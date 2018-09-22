@@ -13,14 +13,19 @@
 
 int main(void)
 {
-    CyGlobalIntEnable; /* Enable global interrupts. */
-
-    /* Place your initialization/startup code here (e.g. MyInst_Start()) */
+    CyGlobalIntEnable;
+    USBFS_Start(0, USBFS_DWR_VDDD_OPERATION);
+    USBFS_CDC_Init();
 
     for(;;)
     {
-        /* Place your application code here. */
+        if (!USBFS_GetConfiguration() || USBFS_IsConfigurationChanged())
+        {
+            while (!USBFS_GetConfiguration())
+                ;
+        }
+
+        USBFS_PutString("Hello, world!\r\n");
+        CyDelay(1000);
     }
 }
-
-/* [] END OF FILE */
