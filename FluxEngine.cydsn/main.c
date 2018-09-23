@@ -1,8 +1,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "project.h"
+#include "../protocol.h"
 
-#define BUFFER_SIZE 63
 #define BUFFER_COUNT 2
 
 static uint8_t td[BUFFER_COUNT];
@@ -50,10 +50,11 @@ CY_ISR(dma_finished_isr)
     else
     {
         LED_REG_Write(0);
-        static uint8_t sendbuffer[BUFFER_SIZE + 1];
-        sendbuffer[0] = 0;
-        memcpy(sendbuffer+1, buffer[last_td], BUFFER_SIZE);
-        USBFS_PutData(sendbuffer, sizeof(sendbuffer));
+        static frame_t sendframe;
+        sendframe.id = FLUXENGINE_ID;
+        sendframe.type = FRAME_OK;
+        memcpy(sendframe.u.buffer, buffer[last_td], BUFFER_SIZE);
+        USBFS_PutData((const uint8_t*) &sendframe, sizeof(sendframe));
     }
 }
 
@@ -67,7 +68,8 @@ int main(void)
     init_dma();
     
     UART_PutString("GO\r");
-    
+    LED_REG_Write(0);
+
     for (;;)
     {
         if (!USBFS_GetConfiguration() || USBFS_IsConfigurationChanged())
