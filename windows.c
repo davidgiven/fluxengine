@@ -1,4 +1,7 @@
 #include "globals.h"
+
+#if defined _WIN32
+
 #include <windows.h>
 
 static HANDLE handle;
@@ -32,3 +35,5 @@ void read_frame(frame_t* frame)
     if ((bytes_read != sizeof(frame_t)) || (frame->id != FLUXENGINE_ID))
         error("sequencing error");
 }
+
+#endif

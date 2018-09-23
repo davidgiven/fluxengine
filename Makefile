@@ -1,6 +1,6 @@
 CFLAGS = -Wall
 
-SRCS = main.c windows.c
+SRCS = main.c windows.c unix.c
 OBJS = $(patsubst %.c, .objs/%.o, $(SRCS))
 
 fluxclient: $(OBJS)
