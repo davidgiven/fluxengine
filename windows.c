@@ -1,6 +1,6 @@
 #include "globals.h"
 
-#if defined _WIN32
+#if defined WINDOWS
 
 #include <windows.h>
 

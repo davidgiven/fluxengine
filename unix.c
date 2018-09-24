@@ -1,6 +1,6 @@
 #include "globals.h"
 
-#if defined __unix__
+#if !defined WINDOWS
 
 #include <sys/types.h>
 #include <sys/stat.h>

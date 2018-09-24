@@ -1,6 +1,10 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
+#if defined _WIN32 || defined __CYGWIN__
+    #define WINDOWS
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>

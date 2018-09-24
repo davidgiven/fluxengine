@@ -1,11 +1,12 @@
 #ifndef PROTOCOL_H
 #define PROTOCOL_H
 
-#define BUFFER_SIZE 61
-
 enum 
 {
-    FLUXENGINE_ID = 'F'
+    FLUXENGINE_ID = 'F',
+
+    FLUXENGINE_VID = 0xF055,
+    FLUXENGINE_PID = 0x9971
 };
 
 enum
@@ -21,6 +22,7 @@ enum
     ERROR_UNDERRUN
 };
 
+#define BUFFER_SIZE 62
 typedef struct
 {
     uint8_t id;
