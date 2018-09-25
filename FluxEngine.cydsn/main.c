@@ -9,6 +9,7 @@ static uint8_t td[BUFFER_COUNT];
 static uint8_t buffer[BUFFER_COUNT][BUFFER_SIZE] __attribute__((aligned()));
 static uint8_t dma_channel;
 
+#if 0
 static void init_dma(void)
 {
     /* Defines for DMA */
@@ -35,7 +36,9 @@ static void init_dma(void)
     }
     CyDmaChSetInitialTd(dma_channel, td[0]);
 }
+#endif
 
+#if 0
 CY_ISR(dma_finished_isr)
 {
     uint8_t which_td;
@@ -57,15 +60,16 @@ CY_ISR(dma_finished_isr)
         USBFS_PutData((const uint8_t*) &sendframe, sizeof(sendframe));
     }
 }
+#endif
 
 int main(void)
 {
     CyGlobalIntEnable;
     UART_Start();
     USBFS_Start(0, USBFS_DWR_VDDD_OPERATION);
-    USBFS_CDC_Init();
-    DMA_FINISHED_IRQ_StartEx(&dma_finished_isr);
-    init_dma();
+    //USBFS_CDC_Init();
+    //DMA_FINISHED_IRQ_StartEx(&dma_finished_isr);
+    //init_dma();
     
     UART_PutString("GO\r");
     LED_REG_Write(0);
@@ -74,12 +78,16 @@ int main(void)
     {
         if (!USBFS_GetConfiguration() || USBFS_IsConfigurationChanged())
         {
-            CyDmaChDisable(dma_channel);
+            //CyDmaChDisable(dma_channel);
             UART_PutString("Waiting for USB...\r");
             while (!USBFS_GetConfiguration())
                 ;
             UART_PutString("USB ready\r");
-            CyDmaChEnable(dma_channel, true);
+            //CyDmaChEnable(dma_channel, true);
+            USBFS_EnableOutEP(FLUXENGINE_OUT_EP);
         }
+        
+        if (USBFS_GetEPState(FLUXENGINE_OUT_EP) == USBFS_OUT_BUFFER_FULL)
+            UART_PutString("packet received!\r");
     }
 }

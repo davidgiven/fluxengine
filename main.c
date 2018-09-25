@@ -2,8 +2,7 @@
 #include <stdarg.h>
 #include <sys/time.h>
 #include <unistd.h>
-
-static const char* serialport = NULL;
+#include <libusb.h>
 
 void error(const char* message, ...)
 {
@@ -36,10 +35,6 @@ static void parse_options(int argc, char* const* argv)
 			case 'h':
 				error("sorry, no help yet");
 
-			case 't':
-				serialport = optarg;
-				break;
-
 			default:
 				error("syntax error (try -h for help)");
 		}
@@ -48,6 +43,11 @@ static void parse_options(int argc, char* const* argv)
 
 int main(int argc, char* const* argv)
 {
+	usb_init();
+
+	usb_send("x", 1);
+
+	#if 0
 	parse_options(argc, argv);
 	if (!serialport)
 		error("you must specify a serial port name");
@@ -66,6 +66,7 @@ int main(int argc, char* const* argv)
     double elapsedtime = endtime - starttime;
     printf("elapsed time: %f seconds\n", elapsedtime);
     printf("performance: %f kB/s\n", (transferred/1024) / elapsedtime);
+#endif
 
     return 0;
 }
