@@ -1,16 +1,15 @@
 #include "globals.h"
 #include <libusb.h>
 
-static libusb_context* ctx;
 static libusb_device_handle* device;
 
 void usb_init(void)
 {
-	int i = libusb_init(&ctx);
+	int i = libusb_init(NULL);
     if (i < 0)
         error("could not start libusb: %s", libusb_strerror(i));
 
-    libusb_device_handle* device = libusb_open_device_with_vid_pid(ctx, FLUXENGINE_VID, FLUXENGINE_PID);
+    device = libusb_open_device_with_vid_pid(NULL, FLUXENGINE_VID, FLUXENGINE_PID);
     if (!device)
 		error("cannot find FluxEngine (is it plugged in?)");
     
@@ -33,5 +32,5 @@ void usb_send(void* ptr, int len)
     int i = libusb_bulk_transfer(device, FLUXENGINE_DATA_OUT_EP,
         ptr, len, &len, 0);
     if (i < 0)
-        error("failed to send request: %s", strerror(errno));
+        error("failed to send request: %s", libusb_strerror(i));
 }
