@@ -62,6 +62,20 @@ CY_ISR(dma_finished_isr)
 }
 #endif
 
+static void handle_usb_packet(void)
+{
+    static uint8_t buffer[64];
+    int length = USBFS_GetEPCount(FLUXENGINE_CMD_OUT_EP_NUM);
+    USBFS_ReadOutEP(FLUXENGINE_CMD_OUT_EP_NUM, buffer, length);
+    UART_PutString("read packet\r");
+    
+    while (USBFS_GetEPState(FLUXENGINE_CMD_IN_EP_NUM) != USBFS_IN_BUFFER_EMPTY)
+        ;
+    
+    char c = 99;
+    USBFS_LoadInEP(FLUXENGINE_CMD_IN_EP_NUM, (uint8_t*) &c, sizeof(c));
+}
+
 int main(void)
 {
     CyGlobalIntEnable;
@@ -84,10 +98,10 @@ int main(void)
                 ;
             UART_PutString("USB ready\r");
             //CyDmaChEnable(dma_channel, true);
-            USBFS_EnableOutEP(FLUXENGINE_OUT_EP);
+            USBFS_EnableOutEP(FLUXENGINE_CMD_OUT_EP_NUM);
         }
         
-        if (USBFS_GetEPState(FLUXENGINE_OUT_EP) == USBFS_OUT_BUFFER_FULL)
-            UART_PutString("packet received!\r");
+        if (USBFS_GetEPState(FLUXENGINE_CMD_OUT_EP_NUM) == USBFS_OUT_BUFFER_FULL)
+            handle_usb_packet();
     }
 }

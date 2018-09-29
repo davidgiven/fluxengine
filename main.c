@@ -45,7 +45,11 @@ int main(int argc, char* const* argv)
 {
 	usb_init();
 
-	usb_send("x", 1);
+	usb_cmd_send("x", 1);
+
+	char c;
+	usb_cmd_recv(&c, 1);
+	printf("got reply: %d\n", c);
 
 	#if 0
 	parse_options(argc, argv);

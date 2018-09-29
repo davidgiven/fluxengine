@@ -1,6 +1,8 @@
 #include "globals.h"
 #include <libusb.h>
 
+#define TIMEOUT 5000
+
 static libusb_device_handle* device;
 
 void usb_init(void)
@@ -27,10 +29,18 @@ void usb_init(void)
         error("could not claim interface: %s", libusb_strerror(i));        
 }
 
-void usb_send(void* ptr, int len)
+void usb_cmd_send(void* ptr, int len)
 {
-    int i = libusb_bulk_transfer(device, FLUXENGINE_DATA_OUT_EP,
-        ptr, len, &len, 0);
+    int i = libusb_interrupt_transfer(device, FLUXENGINE_CMD_OUT_EP,
+        ptr, len, &len, TIMEOUT);
     if (i < 0)
-        error("failed to send request: %s", libusb_strerror(i));
+        error("failed to send command: %s", libusb_strerror(i));
+}
+
+void usb_cmd_recv(void* ptr, int len)
+{
+    int i = libusb_interrupt_transfer(device, FLUXENGINE_CMD_IN_EP,
+        ptr, len, &len, TIMEOUT);
+    if (i < 0)
+        error("failed to receive command reply: %s", libusb_strerror(i));
 }

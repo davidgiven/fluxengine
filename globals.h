@@ -15,6 +15,7 @@
 extern void error(const char* message, ...);
 
 extern void usb_init(void);
-extern void usb_send(void* ptr, int len);
+extern void usb_cmd_send(void* ptr, int len);
+extern void usb_cmd_recv(void* ptr, int len);
 
 #endif
