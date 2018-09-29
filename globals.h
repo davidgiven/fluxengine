@@ -13,6 +13,7 @@
 #include "protocol.h"
 
 extern void error(const char* message, ...);
+extern double gettime(void);
 
 extern void usb_init(void);
 extern void usb_cmd_send(void* ptr, int len);
@@ -21,5 +22,6 @@ extern void usb_cmd_recv(void* ptr, int len);
 extern int usb_get_version(void);
 extern void usb_seek(int track);
 extern int usb_measure_speed(void);
+extern void usb_bulk_test(void);
 
 #endif

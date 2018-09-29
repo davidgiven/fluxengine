@@ -97,3 +97,42 @@ int usb_measure_speed(void)
     return r->period_ms;
 }
 
+static void large_bulk_transfer(int ep, void* buffer, int total_len)
+{
+    int count = 0;
+    while (count < total_len)
+    {
+        int len = total_len - count;
+        int i = libusb_bulk_transfer(device, ep,
+            ((uint8_t*)buffer)+count, len, &len, TIMEOUT);
+        if (i < 0)
+            error("data transfer failed: %s", libusb_strerror(i));
+        count += len;
+    }
+}
+
+void usb_bulk_test(void)
+{
+    struct any_frame f = { .f = {.type = F_FRAME_BULK_TEST_CMD, .size = sizeof(f)} };
+    usb_cmd_send(&f, f.f.size);
+
+    uint8_t bulk_buffer[16*256*64];
+    int total_len = sizeof(bulk_buffer);
+    double start_time = gettime();
+    large_bulk_transfer(FLUXENGINE_DATA_IN_EP, bulk_buffer, total_len);
+    double elapsed_time = gettime() - start_time;
+
+    printf("Transferred %d bytes in %d ms (%d kB/s)\n",
+        total_len, (int)(elapsed_time * 1000.0),
+        (int)((total_len / 1024.0) / elapsed_time));
+    for (int x=0; x<16; x++)
+        for (int y=0; y<256; y++)
+            for (int z=0; z<64; z++)
+            {
+                int offset = x*16384 + y*64 + z;
+                if (bulk_buffer[offset] != (uint8_t)(x+y+z))
+                    error("data transfer corrupted at 0x%x (%d.%d.%d)", offset, x, y, z);
+            }
+
+    await_reply(F_FRAME_BULK_TEST_REPLY);
+}

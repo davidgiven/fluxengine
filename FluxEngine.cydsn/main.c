@@ -14,12 +14,13 @@
 #define STEP_TOWARDS0 1
 #define STEP_AWAYFROM0 0
 
-static uint32_t clock = 0;
+static volatile uint32_t clock = 0;
+static volatile bool index_irq = false;
+
 static bool motor_on = false;
 static uint32_t motor_on_time = 0;
 static bool homed = false;
 static int current_track = 0;
-static volatile bool index_irq = false;
 
 #if 0
 static uint8_t td[BUFFER_COUNT];
@@ -107,10 +108,15 @@ CY_ISR(dma_finished_isr)
 }
 #endif
 
+static void wait_until_writeable(int ep)
+{
+    while (USBFS_GetEPState(ep) != USBFS_IN_BUFFER_EMPTY)
+        ;
+}
+
 static void send_reply(struct any_frame* f)
 {
-    while (USBFS_GetEPState(FLUXENGINE_CMD_IN_EP_NUM) != USBFS_IN_BUFFER_EMPTY)
-        ;
+    wait_until_writeable(FLUXENGINE_CMD_IN_EP_NUM);
     USBFS_LoadInEP(FLUXENGINE_CMD_IN_EP_NUM, (uint8_t*) f, f->f.size);
 }
 
@@ -172,21 +178,39 @@ static void cmd_measure_speed(struct any_frame* f)
 {
     start_motor();
     
-    UART_PutString("wait for index\n");
     index_irq = false;
     while (!index_irq)
         ;
     index_irq = false;
     int start_clock = clock;
-    UART_PutString("wait for another index\n");
     while (!index_irq)
         ;
     int end_clock = clock;
-    UART_PutString("done\n");
     
     DECLARE_REPLY_FRAME(struct speed_frame, F_FRAME_MEASURE_SPEED_REPLY);
     r.period_ms = end_clock - start_clock;
     send_reply((struct any_frame*) &r);    
+}
+
+static void cmd_bulk_test(struct any_frame* f)
+{
+    uint8_t buffer[64];
+    
+    for (int x=0; x<16; x++)
+        for (int y=0; y<256; y++)
+        {
+            for (unsigned z=0; z<sizeof(buffer); z++)
+                buffer[z] = x+y+z;
+                
+            wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
+            USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, buffer, sizeof(buffer));
+        }
+    
+    wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
+    USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, NULL, 0);
+    
+    DECLARE_REPLY_FRAME(struct any_frame, F_FRAME_BULK_TEST_REPLY);
+    send_reply(&r);
 }
 
 static void handle_command(void)
@@ -208,6 +232,10 @@ static void handle_command(void)
         
         case F_FRAME_MEASURE_SPEED_CMD:
             cmd_measure_speed(f);
+            break;
+            
+        case F_FRAME_BULK_TEST_CMD:
+            cmd_bulk_test(f);
             break;
             
         default:
@@ -256,9 +284,14 @@ int main(void)
             UART_PutString("USB ready\r");
             //CyDmaChEnable(dma_channel, true);
             USBFS_EnableOutEP(FLUXENGINE_CMD_OUT_EP_NUM);
+            USBFS_EnableOutEP(FLUXENGINE_DATA_OUT_EP_NUM);
         }
         
         if (USBFS_GetEPState(FLUXENGINE_CMD_OUT_EP_NUM) == USBFS_OUT_BUFFER_FULL)
+        {
+            UART_PutString("incoming USB command\r");
             handle_command();
+            USBFS_EnableOutEP(FLUXENGINE_CMD_OUT_EP);
+        }
     }
 }

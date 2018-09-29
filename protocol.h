@@ -32,6 +32,8 @@ enum
     F_FRAME_SEEK_REPLY,           /* any_frame */
     F_FRAME_MEASURE_SPEED_CMD,    /* any_frame */
     F_FRAME_MEASURE_SPEED_REPLY,  /* speed_frame */
+    F_FRAME_BULK_TEST_CMD,        /* any_frame */
+    F_FRAME_BULK_TEST_REPLY,      /* any_frame */
 };
 
 enum
