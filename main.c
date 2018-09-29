@@ -47,7 +47,9 @@ int main(int argc, char* const* argv)
 
 	int v = usb_get_version();
 	printf("FluxEngine version %d\n", v);
-	usb_seek(40);
+
+	int period_ms = usb_measure_speed();
+	printf("Rotational period is %d ms (%f rpm)\n", period_ms, 60000.0/period_ms);
 
 	#if 0
 	parse_options(argc, argv);

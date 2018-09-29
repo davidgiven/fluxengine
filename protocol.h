@@ -25,11 +25,13 @@ enum
 
 enum
 {
-    F_FRAME_ERROR = 0,
-    F_FRAME_GET_VERSION_CMD,
-    F_FRAME_GET_VERSION_REPLY,
-    F_FRAME_SEEK_CMD,
-    F_FRAME_SEEK_REPLY,
+    F_FRAME_ERROR = 0,            /* any_frame */
+    F_FRAME_GET_VERSION_CMD,      /* any_frame */
+    F_FRAME_GET_VERSION_REPLY,    /* version_frame */
+    F_FRAME_SEEK_CMD,             /* seek_frame */
+    F_FRAME_SEEK_REPLY,           /* any_frame */
+    F_FRAME_MEASURE_SPEED_CMD,    /* any_frame */
+    F_FRAME_MEASURE_SPEED_REPLY,  /* speed_frame */
 };
 
 enum
@@ -65,6 +67,12 @@ struct seek_frame
 {
     struct frame_header f;
     uint8_t track;
+};
+
+struct speed_frame
+{
+    struct frame_header f;
+    uint16_t period_ms;
 };
 
 #endif

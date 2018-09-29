@@ -20,5 +20,6 @@ extern void usb_cmd_recv(void* ptr, int len);
 
 extern int usb_get_version(void);
 extern void usb_seek(int track);
+extern int usb_measure_speed(void);
 
 #endif

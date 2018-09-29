@@ -88,3 +88,12 @@ void usb_seek(int track)
     usb_cmd_send(&f, f.f.size);
     await_reply(F_FRAME_SEEK_REPLY);
 }
+
+int usb_measure_speed(void)
+{
+    struct any_frame f = { .f = {.type = F_FRAME_MEASURE_SPEED_CMD, .size = sizeof(f)} };
+    usb_cmd_send(&f, f.f.size);
+    struct speed_frame* r = await_reply(F_FRAME_MEASURE_SPEED_REPLY);
+    return r->period_ms;
+}
+

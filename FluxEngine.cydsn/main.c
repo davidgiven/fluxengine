@@ -19,6 +19,7 @@ static bool motor_on = false;
 static uint32_t motor_on_time = 0;
 static bool homed = false;
 static int current_track = 0;
+static volatile bool index_irq = false;
 
 #if 0
 static uint8_t td[BUFFER_COUNT];
@@ -34,6 +35,11 @@ static void system_timer_cb(void)
     CyGlobalIntDisable;
     clock++;
     CyGlobalIntEnable;
+}
+
+CY_ISR(index_irq_cb)
+{
+    index_irq = true;
 }
 
 static void start_motor(void)
@@ -162,6 +168,27 @@ static void cmd_seek(struct seek_frame* f)
     send_reply(&r);    
 }
 
+static void cmd_measure_speed(struct any_frame* f)
+{
+    start_motor();
+    
+    UART_PutString("wait for index\n");
+    index_irq = false;
+    while (!index_irq)
+        ;
+    index_irq = false;
+    int start_clock = clock;
+    UART_PutString("wait for another index\n");
+    while (!index_irq)
+        ;
+    int end_clock = clock;
+    UART_PutString("done\n");
+    
+    DECLARE_REPLY_FRAME(struct speed_frame, F_FRAME_MEASURE_SPEED_REPLY);
+    r.period_ms = end_clock - start_clock;
+    send_reply((struct any_frame*) &r);    
+}
+
 static void handle_command(void)
 {
     static uint8_t input_buffer[FRAME_SIZE];
@@ -178,6 +205,10 @@ static void handle_command(void)
         case F_FRAME_SEEK_CMD:
             cmd_seek((struct seek_frame*) f);
             break;
+        
+        case F_FRAME_MEASURE_SPEED_CMD:
+            cmd_measure_speed(f);
+            break;
             
         default:
             send_error(F_ERROR_BAD_COMMAND);
@@ -189,6 +220,7 @@ int main(void)
     CyGlobalIntEnable;
     CySysTickStart();
     CySysTickSetCallback(4, system_timer_cb);
+    INDEX_IRQ_StartEx(&index_irq_cb);
     UART_Start();
     USBFS_Start(0, USBFS_DWR_VDDD_OPERATION);
     //USBFS_CDC_Init();
