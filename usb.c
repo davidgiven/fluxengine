@@ -57,6 +57,9 @@ static void bad_reply(void)
         case F_ERROR_BAD_COMMAND:
             error("device did not understand command");
 
+        case F_ERROR_UNDERRUN:
+            error("USB underrun (not enough bandwidth)");
+            
         default:
             error("unknown error %d", f->error);
     }
@@ -97,18 +100,13 @@ int usb_measure_speed(void)
     return r->period_ms;
 }
 
-static void large_bulk_transfer(int ep, void* buffer, int total_len)
+static int large_bulk_transfer(int ep, void* buffer, int total_len)
 {
-    int count = 0;
-    while (count < total_len)
-    {
-        int len = total_len - count;
-        int i = libusb_bulk_transfer(device, ep,
-            ((uint8_t*)buffer)+count, len, &len, TIMEOUT);
-        if (i < 0)
-            error("data transfer failed: %s", libusb_strerror(i));
-        count += len;
-    }
+    int len;
+    int i = libusb_bulk_transfer(device, ep, buffer, total_len, &len, TIMEOUT);
+    if (i < 0)
+        error("data transfer failed: %s", libusb_strerror(i));
+    return len;
 }
 
 void usb_bulk_test(void)
@@ -135,4 +133,23 @@ void usb_bulk_test(void)
             }
 
     await_reply(F_FRAME_BULK_TEST_REPLY);
+}
+
+void usb_read(int side)
+{
+    struct read_frame f = {
+        .f = { .type = F_FRAME_READ_CMD, .size = sizeof(f) },
+        .side1 = side
+    };
+    usb_cmd_send(&f, f.f.size);
+
+    uint8_t bulk_buffer[200*1024];
+    int len = large_bulk_transfer(FLUXENGINE_DATA_IN_EP, bulk_buffer, sizeof(bulk_buffer));
+    printf("read %d bytes\n", len);
+
+    await_reply(F_FRAME_READ_REPLY);
+
+    FILE* fp = fopen("out.dat", "wb");
+    fwrite(bulk_buffer, 1, len, fp);
+    fclose(fp);
 }

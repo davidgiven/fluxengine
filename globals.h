@@ -23,5 +23,6 @@ extern int usb_get_version(void);
 extern void usb_seek(int track);
 extern int usb_measure_speed(void);
 extern void usb_bulk_test(void);
+extern void usb_read(int side);
 
 #endif

@@ -34,12 +34,15 @@ enum
     F_FRAME_MEASURE_SPEED_REPLY,  /* speed_frame */
     F_FRAME_BULK_TEST_CMD,        /* any_frame */
     F_FRAME_BULK_TEST_REPLY,      /* any_frame */
+    F_FRAME_READ_CMD,             /* read_frame */
+    F_FRAME_READ_REPLY,           /* any_frame */
 };
 
 enum
 {
     F_ERROR_NONE = 0,
-    F_ERROR_BAD_COMMAND = 1,
+    F_ERROR_BAD_COMMAND,
+    F_ERROR_UNDERRUN,
 };
 
 struct frame_header
@@ -75,6 +78,12 @@ struct speed_frame
 {
     struct frame_header f;
     uint16_t period_ms;
+};
+
+struct read_frame
+{
+    struct frame_header f;
+    uint8_t side1;
 };
 
 #endif

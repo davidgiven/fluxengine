@@ -9,24 +9,27 @@
 #define STEP_INTERVAL_TIME 3 /* ms */
 #define STEP_SETTLING_TIME 18 /* ms */
 
-#define BUFFER_COUNT 2
-
 #define STEP_TOWARDS0 1
 #define STEP_AWAYFROM0 0
 
 static volatile uint32_t clock = 0;
 static volatile bool index_irq = false;
+static volatile bool capture_dma_finished_irq = false;
 
 static bool motor_on = false;
 static uint32_t motor_on_time = 0;
 static bool homed = false;
 static int current_track = 0;
 
-#if 0
+#define BUFFER_COUNT 64
+#define BUFFER_SIZE 64
 static uint8_t td[BUFFER_COUNT];
-static uint8_t buffer[BUFFER_COUNT][BUFFER_SIZE] __attribute__((aligned()));
+static uint8_t dma_buffer[BUFFER_COUNT][BUFFER_SIZE] __attribute__((aligned()));
 static uint8_t dma_channel;
-#endif
+
+static volatile int dma_writing_to_td = 0;
+static volatile int dma_reading_from_td = 0;
+static volatile bool dma_underrun = false;
 
 #define DECLARE_REPLY_FRAME(STRUCT, TYPE) \
     STRUCT r = {.f = { .type = TYPE, .size = sizeof(STRUCT) }}
@@ -43,6 +46,25 @@ CY_ISR(index_irq_cb)
     index_irq = true;
 }
 
+CY_ISR(capture_dma_finished_irq_cb)
+{
+    dma_writing_to_td = (dma_writing_to_td+1) % BUFFER_COUNT;
+    if (dma_writing_to_td == dma_reading_from_td)
+        dma_underrun = true;
+}
+
+static void print(const char* s)
+{
+    UART_PutString(s);
+}
+
+static void printi(int i)
+{
+    char buffer[16];
+    sprintf(buffer, "%d", i);
+    print(buffer);
+}
+
 static void start_motor(void)
 {
     if (!motor_on)
@@ -53,23 +75,22 @@ static void start_motor(void)
     
     motor_on_time = clock;
     motor_on = true;
+    CyWdtClear();
 }
 
-#if 0
 static void init_dma(void)
 {
-    /* Defines for DMA */
     #define DMA_BYTES_PER_BURST 1
     #define DMA_REQUEST_PER_BURST 1
     #define DMA_SRC_BASE (CYDEV_PERIPH_BASE)
     #define DMA_DST_BASE (CYDEV_SRAM_BASE)
 
     /* DMA Configuration for DMA */
-    dma_channel = DMA_DmaInitialize(DMA_BYTES_PER_BURST, DMA_REQUEST_PER_BURST, 
+    dma_channel = CAPTURE_DMA_DmaInitialize(DMA_BYTES_PER_BURST, DMA_REQUEST_PER_BURST, 
         HI16(DMA_SRC_BASE), HI16(DMA_DST_BASE));
+    
     for (int i=0; i<BUFFER_COUNT; i++)
-        td[i] = CyDmaTdAllocate();
-        
+        td[i] = CyDmaTdAllocate();    
     for (int i=0; i<BUFFER_COUNT; i++)
     {
         int nexti = i+1;
@@ -77,36 +98,10 @@ static void init_dma(void)
             nexti = 0;
 
         CyDmaTdSetConfiguration(td[i], BUFFER_SIZE, td[nexti],   
-            CY_DMA_TD_INC_DST_ADR | CY_DMA_TD_AUTO_EXEC_NEXT | DMA__TD_TERMOUT_EN);
-        CyDmaTdSetAddress(td[i], LO16((uint32)CounterReg_Status_PTR), LO16((uint32)&buffer[i]));
-    }
-    CyDmaChSetInitialTd(dma_channel, td[0]);
-}
-#endif
-
-#if 0
-CY_ISR(dma_finished_isr)
-{
-    uint8_t which_td;
-    uint8_t state;
-    uint8_t last_td;
-    
-    CyDmaChStatus(dma_channel, &which_td, &state);
-    last_td = (which_td == td[0]);
-
-    if (!USBFS_CDCIsReady())
-        LED_REG_Write(1);
-    else
-    {
-        LED_REG_Write(0);
-        static frame_t sendframe;
-        sendframe.id = FLUXENGINE_ID;
-        sendframe.type = FRAME_OK;
-        memcpy(sendframe.u.buffer, buffer[last_td], BUFFER_SIZE);
-        USBFS_PutData((const uint8_t*) &sendframe, sizeof(sendframe));
+            CY_DMA_TD_INC_DST_ADR | CY_DMA_TD_AUTO_EXEC_NEXT | CAPTURE_DMA__TD_TERMOUT_EN);
+        CyDmaTdSetAddress(td[i], LO16((uint32)CAPTURE_REG_Status_PTR), LO16((uint32)&dma_buffer[i]));
     }
 }
-#endif
 
 static void wait_until_writeable(int ep)
 {
@@ -195,22 +190,143 @@ static void cmd_measure_speed(struct any_frame* f)
 static void cmd_bulk_test(struct any_frame* f)
 {
     uint8_t buffer[64];
+    int longest_time = 0;
     
+    wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
     for (int x=0; x<16; x++)
         for (int y=0; y<256; y++)
         {
             for (unsigned z=0; z<sizeof(buffer); z++)
                 buffer[z] = x+y+z;
-                
+            
             wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
             USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, buffer, sizeof(buffer));
         }
     
-    wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
-    USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, NULL, 0);
-    
     DECLARE_REPLY_FRAME(struct any_frame, F_FRAME_BULK_TEST_REPLY);
     send_reply(&r);
+}
+
+static void cmd_read(struct read_frame* f)
+{
+    start_motor();
+    //SIDE_REG_Write(f->side1);
+    
+    /* Do slow setup *before* we go into the real-time bit. */
+    
+    wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
+    print("starting transfer\r");
+
+    /* Wait for the beginning of a rotation. */
+        
+    index_irq = false;
+    while (!index_irq)
+        ;
+    index_irq = false;
+    
+    int start_time = clock;
+    dma_writing_to_td = 0;
+    dma_reading_from_td = -1;
+    dma_underrun = false;
+    int count = 0;
+    CyDmaClearPendingDrq(dma_channel);
+    CyDmaChSetInitialTd(dma_channel, td[0]);
+    CyDmaChEnable(dma_channel, 1);
+
+    /* Wait for the first DMA transfer to complete, after which we can start the
+     * USB transfer. */
+
+    #if 0
+    while (dma_writing_to_td == 0)
+        ;
+    dma_reading_from_td = 0;
+    
+    /* Start transferring. */
+
+    while (!index_irq)
+    {
+        if (dma_underrun)
+            goto abort;
+        
+        /* Wait for the next block to be read. */
+        while (dma_reading_from_td == dma_writing_to_td)
+        {
+            /* No more data --- exit. */
+            if (index_irq || dma_underrun)
+                break;
+        }
+
+        while (USBFS_GetEPState(FLUXENGINE_DATA_IN_EP_NUM) != USBFS_IN_BUFFER_EMPTY)
+        {
+            if (index_irq || dma_underrun)
+                goto abort;
+        }
+
+        USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, dma_buffer[dma_reading_from_td], BUFFER_SIZE);
+        dma_reading_from_td = (dma_reading_from_td+1) % BUFFER_COUNT;
+        count++;
+        printi(clock);
+        print(" ");
+        printi(dma_reading_from_td);
+        print(" ");
+        printi(dma_writing_to_td);
+        print("\r");
+    }
+abort:
+    printi(dma_reading_from_td);
+    print("\r");
+    printi(dma_writing_to_td);
+    print("\r");
+    #else
+        int oldi = -1;
+        while (!index_irq)
+        {
+            uint8_t current;
+            CyDmaChStatus(dma_channel, &current, NULL);
+            if (current != oldi)
+            {
+                count++;
+                oldi = current;
+            }
+        }
+    int elapsed_time = clock - start_time;
+    print("elapsed time: ");
+    printi(elapsed_time);
+    print(" ms\r");
+    print("packets: ");
+    printi(count);
+    print("\r");
+    print("packets per sec: ");
+    printi(count*1000 / elapsed_time);
+    print("\r");
+    print("drq frequency: ");
+    printi(count*64000 / elapsed_time);
+    print("\r");
+    print("period between packets: ");
+    printi(elapsed_time*1000 / count);
+    print("\r");
+           
+    #endif
+    CyDmaChSetRequest(dma_channel, CY_DMA_CPU_TERM_CHAIN);
+    while (CyDmaChGetRequest(dma_channel))
+        ;
+
+    wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
+    USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, NULL, 0);
+    print("bulk transfer terminated\r");
+
+    if (dma_underrun)
+    {
+        print("underrun after ");
+        printi(count);
+        print(" packets\r");
+        send_error(F_ERROR_UNDERRUN);
+    }
+    else
+    {
+        DECLARE_REPLY_FRAME(struct any_frame, F_FRAME_READ_REPLY);
+        send_reply(&r);
+    }
 }
 
 static void handle_command(void)
@@ -218,7 +334,10 @@ static void handle_command(void)
     static uint8_t input_buffer[FRAME_SIZE];
     int length = USBFS_GetEPCount(FLUXENGINE_CMD_OUT_EP_NUM);
     USBFS_ReadOutEP(FLUXENGINE_CMD_OUT_EP_NUM, input_buffer, length);
-    
+    while (USBFS_GetEPState(FLUXENGINE_CMD_OUT_EP_NUM) == USBFS_OUT_BUFFER_FULL)
+        ;
+    USBFS_EnableOutEP(FLUXENGINE_CMD_OUT_EP_NUM);
+
     struct any_frame* f = (struct any_frame*) input_buffer;
     switch (f->f.type)
     {
@@ -238,6 +357,10 @@ static void handle_command(void)
             cmd_bulk_test(f);
             break;
             
+        case F_FRAME_READ_CMD:
+            cmd_read((struct read_frame*) f);
+            break;
+            
         default:
             send_error(F_ERROR_BAD_COMMAND);
     }
@@ -249,16 +372,18 @@ int main(void)
     CySysTickStart();
     CySysTickSetCallback(4, system_timer_cb);
     INDEX_IRQ_StartEx(&index_irq_cb);
+    CAPTURE_DMA_FINISHED_IRQ_StartEx(&capture_dma_finished_irq_cb);
     UART_Start();
     USBFS_Start(0, USBFS_DWR_VDDD_OPERATION);
-    //USBFS_CDC_Init();
-    //DMA_FINISHED_IRQ_StartEx(&dma_finished_isr);
-    //init_dma();
+    init_dma();
     
     CyWdtStart(CYWDT_1024_TICKS, CYWDT_LPMODE_DISABLED);
     
     UART_PutString("GO\r");
-    LED_REG_Write(0);
+
+    CyDmaClearPendingDrq(dma_channel);
+    CyDmaChSetInitialTd(dma_channel, td[0]);
+    CyDmaChEnable(dma_channel, 1);
 
     for (;;)
     {
@@ -271,7 +396,6 @@ int main(void)
             {
                 MOTOR_REG_Write(0);
                 motor_on = false;
-                homed = false; /* for debugging */
             }
         }
         
@@ -289,9 +413,9 @@ int main(void)
         
         if (USBFS_GetEPState(FLUXENGINE_CMD_OUT_EP_NUM) == USBFS_OUT_BUFFER_FULL)
         {
-            UART_PutString("incoming USB command\r");
             handle_command();
             USBFS_EnableOutEP(FLUXENGINE_CMD_OUT_EP);
+            UART_PutString("idle\r");
         }
     }
 }
