@@ -3,7 +3,7 @@
 
 enum 
 {
-    FLUXENGINE_ID = 'F',
+    FLUXENGINE_VERSION = 1,
 
     FLUXENGINE_VID = 0xF055,
     FLUXENGINE_PID = 0x9973,
@@ -19,32 +19,52 @@ enum
     FLUXENGINE_DATA_IN_EP_NUM = FLUXENGINE_DATA_IN_EP & 0x0f,
     FLUXENGINE_CMD_OUT_EP_NUM = FLUXENGINE_CMD_OUT_EP & 0x0f,
     FLUXENGINE_CMD_IN_EP_NUM = FLUXENGINE_CMD_IN_EP & 0x0f,
+    
+    FRAME_SIZE = 64,
 };
 
 enum
 {
-    FRAME_OK = 0,
-    FRAME_FINISHED,
-    FRAME_COMMAND,
+    F_FRAME_ERROR = 0,
+    F_FRAME_GET_VERSION_CMD,
+    F_FRAME_GET_VERSION_REPLY,
+    F_FRAME_SEEK_CMD,
+    F_FRAME_SEEK_REPLY,
 };
 
 enum
 {
-    ERROR_NONE = 0,
-    ERROR_UNDERRUN
+    F_ERROR_NONE = 0,
+    F_ERROR_BAD_COMMAND = 1,
 };
 
-#define BUFFER_SIZE 62
-typedef struct
+struct frame_header
 {
-    uint8_t id;
     uint8_t type;
-    union
-    {
-        uint8_t buffer[BUFFER_SIZE];
-        uint8_t status;
-    } u;
-}
-frame_t;
+    uint8_t size;
+};
+
+struct any_frame
+{
+    struct frame_header f;
+};
+
+struct error_frame
+{
+    struct frame_header f;
+    uint8_t error;
+};
+
+struct version_frame
+{
+    struct frame_header f;
+    uint8_t version;
+};
+
+struct seek_frame
+{
+    struct frame_header f;
+    uint8_t track;
+};
 
 #endif

@@ -1,13 +1,52 @@
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <setjmp.h>
 #include "project.h"
 #include "../protocol.h"
 
+#define MOTOR_ON_TIME 5000 /* milliseconds */
+#define STEP_INTERVAL_TIME 3 /* ms */
+#define STEP_SETTLING_TIME 18 /* ms */
+
 #define BUFFER_COUNT 2
 
+#define STEP_TOWARDS0 1
+#define STEP_AWAYFROM0 0
+
+static uint32_t clock = 0;
+static bool motor_on = false;
+static uint32_t motor_on_time = 0;
+static bool homed = false;
+static int current_track = 0;
+
+#if 0
 static uint8_t td[BUFFER_COUNT];
 static uint8_t buffer[BUFFER_COUNT][BUFFER_SIZE] __attribute__((aligned()));
 static uint8_t dma_channel;
+#endif
+
+#define DECLARE_REPLY_FRAME(STRUCT, TYPE) \
+    STRUCT r = {.f = { .type = TYPE, .size = sizeof(STRUCT) }}
+
+static void system_timer_cb(void)
+{
+    CyGlobalIntDisable;
+    clock++;
+    CyGlobalIntEnable;
+}
+
+static void start_motor(void)
+{
+    if (!motor_on)
+    {
+        MOTOR_REG_Write(1);
+        CyDelay(1000);
+    }
+    
+    motor_on_time = clock;
+    motor_on = true;
+}
 
 #if 0
 static void init_dma(void)
@@ -62,34 +101,120 @@ CY_ISR(dma_finished_isr)
 }
 #endif
 
-static void handle_usb_packet(void)
+static void send_reply(struct any_frame* f)
 {
-    static uint8_t buffer[64];
-    int length = USBFS_GetEPCount(FLUXENGINE_CMD_OUT_EP_NUM);
-    USBFS_ReadOutEP(FLUXENGINE_CMD_OUT_EP_NUM, buffer, length);
-    UART_PutString("read packet\r");
-    
     while (USBFS_GetEPState(FLUXENGINE_CMD_IN_EP_NUM) != USBFS_IN_BUFFER_EMPTY)
         ;
+    USBFS_LoadInEP(FLUXENGINE_CMD_IN_EP_NUM, (uint8_t*) f, f->f.size);
+}
+
+static void send_error(int code)
+{
+    DECLARE_REPLY_FRAME(struct error_frame, F_FRAME_ERROR);
+    r.error = code;
+    send_reply((struct any_frame*) &r);
+}
+
+static void cmd_get_version(struct any_frame* f)
+{
+    DECLARE_REPLY_FRAME(struct version_frame, F_FRAME_GET_VERSION_REPLY);
+    r.version = FLUXENGINE_VERSION;
+    send_reply((struct any_frame*) &r);
+}
+
+static void step(int dir)
+{
+    STEP_REG_Write(dir | 2);
+    CyDelay(1);
+    STEP_REG_Write(dir);
+    CyDelay(STEP_INTERVAL_TIME);
+}
+
+static void cmd_seek(struct seek_frame* f)
+{
+    start_motor();
+    if (!homed)
+    {
+        while (!TRACK0_REG_Read())
+            step(STEP_TOWARDS0);
+        
+        homed = true;
+        current_track = 0;
+        CyDelay(1); /* for direction change */
+    }
     
-    char c = 99;
-    USBFS_LoadInEP(FLUXENGINE_CMD_IN_EP_NUM, (uint8_t*) &c, sizeof(c));
+    while (f->track != current_track)
+    {
+        if (f->track > current_track)
+        {
+            step(STEP_AWAYFROM0);
+            current_track++;
+        }
+        else if (f->track < current_track)
+        {
+            step(STEP_TOWARDS0);
+            current_track--;
+        }
+    }
+    CyDelay(STEP_SETTLING_TIME);
+            
+    DECLARE_REPLY_FRAME(struct any_frame, F_FRAME_SEEK_REPLY);
+    send_reply(&r);    
+}
+
+static void handle_command(void)
+{
+    static uint8_t input_buffer[FRAME_SIZE];
+    int length = USBFS_GetEPCount(FLUXENGINE_CMD_OUT_EP_NUM);
+    USBFS_ReadOutEP(FLUXENGINE_CMD_OUT_EP_NUM, input_buffer, length);
+    
+    struct any_frame* f = (struct any_frame*) input_buffer;
+    switch (f->f.type)
+    {
+        case F_FRAME_GET_VERSION_CMD:
+            cmd_get_version(f);
+            break;
+            
+        case F_FRAME_SEEK_CMD:
+            cmd_seek((struct seek_frame*) f);
+            break;
+            
+        default:
+            send_error(F_ERROR_BAD_COMMAND);
+    }
 }
 
 int main(void)
 {
     CyGlobalIntEnable;
+    CySysTickStart();
+    CySysTickSetCallback(4, system_timer_cb);
     UART_Start();
     USBFS_Start(0, USBFS_DWR_VDDD_OPERATION);
     //USBFS_CDC_Init();
     //DMA_FINISHED_IRQ_StartEx(&dma_finished_isr);
     //init_dma();
     
+    CyWdtStart(CYWDT_1024_TICKS, CYWDT_LPMODE_DISABLED);
+    
     UART_PutString("GO\r");
     LED_REG_Write(0);
 
     for (;;)
     {
+        CyWdtClear();
+        
+        if (motor_on)
+        {
+            uint32_t time_on = clock - motor_on_time;
+            if (time_on > MOTOR_ON_TIME)
+            {
+                MOTOR_REG_Write(0);
+                motor_on = false;
+                homed = false; /* for debugging */
+            }
+        }
+        
         if (!USBFS_GetConfiguration() || USBFS_IsConfigurationChanged())
         {
             //CyDmaChDisable(dma_channel);
@@ -102,6 +227,6 @@ int main(void)
         }
         
         if (USBFS_GetEPState(FLUXENGINE_CMD_OUT_EP_NUM) == USBFS_OUT_BUFFER_FULL)
-            handle_usb_packet();
+            handle_command();
     }
 }

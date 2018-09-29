@@ -45,11 +45,9 @@ int main(int argc, char* const* argv)
 {
 	usb_init();
 
-	usb_cmd_send("x", 1);
-
-	char c;
-	usb_cmd_recv(&c, 1);
-	printf("got reply: %d\n", c);
+	int v = usb_get_version();
+	printf("FluxEngine version %d\n", v);
+	usb_seek(40);
 
 	#if 0
 	parse_options(argc, argv);
