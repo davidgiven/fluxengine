@@ -56,7 +56,7 @@
         <Data key="derive_type" value="AUTO" />
         <Data key="desired_freq" value="921.6" />
         <Data key="desired_unit" value="3" />
-        <Data key="divider" value="65" />
+        <Data key="divider" value="69" />
         <Data key="domain" value="DIGITAL" />
         <Data key="enabled" value="True" />
         <Data key="minus_accuracy" value="0.25" />
@@ -77,9 +77,9 @@
         <Data key="check_tolerance" value="True" />
         <Data key="clock_version" value="v1" />
         <Data key="derive_type" value="AUTO" />
-        <Data key="desired_freq" value="8" />
+        <Data key="desired_freq" value="16" />
         <Data key="desired_unit" value="6" />
-        <Data key="divider" value="3" />
+        <Data key="divider" value="4" />
         <Data key="domain" value="DIGITAL" />
         <Data key="enabled" value="True" />
         <Data key="minus_accuracy" value="0.25" />
@@ -90,8 +90,8 @@
         <Data key="plus_accuracy" value="0.25" />
         <Data key="plus_tolerance" value="0.25" />
         <Data key="scope" value="LOCAL" />
-        <Data key="src_clk_id" value="CEF43CFB-0213-49b9-B980-2FFAB81C5B47" />
-        <Data key="src_clk_name" value="IMO" />
+        <Data key="src_clk_id" value="61737EF6-3B74-48f9-8B91-F7473A442AE7" />
+        <Data key="src_clk_name" value="MASTER_CLK" />
         <Data key="start_on_reset" value="True" />
         <Data key="sync_with_bus_clk" value="True" />
         <Data key="user_set_domain" value="False" />
@@ -126,7 +126,7 @@
         <Data key="check_tolerance" value="True" />
         <Data key="clock_version" value="v1" />
         <Data key="derive_type" value="BUILTIN" />
-        <Data key="desired_freq" value="60" />
+        <Data key="desired_freq" value="64" />
         <Data key="desired_unit" value="6" />
         <Data key="divider" value="0" />
         <Data key="domain" value="0" />

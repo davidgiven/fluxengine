@@ -1,15 +1,15 @@
 The sampling system is dumb as rocks.
 
-There's an 7-bit counter attached to a clock. Every time a pulse comes
-in, or the counter overflows, we sample the clock and send the result to the
-low 7 bits of the DMA channel; the high bit is the pulse itself (allowing us
-to distinguish between true pulses or counter overflows).
+There's an 8-bit down counter attached to a 16MHz clock. Every time a pulse
+comes in, or the counter overflows, we sample the timer and send the result
+to the DMA channel. We don't bother to distinguish overflows from real pulses
+--- this appears not to ever happen.
 
 An HD floppy has a nominal clock of 500kHz, so we use a sample clock of 8MHz
 (every 0.125us). This means that our 500kHz pulses will have an interval of
 16 (and a DD disk with a 250kHz nominal clock has an interval of 32). This
 gives us more than enough resolution. If no pulse comes in, then we sample on
-rollover at 128 * 0.125us = 160us.
+rollover at 16us.
 
 VERY IMPORTANT:
 

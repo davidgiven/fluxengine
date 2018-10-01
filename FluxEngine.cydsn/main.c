@@ -203,7 +203,7 @@ static void init_dma(void)
 
         CyDmaTdSetConfiguration(td[i], BUFFER_SIZE, td[nexti],   
             CY_DMA_TD_INC_DST_ADR | CAPTURE_DMA__TD_TERMOUT_EN);
-        CyDmaTdSetAddress(td[i], LO16((uint32)CAPTURE_REG_Status_PTR), LO16((uint32)&dma_buffer[i]));
+        CyDmaTdSetAddress(td[i], LO16((uint32)CAPTURE_TIMER_CAPTURE_LSB_PTR), LO16((uint32)&dma_buffer[i]));
     }    
 }
 
@@ -228,6 +228,7 @@ static void cmd_read(struct read_frame* f)
     dma_reading_from_td = -1;
     dma_underrun = false;
     int count = 0;
+    CAPTURE_TIMER_Start();
     CyDmaChSetInitialTd(dma_channel, td[0]);
     CyDmaClearPendingDrq(dma_channel);
     CyDmaChEnable(dma_channel, 1);
