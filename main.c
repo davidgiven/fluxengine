@@ -51,6 +51,7 @@ int main(int argc, char* const* argv)
 	int period_ms = usb_measure_speed();
 	printf("Rotational period is %d ms (%f rpm)\n", period_ms, 60000.0/period_ms);
 
+	usb_seek(20);
 	usb_read(0);
 	//usb_bulk_test();
 

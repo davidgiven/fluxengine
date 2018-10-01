@@ -7,7 +7,7 @@
 
 #define MOTOR_ON_TIME 5000 /* milliseconds */
 #define STEP_INTERVAL_TIME 3 /* ms */
-#define STEP_SETTLING_TIME 18 /* ms */
+#define STEP_SETTLING_TIME 20 /* ms */
 
 #define STEP_TOWARDS0 1
 #define STEP_AWAYFROM0 0
@@ -21,7 +21,7 @@ static uint32_t motor_on_time = 0;
 static bool homed = false;
 static int current_track = 0;
 
-#define BUFFER_COUNT 64
+#define BUFFER_COUNT 16
 #define BUFFER_SIZE 64
 static uint8_t td[BUFFER_COUNT];
 static uint8_t dma_buffer[BUFFER_COUNT][BUFFER_SIZE] __attribute__((aligned()));
@@ -78,31 +78,6 @@ static void start_motor(void)
     CyWdtClear();
 }
 
-static void init_dma(void)
-{
-    #define DMA_BYTES_PER_BURST 1
-    #define DMA_REQUEST_PER_BURST 1
-    #define DMA_SRC_BASE (CYDEV_PERIPH_BASE)
-    #define DMA_DST_BASE (CYDEV_SRAM_BASE)
-
-    /* DMA Configuration for DMA */
-    dma_channel = CAPTURE_DMA_DmaInitialize(DMA_BYTES_PER_BURST, DMA_REQUEST_PER_BURST, 
-        HI16(DMA_SRC_BASE), HI16(DMA_DST_BASE));
-    
-    for (int i=0; i<BUFFER_COUNT; i++)
-        td[i] = CyDmaTdAllocate();    
-    for (int i=0; i<BUFFER_COUNT; i++)
-    {
-        int nexti = i+1;
-        if (nexti == BUFFER_COUNT)
-            nexti = 0;
-
-        CyDmaTdSetConfiguration(td[i], BUFFER_SIZE, td[nexti],   
-            CY_DMA_TD_INC_DST_ADR | CY_DMA_TD_AUTO_EXEC_NEXT | CAPTURE_DMA__TD_TERMOUT_EN);
-        CyDmaTdSetAddress(td[i], LO16((uint32)CAPTURE_REG_Status_PTR), LO16((uint32)&dma_buffer[i]));
-    }
-}
-
 static void wait_until_writeable(int ep)
 {
     while (USBFS_GetEPState(ep) != USBFS_IN_BUFFER_EMPTY)
@@ -137,7 +112,7 @@ static void step(int dir)
     CyDelay(STEP_INTERVAL_TIME);
 }
 
-static void cmd_seek(struct seek_frame* f)
+static void seek_to(int track)
 {
     start_motor();
     if (!homed)
@@ -150,21 +125,25 @@ static void cmd_seek(struct seek_frame* f)
         CyDelay(1); /* for direction change */
     }
     
-    while (f->track != current_track)
+    while (track != current_track)
     {
-        if (f->track > current_track)
+        if (track > current_track)
         {
             step(STEP_AWAYFROM0);
             current_track++;
         }
-        else if (f->track < current_track)
+        else if (track < current_track)
         {
             step(STEP_TOWARDS0);
             current_track--;
         }
     }
     CyDelay(STEP_SETTLING_TIME);
-            
+}
+
+static void cmd_seek(struct seek_frame* f)
+{
+    seek_to(f->track);
     DECLARE_REPLY_FRAME(struct any_frame, F_FRAME_SEEK_REPLY);
     send_reply(&r);    
 }
@@ -190,7 +169,6 @@ static void cmd_measure_speed(struct any_frame* f)
 static void cmd_bulk_test(struct any_frame* f)
 {
     uint8_t buffer[64];
-    int longest_time = 0;
     
     wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
     for (int x=0; x<16; x++)
@@ -207,10 +185,32 @@ static void cmd_bulk_test(struct any_frame* f)
     send_reply(&r);
 }
 
+static void init_dma(void)
+{
+    dma_channel = CAPTURE_DMA_DmaInitialize(
+        1 /* bytes */,
+        true /* request per burst */, 
+        HI16(CYDEV_PERIPH_BASE),
+        HI16(CYDEV_SRAM_BASE));
+    
+    for (int i=0; i<BUFFER_COUNT; i++)
+        td[i] = CyDmaTdAllocate(); 
+    for (int i=0; i<BUFFER_COUNT; i++)
+    {
+        int nexti = i+1;
+        if (nexti == BUFFER_COUNT)
+            nexti = 0;
+
+        CyDmaTdSetConfiguration(td[i], BUFFER_SIZE, td[nexti],   
+            CY_DMA_TD_INC_DST_ADR | CAPTURE_DMA__TD_TERMOUT_EN);
+        CyDmaTdSetAddress(td[i], LO16((uint32)CAPTURE_REG_Status_PTR), LO16((uint32)&dma_buffer[i]));
+    }    
+}
+
 static void cmd_read(struct read_frame* f)
 {
-    start_motor();
-    //SIDE_REG_Write(f->side1);
+    seek_to(current_track);    
+    SIDE_REG_Write(f->side1);
     
     /* Do slow setup *before* we go into the real-time bit. */
     
@@ -224,36 +224,31 @@ static void cmd_read(struct read_frame* f)
         ;
     index_irq = false;
     
-    int start_time = clock;
     dma_writing_to_td = 0;
     dma_reading_from_td = -1;
     dma_underrun = false;
     int count = 0;
-    CyDmaClearPendingDrq(dma_channel);
     CyDmaChSetInitialTd(dma_channel, td[0]);
+    CyDmaClearPendingDrq(dma_channel);
     CyDmaChEnable(dma_channel, 1);
 
-    /* Wait for the first DMA transfer to complete, after which we can start the
+    /* Wait for the fir0st DMA transfer to complete, after which we can start the
      * USB transfer. */
 
-    #if 0
-    while (dma_writing_to_td == 0)
+    while ((dma_writing_to_td == 0) && !index_irq)
         ;
     dma_reading_from_td = 0;
     
     /* Start transferring. */
 
-    while (!index_irq)
+    while (!index_irq && !dma_underrun)
     {
-        if (dma_underrun)
-            goto abort;
-        
         /* Wait for the next block to be read. */
         while (dma_reading_from_td == dma_writing_to_td)
         {
-            /* No more data --- exit. */
-            if (index_irq || dma_underrun)
-                break;
+            /* On an underrun, give up immediately. */
+            if (dma_underrun)
+                goto abort;
         }
 
         while (USBFS_GetEPState(FLUXENGINE_DATA_IN_EP_NUM) != USBFS_IN_BUFFER_EMPTY)
@@ -265,48 +260,8 @@ static void cmd_read(struct read_frame* f)
         USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, dma_buffer[dma_reading_from_td], BUFFER_SIZE);
         dma_reading_from_td = (dma_reading_from_td+1) % BUFFER_COUNT;
         count++;
-        printi(clock);
-        print(" ");
-        printi(dma_reading_from_td);
-        print(" ");
-        printi(dma_writing_to_td);
-        print("\r");
     }
 abort:
-    printi(dma_reading_from_td);
-    print("\r");
-    printi(dma_writing_to_td);
-    print("\r");
-    #else
-        int oldi = -1;
-        while (!index_irq)
-        {
-            uint8_t current;
-            CyDmaChStatus(dma_channel, &current, NULL);
-            if (current != oldi)
-            {
-                count++;
-                oldi = current;
-            }
-        }
-    int elapsed_time = clock - start_time;
-    print("elapsed time: ");
-    printi(elapsed_time);
-    print(" ms\r");
-    print("packets: ");
-    printi(count);
-    print("\r");
-    print("packets per sec: ");
-    printi(count*1000 / elapsed_time);
-    print("\r");
-    print("drq frequency: ");
-    printi(count*64000 / elapsed_time);
-    print("\r");
-    print("period between packets: ");
-    printi(elapsed_time*1000 / count);
-    print("\r");
-           
-    #endif
     CyDmaChSetRequest(dma_channel, CY_DMA_CPU_TERM_CHAIN);
     while (CyDmaChGetRequest(dma_channel))
         ;
@@ -380,10 +335,6 @@ int main(void)
     CyWdtStart(CYWDT_1024_TICKS, CYWDT_LPMODE_DISABLED);
     
     UART_PutString("GO\r");
-
-    CyDmaClearPendingDrq(dma_channel);
-    CyDmaChSetInitialTd(dma_channel, td[0]);
-    CyDmaChEnable(dma_channel, 1);
 
     for (;;)
     {

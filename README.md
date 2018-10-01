@@ -1,18 +1,29 @@
 The sampling system is dumb as rocks.
 
-There's an 8-bit down counter attached to a clock. Every time a pulse comes
+There's an 7-bit counter attached to a clock. Every time a pulse comes
 in, or the counter overflows, we sample the clock and send the result to the
-DMA channel. This gives us a sequence of bytes which indicating the timing
-between pulses.
+low 7 bits of the DMA channel; the high bit is the pulse itself (allowing us
+to distinguish between true pulses or counter overflows).
 
 An HD floppy has a nominal clock of 500kHz, so we use a sample clock of 8MHz
 (every 0.125us). This means that our 500kHz pulses will have an interval of
 16 (and a DD disk with a 250kHz nominal clock has an interval of 32). This
 gives us more than enough resolution. If no pulse comes in, then we sample on
-rollover at 256 * 0.125us = 320us. We distinguish between having a pulse and
-not having a pulse by artifically nudging pulses on the 0 interval up to a 1,
-so we know that a byte of 0 always means no pulse.
+rollover at 128 * 0.125us = 160us.
 
+VERY IMPORTANT:
+
+The READ DATA line on the PSOC is on pin 3[2], which has a integrated
+capacitor! This needs to be removed before the device can see any floppy
+drive data. It's C7, and is easy with some tweezers and a stead hand with
+a soldering iron.
+
+Some useful numbers:
+
+  - nominal rotation speed is 300 rpm, or 5Hz. The period is 200ms.
+  - MFM encoding uses a clock of 500kHz. This makes each recording cell 2us.
+  - a pulse is 150ns to 800ns, so a clock of 7MHz will sample it.
+  
 Useful links:
 
 http://www.hermannseib.com/documents/floppy.pdf
