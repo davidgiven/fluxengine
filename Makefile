@@ -1,7 +1,12 @@
 CFLAGS = -g -Wall $(shell pkg-config --cflags libusb-1.0)
 LDFLAGS = -g $(shell pkg-config --libs libusb-1.0)
 
-SRCS = main.c usb.c
+SRCS = \
+	main.c \
+	usb.c \
+	cmd_rpm.c \
+	cmd_usbbench.c
+
 OBJS = $(patsubst %.c, .objs/%.o, $(SRCS))
 
 fluxclient: $(OBJS) Makefile

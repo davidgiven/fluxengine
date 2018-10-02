@@ -14,6 +14,7 @@
 
 extern void error(const char* message, ...);
 extern double gettime(void);
+extern int countargs(char* const* argv);
 
 extern void usb_init(void);
 extern void usb_cmd_send(void* ptr, int len);
@@ -24,5 +25,8 @@ extern void usb_seek(int track);
 extern int usb_measure_speed(void);
 extern void usb_bulk_test(void);
 extern void usb_read(int side);
+
+extern void cmd_rpm(char* const* argv);
+extern void cmd_usbbench(char* const* argv);
 
 #endif

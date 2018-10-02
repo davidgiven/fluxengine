@@ -23,58 +23,58 @@ double gettime(void)
 	return (double)tv.tv_sec + tv.tv_usec/1000000.0;
 }
 
-static void parse_options(int argc, char* const* argv)
+int countargs(char* const* argv)
+{
+	int count = 0;
+	while (*argv++)
+		count++;
+	return count;
+}
+
+void syntax_error(void)
+{
+	error("syntax error (try -h for help)");
+}
+
+static char* const* parse_global_options(char* const* argv)
 {
 	for (;;)
 	{
-		switch (getopt(argc, argv, "ht:"))
+		switch (getopt(countargs(argv), argv, "+ht:"))
 		{
 			case -1:
-				return;
+				return argv + optind;
 
 			case 'h':
 				error("sorry, no help yet");
 
 			default:
-				error("syntax error (try -h for help)");
+				syntax_error();
 		}
 	}
 }
 
 int main(int argc, char* const* argv)
 {
+	argv = parse_global_options(argv);
 	usb_init();
 
-	int v = usb_get_version();
-	printf("FluxEngine version %d\n", v);
+	/* Just check that a FluxEngine is plugged in. */
 
-	int period_ms = usb_measure_speed();
-	printf("Rotational period is %d ms (%f rpm)\n", period_ms, 60000.0/period_ms);
+	(void) usb_get_version();
 
-	usb_seek(20);
-	usb_read(0);
-	//usb_bulk_test();
+	if (!argv[0])
+		syntax_error();
 
-	#if 0
-	parse_options(argc, argv);
-	if (!serialport)
-		error("you must specify a serial port name");
-    open_serial_port(serialport);
+	if (strcmp(argv[0], "rpm") == 0)
+		cmd_rpm(argv);
+    else if (strcmp(argv[0], "usbbench") == 0)
+        cmd_usbbench(argv);
+    else
+        syntax_error();
 
-	const int iterations = 10000;
-	double starttime = gettime();
-    for (int i=0; i<iterations; i++)
-    {
-        frame_t frame;
-        read_frame(&frame);
-    }
-    double endtime = gettime();
-    int transferred = iterations*sizeof(frame_t);
-    printf("amount transferred: %d bytes\n", transferred);
-    double elapsedtime = endtime - starttime;
-    printf("elapsed time: %f seconds\n", elapsedtime);
-    printf("performance: %f kB/s\n", (transferred/1024) / elapsedtime);
-#endif
+	// usb_seek(20);
+	// usb_read(0);
 
     return 0;
 }

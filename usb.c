@@ -114,7 +114,7 @@ void usb_bulk_test(void)
     struct any_frame f = { .f = {.type = F_FRAME_BULK_TEST_CMD, .size = sizeof(f)} };
     usb_cmd_send(&f, f.f.size);
 
-    uint8_t bulk_buffer[16*256*64];
+    uint8_t bulk_buffer[64*256*64];
     int total_len = sizeof(bulk_buffer);
     double start_time = gettime();
     large_bulk_transfer(FLUXENGINE_DATA_IN_EP, bulk_buffer, total_len);
@@ -123,7 +123,7 @@ void usb_bulk_test(void)
     printf("Transferred %d bytes in %d ms (%d kB/s)\n",
         total_len, (int)(elapsed_time * 1000.0),
         (int)((total_len / 1024.0) / elapsed_time));
-    for (int x=0; x<16; x++)
+    for (int x=0; x<64; x++)
         for (int y=0; y<256; y++)
             for (int z=0; z<64; z++)
             {

@@ -171,7 +171,7 @@ static void cmd_bulk_test(struct any_frame* f)
     uint8_t buffer[64];
     
     wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
-    for (int x=0; x<16; x++)
+    for (int x=0; x<64; x++)
         for (int y=0; y<256; y++)
         {
             for (unsigned z=0; z<sizeof(buffer); z++)
