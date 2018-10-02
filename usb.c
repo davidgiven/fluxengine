@@ -135,7 +135,7 @@ void usb_bulk_test(void)
     await_reply(F_FRAME_BULK_TEST_REPLY);
 }
 
-void usb_read(int side)
+void usb_read(int side, struct raw_data_buffer* buffer)
 {
     struct read_frame f = {
         .f = { .type = F_FRAME_READ_CMD, .size = sizeof(f) },
@@ -143,13 +143,8 @@ void usb_read(int side)
     };
     usb_cmd_send(&f, f.f.size);
 
-    uint8_t bulk_buffer[200*1024];
-    int len = large_bulk_transfer(FLUXENGINE_DATA_IN_EP, bulk_buffer, sizeof(bulk_buffer));
-    printf("read %d bytes\n", len);
+    buffer->len = large_bulk_transfer(FLUXENGINE_DATA_IN_EP,
+        &buffer->buffer, sizeof(buffer->buffer));
 
     await_reply(F_FRAME_READ_REPLY);
-
-    FILE* fp = fopen("out.dat", "wb");
-    fwrite(bulk_buffer, 1, len, fp);
-    fclose(fp);
 }

@@ -70,11 +70,10 @@ int main(int argc, char* const* argv)
 		cmd_rpm(argv);
     else if (strcmp(argv[0], "usbbench") == 0)
         cmd_usbbench(argv);
+    else if (strcmp(argv[0], "read") == 0)
+        cmd_read(argv);
     else
         syntax_error();
-
-	// usb_seek(20);
-	// usb_read(0);
 
     return 0;
 }
