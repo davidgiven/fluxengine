@@ -5,11 +5,20 @@
 static const char* filename = NULL;
 static int start_track = 0;
 static int end_track = 79;
+static int start_side = 0;
+static int end_side = 1;
 static sqlite3* db;
 
 static void syntax_error(void)
 {
-    fprintf(stderr, "syntax: fluxclient read -f <filename>\n");
+    fprintf(stderr,
+        "syntax: fluxclient read <options>:\n"
+        "  -o <filename>       output filename\n"
+        "  -s <start track>    defaults to 0\n"
+        "  -e <end track>      defaults to 79\n"
+        "  -0                  read just side 0 (defaults to both)\n" 
+        "  -1                  read just side 1 (defaults to both)\n" 
+    );
     exit(1);
 }
 
@@ -17,12 +26,12 @@ static char* const* parse_options(char* const* argv)
 {
 	for (;;)
 	{
-		switch (getopt(countargs(argv), argv, "+f:s:e:"))
+		switch (getopt(countargs(argv), argv, "+o:s:e:01"))
 		{
 			case -1:
 				return argv + optind - 1;
 
-			case 'f':
+			case 'o':
                 filename = optarg;
                 break;
 
@@ -32,6 +41,14 @@ static char* const* parse_options(char* const* argv)
 
             case 'e':
                 end_track = atoi(optarg);
+                break;
+
+            case '0':
+                start_side = end_side = 0;
+                break;
+
+            case '1':
+                start_side = end_side = 1;
                 break;
 
 			default:
@@ -47,16 +64,9 @@ static void close_file(void)
 
 static void open_file(void)
 {
-    db = sql_open(filename);
+    db = sql_open(filename, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
     atexit(close_file);
-
-    sql_stmt(db, "PRAGMA synchronous = OFF;");
-    sql_stmt(db, "CREATE TABLE IF NOT EXISTS rawdata ("
-                 "  track INTEGER,"
-                 "  side INTEGER,"
-                 "  data BLOB,"
-                 "  PRIMARY KEY(track, side)"
-                 ");");
+    sql_prepare_raw(db);
 }
 
 void cmd_read(char* const* argv)
@@ -72,32 +82,29 @@ void cmd_read(char* const* argv)
     open_file();
     sql_stmt(db, "BEGIN;");
 
-    sqlite3_stmt* stmt;
-    sql_check(db, sqlite3_prepare_v2(db,
-        "INSERT OR REPLACE INTO rawdata (track, side, data) VALUES (:track, :side, :data)",
-        -1, &stmt, NULL));
-    sql_bind_int(db, stmt, ":side", 0);
-
     for (int t=start_track; t<=end_track; t++)
     {
-        printf("Track %02d: ", t);
-        fflush(stdout);
-	    usb_seek(t);
+        for (int side=start_side; side<=end_side; side++)
+        {
+            printf("Track %02d side %d: ", t, side);
+            fflush(stdout);
+            usb_seek(t);
 
-        struct raw_data_buffer buffer;
-	    usb_read(0, &buffer);
+            struct raw_data_buffer buffer;
+            usb_read(side, &buffer);
 
-        sql_bind_int(db, stmt, ":track", t);
-        sql_bind_blob(db, stmt, ":data", &buffer.buffer, buffer.len);
-        if (sqlite3_step(stmt) != SQLITE_DONE)
-            error("failed to write to database: %s", sqlite3_errmsg(db));
-        sql_check(db, sqlite3_reset(stmt));
+            sql_write_raw(db, t, side, &buffer.buffer, buffer.len);
 
-        FILE* f = fopen("out.dat", "wb");
-        fwrite(&buffer.buffer, 1, buffer.len, f);
-        fclose(f);
+            FILE* f = fopen("out.dat", "wb");
+            fwrite(&buffer.buffer, 1, buffer.len, f);
+            fclose(f);
 
-        printf("%d bytes\n", buffer.len);
+            uint32_t time = 0;
+            for (int i=0; i<buffer.len; i++)
+                time += buffer.buffer[i] & 0x7f;
+
+            printf("%d ms in %d bytes\n", (time*1000)/TICK_FREQUENCY, buffer.len);
+        }
     }
     sql_stmt(db, "COMMIT;");
 }

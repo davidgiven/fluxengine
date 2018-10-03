@@ -8,6 +8,7 @@ SRCS = \
 	cmd_rpm.c \
 	cmd_usbbench.c \
 	cmd_read.c \
+	cmd_decode.c \
 
 OBJS = $(patsubst %.c, .objs/%.o, $(SRCS))
 

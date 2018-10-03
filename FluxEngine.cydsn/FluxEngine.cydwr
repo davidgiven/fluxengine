@@ -56,7 +56,7 @@
         <Data key="derive_type" value="AUTO" />
         <Data key="desired_freq" value="921.6" />
         <Data key="desired_unit" value="3" />
-        <Data key="divider" value="35" />
+        <Data key="divider" value="52" />
         <Data key="domain" value="DIGITAL" />
         <Data key="enabled" value="True" />
         <Data key="minus_accuracy" value="0.25" />
@@ -76,19 +76,20 @@
       <Group key="cb7e877c-9fb4-4fc1-a708-f1e48eb5a68c">
         <Data key="check_tolerance" value="True" />
         <Data key="clock_version" value="v1" />
-        <Data key="derive_type" value="AUTO" />
+        <Data key="derive_type" value="NAMED_FREQ" />
         <Data key="desired_freq" value="16" />
         <Data key="desired_unit" value="6" />
-        <Data key="divider" value="2" />
+        <Data key="divider" value="3" />
         <Data key="domain" value="DIGITAL" />
         <Data key="enabled" value="True" />
         <Data key="minus_accuracy" value="0.25" />
-        <Data key="minus_tolerance" value="0.25" />
+        <Data key="minus_tolerance" value="0.1" />
         <Data key="name" value="CounterClock" />
+        <Data key="named_src_direct_connect" value="False" />
         <Data key="netlist_name" value="CounterClock" />
         <Data key="placement" value="AUTO" />
         <Data key="plus_accuracy" value="0.25" />
-        <Data key="plus_tolerance" value="0.25" />
+        <Data key="plus_tolerance" value="0.1" />
         <Data key="scope" value="LOCAL" />
         <Data key="src_clk_id" value="61737EF6-3B74-48f9-8B91-F7473A442AE7" />
         <Data key="src_clk_name" value="MASTER_CLK" />
@@ -126,7 +127,7 @@
         <Data key="check_tolerance" value="True" />
         <Data key="clock_version" value="v1" />
         <Data key="derive_type" value="BUILTIN" />
-        <Data key="desired_freq" value="32" />
+        <Data key="desired_freq" value="48" />
         <Data key="desired_unit" value="6" />
         <Data key="divider" value="0" />
         <Data key="domain" value="0" />

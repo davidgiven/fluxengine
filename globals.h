@@ -35,5 +35,6 @@ extern void usb_read(int side, struct raw_data_buffer* buffer);
 extern void cmd_rpm(char* const* argv);
 extern void cmd_usbbench(char* const* argv);
 extern void cmd_read(char* const* argv);
+extern void cmd_decode(char* const* argv);
 
 #endif

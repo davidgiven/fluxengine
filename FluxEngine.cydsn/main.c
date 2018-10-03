@@ -215,7 +215,6 @@ static void cmd_read(struct read_frame* f)
     /* Do slow setup *before* we go into the real-time bit. */
     
     wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
-    print("starting transfer\r");
 
     /* Wait for the beginning of a rotation. */
         
@@ -228,11 +227,11 @@ static void cmd_read(struct read_frame* f)
     dma_reading_from_td = -1;
     dma_underrun = false;
     int count = 0;
-    CyDmaChSetInitialTd(dma_channel, td[0]);
+    CyDmaChSetInitialTd(dma_channel, td[dma_writing_to_td]);
     CyDmaClearPendingDrq(dma_channel);
     CyDmaChEnable(dma_channel, 1);
 
-    /* Wait for the fir0st DMA transfer to complete, after which we can start the
+    /* Wait for the first DMA transfer to complete, after which we can start the
      * USB transfer. */
 
     while ((dma_writing_to_td == 0) && !index_irq)
@@ -268,7 +267,6 @@ abort:
 
     wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
     USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, NULL, 0);
-    print("bulk transfer terminated\r");
 
     if (dma_underrun)
     {
