@@ -93,6 +93,10 @@ void cmd_read(char* const* argv)
             error("failed to write to database: %s", sqlite3_errmsg(db));
         sql_check(db, sqlite3_reset(stmt));
 
+        FILE* f = fopen("out.dat", "wb");
+        fwrite(&buffer.buffer, 1, buffer.len, f);
+        fclose(f);
+
         printf("%d bytes\n", buffer.len);
     }
     sql_stmt(db, "COMMIT;");

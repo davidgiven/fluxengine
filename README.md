@@ -1,9 +1,9 @@
 The sampling system is dumb as rocks.
 
-There's an 8-bit down counter attached to a 16MHz clock. Every time a pulse
-comes in, or the counter overflows, we sample the timer and send the result
-to the DMA channel. We don't bother to distinguish overflows from real pulses
---- this appears not to ever happen.
+There's an 7-bit counter attached to a 16MHz clock. Every time a pulse comes
+in, or the counter overflows, we sample it and send the result to the DMA
+channel. The 8th bit contains the inverse of the actual pulse, so we can
+distinguish rollovers (which show up as 0xff) from actual data.
 
 An HD floppy has a nominal clock of 500kHz, so we use a sample clock of 8MHz
 (every 0.125us). This means that our 500kHz pulses will have an interval of
