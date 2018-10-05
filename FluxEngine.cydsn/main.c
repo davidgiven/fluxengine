@@ -7,7 +7,10 @@
 
 #define MOTOR_ON_TIME 5000 /* milliseconds */
 #define STEP_INTERVAL_TIME 3 /* ms */
-#define STEP_SETTLING_TIME 20 /* ms */
+#define STEP_SETTLING_TIME 40 /* ms */
+
+#define DISKSTATUS_WPT    1
+#define DISKSTATUS_DSKCHG 2
 
 #define STEP_TOWARDS0 1
 #define STEP_AWAYFROM0 0
@@ -73,6 +76,10 @@ static void start_motor(void)
         CyDelay(1000);
     }
     
+        
+    if (DISKSTATUS_REG_Read() & DISKSTATUS_DSKCHG)
+        homed = false;
+
     motor_on_time = clock;
     motor_on = true;
     CyWdtClear();
@@ -119,6 +126,9 @@ static void seek_to(int track)
     {
         while (!TRACK0_REG_Read())
             step(STEP_TOWARDS0);
+            
+        /* Step to -1, which should be a nop, to reset the disk on disk change. */
+        step(STEP_TOWARDS0);
         
         homed = true;
         current_track = 0;
