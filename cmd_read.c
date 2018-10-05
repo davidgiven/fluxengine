@@ -66,7 +66,7 @@ static void open_file(void)
 {
     db = sql_open(filename, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
     atexit(close_file);
-    sql_prepare_raw(db);
+    sql_prepare_flux(db);
 }
 
 void cmd_read(char* const* argv)
@@ -93,11 +93,7 @@ void cmd_read(char* const* argv)
             struct raw_data_buffer buffer;
             usb_read(side, &buffer);
 
-            sql_write_raw(db, t, side, &buffer.buffer, buffer.len);
-
-            FILE* f = fopen("out.dat", "wb");
-            fwrite(&buffer.buffer, 1, buffer.len, f);
-            fclose(f);
+            sql_write_flux(db, t, side, buffer.buffer, buffer.len);
 
             uint32_t time = 0;
             for (int i=0; i<buffer.len; i++)

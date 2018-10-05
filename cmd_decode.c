@@ -3,8 +3,19 @@
 #include <unistd.h>
 #include <string.h>
 
-#define CLOCK_DETECTOR_AMPLITUDE_THRESHOLD 100 /* arbitrary */
+#define CLOCK_LOCK_BOOST 6 /* arbitrary */
+#define CLOCK_LOCK_DECAY 1 /* arbitrary */
+#define CLOCK_DETECTOR_AMPLITUDE_THRESHOLD 60 /* arbi4rary */
 #define CLOCK_ERROR_BOUNDS 0.25
+
+#define IAM 0xFC   /* start-of-track record */
+#define IAM_LEN    4
+#define IDAM 0xFE  /* sector header */
+#define IDAM_LEN   10
+#define DAM1 0xF8  /* sector data (type 1) */
+#define DAM2 0xFB  /* sector data (type 2) */
+#define DAM_LEN    6 /* plus user data */
+/* Length of a DAM record is determined by the previous sector header. */
 
 static const char* inputfilename = NULL;
 static const char* outputfilename = NULL;
@@ -20,13 +31,17 @@ static int period1; /* between short and medium transitions */
 static int period2; /* between medium and long transitions */
 static int period3; /* upper limit for a long transition */
 
-static uint32_t buckets[128];
-static uint8_t outputbuffer[100*1024];
+static uint8_t outputbuffer[5*1024];
 static int outputbufferpos;
 static uint8_t fifo = 0;
 static int bitcount = 0;
 static bool phaselocked = false;
 static bool phase = false;
+static bool queued = false;
+static bool has_queued = false;
+
+static int thislength = 0;
+static int nextlength = 0;
 
 static void syntax_error(void)
 {
@@ -68,6 +83,8 @@ static void close_files(void)
 static void open_files(void)
 {
     indb = sql_open(inputfilename, SQLITE_OPEN_READONLY);
+    outdb = sql_open(outputfilename, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
+    sql_prepare_record(outdb);
     atexit(close_files);
 }
 
@@ -99,13 +116,21 @@ static void find_clock(void)
         uint8_t data = inputbuffer[cursor++];
         if (data & 0x80)
             continue;
-        buckets[data] += 4;
+        if (data >= 2)
+            buckets[data-2] += CLOCK_LOCK_BOOST * 1 / 3;
+        if (data >= 1)
+            buckets[data-1] += CLOCK_LOCK_BOOST * 2 / 3;
+        buckets[data] += CLOCK_LOCK_BOOST;
+        if (data <= 0x7e)
+            buckets[data+1] += CLOCK_LOCK_BOOST * 2 / 3;
+        if (data <= 0x7d)
+            buckets[data+2] += CLOCK_LOCK_BOOST * 1 / 3;
 
         /* The bucket list slowly decays. */
 
         for (int i=0; i<128; i++)
             if (buckets[i] > 0)
-                buckets[i]--;
+                buckets[i] -= CLOCK_LOCK_DECAY;
 
         /* 
          * After 10 bytes, we'll have seen 80 bits. So there should be a nice
@@ -142,6 +167,11 @@ static void find_clock(void)
             period3 = long_time + long_time * CLOCK_ERROR_BOUNDS;
             phase = true;
             phaselocked = true;
+            has_queued = false;
+            #if 0
+            printf("{%02x/%02x/%02x/%02x@%x}", period0, period1, period2, period3, cursor);
+            fflush(stdout);
+            #endif
             return;
         }
     }
@@ -156,8 +186,6 @@ static void queue_bit(bool bit)
 
 static bool read_bit(void)
 {
-    static bool queued = false;
-    static bool has_queued = false;
     if (has_queued)
     {
         has_queued = false;
@@ -253,23 +281,95 @@ static uint8_t read_byte(void)
     return fifo;
 }
 
+static bool process_byte(uint8_t b)
+{
+    outputbuffer[outputbufferpos++] = b;
+    if (outputbufferpos == sizeof(outputbuffer))
+        goto abandon_record;
+
+    if (outputbufferpos < 4)
+    {
+        if ((b != 0xA1) && (b != 0xC2))
+            goto abandon_record;
+    }
+
+    if (outputbufferpos == 4)
+    {
+        switch (outputbuffer[3])
+        {
+            case IAM:
+                thislength = IAM_LEN;
+                putchar('T');
+                break;
+
+            case IDAM:
+                thislength = IDAM_LEN;
+                putchar('H');
+                break;
+
+            case DAM1:
+            case DAM2:
+                thislength = nextlength;
+                nextlength = 0;
+                /* Sector with a header? */
+                if (thislength == 0)
+                    goto abandon_record;
+                putchar('D');
+                break;
+
+            default:
+                /* Garbage. If we read too much, give up and resync. */
+                outputbufferpos++;
+                if (outputbufferpos > 8)
+                {
+                    putchar('?');
+                    phaselocked = false;
+                }
+                return false;
+        }
+    }
+
+    if (outputbufferpos == thislength)
+    {
+        /* We've read a complete record. */
+
+        if (outputbuffer[3] == IDAM)
+        {
+            #if 0
+            printf("[%d %d %d] ", outputbuffer[4], outputbuffer[5], outputbuffer[6]);
+            fflush(stdout);
+            #endif
+            nextlength = (1<<(outputbuffer[7] + 7)) + DAM_LEN;
+        }
+
+        phaselocked = false;
+        return true;
+    }
+
+    return false;
+
+abandon_record:
+    phaselocked = false;
+    return false;
+}
+
 static void decode_track_cb(int track, int side, const uint8_t* data, size_t len)
 {
-    printf("Track %d side %d: ", track, side);
+    printf("Track %02d side %d: ", track, side);
 
     inputbuffer = data;
     inputlen = len;
     cursor = 0;
+    int record = 0;
 
     while (cursor < inputlen)
     {
         if (!phaselocked)
         {
-            printf("lost phase sync at byte %x\n", outputbufferpos);
             while (cursor < inputlen)
             {
                 find_clock();
-                while (phaselocked)
+                while (phaselocked && (cursor < inputlen))
                 {
                     if (read_bit())
                         goto found_byte;
@@ -278,14 +378,17 @@ static void decode_track_cb(int track, int side, const uint8_t* data, size_t len
         found_byte:;
             fifo = 1;
             bitcount = 1;
+            outputbufferpos = 0;
         }
 
-        outputbuffer[outputbufferpos++] = read_byte();
+        if (process_byte(read_byte()))
+        {
+            sql_write_record(outdb, track, side, record, outputbuffer, outputbufferpos);
+            record++;
+        }
     }
 
-    FILE* fp = fopen("test.dat", "wb");
-    fwrite(outputbuffer, 1, outputbufferpos, fp);
-    fclose(fp);
+    printf(" = %d records\n", record);
 }
 
 void cmd_decode(char* const* argv)
@@ -295,8 +398,12 @@ void cmd_decode(char* const* argv)
         syntax_error();
     if (!inputfilename)
         error("you must supply a filename to read from");
+    if (!outputfilename)
+        error("you must supply a filename to write to");
 
     open_files();
-    sql_for_all_raw_data(indb, decode_track_cb);
+    sql_stmt(outdb, "BEGIN");
+    sql_stmt(outdb, "DELETE FROM records");
+    sql_for_all_flux_data(indb, decode_track_cb);
+    sql_stmt(outdb, "COMMIT");
 }
-

@@ -40,7 +40,7 @@ void sql_bind_int(sqlite3* db, sqlite3_stmt* stmt, const char* name, int value)
         value));
 }
 
-void sql_prepare_raw(sqlite3* db)
+void sql_prepare_flux(sqlite3* db)
 {
     sql_stmt(db, "PRAGMA synchronous = OFF;");
     sql_stmt(db, "CREATE TABLE IF NOT EXISTS rawdata ("
@@ -51,7 +51,7 @@ void sql_prepare_raw(sqlite3* db)
                  ");");
 }
 
-void sql_write_raw(sqlite3* db, int track, int side, const void* ptr, size_t len)
+void sql_write_flux(sqlite3* db, int track, int side, const uint8_t* ptr, size_t len)
 {
     sqlite3_stmt* stmt;
     sql_check(db, sqlite3_prepare_v2(db,
@@ -66,7 +66,7 @@ void sql_write_raw(sqlite3* db, int track, int side, const void* ptr, size_t len
     sql_check(db, sqlite3_finalize(stmt));
 }
 
-void sql_for_all_raw_data(sqlite3* db,
+void sql_for_all_flux_data(sqlite3* db,
     void (*cb)(int track, int side, const uint8_t* data, size_t len))
 {
     sqlite3_stmt* stmt;
@@ -85,4 +85,54 @@ void sql_for_all_raw_data(sqlite3* db,
 
     sql_check(db, sqlite3_finalize(stmt));
 }
+
+void sql_prepare_record(sqlite3* db)
+{
+    sql_stmt(db, "PRAGMA synchronous = OFF;");
+    sql_stmt(db, "CREATE TABLE IF NOT EXISTS records ("
+                 "  track INTEGER,"
+                 "  side INTEGER,"
+                 "  record INTEGER,"
+                 "  data BLOB,"
+                 "  PRIMARY KEY(track, side, record)"
+                 ");");
+}
+
+void sql_write_record(sqlite3* db, int track, int side, int record, const uint8_t* ptr, size_t len)
+{
+    sqlite3_stmt* stmt;
+    sql_check(db, sqlite3_prepare_v2(db,
+        "INSERT OR REPLACE INTO records (track, side, record, data) VALUES (:track, :side, :record, :data)",
+        -1, &stmt, NULL));
+    sql_bind_int(db, stmt, ":track", track);
+    sql_bind_int(db, stmt, ":side", side);
+    sql_bind_int(db, stmt, ":record", record);
+    sql_bind_blob(db, stmt, ":data", ptr, len);
+
+    if (sqlite3_step(stmt) != SQLITE_DONE)
+        error("failed to write to database: %s", sqlite3_errmsg(db));
+    sql_check(db, sqlite3_finalize(stmt));
+}
+
+void sql_for_all_record_data(sqlite3* db,
+    void (*cb)(int track, int side, int record, const uint8_t* data, size_t len))
+{
+    sqlite3_stmt* stmt;
+    sql_check(db, sqlite3_prepare_v2(db,
+        "SELECT track, side, record, data FROM records",
+        -1, &stmt, NULL));
+
+    while (sqlite3_step(stmt) == SQLITE_ROW)
+    {
+        int track = sqlite3_column_int(stmt, 0);
+        int side = sqlite3_column_int(stmt, 1);
+        int record = sqlite3_column_int(stmt, 2);
+        const void* ptr = sqlite3_column_blob(stmt, 3);
+        size_t len = sqlite3_column_bytes(stmt, 3);
+        cb(track, side, record, ptr, len);
+    }
+
+    sql_check(db, sqlite3_finalize(stmt));
+}
+
 
