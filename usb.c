@@ -139,7 +139,7 @@ void usb_read(int side, struct raw_data_buffer* buffer)
 {
     struct read_frame f = {
         .f = { .type = F_FRAME_READ_CMD, .size = sizeof(f) },
-        .side1 = side
+        .side = side
     };
     usb_cmd_send(&f, f.f.size);
 
@@ -151,5 +151,15 @@ void usb_read(int side, struct raw_data_buffer* buffer)
 
 void usb_write(int side, struct raw_data_buffer* buffer)
 {
-    error("not implemented");
+    struct write_frame f = {
+        .f = { .type = F_FRAME_WRITE_CMD, .size = sizeof(f) },
+        .side = side,
+        .bytes_to_write = htole32(buffer->len),
+    };
+    usb_cmd_send(&f, f.f.size);
+
+    large_bulk_transfer(FLUXENGINE_DATA_OUT_EP, &buffer->buffer, buffer->len);
+    
+    struct write_reply_frame* r = await_reply(F_FRAME_WRITE_REPLY);
+    printf("written %d bytes\n", r->bytes_actually_written);
 }

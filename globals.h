@@ -1,6 +1,8 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
+#define _BSD_SOURCE
+
 #if defined _WIN32 || defined __CYGWIN__
     #define WINDOWS
 #endif
@@ -10,6 +12,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <endian.h>
 
 #include "protocol.h"
 

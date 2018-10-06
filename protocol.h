@@ -42,6 +42,8 @@ enum
     F_FRAME_BULK_TEST_REPLY,      /* any_frame */
     F_FRAME_READ_CMD,             /* read_frame */
     F_FRAME_READ_REPLY,           /* any_frame */
+    F_FRAME_WRITE_CMD,            /* write_frame */
+    F_FRAME_WRITE_REPLY,          /* write_reply_frame */
 };
 
 enum
@@ -89,7 +91,20 @@ struct speed_frame
 struct read_frame
 {
     struct frame_header f;
-    uint8_t side1;
+    uint8_t side;
+};
+
+struct write_frame
+{
+    struct frame_header f;
+    uint8_t side;
+    uint32_t bytes_to_write;
+};
+
+struct write_reply_frame
+{
+    struct frame_header f;
+    uint32_t bytes_actually_written;
 };
 
 #endif

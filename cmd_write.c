@@ -93,7 +93,10 @@ void cmd_write(char* const* argv)
             if (!sql_read_flux(db, t, side, buffer.buffer, &buffer.len))
                 printf("no data in file\n");
             else
+            {
+                printf("sending %ld bytes\n", buffer.len);
                 usb_write(side, &buffer);
+            }
         }
     }
 }
