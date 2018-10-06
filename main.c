@@ -72,6 +72,8 @@ int main(int argc, char* const* argv)
         cmd_usbbench(argv);
     else if (strcmp(argv[0], "read") == 0)
         cmd_read(argv);
+    else if (strcmp(argv[0], "write") == 0)
+        cmd_write(argv);
     else if (strcmp(argv[0], "decode") == 0)
         cmd_decode(argv);
     else

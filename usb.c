@@ -148,3 +148,8 @@ void usb_read(int side, struct raw_data_buffer* buffer)
 
     await_reply(F_FRAME_READ_REPLY);
 }
+
+void usb_write(int side, struct raw_data_buffer* buffer)
+{
+    error("not implemented");
+}

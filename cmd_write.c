@@ -7,19 +7,17 @@ static int start_track = 0;
 static int end_track = 79;
 static int start_side = 0;
 static int end_side = 1;
-static bool highdensity = true;
 static sqlite3* db;
 
 static void syntax_error(void)
 {
     fprintf(stderr,
-        "syntax: fluxclient read <options>:\n"
-        "  -o <filename>       output filename\n"
+        "syntax: fluxclient write <options>:\n"
+        "  -o <filename>       input filename\n"
         "  -s <start track>    defaults to 0\n"
         "  -e <end track>      defaults to 79\n"
         "  -0                  read just side 0 (defaults to both)\n" 
         "  -1                  read just side 1 (defaults to both)\n" 
-        "  -L                  select low density (defaults to high)\n"
     );
     exit(1);
 }
@@ -28,7 +26,7 @@ static char* const* parse_options(char* const* argv)
 {
 	for (;;)
 	{
-		switch (getopt(countargs(argv), argv, "+o:s:e:01L"))
+		switch (getopt(countargs(argv), argv, "+o:s:e:01"))
 		{
 			case -1:
 				return argv + optind - 1;
@@ -53,10 +51,6 @@ static char* const* parse_options(char* const* argv)
                 start_side = end_side = 1;
                 break;
 
-            case 'L':
-                highdensity = false;
-                break;
-
 			default:
 				syntax_error();
 		}
@@ -70,58 +64,37 @@ static void close_file(void)
 
 static void open_file(void)
 {
-    db = sql_open(filename, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
+    db = sql_open(filename, SQLITE_OPEN_READONLY);
     atexit(close_file);
-    sql_prepare_flux(db);
 }
 
-void cmd_read(char* const* argv)
+void cmd_write(char* const* argv)
 {
     argv = parse_options(argv);
     if (countargs(argv) != 1)
         syntax_error();
     if (!filename)
-        error("you must supply a filename to write to");
+        error("you must supply a filename to read from");
     if (start_track > end_track)
-        error("reading from track %d to track %d makes no sense", start_track, end_track);
+        error("writing to track %d to track %d makes no sense", start_track, end_track);
 
     open_file();
-    sql_stmt(db, "BEGIN;");
 
     for (int t=start_track; t<=end_track; t++)
     {
         for (int side=start_side; side<=end_side; side++)
         {
-        retry:
             printf("Track %02d side %d: ", t, side);
             fflush(stdout);
             usb_seek(t);
 
             struct raw_data_buffer buffer;
-            usb_read(
-                (side ? SIDE_SIDEB : SIDE_SIDEA) |
-                (highdensity ? SIDE_HIGHDENSITY : SIDE_LOWDENSITY),
-                &buffer);
-
-            sql_write_flux(db, t, side, buffer.buffer, buffer.len);
-
-            uint32_t time = 0;
-            uint32_t dropouts = 0;
-            for (int i=0; i<buffer.len; i++)
-            {
-                uint8_t b = buffer.buffer[i];
-                if (b == 0xff)
-                    dropouts++;
-                time += buffer.buffer[i] & 0x7f;
-            }
-            if (dropouts > 10)
-            {
-                printf("%d data dropouts, retrying\n", dropouts);
-                goto retry;
-            }
-
-            printf("%d ms in %ld bytes, %d dropouts\n", (time*1000)/TICK_FREQUENCY, buffer.len, dropouts);
+            buffer.len = sizeof(buffer.buffer);
+            if (!sql_read_flux(db, t, side, buffer.buffer, &buffer.len))
+                printf("no data in file\n");
+            else
+                usb_write(side, &buffer);
         }
     }
-    sql_stmt(db, "COMMIT;");
 }
+

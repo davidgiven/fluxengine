@@ -74,6 +74,7 @@ static void start_motor(void)
     {
         MOTOR_REG_Write(1);
         CyDelay(1000);
+        homed = false;
     }
     
         
@@ -219,8 +220,8 @@ static void init_dma(void)
 
 static void cmd_read(struct read_frame* f)
 {
-    seek_to(current_track);    
     SIDE_REG_Write(f->side1);
+    seek_to(current_track);    
     
     /* Do slow setup *before* we go into the real-time bit. */
     

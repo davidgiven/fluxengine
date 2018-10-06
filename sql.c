@@ -66,6 +66,32 @@ void sql_write_flux(sqlite3* db, int track, int side, const uint8_t* ptr, size_t
     sql_check(db, sqlite3_finalize(stmt));
 }
 
+bool sql_read_flux(sqlite3* db, int track, int side, uint8_t* ptr, size_t* len)
+{
+    sqlite3_stmt* stmt;
+    sql_check(db, sqlite3_prepare_v2(db,
+        "SELECT data FROM rawdata WHERE track=:track AND side=:side",
+        -1, &stmt, NULL));
+    sql_bind_int(db, stmt, ":track", track);
+    sql_bind_int(db, stmt, ":side", side);
+
+    int i = sqlite3_step(stmt);
+    if (i == SQLITE_DONE)
+        return false;
+    if (i != SQLITE_ROW)
+        error("failed to read from database: %s", sqlite3_errmsg(db));
+
+    const void* blobptr = sqlite3_column_blob(stmt, 0);
+    size_t bloblen = sqlite3_column_bytes(stmt, 0);
+    if (bloblen > *len)
+        error("buffer overflow (%d bytes in database, buffer %d bytes)", bloblen, *len);
+    *len = bloblen;
+    memcpy(ptr, blobptr, bloblen);
+
+    sql_check(db, sqlite3_finalize(stmt));
+    return true;
+}
+
 void sql_for_all_flux_data(sqlite3* db,
     void (*cb)(int track, int side, const uint8_t* data, size_t len))
 {
