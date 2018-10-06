@@ -17,7 +17,6 @@
 
 static volatile uint32_t clock = 0;
 static volatile bool index_irq = false;
-static volatile bool capture_dma_finished_irq = false;
 
 static bool motor_on = false;
 static uint32_t motor_on_time = 0;
@@ -361,13 +360,24 @@ static void cmd_write(struct write_frame* f)
     bool listening = false;
     bool finished = false;
     int packets = (f->bytes_to_write+FRAME_SIZE-1) / FRAME_SIZE;
+    int count_read = 0;
+    int count_written = 0;
     REPLAY_COUNTER_Start();
     dma_writing_to_td = 0;
     dma_reading_from_td = -1;
     dma_underrun = false;
+    CyDmaChSetInitialTd(dma_channel, td[dma_writing_to_td]);
+    CyDmaClearPendingDrq(dma_channel);
     
+    int old_reading_from_td = -1;
     for (;;)
     {
+        if (dma_reading_from_td != old_reading_from_td)
+        {
+            count_written++;
+            old_reading_from_td = dma_reading_from_td;
+        }
+        
         if (dma_reading_from_td != -1)
         {
             /* We want to be writing to disk. */
@@ -383,6 +393,8 @@ static void cmd_write(struct write_frame* f)
 
                 writing = true;
                 ERASE_REG_Write(1); /* start erasing! */
+                CyDmaChEnable(dma_channel, 1); /* nothing will happen... */
+                CyDmaChSetRequest(dma_channel, CY_DMA_CPU_REQ); /* ...until we manually start the first transfer */
             }
             
             /* ...unless we reach the end of the track, of course. */
@@ -414,13 +426,13 @@ static void cmd_write(struct write_frame* f)
                 listening = false;
                 dma_writing_to_td = NEXT_BUFFER(dma_writing_to_td);
                 
-                packets--;
+                count_read++;
             }
             
             /* Once we have enough data, we're ready to start writing. */
             
             if (dma_reading_from_td == -1)
-                dma_reading_from_td = 0;
+                dma_reading_from_td = old_reading_from_td = 0;
         }
     }
     
@@ -428,16 +440,29 @@ static void cmd_write(struct write_frame* f)
     {
         print("stop writing\r");
         WGATE_Write(0);
+        CyDmaChSetRequest(dma_channel, CY_DMA_CPU_TERM_CHAIN);
+        while (CyDmaChGetRequest(dma_channel))
+            ;
+        REPLAY_COUNTER_Stop();
+        CyDmaChDisable(dma_channel);
     }
     
+    if (dma_underrun)
+    {
+        print("underrun after ");
+        printi(count_read);
+        print(" packets read\r");
+        send_error(F_ERROR_UNDERRUN);
+    }
+
     DECLARE_REPLY_FRAME(struct write_reply_frame, F_FRAME_WRITE_REPLY);
-    r.bytes_actually_written = f->bytes_to_write - (packets*FRAME_SIZE);
+    r.bytes_actually_written = count_written*FRAME_SIZE;
 
     if (!finished)
     {
         if (!listening)
             USBFS_EnableOutEP(FLUXENGINE_DATA_OUT_EP_NUM);
-        while (packets > 0)
+        while (count_read < packets)
         {
             if (USBFS_GetEPState(FLUXENGINE_DATA_OUT_EP_NUM) == USBFS_OUT_BUFFER_FULL)
             {
@@ -445,7 +470,7 @@ static void cmd_write(struct write_frame* f)
                 if (length < FRAME_SIZE)
                     break;
                 USBFS_EnableOutEP(FLUXENGINE_DATA_OUT_EP_NUM);
-                packets--;
+                count_read++;
             }
         }
         USBFS_DisableOutEP(FLUXENGINE_DATA_OUT_EP_NUM);
@@ -524,12 +549,10 @@ int main(void)
         
         if (!USBFS_GetConfiguration() || USBFS_IsConfigurationChanged())
         {
-            //CyDmaChDisable(dma_channel);
             UART_PutString("Waiting for USB...\r");
             while (!USBFS_GetConfiguration())
                 ;
             UART_PutString("USB ready\r");
-            //CyDmaChEnable(dma_channel, true);
             USBFS_EnableOutEP(FLUXENGINE_CMD_OUT_EP_NUM);
         }
         
