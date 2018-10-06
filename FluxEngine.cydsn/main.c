@@ -214,7 +214,7 @@ static void init_dma(void)
 
         CyDmaTdSetConfiguration(td[i], BUFFER_SIZE, td[nexti],   
             CY_DMA_TD_INC_DST_ADR | CAPTURE_DMA__TD_TERMOUT_EN);
-        CyDmaTdSetAddress(td[i], LO16((uint32)CAPTURE_REG_Status_PTR), LO16((uint32)&dma_buffer[i]));
+        CyDmaTdSetAddress(td[i], LO16((uint32)CAPTURE_TIMER_CAPTURE_LSB_PTR), LO16((uint32)&dma_buffer[i]));
     }    
 }
 
@@ -238,6 +238,7 @@ static void cmd_read(struct read_frame* f)
     dma_reading_from_td = -1;
     dma_underrun = false;
     int count = 0;
+    CAPTURE_TIMER_Start();
     CyDmaChSetInitialTd(dma_channel, td[dma_writing_to_td]);
     CyDmaClearPendingDrq(dma_channel);
     CyDmaChEnable(dma_channel, 1);
@@ -267,6 +268,14 @@ static void cmd_read(struct read_frame* f)
                 goto abort;
         }
 
+        /* The timer we use to do the capture is a down-timer, so adjust the data to produce
+         * intervals. */
+        for (int i=0; i<BUFFER_SIZE; i++)
+        {
+            uint8_t* p = &dma_buffer[dma_reading_from_td][i];
+            *p = 0xff - *p;
+        }
+        
         USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, dma_buffer[dma_reading_from_td], BUFFER_SIZE);
         dma_reading_from_td = (dma_reading_from_td+1) % BUFFER_COUNT;
         count++;
@@ -275,6 +284,7 @@ abort:
     CyDmaChSetRequest(dma_channel, CY_DMA_CPU_TERM_CHAIN);
     while (CyDmaChGetRequest(dma_channel))
         ;
+    CAPTURE_TIMER_Stop();
 
     wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
     USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, NULL, 0);

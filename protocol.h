@@ -26,7 +26,7 @@ enum
     SIDE_HIGHDENSITY = 0<<1,
     
     FRAME_SIZE = 64,
-    TICK_FREQUENCY = 8000000,
+    TICK_FREQUENCY = 12000000,
 };
 
 enum

@@ -1,22 +1,26 @@
 The sampling system is dumb as rocks.
 
-There's an 7-bit counter attached to a 16MHz clock. Every time a pulse comes
-in, or the counter overflows, we sample it and send the result to the DMA
-channel. The 8th bit contains the inverse of the actual pulse, so we can
-distinguish rollovers (which show up as 0xff) from actual data.
+There's an 8-bit counter attached to an 12MHz clock. This is used to measure
+the interval between pulses. If the timer overflows, we pretend it's a pulse
+(this very rarely happens in real life).
 
-An HD floppy has a nominal clock of 500kHz, so we use a sample clock of 8MHz
-(every 0.125us). This means that our 500kHz pulses will have an interval of
-16 (and a DD disk with a 250kHz nominal clock has an interval of 32). This
-gives us more than enough resolution. If no pulse comes in, then we sample on
-rollover at 16us.
+An HD floppy has a nominal clock of 500kHz, so we use a sample clock of 12MHz
+(every 83ns). This means that our 500kHz pulses will have an interval of 24
+(and a DD disk with a 250kHz nominal clock has an interval of 48). This gives
+us more than enough resolution. If no pulse comes in, then we sample on
+rollover at 21us.
+
+(The clock needs to be absolutely rock solid or we get jitter which makes the
+data difficult to analyse, so 12 was chosen to be derivable from the
+ultra-accurate USB clock.)
 
 VERY IMPORTANT:
 
-The READ DATA line on the PSOC is on pin 3[2], which has a integrated
-capacitor! This needs to be removed before the device can see any floppy
-drive data. It's C7, and is easy with some tweezers and a stead hand with
-a soldering iron.
+Some of the pins on the PSoC have integrated capacitors, which will play
+havoc with your data! These are C7, C9, C12 and C13. If you don't, your
+floppy drive will be almost unusable (the motor will run but you won't see
+any data). They're easy enough with some tweezers and a steady hand with a
+soldering iron.
 
 Some useful numbers:
 

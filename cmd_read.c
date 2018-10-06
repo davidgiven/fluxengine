@@ -92,7 +92,6 @@ void cmd_read(char* const* argv)
     {
         for (int side=start_side; side<=end_side; side++)
         {
-        retry:
             printf("Track %02d side %d: ", t, side);
             fflush(stdout);
             usb_seek(t);
@@ -106,21 +105,13 @@ void cmd_read(char* const* argv)
             sql_write_flux(db, t, side, buffer.buffer, buffer.len);
 
             uint32_t time = 0;
-            uint32_t dropouts = 0;
             for (int i=0; i<buffer.len; i++)
             {
                 uint8_t b = buffer.buffer[i];
-                if (b == 0xff)
-                    dropouts++;
-                time += buffer.buffer[i] & 0x7f;
-            }
-            if (dropouts > 10)
-            {
-                printf("%d data dropouts, retrying\n", dropouts);
-                goto retry;
+                time += b;
             }
 
-            printf("%d ms in %ld bytes, %d dropouts\n", (time*1000)/TICK_FREQUENCY, buffer.len, dropouts);
+            printf("%d ms in %ld bytes\n", (time*1000)/TICK_FREQUENCY, buffer.len);
         }
     }
     sql_stmt(db, "COMMIT;");

@@ -1,4 +1,4 @@
-CFLAGS = -Os -g -Wall $(shell pkg-config --cflags libusb-1.0) $(shell pkg-config --cflags sqlite3)
+CFLAGS = -g -Wall $(shell pkg-config --cflags libusb-1.0) $(shell pkg-config --cflags sqlite3)
 LDFLAGS = -g $(shell pkg-config --libs libusb-1.0) $(shell pkg-config --libs sqlite3)
 
 SRCS = \

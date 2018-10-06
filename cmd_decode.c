@@ -108,14 +108,12 @@ static void find_clock(void)
      * to miscalculate the clock the first time round.
      */
 
-    uint32_t buckets[128] = {};
+    uint32_t buckets[256] = {};
     for (;;)
     {
         if (cursor >= inputlen)
             return;
         uint8_t data = inputbuffer[cursor++];
-        if (data & 0x80)
-            continue;
         if (data >= 2)
             buckets[data-2] += CLOCK_LOCK_BOOST * 1 / 3;
         if (data >= 1)
@@ -223,8 +221,6 @@ static bool read_bit(void)
     if (cursor >= inputlen)
         return false;
     uint8_t t = inputbuffer[cursor++];
-    if (t & 0x80)
-        t = 0x7f;
 
     if ((t < period0) || (t > period3))
     {
@@ -318,14 +314,7 @@ static bool process_byte(uint8_t b)
                 break;
 
             default:
-                /* Garbage. If we read too much, give up and resync. */
-                outputbufferpos++;
-                if (outputbufferpos > 8)
-                {
-                    putchar('?');
-                    phaselocked = false;
-                }
-                return false;
+                goto abandon_record;
         }
     }
 
@@ -342,6 +331,9 @@ static bool process_byte(uint8_t b)
             nextlength = (1<<(outputbuffer[7] + 7)) + DAM_LEN;
         }
 
+        #if 0
+        putchar('!');
+        #endif
         phaselocked = false;
         return true;
     }
@@ -349,6 +341,8 @@ static bool process_byte(uint8_t b)
     return false;
 
 abandon_record:
+    if (outputbufferpos > 4)
+        putchar('?');
     phaselocked = false;
     return false;
 }
