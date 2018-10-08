@@ -25,8 +25,17 @@ soldering iron.
 Some useful numbers:
 
   - nominal rotation speed is 300 rpm, or 5Hz. The period is 200ms.
-  - MFM encoding uses a clock of 500kHz. This makes each recording cell 2us.
-  - a pulse is 150ns to 800ns, so a clock of 7MHz will sample it.
+  - a pulse is 150ns to 800ns long.
+  - a 12MHz tick is 83ns.
+  - MFM HD encoding uses a clock of 500kHz. This makes each recording cell 2us,
+    or 24 ticks. For DD it's 4us and 48 ticks.
+  - a short transition is one cell (2us == 24 ticks). A medium is a cell and
+    a half (3us == 36 ticks). A long is two cells (4us == 48 ticks). Double
+    that for DD.
+  - pulses are detected with +/- 350ns error for HD and 700ns for DD. That's
+    4 ticks and 8 ticks. That seems to be about what we're seeing.
+  - in real life, start going astray after about 128 ticks == 10us. If you
+    don't write anything, you read back random noise.
   
 Useful links:
 

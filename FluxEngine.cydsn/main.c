@@ -47,6 +47,11 @@ static void system_timer_cb(void)
 CY_ISR(index_irq_cb)
 {
     index_irq = true;
+    
+    /* Stop writing the instant the index pulse comes along; it may take a few
+     * moments for the main code to notice the pulse, and we don't want to overwrite
+     * the beginning of the track. */
+    ERASE_REG_Write(0);
 }
 
 CY_ISR(capture_dma_finished_irq_cb)
@@ -352,6 +357,12 @@ static void init_replay_dma(void)
 
 static void cmd_write(struct write_frame* f)
 {
+    if (f->bytes_to_write % FRAME_SIZE)
+    {
+        send_error(F_ERROR_INVALID_VALUE);
+        return;
+    }
+    
     SIDE_REG_Write(f->side);
     seek_to(current_track);    
 
@@ -359,15 +370,14 @@ static void cmd_write(struct write_frame* f)
     bool writing = false; /* to the disk */
     bool listening = false;
     bool finished = false;
-    int packets = (f->bytes_to_write+FRAME_SIZE-1) / FRAME_SIZE;
+    int packets = f->bytes_to_write / FRAME_SIZE;
     int count_read = 0;
     int count_written = 0;
     REPLAY_COUNTER_Start();
+    REPLAY_COUNTER_WriteCounter(0);
     dma_writing_to_td = 0;
     dma_reading_from_td = -1;
     dma_underrun = false;
-    CyDmaChSetInitialTd(dma_channel, td[dma_writing_to_td]);
-    CyDmaClearPendingDrq(dma_channel);
     
     int old_reading_from_td = -1;
     for (;;)
@@ -393,53 +403,68 @@ static void cmd_write(struct write_frame* f)
 
                 writing = true;
                 ERASE_REG_Write(1); /* start erasing! */
+                REPLAY_DMA_FINISHED_IRQ_Enable();
+                dma_underrun = false;
+                CyDmaChSetInitialTd(dma_channel, td[dma_reading_from_td]);
+                CyDmaClearPendingDrq(dma_channel);
                 CyDmaChEnable(dma_channel, 1); /* nothing will happen... */
-                CyDmaChSetRequest(dma_channel, CY_DMA_CPU_REQ); /* ...until we manually start the first transfer */
             }
             
-            /* ...unless we reach the end of the track, of course. */
+            /* ...unless we reach the end of the track or suffer underrung, of course. */
             
-            if (index_irq)
+            if (index_irq || dma_underrun)
                 break;
         }
         
         if (NEXT_BUFFER(dma_writing_to_td) != dma_reading_from_td)
         {
-            /* We're ready for more data from USB. */
+            /* We're ready for more data. */
             
-            if (!listening)
+            if (finished)
             {
-                USBFS_EnableOutEP(FLUXENGINE_DATA_OUT_EP_NUM);
-                listening = true;
-            }
-            
-            /* Is more data actually ready? */
-            
-            if (USBFS_GetEPState(FLUXENGINE_DATA_OUT_EP_NUM) == USBFS_OUT_BUFFER_FULL)
-            {            
-                int length = usb_read(FLUXENGINE_DATA_OUT_EP_NUM, dma_buffer[dma_writing_to_td]);
-                if ((length < FRAME_SIZE) || (packets == 1))
-                {
-                    print("early end of data\r");
-                    finished = true;
-                }
-                listening = false;
-                dma_writing_to_td = NEXT_BUFFER(dma_writing_to_td);
+                /* The USB stream has stopped early, so just fake data to keep the writer happy. */
                 
-                count_read++;
+                memset(dma_buffer[dma_writing_to_td], 0x30, BUFFER_SIZE);
+                dma_writing_to_td = NEXT_BUFFER(dma_writing_to_td);
+            }
+            else
+            {
+                /* Make sure we're waiting for USB data. */
+                
+                if (!listening)
+                {
+                    USBFS_EnableOutEP(FLUXENGINE_DATA_OUT_EP_NUM);
+                    listening = true;
+                }
+                         
+                /* Is more data actually ready? */
+                
+                if (USBFS_GetEPState(FLUXENGINE_DATA_OUT_EP_NUM) == USBFS_OUT_BUFFER_FULL)
+                {            
+                    int length = usb_read(FLUXENGINE_DATA_OUT_EP_NUM, dma_buffer[dma_writing_to_td]);
+                    listening = false;
+                    dma_writing_to_td = NEXT_BUFFER(dma_writing_to_td);
+                    
+                    count_read++;
+                    if ((length < FRAME_SIZE) || (count_read == packets))
+                        finished = true;
+                }
             }
             
-            /* Once we have enough data, we're ready to start writing. */
+            /* Only start writing once the buffer is full. */
             
-            if (dma_reading_from_td == -1)
+            if ((dma_reading_from_td == -1) && (dma_writing_to_td == BUFFER_COUNT-1))
                 dma_reading_from_td = old_reading_from_td = 0;
         }
     }
-    
+    REPLAY_DMA_FINISHED_IRQ_Disable();
+
     if (writing)
     {
-        print("stop writing\r");
-        WGATE_Write(0);
+        ERASE_REG_Write(0);
+        print("stop writing after ");
+        printi(count_written);
+        print("\r");
         CyDmaChSetRequest(dma_channel, CY_DMA_CPU_TERM_CHAIN);
         while (CyDmaChGetRequest(dma_channel))
             ;
@@ -451,9 +476,11 @@ static void cmd_write(struct write_frame* f)
     {
         print("underrun after ");
         printi(count_read);
+        print(" out of ");
+        printi(packets);
         print(" packets read\r");
-        send_error(F_ERROR_UNDERRUN);
     }
+
 
     DECLARE_REPLY_FRAME(struct write_reply_frame, F_FRAME_WRITE_REPLY);
     r.bytes_actually_written = count_written*FRAME_SIZE;
@@ -477,6 +504,13 @@ static void cmd_write(struct write_frame* f)
     }
     
     deinit_dma();
+    
+    if (dma_underrun)
+    {
+        send_error(F_ERROR_UNDERRUN);
+        return;
+    }
+
     send_reply((struct any_frame*) &r);
 }
 
@@ -535,7 +569,6 @@ int main(void)
     for (;;)
     {
         CyWdtClear();
-        ERASE_REG_Write(0); /* belt and braces. */
         
         if (motor_on)
         {

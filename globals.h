@@ -35,7 +35,7 @@ extern void usb_seek(int track);
 extern int usb_measure_speed(void);
 extern void usb_bulk_test(void);
 extern void usb_read(int side, struct raw_data_buffer* buffer);
-extern void usb_write(int side, struct raw_data_buffer* buffer);
+extern int usb_write(int side, struct raw_data_buffer* buffer);
 
 extern void cmd_rpm(char* const* argv);
 extern void cmd_usbbench(char* const* argv);

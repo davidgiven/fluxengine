@@ -149,7 +149,8 @@ void usb_read(int side, struct raw_data_buffer* buffer)
     await_reply(F_FRAME_READ_REPLY);
 }
 
-void usb_write(int side, struct raw_data_buffer* buffer)
+/* Returns number of bytes actually written */
+int usb_write(int side, struct raw_data_buffer* buffer)
 {
     struct write_frame f = {
         .f = { .type = F_FRAME_WRITE_CMD, .size = sizeof(f) },
@@ -161,5 +162,5 @@ void usb_write(int side, struct raw_data_buffer* buffer)
     large_bulk_transfer(FLUXENGINE_DATA_OUT_EP, &buffer->buffer, buffer->len);
     
     struct write_reply_frame* r = await_reply(F_FRAME_WRITE_REPLY);
-    printf("written %d bytes\n", r->bytes_actually_written);
+    return r->bytes_actually_written;
 }

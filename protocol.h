@@ -51,6 +51,7 @@ enum
     F_ERROR_NONE = 0,
     F_ERROR_BAD_COMMAND,
     F_ERROR_UNDERRUN,
+    F_ERROR_INVALID_VALUE,
 };
 
 struct frame_header
