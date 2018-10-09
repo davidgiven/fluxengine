@@ -51,7 +51,7 @@ void sql_prepare_flux(sqlite3* db)
                  ");");
 }
 
-void sql_write_flux(sqlite3* db, int track, int side, const uint8_t* ptr, size_t len)
+void sql_write_flux(sqlite3* db, int track, int side, const struct fluxmap* fluxmap)
 {
     sqlite3_stmt* stmt;
     sql_check(db, sqlite3_prepare_v2(db,
@@ -59,14 +59,14 @@ void sql_write_flux(sqlite3* db, int track, int side, const uint8_t* ptr, size_t
         -1, &stmt, NULL));
     sql_bind_int(db, stmt, ":track", track);
     sql_bind_int(db, stmt, ":side", side);
-    sql_bind_blob(db, stmt, ":data", ptr, len);
+    sql_bind_blob(db, stmt, ":data", fluxmap->intervals, fluxmap->bytes);
 
     if (sqlite3_step(stmt) != SQLITE_DONE)
         error("failed to write to database: %s", sqlite3_errmsg(db));
     sql_check(db, sqlite3_finalize(stmt));
 }
 
-bool sql_read_flux(sqlite3* db, int track, int side, uint8_t* ptr, size_t* len)
+struct fluxmap* sql_read_flux(sqlite3* db, int track, int side)
 {
     sqlite3_stmt* stmt;
     sql_check(db, sqlite3_prepare_v2(db,
@@ -77,37 +77,39 @@ bool sql_read_flux(sqlite3* db, int track, int side, uint8_t* ptr, size_t* len)
 
     int i = sqlite3_step(stmt);
     if (i == SQLITE_DONE)
-        return false;
+        return NULL;
     if (i != SQLITE_ROW)
         error("failed to read from database: %s", sqlite3_errmsg(db));
 
     const void* blobptr = sqlite3_column_blob(stmt, 0);
     size_t bloblen = sqlite3_column_bytes(stmt, 0);
-    if (bloblen > *len)
-        error("buffer overflow (%d bytes in database, buffer %d bytes)", bloblen, *len);
-    *len = bloblen;
-    memcpy(ptr, blobptr, bloblen);
+    struct fluxmap* fluxmap = create_fluxmap();
+    fluxmap_append_intervals(fluxmap, blobptr, bloblen);
 
     sql_check(db, sqlite3_finalize(stmt));
-    return true;
+    return fluxmap;
 }
 
 void sql_for_all_flux_data(sqlite3* db,
-    void (*cb)(int track, int side, const uint8_t* data, size_t len))
+    void (*cb)(int track, int side, const struct fluxmap* fluxmap))
 {
     sqlite3_stmt* stmt;
     sql_check(db, sqlite3_prepare_v2(db,
         "SELECT track, side, data FROM rawdata",
         -1, &stmt, NULL));
 
+    struct fluxmap* fluxmap = create_fluxmap();
     while (sqlite3_step(stmt) == SQLITE_ROW)
     {
         int track = sqlite3_column_int(stmt, 0);
         int side = sqlite3_column_int(stmt, 1);
         const void* ptr = sqlite3_column_blob(stmt, 2);
         size_t len = sqlite3_column_bytes(stmt, 2);
-        cb(track, side, ptr, len);
+        fluxmap_append_intervals(fluxmap, ptr, len);
+        cb(track, side, fluxmap);
+        fluxmap_clear(fluxmap);
     }
+    free_fluxmap(fluxmap);
 
     sql_check(db, sqlite3_finalize(stmt));
 }

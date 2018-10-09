@@ -11,9 +11,9 @@ extern void sql_bind_blob(sqlite3* db, sqlite3_stmt* stmt, const char* name,
 extern void sql_bind_int(sqlite3* db, sqlite3_stmt* stmt, const char* name, int value);
 
 extern void sql_prepare_flux(sqlite3* db);
-extern void sql_write_flux(sqlite3* db, int track, int side, const uint8_t* ptr, size_t len);
-extern bool sql_read_flux(sqlite3* db, int track, int side, uint8_t* ptr, size_t* len);
-extern void sql_for_all_flux_data(sqlite3* db, void (*cb)(int track, int side, const uint8_t* ptr, size_t len));
+extern void sql_write_flux(sqlite3* db, int track, int side, const struct fluxmap* fluxmap);
+extern struct fluxmap* sql_read_flux(sqlite3* db, int track, int side);
+extern void sql_for_all_flux_data(sqlite3* db, void (*cb)(int track, int side, const struct fluxmap* fluxmap));
 
 extern void sql_prepare_record(sqlite3* db);
 extern void sql_write_record(sqlite3* db, int track, int side, int record, const uint8_t* ptr, size_t len);

@@ -347,12 +347,12 @@ abandon_record:
     return false;
 }
 
-static void decode_track_cb(int track, int side, const uint8_t* data, size_t len)
+static void decode_track_cb(int track, int side, const struct fluxmap* fluxmap)
 {
     printf("Track %02d side %d: ", track, side);
 
-    inputbuffer = data;
-    inputlen = len;
+    inputbuffer = fluxmap->intervals;
+    inputlen = fluxmap->bytes;
     cursor = 0;
     int record = 0;
 

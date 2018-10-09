@@ -96,22 +96,13 @@ void cmd_read(char* const* argv)
             fflush(stdout);
             usb_seek(t);
 
-            struct raw_data_buffer buffer;
-            usb_read(
+            struct fluxmap* fluxmap = usb_read(
                 (side ? SIDE_SIDEB : SIDE_SIDEA) |
-                (highdensity ? SIDE_HIGHDENSITY : SIDE_LOWDENSITY),
-                &buffer);
+                (highdensity ? SIDE_HIGHDENSITY : SIDE_LOWDENSITY));
 
-            sql_write_flux(db, t, side, buffer.buffer, buffer.len);
-
-            uint32_t time = 0;
-            for (int i=0; i<buffer.len; i++)
-            {
-                uint8_t b = buffer.buffer[i];
-                time += b;
-            }
-
-            printf("%d ms in %ld bytes\n", (time*1000)/TICK_FREQUENCY, buffer.len);
+            sql_write_flux(db, t, side, fluxmap);
+            printf("%d ms in %d bytes\n", fluxmap->length_us / 1000, fluxmap->bytes);
+            free_fluxmap(fluxmap);
         }
     }
     sql_stmt(db, "COMMIT;");

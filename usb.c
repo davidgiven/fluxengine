@@ -135,31 +135,35 @@ void usb_bulk_test(void)
     await_reply(F_FRAME_BULK_TEST_REPLY);
 }
 
-void usb_read(int side, struct raw_data_buffer* buffer)
+struct fluxmap* usb_read(int side)
 {
     struct read_frame f = {
         .f = { .type = F_FRAME_READ_CMD, .size = sizeof(f) },
         .side = side
     };
+
+    struct fluxmap* fluxmap = create_fluxmap();
     usb_cmd_send(&f, f.f.size);
 
-    buffer->len = large_bulk_transfer(FLUXENGINE_DATA_IN_EP,
-        &buffer->buffer, sizeof(buffer->buffer));
+    uint8_t buffer[1024*1024];
+    int len = large_bulk_transfer(FLUXENGINE_DATA_IN_EP, buffer, sizeof(buffer));
+    fluxmap_append_intervals(fluxmap, buffer, len);
 
     await_reply(F_FRAME_READ_REPLY);
+    return fluxmap;
 }
 
 /* Returns number of bytes actually written */
-int usb_write(int side, struct raw_data_buffer* buffer)
+int usb_write(int side, struct fluxmap* fluxmap)
 {
     struct write_frame f = {
         .f = { .type = F_FRAME_WRITE_CMD, .size = sizeof(f) },
         .side = side,
-        .bytes_to_write = htole32(buffer->len),
+        .bytes_to_write = htole32(fluxmap->bytes),
     };
     usb_cmd_send(&f, f.f.size);
 
-    large_bulk_transfer(FLUXENGINE_DATA_OUT_EP, &buffer->buffer, buffer->len);
+    large_bulk_transfer(FLUXENGINE_DATA_OUT_EP, fluxmap->intervals, fluxmap->bytes);
     
     struct write_reply_frame* r = await_reply(F_FRAME_WRITE_REPLY);
     return r->bytes_actually_written;

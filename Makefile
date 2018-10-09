@@ -5,6 +5,8 @@ SRCS = \
 	main.c \
 	usb.c \
 	sql.c \
+	encoder.c \
+	fluxmap.c \
 	cmd_rpm.c \
 	cmd_usbbench.c \
 	cmd_read.c \

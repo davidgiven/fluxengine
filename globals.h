@@ -16,11 +16,31 @@
 
 #include "protocol.h"
 
-struct raw_data_buffer
+struct encoding_buffer
 {
-    size_t len;
-    uint8_t buffer[200*1024];
+    int length_us;
+    uint8_t* bitmap;
 };
+
+extern struct encoding_buffer* create_encoding_buffer(int length_us);
+extern void free_encoding_buffer(struct encoding_buffer* buffer);
+
+extern void encoding_buffer_pulse(struct encoding_buffer* buffer, int timestamp_us);
+extern struct fluxmap* encoding_buffer_encode(struct encoding_buffer* buffer);
+
+struct fluxmap
+{
+    int length_ticks;
+    int length_us;
+    int bytes;
+    int buffersize;
+    uint8_t* intervals;
+};
+
+extern struct fluxmap* create_fluxmap(void);
+extern void free_fluxmap(struct fluxmap* fluxmap);
+extern void fluxmap_clear(struct fluxmap* fluxmap);
+extern void fluxmap_append_intervals(struct fluxmap* fluxmap, const uint8_t* intervals, int count);
 
 extern void error(const char* message, ...);
 extern double gettime(void);
@@ -34,8 +54,8 @@ extern int usb_get_version(void);
 extern void usb_seek(int track);
 extern int usb_measure_speed(void);
 extern void usb_bulk_test(void);
-extern void usb_read(int side, struct raw_data_buffer* buffer);
-extern int usb_write(int side, struct raw_data_buffer* buffer);
+extern struct fluxmap* usb_read(int side);
+extern int usb_write(int side, struct fluxmap* fluxmap);
 
 extern void cmd_rpm(char* const* argv);
 extern void cmd_usbbench(char* const* argv);
