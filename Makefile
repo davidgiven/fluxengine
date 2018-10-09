@@ -12,6 +12,7 @@ SRCS = \
 	cmd_read.c \
 	cmd_write.c \
 	cmd_decode.c \
+	cmd_testpattern.c \
 
 OBJS = $(patsubst %.c, .objs/%.o, $(SRCS))
 

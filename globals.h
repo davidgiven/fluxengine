@@ -26,7 +26,7 @@ extern struct encoding_buffer* create_encoding_buffer(int length_us);
 extern void free_encoding_buffer(struct encoding_buffer* buffer);
 
 extern void encoding_buffer_pulse(struct encoding_buffer* buffer, int timestamp_us);
-extern struct fluxmap* encoding_buffer_encode(struct encoding_buffer* buffer);
+extern struct fluxmap* encoding_buffer_encode(const struct encoding_buffer* buffer);
 
 struct fluxmap
 {
@@ -41,6 +41,7 @@ extern struct fluxmap* create_fluxmap(void);
 extern void free_fluxmap(struct fluxmap* fluxmap);
 extern void fluxmap_clear(struct fluxmap* fluxmap);
 extern void fluxmap_append_intervals(struct fluxmap* fluxmap, const uint8_t* intervals, int count);
+extern struct encoding_buffer* fluxmap_decode(const struct fluxmap* fluxmap);
 
 extern void error(const char* message, ...);
 extern double gettime(void);
@@ -62,5 +63,6 @@ extern void cmd_usbbench(char* const* argv);
 extern void cmd_read(char* const* argv);
 extern void cmd_write(char* const* argv);
 extern void cmd_decode(char* const* argv);
+extern void cmd_testpattern(char* const* argv);
 
 #endif

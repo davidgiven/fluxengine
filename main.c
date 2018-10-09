@@ -76,6 +76,8 @@ int main(int argc, char* const* argv)
         cmd_write(argv);
     else if (strcmp(argv[0], "decode") == 0)
         cmd_decode(argv);
+    else if (strcmp(argv[0], "testpattern") == 0)
+        cmd_testpattern(argv);
     else
         syntax_error();
 

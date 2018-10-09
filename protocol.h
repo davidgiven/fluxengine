@@ -27,6 +27,7 @@ enum
     
     FRAME_SIZE = 64,
     TICK_FREQUENCY = 12000000,
+    TICKS_PER_US = TICK_FREQUENCY / 1000000,
 };
 
 enum

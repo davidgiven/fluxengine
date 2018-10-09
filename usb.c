@@ -156,14 +156,15 @@ struct fluxmap* usb_read(int side)
 /* Returns number of bytes actually written */
 int usb_write(int side, struct fluxmap* fluxmap)
 {
+    int safelen = fluxmap->bytes & ~(FRAME_SIZE-1);
     struct write_frame f = {
         .f = { .type = F_FRAME_WRITE_CMD, .size = sizeof(f) },
         .side = side,
-        .bytes_to_write = htole32(fluxmap->bytes),
+        .bytes_to_write = htole32(safelen),
     };
     usb_cmd_send(&f, f.f.size);
 
-    large_bulk_transfer(FLUXENGINE_DATA_OUT_EP, fluxmap->intervals, fluxmap->bytes);
+    large_bulk_transfer(FLUXENGINE_DATA_OUT_EP, fluxmap->intervals, safelen);
     
     struct write_reply_frame* r = await_reply(F_FRAME_WRITE_REPLY);
     return r->bytes_actually_written;

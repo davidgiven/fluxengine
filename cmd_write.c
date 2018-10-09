@@ -13,11 +13,11 @@ static void syntax_error(void)
 {
     fprintf(stderr,
         "syntax: fluxclient write <options>:\n"
-        "  -i <filename>       input filename (can't use with -T)\n"
+        "  -i <filename>       input filename\n"
         "  -s <start track>    defaults to 0\n"
         "  -e <end track>      defaults to 79\n"
-        "  -0                  read just side 0 (defaults to both)\n" 
-        "  -1                  read just side 1 (defaults to both)\n" 
+        "  -0                  write just side 0 (defaults to both)\n" 
+        "  -1                  write just side 1 (defaults to both)\n" 
     );
     exit(1);
 }
