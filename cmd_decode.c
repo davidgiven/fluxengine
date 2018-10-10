@@ -19,12 +19,14 @@
 
 static const char* inputfilename = NULL;
 static const char* outputfilename = NULL;
+static bool verbose = false;
 static sqlite3* indb;
 static sqlite3* outdb;
 
 static const uint8_t* inputbuffer;
 static int inputlen;
 static int cursor;
+static int elapsed_ticks;
 
 static int period0; /* lower limit for a short transition */
 static int period1; /* between short and medium transitions */
@@ -45,7 +47,12 @@ static int nextlength = 0;
 
 static void syntax_error(void)
 {
-    fprintf(stderr, "syntax: fluxclient decode -i <inputfilename> -o <outputfilename> \n");
+    fprintf(stderr,
+        "syntax: fluxclient decode <options>:\n"
+        "  -i <filename>       input filename (.flux)\n"
+        "  -o <filename>       output filename (.rec)\n"
+        "  -v                  verbose decoding\n"
+    );
     exit(1);
 }
 
@@ -53,7 +60,7 @@ static char* const* parse_options(char* const* argv)
 {
 	for (;;)
 	{
-		switch (getopt(countargs(argv), argv, "+i:o:"))
+		switch (getopt(countargs(argv), argv, "+i:o:v"))
 		{
 			case -1:
 				return argv + optind - 1;
@@ -64,6 +71,10 @@ static char* const* parse_options(char* const* argv)
 
             case 'o':
                 outputfilename = optarg;
+                break;
+
+            case 'v':
+                verbose = true;
                 break;
 
 			default:
@@ -114,6 +125,7 @@ static void find_clock(void)
         if (cursor >= inputlen)
             return;
         uint8_t data = inputbuffer[cursor++];
+        elapsed_ticks += data;
         if (data >= 2)
             buckets[data-2] += CLOCK_LOCK_BOOST * 1 / 3;
         if (data >= 1)
@@ -221,6 +233,7 @@ static bool read_bit(void)
     if (cursor >= inputlen)
         return false;
     uint8_t t = inputbuffer[cursor++];
+    elapsed_ticks += t;
 
     if ((t < period0) || (t > period3))
     {
@@ -277,6 +290,14 @@ static uint8_t read_byte(void)
     return fifo;
 }
 
+static void log_record(char type)
+{
+    if (verbose)
+        printf("\n    % 8.3fms [0x%05x]: ",
+            (double)elapsed_ticks / (TICKS_PER_US*1000.0), cursor);
+    putchar(type);
+}
+
 static bool process_byte(uint8_t b)
 {
     outputbuffer[outputbufferpos++] = b;
@@ -295,12 +316,12 @@ static bool process_byte(uint8_t b)
         {
             case IAM:
                 thislength = IAM_LEN;
-                putchar('T');
+                log_record('T');
                 break;
 
             case IDAM:
                 thislength = IDAM_LEN;
-                putchar('H');
+                log_record('H');
                 break;
 
             case DAM1:
@@ -310,7 +331,7 @@ static bool process_byte(uint8_t b)
                 /* Sector with a header? */
                 if (thislength == 0)
                     goto abandon_record;
-                putchar('D');
+                log_record('D');
                 break;
 
             default:
@@ -322,18 +343,24 @@ static bool process_byte(uint8_t b)
     {
         /* We've read a complete record. */
 
-        if (outputbuffer[3] == IDAM)
+        if (verbose)
+            printf(" %d bytes ", thislength);
+
+        switch (outputbuffer[3])
         {
-            #if 0
-            printf("[%d %d %d] ", outputbuffer[4], outputbuffer[5], outputbuffer[6]);
-            fflush(stdout);
-            #endif
-            nextlength = (1<<(outputbuffer[7] + 7)) + DAM_LEN;
+            case IDAM:
+                if (verbose)
+                    printf(" C%02d H%01d S%02d", outputbuffer[4], outputbuffer[5], outputbuffer[6]);
+                nextlength = (1<<(outputbuffer[7] + 7)) + DAM_LEN;
+                break;
+
+            case DAM1:
+            case DAM2:
+                if (verbose)
+                    printf(" (%d bytes user data)", thislength - DAM_LEN);
+                break;
         }
 
-        #if 0
-        putchar('!');
-        #endif
         phaselocked = false;
         return true;
     }
@@ -341,8 +368,8 @@ static bool process_byte(uint8_t b)
     return false;
 
 abandon_record:
-    if (outputbufferpos > 4)
-        putchar('?');
+    if (verbose && (outputbufferpos > 4))
+        printf(" misread");
     phaselocked = false;
     return false;
 }
@@ -354,6 +381,7 @@ static void decode_track_cb(int track, int side, const struct fluxmap* fluxmap)
     inputbuffer = fluxmap->intervals;
     inputlen = fluxmap->bytes;
     cursor = 0;
+    elapsed_ticks = 0;
     int record = 0;
 
     while (cursor < inputlen)
@@ -382,6 +410,8 @@ static void decode_track_cb(int track, int side, const struct fluxmap* fluxmap)
         }
     }
 
+    if (verbose)
+        printf("\n    ");
     printf(" = %d records\n", record);
 }
 

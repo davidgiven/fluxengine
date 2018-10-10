@@ -37,19 +37,3 @@ void fluxmap_append_intervals(struct fluxmap* fluxmap, const uint8_t* intervals,
 
     fluxmap->length_us = fluxmap->length_ticks / (TICK_FREQUENCY / 1000000);
 }
-
-struct encoding_buffer* fluxmap_decode(const struct fluxmap* fluxmap)
-{
-    struct encoding_buffer* buffer = create_encoding_buffer(fluxmap->length_us);
-
-    int total_us = 0;
-    for (int cursor = 0; cursor < fluxmap->bytes; cursor++)
-    {
-        uint8_t interval = fluxmap->intervals[cursor];
-        int us = (interval + TICKS_PER_US/2) / TICKS_PER_US;
-        total_us += us;
-        encoding_buffer_pulse(buffer, total_us);
-    }
-
-    return buffer;
-}

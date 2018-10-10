@@ -41,7 +41,6 @@ extern struct fluxmap* create_fluxmap(void);
 extern void free_fluxmap(struct fluxmap* fluxmap);
 extern void fluxmap_clear(struct fluxmap* fluxmap);
 extern void fluxmap_append_intervals(struct fluxmap* fluxmap, const uint8_t* intervals, int count);
-extern struct encoding_buffer* fluxmap_decode(const struct fluxmap* fluxmap);
 
 extern void error(const char* message, ...);
 extern double gettime(void);

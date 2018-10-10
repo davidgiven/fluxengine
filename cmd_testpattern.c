@@ -8,6 +8,8 @@ static int end_track = 79;
 static int start_side = 0;
 static int end_side = 1;
 static int track_length_ms = 200;
+static int long_pulse_us = 6;
+static int short_pulse_us = 4;
 static sqlite3* db;
 
 static void syntax_error(void)
@@ -18,6 +20,8 @@ static void syntax_error(void)
         "  -s <start track>    defaults to 0\n"
         "  -e <end track>      defaults to 79\n"
         "  -l <track length>   track length in ms (defaults to 200)\n"
+        "  -L <pulse width>    length of long pulse, in microseconds\n"
+        "  -S <pulse width>    length of short pulse, in microseconds\n"
         "  -0                  write just side 0 (defaults to both)\n" 
         "  -1                  write just side 1 (defaults to both)\n" 
     );
@@ -75,22 +79,15 @@ static void open_file(void)
     sql_prepare_flux(db);
 }
 
-static void write_pulsetrain(struct encoding_buffer* buffer, int cursor_ms, int end_ms, int count)
+static void write_pulsetrain(struct encoding_buffer* buffer, int cursor_ms, int length_ms, int width_us)
 {
     int cursor_us = cursor_ms*1000;
-    while (count > 0)
+    int length_us = length_ms*1000;
+    while (length_us > 0)
     {
-        encoding_buffer_pulse(buffer, cursor_us); cursor_us += 4;
-        encoding_buffer_pulse(buffer, cursor_us); cursor_us += 6;
-        encoding_buffer_pulse(buffer, cursor_us); cursor_us += 8;
-        encoding_buffer_pulse(buffer, cursor_us); cursor_us += 6;
-        encoding_buffer_pulse(buffer, cursor_us); cursor_us += 4;
-        count--;
-    }
-
-    while (cursor_us < (end_ms*1000))
-    {
-        encoding_buffer_pulse(buffer, cursor_us); cursor_us += 4;
+        encoding_buffer_pulse(buffer, cursor_us);
+        length_us -= width_us;
+        cursor_us += width_us;
     }
 }
 
@@ -109,8 +106,10 @@ void cmd_testpattern(char* const* argv)
     int cursor_ms = 0;
     while (cursor_ms < track_length_ms)
     {
-        write_pulsetrain(buffer, cursor_ms, cursor_ms+10, cursor_ms/10);
-        cursor_ms += 10;
+        write_pulsetrain(buffer, cursor_ms, 1, long_pulse_us);
+        cursor_ms++;
+        write_pulsetrain(buffer, cursor_ms, 1, short_pulse_us);
+        cursor_ms++;
     }
 
     struct fluxmap* fluxmap = encoding_buffer_encode(buffer);
