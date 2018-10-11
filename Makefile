@@ -11,7 +11,7 @@ SRCS = \
 	cmd_usbbench.c \
 	cmd_read.c \
 	cmd_write.c \
-	cmd_decode.c \
+	cmd_mfmdecode.c \
 	cmd_testpattern.c \
 	cmd_fluxdump.c \
 

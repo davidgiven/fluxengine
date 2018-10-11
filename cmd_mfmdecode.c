@@ -28,6 +28,7 @@ static int inputlen;
 static int cursor;
 static int elapsed_ticks;
 
+static int clock_period; /* mfm cell width */
 static int period0; /* lower limit for a short transition */
 static int period1; /* between short and medium transitions */
 static int period2; /* between medium and long transitions */
@@ -48,7 +49,7 @@ static int nextlength = 0;
 static void syntax_error(void)
 {
     fprintf(stderr,
-        "syntax: fluxclient decode <options>:\n"
+        "syntax: fluxclient mfmdecode <options>:\n"
         "  -i <filename>       input filename (.flux)\n"
         "  -o <filename>       output filename (.rec)\n"
         "  -v                  verbose decoding\n"
@@ -149,13 +150,13 @@ static void find_clock(void)
          */
         
         uint32_t maxvalue = 0;
-        int maxindex = 0;
+        clock_period = 0;
         for (int i=0; i<128; i++)
         {
             if (buckets[i] > maxvalue)
             {
                 maxvalue = buckets[i];
-                maxindex = i;
+                clock_period = i;
             }
         }
 
@@ -167,7 +168,7 @@ static void find_clock(void)
              * to assume that this was a 0 bit and set the phase, god help us.
              */
 
-            double short_time = maxindex;
+            double short_time = clock_period;
             double medium_time = short_time * 1.5;
             double long_time = short_time * 2.0;
 
@@ -178,10 +179,6 @@ static void find_clock(void)
             phase = true;
             phaselocked = true;
             has_queued = false;
-            #if 0
-            printf("{%02x/%02x/%02x/%02x@%x}", period0, period1, period2, period3, cursor);
-            fflush(stdout);
-            #endif
             return;
         }
     }
@@ -415,7 +412,7 @@ static void decode_track_cb(int track, int side, const struct fluxmap* fluxmap)
     printf(" = %d records\n", record);
 }
 
-void cmd_decode(char* const* argv)
+void cmd_mfmdecode(char* const* argv)
 {
     argv = parse_options(argv);
     if (countargs(argv) != 1)

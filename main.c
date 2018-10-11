@@ -74,8 +74,8 @@ int main(int argc, char* const* argv)
         cmd_read(argv);
     else if (strcmp(argv[0], "write") == 0)
         cmd_write(argv);
-    else if (strcmp(argv[0], "decode") == 0)
-        cmd_decode(argv);
+    else if (strcmp(argv[0], "mfmdecode") == 0)
+        cmd_mfmdecode(argv);
     else if (strcmp(argv[0], "testpattern") == 0)
         cmd_testpattern(argv);
     else if (strcmp(argv[0], "fluxdump") == 0)
