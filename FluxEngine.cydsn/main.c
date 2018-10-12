@@ -351,7 +351,7 @@ static void init_replay_dma(void)
 
         CyDmaTdSetConfiguration(td[i], BUFFER_SIZE, td[nexti],
             CY_DMA_TD_INC_SRC_ADR | REPLAY_DMA__TD_TERMOUT_EN);
-        CyDmaTdSetAddress(td[i], LO16((uint32)&dma_buffer[i]), LO16((uint32)REPLAY_COUNTER_COUNTER_LSB_PTR));
+        CyDmaTdSetAddress(td[i], LO16((uint32)&dma_buffer[i]), LO16((uint32)REPLAY_TIMESTAMP_Control_PTR));
     }    
 }
 
@@ -373,8 +373,6 @@ static void cmd_write(struct write_frame* f)
     int packets = f->bytes_to_write / FRAME_SIZE;
     int count_read = 0;
     int count_written = 0;
-    REPLAY_COUNTER_Start();
-    REPLAY_COUNTER_WriteCounter(0);
     dma_writing_to_td = 0;
     dma_reading_from_td = -1;
     dma_underrun = false;
@@ -468,7 +466,6 @@ static void cmd_write(struct write_frame* f)
         CyDmaChSetRequest(dma_channel, CY_DMA_CPU_TERM_CHAIN);
         while (CyDmaChGetRequest(dma_channel))
             ;
-        REPLAY_COUNTER_Stop();
         CyDmaChDisable(dma_channel);
     }
     
@@ -480,7 +477,6 @@ static void cmd_write(struct write_frame* f)
         printi(packets);
         print(" packets read\r");
     }
-
 
     DECLARE_REPLY_FRAME(struct write_reply_frame, F_FRAME_WRITE_REPLY);
     r.bytes_actually_written = count_written*FRAME_SIZE;

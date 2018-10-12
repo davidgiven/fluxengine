@@ -147,6 +147,17 @@ struct fluxmap* usb_read(int side)
 
     uint8_t buffer[1024*1024];
     int len = large_bulk_transfer(FLUXENGINE_DATA_IN_EP, buffer, sizeof(buffer));
+
+    /* Convert from absolute timestamps to intervals. */
+
+    uint8_t now = 0;
+    for (int i=0; i<len; i++)
+    {
+        uint8_t t = buffer[i];
+        buffer[i] = t - now;
+        now = t;
+    }
+
     fluxmap_append_intervals(fluxmap, buffer, len);
 
     await_reply(F_FRAME_READ_REPLY);
@@ -157,6 +168,17 @@ struct fluxmap* usb_read(int side)
 int usb_write(int side, struct fluxmap* fluxmap)
 {
     int safelen = fluxmap->bytes & ~(FRAME_SIZE-1);
+
+    /* Convert from intervals to absolute timestamps. */
+
+    uint8_t buffer[1024*1024];
+    uint8_t clock = 0;
+    for (int i=0; i<safelen; i++)
+    {
+        clock += fluxmap->intervals[i];
+        buffer[i] = clock;
+    }
+
     struct write_frame f = {
         .f = { .type = F_FRAME_WRITE_CMD, .size = sizeof(f) },
         .side = side,
@@ -164,7 +186,7 @@ int usb_write(int side, struct fluxmap* fluxmap)
     };
     usb_cmd_send(&f, f.f.size);
 
-    large_bulk_transfer(FLUXENGINE_DATA_OUT_EP, fluxmap->intervals, safelen);
+    large_bulk_transfer(FLUXENGINE_DATA_OUT_EP, buffer, safelen);
     
     struct write_reply_frame* r = await_reply(F_FRAME_WRITE_REPLY);
     return r->bytes_actually_written;

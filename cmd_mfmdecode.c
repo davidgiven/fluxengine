@@ -100,90 +100,6 @@ static void open_files(void)
     atexit(close_files);
 }
 
-static void find_clock(void)
-{
-    /* Somewhere in the bitstream there'll be a sync sequence of 16 0 bytes
-     * followed by a special index byte, beginning with a 1 bit.
-     * 
-     * These zeroes will be encoded as 10 10 10 10..., so forming a nice
-     * simple signal that should be easy to detect. This routine scans the
-     * bitstream until it finds one of these windows, and sets the clock
-     * accordingly. Remember that the routine can be easily spoofed by bad
-     * data, so you need to check for the marker byte afterwards.
-     * 
-     * ...btw, the standard fill byte is 0x4e:
-     * 
-     *     0  1  0  0  1  1  1  0
-     *    10 01 00 10 01 01 01 00
-     * 
-     * That's four medium transitions vs two short ones. So we know we're going
-     * to miscalculate the clock the first time round.
-     */
-
-    uint32_t buckets[256] = {};
-    for (;;)
-    {
-        if (cursor >= inputlen)
-            return;
-        uint8_t data = inputbuffer[cursor++];
-        elapsed_ticks += data;
-        if (data >= 2)
-            buckets[data-2] += CLOCK_LOCK_BOOST * 1 / 3;
-        if (data >= 1)
-            buckets[data-1] += CLOCK_LOCK_BOOST * 2 / 3;
-        buckets[data] += CLOCK_LOCK_BOOST;
-        if (data <= 0x7e)
-            buckets[data+1] += CLOCK_LOCK_BOOST * 2 / 3;
-        if (data <= 0x7d)
-            buckets[data+2] += CLOCK_LOCK_BOOST * 1 / 3;
-
-        /* The bucket list slowly decays. */
-
-        for (int i=0; i<128; i++)
-            if (buckets[i] > 0)
-                buckets[i] -= CLOCK_LOCK_DECAY;
-
-        /* 
-         * After 10 bytes, we'll have seen 80 bits. So there should be a nice
-         * sharp peak in our distribution. The amplitude is chosen by trial and
-         * error. *
-         */
-        
-        uint32_t maxvalue = 0;
-        clock_period = 0;
-        for (int i=0; i<128; i++)
-        {
-            if (buckets[i] > maxvalue)
-            {
-                maxvalue = buckets[i];
-                clock_period = i;
-            }
-        }
-
-        if (maxvalue > CLOCK_DETECTOR_AMPLITUDE_THRESHOLD)
-        {
-            /* 
-             * Okay, this looks good. We'll assume this is clock/2 --- 250kHz
-             * for HD floppies; this is one short transition. We're also going
-             * to assume that this was a 0 bit and set the phase, god help us.
-             */
-
-            double short_time = clock_period;
-            double medium_time = short_time * 1.5;
-            double long_time = short_time * 2.0;
-
-            period0 = short_time - short_time * CLOCK_ERROR_BOUNDS;
-            period1 = (short_time + medium_time) / 2.0;
-            period2 = (medium_time + long_time) / 2.0;
-            period3 = long_time + long_time * CLOCK_ERROR_BOUNDS;
-            phase = true;
-            phaselocked = true;
-            has_queued = false;
-            return;
-        }
-    }
-}
-
 static void queue_bit(bool bit)
 {
     fifo <<= 1;
@@ -301,11 +217,13 @@ static bool process_byte(uint8_t b)
     if (outputbufferpos == sizeof(outputbuffer))
         goto abandon_record;
 
+#if 0
     if (outputbufferpos < 4)
     {
         if ((b != 0xA1) && (b != 0xC2))
             goto abandon_record;
     }
+    #endif
 
     if (outputbufferpos == 4)
     {
@@ -387,7 +305,44 @@ static void decode_track_cb(int track, int side, const struct fluxmap* fluxmap)
         {
             while (cursor < inputlen)
             {
-                find_clock();
+                /* Somewhere in the bitstream there'll be a sync sequence of 16 0 bytes
+                 * followed by a special index byte, beginning with a 1 bit.
+                 * 
+                 * These zeroes will be encoded as 10 10 10 10..., so forming a nice
+                 * simple signal that should be easy to detect. This routine scans the
+                 * bitstream until it finds one of these windows, and sets the clock
+                 * accordingly. Remember that the routine can be easily spoofed by bad
+                 * data, so you need to check for the marker byte afterwards.
+                 * 
+                 * ...btw, the standard fill byte is 0x4e:
+                 * 
+                 *     0  1  0  0  1  1  1  0
+                 *    10 01 00 10 01 01 01 00
+                 * 
+                 * That's four medium transitions vs two short ones. So we know we're going
+                 * to miscalculate the clock the first time round.
+                 */
+
+                clock_period = fluxmap_seek_clock(fluxmap, &cursor, 16);
+
+                /* 
+                 * Okay, this looks good. We'll assume this is clock/2 --- 250kHz
+                 * for HD floppies; this is one short transition. We're also going
+                 * to assume that this was a 0 bit and set the phase, god help us.
+                 */
+
+                double short_time = clock_period;
+                double medium_time = short_time * 1.5;
+                double long_time = short_time * 2.0;
+
+                period0 = short_time - short_time * CLOCK_ERROR_BOUNDS;
+                period1 = (short_time + medium_time) / 2.0;
+                period2 = (medium_time + long_time) / 2.0;
+                period3 = long_time + long_time * CLOCK_ERROR_BOUNDS;
+                phase = true;
+                phaselocked = true;
+                has_queued = false;
+
                 while (phaselocked && (cursor < inputlen))
                 {
                     if (read_bit())

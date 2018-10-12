@@ -37,3 +37,35 @@ void fluxmap_append_intervals(struct fluxmap* fluxmap, const uint8_t* intervals,
 
     fluxmap->length_us = fluxmap->length_ticks / (TICK_FREQUENCY / 1000000);
 }
+
+int fluxmap_seek_clock(const struct fluxmap* fluxmap, int* cursor, int pulses)
+{
+    int count = 0;
+    int value = 0;
+
+    while (*cursor < fluxmap->bytes)
+    {
+        uint8_t t = fluxmap->intervals[(*cursor)++];
+        if (value == 0)
+            value = t;
+        else
+        {
+            count++;
+            int delta = abs(value - t) / 3 + 1;
+            if (delta > (value / 8))
+                count = value = 0;
+            else
+            {
+                if (t < value)
+                    value -= delta;
+                else
+                    value += delta;
+            }
+        }
+
+        if (count >= pulses)
+            return value;
+    }
+
+    return 1;
+}
