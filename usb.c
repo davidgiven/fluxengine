@@ -165,7 +165,7 @@ struct fluxmap* usb_read(int side)
 }
 
 /* Returns number of bytes actually written */
-int usb_write(int side, struct fluxmap* fluxmap)
+void usb_write(int side, struct fluxmap* fluxmap)
 {
     int safelen = fluxmap->bytes & ~(FRAME_SIZE-1);
 
@@ -188,6 +188,5 @@ int usb_write(int side, struct fluxmap* fluxmap)
 
     large_bulk_transfer(FLUXENGINE_DATA_OUT_EP, buffer, safelen);
     
-    struct write_reply_frame* r = await_reply(F_FRAME_WRITE_REPLY);
-    return r->bytes_actually_written;
+    await_reply(F_FRAME_WRITE_REPLY);
 }

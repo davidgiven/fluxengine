@@ -422,7 +422,9 @@ static void cmd_write(struct write_frame* f)
             {
                 /* The USB stream has stopped early, so just fake data to keep the writer happy. */
                 
-                memset(dma_buffer[dma_writing_to_td], 0x30, BUFFER_SIZE);
+                uint8_t clock = 0;
+                for (int i=0; i<BUFFER_SIZE; i++)
+                    dma_buffer[dma_writing_to_td][i] = clock += 0x30;
                 dma_writing_to_td = NEXT_BUFFER(dma_writing_to_td);
             }
             else
@@ -478,8 +480,7 @@ static void cmd_write(struct write_frame* f)
         print(" packets read\r");
     }
 
-    DECLARE_REPLY_FRAME(struct write_reply_frame, F_FRAME_WRITE_REPLY);
-    r.bytes_actually_written = count_written*FRAME_SIZE;
+    DECLARE_REPLY_FRAME(struct any_frame, F_FRAME_WRITE_REPLY);
 
     if (!finished)
     {

@@ -56,7 +56,7 @@ extern void usb_seek(int track);
 extern int usb_measure_speed(void);
 extern void usb_bulk_test(void);
 extern struct fluxmap* usb_read(int side);
-extern int usb_write(int side, struct fluxmap* fluxmap);
+extern void usb_write(int side, struct fluxmap* fluxmap);
 
 extern void cmd_rpm(char* const* argv);
 extern void cmd_usbbench(char* const* argv);
@@ -66,5 +66,6 @@ extern void cmd_mfmdecode(char* const* argv);
 extern void cmd_fmdecode(char* const* argv);
 extern void cmd_testpattern(char* const* argv);
 extern void cmd_fluxdump(char* const* argv);
+extern void cmd_calibrate(char* const* argv);
 
 #endif

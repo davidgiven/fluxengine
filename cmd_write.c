@@ -97,12 +97,8 @@ void cmd_write(char* const* argv)
             printf("sent %dms", fluxmap->length_us/1000);
             fflush(stdout);
 
-            int bytes_actually_written = usb_write(side, fluxmap);
-
-            int ticks = 0;
-            for (int i=0; i<bytes_actually_written; i++)
-                ticks += fluxmap->intervals[i];
-            printf(", wrote %dms\n", ticks/(TICK_FREQUENCY/1000));
+            usb_write(side, fluxmap);
+            printf("\n");
         }
     }
 }

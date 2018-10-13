@@ -104,10 +104,4 @@ struct write_frame
     uint32_t bytes_to_write;
 };
 
-struct write_reply_frame
-{
-    struct frame_header f;
-    uint32_t bytes_actually_written;
-};
-
 #endif

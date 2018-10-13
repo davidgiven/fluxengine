@@ -82,6 +82,8 @@ int main(int argc, char* const* argv)
         cmd_testpattern(argv);
     else if (strcmp(argv[0], "fluxdump") == 0)
         cmd_fluxdump(argv);
+    else if (strcmp(argv[0], "calibrate") == 0)
+        cmd_calibrate(argv);
     else
         syntax_error();
 

@@ -15,6 +15,7 @@ SRCS = \
 	cmd_fmdecode.c \
 	cmd_testpattern.c \
 	cmd_fluxdump.c \
+	cmd_calibrate.c \
 
 OBJS = $(patsubst %.c, .objs/%.o, $(SRCS))
 
