@@ -7,6 +7,7 @@ static int start_track = 0;
 static int end_track = 79;
 static int start_side = 0;
 static int end_side = 1;
+static int precompensation_ticks = 1;
 static sqlite3* db;
 
 static void syntax_error(void)
@@ -18,6 +19,7 @@ static void syntax_error(void)
         "  -e <end track>      defaults to 79\n"
         "  -0                  write just side 0 (defaults to both)\n" 
         "  -1                  write just side 1 (defaults to both)\n" 
+        "  -P <amount>         amount of write precompensation, in ticks (defaults to 2)\n"
     );
     exit(1);
 }
@@ -26,7 +28,7 @@ static char* const* parse_options(char* const* argv)
 {
 	for (;;)
 	{
-		switch (getopt(countargs(argv), argv, "+i:Ts:e:01"))
+		switch (getopt(countargs(argv), argv, "+i:Ts:e:01P:"))
 		{
 			case -1:
 				return argv + optind - 1;
@@ -49,6 +51,10 @@ static char* const* parse_options(char* const* argv)
 
             case '1':
                 start_side = end_side = 1;
+                break;
+
+            case 'P':
+                precompensation_ticks = atoi(optarg);
                 break;
 
 			default:
@@ -97,6 +103,7 @@ void cmd_write(char* const* argv)
             printf("sent %dms", fluxmap->length_us/1000);
             fflush(stdout);
 
+            fluxmap_precompensate(fluxmap, PRECOMPENSATION_THRESHOLD_TICKS, precompensation_ticks);
             usb_write(side, fluxmap);
             printf("\n");
         }

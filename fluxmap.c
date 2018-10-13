@@ -15,6 +15,13 @@ void free_fluxmap(struct fluxmap* fluxmap)
     }
 }
 
+struct fluxmap* copy_fluxmap(const struct fluxmap* src)
+{
+    struct fluxmap* copy = create_fluxmap();
+    fluxmap_append_intervals(copy, src->intervals, src->bytes);
+    return copy;
+}
+
 void fluxmap_clear(struct fluxmap* fluxmap)
 {
     fluxmap->bytes = fluxmap->length_ticks = fluxmap->length_us = 0;
@@ -71,4 +78,28 @@ int fluxmap_seek_clock(const struct fluxmap* fluxmap, int* cursor, int pulses)
     }
 
     return 1;
+}
+
+void fluxmap_precompensate(struct fluxmap* fluxmap, int threshold_ticks, int amount_ticks)
+{
+    uint8_t junk = 0xff;
+
+    for (int i=0; i<fluxmap->bytes; i++)
+    {
+        uint8_t* prev = (i == 0) ? &junk : &fluxmap->intervals[i-1];
+        uint8_t* curr = &fluxmap->intervals[i];
+
+        if ((*prev <= threshold_ticks) && (*curr > threshold_ticks))
+        {
+            /* 01001; move the previous bit backwards. */
+            *prev -= amount_ticks;
+            *curr += amount_ticks;
+        }
+        else if ((*prev > threshold_ticks) && (*curr <= threshold_ticks))
+        {
+            /* 00101; move the current bit forwards. */
+            *prev += amount_ticks;
+            *curr -= amount_ticks;
+        }
+    }
 }
