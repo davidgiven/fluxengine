@@ -8,8 +8,11 @@ struct fluxmap* create_fluxmap(void)
 
 void free_fluxmap(struct fluxmap* fluxmap)
 {
-    free(fluxmap->intervals);
-    free(fluxmap);
+    if (fluxmap)
+    {
+        free(fluxmap->intervals);
+        free(fluxmap);
+    }
 }
 
 void fluxmap_clear(struct fluxmap* fluxmap)
@@ -31,7 +34,7 @@ void fluxmap_append_intervals(struct fluxmap* fluxmap, const uint8_t* intervals,
     for (int i=0; i<count; i++)
     {
         uint8_t interval = *intervals++;
-        fluxmap->length_ticks += interval;
+        fluxmap->length_ticks += interval ? interval : 0x100;
         fluxmap->intervals[fluxmap->bytes++] = interval;
     }
 
