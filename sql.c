@@ -95,7 +95,7 @@ void sql_for_all_flux_data(sqlite3* db,
 {
     sqlite3_stmt* stmt;
     sql_check(db, sqlite3_prepare_v2(db,
-        "SELECT track, side, data FROM rawdata",
+        "SELECT track, side, data FROM rawdata ORDER BY track, side ASC",
         -1, &stmt, NULL));
 
     struct fluxmap* fluxmap = create_fluxmap();
@@ -147,7 +147,7 @@ void sql_for_all_record_data(sqlite3* db,
 {
     sqlite3_stmt* stmt;
     sql_check(db, sqlite3_prepare_v2(db,
-        "SELECT track, side, record, data FROM records",
+        "SELECT track, side, record, data FROM records ORDER BY track, side, record ASC",
         -1, &stmt, NULL));
 
     while (sqlite3_step(stmt) == SQLITE_ROW)
