@@ -94,23 +94,13 @@ void cmd_read(char* const* argv)
     {
         for (int side=start_side; side<=end_side; side++)
         {
-            struct fluxmap* fluxmap = NULL;
-            for (int retries=0; retries<10; retries++)
-            {
-                printf("Track %02d side %d: ", t, side);
-                fflush(stdout);
-                usb_seek(t);
+            printf("Track %02d side %d: ", t, side);
+            fflush(stdout);
+            usb_seek(t);
 
-                free_fluxmap(fluxmap);
-                fluxmap = usb_read(
-                    (side ? SIDE_SIDEB : SIDE_SIDEA) |
-                    (highdensity ? SIDE_HIGHDENSITY : SIDE_LOWDENSITY));
-                int length_ms = fluxmap->length_us / 1000;
-                if (length_ms >= (period_ms*99/100))
-                    break;
-
-                printf("%d ms of data: blatant misread, retry %d\n", length_ms, retries);
-            }
+            struct fluxmap* fluxmap = usb_read(
+                (side ? SIDE_SIDEB : SIDE_SIDEA) |
+                (highdensity ? SIDE_HIGHDENSITY : SIDE_LOWDENSITY));
 
             sql_write_flux(db, t, side, fluxmap);
             printf("%d ms in %d bytes\n", fluxmap->length_us / 1000, fluxmap->bytes);

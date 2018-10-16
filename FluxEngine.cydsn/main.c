@@ -242,7 +242,7 @@ static void init_capture_dma(void)
 
         CyDmaTdSetConfiguration(td[i], BUFFER_SIZE, td[nexti],   
             CY_DMA_TD_INC_DST_ADR | CAPTURE_DMA__TD_TERMOUT_EN);
-        CyDmaTdSetAddress(td[i], LO16((uint32)CAPTURE_Status_PTR), LO16((uint32)&dma_buffer[i]));
+        CyDmaTdSetAddress(td[i], LO16((uint32)CAPTURE_COUNTER_STATICCOUNT_LSB_PTR), LO16((uint32)&dma_buffer[i]));
     }    
 }
 
@@ -546,6 +546,7 @@ int main(void)
     INDEX_IRQ_StartEx(&index_irq_cb);
     CAPTURE_DMA_FINISHED_IRQ_StartEx(&capture_dma_finished_irq_cb);
     REPLAY_DMA_FINISHED_IRQ_StartEx(&replay_dma_finished_irq_cb);
+    CAPTURE_COUNTER_Start();
     UART_Start();
     USBFS_Start(0, USBFS_DWR_VDDD_OPERATION);
     
