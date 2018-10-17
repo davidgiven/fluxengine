@@ -6,7 +6,6 @@ static const char* input_filename = NULL;
 static const char* output_filename = NULL;
 static int track = 0;
 static int side = 0;
-static int resolution_ns = NS_PER_TICK;
 static sqlite3* db;
 
 static void syntax_error(void)
@@ -18,7 +17,6 @@ static void syntax_error(void)
         "  -t <track>          track to dump\n"
         "  -0                  dump side 0\n"
         "  -1                  dump side 1\n"
-        "  -r <resolution>     time per sample in ns (default: one tick)\n"
     );
     exit(1);
 }
@@ -27,7 +25,7 @@ static char* const* parse_options(char* const* argv)
 {
 	for (;;)
 	{
-		switch (getopt(countargs(argv), argv, "+i:o:t:01r:L"))
+		switch (getopt(countargs(argv), argv, "+i:o:t:01:L"))
 		{
 			case -1:
 				return argv + optind - 1;
@@ -50,10 +48,6 @@ static char* const* parse_options(char* const* argv)
 
             case '1':
                 side = 1;
-                break;
-
-            case 'r':
-                resolution_ns = atoi(optarg);
                 break;
 
 			default:
@@ -82,8 +76,6 @@ void cmd_fluxdump(char* const* argv)
         error("you must supply a filename to read from");
     if (!output_filename)
         error("you must supply a filename to write to");
-    if (resolution_ns < NS_PER_TICK)
-        error("resolution too fine (minimum: %dns)", NS_PER_TICK);
 
     open_file();
     struct fluxmap* fluxmap = sql_read_flux(db, track, side);
@@ -91,21 +83,20 @@ void cmd_fluxdump(char* const* argv)
         error("no data for that track in the file");
     
     printf("Length: %d ms\n", fluxmap->length_us / 1000);
-    int length_r = fluxmap->length_us * 1000 / resolution_ns;
-    printf("Output size: %d bytes\n", length_r);
+    int length_ticks = fluxmap->length_us * TICKS_PER_US;
+    printf("Output size: %d bytes\n", length_ticks);
 
-    uint8_t* buffer = calloc(1, length_r);
-    int cursor_ns = 0;
+    uint8_t* buffer = calloc(1, length_ticks);
+    int cursor_ticks = 0;
     for (int i=0; i<fluxmap->bytes; i++)
     {
-        uint8_t t = fluxmap->intervals[i];
-        cursor_ns += t * NS_PER_TICK / resolution_ns;
-        if (cursor_ns < length_r)
-            buffer[cursor_ns] = 0x7f;
+        cursor_ticks += fluxmap->intervals[i];
+        if (cursor_ticks < length_ticks)
+            buffer[cursor_ticks] = 0x7f;
     }
 
     FILE* fp = fopen(output_filename, "wb");
-    fwrite(buffer, length_r, 1, fp);
+    fwrite(buffer, length_ticks, 1, fp);
     fclose(fp);
     free(buffer);
 }

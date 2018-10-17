@@ -34,6 +34,7 @@ enum
 };
 
 #define NS_PER_TICK ((double)1000000000 / (double)TICK_FREQUENCY)
+#define US_PER_TICK ((double)1000000 / (double)TICK_FREQUENCY)
 
 enum
 {

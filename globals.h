@@ -71,6 +71,7 @@ extern void cmd_usbbench(char* const* argv);
 extern void cmd_read(char* const* argv);
 extern void cmd_write(char* const* argv);
 extern void cmd_mfmdecode(char* const* argv);
+extern void cmd_brotherdecode(char* const* argv);
 extern void cmd_testpattern(char* const* argv);
 extern void cmd_fluxdump(char* const* argv);
 extern void cmd_calibrate(char* const* argv);
