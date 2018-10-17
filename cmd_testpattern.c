@@ -81,13 +81,13 @@ static void open_file(void)
 
 static void write_pulsetrain(struct encoding_buffer* buffer, int cursor_ms, int length_ms, int width_us)
 {
-    int cursor_us = cursor_ms*1000;
-    int length_us = length_ms*1000;
-    while (length_us > 0)
+    int cursor_ns = cursor_ms*1000000;
+    int length_ns = length_ms*1000000;
+    while (length_ns > 0)
     {
-        encoding_buffer_pulse(buffer, cursor_us);
-        length_us -= width_us;
-        cursor_us += width_us;
+        encoding_buffer_pulse(buffer, cursor_ns);
+        length_ns -= width_us*1000;
+        cursor_ns += width_us*1000;
     }
 }
 
@@ -101,7 +101,7 @@ void cmd_testpattern(char* const* argv)
     if (start_track > end_track)
         error("writing to track %d to track %d makes no sense", start_track, end_track);
 
-    struct encoding_buffer* buffer = create_encoding_buffer(track_length_ms*1000);
+    struct encoding_buffer* buffer = create_encoding_buffer(1000, track_length_ms*1000);
     
     int cursor_ms = 0;
     while (cursor_ms < track_length_ms)

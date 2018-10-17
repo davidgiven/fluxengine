@@ -16,16 +16,19 @@
 
 #include "protocol.h"
 
+typedef int nanoseconds_t; /* maximum value is over 2s, which is fine */
+
 struct encoding_buffer
 {
-    int length_us;
-    uint8_t* bitmap;
+    int pulselength_ns;
+    int length_pulses;
+    bool* bitmap;
 };
 
-extern struct encoding_buffer* create_encoding_buffer(int length_us);
+extern struct encoding_buffer* create_encoding_buffer(int pulselength_ns, int length_pulses);
 extern void free_encoding_buffer(struct encoding_buffer* buffer);
 
-extern void encoding_buffer_pulse(struct encoding_buffer* buffer, int timestamp_us);
+extern void encoding_buffer_pulse(struct encoding_buffer* buffer, int timestamp_ns);
 extern struct fluxmap* encoding_buffer_encode(const struct encoding_buffer* buffer);
 
 struct fluxmap
@@ -42,8 +45,11 @@ extern void free_fluxmap(struct fluxmap* fluxmap);
 extern struct fluxmap* copy_fluxmap(const struct fluxmap* fluxmap);
 extern void fluxmap_clear(struct fluxmap* fluxmap);
 extern void fluxmap_append_intervals(struct fluxmap* fluxmap, const uint8_t* intervals, int count);
+extern void fluxmap_append_interval(struct fluxmap* fluxmap, uint8_t interval);
 extern int fluxmap_seek_clock(const struct fluxmap* fluxmap, int* cursor, int pulses);
+extern nanoseconds_t fluxmap_guess_clock(const struct fluxmap* fluxmap);
 extern void fluxmap_precompensate(struct fluxmap* fluxmap, int threshold_ticks, int amount_ticks);
+extern struct encoding_buffer* fluxmap_decode(const struct fluxmap* fluxmap, int clock_ns);
 
 extern void error(const char* message, ...);
 extern double gettime(void);
@@ -65,9 +71,9 @@ extern void cmd_usbbench(char* const* argv);
 extern void cmd_read(char* const* argv);
 extern void cmd_write(char* const* argv);
 extern void cmd_mfmdecode(char* const* argv);
-extern void cmd_fmdecode(char* const* argv);
 extern void cmd_testpattern(char* const* argv);
 extern void cmd_fluxdump(char* const* argv);
 extern void cmd_calibrate(char* const* argv);
+extern void cmd_getclock(char* const* argv);
 
 #endif

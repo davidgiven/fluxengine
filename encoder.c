@@ -2,11 +2,12 @@
 
 #define MAX_INTERVAL_US (128/(TICK_FREQUENCY/1000000))
 
-struct encoding_buffer* create_encoding_buffer(int length_us)
+struct encoding_buffer* create_encoding_buffer(int pulselength_ns, int length_pulses)
 {
     struct encoding_buffer* buffer = calloc(1, sizeof(*buffer));
-    buffer->length_us = length_us;
-    buffer->bitmap = calloc(1, length_us);
+    buffer->pulselength_ns = pulselength_ns;
+    buffer->length_pulses = length_pulses;
+    buffer->bitmap = calloc(1, length_pulses);
     return buffer;
 }
 
@@ -16,10 +17,11 @@ void free_encoding_buffer(struct encoding_buffer* buffer)
     free(buffer);
 }
 
-void encoding_buffer_pulse(struct encoding_buffer* buffer, int timestamp_us)
+void encoding_buffer_pulse(struct encoding_buffer* buffer, int timestamp_ns)
 {
-    if (timestamp_us < buffer->length_us)
-        buffer->bitmap[timestamp_us] = 1;
+    int pulse = timestamp_ns / buffer->pulselength_ns;
+    if (pulse < buffer->length_pulses)
+        buffer->bitmap[pulse] = 1;
 }
 
 struct fluxmap* encoding_buffer_encode(const struct encoding_buffer* buffer)
@@ -28,12 +30,18 @@ struct fluxmap* encoding_buffer_encode(const struct encoding_buffer* buffer)
 
     int lastpulse = 0;
     int cursor = 1;
-    while (cursor < buffer->length_us)
+    while (cursor < buffer->length_pulses)
     {
         if ((buffer->bitmap[cursor]) || (cursor-lastpulse == MAX_INTERVAL_US))
         {
-            uint8_t interval = (cursor - lastpulse) * (TICK_FREQUENCY/1000000);
-            fluxmap_append_intervals(fluxmap, &interval, 1);
+            int delta_ticks = (cursor - lastpulse) / TICKS_PER_NS;
+            while (delta_ticks >= 0xfe)
+            {
+                fluxmap_append_interval(fluxmap, 0xfe);
+                delta_ticks -= 0xfe;
+            }
+
+            fluxmap_append_interval(fluxmap, delta_ticks);
             lastpulse = cursor;
         }
         cursor++;

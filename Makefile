@@ -12,10 +12,10 @@ SRCS = \
 	cmd_read.c \
 	cmd_write.c \
 	cmd_mfmdecode.c \
-	cmd_fmdecode.c \
 	cmd_testpattern.c \
 	cmd_fluxdump.c \
 	cmd_calibrate.c \
+	cmd_getclock.c \
 
 OBJS = $(patsubst %.c, .objs/%.o, $(SRCS))
 
