@@ -280,8 +280,18 @@ static void cmd_read(struct read_frame* f)
     
     /* Start transferring. */
 
-    while (!index_irq && !dma_underrun)
+    int revolutions = f->revolutions;
+    while (!dma_underrun)
     {
+        /* Have we reached the index pulse? */
+        if (index_irq)
+        {
+            index_irq = false;
+            revolutions--;
+            if (revolutions == 0)
+                break;
+        }
+        
         /* Wait for the next block to be read. */
         while (dma_reading_from_td == dma_writing_to_td)
         {

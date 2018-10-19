@@ -7,6 +7,7 @@ static int start_track = 0;
 static int end_track = 79;
 static int start_side = 0;
 static int end_side = 1;
+static int revolutions = 1;
 static bool highdensity = true;
 static sqlite3* db;
 
@@ -19,6 +20,7 @@ static void syntax_error(void)
         "  -e <end track>      defaults to 79\n"
         "  -0                  read just side 0 (defaults to both)\n" 
         "  -1                  read just side 1 (defaults to both)\n" 
+        "  -R <number>         number of revolutions to read (defaults to 1)\n"
         "  -L                  select low density (defaults to high)\n"
     );
     exit(1);
@@ -28,7 +30,7 @@ static char* const* parse_options(char* const* argv)
 {
 	for (;;)
 	{
-		switch (getopt(countargs(argv), argv, "+o:s:e:01L"))
+		switch (getopt(countargs(argv), argv, "+o:s:e:01R:L"))
 		{
 			case -1:
 				return argv + optind - 1;
@@ -51,6 +53,10 @@ static char* const* parse_options(char* const* argv)
 
             case '1':
                 start_side = end_side = 1;
+                break;
+
+            case 'R':
+                revolutions = atoi(optarg);
                 break;
 
             case 'L':
@@ -84,6 +90,8 @@ void cmd_read(char* const* argv)
         error("you must supply a filename to write to");
     if (start_track > end_track)
         error("reading from track %d to track %d makes no sense", start_track, end_track);
+    if (revolutions < 1)
+        error("you must specify at least one revolution");
 
     open_file();
     sql_stmt(db, "BEGIN;");
@@ -100,7 +108,8 @@ void cmd_read(char* const* argv)
 
             struct fluxmap* fluxmap = usb_read(
                 (side ? SIDE_SIDEB : SIDE_SIDEA) |
-                (highdensity ? SIDE_HIGHDENSITY : SIDE_LOWDENSITY));
+                (highdensity ? SIDE_HIGHDENSITY : SIDE_LOWDENSITY),
+                revolutions);
 
             sql_write_flux(db, t, side, fluxmap);
             printf("%d ms in %d bytes\n", fluxmap->length_us / 1000, fluxmap->bytes);

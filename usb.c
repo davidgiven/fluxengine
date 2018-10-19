@@ -135,11 +135,12 @@ void usb_bulk_test(void)
     await_reply(F_FRAME_BULK_TEST_REPLY);
 }
 
-struct fluxmap* usb_read(int side)
+struct fluxmap* usb_read(int side, int revolutions)
 {
     struct read_frame f = {
         .f = { .type = F_FRAME_READ_CMD, .size = sizeof(f) },
-        .side = side
+        .side = side,
+        .revolutions = revolutions
     };
 
     struct fluxmap* fluxmap = create_fluxmap();

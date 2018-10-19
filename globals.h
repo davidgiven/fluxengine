@@ -63,7 +63,7 @@ extern int usb_get_version(void);
 extern void usb_seek(int track);
 extern int usb_measure_speed(void);
 extern void usb_bulk_test(void);
-extern struct fluxmap* usb_read(int side);
+extern struct fluxmap* usb_read(int side, int revolutions);
 extern void usb_write(int side, struct fluxmap* fluxmap);
 
 extern void cmd_rpm(char* const* argv);

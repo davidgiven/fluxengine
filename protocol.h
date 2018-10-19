@@ -100,6 +100,7 @@ struct read_frame
 {
     struct frame_header f;
     uint8_t side;
+    uint8_t revolutions;
 };
 
 struct write_frame
