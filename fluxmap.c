@@ -154,7 +154,7 @@ void fluxmap_precompensate(struct fluxmap* fluxmap, int threshold_ticks, int amo
 struct encoding_buffer* fluxmap_decode(const struct fluxmap* fluxmap, nanoseconds_t clock_period)
 {
     int pulses = (fluxmap->length_us*1000) / clock_period;
-    nanoseconds_t lower_threshold = clock_period * 0.50;
+    nanoseconds_t lower_threshold = clock_period * 0.75;
 
     struct encoding_buffer* buffer = create_encoding_buffer(clock_period, pulses);
     int count = 0;

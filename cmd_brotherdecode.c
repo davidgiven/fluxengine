@@ -89,7 +89,6 @@ static void write_bit(bool bit)
     bitcount++;
     if (bitcount == 8)
     {
-        printf("[0x%02x '%c']", outputfifo & 0xff, isprint(outputfifo & 0xff) ? (outputfifo & 0xff) : '?');
         outputbuffer[outputbufferpos++] = outputfifo;
         bitcount = 0;
     }
@@ -149,37 +148,37 @@ static int decode_data_gcr(uint8_t gcr)
     switch (gcr)
     {
         case 0x55: return 0; // 00000
-        case 0x57: case 0xf7: return 1; // 00001
+        case 0x57: return 1; // 00001
         case 0x5b: return 2; // 00010
         case 0x5d: return 3; // 00011
-        // case 0xef: return 4; // 00100 
+        case 0x5f: return 4; // 00100 
         case 0x6b: return 5; // 00101
         case 0x6d: return 6; // 00110
         case 0x6f: return 7; // 00111
         case 0x75: return 8; // 01000
         case 0x77: return 9; // 01001
         case 0x7b: return 10; // 01010
-        case 0xad: return 11; // 01011
+        case 0x7d: return 11; // 01011
         case 0x7f: return 12; // 01100
         case 0xab: return 13; // 01101
-        // case 0x00: return 14; // 01110 X
+        case 0xad: return 14; // 01110
         case 0xaf: return 15; // 01111
         case 0xb5: return 16; // 10000
-        case 0xf9: case 0xb7: return 17; // 10001
+        case 0xb7: return 17; // 10001
         case 0xbb: return 18; // 10010
         case 0xbd: return 19; // 10011
         case 0xbf: return 20; // 10100
-        // case 0x00: return 21; // 10101 X
-        case 0xf5: return 22; // 10110
+        case 0xd5: return 21; // 10101
+        case 0xd7: return 22; // 10110
         case 0xdb: return 23; // 10111
         case 0xdd: return 24; // 11000
         case 0xdf: return 25; // 11001
         case 0xeb: return 26; // 11010
-        // case 0x00: return 27; // 11011 X
+        case 0xed: return 27; // 11011
         case 0xef: return 28; // 11100
-        // case 0x00: return 29; // 11101 X
-        // case 0x00: return 30; // 11110 X
-        // case 0x00: return 31; // 11111 X
+        case 0xf5: return 29; // 11101
+        case 0xf7: return 30; // 11110
+        case 0xfb: return 31; // 11111
     }
     return -1;
 };
@@ -227,13 +226,11 @@ static void read_sector_record(void)
 
 static void read_data_record(void)
 {
-    for (int i=0; i<410; i++)
+    for (int i=0; i<440; i++)
     {
         read_bits(8);
         int gcr = inputfifo & 0xff;
         int data = decode_data_gcr(gcr);
-        printf("bc=%d gcr=0x%02x data=0x%02x\n", bitcount, gcr, data);
-
         write_quintet(data);
     }
 
