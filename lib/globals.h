@@ -1,12 +1,13 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-#include <vector>
-#include <map>
-#include <string>
-#include <sstream>
-#include <iostream>
 #include <functional>
+#include <iostream>
+#include <map>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <vector>
 
 typedef int nanoseconds_t;
 

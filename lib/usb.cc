@@ -1,6 +1,7 @@
 #include "globals.h"
 #include "usb.h"
 #include "protocol.h"
+#include "fluxmap.h"
 #include <libusb.h>
 
 #define TIMEOUT 5000
@@ -66,7 +67,7 @@ static void bad_reply(void)
 {
     struct error_frame* f = (struct error_frame*) buffer;
     if (f->f.type != F_FRAME_ERROR)
-        Error() << "bad USB reply %d" << f->f.type;
+        Error() << "bad USB reply " << f->f.type;
     switch (f->error)
     {
         case F_ERROR_BAD_COMMAND:
@@ -100,13 +101,13 @@ int usbGetVersion(void)
     return r->version;
 }
 
-void usbSeek(uint8_t track)
+void usbSeek(int track)
 {
     usb_init();
 
     struct seek_frame f = {
         { .type = F_FRAME_SEEK_CMD, .size = sizeof(f) },
-        .track = track
+        .track = (uint8_t) track
     };
     usb_cmd_send(&f, f.f.size);
     await_reply<struct any_frame>(F_FRAME_SEEK_REPLY);
@@ -123,10 +124,10 @@ nanoseconds_t usbGetRotationalPeriod(void)
     return r->period_ms * 1000;
 }
 
-static int large_bulk_transfer(int ep, void* buffer, int total_len)
+static int large_bulk_transfer(int ep, std::vector<uint8_t>& buffer)
 {
     int len;
-    int i = libusb_bulk_transfer(device, ep, (uint8_t*) buffer, total_len, &len, TIMEOUT);
+    int i = libusb_bulk_transfer(device, ep, &buffer[0], buffer.size(), &len, TIMEOUT);
     if (i < 0)
         Error() << "data transfer failed: " << usberror(i);
     return len;
@@ -144,18 +145,17 @@ void usbTestBulkTransport()
     const int YSIZE = 256;
     const int ZSIZE = 64;
 
-    uint8_t bulk_buffer[XSIZE*YSIZE*ZSIZE];
-    int total_len = sizeof(bulk_buffer);
+    std::vector<uint8_t> bulk_buffer(XSIZE*YSIZE*ZSIZE);
     double start_time = getCurrentTime();
-    large_bulk_transfer(FLUXENGINE_DATA_IN_EP, bulk_buffer, total_len);
+    large_bulk_transfer(FLUXENGINE_DATA_IN_EP, bulk_buffer);
     double elapsed_time = getCurrentTime() - start_time;
 
     std::cout << "Transferred "
-              << total_len
+              << bulk_buffer.size()
               << " bytes in "
               << int(elapsed_time * 1000.0)
               << " ("
-              << int((total_len / 1024.0) / elapsed_time)
+              << int((bulk_buffer.size() / 1024.0) / elapsed_time)
               << " kB/s)"
               << std::endl;
 
@@ -164,7 +164,7 @@ void usbTestBulkTransport()
             for (int z=0; z<ZSIZE; z++)
             {
                 int offset = x*XSIZE*YSIZE + y*ZSIZE + z;
-                if (bulk_buffer[offset] != uint8_t(x+y+z))
+                if (bulk_buffer.at(offset) != uint8_t(x+y+z))
                     Error() << "data transfer corrupted at 0x"
                             << std::hex << offset << std::dec
                             << " "
@@ -174,27 +174,28 @@ void usbTestBulkTransport()
     await_reply<struct any_frame>(F_FRAME_BULK_TEST_REPLY);
 }
 
-#if 0
-struct fluxmap* usb_read(int side, int revolutions)
+std::unique_ptr<Fluxmap> usbRead(int side, int revolutions)
 {
     struct read_frame f = {
         .f = { .type = F_FRAME_READ_CMD, .size = sizeof(f) },
-        .side = side,
-        .revolutions = revolutions
+        .side = (uint8_t) side,
+        .revolutions = (uint8_t) revolutions
     };
-
-    struct fluxmap* fluxmap = create_fluxmap();
     usb_cmd_send(&f, f.f.size);
 
-    uint8_t buffer[1024*1024];
-    int len = large_bulk_transfer(FLUXENGINE_DATA_IN_EP, buffer, sizeof(buffer));
+    auto fluxmap = std::unique_ptr<Fluxmap>(new Fluxmap);
 
-    fluxmap_append_intervals(fluxmap, buffer, len);
+    std::vector<uint8_t> buffer(1024*1024);
+    int len = large_bulk_transfer(FLUXENGINE_DATA_IN_EP, buffer);
+    buffer.resize(len);
 
-    await_reply(F_FRAME_READ_REPLY);
+    fluxmap->appendIntervals(buffer);
+
+    await_reply<struct any_frame>(F_FRAME_READ_REPLY);
     return fluxmap;
 }
 
+#if 0
 /* Returns number of bytes actually written */
 void usb_write(int side, struct fluxmap* fluxmap)
 {

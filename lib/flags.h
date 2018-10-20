@@ -67,6 +67,7 @@ public:
         _value(defaultValue)
     {}
 
+    T value() const { return _value; }
     operator T() const { return _value; }
 
     bool hasArgument() const { return true; }
