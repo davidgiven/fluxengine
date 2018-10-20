@@ -56,7 +56,6 @@ void Track::forceReread()
 
 void CapturedTrack::reallyRead()
 {
-
     usbSeek(track);
     _fluxmap = usbRead(side, revolutions);
 }

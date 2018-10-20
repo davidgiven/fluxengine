@@ -4,7 +4,7 @@
 
 Fluxmap& Fluxmap::appendIntervals(std::vector<uint8_t>& intervals)
 {
-    return appendIntervals(&_intervals[0], _intervals.size());
+    return appendIntervals(&intervals[0], intervals.size());
 }
 
 Fluxmap& Fluxmap::appendIntervals(const uint8_t* ptr, size_t len)
