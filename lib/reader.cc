@@ -3,6 +3,7 @@
 #include "usb.h"
 #include "reader.h"
 #include "fluxmap.h"
+#include "sql.h"
 #include <regex>
 
 static const std::regex SOURCE_REGEX("([^:]*)"
@@ -33,6 +34,7 @@ static int starttrack = 0;
 static int endtrack = 79;
 static int startside = 0;
 static int endside = 1;
+static sqlite3* db;
 
 Fluxmap& Track::read()
 {
@@ -60,7 +62,13 @@ void CapturedTrack::reallyRead()
 
 void FileTrack::reallyRead()
 {
-    Error() << "unsupported";
+    std::cout << "read track " << track << " side " << side << ": " << std::flush;
+
+    if (!db)
+        db = sqlOpen(basefilename, SQLITE_OPEN_READONLY);
+    _fluxmap = sqlReadFlux(db, track, side);
+
+    std::cout << int(_fluxmap->duration()/1e6) << "ms in " << _fluxmap->bytes() << " bytes" << std::endl;
 }
 
 std::vector<std::unique_ptr<Track>> readTracks()
