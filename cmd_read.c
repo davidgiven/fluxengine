@@ -1,5 +1,6 @@
 #include "globals.h"
 #include "sql.h"
+#include "fluxmap.h"
 #include <unistd.h>
 
 static const char* filename = NULL;

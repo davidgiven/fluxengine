@@ -1,4 +1,5 @@
 #include "globals.h"
+#include "fluxmap.h"
 #include <libusb.h>
 
 #define TIMEOUT 5000

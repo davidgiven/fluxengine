@@ -1,4 +1,5 @@
 #include "globals.h"
+#include "fluxmap.h"
 
 struct fluxmap* create_fluxmap(void)
 {

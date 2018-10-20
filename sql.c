@@ -1,5 +1,6 @@
 #include "globals.h"
 #include "sql.h"
+#include "fluxmap.h"
 
 void sql_check(sqlite3* db, int i)
 {
