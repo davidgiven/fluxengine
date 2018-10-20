@@ -16,6 +16,8 @@ public:
     Fluxmap& appendIntervals(std::vector<uint8_t>& intervals);
     Fluxmap& appendIntervals(const uint8_t* ptr, size_t len);
 
+    nanoseconds_t guessClock() const;
+
 private:
     nanoseconds_t _duration = 0;
     int _ticks = 0;

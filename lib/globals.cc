@@ -1,5 +1,6 @@
 #include "globals.h"
 #include <sys/time.h>
+#include <stdarg.h>
 
 double getCurrentTime(void)
 {
@@ -8,4 +9,3 @@ double getCurrentTime(void)
 
 	return double(tv.tv_sec) + tv.tv_usec/1000000.0;
 }
-

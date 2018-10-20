@@ -4,6 +4,7 @@
 #include "reader.h"
 #include "fluxmap.h"
 #include "sql.h"
+#include "fmt/format.h"
 #include <regex>
 
 static const std::regex SOURCE_REGEX("([^:]*)"
@@ -40,7 +41,9 @@ Fluxmap& Track::read()
 {
     if (!_read)
     {
+        std::cout << fmt::format("{0:>3}.{1}: ", track, side) << std::flush;
         reallyRead();
+        std::cout << fmt::format("{0} ms in {1} bytes", int(_fluxmap->duration()/1e6), _fluxmap->bytes()) << std::endl;
         _read = true;
     }
     return *_fluxmap.get();
@@ -53,22 +56,16 @@ void Track::forceReread()
 
 void CapturedTrack::reallyRead()
 {
-    std::cout << "read track " << track << " side " << side << ": " << std::flush;
 
     usbSeek(track);
     _fluxmap = usbRead(side, revolutions);
-    std::cout << int(_fluxmap->duration()/1e6) << "ms in " << _fluxmap->bytes() << " bytes" << std::endl;
 }
 
 void FileTrack::reallyRead()
 {
-    std::cout << "read track " << track << " side " << side << ": " << std::flush;
-
     if (!db)
         db = sqlOpen(basefilename, SQLITE_OPEN_READONLY);
     _fluxmap = sqlReadFlux(db, track, side);
-
-    std::cout << int(_fluxmap->duration()/1e6) << "ms in " << _fluxmap->bytes() << " bytes" << std::endl;
 }
 
 std::vector<std::unique_ptr<Track>> readTracks()

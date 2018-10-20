@@ -101,4 +101,16 @@ public:
     void set(const std::string value) { _value = std::stoi(value); }
 };
 
+class DoubleFlag : public ValueFlag<double>
+{
+public:
+    DoubleFlag(const std::vector<std::string>& names, const std::string helptext,
+            double defaultValue = 1.0):
+        ValueFlag(names, helptext, defaultValue)
+    {}
+
+    const std::string defaultValue() const { return std::to_string(_defaultValue); }
+    void set(const std::string value) { _value = std::stod(value); }
+};
+
 #endif

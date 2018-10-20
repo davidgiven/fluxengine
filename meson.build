@@ -24,23 +24,43 @@ executable('fluxclient',
     dependencies: [libusb, sqlite]
 )
 
+fmtlib = shared_library('fmtlib',
+    [
+        'dep/fmt/format.cc',
+        'dep/fmt/posix.cc'
+    ])
+fmtinc = include_directories('dep/fmt')
+
 felib = shared_library('felib',
     [
         'lib/flags.cc',
         'lib/fluxmap.cc',
         'lib/globals.cc',
         'lib/usb.cc',
+        'lib/image.cc',
     ],
+    include_directories: [fmtinc],
+    link_with: [fmtlib],
     dependencies: [libusb]
 )
-
-sqllib = shared_library('sqllib', ['lib/sql.cc'], link_with: [felib], dependencies: [sqlite])
-readerlib = shared_library('readerlib', ['lib/reader.cc'], link_with: [felib, sqllib])
-
 feinc = include_directories('lib')
+
+sqllib =     shared_library('sqllib',     ['lib/sql.cc'],                                     link_with: [felib], dependencies: [sqlite])
+readerlib =  shared_library('readerlib',  ['lib/reader.cc'],   include_directories: [fmtinc], link_with: [felib, sqllib, fmtlib])
+
+decoderlib = shared_library('decoderlib',
+    [
+        'lib/decoders/decoders.cc',
+        'lib/decoders/mfm.cc',
+        'lib/decoders/ibm.cc'
+    ],
+    include_directories: [feinc],
+    link_with: [felib]
+)
+decoderinc = include_directories('lib/decoders')
 
 executable('fe-rpm',               ['src/fe-rpm.cc'],               include_directories: [feinc], link_with: [felib])
 executable('fe-seek',              ['src/fe-seek.cc'],              include_directories: [feinc], link_with: [felib])
 executable('fe-testbulktransport', ['src/fe-testbulktransport.cc'], include_directories: [feinc], link_with: [felib])
-executable('fe-readibm',           ['src/fe-readibm.cc'],           include_directories: [feinc], link_with: [felib, readerlib])
+executable('fe-readibm',           ['src/fe-readibm.cc'],           include_directories: [feinc, fmtinc, decoderinc], link_with: [felib, readerlib, decoderlib, fmtlib])
 
