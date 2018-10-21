@@ -18,6 +18,11 @@ sqlite3* sqlOpen(const std::string filename, int flags)
     return db;
 }
 
+void sqlClose(sqlite3* db)
+{
+	sqlite3_close(db);
+}
+
 void sqlStmt(sqlite3* db, const char* sql)
 {
     char* errmsg;

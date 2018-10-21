@@ -35,7 +35,8 @@ static int starttrack = 0;
 static int endtrack = 79;
 static int startside = 0;
 static int endside = 1;
-static sqlite3* db;
+static sqlite3* indb;
+static sqlite3* outdb;
 
 Fluxmap& Track::read()
 {
@@ -45,7 +46,11 @@ Fluxmap& Track::read()
         reallyRead();
         std::cout << fmt::format("{0} ms in {1} bytes", int(_fluxmap->duration()/1e6), _fluxmap->bytes()) << std::endl;
         _read = true;
+
+		if (outdb)
+			sqlWriteFlux(outdb, track, side, *_fluxmap);
     }
+
     return *_fluxmap.get();
 }
     
@@ -62,9 +67,12 @@ void CapturedTrack::reallyRead()
 
 void FileTrack::reallyRead()
 {
-    if (!db)
-        db = sqlOpen(basefilename, SQLITE_OPEN_READONLY);
-    _fluxmap = sqlReadFlux(db, track, side);
+    if (!indb)
+	{
+        indb = sqlOpen(basefilename, SQLITE_OPEN_READONLY);
+		atexit([]() { sqlClose(indb); });
+	}
+    _fluxmap = sqlReadFlux(indb, track, side);
 }
 
 std::vector<std::unique_ptr<Track>> readTracks()
@@ -90,6 +98,20 @@ std::vector<std::unique_ptr<Track>> readTracks()
               << starttrack << " to " << endtrack << " inclusive" << std::endl
               << "Sides:        "
               << startside << " to " << endside << " inclusive" << std::endl;
+
+	if (!destination.value().empty())
+	{
+		outdb = sqlOpen(destination, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
+		std::cout << "Writing a copy of the flux to " << destination.value() << std::endl;
+		sqlPrepareFlux(outdb);
+		sqlStmt(outdb, "BEGIN;");
+		atexit([]()
+			{
+				sqlStmt(outdb, "COMMIT;");
+				sqlClose(outdb);
+			}
+		);
+	}
 
     std::vector<std::unique_ptr<Track>> tracks;
     for (int track=starttrack; track<=endtrack; track++)

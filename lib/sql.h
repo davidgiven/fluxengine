@@ -7,10 +7,11 @@ class Fluxmap;
 
 extern void sqlCheck(sqlite3* db, int i);
 extern sqlite3* sqlOpen(const std::string filename, int flags);
+extern void sqlClose(sqlite3* db);
 extern void sqlStmt(sqlite3* db, const char* sql);
 
 extern void sqlPrepareFlux(sqlite3* db);
-extern void sqlWriteFlux(sqlite3* db, int track, int side, const struct fluxmap* fluxmap);
+extern void sqlWriteFlux(sqlite3* db, int track, int side, const Fluxmap& fluxmap);
 extern std::unique_ptr<Fluxmap> sqlReadFlux(sqlite3* db, int track, int side);
 
 #if 0
