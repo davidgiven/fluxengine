@@ -63,4 +63,5 @@ executable('fe-rpm',               ['src/fe-rpm.cc'],               include_dire
 executable('fe-seek',              ['src/fe-seek.cc'],              include_directories: [feinc], link_with: [felib])
 executable('fe-testbulktransport', ['src/fe-testbulktransport.cc'], include_directories: [feinc], link_with: [felib])
 executable('fe-readibm',           ['src/fe-readibm.cc'],           include_directories: [feinc, fmtinc, decoderinc], link_with: [felib, readerlib, decoderlib, fmtlib])
+executable('fe-inspect',           ['src/fe-inspect.cc'],           include_directories: [feinc, fmtinc, decoderinc], link_with: [felib, readerlib, decoderlib, fmtlib])
 
