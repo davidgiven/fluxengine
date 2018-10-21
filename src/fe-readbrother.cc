@@ -9,7 +9,7 @@
 static StringFlag outputFilename(
     { "--output", "-o" },
     "The output image file to write to.",
-    "ibm.img");
+    "brother.img");
 
 int main(int argc, const char* argv[])
 {
@@ -23,14 +23,13 @@ int main(int argc, const char* argv[])
         nanoseconds_t clockPeriod = fluxmap.guessClock();
         std::cout << fmt::format("       {:.1f} us clock; ", (double)clockPeriod/1000.0) << std::flush;
 
-        /* For MFM, the bit clock is half the detected clock. */
-        auto bitmap = decodeFluxmapToBits(fluxmap, clockPeriod/2);
+        auto bitmap = decodeFluxmapToBits(fluxmap, clockPeriod);
         std::cout << fmt::format("{} bytes encoded; ", bitmap.size()/8) << std::flush;
 
-        auto records = decodeBitsToRecordsMfm(bitmap);
+        auto records = decodeBitsToRecordsBrother(bitmap);
         std::cout << records.size() << " records." << std::endl;
 
-        auto sectors = parseRecordsToSectorsIbm(records);
+        auto sectors = parseRecordsToSectorsBrother(records);
         std::cout << "       " << sectors.size() << " sectors; ";
 
         int size = 0;

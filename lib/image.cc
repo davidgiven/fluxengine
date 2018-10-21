@@ -25,8 +25,9 @@ void writeSectorsToFile(const std::vector<std::unique_ptr<Sector>>& sectors, con
     size_t trackSize = sideSize * sideCount;
 
     std::cout << fmt::format("{} tracks, {} sides, {} sectors, {} bytes per sector, {} kB total",
-        trackCount, sideCount, sectorCount, sectorSize,
-        trackCount * sideCount * sectorCount * sectorSize / 1024);
+					trackCount, sideCount, sectorCount, sectorSize,
+					trackCount * sideCount * sectorCount * sectorSize / 1024)
+			  << std::endl;
 
     std::ofstream outputFile(filename, std::ios::out | std::ios::binary);
     if (!outputFile.is_open())

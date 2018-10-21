@@ -51,8 +51,10 @@ readerlib =  shared_library('readerlib',  ['lib/reader.cc'],   include_directori
 decoderlib = shared_library('decoderlib',
     [
         'lib/decoders/decoders.cc',
-        'lib/decoders/mfm.cc',
-        'lib/decoders/ibm.cc'
+        'lib/decoders/mfmdecoder.cc',
+        'lib/decoders/ibmparser.cc',
+		'lib/decoders/brotherdecoder.cc',
+		'lib/decoders/brotherparser.cc',
     ],
     include_directories: [feinc],
     link_with: [felib]
@@ -63,5 +65,6 @@ executable('fe-rpm',               ['src/fe-rpm.cc'],               include_dire
 executable('fe-seek',              ['src/fe-seek.cc'],              include_directories: [feinc], link_with: [felib])
 executable('fe-testbulktransport', ['src/fe-testbulktransport.cc'], include_directories: [feinc], link_with: [felib])
 executable('fe-readibm',           ['src/fe-readibm.cc'],           include_directories: [feinc, fmtinc, decoderinc], link_with: [felib, readerlib, decoderlib, fmtlib])
+executable('fe-readbrother',       ['src/fe-readbrother.cc'],       include_directories: [feinc, fmtinc, decoderinc], link_with: [felib, readerlib, decoderlib, fmtlib])
 executable('fe-inspect',           ['src/fe-inspect.cc'],           include_directories: [feinc, fmtinc, decoderinc], link_with: [felib, readerlib, decoderlib, fmtlib])
 
