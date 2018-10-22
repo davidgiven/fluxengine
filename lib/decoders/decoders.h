@@ -20,7 +20,7 @@ struct IbmIdam
     uint8_t side;
     uint8_t sector;
     uint8_t sectorSize;
-    uint16_t crcBE;
+    uint8_t crc[2];
 };
 
 /* Brother word processor format (or at least, one of them) */

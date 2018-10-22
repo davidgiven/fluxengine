@@ -32,7 +32,7 @@ std::vector<std::unique_ptr<Sector>> parseRecordsToSectorsBrother(const std::vec
                 std::vector<uint8_t> sectordata(BROTHER_DATA_RECORD_PAYLOAD);
                 memcpy(&sectordata[0], &record[1], BROTHER_DATA_RECORD_PAYLOAD);
 
-                auto sector = std::unique_ptr<Sector>(new Sector(nextTrack, 0, nextSector, sectordata));
+                auto sector = std::unique_ptr<Sector>(new Sector(Sector::OK, nextTrack, 0, nextSector, sectordata));
                 sectors.push_back(std::move(sector));
                 hasHeader = false;
                 break;

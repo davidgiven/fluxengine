@@ -38,6 +38,8 @@ felib = shared_library('felib',
         'lib/globals.cc',
         'lib/usb.cc',
         'lib/image.cc',
+		'lib/crc.cc',
+		'lib/hexdump.cc',
     ],
     include_directories: [fmtinc],
     link_with: [fmtlib],
@@ -56,8 +58,8 @@ decoderlib = shared_library('decoderlib',
 		'lib/decoders/brotherdecoder.cc',
 		'lib/decoders/brotherparser.cc',
     ],
-    include_directories: [feinc],
-    link_with: [felib]
+    include_directories: [feinc, fmtinc],
+    link_with: [felib, fmtlib]
 )
 decoderinc = include_directories('lib/decoders')
 

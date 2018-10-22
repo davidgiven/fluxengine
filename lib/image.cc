@@ -15,10 +15,10 @@ void writeSectorsToFile(const std::vector<std::unique_ptr<Sector>>& sectors, con
     size_t sectorSize = 0;
     for (auto& sector : sectors)
     {
-        trackCount = std::max(sector->track()+1, trackCount);
-        sideCount = std::max(sector->side()+1, sideCount);
-        sectorCount = std::max(sector->sector()+1, sectorCount);
-        sectorSize = std::max(sector->data().size(), sectorSize);
+        trackCount = std::max(sector->track+1, trackCount);
+        sideCount = std::max(sector->side+1, sideCount);
+        sectorCount = std::max(sector->sector+1, sectorCount);
+        sectorSize = std::max(sector->data.size(), sectorSize);
     }
 
     size_t sideSize = sectorCount * sectorSize;
@@ -35,7 +35,7 @@ void writeSectorsToFile(const std::vector<std::unique_ptr<Sector>>& sectors, con
 
     for (auto& sector : sectors)
     {
-        outputFile.seekp(sector->track()*trackSize + sector->side()*sideSize + sector->sector()*sectorSize, std::ios::beg);
-        outputFile.write((const char*) &sector->data().at(0), sector->data().size());
+        outputFile.seekp(sector->track*trackSize + sector->side*sideSize + sector->sector*sectorSize, std::ios::beg);
+        outputFile.write((const char*) &sector->data[0], sector->data.size());
     }
 }

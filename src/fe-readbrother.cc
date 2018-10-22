@@ -35,7 +35,7 @@ int main(int argc, const char* argv[])
         int size = 0;
         for (auto& sector : sectors)
         {
-            size += sector->data().size();
+            size += sector->data.size();
             allSectors.push_back(std::move(sector));
         }
         std::cout << size << " bytes decoded." << std::endl;

@@ -12,6 +12,7 @@
 typedef int nanoseconds_t;
 
 extern double getCurrentTime();
+extern void hexdump(std::ostream& stream, const std::vector<uint8_t>& buffer);
 
 class Error
 {

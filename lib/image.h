@@ -9,23 +9,25 @@
 class Sector
 {
 public:
-    Sector(int track, int side, int sector, const std::vector<uint8_t>& data):
-        _track(track),
-        _side(side),
-        _sector(sector),
-        _data(data)
+	enum
+	{
+		OK,
+		BAD_CHECKSUM
+	};
+
+    Sector(int status, int track, int side, int sector, const std::vector<uint8_t>& data):
+		status(status),
+        track(track),
+        side(side),
+        sector(sector),
+        data(data)
     {}
 
-    int track() const { return _track; }
-    int side() const { return _side; }
-    int sector() const { return _sector; }
-    const std::vector<uint8_t>& data() const { return _data; }
-
-private:
-    const int _track;
-    const int _side;
-    const int _sector;
-    const std::vector<uint8_t> _data;
+	const int status;
+    const int track;
+    const int side;
+    const int sector;
+    const std::vector<uint8_t> data;
 };
 
 extern void writeSectorsToFile(const std::vector<std::unique_ptr<Sector>>& sectors, const std::string& filename);
