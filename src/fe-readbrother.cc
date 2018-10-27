@@ -20,6 +20,7 @@ static SettableFlag dumpRecords(
 
 int main(int argc, const char* argv[])
 {
+	setReaderDefaults(0, 81, 0, 0);
     Flag::parseFlags(argc, argv);
 
 	bool failures = false;
@@ -77,8 +78,11 @@ int main(int argc, const char* argv[])
         int size = 0;
         for (auto& sector : goodSectors)
         {
-            size += sector->data.size();
-            allSectors.push_back(std::move(sector));
+			if (sector)
+			{
+				size += sector->data.size();
+				allSectors.push_back(std::move(sector));
+			}
         }
         std::cout << size << " bytes decoded." << std::endl;
 

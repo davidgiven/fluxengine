@@ -38,6 +38,14 @@ static int endside = 1;
 static sqlite3* indb;
 static sqlite3* outdb;
 
+void setReaderDefaults(int minTrack, int maxTrack, int minSide, int maxSide)
+{
+	starttrack = minTrack;
+	endtrack = maxTrack;
+	startside = minSide;
+	endside = maxSide;
+}
+
 Fluxmap& Track::read()
 {
     if (!_read)

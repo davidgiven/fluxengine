@@ -32,6 +32,7 @@ public:
     void reallyRead();
 };
 
+extern void setReaderDefaults(int minTrack, int maxTrack, int minSide, int maxSide);
 extern std::vector<std::unique_ptr<Track>> readTracks();
 
 #endif
