@@ -15,7 +15,7 @@ public:
 
     virtual bool hasArgument() const = 0;
     virtual const std::string defaultValue() const = 0;
-    virtual void set(const std::string value) = 0;
+    virtual void set(const std::string& value) = 0;
 
 private:
     const std::vector<std::string> _names;
@@ -33,7 +33,7 @@ public:
 
     bool hasArgument() const { return false; }
     const std::string defaultValue() const { return ""; }
-    void set(const std::string value) { _callback(); }
+    void set(const std::string& value) { _callback(); }
 
 private:
     const std::function<void(void)> _callback;
@@ -50,7 +50,7 @@ public:
 
     bool hasArgument() const { return false; }
     const std::string defaultValue() const { return "false"; }
-    void set(const std::string value) { _value = true; }
+    void set(const std::string& value) { _value = true; }
 
 private:
     bool _value = false;
@@ -86,7 +86,7 @@ public:
     {}
 
     const std::string defaultValue() const { return _defaultValue; }
-    void set(const std::string value) { _value = value; }
+    void set(const std::string& value) { _value = value; }
 };
 
 class IntFlag : public ValueFlag<int>
@@ -98,7 +98,7 @@ public:
     {}
 
     const std::string defaultValue() const { return std::to_string(_defaultValue); }
-    void set(const std::string value) { _value = std::stoi(value); }
+    void set(const std::string& value) { _value = std::stoi(value); }
 };
 
 class DoubleFlag : public ValueFlag<double>
@@ -110,7 +110,19 @@ public:
     {}
 
     const std::string defaultValue() const { return std::to_string(_defaultValue); }
-    void set(const std::string value) { _value = std::stod(value); }
+    void set(const std::string& value) { _value = std::stod(value); }
+};
+
+class BoolFlag : public ValueFlag<double>
+{
+public:
+    BoolFlag(const std::vector<std::string>& names, const std::string helptext,
+            bool defaultValue = false):
+        ValueFlag(names, helptext, defaultValue)
+    {}
+
+    const std::string defaultValue() const { return _defaultValue ? "true" : "false"; }
+    void set(const std::string& value);
 };
 
 #endif

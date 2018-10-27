@@ -79,6 +79,16 @@ void Flag::parseFlags(int argc, const char* argv[])
         
 }
 
+void BoolFlag::set(const std::string& value)
+{
+	if ((value == "true") || (value == "y"))
+		_value = true;
+	else if ((value == "false") || (value == "n"))
+		_value = false;
+	else
+		Error() << "can't parse '" << value << "'; try 'true' or 'false'";
+}
+
 static void doHelp()
 {
     std::cout << "FluxEngine options:" << std::endl;
