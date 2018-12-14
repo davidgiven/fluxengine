@@ -6,6 +6,8 @@ What?
 
 FluxEngine is a very cheap USB floppy disk interface capable of reading (and eventually, writing) exotic non-PC floppy disk formats. It (should, this bit's not done yet) allow you to use a conventional PC drive to accept Amiga disks, CLV Macintosh disks, bizarre 128-sector CP/M disks, and other weird and bizarre formats.
 
+![a FluxEngine attached to a floppy drive](doc/floppy.jpg)
+
 **Big warning.** Right now it is a hacked together prototype. It is not ready to use. Unless you eat and breathe embedded systems code and were born with a soldering iron in your mouth (hopefully, turned off) then this is not for you. If you were... please, give it a try!
 
 ### Infrequently asked questions because nobody's got round to asking them yet
@@ -107,6 +109,13 @@ Here's the physical stuff you need.
     you'll need an actual power supply.
 
 ### Assembly instructions
+
+![closeup of the board](doc/closeup.jpg)
+
+(In the picture above, the extra two wires are the serial port and go off to
+the programmer. Normally that's attached on the left but I had to cut it off
+to make it fit. If you use pins rather than a header you won't need to do
+this.)
 
   1. Very carefully remove C7, C9, C12 and C13 from the top of the board.
      It's not hard; use tweezers or fine needle-nosed pliers to lift the
