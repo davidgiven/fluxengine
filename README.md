@@ -124,6 +124,12 @@ this.)
      they're incredibly small. (I'm looking at changing the pinout to avoid
      needing this step, which is first so that if you ruin your board you don't waste time.)
 
+     They're the circled components in this image. (They are actually clearly
+     labelled but my circles have obscured the labels.) Note that the middle
+     circle contains two capacitors side-by-side.
+
+     ![which capacitors to remove](doc/capacitors.jpg)
+
   2. **If you're using a header:** solder your 17-way header to the
      **bottom** of the board, from 0.2 to 3.0 inclusive. (It has to be the
      bottom because there are components that stick out on the other side and
