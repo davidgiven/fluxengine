@@ -5,6 +5,17 @@ Brother word processor disks are weird, using custom tooling and chipsets. They 
 
 Different word processors use different disk formats --- the only one supported by FluxEngine is the 240kB 3.5" format.
 
+Reading discs
+-------------
+
+Just do:
+
+```
+.obj/fe-readbrother
+```
+
+You should end up with a `brother.img` which is 239616 bytes long.
+
 Low level format
 ----------------
 
