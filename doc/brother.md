@@ -38,7 +38,8 @@ files in and out. However, you'll need to change the media type bytes at
 offsets 0x015 and 0x100 from 0x58 to 0xf0 before mtools will touch it. Once
 done, this will work:
 
-```mdir -i brother.img
+```
+mdir -i brother.img
 mcopy -i brother.img ::brother.doc linux.doc
 ```
 
