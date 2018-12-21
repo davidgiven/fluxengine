@@ -43,7 +43,7 @@ Currently, not a lot.
 
   - IBM MFM 1440kB and 720kB formats, a.k.a. standard PC floppy disks
 
-  - Brother 240kB word processor disks
+  - [Brother 240kB word processor disks](doc/brother.md)
 
 ...aaaand that's it. If you want more, please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new); I need samples
