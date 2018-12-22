@@ -21,6 +21,49 @@ void writeSectorsToFile(const std::vector<std::unique_ptr<Sector>>& sectors, con
         sectorSize = std::max(sector->data.size(), sectorSize);
     }
 
+	/* Create the index. */
+
+	Sector* index[trackCount][sideCount][sectorCount] = {};
+	for (auto& sector : sectors)
+		index[sector->track][sector->side][sector->sector] = sector.get();
+
+	/* Emit the map. */
+
+	int badSectors = 0;
+	int missingSectors = 0;
+	int totalSectors = 0;
+	for (int side = 0; side < sideCount; side++)
+	{
+		for (int sectorId = 0; sectorId < sectorCount; sectorId++)
+		{
+			std::cout << 
+			for (int track = 0; track < trackCount; track++)
+			{
+				Sector* sector = index[track][side][sectorId];
+				if (!sector)
+				{
+					std::cout << '.';
+					missingSectors++;
+				}
+				else if (sector->status == Sector::OK)
+					std::cout << 'G';
+				else
+				{
+					badSectors++;
+					std::cout << 'B';
+				}
+				totalSectors++;
+			}
+			std::cout << std::endl;
+		}
+	}
+	std::cout << "Missing sectors: " << missingSectors << "/" << totalSectors
+	          << " (" << (100*missingSectors/totalSectors) << "%)"
+			  << std::endl;
+	std::cout << "Bad sectors: " << badSectors << "/" << totalSectors
+	          << " (" << (100*badSectors/totalSectors) << "%)"
+			  << std::endl;
+
     size_t sideSize = sectorCount * sectorSize;
     size_t trackSize = sideSize * sideCount;
 
