@@ -133,5 +133,14 @@ std::vector<std::unique_ptr<Track>> readTracks()
             tracks.push_back(std::move(t));
         }
     }
+
+	if (justRead)
+	{
+		for (auto& track : tracks)
+			track->read();
+		std::cout << "--just-read specified, terminating without further processing" << std::endl;
+		exit(0);
+	}
+				
     return tracks;
 }
