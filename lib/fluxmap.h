@@ -10,8 +10,14 @@ public:
     }
 
     nanoseconds_t duration() const { return _duration; }
-    const uint8_t* ptr() const { return &_intervals.at(0); }
     int bytes() const { return _intervals.size(); }
+
+    const uint8_t* ptr() const
+	{
+		if (!_intervals.empty())
+			return &_intervals.at(0);
+		return NULL;
+	}
 
     Fluxmap& appendIntervals(std::vector<uint8_t>& intervals);
     Fluxmap& appendIntervals(const uint8_t* ptr, size_t len);
