@@ -32,11 +32,12 @@ void writeSectorsToFile(const std::vector<std::unique_ptr<Sector>>& sectors, con
 	int badSectors = 0;
 	int missingSectors = 0;
 	int totalSectors = 0;
+	std::cout << "H.SS Tracks --->" << std::endl;
 	for (int side = 0; side < sideCount; side++)
 	{
 		for (int sectorId = 0; sectorId < sectorCount; sectorId++)
 		{
-			std::cout << 
+			std::cout << fmt::format("{}.{:2} ", side, sectorId);
 			for (int track = 0; track < trackCount; track++)
 			{
 				Sector* sector = index[track][side][sectorId];
@@ -57,6 +58,10 @@ void writeSectorsToFile(const std::vector<std::unique_ptr<Sector>>& sectors, con
 			std::cout << std::endl;
 		}
 	}
+	int goodSectors = totalSectors - missingSectors - badSectors;
+	std::cout << "Good sectors: " << goodSectors << "/" << totalSectors
+	          << " (" << (100*goodSectors/totalSectors) << "%)"
+			  << std::endl;
 	std::cout << "Missing sectors: " << missingSectors << "/" << totalSectors
 	          << " (" << (100*missingSectors/totalSectors) << "%)"
 			  << std::endl;
