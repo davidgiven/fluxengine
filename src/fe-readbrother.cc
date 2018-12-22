@@ -24,7 +24,6 @@ int main(int argc, const char* argv[])
     Flag::parseFlags(argc, argv);
 
 	bool failures = false;
-	std::ofstream o("records.txt");
     std::vector<std::unique_ptr<Sector>> allSectors;
     for (auto& track : readTracks())
     {
@@ -93,16 +92,6 @@ int main(int argc, const char* argv[])
 			{
 				hexdump(std::cout, record);
 				std::cout << std::endl;
-			}
-		}
-
-		for (auto& record : records)
-		{
-			if ((record.size() >= 260) && (record[0] == 0xdb))
-			{
-				for (int i=1; i<260; i++)
-					o << fmt::format("{:02x}", record[i]);
-				o << std::endl;
 			}
 		}
     }
