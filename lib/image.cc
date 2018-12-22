@@ -59,15 +59,20 @@ void writeSectorsToFile(const std::vector<std::unique_ptr<Sector>>& sectors, con
 		}
 	}
 	int goodSectors = totalSectors - missingSectors - badSectors;
-	std::cout << "Good sectors: " << goodSectors << "/" << totalSectors
-	          << " (" << (100*goodSectors/totalSectors) << "%)"
-			  << std::endl;
-	std::cout << "Missing sectors: " << missingSectors << "/" << totalSectors
-	          << " (" << (100*missingSectors/totalSectors) << "%)"
-			  << std::endl;
-	std::cout << "Bad sectors: " << badSectors << "/" << totalSectors
-	          << " (" << (100*badSectors/totalSectors) << "%)"
-			  << std::endl;
+	if (totalSectors == 0)
+		std::cout << "No sectors in output; skipping analysis" << std::endl;
+	else
+	{
+		std::cout << "Good sectors: " << goodSectors << "/" << totalSectors
+				  << " (" << (100*goodSectors/totalSectors) << "%)"
+				  << std::endl;
+		std::cout << "Missing sectors: " << missingSectors << "/" << totalSectors
+				  << " (" << (100*missingSectors/totalSectors) << "%)"
+				  << std::endl;
+		std::cout << "Bad sectors: " << badSectors << "/" << totalSectors
+				  << " (" << (100*badSectors/totalSectors) << "%)"
+				  << std::endl;
+    }
 
     size_t sideSize = sectorCount * sectorSize;
     size_t trackSize = sideSize * sideCount;
