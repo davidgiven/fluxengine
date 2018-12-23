@@ -23,21 +23,13 @@ struct IbmIdam
     uint8_t crc[2];
 };
 
-/* Brother word processor format (or at least, one of them) */
-
-#define BROTHER_SECTOR_RECORD 0xFFFFFD57
-#define BROTHER_DATA_RECORD   0xFFFFFDDB
-#define BROTHER_DATA_RECORD_PAYLOAD 256
-
 class Sector;
 class Fluxmap;
 
 extern std::vector<bool> decodeFluxmapToBits(const Fluxmap& fluxmap, nanoseconds_t clock_period);
 
 extern std::vector<std::vector<uint8_t>> decodeBitsToRecordsMfm(const std::vector<bool>& bitmap);
-extern std::vector<std::vector<uint8_t>> decodeBitsToRecordsBrother(const std::vector<bool>& bitmap);
 
 extern std::vector<std::unique_ptr<Sector>> parseRecordsToSectorsIbm(const std::vector<std::vector<uint8_t>>& records);
-extern std::vector<std::unique_ptr<Sector>> parseRecordsToSectorsBrother(const std::vector<std::vector<uint8_t>>& records);
 
 #endif

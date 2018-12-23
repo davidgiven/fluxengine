@@ -2,6 +2,7 @@
 #include "sql.h"
 #include "fluxmap.h"
 #include "decoders.h"
+#include "brother.h"
 #include <ctype.h>
 
 static std::vector<uint8_t> outputbuffer;

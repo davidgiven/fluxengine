@@ -55,18 +55,27 @@ decoderlib = shared_library('decoderlib',
         'lib/decoders/decoders.cc',
         'lib/decoders/mfmdecoder.cc',
         'lib/decoders/ibmparser.cc',
-		'lib/brother/decoder.cc',
-		'lib/brother/parser.cc',
     ],
     include_directories: [feinc, fmtinc],
     link_with: [felib, fmtlib]
 )
 decoderinc = include_directories('lib/decoders')
 
+brotherlib = shared_library('brotherlib',
+    [
+		'lib/brother/decoder.cc',
+		'lib/brother/parser.cc',
+    ],
+    include_directories: [feinc, fmtinc, decoderinc],
+    link_with: [felib, fmtlib, decoderlib]
+)
+brotherinc = include_directories('lib/brother')
+
 executable('fe-rpm',               ['src/fe-rpm.cc'],               include_directories: [feinc], link_with: [felib])
 executable('fe-seek',              ['src/fe-seek.cc'],              include_directories: [feinc], link_with: [felib])
 executable('fe-testbulktransport', ['src/fe-testbulktransport.cc'], include_directories: [feinc], link_with: [felib])
 executable('fe-readibm',           ['src/fe-readibm.cc'],           include_directories: [feinc, fmtinc, decoderinc], link_with: [felib, readerlib, decoderlib, fmtlib])
-executable('fe-readbrother',       ['src/fe-readbrother.cc'],       include_directories: [feinc, fmtinc, decoderinc], link_with: [felib, readerlib, decoderlib, fmtlib])
+executable('fe-readbrother',       ['src/fe-readbrother.cc'],       include_directories: [feinc, fmtinc, decoderinc, brotherinc], link_with: [felib, readerlib, decoderlib, brotherlib, fmtlib])
+executable('fe-writebrother',      ['src/fe-writebrother.cc'],      include_directories: [feinc, fmtinc, decoderinc, brotherinc], link_with: [felib, readerlib, decoderlib, brotherlib, fmtlib])
 executable('fe-inspect',           ['src/fe-inspect.cc'],           include_directories: [feinc, fmtinc, decoderinc], link_with: [felib, readerlib, decoderlib, fmtlib])
 

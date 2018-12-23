@@ -3,6 +3,7 @@
 #include "reader.h"
 #include "fluxmap.h"
 #include "decoders.h"
+#include "brother.h"
 #include "image.h"
 #include <fmt/format.h>
 #include <fstream>
