@@ -99,11 +99,18 @@ int main(int argc, const char* argv[])
 		}
 
         int size = 0;
+		bool printedTrack = false;
 		for (int sectorId = 0; sectorId < SECTOR_COUNT; sectorId++)
 		{
 			auto& sector = readSectors[sectorId];
 			if (sector)
 			{
+				if (!printedTrack)
+				{
+					std::cout << "       logical track " << sector->track << "; ";
+					printedTrack = true;
+				}
+
 				size += sector->data.size();
 				allSectors.push_back(std::move(sector));
 			}
