@@ -30,8 +30,10 @@ public:
     const std::vector<uint8_t> data;
 };
 
+class SectorSet;
+
 extern void writeSectorsToFile(
-	const std::vector<std::unique_ptr<Sector>>& sectors,
+	const SectorSet& sectors,
 	const std::string& filename);
 
 #endif

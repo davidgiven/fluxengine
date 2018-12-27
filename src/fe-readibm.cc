@@ -4,6 +4,7 @@
 #include "fluxmap.h"
 #include "decoders.h"
 #include "image.h"
+#include "sectorset.h"
 #include <fmt/format.h>
 
 static StringFlag outputFilename(
@@ -20,7 +21,7 @@ int main(int argc, const char* argv[])
     Flag::parseFlags(argc, argv);
 
 	bool failures = false;
-    std::vector<std::unique_ptr<Sector>> allSectors;
+	SectorSet allSectors;
     for (auto& track : readTracks())
     {
 		int retries = 5;
@@ -67,7 +68,8 @@ int main(int argc, const char* argv[])
 		for (auto& sector : sectors)
 		{
 			size += sector->data.size();
-			allSectors.push_back(std::move(sector));
+			allSectors[{sector->track, sector->side, sector->sector}] =
+				std::move(sector);
 		}
 		std::cout << size << " bytes decoded." << std::endl;
 

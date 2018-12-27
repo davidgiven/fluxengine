@@ -4,6 +4,7 @@
 #include "fluxmap.h"
 #include "decoders.h"
 #include "brother.h"
+#include "sectorset.h"
 #include "image.h"
 #include <fmt/format.h>
 #include <fstream>
@@ -31,7 +32,7 @@ int main(int argc, const char* argv[])
     Flag::parseFlags(argc, argv);
 
 	bool failures = false;
-    std::vector<std::unique_ptr<Sector>> allSectors;
+	SectorSet allSectors;
     for (auto& track : readTracks())
     {
 		std::map<int, std::unique_ptr<Sector>> readSectors;
@@ -108,12 +109,12 @@ int main(int argc, const char* argv[])
 			{
 				if (!printedTrack)
 				{
-					std::cout << "       logical track " << sector->track << "; ";
+					std::cout << "logical track " << sector->track << "; ";
 					printedTrack = true;
 				}
 
 				size += sector->data.size();
-				allSectors.push_back(std::move(sector));
+				allSectors[{sector->track, 0, sector->sector}] = std::move(sector);
 			}
         }
         std::cout << size << " bytes decoded." << std::endl;

@@ -1,46 +1,33 @@
 #include "globals.h"
 #include "image.h"
+#include "sectorset.h"
 #include "fmt/format.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>
 
-void writeSectorsToFile(const std::vector<std::unique_ptr<Sector>>& sectors, const std::string& filename)
+void writeSectorsToFile(const SectorSet& sectors, const std::string& filename)
 {
-    /* Count the tracks, sides and sectors. */
-
-    int trackCount = 0;
-    int sideCount = 0;
-    int sectorCount = 0;
-    size_t sectorSize = 0;
-    for (auto& sector : sectors)
-    {
-        trackCount = std::max(sector->track+1, trackCount);
-        sideCount = std::max(sector->side+1, sideCount);
-        sectorCount = std::max(sector->sector+1, sectorCount);
-        sectorSize = std::max(sector->data.size(), sectorSize);
-    }
-
-	/* Create the index. */
-
-	Sector* index[trackCount][sideCount][sectorCount] = {};
-	for (auto& sector : sectors)
-		index[sector->track][sector->side][sector->sector] = sector.get();
-
 	/* Emit the map. */
+
+	int numTracks;
+	int numHeads;
+	int numSectors;
+	int sectorSize;
+	sectors.calculateSize(numTracks, numHeads, numSectors, sectorSize);
 
 	int badSectors = 0;
 	int missingSectors = 0;
 	int totalSectors = 0;
 	std::cout << "H.SS Tracks --->" << std::endl;
-	for (int side = 0; side < sideCount; side++)
+	for (int head = 0; head < numHeads; head++)
 	{
-		for (int sectorId = 0; sectorId < sectorCount; sectorId++)
+		for (int sectorId = 0; sectorId < numSectors; sectorId++)
 		{
-			std::cout << fmt::format("{}.{:2} ", side, sectorId);
-			for (int track = 0; track < trackCount; track++)
+			std::cout << fmt::format("{}.{:2} ", head, sectorId);
+			for (int track = 0; track < numTracks; track++)
 			{
-				Sector* sector = index[track][side][sectorId];
+				auto sector = sectors[{track, head, sectorId}];
 				if (!sector)
 				{
 					std::cout << '.';
@@ -74,21 +61,31 @@ void writeSectorsToFile(const std::vector<std::unique_ptr<Sector>>& sectors, con
 				  << std::endl;
     }
 
-    size_t sideSize = sectorCount * sectorSize;
-    size_t trackSize = sideSize * sideCount;
+    size_t headSize = numSectors * sectorSize;
+    size_t trackSize = headSize * numHeads;
 
-    std::cout << fmt::format("{} tracks, {} sides, {} sectors, {} bytes per sector, {} kB total",
-					trackCount, sideCount, sectorCount, sectorSize,
-					trackCount * sideCount * sectorCount * sectorSize / 1024)
+    std::cout << fmt::format("{} tracks, {} heads, {} sectors, {} bytes per sector, {} kB total",
+					numTracks, numHeads, numSectors, sectorSize,
+					numTracks * trackSize / 1024)
 			  << std::endl;
 
     std::ofstream outputFile(filename, std::ios::out | std::ios::binary);
     if (!outputFile.is_open())
-        Error() << "cannot open output file";
+		Error() << "cannot open output file";
 
-    for (auto& sector : sectors)
-    {
-        outputFile.seekp(sector->track*trackSize + sector->side*sideSize + sector->sector*sectorSize, std::ios::beg);
-        outputFile.write((const char*) &sector->data[0], sector->data.size());
-    }
+	for (int track = 0; track < numTracks; track++)
+	{
+		for (int head = 0; head < numHeads; head++)
+		{
+			for (int sectorId = 0; sectorId < numSectors; sectorId++)
+			{
+				auto sector = sectors[{track, head, sectorId}];
+				if (sector)
+				{
+					outputFile.seekp(sector->track*trackSize + sector->side*headSize + sector->sector*sectorSize, std::ios::beg);
+					outputFile.write((const char*) &sector->data[0], sector->data.size());
+				}
+			}
+		}
+	}
 }
