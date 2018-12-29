@@ -1,5 +1,6 @@
 #include "globals.h"
 #include "decoders.h"
+#include "sector.h"
 #include "image.h"
 #include "crc.h"
 #include "fmt/format.h"

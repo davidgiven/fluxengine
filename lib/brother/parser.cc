@@ -1,5 +1,6 @@
 #include "globals.h"
 #include "decoders.h"
+#include "sector.h"
 #include "image.h"
 #include "brother.h"
 #include "crc.h"

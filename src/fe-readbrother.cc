@@ -4,6 +4,7 @@
 #include "fluxmap.h"
 #include "decoders.h"
 #include "brother.h"
+#include "sector.h"
 #include "sectorset.h"
 #include "image.h"
 #include <fmt/format.h>

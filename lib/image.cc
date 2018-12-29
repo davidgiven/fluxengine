@@ -1,10 +1,18 @@
 #include "globals.h"
 #include "image.h"
+#include "sector.h"
 #include "sectorset.h"
 #include "fmt/format.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>
+
+Geometry guessGeometry(const SectorSet& sectors)
+{
+	Geometry g;
+	sectors.calculateSize(g.tracks, g.heads, g.sectors, g.sectorSize);
+	return g;
+}
 
 void writeSectorsToFile(const SectorSet& sectors, const std::string& filename)
 {

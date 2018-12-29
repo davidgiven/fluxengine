@@ -1,5 +1,6 @@
 #include "globals.h"
 #include "image.h"
+#include "sector.h"
 #include "sectorset.h"
 
 std::unique_ptr<Sector>& SectorSet::operator[](const key_t& key)
