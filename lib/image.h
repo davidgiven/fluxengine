@@ -14,8 +14,14 @@ public:
 
 extern Geometry guessGeometry(const SectorSet& sectors);
 
+extern void readSectorsFromFile(
+	SectorSet& sectors,
+	const Geometry& geometry,
+	const std::string& filename);
+
 extern void writeSectorsToFile(
 	const SectorSet& sectors,
+	const Geometry& geometry,
 	const std::string& filename);
 
 #endif

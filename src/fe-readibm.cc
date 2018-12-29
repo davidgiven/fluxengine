@@ -85,7 +85,8 @@ int main(int argc, const char* argv[])
 		}
     }
 
-    writeSectorsToFile(allSectors, outputFilename);
+	Geometry geometry = guessGeometry(allSectors);
+    writeSectorsToFile(allSectors, geometry, outputFilename);
 	if (failures)
 		std::cerr << "Warning: some sectors could not be decoded." << std::endl;
     return 0;
