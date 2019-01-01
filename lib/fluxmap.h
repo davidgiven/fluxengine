@@ -23,6 +23,7 @@ public:
     Fluxmap& appendIntervals(const uint8_t* ptr, size_t len);
 
     nanoseconds_t guessClock() const;
+	std::vector<bool> decodeToBits(nanoseconds_t clock_period) const;
 
 private:
     nanoseconds_t _duration = 0;

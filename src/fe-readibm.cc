@@ -32,7 +32,7 @@ int main(int argc, const char* argv[])
 		std::cout << fmt::format("       {:.1f} us clock; ", (double)clockPeriod/1000.0) << std::flush;
 
 		/* For MFM, the bit clock is half the detected clock. */
-		auto bitmap = decodeFluxmapToBits(fluxmap, clockPeriod/2);
+		auto bitmap = fluxmap.decodeToBits(clockPeriod/2);
 		std::cout << fmt::format("{} bytes encoded; ", bitmap.size()/8) << std::flush;
 
 		auto records = decodeBitsToRecordsMfm(bitmap);

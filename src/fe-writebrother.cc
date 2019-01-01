@@ -23,6 +23,10 @@ int main(int argc, const char* argv[])
 	Geometry geometry = {78, 1, 12, 256};
 	readSectorsFromFile(allSectors, geometry, inputFilename);
 
+	for (int track=0; track<geometry.tracks; track++)
+	{
+	}
+
 	std::cerr << "Not implemented yet." << std::endl;
     return 0;
 }

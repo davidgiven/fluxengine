@@ -26,8 +26,6 @@ struct IbmIdam
 class Sector;
 class Fluxmap;
 
-extern std::vector<bool> decodeFluxmapToBits(const Fluxmap& fluxmap, nanoseconds_t clock_period);
-
 extern std::vector<std::vector<uint8_t>> decodeBitsToRecordsMfm(const std::vector<bool>& bitmap);
 
 extern std::vector<std::unique_ptr<Sector>> parseRecordsToSectorsIbm(const std::vector<std::vector<uint8_t>>& records);

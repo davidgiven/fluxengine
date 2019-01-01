@@ -48,8 +48,18 @@ felib = shared_library('felib',
 )
 feinc = include_directories('lib')
 
-sqllib =     shared_library('sqllib',     ['lib/sql.cc'],                                     link_with: [felib], dependencies: [sqlite])
-readerlib =  shared_library('readerlib',  ['lib/reader.cc'],   include_directories: [fmtinc], link_with: [felib, sqllib, fmtlib])
+sqllib = shared_library('sqllib',
+						['lib/sql.cc'],
+						link_with: [felib],
+						dependencies: [sqlite])
+readerlib = shared_library('readerlib',
+						['lib/reader.cc'],
+						include_directories: [fmtinc],
+						link_with: [felib, sqllib, fmtlib])
+writerlib =  shared_library('writerlib',
+						['lib/writer.cc'],
+						include_directories: [fmtinc],
+						link_with: [felib, sqllib, fmtlib])
 
 decoderlib = shared_library('decoderlib',
     [
@@ -77,6 +87,6 @@ executable('fe-seek',              ['src/fe-seek.cc'],              include_dire
 executable('fe-testbulktransport', ['src/fe-testbulktransport.cc'], include_directories: [feinc], link_with: [felib])
 executable('fe-readibm',           ['src/fe-readibm.cc'],           include_directories: [feinc, fmtinc, decoderinc], link_with: [felib, readerlib, decoderlib, fmtlib])
 executable('fe-readbrother',       ['src/fe-readbrother.cc'],       include_directories: [feinc, fmtinc, decoderinc, brotherinc], link_with: [felib, readerlib, decoderlib, brotherlib, fmtlib])
-executable('fe-writebrother',      ['src/fe-writebrother.cc'],      include_directories: [feinc, fmtinc, decoderinc, brotherinc], link_with: [felib, readerlib, decoderlib, brotherlib, fmtlib])
+executable('fe-writebrother',      ['src/fe-writebrother.cc'],      include_directories: [feinc, fmtinc, decoderinc, brotherinc], link_with: [felib, writerlib, decoderlib, brotherlib, fmtlib])
 executable('fe-inspect',           ['src/fe-inspect.cc'],           include_directories: [feinc, fmtinc, decoderinc], link_with: [felib, readerlib, decoderlib, fmtlib])
 

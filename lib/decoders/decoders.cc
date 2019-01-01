@@ -56,9 +56,9 @@ nanoseconds_t Fluxmap::guessClock() const
 }
 
 /* Decodes a fluxmap into a nice aligned array of bits. */
-std::vector<bool> decodeFluxmapToBits(const Fluxmap& fluxmap, nanoseconds_t clockPeriod)
+std::vector<bool> Fluxmap::decodeToBits(nanoseconds_t clockPeriod) const
 {
-    int pulses = fluxmap.duration() / clockPeriod;
+    int pulses = duration() / clockPeriod;
     nanoseconds_t lowerThreshold = clockPeriod * clockDecodeThreshold;
 
     std::vector<bool> bitmap(pulses);
@@ -69,9 +69,9 @@ std::vector<bool> decodeFluxmapToBits(const Fluxmap& fluxmap, nanoseconds_t cloc
     {
         while (timestamp < lowerThreshold)
         {
-            if (cursor >= fluxmap.bytes())
+            if (cursor >= bytes())
                 goto abort;
-            uint8_t interval = fluxmap[cursor++];
+            uint8_t interval = (*this)[cursor++];
             timestamp += interval * NS_PER_TICK;
         }
 
