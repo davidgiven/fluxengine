@@ -2,6 +2,7 @@
 #include "sql.h"
 #include "fluxmap.h"
 #include "decoders.h"
+#include "record.h"
 #include "brother.h"
 #include <ctype.h>
 
@@ -44,9 +45,15 @@ static int decode_header_gcr(uint16_t word)
 	return -1;             
 };
 
-std::vector<std::vector<uint8_t>> decodeBitsToRecordsBrother(const std::vector<bool>& bits)
+static void add_record(RecordVector& records,
+	nanoseconds_t position, const std::vector<uint8_t>& data)
 {
-    std::vector<std::vector<uint8_t>> records;
+	records.push_back(std::unique_ptr<Record>(new Record(position, data)));
+}
+
+RecordVector decodeBitsToRecordsBrother(const std::vector<bool>& bits)
+{
+    RecordVector records;
 
 	enum
 	{
@@ -61,6 +68,7 @@ std::vector<std::vector<uint8_t>> decodeBitsToRecordsBrother(const std::vector<b
 	uint8_t outputfifo = 0;
 	int outputcount = 0;
     int state = SEEKING;
+	size_t recordstart = 0;
 
     while (cursor < bits.size())
     {
@@ -71,21 +79,23 @@ std::vector<std::vector<uint8_t>> decodeBitsToRecordsBrother(const std::vector<b
 		if (inputfifo == BROTHER_SECTOR_RECORD)
 		{
 			if (state != SEEKING)
-				records.push_back(outputbuffer);
+				add_record(records, recordstart, outputbuffer);
 			outputbuffer.resize(1);
 			outputbuffer[0] = BROTHER_SECTOR_RECORD & 0xff;
 			state = READINGSECTOR;
 			inputcount = 0;
+			recordstart = cursor - 1;
 		}
 		else if (inputfifo == BROTHER_DATA_RECORD)
 		{
 			if (state != SEEKING)
-				records.push_back(outputbuffer);
+				add_record(records, recordstart, outputbuffer);
 			outputbuffer.resize(1);
 			outputbuffer[0] = BROTHER_DATA_RECORD & 0xff;
 			state = READINGDATA;
 			outputcount = 0;
 			inputcount = 0;
+			recordstart = cursor - 1;
 		}
 		else
 		{
@@ -127,7 +137,7 @@ std::vector<std::vector<uint8_t>> decodeBitsToRecordsBrother(const std::vector<b
     }
 
 	if (state != SEEKING)
-		records.push_back(outputbuffer);
+		add_record(records, recordstart, outputbuffer);
 
     return records;
 }

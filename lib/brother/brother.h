@@ -10,8 +10,8 @@
 class Sector;
 class Fluxmap;
 
-extern std::vector<std::vector<uint8_t>> decodeBitsToRecordsBrother(const std::vector<bool>& bitmap);
+extern RecordVector decodeBitsToRecordsBrother(const std::vector<bool>& bitmap);
 
-extern std::vector<std::unique_ptr<Sector>> parseRecordsToSectorsBrother(const std::vector<std::vector<uint8_t>>& records);
+extern std::vector<std::unique_ptr<Sector>> parseRecordsToSectorsBrother(const RecordVector& records);
 
 #endif

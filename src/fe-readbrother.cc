@@ -7,6 +7,7 @@
 #include "sector.h"
 #include "sectorset.h"
 #include "image.h"
+#include "record.h"
 #include <fmt/format.h>
 #include <fstream>
 
@@ -88,7 +89,9 @@ int main(int argc, const char* argv[])
 				std::cout << "\nRaw records follow:\n\n";
 				for (auto& record : records)
 				{
-					hexdump(std::cout, record);
+					std::cout << fmt::format("I+{:.3f}ms", (double)(record->position*clockPeriod)/1e6)
+					          << std::endl;
+					hexdump(std::cout, record->data);
 					std::cout << std::endl;
 				}
 			}

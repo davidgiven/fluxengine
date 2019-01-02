@@ -25,9 +25,11 @@ struct IbmIdam
 
 class Sector;
 class Fluxmap;
+class Record;
+typedef std::vector<std::unique_ptr<Record>> RecordVector;
 
-extern std::vector<std::vector<uint8_t>> decodeBitsToRecordsMfm(const std::vector<bool>& bitmap);
+extern RecordVector decodeBitsToRecordsMfm(const std::vector<bool>& bitmap);
 
-extern std::vector<std::unique_ptr<Sector>> parseRecordsToSectorsIbm(const std::vector<std::vector<uint8_t>>& records);
+extern std::vector<std::unique_ptr<Sector>> parseRecordsToSectorsIbm(const RecordVector& records);
 
 #endif

@@ -6,6 +6,7 @@
 #include "image.h"
 #include "sector.h"
 #include "sectorset.h"
+#include "record.h"
 #include <fmt/format.h>
 
 static StringFlag outputFilename(
@@ -77,9 +78,11 @@ int main(int argc, const char* argv[])
 		if (dumpRecords)
 		{
 			std::cout << "\nRaw records follow:\n\n";
-			for (auto record : records)
+			for (auto& record : records)
 			{
-				hexdump(std::cout, record);
+				std::cout << fmt::format("I+{:.3f}ms", (double)(record->position*clockPeriod)/1e6)
+						  << std::endl;
+				hexdump(std::cout, record->data);
 				std::cout << std::endl;
 			}
 		}

@@ -1,6 +1,7 @@
 #include "globals.h"
 #include "fluxmap.h"
 #include "protocol.h"
+#include "record.h"
 #include <string.h>
 #include <algorithm>
 
@@ -9,7 +10,8 @@
 #define CLOCK_DETECTOR_AMPLITUDE_THRESHOLD 60 /* arbi4rary */
 #define CLOCK_ERROR_BOUNDS 0.25
 
-static unsigned cursor;
+static size_t cursor;
+static size_t recordstart;
 static std::vector<uint8_t> outputbuffer;
 static uint8_t outputfifo = 0;
 static int bitcount = 0;
@@ -26,9 +28,15 @@ static void write_bit(bool bit)
     }
 }
 
-std::vector<std::vector<uint8_t>> decodeBitsToRecordsMfm(const std::vector<bool>& bits)
+static void add_record(RecordVector& records,
+	nanoseconds_t position, const std::vector<uint8_t>& data)
 {
-    std::vector<std::vector<uint8_t>> records;
+	records.push_back(std::unique_ptr<Record>(new Record(position, data)));
+}
+
+RecordVector decodeBitsToRecordsMfm(const std::vector<bool>& bits)
+{
+    RecordVector records;
 
     cursor = 0;
     uint64_t inputfifo = 0;
@@ -73,7 +81,8 @@ std::vector<std::vector<uint8_t>> decodeBitsToRecordsMfm(const std::vector<bool>
         if ((!reading && (masked == 0x522452245224LL)) || (masked == 0x448944894489LL))
         {
             if (reading)
-                records.push_back(outputbuffer);
+				add_record(records, recordstart, outputbuffer);
+			recordstart = cursor - 4*3*8;
 
             outputbuffer.resize(3);
             std::fill(outputbuffer.begin(), outputbuffer.begin()+3, reading ? 0xA1 : 0xC2);
@@ -91,7 +100,7 @@ std::vector<std::vector<uint8_t>> decodeBitsToRecordsMfm(const std::vector<bool>
     }
 
     if (reading)
-        records.push_back(outputbuffer);
+		add_record(records, recordstart, outputbuffer);
 
     return records;
 }
