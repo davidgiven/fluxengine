@@ -14,8 +14,4 @@ extern std::vector<std::vector<uint8_t>> decodeBitsToRecordsBrother(const std::v
 
 extern std::vector<std::unique_ptr<Sector>> parseRecordsToSectorsBrother(const std::vector<std::vector<uint8_t>>& records);
 
-extern std::vector<bool> encodeRecordsToBits(const std::vector<std::vector<uint8_t>>& records);
-
-extern std::vector<std::vector<std::unique_ptr<uint8_t>>> unparseSectorsToRecordsBrother(const std::vector<std::unique_ptr<Sector>>& sectors);
-
 #endif
