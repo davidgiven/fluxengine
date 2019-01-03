@@ -3,6 +3,7 @@
 #include "fluxmap.h"
 #include "writer.h"
 #include "sql.h"
+#include "protocol.h"
 #include "fmt/format.h"
 #include <regex>
 
@@ -73,6 +74,7 @@ void writeTracks(const std::function<Fluxmap(int track, int side)> producer)
         {
 			std::cout << fmt::format("{0:>3}.{1}: ", track, side) << std::flush;
 			Fluxmap fluxmap = producer(track, side);
+			fluxmap.precompensate(PRECOMPENSATION_THRESHOLD_TICKS, 2);
 			if (outdb)
 				sqlWriteFlux(outdb, track, side, fluxmap);
 			else

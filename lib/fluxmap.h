@@ -27,6 +27,8 @@ public:
 
 	Fluxmap& appendBits(const std::vector<bool>& bits, nanoseconds_t clock);
 
+	void precompensate(int threshold_ticks, int amount_ticks);
+
 private:
     nanoseconds_t _duration = 0;
     int _ticks = 0;
