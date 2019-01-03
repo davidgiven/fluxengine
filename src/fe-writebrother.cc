@@ -52,6 +52,7 @@ static int charToInt(char c)
 
 int main(int argc, const char* argv[])
 {
+	setWriterDefaults(0, 77, 0, 0);
     Flag::parseFlags(argc, argv);
 
 	SectorSet allSectors;
@@ -63,34 +64,38 @@ int main(int argc, const char* argv[])
 	          << fmt::format("post-index gap: {:.3f}ms\n", (double)postIndexGapMs);
 
 	const std::string& skew = sectorSkew;
-	for (int track=0; track<geometry.tracks; track++)
-	{
-		std::vector<bool> bits(bitsPerRevolution);
-		unsigned cursor = 0;
 
-		std::cerr << "logical track " << track << std::endl;
-
-		for (int sectorCount=0; sectorCount<geometry.sectors; sectorCount++)
+	writeTracks(
+		[&](int physicalTrack, int physicalSide) -> Fluxmap
 		{
-			int sectorId = charToInt(skew.at(sectorCount));
-			double headerMs = postIndexGapMs + sectorCount*sectorSpacingMs;
-			unsigned headerCursor = headerMs*1e3 / clockRateUs;
-			double dataMs = headerMs + postHeaderSpacingMs;
-			unsigned dataCursor = dataMs*1e3 / clockRateUs;
+			int logicalTrack = physicalTrack;
+			std::vector<bool> bits(bitsPerRevolution);
+			unsigned cursor = 0;
 
-			fillBitmapTo(bits, cursor, headerCursor, { true, false });
-			writeBrotherSectorHeader(bits, cursor, track, sectorId);
-			fillBitmapTo(bits, cursor, dataCursor, { true, false });
+			std::cerr << "logical track " << logicalTrack << std::endl;
 
-			if (cursor > bits.size())
-				Error() << "track data overrun";
+			for (int sectorCount=0; sectorCount<geometry.sectors; sectorCount++)
+			{
+				int sectorId = charToInt(skew.at(sectorCount));
+				double headerMs = postIndexGapMs + sectorCount*sectorSpacingMs;
+				unsigned headerCursor = headerMs*1e3 / clockRateUs;
+				double dataMs = headerMs + postHeaderSpacingMs;
+				unsigned dataCursor = dataMs*1e3 / clockRateUs;
+
+				fillBitmapTo(bits, cursor, headerCursor, { true, false });
+				writeBrotherSectorHeader(bits, cursor, logicalTrack, sectorId);
+				fillBitmapTo(bits, cursor, dataCursor, { true, false });
+
+				if (cursor > bits.size())
+					Error() << "track data overrun";
+			}
+
+			Fluxmap fluxmap;
+			fluxmap.appendBits(bits, clockRateUs*1e3);
+			return fluxmap;
 		}
+	);
 
-		Fluxmap fluxmap;
-		fluxmap.appendBits(bits, clockRateUs*1e3);
-	}
-
-	std::cerr << "Not implemented yet." << std::endl;
     return 0;
 }
 
