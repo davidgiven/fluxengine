@@ -16,5 +16,7 @@ extern std::vector<std::unique_ptr<Sector>> parseRecordsToSectorsBrother(const R
 
 extern void writeBrotherSectorHeader(std::vector<bool>& bits, unsigned& cursor,
 		int track, int sector);
+extern void writeBrotherSectorData(std::vector<bool>& bits, unsigned& cursor,
+		const std::vector<uint8_t>& data);
 
 #endif

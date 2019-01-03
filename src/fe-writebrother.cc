@@ -82,9 +82,12 @@ int main(int argc, const char* argv[])
 				double dataMs = headerMs + postHeaderSpacingMs;
 				unsigned dataCursor = dataMs*1e3 / clockRateUs;
 
+				auto& sectorData = allSectors[{logicalTrack, 0, sectorId}];
+
 				fillBitmapTo(bits, cursor, headerCursor, { true, false });
 				writeBrotherSectorHeader(bits, cursor, logicalTrack, sectorId);
 				fillBitmapTo(bits, cursor, dataCursor, { true, false });
+				writeBrotherSectorData(bits, cursor, sectorData->data);
 
 				if (cursor > bits.size())
 					Error() << "track data overrun";
