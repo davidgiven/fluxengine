@@ -14,4 +14,7 @@ extern RecordVector decodeBitsToRecordsBrother(const std::vector<bool>& bitmap);
 
 extern std::vector<std::unique_ptr<Sector>> parseRecordsToSectorsBrother(const RecordVector& records);
 
+extern void writeBrotherSectorHeader(std::vector<bool>& bits, unsigned& cursor,
+		int track, int sector);
+
 #endif

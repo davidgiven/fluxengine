@@ -19,11 +19,13 @@ public:
 		return NULL;
 	}
 
-    Fluxmap& appendIntervals(std::vector<uint8_t>& intervals);
+    Fluxmap& appendIntervals(const std::vector<uint8_t>& intervals);
     Fluxmap& appendIntervals(const uint8_t* ptr, size_t len);
 
     nanoseconds_t guessClock() const;
 	std::vector<bool> decodeToBits(nanoseconds_t clock_period) const;
+
+	Fluxmap& appendBits(const std::vector<bool>& bits, nanoseconds_t clock);
 
 private:
     nanoseconds_t _duration = 0;

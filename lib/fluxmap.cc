@@ -2,7 +2,7 @@
 #include "fluxmap.h"
 #include "protocol.h"
 
-Fluxmap& Fluxmap::appendIntervals(std::vector<uint8_t>& intervals)
+Fluxmap& Fluxmap::appendIntervals(const std::vector<uint8_t>& intervals)
 {
     return appendIntervals(&intervals[0], intervals.size());
 }
