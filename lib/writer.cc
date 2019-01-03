@@ -4,6 +4,7 @@
 #include "writer.h"
 #include "sql.h"
 #include "protocol.h"
+#include "usb.h"
 #include "fmt/format.h"
 #include <regex>
 
@@ -78,7 +79,10 @@ void writeTracks(const std::function<Fluxmap(int track, int side)> producer)
 			if (outdb)
 				sqlWriteFlux(outdb, track, side, fluxmap);
 			else
-				Error() << "can't write to real hardware yet";
+			{
+				usbSeek(track);
+				usbWrite(side, fluxmap);
+			}
 			std::cout << fmt::format("{0} ms in {1} bytes", int(fluxmap.duration()/1e6), fluxmap.bytes()) << std::endl;
         }
     }

@@ -22,7 +22,7 @@ static DoubleFlag clockRateUs(
 	"Encoded data clock rate (microseconds).",
 	3.850);
 
-static IntFlag postIndexGapMs(
+static DoubleFlag postIndexGapMs(
 	{ "--post-index-gap" },
 	"Post-index gap before first sector header (milliseconds).",
 	2.0);
@@ -31,6 +31,11 @@ static DoubleFlag sectorSpacingMs(
 	{ "--sector-spacing" },
 	"Time between successive sector headers (milliseconds).",
 	16.684);
+
+static IntFlag trackOffset(
+	{ "--track-offset" },
+	"Number of tracks to offset when writing the image.",
+	1);
 
 static DoubleFlag postHeaderSpacingMs(
 	{ "--post-header-spacing" },
@@ -52,7 +57,7 @@ static int charToInt(char c)
 
 int main(int argc, const char* argv[])
 {
-	setWriterDefaults(0, 77, 0, 0);
+	setWriterDefaults(trackOffset, trackOffset+77, 0, 0);
     Flag::parseFlags(argc, argv);
 
 	SectorSet allSectors;
@@ -68,11 +73,12 @@ int main(int argc, const char* argv[])
 	writeTracks(
 		[&](int physicalTrack, int physicalSide) -> Fluxmap
 		{
-			int logicalTrack = physicalTrack;
+			int logicalTrack = physicalTrack - trackOffset;
 			std::vector<bool> bits(bitsPerRevolution);
 			unsigned cursor = 0;
 
-			std::cerr << "logical track " << logicalTrack << std::endl;
+			std::cerr << "logical track " << logicalTrack << std::endl
+					  << "       ";
 
 			for (int sectorCount=0; sectorCount<geometry.sectors; sectorCount++)
 			{
@@ -88,11 +94,14 @@ int main(int argc, const char* argv[])
 				writeBrotherSectorHeader(bits, cursor, logicalTrack, sectorId);
 				fillBitmapTo(bits, cursor, dataCursor, { true, false });
 				writeBrotherSectorData(bits, cursor, sectorData->data);
-
-				if (cursor > bits.size())
-					Error() << "track data overrun";
 			}
 
+			if (cursor > bits.size())
+				Error() << "track data overrun";
+
+			// The pre-index gap is not normally reported.
+			// std::cerr << "pre-index gap " << 200.0 - (double)cursor*clockRateUs/1e3 << std::endl;
+			
 			Fluxmap fluxmap;
 			fluxmap.appendBits(bits, clockRateUs*1e3);
 			return fluxmap;

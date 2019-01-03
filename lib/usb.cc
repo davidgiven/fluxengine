@@ -195,31 +195,29 @@ std::unique_ptr<Fluxmap> usbRead(int side, int revolutions)
     return fluxmap;
 }
 
-#if 0
-/* Returns number of bytes actually written */
-void usb_write(int side, struct fluxmap* fluxmap)
+void usbWrite(int side, const Fluxmap& fluxmap)
 {
-    int safelen = fluxmap->bytes & ~(FRAME_SIZE-1);
+    int safelen = fluxmap.bytes() & ~(FRAME_SIZE-1);
 
     /* Convert from intervals to absolute timestamps. */
 
-    uint8_t buffer[1024*1024];
+	std::vector<uint8_t> buffer(safelen);
     uint8_t clock = 0;
     for (int i=0; i<safelen; i++)
     {
-        clock += fluxmap->intervals[i];
+        clock += fluxmap[i];
         buffer[i] = clock;
     }
 
     struct write_frame f = {
         .f = { .type = F_FRAME_WRITE_CMD, .size = sizeof(f) },
-        .side = side,
+        .side = (uint8_t) side,
         .bytes_to_write = htole32(safelen),
     };
     usb_cmd_send(&f, f.f.size);
 
-    large_bulk_transfer(FLUXENGINE_DATA_OUT_EP, buffer, safelen);
+    large_bulk_transfer(FLUXENGINE_DATA_OUT_EP, buffer);
     
-    await_reply(F_FRAME_WRITE_REPLY);
+    await_reply<struct any_frame>(F_FRAME_WRITE_REPLY);
 }
-#endif
+
