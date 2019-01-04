@@ -1,8 +1,6 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-#include <stdlib.h>
-#include <stdint.h>
 #include <functional>
 #include <iostream>
 #include <map>
