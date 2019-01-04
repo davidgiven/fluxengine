@@ -1,0 +1,29 @@
+language: generic
+
+compiler:
+    - gcc
+
+os:
+    - linux
+
+dist:
+    - xenial
+
+addons:
+    apt:
+        sources:
+        - llvm-toolchain-precise-3.8
+        - ubuntu-toolchain-r-test
+        packages:
+        - ninja-build
+        - meson
+        - libusb-1.0-0-dev
+        - libsqlite3-dev
+        - g++-8
+
+env:
+    - CXX=g++-8
+
+script:
+    - make
+
