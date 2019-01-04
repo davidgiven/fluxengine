@@ -1,4 +1,4 @@
-language: cpp
+language: generic
 
 compiler:
     - gcc
@@ -11,6 +11,9 @@ dist:
 
 addons:
     apt:
+        sources:
+        - llvm-toolchain-precise-3.8
+        - ubuntu-toolchain-r-test
         packages:
         - ninja-build
         - meson
