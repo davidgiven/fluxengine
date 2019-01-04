@@ -21,6 +21,9 @@ addons:
         - libsqlite3-dev
         - g++-8
 
+env:
+    - CXX=g++-8
+
 script:
     - make
 
