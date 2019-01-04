@@ -16,6 +16,7 @@ addons:
         - meson
         - libusb-1.0-0-dev
         - libsqlite3-dev
+        - g++-7
 
 script:
     - make
