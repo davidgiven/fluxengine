@@ -57,7 +57,7 @@ static int charToInt(char c)
 
 int main(int argc, const char* argv[])
 {
-	setWriterDefaults(trackOffset, trackOffset+77, 0, 0);
+	setWriterDefaults(0, 81, 0, 0);
     Flag::parseFlags(argc, argv);
 
 	SectorSet allSectors;
@@ -71,6 +71,7 @@ int main(int argc, const char* argv[])
 	const std::string& skew = sectorSkew;
 
 	writeTracks(
+		trackOffset, trackOffset+77,
 		[&](int physicalTrack, int physicalSide) -> Fluxmap
 		{
 			int logicalTrack = physicalTrack - trackOffset;

@@ -32,7 +32,9 @@ void setWriterDefaults(int minTrack, int maxTrack, int minSide, int maxSide)
 	endside = maxSide;
 }
 
-void writeTracks(const std::function<Fluxmap(int track, int side)> producer)
+void writeTracks(
+	int minTrack, int maxTrack,
+	const std::function<Fluxmap(int track, int side)> producer)
 {
     auto f = dest.value();
     std::smatch match;
@@ -71,6 +73,9 @@ void writeTracks(const std::function<Fluxmap(int track, int side)> producer)
 
     for (int track=starttrack; track<=endtrack; track++)
     {
+		if ((track < minTrack) || (track > maxTrack))
+			continue;
+
         for (int side=startside; side<=endside; side++)
         {
 			std::cout << fmt::format("{0:>3}.{1}: ", track, side) << std::flush;
