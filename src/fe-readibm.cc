@@ -4,6 +4,9 @@
 #include "fluxmap.h"
 #include "decoders.h"
 #include "image.h"
+#include "sector.h"
+#include "sectorset.h"
+#include "record.h"
 #include <fmt/format.h>
 
 static StringFlag outputFilename(
@@ -20,7 +23,7 @@ int main(int argc, const char* argv[])
     Flag::parseFlags(argc, argv);
 
 	bool failures = false;
-    std::vector<std::unique_ptr<Sector>> allSectors;
+	SectorSet allSectors;
     for (auto& track : readTracks())
     {
 		int retries = 5;
@@ -30,7 +33,7 @@ int main(int argc, const char* argv[])
 		std::cout << fmt::format("       {:.1f} us clock; ", (double)clockPeriod/1000.0) << std::flush;
 
 		/* For MFM, the bit clock is half the detected clock. */
-		auto bitmap = decodeFluxmapToBits(fluxmap, clockPeriod/2);
+		auto bitmap = fluxmap.decodeToBits(clockPeriod/2);
 		std::cout << fmt::format("{} bytes encoded; ", bitmap.size()/8) << std::flush;
 
 		auto records = decodeBitsToRecordsMfm(bitmap);
@@ -67,22 +70,26 @@ int main(int argc, const char* argv[])
 		for (auto& sector : sectors)
 		{
 			size += sector->data.size();
-			allSectors.push_back(std::move(sector));
+			allSectors[{sector->track, sector->side, sector->sector}] =
+				std::move(sector);
 		}
 		std::cout << size << " bytes decoded." << std::endl;
 
 		if (dumpRecords)
 		{
 			std::cout << "\nRaw records follow:\n\n";
-			for (auto record : records)
+			for (auto& record : records)
 			{
-				hexdump(std::cout, record);
+				std::cout << fmt::format("I+{:.3f}ms", (double)(record->position*clockPeriod)/1e6)
+						  << std::endl;
+				hexdump(std::cout, record->data);
 				std::cout << std::endl;
 			}
 		}
     }
 
-    writeSectorsToFile(allSectors, outputFilename);
+	Geometry geometry = guessGeometry(allSectors);
+    writeSectorsToFile(allSectors, geometry, outputFilename);
 	if (failures)
 		std::cerr << "Warning: some sectors could not be decoded." << std::endl;
     return 0;

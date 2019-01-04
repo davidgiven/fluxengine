@@ -3,7 +3,11 @@
 #include "reader.h"
 #include "fluxmap.h"
 #include "decoders.h"
+#include "brother.h"
+#include "sector.h"
+#include "sectorset.h"
 #include "image.h"
+#include "record.h"
 #include <fmt/format.h>
 #include <fstream>
 
@@ -30,7 +34,7 @@ int main(int argc, const char* argv[])
     Flag::parseFlags(argc, argv);
 
 	bool failures = false;
-    std::vector<std::unique_ptr<Sector>> allSectors;
+	SectorSet allSectors;
     for (auto& track : readTracks())
     {
 		std::map<int, std::unique_ptr<Sector>> readSectors;
@@ -41,7 +45,7 @@ int main(int argc, const char* argv[])
 			nanoseconds_t clockPeriod = fluxmap.guessClock();
 			std::cout << fmt::format("       {:.1f} us clock; ", (double)clockPeriod/1000.0) << std::flush;
 
-			auto bitmap = decodeFluxmapToBits(fluxmap, clockPeriod);
+			auto bitmap = fluxmap.decodeToBits(clockPeriod);
 			std::cout << fmt::format("{} bytes encoded; ", bitmap.size()/8) << std::flush;
 
 			auto records = decodeBitsToRecordsBrother(bitmap);
@@ -85,7 +89,9 @@ int main(int argc, const char* argv[])
 				std::cout << "\nRaw records follow:\n\n";
 				for (auto& record : records)
 				{
-					hexdump(std::cout, record);
+					std::cout << fmt::format("I+{:.3f}ms", (double)(record->position*clockPeriod)/1e6)
+					          << std::endl;
+					hexdump(std::cout, record->data);
 					std::cout << std::endl;
 				}
 			}
@@ -107,19 +113,20 @@ int main(int argc, const char* argv[])
 			{
 				if (!printedTrack)
 				{
-					std::cout << "       logical track " << sector->track << "; ";
+					std::cout << "logical track " << sector->track << "; ";
 					printedTrack = true;
 				}
 
 				size += sector->data.size();
-				allSectors.push_back(std::move(sector));
+				allSectors[{sector->track, 0, sector->sector}] = std::move(sector);
 			}
         }
         std::cout << size << " bytes decoded." << std::endl;
 
     }
 
-    writeSectorsToFile(allSectors, outputFilename);
+	Geometry geometry = guessGeometry(allSectors);
+    writeSectorsToFile(allSectors, geometry, outputFilename);
 	if (failures)
 		std::cerr << "Warning: some sectors could not be decoded." << std::endl;
     return 0;

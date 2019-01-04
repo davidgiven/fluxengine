@@ -50,7 +50,7 @@ int main(int argc, const char* argv[])
 			nanoseconds_t clockPeriod = fluxmap.guessClock();
 			std::cout << fmt::format("       {:.1f} us clock; ", (double)clockPeriod/1000.0) << std::flush;
 
-			auto bitmap = decodeFluxmapToBits(fluxmap, clockPeriod*clockScaleFlag);
+			auto bitmap = fluxmap.decodeToBits(clockPeriod*clockScaleFlag);
 			std::cout << fmt::format("{} bytes encoded.", bitmap.size()/8) << std::endl;
 
 			if (dumpFluxFlag)

@@ -8,6 +8,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <cassert>
 
 typedef int nanoseconds_t;
 

@@ -1,7 +1,9 @@
 #include "globals.h"
 #include "decoders.h"
+#include "sector.h"
 #include "image.h"
 #include "crc.h"
+#include "record.h"
 #include "fmt/format.h"
 #include <string.h>
 #include <arpa/inet.h>
@@ -9,7 +11,7 @@
 static_assert(std::is_trivially_copyable<IbmIdam>::value);
 
 std::vector<std::unique_ptr<Sector>> parseRecordsToSectorsIbm(
-		const std::vector<std::vector<uint8_t>>& records)
+		const RecordVector& records)
 {
     bool idamValid = false;
     IbmIdam idam;
@@ -17,7 +19,8 @@ std::vector<std::unique_ptr<Sector>> parseRecordsToSectorsIbm(
 
     for (auto& record : records)
     {
-        switch (record[3])
+		const std::vector<uint8_t>& data = record->data;
+        switch (data[3])
         {
             case IBM_IAM:
                 /* Track header. Ignore. */
@@ -25,9 +28,9 @@ std::vector<std::unique_ptr<Sector>> parseRecordsToSectorsIbm(
 
             case IBM_IDAM:
             {
-                if (record.size() < sizeof(idam))
+                if (data.size() < sizeof(idam))
                     break;
-                memcpy(&idam, &record[0], sizeof(idam));
+                memcpy(&idam, &data[0], sizeof(idam));
 
 				uint16_t crc = crc16(CCITT_POLY, (uint8_t*)&idam, (uint8_t*)&idam.crc);
 				uint16_t wantedCrc = (idam.crc[0]<<8) | idam.crc[1];
@@ -42,15 +45,15 @@ std::vector<std::unique_ptr<Sector>> parseRecordsToSectorsIbm(
                     break;
                 
                 unsigned size = 1 << (idam.sectorSize + 7);
-                if ((record.size()-IBM_DAM_LEN-2) < size)
+                if ((data.size()-IBM_DAM_LEN-2) < size)
                     break;
 
-				uint16_t crc = crc16(CCITT_POLY, &record[0], &record[size+4]);
-				uint16_t wantedCrc = (record[size+4] << 8) | record[size+5];
+				uint16_t crc = crc16(CCITT_POLY, &data[0], &data[size+4]);
+				uint16_t wantedCrc = (data[size+4] << 8) | data[size+5];
 				int status = (crc == wantedCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
 
                 std::vector<uint8_t> sectordata(size);
-                memcpy(&sectordata[0], &record[4], size);
+                memcpy(&sectordata[0], &data[4], size);
 
                 auto sector = std::unique_ptr<Sector>(
 					new Sector(status, idam.cylinder, idam.side, idam.sector-1, sectordata));

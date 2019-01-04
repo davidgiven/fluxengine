@@ -19,9 +19,11 @@ You should end up with a `brother.img` which is 239616 bytes long.
 Low level format
 ----------------
 
-The drive is a single-sided 3.5" drive spinning at not 300 rpm (I don't know
-the rprecise speed yet but FluxEngine doesn't care). The disks have 77 tracks,
-which from FluxEngine's perspective reach from track 3 to track 80.
+The drive is a single-sided 3.5" drive spinning at not 300 rpm (I don't
+know the precise speed yet but FluxEngine doesn't care). The disks have 78
+tracks. The Brother drive alignment is kinda variable so on my machine
+logical track 0 is at physical track 3, but I've also seek logical track 0
+at physical track 1.
 
 Each track has 12 256-byte sectors. The drive ignores the index hole so they're
 lined up all anyhow. As FluxEngine can only read from index to index, it
@@ -34,6 +36,10 @@ StackOverflow reverse engineered for me. However, odd though it may be, it does
 seem pretty robust.
 
 See the source code for the GCR tables and CRC routine.
+
+Sectors are about 16.7ms apart on the disk (at 300 rpm). The header and
+data records are 0.694ms apart. (All measured from the beginning of the
+record.) The sector order is 05a3816b4927, which gives a sector skew of 5.
 
 High level format
 -----------------

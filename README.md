@@ -4,11 +4,18 @@ FluxEngine
 What?
 -----
 
-FluxEngine is a very cheap USB floppy disk interface capable of reading (and eventually, writing) exotic non-PC floppy disk formats. It (should, this bit's not done yet) allow you to use a conventional PC drive to accept Amiga disks, CLV Macintosh disks, bizarre 128-sector CP/M disks, and other weird and bizarre formats.
+FluxEngine is a very cheap USB floppy disk interface capable of reading
+and writing exotic non-PC floppy disk formats. It (should, this bit's not
+done yet) allow you to use a conventional PC drive to accept Amiga disks,
+CLV Macintosh disks, bizarre 128-sector CP/M disks, and other weird and
+bizarre formats.
 
 ![a FluxEngine attached to a floppy drive](doc/floppy.jpg)
 
-**Big warning.** Right now it is a hacked together prototype. It is not ready to use. Unless you eat and breathe embedded systems code and were born with a soldering iron in your mouth (hopefully, turned off) then this is not for you. If you were... please, give it a try!
+**Big warning.** Right now it is a hacked together prototype. It is not
+ready to use. Unless you eat and breathe embedded systems code and were
+born with a soldering iron in your mouth (hopefully, turned off) then this
+is not for you. If you were... please, give it a try!
 
 ### Infrequently asked questions because nobody's got round to asking them yet
 
@@ -41,9 +48,10 @@ to be spinning at the same speed.
 
 Currently, not a lot.
 
-  - IBM MFM 1440kB and 720kB formats, a.k.a. standard PC floppy disks
+  - IBM MFM 1440kB and 720kB formats, a.k.a. standard PC floppy disks;
+	read only (I haven't got round to writing the write support)
 
-  - [Brother 240kB word processor disks](doc/brother.md)
+  - [Brother 240kB word processor disks](doc/brother.md); read and write
 
 ...aaaand that's it. If you want more, please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new); I need samples
@@ -102,7 +110,7 @@ Here's the physical stuff you need.
     software itself will run on Linux, Windows, and probably OSX, but you
     have to build the firmware on Windows.)
 
-  - optional: a floppy drive power cable. You can cut this in half, soldering
+  - optional: a floppy drive power cable. You can cut this in half, solder
     the raw end to the FluxEngine board, and power the drive off USB --- very
     convenient. This only works for drives which consume less than 500mA.
     _Check before trying_ (5.25" drives need not apply here). Otherwise
@@ -184,8 +192,9 @@ ready. What next?
      pin 34 on the floppy drive. All the other board pins connect in the
      obvious order. Odd pins on the floppy drive are left unconnected.
 
-  2. **Important.** Make sure that a sacrificial disk is in the drive.
-     (Because if your wiring is wrong, you'll probably corrupt the disk.)
+  2. **Important.** Make sure that no disk you care about is in the drive.
+	 (Because if your wiring is wrong and a disk is inserted, you'll
+	 probably corrupt it.)
 
   3. Connect the floppy drive to power. Nothing should happen. If anything
      does, disconnect it and check step 1.
@@ -215,9 +224,10 @@ directory.
     for debugging.
 
   - `fe-readbrother`: reads 240kB Brother word processor disks. Emits a
-    256-byte-sector FAT filesystem. (You can access this with mtools although
-    you'll need to edit the media type bytes in the boot sector and change
-    them from 0x58 to 0xf0.)
+	256-byte-sector FAT filesystem. (You can access this with mtools
+	although you'll [to edit them first](doc/brother.md).
+
+  - `fe-writebrother`: writes 240kB Brother word processor disks.
 
   - `fe-readibm`: reads 720kB or 1440kB IBM MFM disks. Emits a standard
     filesystem image.

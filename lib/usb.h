@@ -8,5 +8,6 @@ extern void usbSeek(int track);
 extern nanoseconds_t usbGetRotationalPeriod();
 extern void usbTestBulkTransport();
 extern std::unique_ptr<Fluxmap> usbRead(int side, int revolutions);
+extern void usbWrite(int side, const Fluxmap& fluxmap);
 
 #endif

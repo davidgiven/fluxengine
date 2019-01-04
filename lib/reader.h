@@ -3,10 +3,10 @@
 
 class Fluxmap;
 
-class Track
+class ReaderTrack
 {
 public:
-    virtual ~Track() {}
+    virtual ~ReaderTrack() {}
 
     int track;
     int side;
@@ -20,19 +20,19 @@ protected:
     std::unique_ptr<Fluxmap> _fluxmap;    
 };
 
-class CapturedTrack : public Track
+class CapturedReaderTrack : public ReaderTrack
 {
 public:
     void reallyRead();
 };
 
-class FileTrack : public Track
+class FileReaderTrack : public ReaderTrack
 {
 public:
     void reallyRead();
 };
 
 extern void setReaderDefaults(int minTrack, int maxTrack, int minSide, int maxSide);
-extern std::vector<std::unique_ptr<Track>> readTracks();
+extern std::vector<std::unique_ptr<ReaderTrack>> readTracks();
 
 #endif

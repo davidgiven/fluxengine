@@ -46,7 +46,7 @@ void setReaderDefaults(int minTrack, int maxTrack, int minSide, int maxSide)
 	endside = maxSide;
 }
 
-Fluxmap& Track::read()
+Fluxmap& ReaderTrack::read()
 {
     if (!_read)
     {
@@ -62,18 +62,18 @@ Fluxmap& Track::read()
     return *_fluxmap.get();
 }
     
-void Track::forceReread()
+void ReaderTrack::forceReread()
 {
     _read = false;
 }
 
-void CapturedTrack::reallyRead()
+void CapturedReaderTrack::reallyRead()
 {
     usbSeek(track);
     _fluxmap = usbRead(side, revolutions);
 }
 
-void FileTrack::reallyRead()
+void FileReaderTrack::reallyRead()
 {
     if (!indb)
 	{
@@ -83,7 +83,7 @@ void FileTrack::reallyRead()
     _fluxmap = sqlReadFlux(indb, track, side);
 }
 
-std::vector<std::unique_ptr<Track>> readTracks()
+std::vector<std::unique_ptr<ReaderTrack>> readTracks()
 {
     auto f = source.value();
     std::smatch match;
@@ -121,13 +121,15 @@ std::vector<std::unique_ptr<Track>> readTracks()
 		);
 	}
 
-    std::vector<std::unique_ptr<Track>> tracks;
+    std::vector<std::unique_ptr<ReaderTrack>> tracks;
     for (int track=starttrack; track<=endtrack; track++)
     {
         for (int side=startside; side<=endside; side++)
         {
-            std::unique_ptr<Track> t(
-                basefilename.empty() ? (Track*)new CapturedTrack() : (Track*)new FileTrack());
+            std::unique_ptr<ReaderTrack> t(
+                basefilename.empty()
+					? (ReaderTrack*)new CapturedReaderTrack()
+					: (ReaderTrack*)new FileReaderTrack());
             t->track = track;
             t->side = side;
             tracks.push_back(std::move(t));
