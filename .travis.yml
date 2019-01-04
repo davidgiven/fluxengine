@@ -1,0 +1,20 @@
+language: c
+
+env:
+    global: HOMEBREW_NO_AUTO_UPDATE=1
+
+compiler:
+    - gcc
+
+os:
+    - linux
+
+addons:
+    apt:
+        packages:
+        - ninja-build
+        - meson
+
+script:
+    - make
+
