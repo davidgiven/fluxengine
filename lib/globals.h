@@ -1,6 +1,8 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
+#define _DEFAULT_SOURCE
+
 #include <functional>
 #include <iostream>
 #include <map>

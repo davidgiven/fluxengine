@@ -2,6 +2,7 @@
 #include "usb.h"
 #include "protocol.h"
 #include "fluxmap.h"
+#include <endian.h>
 #include <libusb.h>
 
 #define TIMEOUT 5000
