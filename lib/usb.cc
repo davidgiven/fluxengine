@@ -198,13 +198,13 @@ std::unique_ptr<Fluxmap> usbRead(int side, int revolutions)
 
 void usbWrite(int side, const Fluxmap& fluxmap)
 {
-    int safelen = fluxmap.bytes() & ~(FRAME_SIZE-1);
+    unsigned safelen = fluxmap.bytes() & ~(FRAME_SIZE-1);
 
     /* Convert from intervals to absolute timestamps. */
 
 	std::vector<uint8_t> buffer(safelen);
     uint8_t clock = 0;
-    for (int i=0; i<safelen; i++)
+    for (unsigned i=0; i<safelen; i++)
     {
         clock += fluxmap[i];
         buffer[i] = clock;
