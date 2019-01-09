@@ -73,10 +73,12 @@ int main(int argc, const char* argv[])
 			for (int i=0; i<SECTOR_COUNT; i++)
 			{
 				auto& sector = readSectors[i];
-				if (!sector || (sector->status != Sector::OK))
+                Sector::Status status = sector ? (Sector::Status)sector->status : Sector::MISSING;
+				if (status != Sector::OK)
 				{
 					std::cout << std::endl
-							  << "       Failed to read sector " << i << "; ";
+							  << "       Failed to read sector " << i
+                              << " (" << Sector::statusToString(status) << "); ";
 					hasBadSectors = true;
 				}
 			}

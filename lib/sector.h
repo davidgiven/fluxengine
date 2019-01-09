@@ -9,11 +9,14 @@
 class Sector
 {
 public:
-	enum
+	enum Status
 	{
 		OK,
-		BAD_CHECKSUM
+		BAD_CHECKSUM,
+        MISSING
 	};
+
+    static const std::string statusToString(Status status);
 
     Sector(int status, int track, int side, int sector, const std::vector<uint8_t>& data):
 		status(status),
