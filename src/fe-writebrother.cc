@@ -20,17 +20,17 @@ static StringFlag inputFilename(
 static DoubleFlag clockRateUs(
 	{ "--clock-rate" },
 	"Encoded data clock rate (microseconds).",
-	3.850);
+	3.8);
 
 static DoubleFlag postIndexGapMs(
 	{ "--post-index-gap" },
 	"Post-index gap before first sector header (milliseconds).",
-	2.0);
+	1.0);
 
 static DoubleFlag sectorSpacingMs(
 	{ "--sector-spacing" },
 	"Time between successive sector headers (milliseconds).",
-	16.684);
+	16.0);
 
 static IntFlag trackOffset(
 	{ "--track-offset" },
@@ -40,7 +40,7 @@ static IntFlag trackOffset(
 static DoubleFlag postHeaderSpacingMs(
 	{ "--post-header-spacing" },
 	"Time between a sector's header and data records (milliseconds).",
-	0.694);
+	0.69);
 
 
 static StringFlag sectorSkew(
@@ -99,6 +99,7 @@ int main(int argc, const char* argv[])
 
 			if (cursor > bits.size())
 				Error() << "track data overrun";
+            fillBitmapTo(bits, cursor, bits.size(), { true, false });
 
 			// The pre-index gap is not normally reported.
 			// std::cerr << "pre-index gap " << 200.0 - (double)cursor*clockRateUs/1e3 << std::endl;

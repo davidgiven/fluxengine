@@ -96,7 +96,8 @@ int main(int argc, const char* argv[])
 
 			if (dumpBitstreamFlag)
 			{
-				std::cout << "Aligned bitstream follows:" << std::endl
+				std::cout << "Aligned bitstream of length " << bitmap.size()
+                          << " follows:" << std::endl
 						  << std::endl;
 
 				for (bool bit : bitmap)
