@@ -48,7 +48,7 @@ int main(int argc, const char* argv[])
 			Fluxmap& fluxmap = track->read();
 
 			nanoseconds_t clockPeriod = fluxmap.guessClock();
-			std::cout << fmt::format("       {:.1f} us clock; ", (double)clockPeriod/1000.0) << std::flush;
+			std::cout << fmt::format("       {:.2f} us clock; ", (double)clockPeriod/1000.0) << std::flush;
 
 			auto bitmap = fluxmap.decodeToBits(clockPeriod*clockScaleFlag);
 			std::cout << fmt::format("{} bytes encoded.", bitmap.size()/8) << std::endl;
@@ -101,7 +101,7 @@ int main(int argc, const char* argv[])
 						  << std::endl;
 
 				for (bool bit : bitmap)
-					std::cout << (bit ? 'X' : '.');
+					std::cout << (bit ? 'X' : '-');
 				std::cout << std::endl;
 			}
 		}

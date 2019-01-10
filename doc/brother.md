@@ -1,9 +1,12 @@
 Brother word processor disks
 ============================
 
-Brother word processor disks are weird, using custom tooling and chipsets. They are completely not PC compatible in every possible way other than the size.
+Brother word processor disks are weird, using custom tooling and chipsets.
+They are completely not PC compatible in every possible way other than the
+size.
 
-Different word processors use different disk formats --- the only one supported by FluxEngine is the 240kB 3.5" format.
+Different word processors use different disk formats --- the only one
+supported by FluxEngine is the 240kB 3.5" format.
 
 Reading discs
 -------------
@@ -11,10 +14,11 @@ Reading discs
 Just do:
 
 ```
-.obj/fe-readbrother
+.obj/fe-readbrother --revolutions=2
 ```
 
-You should end up with a `brother.img` which is 239616 bytes long.
+You should end up with a `brother.img` which is 239616 bytes long. (If you
+don't specify `--revolutions`, you may end up with a partial image.)
 
 Low level format
 ----------------

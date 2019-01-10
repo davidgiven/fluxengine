@@ -20,7 +20,7 @@ static StringFlag inputFilename(
 static DoubleFlag clockRateUs(
 	{ "--clock-rate" },
 	"Encoded data clock rate (microseconds).",
-	3.8);
+	3.83);
 
 static DoubleFlag postIndexGapMs(
 	{ "--post-index-gap" },
@@ -30,7 +30,7 @@ static DoubleFlag postIndexGapMs(
 static DoubleFlag sectorSpacingMs(
 	{ "--sector-spacing" },
 	"Time between successive sector headers (milliseconds).",
-	16.0);
+	16.2);
 
 static IntFlag trackOffset(
 	{ "--track-offset" },

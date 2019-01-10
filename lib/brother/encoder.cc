@@ -42,10 +42,11 @@ static void write_bits(std::vector<bool>& bits, unsigned& cursor, uint32_t data,
 void writeBrotherSectorHeader(std::vector<bool>& bits, unsigned& cursor,
 		int track, int sector)
 {
-	write_bits(bits, cursor, 0xffffffff, 32);
+	write_bits(bits, cursor, 0xffffffff, 31);
 	write_bits(bits, cursor, BROTHER_SECTOR_RECORD, 32);
 	write_bits(bits, cursor, encode_header_gcr(track), 16);
 	write_bits(bits, cursor, encode_header_gcr(sector), 16);
+	write_bits(bits, cursor, encode_header_gcr(0x2f), 16);
 }
 
 void writeBrotherSectorData(std::vector<bool>& bits, unsigned& cursor,
@@ -82,9 +83,10 @@ void writeBrotherSectorData(std::vector<bool>& bits, unsigned& cursor,
 	write_byte(realCrc>>16);
 	write_byte(realCrc>>8);
 	write_byte(realCrc);
-	write_byte(0);
-
-	assert(width == 0);
+	write_byte(0x58); /* magic */
+    write_byte(0xd4);
+    while (width != 0)
+        write_byte(0);
 }
 
 
