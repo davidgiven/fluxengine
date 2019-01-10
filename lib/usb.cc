@@ -222,3 +222,14 @@ void usbWrite(int side, const Fluxmap& fluxmap)
     await_reply<struct any_frame>(F_FRAME_WRITE_REPLY);
 }
 
+void usbErase(int side)
+{
+    struct erase_frame f = {
+        .f = { .type = F_FRAME_ERASE_CMD, .size = sizeof(f) },
+        .side = (uint8_t) side,
+    };
+    usb_cmd_send(&f, f.f.size);
+
+    await_reply<struct any_frame>(F_FRAME_ERASE_REPLY);
+}
+

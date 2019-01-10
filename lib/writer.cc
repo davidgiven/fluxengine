@@ -73,22 +73,31 @@ void writeTracks(
 
     for (int track=starttrack; track<=endtrack; track++)
     {
-		if ((track < minTrack) || (track > maxTrack))
-			continue;
-
         for (int side=startside; side<=endside; side++)
         {
-			std::cout << fmt::format("{0:>3}.{1}: ", track, side) << std::flush;
-			Fluxmap fluxmap = producer(track, side);
-			fluxmap.precompensate(PRECOMPENSATION_THRESHOLD_TICKS, 2);
-			if (outdb)
-				sqlWriteFlux(outdb, track, side, fluxmap);
-			else
-			{
-				usbSeek(track);
-				usbWrite(side, fluxmap);
-			}
-			std::cout << fmt::format("{0} ms in {1} bytes", int(fluxmap.duration()/1e6), fluxmap.bytes()) << std::endl;
+            std::cout << fmt::format("{0:>3}.{1}: ", track, side) << std::flush;
+            if ((track < minTrack) || (track > maxTrack))
+            {
+                if (!outdb)
+                {
+                    std::cout << "erasing" << std::endl;
+                    usbSeek(track);
+                    usbErase(side);
+                }
+            }
+            else
+            {
+                Fluxmap fluxmap = producer(track, side);
+                fluxmap.precompensate(PRECOMPENSATION_THRESHOLD_TICKS, 2);
+                if (outdb)
+                    sqlWriteFlux(outdb, track, side, fluxmap);
+                else
+                {
+                    usbSeek(track);
+                    usbWrite(side, fluxmap);
+                }
+                std::cout << fmt::format("{0} ms in {1} bytes", int(fluxmap.duration()/1e6), fluxmap.bytes()) << std::endl;
+            }
         }
     }
 }

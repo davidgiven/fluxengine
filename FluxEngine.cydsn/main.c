@@ -511,6 +511,27 @@ static void cmd_write(struct write_frame* f)
     send_reply((struct any_frame*) &r);
 }
 
+static void cmd_erase(struct erase_frame* f)
+{
+    SIDE_REG_Write(f->side);
+    seek_to(current_track);    
+    /* Disk is now spinning. */
+    
+    print("start erasing\r");
+    index_irq = false;
+    while (!index_irq)
+        ;
+    ERASE_REG_Write(1);
+    index_irq = false;
+    while (!index_irq)
+        ;
+    ERASE_REG_Write(0);
+    print("stop erasing\r");
+
+    DECLARE_REPLY_FRAME(struct any_frame, F_FRAME_ERASE_REPLY);
+    send_reply((struct any_frame*) &r);
+}
+
 static void handle_command(void)
 {
     static uint8_t input_buffer[FRAME_SIZE];
@@ -541,6 +562,10 @@ static void handle_command(void)
         
         case F_FRAME_WRITE_CMD:
             cmd_write((struct write_frame*) f);
+            break;
+            
+        case F_FRAME_ERASE_CMD:
+            cmd_erase((struct erase_frame*) f);
             break;
             
         default:

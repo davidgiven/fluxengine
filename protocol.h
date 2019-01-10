@@ -50,7 +50,9 @@ enum
     F_FRAME_READ_CMD,             /* read_frame */
     F_FRAME_READ_REPLY,           /* any_frame */
     F_FRAME_WRITE_CMD,            /* write_frame */
-    F_FRAME_WRITE_REPLY,          /* write_reply_frame */
+    F_FRAME_WRITE_REPLY,          /* any_frame */
+    F_FRAME_ERASE_CMD,            /* erase_frame */
+    F_FRAME_ERASE_REPLY,          /* any_frame */
 };
 
 enum
@@ -108,6 +110,12 @@ struct write_frame
     struct frame_header f;
     uint8_t side;
     uint32_t bytes_to_write;
+};
+
+struct erase_frame
+{
+    struct frame_header f;
+    uint8_t side;
 };
 
 #endif
