@@ -220,6 +220,9 @@ You'll have to play with them. They all support `--help`. They're not
 installed anywhere and after building you'll find them in the `.obj`
 directory.
 
+  - `fe-erase`: wipes (all or part of) a disk --- erases it without writing
+    a pulsetrain.
+
   - `fe-inspect`: dumps the raw pulsetrain / bitstream to stdout. Mainly useful
     for debugging.
 
@@ -240,6 +243,15 @@ directory.
 
   - `fe-testbulktransport`: measures your USB throughput. You need about 600kB/s
     for FluxEngine to work. You don't need a disk in the drive for this one.
+
+Commands which take `--source` or `--dest` take a parameter of the syntax
+`$FILENAME:$MODIFIER:$MODIFER...` A blank filename refers to the physical
+disk; otherwise, you can specify a `.flux` file. The colon-separated
+modifiers limit which bits of the disk are accessed. To specify tracks, do
+`:t=0-9` (or just `:t=7`). For sides, do `:s=0-1` (or commonly just `:s=0`).
+If left unspecified, you get the default specified by the command, which will
+vary depending on which disk format you're using (and is usually the right
+one).
 
 ### How it works
 
