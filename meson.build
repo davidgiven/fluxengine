@@ -79,12 +79,13 @@ brotherencoderlib = shared_library('brotherencoderlib',
 )
 brotherinc = include_directories('lib/brother')
 
+executable('fe-erase',             ['src/fe-erase.cc'],             include_directories: [feinc], link_with: [felib, writerlib])
+executable('fe-inspect',           ['src/fe-inspect.cc'],           include_directories: [feinc, fmtinc, decoderinc], link_with: [felib, readerlib, decoderlib, fmtlib])
+executable('fe-readbrother',       ['src/fe-readbrother.cc'],       include_directories: [feinc, fmtinc, decoderinc, brotherinc], link_with: [felib, readerlib, decoderlib, brotherdecoderlib, fmtlib])
+executable('fe-readibm',           ['src/fe-readibm.cc'],           include_directories: [feinc, fmtinc, decoderinc], link_with: [felib, readerlib, decoderlib, fmtlib])
 executable('fe-rpm',               ['src/fe-rpm.cc'],               include_directories: [feinc], link_with: [felib])
 executable('fe-seek',              ['src/fe-seek.cc'],              include_directories: [feinc], link_with: [felib])
 executable('fe-testbulktransport', ['src/fe-testbulktransport.cc'], include_directories: [feinc], link_with: [felib])
-executable('fe-readibm',           ['src/fe-readibm.cc'],           include_directories: [feinc, fmtinc, decoderinc], link_with: [felib, readerlib, decoderlib, fmtlib])
-executable('fe-readbrother',       ['src/fe-readbrother.cc'],       include_directories: [feinc, fmtinc, decoderinc, brotherinc], link_with: [felib, readerlib, decoderlib, brotherdecoderlib, fmtlib])
-executable('fe-erase',             ['src/fe-erase.cc'],             include_directories: [feinc], link_with: [felib, writerlib])
 executable('fe-writebrother',      ['src/fe-writebrother.cc'],      include_directories: [feinc, fmtinc, brotherinc], link_with: [felib, writerlib, encoderlib, brotherencoderlib, fmtlib])
-executable('fe-inspect',           ['src/fe-inspect.cc'],           include_directories: [feinc, fmtinc, decoderinc], link_with: [felib, readerlib, decoderlib, fmtlib])
+executable('fe-writeflux',         ['src/fe-writeflux.cc'],         include_directories: [feinc, fmtinc], link_with: [felib, readerlib, writerlib, fmtlib])
 

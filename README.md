@@ -232,6 +232,12 @@ directory.
 
   - `fe-writebrother`: writes 240kB Brother word processor disks.
 
+  - `fe-writeflux`: writes raw flux files. This is much less useful than you
+    might think: you can't necessarily copy flux files read from a disk,
+    because errors in the sampling are compounded and the result probably
+    isn't readable. It's mainly useful for flux files synthesised by the
+    other `fe-write*` commands.
+
   - `fe-readibm`: reads 720kB or 1440kB IBM MFM disks. Emits a standard
     filesystem image.
 
