@@ -36,11 +36,13 @@ disk. (Use `-i` to specify a different input filename.)
 Low level format
 ----------------
 
-The drive is a single-sided 3.5" drive spinning at not 300 rpm (I don't
-know the precise speed yet but FluxEngine doesn't care). The disks have 78
-tracks. The Brother drive alignment is kinda variable so on my machine
-logical track 0 is at physical track 3, but I've also seek logical track 0
-at physical track 1.
+The drive is a single-sided 3.5" drive spinning at not 300 rpm (I don't know
+the precise speed yet but FluxEngine doesn't care). The disks have 78 tracks.
+The Brother drive alignment is kinda variable; when you put the disk in the
+drive it seeks all the way to physical track 0 and then starts searching for
+something which looks like data. My machine likes to put logical track 0 on
+physical track 3. FluxEngine puts logical track 0 on physical track 0 for
+simplicity, which works fine (at least on my machine).
 
 Each track has 12 256-byte sectors. The drive ignores the index hole so they're
 lined up all anyhow. As FluxEngine can only read from index to index, it
@@ -54,7 +56,7 @@ seem pretty robust.
 
 See the source code for the GCR tables and CRC routine.
 
-Sectors are about 16.7ms apart on the disk (at 300 rpm). The header and
+Sectors are about 16.2ms apart on the disk (at 300 rpm). The header and
 data records are 0.694ms apart. (All measured from the beginning of the
 record.) The sector order is 05a3816b4927, which gives a sector skew of 5.
 
@@ -82,4 +84,3 @@ change it back to 0x58 before writing an image to disk.
 
 Converting the equally proprietary file format to something readable is,
 unfortunately, out of scope for FluxEngine.
-
