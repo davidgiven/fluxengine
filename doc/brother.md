@@ -18,7 +18,20 @@ Just do:
 ```
 
 You should end up with a `brother.img` which is 239616 bytes long. (If you
-don't specify `--revolutions`, you may end up with a partial image.)
+don't specify `--revolutions`, you may end up with a partial image.) (Use
+`-o` to specify a different output filename.)
+
+Writing discs
+-------------
+
+Just do:
+
+```
+.obj/fe-writebrother
+```
+
+...and it'll write a `brother.img` file which is 239616 bytes long to the
+disk. (Use `-i` to specify a different input filename.)
 
 Low level format
 ----------------
@@ -63,6 +76,9 @@ done, this will work:
 mdir -i brother.img
 mcopy -i brother.img ::brother.doc linux.doc
 ```
+
+The word processor checks the media byte, unfortunately, so you'll need to
+change it back to 0x58 before writing an image to disk.
 
 Converting the equally proprietary file format to something readable is,
 unfortunately, out of scope for FluxEngine.

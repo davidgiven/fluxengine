@@ -35,7 +35,7 @@ static DoubleFlag sectorSpacingMs(
 static IntFlag trackOffset(
 	{ "--track-offset" },
 	"Number of tracks to offset when writing the image.",
-	1);
+	0);
 
 static DoubleFlag postHeaderSpacingMs(
 	{ "--post-header-spacing" },
