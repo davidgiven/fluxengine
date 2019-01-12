@@ -14,15 +14,16 @@ fmtinc = include_directories('dep/fmt')
 
 felib = shared_library('felib',
     [
+		'lib/crc.cc',
+        'lib/dataspec.cc',
+		'lib/hexdump.cc',
+		'lib/sectorset.cc',
         'lib/flags.cc',
         'lib/fluxmap.cc',
         'lib/globals.cc',
-        'lib/usb.cc',
         'lib/image.cc',
-		'lib/crc.cc',
-		'lib/hexdump.cc',
         'lib/sector.cc',
-		'lib/sectorset.cc',
+        'lib/usb.cc',
     ],
     include_directories: [fmtinc],
     link_with: [fmtlib],
@@ -89,3 +90,4 @@ executable('fe-testbulktransport', ['src/fe-testbulktransport.cc'], include_dire
 executable('fe-writebrother',      ['src/fe-writebrother.cc'],      include_directories: [feinc, fmtinc, brotherinc], link_with: [felib, writerlib, encoderlib, brotherencoderlib, fmtlib])
 executable('fe-writeflux',         ['src/fe-writeflux.cc'],         include_directories: [feinc, fmtinc], link_with: [felib, readerlib, writerlib, fmtlib])
 
+test('DataSpec', executable('dataspec-test', ['tests/dataspec.cc'], include_directories: [feinc], link_with: [felib]))

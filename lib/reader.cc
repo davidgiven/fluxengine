@@ -4,6 +4,7 @@
 #include "reader.h"
 #include "fluxmap.h"
 #include "sql.h"
+#include "dataspec.h"
 #include "fmt/format.h"
 #include <regex>
 
@@ -29,6 +30,8 @@ static IntFlag revolutions(
     { "--revolutions" },
     "read this many revolutions of the disk",
     1);
+
+static DataSpec readerspec("foo:f=7:z=9-10");
 
 static std::string basefilename;
 static int starttrack = 0;
