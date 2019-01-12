@@ -8,6 +8,23 @@ size.
 Different word processors use different disk formats --- the only one
 supported by FluxEngine is the 240kB 3.5" format.
 
+Apparently about 20% of Brother word processors have alignment issues which
+means that the disks can't be read by FluxEngine (because the tracks on the
+disk don't line up with the position of the head in a PC drive). The word
+processors themselves solved this by microstepping until they found where the
+real track is, but normal PC drives aren't capable of doing this.
+
+Using FluxEngine to *write* disks isn't a problem, so the
+simplest solution is to use FluxEngine to create a new disk, with the tracks
+aligned properly, and then use a word processor to copy the files you want
+onto it. The new disk can then be read and you can extract the files.
+Obviously this sucks if you don't actually have a word processor, but I can't
+do anything about that.
+
+If you find one of these misaligned disks then *please* [get in
+touch](https://github.com/davidgiven/fluxengine/issues/new); I want to
+investigate.
+
 Reading discs
 -------------
 
@@ -42,7 +59,9 @@ The Brother drive alignment is kinda variable; when you put the disk in the
 drive it seeks all the way to physical track 0 and then starts searching for
 something which looks like data. My machine likes to put logical track 0 on
 physical track 3. FluxEngine puts logical track 0 on physical track 0 for
-simplicity, which works fine (at least on my machine).
+simplicity, which works fine (at least on my machine). If this doesn't work
+for you, [get in touch](https://github.com/davidgiven/fluxengine/issues/new);
+there are potential workarounds.
 
 Each track has 12 256-byte sectors. The drive ignores the index hole so they're
 lined up all anyhow. As FluxEngine can only read from index to index, it
