@@ -20,6 +20,7 @@ public:
     {
         std::string name;
         std::set<unsigned> data;
+        std::string source;
 
         bool operator == (const Modifier& other) const
         { return (name == other.name) && (data == other.data); }
@@ -38,10 +39,31 @@ public:
     { set(spec); }
 
     void set(const std::string& spec);
+    operator std::string () const;
 
     std::string filename;
     std::map<std::string, Modifier> modifiers;
     std::vector<Location> locations;
+};
+
+std::ostream& operator << (std::ostream& os, const DataSpec& dataSpec)
+{ os << (std::string)dataSpec; return os; }
+
+class DataSpecFlag : public Flag
+{
+public:
+    DataSpecFlag(const std::vector<std::string>& names, const std::string helptext,
+            const std::string& defaultValue):
+        Flag(names, helptext),
+        value(defaultValue)
+    {}
+
+    bool hasArgument() const { return true; }
+    const std::string defaultValueAsString() const { return value; }
+    void set(const std::string& value) { this->value.set(value); }
+
+public:
+    DataSpec value;
 };
 
 #endif

@@ -20,6 +20,7 @@ static SettableFlag dumpRecords(
 
 int main(int argc, const char* argv[])
 {
+	setReaderDefaultSource(":t=0-79:s=0-1");
     Flag::parseFlags(argc, argv);
 
 	bool failures = false;
@@ -28,12 +29,12 @@ int main(int argc, const char* argv[])
     {
 		int retries = 5;
 	retry:
-		Fluxmap& fluxmap = track->read();
-		nanoseconds_t clockPeriod = fluxmap.guessClock();
+		std::unique_ptr<Fluxmap> fluxmap = track->read();
+		nanoseconds_t clockPeriod = fluxmap->guessClock();
 		std::cout << fmt::format("       {:.1f} us clock; ", (double)clockPeriod/1000.0) << std::flush;
 
 		/* For MFM, the bit clock is half the detected clock. */
-		auto bitmap = fluxmap.decodeToBits(clockPeriod/2);
+		auto bitmap = fluxmap->decodeToBits(clockPeriod/2);
 		std::cout << fmt::format("{} bytes encoded; ", bitmap.size()/8) << std::flush;
 
 		auto records = decodeBitsToRecordsMfm(bitmap);
@@ -61,7 +62,6 @@ int main(int argc, const char* argv[])
 				std::cout << std::endl
 				          << "       " << retries << " retries remaining" << std::endl;
 				retries--;
-				track->forceReread();
 				goto retry;
 			}
 		}

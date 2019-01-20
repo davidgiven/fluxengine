@@ -6,16 +6,11 @@
 #include "sql.h"
 #include "dataspec.h"
 #include "fmt/format.h"
-#include <regex>
 
-static const std::regex SOURCE_REGEX("([^:]*)"
-                                     "(?::t=([0-9]+)(?:-([0-9]+))?)?"
-                                     "(?::s=([0-9]+)(?:-([0-9]+))?)?");
-
-static StringFlag source(
+static DataSpecFlag source(
     { "--source", "-s" },
     "source for data",
-    "");
+    ":t=0-79:s=0-1");
 
 static StringFlag destination(
     { "--write-flux", "-f" },
@@ -31,89 +26,53 @@ static IntFlag revolutions(
     "read this many revolutions of the disk",
     1);
 
-static DataSpec readerspec("foo:f=7:z=9-10");
-
-static std::string basefilename;
-static int starttrack = 0;
-static int endtrack = 79;
-static int startside = 0;
-static int endside = 1;
 static sqlite3* indb;
 static sqlite3* outdb;
 
-void setReaderDefaults(int minTrack, int maxTrack, int minSide, int maxSide)
+void setReaderDefaultSource(const std::string& source)
 {
-	starttrack = minTrack;
-	endtrack = maxTrack;
-	startside = minSide;
-	endside = maxSide;
+    ::source.set(source);
 }
 
-Fluxmap& ReaderTrack::read()
+std::unique_ptr<Fluxmap> ReaderTrack::read()
 {
-    if (!_read)
-    {
-        std::cout << fmt::format("{0:>3}.{1}: ", track, side) << std::flush;
-        reallyRead();
-        std::cout << fmt::format("{0} ms in {1} bytes", int(_fluxmap->duration()/1e6), _fluxmap->bytes()) << std::endl;
-        _read = true;
+    std::cout << fmt::format("{0:>3}.{1}: ", track, side) << std::flush;
+    std::unique_ptr<Fluxmap> fluxmap = reallyRead();
+    std::cout << fmt::format(
+        "{0} ms in {1} bytes", int(fluxmap->duration()/1e6), fluxmap->bytes()) << std::endl;
 
-		if (outdb)
-			sqlWriteFlux(outdb, track, side, *_fluxmap);
-    }
+    if (outdb)
+        sqlWriteFlux(outdb, track, side, *fluxmap);
 
-    return *_fluxmap.get();
+    return fluxmap;
 }
     
-void ReaderTrack::forceReread()
-{
-    _read = false;
-}
-
-void CapturedReaderTrack::reallyRead()
+std::unique_ptr<Fluxmap> CapturedReaderTrack::reallyRead()
 {
     usbSeek(track);
-    _fluxmap = usbRead(side, revolutions);
+    return usbRead(side, revolutions);
 }
 
-void FileReaderTrack::reallyRead()
+std::unique_ptr<Fluxmap> FileReaderTrack::reallyRead()
 {
     if (!indb)
 	{
-        indb = sqlOpen(basefilename, SQLITE_OPEN_READONLY);
+        indb = sqlOpen(source.value.filename, SQLITE_OPEN_READONLY);
 		atexit([]() { sqlClose(indb); });
 	}
-    _fluxmap = sqlReadFlux(indb, track, side);
+    return sqlReadFlux(indb, track, side);
 }
 
 std::vector<std::unique_ptr<ReaderTrack>> readTracks()
 {
-    auto f = source.value();
-    std::smatch match;
-    if (!std::regex_match(f, match, SOURCE_REGEX))
-        Error() << "invalid source specifier '" << source.value() << "'";
-    
-    basefilename = match[1];
-    if (match[2].length() != 0)
-        starttrack = endtrack = std::stoi(match[2]);
-    if (match[3].length() != 0)
-        endtrack = std::stoi(match[3]);
-    if (match[4].length() != 0)
-        startside = endside = std::stoi(match[4]);
-    if (match[5].length() != 0)
-        endside = std::stoi(match[5]);
+    const DataSpec& dataSpec = source.value;
 
-    std::cout << "Reading from: "
-              << (basefilename.empty() ? "a real floppy disk" : basefilename) << std::endl
-              << "Tracks:       "
-              << starttrack << " to " << endtrack << " inclusive" << std::endl
-              << "Sides:        "
-              << startside << " to " << endside << " inclusive" << std::endl;
+    std::cout << "Reading from: " << dataSpec << std::endl;
 
-	if (!destination.value().empty())
+	if (!destination.value.empty())
 	{
 		outdb = sqlOpen(destination, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
-		std::cout << "Writing a copy of the flux to " << destination.value() << std::endl;
+		std::cout << "Writing a copy of the flux to " << destination.value << std::endl;
 		sqlPrepareFlux(outdb);
 		sqlStmt(outdb, "BEGIN;");
 		atexit([]()
@@ -125,18 +84,15 @@ std::vector<std::unique_ptr<ReaderTrack>> readTracks()
 	}
 
     std::vector<std::unique_ptr<ReaderTrack>> tracks;
-    for (int track=starttrack; track<=endtrack; track++)
+    for (const auto& location : dataSpec.locations)
     {
-        for (int side=startside; side<=endside; side++)
-        {
-            std::unique_ptr<ReaderTrack> t(
-                basefilename.empty()
-					? (ReaderTrack*)new CapturedReaderTrack()
-					: (ReaderTrack*)new FileReaderTrack());
-            t->track = track;
-            t->side = side;
-            tracks.push_back(std::move(t));
-        }
+        std::unique_ptr<ReaderTrack> t(
+            dataSpec.filename.empty()
+                ? (ReaderTrack*)new CapturedReaderTrack()
+                : (ReaderTrack*)new FileReaderTrack());
+        t->track = location.track;
+        t->side = location.side;
+        tracks.push_back(std::move(t));
     }
 
 	if (justRead)

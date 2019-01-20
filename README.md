@@ -215,6 +215,41 @@ ready. What next?
 
 ### The programs
 
+#### Source and destination specifiers
+
+When reading from or writing to _a disk_ (or a file pretending to be a disk),
+use the `-s` and `-d` options to tell FluxEngine which bits of the disk you
+want to access. These use a common syntax:
+
+```
+fe-readibm -s fakedisk.flux:t=0-79:s=0
+```
+
+  - To access a real disk, leave out the filename (so `:t=0-79:s=0`).
+
+  - To access only some tracks, use the `t=` modifier. To access only some
+    sides, use the `s=` modifier.
+
+  - Inside a modifier, you can use a comma separated list of ranges. So
+    `:t=0-3` and `:t=0,1,2,3` are equivalent.
+
+  - When specifying a range, you can also specify the step. For example,
+    `:t=0-79x2` would be used when accessing a 40-track disk with double stepping.
+
+Source and destination specifiers work entirely in *physical units*.
+FluxEngine is intended to be connected to an 80 (or 82) track double sided
+drive, and these are the units used. If the format you're trying to access
+lays out its tracks differently, then you'll need a specifier which tells
+FluxEngine how to find those tracks. See the 40-track disk example above.
+
+If you _don't_ specify a modifier, you'll get the default, which should be
+sensible for the command you're using.
+
+**Important note:** FluxEngine _always_ uses zero-based units (even if the
+*disk format says otherwise).
+
+### The commands
+
 The FluxEngine client software is a largely undocumented set of small tools.
 You'll have to play with them. They all support `--help`. They're not
 installed anywhere and after building you'll find them in the `.obj`

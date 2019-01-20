@@ -1,7 +1,9 @@
 #include "globals.h"
+#include "flags.h"
 #include "dataspec.h"
 #include "fmt/format.h"
 #include <regex>
+#include <sstream>
 
 static const std::regex MOD_REGEX("([a-z]*)=([-x+0-9,]*)");
 static const std::regex DATA_REGEX("([0-9]+)(?:(?:-([0-9]+))|(?:\\+([0-9]+)))?(?:x([0-9]+))?");
@@ -34,6 +36,7 @@ DataSpec::Modifier DataSpec::parseMod(const std::string& spec)
     
     Modifier m;
     m.name = match[1];
+    m.source = spec;
     for (auto& data : split(match[2], ","))
     {
         int start = 0;
@@ -89,4 +92,15 @@ void DataSpec::set(const std::string& spec)
                 locations.push_back({ track, side });
         }
     }
+}
+
+DataSpec::operator std::string(void) const
+{
+    std::stringstream ss;
+    ss << filename;
+
+    for (const auto& mod : modifiers)
+        ss << ':' << mod.second.source;
+
+    return ss.str();
 }

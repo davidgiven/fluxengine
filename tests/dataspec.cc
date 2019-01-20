@@ -1,4 +1,5 @@
 #include "globals.h"
+#include "flags.h"
 #include "dataspec.h"
 #include <assert.h>
 
@@ -39,30 +40,35 @@ static void test_dataspec(void)
     assert((spec.locations
         == std::vector<DataSpec::Location>
         {{0, 0}, {0, 1}, {1, 0}, {1, 1}, {2, 0}, {2, 1}}));
+    assert((std::string)spec == "foo:s=0-1:t=0-2");
 
     spec.set("bar");
     assert(spec.filename == "bar");
     assert((spec.locations
         == std::vector<DataSpec::Location>
         {{0, 0}, {0, 1}, {1, 0}, {1, 1}, {2, 0}, {2, 1}}));
+    assert((std::string)spec == "bar:s=0-1:t=0-2");
 
     spec.set(":t=0");
     assert(spec.filename.empty());
     assert((spec.locations
         == std::vector<DataSpec::Location>
         {{0, 0}, {0, 1}}));
+    assert((std::string)spec == ":s=0-1:t=0");
 
     spec.set(":s=1");
     assert(spec.filename.empty());
     assert((spec.locations
         == std::vector<DataSpec::Location>
         {{0, 1}}));
+    assert((std::string)spec == ":s=1:t=0");
 
     spec.set(":t=9");
     assert(spec.filename.empty());
     assert((spec.locations
         == std::vector<DataSpec::Location>
         {{9, 1}}));
+    assert((std::string)spec == ":s=1:t=9");
 }
 
 int main(int argc, const char* argv[])

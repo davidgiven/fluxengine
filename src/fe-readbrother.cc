@@ -30,7 +30,7 @@ static IntFlag retries(
 
 int main(int argc, const char* argv[])
 {
-	setReaderDefaults(0, 81, 0, 0);
+	setReaderDefaultSource(":t=0-81:s=0");
     Flag::parseFlags(argc, argv);
 
 	bool failures = false;
@@ -40,12 +40,12 @@ int main(int argc, const char* argv[])
 		std::map<int, std::unique_ptr<Sector>> readSectors;
 		for (int retry = ::retries; retry >= 0; retry--)
 		{
-			Fluxmap& fluxmap = track->read();
+			std::unique_ptr<Fluxmap> fluxmap = track->read();
 
-			nanoseconds_t clockPeriod = fluxmap.guessClock();
+			nanoseconds_t clockPeriod = fluxmap->guessClock();
 			std::cout << fmt::format("       {:.1f} us clock; ", (double)clockPeriod/1000.0) << std::flush;
 
-			auto bitmap = fluxmap.decodeToBits(clockPeriod);
+			auto bitmap = fluxmap->decodeToBits(clockPeriod);
 			std::cout << fmt::format("{} bytes encoded; ", bitmap.size()/8) << std::flush;
 
 			auto records = decodeBitsToRecordsBrother(bitmap);
@@ -103,7 +103,6 @@ int main(int argc, const char* argv[])
 
 			std::cout << std::endl
 					  << "       " << retry << " retries remaining" << std::endl;
-			track->forceReread();
 		}
 
         int size = 0;

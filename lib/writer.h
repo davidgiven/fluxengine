@@ -3,14 +3,13 @@
 
 class Fluxmap;
 
-extern void setWriterDefaults(int minTrack, int maxTrack, int minSide, int maxSide);
+extern void setWriterDefaultDest(const std::string& dest);
 
-extern void writeTracks(
-	int minTrack, int maxTrack,
-	const std::function<Fluxmap(int track, int side)> producer);
+extern void writeTracks(const std::function<std::unique_ptr<Fluxmap>(int track, int side)> producer);
 
 extern void fillBitmapTo(std::vector<bool>& bitmap,
 		unsigned& cursor, unsigned terminateAt,
 		const std::vector<bool>& pattern);
 	
+
 #endif

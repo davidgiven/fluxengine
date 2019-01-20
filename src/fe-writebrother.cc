@@ -32,11 +32,6 @@ static DoubleFlag sectorSpacingMs(
 	"Time between successive sector headers (milliseconds).",
 	16.2);
 
-static IntFlag trackOffset(
-	{ "--track-offset" },
-	"Number of tracks to offset when writing the image.",
-	0);
-
 static DoubleFlag postHeaderSpacingMs(
 	{ "--post-header-spacing" },
 	"Time between a sector's header and data records (milliseconds).",
@@ -57,7 +52,7 @@ static int charToInt(char c)
 
 int main(int argc, const char* argv[])
 {
-	setWriterDefaults(0, 81, 0, 0);
+	setWriterDefaultDest(":t=0-77:s=0");
     Flag::parseFlags(argc, argv);
 
 	SectorSet allSectors;
@@ -71,15 +66,13 @@ int main(int argc, const char* argv[])
 	const std::string& skew = sectorSkew;
 
 	writeTracks(
-		trackOffset, trackOffset+77,
-		[&](int physicalTrack, int physicalSide) -> Fluxmap
+		[&](int track, int side) -> std::unique_ptr<Fluxmap>
 		{
-			int logicalTrack = physicalTrack - trackOffset;
+			if ((track < 0) || (track > 77) || (side != 0))
+				return std::unique_ptr<Fluxmap>();
+
 			std::vector<bool> bits(bitsPerRevolution);
 			unsigned cursor = 0;
-
-			std::cerr << "logical track " << logicalTrack << std::endl
-					  << "       ";
 
 			for (int sectorCount=0; sectorCount<geometry.sectors; sectorCount++)
 			{
@@ -89,10 +82,10 @@ int main(int argc, const char* argv[])
 				double dataMs = headerMs + postHeaderSpacingMs;
 				unsigned dataCursor = dataMs*1e3 / clockRateUs;
 
-				auto& sectorData = allSectors[{logicalTrack, 0, sectorId}];
+				auto& sectorData = allSectors[{track, 0, sectorId}];
 
 				fillBitmapTo(bits, cursor, headerCursor, { true, false });
-				writeBrotherSectorHeader(bits, cursor, logicalTrack, sectorId);
+				writeBrotherSectorHeader(bits, cursor, track, sectorId);
 				fillBitmapTo(bits, cursor, dataCursor, { true, false });
 				writeBrotherSectorData(bits, cursor, sectorData->data);
 			}
@@ -104,8 +97,8 @@ int main(int argc, const char* argv[])
 			// The pre-index gap is not normally reported.
 			// std::cerr << "pre-index gap " << 200.0 - (double)cursor*clockRateUs/1e3 << std::endl;
 			
-			Fluxmap fluxmap;
-			fluxmap.appendBits(bits, clockRateUs*1e3);
+			std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
+			fluxmap->appendBits(bits, clockRateUs*1e3);
 			return fluxmap;
 		}
 	);

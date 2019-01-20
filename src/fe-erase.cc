@@ -4,10 +4,10 @@
 
 int main(int argc, const char* argv[])
 {
-	setWriterDefaults(0, 81, 0, 1);
+	setWriterDefaultDest(":t=0-81:s=0-1");
     Flag::parseFlags(argc, argv);
 
-	writeTracks(-1, -1, NULL);
+	writeTracks(NULL);
 
     return 0;
 }

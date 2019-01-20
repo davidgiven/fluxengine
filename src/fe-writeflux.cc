@@ -9,8 +9,8 @@
 
 int main(int argc, const char* argv[])
 {
-    setReaderDefaults(0, 81, 0, 1);
-    setWriterDefaults(0, 81, 0, 1);
+    setReaderDefaultSource(":t=0-81:h=0-1");
+    setWriterDefaultDest(":t=0-81:s=0-1");
     Flag::parseFlags(argc, argv);
 
     auto tracks = readTracks();
@@ -18,8 +18,7 @@ int main(int argc, const char* argv[])
         track->read();
 
     writeTracks(
-        0, 81,
-        [&](int physicalTrack, int physicalSide) -> Fluxmap
+        [&](int physicalTrack, int physicalSide) -> std::unique_ptr<Fluxmap>
         {
             for (auto& track : tracks)
             {

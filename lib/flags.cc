@@ -82,9 +82,9 @@ void Flag::parseFlags(int argc, const char* argv[])
 void BoolFlag::set(const std::string& value)
 {
 	if ((value == "true") || (value == "y"))
-		_value = true;
+		this->value = true;
 	else if ((value == "false") || (value == "n"))
-		_value = false;
+		this->value = false;
 	else
 		Error() << "can't parse '" << value << "'; try 'true' or 'false'";
 }
@@ -105,7 +105,7 @@ static void doHelp()
         }
 
         if (flag->hasArgument())
-            std::cout << " <default: \"" << flag->defaultValue() << "\">";
+            std::cout << " <default: \"" << flag->defaultValueAsString() << "\">";
         std::cout << ": " << flag->helptext() << std::endl;
     }
     exit(0);

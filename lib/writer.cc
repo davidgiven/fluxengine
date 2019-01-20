@@ -5,62 +5,31 @@
 #include "sql.h"
 #include "protocol.h"
 #include "usb.h"
+#include "dataspec.h"
 #include "fmt/format.h"
-#include <regex>
 
-static const std::regex DEST_REGEX("([^:]*)"
-                                     "(?::t=([0-9]+)(?:-([0-9]+))?)?"
-                                     "(?::s=([0-9]+)(?:-([0-9]+))?)?");
-
-static StringFlag dest(
+static DataSpecFlag dest(
     { "--dest", "-d" },
     "destination for data",
-    "");
+    ":t=0-79:s=0-1");
 
-static std::string basefilename;
-static int starttrack = 0;
-static int endtrack = 79;
-static int startside = 0;
-static int endside = 1;
 static sqlite3* outdb;
 
-void setWriterDefaults(int minTrack, int maxTrack, int minSide, int maxSide)
+void setWriterDefaultDest(const std::string& dest)
 {
-	starttrack = minTrack;
-	endtrack = maxTrack;
-	startside = minSide;
-	endside = maxSide;
+    ::dest.set(dest);
 }
 
 void writeTracks(
-	int minTrack, int maxTrack,
-	const std::function<Fluxmap(int track, int side)> producer)
+	const std::function<std::unique_ptr<Fluxmap>(int track, int side)> producer)
 {
-    auto f = dest.value();
-    std::smatch match;
-    if (!std::regex_match(f, match, DEST_REGEX))
-        Error() << "invalid destination specifier '" << dest.value() << "'";
-    
-    basefilename = match[1];
-    if (match[2].length() != 0)
-        starttrack = endtrack = std::stoi(match[2]);
-    if (match[3].length() != 0)
-        endtrack = std::stoi(match[3]);
-    if (match[4].length() != 0)
-        startside = endside = std::stoi(match[4]);
-    if (match[5].length() != 0)
-        endside = std::stoi(match[5]);
+    const auto& spec = dest.value;
 
-    std::cout << "Writing to: "
-              << (basefilename.empty() ? "a real floppy disk" : basefilename) << std::endl
-              << "Tracks:       "
-              << starttrack << " to " << endtrack << " inclusive" << std::endl
-              << "Sides:        "
-              << startside << " to " << endside << " inclusive" << std::endl;
+    std::cout << "Writing to: " << spec << std::endl;
 
-	if (!basefilename.empty())
+	if (!spec.filename.empty())
 	{
-		outdb = sqlOpen(basefilename, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
+		outdb = sqlOpen(spec.filename, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
 		sqlPrepareFlux(outdb);
 		sqlStmt(outdb, "BEGIN;");
 		atexit([]()
@@ -71,33 +40,31 @@ void writeTracks(
 		);
 	}
 
-    for (int track=starttrack; track<=endtrack; track++)
+    for (const auto& location : spec.locations)
     {
-        for (int side=startside; side<=endside; side++)
+        std::cout << fmt::format("{0:>3}.{1}: ", location.track, location.side) << std::flush;
+        std::unique_ptr<Fluxmap> fluxmap = producer(location.track, location.side);
+        if (!fluxmap)
         {
-            std::cout << fmt::format("{0:>3}.{1}: ", track, side) << std::flush;
-            if ((track < minTrack) || (track > maxTrack))
+            if (!outdb)
             {
-                if (!outdb)
-                {
-                    std::cout << "erasing" << std::endl;
-                    usbSeek(track);
-                    usbErase(side);
-                }
+                std::cout << "erasing" << std::endl;
+                usbSeek(location.track);
+                usbErase(location.side);
             }
+        }
+        else
+        {
+            fluxmap->precompensate(PRECOMPENSATION_THRESHOLD_TICKS, 2);
+            if (outdb)
+                sqlWriteFlux(outdb, location.track, location.side, *fluxmap);
             else
             {
-                Fluxmap fluxmap = producer(track, side);
-                fluxmap.precompensate(PRECOMPENSATION_THRESHOLD_TICKS, 2);
-                if (outdb)
-                    sqlWriteFlux(outdb, track, side, fluxmap);
-                else
-                {
-                    usbSeek(track);
-                    usbWrite(side, fluxmap);
-                }
-                std::cout << fmt::format("{0} ms in {1} bytes", int(fluxmap.duration()/1e6), fluxmap.bytes()) << std::endl;
+                usbSeek(location.track);
+                usbWrite(location.side, *fluxmap);
             }
+            std::cout << fmt::format(
+                "{0} ms in {1} bytes", int(fluxmap->duration()/1e6), fluxmap->bytes()) << std::endl;
         }
     }
 }

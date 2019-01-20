@@ -45,12 +45,12 @@ int main(int argc, const char* argv[])
     {
 		if ((track->track == trackFlag) && (track->side == sideFlag))
 		{
-			Fluxmap& fluxmap = track->read();
+			std::unique_ptr<Fluxmap> fluxmap = track->read();
 
-			nanoseconds_t clockPeriod = fluxmap.guessClock();
+			nanoseconds_t clockPeriod = fluxmap->guessClock();
 			std::cout << fmt::format("       {:.2f} us clock; ", (double)clockPeriod/1000.0) << std::flush;
 
-			auto bitmap = fluxmap.decodeToBits(clockPeriod*clockScaleFlag);
+			auto bitmap = fluxmap->decodeToBits(clockPeriod*clockScaleFlag);
 			std::cout << fmt::format("{} bytes encoded.", bitmap.size()/8) << std::endl;
 
 			if (dumpFluxFlag)
@@ -66,9 +66,9 @@ int main(int argc, const char* argv[])
 				nanoseconds_t nextclock = clockPeriod;
 				int ticks = 0;
 				std::cout << fmt::format("{: 10.3f}:-", 0.0);
-				for (int cursor=0; cursor<fluxmap.bytes(); cursor++)
+				for (int cursor=0; cursor<fluxmap->bytes(); cursor++)
 				{
-					int interval = fluxmap[cursor];
+					int interval = (*fluxmap)[cursor];
 					if (interval == 0)
 						interval = 0x100;
 					ticks += interval;
