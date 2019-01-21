@@ -18,6 +18,11 @@ static SettableFlag dumpRecords(
 	{ "--dump-records" },
 	"Dump the parsed records.");
 
+static IntFlag sectorIdBase(
+	{ "--sector-id-base" },
+	"Sector ID of the first sector.",
+	1);
+
 int main(int argc, const char* argv[])
 {
 	setReaderDefaultSource(":t=0-79:s=0-1");
@@ -28,6 +33,8 @@ int main(int argc, const char* argv[])
     for (auto& track : readTracks())
     {
 		int retries = 5;
+		std::map<int, std::unique_ptr<Sector>> goodSectors;
+
 	retry:
 		std::unique_ptr<Fluxmap> fluxmap = track->read();
 		nanoseconds_t clockPeriod = fluxmap->guessClock();
@@ -40,17 +47,24 @@ int main(int argc, const char* argv[])
 		auto records = decodeBitsToRecordsMfm(bitmap);
 		std::cout << records.size() << " records." << std::endl;
 
-		auto sectors = parseRecordsToSectorsIbm(records);
+		auto sectors = parseRecordsToSectorsIbm(records, sectorIdBase);
 		std::cout << "       " << sectors.size() << " sectors; ";
 
 		bool hasBadSectors = false;
 		for (auto& sector : sectors)
 		{
-			if (sector->status != Sector::OK)
+			bool sectorPending = goodSectors.find(sector->sector) == goodSectors.end();
+			if (sectorPending)
 			{
-				std::cout << std::endl
-						  << "       Bad CRC on sector " << sector->sector << "; ";
-				hasBadSectors = true;
+				if (sector->status != Sector::OK)
+				{
+					std::cout << std::endl
+							<< "       Bad CRC on sector " << sector->sector << "; ";
+					hasBadSectors = true;
+				}
+
+				if (((sector->status == Sector::OK) || (retries == 0)) && (sector->sector >= 0))
+					goodSectors[sector->sector] = std::move(sector);
 			}
 		}
 		if (hasBadSectors)
@@ -67,8 +81,9 @@ int main(int argc, const char* argv[])
 		}
 
 		int size = 0;
-		for (auto& sector : sectors)
+		for (auto& i : goodSectors)
 		{
+			auto& sector = i.second;
 			size += sector->data.size();
 			allSectors[{sector->track, sector->side, sector->sector}] =
 				std::move(sector);

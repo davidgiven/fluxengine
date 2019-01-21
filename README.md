@@ -51,6 +51,8 @@ Currently, not a lot.
   - IBM MFM 1440kB and 720kB formats, a.k.a. standard PC floppy disks;
 	read only (I haven't got round to writing the write support)
 
+  - [Acorn ADFS disks](doc/acorn-adfs.md): read only (likewise)
+
   - [Brother 240kB word processor disks](doc/brother.md); read and write
 
 ...aaaand that's it. If you want more, please [get in
