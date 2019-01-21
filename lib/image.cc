@@ -66,11 +66,11 @@ void writeSectorsToFile(const SectorSet& sectors, const Geometry& geometry,
 				auto sector = sectors[{track, head, sectorId}];
 				if (!sector)
 				{
-					std::cout << '.';
+					std::cout << 'X';
 					missingSectors++;
 				}
 				else if (sector->status == Sector::OK)
-					std::cout << 'G';
+					std::cout << '.';
 				else
 				{
 					badSectors++;
