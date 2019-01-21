@@ -22,15 +22,13 @@ static DoubleFlag clockScaleFlag(
 	"Scale the clock by this much after detection (use 0.5 for MFM, 1.0 for anything else).",
 	0.5);
 
-static BoolFlag dumpFluxFlag(
+static SettableFlag dumpFluxFlag(
 	{ "--dump-flux", "-F" },
-	"Dump raw magnetic disk flux.",
-	false);
+	"Dump raw magnetic disk flux.");
 
-static BoolFlag dumpBitstreamFlag(
+static SettableFlag dumpBitstreamFlag(
 	{ "--dump-bitstream", "-B" },
-	"Dump aligned bitstream.",
-	false);
+	"Dump aligned bitstream.");
 
 static IntFlag fluxmapResolutionFlag(
 	{ "--fluxmap-resolution" },
@@ -48,9 +46,12 @@ int main(int argc, const char* argv[])
 			std::unique_ptr<Fluxmap> fluxmap = track->read();
 
 			nanoseconds_t clockPeriod = fluxmap->guessClock();
-			std::cout << fmt::format("       {:.2f} us clock; ", (double)clockPeriod/1000.0) << std::flush;
+			std::cout << fmt::format("       {:.2f} us clock detected; ", (double)clockPeriod/1000.0) << std::flush;
 
-			auto bitmap = fluxmap->decodeToBits(clockPeriod*clockScaleFlag);
+			clockPeriod *= clockScaleFlag;
+			std::cout << fmt::format("{:.2f} us bit clock; ", (double)clockPeriod/1000.0) << std::flush;
+
+			auto bitmap = fluxmap->decodeToBits(clockPeriod);
 			std::cout << fmt::format("{} bytes encoded.", bitmap.size()/8) << std::endl;
 
 			if (dumpFluxFlag)
