@@ -3,6 +3,7 @@
 #include "fluxmap.h"
 #include "decoders.h"
 #include "protocol.h"
+#include "fmt/format.h"
 
 static IntFlag clockDetectionNoiseFloor(
     { "--clock-detection-noise-floor" },
@@ -13,6 +14,10 @@ static DoubleFlag clockDecodeThreshold(
     { "--clock-decode-threshold" },
     "Pulses below this fraction of a clock tick are considered spurious and ignored.",
     0.80);
+
+static SettableFlag showClockHistogram(
+    { "--show-clock-histogram" },
+    "Dump the clock detection histogram.");
 
 /* 
  * Tries to guess the clock by finding the smallest common interval.
@@ -46,6 +51,15 @@ nanoseconds_t Fluxmap::guessClock() const
             peakmaxvalue = v;
         }
         peakhi++;
+    }
+
+    if (showClockHistogram)
+    {
+        std::cout << "Clock detection histogram:" << std::endl;
+        for (int i=0; i<256; i++)
+        {
+            std::cout << fmt::format("{:.2f} {}\n", (double)i * US_PER_TICK, buckets[i]);
+        }
     }
 
     /* 
