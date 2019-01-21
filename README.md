@@ -48,8 +48,9 @@ to be spinning at the same speed.
 
 Currently, not a lot.
 
-  - IBM MFM 1440kB and 720kB formats, a.k.a. standard PC floppy disks;
-	read only (I haven't got round to writing the write support)
+  - IBM MFM 720kB formats, a.k.a. standard PC floppy disks; read only (I
+    haven't got round to writing the write support). **Note:** 1440kB disks
+    _should_ work, but don't. I'm investigating.
 
   - [Acorn ADFS disks](doc/acorn-adfs.md): read only (likewise)
 
