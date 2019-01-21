@@ -148,13 +148,8 @@ void readDiskCommand(
 			for (auto& sector : sectors)
 			{
                 auto& replacing = readSectors[sector->sector];
-                if (sector->status == Sector::OK)
+                if (!replacing || (sector->status == Sector::OK))
                     replacing = std::move(sector);
-                else
-                {
-                    if (!replacing || (replacing->status == Sector::OK))
-                        replacing = std::move(sector);
-                }
 			}
 
 			bool hasBadSectors = false;
@@ -190,7 +185,7 @@ void readDiskCommand(
 
 			std::cout << std::endl
                       << "       ";
-            if (retries == 0)
+            if (retry == 0)
                 std::cout << "giving up" << std::endl
                           << "       ";
             else
