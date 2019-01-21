@@ -35,7 +35,12 @@ static void add_record(RecordVector& records,
 	records.push_back(std::unique_ptr<Record>(new Record(position, data)));
 }
 
-RecordVector MfmBitmapDecoder::decodeBitsToRecords(const std::vector<bool>& bits)
+nanoseconds_t MfmBitmapDecoder::guessClock(Fluxmap& fluxmap) const
+{
+    return fluxmap.guessClock()/2;
+}
+
+RecordVector MfmBitmapDecoder::decodeBitsToRecords(const std::vector<bool>& bits) const
 {
     RecordVector records;
 

@@ -11,7 +11,7 @@
 static_assert(std::is_trivially_copyable<IbmIdam>::value);
 
 std::vector<std::unique_ptr<Sector>> IbmRecordParser::parseRecordsToSectors(
-		const RecordVector& records)
+		const RecordVector& records) const
 {
     bool idamValid = false;
     IbmIdam idam;

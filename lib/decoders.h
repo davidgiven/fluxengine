@@ -33,13 +33,18 @@ class BitmapDecoder
 public:
     virtual ~BitmapDecoder() {}
 
-    virtual RecordVector decodeBitsToRecords(const std::vector<bool>& bitmap) = 0;
+    virtual nanoseconds_t guessClock(Fluxmap& fluxmap) const;
+
+    virtual RecordVector decodeBitsToRecords(
+        const std::vector<bool>& bitmap) const = 0;
 };
 
-class MfmBitmapDecoder
+class MfmBitmapDecoder : public BitmapDecoder
 {
 public:
-    RecordVector decodeBitsToRecords(const std::vector<bool>& bitmap);
+    nanoseconds_t guessClock(Fluxmap& fluxmap) const;
+
+    RecordVector decodeBitsToRecords(const std::vector<bool>& bitmap) const;
 };
 
 class RecordParser
@@ -48,7 +53,7 @@ public:
     virtual ~RecordParser() {}
 
     virtual std::vector<std::unique_ptr<Sector>> parseRecordsToSectors(
-        const RecordVector& records) = 0;
+        const RecordVector& records) const = 0;
 };
 
 class IbmRecordParser : public RecordParser
@@ -59,7 +64,7 @@ public:
     {}
 
     std::vector<std::unique_ptr<Sector>> parseRecordsToSectors(
-        const RecordVector& records);
+        const RecordVector& records) const;
 
 private:
     int _sectorIdBase;

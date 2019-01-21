@@ -1,6 +1,7 @@
 #include "globals.h"
 #include "flags.h"
 #include "fluxmap.h"
+#include "decoders.h"
 #include "protocol.h"
 
 static IntFlag clockDetectionNoiseFloor(
@@ -85,5 +86,10 @@ std::vector<bool> Fluxmap::decodeToBits(nanoseconds_t clockPeriod) const
 abort:
 
     return bitmap;
+}
+
+nanoseconds_t BitmapDecoder::guessClock(Fluxmap& fluxmap) const
+{
+    return fluxmap.guessClock();
 }
 

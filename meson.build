@@ -35,14 +35,6 @@ sqllib = shared_library('sqllib',
 						['lib/sql.cc'],
 						link_with: [felib],
 						dependencies: [sqlite])
-readerlib = shared_library('readerlib',
-						['lib/reader.cc'],
-						include_directories: [fmtinc],
-						link_with: [felib, sqllib, fmtlib])
-writerlib =  shared_library('writerlib',
-						['lib/writer.cc'],
-						include_directories: [fmtinc],
-						link_with: [felib, sqllib, fmtlib])
 
 decoderlib = shared_library('decoderlib',
     [
@@ -54,6 +46,16 @@ decoderlib = shared_library('decoderlib',
     link_with: [felib, fmtlib]
 )
 decoderinc = include_directories('lib/decoders')
+
+readerlib = shared_library('readerlib',
+						['lib/reader.cc'],
+						include_directories: [fmtinc, decoderinc],
+						link_with: [felib, sqllib, fmtlib, decoderlib])
+                        
+writerlib =  shared_library('writerlib',
+						['lib/writer.cc'],
+						include_directories: [fmtinc],
+						link_with: [felib, sqllib, fmtlib])
 
 encoderlib = shared_library('encoderlib',
     [

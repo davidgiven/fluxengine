@@ -14,14 +14,14 @@ class Fluxmap;
 class BrotherBitmapDecoder : public BitmapDecoder
 {
 public:
-	RecordVector decodeBitsToRecords(const std::vector<bool>& bitmap);
+	RecordVector decodeBitsToRecords(const std::vector<bool>& bitmap) const;
 };
 
 class BrotherRecordParser : public RecordParser
 {
 public:
 	std::vector<std::unique_ptr<Sector>> parseRecordsToSectors(
-		const RecordVector& records);
+		const RecordVector& records) const;
 };
 
 extern void writeBrotherSectorHeader(std::vector<bool>& bits, unsigned& cursor,

@@ -5,6 +5,11 @@
 #include "fluxmap.h"
 #include "sql.h"
 #include "dataspec.h"
+#include "decoders.h"
+#include "sector.h"
+#include "sectorset.h"
+#include "record.h"
+#include "image.h"
 #include "fmt/format.h"
 
 static DataSpecFlag source(
@@ -25,6 +30,15 @@ static IntFlag revolutions(
     { "--revolutions" },
     "read this many revolutions of the disk",
     1);
+
+static SettableFlag dumpRecords(
+	{ "--dump-records" },
+	"Dump the parsed records.");
+
+static IntFlag retries(
+	{ "--retries" },
+	"How many times to retry each track in the event of a read failure.",
+	5);
 
 static sqlite3* indb;
 static sqlite3* outdb;
@@ -104,4 +118,107 @@ std::vector<std::unique_ptr<ReaderTrack>> readTracks()
 	}
 				
     return tracks;
+}
+
+void readDiskCommand(
+    const BitmapDecoder& bitmapDecoder, const RecordParser& recordParser,
+    const std::string& outputFilename)
+{
+	bool failures = false;
+	SectorSet allSectors;
+    for (auto& track : readTracks())
+    {
+		std::map<int, std::unique_ptr<Sector>> readSectors;
+		for (int retry = ::retries; retry >= 0; retry--)
+		{
+			std::unique_ptr<Fluxmap> fluxmap = track->read();
+
+			nanoseconds_t clockPeriod = bitmapDecoder.guessClock(*fluxmap);
+			std::cout << fmt::format("       {:.1f} us clock; ", (double)clockPeriod/1000.0) << std::flush;
+
+			auto bitmap = fluxmap->decodeToBits(clockPeriod);
+			std::cout << fmt::format("{} bytes encoded; ", bitmap.size()/8) << std::flush;
+
+			auto records = bitmapDecoder.decodeBitsToRecords(bitmap);
+			std::cout << records.size() << " records." << std::endl;
+
+			auto sectors = recordParser.parseRecordsToSectors(records);
+			std::cout << "       " << sectors.size() << " sectors; ";
+
+			for (auto& sector : sectors)
+			{
+                auto& replacing = readSectors[sector->sector];
+                if (sector->status == Sector::OK)
+                    replacing = std::move(sector);
+                else
+                {
+                    if (!replacing || (replacing->status == Sector::OK))
+                        replacing = std::move(sector);
+                }
+			}
+
+			bool hasBadSectors = false;
+			for (const auto& i : readSectors)
+			{
+                const auto& sector = i.second;
+				if (sector->status != Sector::OK)
+				{
+					std::cout << std::endl
+							  << "       Failed to read sector " << sector->sector
+                              << " (" << Sector::statusToString((Sector::Status)sector->status) << "); ";
+					hasBadSectors = true;
+				}
+			}
+
+			if (hasBadSectors)
+				failures = false;
+
+			if (dumpRecords && (!hasBadSectors || (retry == 0)))
+			{
+				std::cout << "\nRaw records follow:\n\n";
+				for (auto& record : records)
+				{
+					std::cout << fmt::format("I+{:.3f}ms", (double)(record->position*clockPeriod)/1e6)
+					          << std::endl;
+					hexdump(std::cout, record->data);
+					std::cout << std::endl;
+				}
+			}
+
+			if (!hasBadSectors)
+				break;
+
+			std::cout << std::endl
+                      << "       ";
+            if (retries == 0)
+                std::cout << "giving up" << std::endl
+                          << "       ";
+            else
+				std::cout << retry << " retries remaining" << std::endl;
+		}
+
+        int size = 0;
+		bool printedTrack = false;
+        for (auto& i : readSectors)
+        {
+			auto& sector = i.second;
+			if (sector)
+			{
+				if (!printedTrack)
+				{
+					std::cout << "logical track " << sector->track << "; ";
+					printedTrack = true;
+				}
+
+				size += sector->data.size();
+				allSectors[{sector->track, sector->side, sector->sector}] = std::move(sector);
+			}
+        }
+        std::cout << size << " bytes decoded." << std::endl;
+    }
+
+	Geometry geometry = guessGeometry(allSectors);
+    writeSectorsToFile(allSectors, geometry, outputFilename);
+	if (failures)
+		std::cerr << "Warning: some sectors could not be decoded." << std::endl;
 }

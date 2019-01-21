@@ -2,6 +2,8 @@
 #define READER_H
 
 class Fluxmap;
+class BitmapDecoder;
+class RecordParser;
 
 class ReaderTrack
 {
@@ -29,5 +31,9 @@ public:
 
 extern void setReaderDefaultSource(const std::string& source);
 extern std::vector<std::unique_ptr<ReaderTrack>> readTracks();
+
+extern void readDiskCommand(
+    const BitmapDecoder& bitmapDecoder, const RecordParser& recordParser,
+    const std::string& outputFilename);
 
 #endif
