@@ -28,7 +28,19 @@ class Fluxmap;
 class Record;
 typedef std::vector<std::unique_ptr<Record>> RecordVector;
 
-extern RecordVector decodeBitsToRecordsMfm(const std::vector<bool>& bitmap);
+class BitmapDecoder
+{
+public:
+    virtual ~BitmapDecoder() {}
+
+    virtual RecordVector decodeBitsToRecords(const std::vector<bool>& bitmap) = 0;
+};
+
+class MfmBitmapDecoder
+{
+public:
+    RecordVector decodeBitsToRecords(const std::vector<bool>& bitmap);
+};
 
 class RecordParser
 {

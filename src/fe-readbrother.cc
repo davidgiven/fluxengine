@@ -34,6 +34,7 @@ int main(int argc, const char* argv[])
     Flag::parseFlags(argc, argv);
 
 	BrotherRecordParser recordParser;
+	BrotherBitmapDecoder bitmapDecoder;
 
 	bool failures = false;
 	SectorSet allSectors;
@@ -50,7 +51,7 @@ int main(int argc, const char* argv[])
 			auto bitmap = fluxmap->decodeToBits(clockPeriod);
 			std::cout << fmt::format("{} bytes encoded; ", bitmap.size()/8) << std::flush;
 
-			auto records = decodeBitsToRecordsBrother(bitmap);
+			auto records = bitmapDecoder.decodeBitsToRecords(bitmap);
 			std::cout << records.size() << " records." << std::endl;
 
 			auto sectors = recordParser.parseRecordsToSectors(records);

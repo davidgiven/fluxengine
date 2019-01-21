@@ -51,7 +51,7 @@ static void add_record(RecordVector& records,
 	records.push_back(std::unique_ptr<Record>(new Record(position, data)));
 }
 
-RecordVector decodeBitsToRecordsBrother(const std::vector<bool>& bits)
+RecordVector BrotherBitmapDecoder::decodeBitsToRecords(const std::vector<bool>& bits)
 {
     RecordVector records;
 

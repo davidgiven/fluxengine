@@ -29,6 +29,7 @@ int main(int argc, const char* argv[])
     Flag::parseFlags(argc, argv);
 
 	IbmRecordParser recordParser(sectorIdBase);
+	MfmBitmapDecoder bitmapDecoder;
 
 	bool failures = false;
 	SectorSet allSectors;
@@ -46,7 +47,7 @@ int main(int argc, const char* argv[])
 		auto bitmap = fluxmap->decodeToBits(clockPeriod/2);
 		std::cout << fmt::format("{} bytes encoded; ", bitmap.size()/8) << std::flush;
 
-		auto records = decodeBitsToRecordsMfm(bitmap);
+		auto records = bitmapDecoder.decodeBitsToRecords(bitmap);
 		std::cout << records.size() << " records." << std::endl;
 
 		auto sectors = recordParser.parseRecordsToSectors(records);

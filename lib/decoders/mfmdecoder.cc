@@ -2,6 +2,7 @@
 #include "fluxmap.h"
 #include "protocol.h"
 #include "record.h"
+#include "decoders.h"
 #include <string.h>
 #include <algorithm>
 
@@ -34,7 +35,7 @@ static void add_record(RecordVector& records,
 	records.push_back(std::unique_ptr<Record>(new Record(position, data)));
 }
 
-RecordVector decodeBitsToRecordsMfm(const std::vector<bool>& bits)
+RecordVector MfmBitmapDecoder::decodeBitsToRecords(const std::vector<bool>& bits)
 {
     RecordVector records;
 

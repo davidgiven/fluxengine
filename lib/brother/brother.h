@@ -10,12 +10,16 @@
 class Sector;
 class Fluxmap;
 
-extern RecordVector decodeBitsToRecordsBrother(const std::vector<bool>& bitmap);
+
+class BrotherBitmapDecoder : public BitmapDecoder
+{
+public:
+	RecordVector decodeBitsToRecords(const std::vector<bool>& bitmap);
+};
 
 class BrotherRecordParser : public RecordParser
 {
 public:
-
 	std::vector<std::unique_ptr<Sector>> parseRecordsToSectors(
 		const RecordVector& records);
 };
