@@ -12,7 +12,13 @@ class Fluxmap;
 
 extern RecordVector decodeBitsToRecordsBrother(const std::vector<bool>& bitmap);
 
-extern std::vector<std::unique_ptr<Sector>> parseRecordsToSectorsBrother(const RecordVector& records);
+class BrotherRecordParser : public RecordParser
+{
+public:
+
+	std::vector<std::unique_ptr<Sector>> parseRecordsToSectors(
+		const RecordVector& records);
+};
 
 extern void writeBrotherSectorHeader(std::vector<bool>& bits, unsigned& cursor,
 		int track, int sector);

@@ -10,8 +10,8 @@
 
 static_assert(std::is_trivially_copyable<IbmIdam>::value);
 
-std::vector<std::unique_ptr<Sector>> parseRecordsToSectorsIbm(
-		const RecordVector& records, int sectorIdBase)
+std::vector<std::unique_ptr<Sector>> IbmRecordParser::parseRecordsToSectors(
+		const RecordVector& records)
 {
     bool idamValid = false;
     IbmIdam idam;
@@ -55,7 +55,7 @@ std::vector<std::unique_ptr<Sector>> parseRecordsToSectorsIbm(
                 std::vector<uint8_t> sectordata(size);
                 memcpy(&sectordata[0], &data[4], size);
 
-                int sectorNum = idam.sector - sectorIdBase;
+                int sectorNum = idam.sector - _sectorIdBase;
                 auto sector = std::unique_ptr<Sector>(
 					new Sector(status, idam.cylinder, idam.side, sectorNum, sectordata));
                 sectors.push_back(std::move(sector));

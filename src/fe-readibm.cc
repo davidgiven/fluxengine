@@ -28,6 +28,8 @@ int main(int argc, const char* argv[])
 	setReaderDefaultSource(":t=0-79:s=0-1");
     Flag::parseFlags(argc, argv);
 
+	IbmRecordParser recordParser(sectorIdBase);
+
 	bool failures = false;
 	SectorSet allSectors;
     for (auto& track : readTracks())
@@ -47,7 +49,7 @@ int main(int argc, const char* argv[])
 		auto records = decodeBitsToRecordsMfm(bitmap);
 		std::cout << records.size() << " records." << std::endl;
 
-		auto sectors = parseRecordsToSectorsIbm(records, sectorIdBase);
+		auto sectors = recordParser.parseRecordsToSectors(records);
 		std::cout << "       " << sectors.size() << " sectors; ";
 
 		bool hasBadSectors = false;

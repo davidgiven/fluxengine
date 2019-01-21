@@ -30,7 +30,27 @@ typedef std::vector<std::unique_ptr<Record>> RecordVector;
 
 extern RecordVector decodeBitsToRecordsMfm(const std::vector<bool>& bitmap);
 
-extern std::vector<std::unique_ptr<Sector>> parseRecordsToSectorsIbm(
-    const RecordVector& records, int sectorIdBase);
+class RecordParser
+{
+public:
+    virtual ~RecordParser() {}
+
+    virtual std::vector<std::unique_ptr<Sector>> parseRecordsToSectors(
+        const RecordVector& records) = 0;
+};
+
+class IbmRecordParser : public RecordParser
+{
+public:
+    IbmRecordParser(int sectorIdBase):
+        _sectorIdBase(sectorIdBase)
+    {}
+
+    std::vector<std::unique_ptr<Sector>> parseRecordsToSectors(
+        const RecordVector& records);
+
+private:
+    int _sectorIdBase;
+};
 
 #endif

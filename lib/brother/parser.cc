@@ -7,7 +7,8 @@
 #include "record.h"
 #include <string.h>
 
-std::vector<std::unique_ptr<Sector>> parseRecordsToSectorsBrother(const RecordVector& records)
+std::vector<std::unique_ptr<Sector>> BrotherRecordParser::parseRecordsToSectors(
+        const RecordVector& records)
 {
 	int nextTrack = 0;
 	int nextSector = 0;

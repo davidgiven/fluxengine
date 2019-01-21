@@ -33,6 +33,8 @@ int main(int argc, const char* argv[])
 	setReaderDefaultSource(":t=0-81:s=0");
     Flag::parseFlags(argc, argv);
 
+	BrotherRecordParser recordParser;
+
 	bool failures = false;
 	SectorSet allSectors;
     for (auto& track : readTracks())
@@ -51,7 +53,7 @@ int main(int argc, const char* argv[])
 			auto records = decodeBitsToRecordsBrother(bitmap);
 			std::cout << records.size() << " records." << std::endl;
 
-			auto sectors = parseRecordsToSectorsBrother(records);
+			auto sectors = recordParser.parseRecordsToSectors(records);
 			std::cout << "       " << sectors.size() << " sectors; ";
 
 			for (auto& sector : sectors)
