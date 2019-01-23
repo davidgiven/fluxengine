@@ -91,5 +91,6 @@ executable('fe-seek',              ['src/fe-seek.cc'],              include_dire
 executable('fe-testbulktransport', ['src/fe-testbulktransport.cc'], include_directories: [feinc], link_with: [felib])
 executable('fe-writebrother',      ['src/fe-writebrother.cc'],      include_directories: [feinc, fmtinc, brotherinc], link_with: [felib, writerlib, encoderlib, brotherencoderlib, fmtlib])
 executable('fe-writeflux',         ['src/fe-writeflux.cc'],         include_directories: [feinc, fmtinc], link_with: [felib, readerlib, writerlib, fmtlib])
+executable('fe-writetestpattern',  ['src/fe-writetestpattern.cc'],  include_directories: [feinc, fmtinc], link_with: [felib, writerlib, fmtlib])
 
 test('DataSpec', executable('dataspec-test', ['tests/dataspec.cc'], include_directories: [feinc], link_with: [felib]))

@@ -276,6 +276,10 @@ directory.
     isn't readable. It's mainly useful for flux files synthesised by the
     other `fe-write*` commands.
 
+  - `fe-writetestpattern`: writes regular pulses (at a configurable interval)
+    to the disk. Useful for testing drive jitter, erasing disks in a more
+    secure fashion, or simply debugging. Goes well with `fe-inspect`.
+
   - `fe-readibm`: reads 720kB or 1440kB IBM MFM disks. Emits a standard
     filesystem image.
 
