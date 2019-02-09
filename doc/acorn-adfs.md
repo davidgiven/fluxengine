@@ -10,6 +10,7 @@ Tested ones are:
 
   - ADFS L: 80 track, 16 sector, 2 sides, 256 bytes per sector == 640kB.
   - ADFE D/E: 80 track, 5 sector, 2 sides, 1024 bytes per sector == 800kB.
+  - ADFS F: 80 track, 10 sector, 2 sides, 1024 bytes per sector == 1600kB.
 
 I expect the others to work, but haven't tried them; [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new) if you have any
@@ -28,8 +29,8 @@ Reading discs
 Just do:
 
 ```
-.obj/fe-readibm --sector-id-base=0
+.obj/fe-readacorn
 ```
 
-You should end up with an `ibm.img` of the appropriate size for your disk
+You should end up with an `acorn.img` of the appropriate size for your disk
 format.
