@@ -70,7 +70,7 @@ CY_ISR(replay_dma_finished_irq_cb)
 
 static void print(const char* s)
 {
-    UART_PutString(s);
+    /* UART_PutString(s); */
 }
 
 static void printi(int i)
@@ -594,12 +594,12 @@ int main(void)
     CAPTURE_DMA_FINISHED_IRQ_StartEx(&capture_dma_finished_irq_cb);
     REPLAY_DMA_FINISHED_IRQ_StartEx(&replay_dma_finished_irq_cb);
     CAPTURE_COUNTER_Start();
-    UART_Start();
+    /* UART_Start(); */
     USBFS_Start(0, USBFS_DWR_VDDD_OPERATION);
     
     CyWdtStart(CYWDT_1024_TICKS, CYWDT_LPMODE_DISABLED);
     
-    UART_PutString("GO\r");
+    /* UART_PutString("GO\r"); */
 
     for (;;)
     {
@@ -617,10 +617,10 @@ int main(void)
         
         if (!USBFS_GetConfiguration() || USBFS_IsConfigurationChanged())
         {
-            UART_PutString("Waiting for USB...\r");
+            print("Waiting for USB...\r");
             while (!USBFS_GetConfiguration())
                 ;
-            UART_PutString("USB ready\r");
+            print("USB ready\r");
             USBFS_EnableOutEP(FLUXENGINE_CMD_OUT_EP_NUM);
         }
         
@@ -628,7 +628,7 @@ int main(void)
         {
             handle_command();
             USBFS_EnableOutEP(FLUXENGINE_CMD_OUT_EP_NUM);
-            UART_PutString("idle\r");
+            print("idle\r");
         }
     }
 }

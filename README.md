@@ -128,12 +128,12 @@ make it fit on the back of a floppy disk drive. Using pins instead means this
 isn't necessary, but, well, now it's too late.)
 
   1. **If you're using a header:** solder your 17-way header to the
-     **bottom** of the board, from 2.7 to 1.0 inclusive. Skip 12.4 and 12.5.
-     (It has to be the bottom because there are components that stick out on
-     the other side and the bottom needs to go flush against the drive.)
+     **bottom** of the board, from 2.7 to 1.0 inclusive. (It has to be 
+     the bottom because there are components that stick out on the other side
+     and the bottom needs to go flush against the drive.)
 
   3. **If you're using pins:** solder your 17-way pins to **either side** of
-     the board, from 2.7 to 1.0 inclusive. Skip 12.4 and 12.5.
+     the board, from 2.7 to 1.0 inclusive.
 
   4. Solder two wires to any convenient VDD and GND pins and connect these to
      your floppy disk drive's power supply. If you're powering the floppy
@@ -186,13 +186,14 @@ touch](https://github.com/davidgiven/fluxengine/issues/new).
 So you have client software, programmed the firmware, and the hardware is all
 ready. What next?
 
-  1. Attach the FluxEngine to your floppy disk drive. Pin 0.2 is REDWC and
-     connects to pin 2 on the floppy drive. Pin 3.0 is DSKCHG and connects to
-     pin 34 on the floppy drive. All the other board pins connect in the
-     obvious order. Odd pins on the floppy drive are left unconnected. You
-     can push the floppy drive connector straight onto the pins, or the
-     FluxEngine board straight onto the floppy disk drive, depending on how
-     you're doing it.
+  1. Attach the FluxEngine to your floppy disk drive. Pin 0.2 (on the right in
+     the picture above) is REDWC and connects to pin 2 on the floppy drive.
+     Pin 1.0 (on the left in the picture above) is DSKCHG and connects to pin
+     34 on the floppy drive. All the other board pins connect in the obvious
+     order. Odd pins on the floppy drive are left unconnected. You can push
+     the floppy drive connector straight onto the pins, or the FluxEngine
+     board straight onto the floppy disk drive, depending on how you're doing
+     it.
 
   2. **Important.** Make sure that no disk you care about is in the drive.
 	 (Because if your wiring is wrong and a disk is inserted, you'll
