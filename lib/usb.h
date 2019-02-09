@@ -4,6 +4,7 @@
 class Fluxmap;
 
 extern int usbGetVersion();
+extern void usbRecalibrate();
 extern void usbSeek(int track);
 extern nanoseconds_t usbGetRotationalPeriod();
 extern void usbTestBulkTransport();

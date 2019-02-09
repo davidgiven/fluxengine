@@ -114,6 +114,17 @@ void usbSeek(int track)
     await_reply<struct any_frame>(F_FRAME_SEEK_REPLY);
 }
 
+void usbRecalibrate()
+{
+    usb_init();
+
+    struct any_frame f = {
+        { .type = F_FRAME_RECALIBRATE_CMD, .size = sizeof(f) },
+    };
+    usb_cmd_send(&f, f.f.size);
+    await_reply<struct any_frame>(F_FRAME_RECALIBRATE_REPLY);
+}
+
 nanoseconds_t usbGetRotationalPeriod(void)
 {
     usb_init();

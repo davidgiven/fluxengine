@@ -3611,12 +3611,12 @@
   <Group key="Pin2">
     <Group key="4a398466-709f-4228-9500-96178658e13e">
       <Group key="0">
-        <Data key="Port Format" value="3,2" />
+        <Data key="Port Format" value="1,5" />
       </Group>
     </Group>
     <Group key="5a3407c1-b434-4438-a7b4-b9dfd2280495">
       <Group key="0">
-        <Data key="Port Format" value="15,4" />
+        <Data key="Port Format" value="12,4" />
       </Group>
     </Group>
     <Group key="8d318d8b-cf7b-4b6b-b02c-ab1c5c49d0ba">
@@ -3626,7 +3626,7 @@
     </Group>
     <Group key="41e2d8ed-5494-4d8c-8ff7-f4f789cece51">
       <Group key="0">
-        <Data key="Port Format" value="0,2" />
+        <Data key="Port Format" value="2,7" />
       </Group>
     </Group>
     <Group key="264be2d3-9481-494b-8d9c-c1905a45e9cc">
@@ -3678,17 +3678,17 @@
     </Group>
     <Group key="472f8fdb-f772-44fb-8897-cc690694237b">
       <Group key="0">
-        <Data key="Port Format" value="3,6" />
+        <Data key="Port Format" value="1,1" />
       </Group>
     </Group>
     <Group key="736cb12b-c863-43d4-a8f0-42f06023f8b5">
       <Group key="0">
-        <Data key="Port Format" value="3,1" />
+        <Data key="Port Format" value="1,6" />
       </Group>
     </Group>
     <Group key="4249c923-fcff-453b-8629-bec6fddd00c1">
       <Group key="0">
-        <Data key="Port Format" value="3,7" />
+        <Data key="Port Format" value="1,0" />
       </Group>
     </Group>
     <Group key="1425177d-0d0e-4468-8bcc-e638e5509a9b">
@@ -3698,12 +3698,12 @@
     </Group>
     <Group key="a5d987c6-e45b-45b9-ad93-656fab06d720">
       <Group key="0">
-        <Data key="Port Format" value="3,4" />
+        <Data key="Port Format" value="1,3" />
       </Group>
     </Group>
     <Group key="a93ef5b3-00f4-42c0-8fad-0e275a7e2537">
       <Group key="0">
-        <Data key="Port Format" value="15,1" />
+        <Data key="Port Format" value="12,1" />
       </Group>
     </Group>
     <Group key="bc5d52a1-1b25-4aa0-9ba9-3f81d122772f">
@@ -3726,17 +3726,17 @@
     </Group>
     <Group key="c5367cde-21d5-4866-9a32-d16abfea0c61">
       <Group key="0">
-        <Data key="Port Format" value="3,3" />
+        <Data key="Port Format" value="1,4" />
       </Group>
     </Group>
     <Group key="d19368c5-6855-41bb-a9ff-808938abef00">
       <Group key="0">
-        <Data key="Port Format" value="15,5" />
+        <Data key="Port Format" value="12,5" />
       </Group>
     </Group>
     <Group key="e9f14b5a-b2bf-49b8-98f3-d7b5a43ace8d">
       <Group key="0">
-        <Data key="Port Format" value="15,3" />
+        <Data key="Port Format" value="12,3" />
       </Group>
     </Group>
     <Group key="e851a3b9-efb8-48be-bbb8-b303b216c393">
@@ -3746,12 +3746,12 @@
     </Group>
     <Group key="e51063a9-4fad-40c7-a06b-7cc4b137dc18">
       <Group key="0">
-        <Data key="Port Format" value="3,0" />
+        <Data key="Port Format" value="1,7" />
       </Group>
     </Group>
     <Group key="ea7ee228-8b3f-426c-8bb8-cd7a81937769">
       <Group key="0">
-        <Data key="Port Format" value="15,0" />
+        <Data key="Port Format" value="12,0" />
       </Group>
     </Group>
     <Group key="ed092b9b-d398-4703-be89-cebf998501f6">
@@ -3761,12 +3761,12 @@
     </Group>
     <Group key="fede1767-f3fd-4021-b3d7-8f9d88f36f9b">
       <Group key="0">
-        <Data key="Port Format" value="15,2" />
+        <Data key="Port Format" value="12,2" />
       </Group>
     </Group>
     <Group key="fff78075-035e-43d7-8577-bc5be4d21926">
       <Group key="0">
-        <Data key="Port Format" value="3,5" />
+        <Data key="Port Format" value="1,2" />
       </Group>
     </Group>
     <Group key="UnAssigned Pins" />
@@ -3779,7 +3779,7 @@
     <Data key="CYDEV_CONFIG_UNUSED_IO" value="AllowButWarn" />
     <Data key="CYDEV_CONFIGURATION_ECC" value="True" />
     <Data key="CYDEV_CONFIGURATION_MODE" value="COMPRESSED" />
-    <Data key="CYDEV_DEBUGGING_DPS" value="SWD_SWV" />
+    <Data key="CYDEV_DEBUGGING_DPS" value="Disable" />
     <Data key="CYDEV_DEBUGGING_XRES" value="False" />
     <Data key="CYDEV_ECC_ENABLE" value="False" />
     <Data key="CYDEV_HEAP_SIZE" value="0x80" />

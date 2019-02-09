@@ -189,7 +189,10 @@ void readDiskCommand(
                 std::cout << "giving up" << std::endl
                           << "       ";
             else
+            {
 				std::cout << retry << " retries remaining" << std::endl;
+                usbRecalibrate();
+            }
 		}
 
         int size = 0;

@@ -181,6 +181,14 @@ static void cmd_seek(struct seek_frame* f)
     send_reply(&r);    
 }
 
+static void cmd_recalibrate(void)
+{
+    homed = false;
+    seek_to(0);
+    DECLARE_REPLY_FRAME(struct any_frame, F_FRAME_RECALIBRATE_REPLY);
+    send_reply(&r);    
+}
+    
 static void cmd_measure_speed(struct any_frame* f)
 {
     start_motor();
@@ -566,6 +574,10 @@ static void handle_command(void)
             
         case F_FRAME_ERASE_CMD:
             cmd_erase((struct erase_frame*) f);
+            break;
+        
+        case F_FRAME_RECALIBRATE_CMD:
+            cmd_recalibrate();
             break;
             
         default:

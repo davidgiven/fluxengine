@@ -54,6 +54,8 @@ enum
     F_FRAME_WRITE_REPLY,          /* any_frame */
     F_FRAME_ERASE_CMD,            /* erase_frame */
     F_FRAME_ERASE_REPLY,          /* any_frame */
+    F_FRAME_RECALIBRATE_CMD,      /* any_frame */
+    F_FRAME_RECALIBRATE_REPLY,    /* any_frame */
 };
 
 enum
