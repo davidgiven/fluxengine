@@ -4,18 +4,18 @@ FluxEngine
 What?
 -----
 
-FluxEngine is a very cheap USB floppy disk interface capable of reading
-and writing exotic non-PC floppy disk formats. It (should, this bit's not
-done yet) allow you to use a conventional PC drive to accept Amiga disks,
-CLV Macintosh disks, bizarre 128-sector CP/M disks, and other weird and
-bizarre formats.
+FluxEngine is a very cheap USB floppy disk interface capable of reading and
+writing exotic non-PC floppy disk formats. It allows you to use a
+conventional PC drive to accept Amiga disks, CLV Macintosh disks, bizarre
+128-sector CP/M disks, and other weird and bizarre formats. (Although not all
+of these are supported yet. I could really use samples.)
 
 ![a FluxEngine attached to a floppy drive](doc/floppy.jpg)
 
-**Big warning.** Right now it is a hacked together prototype. It is not
-ready to use. Unless you eat and breathe embedded systems code and were
-born with a soldering iron in your mouth (hopefully, turned off) then this
-is not for you. If you were... please, give it a try!
+**Important note.** On 2019-02-09 I did a hardware redesign and moved the pins on
+the board. Sorry for the inconvenience, but it means you don't have to modify
+the board any more to make it work. If you built the hardware prior to then,
+you'll need to adjust it.
 
 ### Infrequently asked questions because nobody's got round to asking them yet
 
@@ -49,8 +49,8 @@ to be spinning at the same speed.
 Currently, not a lot.
 
   - IBM MFM 720kB formats, a.k.a. standard PC floppy disks; read only (I
-    haven't got round to writing the write support). **Note:** 1440kB disks
-    _should_ work, but don't. I'm investigating.
+    haven't got round to writing the write support). **Note:** high density
+    disks _should_ work, but don't. I'm investigating.
 
   - [Acorn ADFS disks](doc/acorn-adfs.md): read only (likewise)
 
@@ -71,13 +71,12 @@ which is a decently fast ARM core wrapped around a CLDC/FPGA soft logic
 device. You can [get one for about
 $15](https://www.mouser.com/ProductDetail/Cypress-Semiconductor/CY8CKIT-059?qs=sGAEpiMZZMuo%252bmZx5g6tFKhundMNZurhvz2tw2jO%2fk8%3d).
 
-You need no extra components --- my current prototype (pictured above) has a
-17-way header soldered to one side of the board; it then pushes directly onto
+You need no extra components --- my old prototype (pictured above) had a
+17-way header soldered to one side of the board; it then pushed directly onto
 the floppy drive connector. Then you plug it into your PC via USB and you're
-ready to go.
-
-(Disclaimer: you do, however, need to _remove_ four components from the
-board. I'm looking into moving the pinout to avoid this.)
+ready to go. My newer prototype has a row of pins so I can plug it into a
+floppy disk drive cable, because that lets me fit it into a properly floppy
+disk drive enclosure. What you do is up to you.
 
 ### Bill of materials
 
@@ -87,8 +86,8 @@ suckers. Well, good luck, that's all I can say.
 Here's the physical stuff you need.
 
   - one (1) CY8CKIT-059 development board. See above. If your soldering is
-    like mine, you may potentially need more, but _I_ managed to construct the
-    thing without frying it so it's not too hard.
+    like mine, you may potentially need more, but as _I_ managed to construct
+    the thing without frying it, it can't be too hard.
 
   - one (1) standard PC floppy disk drive. You'll have to search around as
     they're increasingly hard to find. The FluxEngine should work with any
@@ -100,9 +99,9 @@ Here's the physical stuff you need.
     set of headers to let me attach the board directly on the back of the
     drive; this works fine, but the geometry's kind of awkward as part of the
     board covered the power socket and I had to modify it. (Which is why the
-    programmer is hanging off the back.) I'd probably recommend soldering on
-    pins instead, and using a traditional floppy cable. That'd let you attach
-    two drives, too (although this is currently unsupported in the firmware;
+    programmer is hanging off the back.) I'd recommend soldering on pins
+    instead, and using a traditional floppy cable. That'd let you attach two
+    drives, too (although this is currently unsupported in the firmware;
     if you want this, [get in
     touch](https://github.com/davidgiven/fluxengine/issues/new).
 
@@ -116,41 +115,31 @@ Here's the physical stuff you need.
   - optional: a floppy drive power cable. You can cut this in half, solder
     the raw end to the FluxEngine board, and power the drive off USB --- very
     convenient. This only works for drives which consume less than 500mA.
-    _Check before trying_ (5.25" drives need not apply here). Otherwise
-    you'll need an actual power supply.
+    _Check the drive before trying_ (5.25" drives need not apply here).
+    Otherwise you'll need an actual power supply.
 
 ### Assembly instructions
 
 ![closeup of the board](doc/closeup.jpg)
 
-(In the picture above, the extra two wires are the serial port and go off to
-the programmer. Normally that's attached on the left but I had to cut it off
-to make it fit. If you use pins rather than a header you won't need to do
-this.)
+(In the picture above, the connector on the left goes off to the programmer.
+Normally that's physically attached to the board but I had to cut it off to
+make it fit on the back of a floppy disk drive. Using pins instead means this
+isn't necessary, but, well, now it's too late.)
 
-  1. Very carefully remove C7, C9, C12 and C13 from the top of the board.
-     It's not hard; use tweezers or fine needle-nosed pliers to lift the
-     component, apply heat to one end, wait for a few seconds and as the heat
-     soaks through the solder will soften and it'll come away. Be careful;
-     they're incredibly small. (I'm looking at changing the pinout to avoid
-     needing this step, which is first so that if you ruin your board you don't waste time.)
+  1. **If you're using a header:** solder your 17-way header to the
+     **bottom** of the board, from 2.7 to 1.0 inclusive. Skip 12.4 and 12.5.
+     (It has to be the bottom because there are components that stick out on
+     the other side and the bottom needs to go flush against the drive.)
 
-     They're the circled components in this image. (They are actually clearly
-     labelled but my circles have obscured the labels.) Note that the middle
-     circle contains two capacitors side-by-side.
+  3. **If you're using pins:** solder your 17-way pins to **either side** of
+     the board, from 2.7 to 1.0 inclusive. Skip 12.4 and 12.5.
 
-     ![which capacitors to remove](doc/capacitors.jpg)
-
-  2. **If you're using a header:** solder your 17-way header to the
-     **bottom** of the board, from 0.2 to 3.0 inclusive. (It has to be the
-     bottom because there are components that stick out on the other side and
-     the bottom needs to go flush against the drive.)
-
-  3. **If you're using pins:** solder your 17-way pins to either side of the
-     board, from 0.2 to 3.0 inclusive.
-
-  4. Optional: solder the ends of your floppy drive power supply cable to any
-     convenient VDD and GND pins on the board. Remember to check the polarity.
+  4. Solder two wires to any convenient VDD and GND pins and connect these to
+     your floppy disk drive's power supply. If you're powering the floppy
+     drive from the board, connect these directly to the floppy drive. The
+     board needs to have the same ground as the floppy disk drive or weird
+     stuff could happen. Remember to check the polarity.
 
 And you're done!
 
@@ -174,6 +163,13 @@ When you're ready, open the `FluxEngine.cydsn/FluxEngine.cywrk` workspace,
 pick 'Program' from the menu, and the firmware should compile and be
 programmed onto your board.
 
+**Big warning:** if programming doesn't work and you get a strange dialogue
+asking about port acquisition, then the programmer hasn't found the board.
+This is normal but annoying. You should see the green LED on the programmer
+pulsing slowly (a breathing pattern). Press and hold the little button near
+it for five seconds until the light stays solidly on. Now the programmer
+should work fine.
+
 ### Building the client
 
 The client software is where the intelligence, such as it is, is. It's pretty
@@ -193,7 +189,10 @@ ready. What next?
   1. Attach the FluxEngine to your floppy disk drive. Pin 0.2 is REDWC and
      connects to pin 2 on the floppy drive. Pin 3.0 is DSKCHG and connects to
      pin 34 on the floppy drive. All the other board pins connect in the
-     obvious order. Odd pins on the floppy drive are left unconnected.
+     obvious order. Odd pins on the floppy drive are left unconnected. You
+     can push the floppy drive connector straight onto the pins, or the
+     FluxEngine board straight onto the floppy disk drive, depending on how
+     you're doing it.
 
   2. **Important.** Make sure that no disk you care about is in the drive.
 	 (Because if your wiring is wrong and a disk is inserted, you'll
