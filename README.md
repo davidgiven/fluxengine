@@ -40,6 +40,12 @@ in software. It doesn't rely on any floppy disk controller to interpret the
 pulsetrain, so we can be a lot cleverer. In fact, the disk doesn't even have
 to be spinning at the same speed.
 
+**Q.** Does it work on 5.25" drives?
+
+**A.** Yes! Although PC 5.25" drives spin at 360 RPM rather than 300 RPM,
+which means there's only 166ms of data on one per track rather than 200ms;
+if you try to write a 3.5" format disk onto one it probably won't work.
+
 **Q.** That's awesome! What formats does it support?
 
 **A.** I'm glad you asked the question. Not a lot, currently.
@@ -91,9 +97,7 @@ Here's the physical stuff you need.
 
   - one (1) standard PC floppy disk drive. You'll have to search around as
     they're increasingly hard to find. The FluxEngine should work with any
-    standard 3.5" drive. It's theoretically capable of supporting 5.25"
-    drives too but I'd need to modify the firmware timings. If you want this,
-    [get in touch](https://github.com/davidgiven/fluxengine/issues/new).
+    standard 3.5" or 5.25" drive.
 
   - some way of connecting the board to your drive. My prototype above uses a
     set of headers to let me attach the board directly on the back of the
@@ -297,9 +301,10 @@ Commands which take `--source` or `--dest` take a parameter of the syntax
 disk; otherwise, you can specify a `.flux` file. The colon-separated
 modifiers limit which bits of the disk are accessed. To specify tracks, do
 `:t=0-9` (or just `:t=7`). For sides, do `:s=0-1` (or commonly just `:s=0`).
-If left unspecified, you get the default specified by the command, which will
-vary depending on which disk format you're using (and is usually the right
-one).
+If you have two drives, do `:d=1` (but bear in mind that you need to specify
+exactly one drive; ranges won't work). If left unspecified, you get the
+default specified by the command, which will vary depending on which disk
+format you're using (and is usually the right one).
 
 ### How it works
 

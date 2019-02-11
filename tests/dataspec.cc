@@ -35,40 +35,40 @@ static void test_parsemod(void)
 
 static void test_dataspec(void)
 {
-    DataSpec spec("foo:t=0-2:s=0-1");
+    DataSpec spec("foo:t=0-2:s=0-1:d=0");
     assert(spec.filename == "foo");
     assert((spec.locations
         == std::vector<DataSpec::Location>
-        {{0, 0}, {0, 1}, {1, 0}, {1, 1}, {2, 0}, {2, 1}}));
-    assert((std::string)spec == "foo:s=0-1:t=0-2");
+        {{0, 0, 0}, {0, 0, 1}, {0, 1, 0}, {0, 1, 1}, {0, 2, 0}, {0, 2, 1}}));
+    assert((std::string)spec == "foo:d=0:s=0-1:t=0-2");
 
     spec.set("bar");
     assert(spec.filename == "bar");
     assert((spec.locations
         == std::vector<DataSpec::Location>
-        {{0, 0}, {0, 1}, {1, 0}, {1, 1}, {2, 0}, {2, 1}}));
-    assert((std::string)spec == "bar:s=0-1:t=0-2");
+        {{0, 0, 0}, {0, 0, 1}, {0, 1, 0}, {0, 1, 1}, {0, 2, 0}, {0, 2, 1}}));
+    assert((std::string)spec == "bar:d=0:s=0-1:t=0-2");
 
     spec.set(":t=0");
     assert(spec.filename.empty());
     assert((spec.locations
         == std::vector<DataSpec::Location>
-        {{0, 0}, {0, 1}}));
-    assert((std::string)spec == ":s=0-1:t=0");
+        {{0, 0, 0}, {0, 0, 1}}));
+    assert((std::string)spec == ":d=0:s=0-1:t=0");
 
     spec.set(":s=1");
     assert(spec.filename.empty());
     assert((spec.locations
         == std::vector<DataSpec::Location>
-        {{0, 1}}));
-    assert((std::string)spec == ":s=1:t=0");
+        {{0, 0, 1}}));
+    assert((std::string)spec == ":d=0:s=1:t=0");
 
-    spec.set(":t=9");
+    spec.set(":t=9:d=1");
     assert(spec.filename.empty());
     assert((spec.locations
         == std::vector<DataSpec::Location>
-        {{9, 1}}));
-    assert((std::string)spec == ":s=1:t=9");
+        {{1, 9, 1}}));
+    assert((std::string)spec == ":d=1:s=1:t=9");
 }
 
 int main(int argc, const char* argv[])

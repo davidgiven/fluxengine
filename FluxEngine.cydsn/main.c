@@ -6,7 +6,7 @@
 #include "../protocol.h"
 
 #define MOTOR_ON_TIME 5000 /* milliseconds */
-#define STEP_INTERVAL_TIME 3 /* ms */
+#define STEP_INTERVAL_TIME 6 /* ms */
 #define STEP_SETTLING_TIME 40 /* ms */
 
 #define DISKSTATUS_WPT    1
@@ -22,6 +22,7 @@ static bool motor_on = false;
 static uint32_t motor_on_time = 0;
 static bool homed = false;
 static int current_track = 0;
+static int current_drive = 0;
 
 #define BUFFER_COUNT 16
 #define BUFFER_SIZE 64
@@ -540,6 +541,19 @@ static void cmd_erase(struct erase_frame* f)
     send_reply((struct any_frame*) &r);
 }
 
+static void cmd_set_drive(struct set_drive_frame* f)
+{
+    if (current_drive != f->drive)
+    {
+        current_drive = f->drive;
+        DRIVE_REG_Write(current_drive);
+        homed = false;
+    }
+    
+    DECLARE_REPLY_FRAME(struct any_frame, F_FRAME_SET_DRIVE_REPLY);
+    send_reply((struct any_frame*) &r);
+}
+   
 static void handle_command(void)
 {
     static uint8_t input_buffer[FRAME_SIZE];
@@ -580,6 +594,10 @@ static void handle_command(void)
             cmd_recalibrate();
             break;
             
+        case F_FRAME_SET_DRIVE_CMD:
+            cmd_set_drive((struct set_drive_frame*) f);
+            break;
+            
         default:
             send_error(F_ERROR_BAD_COMMAND);
     }
@@ -594,6 +612,7 @@ int main(void)
     CAPTURE_DMA_FINISHED_IRQ_StartEx(&capture_dma_finished_irq_cb);
     REPLAY_DMA_FINISHED_IRQ_StartEx(&replay_dma_finished_irq_cb);
     CAPTURE_COUNTER_Start();
+    DRIVE_REG_Write(0);
     /* UART_Start(); */
     USBFS_Start(0, USBFS_DWR_VDDD_OPERATION);
     

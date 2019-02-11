@@ -79,17 +79,22 @@ void DataSpec::set(const std::string& spec)
         for (size_t i = 1; i < words.size(); i++)
         {
             auto mod = parseMod(words[i]);
-            if ((mod.name != "t") && (mod.name != "s"))
+            if ((mod.name != "t") && (mod.name != "s") && (mod.name != "d"))
                 Error() << fmt::format("unknown data modifier '{}'", mod.name);
             modifiers[mod.name] = mod;
         }
+
+        const auto& drives = modifiers["d"].data;
+        if (drives.size() != 1)
+            Error() << "you must specify exactly one drive";
+        drive = *drives.begin();
 
         const auto& tracks = modifiers["t"].data;
         const auto& sides = modifiers["s"].data;
         for (auto track : tracks)
         {
             for (auto side : sides)
-                locations.push_back({ track, side });
+                locations.push_back({ drive, track, side });
         }
     }
 }

@@ -56,6 +56,8 @@ enum
     F_FRAME_ERASE_REPLY,          /* any_frame */
     F_FRAME_RECALIBRATE_CMD,      /* any_frame */
     F_FRAME_RECALIBRATE_REPLY,    /* any_frame */
+    F_FRAME_SET_DRIVE_CMD,        /* setdrive_frame */
+    F_FRAME_SET_DRIVE_REPLY,      /* any_frame */
 };
 
 enum
@@ -119,6 +121,12 @@ struct erase_frame
 {
     struct frame_header f;
     uint8_t side;
+};
+
+struct set_drive_frame
+{
+    struct frame_header f;
+    uint8_t drive;
 };
 
 #endif

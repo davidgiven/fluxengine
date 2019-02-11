@@ -10,6 +10,7 @@ class ReaderTrack
 public:
     virtual ~ReaderTrack() {}
 
+    int drive;
     int track;
     int side;
 

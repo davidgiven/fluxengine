@@ -6,14 +6,15 @@ class DataSpec
 public:
     struct Location
     {
+        unsigned drive;
         unsigned track;
         unsigned side;
 
         bool operator == (const Location& other) const
-        { return (track == other.track) && (side == other.side); }
+        { return (drive == other.drive) && (track == other.track) && (side == other.side); }
 
         bool operator != (const Location& other) const
-        { return (track != other.track) || (side != other.side); }
+        { return (drive != other.drive) || (track != other.track) || (side != other.side); }
     };
 
     struct Modifier
@@ -44,6 +45,7 @@ public:
     std::string filename;
     std::map<std::string, Modifier> modifiers;
     std::vector<Location> locations;
+    unsigned drive;
 };
 
 std::ostream& operator << (std::ostream& os, const DataSpec& dataSpec)

@@ -15,7 +15,7 @@
 static DataSpecFlag source(
     { "--source", "-s" },
     "source for data",
-    ":t=0-79:s=0-1");
+    ":t=0-79:s=0-1:d=0");
 
 static StringFlag destination(
     { "--write-flux", "-f" },
@@ -63,6 +63,7 @@ std::unique_ptr<Fluxmap> ReaderTrack::read()
     
 std::unique_ptr<Fluxmap> CapturedReaderTrack::reallyRead()
 {
+    usbSetDrive(drive);
     usbSeek(track);
     return usbRead(side, revolutions);
 }
@@ -104,6 +105,7 @@ std::vector<std::unique_ptr<ReaderTrack>> readTracks()
             dataSpec.filename.empty()
                 ? (ReaderTrack*)new CapturedReaderTrack()
                 : (ReaderTrack*)new FileReaderTrack());
+        t->drive = location.drive;
         t->track = location.track;
         t->side = location.side;
         tracks.push_back(std::move(t));

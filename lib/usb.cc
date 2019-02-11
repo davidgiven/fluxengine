@@ -244,3 +244,15 @@ void usbErase(int side)
     await_reply<struct any_frame>(F_FRAME_ERASE_REPLY);
 }
 
+void usbSetDrive(int drive)
+{
+    usb_init();
+
+    struct set_drive_frame f = {
+        { .type = F_FRAME_SET_DRIVE_CMD, .size = sizeof(f) },
+        .drive = (uint8_t) drive
+    };
+    usb_cmd_send(&f, f.f.size);
+    await_reply<struct any_frame>(F_FRAME_SET_DRIVE_REPLY);
+}
+
