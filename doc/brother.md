@@ -31,12 +31,10 @@ Reading discs
 Just do:
 
 ```
-.obj/fe-readbrother --revolutions=2
+.obj/fe-readbrother
 ```
 
-You should end up with a `brother.img` which is 239616 bytes long. (If you
-don't specify `--revolutions`, you may end up with a partial image.) (Use
-`-o` to specify a different output filename.)
+You should end up with a `brother.img` which is 239616 bytes long.
 
 Writing discs
 -------------

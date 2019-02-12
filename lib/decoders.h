@@ -1,20 +1,28 @@
 #ifndef DECODERS_H
 #define DECODERS_H
 
+/* IBM record scheme variants */
+
+enum
+{
+    IBM_SCHEME_MFM,
+    IBM_SCHEME_FM
+};
+
 /* IBM format (i.e. ordinary PC floppies). */
 
 #define IBM_IAM        0xFC   /* start-of-track record */
-#define IBM_IAM_LEN    4
-#define IBM_IDAM       0xFE  /* sector header */
-#define IBM_IDAM_LEN   10
-#define IBM_DAM1       0xF8  /* sector data (type 1) */
-#define IBM_DAM2       0xFB  /* sector data (type 2) */
-#define IBM_DAM_LEN    6 /* plus user data */
+#define IBM_IAM_LEN    1      /* plus prologue */
+#define IBM_IDAM       0xFE   /* sector header */
+#define IBM_IDAM_LEN   7      /* plus prologue */
+#define IBM_DAM1       0xF8   /* sector data (type 1) */
+#define IBM_DAM2       0xFB   /* sector data (type 2) */
+#define IBM_DAM_LEN    1      /* plus prologue and user data */
+
 /* Length of a DAM record is determined by the previous sector header. */
 
 struct IbmIdam
 {
-    uint8_t marker[3];
     uint8_t id;
     uint8_t cylinder;
     uint8_t side;
@@ -39,11 +47,17 @@ public:
         const std::vector<bool>& bitmap) const = 0;
 };
 
+class FmBitmapDecoder : public BitmapDecoder
+{
+public:
+    nanoseconds_t guessClock(Fluxmap& fluxmap) const;
+    RecordVector decodeBitsToRecords(const std::vector<bool>& bitmap) const;
+};
+
 class MfmBitmapDecoder : public BitmapDecoder
 {
 public:
     nanoseconds_t guessClock(Fluxmap& fluxmap) const;
-
     RecordVector decodeBitsToRecords(const std::vector<bool>& bitmap) const;
 };
 
@@ -59,7 +73,8 @@ public:
 class IbmRecordParser : public RecordParser
 {
 public:
-    IbmRecordParser(int sectorIdBase):
+    IbmRecordParser(int scheme, int sectorIdBase):
+        _scheme(scheme),
         _sectorIdBase(sectorIdBase)
     {}
 
@@ -67,6 +82,7 @@ public:
         const RecordVector& records) const;
 
 private:
+    int _scheme;
     int _sectorIdBase;
 };
 

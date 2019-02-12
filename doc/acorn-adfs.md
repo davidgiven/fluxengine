@@ -3,7 +3,9 @@ Acorn ADFS disks
 
 Acorn ADFS disks are pretty standard MFM encoded IBM scheme disks, although
 with different sector sizes and with the 0-based sector identifiers rather
-than 1-based sector identifiers. There's nothing particularly special here.
+than 1-based sector identifiers. The index hole is ignored and sectors are
+written whereever, requiring FluxEngine to do two revolutions to read a
+disk.
 
 There are various different kinds, which should all work out of the box.
 Tested ones are:
@@ -29,8 +31,8 @@ Reading discs
 Just do:
 
 ```
-.obj/fe-readacorn
+.obj/fe-readadfs
 ```
 
-You should end up with an `acorn.img` of the appropriate size for your disk
+You should end up with an `adfs.img` of the appropriate size for your disk
 format.

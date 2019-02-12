@@ -12,7 +12,7 @@
 static StringFlag outputFilename(
     { "--output", "-o" },
     "The output image file to write to.",
-    "acorn.img");
+    "adfs.img");
 
 static IntFlag sectorIdBase(
 	{ "--sector-id-base" },
@@ -25,7 +25,7 @@ int main(int argc, const char* argv[])
     Flag::parseFlags(argc, argv);
 
 	MfmBitmapDecoder bitmapDecoder;
-	IbmRecordParser recordParser(sectorIdBase);
+	IbmRecordParser recordParser(IBM_SCHEME_MFM, sectorIdBase);
 	readDiskCommand(bitmapDecoder, recordParser, outputFilename);
     return 0;
 }

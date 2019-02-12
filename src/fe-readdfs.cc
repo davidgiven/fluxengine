@@ -3,32 +3,31 @@
 #include "reader.h"
 #include "fluxmap.h"
 #include "decoders.h"
-#include "brother.h"
+#include "image.h"
 #include "sector.h"
 #include "sectorset.h"
-#include "image.h"
 #include "record.h"
 #include <fmt/format.h>
-#include <fstream>
 
 static StringFlag outputFilename(
     { "--output", "-o" },
     "The output image file to write to.",
-    "brother.img");
+    "dfs.img");
 
-#define SECTOR_COUNT 12
-#define TRACK_COUNT 78
+static IntFlag sectorIdBase(
+	{ "--sector-id-base" },
+	"Sector ID of the first sector.",
+	0);
 
 int main(int argc, const char* argv[])
 {
-	setReaderDefaultSource(":t=0-81:s=0");
+	setReaderDefaultSource(":t=0-79:s=0");
     setReaderRevolutions(2);
     Flag::parseFlags(argc, argv);
 
-	BrotherBitmapDecoder bitmapDecoder;
-	BrotherRecordParser recordParser;
+	FmBitmapDecoder bitmapDecoder;
+	IbmRecordParser recordParser(IBM_SCHEME_FM, sectorIdBase);
 	readDiskCommand(bitmapDecoder, recordParser, outputFilename);
-
     return 0;
 }
 

@@ -1,6 +1,5 @@
 project('fluxclient', 'cpp')
 add_global_arguments('--std=c++14', language: 'cpp')
-add_global_arguments('-Og', language: 'cpp')
 
 libusb = dependency('libusb-1.0')
 sqlite = dependency('sqlite3')
@@ -39,6 +38,7 @@ sqllib = shared_library('sqllib',
 decoderlib = shared_library('decoderlib',
     [
         'lib/decoders/decoders.cc',
+        'lib/decoders/fmdecoder.cc',
         'lib/decoders/mfmdecoder.cc',
         'lib/decoders/ibmparser.cc',
     ],
@@ -84,8 +84,9 @@ brotherinc = include_directories('lib/brother')
 
 executable('fe-erase',             ['src/fe-erase.cc'],             include_directories: [feinc], link_with: [felib, writerlib])
 executable('fe-inspect',           ['src/fe-inspect.cc'],           include_directories: [feinc, fmtinc, decoderinc], link_with: [felib, readerlib, decoderlib, fmtlib])
-executable('fe-readacorn',         ['src/fe-readacorn.cc'],         include_directories: [feinc, fmtinc, decoderinc], link_with: [felib, readerlib, decoderlib, fmtlib])
+executable('fe-readadfs',          ['src/fe-readadfs.cc'],          include_directories: [feinc, fmtinc, decoderinc], link_with: [felib, readerlib, decoderlib, fmtlib])
 executable('fe-readbrother',       ['src/fe-readbrother.cc'],       include_directories: [feinc, fmtinc, decoderinc, brotherinc], link_with: [felib, readerlib, decoderlib, brotherdecoderlib, fmtlib])
+executable('fe-readdfs',           ['src/fe-readdfs.cc'],           include_directories: [feinc, fmtinc, decoderinc], link_with: [felib, readerlib, decoderlib, fmtlib])
 executable('fe-readibm',           ['src/fe-readibm.cc'],           include_directories: [feinc, fmtinc, decoderinc], link_with: [felib, readerlib, decoderlib, fmtlib])
 executable('fe-rpm',               ['src/fe-rpm.cc'],               include_directories: [feinc], link_with: [felib])
 executable('fe-seek',              ['src/fe-seek.cc'],              include_directories: [feinc], link_with: [felib])
@@ -95,3 +96,4 @@ executable('fe-writeflux',         ['src/fe-writeflux.cc'],         include_dire
 executable('fe-writetestpattern',  ['src/fe-writetestpattern.cc'],  include_directories: [feinc, fmtinc], link_with: [felib, writerlib, fmtlib])
 
 test('DataSpec', executable('dataspec-test', ['tests/dataspec.cc'], include_directories: [feinc], link_with: [felib]))
+test('Flags',    executable('flags-test', ['tests/flags.cc'], include_directories: [feinc], link_with: [felib]))

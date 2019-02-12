@@ -34,6 +34,7 @@ public:
 };
 
 extern void setReaderDefaultSource(const std::string& source);
+extern void setReaderRevolutions(int revolutions);
 extern std::vector<std::unique_ptr<ReaderTrack>> readTracks();
 
 extern void readDiskCommand(

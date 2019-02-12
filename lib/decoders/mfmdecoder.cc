@@ -6,11 +6,6 @@
 #include <string.h>
 #include <algorithm>
 
-#define CLOCK_LOCK_BOOST 6 /* arbitrary */
-#define CLOCK_LOCK_DECAY 1 /* arbitrary */
-#define CLOCK_DETECTOR_AMPLITUDE_THRESHOLD 60 /* arbi4rary */
-#define CLOCK_ERROR_BOUNDS 0.25
-
 static size_t cursor;
 static size_t recordstart;
 static std::vector<uint8_t> outputbuffer;

@@ -48,6 +48,11 @@ void setReaderDefaultSource(const std::string& source)
     ::source.set(source);
 }
 
+void setReaderRevolutions(int revolutions)
+{
+    ::revolutions.value = ::revolutions.defaultValue = revolutions;
+}
+
 std::unique_ptr<Fluxmap> ReaderTrack::read()
 {
     std::cout << fmt::format("{0:>3}.{1}: ", track, side) << std::flush;

@@ -60,6 +60,8 @@ Currently, not a lot.
 
   - [Acorn ADFS disks](doc/acorn-adfs.md): read only (likewise)
 
+  - [Acorn DFS disks](doc/acorn-dfs.md): read only (likewise)
+
   - [Brother 240kB word processor disks](doc/brother.md); read and write
 
 ...aaaand that's it. If you want more, please [get in
@@ -267,6 +269,10 @@ directory.
 
   - `fe-inspect`: dumps the raw pulsetrain / bitstream to stdout. Mainly useful
     for debugging.
+
+  - `fe-readadfs`: reads various formats of Acorn ADFS disks.
+
+  - `fe-readdfs`: reads various formats of Acorn DFS disks.
 
   - `fe-readbrother`: reads 240kB Brother word processor disks. Emits a
 	256-byte-sector FAT filesystem. (You can access this with mtools

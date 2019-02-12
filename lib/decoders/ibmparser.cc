@@ -17,10 +17,21 @@ std::vector<std::unique_ptr<Sector>> IbmRecordParser::parseRecordsToSectors(
     IbmIdam idam;
     std::vector<std::unique_ptr<Sector>> sectors;
 
+    unsigned prologue;
+    switch (_scheme)
+    {
+        case IBM_SCHEME_MFM: prologue = 3; break;
+        case IBM_SCHEME_FM:  prologue = 0; break;
+        default: assert(false);
+    }
+
     for (auto& record : records)
     {
-		const std::vector<uint8_t>& data = record->data;
-        switch (data[3])
+        const auto& datav = record->data;
+        auto data = datav.begin() + prologue;
+        unsigned len = datav.size() - prologue;
+
+        switch (data[0])
         {
             case IBM_IAM:
                 /* Track header. Ignore. */
@@ -28,11 +39,11 @@ std::vector<std::unique_ptr<Sector>> IbmRecordParser::parseRecordsToSectors(
 
             case IBM_IDAM:
             {
-                if (data.size() < sizeof(idam))
+                if (len < sizeof(idam))
                     break;
                 memcpy(&idam, &data[0], sizeof(idam));
 
-				uint16_t crc = crc16(CCITT_POLY, (uint8_t*)&idam, (uint8_t*)&idam.crc);
+				uint16_t crc = crc16(CCITT_POLY, &datav[0], &datav[offsetof(IbmIdam, crc) + prologue]);
 				uint16_t wantedCrc = (idam.crc[0]<<8) | idam.crc[1];
 				idamValid = (crc == wantedCrc);
                 break;
@@ -45,15 +56,17 @@ std::vector<std::unique_ptr<Sector>> IbmRecordParser::parseRecordsToSectors(
                     break;
                 
                 unsigned size = 1 << (idam.sectorSize + 7);
-                if ((data.size()-IBM_DAM_LEN-2) < size)
+                if (size > (len + IBM_DAM_LEN + 2))
                     break;
 
-				uint16_t crc = crc16(CCITT_POLY, &data[0], &data[size+4]);
-				uint16_t wantedCrc = (data[size+4] << 8) | data[size+5];
+                const uint8_t* userStart = &data[IBM_DAM_LEN];
+                const uint8_t* userEnd = userStart + size;
+				uint16_t crc = crc16(CCITT_POLY, &datav[0], userEnd);
+				uint16_t wantedCrc = (userEnd[0] << 8) | userEnd[1];
 				int status = (crc == wantedCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
 
                 std::vector<uint8_t> sectordata(size);
-                memcpy(&sectordata[0], &data[4], size);
+                memcpy(&sectordata[0], userStart, size);
 
                 int sectorNum = idam.sector - _sectorIdBase;
                 auto sector = std::unique_ptr<Sector>(
