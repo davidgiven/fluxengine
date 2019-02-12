@@ -173,12 +173,19 @@ When you're ready, open the `FluxEngine.cydsn/FluxEngine.cywrk` workspace,
 pick 'Program' from the menu, and the firmware should compile and be
 programmed onto your board.
 
-**Big warning:** if programming doesn't work and you get a strange dialogue
-asking about port acquisition, then the programmer hasn't found the board.
-This is normal but annoying. You should see the green LED on the programmer
-pulsing slowly (a breathing pattern). Press and hold the little button near
-it for five seconds until the light stays solidly on. Now the programmer
-should work fine.
+**Big warning:** If programming doesn't work and you get a strange dialogue
+asking about port acquisition, then this is because the device isn't
+responding to the programmer. This is normal but annoying. You should see the
+device in the dialogue. Select it and press the 'Port Acquire' button. The
+device should reset and an extra item will appear in the dialogue; select
+this and press OK.
+
+If acquiring the port doesn't work, resulting in a long delay and a
+meaningless error message, you need to reset the programmer. You'll see that
+the light on the programmer is pulsing slowly (a breathing pattern). Press
+and hold the little button near the light for five seconds until the light
+stays solidly on. Now you should be able to acquire the port and proceed
+normally.
 
 ### Building the client
 
