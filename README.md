@@ -54,9 +54,13 @@ if you try to write a 3.5" format disk onto one it probably won't work.
 
 Currently, not a lot.
 
-  - IBM MFM 720kB formats, a.k.a. standard PC floppy disks; read only (I
-    haven't got round to writing the write support). **Note:** high density
-    disks _should_ work, but don't. I'm investigating.
+  - All standard double and high density IBM MFM formats, a.k.a. 360kB,
+    720kB, 1200kB, 1440kB formats; read only (I haven't got round to writing
+    the write support). Non-standard formats like the DMF 1680kB format
+    should work too but will require a little effort. ED disks probably don't
+    work, but I'd [love to hear from
+    you](https://github.com/davidgiven/fluxengine/issues/new) if you have one
+    and want to give it a try.
 
   - [Acorn ADFS disks](doc/acorn-adfs.md): read only (likewise)
 
