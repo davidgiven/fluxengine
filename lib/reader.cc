@@ -68,6 +68,11 @@ std::unique_ptr<Fluxmap> CapturedReaderTrack::reallyRead()
     return usbRead(side, revolutions);
 }
 
+void CapturedReaderTrack::recalibrate()
+{
+    usbRecalibrate();
+}
+
 std::unique_ptr<Fluxmap> FileReaderTrack::reallyRead()
 {
     if (!indb)
@@ -77,6 +82,9 @@ std::unique_ptr<Fluxmap> FileReaderTrack::reallyRead()
 	}
     return sqlReadFlux(indb, track, side);
 }
+
+void FileReaderTrack::recalibrate()
+{}
 
 std::vector<std::unique_ptr<ReaderTrack>> readTracks()
 {
@@ -193,7 +201,7 @@ void readDiskCommand(
             else
             {
 				std::cout << retry << " retries remaining" << std::endl;
-                usbRecalibrate();
+                track->recalibrate();
             }
 		}
 

@@ -16,18 +16,21 @@ public:
 
     std::unique_ptr<Fluxmap> read();
     virtual std::unique_ptr<Fluxmap> reallyRead() = 0;
+    virtual void recalibrate() = 0;
 };
 
 class CapturedReaderTrack : public ReaderTrack
 {
 public:
     std::unique_ptr<Fluxmap> reallyRead();
+    void recalibrate();
 };
 
 class FileReaderTrack : public ReaderTrack
 {
 public:
     std::unique_ptr<Fluxmap> reallyRead();
+    void recalibrate();
 };
 
 extern void setReaderDefaultSource(const std::string& source);
