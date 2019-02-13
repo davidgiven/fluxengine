@@ -4,11 +4,11 @@ FluxEngine
 What?
 -----
 
-FluxEngine is a very cheap USB floppy disk interface capable of reading and
-writing exotic non-PC floppy disk formats. It allows you to use a
-conventional PC drive to accept Amiga disks, CLV Macintosh disks, bizarre
-128-sector CP/M disks, and other weird and bizarre formats. (Although not all
-of these are supported yet. I could really use samples.)
+The FluxEngine is a very cheap USB floppy disk interface capable of reading and
+writing exotic non-PC floppy disk formats. It allows you to use a conventional
+PC drive to accept Amiga disks, CLV Macintosh disks, bizarre 128-sector CP/M
+disks, and other weird and bizarre formats. (Although not all of these are
+supported yet. I could really use samples.)
 
 ![a FluxEngine attached to a floppy drive](doc/floppy.jpg)
 
@@ -71,6 +71,31 @@ Currently, not a lot.
 ...aaaand that's it. If you want more, please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new); I need samples
 of floppy disks to scan and play with.
+
+### Big list of stuff to work on
+
+Both the firmware and the software are works in progress. There's still things
+to do.
+
+  - Support for more floppy disk formats! I'm trying to scare up some sample
+	disks to image and decode; I'm particularly looking for Commodore 64 1541
+	disks and Apple Macintosh 800kB CLV disks. If you have any which I can
+	borrow and you live in (or near) Switzerland, please [get in
+	touch](https://github.com/davidgiven/fluxengine/issues/new).
+
+  - Better (and more) write support. The hardware can write disks, but not much
+	of the software's done.  Writing is hard because I really need the device
+	to test the disks on. I could use some help here. Also, most of the write
+	code is a bit of a disaster and needs a major refactoring.
+
+  - Sourcing a different microcontroller. The PSoC5 is a great thing to work
+	with, but it's disappointingly proprietary and the toolchain only works on
+	Windows. It'd be nice to support something easier to work with. I need a 5V
+	microcontroller (which unfortunately rules out Arduinos) with at least
+	seventeen GPIO pins in a row.  As non-PSoC5 microcontrollers won't have the
+	FPGA soft logic, that also means I'd most likely need to bitbang the floppy
+	drive, so speed is important. If you have any recommendations, please [get
+	in touch](https://github.com/davidgiven/fluxengine/issues/new).
 
 How?
 ----
