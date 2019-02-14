@@ -87,11 +87,21 @@ record.) The sector order is 05a3816b4927, which gives a sector skew of 5.
 High level format
 -----------------
 
-Once decoded, you end up with a 234kB file system image. Luckily, this turns
-out to be a completely normal FAT file system with a media type of 0x58 --- did
-you know that FAT supports 256 byte sectors? I didn't --- of the MSX-DOS
-variety. There's a faint possibility that the word processor is based on
-MSX-DOS, but I haven't reverse engineered it to find out.
+Once decoded, you end up with a file system image.
+
+### 120kB disks
+
+These disks use a proprietary and very simple file system which I haven't
+reverse engineered yet. It's FAT-like with an obvious directory and
+allocation table. It'll need custom tools to access files.
+
+### 240kB disks
+
+Conversely, the 240kB disks turns out to be a completely normal Microsoft FAT
+file system with a media type of 0x58 --- did you know that FAT supports 256
+byte sectors? I didn't --- of the MSX-DOS variety. There's a faint
+possibility that the word processor is based on MSX-DOS, but I haven't
+reverse engineered it to find out.
 
 Standard Linux mtools will access the filesystem image and allow you to move
 files in and out. However, you'll need to change the media type bytes at
