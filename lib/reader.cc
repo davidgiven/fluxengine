@@ -23,6 +23,10 @@ static StringFlag destination(
     "write the raw magnetic flux to this file",
     "");
 
+static SettableFlag justRead(
+	{ "--just-read" },
+	"just read the disk and do no further processing");
+
 static SettableFlag dumpRecords(
 	{ "--dump-records" },
 	"Dump the parsed records.");
@@ -46,8 +50,13 @@ void setReaderRevolutions(int revolutions)
 
 std::unique_ptr<Fluxmap> Track::read()
 {
-	std::cout << fmt::format("reading track {} side {}", track, side) << std::endl;
-	return _fluxReader->readFlux(track, side);
+	std::cout << fmt::format("{0:>3}.{1}: ", track, side) << std::flush;
+	std::unique_ptr<Fluxmap> fluxmap = _fluxReader->readFlux(track, side);
+	std::cout << fmt::format(
+		"{0} ms in {1} bytes", int(fluxmap->duration()/1e6), fluxmap->bytes()) << std::endl;
+	if (outdb)
+		sqlWriteFlux(outdb, track, track, *fluxmap);
+	return fluxmap;
 }
 
 void Track::recalibrate()
@@ -82,6 +91,15 @@ std::vector<std::unique_ptr<Track>> readTracks()
 		tracks.push_back(
 			std::unique_ptr<Track>(new Track(fluxreader, location.track, location.side)));
 
+	if (justRead)
+	{
+		for (auto& track : tracks)
+			track->read();
+		
+		std::cout << "--just-read specified, halting now" << std::endl;
+		exit(0);
+	}
+
 	return tracks;
 }
 
@@ -96,12 +114,7 @@ void readDiskCommand(
 		std::map<int, std::unique_ptr<Sector>> readSectors;
 		for (int retry = ::retries; retry >= 0; retry--)
 		{
-			std::cout << fmt::format("{0:>3}.{1}: ", track->track, track->side) << std::flush;
 			std::unique_ptr<Fluxmap> fluxmap = track->read();
-			std::cout << fmt::format(
-				"{0} ms in {1} bytes", int(fluxmap->duration()/1e6), fluxmap->bytes()) << std::endl;
-			if (outdb)
-				sqlWriteFlux(outdb, track->track, track->side, *fluxmap);
 
 			nanoseconds_t clockPeriod = bitmapDecoder.guessClock(*fluxmap);
 			std::cout << fmt::format("       {:.2f} us clock; ", (double)clockPeriod/1000.0) << std::flush;
