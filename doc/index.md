@@ -69,9 +69,9 @@ Currently, not a lot.
     you](https://github.com/davidgiven/fluxengine/issues/new) if you have one
     and want to give it a try.
 
-  - [Acorn ADFS disks](acorn-adfs.md): read only (likewise)
+  - [Acorn ADFS disks](acornadfs.md): read only (likewise)
 
-  - [Acorn DFS disks](acorn-dfs.md): read only (likewise)
+  - [Acorn DFS disks](acorndfs.md): read only (likewise)
 
   - [Brother 120kB and 240kB word processor disks](brother.md); read and
     write
