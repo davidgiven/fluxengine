@@ -10,7 +10,7 @@ PC drive to accept Amiga disks, CLV Macintosh disks, bizarre 128-sector CP/M
 disks, and other weird and bizarre formats. (Although not all of these are
 supported yet. I could really use samples.)
 
-![a FluxEngine attached to a floppy drive](doc/floppy.jpg)
+![a FluxEngine attached to a floppy drive](floppy.jpg)
 
 **Important note.** On 2019-02-09 I did a hardware redesign and moved the pins on
 the board. Sorry for the inconvenience, but it means you don't have to modify
@@ -69,11 +69,11 @@ Currently, not a lot.
     you](https://github.com/davidgiven/fluxengine/issues/new) if you have one
     and want to give it a try.
 
-  - [Acorn ADFS disks](doc/acorn-adfs.md): read only (likewise)
+  - [Acorn ADFS disks](acorn-adfs.md): read only (likewise)
 
-  - [Acorn DFS disks](doc/acorn-dfs.md): read only (likewise)
+  - [Acorn DFS disks](acorn-dfs.md): read only (likewise)
 
-  - [Brother 120kB and 240kB word processor disks](doc/brother.md); read and
+  - [Brother 120kB and 240kB word processor disks](brother.md); read and
     write
 
 ...aaaand that's it. If you want more, please [get in
@@ -163,7 +163,7 @@ Here's the physical stuff you need.
 
 ### Assembly instructions
 
-![closeup of the board](doc/closeup.jpg)
+![closeup of the board](closeup.jpg)
 
 (In the picture above, the connector on the left goes off to the programmer.
 Normally that's physically attached to the board but I had to cut it off to
@@ -325,7 +325,7 @@ directory.
 
   - `fe-readbrother`: reads 240kB Brother word processor disks. Emits a
 	256-byte-sector FAT filesystem. (You can access this with mtools
-	although you'll [to edit them first](doc/brother.md).
+	although you'll [to edit them first](brother.md).
 
   - `fe-writebrother`: writes 240kB Brother word processor disks.
 
