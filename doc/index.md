@@ -105,6 +105,11 @@ to do.
 	drive, so speed is important. If you have any recommendations, please [get
 	in touch](https://github.com/davidgiven/fluxengine/issues/new).
 
+Where?
+------
+
+It's [open source on GitHub!](https://github.com/davidgiven/fluxengine)
+
 How?
 ----
 
