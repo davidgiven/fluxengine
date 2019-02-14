@@ -15,6 +15,9 @@ means that the disks can't be read by FluxEngine (because the tracks on the
 disk don't line up with the position of the head in a PC drive). The word
 processors themselves solved this by microstepping until they found where the
 real track is, but normal PC drives aren't capable of doing this.
+Particularly with the 120kB disks, you might want to fiddle with the start
+track (e.g. `:t=0-79x2`) to get a clean read. Keep an eye on the bad sector
+map that's dumped at the end of a read.
 
 Using FluxEngine to *write* disks isn't a problem, so the
 simplest solution is to use FluxEngine to create a new disk, with the tracks
