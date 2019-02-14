@@ -10,7 +10,7 @@ PC drive to accept Amiga disks, CLV Macintosh disks, bizarre 128-sector CP/M
 disks, and other weird and bizarre formats. (Although not all of these are
 supported yet. I could really use samples.)
 
-![a FluxEngine attached to a floppy drive](floppy.jpg)
+<img src="floppy.jpg" style="width:100%" alt="a FluxEngine attached to a floppy drive">
 
 **Important note.** On 2019-02-09 I did a hardware redesign and moved the pins on
 the board. Sorry for the inconvenience, but it means you don't have to modify
@@ -168,7 +168,7 @@ Here's the physical stuff you need.
 
 ### Assembly instructions
 
-![closeup of the board](closeup.jpg)
+<img src="closeup.jpg" style="width:100%" alt="closeup of the board">
 
 (In the picture above, the connector on the left goes off to the programmer.
 Normally that's physically attached to the board but I had to cut it off to
