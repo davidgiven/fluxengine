@@ -1,6 +1,7 @@
 #include "globals.h"
 #include "flags.h"
 #include "usb.h"
+#include "fluxreader.h"
 #include "reader.h"
 #include "fluxmap.h"
 #include "sql.h"
@@ -22,15 +23,6 @@ static StringFlag destination(
     "write the raw magnetic flux to this file",
     "");
 
-static SettableFlag justRead(
-    { "--just-read", "-R" },
-    "just read the disk but do no further processing");
-
-static IntFlag revolutions(
-    { "--revolutions" },
-    "read this many revolutions of the disk",
-    1);
-
 static SettableFlag dumpRecords(
 	{ "--dump-records" },
 	"Dump the parsed records.");
@@ -40,7 +32,6 @@ static IntFlag retries(
 	"How many times to retry each track in the event of a read failure.",
 	5);
 
-static sqlite3* indb;
 static sqlite3* outdb;
 
 void setReaderDefaultSource(const std::string& source)
@@ -50,48 +41,21 @@ void setReaderDefaultSource(const std::string& source)
 
 void setReaderRevolutions(int revolutions)
 {
-    ::revolutions.value = ::revolutions.defaultValue = revolutions;
+	setHardwareFluxReaderRevolutions(revolutions);
 }
 
-std::unique_ptr<Fluxmap> ReaderTrack::read()
+std::unique_ptr<Fluxmap> Track::read()
 {
-    std::cout << fmt::format("{0:>3}.{1}: ", track, side) << std::flush;
-    std::unique_ptr<Fluxmap> fluxmap = reallyRead();
-    std::cout << fmt::format(
-        "{0} ms in {1} bytes", int(fluxmap->duration()/1e6), fluxmap->bytes()) << std::endl;
-
-    if (outdb)
-        sqlWriteFlux(outdb, track, side, *fluxmap);
-
-    return fluxmap;
+	std::cout << fmt::format("reading track {} side {}", track, side) << std::endl;
+	return _fluxReader->readFlux(track, side);
 }
-    
-std::unique_ptr<Fluxmap> CapturedReaderTrack::reallyRead()
+
+void Track::recalibrate()
 {
-    usbSetDrive(drive);
-    usbSeek(track);
-    return usbRead(side, revolutions);
+	_fluxReader->recalibrate();
 }
 
-void CapturedReaderTrack::recalibrate()
-{
-    usbRecalibrate();
-}
-
-std::unique_ptr<Fluxmap> FileReaderTrack::reallyRead()
-{
-    if (!indb)
-	{
-        indb = sqlOpen(source.value.filename, SQLITE_OPEN_READONLY);
-		atexit([]() { sqlClose(indb); });
-	}
-    return sqlReadFlux(indb, track, side);
-}
-
-void FileReaderTrack::recalibrate()
-{}
-
-std::vector<std::unique_ptr<ReaderTrack>> readTracks()
+std::vector<std::unique_ptr<Track>> readTracks()
 {
     const DataSpec& dataSpec = source.value;
 
@@ -111,28 +75,14 @@ std::vector<std::unique_ptr<ReaderTrack>> readTracks()
 		);
 	}
 
-    std::vector<std::unique_ptr<ReaderTrack>> tracks;
-    for (const auto& location : dataSpec.locations)
-    {
-        std::unique_ptr<ReaderTrack> t(
-            dataSpec.filename.empty()
-                ? (ReaderTrack*)new CapturedReaderTrack()
-                : (ReaderTrack*)new FileReaderTrack());
-        t->drive = location.drive;
-        t->track = location.track;
-        t->side = location.side;
-        tracks.push_back(std::move(t));
-    }
+	std::shared_ptr<FluxReader> fluxreader = FluxReader::create(dataSpec);
 
-	if (justRead)
-	{
-		for (auto& track : tracks)
-			track->read();
-		std::cout << "--just-read specified, terminating without further processing" << std::endl;
-		exit(0);
-	}
-				
-    return tracks;
+	std::vector<std::unique_ptr<Track>> tracks;
+    for (const auto& location : dataSpec.locations)
+		tracks.push_back(
+			std::unique_ptr<Track>(new Track(fluxreader, location.track, location.side)));
+
+	return tracks;
 }
 
 void readDiskCommand(
@@ -141,12 +91,17 @@ void readDiskCommand(
 {
 	bool failures = false;
 	SectorSet allSectors;
-    for (auto& track : readTracks())
-    {
+    for (const auto& track : readTracks())
+	{
 		std::map<int, std::unique_ptr<Sector>> readSectors;
 		for (int retry = ::retries; retry >= 0; retry--)
 		{
+			std::cout << fmt::format("{0:>3}.{1}: ", track->track, track->side) << std::flush;
 			std::unique_ptr<Fluxmap> fluxmap = track->read();
+			std::cout << fmt::format(
+				"{0} ms in {1} bytes", int(fluxmap->duration()/1e6), fluxmap->bytes()) << std::endl;
+			if (outdb)
+				sqlWriteFlux(outdb, track->track, track->side, *fluxmap);
 
 			nanoseconds_t clockPeriod = bitmapDecoder.guessClock(*fluxmap);
 			std::cout << fmt::format("       {:.2f} us clock; ", (double)clockPeriod/1000.0) << std::flush;
@@ -219,7 +174,7 @@ void readDiskCommand(
 			{
 				if (!printedTrack)
 				{
-					std::cout << "logical track " << sector->track << "; ";
+					std::cout << fmt::format("logical track {}.{}; ", sector->track, sector->side);
 					printedTrack = true;
 				}
 

@@ -2,40 +2,34 @@
 #define READER_H
 
 class Fluxmap;
+class FluxReader;
 class BitmapDecoder;
 class RecordParser;
 
-class ReaderTrack
-{
-public:
-    virtual ~ReaderTrack() {}
-
-    int drive;
-    int track;
-    int side;
-
-    std::unique_ptr<Fluxmap> read();
-    virtual std::unique_ptr<Fluxmap> reallyRead() = 0;
-    virtual void recalibrate() = 0;
-};
-
-class CapturedReaderTrack : public ReaderTrack
-{
-public:
-    std::unique_ptr<Fluxmap> reallyRead();
-    void recalibrate();
-};
-
-class FileReaderTrack : public ReaderTrack
-{
-public:
-    std::unique_ptr<Fluxmap> reallyRead();
-    void recalibrate();
-};
-
 extern void setReaderDefaultSource(const std::string& source);
 extern void setReaderRevolutions(int revolutions);
-extern std::vector<std::unique_ptr<ReaderTrack>> readTracks();
+
+class Track
+{
+public:
+    Track(std::shared_ptr<FluxReader>& fluxReader, unsigned track, unsigned side):
+        track(track),
+        side(side),
+        _fluxReader(fluxReader)
+    {}
+
+public:
+    std::unique_ptr<Fluxmap> read();
+    void recalibrate();
+
+    unsigned track;
+    unsigned side;
+
+private:
+    std::shared_ptr<FluxReader> _fluxReader;
+};
+
+extern std::vector<std::unique_ptr<Track>> readTracks();
 
 extern void readDiskCommand(
     const BitmapDecoder& bitmapDecoder, const RecordParser& recordParser,

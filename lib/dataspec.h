@@ -46,6 +46,7 @@ public:
     std::map<std::string, Modifier> modifiers;
     std::vector<Location> locations;
     unsigned drive;
+    unsigned revolutions;
 };
 
 std::ostream& operator << (std::ostream& os, const DataSpec& dataSpec)

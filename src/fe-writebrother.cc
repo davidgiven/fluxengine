@@ -1,6 +1,5 @@
 #include "globals.h"
 #include "flags.h"
-#include "reader.h"
 #include "fluxmap.h"
 #include "sector.h"
 #include "sectorset.h"

@@ -31,9 +31,21 @@ felib = shared_library('felib',
 feinc = include_directories('lib')
 
 sqllib = shared_library('sqllib',
-						['lib/sql.cc'],
-						link_with: [felib],
-						dependencies: [sqlite])
+	['lib/sql.cc'],
+	link_with: [felib],
+	dependencies: [sqlite]
+)
+
+fluxreaderlib = shared_library('fluxreaderlib',
+    [
+        'lib/fluxreader/fluxreader.cc',
+        'lib/fluxreader/sqlitefluxreader.cc',
+        'lib/fluxreader/hardwarefluxreader.cc',
+    ],
+    include_directories: [feinc, fmtinc],
+    link_with: [felib, sqllib, fmtlib]
+)
+fluxreaderinc = include_directories('lib/fluxreader')
 
 decoderlib = shared_library('decoderlib',
     [
@@ -49,8 +61,8 @@ decoderinc = include_directories('lib/decoders')
 
 readerlib = shared_library('readerlib',
 						['lib/reader.cc'],
-						include_directories: [fmtinc, decoderinc],
-						link_with: [felib, sqllib, fmtlib, decoderlib])
+						include_directories: [fmtinc, decoderinc, fluxreaderinc],
+						link_with: [felib, sqllib, fmtlib, decoderlib, fluxreaderlib])
                         
 writerlib =  shared_library('writerlib',
 						['lib/writer.cc'],

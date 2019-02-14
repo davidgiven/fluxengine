@@ -18,7 +18,7 @@ int main(int argc, const char* argv[])
         track->read();
 
     writeTracks(
-        [&](int physicalTrack, int physicalSide) -> std::unique_ptr<Fluxmap>
+        [&](unsigned physicalTrack, unsigned physicalSide) -> std::unique_ptr<Fluxmap>
         {
             for (auto& track : tracks)
             {
