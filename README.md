@@ -46,6 +46,13 @@ to be spinning at the same speed.
 which means there's only 166ms of data on one per track rather than 200ms;
 if you try to write a 3.5" format disk onto one it probably won't work.
 
+**Q.** Is this like KryoFlux? Do you support KryoFlux stream files?
+
+**A.** It's very like KryoFlux, although much simpler. Yes, FluxEngine can
+read from KryoFlux stream files (but not write to them yet; nobody's asked).
+FluxEngine doesn't capture all the data that KryoFlux does, like index
+markers.
+
 **Q.** That's awesome! What formats does it support?
 
 **A.** I'm glad you asked the question. Not a lot, currently.
@@ -66,7 +73,8 @@ Currently, not a lot.
 
   - [Acorn DFS disks](doc/acorn-dfs.md): read only (likewise)
 
-  - [Brother 240kB word processor disks](doc/brother.md); read and write
+  - [Brother 120kB and 240kB word processor disks](doc/brother.md); read and
+    write
 
 ...aaaand that's it. If you want more, please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new); I need samples
@@ -279,7 +287,12 @@ fe-readibm -s fakedisk.flux:t=0-79:s=0
     `:t=0-3` and `:t=0,1,2,3` are equivalent.
 
   - When specifying a range, you can also specify the step. For example,
-    `:t=0-79x2` would be used when accessing a 40-track disk with double stepping.
+    `:t=0-79x2` would be used when accessing a 40-track disk with double
+    stepping.
+
+  - To read from a set of KryoFlux stream files, specify the path to the
+    directory containing the files _with a trailing slash_; so
+    `some/files/:t=0-10`.
 
 Source and destination specifiers work entirely in *physical units*.
 FluxEngine is intended to be connected to an 80 (or 82) track double sided
@@ -399,6 +412,10 @@ Useful links:
     sheet](https://hxc2001.com/download/datasheet/floppy/thirdparty/Teac/TEAC%20FD-05HF-8830.pdf):
     the technical data sheet for a representative drive. Lots of useful
     timing numbers here.
+
+  - [KryoFlux stream file
+    documentation](https://www.kryoflux.com/download/kryoflux_stream_protocol_rev1.1.pdf):
+    the format of KryoFlux stream files (partially supported by FluxEngine)
 
 Who?
 ----

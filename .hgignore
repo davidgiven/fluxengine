@@ -1,2 +1,5 @@
 .obj
+streams
+.*\.flux
+.*\.img
 

@@ -18,6 +18,8 @@ std::unique_ptr<FluxReader> FluxReader::create(const DataSpec& spec)
         return createHardwareFluxReader(spec.drive);
     else if (ends_with(filename, ".flux"))
         return createSqliteFluxReader(filename);
+    else if (ends_with(filename, "/"))
+        return createStreamFluxReader(filename);
 
     Error() << "unrecognised flux filename extension";
     return std::unique_ptr<FluxReader>();

@@ -36,14 +36,22 @@ sqllib = shared_library('sqllib',
 	dependencies: [sqlite]
 )
 
+streamlib = shared_library('streamlib',
+    [ 'lib/stream/stream.cc', ],
+    include_directories: [feinc, fmtinc],
+    link_with: [felib, fmtlib]
+)
+streaminc = include_directories('lib/stream')
+
 fluxreaderlib = shared_library('fluxreaderlib',
     [
         'lib/fluxreader/fluxreader.cc',
         'lib/fluxreader/sqlitefluxreader.cc',
         'lib/fluxreader/hardwarefluxreader.cc',
+        'lib/fluxreader/streamfluxreader.cc',
     ],
-    include_directories: [feinc, fmtinc],
-    link_with: [felib, sqllib, fmtlib]
+    include_directories: [feinc, fmtinc, streaminc],
+    link_with: [felib, streamlib, sqllib, fmtlib]
 )
 fluxreaderinc = include_directories('lib/fluxreader')
 

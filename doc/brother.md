@@ -5,8 +5,10 @@ Brother word processor disks are weird, using custom tooling and chipsets.
 They are completely not PC compatible in every possible way other than the
 size.
 
-Different word processors use different disk formats --- the only one
-supported by FluxEngine is the 240kB 3.5" format.
+Different word processors use different disk formats --- the only ones
+supported by FluxEngine are the 120kB and 240kB 3.5" formats. The default
+options are for the 240kB format. For the 120kB format, which is 40 track, do
+`fe-readbrother -s :t=1-79x2`.
 
 Apparently about 20% of Brother word processors have alignment issues which
 means that the disks can't be read by FluxEngine (because the tracks on the
@@ -52,7 +54,9 @@ Low level format
 ----------------
 
 The drive is a single-sided 3.5" drive spinning at not 300 rpm (I don't know
-the precise speed yet but FluxEngine doesn't care). The disks have 78 tracks.
+the precise speed yet but FluxEngine doesn't care). The 240kB disks have 78
+tracks and the 120kB disks have 39.
+
 The Brother drive alignment is kinda variable; when you put the disk in the
 drive it seeks all the way to physical track 0 and then starts searching for
 something which looks like data. My machine likes to put logical track 0 on

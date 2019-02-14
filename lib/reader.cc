@@ -55,7 +55,7 @@ std::unique_ptr<Fluxmap> Track::read()
 	std::cout << fmt::format(
 		"{0} ms in {1} bytes", int(fluxmap->duration()/1e6), fluxmap->bytes()) << std::endl;
 	if (outdb)
-		sqlWriteFlux(outdb, track, track, *fluxmap);
+		sqlWriteFlux(outdb, track, side, *fluxmap);
 	return fluxmap;
 }
 

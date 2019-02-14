@@ -12,6 +12,7 @@ public:
 private:
     static std::unique_ptr<FluxReader> createSqliteFluxReader(const std::string& filename);
     static std::unique_ptr<FluxReader> createHardwareFluxReader(unsigned drive);
+    static std::unique_ptr<FluxReader> createStreamFluxReader(const std::string& path);
 
 public:
     static std::unique_ptr<FluxReader> create(const DataSpec& spec);

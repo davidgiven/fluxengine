@@ -22,6 +22,11 @@ public:
     Fluxmap& appendIntervals(const std::vector<uint8_t>& intervals);
     Fluxmap& appendIntervals(const uint8_t* ptr, size_t len);
 
+    Fluxmap& appendInterval(uint8_t interval)
+    {
+        return appendIntervals(&interval, 1);
+    }
+
     nanoseconds_t guessClock() const;
 	std::vector<bool> decodeToBits(nanoseconds_t clock_period) const;
 

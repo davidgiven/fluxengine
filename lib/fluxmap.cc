@@ -9,8 +9,6 @@ Fluxmap& Fluxmap::appendIntervals(const std::vector<uint8_t>& intervals)
 
 Fluxmap& Fluxmap::appendIntervals(const uint8_t* ptr, size_t len)
 {
-    _intervals.reserve(_intervals.size() + len);
-
     while (len--)
     {
         uint8_t interval = *ptr++;

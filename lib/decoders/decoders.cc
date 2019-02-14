@@ -8,7 +8,7 @@
 static IntFlag clockDetectionNoiseFloor(
     { "--clock-detection-noise-floor" },
     "Noise floor used for clock detection in flux.",
-    50);
+    200);
 
 static DoubleFlag clockDecodeThreshold(
     { "--clock-decode-threshold" },
@@ -29,10 +29,10 @@ nanoseconds_t Fluxmap::guessClock() const
     for (uint8_t interval : _intervals)
         buckets[interval]++;
     
-    int peaklo = 0;
+    int peaklo = 1;
     while (peaklo < 256)
     {
-        if (buckets[peaklo] > 100)
+        if (buckets[peaklo] > (uint32_t)(clockDetectionNoiseFloor*2))
             break;
         peaklo++;
     }

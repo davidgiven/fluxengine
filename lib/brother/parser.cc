@@ -25,7 +25,7 @@ std::vector<std::unique_ptr<Sector>> BrotherRecordParser::parseRecordsToSectors(
 					goto garbage;
 				nextTrack = data[1];
 				nextSector = data[2];
-				hasHeader = true;
+				hasHeader = (nextTrack != 0xff) && (nextSector != 0xff);
                 break;
 
             case BROTHER_DATA_RECORD & 0xff:
