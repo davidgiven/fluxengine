@@ -1,0 +1,187 @@
+#include "globals.h"
+#include "fmt/format.h"
+#include <fstream>
+#include <fnmatch.h>
+
+struct Dirent
+{
+    std::string filename;
+    int type;
+    int startSector;
+    int sectorCount;
+};
+
+static std::ifstream inputFile;
+static std::map<std::string, std::unique_ptr<Dirent>> directory;
+static std::map<uint16_t, uint16_t> allocationTable;
+
+static std::string& rtrim(std::string& s, const char* t = " \t\n\r\f\v")
+{
+    s.erase(s.find_last_not_of(t) + 1);
+    return s;
+}
+
+void syntax()
+{
+    std::cout << "Syntax: brother120tool <image> [<filenames...>]\n"
+                 "If you specify a filename, it's extracted into the current directory.\n"
+                 "Wildcards are allowed. If you don't, the directory is listed instead.\n";
+    exit(0);
+}
+
+void readDirectory()
+{
+    for (int i=0; i<0x80; i++)
+    {
+        inputFile.seekg(i*16, std::ifstream::beg);
+
+        uint8_t buffer[16];
+        inputFile.read((char*) buffer, sizeof(buffer));
+        if (buffer[0] == 0xf0)
+            continue;
+        
+        std::string filename((const char*)buffer, 8);
+        filename = rtrim(filename);
+        std::unique_ptr<Dirent> dirent(new Dirent);
+        dirent->filename = filename;
+        dirent->type = buffer[8];
+        dirent->startSector = buffer[10];
+        dirent->sectorCount = buffer[11];
+        directory[filename] = std::move(dirent);
+    }
+}
+
+void readAllocationTable()
+{
+    for (int sector=14; sector!=640; sector++)
+    {
+        inputFile.seekg((sector-1)*2 + 0x800, std::ifstream::beg);
+        uint8_t buffer[2];
+        inputFile.read((char*) buffer, sizeof(buffer));
+
+        uint16_t nextSector = buffer[1] | (buffer[0]<<8);
+        allocationTable[sector] = nextSector;
+    }
+}
+
+void checkConsistency()
+{
+    /* Verify that we more-or-less understand the format by checking that each
+     * chain matches the ile length. */
+
+    for (const auto& i : directory)
+    {
+        const Dirent& dirent = *i.second;
+        if (dirent.type != 0)
+            continue;
+        
+        int count = 1;
+        uint16_t sector = dirent.startSector;
+        while ((sector != 0xffff) && (sector != 0))
+        {
+            /* 
+            * Hack: it looks like one extra sector is recorded in the chain ---
+            * that is, the marker at the end of the chain occupies a sector but
+            * that that sector is *not* in the file. Very odd.
+            */
+            if (allocationTable[sector] == 0xffff)
+                break;
+
+            sector = allocationTable[sector];
+            count++;
+        }
+
+        if (count != dirent.sectorCount)
+            std::cout <<
+                fmt::format("Warning: file '{}' claims to be {} sectors long but its chain is {}\n",
+                    dirent.filename, dirent.sectorCount, count);
+    }
+}
+
+void listDirectory()
+{
+    for (const auto& i : directory)
+    {
+        const Dirent& dirent = *i.second;
+        std::cout << fmt::format("{:9} {:6.2f}kB ",
+                        dirent.filename,
+                        (double)dirent.sectorCount / 4.0);
+
+        switch (dirent.type)
+        {
+            case 0:
+                std::cout << fmt::format("starting at sector {}", dirent.startSector);
+                break;
+
+            case 1:
+                std::cout << "DELETED";
+                break;
+
+            default:
+                std::cout << fmt::format("unknown file type 0x{:2}", dirent.type);
+                break;
+        }
+        std::cout << std::endl;
+    }
+}
+
+void extractFile(const std::string& pattern)
+{
+    for (const auto& i : directory)
+    {
+        const Dirent& dirent = *i.second;
+        if (dirent.type != 0)
+            continue;
+
+        if (fnmatch(pattern.c_str(), dirent.filename.c_str(), 0))
+            continue;
+
+        std::cout << fmt::format("Extracting '{}'\n", dirent.filename);
+
+        std::ofstream outputFile(dirent.filename,
+            std::ios::out | std::ios::binary | std::ios::trunc);
+        if (!outputFile)
+            Error() << fmt::format("unable to open output file: {}", strerror(errno));
+
+        uint16_t sector = dirent.startSector;
+        while ((sector != 0) && (sector != 0xffff))
+        {
+            if (allocationTable[sector] == 0xffff)
+                break;
+
+            uint8_t buffer[256];
+            inputFile.seekg(sector * 0x100, std::ifstream::beg);
+            if (!inputFile.read((char*) buffer, sizeof(buffer)))
+                Error() << fmt::format("I/O error on read: {}", strerror(errno));
+            if (!outputFile.write((const char*) buffer, sizeof(buffer)))
+                Error() << fmt::format("I/O error on write: {}", strerror(errno));
+
+            sector = allocationTable[sector];
+        }
+    }
+}
+
+int main(int argc, const char* argv[])
+{
+    if (argc < 2)
+        syntax();
+    
+    inputFile.open(argv[1], std::ios::in | std::ios::binary);
+    if (!inputFile.is_open())
+		Error() << fmt::format("cannot open input file '{}'", argv[1]);
+
+    readDirectory();
+    readAllocationTable();
+    checkConsistency();
+
+    if (argc == 2)
+        listDirectory();
+    else
+    {
+        for (int i=2; i<argc; i++)
+            extractFile(argv[i]);
+    }
+
+    inputFile.close();
+    return 0;
+}

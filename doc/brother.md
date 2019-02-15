@@ -91,9 +91,30 @@ Once decoded, you end up with a file system image.
 
 ### 120kB disks
 
-These disks use a proprietary and very simple file system which I haven't
-reverse engineered yet. It's FAT-like with an obvious directory and
-allocation table. It'll need custom tools to access files.
+These disks use a proprietary and very simple file system. It's FAT-like
+with an obvious directory and allocation table. I have reversed engineered
+a very simple tool for extracting files from it. To show the directory, do:
+
+```
+.obj/brother120tool image.img
+```
+
+To extract a file, do:
+
+```
+.obj/brother120tool image.img filename
+```
+
+Wildcards are supported, so use `'*'` for the filename (remember to quote it)
+if you want to extract everything.
+
+This is _extremely experimental_. There's something weird about the length of
+files --- the last sector in the chain is allocated in the FAT but doesn't
+appear to be counted in the file size or contain file data, so maybe this is
+doing something special.
+
+Any questions? please [get in
+touch](https://github.com/davidgiven/fluxengine/issues/new).
 
 ### 240kB disks
 

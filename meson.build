@@ -115,5 +115,7 @@ executable('fe-writebrother',      ['src/fe-writebrother.cc'],      include_dire
 executable('fe-writeflux',         ['src/fe-writeflux.cc'],         include_directories: [feinc, fmtinc], link_with: [felib, readerlib, writerlib, fmtlib])
 executable('fe-writetestpattern',  ['src/fe-writetestpattern.cc'],  include_directories: [feinc, fmtinc], link_with: [felib, writerlib, fmtlib])
 
+executable('brother120tool',       ['tools/brother120tool.cc'],     include_directories: [feinc, fmtinc], link_with: [felib, fmtlib])
+
 test('DataSpec', executable('dataspec-test', ['tests/dataspec.cc'], include_directories: [feinc], link_with: [felib]))
 test('Flags',    executable('flags-test', ['tests/flags.cc'], include_directories: [feinc], link_with: [felib]))
