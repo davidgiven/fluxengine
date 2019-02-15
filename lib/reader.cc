@@ -192,7 +192,7 @@ void readDiskCommand(
 				}
 
 				size += sector->data.size();
-				allSectors[{sector->track, sector->side, sector->sector}] = std::move(sector);
+				allSectors.get(sector->track, sector->side, sector->sector) = std::move(sector);
 			}
         }
         std::cout << size << " bytes decoded." << std::endl;

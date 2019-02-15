@@ -5,7 +5,7 @@ class Sector;
 
 class SectorSet
 {
-public:
+private:
 	typedef std::tuple<int, int, int> key_t;
 
 public:
@@ -14,8 +14,8 @@ public:
 
 	SectorSet() {};
 
-	std::unique_ptr<Sector>& operator[](const key_t& key);
-	Sector* operator[](const key_t& key) const;
+	std::unique_ptr<Sector>& get(int track, int head, int sector);
+	Sector* get(int track, int head, int sector) const;
 
 	void calculateSize(int& numTracks, int& numHeads, int& numSectors,
 		int& sectorSize) const;

@@ -81,7 +81,7 @@ int main(int argc, const char* argv[])
 				double dataMs = headerMs + postHeaderSpacingMs;
 				unsigned dataCursor = dataMs*1e3 / clockRateUs;
 
-				auto& sectorData = allSectors[SectorSet::key_t {track, 0, sectorId}];
+				auto& sectorData = allSectors.get(track, 0, sectorId);
 
 				fillBitmapTo(bits, cursor, headerCursor, { true, false });
 				writeBrotherSectorHeader(bits, cursor, track, sectorId);

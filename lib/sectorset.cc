@@ -3,13 +3,15 @@
 #include "sector.h"
 #include "sectorset.h"
 
-std::unique_ptr<Sector>& SectorSet::operator[](const key_t& key)
+std::unique_ptr<Sector>& SectorSet::get(int track, int head, int sector)
 {
+        key_t key(track, head, sector);
 	return _data[key];
 }
 
-Sector* SectorSet::operator[](const key_t& key) const
+Sector* SectorSet::get(int track, int head, int sector) const
 {
+        key_t key(track, head, sector);
 	auto i = _data.find(key);
 	if (i == _data.end())
 		return NULL;
