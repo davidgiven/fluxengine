@@ -3,6 +3,9 @@
 #include <fstream>
 #include <fnmatch.h>
 
+/* Theoretical maximum number of sectors. */
+static const int SECTOR_COUNT = 640;
+
 struct Dirent
 {
     std::string filename;
@@ -53,7 +56,7 @@ void readDirectory()
 
 void readAllocationTable()
 {
-    for (int sector=14; sector!=640; sector++)
+    for (int sector=14; sector!=SECTOR_COUNT; sector++)
     {
         inputFile.seekg((sector-1)*2 + 0x800, std::ifstream::beg);
         uint8_t buffer[2];
@@ -66,27 +69,22 @@ void readAllocationTable()
 
 void checkConsistency()
 {
-    /* Verify that we more-or-less understand the format by checking that each
-     * chain matches the ile length. */
+    /* Verify that we more-or-less understand the format by fscking the disk. */
 
+    std::vector<bool> bitmap(640);
     for (const auto& i : directory)
     {
         const Dirent& dirent = *i.second;
         if (dirent.type != 0)
             continue;
         
-        int count = 1;
+        int count = 0;
         uint16_t sector = dirent.startSector;
         while ((sector != 0xffff) && (sector != 0))
         {
-            /* 
-            * Hack: it looks like one extra sector is recorded in the chain ---
-            * that is, the marker at the end of the chain occupies a sector but
-            * that that sector is *not* in the file. Very odd.
-            */
-            if (allocationTable[sector] == 0xffff)
-                break;
-
+            if (bitmap[sector])
+                std::cout << fmt::format("warning: sector {} appears to be multiply used\n", sector);
+            bitmap[sector] = true;
             sector = allocationTable[sector];
             count++;
         }
@@ -110,7 +108,8 @@ void listDirectory()
         switch (dirent.type)
         {
             case 0:
-                std::cout << fmt::format("starting at sector {}", dirent.startSector);
+                std::cout << fmt::format("{} sectors starting at sector {}",
+                    dirent.sectorCount, dirent.startSector);
                 break;
 
             case 1:
@@ -146,9 +145,6 @@ void extractFile(const std::string& pattern)
         uint16_t sector = dirent.startSector;
         while ((sector != 0) && (sector != 0xffff))
         {
-            if (allocationTable[sector] == 0xffff)
-                break;
-
             uint8_t buffer[256];
             inputFile.seekg(sector * 0x100, std::ifstream::beg);
             if (!inputFile.read((char*) buffer, sizeof(buffer)))

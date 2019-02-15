@@ -108,10 +108,9 @@ To extract a file, do:
 Wildcards are supported, so use `'*'` for the filename (remember to quote it)
 if you want to extract everything.
 
-This is _extremely experimental_. There's something weird about the length of
-files --- the last sector in the chain is allocated in the FAT but doesn't
-appear to be counted in the file size or contain file data, so maybe this is
-doing something special.
+This is _extremely experimental_. The data structures I've figured out are
+mostly consistent, but it looks like there's always garbage in the last
+sector of each file, so maybe I'm not getting the file lengths right.
 
 Any questions? please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new).
