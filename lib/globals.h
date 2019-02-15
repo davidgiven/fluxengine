@@ -3,6 +3,7 @@
 
 #define _DEFAULT_SOURCE
 
+#include <stddef.h>
 #include <functional>
 #include <iostream>
 #include <map>
