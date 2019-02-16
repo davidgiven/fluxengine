@@ -67,7 +67,7 @@ Currently, not a lot.
     should work too but will require a little effort. ED disks probably don't
     work, but I'd [love to hear from
     you](https://github.com/davidgiven/fluxengine/issues/new) if you have one
-    and want to give it a try.
+    and want to give it a try. This includes variations like Atari ST.
 
   - [Acorn ADFS disks](acornadfs.md): read only (likewise)
 
