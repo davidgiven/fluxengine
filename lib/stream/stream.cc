@@ -89,7 +89,8 @@ std::unique_ptr<Fluxmap> readStream(const std::string& path, unsigned track, uns
                 else if (b == 0x0c)
                 {
                     /* Flux3: triple byte value */
-                    int ticks = f.get() | (f.get()<<8);
+                    int ticks = f.get() << 8;
+                    ticks |= f.get();
                     writeFlux(ticks);
                 }
                 else if ((b >= 0x0e) && (b <= 0xff))
