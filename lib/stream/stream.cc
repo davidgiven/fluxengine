@@ -4,13 +4,23 @@
 #include "protocol.h"
 #include "fmt/format.h"
 #include <fstream>
+#include <glob.h>
 
 #define SCLK_HZ 24027428.57142857
 #define TICKS_PER_SCLK (TICK_FREQUENCY / SCLK_HZ)
 
 std::unique_ptr<Fluxmap> readStream(const std::string& path, unsigned track, unsigned side)
 {
-    auto filename = fmt::format("{}track{:02}.{}.raw", path, track, side);
+    std::string suffix = fmt::format("{:02}.{}.raw", track, side);
+    std::string pattern = fmt::format("{}*{}", path, suffix);
+    glob_t globdata;
+    if (glob(pattern.c_str(), GLOB_NOSORT, NULL, &globdata))
+        Error() << fmt::format("cannot access path '{}'", path);
+    if (globdata.gl_pathc != 1)
+        Error() << fmt::format("data is ambiguous --- multiple files end in {}", suffix);
+    std::string filename = globdata.gl_pathv[0];
+    globfree(&globdata);
+
     std::ifstream f(filename, std::ios::in | std::ios::binary);
     if (!f.is_open())
 		Error() << fmt::format("cannot open input file '{}'", filename);
