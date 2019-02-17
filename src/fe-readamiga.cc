@@ -18,7 +18,7 @@ static StringFlag outputFilename(
 
 int main(int argc, const char* argv[])
 {
-	setReaderDefaultSource(":t=0-81:s=0");
+	setReaderDefaultSource(":t=0-81:s=0-1");
     setReaderRevolutions(2);
     Flag::parseFlags(argc, argv);
 

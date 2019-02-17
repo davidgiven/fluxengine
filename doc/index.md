@@ -422,6 +422,9 @@ Useful links:
     documentation](https://www.kryoflux.com/download/kryoflux_stream_protocol_rev1.1.pdf):
     the format of KryoFlux stream files (partially supported by FluxEngine)
 
+  - [The Amiga Floppy Boot Process and Physical
+    Layout](https://wiki.amigaos.net/wiki/Amiga_Floppy_Boot_Process_and_Physical_Layout)
+
 Who?
 ----
 
