@@ -11,6 +11,7 @@
 #include "sectorset.h"
 #include "record.h"
 #include "image.h"
+#include "bytes.h"
 #include "fmt/format.h"
 
 static DataSpecFlag source(
@@ -103,9 +104,7 @@ std::vector<std::unique_ptr<Track>> readTracks()
 	return tracks;
 }
 
-void readDiskCommand(
-    const BitmapDecoder& bitmapDecoder, const RecordParser& recordParser,
-    const std::string& outputFilename)
+void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename)
 {
 	bool failures = false;
 	SectorSet allSectors;
@@ -116,16 +115,16 @@ void readDiskCommand(
 		{
 			std::unique_ptr<Fluxmap> fluxmap = track->read();
 
-			nanoseconds_t clockPeriod = bitmapDecoder.guessClock(*fluxmap);
+			nanoseconds_t clockPeriod = decoder.guessClock(*fluxmap);
 			std::cout << fmt::format("       {:.2f} us clock; ", (double)clockPeriod/1000.0) << std::flush;
 
 			auto bitmap = fluxmap->decodeToBits(clockPeriod);
 			std::cout << fmt::format("{} bytes encoded; ", bitmap.size()/8) << std::flush;
 
-			auto records = bitmapDecoder.decodeBitsToRecords(bitmap);
-			std::cout << records.size() << " records." << std::endl;
+			auto rawrecords = decoder.extractRecords(bitmap);
+			std::cout << fmt::format("{} records", rawrecords.size()) << std::endl;
 
-			auto sectors = recordParser.parseRecordsToSectors(records);
+			auto sectors = decoder.decodeToSectors(rawrecords);
 			std::cout << "       " << sectors.size() << " sectors; ";
 
 			for (auto& sector : sectors)
@@ -153,12 +152,12 @@ void readDiskCommand(
 
 			if (dumpRecords && (!hasBadSectors || (retry == 0)))
 			{
-				std::cout << "\nRaw records follow:\n\n";
-				for (auto& record : records)
+				std::cout << "\nRaw (undecoded) records follow:\n\n";
+				for (auto& record : rawrecords)
 				{
 					std::cout << fmt::format("I+{:.3f}ms", (double)(record->position*clockPeriod)/1e6)
 					          << std::endl;
-					hexdump(std::cout, record->data);
+					hexdump(std::cout, toBytes(record->data));
 					std::cout << std::endl;
 				}
 			}

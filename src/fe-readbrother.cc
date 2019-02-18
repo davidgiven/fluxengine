@@ -16,18 +16,14 @@ static StringFlag outputFilename(
     "The output image file to write to.",
     "brother.img");
 
-#define SECTOR_COUNT 12
-#define TRACK_COUNT 78
-
 int main(int argc, const char* argv[])
 {
 	setReaderDefaultSource(":t=0-81:s=0");
     setReaderRevolutions(2);
     Flag::parseFlags(argc, argv);
 
-	BrotherBitmapDecoder bitmapDecoder;
-	BrotherRecordParser recordParser;
-	readDiskCommand(bitmapDecoder, recordParser, outputFilename);
+	BrotherDecoder decoder;
+	readDiskCommand(decoder, outputFilename);
 
     return 0;
 }

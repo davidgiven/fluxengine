@@ -102,7 +102,7 @@ abort:
     return bitmap;
 }
 
-nanoseconds_t BitmapDecoder::guessClock(Fluxmap& fluxmap) const
+nanoseconds_t AbstractDecoder::guessClock(Fluxmap& fluxmap) const
 {
     return fluxmap.guessClock();
 }

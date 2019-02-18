@@ -7,6 +7,7 @@
 #include "sector.h"
 #include "sectorset.h"
 #include "record.h"
+#include "ibm.h"
 #include <fmt/format.h>
 
 static StringFlag outputFilename(
@@ -25,9 +26,8 @@ int main(int argc, const char* argv[])
     setReaderRevolutions(2);
     Flag::parseFlags(argc, argv);
 
-	FmBitmapDecoder bitmapDecoder;
-	IbmRecordParser recordParser(IBM_SCHEME_FM, sectorIdBase);
-	readDiskCommand(bitmapDecoder, recordParser, outputFilename);
+	IbmFmDecoder decoder(sectorIdBase);
+	readDiskCommand(decoder, outputFilename);
     return 0;
 }
 
