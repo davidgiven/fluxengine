@@ -67,13 +67,13 @@ markers.
     you](https://github.com/davidgiven/fluxengine/issues/new) if you have one
     and want to give it a try. This includes variations like Atari ST.
 
-  - [Acorn ADFS disks](acornadfs.md): read only (likewise)
+  - [Acorn ADFS disks](acornadfs.html): read only (likewise)
 
-  - [Acorn DFS disks](acorndfs.md): read only (likewise)
+  - [Acorn DFS disks](acorndfs.html): read only (likewise)
 
-  - [Amiga disks](amiga.md): read only (likewise)
+  - [Amiga disks](amiga.html): read only (likewise)
 
-  - [Brother 120kB and 240kB word processor disks](brother.md); read and
+  - [Brother 120kB and 240kB word processor disks](brother.html); read and
     write
 
 ...aaaand that's it. If you want more, please [get in
@@ -330,7 +330,7 @@ directory.
 
   - `fe-readbrother`: reads 240kB Brother word processor disks. Emits a
 	256-byte-sector FAT filesystem. (You can access this with mtools
-	although you'll [to edit them first](brother.md).
+	although you'll [to edit them first](brother.html).
 
   - `fe-writebrother`: writes 240kB Brother word processor disks.
 
