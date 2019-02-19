@@ -85,16 +85,15 @@ encoderlib = shared_library('encoderlib',
     link_with: [felib, fmtlib]
 )
 
-#amigadecoderlib = shared_library('amigadecoderlib',
-#    [
-#		'lib/amiga/decoder.cc',
-#		'lib/amiga/parser.cc',
-#    ],
-#    include_directories: [feinc, fmtinc, decoderinc],
-#    link_with: [felib, fmtlib, decoderlib]
-#)
-#amigainc = include_directories('lib/amiga')
-#
+amigadecoderlib = shared_library('amigadecoderlib',
+    [
+		'lib/amiga/decoder.cc',
+    ],
+    include_directories: [feinc, fmtinc, decoderinc],
+    link_with: [felib, fmtlib, decoderlib]
+)
+amigainc = include_directories('lib/amiga')
+
 brotherdecoderlib = shared_library('brotherdecoderlib',
     [
 		'lib/brother/decoder.cc',
@@ -123,7 +122,7 @@ ibminc = include_directories('lib/ibm')
 executable('fe-erase',             ['src/fe-erase.cc'],             include_directories: [feinc], link_with: [felib, writerlib])
 executable('fe-inspect',           ['src/fe-inspect.cc'],           include_directories: [feinc, fmtinc, decoderinc], link_with: [felib, readerlib, decoderlib, fmtlib])
 executable('fe-readadfs',          ['src/fe-readadfs.cc'],          include_directories: [feinc, fmtinc, decoderinc, ibminc], link_with: [felib, readerlib, decoderlib, ibmdecoderlib, fmtlib])
-#executable('fe-readamiga',         ['src/fe-readamiga.cc'],         include_directories: [feinc, fmtinc, decoderinc, amigainc], link_with: [felib, readerlib, decoderlib, amigadecoderlib, fmtlib])
+executable('fe-readamiga',         ['src/fe-readamiga.cc'],         include_directories: [feinc, fmtinc, decoderinc, amigainc], link_with: [felib, readerlib, decoderlib, amigadecoderlib, fmtlib])
 executable('fe-readbrother',       ['src/fe-readbrother.cc'],       include_directories: [feinc, fmtinc, decoderinc, brotherinc], link_with: [felib, readerlib, decoderlib, brotherdecoderlib, fmtlib])
 executable('fe-readdfs',           ['src/fe-readdfs.cc'],           include_directories: [feinc, fmtinc, decoderinc, ibminc], link_with: [felib, readerlib, decoderlib, ibmdecoderlib, fmtlib])
 executable('fe-readibm',           ['src/fe-readibm.cc'],           include_directories: [feinc, fmtinc, decoderinc, ibminc], link_with: [felib, readerlib, decoderlib, ibmdecoderlib, fmtlib])

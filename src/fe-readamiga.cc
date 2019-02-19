@@ -22,9 +22,8 @@ int main(int argc, const char* argv[])
     setReaderRevolutions(2);
     Flag::parseFlags(argc, argv);
 
-	AmigaBitmapDecoder bitmapDecoder;
-	AmigaRecordParser recordParser;
-	readDiskCommand(bitmapDecoder, recordParser, outputFilename);
+	AmigaDecoder decoder;
+	readDiskCommand(decoder, outputFilename);
 
     return 0;
 }

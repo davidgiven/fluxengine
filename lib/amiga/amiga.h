@@ -1,26 +1,19 @@
 #ifndef AMIGA_H
 #define AMIGA_H
 
-#define BROTHER_SECTOR_RECORD 0xFFFFFD57
-#define BROTHER_DATA_RECORD   0xFFFFFDDB
-#define BROTHER_DATA_RECORD_PAYLOAD 256
+#define AMIGA_SECTOR_RECORD 0xaaaaaaaa44894489LL
 
 class Sector;
 class Fluxmap;
 
-class AmigaBitmapDecoder : public BitmapDecoder
+class AmigaDecoder : public AbstractDecoder
 {
 public:
-	RecordVector decodeBitsToRecords(const std::vector<bool>& bitmap) const;
-    nanoseconds_t guessClock(Fluxmap& fluxmap) const;
-};
+    virtual ~AmigaDecoder() {}
 
-class AmigaRecordParser : public RecordParser
-{
-public:
-	std::vector<std::unique_ptr<Sector>> parseRecordsToSectors(
-		const RecordVector& records) const;
+    SectorVector decodeToSectors(const RawRecordVector& rawRecords);
+	nanoseconds_t guessClock(Fluxmap& fluxmap) const;
+    int recordMatcher(uint64_t fifo) const;
 };
-
 
 #endif
