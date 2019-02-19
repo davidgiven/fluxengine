@@ -1,7 +1,7 @@
 #ifndef AMIGA_H
 #define AMIGA_H
 
-#define AMIGA_SECTOR_RECORD 0xaaaaaaaa44894489LL
+#define AMIGA_SECTOR_RECORD 0xaaaa44894489LL
 
 class Sector;
 class Fluxmap;

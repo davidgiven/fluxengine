@@ -108,7 +108,8 @@ nanoseconds_t AmigaDecoder::guessClock(Fluxmap& fluxmap) const
 
 int AmigaDecoder::recordMatcher(uint64_t fifo) const
 {
-    if (fifo == AMIGA_SECTOR_RECORD)
+    uint64_t masked = fifo & 0xffffffffffffULL;
+    if (masked == AMIGA_SECTOR_RECORD)
 		return 64;
     return 0;
 }
