@@ -4,6 +4,9 @@
 #include "decoders.h"
 #include "record.h"
 #include "brother.h"
+#include "sector.h"
+#include "bytes.h"
+#include "crc.h"
 #include <ctype.h>
 
 static std::vector<uint8_t> outputbuffer;
@@ -45,100 +48,81 @@ static int decode_header_gcr(uint16_t word)
 	return -1;             
 };
 
-static void add_record(RecordVector& records,
-	nanoseconds_t position, const std::vector<uint8_t>& data)
+SectorVector BrotherDecoder::decodeToSectors(const RawRecordVector& rawRecords)
 {
-	records.push_back(std::unique_ptr<Record>(new Record(position, data)));
-}
+    std::vector<std::unique_ptr<Sector>> sectors;
+	bool headerIsValid = false;
+	int nextTrack = 0;
+	int nextSector = 0;
 
-RecordVector BrotherBitmapDecoder::decodeBitsToRecords(const std::vector<bool>& bits) const
-{
-    RecordVector records;
-
-	enum
-	{
-		SEEKING,
-		READINGSECTOR,
-		READINGDATA
-	};
-
-    size_t cursor = 0;
-    uint32_t inputfifo = 0;
-	int inputcount = 0;
-	uint8_t outputfifo = 0;
-	int outputcount = 0;
-    int state = SEEKING;
-	size_t recordstart = 0;
-
-    while (cursor < bits.size())
+    for (auto& rawrecord : rawRecords)
     {
-        bool bit = bits[cursor++];
-        inputfifo = (inputfifo << 1) | bit;
-		inputcount++;
+		if (rawrecord->data.size() < 32)
+		{
+			headerIsValid = false;
+			continue;
+		}
 
-		if (inputfifo == BROTHER_SECTOR_RECORD)
+		auto ii = rawrecord->data.cbegin();
+		uint32_t signature = read_be32(toBytes(ii, ii+32));
+		switch (signature)
 		{
-			if (state != SEEKING)
-				add_record(records, recordstart, outputbuffer);
-			outputbuffer.resize(1);
-			outputbuffer[0] = BROTHER_SECTOR_RECORD & 0xff;
-			state = READINGSECTOR;
-			inputcount = 0;
-			recordstart = cursor - 1;
-		}
-		else if (inputfifo == BROTHER_DATA_RECORD)
-		{
-			if (state != SEEKING)
-				add_record(records, recordstart, outputbuffer);
-			outputbuffer.resize(1);
-			outputbuffer[0] = BROTHER_DATA_RECORD & 0xff;
-			state = READINGDATA;
-			outputcount = 0;
-			inputcount = 0;
-			recordstart = cursor - 1;
-		}
-		else
-		{
-			switch (state)
+			case BROTHER_SECTOR_RECORD:
 			{
-				case READINGSECTOR:
+				if (rawrecord->data.size() < (32+32))
 				{
-					if (inputcount != 16)
-						break;
-					int data = decode_header_gcr(inputfifo & 0xffff);
-					inputcount = 0;
-
-					outputbuffer.push_back(data);
+					headerIsValid = false;
 					break;
 				}
 
-				case READINGDATA:
-				{
-					if (inputcount != 8)
-						break;
-					int data = decode_data_gcr(inputfifo & 0xff);
-					inputcount = 0;
+				nextTrack = decode_header_gcr(read_be16(toBytes(ii+32, ii+48)));
+				nextSector = decode_header_gcr(read_be16(toBytes(ii+48, ii+64)));
+				headerIsValid = true;
+				break;
+			}
 
-					for (int i=0; i<5; i++)
-					{
-						outputfifo = (outputfifo << 1) | !!(data & 0x10);
-						data <<= 1;
-						outputcount++;
-						if (outputcount == 8)
-						{
-							outputbuffer.push_back(outputfifo);
-							outputcount = 0;
-						}
-					}
+			case BROTHER_DATA_RECORD:
+			{
+				if (!headerIsValid)
+					break;
+				const int size = BROTHER_DATA_RECORD_PAYLOAD + BROTHER_DATA_RECORD_CHECKSUM;
+				if (rawrecord->data.size() < (32 + (size*5/8)))
+				{
+					headerIsValid = false;
 					break;
 				}
+
+				BitAccumulator outputData;
+				auto i = ii + 32;
+				while (outputData.size() != size)
+				{
+					uint32_t nibble = decode_data_gcr(toBytes(i, i+8)[0]);
+					outputData.push(nibble, 5);
+					i += 8;
+				}
+
+				const std::vector<uint8_t>& v = outputData;
+				uint32_t realCrc = crcbrother(&v[0], &v[BROTHER_DATA_RECORD_PAYLOAD]);
+				uint32_t wantCrc = read_be24(&v[BROTHER_DATA_RECORD_PAYLOAD]);
+				int status = (realCrc == wantCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
+
+                auto sector = std::unique_ptr<Sector>(
+					new Sector(status, nextTrack, 0, nextSector,
+						std::vector<uint8_t>(v.begin(), v.begin()+BROTHER_DATA_RECORD_PAYLOAD)));
+                sectors.push_back(std::move(sector));
+                headerIsValid = false;
+				break;
 			}
 		}
-    }
+	}
 
-	if (state != SEEKING)
-		add_record(records, recordstart, outputbuffer);
-
-    return records;
+	return sectors;
 }
 
+int BrotherDecoder::recordMatcher(uint64_t fifo) const
+{
+    uint32_t masked = fifo & 0xffffffff;
+	if ((masked == BROTHER_SECTOR_RECORD) || (masked == BROTHER_DATA_RECORD))
+		return 32;
+    return 0;
+}

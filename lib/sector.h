@@ -33,5 +33,7 @@ public:
     const std::vector<uint8_t> data;
 };
 
+typedef std::vector<std::unique_ptr<Sector>> SectorVector;
+
 #endif
 

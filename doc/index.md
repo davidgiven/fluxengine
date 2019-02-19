@@ -59,8 +59,6 @@ markers.
 
 ### Formats that it supports
 
-Currently, not a lot.
-
   - All standard double and high density IBM MFM formats, a.k.a. 360kB,
     720kB, 1200kB, 1440kB formats; read only (I haven't got round to writing
     the write support). Non-standard formats like the DMF 1680kB format
@@ -72,6 +70,8 @@ Currently, not a lot.
   - [Acorn ADFS disks](acornadfs.md): read only (likewise)
 
   - [Acorn DFS disks](acorndfs.md): read only (likewise)
+
+  - [Amiga disks](amiga.md): read only (likewise)
 
   - [Brother 120kB and 240kB word processor disks](brother.md); read and
     write

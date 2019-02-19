@@ -3,8 +3,7 @@
 
 class Fluxmap;
 class FluxReader;
-class BitmapDecoder;
-class RecordParser;
+class AbstractDecoder;
 
 extern void setReaderDefaultSource(const std::string& source);
 extern void setReaderRevolutions(int revolutions);
@@ -31,8 +30,6 @@ private:
 
 extern std::vector<std::unique_ptr<Track>> readTracks();
 
-extern void readDiskCommand(
-    const BitmapDecoder& bitmapDecoder, const RecordParser& recordParser,
-    const std::string& outputFilename);
+extern void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename);
 
 #endif
