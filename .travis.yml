@@ -1,13 +1,17 @@
 language: generic
 
-compiler:
-    - gcc
-
-os:
-    - linux
-
-dist:
-    - xenial
+matrix:
+    include:
+        -
+            os: linux
+            sudo: false
+            dist: xenial
+            compiler: gcc
+            env: CXX=g++-8
+        -
+            os: osx
+            env: HOMEBREW_NO_AUTO_UPDATE=1
+            compiler: clang
 
 addons:
     apt:
@@ -20,9 +24,10 @@ addons:
         - libusb-1.0-0-dev
         - libsqlite3-dev
         - g++-8
-
-env:
-    - CXX=g++-8
+    homebrew:
+        packages:
+        - ninja
+        - meson
 
 script:
     - make
