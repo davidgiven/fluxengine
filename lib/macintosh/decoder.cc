@@ -96,6 +96,15 @@ static std::vector<uint8_t> decode_crazy_data(const uint8_t* inp, int& status)
     return output;
 }
 
+uint8_t decode_side(uint8_t side)
+{
+    /* Mac disks, being weird, use the side byte to encode both the side (in
+     * bit 5) and also whether we're above track 0x3f (in bit 6).
+     */
+
+    return !!(side & 0x40);
+}
+
 SectorVector MacintoshDecoder::decodeToSectors(
         const RawRecordVector& rawRecords, unsigned physicalTrack)
 {
@@ -150,7 +159,7 @@ SectorVector MacintoshDecoder::decodeToSectors(
                 auto data = decode_crazy_data(inputbuffer, status);
 
                 auto sector = std::unique_ptr<Sector>(
-                    new Sector(status, physicalTrack, nextSide, nextSector, data));
+                    new Sector(status, physicalTrack, decode_side(nextSide), nextSector, data));
                 sectors.push_back(std::move(sector));
                 break;
             }
