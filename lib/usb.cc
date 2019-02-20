@@ -2,7 +2,11 @@
 #include "usb.h"
 #include "protocol.h"
 #include "fluxmap.h"
+#ifdef __APPLE__
+#include "endian.h"
+#else
 #include <endian.h>
+#endif
 #include <libusb.h>
 
 #define TIMEOUT 5000
