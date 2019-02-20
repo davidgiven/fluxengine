@@ -73,12 +73,13 @@ std::unique_ptr<Fluxmap> readStream(const std::string& path, unsigned track, uns
                 else if (b == 0x09)
                 {
                     /* Nop2: skip one byte */
-                    f.seekg(1, std::ios_base::cur);
+                    f.get();
                 }
                 else if (b == 0x0a)
                 {
                     /* Nop3: skip two bytes */
-                    f.seekg(2, std::ios_base::cur);
+                    f.get();
+                    f.get();
                 }
                 else if (b == 0x0b)
                 {   /* Ovl16: the next block is 0x10000 sclks longer than normal.
