@@ -22,6 +22,7 @@ static int decode_data_gcr(uint8_t gcr)
     return -1;
 };
 
+/* This is, um, extremely inspired by the MESS implementation. */
 static std::vector<uint8_t> decode_crazy_data(const uint8_t* inp, int& status)
 {
     std::vector<uint8_t> output;
@@ -90,7 +91,15 @@ static std::vector<uint8_t> decode_crazy_data(const uint8_t* inp, int& status)
     }
 
     uint8_t c4 = ((c1 & 0xC0) >> 6) | ((c2 & 0xC0) >> 4) | ((c3 & 0xC0) >> 2);
-    if ((*inp++ == c1) && (*inp++ == c2) && (*inp++ == c3) && (*inp++ == c4))
+    c1 &= 0x3f;
+    c2 &= 0x3f;
+    c3 &= 0x3f;
+    c4 &= 0x3f;
+    uint8_t g4 = *inp++;
+    uint8_t g3 = *inp++;
+    uint8_t g2 = *inp++;
+    uint8_t g1 = *inp++;
+    if ((g4 == c4) && (g3 == c3) && (g2 == c2) && (g1 == c1))
         status = Sector::OK;
 
     return output;
@@ -134,7 +143,7 @@ SectorVector MacintoshDecoder::decodeToSectors(
                 uint8_t formatByte = decode_data_gcr(rawbytes[6]);
                 uint8_t wantedsum = decode_data_gcr(rawbytes[7]);
 
-                uint8_t gotsum = track ^ nextSector ^ nextSide ^ formatByte;
+                uint8_t gotsum = (track ^ nextSector ^ nextSide ^ formatByte) & 0x3f;
                 headerIsValid = (wantedsum == gotsum);
                 break;
             }
@@ -145,7 +154,7 @@ SectorVector MacintoshDecoder::decodeToSectors(
                     break;
                 headerIsValid = false;
 
-                uint8_t inputbuffer[MAC_SECTOR_LENGTH * 8/6 + 4] = {};
+                uint8_t inputbuffer[MAC_SECTOR_LENGTH * 8/6 + 5] = {};
                 for (unsigned i=0; i<sizeof(inputbuffer); i++)
                 {
                     auto p = rawbytes.begin() + 4 + i;
