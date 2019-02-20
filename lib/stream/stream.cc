@@ -53,7 +53,7 @@ std::unique_ptr<Fluxmap> readStream(const std::string& path, unsigned track, uns
                 if (f.fail() || f.eof())
                     goto finished;
 
-                f.seekg(here + blocklen, std::ios_base::beg);
+                f.seekg(here + blocklen + 3, std::ios_base::beg);
                 break;
             }
 
