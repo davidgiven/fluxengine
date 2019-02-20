@@ -43,6 +43,7 @@ void BitAccumulator::push(uint32_t bits, size_t size)
     {
         _fifo = (_fifo<<1) | (bits >> 31);
         _bitcount++;
+        bits <<= 1;
         if (_bitcount == 8)
         {
             _data.push_back(_fifo);
@@ -51,3 +52,11 @@ void BitAccumulator::push(uint32_t bits, size_t size)
     }
 }
 
+void BitAccumulator::finish()
+{
+    if (_bitcount != 0)
+    {
+        _data.push_back(_fifo);
+        _bitcount = 0;
+    }
+}

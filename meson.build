@@ -145,6 +145,7 @@ executable('fe-writetestpattern',  ['src/fe-writetestpattern.cc'],  include_dire
 
 executable('brother120tool',       ['tools/brother120tool.cc'],     include_directories: [feinc, fmtinc], link_with: [felib, fmtlib])
 
-test('DataSpec', executable('dataspec-test', ['tests/dataspec.cc'], include_directories: [feinc], link_with: [felib]))
-test('Flags',    executable('flags-test', ['tests/flags.cc'],       include_directories: [feinc], link_with: [felib]))
-test('FmMfm',    executable('fmmfm-test', ['tests/fmmfm.cc'],       include_directories: [feinc, decoderinc], link_with: [felib, decoderlib]))
+test('DataSpec',        executable('dataspec-test', ['tests/dataspec.cc'], include_directories: [feinc], link_with: [felib]))
+test('Flags',           executable('flags-test', ['tests/flags.cc'],       include_directories: [feinc], link_with: [felib]))
+test('FmMfm',           executable('fmmfm-test', ['tests/fmmfm.cc'],       include_directories: [feinc, decoderinc], link_with: [felib, decoderlib]))
+test('BitAccumulator',  executable('bitaccumulator-test', ['tests/bitaccumulator.cc'],       include_directories: [feinc], link_with: [felib]))
