@@ -2,7 +2,7 @@
 #include "usb.h"
 #include "protocol.h"
 #include "fluxmap.h"
-#include <endian.h>
+#include "bytes.h"
 #include <libusb.h>
 
 #define TIMEOUT 5000
@@ -224,8 +224,8 @@ void usbWrite(int side, const Fluxmap& fluxmap)
     struct write_frame f = {
         .f = { .type = F_FRAME_WRITE_CMD, .size = sizeof(f) },
         .side = (uint8_t) side,
-        .bytes_to_write = htole32(safelen),
     };
+    write_le32(&f.bytes_to_write, safelen);
     usb_cmd_send(&f, f.f.size);
 
     large_bulk_transfer(FLUXENGINE_DATA_OUT_EP, buffer);
