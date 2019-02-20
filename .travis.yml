@@ -29,6 +29,9 @@ addons:
         - ninja
         - meson
 
+git:
+    depth: 1
+
 script:
     - make
 
