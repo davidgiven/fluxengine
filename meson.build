@@ -119,6 +119,15 @@ ibmdecoderlib = shared_library('ibmdecoderlib',
 )
 ibminc = include_directories('lib/ibm')
 
+macdecoderlib = shared_library('macdecoderlib',
+    [
+		'lib/macintosh/decoder.cc',
+    ],
+    include_directories: [feinc, fmtinc, decoderinc],
+    link_with: [felib, fmtlib, decoderlib]
+)
+macinc = include_directories('lib/macintosh')
+
 executable('fe-erase',             ['src/fe-erase.cc'],             include_directories: [feinc], link_with: [felib, writerlib])
 executable('fe-inspect',           ['src/fe-inspect.cc'],           include_directories: [feinc, fmtinc, decoderinc], link_with: [felib, readerlib, decoderlib, fmtlib])
 executable('fe-readadfs',          ['src/fe-readadfs.cc'],          include_directories: [feinc, fmtinc, decoderinc, ibminc], link_with: [felib, readerlib, decoderlib, ibmdecoderlib, fmtlib])
@@ -126,6 +135,7 @@ executable('fe-readamiga',         ['src/fe-readamiga.cc'],         include_dire
 executable('fe-readbrother',       ['src/fe-readbrother.cc'],       include_directories: [feinc, fmtinc, decoderinc, brotherinc], link_with: [felib, readerlib, decoderlib, brotherdecoderlib, fmtlib])
 executable('fe-readdfs',           ['src/fe-readdfs.cc'],           include_directories: [feinc, fmtinc, decoderinc, ibminc], link_with: [felib, readerlib, decoderlib, ibmdecoderlib, fmtlib])
 executable('fe-readibm',           ['src/fe-readibm.cc'],           include_directories: [feinc, fmtinc, decoderinc, ibminc], link_with: [felib, readerlib, decoderlib, ibmdecoderlib, fmtlib])
+executable('fe-readmac',           ['src/fe-readmac.cc'],           include_directories: [feinc, fmtinc, decoderinc, macinc], link_with: [felib, readerlib, decoderlib, macdecoderlib, fmtlib])
 executable('fe-rpm',               ['src/fe-rpm.cc'],               include_directories: [feinc], link_with: [felib])
 executable('fe-seek',              ['src/fe-seek.cc'],              include_directories: [feinc], link_with: [felib])
 executable('fe-testbulktransport', ['src/fe-testbulktransport.cc'], include_directories: [feinc], link_with: [felib])
