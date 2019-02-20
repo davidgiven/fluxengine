@@ -49,6 +49,7 @@ std::unique_ptr<Fluxmap> readStream(const std::string& path, unsigned track, uns
             case 0x0d: /* OOB block */
             {
                 int blocktype = f.get();
+                (void) blocktype;
                 int blocklen = f.get() | (f.get()<<8);
                 if (f.fail() || f.eof())
                     goto finished;
