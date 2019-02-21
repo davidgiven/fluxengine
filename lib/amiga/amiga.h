@@ -11,7 +11,8 @@ class AmigaDecoder : public AbstractDecoder
 public:
     virtual ~AmigaDecoder() {}
 
-    SectorVector decodeToSectors(const RawRecordVector& rawRecords);
+    SectorVector decodeToSectors(
+        const RawRecordVector& rawRecords, unsigned physicalTrack);
 	nanoseconds_t guessClock(Fluxmap& fluxmap) const;
     int recordMatcher(uint64_t fifo) const;
 };

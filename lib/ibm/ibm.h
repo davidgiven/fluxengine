@@ -34,7 +34,7 @@ public:
     {}
     virtual ~AbstractIbmDecoder() {}
 
-    SectorVector decodeToSectors(const RawRecordVector& rawRecords);
+    SectorVector decodeToSectors(const RawRecordVector& rawRecords, unsigned physicalTrack);
 
 protected:
     virtual int skipHeaderBytes() const = 0;
