@@ -76,8 +76,7 @@ markers.
   - [Brother 120kB and 240kB word processor disks](brother.html); read and
     write
 
-  - [Macintosh 800kB (and probably 400kB too) disks](macintosh.html); read and
-    write
+  - [Macintosh 800kB (and probably 400kB too) disks](macintosh.html); read only
 
 ...aaaand that's it. If you want more, please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new); I need samples
