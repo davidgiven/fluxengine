@@ -56,8 +56,10 @@ public:
     void reset();
     void push(uint32_t bits, size_t size);
     size_t size() const { return _data.size(); }
+    void finish();
 
-    operator const std::vector<uint8_t>& () const { return _data; }
+    operator const std::vector<uint8_t>& ()
+    { finish(); return _data; }
 
 private:
     uint8_t _fifo;

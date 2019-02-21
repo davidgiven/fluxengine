@@ -16,7 +16,8 @@ class BrotherDecoder : public AbstractDecoder
 public:
     virtual ~BrotherDecoder() {}
 
-    SectorVector decodeToSectors(const RawRecordVector& rawRecords);
+    SectorVector decodeToSectors(
+        const RawRecordVector& rawRecords, unsigned physicalTrack);
     int recordMatcher(uint64_t fifo) const;
 };
 

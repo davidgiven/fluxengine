@@ -124,7 +124,7 @@ void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename
 			auto rawrecords = decoder.extractRecords(bitmap);
 			std::cout << fmt::format("{} records", rawrecords.size()) << std::endl;
 
-			auto sectors = decoder.decodeToSectors(rawrecords);
+			auto sectors = decoder.decodeToSectors(rawrecords, track->track);
 			std::cout << "       " << sectors.size() << " sectors; ";
 
 			for (auto& sector : sectors)

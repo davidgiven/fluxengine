@@ -18,7 +18,8 @@ public:
     virtual ~AbstractDecoder() {}
 
     virtual nanoseconds_t guessClock(Fluxmap& fluxmap) const;
-    virtual SectorVector decodeToSectors(const RawRecordVector& rawrecords) = 0;
+    virtual SectorVector decodeToSectors(const RawRecordVector& rawrecords,
+            unsigned physicalTrack) = 0;
 };
 
 #endif

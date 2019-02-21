@@ -25,6 +25,11 @@ static IntFlag fluxmapResolutionFlag(
 	"Resolution of flux visualisation (nanoseconds). 0 to autoscale",
 	0);
 
+static DoubleFlag seekFlag(
+	{ "--seek", "-S" },
+	"Seek this many milliseconds into the track before displaying it.",
+	0.0);
+
 int main(int argc, const char* argv[])
 {
     Flag::parseFlags(argc, argv);
@@ -54,13 +59,29 @@ int main(int argc, const char* argv[])
 		if (resolution == 0)
 			resolution = clockPeriod / 4;
 
-		nanoseconds_t now = 0;
 		nanoseconds_t nextclock = clockPeriod;
+
+		nanoseconds_t now = 0;
+		int cursor = 0;
+		nanoseconds_t seekto = seekFlag*1000000.0;
 		int ticks = 0;
-		std::cout << fmt::format("{: 10.3f}:-", 0.0);
-		for (int cursor=0; cursor<fluxmap->bytes(); cursor++)
+		while (cursor < fluxmap->bytes())
 		{
-			int interval = (*fluxmap)[cursor];
+			int interval = (*fluxmap)[cursor++];
+			if (interval == 0)
+				interval = 0x100;
+			ticks += interval;
+			
+			now = ticks * NS_PER_TICK;
+			if (now >= seekto)
+				break;
+		}
+
+		std::cout << fmt::format("{: 10.3f}:-", ticks*US_PER_TICK);
+		nanoseconds_t lasttransition = 0;
+		while (cursor < fluxmap->bytes())
+		{
+			int interval = (*fluxmap)[cursor++];
 			if (interval == 0)
 				interval = 0x100;
 			ticks += interval;
@@ -82,7 +103,12 @@ int main(int argc, const char* argv[])
 				now = next;
 			}
 
-			std::cout << fmt::format("==== {: 10.3f}", (double)transition / 1000.0);
+			nanoseconds_t length = transition - lasttransition;
+			std::cout << fmt::format("==== {: 10.3f} +{:.3f} = {:.1f} clocks",
+				(double)transition / 1000.0,
+				(double)length / 1000.0,
+				(double)length / clockPeriod);
+			lasttransition = transition;
 		}
 	}
 
@@ -92,8 +118,13 @@ int main(int argc, const char* argv[])
 					<< " follows:" << std::endl
 					<< std::endl;
 
-		for (bool bit : bitmap)
-			std::cout << (bit ? 'X' : '-');
+		size_t cursor = seekFlag*1000000.0 / clockPeriod;
+		while (cursor < bitmap.size())
+		{
+			std::cout << (bitmap[cursor] ? 'X' : '-');
+			cursor++;
+		}
+
 		std::cout << std::endl;
 	}
 
