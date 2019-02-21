@@ -196,7 +196,10 @@ void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename
 				}
 
 				size += sector->data.size();
-				allSectors.get(sector->track, sector->side, sector->sector) = std::move(sector);
+
+				auto& replacing = allSectors.get(sector->track, sector->side, sector->sector);
+				if (!replacing || (replacing->status != Sector::OK))
+					replacing = std::move(sector);
 			}
         }
         std::cout << size << " bytes decoded." << std::endl;
