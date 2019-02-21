@@ -43,8 +43,10 @@ static void usb_init()
         Error() << "could not claim interface: " << usberror(i);
 
     int version = usbGetVersion();
-    if (version > FLUXENGINE_VERSION)
-        Error() << "this version of the client is too old for this FluxEngine";
+    if (version != FLUXENGINE_VERSION)
+        Error() << "your FluxEngine firmware is at version " << version
+                << " but the client is for version " << version
+                << "; please upgrade";
 }
 
 static int usb_cmd_send(void* ptr, int len)
