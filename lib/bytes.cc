@@ -33,6 +33,7 @@ void BitAccumulator::reset()
 {
     _data.resize(0);
     _bitcount = 0;
+	_fifo = 0;
 }
 
 void BitAccumulator::push(uint32_t bits, size_t size)
@@ -48,6 +49,7 @@ void BitAccumulator::push(uint32_t bits, size_t size)
         {
             _data.push_back(_fifo);
             _bitcount = 0;
+			_fifo = 0;
         }
     }
 }
