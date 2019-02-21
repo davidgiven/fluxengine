@@ -22,7 +22,9 @@ static int decode_data_gcr(uint8_t gcr)
     return -1;
 };
 
-/* This is, um, extremely inspired by the MESS implementation. */
+/* This is extremely inspired by the MESS implementation, written by Nathan Woods
+ * and R. Belmont: https://github.com/mamedev/mame/blob/4263a71e64377db11392c458b580c5ae83556bc7/src/lib/formats/ap_dsk35.cpp
+ */
 static std::vector<uint8_t> decode_crazy_data(const uint8_t* inp, int& status)
 {
     std::vector<uint8_t> output;
