@@ -116,6 +116,11 @@ void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename
 			std::unique_ptr<Fluxmap> fluxmap = track->read();
 
 			nanoseconds_t clockPeriod = decoder.guessClock(*fluxmap);
+			if (clockPeriod == 0)
+			{
+				std::cout << "       no clock detected; giving up" << std::endl;
+				continue;
+			}
 			std::cout << fmt::format("       {:.2f} us clock; ", (double)clockPeriod/1000.0) << std::flush;
 
 			auto bitmap = fluxmap->decodeToBits(clockPeriod);
