@@ -52,8 +52,8 @@ SectorVector BrotherDecoder::decodeToSectors(const RawRecordVector& rawRecords, 
 {
     std::vector<std::unique_ptr<Sector>> sectors;
 	bool headerIsValid = false;
-	int nextTrack = 0;
-	int nextSector = 0;
+	unsigned nextTrack = 0;
+	unsigned nextSector = 0;
 
     for (auto& rawrecord : rawRecords)
     {
@@ -77,6 +77,12 @@ SectorVector BrotherDecoder::decodeToSectors(const RawRecordVector& rawRecords, 
 
 				nextTrack = decode_header_gcr(read_be16(toBytes(ii+32, ii+48)));
 				nextSector = decode_header_gcr(read_be16(toBytes(ii+48, ii+64)));
+
+				/* Sanity check the sector; sector IDs above 11 can't exist but appear
+				 * occasionally due to read bit errors. */
+				if (nextSector > 11)
+					break;
+
 				headerIsValid = true;
 				break;
 			}
