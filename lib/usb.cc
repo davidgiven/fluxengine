@@ -222,7 +222,7 @@ void usbWrite(int side, const Fluxmap& fluxmap)
         .f = { .type = F_FRAME_WRITE_CMD, .size = sizeof(f) },
         .side = (uint8_t) side,
     };
-    write_le32(&f.bytes_to_write, safelen);
+    write_le32((uint8_t*) &f.bytes_to_write, safelen);
     usb_cmd_send(&f, f.f.size);
 
     large_bulk_transfer(FLUXENGINE_DATA_OUT_EP, buffer);
