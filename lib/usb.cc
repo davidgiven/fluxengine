@@ -45,7 +45,7 @@ static void usb_init()
     int version = usbGetVersion();
     if (version != FLUXENGINE_VERSION)
         Error() << "your FluxEngine firmware is at version " << version
-                << " but the client is for version " << version
+                << " but the client is for version " << FLUXENGINE_VERSION
                 << "; please upgrade";
 }
 
