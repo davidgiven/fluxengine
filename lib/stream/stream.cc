@@ -31,10 +31,10 @@ std::unique_ptr<Fluxmap> readStream(const std::string& path, unsigned track, uns
         int ticks = (double)sclk * TICKS_PER_SCLK;
         while (ticks >= 0x100)
         {
-            fluxmap->appendInterval(0);
+            fluxmap->appendByte(0);
             ticks -= 0x100;
         }
-        fluxmap->appendInterval((uint8_t)ticks);
+        fluxmap->appendByte((uint8_t)ticks);
     };
 
     uint32_t extrasclks = 0;

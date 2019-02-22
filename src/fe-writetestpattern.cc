@@ -33,7 +33,7 @@ int main(int argc, const char* argv[])
 			std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
 
             while (fluxmap->duration() < (sequenceLength*1000000.0))
-                fluxmap->appendIntervals({ (uint8_t)ticksPerInterval });
+                fluxmap->appendByte(ticksPerInterval);
 
 			return fluxmap;
         }

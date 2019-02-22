@@ -6,9 +6,9 @@ uint32_t Fluxmap::getAndIncrement(size_t& index) const
 {
     uint32_t ticks = 0;
 
-    while (index < _intervals.size())
+    while (index < _bytes.size())
     {
-        uint8_t b = _intervals[index++];
+        uint8_t b = _bytes[index++];
         ticks += b;
         if (!(b & 0x80))
             break;
@@ -17,18 +17,18 @@ uint32_t Fluxmap::getAndIncrement(size_t& index) const
     return ticks;
 }
 
-Fluxmap& Fluxmap::appendIntervals(const std::vector<uint8_t>& intervals)
+Fluxmap& Fluxmap::appendBytes(const std::vector<uint8_t>& bytes)
 {
-    return appendIntervals(&intervals[0], intervals.size());
+    return appendBytes(&bytes[0], bytes.size());
 }
 
-Fluxmap& Fluxmap::appendIntervals(const uint8_t* ptr, size_t len)
+Fluxmap& Fluxmap::appendBytes(const uint8_t* ptr, size_t len)
 {
     while (len--)
     {
-        uint8_t interval = *ptr++;
-        _ticks += interval ? interval : 0x100;
-        _intervals.push_back(interval);
+        uint8_t byte = *ptr++;
+        _ticks += byte ? byte : 0x100;
+        _bytes.push_back(byte);
     }
 
     _duration = _ticks * NS_PER_TICK;
@@ -40,10 +40,10 @@ void Fluxmap::precompensate(int threshold_ticks, int amount_ticks)
 {
     uint8_t junk = 0xff;
 
-    for (unsigned i=0; i<_intervals.size(); i++)
+    for (unsigned i=0; i<_bytes.size(); i++)
     {
-        uint8_t& prev = (i == 0) ? junk : _intervals[i-1];
-        uint8_t& curr = _intervals[i];
+        uint8_t& prev = (i == 0) ? junk : _bytes[i-1];
+        uint8_t& curr = _bytes[i];
 
         if ((prev <= threshold_ticks) && (curr > threshold_ticks))
         {
