@@ -48,7 +48,7 @@ void readDirectory()
         std::unique_ptr<Dirent> dirent(new Dirent);
         dirent->filename = filename;
         dirent->type = buffer[8];
-        dirent->startSector = buffer[10];
+        dirent->startSector = buffer[9] * 256 + buffer[10];
         dirent->sectorCount = buffer[11];
         directory[filename] = std::move(dirent);
     }
