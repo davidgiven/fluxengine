@@ -51,7 +51,7 @@ static int charToInt(char c)
 
 int main(int argc, const char* argv[])
 {
-	setWriterDefaultDest(":t=0-77:s=0");
+	setWriterDefaultDest(":d=0:t=0-77:s=0");
     Flag::parseFlags(argc, argv);
 
 	SectorSet allSectors;

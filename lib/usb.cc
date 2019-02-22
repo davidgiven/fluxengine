@@ -215,13 +215,8 @@ void usbWrite(int side, const Fluxmap& fluxmap)
 
     /* Convert from intervals to absolute timestamps. */
 
-	std::vector<uint8_t> buffer(safelen);
-    uint8_t clock = 0;
-    for (size_t i=0; i<fluxmap.bytes();)
-    {
-        clock += fluxmap.getAndIncrement(i);
-        buffer[i] = clock;
-    }
+	std::vector<uint8_t> buffer(fluxmap.rawBytes());
+    buffer.resize(safelen);
 
     struct write_frame f = {
         .f = { .type = F_FRAME_WRITE_CMD, .size = sizeof(f) },

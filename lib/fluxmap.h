@@ -8,6 +8,7 @@ public:
 
     nanoseconds_t duration() const { return _duration; }
     size_t bytes() const { return _bytes.size(); }
+    const std::vector<uint8_t> rawBytes() const { return _bytes; }
 
     const uint8_t* ptr() const
 	{

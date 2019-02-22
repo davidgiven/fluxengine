@@ -360,7 +360,7 @@ static void init_replay_dma(void)
 
         CyDmaTdSetConfiguration(td[i], BUFFER_SIZE, td[nexti],
             CY_DMA_TD_INC_SRC_ADR | REPLAY_DMA__TD_TERMOUT_EN);
-        CyDmaTdSetAddress(td[i], LO16((uint32)&dma_buffer[i]), LO16((uint32)REPLAY_TIMESTAMP_Control_PTR));
+        CyDmaTdSetAddress(td[i], LO16((uint32)&dma_buffer[i]), LO16((uint32)REPLAY_DATA_Control_PTR));
     }    
 }
 
@@ -373,6 +373,7 @@ static void cmd_write(struct write_frame* f)
     }
     
     SIDE_REG_Write(f->side);
+    REPLAY_RESET_Write(1);
     seek_to(current_track);    
 
     init_replay_dma();
@@ -410,6 +411,7 @@ static void cmd_write(struct write_frame* f)
 
                 writing = true;
                 ERASE_REG_Write(1); /* start erasing! */
+                REPLAY_RESET_Write(0); /* start writing! */
                 REPLAY_DMA_FINISHED_IRQ_Enable();
                 dma_underrun = false;
                 CyDmaChSetInitialTd(dma_channel, td[dma_reading_from_td]);
@@ -431,9 +433,8 @@ static void cmd_write(struct write_frame* f)
             {
                 /* The USB stream has stopped early, so just fake data to keep the writer happy. */
                 
-                uint8_t clock = 0;
                 for (int i=0; i<BUFFER_SIZE; i++)
-                    dma_buffer[dma_writing_to_td][i] = clock += 0x30;
+                    dma_buffer[dma_writing_to_td][i] = 0x80;
                 dma_writing_to_td = NEXT_BUFFER(dma_writing_to_td);
             }
             else
