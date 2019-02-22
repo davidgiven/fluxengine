@@ -27,12 +27,10 @@ end
 
 always @(posedge interrupt)
 begin
-    result[0] <= interval[0] | interval_is_zero;
-    result[6:1] <= interval[6:1];
-    result[7] <= ~sample;
+    result[6:0] <= interval[6:0];
+    result[7] <= interval_is_zero;
     lastpulse <= counter;
 end
-
 
 //`#end` -- edit above this line, do not edit this line
 endmodule

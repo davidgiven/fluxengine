@@ -24,8 +24,6 @@ int main(int argc, const char* argv[])
     Flag::parseFlags(argc, argv);
 
     unsigned ticksPerInterval = (unsigned) (interval * TICKS_PER_US);
-    if (ticksPerInterval > 0xff)
-        Error() << "interval too long";
 
     writeTracks(
         [&](int physicalTrack, int physicalSide) -> std::unique_ptr<Fluxmap>
@@ -33,7 +31,7 @@ int main(int argc, const char* argv[])
 			std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
 
             while (fluxmap->duration() < (sequenceLength*1000000.0))
-                fluxmap->appendByte(ticksPerInterval);
+                fluxmap->appendInterval(ticksPerInterval);
 
 			return fluxmap;
         }

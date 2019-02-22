@@ -17,6 +17,8 @@ public:
 		return NULL;
 	}
 
+    Fluxmap& appendInterval(uint32_t ticks);
+
     Fluxmap& appendBytes(const std::vector<uint8_t>& bytes);
     Fluxmap& appendBytes(const uint8_t* ptr, size_t len);
 
