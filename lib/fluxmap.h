@@ -4,13 +4,10 @@
 class Fluxmap
 {
 public:
-    uint8_t operator[](int index) const
-    {
-        return _intervals.at(index);
-    }
+    uint32_t getAndIncrement(size_t& index) const;
 
     nanoseconds_t duration() const { return _duration; }
-    int bytes() const { return _intervals.size(); }
+    size_t bytes() const { return _intervals.size(); }
 
     const uint8_t* ptr() const
 	{

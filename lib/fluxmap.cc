@@ -2,6 +2,21 @@
 #include "fluxmap.h"
 #include "protocol.h"
 
+uint32_t Fluxmap::getAndIncrement(size_t& index) const
+{
+    uint32_t ticks = 0;
+
+    while (index < _intervals.size())
+    {
+        uint8_t b = _intervals[index++];
+        ticks += b;
+        if (!(b & 0x80))
+            break;
+    }
+
+    return ticks;
+}
+
 Fluxmap& Fluxmap::appendIntervals(const std::vector<uint8_t>& intervals)
 {
     return appendIntervals(&intervals[0], intervals.size());

@@ -62,15 +62,12 @@ int main(int argc, const char* argv[])
 		nanoseconds_t nextclock = clockPeriod;
 
 		nanoseconds_t now = 0;
-		int cursor = 0;
+		size_t cursor = 0;
 		nanoseconds_t seekto = seekFlag*1000000.0;
 		int ticks = 0;
 		while (cursor < fluxmap->bytes())
 		{
-			int interval = (*fluxmap)[cursor++];
-			if (interval == 0)
-				interval = 0x100;
-			ticks += interval;
+			ticks += fluxmap->getAndIncrement(cursor);
 			
 			now = ticks * NS_PER_TICK;
 			if (now >= seekto)
@@ -81,10 +78,7 @@ int main(int argc, const char* argv[])
 		nanoseconds_t lasttransition = 0;
 		while (cursor < fluxmap->bytes())
 		{
-			int interval = (*fluxmap)[cursor++];
-			if (interval == 0)
-				interval = 0x100;
-			ticks += interval;
+			ticks += fluxmap->getAndIncrement(cursor);
 
 			nanoseconds_t transition = ticks*NS_PER_TICK;
 			nanoseconds_t next;

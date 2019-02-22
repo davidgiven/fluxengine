@@ -106,7 +106,7 @@ std::vector<bool> Fluxmap::decodeToBits(nanoseconds_t clockPeriod) const
 
     std::vector<bool> bitmap(pulses);
     unsigned count = 0;
-    int cursor = 0;
+    size_t cursor = 0;
     nanoseconds_t timestamp = 0;
     for (;;)
     {
@@ -114,7 +114,7 @@ std::vector<bool> Fluxmap::decodeToBits(nanoseconds_t clockPeriod) const
         {
             if (cursor >= bytes())
                 goto abort;
-            uint8_t interval = (*this)[cursor++];
+            uint8_t interval = getAndIncrement(cursor);
             timestamp += interval * NS_PER_TICK;
         }
 

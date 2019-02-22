@@ -217,9 +217,9 @@ void usbWrite(int side, const Fluxmap& fluxmap)
 
 	std::vector<uint8_t> buffer(safelen);
     uint8_t clock = 0;
-    for (unsigned i=0; i<safelen; i++)
+    for (size_t i=0; i<fluxmap.bytes();)
     {
-        clock += fluxmap[i];
+        clock += fluxmap.getAndIncrement(i);
         buffer[i] = clock;
     }
 
