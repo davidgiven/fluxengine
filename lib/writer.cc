@@ -11,7 +11,7 @@
 static DataSpecFlag dest(
     { "--dest", "-d" },
     "destination for data",
-    ":t=0-79:s=0-1");
+    ":d=0:t=0-79:s=0-1");
 
 static sqlite3* outdb;
 
