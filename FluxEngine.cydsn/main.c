@@ -90,7 +90,6 @@ static void start_motor(void)
         homed = false;
     }
     
-        
     if (DISKSTATUS_REG_Read() & DISKSTATUS_DSKCHG)
         homed = false;
 

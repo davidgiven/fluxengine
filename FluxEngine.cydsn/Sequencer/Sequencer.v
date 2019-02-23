@@ -4,6 +4,7 @@
 //`#end` -- edit above this line, do not edit this line
 // Generated on 02/22/2019 at 20:31
 // Component: Sequencer
+
 module Sequencer (
 	output reg interrupt,
 	output reg wdata,

@@ -5,7 +5,7 @@
 // Generated on 02/21/2019 at 23:51
 // Component: Sampler
 module Sampler (
-	output interrupt,
+	output reg interrupt,
 	output reg [7:0] result,
 	input clock,
 	input sample
@@ -13,23 +13,34 @@ module Sampler (
 
 //`#start body` -- edit after this line, do not edit this line
 
-reg [6:0] counter;
-reg [6:0] lastpulse;
-wire [6:0] interval = counter - lastpulse;
-wire interval_is_zero = (interval == 0);
+reg [6:0] counter;   // monotonically increasing counter
 
-assign interrupt = sample | interval_is_zero;
+reg last_sample;
 
 always @(posedge clock)
 begin
-    counter <= counter + 1;
-end
-
-always @(posedge interrupt)
-begin
-    result[6:0] <= interval[6:0];
-    result[7] <= interval_is_zero;
-    lastpulse <= counter;
+    if (counter == 0)
+    begin
+        // Rollover.
+        result = 8'h80;
+        interrupt = 1;
+        counter = 1;
+    end
+    else if (sample && !last_sample)
+    begin
+        // A sample happened since the last clock.
+        result[6:0] = counter;
+        result[7] = 0;
+        interrupt = 1;
+        counter = 1;
+    end
+    else
+    begin
+        result = 0;
+        counter = counter + 1;
+        interrupt = 0;
+    end
+    last_sample = sample;
 end
 
 //`#end` -- edit above this line, do not edit this line
