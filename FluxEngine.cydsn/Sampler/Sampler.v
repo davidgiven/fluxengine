@@ -8,39 +8,44 @@ module Sampler (
 	output reg interrupt,
 	output reg [7:0] result,
 	input clock,
-	input sample
+	input sample,
+    input reset
 );
 
 //`#start body` -- edit after this line, do not edit this line
 
 reg [6:0] counter;   // monotonically increasing counter
-
 reg last_sample;
 
 always @(posedge clock)
 begin
-    if (counter == 0)
+    if (reset)
+    begin
+        result <= 0;
+        interrupt <= 0;
+        counter <= 1;
+    end
+    else if (counter == 0)
     begin
         // Rollover.
-        result = 8'h80;
-        interrupt = 1;
-        counter = 1;
+        result <= 8'h80;
+        interrupt <= 1;
+        counter <= 1;
     end
     else if (sample && !last_sample)
     begin
         // A sample happened since the last clock.
-        result[6:0] = counter;
-        result[7] = 0;
-        interrupt = 1;
-        counter = 1;
+        result[6:0] <= counter;
+        result[7] <= 0;
+        interrupt <= 1;
+        counter <= 1;
     end
     else
     begin
-        result = 0;
-        counter = counter + 1;
-        interrupt = 0;
+        counter <= counter + 1;
+        interrupt <= 0;
     end
-    last_sample = sample;
+    last_sample <= sample;
 end
 
 //`#end` -- edit above this line, do not edit this line

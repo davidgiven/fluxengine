@@ -257,10 +257,11 @@ static void init_capture_dma(void)
 static void cmd_read(struct read_frame* f)
 {
     SIDE_REG_Write(f->side);
-    seek_to(current_track);    
+    seek_to(current_track);
     
     /* Do slow setup *before* we go into the real-time bit. */
     
+    CAPTURE_RESET_Write(1);
     wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
     init_capture_dma();
 
@@ -275,6 +276,7 @@ static void cmd_read(struct read_frame* f)
     dma_reading_from_td = -1;
     dma_underrun = false;
     int count = 0;
+    CAPTURE_RESET_Write(0);
     CyDmaChSetInitialTd(dma_channel, td[dma_writing_to_td]);
     CyDmaClearPendingDrq(dma_channel);
     CyDmaChEnable(dma_channel, 1);

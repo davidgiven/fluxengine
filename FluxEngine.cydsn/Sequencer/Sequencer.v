@@ -25,20 +25,17 @@ begin
         interrupt <= 0;
         wdata <= 0;
     end
+    else if (counter == data[6:0])
+    begin
+        counter <= 1; // tick zero is this one
+        interrupt <= 1;
+        wdata <= ~data[7];
+    end
     else
     begin
-        if (counter == data[6:0])
-        begin
-            counter <= 1; // tick zero is this one
-            interrupt <= 1;
-            wdata <= ~data[7];
-        end
-        else
-        begin
-            counter <= counter + 7'b1;
-            interrupt <= 0;
-            wdata <= 0;
-        end
+        counter <= counter + 1;
+        interrupt <= 0;
+        wdata <= 0;
     end
 end
 
