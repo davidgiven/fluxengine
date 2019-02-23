@@ -43,8 +43,10 @@ static void usb_init()
         Error() << "could not claim interface: " << usberror(i);
 
     int version = usbGetVersion();
-    if (version > FLUXENGINE_VERSION)
-        Error() << "this version of the client is too old for this FluxEngine";
+    if (version != FLUXENGINE_VERSION)
+        Error() << "your FluxEngine firmware is at version " << version
+                << " but the client is for version " << FLUXENGINE_VERSION
+                << "; please upgrade";
 }
 
 static int usb_cmd_send(void* ptr, int len)
@@ -201,7 +203,7 @@ std::unique_ptr<Fluxmap> usbRead(int side, int revolutions)
     int len = large_bulk_transfer(FLUXENGINE_DATA_IN_EP, buffer);
     buffer.resize(len);
 
-    fluxmap->appendIntervals(buffer);
+    fluxmap->appendBytes(buffer);
 
     await_reply<struct any_frame>(F_FRAME_READ_REPLY);
     return fluxmap;
@@ -213,13 +215,8 @@ void usbWrite(int side, const Fluxmap& fluxmap)
 
     /* Convert from intervals to absolute timestamps. */
 
-	std::vector<uint8_t> buffer(safelen);
-    uint8_t clock = 0;
-    for (unsigned i=0; i<safelen; i++)
-    {
-        clock += fluxmap[i];
-        buffer[i] = clock;
-    }
+	std::vector<uint8_t> buffer(fluxmap.rawBytes());
+    buffer.resize(safelen);
 
     struct write_frame f = {
         .f = { .type = F_FRAME_WRITE_CMD, .size = sizeof(f) },

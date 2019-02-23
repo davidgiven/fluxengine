@@ -92,7 +92,7 @@ std::unique_ptr<Fluxmap> sqlReadFlux(sqlite3* db, int track, int side)
         const uint8_t* blobptr = (const uint8_t*) sqlite3_column_blob(stmt, 0);
         size_t bloblen = sqlite3_column_bytes(stmt, 0);
 
-        fluxmap->appendIntervals(blobptr, bloblen);
+        fluxmap->appendBytes(blobptr, bloblen);
     }
     sqlCheck(db, sqlite3_finalize(stmt));
     return fluxmap;

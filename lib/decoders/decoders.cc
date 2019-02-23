@@ -21,8 +21,14 @@ static SettableFlag showClockHistogram(
 nanoseconds_t Fluxmap::guessClock() const
 {
     uint32_t buckets[256] = {};
-    for (uint8_t interval : _intervals)
+    size_t cursor = 0;
+    while (cursor < bytes())
+    {
+        uint32_t interval = getAndIncrement(cursor);
+        if (interval > 0xff)
+            continue;
         buckets[interval]++;
+    }
     
     uint32_t max = *std::max_element(std::begin(buckets), std::end(buckets));
     uint32_t min = *std::min_element(std::begin(buckets), std::end(buckets));
@@ -106,7 +112,7 @@ std::vector<bool> Fluxmap::decodeToBits(nanoseconds_t clockPeriod) const
 
     std::vector<bool> bitmap(pulses);
     unsigned count = 0;
-    int cursor = 0;
+    size_t cursor = 0;
     nanoseconds_t timestamp = 0;
     for (;;)
     {
@@ -114,7 +120,7 @@ std::vector<bool> Fluxmap::decodeToBits(nanoseconds_t clockPeriod) const
         {
             if (cursor >= bytes())
                 goto abort;
-            uint8_t interval = (*this)[cursor++];
+            uint8_t interval = getAndIncrement(cursor);
             timestamp += interval * NS_PER_TICK;
         }
 

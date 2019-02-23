@@ -29,14 +29,10 @@ std::unique_ptr<Fluxmap> readStream(const std::string& path, unsigned track, uns
     auto writeFlux = [&](uint32_t sclk)
     {
         int ticks = (double)sclk * TICKS_PER_SCLK;
-        while (ticks >= 0x100)
-        {
-            fluxmap->appendInterval(0);
-            ticks -= 0x100;
-        }
-        fluxmap->appendInterval((uint8_t)ticks);
+        fluxmap->appendInterval(ticks);
     };
 
+    uint32_t extrasclks = 0;
     for (;;)
     {
         int b = f.get(); /* returns -1 or UNSIGNED char */
@@ -64,7 +60,8 @@ std::unique_ptr<Fluxmap> readStream(const std::string& path, unsigned track, uns
                 {
                     /* Flux2: double byte value */
                     b = (b<<8) | f.get();
-                    writeFlux(b);
+                    writeFlux(extrasclks + b);
+                    extrasclks = 0;
                 }
                 else if (b == 0x08)
                 {
@@ -82,23 +79,23 @@ std::unique_ptr<Fluxmap> readStream(const std::string& path, unsigned track, uns
                     f.get();
                 }
                 else if (b == 0x0b)
-                {   /* Ovl16: the next block is 0x10000 sclks longer than normal.
-                     * FluxEngine can't handle long transitions, and implementing
-                     * this is complicated, so we just bodge it.
-                     */
-                    writeFlux(0x10000);
+                {
+                    /* Ovl16: the next block is 0x10000 sclks longer than normal. */
+                    extrasclks += 0x10000;
                 }
                 else if (b == 0x0c)
                 {
                     /* Flux3: triple byte value */
                     int ticks = f.get() << 8;
                     ticks |= f.get();
-                    writeFlux(ticks);
+                    writeFlux(extrasclks + ticks);
+                    extrasclks = 0;
                 }
                 else if ((b >= 0x0e) && (b <= 0xff))
                 {
                     /* Flux1: single byte value */
-                    writeFlux(b);
+                    writeFlux(extrasclks + b);
+                    extrasclks = 0;
                 }
                 else
                     Error() << fmt::format(

@@ -4,27 +4,27 @@
 class Fluxmap
 {
 public:
-    uint8_t operator[](int index) const
-    {
-        return _intervals.at(index);
-    }
+    uint32_t getAndIncrement(size_t& index) const;
 
     nanoseconds_t duration() const { return _duration; }
-    int bytes() const { return _intervals.size(); }
+    size_t bytes() const { return _bytes.size(); }
+    const std::vector<uint8_t> rawBytes() const { return _bytes; }
 
     const uint8_t* ptr() const
 	{
-		if (!_intervals.empty())
-			return &_intervals.at(0);
+		if (!_bytes.empty())
+			return &_bytes.at(0);
 		return NULL;
 	}
 
-    Fluxmap& appendIntervals(const std::vector<uint8_t>& intervals);
-    Fluxmap& appendIntervals(const uint8_t* ptr, size_t len);
+    Fluxmap& appendInterval(uint32_t ticks);
 
-    Fluxmap& appendInterval(uint8_t interval)
+    Fluxmap& appendBytes(const std::vector<uint8_t>& bytes);
+    Fluxmap& appendBytes(const uint8_t* ptr, size_t len);
+
+    Fluxmap& appendByte(uint8_t byte)
     {
-        return appendIntervals(&interval, 1);
+        return appendBytes(&byte, 1);
     }
 
     nanoseconds_t guessClock() const;
@@ -37,7 +37,7 @@ public:
 private:
     nanoseconds_t _duration = 0;
     int _ticks = 0;
-    std::vector<uint8_t> _intervals;
+    std::vector<uint8_t> _bytes;
 };
 
 #endif

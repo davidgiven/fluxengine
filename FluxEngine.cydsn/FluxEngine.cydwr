@@ -32,7 +32,7 @@
         <Data key="check_tolerance" value="True" />
         <Data key="clock_version" value="v1" />
         <Data key="derive_type" value="NAMED_FREQ" />
-        <Data key="desired_freq" value="16" />
+        <Data key="desired_freq" value="12" />
         <Data key="desired_unit" value="6" />
         <Data key="divider" value="2" />
         <Data key="domain" value="DIGITAL" />
@@ -89,6 +89,30 @@
         <Data key="name" value="Clock_2" />
         <Data key="named_src_direct_connect" value="True" />
         <Data key="netlist_name" value="Clock_2" />
+        <Data key="placement" value="AUTO" />
+        <Data key="plus_accuracy" value="0.25" />
+        <Data key="plus_tolerance" value="5" />
+        <Data key="scope" value="LOCAL" />
+        <Data key="src_clk_id" value="75C2148C-3656-4d8a-846D-0CAE99AB6FF7" />
+        <Data key="src_clk_name" value="BUS_CLK" />
+        <Data key="start_on_reset" value="True" />
+        <Data key="sync_with_bus_clk" value="True" />
+        <Data key="user_set_domain" value="False" />
+      </Group>
+      <Group key="66f14071-bddd-4b4d-a9aa-a129cceaa7b6">
+        <Data key="check_tolerance" value="True" />
+        <Data key="clock_version" value="v1" />
+        <Data key="derive_type" value="NAMED_DIVIDER" />
+        <Data key="desired_freq" value="0" />
+        <Data key="desired_unit" value="15" />
+        <Data key="divider" value="0" />
+        <Data key="domain" value="DIGITAL" />
+        <Data key="enabled" value="True" />
+        <Data key="minus_accuracy" value="0.25" />
+        <Data key="minus_tolerance" value="5" />
+        <Data key="name" value="Clock_3" />
+        <Data key="named_src_direct_connect" value="True" />
+        <Data key="netlist_name" value="Clock_3" />
         <Data key="placement" value="AUTO" />
         <Data key="plus_accuracy" value="0.25" />
         <Data key="plus_tolerance" value="5" />
@@ -248,9 +272,9 @@
         <Data key="clock_version" value="v1" />
         <Data key="derive_type" value="BUILTIN" />
         <Data key="desired_freq" value="0" />
-        <Data key="desired_unit" value="0" />
+        <Data key="desired_unit" value="15" />
         <Data key="divider" value="0" />
-        <Data key="domain" value="DIGITAL" />
+        <Data key="domain" value="0" />
         <Data key="enabled" value="False" />
         <Data key="minus_accuracy" value="0" />
         <Data key="minus_tolerance" value="0" />
@@ -270,7 +294,7 @@
         <Data key="check_tolerance" value="True" />
         <Data key="clock_version" value="v1" />
         <Data key="derive_type" value="BUILTIN" />
-        <Data key="desired_freq" value="48" />
+        <Data key="desired_freq" value="64" />
         <Data key="desired_unit" value="6" />
         <Data key="divider" value="0" />
         <Data key="domain" value="0" />
@@ -357,7 +381,7 @@
         <Data key="desired_freq" value="0" />
         <Data key="desired_unit" value="0" />
         <Data key="divider" value="1" />
-        <Data key="domain" value="DIGITAL" />
+        <Data key="domain" value="0" />
         <Data key="enabled" value="True" />
         <Data key="master_divider_used" value="True" />
         <Data key="minus_accuracy" value="0.25" />
@@ -492,6 +516,7 @@
       <Data key="06c4d5d4-f15f-4b29-a1d0-c24b2e38b1ec" value="CounterClock" />
       <Data key="24cd38f7-f472-4403-837f-86807c8f5333" value="PULSE_CLOCK" />
       <Data key="63ed4137-0b09-4256-8a27-35c9a2653f1a" value="Clock_2" />
+      <Data key="66f14071-bddd-4b4d-a9aa-a129cceaa7b6" value="Clock_3" />
       <Data key="349ffa20-8576-4ac3-9a6f-34ef606de6cf" value="Clock_1" />
       <Data key="6616e828-6611-4893-a674-66c861d79d6c" value="SignalSamplingClock" />
       <Data key="12664fc6-9d70-44b1-8a49-887a292e1b7f" value="Clock_3" />

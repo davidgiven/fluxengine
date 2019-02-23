@@ -11,12 +11,14 @@ Fluxmap& Fluxmap::appendBits(const std::vector<bool>& bits, nanoseconds_t clock)
 		if (bits[i])
 		{
 			unsigned delta = (now - duration()) / NS_PER_TICK;
-			while (delta > 255)
+			while (delta >= 0x80)
 			{
-				appendIntervals({ 255 });
-				delta -= 255;
+				appendByte(0x80);
+				delta -= 0x80;
 			}
-			appendIntervals({ (uint8_t)delta });
+            if (delta == 0x00)
+                delta++;
+			appendByte(delta);
 		}
 	}
 
