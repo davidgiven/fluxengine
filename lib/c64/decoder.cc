@@ -29,8 +29,8 @@ nanoseconds_t Commodore64Decoder::guessClock(Fluxmap& fluxmap) const
 
 int Commodore64Decoder::recordMatcher(uint64_t fifo) const
 {
-    uint64_t masked = fifo & 0xffffffffffffULL;
-    if (masked == 0)
-		return 64;
+    uint32_t masked = fifo & 0xffffff;
+    if ((masked == C64_SECTOR_RECORD) || (masked == C64_DATA_RECORD))
+		return 24;
     return 0;
 }

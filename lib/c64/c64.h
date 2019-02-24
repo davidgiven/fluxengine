@@ -1,6 +1,9 @@
 #ifndef C64_H
 #define C64_H
 
+#define C64_SECTOR_RECORD 0xfff527
+#define C64_DATA_RECORD   0xfff55d
+
 class Sector;
 class Fluxmap;
 
