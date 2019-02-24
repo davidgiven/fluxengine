@@ -110,6 +110,15 @@ brotherencoderlib = shared_library('brotherencoderlib',
 )
 brotherinc = include_directories('lib/brother')
 
+c64decoderlib = shared_library('c64decoderlib',
+    [
+		'lib/c64/decoder.cc',
+    ],
+    include_directories: [feinc, fmtinc, decoderinc],
+    link_with: [felib, fmtlib, decoderlib]
+)
+c64inc = include_directories('lib/c64')
+
 ibmdecoderlib = shared_library('ibmdecoderlib',
     [
 		'lib/ibm/decoder.cc',
@@ -133,6 +142,7 @@ executable('fe-inspect',           ['src/fe-inspect.cc'],           include_dire
 executable('fe-readadfs',          ['src/fe-readadfs.cc'],          include_directories: [feinc, fmtinc, decoderinc, ibminc], link_with: [felib, readerlib, decoderlib, ibmdecoderlib, fmtlib])
 executable('fe-readamiga',         ['src/fe-readamiga.cc'],         include_directories: [feinc, fmtinc, decoderinc, amigainc], link_with: [felib, readerlib, decoderlib, amigadecoderlib, fmtlib])
 executable('fe-readbrother',       ['src/fe-readbrother.cc'],       include_directories: [feinc, fmtinc, decoderinc, brotherinc], link_with: [felib, readerlib, decoderlib, brotherdecoderlib, fmtlib])
+executable('fe-readc64',           ['src/fe-readc64.cc'],           include_directories: [feinc, fmtinc, decoderinc, c64inc], link_with: [felib, readerlib, decoderlib, c64decoderlib, fmtlib])
 executable('fe-readdfs',           ['src/fe-readdfs.cc'],           include_directories: [feinc, fmtinc, decoderinc, ibminc], link_with: [felib, readerlib, decoderlib, ibmdecoderlib, fmtlib])
 executable('fe-readibm',           ['src/fe-readibm.cc'],           include_directories: [feinc, fmtinc, decoderinc, ibminc], link_with: [felib, readerlib, decoderlib, ibmdecoderlib, fmtlib])
 executable('fe-readmac',           ['src/fe-readmac.cc'],           include_directories: [feinc, fmtinc, decoderinc, macinc], link_with: [felib, readerlib, decoderlib, macdecoderlib, fmtlib])
