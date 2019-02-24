@@ -178,12 +178,17 @@ make it fit on the back of a floppy disk drive. Using pins instead means this
 isn't necessary, but, well, now it's too late.)
 
   1. **If you're using a header:** solder your 17-way header to the
-     **bottom** of the board, from 2.7 to 1.0 inclusive. (It has to be 
+     **bottom** of the board, from 2.7 to 1.7 inclusive. (It has to be 
      the bottom because there are components that stick out on the other side
      and the bottom needs to go flush against the drive.)
 
-  3. **If you're using pins:** solder your 17-way pins to **either side** of
-     the board, from 2.7 to 1.0 inclusive.
+  2. **If you're using an IDC header plug:** solder it to the **top** of
+     the board, notch up, with the _top_ row of pins overhanging the edge
+     of the board (so that pin 1 is disconnected). Pin 2 should be in board
+     pin 2.7, and pin 34 in baord pin 1.7.
+
+  3. **If you're using bare pins:** solder your 17-way pin header
+     to **either side** of the board, from 2.7 to 1.7 inclusive.
 
   4. Solder two wires to any convenient VDD and GND pins and connect these to
      your floppy disk drive's power supply. If you're powering the floppy
@@ -243,9 +248,9 @@ touch](https://github.com/davidgiven/fluxengine/issues/new).
 So you have client software, programmed the firmware, and the hardware is all
 ready. What next?
 
-  1. Attach the FluxEngine to your floppy disk drive. Pin 0.2 (on the right in
+  1. Attach the FluxEngine to your floppy disk drive. Pin 2.7 (on the right in
      the picture above) is REDWC and connects to pin 2 on the floppy drive.
-     Pin 1.0 (on the left in the picture above) is DSKCHG and connects to pin
+     Pin 1.7 (on the left in the picture above) is DSKCHG and connects to pin
      34 on the floppy drive. All the other board pins connect in the obvious
      order. Odd pins on the floppy drive are left unconnected. You can push
      the floppy drive connector straight onto the pins, or the FluxEngine
