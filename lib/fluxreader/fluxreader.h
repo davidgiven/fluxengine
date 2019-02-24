@@ -20,6 +20,7 @@ public:
 public:
     virtual std::unique_ptr<Fluxmap> readFlux(int track, int side) = 0;
     virtual void recalibrate() {}
+    virtual bool retryable() { return false; }
 };
 
 extern void setHardwareFluxReaderRevolutions(int revolutions);

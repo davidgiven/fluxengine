@@ -65,6 +65,11 @@ void Track::recalibrate()
 	_fluxReader->recalibrate();
 }
 
+bool Track::retryable()
+{
+	return _fluxReader->retryable();
+}
+
 std::vector<std::unique_ptr<Track>> readTracks()
 {
     const DataSpec& dataSpec = source.value;
@@ -172,6 +177,9 @@ void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename
 
 			std::cout << std::endl
                       << "       ";
+
+			if (!track->retryable())
+				break;
             if (retry == 0)
                 std::cout << "giving up" << std::endl
                           << "       ";
