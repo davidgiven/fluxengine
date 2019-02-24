@@ -250,7 +250,7 @@ static void init_capture_dma(void)
 
         CyDmaTdSetConfiguration(td[i], BUFFER_SIZE, td[nexti],   
             CY_DMA_TD_INC_DST_ADR | CAPTURE_DMA__TD_TERMOUT_EN);
-        CyDmaTdSetAddress(td[i], LO16((uint32)&CAPTURE_REG_Status), LO16((uint32)&dma_buffer[i]));
+        CyDmaTdSetAddress(td[i], LO16((uint32)SAMPLER_Datapath_1_F0_PTR), LO16((uint32)&dma_buffer[i]));
     }    
 }
 
@@ -261,7 +261,7 @@ static void cmd_read(struct read_frame* f)
     
     /* Do slow setup *before* we go into the real-time bit. */
     
-    CAPTURE_RESET_Write(1);
+    SAMPLER_CONTROL_Write(1); /* reset */
     wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
     init_capture_dma();
 
@@ -276,7 +276,7 @@ static void cmd_read(struct read_frame* f)
     dma_reading_from_td = -1;
     dma_underrun = false;
     int count = 0;
-    CAPTURE_RESET_Write(0);
+    SAMPLER_CONTROL_Write(0); /* !reset */
     CyDmaChSetInitialTd(dma_channel, td[dma_writing_to_td]);
     CyDmaClearPendingDrq(dma_channel);
     CyDmaChEnable(dma_channel, 1);
