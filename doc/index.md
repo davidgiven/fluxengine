@@ -62,7 +62,7 @@ markers.
 Here's the table.
 
 | Format                            | Read? | Write? | Notes |
-|-----------------------------------|-------|--------|-------|
+|:----------------------------------|:-----:|:------:|-------|
 | IBM PC compatible                 |	 🦄   |        | and compatibles (like the Atari ST) |
 | [Acorn ADFS](acornadfs.html)      |  🦖   |        | single- and double- sided           |
 | [Acorn DFS](acorndfs.html)        |  🦄   |        |                                     |
@@ -71,6 +71,7 @@ Here's the table.
 | [Brother 120kB](brother.html)     |  🦄   |        |                                     |
 | [Brother 240kB](brother.html)     |  🦄   |   🦄   |                                     |
 | [Macintosh 800kB](macintosh.html) |  🦖   |        | and probably the 400kB too          |
+{: .datatable }
 
 Dinosaurs (🦖) have yet to be observed in real life --- I've written the
 decoder based on Kryoflux (or other) dumps I've found. I don't (yet) have
