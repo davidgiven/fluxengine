@@ -54,23 +54,23 @@ SectorVector Commodore64Decoder::decodeToSectors(const RawRecordVector& rawRecor
     for (auto& rawrecord : rawRecords)
     {
         const auto& rawdata = rawrecord->data;
-        const auto& rawbytes = decode(rawdata);
+        const auto& bytes = decode(rawdata);
 
-        if (rawbytes.size() == 0)
+        if (bytes.size() == 0)
             continue;
 
-        switch (rawbytes[0])
+        switch (bytes[0])
         {
             case 8: /* sector record */
             {
                 headerIsValid = false;
-                if (rawbytes.size() < 6)
+                if (bytes.size() < 6)
                     break;
 
-                uint8_t checksum = rawbytes[1];
-                nextSector = rawbytes[2];
-                nextTrack = rawbytes[3];
-                if (checksum != xorBytes(&rawbytes[2], &rawbytes[6]))
+                uint8_t checksum = bytes[1];
+                nextSector = bytes[2];
+                nextTrack = bytes[3];
+                if (checksum != xorBytes(&bytes[2], &bytes[6]))
                     break;
 
                 headerIsValid = true;
@@ -82,11 +82,15 @@ SectorVector Commodore64Decoder::decodeToSectors(const RawRecordVector& rawRecor
                 if (!headerIsValid)
                     break;
                 headerIsValid = false;
+                if (bytes.size() < 258)
+                    break;
 
-                int status = Sector::BAD_CHECKSUM;
+                uint8_t checksum = xorBytes(&bytes[1], &bytes[257]);
+                int status = (checksum == bytes[257]) ? Sector::OK : Sector::BAD_CHECKSUM;
+
                 auto sector = std::unique_ptr<Sector>(
 					new Sector(status, nextTrack, 0, nextSector,
-						std::vector<uint8_t>()));
+                        std::vector<uint8_t>(&bytes[1], &bytes[257])));
                 sectors.push_back(std::move(sector));
                 break;
             }
@@ -96,15 +100,10 @@ SectorVector Commodore64Decoder::decodeToSectors(const RawRecordVector& rawRecor
 	return sectors;
 }
 
-nanoseconds_t Commodore64Decoder::guessClock(Fluxmap& fluxmap) const
-{
-    return fluxmap.guessClock();
-}
-
 int Commodore64Decoder::recordMatcher(uint64_t fifo) const
 {
-    uint32_t masked = fifo & 0xffffff;
-    if ((masked == C64_SECTOR_RECORD) || (masked == C64_DATA_RECORD))
-		return 12;
+    uint16_t masked = fifo & 0xffff;
+    if (masked == C64_RECORD_SEPARATOR)
+		return 4;
     return 0;
 }

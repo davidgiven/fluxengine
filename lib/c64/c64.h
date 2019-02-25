@@ -1,8 +1,7 @@
 #ifndef C64_H
 #define C64_H
 
-#define C64_SECTOR_RECORD 0xfff527
-#define C64_DATA_RECORD   0xfff55d
+#define C64_RECORD_SEPARATOR 0xfff5
 
 class Sector;
 class Fluxmap;
@@ -14,7 +13,6 @@ public:
 
     SectorVector decodeToSectors(
         const RawRecordVector& rawRecords, unsigned physicalTrack);
-	nanoseconds_t guessClock(Fluxmap& fluxmap) const;
     int recordMatcher(uint64_t fifo) const;
 };
 
