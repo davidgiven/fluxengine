@@ -5,6 +5,7 @@
 #include "decoders.h"
 #include "sector.h"
 #include "c64.h"
+#include "crc.h"
 #include "bytes.h"
 #include "fmt/format.h"
 #include <string.h>
@@ -46,6 +47,9 @@ static std::vector<uint8_t> decode(const std::vector<bool>& bits)
 SectorVector Commodore64Decoder::decodeToSectors(const RawRecordVector& rawRecords, unsigned)
 {
     std::vector<std::unique_ptr<Sector>> sectors;
+    unsigned nextSector;
+    unsigned nextTrack;
+    bool headerIsValid = false;
 
     for (auto& rawrecord : rawRecords)
     {
@@ -54,6 +58,39 @@ SectorVector Commodore64Decoder::decodeToSectors(const RawRecordVector& rawRecor
 
         if (rawbytes.size() == 0)
             continue;
+
+        switch (rawbytes[0])
+        {
+            case 8: /* sector record */
+            {
+                headerIsValid = false;
+                if (rawbytes.size() < 6)
+                    break;
+
+                uint8_t checksum = rawbytes[1];
+                nextSector = rawbytes[2];
+                nextTrack = rawbytes[3];
+                if (checksum != xorBytes(&rawbytes[2], &rawbytes[6]))
+                    break;
+
+                headerIsValid = true;
+                break;
+            }
+            
+            case 7: /* data record */
+            {
+                if (!headerIsValid)
+                    break;
+                headerIsValid = false;
+
+                int status = Sector::BAD_CHECKSUM;
+                auto sector = std::unique_ptr<Sector>(
+					new Sector(status, nextTrack, 0, nextSector,
+						std::vector<uint8_t>()));
+                sectors.push_back(std::move(sector));
+                break;
+            }
+        }
 	}
 
 	return sectors;
