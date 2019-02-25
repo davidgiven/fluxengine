@@ -69,7 +69,7 @@ SectorVector Commodore64Decoder::decodeToSectors(const RawRecordVector& rawRecor
 
                 uint8_t checksum = bytes[1];
                 nextSector = bytes[2];
-                nextTrack = bytes[3];
+                nextTrack = bytes[3] - 1;
                 if (checksum != xorBytes(&bytes[2], &bytes[6]))
                     break;
 
