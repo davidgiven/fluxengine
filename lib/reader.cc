@@ -109,6 +109,21 @@ std::vector<std::unique_ptr<Track>> readTracks()
 	return tracks;
 }
 
+static void replace_sector(std::unique_ptr<Sector>& replacing, std::unique_ptr<Sector>& replacement)
+{
+	if (replacing && (replacing->status == Sector::OK) && (replacement->status == Sector::OK))
+	{
+		if (replacement->data != replacing->data)
+		{
+			std::cout << std::endl
+						<< "       Multiple conflicting copies of sector " << replacing->sector
+						<< " seen";
+		}
+	}
+	if (!replacing || (replacing->status != Sector::OK))
+		replacing = std::move(replacement);
+}
+
 void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename)
 {
 	bool failures = false;
@@ -140,8 +155,7 @@ void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename
 			for (auto& sector : sectors)
 			{
                 auto& replacing = readSectors[sector->sector];
-                if (!replacing || (sector->status == Sector::OK))
-                    replacing = std::move(sector);
+				replace_sector(replacing, sector);
 			}
 
 			bool hasBadSectors = false;
@@ -206,8 +220,7 @@ void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename
 				size += sector->data.size();
 
 				auto& replacing = allSectors.get(sector->track, sector->side, sector->sector);
-				if (!replacing || (replacing->status != Sector::OK))
-					replacing = std::move(sector);
+				replace_sector(replacing, sector);
 			}
         }
         std::cout << size << " bytes decoded." << std::endl;
