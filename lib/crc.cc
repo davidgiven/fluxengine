@@ -1,6 +1,14 @@
 #include "globals.h"
 #include "crc.h"
 
+uint8_t xorBytes(const uint8_t* start, const uint8_t* end)
+{
+	uint8_t i = 0;
+	while (start != end)
+		i ^= *start++;
+	return i;
+}
+
 uint16_t crc16(uint16_t poly, const uint8_t* start, const uint8_t* end)
 {
 	uint16_t crc = 0xffff;
