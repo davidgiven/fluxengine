@@ -262,6 +262,15 @@ static void cmd_read(struct read_frame* f)
     /* Do slow setup *before* we go into the real-time bit. */
     
     SAMPLER_CONTROL_Write(1); /* reset */
+    
+    {
+        uint8_t i = CyEnterCriticalSection();
+        SAMPLER_Datapath_1_F0_SET_LEVEL_NORMAL;
+        SAMPLER_Datapath_1_F0_CLEAR;
+        SAMPLER_Datapath_1_F0_SINGLE_BUFFER_UNSET;
+        CyExitCriticalSection(i);
+    }
+    
     wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
     init_capture_dma();
 
