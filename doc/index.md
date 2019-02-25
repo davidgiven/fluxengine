@@ -55,32 +55,58 @@ markers.
 
 **Q.** That's awesome! What formats does it support?
 
-**A.** I'm glad you asked the question. Not a lot, currently.
+**A.** I'm glad you asked the question. Consult the following table!
 
 ### Formats that it supports
 
-  - All standard double and high density IBM MFM formats, a.k.a. 360kB,
-    720kB, 1200kB, 1440kB formats; read only (I haven't got round to writing
-    the write support). Non-standard formats like the DMF 1680kB format
-    should work too but will require a little effort. ED disks probably don't
-    work, but I'd [love to hear from
-    you](https://github.com/davidgiven/fluxengine/issues/new) if you have one
-    and want to give it a try. This includes variations like Atari ST.
+Here's the table.
 
-  - [Acorn ADFS disks](acornadfs.html): read only (likewise)
+| Format                            | Read? | Write? | Notes |
+|-----------------------------------|-------|--------|-------|
+| IBM PC compatible                 |	 🦄   |        | and compatibles (like the Atari ST) |
+| [Acorn ADFS](acornadfs.html)      |  🦖   |        | single- and double- sided           |
+| [Acorn DFS](acorndfs.html)        |  🦄   |        |                                     |
+| [Commodore Amiga](amiga.html)     |  🦖   |        |                                     |
+| [Commodore 64 1451](c64.html)     |  🦖   |        | and probably the other GCR formats  |
+| [Brother 120kB](brother.html)     |  🦄   |        |                                     |
+| [Brother 240kB](brother.html)     |  🦄   |   🦄   |                                     |
+| [Macintosh 800kB](macintosh.html) |  🦖   |        | and probably the 400kB too          |
 
-  - [Acorn DFS disks](acorndfs.html): read only (likewise)
+Dinosaurs (🦖) have yet to be observed in real life --- I've written the
+decoder based on Kryoflux (or other) dumps I've found. I don't (yet) have
+real, physical disks in my hand to test the capture process.
 
-  - [Amiga disks](amiga.html): read only (likewise)
+Unicorns (🦄) are completely real --- this means that I've read actual,
+physical disks with these formats and so know they work.
 
-  - [Brother 120kB and 240kB word processor disks](brother.html); read and
-    write
+Notes:
 
-  - [Macintosh 800kB (and probably 400kB too) disks](macintosh.html); read only
+  - IBM PC disks are the lowest-common-denominator standard. A number of other
+    systems use this format in disguise (the Atari ST, late-era Apple
+    machines, Acorn). FluxEngine supports both FM and MFM disks, although you
+    have to tell it which one. If you have an unknown disk, try this; you may
+    get something. Then [tell me about
+    it](https://github.com/davidgiven/fluxengine/issues/new).
 
-...aaaand that's it. If you want more, please [get in
-touch](https://github.com/davidgiven/fluxengine/issues/new); I need samples
-of floppy disks to scan and play with.
+  - Not many formats support writing yet. That's because I need actual,
+    physical hardware to test with in order to verify it works, and I only
+    have a limited selection. (Plus a lot of the write code needs work.)
+    There hasn't been a lot of demand for this yet; if you have a pressing
+    need to write weird disks, [please
+    ask](https://github.com/davidgiven/fluxengine/issues/new). I haven't
+    implement write support for PC disks because they're boring and I'm lazy,
+    and also because they vary so much that figuring out how to specify them
+    is hard.
+
+If you have samples of weird disks, and want to send them to me --- either
+FluxEngine or Kryoflux dumps, or (even better) actually physically --- I can
+identify them and add support.
+
+Please note that at this point I am *not interested in copy protected disks*.
+It's not out of principle. It's just they'll drive me insane. FluxEngine will
+most likely be able to read the data fine, unless they're doing bizarre
+things like spiral tracks or partially encoded data, but let's stick with
+normal conventionally formatted disks for the time being!
 
 ### Big list of stuff to work on
 
