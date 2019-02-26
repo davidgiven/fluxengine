@@ -20,6 +20,7 @@ public:
 public:
     std::unique_ptr<Fluxmap> read();
     void recalibrate();
+    bool retryable();
 
     unsigned track;
     unsigned side;

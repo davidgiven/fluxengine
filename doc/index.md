@@ -55,32 +55,59 @@ markers.
 
 **Q.** That's awesome! What formats does it support?
 
-**A.** I'm glad you asked the question. Not a lot, currently.
+**A.** I'm glad you asked the question. Consult the following table!
 
 ### Formats that it supports
 
-  - All standard double and high density IBM MFM formats, a.k.a. 360kB,
-    720kB, 1200kB, 1440kB formats; read only (I haven't got round to writing
-    the write support). Non-standard formats like the DMF 1680kB format
-    should work too but will require a little effort. ED disks probably don't
-    work, but I'd [love to hear from
-    you](https://github.com/davidgiven/fluxengine/issues/new) if you have one
-    and want to give it a try. This includes variations like Atari ST.
+Here's the table.
 
-  - [Acorn ADFS disks](acornadfs.html): read only (likewise)
+| Format                            | Read? | Write? | Notes |
+|:----------------------------------|:-----:|:------:|-------|
+| IBM PC compatible                 |	 🦄   |        | and compatibles (like the Atari ST) |
+| [Acorn ADFS](acornadfs.html)      |  🦖   |        | single- and double- sided           |
+| [Acorn DFS](acorndfs.html)        |  🦄   |        |                                     |
+| [Commodore Amiga](amiga.html)     |  🦖   |        |                                     |
+| [Commodore 64 1451](c64.html)     |  🦖   |        | and probably the other GCR formats  |
+| [Brother 120kB](brother.html)     |  🦄   |        |                                     |
+| [Brother 240kB](brother.html)     |  🦄   |   🦄   |                                     |
+| [Macintosh 800kB](macintosh.html) |  🦖   |        | and probably the 400kB too          |
+{: .datatable }
 
-  - [Acorn DFS disks](acorndfs.html): read only (likewise)
+Dinosaurs (🦖) have yet to be observed in real life --- I've written the
+decoder based on Kryoflux (or other) dumps I've found. I don't (yet) have
+real, physical disks in my hand to test the capture process.
 
-  - [Amiga disks](amiga.html): read only (likewise)
+Unicorns (🦄) are completely real --- this means that I've read actual,
+physical disks with these formats and so know they work.
 
-  - [Brother 120kB and 240kB word processor disks](brother.html); read and
-    write
+Notes:
 
-  - [Macintosh 800kB (and probably 400kB too) disks](macintosh.html); read only
+  - IBM PC disks are the lowest-common-denominator standard. A number of other
+    systems use this format in disguise (the Atari ST, late-era Apple
+    machines, Acorn). FluxEngine supports both FM and MFM disks, although you
+    have to tell it which one. If you have an unknown disk, try this; you may
+    get something. Then [tell me about
+    it](https://github.com/davidgiven/fluxengine/issues/new).
 
-...aaaand that's it. If you want more, please [get in
-touch](https://github.com/davidgiven/fluxengine/issues/new); I need samples
-of floppy disks to scan and play with.
+  - Not many formats support writing yet. That's because I need actual,
+    physical hardware to test with in order to verify it works, and I only
+    have a limited selection. (Plus a lot of the write code needs work.)
+    There hasn't been a lot of demand for this yet; if you have a pressing
+    need to write weird disks, [please
+    ask](https://github.com/davidgiven/fluxengine/issues/new). I haven't
+    implement write support for PC disks because they're boring and I'm lazy,
+    and also because they vary so much that figuring out how to specify them
+    is hard.
+
+If you have samples of weird disks, and want to send them to me --- either
+FluxEngine or Kryoflux dumps, or (even better) actually physically --- I can
+identify them and add support.
+
+Please note that at this point I am *not interested in copy protected disks*.
+It's not out of principle. It's just they'll drive me insane. FluxEngine will
+most likely be able to read the data fine, unless they're doing bizarre
+things like spiral tracks or partially encoded data, but let's stick with
+normal conventionally formatted disks for the time being!
 
 ### Big list of stuff to work on
 
@@ -178,12 +205,17 @@ make it fit on the back of a floppy disk drive. Using pins instead means this
 isn't necessary, but, well, now it's too late.)
 
   1. **If you're using a header:** solder your 17-way header to the
-     **bottom** of the board, from 2.7 to 1.0 inclusive. (It has to be 
+     **bottom** of the board, from 2.7 to 1.7 inclusive. (It has to be 
      the bottom because there are components that stick out on the other side
      and the bottom needs to go flush against the drive.)
 
-  3. **If you're using pins:** solder your 17-way pins to **either side** of
-     the board, from 2.7 to 1.0 inclusive.
+  2. **If you're using an IDC header plug:** solder it to the **top** of
+     the board, notch up, with the _top_ row of pins overhanging the edge
+     of the board (so that pin 1 is disconnected). Pin 2 should be in board
+     pin 2.7, and pin 34 in baord pin 1.7.
+
+  3. **If you're using bare pins:** solder your 17-way pin header
+     to **either side** of the board, from 2.7 to 1.7 inclusive.
 
   4. Solder two wires to any convenient VDD and GND pins and connect these to
      your floppy disk drive's power supply. If you're powering the floppy
@@ -243,9 +275,9 @@ touch](https://github.com/davidgiven/fluxengine/issues/new).
 So you have client software, programmed the firmware, and the hardware is all
 ready. What next?
 
-  1. Attach the FluxEngine to your floppy disk drive. Pin 0.2 (on the right in
+  1. Attach the FluxEngine to your floppy disk drive. Pin 2.7 (on the right in
      the picture above) is REDWC and connects to pin 2 on the floppy drive.
-     Pin 1.0 (on the left in the picture above) is DSKCHG and connects to pin
+     Pin 1.7 (on the left in the picture above) is DSKCHG and connects to pin
      34 on the floppy drive. All the other board pins connect in the obvious
      order. Odd pins on the floppy drive are left unconnected. You can push
      the floppy drive connector straight onto the pins, or the FluxEngine

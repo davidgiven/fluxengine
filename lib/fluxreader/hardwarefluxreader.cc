@@ -29,8 +29,14 @@ public:
         return usbRead(side, revolutions);
     }
 
-    void recalibrate() {
+    void recalibrate()
+    {
         usbRecalibrate();
+    }
+
+    bool retryable()
+    {
+        return true;
     }
 
 private:
