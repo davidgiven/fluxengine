@@ -10,12 +10,16 @@ PC drive to accept Amiga disks, CLV Macintosh disks, bizarre 128-sector CP/M
 disks, and other weird and bizarre formats. (Although not all of these are
 supported yet. I could really use samples.)
 
-<img src="floppy.jpg" style="width:100%" alt="a FluxEngine attached to a floppy drive">
+<img src="floppy.jpg" style="width:50%" alt="a FluxEngine attached to a floppy drive">
 
 **Important note.** On 2019-02-09 I did a hardware redesign and moved the pins on
 the board. Sorry for the inconvenience, but it means you don't have to modify
 the board any more to make it work. If you built the hardware prior to then,
 you'll need to adjust it.
+
+**New!** There's a demo reel!
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/m_s1iw8eW7o" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 ### Infrequently asked questions because nobody's got round to asking them yet
 
@@ -63,7 +67,7 @@ Here's the table.
 
 | Format                            | Read? | Write? | Notes |
 |:----------------------------------|:-----:|:------:|-------|
-| IBM PC compatible                 |	 🦄   |        | and compatibles (like the Atari ST) |
+| IBM PC compatible                 |  🦄   |        | and compatibles (like the Atari ST) |
 | [Acorn ADFS](acornadfs.html)      |  🦖   |        | single- and double- sided           |
 | [Acorn DFS](acorndfs.html)        |  🦄   |        |                                     |
 | [Commodore Amiga](amiga.html)     |  🦖   |        |                                     |
