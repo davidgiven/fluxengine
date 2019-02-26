@@ -6,7 +6,8 @@
 #include "sector.h"
 #include <string.h>
 
-static_assert(std::is_trivially_copyable<IbmIdam>::value);
+static_assert(std::is_trivially_copyable<IbmIdam>::value,
+		"IbmIdam is not trivially copyable");
 
 SectorVector AbstractIbmDecoder::decodeToSectors(const RawRecordVector& rawRecords, unsigned)
 {
