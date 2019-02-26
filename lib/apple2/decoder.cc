@@ -4,7 +4,7 @@
 #include "record.h"
 #include "decoders.h"
 #include "sector.h"
-#include "macintosh.h"
+#include "apple2.h"
 #include "bytes.h"
 #include "fmt/format.h"
 #include <string.h>
@@ -116,12 +116,17 @@ uint8_t decode_side(uint8_t side)
     return !!(side & 0x40);
 }
 
-SectorVector MacintoshDecoder::decodeToSectors(
-        const RawRecordVector& rawRecords, unsigned physicalTrack)
+uint8_t combine(uint16_t word)
+{
+    return word & (word >> 7);
+}
+
+SectorVector Apple2Decoder::decodeToSectors(
+        const RawRecordVector& rawRecords, unsigned)
 {
     std::vector<std::unique_ptr<Sector>> sectors;
+    int nextTrack;
     int nextSector;
-    int nextSide;
     bool headerIsValid = false;
 
     for (auto& rawrecord : rawRecords)
@@ -137,16 +142,11 @@ SectorVector MacintoshDecoder::decodeToSectors(
         {
             case MAC_SECTOR_RECORD:
             {
-                unsigned track = decode_data_gcr(rawbytes[3]);
-                if (track != (physicalTrack & 0x3f))
-                    break;
-                nextSector = decode_data_gcr(rawbytes[4]);
-                nextSide = decode_data_gcr(rawbytes[5]);
-                uint8_t formatByte = decode_data_gcr(rawbytes[6]);
-                uint8_t wantedsum = decode_data_gcr(rawbytes[7]);
-
-                uint8_t gotsum = (track ^ nextSector ^ nextSide ^ formatByte) & 0x3f;
-                headerIsValid = (wantedsum == gotsum);
+                uint8_t volume = combine(read_be16(&rawbytes[3]));
+                nextTrack = combine(read_be16(&rawbytes[5]));
+                nextSector = combine(read_be16(&rawbytes[7]));
+                uint8_t checksum = combine(read_be16(&rawbytes[9]));
+                headerIsValid = checksum == (volume ^ nextTrack ^ nextSector);
                 break;
             }
 
@@ -170,7 +170,7 @@ SectorVector MacintoshDecoder::decodeToSectors(
                 auto data = decode_crazy_data(inputbuffer, status);
 
                 auto sector = std::unique_ptr<Sector>(
-                    new Sector(status, physicalTrack, decode_side(nextSide), nextSector, data));
+                    new Sector(status, nextTrack, 0, nextSector, data));
                 sectors.push_back(std::move(sector));
                 break;
             }
@@ -180,7 +180,7 @@ SectorVector MacintoshDecoder::decodeToSectors(
 	return sectors;
 }
 
-int MacintoshDecoder::recordMatcher(uint64_t fifo) const
+int Apple2Decoder::recordMatcher(uint64_t fifo) const
 {
     uint32_t masked = fifo & 0xffffff;
     if ((masked == MAC_SECTOR_RECORD) || (masked == MAC_DATA_RECORD))
