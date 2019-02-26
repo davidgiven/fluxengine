@@ -94,6 +94,15 @@ amigadecoderlib = shared_library('amigadecoderlib',
 )
 amigainc = include_directories('lib/amiga')
 
+apple2decoderlib = shared_library('apple2decoderlib',
+    [
+		'lib/apple2/decoder.cc',
+    ],
+    include_directories: [feinc, fmtinc, decoderinc],
+    link_with: [felib, fmtlib, decoderlib]
+)
+apple2inc = include_directories('lib/apple2')
+
 brotherdecoderlib = shared_library('brotherdecoderlib',
     [
 		'lib/brother/decoder.cc',
@@ -141,6 +150,7 @@ executable('fe-erase',             ['src/fe-erase.cc'],             include_dire
 executable('fe-inspect',           ['src/fe-inspect.cc'],           include_directories: [feinc, fmtinc, decoderinc], link_with: [felib, readerlib, decoderlib, fmtlib])
 executable('fe-readadfs',          ['src/fe-readadfs.cc'],          include_directories: [feinc, fmtinc, decoderinc, ibminc], link_with: [felib, readerlib, decoderlib, ibmdecoderlib, fmtlib])
 executable('fe-readamiga',         ['src/fe-readamiga.cc'],         include_directories: [feinc, fmtinc, decoderinc, amigainc], link_with: [felib, readerlib, decoderlib, amigadecoderlib, fmtlib])
+executable('fe-readapple2',        ['src/fe-readapple2.cc'],        include_directories: [feinc, fmtinc, decoderinc, apple2inc], link_with: [felib, readerlib, decoderlib, apple2decoderlib, fmtlib])
 executable('fe-readbrother',       ['src/fe-readbrother.cc'],       include_directories: [feinc, fmtinc, decoderinc, brotherinc], link_with: [felib, readerlib, decoderlib, brotherdecoderlib, fmtlib])
 executable('fe-readc64',           ['src/fe-readc64.cc'],           include_directories: [feinc, fmtinc, decoderinc, c64inc], link_with: [felib, readerlib, decoderlib, c64decoderlib, fmtlib])
 executable('fe-readdfs',           ['src/fe-readdfs.cc'],           include_directories: [feinc, fmtinc, decoderinc, ibminc], link_with: [felib, readerlib, decoderlib, ibmdecoderlib, fmtlib])
