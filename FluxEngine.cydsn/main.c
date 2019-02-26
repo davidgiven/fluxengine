@@ -250,7 +250,7 @@ static void init_capture_dma(void)
 
         CyDmaTdSetConfiguration(td[i], BUFFER_SIZE, td[nexti],   
             CY_DMA_TD_INC_DST_ADR | CAPTURE_DMA__TD_TERMOUT_EN);
-        CyDmaTdSetAddress(td[i], LO16((uint32)SAMPLER_Datapath_1_F0_PTR), LO16((uint32)&dma_buffer[i]));
+        CyDmaTdSetAddress(td[i], LO16((uint32)SAMPLER_DATAPATH_F0_PTR), LO16((uint32)&dma_buffer[i]));
     }    
 }
 
@@ -265,9 +265,9 @@ static void cmd_read(struct read_frame* f)
     
     {
         uint8_t i = CyEnterCriticalSection();
-        SAMPLER_Datapath_1_F0_SET_LEVEL_NORMAL;
-        SAMPLER_Datapath_1_F0_CLEAR;
-        SAMPLER_Datapath_1_F0_SINGLE_BUFFER_UNSET;
+        SAMPLER_DATAPATH_F0_SET_LEVEL_NORMAL;
+        SAMPLER_DATAPATH_F0_CLEAR;
+        SAMPLER_DATAPATH_F0_SINGLE_BUFFER_UNSET;
         CyExitCriticalSection(i);
     }
     
