@@ -8,14 +8,16 @@
 module Sequencer (
 	output reg interrupt,
 	output reg wdata,
-	input clock,
+	input sampleclock,
 	input [7:0] data,
-    input reset
+    input reset,
+    input clock
 );
 
 //`#start body` -- edit after this line, do not edit this line
 
 reg [6:0] counter;
+reg lastsampleclock;
 
 always @(posedge clock)
 begin
@@ -24,18 +26,26 @@ begin
         counter <= 0;
         interrupt <= 0;
         wdata <= 0;
-    end
-    else if (counter == data[6:0])
-    begin
-        counter <= 1; // tick zero is this one
-        interrupt <= 1;
-        wdata <= ~data[7];
+        lastsampleclock <= 0;
     end
     else
     begin
-        counter <= counter + 1;
-        interrupt <= 0;
-        wdata <= 0;
+        if (sampleclock && !lastsampleclock)
+        begin
+            if (counter == data[6:0])
+            begin
+                counter <= 1; // tick zero is this one
+                interrupt <= 1;
+                wdata <= ~data[7];
+            end
+            else
+            begin
+                counter <= counter + 1;
+                interrupt <= 0;
+                wdata <= 0;
+            end
+        end
+        lastsampleclock <= sampleclock;
     end
 end
 
