@@ -235,7 +235,7 @@ static void deinit_dma(void)
 static void init_capture_dma(void)
 {
     dma_channel = CAPTURE_DMA_DmaInitialize(
-        1 /* bytes */,
+        2 /* bytes */,
         true /* request per burst */, 
         HI16(CYDEV_PERIPH_BASE),
         HI16(CYDEV_SRAM_BASE));
@@ -265,7 +265,7 @@ static void cmd_read(struct read_frame* f)
     
     {
         uint8_t i = CyEnterCriticalSection();
-        SAMPLER_DATAPATH_F0_SET_LEVEL_NORMAL;
+        SAMPLER_DATAPATH_F0_SET_LEVEL_MID;
         SAMPLER_DATAPATH_F0_CLEAR;
         SAMPLER_DATAPATH_F0_SINGLE_BUFFER_UNSET;
         CyExitCriticalSection(i);
