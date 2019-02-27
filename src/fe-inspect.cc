@@ -20,6 +20,10 @@ static SettableFlag dumpBitstreamFlag(
 	{ "--dump-bitstream", "-B" },
 	"Dump aligned bitstream.");
 
+static SettableFlag dumpBytecodesFlag(
+    { "--dump-bytecodes", "-H" },
+    "Dump the raw FluxEngine bytecodes.");
+
 static IntFlag fluxmapResolutionFlag(
 	{ "--fluxmap-resolution" },
 	"Resolution of flux visualisation (nanoseconds). 0 to autoscale",
@@ -121,6 +125,14 @@ int main(int argc, const char* argv[])
 
 		std::cout << std::endl;
 	}
+
+    if (dumpBytecodesFlag)
+    {
+        std::cout << "Raw FluxEngine bytecodes follow:" << std::endl;
+
+        const auto& bytes = fluxmap->rawBytes();
+        hexdump(std::cout, bytes);
+    }
 
     return 0;
 }
