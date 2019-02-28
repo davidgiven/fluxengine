@@ -10,8 +10,7 @@ on the bottom of a 5.25" drive.
 It stored either 400kB on a double-sided 40-track drive or 800kB on a
 double-sided 80 track drive. The disk format it used was a slightly quirky
 variation of the standard MFM IBM scheme --- sector numbering starts at 17
-rather than 1 (or Acorn's 0). FluxEngine supports this. FM. FluxEngine
-supports this.
+rather than 1 (or Acorn's 0). FluxEngine supports this.
 
 
 Reading discs
@@ -23,7 +22,7 @@ Just do:
 .obj/fe-readampro
 ```
 
-You should end up with an `ampro.adf` which is 409600 or 819200 bytes long.
+You should end up with an `ampro.img` which is 409600 or 819200 bytes long.
 You can pass this straight into [cpmtools](http://www.moria.de/~michael/cpmtools/):
 
 ```
