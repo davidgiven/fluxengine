@@ -5,6 +5,7 @@
 #define MAC_DATA_RECORD     0xd5aaad
 
 #define MAC_SECTOR_LENGTH   524 /* yes, really */
+#define MAC_ENCODED_SECTOR_LENGTH 700
 
 class Sector;
 class Fluxmap;

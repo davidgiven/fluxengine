@@ -116,8 +116,8 @@ static void replace_sector(std::unique_ptr<Sector>& replacing, std::unique_ptr<S
 		if (replacement->data != replacing->data)
 		{
 			std::cout << std::endl
-						<< "       Multiple conflicting copies of sector " << replacing->sector
-						<< " seen";
+						<< "       multiple conflicting copies of sector " << replacing->sector
+						<< " seen; ";
 		}
 	}
 	if (!replacing || (replacing->status != Sector::OK))
@@ -174,7 +174,7 @@ void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename
 			if (hasBadSectors)
 				failures = false;
 
-			if (dumpRecords && (!hasBadSectors || (retry == 0)))
+			if (dumpRecords && (!hasBadSectors || (retry == 0) || !track->retryable()))
 			{
 				std::cout << "\nRaw (undecoded) records follow:\n\n";
 				for (auto& record : rawrecords)
@@ -186,11 +186,11 @@ void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename
 				}
 			}
 
-			if (!hasBadSectors)
-				break;
-
 			std::cout << std::endl
                       << "       ";
+
+			if (!hasBadSectors)
+				break;
 
 			if (!track->retryable())
 				break;
