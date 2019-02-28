@@ -72,6 +72,7 @@ Here's the table.
 | IBM PC compatible                 |  🦄   |        | and compatibles (like the Atari ST) |
 | [Acorn ADFS](acornadfs.html)      |  🦖   |        | single- and double- sided           |
 | [Acorn DFS](acorndfs.html)        |  🦄   |        |                                     |
+| [Ampro Little Board](ampro.html)  |  🦄   |        |                                     |
 | [Commodore Amiga](amiga.html)     |  🦖   |        |                                     |
 | [Commodore 64 1541](c64.html)     |  🦖   |        | and probably the other GCR formats  |
 | [Brother 120kB](brother.html)     |  🦄   |        |                                     |
