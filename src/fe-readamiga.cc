@@ -14,7 +14,7 @@
 static StringFlag outputFilename(
     { "--output", "-o" },
     "The output image file to write to.",
-    "amiga.img");
+    "amiga.adf");
 
 int main(int argc, const char* argv[])
 {

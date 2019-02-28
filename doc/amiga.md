@@ -19,8 +19,9 @@ Just do:
 .obj/fe-readamiga
 ```
 
-You should end up with an `amiga.img` which is 901120 bytes long (for a normal
-DD disk).
+You should end up with an `amiga.adf` which is 901120 bytes long (for a
+normal DD disk) --- it ought to be a perfectly normal ADF file which you can
+use in an emulator.
 
 Useful references
 -----------------
