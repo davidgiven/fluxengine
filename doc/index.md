@@ -10,12 +10,18 @@ PC drive to accept Amiga disks, CLV Macintosh disks, bizarre 128-sector CP/M
 disks, and other weird and bizarre formats. (Although not all of these are
 supported yet. I could really use samples.)
 
-<img src="floppy.jpg" style="width:100%" alt="a FluxEngine attached to a floppy drive">
+<img src="floppy.jpg" style="width:50%" alt="a FluxEngine attached to a floppy drive">
 
 **Important note.** On 2019-02-09 I did a hardware redesign and moved the pins on
 the board. Sorry for the inconvenience, but it means you don't have to modify
 the board any more to make it work. If you built the hardware prior to then,
 you'll need to adjust it.
+
+**New!** There's a demo reel!
+
+<div style="text-align: center">
+<iframe width="560" height="315" src="https://www.youtube.com/embed/m_s1iw8eW7o" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
 
 ### Infrequently asked questions because nobody's got round to asking them yet
 
@@ -63,7 +69,7 @@ Here's the table.
 
 | Format                            | Read? | Write? | Notes |
 |:----------------------------------|:-----:|:------:|-------|
-| IBM PC compatible                 |	 🦄   |        | and compatibles (like the Atari ST) |
+| IBM PC compatible                 |  🦄   |        | and compatibles (like the Atari ST) |
 | [Acorn ADFS](acornadfs.html)      |  🦖   |        | single- and double- sided           |
 | [Acorn DFS](acorndfs.html)        |  🦄   |        |                                     |
 | [Commodore Amiga](amiga.html)     |  🦖   |        |                                     |
@@ -284,6 +290,17 @@ ready. What next?
      board straight onto the floppy disk drive, depending on how you're doing
      it.
 
+     Important note if you're using a floppy disk cable: these typically have
+     [two pairs of floppy disk drive connectors with a twist between
+     them](http://www.nullmodem.com/Floppy.htm). (Each pair has one connector
+     for a 3.5" drive and a different one for a 5.25" drive.) Normally the
+     first floppy disk drive is drive B, and the one after the twist is drive
+     A. However, FluxEngine considers the first drive to be drive 0 and the
+     second one to be drive 1. It's this way so as to allow the FluxEngine to
+     be plugged directly onto the back of a disk drive. If you only have one
+     drive, remember to plug the drive into the connector _before_ the twist.
+     (Or use `-s :d=1` to select drive 1 when working with disks.)
+
   2. **Important.** Make sure that no disk you care about is in the drive.
 	 (Because if your wiring is wrong and a disk is inserted, you'll
 	 probably corrupt it.)
@@ -320,7 +337,7 @@ fe-readibm -s fakedisk.flux:t=0-79:s=0
   - To access a real disk, leave out the filename (so `:t=0-79:s=0`).
 
   - To access only some tracks, use the `t=` modifier. To access only some
-    sides, use the `s=` modifier.
+    sides, use the `s=` modifier. To change drives, use `d=`.
 
   - Inside a modifier, you can use a comma separated list of ranges. So
     `:t=0-3` and `:t=0,1,2,3` are equivalent.
@@ -329,9 +346,12 @@ fe-readibm -s fakedisk.flux:t=0-79:s=0
     `:t=0-79x2` would be used when accessing a 40-track disk with double
     stepping.
 
+  - To read from drive 1 instead of drive 0, use `:d=1`.
+
   - To read from a set of KryoFlux stream files, specify the path to the
     directory containing the files _with a trailing slash_; so
-    `some/files/:t=0-10`.
+    `some/files/:t=0-10`. There must be a files for a single disk only
+    in the directory.
 
 Source and destination specifiers work entirely in *physical units*.
 FluxEngine is intended to be connected to an 80 (or 82) track double sided
@@ -358,15 +378,11 @@ directory.
   - `fe-inspect`: dumps the raw pulsetrain / bitstream to stdout. Mainly useful
     for debugging.
 
-  - `fe-readadfs`: reads various formats of Acorn ADFS disks.
+  - `fe-read*`: reads various formats of disk. See the per-format documentation
+    linked from the table above.
 
-  - `fe-readdfs`: reads various formats of Acorn DFS disks.
-
-  - `fe-readbrother`: reads 240kB Brother word processor disks. Emits a
-	256-byte-sector FAT filesystem. (You can access this with mtools
-	although you'll [to edit them first](brother.html).
-
-  - `fe-writebrother`: writes 240kB Brother word processor disks.
+  - `fe-write*`: writes various formats of disk. Again, see the per-format
+    documentation above.
 
   - `fe-writeflux`: writes raw flux files. This is much less useful than you
     might think: you can't necessarily copy flux files read from a disk,
@@ -391,14 +407,9 @@ directory.
     for FluxEngine to work. You don't need a disk in the drive for this one.
 
 Commands which take `--source` or `--dest` take a parameter of the syntax
-`$FILENAME:$MODIFIER:$MODIFER...` A blank filename refers to the physical
-disk; otherwise, you can specify a `.flux` file. The colon-separated
-modifiers limit which bits of the disk are accessed. To specify tracks, do
-`:t=0-9` (or just `:t=7`). For sides, do `:s=0-1` (or commonly just `:s=0`).
-If you have two drives, do `:d=1` (but bear in mind that you need to specify
-exactly one drive; ranges won't work). If left unspecified, you get the
-default specified by the command, which will vary depending on which disk
-format you're using (and is usually the right one).
+`$FILENAME:$MODIFIER:$MODIFER...` as described above. If left unspecified,
+you get the default specified by the command, which will vary depending on
+which disk format you're using (and is usually the right one).
 
 ### How it works
 
@@ -407,7 +418,8 @@ pulses, encodes them, and streams them over USB to the PC.
 
 There's an 8-bit counter attached to an 12MHz clock. This is used to measure
 the interval between pulses. If the timer overflows, we pretend it's a pulse
-(this very rarely happens in real life).
+(this very rarely happens in real life). ([I'm working on
+this.](https://github.com/davidgiven/fluxengine/issues/8))
 
 An HD floppy has a nominal clock of 500kHz, so we use a sample clock of 12MHz
 (every 83ns). This means that our 500kHz pulses will have an interval of 24
