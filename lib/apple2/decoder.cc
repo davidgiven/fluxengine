@@ -23,97 +23,38 @@ static int decode_data_gcr(uint8_t gcr)
 };
 
 /* This is extremely inspired by the MESS implementation, written by Nathan Woods
- * and R. Belmont: https://github.com/mamedev/mame/blob/4263a71e64377db11392c458b580c5ae83556bc7/src/lib/formats/ap_dsk35.cpp
+ * and R. Belmont: https://github.com/mamedev/mame/blob/7914a6083a3b3a8c243ae6c3b8cb50b023f21e0e/src/lib/formats/ap2_dsk.cpp
  */
 static std::vector<uint8_t> decode_crazy_data(const uint8_t* inp, int& status)
 {
-    std::vector<uint8_t> output;
+    std::vector<uint8_t> output(APPLE2_SECTOR_LENGTH);
 
-    static const int LOOKUP_LEN = MAC_SECTOR_LENGTH / 3;
-
-    uint8_t b1[LOOKUP_LEN + 1];
-    uint8_t b2[LOOKUP_LEN + 1];
-    uint8_t b3[LOOKUP_LEN + 1];
-
-    for (int i=0; i<=LOOKUP_LEN; i++)
+    uint8_t checksum = 0;
+    for (unsigned i = 0; i < APPLE2_ENCODED_SECTOR_LENGTH; i++)
     {
-        uint8_t w4 = *inp++;
-        uint8_t w1 = *inp++;
-        uint8_t w2 = *inp++;
-        uint8_t w3 = (i != 174) ? *inp++ : 0;
+        uint8_t b = decode_data_gcr(*inp++);
+        uint8_t newvalue = b ^ checksum;
 
-        b1[i] = (w1 & 0x3F) | ((w4 << 2) & 0xC0);
-        b2[i] = (w2 & 0x3F) | ((w4 << 4) & 0xC0);
-        b3[i] = (w3 & 0x3F) | ((w4 << 6) & 0xC0);
+        if (i >= 0x56)
+        {
+            /* 6 bit */
+            output[i - 0x56] |= (newvalue << 2);
+        }
+        else
+        {
+            /* 3 * 2 bit */
+            output[i + 0x00] = ((newvalue >> 1) & 0x01) | ((newvalue << 1) & 0x02);
+            output[i + 0x56] = ((newvalue >> 3) & 0x01) | ((newvalue >> 1) & 0x02);
+            if ((i + 0xAC) < APPLE2_SECTOR_LENGTH)
+                output[i + 0xAC] = ((newvalue >> 5) & 0x01) | ((newvalue >> 3) & 0x02);
+        }
+        checksum = newvalue;
     }
 
-    /* Copy from the user's buffer to our buffer, while computing
-     * the three-byte data checksum. */
-
-    uint32_t c1 = 0;
-    uint32_t c2 = 0;
-    uint32_t c3 = 0;
-    unsigned count = 0;
-    for (;;)
-    {
-        c1 = (c1 & 0xFF) << 1;
-        if (c1 & 0x0100)
-            c1++;
-
-        uint8_t val = b1[count] ^ c1;
-        c3 += val;
-        if (c1 & 0x0100)
-        {
-            c3++;
-            c1 &= 0xFF;
-        }
-        output.push_back(val);
-
-        val = b2[count] ^ c3;
-        c2 += val;
-        if (c3 > 0xFF)
-        {
-            c2++;
-            c3 &= 0xFF;
-        }
-        output.push_back(val);
-
-        if (output.size() == 524)
-            break;
-
-        val = b3[count] ^ c2;
-        c1 += val;
-        if (c2 > 0xFF)
-        {
-            c1++;
-            c2 &= 0xFF;
-        }
-        output.push_back(val);
-        count++;
-    }
-
-    uint8_t c4 = ((c1 & 0xC0) >> 6) | ((c2 & 0xC0) >> 4) | ((c3 & 0xC0) >> 2);
-    c1 &= 0x3f;
-    c2 &= 0x3f;
-    c3 &= 0x3f;
-    c4 &= 0x3f;
-    uint8_t g4 = *inp++;
-    uint8_t g3 = *inp++;
-    uint8_t g2 = *inp++;
-    uint8_t g1 = *inp++;
-    if ((g4 == c4) && (g3 == c3) && (g2 == c2) && (g1 == c1))
-        status = Sector::OK;
-
+    checksum &= 0x3f;
+    uint8_t wantedchecksum = decode_data_gcr(*inp);
+    status = (checksum == wantedchecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
     return output;
-}
-
-uint8_t decode_side(uint8_t side)
-{
-    /* Mac disks, being weird, use the side byte to encode both the side (in
-     * bit 5) and also whether we're above track 0x3f (in bit 6).
-     */
-
-    return !!(side & 0x40);
 }
 
 uint8_t combine(uint16_t word)
@@ -140,7 +81,7 @@ SectorVector Apple2Decoder::decodeToSectors(
         uint32_t signature = read_be24(&rawbytes[0]);
         switch (signature)
         {
-            case MAC_SECTOR_RECORD:
+            case APPLE2_SECTOR_RECORD:
             {
                 uint8_t volume = combine(read_be16(&rawbytes[3]));
                 nextTrack = combine(read_be16(&rawbytes[5]));
@@ -150,24 +91,16 @@ SectorVector Apple2Decoder::decodeToSectors(
                 break;
             }
 
-            case MAC_DATA_RECORD:
+            case APPLE2_DATA_RECORD:
             {
                 if (!headerIsValid)
                     break;
                 headerIsValid = false;
-
-                uint8_t inputbuffer[MAC_SECTOR_LENGTH * 8/6 + 5] = {};
-                for (unsigned i=0; i<sizeof(inputbuffer); i++)
-                {
-                    auto p = rawbytes.begin() + 4 + i;
-                    if (p > rawbytes.end())
-                        break;
                     
-                    inputbuffer[i] = decode_data_gcr(*p);
-                }
-                    
+                std::vector<uint8_t> clippedbytes(rawbytes);
+                clippedbytes.resize(APPLE2_ENCODED_SECTOR_LENGTH + 5);
                 int status = Sector::BAD_CHECKSUM;
-                auto data = decode_crazy_data(inputbuffer, status);
+                auto data = decode_crazy_data(&clippedbytes[4], status);
 
                 auto sector = std::unique_ptr<Sector>(
                     new Sector(status, nextTrack, 0, nextSector, data));
@@ -183,7 +116,7 @@ SectorVector Apple2Decoder::decodeToSectors(
 int Apple2Decoder::recordMatcher(uint64_t fifo) const
 {
     uint32_t masked = fifo & 0xffffff;
-    if ((masked == MAC_SECTOR_RECORD) || (masked == MAC_DATA_RECORD))
+    if ((masked == APPLE2_SECTOR_RECORD) || (masked == APPLE2_DATA_RECORD))
 		return 24;
     return 0;
 }
