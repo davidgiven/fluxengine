@@ -73,7 +73,7 @@ Here's the table.
 | [Acorn ADFS](acornadfs.html)      |  🦖   |        | single- and double- sided           |
 | [Acorn DFS](acorndfs.html)        |  🦄   |        |                                     |
 | [Commodore Amiga](amiga.html)     |  🦖   |        |                                     |
-| [Commodore 64 1451](c64.html)     |  🦖   |        | and probably the other GCR formats  |
+| [Commodore 64 1541](c64.html)     |  🦖   |        | and probably the other GCR formats  |
 | [Brother 120kB](brother.html)     |  🦄   |        |                                     |
 | [Brother 240kB](brother.html)     |  🦄   |   🦄   |                                     |
 | [Macintosh 800kB](macintosh.html) |  🦖   |        | and probably the 400kB too          |
