@@ -156,7 +156,7 @@ SectorVector MacintoshDecoder::decodeToSectors(
                     break;
                 headerIsValid = false;
 
-                uint8_t inputbuffer[MAC_SECTOR_LENGTH * 8/6 + 5] = {};
+                uint8_t inputbuffer[MAC_ENCODED_SECTOR_LENGTH + 4] = {};
                 for (unsigned i=0; i<sizeof(inputbuffer); i++)
                 {
                     auto p = rawbytes.begin() + 4 + i;
