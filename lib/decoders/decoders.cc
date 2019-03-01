@@ -43,7 +43,7 @@ nanoseconds_t Fluxmap::guessClock() const
     
     uint32_t max = *std::max_element(std::begin(buckets), std::end(buckets));
     uint32_t min = *std::min_element(std::begin(buckets), std::end(buckets));
-    uint32_t noise_floor = (min+max)/100;
+    uint32_t noise_floor = min + (max-min)/100;
     uint32_t signal_level = noise_floor * 5;
 
     /* Find a point solidly within the first pulse. */
