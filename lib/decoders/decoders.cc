@@ -98,19 +98,31 @@ nanoseconds_t Fluxmap::guessClock() const
     {
         std::cout << "Clock detection histogram:" << std::endl;
 
+		bool skipping = true;
         for (int i=0; i<256; i++)
 		{
 			uint32_t value = buckets[i];
-			int bar = 320*value/max;
-			int fullblocks = bar / 8;
+			if (value < noise_floor/2)
+			{
+				if (!skipping)
+					std::cout << "..." << std::endl;
+				skipping = true;
+			}
+			else
+			{
+				skipping = false;
 
-			std::string s;
-			for (int j=0; j<fullblocks; j++)
-				s += BLOCK_ELEMENTS[8];
-			s += BLOCK_ELEMENTS[bar & 7];
+				int bar = 320*value/max;
+				int fullblocks = bar / 8;
 
-            std::cout << fmt::format("{:.2f} {:6} {}", (double)i * US_PER_TICK, value, s);
-			std::cout << std::endl;
+				std::string s;
+				for (int j=0; j<fullblocks; j++)
+					s += BLOCK_ELEMENTS[8];
+				s += BLOCK_ELEMENTS[bar & 7];
+
+				std::cout << fmt::format("{:.2f} {:6} {}", (double)i * US_PER_TICK, value, s);
+				std::cout << std::endl;
+			}
 		}
 
         std::cout << fmt::format("Noise floor:  {}", noise_floor) << std::endl;
