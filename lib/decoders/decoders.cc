@@ -14,12 +14,33 @@ static SettableFlag showClockHistogram(
     { "--show-clock-histogram" },
     "Dump the clock detection histogram.");
 
+static DoubleFlag manualClockRate(
+	{ "--manual-clock-rate-us" },
+	"If not zero, force this clock rate; if zero, try to autodetect it.",
+	0.0);
+
+static DoubleFlag noiseFloorFactor(
+    { "--noise-floor-factor" },
+    "Clock detection noise floor (min + (max-min)*factor).",
+    0.01);
+
+static DoubleFlag signalLevelFactor(
+    { "--signal-level-factor" },
+    "Clock detection signal level (min + (max-min)*factor).",
+    0.1);
+
+static const std::string BLOCK_ELEMENTS[] =
+{ " ", "▏", "▎", "▍", "▌", "▋", "▊", "▉", "█" };
+
 /* 
- * Tries to guess the clock by finding the smallest common interval.
+* Tries to guess the clock by finding the smallest common interval.
  * Returns nanoseconds.
  */
 nanoseconds_t Fluxmap::guessClock() const
 {
+	if (manualClockRate != 0.0)
+		return manualClockRate * 1000.0;
+
     uint32_t buckets[256] = {};
     size_t cursor = 0;
     while (cursor < bytes())
@@ -32,8 +53,8 @@ nanoseconds_t Fluxmap::guessClock() const
     
     uint32_t max = *std::max_element(std::begin(buckets), std::end(buckets));
     uint32_t min = *std::min_element(std::begin(buckets), std::end(buckets));
-    uint32_t noise_floor = (min+max)/100;
-    uint32_t signal_level = noise_floor * 5;
+    uint32_t noise_floor = min + (max-min)*noiseFloorFactor;
+    uint32_t signal_level = min + (max-min)*signalLevelFactor;
 
     /* Find a point solidly within the first pulse. */
 
@@ -86,8 +107,33 @@ nanoseconds_t Fluxmap::guessClock() const
     if (showClockHistogram)
     {
         std::cout << "Clock detection histogram:" << std::endl;
+
+		bool skipping = true;
         for (int i=0; i<256; i++)
-            std::cout << fmt::format("{:.2f} {}", (double)i * US_PER_TICK, buckets[i]) << std::endl;
+		{
+			uint32_t value = buckets[i];
+			if (value < noise_floor/2)
+			{
+				if (!skipping)
+					std::cout << "..." << std::endl;
+				skipping = true;
+			}
+			else
+			{
+				skipping = false;
+
+				int bar = 320*value/max;
+				int fullblocks = bar / 8;
+
+				std::string s;
+				for (int j=0; j<fullblocks; j++)
+					s += BLOCK_ELEMENTS[8];
+				s += BLOCK_ELEMENTS[bar & 7];
+
+				std::cout << fmt::format("{:.2f} {:6} {}", (double)i * US_PER_TICK, value, s);
+				std::cout << std::endl;
+			}
+		}
 
         std::cout << fmt::format("Noise floor:  {}", noise_floor) << std::endl;
         std::cout << fmt::format("Signal level: {}", signal_level) << std::endl;

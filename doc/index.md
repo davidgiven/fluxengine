@@ -78,6 +78,7 @@ Here's the table.
 | [Brother 120kB](brother.html)     |  🦄   |        |                                     |
 | [Brother 240kB](brother.html)     |  🦄   |   🦄   |                                     |
 | [Macintosh 800kB](macintosh.html) |  🦖   |        | and probably the 400kB too          |
+| [Victor 9000](victor9k.html)      |  🦖   |        | experimental, probably buggy        |
 {: .datatable }
 
 Dinosaurs (🦖) have yet to be observed in real life --- I've written the
