@@ -38,7 +38,8 @@ static std::vector<uint8_t> decode(const std::vector<bool>& bits)
             inputfifo = (inputfifo<<1) | *ii++;
         }
 
-        ba.push(decode_data_gcr(inputfifo), 4);
+        uint8_t decoded = decode_data_gcr(inputfifo);
+        ba.push(decoded, 4);
     }
 
     return ba;
@@ -89,16 +90,16 @@ SectorVector VictorDecoder::decodeToSectors(const RawRecordVector& rawRecords, u
                 if (!headerIsValid)
                     break;
                 headerIsValid = false;
-                if (bytes.size() < 258)
+                if (bytes.size() < VICTOR_SECTOR_LENGTH+3)
                     break;
 
-                uint16_t gotChecksum = sumBytes(&bytes[1], &bytes[257]);
-                uint16_t wantChecksum = read_be16(&bytes[257]);
+                uint16_t gotChecksum = sumBytes(&bytes[1], &bytes[VICTOR_SECTOR_LENGTH+1]);
+                uint16_t wantChecksum = read_le16(&bytes[VICTOR_SECTOR_LENGTH+1]);
                 int status = (gotChecksum == wantChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
 
                 auto sector = std::unique_ptr<Sector>(
 					new Sector(status, nextTrack, 0, nextSector,
-                        std::vector<uint8_t>(&bytes[1], &bytes[257])));
+                        std::vector<uint8_t>(&bytes[1], &bytes[VICTOR_SECTOR_LENGTH+1])));
                 sectors.push_back(std::move(sector));
                 break;
             }

@@ -4,6 +4,8 @@
 #define VICTOR_SECTOR_RECORD 0xffeab
 #define VICTOR_DATA_RECORD   0xffea4
 
+#define VICTOR_SECTOR_LENGTH 512
+
 class Sector;
 class Fluxmap;
 
