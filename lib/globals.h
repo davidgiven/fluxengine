@@ -1,8 +1,6 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-#define _DEFAULT_SOURCE
-
 #include <stddef.h>
 #include <functional>
 #include <iostream>

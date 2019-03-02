@@ -9,22 +9,32 @@
 #define SCLK_HZ 24027428.57142857
 #define TICKS_PER_SCLK (TICK_FREQUENCY / SCLK_HZ)
 
-std::unique_ptr<Fluxmap> readStream(const std::string& path, unsigned track, unsigned side)
+std::unique_ptr<Fluxmap> readStream(const std::string& dir, unsigned track, unsigned side)
 {
     std::string suffix = fmt::format("{:02}.{}.raw", track, side);
-    std::string pattern = fmt::format("{}*{}", path, suffix);
+    std::string pattern = fmt::format("{}*{}", dir, suffix);
     glob_t globdata;
     if (glob(pattern.c_str(), GLOB_NOSORT, NULL, &globdata))
-        Error() << fmt::format("cannot access path '{}'", path);
+        Error() << fmt::format("cannot access path '{}'", dir);
     if (globdata.gl_pathc != 1)
         Error() << fmt::format("data is ambiguous --- multiple files end in {}", suffix);
     std::string filename = globdata.gl_pathv[0];
     globfree(&globdata);
 
+    return readStream(filename);
+}
+
+std::unique_ptr<Fluxmap> readStream(const std::string& filename)
+{
     std::ifstream f(filename, std::ios::in | std::ios::binary);
     if (!f.is_open())
 		Error() << fmt::format("cannot open input file '{}'", filename);
 
+    return readStream(f);
+}
+
+std::unique_ptr<Fluxmap> readStream(std::istream& f)
+{
     std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
     auto writeFlux = [&](uint32_t sclk)
     {
@@ -38,7 +48,6 @@ std::unique_ptr<Fluxmap> readStream(const std::string& path, unsigned track, uns
         int b = f.get(); /* returns -1 or UNSIGNED char */
         if (b == -1)
             break;
-        uint64_t here = f.tellg();
 
         switch (b)
         {
@@ -46,11 +55,12 @@ std::unique_ptr<Fluxmap> readStream(const std::string& path, unsigned track, uns
             {
                 int blocktype = f.get();
                 (void) blocktype;
-                int blocklen = f.get() | (f.get()<<8);
+                uint16_t blocklen = f.get() | (f.get()<<8);
                 if (f.fail() || f.eof())
                     goto finished;
 
-                f.seekg(here + blocklen + 3, std::ios_base::beg);
+                while (blocklen--)
+                    f.get();
                 break;
             }
 
@@ -99,13 +109,13 @@ std::unique_ptr<Fluxmap> readStream(const std::string& path, unsigned track, uns
                 }
                 else
                     Error() << fmt::format(
-                        "unknown stream block byte 0x{:02x} at 0x{:08x}", b, here);
+                        "unknown stream block byte 0x{:02x} at 0x{:08x}", b, (uint64_t)f.tellg()-1);
             }
         }
     }
 
 finished:
     if (!f.eof())
-        Error() << fmt::format("I/O error reading '{}'", filename);
+        Error() << "I/O error reading stream";
     return fluxmap;
 }
