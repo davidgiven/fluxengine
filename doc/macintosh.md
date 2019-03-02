@@ -53,8 +53,7 @@ touch](https://github.com/davidgiven/fluxengine/issues/new).
 Useful references
 -----------------
 
-  - [MAME's ap_dsk35.cpp file]
-    (https://github.com/mamedev/mame/blob/4263a71e64377db11392c458b580c5ae83556bc7/src/lib/formats/ap_dsk35.cpp),
+  - [MAME's ap_dsk35.cpp file](https://github.com/mamedev/mame/blob/4263a71e64377db11392c458b580c5ae83556bc7/src/lib/formats/ap_dsk35.cpp),
     without which I'd never have managed to do this
 
   - [Crazy Disk Encoding
