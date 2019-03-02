@@ -32,23 +32,21 @@ static std::vector<uint8_t> decode_crazy_data(const uint8_t* inp, int& status)
     uint8_t checksum = 0;
     for (unsigned i = 0; i < APPLE2_ENCODED_SECTOR_LENGTH; i++)
     {
-        uint8_t b = decode_data_gcr(*inp++);
-        uint8_t newvalue = b ^ checksum;
+        checksum ^= decode_data_gcr(*inp++);
 
-        if (i >= 0x56)
+        if (i >= 86)
         {
             /* 6 bit */
-            output[i - 0x56] |= (newvalue << 2);
+            output[i - 86] |= (checksum << 2);
         }
         else
         {
             /* 3 * 2 bit */
-            output[i + 0x00] = ((newvalue >> 1) & 0x01) | ((newvalue << 1) & 0x02);
-            output[i + 0x56] = ((newvalue >> 3) & 0x01) | ((newvalue >> 1) & 0x02);
-            if ((i + 0xAC) < APPLE2_SECTOR_LENGTH)
-                output[i + 0xAC] = ((newvalue >> 5) & 0x01) | ((newvalue >> 3) & 0x02);
+            output[i + 0] = ((checksum >> 1) & 0x01) | ((checksum << 1) & 0x02);
+            output[i + 86] = ((checksum >> 3) & 0x01) | ((checksum >> 1) & 0x02);
+            if ((i + 172) < APPLE2_SECTOR_LENGTH)
+                output[i + 172] = ((checksum >> 5) & 0x01) | ((checksum >> 3) & 0x02);
         }
-        checksum = newvalue;
     }
 
     checksum &= 0x3f;
@@ -100,7 +98,7 @@ SectorVector Apple2Decoder::decodeToSectors(
                 std::vector<uint8_t> clippedbytes(rawbytes);
                 clippedbytes.resize(APPLE2_ENCODED_SECTOR_LENGTH + 5);
                 int status = Sector::BAD_CHECKSUM;
-                auto data = decode_crazy_data(&clippedbytes[4], status);
+                auto data = decode_crazy_data(&clippedbytes[3], status);
 
                 auto sector = std::unique_ptr<Sector>(
                     new Sector(status, nextTrack, 0, nextSector, data));
