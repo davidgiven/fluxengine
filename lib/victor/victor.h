@@ -1,7 +1,8 @@
 #ifndef VICTOR_H
 #define VICTOR_H
 
-#define VICTOR_RECORD_SEPARATOR 0xffffea
+#define VICTOR_SECTOR_RECORD 0xffeab
+#define VICTOR_DATA_RECORD   0xffea4
 
 class Sector;
 class Fluxmap;

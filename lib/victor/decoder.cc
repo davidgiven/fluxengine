@@ -49,6 +49,7 @@ SectorVector VictorDecoder::decodeToSectors(const RawRecordVector& rawRecords, u
     std::vector<std::unique_ptr<Sector>> sectors;
     unsigned nextSector;
     unsigned nextTrack;
+    unsigned nextSide;
     bool headerIsValid = false;
 
     for (auto& rawrecord : rawRecords)
@@ -61,23 +62,29 @@ SectorVector VictorDecoder::decodeToSectors(const RawRecordVector& rawRecords, u
 
         switch (bytes[0])
         {
-            case 8: /* sector record */
+            case 7: /* sector record */
             {
                 headerIsValid = false;
                 if (bytes.size() < 6)
                     break;
 
-                uint8_t checksum = bytes[1];
+                uint8_t rawTrack = bytes[1];
                 nextSector = bytes[2];
-                nextTrack = bytes[3] - 1;
-                if (checksum != xorBytes(&bytes[2], &bytes[6]))
+                uint8_t gotChecksum = bytes[3];
+
+                nextTrack = rawTrack & 0x7f;
+                nextSide = rawTrack >> 7;
+                uint8_t wantChecksum = sumBytes(&bytes[1], &bytes[3]);
+                if (wantChecksum != gotChecksum)
+                    break;
+                if ((nextSector > 20) || (nextTrack > 85) || (nextSide > 1))
                     break;
 
                 headerIsValid = true;
                 break;
             }
             
-            case 7: /* data record */
+            case 8: /* data record */
             {
                 if (!headerIsValid)
                     break;
@@ -85,8 +92,9 @@ SectorVector VictorDecoder::decodeToSectors(const RawRecordVector& rawRecords, u
                 if (bytes.size() < 258)
                     break;
 
-                uint8_t checksum = xorBytes(&bytes[1], &bytes[257]);
-                int status = (checksum == bytes[257]) ? Sector::OK : Sector::BAD_CHECKSUM;
+                uint16_t gotChecksum = sumBytes(&bytes[1], &bytes[257]);
+                uint16_t wantChecksum = read_be16(&bytes[257]);
+                int status = (gotChecksum == wantChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
 
                 auto sector = std::unique_ptr<Sector>(
 					new Sector(status, nextTrack, 0, nextSector,
@@ -102,8 +110,8 @@ SectorVector VictorDecoder::decodeToSectors(const RawRecordVector& rawRecords, u
 
 int VictorDecoder::recordMatcher(uint64_t fifo) const
 {
-    uint32_t masked = fifo & 0xffffff;
-    if (masked == VICTOR_RECORD_SEPARATOR)
-		return 8;
+    uint32_t masked = fifo & 0xfffff;
+    if ((masked == VICTOR_SECTOR_RECORD) || (masked == VICTOR_DATA_RECORD))
+		return 9;
     return 0;
 }

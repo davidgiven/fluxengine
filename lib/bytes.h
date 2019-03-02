@@ -46,6 +46,10 @@ inline void write_le32(T ptr, uint32_t value)
     ptr[3] = (value>>24) & 0xff;
 }
 
+extern uint8_t toByte(
+    std::vector<bool>::const_iterator start,
+    std::vector<bool>::const_iterator end);
+
 extern std::vector<uint8_t> toBytes(
     std::vector<bool>::const_iterator start,
     std::vector<bool>::const_iterator end);

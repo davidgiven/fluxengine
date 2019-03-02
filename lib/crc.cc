@@ -1,6 +1,14 @@
 #include "globals.h"
 #include "crc.h"
 
+uint16_t sumBytes(const uint8_t* start, const uint8_t* end)
+{
+	uint16_t i = 0;
+	while (start != end)
+		i += *start++;
+	return i;
+}
+
 uint8_t xorBytes(const uint8_t* start, const uint8_t* end)
 {
 	uint8_t i = 0;
