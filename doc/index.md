@@ -52,12 +52,24 @@ to be spinning at the same speed.
 which means there's only 166ms of data on one per track rather than 200ms;
 if you try to write a 3.5" format disk onto one it probably won't work.
 
+**Q.** Does it work on 8" drives?
+
+**A.** Probably? You'd need an adapter to let you connect the drive to the
+FluxEngine --- [you can get them](http://www.dbit.com/fdadap.html). I don't
+have either the adapter, the drive, or any 8" disks. If anyone wants to give
+it a try, please [tell me about
+it](https://github.com/davidgiven/fluxengine/issues/new).
+
 **Q.** Is this like KryoFlux? Do you support KryoFlux stream files?
 
 **A.** It's very like KryoFlux, although much simpler. Yes, FluxEngine can
 read from KryoFlux stream files (but not write to them yet; nobody's asked).
 FluxEngine doesn't capture all the data that KryoFlux does, like index
 markers.
+
+**Q.** I've tried it and my disk doesn't work!
+
+**A.** [I have an entire page on diagnosing read failures.](problems.html)
 
 **Q.** That's awesome! What formats does it support?
 
