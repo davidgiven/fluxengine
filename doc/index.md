@@ -86,6 +86,7 @@ Here's the table.
 | [Acorn DFS](acorndfs.html)        |  🦄   |        |                                     |
 | [Ampro Little Board](ampro.html)  |  🦖   |        |                                     |
 | [Apple II DOS 3.3](apple2.html)   |  🦖   |        | doesn't do logical sector remapping |
+| [Amiga](amiga.html)               |  🦄   |        |                                     |
 | [Commodore Amiga](amiga.html)     |  🦖   |        |                                     |
 | [Commodore 64 1541](c64.html)     |  🦖   |        | and probably the other GCR formats  |
 | [Brother 120kB](brother.html)     |  🦄   |        |                                     |
