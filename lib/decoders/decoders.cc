@@ -19,6 +19,16 @@ static DoubleFlag manualClockRate(
 	"If not zero, force this clock rate; if zero, try to autodetect it.",
 	0.0);
 
+static DoubleFlag noiseFloorFactor(
+    { "--noise-floor-factor" },
+    "Clock detection noise floor (min + (max-min)*factor).",
+    0.01);
+
+static DoubleFlag signalLevelFactor(
+    { "--signal-level-factor" },
+    "Clock detection signal level (min + (max-min)*factor).",
+    0.1);
+
 static const std::string BLOCK_ELEMENTS[] =
 { " ", "▏", "▎", "▍", "▌", "▋", "▊", "▉", "█" };
 
@@ -43,8 +53,8 @@ nanoseconds_t Fluxmap::guessClock() const
     
     uint32_t max = *std::max_element(std::begin(buckets), std::end(buckets));
     uint32_t min = *std::min_element(std::begin(buckets), std::end(buckets));
-    uint32_t noise_floor = min + (max-min)/100;
-    uint32_t signal_level = noise_floor * 5;
+    uint32_t noise_floor = min + (max-min)*noiseFloorFactor;
+    uint32_t signal_level = min + (max-min)*signalLevelFactor;
 
     /* Find a point solidly within the first pulse. */
 
