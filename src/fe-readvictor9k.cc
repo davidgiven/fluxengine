@@ -3,7 +3,7 @@
 #include "reader.h"
 #include "fluxmap.h"
 #include "decoders.h"
-#include "amiga.h"
+#include "victor9k.h"
 #include "sector.h"
 #include "sectorset.h"
 #include "image.h"
@@ -14,15 +14,15 @@
 static StringFlag outputFilename(
     { "--output", "-o" },
     "The output image file to write to.",
-    "amiga.adf");
+    "victor9k.img");
 
 int main(int argc, const char* argv[])
 {
-	setReaderDefaultSource(":t=0-79:s=0-1");
+	setReaderDefaultSource(":t=0-79:s=0");
     setReaderRevolutions(2);
     Flag::parseFlags(argc, argv);
 
-	AmigaDecoder decoder;
+	Victor9kDecoder decoder;
 	readDiskCommand(decoder, outputFilename);
 
     return 0;

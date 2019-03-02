@@ -72,11 +72,13 @@ Here's the table.
 | IBM PC compatible                 |  🦄   |        | and compatibles (like the Atari ST) |
 | [Acorn ADFS](acornadfs.html)      |  🦖   |        | single- and double- sided           |
 | [Acorn DFS](acorndfs.html)        |  🦄   |        |                                     |
+| [Ampro Little Board](ampro.html)  |  🦖   |        |                                     |
 | [Commodore Amiga](amiga.html)     |  🦖   |        |                                     |
-| [Commodore 64 1451](c64.html)     |  🦖   |        | and probably the other GCR formats  |
+| [Commodore 64 1541](c64.html)     |  🦖   |        | and probably the other GCR formats  |
 | [Brother 120kB](brother.html)     |  🦄   |        |                                     |
 | [Brother 240kB](brother.html)     |  🦄   |   🦄   |                                     |
 | [Macintosh 800kB](macintosh.html) |  🦖   |        | and probably the 400kB too          |
+| [Victor 9000](victor9k.html)      |  🦖   |        | experimental, probably buggy        |
 {: .datatable }
 
 Dinosaurs (🦖) have yet to be observed in real life --- I've written the

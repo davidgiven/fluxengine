@@ -1,6 +1,13 @@
 #include "globals.h"
 #include "bytes.h"
 
+uint8_t toByte(
+    std::vector<bool>::const_iterator start,
+    std::vector<bool>::const_iterator end)
+{
+    return toBytes(start, end).at(0);
+}
+
 std::vector<uint8_t> toBytes(
     std::vector<bool>::const_iterator start,
     std::vector<bool>::const_iterator end)
