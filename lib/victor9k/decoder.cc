@@ -4,7 +4,7 @@
 #include "record.h"
 #include "decoders.h"
 #include "sector.h"
-#include "victor.h"
+#include "victor9k.h"
 #include "crc.h"
 #include "bytes.h"
 #include "fmt/format.h"
@@ -45,7 +45,7 @@ static std::vector<uint8_t> decode(const std::vector<bool>& bits)
     return ba;
 }
 
-SectorVector VictorDecoder::decodeToSectors(const RawRecordVector& rawRecords, unsigned)
+SectorVector Victor9kDecoder::decodeToSectors(const RawRecordVector& rawRecords, unsigned)
 {
     std::vector<std::unique_ptr<Sector>> sectors;
     unsigned nextSector;
@@ -90,16 +90,16 @@ SectorVector VictorDecoder::decodeToSectors(const RawRecordVector& rawRecords, u
                 if (!headerIsValid)
                     break;
                 headerIsValid = false;
-                if (bytes.size() < VICTOR_SECTOR_LENGTH+3)
+                if (bytes.size() < VICTOR9K_SECTOR_LENGTH+3)
                     break;
 
-                uint16_t gotChecksum = sumBytes(&bytes[1], &bytes[VICTOR_SECTOR_LENGTH+1]);
-                uint16_t wantChecksum = read_le16(&bytes[VICTOR_SECTOR_LENGTH+1]);
+                uint16_t gotChecksum = sumBytes(&bytes[1], &bytes[VICTOR9K_SECTOR_LENGTH+1]);
+                uint16_t wantChecksum = read_le16(&bytes[VICTOR9K_SECTOR_LENGTH+1]);
                 int status = (gotChecksum == wantChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
 
                 auto sector = std::unique_ptr<Sector>(
 					new Sector(status, nextTrack, 0, nextSector,
-                        std::vector<uint8_t>(&bytes[1], &bytes[VICTOR_SECTOR_LENGTH+1])));
+                        std::vector<uint8_t>(&bytes[1], &bytes[VICTOR9K_SECTOR_LENGTH+1])));
                 sectors.push_back(std::move(sector));
                 break;
             }
@@ -109,10 +109,10 @@ SectorVector VictorDecoder::decodeToSectors(const RawRecordVector& rawRecords, u
 	return sectors;
 }
 
-int VictorDecoder::recordMatcher(uint64_t fifo) const
+int Victor9kDecoder::recordMatcher(uint64_t fifo) const
 {
     uint32_t masked = fifo & 0xfffff;
-    if ((masked == VICTOR_SECTOR_RECORD) || (masked == VICTOR_DATA_RECORD))
+    if ((masked == VICTOR9K_SECTOR_RECORD) || (masked == VICTOR9K_DATA_RECORD))
 		return 9;
     return 0;
 }

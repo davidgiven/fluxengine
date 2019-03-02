@@ -3,7 +3,7 @@
 #include "reader.h"
 #include "fluxmap.h"
 #include "decoders.h"
-#include "victor.h"
+#include "victor9k.h"
 #include "sector.h"
 #include "sectorset.h"
 #include "image.h"
@@ -22,7 +22,7 @@ int main(int argc, const char* argv[])
     setReaderRevolutions(2);
     Flag::parseFlags(argc, argv);
 
-	VictorDecoder decoder;
+	Victor9kDecoder decoder;
 	readDiskCommand(decoder, outputFilename);
 
     return 0;
