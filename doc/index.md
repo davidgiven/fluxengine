@@ -423,6 +423,10 @@ directory.
   - `fe-testbulktransport`: measures your USB throughput. You need about 600kB/s
     for FluxEngine to work. You don't need a disk in the drive for this one.
 
+  - `fe-upgradefluxfile`: occasionally I need to upgrade the flux file format in
+    a non-backwards-compatible way; this tool will upgrade flux files to the new
+    format.
+
 Commands which take `--source` or `--dest` take a parameter of the syntax
 `$FILENAME:$MODIFIER:$MODIFER...` as described above. If left unspecified,
 you get the default specified by the command, which will vary depending on

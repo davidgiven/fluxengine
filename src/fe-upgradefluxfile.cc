@@ -8,7 +8,7 @@ static sqlite3* db;
 int main(int argc, const char* argv[])
 {
     if (argc != 2)
-        Error() << "syntax: fe-update <fluxfile>";
+        Error() << "syntax: fe-upgradefluxfile <fluxfile>";
     std::string filename = argv[1];
     
     db = sqlOpen(filename, SQLITE_OPEN_READWRITE);
