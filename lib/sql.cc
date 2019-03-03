@@ -1,6 +1,14 @@
 #include "globals.h"
 #include "sql.h"
 #include "fluxmap.h"
+#include "bytes.h"
+#include "fmt/format.h"
+
+enum
+{
+    COMPRESSION_NONE,
+    COMPRESSION_ZLIB
+};
 
 void sqlCheck(sqlite3* db, int i)
 {
@@ -66,17 +74,28 @@ void sqlPrepareFlux(sqlite3* db)
                  "  data BLOB,"
                  "  PRIMARY KEY(track, side)"
                  ");");
+    sqlStmt(db, "CREATE TABLE IF NOT EXISTS zdata ("
+                 "  track INTEGER,"
+                 "  side INTEGER,"
+                 "  data BLOB,"
+                 "  compression INTEGER,"
+                 "  PRIMARY KEY(track, side)"
+                 ");");
 }
 
 void sqlWriteFlux(sqlite3* db, int track, int side, const Fluxmap& fluxmap)
 {
+    const auto compressed = compress(fluxmap.rawBytes());
+
     sqlite3_stmt* stmt;
     sqlCheck(db, sqlite3_prepare_v2(db,
-        "INSERT OR REPLACE INTO rawdata (track, side, data) VALUES (:track, :side, :data)",
+        "INSERT OR REPLACE INTO zdata (track, side, data, compression)"
+            " VALUES (:track, :side, :data, :compression)",
         -1, &stmt, NULL));
     sql_bind_int(db, stmt, ":track", track);
     sql_bind_int(db, stmt, ":side", side);
-    sql_bind_blob(db, stmt, ":data", fluxmap.ptr(), fluxmap.bytes());
+    sql_bind_blob(db, stmt, ":data", &compressed[0], compressed.size());
+    sql_bind_int(db, stmt, ":compression", COMPRESSION_ZLIB);
 
     if (sqlite3_step(stmt) != SQLITE_DONE)
         Error() << "failed to write to database: " << sqlite3_errmsg(db);
@@ -87,7 +106,11 @@ std::unique_ptr<Fluxmap> sqlReadFlux(sqlite3* db, int track, int side)
 {
     sqlite3_stmt* stmt;
     sqlCheck(db, sqlite3_prepare_v2(db,
-        "SELECT data FROM rawdata WHERE track=:track AND side=:side",
+        "SELECT * FROM ("
+            " SELECT data, compression FROM zdata WHERE track=:track AND side=:side"
+            " UNION"
+            " SELECT data, 0 as compression FROM rawdata WHERE track=:track AND side=:side"
+        ") LIMIT 1",
         -1, &stmt, NULL));
     sql_bind_int(db, stmt, ":track", track);
     sql_bind_int(db, stmt, ":side", side);
@@ -102,8 +125,23 @@ std::unique_ptr<Fluxmap> sqlReadFlux(sqlite3* db, int track, int side)
 
         const uint8_t* blobptr = (const uint8_t*) sqlite3_column_blob(stmt, 0);
         size_t bloblen = sqlite3_column_bytes(stmt, 0);
+        int compression = sqlite3_column_int(stmt, 1);
+        std::vector<uint8_t> data(blobptr, blobptr+bloblen);
 
-        fluxmap->appendBytes(blobptr, bloblen);
+        switch (compression)
+        {
+            case COMPRESSION_NONE:
+                break;
+
+            case COMPRESSION_ZLIB:
+                data = decompress(data);
+                break;
+
+            default:
+                Error() << fmt::format("unsupported compression type {}", compression);
+        }
+
+        fluxmap->appendBytes(data);
     }
     sqlCheck(db, sqlite3_finalize(stmt));
     return fluxmap;

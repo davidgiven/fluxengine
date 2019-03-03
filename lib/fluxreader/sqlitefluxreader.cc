@@ -8,7 +8,8 @@ class SqliteFluxReader : public FluxReader
 public:
     SqliteFluxReader(const std::string& filename)
     {
-        _indb = sqlOpen(filename, SQLITE_OPEN_READONLY);
+        _indb = sqlOpen(filename, SQLITE_OPEN_READWRITE);
+        sqlPrepareFlux(_indb);
     }
 
     ~SqliteFluxReader()

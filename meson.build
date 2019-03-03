@@ -3,6 +3,7 @@ add_global_arguments('--std=c++14', language: 'cpp')
 
 libusb = dependency('libusb-1.0')
 sqlite = dependency('sqlite3')
+zlib = dependency('zlib')
 
 fmtlib = shared_library('fmtlib',
     [
@@ -27,13 +28,14 @@ felib = shared_library('felib',
     ],
     include_directories: [fmtinc],
     link_with: [fmtlib],
-    dependencies: [libusb]
+    dependencies: [libusb, zlib]
 )
 feinc = include_directories('lib')
 
 sqllib = shared_library('sqllib',
 	['lib/sql.cc'],
-	link_with: [felib],
+    include_directories: [feinc, fmtinc],
+	link_with: [felib, fmtlib],
 	dependencies: [sqlite]
 )
 
@@ -192,3 +194,4 @@ test('Flags',           executable('flags-test', ['tests/flags.cc'],            
 test('FmMfm',           executable('fmmfm-test', ['tests/fmmfm.cc'],                   include_directories: [feinc, decoderinc], link_with: [felib, decoderlib]))
 test('BitAccumulator',  executable('bitaccumulator-test', ['tests/bitaccumulator.cc'], include_directories: [feinc], link_with: [felib]))
 test('Kryoflux',        executable('kryoflux-test', ['tests/kryoflux.cc'],             include_directories: [feinc, decoderinc, streaminc], link_with: [felib, decoderlib, streamlib]))
+test('Compression',     executable('compression-test', ['tests/compression.cc'],       include_directories: [feinc, decoderinc, streaminc], link_with: [felib, decoderlib, streamlib]))
