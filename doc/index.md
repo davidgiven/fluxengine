@@ -168,148 +168,25 @@ How?
 
 ### Introduction
 
-The system is based around a [Cypress PSoC5LP CY8CKIT-059 development
-board](http://www.cypress.com/documentation/development-kitsboards/cy8ckit-059-psoc-5lp-prototyping-kit-onboard-programmer-and),
-which is a decently fast ARM core wrapped around a CLDC/FPGA soft logic
-device. You can [get one for about
-$15](https://www.mouser.com/ProductDetail/Cypress-Semiconductor/CY8CKIT-059?qs=sGAEpiMZZMuo%252bmZx5g6tFKhundMNZurhvz2tw2jO%2fk8%3d).
+The system is based around an off-the-shelf Cypress development board,
+costing about $10 plus shipping. The only hardware modification you need to
+do is to attach a floppy drive connector.
 
-You need no extra components --- my old prototype (pictured above) had a
-17-way header soldered to one side of the board; it then pushed directly onto
-the floppy drive connector. Then you plug it into your PC via USB and you're
-ready to go. My newer prototype has a row of pins so I can plug it into a
-floppy disk drive cable, because that lets me fit it into a properly floppy
-disk drive enclosure. What you do is up to you.
+[I wrote a long, detailed set of instructions on building and programming
+it.](building.html)
 
-### Bill of materials
-
-So you've decide to go against my advice and attempt to build on of these
-suckers. Well, good luck, that's all I can say.
-
-Here's the physical stuff you need.
-
-  - one (1) CY8CKIT-059 development board. See above. If your soldering is
-    like mine, you may potentially need more, but as _I_ managed to construct
-    the thing without frying it, it can't be too hard.
-
-  - one (1) standard PC floppy disk drive. You'll have to search around as
-    they're increasingly hard to find. The FluxEngine should work with any
-    standard 3.5" or 5.25" drive.
-
-  - some way of connecting the board to your drive. My prototype above uses a
-    set of headers to let me attach the board directly on the back of the
-    drive; this works fine, but the geometry's kind of awkward as part of the
-    board covered the power socket and I had to modify it. (Which is why the
-    programmer is hanging off the back.) I'd recommend soldering on pins
-    instead, and using a traditional floppy cable. That'd let you attach two
-    drives, too (although this is currently unsupported in the firmware;
-    if you want this, [get in
-    touch](https://github.com/davidgiven/fluxengine/issues/new).
-
-  - decent soldering iron skills and an iron with a fine tip --- the pads on
-    the board are very small.
-
-  - a Windows machine to run the Cypress SDK on. (The FluxEngine client
-    software itself will run on Linux, Windows, and probably OSX, but you
-    have to build the firmware on Windows.)
-
-  - optional: a floppy drive power cable. You can cut this in half, solder
-    the raw end to the FluxEngine board, and power the drive off USB --- very
-    convenient. This only works for drives which consume less than 500mA.
-    _Check the drive before trying_ (5.25" drives need not apply here).
-    Otherwise you'll need an actual power supply.
-
-### Assembly instructions
-
-<img src="closeup.jpg" style="width:100%" alt="closeup of the board">
-
-(In the picture above, the connector on the left goes off to the programmer.
-Normally that's physically attached to the board but I had to cut it off to
-make it fit on the back of a floppy disk drive. Using pins instead means this
-isn't necessary, but, well, now it's too late.)
-
-  1. **If you're using a header:** solder your 17-way header to the
-     **bottom** of the board, from 2.7 to 1.7 inclusive. (It has to be 
-     the bottom because there are components that stick out on the other side
-     and the bottom needs to go flush against the drive.)
-
-  2. **If you're using an IDC header plug:** solder it to the **top** of
-     the board, notch up, with the _top_ row of pins overhanging the edge
-     of the board (so that pin 1 is disconnected). Pin 2 should be in board
-     pin 2.7, and pin 34 in baord pin 1.7.
-
-  3. **If you're using bare pins:** solder your 17-way pin header
-     to **either side** of the board, from 2.7 to 1.7 inclusive.
-
-  4. Solder two wires to any convenient VDD and GND pins and connect these to
-     your floppy disk drive's power supply. If you're powering the floppy
-     drive from the board, connect these directly to the floppy drive. The
-     board needs to have the same ground as the floppy disk drive or weird
-     stuff could happen. Remember to check the polarity.
-
-And you're done!
-
-### Building the firmware
-
-On your Windows machine, [install the Cypress SDK and CY8CKIT-059
-BSP](http://www.cypress.com/documentation/development-kitsboards/cy8ckit-059-psoc-5lp-prototyping-kit-onboard-programmer-and).
-This is a frustratingly long process and there are a lot of moving parts; you
-may need to register. You want the file from the above site marked 'Download
-CY8CKIT-059 Kit Setup (Kit Design Files, Creator, Programmer, Documentation,
-Examples)'. I'm not linking to it in case the URL changes when they update
-it.
-
-Once this is done, I'd strongly recommend working through the initial
-tutorial and making the LED on your board flash. The FluxEngine firmware
-isn't nearly ready for fire-and-forget use and you'll probably need to tweak
-it. (If you do, please [get in
-touch](https://github.com/davidgiven/fluxengine/issues/new)).
-
-When you're ready, open the `FluxEngine.cydsn/FluxEngine.cywrk` workspace,
-pick 'Program' from the menu, and the firmware should compile and be
-programmed onto your board.
-
-**Big warning:** If programming doesn't work and you get a strange dialogue
-asking about port acquisition, then this is because the device isn't
-responding to the programmer. This is normal but annoying. You should see the
-device in the dialogue. Select it and press the 'Port Acquire' button. The
-device should reset and an extra item will appear in the dialogue; select
-this and press OK.
-
-If acquiring the port doesn't work, resulting in a long delay and a
-meaningless error message, you need to reset the programmer. You'll see that
-the light on the programmer is pulsing slowly (a breathing pattern). Press
-and hold the little button near the light for five seconds until the light
-stays solidly on. Now you should be able to acquire the port and proceed
-normally.
-
-### Building the client
-
-The client software is where the intelligence, such as it is, is. It's pretty
-generic libusb stuff and should build and run on Windows, Linux and probably
-OSX as well, although on Windows I've only ever used it with Cygwin. You'll
-need the `sqlite3`, `meson` and `ninja` packages (which should be easy to
-come by in your distro). Just do `make` and it should build.
-
-If it doesn't build, please [get in
-touch](https://github.com/davidgiven/fluxengine/issues/new).
+I'm going to assume you've done this.
 
 ### Using it
 
-So you have client software, programmed the firmware, and the hardware is all
-ready. What next?
+  1. Attach the FluxEngine to your floppy disk cable.
 
-  1. Attach the FluxEngine to your floppy disk drive. Pin 2.7 (on the right in
-     the picture above) is REDWC and connects to pin 2 on the floppy drive.
-     Pin 1.7 (on the left in the picture above) is DSKCHG and connects to pin
-     34 on the floppy drive. All the other board pins connect in the obvious
-     order. Odd pins on the floppy drive are left unconnected. You can push
-     the floppy drive connector straight onto the pins, or the FluxEngine
-     board straight onto the floppy disk drive, depending on how you're doing
-     it.
+     If you built your board using a connector, this is easy: just plug it in. If you're using pins, you need to make sure that the red strip on the cable is **to the right** (next to pin 2.7 on the board), and that the pins plug into the **lower set of holes** in the connector (so the connector overhangs the top of the board).
 
-     Important note if you're using a floppy disk cable: these typically have
-     [two pairs of floppy disk drive connectors with a twist between
+  2. Attach the cable to your drives.
+
+     Floppy disk cables typically have [two pairs of floppy disk drive
+     connectors with a twist between
      them](http://www.nullmodem.com/Floppy.htm). (Each pair has one connector
      for a 3.5" drive and a different one for a 5.25" drive.) Normally the
      first floppy disk drive is drive B, and the one after the twist is drive
@@ -320,8 +197,8 @@ ready. What next?
      (Or use `-s :d=1` to select drive 1 when working with disks.)
 
   2. **Important.** Make sure that no disk you care about is in the drive.
-	 (Because if your wiring is wrong and a disk is inserted, you'll
-	 probably corrupt it.)
+     (Because if your wiring is wrong and a disk is inserted, you'll probably
+     corrupt it.)
 
   3. Connect the floppy drive to power. Nothing should happen. If anything
      does, disconnect it and check step 1.
