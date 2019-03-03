@@ -2,7 +2,7 @@
 #define AESLANIER_H
 
 #define AESLANIER_RECORD_SEPARATOR 0x55555122
-#define AESLANIER_SECTOR_LENGTH    256
+#define AESLANIER_SECTOR_LENGTH    252
 
 class Sector;
 class Fluxmap;

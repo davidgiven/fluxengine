@@ -43,19 +43,21 @@ SectorVector AesLanierDecoder::decodeToSectors(const RawRecordVector& rawRecords
 
         /* Check header 'checksum' (which seems far too simple to mean much). */
 
-        uint8_t wantedChecksum = reversed[3];
-        uint8_t gotChecksum = reversed[1] + reversed[2];
-        if (wantedChecksum != gotChecksum)
-            continue;
+        {
+            uint8_t wanted = reversed[3];
+            uint8_t got = reversed[1] + reversed[2];
+            if (wanted != got)
+                continue;
+        }
 
-        // hexdump(std::cout, reversed);
+        /* Check data checksum, which also includes the header and is
+         * significantly better. */
+
+        uint16_t wanted = read_le16(&reversed[0x101]);
+        uint16_t got = crc16ref(MODBUS_POLY_REF, &reversed[1], &reversed[0x101]);
+        int status = (wanted == got) ? Sector::OK : Sector::BAD_CHECKSUM;
 
         const std::vector<uint8_t> data(&reversed[5], &reversed[5+AESLANIER_SECTOR_LENGTH]);
-        // std::cout << fmt::format("want={:04x} got={:02x}\n", read_le16(&reversed[0x101]),
-        //     crc16(CCITT_POLY, &reversed[0x002], &reversed[0x101]));
-
-        // int status = (wantedChecksum == gotChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
-        int status = Sector::BAD_CHECKSUM;
         auto sector = std::unique_ptr<Sector>(
             new Sector(status, track, 0, sectorid, data));
         sectors.push_back(std::move(sector));
