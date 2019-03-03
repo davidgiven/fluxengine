@@ -119,6 +119,7 @@ int main(int argc, const char* argv[])
 
     outputDb = sqlOpen(argv[2], SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
     sqlPrepareFlux(outputDb);
+    sqlWriteIntProperty(outputDb, "version", FLUX_VERSION_CURRENT);
     sqlStmt(outputDb, "BEGIN;");
 
     read_header();
