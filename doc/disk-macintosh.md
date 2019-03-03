@@ -1,4 +1,4 @@
-Macintosh disks
+Disk: Macintosh
 ===============
 
 Macintosh disks come in two varieties: the newer 1440kB ones, which are

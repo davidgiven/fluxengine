@@ -1,4 +1,4 @@
-Apple II disks
+Disk: Apple II
 ==============
 
 Apple II disks are nominally fairly sensible 40-track, single-sided, 256

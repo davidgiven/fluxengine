@@ -1,4 +1,4 @@
-Ampro Little Board disks
+Disk: Ampro Little Board
 ========================
 
 The Ampro Little Board was a very simple and cheap Z80-based computer from

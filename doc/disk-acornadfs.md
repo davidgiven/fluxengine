@@ -1,4 +1,4 @@
-Acorn ADFS disks
+Disk: Acorn ADFS
 ================
 
 Acorn ADFS disks are pretty standard MFM encoded IBM scheme disks, although

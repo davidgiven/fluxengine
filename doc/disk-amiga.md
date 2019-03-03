@@ -1,4 +1,4 @@
-Amiga disks
+Disk: Amiga
 ===========
 
 Amiga disks use MFM, but don't use IBM scheme. Instead, the entire track is

@@ -1,5 +1,5 @@
-Acorn DFS disks
-================
+Disk: Acorn DFS
+===============
 
 Acorn DFS disks are pretty standard FM encoded IBM scheme disks, with
 256-sectors and 0-based sector identifiers. There's nothing particularly
