@@ -28,7 +28,7 @@ SectorVector AesLanierDecoder::decodeToSectors(const RawRecordVector& rawRecords
         const auto& bytes = decodeFmMfm(rawdata);
         const auto& reversed = reverse_bits(bytes);
 
-        if (reversed.size() < AESLANIER_SECTOR_LENGTH+7)
+        if (reversed.size() < 0x103)
             continue;
 
         unsigned track = reversed[1];
@@ -57,11 +57,10 @@ SectorVector AesLanierDecoder::decodeToSectors(const RawRecordVector& rawRecords
         uint16_t got = crc16ref(MODBUS_POLY_REF, &reversed[1], &reversed[0x101]);
         int status = (wanted == got) ? Sector::OK : Sector::BAD_CHECKSUM;
 
-        const std::vector<uint8_t> data(&reversed[5], &reversed[5+AESLANIER_SECTOR_LENGTH]);
+        const std::vector<uint8_t> data(&reversed[4], &reversed[4+AESLANIER_SECTOR_LENGTH]);
         auto sector = std::unique_ptr<Sector>(
             new Sector(status, track, 0, sectorid, data));
         sectors.push_back(std::move(sector));
-
 	}
 
 	return sectors;
