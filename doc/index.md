@@ -82,18 +82,18 @@ Here's the table.
 | Format                            | Read? | Write? | Notes |
 |:----------------------------------|:-----:|:------:|-------|
 | IBM PC compatible                 |  🦄   |        | and compatibles (like the Atari ST) |
-| [Acorn ADFS](acornadfs.html)      |  🦖   |        | single- and double- sided           |
-| [Acorn DFS](acorndfs.html)        |  🦄   |        |                                     |
-| [AES Superplus / No Problem](aeslanier.html) |  🦖   | | hard sectors! and _very_ experimental |
-| [Ampro Little Board](ampro.html)  |  🦖   |        |                                     |
-| [Apple II DOS 3.3](apple2.html)   |  🦖   |        | doesn't do logical sector remapping |
-| [Amiga](amiga.html)               |  🦄   |        |                                     |
-| [Commodore Amiga](amiga.html)     |  🦖   |        |                                     |
-| [Commodore 64 1541](c64.html)     |  🦖   |        | and probably the other GCR formats  |
-| [Brother 120kB](brother.html)     |  🦄   |        |                                     |
-| [Brother 240kB](brother.html)     |  🦄   |   🦄   |                                     |
-| [Macintosh 800kB](macintosh.html) |  🦖   |        | and probably the 400kB too          |
-| [Victor 9000](victor9k.html)      |  🦖   |        | experimental, probably buggy        |
+| [Acorn ADFS](disk-acornadfs.html)      |  🦖   |        | single- and double- sided           |
+| [Acorn DFS](disk-acorndfs.html)        |  🦄   |        |                                     |
+| [AES Superplus / No Problem](disk-aeslanier.html) |  🦖   | | hard sectors! and _very_ experimental |
+| [Ampro Little Board](disk-ampro.html)  |  🦖   |        |                                     |
+| [Apple II DOS 3.3](disk-apple2.html)   |  🦖   |        | doesn't do logical sector remapping |
+| [Amiga](disk-amiga.html)               |  🦄   |        |                                     |
+| [Commodore Amiga](disk-amiga.html)     |  🦖   |        |                                     |
+| [Commodore 64 1541](disk-c64.html)     |  🦖   |        | and probably the other GCR formats  |
+| [Brother 120kB](disk-brother.html)     |  🦄   |        |                                     |
+| [Brother 240kB](disk-brother.html)     |  🦄   |   🦄   |                                     |
+| [Macintosh 800kB](disk-macintosh.html) |  🦖   |        | and probably the 400kB too          |
+| [Victor 9000](disk-victor9k.html)      |  🦖   |        | experimental, probably buggy        |
 {: .datatable }
 
 Dinosaurs (🦖) have yet to be observed in real life --- I've written the

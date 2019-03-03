@@ -1,4 +1,4 @@
-Brother word processor disks
+Disk: Brother word processor
 ============================
 
 Brother word processor disks are weird, using custom tooling and chipsets.

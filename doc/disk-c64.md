@@ -1,4 +1,4 @@
-Commodore 64 disks
+Disk: Commodore 64
 ==================
 
 Commodore 64 disks come in two varieties: GCR, which are the overwhelming

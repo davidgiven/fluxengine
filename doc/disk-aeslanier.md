@@ -1,4 +1,4 @@
-AES Lanier word processor disks
+Disk: AES Lanier word processor
 ===============================
 
 Back in 1980 Lanier released a series of very early integrated word processor

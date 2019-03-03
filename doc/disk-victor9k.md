@@ -1,4 +1,4 @@
-Victor 9000 disks
+Disk: Victor 9000
 =================
 
 **Warning.** This is experimental; I haven't found a clean disk to read yet.
