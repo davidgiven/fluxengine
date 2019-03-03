@@ -13,7 +13,8 @@ public:
 	{
 		OK,
 		BAD_CHECKSUM,
-        MISSING
+        MISSING,
+        CONFLICT
 	};
 
     static const std::string statusToString(Status status);
@@ -26,7 +27,7 @@ public:
         data(data)
     {}
 
-	const int status;
+	int status;
     const int track;
     const int side;
     const int sector;
