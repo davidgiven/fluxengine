@@ -12,6 +12,8 @@
 #define IBM_IDAM_LEN   7      /* plus prologue */
 #define IBM_DAM1       0xF8   /* sector data (type 1) */
 #define IBM_DAM2       0xFB   /* sector data (type 2) */
+#define IBM_TRS80DAM1  0xF9   /* sector data (TRS-80 directory) */
+#define IBM_TRS80DAM2  0xFA   /* sector data (TRS-80 directory) */
 #define IBM_DAM_LEN    1      /* plus prologue and user data */
 
 /* Length of a DAM record is determined by the previous sector header. */

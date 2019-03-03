@@ -42,6 +42,8 @@ SectorVector AbstractIbmDecoder::decodeToSectors(const RawRecordVector& rawRecor
 
             case IBM_DAM1:
             case IBM_DAM2:
+            case IBM_TRS80DAM1:
+            case IBM_TRS80DAM2:
             {
                 if (!idamValid)
                     break;
@@ -88,21 +90,46 @@ int IbmFmDecoder::recordMatcher(uint64_t fifo) const
      * clock:  X X - X - X X X  = 0xd7
      * data:    X X X X X X - - = 0xfc
      * 
-     * ID record:
+     * IDAM record:
      * flux:   XXXX-X-X-XXXXXX- = 0xf57e
      * clock:  X X - - - X X X  = 0xc7
      * data:    X X X X X X X - = 0xfe
      * 
-     * ID record:
+     * DAM1 record:
+     * flux:   XXXX-X-X-XX-X-X- = 0xf56a
+     * clock:  X X - - - X X X  = 0xc7
+     * data:    X X X X X - - - = 0xf8
+     * 
+     * DAM2 record:
      * flux:   XXXX-X-X-XX-XXXX = 0xf56f
      * clock:  X X - - - X X X  = 0xc7
-     * data:    X X X X X - X X = 0xfe
+     * data:    X X X X X - X X = 0xfb
+     * 
+     * TRS80DAM1 record:
+     * flux:   XXXX-X-X-XX-X-XX = 0xf56b
+     * clock:  X X - - - X X X  = 0xc7
+     * data:    X X X X X - - X = 0xf9
+     * 
+     * TRS80DAM2 record:
+     * flux:   XXXX-X-X-XX-XXX- = 0xf56c
+     * clock:  X X - - - X X X  = 0xc7
+     * data:    X X X X X - X - = 0xfa
      */
          
     uint16_t masked = fifo & 0xffff;
-    if ((masked == 0xf77a) || (masked == 0xf57e) || (masked == 0xf56f))
-        return 16;
-    return 0;
+    switch (masked)
+    {
+        case 0xf77a:
+        case 0xf57e:
+        case 0xf56a:
+        case 0xf56f:
+        case 0xf56b:
+        case 0xf56c:
+            return 16;
+        
+        default:
+            return 0;
+    }
 }
 
 int IbmMfmDecoder::recordMatcher(uint64_t fifo) const
