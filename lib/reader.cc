@@ -109,15 +109,22 @@ std::vector<std::unique_ptr<Track>> readTracks()
 	return tracks;
 }
 
+static bool conflictable(int status)
+{
+	return (status == Sector::OK) || (status == Sector::CONFLICT);
+}
+
 static void replace_sector(std::unique_ptr<Sector>& replacing, std::unique_ptr<Sector>& replacement)
 {
-	if (replacing && (replacing->status == Sector::OK) && (replacement->status == Sector::OK))
+	if (replacing && conflictable(replacing->status) && conflictable(replacement->status))
 	{
 		if (replacement->data != replacing->data)
 		{
 			std::cout << std::endl
 						<< "       multiple conflicting copies of sector " << replacing->sector
 						<< " seen; ";
+			replacing->status = Sector::CONFLICT;
+			return;
 		}
 	}
 	if (!replacing || (replacing->status != Sector::OK))

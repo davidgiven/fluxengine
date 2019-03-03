@@ -15,10 +15,10 @@ std::vector<uint8_t> decodeFmMfm(const std::vector<bool> bits)
      *
      * So we just need to extract all the odd bits.
      * 
-     * MFM is slightly more complicated, where the first bit of each pair can
-     * be either 0 or 1... but the second bit is always the data bit, and at
-     * this point we simply don't care what the first bit is, so decoding MFM
-     * uses just the same code!
+     * MFM and M2FM are slightly more complicated, where the first bit of each
+     * pair can be either 0 or 1... but the second bit is always the data bit,
+     * and at this point we simply don't care what the first bit is, so
+     * decoding MFM uses just the same code!
      */
 
     std::vector<uint8_t> bytes;

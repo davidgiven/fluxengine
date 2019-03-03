@@ -1,6 +1,14 @@
 #ifndef BYTES_H
 #define BYTES_H
 
+static inline uint8_t reverse_bits(uint8_t b)
+{
+    b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
+    b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
+    b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
+    return b;
+}
+
 template <class T>
 inline uint32_t read_be16(T ptr)
 {

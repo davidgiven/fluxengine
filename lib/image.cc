@@ -69,12 +69,28 @@ void writeSectorsToFile(const SectorSet& sectors, const Geometry& geometry,
 					std::cout << 'X';
 					missingSectors++;
 				}
-				else if (sector->status == Sector::OK)
-					std::cout << '.';
 				else
 				{
-					badSectors++;
-					std::cout << 'B';
+					switch (sector->status)
+					{
+						case Sector::OK:
+                            std::cout << '.';
+                            break;
+
+                        case Sector::BAD_CHECKSUM:
+                            std::cout << 'B';
+                            badSectors++;
+                            break;
+
+                        case Sector::CONFLICT:
+                            std::cout << 'C';
+                            badSectors++;
+                            break;
+
+                        default:
+                            std::cout << '?';
+                            break;
+                    }
 				}
 				totalSectors++;
 			}

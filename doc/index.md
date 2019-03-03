@@ -84,6 +84,7 @@ Here's the table.
 | IBM PC compatible                 |  🦄   |        | and compatibles (like the Atari ST) |
 | [Acorn ADFS](acornadfs.html)      |  🦖   |        | single- and double- sided           |
 | [Acorn DFS](acorndfs.html)        |  🦄   |        |                                     |
+| [AES Superplus / No Problem](aeslanier.html) |  🦖   | | hard sectors! and _very_ experimental |
 | [Ampro Little Board](ampro.html)  |  🦖   |        |                                     |
 | [Apple II DOS 3.3](apple2.html)   |  🦖   |        | doesn't do logical sector remapping |
 | [Amiga](amiga.html)               |  🦄   |        |                                     |
