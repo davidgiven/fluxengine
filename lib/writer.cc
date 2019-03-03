@@ -32,6 +32,7 @@ void writeTracks(
 		outdb = sqlOpen(spec.filename, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
 		sqlPrepareFlux(outdb);
 		sqlStmt(outdb, "BEGIN;");
+        sqlWriteIntProperty(outdb, "version", FLUX_VERSION_CURRENT);
 		atexit([]()
 			{
 				sqlStmt(outdb, "COMMIT;");

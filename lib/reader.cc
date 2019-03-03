@@ -82,6 +82,7 @@ std::vector<std::unique_ptr<Track>> readTracks()
 		std::cout << "Writing a copy of the flux to " << destination.value << std::endl;
 		sqlPrepareFlux(outdb);
 		sqlStmt(outdb, "BEGIN;");
+        sqlWriteIntProperty(outdb, "version", FLUX_VERSION_CURRENT);
 		atexit([]()
 			{
 				sqlStmt(outdb, "COMMIT;");
