@@ -54,10 +54,11 @@ SectorVector AesLanierDecoder::decodeToSectors(const RawRecordVector& rawRecords
          * significantly better. */
 
         uint16_t wanted = read_le16(&reversed[0x101]);
-        uint16_t got = crc16ref(MODBUS_POLY_REF, &reversed[1], &reversed[0x101]);
+        uint16_t got = crc16ref(MODBUS_POLY_REF,
+            &reversed[1], &reversed[1+AESLANIER_SECTOR_LENGTH]);
         int status = (wanted == got) ? Sector::OK : Sector::BAD_CHECKSUM;
 
-        const std::vector<uint8_t> data(&reversed[4], &reversed[4+AESLANIER_SECTOR_LENGTH]);
+        const std::vector<uint8_t> data(&reversed[1], &reversed[1+AESLANIER_SECTOR_LENGTH]);
         auto sector = std::unique_ptr<Sector>(
             new Sector(status, track, 0, sectorid, data));
         sectors.push_back(std::move(sector));
