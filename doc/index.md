@@ -79,10 +79,10 @@ markers.
 
 Here's the table.
 
-| Format                            | Read? | Write? | Notes |
-|:----------------------------------|:-----:|:------:|-------|
-| IBM PC compatible                 |  🦄   |        | and compatibles (like the Atari ST) |
-| [Acorn ADFS](disk-acornadfs.html)      |  🦖   |        | single- and double- sided           |
+| Format                                 | Read? | Write? | Notes |
+|:---------------------------------------|:-----:|:------:|-------|
+| IBM PC compatible                      |  🦄   |        | and compatibles (like the Atari ST) |
+| [Acorn ADFS](disk-acornadfs.html)      |  🦄   |        | single- and double- sided           |
 | [Acorn DFS](disk-acorndfs.html)        |  🦄   |        |                                     |
 | [AES Superplus / No Problem](disk-aeslanier.html) |  🦖   | | hard sectors! and _very_ experimental |
 | [Ampro Little Board](disk-ampro.html)  |  🦖   |        |                                     |
