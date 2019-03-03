@@ -65,6 +65,9 @@ extern std::vector<uint8_t> toBytes(
 inline std::vector<uint8_t> toBytes(const std::vector<bool>& bits)
 { return toBytes(bits.begin(), bits.end()); }
 
+extern std::vector<uint8_t> compress(const std::vector<uint8_t>& source);
+extern std::vector<uint8_t> decompress(const std::vector<uint8_t>& source);
+
 class BitAccumulator
 {
 public:

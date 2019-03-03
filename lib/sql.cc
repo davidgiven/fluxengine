@@ -1,6 +1,16 @@
 #include "globals.h"
 #include "sql.h"
 #include "fluxmap.h"
+#include "bytes.h"
+#include "fmt/format.h"
+
+enum
+{
+    COMPRESSION_NONE,
+    COMPRESSION_ZLIB
+};
+
+static bool hasProperties(sqlite3* db);
 
 void sqlCheck(sqlite3* db, int i)
 {
@@ -13,7 +23,7 @@ sqlite3* sqlOpen(const std::string filename, int flags)
     sqlite3* db;
     int i = sqlite3_open_v2(filename.c_str(), &db, flags, NULL);
     if (i != SQLITE_OK)
-        Error() << "failed to open output file: " << sqlite3_errstr(i);
+        Error() << "failed: " << sqlite3_errstr(i);
 
     return db;
 }
@@ -31,6 +41,27 @@ void sqlStmt(sqlite3* db, const char* sql)
         Error() << "database error: %s" << errmsg;
 }
 
+int sqlGetVersion(sqlite3* db)
+{
+    return sqlReadIntProperty(db, "version");
+}
+
+bool hasProperties(sqlite3* db)
+{
+    sqlite3_stmt* stmt;
+    sqlCheck(db, sqlite3_prepare_v2(db,
+        "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='properties'",
+        -1, &stmt, NULL));
+
+    int i = sqlite3_step(stmt);
+    if (i != SQLITE_ROW)
+        Error() << "Error accessing sqlite metadata";
+    bool has_properties = sqlite3_column_int(stmt, 0) != 0;
+    sqlCheck(db, sqlite3_finalize(stmt));
+
+    return has_properties;
+}
+
 void sql_bind_blob(sqlite3* db, sqlite3_stmt* stmt, const char* name,
     const void* ptr, size_t bytes)
 {
@@ -46,26 +77,44 @@ void sql_bind_int(sqlite3* db, sqlite3_stmt* stmt, const char* name, int value)
         value));
 }
 
+void sql_bind_string(sqlite3* db, sqlite3_stmt* stmt, const char* name, const char* value)
+{
+    sqlCheck(db, sqlite3_bind_text(stmt,
+        sqlite3_bind_parameter_index(stmt, name),
+        value, -1, SQLITE_TRANSIENT));
+}
+
 void sqlPrepareFlux(sqlite3* db)
 {
     sqlStmt(db, "PRAGMA synchronous = OFF;");
-    sqlStmt(db, "CREATE TABLE IF NOT EXISTS rawdata ("
+    sqlStmt(db, "BEGIN;");
+    sqlStmt(db, "CREATE TABLE IF NOT EXISTS properties ("
+                 "  key TEXT UNIQUE NOT NULL PRIMARY KEY,"
+                 "  value TEXT"
+                 ");");
+    sqlStmt(db, "CREATE TABLE IF NOT EXISTS zdata ("
                  "  track INTEGER,"
                  "  side INTEGER,"
                  "  data BLOB,"
+                 "  compression INTEGER,"
                  "  PRIMARY KEY(track, side)"
                  ");");
+    sqlStmt(db, "COMMIT;");
 }
 
 void sqlWriteFlux(sqlite3* db, int track, int side, const Fluxmap& fluxmap)
 {
+    const auto compressed = compress(fluxmap.rawBytes());
+
     sqlite3_stmt* stmt;
     sqlCheck(db, sqlite3_prepare_v2(db,
-        "INSERT OR REPLACE INTO rawdata (track, side, data) VALUES (:track, :side, :data)",
+        "INSERT OR REPLACE INTO zdata (track, side, data, compression)"
+            " VALUES (:track, :side, :data, :compression)",
         -1, &stmt, NULL));
     sql_bind_int(db, stmt, ":track", track);
     sql_bind_int(db, stmt, ":side", side);
-    sql_bind_blob(db, stmt, ":data", fluxmap.ptr(), fluxmap.bytes());
+    sql_bind_blob(db, stmt, ":data", &compressed[0], compressed.size());
+    sql_bind_int(db, stmt, ":compression", COMPRESSION_ZLIB);
 
     if (sqlite3_step(stmt) != SQLITE_DONE)
         Error() << "failed to write to database: " << sqlite3_errmsg(db);
@@ -76,7 +125,7 @@ std::unique_ptr<Fluxmap> sqlReadFlux(sqlite3* db, int track, int side)
 {
     sqlite3_stmt* stmt;
     sqlCheck(db, sqlite3_prepare_v2(db,
-        "SELECT data FROM rawdata WHERE track=:track AND side=:side",
+        "SELECT data, compression FROM zdata WHERE track=:track AND side=:side",
         -1, &stmt, NULL));
     sql_bind_int(db, stmt, ":track", track);
     sql_bind_int(db, stmt, ":side", side);
@@ -91,86 +140,106 @@ std::unique_ptr<Fluxmap> sqlReadFlux(sqlite3* db, int track, int side)
 
         const uint8_t* blobptr = (const uint8_t*) sqlite3_column_blob(stmt, 0);
         size_t bloblen = sqlite3_column_bytes(stmt, 0);
+        int compression = sqlite3_column_int(stmt, 1);
+        std::vector<uint8_t> data(blobptr, blobptr+bloblen);
 
-        fluxmap->appendBytes(blobptr, bloblen);
+        switch (compression)
+        {
+            case COMPRESSION_NONE:
+                break;
+
+            case COMPRESSION_ZLIB:
+                data = decompress(data);
+                break;
+
+            default:
+                Error() << fmt::format("unsupported compression type {}", compression);
+        }
+
+        fluxmap->appendBytes(data);
     }
     sqlCheck(db, sqlite3_finalize(stmt));
     return fluxmap;
 }
 
-#if 0
-void sql_for_all_flux_data(sqlite3* db,
-    void (*cb)(int track, int side, const struct fluxmap* fluxmap))
+void sqlWriteStringProperty(sqlite3* db, const std::string& name, const std::string& value)
 {
+    if (!hasProperties(db))
+        sqlPrepareFlux(db);
+
     sqlite3_stmt* stmt;
-    sql_check(db, sqlite3_prepare_v2(db,
-        "SELECT track, side, data FROM rawdata ORDER BY track, side ASC",
+    sqlCheck(db, sqlite3_prepare_v2(db,
+        "INSERT OR REPLACE INTO properties (key, value) VALUES (:key, :value)",
         -1, &stmt, NULL));
-
-    struct fluxmap* fluxmap = create_fluxmap();
-    while (sqlite3_step(stmt) == SQLITE_ROW)
-    {
-        int track = sqlite3_column_int(stmt, 0);
-        int side = sqlite3_column_int(stmt, 1);
-        const void* ptr = sqlite3_column_blob(stmt, 2);
-        size_t len = sqlite3_column_bytes(stmt, 2);
-        fluxmap_append_intervals(fluxmap, ptr, len);
-        cb(track, side, fluxmap);
-        fluxmap_clear(fluxmap);
-    }
-    free_fluxmap(fluxmap);
-
-    sql_check(db, sqlite3_finalize(stmt));
-}
-
-void sql_prepare_record(sqlite3* db)
-{
-    sql_stmt(db, "PRAGMA synchronous = OFF;");
-    sql_stmt(db, "CREATE TABLE IF NOT EXISTS records ("
-                 "  track INTEGER,"
-                 "  side INTEGER,"
-                 "  record INTEGER,"
-                 "  data BLOB,"
-                 "  PRIMARY KEY(track, side, record)"
-                 ");");
-}
-
-void sql_write_record(sqlite3* db, int track, int side, int record, const uint8_t* ptr, size_t len)
-{
-    sqlite3_stmt* stmt;
-    sql_check(db, sqlite3_prepare_v2(db,
-        "INSERT OR REPLACE INTO records (track, side, record, data) VALUES (:track, :side, :record, :data)",
-        -1, &stmt, NULL));
-    sql_bind_int(db, stmt, ":track", track);
-    sql_bind_int(db, stmt, ":side", side);
-    sql_bind_int(db, stmt, ":record", record);
-    sql_bind_blob(db, stmt, ":data", ptr, len);
+    sql_bind_string(db, stmt, ":key", name.c_str());
+    sql_bind_string(db, stmt, ":value", value.c_str());
 
     if (sqlite3_step(stmt) != SQLITE_DONE)
-        error("failed to write to database: %s", sqlite3_errmsg(db));
-    sql_check(db, sqlite3_finalize(stmt));
+        Error() << "failed to write to database: " << sqlite3_errmsg(db);
+    sqlCheck(db, sqlite3_finalize(stmt));
 }
 
-void sql_for_all_record_data(sqlite3* db,
-    void (*cb)(int track, int side, int record, const uint8_t* data, size_t len))
+std::string sqlReadStringProperty(sqlite3* db, const std::string& name)
 {
+    if (!hasProperties(db))
+        return "";
+
     sqlite3_stmt* stmt;
-    sql_check(db, sqlite3_prepare_v2(db,
-        "SELECT track, side, record, data FROM records ORDER BY track, side, record ASC",
+    sqlCheck(db, sqlite3_prepare_v2(db,
+        "SELECT value FROM properties WHERE key=:key",
         -1, &stmt, NULL));
+    sql_bind_string(db, stmt, ":key", name.c_str());
 
-    while (sqlite3_step(stmt) == SQLITE_ROW)
+    int i = sqlite3_step(stmt);
+    std::string result;
+    if (i != SQLITE_DONE)
     {
-        int track = sqlite3_column_int(stmt, 0);
-        int side = sqlite3_column_int(stmt, 1);
-        int record = sqlite3_column_int(stmt, 2);
-        const void* ptr = sqlite3_column_blob(stmt, 3);
-        size_t len = sqlite3_column_bytes(stmt, 3);
-        cb(track, side, record, ptr, len);
-    }
+        if (i != SQLITE_ROW)
+            Error() << "failed to read from database: " << sqlite3_errmsg(db);
 
-    sql_check(db, sqlite3_finalize(stmt));
+        result = (const char*) sqlite3_column_text(stmt, 0);
+    }
+    sqlCheck(db, sqlite3_finalize(stmt));
+    return result;
 }
 
+void sqlWriteIntProperty(sqlite3* db, const std::string& name, long value)
+{
+    if (!hasProperties(db))
+        sqlPrepareFlux(db);
 
-#endif
+    sqlite3_stmt* stmt;
+    sqlCheck(db, sqlite3_prepare_v2(db,
+        "INSERT OR REPLACE INTO properties (key, value) VALUES (:key, :value)",
+        -1, &stmt, NULL));
+    sql_bind_string(db, stmt, ":key", name.c_str());
+    sql_bind_int(db, stmt, ":value", value);
+
+    if (sqlite3_step(stmt) != SQLITE_DONE)
+        Error() << "failed to write to database: " << sqlite3_errmsg(db);
+    sqlCheck(db, sqlite3_finalize(stmt));
+}
+
+long sqlReadIntProperty(sqlite3* db, const std::string& name)
+{
+    if (!hasProperties(db))
+        return 0;
+
+    sqlite3_stmt* stmt;
+    sqlCheck(db, sqlite3_prepare_v2(db,
+        "SELECT value FROM properties WHERE key=:key",
+        -1, &stmt, NULL));
+    sql_bind_string(db, stmt, ":key", name.c_str());
+
+    int i = sqlite3_step(stmt);
+    long result = 0;
+    if (i != SQLITE_DONE)
+    {
+        if (i != SQLITE_ROW)
+            Error() << "failed to read from database: " << sqlite3_errmsg(db);
+
+        result = sqlite3_column_int(stmt, 0);
+    }
+    sqlCheck(db, sqlite3_finalize(stmt));
+    return result;
+}
