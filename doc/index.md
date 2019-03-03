@@ -93,6 +93,7 @@ Here's the table.
 | [Brother 120kB](disk-brother.html)     |  🦄   |        |                                     |
 | [Brother 240kB](disk-brother.html)     |  🦄   |   🦄   |                                     |
 | [Macintosh 800kB](disk-macintosh.html) |  🦖   |        | and probably the 400kB too          |
+| [TRS-80](disk-trs80.html)              |  🦖   |        | a minor variation of the IBM scheme |
 | [Victor 9000](disk-victor9k.html)      |  🦖   |        | experimental, probably buggy        |
 {: .datatable }
 
