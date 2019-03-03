@@ -27,7 +27,7 @@ static DoubleFlag noiseFloorFactor(
 static DoubleFlag signalLevelFactor(
     { "--signal-level-factor" },
     "Clock detection signal level (min + (max-min)*factor).",
-    0.1);
+    0.05);
 
 static const std::string BLOCK_ELEMENTS[] =
 { " ", "▏", "▎", "▍", "▌", "▋", "▊", "▉", "█" };
