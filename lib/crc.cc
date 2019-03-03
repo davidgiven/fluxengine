@@ -31,6 +31,20 @@ uint16_t crc16(uint16_t poly, const uint8_t* start, const uint8_t* end)
 	return crc;
 }
 
+uint16_t crc16ref(uint16_t poly, const uint8_t* start, const uint8_t* end)
+{
+	uint16_t crc = 0xffff;
+
+	while (start != end)
+	{
+		crc ^= *start++;
+		for (int i=0; i<8; i++)
+			crc = (crc & 0x0001) ? ((crc>>1)^poly) : (crc>>1);
+	}
+
+	return crc;
+}
+
 /* Thanks to user202729 on StackOverflow for miraculously reverse engineering
  * this. */
 uint32_t crcbrother(const uint8_t* start, const uint8_t* end)
