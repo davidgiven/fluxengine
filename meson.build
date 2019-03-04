@@ -196,3 +196,4 @@ test('FmMfm',           executable('fmmfm-test', ['tests/fmmfm.cc'],            
 test('BitAccumulator',  executable('bitaccumulator-test', ['tests/bitaccumulator.cc'], include_directories: [feinc], link_with: [felib]))
 test('Kryoflux',        executable('kryoflux-test', ['tests/kryoflux.cc'],             include_directories: [feinc, decoderinc, streaminc], link_with: [felib, decoderlib, streamlib]))
 test('Compression',     executable('compression-test', ['tests/compression.cc'],       include_directories: [feinc, decoderinc, streaminc], link_with: [felib, decoderlib, streamlib]))
+test('Bytes',           executable('bytes-test', ['tests/bytes.cc'],                   include_directories: [feinc], link_with: [felib]))

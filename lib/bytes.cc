@@ -3,6 +3,99 @@
 #include "fmt/format.h"
 #include <zlib.h>
 
+static std::shared_ptr<std::vector<uint8_t>> createVector(unsigned size)
+{
+    std::shared_ptr<std::vector<uint8_t>> vector(new std::vector<uint8_t>(size));
+    return vector;
+}
+
+static std::shared_ptr<std::vector<uint8_t>> createVector(std::initializer_list<uint8_t> data)
+{
+    std::shared_ptr<std::vector<uint8_t>> vector(new std::vector<uint8_t>(data.size()));
+    std::uninitialized_copy(data.begin(), data.end(), vector->begin());
+    return vector;
+}
+
+Bytes::Bytes():
+    _data(createVector(0)),
+    _low(0),
+    _high(0)
+{}
+
+Bytes::Bytes(unsigned size):
+    _data(createVector(size)),
+    _low(0),
+    _high(size)
+{}
+
+Bytes::Bytes(std::initializer_list<uint8_t> data):
+    _data(createVector(data)),
+    _low(0),
+    _high(data.size())
+{}
+
+Bytes::Bytes(std::shared_ptr<std::vector<uint8_t>> data):
+    _data(data),
+    _low(0),
+    _high(data->size())
+{}
+
+Bytes::Bytes(std::shared_ptr<std::vector<uint8_t>> data, unsigned start, unsigned end):
+    _data(data),
+    _low(start),
+    _high(end),
+    _pos(start)
+{}
+
+Bytes* Bytes::operator = (const Bytes& other)
+{
+    _data = other._data;
+    _low = other._low;
+    _high = other._high;
+    _pos = other._pos;
+    return this;
+}
+
+void Bytes::_boundsCheck(unsigned pos) const
+{
+    if (pos >= _high)
+        throw std::out_of_range("byte access out of range");
+}
+
+void Bytes::_writableCheck() const
+{
+    if (_data.use_count() != 1)
+        throw std::invalid_argument("write to shared byte object");
+}
+
+void Bytes::_adjustBounds(unsigned pos)
+{
+    _writableCheck();
+    if (pos >= _high)
+    {
+        _high = pos+1;
+        _data->resize(_high);
+    }
+}
+
+uint8_t Bytes::operator [] (unsigned pos) const
+{
+    pos += _low;
+    _boundsCheck(pos);
+    return (*_data)[pos];
+}
+
+Bytes Bytes::slice(unsigned start, unsigned len)
+{
+    start += _low;
+    _boundsCheck(start);
+    unsigned end = start + len;
+    _boundsCheck(end - 1);
+
+    Bytes b(_data, start, end);
+    return b;
+}
+
 uint8_t toByte(
     std::vector<bool>::const_iterator start,
     std::vector<bool>::const_iterator end)
