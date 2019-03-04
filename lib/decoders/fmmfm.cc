@@ -1,7 +1,7 @@
 #include "globals.h"
 #include "decoders.h"
 
-std::vector<uint8_t> decodeFmMfm(const std::vector<bool> bits)
+Bytes decodeFmMfm(const std::vector<bool> bits)
 {
     /* 
      * FM is dumb as rocks, consisting on regular clock pulses with data pulses in
@@ -21,7 +21,9 @@ std::vector<uint8_t> decodeFmMfm(const std::vector<bool> bits)
      * decoding MFM uses just the same code!
      */
 
-    std::vector<uint8_t> bytes;
+    Bytes bytes;
+    ByteWriter bw(bytes);
+
     size_t cursor = 1;
     int bitcount = 0;
     uint8_t fifo;
@@ -33,7 +35,7 @@ std::vector<uint8_t> decodeFmMfm(const std::vector<bool> bits)
         bitcount++;
         if (bitcount == 8)
         {
-            bytes.push_back(fifo);
+            bw.write_8(fifo);
             bitcount = 0;
         }
     }
@@ -41,7 +43,7 @@ std::vector<uint8_t> decodeFmMfm(const std::vector<bool> bits)
     if (bitcount != 0)
     {
         fifo <<= 8-bitcount;
-        bytes.push_back(fifo);
+        bw.write_8(fifo);
     }
 
     return bytes;

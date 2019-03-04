@@ -4,11 +4,14 @@
 
 int main(int argc, const char* argv[])
 {
-    BitAccumulator ba;
+    Bytes bytes;
+    ByteWriter bw(bytes);
+    BitWriter bitw(bw);
 
-    ba.reset();
-    ba.push(0x1e, 5);
-    assert((std::vector<uint8_t>)ba == std::vector<uint8_t>{ 0x1e });
+    bitw.push(0x1e, 5);
+    bitw.flush();
+
+    assert(bytes == Bytes{ 0x1e });
 
     return 0;
 }

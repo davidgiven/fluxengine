@@ -3,11 +3,10 @@
 
 static void test_roundtrip()
 {
-    std::string sourceText = "This is some data.";
-    std::vector<uint8_t> source(sourceText.begin(), sourceText.end());
+    Bytes source = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
-    auto compressed = compress(source);
-    auto decompressed = decompress(compressed);
+    auto compressed = source.compress();
+    auto decompressed = compressed.decompress();
 
     assert(decompressed == source);
 }

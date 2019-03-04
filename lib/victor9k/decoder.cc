@@ -23,9 +23,11 @@ static int decode_data_gcr(uint8_t gcr)
     return -1;
 };
 
-static std::vector<uint8_t> decode(const std::vector<bool>& bits)
+static Bytes decode(const std::vector<bool>& bits)
 {
-    BitAccumulator ba;
+    Bytes output;
+    ByteWriter bw(output);
+    BitWriter bitw(bw);
 
     auto ii = bits.begin();
     while (ii != bits.end())
@@ -39,10 +41,11 @@ static std::vector<uint8_t> decode(const std::vector<bool>& bits)
         }
 
         uint8_t decoded = decode_data_gcr(inputfifo);
-        ba.push(decoded, 4);
+        bitw.push(decoded, 4);
     }
+    bitw.flush();
 
-    return ba;
+    return output;
 }
 
 SectorVector Victor9kDecoder::decodeToSectors(const RawRecordVector& rawRecords, unsigned)
@@ -75,7 +78,7 @@ SectorVector Victor9kDecoder::decodeToSectors(const RawRecordVector& rawRecords,
 
                 nextTrack = rawTrack & 0x7f;
                 nextSide = rawTrack >> 7;
-                uint8_t wantChecksum = sumBytes(&bytes[1], &bytes[3]);
+                uint8_t wantChecksum = bytes[1] + bytes[2];
                 if (wantChecksum != gotChecksum)
                     break;
                 if ((nextSector > 20) || (nextTrack > 85) || (nextSide > 1))
@@ -93,13 +96,13 @@ SectorVector Victor9kDecoder::decodeToSectors(const RawRecordVector& rawRecords,
                 if (bytes.size() < VICTOR9K_SECTOR_LENGTH+3)
                     break;
 
-                uint16_t gotChecksum = sumBytes(&bytes[1], &bytes[VICTOR9K_SECTOR_LENGTH+1]);
-                uint16_t wantChecksum = read_le16(&bytes[VICTOR9K_SECTOR_LENGTH+1]);
+                Bytes payload = bytes.slice(1, VICTOR9K_SECTOR_LENGTH);
+                uint16_t gotChecksum = sumBytes(payload);
+                uint16_t wantChecksum = bytes.reader().seek(VICTOR9K_SECTOR_LENGTH+1).read_le16();
                 int status = (gotChecksum == wantChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
 
                 auto sector = std::unique_ptr<Sector>(
-					new Sector(status, nextTrack, 0, nextSector,
-                        std::vector<uint8_t>(&bytes[1], &bytes[VICTOR9K_SECTOR_LENGTH+1])));
+					new Sector(status, nextTrack, 0, nextSector, payload));
                 sectors.push_back(std::move(sector));
                 break;
             }

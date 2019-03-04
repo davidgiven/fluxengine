@@ -17,10 +17,9 @@ SectorVector AbstractIbmDecoder::decodeToSectors(const RawRecordVector& rawRecor
 
     for (auto& rawrecord : rawRecords)
     {
-        const auto& bytes = decodeFmMfm(rawrecord->data);
+        const Bytes& bytes = decodeFmMfm(rawrecord->data);
         int headerSize = skipHeaderBytes();
-        auto data = bytes.begin() + headerSize;
-        unsigned len = bytes.size() - headerSize;
+        const Bytes& data = bytes.slice(headerSize, bytes.size() - headerSize);
 
         switch (data[0])
         {
@@ -30,11 +29,11 @@ SectorVector AbstractIbmDecoder::decodeToSectors(const RawRecordVector& rawRecor
 
             case IBM_IDAM:
             {
-                if (len < sizeof(idam))
+                if (data.size() < sizeof(idam))
                     break;
-                memcpy(&idam, &data[0], sizeof(idam));
+                memcpy(&idam, data.cbegin(), sizeof(idam));
 
-				uint16_t crc = crc16(CCITT_POLY, &bytes[0], &bytes[offsetof(IbmIdam, crc) + headerSize]);
+				uint16_t crc = crc16(CCITT_POLY, bytes.slice(0, offsetof(IbmIdam, crc) + headerSize));
 				uint16_t wantedCrc = (idam.crc[0]<<8) | idam.crc[1];
 				idamValid = (crc == wantedCrc);
                 break;
@@ -49,21 +48,17 @@ SectorVector AbstractIbmDecoder::decodeToSectors(const RawRecordVector& rawRecor
                     break;
                 
                 unsigned size = 1 << (idam.sectorSize + 7);
-                if (size > (len + IBM_DAM_LEN + 2))
+                if (size > (data.size() + IBM_DAM_LEN + 2))
                     break;
 
-                const uint8_t* userStart = &data[IBM_DAM_LEN];
-                const uint8_t* userEnd = userStart + size;
-				uint16_t crc = crc16(CCITT_POLY, &bytes[0], userEnd);
-				uint16_t wantedCrc = (userEnd[0] << 8) | userEnd[1];
+                const Bytes payload = data.slice(IBM_DAM_LEN, size);
+				uint16_t crc = crc16(CCITT_POLY, payload);
+				uint16_t wantedCrc = data.reader().seek(IBM_DAM_LEN+size).read_be16();
 				int status = (crc == wantedCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
-
-                std::vector<uint8_t> sectordata(size);
-                memcpy(&sectordata[0], userStart, size);
 
                 int sectorNum = idam.sector - _sectorIdBase;
                 auto sector = std::unique_ptr<Sector>(
-					new Sector(status, idam.cylinder, idam.side, sectorNum, sectordata));
+					new Sector(status, idam.cylinder, idam.side, sectorNum, payload));
                 sectors.push_back(std::move(sector));
                 idamValid = false;
                 break;

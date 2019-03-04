@@ -15,7 +15,7 @@ int main(int argc, const char* argv[])
             true, false,
             true, false
         }
-    ) == std::vector<uint8_t>{ 0x00 });
+    ) == Bytes{ 0x00 });
 
     assert(decodeFmMfm(
         std::vector<bool>{
@@ -28,14 +28,14 @@ int main(int argc, const char* argv[])
             true, false,
             true, true
         }
-    ) == std::vector<uint8_t>{ 0x81 });
+    ) == Bytes{ 0x81 });
 
     assert(decodeFmMfm(
         std::vector<bool>{
             true, true,
             true, false,
         }
-    ) == std::vector<uint8_t>{ 0x80 });
+    ) == Bytes{ 0x80 });
 
     return 0;
 }

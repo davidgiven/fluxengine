@@ -25,9 +25,11 @@ static int decode_data_gcr(uint8_t gcr)
 /* This is extremely inspired by the MESS implementation, written by Nathan Woods
  * and R. Belmont: https://github.com/mamedev/mame/blob/4263a71e64377db11392c458b580c5ae83556bc7/src/lib/formats/ap_dsk35.cpp
  */
-static std::vector<uint8_t> decode_crazy_data(const uint8_t* inp, int& status)
+static Bytes decode_crazy_data(const Bytes& input, int& status)
 {
-    std::vector<uint8_t> output;
+    Bytes output;
+    ByteWriter bw(output);
+    ByteReader br(input);
 
     static const int LOOKUP_LEN = MAC_SECTOR_LENGTH / 3;
 
@@ -37,10 +39,10 @@ static std::vector<uint8_t> decode_crazy_data(const uint8_t* inp, int& status)
 
     for (int i=0; i<=LOOKUP_LEN; i++)
     {
-        uint8_t w4 = *inp++;
-        uint8_t w1 = *inp++;
-        uint8_t w2 = *inp++;
-        uint8_t w3 = (i != 174) ? *inp++ : 0;
+        uint8_t w4 = br.read_8();
+        uint8_t w1 = br.read_8();
+        uint8_t w2 = br.read_8();
+        uint8_t w3 = (i != 174) ? br.read_8() : 0;
 
         b1[i] = (w1 & 0x3F) | ((w4 << 2) & 0xC0);
         b2[i] = (w2 & 0x3F) | ((w4 << 4) & 0xC0);
@@ -67,7 +69,7 @@ static std::vector<uint8_t> decode_crazy_data(const uint8_t* inp, int& status)
             c3++;
             c1 &= 0xFF;
         }
-        output.push_back(val);
+        bw.write_8(val);
 
         val = b2[count] ^ c3;
         c2 += val;
@@ -76,7 +78,7 @@ static std::vector<uint8_t> decode_crazy_data(const uint8_t* inp, int& status)
             c2++;
             c3 &= 0xFF;
         }
-        output.push_back(val);
+        bw.write_8(val);
 
         if (output.size() == 524)
             break;
@@ -88,7 +90,7 @@ static std::vector<uint8_t> decode_crazy_data(const uint8_t* inp, int& status)
             c1++;
             c2 &= 0xFF;
         }
-        output.push_back(val);
+        bw.write_8(val);
         count++;
     }
 
@@ -97,10 +99,10 @@ static std::vector<uint8_t> decode_crazy_data(const uint8_t* inp, int& status)
     c2 &= 0x3f;
     c3 &= 0x3f;
     c4 &= 0x3f;
-    uint8_t g4 = *inp++;
-    uint8_t g3 = *inp++;
-    uint8_t g2 = *inp++;
-    uint8_t g1 = *inp++;
+    uint8_t g4 = br.read_8();
+    uint8_t g3 = br.read_8();
+    uint8_t g2 = br.read_8();
+    uint8_t g1 = br.read_8();
     if ((g4 == c4) && (g3 == c3) && (g2 == c2) && (g1 == c1))
         status = Sector::OK;
 
@@ -127,12 +129,12 @@ SectorVector MacintoshDecoder::decodeToSectors(
     for (auto& rawrecord : rawRecords)
     {
         const std::vector<bool>& rawdata = rawrecord->data;
-        const std::vector<uint8_t>& rawbytes = toBytes(rawdata);
+        const auto& rawbytes = toBytes(rawdata);
 
         if (rawbytes.size() < 8)
             continue;
 
-        uint32_t signature = read_be24(&rawbytes[0]);
+        uint32_t signature = rawbytes.reader().read_be24();
         switch (signature)
         {
             case MAC_SECTOR_RECORD:
@@ -156,7 +158,7 @@ SectorVector MacintoshDecoder::decodeToSectors(
                     break;
                 headerIsValid = false;
 
-                uint8_t inputbuffer[MAC_ENCODED_SECTOR_LENGTH + 4] = {};
+                Bytes inputbuffer(MAC_ENCODED_SECTOR_LENGTH + 4);
                 for (unsigned i=0; i<sizeof(inputbuffer); i++)
                 {
                     auto p = rawbytes.begin() + 4 + i;

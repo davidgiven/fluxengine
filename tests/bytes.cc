@@ -25,6 +25,7 @@ static void test_bounds()
 
     Bytes b2 = b1.slice(1, 2);
     assert(b2.size() == 2);
+    int i = b2[0];
     assert(b2[0] == 2);
     assert(b2[1] == 3);
     check_oob(b2, 2);
@@ -57,42 +58,44 @@ static void test_equality()
 static void test_reads()
 {
     Bytes b = {1, 2, 3, 4};
+    ByteReader br(b);
 
-    b.seek(0);
-    assert(b.read_be16() == 0x0102);
-    assert(b.read_le16() == 0x0403);
+    br.seek(0);
+    assert(br.read_be16() == 0x0102);
+    assert(br.read_le16() == 0x0403);
 
-    b.seek(0);
-    assert(b.read_8() == 0x01);
-    assert(b.read_8() == 0x02);
+    br.seek(0);
+    assert(br.read_8() == 0x01);
+    assert(br.read_8() == 0x02);
 
-    b.seek(0); assert(b.read_be24() == 0x010203);
-    b.seek(0); assert(b.read_le24() == 0x030201);
-    b.seek(0); assert(b.read_be32() == 0x01020304);
-    b.seek(0); assert(b.read_le32() == 0x04030201);
+    br.seek(0); assert(br.read_be24() == 0x010203);
+    br.seek(0); assert(br.read_le24() == 0x030201);
+    br.seek(0); assert(br.read_be32() == 0x01020304);
+    br.seek(0); assert(br.read_le32() == 0x04030201);
 }
 
 static void test_writes()
 {
     Bytes b;
+    ByteWriter bw(b);
 
-    b.seek(0);
-    b.write_8(1);
+    bw.seek(0);
+    bw.write_8(1);
     assert((b == Bytes{ 1 }));
-    b.write_be32(0x02020202);
+    bw.write_be32(0x02020202);
     assert((b == Bytes{ 1, 2, 2, 2, 2 }));
 
-    auto reset = [&]() { b.resize(0); b.seek(0); };
+    auto reset = [&]() { b.resize(0); bw.seek(0); };
 
-    reset(); b.write_le16(0x0102); assert((b == Bytes{ 2, 1 }));
-    reset(); b.write_be16(0x0102); assert((b == Bytes{ 1, 2 }));
-    reset(); b.write_le24(0x010203); assert((b == Bytes{ 3, 2, 1 }));
-    reset(); b.write_be24(0x010203); assert((b == Bytes{ 1, 2, 3 }));
-    reset(); b.write_le32(0x01020304); assert((b == Bytes{ 4, 3, 2, 1 }));
-    reset(); b.write_be32(0x01020304); assert((b == Bytes{ 1, 2, 3, 4 }));
+    reset(); bw.write_le16(0x0102); assert((b == Bytes{ 2, 1 }));
+    reset(); bw.write_be16(0x0102); assert((b == Bytes{ 1, 2 }));
+    reset(); bw.write_le24(0x010203); assert((b == Bytes{ 3, 2, 1 }));
+    reset(); bw.write_be24(0x010203); assert((b == Bytes{ 1, 2, 3 }));
+    reset(); bw.write_le32(0x01020304); assert((b == Bytes{ 4, 3, 2, 1 }));
+    reset(); bw.write_be32(0x01020304); assert((b == Bytes{ 1, 2, 3, 4 }));
 
     reset();
-    b.write({ 1, 2, 3, 4, 5 });
+    bw += { 1, 2, 3, 4, 5 };
     assert((b == Bytes{ 1, 2, 3, 4, 5 }));
 }
 

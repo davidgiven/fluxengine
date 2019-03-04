@@ -50,8 +50,7 @@ void writeBrotherSectorHeader(std::vector<bool>& bits, unsigned& cursor,
 	write_bits(bits, cursor, encode_header_gcr(0x2f), 16);
 }
 
-void writeBrotherSectorData(std::vector<bool>& bits, unsigned& cursor,
-		const std::vector<uint8_t>& data)
+void writeBrotherSectorData(std::vector<bool>& bits, unsigned& cursor, const Bytes& data)
 {
 	write_bits(bits, cursor, 0xffffffff, 32);
 	write_bits(bits, cursor, BROTHER_DATA_RECORD, 32);
@@ -80,7 +79,7 @@ void writeBrotherSectorData(std::vector<bool>& bits, unsigned& cursor,
 	for (uint8_t byte : data)
 		write_byte(byte);
 
-	uint32_t realCrc = crcbrother(&data[0], &data[256]);
+	uint32_t realCrc = crcbrother(data);
 	write_byte(realCrc>>16);
 	write_byte(realCrc>>8);
 	write_byte(realCrc);

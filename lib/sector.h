@@ -1,6 +1,8 @@
 #ifndef SECTOR_H
 #define SECTOR_H
 
+#include "bytes.h"
+
 /* 
  * Note that sectors here used zero-based numbering throughout (to make the
  * maths easier); traditionally floppy disk use 0-based track numbering and
@@ -19,7 +21,7 @@ public:
 
     static const std::string statusToString(Status status);
 
-    Sector(int status, int track, int side, int sector, const std::vector<uint8_t>& data):
+    Sector(int status, int track, int side, int sector, const Bytes& data):
 		status(status),
         track(track),
         side(side),
@@ -31,7 +33,7 @@ public:
     const int track;
     const int side;
     const int sector;
-    const std::vector<uint8_t> data;
+    const Bytes data;
 };
 
 typedef std::vector<std::unique_ptr<Sector>> SectorVector;

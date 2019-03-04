@@ -23,9 +23,11 @@ static int decode_data_gcr(uint8_t gcr)
     return -1;
 };
 
-static std::vector<uint8_t> decode(const std::vector<bool>& bits)
+static Bytes decode(const std::vector<bool>& bits)
 {
-    BitAccumulator ba;
+    Bytes output;
+    ByteWriter bw(output);
+    BitWriter bitw(bw);
 
     auto ii = bits.begin();
     while (ii != bits.end())
@@ -38,10 +40,11 @@ static std::vector<uint8_t> decode(const std::vector<bool>& bits)
             inputfifo = (inputfifo<<1) | *ii++;
         }
 
-        ba.push(decode_data_gcr(inputfifo), 4);
+        bitw.push(decode_data_gcr(inputfifo), 4);
     }
+    bitw.flush();
 
-    return ba;
+    return output;
 }
 
 SectorVector Commodore64Decoder::decodeToSectors(const RawRecordVector& rawRecords, unsigned)
@@ -70,7 +73,7 @@ SectorVector Commodore64Decoder::decodeToSectors(const RawRecordVector& rawRecor
                 uint8_t checksum = bytes[1];
                 nextSector = bytes[2];
                 nextTrack = bytes[3] - 1;
-                if (checksum != xorBytes(&bytes[2], &bytes[6]))
+                if (checksum != xorBytes(bytes.slice(2, 4)))
                     break;
 
                 headerIsValid = true;
@@ -85,12 +88,13 @@ SectorVector Commodore64Decoder::decodeToSectors(const RawRecordVector& rawRecor
                 if (bytes.size() < 258)
                     break;
 
-                uint8_t checksum = xorBytes(&bytes[1], &bytes[257]);
-                int status = (checksum == bytes[257]) ? Sector::OK : Sector::BAD_CHECKSUM;
+                Bytes payload = bytes.slice(1, C64_SECTOR_LENGTH);
+                uint8_t gotChecksum = xorBytes(payload);
+                uint8_t wantChecksum = bytes[257];
+                int status = (wantChecksum == gotChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
 
                 auto sector = std::unique_ptr<Sector>(
-					new Sector(status, nextTrack, 0, nextSector,
-                        std::vector<uint8_t>(&bytes[1], &bytes[257])));
+					new Sector(status, nextTrack, 0, nextSector, payload));
                 sectors.push_back(std::move(sector));
                 break;
             }
