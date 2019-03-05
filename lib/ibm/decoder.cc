@@ -50,14 +50,14 @@ SectorVector AbstractIbmDecoder::decodeToSectors(const RawRecordVector& rawRecor
                 unsigned size = 1 << (idam.sectorSize + 7);
                 data.resize(IBM_DAM_LEN + size + 2);
 
-                const Bytes payload = data.slice(IBM_DAM_LEN, size);
-				uint16_t gotCrc = crc16(CCITT_POLY, payload);
+				uint16_t gotCrc = crc16(CCITT_POLY, bytes.slice(0, IBM_DAM_LEN+size+headerSize));
 				uint16_t wantedCrc = data.reader().seek(IBM_DAM_LEN+size).read_be16();
 				int status = (gotCrc == wantedCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
 
                 int sectorNum = idam.sector - _sectorIdBase;
                 auto sector = std::unique_ptr<Sector>(
-					new Sector(status, idam.cylinder, idam.side, sectorNum, payload));
+					new Sector(status, idam.cylinder, idam.side, sectorNum,
+                        data.slice(IBM_DAM_LEN, size)));
                 sectors.push_back(std::move(sector));
                 idamValid = false;
                 break;
