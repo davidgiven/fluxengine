@@ -73,7 +73,8 @@ SectorVector BrotherDecoder::decodeToSectors(const RawRecordVector& rawRecords, 
 				if (rawrecord->data.size() < (32+32))
 					break;
 
-				ByteReader br(toBytes(ii+32, ii+64));
+				const auto& by = toBytes(ii+32, ii+64);
+				ByteReader br(by);
 				nextTrack = decode_header_gcr(br.read_be16());
 				nextSector = decode_header_gcr(br.read_be16());
 

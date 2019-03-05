@@ -5,20 +5,19 @@
 
 static std::shared_ptr<std::vector<uint8_t>> createVector(unsigned size)
 {
-    std::shared_ptr<std::vector<uint8_t>> vector(new std::vector<uint8_t>(size));
-    return vector;
+    return std::make_shared<std::vector<uint8_t>>(size);
 }
 
 static std::shared_ptr<std::vector<uint8_t>> createVector(const uint8_t* ptr, unsigned size)
 {
-    std::shared_ptr<std::vector<uint8_t>> vector(new std::vector<uint8_t>(size));
+    auto vector = std::make_shared<std::vector<uint8_t>>(size);
     std::uninitialized_copy(ptr, ptr+size, vector->begin());
     return vector;
 }
 
 static std::shared_ptr<std::vector<uint8_t>> createVector(std::initializer_list<uint8_t> data)
 {
-    std::shared_ptr<std::vector<uint8_t>> vector(new std::vector<uint8_t>(data.size()));
+    auto vector = std::make_shared<std::vector<uint8_t>>(data.size());
     std::uninitialized_copy(data.begin(), data.end(), vector->begin());
     return vector;
 }
@@ -151,25 +150,11 @@ Bytes toBytes(
 {
     Bytes bytes;
     ByteWriter bw(bytes);
-    size_t bitcount = 0;
-    uint8_t fifo;
 
+    BitWriter bitw(bw);
     while (start != end)
-    {
-        fifo = (fifo<<1) | *start++;
-        bitcount++;
-        if (bitcount == 8)
-        {
-            bitcount = 0;
-            bw.write_8(fifo);
-        }
-    }
-
-    if (bitcount != 0)
-    {
-        fifo <<= 8-bitcount;
-        bw.write_8(fifo);
-    }
+        bitw.push(*start++, 1);
+    bitw.flush();
 
     return bytes;
 }

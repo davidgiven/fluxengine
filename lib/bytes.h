@@ -63,6 +63,8 @@ public:
         _bytes(bytes)
     {}
 
+    ByteReader(const Bytes&&) = delete;
+
     unsigned pos = 0;
     bool eof() const
     { return pos == _bytes.size(); }
@@ -136,6 +138,8 @@ public:
     ByteWriter(Bytes& bytes):
         _bytes(bytes)
     {}
+
+    ByteWriter(const Bytes&&) = delete;
 
     unsigned pos = 0;
 
@@ -253,6 +257,8 @@ public:
     BitWriter(ByteWriter& bw):
         _bw(bw)
     {}
+
+    BitWriter(ByteWriter&&) = delete;
 
     void push(uint32_t bits, size_t size);
     void flush();

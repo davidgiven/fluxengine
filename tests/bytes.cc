@@ -25,7 +25,6 @@ static void test_bounds()
 
     Bytes b2 = b1.slice(1, 2);
     assert(b2.size() == 2);
-    int i = b2[0];
     assert(b2[0] == 2);
     assert(b2[1] == 3);
     check_oob(b2, 2);
