@@ -10,7 +10,7 @@ public:
 
     virtual int recordMatcher(uint64_t fifo) const = 0;
 
-    RawRecordVector extractRecords(std::vector<bool> bits) const;
+    virtual RawRecordVector extractRecords(std::vector<bool> bits) const;
 };
 
 #endif

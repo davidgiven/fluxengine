@@ -157,6 +157,15 @@ macdecoderlib = shared_library('macdecoderlib',
 )
 macinc = include_directories('lib/macintosh')
 
+zilogmczdecoderlib = shared_library('zilogmczdecoderlib',
+    [
+		'lib/zilogmcz/decoder.cc',
+    ],
+    include_directories: [feinc, fmtinc, decoderinc],
+    link_with: [felib, fmtlib, decoderlib]
+)
+zilogmczinc = include_directories('lib/zilogmcz')
+
 victor9kdecoderlib = shared_library('victor9kdecoderlib',
     [
 		'lib/victor9k/decoder.cc',
@@ -178,6 +187,7 @@ executable('fe-readc64',           ['src/fe-readc64.cc'],           include_dire
 executable('fe-readdfs',           ['src/fe-readdfs.cc'],           include_directories: [feinc, fmtinc, decoderinc, ibminc], link_with: [felib, readerlib, decoderlib, ibmdecoderlib, fmtlib])
 executable('fe-readibm',           ['src/fe-readibm.cc'],           include_directories: [feinc, fmtinc, decoderinc, ibminc], link_with: [felib, readerlib, decoderlib, ibmdecoderlib, fmtlib])
 executable('fe-readmac',           ['src/fe-readmac.cc'],           include_directories: [feinc, fmtinc, decoderinc, macinc], link_with: [felib, readerlib, decoderlib, macdecoderlib, fmtlib])
+executable('fe-readzilogmcz',       ['src/fe-readzilogmcz.cc'],       include_directories: [feinc, fmtinc, decoderinc, zilogmczinc], link_with: [felib, readerlib, decoderlib, zilogmczdecoderlib, fmtlib])
 executable('fe-readvictor9k',      ['src/fe-readvictor9k.cc'],      include_directories: [feinc, fmtinc, decoderinc, victor9kinc], link_with: [felib, readerlib, decoderlib, victor9kdecoderlib, fmtlib])
 executable('fe-rpm',               ['src/fe-rpm.cc'],               include_directories: [feinc], link_with: [felib])
 executable('fe-seek',              ['src/fe-seek.cc'],              include_directories: [feinc], link_with: [felib])
