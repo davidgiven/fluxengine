@@ -58,14 +58,13 @@ uint32_t crcbrother(const Bytes& bytes)
 {
 	ByteReader br(bytes);
 
-	uint32_t crc = 0;
-	do
+	uint32_t crc = br.read_8();
+	while (!br.eof())
 	{
-		crc ^= br.read_8();
 		for (int i=0; i<8; i++)
 			crc = (crc & 0x800000) ? ((crc<<1)^BROTHER_POLY) : (crc<<1);
+		crc ^= br.read_8();
 	}
-	while (!br.eof());
 
 	return crc & 0xFFFFFF;
 }
