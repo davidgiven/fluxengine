@@ -96,9 +96,13 @@ void Bytes::adjustBounds(unsigned pos)
 
 Bytes& Bytes::resize(unsigned size)
 {
-    checkWritable();
+    unsigned oldsize = _high - _low;
+    if (size > oldsize)
+    {
+        checkWritable();
+        _data->resize(_low + size);
+    }
     _high = _low + size;
-    _data->resize(_high);
     return *this;
 }
 
