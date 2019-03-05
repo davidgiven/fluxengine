@@ -17,9 +17,9 @@ SectorVector AbstractIbmDecoder::decodeToSectors(const RawRecordVector& rawRecor
 
     for (auto& rawrecord : rawRecords)
     {
-        const Bytes& bytes = decodeFmMfm(rawrecord->data);
+        const Bytes bytes = decodeFmMfm(rawrecord->data);
         int headerSize = skipHeaderBytes();
-        const Bytes& data = bytes.slice(headerSize, bytes.size() - headerSize);
+        Bytes data = bytes.slice(headerSize, bytes.size() - headerSize);
 
         switch (data[0])
         {
@@ -48,13 +48,12 @@ SectorVector AbstractIbmDecoder::decodeToSectors(const RawRecordVector& rawRecor
                     break;
                 
                 unsigned size = 1 << (idam.sectorSize + 7);
-                if (size > (data.size() + IBM_DAM_LEN + 2))
-                    break;
+                data.resize(IBM_DAM_LEN + size + 2);
 
                 const Bytes payload = data.slice(IBM_DAM_LEN, size);
-				uint16_t crc = crc16(CCITT_POLY, payload);
+				uint16_t gotCrc = crc16(CCITT_POLY, payload);
 				uint16_t wantedCrc = data.reader().seek(IBM_DAM_LEN+size).read_be16();
-				int status = (crc == wantedCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
+				int status = (gotCrc == wantedCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
 
                 int sectorNum = idam.sector - _sectorIdBase;
                 auto sector = std::unique_ptr<Sector>(
