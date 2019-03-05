@@ -2,6 +2,7 @@
 #define C64_H
 
 #define C64_RECORD_SEPARATOR 0xfff5
+#define C64_SECTOR_LENGTH    256
 
 class Sector;
 class Fluxmap;

@@ -57,14 +57,14 @@ SectorVector BrotherDecoder::decodeToSectors(const RawRecordVector& rawRecords, 
 
     for (auto& rawrecord : rawRecords)
     {
-		if (rawrecord->data.size() < 32)
+		if (rawrecord->data.size() < 64)
 		{
 			headerIsValid = false;
 			continue;
 		}
 
 		auto ii = rawrecord->data.cbegin();
-		uint32_t signature = read_be32(toBytes(ii, ii+32));
+		uint32_t signature = toBytes(ii, ii+32).reader().read_be32();
 		switch (signature)
 		{
 			case BROTHER_SECTOR_RECORD:
@@ -73,8 +73,10 @@ SectorVector BrotherDecoder::decodeToSectors(const RawRecordVector& rawRecords, 
 				if (rawrecord->data.size() < (32+32))
 					break;
 
-				nextTrack = decode_header_gcr(read_be16(toBytes(ii+32, ii+48)));
-				nextSector = decode_header_gcr(read_be16(toBytes(ii+48, ii+64)));
+				const auto& by = toBytes(ii+32, ii+64);
+				ByteReader br(by);
+				nextTrack = decode_header_gcr(br.read_be16());
+				nextSector = decode_header_gcr(br.read_be16());
 
 				/* Sanity check the values read; there's no header checksum and
 				 * occasionally we get garbage due to bit errors. */
@@ -91,30 +93,30 @@ SectorVector BrotherDecoder::decodeToSectors(const RawRecordVector& rawRecords, 
 			{
 				if (!headerIsValid)
 					break;
-				const int size = BROTHER_DATA_RECORD_PAYLOAD + BROTHER_DATA_RECORD_CHECKSUM;
-				if (rawrecord->data.size() < (32 + (size*5/8)))
-				{
-					headerIsValid = false;
-					break;
-				}
 
-				BitAccumulator outputData;
-				auto i = ii + 32;
-				while (outputData.size() != size)
-				{
-					uint32_t nibble = decode_data_gcr(toBytes(i, i+8)[0]);
-					outputData.push(nibble, 5);
-					i += 8;
-				}
+				Bytes rawbytes = toBytes(rawrecord->data.cbegin()+32, rawrecord->data.cend());
+				const int totalsize = BROTHER_DATA_RECORD_PAYLOAD + BROTHER_DATA_RECORD_CHECKSUM;
 
-				const std::vector<uint8_t>& v = outputData;
-				uint32_t realCrc = crcbrother(&v[0], &v[BROTHER_DATA_RECORD_PAYLOAD]);
-				uint32_t wantCrc = read_be24(&v[BROTHER_DATA_RECORD_PAYLOAD]);
+				Bytes output;
+				ByteWriter bw(output);
+				BitWriter bitw(bw);
+				for (uint8_t b : rawbytes)
+				{
+					uint32_t nibble = decode_data_gcr(b);
+					bitw.push(nibble, 5);
+					if (output.size() == totalsize)
+						break;
+				}
+				bitw.flush();
+				output.resize(totalsize);
+
+				Bytes payload = output.slice(0, BROTHER_DATA_RECORD_PAYLOAD);
+				uint32_t realCrc = crcbrother(payload);
+				uint32_t wantCrc = output.reader().seek(BROTHER_DATA_RECORD_PAYLOAD).read_be24();
 				int status = (realCrc == wantCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
 
                 auto sector = std::unique_ptr<Sector>(
-					new Sector(status, nextTrack, 0, nextSector,
-						std::vector<uint8_t>(v.begin(), v.begin()+BROTHER_DATA_RECORD_PAYLOAD)));
+					new Sector(status, nextTrack, 0, nextSector, payload));
                 sectors.push_back(std::move(sector));
                 headerIsValid = false;
 				break;

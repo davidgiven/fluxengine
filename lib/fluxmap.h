@@ -1,6 +1,8 @@
 #ifndef FLUXMAP_H
 #define FLUXMAP_H
 
+#include "bytes.h"
+
 class Fluxmap
 {
 public:
@@ -8,18 +10,18 @@ public:
 
     nanoseconds_t duration() const { return _duration; }
     size_t bytes() const { return _bytes.size(); }
-    const std::vector<uint8_t> rawBytes() const { return _bytes; }
+    const Bytes& rawBytes() const { return _bytes; }
 
     const uint8_t* ptr() const
 	{
 		if (!_bytes.empty())
-			return &_bytes.at(0);
+			return &_bytes[0];
 		return NULL;
 	}
 
     Fluxmap& appendInterval(uint32_t ticks);
 
-    Fluxmap& appendBytes(const std::vector<uint8_t>& bytes);
+    Fluxmap& appendBytes(const Bytes& bytes);
     Fluxmap& appendBytes(const uint8_t* ptr, size_t len);
 
     Fluxmap& appendByte(uint8_t byte)
@@ -37,7 +39,7 @@ public:
 private:
     nanoseconds_t _duration = 0;
     int _ticks = 0;
-    std::vector<uint8_t> _bytes;
+    Bytes _bytes;
 };
 
 #endif

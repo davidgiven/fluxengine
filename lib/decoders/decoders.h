@@ -2,7 +2,7 @@
 #define DECODERS_H
 
 #include "segmenter.h"
-
+#include "bytes.h"
 
 class Sector;
 class Fluxmap;
@@ -10,7 +10,7 @@ class RawRecord;
 typedef std::vector<std::unique_ptr<RawRecord>> RawRecordVector;
 typedef std::vector<std::unique_ptr<Sector>> SectorVector;
 
-extern std::vector<uint8_t> decodeFmMfm(const std::vector<bool> bits);
+extern Bytes decodeFmMfm(const std::vector<bool> bits);
 
 class AbstractDecoder : public AbstractSegmenter
 {

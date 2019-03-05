@@ -138,10 +138,10 @@ nanoseconds_t usbGetRotationalPeriod(void)
     return r->period_ms * 1000;
 }
 
-static int large_bulk_transfer(int ep, std::vector<uint8_t>& buffer)
+static int large_bulk_transfer(int ep, Bytes& bytes)
 {
     int len;
-    int i = libusb_bulk_transfer(device, ep, &buffer[0], buffer.size(), &len, TIMEOUT);
+    int i = libusb_bulk_transfer(device, ep, bytes.begin(), bytes.size(), &len, TIMEOUT);
     if (i < 0)
         Error() << "data transfer failed: " << usberror(i);
     return len;
@@ -159,7 +159,7 @@ void usbTestBulkTransport()
     const int YSIZE = 256;
     const int ZSIZE = 64;
 
-    std::vector<uint8_t> bulk_buffer(XSIZE*YSIZE*ZSIZE);
+    Bytes bulk_buffer(XSIZE*YSIZE*ZSIZE);
     double start_time = getCurrentTime();
     large_bulk_transfer(FLUXENGINE_DATA_IN_EP, bulk_buffer);
     double elapsed_time = getCurrentTime() - start_time;
@@ -178,7 +178,7 @@ void usbTestBulkTransport()
             for (int z=0; z<ZSIZE; z++)
             {
                 int offset = x*XSIZE*YSIZE + y*ZSIZE + z;
-                if (bulk_buffer.at(offset) != uint8_t(x+y+z))
+                if (bulk_buffer[offset] != uint8_t(x+y+z))
                     Error() << "data transfer corrupted at 0x"
                             << std::hex << offset << std::dec
                             << " "
@@ -199,7 +199,7 @@ std::unique_ptr<Fluxmap> usbRead(int side, int revolutions)
 
     auto fluxmap = std::unique_ptr<Fluxmap>(new Fluxmap);
 
-    std::vector<uint8_t> buffer(1024*1024);
+    Bytes buffer(1024*1024);
     int len = large_bulk_transfer(FLUXENGINE_DATA_IN_EP, buffer);
     buffer.resize(len);
 
@@ -215,14 +215,18 @@ void usbWrite(int side, const Fluxmap& fluxmap)
 
     /* Convert from intervals to absolute timestamps. */
 
-	std::vector<uint8_t> buffer(fluxmap.rawBytes());
+	Bytes buffer(fluxmap.rawBytes());
     buffer.resize(safelen);
 
     struct write_frame f = {
         .f = { .type = F_FRAME_WRITE_CMD, .size = sizeof(f) },
         .side = (uint8_t) side,
     };
-    write_le32((uint8_t*) &f.bytes_to_write, safelen);
+    ((uint8_t*)&f.bytes_to_write)[0] = safelen;
+    ((uint8_t*)&f.bytes_to_write)[1] = safelen >> 8;
+    ((uint8_t*)&f.bytes_to_write)[2] = safelen >> 16;
+    ((uint8_t*)&f.bytes_to_write)[3] = safelen >> 24;
+
     usb_cmd_send(&f, f.f.size);
 
     large_bulk_transfer(FLUXENGINE_DATA_OUT_EP, buffer);

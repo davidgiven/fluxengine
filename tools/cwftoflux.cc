@@ -77,7 +77,7 @@ static void read_track()
     inputFile.read((char*) &trackheader, sizeof(trackheader));
     check_for_error();
 
-    uint32_t length = read_le32(trackheader.length) - sizeof(CwfTrack);
+    uint32_t length = Bytes(trackheader.length, 4).reader().read_le32() - sizeof(CwfTrack);
     unsigned track_number = trackheader.track * header.step;
     std::cout << fmt::format("{}.{}: {} input bytes; ", track_number, trackheader.side, length)
         << std::flush;

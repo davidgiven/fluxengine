@@ -104,7 +104,7 @@ void sqlPrepareFlux(sqlite3* db)
 
 void sqlWriteFlux(sqlite3* db, int track, int side, const Fluxmap& fluxmap)
 {
-    const auto compressed = compress(fluxmap.rawBytes());
+    const auto compressed = fluxmap.rawBytes().compress();
 
     sqlite3_stmt* stmt;
     sqlCheck(db, sqlite3_prepare_v2(db,
@@ -141,7 +141,7 @@ std::unique_ptr<Fluxmap> sqlReadFlux(sqlite3* db, int track, int side)
         const uint8_t* blobptr = (const uint8_t*) sqlite3_column_blob(stmt, 0);
         size_t bloblen = sqlite3_column_bytes(stmt, 0);
         int compression = sqlite3_column_int(stmt, 1);
-        std::vector<uint8_t> data(blobptr, blobptr+bloblen);
+        Bytes data(blobptr, bloblen);
 
         switch (compression)
         {
@@ -149,7 +149,7 @@ std::unique_ptr<Fluxmap> sqlReadFlux(sqlite3* db, int track, int side)
                 break;
 
             case COMPRESSION_ZLIB:
-                data = decompress(data);
+                data = data.decompress();
                 break;
 
             default:

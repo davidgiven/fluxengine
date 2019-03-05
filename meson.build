@@ -182,7 +182,7 @@ executable('fe-readvictor9k',      ['src/fe-readvictor9k.cc'],      include_dire
 executable('fe-rpm',               ['src/fe-rpm.cc'],               include_directories: [feinc], link_with: [felib])
 executable('fe-seek',              ['src/fe-seek.cc'],              include_directories: [feinc], link_with: [felib])
 executable('fe-testbulktransport', ['src/fe-testbulktransport.cc'], include_directories: [feinc], link_with: [felib])
-executable('fe-update',            ['src/fe-upgradefluxfile.cc'],   include_directories: [feinc, fmtinc], link_with: [felib, fmtlib, sqllib])
+executable('fe-upgradefluxfile',   ['src/fe-upgradefluxfile.cc'],   include_directories: [feinc, fmtinc], link_with: [felib, fmtlib, sqllib])
 executable('fe-writebrother',      ['src/fe-writebrother.cc'],      include_directories: [feinc, fmtinc, decoderinc, brotherinc], link_with: [felib, writerlib, decoderlib, encoderlib, brotherencoderlib, fmtlib])
 executable('fe-writeflux',         ['src/fe-writeflux.cc'],         include_directories: [feinc, fmtinc], link_with: [felib, readerlib, writerlib, fmtlib])
 executable('fe-writetestpattern',  ['src/fe-writetestpattern.cc'],  include_directories: [feinc, fmtinc], link_with: [felib, writerlib, fmtlib])
@@ -196,3 +196,4 @@ test('FmMfm',           executable('fmmfm-test', ['tests/fmmfm.cc'],            
 test('BitAccumulator',  executable('bitaccumulator-test', ['tests/bitaccumulator.cc'], include_directories: [feinc], link_with: [felib]))
 test('Kryoflux',        executable('kryoflux-test', ['tests/kryoflux.cc'],             include_directories: [feinc, decoderinc, streaminc], link_with: [felib, decoderlib, streamlib]))
 test('Compression',     executable('compression-test', ['tests/compression.cc'],       include_directories: [feinc, decoderinc, streaminc], link_with: [felib, decoderlib, streamlib]))
+test('Bytes',           executable('bytes-test', ['tests/bytes.cc'],                   include_directories: [feinc], link_with: [felib]))

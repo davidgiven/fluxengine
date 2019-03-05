@@ -1,7 +1,8 @@
 #include "globals.h"
+#include "bytes.h"
 #include "fmt/format.h"
 
-void hexdump(std::ostream& stream, const std::vector<uint8_t>& buffer)
+void hexdump(std::ostream& stream, const Bytes& buffer)
 {
 	size_t pos = 0;
 
@@ -11,7 +12,7 @@ void hexdump(std::ostream& stream, const std::vector<uint8_t>& buffer)
 		for (int i=0; i<16; i++)
 		{
 			if ((pos+i) < buffer.size())
-				stream << fmt::format("{:02x} ", buffer.at(pos+i));
+				stream << fmt::format("{:02x} ", buffer[pos+i]);
 			else
 				stream << "-- ";
 		}
@@ -21,7 +22,7 @@ void hexdump(std::ostream& stream, const std::vector<uint8_t>& buffer)
 			if ((pos+i) >= buffer.size())
 				break;
 
-			uint8_t c = buffer.at(pos+i);
+			uint8_t c = buffer[pos+i];
 			stream << (isprint(c) ? (char)c : '.');
 		}
 		stream << std::endl;

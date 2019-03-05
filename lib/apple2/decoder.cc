@@ -25,9 +25,9 @@ static int decode_data_gcr(uint8_t gcr)
 /* This is extremely inspired by the MESS implementation, written by Nathan Woods
  * and R. Belmont: https://github.com/mamedev/mame/blob/7914a6083a3b3a8c243ae6c3b8cb50b023f21e0e/src/lib/formats/ap2_dsk.cpp
  */
-static std::vector<uint8_t> decode_crazy_data(const uint8_t* inp, int& status)
+static Bytes decode_crazy_data(const uint8_t* inp, int& status)
 {
-    std::vector<uint8_t> output(APPLE2_SECTOR_LENGTH);
+    Bytes output(APPLE2_SECTOR_LENGTH);
 
     uint8_t checksum = 0;
     for (unsigned i = 0; i < APPLE2_ENCODED_SECTOR_LENGTH; i++)
@@ -71,20 +71,21 @@ SectorVector Apple2Decoder::decodeToSectors(
     for (auto& rawrecord : rawRecords)
     {
         const std::vector<bool>& rawdata = rawrecord->data;
-        const std::vector<uint8_t>& rawbytes = toBytes(rawdata);
+        const Bytes& rawbytes = toBytes(rawdata);
+        ByteReader br(rawbytes);
 
         if (rawbytes.size() < 8)
             continue;
 
-        uint32_t signature = read_be24(&rawbytes[0]);
+        uint32_t signature = br.read_be24();
         switch (signature)
         {
             case APPLE2_SECTOR_RECORD:
             {
-                uint8_t volume = combine(read_be16(&rawbytes[3]));
-                nextTrack = combine(read_be16(&rawbytes[5]));
-                nextSector = combine(read_be16(&rawbytes[7]));
-                uint8_t checksum = combine(read_be16(&rawbytes[9]));
+                uint8_t volume = combine(br.read_be16());
+                nextTrack = combine(br.read_be16());
+                nextSector = combine(br.read_be16());
+                uint8_t checksum = combine(br.read_be16());
                 headerIsValid = checksum == (volume ^ nextTrack ^ nextSector);
                 break;
             }
@@ -95,10 +96,9 @@ SectorVector Apple2Decoder::decodeToSectors(
                     break;
                 headerIsValid = false;
                     
-                std::vector<uint8_t> clippedbytes(rawbytes);
-                clippedbytes.resize(APPLE2_ENCODED_SECTOR_LENGTH + 5);
+                Bytes clipped_bytes = rawbytes.slice(0, APPLE2_ENCODED_SECTOR_LENGTH + 5);
                 int status = Sector::BAD_CHECKSUM;
-                auto data = decode_crazy_data(&clippedbytes[3], status);
+                auto data = decode_crazy_data(&clipped_bytes[3], status);
 
                 auto sector = std::unique_ptr<Sector>(
                     new Sector(status, nextTrack, 0, nextSector, data));

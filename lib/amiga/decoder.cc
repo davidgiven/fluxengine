@@ -18,13 +18,13 @@
  * MFM works.
  */
          
-static std::vector<uint8_t> deinterleave(std::vector<uint8_t>::const_iterator& input, size_t len)
+static Bytes deinterleave(const uint8_t*& input, size_t len)
 {
     assert(!(len & 1));
     const uint8_t* odds = &input[0];
     const uint8_t* evens = &input[len/2];
-    std::vector<uint8_t> output;
-    output.reserve(len);
+    Bytes output;
+    ByteWriter bw(output);
 
     for (size_t i=0; i<len/2; i++)
     {
@@ -40,25 +40,21 @@ static std::vector<uint8_t> deinterleave(std::vector<uint8_t>::const_iterator& i
             (((o * 0x0101010101010101ULL & 0x8040201008040201ULL)
                 * 0x0102040810204081ULL >> 48) & 0xAAAA);
         
-        output.push_back((uint8_t)(result >> 8));
-        output.push_back((uint8_t)result);
+        bw.write_be16(result);
     }
 
     input += len;
     return output;
 }
 
-static uint32_t checksum(std::vector<uint8_t>::const_iterator input, size_t len)
+static uint32_t checksum(const Bytes& bytes)
 {
+    ByteReader br(bytes);
     uint32_t checksum = 0;
 
-    assert((len & 3) == 0);
-    while (len != 0)
-    {
-        checksum ^= read_be32(input);
-        input += 4;
-        len -= 4;
-    }
+    assert((bytes.size() & 3) == 0);
+    while (!br.eof())
+        checksum ^= br.read_be32();
 
     return checksum & 0x55555555;
 }
@@ -76,21 +72,21 @@ SectorVector AmigaDecoder::decodeToSectors(const RawRecordVector& rawRecords, un
         if (bytes.size() < 544)
             continue;
 
-        auto ptr = bytes.begin() + 4;
+        const uint8_t* ptr = bytes.begin() + 4;
 
-        std::vector<uint8_t> header = deinterleave(ptr, 4);
-        std::vector<uint8_t> recoveryinfo = deinterleave(ptr, 16);
+        Bytes header = deinterleave(ptr, 4);
+        Bytes recoveryinfo = deinterleave(ptr, 16);
 
-        uint32_t wantedheaderchecksum = read_be32(deinterleave(ptr, 4));
-        uint32_t gotheaderchecksum = checksum(rawbytes.begin() + 8, 40);
+        uint32_t wantedheaderchecksum = deinterleave(ptr, 4).reader().read_be32();
+        uint32_t gotheaderchecksum = checksum(rawbytes.slice(8, 40));
         if (gotheaderchecksum != wantedheaderchecksum)
             continue;
 
-        uint32_t wanteddatachecksum = read_be32(deinterleave(ptr, 4));
-        uint32_t gotdatachecksum = checksum(rawbytes.begin() + 64, 1024);
+        uint32_t wanteddatachecksum = deinterleave(ptr, 4).reader().read_be32();
+        uint32_t gotdatachecksum = checksum(rawbytes.slice(64, 1024));
         int status = (gotdatachecksum == wanteddatachecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
 
-        std::vector<uint8_t> databytes = deinterleave(ptr, 512);
+        Bytes databytes = deinterleave(ptr, 512);
         unsigned track = header[1] >> 1;
         unsigned side = header[1] & 1;
         auto sector = std::unique_ptr<Sector>(

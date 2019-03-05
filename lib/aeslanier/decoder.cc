@@ -10,11 +10,13 @@
 
 /* This is actually M2FM, rather than MFM, but it our MFM/FM decoder copes fine with it. */
 
-static std::vector<uint8_t> reverse_bits(const std::vector<uint8_t>& input)
+static Bytes reverse_bits(const Bytes& input)
 {
-    std::vector<uint8_t> output;
+    Bytes output;
+    ByteWriter bw(output);
+
     for (uint8_t b : input)
-        output.push_back(reverse_bits(b));
+        bw.write_8(reverse_bits(b));
     return output;
 }
 
@@ -53,14 +55,13 @@ SectorVector AesLanierDecoder::decodeToSectors(const RawRecordVector& rawRecords
         /* Check data checksum, which also includes the header and is
          * significantly better. */
 
-        uint16_t wanted = read_le16(&reversed[0x101]);
-        uint16_t got = crc16ref(MODBUS_POLY_REF,
-            &reversed[1], &reversed[1+AESLANIER_SECTOR_LENGTH]);
+        Bytes payload = reversed.slice(1, AESLANIER_SECTOR_LENGTH);
+        uint16_t wanted = reversed.reader().seek(0x101).read_le16();
+        uint16_t got = crc16ref(MODBUS_POLY_REF, payload);
         int status = (wanted == got) ? Sector::OK : Sector::BAD_CHECKSUM;
 
-        const std::vector<uint8_t> data(&reversed[1], &reversed[1+AESLANIER_SECTOR_LENGTH]);
         auto sector = std::unique_ptr<Sector>(
-            new Sector(status, track, 0, sectorid, data));
+            new Sector(status, track, 0, sectorid, payload));
         sectors.push_back(std::move(sector));
 	}
 

@@ -30,7 +30,6 @@ void readSectorsFromFile(SectorSet& sectors, const Geometry& geometry,
 					geometry.tracks * trackSize / 1024)
 			  << std::endl;
 
-	std::vector<uint8_t> data(geometry.sectorSize);
 	for (int track = 0; track < geometry.tracks; track++)
 	{
 		for (int head = 0; head < geometry.heads; head++)
@@ -38,7 +37,9 @@ void readSectorsFromFile(SectorSet& sectors, const Geometry& geometry,
 			for (int sectorId = 0; sectorId < geometry.sectors; sectorId++)
 			{
 				inputFile.seekg(track*trackSize + head*headSize + sectorId*geometry.sectorSize, std::ios::beg);
-				inputFile.read((char*) &data[0], geometry.sectorSize);
+
+				Bytes data(geometry.sectorSize);
+				inputFile.read((char*) data.begin(), geometry.sectorSize);
 
 				sectors.get(track, head, sectorId).reset(
 					new Sector(Sector::OK, track, head, sectorId, data));

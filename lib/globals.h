@@ -13,9 +13,10 @@
 #include <cassert>
 
 typedef int nanoseconds_t;
+class Bytes;
 
 extern double getCurrentTime();
-extern void hexdump(std::ostream& stream, const std::vector<uint8_t>& buffer);
+extern void hexdump(std::ostream& stream, const Bytes& bytes);
 
 class Error
 {
