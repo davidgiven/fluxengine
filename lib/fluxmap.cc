@@ -9,9 +9,11 @@ uint32_t Fluxmap::getAndIncrement(size_t& index) const
     while (index < _bytes.size())
     {
         uint8_t b = _bytes[index++];
-        ticks += b;
-        if (!(b & 0x80))
+        if (b < 0x80)
+            ticks += b;
+        if (b == 0x80)
             break;
+        /* everything above 0x80 is ignored for now */
     }
 
     return ticks;
@@ -30,7 +32,8 @@ Fluxmap& Fluxmap::appendBytes(const uint8_t* ptr, size_t len)
     while (len--)
     {
         uint8_t byte = *ptr++;
-        _ticks += byte;
+        if (byte < 0x80)
+            _ticks += byte;
         bw.write_8(byte);
     }
 
@@ -40,12 +43,19 @@ Fluxmap& Fluxmap::appendBytes(const uint8_t* ptr, size_t len)
 
 Fluxmap& Fluxmap::appendInterval(uint32_t ticks)
 {
-    while (ticks >= 0x80)
+    while (ticks >= 0x7f)
     {
-        appendByte(0x80);
-        ticks -= 0x80;
+        appendByte(0x7f);
+        ticks -= 0x7f;
     }
     appendByte((uint8_t)ticks);
+    appendByte(0x80);
+    return *this;
+}
+
+Fluxmap& Fluxmap::appendIndex()
+{
+    appendByte(0x81);
     return *this;
 }
 

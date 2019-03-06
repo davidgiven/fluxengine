@@ -9,8 +9,9 @@ enum
 {
     FLUX_VERSION_0, /* without properties table */
     FLUX_VERSION_1,
+    FLUX_VERSION_2, /* new bytecode with index marks */
 
-    FLUX_VERSION_CURRENT = 1,
+    FLUX_VERSION_CURRENT = 2,
 };
 
 extern void sqlCheck(sqlite3* db, int i);
@@ -22,6 +23,7 @@ extern int sqlGetVersion(sqlite3* db);
 extern void sqlPrepareFlux(sqlite3* db);
 extern void sqlWriteFlux(sqlite3* db, int track, int side, const Fluxmap& fluxmap);
 extern std::unique_ptr<Fluxmap> sqlReadFlux(sqlite3* db, int track, int side);
+extern std::vector<std::pair<unsigned, unsigned>> sqlFindFlux(sqlite3* db);
 
 extern void sqlWriteStringProperty(sqlite3* db, const std::string& name, const std::string& value);
 extern std::string sqlReadStringProperty(sqlite3* db, const std::string& name);
