@@ -87,6 +87,7 @@ void sql_bind_string(sqlite3* db, sqlite3_stmt* stmt, const char* name, const ch
 void sqlPrepareFlux(sqlite3* db)
 {
     sqlStmt(db, "PRAGMA synchronous = OFF;");
+    sqlStmt(db, "PRAGMA auto_vacuum = FULL;");
     sqlStmt(db, "BEGIN;");
     sqlStmt(db, "CREATE TABLE IF NOT EXISTS properties ("
                  "  key TEXT UNIQUE NOT NULL PRIMARY KEY,"
@@ -160,6 +161,32 @@ std::unique_ptr<Fluxmap> sqlReadFlux(sqlite3* db, int track, int side)
     }
     sqlCheck(db, sqlite3_finalize(stmt));
     return fluxmap;
+}
+
+std::vector<std::pair<unsigned, unsigned>> sqlFindFlux(sqlite3* db)
+{
+    std::vector<std::pair<unsigned, unsigned>> output;
+
+    sqlite3_stmt* stmt;
+    sqlCheck(db, sqlite3_prepare_v2(db,
+        "SELECT track, side FROM zdata",
+        -1, &stmt, NULL));
+
+    for (;;)
+    {
+        int i = sqlite3_step(stmt);
+        if (i == SQLITE_DONE)
+            break;
+        if (i != SQLITE_ROW)
+            Error() << "failed to read from database: " << sqlite3_errmsg(db);
+
+        unsigned track = sqlite3_column_int(stmt, 0);
+        unsigned side = sqlite3_column_int(stmt, 1);
+        output.push_back(std::make_pair(track, side));
+    }
+    sqlCheck(db, sqlite3_finalize(stmt));
+
+    return output;
 }
 
 void sqlWriteStringProperty(sqlite3* db, const std::string& name, const std::string& value)
