@@ -88,9 +88,12 @@ static void read_track()
 
     Fluxmap fluxmap;
     uint32_t pending = 0;
+    bool oldindex = true;
     for (unsigned cursor = 0; cursor < length; cursor++)
     {
-        uint32_t b = inputdata[cursor] & 0x7f;
+        uint32_t b = inputdata[cursor];
+        bool index = !!(b & 0x80);
+        b &= 0x7f;
         if (b == 0x7f)
         {
             pending += 0x7f;
@@ -101,6 +104,10 @@ static void read_track()
 
         double interval_us = b * (1e6/clockRate);
         fluxmap.appendInterval(interval_us / US_PER_TICK);
+
+        if (index && !oldindex)
+            fluxmap.appendIndex();
+        oldindex = index;
     }
 
     std::cout << fmt::format(" {} ms in {} output bytes\n",
