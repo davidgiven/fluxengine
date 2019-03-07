@@ -10,7 +10,7 @@ PC drive to accept Amiga disks, CLV Macintosh disks, bizarre 128-sector CP/M
 disks, and other weird and bizarre formats. (Although not all of these are
 supported yet. I could really use samples.)
 
-<img src="floppy.jpg" style="width:50%" alt="a FluxEngine attached to a floppy drive">
+<img src="doc/floppy.jpg" style="width:50%" alt="a FluxEngine attached to a floppy drive">
 
 **Important note.** On 2019-02-09 I did a hardware redesign and moved the pins on
 the board. Sorry for the inconvenience, but it means you don't have to modify
