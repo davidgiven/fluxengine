@@ -37,9 +37,9 @@ This is the physical stuff you'll need.
   - Basic soldering ability.
 
   - (Optional) Some kind of box to put it in. I found an old twin 5.25"
-    Hewlett Packard drive enclosure and ripped all the SCSI guts out; this
-    both provides a good, solid box to house both my 3.5" and 5.25" drives
-    in, but provides an ideal power supply too. Bonus!
+	Hewlett Packard drive enclosure and ripped all the SCSI guts out; this not
+	only provides a good, solid box to house both my 3.5" and 5.25" drives in,
+	but also contains an ideal power supply too. Bonus!
 
 
 ## Assembly instructions
@@ -58,8 +58,7 @@ soldering iron tip.
 Line it up like this.
 
 <div style="text-align: center">
-<img src="closeup1.jpg" style="width:80%" alt="closeup of the board with
-connector attached">
+<a href="closeup1.jpg"><img src="closeup1.jpg" style="width:80%" alt="closeup of the board with connector attached"></a>
 </div>
 
 Note the following:
@@ -83,8 +82,7 @@ need to use a pair of needle-nosed pliers to pull pin 5 out of the connector.
 Line it up like this.
 
 <div style="text-align: center">
-<img src="closeup2.jpg" style="width:80%" alt="closeup of the board with
-connector attached">
+<a href="closeup2.jpg"><img src="closeup2.jpg" style="width:80%" alt="closeup of the board with connector attached"></a>
 </div>
 
 You're now looking at the _top_ of the board.
