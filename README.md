@@ -159,7 +159,7 @@ Given and is licensed under the MIT open source license. Please see
 with it provided you don't claim you wrote it.
 
 As an exception, `dep/fmt` contains a copy of [fmt](http://fmtlib.net),
-maintained by Victor Zverovich (`vitaut <https://github.com/vitaut>`_) and
-Jonathan Müller (`foonathan <https://github.com/foonathan>`_) with
+maintained by Victor Zverovich (`vitaut <https://github.com/vitaut>`) and
+Jonathan Müller (`foonathan <https://github.com/foonathan>`) with
 contributions from many other people. It is licensed under the terms of the
 BSD license. Please see the contents of the directory for the full text.
