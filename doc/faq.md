@@ -38,14 +38,57 @@ have either the adapter, the drive, or any 8" disks. If anyone wants to give
 it a try, please [tell me about
 it](https://github.com/davidgiven/fluxengine/issues/new).
 
-**Q.** Is this like KryoFlux / Catweasel / DiskFerret? Do you support KryoFlux stream files?
+**Q.** Does it work on hard sectored disks?
+
+**A.** Probably? I already have decoder support for some hard-sectored disk
+formats, based on Kryoflux streams people sent me, and the firmware supports
+reporting index hole information, so in theory it _should_ work; but I
+haven't had the chance to try it end-for-end. I really need a hard-sectored
+5.25" floppy to test with.
+
+**Q.** Does it work with flippy disks?
+
+Uhhh... probably not.
+
+So the problem with flippy disks (5.25" single-sided disks which could be
+inserted upside down to read the second side) is the index hole. Trouble is,
+the window to let the sensor see the index hole isn't symmetrical on a 5.25"
+disk, so if you turn the disk upside down, the drive can't see the hole any
+more:
+
+<div style="text-align: center">
+<a href="https://commons.wikimedia.org/wiki/Category:5¼-inch_floppy_disks#/media/File:Atari_Master_Diskette_3_DOS_3_Floppy_Disk.jpg"><img src="525-floppy.jpg" style="min-width:80%" alt="non-flippy 5.25 inch disk"></a>
+</div>
+
+Some flippy disks had two windows, so they'd work properly either way up, but
+most didn't. This was fine on a lot of old machines because those drives
+didn't have an index hole sensor. But a lot of modern drives use the index
+hole to detect whether the disk is actually present and if they don't see it,
+they simply won't work. There's nothing FluxEngine can do; it's a hardware
+limitation.
+
+(If you have one of the rare disks with two index holes, then FluxEngine
+_will_ read those.)
+
+There are workarounds. One is to read the data on the other side of the disk
+using the other head --- because, of course, modern drives are double-sided.
+Sure, the disk is spinning in the wrong direction, but that's no problem.
+Except there _is_ a problem, which is the tracks on the two sides of the disk
+are not in the same place; one side has them offset eight tracks compared to
+the other. But a flippy disk has both sets of tracks in the same place,
+because they're both accessed using the side 0 head...
+
+The only real way round this is to modify a 5.25" drive. That's _seriously_
+not in FluxEngine's remit. Sorry.
+
+**Q.** Is this like KryoFlux / Catweasel / DiskFerret? Do you support KryoFlux
+stream files?
 
 **A.** It's very like all of these; the idea's old, and lots of people have
-*tried it (you can get away with any sufficiently fast microcontroller and
-*enough RAM). FluxEngine can
-read from KryoFlux stream files natively, and there's a tool which will let
-you convert at least one kind of Catweasel file to FluxEngine's native flux
-file format.
+tried it (you can get away with any sufficiently fast microcontroller and
+enough RAM). FluxEngine can read from KryoFlux stream files natively, and
+there's a tool which will let you convert at least one kind of Catweasel file
+to FluxEngine's native flux file format.
 
 **Q.** Can I use this to make exact copies of disks?
 
