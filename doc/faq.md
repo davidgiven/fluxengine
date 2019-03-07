@@ -57,7 +57,7 @@ disk, so if you turn the disk upside down, the drive can't see the hole any
 more:
 
 <div style="text-align: center">
-<a href="https://commons.wikimedia.org/wiki/Category:5¼-inch_floppy_disks#/media/File:Atari_Master_Diskette_3_DOS_3_Floppy_Disk.jpg"><img src="525-floppy.jpg" style="min-width:80%" alt="non-flippy 5.25 inch disk"></a>
+<a href="https://commons.wikimedia.org/wiki/Category:5¼-inch_floppy_disks#/media/File:Atari_Master_Diskette_3_DOS_3_Floppy_Disk.jpg"><img src="525-floppy.webp" alt="non-flippy 5.25 inch disk"></a>
 </div>
 
 Some flippy disks had two windows, so they'd work properly either way up, but
