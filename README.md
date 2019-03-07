@@ -55,8 +55,8 @@ following friendly articles:
     the sector map ∾ clock detection and the histogram ∾ tuning the clock ∾
     manual adjustment
 
-Supported disk formats
-----------------------
+Which?
+------
 
 The current support state is as follows.
 
@@ -112,6 +112,36 @@ It's not out of principle. It's just they'll drive me insane. FluxEngine will
 most likely be able to read the data fine, unless they're doing bizarre
 things like spiral tracks or partially encoded data, but let's stick with
 normal conventionally formatted disks for the time being!
+
+But!
+----
+
+That said, I need to post a warning.
+
+<div style="text-align: center; color: red">
+<b>********** BIG DISCLAIMERY WARNING WITH ASTERISKS **********</b>
+</div>
+
+Floppy disks are old, unreliable, and frequently damaged and/or filthy. I
+expect you to know what you're doing and be responsible for your own actions.
+It's entirely possible for a damaged disk, when read, to scrape the magnetic
+coating off the disk and pack it into the drive's disk head, not only
+permanently damaging the drive, but also irrecoverably destroying any data on
+the disk.
+
+If this happens and you complain to me, I will be sympathetic but
+fundamentally unhelpful. Proceed at your own risk.
+
+Remember: **FluxEngine is not a substitute for a real data recovery
+service.** Is your data worth money to you? If so, don't try to read it using
+an open source project hacked together by some person you've never met on the
+internet.
+
+Also, remember to clean your disk heads.
+
+<div style="text-align: center; color: red">
+<b>********** END OF WARNING **********</b>
+</div>
 
 Who?
 ----
