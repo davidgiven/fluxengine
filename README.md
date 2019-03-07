@@ -16,6 +16,7 @@ supported yet. I could really use samples.)
 The hardware consists of a single, commodity part with a floppy drive
 connector soldered onto it. No ordering custom boards, no fiddly surface
 mount assembly, and no fuss: nineteen simpler solder joints and you're done.
+You can make one for $15 (plus shipping).
 
 Don't believe me? Watch the demo reel!
 
