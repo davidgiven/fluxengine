@@ -9,7 +9,7 @@ worked](https://github.com/davidgiven/fluxengine/issues/new).
 
 The GCR disks are much more interesting. They could store 170kB on a
 single-sided disk (although later drives were double-sided), using a proprietary
-encoding and record scheme; like [Apple Macintosh disks](macintosh.html) they
+encoding and record scheme; like [Apple Macintosh disks](macintosh.md) they
 stored varying numbers of sectors per track to make the most of the physical
 disk area, although unlike them they did it by changing the bitrate rather than
 adjusting the motor speed.
