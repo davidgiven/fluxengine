@@ -96,10 +96,11 @@ well. (The same applies to writing flux back onto the disk.)
 The development board I'm using, the
 [CY8CKIT-059](https://www.cypress.com/documentation/development-kitsboards/cy8ckit-059-psoc-5lp-prototyping-kit-onboard-programmer-and),
 also has another big advantage: it's the right shape. It's got 17 holes in a
-row connected to GPIO pins which means I can just connect a floppy drive
-connector directly to the board without needing to build any hardware. No
-adapter board, no special cable, nothing. This makes the FluxEngine hardware
-incredibly easy to assemble, which therefore means cheap.
+row connected to GPIO pins, and it's a native 5V part, which means I can just
+connect a floppy drive connector directly to the board without needing to
+build any hardware. No adapter board, no level shifting, no special cable,
+nothing. This makes the FluxEngine hardware incredibly easy to assemble,
+which therefore means cheap.
 
 Speaking of which, the CY8CKIT-059 is $10. (Before shipping, which is
 admittedly expensive.)
