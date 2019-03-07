@@ -264,7 +264,7 @@ public:
     void flush();
 
 private:
-    uint8_t _fifo;
+    uint8_t _fifo = 0;
     size_t _bitcount = 0;
     ByteWriter& _bw;
 };

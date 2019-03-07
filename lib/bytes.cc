@@ -165,7 +165,7 @@ Bytes toBytes(
 
 Bytes Bytes::compress() const
 {
-    size_t destsize = compressBound(size());
+    uLongf destsize = compressBound(size());
     Bytes dest(destsize);
     if (::compress(dest.begin(), &destsize, cbegin(), size()) != Z_OK)
         Error() << "error compressing data";
