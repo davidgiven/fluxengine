@@ -9,7 +9,7 @@
 class Sector;
 class Fluxmap;
 
-class Victor9kDecoder : public AbstractDecoder
+class Victor9kDecoder : public AbstractSoftSectorDecoder
 {
 public:
     virtual ~Victor9kDecoder() {}

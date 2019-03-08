@@ -61,7 +61,6 @@ fluxreaderinc = include_directories('lib/fluxreader')
 decoderlib = shared_library('decoderlib',
     [
         'lib/decoders/decoders.cc',
-        'lib/decoders/segmenter.cc',
 		'lib/decoders/fmmfm.cc',
     ],
     include_directories: [feinc, fmtinc],

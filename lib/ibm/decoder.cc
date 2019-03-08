@@ -4,6 +4,7 @@
 #include "crc.h"
 #include "fluxmap.h"
 #include "sector.h"
+#include "record.h"
 #include <string.h>
 
 static_assert(std::is_trivially_copyable<IbmIdam>::value,

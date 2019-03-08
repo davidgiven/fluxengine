@@ -6,7 +6,7 @@
 class Sector;
 class Fluxmap;
 
-class AmigaDecoder : public AbstractDecoder
+class AmigaDecoder : public AbstractSoftSectorDecoder
 {
 public:
     virtual ~AmigaDecoder() {}

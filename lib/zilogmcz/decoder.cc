@@ -44,5 +44,5 @@ int ZilogMczDecoder::recordMatcher(uint64_t fifo) const
 
 RawRecordVector ZilogMczDecoder::extractRecords(std::vector<bool> bits) const
 {
-    return AbstractDecoder::extractRecords(reverseBits(bits));
+    return AbstractSoftSectorDecoder::extractRecords(reverseBits(bits));
 }
