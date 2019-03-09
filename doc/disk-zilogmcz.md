@@ -39,7 +39,8 @@ if you want the double-sided variety, use `-s :s=0-1`.
 Useful references
 -----------------
 
-  * http://www.retrotechnology.com/restore/zilog.html
+  * [About the Zilog MCZ](http://www.retrotechnology.com/restore/zilog.html),
+    containing lots of useful links
 
-  * https://amaus.org/static/S100/zilog/ZDS/Zilog%20ZDS%201-25%20Hardware%20Users%20Manual.pdf
+  * [The hardware user's manual](https://amaus.org/static/S100/zilog/ZDS/Zilog%20ZDS%201-25%20Hardware%20Users%20Manual.pdf)
   
