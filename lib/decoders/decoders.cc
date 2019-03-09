@@ -6,6 +6,7 @@
 #include "protocol.h"
 #include "rawbits.h"
 #include "fmt/format.h"
+#include <numeric>
 
 static DoubleFlag clockDecodeThreshold(
     { "--clock-decode-threshold" },
@@ -241,25 +242,56 @@ RawRecordVector AbstractSoftSectorDecoder::extractRecords(const RawBits& rawbits
 
 RawRecordVector AbstractHardSectorDecoder::extractRecords(const RawBits& rawbits) const
 {
+    /* This is less easy than it looks.
+     *
+     * Hard-sectored disks contain one extra index hole, marking the top of the
+     * disk. This appears halfway in between two start-of-sector index holes. We
+     * need to find this and ignore it, otherwise we'll split that sector in two
+     * (and it won't work).
+     * 
+     * The routine here is pretty simple and requires this extra hole to have
+     * valid index holes either side of it --- it can't cope with the extra
+     * index hole being the first or last seen. Always give it slightly more
+     * than one revolution of data.
+     */
+
     RawRecordVector records;
-    int matchStart = 0;
-
-    auto pushRecord = [&](size_t end)
+    const auto& indices = rawbits.indices();
+    if (!indices.empty())
     {
-        records.push_back(
-            std::unique_ptr<RawRecord>(
-                new RawRecord(
-                    matchStart,
-                    rawbits.begin() + matchStart,
-                    rawbits.begin() + end)
-            )
-        );
-        matchStart = end;
-    };
+        unsigned total = 0;
+        unsigned previous = 0;
+        for (unsigned index : indices)
+        {
+            total += index - previous;
+            previous = index;
+        }
+        total += rawbits.size() - previous;
 
-    for (size_t index : rawbits.indices())
-        pushRecord(index);
-    pushRecord(rawbits.size());
+        unsigned sectors_must_be_bigger_than = (total / indices.size()) * 2/3;
+
+
+        previous = 0;
+        auto pushRecord = [&](size_t end)
+        {
+            if ((end - previous) < sectors_must_be_bigger_than)
+                return;
+
+            records.push_back(
+                std::unique_ptr<RawRecord>(
+                    new RawRecord(
+                        previous,
+                        rawbits.begin() + previous,
+                        rawbits.begin() + end)
+                )
+            );
+            previous = end;
+        };
+
+        for (unsigned index : indices)
+            pushRecord(index);
+        pushRecord(rawbits.size());
+    }
 
     return records;
 }
