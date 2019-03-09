@@ -33,8 +33,7 @@ Just do:
 .obj/fe-readzilogmcz
 ```
 
-You should end up with an `victor9k.img` which is 774656 bytes long.
-if you want the double-sided variety, use `-s :s=0-1`.
+You should end up with an `zilogmcz.img` which is 315392 bytes long.
 
 Useful references
 -----------------
