@@ -61,12 +61,20 @@ Which?
 
 The current support state is as follows.
 
+Dinosaurs (🦖) have yet to be observed in real life --- I've written the
+decoder based on Kryoflux (or other) dumps I've found. I don't (yet) have
+real, physical disks in my hand to test the capture process.
+
+Unicorns (🦄) are completely real --- this means that I've read actual,
+physical disks with these formats and so know they work.
+
+### Old disk formats
+
 | Format                                   | Read? | Write? | Notes |
 |:-----------------------------------------|:-----:|:------:|-------|
 | IBM PC compatible                        |  🦄   |        | and compatibles (like the Atari ST) |
 | [Acorn ADFS](doc/disk-acornadfs.md)      |  🦄   |        | single- and double- sided           |
 | [Acorn DFS](doc/disk-acorndfs.md)        |  🦄   |        |                                     |
-| [AES Superplus / No Problem](doc/disk-aeslanier.md) |  🦖   | | hard sectors! and _very_ experimental |
 | [Ampro Little Board](doc/disk-ampro.md)  |  🦖   |        |                                     |
 | [Apple II DOS 3.3](doc/disk-apple2.md)   |  🦖   |        | doesn't do logical sector remapping |
 | [Amiga](doc/disk-amiga.md)               |  🦄   |        |                                     |
@@ -75,17 +83,23 @@ The current support state is as follows.
 | [Brother 240kB](doc/disk-brother.md)     |  🦄   |   🦄   |                                     |
 | [Macintosh 800kB](doc/disk-macintosh.md) |  🦖   |        | and probably the 400kB too          |
 | [TRS-80](doc/disk-trs80.md)              |  🦖   |        | a minor variation of the IBM scheme |
-| [Victor 9000](doc/disk-victor9k.md)      |  🦖   |        | experimental, probably buggy        |
 {: .datatable }
 
-Dinosaurs (🦖) have yet to be observed in real life --- I've written the
-decoder based on Kryoflux (or other) dumps I've found. I don't (yet) have
-real, physical disks in my hand to test the capture process.
+### Even older disk formats
 
-Unicorns (🦄) are completely real --- this means that I've read actual,
-physical disks with these formats and so know they work.
+These formats are for particularly old, weird architectures, even by the
+standards of floppy disks. They've largely been implemented from single flux
+files with no access to physical hardware. Typically the reads were pretty
+bad and I've had to make a number of guesses as to how things work. They do,
+at least, check the CRC so what data's there is probably good.
 
-Notes:
+| Format                                   | Read? | Write? | Notes |
+|:-----------------------------------------|:-----:|:------:|-------|
+| [AES Superplus / No Problem](doc/disk-aeslanier.md) |  🦖   | | hard sectors! |
+| [Victor 9000](doc/disk-victor9k.md)      |  🦖   |        | 8-inch        |
+| [Zilog MCZ](doc/disk-zilogmcz.md)        |  🦖   |        | 8-inch _and_ hard sectors |
+{: .datatable }
+### Notes
 
   - IBM PC disks are the lowest-common-denominator standard. A number of other
     systems use this format in disguise (the Atari ST, late-era Apple
@@ -105,8 +119,8 @@ Notes:
     is hard.
 
 If you have samples of weird disks, and want to send them to me --- either
-FluxEngine or Kryoflux dumps, or (even better) actually physically --- I can
-identify them and add support.
+FluxEngine, Kryoflux or Catweasel dumps, or (even better) actually physically
+--- I can identify them and add support.
 
 Please note that at this point I am *not interested in copy protected disks*.
 It's not out of principle. It's just they'll drive me insane. FluxEngine will

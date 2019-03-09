@@ -241,3 +241,8 @@ void BitWriter::flush()
     }
 }
 
+std::vector<bool> reverseBits(const std::vector<bool>& bits)
+{
+    std::vector<bool> output(bits.rbegin(), bits.rend());
+    return output;
+}

@@ -5,6 +5,7 @@
 #include "decoders.h"
 #include "image.h"
 #include "protocol.h"
+#include "rawbits.h"
 #include <fmt/format.h>
 
 static DoubleFlag clockScaleFlag(
@@ -51,7 +52,7 @@ int main(int argc, const char* argv[])
 	clockPeriod *= clockScaleFlag;
 	std::cout << fmt::format("{:.2f} us bit clock; ", (double)clockPeriod/1000.0) << std::flush;
 
-	auto bitmap = fluxmap->decodeToBits(clockPeriod);
+	const auto& bitmap = fluxmap->decodeToBits(clockPeriod);
 	std::cout << fmt::format("{} bytes encoded.", bitmap.size()/8) << std::endl;
 
 	if (dumpFluxFlag)
@@ -69,9 +70,14 @@ int main(int argc, const char* argv[])
 		size_t cursor = 0;
 		nanoseconds_t seekto = seekFlag*1000000.0;
 		int ticks = 0;
-		while (cursor < fluxmap->bytes())
+		FluxmapReader fr(*fluxmap);
+		for (;;)
 		{
-			ticks += fluxmap->getAndIncrement(cursor);
+			unsigned interval;
+			int opcode = fr.readPulse(interval);
+			if (opcode == -1)
+				break;
+			ticks += interval;
 			
 			now = ticks * NS_PER_TICK;
 			if (now >= seekto)
@@ -80,9 +86,14 @@ int main(int argc, const char* argv[])
 
 		std::cout << fmt::format("{: 10.3f}:-", ticks*US_PER_TICK);
 		nanoseconds_t lasttransition = 0;
-		while (cursor < fluxmap->bytes())
+		fr.rewind();
+		for (;;)
 		{
-			ticks += fluxmap->getAndIncrement(cursor);
+			unsigned interval;
+			int opcode = fr.readPulse(interval);
+			if (opcode == -1)
+				break;
+			ticks += interval;
 
 			nanoseconds_t transition = ticks*NS_PER_TICK;
 			nanoseconds_t next;

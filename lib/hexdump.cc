@@ -31,3 +31,11 @@ void hexdump(std::ostream& stream, const Bytes& buffer)
 	}
 }
 
+void hexdumpForSrp16(std::ostream& stream, const Bytes& buffer)
+{
+	for (uint8_t byte : buffer)
+		stream << fmt::format("{:02x}", byte);
+	stream << std::endl;
+}
+
+

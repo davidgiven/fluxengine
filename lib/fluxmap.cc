@@ -2,23 +2,6 @@
 #include "fluxmap.h"
 #include "protocol.h"
 
-uint32_t Fluxmap::getAndIncrement(size_t& index) const
-{
-    uint32_t ticks = 0;
-
-    while (index < _bytes.size())
-    {
-        uint8_t b = _bytes[index++];
-        if (b < 0x80)
-            ticks += b;
-        if (b == 0x80)
-            break;
-        /* everything above 0x80 is ignored for now */
-    }
-
-    return ticks;
-}
-
 Fluxmap& Fluxmap::appendBytes(const Bytes& bytes)
 {
     return appendBytes(&bytes[0], bytes.size());
@@ -87,5 +70,35 @@ void Fluxmap::precompensate(int threshold_ticks, int amount_ticks)
                     curr -= amount_ticks;
             }
         }
+    }
+}
+
+int FluxmapReader::read(unsigned& ticks)
+{
+    ticks = 0;
+
+    while (_cursor < _size)
+    {
+        uint8_t b = _bytes[_cursor++];
+        if (b < 0x80)
+            ticks += b;
+        else
+            return b;
+    }
+
+    return -1;
+}
+
+int FluxmapReader::readPulse(unsigned& ticks)
+{
+    ticks = 0;
+
+    for (;;)
+    {
+        unsigned thisTicks;
+        int opcode = read(thisTicks);
+        ticks += thisTicks;
+        if ((opcode == -1) || (opcode == 0x80))
+            return opcode;
     }
 }

@@ -22,11 +22,10 @@ uint8_t xorBytes(const Bytes& bytes)
 	return i;
 }
 
-uint16_t crc16(uint16_t poly, const Bytes& bytes)
+uint16_t crc16(uint16_t poly, uint16_t crc, const Bytes& bytes)
 {
 	ByteReader br(bytes);
 
-	uint16_t crc = 0xffff;
 	while (!br.eof())
 	{
 		crc ^= br.read_8() << 8;

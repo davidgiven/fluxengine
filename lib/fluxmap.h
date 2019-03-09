@@ -3,11 +3,11 @@
 
 #include "bytes.h"
 
+class RawBits;
+
 class Fluxmap
 {
 public:
-    uint32_t getAndIncrement(size_t& index) const;
-
     nanoseconds_t duration() const { return _duration; }
     size_t bytes() const { return _bytes.size(); }
     const Bytes& rawBytes() const { return _bytes; }
@@ -31,7 +31,7 @@ public:
     }
 
     nanoseconds_t guessClock() const;
-	std::vector<bool> decodeToBits(nanoseconds_t clock_period) const;
+	const RawBits decodeToBits(nanoseconds_t clock_period) const;
 
 	Fluxmap& appendBits(const std::vector<bool>& bits, nanoseconds_t clock);
 
@@ -41,6 +41,35 @@ private:
     nanoseconds_t _duration = 0;
     int _ticks = 0;
     Bytes _bytes;
+};
+
+class FluxmapReader
+{
+public:
+    FluxmapReader(const Fluxmap& fluxmap):
+        _fluxmap(fluxmap),
+        _bytes(fluxmap.ptr()),
+        _size(fluxmap.bytes())
+    {
+        rewind();
+    }
+
+    FluxmapReader(const Fluxmap&& fluxmap) = delete;
+
+    void rewind()
+    { _cursor = 0; }
+
+    size_t tell() const
+    { return _cursor; }
+
+    int read(unsigned& ticks);
+    int readPulse(unsigned& ticks);
+
+private:
+    const Fluxmap& _fluxmap;
+    const uint8_t* _bytes;
+    const size_t _size;
+    size_t _cursor;
 };
 
 #endif

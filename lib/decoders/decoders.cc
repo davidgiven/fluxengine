@@ -2,8 +2,11 @@
 #include "flags.h"
 #include "fluxmap.h"
 #include "decoders.h"
+#include "record.h"
 #include "protocol.h"
+#include "rawbits.h"
 #include "fmt/format.h"
+#include <numeric>
 
 static DoubleFlag clockDecodeThreshold(
     { "--clock-decode-threshold" },
@@ -43,9 +46,13 @@ nanoseconds_t Fluxmap::guessClock() const
 
     uint32_t buckets[256] = {};
     size_t cursor = 0;
+    FluxmapReader fr(*this);
     while (cursor < bytes())
     {
-        uint32_t interval = getAndIncrement(cursor);
+        unsigned interval;
+        int opcode = fr.readPulse(interval);
+        if (opcode != 0x80)
+            break;
         if (interval > 0xff)
             continue;
         buckets[interval]++;
@@ -151,39 +158,142 @@ nanoseconds_t Fluxmap::guessClock() const
 }
 
 /* Decodes a fluxmap into a nice aligned array of bits. */
-std::vector<bool> Fluxmap::decodeToBits(nanoseconds_t clockPeriod) const
+const RawBits Fluxmap::decodeToBits(nanoseconds_t clockPeriod) const
 {
     int pulses = duration() / clockPeriod;
     nanoseconds_t lowerThreshold = clockPeriod * clockDecodeThreshold;
 
-    std::vector<bool> bitmap(pulses);
+    auto bitmap = std::make_unique<std::vector<bool>>(pulses);
+    auto indices = std::make_unique<std::vector<size_t>>();
+
     unsigned count = 0;
-    size_t cursor = 0;
     nanoseconds_t timestamp = 0;
+    FluxmapReader fr(*this);
     for (;;)
     {
-        while (timestamp < lowerThreshold)
+        for (;;)
         {
-            if (cursor >= bytes())
-                goto abort;
-            uint8_t interval = getAndIncrement(cursor);
+            unsigned interval;
+            int opcode = fr.read(interval);
             timestamp += interval * NS_PER_TICK;
+            if (opcode == -1)
+                goto abort;
+            else if ((opcode == 0x80) && (timestamp >= lowerThreshold))
+                break;
+            else if (opcode == 0x81)
+                indices->push_back(count);
         }
 
         int clocks = (timestamp + clockPeriod/2) / clockPeriod;
         count += clocks;
-        if (count >= bitmap.size())
+        if (count >= bitmap->size())
             goto abort;
-        bitmap[count] = true;
+        bitmap->at(count) = true;
         timestamp = 0;
     }
 abort:
 
-    return bitmap;
+    RawBits rawbits(std::move(bitmap), std::move(indices));
+    return rawbits;
 }
 
 nanoseconds_t AbstractDecoder::guessClock(Fluxmap& fluxmap) const
 {
     return fluxmap.guessClock();
 }
+
+RawRecordVector AbstractSoftSectorDecoder::extractRecords(const RawBits& rawbits) const
+{
+    RawRecordVector records;
+    uint64_t fifo = 0;
+    size_t cursor = 0;
+    int matchStart = -1;
+
+    auto pushRecord = [&](size_t end)
+    {
+        if (matchStart == -1)
+            return;
+
+        records.push_back(
+            std::unique_ptr<RawRecord>(
+                new RawRecord(
+                    matchStart,
+                    rawbits.begin() + matchStart,
+                    rawbits.begin() + end)
+            )
+        );
+    };
+
+    while (cursor < rawbits.size())
+    {
+        fifo = (fifo << 1) | rawbits[cursor++];
+        
+        int match = recordMatcher(fifo);
+        if (match > 0)
+        {
+            pushRecord(cursor - match);
+            matchStart = cursor - match;
+        }
+    }
+    pushRecord(cursor);
+    
+    return records;
+}
+
+RawRecordVector AbstractHardSectorDecoder::extractRecords(const RawBits& rawbits) const
+{
+    /* This is less easy than it looks.
+     *
+     * Hard-sectored disks contain one extra index hole, marking the top of the
+     * disk. This appears halfway in between two start-of-sector index holes. We
+     * need to find this and ignore it, otherwise we'll split that sector in two
+     * (and it won't work).
+     * 
+     * The routine here is pretty simple and requires this extra hole to have
+     * valid index holes either side of it --- it can't cope with the extra
+     * index hole being the first or last seen. Always give it slightly more
+     * than one revolution of data.
+     */
+
+    RawRecordVector records;
+    const auto& indices = rawbits.indices();
+    if (!indices.empty())
+    {
+        unsigned total = 0;
+        unsigned previous = 0;
+        for (unsigned index : indices)
+        {
+            total += index - previous;
+            previous = index;
+        }
+        total += rawbits.size() - previous;
+
+        unsigned sectors_must_be_bigger_than = (total / indices.size()) * 2/3;
+
+
+        previous = 0;
+        auto pushRecord = [&](size_t end)
+        {
+            if ((end - previous) < sectors_must_be_bigger_than)
+                return;
+
+            records.push_back(
+                std::unique_ptr<RawRecord>(
+                    new RawRecord(
+                        previous,
+                        rawbits.begin() + previous,
+                        rawbits.begin() + end)
+                )
+            );
+            previous = end;
+        };
+
+        for (unsigned index : indices)
+            pushRecord(index);
+        pushRecord(rawbits.size());
+    }
+
+    return records;
+}
+
 

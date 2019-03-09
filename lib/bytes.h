@@ -288,4 +288,6 @@ extern Bytes toBytes(
 inline Bytes toBytes(const std::vector<bool>& bits)
 { return toBytes(bits.begin(), bits.end()); }
 
+extern std::vector<bool> reverseBits(const std::vector<bool>& bits);
+
 #endif

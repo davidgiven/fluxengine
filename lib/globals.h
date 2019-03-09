@@ -17,6 +17,7 @@ class Bytes;
 
 extern double getCurrentTime();
 extern void hexdump(std::ostream& stream, const Bytes& bytes);
+extern void hexdumpForSrp16(std::ostream& stream, const Bytes& bytes);
 
 class Error
 {

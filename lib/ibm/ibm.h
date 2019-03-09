@@ -2,7 +2,6 @@
 #define IBM_H
 
 #include "decoders.h"
-#include "segmenter.h"
 
 /* IBM format (i.e. ordinary PC floppies). */
 
@@ -28,7 +27,7 @@ struct IbmIdam
     uint8_t crc[2];
 };
 
-class AbstractIbmDecoder : public AbstractDecoder
+class AbstractIbmDecoder : public AbstractSoftSectorDecoder
 {
 public:
     AbstractIbmDecoder(unsigned sectorIdBase):
