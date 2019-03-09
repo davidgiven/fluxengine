@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include "globals.h"
 #include "fluxmap.h"
-#include "stream.h"
+#include "kryoflux.h"
 
 struct memstreambuf : std::streambuf
 {

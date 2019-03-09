@@ -67,7 +67,6 @@ int main(int argc, const char* argv[])
 		nanoseconds_t nextclock = clockPeriod;
 
 		nanoseconds_t now = 0;
-		size_t cursor = 0;
 		nanoseconds_t seekto = seekFlag*1000000.0;
 		int ticks = 0;
 		FluxmapReader fr(*fluxmap);
