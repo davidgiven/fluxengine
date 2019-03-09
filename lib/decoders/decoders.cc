@@ -170,13 +170,17 @@ const RawBits Fluxmap::decodeToBits(nanoseconds_t clockPeriod) const
     FluxmapReader fr(*this);
     for (;;)
     {
-        while (timestamp < lowerThreshold)
+        for (;;)
         {
             unsigned interval;
-            int opcode = fr.readPulse(interval);
+            int opcode = fr.read(interval);
+            timestamp += interval * NS_PER_TICK;
             if (opcode == -1)
                 goto abort;
-            timestamp += interval * NS_PER_TICK;
+            else if ((opcode == 0x80) && (timestamp >= lowerThreshold))
+                break;
+            else if (opcode == 0x81)
+                indices->push_back(count);
         }
 
         int clocks = (timestamp + clockPeriod/2) / clockPeriod;

@@ -59,6 +59,9 @@ public:
     void rewind()
     { _cursor = 0; }
 
+    size_t tell() const
+    { return _cursor; }
+
     int read(unsigned& ticks);
     int readPulse(unsigned& ticks);
 

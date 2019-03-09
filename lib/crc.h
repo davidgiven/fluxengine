@@ -8,9 +8,12 @@
 
 extern uint16_t sumBytes(const Bytes& bytes);
 extern uint8_t xorBytes(const Bytes& bytes);
-extern uint16_t crc16(uint16_t poly, const Bytes& bytes);
+extern uint16_t crc16(uint16_t poly, uint16_t init, const Bytes& bytes);
 extern uint16_t crc16ref(uint16_t poly, const Bytes& bytes);
 extern uint32_t crcbrother(const Bytes& bytes);
+
+static inline uint16_t crc16(uint16_t poly, const Bytes& bytes)
+{ return crc16(poly, 0xffff, bytes); }
 
 #endif
 

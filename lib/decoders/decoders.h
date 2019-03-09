@@ -11,7 +11,11 @@ class RawBits;
 typedef std::vector<std::unique_ptr<RawRecord>> RawRecordVector;
 typedef std::vector<std::unique_ptr<Sector>> SectorVector;
 
-extern Bytes decodeFmMfm(const std::vector<bool> bits);
+extern Bytes decodeFmMfm(std::vector<bool>::const_iterator start,
+    std::vector<bool>::const_iterator end);
+
+static inline Bytes decodeFmMfm(const std::vector<bool> bits)
+{ return decodeFmMfm(bits.begin(), bits.end()); }
 
 class AbstractDecoder
 {
