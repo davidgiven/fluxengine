@@ -12,6 +12,7 @@
 #include "record.h"
 #include "image.h"
 #include "bytes.h"
+#include "rawbits.h"
 #include "fmt/format.h"
 
 static DataSpecFlag source(
@@ -154,7 +155,7 @@ void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename
 			}
 			std::cout << fmt::format("       {:.2f} us clock; ", (double)clockPeriod/1000.0) << std::flush;
 
-			auto bitmap = fluxmap->decodeToBits(clockPeriod);
+			const auto& bitmap = fluxmap->decodeToBits(clockPeriod);
 			std::cout << fmt::format("{} bytes encoded; ", bitmap.size()/8) << std::flush;
 
 			auto rawrecords = decoder.extractRecords(bitmap);

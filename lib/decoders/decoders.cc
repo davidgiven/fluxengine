@@ -4,6 +4,7 @@
 #include "decoders.h"
 #include "record.h"
 #include "protocol.h"
+#include "rawbits.h"
 #include "fmt/format.h"
 
 static DoubleFlag clockDecodeThreshold(
@@ -44,9 +45,13 @@ nanoseconds_t Fluxmap::guessClock() const
 
     uint32_t buckets[256] = {};
     size_t cursor = 0;
+    FluxmapReader fr(*this);
     while (cursor < bytes())
     {
-        uint32_t interval = getAndIncrement(cursor);
+        unsigned interval;
+        int opcode = fr.readPulse(interval);
+        if (opcode != 0x80)
+            break;
         if (interval > 0xff)
             continue;
         buckets[interval]++;
@@ -152,35 +157,39 @@ nanoseconds_t Fluxmap::guessClock() const
 }
 
 /* Decodes a fluxmap into a nice aligned array of bits. */
-std::vector<bool> Fluxmap::decodeToBits(nanoseconds_t clockPeriod) const
+const RawBits Fluxmap::decodeToBits(nanoseconds_t clockPeriod) const
 {
     int pulses = duration() / clockPeriod;
     nanoseconds_t lowerThreshold = clockPeriod * clockDecodeThreshold;
 
-    std::vector<bool> bitmap(pulses);
+    auto bitmap = std::make_unique<std::vector<bool>>(pulses);
+    auto indices = std::make_unique<std::vector<size_t>>();
+
     unsigned count = 0;
-    size_t cursor = 0;
     nanoseconds_t timestamp = 0;
+    FluxmapReader fr(*this);
     for (;;)
     {
         while (timestamp < lowerThreshold)
         {
-            if (cursor >= bytes())
+            unsigned interval;
+            int opcode = fr.readPulse(interval);
+            if (opcode == -1)
                 goto abort;
-            uint8_t interval = getAndIncrement(cursor);
             timestamp += interval * NS_PER_TICK;
         }
 
         int clocks = (timestamp + clockPeriod/2) / clockPeriod;
         count += clocks;
-        if (count >= bitmap.size())
+        if (count >= bitmap->size())
             goto abort;
-        bitmap[count] = true;
+        bitmap->at(count) = true;
         timestamp = 0;
     }
 abort:
 
-    return bitmap;
+    RawBits rawbits(std::move(bitmap), std::move(indices));
+    return rawbits;
 }
 
 nanoseconds_t AbstractDecoder::guessClock(Fluxmap& fluxmap) const
@@ -188,7 +197,7 @@ nanoseconds_t AbstractDecoder::guessClock(Fluxmap& fluxmap) const
     return fluxmap.guessClock();
 }
 
-RawRecordVector AbstractSoftSectorDecoder::extractRecords(std::vector<bool> bits) const
+RawRecordVector AbstractSoftSectorDecoder::extractRecords(const RawBits& rawbits) const
 {
     RawRecordVector records;
     uint64_t fifo = 0;
@@ -204,15 +213,15 @@ RawRecordVector AbstractSoftSectorDecoder::extractRecords(std::vector<bool> bits
             std::unique_ptr<RawRecord>(
                 new RawRecord(
                     matchStart,
-                    bits.begin() + matchStart,
-                    bits.begin() + end)
+                    rawbits.begin() + matchStart,
+                    rawbits.begin() + end)
             )
         );
     };
 
-    while (cursor < bits.size())
+    while (cursor < rawbits.size())
     {
-        fifo = (fifo << 1) | bits[cursor++];
+        fifo = (fifo << 1) | rawbits[cursor++];
         
         int match = recordMatcher(fifo);
         if (match > 0)
@@ -225,4 +234,30 @@ RawRecordVector AbstractSoftSectorDecoder::extractRecords(std::vector<bool> bits
     
     return records;
 }
+
+RawRecordVector AbstractHardSectorDecoder::extractRecords(const RawBits& rawbits) const
+{
+    RawRecordVector records;
+    int matchStart = 0;
+
+    auto pushRecord = [&](size_t end)
+    {
+        records.push_back(
+            std::unique_ptr<RawRecord>(
+                new RawRecord(
+                    matchStart,
+                    rawbits.begin() + matchStart,
+                    rawbits.begin() + end)
+            )
+        );
+        matchStart = end;
+    };
+
+    for (size_t index : rawbits.indices())
+        pushRecord(index);
+    pushRecord(rawbits.size());
+
+    return records;
+}
+
 
