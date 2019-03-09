@@ -1,6 +1,6 @@
 #include "globals.h"
 #include "fluxmap.h"
-#include "stream.h"
+#include "kryoflux.h"
 #include "fluxreader.h"
 
 class StreamFluxReader : public FluxReader
