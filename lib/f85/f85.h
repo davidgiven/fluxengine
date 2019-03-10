@@ -1,8 +1,8 @@
 #ifndef F85_H
 #define F85_H
 
-#define F85_RECORD_SEPARATOR 0xfff5
-#define F85_SECTOR_LENGTH    256
+#define F85_RECORD_SEPARATOR 0xfffc
+#define F85_SECTOR_LENGTH    512
 
 class Sector;
 class Fluxmap;

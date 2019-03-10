@@ -59,40 +59,35 @@ SectorVector DurangoF85Decoder::decodeToSectors(const RawRecordVector& rawRecord
         const auto& rawdata = rawrecord->data;
         const auto& bytes = decode(rawdata);
 
-        if (bytes.size() == 0)
+        if (bytes.size() < 4)
             continue;
 
         switch (bytes[0])
         {
-            case 8: /* sector record */
+            case 0xce: /* sector record */
             {
                 headerIsValid = false;
-                if (bytes.size() < 6)
-                    break;
+                nextSector = bytes[3];
+                nextTrack = bytes[1];
 
-                uint8_t checksum = bytes[1];
-                nextSector = bytes[2];
-                nextTrack = bytes[3] - 1;
-                if (checksum != xorBytes(bytes.slice(2, 4)))
-                    break;
-
-                headerIsValid = true;
+                uint16_t wantChecksum = bytes.reader().seek(5).read_be16();
+                uint16_t gotChecksum = crc16(CCITT_POLY, 0xef21, bytes.slice(1, 4));
+                headerIsValid = (wantChecksum == gotChecksum);
                 break;
             }
-            
-            case 7: /* data record */
+
+            case 0xcb: /* data record */
             {
                 if (!headerIsValid)
                     break;
-                headerIsValid = false;
-                if (bytes.size() < 258)
-                    break;
+                if (bytes.size() < (F85_SECTOR_LENGTH + 3))
+                    continue;
 
-                Bytes payload = bytes.slice(1, F85_SECTOR_LENGTH);
-                uint8_t gotChecksum = xorBytes(payload);
-                uint8_t wantChecksum = bytes[257];
+                const auto& payload = bytes.slice(1, F85_SECTOR_LENGTH);
+                uint16_t wantChecksum = bytes.reader().seek(F85_SECTOR_LENGTH+1).read_be16();
+                uint16_t gotChecksum = crc16(CCITT_POLY, 0xbf84, payload);
+
                 int status = (wantChecksum == gotChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
-
                 auto sector = std::unique_ptr<Sector>(
 					new Sector(status, nextTrack, 0, nextSector, payload));
                 sectors.push_back(std::move(sector));
@@ -106,8 +101,8 @@ SectorVector DurangoF85Decoder::decodeToSectors(const RawRecordVector& rawRecord
 
 int DurangoF85Decoder::recordMatcher(uint64_t fifo) const
 {
-    uint16_t masked = fifo & 0xffff;
+    uint32_t masked = fifo & 0xffff;
     if (masked == F85_RECORD_SEPARATOR)
-		return 4;
+		return 6;
     return 0;
 }
