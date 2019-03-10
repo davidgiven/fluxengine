@@ -96,6 +96,7 @@ at least, check the CRC so what data's there is probably good.
 | Format                                   | Read? | Write? | Notes |
 |:-----------------------------------------|:-----:|:------:|-------|
 | [AES Superplus / No Problem](doc/disk-aeslanier.md) |  🦖   | | hard sectors! |
+| [Durango F85](doc/disk-durangof85.md)    |  🦖   |        | 8-inch _and_ hard sectors |
 | [Victor 9000](doc/disk-victor9k.md)      |  🦖   |        | 8-inch        |
 | [Zilog MCZ](doc/disk-zilogmcz.md)        |  🦖   |        | 8-inch _and_ hard sectors |
 {: .datatable }
