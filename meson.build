@@ -57,7 +57,7 @@ fluxreaderlib = declare_dependency(
                 'lib/fluxreader/streamfluxreader.cc',
                 'lib/fluxreader/kryoflux.cc',
             ],
-            dependencies: [fmtlib, felib, sqllib]
+            dependencies: [fmtlib, felib, sqllib, sqlite]
         ),
     include_directories:
         include_directories('lib/fluxreader')
@@ -80,14 +80,14 @@ readerlib = declare_dependency(
     link_with:
         shared_library('readerlib',
             ['lib/reader.cc'],
-            dependencies: [fmtlib, felib, sqllib, decoderlib, fluxreaderlib])
+            dependencies: [fmtlib, felib, sqllib, decoderlib, fluxreaderlib, sqlite])
 )
                         
 writerlib = declare_dependency(
     link_with:
         shared_library('writerlib',
             ['lib/writer.cc'],
-            dependencies: [fmtlib, felib, sqllib]
+            dependencies: [fmtlib, felib, sqllib, sqlite]
         )
 )
 
@@ -130,7 +130,7 @@ brotherdecoderlib = declare_dependency(
     link_with:
         shared_library('brotherdecoderlib',
         [ 'lib/brother/decoder.cc', ],
-        dependencies: [fmtlib, felib, decoderlib]),
+        dependencies: [fmtlib, felib, decoderlib, sqlite]),
     include_directories:
         include_directories('lib/brother')
 )
@@ -216,13 +216,13 @@ executable('fe-readvictor9k',      ['src/fe-readvictor9k.cc'],      dependencies
 executable('fe-rpm',               ['src/fe-rpm.cc'],               dependencies: [fmtlib, felib])
 executable('fe-seek',              ['src/fe-seek.cc'],              dependencies: [fmtlib, felib])
 executable('fe-testbulktransport', ['src/fe-testbulktransport.cc'], dependencies: [fmtlib, felib])
-executable('fe-upgradefluxfile',   ['src/fe-upgradefluxfile.cc'],   dependencies: [fmtlib, felib, sqllib])
+executable('fe-upgradefluxfile',   ['src/fe-upgradefluxfile.cc'],   dependencies: [fmtlib, felib, sqllib, sqlite])
 executable('fe-writebrother',      ['src/fe-writebrother.cc'],      dependencies: [fmtlib, felib, writerlib, decoderlib, encoderlib, brotherencoderlib])
 executable('fe-writeflux',         ['src/fe-writeflux.cc'],         dependencies: [fmtlib, felib, readerlib, writerlib])
 executable('fe-writetestpattern',  ['src/fe-writetestpattern.cc'],  dependencies: [fmtlib, felib, writerlib])
 
 executable('brother120tool',       ['tools/brother120tool.cc'],     dependencies: [fmtlib, felib])
-executable('cwftoflux',            ['tools/cwftoflux.cc'],          dependencies: [fmtlib, felib, sqllib])
+executable('cwftoflux',            ['tools/cwftoflux.cc'],          dependencies: [fmtlib, felib, sqllib, sqlite])
 
 test('DataSpec',        executable('dataspec-test', ['tests/dataspec.cc'],             dependencies: [felib]))
 test('Flags',           executable('flags-test', ['tests/flags.cc'],                   dependencies: [felib]))
