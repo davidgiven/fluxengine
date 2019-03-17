@@ -65,7 +65,7 @@ public:
         AbstractIbmDecoder(sectorIdBase)
     {}
 
-    nanoseconds_t guessClock(Fluxmap& fluxmap) const;
+    nanoseconds_t guessClock(Fluxmap& fluxmap, unsigned physicalTrack) const;
     int recordMatcher(uint64_t fifo) const;
 
 protected:

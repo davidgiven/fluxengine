@@ -69,7 +69,7 @@ SectorVector AbstractIbmDecoder::decodeToSectors(const RawRecordVector& rawRecor
     return sectors;
 }
 
-nanoseconds_t IbmMfmDecoder::guessClock(Fluxmap& fluxmap) const
+nanoseconds_t IbmMfmDecoder::guessClock(Fluxmap& fluxmap, unsigned physicalTrack) const
 {
     return fluxmap.guessClock() / 2;
 }

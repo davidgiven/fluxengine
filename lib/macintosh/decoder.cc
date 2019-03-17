@@ -6,9 +6,15 @@
 #include "sector.h"
 #include "macintosh.h"
 #include "bytes.h"
+#include "flags.h"
 #include "fmt/format.h"
 #include <string.h>
 #include <algorithm>
+
+static BoolFlag guessClockFlag(
+	{ "--guess-clock" },
+	"Guess the clock rate rather than using the hard-coded table.",
+    false);
 
 static int decode_data_gcr(uint8_t gcr)
 {
@@ -144,6 +150,10 @@ SectorVector MacintoshDecoder::decodeToSectors(
                     break;
                 nextSector = decode_data_gcr(rawbytes[4]);
                 nextSide = decode_data_gcr(rawbytes[5]);
+                if (nextSector > 11)
+                    break;
+                if (nextSide > 1)
+                    break;
                 uint8_t formatByte = decode_data_gcr(rawbytes[6]);
                 uint8_t wantedsum = decode_data_gcr(rawbytes[7]);
 
@@ -188,4 +198,20 @@ int MacintoshDecoder::recordMatcher(uint64_t fifo) const
     if ((masked == MAC_SECTOR_RECORD) || (masked == MAC_DATA_RECORD))
 		return 24;
     return 0;
+}
+
+nanoseconds_t MacintoshDecoder::guessClock(Fluxmap& fluxmap, unsigned physicalTrack) const
+{
+    if (guessClockFlag)
+        return AbstractDecoder::guessClock(fluxmap, physicalTrack);
+
+    if (physicalTrack < 16)
+        return 2750;
+    if (physicalTrack < 32)
+        return 3000;
+    if (physicalTrack < 48)
+        return 3250;
+    if (physicalTrack < 64)
+        return 3580;
+    return 4000;
 }

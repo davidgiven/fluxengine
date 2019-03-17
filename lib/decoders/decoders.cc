@@ -8,10 +8,10 @@
 #include "fmt/format.h"
 #include <numeric>
 
-static DoubleFlag clockDecodeThreshold(
-    { "--clock-decode-threshold" },
-    "Pulses below this fraction of a clock tick are considered spurious and ignored.",
-    0.80);
+static DoubleFlag pulseAccuracyFactor(
+    { "--pulse-accuracy-factor" },
+    "Pulses must be within this much of an expected clock tick to register (in clock periods).",
+    0.4);
 
 static SettableFlag showClockHistogram(
     { "--show-clock-histogram" },
@@ -114,7 +114,20 @@ nanoseconds_t Fluxmap::guessClock() const
     if (showClockHistogram)
     {
         std::cout << "Clock detection histogram:" << std::endl;
+        double blocks_per_count = 320.0/max;
 
+        auto show_noise_and_signal_levels = [=] {
+            /* Must be 12 chars in left margin */
+            std::cout << fmt::format("        0% >{:>{}}{:>{}}{:<{}}< 100%\n",
+                "|",
+                int((noise_floor*blocks_per_count)/8),
+                "|",
+                int((signal_level - noise_floor)*blocks_per_count/8),
+                "",
+                int((max - signal_level)*blocks_per_count/8));
+        };
+
+        show_noise_and_signal_levels();
 		bool skipping = true;
         for (int i=0; i<256; i++)
 		{
@@ -122,14 +135,14 @@ nanoseconds_t Fluxmap::guessClock() const
 			if (value < noise_floor/2)
 			{
 				if (!skipping)
-					std::cout << "..." << std::endl;
+					show_noise_and_signal_levels();
 				skipping = true;
 			}
 			else
 			{
 				skipping = false;
 
-				int bar = 320*value/max;
+				int bar = value * blocks_per_count;
 				int fullblocks = bar / 8;
 
 				std::string s;
@@ -137,7 +150,8 @@ nanoseconds_t Fluxmap::guessClock() const
 					s += BLOCK_ELEMENTS[8];
 				s += BLOCK_ELEMENTS[bar & 7];
 
-				std::cout << fmt::format("{:.2f} {:6} {}", (double)i * US_PER_TICK, value, s);
+                /* Must be 10 chars in left margin */
+				std::cout << fmt::format("{:5.2f}{:6} {}", (double)i * US_PER_TICK, value, s);
 				std::cout << std::endl;
 			}
 		}
@@ -161,7 +175,7 @@ nanoseconds_t Fluxmap::guessClock() const
 const RawBits Fluxmap::decodeToBits(nanoseconds_t clockPeriod) const
 {
     int pulses = duration() / clockPeriod;
-    nanoseconds_t lowerThreshold = clockPeriod * clockDecodeThreshold;
+    nanoseconds_t pulseAccuracy = pulseAccuracyFactor * clockPeriod;
 
     auto bitmap = std::make_unique<std::vector<bool>>(pulses);
     auto indices = std::make_unique<std::vector<size_t>>();
@@ -178,13 +192,17 @@ const RawBits Fluxmap::decodeToBits(nanoseconds_t clockPeriod) const
             timestamp += interval * NS_PER_TICK;
             if (opcode == -1)
                 goto abort;
-            else if ((opcode == 0x80) && (timestamp >= lowerThreshold))
+            else if (opcode == 0x80)
                 break;
             else if (opcode == 0x81)
                 indices->push_back(count);
         }
 
         int clocks = (timestamp + clockPeriod/2) / clockPeriod;
+        nanoseconds_t expectedClock = clocks*clockPeriod;
+        if (abs(expectedClock - timestamp) > pulseAccuracy)
+            continue;
+
         count += clocks;
         if (count >= bitmap->size())
             goto abort;
@@ -197,7 +215,7 @@ abort:
     return rawbits;
 }
 
-nanoseconds_t AbstractDecoder::guessClock(Fluxmap& fluxmap) const
+nanoseconds_t AbstractDecoder::guessClock(Fluxmap& fluxmap, unsigned physicalTrack) const
 {
     return fluxmap.guessClock();
 }
