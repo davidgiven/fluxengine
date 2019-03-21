@@ -98,6 +98,23 @@ static void test_writes()
     assert((b == Bytes{ 1, 2, 3, 4, 5 }));
 }
 
+static void test_slice()
+{
+    Bytes b = {1, 2, 3};
+
+    Bytes bs = b.slice(1, 1);
+    assert((bs == Bytes{ 2 }));
+
+    bs = b.slice(1, 2);
+    assert((bs == Bytes{ 2, 3 }));
+
+    bs = b.slice(1, 3);
+    assert((bs == Bytes{ 2, 3, 0 }));
+    
+    bs = b.slice(4, 2);
+    assert((bs == Bytes{ 0, 0 }));
+}
+
 int main(int argc, const char* argv[])
 {
     test_bounds();
@@ -105,5 +122,6 @@ int main(int argc, const char* argv[])
     test_equality();
     test_reads();
     test_writes();
+    test_slice();
     return 0;
 }

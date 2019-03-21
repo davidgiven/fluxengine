@@ -20,6 +20,8 @@ SectorVector AbstractIbmDecoder::decodeToSectors(const RawRecordVector& rawRecor
     {
         const Bytes bytes = decodeFmMfm(rawrecord->data);
         int headerSize = skipHeaderBytes();
+        if (bytes.size() < (headerSize + 1))
+            continue;
         Bytes data = bytes.slice(headerSize, bytes.size() - headerSize);
 
         switch (data[0])

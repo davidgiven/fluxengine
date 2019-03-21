@@ -124,12 +124,16 @@ uint8_t& Bytes::operator [] (unsigned pos)
 Bytes Bytes::slice(unsigned start, unsigned len) const
 {
     start += _low;
-    boundsCheck(start);
     unsigned end = start + len;
-    if (end > _high)
+    if (start >= _high)
+    {
+        /* Asking for a completely out-of-range slice --- just return zeroes. */
+        return Bytes(len);
+    }
+    else if (end > _high)
     {
         /* Can't share the buffer, as we need to zero-pad the end. */
-        Bytes b(end - start);
+        Bytes b(len);
         std::uninitialized_copy(cbegin()+start, cend(), b.begin());
         return b;
     }
