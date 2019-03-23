@@ -48,7 +48,7 @@ void readDirectory()
         std::unique_ptr<Dirent> dirent(new Dirent);
         dirent->filename = filename;
         dirent->type = buffer[8];
-        dirent->startSector = buffer[9] * 256 + buffer[10];
+        dirent->startSector = buffer[9]*256 + buffer[10];
         dirent->sectorCount = buffer[11];
         directory[filename] = std::move(dirent);
     }
@@ -62,7 +62,7 @@ void readAllocationTable()
         uint8_t buffer[2];
         inputFile.read((char*) buffer, sizeof(buffer));
 
-        uint16_t nextSector = buffer[1] | (buffer[0]<<8);
+        uint16_t nextSector = (buffer[0]*256) + buffer[1];
         allocationTable[sector] = nextSector;
     }
 }
@@ -146,7 +146,7 @@ void extractFile(const std::string& pattern)
         while ((sector != 0) && (sector != 0xffff))
         {
             uint8_t buffer[256];
-            inputFile.seekg(sector * 0x100, std::ifstream::beg);
+            inputFile.seekg((sector-1) * 0x100, std::ifstream::beg);
             if (!inputFile.read((char*) buffer, sizeof(buffer)))
                 Error() << fmt::format("I/O error on read: {}", strerror(errno));
             if (!outputFile.write((const char*) buffer, sizeof(buffer)))
