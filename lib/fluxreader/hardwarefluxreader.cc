@@ -9,9 +9,12 @@ static IntFlag revolutions(
     "read this many revolutions of the disk",
     1);
 
-static SettableFlag highDensity(
-    { "--high-density", "-H" },
-    "sets the drive to high density mode");
+static bool high_density = false;
+
+void setHardwareFluxReaderDensity(bool high_density)
+{
+	::high_density = high_density;
+}
 
 class HardwareFluxReader : public FluxReader
 {
@@ -28,7 +31,7 @@ public:
 public:
     std::unique_ptr<Fluxmap> readFlux(int track, int side)
     {
-        usbSetDrive(_drive, highDensity);
+        usbSetDrive(_drive, high_density);
         usbSeek(track);
         return usbRead(side, revolutions);
     }
