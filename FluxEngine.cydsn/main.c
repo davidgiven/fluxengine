@@ -22,7 +22,7 @@ static bool motor_on = false;
 static uint32_t motor_on_time = 0;
 static bool homed = false;
 static int current_track = 0;
-static uint8_t current_drive_flags = 0;
+static int current_drive = 0;
 
 #define BUFFER_COUNT 16
 #define BUFFER_SIZE 64
@@ -568,10 +568,10 @@ static void cmd_erase(struct erase_frame* f)
 
 static void cmd_set_drive(struct set_drive_frame* f)
 {
-    if (current_drive_flags != f->drive)
+    if (current_drive != f->drive)
     {
-        current_drive_flags = f->drive | (f->high_density<<1);
-        DRIVE_REG_Write(current_drive_flags);
+        current_drive = f->drive;
+        DRIVE_REG_Write(current_drive);
         homed = false;
     }
     
