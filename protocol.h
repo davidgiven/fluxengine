@@ -3,7 +3,7 @@
 
 enum 
 {
-    FLUXENGINE_VERSION = 5,
+    FLUXENGINE_VERSION = 6,
 
     FLUXENGINE_VID = 0x1209,
     FLUXENGINE_PID = 0x6e00,
@@ -22,6 +22,11 @@ enum
     
     SIDE_SIDEA = 0<<0,
     SIDE_SIDEB = 1<<0,
+    
+    DRIVE_0 = 0,
+    DRIVE_1 = 1,
+    DRIVE_DD = 0<<1,
+    DRIVE_HD = 1<<1,
     
     FRAME_SIZE = 64,
     TICK_FREQUENCY = 12000000,
@@ -124,8 +129,7 @@ struct erase_frame
 struct set_drive_frame
 {
     struct frame_header f;
-    uint8_t drive;
-    uint8_t high_density;
+    uint8_t drive_flags;
 };
 
 #endif

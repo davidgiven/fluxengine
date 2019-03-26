@@ -568,9 +568,9 @@ static void cmd_erase(struct erase_frame* f)
 
 static void cmd_set_drive(struct set_drive_frame* f)
 {
-    if (current_drive_flags != f->drive)
+    if (current_drive_flags != f->drive_flags)
     {
-        current_drive_flags = f->drive | (f->high_density<<1);
+        current_drive_flags = f->drive_flags;
         DRIVE_REG_Write(current_drive_flags);
         homed = false;
     }
