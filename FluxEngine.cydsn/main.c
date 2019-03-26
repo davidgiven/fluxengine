@@ -4,6 +4,7 @@
 #include <setjmp.h>
 #include "project.h"
 #include "../protocol.h"
+#include "../lib/common/crunch.h"
 
 #define MOTOR_ON_TIME 5000 /* milliseconds */
 #define STEP_INTERVAL_TIME 6 /* ms */
@@ -28,6 +29,7 @@ static uint8_t current_drive_flags = 0;
 #define BUFFER_SIZE 64
 static uint8_t td[BUFFER_COUNT];
 static uint8_t dma_buffer[BUFFER_COUNT][BUFFER_SIZE] __attribute__((aligned()));
+static uint8_t usb_buffer[BUFFER_SIZE] __attribute__((aligned()));
 static uint8_t dma_channel;
 #define NEXT_BUFFER(b) (((b)+1) % BUFFER_COUNT)
 
@@ -281,6 +283,11 @@ static void cmd_read(struct read_frame* f)
         ;
     index_irq = false;
     
+    crunch_state_t cs;
+    cs.fifolen = 0;
+    cs.outputptr = usb_buffer;
+    cs.outputlen = BUFFER_SIZE;
+    
     dma_writing_to_td = 0;
     dma_reading_from_td = -1;
     dma_underrun = false;
@@ -302,6 +309,8 @@ static void cmd_read(struct read_frame* f)
     int revolutions = f->revolutions;
     while (!dma_underrun)
     {
+        CyWdtClear();
+
         /* Have we reached the index pulse? */
         if (index_irq)
         {
@@ -325,17 +334,35 @@ static void cmd_read(struct read_frame* f)
                 goto abort;
         }
 
-        USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, dma_buffer[dma_reading_from_td], BUFFER_SIZE);
+        uint8_t dma_buffer_usage = 0;
+        while (dma_buffer_usage < BUFFER_SIZE)
+        {
+            cs.inputptr = dma_buffer[dma_reading_from_td] + dma_buffer_usage;
+            cs.inputlen = BUFFER_SIZE - dma_buffer_usage;
+            crunch(&cs);
+            dma_buffer_usage += BUFFER_SIZE - cs.inputlen;
+            count++;
+            if (cs.outputlen == 0)
+            {
+                USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, usb_buffer, BUFFER_SIZE);
+                cs.outputptr = usb_buffer;
+                cs.outputlen = BUFFER_SIZE;
+            }
+        }
         dma_reading_from_td = NEXT_BUFFER(dma_reading_from_td);
-        count++;
     }
 abort:
     CyDmaChSetRequest(dma_channel, CY_DMA_CPU_TERM_CHAIN);
     while (CyDmaChGetRequest(dma_channel))
         ;
 
+    donecrunch(&cs);
     wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
-    USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, NULL, 0);
+    if (cs.outputlen != BUFFER_SIZE)
+        USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, usb_buffer, BUFFER_SIZE-cs.outputlen);
+    else
+        USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, NULL, 0);
+    wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
     deinit_dma();
 
     if (dma_underrun)

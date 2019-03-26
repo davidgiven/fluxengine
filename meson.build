@@ -1,4 +1,4 @@
-project('fluxclient', 'cpp')
+project('fluxclient', 'c', 'cpp')
 add_global_arguments('--std=c++14', language: 'cpp')
 
 libusb = dependency('libusb-1.0')
@@ -17,6 +17,15 @@ fmtlib = declare_dependency(
         include_directories('dep/fmt')
 )
 
+crunchlib = declare_dependency(
+    link_with:
+        shared_library('crunch',
+            ['lib/common/crunch.c']
+        ),
+    include_directories:
+        include_directories('lib/common')
+)
+
 felib = declare_dependency(
     link_with:
         shared_library('felib',
@@ -33,7 +42,7 @@ felib = declare_dependency(
                 'lib/usb.cc',
                 'lib/bytes.cc',
             ],
-            dependencies: [fmtlib, libusb, zlib]
+            dependencies: [fmtlib, crunchlib, libusb, zlib]
         ),
     include_directories:
         include_directories('lib')
@@ -231,3 +240,4 @@ test('BitAccumulator',  executable('bitaccumulator-test', ['tests/bitaccumulator
 test('Kryoflux',        executable('kryoflux-test', ['tests/kryoflux.cc'],             dependencies: [felib, decoderlib, fluxreaderlib]))
 test('Compression',     executable('compression-test', ['tests/compression.cc'],       dependencies: [felib, decoderlib]))
 test('Bytes',           executable('bytes-test', ['tests/bytes.cc'],                   dependencies: [felib]))
+test('Crunch',          executable('crunch-test', ['tests/crunch.cc'],                 dependencies: [felib, crunchlib]))

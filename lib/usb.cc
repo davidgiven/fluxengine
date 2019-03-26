@@ -3,6 +3,7 @@
 #include "protocol.h"
 #include "fluxmap.h"
 #include "bytes.h"
+#include "crunch.h"
 #include <libusb.h>
 
 #define TIMEOUT 5000
@@ -188,7 +189,7 @@ void usbTestBulkTransport()
     await_reply<struct any_frame>(F_FRAME_BULK_TEST_REPLY);
 }
 
-std::unique_ptr<Fluxmap> usbRead(int side, int revolutions)
+Bytes usbRead(int side, int revolutions)
 {
     struct read_frame f = {
         .f = { .type = F_FRAME_READ_CMD, .size = sizeof(f) },
@@ -203,10 +204,8 @@ std::unique_ptr<Fluxmap> usbRead(int side, int revolutions)
     int len = large_bulk_transfer(FLUXENGINE_DATA_IN_EP, buffer);
     buffer.resize(len);
 
-    fluxmap->appendBytes(buffer);
-
     await_reply<struct any_frame>(F_FRAME_READ_REPLY);
-    return fluxmap;
+    return buffer;
 }
 
 void usbWrite(int side, const Fluxmap& fluxmap)
