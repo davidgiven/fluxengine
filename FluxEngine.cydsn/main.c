@@ -340,12 +340,6 @@ static void cmd_read(struct read_frame* f)
                 goto abort;
         }
 
-        while (USBFS_GetEPState(FLUXENGINE_DATA_IN_EP_NUM) != USBFS_IN_BUFFER_EMPTY)
-        {
-            if (index_irq || dma_underrun)
-                goto abort;
-        }
-
         uint8_t dma_buffer_usage = 0;
         while (dma_buffer_usage < BUFFER_SIZE)
         {
@@ -356,6 +350,12 @@ static void cmd_read(struct read_frame* f)
             count++;
             if (cs.outputlen == 0)
             {
+                while (USBFS_GetEPState(FLUXENGINE_DATA_IN_EP_NUM) != USBFS_IN_BUFFER_EMPTY)
+                {
+                    if (index_irq || dma_underrun)
+                        goto abort;
+                }
+
                 USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, usb_buffer, BUFFER_SIZE);
                 cs.outputptr = usb_buffer;
                 cs.outputlen = BUFFER_SIZE;
@@ -364,6 +364,7 @@ static void cmd_read(struct read_frame* f)
         dma_reading_from_td = NEXT_BUFFER(dma_reading_from_td);
     }
 abort:
+    //debug("count=%d i=%d d=%d", count, index_irq, dma_underrun);
     CyDmaChSetRequest(dma_channel, CY_DMA_CPU_TERM_CHAIN);
     while (CyDmaChGetRequest(dma_channel))
         ;
