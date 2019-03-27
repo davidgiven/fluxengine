@@ -43,7 +43,7 @@ void donecrunch(crunch_state_t* state)
 
 void uncrunch(crunch_state_t* state)
 {
-    do
+    while (state->inputlen && state->outputlen)
     {
         if (state->fifolen < 8)
         {
@@ -72,7 +72,6 @@ void uncrunch(crunch_state_t* state)
             state->outputlen--;
         }
     }
-    while (state->inputlen && state->outputlen);
 }
 
 void doneuncrunch(crunch_state_t* state)

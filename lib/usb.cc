@@ -5,6 +5,7 @@
 #include "bytes.h"
 #include "crunch.h"
 #include <libusb.h>
+#include <fmt/format.h>
 
 #define TIMEOUT 5000
 
@@ -81,18 +82,26 @@ static void bad_reply(void)
             Error() << "USB underrun (not enough bandwidth)";
             
         default:
-            Error() << "unknown device error " << f->error;
+            Error() << fmt::format("unknown device error {}", f->error);
     }
 }
 
 template <typename T>
 static T* await_reply(int desired)
 {
-    usb_cmd_recv(buffer, sizeof(buffer));
-    struct any_frame* r = (struct any_frame*) buffer;
-    if (r->f.type != desired)
-        bad_reply();
-    return (T*) r;
+    for (;;)
+    {
+        usb_cmd_recv(buffer, sizeof(buffer));
+        struct any_frame* r = (struct any_frame*) buffer;
+        if (r->f.type == F_FRAME_DEBUG)
+        {
+            std::cout << "dev: " << ((struct debug_frame*)r)->payload << std::endl;
+            continue;
+        }
+        if (r->f.type != desired)
+            bad_reply();
+        return (T*) r;
+    }
 }
 
 int usbGetVersion(void)
@@ -208,14 +217,10 @@ Bytes usbRead(int side, int revolutions)
     return buffer;
 }
 
-void usbWrite(int side, const Fluxmap& fluxmap)
+void usbWrite(int side, const Bytes& bytes)
 {
-    unsigned safelen = fluxmap.bytes() & ~(FRAME_SIZE-1);
-
-    /* Convert from intervals to absolute timestamps. */
-
-	Bytes buffer(fluxmap.rawBytes());
-    buffer.resize(safelen);
+    unsigned safelen = bytes.size() & ~(FRAME_SIZE-1);
+    Bytes safeBytes = bytes.slice(0, safelen);
 
     struct write_frame f = {
         .f = { .type = F_FRAME_WRITE_CMD, .size = sizeof(f) },
@@ -228,7 +233,7 @@ void usbWrite(int side, const Fluxmap& fluxmap)
 
     usb_cmd_send(&f, f.f.size);
 
-    large_bulk_transfer(FLUXENGINE_DATA_OUT_EP, buffer);
+    int len = large_bulk_transfer(FLUXENGINE_DATA_OUT_EP, safeBytes);
     
     await_reply<struct any_frame>(F_FRAME_WRITE_REPLY);
 }

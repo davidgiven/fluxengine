@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <setjmp.h>
 #include "project.h"
 #include "../protocol.h"
@@ -116,6 +117,18 @@ static void send_error(int code)
 {
     DECLARE_REPLY_FRAME(struct error_frame, F_FRAME_ERROR);
     r.error = code;
+    send_reply((struct any_frame*) &r);
+}
+
+static void debug(const char* msg, ...)
+{
+    DECLARE_REPLY_FRAME(struct debug_frame, F_FRAME_DEBUG);
+    
+    va_list ap;
+    va_start(ap, msg);
+    vsnprintf(r.payload, sizeof(r.payload), msg, ap);
+    va_end(ap);
+    
     send_reply((struct any_frame*) &r);
 }
 
@@ -283,8 +296,7 @@ static void cmd_read(struct read_frame* f)
         ;
     index_irq = false;
     
-    crunch_state_t cs;
-    cs.fifolen = 0;
+    crunch_state_t cs = {};
     cs.outputptr = usb_buffer;
     cs.outputlen = BUFFER_SIZE;
     
@@ -422,32 +434,80 @@ static void cmd_write(struct write_frame* f)
 
     init_replay_dma();
     bool writing = false; /* to the disk */
-    bool listening = false;
     bool finished = false;
     int packets = f->bytes_to_write / FRAME_SIZE;
-    int count_read = 0;
     int count_written = 0;
+    int count_read = 0;
     dma_writing_to_td = 0;
     dma_reading_from_td = -1;
     dma_underrun = false;
 
+    crunch_state_t cs = {};
+    cs.outputlen = BUFFER_SIZE;
+    USBFS_EnableOutEP(FLUXENGINE_DATA_OUT_EP_NUM);
+    
     int old_reading_from_td = -1;
     for (;;)
     {
-        if (dma_reading_from_td != old_reading_from_td)
-        {
-            count_written++;
-            old_reading_from_td = dma_reading_from_td;
-        }
+        /* Read data from USB into the buffers. */
         
-        if (dma_reading_from_td != -1)
+        if (NEXT_BUFFER(dma_writing_to_td) != dma_reading_from_td)
         {
-            /* We want to be writing to disk. */
+            if (writing && (dma_underrun || index_irq))
+                goto abort;
             
-            if (!writing)
+            /* Read crunched data, if necessary. */
+            
+            if (cs.inputlen == 0)
             {
-                print("start writing\r");
+                if (finished)
+                {
+                    /* There's no more data to read, so fake some. */
+                    
+                    for (int i=0; i<BUFFER_SIZE; i++)
+                        usb_buffer[i+0] = 0x7f;
+                    cs.inputptr = usb_buffer;
+                    cs.inputlen = BUFFER_SIZE;
+                }
+                else
+                {
+                    while (USBFS_GetEPState(FLUXENGINE_DATA_OUT_EP_NUM) != USBFS_OUT_BUFFER_FULL)
+                    {
+                        if (writing && (dma_underrun || index_irq))
+                            goto abort;
+                    }
 
+                    int length = usb_read(FLUXENGINE_DATA_OUT_EP_NUM, usb_buffer);
+                    cs.inputptr = usb_buffer;
+                    cs.inputlen = length;
+                    USBFS_EnableOutEP(FLUXENGINE_DATA_OUT_EP_NUM);
+
+                    count_read++;
+                    if ((length < FRAME_SIZE) || (count_read == packets))
+                        finished = true;
+                }
+            }
+            
+            /* If there *is* data waiting in the buffer, uncrunch it. */
+            
+            if (cs.inputlen != 0)
+            {
+                cs.outputptr = dma_buffer[dma_writing_to_td] + BUFFER_SIZE - cs.outputlen;
+                uncrunch(&cs);
+                if (cs.outputlen == 0)
+                {
+                    /* Completed a DMA buffer; queue it for writing. */
+                    
+                    dma_writing_to_td = NEXT_BUFFER(dma_writing_to_td);
+                    cs.outputlen = BUFFER_SIZE;
+                }
+            }
+            
+            /* If we have a full buffer, start writing. */
+            if ((dma_reading_from_td == -1) && (dma_writing_to_td == BUFFER_COUNT-1))
+            {
+                dma_reading_from_td = old_reading_from_td = 0;
+                
                 /* Start the DMA engine. */
                 
                 SEQUENCER_DMA_FINISHED_IRQ_Enable();
@@ -468,90 +528,38 @@ static void cmd_write(struct write_frame* f)
                 ERASE_REG_Write(1); /* start erasing! */
                 SEQUENCER_CONTROL_Write(0); /* start writing! */
             }
-            
-            /* ...unless we reach the end of the track or suffer underrung, of course. */
-            
-            if (index_irq || dma_underrun)
-                break;
         }
         
-        if (NEXT_BUFFER(dma_writing_to_td) != dma_reading_from_td)
+        if (writing && (dma_underrun || index_irq))
+            goto abort;
+
+        if (dma_reading_from_td != old_reading_from_td)
         {
-            /* We're ready for more data. */
-            
-            if (finished)
-            {
-                /* The USB stream has stopped early, so just fake data to keep the writer happy. */
-                
-                for (int i=0; i<BUFFER_SIZE; i++)
-                    dma_buffer[dma_writing_to_td][i] = 0x80;
-                dma_writing_to_td = NEXT_BUFFER(dma_writing_to_td);
-            }
-            else
-            {
-                /* Make sure we're waiting for USB data. */
-                
-                if (!listening)
-                {
-                    USBFS_EnableOutEP(FLUXENGINE_DATA_OUT_EP_NUM);
-                    listening = true;
-                }
-                         
-                /* Is more data actually ready? */
-                
-                if (USBFS_GetEPState(FLUXENGINE_DATA_OUT_EP_NUM) == USBFS_OUT_BUFFER_FULL)
-                {            
-                    int length = usb_read(FLUXENGINE_DATA_OUT_EP_NUM, dma_buffer[dma_writing_to_td]);
-                    listening = false;
-                    dma_writing_to_td = NEXT_BUFFER(dma_writing_to_td);
-                    
-                    count_read++;
-                    if ((length < FRAME_SIZE) || (count_read == packets))
-                        finished = true;
-                }
-            }
-            
-            /* Only start writing once the buffer is full. */
-            
-            if ((dma_reading_from_td == -1) && (dma_writing_to_td == BUFFER_COUNT-1))
-                dma_reading_from_td = old_reading_from_td = 0;
+            count_written++;
+            old_reading_from_td = dma_reading_from_td;
         }
     }
+abort:
     SEQUENCER_DMA_FINISHED_IRQ_Disable();
 
     SEQUENCER_CONTROL_Write(1); /* reset */
     if (writing)
     {
         ERASE_REG_Write(0);
-        print("stop writing after ");
-        printi(count_written);
-        print("\r");
         CyDmaChSetRequest(dma_channel, CY_DMA_CPU_TERM_CHAIN);
         while (CyDmaChGetRequest(dma_channel))
             ;
         CyDmaChDisable(dma_channel);
     }
     
-    if (dma_underrun)
-    {
-        print("underrun after ");
-        printi(count_read);
-        print(" out of ");
-        printi(packets);
-        print(" packets read\r");
-    }
-
-    DECLARE_REPLY_FRAME(struct any_frame, F_FRAME_WRITE_REPLY);
-
+    //debug("p=%d cr=%d cw=%d f=%d l=%d w=%d index=%d underrun=%d", packets, count_read, count_written, finished, listening, writing, index_irq, dma_underrun);
     if (!finished)
     {
-        if (!listening)
-            USBFS_EnableOutEP(FLUXENGINE_DATA_OUT_EP_NUM);
         while (count_read < packets)
         {
             if (USBFS_GetEPState(FLUXENGINE_DATA_OUT_EP_NUM) == USBFS_OUT_BUFFER_FULL)
             {
-                int length = usb_read(FLUXENGINE_DATA_OUT_EP_NUM, dma_buffer[0]);
+                int length = usb_read(FLUXENGINE_DATA_OUT_EP_NUM, usb_buffer);
                 if (length < FRAME_SIZE)
                     break;
                 USBFS_EnableOutEP(FLUXENGINE_DATA_OUT_EP_NUM);
@@ -569,6 +577,7 @@ static void cmd_write(struct write_frame* f)
         return;
     }
 
+    DECLARE_REPLY_FRAME(struct any_frame, F_FRAME_WRITE_REPLY);
     send_reply((struct any_frame*) &r);
 }
 

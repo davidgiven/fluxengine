@@ -43,6 +43,7 @@ enum
 enum
 {
     F_FRAME_ERROR = 0,            /* any_frame */
+    F_FRAME_DEBUG,                /* debug_frame */
     F_FRAME_GET_VERSION_CMD,      /* any_frame */
     F_FRAME_GET_VERSION_REPLY,    /* version_frame */
     F_FRAME_SEEK_CMD,             /* seek_frame */
@@ -69,6 +70,7 @@ enum
     F_ERROR_BAD_COMMAND,
     F_ERROR_UNDERRUN,
     F_ERROR_INVALID_VALUE,
+    F_ERROR_INTERNAL,
 };
 
 struct frame_header
@@ -86,6 +88,12 @@ struct error_frame
 {
     struct frame_header f;
     uint8_t error;
+};
+
+struct debug_frame
+{
+    struct frame_header f;
+    char payload[60];
 };
 
 struct version_frame
