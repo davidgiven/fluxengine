@@ -31,7 +31,7 @@ public:
     {
         usbSetDrive(_drive, highDensity);
         usbSeek(track);
-        Bytes crunched = usbRead(side, _revolutions);
+        Bytes crunched = usbRead(side, revolutions);
         std::cout << fmt::format("({} bytes crunched) ", crunched.size());
 
         Bytes uncrunched = crunched.uncrunch();
@@ -52,7 +52,6 @@ public:
 
 private:
     unsigned _drive;
-    unsigned _revolutions;
 };
 
 void setHardwareFluxReaderRevolutions(int revolutions)
