@@ -233,7 +233,7 @@ void usbWrite(int side, const Bytes& bytes)
 
     usb_cmd_send(&f, f.f.size);
 
-    int len = large_bulk_transfer(FLUXENGINE_DATA_OUT_EP, safeBytes);
+    large_bulk_transfer(FLUXENGINE_DATA_OUT_EP, safeBytes);
     
     await_reply<struct any_frame>(F_FRAME_WRITE_REPLY);
 }
