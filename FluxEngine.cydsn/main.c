@@ -72,16 +72,17 @@ CY_ISR(replay_dma_finished_irq_cb)
         dma_underrun = true;
 }
 
-static void print(const char* s)
+static void print(const char* msg, ...)
 {
-    /* UART_PutString(s); */
-}
-
-static void printi(int i)
-{
-    char buffer[16];
-    sprintf(buffer, "%d", i);
-    print(buffer);
+    char buffer[64];
+    
+    va_list ap;
+    va_start(ap, msg);
+    vsnprintf(buffer, sizeof(buffer), msg, ap);
+    va_end(ap);
+    
+    UART_PutString(buffer);
+    UART_PutCRLF();
 }
 
 static void start_motor(void)
@@ -109,6 +110,7 @@ static void wait_until_writeable(int ep)
 
 static void send_reply(struct any_frame* f)
 {
+    print("reply 0x%02x", f->f.type);
     wait_until_writeable(FLUXENGINE_CMD_IN_EP_NUM);
     USBFS_LoadInEP(FLUXENGINE_CMD_IN_EP_NUM, (uint8_t*) f, f->f.size);
 }
@@ -117,18 +119,6 @@ static void send_error(int code)
 {
     DECLARE_REPLY_FRAME(struct error_frame, F_FRAME_ERROR);
     r.error = code;
-    send_reply((struct any_frame*) &r);
-}
-
-static void debug(const char* msg, ...)
-{
-    DECLARE_REPLY_FRAME(struct debug_frame, F_FRAME_DEBUG);
-    
-    va_list ap;
-    va_start(ap, msg);
-    vsnprintf(r.payload, sizeof(r.payload), msg, ap);
-    va_end(ap);
-    
     send_reply((struct any_frame*) &r);
 }
 
@@ -291,6 +281,7 @@ static void cmd_read(struct read_frame* f)
 
     /* Wait for the beginning of a rotation. */
         
+    print("wait");
     index_irq = false;
     while (!index_irq)
         ;
@@ -364,25 +355,23 @@ static void cmd_read(struct read_frame* f)
         dma_reading_from_td = NEXT_BUFFER(dma_reading_from_td);
     }
 abort:
-    //debug("count=%d i=%d d=%d", count, index_irq, dma_underrun);
     CyDmaChSetRequest(dma_channel, CY_DMA_CPU_TERM_CHAIN);
     while (CyDmaChGetRequest(dma_channel))
         ;
 
     donecrunch(&cs);
     wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
+    unsigned zz = cs.outputlen;
     if (cs.outputlen != BUFFER_SIZE)
         USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, usb_buffer, BUFFER_SIZE-cs.outputlen);
-    else
+    if ((cs.outputlen == BUFFER_SIZE) || (cs.outputlen == 0))
         USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, NULL, 0);
     wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
     deinit_dma();
 
     if (dma_underrun)
     {
-        print("underrun after ");
-        printi(count);
-        print(" packets\r");
+        print("underrun after %d packets");
         send_error(F_ERROR_UNDERRUN);
     }
     else
@@ -390,6 +379,7 @@ abort:
         DECLARE_REPLY_FRAME(struct any_frame, F_FRAME_READ_REPLY);
         send_reply(&r);
     }
+    print("count=%d i=%d d=%d zz=%d", count, index_irq, dma_underrun, zz);
 }
 
 static void init_replay_dma(void)
@@ -588,7 +578,7 @@ static void cmd_erase(struct erase_frame* f)
     seek_to(current_track);    
     /* Disk is now spinning. */
     
-    print("start erasing\r");
+    print("start erasing");
     index_irq = false;
     while (!index_irq)
         ;
@@ -597,7 +587,7 @@ static void cmd_erase(struct erase_frame* f)
     while (!index_irq)
         ;
     ERASE_REG_Write(0);
-    print("stop erasing\r");
+    print("stop erasing");
 
     DECLARE_REPLY_FRAME(struct any_frame, F_FRAME_ERASE_REPLY);
     send_reply((struct any_frame*) &r);
@@ -622,6 +612,7 @@ static void handle_command(void)
     (void) usb_read(FLUXENGINE_CMD_OUT_EP_NUM, input_buffer);
 
     struct any_frame* f = (struct any_frame*) input_buffer;
+    print("command 0x%02x", f->f.type);
     switch (f->f.type)
     {
         case F_FRAME_GET_VERSION_CMD:
@@ -674,7 +665,7 @@ int main(void)
     CAPTURE_DMA_FINISHED_IRQ_StartEx(&capture_dma_finished_irq_cb);
     SEQUENCER_DMA_FINISHED_IRQ_StartEx(&replay_dma_finished_irq_cb);
     DRIVE_REG_Write(0);
-    /* UART_Start(); */
+    UART_Start();
     USBFS_Start(0, USBFS_DWR_VDDD_OPERATION);
     
     CyWdtStart(CYWDT_1024_TICKS, CYWDT_LPMODE_DISABLED);
@@ -697,10 +688,10 @@ int main(void)
         
         if (!USBFS_GetConfiguration() || USBFS_IsConfigurationChanged())
         {
-            print("Waiting for USB...\r");
+            print("Waiting for USB...");
             while (!USBFS_GetConfiguration())
                 ;
-            print("USB ready\r");
+            print("USB ready");
             USBFS_EnableOutEP(FLUXENGINE_CMD_OUT_EP_NUM);
         }
         
@@ -708,7 +699,7 @@ int main(void)
         {
             handle_command();
             USBFS_EnableOutEP(FLUXENGINE_CMD_OUT_EP_NUM);
-            print("idle\r");
+            print("idle");
         }
     }
 }
