@@ -53,7 +53,7 @@ static void usb_init()
 
 static int usb_cmd_send(void* ptr, int len)
 {
-    std::cerr << "send:\n";
+    //std::cerr << "send:\n";
     //hexdump(std::cerr, Bytes((const uint8_t*)ptr, len));
     int i = libusb_interrupt_transfer(device, FLUXENGINE_CMD_OUT_EP,
         (uint8_t*) ptr, len, &len, TIMEOUT);
@@ -68,7 +68,7 @@ void usb_cmd_recv(void* ptr, int len)
        (uint8_t*)  ptr, len, &len, TIMEOUT);
     if (i < 0)
         Error() << "failed to receive command reply: " << usberror(i);
-    std::cerr << "recv:\n";
+    //std::cerr << "recv:\n";
     //hexdump(std::cerr, Bytes((const uint8_t*)ptr, len));
 }
 
