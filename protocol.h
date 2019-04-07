@@ -3,7 +3,7 @@
 
 enum 
 {
-    FLUXENGINE_VERSION = 4,
+    FLUXENGINE_VERSION = 8,
 
     FLUXENGINE_VID = 0x1209,
     FLUXENGINE_PID = 0x6e00,
@@ -22,8 +22,11 @@ enum
     
     SIDE_SIDEA = 0<<0,
     SIDE_SIDEB = 1<<0,
-    SIDE_LOWDENSITY = 1<<1,
-    SIDE_HIGHDENSITY = 0<<1,
+    
+    DRIVE_0 = 0,
+    DRIVE_1 = 1,
+    DRIVE_DD = 0<<1,
+    DRIVE_HD = 1<<1,
     
     FRAME_SIZE = 64,
     TICK_FREQUENCY = 12000000,
@@ -40,6 +43,7 @@ enum
 enum
 {
     F_FRAME_ERROR = 0,            /* any_frame */
+    F_FRAME_DEBUG,                /* debug_frame */
     F_FRAME_GET_VERSION_CMD,      /* any_frame */
     F_FRAME_GET_VERSION_REPLY,    /* version_frame */
     F_FRAME_SEEK_CMD,             /* seek_frame */
@@ -66,6 +70,7 @@ enum
     F_ERROR_BAD_COMMAND,
     F_ERROR_UNDERRUN,
     F_ERROR_INVALID_VALUE,
+    F_ERROR_INTERNAL,
 };
 
 struct frame_header
@@ -83,6 +88,12 @@ struct error_frame
 {
     struct frame_header f;
     uint8_t error;
+};
+
+struct debug_frame
+{
+    struct frame_header f;
+    char payload[60];
 };
 
 struct version_frame
@@ -126,7 +137,7 @@ struct erase_frame
 struct set_drive_frame
 {
     struct frame_header f;
-    uint8_t drive;
+    uint8_t drive_flags;
 };
 
 #endif

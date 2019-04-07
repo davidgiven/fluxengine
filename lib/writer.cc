@@ -61,8 +61,9 @@ void writeTracks(
                 sqlWriteFlux(outdb, location.track, location.side, *fluxmap);
             else
             {
+                Bytes crunched = fluxmap->rawBytes().crunch();
                 usbSeek(location.track);
-                usbWrite(location.side, *fluxmap);
+                usbWrite(location.side, crunched);
             }
             std::cout << fmt::format(
                 "{0} ms in {1} bytes", int(fluxmap->duration()/1e6), fluxmap->bytes()) << std::endl;

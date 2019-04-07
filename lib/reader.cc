@@ -55,10 +55,9 @@ std::unique_ptr<Fluxmap> Track::read()
 	std::cout << fmt::format("{0:>3}.{1}: ", track, side) << std::flush;
 	std::unique_ptr<Fluxmap> fluxmap = _fluxReader->readFlux(track, side);
 	std::cout << fmt::format(
-		"{0} ms in {1} bytes ({2} kB/s)\n",
+		"{0} ms in {1} bytes\n",
             int(fluxmap->duration()/1e6),
-            fluxmap->bytes(),
-            (int)(1e6 * fluxmap->bytes() / fluxmap->duration()));
+            fluxmap->bytes());
 	if (outdb)
 		sqlWriteFlux(outdb, track, side, *fluxmap);
 	return fluxmap;

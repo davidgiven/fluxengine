@@ -1,6 +1,7 @@
 #include "globals.h"
 #include "bytes.h"
 #include "fmt/format.h"
+#include "crunch.h"
 #include <zlib.h>
 
 static std::shared_ptr<std::vector<uint8_t>> createVector(unsigned size)
@@ -204,6 +205,60 @@ Bytes Bytes::decompress() const
     }
     while (ret != Z_STREAM_END);
     inflateEnd(&stream);
+
+    return output;
+}
+
+Bytes Bytes::crunch() const
+{
+    Bytes output;
+    ByteWriter bw(output);
+    Bytes outputBuffer(1024*1024);
+
+    crunch_state_t cs = {};
+    cs.inputptr = begin();
+    cs.inputlen = size();
+
+    do
+    {
+        cs.outputptr = outputBuffer.begin();
+        cs.outputlen = outputBuffer.size();
+
+        ::crunch(&cs);
+        bw += outputBuffer.slice(0, outputBuffer.size() - cs.outputlen);
+    }
+    while (cs.inputlen != 0);
+    cs.outputptr = outputBuffer.begin();
+    cs.outputlen = outputBuffer.size();
+    donecrunch(&cs);
+    bw += outputBuffer.slice(0, outputBuffer.size() - cs.outputlen);
+
+    return output;
+}
+
+Bytes Bytes::uncrunch() const
+{
+    Bytes output;
+    ByteWriter bw(output);
+    Bytes outputBuffer(1024*1024);
+
+    crunch_state_t cs = {};
+    cs.inputptr = begin();
+    cs.inputlen = size();
+
+    do
+    {
+        cs.outputptr = outputBuffer.begin();
+        cs.outputlen = outputBuffer.size();
+
+        ::uncrunch(&cs);
+        bw += outputBuffer.slice(0, outputBuffer.size() - cs.outputlen);
+    }
+    while (cs.inputlen != 0);
+    cs.outputptr = outputBuffer.begin();
+    cs.outputlen = outputBuffer.size();
+    doneuncrunch(&cs);
+    bw += outputBuffer.slice(0, outputBuffer.size() - cs.outputlen);
 
     return output;
 }
