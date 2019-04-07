@@ -110,6 +110,25 @@ sensible for the command you're using.
 **Important note:** FluxEngine _always_ uses zero-based units (even if the
 *disk format says otherwise).
 
+### High density disks
+
+High density disks use a different magnetic medium to low and double density
+disks, and have different magnetic properties. 3.5" drives can usually
+autodetect what kind of medium is inserted into the drive based on the hole
+in the disk casing, but 5.25" drives can't. As a result, you need to
+explicitly tell FluxEngine on the command line whether you're using a high
+density disk or not with the `--hd` flag.
+**If you don't do this, your disks may not read correctly and will _certainly_
+fail to write correctly.**
+
+You can distinguish high density 5.25" floppies from the presence of a
+traction ring around the hole in the middle of the disk; if the ring is not
+present, the disk is probably high density. However, this isn't always the
+case, and reading the disk label is much more reliable.
+
+[Lots more information on high density vs double density disks can be found
+here.](http://www.retrotechnology.com/herbs_stuff/guzis.html)
+
 ### The commands
 
 The FluxEngine client software is a largely undocumented set of small tools.

@@ -33,7 +33,10 @@ public:
     {
         usbSetDrive(_drive, high_density);
         usbSeek(track);
-        return usbRead(side, revolutions);
+        Bytes crunched = usbRead(side, revolutions);
+        auto fluxmap = std::make_unique<Fluxmap>();
+        fluxmap->appendBytes(crunched.uncrunch());
+        return fluxmap;
     }
 
     void recalibrate()

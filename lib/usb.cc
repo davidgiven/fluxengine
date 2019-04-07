@@ -3,7 +3,9 @@
 #include "protocol.h"
 #include "fluxmap.h"
 #include "bytes.h"
+#include "crunch.h"
 #include <libusb.h>
+#include <fmt/format.h>
 
 #define TIMEOUT 5000
 
@@ -51,6 +53,8 @@ static void usb_init()
 
 static int usb_cmd_send(void* ptr, int len)
 {
+    //std::cerr << "send:\n";
+    //hexdump(std::cerr, Bytes((const uint8_t*)ptr, len));
     int i = libusb_interrupt_transfer(device, FLUXENGINE_CMD_OUT_EP,
         (uint8_t*) ptr, len, &len, TIMEOUT);
     if (i < 0)
@@ -64,13 +68,15 @@ void usb_cmd_recv(void* ptr, int len)
        (uint8_t*)  ptr, len, &len, TIMEOUT);
     if (i < 0)
         Error() << "failed to receive command reply: " << usberror(i);
+    //std::cerr << "recv:\n";
+    //hexdump(std::cerr, Bytes((const uint8_t*)ptr, len));
 }
 
 static void bad_reply(void)
 {
     struct error_frame* f = (struct error_frame*) buffer;
     if (f->f.type != F_FRAME_ERROR)
-        Error() << "bad USB reply " << f->f.type;
+        Error() << fmt::format("bad USB reply 0x{:2x}", f->f.type);
     switch (f->error)
     {
         case F_ERROR_BAD_COMMAND:
@@ -80,18 +86,26 @@ static void bad_reply(void)
             Error() << "USB underrun (not enough bandwidth)";
             
         default:
-            Error() << "unknown device error " << f->error;
+            Error() << fmt::format("unknown device error {}", f->error);
     }
 }
 
 template <typename T>
 static T* await_reply(int desired)
 {
-    usb_cmd_recv(buffer, sizeof(buffer));
-    struct any_frame* r = (struct any_frame*) buffer;
-    if (r->f.type != desired)
-        bad_reply();
-    return (T*) r;
+    for (;;)
+    {
+        usb_cmd_recv(buffer, sizeof(buffer));
+        struct any_frame* r = (struct any_frame*) buffer;
+        if (r->f.type == F_FRAME_DEBUG)
+        {
+            std::cout << "dev: " << ((struct debug_frame*)r)->payload << std::endl;
+            continue;
+        }
+        if (r->f.type != desired)
+            bad_reply();
+        return (T*) r;
+    }
 }
 
 int usbGetVersion(void)
@@ -188,7 +202,7 @@ void usbTestBulkTransport()
     await_reply<struct any_frame>(F_FRAME_BULK_TEST_REPLY);
 }
 
-std::unique_ptr<Fluxmap> usbRead(int side, int revolutions)
+Bytes usbRead(int side, int revolutions)
 {
     struct read_frame f = {
         .f = { .type = F_FRAME_READ_CMD, .size = sizeof(f) },
@@ -203,20 +217,14 @@ std::unique_ptr<Fluxmap> usbRead(int side, int revolutions)
     int len = large_bulk_transfer(FLUXENGINE_DATA_IN_EP, buffer);
     buffer.resize(len);
 
-    fluxmap->appendBytes(buffer);
-
     await_reply<struct any_frame>(F_FRAME_READ_REPLY);
-    return fluxmap;
+    return buffer;
 }
 
-void usbWrite(int side, const Fluxmap& fluxmap)
+void usbWrite(int side, const Bytes& bytes)
 {
-    unsigned safelen = fluxmap.bytes() & ~(FRAME_SIZE-1);
-
-    /* Convert from intervals to absolute timestamps. */
-
-	Bytes buffer(fluxmap.rawBytes());
-    buffer.resize(safelen);
+    unsigned safelen = bytes.size() & ~(FRAME_SIZE-1);
+    Bytes safeBytes = bytes.slice(0, safelen);
 
     struct write_frame f = {
         .f = { .type = F_FRAME_WRITE_CMD, .size = sizeof(f) },
@@ -229,7 +237,7 @@ void usbWrite(int side, const Fluxmap& fluxmap)
 
     usb_cmd_send(&f, f.f.size);
 
-    large_bulk_transfer(FLUXENGINE_DATA_OUT_EP, buffer);
+    large_bulk_transfer(FLUXENGINE_DATA_OUT_EP, safeBytes);
     
     await_reply<struct any_frame>(F_FRAME_WRITE_REPLY);
 }
@@ -251,8 +259,7 @@ void usbSetDrive(int drive, bool high_density)
 
     struct set_drive_frame f = {
         { .type = F_FRAME_SET_DRIVE_CMD, .size = sizeof(f) },
-        .drive = (uint8_t) drive,
-        .high_density = (uint8_t) high_density,
+        .drive_flags = (uint8_t)((drive ? DRIVE_1 : DRIVE_0) | (high_density ? DRIVE_HD : DRIVE_DD)),
     };
     usb_cmd_send(&f, f.f.size);
     await_reply<struct any_frame>(F_FRAME_SET_DRIVE_REPLY);

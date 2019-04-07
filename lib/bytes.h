@@ -46,6 +46,8 @@ public:
     Bytes slice(unsigned start, unsigned len) const;
     Bytes compress() const;
     Bytes decompress() const;
+    Bytes crunch() const;
+    Bytes uncrunch() const;
 
     ByteReader reader() const;
     ByteWriter writer();
