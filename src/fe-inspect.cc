@@ -112,7 +112,8 @@ int main(int argc, const char* argv[])
 			}
 
 			nanoseconds_t length = transition - lasttransition;
-			std::cout << fmt::format("==== {: 10.3f} +{:.3f} = {:.1f} clocks",
+			std::cout << fmt::format("==== {:06x} {: 10.3f} +{:.3f} = {:.1f} clocks",
+			    fr.tell(),
 				(double)transition / 1000.0,
 				(double)length / 1000.0,
 				(double)length / clockPeriod);
@@ -129,8 +130,16 @@ int main(int argc, const char* argv[])
 		size_t cursor = seekFlag*1000000.0 / clockPeriod;
 		while (cursor < bitmap.size())
 		{
-			std::cout << (bitmap[cursor] ? 'X' : '-');
-			cursor++;
+			std::cout << fmt::format("{: 10.3f} : ", (double)cursor / clockPeriod);
+			for (unsigned i=0; i<60; i++)
+			{
+				if (cursor >= bitmap.size())
+					break;
+				std::cout << (bitmap[cursor] ? 'X' : '-');
+				cursor++;
+			}
+
+			std::cout << std::endl;
 		}
 
 		std::cout << std::endl;
