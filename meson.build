@@ -171,6 +171,15 @@ f85decoderlib = declare_dependency(
         include_directories('lib/f85')
 )
 
+fb100decoderlib = declare_dependency(
+    link_with:
+        shared_library('fb100decoderlib',
+        [ 'lib/fb100/decoder.cc', ],
+        dependencies: [fmtlib, felib, decoderlib]),
+    include_directories:
+        include_directories('lib/fb100')
+)
+
 ibmdecoderlib = declare_dependency(
     link_with:
         shared_library('ibmdecoderlib',
@@ -218,6 +227,7 @@ executable('fe-readbrother',       ['src/fe-readbrother.cc'],       dependencies
 executable('fe-readc64',           ['src/fe-readc64.cc'],           dependencies: [fmtlib, felib, decoderlib, readerlib, c64decoderlib])
 executable('fe-readdfs',           ['src/fe-readdfs.cc'],           dependencies: [fmtlib, felib, decoderlib, readerlib, ibmdecoderlib])
 executable('fe-readf85',           ['src/fe-readf85.cc'],           dependencies: [fmtlib, felib, decoderlib, readerlib, f85decoderlib])
+executable('fe-readfb100',         ['src/fe-readfb100.cc'],         dependencies: [fmtlib, felib, decoderlib, readerlib, fb100decoderlib])
 executable('fe-readibm',           ['src/fe-readibm.cc'],           dependencies: [fmtlib, felib, decoderlib, readerlib, ibmdecoderlib])
 executable('fe-readmac',           ['src/fe-readmac.cc'],           dependencies: [fmtlib, felib, decoderlib, readerlib, macdecoderlib])
 executable('fe-readzilogmcz',      ['src/fe-readzilogmcz.cc'],      dependencies: [fmtlib, felib, decoderlib, readerlib, zilogmczdecoderlib])
