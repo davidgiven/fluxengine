@@ -1,19 +1,20 @@
 #ifndef FB100_H
 #define FB100_H
 
-#define FB100_SECTOR_SIZE 0x500
+#define FB100_RECORD_SIZE 0x516 /* bytes */
+#define FB100_ID_SIZE 17
+#define FB100_PAYLOAD_SIZE 0x500
 
 class Sector;
 class Fluxmap;
 
-class Fb100Decoder : public AbstractSoftSectorDecoder
+class Fb100Decoder : public AbstractStatefulDecoder
 {
 public:
     virtual ~Fb100Decoder() {}
 
-    SectorVector decodeToSectors(
-        const RawRecordVector& rawRecords, unsigned physicalTrack);
-    int recordMatcher(uint64_t fifo) const;
+    void decodeToSectors(const RawBits& bitmap, unsigned physicalTrack,
+        RawRecordVector& rawrecords, SectorVector& sectors);
 };
 
 #endif

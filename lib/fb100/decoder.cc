@@ -7,49 +7,67 @@
 #include "fb100.h"
 #include "crc.h"
 #include "bytes.h"
+#include "rawbits.h"
 #include "fmt/format.h"
 #include <string.h>
 #include <algorithm>
 
-SectorVector Fb100Decoder::decodeToSectors(const RawRecordVector& rawRecords, unsigned)
+static bool search(const RawBits& rawbits, size_t& cursor)
 {
-    std::vector<std::unique_ptr<Sector>> sectors;
-    unsigned nextSector;
-    unsigned nextTrack;
-    bool headerIsValid = false;
+    uint16_t fifo = 0;
 
-    for (auto& rawrecord : rawRecords)
+    while (cursor < rawbits.size())
     {
-        const Bytes bytes = decodeFmMfm(rawrecord->data);
-        hexdump(std::cout, bytes);
-        if (bytes.size() < 0x515)
-            continue;
+        fifo = (fifo << 1) | rawbits[cursor++];
+        
+        if (fifo == 0xabaa)
+        {
+            cursor -= 16;
+            return true;
+        }
+    }
 
-        uint8_t abssector = bytes[2];
+    return false;
+}
+
+void Fb100Decoder::decodeToSectors(const RawBits& rawbits, unsigned,
+    RawRecordVector& rawrecords, SectorVector& sectors)
+{
+    size_t cursor = 0;
+
+    for (;;)
+    {
+        if (!search(rawbits, cursor))
+            break;
+
+        unsigned record_start = cursor;
+        cursor = std::min(cursor + FB100_RECORD_SIZE*16, rawbits.size());
+        std::vector<bool> recordbits(rawbits.begin() + record_start, rawbits.begin() + cursor);
+
+        rawrecords.push_back(
+            std::unique_ptr<RawRecord>(
+                new RawRecord(
+                    record_start,
+                    recordbits.begin(),
+                    recordbits.end())
+            )
+        );
+
+        const Bytes bytes = decodeFmMfm(recordbits).slice(0, FB100_RECORD_SIZE);
+        ByteReader br(bytes);
+        br.seek(1);
+        const Bytes id = br.read(FB100_ID_SIZE);
+        uint16_t wantIdCrc = br.read_be16();
+        const Bytes payload = br.read(FB100_PAYLOAD_SIZE);
+        uint16_t wantPayloadCrc = br.read_be16();
+
+        uint8_t abssector = id[2];
         uint8_t track = abssector >> 1;
         uint8_t sectorid = abssector & 1;
 
-        uint16_t wantHeaderCrc = bytes.reader().seek(0x11).read_be16();
-
-        const Bytes payload = bytes.slice(0x13, FB100_SECTOR_SIZE);
-        uint16_t wantPayloadCrc = bytes.reader().seek(0x513).read_be16();
-        // hexdumpForSrp16(std::cout, payload);
-        // std::cout << fmt::format("{:04x}\n", wantPayloadCrc);
-
-        int status = Sector::OK;
+        int status = Sector::BAD_CHECKSUM;
         auto sector = std::unique_ptr<Sector>(
             new Sector(status, track, 0, sectorid, payload));
         sectors.push_back(std::move(sector));
     }
-
-    return sectors;
 }
-
-int Fb100Decoder::recordMatcher(uint64_t fifo) const
-{
-    uint32_t masked = fifo;
-    if (masked == 0xeaaaaeea)
-        return 22;
-    return 0;
-}
-

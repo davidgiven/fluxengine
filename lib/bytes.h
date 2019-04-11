@@ -77,6 +77,13 @@ public:
         return *this;
     }
 
+    const Bytes read(unsigned len)
+    {
+        const Bytes bytes = _bytes.slice(pos, len);
+        pos += len;
+        return bytes;
+    }
+
     uint8_t read_8()
     {
         return _bytes[pos++];
