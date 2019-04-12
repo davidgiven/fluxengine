@@ -256,6 +256,11 @@ public:
         return *this;
     }
 
+    ByteWriter& append(const Bytes data)
+    {
+        return *this += data;
+    }
+
 private:
     Bytes& _bytes;
 };

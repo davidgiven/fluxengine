@@ -153,9 +153,12 @@ void Fb100Decoder::decodeToSectors(const RawBits& rawbits, unsigned,
         uint8_t track = abssector >> 1;
         uint8_t sectorid = abssector & 1;
 
+        Bytes data;
+        data.writer().append(id.slice(5, 12)).append(payload);
+
         int status = (wantPayloadCrc == gotPayloadCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
         auto sector = std::unique_ptr<Sector>(
-            new Sector(status, track, 0, sectorid, payload));
+            new Sector(status, track, 0, sectorid, data));
         sectors.push_back(std::move(sector));
     }
 }

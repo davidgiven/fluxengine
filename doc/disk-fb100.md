@@ -8,11 +8,13 @@ usually rebadged, sometimes with a cheap paper label stuck over the Brother
 logo: the most common variant appears to be the Tandy Portable Disk Drive or
 TPDD:
 
+<div style="text-align: center">
 <a href="http://www.old-computers.com/museum/computer.asp?c=233&st=1"> <img src="tdpp.jpg" alt="A Tandy Portable Disk Drive"/></a>
+</div>
 
 It's a bit of an oddball: the disk encoding is FM with a very custom record
 scheme: 40-track single-sided 3.5" disks storing 100kB or so each. Each track
-had only _two_ sectors, each 1280 bytes, but with an additional 17 bytes of
+had only _two_ sectors, each 1280 bytes, but with an additional 12 bytes of
 ID data used for filesystem management.
 
 There was also apparently a TPDD-2 which could store twice as much data, but
@@ -28,5 +30,16 @@ Just do:
 ```
 
 You should end up with an `fb11.img` of the appropriate size. It's a simple
-array of 80 1297-byte sectors (17 bytes for the ID record plus 1280 bytes for
+array of 80 1292-byte sectors (12 bytes for the ID record plus 1280 bytes for
 the data).
+
+References
+----------
+
+  - [Tandy Portable Disk Drive operations manual](http://www.classiccmp.org/cini/pdf/Tandy/Portable%20Disk%20Drive%20Operation%20Manual.pdf)
+
+  - [Tandy Portable Disk Drive service manual](https://archive.org/details/TandyPortableDiskDriveSoftwareManual26-3808s)
+
+  - [TPDD design notes (including a dump of the ROM)](http://bitchin100.com/wiki/index.php?title=TPDD_Design_Notes)
+
+  - [Knitting machine FB-100 resources](http://www.k2g2.org/wiki:brother_fb-100)
