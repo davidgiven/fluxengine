@@ -5,6 +5,7 @@
 #include "record.h"
 #include "protocol.h"
 #include "rawbits.h"
+#include "sector.h"
 #include "fmt/format.h"
 #include <numeric>
 
@@ -31,6 +32,11 @@ static DoubleFlag signalLevelFactor(
     { "--signal-level-factor" },
     "Clock detection signal level (min + (max-min)*factor).",
     0.05);
+
+void setDecoderManualClockRate(double clockrate_us)
+{
+    manualClockRate.value = clockrate_us;
+}
 
 static const std::string BLOCK_ELEMENTS[] =
 { " ", "▏", "▎", "▍", "▌", "▋", "▊", "▉", "█" };
@@ -200,6 +206,13 @@ abort:
 nanoseconds_t AbstractDecoder::guessClock(Fluxmap& fluxmap) const
 {
     return fluxmap.guessClock();
+}
+
+void AbstractSeparatedDecoder::decodeToSectors(const RawBits& bitmap, unsigned physicalTrack,
+    RawRecordVector& rawrecords, SectorVector& sectors)
+{
+    rawrecords = extractRecords(bitmap);
+    sectors = decodeToSectors(rawrecords, physicalTrack);
 }
 
 RawRecordVector AbstractSoftSectorDecoder::extractRecords(const RawBits& rawbits) const
