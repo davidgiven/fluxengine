@@ -9,7 +9,7 @@ logo: the most common variant appears to be the Tandy Portable Disk Drive or
 TPDD:
 
 <div style="text-align: center">
-<a href="http://www.old-computers.com/museum/computer.asp?c=233&st=1"> <img src="tdpp.jpg" alt="A Tandy Portable Disk Drive"/></a>
+<a href="http://www.old-computers.com/museum/computer.asp?c=233&st=1"> <img src="tpdd.jpg" alt="A Tandy Portable Disk Drive"/></a>
 </div>
 
 It's a bit of an oddball: the disk encoding is FM with a very custom record
