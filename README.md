@@ -81,6 +81,7 @@ physical disks with these formats and so know they work.
 | [Commodore 64 1541](doc/disk-c64.md)     |  🦖   |        | and probably the other GCR formats  |
 | [Brother 120kB](doc/disk-brother.md)     |  🦄   |        |                                     |
 | [Brother 240kB](doc/disk-brother.md)     |  🦄   |   🦄   |                                     |
+| [Brother FB-100](doc/disk-fb100.md)      |  🦖   |        | Tandy Model 100, Husky Hunter, knitting machines |
 | [Macintosh 800kB](doc/disk-macintosh.md) |  🦖   |        | and probably the 400kB too          |
 | [TRS-80](doc/disk-trs80.md)              |  🦖   |        | a minor variation of the IBM scheme |
 {: .datatable }
@@ -100,6 +101,7 @@ at least, check the CRC so what data's there is probably good.
 | [Victor 9000](doc/disk-victor9k.md)      |  🦖   |        | 8-inch        |
 | [Zilog MCZ](doc/disk-zilogmcz.md)        |  🦖   |        | 8-inch _and_ hard sectors |
 {: .datatable }
+
 ### Notes
 
   - IBM PC disks are the lowest-common-denominator standard. A number of other
