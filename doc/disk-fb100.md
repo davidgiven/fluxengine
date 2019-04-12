@@ -5,8 +5,8 @@ The Brother FB-100 is a serial-attached smart floppy drive used by a several
 different machines for mass storage, including the Tandy Model 100 and
 clones, the Husky Hunter 2, and (bizarrely) several knitting machines. It was
 usually rebadged, sometimes with a cheap paper label stuck over the Brother
-logo: the most common variant appears to be the Tandy Portable Disk Drive or
-TPDD:
+logo, but the most common variant appears to be the Tandy Portable Disk Drive
+or TPDD:
 
 <div style="text-align: center">
 <a href="http://www.old-computers.com/museum/computer.asp?c=233&st=1"> <img src="tpdd.jpg" alt="A Tandy Portable Disk Drive"/></a>
@@ -29,7 +29,7 @@ Just do:
 .obj/fe-readfb100
 ```
 
-You should end up with an `fb11.img` of the appropriate size. It's a simple
+You should end up with an `fb100.img` of the appropriate size. It's a simple
 array of 80 1292-byte sectors (12 bytes for the ID record plus 1280 bytes for
 the data).
 
