@@ -104,6 +104,7 @@ static void read_track()
 
         double interval_us = b * (1e6/clockRate);
         fluxmap.appendInterval(interval_us / US_PER_TICK);
+        fluxmap.appendPulse();
 
         if (index && !oldindex)
             fluxmap.appendIndex();
