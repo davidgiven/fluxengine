@@ -273,6 +273,16 @@ ByteWriter Bytes::writer()
     return ByteWriter(*this);
 }
 
+ByteWriter& ByteWriter::operator +=(std::istream& stream)
+{
+    Bytes buffer(4096);
+
+    while (stream.read((char*) buffer.begin(), buffer.size()))
+        this->append(buffer);
+    this->append(buffer.slice(0, stream.gcount()));
+    return *this;
+}
+
 void BitWriter::push(uint32_t bits, size_t size)
 {
     bits <<= 32-size;

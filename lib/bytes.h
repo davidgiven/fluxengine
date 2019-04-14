@@ -69,11 +69,17 @@ public:
 
     unsigned pos = 0;
     bool eof() const
-    { return pos == _bytes.size(); }
+    { return pos >= _bytes.size(); }
 
     ByteReader& seek(unsigned pos)
     {
         this->pos = pos;
+        return *this;
+    }
+
+    ByteReader& skip(int delta)
+    {
+        this->pos += delta;
         return *this;
     }
 
@@ -256,9 +262,16 @@ public:
         return *this;
     }
 
+    ByteWriter& operator += (std::istream& stream);
+
     ByteWriter& append(const Bytes data)
     {
         return *this += data;
+    }
+
+    ByteWriter& append(std::istream& stream)
+    {
+        return *this += stream;
     }
 
 private:
