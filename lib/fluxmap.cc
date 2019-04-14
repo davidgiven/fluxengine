@@ -32,6 +32,11 @@ Fluxmap& Fluxmap::appendInterval(uint32_t ticks)
         ticks -= 0x7f;
     }
     appendByte((uint8_t)ticks);
+    return *this;
+}
+
+Fluxmap& Fluxmap::appendPulse()
+{
     appendByte(0x80);
     return *this;
 }

@@ -34,9 +34,7 @@ SectorVector ZilogMczDecoder::decodeToSectors(
     for (auto& rawrecord : rawRecords)
     {
         auto start = find_start_of_data(rawrecord->data);
-        auto rawbytes = decodeFmMfm(start, rawrecord->data.cend());
-        if (rawbytes.size() < 134)
-            continue;
+        auto rawbytes = decodeFmMfm(start, rawrecord->data.cend()).slice(0, 136);
 
         uint8_t sectorid = rawbytes[0] & 0x1f;
         uint8_t track = rawbytes[1] & 0x7f;
