@@ -146,7 +146,7 @@ void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename
 		{
 			std::unique_ptr<Fluxmap> fluxmap = track->read();
 
-			nanoseconds_t clockPeriod = decoder.guessClock(*fluxmap);
+			nanoseconds_t clockPeriod = decoder.guessClock(*fluxmap, track->track);
 			if (clockPeriod == 0)
 			{
 				std::cout << "       no clock detected; giving up" << std::endl;

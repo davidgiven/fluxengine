@@ -17,6 +17,8 @@ public:
     SectorVector decodeToSectors(
         const RawRecordVector& rawRecords, unsigned physicalTrack);
     int recordMatcher(uint64_t fifo) const;
+
+    nanoseconds_t guessClockImpl(Fluxmap& fluxmap, unsigned physicalTrack) const;
 };
 
 #endif

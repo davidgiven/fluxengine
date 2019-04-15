@@ -24,7 +24,8 @@ class AbstractDecoder
 public:
     virtual ~AbstractDecoder() {}
 
-    virtual nanoseconds_t guessClock(Fluxmap& fluxmap) const;
+    nanoseconds_t guessClock(Fluxmap& fluxmap, unsigned physicalTrack) const;
+    virtual nanoseconds_t guessClockImpl(Fluxmap& fluxmap, unsigned physicalTrack) const;
 
     virtual void decodeToSectors(const RawBits& bitmap, unsigned physicalTrack,
         RawRecordVector& rawrecords, SectorVector& sectors) = 0;
