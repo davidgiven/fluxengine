@@ -47,9 +47,6 @@ static const std::string BLOCK_ELEMENTS[] =
  */
 nanoseconds_t Fluxmap::guessClock() const
 {
-	if (manualClockRate != 0.0)
-		return manualClockRate * 1000.0;
-
     uint32_t buckets[256] = {};
     size_t cursor = 0;
     FluxmapReader fr(*this);
@@ -203,7 +200,14 @@ abort:
     return rawbits;
 }
 
-nanoseconds_t AbstractDecoder::guessClock(Fluxmap& fluxmap) const
+nanoseconds_t AbstractDecoder::guessClock(Fluxmap& fluxmap, unsigned physicalTrack) const
+{
+	if (manualClockRate != 0.0)
+		return manualClockRate * 1000.0;
+    return guessClockImpl(fluxmap, physicalTrack);
+}
+
+nanoseconds_t AbstractDecoder::guessClockImpl(Fluxmap& fluxmap, unsigned) const
 {
     return fluxmap.guessClock();
 }

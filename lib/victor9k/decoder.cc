@@ -119,3 +119,26 @@ int Victor9kDecoder::recordMatcher(uint64_t fifo) const
 		return 9;
     return 0;
 }
+
+nanoseconds_t Victor9kDecoder::guessClockImpl(Fluxmap& fluxmap, unsigned physicalTrack) const
+{
+    const nanoseconds_t BASE_CLOCK = 2065;
+    const double BASE_SPEED = 167.0;
+
+    if (physicalTrack < 4)
+        return BASE_CLOCK * BASE_SPEED / 237.9;
+    else if (physicalTrack < 16)
+        return BASE_CLOCK * BASE_SPEED / 224.5;
+    else if (physicalTrack < 27)
+        return BASE_CLOCK * BASE_SPEED / 212.2;
+    else if (physicalTrack < 38)
+        return BASE_CLOCK * BASE_SPEED / 199.9;
+    else if (physicalTrack < 49)
+        return BASE_CLOCK * BASE_SPEED / 187.6;
+    else if (physicalTrack < 60)
+        return BASE_CLOCK * BASE_SPEED / 175.3;
+    else if (physicalTrack < 71)    
+        return BASE_CLOCK * BASE_SPEED / 163.0;
+    else
+        return BASE_CLOCK * BASE_SPEED / 149.6;
+}
