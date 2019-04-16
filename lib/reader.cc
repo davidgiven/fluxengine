@@ -38,6 +38,10 @@ static IntFlag retries(
 	"How many times to retry each track in the event of a read failure.",
 	5);
 
+static SettableFlag highDensityFlag(
+	{ "--high-density", "-H" },
+	"set the drive to high density mode");
+
 static sqlite3* outdb;
 
 void setReaderDefaultSource(const std::string& source)
@@ -78,6 +82,8 @@ std::vector<std::unique_ptr<Track>> readTracks()
     const DataSpec& dataSpec = source.value;
 
     std::cout << "Reading from: " << dataSpec << std::endl;
+
+	setHardwareFluxReaderDensity(highDensityFlag);
 
 	if (!destination.value.empty())
 	{

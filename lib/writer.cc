@@ -6,12 +6,18 @@
 #include "protocol.h"
 #include "usb.h"
 #include "dataspec.h"
+#include "fluxreader.h"
+#include "fluxwriter.h"
 #include "fmt/format.h"
 
 static DataSpecFlag dest(
     { "--dest", "-d" },
     "destination for data",
     ":d=0:t=0-79:s=0-1");
+
+static SettableFlag highDensityFlag(
+	{ "--high-density", "-H" },
+	"set the drive to high density mode");
 
 static sqlite3* outdb;
 
@@ -26,6 +32,9 @@ void writeTracks(
     const auto& spec = dest.value;
 
     std::cout << "Writing to: " << spec << std::endl;
+
+	setHardwareFluxReaderDensity(highDensityFlag);
+	setHardwareFluxWriterDensity(highDensityFlag);
 
 	if (!spec.filename.empty())
 	{

@@ -24,6 +24,7 @@ public:
 };
 
 extern void setHardwareFluxReaderRevolutions(int revolutions);
+extern void setHardwareFluxReaderDensity(bool high_density);
 
 #endif
 

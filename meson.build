@@ -72,6 +72,20 @@ fluxreaderlib = declare_dependency(
         include_directories('lib/fluxreader')
 )
 
+fluxwriterlib = declare_dependency(
+	link_with:
+		shared_library('fluxwriterlib',
+			[
+				'lib/fluxwriter/fluxwriter.cc',
+				'lib/fluxwriter/sqlitefluxwriter.cc',
+				'lib/fluxwriter/hardwarefluxwriter.cc',
+			],
+			dependencies: [fmtlib, felib, sqllib, sqlite]
+		),
+	include_directories:
+		include_directories('lib/fluxwriter')
+)
+
 decoderlib = declare_dependency(
     link_with:
         shared_library('decoderlib',
@@ -96,7 +110,7 @@ writerlib = declare_dependency(
     link_with:
         shared_library('writerlib',
             ['lib/writer.cc'],
-            dependencies: [fmtlib, felib, sqllib, sqlite]
+            dependencies: [fmtlib, felib, sqllib, fluxreaderlib, fluxwriterlib, sqlite]
         )
 )
 

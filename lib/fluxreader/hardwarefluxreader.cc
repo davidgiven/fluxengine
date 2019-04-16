@@ -3,16 +3,18 @@
 #include "fluxmap.h"
 #include "usb.h"
 #include "fluxreader.h"
-#include <fmt/format.h>
 
 static IntFlag revolutions(
     { "--revolutions" },
     "read this many revolutions of the disk",
     1);
 
-static SettableFlag highDensity(
-    { "--high-density", "--hd" },
-    "sets the drive to high density mode");
+static bool high_density = false;
+
+void setHardwareFluxReaderDensity(bool high_density)
+{
+	::high_density = high_density;
+}
 
 class HardwareFluxReader : public FluxReader
 {
@@ -29,14 +31,11 @@ public:
 public:
     std::unique_ptr<Fluxmap> readFlux(int track, int side)
     {
-        usbSetDrive(_drive, highDensity);
+        usbSetDrive(_drive, high_density);
         usbSeek(track);
         Bytes crunched = usbRead(side, revolutions);
-        std::cout << fmt::format("({} bytes crunched) ", crunched.size());
-
-        Bytes uncrunched = crunched.uncrunch();
         auto fluxmap = std::make_unique<Fluxmap>();
-        fluxmap->appendBytes(uncrunched);
+        fluxmap->appendBytes(crunched.uncrunch());
         return fluxmap;
     }
 
@@ -52,6 +51,7 @@ public:
 
 private:
     unsigned _drive;
+    unsigned _revolutions;
 };
 
 void setHardwareFluxReaderRevolutions(int revolutions)
