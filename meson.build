@@ -92,6 +92,7 @@ decoderlib = declare_dependency(
             [
                 'lib/decoders/decoders.cc',
                 'lib/decoders/fmmfm.cc',
+                'lib/decoders/fluxreader.cc',
             ],
             dependencies: [fmtlib, felib]
         ),
@@ -102,7 +103,8 @@ decoderlib = declare_dependency(
 readerlib = declare_dependency(
     link_with:
         shared_library('readerlib',
-            ['lib/reader.cc'],
+            [
+                'lib/reader.cc'],
             dependencies: [fmtlib, felib, sqllib, decoderlib, fluxsourcelib, sqlite])
 )
                         

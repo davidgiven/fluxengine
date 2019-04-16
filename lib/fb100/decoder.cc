@@ -8,6 +8,7 @@
 #include "crc.h"
 #include "bytes.h"
 #include "rawbits.h"
+#include "track.h"
 #include "fmt/format.h"
 #include <string.h>
 #include <algorithm>
@@ -113,10 +114,14 @@ static uint16_t checksum(const Bytes& bytes)
     return (crchi << 8) | crclo;
 }
 
-void Fb100Decoder::decodeToSectors(const RawBits& rawbits, unsigned, unsigned,
-    RawRecordVector& rawrecords, SectorVector& sectors)
+void Fb100Decoder::decodeToSectors(const RawBits& rawbits, Track& track)
 {
     size_t cursor = 0;
+
+    if (track.rawrecords || track.sectors)
+        Error() << "cannot decode track twice";
+    track.rawrecords = std::make_unique<RawRecordVector>();
+    track.sectors = std::make_unique<SectorVector>();
 
     for (;;)
     {
@@ -127,7 +132,7 @@ void Fb100Decoder::decodeToSectors(const RawBits& rawbits, unsigned, unsigned,
         cursor = std::min(cursor + FB100_RECORD_SIZE*16, rawbits.size());
         std::vector<bool> recordbits(rawbits.begin() + record_start, rawbits.begin() + cursor);
 
-        rawrecords.push_back(
+        track.rawrecords->push_back(
             std::unique_ptr<RawRecord>(
                 new RawRecord(
                     record_start,
@@ -150,7 +155,7 @@ void Fb100Decoder::decodeToSectors(const RawBits& rawbits, unsigned, unsigned,
             continue;
 
         uint8_t abssector = id[2];
-        uint8_t track = abssector >> 1;
+        uint8_t trackid = abssector >> 1;
         uint8_t sectorid = abssector & 1;
 
         Bytes data;
@@ -158,7 +163,7 @@ void Fb100Decoder::decodeToSectors(const RawBits& rawbits, unsigned, unsigned,
 
         int status = (wantPayloadCrc == gotPayloadCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
         auto sector = std::unique_ptr<Sector>(
-            new Sector(status, track, 0, sectorid, data));
-        sectors.push_back(std::move(sector));
+            new Sector(status, trackid, 0, sectorid, data));
+        track.sectors->push_back(std::move(sector));
     }
 }

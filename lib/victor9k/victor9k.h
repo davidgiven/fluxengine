@@ -18,7 +18,7 @@ public:
         const RawRecordVector& rawRecords, unsigned physicalTrack, unsigned physicalSide);
     int recordMatcher(uint64_t fifo) const;
 
-    nanoseconds_t guessClockImpl(Fluxmap& fluxmap, unsigned physicalTrack, unsigned physicalSide) const;
+    nanoseconds_t guessClockImpl(Track& track) const;
 };
 
 #endif

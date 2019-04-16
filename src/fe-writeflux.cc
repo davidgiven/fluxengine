@@ -3,6 +3,9 @@
 #include "reader.h"
 #include "fluxmap.h"
 #include "writer.h"
+#include "record.h"
+#include "sector.h"
+#include "track.h"
 #include <fmt/format.h>
 #include <fstream>
 #include <ctype.h>
@@ -15,18 +18,25 @@ int main(int argc, const char* argv[])
 
     auto tracks = readTracks();
     for (auto& track : tracks)
-        track->read();
+        track->readFluxmap();
 
     writeTracks(
         [&](unsigned physicalTrack, unsigned physicalSide) -> std::unique_ptr<Fluxmap>
         {
             for (auto& track : tracks)
             {
-                if (track && (track->track == physicalTrack) && (track->side == physicalSide))
-                    return track->read();
+                if (track && (track->physicalTrack == physicalTrack) && (track->physicalSide == physicalSide))
+                {
+                    /* 
+                     * std::move actually isn't really allowed here as it'll
+                     * cause the fluxmap to be lost. But let's go with it
+                     * anyway until this code gets rewritten.
+                     */
+                    return std::move(track->fluxmap);
+                }
             }
             Error() << "missing in source";
-            throw 0; /* unreachable */
+            throw "unreachable";
         }
     );
 

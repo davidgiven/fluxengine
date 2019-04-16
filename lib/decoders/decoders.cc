@@ -5,6 +5,7 @@
 #include "record.h"
 #include "protocol.h"
 #include "rawbits.h"
+#include "track.h"
 #include "sector.h"
 #include "fmt/format.h"
 #include <numeric>
@@ -200,23 +201,22 @@ abort:
     return rawbits;
 }
 
-nanoseconds_t AbstractDecoder::guessClock(Fluxmap& fluxmap, unsigned physicalTrack, unsigned physicalSide) const
+nanoseconds_t AbstractDecoder::guessClock(Track& track) const
 {
 	if (manualClockRate != 0.0)
 		return manualClockRate * 1000.0;
-    return guessClockImpl(fluxmap, physicalTrack, physicalSide);
+    return guessClockImpl(track);
 }
 
-nanoseconds_t AbstractDecoder::guessClockImpl(Fluxmap& fluxmap, unsigned, unsigned) const
+nanoseconds_t AbstractDecoder::guessClockImpl(Track& track) const
 {
-    return fluxmap.guessClock();
+    return track.fluxmap->guessClock();
 }
 
-void AbstractSeparatedDecoder::decodeToSectors(const RawBits& bitmap, unsigned physicalTrack, unsigned physicalSide,
-    RawRecordVector& rawrecords, SectorVector& sectors)
+void AbstractSeparatedDecoder::decodeToSectors(const RawBits& bitmap, Track& track)
 {
-    rawrecords = extractRecords(bitmap);
-    sectors = decodeToSectors(rawrecords, physicalTrack, physicalSide);
+    track.rawrecords = std::make_unique<RawRecordVector>(extractRecords(bitmap));
+    track.sectors = std::make_unique<SectorVector>(decodeToSectors(*track.rawrecords, track.physicalTrack, track.physicalSide));
 }
 
 RawRecordVector AbstractSoftSectorDecoder::extractRecords(const RawBits& rawbits) const

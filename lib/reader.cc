@@ -13,6 +13,7 @@
 #include "image.h"
 #include "bytes.h"
 #include "rawbits.h"
+#include "track.h"
 #include "fmt/format.h"
 
 static DataSpecFlag source(
@@ -54,27 +55,19 @@ void setReaderRevolutions(int revolutions)
 	setHardwareFluxSourceRevolutions(revolutions);
 }
 
-std::unique_ptr<Fluxmap> Track::read()
+void Track::readFluxmap()
 {
-	std::cout << fmt::format("{0:>3}.{1}: ", track, side) << std::flush;
-	std::unique_ptr<Fluxmap> fluxmap = _FluxSource->readFlux(track, side);
+	if (fluxmap)
+		Error() << "cannot read a track twice";
+
+	std::cout << fmt::format("{0:>3}.{1}: ", physicalTrack, physicalSide) << std::flush;
+	fluxmap = fluxsource->readFlux(physicalTrack, physicalSide);
 	std::cout << fmt::format(
 		"{0} ms in {1} bytes\n",
             int(fluxmap->duration()/1e6),
             fluxmap->bytes());
 	if (outdb)
-		sqlWriteFlux(outdb, track, side, *fluxmap);
-	return fluxmap;
-}
-
-void Track::recalibrate()
-{
-	_FluxSource->recalibrate();
-}
-
-bool Track::retryable()
-{
-	return _FluxSource->retryable();
+		sqlWriteFlux(outdb, physicalTrack, physicalSide, *fluxmap);
 }
 
 std::vector<std::unique_ptr<Track>> readTracks()
@@ -100,17 +93,20 @@ std::vector<std::unique_ptr<Track>> readTracks()
 		);
 	}
 
-	std::shared_ptr<FluxSource> FluxSource = FluxSource::create(dataSpec);
+	std::shared_ptr<FluxSource> fluxSource = FluxSource::create(dataSpec);
 
 	std::vector<std::unique_ptr<Track>> tracks;
     for (const auto& location : dataSpec.locations)
-		tracks.push_back(
-			std::unique_ptr<Track>(new Track(FluxSource, location.track, location.side)));
+	{
+		auto track = std::make_unique<Track>(location.track, location.side);
+		track->fluxsource = fluxSource;
+		tracks.push_back(std::move(track));
+	}
 
 	if (justRead)
 	{
 		for (auto& track : tracks)
-			track->read();
+			track->readFluxmap();
 		
 		std::cout << "--just-read specified, halting now" << std::endl;
 		exit(0);
@@ -150,9 +146,9 @@ void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename
 		std::map<int, std::unique_ptr<Sector>> readSectors;
 		for (int retry = ::retries; retry >= 0; retry--)
 		{
-			std::unique_ptr<Fluxmap> fluxmap = track->read();
+			track->readFluxmap();
 
-			nanoseconds_t clockPeriod = decoder.guessClock(*fluxmap, track->track, track->side);
+			nanoseconds_t clockPeriod = decoder.guessClock(*track);
 			if (clockPeriod == 0)
 			{
 				std::cout << "       no clock detected; giving up" << std::endl;
@@ -160,17 +156,15 @@ void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename
 			}
 			std::cout << fmt::format("       {:.2f} us clock; ", (double)clockPeriod/1000.0) << std::flush;
 
-			const auto& bitmap = fluxmap->decodeToBits(clockPeriod);
+			const auto& bitmap = track->fluxmap->decodeToBits(clockPeriod);
 			std::cout << fmt::format("{} bytes encoded; ", bitmap.size()/8) << std::flush;
 
-			RawRecordVector rawrecords;
-			SectorVector sectors;
-			decoder.decodeToSectors(bitmap, track->track, track->side, rawrecords, sectors);
+			decoder.decodeToSectors(bitmap, *track);
 
-			std::cout << fmt::format("{} records", rawrecords.size()) << std::endl
-			          << "       " << sectors.size() << " sectors; ";
+			std::cout << fmt::format("{} records", track->rawrecords->size()) << std::endl
+			          << "       " << track->sectors->size() << " sectors; ";
 
-			for (auto& sector : sectors)
+			for (auto& sector : *track->sectors)
 			{
                 auto& replacing = readSectors[sector->sector];
 				replace_sector(replacing, sector);
@@ -192,10 +186,10 @@ void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename
 			if (hasBadSectors)
 				failures = false;
 
-			if (dumpRecords && (!hasBadSectors || (retry == 0) || !track->retryable()))
+			if (dumpRecords && (!hasBadSectors || (retry == 0) || !track->fluxsource->retryable()))
 			{
 				std::cout << "\nRaw (undecoded) records follow:\n\n";
-				for (auto& record : rawrecords)
+				for (auto& record : *track->rawrecords)
 				{
 					std::cout << fmt::format("I+{:.3f}ms", (double)(record->position*clockPeriod)/1e6)
 					          << std::endl;
@@ -210,7 +204,7 @@ void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename
 			if (!hasBadSectors)
 				break;
 
-			if (!track->retryable())
+			if (!track->fluxsource->retryable())
 				break;
             if (retry == 0)
                 std::cout << "giving up" << std::endl
@@ -218,7 +212,7 @@ void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename
             else
             {
 				std::cout << retry << " retries remaining" << std::endl;
-                track->recalibrate();
+                track->fluxsource->recalibrate();
             }
 		}
 

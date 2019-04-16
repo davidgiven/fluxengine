@@ -7,6 +7,7 @@
 #include "victor9k.h"
 #include "crc.h"
 #include "bytes.h"
+#include "track.h"
 #include "fmt/format.h"
 #include <string.h>
 #include <algorithm>
@@ -120,45 +121,46 @@ int Victor9kDecoder::recordMatcher(uint64_t fifo) const
     return 0;
 }
 
-nanoseconds_t Victor9kDecoder::guessClockImpl(Fluxmap& fluxmap, unsigned physicalTrack, unsigned physicalSide) const
+nanoseconds_t Victor9kDecoder::guessClockImpl(Track& track) const
 {
     const nanoseconds_t BASE_CLOCK = 2065;
     const double BASE_SPEED = 167.0;
 
-    switch (physicalSide)
+    unsigned trackid = track.physicalTrack;
+    switch (track.physicalSide)
     {
         case 0:
-            if (physicalTrack < 4)
+            if (trackid < 4)
                 return BASE_CLOCK * BASE_SPEED / 237.9;
-            else if (physicalTrack < 16)
+            else if (trackid < 16)
                 return BASE_CLOCK * BASE_SPEED / 224.5;
-            else if (physicalTrack < 27)
+            else if (trackid < 27)
                 return BASE_CLOCK * BASE_SPEED / 212.2;
-            else if (physicalTrack < 38)
+            else if (trackid < 38)
                 return BASE_CLOCK * BASE_SPEED / 199.9;
-            else if (physicalTrack < 49)
+            else if (trackid < 49)
                 return BASE_CLOCK * BASE_SPEED / 187.6;
-            else if (physicalTrack < 60)
+            else if (trackid < 60)
                 return BASE_CLOCK * BASE_SPEED / 175.3;
-            else if (physicalTrack < 71)    
+            else if (trackid < 71)    
                 return BASE_CLOCK * BASE_SPEED / 163.0;
             else
                 return BASE_CLOCK * BASE_SPEED / 149.6;
         
         case 1:
-            if (physicalTrack < 8)
+            if (trackid < 8)
                 return BASE_CLOCK * BASE_SPEED / 224.5;
-            else if (physicalTrack < 19)
+            else if (trackid < 19)
                 return BASE_CLOCK * BASE_SPEED / 212.2;
-            else if (physicalTrack < 30)
+            else if (trackid < 30)
                 return BASE_CLOCK * BASE_SPEED / 199.9;
-            else if (physicalTrack < 41)
+            else if (trackid < 41)
                 return BASE_CLOCK * BASE_SPEED / 187.6;
-            else if (physicalTrack < 52)
+            else if (trackid < 52)
                 return BASE_CLOCK * BASE_SPEED / 175.3;
-            else if (physicalTrack < 63)    
+            else if (trackid < 63)    
                 return BASE_CLOCK * BASE_SPEED / 163.0;
-            else if (physicalTrack < 75)
+            else if (trackid < 75)
                 return BASE_CLOCK * BASE_SPEED / 149.6;
             else
                 return BASE_CLOCK * BASE_SPEED / 144.0;

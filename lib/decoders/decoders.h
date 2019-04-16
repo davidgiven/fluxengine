@@ -7,6 +7,7 @@ class Sector;
 class Fluxmap;
 class RawRecord;
 class RawBits;
+class Track;
 
 typedef std::vector<std::unique_ptr<RawRecord>> RawRecordVector;
 typedef std::vector<std::unique_ptr<Sector>> SectorVector;
@@ -24,13 +25,13 @@ class AbstractDecoder
 public:
     virtual ~AbstractDecoder() {}
 
-    nanoseconds_t guessClock(Fluxmap& fluxmap, unsigned physicalTrack, unsigned physicalSide) const;
-    virtual nanoseconds_t guessClockImpl(Fluxmap& fluxmap, unsigned physicalTrack, unsigned physicalSide) const;
+    nanoseconds_t guessClock(Track& track) const;
+    virtual nanoseconds_t guessClockImpl(Track& track) const;
 
-    virtual void decodeToSectors(const RawBits& bitmap, unsigned physicalTrack,
-        unsigned physicalSide, RawRecordVector& rawrecords, SectorVector& sectors) = 0;
+    virtual void decodeToSectors(const RawBits& bitmap, Track& track) = 0;
 };
 
+/* DEPRECATED */
 class AbstractSeparatedDecoder : public AbstractDecoder
 {
 public:
@@ -40,10 +41,10 @@ public:
     virtual SectorVector decodeToSectors(const RawRecordVector& rawrecords,
             unsigned physicalTrack, unsigned physicalSide) = 0;
 
-    void decodeToSectors(const RawBits& bitmap, unsigned physicalTrack, unsigned physicalSide,
-        RawRecordVector& rawrecords, SectorVector& sectors);
+    void decodeToSectors(const RawBits& bitmap, Track& track);
 };
 
+/* DEPRECATED */
 class AbstractSoftSectorDecoder : public AbstractSeparatedDecoder
 {
 public:
@@ -54,6 +55,7 @@ public:
     virtual int recordMatcher(uint64_t fifo) const = 0;
 };
 
+/* DEPRECATED */
 class AbstractHardSectorDecoder : public AbstractSeparatedDecoder
 {
 public:
