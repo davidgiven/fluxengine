@@ -27,7 +27,7 @@ static std::vector<bool>::const_iterator find_start_of_data(const std::vector<bo
 }
 
 SectorVector ZilogMczDecoder::decodeToSectors(
-        const RawRecordVector& rawRecords, unsigned physicalTrack)
+        const RawRecordVector& rawRecords, unsigned physicalTrack, unsigned physicalSide)
 {
     std::vector<std::unique_ptr<Sector>> sectors;
 

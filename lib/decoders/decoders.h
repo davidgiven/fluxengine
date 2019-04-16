@@ -24,11 +24,11 @@ class AbstractDecoder
 public:
     virtual ~AbstractDecoder() {}
 
-    nanoseconds_t guessClock(Fluxmap& fluxmap, unsigned physicalTrack) const;
-    virtual nanoseconds_t guessClockImpl(Fluxmap& fluxmap, unsigned physicalTrack) const;
+    nanoseconds_t guessClock(Fluxmap& fluxmap, unsigned physicalTrack, unsigned physicalSide) const;
+    virtual nanoseconds_t guessClockImpl(Fluxmap& fluxmap, unsigned physicalTrack, unsigned physicalSide) const;
 
     virtual void decodeToSectors(const RawBits& bitmap, unsigned physicalTrack,
-        RawRecordVector& rawrecords, SectorVector& sectors) = 0;
+        unsigned physicalSide, RawRecordVector& rawrecords, SectorVector& sectors) = 0;
 };
 
 class AbstractSeparatedDecoder : public AbstractDecoder
@@ -38,9 +38,9 @@ public:
 
     virtual RawRecordVector extractRecords(const RawBits& rawbits) const = 0;
     virtual SectorVector decodeToSectors(const RawRecordVector& rawrecords,
-            unsigned physicalTrack) = 0;
+            unsigned physicalTrack, unsigned physicalSide) = 0;
 
-    void decodeToSectors(const RawBits& bitmap, unsigned physicalTrack,
+    void decodeToSectors(const RawBits& bitmap, unsigned physicalTrack, unsigned physicalSide,
         RawRecordVector& rawrecords, SectorVector& sectors);
 };
 

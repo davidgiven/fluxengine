@@ -10,7 +10,7 @@
 static_assert(std::is_trivially_copyable<IbmIdam>::value,
 		"IbmIdam is not trivially copyable");
 
-SectorVector AbstractIbmDecoder::decodeToSectors(const RawRecordVector& rawRecords, unsigned)
+SectorVector AbstractIbmDecoder::decodeToSectors(const RawRecordVector& rawRecords, unsigned, unsigned)
 {
     bool idamValid = false;
     IbmIdam idam;

@@ -59,7 +59,7 @@ static uint32_t checksum(const Bytes& bytes)
     return checksum & 0x55555555;
 }
 
-SectorVector AmigaDecoder::decodeToSectors(const RawRecordVector& rawRecords, unsigned)
+SectorVector AmigaDecoder::decodeToSectors(const RawRecordVector& rawRecords, unsigned, unsigned)
 {
     std::vector<std::unique_ptr<Sector>> sectors;
 

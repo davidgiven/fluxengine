@@ -21,7 +21,7 @@ static Bytes reverse_bits(const Bytes& input)
     return output;
 }
 
-SectorVector AesLanierDecoder::decodeToSectors(const RawRecordVector& rawRecords, unsigned)
+SectorVector AesLanierDecoder::decodeToSectors(const RawRecordVector& rawRecords, unsigned, unsigned)
 {
     std::vector<std::unique_ptr<Sector>> sectors;
 

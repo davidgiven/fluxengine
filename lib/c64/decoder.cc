@@ -47,7 +47,7 @@ static Bytes decode(const std::vector<bool>& bits)
     return output;
 }
 
-SectorVector Commodore64Decoder::decodeToSectors(const RawRecordVector& rawRecords, unsigned)
+SectorVector Commodore64Decoder::decodeToSectors(const RawRecordVector& rawRecords, unsigned, unsigned)
 {
     std::vector<std::unique_ptr<Sector>> sectors;
     unsigned nextSector;

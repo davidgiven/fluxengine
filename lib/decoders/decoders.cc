@@ -200,23 +200,23 @@ abort:
     return rawbits;
 }
 
-nanoseconds_t AbstractDecoder::guessClock(Fluxmap& fluxmap, unsigned physicalTrack) const
+nanoseconds_t AbstractDecoder::guessClock(Fluxmap& fluxmap, unsigned physicalTrack, unsigned physicalSide) const
 {
 	if (manualClockRate != 0.0)
 		return manualClockRate * 1000.0;
-    return guessClockImpl(fluxmap, physicalTrack);
+    return guessClockImpl(fluxmap, physicalTrack, physicalSide);
 }
 
-nanoseconds_t AbstractDecoder::guessClockImpl(Fluxmap& fluxmap, unsigned) const
+nanoseconds_t AbstractDecoder::guessClockImpl(Fluxmap& fluxmap, unsigned, unsigned) const
 {
     return fluxmap.guessClock();
 }
 
-void AbstractSeparatedDecoder::decodeToSectors(const RawBits& bitmap, unsigned physicalTrack,
+void AbstractSeparatedDecoder::decodeToSectors(const RawBits& bitmap, unsigned physicalTrack, unsigned physicalSide,
     RawRecordVector& rawrecords, SectorVector& sectors)
 {
     rawrecords = extractRecords(bitmap);
-    sectors = decodeToSectors(rawrecords, physicalTrack);
+    sectors = decodeToSectors(rawrecords, physicalTrack, physicalSide);
 }
 
 RawRecordVector AbstractSoftSectorDecoder::extractRecords(const RawBits& rawbits) const
