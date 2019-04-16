@@ -1,22 +1,14 @@
 Disk: Victor 9000
 =================
 
-**Warning.** This is experimental; I haven't found a clean disk to read yet.
-The fragmented disk images which I have found ([from
-vintagecomputer.ca](http://vintagecomputer.ca/files/Victor%209000/)) get
-about 57% good sectors. It could just be that the disks are bad, but there
-could also be something wrong with my decode logic. If you have any Victor
-disks and want to give this a try for real, [please get in
-touch](https://github.com/davidgiven/fluxengine/issues/new).
-
 The Victor 9000 / Sirius One was a rather strange old 8086-based machine
 which used a disk format very reminiscent of the Commodore format; not a
 coincidence, as Chuck Peddle designed them both. They're 80-track, 512-byte
 sector GCR disks, with a variable-speed drive and a varying number of sectors
-per track --- from 19 to 12. Reports are that they're double-sided but I've
-never seen a double-sided disk image.
+per track --- from 19 to 12. Disks can be double-sided, meaning that they can
+store 1513kB per disk, which was almost unheard of back then.
 
-FluxEngine reads them (subject to the warning above).
+FluxEngine reads these.
 
 Reading discs
 -------------
