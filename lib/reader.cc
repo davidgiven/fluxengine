@@ -1,7 +1,7 @@
 #include "globals.h"
 #include "flags.h"
 #include "usb.h"
-#include "fluxreader.h"
+#include "fluxsource.h"
 #include "reader.h"
 #include "fluxmap.h"
 #include "sql.h"
@@ -51,13 +51,13 @@ void setReaderDefaultSource(const std::string& source)
 
 void setReaderRevolutions(int revolutions)
 {
-	setHardwareFluxReaderRevolutions(revolutions);
+	setHardwareFluxSourceRevolutions(revolutions);
 }
 
 std::unique_ptr<Fluxmap> Track::read()
 {
 	std::cout << fmt::format("{0:>3}.{1}: ", track, side) << std::flush;
-	std::unique_ptr<Fluxmap> fluxmap = _fluxReader->readFlux(track, side);
+	std::unique_ptr<Fluxmap> fluxmap = _FluxSource->readFlux(track, side);
 	std::cout << fmt::format(
 		"{0} ms in {1} bytes\n",
             int(fluxmap->duration()/1e6),
@@ -69,12 +69,12 @@ std::unique_ptr<Fluxmap> Track::read()
 
 void Track::recalibrate()
 {
-	_fluxReader->recalibrate();
+	_FluxSource->recalibrate();
 }
 
 bool Track::retryable()
 {
-	return _fluxReader->retryable();
+	return _FluxSource->retryable();
 }
 
 std::vector<std::unique_ptr<Track>> readTracks()
@@ -83,7 +83,7 @@ std::vector<std::unique_ptr<Track>> readTracks()
 
     std::cout << "Reading from: " << dataSpec << std::endl;
 
-	setHardwareFluxReaderDensity(highDensityFlag);
+	setHardwareFluxSourceDensity(highDensityFlag);
 
 	if (!destination.value.empty())
 	{
@@ -100,12 +100,12 @@ std::vector<std::unique_ptr<Track>> readTracks()
 		);
 	}
 
-	std::shared_ptr<FluxReader> fluxreader = FluxReader::create(dataSpec);
+	std::shared_ptr<FluxSource> FluxSource = FluxSource::create(dataSpec);
 
 	std::vector<std::unique_ptr<Track>> tracks;
     for (const auto& location : dataSpec.locations)
 		tracks.push_back(
-			std::unique_ptr<Track>(new Track(fluxreader, location.track, location.side)));
+			std::unique_ptr<Track>(new Track(FluxSource, location.track, location.side)));
 
 	if (justRead)
 	{

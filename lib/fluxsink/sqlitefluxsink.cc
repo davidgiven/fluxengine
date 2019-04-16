@@ -1,13 +1,13 @@
 #include "globals.h"
 #include "fluxmap.h"
 #include "sql.h"
-#include "fluxwriter.h"
+#include "fluxsink.h"
 #include "fmt/format.h"
 
-class SqliteFluxWriter : public FluxWriter
+class SqliteFluxSink : public FluxSink
 {
 public:
-    SqliteFluxWriter(const std::string& filename)
+    SqliteFluxSink(const std::string& filename)
     {
 		_outdb = sqlOpen(filename, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
 		int oldVersion = sqlReadIntProperty(_outdb, "version");
@@ -20,7 +20,7 @@ public:
         sqlWriteIntProperty(_outdb, "version", FLUX_VERSION_CURRENT);
     }
 
-    ~SqliteFluxWriter()
+    ~SqliteFluxSink()
     {
         if (_outdb)
 		{
@@ -39,9 +39,9 @@ private:
     sqlite3* _outdb;
 };
 
-std::unique_ptr<FluxWriter> FluxWriter::createSqliteFluxWriter(const std::string& filename)
+std::unique_ptr<FluxSink> FluxSink::createSqliteFluxSink(const std::string& filename)
 {
-    return std::unique_ptr<FluxWriter>(new SqliteFluxWriter(filename));
+    return std::unique_ptr<FluxSink>(new SqliteFluxSink(filename));
 }
 
 

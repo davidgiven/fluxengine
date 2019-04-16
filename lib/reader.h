@@ -2,7 +2,7 @@
 #define READER_H
 
 class Fluxmap;
-class FluxReader;
+class FluxSource;
 class AbstractDecoder;
 
 extern void setReaderDefaultSource(const std::string& source);
@@ -11,10 +11,10 @@ extern void setReaderRevolutions(int revolutions);
 class Track
 {
 public:
-    Track(std::shared_ptr<FluxReader>& fluxReader, unsigned track, unsigned side):
+    Track(std::shared_ptr<FluxSource>& FluxSource, unsigned track, unsigned side):
         track(track),
         side(side),
-        _fluxReader(fluxReader)
+        _FluxSource(FluxSource)
     {}
 
 public:
@@ -26,7 +26,7 @@ public:
     unsigned side;
 
 private:
-    std::shared_ptr<FluxReader> _fluxReader;
+    std::shared_ptr<FluxSource> _FluxSource;
 };
 
 extern std::vector<std::unique_ptr<Track>> readTracks();

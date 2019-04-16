@@ -1,13 +1,13 @@
 #include "globals.h"
 #include "fluxmap.h"
 #include "sql.h"
-#include "fluxreader.h"
+#include "fluxsource.h"
 #include "fmt/format.h"
 
-class SqliteFluxReader : public FluxReader
+class SqliteFluxSource : public FluxSource
 {
 public:
-    SqliteFluxReader(const std::string& filename)
+    SqliteFluxSource(const std::string& filename)
     {
         _indb = sqlOpen(filename, SQLITE_OPEN_READONLY);
         int version = sqlGetVersion(_indb);
@@ -16,7 +16,7 @@ public:
                 version, FLUX_VERSION_CURRENT);
     }
 
-    ~SqliteFluxReader()
+    ~SqliteFluxSource()
     {
         if (_indb)
             sqlClose(_indb);
@@ -34,9 +34,9 @@ private:
     sqlite3* _indb;
 };
 
-std::unique_ptr<FluxReader> FluxReader::createSqliteFluxReader(const std::string& filename)
+std::unique_ptr<FluxSource> FluxSource::createSqliteFluxSource(const std::string& filename)
 {
-    return std::unique_ptr<FluxReader>(new SqliteFluxReader(filename));
+    return std::unique_ptr<FluxSource>(new SqliteFluxSource(filename));
 }
 
 

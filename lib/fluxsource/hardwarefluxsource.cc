@@ -2,7 +2,7 @@
 #include "flags.h"
 #include "fluxmap.h"
 #include "usb.h"
-#include "fluxreader.h"
+#include "fluxsource.h"
 
 static IntFlag revolutions(
     { "--revolutions" },
@@ -11,20 +11,20 @@ static IntFlag revolutions(
 
 static bool high_density = false;
 
-void setHardwareFluxReaderDensity(bool high_density)
+void setHardwareFluxSourceDensity(bool high_density)
 {
 	::high_density = high_density;
 }
 
-class HardwareFluxReader : public FluxReader
+class HardwareFluxSource : public FluxSource
 {
 public:
-    HardwareFluxReader(unsigned drive):
+    HardwareFluxSource(unsigned drive):
         _drive(drive)
     {
     }
 
-    ~HardwareFluxReader()
+    ~HardwareFluxSource()
     {
     }
 
@@ -54,14 +54,14 @@ private:
     unsigned _revolutions;
 };
 
-void setHardwareFluxReaderRevolutions(int revolutions)
+void setHardwareFluxSourceRevolutions(int revolutions)
 {
     ::revolutions.value = ::revolutions.defaultValue = revolutions;
 }
 
-std::unique_ptr<FluxReader> FluxReader::createHardwareFluxReader(unsigned drive)
+std::unique_ptr<FluxSource> FluxSource::createHardwareFluxSource(unsigned drive)
 {
-    return std::unique_ptr<FluxReader>(new HardwareFluxReader(drive));
+    return std::unique_ptr<FluxSource>(new HardwareFluxSource(drive));
 }
 
 

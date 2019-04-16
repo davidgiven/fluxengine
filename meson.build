@@ -56,34 +56,34 @@ sqllib = declare_dependency(
         )
 )
 
-fluxreaderlib = declare_dependency(
+fluxsourcelib = declare_dependency(
     link_with:
-        shared_library('fluxreaderlib',
+        shared_library('fluxsourcelib',
             [
-                'lib/fluxreader/fluxreader.cc',
-                'lib/fluxreader/sqlitefluxreader.cc',
-                'lib/fluxreader/hardwarefluxreader.cc',
-                'lib/fluxreader/streamfluxreader.cc',
-                'lib/fluxreader/kryoflux.cc',
+                'lib/fluxsource/fluxsource.cc',
+                'lib/fluxsource/sqlitefluxsource.cc',
+                'lib/fluxsource/hardwarefluxsource.cc',
+                'lib/fluxsource/streamfluxsource.cc',
+                'lib/fluxsource/kryoflux.cc',
             ],
             dependencies: [fmtlib, felib, sqllib, sqlite]
         ),
     include_directories:
-        include_directories('lib/fluxreader')
+        include_directories('lib/fluxsource')
 )
 
-fluxwriterlib = declare_dependency(
+fluxsinklib = declare_dependency(
 	link_with:
-		shared_library('fluxwriterlib',
+		shared_library('fluxsinklib',
 			[
-				'lib/fluxwriter/fluxwriter.cc',
-				'lib/fluxwriter/sqlitefluxwriter.cc',
-				'lib/fluxwriter/hardwarefluxwriter.cc',
+				'lib/fluxsink/fluxsink.cc',
+				'lib/fluxsink/sqlitefluxsink.cc',
+				'lib/fluxsink/hardwarefluxsink.cc',
 			],
 			dependencies: [fmtlib, felib, sqllib, sqlite]
 		),
 	include_directories:
-		include_directories('lib/fluxwriter')
+		include_directories('lib/fluxsink')
 )
 
 decoderlib = declare_dependency(
@@ -103,14 +103,14 @@ readerlib = declare_dependency(
     link_with:
         shared_library('readerlib',
             ['lib/reader.cc'],
-            dependencies: [fmtlib, felib, sqllib, decoderlib, fluxreaderlib, sqlite])
+            dependencies: [fmtlib, felib, sqllib, decoderlib, fluxsourcelib, sqlite])
 )
                         
 writerlib = declare_dependency(
     link_with:
         shared_library('writerlib',
             ['lib/writer.cc'],
-            dependencies: [fmtlib, felib, sqllib, fluxreaderlib, fluxwriterlib, sqlite]
+            dependencies: [fmtlib, felib, sqllib, fluxsourcelib, fluxsinklib, sqlite]
         )
 )
 
@@ -261,7 +261,7 @@ test('DataSpec',        executable('dataspec-test', ['tests/dataspec.cc'],      
 test('Flags',           executable('flags-test', ['tests/flags.cc'],                   dependencies: [felib]))
 test('FmMfm',           executable('fmmfm-test', ['tests/fmmfm.cc'],                   dependencies: [felib, decoderlib]))
 test('BitAccumulator',  executable('bitaccumulator-test', ['tests/bitaccumulator.cc'], dependencies: [felib]))
-test('Kryoflux',        executable('kryoflux-test', ['tests/kryoflux.cc'],             dependencies: [felib, decoderlib, fluxreaderlib]))
+test('Kryoflux',        executable('kryoflux-test', ['tests/kryoflux.cc'],             dependencies: [felib, decoderlib, fluxsourcelib]))
 test('Compression',     executable('compression-test', ['tests/compression.cc'],       dependencies: [felib, decoderlib]))
 test('Bytes',           executable('bytes-test', ['tests/bytes.cc'],                   dependencies: [felib]))
 test('Crunch',          executable('crunch-test', ['tests/crunch.cc'],                 dependencies: [felib, crunchlib]))
