@@ -20,6 +20,7 @@ static void update_version_1_to_2()
             if (b < 0x80)
             {
                 after.appendInterval(b + pending);
+                after.appendPulse();
                 pending = 0;
             }
             else

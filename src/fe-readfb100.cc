@@ -7,21 +7,22 @@
 #include "sector.h"
 #include "sectorset.h"
 #include "record.h"
-#include "zilogmcz.h"
+#include "fb100.h"
 #include <fmt/format.h>
 
 static StringFlag outputFilename(
     { "--output", "-o" },
     "The output image file to write to.",
-    "zilogmcz.img");
+    "fb100.img");
 
 int main(int argc, const char* argv[])
 {
-	setReaderDefaultSource(":t=0-76:s=0");
+	setReaderDefaultSource(":t=0-79:s=0");
     setReaderRevolutions(2);
+    setDecoderManualClockRate(4.0);
     Flag::parseFlags(argc, argv);
 
-	ZilogMczDecoder decoder;
+	Fb100Decoder decoder;
 	readDiskCommand(decoder, outputFilename);
     return 0;
 }

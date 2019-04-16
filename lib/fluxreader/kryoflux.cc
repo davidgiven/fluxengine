@@ -6,7 +6,10 @@
 #include <fstream>
 #include <glob.h>
 
-#define SCLK_HZ 24027428.57142857
+#define MCLK_HZ (((18432000.0 * 73.0) / 14.0) / 2.0)
+#define SCLK_HZ (MCLK_HZ / 2)
+#define ICLK_HZ (MCLK_HZ / 16)
+
 #define TICKS_PER_SCLK (TICK_FREQUENCY / SCLK_HZ)
 
 std::unique_ptr<Fluxmap> readStream(const std::string& dir, unsigned track, unsigned side)
@@ -30,37 +33,41 @@ std::unique_ptr<Fluxmap> readStream(const std::string& filename)
     if (!f.is_open())
 		Error() << fmt::format("cannot open input file '{}'", filename);
 
-    return readStream(f);
+    Bytes bytes;
+    ByteWriter bw(bytes);
+    bw.append(f);
+
+    return readStream(bytes);
 }
 
-std::unique_ptr<Fluxmap> readStream(std::istream& f)
+std::unique_ptr<Fluxmap> readStream(const Bytes& bytes)
 {
-    std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
-    auto writeFlux = [&](uint32_t sclk)
-    {
-        int ticks = (double)sclk * TICKS_PER_SCLK;
-        fluxmap->appendInterval(ticks);
-    };
+    ByteReader br(bytes);
 
-    uint32_t extrasclks = 0;
-    for (;;)
+    /* Pass 1: scan the stream looking for index marks. */
+    
+    std::set<uint32_t> indexmarks;
+    br.seek(0);
+    while (!br.eof())
     {
-        int b = f.get(); /* returns -1 or UNSIGNED char */
-        if (b == -1)
-            break;
-
+        uint8_t b = br.read_8();
+        unsigned len = 0;
         switch (b)
         {
             case 0x0d: /* OOB block */
             {
-                int blocktype = f.get();
-                (void) blocktype;
-                uint16_t blocklen = f.get() | (f.get()<<8);
-                if (f.fail() || f.eof())
-                    goto finished;
+                int blocktype = br.read_8();
+                len = br.read_le16();
+                if (br.eof())
+                    goto finished_pass_1;
 
-                while (blocklen--)
-                    f.get();
+                if (blocktype == 0x02)
+                {
+                    /* index data, sent asynchronously */
+                    uint32_t streampos = br.read_le32();
+                    indexmarks.insert(streampos);
+                    len -= 4;
+                }
                 break;
             }
 
@@ -69,7 +76,104 @@ std::unique_ptr<Fluxmap> readStream(std::istream& f)
                 if ((b >= 0x00) && (b <= 0x07))
                 {
                     /* Flux2: double byte value */
-                    b = (b<<8) | f.get();
+                    len = 1;
+                }
+                else if (b == 0x08)
+                {
+                    /* Nop1: do nothing */
+                    len = 0;
+                }
+                else if (b == 0x09)
+                {
+                    /* Nop2: skip one byte */
+                    len = 1;
+                }
+                else if (b == 0x0a)
+                {
+                    /* Nop3: skip two bytes */
+                    len = 2;
+                }
+                else if (b == 0x0b)
+                {
+                    /* Ovl16: the next block is 0x10000 sclks longer than normal. */
+                    len = 0;
+                }
+                else if (b == 0x0c)
+                {
+                    /* Flux3: triple byte value */
+                    len = 2;
+                }
+                else if ((b >= 0x0e) && (b <= 0xff))
+                {
+                    /* Flux1: single byte value */
+                    len = 0;
+                }
+                else
+                    Error() << fmt::format(
+                        "unknown stream block byte 0x{:02x} at 0x{:08x}", b, (uint64_t)br.pos-1);
+            }
+        }
+
+        br.skip(len);
+    }
+finished_pass_1:
+
+    /* Pass 2: actually read the data. */
+
+    std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
+    int streamdelta = 0;
+    auto writeFlux = [&](uint32_t sclk)
+    {
+        const auto& nextindex = indexmarks.begin();
+        if (nextindex != indexmarks.end())
+        {
+            uint32_t nextindexpos = *nextindex + streamdelta;
+            if (br.pos >= nextindexpos)
+            {
+                fluxmap->appendIndex();
+                indexmarks.erase(nextindex);
+            }
+        }
+        int ticks = (double)sclk * TICKS_PER_SCLK;
+        fluxmap->appendInterval(ticks);
+        fluxmap->appendPulse();
+    };
+
+    uint32_t extrasclks = 0;
+    br.seek(0);
+    while (!br.eof())
+    {
+        unsigned b = br.read_8();
+        switch (b)
+        {
+            case 0x0d: /* OOB block */
+            {
+                int blocktype = br.read_8();
+                uint16_t blocklen = br.read_le16();
+                if (br.eof())
+                    goto finished_pass_2;
+
+                switch (blocktype)
+                {
+                    case 0x01: /* streaminfo */
+                    {
+                        uint32_t blockpos = br.pos - 3;
+                        streamdelta = blockpos - br.read_le32();
+                        blocklen -= 4;
+                        break;
+                    }
+                }
+
+                br.skip(blocklen);
+                break;
+            }
+
+            default:
+            {
+                if ((b >= 0x00) && (b <= 0x07))
+                {
+                    /* Flux2: double byte value */
+                    b = (b<<8) | br.read_8();
                     writeFlux(extrasclks + b);
                     extrasclks = 0;
                 }
@@ -80,13 +184,12 @@ std::unique_ptr<Fluxmap> readStream(std::istream& f)
                 else if (b == 0x09)
                 {
                     /* Nop2: skip one byte */
-                    f.get();
+                    br.skip(1);
                 }
                 else if (b == 0x0a)
                 {
                     /* Nop3: skip two bytes */
-                    f.get();
-                    f.get();
+                    br.skip(2);
                 }
                 else if (b == 0x0b)
                 {
@@ -96,8 +199,7 @@ std::unique_ptr<Fluxmap> readStream(std::istream& f)
                 else if (b == 0x0c)
                 {
                     /* Flux3: triple byte value */
-                    int ticks = f.get() << 8;
-                    ticks |= f.get();
+                    int ticks = br.read_be16(); /* yes, really big-endian */
                     writeFlux(extrasclks + ticks);
                     extrasclks = 0;
                 }
@@ -109,13 +211,13 @@ std::unique_ptr<Fluxmap> readStream(std::istream& f)
                 }
                 else
                     Error() << fmt::format(
-                        "unknown stream block byte 0x{:02x} at 0x{:08x}", b, (uint64_t)f.tellg()-1);
+                        "unknown stream block byte 0x{:02x} at 0x{:08x}", b, (uint64_t)br.pos-1);
             }
         }
     }
 
-finished:
-    if (!f.eof())
+finished_pass_2:
+    if (!br.eof())
         Error() << "I/O error reading stream";
     return fluxmap;
 }

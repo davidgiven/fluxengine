@@ -119,7 +119,7 @@ uint8_t decode_side(uint8_t side)
 }
 
 SectorVector MacintoshDecoder::decodeToSectors(
-        const RawRecordVector& rawRecords, unsigned physicalTrack)
+        const RawRecordVector& rawRecords, unsigned physicalTrack, unsigned physicalSide)
 {
     std::vector<std::unique_ptr<Sector>> sectors;
     int nextSector;

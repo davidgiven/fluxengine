@@ -69,12 +69,25 @@ public:
 
     unsigned pos = 0;
     bool eof() const
-    { return pos == _bytes.size(); }
+    { return pos >= _bytes.size(); }
 
     ByteReader& seek(unsigned pos)
     {
         this->pos = pos;
         return *this;
+    }
+
+    ByteReader& skip(int delta)
+    {
+        this->pos += delta;
+        return *this;
+    }
+
+    const Bytes read(unsigned len)
+    {
+        const Bytes bytes = _bytes.slice(pos, len);
+        pos += len;
+        return bytes;
     }
 
     uint8_t read_8()
@@ -247,6 +260,18 @@ public:
         std::copy(data.begin(), data.end(), _bytes.begin() + pos);
         pos += data.size();
         return *this;
+    }
+
+    ByteWriter& operator += (std::istream& stream);
+
+    ByteWriter& append(const Bytes data)
+    {
+        return *this += data;
+    }
+
+    ByteWriter& append(std::istream& stream)
+    {
+        return *this += stream;
     }
 
 private:

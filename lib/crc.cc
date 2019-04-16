@@ -2,6 +2,47 @@
 #include "bytes.h"
 #include "crc.h"
 
+template <class T>
+T reflect(T bin, unsigned width = sizeof(T)*8)
+{
+	T bout = 0;
+	while (width--)
+	{
+		bout <<= 1;
+		bout |= (bin & 1);
+		bin >>= 1;
+	}
+	return bout;
+}
+
+uint64_t generic_crc(const struct crcspec& spec, const Bytes& bytes)
+{
+	uint64_t crc = spec.init;
+	uint64_t top = 1LL << (spec.width-1);
+	uint64_t mask = (top<<1) - 1;
+
+	for (uint8_t b : bytes)
+	{
+		if (spec.refin)
+			b = reflect(b);
+
+		for (uint8_t i = 0x80; i != 0; i >>= 1)
+		{
+			uint64_t bit = crc & top;
+			crc <<= 1;
+			if (b & i)
+				bit ^= top;
+			if (bit)
+				crc ^= spec.poly;
+		}
+	}
+
+	if (spec.refout)
+		crc = reflect(crc, spec.width);
+	crc ^= spec.xorout;
+	return crc & mask;
+}
+
 uint16_t sumBytes(const Bytes& bytes)
 {
 	ByteReader br(bytes);
@@ -36,11 +77,10 @@ uint16_t crc16(uint16_t poly, uint16_t crc, const Bytes& bytes)
 	return crc;
 }
 
-uint16_t crc16ref(uint16_t poly, const Bytes& bytes)
+uint16_t crc16ref(uint16_t poly, uint16_t crc, const Bytes& bytes)
 {
 	ByteReader br(bytes);
 
-	uint16_t crc = 0xffff;
 	while (!br.eof())
 	{
 		crc ^= br.read_8();

@@ -15,8 +15,10 @@ public:
     virtual ~Victor9kDecoder() {}
 
     SectorVector decodeToSectors(
-        const RawRecordVector& rawRecords, unsigned physicalTrack);
+        const RawRecordVector& rawRecords, unsigned physicalTrack, unsigned physicalSide);
     int recordMatcher(uint64_t fifo) const;
+
+    nanoseconds_t guessClockImpl(Fluxmap& fluxmap, unsigned physicalTrack, unsigned physicalSide) const;
 };
 
 #endif

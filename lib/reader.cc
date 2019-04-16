@@ -152,7 +152,7 @@ void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename
 		{
 			std::unique_ptr<Fluxmap> fluxmap = track->read();
 
-			nanoseconds_t clockPeriod = decoder.guessClock(*fluxmap);
+			nanoseconds_t clockPeriod = decoder.guessClock(*fluxmap, track->track, track->side);
 			if (clockPeriod == 0)
 			{
 				std::cout << "       no clock detected; giving up" << std::endl;
@@ -163,11 +163,12 @@ void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename
 			const auto& bitmap = fluxmap->decodeToBits(clockPeriod);
 			std::cout << fmt::format("{} bytes encoded; ", bitmap.size()/8) << std::flush;
 
-			auto rawrecords = decoder.extractRecords(bitmap);
-			std::cout << fmt::format("{} records", rawrecords.size()) << std::endl;
+			RawRecordVector rawrecords;
+			SectorVector sectors;
+			decoder.decodeToSectors(bitmap, track->track, track->side, rawrecords, sectors);
 
-			auto sectors = decoder.decodeToSectors(rawrecords, track->track);
-			std::cout << "       " << sectors.size() << " sectors; ";
+			std::cout << fmt::format("{} records", rawrecords.size()) << std::endl
+			          << "       " << sectors.size() << " sectors; ";
 
 			for (auto& sector : sectors)
 			{

@@ -5,6 +5,7 @@
 #include "record.h"
 #include "protocol.h"
 #include "rawbits.h"
+#include "sector.h"
 #include "fmt/format.h"
 #include <numeric>
 
@@ -32,6 +33,11 @@ static DoubleFlag signalLevelFactor(
     "Clock detection signal level (min + (max-min)*factor).",
     0.05);
 
+void setDecoderManualClockRate(double clockrate_us)
+{
+    manualClockRate.value = clockrate_us;
+}
+
 static const std::string BLOCK_ELEMENTS[] =
 { " ", "▏", "▎", "▍", "▌", "▋", "▊", "▉", "█" };
 
@@ -41,9 +47,6 @@ static const std::string BLOCK_ELEMENTS[] =
  */
 nanoseconds_t Fluxmap::guessClock() const
 {
-	if (manualClockRate != 0.0)
-		return manualClockRate * 1000.0;
-
     uint32_t buckets[256] = {};
     size_t cursor = 0;
     FluxmapReader fr(*this);
@@ -197,9 +200,23 @@ abort:
     return rawbits;
 }
 
-nanoseconds_t AbstractDecoder::guessClock(Fluxmap& fluxmap) const
+nanoseconds_t AbstractDecoder::guessClock(Fluxmap& fluxmap, unsigned physicalTrack, unsigned physicalSide) const
+{
+	if (manualClockRate != 0.0)
+		return manualClockRate * 1000.0;
+    return guessClockImpl(fluxmap, physicalTrack, physicalSide);
+}
+
+nanoseconds_t AbstractDecoder::guessClockImpl(Fluxmap& fluxmap, unsigned, unsigned) const
 {
     return fluxmap.guessClock();
+}
+
+void AbstractSeparatedDecoder::decodeToSectors(const RawBits& bitmap, unsigned physicalTrack, unsigned physicalSide,
+    RawRecordVector& rawrecords, SectorVector& sectors)
+{
+    rawrecords = extractRecords(bitmap);
+    sectors = decodeToSectors(rawrecords, physicalTrack, physicalSide);
 }
 
 RawRecordVector AbstractSoftSectorDecoder::extractRecords(const RawBits& rawbits) const

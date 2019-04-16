@@ -61,7 +61,7 @@ uint8_t combine(uint16_t word)
 }
 
 SectorVector Apple2Decoder::decodeToSectors(
-        const RawRecordVector& rawRecords, unsigned)
+        const RawRecordVector& rawRecords, unsigned, unsigned)
 {
     std::vector<std::unique_ptr<Sector>> sectors;
     int nextTrack;

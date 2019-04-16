@@ -12,7 +12,7 @@ public:
     virtual ~AmigaDecoder() {}
 
     SectorVector decodeToSectors(
-        const RawRecordVector& rawRecords, unsigned physicalTrack);
+        const RawRecordVector& rawRecords, unsigned physicalTrack, unsigned physicalSide);
 	nanoseconds_t guessClock(Fluxmap& fluxmap) const;
     int recordMatcher(uint64_t fifo) const;
 };

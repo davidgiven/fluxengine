@@ -20,6 +20,7 @@ public:
 	}
 
     Fluxmap& appendInterval(uint32_t ticks);
+    Fluxmap& appendPulse();
     Fluxmap& appendIndex();
 
     Fluxmap& appendBytes(const Bytes& bytes);

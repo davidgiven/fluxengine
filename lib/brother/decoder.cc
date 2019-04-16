@@ -48,7 +48,7 @@ static int decode_header_gcr(uint16_t word)
 	return -1;             
 };
 
-SectorVector BrotherDecoder::decodeToSectors(const RawRecordVector& rawRecords, unsigned)
+SectorVector BrotherDecoder::decodeToSectors(const RawRecordVector& rawRecords, unsigned, unsigned)
 {
     std::vector<std::unique_ptr<Sector>> sectors;
 	bool headerIsValid = false;

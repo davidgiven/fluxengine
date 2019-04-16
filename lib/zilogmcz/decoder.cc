@@ -27,16 +27,14 @@ static std::vector<bool>::const_iterator find_start_of_data(const std::vector<bo
 }
 
 SectorVector ZilogMczDecoder::decodeToSectors(
-        const RawRecordVector& rawRecords, unsigned physicalTrack)
+        const RawRecordVector& rawRecords, unsigned physicalTrack, unsigned physicalSide)
 {
     std::vector<std::unique_ptr<Sector>> sectors;
 
     for (auto& rawrecord : rawRecords)
     {
         auto start = find_start_of_data(rawrecord->data);
-        auto rawbytes = decodeFmMfm(start, rawrecord->data.cend());
-        if (rawbytes.size() < 134)
-            continue;
+        auto rawbytes = decodeFmMfm(start, rawrecord->data.cend()).slice(0, 136);
 
         uint8_t sectorid = rawbytes[0] & 0x1f;
         uint8_t track = rawbytes[1] & 0x7f;

@@ -13,7 +13,7 @@ public:
     virtual ~Commodore64Decoder() {}
 
     SectorVector decodeToSectors(
-        const RawRecordVector& rawRecords, unsigned physicalTrack);
+        const RawRecordVector& rawRecords, unsigned physicalTrack, unsigned physicalSide);
     int recordMatcher(uint64_t fifo) const;
 };
 

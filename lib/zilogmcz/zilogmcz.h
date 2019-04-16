@@ -9,7 +9,7 @@ class ZilogMczDecoder : public AbstractHardSectorDecoder
 public:
     virtual ~ZilogMczDecoder() {}
 
-    SectorVector decodeToSectors(const RawRecordVector& rawRecords, unsigned physicalTrack);
+    SectorVector decodeToSectors(const RawRecordVector& rawRecords, unsigned physicalTrack, unsigned physicalSide);
 };
 
 #endif

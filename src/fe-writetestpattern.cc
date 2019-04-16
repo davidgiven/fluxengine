@@ -31,7 +31,10 @@ int main(int argc, const char* argv[])
 			std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
 
             while (fluxmap->duration() < (sequenceLength*1000000.0))
+            {
                 fluxmap->appendInterval(ticksPerInterval);
+                fluxmap->appendPulse();
+            }
 
 			return fluxmap;
         }
