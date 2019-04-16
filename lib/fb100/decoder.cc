@@ -113,7 +113,7 @@ static uint16_t checksum(const Bytes& bytes)
     return (crchi << 8) | crclo;
 }
 
-void Fb100Decoder::decodeToSectors(const RawBits& rawbits, unsigned,
+void Fb100Decoder::decodeToSectors(const RawBits& rawbits, unsigned, unsigned,
     RawRecordVector& rawrecords, SectorVector& sectors)
 {
     size_t cursor = 0;

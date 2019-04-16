@@ -37,7 +37,7 @@ Bad sectors: 304/1520 (20%)
 
 This is the **sector map**, and is showing me the status of every sector it
 found on the disk. (Tracks on the X-axis, sectors on the Y-axis.) This is a
-very bad read from a [Victor 9000](victor9k.md) disk; good reads shouldn't
+very bad read from a [Victor 9000](disk-victor9k.md) disk; good reads shouldn't
 look like this. A dot represents a good sector. A B is one where the CRC
 check failed; an X is one which couldn't be found at all.
 

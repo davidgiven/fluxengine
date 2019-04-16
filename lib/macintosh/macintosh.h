@@ -15,7 +15,7 @@ class MacintoshDecoder : public AbstractSoftSectorDecoder
 public:
     virtual ~MacintoshDecoder() {}
 
-    SectorVector decodeToSectors(const RawRecordVector& rawRecords, unsigned physicalTrack);
+    SectorVector decodeToSectors(const RawRecordVector& rawRecords, unsigned physicalTrack, unsigned physicalSide);
     int recordMatcher(uint64_t fifo) const;
 };
 
