@@ -6,7 +6,7 @@ which used a disk format very reminiscent of the Commodore format; not a
 coincidence, as Chuck Peddle designed them both. They're 80-track, 512-byte
 sector GCR disks, with a variable-speed drive and a varying number of sectors
 per track --- from 19 to 12. Disks can be double-sided, meaning that they can
-store 1513kB per disk, which was almost unheard of back then.
+store 1224kB per disk, which was almost unheard of back then.
 
 FluxEngine reads these.
 
