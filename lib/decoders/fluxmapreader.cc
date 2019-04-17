@@ -76,6 +76,8 @@ bool FluxPattern::matches(const unsigned* end, double& clock) const
 {
     const unsigned* start = end - intervals.size();
     unsigned candidatelength = std::accumulate(start, end, 0);
+    if (!candidatelength)
+        return false;
     clock = (double)candidatelength / (double)length;
 
     for (unsigned i=0; i<intervals.size(); i++)
@@ -127,6 +129,8 @@ nanoseconds_t FluxmapReader::seekToPattern(const FluxPattern& pattern)
 
 bool FluxmapReader::readRawBit(nanoseconds_t clockPeriod)
 {
+    assert(clockPeriod != 0);
+
     if (_pendingZeroBits)
     {
         _pendingZeroBits--;
@@ -137,6 +141,8 @@ bool FluxmapReader::readRawBit(nanoseconds_t clockPeriod)
     unsigned clockTicks = clockPeriod / NS_PER_TICK;
     double clocks = (double)interval / clockTicks;
 
+    if (clocks < 1.0)
+        clocks = 1.0;
     _pendingZeroBits = (int)round(clocks) - 1;
     return true;
 }

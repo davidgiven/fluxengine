@@ -5,18 +5,17 @@
 #define MAC_DATA_RECORD     0xd5aaad
 
 #define MAC_SECTOR_LENGTH   524 /* yes, really */
-#define MAC_ENCODED_SECTOR_LENGTH 700
+#define MAC_ENCODED_SECTOR_LENGTH 703
 
 class Sector;
 class Fluxmap;
 
-class MacintoshDecoder : public AbstractSoftSectorDecoder
+class MacintoshDecoder : public AbstractStatefulDecoder
 {
 public:
     virtual ~MacintoshDecoder() {}
 
-    SectorVector decodeToSectors(const RawRecordVector& rawRecords, unsigned physicalTrack, unsigned physicalSide);
-    int recordMatcher(uint64_t fifo) const;
+    void decodeToSectors(Track& track) override;
 };
 
 #endif

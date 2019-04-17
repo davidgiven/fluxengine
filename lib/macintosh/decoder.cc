@@ -1,14 +1,18 @@
 #include "globals.h"
 #include "fluxmap.h"
+#include "fluxmapreader.h"
 #include "protocol.h"
 #include "record.h"
 #include "decoders.h"
 #include "sector.h"
+#include "track.h"
 #include "macintosh.h"
 #include "bytes.h"
 #include "fmt/format.h"
 #include <string.h>
 #include <algorithm>
+
+const FluxPattern SECTOR_ID_PATTERN(16, 0xd5aa);
 
 static int decode_data_gcr(uint8_t gcr)
 {
@@ -118,36 +122,41 @@ uint8_t decode_side(uint8_t side)
     return !!(side & 0x40);
 }
 
-SectorVector MacintoshDecoder::decodeToSectors(
-        const RawRecordVector& rawRecords, unsigned physicalTrack, unsigned physicalSide)
+void MacintoshDecoder::decodeToSectors(Track& track)
 {
-    std::vector<std::unique_ptr<Sector>> sectors;
+    if (track.rawrecords || track.sectors)
+        Error() << "cannot decode track twice";
+    track.rawrecords = std::make_unique<RawRecordVector>();
+    track.sectors = std::make_unique<SectorVector>();
+
+    FluxmapReader fmr(*track.fluxmap);
+
     int nextSector;
     int nextSide;
     bool headerIsValid = false;
-
-    for (auto& rawrecord : rawRecords)
+    for (;;)
     {
-        const std::vector<bool>& rawdata = rawrecord->data;
-        const auto& rawbytes = toBytes(rawdata);
+        nanoseconds_t clockPeriod = fmr.seekToPattern(SECTOR_ID_PATTERN);
+        if (fmr.eof() || !clockPeriod)
+            break;
 
-        if (rawbytes.size() < 8)
-            continue;
-
-        uint32_t signature = rawbytes.reader().read_be24();
-        switch (signature)
+        auto idfield = toBytes(fmr.readRawBits(24, clockPeriod)).slice(0, 3).reader().read_be24();
+        switch (idfield)
         {
             case MAC_SECTOR_RECORD:
             {
-                unsigned track = decode_data_gcr(rawbytes[3]);
-                if (track != (physicalTrack & 0x3f))
+                auto header = toBytes(fmr.readRawBits(7*8, clockPeriod))
+                    .slice(0, 7);
+                
+                unsigned trackid = decode_data_gcr(header[0]);
+                if (trackid != (track.physicalTrack & 0x3f))
                     break;
-                nextSector = decode_data_gcr(rawbytes[4]);
-                nextSide = decode_data_gcr(rawbytes[5]);
-                uint8_t formatByte = decode_data_gcr(rawbytes[6]);
-                uint8_t wantedsum = decode_data_gcr(rawbytes[7]);
+                nextSector = decode_data_gcr(header[1]);
+                nextSide = decode_data_gcr(header[2]);
+                uint8_t formatByte = decode_data_gcr(header[3]);
+                uint8_t wantedsum = decode_data_gcr(header[4]);
 
-                uint8_t gotsum = (track ^ nextSector ^ nextSide ^ formatByte) & 0x3f;
+                uint8_t gotsum = (trackid ^ nextSector ^ nextSide ^ formatByte) & 0x3f;
                 headerIsValid = (wantedsum == gotsum);
                 break;
             }
@@ -158,34 +167,22 @@ SectorVector MacintoshDecoder::decodeToSectors(
                     break;
                 headerIsValid = false;
 
-                Bytes inputbuffer(MAC_ENCODED_SECTOR_LENGTH + 4);
+                fmr.readRawBits(8, clockPeriod); /* skip spare byte */
+                auto inputbuffer = toBytes(fmr.readRawBits(MAC_ENCODED_SECTOR_LENGTH*8, clockPeriod))
+                    .slice(0, MAC_ENCODED_SECTOR_LENGTH);
+
                 for (unsigned i=0; i<inputbuffer.size(); i++)
-                {
-                    auto p = rawbytes.begin() + 4 + i;
-                    if (p > rawbytes.end())
-                        break;
-                    
-                    inputbuffer[i] = decode_data_gcr(*p);
-                }
+                    inputbuffer[i] = decode_data_gcr(inputbuffer[i]);
                     
                 int status = Sector::BAD_CHECKSUM;
                 auto data = decode_crazy_data(inputbuffer, status);
 
                 auto sector = std::unique_ptr<Sector>(
-                    new Sector(status, physicalTrack, decode_side(nextSide), nextSector, data));
-                sectors.push_back(std::move(sector));
+                    new Sector(status, track.physicalTrack, decode_side(nextSide), nextSector, data));
+                sector->clock = clockPeriod;
+                track.sectors->push_back(std::move(sector));
                 break;
             }
         }
-	}
-
-	return sectors;
-}
-
-int MacintoshDecoder::recordMatcher(uint64_t fifo) const
-{
-    uint32_t masked = fifo & 0xffffff;
-    if ((masked == MAC_SECTOR_RECORD) || (masked == MAC_DATA_RECORD))
-		return 24;
-    return 0;
+    }
 }

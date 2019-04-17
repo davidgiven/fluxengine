@@ -159,7 +159,7 @@ void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename
 				 track->rawrecords->size(),
 			     track->sectors->size());
 			if (track->sectors->size() > 0)
-				std::cout << fmt::format("{:.2}us clock; ",
+				std::cout << fmt::format("{:.2f}us clock; ",
 					track->sectors->begin()->get()->clock / 1000.0);
 
 			for (auto& sector : *track->sectors)
