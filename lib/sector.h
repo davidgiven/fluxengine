@@ -30,6 +30,7 @@ public:
     {}
 
 	int status;
+    nanoseconds_t clock;
     const int track;
     const int side;
     const int sector;

@@ -2,6 +2,7 @@
 #include "flags.h"
 #include "reader.h"
 #include "fluxmap.h"
+#include "fluxmapreader.h"
 #include "decoders.h"
 #include "image.h"
 #include "protocol.h"
@@ -73,13 +74,9 @@ int main(int argc, const char* argv[])
 		nanoseconds_t seekto = seekFlag*1000000.0;
 		int ticks = 0;
 		FluxmapReader fr(*track->fluxmap);
-		for (;;)
+		while (!fr.eof())
 		{
-			unsigned interval;
-			int opcode = fr.readPulse(interval);
-			if (opcode == -1)
-				break;
-			ticks += interval;
+			ticks += fr.readNextMatchingOpcode(F_OP_PULSE);
 			
 			now = ticks * NS_PER_TICK;
 			if (now >= seekto)
@@ -89,13 +86,9 @@ int main(int argc, const char* argv[])
 		std::cout << fmt::format("{: 10.3f}:-", ticks*US_PER_TICK);
 		nanoseconds_t lasttransition = 0;
 		fr.rewind();
-		for (;;)
+		while (!fr.eof())
 		{
-			unsigned interval;
-			int opcode = fr.readPulse(interval);
-			if (opcode == -1)
-				break;
-			ticks += interval;
+			ticks += fr.readNextMatchingOpcode(F_OP_PULSE);
 
 			nanoseconds_t transition = ticks*NS_PER_TICK;
 			nanoseconds_t next;
@@ -116,7 +109,7 @@ int main(int argc, const char* argv[])
 
 			nanoseconds_t length = transition - lasttransition;
 			std::cout << fmt::format("==== {:06x} {: 10.3f} +{:.3f} = {:.1f} clocks",
-			    fr.tell(),
+			    fr.tell().bytes,
 				(double)transition / 1000.0,
 				(double)length / 1000.0,
 				(double)length / clockPeriod);

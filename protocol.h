@@ -73,6 +73,12 @@ enum
     F_ERROR_INTERNAL,
 };
 
+enum
+{
+    F_OP_PULSE = 0x80,
+    F_OP_INDEX = 0x81
+};
+
 struct frame_header
 {
     uint8_t type;

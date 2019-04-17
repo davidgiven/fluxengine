@@ -14,7 +14,7 @@ class Fb100Decoder : public AbstractStatefulDecoder
 public:
     virtual ~Fb100Decoder() {}
 
-    void decodeToSectors(const RawBits& bitmap, Track& track);
+    void decodeToSectors(Track& track) override;
 };
 
 #endif

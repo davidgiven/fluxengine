@@ -1,6 +1,7 @@
 #include "globals.h"
 #include "flags.h"
 #include "fluxmap.h"
+#include "fluxmapreader.h"
 #include "decoders.h"
 #include "record.h"
 #include "protocol.h"
@@ -49,14 +50,11 @@ static const std::string BLOCK_ELEMENTS[] =
 nanoseconds_t Fluxmap::guessClock() const
 {
     uint32_t buckets[256] = {};
-    size_t cursor = 0;
     FluxmapReader fr(*this);
-    while (cursor < bytes())
+
+    while (!fr.eof())
     {
-        unsigned interval;
-        int opcode = fr.readPulse(interval);
-        if (opcode != 0x80)
-            break;
+        unsigned interval = fr.readNextMatchingOpcode(F_OP_PULSE);
         if (interval > 0xff)
             continue;
         buckets[interval]++;
@@ -178,7 +176,7 @@ const RawBits Fluxmap::decodeToBits(nanoseconds_t clockPeriod) const
         for (;;)
         {
             unsigned interval;
-            int opcode = fr.read(interval);
+            int opcode = fr.readOpcode(interval);
             timestamp += interval * NS_PER_TICK;
             if (opcode == -1)
                 goto abort;
@@ -211,6 +209,22 @@ nanoseconds_t AbstractDecoder::guessClock(Track& track) const
 nanoseconds_t AbstractDecoder::guessClockImpl(Track& track) const
 {
     return track.fluxmap->guessClock();
+}
+
+void AbstractSeparatedDecoder::decodeToSectors(Track& track)
+{
+    nanoseconds_t clockPeriod = guessClock(track);
+    if (clockPeriod == 0)
+    {
+        std::cout << "       no clock detected; giving up" << std::endl;
+        return;
+    }
+    std::cout << fmt::format("       {:.2f} us clock; ", (double)clockPeriod/1000.0) << std::flush;
+
+    const auto& bitmap = track.fluxmap->decodeToBits(clockPeriod);
+    std::cout << fmt::format("{} bytes encoded; ", bitmap.size()/8) << std::flush;
+
+    decodeToSectors(bitmap, track);
 }
 
 void AbstractSeparatedDecoder::decodeToSectors(const RawBits& bitmap, Track& track)

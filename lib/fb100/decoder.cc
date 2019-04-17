@@ -1,5 +1,6 @@
 #include "globals.h"
 #include "fluxmap.h"
+#include "fluxmapreader.h"
 #include "protocol.h"
 #include "record.h"
 #include "decoders.h"
@@ -13,23 +14,7 @@
 #include <string.h>
 #include <algorithm>
 
-static bool search(const RawBits& rawbits, size_t& cursor)
-{
-    uint16_t fifo = 0;
-
-    while (cursor < rawbits.size())
-    {
-        fifo = (fifo << 1) | rawbits[cursor++];
-        
-        if (fifo == 0xabaa)
-        {
-            cursor -= 16;
-            return true;
-        }
-    }
-
-    return false;
-}
+const FluxPattern SECTOR_ID_PATTERN(16, 0xabaa);
 
 /* 
  * Reverse engineered from a dump of the floppy drive's ROM. I have no idea how
@@ -114,34 +99,33 @@ static uint16_t checksum(const Bytes& bytes)
     return (crchi << 8) | crclo;
 }
 
-void Fb100Decoder::decodeToSectors(const RawBits& rawbits, Track& track)
+void Fb100Decoder::decodeToSectors(Track& track)
 {
-    size_t cursor = 0;
-
     if (track.rawrecords || track.sectors)
         Error() << "cannot decode track twice";
     track.rawrecords = std::make_unique<RawRecordVector>();
     track.sectors = std::make_unique<SectorVector>();
 
+    FluxmapReader fmr(*track.fluxmap);
+
     for (;;)
     {
-        if (!search(rawbits, cursor))
+        nanoseconds_t clockPeriod = fmr.seekToPattern(SECTOR_ID_PATTERN);
+        if (fmr.eof())
             break;
 
-        unsigned record_start = cursor;
-        cursor = std::min(cursor + FB100_RECORD_SIZE*16, rawbits.size());
-        std::vector<bool> recordbits(rawbits.begin() + record_start, rawbits.begin() + cursor);
+        auto rawbits = fmr.readRawBits(FB100_RECORD_SIZE*16, clockPeriod);
 
         track.rawrecords->push_back(
             std::unique_ptr<RawRecord>(
                 new RawRecord(
-                    record_start,
-                    recordbits.begin(),
-                    recordbits.end())
+                    0,
+                    rawbits.begin(),
+                    rawbits.end())
             )
         );
 
-        const Bytes bytes = decodeFmMfm(recordbits).slice(0, FB100_RECORD_SIZE);
+        const Bytes bytes = decodeFmMfm(rawbits).slice(0, FB100_RECORD_SIZE);
         ByteReader br(bytes);
         br.seek(1);
         const Bytes id = br.read(FB100_ID_SIZE);
@@ -164,6 +148,7 @@ void Fb100Decoder::decodeToSectors(const RawBits& rawbits, Track& track)
         int status = (wantPayloadCrc == gotPayloadCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
         auto sector = std::unique_ptr<Sector>(
             new Sector(status, trackid, 0, sectorid, data));
+        sector->clock = clockPeriod;
         track.sectors->push_back(std::move(sector));
     }
 }

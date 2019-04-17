@@ -44,33 +44,4 @@ private:
     Bytes _bytes;
 };
 
-class FluxmapReader
-{
-public:
-    FluxmapReader(const Fluxmap& fluxmap):
-        _fluxmap(fluxmap),
-        _bytes(fluxmap.ptr()),
-        _size(fluxmap.bytes())
-    {
-        rewind();
-    }
-
-    FluxmapReader(const Fluxmap&& fluxmap) = delete;
-
-    void rewind()
-    { _cursor = 0; }
-
-    size_t tell() const
-    { return _cursor; }
-
-    int read(unsigned& ticks);
-    int readPulse(unsigned& ticks);
-
-private:
-    const Fluxmap& _fluxmap;
-    const uint8_t* _bytes;
-    const size_t _size;
-    size_t _cursor;
-};
-
 #endif

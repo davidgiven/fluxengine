@@ -28,7 +28,7 @@ public:
     nanoseconds_t guessClock(Track& track) const;
     virtual nanoseconds_t guessClockImpl(Track& track) const;
 
-    virtual void decodeToSectors(const RawBits& bitmap, Track& track) = 0;
+    virtual void decodeToSectors(Track& track) = 0;
 };
 
 /* DEPRECATED */
@@ -41,6 +41,7 @@ public:
     virtual SectorVector decodeToSectors(const RawRecordVector& rawrecords,
             unsigned physicalTrack, unsigned physicalSide) = 0;
 
+    void decodeToSectors(Track& track);
     void decodeToSectors(const RawBits& bitmap, Track& track);
 };
 

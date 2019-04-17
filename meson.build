@@ -92,7 +92,7 @@ decoderlib = declare_dependency(
             [
                 'lib/decoders/decoders.cc',
                 'lib/decoders/fmmfm.cc',
-                'lib/decoders/fluxreader.cc',
+                'lib/decoders/fluxmapreader.cc',
             ],
             dependencies: [fmtlib, felib]
         ),
@@ -267,3 +267,4 @@ test('Kryoflux',        executable('kryoflux-test', ['tests/kryoflux.cc'],      
 test('Compression',     executable('compression-test', ['tests/compression.cc'],       dependencies: [felib, decoderlib]))
 test('Bytes',           executable('bytes-test', ['tests/bytes.cc'],                   dependencies: [felib]))
 test('Crunch',          executable('crunch-test', ['tests/crunch.cc'],                 dependencies: [felib, crunchlib]))
+test('FluxPattern',     executable('fluxpattern-test', ['tests/fluxpattern.cc'],       dependencies: [felib, decoderlib]))

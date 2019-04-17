@@ -40,7 +40,7 @@ static IntFlag retries(
 	5);
 
 static SettableFlag highDensityFlag(
-	{ "--high-density", "-H" },
+	{ "--high-density", "--hd" },
 	"set the drive to high density mode");
 
 static sqlite3* outdb;
@@ -147,22 +147,20 @@ void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename
 		for (int retry = ::retries; retry >= 0; retry--)
 		{
 			track->readFluxmap();
+			decoder.decodeToSectors(*track);
 
-			nanoseconds_t clockPeriod = decoder.guessClock(*track);
-			if (clockPeriod == 0)
+			if (!track->sectors)
 			{
-				std::cout << "       no clock detected; giving up" << std::endl;
+				std::cout << "       no sectors found; giving up" << std::endl;
 				continue;
 			}
-			std::cout << fmt::format("       {:.2f} us clock; ", (double)clockPeriod/1000.0) << std::flush;
 
-			const auto& bitmap = track->fluxmap->decodeToBits(clockPeriod);
-			std::cout << fmt::format("{} bytes encoded; ", bitmap.size()/8) << std::flush;
-
-			decoder.decodeToSectors(bitmap, *track);
-
-			std::cout << fmt::format("{} records", track->rawrecords->size()) << std::endl
-			          << "       " << track->sectors->size() << " sectors; ";
+			std::cout << fmt::format("       {} records, {} sectors; ",
+				 track->rawrecords->size(),
+			     track->sectors->size());
+			if (track->sectors->size() > 0)
+				std::cout << fmt::format("{:.2}us clock; ",
+					track->sectors->begin()->get()->clock / 1000.0);
 
 			for (auto& sector : *track->sectors)
 			{
@@ -191,7 +189,7 @@ void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename
 				std::cout << "\nRaw (undecoded) records follow:\n\n";
 				for (auto& record : *track->rawrecords)
 				{
-					std::cout << fmt::format("I+{:.3f}ms", (double)(record->position*clockPeriod)/1e6)
+					std::cout << fmt::format("I+0x{:x} bits", record->position)
 					          << std::endl;
 					hexdump(std::cout, toBytes(record->data));
 					std::cout << std::endl;
