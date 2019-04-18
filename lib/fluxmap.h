@@ -2,11 +2,22 @@
 #define FLUXMAP_H
 
 #include "bytes.h"
+#include "protocol.h"
 
 class RawBits;
 
 class Fluxmap
 {
+public:
+    struct Position
+    {
+        unsigned bytes = 0;
+        unsigned ticks = 0;
+
+        nanoseconds_t ns() const
+        { return ticks * NS_PER_TICK; }
+    };
+
 public:
     nanoseconds_t duration() const { return _duration; }
     size_t bytes() const { return _bytes.size(); }

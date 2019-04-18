@@ -99,45 +99,36 @@ static uint16_t checksum(const Bytes& bytes)
     return (crchi << 8) | crclo;
 }
 
-void Fb100Decoder::decodeToSectors(Track& track)
+nanoseconds_t Fb100Decoder::findSector(FluxmapReader& fmr, Track& track)
 {
-    Sector sector;
-    sector.physicalSide = track.physicalSide;
-    sector.physicalTrack = track.physicalTrack;
-    RawRecord record;
+    return fmr.seekToPattern(SECTOR_ID_PATTERN);
+}
 
-    FluxmapReader fmr(*track.fluxmap);
+void Fb100Decoder::decodeSingleSector(FluxmapReader& fmr, Track& track, Sector& sector)
+{
+    auto rawbits = fmr.readRawBits(FB100_RECORD_SIZE*16, sector.clock);
 
-    for (;;)
-    {
-        nanoseconds_t clockPeriod = fmr.seekToPattern(SECTOR_ID_PATTERN);
-        if (fmr.eof() || !clockPeriod)
-            break;
+    const Bytes bytes = decodeFmMfm(rawbits).slice(0, FB100_RECORD_SIZE);
+    ByteReader br(bytes);
+    br.seek(1);
+    const Bytes id = br.read(FB100_ID_SIZE);
+    uint16_t wantIdCrc = br.read_be16();
+    uint16_t gotIdCrc = checksum(id);
+    const Bytes payload = br.read(FB100_PAYLOAD_SIZE);
+    uint16_t wantPayloadCrc = br.read_be16();
+    uint16_t gotPayloadCrc = checksum(payload);
 
-        sector.clock = record.clock = clockPeriod;
-        sector.position = record.position = fmr.tellNs();
-        auto rawbits = fmr.readRawBits(FB100_RECORD_SIZE*16, clockPeriod);
-        record.bytes.writer().seekToEnd() += toBytes(rawbits);
+    if (wantIdCrc != gotIdCrc)
+        return;
 
-        const Bytes bytes = decodeFmMfm(rawbits).slice(0, FB100_RECORD_SIZE);
-        ByteReader br(bytes);
-        br.seek(1);
-        const Bytes id = br.read(FB100_ID_SIZE);
-        uint16_t wantIdCrc = br.read_be16();
-        uint16_t gotIdCrc = checksum(id);
-        const Bytes payload = br.read(FB100_PAYLOAD_SIZE);
-        uint16_t wantPayloadCrc = br.read_be16();
-        uint16_t gotPayloadCrc = checksum(payload);
+    uint8_t abssector = id[2];
+    sector.logicalTrack = abssector >> 1;
+    sector.logicalSide = 0;
+    sector.logicalSector = abssector & 1;
+    sector.data.writer().append(id.slice(5, 12)).append(payload);
 
-        if (wantIdCrc != gotIdCrc)
-            continue;
-
-        uint8_t abssector = id[2];
-        sector.logicalTrack = abssector & 1;
-        sector.logicalSide = 0;
-        sector.logicalSector = abssector & 1;
-        sector.data.clear().writer().append(id.slice(5, 12)).append(payload);
-        sector.status = (wantPayloadCrc == gotPayloadCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
-        track.sectors.push_back(sector);
-    }
+    if (wantPayloadCrc == gotPayloadCrc)
+        sector.status = Sector::OK;
+    else
+        sector.status = Sector::BAD_CHECKSUM;
 }

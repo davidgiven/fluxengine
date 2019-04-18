@@ -12,7 +12,8 @@
 #include <string.h>
 #include <algorithm>
 
-const FluxPattern SECTOR_ID_PATTERN(16, 0xd5aa);
+const FluxPattern SECTOR_RECORD_PATTERN(24, MAC_SECTOR_RECORD);
+const FluxPatterns SECTOR_OR_DATA_RECORD_PATTERN(24, { MAC_SECTOR_RECORD, MAC_DATA_RECORD });
 
 static int decode_data_gcr(uint8_t gcr)
 {
@@ -122,72 +123,57 @@ uint8_t decode_side(uint8_t side)
     return !!(side & 0x40);
 }
 
-void MacintoshDecoder::decodeToSectors(Track& track)
+nanoseconds_t MacintoshDecoder::findSector(FluxmapReader& fmr, Track& track)
 {
-    Sector sector;
-    sector.physicalSide = track.physicalSide;
-    sector.physicalTrack = track.physicalTrack;
-    RawRecord record;
+    return fmr.seekToPattern(SECTOR_RECORD_PATTERN);
+}
 
-    FluxmapReader fmr(*track.fluxmap);
+nanoseconds_t MacintoshDecoder::findData(FluxmapReader& fmr, Track& track)
+{
+    return fmr.seekToPattern(SECTOR_OR_DATA_RECORD_PATTERN);
+}
 
-    bool headerIsValid = false;
-    for (;;)
-    {
-        nanoseconds_t clockPeriod = fmr.seekToPattern(SECTOR_ID_PATTERN);
-        if (fmr.eof() || !clockPeriod)
-            break;
-        sector.clock = record.clock = clockPeriod;
-        sector.position = record.position = fmr.tellNs();
+void MacintoshDecoder::decodeHeader(FluxmapReader& fmr, Track& track, Sector& sector)
+{
+    /* Skip ID (as we know it's a MAC_SECTOR_RECORD). */
+    fmr.readRawBits(24, sector.clock);
 
-        Bytes idbytes = toBytes(fmr.readRawBits(24, clockPeriod)).slice(0, 3);
-        record.bytes.clear().writer() += idbytes;
-        switch (idbytes.reader().read_be24())
-        {
-            case MAC_SECTOR_RECORD:
-            {
-                auto header = toBytes(fmr.readRawBits(7*8, clockPeriod))
-                    .slice(0, 7);
-                record.bytes.writer().seekToEnd() += header;
+    /* Read header. */
+
+    auto header = toBytes(fmr.readRawBits(7*8, sector.clock)).slice(0, 7);
                 
-                uint8_t encodedTrack = decode_data_gcr(header[0]);
-                if (encodedTrack != (track.physicalTrack & 0x3f))
-                    break;
+    uint8_t encodedTrack = decode_data_gcr(header[0]);
+    if (encodedTrack != (track.physicalTrack & 0x3f))
+        return;
                 
-                uint8_t encodedSector = decode_data_gcr(header[1]);
-                uint8_t encodedSide = decode_data_gcr(header[2]);
-                uint8_t formatByte = decode_data_gcr(header[3]);
-                uint8_t wantedsum = decode_data_gcr(header[4]);
+    uint8_t encodedSector = decode_data_gcr(header[1]);
+    uint8_t encodedSide = decode_data_gcr(header[2]);
+    uint8_t formatByte = decode_data_gcr(header[3]);
+    uint8_t wantedsum = decode_data_gcr(header[4]);
 
-                uint8_t gotsum = (encodedTrack ^ encodedSector ^ encodedSide ^ formatByte) & 0x3f;
-                headerIsValid = (wantedsum == gotsum);
-                sector.logicalTrack = track.physicalTrack;
-                sector.logicalSide = decode_side(encodedSide);
-                sector.logicalSector = encodedSector;
-                break;
-            }
+    sector.logicalTrack = track.physicalTrack;
+    sector.logicalSide = decode_side(encodedSide);
+    sector.logicalSector = encodedSector;
+    uint8_t gotsum = (encodedTrack ^ encodedSector ^ encodedSide ^ formatByte) & 0x3f;
+    if (wantedsum == gotsum)
+        sector.status = Sector::DATA_MISSING; /* unintuitive but correct */
+}
 
-            case MAC_DATA_RECORD:
-            {
-                if (!headerIsValid)
-                    break;
-                headerIsValid = false;
+void MacintoshDecoder::decodeData(FluxmapReader& fmr, Track& track, Sector& sector)
+{
+    auto id = toBytes(fmr.readRawBits(24, sector.clock)).reader().read_be24();
+    if (id != MAC_DATA_RECORD)
+        return;
 
-                fmr.readRawBits(8, clockPeriod); /* skip spare byte */
-                auto inputbuffer = toBytes(fmr.readRawBits(MAC_ENCODED_SECTOR_LENGTH*8, clockPeriod))
-                    .slice(0, MAC_ENCODED_SECTOR_LENGTH);
-                record.bytes.writer().seekToEnd() += inputbuffer;
+    /* Read data. */
 
-                for (unsigned i=0; i<inputbuffer.size(); i++)
-                    inputbuffer[i] = decode_data_gcr(inputbuffer[i]);
-                    
-                sector.status = Sector::BAD_CHECKSUM;
-                sector.data = decode_crazy_data(inputbuffer, sector.status);
-                track.sectors.push_back(sector);
-                break;
-            }
-        }
+    fmr.readRawBits(8, sector.clock); /* skip spare byte */
+    auto inputbuffer = toBytes(fmr.readRawBits(MAC_ENCODED_SECTOR_LENGTH*8, sector.clock))
+        .slice(0, MAC_ENCODED_SECTOR_LENGTH);
 
-        track.rawrecords.push_back(record);
-    }
+    for (unsigned i=0; i<inputbuffer.size(); i++)
+        inputbuffer[i] = decode_data_gcr(inputbuffer[i]);
+        
+    sector.status = Sector::BAD_CHECKSUM;
+    sector.data = decode_crazy_data(inputbuffer, sector.status);
 }

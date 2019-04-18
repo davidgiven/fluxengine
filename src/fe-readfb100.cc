@@ -17,7 +17,7 @@ static StringFlag outputFilename(
 
 int main(int argc, const char* argv[])
 {
-	setReaderDefaultSource(":t=0-79:s=0");
+	setReaderDefaultSource(":t=0-79x2:s=0");
     setReaderRevolutions(2);
     setDecoderManualClockRate(4.0);
     Flag::parseFlags(argc, argv);

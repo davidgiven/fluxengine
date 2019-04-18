@@ -14,7 +14,8 @@ class Fb100Decoder : public AbstractStatefulDecoder
 public:
     virtual ~Fb100Decoder() {}
 
-    void decodeToSectors(Track& track) override;
+    nanoseconds_t findSector(FluxmapReader& fmr, Track& track) override;
+    void decodeSingleSector(FluxmapReader& fmr, Track& track, Sector& sector) override;
 };
 
 #endif

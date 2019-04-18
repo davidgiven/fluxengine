@@ -141,7 +141,7 @@ void writeSectorsToFile(const SectorSet& sectors, const Geometry& geometry,
 				if (sector)
 				{
 					outputFile.seekp(sector->logicalTrack*trackSize + sector->logicalSide*headSize + sector->logicalSector*geometry.sectorSize, std::ios::beg);
-					outputFile.write((const char*) &sector->data[0], sector->data.size());
+					outputFile.write((const char*) sector->data.cbegin(), sector->data.size());
 				}
 			}
 		}

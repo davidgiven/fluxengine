@@ -49,6 +49,9 @@ static const std::string BLOCK_ELEMENTS[] =
  */
 nanoseconds_t Fluxmap::guessClock() const
 {
+	if (manualClockRate != 0.0)
+		return manualClockRate * 1000.0;
+
     uint32_t buckets[256] = {};
     FluxmapReader fr(*this);
 
@@ -248,6 +251,7 @@ RawRecordVector AbstractSoftSectorDecoder::extractRecords(const RawBits& rawbits
         if (matchStart == -1)
             return;
 
+#if 0
         records.push_back(
             std::unique_ptr<RawRecord>(
                 new RawRecord(
@@ -260,6 +264,7 @@ RawRecordVector AbstractSoftSectorDecoder::extractRecords(const RawBits& rawbits
                 )
             )
         );
+        #endif
     };
 
     while (cursor < rawbits.size())
@@ -315,6 +320,7 @@ RawRecordVector AbstractHardSectorDecoder::extractRecords(const RawBits& rawbits
             if ((end - previous) < sectors_must_be_bigger_than)
                 return;
 
+#if 0
             records.push_back(
                 std::unique_ptr<RawRecord>(
                     new RawRecord(
@@ -327,6 +333,7 @@ RawRecordVector AbstractHardSectorDecoder::extractRecords(const RawBits& rawbits
                     )
                 )
             );
+            #endif
             previous = end;
         };
 
@@ -338,4 +345,69 @@ RawRecordVector AbstractHardSectorDecoder::extractRecords(const RawBits& rawbits
     return records;
 }
 
+void AbstractStatefulDecoder::decodeToSectors(Track& track)
+{
+    Sector sector;
+    sector.physicalSide = track.physicalSide;
+    sector.physicalTrack = track.physicalTrack;
 
+    FluxmapReader fmr(*track.fluxmap);
+    for (;;)
+    {
+        nanoseconds_t clockPeriod = findSector(fmr, track);
+        if (fmr.eof() || !clockPeriod)
+            break;
+
+        sector.status = Sector::MISSING;
+        sector.data.clear();
+        sector.clock = clockPeriod;
+        _recordStart = sector.position = fmr.tell();
+
+        decodeSingleSector(fmr, track, sector);
+        pushRecord(fmr, track, sector);
+        if (sector.status != Sector::MISSING)
+            track.sectors.push_back(sector);
+    }
+}
+
+void AbstractStatefulDecoder::pushRecord(FluxmapReader& fmr, Track& track, Sector& sector)
+{
+    RawRecord record;
+    record.physicalSide = track.physicalSide;
+    record.physicalTrack = track.physicalTrack;
+    record.clock = sector.clock;
+    record.position = _recordStart;
+
+    Fluxmap::Position here = fmr.tell();
+    fmr.seek(_recordStart);
+    record.data = toBytes(fmr.readRawBits(here, sector.clock));
+    track.rawrecords.push_back(record);
+    _recordStart = here;
+}
+
+void AbstractStatefulDecoder::discardRecord(FluxmapReader& fmr)
+{
+    _recordStart = fmr.tell();
+}
+
+void AbstractSplitDecoder::decodeSingleSector(FluxmapReader& fmr, Track& track, Sector& sector)
+{
+    decodeHeader(fmr, track, sector);
+    if (sector.status == Sector::MISSING)
+        return;
+    pushRecord(fmr, track, sector);
+
+    nanoseconds_t clockPeriod = findData(fmr, track);
+    if (fmr.eof() || !clockPeriod)
+        return;
+    sector.clock = clockPeriod;
+
+    discardRecord(fmr);
+    Fluxmap::Position pos = fmr.tell();
+    decodeData(fmr, track, sector);
+    if (sector.status == Sector::DATA_MISSING)
+    {
+        fmr.seek(pos);
+        return;
+    }
+}

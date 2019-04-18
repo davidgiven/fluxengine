@@ -53,6 +53,8 @@ int main(int argc, const char* argv[])
 	nanoseconds_t clockPeriod = track->fluxmap->guessClock();
 	std::cout << fmt::format("       {:.2f} us clock detected; ", (double)clockPeriod/1000.0) << std::flush;
 
+	FluxmapReader fmr(*track->fluxmap);
+#if 0
 	clockPeriod *= clockScaleFlag;
 	std::cout << fmt::format("{:.2f} us bit clock; ", (double)clockPeriod/1000.0) << std::flush;
 
@@ -116,23 +118,24 @@ int main(int argc, const char* argv[])
 			lasttransition = transition;
 		}
 	}
+#endif
 
 	if (dumpBitstreamFlag)
 	{
-		std::cout << "Aligned bitstream of length " << bitmap.size()
-					<< " follows:" << std::endl
-					<< std::endl;
+		fmr.seek(seekFlag*1000000.0);
 
-		size_t cursor = seekFlag*1000000.0 / clockPeriod;
-		while (cursor < bitmap.size())
+		std::cout << fmt::format("Aligned bitstream from {:.3f}ms follows:\n",
+				fmr.tell().ns() / 1000000.0);
+
+		while (!fmr.eof())
 		{
-			std::cout << fmt::format("{: 10.3f} : ", (double)cursor / clockPeriod);
+			std::cout << fmt::format("{: 10.3f} : ", fmr.tell().ns() / 1000000.0);
 			for (unsigned i=0; i<60; i++)
 			{
-				if (cursor >= bitmap.size())
+				if (fmr.eof())
 					break;
-				std::cout << (bitmap[cursor] ? 'X' : '-');
-				cursor++;
+				bool b = fmr.readRawBit(clockPeriod);
+				std::cout << (b ? 'X' : '-');
 			}
 
 			std::cout << std::endl;

@@ -4,27 +4,62 @@
 #include "fluxmap.h"
 #include "protocol.h"
 
-class FluxPattern
+class FluxMatcher
 {
 public:
-    FluxPattern(unsigned len, uint64_t pattern);
+    FluxMatcher(unsigned bits):
+        _bits(bits)
+    {}
 
-    bool matches(const unsigned* intervals, double& clock) const;
+    virtual ~FluxMatcher() {}
 
-    unsigned bits;
-    std::vector<unsigned> intervals;
-    unsigned length;
+    /* Returns the number of intervals matched */
+    virtual unsigned matches(const unsigned* intervals, double& clock) const = 0;
+    virtual unsigned intervals() const = 0;
+
+    unsigned bits() const
+    { return _bits; }
+
+protected:
+    unsigned _bits;
+};
+
+class FluxPattern : public FluxMatcher
+{
+public:
+    FluxPattern(unsigned bits, uint64_t patterns);
+
+    unsigned matches(const unsigned* intervals, double& clock) const override;
+
+    unsigned intervals() const override
+    { return _intervals.size(); }
+
+private:
+    std::vector<unsigned> _intervals;
+    unsigned _length;
+
+public:
+    friend void test_patternconstruction();
+    friend void test_patternmatching();
+};
+
+class FluxPatterns : public FluxMatcher
+{
+public:
+    FluxPatterns(unsigned bits, std::initializer_list<uint64_t> patterns);
+
+    unsigned matches(const unsigned* intervals, double& clock) const override;
+
+    unsigned intervals() const override
+    { return _intervals; }
+
+private:
+    unsigned _intervals;
+    std::vector<std::unique_ptr<FluxPattern>> _patterns;
 };
 
 class FluxmapReader
 {
-public:
-    struct Position
-    {
-        unsigned bytes;
-        unsigned ticks;
-    };
-
 public:
     FluxmapReader(const Fluxmap& fluxmap):
         _fluxmap(fluxmap),
@@ -46,30 +81,28 @@ public:
     bool eof() const
     { return _pos.bytes == _size; }
 
-    Position tell() const
+    Fluxmap::Position tell() const
     { return _pos; }
 
-    void seek(const Position& pos)
-    { _pos = pos; }
-
-    nanoseconds_t tellNs() const
-    { return _pos.ticks * NS_PER_TICK; }
+    void seek(const Fluxmap::Position& pos)
+    { _pos = pos; _pendingZeroBits = 0; }
 
     int readOpcode(unsigned& ticks);
     unsigned readNextMatchingOpcode(uint8_t opcode);
 
     void seek(nanoseconds_t ns);
     void seekToIndexMark();
-    nanoseconds_t seekToPattern(const FluxPattern& pattern);
+    nanoseconds_t seekToPattern(const FluxMatcher& pattern);
 
     bool readRawBit(nanoseconds_t clockPeriod);
     std::vector<bool> readRawBits(unsigned count, nanoseconds_t clockPeriod);
+    std::vector<bool> readRawBits(const Fluxmap::Position& until, nanoseconds_t clockPeriod);
 
 private:
     const Fluxmap& _fluxmap;
     const uint8_t* _bytes;
     const size_t _size;
-    Position _pos;
+    Fluxmap::Position _pos;
     unsigned _pendingZeroBits;
 };
 

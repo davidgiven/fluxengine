@@ -1,20 +1,18 @@
 #ifndef RECORD_H
 #define RECORD_H
 
+#include "fluxmap.h"
+
 class RawRecord
 {
 public:
 	RawRecord() {}
 
-	RawRecord(nanoseconds_t position, nanoseconds_t clock, const Bytes& bytes):
-		position(position),
-		clock(clock),
-		bytes(bytes)
-	{}
-
-	nanoseconds_t position;
-	nanoseconds_t clock;
-	Bytes bytes;
+	Fluxmap::Position position;
+	nanoseconds_t clock = 0;
+    int physicalTrack = 0;
+    int physicalSide = 0;
+	Bytes data;
 };
 
 #endif
