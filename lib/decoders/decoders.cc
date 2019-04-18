@@ -229,8 +229,11 @@ void AbstractSeparatedDecoder::decodeToSectors(Track& track)
 
 void AbstractSeparatedDecoder::decodeToSectors(const RawBits& bitmap, Track& track)
 {
-    track.rawrecords = std::make_unique<RawRecordVector>(extractRecords(bitmap));
-    track.sectors = std::make_unique<SectorVector>(decodeToSectors(*track.rawrecords, track.physicalTrack, track.physicalSide));
+    const auto& records = extractRecords(bitmap);
+    for (const auto& sector : decodeToSectors(records, track.physicalTrack, track.physicalSide))
+        track.sectors.push_back(*sector);
+    for (const auto& record : extractRecords(bitmap))
+        track.rawrecords.push_back(*record);
 }
 
 RawRecordVector AbstractSoftSectorDecoder::extractRecords(const RawBits& rawbits) const
@@ -248,9 +251,13 @@ RawRecordVector AbstractSoftSectorDecoder::extractRecords(const RawBits& rawbits
         records.push_back(
             std::unique_ptr<RawRecord>(
                 new RawRecord(
-                    matchStart,
-                    rawbits.begin() + matchStart,
-                    rawbits.begin() + end)
+                    0,
+                    0,
+                    toBytes(
+                        rawbits.begin() + matchStart,
+                        rawbits.begin() + end
+                    )
+                )
             )
         );
     };
@@ -311,9 +318,13 @@ RawRecordVector AbstractHardSectorDecoder::extractRecords(const RawBits& rawbits
             records.push_back(
                 std::unique_ptr<RawRecord>(
                     new RawRecord(
-                        previous,
-                        rawbits.begin() + previous,
-                        rawbits.begin() + end)
+                        0,
+                        0,
+                        toBytes(
+                            rawbits.begin() + previous,
+                            rawbits.begin() + end
+                        )
+                    )
                 )
             );
             previous = end;

@@ -43,6 +43,9 @@ public:
     void adjustBounds(unsigned pos);
     Bytes& resize(unsigned size);
 
+    Bytes& clear()
+    { resize(0); return *this; }
+
     Bytes slice(unsigned start, unsigned len) const;
     Bytes compress() const;
     Bytes decompress() const;

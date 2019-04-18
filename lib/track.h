@@ -21,8 +21,8 @@ public:
     std::shared_ptr<FluxSource> fluxsource;
     std::unique_ptr<Fluxmap> fluxmap;
 
-    std::unique_ptr<RawRecordVector> rawrecords;
-    std::unique_ptr<SectorVector> sectors;
+    std::vector<RawRecord> rawrecords;
+    std::vector<Sector> sectors;
 };
 
 typedef std::vector<std::unique_ptr<Track>> TrackVector;

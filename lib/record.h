@@ -4,18 +4,18 @@
 class RawRecord
 {
 public:
-	RawRecord(
-			size_t position,
-			const std::vector<bool>::const_iterator start,
-			const std::vector<bool>::const_iterator end):
-		position(position), data(start, end)
+	RawRecord() {}
+
+	RawRecord(nanoseconds_t position, nanoseconds_t clock, const Bytes& bytes):
+		position(position),
+		clock(clock),
+		bytes(bytes)
 	{}
 
-	size_t position; // in bits
-	std::vector<bool> data;
+	nanoseconds_t position;
+	nanoseconds_t clock;
+	Bytes bytes;
 };
-
-typedef std::vector<std::unique_ptr<RawRecord>> RawRecordVector;
 
 #endif
 

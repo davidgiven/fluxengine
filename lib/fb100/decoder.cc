@@ -101,29 +101,23 @@ static uint16_t checksum(const Bytes& bytes)
 
 void Fb100Decoder::decodeToSectors(Track& track)
 {
-    if (track.rawrecords || track.sectors)
-        Error() << "cannot decode track twice";
-    track.rawrecords = std::make_unique<RawRecordVector>();
-    track.sectors = std::make_unique<SectorVector>();
+    Sector sector;
+    sector.physicalSide = track.physicalSide;
+    sector.physicalTrack = track.physicalTrack;
+    RawRecord record;
 
     FluxmapReader fmr(*track.fluxmap);
 
     for (;;)
     {
         nanoseconds_t clockPeriod = fmr.seekToPattern(SECTOR_ID_PATTERN);
-        if (fmr.eof())
+        if (fmr.eof() || !clockPeriod)
             break;
 
+        sector.clock = record.clock = clockPeriod;
+        sector.position = record.position = fmr.tellNs();
         auto rawbits = fmr.readRawBits(FB100_RECORD_SIZE*16, clockPeriod);
-
-        track.rawrecords->push_back(
-            std::unique_ptr<RawRecord>(
-                new RawRecord(
-                    0,
-                    rawbits.begin(),
-                    rawbits.end())
-            )
-        );
+        record.bytes.writer().seekToEnd() += toBytes(rawbits);
 
         const Bytes bytes = decodeFmMfm(rawbits).slice(0, FB100_RECORD_SIZE);
         ByteReader br(bytes);
@@ -139,16 +133,11 @@ void Fb100Decoder::decodeToSectors(Track& track)
             continue;
 
         uint8_t abssector = id[2];
-        uint8_t trackid = abssector >> 1;
-        uint8_t sectorid = abssector & 1;
-
-        Bytes data;
-        data.writer().append(id.slice(5, 12)).append(payload);
-
-        int status = (wantPayloadCrc == gotPayloadCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
-        auto sector = std::unique_ptr<Sector>(
-            new Sector(status, trackid, 0, sectorid, data));
-        sector->clock = clockPeriod;
-        track.sectors->push_back(std::move(sector));
+        sector.logicalTrack = abssector & 1;
+        sector.logicalSide = 0;
+        sector.logicalSector = abssector & 1;
+        sector.data.clear().writer().append(id.slice(5, 12)).append(payload);
+        sector.status = (wantPayloadCrc == gotPayloadCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
+        track.sectors.push_back(sector);
     }
 }

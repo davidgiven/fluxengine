@@ -41,8 +41,12 @@ void readSectorsFromFile(SectorSet& sectors, const Geometry& geometry,
 				Bytes data(geometry.sectorSize);
 				inputFile.read((char*) data.begin(), geometry.sectorSize);
 
-				sectors.get(track, head, sectorId).reset(
-					new Sector(Sector::OK, track, head, sectorId, data));
+				Sector* sector = sectors.get(track, head, sectorId) = new Sector();
+				sector->status = Sector::OK;
+				sector->logicalTrack = sector->physicalTrack = track;
+				sector->logicalSide = sector->physicalSide = head;
+				sector->logicalSector = sectorId;
+				sector->data = data;
 			}
 		}
 	}
@@ -64,7 +68,7 @@ void writeSectorsToFile(const SectorSet& sectors, const Geometry& geometry,
 			std::cout << fmt::format("{}.{:2} ", head, sectorId);
 			for (int track = 0; track < geometry.tracks; track++)
 			{
-				auto sector = sectors.get(track, head, sectorId);
+				Sector* sector = sectors.get(track, head, sectorId);
 				if (!sector)
 				{
 					std::cout << 'X';
@@ -136,7 +140,7 @@ void writeSectorsToFile(const SectorSet& sectors, const Geometry& geometry,
 				auto sector = sectors.get(track, head, sectorId);
 				if (sector)
 				{
-					outputFile.seekp(sector->track*trackSize + sector->side*headSize + sector->sector*geometry.sectorSize, std::ios::beg);
+					outputFile.seekp(sector->logicalTrack*trackSize + sector->logicalSide*headSize + sector->logicalSector*geometry.sectorSize, std::ios::beg);
 					outputFile.write((const char*) &sector->data[0], sector->data.size());
 				}
 			}

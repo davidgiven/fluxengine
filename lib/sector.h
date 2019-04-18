@@ -16,28 +16,22 @@ public:
 		OK,
 		BAD_CHECKSUM,
         MISSING,
-        CONFLICT
+        CONFLICT,
+        INTERNAL_ERROR
 	};
 
     static const std::string statusToString(Status status);
 
-    Sector(int status, int track, int side, int sector, const Bytes& data):
-		status(status),
-        track(track),
-        side(side),
-        sector(sector),
-        data(data)
-    {}
-
-	int status;
-    nanoseconds_t clock;
-    const int track;
-    const int side;
-    const int sector;
-    const Bytes data;
+	Status status = Status::INTERNAL_ERROR;
+    nanoseconds_t position = 0;
+    nanoseconds_t clock = 0;
+    int physicalTrack = 0;
+    int physicalSide = 0;
+    int logicalTrack = 0;
+    int logicalSide = 0;
+    int logicalSector = 0;
+    Bytes data;
 };
-
-typedef std::vector<std::unique_ptr<Sector>> SectorVector;
 
 #endif
 

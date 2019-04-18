@@ -3,9 +3,9 @@
 #include "sector.h"
 #include "sectorset.h"
 
-std::unique_ptr<Sector>& SectorSet::get(int track, int head, int sector)
+Sector*& SectorSet::get(int track, int head, int sector)
 {
-        key_t key(track, head, sector);
+	key_t key(track, head, sector);
 	return _data[key];
 }
 
@@ -15,7 +15,7 @@ Sector* SectorSet::get(int track, int head, int sector) const
 	auto i = _data.find(key);
 	if (i == _data.end())
 		return NULL;
-	return i->second.get();
+	return i->second;
 }
 
 void SectorSet::calculateSize(int& numTracks, int& numHeads, int& numSectors,
@@ -28,9 +28,9 @@ void SectorSet::calculateSize(int& numTracks, int& numHeads, int& numSectors,
 		auto& sector = i.second;
 		if (sector)
 		{
-			numTracks = std::max(numTracks, sector->track+1);
-			numHeads = std::max(numHeads, sector->side+1);
-			numSectors = std::max(numSectors, sector->sector+1);
+			numTracks = std::max(numTracks, sector->logicalTrack+1);
+			numHeads = std::max(numHeads, sector->logicalSide+1);
+			numSectors = std::max(numSectors, sector->logicalSector+1);
 			sectorSize = std::max(sectorSize, (int)sector->data.size());
 		}
 	}
