@@ -1,5 +1,6 @@
 #include "globals.h"
 #include "fluxmap.h"
+#include "fluxmapreader.h"
 #include "protocol.h"
 #include "record.h"
 #include "decoders.h"
@@ -11,47 +12,33 @@
 #include <string.h>
 #include <algorithm>
 
-static std::vector<bool>::const_iterator find_start_of_data(const std::vector<bool>& rawbits)
+static const FluxPattern SECTOR_START_PATTERN(16, 0xaaab);
+
+nanoseconds_t ZilogMczDecoder::findSector(FluxmapReader& fmr, Track& track)
 {
-    uint8_t fifo = 0;
-    auto ii = rawbits.begin();
-
-    while (ii != rawbits.end())
-    {
-        fifo = (fifo << 1) | *ii++;
-        if (fifo == 0xab)
-            return ii-2;
-    }
-
-    return ii;
+    fmr.seekToIndexMark();
+    return fmr.seekToPattern(SECTOR_START_PATTERN);
 }
 
-SectorVector ZilogMczDecoder::decodeToSectors(
-        const RawRecordVector& rawRecords, unsigned physicalTrack, unsigned physicalSide)
+void ZilogMczDecoder::decodeSingleSector(FluxmapReader& fmr, Track& track, Sector& sector)
 {
-    std::vector<std::unique_ptr<Sector>> sectors;
+    fmr.readRawBits(14, sector.clock);
 
-    for (auto& rawrecord : rawRecords)
-    {
-        auto start = find_start_of_data(rawrecord->data);
-        auto rawbytes = decodeFmMfm(start, rawrecord->data.cend()).slice(0, 136);
+    auto rawbits = fmr.readRawBits(140*16, sector.clock);
+    auto bytes = decodeFmMfm(rawbits).slice(0, 140);
+    ByteReader br(bytes);
 
-        uint8_t sectorid = rawbytes[0] & 0x1f;
-        uint8_t track = rawbytes[1] & 0x7f;
-        if (sectorid > 31)
-            continue;
-        if (track > 80)
-            continue;
+    sector.logicalSector = br.read_8() & 0x1f;
+    sector.logicalSide = 0;
+    sector.logicalTrack = br.read_8() & 0x7f;
+    if (sector.logicalSector > 31)
+        return;
+    if (sector.logicalTrack > 80)
+        return;
 
-        Bytes payload = rawbytes.slice(2, 132);
-        uint16_t wantChecksum = rawbytes.reader().seek(134).read_be16();
-        uint16_t gotChecksum = crc16(MODBUS_POLY, 0x0000, rawbytes.slice(0, 134));
+    sector.data = br.read(132);
+    uint16_t wantChecksum = br.read_be16();
+    uint16_t gotChecksum = crc16(MODBUS_POLY, 0x0000, bytes.slice(0, 134));
 
-        int status = (wantChecksum == gotChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
-        auto sector = std::unique_ptr<Sector>(
-            new Sector(status, track, 0, sectorid, payload));
-        sectors.push_back(std::move(sector));
-	}
-
-	return sectors;
+    sector.status = (wantChecksum == gotChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
 }

@@ -172,6 +172,12 @@ nanoseconds_t FluxmapReader::seekToPattern(const FluxMatcher& pattern)
     return 0;
 }
 
+void FluxmapReader::seekToIndexMark()
+{
+    readNextMatchingOpcode(F_OP_INDEX);
+    _pendingZeroBits = 0;
+}
+
 bool FluxmapReader::readRawBit(nanoseconds_t clockPeriod)
 {
     assert(clockPeriod != 0);
