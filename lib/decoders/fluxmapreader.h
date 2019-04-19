@@ -85,7 +85,10 @@ public:
     { return _pos; }
 
     void seek(const Fluxmap::Position& pos)
-    { _pos = pos; _pendingZeroBits = 0; }
+    {
+        _pos = pos;
+        _pendingZeroBits = 0;
+    }
 
     int readOpcode(unsigned& ticks);
     unsigned readNextMatchingOpcode(uint8_t opcode);

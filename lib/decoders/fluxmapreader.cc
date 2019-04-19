@@ -3,6 +3,7 @@
 #include "fluxmapreader.h"
 #include "flags.h"
 #include "protocol.h"
+#include "fmt/format.h"
 #include <numeric>
 #include <math.h>
 
@@ -10,6 +11,11 @@ static DoubleFlag clockDecodeThreshold(
     { "--bit-error-threshold" },
     "Amount of error to tolerate in pulse timing.",
     0.30);
+
+static DoubleFlag clockIntervalBias(
+    { "--clock-interval-bias" },
+    "Adjust intervals between pulses by this many clocks before decoding.",
+    -0.02);
 
 int FluxmapReader::readOpcode(unsigned& ticks)
 {
@@ -176,9 +182,8 @@ bool FluxmapReader::readRawBit(nanoseconds_t clockPeriod)
         return false;
     }
 
-    unsigned interval = readNextMatchingOpcode(F_OP_PULSE);
-    unsigned clockTicks = clockPeriod / NS_PER_TICK;
-    double clocks = (double)interval / clockTicks;
+    nanoseconds_t interval = readNextMatchingOpcode(F_OP_PULSE)*NS_PER_TICK;
+    double clocks = (double)interval / clockPeriod + clockIntervalBias;
 
     if (clocks < 1.0)
         clocks = 1.0;
@@ -190,7 +195,10 @@ std::vector<bool> FluxmapReader::readRawBits(unsigned count, nanoseconds_t clock
 {
     std::vector<bool> result;
     while (!eof() && count--)
-        result.push_back(readRawBit(clockPeriod));
+    {
+        bool b = readRawBit(clockPeriod);
+        result.push_back(b);
+    }
     return result;
 }
 
