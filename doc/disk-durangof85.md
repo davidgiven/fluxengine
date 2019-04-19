@@ -15,7 +15,8 @@ it for the following photo...
 <img src="durangof85.jpg" style="max-width: 60%" alt="A Durango F85, held precariously">
 </div>
 
-...and even then, only for a few seconds.
+...and even then, they had to airbrush out the tendons in her neck from the
+effort!
 
 It used 5.25 soft-sectored disks storing an impressive-for-those-days
 480kBish on a side, using a proprietary 4-in-5 GCR encoding. They used 77
