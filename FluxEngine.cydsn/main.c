@@ -93,9 +93,6 @@ static void start_motor(void)
         CyDelay(1000);
         homed = false;
     }
-    
-    if (DISKSTATUS_REG_Read() & DISKSTATUS_DSKCHG)
-        homed = false;
 
     motor_on_time = clock;
     motor_on = true;
