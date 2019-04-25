@@ -7,21 +7,11 @@
 class FluxMatcher
 {
 public:
-    FluxMatcher(unsigned bits):
-        _bits(bits)
-    {}
-
     virtual ~FluxMatcher() {}
 
     /* Returns the number of intervals matched */
     virtual unsigned matches(const unsigned* intervals, double& clock) const = 0;
     virtual unsigned intervals() const = 0;
-
-    unsigned bits() const
-    { return _bits; }
-
-protected:
-    unsigned _bits;
 };
 
 class FluxPattern : public FluxMatcher
@@ -37,6 +27,8 @@ public:
 private:
     std::vector<unsigned> _intervals;
     unsigned _length;
+    unsigned _bits;
+    bool _lowzero = false;
 
 public:
     friend void test_patternconstruction();
@@ -56,6 +48,21 @@ public:
 private:
     unsigned _intervals;
     std::vector<std::unique_ptr<FluxPattern>> _patterns;
+};
+
+class FluxMatchers : public FluxMatcher
+{
+public:
+    FluxMatchers(const std::initializer_list<const FluxMatcher*> matchers);
+
+    unsigned matches(const unsigned* intervals, double& clock) const override;
+
+    unsigned intervals() const override
+    { return _intervals; }
+
+private:
+    unsigned _intervals;
+    std::vector<const FluxMatcher*> _matchers;
 };
 
 class FluxmapReader
@@ -84,6 +91,7 @@ public:
     Fluxmap::Position tell() const
     { return _pos; }
 
+    /* Important! You can only reliably seek to 1 bits. */
     void seek(const Fluxmap::Position& pos)
     {
         _pos = pos;
@@ -93,7 +101,9 @@ public:
     int readOpcode(unsigned& ticks);
     unsigned readNextMatchingOpcode(uint8_t opcode);
 
+    /* Important! You can only reliably seek to 1 bits. */
     void seek(nanoseconds_t ns);
+
     void seekToIndexMark();
     nanoseconds_t seekToPattern(const FluxMatcher& pattern);
 

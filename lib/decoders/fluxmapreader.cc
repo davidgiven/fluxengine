@@ -6,11 +6,12 @@
 #include "fmt/format.h"
 #include <numeric>
 #include <math.h>
+#include <strings.h>
 
 static DoubleFlag clockDecodeThreshold(
     { "--bit-error-threshold" },
     "Amount of error to tolerate in pulse timing.",
-    0.30);
+    0.10);
 
 static DoubleFlag clockIntervalBias(
     { "--clock-interval-bias" },
@@ -54,12 +55,13 @@ unsigned FluxmapReader::readNextMatchingOpcode(uint8_t opcode)
 }
 
 FluxPattern::FluxPattern(unsigned bits, uint64_t pattern):
-    FluxMatcher(bits)
+    _bits(bits)
 {
     const uint64_t TOPBIT = 1ULL << 63;
 
     assert(pattern != 0);
 
+    unsigned lowbit = ffsll(pattern)-1;
     while (!(pattern & TOPBIT))
         pattern <<= 1;
 
@@ -76,17 +78,25 @@ FluxPattern::FluxPattern(unsigned bits, uint64_t pattern):
         _intervals.push_back(interval);
         _length += interval;
     }
+
+    if (lowbit)
+    {
+        _lowzero = true;
+        /* Note that length does *not* include this interval. */
+        _intervals.push_back(lowbit + 1);
+    }
 }
 
 unsigned FluxPattern::matches(const unsigned* end, double& clock) const
 {
     const unsigned* start = end - _intervals.size();
-    unsigned candidatelength = std::accumulate(start, end, 0);
+    unsigned candidatelength = std::accumulate(start, end - _lowzero, 0);
     if (!candidatelength)
         return 0;
     clock = (double)candidatelength / (double)_length;
 
-    for (unsigned i=0; i<_intervals.size(); i++)
+    unsigned exactIntervals = _intervals.size() - _lowzero;
+    for (unsigned i=0; i<exactIntervals; i++)
     {
         double ii = clock * (double)_intervals[i];
         double ci = (double)start[i];
@@ -95,11 +105,18 @@ unsigned FluxPattern::matches(const unsigned* end, double& clock) const
             return 0;
     }
 
+    if (_lowzero)
+    {
+        double ii = clock * (double)_intervals[exactIntervals];
+        double ci = (double)start[exactIntervals];
+        if (ci < (ii - clockDecodeThreshold*ii/ci))
+            return 0;
+    }
+
     return _intervals.size();
 }
 
-FluxPatterns::FluxPatterns(unsigned bits, std::initializer_list<uint64_t> patterns):
-    FluxMatcher(bits)
+FluxPatterns::FluxPatterns(unsigned bits, std::initializer_list<uint64_t> patterns)
 {
     _intervals = 0;
     for (uint64_t p : patterns)
@@ -115,6 +132,25 @@ unsigned FluxPatterns::matches(const unsigned* intervals, double& clock) const
     for (const auto& pattern : _patterns)
     {
         unsigned m = pattern->matches(intervals, clock);
+        if (m)
+            return m;
+    }
+    return 0;
+}
+
+FluxMatchers::FluxMatchers(const std::initializer_list<const FluxMatcher*> matchers):
+    _matchers(matchers)
+{
+    _intervals = 0;
+    for (const auto* matcher : matchers)
+        _intervals = std::max(_intervals, matcher->intervals());
+}
+
+unsigned FluxMatchers::matches(const unsigned* intervals, double& clock) const
+{
+    for (const auto* matcher : _matchers)
+    {
+        unsigned m = matcher->matches(intervals, clock);
         if (m)
             return m;
     }
@@ -143,23 +179,14 @@ nanoseconds_t FluxmapReader::seekToPattern(const FluxMatcher& pattern)
     unsigned candidates[intervalCount+1];
     Fluxmap::Position positions[intervalCount+1];
 
-    for (unsigned& i : candidates)
-        i = 0;
-    for (Fluxmap::Position& p : positions)
-        p = tell();
+    for (unsigned i=0; i<=intervalCount; i++)
+    {
+        positions[i] = tell();
+        candidates[i] = readNextMatchingOpcode(F_OP_PULSE);
+    }
 
     while (!eof())
     {
-        unsigned interval = readNextMatchingOpcode(F_OP_PULSE);
-
-        for (unsigned i=0; i<intervalCount; i++)
-        {
-            positions[i] = positions[i+1];
-            candidates[i] = candidates[i+1];
-        }
-        positions[intervalCount] = tell();
-        candidates[intervalCount] = interval;
-
         double clock;
         unsigned m = pattern.matches(&candidates[intervalCount+1], clock);
         if (m)
@@ -167,6 +194,15 @@ nanoseconds_t FluxmapReader::seekToPattern(const FluxMatcher& pattern)
             seek(positions[intervalCount-m]);
             return clock * NS_PER_TICK;
         }
+
+        for (unsigned i=0; i<intervalCount; i++)
+        {
+            positions[i] = positions[i+1];
+            candidates[i] = candidates[i+1];
+        }
+        candidates[intervalCount] = readNextMatchingOpcode(F_OP_PULSE);
+        positions[intervalCount] = tell();
+
     }
 
     return 0;
