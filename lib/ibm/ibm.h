@@ -5,6 +5,7 @@
 
 /* IBM format (i.e. ordinary PC floppies). */
 
+#define IBM_MFM_SYNC   0xA1   /* sync byte for MFM */
 #define IBM_IAM        0xFC   /* start-of-track record */
 #define IBM_IAM_LEN    1      /* plus prologue */
 #define IBM_IDAM       0xFE   /* sector header */
@@ -27,6 +28,24 @@ struct IbmIdam
     uint8_t crc[2];
 };
 
+class IbmDecoder : public AbstractSplitDecoder
+{
+public:
+    IbmDecoder(unsigned sectorBase):
+        _sectorBase(sectorBase)
+    {}
+
+    nanoseconds_t findSector(FluxmapReader& fmr, Track& track) override;
+    nanoseconds_t findData(FluxmapReader& fmr, Track& track) override;
+    void decodeHeader(FluxmapReader& fmr, Track& track, Sector& sector) override;
+    void decodeData(FluxmapReader& fmr, Track& track, Sector& sector) override;
+
+private:
+    unsigned _sectorBase;
+    unsigned _sectorSize;
+};
+
+#if 0
 class AbstractIbmDecoder : public AbstractSoftSectorDecoder
 {
 public:
@@ -72,5 +91,6 @@ protected:
     int skipHeaderBytes() const
     { return 3; }
 };
+#endif
 
 #endif

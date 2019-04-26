@@ -100,7 +100,7 @@ void test_patternmatchingwithtrailingzeros()
     FluxPattern fp(16, 0x0016);
     const unsigned matching[] = { 100, 100, 200, 100, 200 };
     const unsigned notmatching[] = { 100, 200, 100, 100, 100 };
-    const unsigned closematch1[] = { 90, 90, 180, 90, 200 };
+    const unsigned closematch1[] = { 90, 90, 180, 90, 300 };
     const unsigned closematch2[] = { 110, 110, 220, 110, 220 };
     
     double clock;

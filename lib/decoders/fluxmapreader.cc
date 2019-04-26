@@ -10,8 +10,8 @@
 
 static DoubleFlag clockDecodeThreshold(
     { "--bit-error-threshold" },
-    "Amount of error to tolerate in pulse timing.",
-    0.10);
+    "Amount of error to tolerate in pulse timing, in fractions of a clock.",
+    0.20);
 
 static DoubleFlag clockIntervalBias(
     { "--clock-interval-bias" },
@@ -100,7 +100,7 @@ unsigned FluxPattern::matches(const unsigned* end, double& clock) const
     {
         double ii = clock * (double)_intervals[i];
         double ci = (double)start[i];
-        double error = fabs(1.0 - ii/ci);
+        double error = fabs((ii - ci) / clock);
         if (error > clockDecodeThreshold)
             return 0;
     }
@@ -109,7 +109,8 @@ unsigned FluxPattern::matches(const unsigned* end, double& clock) const
     {
         double ii = clock * (double)_intervals[exactIntervals];
         double ci = (double)start[exactIntervals];
-        if (ci < (ii - clockDecodeThreshold*ii/ci))
+        double error = (ii - ci) / clock;
+        if (error > clockDecodeThreshold)
             return 0;
     }
 
@@ -182,7 +183,7 @@ nanoseconds_t FluxmapReader::seekToPattern(const FluxMatcher& pattern)
     for (unsigned i=0; i<=intervalCount; i++)
     {
         positions[i] = tell();
-        candidates[i] = readNextMatchingOpcode(F_OP_PULSE);
+        candidates[i] = 0;
     }
 
     while (!eof())
