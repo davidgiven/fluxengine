@@ -88,11 +88,17 @@ void test_patternmatchingwithouttrailingzeros()
     const unsigned closematch1[] = { 90, 90, 180, 90 };
     const unsigned closematch2[] = { 110, 110, 220, 110 };
     
-    double clock;
-    assert(fp.matches(&matching[4], clock), 2U);
-    assert(fp.matches(&notmatching[4], clock), 0U);
-    assert(fp.matches(&closematch1[4], clock), 2U);
-    assert(fp.matches(&closematch2[4], clock), 2U);
+    FluxMatch match;
+    assert(fp.matches(&matching[4], match), true);
+    assert(match.intervals, 2U);
+
+    assert(fp.matches(&notmatching[4], match), false);
+    
+    assert(fp.matches(&closematch1[4], match), true);
+    assert(match.intervals, 2U);
+
+    assert(fp.matches(&closematch2[4], match), true);
+    assert(match.intervals, 2U);
 }
 
 void test_patternmatchingwithtrailingzeros()
@@ -103,11 +109,17 @@ void test_patternmatchingwithtrailingzeros()
     const unsigned closematch1[] = { 90, 90, 180, 90, 300 };
     const unsigned closematch2[] = { 110, 110, 220, 110, 220 };
     
-    double clock;
-    assert(fp.matches(&matching[5], clock), 3U);
-    assert(fp.matches(&notmatching[5], clock), 0U);
-    assert(fp.matches(&closematch1[5], clock), 3U);
-    assert(fp.matches(&closematch2[5], clock), 3U);
+    FluxMatch match;
+    assert(fp.matches(&matching[5], match), true);
+    assert(match.intervals, 3U);
+
+    assert(fp.matches(&notmatching[5], match), false);
+
+    assert(fp.matches(&closematch1[5], match), true);
+    assert(match.intervals, 3U);
+
+    assert(fp.matches(&closematch2[5], match), true);
+    assert(match.intervals, 3U);
 }
 
 int main(int argc, const char* argv[])

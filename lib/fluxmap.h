@@ -13,6 +13,7 @@ public:
     {
         unsigned bytes = 0;
         unsigned ticks = 0;
+        unsigned zeroes = 0;
 
         nanoseconds_t ns() const
         { return ticks * NS_PER_TICK; }

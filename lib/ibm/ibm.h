@@ -42,7 +42,8 @@ public:
 
 private:
     unsigned _sectorBase;
-    unsigned _sectorSize;
+    unsigned _currentSectorSize;
+    unsigned _currentHeaderLength;
 };
 
 #if 0

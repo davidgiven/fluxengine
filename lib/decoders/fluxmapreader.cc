@@ -62,8 +62,14 @@ FluxPattern::FluxPattern(unsigned bits, uint64_t pattern):
     assert(pattern != 0);
 
     unsigned lowbit = ffsll(pattern)-1;
+
+    pattern <<= 64 - bits;
+    _highzeroes = 0;
     while (!(pattern & TOPBIT))
+    {
         pattern <<= 1;
+        _highzeroes++;
+    }
 
     _length = 0;
     while (pattern != TOPBIT)
@@ -87,34 +93,37 @@ FluxPattern::FluxPattern(unsigned bits, uint64_t pattern):
     }
 }
 
-unsigned FluxPattern::matches(const unsigned* end, double& clock) const
+bool FluxPattern::matches(const unsigned* end, FluxMatch& match) const
 {
     const unsigned* start = end - _intervals.size();
     unsigned candidatelength = std::accumulate(start, end - _lowzero, 0);
     if (!candidatelength)
-        return 0;
-    clock = (double)candidatelength / (double)_length;
+        return false;
+    match.clock = (double)candidatelength / (double)_length;
 
     unsigned exactIntervals = _intervals.size() - _lowzero;
     for (unsigned i=0; i<exactIntervals; i++)
     {
-        double ii = clock * (double)_intervals[i];
+        double ii = match.clock * (double)_intervals[i];
         double ci = (double)start[i];
-        double error = fabs((ii - ci) / clock);
+        double error = fabs((ii - ci) / match.clock);
         if (error > clockDecodeThreshold)
-            return 0;
+            return false;
     }
 
     if (_lowzero)
     {
-        double ii = clock * (double)_intervals[exactIntervals];
+        double ii = match.clock * (double)_intervals[exactIntervals];
         double ci = (double)start[exactIntervals];
-        double error = (ii - ci) / clock;
+        double error = (ii - ci) / match.clock;
         if (error > clockDecodeThreshold)
-            return 0;
+            return false;
     }
 
-    return _intervals.size();
+    match.matcher = this;
+    match.intervals = _intervals.size();
+    match.zeroes = _highzeroes;
+    return true;
 }
 
 FluxMatchers::FluxMatchers(const std::initializer_list<const FluxMatcher*> matchers):
@@ -125,15 +134,14 @@ FluxMatchers::FluxMatchers(const std::initializer_list<const FluxMatcher*> match
         _intervals = std::max(_intervals, matcher->intervals());
 }
 
-unsigned FluxMatchers::matches(const unsigned* intervals, double& clock) const
+bool FluxMatchers::matches(const unsigned* intervals, FluxMatch& match) const
 {
     for (const auto* matcher : _matchers)
     {
-        unsigned m = matcher->matches(intervals, clock);
-        if (m)
-            return m;
+        if (matcher->matches(intervals, match))
+            return true;
     }
-    return 0;
+    return false;
 }
 
 void FluxmapReader::seek(nanoseconds_t ns)
@@ -166,12 +174,12 @@ nanoseconds_t FluxmapReader::seekToPattern(const FluxMatcher& pattern)
 
     while (!eof())
     {
-        double clock;
-        unsigned m = pattern.matches(&candidates[intervalCount+1], clock);
-        if (m)
+        FluxMatch match;
+        if (pattern.matches(&candidates[intervalCount+1], match))
         {
-            seek(positions[intervalCount-m]);
-            return clock * NS_PER_TICK;
+            seek(positions[intervalCount-match.intervals]);
+            _pos.zeroes = match.zeroes;
+            return match.clock * NS_PER_TICK;
         }
 
         for (unsigned i=0; i<intervalCount; i++)
@@ -190,16 +198,16 @@ nanoseconds_t FluxmapReader::seekToPattern(const FluxMatcher& pattern)
 void FluxmapReader::seekToIndexMark()
 {
     readNextMatchingOpcode(F_OP_INDEX);
-    _pendingZeroBits = 0;
+    _pos.zeroes = 0;
 }
 
 bool FluxmapReader::readRawBit(nanoseconds_t clockPeriod)
 {
     assert(clockPeriod != 0);
 
-    if (_pendingZeroBits)
+    if (_pos.zeroes)
     {
-        _pendingZeroBits--;
+        _pos.zeroes--;
         return false;
     }
 
@@ -208,7 +216,7 @@ bool FluxmapReader::readRawBit(nanoseconds_t clockPeriod)
 
     if (clocks < 1.0)
         clocks = 1.0;
-    _pendingZeroBits = (int)round(clocks) - 1;
+    _pos.zeroes = (int)round(clocks) - 1;
     return true;
 }
 
