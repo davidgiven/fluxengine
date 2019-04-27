@@ -25,7 +25,7 @@ int main(int argc, const char* argv[])
 	setReaderDefaultSource(":t=0-79:s=0-1");
     Flag::parseFlags(argc, argv);
 
-	IbmMfmDecoder decoder(sectorIdBase);
+	IbmDecoder decoder(sectorIdBase);
 	readDiskCommand(decoder, outputFilename);
     return 0;
 }

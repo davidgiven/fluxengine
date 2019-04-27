@@ -20,26 +20,13 @@ static IntFlag sectorIdBase(
 	"Sector ID of the first sector.",
 	1);
 
-static BoolFlag readFm(
-	{ "--read-fm" },
-	"Read FM disks rather than MFM disks.",
-	false);
-
 int main(int argc, const char* argv[])
 {
 	setReaderDefaultSource(":t=0-79:s=0-1");
     Flag::parseFlags(argc, argv);
 
-	if (readFm)
-	{
-		IbmFmDecoder decoder(sectorIdBase);
-		readDiskCommand(decoder, outputFilename);
-	}
-	else
-	{
-		IbmMfmDecoder decoder(sectorIdBase);
-		readDiskCommand(decoder, outputFilename);
-	}
+	IbmDecoder decoder(sectorIdBase);
+	readDiskCommand(decoder, outputFilename);
     return 0;
 }
 
