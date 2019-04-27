@@ -3,19 +3,18 @@
 
 #define AESLANIER_RECORD_SEPARATOR 0x55555122
 #define AESLANIER_SECTOR_LENGTH    256
+#define AESLANIER_RECORD_SIZE      (AESLANIER_SECTOR_LENGTH + 5)
 
 class Sector;
 class Fluxmap;
 
-class AesLanierDecoder : public AbstractSoftSectorDecoder
+class AesLanierDecoder : public AbstractStatefulDecoder
 {
 public:
     virtual ~AesLanierDecoder() {}
 
-    SectorVector decodeToSectors(
-        const RawRecordVector& rawRecords, unsigned physicalTrack, unsigned physicalSide);
-	nanoseconds_t guessClock(Fluxmap& fluxmap) const;
-    int recordMatcher(uint64_t fifo) const;
+    nanoseconds_t findSector(FluxmapReader& fmr, Track& track);
+    void decodeSingleSector(FluxmapReader& fmr, Track& track, Sector& sector);
 };
 
 #endif

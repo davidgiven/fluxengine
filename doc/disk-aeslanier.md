@@ -3,7 +3,7 @@ Disk: AES Lanier word processor
 
 Back in 1980 Lanier released a series of very early integrated word processor
 appliances, the No Problem. These were actually [rebranded AES Data Superplus
-machines](http://vintagecomputers.site90.net/aes/). They wrer gigantic,
+machines](http://vintagecomputers.site90.net/aes/). They were gigantic,
 weighed 40kg, and one example I've found cost £13,000 in 1981 (the equivalent
 of nearly £50,000 in 2018!).
 
@@ -17,9 +17,10 @@ indicating to the hardware where the sectors start. The encoding scheme
 itself is [MMFM (aka
 M2FM)](http://www.retrotechnology.com/herbs_stuff/m2fm.html), an early
 attempt at double-density disk encoding which rapidly got obsoleted by the
-simpler MFM. Even aside from the encoding, the format on disk was strange;
-unified sector header/data records, so that the sector header (containing the
-sector and track number) is actually inside the user data.
+simpler MFM --- and the bytes are stored on disk _backwards_. Even aside from
+the encoding, the format on disk was strange; unified sector header/data
+records, so that the sector header (containing the sector and track number)
+is actually inside the user data.
 
 FluxEngine can read these, but I only have a single, fairly poor example of a
 disk image, and I've had to make a lot of guesses as to the sector format

@@ -3,11 +3,14 @@
 #include "aeslanier.h"
 #include "crc.h"
 #include "fluxmap.h"
+#include "fluxmapreader.h"
 #include "sector.h"
 #include "bytes.h"
 #include "record.h"
 #include "fmt/format.h"
 #include <string.h>
+
+static const FluxPattern SECTOR_PATTERN(32, AESLANIER_RECORD_SEPARATOR);
 
 /* This is actually M2FM, rather than MFM, but it our MFM/FM decoder copes fine with it. */
 
@@ -21,63 +24,39 @@ static Bytes reverse_bits(const Bytes& input)
     return output;
 }
 
-SectorVector AesLanierDecoder::decodeToSectors(const RawRecordVector& rawRecords, unsigned, unsigned)
+nanoseconds_t AesLanierDecoder::findSector(FluxmapReader& fmr, Track& track)
 {
-    std::vector<std::unique_ptr<Sector>> sectors;
+    return fmr.seekToPattern(SECTOR_PATTERN);
+}
 
-    for (auto& rawrecord : rawRecords)
+void AesLanierDecoder::decodeSingleSector(FluxmapReader& fmr, Track& track, Sector& sector)
+{
+    /* Skip ID mark. */
+
+    fmr.readRawBits(16, sector.clock);
+
+    const auto& rawbits = fmr.readRawBits(AESLANIER_RECORD_SIZE*16, sector.clock);
+    const auto& bytes = decodeFmMfm(rawbits).slice(0, AESLANIER_RECORD_SIZE);
+    const auto& reversed = reverse_bits(bytes);
+
+    sector.logicalTrack = reversed[1];
+    sector.logicalSide = 0;
+    sector.logicalSector = reversed[2];
+
+    /* Check header 'checksum' (which seems far too simple to mean much). */
+
     {
-        const auto& rawdata = rawrecord->data;
-        const auto& bytes = decodeFmMfm(rawdata);
-        const auto& reversed = reverse_bits(bytes);
+        uint8_t wanted = reversed[3];
+        uint8_t got = reversed[1] + reversed[2];
+        if (wanted != got)
+            return;
+    }
 
-        if (reversed.size() < 0x103)
-            continue;
+    /* Check data checksum, which also includes the header and is
+        * significantly better. */
 
-        unsigned track = reversed[1];
-        unsigned sectorid = reversed[2];
-
-        /* Basic sanity checking. */
-
-        if (track > 85)
-            continue;
-        if (sectorid > 35)
-            continue;
-
-        /* Check header 'checksum' (which seems far too simple to mean much). */
-
-        {
-            uint8_t wanted = reversed[3];
-            uint8_t got = reversed[1] + reversed[2];
-            if (wanted != got)
-                continue;
-        }
-
-        /* Check data checksum, which also includes the header and is
-         * significantly better. */
-
-        Bytes payload = reversed.slice(1, AESLANIER_SECTOR_LENGTH);
-        uint16_t wanted = reversed.reader().seek(0x101).read_le16();
-        uint16_t got = crc16ref(MODBUS_POLY_REF, payload);
-        int status = (wanted == got) ? Sector::OK : Sector::BAD_CHECKSUM;
-
-        auto sector = std::unique_ptr<Sector>(
-            new Sector(status, track, 0, sectorid, payload));
-        sectors.push_back(std::move(sector));
-	}
-
-	return sectors;
-}
-
-nanoseconds_t AesLanierDecoder::guessClock(Fluxmap& fluxmap) const
-{
-    return fluxmap.guessClock() / 2;
-}
-
-int AesLanierDecoder::recordMatcher(uint64_t fifo) const
-{
-    uint32_t masked = fifo & 0xffffffff;
-    if (masked == AESLANIER_RECORD_SEPARATOR)
-	 	return 16;
-    return 0;
+    sector.data = reversed.slice(1, AESLANIER_SECTOR_LENGTH);
+    uint16_t wanted = reversed.reader().seek(0x101).read_le16();
+    uint16_t got = crc16ref(MODBUS_POLY_REF, sector.data);
+    sector.status = (wanted == got) ? Sector::OK : Sector::BAD_CHECKSUM;
 }
