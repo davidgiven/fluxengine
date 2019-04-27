@@ -34,40 +34,6 @@ public:
     virtual void decodeToSectors(Track& track) = 0;
 };
 
-/* DEPRECATED */
-class AbstractSeparatedDecoder : public AbstractDecoder
-{
-public:
-    virtual ~AbstractSeparatedDecoder() {}
-
-    virtual RawRecordVector extractRecords(const RawBits& rawbits) const = 0;
-    virtual SectorVector decodeToSectors(const RawRecordVector& rawrecords,
-            unsigned physicalTrack, unsigned physicalSide) = 0;
-
-    void decodeToSectors(Track& track);
-    void decodeToSectors(const RawBits& bitmap, Track& track);
-};
-
-/* DEPRECATED */
-class AbstractSoftSectorDecoder : public AbstractSeparatedDecoder
-{
-public:
-    virtual ~AbstractSoftSectorDecoder() {}
-
-    RawRecordVector extractRecords(const RawBits& rawbits) const;
-
-    virtual int recordMatcher(uint64_t fifo) const = 0;
-};
-
-/* DEPRECATED */
-class AbstractHardSectorDecoder : public AbstractSeparatedDecoder
-{
-public:
-    virtual ~AbstractHardSectorDecoder() {}
-
-    RawRecordVector extractRecords(const RawBits& rawbits) const;
-};
-
 class AbstractStatefulDecoder : public AbstractDecoder
 {
 public:
