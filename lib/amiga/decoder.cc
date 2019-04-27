@@ -1,5 +1,6 @@
 #include "globals.h"
 #include "fluxmap.h"
+#include "fluxmapreader.h"
 #include "protocol.h"
 #include "record.h"
 #include "decoders.h"
@@ -18,6 +19,8 @@
  * MFM works.
  */
          
+static const FluxPattern SECTOR_PATTERN(48, AMIGA_SECTOR_RECORD);
+
 static Bytes deinterleave(const uint8_t*& input, size_t len)
 {
     assert(!(len & 1));
@@ -59,53 +62,33 @@ static uint32_t checksum(const Bytes& bytes)
     return checksum & 0x55555555;
 }
 
-SectorVector AmigaDecoder::decodeToSectors(const RawRecordVector& rawRecords, unsigned, unsigned)
+nanoseconds_t AmigaDecoder::findSector(FluxmapReader& fmr, Track& track)
 {
-    std::vector<std::unique_ptr<Sector>> sectors;
-
-    for (auto& rawrecord : rawRecords)
-    {
-        const auto& rawdata = rawrecord->data;
-        const auto& rawbytes = toBytes(rawdata);
-        const auto& bytes = decodeFmMfm(rawdata);
-
-        if (bytes.size() < 544)
-            continue;
-
-        const uint8_t* ptr = bytes.begin() + 4;
-
-        Bytes header = deinterleave(ptr, 4);
-        Bytes recoveryinfo = deinterleave(ptr, 16);
-
-        uint32_t wantedheaderchecksum = deinterleave(ptr, 4).reader().read_be32();
-        uint32_t gotheaderchecksum = checksum(rawbytes.slice(8, 40));
-        if (gotheaderchecksum != wantedheaderchecksum)
-            continue;
-
-        uint32_t wanteddatachecksum = deinterleave(ptr, 4).reader().read_be32();
-        uint32_t gotdatachecksum = checksum(rawbytes.slice(64, 1024));
-        int status = (gotdatachecksum == wanteddatachecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
-
-        Bytes databytes = deinterleave(ptr, 512);
-        unsigned track = header[1] >> 1;
-        unsigned side = header[1] & 1;
-        auto sector = std::unique_ptr<Sector>(
-            new Sector(status, track, side, header[2], databytes));
-        sectors.push_back(std::move(sector));
-	}
-
-	return sectors;
+    return fmr.seekToPattern(SECTOR_PATTERN);
 }
 
-nanoseconds_t AmigaDecoder::guessClock(Fluxmap& fluxmap) const
+void AmigaDecoder::decodeSingleSector(FluxmapReader& fmr, Track& track, Sector& sector)
 {
-    return fluxmap.guessClock() / 2;
-}
+    const auto& rawbits = fmr.readRawBits(AMIGA_RECORD_SIZE*16, sector.clock);
+    const auto& rawbytes = toBytes(rawbits).slice(0, AMIGA_RECORD_SIZE*2);
+    const auto& bytes = decodeFmMfm(rawbits).slice(0, AMIGA_RECORD_SIZE);
 
-int AmigaDecoder::recordMatcher(uint64_t fifo) const
-{
-    uint64_t masked = fifo & 0xffffffffffffULL;
-    if (masked == AMIGA_SECTOR_RECORD)
-		return 64;
-    return 0;
+    const uint8_t* ptr = bytes.begin() + 3;
+
+    Bytes header = deinterleave(ptr, 4);
+    Bytes recoveryinfo = deinterleave(ptr, 16);
+
+    sector.logicalTrack = header[1] >> 1;
+    sector.logicalSide = header[1] & 1;
+    sector.logicalSector = header[2];
+
+    uint32_t wantedheaderchecksum = deinterleave(ptr, 4).reader().read_be32();
+    uint32_t gotheaderchecksum = checksum(rawbytes.slice(6, 40));
+    if (gotheaderchecksum != wantedheaderchecksum)
+        return;
+
+    uint32_t wanteddatachecksum = deinterleave(ptr, 4).reader().read_be32();
+    uint32_t gotdatachecksum = checksum(rawbytes.slice(62, 1024));
+    sector.data = deinterleave(ptr, 512);
+    sector.status = (gotdatachecksum == wanteddatachecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
 }
