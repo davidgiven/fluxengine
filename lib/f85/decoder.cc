@@ -13,7 +13,8 @@
 #include <algorithm>
 
 const FluxPattern SECTOR_RECORD_PATTERN(24, F85_SECTOR_RECORD);
-const FluxPatterns SECTOR_OR_DATA_RECORD_PATTERN(24, { F85_SECTOR_RECORD, F85_DATA_RECORD });
+const FluxPattern DATA_RECORD_PATTERN(24, F85_DATA_RECORD);
+const FluxMatchers SECTOR_OR_DATA_RECORD_PATTERN({ &SECTOR_RECORD_PATTERN, &DATA_RECORD_PATTERN });
 
 static int decode_data_gcr(uint8_t gcr)
 {

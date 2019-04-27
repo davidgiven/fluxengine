@@ -80,10 +80,10 @@ const FluxMatchers SEPARATOR_PATTERNS(
     {
         &MFM_PATTERN,
         &FM_IDAM_PATTERN,
-        // &FM_DAM1_PATTERN,
+        &FM_DAM1_PATTERN,
         &FM_DAM2_PATTERN,
-        // &FM_TRS80DAM1_PATTERN,
-        // &FM_TRS80DAM2_PATTERN,
+        &FM_TRS80DAM1_PATTERN,
+        &FM_TRS80DAM2_PATTERN,
     }
 );
 

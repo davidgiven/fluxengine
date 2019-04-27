@@ -110,22 +110,10 @@ void test_patternmatchingwithtrailingzeros()
     assert(fp.matches(&closematch2[5], clock), 3U);
 }
 
-void test_patternsmatching()
-{
-    FluxPatterns fp(16, { 0x000b, 0x0015 });
-    const unsigned matching1[] = { 100, 100, 200, 100 };
-    const unsigned matching2[] = { 100, 100, 200, 200 };
-
-    double clock;
-    assert(fp.matches(&matching1[4], clock), 2U);
-    assert(fp.matches(&matching2[4], clock), 2U);
-}
-
 int main(int argc, const char* argv[])
 {
     test_patternconstruction();
     test_patternmatchingwithouttrailingzeros();
     test_patternmatchingwithtrailingzeros();
-    test_patternsmatching();
     return 0;
 }

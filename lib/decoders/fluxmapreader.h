@@ -35,21 +35,6 @@ public:
     friend void test_patternmatching();
 };
 
-class FluxPatterns : public FluxMatcher
-{
-public:
-    FluxPatterns(unsigned bits, std::initializer_list<uint64_t> patterns);
-
-    unsigned matches(const unsigned* intervals, double& clock) const override;
-
-    unsigned intervals() const override
-    { return _intervals; }
-
-private:
-    unsigned _intervals;
-    std::vector<std::unique_ptr<FluxPattern>> _patterns;
-};
-
 class FluxMatchers : public FluxMatcher
 {
 public:

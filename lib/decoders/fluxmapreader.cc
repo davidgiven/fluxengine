@@ -117,28 +117,6 @@ unsigned FluxPattern::matches(const unsigned* end, double& clock) const
     return _intervals.size();
 }
 
-FluxPatterns::FluxPatterns(unsigned bits, std::initializer_list<uint64_t> patterns)
-{
-    _intervals = 0;
-    for (uint64_t p : patterns)
-    {
-        auto pattern = std::make_unique<FluxPattern>(bits, p);
-        _intervals = std::max(_intervals, pattern->intervals());
-        _patterns.push_back(std::move(pattern));
-    }
-}
-
-unsigned FluxPatterns::matches(const unsigned* intervals, double& clock) const
-{
-    for (const auto& pattern : _patterns)
-    {
-        unsigned m = pattern->matches(intervals, clock);
-        if (m)
-            return m;
-    }
-    return 0;
-}
-
 FluxMatchers::FluxMatchers(const std::initializer_list<const FluxMatcher*> matchers):
     _matchers(matchers)
 {
