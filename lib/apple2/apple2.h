@@ -10,14 +10,17 @@
 class Sector;
 class Fluxmap;
 
-class Apple2Decoder : public AbstractSoftSectorDecoder
+class Apple2Decoder : public AbstractSplitDecoder
 {
 public:
     virtual ~Apple2Decoder() {}
 
-    SectorVector decodeToSectors(const RawRecordVector& rawRecords, unsigned physicalTrack, unsigned physicalSide);
-    int recordMatcher(uint64_t fifo) const;
+    nanoseconds_t findSector(FluxmapReader& fmr, Track& track) override;
+    nanoseconds_t findData(FluxmapReader& fmr, Track& track) override;
+    void decodeHeader(FluxmapReader& fmr, Track& track, Sector& sector) override;
+    void decodeData(FluxmapReader& fmr, Track& track, Sector& sector) override;
 };
+
 
 #endif
 
