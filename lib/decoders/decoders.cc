@@ -11,11 +11,6 @@
 #include "fmt/format.h"
 #include <numeric>
 
-static DoubleFlag clockDecodeThreshold(
-    { "--clock-decode-threshold" },
-    "Pulses below this fraction of a clock tick are considered spurious and ignored.",
-    0.80);
-
 static SettableFlag showClockHistogram(
     { "--show-clock-histogram" },
     "Dump the clock detection histogram.");
@@ -160,46 +155,6 @@ nanoseconds_t Fluxmap::guessClock() const
      */
 
     return median * NS_PER_TICK;
-}
-
-/* Decodes a fluxmap into a nice aligned array of bits. */
-const RawBits Fluxmap::decodeToBits(nanoseconds_t clockPeriod) const
-{
-    int pulses = duration() / clockPeriod;
-    nanoseconds_t lowerThreshold = clockPeriod * clockDecodeThreshold;
-
-    auto bitmap = std::make_unique<std::vector<bool>>(pulses);
-    auto indices = std::make_unique<std::vector<size_t>>();
-
-    unsigned count = 0;
-    nanoseconds_t timestamp = 0;
-    FluxmapReader fr(*this);
-    for (;;)
-    {
-        for (;;)
-        {
-            unsigned interval;
-            int opcode = fr.readOpcode(interval);
-            timestamp += interval * NS_PER_TICK;
-            if (opcode == -1)
-                goto abort;
-            else if ((opcode == 0x80) && (timestamp >= lowerThreshold))
-                break;
-            else if (opcode == 0x81)
-                indices->push_back(count);
-        }
-
-        int clocks = (timestamp + clockPeriod/2) / clockPeriod;
-        count += clocks;
-        if (count >= bitmap->size())
-            goto abort;
-        bitmap->at(count) = true;
-        timestamp = 0;
-    }
-abort:
-
-    RawBits rawbits(std::move(bitmap), std::move(indices));
-    return rawbits;
 }
 
 nanoseconds_t AbstractDecoder::guessClock(Track& track) const

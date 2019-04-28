@@ -44,7 +44,6 @@ public:
     }
 
     nanoseconds_t guessClock() const;
-	const RawBits decodeToBits(nanoseconds_t clock_period) const;
 
 	Fluxmap& appendBits(const std::vector<bool>& bits, nanoseconds_t clock);
 
