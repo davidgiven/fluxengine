@@ -7,14 +7,15 @@
 class Sector;
 class Fluxmap;
 
-class Commodore64Decoder : public AbstractSoftSectorDecoder
+class Commodore64Decoder : public AbstractSplitDecoder
 {
 public:
     virtual ~Commodore64Decoder() {}
 
-    SectorVector decodeToSectors(
-        const RawRecordVector& rawRecords, unsigned physicalTrack, unsigned physicalSide);
-    int recordMatcher(uint64_t fifo) const;
+    nanoseconds_t findSector(FluxmapReader& fmr, Track& track) override;
+    nanoseconds_t findData(FluxmapReader& fmr, Track& track) override;
+    void decodeHeader(FluxmapReader& fmr, Track& track, Sector& sector) override;
+    void decodeData(FluxmapReader& fmr, Track& track, Sector& sector) override;
 };
 
 #endif
