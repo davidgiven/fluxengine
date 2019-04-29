@@ -12,11 +12,6 @@
 #include "track.h"
 #include <fmt/format.h>
 
-static DoubleFlag clockScaleFlag(
-	{ "--clock-scale" },
-	"Scale the clock by this much after detection (use 0.5 for MFM, 1.0 for anything else).",
-	0.5);
-
 static SettableFlag dumpFluxFlag(
 	{ "--dump-flux", "-F" },
 	"Dump raw magnetic disk flux.");
@@ -54,12 +49,8 @@ int main(int argc, const char* argv[])
 	std::cout << fmt::format("       {:.2f} us clock detected; ", (double)clockPeriod/1000.0) << std::flush;
 
 	FluxmapReader fmr(*track->fluxmap);
-#if 0
-	clockPeriod *= clockScaleFlag;
+	fmr.seek(seekFlag*1000000.0);
 	std::cout << fmt::format("{:.2f} us bit clock; ", (double)clockPeriod/1000.0) << std::flush;
-
-	const auto& bitmap = track->fluxmap->decodeToBits(clockPeriod);
-	std::cout << fmt::format("{} bytes encoded.", bitmap.size()/8) << std::endl;
 
 	if (dumpFluxFlag)
 	{
@@ -72,25 +63,14 @@ int main(int argc, const char* argv[])
 
 		nanoseconds_t nextclock = clockPeriod;
 
-		nanoseconds_t now = 0;
-		nanoseconds_t seekto = seekFlag*1000000.0;
-		int ticks = 0;
-		FluxmapReader fr(*track->fluxmap);
-		while (!fr.eof())
-		{
-			ticks += fr.readNextMatchingOpcode(F_OP_PULSE);
-			
-			now = ticks * NS_PER_TICK;
-			if (now >= seekto)
-				break;
-		}
+		nanoseconds_t now = fmr.tell().ns();
+		int ticks = now / NS_PER_TICK;
 
 		std::cout << fmt::format("{: 10.3f}:-", ticks*US_PER_TICK);
 		nanoseconds_t lasttransition = 0;
-		fr.rewind();
-		while (!fr.eof())
+		while (!fmr.eof())
 		{
-			ticks += fr.readNextMatchingOpcode(F_OP_PULSE);
+			ticks += fmr.readNextMatchingOpcode(F_OP_PULSE);
 
 			nanoseconds_t transition = ticks*NS_PER_TICK;
 			nanoseconds_t next;
@@ -111,26 +91,24 @@ int main(int argc, const char* argv[])
 
 			nanoseconds_t length = transition - lasttransition;
 			std::cout << fmt::format("==== {:06x} {: 10.3f} +{:.3f} = {:.1f} clocks",
-			    fr.tell().bytes,
+			    fmr.tell().bytes,
 				(double)transition / 1000.0,
 				(double)length / 1000.0,
 				(double)length / clockPeriod);
 			lasttransition = transition;
 		}
 	}
-#endif
 
 	if (dumpBitstreamFlag)
 	{
-		fmr.seek(seekFlag*1000000.0);
-
 		std::cout << fmt::format("Aligned bitstream from {:.3f}ms follows:\n",
 				fmr.tell().ns() / 1000000.0);
 
 		while (!fmr.eof())
 		{
-			std::cout << fmt::format("{: 10.3f} : ", fmr.tell().ns() / 1000000.0);
-			for (unsigned i=0; i<60; i++)
+			std::cout << fmt::format("{:06x} {: 10.3f} : ",
+				fmr.tell().bytes, fmr.tell().ns() / 1000000.0);
+			for (unsigned i=0; i<50; i++)
 			{
 				if (fmr.eof())
 					break;
