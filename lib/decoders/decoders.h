@@ -34,6 +34,30 @@ public:
     virtual void decodeToSectors(Track& track) = 0;
 };
 
+class AbstractSimplifiedDecoder : public AbstractDecoder
+{
+public:
+    enum RecordType
+    {
+        SECTOR_RECORD,
+        DATA_RECORD,
+        UNKNOWN_RECORD
+    };
+
+public:
+    void decodeToSectors(Track& track) override;
+    void pushRecord(const Fluxmap::Position& start, const Fluxmap::Position& end);
+
+protected:
+    virtual RecordType advanceToNextRecord() = 0;
+    virtual void decodeSectorRecord() = 0;
+    virtual void decodeDataRecord() {};
+
+    FluxmapReader* _fmr;
+    Track* _track;
+    Sector* _sector;
+};
+
 class AbstractStatefulDecoder : public AbstractDecoder
 {
 public:
