@@ -8,6 +8,11 @@
 #include <math.h>
 #include <strings.h>
 
+static DoubleFlag pulseDebounceThreshold(
+    { "--pulse-debounce-threshold" },
+    "Ignore pulses with intervals short than this, in fractions of a clock.",
+    0.30);
+
 static DoubleFlag clockDecodeThreshold(
     { "--bit-error-threshold" },
     "Amount of error to tolerate in pulse timing, in fractions of a clock.",
@@ -52,6 +57,16 @@ unsigned FluxmapReader::readNextMatchingOpcode(uint8_t opcode)
         if (op == opcode)
             return ticks;
     }
+}
+
+unsigned FluxmapReader::readInterval(nanoseconds_t clock)
+{
+    unsigned thresholdTicks = (clock * pulseDebounceThreshold) / NS_PER_TICK;
+    unsigned ticks = 0;
+
+    while (ticks < thresholdTicks)
+        ticks += readNextMatchingOpcode(F_OP_PULSE);
+    return ticks;
 }
 
 FluxPattern::FluxPattern(unsigned bits, uint64_t pattern):
@@ -158,9 +173,16 @@ void FluxmapReader::seek(nanoseconds_t ns)
         unsigned t;
         readOpcode(t);
     }
+    _pos.zeroes = 0;
 }
 
 nanoseconds_t FluxmapReader::seekToPattern(const FluxMatcher& pattern)
+{
+    const FluxMatcher* unused;
+    return seekToPattern(pattern, unused);
+}
+
+nanoseconds_t FluxmapReader::seekToPattern(const FluxMatcher& pattern, const FluxMatcher*& matching)
 {
     unsigned intervalCount = pattern.intervals();
     unsigned candidates[intervalCount+1];
@@ -179,6 +201,7 @@ nanoseconds_t FluxmapReader::seekToPattern(const FluxMatcher& pattern)
         {
             seek(positions[intervalCount-match.intervals]);
             _pos.zeroes = match.zeroes;
+            matching = match.matcher;
             return match.clock * NS_PER_TICK;
         }
 
@@ -192,6 +215,7 @@ nanoseconds_t FluxmapReader::seekToPattern(const FluxMatcher& pattern)
 
     }
 
+    matching = NULL;
     return 0;
 }
 
@@ -211,7 +235,7 @@ bool FluxmapReader::readRawBit(nanoseconds_t clockPeriod)
         return false;
     }
 
-    nanoseconds_t interval = readNextMatchingOpcode(F_OP_PULSE)*NS_PER_TICK;
+    nanoseconds_t interval = readInterval(clockPeriod)*NS_PER_TICK;
     double clocks = (double)interval / clockPeriod + clockIntervalBias;
 
     if (clocks < 1.0)

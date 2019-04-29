@@ -95,12 +95,14 @@ public:
 
     int readOpcode(unsigned& ticks);
     unsigned readNextMatchingOpcode(uint8_t opcode);
+    unsigned readInterval(nanoseconds_t clock); /* with debounce support */
 
     /* Important! You can only reliably seek to 1 bits. */
     void seek(nanoseconds_t ns);
 
     void seekToIndexMark();
     nanoseconds_t seekToPattern(const FluxMatcher& pattern);
+    nanoseconds_t seekToPattern(const FluxMatcher& pattern, const FluxMatcher*& matching);
 
     bool readRawBit(nanoseconds_t clockPeriod);
     std::vector<bool> readRawBits(unsigned count, nanoseconds_t clockPeriod);
