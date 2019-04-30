@@ -223,14 +223,14 @@ zilogmczdecoderlib = declare_dependency(
         include_directories('lib/zilogmcz')
 )
 
-# victor9kdecoderlib = declare_dependency(
-#     link_with:
-#         shared_library('victor9kdecoderlib',
-#         [ 'lib/victor9k/decoder.cc', ],
-#         dependencies: [fmtlib, felib, decoderlib]),
-#     include_directories:
-#         include_directories('lib/victor9k')
-# )
+victor9kdecoderlib = declare_dependency(
+    link_with:
+        shared_library('victor9kdecoderlib',
+        [ 'lib/victor9k/decoder.cc', ],
+        dependencies: [fmtlib, felib, decoderlib]),
+    include_directories:
+        include_directories('lib/victor9k')
+)
 
 executable('fe-erase',             ['src/fe-erase.cc'],             dependencies: [felib, writerlib])
 executable('fe-inspect',           ['src/fe-inspect.cc'],           dependencies: [fmtlib, felib, decoderlib, readerlib])
@@ -247,7 +247,7 @@ executable('fe-readfb100',         ['src/fe-readfb100.cc'],         dependencies
 executable('fe-readibm',           ['src/fe-readibm.cc'],           dependencies: [fmtlib, felib, decoderlib, readerlib, ibmdecoderlib])
 executable('fe-readmac',           ['src/fe-readmac.cc'],           dependencies: [fmtlib, felib, decoderlib, readerlib, macdecoderlib])
 executable('fe-readzilogmcz',      ['src/fe-readzilogmcz.cc'],      dependencies: [fmtlib, felib, decoderlib, readerlib, zilogmczdecoderlib])
-# executable('fe-readvictor9k',      ['src/fe-readvictor9k.cc'],      dependencies: [fmtlib, felib, decoderlib, readerlib, victor9kdecoderlib])
+executable('fe-readvictor9k',      ['src/fe-readvictor9k.cc'],      dependencies: [fmtlib, felib, decoderlib, readerlib, victor9kdecoderlib])
 executable('fe-rpm',               ['src/fe-rpm.cc'],               dependencies: [fmtlib, felib])
 executable('fe-seek',              ['src/fe-seek.cc'],              dependencies: [fmtlib, felib])
 executable('fe-testbulktransport', ['src/fe-testbulktransport.cc'], dependencies: [fmtlib, felib])

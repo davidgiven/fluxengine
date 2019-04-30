@@ -15,7 +15,7 @@
 
 const FluxPattern SECTOR_RECORD_PATTERN(32, VICTOR9K_SECTOR_RECORD);
 const FluxPattern DATA_RECORD_PATTERN(32, VICTOR9K_DATA_RECORD);
-const FluxMatchers SECTOR_OR_DATA_RECORD_PATTERN({ &SECTOR_RECORD_PATTERN, &DATA_RECORD_PATTERN });
+const FluxMatchers ANY_RECORD_PATTERN({ &SECTOR_RECORD_PATTERN, &DATA_RECORD_PATTERN });
 
 static int decode_data_gcr(uint8_t gcr)
 {
@@ -54,47 +54,48 @@ static Bytes decode(const std::vector<bool>& bits)
     return output;
 }
 
-nanoseconds_t Victor9kDecoder::findSector(FluxmapReader& fmr, Track& track)
+AbstractSimplifiedDecoder::RecordType Victor9kDecoder::advanceToNextRecord()
 {
-    return fmr.seekToPattern(SECTOR_RECORD_PATTERN);
+	const FluxMatcher* matcher = nullptr;
+	_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
+	if (matcher == &SECTOR_RECORD_PATTERN)
+		return SECTOR_RECORD;
+	if (matcher == &DATA_RECORD_PATTERN)
+		return DATA_RECORD;
+	return UNKNOWN_RECORD;
 }
 
-nanoseconds_t Victor9kDecoder::findData(FluxmapReader& fmr, Track& track)
-{
-    return fmr.seekToPattern(SECTOR_OR_DATA_RECORD_PATTERN);
-}
-
-void Victor9kDecoder::decodeHeader(FluxmapReader& fmr, Track& track, Sector& sector)
+void Victor9kDecoder::decodeSectorRecord()
 {
     /* Skip the sync marker bit. */
-    fmr.readRawBits(23, sector.clock);
+    readRawBits(23);
 
     /* Read header. */
 
-    auto bytes = decode(fmr.readRawBits(4*10, sector.clock)).slice(0, 4);
+    auto bytes = decode(readRawBits(4*10)).slice(0, 4);
 
     uint8_t rawTrack = bytes[1];
-    sector.logicalSector = bytes[2];
+    _sector->logicalSector = bytes[2];
     uint8_t gotChecksum = bytes[3];
 
-    sector.logicalTrack = rawTrack & 0x7f;
-    sector.logicalSide = rawTrack >> 7;
+    _sector->logicalTrack = rawTrack & 0x7f;
+    _sector->logicalSide = rawTrack >> 7;
     uint8_t wantChecksum = bytes[1] + bytes[2];
-    if ((sector.logicalSector > 20) || (sector.logicalTrack > 85) || (sector.logicalSide > 1))
+    if ((_sector->logicalSector > 20) || (_sector->logicalTrack > 85) || (_sector->logicalSide > 1))
         return;
                 
     if (wantChecksum == gotChecksum)
-        sector.status = Sector::DATA_MISSING; /* unintuitive but correct */
+        _sector->status = Sector::DATA_MISSING; /* unintuitive but correct */
 }
 
-void Victor9kDecoder::decodeData(FluxmapReader& fmr, Track& track, Sector& sector)
+void Victor9kDecoder::decodeDataRecord()
 {
     /* Skip the sync marker bit. */
-    fmr.readRawBits(23, sector.clock);
+    readRawBits(23);
 
     /* Read data. */
 
-    auto bytes = decode(fmr.readRawBits((VICTOR9K_SECTOR_LENGTH+5)*10, sector.clock))
+    auto bytes = decode(readRawBits((VICTOR9K_SECTOR_LENGTH+5)*10))
         .slice(0, VICTOR9K_SECTOR_LENGTH+5);
     ByteReader br(bytes);
 
@@ -103,8 +104,8 @@ void Victor9kDecoder::decodeData(FluxmapReader& fmr, Track& track, Sector& secto
     if (br.read_8() != 8)
         return;
 
-    sector.data = br.read(VICTOR9K_SECTOR_LENGTH);
-    uint16_t gotChecksum = sumBytes(sector.data);
+    _sector->data = br.read(VICTOR9K_SECTOR_LENGTH);
+    uint16_t gotChecksum = sumBytes(_sector->data);
     uint16_t wantChecksum = br.read_le16();
-    sector.status = (gotChecksum == wantChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
+    _sector->status = (gotChecksum == wantChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
 }
