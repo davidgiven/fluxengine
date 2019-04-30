@@ -4,6 +4,7 @@
 #include "bytes.h"
 #include "sector.h"
 #include "record.h"
+#include "fluxmapreader.h"
 
 class Sector;
 class Fluxmap;
@@ -47,6 +48,15 @@ public:
 public:
     void decodeToSectors(Track& track) override;
     void pushRecord(const Fluxmap::Position& start, const Fluxmap::Position& end);
+
+    std::vector<bool> readRawBits(unsigned count)
+    { return _fmr->readRawBits(count, _sector->clock); }
+
+    Fluxmap::Position tell()
+    { return _fmr->tell(); } 
+
+    void seek(const Fluxmap::Position& pos)
+    { return _fmr->seek(pos); } 
 
 protected:
     virtual RecordType advanceToNextRecord() = 0;

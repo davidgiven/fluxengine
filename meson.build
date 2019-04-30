@@ -124,32 +124,32 @@ encoderlib = declare_dependency(
         )
 )
 
-aeslanierdecoderlib = declare_dependency(
-   link_with:
-       shared_library('aeslanierdecoderlib',
-       [ 'lib/aeslanier/decoder.cc', ],
-       dependencies: [fmtlib, felib, decoderlib]),
-   include_directories:
-       include_directories('lib/aeslanier')
-)
+# aeslanierdecoderlib = declare_dependency(
+#    link_with:
+#        shared_library('aeslanierdecoderlib',
+#        [ 'lib/aeslanier/decoder.cc', ],
+#        dependencies: [fmtlib, felib, decoderlib]),
+#    include_directories:
+#        include_directories('lib/aeslanier')
+# )
 
-amigadecoderlib = declare_dependency(
-   link_with:
-       shared_library('amigadecoderlib',
-       [ 'lib/amiga/decoder.cc', ],
-       dependencies: [fmtlib, felib, decoderlib]),
-   include_directories:
-       include_directories('lib/amiga')
-)
+# amigadecoderlib = declare_dependency(
+#    link_with:
+#        shared_library('amigadecoderlib',
+#        [ 'lib/amiga/decoder.cc', ],
+#        dependencies: [fmtlib, felib, decoderlib]),
+#    include_directories:
+#        include_directories('lib/amiga')
+# )
 
-apple2decoderlib = declare_dependency(
-   link_with:
-       shared_library('apple2decoderlib',
-       [ 'lib/apple2/decoder.cc', ],
-       dependencies: [fmtlib, felib, decoderlib]),
-   include_directories:
-       include_directories('lib/apple2')
-)
+# apple2decoderlib = declare_dependency(
+#    link_with:
+#        shared_library('apple2decoderlib',
+#        [ 'lib/apple2/decoder.cc', ],
+#        dependencies: [fmtlib, felib, decoderlib]),
+#    include_directories:
+#        include_directories('lib/apple2')
+# )
 
 brotherdecoderlib = declare_dependency(
    link_with:
@@ -169,32 +169,32 @@ brotherdecoderlib = declare_dependency(
 #        include_directories('lib/brother')
 #)
 
-c64decoderlib = declare_dependency(
-   link_with:
-       shared_library('c64decoderlib',
-       [ 'lib/c64/decoder.cc', ],
-       dependencies: [fmtlib, felib, decoderlib]),
-   include_directories:
-       include_directories('lib/c64')
-)
+# c64decoderlib = declare_dependency(
+#    link_with:
+#        shared_library('c64decoderlib',
+#        [ 'lib/c64/decoder.cc', ],
+#        dependencies: [fmtlib, felib, decoderlib]),
+#    include_directories:
+#        include_directories('lib/c64')
+# )
 
-f85decoderlib = declare_dependency(
-    link_with:
-        shared_library('f85decoderlib',
-        [ 'lib/f85/decoder.cc', ],
-        dependencies: [fmtlib, felib, decoderlib]),
-    include_directories:
-        include_directories('lib/f85')
-)
+# f85decoderlib = declare_dependency(
+#     link_with:
+#         shared_library('f85decoderlib',
+#         [ 'lib/f85/decoder.cc', ],
+#         dependencies: [fmtlib, felib, decoderlib]),
+#     include_directories:
+#         include_directories('lib/f85')
+# )
 
-fb100decoderlib = declare_dependency(
-    link_with:
-        shared_library('fb100decoderlib',
-        [ 'lib/fb100/decoder.cc', ],
-        dependencies: [fmtlib, felib, decoderlib]),
-    include_directories:
-        include_directories('lib/fb100')
-)
+# fb100decoderlib = declare_dependency(
+#     link_with:
+#         shared_library('fb100decoderlib',
+#         [ 'lib/fb100/decoder.cc', ],
+#         dependencies: [fmtlib, felib, decoderlib]),
+#     include_directories:
+#         include_directories('lib/fb100')
+# )
 
 ibmdecoderlib = declare_dependency(
     link_with:
@@ -205,49 +205,49 @@ ibmdecoderlib = declare_dependency(
         include_directories('lib/ibm')
 )
 
-macdecoderlib = declare_dependency(
-    link_with:
-        shared_library('macdecoderlib',
-        [ 'lib/macintosh/decoder.cc', ],
-        dependencies: [fmtlib, felib, decoderlib]),
-    include_directories:
-        include_directories('lib/macintosh')
-)
+# macdecoderlib = declare_dependency(
+#     link_with:
+#         shared_library('macdecoderlib',
+#         [ 'lib/macintosh/decoder.cc', ],
+#         dependencies: [fmtlib, felib, decoderlib]),
+#     include_directories:
+#         include_directories('lib/macintosh')
+# )
 
-zilogmczdecoderlib = declare_dependency(
-    link_with:
-        shared_library('zilogmczdecoderlib',
-        [ 'lib/zilogmcz/decoder.cc', ],
-        dependencies: [fmtlib, felib, decoderlib]),
-    include_directories:
-        include_directories('lib/zilogmcz')
-)
+# zilogmczdecoderlib = declare_dependency(
+#     link_with:
+#         shared_library('zilogmczdecoderlib',
+#         [ 'lib/zilogmcz/decoder.cc', ],
+#         dependencies: [fmtlib, felib, decoderlib]),
+#     include_directories:
+#         include_directories('lib/zilogmcz')
+# )
 
-victor9kdecoderlib = declare_dependency(
-    link_with:
-        shared_library('victor9kdecoderlib',
-        [ 'lib/victor9k/decoder.cc', ],
-        dependencies: [fmtlib, felib, decoderlib]),
-    include_directories:
-        include_directories('lib/victor9k')
-)
+# victor9kdecoderlib = declare_dependency(
+#     link_with:
+#         shared_library('victor9kdecoderlib',
+#         [ 'lib/victor9k/decoder.cc', ],
+#         dependencies: [fmtlib, felib, decoderlib]),
+#     include_directories:
+#         include_directories('lib/victor9k')
+# )
 
 executable('fe-erase',             ['src/fe-erase.cc'],             dependencies: [felib, writerlib])
 executable('fe-inspect',           ['src/fe-inspect.cc'],           dependencies: [fmtlib, felib, decoderlib, readerlib])
 executable('fe-readadfs',          ['src/fe-readadfs.cc'],          dependencies: [fmtlib, felib, decoderlib, readerlib, ibmdecoderlib])
-executable('fe-readaeslanier',     ['src/fe-readaeslanier.cc'],     dependencies: [fmtlib, felib, decoderlib, readerlib, aeslanierdecoderlib])
-executable('fe-readamiga',         ['src/fe-readamiga.cc'],         dependencies: [fmtlib, felib, decoderlib, readerlib, amigadecoderlib])
-executable('fe-readampro',         ['src/fe-readampro.cc'],         dependencies: [fmtlib, felib, decoderlib, readerlib, ibmdecoderlib])
-executable('fe-readapple2',        ['src/fe-readapple2.cc'],        dependencies: [fmtlib, felib, decoderlib, readerlib, apple2decoderlib])
+# executable('fe-readaeslanier',     ['src/fe-readaeslanier.cc'],     dependencies: [fmtlib, felib, decoderlib, readerlib, aeslanierdecoderlib])
+# executable('fe-readamiga',         ['src/fe-readamiga.cc'],         dependencies: [fmtlib, felib, decoderlib, readerlib, amigadecoderlib])
+# executable('fe-readampro',         ['src/fe-readampro.cc'],         dependencies: [fmtlib, felib, decoderlib, readerlib, ibmdecoderlib])
+# executable('fe-readapple2',        ['src/fe-readapple2.cc'],        dependencies: [fmtlib, felib, decoderlib, readerlib, apple2decoderlib])
 executable('fe-readbrother',       ['src/fe-readbrother.cc'],       dependencies: [fmtlib, felib, decoderlib, readerlib, brotherdecoderlib])
-executable('fe-readc64',           ['src/fe-readc64.cc'],           dependencies: [fmtlib, felib, decoderlib, readerlib, c64decoderlib])
+# executable('fe-readc64',           ['src/fe-readc64.cc'],           dependencies: [fmtlib, felib, decoderlib, readerlib, c64decoderlib])
 executable('fe-readdfs',           ['src/fe-readdfs.cc'],           dependencies: [fmtlib, felib, decoderlib, readerlib, ibmdecoderlib])
-executable('fe-readf85',           ['src/fe-readf85.cc'],           dependencies: [fmtlib, felib, decoderlib, readerlib, f85decoderlib])
-executable('fe-readfb100',         ['src/fe-readfb100.cc'],         dependencies: [fmtlib, felib, decoderlib, readerlib, fb100decoderlib])
+# executable('fe-readf85',           ['src/fe-readf85.cc'],           dependencies: [fmtlib, felib, decoderlib, readerlib, f85decoderlib])
+# executable('fe-readfb100',         ['src/fe-readfb100.cc'],         dependencies: [fmtlib, felib, decoderlib, readerlib, fb100decoderlib])
 executable('fe-readibm',           ['src/fe-readibm.cc'],           dependencies: [fmtlib, felib, decoderlib, readerlib, ibmdecoderlib])
-executable('fe-readmac',           ['src/fe-readmac.cc'],           dependencies: [fmtlib, felib, decoderlib, readerlib, macdecoderlib])
-executable('fe-readzilogmcz',      ['src/fe-readzilogmcz.cc'],      dependencies: [fmtlib, felib, decoderlib, readerlib, zilogmczdecoderlib])
-executable('fe-readvictor9k',      ['src/fe-readvictor9k.cc'],      dependencies: [fmtlib, felib, decoderlib, readerlib, victor9kdecoderlib])
+# executable('fe-readmac',           ['src/fe-readmac.cc'],           dependencies: [fmtlib, felib, decoderlib, readerlib, macdecoderlib])
+# executable('fe-readzilogmcz',      ['src/fe-readzilogmcz.cc'],      dependencies: [fmtlib, felib, decoderlib, readerlib, zilogmczdecoderlib])
+# executable('fe-readvictor9k',      ['src/fe-readvictor9k.cc'],      dependencies: [fmtlib, felib, decoderlib, readerlib, victor9kdecoderlib])
 executable('fe-rpm',               ['src/fe-rpm.cc'],               dependencies: [fmtlib, felib])
 executable('fe-seek',              ['src/fe-seek.cc'],              dependencies: [fmtlib, felib])
 executable('fe-testbulktransport', ['src/fe-testbulktransport.cc'], dependencies: [fmtlib, felib])

@@ -76,7 +76,7 @@ const FluxPattern FM_TRS80DAM2_PATTERN(16, 0xf56c);
  */
 const FluxPattern MFM_PATTERN(16, 0x4489);
 
-const FluxMatchers SEPARATOR_PATTERNS(
+const FluxMatchers ANY_RECORD_PATTERN(
     {
         &MFM_PATTERN,
         &FM_IDAM_PATTERN,
@@ -87,77 +87,67 @@ const FluxMatchers SEPARATOR_PATTERNS(
     }
 );
 
-nanoseconds_t IbmDecoder::findSector(FluxmapReader& fmr, Track& track)
+AbstractSimplifiedDecoder::RecordType IbmDecoder::advanceToNextRecord()
 {
-    for (;;)
+	const FluxMatcher* matcher = nullptr;
+	_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
+
+    /* If this is the MFM prefix byte, the the decoder is going to expect three
+     * extra bytes on the front of the header. */
+    _currentHeaderLength = (matcher == &MFM_PATTERN) ? 3 : 0;
+
+    Fluxmap::Position here = tell();
+    if (_currentHeaderLength > 0)
+        readRawBits(_currentHeaderLength*16);
+    auto idbits = readRawBits(16);
+    uint8_t id = decodeFmMfm(idbits).slice(0, 1)[0];
+    seek(here);
+    
+    switch (id)
     {
-        nanoseconds_t clock = fmr.seekToPattern(SEPARATOR_PATTERNS);
-        if (fmr.eof() || !clock)
-            return 0;
+        case IBM_IDAM:
+            return RecordType::SECTOR_RECORD;
 
-        auto here = fmr.tell();
-        auto idbits = fmr.readRawBits(16, clock);
-        uint8_t id = decodeFmMfm(idbits).slice(0, 1)[0];
-        fmr.seek(here);
-        /* If this is the MFM prefix byte, the the decoder is going to expect three
-         * extra bytes on the front of the header. */
-        _currentHeaderLength = (id == IBM_MFM_SYNC) ? 3 : 0;
-
-        switch (id)
-        {
-            case IBM_MFM_SYNC:
-            case IBM_IDAM:
-            case IBM_DAM1:
-            case IBM_DAM2:
-            case IBM_TRS80DAM1:
-            case IBM_TRS80DAM2:
-                return clock;
-        }
-
-        fmr.readRawBit(clock);
+        case IBM_DAM1:
+        case IBM_DAM2:
+        case IBM_TRS80DAM1:
+        case IBM_TRS80DAM2:
+            return RecordType::DATA_RECORD;
     }
+    return RecordType::UNKNOWN_RECORD;
 }
 
-nanoseconds_t IbmDecoder::findData(FluxmapReader& fmr, Track& track)
-{
-    return findSector(fmr, track);
-}
-
-void IbmDecoder::decodeHeader(FluxmapReader& fmr, Track& track, Sector& sector)
+void IbmDecoder::decodeSectorRecord()
 {
     unsigned recordSize = _currentHeaderLength + IBM_IDAM_LEN;
-    auto bits = fmr.readRawBits(recordSize*16, sector.clock);
+    auto bits = readRawBits(recordSize*16);
     auto bytes = decodeFmMfm(bits).slice(0, recordSize);
 
     ByteReader br(bytes);
     br.seek(_currentHeaderLength);
-    uint8_t id = br.read_8();
-    if (id != IBM_IDAM)
-        return;
-    sector.logicalTrack = br.read_8();
-    sector.logicalSide = br.read_8();
-    sector.logicalSector = br.read_8() - _sectorBase;
+    br.read_8(); /* skip ID byte */
+    _sector->logicalTrack = br.read_8();
+    _sector->logicalSide = br.read_8();
+    _sector->logicalSector = br.read_8() - _sectorBase;
     _currentSectorSize = 1 << (br.read_8() + 7);
     uint16_t wantCrc = br.read_be16();
     uint16_t gotCrc = crc16(CCITT_POLY, bytes.slice(0, _currentHeaderLength + 5));
     if (wantCrc == gotCrc)
-        sector.status = Sector::DATA_MISSING; /* correct but unintuitive */
+        _sector->status = Sector::DATA_MISSING; /* correct but unintuitive */
 }
 
-void IbmDecoder::decodeData(FluxmapReader& fmr, Track& track, Sector& sector)
+void IbmDecoder::decodeDataRecord()
 {
     unsigned recordLength = _currentHeaderLength + _currentSectorSize + 3;
-    auto bits = fmr.readRawBits(recordLength*16, sector.clock);
+    auto bits = readRawBits(recordLength*16);
     auto bytes = decodeFmMfm(bits).slice(0, recordLength);
 
     ByteReader br(bytes);
     br.seek(_currentHeaderLength);
-    uint8_t id = br.read_8();
-    if ((id != IBM_DAM1) && (id != IBM_DAM2) && (id != IBM_TRS80DAM1) && (id != IBM_TRS80DAM2))
-        return;
+    br.read_8(); /* skip ID byte */
 
-    sector.data = br.read(_currentSectorSize);
+    _sector->data = br.read(_currentSectorSize);
     uint16_t wantCrc = br.read_be16();
     uint16_t gotCrc = crc16(CCITT_POLY, bytes.slice(0, recordLength-2));
-    sector.status = (wantCrc == gotCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
+    _sector->status = (wantCrc == gotCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
 }

@@ -66,8 +66,8 @@ AbstractSimplifiedDecoder::RecordType BrotherDecoder::advanceToNextRecord()
 
 void BrotherDecoder::decodeSectorRecord()
 {
-	_fmr->readRawBits(32, _sector->clock);
-	const auto& rawbits = _fmr->readRawBits(32, _sector->clock);
+	readRawBits(32);
+	const auto& rawbits = readRawBits(32);
 	const auto& bytes = toBytes(rawbits).slice(0, 4);
 
 	ByteReader br(bytes);
@@ -86,9 +86,9 @@ void BrotherDecoder::decodeSectorRecord()
 
 void BrotherDecoder::decodeDataRecord()
 {
-	_fmr->readRawBits(32, _sector->clock);
+	readRawBits(32);
 
-	const auto& rawbits = _fmr->readRawBits(BROTHER_DATA_RECORD_ENCODED_SIZE*8, _sector->clock);
+	const auto& rawbits = readRawBits(BROTHER_DATA_RECORD_ENCODED_SIZE*8);
 	const auto& rawbytes = toBytes(rawbits).slice(0, BROTHER_DATA_RECORD_ENCODED_SIZE);
 
 	Bytes bytes;

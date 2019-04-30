@@ -28,17 +28,16 @@ struct IbmIdam
     uint8_t crc[2];
 };
 
-class IbmDecoder : public AbstractSplitDecoder
+class IbmDecoder : public AbstractSimplifiedDecoder
 {
 public:
     IbmDecoder(unsigned sectorBase):
         _sectorBase(sectorBase)
     {}
 
-    nanoseconds_t findSector(FluxmapReader& fmr, Track& track) override;
-    nanoseconds_t findData(FluxmapReader& fmr, Track& track) override;
-    void decodeHeader(FluxmapReader& fmr, Track& track, Sector& sector) override;
-    void decodeData(FluxmapReader& fmr, Track& track, Sector& sector) override;
+    RecordType advanceToNextRecord();
+    void decodeSectorRecord();
+    void decodeDataRecord();
 
 private:
     unsigned _sectorBase;
