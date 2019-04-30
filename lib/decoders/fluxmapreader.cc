@@ -74,6 +74,19 @@ unsigned FluxmapReader::readInterval(nanoseconds_t clock)
     return ticks;
 }
 
+static int findLowestSetBit(uint64_t value)
+{
+    if (!value)
+        return 0;
+    int bit = 1;
+    while (!(value & 1))
+    {
+        value >>= 1;
+        bit++;
+    }
+    return bit;
+}
+
 FluxPattern::FluxPattern(unsigned bits, uint64_t pattern):
     _bits(bits)
 {
@@ -81,7 +94,7 @@ FluxPattern::FluxPattern(unsigned bits, uint64_t pattern):
 
     assert(pattern != 0);
 
-    unsigned lowbit = ffsll(pattern)-1;
+    unsigned lowbit = findLowestSetBit(pattern)-1;
 
     pattern <<= 64 - bits;
     _highzeroes = 0;
