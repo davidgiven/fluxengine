@@ -160,14 +160,14 @@ brotherdecoderlib = declare_dependency(
        include_directories('lib/brother')
 )
 
-#brotherencoderlib = declare_dependency(
-#    link_with:
-#        shared_library('brotherencoderlib',
-#        [ 'lib/brother/encoder.cc', ],
-#        dependencies: [fmtlib, felib, decoderlib, encoderlib]),
-#    include_directories:
-#        include_directories('lib/brother')
-#)
+brotherencoderlib = declare_dependency(
+   link_with:
+       shared_library('brotherencoderlib',
+       [ 'lib/brother/encoder.cc', ],
+       dependencies: [fmtlib, felib, decoderlib, encoderlib]),
+   include_directories:
+       include_directories('lib/brother')
+)
 
 c64decoderlib = declare_dependency(
    link_with:
@@ -252,7 +252,7 @@ executable('fe-rpm',               ['src/fe-rpm.cc'],               dependencies
 executable('fe-seek',              ['src/fe-seek.cc'],              dependencies: [fmtlib, felib])
 executable('fe-testbulktransport', ['src/fe-testbulktransport.cc'], dependencies: [fmtlib, felib])
 executable('fe-upgradefluxfile',   ['src/fe-upgradefluxfile.cc'],   dependencies: [fmtlib, felib, sqllib, sqlite])
-#executable('fe-writebrother',      ['src/fe-writebrother.cc'],      dependencies: [fmtlib, felib, writerlib, decoderlib, encoderlib, brotherencoderlib])
+executable('fe-writebrother',      ['src/fe-writebrother.cc'],      dependencies: [fmtlib, felib, writerlib, decoderlib, encoderlib, brotherencoderlib])
 executable('fe-writeflux',         ['src/fe-writeflux.cc'],         dependencies: [fmtlib, felib, readerlib, writerlib])
 executable('fe-writetestpattern',  ['src/fe-writetestpattern.cc'],  dependencies: [fmtlib, felib, writerlib])
 
