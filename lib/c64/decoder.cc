@@ -12,7 +12,9 @@
 #include <string.h>
 #include <algorithm>
 
-const FluxPattern RECORD_SEPARATOR_PATTERN(16, C64_RECORD_SEPARATOR);
+const FluxPattern SECTOR_RECORD_PATTERN(20, C64_SECTOR_RECORD);
+const FluxPattern DATA_RECORD_PATTERN(20, C64_DATA_RECORD);
+const FluxMatchers ANY_RECORD_PATTERN({ &SECTOR_RECORD_PATTERN, &DATA_RECORD_PATTERN });
 
 static int decode_data_gcr(uint8_t gcr)
 {
@@ -50,49 +52,41 @@ static Bytes decode(const std::vector<bool>& bits)
     return output;
 }
 
-nanoseconds_t Commodore64Decoder::findSector(FluxmapReader& fmr, Track& track)
+AbstractSimplifiedDecoder::RecordType Commodore64Decoder::advanceToNextRecord()
 {
-    nanoseconds_t clock = fmr.seekToPattern(RECORD_SEPARATOR_PATTERN);
-    if (clock)
-        fmr.readRawBits(12, clock);
-    return clock;
+	const FluxMatcher* matcher = nullptr;
+	_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
+	if (matcher == &SECTOR_RECORD_PATTERN)
+		return RecordType::SECTOR_RECORD;
+	if (matcher == &DATA_RECORD_PATTERN)
+		return RecordType::DATA_RECORD;
+	return RecordType::UNKNOWN_RECORD;
 }
 
-nanoseconds_t Commodore64Decoder::findData(FluxmapReader& fmr, Track& track)
+void Commodore64Decoder::decodeSectorRecord()
 {
-    return findSector(fmr, track);
-}
+    readRawBits(20);
 
-void Commodore64Decoder::decodeHeader(FluxmapReader& fmr, Track& track, Sector& sector)
-{
-    const auto& idbits = fmr.readRawBits(1*10, sector.clock);
-    const auto& idbytes = decode(idbits).slice(0, 1);
-    if (idbytes[0] != 8)
-        return; /* Not a sector record */
-
-    const auto& bits = fmr.readRawBits(5*10, sector.clock);
+    const auto& bits = readRawBits(5*10);
     const auto& bytes = decode(bits).slice(0, 5);
 
     uint8_t checksum = bytes[0];
-    sector.logicalSector = bytes[1];
-    sector.logicalSide = 0;
-    sector.logicalTrack = bytes[2] - 1;
+    _sector->logicalSector = bytes[1];
+    _sector->logicalSide = 0;
+    _sector->logicalTrack = bytes[2] - 1;
     if (checksum == xorBytes(bytes.slice(1, 4)))
-        sector.status = Sector::DATA_MISSING; /* unintuitive but correct */
+        _sector->status = Sector::DATA_MISSING; /* unintuitive but correct */
 }
 
-void Commodore64Decoder::decodeData(FluxmapReader& fmr, Track& track, Sector& sector)
+void Commodore64Decoder::decodeDataRecord()
 {
-    const auto& idbits = fmr.readRawBits(1*10, sector.clock);
-    const auto& idbytes = decode(idbits).slice(0, 1);
-    if (idbytes[0] != 7)
-        return; /* Not a data record */
+    readRawBits(20);
 
-    const auto& bits = fmr.readRawBits(259*10, sector.clock);
+    const auto& bits = readRawBits(259*10);
     const auto& bytes = decode(bits).slice(0, 259);
 
-    sector.data = bytes.slice(0, C64_SECTOR_LENGTH);
-    uint8_t gotChecksum = xorBytes(sector.data);
+    _sector->data = bytes.slice(0, C64_SECTOR_LENGTH);
+    uint8_t gotChecksum = xorBytes(_sector->data);
     uint8_t wantChecksum = bytes[256];
-    sector.status = (wantChecksum == gotChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
+    _sector->status = (wantChecksum == gotChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
 }
