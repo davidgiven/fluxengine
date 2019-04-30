@@ -14,7 +14,7 @@
 
 const FluxPattern SECTOR_RECORD_PATTERN(24, MAC_SECTOR_RECORD);
 const FluxPattern DATA_RECORD_PATTERN(24, MAC_DATA_RECORD);
-const FluxMatchers SECTOR_OR_DATA_RECORD_PATTERN({ &SECTOR_RECORD_PATTERN, &DATA_RECORD_PATTERN });
+const FluxMatchers ANY_RECORD_PATTERN({ &SECTOR_RECORD_PATTERN, &DATA_RECORD_PATTERN });
 
 static int decode_data_gcr(uint8_t gcr)
 {
@@ -124,27 +124,28 @@ uint8_t decode_side(uint8_t side)
     return !!(side & 0x40);
 }
 
-nanoseconds_t MacintoshDecoder::findSector(FluxmapReader& fmr, Track& track)
+AbstractSimplifiedDecoder::RecordType MacintoshDecoder::advanceToNextRecord()
 {
-    return fmr.seekToPattern(SECTOR_RECORD_PATTERN);
+	const FluxMatcher* matcher = nullptr;
+	_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
+	if (matcher == &SECTOR_RECORD_PATTERN)
+		return SECTOR_RECORD;
+	if (matcher == &DATA_RECORD_PATTERN)
+		return DATA_RECORD;
+	return UNKNOWN_RECORD;
 }
 
-nanoseconds_t MacintoshDecoder::findData(FluxmapReader& fmr, Track& track)
-{
-    return fmr.seekToPattern(SECTOR_OR_DATA_RECORD_PATTERN);
-}
-
-void MacintoshDecoder::decodeHeader(FluxmapReader& fmr, Track& track, Sector& sector)
+void MacintoshDecoder::decodeSectorRecord()
 {
     /* Skip ID (as we know it's a MAC_SECTOR_RECORD). */
-    fmr.readRawBits(24, sector.clock);
+    readRawBits(24);
 
     /* Read header. */
 
-    auto header = toBytes(fmr.readRawBits(7*8, sector.clock)).slice(0, 7);
+    auto header = toBytes(readRawBits(7*8)).slice(0, 7);
                 
     uint8_t encodedTrack = decode_data_gcr(header[0]);
-    if (encodedTrack != (track.physicalTrack & 0x3f))
+    if (encodedTrack != (_track->physicalTrack & 0x3f))
         return;
                 
     uint8_t encodedSector = decode_data_gcr(header[1]);
@@ -152,29 +153,29 @@ void MacintoshDecoder::decodeHeader(FluxmapReader& fmr, Track& track, Sector& se
     uint8_t formatByte = decode_data_gcr(header[3]);
     uint8_t wantedsum = decode_data_gcr(header[4]);
 
-    sector.logicalTrack = track.physicalTrack;
-    sector.logicalSide = decode_side(encodedSide);
-    sector.logicalSector = encodedSector;
+    _sector->logicalTrack = _track->physicalTrack;
+    _sector->logicalSide = decode_side(encodedSide);
+    _sector->logicalSector = encodedSector;
     uint8_t gotsum = (encodedTrack ^ encodedSector ^ encodedSide ^ formatByte) & 0x3f;
     if (wantedsum == gotsum)
-        sector.status = Sector::DATA_MISSING; /* unintuitive but correct */
+        _sector->status = Sector::DATA_MISSING; /* unintuitive but correct */
 }
 
-void MacintoshDecoder::decodeData(FluxmapReader& fmr, Track& track, Sector& sector)
+void MacintoshDecoder::decodeDataRecord()
 {
-    auto id = toBytes(fmr.readRawBits(24, sector.clock)).reader().read_be24();
+    auto id = toBytes(readRawBits(24)).reader().read_be24();
     if (id != MAC_DATA_RECORD)
         return;
 
     /* Read data. */
 
-    fmr.readRawBits(8, sector.clock); /* skip spare byte */
-    auto inputbuffer = toBytes(fmr.readRawBits(MAC_ENCODED_SECTOR_LENGTH*8, sector.clock))
+    readRawBits(8); /* skip spare byte */
+    auto inputbuffer = toBytes(readRawBits(MAC_ENCODED_SECTOR_LENGTH*8))
         .slice(0, MAC_ENCODED_SECTOR_LENGTH);
 
     for (unsigned i=0; i<inputbuffer.size(); i++)
         inputbuffer[i] = decode_data_gcr(inputbuffer[i]);
         
-    sector.status = Sector::BAD_CHECKSUM;
-    sector.data = decode_crazy_data(inputbuffer, sector.status);
+    _sector->status = Sector::BAD_CHECKSUM;
+    _sector->data = decode_crazy_data(inputbuffer, _sector->status);
 }

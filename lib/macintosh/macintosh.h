@@ -10,15 +10,14 @@
 class Sector;
 class Fluxmap;
 
-class MacintoshDecoder : public AbstractSplitDecoder
+class MacintoshDecoder : public AbstractSimplifiedDecoder
 {
 public:
     virtual ~MacintoshDecoder() {}
 
-    nanoseconds_t findSector(FluxmapReader& fmr, Track& track) override;
-    nanoseconds_t findData(FluxmapReader& fmr, Track& track) override;
-    void decodeHeader(FluxmapReader& fmr, Track& track, Sector& sector) override;
-    void decodeData(FluxmapReader& fmr, Track& track, Sector& sector) override;
+    RecordType advanceToNextRecord();
+    void decodeSectorRecord();
+    void decodeDataRecord();
 };
 
 #endif

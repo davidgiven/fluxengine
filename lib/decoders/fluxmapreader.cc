@@ -65,7 +65,12 @@ unsigned FluxmapReader::readInterval(nanoseconds_t clock)
     unsigned ticks = 0;
 
     while (ticks < thresholdTicks)
-        ticks += readNextMatchingOpcode(F_OP_PULSE);
+    {
+        unsigned thisTicks = readNextMatchingOpcode(F_OP_PULSE);
+        if (!thisTicks)
+            break;
+        ticks += thisTicks;
+    }
     return ticks;
 }
 
