@@ -237,7 +237,7 @@ executable('fe-inspect',           ['src/fe-inspect.cc'],           dependencies
 executable('fe-readadfs',          ['src/fe-readadfs.cc'],          dependencies: [fmtlib, felib, decoderlib, readerlib, ibmdecoderlib])
 executable('fe-readaeslanier',     ['src/fe-readaeslanier.cc'],     dependencies: [fmtlib, felib, decoderlib, readerlib, aeslanierdecoderlib])
 executable('fe-readamiga',         ['src/fe-readamiga.cc'],         dependencies: [fmtlib, felib, decoderlib, readerlib, amigadecoderlib])
-# executable('fe-readampro',         ['src/fe-readampro.cc'],         dependencies: [fmtlib, felib, decoderlib, readerlib, ibmdecoderlib])
+executable('fe-readampro',         ['src/fe-readampro.cc'],         dependencies: [fmtlib, felib, decoderlib, readerlib, ibmdecoderlib])
 # executable('fe-readapple2',        ['src/fe-readapple2.cc'],        dependencies: [fmtlib, felib, decoderlib, readerlib, apple2decoderlib])
 executable('fe-readbrother',       ['src/fe-readbrother.cc'],       dependencies: [fmtlib, felib, decoderlib, readerlib, brotherdecoderlib])
 # executable('fe-readc64',           ['src/fe-readc64.cc'],           dependencies: [fmtlib, felib, decoderlib, readerlib, c64decoderlib])
