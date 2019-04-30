@@ -4,13 +4,13 @@
 class Sector;
 class Fluxmap;
 
-class ZilogMczDecoder : public AbstractStatefulDecoder
+class ZilogMczDecoder : public AbstractSimplifiedDecoder
 {
 public:
     virtual ~ZilogMczDecoder() {}
 
-    nanoseconds_t findSector(FluxmapReader& fmr, Track& track);
-    void decodeSingleSector(FluxmapReader& fmr, Track& track, Sector& sector);
+    RecordType advanceToNextRecord();
+    void decodeSectorRecord();
 };
 
 #endif

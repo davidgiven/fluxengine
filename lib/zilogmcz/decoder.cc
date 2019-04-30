@@ -14,31 +14,35 @@
 
 static const FluxPattern SECTOR_START_PATTERN(16, 0xaaab);
 
-nanoseconds_t ZilogMczDecoder::findSector(FluxmapReader& fmr, Track& track)
+AbstractSimplifiedDecoder::RecordType ZilogMczDecoder::advanceToNextRecord()
 {
-    fmr.seekToIndexMark();
-    return fmr.seekToPattern(SECTOR_START_PATTERN);
+	const FluxMatcher* matcher = nullptr;
+    _fmr->seekToIndexMark();
+	_sector->clock = _fmr->seekToPattern(SECTOR_START_PATTERN, matcher);
+	if (matcher == &SECTOR_START_PATTERN)
+		return SECTOR_RECORD;
+	return UNKNOWN_RECORD;
 }
 
-void ZilogMczDecoder::decodeSingleSector(FluxmapReader& fmr, Track& track, Sector& sector)
+void ZilogMczDecoder::decodeSectorRecord()
 {
-    fmr.readRawBits(14, sector.clock);
+    readRawBits(14);
 
-    auto rawbits = fmr.readRawBits(140*16, sector.clock);
+    auto rawbits = readRawBits(140*16);
     auto bytes = decodeFmMfm(rawbits).slice(0, 140);
     ByteReader br(bytes);
 
-    sector.logicalSector = br.read_8() & 0x1f;
-    sector.logicalSide = 0;
-    sector.logicalTrack = br.read_8() & 0x7f;
-    if (sector.logicalSector > 31)
+    _sector->logicalSector = br.read_8() & 0x1f;
+    _sector->logicalSide = 0;
+    _sector->logicalTrack = br.read_8() & 0x7f;
+    if (_sector->logicalSector > 31)
         return;
-    if (sector.logicalTrack > 80)
+    if (_sector->logicalTrack > 80)
         return;
 
-    sector.data = br.read(132);
+    _sector->data = br.read(132);
     uint16_t wantChecksum = br.read_be16();
     uint16_t gotChecksum = crc16(MODBUS_POLY, 0x0000, bytes.slice(0, 134));
 
-    sector.status = (wantChecksum == gotChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
+    _sector->status = (wantChecksum == gotChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
 }
