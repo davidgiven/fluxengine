@@ -43,8 +43,6 @@ public:
         return appendBytes(&byte, 1);
     }
 
-    nanoseconds_t guessClock() const;
-
 	Fluxmap& appendBits(const std::vector<bool>& bits, nanoseconds_t clock);
 
 	void precompensate(int threshold_ticks, int amount_ticks);
