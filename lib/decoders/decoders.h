@@ -68,28 +68,4 @@ protected:
     Sector* _sector;
 };
 
-class AbstractStatefulDecoder : public AbstractDecoder
-{
-public:
-    void decodeToSectors(Track& track);
-    void discardRecord(FluxmapReader& fmr);
-    void pushRecord(FluxmapReader& fmr, Track& track, Sector& sector);
-
-protected:
-    virtual nanoseconds_t findSector(FluxmapReader& fmr, Track& track) = 0;
-    virtual void decodeSingleSector(FluxmapReader& fmr, Track& track, Sector& sector) = 0;
-
-private:
-    Fluxmap::Position _recordStart;
-};
-
-class AbstractSplitDecoder : public AbstractStatefulDecoder
-{
-    void decodeSingleSector(FluxmapReader& fmr, Track& track, Sector& sector) override;
-
-    virtual nanoseconds_t findData(FluxmapReader& fmr, Track& track) = 0;
-    virtual void decodeHeader(FluxmapReader& fmr, Track& track, Sector& sector) = 0;
-    virtual void decodeData(FluxmapReader& fmr, Track& track, Sector& sector) = 0;
-};
-
 #endif
