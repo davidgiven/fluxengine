@@ -13,7 +13,7 @@
 
 const FluxPattern SECTOR_RECORD_PATTERN(24, APPLE2_SECTOR_RECORD);
 const FluxPattern DATA_RECORD_PATTERN(24, APPLE2_DATA_RECORD);
-const FluxMatchers SECTOR_OR_DATA_RECORD_PATTERN({ &SECTOR_RECORD_PATTERN, &DATA_RECORD_PATTERN });
+const FluxMatchers ANY_RECORD_PATTERN({ &SECTOR_RECORD_PATTERN, &DATA_RECORD_PATTERN });
 
 static int decode_data_gcr(uint8_t gcr)
 {
@@ -65,47 +65,48 @@ uint8_t combine(uint16_t word)
     return word & (word >> 7);
 }
 
-nanoseconds_t Apple2Decoder::findSector(FluxmapReader& fmr, Track& track)
+AbstractSimplifiedDecoder::RecordType Apple2Decoder::advanceToNextRecord()
 {
-    return fmr.seekToPattern(SECTOR_RECORD_PATTERN);
+	const FluxMatcher* matcher = nullptr;
+	_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
+	if (matcher == &SECTOR_RECORD_PATTERN)
+		return RecordType::SECTOR_RECORD;
+	if (matcher == &DATA_RECORD_PATTERN)
+		return RecordType::DATA_RECORD;
+	return RecordType::UNKNOWN_RECORD;
 }
 
-nanoseconds_t Apple2Decoder::findData(FluxmapReader& fmr, Track& track)
-{
-    return fmr.seekToPattern(SECTOR_OR_DATA_RECORD_PATTERN);
-}
-
-void Apple2Decoder::decodeHeader(FluxmapReader& fmr, Track& track, Sector& sector)
+void Apple2Decoder::decodeSectorRecord()
 {
     /* Skip ID (as we know it's a APPLE2_SECTOR_RECORD). */
-    fmr.readRawBits(24, sector.clock);
+    readRawBits(24);
 
     /* Read header. */
 
-    auto header = toBytes(fmr.readRawBits(8*8, sector.clock)).slice(0, 8);
+    auto header = toBytes(readRawBits(8*8)).slice(0, 8);
     ByteReader br(header);
 
     uint8_t volume = combine(br.read_be16());
-    sector.logicalTrack = combine(br.read_be16());
-    sector.logicalSector = combine(br.read_be16());
+    _sector->logicalTrack = combine(br.read_be16());
+    _sector->logicalSector = combine(br.read_be16());
     uint8_t checksum = combine(br.read_be16());
-    if (checksum == (volume ^ sector.logicalTrack ^ sector.logicalSector))
-        sector.status = Sector::DATA_MISSING; /* unintuitive but correct */
+    if (checksum == (volume ^ _sector->logicalTrack ^ _sector->logicalSector))
+        _sector->status = Sector::DATA_MISSING; /* unintuitive but correct */
 }
 
-void Apple2Decoder::decodeData(FluxmapReader& fmr, Track& track, Sector& sector)
+void Apple2Decoder::decodeDataRecord()
 {
     /* Check ID. */
 
-    Bytes bytes = toBytes(fmr.readRawBits(3*8, sector.clock)).slice(0, 3);
+    Bytes bytes = toBytes(readRawBits(3*8)).slice(0, 3);
     if (bytes.reader().read_be24() != APPLE2_DATA_RECORD)
         return;
 
     /* Read and decode data. */
 
     unsigned recordLength = APPLE2_ENCODED_SECTOR_LENGTH + 2;
-    bytes = toBytes(fmr.readRawBits(recordLength*8, sector.clock)).slice(0, recordLength);
+    bytes = toBytes(readRawBits(recordLength*8)).slice(0, recordLength);
 
-    sector.status = Sector::BAD_CHECKSUM;
-    sector.data = decode_crazy_data(&bytes[0], sector.status);
+    _sector->status = Sector::BAD_CHECKSUM;
+    _sector->data = decode_crazy_data(&bytes[0], _sector->status);
 }

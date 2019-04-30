@@ -142,14 +142,14 @@ amigadecoderlib = declare_dependency(
        include_directories('lib/amiga')
 )
 
-# apple2decoderlib = declare_dependency(
-#    link_with:
-#        shared_library('apple2decoderlib',
-#        [ 'lib/apple2/decoder.cc', ],
-#        dependencies: [fmtlib, felib, decoderlib]),
-#    include_directories:
-#        include_directories('lib/apple2')
-# )
+apple2decoderlib = declare_dependency(
+   link_with:
+       shared_library('apple2decoderlib',
+       [ 'lib/apple2/decoder.cc', ],
+       dependencies: [fmtlib, felib, decoderlib]),
+   include_directories:
+       include_directories('lib/apple2')
+)
 
 brotherdecoderlib = declare_dependency(
    link_with:
@@ -238,7 +238,7 @@ executable('fe-readadfs',          ['src/fe-readadfs.cc'],          dependencies
 executable('fe-readaeslanier',     ['src/fe-readaeslanier.cc'],     dependencies: [fmtlib, felib, decoderlib, readerlib, aeslanierdecoderlib])
 executable('fe-readamiga',         ['src/fe-readamiga.cc'],         dependencies: [fmtlib, felib, decoderlib, readerlib, amigadecoderlib])
 executable('fe-readampro',         ['src/fe-readampro.cc'],         dependencies: [fmtlib, felib, decoderlib, readerlib, ibmdecoderlib])
-# executable('fe-readapple2',        ['src/fe-readapple2.cc'],        dependencies: [fmtlib, felib, decoderlib, readerlib, apple2decoderlib])
+executable('fe-readapple2',        ['src/fe-readapple2.cc'],        dependencies: [fmtlib, felib, decoderlib, readerlib, apple2decoderlib])
 executable('fe-readbrother',       ['src/fe-readbrother.cc'],       dependencies: [fmtlib, felib, decoderlib, readerlib, brotherdecoderlib])
 # executable('fe-readc64',           ['src/fe-readc64.cc'],           dependencies: [fmtlib, felib, decoderlib, readerlib, c64decoderlib])
 executable('fe-readdfs',           ['src/fe-readdfs.cc'],           dependencies: [fmtlib, felib, decoderlib, readerlib, ibmdecoderlib])
