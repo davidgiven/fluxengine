@@ -1,5 +1,6 @@
 #include "globals.h"
 #include "fluxmap.h"
+#include "fluxmapreader.h"
 #include "protocol.h"
 #include "record.h"
 #include "decoders.h"
@@ -9,6 +10,10 @@
 #include "fmt/format.h"
 #include <string.h>
 #include <algorithm>
+
+const FluxPattern SECTOR_RECORD_PATTERN(24, APPLE2_SECTOR_RECORD);
+const FluxPattern DATA_RECORD_PATTERN(24, APPLE2_DATA_RECORD);
+const FluxMatchers ANY_RECORD_PATTERN({ &SECTOR_RECORD_PATTERN, &DATA_RECORD_PATTERN });
 
 static int decode_data_gcr(uint8_t gcr)
 {
@@ -25,7 +30,7 @@ static int decode_data_gcr(uint8_t gcr)
 /* This is extremely inspired by the MESS implementation, written by Nathan Woods
  * and R. Belmont: https://github.com/mamedev/mame/blob/7914a6083a3b3a8c243ae6c3b8cb50b023f21e0e/src/lib/formats/ap2_dsk.cpp
  */
-static Bytes decode_crazy_data(const uint8_t* inp, int& status)
+static Bytes decode_crazy_data(const uint8_t* inp, Sector::Status& status)
 {
     Bytes output(APPLE2_SECTOR_LENGTH);
 
@@ -60,61 +65,48 @@ uint8_t combine(uint16_t word)
     return word & (word >> 7);
 }
 
-SectorVector Apple2Decoder::decodeToSectors(
-        const RawRecordVector& rawRecords, unsigned, unsigned)
+AbstractDecoder::RecordType Apple2Decoder::advanceToNextRecord()
 {
-    std::vector<std::unique_ptr<Sector>> sectors;
-    int nextTrack;
-    int nextSector;
-    bool headerIsValid = false;
-
-    for (auto& rawrecord : rawRecords)
-    {
-        const std::vector<bool>& rawdata = rawrecord->data;
-        const Bytes& rawbytes = toBytes(rawdata);
-        ByteReader br(rawbytes);
-
-        if (rawbytes.size() < 8)
-            continue;
-
-        uint32_t signature = br.read_be24();
-        switch (signature)
-        {
-            case APPLE2_SECTOR_RECORD:
-            {
-                uint8_t volume = combine(br.read_be16());
-                nextTrack = combine(br.read_be16());
-                nextSector = combine(br.read_be16());
-                uint8_t checksum = combine(br.read_be16());
-                headerIsValid = checksum == (volume ^ nextTrack ^ nextSector);
-                break;
-            }
-
-            case APPLE2_DATA_RECORD:
-            {
-                if (!headerIsValid)
-                    break;
-                headerIsValid = false;
-                    
-                Bytes clipped_bytes = rawbytes.slice(0, APPLE2_ENCODED_SECTOR_LENGTH + 5);
-                int status = Sector::BAD_CHECKSUM;
-                auto data = decode_crazy_data(&clipped_bytes[3], status);
-
-                auto sector = std::unique_ptr<Sector>(
-                    new Sector(status, nextTrack, 0, nextSector, data));
-                sectors.push_back(std::move(sector));
-                break;
-            }
-        }
-	}
-
-	return sectors;
+	const FluxMatcher* matcher = nullptr;
+	_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
+	if (matcher == &SECTOR_RECORD_PATTERN)
+		return RecordType::SECTOR_RECORD;
+	if (matcher == &DATA_RECORD_PATTERN)
+		return RecordType::DATA_RECORD;
+	return RecordType::UNKNOWN_RECORD;
 }
 
-int Apple2Decoder::recordMatcher(uint64_t fifo) const
+void Apple2Decoder::decodeSectorRecord()
 {
-    uint32_t masked = fifo & 0xffffff;
-    if ((masked == APPLE2_SECTOR_RECORD) || (masked == APPLE2_DATA_RECORD))
-		return 24;
-    return 0;
+    /* Skip ID (as we know it's a APPLE2_SECTOR_RECORD). */
+    readRawBits(24);
+
+    /* Read header. */
+
+    auto header = toBytes(readRawBits(8*8)).slice(0, 8);
+    ByteReader br(header);
+
+    uint8_t volume = combine(br.read_be16());
+    _sector->logicalTrack = combine(br.read_be16());
+    _sector->logicalSector = combine(br.read_be16());
+    uint8_t checksum = combine(br.read_be16());
+    if (checksum == (volume ^ _sector->logicalTrack ^ _sector->logicalSector))
+        _sector->status = Sector::DATA_MISSING; /* unintuitive but correct */
+}
+
+void Apple2Decoder::decodeDataRecord()
+{
+    /* Check ID. */
+
+    Bytes bytes = toBytes(readRawBits(3*8)).slice(0, 3);
+    if (bytes.reader().read_be24() != APPLE2_DATA_RECORD)
+        return;
+
+    /* Read and decode data. */
+
+    unsigned recordLength = APPLE2_ENCODED_SECTOR_LENGTH + 2;
+    bytes = toBytes(readRawBits(recordLength*8)).slice(0, recordLength);
+
+    _sector->status = Sector::BAD_CHECKSUM;
+    _sector->data = decode_crazy_data(&bytes[0], _sector->status);
 }

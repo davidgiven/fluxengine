@@ -2,11 +2,16 @@
 #define DECODERS_H
 
 #include "bytes.h"
+#include "sector.h"
+#include "record.h"
+#include "fluxmapreader.h"
 
 class Sector;
 class Fluxmap;
+class FluxmapReader;
 class RawRecord;
 class RawBits;
+class Track;
 
 typedef std::vector<std::unique_ptr<RawRecord>> RawRecordVector;
 typedef std::vector<std::unique_ptr<Sector>> SectorVector;
@@ -24,46 +29,35 @@ class AbstractDecoder
 public:
     virtual ~AbstractDecoder() {}
 
-    nanoseconds_t guessClock(Fluxmap& fluxmap, unsigned physicalTrack, unsigned physicalSide) const;
-    virtual nanoseconds_t guessClockImpl(Fluxmap& fluxmap, unsigned physicalTrack, unsigned physicalSide) const;
-
-    virtual void decodeToSectors(const RawBits& bitmap, unsigned physicalTrack,
-        unsigned physicalSide, RawRecordVector& rawrecords, SectorVector& sectors) = 0;
-};
-
-class AbstractSeparatedDecoder : public AbstractDecoder
-{
 public:
-    virtual ~AbstractSeparatedDecoder() {}
+    enum RecordType
+    {
+        SECTOR_RECORD,
+        DATA_RECORD,
+        UNKNOWN_RECORD
+    };
 
-    virtual RawRecordVector extractRecords(const RawBits& rawbits) const = 0;
-    virtual SectorVector decodeToSectors(const RawRecordVector& rawrecords,
-            unsigned physicalTrack, unsigned physicalSide) = 0;
-
-    void decodeToSectors(const RawBits& bitmap, unsigned physicalTrack, unsigned physicalSide,
-        RawRecordVector& rawrecords, SectorVector& sectors);
-};
-
-class AbstractSoftSectorDecoder : public AbstractSeparatedDecoder
-{
 public:
-    virtual ~AbstractSoftSectorDecoder() {}
+    void decodeToSectors(Track& track);
+    void pushRecord(const Fluxmap::Position& start, const Fluxmap::Position& end);
 
-    RawRecordVector extractRecords(const RawBits& rawbits) const;
+    std::vector<bool> readRawBits(unsigned count)
+    { return _fmr->readRawBits(count, _sector->clock); }
 
-    virtual int recordMatcher(uint64_t fifo) const = 0;
-};
+    Fluxmap::Position tell()
+    { return _fmr->tell(); } 
 
-class AbstractHardSectorDecoder : public AbstractSeparatedDecoder
-{
-public:
-    virtual ~AbstractHardSectorDecoder() {}
+    void seek(const Fluxmap::Position& pos)
+    { return _fmr->seek(pos); } 
 
-    RawRecordVector extractRecords(const RawBits& rawbits) const;
-};
+protected:
+    virtual RecordType advanceToNextRecord() = 0;
+    virtual void decodeSectorRecord() = 0;
+    virtual void decodeDataRecord() {};
 
-class AbstractStatefulDecoder : public AbstractDecoder
-{
+    FluxmapReader* _fmr;
+    Track* _track;
+    Sector* _sector;
 };
 
 #endif

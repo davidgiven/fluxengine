@@ -56,34 +56,34 @@ sqllib = declare_dependency(
         )
 )
 
-fluxreaderlib = declare_dependency(
+fluxsourcelib = declare_dependency(
     link_with:
-        shared_library('fluxreaderlib',
+        shared_library('fluxsourcelib',
             [
-                'lib/fluxreader/fluxreader.cc',
-                'lib/fluxreader/sqlitefluxreader.cc',
-                'lib/fluxreader/hardwarefluxreader.cc',
-                'lib/fluxreader/streamfluxreader.cc',
-                'lib/fluxreader/kryoflux.cc',
+                'lib/fluxsource/fluxsource.cc',
+                'lib/fluxsource/sqlitefluxsource.cc',
+                'lib/fluxsource/hardwarefluxsource.cc',
+                'lib/fluxsource/streamfluxsource.cc',
+                'lib/fluxsource/kryoflux.cc',
             ],
             dependencies: [fmtlib, felib, sqllib, sqlite]
         ),
     include_directories:
-        include_directories('lib/fluxreader')
+        include_directories('lib/fluxsource')
 )
 
-fluxwriterlib = declare_dependency(
+fluxsinklib = declare_dependency(
 	link_with:
-		shared_library('fluxwriterlib',
+		shared_library('fluxsinklib',
 			[
-				'lib/fluxwriter/fluxwriter.cc',
-				'lib/fluxwriter/sqlitefluxwriter.cc',
-				'lib/fluxwriter/hardwarefluxwriter.cc',
+				'lib/fluxsink/fluxsink.cc',
+				'lib/fluxsink/sqlitefluxsink.cc',
+				'lib/fluxsink/hardwarefluxsink.cc',
 			],
 			dependencies: [fmtlib, felib, sqllib, sqlite]
 		),
 	include_directories:
-		include_directories('lib/fluxwriter')
+		include_directories('lib/fluxsink')
 )
 
 decoderlib = declare_dependency(
@@ -92,6 +92,7 @@ decoderlib = declare_dependency(
             [
                 'lib/decoders/decoders.cc',
                 'lib/decoders/fmmfm.cc',
+                'lib/decoders/fluxmapreader.cc',
             ],
             dependencies: [fmtlib, felib]
         ),
@@ -102,15 +103,16 @@ decoderlib = declare_dependency(
 readerlib = declare_dependency(
     link_with:
         shared_library('readerlib',
-            ['lib/reader.cc'],
-            dependencies: [fmtlib, felib, sqllib, decoderlib, fluxreaderlib, sqlite])
+            [
+                'lib/reader.cc'],
+            dependencies: [fmtlib, felib, sqllib, decoderlib, fluxsourcelib, sqlite])
 )
                         
 writerlib = declare_dependency(
     link_with:
         shared_library('writerlib',
             ['lib/writer.cc'],
-            dependencies: [fmtlib, felib, sqllib, fluxreaderlib, fluxwriterlib, sqlite]
+            dependencies: [fmtlib, felib, sqllib, fluxsourcelib, fluxsinklib, sqlite]
         )
 )
 
@@ -123,57 +125,57 @@ encoderlib = declare_dependency(
 )
 
 aeslanierdecoderlib = declare_dependency(
-    link_with:
-        shared_library('aeslanierdecoderlib',
-        [ 'lib/aeslanier/decoder.cc', ],
-        dependencies: [fmtlib, felib, decoderlib]),
-    include_directories:
-        include_directories('lib/aeslanier')
+   link_with:
+       shared_library('aeslanierdecoderlib',
+       [ 'lib/aeslanier/decoder.cc', ],
+       dependencies: [fmtlib, felib, decoderlib]),
+   include_directories:
+       include_directories('lib/aeslanier')
 )
 
 amigadecoderlib = declare_dependency(
-    link_with:
-        shared_library('amigadecoderlib',
-        [ 'lib/amiga/decoder.cc', ],
-        dependencies: [fmtlib, felib, decoderlib]),
-    include_directories:
-        include_directories('lib/amiga')
+   link_with:
+       shared_library('amigadecoderlib',
+       [ 'lib/amiga/decoder.cc', ],
+       dependencies: [fmtlib, felib, decoderlib]),
+   include_directories:
+       include_directories('lib/amiga')
 )
 
 apple2decoderlib = declare_dependency(
-    link_with:
-        shared_library('apple2decoderlib',
-        [ 'lib/apple2/decoder.cc', ],
-        dependencies: [fmtlib, felib, decoderlib]),
-    include_directories:
-        include_directories('lib/apple2')
+   link_with:
+       shared_library('apple2decoderlib',
+       [ 'lib/apple2/decoder.cc', ],
+       dependencies: [fmtlib, felib, decoderlib]),
+   include_directories:
+       include_directories('lib/apple2')
 )
 
 brotherdecoderlib = declare_dependency(
-    link_with:
-        shared_library('brotherdecoderlib',
-        [ 'lib/brother/decoder.cc', ],
-        dependencies: [fmtlib, felib, decoderlib, sqlite]),
-    include_directories:
-        include_directories('lib/brother')
+   link_with:
+       shared_library('brotherdecoderlib',
+       [ 'lib/brother/decoder.cc', ],
+       dependencies: [fmtlib, felib, decoderlib, sqlite]),
+   include_directories:
+       include_directories('lib/brother')
 )
 
 brotherencoderlib = declare_dependency(
-    link_with:
-        shared_library('brotherencoderlib',
-        [ 'lib/brother/encoder.cc', ],
-        dependencies: [fmtlib, felib, decoderlib, encoderlib]),
-    include_directories:
-        include_directories('lib/brother')
+   link_with:
+       shared_library('brotherencoderlib',
+       [ 'lib/brother/encoder.cc', ],
+       dependencies: [fmtlib, felib, decoderlib, encoderlib]),
+   include_directories:
+       include_directories('lib/brother')
 )
 
 c64decoderlib = declare_dependency(
-    link_with:
-        shared_library('c64decoderlib',
-        [ 'lib/c64/decoder.cc', ],
-        dependencies: [fmtlib, felib, decoderlib]),
-    include_directories:
-        include_directories('lib/c64')
+   link_with:
+       shared_library('c64decoderlib',
+       [ 'lib/c64/decoder.cc', ],
+       dependencies: [fmtlib, felib, decoderlib]),
+   include_directories:
+       include_directories('lib/c64')
 )
 
 f85decoderlib = declare_dependency(
@@ -261,7 +263,8 @@ test('DataSpec',        executable('dataspec-test', ['tests/dataspec.cc'],      
 test('Flags',           executable('flags-test', ['tests/flags.cc'],                   dependencies: [felib]))
 test('FmMfm',           executable('fmmfm-test', ['tests/fmmfm.cc'],                   dependencies: [felib, decoderlib]))
 test('BitAccumulator',  executable('bitaccumulator-test', ['tests/bitaccumulator.cc'], dependencies: [felib]))
-test('Kryoflux',        executable('kryoflux-test', ['tests/kryoflux.cc'],             dependencies: [felib, decoderlib, fluxreaderlib]))
+test('Kryoflux',        executable('kryoflux-test', ['tests/kryoflux.cc'],             dependencies: [felib, decoderlib, fluxsourcelib]))
 test('Compression',     executable('compression-test', ['tests/compression.cc'],       dependencies: [felib, decoderlib]))
 test('Bytes',           executable('bytes-test', ['tests/bytes.cc'],                   dependencies: [felib]))
 test('Crunch',          executable('crunch-test', ['tests/crunch.cc'],                 dependencies: [felib, crunchlib]))
+test('FluxPattern',     executable('fluxpattern-test', ['tests/fluxpattern.cc'],       dependencies: [felib, decoderlib]))

@@ -1,21 +1,19 @@
 #ifndef RECORD_H
 #define RECORD_H
 
+#include "fluxmap.h"
+
 class RawRecord
 {
 public:
-	RawRecord(
-			size_t position,
-			const std::vector<bool>::const_iterator start,
-			const std::vector<bool>::const_iterator end):
-		position(position), data(start, end)
-	{}
+	RawRecord() {}
 
-	size_t position; // in bits
-	std::vector<bool> data;
+	Fluxmap::Position position;
+	nanoseconds_t clock = 0;
+    int physicalTrack = 0;
+    int physicalSide = 0;
+	Bytes data;
 };
-
-typedef std::vector<std::unique_ptr<RawRecord>> RawRecordVector;
 
 #endif
 

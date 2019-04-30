@@ -4,12 +4,13 @@
 class Sector;
 class Fluxmap;
 
-class ZilogMczDecoder : public AbstractHardSectorDecoder
+class ZilogMczDecoder : public AbstractDecoder
 {
 public:
     virtual ~ZilogMczDecoder() {}
 
-    SectorVector decodeToSectors(const RawRecordVector& rawRecords, unsigned physicalTrack, unsigned physicalSide);
+    RecordType advanceToNextRecord();
+    void decodeSectorRecord();
 };
 
 #endif

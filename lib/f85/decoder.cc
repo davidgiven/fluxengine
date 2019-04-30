@@ -1,5 +1,6 @@
 #include "globals.h"
 #include "fluxmap.h"
+#include "fluxmapreader.h"
 #include "protocol.h"
 #include "record.h"
 #include "decoders.h"
@@ -10,6 +11,10 @@
 #include "fmt/format.h"
 #include <string.h>
 #include <algorithm>
+
+const FluxPattern SECTOR_RECORD_PATTERN(24, F85_SECTOR_RECORD);
+const FluxPattern DATA_RECORD_PATTERN(24, F85_DATA_RECORD);
+const FluxMatchers ANY_RECORD_PATTERN({ &SECTOR_RECORD_PATTERN, &DATA_RECORD_PATTERN });
 
 static int decode_data_gcr(uint8_t gcr)
 {
@@ -47,62 +52,49 @@ static Bytes decode(const std::vector<bool>& bits)
     return output;
 }
 
-SectorVector DurangoF85Decoder::decodeToSectors(const RawRecordVector& rawRecords, unsigned, unsigned)
+AbstractDecoder::RecordType DurangoF85Decoder::advanceToNextRecord()
 {
-    std::vector<std::unique_ptr<Sector>> sectors;
-    unsigned nextSector;
-    unsigned nextTrack;
-    bool headerIsValid = false;
-
-    for (auto& rawrecord : rawRecords)
-    {
-        const auto& rawdata = rawrecord->data;
-        const auto& bytes = decode(rawdata);
-
-        if (bytes.size() < 4)
-            continue;
-
-        switch (bytes[0])
-        {
-            case 0xce: /* sector record */
-            {
-                headerIsValid = false;
-                nextSector = bytes[3];
-                nextTrack = bytes[1];
-
-                uint16_t wantChecksum = bytes.reader().seek(5).read_be16();
-                uint16_t gotChecksum = crc16(CCITT_POLY, 0xef21, bytes.slice(1, 4));
-                headerIsValid = (wantChecksum == gotChecksum);
-                break;
-            }
-
-            case 0xcb: /* data record */
-            {
-                if (!headerIsValid)
-                    break;
-                if (bytes.size() < (F85_SECTOR_LENGTH + 3))
-                    continue;
-
-                const auto& payload = bytes.slice(1, F85_SECTOR_LENGTH);
-                uint16_t wantChecksum = bytes.reader().seek(F85_SECTOR_LENGTH+1).read_be16();
-                uint16_t gotChecksum = crc16(CCITT_POLY, 0xbf84, payload);
-
-                int status = (wantChecksum == gotChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
-                auto sector = std::unique_ptr<Sector>(
-					new Sector(status, nextTrack, 0, nextSector, payload));
-                sectors.push_back(std::move(sector));
-                break;
-            }
-        }
-	}
-
-	return sectors;
+	const FluxMatcher* matcher = nullptr;
+	_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
+	if (matcher == &SECTOR_RECORD_PATTERN)
+		return RecordType::SECTOR_RECORD;
+	if (matcher == &DATA_RECORD_PATTERN)
+		return RecordType::DATA_RECORD;
+	return RecordType::UNKNOWN_RECORD;
 }
 
-int DurangoF85Decoder::recordMatcher(uint64_t fifo) const
+void DurangoF85Decoder::decodeSectorRecord()
 {
-    uint32_t masked = fifo & 0xffff;
-    if (masked == F85_RECORD_SEPARATOR)
-		return 6;
-    return 0;
+    /* Skip sync bits and ID byte. */
+
+    readRawBits(24);
+
+    /* Read header. */
+
+    const auto& bytes = decode(readRawBits(6*10));
+
+    _sector->logicalSector = bytes[2];
+    _sector->logicalSide = 0;
+    _sector->logicalTrack = bytes[0];
+
+    uint16_t wantChecksum = bytes.reader().seek(4).read_be16();
+    uint16_t gotChecksum = crc16(CCITT_POLY, 0xef21, bytes.slice(0, 4));
+    if (wantChecksum == gotChecksum)
+        _sector->status = Sector::DATA_MISSING; /* unintuitive but correct */
+}
+
+void DurangoF85Decoder::decodeDataRecord()
+{
+    /* Skip sync bits ID byte. */
+
+    readRawBits(24);
+
+    const auto& bytes = decode(readRawBits((F85_SECTOR_LENGTH+3)*10))
+        .slice(0, F85_SECTOR_LENGTH+3);
+    ByteReader br(bytes);
+
+    _sector->data = br.read(F85_SECTOR_LENGTH);
+    uint16_t wantChecksum = br.read_be16();
+    uint16_t gotChecksum = crc16(CCITT_POLY, 0xbf84, _sector->data);
+    _sector->status = (wantChecksum == gotChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
 }

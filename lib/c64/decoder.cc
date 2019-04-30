@@ -1,5 +1,6 @@
 #include "globals.h"
 #include "fluxmap.h"
+#include "fluxmapreader.h"
 #include "protocol.h"
 #include "record.h"
 #include "decoders.h"
@@ -10,6 +11,10 @@
 #include "fmt/format.h"
 #include <string.h>
 #include <algorithm>
+
+const FluxPattern SECTOR_RECORD_PATTERN(20, C64_SECTOR_RECORD);
+const FluxPattern DATA_RECORD_PATTERN(20, C64_DATA_RECORD);
+const FluxMatchers ANY_RECORD_PATTERN({ &SECTOR_RECORD_PATTERN, &DATA_RECORD_PATTERN });
 
 static int decode_data_gcr(uint8_t gcr)
 {
@@ -47,67 +52,41 @@ static Bytes decode(const std::vector<bool>& bits)
     return output;
 }
 
-SectorVector Commodore64Decoder::decodeToSectors(const RawRecordVector& rawRecords, unsigned, unsigned)
+AbstractDecoder::RecordType Commodore64Decoder::advanceToNextRecord()
 {
-    std::vector<std::unique_ptr<Sector>> sectors;
-    unsigned nextSector;
-    unsigned nextTrack;
-    bool headerIsValid = false;
-
-    for (auto& rawrecord : rawRecords)
-    {
-        const auto& rawdata = rawrecord->data;
-        const auto& bytes = decode(rawdata);
-
-        if (bytes.size() == 0)
-            continue;
-
-        switch (bytes[0])
-        {
-            case 8: /* sector record */
-            {
-                headerIsValid = false;
-                if (bytes.size() < 6)
-                    break;
-
-                uint8_t checksum = bytes[1];
-                nextSector = bytes[2];
-                nextTrack = bytes[3] - 1;
-                if (checksum != xorBytes(bytes.slice(2, 4)))
-                    break;
-
-                headerIsValid = true;
-                break;
-            }
-            
-            case 7: /* data record */
-            {
-                if (!headerIsValid)
-                    break;
-                headerIsValid = false;
-                if (bytes.size() < 258)
-                    break;
-
-                Bytes payload = bytes.slice(1, C64_SECTOR_LENGTH);
-                uint8_t gotChecksum = xorBytes(payload);
-                uint8_t wantChecksum = bytes[257];
-                int status = (wantChecksum == gotChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
-
-                auto sector = std::unique_ptr<Sector>(
-					new Sector(status, nextTrack, 0, nextSector, payload));
-                sectors.push_back(std::move(sector));
-                break;
-            }
-        }
-	}
-
-	return sectors;
+	const FluxMatcher* matcher = nullptr;
+	_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
+	if (matcher == &SECTOR_RECORD_PATTERN)
+		return RecordType::SECTOR_RECORD;
+	if (matcher == &DATA_RECORD_PATTERN)
+		return RecordType::DATA_RECORD;
+	return RecordType::UNKNOWN_RECORD;
 }
 
-int Commodore64Decoder::recordMatcher(uint64_t fifo) const
+void Commodore64Decoder::decodeSectorRecord()
 {
-    uint16_t masked = fifo & 0xffff;
-    if (masked == C64_RECORD_SEPARATOR)
-		return 4;
-    return 0;
+    readRawBits(20);
+
+    const auto& bits = readRawBits(5*10);
+    const auto& bytes = decode(bits).slice(0, 5);
+
+    uint8_t checksum = bytes[0];
+    _sector->logicalSector = bytes[1];
+    _sector->logicalSide = 0;
+    _sector->logicalTrack = bytes[2] - 1;
+    if (checksum == xorBytes(bytes.slice(1, 4)))
+        _sector->status = Sector::DATA_MISSING; /* unintuitive but correct */
+}
+
+void Commodore64Decoder::decodeDataRecord()
+{
+    readRawBits(20);
+
+    const auto& bits = readRawBits(259*10);
+    const auto& bytes = decode(bits).slice(0, 259);
+
+    _sector->data = bytes.slice(0, C64_SECTOR_LENGTH);
+    uint8_t gotChecksum = xorBytes(_sector->data);
+    uint8_t wantChecksum = bytes[256];
+    _sector->status = (wantChecksum == gotChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
 }

@@ -3,22 +3,23 @@
 
 /* Brother word processor format (or at least, one of them) */
 
-#define BROTHER_SECTOR_RECORD 0xFFFFFD57
-#define BROTHER_DATA_RECORD   0xFFFFFDDB
-#define BROTHER_DATA_RECORD_PAYLOAD  256
-#define BROTHER_DATA_RECORD_CHECKSUM 3
+#define BROTHER_SECTOR_RECORD            0xFFFFFD57
+#define BROTHER_DATA_RECORD              0xFFFFFDDB
+#define BROTHER_DATA_RECORD_PAYLOAD      256
+#define BROTHER_DATA_RECORD_CHECKSUM     3
+#define BROTHER_DATA_RECORD_ENCODED_SIZE 415
 
 class Sector;
 class Fluxmap;
 
-class BrotherDecoder : public AbstractSoftSectorDecoder
+class BrotherDecoder : public AbstractDecoder
 {
 public:
     virtual ~BrotherDecoder() {}
 
-    SectorVector decodeToSectors(
-        const RawRecordVector& rawRecords, unsigned physicalTrack, unsigned physicalSide);
-    int recordMatcher(uint64_t fifo) const;
+    RecordType advanceToNextRecord();
+    void decodeSectorRecord();
+    void decodeDataRecord();
 };
 
 extern void writeBrotherSectorHeader(std::vector<bool>& bits, unsigned& cursor,

@@ -1,6 +1,7 @@
 #include "globals.h"
 #include "sql.h"
 #include "fluxmap.h"
+#include "fluxmapreader.h"
 #include "decoders.h"
 #include "record.h"
 #include "brother.h"
@@ -8,6 +9,10 @@
 #include "bytes.h"
 #include "crc.h"
 #include <ctype.h>
+
+const FluxPattern SECTOR_RECORD_PATTERN(32, BROTHER_SECTOR_RECORD);
+const FluxPattern DATA_RECORD_PATTERN(32, BROTHER_DATA_RECORD);
+const FluxMatchers ANY_RECORD_PATTERN({ &SECTOR_RECORD_PATTERN, &DATA_RECORD_PATTERN });
 
 static std::vector<uint8_t> outputbuffer;
 
@@ -48,89 +53,56 @@ static int decode_header_gcr(uint16_t word)
 	return -1;             
 };
 
-SectorVector BrotherDecoder::decodeToSectors(const RawRecordVector& rawRecords, unsigned, unsigned)
+AbstractDecoder::RecordType BrotherDecoder::advanceToNextRecord()
 {
-    std::vector<std::unique_ptr<Sector>> sectors;
-	bool headerIsValid = false;
-	unsigned nextTrack = 0;
-	unsigned nextSector = 0;
-
-    for (auto& rawrecord : rawRecords)
-    {
-		if (rawrecord->data.size() < 64)
-		{
-			headerIsValid = false;
-			continue;
-		}
-
-		auto ii = rawrecord->data.cbegin();
-		uint32_t signature = toBytes(ii, ii+32).reader().read_be32();
-		switch (signature)
-		{
-			case BROTHER_SECTOR_RECORD:
-			{
-				headerIsValid = false;
-				if (rawrecord->data.size() < (32+32))
-					break;
-
-				const auto& by = toBytes(ii+32, ii+64);
-				ByteReader br(by);
-				nextTrack = decode_header_gcr(br.read_be16());
-				nextSector = decode_header_gcr(br.read_be16());
-
-				/* Sanity check the values read; there's no header checksum and
-				 * occasionally we get garbage due to bit errors. */
-				if (nextSector > 11)
-					break;
-				if (nextTrack > 79)
-					break;
-
-				headerIsValid = true;
-				break;
-			}
-
-			case BROTHER_DATA_RECORD:
-			{
-				if (!headerIsValid)
-					break;
-
-				Bytes rawbytes = toBytes(rawrecord->data.cbegin()+32, rawrecord->data.cend());
-				const int totalsize = BROTHER_DATA_RECORD_PAYLOAD + BROTHER_DATA_RECORD_CHECKSUM;
-
-				Bytes output;
-				ByteWriter bw(output);
-				BitWriter bitw(bw);
-				for (uint8_t b : rawbytes)
-				{
-					uint32_t nibble = decode_data_gcr(b);
-					bitw.push(nibble, 5);
-					if (output.size() == totalsize)
-						break;
-				}
-				bitw.flush();
-				output.resize(totalsize);
-
-				Bytes payload = output.slice(0, BROTHER_DATA_RECORD_PAYLOAD);
-				uint32_t realCrc = crcbrother(payload);
-				uint32_t wantCrc = output.reader().seek(BROTHER_DATA_RECORD_PAYLOAD).read_be24();
-				int status = (realCrc == wantCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
-
-                auto sector = std::unique_ptr<Sector>(
-					new Sector(status, nextTrack, 0, nextSector, payload));
-                sectors.push_back(std::move(sector));
-                headerIsValid = false;
-				break;
-			}
-		}
-	}
-
-	return sectors;
+	const FluxMatcher* matcher = nullptr;
+	_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
+	if (matcher == &SECTOR_RECORD_PATTERN)
+		return RecordType::SECTOR_RECORD;
+	if (matcher == &DATA_RECORD_PATTERN)
+		return RecordType::DATA_RECORD;
+	return RecordType::UNKNOWN_RECORD;
 }
 
-int BrotherDecoder::recordMatcher(uint64_t fifo) const
+void BrotherDecoder::decodeSectorRecord()
 {
-    uint32_t masked = fifo & 0xffffffff;
-	if ((masked == BROTHER_SECTOR_RECORD) || (masked == BROTHER_DATA_RECORD))
-		return 32;
-    return 0;
+	readRawBits(32);
+	const auto& rawbits = readRawBits(32);
+	const auto& bytes = toBytes(rawbits).slice(0, 4);
+
+	ByteReader br(bytes);
+	_sector->logicalTrack = decode_header_gcr(br.read_be16());
+	_sector->logicalSector = decode_header_gcr(br.read_be16());
+
+	/* Sanity check the values read; there's no header checksum and
+		* occasionally we get garbage due to bit errors. */
+	if (_sector->logicalSector > 11)
+		return;
+	if (_sector->logicalTrack > 79)
+		return;
+
+	_sector->status = Sector::DATA_MISSING;
+}
+
+void BrotherDecoder::decodeDataRecord()
+{
+	readRawBits(32);
+
+	const auto& rawbits = readRawBits(BROTHER_DATA_RECORD_ENCODED_SIZE*8);
+	const auto& rawbytes = toBytes(rawbits).slice(0, BROTHER_DATA_RECORD_ENCODED_SIZE);
+
+	Bytes bytes;
+	ByteWriter bw(bytes);
+	BitWriter bitw(bw);
+	for (uint8_t b : rawbytes)
+	{
+		uint32_t nibble = decode_data_gcr(b);
+		bitw.push(nibble, 5);
+	}
+	bitw.flush();
+
+	_sector->data = bytes.slice(0, BROTHER_DATA_RECORD_PAYLOAD);
+	uint32_t realCrc = crcbrother(_sector->data);
+	uint32_t wantCrc = bytes.reader().seek(BROTHER_DATA_RECORD_PAYLOAD).read_be24();
+	_sector->status = (realCrc == wantCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
 }

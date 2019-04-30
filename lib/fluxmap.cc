@@ -77,33 +77,3 @@ void Fluxmap::precompensate(int threshold_ticks, int amount_ticks)
         }
     }
 }
-
-int FluxmapReader::read(unsigned& ticks)
-{
-    ticks = 0;
-
-    while (_cursor < _size)
-    {
-        uint8_t b = _bytes[_cursor++];
-        if (b < 0x80)
-            ticks += b;
-        else
-            return b;
-    }
-
-    return -1;
-}
-
-int FluxmapReader::readPulse(unsigned& ticks)
-{
-    ticks = 0;
-
-    for (;;)
-    {
-        unsigned thisTicks;
-        int opcode = read(thisTicks);
-        ticks += thisTicks;
-        if ((opcode == -1) || (opcode == 0x80))
-            return opcode;
-    }
-}

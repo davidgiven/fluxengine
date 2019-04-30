@@ -10,14 +10,16 @@
 class Sector;
 class Fluxmap;
 
-class Apple2Decoder : public AbstractSoftSectorDecoder
+class Apple2Decoder : public AbstractDecoder
 {
 public:
     virtual ~Apple2Decoder() {}
 
-    SectorVector decodeToSectors(const RawRecordVector& rawRecords, unsigned physicalTrack, unsigned physicalSide);
-    int recordMatcher(uint64_t fifo) const;
+    RecordType advanceToNextRecord();
+    void decodeSectorRecord();
+    void decodeDataRecord();
 };
+
 
 #endif
 

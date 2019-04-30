@@ -2,6 +2,7 @@
 #define SECTOR_H
 
 #include "bytes.h"
+#include "fluxmap.h"
 
 /* 
  * Note that sectors here used zero-based numbering throughout (to make the
@@ -16,27 +17,23 @@ public:
 		OK,
 		BAD_CHECKSUM,
         MISSING,
-        CONFLICT
+        DATA_MISSING,
+        CONFLICT,
+        INTERNAL_ERROR
 	};
 
     static const std::string statusToString(Status status);
 
-    Sector(int status, int track, int side, int sector, const Bytes& data):
-		status(status),
-        track(track),
-        side(side),
-        sector(sector),
-        data(data)
-    {}
-
-	int status;
-    const int track;
-    const int side;
-    const int sector;
-    const Bytes data;
+	Status status = Status::INTERNAL_ERROR;
+    Fluxmap::Position position;
+    nanoseconds_t clock = 0;
+    int physicalTrack = 0;
+    int physicalSide = 0;
+    int logicalTrack = 0;
+    int logicalSide = 0;
+    int logicalSector = 0;
+    Bytes data;
 };
-
-typedef std::vector<std::unique_ptr<Sector>> SectorVector;
 
 #endif
 

@@ -26,7 +26,7 @@ Bytes decodeFmMfm(
     ByteWriter bw(bytes);
 
     int bitcount = 0;
-    uint8_t fifo;
+    uint8_t fifo = 0;
 
     while (ii != end)
     {

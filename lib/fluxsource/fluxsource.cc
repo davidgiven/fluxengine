@@ -1,7 +1,7 @@
 #include "globals.h"
 #include "flags.h"
 #include "dataspec.h"
-#include "fluxwriter.h"
+#include "fluxsource.h"
 
 static bool ends_with(const std::string& value, const std::string& ending)
 {
@@ -10,15 +10,17 @@ static bool ends_with(const std::string& value, const std::string& ending)
     return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
 }
 
-std::unique_ptr<FluxWriter> FluxWriter::create(const DataSpec& spec)
+std::unique_ptr<FluxSource> FluxSource::create(const DataSpec& spec)
 {
     const auto& filename = spec.filename;
 
     if (filename.empty())
-        return createHardwareFluxWriter(spec.drive);
+        return createHardwareFluxSource(spec.drive);
     else if (ends_with(filename, ".flux"))
-        return createSqliteFluxWriter(filename);
+        return createSqliteFluxSource(filename);
+    else if (ends_with(filename, "/"))
+        return createStreamFluxSource(filename);
 
     Error() << "unrecognised flux filename extension";
-    return std::unique_ptr<FluxWriter>();
+    return std::unique_ptr<FluxSource>();
 }

@@ -6,8 +6,8 @@
 #include "protocol.h"
 #include "usb.h"
 #include "dataspec.h"
-#include "fluxreader.h"
-#include "fluxwriter.h"
+#include "fluxsource.h"
+#include "fluxsink.h"
 #include "fmt/format.h"
 
 static DataSpecFlag dest(
@@ -33,8 +33,8 @@ void writeTracks(
 
     std::cout << "Writing to: " << spec << std::endl;
 
-	setHardwareFluxReaderDensity(highDensityFlag);
-	setHardwareFluxWriterDensity(highDensityFlag);
+	setHardwareFluxSourceDensity(highDensityFlag);
+	setHardwareFluxSinkDensity(highDensityFlag);
 
 	if (!spec.filename.empty())
 	{

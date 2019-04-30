@@ -1,17 +1,17 @@
 #include "globals.h"
 #include "fluxmap.h"
 #include "kryoflux.h"
-#include "fluxreader.h"
+#include "fluxsource.h"
 
-class StreamFluxReader : public FluxReader
+class StreamFluxSource : public FluxSource
 {
 public:
-    StreamFluxReader(const std::string& path):
+    StreamFluxSource(const std::string& path):
         _path(path)
     {
     }
 
-    ~StreamFluxReader()
+    ~StreamFluxSource()
     {
     }
 
@@ -27,7 +27,7 @@ private:
     const std::string& _path;
 };
 
-std::unique_ptr<FluxReader> FluxReader::createStreamFluxReader(const std::string& path)
+std::unique_ptr<FluxSource> FluxSource::createStreamFluxSource(const std::string& path)
 {
-    return std::unique_ptr<FluxReader>(new StreamFluxReader(path));
+    return std::unique_ptr<FluxSource>(new StreamFluxSource(path));
 }

@@ -1,7 +1,7 @@
 #include "globals.h"
 #include "flags.h"
 #include "usb.h"
-#include "fluxreader.h"
+#include "fluxsource.h"
 #include "reader.h"
 #include "fluxmap.h"
 #include "sql.h"
@@ -13,6 +13,7 @@
 #include "image.h"
 #include "bytes.h"
 #include "rawbits.h"
+#include "track.h"
 #include "fmt/format.h"
 
 static DataSpecFlag source(
@@ -39,7 +40,7 @@ static IntFlag retries(
 	5);
 
 static SettableFlag highDensityFlag(
-	{ "--high-density", "-H" },
+	{ "--high-density", "--hd" },
 	"set the drive to high density mode");
 
 static sqlite3* outdb;
@@ -51,30 +52,19 @@ void setReaderDefaultSource(const std::string& source)
 
 void setReaderRevolutions(int revolutions)
 {
-	setHardwareFluxReaderRevolutions(revolutions);
+	setHardwareFluxSourceRevolutions(revolutions);
 }
 
-std::unique_ptr<Fluxmap> Track::read()
+void Track::readFluxmap()
 {
-	std::cout << fmt::format("{0:>3}.{1}: ", track, side) << std::flush;
-	std::unique_ptr<Fluxmap> fluxmap = _fluxReader->readFlux(track, side);
+	std::cout << fmt::format("{0:>3}.{1}: ", physicalTrack, physicalSide) << std::flush;
+	fluxmap = fluxsource->readFlux(physicalTrack, physicalSide);
 	std::cout << fmt::format(
 		"{0} ms in {1} bytes\n",
             int(fluxmap->duration()/1e6),
             fluxmap->bytes());
 	if (outdb)
-		sqlWriteFlux(outdb, track, side, *fluxmap);
-	return fluxmap;
-}
-
-void Track::recalibrate()
-{
-	_fluxReader->recalibrate();
-}
-
-bool Track::retryable()
-{
-	return _fluxReader->retryable();
+		sqlWriteFlux(outdb, physicalTrack, physicalSide, *fluxmap);
 }
 
 std::vector<std::unique_ptr<Track>> readTracks()
@@ -83,7 +73,7 @@ std::vector<std::unique_ptr<Track>> readTracks()
 
     std::cout << "Reading from: " << dataSpec << std::endl;
 
-	setHardwareFluxReaderDensity(highDensityFlag);
+	setHardwareFluxSourceDensity(highDensityFlag);
 
 	if (!destination.value.empty())
 	{
@@ -100,17 +90,20 @@ std::vector<std::unique_ptr<Track>> readTracks()
 		);
 	}
 
-	std::shared_ptr<FluxReader> fluxreader = FluxReader::create(dataSpec);
+	std::shared_ptr<FluxSource> fluxSource = FluxSource::create(dataSpec);
 
 	std::vector<std::unique_ptr<Track>> tracks;
     for (const auto& location : dataSpec.locations)
-		tracks.push_back(
-			std::unique_ptr<Track>(new Track(fluxreader, location.track, location.side)));
+	{
+		auto track = std::make_unique<Track>(location.track, location.side);
+		track->fluxsource = fluxSource;
+		tracks.push_back(std::move(track));
+	}
 
 	if (justRead)
 	{
 		for (auto& track : tracks)
-			track->read();
+			track->readFluxmap();
 		
 		std::cout << "--just-read specified, halting now" << std::endl;
 		exit(0);
@@ -119,98 +112,81 @@ std::vector<std::unique_ptr<Track>> readTracks()
 	return tracks;
 }
 
-static bool conflictable(int status)
+static bool conflictable(Sector::Status status)
 {
 	return (status == Sector::OK) || (status == Sector::CONFLICT);
 }
 
-static void replace_sector(std::unique_ptr<Sector>& replacing, std::unique_ptr<Sector>& replacement)
+static void replace_sector(Sector*& replacing, Sector& replacement)
 {
-	if (replacing && conflictable(replacing->status) && conflictable(replacement->status))
+	if (replacing && conflictable(replacing->status) && conflictable(replacement.status))
 	{
-		if (replacement->data != replacing->data)
+		if (replacement.data != replacing->data)
 		{
 			std::cout << std::endl
-						<< "       multiple conflicting copies of sector " << replacing->sector
+						<< "       multiple conflicting copies of sector " << replacing->logicalSector
 						<< " seen; ";
 			replacing->status = Sector::CONFLICT;
 			return;
 		}
 	}
 	if (!replacing || (replacing->status != Sector::OK))
-		replacing = std::move(replacement);
+		replacing = &replacement;
 }
 
 void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename)
 {
 	bool failures = false;
 	SectorSet allSectors;
-    for (const auto& track : readTracks())
+	auto tracks = readTracks();
+    for (const auto& track : tracks)
 	{
-		std::map<int, std::unique_ptr<Sector>> readSectors;
+		std::map<int, Sector*> readSectors;
 		for (int retry = ::retries; retry >= 0; retry--)
 		{
-			std::unique_ptr<Fluxmap> fluxmap = track->read();
+			track->readFluxmap();
+			decoder.decodeToSectors(*track);
 
-			nanoseconds_t clockPeriod = decoder.guessClock(*fluxmap, track->track, track->side);
-			if (clockPeriod == 0)
+			std::cout << "       ";
+			if (!track->sectors.empty())
 			{
-				std::cout << "       no clock detected; giving up" << std::endl;
-				continue;
-			}
-			std::cout << fmt::format("       {:.2f} us clock; ", (double)clockPeriod/1000.0) << std::flush;
+				std::cout << fmt::format("{} records, {} sectors; ",
+					track->rawrecords.size(),
+					track->sectors.size());
+				if (track->sectors.size() > 0)
+					std::cout << fmt::format("{:.2f}us clock; ",
+						track->sectors.begin()->clock / 1000.0);
 
-			const auto& bitmap = fluxmap->decodeToBits(clockPeriod);
-			std::cout << fmt::format("{} bytes encoded; ", bitmap.size()/8) << std::flush;
-
-			RawRecordVector rawrecords;
-			SectorVector sectors;
-			decoder.decodeToSectors(bitmap, track->track, track->side, rawrecords, sectors);
-
-			std::cout << fmt::format("{} records", rawrecords.size()) << std::endl
-			          << "       " << sectors.size() << " sectors; ";
-
-			for (auto& sector : sectors)
-			{
-                auto& replacing = readSectors[sector->sector];
-				replace_sector(replacing, sector);
-			}
-
-			bool hasBadSectors = false;
-			for (const auto& i : readSectors)
-			{
-                const auto& sector = i.second;
-				if (sector->status != Sector::OK)
+				for (auto& sector : track->sectors)
 				{
-					std::cout << std::endl
-							  << "       Failed to read sector " << sector->sector
-                              << " (" << Sector::statusToString((Sector::Status)sector->status) << "); ";
-					hasBadSectors = true;
+					auto& replacing = readSectors[sector.logicalSector];
+					replace_sector(replacing, sector);
 				}
-			}
 
-			if (hasBadSectors)
-				failures = false;
-
-			if (dumpRecords && (!hasBadSectors || (retry == 0) || !track->retryable()))
-			{
-				std::cout << "\nRaw (undecoded) records follow:\n\n";
-				for (auto& record : rawrecords)
+				bool hasBadSectors = false;
+				for (const auto& i : readSectors)
 				{
-					std::cout << fmt::format("I+{:.3f}ms", (double)(record->position*clockPeriod)/1e6)
-					          << std::endl;
-					hexdump(std::cout, toBytes(record->data));
-					std::cout << std::endl;
+					const auto& sector = i.second;
+					if (sector->status != Sector::OK)
+					{
+						std::cout << std::endl
+								<< "       Failed to read sector " << sector->logicalSector
+								<< " (" << Sector::statusToString((Sector::Status)sector->status) << "); ";
+						hasBadSectors = true;
+					}
 				}
+
+				if (hasBadSectors)
+					failures = false;
+
+				std::cout << std::endl
+						<< "       ";
+
+				if (!hasBadSectors)
+					break;
 			}
 
-			std::cout << std::endl
-                      << "       ";
-
-			if (!hasBadSectors)
-				break;
-
-			if (!track->retryable())
+			if (!track->fluxsource->retryable())
 				break;
             if (retry == 0)
                 std::cout << "giving up" << std::endl
@@ -218,8 +194,20 @@ void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename
             else
             {
 				std::cout << retry << " retries remaining" << std::endl;
-                track->recalibrate();
+                track->fluxsource->recalibrate();
             }
+		}
+
+		if (dumpRecords)
+		{
+			std::cout << "\nRaw (undecoded) records follow:\n\n";
+			for (auto& record : track->rawrecords)
+			{
+				std::cout << fmt::format("I+{:.2f}us", record.position.ns() / 1000.0)
+						<< std::endl;
+				hexdump(std::cout, record.data);
+				std::cout << std::endl;
+			}
 		}
 
         int size = 0;
@@ -231,14 +219,14 @@ void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename
 			{
 				if (!printedTrack)
 				{
-					std::cout << fmt::format("logical track {}.{}; ", sector->track, sector->side);
+					std::cout << fmt::format("logical track {}.{}; ", sector->logicalTrack, sector->logicalSide);
 					printedTrack = true;
 				}
 
 				size += sector->data.size();
 
-				auto& replacing = allSectors.get(sector->track, sector->side, sector->sector);
-				replace_sector(replacing, sector);
+				Sector*& replacing = allSectors.get(sector->logicalTrack, sector->logicalSide, sector->logicalSector);
+				replace_sector(replacing, *sector);
 			}
         }
         std::cout << size << " bytes decoded." << std::endl;

@@ -5,6 +5,7 @@
 
 /* IBM format (i.e. ordinary PC floppies). */
 
+#define IBM_MFM_SYNC   0xA1   /* sync byte for MFM */
 #define IBM_IAM        0xFC   /* start-of-track record */
 #define IBM_IAM_LEN    1      /* plus prologue */
 #define IBM_IDAM       0xFE   /* sector header */
@@ -27,6 +28,24 @@ struct IbmIdam
     uint8_t crc[2];
 };
 
+class IbmDecoder : public AbstractDecoder
+{
+public:
+    IbmDecoder(unsigned sectorBase):
+        _sectorBase(sectorBase)
+    {}
+
+    RecordType advanceToNextRecord();
+    void decodeSectorRecord();
+    void decodeDataRecord();
+
+private:
+    unsigned _sectorBase;
+    unsigned _currentSectorSize;
+    unsigned _currentHeaderLength;
+};
+
+#if 0
 class AbstractIbmDecoder : public AbstractSoftSectorDecoder
 {
 public:
@@ -72,5 +91,6 @@ protected:
     int skipHeaderBytes() const
     { return 3; }
 };
+#endif
 
 #endif

@@ -7,14 +7,15 @@
 
 class Sector;
 class Fluxmap;
+class Track;
 
-class Fb100Decoder : public AbstractStatefulDecoder
+class Fb100Decoder : public AbstractDecoder
 {
 public:
     virtual ~Fb100Decoder() {}
 
-    void decodeToSectors(const RawBits& bitmap, unsigned physicalTrack, unsigned physicalSide,
-        RawRecordVector& rawrecords, SectorVector& sectors);
+    RecordType advanceToNextRecord();
+    void decodeSectorRecord();
 };
 
 #endif

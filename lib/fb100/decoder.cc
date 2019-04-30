@@ -1,5 +1,6 @@
 #include "globals.h"
 #include "fluxmap.h"
+#include "fluxmapreader.h"
 #include "protocol.h"
 #include "record.h"
 #include "decoders.h"
@@ -8,27 +9,12 @@
 #include "crc.h"
 #include "bytes.h"
 #include "rawbits.h"
+#include "track.h"
 #include "fmt/format.h"
 #include <string.h>
 #include <algorithm>
 
-static bool search(const RawBits& rawbits, size_t& cursor)
-{
-    uint16_t fifo = 0;
-
-    while (cursor < rawbits.size())
-    {
-        fifo = (fifo << 1) | rawbits[cursor++];
-        
-        if (fifo == 0xabaa)
-        {
-            cursor -= 16;
-            return true;
-        }
-    }
-
-    return false;
-}
+const FluxPattern SECTOR_ID_PATTERN(16, 0xabaa);
 
 /* 
  * Reverse engineered from a dump of the floppy drive's ROM. I have no idea how
@@ -113,52 +99,37 @@ static uint16_t checksum(const Bytes& bytes)
     return (crchi << 8) | crclo;
 }
 
-void Fb100Decoder::decodeToSectors(const RawBits& rawbits, unsigned, unsigned,
-    RawRecordVector& rawrecords, SectorVector& sectors)
+AbstractDecoder::RecordType Fb100Decoder::advanceToNextRecord()
 {
-    size_t cursor = 0;
+	const FluxMatcher* matcher = nullptr;
+	_sector->clock = _fmr->seekToPattern(SECTOR_ID_PATTERN, matcher);
+    if (matcher == &SECTOR_ID_PATTERN)
+		return RecordType::SECTOR_RECORD;
+	return RecordType::UNKNOWN_RECORD;
+}
 
-    for (;;)
-    {
-        if (!search(rawbits, cursor))
-            break;
+void Fb100Decoder::decodeSectorRecord()
+{
+    auto rawbits = readRawBits(FB100_RECORD_SIZE*16);
 
-        unsigned record_start = cursor;
-        cursor = std::min(cursor + FB100_RECORD_SIZE*16, rawbits.size());
-        std::vector<bool> recordbits(rawbits.begin() + record_start, rawbits.begin() + cursor);
+    const Bytes bytes = decodeFmMfm(rawbits).slice(0, FB100_RECORD_SIZE);
+    ByteReader br(bytes);
+    br.seek(1);
+    const Bytes id = br.read(FB100_ID_SIZE);
+    uint16_t wantIdCrc = br.read_be16();
+    uint16_t gotIdCrc = checksum(id);
+    const Bytes payload = br.read(FB100_PAYLOAD_SIZE);
+    uint16_t wantPayloadCrc = br.read_be16();
+    uint16_t gotPayloadCrc = checksum(payload);
 
-        rawrecords.push_back(
-            std::unique_ptr<RawRecord>(
-                new RawRecord(
-                    record_start,
-                    recordbits.begin(),
-                    recordbits.end())
-            )
-        );
+    if (wantIdCrc != gotIdCrc)
+        return;
 
-        const Bytes bytes = decodeFmMfm(recordbits).slice(0, FB100_RECORD_SIZE);
-        ByteReader br(bytes);
-        br.seek(1);
-        const Bytes id = br.read(FB100_ID_SIZE);
-        uint16_t wantIdCrc = br.read_be16();
-        uint16_t gotIdCrc = checksum(id);
-        const Bytes payload = br.read(FB100_PAYLOAD_SIZE);
-        uint16_t wantPayloadCrc = br.read_be16();
-        uint16_t gotPayloadCrc = checksum(payload);
+    uint8_t abssector = id[2];
+    _sector->logicalTrack = abssector >> 1;
+    _sector->logicalSide = 0;
+    _sector->logicalSector = abssector & 1;
+    _sector->data.writer().append(id.slice(5, 12)).append(payload);
 
-        if (wantIdCrc != gotIdCrc)
-            continue;
-
-        uint8_t abssector = id[2];
-        uint8_t track = abssector >> 1;
-        uint8_t sectorid = abssector & 1;
-
-        Bytes data;
-        data.writer().append(id.slice(5, 12)).append(payload);
-
-        int status = (wantPayloadCrc == gotPayloadCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
-        auto sector = std::unique_ptr<Sector>(
-            new Sector(status, track, 0, sectorid, data));
-        sectors.push_back(std::move(sector));
-    }
+    _sector->status = (wantPayloadCrc == gotPayloadCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
 }
