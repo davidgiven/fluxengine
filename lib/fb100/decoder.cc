@@ -99,14 +99,18 @@ static uint16_t checksum(const Bytes& bytes)
     return (crchi << 8) | crclo;
 }
 
-nanoseconds_t Fb100Decoder::findSector(FluxmapReader& fmr, Track& track)
+AbstractSimplifiedDecoder::RecordType Fb100Decoder::advanceToNextRecord()
 {
-    return fmr.seekToPattern(SECTOR_ID_PATTERN);
+	const FluxMatcher* matcher = nullptr;
+	_sector->clock = _fmr->seekToPattern(SECTOR_ID_PATTERN, matcher);
+    if (matcher == &SECTOR_ID_PATTERN)
+		return RecordType::SECTOR_RECORD;
+	return RecordType::UNKNOWN_RECORD;
 }
 
-void Fb100Decoder::decodeSingleSector(FluxmapReader& fmr, Track& track, Sector& sector)
+void Fb100Decoder::decodeSectorRecord()
 {
-    auto rawbits = fmr.readRawBits(FB100_RECORD_SIZE*16, sector.clock);
+    auto rawbits = readRawBits(FB100_RECORD_SIZE*16);
 
     const Bytes bytes = decodeFmMfm(rawbits).slice(0, FB100_RECORD_SIZE);
     ByteReader br(bytes);
@@ -122,13 +126,10 @@ void Fb100Decoder::decodeSingleSector(FluxmapReader& fmr, Track& track, Sector& 
         return;
 
     uint8_t abssector = id[2];
-    sector.logicalTrack = abssector >> 1;
-    sector.logicalSide = 0;
-    sector.logicalSector = abssector & 1;
-    sector.data.writer().append(id.slice(5, 12)).append(payload);
+    _sector->logicalTrack = abssector >> 1;
+    _sector->logicalSide = 0;
+    _sector->logicalSector = abssector & 1;
+    _sector->data.writer().append(id.slice(5, 12)).append(payload);
 
-    if (wantPayloadCrc == gotPayloadCrc)
-        sector.status = Sector::OK;
-    else
-        sector.status = Sector::BAD_CHECKSUM;
+    _sector->status = (wantPayloadCrc == gotPayloadCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
 }

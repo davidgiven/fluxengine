@@ -9,13 +9,13 @@ class Sector;
 class Fluxmap;
 class Track;
 
-class Fb100Decoder : public AbstractStatefulDecoder
+class Fb100Decoder : public AbstractSimplifiedDecoder
 {
 public:
     virtual ~Fb100Decoder() {}
 
-    nanoseconds_t findSector(FluxmapReader& fmr, Track& track) override;
-    void decodeSingleSector(FluxmapReader& fmr, Track& track, Sector& sector) override;
+    RecordType advanceToNextRecord();
+    void decodeSectorRecord();
 };
 
 #endif
