@@ -52,9 +52,8 @@ following friendly articles:
   - [Using a FluxEngine](doc/using.md) ∾ what to do with your new hardware ∾
     flux files and image files ∾ knowing what you're doing
 
-  - [Reading dubious disks](doc/problems.md) ∾ it's not an exact science ∾
-    the sector map ∾ clock detection and the histogram ∾ tuning the clock ∾
-    manual adjustment
+  - [Troubleshooting dubious disks](doc/problems.md) ∾ it's not an exact science ∾
+    the sector map ∾ clock detection and the histogram
 
 Which?
 ------

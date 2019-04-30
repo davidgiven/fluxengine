@@ -194,16 +194,24 @@ Typically I do this:
 $ fe-readbrother -s :d=0 -o brother.img --write-flux=brother.flux
 ```
 
-This will read the disk in drive 0 and write out a filesystem image. It'll also copy the flux to brother.flux. If I then need to tweak the settings, I can rerun the decode without having to physically touch the disk like this:
+This will read the disk in drive 0 and write out a filesystem image. It'll
+also copy the flux to brother.flux. If I then need to tweak the settings, I
+can rerun the decode without having to physically touch the disk like this:
 
 ```
 $ fe-readbrother -s brother.flux -o brother.img
 ```
 
-If the disk is particularly fragile, you can force FluxEngine not to retry
+Apart from being drastically faster, this avoids touching the (potentially
+physically fragile) disk.
+
+If the disk is particularly dodgy, you can force FluxEngine not to retry
 failed reads with `--retries=0`. This reduces head movement. **This is not
 recommended.** Floppy disks are inherently unreliable, and the occasional bit
-error is perfectly normal; the sector will read fine next time. If you
-prevent retries, then not only do you get bad sectors in the resulting image,
-but the flux file itself contains the bad read, so attempting a decode of it
-will just reproduce the same bad data.
+error is perfectly normal; FluxEngine will retry and the sector will read
+fine next time. If you prevent retries, then not only do you get bad sectors
+in the resulting image, but the flux file itself contains the bad read, so
+attempting a decode of it will just reproduce the same bad data.
+
+See also the [troubleshooting page](problems.md) for more information about
+reading dubious disks.
