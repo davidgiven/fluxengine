@@ -124,14 +124,14 @@ encoderlib = declare_dependency(
         )
 )
 
-# aeslanierdecoderlib = declare_dependency(
-#    link_with:
-#        shared_library('aeslanierdecoderlib',
-#        [ 'lib/aeslanier/decoder.cc', ],
-#        dependencies: [fmtlib, felib, decoderlib]),
-#    include_directories:
-#        include_directories('lib/aeslanier')
-# )
+aeslanierdecoderlib = declare_dependency(
+   link_with:
+       shared_library('aeslanierdecoderlib',
+       [ 'lib/aeslanier/decoder.cc', ],
+       dependencies: [fmtlib, felib, decoderlib]),
+   include_directories:
+       include_directories('lib/aeslanier')
+)
 
 # amigadecoderlib = declare_dependency(
 #    link_with:
@@ -235,7 +235,7 @@ ibmdecoderlib = declare_dependency(
 executable('fe-erase',             ['src/fe-erase.cc'],             dependencies: [felib, writerlib])
 executable('fe-inspect',           ['src/fe-inspect.cc'],           dependencies: [fmtlib, felib, decoderlib, readerlib])
 executable('fe-readadfs',          ['src/fe-readadfs.cc'],          dependencies: [fmtlib, felib, decoderlib, readerlib, ibmdecoderlib])
-# executable('fe-readaeslanier',     ['src/fe-readaeslanier.cc'],     dependencies: [fmtlib, felib, decoderlib, readerlib, aeslanierdecoderlib])
+executable('fe-readaeslanier',     ['src/fe-readaeslanier.cc'],     dependencies: [fmtlib, felib, decoderlib, readerlib, aeslanierdecoderlib])
 # executable('fe-readamiga',         ['src/fe-readamiga.cc'],         dependencies: [fmtlib, felib, decoderlib, readerlib, amigadecoderlib])
 # executable('fe-readampro',         ['src/fe-readampro.cc'],         dependencies: [fmtlib, felib, decoderlib, readerlib, ibmdecoderlib])
 # executable('fe-readapple2',        ['src/fe-readapple2.cc'],        dependencies: [fmtlib, felib, decoderlib, readerlib, apple2decoderlib])

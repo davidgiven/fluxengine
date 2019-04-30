@@ -8,13 +8,13 @@
 class Sector;
 class Fluxmap;
 
-class AesLanierDecoder : public AbstractStatefulDecoder
+class AesLanierDecoder : public AbstractSimplifiedDecoder
 {
 public:
     virtual ~AesLanierDecoder() {}
 
-    nanoseconds_t findSector(FluxmapReader& fmr, Track& track);
-    void decodeSingleSector(FluxmapReader& fmr, Track& track, Sector& sector);
+    RecordType advanceToNextRecord();
+    void decodeSectorRecord();
 };
 
 #endif

@@ -24,24 +24,27 @@ static Bytes reverse_bits(const Bytes& input)
     return output;
 }
 
-nanoseconds_t AesLanierDecoder::findSector(FluxmapReader& fmr, Track& track)
+AbstractSimplifiedDecoder::RecordType AesLanierDecoder::advanceToNextRecord()
 {
-    return fmr.seekToPattern(SECTOR_PATTERN);
+    _sector->clock = _fmr->seekToPattern(SECTOR_PATTERN);
+    if (_fmr->eof() || !_sector->clock)
+        return UNKNOWN_RECORD;
+    return SECTOR_RECORD;
 }
 
-void AesLanierDecoder::decodeSingleSector(FluxmapReader& fmr, Track& track, Sector& sector)
+void AesLanierDecoder::decodeSectorRecord()
 {
     /* Skip ID mark. */
 
-    fmr.readRawBits(16, sector.clock);
+    readRawBits(16);
 
-    const auto& rawbits = fmr.readRawBits(AESLANIER_RECORD_SIZE*16, sector.clock);
+    const auto& rawbits = readRawBits(AESLANIER_RECORD_SIZE*16);
     const auto& bytes = decodeFmMfm(rawbits).slice(0, AESLANIER_RECORD_SIZE);
     const auto& reversed = reverse_bits(bytes);
 
-    sector.logicalTrack = reversed[1];
-    sector.logicalSide = 0;
-    sector.logicalSector = reversed[2];
+    _sector->logicalTrack = reversed[1];
+    _sector->logicalSide = 0;
+    _sector->logicalSector = reversed[2];
 
     /* Check header 'checksum' (which seems far too simple to mean much). */
 
@@ -55,8 +58,8 @@ void AesLanierDecoder::decodeSingleSector(FluxmapReader& fmr, Track& track, Sect
     /* Check data checksum, which also includes the header and is
         * significantly better. */
 
-    sector.data = reversed.slice(1, AESLANIER_SECTOR_LENGTH);
+    _sector->data = reversed.slice(1, AESLANIER_SECTOR_LENGTH);
     uint16_t wanted = reversed.reader().seek(0x101).read_le16();
-    uint16_t got = crc16ref(MODBUS_POLY_REF, sector.data);
-    sector.status = (wanted == got) ? Sector::OK : Sector::BAD_CHECKSUM;
+    uint16_t got = crc16ref(MODBUS_POLY_REF, _sector->data);
+    _sector->status = (wanted == got) ? Sector::OK : Sector::BAD_CHECKSUM;
 }
