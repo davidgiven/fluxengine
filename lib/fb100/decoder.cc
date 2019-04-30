@@ -99,7 +99,7 @@ static uint16_t checksum(const Bytes& bytes)
     return (crchi << 8) | crclo;
 }
 
-AbstractSimplifiedDecoder::RecordType Fb100Decoder::advanceToNextRecord()
+AbstractDecoder::RecordType Fb100Decoder::advanceToNextRecord()
 {
 	const FluxMatcher* matcher = nullptr;
 	_sector->clock = _fmr->seekToPattern(SECTOR_ID_PATTERN, matcher);

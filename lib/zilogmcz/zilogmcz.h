@@ -4,7 +4,7 @@
 class Sector;
 class Fluxmap;
 
-class ZilogMczDecoder : public AbstractSimplifiedDecoder
+class ZilogMczDecoder : public AbstractDecoder
 {
 public:
     virtual ~ZilogMczDecoder() {}

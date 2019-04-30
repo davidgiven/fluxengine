@@ -65,7 +65,7 @@ uint8_t combine(uint16_t word)
     return word & (word >> 7);
 }
 
-AbstractSimplifiedDecoder::RecordType Apple2Decoder::advanceToNextRecord()
+AbstractDecoder::RecordType Apple2Decoder::advanceToNextRecord()
 {
 	const FluxMatcher* matcher = nullptr;
 	_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);

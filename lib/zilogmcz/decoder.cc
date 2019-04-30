@@ -14,7 +14,7 @@
 
 static const FluxPattern SECTOR_START_PATTERN(16, 0xaaab);
 
-AbstractSimplifiedDecoder::RecordType ZilogMczDecoder::advanceToNextRecord()
+AbstractDecoder::RecordType ZilogMczDecoder::advanceToNextRecord()
 {
 	const FluxMatcher* matcher = nullptr;
     _fmr->seekToIndexMark();

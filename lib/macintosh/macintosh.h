@@ -10,7 +10,7 @@
 class Sector;
 class Fluxmap;
 
-class MacintoshDecoder : public AbstractSimplifiedDecoder
+class MacintoshDecoder : public AbstractDecoder
 {
 public:
     virtual ~MacintoshDecoder() {}

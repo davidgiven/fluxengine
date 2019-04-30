@@ -12,7 +12,7 @@
 class Sector;
 class Fluxmap;
 
-class BrotherDecoder : public AbstractSimplifiedDecoder
+class BrotherDecoder : public AbstractDecoder
 {
 public:
     virtual ~BrotherDecoder() {}

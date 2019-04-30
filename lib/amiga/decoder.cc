@@ -62,7 +62,7 @@ static uint32_t checksum(const Bytes& bytes)
     return checksum & 0x55555555;
 }
 
-AbstractSimplifiedDecoder::RecordType AmigaDecoder::advanceToNextRecord()
+AbstractDecoder::RecordType AmigaDecoder::advanceToNextRecord()
 {
     _sector->clock = _fmr->seekToPattern(SECTOR_PATTERN);
     if (_fmr->eof() || !_sector->clock)

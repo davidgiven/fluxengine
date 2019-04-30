@@ -87,7 +87,7 @@ const FluxMatchers ANY_RECORD_PATTERN(
     }
 );
 
-AbstractSimplifiedDecoder::RecordType IbmDecoder::advanceToNextRecord()
+AbstractDecoder::RecordType IbmDecoder::advanceToNextRecord()
 {
 	const FluxMatcher* matcher = nullptr;
 	_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);

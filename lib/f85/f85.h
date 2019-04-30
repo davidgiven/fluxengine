@@ -8,7 +8,7 @@
 class Sector;
 class Fluxmap;
 
-class DurangoF85Decoder : public AbstractSimplifiedDecoder
+class DurangoF85Decoder : public AbstractDecoder
 {
 public:
     virtual ~DurangoF85Decoder() {}

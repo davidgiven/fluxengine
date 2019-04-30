@@ -28,7 +28,7 @@ struct IbmIdam
     uint8_t crc[2];
 };
 
-class IbmDecoder : public AbstractSimplifiedDecoder
+class IbmDecoder : public AbstractDecoder
 {
 public:
     IbmDecoder(unsigned sectorBase):

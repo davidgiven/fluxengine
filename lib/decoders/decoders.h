@@ -29,14 +29,6 @@ class AbstractDecoder
 public:
     virtual ~AbstractDecoder() {}
 
-    nanoseconds_t guessClock(Track& track) const;
-    virtual nanoseconds_t guessClockImpl(Track& track) const;
-
-    virtual void decodeToSectors(Track& track) = 0;
-};
-
-class AbstractSimplifiedDecoder : public AbstractDecoder
-{
 public:
     enum RecordType
     {
@@ -46,7 +38,7 @@ public:
     };
 
 public:
-    void decodeToSectors(Track& track) override;
+    void decodeToSectors(Track& track);
     void pushRecord(const Fluxmap::Position& start, const Fluxmap::Position& end);
 
     std::vector<bool> readRawBits(unsigned count)

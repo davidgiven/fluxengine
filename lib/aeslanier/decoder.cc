@@ -24,7 +24,7 @@ static Bytes reverse_bits(const Bytes& input)
     return output;
 }
 
-AbstractSimplifiedDecoder::RecordType AesLanierDecoder::advanceToNextRecord()
+AbstractDecoder::RecordType AesLanierDecoder::advanceToNextRecord()
 {
     _sector->clock = _fmr->seekToPattern(SECTOR_PATTERN);
     if (_fmr->eof() || !_sector->clock)

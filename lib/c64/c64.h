@@ -8,7 +8,7 @@
 class Sector;
 class Fluxmap;
 
-class Commodore64Decoder : public AbstractSimplifiedDecoder
+class Commodore64Decoder : public AbstractDecoder
 {
 public:
     virtual ~Commodore64Decoder() {}

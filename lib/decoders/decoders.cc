@@ -157,19 +157,7 @@ nanoseconds_t Fluxmap::guessClock() const
     return median * NS_PER_TICK;
 }
 
-nanoseconds_t AbstractDecoder::guessClock(Track& track) const
-{
-	if (manualClockRate != 0.0)
-		return manualClockRate * 1000.0;
-    return guessClockImpl(track);
-}
-
-nanoseconds_t AbstractDecoder::guessClockImpl(Track& track) const
-{
-    return track.fluxmap->guessClock();
-}
-
-void AbstractSimplifiedDecoder::decodeToSectors(Track& track)
+void AbstractDecoder::decodeToSectors(Track& track)
 {
     Sector sector;
     sector.physicalSide = track.physicalSide;
@@ -219,7 +207,7 @@ void AbstractSimplifiedDecoder::decodeToSectors(Track& track)
     }
 }
 
-void AbstractSimplifiedDecoder::pushRecord(const Fluxmap::Position& start, const Fluxmap::Position& end)
+void AbstractDecoder::pushRecord(const Fluxmap::Position& start, const Fluxmap::Position& end)
 {
     Fluxmap::Position here = _fmr->tell();
 

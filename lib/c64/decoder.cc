@@ -52,7 +52,7 @@ static Bytes decode(const std::vector<bool>& bits)
     return output;
 }
 
-AbstractSimplifiedDecoder::RecordType Commodore64Decoder::advanceToNextRecord()
+AbstractDecoder::RecordType Commodore64Decoder::advanceToNextRecord()
 {
 	const FluxMatcher* matcher = nullptr;
 	_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);

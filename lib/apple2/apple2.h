@@ -10,7 +10,7 @@
 class Sector;
 class Fluxmap;
 
-class Apple2Decoder : public AbstractSimplifiedDecoder
+class Apple2Decoder : public AbstractDecoder
 {
 public:
     virtual ~Apple2Decoder() {}
