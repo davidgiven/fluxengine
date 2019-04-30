@@ -62,14 +62,17 @@ static uint32_t checksum(const Bytes& bytes)
     return checksum & 0x55555555;
 }
 
-nanoseconds_t AmigaDecoder::findSector(FluxmapReader& fmr, Track& track)
+AbstractSimplifiedDecoder::RecordType AmigaDecoder::advanceToNextRecord()
 {
-    return fmr.seekToPattern(SECTOR_PATTERN);
+    _sector->clock = _fmr->seekToPattern(SECTOR_PATTERN);
+    if (_fmr->eof() || !_sector->clock)
+        return UNKNOWN_RECORD;
+    return SECTOR_RECORD;
 }
 
-void AmigaDecoder::decodeSingleSector(FluxmapReader& fmr, Track& track, Sector& sector)
+void AmigaDecoder::decodeSectorRecord()
 {
-    const auto& rawbits = fmr.readRawBits(AMIGA_RECORD_SIZE*16, sector.clock);
+    const auto& rawbits = readRawBits(AMIGA_RECORD_SIZE*16);
     const auto& rawbytes = toBytes(rawbits).slice(0, AMIGA_RECORD_SIZE*2);
     const auto& bytes = decodeFmMfm(rawbits).slice(0, AMIGA_RECORD_SIZE);
 
@@ -78,9 +81,9 @@ void AmigaDecoder::decodeSingleSector(FluxmapReader& fmr, Track& track, Sector& 
     Bytes header = deinterleave(ptr, 4);
     Bytes recoveryinfo = deinterleave(ptr, 16);
 
-    sector.logicalTrack = header[1] >> 1;
-    sector.logicalSide = header[1] & 1;
-    sector.logicalSector = header[2];
+    _sector->logicalTrack = header[1] >> 1;
+    _sector->logicalSide = header[1] & 1;
+    _sector->logicalSector = header[2];
 
     uint32_t wantedheaderchecksum = deinterleave(ptr, 4).reader().read_be32();
     uint32_t gotheaderchecksum = checksum(rawbytes.slice(6, 40));
@@ -89,6 +92,6 @@ void AmigaDecoder::decodeSingleSector(FluxmapReader& fmr, Track& track, Sector& 
 
     uint32_t wanteddatachecksum = deinterleave(ptr, 4).reader().read_be32();
     uint32_t gotdatachecksum = checksum(rawbytes.slice(62, 1024));
-    sector.data = deinterleave(ptr, 512);
-    sector.status = (gotdatachecksum == wanteddatachecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
+    _sector->data = deinterleave(ptr, 512);
+    _sector->status = (gotdatachecksum == wanteddatachecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
 }

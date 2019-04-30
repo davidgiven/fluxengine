@@ -8,13 +8,13 @@
 class Sector;
 class Fluxmap;
 
-class AmigaDecoder : public AbstractStatefulDecoder
+class AmigaDecoder : public AbstractSimplifiedDecoder
 {
 public:
     virtual ~AmigaDecoder() {}
 
-    nanoseconds_t findSector(FluxmapReader& fmr, Track& track);
-    void decodeSingleSector(FluxmapReader& fmr, Track& track, Sector& sector);
+    RecordType advanceToNextRecord();
+    void decodeSectorRecord();
 };
 
 #endif
