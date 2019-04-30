@@ -8,15 +8,14 @@
 class Sector;
 class Fluxmap;
 
-class DurangoF85Decoder : public AbstractSplitDecoder
+class DurangoF85Decoder : public AbstractSimplifiedDecoder
 {
 public:
     virtual ~DurangoF85Decoder() {}
 
-    nanoseconds_t findSector(FluxmapReader& fmr, Track& track) override;
-    nanoseconds_t findData(FluxmapReader& fmr, Track& track) override;
-    void decodeHeader(FluxmapReader& fmr, Track& track, Sector& sector) override;
-    void decodeData(FluxmapReader& fmr, Track& track, Sector& sector) override;
+    RecordType advanceToNextRecord();
+    void decodeSectorRecord();
+    void decodeDataRecord();
 };
 
 #endif
