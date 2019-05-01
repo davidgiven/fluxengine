@@ -9,7 +9,7 @@
 
 #define MOTOR_ON_TIME 5000 /* milliseconds */
 #define STEP_INTERVAL_TIME 6 /* ms */
-#define STEP_SETTLING_TIME 40 /* ms */
+#define STEP_SETTLING_TIME 50 /* ms */
 
 #define DISKSTATUS_WPT    1
 #define DISKSTATUS_DSKCHG 2
@@ -138,8 +138,10 @@ static void cmd_get_version(struct any_frame* f)
 
 static void step(int dir)
 {
+    STEP_REG_Write(dir);
+    CyDelayUs(1);
     STEP_REG_Write(dir | 2);
-    CyDelay(1);
+    CyDelayUs(1);
     STEP_REG_Write(dir);
     CyDelay(STEP_INTERVAL_TIME);
 }
@@ -149,6 +151,7 @@ static void seek_to(int track)
     start_motor();
     if (!homed)
     {
+        print("homing");
         while (!TRACK0_REG_Read())
             step(STEP_TOWARDS0);
             
@@ -157,11 +160,19 @@ static void seek_to(int track)
         
         homed = true;
         current_track = 0;
-        CyDelay(1); /* for direction change */
+        CyDelayUs(1); /* for direction change */
     }
     
+    print("beginning seek from %d to %d", current_track, track);
     while (track != current_track)
     {
+        if (TRACK0_REG_Read())
+        {
+            if (current_track != 0)
+                print("unexpectedly detected track 0");
+            current_track = 0;
+        }
+        
         if (track > current_track)
         {
             step(STEP_AWAYFROM0);
@@ -172,8 +183,10 @@ static void seek_to(int track)
             step(STEP_TOWARDS0);
             current_track--;
         }
+        CyWdtClear();
     }
     CyDelay(STEP_SETTLING_TIME);
+    print("finished seek");
 }
 
 static void cmd_seek(struct seek_frame* f)
