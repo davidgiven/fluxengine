@@ -108,9 +108,9 @@ To extract a file, do:
 Wildcards are supported, so use `'*'` for the filename (remember to quote it)
 if you want to extract everything.
 
-This is _extremely experimental_. The data structures I've figured out are
-mostly consistent, but it looks like there's always garbage in the last
-sector of each file, so maybe I'm not getting the file lengths right.
+The files are usually in the format known as WP-1, which aren't well supported
+by modern tools (to nobody's great surprise). Matthias Encke is [working on a
+tool to turn this into RTF](https://mathesoft.eu/brother-wp-1-dokumente/)
 
 Any questions? please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new).
