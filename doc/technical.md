@@ -114,8 +114,12 @@ admittedly expensive.)
 
   - [The TEAC FD-05HF-8830 data
     sheet](https://hxc2001.com/download/datasheet/floppy/thirdparty/Teac/TEAC%20FD-05HF-8830.pdf):
-    the technical data sheet for a representative drive. Lots of useful
+    the technical data sheet for a representative 3.5" drive. Lots of useful
     timing numbers here.
+
+  - [The Mitsubishi M4851 data
+    sheet](http://www.bitsavers.org/pdf/mitsubishi/floppy/M4851/TJ2-G30211A_M4851_DSHH_48TPI_OEM_Manual_Nov83.pdf):
+    the equivalent data sheet for a representative 5.25" drive.
 
   - [KryoFlux stream file
     documentation](https://www.kryoflux.com/download/kryoflux_stream_protocol_rev1.1.pdf):
