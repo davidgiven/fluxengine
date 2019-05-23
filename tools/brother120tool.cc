@@ -54,6 +54,11 @@ void readDirectory()
     }
 }
 
+static bool isValidFile(const Dirent& dirent)
+{
+    return (dirent.filename[0] & 0x80) == 0;
+}
+
 void readAllocationTable()
 {
     for (int sector=14; sector!=SECTOR_COUNT; sector++)
@@ -75,7 +80,7 @@ void checkConsistency()
     for (const auto& i : directory)
     {
         const Dirent& dirent = *i.second;
-        if (dirent.type != 0)
+        if (!isValidFile(dirent))
             continue;
         
         int count = 0;
@@ -101,25 +106,17 @@ void listDirectory()
     for (const auto& i : directory)
     {
         const Dirent& dirent = *i.second;
-        std::cout << fmt::format("{:9} {:6.2f}kB ",
+        std::cout << fmt::format("{:9} {:6.2f}kB type {}: ",
                         dirent.filename,
-                        (double)dirent.sectorCount / 4.0);
+                        (double)dirent.sectorCount / 4.0,
+                        dirent.type);
 
-        switch (dirent.type)
-        {
-            case 0:
-                std::cout << fmt::format("{} sectors starting at sector {}",
-                    dirent.sectorCount, dirent.startSector);
-                break;
-
-            case 1:
+        if (isValidFile(dirent))
+            std::cout << fmt::format("{} sectors starting at sector {}",
+                dirent.sectorCount, dirent.startSector);
+        else
                 std::cout << "DELETED";
-                break;
 
-            default:
-                std::cout << fmt::format("unknown file type 0x{:2}", dirent.type);
-                break;
-        }
         std::cout << std::endl;
     }
 }
