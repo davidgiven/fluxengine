@@ -109,7 +109,7 @@ Wildcards are supported, so use `'*'` for the filename (remember to quote it)
 if you want to extract everything.
 
 The files are usually in the format known as WP-1, which aren't well supported
-by modern tools (to nobody's great surprise). Matthias Encke is [working on a
+by modern tools (to nobody's great surprise). Matthias Henkell is [working on a
 tool to turn this into RTF](https://mathesoft.eu/brother-wp-1-dokumente/)
 
 Any questions? please [get in
