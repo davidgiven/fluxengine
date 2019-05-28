@@ -108,9 +108,13 @@ To extract a file, do:
 Wildcards are supported, so use `'*'` for the filename (remember to quote it)
 if you want to extract everything.
 
-The files are usually in the format known as WP-1, which aren't well supported
-by modern tools (to nobody's great surprise). Matthias Henkell is [working on a
-tool to turn this into RTF](https://mathesoft.eu/brother-wp-1-dokumente/)
+The files are usually in the format known as WP-1, which aren't well
+supported by modern tools (to nobody's great surprise). Matthias Henckell has
+[reverse engineered the file
+format](https://mathesoft.eu/brother-wp-1-dokumente/) and has produced a
+(Windows-only, but runs in Wine) [tool which will convert these files into
+RTF](https://mathesoft.eu/sdm_downloads/wp2rtf/). This will only work on WP-1
+files.
 
 Any questions? please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new).
@@ -136,5 +140,6 @@ mcopy -i brother.img ::brother.doc linux.doc
 The word processor checks the media byte, unfortunately, so you'll need to
 change it back to 0x58 before writing an image to disk.
 
-Converting the equally proprietary file format to something readable is,
-unfortunately, out of scope for FluxEngine.
+The file format is not WP-1, and currently remains completely unknown,
+although it's probably related. If anyone knows anything about this, please
+[get in touch](https://github.com/davidgiven/fluxengine/issues/new).
