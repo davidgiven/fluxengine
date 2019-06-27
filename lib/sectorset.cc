@@ -3,7 +3,7 @@
 #include "sector.h"
 #include "sectorset.h"
 
-Sector*& SectorSet::get(int track, int head, int sector)
+std::unique_ptr<Sector>& SectorSet::get(int track, int head, int sector)
 {
 	key_t key(track, head, sector);
 	return _data[key];
@@ -11,11 +11,11 @@ Sector*& SectorSet::get(int track, int head, int sector)
 
 Sector* SectorSet::get(int track, int head, int sector) const
 {
-        key_t key(track, head, sector);
+    key_t key(track, head, sector);
 	auto i = _data.find(key);
 	if (i == _data.end())
 		return NULL;
-	return i->second;
+	return i->second.get();
 }
 
 void SectorSet::calculateSize(int& numTracks, int& numHeads, int& numSectors,

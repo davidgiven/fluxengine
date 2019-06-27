@@ -117,7 +117,7 @@ static bool conflictable(Sector::Status status)
 	return (status == Sector::OK) || (status == Sector::CONFLICT);
 }
 
-static void replace_sector(Sector*& replacing, Sector& replacement)
+static void replace_sector(std::unique_ptr<Sector>& replacing, Sector& replacement)
 {
 	if (replacing && conflictable(replacing->status) && conflictable(replacement.status))
 	{
@@ -131,7 +131,11 @@ static void replace_sector(Sector*& replacing, Sector& replacement)
 		}
 	}
 	if (!replacing || (replacing->status != Sector::OK))
-		replacing = &replacement;
+	{
+		if (!replacing)
+			replacing.reset(new Sector);
+		*replacing = replacement;
+	}
 }
 
 void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename)
@@ -141,7 +145,7 @@ void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename
 	auto tracks = readTracks();
     for (const auto& track : tracks)
 	{
-		std::map<int, Sector*> readSectors;
+		std::map<int, std::unique_ptr<Sector>> readSectors;
 		for (int retry = ::retries; retry >= 0; retry--)
 		{
 			track->readFluxmap();
@@ -225,7 +229,7 @@ void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename
 
 				size += sector->data.size();
 
-				Sector*& replacing = allSectors.get(sector->logicalTrack, sector->logicalSide, sector->logicalSector);
+				std::unique_ptr<Sector>& replacing = allSectors.get(sector->logicalTrack, sector->logicalSide, sector->logicalSector);
 				replace_sector(replacing, *sector);
 			}
         }
