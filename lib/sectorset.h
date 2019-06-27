@@ -14,14 +14,14 @@ public:
 
 	SectorSet() {};
 
-	Sector*& get(int track, int head, int sector);
+	std::unique_ptr<Sector>& get(int track, int head, int sector);
 	Sector* get(int track, int head, int sector) const;
 
 	void calculateSize(int& numTracks, int& numHeads, int& numSectors,
 		int& sectorSize) const;
 
 private:
-	std::map<const key_t, Sector*> _data;
+	std::map<const key_t, std::unique_ptr<Sector>> _data;
 };
 
 #endif

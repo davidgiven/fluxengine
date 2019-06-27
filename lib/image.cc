@@ -41,7 +41,8 @@ void readSectorsFromFile(SectorSet& sectors, const Geometry& geometry,
 				Bytes data(geometry.sectorSize);
 				inputFile.read((char*) data.begin(), geometry.sectorSize);
 
-				Sector* sector = sectors.get(track, head, sectorId) = new Sector();
+				std::unique_ptr<Sector>& sector = sectors.get(track, head, sectorId);
+				sector.reset(new Sector);
 				sector->status = Sector::OK;
 				sector->logicalTrack = sector->physicalTrack = track;
 				sector->logicalSide = sector->physicalSide = head;
