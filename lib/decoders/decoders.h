@@ -51,6 +51,7 @@ public:
     { return _fmr->seek(pos); } 
 
 protected:
+    virtual void beginTrack() {};
     virtual RecordType advanceToNextRecord() = 0;
     virtual void decodeSectorRecord() = 0;
     virtual void decodeDataRecord() {};

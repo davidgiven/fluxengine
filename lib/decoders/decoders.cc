@@ -22,6 +22,7 @@ void AbstractDecoder::decodeToSectors(Track& track)
     _sector = &sector;
     _fmr = &fmr;
 
+    beginTrack();
     for (;;)
     {
         Fluxmap::Position recordStart = sector.position = fmr.tell();

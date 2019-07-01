@@ -47,6 +47,7 @@ public:
     { resize(0); return *this; }
 
     Bytes slice(unsigned start, unsigned len) const;
+    Bytes swab() const;
     Bytes compress() const;
     Bytes decompress() const;
     Bytes crunch() const;

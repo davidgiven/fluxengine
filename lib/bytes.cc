@@ -168,6 +168,23 @@ Bytes toBytes(
     return bytes;
 }
 
+Bytes Bytes::swab() const
+{
+    Bytes output;
+    ByteWriter bw(output);
+    ByteReader br(*this);
+
+    while (!br.eof())
+    {
+        uint8_t a = br.read_8();
+        uint8_t b = br.read_8();
+        bw.write_8(b);
+        bw.write_8(a);
+    }
+
+    return output;
+}
+
 Bytes Bytes::compress() const
 {
     uLongf destsize = compressBound(size());
