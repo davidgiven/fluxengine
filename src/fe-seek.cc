@@ -2,7 +2,7 @@
 #include "flags.h"
 #include "usb.h"
 
-FlagGroup flags;
+static FlagGroup flags;
 
 static IntFlag drive(
     { "--drive", "-d" },
@@ -14,7 +14,7 @@ static IntFlag track(
     "track to seek to",
     0);
 
-int main(int argc, const char* argv[])
+int mainSeek(int argc, const char* argv[])
 {
     flags.parseFlags(argc, argv);
 

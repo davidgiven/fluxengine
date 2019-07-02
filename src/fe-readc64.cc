@@ -11,14 +11,14 @@
 #include <fmt/format.h>
 #include <fstream>
 
-FlagGroup flags { &readerFlags };
+static FlagGroup flags { &readerFlags };
 
 static StringFlag outputFilename(
     { "--output", "-o" },
     "The output image file to write to.",
     "c64.img");
 
-int main(int argc, const char* argv[])
+int mainReadC64(int argc, const char* argv[])
 {
 	setReaderDefaultSource(":t=0-79x2:s=0");
     setReaderRevolutions(2);

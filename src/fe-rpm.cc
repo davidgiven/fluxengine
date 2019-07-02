@@ -3,14 +3,14 @@
 #include "usb.h"
 #include "dataspec.h"
 
-FlagGroup flags;
+static FlagGroup flags;
 
 static DataSpecFlag source(
     { "--source", "-s" },
     "source for data",
     ":d=0");
 
-int main(int argc, const char* argv[])
+int mainRpm(int argc, const char* argv[])
 {
     flags.parseFlags(argc, argv);
 

@@ -11,14 +11,14 @@
 #include <fmt/format.h>
 #include <fstream>
 
-FlagGroup flags { &readerFlags };
+static FlagGroup flags { &readerFlags };
 
 static StringFlag outputFilename(
     { "--output", "-o" },
     "The output image file to write to.",
     "brother.img");
 
-int main(int argc, const char* argv[])
+int mainReadBrother(int argc, const char* argv[])
 {
 	setReaderDefaultSource(":t=0-81:s=0");
     setReaderRevolutions(2);

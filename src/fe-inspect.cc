@@ -12,7 +12,7 @@
 #include "track.h"
 #include <fmt/format.h>
 
-FlagGroup flags;
+static FlagGroup flags;
 
 static SettableFlag dumpFluxFlag(
 	{ "--dump-flux", "-F" },
@@ -175,7 +175,7 @@ static nanoseconds_t guessClock(const Fluxmap& fluxmap)
     return median * NS_PER_TICK;
 }
 
-int main(int argc, const char* argv[])
+int mainInspect(int argc, const char* argv[])
 {
     flags.parseFlags(argc, argv);
 

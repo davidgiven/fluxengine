@@ -49,7 +49,7 @@ public:
     unsigned revolutions;
 };
 
-std::ostream& operator << (std::ostream& os, const DataSpec& dataSpec)
+static inline std::ostream& operator << (std::ostream& os, const DataSpec& dataSpec)
 { os << (std::string)dataSpec; return os; }
 
 class DataSpecFlag : public Flag

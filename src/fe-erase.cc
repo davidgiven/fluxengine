@@ -3,9 +3,9 @@
 #include "fluxmap.h"
 #include "writer.h"
 
-FlagGroup flags;
+static FlagGroup flags;
 
-int main(int argc, const char* argv[])
+int mainErase(int argc, const char* argv[])
 {
 	setWriterDefaultDest(":t=0-81:s=0-1");
     flags.parseFlags(argc, argv);

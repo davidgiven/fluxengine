@@ -11,7 +11,7 @@
 #include <fstream>
 #include <ctype.h>
 
-FlagGroup flags { &writerFlags };
+static FlagGroup flags { &writerFlags };
 
 static StringFlag inputFilename(
     { "--input", "-i" },
@@ -51,7 +51,7 @@ static int charToInt(char c)
 	return 10 + tolower(c) - 'a';
 }
 
-int main(int argc, const char* argv[])
+int mainWriteBrother(int argc, const char* argv[])
 {
 	setWriterDefaultDest(":d=0:t=0-77:s=0");
     flags.parseFlags(argc, argv);

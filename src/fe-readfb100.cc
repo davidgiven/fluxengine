@@ -10,14 +10,14 @@
 #include "fb100.h"
 #include <fmt/format.h>
 
-FlagGroup flags { &readerFlags };
+static FlagGroup flags { &readerFlags };
 
 static StringFlag outputFilename(
     { "--output", "-o" },
     "The output image file to write to.",
     "fb100.img");
 
-int main(int argc, const char* argv[])
+int mainReadFB100(int argc, const char* argv[])
 {
 	setReaderDefaultSource(":t=0-79x2:s=0");
     setReaderRevolutions(2);

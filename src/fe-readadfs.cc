@@ -10,7 +10,7 @@
 #include "ibm.h"
 #include <fmt/format.h>
 
-FlagGroup flags { &readerFlags };
+static FlagGroup flags { &readerFlags };
 
 static StringFlag outputFilename(
     { "--output", "-o" },
@@ -22,7 +22,7 @@ static IntFlag sectorIdBase(
 	"Sector ID of the first sector.",
 	0);
 
-int main(int argc, const char* argv[])
+int mainReadADFS(int argc, const char* argv[])
 {
 	setReaderDefaultSource(":t=0-79:s=0-1");
     flags.parseFlags(argc, argv);

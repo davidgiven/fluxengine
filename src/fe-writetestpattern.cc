@@ -8,7 +8,7 @@
 #include <fstream>
 #include <ctype.h>
 
-FlagGroup flags { &writerFlags };
+static FlagGroup flags { &writerFlags };
 
 static DoubleFlag interval(
 	{ "--interval" },
@@ -20,7 +20,7 @@ static DoubleFlag sequenceLength(
 	"Total length of test pattern (milliseconds).",
 	200.0);
 
-int main(int argc, const char* argv[])
+int mainWriteTestPattern(int argc, const char* argv[])
 {
     setWriterDefaultDest(":t=0-81:s=0-1");
     flags.parseFlags(argc, argv);

@@ -5,9 +5,6 @@
 #include <regex>
 #include <sstream>
 
-static const std::regex MOD_REGEX("([a-z]*)=([-x+0-9,]*)");
-static const std::regex DATA_REGEX("([0-9]+)(?:(?:-([0-9]+))|(?:\\+([0-9]+)))?(?:x([0-9]+))?");
-
 std::vector<std::string> DataSpec::split(
         const std::string& s, const std::string& delimiter)
 {
@@ -30,6 +27,9 @@ std::vector<std::string> DataSpec::split(
 
 DataSpec::Modifier DataSpec::parseMod(const std::string& spec)
 {
+    static const std::regex MOD_REGEX("([a-z]*)=([-x+0-9,]*)");
+    static const std::regex DATA_REGEX("([0-9]+)(?:(?:-([0-9]+))|(?:\\+([0-9]+)))?(?:x([0-9]+))?");
+
     std::smatch match;
     if (!std::regex_match(spec, match, MOD_REGEX))
         Error() << "invalid data modifier syntax '" << spec << "'";

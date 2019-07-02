@@ -2,9 +2,9 @@
 #include "flags.h"
 #include "usb.h"
 
-FlagGroup flags;
+static FlagGroup flags;
 
-int main(int argc, const char* argv[])
+int mainTestBulkTransport(int argc, const char* argv[])
 {
     flags.parseFlags(argc, argv);
     usbTestBulkTransport();

@@ -10,14 +10,14 @@
 #include "zilogmcz.h"
 #include <fmt/format.h>
 
-FlagGroup flags { &readerFlags };
+static FlagGroup flags { &readerFlags };
 
 static StringFlag outputFilename(
     { "--output", "-o" },
     "The output image file to write to.",
     "zilogmcz.img");
 
-int main(int argc, const char* argv[])
+int mainReadZilogMCZ(int argc, const char* argv[])
 {
 	setReaderDefaultSource(":t=0-76:s=0");
     setReaderRevolutions(2);
