@@ -16,7 +16,7 @@ Reading discs
 Just do:
 
 ```
-.obj/fe-readvictor9k
+fluxengine read victor9k
 ```
 
 You should end up with an `victor9k.img` which is 774656 bytes long.

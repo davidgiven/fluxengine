@@ -16,7 +16,7 @@ Reading discs
 Just do:
 
 ```
-.obj/fe-readamiga
+fluxengine read amiga
 ```
 
 You should end up with an `amiga.adf` which is 901120 bytes long (for a

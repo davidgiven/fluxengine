@@ -32,7 +32,7 @@ Reading discs
 Just do:
 
 ```
-.obj/fe-readf85
+fluxengine read f85
 ```
 
 You should end up with an `f85.img` which is 472064 bytes long.

@@ -19,7 +19,7 @@ Reading discs
 Just do:
 
 ```
-.obj/fe-readdfs
+fluxengine read dfs
 ```
 
 You should end up with an `dfs.img` of the appropriate size for your disk

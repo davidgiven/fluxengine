@@ -46,28 +46,30 @@ In order to do anything useful, you have to plug it in to a floppy disk drive (o
   5. Connect the FluxEngine to your PC via USB --- using the little socket on
      the board, not the big programmer plug.
 
-  6. Insert a scratch disk and do `.obj/fe-rpm` from the shell. The motor
+  6. Insert a scratch disk and do `fluxengine rpm` from the shell. The motor
      should work and it'll tell you that the disk is spinning at about 300
      rpm for a 3.5" disk, or 360 rpm for a 5.25" disk. If it doesn't, please
      [get in touch](https://github.com/davidgiven/fluxengine/issues/new).
 
-  7. Do `.obj/fe-testbulktransport` from the shell. It'll measure your USB
+  7. Do `fluxengine testbulktransport` from the shell. It'll measure your USB
      bandwidth. Ideally you should be getting above 900kB/s. FluxEngine needs
      about 850kB/s, so if you're getting less than this, try a different USB
      port.
 
   8. Insert a standard PC formatted floppy disk into the drive (probably a good
-     idea to remove the old disk first). Then do `.obj/fe-readibm`. It should
-     read the disk, emitting copious diagnostics, and spit out an `ibm.img`
-     file containing the decoded disk image (either 1440kB or 720kB depending).
+     idea to remove the old disk first). Then do `fluxengine read ibm`. It
+     should read the disk, emitting copious diagnostics, and spit out an
+     `ibm.img` file containing the decoded disk image (either 1440kB or 720kB
+     depending).
 
   9. Profit!
 
 ## The programs
 
-I'm sorry to say that the programs are very badly documented --- they're
-moving too quickly for the documentation to keep up. They do all respond to
-`--help`. There are some common properties, described below.
+I'm sorry to say that the client program is very badly documented --- it's
+moving too quickly for the documentation to keep up. It does respond to
+`--help` or `help` depending on context. There are some common properties,
+described below.
 
 ### Source and destination specifiers
 
@@ -76,7 +78,7 @@ use the `--source` (`-s`) and `--dest` (`-d`) options to tell FluxEngine
 which bits of the disk you want to access. These use a common syntax:
 
 ```
-.obj/fe-readibm -s fakedisk.flux:t=0-79:s=0
+fluxengine read ibm -s fakedisk.flux:t=0-79:s=0
 ```
 
   - To access a real disk, leave out the filename (so `:t=0-79:s=0`).
@@ -136,43 +138,47 @@ You'll have to play with them. They all support `--help`. They're not
 installed anywhere and after building you'll find them in the `.obj`
 directory.
 
-  - `fe-erase`: wipes (all or part of) a disk --- erases it without writing
-    a pulsetrain.
+  - `fluxengine erase`: wipes (all or part of) a disk --- erases it without
+  writing a pulsetrain.
 
-  - `fe-inspect`: dumps the raw pulsetrain / bitstream to stdout. Mainly useful
-    for debugging.
+  - `fluxengine inspect`: dumps the raw pulsetrain / bitstream to stdout.
+  Mainly useful for debugging.
 
-  - `fe-read*`: reads various formats of disk. See the per-format documentation
-    linked from the table above. These all take an optional `--write-flux`
-    option which will cause the raw flux to be written to the specified file.
+  - `fluxengine read*`: reads various formats of disk. See the per-format
+  documentation linked from the table above. These all take an optional
+  `--write-flux` option which will cause the raw flux to be written to the
+  specified file.
 
-  - `fe-write*`: writes various formats of disk. Again, see the per-format
-    documentation above.
+  - `fluxengine write*`: writes various formats of disk. Again, see the
+  per-format documentation above.
 
-  - `fe-writeflux`: writes raw flux files. This is much less useful than you
-    might think: you can't write flux files read from a disk to another disk.
-    (See the [FAQ](faq.md) for more information.) It's mainly useful for flux
-    files synthesised by the other `fe-write*` commands.
+  - `fluxengine writeflux`: writes raw flux files. This is much less useful
+  than you might think: you can't write flux files read from a disk to
+  another disk. (See the [FAQ](faq.md) for more information.) It's mainly
+  useful for flux files synthesised by the other `fluxengine write` commands.
 
-  - `fe-writetestpattern`: writes regular pulses (at a configurable interval)
-    to the disk. Useful for testing drive jitter, erasing disks in a more
-    secure fashion, or simply debugging. Goes well with `fe-inspect`.
+  - `fluxengine writetestpattern`: writes regular pulses (at a configurable
+  interval) to the disk. Useful for testing drive jitter, erasing disks in a
+  more secure fashion, or simply debugging. Goes well with `fluxengine
+  inspect`.
 
-  - `fe-rpm`: measures the RPM of the drive (requires a disk in the drive).
-    Mainly useful for testing.
+  - `fluxengine rpm`: measures the RPM of the drive (requires a disk in the
+  drive). Mainly useful for testing.
 
-  - `fe-seek`: moves the head. Mainly useful for finding out whether your drive
-    can seek to track 82. (Mine can't.)
+  - `fluxengine seek`: moves the head. Mainly useful for finding out whether
+  your drive can seek to track 82. (Mine can't.)
 
-  - `fe-testbulktransport`: measures your USB throughput. You need about 600kB/s
-    for FluxEngine to work. You don't need a disk in the drive for this one.
+  - `fluxengine testbulktransport`: measures your USB throughput. You need
+  about 600kB/s for FluxEngine to work. You don't need a disk in the drive
+  for this one.
 
-  - `fe-upgradefluxfile`: occasionally I need to upgrade the flux file format in
-    a non-backwards-compatible way; this tool will upgrade flux files to the new
-    format.
+  - `fluxengine upgradefluxfile`: occasionally I need to upgrade the flux
+  file format in a non-backwards-compatible way; this tool will upgrade flux
+  files to the new format.
 
-Commands which normally take `--source` or `--dest` get a sensible default if left
-unspecified. `fe-readibm` on its own will read drive 0 and write an `ibm.img` file.
+Commands which normally take `--source` or `--dest` get a sensible default if
+left unspecified. `fluxengine read ibm` on its own will read drive 0 and
+write an `ibm.img` file.
 
 ## Extra programs
 
@@ -191,7 +197,7 @@ So you've just received, say, a huge pile of old Brother word processor disks co
 Typically I do this:
 
 ```
-$ fe-readbrother -s :d=0 -o brother.img --write-flux=brother.flux
+$ fluxengine read brother -s :d=0 -o brother.img --write-flux=brother.flux
 ```
 
 This will read the disk in drive 0 and write out a filesystem image. It'll
@@ -199,7 +205,7 @@ also copy the flux to brother.flux. If I then need to tweak the settings, I
 can rerun the decode without having to physically touch the disk like this:
 
 ```
-$ fe-readbrother -s brother.flux -o brother.img
+$ fluxengine read brother -s brother.flux -o brother.img
 ```
 
 Apart from being drastically faster, this avoids touching the (potentially

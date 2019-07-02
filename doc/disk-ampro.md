@@ -19,7 +19,7 @@ Reading discs
 Just do:
 
 ```
-.obj/fe-readampro
+fluxengine read ampro
 ```
 
 You should end up with an `ampro.img` which is 409600 or 819200 bytes long.
