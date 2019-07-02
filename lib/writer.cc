@@ -10,7 +10,7 @@
 #include "fluxsink.h"
 #include "fmt/format.h"
 
-FlagGroup writerFlags;
+FlagGroup writerFlags { &hardwareFluxSourceFlags };
 
 static DataSpecFlag dest(
     { "--dest", "-d" },

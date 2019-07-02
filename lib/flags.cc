@@ -49,10 +49,12 @@ void FlagGroup::parseFlags(int argc, const char* argv[])
 
         for (Flag* flag : group->_flags)
         {
-            const auto& name = flag->name();
-            if (flags_by_name.find(name) != flags_by_name.end())
-                Error() << "two flags use the name '" << name << "'";
-            flags_by_name[name] = flag;
+            for (const auto& name : flag->names())
+            {
+                if (flags_by_name.find(name) != flags_by_name.end())
+                    Error() << "two flags use the name '" << name << "'";
+                flags_by_name[name] = flag;
+            }
 
             all_flags.push_back(flag);
         }
@@ -60,6 +62,7 @@ void FlagGroup::parseFlags(int argc, const char* argv[])
         group->_initialised = true;
     };
     recurse(this);
+    recurse(&helpGroup);
 
     /* Now actually parse them. */
 

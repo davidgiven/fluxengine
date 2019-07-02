@@ -8,7 +8,7 @@
 #include <fstream>
 #include <ctype.h>
 
-FlagGroup flags;
+FlagGroup flags { &writerFlags };
 
 static DoubleFlag interval(
 	{ "--interval" },

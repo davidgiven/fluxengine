@@ -10,7 +10,7 @@
 #include <fstream>
 #include <ctype.h>
 
-FlagGroup flags;
+FlagGroup flags { &writerFlags };
 
 int main(int argc, const char* argv[])
 {

@@ -11,7 +11,7 @@
 #include <fmt/format.h>
 #include <fstream>
 
-FlagGroup flags;
+FlagGroup flags { &readerFlags };
 
 static StringFlag outputFilename(
     { "--output", "-o" },

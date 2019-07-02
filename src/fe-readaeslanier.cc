@@ -10,7 +10,7 @@
 #include "aeslanier.h"
 #include <fmt/format.h>
 
-FlagGroup flags;
+FlagGroup flags { &readerFlags };
 
 static StringFlag outputFilename(
     { "--output", "-o" },

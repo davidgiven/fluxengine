@@ -16,7 +16,7 @@
 #include "track.h"
 #include "fmt/format.h"
 
-FlagGroup readerFlags;
+FlagGroup readerFlags { &hardwareFluxSourceFlags, &fluxmapReaderFlags };
 
 static DataSpecFlag source(
     { "--source", "-s" },

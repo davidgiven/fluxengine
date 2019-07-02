@@ -11,7 +11,7 @@
 #include <fstream>
 #include <ctype.h>
 
-FlagGroup flags;
+FlagGroup flags { &writerFlags };
 
 static StringFlag inputFilename(
     { "--input", "-i" },
