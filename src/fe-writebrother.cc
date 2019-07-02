@@ -11,6 +11,8 @@
 #include <fstream>
 #include <ctype.h>
 
+FlagGroup flags;
+
 static StringFlag inputFilename(
     { "--input", "-i" },
     "The input image file to read from.",
@@ -52,7 +54,7 @@ static int charToInt(char c)
 int main(int argc, const char* argv[])
 {
 	setWriterDefaultDest(":d=0:t=0-77:s=0");
-    Flag::parseFlags(argc, argv);
+    flags.parseFlags(argc, argv);
 
 	SectorSet allSectors;
 	Geometry geometry = {78, 1, 12, 256};

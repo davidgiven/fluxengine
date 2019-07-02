@@ -12,6 +12,8 @@
 #include "track.h"
 #include <fmt/format.h>
 
+FlagGroup flags;
+
 static SettableFlag dumpFluxFlag(
 	{ "--dump-flux", "-F" },
 	"Dump raw magnetic disk flux.");
@@ -51,7 +53,7 @@ static DoubleFlag signalLevelFactor(
 
 void setDecoderManualClockRate(double clockrate_us)
 {
-    manualClockRate.value = clockrate_us;
+    manualClockRate.setDefaultValue(clockrate_us);
 }
 
 static const std::string BLOCK_ELEMENTS[] =
@@ -175,7 +177,7 @@ static nanoseconds_t guessClock(const Fluxmap& fluxmap)
 
 int main(int argc, const char* argv[])
 {
-    Flag::parseFlags(argc, argv);
+    flags.parseFlags(argc, argv);
 
 	const auto& tracks = readTracks();
 	if (tracks.size() != 1)

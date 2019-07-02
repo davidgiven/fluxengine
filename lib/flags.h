@@ -2,14 +2,35 @@
 #define FLAGS_H
 
 class DataSpec;
+class Flag;
+
+class FlagGroup
+{
+private:
+    FlagGroup(const FlagGroup& group);
+public:
+    FlagGroup(const std::initializer_list<FlagGroup*> groups);
+    FlagGroup();
+
+public:
+    void parseFlags(int argc, const char* argv[]);
+    void addFlag(Flag* flag);
+    void checkInitialised() const;
+
+private:
+    bool _initialised = false;
+    const std::vector<FlagGroup*> _groups;
+    std::vector<Flag*> _flags;
+};
 
 class Flag
 {
 public:
-    static void parseFlags(int argc, const char* argv[]);
-
     Flag(const std::vector<std::string>& names, const std::string helptext);
     virtual ~Flag() {};
+
+    void checkInitialised() const
+    { _group.checkInitialised(); }
 
     const std::string& name() const { return _names[0]; }
     const std::vector<std::string> names() const { return _names; }
@@ -20,6 +41,7 @@ public:
     virtual void set(const std::string& value) = 0;
 
 private:
+    FlagGroup& _group;
     const std::vector<std::string> _names;
     const std::string _helptext;
 };
@@ -48,7 +70,8 @@ public:
         Flag(names, helptext)
     {}
 
-    operator bool() const { return _value; }
+    operator bool() const
+    { checkInitialised(); return _value; }
 
     bool hasArgument() const { return false; }
     const std::string defaultValueAsString() const { return "false"; }
@@ -65,16 +88,26 @@ public:
     ValueFlag(const std::vector<std::string>& names, const std::string helptext,
             const T defaultValue):
         Flag(names, helptext),
-        defaultValue(defaultValue),
-        value(defaultValue)
+        _defaultValue(defaultValue),
+        _value(defaultValue)
     {}
 
-    operator T() const { return value; }
+    const T& get() const
+    { checkInitialised(); return _value; }
+
+    operator const T& () const 
+    { return get(); }
+
+    void setDefaultValue(T value)
+    {
+        _value = _defaultValue = value;
+    }
 
     bool hasArgument() const { return true; }
 
-    T defaultValue;
-    T value;
+protected:
+    T _defaultValue;
+    T _value;
 };
 
 class StringFlag : public ValueFlag<std::string>
@@ -85,8 +118,8 @@ public:
         ValueFlag(names, helptext, defaultValue)
     {}
 
-    const std::string defaultValueAsString() const { return defaultValue; }
-    void set(const std::string& value) { this->value = value; }
+    const std::string defaultValueAsString() const { return _defaultValue; }
+    void set(const std::string& value) { _value = value; }
 };
 
 class IntFlag : public ValueFlag<int>
@@ -97,8 +130,8 @@ public:
         ValueFlag(names, helptext, defaultValue)
     {}
 
-    const std::string defaultValueAsString() const { return std::to_string(defaultValue); }
-    void set(const std::string& value) { this->value = std::stoi(value); }
+    const std::string defaultValueAsString() const { return std::to_string(_defaultValue); }
+    void set(const std::string& value) { _value = std::stoi(value); }
 };
 
 class DoubleFlag : public ValueFlag<double>
@@ -109,8 +142,8 @@ public:
         ValueFlag(names, helptext, defaultValue)
     {}
 
-    const std::string defaultValueAsString() const { return std::to_string(defaultValue); }
-    void set(const std::string& value) { this->value = std::stod(value); }
+    const std::string defaultValueAsString() const { return std::to_string(_defaultValue); }
+    void set(const std::string& value) { _value = std::stod(value); }
 };
 
 class BoolFlag : public ValueFlag<double>
@@ -121,7 +154,7 @@ public:
         ValueFlag(names, helptext, defaultValue)
     {}
 
-    const std::string defaultValueAsString() const { return defaultValue ? "true" : "false"; }
+    const std::string defaultValueAsString() const { return _defaultValue ? "true" : "false"; }
     void set(const std::string& value);
 };
 

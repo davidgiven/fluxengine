@@ -8,6 +8,8 @@
 #include <fstream>
 #include <ctype.h>
 
+FlagGroup flags;
+
 static DoubleFlag interval(
 	{ "--interval" },
 	"Interval between pulses (microseconds).",
@@ -21,7 +23,7 @@ static DoubleFlag sequenceLength(
 int main(int argc, const char* argv[])
 {
     setWriterDefaultDest(":t=0-81:s=0-1");
-    Flag::parseFlags(argc, argv);
+    flags.parseFlags(argc, argv);
 
     unsigned ticksPerInterval = (unsigned) (interval * TICKS_PER_US);
 

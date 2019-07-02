@@ -4,6 +4,8 @@
 #include "usb.h"
 #include "fluxsource.h"
 
+FlagGroup hardwareFluxSourceFlags;
+
 static IntFlag revolutions(
     { "--revolutions" },
     "read this many revolutions of the disk",
@@ -56,7 +58,7 @@ private:
 
 void setHardwareFluxSourceRevolutions(int revolutions)
 {
-    ::revolutions.value = ::revolutions.defaultValue = revolutions;
+    ::revolutions.setDefaultValue(revolutions);
 }
 
 std::unique_ptr<FluxSource> FluxSource::createHardwareFluxSource(unsigned drive)

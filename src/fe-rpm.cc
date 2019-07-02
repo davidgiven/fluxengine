@@ -3,6 +3,8 @@
 #include "usb.h"
 #include "dataspec.h"
 
+FlagGroup flags;
+
 static DataSpecFlag source(
     { "--source", "-s" },
     "source for data",
@@ -10,9 +12,9 @@ static DataSpecFlag source(
 
 int main(int argc, const char* argv[])
 {
-    Flag::parseFlags(argc, argv);
+    flags.parseFlags(argc, argv);
 
-    usbSetDrive(source.value.drive, false);
+    usbSetDrive(source.get().drive, false);
     nanoseconds_t period = usbGetRotationalPeriod();
     std::cout << "Rotational period is " << period/1000 << " ms (" << 60e6/period << " rpm)" << std::endl;
 

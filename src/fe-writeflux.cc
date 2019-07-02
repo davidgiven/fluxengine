@@ -10,11 +10,13 @@
 #include <fstream>
 #include <ctype.h>
 
+FlagGroup flags;
+
 int main(int argc, const char* argv[])
 {
     setReaderDefaultSource(":t=0-81:h=0-1");
     setWriterDefaultDest(":t=0-81:s=0-1");
-    Flag::parseFlags(argc, argv);
+    flags.parseFlags(argc, argv);
 
     auto tracks = readTracks();
     for (auto& track : tracks)

@@ -10,6 +10,8 @@
 #include "fluxsink.h"
 #include "fmt/format.h"
 
+FlagGroup writerFlags;
+
 static DataSpecFlag dest(
     { "--dest", "-d" },
     "destination for data",
@@ -29,7 +31,7 @@ void setWriterDefaultDest(const std::string& dest)
 void writeTracks(
 	const std::function<std::unique_ptr<Fluxmap>(int track, int side)> producer)
 {
-    const auto& spec = dest.value;
+    const DataSpec& spec = dest;
 
     std::cout << "Writing to: " << spec << std::endl;
 

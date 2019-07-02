@@ -1,7 +1,10 @@
 #include "globals.h"
+#include "flags.h"
 #include "fluxmap.h"
 #include "fluxmapreader.h"
 #include <sstream>
+
+FlagGroup flags { &fluxmapReaderFlags };
 
 typedef std::vector<unsigned> ivector;
 
@@ -124,6 +127,8 @@ void test_patternmatchingwithtrailingzeros()
 
 int main(int argc, const char* argv[])
 {
+    flags.parseFlags(0, NULL);
+
     test_patternconstruction();
     test_patternmatchingwithouttrailingzeros();
     test_patternmatchingwithtrailingzeros();

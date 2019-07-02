@@ -2,6 +2,8 @@
 #include "flags.h"
 #include "usb.h"
 
+FlagGroup flags;
+
 static IntFlag drive(
     { "--drive", "-d" },
     "drive to use",
@@ -14,7 +16,7 @@ static IntFlag track(
 
 int main(int argc, const char* argv[])
 {
-    Flag::parseFlags(argc, argv);
+    flags.parseFlags(argc, argv);
 
     usbSetDrive(drive, false);
     usbSeek(track);

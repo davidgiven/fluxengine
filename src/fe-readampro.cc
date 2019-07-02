@@ -10,6 +10,8 @@
 #include "ibm.h"
 #include <fmt/format.h>
 
+FlagGroup flags;
+
 static StringFlag outputFilename(
     { "--output", "-o" },
     "The output image file to write to.",
@@ -24,7 +26,7 @@ int main(int argc, const char* argv[])
 {
 	setReaderDefaultSource(":t=0-79:s=0");
     setReaderRevolutions(2);
-    Flag::parseFlags(argc, argv);
+    flags.parseFlags(argc, argv);
 
 	IbmDecoder decoder(sectorIdBase);
 	readDiskCommand(decoder, outputFilename);

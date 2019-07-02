@@ -1,25 +1,68 @@
 #include "globals.h"
 #include "flags.h"
 
+static FlagGroup* currentFlagGroup;
 static std::vector<Flag*> all_flags;
 static std::map<const std::string, Flag*> flags_by_name;
 
-Flag::Flag(const std::vector<std::string>& names, const std::string helptext):
-    _names(names),
-    _helptext(helptext)
-{
-    for (auto& name : names)
-    {
-        if (flags_by_name.find(name) != flags_by_name.end())
-            Error() << "two flags use the name '" << name << "'";
-        flags_by_name[name] = this;
-    }
+static void doHelp();
 
-    all_flags.push_back(this);
+static FlagGroup helpGroup;
+static ActionFlag helpFlag = ActionFlag(
+    { "--help", "-h" },
+    "Shows the help.",
+    doHelp);
+
+FlagGroup::FlagGroup(const std::initializer_list<FlagGroup*> groups):
+    _groups(groups.begin(), groups.end())
+{
+    currentFlagGroup = this;
 }
 
-void Flag::parseFlags(int argc, const char* argv[])
+FlagGroup::FlagGroup()
 {
+    currentFlagGroup = this;
+}
+
+void FlagGroup::addFlag(Flag* flag)
+{
+    _flags.push_back(flag);
+}
+
+void FlagGroup::parseFlags(int argc, const char* argv[])
+{
+    if (_initialised)
+        throw std::runtime_error("called parseFlags() twice");
+
+    /* Recursively accumulate a list of all flags. */
+
+    all_flags.clear();
+    flags_by_name.clear();
+    std::function<void(FlagGroup*)> recurse;
+    recurse = [&](FlagGroup* group)
+    {
+        if (group->_initialised)
+            return;
+        
+        for (FlagGroup* subgroup : group->_groups)
+            recurse(subgroup);
+
+        for (Flag* flag : group->_flags)
+        {
+            const auto& name = flag->name();
+            if (flags_by_name.find(name) != flags_by_name.end())
+                Error() << "two flags use the name '" << name << "'";
+            flags_by_name[name] = flag;
+
+            all_flags.push_back(flag);
+        }
+
+        group->_initialised = true;
+    };
+    recurse(this);
+
+    /* Now actually parse them. */
+
     int index = 1;
     while (index < argc)
     {
@@ -76,15 +119,28 @@ void Flag::parseFlags(int argc, const char* argv[])
         if (usesthat && flag->second->hasArgument())
             index++;
     }
-        
+}
+
+void FlagGroup::checkInitialised() const
+{
+    if (!_initialised)
+        throw std::runtime_error("Attempt to access uninitialised flag");
+}
+
+Flag::Flag(const std::vector<std::string>& names, const std::string helptext):
+    _group(*currentFlagGroup),
+    _names(names),
+    _helptext(helptext)
+{
+    _group.addFlag(this);
 }
 
 void BoolFlag::set(const std::string& value)
 {
 	if ((value == "true") || (value == "y"))
-		this->value = true;
+		_value = true;
 	else if ((value == "false") || (value == "n"))
-		this->value = false;
+		_value = false;
 	else
 		Error() << "can't parse '" << value << "'; try 'true' or 'false'";
 }
@@ -110,8 +166,3 @@ static void doHelp()
     }
     exit(0);
 }
-
-static ActionFlag helpFlag = ActionFlag(
-    { "--help", "-h" },
-    "Shows the help.",
-    doHelp);

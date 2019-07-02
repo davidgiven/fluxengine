@@ -8,7 +8,9 @@
 #include <math.h>
 #include <strings.h>
 
-static DoubleFlag pulseDebounceThreshold(
+FlagGroup fluxmapReaderFlags;
+
+DoubleFlag pulseDebounceThreshold(
     { "--pulse-debounce-threshold" },
     "Ignore pulses with intervals short than this, in fractions of a clock.",
     0.30);

@@ -10,6 +10,8 @@
 #include "fb100.h"
 #include <fmt/format.h>
 
+FlagGroup flags;
+
 static StringFlag outputFilename(
     { "--output", "-o" },
     "The output image file to write to.",
@@ -19,7 +21,7 @@ int main(int argc, const char* argv[])
 {
 	setReaderDefaultSource(":t=0-79x2:s=0");
     setReaderRevolutions(2);
-    Flag::parseFlags(argc, argv);
+    flags.parseFlags(argc, argv);
 
 	Fb100Decoder decoder;
 	readDiskCommand(decoder, outputFilename);
