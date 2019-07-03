@@ -9,7 +9,7 @@ init:
 
 install:
   - '%CYGWIN%\bin\bash -lc "cygcheck -dc cygwin"'
-  - '%CYGWIN%\setup-x86_64 -q -P libsqlite3-devel,ninja'
+  - '%CYGWIN%\setup-x86_64 -q -P libsqlite3-devel,ninja,zlib-devel,libusb1.0-devel'
 
 build_script:
   - 'echo building...'
