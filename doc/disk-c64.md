@@ -3,8 +3,8 @@ Disk: Commodore 64
 
 Commodore 64 disks come in two varieties: GCR, which are the overwhelming
 majority; and MFM, only used on the 1571 and 1581. The latter were (as far as
-I can tell) standard IBM PC format disks, so use `fe-readibm` to read them
-(and then [let me know if it
+I can tell) standard IBM PC format disks, so use `fluxengine read ibm` to
+read them (and then [let me know if it
 worked](https://github.com/davidgiven/fluxengine/issues/new).
 
 The GCR disks are much more interesting. They could store 170kB on a
@@ -31,7 +31,7 @@ Reading discs
 Just do:
 
 ```
-.obj/fe-readc64
+fluxengine read c64
 ```
 
 You should end up with an `c64.img` which is 187136 bytes long (for a normal

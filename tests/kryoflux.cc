@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include "globals.h"
 #include "fluxmap.h"
-#include "kryoflux.h"
+#include "fluxsource/kryoflux.h"
 
 static Bytes operator + (const Bytes& left, const Bytes& right)
 {

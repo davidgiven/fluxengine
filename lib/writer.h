@@ -1,6 +1,10 @@
 #ifndef WRITER_H
 #define WRITER_H
 
+#include "flags.h"
+
+extern FlagGroup writerFlags;
+
 class Fluxmap;
 
 extern void setWriterDefaultDest(const std::string& dest);

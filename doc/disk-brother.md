@@ -8,7 +8,7 @@ size.
 Different word processors use different disk formats --- the only ones
 supported by FluxEngine are the 120kB and 240kB 3.5" formats. The default
 options are for the 240kB format. For the 120kB format, which is 40 track, do
-`fe-readbrother -s :t=1-79x2`.
+`fluxengine read brother -s :t=1-79x2`.
 
 Apparently about 20% of Brother word processors have alignment issues which
 means that the disks can't be read by FluxEngine (because the tracks on the
@@ -36,7 +36,7 @@ Reading discs
 Just do:
 
 ```
-.obj/fe-readbrother
+fluxengine read brother
 ```
 
 You should end up with a `brother.img` which is 239616 bytes long.
@@ -47,7 +47,7 @@ Writing discs
 Just do:
 
 ```
-.obj/fe-writebrother
+fluxengine write brother
 ```
 
 ...and it'll write a `brother.img` file which is 239616 bytes long to the

@@ -1,6 +1,10 @@
 #ifndef FLUXSOURCE_H
 #define FLUXSOURCE_H
 
+#include "flags.h"
+
+extern FlagGroup hardwareFluxSourceFlags;
+
 class Fluxmap;
 class DataSpec;
 

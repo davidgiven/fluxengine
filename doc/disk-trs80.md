@@ -22,7 +22,7 @@ Reading discs
 Just do:
 
 ```
-.obj/fe-readibm
+fluxengine read ibm
 ```
 
 You should end up with an `ibm.img` of the appropriate size. It's a simple

@@ -6,15 +6,17 @@
 #include "record.h"
 #include "sector.h"
 #include "track.h"
-#include <fmt/format.h>
+#include "fmt/format.h"
 #include <fstream>
 #include <ctype.h>
 
-int main(int argc, const char* argv[])
+static FlagGroup flags { &writerFlags };
+
+int mainWriteFlux(int argc, const char* argv[])
 {
     setReaderDefaultSource(":t=0-81:h=0-1");
     setWriterDefaultDest(":t=0-81:s=0-1");
-    Flag::parseFlags(argc, argv);
+    flags.parseFlags(argc, argv);
 
     auto tracks = readTracks();
     for (auto& track : tracks)

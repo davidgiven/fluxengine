@@ -26,7 +26,7 @@ Reading discs
 Just do:
 
 ```
-.obj/fe-readfb100
+fluxengine read fb100
 ```
 
 You should end up with an `fb100.img` of the appropriate size. It's a simple

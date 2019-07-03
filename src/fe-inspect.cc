@@ -2,15 +2,17 @@
 #include "flags.h"
 #include "reader.h"
 #include "fluxmap.h"
-#include "fluxmapreader.h"
-#include "decoders.h"
+#include "decoders/fluxmapreader.h"
+#include "decoders/decoders.h"
 #include "image.h"
 #include "protocol.h"
-#include "rawbits.h"
+#include "decoders/rawbits.h"
 #include "record.h"
 #include "sector.h"
 #include "track.h"
-#include <fmt/format.h>
+#include "fmt/format.h"
+
+static FlagGroup flags;
 
 static SettableFlag dumpFluxFlag(
 	{ "--dump-flux", "-F" },
@@ -51,7 +53,7 @@ static DoubleFlag signalLevelFactor(
 
 void setDecoderManualClockRate(double clockrate_us)
 {
-    manualClockRate.value = clockrate_us;
+    manualClockRate.setDefaultValue(clockrate_us);
 }
 
 static const std::string BLOCK_ELEMENTS[] =
@@ -173,9 +175,9 @@ static nanoseconds_t guessClock(const Fluxmap& fluxmap)
     return median * NS_PER_TICK;
 }
 
-int main(int argc, const char* argv[])
+int mainInspect(int argc, const char* argv[])
 {
-    Flag::parseFlags(argc, argv);
+    flags.parseFlags(argc, argv);
 
 	const auto& tracks = readTracks();
 	if (tracks.size() != 1)

@@ -1,7 +1,7 @@
 #ifndef IBM_H
 #define IBM_H
 
-#include "decoders.h"
+#include "decoders/decoders.h"
 
 /* IBM format (i.e. ordinary PC floppies). */
 

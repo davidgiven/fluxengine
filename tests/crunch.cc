@@ -1,6 +1,6 @@
 #include "globals.h"
 #include "bytes.h"
-#include "crunch.h"
+#include "common/crunch.h"
 
 static uint8_t outputbuffer[64];
 

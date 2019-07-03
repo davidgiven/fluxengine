@@ -1,7 +1,7 @@
 #include "globals.h"
 #include "fluxmap.h"
 #include "sql.h"
-#include "fluxsink.h"
+#include "fluxsink/fluxsink.h"
 #include "fmt/format.h"
 
 class SqliteFluxSink : public FluxSink

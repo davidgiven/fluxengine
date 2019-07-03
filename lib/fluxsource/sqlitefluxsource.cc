@@ -1,7 +1,7 @@
 #include "globals.h"
 #include "fluxmap.h"
 #include "sql.h"
-#include "fluxsource.h"
+#include "fluxsource/fluxsource.h"
 #include "fmt/format.h"
 
 class SqliteFluxSource : public FluxSource

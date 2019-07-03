@@ -1,7 +1,7 @@
 #include "globals.h"
 #include "flags.h"
 #include "dataspec.h"
-#include "fluxsource.h"
+#include "fluxsource/fluxsource.h"
 
 static bool ends_with(const std::string& value, const std::string& ending)
 {

@@ -2,9 +2,9 @@ Disk: Macintosh
 ===============
 
 Macintosh disks come in two varieties: the newer 1440kB ones, which are
-perfectly ordinary PC disks you should use `fe-readibm` to read, and the
-older 800kB disks (and 400kB for the single sides ones). They have 80 tracks
-and up to 12 sectors per track.
+perfectly ordinary PC disks you should use `fluxengine read ibm` to read, and
+the older 800kB disks (and 400kB for the single sides ones). They have 80
+tracks and up to 12 sectors per track.
 
 They are also completely insane.
 
@@ -37,7 +37,7 @@ Reading discs
 Just do:
 
 ```
-.obj/fe-readmac
+fluxengine read mac
 ```
 
 You should end up with an `mac.img` which is 1001888 bytes long (for a normal

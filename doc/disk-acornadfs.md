@@ -31,7 +31,7 @@ Reading discs
 Just do:
 
 ```
-.obj/fe-readadfs
+fluxengine read adfs
 ```
 
 You should end up with an `adfs.img` of the appropriate size for your disk

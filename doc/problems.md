@@ -133,14 +133,14 @@ probably never need to touch them.
 Clock detection
 ---------------
 
-A very useful tool for examining problematic disks is `fe-inspect`. This will
-let you examine the raw flux on a disk (or flux file). It'll also guess the
-clock rate on the disk for you, using a simple statistical analysis of the
-pulse intervals on the disk. (Note that the tool only works on one track at a
-time.)
+A very useful tool for examining problematic disks is `fluxengine inspect`.
+This will let you examine the raw flux on a disk (or flux file). It'll also
+guess the clock rate on the disk for you, using a simple statistical analysis
+of the pulse intervals on the disk. (Note that the tool only works on one
+track at a time.)
 
 ```
-$ fe-inspect -s good.flux:t=0:s=0
+$ fluxengine inspect -s good.flux:t=0:s=0
 Clock detection histogram:
 3.58    737 ▉
 3.67   3838 ████▊
@@ -192,7 +192,7 @@ So, what does my Victor 9000 histogram look like? Let's look at the
 histogram for a single track:
 
 ```
-$ fe-inspect -s dubious.flux:t=0:s=0
+$ fluxengine inspect -s dubious.flux:t=0:s=0
 Clock detection histogram:
 1.33   1904 █▉
 1.42  21669 ██████████████████████▌
@@ -241,15 +241,15 @@ That's... not good. The disk is very noisy, and the intervals between pulses
 are horribly distributed. The detected clock from the decode is 1.45us, which
 does correspond more-or-less to a peak. You'll also notice that the
 double-clock interval is at 3.00us, which is _not_ twice 1.45us. The guessed
-clock by `fe-inspect` is 1.67us, which is clearly wrong.
+clock by `fluxengine inspect` is 1.67us, which is clearly wrong.
 
 This demonstrates that the statistical clock guessing isn't brilliant, which
 is why I've just rewritten the decoder not to use it; nevertheless, it's a
 useful tool for examining disks.
 
-`fe-inspect` will also dump the raw flux data in various formats, but that's
-mostly only useful to me. Try `--dump-bits` to see the raw bit pattern on the
-disk (using the guessed clock, or `--manual-clock-rate-us` to set it
+`fluxengine inspect` will also dump the raw flux data in various formats, but
+that's mostly only useful to me. Try `--dump-bits` to see the raw bit pattern
+on the disk (using the guessed clock, or `--manual-clock-rate-us` to set it
 yourself); `--dump-flux` will show you discrete pulses and the intervals
 between them.
 
