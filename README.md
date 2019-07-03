@@ -29,6 +29,13 @@ the board. Sorry for the inconvenience, but it means you don't have to modify
 the board any more to make it work. If you built the hardware prior to then,
 you'll need to adjust it.
 
+**Another important note.** On 2019-06-03 I've revamped the build process and
+the (command line) user interface. It should be much nicer now, not least in
+that there's a single client binary with all the functionality in it. The
+interface is a little different, but not much. The build process is now
+better (simpler). See [the building](doc/building.md) and
+[using](doc/using.md) pages for more details.
+
 Where?
 ------
 
@@ -65,7 +72,8 @@ decoder based on Kryoflux (or other) dumps I've found. I don't (yet) have
 real, physical disks in my hand to test the capture process.
 
 Unicorns (🦄) are completely real --- this means that I've read actual,
-physical disks with these formats and so know they work.
+physical disks with these formats and so know they work (or had reports from
+people who've had it work).
 
 ### Old disk formats
 
@@ -75,7 +83,7 @@ physical disks with these formats and so know they work.
 | [Acorn ADFS](doc/disk-acornadfs.md)      |  🦄   |        | single- and double- sided           |
 | [Acorn DFS](doc/disk-acorndfs.md)        |  🦄   |        |                                     |
 | [Ampro Little Board](doc/disk-ampro.md)  |  🦖   |        |                                     |
-| [Apple II DOS 3.3](doc/disk-apple2.md)   |  🦖   |        | doesn't do logical sector remapping |
+| [Apple II DOS 3.3](doc/disk-apple2.md)   |  🦄   |        | doesn't do logical sector remapping |
 | [Amiga](doc/disk-amiga.md)               |  🦄   |        |                                     |
 | [Commodore 64 1541](doc/disk-c64.md)     |  🦖   |        | and probably the other GCR formats  |
 | [Brother 120kB](doc/disk-brother.md)     |  🦄   |        |                                     |
