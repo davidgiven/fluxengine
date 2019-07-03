@@ -6,8 +6,8 @@
 #include "protocol.h"
 #include "usb.h"
 #include "dataspec.h"
-#include "fluxsource.h"
-#include "fluxsink.h"
+#include "fluxsource/fluxsource.h"
+#include "fluxsink/fluxsink.h"
 #include "fmt/format.h"
 
 FlagGroup writerFlags { &hardwareFluxSourceFlags };

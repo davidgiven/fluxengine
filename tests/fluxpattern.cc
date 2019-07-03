@@ -1,7 +1,7 @@
 #include "globals.h"
 #include "flags.h"
 #include "fluxmap.h"
-#include "fluxmapreader.h"
+#include "decoders/fluxmapreader.h"
 #include <sstream>
 
 FlagGroup flags { &fluxmapReaderFlags };

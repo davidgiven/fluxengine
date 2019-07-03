@@ -1,6 +1,6 @@
 #include "globals.h"
 #include "fluxmap.h"
-#include "fluxmapreader.h"
+#include "decoders/fluxmapreader.h"
 #include "flags.h"
 #include "protocol.h"
 #include "fmt/format.h"

@@ -3,8 +3,8 @@
 #include "fluxmap.h"
 #include "sector.h"
 #include "sectorset.h"
-#include "decoders.h"
-#include "brother.h"
+#include "decoders/decoders.h"
+#include "brother/brother.h"
 #include "image.h"
 #include "writer.h"
 #include <fmt/format.h>

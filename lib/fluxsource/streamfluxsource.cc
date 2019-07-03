@@ -1,7 +1,7 @@
 #include "globals.h"
 #include "fluxmap.h"
 #include "kryoflux.h"
-#include "fluxsource.h"
+#include "fluxsource/fluxsource.h"
 
 class StreamFluxSource : public FluxSource
 {

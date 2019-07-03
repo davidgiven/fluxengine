@@ -142,15 +142,19 @@ the port and proceed normally.
 The client software is where the intelligence, such as it is, is. It's pretty
 generic libusb stuff and should build and run on Windows, Linux and OSX as
 well, although on Windows I've only ever used it with Cygwin. You'll need the
-`sqlite3`, `meson` and `ninja` packages (which should be easy to come by in
-your distribution). Just do `make` and it should build.
+`sqlite3`, `libusb-1.0` and `ninja` packages (which should be easy to come by
+in your distribution). Just do `ninja` and it should build. The result will
+be a single executable, `fluxengine`, in the current directory. It has
+minimal dependencies and can be installed anywhere.
 
 If it doesn't build, please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new).
 
 ## Next steps
 
-The board's now assembled and programmed. Plug it into your drive, strip the plastic off the little USB connector and plug that into your computer, and you're ready to start using it.
+The board's now assembled and programmed. Plug it into your drive, strip the
+plastic off the little USB connector and plug that into your computer, and
+you're ready to start using it.
 
 I _do_ make updates to the firmware whenever necessary, so you may need to
 reprogram it at intervals; you may want to take this into account if you

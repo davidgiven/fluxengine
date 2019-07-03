@@ -1,5 +1,5 @@
 #include "globals.h"
-#include "decoders.h"
+#include "decoders/decoders.h"
 #include <assert.h>
 
 int main(int argc, const char* argv[])

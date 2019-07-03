@@ -1,6 +1,6 @@
 #include "globals.h"
 #include "record.h"
-#include "decoders.h"
+#include "decoders/decoders.h"
 #include "brother.h"
 #include "crc.h"
 
