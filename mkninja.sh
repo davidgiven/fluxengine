@@ -111,7 +111,12 @@ runtest() {
     prog=$1
     shift
 
-    buildlibrary lib$prog.a -Ilib $pkgcflags "$@"
+    buildlibrary lib$prog.a \
+        -Ilib \
+        -Idep \
+        $pkgcflags \
+        "$@"
+
     buildprogram \$OBJDIR/$prog \
         $pkgldflags \
         lib$prog.a \
@@ -127,6 +132,7 @@ buildlibrary libfmt.a \
 
 buildlibrary libbackend.a \
     -Ilib \
+    -Idep \
     $pkgcflags \
     lib/aeslanier/decoder.cc \
     lib/amiga/decoder.cc \
@@ -170,6 +176,7 @@ buildlibrary libbackend.a \
 
 buildlibrary libfrontend.a \
     -Ilib \
+    -Idep \
     src/fe-erase.cc \
     src/fe-inspect.cc \
     src/fe-readadfs.cc \
