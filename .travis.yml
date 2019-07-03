@@ -23,7 +23,6 @@ addons:
         - libsqlite3-dev
         - g++-8
     homebrew:
-        update: true
         packages:
         - ninja
 
