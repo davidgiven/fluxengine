@@ -13,7 +13,7 @@ build build.ninja : mkninja mkninja.sh
 
 CXX = g++
 AR = ar rcs
-CFLAGS = -Og -g
+CFLAGS = -Og -g --std=c++14
 LDFLAGS = -Og
 
 OBJDIR = .obj
