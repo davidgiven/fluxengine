@@ -10,6 +10,7 @@ matrix:
             env: CXX=g++-8
         -
             os: osx
+            osx_image: xcode10
             compiler: clang
 
 addons:
