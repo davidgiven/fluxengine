@@ -29,7 +29,7 @@ rule library
     description = AR $in
 
 rule link
-    command = $CXX $LDFLAGS $flags -o $out -Wl,--start-group $in -Wl,--end-group
+    command = $CXX $LDFLAGS -o $out -Wl,--start-group $in -Wl,--end-group $flags
     description = LINK $in
 
 rule test
