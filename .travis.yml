@@ -19,7 +19,6 @@ addons:
         - ubuntu-toolchain-r-test
         packages:
         - ninja-build
-        - meson
         - libusb-1.0-0-dev
         - libsqlite3-dev
         - g++-8
@@ -27,11 +26,10 @@ addons:
         update: true
         packages:
         - ninja
-        - meson
 
 git:
     depth: 1
 
 script:
-    - make
+    - ninja
 
