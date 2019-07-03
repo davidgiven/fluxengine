@@ -1,5 +1,5 @@
 #include "globals.h"
-#include "decoders.h"
+#include "decoders/decoders.h"
 
 Bytes decodeFmMfm(
         std::vector<bool>::const_iterator ii, std::vector<bool>::const_iterator end)

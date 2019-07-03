@@ -3,13 +3,15 @@
 #include "fluxmap.h"
 #include "sector.h"
 #include "sectorset.h"
-#include "decoders.h"
-#include "brother.h"
+#include "decoders/decoders.h"
+#include "brother/brother.h"
 #include "image.h"
 #include "writer.h"
-#include <fmt/format.h>
+#include "fmt/format.h"
 #include <fstream>
 #include <ctype.h>
+
+static FlagGroup flags { &writerFlags };
 
 static StringFlag inputFilename(
     { "--input", "-i" },
@@ -49,10 +51,10 @@ static int charToInt(char c)
 	return 10 + tolower(c) - 'a';
 }
 
-int main(int argc, const char* argv[])
+int mainWriteBrother(int argc, const char* argv[])
 {
 	setWriterDefaultDest(":d=0:t=0-77:s=0");
-    Flag::parseFlags(argc, argv);
+    flags.parseFlags(argc, argv);
 
 	SectorSet allSectors;
 	Geometry geometry = {78, 1, 12, 256};

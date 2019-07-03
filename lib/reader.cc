@@ -1,20 +1,22 @@
 #include "globals.h"
 #include "flags.h"
 #include "usb.h"
-#include "fluxsource.h"
+#include "fluxsource/fluxsource.h"
 #include "reader.h"
 #include "fluxmap.h"
 #include "sql.h"
 #include "dataspec.h"
-#include "decoders.h"
+#include "decoders/decoders.h"
 #include "sector.h"
 #include "sectorset.h"
 #include "record.h"
 #include "image.h"
 #include "bytes.h"
-#include "rawbits.h"
+#include "decoders/rawbits.h"
 #include "track.h"
 #include "fmt/format.h"
+
+FlagGroup readerFlags { &hardwareFluxSourceFlags, &fluxmapReaderFlags };
 
 static DataSpecFlag source(
     { "--source", "-s" },
@@ -69,16 +71,16 @@ void Track::readFluxmap()
 
 std::vector<std::unique_ptr<Track>> readTracks()
 {
-    const DataSpec& dataSpec = source.value;
+    const DataSpec& dataSpec = source;
 
     std::cout << "Reading from: " << dataSpec << std::endl;
 
 	setHardwareFluxSourceDensity(highDensityFlag);
 
-	if (!destination.value.empty())
+	if (!destination.get().empty())
 	{
 		outdb = sqlOpen(destination, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
-		std::cout << "Writing a copy of the flux to " << destination.value << std::endl;
+		std::cout << "Writing a copy of the flux to " << destination.get() << std::endl;
 		sqlPrepareFlux(outdb);
 		sqlStmt(outdb, "BEGIN;");
         sqlWriteIntProperty(outdb, "version", FLUX_VERSION_CURRENT);

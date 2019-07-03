@@ -33,7 +33,7 @@ Reading discs
 Just do:
 
 ```
-.obj/fe-readaeslanier
+fluxengine read aeslanier
 ```
 
 Useful references

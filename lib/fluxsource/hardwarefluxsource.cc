@@ -2,7 +2,9 @@
 #include "flags.h"
 #include "fluxmap.h"
 #include "usb.h"
-#include "fluxsource.h"
+#include "fluxsource/fluxsource.h"
+
+FlagGroup hardwareFluxSourceFlags;
 
 static IntFlag revolutions(
     { "--revolutions" },
@@ -56,7 +58,7 @@ private:
 
 void setHardwareFluxSourceRevolutions(int revolutions)
 {
-    ::revolutions.value = ::revolutions.defaultValue = revolutions;
+    ::revolutions.setDefaultValue(revolutions);
 }
 
 std::unique_ptr<FluxSource> FluxSource::createHardwareFluxSource(unsigned drive)

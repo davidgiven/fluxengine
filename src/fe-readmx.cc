@@ -2,13 +2,15 @@
 #include "flags.h"
 #include "reader.h"
 #include "fluxmap.h"
-#include "decoders.h"
-#include "mx.h"
+#include "decoders/decoders.h"
+#include "mx/mx.h"
 #include "image.h"
 #include "sector.h"
 #include "sectorset.h"
 #include "record.h"
 #include <fmt/format.h>
+
+static FlagGroup flags { &readerFlags };
 
 static StringFlag outputFilename(
     { "--output", "-o" },
@@ -18,7 +20,7 @@ static StringFlag outputFilename(
 int main(int argc, const char* argv[])
 {
 	setReaderDefaultSource(":t=0-79:s=0-1");
-    Flag::parseFlags(argc, argv);
+    flags.parseFlags(argc, argv);
 
 	MxDecoder decoder;
 	readDiskCommand(decoder, outputFilename);

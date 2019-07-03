@@ -1,7 +1,7 @@
 #include "globals.h"
 #include "bytes.h"
 #include "fmt/format.h"
-#include "crunch.h"
+#include "common/crunch.h"
 #include <zlib.h>
 
 static std::shared_ptr<std::vector<uint8_t>> createVector(unsigned size)

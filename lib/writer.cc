@@ -6,9 +6,11 @@
 #include "protocol.h"
 #include "usb.h"
 #include "dataspec.h"
-#include "fluxsource.h"
-#include "fluxsink.h"
+#include "fluxsource/fluxsource.h"
+#include "fluxsink/fluxsink.h"
 #include "fmt/format.h"
+
+FlagGroup writerFlags { &hardwareFluxSourceFlags };
 
 static DataSpecFlag dest(
     { "--dest", "-d" },
@@ -29,7 +31,7 @@ void setWriterDefaultDest(const std::string& dest)
 void writeTracks(
 	const std::function<std::unique_ptr<Fluxmap>(int track, int side)> producer)
 {
-    const auto& spec = dest.value;
+    const DataSpec& spec = dest;
 
     std::cout << "Writing to: " << spec << std::endl;
 

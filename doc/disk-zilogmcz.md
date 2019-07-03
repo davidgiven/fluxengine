@@ -30,7 +30,7 @@ Reading discs
 Just do:
 
 ```
-.obj/fe-readzilogmcz
+fluxengine read zilogmcz
 ```
 
 You should end up with an `zilogmcz.img` which is 315392 bytes long.

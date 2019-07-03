@@ -3,6 +3,9 @@
 
 #include "fluxmap.h"
 #include "protocol.h"
+#include "flags.h"
+
+extern FlagGroup fluxmapReaderFlags;
 
 class FluxMatcher;
 

@@ -1,7 +1,7 @@
 #ifndef MX_H
 #define MX_H
 
-#include "decoders.h"
+#include "decoders/decoders.h"
 
 class MxDecoder : public AbstractDecoder
 {

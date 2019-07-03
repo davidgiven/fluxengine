@@ -10,6 +10,7 @@ matrix:
             env: CXX=g++-8
         -
             os: osx
+            osx_image: xcode10.2
             compiler: clang
 
 addons:
@@ -19,19 +20,16 @@ addons:
         - ubuntu-toolchain-r-test
         packages:
         - ninja-build
-        - meson
         - libusb-1.0-0-dev
         - libsqlite3-dev
         - g++-8
     homebrew:
-        update: true
         packages:
         - ninja
-        - meson
 
 git:
     depth: 1
 
 script:
-    - make
+    - ninja
 

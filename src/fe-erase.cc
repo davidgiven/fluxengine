@@ -3,10 +3,12 @@
 #include "fluxmap.h"
 #include "writer.h"
 
-int main(int argc, const char* argv[])
+static FlagGroup flags;
+
+int mainErase(int argc, const char* argv[])
 {
 	setWriterDefaultDest(":t=0-81:s=0-1");
-    Flag::parseFlags(argc, argv);
+    flags.parseFlags(argc, argv);
 
 	writeTracks(
         [](int physicalTrack, int physicalSide) -> std::unique_ptr<Fluxmap>

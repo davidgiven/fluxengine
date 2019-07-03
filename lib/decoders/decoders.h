@@ -4,7 +4,7 @@
 #include "bytes.h"
 #include "sector.h"
 #include "record.h"
-#include "fluxmapreader.h"
+#include "decoders/fluxmapreader.h"
 
 class Sector;
 class Fluxmap;

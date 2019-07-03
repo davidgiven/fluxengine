@@ -1,9 +1,9 @@
 #include "globals.h"
-#include "decoders.h"
+#include "decoders/decoders.h"
 #include "ibm.h"
 #include "crc.h"
 #include "fluxmap.h"
-#include "fluxmapreader.h"
+#include "decoders/fluxmapreader.h"
 #include "sector.h"
 #include "record.h"
 #include <string.h>

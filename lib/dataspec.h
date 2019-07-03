@@ -49,7 +49,7 @@ public:
     unsigned revolutions;
 };
 
-std::ostream& operator << (std::ostream& os, const DataSpec& dataSpec)
+static inline std::ostream& operator << (std::ostream& os, const DataSpec& dataSpec)
 { os << (std::string)dataSpec; return os; }
 
 class DataSpecFlag : public Flag
@@ -58,15 +58,21 @@ public:
     DataSpecFlag(const std::vector<std::string>& names, const std::string helptext,
             const std::string& defaultValue):
         Flag(names, helptext),
-        value(defaultValue)
+        _value(defaultValue)
     {}
 
-    bool hasArgument() const { return true; }
-    const std::string defaultValueAsString() const { return value; }
-    void set(const std::string& value) { this->value.set(value); }
+    const DataSpec& get() const
+    { checkInitialised(); return _value; }
 
-public:
-    DataSpec value;
+    operator const DataSpec& () const
+    { return get(); }
+
+    bool hasArgument() const { return true; }
+    const std::string defaultValueAsString() const { return _value; }
+    void set(const std::string& value) { _value.set(value); }
+
+private:
+    DataSpec _value;
 };
 
 #endif

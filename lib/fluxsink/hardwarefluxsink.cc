@@ -2,7 +2,7 @@
 #include "flags.h"
 #include "fluxmap.h"
 #include "usb.h"
-#include "fluxsink.h"
+#include "fluxsink/fluxsink.h"
 
 static bool high_density = false;
 
