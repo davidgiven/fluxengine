@@ -17,7 +17,7 @@ static StringFlag outputFilename(
     "The output image file to write to.",
     "mx.img");
 
-int main(int argc, const char* argv[])
+int mainReadMx(int argc, const char* argv[])
 {
 	setReaderDefaultSource(":t=0-79:s=0-1");
     flags.parseFlags(argc, argv);
