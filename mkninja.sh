@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 packages="zlib sqlite3 libusb-1.0"
-pkgcflags=$(pkg-config --cflags $packages)
+pkgcflags="$(pkg-config --cflags $packages) -Idep/fmt"
 pkgldflags=$(pkg-config --libs $packages)
 
 cat <<-EOF
@@ -113,7 +113,6 @@ runtest() {
 
     buildlibrary lib$prog.a \
         -Ilib \
-        -Idep \
         $pkgcflags \
         "$@"
 
@@ -132,7 +131,6 @@ buildlibrary libfmt.a \
 
 buildlibrary libbackend.a \
     -Ilib \
-    -Idep \
     $pkgcflags \
     lib/aeslanier/decoder.cc \
     lib/amiga/decoder.cc \
@@ -176,7 +174,6 @@ buildlibrary libbackend.a \
 
 buildlibrary libfrontend.a \
     -Ilib \
-    -Idep \
     src/fe-erase.cc \
     src/fe-inspect.cc \
     src/fe-readadfs.cc \
