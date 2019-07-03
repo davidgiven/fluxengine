@@ -8,7 +8,7 @@
 #include "sectorset.h"
 #include "record.h"
 #include "zilogmcz/zilogmcz.h"
-#include <fmt/format.h>
+#include "fmt/format.h"
 
 static FlagGroup flags { &readerFlags };
 

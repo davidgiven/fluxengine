@@ -5,7 +5,7 @@
 #include "bytes.h"
 #include "common/crunch.h"
 #include <libusb.h>
-#include <fmt/format.h>
+#include "fmt/format.h"
 
 #define TIMEOUT 5000
 

@@ -120,53 +120,53 @@ build $OBJDIR/lib/zilogmcz/decoder.o : cxx lib/zilogmcz/decoder.cc
     flags= -Ilib -I/usr/include/libusb-1.0 -Idep/fmt
 build $OBJDIR/libbackend.a : library $OBJDIR/lib/aeslanier/decoder.o $OBJDIR/lib/amiga/decoder.o $OBJDIR/lib/apple2/decoder.o $OBJDIR/lib/brother/decoder.o $OBJDIR/lib/brother/encoder.o $OBJDIR/lib/bytes.o $OBJDIR/lib/c64/decoder.o $OBJDIR/lib/common/crunch.c.o $OBJDIR/lib/crc.o $OBJDIR/lib/dataspec.o $OBJDIR/lib/decoders/decoders.o $OBJDIR/lib/decoders/fluxmapreader.o $OBJDIR/lib/decoders/fmmfm.o $OBJDIR/lib/encoder.o $OBJDIR/lib/f85/decoder.o $OBJDIR/lib/fb100/decoder.o $OBJDIR/lib/flags.o $OBJDIR/lib/fluxmap.o $OBJDIR/lib/fluxsink/fluxsink.o $OBJDIR/lib/fluxsink/hardwarefluxsink.o $OBJDIR/lib/fluxsink/sqlitefluxsink.o $OBJDIR/lib/fluxsource/fluxsource.o $OBJDIR/lib/fluxsource/hardwarefluxsource.o $OBJDIR/lib/fluxsource/kryoflux.o $OBJDIR/lib/fluxsource/sqlitefluxsource.o $OBJDIR/lib/fluxsource/streamfluxsource.o $OBJDIR/lib/globals.o $OBJDIR/lib/hexdump.o $OBJDIR/lib/ibm/decoder.o $OBJDIR/lib/image.o $OBJDIR/lib/macintosh/decoder.o $OBJDIR/lib/reader.o $OBJDIR/lib/sector.o $OBJDIR/lib/sectorset.o $OBJDIR/lib/sql.o $OBJDIR/lib/usb.o $OBJDIR/lib/victor9k/decoder.o $OBJDIR/lib/writer.o $OBJDIR/lib/zilogmcz/decoder.o
 build $OBJDIR/src/fe-erase.o : cxx src/fe-erase.cc
-    flags= -Ilib
+    flags= -Ilib -I/usr/include/libusb-1.0 -Idep/fmt
 build $OBJDIR/src/fe-inspect.o : cxx src/fe-inspect.cc
-    flags= -Ilib
+    flags= -Ilib -I/usr/include/libusb-1.0 -Idep/fmt
 build $OBJDIR/src/fe-readadfs.o : cxx src/fe-readadfs.cc
-    flags= -Ilib
+    flags= -Ilib -I/usr/include/libusb-1.0 -Idep/fmt
 build $OBJDIR/src/fe-readaeslanier.o : cxx src/fe-readaeslanier.cc
-    flags= -Ilib
+    flags= -Ilib -I/usr/include/libusb-1.0 -Idep/fmt
 build $OBJDIR/src/fe-readamiga.o : cxx src/fe-readamiga.cc
-    flags= -Ilib
+    flags= -Ilib -I/usr/include/libusb-1.0 -Idep/fmt
 build $OBJDIR/src/fe-readampro.o : cxx src/fe-readampro.cc
-    flags= -Ilib
+    flags= -Ilib -I/usr/include/libusb-1.0 -Idep/fmt
 build $OBJDIR/src/fe-readapple2.o : cxx src/fe-readapple2.cc
-    flags= -Ilib
+    flags= -Ilib -I/usr/include/libusb-1.0 -Idep/fmt
 build $OBJDIR/src/fe-readbrother.o : cxx src/fe-readbrother.cc
-    flags= -Ilib
+    flags= -Ilib -I/usr/include/libusb-1.0 -Idep/fmt
 build $OBJDIR/src/fe-readc64.o : cxx src/fe-readc64.cc
-    flags= -Ilib
+    flags= -Ilib -I/usr/include/libusb-1.0 -Idep/fmt
 build $OBJDIR/src/fe-readdfs.o : cxx src/fe-readdfs.cc
-    flags= -Ilib
+    flags= -Ilib -I/usr/include/libusb-1.0 -Idep/fmt
 build $OBJDIR/src/fe-readf85.o : cxx src/fe-readf85.cc
-    flags= -Ilib
+    flags= -Ilib -I/usr/include/libusb-1.0 -Idep/fmt
 build $OBJDIR/src/fe-readfb100.o : cxx src/fe-readfb100.cc
-    flags= -Ilib
+    flags= -Ilib -I/usr/include/libusb-1.0 -Idep/fmt
 build $OBJDIR/src/fe-readibm.o : cxx src/fe-readibm.cc
-    flags= -Ilib
+    flags= -Ilib -I/usr/include/libusb-1.0 -Idep/fmt
 build $OBJDIR/src/fe-readmac.o : cxx src/fe-readmac.cc
-    flags= -Ilib
+    flags= -Ilib -I/usr/include/libusb-1.0 -Idep/fmt
 build $OBJDIR/src/fe-readvictor9k.o : cxx src/fe-readvictor9k.cc
-    flags= -Ilib
+    flags= -Ilib -I/usr/include/libusb-1.0 -Idep/fmt
 build $OBJDIR/src/fe-readzilogmcz.o : cxx src/fe-readzilogmcz.cc
-    flags= -Ilib
+    flags= -Ilib -I/usr/include/libusb-1.0 -Idep/fmt
 build $OBJDIR/src/fe-rpm.o : cxx src/fe-rpm.cc
-    flags= -Ilib
+    flags= -Ilib -I/usr/include/libusb-1.0 -Idep/fmt
 build $OBJDIR/src/fe-seek.o : cxx src/fe-seek.cc
-    flags= -Ilib
+    flags= -Ilib -I/usr/include/libusb-1.0 -Idep/fmt
 build $OBJDIR/src/fe-testbulktransport.o : cxx src/fe-testbulktransport.cc
-    flags= -Ilib
+    flags= -Ilib -I/usr/include/libusb-1.0 -Idep/fmt
 build $OBJDIR/src/fe-upgradefluxfile.o : cxx src/fe-upgradefluxfile.cc
-    flags= -Ilib
+    flags= -Ilib -I/usr/include/libusb-1.0 -Idep/fmt
 build $OBJDIR/src/fe-writebrother.o : cxx src/fe-writebrother.cc
-    flags= -Ilib
+    flags= -Ilib -I/usr/include/libusb-1.0 -Idep/fmt
 build $OBJDIR/src/fe-writeflux.o : cxx src/fe-writeflux.cc
-    flags= -Ilib
+    flags= -Ilib -I/usr/include/libusb-1.0 -Idep/fmt
 build $OBJDIR/src/fe-writetestpattern.o : cxx src/fe-writetestpattern.cc
-    flags= -Ilib
+    flags= -Ilib -I/usr/include/libusb-1.0 -Idep/fmt
 build $OBJDIR/src/fluxengine.o : cxx src/fluxengine.cc
-    flags= -Ilib
+    flags= -Ilib -I/usr/include/libusb-1.0 -Idep/fmt
 build $OBJDIR/libfrontend.a : library $OBJDIR/src/fe-erase.o $OBJDIR/src/fe-inspect.o $OBJDIR/src/fe-readadfs.o $OBJDIR/src/fe-readaeslanier.o $OBJDIR/src/fe-readamiga.o $OBJDIR/src/fe-readampro.o $OBJDIR/src/fe-readapple2.o $OBJDIR/src/fe-readbrother.o $OBJDIR/src/fe-readc64.o $OBJDIR/src/fe-readdfs.o $OBJDIR/src/fe-readf85.o $OBJDIR/src/fe-readfb100.o $OBJDIR/src/fe-readibm.o $OBJDIR/src/fe-readmac.o $OBJDIR/src/fe-readvictor9k.o $OBJDIR/src/fe-readzilogmcz.o $OBJDIR/src/fe-rpm.o $OBJDIR/src/fe-seek.o $OBJDIR/src/fe-testbulktransport.o $OBJDIR/src/fe-upgradefluxfile.o $OBJDIR/src/fe-writebrother.o $OBJDIR/src/fe-writeflux.o $OBJDIR/src/fe-writetestpattern.o $OBJDIR/src/fluxengine.o
 build fluxengine : link $OBJDIR/libfrontend.a $OBJDIR/libbackend.a $OBJDIR/libfmt.a
     flags= -lz -lsqlite3 -lusb-1.0

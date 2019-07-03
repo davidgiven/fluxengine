@@ -8,7 +8,7 @@
 #include "sectorset.h"
 #include "record.h"
 #include "fb100/fb100.h"
-#include <fmt/format.h>
+#include "fmt/format.h"
 
 static FlagGroup flags { &readerFlags };
 

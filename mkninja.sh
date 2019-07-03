@@ -174,6 +174,7 @@ buildlibrary libbackend.a \
 
 buildlibrary libfrontend.a \
     -Ilib \
+    $pkgcflags \
     src/fe-erase.cc \
     src/fe-inspect.cc \
     src/fe-readadfs.cc \
