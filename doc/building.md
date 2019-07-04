@@ -143,7 +143,7 @@ The client software is where the intelligence, such as it is, is. It's pretty
 generic libusb stuff and should build and run on Windows, Linux and OSX as
 well, although on Windows I've only ever used it with Cygwin. You'll need the
 `sqlite3`, `libusb-1.0` and `ninja` packages (which should be easy to come by
-in your distribution). Just do `ninja` and it should build. The result will
+in your distribution). Just do `make` and it should build. The result will
 be a single executable, `fluxengine`, in the current directory. It has
 minimal dependencies and can be installed anywhere.
 
