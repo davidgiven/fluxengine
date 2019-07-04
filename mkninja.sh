@@ -5,26 +5,18 @@ pkgcflags="$(pkg-config --cflags $packages) -Idep/fmt"
 pkgldflags=$(pkg-config --libs $packages)
 
 cat <<EOF
-CXX = g++
-AR = ar rcs
-STRIP = strip
-CFLAGS = -Og -g --std=c++14
-LDFLAGS = -Og
-
-OBJDIR = .obj
-
 rule cxx
-    command = \$CXX \$CFLAGS \$flags -I. -c -o \$out \$in -MMD -MF \$out.d
+    command = $CXX $CFLAGS \$flags -I. -c -o \$out \$in -MMD -MF \$out.d
     description = CXX \$in
     depfile = \$out.d
     deps = gcc
     
 rule library
-    command = \$AR \$out \$in
+    command = $AR \$out \$in
     description = AR \$in
 
 rule link
-    command = \$CXX \$LDFLAGS -o \$out \$in \$flags
+    command = $CXX $LDFLAGS -o \$out \$in \$flags
     description = LINK \$in
 
 rule test
@@ -32,7 +24,7 @@ rule test
     description = TEST \$in
 
 rule strip
-    command = cp -f \$in \$out && \$STRIP \$out
+    command = cp -f \$in \$out && $STRIP \$out
     description = STRIP \$in
 EOF
 
@@ -59,14 +51,14 @@ buildlibrary() {
     objs=
     for src in "$@"; do
         local obj
-        obj="\$OBJDIR/${src%%.cc}.o"
+        obj="$OBJDIR/${src%%.cc}.o"
         objs="$objs $obj"
 
         echo build $obj : cxx $src
         echo "    flags=$flags"
     done
 
-    echo build \$OBJDIR/$lib : library $objs
+    echo build $OBJDIR/$lib : library $objs
 }
 
 buildprogram() {
@@ -91,7 +83,7 @@ buildprogram() {
     local objs
     objs=
     for src in "$@"; do
-        objs="$objs \$OBJDIR/$src"
+        objs="$objs $OBJDIR/$src"
     done
 
     echo build $prog : link $objs
@@ -108,13 +100,13 @@ runtest() {
         $pkgcflags \
         "$@"
 
-    buildprogram \$OBJDIR/$prog \
+    buildprogram $OBJDIR/$prog \
         $pkgldflags \
         lib$prog.a \
         libbackend.a \
         libfmt.a
 
-    echo build \$OBJDIR/$prog.stamp : test \$OBJDIR/$prog
+    echo build $OBJDIR/$prog.stamp : test $OBJDIR/$prog
 }
 
 buildlibrary libfmt.a \
