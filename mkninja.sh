@@ -4,9 +4,10 @@ packages="zlib sqlite3 libusb-1.0"
 pkgcflags="$(pkg-config --cflags $packages) -Idep/fmt"
 pkgldflags=$(pkg-config --libs $packages)
 
-cat <<-EOF
+cat <<EOF
 CXX = g++
 AR = ar rcs
+STRIP = strip
 CFLAGS = -Og -g --std=c++14
 LDFLAGS = -Og
 
@@ -29,6 +30,10 @@ rule link
 rule test
     command = \$in && touch \$out
     description = TEST \$in
+
+rule strip
+    command = cp -f \$in \$out && \$STRIP \$out
+    description = STRIP \$in
 EOF
 
 buildlibrary() {
@@ -89,11 +94,8 @@ buildprogram() {
         objs="$objs \$OBJDIR/$src"
     done
 
-    echo build $prog-debug : link $objs
-    echo "    flags=$flags"
-
     echo build $prog : link $objs
-    echo "    flags=$flags -s"
+    echo "    flags=$flags"
 }
 
 runtest() {
@@ -192,11 +194,13 @@ buildlibrary libfrontend.a \
     src/fe-writetestpattern.cc \
     src/fluxengine.cc \
 
-buildprogram fluxengine \
+buildprogram fluxengine-debug \
     $pkgldflags \
     libfrontend.a \
     libbackend.a \
     libfmt.a \
+
+echo "build fluxengine : strip fluxengine-debug"
 
 runtest dataspec-test       tests/dataspec.cc
 runtest flags-test          tests/flags.cc
