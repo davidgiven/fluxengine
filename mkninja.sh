@@ -89,8 +89,11 @@ buildprogram() {
         objs="$objs \$OBJDIR/$src"
     done
 
-    echo build $prog : link $objs
+    echo build $prog-debug : link $objs
     echo "    flags=$flags"
+
+    echo build $prog : link $objs
+    echo "    flags=$flags -s"
 }
 
 runtest() {
