@@ -31,5 +31,5 @@ git:
     depth: 1
 
 script:
-    - ninja
+    - make
 
