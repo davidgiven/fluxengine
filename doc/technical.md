@@ -13,9 +13,9 @@ Verilog turns the timer, pulse and index information into a bytecode stream
 which encodes intervals, pulses, and whether the index hole has been seen.
 
 This is then streamed back to the PC, where offline software decodes it: it
-does simple statistical analysis to guess the clock rate, then turns the
-pulses into a nice, lined up bit array and from there decodes the file system
-format.
+searches for known bit patterns (which depend on the format), uses those to
+determine the clock rate, and then turns the pulses into a nice, lined up bit
+array and from there decodes the file system format.
 
 Writing back to disk works the same way: bytes are streamed to the
 FluxEngine, where a different datapath state machine thingy (the PSoC5LP has
@@ -24,7 +24,9 @@ stream of pulses to the disk.
 
 The bytecode format represents an interval between pulses as a byte, a pulse
 as a byte, and the index hole as a byte. Timer overflows are handled by
-sending multiple intervals in a row.
+sending multiple intervals in a row. However, the USB transport applies a
+simple compression system to this in order to get the USB bandwidth down to
+something manageable.
 
 An HD floppy has a nominal pulse frequency of 500kHz, and we use a sample
 clock of 12MHz (every 83ns). This means that our 500kHz pulses will have an
@@ -75,7 +77,7 @@ second (one for each 64-byte frame) in order to transfer the data.
 
 The Atmels and STM32s I found were perfectly capable of doing the real-time
 sampling, using hand-tool assembly, but I very much doubt whether they could
-do the USB streaming as well (although I'd like to move away from the Cypress
+do the USB streaming as well (although I want to move away from the Cypress
 onto something less proprietary and easier to source, so I'd like to be
 proven wrong here).
 
