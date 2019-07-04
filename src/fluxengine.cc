@@ -91,7 +91,7 @@ static int mainReadWrite(std::vector<Command>& subcommands, const std::string& c
         readWriteHelp(subcommands, command);
 
     std::string format = argv[1];
-    if (format == "help")
+    if (format == "--help")
         readWriteHelp(subcommands, command);
 
     for (Command& c : subcommands)
@@ -100,7 +100,7 @@ static int mainReadWrite(std::vector<Command>& subcommands, const std::string& c
             return c.main(argc-1, argv+1);
     }
 
-    std::cerr << "fluxengine: unrecognised format (try help)\n";
+    std::cerr << "fluxengine: unrecognised format (try --help)\n";
     return 1;
 }
 
@@ -127,7 +127,7 @@ int main(int argc, const char* argv[])
         help();
 
     std::string command = argv[1];
-    if (command == "help")
+    if (command == "--help")
         help();
 
     for (Command& c : commands)
@@ -136,6 +136,6 @@ int main(int argc, const char* argv[])
             return c.main(argc-1, argv+1);
     }
 
-    std::cerr << "fluxengine: unrecognised command (try help)\n";
+    std::cerr << "fluxengine: unrecognised command (try --help)\n";
     return 1;
 }
