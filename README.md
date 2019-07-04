@@ -29,7 +29,7 @@ the board. Sorry for the inconvenience, but it means you don't have to modify
 the board any more to make it work. If you built the hardware prior to then,
 you'll need to adjust it.
 
-**Another important note.** On 2019-06-03 I've revamped the build process and
+**Another important note.** On 2019-07-03 I've revamped the build process and
 the (command line) user interface. It should be much nicer now, not least in
 that there's a single client binary with all the functionality in it. The
 interface is a little different, but not much. The build process is now
