@@ -23,7 +23,7 @@ matrix:
             env:
               MSYSTEM: MINGW32
             install:
-            - choco install msys2 /noupdate
+            - choco install msys2 --params /noupdate
             - c:/tools/msys64/usr/bin/pacman -S ninja
             script:
               - c:/tools/msys64/usr/bin/make
