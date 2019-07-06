@@ -8,7 +8,7 @@ init:
   - git config --global core.autocrlf input
 
 install:
-  - set PATH=%PATH%;c:\msys64\mingw32\bin
+  - set PATH=%PATH%;c:\msys64\mingw32\bin;c:\msys64\usr\bin;c:\msys64\bin
   - pacman -S make ninja mingw-w64-i686-libusb  mingw-w64-i686-sqlite3 mingw-w64-i686-zlib 
 
 build_script:
