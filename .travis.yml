@@ -16,6 +16,7 @@ matrix:
             os: windows
 
             install:
+            - choco upgrade git.install
             - pacman -S ninja
 
 addons:
