@@ -16,7 +16,7 @@ matrix:
             os: windows
 
             install:
-            - choco install ninja
+            - pacman -S ninja
 
 addons:
     apt:
