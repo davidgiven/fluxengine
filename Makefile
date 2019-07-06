@@ -1,4 +1,4 @@
-PACKAGES = zlib slite3 libusb-1.0
+PACKAGES = zlib sqlite3 libusb-1.0
 
 ifeq ($(OS), Windows_NT)
 export CXX = /mingw32/bin/g++
@@ -12,9 +12,9 @@ else
 export CXX = g++
 export AR = ar rcs
 export STRIP = strip
-export CFLAGS = -Og -g --std=c++14 $(pkg-config --cflags $(PACKAGES))
+export CFLAGS = -Og -g --std=c++14 $(shell pkg-config --cflags $(PACKAGES))
 export LDFLAGS = -Og
-export LIBS = $(pkg-config --libs $(PACKAGES))
+export LIBS = $(shell pkg-config --libs $(PACKAGES))
 export EXTENSION =
 endif
 
