@@ -1,4 +1,4 @@
-language: generic
+language: cpp
 
 matrix:
     include:
@@ -12,6 +12,8 @@ matrix:
             os: osx
             osx_image: xcode10.2
             compiler: clang
+        -
+            os: windows
 
 addons:
     apt:
@@ -24,6 +26,9 @@ addons:
         - libsqlite3-dev
         - g++-8
     homebrew:
+        packages:
+        - ninja
+    chocolatey:
         packages:
         - ninja
 
