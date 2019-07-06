@@ -95,12 +95,12 @@ runtest() {
     buildlibrary lib$prog.a \
         "$@"
 
-    buildprogram $OBJDIR/$prog \
+    buildprogram $OBJDIR/$prog$EXTENSION \
         lib$prog.a \
         libbackend.a \
         libfmt.a
 
-    echo build $OBJDIR/$prog.stamp : test $OBJDIR/$prog
+    echo build $OBJDIR/$prog.stamp : test $OBJDIR/$prog$EXTENSION
 }
 
 buildlibrary libfmt.a \
@@ -176,12 +176,12 @@ buildlibrary libfrontend.a \
     src/fe-writetestpattern.cc \
     src/fluxengine.cc \
 
-buildprogram fluxengine-debug \
+buildprogram fluxengine-debug$EXTENSION \
     libfrontend.a \
     libbackend.a \
     libfmt.a \
 
-echo "build fluxengine : strip fluxengine-debug"
+echo "build fluxengine$EXTENSION : strip fluxengine-debug$EXTENSION"
 
 runtest dataspec-test       tests/dataspec.cc
 runtest flags-test          tests/flags.cc
