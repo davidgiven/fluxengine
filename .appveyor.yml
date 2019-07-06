@@ -19,3 +19,15 @@ artifacts:
   - path: fluxengine.exe
     name: fluxengine.exe
 
+deploy:
+  release: fluxengine-windows-client-v$(appveyor_build_version)
+  description: FluxEngine Windows client
+  provider: GitHub
+  auth_token:
+    secure: dfJjj7fWCoDUz+Ni11OcNPB/U3TNJFwNA2AsL++ChFjniUsZLlC6SDWHiL/t4FZo
+  artifact: fluxengine.exe
+  draft: false
+  prerelease: false
+  on:
+    branch: master
+
