@@ -24,8 +24,9 @@ matrix:
               MSYSTEM: MINGW32
             install:
             - choco install msys2
+            - c:/tools/msys64/usr/bin/pacman -S ninja
             script:
-              - c:/msys64/usr/bin/make
+              - c:/tools/msys64/usr/bin/make
 
 addons:
     apt:
