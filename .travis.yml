@@ -1,4 +1,4 @@
-language: cpp
+language: generic
 
 matrix:
     include:
@@ -14,6 +14,8 @@ matrix:
             compiler: clang
         -
             os: windows
+            install:
+            - choco install ninja
 
 addons:
     apt:
@@ -26,9 +28,6 @@ addons:
         - libsqlite3-dev
         - g++-8
     homebrew:
-        packages:
-        - ninja
-    chocolatey:
         packages:
         - ninja
 
