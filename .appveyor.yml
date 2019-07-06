@@ -18,8 +18,8 @@ build_script:
   - zip -9 fluxengine.zip fluxengine.exe
 
 artifacts:
-  - path: fluxengine.exe
-    name: fluxengine.exe
+  - path: fluxengine.zip
+    name: fluxengine.zip
 
 deploy:
   release: FluxEngine Windows client version $(APPVEYOR_BUILD_NUMBER)
