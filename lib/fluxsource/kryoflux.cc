@@ -4,7 +4,8 @@
 #include "protocol.h"
 #include "fmt/format.h"
 #include <fstream>
-#include <glob.h>
+#include <sys/types.h>
+#include <dirent.h>
 
 #define MCLK_HZ (((18432000.0 * 73.0) / 14.0) / 2.0)
 #define SCLK_HZ (MCLK_HZ / 2)
@@ -12,17 +13,40 @@
 
 #define TICKS_PER_SCLK (TICK_FREQUENCY / SCLK_HZ)
 
+static bool has_suffix(const std::string& haystack, const std::string& needle)
+{
+    if (needle.length() > haystack.length())
+        return false;
+    
+    return haystack.compare(haystack.length() - needle.length(), needle.length(), needle) == 0;
+}
+
 std::unique_ptr<Fluxmap> readStream(const std::string& dir, unsigned track, unsigned side)
 {
     std::string suffix = fmt::format("{:02}.{}.raw", track, side);
-    std::string pattern = fmt::format("{}*{}", dir, suffix);
-    glob_t globdata;
-    if (glob(pattern.c_str(), GLOB_NOSORT, NULL, &globdata))
+
+    DIR* dirp = opendir(dir.c_str());
+    if (!dirp)
         Error() << fmt::format("cannot access path '{}'", dir);
-    if (globdata.gl_pathc != 1)
-        Error() << fmt::format("data is ambiguous --- multiple files end in {}", suffix);
-    std::string filename = globdata.gl_pathv[0];
-    globfree(&globdata);
+
+    std::string filename;
+    for (;;)
+    {
+        struct dirent* de = readdir(dirp);
+        if (!de)
+            break;
+        
+        if (has_suffix(de->d_name, suffix))
+        {
+            if (!filename.empty())
+                Error() << fmt::format("data is ambiguous --- multiple files end in {}", suffix);
+            filename = fmt::format("{}/{}", dir, de->d_name);
+        }
+    }
+    closedir(dirp);
+
+    if (filename.empty())
+        Error() << fmt::format("failed to find track {} side {} in {}", track, side, dir);
 
     return readStream(filename);
 }

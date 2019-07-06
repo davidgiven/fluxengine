@@ -1,4 +1,6 @@
-language: generic
+language: shell
+git:
+    depth: 1
 
 matrix:
     include:
@@ -8,6 +10,8 @@ matrix:
             dist: xenial
             compiler: gcc
             env: CXX=g++-8
+            script:
+              - make
         -
             os: osx
             osx_image: xcode10.2
@@ -27,9 +31,7 @@ addons:
         packages:
         - ninja
 
-git:
-    depth: 1
-
 script:
-    - make
+- make
+
 
