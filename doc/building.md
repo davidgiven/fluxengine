@@ -139,6 +139,11 @@ the port and proceed normally.
 
 ## Building the client
 
+**Before you read this:** If you're on Windows, good news! You can download a
+*precompiled version of the FluxEngine client [from the GitHub releases
+*page](https://github.com/davidgiven/fluxengine/releases/latest). Simply unzip
+*it somewhere and run it from a `cmd` window (or other shell).
+
 The client software is where the intelligence, such as it is, is. It's pretty
 generic libusb stuff and should build and run on Windows, Linux and OSX as
 well, although on Windows it'll need MSYS2 and mingw32. You'll need to
