@@ -4,8 +4,8 @@ ifeq ($(OS), Windows_NT)
 export CXX = /mingw32/bin/g++
 export AR = /mingw32/bin/ar rcs
 export STRIP = /mingw32/bin/strip
-export CFLAGS = -Og -g --std=c++14 -I/mingw32/include/libusb-1.0
-export LDFLAGS = -Og
+export CFLAGS = -O3 -g --std=c++14 -I/mingw32/include/libusb-1.0
+export LDFLAGS = -O3
 export LIBS = -static -lz -lsqlite3 -lusb-1.0
 export EXTENSION = .exe
 else
