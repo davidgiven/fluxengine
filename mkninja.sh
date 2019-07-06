@@ -1,8 +1,5 @@
 #!/bin/sh
 set -e
-packages="zlib sqlite3 libusb-1.0"
-pkgcflags="$(pkg-config --cflags $packages) -Idep/fmt"
-pkgldflags=$(pkg-config --libs $packages)
 
 cat <<EOF
 rule cxx
@@ -16,7 +13,7 @@ rule library
     description = AR \$in
 
 rule link
-    command = $CXX $LDFLAGS -o \$out \$in \$flags
+    command = $CXX $LDFLAGS -o \$out \$in \$flags $LIBS
     description = LINK \$in
 
 rule test
@@ -96,12 +93,9 @@ runtest() {
     shift
 
     buildlibrary lib$prog.a \
-        -Ilib \
-        $pkgcflags \
         "$@"
 
     buildprogram $OBJDIR/$prog \
-        $pkgldflags \
         lib$prog.a \
         libbackend.a \
         libfmt.a
@@ -114,8 +108,6 @@ buildlibrary libfmt.a \
     dep/fmt/posix.cc \
 
 buildlibrary libbackend.a \
-    -Ilib \
-    $pkgcflags \
     lib/aeslanier/decoder.cc \
     lib/amiga/decoder.cc \
     lib/apple2/decoder.cc \
@@ -158,8 +150,6 @@ buildlibrary libbackend.a \
     lib/zilogmcz/decoder.cc \
 
 buildlibrary libfrontend.a \
-    -Ilib \
-    $pkgcflags \
     src/fe-erase.cc \
     src/fe-inspect.cc \
     src/fe-readadfs.cc \
@@ -187,7 +177,6 @@ buildlibrary libfrontend.a \
     src/fluxengine.cc \
 
 buildprogram fluxengine-debug \
-    $pkgldflags \
     libfrontend.a \
     libbackend.a \
     libfmt.a \
