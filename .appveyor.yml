@@ -9,7 +9,7 @@ init:
 
 install:
   - set PATH=%PATH%;c:\msys64\mingw32\bin;c:\msys64\usr\bin;c:\msys64\bin
-  - pacman -S make ninja mingw-w64-i686-libusb  mingw-w64-i686-sqlite3 mingw-w64-i686-zlib 
+  - pacman -S --noconfirm make ninja mingw-w64-i686-libusb mingw-w64-i686-sqlite3 mingw-w64-i686-zlib 
 
 build_script:
   - make

@@ -16,17 +16,6 @@ matrix:
             os: osx
             osx_image: xcode10.2
             compiler: clang
-            script:
-              - make
-        -
-            os: windows
-            env:
-              MSYSTEM: MINGW32
-            install:
-            - choco install msys2 --params /noupdate
-            - c:/tools/msys64/usr/bin/pacman -S ninja
-            script:
-              - c:/tools/msys64/usr/bin/make
 
 addons:
     apt:
@@ -41,5 +30,8 @@ addons:
     homebrew:
         packages:
         - ninja
+
+script:
+- make
 
 
