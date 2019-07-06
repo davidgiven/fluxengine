@@ -15,13 +15,14 @@ install:
 
 build_script:
   - make
+  - zip -9 fluxengine.zip fluxengine.exe
 
 artifacts:
   - path: fluxengine.exe
     name: fluxengine.exe
 
 deploy:
-  release: FluxEngine Windows client version $(appveyor_build_version)
+  release: FluxEngine Windows client version $(APPVEYOR_BUILD_NUMBER)
   description: >
     This is an automatically built version of the FluxEngine Windows client
     which is generated whenever a significant checkin has happened. It's had
@@ -32,7 +33,7 @@ deploy:
   provider: GitHub
   auth_token:
     secure: dfJjj7fWCoDUz+Ni11OcNPB/U3TNJFwNA2AsL++ChFjniUsZLlC6SDWHiL/t4FZo
-  artifact: fluxengine.exe
+  artifact: fluxengine.zip
   draft: false
   prerelease: false
   on:
