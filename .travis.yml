@@ -1,4 +1,6 @@
 language: shell
+git:
+    depth: 1
 
 matrix:
     include:
@@ -8,16 +10,22 @@ matrix:
             dist: xenial
             compiler: gcc
             env: CXX=g++-8
+            script:
+              - make
         -
             os: osx
             osx_image: xcode10.2
             compiler: clang
+            script:
+              - make
         -
             os: windows
-
+            env:
+              MSYSTEM: MINGW32
             install:
-            - choco upgrade git.install
-            - pacman -S ninja
+            - choco install ninja
+            script:
+              - c:/msys64/usr/bin/make
 
 addons:
     apt:
@@ -33,9 +41,4 @@ addons:
         packages:
         - ninja
 
-git:
-    depth: 1
-
-script:
-    - make
 
