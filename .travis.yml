@@ -23,7 +23,7 @@ matrix:
             env:
               MSYSTEM: MINGW32
             install:
-            - choco install ninja
+            - choco install msys2
             script:
               - c:/msys64/usr/bin/make
 
