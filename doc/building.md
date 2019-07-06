@@ -141,11 +141,22 @@ the port and proceed normally.
 
 The client software is where the intelligence, such as it is, is. It's pretty
 generic libusb stuff and should build and run on Windows, Linux and OSX as
-well, although on Windows I've only ever used it with Cygwin. You'll need the
-`sqlite3`, `libusb-1.0` and `ninja` packages (which should be easy to come by
-in your distribution). Just do `make` and it should build. The result will
-be a single executable, `fluxengine`, in the current directory. It has
-minimal dependencies and can be installed anywhere.
+well, although on Windows it'll need MSYS2 and mingw32. You'll need to
+install some support packages.
+
+  - For Linux (this is Ubuntu, but this should apply to Debian too):
+  `ninja-build`, `libusb-1.0-0-dev`, `libsqlite3-dev`.
+  - For OSX with Homebrew: `ninja`.
+  - For Windows with MSYS2: `make`, `ninja`, `mingw-w64-i686-libusb`,
+  `mingw-w64-i686-sqlite3`, `mingw-w64-i686-zlib`, `mingw-w64-i686-gcc`.
+
+These lists are not necessarily exhaustive --- plaese [get in
+touch](https://github.com/davidgiven/fluxengine/issues/new) if I've missed
+anything.
+
+All systems build by just doing `make`. You should end up with a single
+executable in the current directory, called `fluxengine`. It has minimal
+dependencies and you should be able to put it anywhere.
 
 If it doesn't build, please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new).
