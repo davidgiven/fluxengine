@@ -1,10 +1,15 @@
+version: '{branch}.{build}'
+clone_depth: 1
+
 environment:
   MSYSTEM: MINGW32
-
-clone_depth: 1
+  PATH: c:\msys64\mingw32\bin
 
 init:
   - git config --global core.autocrlf input
+
+install:
+  - pacman -S make ninja mingw-w64-i686-libusb  mingw-w64-i686-sqlite3 mingw-w64-i686-zlib 
 
 build_script:
   - make
