@@ -561,6 +561,7 @@
       <Data key="1425177d-0d0e-4468-8bcc-e638e5509a9b" value="UartRx" />
       <Data key="a5d987c6-e45b-45b9-ad93-656fab06d720" value="TRK00" />
       <Data key="a93ef5b3-00f4-42c0-8fad-0e275a7e2537" value="MOTEB" />
+      <Data key="b8380fb7-fdb8-449f-bd8d-c4ca96cdf55a" value="DEBUG_PINS" />
       <Data key="bc5d52a1-1b25-4aa0-9ba9-3f81d122772f" value="DEBUG_PINS" />
       <Data key="beca5e2d-f70f-4900-a4db-7eca1ed3126e/8b77a6c4-10a0-4390-971c-672353e2a49c" value="USBFS_Dm" />
       <Data key="beca5e2d-f70f-4900-a4db-7eca1ed3126e/618a72fc-5ddd-4df5-958f-a3d55102db42" value="USBFS_Dp" />
@@ -571,7 +572,7 @@
       <Data key="e51063a9-4fad-40c7-a06b-7cc4b137dc18" value="DSKCHG" />
       <Data key="ea7ee228-8b3f-426c-8bb8-cd7a81937769" value="DIR" />
       <Data key="ed092b9b-d398-4703-be89-cebf998501f6" value="UartTx" />
-      <Data key="fbd1f839-40f9-498e-a48b-5f3048ea5c3d/52f31aa9-2f0a-497d-9a1f-1424095e13e6" value="SW_Tx_UART_1_tx" />
+      <Data key="fbd1f839-40f9-498e-a48b-5f3048ea5c3d/52f31aa9-2f0a-497d-9a1f-1424095e13e6" value="UART_tx" />
       <Data key="fede1767-f3fd-4021-b3d7-8f9d88f36f9b" value="DRVSA" />
       <Data key="fff78075-035e-43d7-8577-bc5be4d21926" value="WGATE" />
     </Group>
@@ -3755,6 +3756,17 @@
     <Group key="a93ef5b3-00f4-42c0-8fad-0e275a7e2537">
       <Group key="0">
         <Data key="Port Format" value="12,1" />
+      </Group>
+    </Group>
+    <Group key="b8380fb7-fdb8-449f-bd8d-c4ca96cdf55a">
+      <Group key="0">
+        <Data key="Port Format" value="2,5" />
+      </Group>
+      <Group key="1">
+        <Data key="Port Format" value="2,4" />
+      </Group>
+      <Group key="2">
+        <Data key="Port Format" value="2,3" />
       </Group>
     </Group>
     <Group key="bc5d52a1-1b25-4aa0-9ba9-3f81d122772f">
