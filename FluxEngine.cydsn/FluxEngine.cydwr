@@ -3840,7 +3840,7 @@
     <Data key="CYDEV_ECC_ENABLE" value="False" />
     <Data key="CYDEV_HEAP_SIZE" value="0x80" />
     <Data key="CYDEV_INSTRUCT_CACHE_ENABLED" value="True" />
-    <Data key="CYDEV_PROTECTION_ENABLE" value="False" />
+    <Data key="CYDEV_PROTECTION_ENABLE" value="True" />
     <Data key="CYDEV_STACK_SIZE" value="0x0800" />
     <Data key="CYDEV_TEMPERATURE" value="0C - 85/125C" />
     <Data key="CYDEV_TRACE_ENABLED" value="False" />
