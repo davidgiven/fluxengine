@@ -11,11 +11,13 @@ matrix:
             compiler: gcc
             env: CXX=g++-8
             script:
-              - make
+            - make
         -
             os: osx
             osx_image: xcode10.2
             compiler: clang
+            env:
+            - HOMEBREW_NO_INSTALL_CLEANUP=1
 
 addons:
     apt:
