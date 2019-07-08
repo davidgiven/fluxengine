@@ -1,7 +1,7 @@
 #include "globals.h"
 #include "fmt/format.h"
 #include <fstream>
-#include <fnmatch.h>
+#include "fnmatch.h"
 
 /* Theoretical maximum number of sectors. */
 static const int SECTOR_COUNT = 640;
