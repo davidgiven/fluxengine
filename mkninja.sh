@@ -203,6 +203,14 @@ buildprogram cwftoflux \
     libbackend.a \
     libfmt.a \
 
+buildlibrary libfluxtovcd.a \
+    tools/fluxtovcd.cc \
+
+buildprogram fluxtovcd \
+    libfluxtovcd.a \
+    libbackend.a \
+    libfmt.a \
+
 runtest dataspec-test       tests/dataspec.cc
 runtest flags-test          tests/flags.cc
 runtest fmmfm-test          tests/fmmfm.cc
