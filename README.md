@@ -188,3 +188,8 @@ maintained by Victor Zverovich (`vitaut <https://github.com/vitaut>`) and
 Jonathan Müller (`foonathan <https://github.com/foonathan>`) with
 contributions from many other people. It is licensed under the terms of the
 BSD license. Please see the contents of the directory for the full text.
+
+As an exception, `dep/fnmatchemu` contains parts of the OpenBSD C library
+code, Todd Miller and William A. Rowe (and probably others). It is licensed
+under the terms of the 3-clause BSD license. Please see the contents of the
+directory for the full text. It's been lightly modified by me.

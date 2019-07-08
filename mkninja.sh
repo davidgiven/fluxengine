@@ -48,7 +48,7 @@ buildlibrary() {
     objs=
     for src in "$@"; do
         local obj
-        obj="$OBJDIR/${src%%.cc}.o"
+        obj="$OBJDIR/${src%%.c*}.o"
         objs="$objs $obj"
 
         echo build $obj : cxx $src
@@ -184,10 +184,15 @@ buildprogram fluxengine \
     libfmt.a \
 
 buildlibrary libbrother120tool.a \
+    -Idep/fnmatchemu \
     tools/brother120tool.cc \
+
+buildlibrary libfnmatchemu.a \
+    dep/fnmatchemu/fnmatchemu.c
 
 buildprogram brother120tool \
     libbrother120tool.a \
+    libfnmatchemu.a \
     libfmt.a \
 
 buildlibrary libcwftoflux.a \

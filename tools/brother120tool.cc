@@ -1,7 +1,7 @@
 #include "globals.h"
 #include "fmt/format.h"
 #include <fstream>
-#include <fnmatch.h>
+#include "fnmatchemu.h"
 
 /* Theoretical maximum number of sectors. */
 static const int SECTOR_COUNT = 640;
@@ -129,7 +129,7 @@ void extractFile(const std::string& pattern)
         if (dirent.type != 0)
             continue;
 
-        if (fnmatch(pattern.c_str(), dirent.filename.c_str(), 0))
+        if (fnmatchemu(pattern.c_str(), dirent.filename.c_str(), 0))
             continue;
 
         std::cout << fmt::format("Extracting '{}'\n", dirent.filename);
