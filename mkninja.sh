@@ -48,7 +48,7 @@ buildlibrary() {
     objs=
     for src in "$@"; do
         local obj
-        obj="$OBJDIR/${src%%.cc}.o"
+        obj="$OBJDIR/${src%%.c*}.o"
         objs="$objs $obj"
 
         echo build $obj : cxx $src
@@ -83,8 +83,10 @@ buildprogram() {
         objs="$objs $OBJDIR/$src"
     done
 
-    echo build $prog : link $objs
+    echo build $prog-debug$EXTENSION : link $objs
     echo "    flags=$flags"
+
+    echo build $prog$EXTENSION : strip $prog-debug$EXTENSION
 }
 
 runtest() {
@@ -95,12 +97,12 @@ runtest() {
     buildlibrary lib$prog.a \
         "$@"
 
-    buildprogram $OBJDIR/$prog$EXTENSION \
+    buildprogram $OBJDIR/$prog \
         lib$prog.a \
         libbackend.a \
         libfmt.a
 
-    echo build $OBJDIR/$prog.stamp : test $OBJDIR/$prog$EXTENSION
+    echo build $OBJDIR/$prog.stamp : test $OBJDIR/$prog-debug$EXTENSION
 }
 
 buildlibrary libfmt.a \
@@ -176,12 +178,30 @@ buildlibrary libfrontend.a \
     src/fe-writetestpattern.cc \
     src/fluxengine.cc \
 
-buildprogram fluxengine-debug$EXTENSION \
+buildprogram fluxengine \
     libfrontend.a \
     libbackend.a \
     libfmt.a \
 
-echo "build fluxengine$EXTENSION : strip fluxengine-debug$EXTENSION"
+buildlibrary libbrother120tool.a \
+    -Idep/emu \
+    tools/brother120tool.cc \
+
+buildlibrary libemu.a \
+    dep/emu/fnmatch.c
+
+buildprogram brother120tool \
+    libbrother120tool.a \
+    libemu.a \
+    libfmt.a \
+
+buildlibrary libcwftoflux.a \
+    tools/cwftoflux.cc \
+
+buildprogram cwftoflux \
+    libcwftoflux.a \
+    libbackend.a \
+    libfmt.a \
 
 runtest dataspec-test       tests/dataspec.cc
 runtest flags-test          tests/flags.cc
