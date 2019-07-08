@@ -97,7 +97,7 @@ runtest() {
     buildlibrary lib$prog.a \
         "$@"
 
-    buildprogram $OBJDIR/$prog$EXTENSION \
+    buildprogram $OBJDIR/$prog \
         lib$prog.a \
         libbackend.a \
         libfmt.a
