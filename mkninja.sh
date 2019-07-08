@@ -184,15 +184,15 @@ buildprogram fluxengine \
     libfmt.a \
 
 buildlibrary libbrother120tool.a \
-    -Idep/fnmatchemu \
+    -Idep/emu \
     tools/brother120tool.cc \
 
-buildlibrary libfnmatchemu.a \
-    dep/fnmatchemu/fnmatchemu.c
+buildlibrary libemu.a \
+    dep/emu/fnmatch.c
 
 buildprogram brother120tool \
     libbrother120tool.a \
-    libfnmatchemu.a \
+    libemu.a \
     libfmt.a \
 
 buildlibrary libcwftoflux.a \

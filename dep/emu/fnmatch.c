@@ -90,11 +90,11 @@
  * path delimiter must be aware that 0x5C is NOT unique within SHIFT-JIS.
  */
 
+#include "fnmatch.h"
 #include <string.h>
 #include <ctype.h>
 #include <limits.h>
 
-#include "fnmatchemu.h"
 #include "charclass.h"
 
 #define	RANGE_MATCH	1
@@ -275,12 +275,11 @@ fnmatch_ch_success:
 }
 
 
-int fnmatchemu(const char *pattern, const char *string, int flags)
+int fnmatch(const char *pattern, const char *string, int flags)
 {
     static const char dummystring[2] = {' ', 0};
     const int escape = !(flags & FNM_NOESCAPE);
     const int slash = !!(flags & FNM_PATHNAME);
-    const int leading_dir = !!(flags & FNM_LEADING_DIR);
     const char *strendseg;
     const char *dummyptr;
     const char *matchptr;
@@ -463,16 +462,13 @@ firstsegment:
             }
         }
 
-        if (*string && !((slash || leading_dir) && (*string == '/')))
+        if (*string && !(slash && (*string == '/')))
             return FNM_NOMATCH;
 
         if (*pattern && !(slash && ((*pattern == '/')
                                     || (escape && (*pattern == '\\')
                                                && (pattern[1] == '/')))))
             return FNM_NOMATCH;
-
-        if (leading_dir && !*pattern && *string == '/')
-            return 0;
     }
 
     /* Where both pattern and string are at EOS, declare success
