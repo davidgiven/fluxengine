@@ -90,7 +90,6 @@
  * path delimiter must be aware that 0x5C is NOT unique within SHIFT-JIS.
  */
 
-#include <fnmatch.h>
 #include <string.h>
 #include <ctype.h>
 #include <limits.h>
