@@ -12,7 +12,7 @@
 #include "track.h"
 #include "fmt/format.h"
 
-static FlagGroup flags;
+static FlagGroup flags { &readerFlags };
 
 static SettableFlag dumpFluxFlag(
 	{ "--dump-flux", "-F" },
