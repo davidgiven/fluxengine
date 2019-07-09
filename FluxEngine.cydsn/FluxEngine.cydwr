@@ -553,6 +553,7 @@
       <Data key="4a398466-709f-4228-9500-96178658e13e" value="RDATA" />
       <Data key="5a3407c1-b434-4438-a7b4-b9dfd2280495" value="MOTEA" />
       <Data key="8d318d8b-cf7b-4b6b-b02c-ab1c5c49d0ba" value="SW1" />
+      <Data key="12e00eac-69b5-4717-85c8-25ef6b224d4c" value="DEBUG_PINS" />
       <Data key="41e2d8ed-5494-4d8c-8ff7-f4f789cece51" value="REDWC" />
       <Data key="264be2d3-9481-494b-8d9c-c1905a45e9cc" value="FDD" />
       <Data key="472f8fdb-f772-44fb-8897-cc690694237b" value="WDATA" />
@@ -3674,6 +3675,17 @@
     <Group key="8d318d8b-cf7b-4b6b-b02c-ab1c5c49d0ba">
       <Group key="0">
         <Data key="Port Format" value="2,2" />
+      </Group>
+    </Group>
+    <Group key="12e00eac-69b5-4717-85c8-25ef6b224d4c">
+      <Group key="0">
+        <Data key="Port Format" value="2,2" />
+      </Group>
+      <Group key="1">
+        <Data key="Port Format" value="2,3" />
+      </Group>
+      <Group key="2">
+        <Data key="Port Format" value="2,4" />
       </Group>
     </Group>
     <Group key="41e2d8ed-5494-4d8c-8ff7-f4f789cece51">
