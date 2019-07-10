@@ -211,6 +211,14 @@ buildprogram fluxtovcd \
     libbackend.a \
     libfmt.a \
 
+buildlibrary libfluxtoau.a \
+    tools/fluxtoau.cc \
+
+buildprogram fluxtoau \
+    libfluxtoau.a \
+    libbackend.a \
+    libfmt.a \
+
 runtest dataspec-test       tests/dataspec.cc
 runtest flags-test          tests/flags.cc
 runtest fmmfm-test          tests/fmmfm.cc

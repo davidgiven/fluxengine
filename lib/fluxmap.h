@@ -21,6 +21,7 @@ public:
 
 public:
     nanoseconds_t duration() const { return _duration; }
+    unsigned ticks() const { return _ticks; }
     size_t bytes() const { return _bytes.size(); }
     const Bytes& rawBytes() const { return _bytes; }
 
