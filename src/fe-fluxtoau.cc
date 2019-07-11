@@ -10,7 +10,7 @@
 #include "fmt/format.h"
 #include <fstream>
 
-FlagGroup flags { &hardwareFluxSourceFlags };
+static FlagGroup flags { &hardwareFluxSourceFlags };
 
 static DataSpecFlag source(
     { "--source", "-s" },
@@ -30,7 +30,7 @@ static SettableFlag withIndex(
     { "--with-index" },
     "place index markers in the right hand channel");
 
-int main(int argc, const char* argv[])
+int mainConvertFluxToAu(int argc, const char* argv[])
 {
     flags.parseFlags(argc, argv);
 
@@ -94,5 +94,7 @@ int main(int argc, const char* argv[])
         of.write((const char*) data.cbegin(), data.size());
     }
 
+    std::cerr << "Done. Warning: do not play this file, or you will break your speakers"
+	         " and/or ears!\n";
     return 0;
 }

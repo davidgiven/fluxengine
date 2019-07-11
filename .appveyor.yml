@@ -15,7 +15,7 @@ install:
 
 build_script:
   - make
-  - zip -9 fluxengine.zip fluxengine.exe brother120tool.exe cwftoflux.exe fluxtovcd.exe fluxtoau.exe
+  - zip -9 fluxengine.zip fluxengine.exe brother120tool.exe
 
 artifacts:
   - path: fluxengine.zip
