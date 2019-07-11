@@ -15,6 +15,7 @@ public:
 private:
     nanoseconds_t _clock;
     int _currentSector;
+    int _logicalTrack;
 };
 
 #endif
