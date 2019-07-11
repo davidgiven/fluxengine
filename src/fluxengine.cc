@@ -3,6 +3,7 @@
 typedef int command_cb(int agrc, const char* argv[]);
 
 extern command_cb mainErase;
+extern command_cb mainConvertCwfToFlux;
 extern command_cb mainInspect;
 extern command_cb mainReadADFS;
 extern command_cb mainReadAESLanier;
@@ -15,9 +16,9 @@ extern command_cb mainReadDFS;
 extern command_cb mainReadF85;
 extern command_cb mainReadFB100;
 extern command_cb mainReadIBM;
-extern command_cb mainReadVictor9K;
 extern command_cb mainReadMac;
 extern command_cb mainReadMx;
+extern command_cb mainReadVictor9K;
 extern command_cb mainReadZilogMCZ;
 extern command_cb mainRpm;
 extern command_cb mainSeek;
@@ -36,16 +37,18 @@ struct Command
 
 static command_cb mainRead;
 static command_cb mainWrite;
+static command_cb mainConvert;
 
 static std::vector<Command> commands =
 {
     { "erase",             mainErase,             "Permanently but rapidly erases some or all of a disk." },
+    { "convert",           mainConvert,           "Converts various types of data file.", },
     { "inspect",           mainInspect,           "Low-level analysis and inspection of a disk." },
+    { "read",              mainRead,              "Reads a disk, producing a sector image.", },
     { "rpm",               mainRpm,               "Measures the disk rotational speed.", },
     { "seek",              mainSeek,              "Moves the disk head.", },
     { "testbulktransport", mainTestBulkTransport, "Measures your USB bandwidth.", },
     { "upgradefluxfile",   mainUpgradeFluxFile,   "Upgrades a flux file from a previous version of this software.", },
-    { "read",              mainRead,              "Reads a disk, producing a sector image.", },
     { "write",             mainWrite,             "Writes a sector image to a disk.", },
     { "writeflux",         mainWriteFlux,         "Writes a raw flux file. Warning: you can't use this to copy disks.", },
     { "writetestpattern",  mainWriteTestPattern,  "Writes a machine-generated test pattern to a disk.", },
@@ -75,10 +78,15 @@ static std::vector<Command> writeables =
     { "brother",       mainWriteBrother,  "Writes 120kB and 240kB Brother word processor disks.", },
 };
 
-static void readWriteHelp(std::vector<Command>& subcommands, const std::string& command)
+static std::vector<Command> convertables =
+{
+    { "cwftoflux",     mainConvertCwfToFlux, "Converts CatWeasel stream files to flux.", },
+};
+
+static void extendedHelp(std::vector<Command>& subcommands, const std::string& command)
 {
     std::cout << "fluxengine: syntax: fluxengine " << command << " <format> [<flags>...]\n"
-                 "These formats are supported:\n";
+                 "These subcommands are supported:\n";
 
     for (Command& c : subcommands)
         std::cout << "  " << c.name << ": " << c.help << "\n";
@@ -86,15 +94,15 @@ static void readWriteHelp(std::vector<Command>& subcommands, const std::string& 
     exit(0);
 }
 
-static int mainReadWrite(std::vector<Command>& subcommands, const std::string& command,
+static int mainExtended(std::vector<Command>& subcommands, const std::string& command,
          int argc, const char* argv[])
 {
     if (argc == 1)
-        readWriteHelp(subcommands, command);
+        extendedHelp(subcommands, command);
 
     std::string format = argv[1];
     if (format == "--help")
-        readWriteHelp(subcommands, command);
+        extendedHelp(subcommands, command);
 
     for (Command& c : subcommands)
     {
@@ -107,10 +115,13 @@ static int mainReadWrite(std::vector<Command>& subcommands, const std::string& c
 }
 
 static int mainRead(int argc, const char* argv[])
-{ return mainReadWrite(readables, "read", argc, argv); }
+{ return mainExtended(readables, "read", argc, argv); }
 
 static int mainWrite(int argc, const char* argv[])
-{ return mainReadWrite(writeables, "write", argc, argv); }
+{ return mainExtended(writeables, "write", argc, argv); }
+
+static int mainConvert(int argc, const char* argv[])
+{ return mainExtended(convertables, "convert", argc, argv); }
 
 static void help()
 {

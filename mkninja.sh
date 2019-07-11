@@ -180,6 +180,7 @@ buildlibrary libbackend.a \
 
 buildlibrary libfrontend.a \
     src/fe-erase.cc \
+    src/fe-cwftoflux.cc \
     src/fe-inspect.cc \
     src/fe-readadfs.cc \
     src/fe-readaeslanier.cc \
@@ -218,11 +219,6 @@ buildsimpleprogram brother120tool \
     tools/brother120tool.cc \
     libbackend.a \
     libemu.a \
-    libfmt.a \
-
-buildsimpleprogram cwftoflux \
-    tools/cwftoflux.cc \
-    libbackend.a \
     libfmt.a \
 
 buildsimpleprogram fluxtovcd \

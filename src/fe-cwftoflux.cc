@@ -37,7 +37,7 @@ static double clockRate;
 
 static void syntax()
 {
-    std::cout << "Syntax: cwftoflux <cwffile> <fluxfile>\n";
+    std::cout << "Syntax: fluxengine convert cwftoflux <cwffile> <fluxfile>\n";
     exit(0);
 }
 
@@ -116,7 +116,7 @@ static void read_track()
     sqlWriteFlux(outputDb, track_number, trackheader.side, fluxmap);
 }
 
-int main(int argc, const char* argv[])
+int mainConvertCwfToFlux(int argc, const char* argv[])
 {
     if (argc != 3)
         syntax();
