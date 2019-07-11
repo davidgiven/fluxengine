@@ -89,6 +89,33 @@ buildprogram() {
     echo build $prog$EXTENSION : strip $prog-debug$EXTENSION
 }
 
+buildsimpleprogram() {
+	local prog
+	prog=$1
+	shift
+
+    local flags
+    flags=
+    while true; do
+        case $1 in
+            -*)
+                flags="$flags $1"
+                shift
+                ;;
+
+            *)
+                break
+        esac
+    done
+
+	local src
+	src=$1
+	shift
+
+	buildlibrary lib$prog.a $flags $src
+	buildprogram $prog lib$prog.a "$@"
+}
+
 runtest() {
     local prog
     prog=$1
@@ -183,39 +210,28 @@ buildprogram fluxengine \
     libbackend.a \
     libfmt.a \
 
-buildlibrary libbrother120tool.a \
-    -Idep/emu \
-    tools/brother120tool.cc \
-
 buildlibrary libemu.a \
     dep/emu/fnmatch.c
 
-buildprogram brother120tool \
-    libbrother120tool.a \
+buildsimpleprogram brother120tool \
+	-Idep/fmt \
+    tools/brother120tool.cc \
+    libbackend.a \
     libemu.a \
     libfmt.a \
 
-buildlibrary libcwftoflux.a \
+buildsimpleprogram cwftoflux \
     tools/cwftoflux.cc \
-
-buildprogram cwftoflux \
-    libcwftoflux.a \
     libbackend.a \
     libfmt.a \
 
-buildlibrary libfluxtovcd.a \
+buildsimpleprogram fluxtovcd \
     tools/fluxtovcd.cc \
-
-buildprogram fluxtovcd \
-    libfluxtovcd.a \
     libbackend.a \
     libfmt.a \
 
-buildlibrary libfluxtoau.a \
+buildsimpleprogram fluxtoau \
     tools/fluxtoau.cc \
-
-buildprogram fluxtoau \
-    libfluxtoau.a \
     libbackend.a \
     libfmt.a \
 
