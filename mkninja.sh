@@ -181,6 +181,7 @@ buildlibrary libbackend.a \
 buildlibrary libfrontend.a \
     src/fe-cwftoflux.cc \
     src/fe-erase.cc \
+    src/fe-fluxtoau.cc \
     src/fe-fluxtovcd.cc \
     src/fe-inspect.cc \
     src/fe-readadfs.cc \
@@ -220,11 +221,6 @@ buildsimpleprogram brother120tool \
     tools/brother120tool.cc \
     libbackend.a \
     libemu.a \
-    libfmt.a \
-
-buildsimpleprogram fluxtoau \
-    tools/fluxtoau.cc \
-    libbackend.a \
     libfmt.a \
 
 runtest dataspec-test       tests/dataspec.cc
