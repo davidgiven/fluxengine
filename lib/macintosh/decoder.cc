@@ -153,6 +153,9 @@ void MacintoshDecoder::decodeSectorRecord()
     uint8_t formatByte = decode_data_gcr(header[3]);
     uint8_t wantedsum = decode_data_gcr(header[4]);
 
+    if (encodedSector > 11)
+        return;
+
     _sector->logicalTrack = _track->physicalTrack;
     _sector->logicalSide = decode_side(encodedSide);
     _sector->logicalSector = encodedSector;
