@@ -89,7 +89,7 @@ people who've had it work).
 | [Brother 120kB](doc/disk-brother.md)     |  🦄   |        |                                     |
 | [Brother 240kB](doc/disk-brother.md)     |  🦄   |   🦄   |                                     |
 | [Brother FB-100](doc/disk-fb100.md)      |  🦖   |        | Tandy Model 100, Husky Hunter, knitting machines |
-| [Macintosh 800kB](doc/disk-macintosh.md) |  🦖   |        | and probably the 400kB too          |
+| [Macintosh 800kB](doc/disk-macintosh.md) |  🦄   |        | and probably the 400kB too          |
 | [TRS-80](doc/disk-trs80.md)              |  🦖   |        | a minor variation of the IBM scheme |
 {: .datatable }
 
@@ -105,6 +105,7 @@ at least, check the CRC so what data's there is probably good.
 |:-----------------------------------------|:-----:|:------:|-------|
 | [AES Superplus / No Problem](doc/disk-aeslanier.md) |  🦖   | | hard sectors! |
 | [Durango F85](doc/disk-durangof85.md)    |  🦖   |        | 5.25" |
+| [DVK MX](doc/disk-mx.md)                 |  🦖   |        | Soviet PDP-11 clone |
 | [Victor 9000](doc/disk-victor9k.md)      |  🦖   |        | 8-inch        |
 | [Zilog MCZ](doc/disk-zilogmcz.md)        |  🦖   |        | 8-inch _and_ hard sectors |
 {: .datatable }
@@ -189,7 +190,7 @@ Jonathan Müller (`foonathan <https://github.com/foonathan>`) with
 contributions from many other people. It is licensed under the terms of the
 BSD license. Please see the contents of the directory for the full text.
 
-As an exception, `dep/fnmatchemu` contains parts of the OpenBSD C library
+As an exception, `dep/emu` contains parts of the OpenBSD C library
 code, Todd Miller and William A. Rowe (and probably others). It is licensed
 under the terms of the 3-clause BSD license. Please see the contents of the
 directory for the full text. It's been lightly modified by me.
