@@ -26,7 +26,7 @@ static SettableFlag highDensityFlag(
     { "--high-density", "--hd" },
     "set the drive to high density mode");
 
-int main(int argc, const char* argv[])
+int mainConvertFluxToVcd(int argc, const char* argv[])
 {
     flags.parseFlags(argc, argv);
 

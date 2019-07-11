@@ -179,8 +179,9 @@ buildlibrary libbackend.a \
     lib/zilogmcz/decoder.cc \
 
 buildlibrary libfrontend.a \
-    src/fe-erase.cc \
     src/fe-cwftoflux.cc \
+    src/fe-erase.cc \
+    src/fe-fluxtovcd.cc \
     src/fe-inspect.cc \
     src/fe-readadfs.cc \
     src/fe-readaeslanier.cc \
@@ -219,11 +220,6 @@ buildsimpleprogram brother120tool \
     tools/brother120tool.cc \
     libbackend.a \
     libemu.a \
-    libfmt.a \
-
-buildsimpleprogram fluxtovcd \
-    tools/fluxtovcd.cc \
-    libbackend.a \
     libfmt.a \
 
 buildsimpleprogram fluxtoau \

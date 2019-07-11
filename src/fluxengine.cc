@@ -4,6 +4,7 @@ typedef int command_cb(int agrc, const char* argv[]);
 
 extern command_cb mainErase;
 extern command_cb mainConvertCwfToFlux;
+extern command_cb mainConvertFluxToVcd;
 extern command_cb mainInspect;
 extern command_cb mainReadADFS;
 extern command_cb mainReadAESLanier;
@@ -81,6 +82,7 @@ static std::vector<Command> writeables =
 static std::vector<Command> convertables =
 {
     { "cwftoflux",     mainConvertCwfToFlux, "Converts CatWeasel stream files to flux.", },
+    { "fluxtovcd",     mainConvertFluxToVcd, "Converts (one track of a) flux file to a VCD file.", },
 };
 
 static void extendedHelp(std::vector<Command>& subcommands, const std::string& command)
