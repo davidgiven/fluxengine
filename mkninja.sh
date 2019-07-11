@@ -217,7 +217,7 @@ buildlibrary libemu.a \
     dep/emu/fnmatch.c
 
 buildsimpleprogram brother120tool \
-	-Idep/fmt \
+	-Idep/emu \
     tools/brother120tool.cc \
     libbackend.a \
     libemu.a \
