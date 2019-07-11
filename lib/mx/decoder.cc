@@ -37,7 +37,7 @@ AbstractDecoder::RecordType MxDecoder::advanceToNextRecord()
         const FluxMatcher* matcher = nullptr;
         _sector->clock = _clock = _fmr->seekToPattern(ID_PATTERN, matcher);
         readRawBits(32); /* skip the ID mark */
-        readRawBits(32); /* skip the track number */
+        _logicalTrack = decodeFmMfm(readRawBits(32)).reader().read_be16();
     }
     else if (_currentSector == 10)
     {
@@ -67,7 +67,7 @@ void MxDecoder::decodeSectorRecord()
         gotChecksum += br.read_le16();
     uint16_t wantChecksum = br.read_le16();
 
-    _sector->logicalTrack = _track->physicalTrack;
+    _sector->logicalTrack = _logicalTrack;
     _sector->logicalSide = _track->physicalSide;
     _sector->logicalSector = _currentSector;
     _sector->data = bytes.slice(0, SECTOR_SIZE);
