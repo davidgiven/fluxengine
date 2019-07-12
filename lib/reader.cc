@@ -160,8 +160,9 @@ void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename
 					track->rawrecords.size(),
 					track->sectors.size());
 				if (track->sectors.size() > 0)
-					std::cout << fmt::format("{:.2f}us clock; ",
-						track->sectors.begin()->clock / 1000.0);
+					std::cout << fmt::format("{:.2f}us clock ({:.0f}kHz); ",
+						track->sectors.begin()->clock / 1000.0,
+                        1000000.0 / track->sectors.begin()->clock);
 
 				for (auto& sector : track->sectors)
 				{
