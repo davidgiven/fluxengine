@@ -4,6 +4,7 @@
 #include "sector.h"
 #include "sectorset.h"
 #include "decoders/decoders.h"
+#include "encoders/encoders.h"
 #include "brother/brother.h"
 #include "image.h"
 #include "writer.h"

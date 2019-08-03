@@ -22,6 +22,12 @@ public:
     void decodeDataRecord();
 };
 
+class BrotherEncoder : public AbstractEncoder
+{
+public:
+	virtual ~BrotherEncoder() {}
+};
+
 extern void writeBrotherSectorHeader(std::vector<bool>& bits, unsigned& cursor,
 		int track, int sector);
 extern void writeBrotherSectorData(std::vector<bool>& bits, unsigned& cursor,
