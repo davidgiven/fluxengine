@@ -137,13 +137,20 @@ buildlibrary libfmt.a \
     dep/fmt/posix.cc \
 
 buildlibrary libbackend.a \
-    lib/aeslanier/decoder.cc \
-    lib/amiga/decoder.cc \
-    lib/apple2/decoder.cc \
-    lib/brother/decoder.cc \
-    lib/brother/encoder.cc \
+    arch/aeslanier/decoder.cc \
+    arch/amiga/decoder.cc \
+    arch/apple2/decoder.cc \
+    arch/brother/decoder.cc \
+    arch/brother/encoder.cc \
+    arch/c64/decoder.cc \
+    arch/f85/decoder.cc \
+    arch/fb100/decoder.cc \
+    arch/ibm/decoder.cc \
+    arch/macintosh/decoder.cc \
+    arch/mx/decoder.cc \
+    arch/victor9k/decoder.cc \
+    arch/zilogmcz/decoder.cc \
     lib/bytes.cc \
-    lib/c64/decoder.cc \
     lib/common/crunch.c \
     lib/crc.cc \
     lib/dataspec.cc \
@@ -151,8 +158,6 @@ buildlibrary libbackend.a \
     lib/decoders/fluxmapreader.cc \
     lib/decoders/fmmfm.cc \
     lib/encoders/encoders.cc \
-    lib/f85/decoder.cc \
-    lib/fb100/decoder.cc \
     lib/flags.cc \
     lib/fluxmap.cc \
     lib/fluxsink/fluxsink.cc \
@@ -165,18 +170,13 @@ buildlibrary libbackend.a \
     lib/fluxsource/streamfluxsource.cc \
     lib/globals.cc \
     lib/hexdump.cc \
-    lib/ibm/decoder.cc \
     lib/image.cc \
-    lib/macintosh/decoder.cc \
-    lib/mx/decoder.cc \
     lib/reader.cc \
     lib/sector.cc \
     lib/sectorset.cc \
     lib/sql.cc \
     lib/usb.cc \
-    lib/victor9k/decoder.cc \
     lib/writer.cc \
-    lib/zilogmcz/decoder.cc \
 
 buildlibrary libfrontend.a \
     src/fe-cwftoflux.cc \
