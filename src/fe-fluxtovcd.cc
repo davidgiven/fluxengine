@@ -30,14 +30,15 @@ int mainConvertFluxToVcd(int argc, const char* argv[])
 {
     flags.parseFlags(argc, argv);
 
-    const auto& locations = source.get().locations;
+    const FluxSpec spec(source);
+    const auto& locations = spec.locations;
     if (locations.size() != 1)
         Error() << "the source dataspec must contain exactly one track (two sides count as two tracks)";
     const auto& location = *(locations.begin());
 
     std::cerr << "Reading source flux...\n";
     setHardwareFluxSourceDensity(highDensityFlag);
-    std::shared_ptr<FluxSource> fluxsource = FluxSource::create(source);
+    std::shared_ptr<FluxSource> fluxsource = FluxSource::create(spec);
     const auto& fluxmap = fluxsource->readFlux(location.track, location.side);
 
     std::cerr << "Writing destination VCD...\n";

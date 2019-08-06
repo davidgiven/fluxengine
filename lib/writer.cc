@@ -36,9 +36,9 @@ void setWriterDefaultDest(const std::string& dest)
 void writeTracks(
 	const std::function<std::unique_ptr<Fluxmap>(int track, int side)> producer)
 {
-    const DataSpec& spec = dest;
+    const FluxSpec spec(dest);
 
-    std::cout << "Writing to: " << spec << std::endl;
+    std::cout << "Writing to: " << dest << std::endl;
 
 	setHardwareFluxSourceDensity(highDensityFlag);
 	setHardwareFluxSinkDensity(highDensityFlag);

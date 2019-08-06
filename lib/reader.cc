@@ -71,9 +71,9 @@ void Track::readFluxmap()
 
 std::vector<std::unique_ptr<Track>> readTracks()
 {
-    const DataSpec& dataSpec = source;
+    const FluxSpec spec(source);
 
-    std::cout << "Reading from: " << dataSpec << std::endl;
+    std::cout << "Reading from: " << source << std::endl;
 
 	setHardwareFluxSourceDensity(highDensityFlag);
 
@@ -92,10 +92,10 @@ std::vector<std::unique_ptr<Track>> readTracks()
 		);
 	}
 
-	std::shared_ptr<FluxSource> fluxSource = FluxSource::create(dataSpec);
+	std::shared_ptr<FluxSource> fluxSource = FluxSource::create(spec);
 
 	std::vector<std::unique_ptr<Track>> tracks;
-    for (const auto& location : dataSpec.locations)
+    for (const auto& location : spec.locations)
 	{
 		auto track = std::make_unique<Track>(location.track, location.side);
 		track->fluxsource = fluxSource;

@@ -74,28 +74,54 @@ void DataSpec::set(const std::string& spec)
     filename = words[0];
     if (words.size() > 1)
     {
-        locations.clear();
-
         for (size_t i = 1; i < words.size(); i++)
         {
             auto mod = parseMod(words[i]);
-            if ((mod.name != "t") && (mod.name != "s") && (mod.name != "d"))
-                Error() << fmt::format("unknown data modifier '{}'", mod.name);
             modifiers[mod.name] = mod;
         }
+    }
+}
 
-        const auto& drives = modifiers["d"].data;
-        if (drives.size() != 1)
-            Error() << "you must specify exactly one drive";
-        drive = *drives.begin();
+FluxSpec::FluxSpec(const DataSpec& spec)
+{
+    filename = spec.filename;
 
-        const auto& tracks = modifiers["t"].data;
-        const auto& sides = modifiers["s"].data;
-        for (auto track : tracks)
-        {
-            for (auto side : sides)
-                locations.push_back({ drive, track, side });
-        }
+    locations.clear();
+
+    const auto& drives = spec.modifiers.at("d").data;
+    if (drives.size() != 1)
+        Error() << "you must specify exactly one drive";
+    drive = *drives.begin();
+
+    const auto& tracks = spec.modifiers.at("t").data;
+    const auto& sides = spec.modifiers.at("s").data;
+    for (auto track : tracks)
+    {
+        for (auto side : sides)
+            locations.push_back({ drive, track, side });
+    }
+
+    for (const auto& e : spec.modifiers)
+    {
+        const auto name = e.second.name;
+        if ((name != "t") && (name != "s") && (name != "d"))
+            Error() << fmt::format("unknown fluxspec modifier '{}'", name);
+    }
+}
+
+ImageSpec::ImageSpec(const DataSpec& spec)
+{
+    filename = spec.filename;
+
+    tracks = spec.modifiers.at("t").only();
+    heads = spec.modifiers.at("h").only();
+    sectors = spec.modifiers.at("s").only();
+
+    for (const auto& e : spec.modifiers)
+    {
+        const auto name = e.second.name;
+        if ((name != "t") && (name != "h") && (name != "s"))
+            Error() << fmt::format("unknown fluxspec modifier '{}'", name);
     }
 }
 

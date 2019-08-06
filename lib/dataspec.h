@@ -4,19 +4,6 @@
 class DataSpec
 {
 public:
-    struct Location
-    {
-        unsigned drive;
-        unsigned track;
-        unsigned side;
-
-        bool operator == (const Location& other) const
-        { return (drive == other.drive) && (track == other.track) && (side == other.side); }
-
-        bool operator != (const Location& other) const
-        { return (drive != other.drive) || (track != other.track) || (side != other.side); }
-    };
-
     struct Modifier
     {
         std::string name;
@@ -28,6 +15,13 @@ public:
 
         bool operator != (const Modifier& other) const
         { return (name != other.name) || (data != other.data); }
+
+        unsigned only() const
+        {
+            if (data.size() != 1)
+                Error() << "modifier " << name << " can only have one value";
+            return *(data.begin());
+        }
     };
 
 public:
@@ -44,9 +38,43 @@ public:
 
     std::string filename;
     std::map<std::string, Modifier> modifiers;
+};
+
+class FluxSpec
+{
+public:
+    struct Location
+    {
+        unsigned drive;
+        unsigned track;
+        unsigned side;
+
+        bool operator == (const Location& other) const
+        { return (drive == other.drive) && (track == other.track) && (side == other.side); }
+
+        bool operator != (const Location& other) const
+        { return (drive != other.drive) || (track != other.track) || (side != other.side); }
+    };
+
+public:
+    FluxSpec(const DataSpec& dataspec);
+
+public:
+    std::string filename;
     std::vector<Location> locations;
     unsigned drive;
-    unsigned revolutions;
+};
+
+class ImageSpec
+{
+public:
+    ImageSpec(const DataSpec& dataspec);
+
+public:
+    std::string filename;
+    unsigned tracks;
+    unsigned heads;
+    unsigned sectors;
 };
 
 static inline std::ostream& operator << (std::ostream& os, const DataSpec& dataSpec)
