@@ -6,6 +6,8 @@
 extern FlagGroup writerFlags;
 
 class Fluxmap;
+class AbstractEncoder;
+class Geometry;
 
 extern void setWriterDefaultDest(const std::string& dest);
 
@@ -15,5 +17,7 @@ extern void fillBitmapTo(std::vector<bool>& bitmap,
 		unsigned& cursor, unsigned terminateAt,
 		const std::vector<bool>& pattern);
 	
+extern void writeDiskCommand(
+    AbstractEncoder& encoder, const Geometry& geometry, const std::string& inputFilename);
 
 #endif

@@ -150,7 +150,7 @@ buildlibrary libbackend.a \
     lib/decoders/decoders.cc \
     lib/decoders/fluxmapreader.cc \
     lib/decoders/fmmfm.cc \
-    lib/encoder.cc \
+    lib/encoders/encoders.cc \
     lib/f85/decoder.cc \
     lib/fb100/decoder.cc \
     lib/flags.cc \

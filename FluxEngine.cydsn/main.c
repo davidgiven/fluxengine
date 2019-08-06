@@ -306,6 +306,7 @@ static void cmd_read(struct read_frame* f)
     dma_underrun = false;
     int count = 0;
     SAMPLER_CONTROL_Write(0); /* !reset */
+    CAPTURE_CONTROL_Write(1);
     CyDmaChSetInitialTd(dma_channel, td[dma_writing_to_td]);
     CyDmaClearPendingDrq(dma_channel);
     CyDmaChEnable(dma_channel, 1);
@@ -364,7 +365,8 @@ static void cmd_read(struct read_frame* f)
         }
         dma_reading_from_td = NEXT_BUFFER(dma_reading_from_td);
     }
-abort:
+abort:;
+    CAPTURE_CONTROL_Write(0);
     CyDmaChSetRequest(dma_channel, CY_DMA_CPU_TERM_CHAIN);
     while (CyDmaChGetRequest(dma_channel))
         ;

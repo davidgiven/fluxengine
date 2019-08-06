@@ -3,6 +3,7 @@
 #include "fluxmap.h"
 #include "decoders/fluxmapreader.h"
 #include "decoders/decoders.h"
+#include "encoders/encoders.h"
 #include "record.h"
 #include "brother.h"
 #include "sector.h"
