@@ -6,9 +6,14 @@
 #include "protocol.h"
 #include "usb.h"
 #include "dataspec.h"
+#include "encoders/encoders.h"
 #include "fluxsource/fluxsource.h"
 #include "fluxsink/fluxsink.h"
 #include "fmt/format.h"
+#include "record.h"
+#include "image.h"
+#include "sector.h"
+#include "sectorset.h"
 
 FlagGroup writerFlags { &hardwareFluxSourceFlags };
 
@@ -60,10 +65,12 @@ void writeTracks(
         {
             if (!outdb)
             {
-                std::cout << "erasing" << std::endl;
+                std::cout << "erasing\n";
                 usbSeek(location.track);
                 usbErase(location.side);
             }
+            else
+                std::cout << "skipping\n";
         }
         else
         {
@@ -96,3 +103,16 @@ void fillBitmapTo(std::vector<bool>& bitmap,
 	}
 }
 
+void writeDiskCommand(
+    AbstractEncoder& encoder, const Geometry& geometry, const std::string& inputFilename)
+{
+    SectorSet allSectors;
+
+	readSectorsFromFile(allSectors, geometry, inputFilename);
+	writeTracks(
+		[&](int track, int side) -> std::unique_ptr<Fluxmap>
+		{
+			return encoder.encode(track, side, allSectors);
+		}
+	);
+}

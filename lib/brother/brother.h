@@ -9,6 +9,9 @@
 #define BROTHER_DATA_RECORD_CHECKSUM     3
 #define BROTHER_DATA_RECORD_ENCODED_SIZE 415
 
+#define BROTHER_TRACKS_PER_DISK          78
+#define BROTHER_SECTORS_PER_TRACK        12
+
 class Sector;
 class Fluxmap;
 
@@ -26,11 +29,11 @@ class BrotherEncoder : public AbstractEncoder
 {
 public:
 	virtual ~BrotherEncoder() {}
+
+public:
+    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors);
 };
 
-extern void writeBrotherSectorHeader(std::vector<bool>& bits, unsigned& cursor,
-		int track, int sector);
-extern void writeBrotherSectorData(std::vector<bool>& bits, unsigned& cursor,
-		const Bytes& data);
+extern FlagGroup brotherEncoderFlags;
 
 #endif
