@@ -79,6 +79,8 @@ class ImageSpec
 {
 public:
     ImageSpec(const DataSpec& dataspec);
+    ImageSpec(const std::string filename,
+        unsigned cylinders, unsigned heads, unsigned sectors, unsigned bytes);
 
 public:
     std::string filename;

@@ -171,6 +171,16 @@ ImageSpec::ImageSpec(const DataSpec& spec)
     }
 }
 
+ImageSpec::ImageSpec(const std::string filename,
+        unsigned cylinders, unsigned heads, unsigned sectors, unsigned bytes):
+    filename(filename),
+    cylinders(cylinders),
+    heads(heads),
+    sectors(sectors),
+    bytes(bytes),
+    initialised(true)
+{}
+
 DataSpec::operator std::string(void) const
 {
     std::stringstream ss;

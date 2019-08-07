@@ -168,6 +168,8 @@ buildlibrary libbackend.a \
     lib/fluxsource/kryoflux.cc \
     lib/fluxsource/sqlitefluxsource.cc \
     lib/fluxsource/streamfluxsource.cc \
+	lib/imagewriter/imagewriter.cc \
+	lib/imagewriter/imgimagewriter.cc \
     lib/globals.cc \
     lib/hexdump.cc \
     lib/image.cc \
