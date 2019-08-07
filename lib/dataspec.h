@@ -1,6 +1,13 @@
 #ifndef DATASPEC_H
 #define DATASPEC_H
 
+class MissingModifierException : public std::runtime_error
+{
+public:
+    MissingModifierException(const std::string& mod);
+    const std::string mod;
+};
+
 class DataSpec
 {
 public:
@@ -35,6 +42,9 @@ public:
 
     void set(const std::string& spec);
     operator std::string () const;
+
+    const Modifier& at(const std::string& mod) const;
+    bool has(const std::string& mod) const;
 
     std::string filename;
     std::map<std::string, Modifier> modifiers;
@@ -72,9 +82,11 @@ public:
 
 public:
     std::string filename;
-    unsigned tracks;
+    unsigned cylinders;
     unsigned heads;
     unsigned sectors;
+    unsigned bytes;
+    bool initialised : 1;
 };
 
 static inline std::ostream& operator << (std::ostream& os, const DataSpec& dataSpec)

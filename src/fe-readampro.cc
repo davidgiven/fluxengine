@@ -12,11 +12,6 @@
 
 static FlagGroup flags { &readerFlags };
 
-static StringFlag outputFilename(
-    { "--output", "-o" },
-    "The output image file to write to.",
-    "ampro.img");
-
 static IntFlag sectorIdBase(
 	{ "--sector-id-base" },
 	"Sector ID of the first sector.",
@@ -25,11 +20,12 @@ static IntFlag sectorIdBase(
 int mainReadAmpro(int argc, const char* argv[])
 {
 	setReaderDefaultSource(":t=0-79:s=0");
+	setReaderDefaultOutput("ampro.adf");
     setReaderRevolutions(2);
     flags.parseFlags(argc, argv);
 
 	IbmDecoder decoder(sectorIdBase);
-	readDiskCommand(decoder, outputFilename);
+	readDiskCommand(decoder);
     return 0;
 }
 

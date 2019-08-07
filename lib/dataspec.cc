@@ -5,6 +5,11 @@
 #include <regex>
 #include <sstream>
 
+MissingModifierException::MissingModifierException(const std::string& mod):
+    mod(mod),
+    std::runtime_error(fmt::format("missing mandatory modifier '{}'", mod))
+{}
+
 std::vector<std::string> DataSpec::split(
         const std::string& s, const std::string& delimiter)
 {
@@ -82,45 +87,86 @@ void DataSpec::set(const std::string& spec)
     }
 }
 
+const DataSpec::Modifier& DataSpec::at(const std::string& mod) const
+{
+    try
+    {
+        return modifiers.at(mod);
+    }
+    catch (const std::out_of_range& e)
+    {
+        throw MissingModifierException(mod);
+    }
+}
+
+bool DataSpec::has(const std::string& mod) const
+{
+    return modifiers.find(mod) != modifiers.end();
+}
+
 FluxSpec::FluxSpec(const DataSpec& spec)
 {
-    filename = spec.filename;
-
-    locations.clear();
-
-    const auto& drives = spec.modifiers.at("d").data;
-    if (drives.size() != 1)
-        Error() << "you must specify exactly one drive";
-    drive = *drives.begin();
-
-    const auto& tracks = spec.modifiers.at("t").data;
-    const auto& sides = spec.modifiers.at("s").data;
-    for (auto track : tracks)
+    try 
     {
-        for (auto side : sides)
-            locations.push_back({ drive, track, side });
+        filename = spec.filename;
+
+        locations.clear();
+
+        const auto& drives = spec.at("d").data;
+        if (drives.size() != 1)
+            Error() << "you must specify exactly one drive";
+        drive = *drives.begin();
+
+        const auto& tracks = spec.at("t").data;
+        const auto& sides = spec.at("s").data;
+        for (auto track : tracks)
+        {
+            for (auto side : sides)
+                locations.push_back({ drive, track, side });
+        }
+
+        for (const auto& e : spec.modifiers)
+        {
+            const auto name = e.second.name;
+            if ((name != "t") && (name != "s") && (name != "d"))
+                Error() << fmt::format("unknown fluxspec modifier '{}'", name);
+        }
     }
-
-    for (const auto& e : spec.modifiers)
+    catch (const MissingModifierException& e)
     {
-        const auto name = e.second.name;
-        if ((name != "t") && (name != "s") && (name != "d"))
-            Error() << fmt::format("unknown fluxspec modifier '{}'", name);
+        Error() << e.what() << " in fluxspec '" << spec << "'";
     }
 }
 
 ImageSpec::ImageSpec(const DataSpec& spec)
 {
-    filename = spec.filename;
+    try
+    {
+        filename = spec.filename;
 
-    tracks = spec.modifiers.at("t").only();
-    heads = spec.modifiers.at("h").only();
-    sectors = spec.modifiers.at("s").only();
+        if (!spec.has("c") && !spec.has("h") && !spec.has("s") && !spec.has("b"))
+        {
+            cylinders = heads = sectors = bytes = 0;
+            initialised = false;
+        }
+        else
+        {
+            cylinders = spec.at("c").only();
+            heads = spec.at("h").only();
+            sectors = spec.at("s").only();
+            bytes = spec.at("b").only();
+            initialised = true;
+        }
+    }
+    catch (const MissingModifierException& e)
+    {
+        Error() << e.what() << " in imagespec '" << spec << "'";
+    }
 
     for (const auto& e : spec.modifiers)
     {
         const auto name = e.second.name;
-        if ((name != "t") && (name != "h") && (name != "s"))
+        if ((name != "c") && (name != "h") && (name != "s") && (name != "b"))
             Error() << fmt::format("unknown fluxspec modifier '{}'", name);
     }
 }

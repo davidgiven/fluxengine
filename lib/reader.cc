@@ -23,6 +23,11 @@ static DataSpecFlag source(
     "source for data",
     ":t=0-79:s=0-1:d=0");
 
+static DataSpecFlag output(
+	{ "--output", "-o" },
+	"output image file to write to",
+	"");
+
 static StringFlag destination(
     { "--write-flux", "-f" },
     "write the raw magnetic flux to this file",
@@ -50,6 +55,11 @@ static sqlite3* outdb;
 void setReaderDefaultSource(const std::string& source)
 {
     ::source.set(source);
+}
+
+void setReaderDefaultOutput(const std::string& output)
+{
+    ::output.set(output);
 }
 
 void setReaderRevolutions(int revolutions)
@@ -140,8 +150,10 @@ static void replace_sector(std::unique_ptr<Sector>& replacing, Sector& replaceme
 	}
 }
 
-void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename)
+void readDiskCommand(AbstractDecoder& decoder)
 {
+	const ImageSpec outputSpec(output);
+
 	bool failures = false;
 	SectorSet allSectors;
 	auto tracks = readTracks();
@@ -239,8 +251,7 @@ void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename
         std::cout << size << " bytes decoded." << std::endl;
     }
 
-	Geometry geometry = guessGeometry(allSectors);
-    writeSectorsToFile(allSectors, geometry, outputFilename);
+    writeSectorsToFile(allSectors, outputSpec);
 	if (failures)
 		std::cerr << "Warning: some sectors could not be decoded." << std::endl;
 }

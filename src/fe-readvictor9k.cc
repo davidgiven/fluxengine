@@ -13,19 +13,15 @@
 
 static FlagGroup flags { &readerFlags };
 
-static StringFlag outputFilename(
-    { "--output", "-o" },
-    "The output image file to write to.",
-    "victor9k.img");
-
 int mainReadVictor9K(int argc, const char* argv[])
 {
 	setReaderDefaultSource(":t=0-79:s=0");
+	setReaderDefaultOutput("victor9k.img");
     setReaderRevolutions(2);
     flags.parseFlags(argc, argv);
 
 	Victor9kDecoder decoder;
-	readDiskCommand(decoder, outputFilename);
+	readDiskCommand(decoder);
 
     return 0;
 }

@@ -13,19 +13,15 @@
 
 static FlagGroup flags { &readerFlags };
 
-static StringFlag outputFilename(
-    { "--output", "-o" },
-    "The output image file to write to.",
-    "c64.img");
-
 int mainReadC64(int argc, const char* argv[])
 {
 	setReaderDefaultSource(":t=0-79x2:s=0");
+	setReaderDefaultOutput("c64.img");
     setReaderRevolutions(2);
     flags.parseFlags(argc, argv);
 
 	Commodore64Decoder decoder;
-	readDiskCommand(decoder, outputFilename);
+	readDiskCommand(decoder);
 
     return 0;
 }
