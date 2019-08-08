@@ -85,6 +85,15 @@ static void test_fluxspec(void)
             {{1, 9, 1}}));
         assert((std::string)spec == ":d=1:s=1:t=9");
     }
+
+    spec.set("");
+    assert(FluxSpec(spec).quickdisk == false);
+
+    spec.set(":qd=0");
+    assert(FluxSpec(spec).quickdisk == false);
+
+    spec.set(":qd=1");
+    assert(FluxSpec(spec).quickdisk == true);
 }
 
 static void test_imagespec(void)

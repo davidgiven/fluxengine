@@ -3,7 +3,7 @@
 
 enum 
 {
-    FLUXENGINE_VERSION = 8,
+    FLUXENGINE_VERSION = 9,
 
     FLUXENGINE_VID = 0x1209,
     FLUXENGINE_PID = 0x6e00,
@@ -54,6 +54,8 @@ enum
     F_FRAME_BULK_TEST_REPLY,      /* any_frame */
     F_FRAME_READ_CMD,             /* read_frame */
     F_FRAME_READ_REPLY,           /* any_frame */
+    F_FRAME_READ_QD_CMD,          /* read_frame */
+    F_FRAME_READ_QD_REPLY,        /* any_frame */
     F_FRAME_WRITE_CMD,            /* write_frame */
     F_FRAME_WRITE_REPLY,          /* any_frame */
     F_FRAME_ERASE_CMD,            /* erase_frame */

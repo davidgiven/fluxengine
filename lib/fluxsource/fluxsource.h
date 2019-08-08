@@ -4,6 +4,7 @@
 #include "flags.h"
 
 extern FlagGroup hardwareFluxSourceFlags;
+extern FlagGroup quickdiskFluxSourceFlags;
 
 class Fluxmap;
 class FluxSpec;
@@ -16,6 +17,7 @@ public:
 private:
     static std::unique_ptr<FluxSource> createSqliteFluxSource(const std::string& filename);
     static std::unique_ptr<FluxSource> createHardwareFluxSource(unsigned drive);
+    static std::unique_ptr<FluxSource> createQuickdiskFluxSource(unsigned drive);
     static std::unique_ptr<FluxSource> createStreamFluxSource(const std::string& path);
 
 public:

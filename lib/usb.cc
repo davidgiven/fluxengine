@@ -221,6 +221,25 @@ Bytes usbRead(int side, int revolutions)
     return buffer;
 }
 
+Bytes usbReadQD(int side)
+{
+    struct read_frame f = {
+        .f = { .type = F_FRAME_READ_QD_CMD, .size = sizeof(f) },
+        .side = (uint8_t) side,
+        .revolutions = 1
+    };
+    usb_cmd_send(&f, f.f.size);
+
+    auto fluxmap = std::unique_ptr<Fluxmap>(new Fluxmap);
+
+    Bytes buffer(1024*1024);
+    int len = large_bulk_transfer(FLUXENGINE_DATA_IN_EP, buffer);
+    buffer.resize(len);
+
+    await_reply<struct any_frame>(F_FRAME_READ_REPLY);
+    return buffer;
+}
+
 void usbWrite(int side, const Bytes& bytes)
 {
     unsigned safelen = bytes.size() & ~(FRAME_SIZE-1);

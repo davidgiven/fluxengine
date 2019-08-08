@@ -15,7 +15,12 @@ std::unique_ptr<FluxSource> FluxSource::create(const FluxSpec& spec)
     const auto& filename = spec.filename;
 
     if (filename.empty())
-        return createHardwareFluxSource(spec.drive);
+    {
+        if (spec.quickdisk)
+            return createQuickdiskFluxSource(spec.drive);
+        else
+            return createHardwareFluxSource(spec.drive);
+    }
     else if (ends_with(filename, ".flux"))
         return createSqliteFluxSource(filename);
     else if (ends_with(filename, "/"))
