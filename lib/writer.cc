@@ -22,6 +22,11 @@ static DataSpecFlag dest(
     "destination for data",
     ":d=0:t=0-79:s=0-1");
 
+static DataSpecFlag input(
+    { "--input", "-i" },
+    "input image file to read from",
+    "");
+
 static SettableFlag highDensityFlag(
 	{ "--high-density", "-H" },
 	"set the drive to high density mode");
@@ -33,12 +38,17 @@ void setWriterDefaultDest(const std::string& dest)
     ::dest.set(dest);
 }
 
+void setWriterDefaultInput(const std::string& input)
+{
+    ::input.set(input);
+}
+
 void writeTracks(
 	const std::function<std::unique_ptr<Fluxmap>(int track, int side)> producer)
 {
-    const DataSpec& spec = dest;
+    const FluxSpec spec(dest);
 
-    std::cout << "Writing to: " << spec << std::endl;
+    std::cout << "Writing to: " << dest << std::endl;
 
 	setHardwareFluxSourceDensity(highDensityFlag);
 	setHardwareFluxSinkDensity(highDensityFlag);
@@ -103,12 +113,12 @@ void fillBitmapTo(std::vector<bool>& bitmap,
 	}
 }
 
-void writeDiskCommand(
-    AbstractEncoder& encoder, const Geometry& geometry, const std::string& inputFilename)
+void writeDiskCommand(AbstractEncoder& encoder)
 {
     SectorSet allSectors;
 
-	readSectorsFromFile(allSectors, geometry, inputFilename);
+    const ImageSpec spec(input);
+	readSectorsFromFile(allSectors, spec);
 	writeTracks(
 		[&](int track, int side) -> std::unique_ptr<Fluxmap>
 		{

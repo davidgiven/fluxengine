@@ -14,19 +14,15 @@
 
 static FlagGroup flags { &readerFlags };
 
-static StringFlag outputFilename(
-    { "--output", "-o" },
-    "The output image file to write to.",
-    "brother.img");
-
 int mainReadBrother(int argc, const char* argv[])
 {
 	setReaderDefaultSource(":t=0-81:s=0");
+	setReaderDefaultOutput("brother.img");
     setReaderRevolutions(2);
     flags.parseFlags(argc, argv);
 
 	BrotherDecoder decoder;
-	readDiskCommand(decoder, outputFilename);
+	readDiskCommand(decoder);
 
     return 0;
 }

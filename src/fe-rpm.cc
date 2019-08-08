@@ -14,7 +14,8 @@ int mainRpm(int argc, const char* argv[])
 {
     flags.parseFlags(argc, argv);
 
-    usbSetDrive(source.get().drive, false);
+    FluxSpec spec(source);
+    usbSetDrive(spec.drive, false);
     nanoseconds_t period = usbGetRotationalPeriod();
     std::cout << "Rotational period is " << period/1000 << " ms (" << 60e6/period << " rpm)" << std::endl;
 

@@ -23,6 +23,11 @@ static DataSpecFlag source(
     "source for data",
     ":t=0-79:s=0-1:d=0");
 
+static DataSpecFlag output(
+	{ "--output", "-o" },
+	"output image file to write to",
+	"");
+
 static StringFlag destination(
     { "--write-flux", "-f" },
     "write the raw magnetic flux to this file",
@@ -52,6 +57,11 @@ void setReaderDefaultSource(const std::string& source)
     ::source.set(source);
 }
 
+void setReaderDefaultOutput(const std::string& output)
+{
+    ::output.set(output);
+}
+
 void setReaderRevolutions(int revolutions)
 {
 	setHardwareFluxSourceRevolutions(revolutions);
@@ -71,9 +81,9 @@ void Track::readFluxmap()
 
 std::vector<std::unique_ptr<Track>> readTracks()
 {
-    const DataSpec& dataSpec = source;
+    const FluxSpec spec(source);
 
-    std::cout << "Reading from: " << dataSpec << std::endl;
+    std::cout << "Reading from: " << source << std::endl;
 
 	setHardwareFluxSourceDensity(highDensityFlag);
 
@@ -92,10 +102,10 @@ std::vector<std::unique_ptr<Track>> readTracks()
 		);
 	}
 
-	std::shared_ptr<FluxSource> fluxSource = FluxSource::create(dataSpec);
+	std::shared_ptr<FluxSource> fluxSource = FluxSource::create(spec);
 
 	std::vector<std::unique_ptr<Track>> tracks;
-    for (const auto& location : dataSpec.locations)
+    for (const auto& location : spec.locations)
 	{
 		auto track = std::make_unique<Track>(location.track, location.side);
 		track->fluxsource = fluxSource;
@@ -140,8 +150,10 @@ static void replace_sector(std::unique_ptr<Sector>& replacing, Sector& replaceme
 	}
 }
 
-void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename)
+void readDiskCommand(AbstractDecoder& decoder)
 {
+	const ImageSpec outputSpec(output);
+
 	bool failures = false;
 	SectorSet allSectors;
 	auto tracks = readTracks();
@@ -239,8 +251,7 @@ void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename
         std::cout << size << " bytes decoded." << std::endl;
     }
 
-	Geometry geometry = guessGeometry(allSectors);
-    writeSectorsToFile(allSectors, geometry, outputFilename);
+    writeSectorsToFile(allSectors, outputSpec);
 	if (failures)
 		std::cerr << "Warning: some sectors could not be decoded." << std::endl;
 }

@@ -13,19 +13,15 @@
 
 static FlagGroup flags { &readerFlags };
 
-static StringFlag outputFilename(
-    { "--output", "-o" },
-    "The output image file to write to.",
-    "f85.img");
-
 int mainReadF85(int argc, const char* argv[])
 {
 	setReaderDefaultSource(":t=0-79:s=0");
+	setReaderDefaultOutput("f85.img");
     setReaderRevolutions(2);
     flags.parseFlags(argc, argv);
 
 	DurangoF85Decoder decoder;
-	readDiskCommand(decoder, outputFilename);
+	readDiskCommand(decoder);
 
     return 0;
 }

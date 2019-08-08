@@ -11,10 +11,11 @@ class Track;
 extern FlagGroup readerFlags;
 
 extern void setReaderDefaultSource(const std::string& source);
+extern void setReaderDefaultOutput(const std::string& output);
 extern void setReaderRevolutions(int revolutions);
 
 extern std::vector<std::unique_ptr<Track>> readTracks();
 
-extern void readDiskCommand(AbstractDecoder& decoder, const std::string& outputFilename);
+extern void readDiskCommand(AbstractDecoder& decoder);
 
 #endif

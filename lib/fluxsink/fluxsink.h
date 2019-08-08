@@ -2,7 +2,7 @@
 #define FLUXSINK_H
 
 class Fluxmap;
-class DataSpec;
+class FluxSpec;
 
 class FluxSink
 {
@@ -14,7 +14,7 @@ private:
     static std::unique_ptr<FluxSink> createHardwareFluxSink(unsigned drive);
 
 public:
-    static std::unique_ptr<FluxSink> create(const DataSpec& spec);
+    static std::unique_ptr<FluxSink> create(const FluxSpec& spec);
 
 public:
     virtual void writeFlux(int track, int side, Fluxmap& fluxmap) = 0;

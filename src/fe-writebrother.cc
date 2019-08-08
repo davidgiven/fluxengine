@@ -10,19 +10,14 @@
 
 static FlagGroup flags { &writerFlags, &brotherEncoderFlags };
 
-static StringFlag inputFilename(
-    { "--input", "-i" },
-    "The input image file to read from.",
-    "brother.img");
-
 int mainWriteBrother(int argc, const char* argv[])
 {
+    setWriterDefaultInput(":c=78:h=1:s=12:b=256");
 	setWriterDefaultDest(":d=0:t=0-77:s=0");
     flags.parseFlags(argc, argv);
 
 	BrotherEncoder encoder;
-	Geometry geometry = {78, 1, 12, 256};
-	writeDiskCommand(encoder, geometry, inputFilename);
+	writeDiskCommand(encoder);
 
     return 0;
 }

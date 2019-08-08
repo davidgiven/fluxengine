@@ -20,11 +20,12 @@ static StringFlag outputFilename(
 int mainReadAESLanier(int argc, const char* argv[])
 {
 	setReaderDefaultSource(":t=0-79:s=0");
+	setReaderDefaultOutput("aeslanier.img");
     setReaderRevolutions(2);
     flags.parseFlags(argc, argv);
 
 	AesLanierDecoder decoder;
-	readDiskCommand(decoder, outputFilename);
+	readDiskCommand(decoder);
     return 0;
 }
 

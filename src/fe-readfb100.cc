@@ -12,19 +12,15 @@
 
 static FlagGroup flags { &readerFlags };
 
-static StringFlag outputFilename(
-    { "--output", "-o" },
-    "The output image file to write to.",
-    "fb100.img");
-
 int mainReadFB100(int argc, const char* argv[])
 {
 	setReaderDefaultSource(":t=0-79x2:s=0");
+	setReaderDefaultOutput("fb100.img");
     setReaderRevolutions(2);
     flags.parseFlags(argc, argv);
 
 	Fb100Decoder decoder;
-	readDiskCommand(decoder, outputFilename);
+	readDiskCommand(decoder);
     return 0;
 }
 

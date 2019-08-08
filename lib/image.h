@@ -2,26 +2,14 @@
 #define IMAGE_H
 
 class SectorSet;
-
-class Geometry
-{
-public:
-	int tracks;
-	int heads;
-	int sectors;
-	int sectorSize;
-};
-
-extern Geometry guessGeometry(const SectorSet& sectors);
+class ImageSpec;
 
 extern void readSectorsFromFile(
 	SectorSet& sectors,
-	const Geometry& geometry,
-	const std::string& filename);
+	const ImageSpec& filename);
 
 extern void writeSectorsToFile(
 	const SectorSet& sectors,
-	const Geometry& geometry,
-	const std::string& filename);
+	const ImageSpec& filename);
 
 #endif

@@ -6,7 +6,7 @@
 extern FlagGroup hardwareFluxSourceFlags;
 
 class Fluxmap;
-class DataSpec;
+class FluxSpec;
 
 class FluxSource
 {
@@ -19,7 +19,7 @@ private:
     static std::unique_ptr<FluxSource> createStreamFluxSource(const std::string& path);
 
 public:
-    static std::unique_ptr<FluxSource> create(const DataSpec& spec);
+    static std::unique_ptr<FluxSource> create(const FluxSpec& spec);
 
 public:
     virtual std::unique_ptr<Fluxmap> readFlux(int track, int side) = 0;
