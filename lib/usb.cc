@@ -76,7 +76,7 @@ static void bad_reply(void)
 {
     struct error_frame* f = (struct error_frame*) buffer;
     if (f->f.type != F_FRAME_ERROR)
-        Error() << fmt::format("bad USB reply 0x{:2x}", f->f.type);
+        Error() << fmt::format("bad USB reply 0x{:02x}", f->f.type);
     switch (f->error)
     {
         case F_ERROR_BAD_COMMAND:
