@@ -23,6 +23,17 @@ You should end up with an `amiga.adf` which is 901120 bytes long (for a
 normal DD disk) --- it ought to be a perfectly normal ADF file which you can
 use in an emulator.
 
+If you want the metadata as well, specify a 528 byte sector size for the
+output image:
+
+```
+fluxengine read amiga -o amiga.adf:b=528
+```
+
+You will end up with a 929280 byte long image which you probably _can't_ use
+in an emulator; each sector will contain the 512 bytes of user payload
+followed by the 16 bytes of metadata.
+
 Useful references
 -----------------
 

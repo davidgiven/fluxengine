@@ -33,48 +33,79 @@ static void test_parsemod(void)
         == (DataSpec::Modifier{"x", {2, 4, 9}}));
 }
 
-static void test_dataspec(void)
+static void test_fluxspec(void)
 {
     DataSpec spec("foo:t=0-2:s=0-1:d=0");
-    assert(spec.filename == "foo");
-    assert((spec.locations
-        == std::vector<DataSpec::Location>
-        {{0, 0, 0}, {0, 0, 1}, {0, 1, 0}, {0, 1, 1}, {0, 2, 0}, {0, 2, 1}}));
-    assert((std::string)spec == "foo:d=0:s=0-1:t=0-2");
+
+    {
+        FluxSpec fspec(spec);
+        assert(fspec.filename == "foo");
+        assert((fspec.locations
+            == std::vector<FluxSpec::Location>
+            {{0, 0, 0}, {0, 0, 1}, {0, 1, 0}, {0, 1, 1}, {0, 2, 0}, {0, 2, 1}}));
+        assert((std::string)spec == "foo:d=0:s=0-1:t=0-2");
+    }
 
     spec.set("bar");
-    assert(spec.filename == "bar");
-    assert((spec.locations
-        == std::vector<DataSpec::Location>
-        {{0, 0, 0}, {0, 0, 1}, {0, 1, 0}, {0, 1, 1}, {0, 2, 0}, {0, 2, 1}}));
-    assert((std::string)spec == "bar:d=0:s=0-1:t=0-2");
+    {
+        FluxSpec fspec(spec);
+        assert(fspec.filename == "bar");
+        assert((fspec.locations
+            == std::vector<FluxSpec::Location>
+            {{0, 0, 0}, {0, 0, 1}, {0, 1, 0}, {0, 1, 1}, {0, 2, 0}, {0, 2, 1}}));
+        assert((std::string)spec == "bar:d=0:s=0-1:t=0-2");
+    }
 
     spec.set(":t=0");
-    assert(spec.filename.empty());
-    assert((spec.locations
-        == std::vector<DataSpec::Location>
-        {{0, 0, 0}, {0, 0, 1}}));
-    assert((std::string)spec == ":d=0:s=0-1:t=0");
+    {
+        FluxSpec fspec(spec);
+        assert(fspec.filename.empty());
+        assert((fspec.locations
+            == std::vector<FluxSpec::Location>
+            {{0, 0, 0}, {0, 0, 1}}));
+        assert((std::string)spec == ":d=0:s=0-1:t=0");
+    }
 
     spec.set(":s=1");
-    assert(spec.filename.empty());
-    assert((spec.locations
-        == std::vector<DataSpec::Location>
-        {{0, 0, 1}}));
-    assert((std::string)spec == ":d=0:s=1:t=0");
+    {
+        FluxSpec fspec(spec);
+        assert(fspec.filename.empty());
+        assert((fspec.locations
+            == std::vector<FluxSpec::Location>
+            {{0, 0, 1}}));
+        assert((std::string)spec == ":d=0:s=1:t=0");
+    }
 
     spec.set(":t=9:d=1");
-    assert(spec.filename.empty());
-    assert((spec.locations
-        == std::vector<DataSpec::Location>
-        {{1, 9, 1}}));
-    assert((std::string)spec == ":d=1:s=1:t=9");
+    {
+        FluxSpec fspec(spec);
+        assert(fspec.filename.empty());
+        assert((fspec.locations
+            == std::vector<FluxSpec::Location>
+            {{1, 9, 1}}));
+        assert((std::string)spec == ":d=1:s=1:t=9");
+    }
+}
+
+static void test_imagespec(void)
+{
+    DataSpec spec("foo:c=9:h=2:s=99:b=256");
+
+    {
+        ImageSpec ispec(spec);
+        assert(ispec.filename == "foo");
+        assert(ispec.cylinders == 9);
+        assert(ispec.heads == 2);
+        assert(ispec.sectors == 99);
+        assert(ispec.bytes = 256);
+    }
 }
 
 int main(int argc, const char* argv[])
 {
     test_split();
     test_parsemod();
-    test_dataspec();
+    test_fluxspec();
+    test_imagespec();
     return 0;
 }

@@ -10,7 +10,7 @@ static bool ends_with(const std::string& value, const std::string& ending)
     return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
 }
 
-std::unique_ptr<FluxSink> FluxSink::create(const DataSpec& spec)
+std::unique_ptr<FluxSink> FluxSink::create(const FluxSpec& spec)
 {
     const auto& filename = spec.filename;
 

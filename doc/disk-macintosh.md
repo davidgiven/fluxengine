@@ -50,6 +50,10 @@ with holes where missing sectors should be. This was easiest. If anyone can
 suggest a better way, please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new).
 
+The 12 bytes of metadata _follow_ the 512 bytes of user payload in the sector
+image. If you don't want it, specify a geometry in the output file with a
+512-byte sectore size like `-o mac.img:c=80:h=1:s=12:b=512`.
+
 Useful references
 -----------------
 

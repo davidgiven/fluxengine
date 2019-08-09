@@ -13,19 +13,15 @@
 
 static FlagGroup flags { &readerFlags };
 
-static StringFlag outputFilename(
-    { "--output", "-o" },
-    "The output image file to write to.",
-    "apple2.img");
-
 int mainReadApple2(int argc, const char* argv[])
 {
 	setReaderDefaultSource(":t=0-79:s=0");
+	setReaderDefaultOutput("apple2.adf");
     setReaderRevolutions(2);
     flags.parseFlags(argc, argv);
 
 	Apple2Decoder decoder;
-	readDiskCommand(decoder, outputFilename);
+	readDiskCommand(decoder);
 
     return 0;
 }

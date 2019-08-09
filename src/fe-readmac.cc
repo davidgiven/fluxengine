@@ -13,19 +13,15 @@
 
 static FlagGroup flags { &readerFlags };
 
-static StringFlag outputFilename(
-    { "--output", "-o" },
-    "The output image file to write to.",
-    "mac.img");
-
 int mainReadMac(int argc, const char* argv[])
 {
 	setReaderDefaultSource(":t=0-79:s=0-1");
+	setReaderDefaultOutput("mac.img");
     setReaderRevolutions(2);
     flags.parseFlags(argc, argv);
 
 	MacintoshDecoder decoder;
-	readDiskCommand(decoder, outputFilename);
+	readDiskCommand(decoder);
 
     return 0;
 }

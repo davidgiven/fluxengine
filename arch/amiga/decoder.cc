@@ -92,6 +92,8 @@ void AmigaDecoder::decodeSectorRecord()
 
     uint32_t wanteddatachecksum = deinterleave(ptr, 4).reader().read_be32();
     uint32_t gotdatachecksum = checksum(rawbytes.slice(62, 1024));
-    _sector->data = deinterleave(ptr, 512);
+
+    _sector->data.clear();
+    _sector->data.writer().append(deinterleave(ptr, 512)).append(recoveryinfo);
     _sector->status = (gotdatachecksum == wanteddatachecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
 }
