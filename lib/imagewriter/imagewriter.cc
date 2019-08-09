@@ -20,6 +20,8 @@ std::unique_ptr<ImageWriter> ImageWriter::create(const SectorSet& sectors, const
 
     if (ends_with(filename, ".img") || ends_with(filename, ".adf"))
         return createImgImageWriter(sectors, spec);
+	else if (ends_with(filename, ".ldbs"))
+		return createLDBSImageWriter(sectors, spec);
 
     Error() << "unrecognised image filename extension";
     return std::unique_ptr<ImageWriter>();

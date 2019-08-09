@@ -141,6 +141,7 @@ buildlibrary libbackend.a \
 	lib/imagereader/imgimagereader.cc \
 	lib/imagewriter/imagewriter.cc \
 	lib/imagewriter/imgimagewriter.cc \
+	lib/imagewriter/ldbsimagewriter.cc \
     arch/aeslanier/decoder.cc \
     arch/amiga/decoder.cc \
     arch/apple2/decoder.cc \
