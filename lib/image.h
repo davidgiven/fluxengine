@@ -4,8 +4,7 @@
 class SectorSet;
 class ImageSpec;
 
-extern void readSectorsFromFile(
-	SectorSet& sectors,
+extern SectorSet readSectorsFromFile(
 	const ImageSpec& filename);
 
 extern void writeSectorsToFile(

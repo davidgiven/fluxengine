@@ -112,6 +112,23 @@ sensible for the command you're using.
 **Important note:** FluxEngine _always_ uses zero-based units (even if the
 *disk format says otherwise).
 
+### Input and output specifiers
+
+These use a very similar syntax to the source and destination specifiers
+(because they're based on the same microformat library!) but are used for
+input and output _images_: i.e. nicely lined up arrays of sectors which you
+can actually do something with.
+
+Use `--input` (`-i`) or `--output` (`-o`) as appropriate to tell FluxEngine
+where you want to read from or write to. The actual format is autodetected
+based on the extension:
+
+  - `.img` or `.adf`: raw sector images in CHS order. Append
+    `:c=80:h=2:s=9:b=512` to set the geometry; that specifies 80 cylinders, 2
+    heads, 9 sectors, 512 bytes per sector. For output files (`--output`) the
+    geometry will be autodetected if left unspecified. For input files you
+    normally have to specify it.
+
 ### High density disks
 
 High density disks use a different magnetic medium to low and double density

@@ -27,7 +27,7 @@ public:
 		size_t headSize = numSectors * numBytes;
 		size_t trackSize = headSize * numHeads;
 
-		std::cout << fmt::format("{} tracks, {} heads, {} sectors, {} bytes per sector, {} kB total",
+		std::cout << fmt::format("writing {} tracks, {} heads, {} sectors, {} bytes per sector, {} kB total",
 						numCylinders, numHeads,
 						numSectors, numBytes,
 						numCylinders * trackSize / 1024)
