@@ -115,10 +115,8 @@ void fillBitmapTo(std::vector<bool>& bitmap,
 
 void writeDiskCommand(AbstractEncoder& encoder)
 {
-    SectorSet allSectors;
-
     const ImageSpec spec(input);
-	readSectorsFromFile(allSectors, spec);
+	SectorSet allSectors = readSectorsFromFile(spec);
 	writeTracks(
 		[&](int track, int side) -> std::unique_ptr<Fluxmap>
 		{

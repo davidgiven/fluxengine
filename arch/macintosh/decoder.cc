@@ -180,5 +180,7 @@ void MacintoshDecoder::decodeDataRecord()
         inputbuffer[i] = decode_data_gcr(inputbuffer[i]);
         
     _sector->status = Sector::BAD_CHECKSUM;
-    _sector->data = decode_crazy_data(inputbuffer, _sector->status);
+    Bytes userData = decode_crazy_data(inputbuffer, _sector->status);
+    _sector->data.clear();
+    _sector->data.writer().append(userData.slice(12, 512)).append(userData.slice(0, 12));
 }
