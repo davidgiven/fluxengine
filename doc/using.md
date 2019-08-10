@@ -129,6 +129,25 @@ based on the extension:
     geometry will be autodetected if left unspecified. For input files you
     normally have to specify it.
 
+  - `.ldbs`: John Elliott's [LDBS disk image
+    format](http://www.seasip.info/Unix/LibDsk/ldbs.html), which is
+    consumable by the [libdsk](http://www.seasip.info/Unix/LibDsk/) suite of
+    tools. This allows things like variable numbers of sectors per track
+    (e.g. Macintosh or Commodore 64) and also provides information about
+    whether sectors were read correctly. You can use libdsk to convert this
+    to other formats, using a command like this:
+
+    ```
+    $ dsktrans out.ldbs -otype tele out.td0
+    ```
+
+    ...to convert to TeleDisk format. (Note you have to use dsktrans rather
+    than dskconv due to a minor bug in the geometry hadnling.)
+
+    FluxEngine's LDBS support is currently limited to write only, and
+    it doesn't store a lot of the more esoteric LDBS features like format
+    types, timings, and data rates.
+
 ### High density disks
 
 High density disks use a different magnetic medium to low and double density
