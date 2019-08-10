@@ -22,15 +22,20 @@ public:
 	{
         LDBS ldbs;
 
+		unsigned numCylinders = spec.cylinders;
+		unsigned numHeads = spec.heads;
+		unsigned numSectors = spec.sectors;
+		unsigned numBytes = spec.bytes;
+		std::cout << fmt::format("writing {} tracks, {} heads, {} sectors, {} bytes per sector",
+						numCylinders, numHeads,
+						numSectors, numBytes)
+				<< std::endl;
+
         Bytes trackDirectory;
         ByteWriter trackDirectoryWriter(trackDirectory);
         int trackDirectorySize = 0;
         trackDirectoryWriter.write_le16(0);
 
-		unsigned numCylinders = spec.cylinders;
-		unsigned numHeads = spec.heads;
-		unsigned numSectors = spec.sectors;
-		unsigned numBytes = spec.bytes;
 		for (int track = 0; track < numCylinders; track++)
 		{
 			for (int head = 0; head < numHeads; head++)
@@ -67,7 +72,7 @@ public:
                         trackHeaderWriter.write_8(head);
                         trackHeaderWriter.write_8(sectorId);
                         trackHeaderWriter.write_8(0); /* power-of-two size */
-                        trackHeaderWriter.write_8((sector->status == Sector::OK) ? 0x20 : 0x00); /* 8272 status 1 */
+                        trackHeaderWriter.write_8((sector->status == Sector::OK) ? 0x00 : 0x20); /* 8272 status 1 */
                         trackHeaderWriter.write_8(0); /* 8272 status 2 */
                         trackHeaderWriter.write_8(1); /* number of copies */
                         trackHeaderWriter.write_8(0); /* filler byte */
