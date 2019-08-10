@@ -137,6 +137,11 @@ buildlibrary libfmt.a \
     dep/fmt/posix.cc \
 
 buildlibrary libbackend.a \
+	lib/imagereader/imagereader.cc \
+	lib/imagereader/imgimagereader.cc \
+	lib/imagewriter/imagewriter.cc \
+	lib/imagewriter/imgimagewriter.cc \
+	lib/imagewriter/ldbsimagewriter.cc \
     arch/aeslanier/decoder.cc \
     arch/amiga/decoder.cc \
     arch/apple2/decoder.cc \
@@ -169,13 +174,10 @@ buildlibrary libbackend.a \
     lib/fluxsource/kryoflux.cc \
     lib/fluxsource/sqlitefluxsource.cc \
     lib/fluxsource/streamfluxsource.cc \
-	lib/imagereader/imagereader.cc \
-	lib/imagereader/imgimagereader.cc \
-	lib/imagewriter/imagewriter.cc \
-	lib/imagewriter/imgimagewriter.cc \
     lib/globals.cc \
     lib/hexdump.cc \
     lib/image.cc \
+    lib/ldbs.cc \
     lib/reader.cc \
     lib/sector.cc \
     lib/sectorset.cc \
@@ -229,12 +231,13 @@ buildsimpleprogram brother120tool \
     libemu.a \
     libfmt.a \
 
+runtest bitaccumulator-test tests/bitaccumulator.cc
+runtest bytes-test          tests/bytes.cc
+runtest compression-test    tests/compression.cc
+runtest crunch-test         tests/crunch.cc
 runtest dataspec-test       tests/dataspec.cc
 runtest flags-test          tests/flags.cc
-runtest fmmfm-test          tests/fmmfm.cc
-runtest bitaccumulator-test tests/bitaccumulator.cc
-runtest kryoflux-test       tests/kryoflux.cc
-runtest compression-test    tests/compression.cc
-runtest bytes-test          tests/bytes.cc
-runtest crunch-test         tests/crunch.cc
 runtest fluxpattern-test    tests/fluxpattern.cc
+runtest fmmfm-test          tests/fmmfm.cc
+runtest kryoflux-test       tests/kryoflux.cc
+runtest ldbs-test           tests/ldbs.cc

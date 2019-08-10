@@ -56,6 +56,8 @@ public:
     ByteReader reader() const;
     ByteWriter writer();
 
+    void writeToFile(const std::string& filename) const;
+
 private:
     std::shared_ptr<std::vector<uint8_t>> _data;
     unsigned _low;
