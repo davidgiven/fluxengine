@@ -2,6 +2,7 @@
 #include "bytes.h"
 #include "fmt/format.h"
 #include "common/crunch.h"
+#include <fstream>
 #include <zlib.h>
 
 static std::shared_ptr<std::vector<uint8_t>> createVector(unsigned size)
@@ -278,6 +279,16 @@ Bytes Bytes::uncrunch() const
     bw += outputBuffer.slice(0, outputBuffer.size() - cs.outputlen);
 
     return output;
+}
+
+void Bytes::writeToFile(const std::string& filename) const
+{
+    std::ofstream f(filename, std::ios::out | std::ios::binary);
+    if (!f.is_open())
+        Error() << fmt::format("cannot open output file '{}'", filename);
+
+    f.write((const char*) cbegin(), size());
+    f.close();
 }
 
 ByteReader Bytes::reader() const
