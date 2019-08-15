@@ -103,7 +103,43 @@ the unconnected pins and solder a short piece of wire to a GND pin on the
 board. Alternatively you'll need to splice it into your drive's power supply
 cable somehow. (The black one.)
 
-## Building the firmware
+## Programming the board
+
+You've got two options here. You can either use the precompiled firmware
+supplied with the source, or else install the Cypress SDK and build it
+yourself. If you want to hack the firmware source you need the latter, but
+if you trust me to do it for you use the precompiled firmware. In either
+case you'll need Windows and have to install some Cypress stuff.
+
+**Before you read this:** If you're on Windows, good news! You can download a
+precompiled version of the FluxEngine client and precompiled firmware [from
+the GitHub releases
+page](https://github.com/davidgiven/fluxengine/releases/latest). Simply unzip
+it somewhere and run the `.exe` files from a `cmd` window (or other shell).
+Follow the instructions below to program the board with the firmware.
+
+### Using the precompiled firmware
+
+On your Windows machine, [install the PSoC
+Programmer](https://www.cypress.com/products/psoc-programming-solutions).
+**Note:** _not_ the Cypress Programmer, which is for a different board!
+Cypress will make you register.
+
+Once done, run it. Plug the blunt end of the FluxEngine board into a USB
+port (the end which is a USB connector). The programmer should detect it
+and report it as a KitProg. You may be prompted to upgrade the programmer
+hardware; if so, follow the instructions and do it.
+
+Now go to File -> File Load and open
+`FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex` in the
+project. If you're on Windows, the precompiled zipfile also contains a copy
+of this file. Press the Program button (the one in the toolbar marked with a
+down arrow). Stuff will happen and you should be left with three green boxes
+in the status bar and 'Programming Succeeded' at the top of the log window.
+
+You're done. You can unplug the board and close the programmer.
+
+### Building the firmware yourself
 
 On your Windows machine, [install the Cypress SDK and CY8CKIT-059
 BSP](http://www.cypress.com/documentation/development-kitsboards/cy8ckit-059-psoc-5lp-prototyping-kit-onboard-programmer-and).
@@ -118,7 +154,7 @@ tutorial and making the LED on your board flash. It'll tell you where all the
 controls are and how to program the board. Remember that the big end of the
 board plugs into your computer for programming.
 
-When you're ready, open the `FluxEngine.cydsn/FluxEngine.cywrk` workspace,
+When you're ready, open the `FluxEngine.cydsn/FluxEngine.cyprj` project,
 pick 'Program' from the menu, and the firmware should compile and be
 programmed onto your board.
 
@@ -138,11 +174,6 @@ until the light stays solidly on. Now you should be able to acquire
 the port and proceed normally.
 
 ## Building the client
-
-**Before you read this:** If you're on Windows, good news! You can download a
-*precompiled version of the FluxEngine client [from the GitHub releases
-*page](https://github.com/davidgiven/fluxengine/releases/latest). Simply unzip
-*it somewhere and run it from a `cmd` window (or other shell).
 
 The client software is where the intelligence, such as it is, is. It's pretty
 generic libusb stuff and should build and run on Windows, Linux and OSX as

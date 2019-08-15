@@ -15,7 +15,7 @@ install:
 
 build_script:
   - make
-  - zip -9 fluxengine.zip fluxengine.exe brother120tool.exe
+  - zip -9 fluxengine.zip fluxengine.exe brother120tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex
 
 artifacts:
   - path: fluxengine.zip
