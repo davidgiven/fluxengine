@@ -16,7 +16,7 @@ static FlagGroup flags { &readerFlags };
 int mainReadC64(int argc, const char* argv[])
 {
 	setReaderDefaultSource(":t=0-79x2:s=0");
-	setReaderDefaultOutput("c64.img");
+	setReaderDefaultOutput("c64.d64");
     setReaderRevolutions(2);
     flags.parseFlags(argc, argv);
 
