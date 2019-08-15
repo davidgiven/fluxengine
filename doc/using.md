@@ -148,6 +148,15 @@ based on the extension:
     it doesn't store a lot of the more esoteric LDBS features like format
     types, timings, and data rates.
 
+  - `.d64`: the venerable Commodore 64 disk image format as used by the 1540,
+    1541, etc. This is a special-purpose format due to the weird layout of
+    1540 disks and while you can use this for non-Commodore disks the result
+    will be gibberish. Use this to image Commodore 64 disks and load the
+    result into an emulator.
+
+    FluxEngine's D64 support is currently limited to write only. It will work
+    with up to 40 logical tracks.
+
 ### High density disks
 
 High density disks use a different magnetic medium to low and double density

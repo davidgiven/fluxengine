@@ -18,6 +18,8 @@ private:
 		const SectorSet& sectors, const ImageSpec& spec);
     static std::unique_ptr<ImageWriter> createLDBSImageWriter(
 		const SectorSet& sectors, const ImageSpec& spec);
+    static std::unique_ptr<ImageWriter> createD64ImageWriter(
+		const SectorSet& sectors, const ImageSpec& spec);
 
 public:
 	virtual void adjustGeometry();

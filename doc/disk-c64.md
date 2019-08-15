@@ -23,7 +23,7 @@ computer](https://ilesj.wordpress.com/2014/05/14/1541-why-so-complicated/) of
 300 bytes per second (!). (The drive itself could transfer data reasonably
 quickly.)
 
-A standard 1541 disk has 35 tracks of 17 to 20 sectors, each 256 bytes long.
+A standard 1541 disk has 35 tracks of 17 to 21 sectors, each 256 bytes long.
 
 Reading discs
 -------------
@@ -34,15 +34,14 @@ Just do:
 fluxengine read c64
 ```
 
-You should end up with an `c64.img` which is 187136 bytes long (for a normal
-1541 disk).
+You should end up with an `c64.d64` file which is 174848 bytes long. You can
+load this straight into a Commodore 64 emulator such as
+[VICE](http://vice-emu.sourceforge.net/).
 
-**Big warning!** The image may not work in an emulator. Commodore 64 disk images are
+**Big warning!** Commodore 64 disk images are
 complicated due to the way the tracks are different sizes and the odd sector
-size. FluxEngine chooses to store them in a simple 256 x 20 x 35 layout,
-with holes where missing sectors should be. This was easiest. If anyone can
-suggest a better way, please [get in
-touch](https://github.com/davidgiven/fluxengine/issues/new).
+size, so you need the special D64 or LDBS output formats to represent them
+sensibly. Don't use IMG unless you know what you're doing.
 
 Useful references
 -----------------
