@@ -16,7 +16,7 @@
 #include "track.h"
 #include "fmt/format.h"
 
-FlagGroup readerFlags { &hardwareFluxSourceFlags, &fluxmapReaderFlags };
+FlagGroup readerFlags { &hardwareFluxSourceFlags, &quickdiskFluxSourceFlags, &fluxmapReaderFlags };
 
 static DataSpecFlag source(
     { "--source", "-s" },
@@ -85,8 +85,6 @@ std::vector<std::unique_ptr<Track>> readTracks()
 
     std::cout << "Reading from: " << source << std::endl;
 
-	setHardwareFluxSourceDensity(highDensityFlag);
-
 	if (!destination.get().empty())
 	{
 		outdb = sqlOpen(destination, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
@@ -102,8 +100,9 @@ std::vector<std::unique_ptr<Track>> readTracks()
 		);
 	}
 
-	std::shared_ptr<FluxSource> fluxSource = FluxSource::create(spec);
+	setHardwareFluxSourceDensity(highDensityFlag);
 
+	std::shared_ptr<FluxSource> fluxSource = FluxSource::create(spec);
 	std::vector<std::unique_ptr<Track>> tracks;
     for (const auto& location : spec.locations)
 	{

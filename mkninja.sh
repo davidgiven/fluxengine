@@ -171,6 +171,7 @@ buildlibrary libbackend.a \
     lib/fluxsink/sqlitefluxsink.cc \
     lib/fluxsource/fluxsource.cc \
     lib/fluxsource/hardwarefluxsource.cc \
+    lib/fluxsource/quickdiskfluxsource.cc \
     lib/fluxsource/kryoflux.cc \
     lib/fluxsource/sqlitefluxsource.cc \
     lib/fluxsource/streamfluxsource.cc \
@@ -204,6 +205,7 @@ buildlibrary libfrontend.a \
     src/fe-readibm.cc \
     src/fe-readmac.cc \
     src/fe-readmx.cc \
+    src/fe-readqd.cc \
     src/fe-readvictor9k.cc \
     src/fe-readzilogmcz.cc \
     src/fe-rpm.cc \

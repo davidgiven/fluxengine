@@ -73,6 +73,7 @@ public:
     std::string filename;
     std::vector<Location> locations;
     unsigned drive;
+    bool quickdisk : 1;
 };
 
 class ImageSpec

@@ -112,6 +112,7 @@ FluxSpec::FluxSpec(const DataSpec& spec)
 
         locations.clear();
 
+        quickdisk = spec.has("qd") && spec.at("qd").only();
         const auto& drives = spec.at("d").data;
         if (drives.size() != 1)
             Error() << "you must specify exactly one drive";
@@ -128,7 +129,7 @@ FluxSpec::FluxSpec(const DataSpec& spec)
         for (const auto& e : spec.modifiers)
         {
             const auto name = e.second.name;
-            if ((name != "t") && (name != "s") && (name != "d"))
+            if ((name != "t") && (name != "s") && (name != "d") && (name != "qd"))
                 Error() << fmt::format("unknown fluxspec modifier '{}'", name);
         }
     }

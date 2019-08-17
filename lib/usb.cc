@@ -76,7 +76,7 @@ static void bad_reply(void)
 {
     struct error_frame* f = (struct error_frame*) buffer;
     if (f->f.type != F_FRAME_ERROR)
-        Error() << fmt::format("bad USB reply 0x{:2x}", f->f.type);
+        Error() << fmt::format("bad USB reply 0x{:02x}", f->f.type);
     switch (f->error)
     {
         case F_ERROR_BAD_COMMAND:
@@ -208,6 +208,25 @@ Bytes usbRead(int side, int revolutions)
         .f = { .type = F_FRAME_READ_CMD, .size = sizeof(f) },
         .side = (uint8_t) side,
         .revolutions = (uint8_t) revolutions
+    };
+    usb_cmd_send(&f, f.f.size);
+
+    auto fluxmap = std::unique_ptr<Fluxmap>(new Fluxmap);
+
+    Bytes buffer(1024*1024);
+    int len = large_bulk_transfer(FLUXENGINE_DATA_IN_EP, buffer);
+    buffer.resize(len);
+
+    await_reply<struct any_frame>(F_FRAME_READ_REPLY);
+    return buffer;
+}
+
+Bytes usbReadQD(int side)
+{
+    struct read_frame f = {
+        .f = { .type = F_FRAME_READ_QD_CMD, .size = sizeof(f) },
+        .side = (uint8_t) side,
+        .revolutions = 1
     };
     usb_cmd_send(&f, f.f.size);
 

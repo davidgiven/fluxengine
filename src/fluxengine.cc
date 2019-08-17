@@ -20,6 +20,7 @@ extern command_cb mainReadFB100;
 extern command_cb mainReadIBM;
 extern command_cb mainReadMac;
 extern command_cb mainReadMx;
+extern command_cb mainReadQd;
 extern command_cb mainReadVictor9K;
 extern command_cb mainReadZilogMCZ;
 extern command_cb mainRpm;
@@ -71,6 +72,7 @@ static std::vector<Command> readables =
     { "ibm",           mainReadIBM,       "Reads the ubiquitous IBM format disks.", },
     { "mac",           mainReadMac,       "Reads Apple Macintosh disks.", },
     { "mx",            mainReadMx,        "Reads MX disks.", },
+    { "qd",            mainReadQd,        "Reads QuickDisk disks.", },
     { "victor9k",      mainReadVictor9K,  "Reads Victor 9000 disks.", },
     { "zilogmcz",      mainReadZilogMCZ,  "Reads Zilog MCZ disks.", },
 };

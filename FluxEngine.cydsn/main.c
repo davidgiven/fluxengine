@@ -12,7 +12,7 @@
 #define STEP_SETTLING_TIME 50 /* ms */
 
 #define DISKSTATUS_WPT    1
-#define DISKSTATUS_DSKCHG 2
+#define DISKSTATUS_READY  2 /* Only used on QuickDisk drives */
 
 #define STEP_TOWARDS0 1
 #define STEP_AWAYFROM0 0
@@ -37,6 +37,7 @@ static uint8_t dma_channel;
 static volatile int dma_writing_to_td = 0;
 static volatile int dma_reading_from_td = 0;
 static volatile bool dma_underrun = false;
+static crunch_state_t cs = {};
 
 #define DECLARE_REPLY_FRAME(STRUCT, TYPE) \
     STRUCT r = {.f = { .type = TYPE, .size = sizeof(STRUCT) }}
@@ -269,13 +270,8 @@ static void init_capture_dma(void)
     }    
 }
 
-static void cmd_read(struct read_frame* f)
+static void init_capture(void)
 {
-    SIDE_REG_Write(f->side);
-    seek_to(current_track);
-    
-    /* Do slow setup *before* we go into the real-time bit. */
-    
     SAMPLER_CONTROL_Write(1); /* reset */
     
     {
@@ -288,38 +284,103 @@ static void cmd_read(struct read_frame* f)
     
     wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
     init_capture_dma();
+}
 
-    /* Wait for the beginning of a rotation. */
-        
-    print("wait");
-    index_irq = false;
-    while (!index_irq)
-        ;
-    index_irq = false;
-    
-    crunch_state_t cs = {};
+static void start_capture(void)
+{
+    memset(&cs, 0, sizeof(crunch_state_t));
     cs.outputptr = usb_buffer;
     cs.outputlen = BUFFER_SIZE;
     
     dma_writing_to_td = 0;
     dma_reading_from_td = -1;
     dma_underrun = false;
-    int count = 0;
     SAMPLER_CONTROL_Write(0); /* !reset */
     CAPTURE_CONTROL_Write(1);
     CyDmaChSetInitialTd(dma_channel, td[dma_writing_to_td]);
     CyDmaClearPendingDrq(dma_channel);
     CyDmaChEnable(dma_channel, 1);
 
-    /* Wait for the first DMA transfer to complete, after which we can start the
-     * USB transfer. */
+    /* Wait for the first DMA transfer to complete, after which we can start
+     * the USB transfer. */
 
-    while ((dma_writing_to_td == 0) && !index_irq)
+    while (dma_writing_to_td == 0)
         ;
     dma_reading_from_td = 0;
+}
+
+/* returns true if capture is aborted */
+static bool do_capture_chunk(void)
+{
+    /* Wait for the next block to be read. */
+    while (dma_reading_from_td == dma_writing_to_td)
+    {
+        /* On an underrun, give up immediately. */
+        if (dma_underrun)
+            return true;
+    }
+
+    uint8_t dma_buffer_usage = 0;
+    while (dma_buffer_usage < BUFFER_SIZE)
+    {
+        cs.inputptr = dma_buffer[dma_reading_from_td] + dma_buffer_usage;
+        cs.inputlen = BUFFER_SIZE - dma_buffer_usage;
+        crunch(&cs);
+        dma_buffer_usage += BUFFER_SIZE - cs.inputlen;
+        if (cs.outputlen == 0)
+        {
+            while (USBFS_GetEPState(FLUXENGINE_DATA_IN_EP_NUM) != USBFS_IN_BUFFER_EMPTY)
+            {
+                if (dma_underrun)
+                    return true;
+            }
+
+            USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, usb_buffer, BUFFER_SIZE);
+            cs.outputptr = usb_buffer;
+            cs.outputlen = BUFFER_SIZE;
+        }
+    }
+    dma_reading_from_td = NEXT_BUFFER(dma_reading_from_td);
+    
+    return false;
+}
+
+static void stop_capture(void)
+{
+    CAPTURE_CONTROL_Write(0);
+    CyDmaChSetRequest(dma_channel, CY_DMA_CPU_TERM_CHAIN);
+    while (CyDmaChGetRequest(dma_channel))
+        ;
+
+    donecrunch(&cs);
+    wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
+    if (cs.outputlen != BUFFER_SIZE)
+        USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, usb_buffer, BUFFER_SIZE-cs.outputlen);
+    if ((cs.outputlen == BUFFER_SIZE) || (cs.outputlen == 0))
+        USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, NULL, 0);
+    wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
+    deinit_dma();
+}
+
+static void cmd_read(struct read_frame* f)
+{
+    SIDE_REG_Write(f->side);
+    seek_to(current_track);
+    
+    /* Do slow setup *before* we go into the real-time bit. */
+    
+    init_capture();
+    
+    /* Wait for the beginning of a rotation. */
+        
+    index_irq = false;
+    while (!index_irq)
+        ;
+    index_irq = false;
     
     /* Start transferring. */
 
+    start_capture();
     int revolutions = f->revolutions;
     while (!dma_underrun)
     {
@@ -333,65 +394,77 @@ static void cmd_read(struct read_frame* f)
             if (revolutions == 0)
                 break;
         }
-        
-        /* Wait for the next block to be read. */
-        while (dma_reading_from_td == dma_writing_to_td)
-        {
-            /* On an underrun, give up immediately. */
-            if (dma_underrun)
-                goto abort;
-        }
 
-        uint8_t dma_buffer_usage = 0;
-        while (dma_buffer_usage < BUFFER_SIZE)
-        {
-            cs.inputptr = dma_buffer[dma_reading_from_td] + dma_buffer_usage;
-            cs.inputlen = BUFFER_SIZE - dma_buffer_usage;
-            crunch(&cs);
-            dma_buffer_usage += BUFFER_SIZE - cs.inputlen;
-            count++;
-            if (cs.outputlen == 0)
-            {
-                while (USBFS_GetEPState(FLUXENGINE_DATA_IN_EP_NUM) != USBFS_IN_BUFFER_EMPTY)
-                {
-                    if (index_irq || dma_underrun)
-                        goto abort;
-                }
-
-                USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, usb_buffer, BUFFER_SIZE);
-                cs.outputptr = usb_buffer;
-                cs.outputlen = BUFFER_SIZE;
-            }
-        }
-        dma_reading_from_td = NEXT_BUFFER(dma_reading_from_td);
+        if (do_capture_chunk())
+            goto abort;
     }
 abort:;
-    CAPTURE_CONTROL_Write(0);
-    CyDmaChSetRequest(dma_channel, CY_DMA_CPU_TERM_CHAIN);
-    while (CyDmaChGetRequest(dma_channel))
-        ;
-
-    donecrunch(&cs);
-    wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
-    unsigned zz = cs.outputlen;
-    if (cs.outputlen != BUFFER_SIZE)
-        USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, usb_buffer, BUFFER_SIZE-cs.outputlen);
-    if ((cs.outputlen == BUFFER_SIZE) || (cs.outputlen == 0))
-        USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, NULL, 0);
-    wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
-    deinit_dma();
+    stop_capture();
 
     if (dma_underrun)
-    {
-        print("underrun after %d packets");
         send_error(F_ERROR_UNDERRUN);
-    }
     else
     {
         DECLARE_REPLY_FRAME(struct any_frame, F_FRAME_READ_REPLY);
         send_reply(&r);
     }
-    print("count=%d i=%d d=%d zz=%d", count, index_irq, dma_underrun, zz);
+}
+
+static void cmd_read_qd(struct read_frame* f)
+{
+    SIDE_REG_Write(f->side);
+    
+    /* Do slow setup *before* we go into the real-time bit. */
+    
+    init_capture();
+    
+    /* Reset the drive. */
+    
+    STEP_REG_Write(2);
+    CyDelay(10); /* ms */
+    STEP_REG_Write(0);
+    
+    /* Motor on, and wait for ready. */
+    
+    MOTOR_REG_Write(1);
+    while (!(DISKSTATUS_REG_Read() & DISKSTATUS_READY))
+        ;
+    
+    /* Turning the motor off has no effect until the head hits the stop,
+     * at which point it'll stop automatically. */
+    
+    MOTOR_REG_Write(0);
+    
+    /* Start transferring. */
+
+    start_capture();
+    while (!dma_underrun)
+    {
+        CyWdtClear();
+
+        /* Have we reached the end? */
+        if (!(DISKSTATUS_REG_Read() & DISKSTATUS_READY))
+            break;
+
+        if (do_capture_chunk())
+            goto abort;
+    }
+abort:;
+    stop_capture();
+
+    /* Reset the drive again to ensure the motor stops. */
+    
+    STEP_REG_Write(2);
+    CyDelay(10); /* ms */
+    STEP_REG_Write(0);
+
+    if (dma_underrun)
+        send_error(F_ERROR_UNDERRUN);
+    else
+    {
+        DECLARE_REPLY_FRAME(struct any_frame, F_FRAME_READ_QD_REPLY);
+        send_reply(&r);
+    }
 }
 
 static void init_replay_dma(void)
@@ -645,6 +718,10 @@ static void handle_command(void)
             
         case F_FRAME_READ_CMD:
             cmd_read((struct read_frame*) f);
+            break;
+        
+        case F_FRAME_READ_QD_CMD:
+            cmd_read_qd((struct read_frame*) f);
             break;
         
         case F_FRAME_WRITE_CMD:
