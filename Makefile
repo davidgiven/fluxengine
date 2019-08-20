@@ -22,7 +22,7 @@ export LIBS = $(shell pkg-config --libs $(PACKAGES))
 export EXTENSION =
 endif
 
-CFLAGS += -Ilib -Idep/fmt -Iarch
+export CFLAGS += -Ilib -Idep/fmt -Iarch
 
 export OBJDIR = .obj
 
