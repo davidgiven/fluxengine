@@ -22,7 +22,7 @@ extern void hexdumpForSrp16(std::ostream& stream, const Bytes& bytes);
 class Error
 {
 public:
-    ~Error()
+    [[ noreturn ]] ~Error()
     {
         std::cerr << "Error: " << _stream.str() << std::endl;
         exit(1);
