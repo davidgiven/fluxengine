@@ -24,7 +24,7 @@ public:
     void recalibrate() {}
 
 private:
-    const std::string& _path;
+    const std::string _path;
 };
 
 std::unique_ptr<FluxSource> FluxSource::createStreamFluxSource(const std::string& path)
