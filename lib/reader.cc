@@ -14,6 +14,7 @@
 #include "bytes.h"
 #include "decoders/rawbits.h"
 #include "track.h"
+#include "imagewriter/imagewriter.h"
 #include "fmt/format.h"
 
 FlagGroup readerFlags { &hardwareFluxSourceFlags, &fluxmapReaderFlags };
@@ -153,7 +154,8 @@ static void replace_sector(std::unique_ptr<Sector>& replacing, Sector& replaceme
 void readDiskCommand(AbstractDecoder& decoder)
 {
 	const ImageSpec outputSpec(output);
-
+	ImageWriter::verifyImageSpec(outputSpec);
+        
 	bool failures = false;
 	SectorSet allSectors;
 	auto tracks = readTracks();

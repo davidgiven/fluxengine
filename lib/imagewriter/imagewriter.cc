@@ -7,6 +7,15 @@
 #include "imagewriter/imagewriter.h"
 #include "fmt/format.h"
 
+std::map<std::string, ImageWriter::Constructor> ImageWriter::formats =
+{
+	{".adf", ImageWriter::createImgImageWriter},
+	{".d64", ImageWriter::createD64ImageWriter},
+	{".d81", ImageWriter::createImgImageWriter},
+	{".img", ImageWriter::createImgImageWriter},
+	{".ldbs", ImageWriter::createLDBSImageWriter},
+};
+
 static bool ends_with(const std::string& value, const std::string& ending)
 {
     if (ending.size() > value.size())
@@ -14,19 +23,29 @@ static bool ends_with(const std::string& value, const std::string& ending)
     return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
 }
 
-std::unique_ptr<ImageWriter> ImageWriter::create(const SectorSet& sectors, const ImageSpec& spec)
+ImageWriter::Constructor ImageWriter::findConstructor(const ImageSpec& spec)
 {
     const auto& filename = spec.filename;
 
-    if (ends_with(filename, ".img") || ends_with(filename, ".adf"))
-        return createImgImageWriter(sectors, spec);
-	else if (ends_with(filename, ".ldbs"))
-		return createLDBSImageWriter(sectors, spec);
-	else if (ends_with(filename, ".d64"))
-		return createD64ImageWriter(sectors, spec);
+	for (const auto& e : formats)
+	{
+		if (ends_with(filename, e.first))
+			return e.second;
+	}
 
-    Error() << "unrecognised image filename extension";
-    return std::unique_ptr<ImageWriter>();
+	return NULL;
+}
+
+std::unique_ptr<ImageWriter> ImageWriter::create(const SectorSet& sectors, const ImageSpec& spec)
+{
+	verifyImageSpec(spec);
+	return findConstructor(spec)(sectors, spec);
+}
+
+void ImageWriter::verifyImageSpec(const ImageSpec& spec)
+{
+	if (!findConstructor(spec))
+		Error() << "unrecognised image filename extension";
 }
 
 ImageWriter::ImageWriter(const SectorSet& sectors, const ImageSpec& spec):
