@@ -17,13 +17,18 @@ static IntFlag sectorIdBase(
 	"Sector ID of the first sector.",
 	1);
 
+static BoolFlag ignoreSideByte(
+	{ "--ignore-side-byte" },
+	"Ignore the side byte in the sector ID, and use the physical side instead.",
+	false);
+
 int mainReadIBM(int argc, const char* argv[])
 {
 	setReaderDefaultSource(":t=0-79:s=0-1");
 	setReaderDefaultOutput("ibm.img");
     flags.parseFlags(argc, argv);
 
-	IbmDecoder decoder(sectorIdBase);
+	IbmDecoder decoder(sectorIdBase, ignoreSideByte);
 	readDiskCommand(decoder);
     return 0;
 }

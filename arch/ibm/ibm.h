@@ -31,8 +31,9 @@ struct IbmIdam
 class IbmDecoder : public AbstractDecoder
 {
 public:
-    IbmDecoder(unsigned sectorBase):
-        _sectorBase(sectorBase)
+    IbmDecoder(unsigned sectorBase, bool ignoreSideByte=false):
+        _sectorBase(sectorBase),
+        _ignoreSideByte(ignoreSideByte)
     {}
 
     RecordType advanceToNextRecord();
@@ -41,6 +42,7 @@ public:
 
 private:
     unsigned _sectorBase;
+    bool _ignoreSideByte;
     unsigned _currentSectorSize;
     unsigned _currentHeaderLength;
 };

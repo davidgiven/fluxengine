@@ -134,6 +134,9 @@ void IbmDecoder::decodeSectorRecord()
     uint16_t gotCrc = crc16(CCITT_POLY, bytes.slice(0, _currentHeaderLength + 5));
     if (wantCrc == gotCrc)
         _sector->status = Sector::DATA_MISSING; /* correct but unintuitive */
+
+    if (_ignoreSideByte)
+        _sector->logicalSide = _sector->physicalSide;
 }
 
 void IbmDecoder::decodeDataRecord()
