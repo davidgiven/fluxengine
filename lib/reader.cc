@@ -18,7 +18,7 @@
 #include "imagewriter/imagewriter.h"
 #include "fmt/format.h"
 
-FlagGroup readerFlags { &hardwareFluxSourceFlags, &fluxmapReaderFlags };
+FlagGroup readerFlags { &hardwareFluxSourceFlags, &fluxmapReaderFlags, &visualiserFlags };
 
 static DataSpecFlag source(
     { "--source", "-s" },

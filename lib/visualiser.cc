@@ -4,8 +4,16 @@
 #include "sectorset.h"
 #include "visualiser.h"
 #include "fmt/format.h"
+#include "flags.h"
 #include <iostream>
 #include <fstream>
+
+FlagGroup visualiserFlags;
+
+static IntFlag period(
+    { "--visualiser-period" },
+    "rotational period for use by the visualiser (milliseconds)",
+    200);
 
 static const int SIZE = 480;
 static const int BORDER = 10;
@@ -13,8 +21,6 @@ static const int RADIUS = (SIZE/2) - (BORDER/2);
 static const int CORE = 50;
 static const int TRACKS = 83;
 static const double TRACK_SPACING = double(RADIUS-CORE) / TRACKS;
-static const nanoseconds_t PERIOD = 200e6;
-static const double RADIANS_PER_NS = 2.0*M_PI / (double)PERIOD;
 
 void visualiseSectorsToFile(const SectorSet& sectors, const std::string& filename)
 {
@@ -25,6 +31,8 @@ void visualiseSectorsToFile(const SectorSet& sectors, const std::string& filenam
 
     f << fmt::format("<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"{0} {1} {2} {3}\">",
         0, 0, SIZE*2, SIZE);
+
+    const double radians_per_ns = 2.0*M_PI / (period*1e6);
 
     auto drawSide = [&](int side)
     {
@@ -38,13 +46,13 @@ void visualiseSectorsToFile(const SectorSet& sectors, const std::string& filenam
 
             auto drawArc = [&](const std::unique_ptr<Sector>& sector, nanoseconds_t start, nanoseconds_t end, const std::string& colour)
             {
-                start %= PERIOD;
-                end %= PERIOD;
+                start %= period*1000000;
+                end %= period*1000000;
                 if (end < start)
-                    end += PERIOD;
+                    end += period*1000000;
                 
-                double theta1 = start * RADIANS_PER_NS;
-                double theta2 = end * RADIANS_PER_NS;
+                double theta1 = start * radians_per_ns;
+                double theta2 = end * radians_per_ns;
                 int large = (theta2 - theta1) >= M_PI;
 
                 f << fmt::format("\n<!-- {} {} = {} {} -->", start, end, theta1, theta2);
