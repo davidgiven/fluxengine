@@ -203,6 +203,7 @@ buildlibrary libfrontend.a \
     src/fe-readfb100.cc \
     src/fe-readibm.cc \
     src/fe-readmac.cc \
+    src/fe-readmicrobee.cc \
     src/fe-readmx.cc \
     src/fe-readvictor9k.cc \
     src/fe-readzilogmcz.cc \
