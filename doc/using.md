@@ -225,6 +225,21 @@ Commands which normally take `--source` or `--dest` get a sensible default if
 left unspecified. `fluxengine read ibm` on its own will read drive 0 and
 write an `ibm.img` file.
 
+## Visualisation
+
+When doing a read (either from a real disk or from a flux file) you can use
+`--write-svg=output.svg` to write out a graphical visualisation of where the
+sectors are on the disk. Here's a IBM PC 1232kB disk:
+
+![A disk visualisation](./visualiser.svg)
+
+Blue represents data, light blue a header, and red is a bad sector. Side zero
+is on the left and side one is on the right.
+
+The visualiser is extremely primitive and you have to explicitly tell it how
+big your disk is, in milliseconds. The default is 200ms (for a normal 3.5"
+disk). For a 5.25" disk, use `--visualiser-period=166`.
+
 ## Extra programs
 
 Supplied with FluxEngine, but not part of FluxEngine, are some little tools I
