@@ -149,7 +149,7 @@ static void replace_sector(std::unique_ptr<Sector>& replacing, Sector& replaceme
 			return;
 		}
 	}
-	if (!replacing || (replacing->status != Sector::OK))
+	if (!replacing || ((replacing->status != Sector::OK) && (replacement.status == Sector::OK)))
 	{
 		if (!replacing)
 			replacing.reset(new Sector);
