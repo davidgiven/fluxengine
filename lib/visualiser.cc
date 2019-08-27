@@ -1,3 +1,4 @@
+#define _USE_MATH_DEFINES
 #include "globals.h"
 #include "image.h"
 #include "sector.h"
@@ -7,6 +8,7 @@
 #include "flags.h"
 #include <iostream>
 #include <fstream>
+#include <math.h>
 
 FlagGroup visualiserFlags;
 
