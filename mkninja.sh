@@ -183,6 +183,7 @@ buildlibrary libbackend.a \
     lib/sectorset.cc \
     lib/sql.cc \
     lib/usb.cc \
+    lib/visualiser.cc \
     lib/writer.cc \
 
 buildlibrary libfrontend.a \

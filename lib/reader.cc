@@ -9,6 +9,7 @@
 #include "decoders/decoders.h"
 #include "sector.h"
 #include "sectorset.h"
+#include "visualiser.h"
 #include "record.h"
 #include "image.h"
 #include "bytes.h"
@@ -17,7 +18,7 @@
 #include "imagewriter/imagewriter.h"
 #include "fmt/format.h"
 
-FlagGroup readerFlags { &hardwareFluxSourceFlags, &fluxmapReaderFlags };
+FlagGroup readerFlags { &hardwareFluxSourceFlags, &fluxmapReaderFlags, &visualiserFlags };
 
 static DataSpecFlag source(
     { "--source", "-s" },
@@ -33,6 +34,11 @@ static StringFlag destination(
     { "--write-flux", "-f" },
     "write the raw magnetic flux to this file",
     "");
+
+static StringFlag visualise(
+	{ "--write-svg" },
+	"write a visualisation of the disk to this file",
+	"");
 
 static SettableFlag justRead(
 	{ "--just-read" },
@@ -143,7 +149,7 @@ static void replace_sector(std::unique_ptr<Sector>& replacing, Sector& replaceme
 			return;
 		}
 	}
-	if (!replacing || (replacing->status != Sector::OK))
+	if (!replacing || ((replacing->status != Sector::OK) && (replacement.status == Sector::OK)))
 	{
 		if (!replacing)
 			replacing.reset(new Sector);
@@ -252,6 +258,9 @@ void readDiskCommand(AbstractDecoder& decoder)
         }
         std::cout << size << " bytes decoded." << std::endl;
     }
+
+	if (!visualise.get().empty())
+		visualiseSectorsToFile(allSectors, visualise.get());
 
     writeSectorsToFile(allSectors, outputSpec);
 	if (failures)
