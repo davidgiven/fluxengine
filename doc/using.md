@@ -221,6 +221,12 @@ directory.
   file format in a non-backwards-compatible way; this tool will upgrade flux
   files to the new format.
 
+  - `fluxengine convert`: converts various formats to various other formats.
+  You can use this to convert Catweasel or Supercard Pro flux files to
+  FluxEngine's native format, for flux files to various other formats useful
+  for debugging (including VCD which can be loaded into
+  [sigrok](http://sigrok.org)).
+
 Commands which normally take `--source` or `--dest` get a sensible default if
 left unspecified. `fluxengine read ibm` on its own will read drive 0 and
 write an `ibm.img` file.
@@ -247,25 +253,24 @@ wrote to do useful things. These are built alongside FluxEngine.
 
   - `brother120tool`: extracts files from a 120kB Brother filesystem image.
 
-  - `cwftoflux`: converts (one flavour of) CatWeasel flux file into a
-    FluxEngine flux file.
-
 ## The recommended workflow
 
-So you've just received, say, a huge pile of old Brother word processor disks containing valuable historical data, and you want to read them.
+So you've just received, say, a huge pile of old Brother word processor disks
+containing valuable historical data, and you want to read them.
 
 Typically I do this:
 
 ```
-$ fluxengine read brother -s :d=0 -o brother.img --write-flux=brother.flux
+$ fluxengine read brother -s :d=0 -o brother.img --write-flux=brother.flux --write-svg=brother.svg
 ```
 
 This will read the disk in drive 0 and write out a filesystem image. It'll
-also copy the flux to brother.flux. If I then need to tweak the settings, I
-can rerun the decode without having to physically touch the disk like this:
+also copy the flux to brother.flux and write out an SVG visualisation. If I
+then need to tweak the settings, I can rerun the decode without having to
+physically touch the disk like this:
 
 ```
-$ fluxengine read brother -s brother.flux -o brother.img
+$ fluxengine read brother -s brother.flux -o brother.img --write-svg=brother.svg
 ```
 
 Apart from being drastically faster, this avoids touching the (potentially
