@@ -6,6 +6,7 @@ extern command_cb mainErase;
 extern command_cb mainConvertCwfToFlux;
 extern command_cb mainConvertFluxToAu;
 extern command_cb mainConvertFluxToVcd;
+extern command_cb mainConvertScpToFlux;
 extern command_cb mainInspect;
 extern command_cb mainReadADFS;
 extern command_cb mainReadAESLanier;
@@ -83,6 +84,7 @@ static std::vector<Command> writeables =
 static std::vector<Command> convertables =
 {
     { "cwftoflux",     mainConvertCwfToFlux, "Converts CatWeasel stream files to flux.", },
+    { "scptoflux",     mainConvertScpToFlux, "Converts Supercard Pro stream files to flux.", },
     { "fluxtoau",      mainConvertFluxToAu,  "Converts (one track of a) flux file to an .au audio file.", },
     { "fluxtovcd",     mainConvertFluxToVcd, "Converts (one track of a) flux file to a VCD file.", },
 };
