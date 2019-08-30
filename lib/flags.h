@@ -14,6 +14,7 @@ public:
 
 public:
     void parseFlags(int argc, const char* argv[]);
+    std::vector<std::string> parseFlagsWithFilenames(int argc, const char* argv[]);
     void addFlag(Flag* flag);
     void checkInitialised() const;
 
