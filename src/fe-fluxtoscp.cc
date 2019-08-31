@@ -9,6 +9,7 @@
 #include "decoders/fluxmapreader.h"
 #include "scp.h"
 #include <fstream>
+#include <algorithm>
 
 static FlagGroup flags { };
 
@@ -44,6 +45,16 @@ static void write_le32(uint8_t dest[4], uint32_t v)
     dest[3] = v >> 24;
 }
 
+static int strackno(int track, int side)
+{
+    if (fortyTrackMode)
+        track /= 2;
+    if (singleSided)
+        return track;
+    else
+        return (track << 1) | side;
+}
+
 int mainConvertFluxToScp(int argc, const char* argv[])
 {
     auto filenames = flags.parseFlagsWithFilenames(argc, argv);
@@ -54,18 +65,20 @@ int mainConvertFluxToScp(int argc, const char* argv[])
     auto tracks = sqlFindFlux(inputDb);
 
     int maxTrack = 0;
+    int maxSide = 0;
     for (auto p : tracks)
     {
         if (singleSided && (p.second == 1))
             continue;
-        if (p.first > maxTrack)
-            maxTrack = p.first;
+        maxTrack = std::max(maxTrack, (int)p.first);
+        maxSide = std::max(maxSide, (int)p.second);
     }
+    int maxStrack = strackno(maxTrack, maxSide);
 
-    std::cout << fmt::format("Writing {} {} SCP file containing {} tracks\n",
+    std::cout << fmt::format("Writing {} {} SCP file containing {} SCP tracks\n",
         fortyTrackMode ? "48 tpi" : "96 tpi",
         singleSided ? "single sided" : "double sided",
-        (fortyTrackMode ? (maxTrack / 2) : maxTrack) + 1
+        maxStrack + 1
     );
 
     ScpHeader fileheader = {0};
@@ -76,7 +89,7 @@ int mainConvertFluxToScp(int argc, const char* argv[])
     fileheader.type = diskType;
     fileheader.revolutions = 5;
     fileheader.start_track = 0;
-    fileheader.end_track = maxTrack;
+    fileheader.end_track = maxStrack;
     fileheader.flags = SCP_FLAG_INDEXED | (fortyTrackMode ? 0 : SCP_FLAG_96TPI);
     fileheader.cell_width = 0;
     fileheader.heads = singleSided ? 1 : 0;
@@ -86,11 +99,11 @@ int mainConvertFluxToScp(int argc, const char* argv[])
 
     int trackstep = 1 + fortyTrackMode;
     int maxside = singleSided ? 0 : 1;
-    int strack = 0;
     for (int track = 0; track <= maxTrack; track += trackstep)
     {
         for (int side = 0; side <= maxside; side++)
         {
+            int strack = strackno(track, side);
             std::cout << fmt::format("FE track {}.{}, SCP track {}: ", track, side, strack) << std::flush;
 
             auto fluxmap = sqlReadFlux(inputDb, track, side);
@@ -127,7 +140,7 @@ int mainConvertFluxToScp(int argc, const char* argv[])
                     {
                         auto* revheader = &trackheader.revolution[revolution];
                         write_le32(revheader->offset, startOffset + sizeof(ScpTrack));
-                        write_le32(revheader->length, fluxdataWriter.pos - startOffset);
+                        write_le32(revheader->length, (fluxdataWriter.pos - startOffset) / 2);
                         write_le32(revheader->index, revTicks * NS_PER_TICK / 25);
                         revolution++;
                         revheader++;
@@ -158,7 +171,6 @@ int mainConvertFluxToScp(int argc, const char* argv[])
             std::cout << fmt::format("{} ms in {} bytes\n",
                 totalTicks * MS_PER_TICK,
                 fluxdata.size());
-            strack++;
         }
     }
 

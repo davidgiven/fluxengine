@@ -81,6 +81,7 @@ static void read_track(int strack)
 
     Fluxmap fluxmap;
     nanoseconds_t pending = 0;
+    unsigned inputBytes = 0;
     for (int revolution = 0; revolution < header.revolutions; revolution++)
     {
         if (revolution != 0)
@@ -107,10 +108,12 @@ static void read_track(int strack)
             else
                 pending += 0x10000;
         }
+
+        inputBytes += datalength*2;
     }
 
-    std::cout << fmt::format(" {} ms in {} output bytes\n",
-        fluxmap.duration() / 1e6, fluxmap.bytes());
+    std::cout << fmt::format(" {} ms in {} input bytes and {} output bytes\n",
+        fluxmap.duration() / 1e6, inputBytes, fluxmap.bytes());
     sqlWriteFlux(outputDb, trackno(strack), headno(strack), fluxmap);
 }
 
