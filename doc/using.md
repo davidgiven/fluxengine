@@ -221,11 +221,12 @@ directory.
   file format in a non-backwards-compatible way; this tool will upgrade flux
   files to the new format.
 
-  - `fluxengine convert`: converts various formats to various other formats.
-  You can use this to convert Catweasel or Supercard Pro flux files to
-  FluxEngine's native format, for flux files to various other formats useful
-  for debugging (including VCD which can be loaded into
-  [sigrok](http://sigrok.org)).
+  - `fluxengine convert`: converts flux files from various formats to various
+  other formats. You can use this to convert Catweasel flux files to
+  FluxEngine's native format, FluxEngine flux files to various other formats
+  useful for debugging (including VCD which can be loaded into
+  [sigrok](http://sigrok.org)), and bidirectional conversion to and from
+  Supercard Pro `.scp` format.
 
 Commands which normally take `--source` or `--dest` get a sensible default if
 left unspecified. `fluxengine read ibm` on its own will read drive 0 and
