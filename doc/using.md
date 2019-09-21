@@ -228,6 +228,13 @@ directory.
   [sigrok](http://sigrok.org)), and bidirectional conversion to and from
   Supercard Pro `.scp` format.
 
+  **Important SCP note:** import (`fluxengine convert scptoflux`) should be
+  fairly robust, but export (`fluxengine convert fluxtoscp`) should only be
+  done with great caution as FluxEngine files contain features which can't be
+  represented very well in `.scp` format and they're probably pretty dubious.
+  As ever, please [get in
+  touch](https://github.com/davidgiven/fluxengine/issues/new) with any reports.
+
 Commands which normally take `--source` or `--dest` get a sensible default if
 left unspecified. `fluxengine read ibm` on its own will read drive 0 and
 write an `ibm.img` file.
