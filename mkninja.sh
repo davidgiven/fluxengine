@@ -190,6 +190,7 @@ buildlibrary libfrontend.a \
     src/fe-cwftoflux.cc \
     src/fe-erase.cc \
     src/fe-fluxtoau.cc \
+    src/fe-fluxtoscp.cc \
     src/fe-fluxtovcd.cc \
     src/fe-inspect.cc \
     src/fe-readadfs.cc \

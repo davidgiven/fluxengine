@@ -4,36 +4,8 @@
 #include "bytes.h"
 #include "protocol.h"
 #include "fmt/format.h"
+#include "scp.h"
 #include <fstream>
-
-struct ScpHeader
-{
-    char file_id[3];       // file ID - 'SCP'
-    uint8_t version;       // major/minor in nibbles
-    uint8_t type;          // disk type - subclass/class in nibbles
-    uint8_t revolutions;   // up to 5
-    uint8_t start_track;   // 0..165
-    uint8_t end_track;     // 0..165
-    uint8_t flags;         // see below
-    uint8_t cell_width;    // in bits, 0 meaning 16
-    uint8_t heads;         // 0 = both, 1 = side 0 only, 2 = side 1 only
-    uint8_t resolution;    // 25ns * (resolution+1)
-    uint8_t checksum[4];   // of data after this point
-    uint8_t track[165][4]; // track offsets, not necessarily 165
-};
-
-struct ScpTrack
-{
-    char track_id[3];      // 'TRK'
-    uint8_t strack;        // SCP track number
-    struct
-    {
-        uint8_t index[4];  // time for one revolution
-        uint8_t length[4]; // number of bitcells
-        uint8_t offset[4]; // offset to bitcell data, relative to track header
-    }
-    revolution[5];
-};
 
 static std::ifstream inputFile;
 static sqlite3* outputDb;
@@ -109,6 +81,7 @@ static void read_track(int strack)
 
     Fluxmap fluxmap;
     nanoseconds_t pending = 0;
+    unsigned inputBytes = 0;
     for (int revolution = 0; revolution < header.revolutions; revolution++)
     {
         if (revolution != 0)
@@ -133,12 +106,14 @@ static void read_track(int strack)
                 pending = 0;
             }
             else
-                pending += interval;
+                pending += 0x10000;
         }
+
+        inputBytes += datalength*2;
     }
 
-    std::cout << fmt::format(" {} ms in {} output bytes\n",
-        fluxmap.duration() / 1e6, fluxmap.bytes());
+    std::cout << fmt::format(" {} ms in {} input bytes and {} output bytes\n",
+        fluxmap.duration() / 1e6, inputBytes, fluxmap.bytes());
     sqlWriteFlux(outputDb, trackno(strack), headno(strack), fluxmap);
 }
 

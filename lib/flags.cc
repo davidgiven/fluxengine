@@ -29,7 +29,7 @@ void FlagGroup::addFlag(Flag* flag)
     _flags.push_back(flag);
 }
 
-void FlagGroup::parseFlags(int argc, const char* argv[])
+std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc, const char* argv[])
 {
     if (_initialised)
         throw std::runtime_error("called parseFlags() twice");
@@ -66,6 +66,7 @@ void FlagGroup::parseFlags(int argc, const char* argv[])
 
     /* Now actually parse them. */
 
+    std::vector<std::string> filenames;
     int index = 1;
     while (index < argc)
     {
@@ -76,52 +77,73 @@ void FlagGroup::parseFlags(int argc, const char* argv[])
         std::string value;
         bool usesthat = false;
 
-        if ((thisarg.size() == 0) || (thisarg[0] != '-'))
-            Error() << "non-option parameter " << thisarg << " seen (try --help)";
-        if ((thisarg.size() > 1) && (thisarg[1] == '-'))
+        if (thisarg.size() == 0)
         {
-            /* Long option. */
-
-            auto equals = thisarg.rfind('=');
-            if (equals != std::string::npos)
-            {
-                key = thisarg.substr(0, equals);
-                value = thisarg.substr(equals+1);
-            }
-            else
-            {
-                key = thisarg;
-                value = thatarg;
-                usesthat = true;
-            }
+            /* Ignore this argument. */
+        }
+        else if (thisarg[0] != '-')
+        {
+            /* This is a filename. */
+            filenames.push_back(thisarg);
         }
         else
         {
-            /* Short option. */
+            /* This is a flag. */
 
-            if (thisarg.size() > 2)
+            if ((thisarg.size() > 1) && (thisarg[1] == '-'))
             {
-                key = thisarg.substr(0, 2);
-                value = thisarg.substr(2);
+                /* Long option. */
+
+                auto equals = thisarg.rfind('=');
+                if (equals != std::string::npos)
+                {
+                    key = thisarg.substr(0, equals);
+                    value = thisarg.substr(equals+1);
+                }
+                else
+                {
+                    key = thisarg;
+                    value = thatarg;
+                    usesthat = true;
+                }
             }
             else
             {
-                key = thisarg;
-                value = thatarg;
-                usesthat = true;
+                /* Short option. */
+
+                if (thisarg.size() > 2)
+                {
+                    key = thisarg.substr(0, 2);
+                    value = thisarg.substr(2);
+                }
+                else
+                {
+                    key = thisarg;
+                    value = thatarg;
+                    usesthat = true;
+                }
             }
+
+            auto flag = flags_by_name.find(key);
+            if (flag == flags_by_name.end())
+                Error() << "unknown flag '" << key << "'; try --help";
+
+            flag->second->set(value);
+            if (usesthat && flag->second->hasArgument())
+                index++;
         }
 
-        auto flag = flags_by_name.find(key);
-        if (flag == flags_by_name.end())
-            Error() << "unknown flag '" << key << "'; try --help";
-
-        flag->second->set(value);
-
         index++;
-        if (usesthat && flag->second->hasArgument())
-            index++;
     }
+
+    return filenames;
+}
+
+void FlagGroup::parseFlags(int argc, const char* argv[])
+{
+    auto filenames = parseFlagsWithFilenames(argc, argv);
+    if (!filenames.empty())
+        Error() << "non-option parameter " << *filenames.begin() << " seen (try --help)";
 }
 
 void FlagGroup::checkInitialised() const
