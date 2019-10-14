@@ -8,7 +8,7 @@ static FlagGroup flags;
 static DataSpecFlag source(
     { "--source", "-s" },
     "source for data",
-    ":d=0");
+    ":d=0:t=0:s=0");
 
 int mainRpm(int argc, const char* argv[])
 {
