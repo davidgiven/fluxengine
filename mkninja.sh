@@ -183,12 +183,14 @@ buildlibrary libbackend.a \
     lib/sectorset.cc \
     lib/sql.cc \
     lib/usb.cc \
+    lib/visualiser.cc \
     lib/writer.cc \
 
 buildlibrary libfrontend.a \
     src/fe-cwftoflux.cc \
     src/fe-erase.cc \
     src/fe-fluxtoau.cc \
+    src/fe-fluxtoscp.cc \
     src/fe-fluxtovcd.cc \
     src/fe-inspect.cc \
     src/fe-readadfs.cc \
@@ -208,6 +210,7 @@ buildlibrary libfrontend.a \
     src/fe-readvictor9k.cc \
     src/fe-readzilogmcz.cc \
     src/fe-rpm.cc \
+    src/fe-scptoflux.cc \
     src/fe-seek.cc \
     src/fe-testbulktransport.cc \
     src/fe-upgradefluxfile.cc \
