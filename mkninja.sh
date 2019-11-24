@@ -233,6 +233,13 @@ buildsimpleprogram brother120tool \
     libemu.a \
     libfmt.a \
 
+buildsimpleprogram brother240tool \
+	-Idep/emu \
+    tools/brother240tool.cc \
+    libbackend.a \
+    libemu.a \
+    libfmt.a \
+
 runtest bitaccumulator-test tests/bitaccumulator.cc
 runtest bytes-test          tests/bytes.cc
 runtest compression-test    tests/compression.cc

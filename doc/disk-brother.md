@@ -129,8 +129,8 @@ reverse engineered it to find out.
 
 Standard Linux mtools will access the filesystem image and allow you to move
 files in and out. However, you'll need to change the media type bytes at
-offsets 0x015 and 0x100 from 0x58 to 0xf0 before mtools will touch it. Once
-done, this will work:
+offsets 0x015 and 0x100 from 0x58 to 0xf0 before mtools will touch it. The
+supplied `brother240tool` will do this. Once done, this will work:
 
 ```
 mdir -i brother.img
