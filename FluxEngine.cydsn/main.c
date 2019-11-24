@@ -291,7 +291,6 @@ static void cmd_read(struct read_frame* f)
 
     /* Wait for the beginning of a rotation. */
         
-    print("wait");
     index_irq = false;
     while (!index_irq)
         ;
@@ -306,7 +305,6 @@ static void cmd_read(struct read_frame* f)
     dma_underrun = false;
     int count = 0;
     SAMPLER_CONTROL_Write(0); /* !reset */
-    CAPTURE_CONTROL_Write(1);
     CyDmaChSetInitialTd(dma_channel, td[dma_writing_to_td]);
     CyDmaClearPendingDrq(dma_channel);
     CyDmaChEnable(dma_channel, 1);
@@ -366,7 +364,6 @@ static void cmd_read(struct read_frame* f)
         dma_reading_from_td = NEXT_BUFFER(dma_reading_from_td);
     }
 abort:;
-    CAPTURE_CONTROL_Write(0);
     CyDmaChSetRequest(dma_channel, CY_DMA_CPU_TERM_CHAIN);
     while (CyDmaChGetRequest(dma_channel))
         ;
@@ -418,6 +415,8 @@ static void init_replay_dma(void)
 
 static void cmd_write(struct write_frame* f)
 {
+    print("cmd_write");
+    
     if (f->bytes_to_write % FRAME_SIZE)
     {
         send_error(F_ERROR_INVALID_VALUE);
@@ -555,7 +554,7 @@ abort:
         CyDmaChDisable(dma_channel);
     }
     
-    //debug("p=%d cr=%d cw=%d f=%d l=%d w=%d index=%d underrun=%d", packets, count_read, count_written, finished, listening, writing, index_irq, dma_underrun);
+    print("p=%d cr=%d cw=%d f=%d w=%d index=%d underrun=%d", packets, count_read, count_written, finished, writing, index_irq, dma_underrun);
     if (!finished)
     {
         while (count_read < packets)
@@ -573,6 +572,7 @@ abort:
     }
     
     deinit_dma();
+    print("write finished");
     
     if (dma_underrun)
     {
