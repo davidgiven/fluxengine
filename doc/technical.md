@@ -123,6 +123,10 @@ admittedly expensive.)
     sheet](http://www.bitsavers.org/pdf/mitsubishi/floppy/M4851/TJ2-G30211A_M4851_DSHH_48TPI_OEM_Manual_Nov83.pdf):
     the equivalent data sheet for a representative 5.25" drive.
 
+  - [The DRG Business Machines YD-174 manual](https://electrickery.hosting.philpem.me.uk/comp/divcomp/doc/YE_Data_YD-174_8inchFloppyDriveTechnicalManual.pdf):
+	the equivalent manual (data sheets hadn't been invented then) for a
+	representative 8" drive.
+
   - [KryoFlux stream file
     documentation](https://www.kryoflux.com/download/kryoflux_stream_protocol_rev1.1.pdf):
     the format of KryoFlux stream files (partially supported by FluxEngine)
