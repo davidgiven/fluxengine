@@ -57,27 +57,18 @@ begin
         countdown <= 0;
     end
     else
-    begin
         case (state)
             STATE_IDLE:
-            begin
                 state <= STATE_LOAD;
-            end
             
             STATE_LOAD:
-            begin
                 if (dataclocked)
-                begin
                     case (opcode)
                         OPCODE_PULSE:
-                        begin
                             state <= STATE_PULSING;
-                        end
                         
                         OPCODE_INDEX:
-                        begin
                             state <= STATE_INDEXING;
-                        end
                         
                         default:
                         begin
@@ -85,38 +76,23 @@ begin
                             state <= STATE_WAITING;
                         end
                     endcase
-                end
-            end
             
             STATE_WAITING:
-            begin
                 if (sampleclocked)
                 begin
                     if (countdown == 0)
-                    begin
                         state <= STATE_LOAD;
-                    end
                     else
-                    begin
                         countdown <= countdown - 1;
-                    end
                 end
-            end
             
             STATE_PULSING:
-            begin
                 state <= STATE_LOAD;
-            end
             
             STATE_INDEXING:
-            begin
                 if (indexed)
-                begin
                     state <= STATE_LOAD;
-                end
-            end
         endcase
-    end
 end
 
 //`#end` -- edit above this line, do not edit this line
