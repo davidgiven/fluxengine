@@ -409,7 +409,7 @@ static void init_replay_dma(void)
 
         CyDmaTdSetConfiguration(td[i], BUFFER_SIZE, td[nexti],
             CY_DMA_TD_INC_SRC_ADR | SEQUENCER_DMA__TD_TERMOUT_EN);
-        CyDmaTdSetAddress(td[i], LO16((uint32)&dma_buffer[i]), LO16((uint32)&SEQUENCER_DATAPATH_F0_REG));
+        CyDmaTdSetAddress(td[i], LO16((uint32)&dma_buffer[i]), LO16((uint32)REPLAY_FIFO_FIFO_PTR));
     }    
 }
 
@@ -423,13 +423,14 @@ static void cmd_write(struct write_frame* f)
         return;
     }
     
+    SEQUENCER_CONTROL_Write(1); /* put the sequencer into reset */
+
     SIDE_REG_Write(f->side);
-    SEQUENCER_CONTROL_Write(1); /* reset */
     {
-        uint8_t i = CyEnterCriticalSection();
-        SEQUENCER_DATAPATH_F0_SET_LEVEL_NORMAL;
-        SEQUENCER_DATAPATH_F0_CLEAR;
-        SEQUENCER_DATAPATH_F0_SINGLE_BUFFER_UNSET;
+        uint8_t i = CyEnterCriticalSection();        
+        REPLAY_FIFO_SET_LEVEL_NORMAL;
+        REPLAY_FIFO_CLEAR;
+        REPLAY_FIFO_SINGLE_BUFFER_UNSET;
         CyExitCriticalSection(i);
     }
     seek_to(current_track);    

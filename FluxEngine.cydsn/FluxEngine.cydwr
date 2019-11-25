@@ -28,6 +28,30 @@
         <Data key="sync_with_bus_clk" value="True" />
         <Data key="user_set_domain" value="False" />
       </Group>
+      <Group key="1a7e8637-3b6b-4e84-839c-0dfc18fdaf5b">
+        <Data key="check_tolerance" value="True" />
+        <Data key="clock_version" value="v1" />
+        <Data key="derive_type" value="NAMED_DIVIDER" />
+        <Data key="desired_freq" value="0" />
+        <Data key="desired_unit" value="15" />
+        <Data key="divider" value="0" />
+        <Data key="domain" value="DIGITAL" />
+        <Data key="enabled" value="True" />
+        <Data key="minus_accuracy" value="0.25" />
+        <Data key="minus_tolerance" value="5" />
+        <Data key="name" value="Clock_5" />
+        <Data key="named_src_direct_connect" value="True" />
+        <Data key="netlist_name" value="Clock_5" />
+        <Data key="placement" value="AUTO" />
+        <Data key="plus_accuracy" value="0.25" />
+        <Data key="plus_tolerance" value="5" />
+        <Data key="scope" value="LOCAL" />
+        <Data key="src_clk_id" value="75C2148C-3656-4d8a-846D-0CAE99AB6FF7" />
+        <Data key="src_clk_name" value="BUS_CLK" />
+        <Data key="start_on_reset" value="True" />
+        <Data key="sync_with_bus_clk" value="True" />
+        <Data key="user_set_domain" value="False" />
+      </Group>
       <Group key="4eef02b9-8ad1-43c4-85f1-b3335faa5fc4">
         <Data key="check_tolerance" value="True" />
         <Data key="clock_version" value="v1" />
@@ -609,6 +633,7 @@
   <Group key="DWRInstGuidMapping">
     <Group key="Clock">
       <Data key="0b2f9bbb-00ce-4115-a788-ffb9d046a9e5" value="Clock_4" />
+      <Data key="1a7e8637-3b6b-4e84-839c-0dfc18fdaf5b" value="Clock_5" />
       <Data key="4eef02b9-8ad1-43c4-85f1-b3335faa5fc4" value="Clock_3" />
       <Data key="06c4d5d4-f15f-4b29-a1d0-c24b2e38b1ec" value="CounterClock" />
       <Data key="24cd38f7-f472-4403-837f-86807c8f5333" value="PULSE_CLOCK" />
@@ -3862,10 +3887,28 @@
     </Group>
     <Group key="bc2e8987-db82-469c-bf6f-22fd3464cc70">
       <Group key="0">
-        <Data key="Port Format" value="2,2" />
+        <Data key="Port Format" value="0,0" />
       </Group>
       <Group key="1">
-        <Data key="Port Format" value="2,3" />
+        <Data key="Port Format" value="0,1" />
+      </Group>
+      <Group key="2">
+        <Data key="Port Format" value="0,2" />
+      </Group>
+      <Group key="3">
+        <Data key="Port Format" value="0,3" />
+      </Group>
+      <Group key="4">
+        <Data key="Port Format" value="0,4" />
+      </Group>
+      <Group key="5">
+        <Data key="Port Format" value="0,5" />
+      </Group>
+      <Group key="6">
+        <Data key="Port Format" value="0,6" />
+      </Group>
+      <Group key="7">
+        <Data key="Port Format" value="0,7" />
       </Group>
     </Group>
     <Group key="bc5d52a1-1b25-4aa0-9ba9-3f81d122772f">
