@@ -291,7 +291,6 @@ static void cmd_read(struct read_frame* f)
 
     /* Wait for the beginning of a rotation. */
         
-    print("wait");
     index_irq = false;
     while (!index_irq)
         ;
@@ -306,7 +305,6 @@ static void cmd_read(struct read_frame* f)
     dma_underrun = false;
     int count = 0;
     SAMPLER_CONTROL_Write(0); /* !reset */
-    CAPTURE_CONTROL_Write(1);
     CyDmaChSetInitialTd(dma_channel, td[dma_writing_to_td]);
     CyDmaClearPendingDrq(dma_channel);
     CyDmaChEnable(dma_channel, 1);
@@ -366,7 +364,6 @@ static void cmd_read(struct read_frame* f)
         dma_reading_from_td = NEXT_BUFFER(dma_reading_from_td);
     }
 abort:;
-    CAPTURE_CONTROL_Write(0);
     CyDmaChSetRequest(dma_channel, CY_DMA_CPU_TERM_CHAIN);
     while (CyDmaChGetRequest(dma_channel))
         ;
@@ -412,25 +409,28 @@ static void init_replay_dma(void)
 
         CyDmaTdSetConfiguration(td[i], BUFFER_SIZE, td[nexti],
             CY_DMA_TD_INC_SRC_ADR | SEQUENCER_DMA__TD_TERMOUT_EN);
-        CyDmaTdSetAddress(td[i], LO16((uint32)&dma_buffer[i]), LO16((uint32)&SEQUENCER_DATAPATH_F0_REG));
+        CyDmaTdSetAddress(td[i], LO16((uint32)&dma_buffer[i]), LO16((uint32)REPLAY_FIFO_FIFO_PTR));
     }    
 }
 
 static void cmd_write(struct write_frame* f)
 {
+    print("cmd_write");
+    
     if (f->bytes_to_write % FRAME_SIZE)
     {
         send_error(F_ERROR_INVALID_VALUE);
         return;
     }
     
+    SEQUENCER_CONTROL_Write(1); /* put the sequencer into reset */
+
     SIDE_REG_Write(f->side);
-    SEQUENCER_CONTROL_Write(1); /* reset */
     {
-        uint8_t i = CyEnterCriticalSection();
-        SEQUENCER_DATAPATH_F0_SET_LEVEL_NORMAL;
-        SEQUENCER_DATAPATH_F0_CLEAR;
-        SEQUENCER_DATAPATH_F0_SINGLE_BUFFER_UNSET;
+        uint8_t i = CyEnterCriticalSection();        
+        REPLAY_FIFO_SET_LEVEL_NORMAL;
+        REPLAY_FIFO_CLEAR;
+        REPLAY_FIFO_SINGLE_BUFFER_UNSET;
         CyExitCriticalSection(i);
     }
     seek_to(current_track);    
@@ -555,7 +555,7 @@ abort:
         CyDmaChDisable(dma_channel);
     }
     
-    //debug("p=%d cr=%d cw=%d f=%d l=%d w=%d index=%d underrun=%d", packets, count_read, count_written, finished, listening, writing, index_irq, dma_underrun);
+    print("p=%d cr=%d cw=%d f=%d w=%d index=%d underrun=%d", packets, count_read, count_written, finished, writing, index_irq, dma_underrun);
     if (!finished)
     {
         while (count_read < packets)
@@ -573,6 +573,7 @@ abort:
     }
     
     deinit_dma();
+    print("write finished");
     
     if (dma_underrun)
     {
