@@ -26,6 +26,18 @@ static int charToInt(char c)
 	return 10 + tolower(c) - 'a';
 }
 
+static uint32_t checksum(const Bytes& bytes)
+{
+    ByteReader br(bytes);
+    uint32_t checksum = 0;
+
+    assert((bytes.size() & 3) == 0);
+    while (!br.eof())
+        checksum ^= br.read_be32();
+
+    return checksum & 0x55555555;
+}
+
 static void write_bits(std::vector<bool>& bits, unsigned& cursor, uint64_t data, int width)
 {
 	cursor += width;
@@ -45,7 +57,7 @@ static void write_sector(std::vector<bool> bits, unsigned& cursor, const Sector*
     Bytes header(4);
     ByteWriter bw(header);
     bw.write_8(0xff); /* Amiga 1.0 format byte */
-    bw.write_8(sector->logicalTrack);
+    bw.write_8((sector->logicalTrack<<1) | sector->logicalSide);
     bw.write_8(sector->logicalSector);
     bw.write_8(AMIGA_SECTORS_PER_TRACK - sector->logicalSector);
 }
