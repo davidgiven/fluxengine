@@ -12,11 +12,6 @@
 
 static FlagGroup flags { &readerFlags };
 
-static StringFlag outputFilename(
-    { "--output", "-o" },
-    "The output image file to write to.",
-    "aeslanier.img");
-
 int mainReadAESLanier(int argc, const char* argv[])
 {
 	setReaderDefaultSource(":t=0-79:s=0");
