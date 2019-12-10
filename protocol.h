@@ -62,6 +62,8 @@ enum
     F_FRAME_RECALIBRATE_REPLY,    /* any_frame */
     F_FRAME_SET_DRIVE_CMD,        /* setdrive_frame */
     F_FRAME_SET_DRIVE_REPLY,      /* any_frame */
+    F_FRAME_MEASURE_VOLTAGES_CMD, /* any_frame */
+    F_FRAME_MEASURE_VOLTAGES_REPLY, /* voltages_frame */
 };
 
 enum
@@ -144,6 +146,27 @@ struct set_drive_frame
 {
     struct frame_header f;
     uint8_t drive_flags;
+};
+
+struct voltages
+{
+    uint16_t logic0_mv;
+    uint16_t logic1_mv;
+};
+
+struct voltages_frame
+{
+    struct frame_header f;
+    struct voltages output_both_off;
+    struct voltages output_drive_0_selected;
+    struct voltages output_drive_1_selected;
+    struct voltages output_drive_0_running;
+    struct voltages output_drive_1_running;
+    struct voltages input_both_off;
+    struct voltages input_drive_0_selected;
+    struct voltages input_drive_1_selected;
+    struct voltages input_drive_0_running;
+    struct voltages input_drive_1_running;
 };
 
 #endif

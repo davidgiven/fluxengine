@@ -212,6 +212,7 @@ buildlibrary libfrontend.a \
     src/fe-scptoflux.cc \
     src/fe-seek.cc \
     src/fe-testbulktransport.cc \
+    src/fe-testvoltages.cc \
     src/fe-upgradefluxfile.cc \
     src/fe-writebrother.cc \
     src/fe-writeflux.cc \

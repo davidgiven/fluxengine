@@ -99,6 +99,15 @@ static void start_motor(void)
     CyWdtClear();
 }
 
+static void stop_motor(void)
+{
+    if (motor_on)
+    {
+        MOTOR_REG_Write(0);
+        motor_on = false;
+    }
+}
+
 static void wait_until_writeable(int ep)
 {
     while (USBFS_GetEPState(ep) != USBFS_IN_BUFFER_EMPTY)
@@ -138,25 +147,36 @@ static void cmd_get_version(struct any_frame* f)
 
 static void step(int dir)
 {
-    STEP_REG_Write(dir);
-    CyDelayUs(1);
-    STEP_REG_Write(dir | 2);
-    CyDelayUs(1);
-    STEP_REG_Write(dir);
+    STEP_REG_Write(dir); /* step high */
+    CyDelayUs(6);
+    STEP_REG_Write(dir | 2); /* step low */
+    CyDelayUs(6);
+    STEP_REG_Write(dir); /* step high again, drive moves now */
     CyDelay(STEP_INTERVAL_TIME);
+}
+
+static void home(void)
+{
+    for (int i=0; i<100; i++)
+    {
+        /* Don't keep stepping forever, because if a drive's
+         * not connected bad things happen. */
+        if (TRACK0_REG_Read())
+            break;
+        step(STEP_TOWARDS0);
+    }
+    
+    /* Step to -1, which should be a nop, to reset the disk on disk change. */
+    step(STEP_TOWARDS0);
 }
 
 static void seek_to(int track)
 {
     start_motor();
-    if (!homed)
+    if (!homed || (track == 0))
     {
         print("homing");
-        while (!TRACK0_REG_Read())
-            step(STEP_TOWARDS0);
-            
-        /* Step to -1, which should be a nop, to reset the disk on disk change. */
-        step(STEP_TOWARDS0);
+        home();
         
         homed = true;
         current_track = 0;
@@ -167,11 +187,7 @@ static void seek_to(int track)
     while (track != current_track)
     {
         if (TRACK0_REG_Read())
-        {
-            if (current_track != 0)
-                print("unexpectedly detected track 0");
             current_track = 0;
-        }
         
         if (track > current_track)
         {
@@ -606,19 +622,113 @@ static void cmd_erase(struct erase_frame* f)
     send_reply((struct any_frame*) &r);
 }
 
+static void set_drive_flags(uint8_t flags)
+{
+    if (current_drive_flags != flags)
+        homed = false;
+    
+    current_drive_flags = flags;
+    DRIVESELECT_REG_Write((flags & 1) ? 2 : 1); /* select drive 1 or 0 */
+    DENSITY_REG_Write(flags >> 1); /* density bit */
+}
+
 static void cmd_set_drive(struct set_drive_frame* f)
 {
-    if (current_drive_flags != f->drive_flags)
-    {
-        current_drive_flags = f->drive_flags;
-        DRIVE_REG_Write(current_drive_flags);
-        homed = false;
-    }
+    set_drive_flags(f->drive_flags);
     
     DECLARE_REPLY_FRAME(struct any_frame, F_FRAME_SET_DRIVE_REPLY);
     send_reply((struct any_frame*) &r);
 }
-   
+
+static uint16_t read_output_voltage_mv(void)
+{
+    OUTPUT_VOLTAGE_ADC_StartConvert();
+    OUTPUT_VOLTAGE_ADC_IsEndConversion(OUTPUT_VOLTAGE_ADC_WAIT_FOR_RESULT);
+    uint16_t samples = OUTPUT_VOLTAGE_ADC_GetResult16();
+    return OUTPUT_VOLTAGE_ADC_CountsTo_mVolts(samples);
+}
+
+static void read_output_voltages(struct voltages* v)
+{
+    SIDE_REG_Write(1); /* set DIR to low (remember this is inverted) */
+    CyDelay(100);
+    v->logic0_mv = read_output_voltage_mv();
+
+    SIDE_REG_Write(0);
+    CyDelay(100);
+    v->logic1_mv = read_output_voltage_mv();
+}
+
+static uint16_t read_input_voltage_mv(void)
+{
+    INPUT_VOLTAGE_ADC_StartConvert();
+    INPUT_VOLTAGE_ADC_IsEndConversion(INPUT_VOLTAGE_ADC_WAIT_FOR_RESULT);
+    uint16_t samples = INPUT_VOLTAGE_ADC_GetResult16();
+    return INPUT_VOLTAGE_ADC_CountsTo_mVolts(samples);
+}
+
+static void read_input_voltages(struct voltages* v)
+{
+    home();
+    CyDelay(50);
+    v->logic0_mv = read_input_voltage_mv();
+    
+    step(STEP_AWAYFROM0);
+    CyDelay(50);
+    v->logic1_mv = read_input_voltage_mv();
+}
+
+static void cmd_measure_voltages(void)
+{
+    stop_motor();
+    INPUT_VOLTAGE_ADC_Start();
+    INPUT_VOLTAGE_ADC_SetPower(INPUT_VOLTAGE_ADC__HIGHPOWER);
+    OUTPUT_VOLTAGE_ADC_Start();
+    OUTPUT_VOLTAGE_ADC_SetPower(OUTPUT_VOLTAGE_ADC__HIGHPOWER);
+    
+    DECLARE_REPLY_FRAME(struct voltages_frame, F_FRAME_MEASURE_VOLTAGES_REPLY);
+    
+    CyWdtClear();
+    MOTOR_REG_Write(0); /* should be ignored anyway */
+    DRIVESELECT_REG_Write(0); /* deselect both drives */
+    CyDelay(200); /* wait for things to settle */
+    read_output_voltages(&r.output_both_off);
+    read_input_voltages(&r.input_both_off);
+
+    CyWdtClear();
+    DRIVESELECT_REG_Write(1); /* select drive 0 */
+    CyDelay(50);
+    read_output_voltages(&r.output_drive_0_selected);
+    read_input_voltages(&r.input_drive_0_selected);
+    MOTOR_REG_Write(1);
+    CyDelay(300);
+    CyWdtClear();
+    read_output_voltages(&r.output_drive_0_running);
+    read_input_voltages(&r.input_drive_0_running);
+    MOTOR_REG_Write(0);
+    CyDelay(300);
+    
+    CyWdtClear();
+    DRIVESELECT_REG_Write(2); /* select drive 1 */
+    CyDelay(50);
+    read_output_voltages(&r.output_drive_1_selected);
+    read_input_voltages(&r.input_drive_1_selected);
+    MOTOR_REG_Write(1);
+    CyDelay(300);
+    CyWdtClear();
+    read_output_voltages(&r.output_drive_1_running);
+    read_input_voltages(&r.input_drive_1_running);
+    MOTOR_REG_Write(0);
+    CyDelay(300);
+
+    CyWdtClear();
+    DRIVESELECT_REG_Write(0);
+    homed = false;
+    INPUT_VOLTAGE_ADC_Stop();
+    OUTPUT_VOLTAGE_ADC_Stop();
+    send_reply((struct any_frame*) &r);
+}
+
 static void handle_command(void)
 {
     static uint8_t input_buffer[FRAME_SIZE];
@@ -663,6 +773,10 @@ static void handle_command(void)
         case F_FRAME_SET_DRIVE_CMD:
             cmd_set_drive((struct set_drive_frame*) f);
             break;
+        
+        case F_FRAME_MEASURE_VOLTAGES_CMD:
+            cmd_measure_voltages();
+            break;
             
         default:
             send_error(F_ERROR_BAD_COMMAND);
@@ -677,7 +791,9 @@ int main(void)
     INDEX_IRQ_StartEx(&index_irq_cb);
     CAPTURE_DMA_FINISHED_IRQ_StartEx(&capture_dma_finished_irq_cb);
     SEQUENCER_DMA_FINISHED_IRQ_StartEx(&replay_dma_finished_irq_cb);
-    DRIVE_REG_Write(0);
+    INPUT_VOLTAGE_ADC_Stop();
+    OUTPUT_VOLTAGE_ADC_Stop();
+    DRIVESELECT_REG_Write(0);
     UART_Start();
     USBFS_Start(0, USBFS_DWR_VDDD_OPERATION);
     
@@ -710,6 +826,7 @@ int main(void)
         
         if (USBFS_GetEPState(FLUXENGINE_CMD_OUT_EP_NUM) == USBFS_OUT_BUFFER_FULL)
         {
+            set_drive_flags(current_drive_flags);
             handle_command();
             USBFS_EnableOutEP(FLUXENGINE_CMD_OUT_EP_NUM);
             print("idle");
