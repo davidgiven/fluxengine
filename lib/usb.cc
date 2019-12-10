@@ -289,9 +289,13 @@ void usbMeasureVoltages(struct voltages_frame* voltages)
 
     struct voltages_frame* r = await_reply<struct voltages_frame>(F_FRAME_MEASURE_VOLTAGES_REPLY);
     convert_voltages_from_usb(r->input_both_off, voltages->input_both_off);
-    convert_voltages_from_usb(r->input_drive_0_on, voltages->input_drive_0_on);
-    convert_voltages_from_usb(r->input_drive_1_on, voltages->input_drive_1_on);
+    convert_voltages_from_usb(r->input_drive_0_selected, voltages->input_drive_0_selected);
+    convert_voltages_from_usb(r->input_drive_1_selected, voltages->input_drive_1_selected);
+    convert_voltages_from_usb(r->input_drive_0_running, voltages->input_drive_0_running);
+    convert_voltages_from_usb(r->input_drive_1_running, voltages->input_drive_1_running);
     convert_voltages_from_usb(r->output_both_off, voltages->output_both_off);
-    convert_voltages_from_usb(r->output_drive_0_on, voltages->output_drive_0_on);
-    convert_voltages_from_usb(r->output_drive_1_on, voltages->output_drive_1_on);
+    convert_voltages_from_usb(r->output_drive_0_selected, voltages->output_drive_0_selected);
+    convert_voltages_from_usb(r->output_drive_1_selected, voltages->output_drive_1_selected);
+    convert_voltages_from_usb(r->output_drive_0_running, voltages->output_drive_0_running);
+    convert_voltages_from_usb(r->output_drive_1_running, voltages->output_drive_1_running);
 }

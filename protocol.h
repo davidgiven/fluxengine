@@ -158,11 +158,15 @@ struct voltages_frame
 {
     struct frame_header f;
     struct voltages output_both_off;
-    struct voltages output_drive_0_on;
-    struct voltages output_drive_1_on;
+    struct voltages output_drive_0_selected;
+    struct voltages output_drive_1_selected;
+    struct voltages output_drive_0_running;
+    struct voltages output_drive_1_running;
     struct voltages input_both_off;
-    struct voltages input_drive_0_on;
-    struct voltages input_drive_1_on;
+    struct voltages input_drive_0_selected;
+    struct voltages input_drive_1_selected;
+    struct voltages input_drive_0_running;
+    struct voltages input_drive_1_running;
 };
 
 #endif
