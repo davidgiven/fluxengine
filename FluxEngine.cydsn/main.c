@@ -99,6 +99,15 @@ static void start_motor(void)
     CyWdtClear();
 }
 
+static void stop_motor(void)
+{
+    if (motor_on)
+    {
+        MOTOR_REG_Write(0);
+        motor_on = false;
+    }
+}
+
 static void wait_until_writeable(int ep)
 {
     while (USBFS_GetEPState(ep) != USBFS_IN_BUFFER_EMPTY)
@@ -139,9 +148,9 @@ static void cmd_get_version(struct any_frame* f)
 static void step(int dir)
 {
     STEP_REG_Write(dir);
-    CyDelayUs(1);
+    CyDelayUs(6);
     STEP_REG_Write(dir | 2);
-    CyDelayUs(1);
+    CyDelayUs(6);
     STEP_REG_Write(dir);
     CyDelay(STEP_INTERVAL_TIME);
 }
@@ -167,11 +176,7 @@ static void seek_to(int track)
     while (track != current_track)
     {
         if (TRACK0_REG_Read())
-        {
-            if (current_track != 0)
-                print("unexpectedly detected track 0");
             current_track = 0;
-        }
         
         if (track > current_track)
         {
@@ -606,19 +611,96 @@ static void cmd_erase(struct erase_frame* f)
     send_reply((struct any_frame*) &r);
 }
 
-static void cmd_set_drive(struct set_drive_frame* f)
+static void set_drive_flags(uint8_t flags)
 {
-    if (current_drive_flags != f->drive_flags)
+    if (current_drive_flags != flags)
     {
-        current_drive_flags = f->drive_flags;
-        DRIVE_REG_Write(current_drive_flags);
+        current_drive_flags = flags;
+        DRIVE_REG_Write(current_drive_flags & 1);
+        DENSITY_REG_Write(current_drive_flags >> 1); /* density bit */
         homed = false;
     }
+}
+
+static void cmd_set_drive(struct set_drive_frame* f)
+{
+    set_drive_flags(f->drive_flags);
     
     DECLARE_REPLY_FRAME(struct any_frame, F_FRAME_SET_DRIVE_REPLY);
     send_reply((struct any_frame*) &r);
 }
-   
+
+static uint16_t read_output_voltage_mv(void)
+{
+    OUTPUT_VOLTAGE_ADC_StartConvert();
+    OUTPUT_VOLTAGE_ADC_IsEndConversion(OUTPUT_VOLTAGE_ADC_WAIT_FOR_RESULT);
+    uint16_t samples = OUTPUT_VOLTAGE_ADC_GetResult16();
+    return OUTPUT_VOLTAGE_ADC_CountsTo_mVolts(samples);
+}
+
+static void read_output_voltages(struct voltages* v)
+{
+    DENSITY_REG_Write(1); /* set REDWC to low (remember it's inverted) */
+    CyDelay(100);
+    v->logic0_mv = read_output_voltage_mv();
+
+    DENSITY_REG_Write(0);
+    CyDelay(100);
+    v->logic1_mv = read_output_voltage_mv();
+}
+
+static uint16_t read_input_voltage_mv(void)
+{
+    INPUT_VOLTAGE_ADC_StartConvert();
+    INPUT_VOLTAGE_ADC_IsEndConversion(INPUT_VOLTAGE_ADC_WAIT_FOR_RESULT);
+    uint16_t samples = INPUT_VOLTAGE_ADC_GetResult16();
+    return INPUT_VOLTAGE_ADC_CountsTo_mVolts(samples);
+}
+
+static void read_input_voltages(struct voltages* v)
+{
+    seek_to(0);
+    CyDelay(200);
+    v->logic0_mv = read_input_voltage_mv();
+
+    seek_to(1);
+    CyDelay(200);
+    v->logic1_mv = read_input_voltage_mv();
+}
+
+static void cmd_measure_voltages(void)
+{
+    stop_motor();
+    INPUT_VOLTAGE_ADC_Start();
+    INPUT_VOLTAGE_ADC_SetPower(INPUT_VOLTAGE_ADC__HIGHPOWER);
+    OUTPUT_VOLTAGE_ADC_Start();
+    OUTPUT_VOLTAGE_ADC_SetPower(OUTPUT_VOLTAGE_ADC__HIGHPOWER);
+    
+    DECLARE_REPLY_FRAME(struct voltages_frame, F_FRAME_MEASURE_VOLTAGES_REPLY);
+    
+    set_drive_flags(0);
+    CyDelay(500); /* wait for things to settle */
+    read_output_voltages(&r.output_both_off);
+    read_input_voltages(&r.input_both_off);
+    
+    set_drive_flags(0);
+    start_motor();
+    CyDelay(500);
+    read_output_voltages(&r.output_drive_0_on);
+    read_input_voltages(&r.input_drive_0_on);
+    
+    set_drive_flags(1);
+    CyDelay(500);
+    read_output_voltages(&r.output_drive_1_on);
+    read_input_voltages(&r.input_drive_1_on);
+    
+    stop_motor();
+    
+    INPUT_VOLTAGE_ADC_Stop();
+    OUTPUT_VOLTAGE_ADC_Stop();
+    send_reply((struct any_frame*) &r);
+}
+
 static void handle_command(void)
 {
     static uint8_t input_buffer[FRAME_SIZE];
@@ -663,6 +745,10 @@ static void handle_command(void)
         case F_FRAME_SET_DRIVE_CMD:
             cmd_set_drive((struct set_drive_frame*) f);
             break;
+        
+        case F_FRAME_MEASURE_VOLTAGES_CMD:
+            cmd_measure_voltages();
+            break;
             
         default:
             send_error(F_ERROR_BAD_COMMAND);
@@ -677,6 +763,8 @@ int main(void)
     INDEX_IRQ_StartEx(&index_irq_cb);
     CAPTURE_DMA_FINISHED_IRQ_StartEx(&capture_dma_finished_irq_cb);
     SEQUENCER_DMA_FINISHED_IRQ_StartEx(&replay_dma_finished_irq_cb);
+    INPUT_VOLTAGE_ADC_Stop();
+    OUTPUT_VOLTAGE_ADC_Stop();
     DRIVE_REG_Write(0);
     UART_Start();
     USBFS_Start(0, USBFS_DWR_VDDD_OPERATION);

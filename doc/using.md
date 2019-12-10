@@ -51,7 +51,7 @@ In order to do anything useful, you have to plug it in to a floppy disk drive (o
      rpm for a 3.5" disk, or 360 rpm for a 5.25" disk. If it doesn't, please
      [get in touch](https://github.com/davidgiven/fluxengine/issues/new).
 
-  7. Do `fluxengine testbulktransport` from the shell. It'll measure your USB
+  7. Do `fluxengine test bulktransport` from the shell. It'll measure your USB
      bandwidth. Ideally you should be getting above 900kB/s. FluxEngine needs
      about 850kB/s, so if you're getting less than this, try a different USB
      port.
@@ -213,9 +213,12 @@ directory.
   - `fluxengine seek`: moves the head. Mainly useful for finding out whether
   your drive can seek to track 82. (Mine can't.)
 
-  - `fluxengine testbulktransport`: measures your USB throughput. You need
+  - `fluxengine test bulktransport`: measures your USB throughput. You need
   about 600kB/s for FluxEngine to work. You don't need a disk in the drive
   for this one.
+
+  - `fluxengine test voltages`: measures your FDD bus signal voltages, which
+  is useful for testing for termination issues.
 
   - `fluxengine upgradefluxfile`: occasionally I need to upgrade the flux
   file format in a non-backwards-compatible way; this tool will upgrade flux
