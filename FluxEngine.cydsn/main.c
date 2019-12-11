@@ -281,7 +281,7 @@ static void init_capture_dma(void)
 
         CyDmaTdSetConfiguration(td[i], BUFFER_SIZE, td[nexti],   
             CY_DMA_TD_INC_DST_ADR | CAPTURE_DMA__TD_TERMOUT_EN);
-        CyDmaTdSetAddress(td[i], LO16((uint32)&SAMPLER_DATAPATH_F0_REG), LO16((uint32)&dma_buffer[i]));
+        CyDmaTdSetAddress(td[i], LO16((uint32)CAPTURE_FIFO_FIFO_PTR), LO16((uint32)&dma_buffer[i]));
     }    
 }
 
@@ -292,13 +292,11 @@ static void cmd_read(struct read_frame* f)
     
     /* Do slow setup *before* we go into the real-time bit. */
     
-    SAMPLER_CONTROL_Write(1); /* reset */
-    
     {
         uint8_t i = CyEnterCriticalSection();
-        SAMPLER_DATAPATH_F0_SET_LEVEL_MID;
-        SAMPLER_DATAPATH_F0_CLEAR;
-        SAMPLER_DATAPATH_F0_SINGLE_BUFFER_UNSET;
+        CAPTURE_FIFO_SET_LEVEL_MID;
+        CAPTURE_FIFO_CLEAR;
+        CAPTURE_FIFO_SINGLE_BUFFER_UNSET;
         CyExitCriticalSection(i);
     }
     
@@ -320,7 +318,6 @@ static void cmd_read(struct read_frame* f)
     dma_reading_from_td = -1;
     dma_underrun = false;
     int count = 0;
-    SAMPLER_CONTROL_Write(0); /* !reset */
     CyDmaChSetInitialTd(dma_channel, td[dma_writing_to_td]);
     CyDmaClearPendingDrq(dma_channel);
     CyDmaChEnable(dma_channel, 1);
