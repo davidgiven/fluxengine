@@ -2,8 +2,10 @@
 //`#start header` -- edit after this line, do not edit this line
 `include "cypress.v"
 //`#end` -- edit above this line, do not edit this line
-// Generated on 10/10/2010 at 20:39
-// Component: FIFOin
+
+/* Ultra-simple FIFO in component: a byte is shifted in every clock when req
+ * is high. */
+ 
 module FIFOin (drq, clk, d, req);
 	output  drq;
 	input   clk;
@@ -15,38 +17,7 @@ module FIFOin (drq, clk, d, req);
 wire [7:0] pi;
 assign pi = d;
 
-localparam STATE_WAIT = 1'b0;
-localparam STATE_READ = 1'b1;
-
-reg state;
-reg oldreq;
-
-wire load;
-wire full;
-
-assign load = state == STATE_READ;
-
-always @(posedge clk)
-begin
-    case (state)
-        STATE_WAIT:
-        begin
-            if (!full)
-            begin
-                if (req && !oldreq)
-                begin
-                    state <= STATE_READ;
-                end
-                oldreq <= req;
-            end
-        end
-        
-        STATE_READ:
-        begin
-            state <= STATE_WAIT;
-        end
-    endcase
-end
+assign load = req;
 
 cy_psoc3_dp #(.cy_dpconfig(
 {

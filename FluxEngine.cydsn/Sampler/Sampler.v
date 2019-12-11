@@ -2,6 +2,7 @@
 //`#start header` -- edit after this line, do not edit this line
 `include "cypress.v"
 `include "../SuperCounter/SuperCounter.v"
+
 //`#end` -- edit above this line, do not edit this line
 // Generated on 12/11/2019 at 21:18
 // Component: Sampler
@@ -20,10 +21,19 @@ module Sampler (
 
 localparam STATE_RESET = 0;
 localparam STATE_WAITING = 1;
-localparam STATE_OPCODE = 2;
+localparam STATE_INTERVAL = 2;
+localparam STATE_DISPATCH = 3;
+localparam STATE_OPCODE = 4;
+localparam STATE_COUNTING = 5;
 
-reg [1:0] state;
+reg [2:0] state;
 wire [6:0] counter;
+
+wire countnow;
+assign countnow = (state == STATE_COUNTING);
+
+wire counterreset;
+assign counterreset = (state == STATE_INTERVAL) || (state == STATE_OPCODE);
 
 SuperCounter #(.Delta(1), .ResetValue(0)) Counter
 (
@@ -33,14 +43,19 @@ SuperCounter #(.Delta(1), .ResetValue(0)) Counter
     /* output */ .d(counter)
 );
 
-wire countnow;
-wire counterreset;
-
 reg oldsampleclock;
-reg oldindex;
-reg oldrdata;
+wire sampleclocked;
+assign sampleclocked = !oldsampleclock && sampleclock;
 
-assign req = (state == STATE_OPCODE);
+reg oldindex;
+wire indexed;
+assign indexed = !oldindex && index;
+
+wire rdataed;
+reg oldrdata;
+assign rdataed = !oldrdata && rdata;
+
+assign req = (state == STATE_INTERVAL) || (state == STATE_OPCODE);
 
 always @(posedge clock)
 begin
@@ -51,43 +66,29 @@ begin
         oldsampleclock <= 0;
         oldindex <= 0;
         oldrdata <= 0;
-        counterreset <= 1;
-        countnow <= 0;
     end
     else
         case (state)
             STATE_RESET:
-            begin
                 state <= STATE_WAITING;
-                countnow <= 0;
-                counterreset <= 0;
-            end
             
             STATE_WAITING:
             begin
-                countnow <= 0;
-                counterreset <= 0;
-                
-                if (rdata && !oldrdata)
+                if (rdataed || indexed)
                 begin
-                    oldrdata <= 1;
-                    opcode <= 8'h80;
-                    state <= STATE_OPCODE;
+                    opcode <= {0, counter};
+                    state <= STATE_INTERVAL;
                 end
-                else if (index && !oldindex)
-                begin
-                    oldindex <= 1;
-                    opcode <= 8'h81;
-                    state <= STATE_OPCODE;
-                end
-                else if (sampleclock && !oldsampleclock)
+                else if (sampleclocked)
                 begin
                     oldsampleclock <= 1;
-                    opcode <= {0, counter};
                     if (counter == 7'h7f)
+                    begin
+                        opcode <= {0, counter};
                         state <= STATE_OPCODE;
+                    end
                     else
-                        countnow <= 1;
+                        state <= STATE_COUNTING;
                 end
                 
                 if (oldrdata && !rdata)
@@ -98,11 +99,32 @@ begin
                     oldsampleclock <= 0;
             end
             
-            STATE_OPCODE:
+            STATE_INTERVAL: /* interval byte sent here; counter reset */
+                state <= STATE_DISPATCH;
+                
+            STATE_DISPATCH: /* relax after interval byte, dispatch for opcode */
             begin
-                counterreset <= 1;
-                state <= STATE_WAITING;
+                if (rdataed)
+                begin
+                    oldrdata <= 1;
+                    opcode <= 8'h80;
+                    state <= STATE_OPCODE;
+                end
+                else if (indexed)
+                begin
+                    oldindex <= 1;
+                    opcode <= 8'h81;
+                    state <= STATE_OPCODE;
+                end
+                else
+                    state <= STATE_WAITING;
             end
+            
+            STATE_OPCODE: /* opcode byte sent here */
+                state <= STATE_WAITING;
+                            
+            STATE_COUNTING:
+                state <= STATE_WAITING;
         endcase
 end
 
