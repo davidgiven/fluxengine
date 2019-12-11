@@ -85,10 +85,21 @@ static void print(const char* msg, ...)
     UART_PutCRLF();
 }
 
+static void set_drive_flags(uint8_t flags)
+{
+    if (current_drive_flags != flags)
+        homed = false;
+    
+    current_drive_flags = flags;
+    DRIVESELECT_REG_Write((flags & 1) ? 2 : 1); /* select drive 1 or 0 */
+    DENSITY_REG_Write(flags >> 1); /* density bit */
+}
+
 static void start_motor(void)
 {
     if (!motor_on)
     {
+        set_drive_flags(current_drive_flags);
         MOTOR_REG_Write(1);
         CyDelay(1000);
         homed = false;
@@ -104,6 +115,7 @@ static void stop_motor(void)
     if (motor_on)
     {
         MOTOR_REG_Write(0);
+        DRIVESELECT_REG_Write(0); /* deselect all drives */
         motor_on = false;
     }
 }
@@ -619,16 +631,6 @@ static void cmd_erase(struct erase_frame* f)
     send_reply((struct any_frame*) &r);
 }
 
-static void set_drive_flags(uint8_t flags)
-{
-    if (current_drive_flags != flags)
-        homed = false;
-    
-    current_drive_flags = flags;
-    DRIVESELECT_REG_Write((flags & 1) ? 2 : 1); /* select drive 1 or 0 */
-    DENSITY_REG_Write(flags >> 1); /* density bit */
-}
-
 static void cmd_set_drive(struct set_drive_frame* f)
 {
     set_drive_flags(f->drive_flags);
@@ -806,10 +808,7 @@ int main(void)
         {
             uint32_t time_on = clock - motor_on_time;
             if (time_on > MOTOR_ON_TIME)
-            {
-                MOTOR_REG_Write(0);
-                motor_on = false;
-            }
+                stop_motor();
         }
         
         if (!USBFS_GetConfiguration() || USBFS_IsConfigurationChanged())

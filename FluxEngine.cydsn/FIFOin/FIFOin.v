@@ -17,6 +17,7 @@ module FIFOin (drq, clk, d, req);
 wire [7:0] pi;
 assign pi = d;
 
+wire load;
 assign load = req;
 
 cy_psoc3_dp #(.cy_dpconfig(
