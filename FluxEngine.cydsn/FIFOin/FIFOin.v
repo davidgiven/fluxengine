@@ -12,7 +12,7 @@ module FIFOin (drq, clk, d, req);
 
 //`#start body` -- edit after this line, do not edit this line
 
-reg [7:0] pi;
+wire [7:0] pi;
 assign pi = d;
 
 localparam STATE_WAIT = 1'b0;

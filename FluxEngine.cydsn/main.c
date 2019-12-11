@@ -265,7 +265,7 @@ static void deinit_dma(void)
 
 static void init_capture_dma(void)
 {
-    dma_channel = CAPTURE_DMA_DmaInitialize(
+    dma_channel = SAMPLER_DMA_DmaInitialize(
         2 /* bytes */,
         true /* request per burst */, 
         HI16(CYDEV_PERIPH_BASE),
@@ -280,8 +280,8 @@ static void init_capture_dma(void)
             nexti = 0;
 
         CyDmaTdSetConfiguration(td[i], BUFFER_SIZE, td[nexti],   
-            CY_DMA_TD_INC_DST_ADR | CAPTURE_DMA__TD_TERMOUT_EN);
-        CyDmaTdSetAddress(td[i], LO16((uint32)CAPTURE_FIFO_FIFO_PTR), LO16((uint32)&dma_buffer[i]));
+            CY_DMA_TD_INC_DST_ADR | SAMPLER_DMA__TD_TERMOUT_EN);
+        CyDmaTdSetAddress(td[i], LO16((uint32)SAMPLER_FIFO_FIFO_PTR), LO16((uint32)&dma_buffer[i]));
     }    
 }
 
@@ -294,9 +294,9 @@ static void cmd_read(struct read_frame* f)
     
     {
         uint8_t i = CyEnterCriticalSection();
-        CAPTURE_FIFO_SET_LEVEL_MID;
-        CAPTURE_FIFO_CLEAR;
-        CAPTURE_FIFO_SINGLE_BUFFER_UNSET;
+        SAMPLER_FIFO_SET_LEVEL_MID;
+        SAMPLER_FIFO_CLEAR;
+        SAMPLER_FIFO_SINGLE_BUFFER_UNSET;
         CyExitCriticalSection(i);
     }
     
@@ -786,7 +786,7 @@ int main(void)
     CySysTickStart();
     CySysTickSetCallback(4, system_timer_cb);
     INDEX_IRQ_StartEx(&index_irq_cb);
-    CAPTURE_DMA_FINISHED_IRQ_StartEx(&capture_dma_finished_irq_cb);
+    SAMPLER_DMA_FINISHED_IRQ_StartEx(&capture_dma_finished_irq_cb);
     SEQUENCER_DMA_FINISHED_IRQ_StartEx(&replay_dma_finished_irq_cb);
     INPUT_VOLTAGE_ADC_Stop();
     OUTPUT_VOLTAGE_ADC_Stop();
