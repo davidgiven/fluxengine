@@ -395,12 +395,14 @@ abort:;
 
     donecrunch(&cs);
     wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
-    unsigned zz = cs.outputlen;
-    if (cs.outputlen != BUFFER_SIZE)
-        USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, usb_buffer, BUFFER_SIZE-cs.outputlen);
+    if (!dma_underrun)
+    {
+        if (cs.outputlen != BUFFER_SIZE)
+            USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, usb_buffer, BUFFER_SIZE-cs.outputlen);
+        wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
+    }
     if ((cs.outputlen == BUFFER_SIZE) || (cs.outputlen == 0))
         USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, NULL, 0);
-    wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
     deinit_dma();
 
     if (dma_underrun)
@@ -413,7 +415,7 @@ abort:;
         DECLARE_REPLY_FRAME(struct any_frame, F_FRAME_READ_REPLY);
         send_reply(&r);
     }
-    print("count=%d i=%d d=%d zz=%d", count, index_irq, dma_underrun, zz);
+    print("count=%d i=%d d=%d", count, index_irq, dma_underrun);
 }
 
 static void init_replay_dma(void)
