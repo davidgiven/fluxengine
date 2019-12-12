@@ -85,10 +85,21 @@ static void print(const char* msg, ...)
     UART_PutCRLF();
 }
 
+static void set_drive_flags(uint8_t flags)
+{
+    if (current_drive_flags != flags)
+        homed = false;
+    
+    current_drive_flags = flags;
+    DRIVESELECT_REG_Write((flags & 1) ? 2 : 1); /* select drive 1 or 0 */
+    DENSITY_REG_Write(flags >> 1); /* density bit */
+}
+
 static void start_motor(void)
 {
     if (!motor_on)
     {
+        set_drive_flags(current_drive_flags);
         MOTOR_REG_Write(1);
         CyDelay(1000);
         homed = false;
@@ -104,6 +115,7 @@ static void stop_motor(void)
     if (motor_on)
     {
         MOTOR_REG_Write(0);
+        DRIVESELECT_REG_Write(0); /* deselect all drives */
         motor_on = false;
     }
 }
@@ -265,7 +277,7 @@ static void deinit_dma(void)
 
 static void init_capture_dma(void)
 {
-    dma_channel = CAPTURE_DMA_DmaInitialize(
+    dma_channel = SAMPLER_DMA_DmaInitialize(
         2 /* bytes */,
         true /* request per burst */, 
         HI16(CYDEV_PERIPH_BASE),
@@ -280,8 +292,8 @@ static void init_capture_dma(void)
             nexti = 0;
 
         CyDmaTdSetConfiguration(td[i], BUFFER_SIZE, td[nexti],   
-            CY_DMA_TD_INC_DST_ADR | CAPTURE_DMA__TD_TERMOUT_EN);
-        CyDmaTdSetAddress(td[i], LO16((uint32)&SAMPLER_DATAPATH_F0_REG), LO16((uint32)&dma_buffer[i]));
+            CY_DMA_TD_INC_DST_ADR | SAMPLER_DMA__TD_TERMOUT_EN);
+        CyDmaTdSetAddress(td[i], LO16((uint32)SAMPLER_FIFO_FIFO_PTR), LO16((uint32)&dma_buffer[i]));
     }    
 }
 
@@ -292,13 +304,11 @@ static void cmd_read(struct read_frame* f)
     
     /* Do slow setup *before* we go into the real-time bit. */
     
-    SAMPLER_CONTROL_Write(1); /* reset */
-    
     {
         uint8_t i = CyEnterCriticalSection();
-        SAMPLER_DATAPATH_F0_SET_LEVEL_MID;
-        SAMPLER_DATAPATH_F0_CLEAR;
-        SAMPLER_DATAPATH_F0_SINGLE_BUFFER_UNSET;
+        SAMPLER_FIFO_SET_LEVEL_MID;
+        SAMPLER_FIFO_CLEAR;
+        SAMPLER_FIFO_SINGLE_BUFFER_UNSET;
         CyExitCriticalSection(i);
     }
     
@@ -320,7 +330,6 @@ static void cmd_read(struct read_frame* f)
     dma_reading_from_td = -1;
     dma_underrun = false;
     int count = 0;
-    SAMPLER_CONTROL_Write(0); /* !reset */
     CyDmaChSetInitialTd(dma_channel, td[dma_writing_to_td]);
     CyDmaClearPendingDrq(dma_channel);
     CyDmaChEnable(dma_channel, 1);
@@ -386,12 +395,14 @@ abort:;
 
     donecrunch(&cs);
     wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
-    unsigned zz = cs.outputlen;
-    if (cs.outputlen != BUFFER_SIZE)
-        USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, usb_buffer, BUFFER_SIZE-cs.outputlen);
+    if (!dma_underrun)
+    {
+        if (cs.outputlen != BUFFER_SIZE)
+            USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, usb_buffer, BUFFER_SIZE-cs.outputlen);
+        wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
+    }
     if ((cs.outputlen == BUFFER_SIZE) || (cs.outputlen == 0))
         USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, NULL, 0);
-    wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
     deinit_dma();
 
     if (dma_underrun)
@@ -404,7 +415,7 @@ abort:;
         DECLARE_REPLY_FRAME(struct any_frame, F_FRAME_READ_REPLY);
         send_reply(&r);
     }
-    print("count=%d i=%d d=%d zz=%d", count, index_irq, dma_underrun, zz);
+    print("count=%d i=%d d=%d", count, index_irq, dma_underrun);
 }
 
 static void init_replay_dma(void)
@@ -622,16 +633,6 @@ static void cmd_erase(struct erase_frame* f)
     send_reply((struct any_frame*) &r);
 }
 
-static void set_drive_flags(uint8_t flags)
-{
-    if (current_drive_flags != flags)
-        homed = false;
-    
-    current_drive_flags = flags;
-    DRIVESELECT_REG_Write((flags & 1) ? 2 : 1); /* select drive 1 or 0 */
-    DENSITY_REG_Write(flags >> 1); /* density bit */
-}
-
 static void cmd_set_drive(struct set_drive_frame* f)
 {
     set_drive_flags(f->drive_flags);
@@ -789,7 +790,7 @@ int main(void)
     CySysTickStart();
     CySysTickSetCallback(4, system_timer_cb);
     INDEX_IRQ_StartEx(&index_irq_cb);
-    CAPTURE_DMA_FINISHED_IRQ_StartEx(&capture_dma_finished_irq_cb);
+    SAMPLER_DMA_FINISHED_IRQ_StartEx(&capture_dma_finished_irq_cb);
     SEQUENCER_DMA_FINISHED_IRQ_StartEx(&replay_dma_finished_irq_cb);
     INPUT_VOLTAGE_ADC_Stop();
     OUTPUT_VOLTAGE_ADC_Stop();
@@ -809,10 +810,7 @@ int main(void)
         {
             uint32_t time_on = clock - motor_on_time;
             if (time_on > MOTOR_ON_TIME)
-            {
-                MOTOR_REG_Write(0);
-                motor_on = false;
-            }
+                stop_motor();
         }
         
         if (!USBFS_GetConfiguration() || USBFS_IsConfigurationChanged())
