@@ -15,9 +15,9 @@ export EXTENSION = .exe
 else
 
 packages-exist = $(shell pkg-config --exists $(PACKAGES))
-ifneq ($(packages-exist), 0)
-$(warning These pkg-config packages are installed: $(shell pkg-config --list-all | awk '{print $$1}'))
-$(error You must have these pkg-config packages installed: $(PACKAGES) But only)
+ifneq ($(packages-exist),0)
+$(warning These pkg-config packages are installed: $(shell pkg-config --list-all | sort | awk '{print $$1}'))
+$(error You must have these pkg-config packages installed: $(PACKAGES))
 endif
 
 export CXX = g++
