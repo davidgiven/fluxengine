@@ -92,6 +92,8 @@ begin
             STATE_INDEXING:
                 if (indexed)
                     state <= STATE_LOAD;
+                else
+                    state <= STATE_INDEXING;
         endcase
 end
 

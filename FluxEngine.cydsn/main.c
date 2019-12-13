@@ -85,10 +85,21 @@ static void print(const char* msg, ...)
     UART_PutCRLF();
 }
 
+static void set_drive_flags(uint8_t flags)
+{
+    if (current_drive_flags != flags)
+        homed = false;
+    
+    current_drive_flags = flags;
+    DRIVESELECT_REG_Write((flags & 1) ? 2 : 1); /* select drive 1 or 0 */
+    DENSITY_REG_Write(flags >> 1); /* density bit */
+}
+
 static void start_motor(void)
 {
     if (!motor_on)
     {
+        set_drive_flags(current_drive_flags);
         MOTOR_REG_Write(1);
         CyDelay(1000);
         homed = false;
@@ -97,6 +108,16 @@ static void start_motor(void)
     motor_on_time = clock;
     motor_on = true;
     CyWdtClear();
+}
+
+static void stop_motor(void)
+{
+    if (motor_on)
+    {
+        MOTOR_REG_Write(0);
+        DRIVESELECT_REG_Write(0); /* deselect all drives */
+        motor_on = false;
+    }
 }
 
 static void wait_until_writeable(int ep)
@@ -138,25 +159,36 @@ static void cmd_get_version(struct any_frame* f)
 
 static void step(int dir)
 {
-    STEP_REG_Write(dir);
-    CyDelayUs(1);
-    STEP_REG_Write(dir | 2);
-    CyDelayUs(1);
-    STEP_REG_Write(dir);
+    STEP_REG_Write(dir); /* step high */
+    CyDelayUs(6);
+    STEP_REG_Write(dir | 2); /* step low */
+    CyDelayUs(6);
+    STEP_REG_Write(dir); /* step high again, drive moves now */
     CyDelay(STEP_INTERVAL_TIME);
+}
+
+static void home(void)
+{
+    for (int i=0; i<100; i++)
+    {
+        /* Don't keep stepping forever, because if a drive's
+         * not connected bad things happen. */
+        if (TRACK0_REG_Read())
+            break;
+        step(STEP_TOWARDS0);
+    }
+    
+    /* Step to -1, which should be a nop, to reset the disk on disk change. */
+    step(STEP_TOWARDS0);
 }
 
 static void seek_to(int track)
 {
     start_motor();
-    if (!homed)
+    if (!homed || (track == 0))
     {
         print("homing");
-        while (!TRACK0_REG_Read())
-            step(STEP_TOWARDS0);
-            
-        /* Step to -1, which should be a nop, to reset the disk on disk change. */
-        step(STEP_TOWARDS0);
+        home();
         
         homed = true;
         current_track = 0;
@@ -167,11 +199,7 @@ static void seek_to(int track)
     while (track != current_track)
     {
         if (TRACK0_REG_Read())
-        {
-            if (current_track != 0)
-                print("unexpectedly detected track 0");
             current_track = 0;
-        }
         
         if (track > current_track)
         {
@@ -249,7 +277,7 @@ static void deinit_dma(void)
 
 static void init_capture_dma(void)
 {
-    dma_channel = CAPTURE_DMA_DmaInitialize(
+    dma_channel = SAMPLER_DMA_DmaInitialize(
         2 /* bytes */,
         true /* request per burst */, 
         HI16(CYDEV_PERIPH_BASE),
@@ -264,8 +292,8 @@ static void init_capture_dma(void)
             nexti = 0;
 
         CyDmaTdSetConfiguration(td[i], BUFFER_SIZE, td[nexti],   
-            CY_DMA_TD_INC_DST_ADR | CAPTURE_DMA__TD_TERMOUT_EN);
-        CyDmaTdSetAddress(td[i], LO16((uint32)&SAMPLER_DATAPATH_F0_REG), LO16((uint32)&dma_buffer[i]));
+            CY_DMA_TD_INC_DST_ADR | SAMPLER_DMA__TD_TERMOUT_EN);
+        CyDmaTdSetAddress(td[i], LO16((uint32)SAMPLER_FIFO_FIFO_PTR), LO16((uint32)&dma_buffer[i]));
     }    
 }
 
@@ -276,13 +304,11 @@ static void cmd_read(struct read_frame* f)
     
     /* Do slow setup *before* we go into the real-time bit. */
     
-    SAMPLER_CONTROL_Write(1); /* reset */
-    
     {
         uint8_t i = CyEnterCriticalSection();
-        SAMPLER_DATAPATH_F0_SET_LEVEL_MID;
-        SAMPLER_DATAPATH_F0_CLEAR;
-        SAMPLER_DATAPATH_F0_SINGLE_BUFFER_UNSET;
+        SAMPLER_FIFO_SET_LEVEL_MID;
+        SAMPLER_FIFO_CLEAR;
+        SAMPLER_FIFO_SINGLE_BUFFER_UNSET;
         CyExitCriticalSection(i);
     }
     
@@ -304,7 +330,6 @@ static void cmd_read(struct read_frame* f)
     dma_reading_from_td = -1;
     dma_underrun = false;
     int count = 0;
-    SAMPLER_CONTROL_Write(0); /* !reset */
     CyDmaChSetInitialTd(dma_channel, td[dma_writing_to_td]);
     CyDmaClearPendingDrq(dma_channel);
     CyDmaChEnable(dma_channel, 1);
@@ -370,12 +395,14 @@ abort:;
 
     donecrunch(&cs);
     wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
-    unsigned zz = cs.outputlen;
-    if (cs.outputlen != BUFFER_SIZE)
-        USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, usb_buffer, BUFFER_SIZE-cs.outputlen);
+    if (!dma_underrun)
+    {
+        if (cs.outputlen != BUFFER_SIZE)
+            USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, usb_buffer, BUFFER_SIZE-cs.outputlen);
+        wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
+    }
     if ((cs.outputlen == BUFFER_SIZE) || (cs.outputlen == 0))
         USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, NULL, 0);
-    wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
     deinit_dma();
 
     if (dma_underrun)
@@ -388,7 +415,7 @@ abort:;
         DECLARE_REPLY_FRAME(struct any_frame, F_FRAME_READ_REPLY);
         send_reply(&r);
     }
-    print("count=%d i=%d d=%d zz=%d", count, index_irq, dma_underrun, zz);
+    print("count=%d i=%d d=%d", count, index_irq, dma_underrun);
 }
 
 static void init_replay_dma(void)
@@ -608,17 +635,101 @@ static void cmd_erase(struct erase_frame* f)
 
 static void cmd_set_drive(struct set_drive_frame* f)
 {
-    if (current_drive_flags != f->drive_flags)
-    {
-        current_drive_flags = f->drive_flags;
-        DRIVE_REG_Write(current_drive_flags);
-        homed = false;
-    }
+    set_drive_flags(f->drive_flags);
     
     DECLARE_REPLY_FRAME(struct any_frame, F_FRAME_SET_DRIVE_REPLY);
     send_reply((struct any_frame*) &r);
 }
-   
+
+static uint16_t read_output_voltage_mv(void)
+{
+    OUTPUT_VOLTAGE_ADC_StartConvert();
+    OUTPUT_VOLTAGE_ADC_IsEndConversion(OUTPUT_VOLTAGE_ADC_WAIT_FOR_RESULT);
+    uint16_t samples = OUTPUT_VOLTAGE_ADC_GetResult16();
+    return OUTPUT_VOLTAGE_ADC_CountsTo_mVolts(samples);
+}
+
+static void read_output_voltages(struct voltages* v)
+{
+    SIDE_REG_Write(1); /* set DIR to low (remember this is inverted) */
+    CyDelay(100);
+    v->logic0_mv = read_output_voltage_mv();
+
+    SIDE_REG_Write(0);
+    CyDelay(100);
+    v->logic1_mv = read_output_voltage_mv();
+}
+
+static uint16_t read_input_voltage_mv(void)
+{
+    INPUT_VOLTAGE_ADC_StartConvert();
+    INPUT_VOLTAGE_ADC_IsEndConversion(INPUT_VOLTAGE_ADC_WAIT_FOR_RESULT);
+    uint16_t samples = INPUT_VOLTAGE_ADC_GetResult16();
+    return INPUT_VOLTAGE_ADC_CountsTo_mVolts(samples);
+}
+
+static void read_input_voltages(struct voltages* v)
+{
+    home();
+    CyDelay(50);
+    v->logic0_mv = read_input_voltage_mv();
+    
+    step(STEP_AWAYFROM0);
+    CyDelay(50);
+    v->logic1_mv = read_input_voltage_mv();
+}
+
+static void cmd_measure_voltages(void)
+{
+    stop_motor();
+    INPUT_VOLTAGE_ADC_Start();
+    INPUT_VOLTAGE_ADC_SetPower(INPUT_VOLTAGE_ADC__HIGHPOWER);
+    OUTPUT_VOLTAGE_ADC_Start();
+    OUTPUT_VOLTAGE_ADC_SetPower(OUTPUT_VOLTAGE_ADC__HIGHPOWER);
+    
+    DECLARE_REPLY_FRAME(struct voltages_frame, F_FRAME_MEASURE_VOLTAGES_REPLY);
+    
+    CyWdtClear();
+    MOTOR_REG_Write(0); /* should be ignored anyway */
+    DRIVESELECT_REG_Write(0); /* deselect both drives */
+    CyDelay(200); /* wait for things to settle */
+    read_output_voltages(&r.output_both_off);
+    read_input_voltages(&r.input_both_off);
+
+    CyWdtClear();
+    DRIVESELECT_REG_Write(1); /* select drive 0 */
+    CyDelay(50);
+    read_output_voltages(&r.output_drive_0_selected);
+    read_input_voltages(&r.input_drive_0_selected);
+    MOTOR_REG_Write(1);
+    CyDelay(300);
+    CyWdtClear();
+    read_output_voltages(&r.output_drive_0_running);
+    read_input_voltages(&r.input_drive_0_running);
+    MOTOR_REG_Write(0);
+    CyDelay(300);
+    
+    CyWdtClear();
+    DRIVESELECT_REG_Write(2); /* select drive 1 */
+    CyDelay(50);
+    read_output_voltages(&r.output_drive_1_selected);
+    read_input_voltages(&r.input_drive_1_selected);
+    MOTOR_REG_Write(1);
+    CyDelay(300);
+    CyWdtClear();
+    read_output_voltages(&r.output_drive_1_running);
+    read_input_voltages(&r.input_drive_1_running);
+    MOTOR_REG_Write(0);
+    CyDelay(300);
+
+    CyWdtClear();
+    DRIVESELECT_REG_Write(0);
+    homed = false;
+    INPUT_VOLTAGE_ADC_Stop();
+    OUTPUT_VOLTAGE_ADC_Stop();
+    send_reply((struct any_frame*) &r);
+}
+
 static void handle_command(void)
 {
     static uint8_t input_buffer[FRAME_SIZE];
@@ -663,6 +774,10 @@ static void handle_command(void)
         case F_FRAME_SET_DRIVE_CMD:
             cmd_set_drive((struct set_drive_frame*) f);
             break;
+        
+        case F_FRAME_MEASURE_VOLTAGES_CMD:
+            cmd_measure_voltages();
+            break;
             
         default:
             send_error(F_ERROR_BAD_COMMAND);
@@ -675,9 +790,11 @@ int main(void)
     CySysTickStart();
     CySysTickSetCallback(4, system_timer_cb);
     INDEX_IRQ_StartEx(&index_irq_cb);
-    CAPTURE_DMA_FINISHED_IRQ_StartEx(&capture_dma_finished_irq_cb);
+    SAMPLER_DMA_FINISHED_IRQ_StartEx(&capture_dma_finished_irq_cb);
     SEQUENCER_DMA_FINISHED_IRQ_StartEx(&replay_dma_finished_irq_cb);
-    DRIVE_REG_Write(0);
+    INPUT_VOLTAGE_ADC_Stop();
+    OUTPUT_VOLTAGE_ADC_Stop();
+    DRIVESELECT_REG_Write(0);
     UART_Start();
     USBFS_Start(0, USBFS_DWR_VDDD_OPERATION);
     
@@ -693,10 +810,7 @@ int main(void)
         {
             uint32_t time_on = clock - motor_on_time;
             if (time_on > MOTOR_ON_TIME)
-            {
-                MOTOR_REG_Write(0);
-                motor_on = false;
-            }
+                stop_motor();
         }
         
         if (!USBFS_GetConfiguration() || USBFS_IsConfigurationChanged())
@@ -710,6 +824,7 @@ int main(void)
         
         if (USBFS_GetEPState(FLUXENGINE_CMD_OUT_EP_NUM) == USBFS_OUT_BUFFER_FULL)
         {
+            set_drive_flags(current_drive_flags);
             handle_command();
             USBFS_EnableOutEP(FLUXENGINE_CMD_OUT_EP_NUM);
             print("idle");

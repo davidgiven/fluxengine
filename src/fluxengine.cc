@@ -27,6 +27,7 @@ extern command_cb mainReadZilogMCZ;
 extern command_cb mainRpm;
 extern command_cb mainSeek;
 extern command_cb mainTestBulkTransport;
+extern command_cb mainTestVoltages;
 extern command_cb mainUpgradeFluxFile;
 extern command_cb mainWriteAmiga;
 extern command_cb mainWriteBrother;
@@ -43,6 +44,7 @@ struct Command
 static command_cb mainRead;
 static command_cb mainWrite;
 static command_cb mainConvert;
+static command_cb mainTest;
 
 static std::vector<Command> commands =
 {
@@ -52,7 +54,7 @@ static std::vector<Command> commands =
     { "read",              mainRead,              "Reads a disk, producing a sector image.", },
     { "rpm",               mainRpm,               "Measures the disk rotational speed.", },
     { "seek",              mainSeek,              "Moves the disk head.", },
-    { "testbulktransport", mainTestBulkTransport, "Measures your USB bandwidth.", },
+    { "test",              mainTest,              "Various testing commands.", },
     { "upgradefluxfile",   mainUpgradeFluxFile,   "Upgrades a flux file from a previous version of this software.", },
     { "write",             mainWrite,             "Writes a sector image to a disk.", },
     { "writeflux",         mainWriteFlux,         "Writes a raw flux file. Warning: you can't use this to copy disks.", },
@@ -91,6 +93,12 @@ static std::vector<Command> convertables =
     { "fluxtoau",      mainConvertFluxToAu,  "Converts (one track of a) flux file to an .au audio file.", },
     { "fluxtoscp",     mainConvertFluxToScp, "Converrt a flux file to a Supercard Pro file.", },
     { "fluxtovcd",     mainConvertFluxToVcd, "Converts (one track of a) flux file to a VCD file.", },
+};
+
+static std::vector<Command> testables =
+{
+    { "bulktransport", mainTestBulkTransport, "Measures your USB bandwidth.", },
+    { "voltages",      mainTestVoltages,      "Measures the FDD bus voltages.", },
 };
 
 static void extendedHelp(std::vector<Command>& subcommands, const std::string& command)
@@ -132,6 +140,9 @@ static int mainWrite(int argc, const char* argv[])
 
 static int mainConvert(int argc, const char* argv[])
 { return mainExtended(convertables, "convert", argc, argv); }
+
+static int mainTest(int argc, const char* argv[])
+{ return mainExtended(testables, "test", argc, argv); }
 
 static void help()
 {

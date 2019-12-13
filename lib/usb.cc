@@ -265,3 +265,37 @@ void usbSetDrive(int drive, bool high_density)
     await_reply<struct any_frame>(F_FRAME_SET_DRIVE_REPLY);
 }
 
+/* Hacky: the board always operates in little-endian mode. */
+static uint16_t read_short_from_usb(uint16_t usb)
+{
+    uint8_t* p = (uint8_t*)&usb;
+    return p[0] | (p[1] << 8);
+}
+
+static void convert_voltages_from_usb(const struct voltages& vin, struct voltages& vout)
+{
+    vout.logic0_mv = read_short_from_usb(vin.logic0_mv);
+    vout.logic1_mv = read_short_from_usb(vin.logic1_mv);
+}
+
+void usbMeasureVoltages(struct voltages_frame* voltages)
+{
+    usb_init();
+
+    struct any_frame f = {
+        { .type = F_FRAME_MEASURE_VOLTAGES_CMD, .size = sizeof(f) },
+    };
+    usb_cmd_send(&f, f.f.size);
+
+    struct voltages_frame* r = await_reply<struct voltages_frame>(F_FRAME_MEASURE_VOLTAGES_REPLY);
+    convert_voltages_from_usb(r->input_both_off, voltages->input_both_off);
+    convert_voltages_from_usb(r->input_drive_0_selected, voltages->input_drive_0_selected);
+    convert_voltages_from_usb(r->input_drive_1_selected, voltages->input_drive_1_selected);
+    convert_voltages_from_usb(r->input_drive_0_running, voltages->input_drive_0_running);
+    convert_voltages_from_usb(r->input_drive_1_running, voltages->input_drive_1_running);
+    convert_voltages_from_usb(r->output_both_off, voltages->output_both_off);
+    convert_voltages_from_usb(r->output_drive_0_selected, voltages->output_drive_0_selected);
+    convert_voltages_from_usb(r->output_drive_1_selected, voltages->output_drive_1_selected);
+    convert_voltages_from_usb(r->output_drive_0_running, voltages->output_drive_0_running);
+    convert_voltages_from_usb(r->output_drive_1_running, voltages->output_drive_1_running);
+}
