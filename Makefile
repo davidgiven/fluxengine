@@ -4,7 +4,7 @@ export CFLAGS = -Os -g --std=c++14 \
 	-ffunction-sections -fdata-sections
 export LDFLAGS = -Os
 
-ifeq ($(OS), Windows_NTz)
+ifeq ($(OS), Windows_NT)
 export CXX = /mingw32/bin/g++
 export AR = /mingw32/bin/ar rcs
 export STRIP = /mingw32/bin/strip
@@ -14,8 +14,9 @@ export LIBS = -static -lz -lsqlite3 -lusb-1.0
 export EXTENSION = .exe
 else
 
-packages-exist = $(shell pkg-config --exists $(PACKAGES))
-ifneq ($(packages-exist),0)
+packages-exist = $(shell pkg-config --exists $(PACKAGES) && echo yes)
+$(warning Package check said: $(packages-exist))
+ifneq ($(packages-exist),yes)
 $(warning These pkg-config packages are installed: $(shell pkg-config --list-all | sort | awk '{print $$1}'))
 $(error You must have these pkg-config packages installed: $(PACKAGES))
 endif
