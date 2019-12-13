@@ -15,7 +15,6 @@ export EXTENSION = .exe
 else
 
 packages-exist = $(shell pkg-config --exists $(PACKAGES) && echo yes)
-$(warning Package check said: $(packages-exist))
 ifneq ($(packages-exist),yes)
 $(warning These pkg-config packages are installed: $(shell pkg-config --list-all | sort | awk '{print $$1}'))
 $(error You must have these pkg-config packages installed: $(PACKAGES))
