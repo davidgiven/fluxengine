@@ -5,14 +5,6 @@ git:
 matrix:
     include:
         -
-            os: linux
-            sudo: false
-            dist: xenial
-            compiler: gcc
-            env: CXX=g++-8
-            script:
-            - make
-        -
             os: osx
             osx_image: xcode10.2
             compiler: clang
@@ -20,15 +12,6 @@ matrix:
             - HOMEBREW_NO_INSTALL_CLEANUP=1
 
 addons:
-    apt:
-        sources:
-        - llvm-toolchain-precise-3.8
-        - ubuntu-toolchain-r-test
-        packages:
-        - ninja-build
-        - libusb-1.0-0-dev
-        - libsqlite3-dev
-        - g++-8
     homebrew:
         packages:
         - ninja
