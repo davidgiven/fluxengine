@@ -27,16 +27,9 @@ jobs:
     - uses: numworks/setup-msys2@v1
       with:
         msystem: MSYS
+    - uses: actions/checkout@v1
     - name: pacman
       run: msys2do pacman -S --noconfirm --needed make ninja mingw-w64-i686-libusb mingw-w64-i686-sqlite3 mingw-w64-i686-zlib mingw-w64-i686-gcc zip
-    - name: pwd
-      run: |
-        set MSYSTEM=MINGW32
-        msys2do pwd
-    - name: ls
-      run: |
-        set MSYSTEM=MINGW32
-        msys2do ls
     - name: make
       run: |
         set MSYSTEM=MINGW32
