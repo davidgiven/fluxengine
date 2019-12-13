@@ -4,7 +4,7 @@ export CFLAGS = -Os -g --std=c++14 \
 	-ffunction-sections -fdata-sections
 export LDFLAGS = -Os
 
-ifeq ($(OS), Windows_NT)
+ifeq ($(OS), Windows_NTz)
 export CXX = /mingw32/bin/g++
 export AR = /mingw32/bin/ar rcs
 export STRIP = /mingw32/bin/strip
@@ -16,7 +16,8 @@ else
 
 packages-exist = $(shell pkg-config --exists $(PACKAGES))
 ifneq ($(packages-exist), 0)
-$(error You must install these packages with pkg-config: $(PACKAGES))
+$(warning These pkg-config packages are installed: $(shell pkg-config --list-all | awk '{print $$1}'))
+$(error You must have these pkg-config packages installed: $(PACKAGES) But only)
 endif
 
 export CXX = g++
