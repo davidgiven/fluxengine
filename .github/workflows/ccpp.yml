@@ -3,7 +3,7 @@ name: C/C++ CI
 on: [push, pull_request]
 
 jobs:
-  build:
+  build-linux:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
@@ -12,7 +12,7 @@ jobs:
     - name: make
       run: make
 
-  build:
+  build-macos:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v1
