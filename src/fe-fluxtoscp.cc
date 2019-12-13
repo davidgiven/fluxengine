@@ -85,7 +85,7 @@ int mainConvertFluxToScp(int argc, const char* argv[])
     fileheader.file_id[0] = 'S';
     fileheader.file_id[1] = 'C';
     fileheader.file_id[2] = 'P';
-    fileheader.file_id[3] = 0x18; /* Version 1.8 of the spec */
+    fileheader.version = 0x18; /* Version 1.8 of the spec */
     fileheader.type = diskType;
     fileheader.revolutions = 5;
     fileheader.start_track = 0;

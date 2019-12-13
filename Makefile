@@ -13,6 +13,13 @@ export LDFLAGS +=
 export LIBS = -static -lz -lsqlite3 -lusb-1.0
 export EXTENSION = .exe
 else
+
+packages-exist = $(shell pkg-config --exists $(PACKAGES) && echo yes)
+ifneq ($(packages-exist),yes)
+$(warning These pkg-config packages are installed: $(shell pkg-config --list-all | sort | awk '{print $$1}'))
+$(error You must have these pkg-config packages installed: $(PACKAGES))
+endif
+
 export CXX = g++
 export AR = ar rcs
 export STRIP = strip
