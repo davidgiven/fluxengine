@@ -10,7 +10,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: apt
-      run: apt install libusb-1.0-0-dev libsqlite3-dev
+      run: sudo apt install libusb-1.0-0-dev libsqlite3-dev
     - name: make
       run: make
 
