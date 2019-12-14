@@ -18,7 +18,7 @@ DoubleFlag pulseDebounceThreshold(
 static DoubleFlag clockDecodeThreshold(
     { "--bit-error-threshold" },
     "Amount of error to tolerate in pulse timing, in fractions of a clock.",
-    0.20);
+    0.40);
 
 static DoubleFlag clockIntervalBias(
     { "--clock-interval-bias" },
