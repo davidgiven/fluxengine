@@ -146,6 +146,7 @@ buildlibrary libbackend.a \
     arch/aeslanier/decoder.cc \
     arch/amiga/decoder.cc \
     arch/amiga/encoder.cc \
+    arch/amiga/amiga.cc \
     arch/apple2/decoder.cc \
     arch/brother/decoder.cc \
     arch/brother/encoder.cc \
@@ -253,3 +254,4 @@ runtest fluxpattern-test    tests/fluxpattern.cc
 runtest fmmfm-test          tests/fmmfm.cc
 runtest kryoflux-test       tests/kryoflux.cc
 runtest ldbs-test           tests/ldbs.cc
+runtest amiga-test          tests/amiga.cc

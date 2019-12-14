@@ -33,4 +33,9 @@ public:
 
 extern FlagGroup amigaEncoderFlags;
 
+extern uint32_t amigaChecksum(const Bytes& bytes);
+extern Bytes amigaInterleave(const Bytes& input);
+extern Bytes amigaDeinterleave(const uint8_t*& input, size_t len);
+extern Bytes amigaDeinterleave(const Bytes& input);
+
 #endif

@@ -154,7 +154,7 @@ std::unique_ptr<Fluxmap> BrotherEncoder::encode(
 		write_sector_data(bits, cursor, sectorData->data);
 	}
 
-	if (cursor > bits.size())
+	if (cursor >= bits.size())
 		Error() << "track data overrun";
 	fillBitmapTo(bits, cursor, bits.size(), { true, false });
 
