@@ -17,7 +17,7 @@ static DoubleFlag clockRateUs(
 static DoubleFlag postIndexGapMs(
 	{ "--post-index-gap" },
 	"Post-index gap before first sector header (milliseconds).",
-	5.0);
+	0.5);
 
 static int charToInt(char c)
 {
@@ -64,6 +64,9 @@ static void write_interleaved_bytes(std::vector<bool>& bits, unsigned& cursor, u
 
 static void write_sector(std::vector<bool>& bits, unsigned& cursor, const Sector* sector)
 {
+	if ((sector->data.size() != 512) && (sector->data.size() != 528))
+		Error() << "unsupported sector size --- you must pick 512 or 528";
+
     write_bits(bits, cursor, AMIGA_SECTOR_RECORD, 6*8);
 
 	std::vector<bool> headerBits(20*16);
@@ -78,6 +81,8 @@ static void write_sector(std::vector<bool>& bits, unsigned& cursor, const Sector
 		};
 	write_interleaved_bytes(headerBits, headerCursor, header);
 	Bytes recoveryInfo(16);
+	if (sector->data.size() == 528)
+		recoveryInfo = sector->data.slice(512, 16);
 	write_interleaved_bytes(headerBits, headerCursor, recoveryInfo);
 
 	std::vector<bool> dataBits(512*16);
