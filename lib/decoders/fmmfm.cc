@@ -51,3 +51,25 @@ Bytes decodeFmMfm(
 
     return bytes;
 }
+
+void encodeMfm(std::vector<bool>& bits, unsigned& cursor, const Bytes& input)
+{
+    bool lastBit = false;
+    unsigned len = bits.size()-1;
+
+    for (uint8_t b : input)
+    {
+        for (int i=0; i<8; i++)
+        {
+            bool bit = b & 0x80;
+            b <<= 1;
+
+            if (cursor >= len)
+                return;
+            
+            bits[cursor++] = !lastBit && !bit;
+            bits[cursor++] = bit;
+            lastBit = bit;
+        }
+    }
+}

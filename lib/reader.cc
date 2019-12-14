@@ -219,10 +219,7 @@ void readDiskCommand(AbstractDecoder& decoder)
                 std::cout << "giving up" << std::endl
                           << "       ";
             else
-            {
 				std::cout << retry << " retries remaining" << std::endl;
-                track->fluxsource->recalibrate();
-            }
 		}
 
 		if (dumpRecords)

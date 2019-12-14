@@ -29,6 +29,7 @@ extern command_cb mainSeek;
 extern command_cb mainTestBulkTransport;
 extern command_cb mainTestVoltages;
 extern command_cb mainUpgradeFluxFile;
+extern command_cb mainWriteAmiga;
 extern command_cb mainWriteBrother;
 extern command_cb mainWriteFlux;
 extern command_cb mainWriteTestPattern;
@@ -81,6 +82,7 @@ static std::vector<Command> readables =
 
 static std::vector<Command> writeables =
 {
+    { "amiga",         mainWriteAmiga,    "Writes Amiga disks.", },
     { "brother",       mainWriteBrother,  "Writes 120kB and 240kB Brother word processor disks.", },
 };
 

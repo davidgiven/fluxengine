@@ -145,6 +145,8 @@ buildlibrary libbackend.a \
 	lib/imagewriter/ldbsimagewriter.cc \
     arch/aeslanier/decoder.cc \
     arch/amiga/decoder.cc \
+    arch/amiga/encoder.cc \
+    arch/amiga/amiga.cc \
     arch/apple2/decoder.cc \
     arch/brother/decoder.cc \
     arch/brother/encoder.cc \
@@ -214,6 +216,7 @@ buildlibrary libfrontend.a \
     src/fe-testbulktransport.cc \
     src/fe-testvoltages.cc \
     src/fe-upgradefluxfile.cc \
+    src/fe-writeamiga.cc \
     src/fe-writebrother.cc \
     src/fe-writeflux.cc \
     src/fe-writetestpattern.cc \
@@ -251,3 +254,4 @@ runtest fluxpattern-test    tests/fluxpattern.cc
 runtest fmmfm-test          tests/fmmfm.cc
 runtest kryoflux-test       tests/kryoflux.cc
 runtest ldbs-test           tests/ldbs.cc
+runtest amiga-test          tests/amiga.cc
