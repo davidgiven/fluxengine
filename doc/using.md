@@ -64,6 +64,16 @@ In order to do anything useful, you have to plug it in to a floppy disk drive (o
 
   9. Profit!
 
+## Bonus hardware features
+
+For advanced users, the board has a few extra signals which are useful for special purposes.
+
+  - Pin 3[0] produces short pulses every 200ms. This is useful for spoofing
+    index signals to 300 RPM drives; for example, to read flippy disks.
+
+  - Pin 3[1] is the same, but produces the pulses every 166ms; this works with
+    360 RPM drives.
+
 ## The programs
 
 I'm sorry to say that the client program is very badly documented --- it's

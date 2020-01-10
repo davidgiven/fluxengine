@@ -84,6 +84,11 @@ contributed](Index_sensor_mod_FDD_1.1.pdf) on how to do this. I've never done
 it myself; if you try this and it works/doesn't work, as always, [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new).
 
+Another option is to fake the index signal to the drive completely. The
+FluxEngine emits suitable pulses for a 300RPM drive on pin 3[0] and the
+equivalent pulses for a 360RPM drive on pin 3[1]. Disclaimer: I have never used
+these.
+
 **Q.** Is this like Supercard Pro / KryoFlux / Catweasel / DiskFerret? Do you
 *support KryoFlux
 stream files?
