@@ -253,16 +253,28 @@ static void cmd_measure_speed(struct any_frame* f)
     start_motor();
     
     index_irq = false;
-    while (!index_irq)
-        ;
-    index_irq = false;
     int start_clock = clock;
+    int elapsed = 0;
     while (!index_irq)
-        ;
-    int end_clock = clock;
+    {
+        elapsed = clock - start_clock;
+        if (elapsed > 1000)
+        {
+            elapsed = 0;
+            break;
+        }
+    }
+
+    if (elapsed != 0)
+    {
+        index_irq = false;
+        start_clock = clock;
+        while (!index_irq)
+            elapsed = clock - start_clock;
+    }
     
     DECLARE_REPLY_FRAME(struct speed_frame, F_FRAME_MEASURE_SPEED_REPLY);
-    r.period_ms = end_clock - start_clock;
+    r.period_ms = elapsed;
     send_reply((struct any_frame*) &r);    
 }
 
@@ -495,6 +507,8 @@ static void cmd_write(struct write_frame* f)
     int old_reading_from_td = -1;
     for (;;)
     {
+        CyWdtClear();
+
         /* Read data from USB into the buffers. */
         
         if (NEXT_BUFFER(dma_writing_to_td) != dma_reading_from_td)

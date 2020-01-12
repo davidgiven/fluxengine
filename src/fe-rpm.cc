@@ -18,7 +18,16 @@ int mainRpm(int argc, const char* argv[])
     FluxSpec spec(source);
     usbSetDrive(spec.drive, false, F_INDEX_REAL);
     nanoseconds_t period = usbGetRotationalPeriod();
-    std::cout << "Rotational period is " << period/1000 << " ms (" << 60e6/period << " rpm)" << std::endl;
+    if (period != 0)
+        std::cout << "Rotational period is " << period/1000 << " ms (" << 60e6/period << " rpm)" << std::endl;
+    else
+    {
+        std::cout << "No index pulses detected from the disk. Common causes of this are:\n"
+                     "  - no drive is connected\n"
+                     "  - the drive doesn't have an index sensor (e.g. BBC Micro drives)\n"
+                     "  - the disk has no index holes (e.g. reversed flippy disks)\n"
+                     "  - (most common) no disk is inserted in the drive!\n";
+    }
 
     return 0;
 }
