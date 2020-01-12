@@ -3,7 +3,7 @@
 
 enum 
 {
-    FLUXENGINE_VERSION = 9,
+    FLUXENGINE_VERSION = 10,
 
     FLUXENGINE_VID = 0x1209,
     FLUXENGINE_PID = 0x6e00,
@@ -77,6 +77,13 @@ enum
 
 enum
 {
+    F_INDEX_REAL,
+    F_INDEX_300,
+    F_INDEX_360
+};
+
+enum
+{
     F_OP_PULSE = 0x80,
     F_OP_INDEX = 0x81
 };
@@ -145,7 +152,9 @@ struct erase_frame
 struct set_drive_frame
 {
     struct frame_header f;
-    uint8_t drive_flags;
+    uint8_t drive;
+    uint8_t high_density;
+    uint8_t index_mode;
 };
 
 struct voltages

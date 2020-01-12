@@ -1,6 +1,10 @@
 #ifndef FLUXSINK_H
 #define FLUXSINK_H
 
+#include "flags.h"
+
+extern FlagGroup hardwareFluxSinkFlags;
+
 class Fluxmap;
 class FluxSpec;
 

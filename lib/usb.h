@@ -12,7 +12,7 @@ extern void usbTestBulkTransport();
 extern Bytes usbRead(int side, int revolutions);
 extern void usbWrite(int side, const Bytes& bytes);
 extern void usbErase(int side);
-extern void usbSetDrive(int drive, bool high_density);
+extern void usbSetDrive(int drive, bool high_density, int index_mode);
 extern void usbMeasureVoltages(struct voltages_frame* voltages);
 
 #endif
