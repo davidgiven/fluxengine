@@ -157,6 +157,8 @@ Flag::Flag(const std::vector<std::string>& names, const std::string helptext):
     _names(names),
     _helptext(helptext)
 {
+    if (!currentFlagGroup)
+        Error() << "no flag group defined for " << *names.begin();
     _group.addFlag(this);
 }
 

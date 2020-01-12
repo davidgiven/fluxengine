@@ -17,14 +17,14 @@
 #define STEP_TOWARDS0 1
 #define STEP_AWAYFROM0 0
 
-static volatile uint32_t clock = 0;
+static volatile uint32_t clock = 0; /* ms */
 static volatile bool index_irq = false;
 
 static bool motor_on = false;
 static uint32_t motor_on_time = 0;
 static bool homed = false;
 static int current_track = 0;
-static uint8_t current_drive_flags = 0;
+static struct set_drive_frame current_drive_flags;
 
 #define BUFFER_COUNT 16
 #define BUFFER_SIZE 64
@@ -45,6 +45,21 @@ static void system_timer_cb(void)
 {
     CyGlobalIntDisable;
     clock++;
+    
+    static int counter300rpm = 0;
+    counter300rpm++;
+    if (counter300rpm == 200)
+        counter300rpm = 0;
+    
+    static int counter360rpm = 0;
+    counter360rpm++;
+    if (counter360rpm == 167)
+        counter360rpm = 0;
+    
+    FAKE_INDEX_GENERATOR_REG_Write(
+        ((counter300rpm == 0) ? 1 : 0)
+        | ((counter360rpm == 0) ? 2 : 0));
+    
     CyGlobalIntEnable;
 }
 
@@ -85,21 +100,22 @@ static void print(const char* msg, ...)
     UART_PutCRLF();
 }
 
-static void set_drive_flags(uint8_t flags)
+static void set_drive_flags(struct set_drive_frame* flags)
 {
-    if (current_drive_flags != flags)
+    if (current_drive_flags.drive != flags->drive)
         homed = false;
     
-    current_drive_flags = flags;
-    DRIVESELECT_REG_Write((flags & 1) ? 2 : 1); /* select drive 1 or 0 */
-    DENSITY_REG_Write(flags >> 1); /* density bit */
+    current_drive_flags = *flags;
+    DRIVESELECT_REG_Write(flags->drive ? 2 : 1); /* select drive 1 or 0 */
+    DENSITY_REG_Write(flags->high_density); /* density bit */
+    INDEX_REG_Write(flags->index_mode);
 }
 
 static void start_motor(void)
 {
     if (!motor_on)
     {
-        set_drive_flags(current_drive_flags);
+        set_drive_flags(&current_drive_flags);
         MOTOR_REG_Write(1);
         CyDelay(1000);
         homed = false;
@@ -237,16 +253,28 @@ static void cmd_measure_speed(struct any_frame* f)
     start_motor();
     
     index_irq = false;
-    while (!index_irq)
-        ;
-    index_irq = false;
     int start_clock = clock;
+    int elapsed = 0;
     while (!index_irq)
-        ;
-    int end_clock = clock;
+    {
+        elapsed = clock - start_clock;
+        if (elapsed > 1000)
+        {
+            elapsed = 0;
+            break;
+        }
+    }
+
+    if (elapsed != 0)
+    {
+        index_irq = false;
+        start_clock = clock;
+        while (!index_irq)
+            elapsed = clock - start_clock;
+    }
     
     DECLARE_REPLY_FRAME(struct speed_frame, F_FRAME_MEASURE_SPEED_REPLY);
-    r.period_ms = end_clock - start_clock;
+    r.period_ms = elapsed;
     send_reply((struct any_frame*) &r);    
 }
 
@@ -479,6 +507,8 @@ static void cmd_write(struct write_frame* f)
     int old_reading_from_td = -1;
     for (;;)
     {
+        CyWdtClear();
+
         /* Read data from USB into the buffers. */
         
         if (NEXT_BUFFER(dma_writing_to_td) != dma_reading_from_td)
@@ -635,7 +665,7 @@ static void cmd_erase(struct erase_frame* f)
 
 static void cmd_set_drive(struct set_drive_frame* f)
 {
-    set_drive_flags(f->drive_flags);
+    set_drive_flags(f);
     
     DECLARE_REPLY_FRAME(struct any_frame, F_FRAME_SET_DRIVE_REPLY);
     send_reply((struct any_frame*) &r);
@@ -824,7 +854,7 @@ int main(void)
         
         if (USBFS_GetEPState(FLUXENGINE_CMD_OUT_EP_NUM) == USBFS_OUT_BUFFER_FULL)
         {
-            set_drive_flags(current_drive_flags);
+            set_drive_flags(&current_drive_flags);
             handle_command();
             USBFS_EnableOutEP(FLUXENGINE_CMD_OUT_EP_NUM);
             print("idle");

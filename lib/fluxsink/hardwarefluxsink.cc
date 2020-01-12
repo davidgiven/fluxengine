@@ -4,7 +4,14 @@
 #include "usb.h"
 #include "fluxsink/fluxsink.h"
 
+FlagGroup hardwareFluxSinkFlags;
+
 static bool high_density = false;
+
+static IntFlag indexMode(
+    { "--write-index-mode" },
+    "index pulse source (0=drive, 1=300 RPM fake source, 2=360 RPM fake source",
+    0);
 
 void setHardwareFluxSinkDensity(bool high_density)
 {
@@ -26,7 +33,7 @@ public:
 public:
     void writeFlux(int track, int side, Fluxmap& fluxmap)
     {
-        usbSetDrive(_drive, high_density);
+        usbSetDrive(_drive, high_density, indexMode);
         usbSeek(track);
 
         Bytes crunched = fluxmap.rawBytes().crunch();

@@ -64,6 +64,16 @@ In order to do anything useful, you have to plug it in to a floppy disk drive (o
 
   9. Profit!
 
+## Bonus hardware features
+
+For advanced users, the board has a few extra signals which are useful for special purposes.
+
+  - Pin 3[0] produces short pulses every 200ms. This is useful for spoofing
+    index signals to 300 RPM drives; for example, to read flippy disks.
+
+  - Pin 3[1] is the same, but produces the pulses every 166ms; this works with
+    360 RPM drives.
+
 ## The programs
 
 I'm sorry to say that the client program is very badly documented --- it's
@@ -175,6 +185,23 @@ case, and reading the disk label is much more reliable.
 
 [Lots more information on high density vs double density disks can be found
 here.](http://www.retrotechnology.com/herbs_stuff/guzis.html)
+
+### Other important flags
+
+These flags apply to many operations and are useful for modifying the overall
+behaviour.
+
+  - `--revolutions=X`: when reading, spin the disk X times. Many formats
+  require `--revolutions=2` (which should happen automatically); or you can
+  increase the number to sample more data.
+
+  - `--index-source=X`, `--write-index-source=X`: set the source of index
+  pulses when reading or writing respectively. This is for use with drives
+  which don't produce index pulse data. Use 0 to get index pulses from the
+  drive, 1 to fake 300RPM pulses, or 2 to fake 360RPM pulses. Note this has
+  no effect on the _drive_, so it doesn't help with flippy disks, but is
+  useful for using very old drives with FluxEngine itself. If you use this
+  option, then any index marks in the sampled flux are, of course, garbage.
 
 ### The commands
 

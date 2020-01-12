@@ -15,7 +15,7 @@
 #include "sector.h"
 #include "sectorset.h"
 
-FlagGroup writerFlags { &hardwareFluxSourceFlags };
+FlagGroup writerFlags { &hardwareFluxSourceFlags, &hardwareFluxSinkFlags };
 
 static DataSpecFlag dest(
     { "--dest", "-d" },
