@@ -259,9 +259,9 @@ void usbSetDrive(int drive, bool high_density, int index_mode)
 
     struct set_drive_frame f = {
         { .type = F_FRAME_SET_DRIVE_CMD, .size = sizeof(f) },
-        .drive = drive,
+        .drive = (uint8_t) drive,
         .high_density = high_density,
-        .index_mode = index_mode
+        .index_mode = (uint8_t) index_mode
     };
     usb_cmd_send(&f, f.f.size);
     await_reply<struct any_frame>(F_FRAME_SET_DRIVE_REPLY);
