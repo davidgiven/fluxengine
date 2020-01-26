@@ -227,8 +227,8 @@ void readDiskCommand(AbstractDecoder& decoder)
 			std::cout << "\nRaw (undecoded) records follow:\n\n";
 			for (auto& record : track->rawrecords)
 			{
-				std::cout << fmt::format("I+{:.2f}us", record.position.ns() / 1000.0)
-						<< std::endl;
+				std::cout << fmt::format("I+{:.2f}us with {:.2f}us clock\n",
+                            record.position.ns() / 1000.0, record.clock / 1000.0);
 				hexdump(std::cout, record.data);
 				std::cout << std::endl;
 			}
