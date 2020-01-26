@@ -100,7 +100,8 @@ AbstractDecoder::RecordType IbmDecoder::advanceToNextRecord()
     if (_currentHeaderLength > 0)
         readRawBits(_currentHeaderLength*16);
     auto idbits = readRawBits(16);
-    uint8_t id = decodeFmMfm(idbits).slice(0, 1)[0];
+    const Bytes idbytes = decodeFmMfm(idbits);
+    uint8_t id = idbytes.slice(0, 1)[0];
     seek(here);
     
     switch (id)
