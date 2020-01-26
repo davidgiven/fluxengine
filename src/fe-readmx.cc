@@ -8,7 +8,6 @@
 #include "sector.h"
 #include "sectorset.h"
 #include "record.h"
-#include <fmt/format.h>
 
 static FlagGroup flags { &readerFlags };
 

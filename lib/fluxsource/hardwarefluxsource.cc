@@ -11,6 +11,11 @@ static IntFlag revolutions(
     "read this many revolutions of the disk",
     1);
 
+static IntFlag indexMode(
+    { "--index-mode" },
+    "index pulse source (0=drive, 1=300 RPM fake source, 2=360 RPM fake source",
+    0);
+
 static bool high_density = false;
 
 void setHardwareFluxSourceDensity(bool high_density)
@@ -33,7 +38,7 @@ public:
 public:
     std::unique_ptr<Fluxmap> readFlux(int track, int side)
     {
-        usbSetDrive(_drive, high_density);
+        usbSetDrive(_drive, high_density, indexMode);
         usbSeek(track);
         Bytes crunched = usbRead(side, revolutions);
         auto fluxmap = std::make_unique<Fluxmap>();

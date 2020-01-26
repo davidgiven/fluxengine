@@ -48,7 +48,7 @@ haven't had the chance to try it end-for-end. I really need a hard-sectored
 
 **Q.** Does it work with flippy disks?
 
-Uhhh... probably not.
+Uhhh... maybe?
 
 So the problem with flippy disks (5.25" single-sided disks which could be
 inserted upside down to read the second side) is the index hole. Trouble is,
@@ -79,16 +79,26 @@ the other. But a flippy disk has both sets of tracks in the same place,
 because they're both accessed using the side 0 head...
 
 The only real way round this is to modify a 5.25" drive. That's _seriously_
-not in FluxEngine's remit. Sorry.
+not in FluxEngine's remit, but I've had some [excellent documentation
+contributed](Index_sensor_mod_FDD_1.1.pdf) on how to do this. I've never done
+it myself; if you try this and it works/doesn't work, as always, [get in
+touch](https://github.com/davidgiven/fluxengine/issues/new).
 
-**Q.** Is this like KryoFlux / Catweasel / DiskFerret? Do you support KryoFlux
+Another option is to fake the index signal to the drive completely. The
+FluxEngine emits suitable pulses for a 300RPM drive on pin 3[0] and the
+equivalent pulses for a 360RPM drive on pin 3[1]. Disclaimer: I have never used
+these.
+
+**Q.** Is this like Supercard Pro / KryoFlux / Catweasel / DiskFerret? Do you
+*support KryoFlux
 stream files?
 
 **A.** It's very like all of these; the idea's old, and lots of people have
 tried it (you can get away with any sufficiently fast microcontroller and
 enough RAM). FluxEngine can read from KryoFlux stream files natively, and
-there's a tool which will let you convert at least one kind of Catweasel file
-to FluxEngine's native flux file format.
+there's a tool which will let you convert at least one kind of Catweasel
+files and Supercard Pro files to and from FluxEngine's native flux file
+format.
 
 **Q.** Can I use this to make exact copies of disks?
 

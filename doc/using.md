@@ -51,7 +51,7 @@ In order to do anything useful, you have to plug it in to a floppy disk drive (o
      rpm for a 3.5" disk, or 360 rpm for a 5.25" disk. If it doesn't, please
      [get in touch](https://github.com/davidgiven/fluxengine/issues/new).
 
-  7. Do `fluxengine testbulktransport` from the shell. It'll measure your USB
+  7. Do `fluxengine test bulktransport` from the shell. It'll measure your USB
      bandwidth. Ideally you should be getting above 900kB/s. FluxEngine needs
      about 850kB/s, so if you're getting less than this, try a different USB
      port.
@@ -63,6 +63,16 @@ In order to do anything useful, you have to plug it in to a floppy disk drive (o
      depending).
 
   9. Profit!
+
+## Bonus hardware features
+
+For advanced users, the board has a few extra signals which are useful for special purposes.
+
+  - Pin 3[0] produces short pulses every 200ms. This is useful for spoofing
+    index signals to 300 RPM drives; for example, to read flippy disks.
+
+  - Pin 3[1] is the same, but produces the pulses every 166ms; this works with
+    360 RPM drives.
 
 ## The programs
 
@@ -176,6 +186,23 @@ case, and reading the disk label is much more reliable.
 [Lots more information on high density vs double density disks can be found
 here.](http://www.retrotechnology.com/herbs_stuff/guzis.html)
 
+### Other important flags
+
+These flags apply to many operations and are useful for modifying the overall
+behaviour.
+
+  - `--revolutions=X`: when reading, spin the disk X times. Many formats
+  require `--revolutions=2` (which should happen automatically); or you can
+  increase the number to sample more data.
+
+  - `--index-source=X`, `--write-index-source=X`: set the source of index
+  pulses when reading or writing respectively. This is for use with drives
+  which don't produce index pulse data. Use 0 to get index pulses from the
+  drive, 1 to fake 300RPM pulses, or 2 to fake 360RPM pulses. Note this has
+  no effect on the _drive_, so it doesn't help with flippy disks, but is
+  useful for using very old drives with FluxEngine itself. If you use this
+  option, then any index marks in the sampled flux are, of course, garbage.
+
 ### The commands
 
 The FluxEngine client software is a largely undocumented set of small tools.
@@ -189,12 +216,13 @@ directory.
   - `fluxengine inspect`: dumps the raw pulsetrain / bitstream to stdout.
   Mainly useful for debugging.
 
-  - `fluxengine read*`: reads various formats of disk. See the per-format
+  - `fluxengine read *`: reads various formats of disk. See the per-format
   documentation linked from the table above. These all take an optional
   `--write-flux` option which will cause the raw flux to be written to the
-  specified file.
+  specified file. There are various `--dump` options for showing raw data
+  during the decode process.
 
-  - `fluxengine write*`: writes various formats of disk. Again, see the
+  - `fluxengine write *`: writes various formats of disk. Again, see the
   per-format documentation above.
 
   - `fluxengine writeflux`: writes raw flux files. This is much less useful
@@ -213,9 +241,12 @@ directory.
   - `fluxengine seek`: moves the head. Mainly useful for finding out whether
   your drive can seek to track 82. (Mine can't.)
 
-  - `fluxengine testbulktransport`: measures your USB throughput. You need
+  - `fluxengine test bulktransport`: measures your USB throughput. You need
   about 600kB/s for FluxEngine to work. You don't need a disk in the drive
   for this one.
+
+  - `fluxengine test voltages`: measures your FDD bus signal voltages, which
+  is useful for testing for termination issues.
 
   - `fluxengine upgradefluxfile`: occasionally I need to upgrade the flux
   file format in a non-backwards-compatible way; this tool will upgrade flux

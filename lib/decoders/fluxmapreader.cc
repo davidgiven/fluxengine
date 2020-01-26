@@ -18,12 +18,17 @@ DoubleFlag pulseDebounceThreshold(
 static DoubleFlag clockDecodeThreshold(
     { "--bit-error-threshold" },
     "Amount of error to tolerate in pulse timing, in fractions of a clock.",
-    0.20);
+    0.40);
 
 static DoubleFlag clockIntervalBias(
     { "--clock-interval-bias" },
     "Adjust intervals between pulses by this many clocks before decoding.",
     -0.02);
+
+static DoubleFlag minimumClockUs(
+    { "--minimum-clock-us" },
+    "Refuse to detect clocks shorter than this, to avoid false positives.",
+    0.75);
 
 int FluxmapReader::readOpcode(unsigned& ticks)
 {
@@ -222,7 +227,9 @@ nanoseconds_t FluxmapReader::seekToPattern(const FluxMatcher& pattern, const Flu
             seek(positions[intervalCount-match.intervals]);
             _pos.zeroes = match.zeroes;
             matching = match.matcher;
-            return match.clock * NS_PER_TICK;
+            nanoseconds_t detectedClock = match.clock * NS_PER_TICK;
+            if (detectedClock > (minimumClockUs*1000))
+                return match.clock * NS_PER_TICK;
         }
 
         for (unsigned i=0; i<intervalCount; i++)

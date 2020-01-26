@@ -25,7 +25,7 @@ void AbstractDecoder::decodeToSectors(Track& track)
     beginTrack();
     for (;;)
     {
-        Fluxmap::Position recordStart = sector.position = fmr.tell();
+        Fluxmap::Position recordStart = fmr.tell();
         sector.clock = 0;
         sector.status = Sector::MISSING;
         sector.data.clear();
@@ -41,7 +41,7 @@ void AbstractDecoder::decodeToSectors(Track& track)
 
         /* Read the sector record. */
 
-        recordStart = fmr.tell();
+        sector.position = recordStart = fmr.tell();
         decodeSectorRecord();
         Fluxmap::Position recordEnd = fmr.tell();
         pushRecord(recordStart, recordEnd);
@@ -52,13 +52,11 @@ void AbstractDecoder::decodeToSectors(Track& track)
             sector.headerStartTime = recordStart.ns();
             sector.headerEndTime = recordEnd.ns();
             r = advanceToNextRecord();
+            recordStart = fmr.tell();
             if (r == DATA_RECORD)
-            {
-                recordStart = fmr.tell();
                 decodeDataRecord();
-                recordEnd = fmr.tell();
-                pushRecord(recordStart, recordEnd);
-            }
+            recordEnd = fmr.tell();
+            pushRecord(recordStart, recordEnd);
         }
         sector.dataStartTime = recordStart.ns();
         sector.dataEndTime = recordEnd.ns();

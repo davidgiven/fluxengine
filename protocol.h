@@ -3,7 +3,7 @@
 
 enum 
 {
-    FLUXENGINE_VERSION = 8,
+    FLUXENGINE_VERSION = 10,
 
     FLUXENGINE_VID = 0x1209,
     FLUXENGINE_PID = 0x6e00,
@@ -62,6 +62,8 @@ enum
     F_FRAME_RECALIBRATE_REPLY,    /* any_frame */
     F_FRAME_SET_DRIVE_CMD,        /* setdrive_frame */
     F_FRAME_SET_DRIVE_REPLY,      /* any_frame */
+    F_FRAME_MEASURE_VOLTAGES_CMD, /* any_frame */
+    F_FRAME_MEASURE_VOLTAGES_REPLY, /* voltages_frame */
 };
 
 enum
@@ -71,6 +73,13 @@ enum
     F_ERROR_UNDERRUN,
     F_ERROR_INVALID_VALUE,
     F_ERROR_INTERNAL,
+};
+
+enum
+{
+    F_INDEX_REAL,
+    F_INDEX_300,
+    F_INDEX_360
 };
 
 enum
@@ -143,7 +152,30 @@ struct erase_frame
 struct set_drive_frame
 {
     struct frame_header f;
-    uint8_t drive_flags;
+    uint8_t drive;
+    uint8_t high_density;
+    uint8_t index_mode;
+};
+
+struct voltages
+{
+    uint16_t logic0_mv;
+    uint16_t logic1_mv;
+};
+
+struct voltages_frame
+{
+    struct frame_header f;
+    struct voltages output_both_off;
+    struct voltages output_drive_0_selected;
+    struct voltages output_drive_1_selected;
+    struct voltages output_drive_0_running;
+    struct voltages output_drive_1_running;
+    struct voltages input_both_off;
+    struct voltages input_drive_0_selected;
+    struct voltages input_drive_1_selected;
+    struct voltages input_drive_0_running;
+    struct voltages input_drive_1_running;
 };
 
 #endif

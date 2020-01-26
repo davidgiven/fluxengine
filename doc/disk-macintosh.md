@@ -28,8 +28,16 @@ for example the Commodore 64 1541 drive, changed bitrate this way.
 But Macintosh disks used a constant bitrate and changed the speed that the
 disk spun instead to achieve the same effect...
 
-_Anyway_: FluxEngine will read them fine on a conventional drive. Because
-it's clever.
+_Anyway_: FluxEngine will read them fine on conventional drives.
+Because it's clever.
+
+**Big note.** Apparently --- and I'm still getting to the bottom of this ---
+some drives work and some don't. My drives produce about 90% good reads of
+known good disks. One rumour I've heard is that drives sometimes include
+filters which damage the signals at very particular intervals which Mac disks
+use, but frankly this seems unlikely; it could be a software issue at my end
+and I'm investigating. If you have any insight, please [get in
+touch](https://github.com/davidgiven/fluxengine/issues/new).
 
 Reading discs
 -------------
