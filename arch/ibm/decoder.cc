@@ -73,8 +73,10 @@ const FluxPattern FM_TRS80DAM2_PATTERN(16, 0xf56c);
  * encoding (you can't do 10 00). So this can't be spoofed by user data.
  * 
  * shifted: 10 00 10 01 00 01 00 1
+ * 
+ * It's repeated three times.
  */
-const FluxPattern MFM_PATTERN(16, 0x4489);
+const FluxPattern MFM_PATTERN(48, 0x448944894489LL);
 
 const FluxMatchers ANY_RECORD_PATTERN(
     {
