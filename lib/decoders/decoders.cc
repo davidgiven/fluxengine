@@ -51,7 +51,13 @@ void AbstractDecoder::decodeToSectors(Track& track)
 
             sector.headerStartTime = recordStart.ns();
             sector.headerEndTime = recordEnd.ns();
-            r = advanceToNextRecord();
+			for (;;)
+			{
+				r = advanceToNextRecord();
+				if (r != UNKNOWN_RECORD)
+					break;
+				fmr.readNextMatchingOpcode(F_OP_PULSE);
+			}
             recordStart = fmr.tell();
             if (r == DATA_RECORD)
                 decodeDataRecord();
