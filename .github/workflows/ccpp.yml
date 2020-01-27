@@ -7,6 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
     - name: apt
       run: sudo apt install libusb-1.0-0-dev libsqlite3-dev ninja-build
     - name: make
@@ -16,6 +18,8 @@ jobs:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
     - name: brew
       run: brew install sqlite pkg-config libusb ninja
     - name: make
@@ -24,7 +28,7 @@ jobs:
   build-windows:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: numworks/setup-msys2@v1
     - uses: actions/checkout@v1
     - name: pacman
       run: |
