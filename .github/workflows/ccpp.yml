@@ -7,6 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
     - name: apt
       run: sudo apt install libusb-1.0-0-dev libsqlite3-dev ninja-build
     - name: make
@@ -16,6 +18,8 @@ jobs:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
     - name: brew
       run: brew install sqlite pkg-config libusb ninja
     - name: make
@@ -26,9 +30,12 @@ jobs:
 #    steps:
 #    - uses: numworks/setup-msys2@v1
 #      with:
-#        msystem: MSYS
+#        path-type: inherit
 #    - uses: actions/checkout@v1
 #    - name: pacman
-#      run: msys2do pacman -S --noconfirm --needed make ninja mingw-w64-i686-libusb mingw-w64-i686-sqlite3 mingw-w64-i686-zlib mingw-w64-i686-gcc zip
-#    - name: make
-#      run: msys2do make
+#      run: |
+#        msys2do pacman -S --noconfirm --needed make ninja mingw-w64-i686-libusb mingw-w64-i686-sqlite3 mingw-w64-i686-zlib mingw-w64-i686-gcc zip
+#    - name: build
+#      run: |
+#        msys2do make
+
