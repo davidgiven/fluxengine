@@ -26,8 +26,9 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: pacman
-      shell: python .github\workflows\msys-bash.py {0}
+      #shell: python .github\workflows\msys-bash.py {0}
       run: |
+        dir /s c:\tools
         pacman -S --noconfirm --needed make ninja mingw-w64-i686-libusb mingw-w64-i686-sqlite3 mingw-w64-i686-zlib mingw-w64-i686-gcc zip
         ls
 
