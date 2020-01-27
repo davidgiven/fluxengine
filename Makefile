@@ -10,9 +10,9 @@ export CDBGFLAGS = -O0 -g
 export LDDBGFLAGS = -O0 -g
 
 ifeq ($(OS), Windows_NT)
-export CXX = g++
-export AR = ar rcs
-export STRIP = strip
+export CXX = /mingw32/bin/g++
+export AR = /mingw32/bin/ar rcs
+export STRIP = /mingw32/bin/strip
 export CFLAGS += -I/mingw32/include/libusb-1.0
 export LDFLAGS +=
 export LIBS = -static -lz -lsqlite3 -lusb-1.0
