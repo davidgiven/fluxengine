@@ -56,7 +56,8 @@ void AbstractDecoder::decodeToSectors(Track& track)
 				r = advanceToNextRecord();
 				if (r != UNKNOWN_RECORD)
 					break;
-				fmr.readNextMatchingOpcode(F_OP_PULSE);
+				if (fmr.readNextMatchingOpcode(F_OP_PULSE) == 0)
+                    break;
 			}
             recordStart = fmr.tell();
             if (r == DATA_RECORD)
