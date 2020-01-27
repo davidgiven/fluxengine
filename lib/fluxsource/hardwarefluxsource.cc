@@ -53,7 +53,6 @@ public:
         Bytes crunched = usbRead(side, synced, revolutions * _oneRevolution);
         auto fluxmap = std::make_unique<Fluxmap>();
         fluxmap->appendBytes(crunched.uncrunch());
-        std::cerr << "return fluxmap\n";
         return fluxmap;
     }
 
