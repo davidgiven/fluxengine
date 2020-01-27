@@ -3,13 +3,19 @@
 #include "fluxmap.h"
 #include "usb.h"
 #include "fluxsource/fluxsource.h"
+#include "fmt/format.h"
 
 FlagGroup hardwareFluxSourceFlags;
 
-static IntFlag revolutions(
+static DoubleFlag revolutions(
     { "--revolutions" },
     "read this many revolutions of the disk",
-    1);
+    1.25);
+
+static BoolFlag synced(
+    { "--sync-with-index" },
+    "whether to wait for an index pulse before started to read",
+    false);
 
 static IntFlag indexMode(
     { "--index-mode" },
@@ -29,6 +35,10 @@ public:
     HardwareFluxSource(unsigned drive):
         _drive(drive)
     {
+        usbSetDrive(_drive, high_density, indexMode);
+        std::cerr << "Measuring rotational speed... " << std::flush;
+        _oneRevolution = usbGetRotationalPeriod();
+        std::cerr << fmt::format("{}ms\n", _oneRevolution / 1e6);
     }
 
     ~HardwareFluxSource()
@@ -40,7 +50,7 @@ public:
     {
         usbSetDrive(_drive, high_density, indexMode);
         usbSeek(track);
-        Bytes crunched = usbRead(side, revolutions);
+        Bytes crunched = usbRead(side, synced, revolutions * _oneRevolution);
         auto fluxmap = std::make_unique<Fluxmap>();
         fluxmap->appendBytes(crunched.uncrunch());
         return fluxmap;
@@ -59,11 +69,17 @@ public:
 private:
     unsigned _drive;
     unsigned _revolutions;
+    nanoseconds_t _oneRevolution;
 };
 
-void setHardwareFluxSourceRevolutions(int revolutions)
+void setHardwareFluxSourceRevolutions(double revolutions)
 {
     ::revolutions.setDefaultValue(revolutions);
+}
+
+void setHardwareFluxSourceSynced(bool synced)
+{
+    ::synced.setDefaultValue(synced);
 }
 
 std::unique_ptr<FluxSource> FluxSource::createHardwareFluxSource(unsigned drive)

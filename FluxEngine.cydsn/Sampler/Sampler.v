@@ -123,7 +123,7 @@ begin
             STATE_OPCODE: /* opcode byte sent here */
                 state <= STATE_WAITING;
                             
-            STATE_COUNTING:
+            STATE_COUNTING: /* counter changes here */
                 state <= STATE_WAITING;
         endcase
 end

@@ -19,7 +19,7 @@ int mainRpm(int argc, const char* argv[])
     usbSetDrive(spec.drive, false, F_INDEX_REAL);
     nanoseconds_t period = usbGetRotationalPeriod();
     if (period != 0)
-        std::cout << "Rotational period is " << period/1000 << " ms (" << 60e6/period << " rpm)" << std::endl;
+        std::cout << "Rotational period is " << period/1000000 << " ms (" << 60e3/period << " rpm)" << std::endl;
     else
     {
         std::cout << "No index pulses detected from the disk. Common causes of this are:\n"

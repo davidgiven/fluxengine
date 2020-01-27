@@ -149,7 +149,7 @@ nanoseconds_t usbGetRotationalPeriod(void)
     usb_cmd_send(&f, f.f.size);
 
     auto r = await_reply<struct speed_frame>(F_FRAME_MEASURE_SPEED_REPLY);
-    return r->period_ms * 1000;
+    return r->period_ms * 1000000;
 }
 
 static int large_bulk_transfer(int ep, Bytes& bytes)
@@ -202,13 +202,16 @@ void usbTestBulkTransport()
     await_reply<struct any_frame>(F_FRAME_BULK_TEST_REPLY);
 }
 
-Bytes usbRead(int side, int revolutions)
+Bytes usbRead(int side, bool synced, nanoseconds_t readTime)
 {
     struct read_frame f = {
         .f = { .type = F_FRAME_READ_CMD, .size = sizeof(f) },
         .side = (uint8_t) side,
-        .revolutions = (uint8_t) revolutions
+        .synced = (uint8_t) synced
     };
+    uint16_t milliseconds = readTime / 1e6;
+    ((uint8_t*)&f.milliseconds)[0] = milliseconds;
+    ((uint8_t*)&f.milliseconds)[1] = milliseconds >> 8;
     usb_cmd_send(&f, f.f.size);
 
     auto fluxmap = std::unique_ptr<Fluxmap>(new Fluxmap);

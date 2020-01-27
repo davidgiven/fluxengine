@@ -343,12 +343,15 @@ static void cmd_read(struct read_frame* f)
     wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
     init_capture_dma();
 
-    /* Wait for the beginning of a rotation. */
+    /* Wait for the beginning of a rotation, if requested. */
         
-    index_irq = false;
-    while (!index_irq)
-        ;
-    index_irq = false;
+    if (f->synced)
+    {
+        index_irq = false;
+        while (!index_irq)
+            ;
+        index_irq = false;
+    }
     
     crunch_state_t cs = {};
     cs.outputptr = usb_buffer;
@@ -365,31 +368,26 @@ static void cmd_read(struct read_frame* f)
     /* Wait for the first DMA transfer to complete, after which we can start the
      * USB transfer. */
 
-    while ((dma_writing_to_td == 0) && !index_irq)
+    while (dma_writing_to_td == 0)
         ;
     dma_reading_from_td = 0;
     
     /* Start transferring. */
 
-    int revolutions = f->revolutions;
+    uint32_t start_time = clock;
     while (!dma_underrun)
     {
         CyWdtClear();
 
-        /* Have we reached the index pulse? */
-        if (index_irq)
-        {
-            index_irq = false;
-            revolutions--;
-            if (revolutions == 0)
-                break;
-        }
-        
         /* Wait for the next block to be read. */
         while (dma_reading_from_td == dma_writing_to_td)
         {
             /* On an underrun, give up immediately. */
             if (dma_underrun)
+                goto abort;
+            
+            /* Also finish if the sample session is over. */
+            if ((clock - start_time) >= f->milliseconds)
                 goto abort;
         }
 
@@ -401,15 +399,14 @@ static void cmd_read(struct read_frame* f)
             crunch(&cs);
             dma_buffer_usage += BUFFER_SIZE - cs.inputlen;
             count++;
+            
+            /* If there is no available space in the output buffer, flush the buffer via
+             * USB and go again. */
             if (cs.outputlen == 0)
             {
-                while (USBFS_GetEPState(FLUXENGINE_DATA_IN_EP_NUM) != USBFS_IN_BUFFER_EMPTY)
-                {
-                    if (index_irq || dma_underrun)
-                        goto abort;
-                }
-
+                wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
                 USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, usb_buffer, BUFFER_SIZE);
+                
                 cs.outputptr = usb_buffer;
                 cs.outputlen = BUFFER_SIZE;
             }
@@ -417,23 +414,33 @@ static void cmd_read(struct read_frame* f)
         dma_reading_from_td = NEXT_BUFFER(dma_reading_from_td);
     }
 abort:;
+    bool saved_dma_underrun = dma_underrun;
     CyDmaChSetRequest(dma_channel, CY_DMA_CPU_TERM_CHAIN);
     while (CyDmaChGetRequest(dma_channel))
         ;
 
     donecrunch(&cs);
     wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
-    if (!dma_underrun)
+    /* If there's a complete packet waiting, send it. */
+    if (cs.outputlen != BUFFER_SIZE)
     {
-        if (cs.outputlen != BUFFER_SIZE)
-            USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, usb_buffer, BUFFER_SIZE-cs.outputlen);
+        USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, usb_buffer, BUFFER_SIZE);
         wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
     }
-    if ((cs.outputlen == BUFFER_SIZE) || (cs.outputlen == 0))
+    if ((cs.outputlen != 0) && (cs.outputlen != BUFFER_SIZE))
+    {
+        /* If there's a partial packet waiting, send it; this will also terminate the transfer. */
+        USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, usb_buffer, BUFFER_SIZE-cs.outputlen);
+    }
+    else
+    {
+        /* Otherwise just terminate the transfer. */
         USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, NULL, 0);
+    }
+    wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
     deinit_dma();
 
-    if (dma_underrun)
+    if (saved_dma_underrun)
     {
         print("underrun after %d packets");
         send_error(F_ERROR_UNDERRUN);
