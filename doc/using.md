@@ -216,12 +216,13 @@ directory.
   - `fluxengine inspect`: dumps the raw pulsetrain / bitstream to stdout.
   Mainly useful for debugging.
 
-  - `fluxengine read*`: reads various formats of disk. See the per-format
+  - `fluxengine read *`: reads various formats of disk. See the per-format
   documentation linked from the table above. These all take an optional
   `--write-flux` option which will cause the raw flux to be written to the
-  specified file.
+  specified file. There are various `--dump` options for showing raw data
+  during the decode process.
 
-  - `fluxengine write*`: writes various formats of disk. Again, see the
+  - `fluxengine write *`: writes various formats of disk. Again, see the
   per-format documentation above.
 
   - `fluxengine writeflux`: writes raw flux files. This is much less useful

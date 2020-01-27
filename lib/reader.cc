@@ -46,7 +46,11 @@ static SettableFlag justRead(
 
 static SettableFlag dumpRecords(
 	{ "--dump-records" },
-	"Dump the parsed records.");
+	"Dump the parsed but undecoded records.");
+
+static SettableFlag dumpSectors(
+	{ "--dump-sectors" },
+	"Dump the decoded sectors.");
 
 static IntFlag retries(
 	{ "--retries" },
@@ -233,6 +237,20 @@ void readDiskCommand(AbstractDecoder& decoder)
 				std::cout << std::endl;
 			}
 		}
+
+        if (dumpSectors)
+        {
+            std::cout << "\nDecoded sectors follow:\n\n";
+            for (auto& i : readSectors)
+            {
+                auto& sector = i.second;
+				std::cout << fmt::format("{}.{:02}.{:02}: I+{:.2f}us with {:.2f}us clock\n",
+                            sector->logicalTrack, sector->logicalSide, sector->logicalSector,
+                            sector->position.ns() / 1000.0, sector->clock / 1000.0);
+				hexdump(std::cout, sector->data);
+				std::cout << std::endl;
+            }
+        }
 
         int size = 0;
 		bool printedTrack = false;
