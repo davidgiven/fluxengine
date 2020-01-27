@@ -401,15 +401,14 @@ static void cmd_read(struct read_frame* f)
             crunch(&cs);
             dma_buffer_usage += BUFFER_SIZE - cs.inputlen;
             count++;
+            
+            /* If there is no available space in the output buffer, flush the buffer via
+             * USB and go again. */
             if (cs.outputlen == 0)
             {
-                while (USBFS_GetEPState(FLUXENGINE_DATA_IN_EP_NUM) != USBFS_IN_BUFFER_EMPTY)
-                {
-                    if (index_irq || dma_underrun)
-                        goto abort;
-                }
-
+                wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
                 USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, usb_buffer, BUFFER_SIZE);
+                
                 cs.outputptr = usb_buffer;
                 cs.outputlen = BUFFER_SIZE;
             }
@@ -430,7 +429,10 @@ abort:;
         wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
     }
     if ((cs.outputlen == BUFFER_SIZE) || (cs.outputlen == 0))
+    {
         USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, NULL, 0);
+        wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
+    }
     deinit_dma();
 
     if (dma_underrun)
