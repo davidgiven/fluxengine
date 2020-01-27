@@ -34,9 +34,8 @@ jobs:
     - uses: actions/checkout@v1
     - name: pacman
       run: |
-        msys2do printenv
-        msys2do pwd
-        msys2do find /c -name pacman.exe
-        #pacman -S --noconfirm --needed make ninja mingw-w64-i686-libusb mingw-w64-i686-sqlite3 mingw-w64-i686-zlib mingw-w64-i686-gcc zip
-        #ls
+        msys2do pacman -S --noconfirm --needed make ninja mingw-w64-i686-libusb mingw-w64-i686-sqlite3 mingw-w64-i686-zlib mingw-w64-i686-gcc zip
+    - name: build
+      run: |
+        msys2do make
 
