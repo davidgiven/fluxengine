@@ -24,14 +24,10 @@ jobs:
   build-windows:
     runs-on: windows-latest
     steps:
-    - uses: numworks/setup-msys2@v1
-      with:
-        msystem: MSYS
     - uses: actions/checkout@v1
     - name: pacman
-      run: msys2do pacman -S --noconfirm --needed make ninja mingw-w64-i686-libusb mingw-w64-i686-sqlite3 mingw-w64-i686-zlib mingw-w64-i686-gcc zip
-    - name: make
+      shell: python scripts\msys-bash.py {0}
       run: |
-        set MSYSTEM=MINGW32
-        msys2do ls /
-        msys2do make
+        pacman -S --noconfirm --needed make ninja mingw-w64-i686-libusb mingw-w64-i686-sqlite3 mingw-w64-i686-zlib mingw-w64-i686-gcc zip
+        ls
+
