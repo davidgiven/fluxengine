@@ -3,7 +3,7 @@
 
 enum 
 {
-    FLUXENGINE_VERSION = 10,
+    FLUXENGINE_VERSION = 11,
 
     FLUXENGINE_VID = 0x1209,
     FLUXENGINE_PID = 0x6e00,
@@ -133,7 +133,8 @@ struct read_frame
 {
     struct frame_header f;
     uint8_t side;
-    uint8_t revolutions;
+    uint8_t synced;
+    uint16_t milliseconds;
 };
 
 struct write_frame

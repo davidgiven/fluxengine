@@ -27,8 +27,9 @@ public:
     virtual bool retryable() { return false; }
 };
 
-extern void setHardwareFluxSourceRevolutions(int revolutions);
+extern void setHardwareFluxSourceRevolutions(double revolutions);
 extern void setHardwareFluxSourceDensity(bool high_density);
+extern void setHardwareFluxSourceSynced(bool synced);
 
 #endif
 
