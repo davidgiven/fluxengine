@@ -34,8 +34,8 @@ jobs:
     - uses: actions/checkout@v1
     - name: pacman
       run: |
-        msys2do echo $PATH
-        msys2do find /c/tools
+        msys2do set
+        msys2do pwd
         #pacman -S --noconfirm --needed make ninja mingw-w64-i686-libusb mingw-w64-i686-sqlite3 mingw-w64-i686-zlib mingw-w64-i686-gcc zip
         #ls
 
