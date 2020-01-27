@@ -29,9 +29,12 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: numworks/setup-msys2@v1
+      with:
+        path-type: inherit
     - uses: actions/checkout@v1
     - name: pacman
       run: |
+        msys2do echo $PATH
         msys2do find /c/tools
         #pacman -S --noconfirm --needed make ninja mingw-w64-i686-libusb mingw-w64-i686-sqlite3 mingw-w64-i686-zlib mingw-w64-i686-gcc zip
         #ls
