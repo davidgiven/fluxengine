@@ -44,18 +44,27 @@ buildlibrary() {
         esac
     done
 
-    local objs
-    objs=
+    local oobjs
+	local dobjs
+    oobjs=
+	dobjs=
     for src in "$@"; do
         local obj
-        obj="$OBJDIR/${src%%.c*}.o"
-        objs="$objs $obj"
+        obj="$OBJDIR/opt/${src%%.c*}.o"
+        oobjs="$oobjs $obj"
 
         echo build $obj : cxx $src
-        echo "    flags=$flags"
+        echo "    flags=$flags $COPTFLAGS"
+
+        obj="$OBJDIR/dbg/${src%%.c*}.o"
+        dobjs="$dobjs $obj"
+
+        echo build $obj : cxx $src
+        echo "    flags=$flags $CDBGFLAGS"
     done
 
-    echo build $OBJDIR/$lib : library $objs
+    echo build $OBJDIR/opt/$lib : library $oobjs
+    echo build $OBJDIR/dbg/$lib : library $dobjs
 }
 
 buildprogram() {
@@ -77,16 +86,21 @@ buildprogram() {
         esac
     done
 
-    local objs
-    objs=
+    local oobjs
+	local dobjs
+    oobjs=
+	dobjs=
     for src in "$@"; do
-        objs="$objs $OBJDIR/$src"
+        oobjs="$oobjs $OBJDIR/opt/$src"
+        dobjs="$dobjs $OBJDIR/dbg/$src"
     done
 
-    echo build $prog-debug$EXTENSION : link $objs
-    echo "    flags=$flags"
+    echo build $prog-debug$EXTENSION : link $dobjs
+    echo "    flags=$flags $LDDBGFLAGS"
 
-    echo build $prog$EXTENSION : strip $prog-debug$EXTENSION
+    echo build $prog$EXTENSION : link $oobjs
+    echo "    flags=$flags $LDOPTFLAGS"
+
 }
 
 buildsimpleprogram() {

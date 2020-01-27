@@ -1,8 +1,13 @@
 PACKAGES = zlib sqlite3 libusb-1.0
 
-export CFLAGS = -Os -g --std=c++14 \
-	-ffunction-sections -fdata-sections
-export LDFLAGS = -Os
+export CFLAGS = --std=c++14 -ffunction-sections -fdata-sections
+export LDFLAGS =
+
+export COPTFLAGS = -Os
+export LDOPTFLAGS = -Os -s
+
+export CDBGFLAGS = -O0 -g
+export LDDBGFLAGS = -O0 -g
 
 ifeq ($(OS), Windows_NT)
 export CXX = /mingw32/bin/g++
