@@ -31,4 +31,7 @@ jobs:
     - name: pacman
       run: msys2do pacman -S --noconfirm --needed make ninja mingw-w64-i686-libusb mingw-w64-i686-sqlite3 mingw-w64-i686-zlib mingw-w64-i686-gcc zip
     - name: make
-      run: msys2do make
+      run: |
+        set MSYSTEM=MINGW32
+        msys2do ls /
+        msys2do make
