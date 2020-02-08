@@ -2,6 +2,7 @@
 #include "flags.h"
 #include "usb.h"
 #include "fluxsource/fluxsource.h"
+#include "fluxsink/fluxsink.h"
 #include "reader.h"
 #include "fluxmap.h"
 #include "sql.h"
@@ -18,7 +19,13 @@
 #include "imagewriter/imagewriter.h"
 #include "fmt/format.h"
 
-FlagGroup readerFlags { &hardwareFluxSourceFlags, &fluxmapReaderFlags, &visualiserFlags };
+FlagGroup readerFlags
+{
+	&hardwareFluxSourceFlags,
+	&sqliteFluxSinkFlags,
+	&fluxmapReaderFlags,
+	&visualiserFlags
+};
 
 static DataSpecFlag source(
     { "--source", "-s" },
@@ -61,7 +68,7 @@ static SettableFlag highDensityFlag(
 	{ "--high-density", "--hd" },
 	"set the drive to high density mode");
 
-static sqlite3* outdb;
+static std::unique_ptr<FluxSink> outputFluxSink;
 
 void setReaderDefaultSource(const std::string& source)
 {
@@ -86,8 +93,8 @@ void Track::readFluxmap()
 		"{0} ms in {1} bytes\n",
             int(fluxmap->duration()/1e6),
             fluxmap->bytes());
-	if (outdb)
-		sqlWriteFlux(outdb, physicalTrack, physicalSide, *fluxmap);
+	if (outputFluxSink)
+		outputFluxSink->writeFlux(physicalTrack, physicalSide, *fluxmap);
 }
 
 std::vector<std::unique_ptr<Track>> readTracks()
@@ -100,17 +107,8 @@ std::vector<std::unique_ptr<Track>> readTracks()
 
 	if (!destination.get().empty())
 	{
-		outdb = sqlOpen(destination, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
 		std::cout << "Writing a copy of the flux to " << destination.get() << std::endl;
-		sqlPrepareFlux(outdb);
-		sqlStmt(outdb, "BEGIN;");
-        sqlWriteIntProperty(outdb, "version", FLUX_VERSION_CURRENT);
-		atexit([]()
-			{
-				sqlStmt(outdb, "COMMIT;");
-				sqlClose(outdb);
-			}
-		);
+		outputFluxSink = FluxSink::createSqliteFluxSink(destination.get());
 	}
 
 	std::shared_ptr<FluxSource> fluxSource = FluxSource::create(spec);

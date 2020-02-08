@@ -300,13 +300,13 @@ containing valuable historical data, and you want to read them.
 Typically I do this:
 
 ```
-$ fluxengine read brother -s :d=0 -o brother.img --write-flux=brother.flux --write-svg=brother.svg
+$ fluxengine read brother -s :d=0 -o brother.img --write-flux=brother.flux --overwrite --write-svg=brother.svg
 ```
 
-This will read the disk in drive 0 and write out a filesystem image. It'll
-also copy the flux to brother.flux and write out an SVG visualisation. If I
-then need to tweak the settings, I can rerun the decode without having to
-physically touch the disk like this:
+This will read the disk in drive 0 and write out a filesystem image. It'll also
+copy the flux to `brother.flux` (replacing any old one) and write out an SVG
+visualisation. If I then need to tweak the settings, I can rerun the decode
+without having to physically touch the disk like this:
 
 ```
 $ fluxengine read brother -s brother.flux -o brother.img --write-svg=brother.svg

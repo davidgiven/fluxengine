@@ -147,7 +147,7 @@ public:
     void set(const std::string& value) { _value = std::stod(value); }
 };
 
-class BoolFlag : public ValueFlag<double>
+class BoolFlag : public ValueFlag<bool>
 {
 public:
     BoolFlag(const std::vector<std::string>& names, const std::string helptext,
