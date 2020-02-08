@@ -41,8 +41,8 @@ of the disk image will vary depending on the format.
 
 Configuration options you'll want include:
 
-  - `--sector-id-base`: specifies the ID of the first sector; this defaults to
-	1. Some formats (like the Acorn ones) start at 0. This can't be
+  - `--sector-id-base`: specifies the ID of the first sector; this defaults
+    to 1. Some formats (like the Acorn ones) start at 0. This can't be
 	autodetected because FluxEngine can't distinguish between a disk which
 	starts at sector 1 and a disk which starts at sector 0 but all the sector
 	0s are missing.
