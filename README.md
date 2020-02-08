@@ -79,7 +79,7 @@ people who've had it work).
 
 | Format                                   | Read? | Write? | Notes |
 |:-----------------------------------------|:-----:|:------:|-------|
-| [IBM PC compatible](disk-ibm.md)         |  🦄   |        | and compatibles (like the Atari ST) |
+| [IBM PC compatible](doc/disk-ibm.md)     |  🦄   |        | and compatibles (like the Atari ST) |
 | [Acorn ADFS](doc/disk-acornadfs.md)      |  🦄   |        | single- and double- sided           |
 | [Acorn DFS](doc/disk-acorndfs.md)        |  🦄   |        |                                     |
 | [Ampro Little Board](doc/disk-ampro.md)  |  🦖   |        |                                     |
