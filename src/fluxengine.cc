@@ -31,6 +31,7 @@ extern command_cb mainTestVoltages;
 extern command_cb mainUpgradeFluxFile;
 extern command_cb mainWriteAmiga;
 extern command_cb mainWriteBrother;
+extern command_cb mainWriteIbm;
 extern command_cb mainWriteFlux;
 extern command_cb mainWriteTestPattern;
 
@@ -84,6 +85,7 @@ static std::vector<Command> writeables =
 {
     { "amiga",         mainWriteAmiga,    "Writes Amiga disks.", },
     { "brother",       mainWriteBrother,  "Writes 120kB and 240kB Brother word processor disks.", },
+    { "ibm",           mainWriteIbm,      "Writes the ubiquitous IBM format disks.", },
 };
 
 static std::vector<Command> convertables =
