@@ -47,11 +47,13 @@ public:
     { resize(0); return *this; }
 
     Bytes slice(unsigned start, unsigned len) const;
+    Bytes slice(unsigned start) const;
     Bytes swab() const;
     Bytes compress() const;
     Bytes decompress() const;
     Bytes crunch() const;
     Bytes uncrunch() const;
+	std::vector<bool> toBits() const;
 
     ByteReader reader() const;
     ByteWriter writer();

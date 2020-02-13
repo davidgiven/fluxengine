@@ -147,6 +147,28 @@ Bytes Bytes::slice(unsigned start, unsigned len) const
     }
 }
 
+Bytes Bytes::slice(unsigned start) const
+{
+	int len = 0;
+	if (start < size())
+		len = size() - start;
+	return slice(start, len);
+}
+
+std::vector<bool> Bytes::toBits() const
+{
+	std::vector<bool> bits;
+	for (uint8_t byte : *this)
+	{
+		for (int i=0; i<8; i++)
+		{
+			bits.push_back(byte & 0x80);
+			byte <<= 1;
+		}
+	}
+	return bits;
+}
+
 uint8_t toByte(
     std::vector<bool>::const_iterator start,
     std::vector<bool>::const_iterator end)
