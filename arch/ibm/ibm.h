@@ -50,15 +50,18 @@ private:
 
 struct IbmParameters
 {
-	int sectorsPerTrack;
+	int trackLengthMs;
 	int sectorSize;
 	bool emitIam;
 	int startSectorId;
-	int clockSpeedKhz;
+	int clockRateKhz;
 	bool useFm;
+	uint16_t idamByte;
+	uint16_t damByte;
+	int gap0;
 	int gap1;
+	int gap2;
 	int gap3;
-	uint8_t damByte;
 	std::string sectorSkew;
 };
 
@@ -66,7 +69,7 @@ class IbmEncoder : public AbstractEncoder
 {
 public:
 	IbmEncoder(const IbmParameters& parameters):
-		parameters(parameters)
+		_parameters(parameters)
 	{}
 
 	virtual ~IbmEncoder() {}
@@ -75,7 +78,16 @@ public:
     std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors);
 
 private:
-	IbmParameters parameters;
+	void writeRawBits(uint32_t data, int width);
+	void writeBytes(const Bytes& bytes);
+	void writeBytes(int count, uint8_t value);
+	void writeSync();
+	
+private:
+	IbmParameters _parameters;
+	std::vector<bool> _bits;
+	unsigned _cursor;
+	bool _lastBit;
 };
 
 #endif

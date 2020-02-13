@@ -10,9 +10,9 @@
 
 static FlagGroup flags { &writerFlags };
 
-static IntFlag sectorsPerTrack(
-	{ "--ibm-sectors-per-track" },
-	"Number of sectors per track to write.",
+static IntFlag trackLengthMs(
+	{ "--ibm-track-length-ms" },
+	"Length of a track in milliseconds.",
 	0);
 
 static IntFlag sectorSize(
@@ -30,7 +30,7 @@ static IntFlag startSectorId(
 	"Sector ID of first sector.",
 	1);
 
-static IntFlag clockSpeedKhz(
+static IntFlag clockRateKhz(
 	{ "--ibm-clock-rate-khz" },
 	"Clock rate of data to write.",
 	0);
@@ -40,20 +40,35 @@ static BoolFlag useFm(
 	"Write in FM mode, rather than MFM.",
 	false);
 
+static HexIntFlag idamByte(
+	{ "--ibm-idam-byte" },
+	"16-bit RAW bit pattern to use for the IDAM ID byte",
+	0);
+
+static HexIntFlag damByte(
+	{ "--ibm-dam-byte" },
+	"16-bit RAW bit pattern to use for the DAM ID byte",
+	0);
+
+static IntFlag gap0(
+	{ "--ibm-gap0-bytes" },
+	"Size of gap 0 (the pre-index gap)",
+	0);
+
 static IntFlag gap1(
 	{ "--ibm-gap1-bytes" },
-	"Size of gap 1.",
+	"Size of gap 1 (the post-index gap).",
+	0);
+
+static IntFlag gap2(
+	{ "--ibm-gap2-bytes" },
+	"Size of gap 2 (the post-ID gap).",
 	0);
 
 static IntFlag gap3(
 	{ "--ibm-gap3-bytes" },
-	"Size of gap 3.",
+	"Size of gap 3 (the post-data or format gap).",
 	0);
-
-static IntFlag damByte(
-	{ "--ibm-dam-byte" },
-	"Value of DAM byte to emit.",
-	0xf8);
 
 static StringFlag sectorSkew(
 	{ "--ibm-sector-skew" },
@@ -64,30 +79,39 @@ static ActionFlag preset1440(
 	{ "--ibm-preset-1440" },
 	"Preset parameters to a 3.5\" 1440kB disk.",
 	[] {
-		sectorsPerTrack.setDefaultValue(18);
+		trackLengthMs.setDefaultValue(200);
 		sectorSize.setDefaultValue(512);
 		emitIam.setDefaultValue(true);
-		clockSpeedKhz.setDefaultValue(500);
-		gap1.setDefaultValue(0x1b);
-		gap3.setDefaultValue(0x6c);
-		sectorSkew.setDefaultValue("123456789abcdefghi");
+		clockRateKhz.setDefaultValue(500);
+		idamByte.setDefaultValue(0x5554);
+		damByte.setDefaultValue(0x5545);
+		gap0.setDefaultValue(80);
+		gap1.setDefaultValue(50);
+		gap2.setDefaultValue(22);
+		gap3.setDefaultValue(54);
+		sectorSkew.setDefaultValue("0123456789abcdefgh");
 	});
 
 int mainWriteIbm(int argc, const char* argv[])
 {
     setWriterDefaultInput(":c=80:h=2:s=18:b=512");
-	setWriterDefaultDest(":d=0:t=0-79:s=2");
+	setWriterDefaultDest(":d=0:t=0-79:s=0-1");
     flags.parseFlags(argc, argv);
 
 	IbmParameters parameters;
-	parameters.sectorsPerTrack = sectorsPerTrack;
+	parameters.trackLengthMs = trackLengthMs;
 	parameters.sectorSize = sectorSize;
 	parameters.emitIam = emitIam;
-	parameters.clockSpeedKhz = clockSpeedKhz;
+	parameters.startSectorId = startSectorId;
+	parameters.clockRateKhz = clockRateKhz;
 	parameters.useFm = useFm;
+	parameters.idamByte = idamByte;
+	parameters.damByte = damByte;
+	parameters.gap0 = gap0;
 	parameters.gap1 = gap1;
+	parameters.gap2 = gap2;
 	parameters.gap3 = gap3;
-	parameters.damByte = (uint8_t) damByte;
+	parameters.sectorSkew = sectorSkew;
 
 	IbmEncoder encoder(parameters);
 	writeDiskCommand(encoder);

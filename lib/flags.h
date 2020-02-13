@@ -135,6 +135,17 @@ public:
     void set(const std::string& value) { _value = std::stoi(value); }
 };
 
+class HexIntFlag : public IntFlag
+{
+public:
+    HexIntFlag(const std::vector<std::string>& names, const std::string helptext,
+            int defaultValue = 0):
+        IntFlag(names, helptext, defaultValue)
+    {}
+
+    const std::string defaultValueAsString() const;
+};
+
 class DoubleFlag : public ValueFlag<double>
 {
 public:
