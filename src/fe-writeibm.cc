@@ -79,6 +79,7 @@ static ActionFlag preset1440(
 	{ "--ibm-preset-1440" },
 	"Preset parameters to a 3.5\" 1440kB disk.",
 	[] {
+		setWriterDefaultInput(":c=80:h=2:s=18:b=512");
 		trackLengthMs.setDefaultValue(200);
 		sectorSize.setDefaultValue(512);
 		emitIam.setDefaultValue(true);
@@ -88,13 +89,30 @@ static ActionFlag preset1440(
 		gap0.setDefaultValue(80);
 		gap1.setDefaultValue(50);
 		gap2.setDefaultValue(22);
-		gap3.setDefaultValue(54);
+		gap3.setDefaultValue(108);
 		sectorSkew.setDefaultValue("0123456789abcdefgh");
+	});
+
+static ActionFlag preset720(
+	{ "--ibm-preset-720" },
+	"Preset parameters to a 3.5\" 720kB disk.",
+	[] {
+		setWriterDefaultInput(":c=80:h=2:s=9:b=512");
+		trackLengthMs.setDefaultValue(200);
+		sectorSize.setDefaultValue(512);
+		emitIam.setDefaultValue(true);
+		clockRateKhz.setDefaultValue(250);
+		idamByte.setDefaultValue(0x5554);
+		damByte.setDefaultValue(0x5545);
+		gap0.setDefaultValue(80);
+		gap1.setDefaultValue(50);
+		gap2.setDefaultValue(22);
+		gap3.setDefaultValue(80);
+		sectorSkew.setDefaultValue("012345678");
 	});
 
 int mainWriteIbm(int argc, const char* argv[])
 {
-    setWriterDefaultInput(":c=80:h=2:s=18:b=512");
 	setWriterDefaultDest(":d=0:t=0-79:s=0-1");
     flags.parseFlags(argc, argv);
 

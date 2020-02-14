@@ -6,6 +6,7 @@
 #include "crc.h"
 #include "sectorset.h"
 #include "writer.h"
+#include "fmt/format.h"
 #include <ctype.h>
 
 /* IAM record separator:
@@ -69,7 +70,7 @@ void IbmEncoder::writeRawBits(uint32_t data, int width)
 	{
 		unsigned pos = _cursor - i - 1;
 		if (pos < _bits.size())
-			_bits[pos] = data & 1;
+			_lastBit = _bits[pos] = data & 1;
 		data >>= 1;
 	}
 }
@@ -126,7 +127,6 @@ std::unique_ptr<Fluxmap> IbmEncoder::encode(
 	if (_parameters.emitIam)
 	{
 		writeBytes(_parameters.useFm ? 6 : 12, 0x00);
-		_lastBit = false;
 		if (!_parameters.useFm)
 		{
 			for (int i=0; i<3; i++)
@@ -136,16 +136,17 @@ std::unique_ptr<Fluxmap> IbmEncoder::encode(
 		writeBytes(_parameters.gap1, gapFill);
 	}
 
-	int sectorIndex = 0;
-	while (sectorIndex < _parameters.sectorSkew.size())
+	bool first = true;
+	for (char sectorChar : _parameters.sectorSkew)
 	{
-		if (sectorIndex != 0)
+		int sectorId = charToInt(sectorChar);
+		if (!first)
 			writeBytes(_parameters.gap3, gapFill);
+		first = false;
 
-		int sectorId = charToInt(_parameters.sectorSkew.at(sectorIndex));
 		const auto& sectorData = allSectors.get(physicalTrack, physicalSide, sectorId);
 		if (!sectorData)
-			break;
+			Error() << fmt::format("format tried to find sector {} which wasn't in the input file", sectorId);
 
 		/* Writing the sector and data records are fantastically annoying.
 		 * The CRC is calculated from the *very start* of the record, and
@@ -160,7 +161,6 @@ std::unique_ptr<Fluxmap> IbmEncoder::encode(
 			ByteWriter bw(header);
 
 			writeBytes(_parameters.useFm ? 6 : 12, 0x00);
-			_lastBit = false;
 			if (!_parameters.useFm)
 			{
 				for (int i=0; i<3; i++)
@@ -195,7 +195,6 @@ std::unique_ptr<Fluxmap> IbmEncoder::encode(
 			ByteWriter bw(data);
 
 			writeBytes(_parameters.useFm ? 6 : 12, 0x00);
-			_lastBit = false;
 			if (!_parameters.useFm)
 			{
 				for (int i=0; i<3; i++)
@@ -221,8 +220,6 @@ std::unique_ptr<Fluxmap> IbmEncoder::encode(
 
 			writeBytes(data.slice(conventionalHeaderStart));
 		}
-
-		sectorIndex++;
     }
 
 	if (_cursor >= _bits.size())
