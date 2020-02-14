@@ -28,7 +28,7 @@ public:
 		{
 			if (!overwriteFlag && (access(filename.c_str(), F_OK) == 0))
 				Error() << "cowardly refusing to overwrite flux file without --merge or --overwrite specified";
-			if (remove(filename.c_str()) != 0)
+			if ((access(filename.c_str(), F_OK) == 0) && (remove(filename.c_str()) != 0))
 				Error() << fmt::format("failed to overwrite flux file");
 		}
 		_outdb = sqlOpen(filename, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
