@@ -62,7 +62,6 @@ begin
                 if ((rdataed || indexed) && (counter != 0))
                 begin
                     opcode <= {0, counter};
-                    counter <= 0;
                     state <= STATE_OPCODE;
                 end
                 else if (indexed)
@@ -85,7 +84,7 @@ begin
                         opcode <= {0, counter};
                         state <= STATE_OPCODE;
                     end
-                    counter <= counter + 1; /* if 0x7f, this rolls over to 0 */
+                    counter <= counter + 1;
                 end
                 
                 /* Reset state once we've done the thing. */
@@ -99,7 +98,10 @@ begin
             end
             
             STATE_OPCODE: /* opcode or interval byte sent here */
+            begin
                 state <= STATE_WAITING;
+                counter <= 0;
+            end
         endcase
 end
 
