@@ -66,11 +66,12 @@ static int charToInt(char c)
 void IbmEncoder::writeRawBits(uint32_t data, int width)
 {
 	_cursor += width;
+	_lastBit = data & 1;
 	for (int i=0; i<width; i++)
 	{
 		unsigned pos = _cursor - i - 1;
 		if (pos < _bits.size())
-			_lastBit = _bits[pos] = data & 1;
+			_bits[pos] = data & 1;
 		data >>= 1;
 	}
 }

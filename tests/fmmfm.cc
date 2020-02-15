@@ -82,6 +82,19 @@ static void testEncodeMfm(void)
 			false, false
 		})
 	);
+
+	assert(wrappedEncodeMfm(Bytes{ 0xb0 })
+		== (std::vector<bool>{
+			false, true,
+			false, false,
+			false, true,
+			false, true,
+			false, false,
+			true, false,
+			true, false,
+			true, false,
+		})
+	);
 }
 
 static void testEncodeFm(void)
