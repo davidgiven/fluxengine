@@ -334,7 +334,7 @@ static void cmd_read(struct read_frame* f)
     
     {
         uint8_t i = CyEnterCriticalSection();
-        SAMPLER_FIFO_SET_LEVEL_MID;
+        SAMPLER_FIFO_SET_LEVEL_NORMAL;
         SAMPLER_FIFO_CLEAR;
         SAMPLER_FIFO_SINGLE_BUFFER_UNSET;
         CyExitCriticalSection(i);
@@ -490,7 +490,7 @@ static void cmd_write(struct write_frame* f)
     SIDE_REG_Write(f->side);
     {
         uint8_t i = CyEnterCriticalSection();        
-        REPLAY_FIFO_SET_LEVEL_NORMAL;
+        REPLAY_FIFO_SET_LEVEL_MID;
         REPLAY_FIFO_CLEAR;
         REPLAY_FIFO_SINGLE_BUFFER_UNSET;
         CyExitCriticalSection(i);

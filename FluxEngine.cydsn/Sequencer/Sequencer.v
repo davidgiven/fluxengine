@@ -40,9 +40,7 @@ always @(posedge clock) olddataclock <= dataclock;
 assign dataclocked = !olddataclock && dataclock;
 
 reg oldsampleclock;
-wire sampleclocked;
-always @(posedge clock) oldsampleclock <= sampleclock;
-assign sampleclocked = !oldsampleclock && sampleclock;
+reg sampleclocked;
 
 reg oldindex;
 wire indexed;
@@ -57,11 +55,18 @@ begin
         countdown <= 0;
     end
     else
+    begin
+        if (!oldsampleclock && sampleclock)
+            sampleclocked <= 1;
+        oldsampleclock <= sampleclock;
+        
         case (state)
             STATE_IDLE:
                 state <= STATE_LOAD;
             
             STATE_LOAD:
+                /* Wait for a posedge on dataclocked, indicating an opcode has
+                 * arrived. */
                 if (dataclocked)
                     case (opcode)
                         OPCODE_PULSE:
@@ -80,10 +85,10 @@ begin
             STATE_WAITING:
                 if (sampleclocked)
                 begin
+                    sampleclocked <= 0;
+                    countdown <= countdown - 1;
                     if (countdown == 0)
                         state <= STATE_LOAD;
-                    else
-                        countdown <= countdown - 1;
                 end
             
             STATE_PULSING:
@@ -92,9 +97,8 @@ begin
             STATE_INDEXING:
                 if (indexed)
                     state <= STATE_LOAD;
-                else
-                    state <= STATE_INDEXING;
         endcase
+    end
 end
 
 //`#end` -- edit above this line, do not edit this line
