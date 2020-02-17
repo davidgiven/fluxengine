@@ -279,7 +279,7 @@ static void cmd_measure_speed(struct any_frame* f)
     send_reply((struct any_frame*) &r);    
 }
 
-static void cmd_bulk_test(struct any_frame* f)
+static void cmd_bulk_write_test(struct any_frame* f)
 {
     uint8_t buffer[64];
     
@@ -294,8 +294,45 @@ static void cmd_bulk_test(struct any_frame* f)
             USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, buffer, sizeof(buffer));
         }
     
-    DECLARE_REPLY_FRAME(struct any_frame, F_FRAME_BULK_TEST_REPLY);
+    DECLARE_REPLY_FRAME(struct any_frame, F_FRAME_BULK_WRITE_TEST_REPLY);
     send_reply(&r);
+}
+
+static void cmd_bulk_read_test(struct any_frame* f)
+{
+    uint8_t buffer[64];
+    
+    bool passed = true;
+    for (int x=0; x<64; x++)
+    {
+        for (int y=0; y<256; y++)
+        {
+            USBFS_EnableOutEP(FLUXENGINE_DATA_OUT_EP_NUM);
+            while (USBFS_GetEPState(FLUXENGINE_DATA_OUT_EP_NUM) != USBFS_OUT_BUFFER_FULL)
+                ;
+            USBFS_ReadOutEP(FLUXENGINE_DATA_OUT_EP_NUM, buffer, sizeof(buffer));
+            while (USBFS_GetEPState(FLUXENGINE_DATA_OUT_EP_NUM) != USBFS_OUT_BUFFER_EMPTY)
+                ;
+            
+            for (unsigned z=0; z<sizeof(buffer); z++)
+            {
+                if (buffer[z] != (uint8)(x+y+z))
+                {
+                    print("fail %d+%d+%d == %d, not %d", x, y, z, buffer[z], (uint8)(x+y+z));
+                    passed = false;
+                }
+            }
+        }
+    }
+
+    print("passed=%d", passed);
+    if (passed)
+    {
+        DECLARE_REPLY_FRAME(struct any_frame, F_FRAME_BULK_READ_TEST_REPLY);
+        send_reply(&r);
+    }
+    else
+        send_error(F_ERROR_INVALID_VALUE);
 }
 
 static void deinit_dma(void)
@@ -836,8 +873,12 @@ static void handle_command(void)
             cmd_measure_speed(f);
             break;
             
-        case F_FRAME_BULK_TEST_CMD:
-            cmd_bulk_test(f);
+        case F_FRAME_BULK_WRITE_TEST_CMD:
+            cmd_bulk_write_test(f);
+            break;
+            
+        case F_FRAME_BULK_READ_TEST_CMD:
+            cmd_bulk_read_test(f);
             break;
             
         case F_FRAME_READ_CMD:
