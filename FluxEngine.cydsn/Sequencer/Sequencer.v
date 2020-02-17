@@ -83,9 +83,9 @@ begin
                 begin
                     sampleclocked <= 0;
                     countdown <= countdown - 1;
-                    /* Nasty fudge factor here to account for approximately
-                     * one sample tick lost per pulse. */
-                    if (countdown <= 1)
+                    /* Nasty fudge factor here to account for one to two
+                     * sample ticks lost per pulse. */
+                    if (countdown <= 2)
                         state <= STATE_LOAD;
                 end
             
