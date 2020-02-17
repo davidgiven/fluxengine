@@ -18,19 +18,18 @@ module Sequencer (
 
 //`#start body` -- edit after this line, do not edit this line
 
-localparam STATE_IDLE = 0;
-localparam STATE_LOAD = 1;
-localparam STATE_WAITING = 2;
-localparam STATE_PULSING = 3;
-localparam STATE_INDEXING = 4;
+localparam STATE_LOAD = 0;
+localparam STATE_WAITING = 1;
+localparam STATE_PULSING = 2;
+localparam STATE_INDEXING = 3;
 
 localparam OPCODE_PULSE = 8'h80;
 localparam OPCODE_INDEX = 8'h81;
 
-reg [2:0] state;
+reg [1:0] state;
 reg [6:0] countdown;
 
-assign req = (state == STATE_LOAD);
+assign req = (!reset && (state == STATE_LOAD));
 assign wdata = (state == STATE_PULSING);
 assign debug_state = state;
 
@@ -51,7 +50,7 @@ always @(posedge clock)
 begin
     if (reset)
     begin
-        state <= STATE_IDLE;
+        state <= STATE_LOAD;
         countdown <= 0;
     end
     else
@@ -61,9 +60,6 @@ begin
         oldsampleclock <= sampleclock;
         
         case (state)
-            STATE_IDLE:
-                state <= STATE_LOAD;
-            
             STATE_LOAD:
                 /* Wait for a posedge on dataclocked, indicating an opcode has
                  * arrived. */
@@ -87,7 +83,9 @@ begin
                 begin
                     sampleclocked <= 0;
                     countdown <= countdown - 1;
-                    if (countdown == 0)
+                    /* Nasty fudge factor here to account for approximately
+                     * one sample tick lost per pulse. */
+                    if (countdown <= 1)
                         state <= STATE_LOAD;
                 end
             

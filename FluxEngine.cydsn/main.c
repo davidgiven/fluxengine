@@ -31,6 +31,7 @@ static struct set_drive_frame current_drive_flags;
 static uint8_t td[BUFFER_COUNT];
 static uint8_t dma_buffer[BUFFER_COUNT][BUFFER_SIZE] __attribute__((aligned()));
 static uint8_t usb_buffer[BUFFER_SIZE] __attribute__((aligned()));
+static uint8_t xfer_buffer[BUFFER_SIZE] __attribute__((aligned()));
 static uint8_t dma_channel;
 #define NEXT_BUFFER(b) (((b)+1) % BUFFER_COUNT)
 
@@ -354,7 +355,7 @@ static void cmd_read(struct read_frame* f)
     }
     
     crunch_state_t cs = {};
-    cs.outputptr = usb_buffer;
+    cs.outputptr = xfer_buffer;
     cs.outputlen = BUFFER_SIZE;
     
     dma_writing_to_td = 0;
@@ -405,9 +406,10 @@ static void cmd_read(struct read_frame* f)
             if (cs.outputlen == 0)
             {
                 wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
+                memcpy(usb_buffer, xfer_buffer, FRAME_SIZE);
                 USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, usb_buffer, BUFFER_SIZE);
                 
-                cs.outputptr = usb_buffer;
+                cs.outputptr = xfer_buffer;
                 cs.outputlen = BUFFER_SIZE;
             }
         }
@@ -547,11 +549,12 @@ static void cmd_write(struct write_frame* f)
                     int length = usb_read(FLUXENGINE_DATA_OUT_EP_NUM, usb_buffer);
                     cs.inputptr = usb_buffer;
                     cs.inputlen = length;
-                    USBFS_EnableOutEP(FLUXENGINE_DATA_OUT_EP_NUM);
 
                     count_read++;
                     if ((length < FRAME_SIZE) || (count_read == packets))
                         finished = true;
+                    else
+                        USBFS_EnableOutEP(FLUXENGINE_DATA_OUT_EP_NUM);
                 }
             }
             
@@ -622,7 +625,9 @@ abort:
     print("p=%d cr=%d cw=%d f=%d w=%d index=%d underrun=%d", packets, count_read, count_written, finished, writing, index_irq, dma_underrun);
     if (!finished)
     {
-        while (count_read < packets)
+        /* There's still some data to read, so just read and blackhole it ---
+         * easier than trying to terminate the connection. */
+        while (count_read != packets)
         {
             if (USBFS_GetEPState(FLUXENGINE_DATA_OUT_EP_NUM) == USBFS_OUT_BUFFER_FULL)
             {
