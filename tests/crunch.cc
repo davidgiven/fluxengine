@@ -7,7 +7,7 @@ static uint8_t outputbuffer[64];
 static void test_crunch()
 {
     crunch_state_t cs = {};
-    Bytes inputdata = { 0x01, 0x7f, 0x80, 0x81, 0x01 };
+    Bytes inputdata = { 0x01, 0x7f, 0x80, 0x05, 0x80, 0x81, 0x01 };
     cs.inputptr = inputdata.begin();
     cs.inputlen = inputdata.size();
     cs.outputptr = outputbuffer;
@@ -16,13 +16,13 @@ static void test_crunch()
     donecrunch(&cs);
     Bytes outputdata(outputbuffer, cs.outputptr - outputbuffer);
 
-    assert((outputdata == Bytes{ 0x01, 0x7f, 0xb0, 0x10 }));
+    assert((outputdata == Bytes{ 0x01, 0x7f, 0xc5, 0x94, 0x04 }));
 }
 
 static void test_uncrunch()
 {
     crunch_state_t cs = {};
-    Bytes inputdata = { 0x01, 0x7f, 0xb0, 0x10 };
+    Bytes inputdata = { 0x01, 0x7f, 0xc5, 0x94, 0x04 };
     cs.inputptr = inputdata.begin();
     cs.inputlen = inputdata.size();
     cs.outputptr = outputbuffer;
@@ -31,7 +31,7 @@ static void test_uncrunch()
     doneuncrunch(&cs);
     Bytes outputdata(outputbuffer, cs.outputptr - outputbuffer);
 
-    assert((outputdata == Bytes { 0x01, 0x7f, 0x80, 0x81, 0x01 }));
+    assert((outputdata == Bytes { 0x01, 0x7f, 0x80, 0x05, 0x80, 0x81, 0x01 }));
 }
 
 int main(int argc, const char* argv[])
