@@ -4,7 +4,7 @@
 
 static FlagGroup flags;
 
-int mainTestBulkTransport(int argc, const char* argv[])
+int mainTestBandwidth(int argc, const char* argv[])
 {
     flags.parseFlags(argc, argv);
     usbTestBulkWrite();

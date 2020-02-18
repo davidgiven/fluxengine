@@ -228,7 +228,7 @@ buildlibrary libfrontend.a \
     src/fe-rpm.cc \
     src/fe-scptoflux.cc \
     src/fe-seek.cc \
-    src/fe-testbulktransport.cc \
+    src/fe-testbandwidth.cc \
     src/fe-testvoltages.cc \
     src/fe-upgradefluxfile.cc \
     src/fe-writeamiga.cc \

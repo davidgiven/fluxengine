@@ -285,6 +285,8 @@ static void cmd_bulk_write_test(struct any_frame* f)
     
     wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
     for (int x=0; x<64; x++)
+    {
+        CyWdtClear();
         for (int y=0; y<256; y++)
         {
             for (unsigned z=0; z<sizeof(buffer); z++)
@@ -293,6 +295,7 @@ static void cmd_bulk_write_test(struct any_frame* f)
             wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
             USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, buffer, sizeof(buffer));
         }
+    }
     
     DECLARE_REPLY_FRAME(struct any_frame, F_FRAME_BULK_WRITE_TEST_REPLY);
     send_reply(&r);
@@ -305,6 +308,7 @@ static void cmd_bulk_read_test(struct any_frame* f)
     bool passed = true;
     for (int x=0; x<64; x++)
     {
+        CyWdtClear();
         for (int y=0; y<256; y++)
         {
             USBFS_EnableOutEP(FLUXENGINE_DATA_OUT_EP_NUM);
