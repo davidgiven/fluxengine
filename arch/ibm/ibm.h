@@ -2,6 +2,7 @@
 #define IBM_H
 
 #include "decoders/decoders.h"
+#include "encoders/encoders.h"
 
 /* IBM format (i.e. ordinary PC floppies). */
 
@@ -47,52 +48,46 @@ private:
     unsigned _currentHeaderLength;
 };
 
-#if 0
-class AbstractIbmDecoder : public AbstractSoftSectorDecoder
+struct IbmParameters
+{
+	int trackLengthMs;
+	int sectorSize;
+	bool emitIam;
+	int startSectorId;
+	int clockRateKhz;
+	bool useFm;
+	uint16_t idamByte;
+	uint16_t damByte;
+	int gap0;
+	int gap1;
+	int gap2;
+	int gap3;
+	std::string sectorSkew;
+};
+
+class IbmEncoder : public AbstractEncoder
 {
 public:
-    AbstractIbmDecoder(unsigned sectorIdBase):
-        _sectorIdBase(sectorIdBase)
-    {}
-    virtual ~AbstractIbmDecoder() {}
+	IbmEncoder(const IbmParameters& parameters):
+		_parameters(parameters)
+	{}
 
-    SectorVector decodeToSectors(const RawRecordVector& rawRecords, unsigned physicalTrack, unsigned physicalSide);
+	virtual ~IbmEncoder() {}
 
-protected:
-    virtual int skipHeaderBytes() const = 0;
+public:
+    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors);
 
 private:
-    unsigned _sectorIdBase;
+	void writeRawBits(uint32_t data, int width);
+	void writeBytes(const Bytes& bytes);
+	void writeBytes(int count, uint8_t value);
+	void writeSync();
+	
+private:
+	IbmParameters _parameters;
+	std::vector<bool> _bits;
+	unsigned _cursor;
+	bool _lastBit;
 };
-
-class IbmFmDecoder : public AbstractIbmDecoder
-{
-public:
-    IbmFmDecoder(unsigned sectorIdBase):
-        AbstractIbmDecoder(sectorIdBase)
-    {}
-
-    int recordMatcher(uint64_t fifo) const;
-
-protected:
-    int skipHeaderBytes() const
-    { return 0; }
-};
-
-class IbmMfmDecoder : public AbstractIbmDecoder
-{
-public:
-    IbmMfmDecoder(unsigned sectorIdBase):
-        AbstractIbmDecoder(sectorIdBase)
-    {}
-
-    nanoseconds_t guessClock(Fluxmap& fluxmap) const;
-    int recordMatcher(uint64_t fifo) const;
-
-protected:
-    int skipHeaderBytes() const
-    { return 3; }
-};
-#endif
 
 #endif

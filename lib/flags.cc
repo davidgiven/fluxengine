@@ -1,5 +1,6 @@
 #include "globals.h"
 #include "flags.h"
+#include "fmt/format.h"
 
 static FlagGroup* currentFlagGroup;
 static std::vector<Flag*> all_flags;
@@ -170,6 +171,11 @@ void BoolFlag::set(const std::string& value)
 		_value = false;
 	else
 		Error() << "can't parse '" << value << "'; try 'true' or 'false'";
+}
+
+const std::string HexIntFlag::defaultValueAsString() const
+{
+	return fmt::format("0x{:x}", _defaultValue);
 }
 
 static void doHelp()

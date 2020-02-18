@@ -26,11 +26,12 @@ extern command_cb mainReadVictor9K;
 extern command_cb mainReadZilogMCZ;
 extern command_cb mainRpm;
 extern command_cb mainSeek;
-extern command_cb mainTestBulkTransport;
+extern command_cb mainTestBandwidth;
 extern command_cb mainTestVoltages;
 extern command_cb mainUpgradeFluxFile;
 extern command_cb mainWriteAmiga;
 extern command_cb mainWriteBrother;
+extern command_cb mainWriteIbm;
 extern command_cb mainWriteFlux;
 extern command_cb mainWriteTestPattern;
 
@@ -84,6 +85,7 @@ static std::vector<Command> writeables =
 {
     { "amiga",         mainWriteAmiga,    "Writes Amiga disks.", },
     { "brother",       mainWriteBrother,  "Writes 120kB and 240kB Brother word processor disks.", },
+    { "ibm",           mainWriteIbm,      "Writes the ubiquitous IBM format disks.", },
 };
 
 static std::vector<Command> convertables =
@@ -97,8 +99,8 @@ static std::vector<Command> convertables =
 
 static std::vector<Command> testables =
 {
-    { "bulktransport", mainTestBulkTransport, "Measures your USB bandwidth.", },
-    { "voltages",      mainTestVoltages,      "Measures the FDD bus voltages.", },
+    { "bandwidth",     mainTestBandwidth, "Measures your USB bandwidth.", },
+    { "voltages",      mainTestVoltages,  "Measures the FDD bus voltages.", },
 };
 
 static void extendedHelp(std::vector<Command>& subcommands, const std::string& command)

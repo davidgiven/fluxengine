@@ -168,6 +168,7 @@ buildlibrary libbackend.a \
     arch/f85/decoder.cc \
     arch/fb100/decoder.cc \
     arch/ibm/decoder.cc \
+    arch/ibm/encoder.cc \
     arch/macintosh/decoder.cc \
     arch/mx/decoder.cc \
     arch/victor9k/decoder.cc \
@@ -227,11 +228,12 @@ buildlibrary libfrontend.a \
     src/fe-rpm.cc \
     src/fe-scptoflux.cc \
     src/fe-seek.cc \
-    src/fe-testbulktransport.cc \
+    src/fe-testbandwidth.cc \
     src/fe-testvoltages.cc \
     src/fe-upgradefluxfile.cc \
     src/fe-writeamiga.cc \
     src/fe-writebrother.cc \
+    src/fe-writeibm.cc \
     src/fe-writeflux.cc \
     src/fe-writetestpattern.cc \
     src/fluxengine.cc \

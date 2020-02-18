@@ -21,27 +21,10 @@ module Sampler (
 
 localparam STATE_RESET = 0;
 localparam STATE_WAITING = 1;
-localparam STATE_INTERVAL = 2;
-localparam STATE_DISPATCH = 3;
-localparam STATE_OPCODE = 4;
-localparam STATE_COUNTING = 5;
+localparam STATE_OPCODE = 2;
 
-reg [2:0] state;
-wire [6:0] counter;
-
-wire countnow;
-assign countnow = (state == STATE_COUNTING);
-
-wire counterreset;
-assign counterreset = (state == STATE_INTERVAL) || (state == STATE_OPCODE);
-
-SuperCounter #(.Delta(1), .ResetValue(0)) Counter
-(
-    /* input */ .clk(clock),
-    /* input */ .reset(counterreset),
-    /* input */ .count(countnow),
-    /* output */ .d(counter)
-);
+reg [1:0] state;
+reg [6:0] counter;
 
 reg oldsampleclock;
 wire sampleclocked;
@@ -55,7 +38,7 @@ wire rdataed;
 reg oldrdata;
 assign rdataed = !oldrdata && rdata;
 
-assign req = (state == STATE_INTERVAL) || (state == STATE_OPCODE);
+assign req = (state == STATE_OPCODE);
 
 always @(posedge clock)
 begin
@@ -66,6 +49,7 @@ begin
         oldsampleclock <= 0;
         oldindex <= 0;
         oldrdata <= 0;
+        counter <= 0;
     end
     else
         case (state)
@@ -74,10 +58,23 @@ begin
             
             STATE_WAITING:
             begin
-                if (rdataed || indexed)
+                /* If something has happened, emit any necessary interval byte. */
+                if ((rdataed || indexed) && (counter != 0))
                 begin
                     opcode <= {0, counter};
-                    state <= STATE_INTERVAL;
+                    state <= STATE_OPCODE;
+                end
+                else if (indexed)
+                begin
+                    oldindex <= 1;
+                    opcode <= 8'h81;
+                    state <= STATE_OPCODE;
+                end
+                else if (rdataed)
+                begin
+                    oldrdata <= 1;
+                    opcode <= 8'h80;
+                    state <= STATE_OPCODE;
                 end
                 else if (sampleclocked)
                 begin
@@ -87,9 +84,10 @@ begin
                         opcode <= {0, counter};
                         state <= STATE_OPCODE;
                     end
-                    else
-                        state <= STATE_COUNTING;
+                    counter <= counter + 1;
                 end
+                
+                /* Reset state once we've done the thing. */
                 
                 if (oldrdata && !rdata)
                     oldrdata <= 0;
@@ -99,32 +97,11 @@ begin
                     oldsampleclock <= 0;
             end
             
-            STATE_INTERVAL: /* interval byte sent here; counter reset */
-                state <= STATE_DISPATCH;
-                
-            STATE_DISPATCH: /* relax after interval byte, dispatch for opcode */
+            STATE_OPCODE: /* opcode or interval byte sent here */
             begin
-                if (rdataed)
-                begin
-                    oldrdata <= 1;
-                    opcode <= 8'h80;
-                    state <= STATE_OPCODE;
-                end
-                else if (indexed)
-                begin
-                    oldindex <= 1;
-                    opcode <= 8'h81;
-                    state <= STATE_OPCODE;
-                end
-                else
-                    state <= STATE_WAITING;
+                state <= STATE_WAITING;
+                counter <= 0;
             end
-            
-            STATE_OPCODE: /* opcode byte sent here */
-                state <= STATE_WAITING;
-                            
-            STATE_COUNTING: /* counter changes here */
-                state <= STATE_WAITING;
         endcase
 end
 

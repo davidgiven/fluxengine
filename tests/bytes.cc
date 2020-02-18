@@ -115,6 +115,15 @@ static void test_slice()
     assert((bs == Bytes{ 0, 0 }));
 }
 
+static void test_tobits()
+{
+	Bytes b = {1, 2};
+	assert(b.toBits() == (std::vector<bool>{
+		false, false, false, false, false, false, false, true,
+		false, false, false, false, false, false, true, false
+	}));
+}
+
 int main(int argc, const char* argv[])
 {
     test_bounds();
@@ -123,5 +132,6 @@ int main(int argc, const char* argv[])
     test_reads();
     test_writes();
     test_slice();
+	test_tobits();
     return 0;
 }

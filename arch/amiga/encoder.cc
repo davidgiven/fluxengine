@@ -19,6 +19,8 @@ static DoubleFlag postIndexGapMs(
 	"Post-index gap before first sector header (milliseconds).",
 	0.5);
 
+static bool lastBit;
+
 static int charToInt(char c)
 {
 	if (isdigit(c))
@@ -51,7 +53,7 @@ static void write_interleaved_bytes(std::vector<bool>& bits, unsigned& cursor, c
 {
 	assert(!(bytes.size() & 3));
 	Bytes interleaved = amigaInterleave(bytes);
-	encodeMfm(bits, cursor, interleaved);
+	encodeMfm(bits, cursor, interleaved, lastBit);
 }
 
 static void write_interleaved_bytes(std::vector<bool>& bits, unsigned& cursor, uint32_t data)
@@ -108,6 +110,7 @@ std::unique_ptr<Fluxmap> AmigaEncoder::encode(
 	unsigned cursor = 0;
 
     fillBitmapTo(bits, cursor, postIndexGapMs * 1000 / clockRateUs, { true, false });
+	lastBit = false;
 
 	for (int sectorId=0; sectorId<AMIGA_SECTORS_PER_TRACK; sectorId++)
 	{

@@ -79,10 +79,10 @@ people who've had it work).
 
 | Format                                   | Read? | Write? | Notes |
 |:-----------------------------------------|:-----:|:------:|-------|
-| [IBM PC compatible](doc/disk-ibm.md)     |  🦄   |        | and compatibles (like the Atari ST) |
-| [Acorn ADFS](doc/disk-acornadfs.md)      |  🦄   |        | single- and double- sided           |
-| [Acorn DFS](doc/disk-acorndfs.md)        |  🦄   |        |                                     |
-| [Ampro Little Board](doc/disk-ampro.md)  |  🦖   |        |                                     |
+| [IBM PC compatible](doc/disk-ibm.md)     |  🦄   |   🦄   | and compatibles (like the Atari ST) |
+| [Acorn ADFS](doc/disk-acornadfs.md)      |  🦄   |   🦖*  | single- and double- sided           |
+| [Acorn DFS](doc/disk-acorndfs.md)        |  🦄   |   🦖*  |                                     |
+| [Ampro Little Board](doc/disk-ampro.md)  |  🦖   |   🦖*   |                                     |
 | [Apple II DOS 3.3](doc/disk-apple2.md)   |  🦄   |        | doesn't do logical sector remapping |
 | [Amiga](doc/disk-amiga.md)               |  🦄   |        |                                     |
 | [Commodore 64 1541](doc/disk-c64.md)     |  🦖   |        | and probably the other GCR formats  |
@@ -90,8 +90,12 @@ people who've had it work).
 | [Brother 240kB](doc/disk-brother.md)     |  🦄   |   🦄   |                                     |
 | [Brother FB-100](doc/disk-fb100.md)      |  🦖   |        | Tandy Model 100, Husky Hunter, knitting machines |
 | [Macintosh 800kB](doc/disk-macintosh.md) |  🦖   |        | and probably the 400kB too          |
-| [TRS-80](doc/disk-trs80.md)              |  🦖   |        | a minor variation of the IBM scheme |
+| [TRS-80](doc/disk-trs80.md)              |  🦖   |   🦖*  | a minor variation of the IBM scheme |
 {: .datatable }
+
+`*`: these formats are variations of the generic IBM format, and since the
+IBM writer is completely generic, it should be configurable for these
+formats... theoretically. I don't have the hardware to try it.
 
 ### Even older disk formats
 

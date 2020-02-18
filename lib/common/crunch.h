@@ -11,7 +11,8 @@ extern "C" {
  * sending it over USB. The encoding used is:
  * 
  * 0nnn.nnnn: value 0x00..0x7f
- * 1n       : value 0x80|n
+ * 11nn.nnnn: value 0x80 then 0x00..0x3f
+ * 10n      : value 0x80|n
  *
  * The end of the buffer is terminated with zeroes, which are ignored
  * (not written to the output).
@@ -25,8 +26,10 @@ typedef struct crunch_state_t
     uint32_t inputlen;
     uint8_t* outputptr;
     uint32_t outputlen;
-    uint16_t fifo;
+    uint32_t fifo;
     uint8_t fifolen;
+	bool haspending;
+	uint8_t pendingbyte;
 }
 crunch_state_t;
 

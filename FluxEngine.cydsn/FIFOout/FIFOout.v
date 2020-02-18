@@ -20,33 +20,34 @@ module FIFOout (
 wire [7:0] po;
 assign d = po;
 
-localparam STATE_WAIT = 1'b0;
-localparam STATE_READ = 1'b1;
+localparam STATE_WAITFORREQ = 0;
+localparam STATE_READFROMFIFO = 1;
+localparam STATE_WAITFORNREQ = 2;
 
-reg state;
-reg oldreq;
+reg [1:0] state;
+wire readfromfifo;
 
-assign ack = (state != STATE_READ);
+assign ack = (state == STATE_WAITFORNREQ);
+assign readfromfifo = (state == STATE_READFROMFIFO);
 
 always @(posedge clk)
 begin
     case (state)
-        STATE_WAIT:
+        /* opcode is not valid; req is low; wait for req to go high. */
+        STATE_WAITFORREQ:
         begin
-            if (!empty)
-            begin
-                if (req && !oldreq)
-                begin
-                    state <= STATE_READ;
-                end
-                oldreq <= req;
-            end
+            if (!empty && req)
+                state <= STATE_READFROMFIFO;
         end
         
-        STATE_READ:
-        begin
-            state <= STATE_WAIT;
-        end
+        /* Fetch a single value from the FIFO. */
+        STATE_READFROMFIFO:
+            state <= STATE_WAITFORNREQ;
+            
+        /* opcode is valid; ack is high. Wait for req to go low. */
+        STATE_WAITFORNREQ:
+            if (!req)
+                state <= STATE_WAITFORREQ;
     endcase
 end
             
@@ -55,11 +56,11 @@ cy_psoc3_dp #(.cy_dpconfig(
     `CS_ALU_OP_PASS, `CS_SRCA_A0, `CS_SRCB_D0,
     `CS_SHFT_OP_PASS, `CS_A0_SRC_NONE, `CS_A1_SRC_NONE,
     `CS_FEEDBACK_DSBL, `CS_CI_SEL_CFGA, `CS_SI_SEL_CFGA,
-    `CS_CMP_SEL_CFGA, /*CFGRAM0: STATE_WAITFORREQ*/
+    `CS_CMP_SEL_CFGA, /*CFGRAM0: idle */
     `CS_ALU_OP_PASS, `CS_SRCA_A0, `CS_SRCB_D0,
     `CS_SHFT_OP_PASS, `CS_A0_SRC___F0, `CS_A1_SRC_NONE,
     `CS_FEEDBACK_DSBL, `CS_CI_SEL_CFGA, `CS_SI_SEL_CFGA,
-    `CS_CMP_SEL_CFGA, /*CFGRAM1: STATE_LOAD*/
+    `CS_CMP_SEL_CFGA, /*CFGRAM1: read from fifo */
     `CS_ALU_OP_PASS, `CS_SRCA_A0, `CS_SRCB_D0,
     `CS_SHFT_OP_PASS, `CS_A0_SRC_NONE, `CS_A1_SRC_NONE,
     `CS_FEEDBACK_DSBL, `CS_CI_SEL_CFGA, `CS_SI_SEL_CFGA,
@@ -102,7 +103,7 @@ cy_psoc3_dp #(.cy_dpconfig(
 )) dp(
         /*  input                   */  .reset(1'b0),
         /*  input                   */  .clk(clk),
-        /*  input   [02:00]         */  .cs_addr({2'b0, state}),
+        /*  input   [02:00]         */  .cs_addr({2'b0, readfromfifo}),
         /*  input                   */  .route_si(1'b0),
         /*  input                   */  .route_ci(1'b0),
         /*  input                   */  .f0_load(1'b0),

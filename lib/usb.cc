@@ -161,11 +161,11 @@ static int large_bulk_transfer(int ep, Bytes& bytes)
     return len;
 }
 
-void usbTestBulkTransport()
+void usbTestBulkWrite()
 {
     usb_init();
 
-    struct any_frame f = { .f = {.type = F_FRAME_BULK_TEST_CMD, .size = sizeof(f)} };
+    struct any_frame f = { .f = {.type = F_FRAME_BULK_WRITE_TEST_CMD, .size = sizeof(f)} };
     usb_cmd_send(&f, f.f.size);
 
     /* These must match the device. */
@@ -180,9 +180,9 @@ void usbTestBulkTransport()
 
     std::cout << "Transferred "
               << bulk_buffer.size()
-              << " bytes in "
+              << " bytes from FluxEngine -> PC in "
               << int(elapsed_time * 1000.0)
-              << " ("
+              << " ms ("
               << int((bulk_buffer.size() / 1024.0) / elapsed_time)
               << " kB/s)"
               << std::endl;
@@ -199,7 +199,44 @@ void usbTestBulkTransport()
                             << x << '.' << y << '.' << z << '.';
             }
 
-    await_reply<struct any_frame>(F_FRAME_BULK_TEST_REPLY);
+    await_reply<struct any_frame>(F_FRAME_BULK_WRITE_TEST_REPLY);
+}
+
+void usbTestBulkRead()
+{
+    usb_init();
+
+    struct any_frame f = { .f = {.type = F_FRAME_BULK_READ_TEST_CMD, .size = sizeof(f)} };
+    usb_cmd_send(&f, f.f.size);
+
+    /* These must match the device. */
+    const int XSIZE = 64;
+    const int YSIZE = 256;
+    const int ZSIZE = 64;
+
+    Bytes bulk_buffer(XSIZE*YSIZE*ZSIZE);
+    for (int x=0; x<XSIZE; x++)
+        for (int y=0; y<YSIZE; y++)
+            for (int z=0; z<ZSIZE; z++)
+            {
+                int offset = x*XSIZE*YSIZE + y*ZSIZE + z;
+                bulk_buffer[offset] = uint8_t(x+y+z);
+            }
+
+    double start_time = getCurrentTime();
+    large_bulk_transfer(FLUXENGINE_DATA_OUT_EP, bulk_buffer);
+    double elapsed_time = getCurrentTime() - start_time;
+
+    std::cout << "Transferred "
+              << bulk_buffer.size()
+              << " bytes from PC -> FluxEngine in "
+              << int(elapsed_time * 1000.0)
+              << " ms ("
+              << int((bulk_buffer.size() / 1024.0) / elapsed_time)
+              << " kB/s)"
+              << std::endl;
+
+    await_reply<struct any_frame>(F_FRAME_BULK_READ_TEST_REPLY);
 }
 
 Bytes usbRead(int side, bool synced, nanoseconds_t readTime)

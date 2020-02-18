@@ -52,9 +52,32 @@ Bytes decodeFmMfm(
     return bytes;
 }
 
-void encodeMfm(std::vector<bool>& bits, unsigned& cursor, const Bytes& input)
+void encodeFm(std::vector<bool>& bits, unsigned& cursor, const Bytes& input)
 {
-    bool lastBit = false;
+	if (bits.size() == 0)
+		return;
+    unsigned len = bits.size()-1;
+
+    for (uint8_t b : input)
+    {
+        for (int i=0; i<8; i++)
+        {
+            bool bit = b & 0x80;
+            b <<= 1;
+
+            if (cursor >= len)
+                return;
+            
+            bits[cursor++] = true;
+            bits[cursor++] = bit;
+        }
+    }
+}
+
+void encodeMfm(std::vector<bool>& bits, unsigned& cursor, const Bytes& input, bool& lastBit)
+{
+	if (bits.size() == 0)
+		return;
     unsigned len = bits.size()-1;
 
     for (uint8_t b : input)
