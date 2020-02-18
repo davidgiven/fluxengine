@@ -84,7 +84,9 @@ void writeTracks(
         }
         else
         {
-            fluxmap->precompensate(PRECOMPENSATION_THRESHOLD_TICKS, 2);
+            /* Precompensation actually seems to make things worse, so let's leave
+             * it disabled for now. */
+            //fluxmap->precompensate(PRECOMPENSATION_THRESHOLD_TICKS, 2);
             if (outdb)
                 sqlWriteFlux(outdb, location.track, location.side, *fluxmap);
             else
