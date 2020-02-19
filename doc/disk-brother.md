@@ -14,10 +14,12 @@ Apparently about 20% of Brother word processors have alignment issues which
 means that the disks can't be read by FluxEngine (because the tracks on the
 disk don't line up with the position of the head in a PC drive). The word
 processors themselves solved this by microstepping until they found where the
-real track is, but normal PC drives aren't capable of doing this.
-Particularly with the 120kB disks, you might want to fiddle with the start
-track (e.g. `:t=0-79x2`) to get a clean read. Keep an eye on the bad sector
-map that's dumped at the end of a read.
+real track is, but normal PC drives aren't capable of doing this.  Particularly
+with the 120kB disks, you might want to fiddle with the start track (e.g.
+`:t=0-79x2`) to get a clean read. Keep an eye on the bad sector map that's
+dumped at the end of a read. My word processor likes to put logical track 0 on
+physical track 3, which means that logical track 77 is on physical track 80;
+luckily my PC drive can access track 80.
 
 Using FluxEngine to *write* disks isn't a problem, so the
 simplest solution is to use FluxEngine to create a new disk, with the tracks
@@ -30,7 +32,7 @@ If you find one of these misaligned disks then *please* [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new); I want to
 investigate.
 
-Reading discs
+Reading disks
 -------------
 
 Just do:
@@ -41,7 +43,7 @@ fluxengine read brother
 
 You should end up with a `brother.img` which is 239616 bytes long.
 
-Writing discs
+Writing disks
 -------------
 
 Just do:
@@ -53,20 +55,33 @@ fluxengine write brother
 ...and it'll write a `brother.img` file which is 239616 bytes long to the
 disk. (Use `-i` to specify a different input filename.)
 
+Dealing with misaligned disks
+-----------------------------
+
+While FluxEngine can't read misaligned disks directly, Brother word processors
+_can_. If you have access to a compatible word processor, there's a fairly
+simple workaround to allow you to extract the data:
+
+  1. Format a disk using FluxEngine (by simply writing a blank filesystem image
+	 to a disk). This will have the correct alignment to work on a PC drive.
+
+  2. Use a word processor to copy the misaligned disk to the newly formatted
+	 disk. The machine will happily adjust itself to both sets of alignments.
+
+  3. Use FluxEngine to read the data off the correctly aligned disk.
+
+I realise this is rather unsatisfactory, as the Brother hardware is becoming
+rarer and they cope rather badly with damaged disks, but this is a limitation
+of the hardware of normal PC drives. (It _is_ possible to deliberately misalign
+a drive to make it match up with a bad disk, but this is for experts only --- I
+wouldn't dare.)
+
 Low level format
 ----------------
 
 The drive is a single-sided 3.5" drive spinning at not 300 rpm (I don't know
 the precise speed yet but FluxEngine doesn't care). The 240kB disks have 78
 tracks and the 120kB disks have 39.
-
-The Brother drive alignment is kinda variable; when you put the disk in the
-drive it seeks all the way to physical track 0 and then starts searching for
-something which looks like data. My machine likes to put logical track 0 on
-physical track 3. FluxEngine puts logical track 0 on physical track 0 for
-simplicity, which works fine (at least on my machine). If this doesn't work
-for you, [get in touch](https://github.com/davidgiven/fluxengine/issues/new);
-there are potential workarounds.
 
 Each track has 12 256-byte sectors. The drive ignores the index hole so they're
 lined up all anyhow. As FluxEngine can only read from index to index, it
@@ -138,7 +153,8 @@ mcopy -i brother.img ::brother.doc linux.doc
 ```
 
 The word processor checks the media byte, unfortunately, so you'll need to
-change it back to 0x58 before writing an image to disk.
+change it back to 0x58 before writing an image to disk. Just run
+`brother240tool` on the image again and it will flip it back.
 
 The file format is not WP-1, and currently remains completely unknown,
 although it's probably related. If anyone knows anything about this, please
