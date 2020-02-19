@@ -25,6 +25,8 @@ This is the physical stuff you'll need.
     connector](https://eu.mouser.com/ProductDetail/Amphenol-FCI/86130342114345E1LF?qs=%2Fha2pyFadug%252BpMTyxmFhglPPVKuWXYuFpPNgq%252BsrzhDnXxo8B28k7UCGc7F%2FXjsi)
     (or one of the other myriad compatible connectors; there's a billion).
 
+  - A floppy drive cable, preferably one with two connectors and a twist.
+
   - A suitable power supply. 3.5" floppy drives use 5V at about an amp
     (usually less) --- sadly, too much to power from USB. 5.25" floppy drives
     also require 12V. An old but decent quality PC power supply is ideal, as
