@@ -48,7 +48,7 @@ All you need to do is attach your chosen connector to the board. You'll need
 to make sure that pin 2 on the cable is connected to pin 2.7 on the board,
 and pin 34 to pin 1.7 on the board (and of course all the ones in between).
 Apart from grounding the board (see below), this is literally all there is to
-it.
+it. The actual pinout is described in detail below.
 
 The pads are small, but soldering them isn't too bad with a needle-nosed
 soldering iron tip.
@@ -172,6 +172,98 @@ You'll see that the light on the programmer is pulsing slowly in a breathing
 pattern. Press and hold the little button near the light for five seconds
 until the light stays solidly on. Now you should be able to acquire
 the port and proceed normally.
+
+## Technical details
+
+The board pinout and the way it's connected to the floppy bus is described
+below.
+
+```ditaa
+:-E -s 0.75
+                 +-----+
+                 |||||||
+            +----+-----+----+
+            +cAAA           +
+            +  Debug board  +
+            +----+-----+----+
+            + GND|cDDD | VDD+  
+            +----+     +----+
+INDEX300 ---+ 3.0|     | GND+--------------------------+
+            +----+     +----+                 +--+--+  |
+INDEX360 ---+ 3.1|     | 1.7+------ DISKCHG --+34+33+--+
+            +----+     +----+                 +--+--+
+            + 3.2|     | 1.6+------- SIDE1 ---+32+31+
+            +----+     +----+                 +--+--+
+            + 3.3|     | 1.5+------- RDATA ---+30+29+
+            +----+     +----+                 +--+--+
+            + 3.4|     | 1.4+-------- WPT ----+28+27+
+            +----+     +----+                 +--+--+
+            + 3.5|     | 1.3+------- TRK00 ---+26+25+
+            +----+     +----+                 +--+--+
+            + 3.6|     | 1.2+------- WGATE ---+24+23+
+            +----+     +----+                 +--+--+
+            + 3.7|     | 1.1+------- WDATA ---+22+21+
+            +----+     +----+                 +--+--+
+            +15.0|     | 1.0+------- STEP ----+20+19+
+            +----+     +----+                 +--+--+
+            +15.1|     |12.0+-------- DIR ----+18+17+
+            +----+     +----+                 +--+--+
+            +15.2|     |12.1+------- MOTEB ---+16+15+
+            +----+     +----+                 +--+--+
+            +15.3|     |12.2+------- DRVSA ---+14+13+
+            +----+     +----+                 +--+--+
+            +15.4|     |12.3+------- DRVSB ---+12+11+
+            +----+     +----+                 +--+--+
+            +15.5|     |12.4+------- MOTEA ---+10+9 +
+            +----+     +----+                 +--+--+
+            + 0.0|     |12.5+------- INDEX ---+8 +7 +
+            +----+     +----+                 +--+--+
+            + 0.1|     |12.6+-------- n/c ----+6 +5 +
+            +----+     +----+                 +--+--+
+            + 0.2|     |12.7+- TX --- n/c ----+4 +3 +
+            +----+     +----+                 +--+--+
+            + 0.3|     | 2.7+------- REDWC ---+2 +1 +
+            +----+     +----+                 +--+--+
+            + 0.4|     | 2.6+  
+            +----+     +----+                FDD socket
+            + 0.5|     | 2.5+  
+            +----+     +----+
+            + 0.6|     | 2.4+    TX: debug UART from board
+            +----+     +----+
+            + 0.7|     | 2.3+
+            +----+     +----+
+            + RST|     | 2.2+  
+            +----+     +----+
+            + GND|     | 2.1+  
+            +----+ USB +----+
+            + VDD+-----+ 2.0+  
+            +----+-----+----+
+               PSoC5 board
+```
+
+Notes:
+
+  - `TX` is the debug UART port. It's on pin 12.7 because the board routes it
+  to the USB serial port on the programmer, so you can get debug information
+  from the FluxEngine by just plugging the programming end into a USB port
+  and using a serial terminal at 115200 baud. If you solder a floppy drive
+  connector on, then it'll end up connected to pin 4 of the floppy drive bus,
+  which is usually not connected. It's possible that some floppy drives do,
+  in fact, use this pin. You may wish to remove pin 4 from the floppy drive
+  socket before attaching it to the FluxEngine to make sure that this pin is
+  not connected; however, so far I have not found any drives for which this
+  is necessary. If you do find one, _please_ [get in
+  touch](https://github.com/davidgiven/fluxengine/issues/new) so I can
+  document it.
+
+  - The `GND` pin only really needs to be connected to one of the floppy bus
+  ground pins; pin 33 is the closest. For extra safety, you can bridge all
+  the odd numbered pins together and ground them all if you like.
+
+  - `INDEX300` and `INDEX360` are optional output pins which generate fake
+  timing pulses for 300 and 360 RPM drives. These are useful for certain
+  rather exotic things. See the section on flippy disks [in the FAQ](faq.md)
+  for more details; you can normally ignore these.
 
 ## Building the client
 
