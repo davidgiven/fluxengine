@@ -25,6 +25,8 @@ This is the physical stuff you'll need.
     connector](https://eu.mouser.com/ProductDetail/Amphenol-FCI/86130342114345E1LF?qs=%2Fha2pyFadug%252BpMTyxmFhglPPVKuWXYuFpPNgq%252BsrzhDnXxo8B28k7UCGc7F%2FXjsi)
     (or one of the other myriad compatible connectors; there's a billion).
 
+  - A floppy drive cable, preferably one with two connectors and a twist.
+
   - A suitable power supply. 3.5" floppy drives use 5V at about an amp
     (usually less) --- sadly, too much to power from USB. 5.25" floppy drives
     also require 12V. An old but decent quality PC power supply is ideal, as
@@ -48,7 +50,7 @@ All you need to do is attach your chosen connector to the board. You'll need
 to make sure that pin 2 on the cable is connected to pin 2.7 on the board,
 and pin 34 to pin 1.7 on the board (and of course all the ones in between).
 Apart from grounding the board (see below), this is literally all there is to
-it.
+it. The actual pinout is described in detail below.
 
 The pads are small, but soldering them isn't too bad with a needle-nosed
 soldering iron tip.
@@ -173,6 +175,7 @@ pattern. Press and hold the little button near the light for five seconds
 until the light stays solidly on. Now you should be able to acquire
 the port and proceed normally.
 
+
 ## Building the client
 
 The client software is where the intelligence, such as it is, is. It's pretty
@@ -181,12 +184,12 @@ well, although on Windows it'll need MSYS2 and mingw32. You'll need to
 install some support packages.
 
   - For Linux (this is Ubuntu, but this should apply to Debian too):
-  `ninja-build`, `libusb-1.0-0-dev`, `libsqlite3-dev`.
+	`ninja-build`, `libusb-1.0-0-dev`, `libsqlite3-dev`.
   - For OSX with Homebrew: `ninja`, `libusb`, `pkg-config`, `sqlite`.
   - For Windows with MSYS2: `make`, `ninja`, `mingw-w64-i686-libusb`,
-  `mingw-w64-i686-sqlite3`, `mingw-w64-i686-zlib`, `mingw-w64-i686-gcc`.
+	`mingw-w64-i686-sqlite3`, `mingw-w64-i686-zlib`, `mingw-w64-i686-gcc`.
 
-These lists are not necessarily exhaustive --- plaese [get in
+These lists are not necessarily exhaustive --- please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new) if I've missed
 anything.
 
@@ -197,11 +200,167 @@ dependencies and you should be able to put it anywhere.
 If it doesn't build, please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new).
 
+
+## Connecting it up
+
+You should now have a working board, so it's time to test it.
+
+  1. Plug the motherboard end of your floppy disk cable into the FluxEngine.
+     
+     The **red stripe goes on the right**. The **lower set of
+     holes connect to the board**. See the pinout below.
+
+     If you're using header pins, the upper row of holes in the connector
+     should overhang the edge of the board. If you're using a floppy drive
+     motherboard connector, you're golden, of course (unless you have one of
+     those annoying unkeyed cables, or have accidentally soldered the
+     connector on in the wrong place --- don't laugh, I've done it.)
+
+  2. Plug the drive end of your floppy disk cable into the drive (or drives).
+
+     Floppy disk cables typically have [two pairs of floppy disk drive
+     connectors with a twist between
+     them](http://www.nullmodem.com/Floppy.htm). (Each pair has one connector
+     for a 3.5" drive and a different one for a 5.25" drive.) (Some cables
+     are cheap and just have the 3.5" connectors. Some are _very_ cheap and
+     have a single 3.5" connector, after the twist.)
+     
+	 FluxEngine uses, sadly, non-standard disk numbering (there are reasons).
+	 Drive 0 is the one nearest the motherboard; that is, before the twist.
+	 Drive 1 is the one at the end of the cable; that is, after the twist.
+	 Drive 0 is the default. If you only have one drive, remember to plug the
+	 drive into the connector _before_ the twist. (Or you can tell the client
+	 to select drive 1 by using `-s :d=1`.)
+
+  3. **Important.** Make sure that no disk you care about is in the drive.
+	 (Because if your wiring is wrong and a disk is inserted, you'll corrupt
+	 it.)
+
+  4. Connect the floppy drive to power. Nothing should happen. If you've
+	 connected something in backwards, you'll see the drive light up, the motor
+	 start, and if you didn't take the disk out, one track has just been wiped.
+	 If this happens, check your wiring.
+
+  5. Strip off the little piece of protective plastic on the USB socket on the
+	 board --- the little socket at the end, not the big programmer plug.
+
+  6. Connect the FluxEngine to your PC via USB.
+
+  7. Insert a scratch disk and do `fluxengine rpm` from the shell. The motor
+     should work and it'll tell you that the disk is spinning at about 300
+     rpm for a 3.5" disk, or 360 rpm for a 5.25" disk. If it doesn't, please
+     [get in touch](https://github.com/davidgiven/fluxengine/issues/new).
+
+  8. Do `fluxengine test bandwidth` from the shell. It'll measure your USB
+	 bandwidth. Ideally you should be getting above 900kB/s in both directions.
+	 FluxEngine needs about 400kB/s for a DD disk and about 850kB/s for a HD
+	 disk, so if you're getting less than this, try a different USB port.
+
+  9. Insert a standard PC formatted floppy disk into the drive (probably a good
+     idea to remove the old disk first). Then do `fluxengine read ibm`. It
+     should read the disk, emitting copious diagnostics, and spit out an
+     `ibm.img` file containing the decoded disk image (either 1440kB or 720kB
+     depending).
+
+ 10. Profit!
+
+## Technical details
+
+The board pinout and the way it's connected to the floppy bus is described
+below.
+
+```ditaa
+:-E -s 0.75
+                 +-----+
+                 |||||||
+            +----+-----+----+
+            +cAAA           +
+            +  Debug board  +
+            +----+-----+----+
+            + GND|cDDD | VDD+  
+            +----+     +----+
+INDEX300 ---+ 3.0|     | GND+--------------------------+
+            +----+     +----+                 +--+--+  |
+INDEX360 ---+ 3.1|     | 1.7+------ DISKCHG --+34+33+--+
+            +----+     +----+                 +--+--+
+            + 3.2|     | 1.6+------- SIDE1 ---+32+31+
+            +----+     +----+                 +--+--+
+            + 3.3|     | 1.5+------- RDATA ---+30+29+
+            +----+     +----+                 +--+--+
+            + 3.4|     | 1.4+-------- WPT ----+28+27+
+            +----+     +----+                 +--+--+
+            + 3.5|     | 1.3+------- TRK00 ---+26+25+
+            +----+     +----+                 +--+--+
+            + 3.6|     | 1.2+------- WGATE ---+24+23+
+            +----+     +----+                 +--+--+
+            + 3.7|     | 1.1+------- WDATA ---+22+21+
+            +----+     +----+                 +--+--+
+            +15.0|     | 1.0+------- STEP ----+20+19+
+            +----+     +----+                 +--+--+
+            +15.1|     |12.0+-------- DIR ----+18+17+
+            +----+     +----+                 +--+--+
+            +15.2|     |12.1+------- MOTEB ---+16+15+
+            +----+     +----+                 +--+--+
+            +15.3|     |12.2+------- DRVSA ---+14+13+
+            +----+     +----+                 +--+--+
+            +15.4|     |12.3+------- DRVSB ---+12+11+
+            +----+     +----+                 +--+--+
+            +15.5|     |12.4+------- MOTEA ---+10+9 +
+            +----+     +----+                 +--+--+
+            + 0.0|     |12.5+------- INDEX ---+8 +7 +
+            +----+     +----+                 +--+--+
+            + 0.1|     |12.6+-------- n/c ----+6 +5 +
+            +----+     +----+                 +--+--+
+            + 0.2|     |12.7+- TX --- n/c ----+4 +3 +
+            +----+     +----+                 +--+--+
+            + 0.3|     | 2.7+------- REDWC ---+2 +1 +
+            +----+     +----+                 +--+--+
+            + 0.4|     | 2.6+  
+            +----+     +----+                FDD socket
+            + 0.5|     | 2.5+  
+            +----+     +----+
+            + 0.6|     | 2.4+    TX: debug UART from board
+            +----+     +----+
+            + 0.7|     | 2.3+
+            +----+     +----+
+            + RST|     | 2.2+  
+            +----+     +----+
+            + GND|     | 2.1+  
+            +----+ USB +----+
+            + VDD+-----+ 2.0+  
+            +----+-----+----+
+               PSoC5 board
+```
+
+Notes:
+
+  - `TX` is the debug UART port. It's on pin 12.7 because the board routes it
+  to the USB serial port on the programmer, so you can get debug information
+  from the FluxEngine by just plugging the programming end into a USB port
+  and using a serial terminal at 115200 baud. If you solder a floppy drive
+  connector on, then it'll end up connected to pin 4 of the floppy drive bus,
+  which is usually not connected. It's possible that some floppy drives do,
+  in fact, use this pin. You may wish to remove pin 4 from the floppy drive
+  socket before attaching it to the FluxEngine to make sure that this pin is
+  not connected; however, so far I have not found any drives for which this
+  is necessary. If you do find one, _please_ [get in
+  touch](https://github.com/davidgiven/fluxengine/issues/new) so I can
+  document it.
+
+  - The `GND` pin only really needs to be connected to one of the floppy bus
+  ground pins; pin 33 is the closest. For extra safety, you can bridge all
+  the odd numbered pins together and ground them all if you like.
+
+  - `INDEX300` and `INDEX360` are optional output pins which generate fake
+  timing pulses for 300 and 360 RPM drives. These are useful for certain
+  rather exotic things. See the section on flippy disks [in the FAQ](faq.md)
+  for more details; you can normally ignore these.
+
 ## Next steps
 
-The board's now assembled and programmed. Plug it into your drive, strip the
-plastic off the little USB connector and plug that into your computer, and
-you're ready to start using it.
+You should now be ready to go. You'll want to read [the client
+documentation](using.md) for information about how to actually do interesting
+things.
 
 I _do_ make updates to the firmware whenever necessary, so you may need to
 reprogram it at intervals; you may want to take this into account if you

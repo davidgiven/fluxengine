@@ -1,78 +1,8 @@
 Using a FluxEngine
 ==================
 
-So you've [built the hardware](building.md)! What now?
-
-## Connecting it up
-
-In order to do anything useful, you have to plug it in to a floppy disk drive (or two).
-
-  1. Plug the motherboard end of your floppy disk cable into the FluxEngine.
-     
-     The **red stripe goes on the right**. The **lower set of
-     holes connect to the board**. (Pin 2 of the connector needs to connect
-     to pin 2.7 on the board.)
-
-     If you're using header pins, the upper row of holes in the connector
-     should overhang the edge of the board. If you're using a floppy drive
-     motherboard connector, you're golden, of course (unless you have one of
-     those annoying unkeyed cables, or have accidentally soldered the
-     connector on in the wrong place --- don't laugh, I've done it.)
-
-  2. Plug the drive end of your floppy disk cable into the drive (or drives).
-
-     Floppy disk cables typically have [two pairs of floppy disk drive
-     connectors with a twist between
-     them](http://www.nullmodem.com/Floppy.htm). (Each pair has one connector
-     for a 3.5" drive and a different one for a 5.25" drive.) (Some cables
-     are cheap and just have the 3.5" connectors. Some are _very_ cheap and
-     have a single 3.5" connector, after the twist.)
-     
-     FluxEngine uses, sadly, non-standard disk numbering (there are reasons).
-     Drive 0 is the one nearest the motherboard; that is, before the twist.
-     Drive 1 is the one at the end of the cable; that is, after the twist.
-     Drive 0 is the default. If you only have one drive, remember to plug the
-     drive into the connector _before_ the twist. (Or use `-s :d=1` to select
-     drive 1 when working with disks.)
-
-  3. **Important.** Make sure that no disk you care about is in the drive.
-     (Because if your wiring is wrong and a disk is inserted, you'll corrupt it.)
-
-  4. Connect the floppy drive to power. Nothing should happen. If you've
-     connected something in backwards, you'll see the drive light up, the
-     motor start, and if you didn't take the disk out, one track has just
-     been wiped. If this happens, check your wiring.
-
-  5. Connect the FluxEngine to your PC via USB --- using the little socket on
-     the board, not the big programmer plug.
-
-  6. Insert a scratch disk and do `fluxengine rpm` from the shell. The motor
-     should work and it'll tell you that the disk is spinning at about 300
-     rpm for a 3.5" disk, or 360 rpm for a 5.25" disk. If it doesn't, please
-     [get in touch](https://github.com/davidgiven/fluxengine/issues/new).
-
-  7. Do `fluxengine test bandwidth` from the shell. It'll measure your USB
-     bandwidth. Ideally you should be getting above 900kB/s. FluxEngine needs
-     about 850kB/s, so if you're getting less than this, try a different USB
-     port.
-
-  8. Insert a standard PC formatted floppy disk into the drive (probably a good
-     idea to remove the old disk first). Then do `fluxengine read ibm`. It
-     should read the disk, emitting copious diagnostics, and spit out an
-     `ibm.img` file containing the decoded disk image (either 1440kB or 720kB
-     depending).
-
-  9. Profit!
-
-## Bonus hardware features
-
-For advanced users, the board has a few extra signals which are useful for special purposes.
-
-  - Pin 3[0] produces short pulses every 200ms. This is useful for spoofing
-    index signals to 300 RPM drives; for example, to read flippy disks.
-
-  - Pin 3[1] is the same, but produces the pulses every 166ms; this works with
-    360 RPM drives.
+So you've [built the hardware](building.md), programmed and tested it! What
+now?
 
 ## The programs
 
@@ -81,10 +11,33 @@ moving too quickly for the documentation to keep up. It does respond to
 `--help` or `help` depending on context. There are some common properties,
 described below.
 
+### Core concepts
+
+FluxEngine fundamentally takes file system images and puts them on disk; or
+reads the disk and produces a file system image.
+
+A file system image typically has the extension `.img`. It contains a
+sector-by-sector record of the _decoded_ data on the disk. For example, on a
+disk with 512 byte sectors, one sector will occupy 512 bytes. These are
+typically what you want in everyday life.
+
+FluxEngine can also record the raw magnetic data on the disk into a file, which
+we call a _flux file_. This contains all the low-level data which the drive
+produced as the disk rotated. These are continuous streams of samples from the
+disk and are completely useless in day-to-day life. FluxEngine uses its own
+format for this, `.flux`, although it's capable of limited interchange with
+Kryoflux, Supercard Pro and Catweasel files. A flux file will typically contain
+from 80 to 150 kilobytes of data per track.
+
+In general, FluxEngine can use either a real disk or a flux file
+interchangeably: you can specify either at (very nearly) any time. A very
+common workflow is to read a disk to a flux file, and then reread from the flux
+file while changing the decoder options, to save disk wear. It's also much faster.
+
 ### Source and destination specifiers
 
-When reading from or writing to _a disk_ (or a file pretending to be a disk),
-use the `--source` (`-s`) and `--dest` (`-d`) options to tell FluxEngine
+When reading from or writing _flux_ (either from or to a real disk, or a flux
+file), use the `--source` (`-s`) and `--dest` (`-d`) options to tell FluxEngine
 which bits of the disk you want to access. These use a common syntax:
 
 ```
@@ -94,7 +47,7 @@ fluxengine read ibm -s fakedisk.flux:t=0-79:s=0
   - To access a real disk, leave out the filename (so `:t=0-79:s=0`).
 
   - To access only some tracks, use the `t=` modifier. To access only some
-    sides, use the `s=` modifier. To change drives, use `d=`.
+    sides, use the `s=` modifier.
 
   - Inside a modifier, you can use a comma separated list of ranges. So
     `:t=0-3` and `:t=0,1,2,3` are equivalent.
@@ -120,18 +73,15 @@ If you _don't_ specify a modifier, you'll get the default, which should be
 sensible for the command you're using.
 
 **Important note:** FluxEngine _always_ uses zero-based units (even if the
-*disk format says otherwise).
+disk format says otherwise).
 
 ### Input and output specifiers
 
-These use a very similar syntax to the source and destination specifiers
-(because they're based on the same microformat library!) but are used for
-input and output _images_: i.e. nicely lined up arrays of sectors which you
-can actually do something with.
-
-Use `--input` (`-i`) or `--output` (`-o`) as appropriate to tell FluxEngine
-where you want to read from or write to. The actual format is autodetected
-based on the extension:
+When reading or writing _file system images_, use the `--input` (`-i`) and
+`--output` (`-o`) options to specify the file and file format. These use a very
+similar syntax to the source and destination specifiers (because they're based
+on the same microformat library!) but with different specifiers. Also, the
+exact format varies according to the extension:
 
   - `.img` or `.adf`: raw sector images in CHS order. Append
     `:c=80:h=2:s=9:b=512` to set the geometry; that specifies 80 cylinders, 2
@@ -191,17 +141,23 @@ here.](http://www.retrotechnology.com/herbs_stuff/guzis.html)
 These flags apply to many operations and are useful for modifying the overall
 behaviour.
 
-  - `--revolutions=X`: when reading, spin the disk X times. Many formats
-  require `--revolutions=2` (which should happen automatically); or you can
-  increase the number to sample more data.
+  - `--revolutions=X`: when reading, spin the disk X times. X can be a floating
+	point number. The default is usually 1.25. Some formats default to 1.
+	Increasing the number will sample more data, and can be useful on dubious
+	disks to try and get a better read.
+
+  - `--sync-with-index=true|false`: wait for an index pulse before starting to
+	read the disk. (Ignored for write operations.) By default FluxEngine
+	doesn't, as it makes reads faster, but when diagnosing disk problems it's
+	helpful to have all your data start at the same place each time.
 
   - `--index-source=X`, `--write-index-source=X`: set the source of index
-  pulses when reading or writing respectively. This is for use with drives
-  which don't produce index pulse data. Use 0 to get index pulses from the
-  drive, 1 to fake 300RPM pulses, or 2 to fake 360RPM pulses. Note this has
-  no effect on the _drive_, so it doesn't help with flippy disks, but is
-  useful for using very old drives with FluxEngine itself. If you use this
-  option, then any index marks in the sampled flux are, of course, garbage.
+	pulses when reading or writing respectively. This is for use with drives
+	which don't produce index pulse data. Use 0 to get index pulses from the
+	drive, 1 to fake 300RPM pulses, or 2 to fake 360RPM pulses. Note this has
+	no effect on the _drive_, so it doesn't help with flippy disks, but is
+	useful for using very old drives with FluxEngine itself. If you use this
+	option, then any index marks in the sampled flux are, of course, garbage.
 
 ### The commands
 
@@ -211,60 +167,61 @@ installed anywhere and after building you'll find them in the `.obj`
 directory.
 
   - `fluxengine erase`: wipes (all or part of) a disk --- erases it without
-  writing a pulsetrain.
+	writing a pulsetrain.
 
   - `fluxengine inspect`: dumps the raw pulsetrain / bitstream to stdout.
-  Mainly useful for debugging.
+	Mainly useful for debugging.
 
   - `fluxengine read *`: reads various formats of disk. See the per-format
-  documentation linked from the table above. These all take an optional
-  `--write-flux` option which will cause the raw flux to be written to the
-  specified file. There are various `--dump` options for showing raw data
-  during the decode process.
+	documentation linked from the table [in the index page](../README.md).
+	These all take an optional `--write-flux` option which will cause the raw
+	flux to be written to the specified file as well as the normal decode.
+	There are various `--dump` options for showing raw data during the decode
+	process.
 
   - `fluxengine write *`: writes various formats of disk. Again, see the
-  per-format documentation above.
+	per-format documentation [in the index page](../README.md).
 
   - `fluxengine writeflux`: writes raw flux files. This is much less useful
-  than you might think: you can't write flux files read from a disk to
-  another disk. (See the [FAQ](faq.md) for more information.) It's mainly
-  useful for flux files synthesised by the other `fluxengine write` commands.
+	than you might think: you can't reliably write flux files read from a disk
+	to another disk. (See the [FAQ](faq.md) for more information.) It's mainly
+	useful for flux files synthesised by the other `fluxengine write` commands.
 
   - `fluxengine writetestpattern`: writes regular pulses (at a configurable
-  interval) to the disk. Useful for testing drive jitter, erasing disks in a
-  more secure fashion, or simply debugging. Goes well with `fluxengine
-  inspect`.
+	interval) to the disk. Useful for testing drive jitter, erasing disks in a
+	more secure fashion, or simply debugging. Goes well with `fluxengine
+	inspect`.
 
   - `fluxengine rpm`: measures the RPM of the drive (requires a disk in the
-  drive). Mainly useful for testing.
+	drive). Mainly useful for testing.
 
   - `fluxengine seek`: moves the head. Mainly useful for finding out whether
-  your drive can seek to track 82. (Mine can't.)
+	your drive can seek to track 82. (Mine can't.)
 
-  - `fluxengine test bandwidth`: measures your USB throughput. You need about
-  600kB/s for FluxEngine to work for DD disks, and 900 to 950kB/s for HD
-  disks. You don't need a disk in the drive for this one.
+  - `fluxengine test bandwidth`: measures your USB throughput.  You don't need
+	a disk in the drive for this one.
 
-  - `fluxengine test voltages`: measures your FDD bus signal voltages, which
-  is useful for testing for termination issues.
+  - `fluxengine test voltages`: measures your FDD bus signal voltages, which is
+	useful for testing for termination issues.
 
-  - `fluxengine upgradefluxfile`: occasionally I need to upgrade the flux
-  file format in a non-backwards-compatible way; this tool will upgrade flux
-  files to the new format.
+  - `fluxengine upgradefluxfile`: occasionally I need to upgrade the flux file
+	format in a non-backwards-compatible way; this tool will upgrade flux files
+	to the new format.
 
   - `fluxengine convert`: converts flux files from various formats to various
-  other formats. You can use this to convert Catweasel flux files to
-  FluxEngine's native format, FluxEngine flux files to various other formats
-  useful for debugging (including VCD which can be loaded into
-  [sigrok](http://sigrok.org)), and bidirectional conversion to and from
-  Supercard Pro `.scp` format.
+	other formats. You can use this to convert Catweasel flux files to
+	FluxEngine's native format, FluxEngine flux files to various other formats
+	useful for debugging (including VCD which can be loaded into
+	[sigrok](http://sigrok.org)), and bidirectional conversion to and from
+	Supercard Pro `.scp` format.
 
-  **Important SCP note:** import (`fluxengine convert scptoflux`) should be
-  fairly robust, but export (`fluxengine convert fluxtoscp`) should only be
-  done with great caution as FluxEngine files contain features which can't be
-  represented very well in `.scp` format and they're probably pretty dubious.
-  As ever, please [get in
-  touch](https://github.com/davidgiven/fluxengine/issues/new) with any reports.
+	**Important SCP note:** import (`fluxengine convert scptoflux`) should be
+	fairly robust, but export (`fluxengine convert fluxtoscp`) should only be
+	done with great caution as FluxEngine files contain features which can't be
+	represented very well in `.scp` format and they're probably pretty dubious.
+	As ever, please [get in
+	touch](https://github.com/davidgiven/fluxengine/issues/new) with any
+	reports.
 
 Commands which normally take `--source` or `--dest` get a sensible default if
 left unspecified. `fluxengine read ibm` on its own will read drive 0 and
@@ -290,8 +247,10 @@ disk). For a 5.25" disk, use `--visualiser-period=166`.
 Supplied with FluxEngine, but not part of FluxEngine, are some little tools I
 wrote to do useful things. These are built alongside FluxEngine.
 
-  - `brother120tool`: extracts files from a 120kB Brother filesystem image.
-
+  - `brother120tool`, `brother240tool`: does things to Brother word processor
+	disks. These are [documented on the Brother disk format
+	page](disk-brother.md).
+  
 ## The recommended workflow
 
 So you've just received, say, a huge pile of old Brother word processor disks
