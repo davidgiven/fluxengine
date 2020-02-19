@@ -173,6 +173,95 @@ pattern. Press and hold the little button near the light for five seconds
 until the light stays solidly on. Now you should be able to acquire
 the port and proceed normally.
 
+
+## Building the client
+
+The client software is where the intelligence, such as it is, is. It's pretty
+generic libusb stuff and should build and run on Windows, Linux and OSX as
+well, although on Windows it'll need MSYS2 and mingw32. You'll need to
+install some support packages.
+
+  - For Linux (this is Ubuntu, but this should apply to Debian too):
+	`ninja-build`, `libusb-1.0-0-dev`, `libsqlite3-dev`.
+  - For OSX with Homebrew: `ninja`, `libusb`, `pkg-config`, `sqlite`.
+  - For Windows with MSYS2: `make`, `ninja`, `mingw-w64-i686-libusb`,
+	`mingw-w64-i686-sqlite3`, `mingw-w64-i686-zlib`, `mingw-w64-i686-gcc`.
+
+These lists are not necessarily exhaustive --- please [get in
+touch](https://github.com/davidgiven/fluxengine/issues/new) if I've missed
+anything.
+
+All systems build by just doing `make`. You should end up with a single
+executable in the current directory, called `fluxengine`. It has minimal
+dependencies and you should be able to put it anywhere.
+
+If it doesn't build, please [get in
+touch](https://github.com/davidgiven/fluxengine/issues/new).
+
+
+## Connecting it up
+
+You should now have a working board, so it's time to test it.
+
+  1. Plug the motherboard end of your floppy disk cable into the FluxEngine.
+     
+     The **red stripe goes on the right**. The **lower set of
+     holes connect to the board**. See the pinout below.
+
+     If you're using header pins, the upper row of holes in the connector
+     should overhang the edge of the board. If you're using a floppy drive
+     motherboard connector, you're golden, of course (unless you have one of
+     those annoying unkeyed cables, or have accidentally soldered the
+     connector on in the wrong place --- don't laugh, I've done it.)
+
+  2. Plug the drive end of your floppy disk cable into the drive (or drives).
+
+     Floppy disk cables typically have [two pairs of floppy disk drive
+     connectors with a twist between
+     them](http://www.nullmodem.com/Floppy.htm). (Each pair has one connector
+     for a 3.5" drive and a different one for a 5.25" drive.) (Some cables
+     are cheap and just have the 3.5" connectors. Some are _very_ cheap and
+     have a single 3.5" connector, after the twist.)
+     
+	 FluxEngine uses, sadly, non-standard disk numbering (there are reasons).
+	 Drive 0 is the one nearest the motherboard; that is, before the twist.
+	 Drive 1 is the one at the end of the cable; that is, after the twist.
+	 Drive 0 is the default. If you only have one drive, remember to plug the
+	 drive into the connector _before_ the twist. (Or you can tell the client
+	 to select drive 1 by using `-s :d=1`.)
+
+  3. **Important.** Make sure that no disk you care about is in the drive.
+	 (Because if your wiring is wrong and a disk is inserted, you'll corrupt
+	 it.)
+
+  4. Connect the floppy drive to power. Nothing should happen. If you've
+	 connected something in backwards, you'll see the drive light up, the motor
+	 start, and if you didn't take the disk out, one track has just been wiped.
+	 If this happens, check your wiring.
+
+  5. Strip off the little piece of protective plastic on the USB socket on the
+	 board --- the little socket at the end, not the big programmer plug.
+
+  6. Connect the FluxEngine to your PC via USB.
+
+  7. Insert a scratch disk and do `fluxengine rpm` from the shell. The motor
+     should work and it'll tell you that the disk is spinning at about 300
+     rpm for a 3.5" disk, or 360 rpm for a 5.25" disk. If it doesn't, please
+     [get in touch](https://github.com/davidgiven/fluxengine/issues/new).
+
+  8. Do `fluxengine test bandwidth` from the shell. It'll measure your USB
+	 bandwidth. Ideally you should be getting above 900kB/s in both directions.
+	 FluxEngine needs about 400kB/s for a DD disk and about 850kB/s for a HD
+	 disk, so if you're getting less than this, try a different USB port.
+
+  9. Insert a standard PC formatted floppy disk into the drive (probably a good
+     idea to remove the old disk first). Then do `fluxengine read ibm`. It
+     should read the disk, emitting copious diagnostics, and spit out an
+     `ibm.img` file containing the decoded disk image (either 1440kB or 720kB
+     depending).
+
+ 10. Profit!
+
 ## Technical details
 
 The board pinout and the way it's connected to the floppy bus is described
@@ -265,35 +354,11 @@ Notes:
   rather exotic things. See the section on flippy disks [in the FAQ](faq.md)
   for more details; you can normally ignore these.
 
-## Building the client
-
-The client software is where the intelligence, such as it is, is. It's pretty
-generic libusb stuff and should build and run on Windows, Linux and OSX as
-well, although on Windows it'll need MSYS2 and mingw32. You'll need to
-install some support packages.
-
-  - For Linux (this is Ubuntu, but this should apply to Debian too):
-  `ninja-build`, `libusb-1.0-0-dev`, `libsqlite3-dev`.
-  - For OSX with Homebrew: `ninja`, `libusb`, `pkg-config`, `sqlite`.
-  - For Windows with MSYS2: `make`, `ninja`, `mingw-w64-i686-libusb`,
-  `mingw-w64-i686-sqlite3`, `mingw-w64-i686-zlib`, `mingw-w64-i686-gcc`.
-
-These lists are not necessarily exhaustive --- plaese [get in
-touch](https://github.com/davidgiven/fluxengine/issues/new) if I've missed
-anything.
-
-All systems build by just doing `make`. You should end up with a single
-executable in the current directory, called `fluxengine`. It has minimal
-dependencies and you should be able to put it anywhere.
-
-If it doesn't build, please [get in
-touch](https://github.com/davidgiven/fluxengine/issues/new).
-
 ## Next steps
 
-The board's now assembled and programmed. Plug it into your drive, strip the
-plastic off the little USB connector and plug that into your computer, and
-you're ready to start using it.
+You should now be ready to go. You'll want to read [the client
+documentation](using.md) for information about how to actually do interesting
+things.
 
 I _do_ make updates to the firmware whenever necessary, so you may need to
 reprogram it at intervals; you may want to take this into account if you
