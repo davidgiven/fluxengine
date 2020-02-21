@@ -41,18 +41,27 @@ of the disk image will vary depending on the format.
 
 Configuration options you'll want include:
 
-  - `--sector-id-base`: specifies the ID of the first sector; this defaults
-    to 1. Some formats (like the Acorn ones) start at 0. This can't be
+  - `--ibm-sector-id-base=N`: specifies the ID of the first sector; this defaults
+	to 1. Some formats (like the Acorn ones) start at 0. This can't be
 	autodetected because FluxEngine can't distinguish between a disk which
 	starts at sector 1 and a disk which starts at sector 0 but all the sector
 	0s are missing.
 
-  - `--ignore-side-byte`: each sector header describes the location of the
+  - `--ibm-ignore-side-byte=true|false`: each sector header describes the location of the
 	sector: sector ID, track and side. Some formats use the wrong side ID, so
 	the sectors on side 1 are labelled as belonging to side 0. This causes
 	FluxEngine to see duplicate sectors (as it can't distinguish between the
 	two sides). This option tells FluxEngine to ignore the side byte completely
 	and use the physical side instead.
+
+  - `--ibm-required-sectors=range`: if you know how many sectors to expect per
+	track, you can improve reads by telling FluxEngine what to expect here. If
+	a track is read and a sector on this list is _not_ present, then FluxEngine
+	assumes the read failed and will retry. This avoids the situation where
+	FluxEngine can't tell the difference between a sector missing because it's
+	bad or a sector missing because it was never written in the first place. If
+	sectors are seen outside the range here, it will still be read. You can use
+	the same syntax as for track specifiers: e.g. `0-9`, `0,1,2,3`, etc.
 
 
 Writing disks

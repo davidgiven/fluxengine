@@ -15,34 +15,31 @@ std::vector<std::string> DataSpec::split(
 {
     std::vector<std::string> ret;
 
-    size_t start = 0;
-    size_t end = 0;
-    size_t len = 0;
-    do
-    {
-        end = s.find(delimiter,start); 
-        len = end - start;
-        std::string token = s.substr(start, len);
-        ret.emplace_back( token );
-        start += len + delimiter.length();
-    }
-    while (end != std::string::npos);
+	if (!s.empty())
+	{
+		size_t start = 0;
+		size_t end = 0;
+		size_t len = 0;
+		do
+		{
+			end = s.find(delimiter,start); 
+			len = end - start;
+			std::string token = s.substr(start, len);
+			ret.emplace_back( token );
+			start += len + delimiter.length();
+		}
+		while (end != std::string::npos);
+	}
+
     return ret;
 }
 
-DataSpec::Modifier DataSpec::parseMod(const std::string& spec)
+std::set<unsigned> DataSpec::parseRange(const std::string& data)
 {
-    static const std::regex MOD_REGEX("([a-z]*)=([-x+0-9,]*)");
-    static const std::regex DATA_REGEX("([0-9]+)(?:(?:-([0-9]+))|(?:\\+([0-9]+)))?(?:x([0-9]+))?");
+	static const std::regex DATA_REGEX("([0-9]+)(?:(?:-([0-9]+))|(?:\\+([0-9]+)))?(?:x([0-9]+))?");
 
-    std::smatch match;
-    if (!std::regex_match(spec, match, MOD_REGEX))
-        Error() << "invalid data modifier syntax '" << spec << "'";
-    
-    Modifier m;
-    m.name = match[1];
-    m.source = spec;
-    for (auto& data : split(match[2], ","))
+	std::set<unsigned> result;
+    for (auto& data : split(data, ","))
     {
         int start = 0;
         int count = 1;
@@ -64,9 +61,24 @@ DataSpec::Modifier DataSpec::parseMod(const std::string& spec)
             Error() << "mod '" << data << "' specifies an illegal quantity";
 
         for (int i = start; i < (start+count); i += step)
-            m.data.insert(i);
+            result.insert(i);
     }
 
+    return result;
+}
+
+DataSpec::Modifier DataSpec::parseMod(const std::string& spec)
+{
+	static const std::regex MOD_REGEX("([a-z]*)=([-x+0-9,]*)");
+
+    std::smatch match;
+    if (!std::regex_match(spec, match, MOD_REGEX))
+        Error() << "invalid data modifier syntax '" << spec << "'";
+    
+    Modifier m;
+    m.name = match[1];
+    m.source = spec;
+	m.data = parseRange(match[2]);
     return m;
 }
 
@@ -74,7 +86,7 @@ void DataSpec::set(const std::string& spec)
 {
     std::vector<std::string> words = split(spec, ":");
     if (words.size() == 0)
-        Error() << "empty data specification (you have to specify *something*)";
+		return;
 
     filename = words[0];
     if (words.size() > 1)

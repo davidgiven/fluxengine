@@ -88,3 +88,10 @@ void AbstractDecoder::pushRecord(const Fluxmap::Position& start, const Fluxmap::
     _track->rawrecords.push_back(record);
     _fmr->seek(here);
 }
+
+std::set<unsigned> AbstractDecoder::requiredSectors(Track& track) const
+{
+	static std::set<unsigned> empty;
+	return empty;
+}
+

@@ -176,8 +176,6 @@ void readDiskCommand(AbstractDecoder& decoder)
 			decoder.decodeToSectors(*track);
 
 			std::cout << "       ";
-			if (!track->sectors.empty())
-			{
 				std::cout << fmt::format("{} records, {} sectors; ",
 					track->rawrecords.size(),
 					track->sectors.size());
@@ -193,9 +191,12 @@ void readDiskCommand(AbstractDecoder& decoder)
 				}
 
 				bool hasBadSectors = false;
+				std::set<unsigned> requiredSectors = decoder.requiredSectors(*track);
 				for (const auto& i : readSectors)
 				{
 					const auto& sector = i.second;
+					requiredSectors.erase(sector->logicalSector);
+
 					if (sector->status != Sector::OK)
 					{
 						std::cout << std::endl
@@ -203,6 +204,12 @@ void readDiskCommand(AbstractDecoder& decoder)
 								<< " (" << Sector::statusToString((Sector::Status)sector->status) << "); ";
 						hasBadSectors = true;
 					}
+				}
+				for (unsigned logicalSector : requiredSectors)
+				{
+					std::cout << "\n"
+					          << "       Required sector " << logicalSector << " missing; ";
+					hasBadSectors = true;
 				}
 
 				if (hasBadSectors)
@@ -213,7 +220,6 @@ void readDiskCommand(AbstractDecoder& decoder)
 
 				if (!hasBadSectors)
 					break;
-			}
 
 			if (!track->fluxsource->retryable())
 				break;

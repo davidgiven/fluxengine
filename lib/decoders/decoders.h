@@ -52,6 +52,11 @@ public:
     void seek(const Fluxmap::Position& pos)
     { return _fmr->seek(pos); } 
 
+	/* Returns a set of sectors required to exist on this track. If the reader
+	 * sees any missing, it will consider this to be an error and will retry
+	 * the read. */
+	virtual std::set<unsigned> requiredSectors(Track& track) const;
+
 protected:
     virtual void beginTrack() {};
     virtual RecordType advanceToNextRecord() = 0;

@@ -184,3 +184,26 @@ void MacintoshDecoder::decodeDataRecord()
     _sector->data.clear();
     _sector->data.writer().append(userData.slice(12, 512)).append(userData.slice(0, 12));
 }
+
+std::set<unsigned> MacintoshDecoder::requiredSectors(Track& track) const
+{
+	int count;
+	if (track.physicalTrack < 16)
+		count = 12;
+	else if (track.physicalTrack < 32)
+		count = 11;
+	else if (track.physicalTrack < 48)
+		count = 10;
+	else if (track.physicalTrack < 64)
+		count = 9;
+	else
+		count = 8;
+
+	std::set<unsigned> sectors;
+	do
+		sectors.insert(count);
+	while (count--);
+	return sectors;
+}
+
+
