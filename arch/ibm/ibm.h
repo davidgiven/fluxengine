@@ -32,18 +32,24 @@ struct IbmIdam
 class IbmDecoder : public AbstractDecoder
 {
 public:
-    IbmDecoder(unsigned sectorBase, bool ignoreSideByte=false):
+    IbmDecoder(unsigned sectorBase, bool ignoreSideByte=false,
+			const std::set<unsigned> requiredSectors=std::set<unsigned>()):
         _sectorBase(sectorBase),
-        _ignoreSideByte(ignoreSideByte)
+        _ignoreSideByte(ignoreSideByte),
+		_requiredSectors(requiredSectors)
     {}
 
     RecordType advanceToNextRecord();
     void decodeSectorRecord();
     void decodeDataRecord();
 
+	std::set<unsigned> requiredSectors(Track& track) const
+	{ return _requiredSectors; }
+
 private:
     unsigned _sectorBase;
     bool _ignoreSideByte;
+	std::set<unsigned> _requiredSectors;
     unsigned _currentSectorSize;
     unsigned _currentHeaderLength;
 };

@@ -34,6 +34,8 @@ public:
 public:
     static std::vector<std::string> split(
         const std::string& s, const std::string& delimiter);
+	static std::set<unsigned> parseRange(const std::string& spec);
+
     static Modifier parseMod(const std::string& spec);
 
 public:
@@ -115,6 +117,36 @@ public:
 
 private:
     DataSpec _value;
+};
+
+class RangeFlag : public Flag
+{
+public:
+    RangeFlag(const std::vector<std::string>& names, const std::string helptext,
+            const std::string& defaultValue):
+        Flag(names, helptext),
+		_stringValue(defaultValue),
+        _value(DataSpec::parseRange(defaultValue))
+    {}
+
+    const std::set<unsigned>& get() const
+    { checkInitialised(); return _value; }
+
+    operator const std::set<unsigned>& () const
+    { return get(); }
+
+    bool hasArgument() const { return true; }
+    const std::string defaultValueAsString() const { return _stringValue; }
+
+    void set(const std::string& value)
+	{
+		_stringValue = value;
+		_value = DataSpec::parseRange(value);
+	}
+
+private:
+	std::string _stringValue;
+    std::set<unsigned> _value;
 };
 
 #endif

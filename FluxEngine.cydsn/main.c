@@ -17,6 +17,9 @@
 #define STEP_TOWARDS0 1
 #define STEP_AWAYFROM0 0
 
+static bool drive0_present;
+static bool drive1_present;
+
 static volatile uint32_t clock = 0; /* ms */
 static volatile bool index_irq = false;
 
@@ -41,6 +44,8 @@ static volatile bool dma_underrun = false;
 
 #define DECLARE_REPLY_FRAME(STRUCT, TYPE) \
     STRUCT r = {.f = { .type = TYPE, .size = sizeof(STRUCT) }}
+
+static void stop_motor(void);
 
 static void system_timer_cb(void)
 {
@@ -104,7 +109,10 @@ static void print(const char* msg, ...)
 static void set_drive_flags(struct set_drive_frame* flags)
 {
     if (current_drive_flags.drive != flags->drive)
+    {
+        stop_motor();
         homed = false;
+    }
     
     current_drive_flags = *flags;
     DRIVESELECT_REG_Write(flags->drive ? 2 : 1); /* select drive 1 or 0 */
@@ -184,19 +192,19 @@ static void step(int dir)
     CyDelay(STEP_INTERVAL_TIME);
 }
 
-static void home(void)
+/* returns true if it looks like a drive is attached */
+static bool home(void)
 {
     for (int i=0; i<100; i++)
     {
         /* Don't keep stepping forever, because if a drive's
          * not connected bad things happen. */
         if (TRACK0_REG_Read())
-            break;
+            return true;
         step(STEP_TOWARDS0);
     }
     
-    /* Step to -1, which should be a nop, to reset the disk on disk change. */
-    step(STEP_TOWARDS0);
+    return false;
 }
 
 static void seek_to(int track)
@@ -761,6 +769,10 @@ static void cmd_erase(struct erase_frame* f)
 
 static void cmd_set_drive(struct set_drive_frame* f)
 {
+    if (drive0_present && !drive1_present)
+        f->drive = 0;
+    if (drive1_present && !drive0_present)
+        f->drive = 1;
     set_drive_flags(f);
     
     DECLARE_REPLY_FRAME(struct any_frame, F_FRAME_SET_DRIVE_REPLY);
@@ -929,6 +941,18 @@ int main(void)
     USBFS_Start(0, USBFS_DWR_VDDD_OPERATION);
     
     CyWdtStart(CYWDT_1024_TICKS, CYWDT_LPMODE_DISABLED);
+    
+    current_drive_flags.drive = 0;
+    start_motor();
+    drive0_present = home();
+    stop_motor();
+    
+    current_drive_flags.drive = 1;
+    start_motor();
+    drive1_present = home();
+    stop_motor();
+    
+    print("drive 0: %s drive 1: %s", drive0_present ? "yes" : "no", drive1_present ? "yes" : "no");
     
     /* UART_PutString("GO\r"); */
 

@@ -18,6 +18,8 @@ public:
     RecordType advanceToNextRecord();
     void decodeSectorRecord();
     void decodeDataRecord();
+
+	std::set<unsigned> requiredSectors(Track& track) const;
 };
 
 #endif

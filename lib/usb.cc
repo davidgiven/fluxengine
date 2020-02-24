@@ -44,6 +44,10 @@ static void usb_init()
     if (i < 0)
         Error() << "could not claim interface: " << usberror(i);
 
+	i = libusb_reset_device(device);
+	if (i < 0)
+		Error() << "could not reset device: " << usberror(i);
+
     int version = usbGetVersion();
     if (version != FLUXENGINE_VERSION)
         Error() << "your FluxEngine firmware is at version " << version
