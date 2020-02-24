@@ -225,12 +225,21 @@ You should now have a working board, so it's time to test it.
      are cheap and just have the 3.5" connectors. Some are _very_ cheap and
      have a single 3.5" connector, after the twist.)
      
-	 FluxEngine uses, sadly, non-standard disk numbering (there are reasons).
-	 Drive 0 is the one nearest the motherboard; that is, before the twist.
-	 Drive 1 is the one at the end of the cable; that is, after the twist.
-	 Drive 0 is the default. If you only have one drive, remember to plug the
-	 drive into the connector _before_ the twist. (Or you can tell the client
-	 to select drive 1 by using `-s :d=1`.)
+     If you have **two** drives, plug them into both connectors. FluxEngine,
+     sadly, non-standard disk numbering (there are reasons). Drive 0 is the
+     one nearest the motherboard; that is, before the twist. Drive 1 is the
+     one at the end of the cable; that is, after the twist. Drive 0 is the
+     default. You can tell the client to select drive 1 by using `-s :d=1`.
+
+     If you have **one** drive, you may plug it into _either_ connector.
+     FluxEngine will autodetect it and treat it as drive 0. However, you'll
+     get the most reliable electrical signal if you plug it in at the end of
+     the cable.
+
+     **A note on termination:** some 5.25" drives require jumper configuration
+     to tell them whether they're at the end of the cable or in the middle of
+     the cable. 3.5" drives don't, and my 5.25" drives don't, so I can't
+     advise there. Consult your drive datasheet for details.
 
   3. **Important.** Make sure that no disk you care about is in the drive.
 	 (Because if your wiring is wrong and a disk is inserted, you'll corrupt
