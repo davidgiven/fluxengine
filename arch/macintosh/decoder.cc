@@ -200,9 +200,8 @@ std::set<unsigned> MacintoshDecoder::requiredSectors(Track& track) const
 		count = 8;
 
 	std::set<unsigned> sectors;
-	do
+	while (count--)
 		sectors.insert(count);
-	while (count--);
 	return sectors;
 }
 

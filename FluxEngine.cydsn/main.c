@@ -926,6 +926,21 @@ static void handle_command(void)
     }
 }
 
+static void detect_drives(void)
+{
+    current_drive_flags.drive = 0;
+    start_motor();
+    drive0_present = home();
+    stop_motor();
+    
+    current_drive_flags.drive = 1;
+    start_motor();
+    drive1_present = home();
+    stop_motor();
+    
+    print("drive 0: %s drive 1: %s", drive0_present ? "yes" : "no", drive1_present ? "yes" : "no");
+}
+
 int main(void)
 {
     CyGlobalIntEnable;
@@ -940,22 +955,9 @@ int main(void)
     UART_Start();
     USBFS_Start(0, USBFS_DWR_VDDD_OPERATION);
     
+    detect_drives();
     CyWdtStart(CYWDT_1024_TICKS, CYWDT_LPMODE_DISABLED);
     
-    current_drive_flags.drive = 0;
-    start_motor();
-    drive0_present = home();
-    stop_motor();
-    
-    current_drive_flags.drive = 1;
-    start_motor();
-    drive1_present = home();
-    stop_motor();
-    
-    print("drive 0: %s drive 1: %s", drive0_present ? "yes" : "no", drive1_present ? "yes" : "no");
-    
-    /* UART_PutString("GO\r"); */
-
     for (;;)
     {
         CyWdtClear();
@@ -971,7 +973,7 @@ int main(void)
         {
             print("Waiting for USB...");
             while (!USBFS_GetConfiguration())
-                ;
+                CyWdtClear();
             print("USB ready");
             USBFS_EnableOutEP(FLUXENGINE_CMD_OUT_EP_NUM);
         }
