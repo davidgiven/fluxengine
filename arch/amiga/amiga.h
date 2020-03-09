@@ -20,6 +20,8 @@ public:
 
     RecordType advanceToNextRecord();
     void decodeSectorRecord();
+
+	std::set<unsigned> requiredSectors(Track& track) const;
 };
 
 class AmigaEncoder : public AbstractEncoder
