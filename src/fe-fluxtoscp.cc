@@ -125,43 +125,34 @@ int mainConvertFluxToScp(int argc, const char* argv[])
             while (revolution < 5)
             {
                 unsigned ticks;
-                int opcode = fmr.readOpcode(ticks);
-                if (ticks)
-                {
-                    ticksSinceLastPulse += ticks;
-                    totalTicks += ticks;
-                    revTicks += ticks;
-                }
+                uint8_t bits = fmr.getNextEvent(ticks);
+				ticksSinceLastPulse += ticks;
+				totalTicks += ticks;
+				revTicks += ticks;
 
-                switch (opcode)
-                {
-                    case -1: /* end of flux, treat like an index marker */
-                    case F_OP_INDEX:
-                    {
-                        auto* revheader = &trackheader.revolution[revolution];
-                        write_le32(revheader->offset, startOffset + sizeof(ScpTrack));
-                        write_le32(revheader->length, (fluxdataWriter.pos - startOffset) / 2);
-                        write_le32(revheader->index, revTicks * NS_PER_TICK / 25);
-                        revolution++;
-                        revheader++;
-                        revTicks = 0;
-                        startOffset = fluxdataWriter.pos;
-                        break;
-                    }
+				if (fmr.eof() || (bits & F_BIT_INDEX))
+				{
+					auto* revheader = &trackheader.revolution[revolution];
+					write_le32(revheader->offset, startOffset + sizeof(ScpTrack));
+					write_le32(revheader->length, (fluxdataWriter.pos - startOffset) / 2);
+					write_le32(revheader->index, revTicks * NS_PER_TICK / 25);
+					revolution++;
+					revheader++;
+					revTicks = 0;
+					startOffset = fluxdataWriter.pos;
+				}
 
-                    case F_OP_PULSE:
-                    {
-                        unsigned t = ticksSinceLastPulse * NS_PER_TICK / 25;
-                        while (t >= 0x10000)
-                        {
-                            fluxdataWriter.write_be16(0);
-                            t -= 0x10000;
-                        }
-                        fluxdataWriter.write_be16(t);
-                        ticksSinceLastPulse = 0;
-                        break;
-                    }
-                }
+				if (bits & F_BIT_PULSE)
+				{
+					unsigned t = ticksSinceLastPulse * NS_PER_TICK / 25;
+					while (t >= 0x10000)
+					{
+						fluxdataWriter.write_be16(0);
+						t -= 0x10000;
+					}
+					fluxdataWriter.write_be16(t);
+					ticksSinceLastPulse = 0;
+				}
             }
 
             write_le32(fileheader.track[strack], trackdataWriter.pos + sizeof(ScpHeader));

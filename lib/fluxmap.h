@@ -49,6 +49,9 @@ public:
 	void precompensate(int threshold_ticks, int amount_ticks);
 
 private:
+	uint8_t& findLastByte();
+
+private:
     nanoseconds_t _duration = 0;
     int _ticks = 0;
     Bytes _bytes;

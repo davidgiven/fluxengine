@@ -59,8 +59,8 @@ int mainConvertFluxToVcd(int argc, const char* argv[])
     while (!fmr.eof())
     {
         unsigned ticks;
-        int op = fmr.readOpcode(ticks);
-        if (op == -1)
+        uint8_t bits = fmr.getNextEvent(ticks);
+        if (fmr.eof())
             break;
 
         unsigned newtimestamp = timestamp + ticks;
@@ -71,9 +71,9 @@ int mainConvertFluxToVcd(int argc, const char* argv[])
             of << fmt::format("#{} ", (uint64_t)(timestamp * NS_PER_TICK));
         }
 
-        if (op == F_OP_PULSE)
+        if (bits & F_BIT_PULSE)
             of << "1p ";
-        if (op == F_OP_INDEX)
+        if (bits & F_BIT_INDEX)
             of << "1i ";
 
         lasttimestamp = timestamp;

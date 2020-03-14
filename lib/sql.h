@@ -10,8 +10,9 @@ enum
     FLUX_VERSION_0, /* without properties table */
     FLUX_VERSION_1,
     FLUX_VERSION_2, /* new bytecode with index marks */
+	FLUX_VERSION_3, /* simplified bytecode with six-bit timer */
 
-    FLUX_VERSION_CURRENT = 2,
+    FLUX_VERSION_CURRENT = FLUX_VERSION_3,
 };
 
 extern void sqlCheck(sqlite3* db, int i);

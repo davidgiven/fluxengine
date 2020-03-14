@@ -30,16 +30,15 @@ static DoubleFlag minimumClockUs(
     "Refuse to detect clocks shorter than this, to avoid false positives.",
     0.75);
 
-int FluxmapReader::readOpcode(unsigned& ticks)
+uint8_t FluxmapReader::getNextEvent(unsigned& ticks)
 {
     ticks = 0;
 
     while (!eof())
     {
         uint8_t b = _bytes[_pos.bytes++];
-        if (b < 0x80)
-            ticks += b;
-        else
+		ticks += b & 0x3f;
+		if (b & (F_BIT_PULSE|F_BIT_INDEX))
         {
             _pos.ticks += ticks;
             return b;
@@ -47,21 +46,21 @@ int FluxmapReader::readOpcode(unsigned& ticks)
     }
 
     _pos.ticks += ticks;
-    return -1;
+    return 0;
 }
 
-unsigned FluxmapReader::readNextMatchingOpcode(uint8_t opcode)
+unsigned FluxmapReader::findEvent(uint8_t target)
 {
     unsigned ticks = 0;
 
     for (;;)
     {
         unsigned thisTicks;
-        int op = readOpcode(thisTicks);
+        uint8_t bits = getNextEvent(thisTicks);
         ticks += thisTicks;
-        if (op == -1)
+        if (eof())
             return 0;
-        if (op == opcode)
+        if (bits & target)
             return ticks;
     }
 }
@@ -73,7 +72,7 @@ unsigned FluxmapReader::readInterval(nanoseconds_t clock)
 
     while (ticks < thresholdTicks)
     {
-        unsigned thisTicks = readNextMatchingOpcode(F_OP_PULSE);
+        unsigned thisTicks = findEvent(F_BIT_PULSE);
         if (!thisTicks)
             break;
         ticks += thisTicks;
@@ -196,7 +195,7 @@ void FluxmapReader::seek(nanoseconds_t ns)
     while (!eof() && (_pos.ticks < ticks))
     {
         unsigned t;
-        readOpcode(t);
+        getNextEvent(t);
     }
     _pos.zeroes = 0;
 }
@@ -237,7 +236,7 @@ nanoseconds_t FluxmapReader::seekToPattern(const FluxMatcher& pattern, const Flu
             positions[i] = positions[i+1];
             candidates[i] = candidates[i+1];
         }
-        candidates[intervalCount] = readNextMatchingOpcode(F_OP_PULSE);
+        candidates[intervalCount] = findEvent(F_BIT_PULSE);
         positions[intervalCount] = tell();
 
     }
@@ -248,7 +247,7 @@ nanoseconds_t FluxmapReader::seekToPattern(const FluxMatcher& pattern, const Flu
 
 void FluxmapReader::seekToIndexMark()
 {
-    readNextMatchingOpcode(F_OP_INDEX);
+    findEvent(F_BIT_INDEX);
     _pos.zeroes = 0;
 }
 

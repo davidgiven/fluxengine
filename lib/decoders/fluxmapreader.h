@@ -96,8 +96,8 @@ public:
         _pos = pos;
     }
 
-    int readOpcode(unsigned& ticks);
-    unsigned readNextMatchingOpcode(uint8_t opcode);
+    uint8_t getNextEvent(unsigned& ticks);
+    unsigned findEvent(uint8_t bits);
     unsigned readInterval(nanoseconds_t clock); /* with debounce support */
 
     /* Important! You can only reliably seek to 1 bits. */

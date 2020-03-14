@@ -15,8 +15,7 @@ Fluxmap& Fluxmap::appendBytes(const uint8_t* ptr, size_t len)
     while (len--)
     {
         uint8_t byte = *ptr++;
-        if (byte < 0x80)
-            _ticks += byte;
+		_ticks += byte & 0x3f;
         bw.write_8(byte);
     }
 
@@ -24,12 +23,19 @@ Fluxmap& Fluxmap::appendBytes(const uint8_t* ptr, size_t len)
     return *this;
 }
 
+uint8_t& Fluxmap::findLastByte()
+{
+	if (_bytes.empty())
+		appendByte(0x00);
+	return *(_bytes.end() - 1);
+}
+
 Fluxmap& Fluxmap::appendInterval(uint32_t ticks)
 {
-    while (ticks >= 0x7f)
+    while (ticks >= 0x3f)
     {
-        appendByte(0x7f);
-        ticks -= 0x7f;
+        appendByte(0x3f);
+        ticks -= 0x3f;
     }
     appendByte((uint8_t)ticks);
     return *this;
@@ -37,13 +43,13 @@ Fluxmap& Fluxmap::appendInterval(uint32_t ticks)
 
 Fluxmap& Fluxmap::appendPulse()
 {
-    appendByte(0x80);
+	findLastByte() |= 0x80;
     return *this;
 }
 
 Fluxmap& Fluxmap::appendIndex()
 {
-    appendByte(0x81);
+	findLastByte() |= 0x40;
     return *this;
 }
 
@@ -54,25 +60,26 @@ void Fluxmap::precompensate(int threshold_ticks, int amount_ticks)
     for (unsigned i=0; i<_bytes.size(); i++)
     {
         uint8_t& prev = (i == 0) ? junk : _bytes[i-1];
-        uint8_t curr = _bytes[i];
+		uint8_t prevticks = prev & 0x3f;
+        uint8_t currticks = _bytes[i] & 0x3f;
 
-        if (curr < (3*threshold_ticks))
+        if (currticks < (3*threshold_ticks))
         {
-            if ((prev <= threshold_ticks) && (curr > threshold_ticks))
+            if ((prevticks <= threshold_ticks) && (currticks > threshold_ticks))
             {
                 /* 01001; move the previous bit backwards. */
-                if (prev >= (1+amount_ticks))
+                if (prevticks >= (1+amount_ticks))
                     prev -= amount_ticks;
-                if (curr <= (0x7f-amount_ticks))
-                    curr += amount_ticks;
+                if (currticks <= (0x7f-amount_ticks))
+                    currticks += amount_ticks;
             }
-            else if ((prev > threshold_ticks) && (curr <= threshold_ticks))
+            else if ((prevticks > threshold_ticks) && (currticks <= threshold_ticks))
             {
                 /* 00101; move the current bit forwards. */
-                if (prev <= (0x7f-amount_ticks))
+                if (prevticks <= (0x7f-amount_ticks))
                     prev += amount_ticks;
-                if (curr >= (1+amount_ticks))
-                    curr -= amount_ticks;
+                if (currticks >= (1+amount_ticks))
+                    currticks -= amount_ticks;
             }
         }
     }

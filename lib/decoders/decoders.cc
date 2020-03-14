@@ -35,7 +35,7 @@ void AbstractDecoder::decodeToSectors(Track& track)
             return;
         if ((r == UNKNOWN_RECORD) || (r == DATA_RECORD))
         {
-            fmr.readNextMatchingOpcode(F_OP_PULSE);
+            fmr.findEvent(F_BIT_PULSE);
             continue;
         }
 
@@ -56,7 +56,7 @@ void AbstractDecoder::decodeToSectors(Track& track)
 				r = advanceToNextRecord();
 				if (r != UNKNOWN_RECORD)
 					break;
-				if (fmr.readNextMatchingOpcode(F_OP_PULSE) == 0)
+				if (fmr.findEvent(F_BIT_PULSE) == 0)
                     break;
 			}
             recordStart = fmr.tell();
