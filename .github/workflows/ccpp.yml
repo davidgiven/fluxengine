@@ -10,7 +10,7 @@ jobs:
       with:
         fetch-depth: 1
     - name: apt
-      run: sudo apt install libusb-1.0-0-dev libsqlite3-dev ninja-build
+      run: sudo apt update && sudo apt install libusb-1.0-0-dev libsqlite3-dev ninja-build
     - name: make
       run: make
 
