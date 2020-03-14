@@ -18,6 +18,8 @@
 #include "track.h"
 #include "imagewriter/imagewriter.h"
 #include "fmt/format.h"
+#include <iostream>
+#include <fstream>
 
 FlagGroup readerFlags
 {
@@ -45,6 +47,11 @@ static StringFlag destination(
 static StringFlag visualise(
 	{ "--write-svg" },
 	"write a visualisation of the disk to this file",
+	"");
+
+static StringFlag csvFile(
+	{ "--write-csv" },
+	"write a CSV report of the disk state",
 	"");
 
 static SettableFlag justRead(
@@ -131,6 +138,48 @@ std::vector<std::unique_ptr<Track>> readTracks()
 	}
 
 	return tracks;
+}
+
+static void writeCsv(const SectorSet& sectors, const std::string& filename)
+{
+	std::ofstream f(filename, std::ios::out);
+	if (!f.is_open())
+		Error() << "cannot open CSV report file";
+
+	f << "\"Physical track\","
+		"\"Physical side\","
+		"\"Logical track\","
+		"\"Logical side\","
+		"\"Logical sector\","
+		"\"Clock (ns)\","
+		"\"Header start (ns)\","
+		"\"Header end (ns)\","
+		"\"Data start (ns)\","
+		"\"Data end (ns)\","
+		"\"Raw data address (bytes)\","
+		"\"User payload length (bytes)\","
+		"\"Status\""
+		"\n";
+
+	for (const auto& e : sectors.get())
+	{
+		const auto& sector = e.second;
+		f << fmt::format("{},{},{},{},{},{},{},{},{},{},{},{},{}\n",
+			sector->physicalTrack,
+			sector->physicalSide,
+			sector->logicalTrack,
+			sector->logicalSide,
+			sector->logicalSector,
+			sector->clock,
+			sector->headerStartTime,
+			sector->headerEndTime,
+			sector->dataStartTime,
+			sector->dataEndTime,
+			sector->position.bytes,
+			sector->data.size(),
+			Sector::statusToString(sector->status)
+		);
+	}
 }
 
 static bool conflictable(Sector::Status status)
@@ -280,6 +329,9 @@ void readDiskCommand(AbstractDecoder& decoder)
 
 	if (!visualise.get().empty())
 		visualiseSectorsToFile(allSectors, visualise.get());
+	
+	if (!csvFile.get().empty())
+		writeCsv(allSectors, csvFile.get());
 
     writeSectorsToFile(allSectors, outputSpec);
 	if (failures)
