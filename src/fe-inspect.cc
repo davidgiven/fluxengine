@@ -186,6 +186,12 @@ int mainInspect(int argc, const char* argv[])
 	auto& track = *tracks.begin();
 	track->readFluxmap();
 
+	std::cout << fmt::format("0x{:x} bytes of data in {:.3f}ms\n",
+			track->fluxmap->bytes(),
+			track->fluxmap->duration() / 1e6);
+	std::cout << fmt::format("Required USB bandwidth: {}kB/s\n",
+			track->fluxmap->bytes()/1024.0 / (track->fluxmap->duration() / 1e9));
+
 	nanoseconds_t clockPeriod = guessClock(*track->fluxmap);
 	std::cout << fmt::format("{:.2f} us clock detected.", (double)clockPeriod/1000.0) << std::flush;
 
