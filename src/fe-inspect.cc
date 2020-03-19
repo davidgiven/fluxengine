@@ -156,7 +156,11 @@ static nanoseconds_t guessClock(const Fluxmap& fluxmap)
 				s += BLOCK_ELEMENTS[8];
 			s += BLOCK_ELEMENTS[bar & 7];
 
-			std::cout << fmt::format("{:.2f} {:6} {}", (double)i * US_PER_TICK, value, s);
+			std::cout << fmt::format("{: 3} {:.2f} {:6} {}",
+					i,
+					(double)i * US_PER_TICK,
+					value,
+					s);
 			std::cout << std::endl;
 		}
 	}
