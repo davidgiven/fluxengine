@@ -354,7 +354,7 @@ static void deinit_dma(void)
 static void init_capture_dma(void)
 {
     dma_channel = SAMPLER_DMA_DmaInitialize(
-        2 /* bytes */,
+        1 /* bytes */,
         true /* request per burst */, 
         HI16(CYDEV_PERIPH_BASE),
         HI16(CYDEV_SRAM_BASE));
