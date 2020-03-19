@@ -36,8 +36,7 @@ public:
         usbSetDrive(_drive, high_density, indexMode);
         usbSeek(track);
 
-        Bytes crunched = fluxmap.rawBytes().crunch();
-        return usbWrite(side, crunched);
+        return usbWrite(side, fluxmap.rawBytes());
     }
 
 private:

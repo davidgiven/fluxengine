@@ -174,7 +174,6 @@ buildlibrary libbackend.a \
     arch/victor9k/decoder.cc \
     arch/zilogmcz/decoder.cc \
     lib/bytes.cc \
-    lib/common/crunch.c \
     lib/crc.cc \
     lib/dataspec.cc \
     lib/decoders/decoders.cc \
@@ -263,7 +262,6 @@ buildsimpleprogram brother240tool \
 runtest bitaccumulator-test tests/bitaccumulator.cc
 runtest bytes-test          tests/bytes.cc
 runtest compression-test    tests/compression.cc
-runtest crunch-test         tests/crunch.cc
 runtest dataspec-test       tests/dataspec.cc
 runtest flags-test          tests/flags.cc
 runtest fluxpattern-test    tests/fluxpattern.cc

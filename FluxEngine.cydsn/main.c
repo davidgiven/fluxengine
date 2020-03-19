@@ -5,7 +5,6 @@
 #include <setjmp.h>
 #include "project.h"
 #include "../protocol.h"
-#include "../lib/common/crunch.h"
 
 #define MOTOR_ON_TIME 5000 /* milliseconds */
 #define STEP_INTERVAL_TIME 6 /* ms */
@@ -34,7 +33,6 @@ static struct set_drive_frame current_drive_flags;
 static uint8_t td[BUFFER_COUNT];
 static uint8_t dma_buffer[BUFFER_COUNT][BUFFER_SIZE] __attribute__((aligned()));
 static uint8_t usb_buffer[BUFFER_SIZE] __attribute__((aligned()));
-static uint8_t xfer_buffer[BUFFER_SIZE] __attribute__((aligned()));
 static uint8_t dma_channel;
 #define NEXT_BUFFER(b) (((b)+1) % BUFFER_COUNT)
 
@@ -403,10 +401,6 @@ static void cmd_read(struct read_frame* f)
         index_irq = false;
     }
     
-    crunch_state_t cs = {};
-    cs.outputptr = xfer_buffer;
-    cs.outputlen = BUFFER_SIZE;
-    
     dma_writing_to_td = 0;
     dma_reading_from_td = -1;
     dma_underrun = false;
@@ -463,51 +457,18 @@ static void cmd_read(struct read_frame* f)
         {
             /* Otherwise, there's a block waiting, so attempt to send it. */
             
-            uint8_t dma_buffer_usage = 0;
-            while (dma_buffer_usage < BUFFER_SIZE)
-            {
-                cs.inputptr = dma_buffer[dma_reading_from_td] + dma_buffer_usage;
-                cs.inputlen = BUFFER_SIZE - dma_buffer_usage;
-                crunch(&cs);
-                dma_buffer_usage += BUFFER_SIZE - cs.inputlen;
-                count++;
-                
-                /* If there is no available space in the output buffer, flush the buffer via
-                 * USB and go again. */
-                if (cs.outputlen == 0)
-                {
-                    wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
-                    memcpy(usb_buffer, xfer_buffer, FRAME_SIZE);
-                    USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, usb_buffer, BUFFER_SIZE);
-                    
-                    cs.outputptr = xfer_buffer;
-                    cs.outputlen = BUFFER_SIZE;
-                }
-            }
+            wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
+            USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, dma_buffer[dma_reading_from_td], BUFFER_SIZE);
+            count++;
             dma_reading_from_td = NEXT_BUFFER(dma_reading_from_td);
         }
     }
 abort:;
     bool saved_dma_underrun = dma_underrun;
 
-    donecrunch(&cs);
+    /* Terminate the transfer (all transfers are an exact number of fragments). */
     wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
-    /* If there's a complete packet waiting, send it. */
-    if (cs.outputlen != BUFFER_SIZE)
-    {
-        USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, usb_buffer, BUFFER_SIZE);
-        wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
-    }
-    if ((cs.outputlen != 0) && (cs.outputlen != BUFFER_SIZE))
-    {
-        /* If there's a partial packet waiting, send it; this will also terminate the transfer. */
-        USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, usb_buffer, BUFFER_SIZE-cs.outputlen);
-    }
-    else
-    {
-        /* Otherwise just terminate the transfer. */
-        USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, NULL, 0);
-    }
+    USBFS_LoadInEP(FLUXENGINE_DATA_IN_EP_NUM, NULL, 0);
     wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
     deinit_dma();
 
@@ -579,8 +540,6 @@ static void cmd_write(struct write_frame* f)
     dma_reading_from_td = -1;
     dma_underrun = false;
 
-    crunch_state_t cs = {};
-    cs.outputlen = BUFFER_SIZE;
     USBFS_EnableOutEP(FLUXENGINE_DATA_OUT_EP_NUM);
     
     int old_reading_from_td = -1;
@@ -609,57 +568,32 @@ static void cmd_write(struct write_frame* f)
             if (writing && (dma_underrun || index_irq))
                 goto abort;
             
-            /* Read crunched data, if necessary. */
-            
-            if (cs.inputlen == 0)
+            uint8_t* buffer = dma_buffer[dma_writing_to_td];
+            if (finished)
             {
-                if (finished)
-                {
-                    /* There's no more data to read, so fake some. */
-                    
-                    for (int i=0; i<BUFFER_SIZE; i++)
-                        xfer_buffer[i+0] = 0x7f;
-                    cs.inputptr = xfer_buffer;
-                    cs.inputlen = BUFFER_SIZE;
-                }
-                else if (packetwaiting)
-                {
-                    /* There's a USB read into usb_buffer in progress, so check if it's finished. */
-                    
-                    if (USBFS_GetEPState(FLUXENGINE_DATA_OUT_EP_NUM) == USBFS_OUT_BUFFER_EMPTY)
-                    {
-                        /* It's done, so copy out the data. */
-                        
-                        memcpy(xfer_buffer, usb_buffer, FRAME_SIZE);
-                        cs.inputptr = xfer_buffer;
-                        cs.inputlen = packetwaiting;
-
-                        count_read++;
-                        if ((packetwaiting < FRAME_SIZE) || (count_read == packets))
-                            finished = true;
-                        else
-                        {
-                            /* Wait for more USB data to show up. */
-                            
-                            packetwaiting = 0;
-                            USBFS_EnableOutEP(FLUXENGINE_DATA_OUT_EP_NUM);
-                        }
-                    }
-                }
+                /* There's no more data to read, so fake some. */
+                
+                memset(buffer, 0x3f, BUFFER_SIZE);
             }
-            
-            /* If there *is* data waiting in the buffer, uncrunch it. */
-            
-            if (cs.inputlen != 0)
+            else if (packetwaiting)
             {
-                cs.outputptr = dma_buffer[dma_writing_to_td] + BUFFER_SIZE - cs.outputlen;
-                uncrunch(&cs);
-                if (cs.outputlen == 0)
+                /* There's a USB read into usb_buffer in progress, so check if it's finished. */
+                
+                if (USBFS_GetEPState(FLUXENGINE_DATA_OUT_EP_NUM) == USBFS_OUT_BUFFER_EMPTY)
                 {
-                    /* Completed a DMA buffer; queue it for writing. */
+                    /* It's done, so copy out the data. */
                     
-                    dma_writing_to_td = NEXT_BUFFER(dma_writing_to_td);
-                    cs.outputlen = BUFFER_SIZE;
+                    memcpy(buffer, usb_buffer, FRAME_SIZE);
+                    count_read++;
+                    if ((packetwaiting < FRAME_SIZE) || (count_read == packets))
+                        finished = true;
+                    else
+                    {
+                        /* Wait for more USB data to show up. */
+                        
+                        packetwaiting = 0;
+                        USBFS_EnableOutEP(FLUXENGINE_DATA_OUT_EP_NUM);
+                    }
                 }
             }
             

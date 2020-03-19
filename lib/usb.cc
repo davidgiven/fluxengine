@@ -3,7 +3,6 @@
 #include "protocol.h"
 #include "fluxmap.h"
 #include "bytes.h"
-#include "common/crunch.h"
 #include <libusb.h>
 #include "fmt/format.h"
 

@@ -51,8 +51,6 @@ public:
     Bytes swab() const;
     Bytes compress() const;
     Bytes decompress() const;
-    Bytes crunch() const;
-    Bytes uncrunch() const;
 	std::vector<bool> toBits() const;
 
     ByteReader reader() const;
