@@ -149,6 +149,12 @@ static void wait_until_writeable(int ep)
         ;
 }
 
+static void wait_until_readable(int ep)
+{
+    while (USBFS_GetEPState(ep) != USBFS_OUT_BUFFER_FULL)
+        ;
+}
+
 static void send_reply(struct any_frame* f)
 {
     print("reply 0x%02x", f->f.type);
@@ -166,9 +172,15 @@ static void send_error(int code)
 /* buffer must be big enough for a frame */
 static int usb_read(int ep, uint8_t buffer[FRAME_SIZE])
 {
+    if (USBFS_GetEPState(ep) != USBFS_OUT_BUFFER_FULL)
+    {
+        USBFS_EnableOutEP(ep);
+        wait_until_readable(ep);
+    }
+
     int length = USBFS_GetEPCount(ep);
     USBFS_ReadOutEP(ep, buffer, length);
-    while (USBFS_GetEPState(ep) == USBFS_OUT_BUFFER_FULL)
+    while (USBFS_GetEPState(ep) != USBFS_OUT_BUFFER_EMPTY)
         ;
     return length;
 }
@@ -317,13 +329,7 @@ static void cmd_bulk_read_test(struct any_frame* f)
         CyWdtClear();
         for (int y=0; y<256; y++)
         {
-            USBFS_EnableOutEP(FLUXENGINE_DATA_OUT_EP_NUM);
-            while (USBFS_GetEPState(FLUXENGINE_DATA_OUT_EP_NUM) != USBFS_OUT_BUFFER_FULL)
-                ;
-            USBFS_ReadOutEP(FLUXENGINE_DATA_OUT_EP_NUM, buffer, sizeof(buffer));
-            while (USBFS_GetEPState(FLUXENGINE_DATA_OUT_EP_NUM) != USBFS_OUT_BUFFER_EMPTY)
-                ;
-            
+            usb_read(FLUXENGINE_DATA_OUT_EP_NUM, buffer);
             for (unsigned z=0; z<sizeof(buffer); z++)
             {
                 if (buffer[z] != (uint8)(x+y+z))
@@ -535,31 +541,14 @@ static void cmd_write(struct write_frame* f)
     int packets = f->bytes_to_write / FRAME_SIZE;
     int count_written = 0;
     int count_read = 0;
-    int packetwaiting = 0;
     dma_writing_to_td = 0;
     dma_reading_from_td = -1;
     dma_underrun = false;
 
-    USBFS_EnableOutEP(FLUXENGINE_DATA_OUT_EP_NUM);
-    
     int old_reading_from_td = -1;
     for (;;)
     {
-        CyWdtClear();
-
-        /* Make sure that we always have a USB read in progress whenever possible. */
-        
-        if (!finished && !packetwaiting)
-        {
-            /* There is no read in progress; has data arrived in the external USB buffer? */
-            
-            if (USBFS_GetEPState(FLUXENGINE_DATA_OUT_EP_NUM) == USBFS_OUT_BUFFER_FULL)
-            {
-                /* Yes, data has arrived, so initiate the copy. */
-                
-                packetwaiting = USBFS_ReadOutEP(FLUXENGINE_DATA_OUT_EP_NUM, usb_buffer, FRAME_SIZE);
-            }
-        }
+        //CyWdtClear();
 
         /* Read data from USB into the buffers. */
         
@@ -575,27 +564,15 @@ static void cmd_write(struct write_frame* f)
                 
                 memset(buffer, 0x3f, BUFFER_SIZE);
             }
-            else if (packetwaiting)
+            else
             {
-                /* There's a USB read into usb_buffer in progress, so check if it's finished. */
+                (void) usb_read(FLUXENGINE_DATA_OUT_EP_NUM, buffer);
+                count_read++;
                 
-                if (USBFS_GetEPState(FLUXENGINE_DATA_OUT_EP_NUM) == USBFS_OUT_BUFFER_EMPTY)
-                {
-                    /* It's done, so copy out the data. */
-                    
-                    memcpy(buffer, usb_buffer, FRAME_SIZE);
-                    count_read++;
-                    if ((packetwaiting < FRAME_SIZE) || (count_read == packets))
-                        finished = true;
-                    else
-                    {
-                        /* Wait for more USB data to show up. */
-                        
-                        packetwaiting = 0;
-                        USBFS_EnableOutEP(FLUXENGINE_DATA_OUT_EP_NUM);
-                    }
-                }
+                if (count_read == packets)
+                    finished = true;
             }
+            dma_writing_to_td = NEXT_BUFFER(dma_writing_to_td);
             
             /* Once all the buffers are full, start writing. */
             
@@ -605,6 +582,7 @@ static void cmd_write(struct write_frame* f)
                 
                 /* Start the DMA engine. */
                 
+                print("writing");
                 SEQUENCER_DMA_FINISHED_IRQ_Enable();
                 dma_underrun = false;
                 CyDmaChSetInitialTd(dma_channel, td[dma_reading_from_td]);
@@ -635,7 +613,6 @@ static void cmd_write(struct write_frame* f)
         }
     }
 abort:
-    print("done %d %d", dma_reading_from_td, dma_writing_to_td);
     SEQUENCER_DMA_FINISHED_IRQ_Disable();
 
     SEQUENCER_CONTROL_Write(1); /* reset */
@@ -655,16 +632,10 @@ abort:
          * easier than trying to terminate the connection. */
         while (count_read != packets)
         {
-            if (USBFS_GetEPState(FLUXENGINE_DATA_OUT_EP_NUM) == USBFS_OUT_BUFFER_FULL)
-            {
-                int length = usb_read(FLUXENGINE_DATA_OUT_EP_NUM, usb_buffer);
-                if (length < FRAME_SIZE)
-                    break;
-                USBFS_EnableOutEP(FLUXENGINE_DATA_OUT_EP_NUM);
-                count_read++;
-            }
+            (void) usb_read(FLUXENGINE_DATA_OUT_EP_NUM, usb_buffer);
+            count_read++;
+            print("R p=%d cr=%d", packets, count_read);
         }
-        USBFS_DisableOutEP(FLUXENGINE_DATA_OUT_EP_NUM);
     }
     
     deinit_dma();
@@ -672,10 +643,12 @@ abort:
     
     if (dma_underrun)
     {
+        print("underrun!");
         send_error(F_ERROR_UNDERRUN);
         return;
     }
 
+    print("success");
     DECLARE_REPLY_FRAME(struct any_frame, F_FRAME_WRITE_REPLY);
     send_reply((struct any_frame*) &r);
 }
@@ -888,6 +861,7 @@ int main(void)
     DRIVESELECT_REG_Write(0);
     UART_Start();
     USBFS_Start(0, USBFS_DWR_VDDD_OPERATION);
+    USBFS_DisableOutEP(FLUXENGINE_DATA_OUT_EP_NUM);
     
     detect_drives();
     CyWdtStart(CYWDT_1024_TICKS, CYWDT_LPMODE_DISABLED);

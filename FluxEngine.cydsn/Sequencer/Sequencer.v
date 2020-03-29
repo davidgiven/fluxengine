@@ -19,19 +19,15 @@ module Sequencer (
 //`#start body` -- edit after this line, do not edit this line
 
 localparam STATE_LOAD = 0;
-localparam STATE_WAITING = 1;
-localparam STATE_PULSING = 2;
-localparam STATE_INDEXING = 3;
+localparam STATE_WRITING = 1;
 
-localparam OPCODE_PULSE = 8'h80;
-localparam OPCODE_INDEX = 8'h81;
-
-reg [1:0] state;
-reg [6:0] countdown;
+reg state;
+reg [5:0] countdown;
+reg pulsepending;
 
 assign req = (!reset && (state == STATE_LOAD));
-assign wdata = (state == STATE_PULSING);
-assign debug_state = state;
+assign wdata = (!reset && (state == STATE_WRITING) && (countdown == 0) && pulsepending);
+assign debug_state = 0;
 
 reg olddataclock;
 wire dataclocked;
@@ -39,7 +35,9 @@ always @(posedge clock) olddataclock <= dataclock;
 assign dataclocked = !olddataclock && dataclock;
 
 reg oldsampleclock;
-reg sampleclocked;
+always @(posedge clock) oldsampleclock <= sampleclock;
+wire sampleclocked;
+assign sampleclocked = !oldsampleclock && sampleclock;
 
 reg oldindex;
 wire indexed;
@@ -52,49 +50,33 @@ begin
     begin
         state <= STATE_LOAD;
         countdown <= 0;
+        pulsepending <= 0;
     end
     else
     begin
-        if (!oldsampleclock && sampleclock)
-            sampleclocked <= 1;
-        oldsampleclock <= sampleclock;
-        
         case (state)
             STATE_LOAD:
-                /* Wait for a posedge on dataclocked, indicating an opcode has
+            begin
+                /* A posedge on dataclocked indicates that another opcode has
                  * arrived. */
                 if (dataclocked)
-                    case (opcode)
-                        OPCODE_PULSE:
-                            state <= STATE_PULSING;
-                        
-                        OPCODE_INDEX:
-                            state <= STATE_INDEXING;
-                        
-                        default:
-                        begin
-                            countdown <= opcode[6:0];
-                            state <= STATE_WAITING;
-                        end
-                    endcase
+                begin
+                    pulsepending <= opcode[7];
+                    countdown <= opcode[5:0];
+                    state <= STATE_WRITING;
+                end
+            end
             
-            STATE_WAITING:
+            STATE_WRITING:
+            begin
                 if (sampleclocked)
                 begin
-                    sampleclocked <= 0;
-                    countdown <= countdown - 1;
-                    /* Nasty fudge factor here to account for one to two
-                     * sample ticks lost per pulse. */
-                    if (countdown <= 2)
+                    if (countdown == 0)
                         state <= STATE_LOAD;
+                    else
+                        countdown <= countdown - 1;
                 end
-            
-            STATE_PULSING:
-                state <= STATE_LOAD;
-            
-            STATE_INDEXING:
-                if (indexed)
-                    state <= STATE_LOAD;
+            end
         endcase
     end
 end
