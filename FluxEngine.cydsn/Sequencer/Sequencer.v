@@ -35,9 +35,7 @@ always @(posedge clock) olddataclock <= dataclock;
 assign dataclocked = !olddataclock && dataclock;
 
 reg oldsampleclock;
-always @(posedge clock) oldsampleclock <= sampleclock;
-wire sampleclocked;
-assign sampleclocked = !oldsampleclock && sampleclock;
+reg sampleclocked;
 
 reg oldindex;
 wire indexed;
@@ -51,9 +49,14 @@ begin
         state <= STATE_LOAD;
         countdown <= 0;
         pulsepending <= 0;
+        oldsampleclock <= 0;
     end
     else
     begin
+        if (!oldsampleclock && sampleclock)
+            sampleclocked <= 1;
+        oldsampleclock <= sampleclock;
+            
         case (state)
             STATE_LOAD:
             begin
@@ -75,6 +78,7 @@ begin
                         state <= STATE_LOAD;
                     else
                         countdown <= countdown - 1;
+                    sampleclocked <= 0;
                 end
             end
         endcase

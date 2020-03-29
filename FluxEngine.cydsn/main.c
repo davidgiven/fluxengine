@@ -582,7 +582,6 @@ static void cmd_write(struct write_frame* f)
                 
                 /* Start the DMA engine. */
                 
-                print("writing");
                 SEQUENCER_DMA_FINISHED_IRQ_Enable();
                 dma_underrun = false;
                 CyDmaChSetInitialTd(dma_channel, td[dma_reading_from_td]);
@@ -634,12 +633,10 @@ abort:
         {
             (void) usb_read(FLUXENGINE_DATA_OUT_EP_NUM, usb_buffer);
             count_read++;
-            print("R p=%d cr=%d", packets, count_read);
         }
     }
     
     deinit_dma();
-    print("write finished");
     
     if (dma_underrun)
     {
