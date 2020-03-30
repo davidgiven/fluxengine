@@ -1,5 +1,4 @@
 #include "globals.h"
-#include "image.h"
 #include "flags.h"
 #include "dataspec.h"
 #include "sector.h"

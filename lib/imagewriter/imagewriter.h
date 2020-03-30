@@ -35,6 +35,7 @@ private:
 public:
 	virtual void adjustGeometry();
 	void printMap();
+	void writeCsv(const std::string& filename);
 	virtual void writeImage() = 0;
 
 protected:

@@ -4,7 +4,6 @@
 #include "amiga/amiga.h"
 #include "writer.h"
 #include "fmt/format.h"
-#include "image.h"
 #include <fstream>
 
 static FlagGroup flags { &writerFlags, &amigaEncoderFlags };

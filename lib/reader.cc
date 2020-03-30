@@ -12,7 +12,6 @@
 #include "sectorset.h"
 #include "visualiser.h"
 #include "record.h"
-#include "image.h"
 #include "bytes.h"
 #include "decoders/rawbits.h"
 #include "track.h"
@@ -49,11 +48,6 @@ static StringFlag visualise(
 	"write a visualisation of the disk to this file",
 	"");
 
-static StringFlag csvFile(
-	{ "--write-csv" },
-	"write a CSV report of the disk state",
-	"");
-
 static SettableFlag justRead(
 	{ "--just-read" },
 	"just read the disk and do no further processing");
@@ -75,6 +69,11 @@ static SettableFlag highDensityFlag(
 	{ "--high-density", "--hd" },
 	"set the drive to high density mode");
 
+static StringFlag csvFile(
+	{ "--write-csv" },
+	"write a CSV report of the disk state",
+	"");
+
 static std::unique_ptr<FluxSink> outputFluxSink;
 
 void setReaderDefaultSource(const std::string& source)
@@ -90,6 +89,16 @@ void setReaderDefaultOutput(const std::string& output)
 void setReaderRevolutions(int revolutions)
 {
 	setHardwareFluxSourceRevolutions(revolutions);
+}
+
+static void writeSectorsToFile(const SectorSet& sectors, const ImageSpec& spec)
+{
+	std::unique_ptr<ImageWriter> writer(ImageWriter::create(sectors, spec));
+	writer->adjustGeometry();
+	writer->printMap();
+	if (!csvFile.get().empty())
+		writer->writeCsv(csvFile.get());
+	writer->writeImage();
 }
 
 void Track::readFluxmap()
@@ -138,48 +147,6 @@ std::vector<std::unique_ptr<Track>> readTracks()
 	}
 
 	return tracks;
-}
-
-static void writeCsv(const SectorSet& sectors, const std::string& filename)
-{
-	std::ofstream f(filename, std::ios::out);
-	if (!f.is_open())
-		Error() << "cannot open CSV report file";
-
-	f << "\"Physical track\","
-		"\"Physical side\","
-		"\"Logical track\","
-		"\"Logical side\","
-		"\"Logical sector\","
-		"\"Clock (ns)\","
-		"\"Header start (ns)\","
-		"\"Header end (ns)\","
-		"\"Data start (ns)\","
-		"\"Data end (ns)\","
-		"\"Raw data address (bytes)\","
-		"\"User payload length (bytes)\","
-		"\"Status\""
-		"\n";
-
-	for (const auto& e : sectors.get())
-	{
-		const auto& sector = e.second;
-		f << fmt::format("{},{},{},{},{},{},{},{},{},{},{},{},{}\n",
-			sector->physicalTrack,
-			sector->physicalSide,
-			sector->logicalTrack,
-			sector->logicalSide,
-			sector->logicalSector,
-			sector->clock,
-			sector->headerStartTime,
-			sector->headerEndTime,
-			sector->dataStartTime,
-			sector->dataEndTime,
-			sector->position.bytes,
-			sector->data.size(),
-			Sector::statusToString(sector->status)
-		);
-	}
 }
 
 static bool conflictable(Sector::Status status)
@@ -330,9 +297,6 @@ void readDiskCommand(AbstractDecoder& decoder)
 	if (!visualise.get().empty())
 		visualiseSectorsToFile(allSectors, visualise.get());
 	
-	if (!csvFile.get().empty())
-		writeCsv(allSectors, csvFile.get());
-
     writeSectorsToFile(allSectors, outputSpec);
 	if (failures)
 		std::cerr << "Warning: some sectors could not be decoded." << std::endl;
