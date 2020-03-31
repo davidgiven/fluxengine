@@ -4,7 +4,6 @@
 #include "fluxmap.h"
 #include "decoders/fluxmapreader.h"
 #include "decoders/decoders.h"
-#include "image.h"
 #include "protocol.h"
 #include "decoders/rawbits.h"
 #include "record.h"

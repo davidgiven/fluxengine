@@ -1,11 +1,12 @@
 #include "globals.h"
-#include "image.h"
 #include "flags.h"
 #include "dataspec.h"
 #include "sector.h"
 #include "sectorset.h"
 #include "imagewriter/imagewriter.h"
 #include "fmt/format.h"
+#include <iostream>
+#include <fstream>
 
 std::map<std::string, ImageWriter::Constructor> ImageWriter::formats =
 {
@@ -60,6 +61,56 @@ void ImageWriter::adjustGeometry()
 		sectors.calculateSize(spec.cylinders, spec.heads, spec.sectors, spec.bytes);
         spec.initialised = true;
 		std::cout << "Autodetecting output geometry\n";
+	}
+}
+
+void ImageWriter::writeCsv(const std::string& filename)
+{
+	std::ofstream f(filename, std::ios::out);
+	if (!f.is_open())
+		Error() << "cannot open CSV report file";
+
+	f << "\"Physical track\","
+		"\"Physical side\","
+		"\"Logical track\","
+		"\"Logical side\","
+		"\"Logical sector\","
+		"\"Clock (ns)\","
+		"\"Header start (ns)\","
+		"\"Header end (ns)\","
+		"\"Data start (ns)\","
+		"\"Data end (ns)\","
+		"\"Raw data address (bytes)\","
+		"\"User payload length (bytes)\","
+		"\"Status\""
+		"\n";
+
+	for (int track = 0; track < spec.cylinders; track++)
+	{
+		for (int head = 0; head < spec.heads; head++)
+		{
+			for (int sectorId = 0; sectorId < spec.sectors; sectorId++)
+			{
+				f << fmt::format("{},{},", track, head);
+				const auto& sector = sectors.get(track, head, sectorId);
+				if (!sector)
+					f << fmt::format(",,{},,,,,,,,MISSING\n", sectorId);
+				else
+					f << fmt::format("{},{},{},{},{},{},{},{},{},{},{}\n",
+						sector->logicalTrack,
+						sector->logicalSide,
+						sector->logicalSector,
+						sector->clock,
+						sector->headerStartTime,
+						sector->headerEndTime,
+						sector->dataStartTime,
+						sector->dataEndTime,
+						sector->position.bytes,
+						sector->data.size(),
+						Sector::statusToString(sector->status)
+					);
+			}
+		}
 	}
 }
 

@@ -6,7 +6,6 @@
 #include "macintosh/macintosh.h"
 #include "sector.h"
 #include "sectorset.h"
-#include "image.h"
 #include "record.h"
 #include "fmt/format.h"
 #include <fstream>

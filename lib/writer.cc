@@ -9,9 +9,9 @@
 #include "encoders/encoders.h"
 #include "fluxsource/fluxsource.h"
 #include "fluxsink/fluxsink.h"
+#include "imagereader/imagereader.h"
 #include "fmt/format.h"
 #include "record.h"
-#include "image.h"
 #include "sector.h"
 #include "sectorset.h"
 
@@ -41,6 +41,11 @@ void setWriterDefaultDest(const std::string& dest)
 void setWriterDefaultInput(const std::string& input)
 {
     ::input.set(input);
+}
+
+static SectorSet readSectorsFromFile(const ImageSpec& spec)
+{
+	return ImageReader::create(spec)->readImage();
 }
 
 void writeTracks(
