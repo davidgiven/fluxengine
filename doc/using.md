@@ -177,7 +177,8 @@ directory.
 	These all take an optional `--write-flux` option which will cause the raw
 	flux to be written to the specified file as well as the normal decode.
 	There are various `--dump` options for showing raw data during the decode
-	process.
+	process, and `--write-csv` will write a copious CSV report of the state of
+	every sector in the file in machine-readable format.
 
   - `fluxengine write *`: writes various formats of disk. Again, see the
 	per-format documentation [in the index page](../README.md).

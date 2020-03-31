@@ -4,7 +4,6 @@
 #include "fluxmap.h"
 #include "decoders/decoders.h"
 #include "mx/mx.h"
-#include "image.h"
 #include "sector.h"
 #include "sectorset.h"
 #include "record.h"

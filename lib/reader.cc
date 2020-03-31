@@ -12,12 +12,13 @@
 #include "sectorset.h"
 #include "visualiser.h"
 #include "record.h"
-#include "image.h"
 #include "bytes.h"
 #include "decoders/rawbits.h"
 #include "track.h"
 #include "imagewriter/imagewriter.h"
 #include "fmt/format.h"
+#include <iostream>
+#include <fstream>
 
 FlagGroup readerFlags
 {
@@ -68,6 +69,11 @@ static SettableFlag highDensityFlag(
 	{ "--high-density", "--hd" },
 	"set the drive to high density mode");
 
+static StringFlag csvFile(
+	{ "--write-csv" },
+	"write a CSV report of the disk state",
+	"");
+
 static std::unique_ptr<FluxSink> outputFluxSink;
 
 void setReaderDefaultSource(const std::string& source)
@@ -83,6 +89,16 @@ void setReaderDefaultOutput(const std::string& output)
 void setReaderRevolutions(int revolutions)
 {
 	setHardwareFluxSourceRevolutions(revolutions);
+}
+
+static void writeSectorsToFile(const SectorSet& sectors, const ImageSpec& spec)
+{
+	std::unique_ptr<ImageWriter> writer(ImageWriter::create(sectors, spec));
+	writer->adjustGeometry();
+	writer->printMap();
+	if (!csvFile.get().empty())
+		writer->writeCsv(csvFile.get());
+	writer->writeImage();
 }
 
 void Track::readFluxmap()
@@ -280,7 +296,7 @@ void readDiskCommand(AbstractDecoder& decoder)
 
 	if (!visualise.get().empty())
 		visualiseSectorsToFile(allSectors, visualise.get());
-
+	
     writeSectorsToFile(allSectors, outputSpec);
 	if (failures)
 		std::cerr << "Warning: some sectors could not be decoded." << std::endl;

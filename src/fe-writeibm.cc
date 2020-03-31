@@ -5,7 +5,6 @@
 #include "ibm/ibm.h"
 #include "writer.h"
 #include "fmt/format.h"
-#include "image.h"
 #include <fstream>
 
 static FlagGroup flags { &writerFlags };

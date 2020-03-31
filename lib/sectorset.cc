@@ -1,5 +1,4 @@
 #include "globals.h"
-#include "image.h"
 #include "sector.h"
 #include "sectorset.h"
 
