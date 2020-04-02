@@ -3,7 +3,6 @@
 #include "protocol.h"
 #include "fluxmap.h"
 #include "bytes.h"
-#include "common/crunch.h"
 #include <libusb.h>
 #include "fmt/format.h"
 
@@ -43,10 +42,6 @@ static void usb_init()
     i = libusb_claim_interface(device, 0);
     if (i < 0)
         Error() << "could not claim interface: " << usberror(i);
-
-	i = libusb_reset_device(device);
-	if (i < 0)
-		Error() << "could not reset device: " << usberror(i);
 
     int version = usbGetVersion();
     if (version != FLUXENGINE_VERSION)
@@ -161,7 +156,7 @@ static int large_bulk_transfer(int ep, Bytes& bytes)
     int len;
     int i = libusb_bulk_transfer(device, ep, bytes.begin(), bytes.size(), &len, TIMEOUT);
     if (i < 0)
-        Error() << "data transfer failed: " << usberror(i);
+        Error() << fmt::format("data transfer failed at {} bytes: {}", len, usberror(i));
     return len;
 }
 
@@ -280,7 +275,6 @@ void usbWrite(int side, const Bytes& bytes)
     ((uint8_t*)&f.bytes_to_write)[3] = safelen >> 24;
 
     usb_cmd_send(&f, f.f.size);
-
     large_bulk_transfer(FLUXENGINE_DATA_OUT_EP, safeBytes);
     
     await_reply<struct any_frame>(F_FRAME_WRITE_REPLY);

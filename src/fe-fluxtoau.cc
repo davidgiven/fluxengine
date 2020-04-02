@@ -81,14 +81,14 @@ int mainConvertFluxToAu(int argc, const char* argv[])
         while (!fmr.eof())
         {
             unsigned ticks;
-            int op = fmr.readOpcode(ticks);
-            if (op == -1)
+            uint8_t bits = fmr.getNextEvent(ticks);
+            if (fmr.eof())
                 break;
             timestamp += ticks;
 
-            if (op == F_OP_PULSE)
+            if (bits & F_BIT_PULSE)
                 data[timestamp*channels + 0] = 0x7f;
-            if (withIndex && (op == F_OP_INDEX))
+            if (withIndex && (bits & F_BIT_INDEX))
                 data[timestamp*channels + 1] = 0x7f;
         }
 

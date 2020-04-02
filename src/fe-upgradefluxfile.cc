@@ -6,7 +6,7 @@
 
 static sqlite3* db;
 
-static void update_version_1_to_2()
+static void update_version_1_to_3()
 {
     for (const auto i : sqlFindFlux(db))
     {
@@ -26,6 +26,44 @@ static void update_version_1_to_2()
             else
                 pending += 0x80;
         }
+
+        sqlWriteFlux(db, i.first, i.second, after);
+        std::cout << '.' << std::flush;
+    }
+    std::cout << std::endl;
+}
+
+static void update_version_2_to_3()
+{
+	for (const auto i : sqlFindFlux(db))
+	{
+		Fluxmap after;
+        const auto before = sqlReadFlux(db, i.first, i.second);
+
+        /* Remember, before does not contain valid opcodes! */
+        unsigned pending = 0;
+        for (uint8_t b : before->rawBytes())
+        {
+			switch (b)
+			{
+				case 0x80: /* pulse */
+					after.appendInterval(pending);
+					after.appendPulse();
+					pending = 0;
+					break;
+
+				case 0x81: /* index */
+					after.appendInterval(pending);
+					after.appendIndex();
+					pending = 0;
+					break;
+
+				default:
+					pending += b;
+					break;
+			}
+        }
+		after.appendInterval(pending);
 
         sqlWriteFlux(db, i.first, i.second, after);
         std::cout << '.' << std::flush;
@@ -71,13 +109,23 @@ int mainUpgradeFluxFile(int argc, const char* argv[])
 
     if (version == FLUX_VERSION_1)
     {
-        std::cout << "Upgrading to version 2\n";
+        std::cout << "Upgrading to version 3\n";
         sqlStmt(db, "BEGIN;");
-        update_version_1_to_2();
-        version = FLUX_VERSION_2;
+        update_version_1_to_3();
+        version = FLUX_VERSION_3;
         sqlWriteIntProperty(db, "version", version);
         sqlStmt(db, "COMMIT;");
     }
+
+	if (version == FLUX_VERSION_2)
+	{
+        std::cout << "Upgrading to version 3\n";
+        sqlStmt(db, "BEGIN;");
+        update_version_2_to_3();
+        version = FLUX_VERSION_3;
+        sqlWriteIntProperty(db, "version", version);
+        sqlStmt(db, "COMMIT;");
+	}
 
     std::cout << "Vacuuming\n";
     sqlStmt(db, "VACUUM;");

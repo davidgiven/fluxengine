@@ -72,7 +72,7 @@ static nanoseconds_t guessClock(const Fluxmap& fluxmap)
 
     while (!fr.eof())
     {
-        unsigned interval = fr.readNextMatchingOpcode(F_OP_PULSE);
+        unsigned interval = fr.findEvent(F_BIT_PULSE);
         if (interval > 0xff)
             continue;
         buckets[interval]++;
@@ -155,7 +155,11 @@ static nanoseconds_t guessClock(const Fluxmap& fluxmap)
 				s += BLOCK_ELEMENTS[8];
 			s += BLOCK_ELEMENTS[bar & 7];
 
-			std::cout << fmt::format("{:.2f} {:6} {}", (double)i * US_PER_TICK, value, s);
+			std::cout << fmt::format("{: 3} {:.2f} {:6} {}",
+					i,
+					(double)i * US_PER_TICK,
+					value,
+					s);
 			std::cout << std::endl;
 		}
 	}
@@ -185,6 +189,12 @@ int mainInspect(int argc, const char* argv[])
 	auto& track = *tracks.begin();
 	track->readFluxmap();
 
+	std::cout << fmt::format("0x{:x} bytes of data in {:.3f}ms\n",
+			track->fluxmap->bytes(),
+			track->fluxmap->duration() / 1e6);
+	std::cout << fmt::format("Required USB bandwidth: {}kB/s\n",
+			track->fluxmap->bytes()/1024.0 / (track->fluxmap->duration() / 1e9));
+
 	nanoseconds_t clockPeriod = guessClock(*track->fluxmap);
 	std::cout << fmt::format("{:.2f} us clock detected.", (double)clockPeriod/1000.0) << std::flush;
 
@@ -208,7 +218,7 @@ int mainInspect(int argc, const char* argv[])
 		nanoseconds_t lasttransition = 0;
 		while (!fmr.eof())
 		{
-			ticks += fmr.readNextMatchingOpcode(F_OP_PULSE);
+			ticks += fmr.findEvent(F_BIT_PULSE);
 
 			nanoseconds_t transition = ticks*NS_PER_TICK;
 			nanoseconds_t next;

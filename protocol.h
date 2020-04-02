@@ -86,8 +86,8 @@ enum
 
 enum
 {
-    F_OP_PULSE = 0x80,
-    F_OP_INDEX = 0x81
+    F_BIT_PULSE = 0x80,
+    F_BIT_INDEX = 0x40
 };
 
 struct frame_header

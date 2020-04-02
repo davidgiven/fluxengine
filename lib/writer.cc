@@ -15,7 +15,7 @@
 #include "sector.h"
 #include "sectorset.h"
 
-FlagGroup writerFlags { &hardwareFluxSourceFlags, &hardwareFluxSinkFlags };
+FlagGroup writerFlags { &hardwareFluxSourceFlags, &sqliteFluxSinkFlags, &hardwareFluxSinkFlags };
 
 static DataSpecFlag dest(
     { "--dest", "-d" },
@@ -58,19 +58,7 @@ void writeTracks(
 	setHardwareFluxSourceDensity(highDensityFlag);
 	setHardwareFluxSinkDensity(highDensityFlag);
 
-	if (!spec.filename.empty())
-	{
-		outdb = sqlOpen(spec.filename, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
-		sqlPrepareFlux(outdb);
-		sqlStmt(outdb, "BEGIN;");
-        sqlWriteIntProperty(outdb, "version", FLUX_VERSION_CURRENT);
-		atexit([]()
-			{
-				sqlStmt(outdb, "COMMIT;");
-				sqlClose(outdb);
-			}
-		);
-	}
+	std::shared_ptr<FluxSink> fluxSink = FluxSink::create(spec);
 
     for (const auto& location : spec.locations)
     {
@@ -78,31 +66,16 @@ void writeTracks(
         std::unique_ptr<Fluxmap> fluxmap = producer(location.track, location.side);
         if (!fluxmap)
         {
-            if (!outdb)
-            {
-                std::cout << "erasing\n";
-                usbSeek(location.track);
-                usbErase(location.side);
-            }
-            else
-                std::cout << "skipping\n";
+            /* Create an empty fluxmap for writing. */
+            fluxmap.reset(new Fluxmap());
         }
-        else
-        {
-            /* Precompensation actually seems to make things worse, so let's leave
-             * it disabled for now. */
-            //fluxmap->precompensate(PRECOMPENSATION_THRESHOLD_TICKS, 2);
-            if (outdb)
-                sqlWriteFlux(outdb, location.track, location.side, *fluxmap);
-            else
-            {
-                Bytes crunched = fluxmap->rawBytes().crunch();
-                usbSeek(location.track);
-                usbWrite(location.side, crunched);
-            }
-            std::cout << fmt::format(
-                "{0} ms in {1} bytes", int(fluxmap->duration()/1e6), fluxmap->bytes()) << std::endl;
-        }
+
+        /* Precompensation actually seems to make things worse, so let's leave
+            * it disabled for now. */
+        //fluxmap->precompensate(PRECOMPENSATION_THRESHOLD_TICKS, 2);
+        fluxSink->writeFlux(location.track, location.side, *fluxmap);
+        std::cout << fmt::format(
+            "{0} ms in {1} bytes", int(fluxmap->duration()/1e6), fluxmap->bytes()) << std::endl;
     }
 }
 

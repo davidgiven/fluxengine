@@ -50,9 +50,9 @@ public:
     {
         usbSetDrive(_drive, high_density, indexMode);
         usbSeek(track);
-        Bytes crunched = usbRead(side, synced, revolutions * _oneRevolution);
+        Bytes data = usbRead(side, synced, revolutions * _oneRevolution);
         auto fluxmap = std::make_unique<Fluxmap>();
-        fluxmap->appendBytes(crunched.uncrunch());
+        fluxmap->appendBytes(data);
         return fluxmap;
     }
 
