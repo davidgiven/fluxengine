@@ -6,7 +6,7 @@
 
 static sqlite3* db;
 
-static void update_version_1_to_2()
+static void update_version_1_to_3()
 {
     for (const auto i : sqlFindFlux(db))
     {
@@ -109,10 +109,10 @@ int mainUpgradeFluxFile(int argc, const char* argv[])
 
     if (version == FLUX_VERSION_1)
     {
-        std::cout << "Upgrading to version 2\n";
+        std::cout << "Upgrading to version 3\n";
         sqlStmt(db, "BEGIN;");
-        update_version_1_to_2();
-        version = FLUX_VERSION_2;
+        update_version_1_to_3();
+        version = FLUX_VERSION_3;
         sqlWriteIntProperty(db, "version", version);
         sqlStmt(db, "COMMIT;");
     }
