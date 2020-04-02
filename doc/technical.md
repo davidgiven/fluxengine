@@ -22,19 +22,17 @@ FluxEngine, where a different datapath state machine thingy (the PSoC5LP has
 24, all independently programmable) to interpret the bytecodes, generate a
 stream of pulses to the disk.
 
-The bytecode format represents an interval between pulses as a byte, a pulse
-as a byte, and the index hole as a byte. Timer overflows are handled by
-sending multiple intervals in a row. However, the USB transport applies a
-simple compression system to this in order to get the USB bandwidth down to
-something manageable.
+The bytecode format is very simple with a six-bit interval since the previous
+event in the lower six bits and the top two bits are set of a pulse or an index
+hole (or both, or neither).
 
 An HD floppy has a nominal pulse frequency of 500kHz, and we use a sample
 clock of 12MHz (every 83ns). This means that our 500kHz pulses will have an
 average interval of 24. This gives us more than enough resolution. At this
 speed, in the 200ms that a 3.5" disk takes to rotate, we will see about
-100,000 pulses. Each one is encoded as two bytes, one for the interval and
-one to generate the pulse; so that revolution generates 200kB of data.
-(Extremely approximately. The actual figure is less.)
+100,000 pulses. Each one is encoded as a single byte; so that revolution
+generates 100kB of data.  (Extremely approximately. The actual figure varies
+depending on what data is stored on the disk.)
 
 (The clock needs to be absolutely rock solid or we get jitter which makes the
 data difficult to analyse, so 12 was chosen to be derivable from the

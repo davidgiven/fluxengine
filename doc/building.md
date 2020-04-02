@@ -261,8 +261,8 @@ You should now have a working board, so it's time to test it.
      [get in touch](https://github.com/davidgiven/fluxengine/issues/new).
 
   8. Do `fluxengine test bandwidth` from the shell. It'll measure your USB
-	 bandwidth. Ideally you should be getting above 900kB/s in both directions.
-	 FluxEngine needs about 400kB/s for a DD disk and about 850kB/s for a HD
+	 bandwidth. Ideally you should be getting above 800kB/s in both directions.
+	 FluxEngine needs about 300kB/s for a DD disk and about 600kB/s for a HD
 	 disk, so if you're getting less than this, try a different USB port.
 
   9. Insert a standard PC formatted floppy disk into the drive (probably a good

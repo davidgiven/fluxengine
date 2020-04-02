@@ -24,17 +24,10 @@ Don't believe me? Watch the demo reel!
 <iframe width="373" height="210" src="https://www.youtube.com/embed/m_s1iw8eW7o" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </div>
 
-**Important note.** On 2019-02-09 I did a hardware redesign and moved the pins on
-the board. Sorry for the inconvenience, but it means you don't have to modify
-the board any more to make it work. If you built the hardware prior to then,
-you'll need to adjust it.
-
-**Another important note.** On 2019-07-03 I've revamped the build process and
-the (command line) user interface. It should be much nicer now, not least in
-that there's a single client binary with all the functionality in it. The
-interface is a little different, but not much. The build process is now
-better (simpler). See [the building](doc/building.md) and
-[using](doc/using.md) pages for more details.
+**Important note.** On 2020-04-02 I changed the bytecode format (and firmware).
+Flux files will need to be upgraded with `fluxengine upgradefluxfile`. The new
+format should be more reliable and use way, way less bandwidth. Sorry for the
+inconvenience.
 
 Where?
 ------
