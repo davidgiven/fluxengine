@@ -75,7 +75,7 @@ begin
                         opcode <= {rdataed, indexed, counter};
                         rdataed <= 0;
                         indexed <= 0;
-                        counter <= 0;
+                        counter <= 1; /* remember to count this tick */
                         state <= STATE_OPCODE;
                     end
                     else
