@@ -57,6 +57,7 @@ public:
     ByteWriter writer();
 
     void writeToFile(const std::string& filename) const;
+	void writeTo(std::ostream& stream) const;
 
 private:
     std::shared_ptr<std::vector<uint8_t>> _data;

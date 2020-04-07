@@ -258,6 +258,11 @@ void Bytes::writeToFile(const std::string& filename) const
     f.close();
 }
 
+void Bytes::writeTo(std::ostream& stream) const
+{
+	stream.write((const char*) cbegin(), size());
+}
+
 ByteReader Bytes::reader() const
 {
     return ByteReader(*this);
