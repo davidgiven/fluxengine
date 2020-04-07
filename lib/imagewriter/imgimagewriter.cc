@@ -46,7 +46,7 @@ public:
 					if (sector)
 					{
 						outputFile.seekp(sector->logicalTrack*trackSize + sector->logicalSide*headSize + sector->logicalSector*numBytes, std::ios::beg);
-						outputFile.write((const char*) sector->data.cbegin(), sector->data.size());
+						sector->data.slice(0, numBytes).writeTo(outputFile);
 					}
 				}
 			}
