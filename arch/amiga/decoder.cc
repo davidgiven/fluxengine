@@ -32,6 +32,8 @@ AbstractDecoder::RecordType AmigaDecoder::advanceToNextRecord()
 void AmigaDecoder::decodeSectorRecord()
 {
     const auto& rawbits = readRawBits(AMIGA_RECORD_SIZE*16);
+	if (rawbits < (AMIGA_RECORD_SIZE*16))
+		return;
     const auto& rawbytes = toBytes(rawbits).slice(0, AMIGA_RECORD_SIZE*2);
     const auto& bytes = decodeFmMfm(rawbits).slice(0, AMIGA_RECORD_SIZE);
 
