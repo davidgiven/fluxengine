@@ -42,7 +42,7 @@ void visualiseSectorsToFile(const SectorSet& sectors, const std::string& filenam
 
         for (int physicalTrack = 0; physicalTrack < TRACKS; physicalTrack++)
         {
-            double radius = CORE + physicalTrack*TRACK_SPACING;
+            double radius = CORE + (TRACKS-physicalTrack)*TRACK_SPACING;
             f << fmt::format("<circle cx='0' cy='0' r='{}' stroke='#888' stroke-width='0.5' fill='none'/>", radius);
 
             auto drawArc = [&](const std::unique_ptr<Sector>& sector, nanoseconds_t start, nanoseconds_t end, const std::string& colour)
@@ -51,7 +51,7 @@ void visualiseSectorsToFile(const SectorSet& sectors, const std::string& filenam
                 end %= period*1000000;
                 if (end < start)
                     end += period*1000000;
-                
+
                 double theta1 = start * radians_per_ns;
                 double theta2 = end * radians_per_ns;
                 int large = (theta2 - theta1) >= M_PI;
