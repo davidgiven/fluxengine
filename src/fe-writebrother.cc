@@ -9,13 +9,22 @@
 
 static FlagGroup flags { &writerFlags, &brotherEncoderFlags };
 
+static int brotherFormat = 240;
+static ActionFlag preset120(
+	{ "--brother-preset-120" },
+	"Write the Brother 120kB format instead of the 240kB one.",
+	[] {
+		setWriterDefaultInput(":c=39:h=1:s=12:b=256");
+		brotherFormat = 120;
+	});
+
 int mainWriteBrother(int argc, const char* argv[])
 {
     setWriterDefaultInput(":c=78:h=1:s=12:b=256");
 	setWriterDefaultDest(":d=0:t=0-77:s=0");
     flags.parseFlags(argc, argv);
 
-	BrotherEncoder encoder;
+	BrotherEncoder encoder(brotherFormat);
 	writeDiskCommand(encoder);
 
     return 0;

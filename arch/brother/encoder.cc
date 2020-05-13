@@ -129,9 +129,24 @@ static int charToInt(char c)
 std::unique_ptr<Fluxmap> BrotherEncoder::encode(
 	int physicalTrack, int physicalSide, const SectorSet& allSectors)
 {
-	if ((physicalTrack < 0) || (physicalTrack >= BROTHER_TRACKS_PER_DISK)
-        || (physicalSide != 0))
+	int logicalTrack;
+	if (physicalSide != 0)
 		return std::unique_ptr<Fluxmap>();
+	switch (_format)
+	{
+		case 120:
+			if ((physicalTrack < 0) || (physicalTrack >= BROTHER_TRACKS_PER_120KB_DISK)
+					|| (physicalTrack & 1))
+				return std::unique_ptr<Fluxmap>();
+			logicalTrack = physicalTrack/2;
+			break;
+
+		case 240:
+			if ((physicalTrack < 0) || (physicalTrack >= BROTHER_TRACKS_PER_240KB_DISK))
+				return std::unique_ptr<Fluxmap>();
+			logicalTrack = physicalTrack;
+			break;
+	}
 
 	int bitsPerRevolution = 200000.0 / clockRateUs;
 	const std::string& skew = sectorSkew.get();
@@ -146,7 +161,7 @@ std::unique_ptr<Fluxmap> BrotherEncoder::encode(
 		double dataMs = headerMs + postHeaderSpacingMs;
 		unsigned dataCursor = dataMs*1e3 / clockRateUs;
 
-		const auto& sectorData = allSectors.get(physicalTrack, 0, sectorId);
+		const auto& sectorData = allSectors.get(logicalTrack, 0, sectorId);
 
 		fillBitmapTo(bits, cursor, headerCursor, { true, false });
 		write_sector_header(bits, cursor, physicalTrack, sectorId);
