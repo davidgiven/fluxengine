@@ -4,6 +4,9 @@
 
 Fluxmap& Fluxmap::appendBytes(const Bytes& bytes)
 {
+	if (bytes.size() == 0)
+		return *this;
+
     return appendBytes(&bytes[0], bytes.size());
 }
 
