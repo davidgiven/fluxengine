@@ -29,14 +29,16 @@ public:
 class BrotherEncoder : public AbstractEncoder
 {
 public:
-	BrotherEncoder(int format):
-		_format(format)
+	BrotherEncoder(int format, int bias):
+		_format(format),
+		_bias(bias)
 	{}
 
 	virtual ~BrotherEncoder() {}
 
 private:
 	int _format;
+	int _bias;
 public:
     std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors);
 };

@@ -132,6 +132,7 @@ std::unique_ptr<Fluxmap> BrotherEncoder::encode(
 	int logicalTrack;
 	if (physicalSide != 0)
 		return std::unique_ptr<Fluxmap>();
+	physicalTrack -= _bias;
 	switch (_format)
 	{
 		case 120:
