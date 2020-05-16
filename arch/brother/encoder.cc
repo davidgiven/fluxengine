@@ -136,7 +136,7 @@ std::unique_ptr<Fluxmap> BrotherEncoder::encode(
 	switch (_format)
 	{
 		case 120:
-			if ((physicalTrack < 0) || (physicalTrack >= BROTHER_TRACKS_PER_120KB_DISK)
+			if ((physicalTrack < 0) || (physicalTrack >= (BROTHER_TRACKS_PER_120KB_DISK*2))
 					|| (physicalTrack & 1))
 				return std::unique_ptr<Fluxmap>();
 			logicalTrack = physicalTrack/2;
@@ -165,7 +165,7 @@ std::unique_ptr<Fluxmap> BrotherEncoder::encode(
 		const auto& sectorData = allSectors.get(logicalTrack, 0, sectorId);
 
 		fillBitmapTo(bits, cursor, headerCursor, { true, false });
-		write_sector_header(bits, cursor, physicalTrack, sectorId);
+		write_sector_header(bits, cursor, logicalTrack, sectorId);
 		fillBitmapTo(bits, cursor, dataCursor, { true, false });
 		write_sector_data(bits, cursor, sectorData->data);
 	}
