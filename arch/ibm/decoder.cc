@@ -57,11 +57,11 @@ const FluxPattern FM_TRS80DAM1_PATTERN(16, 0xf56b);
 
 /* 
  * TRS80DAM2 record:
- * flux:   XXXX-X-X-XX-XXX- = 0xf56c
+ * flux:   XXXX-X-X-XX-XXX- = 0xf56e
  * clock:  X X - - - X X X  = 0xc7
  * data:    X X X X X - X - = 0xfa
  */
-const FluxPattern FM_TRS80DAM2_PATTERN(16, 0xf56c);
+const FluxPattern FM_TRS80DAM2_PATTERN(16, 0xf56e);
 
 /* MFM record separator:
  * 0xA1 is:
