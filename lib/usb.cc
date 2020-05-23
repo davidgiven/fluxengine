@@ -153,6 +153,9 @@ nanoseconds_t usbGetRotationalPeriod(void)
 
 static int large_bulk_transfer(int ep, Bytes& bytes)
 {
+    if (bytes.size() == 0)
+        return 0;
+
     int len;
     int i = libusb_bulk_transfer(device, ep, bytes.begin(), bytes.size(), &len, TIMEOUT);
     if (i < 0)

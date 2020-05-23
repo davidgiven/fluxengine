@@ -5,12 +5,15 @@
 #include "sectorset.h"
 #include "imagereader/imagereader.h"
 #include "fmt/format.h"
+#include <algorithm>
+#include <ctype.h>
 
 std::map<std::string, ImageReader::Constructor> ImageReader::formats =
 {
 	{".adf", ImageReader::createImgImageReader},
 	{".d81", ImageReader::createImgImageReader},
 	{".img", ImageReader::createImgImageReader},
+	{".ima", ImageReader::createImgImageReader},
 };
 
 static bool ends_with(const std::string& value, const std::string& ending)

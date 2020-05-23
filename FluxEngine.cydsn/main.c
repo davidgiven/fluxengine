@@ -537,14 +537,14 @@ static void cmd_write(struct write_frame* f)
 
     init_replay_dma();
     bool writing = false; /* to the disk */
-    bool finished = false;
     int packets = f->bytes_to_write / FRAME_SIZE;
+    bool finished = (packets == 0);
     int count_written = 0;
     int count_read = 0;
     dma_writing_to_td = 0;
     dma_reading_from_td = -1;
     dma_underrun = false;
-
+    
     int old_reading_from_td = -1;
     for (;;)
     {
