@@ -8,7 +8,7 @@
 module Sampler (
 	output [2:0] debug_state,
 	output reg [7:0] opcode,
-	output reg       req,
+	output  reg       req,
 	input   clock,
 	input   index,
 	input   rdata,
@@ -18,60 +18,62 @@ module Sampler (
 
 //`#start body` -- edit after this line, do not edit this line
 
+// NOTE: Reset pulse is used in both clock domains, and must be long enough
+// to be detected in both.
+
 reg [5:0] counter;
 
-reg sampleclock_q;
 reg index_q;
 reg rdata_q;
 
-reg sampleclock_edge;
 reg index_edge;
 reg rdata_edge;
 
-always @(posedge clock)
+reg req_toggle;
+
+always @(posedge sampleclock)
 begin
     if (reset)
     begin
-        sampleclock_edge <= 0;
         index_edge <= 0;
         rdata_edge <= 0;
-        sampleclock_q <= 0;
         index_q <= 0;
         rdata_q <= 0;
         counter <= 0;
+        req_toggle <= 0;
     end
     else
     begin
-        /* Remember positive egdes for sampleclock, index and rdata. */
-        
-        /* Positive-going edge detection of 16 MHz square-wave sample clock vs.
-         * 64 MHz clock.
+        /* Both index and rdata are active high -- positive-going edges
+         * indicate the start of an index pulse and read pulse, respectively.
          */
-        sampleclock_edge <= sampleclock && !sampleclock_q;
-        sampleclock_q <= sampleclock;
+         
+        index_edge <= index && !index_q;
+        index_q <= index;
         
-        /* Request to write FIFO is inactive by default */
-        req <= 0;
+        rdata_edge <= rdata && !rdata_q;
+        rdata_q <= rdata;
         
-        if (sampleclock_edge) begin
-            /* Both index and rdata are active high -- positive-going edges
-             * indicate the start of an index pulse and read pulse, respectively.
-             */
-             
-            index_edge <= index && !index_q;
-            index_q <= index;
-            
-            rdata_edge <= rdata && !rdata_q;
-            rdata_q <= rdata;
-            
-            if (rdata_edge || index_edge || (counter == 6'h3f)) begin
-                opcode <= { rdata_edge, index_edge, counter };
-                req <= 1;
-                counter <= 1;
-            end else begin
-                counter <= counter + 1;
-            end
+        if (rdata_edge || index_edge || (counter == 6'h3f)) begin
+            opcode <= { rdata_edge, index_edge, counter };
+            req_toggle <= ~req_toggle;
+            counter <= 1;   /* remember to count this tick */
+        end else begin
+            counter <= counter + 1;
         end
+    end
+end
+
+reg req_toggle_q;
+
+always @(posedge clock)
+begin
+    if (reset) begin
+        req_toggle_q <= 0;
+        req <= 0;
+    end else begin
+        req_toggle_q <= req_toggle;
+        req <= (req_toggle != req_toggle_q);
     end
 end
 
