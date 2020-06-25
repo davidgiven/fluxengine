@@ -10,6 +10,7 @@
 #include "sector.h"
 #include "track.h"
 #include "fmt/format.h"
+#include "kmedian.h"
 
 static FlagGroup flags { &readerFlags };
 
@@ -169,6 +170,11 @@ static nanoseconds_t guessClock(const Fluxmap& fluxmap)
 	std::cout << fmt::format("Peak start:   {} ({:.2f} us)", peaklo, peaklo*US_PER_TICK) << std::endl;
 	std::cout << fmt::format("Peak end:     {} ({:.2f} us)", peakhi, peakhi*US_PER_TICK) << std::endl;
 	std::cout << fmt::format("Median:       {} ({:.2f} us)", median, median*US_PER_TICK) << std::endl;
+
+	std::cout << "\nCalculating centres for 3 bands...\n";
+	std::vector<float> centres = optimalKMedian(fluxmap, 3);
+	for (int i=0; i<3; i++)
+		std::cout << fmt::format("center #{} = {:.2f} us\n", i, centres[i]);
 
     /* 
      * Okay, the median should now be a good candidate for the (or a) clock.

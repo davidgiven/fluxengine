@@ -192,6 +192,7 @@ buildlibrary libbackend.a \
     lib/fluxsource/streamfluxsource.cc \
     lib/globals.cc \
     lib/hexdump.cc \
+	lib/kmedian.cc \
     lib/ldbs.cc \
     lib/reader.cc \
     lib/sector.cc \
