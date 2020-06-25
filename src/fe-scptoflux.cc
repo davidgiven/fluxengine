@@ -16,7 +16,7 @@ static int endSide;
 
 static void syntax()
 {
-    std::cout << "Syntax: fluxengine convert cwftoflux <cwffile> <fluxfile>\n";
+    std::cout << "Syntax: fluxengine convert scptoflux <scpfile> <fluxfile>\n";
     exit(0);
 }
 

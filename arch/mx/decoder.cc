@@ -37,7 +37,7 @@ AbstractDecoder::RecordType MxDecoder::advanceToNextRecord()
         const FluxMatcher* matcher = nullptr;
         _sector->clock = _clock = _fmr->seekToPattern(ID_PATTERN, matcher);
         readRawBits(32); /* skip the ID mark */
-        _logicalTrack = decodeFmMfm(readRawBits(32)).reader().read_be16();
+        _logicalTrack = decodeFmMfm(readRawBits(32)).slice(0, 32).reader().read_be16();
     }
     else if (_currentSector == 10)
     {
