@@ -61,10 +61,7 @@ static int strackno(int track, int side)
 {
     if (fortyTrackMode)
         track /= 2;
-    if (singleSided)
-        return track;
-    else
-        return (track << 1) | side;
+	return (track << 1) | side;
 }
 
 int mainConvertFluxToScp(int argc, const char* argv[])
@@ -117,9 +114,15 @@ int mainConvertFluxToScp(int argc, const char* argv[])
         for (int side = 0; side <= maxside; side++)
         {
             int strack = strackno(track, side);
-            std::cout << fmt::format("FE track {}.{}, SCP track {}: ", track, side, strack) << std::flush;
+            std::cout << fmt::format("{}.{}: ", track, side) << std::flush;
 
             auto fluxmap = sqlReadFlux(inputDb, track, side);
+			if (fluxmap->bytes() == 0)
+			{
+				std::cout << "missing\n";
+				continue;
+			}
+
             ScpTrack trackheader = {0};
             trackheader.track_id[0] = 'T';
             trackheader.track_id[1] = 'R';
@@ -175,7 +178,7 @@ int mainConvertFluxToScp(int argc, const char* argv[])
             trackdataWriter += Bytes((uint8_t*)&trackheader, sizeof(trackheader));
             trackdataWriter += fluxdata;
 
-            std::cout << fmt::format("{} ms in {} bytes\n",
+            std::cout << fmt::format("{:.3f} ms in {} bytes\n",
                 totalTicks * MS_PER_TICK,
                 fluxdata.size());
         }
