@@ -43,9 +43,7 @@ public:
 
 	float medianPoint(int low, int high)
 	{
-		int size = high - low;
-		int m = size / 2;
-
+		int m = (high + low - 1) / 2.0;
 		return (points[(int)floor(m)] + points[(int)ceil(m)]) / 2.0;
 	}
 
