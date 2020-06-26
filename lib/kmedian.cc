@@ -23,14 +23,9 @@ public:
 	std::vector<float> points;        /* sorted list of points */
 	std::vector<float> cumulativeSum; /* cumulative sum of points */
 
-	KCluster(const Fluxmap& fluxmap)
+	KCluster(const std::vector<float>& inputPoints)
 	{
-		FluxmapReader fmr(fluxmap);
-		while (!fmr.eof())
-		{
-			float point = fmr.findEvent(F_BIT_PULSE) * US_PER_TICK;
-			points.push_back(point);
-		}
+		points = inputPoints;
 		std::sort(points.begin(), points.end());
 
 		numPoints = points.size();
@@ -43,7 +38,7 @@ public:
 
 	float medianPoint(int low, int high)
 	{
-		int m = (high + low - 1) / 2.0;
+		float m = (high + low - 1) / 2.0;
 		return (points[(int)floor(m)] + points[(int)ceil(m)]) / 2.0;
 	}
 
@@ -185,13 +180,11 @@ public:
 		 */
 
 		int currentClusteringRange = numPoints;
-		std::vector<int> clusterBoundaries;
 		std::vector<float> centres;
 
 		for (int i=numClusters; i>0; i--)
 		{
 			int newClusterRange = T[i][currentClusteringRange];
-			clusterBoundaries.push_back(newClusterRange);
 
 			centres.push_back(medianPoint(newClusterRange, currentClusteringRange));
 			currentClusteringRange = newClusterRange;
@@ -202,12 +195,29 @@ public:
 	}
 };
 	
+static std::vector<float> getPointsFromFluxmap(const Fluxmap& fluxmap)
+{
+	FluxmapReader fmr(fluxmap);
+	std::vector<float> points;
+	while (!fmr.eof())
+	{
+		float point = fmr.findEvent(F_BIT_PULSE) * US_PER_TICK;
+		points.push_back(point);
+	}
+	return points;
+}
+
 /* Analyses the fluxmap and determines the optimal cluster centres for it. The
  * number of clusters is taken from the size of the output array. */
 
+std::vector<float> optimalKMedian(const std::vector<float>& points, int clusters)
+{
+	KCluster kcluster(points);
+	return kcluster.optimalKMedian(clusters);
+}
+
 std::vector<float> optimalKMedian(const Fluxmap& fluxmap, int clusters)
 {
-	KCluster kcluster(fluxmap);
-	return kcluster.optimalKMedian(clusters);
+	return optimalKMedian(getPointsFromFluxmap(fluxmap), clusters);
 }
 

@@ -259,6 +259,7 @@ buildsimpleprogram brother240tool \
     libemu.a \
     libfmt.a \
 
+runtest amiga-test          tests/amiga.cc
 runtest bitaccumulator-test tests/bitaccumulator.cc
 runtest bytes-test          tests/bytes.cc
 runtest compression-test    tests/compression.cc
@@ -266,6 +267,7 @@ runtest dataspec-test       tests/dataspec.cc
 runtest flags-test          tests/flags.cc
 runtest fluxpattern-test    tests/fluxpattern.cc
 runtest fmmfm-test          tests/fmmfm.cc
+runtest kmedian-test        tests/kmedian.cc
 runtest kryoflux-test       tests/kryoflux.cc
 runtest ldbs-test           tests/ldbs.cc
-runtest amiga-test          tests/amiga.cc
+
