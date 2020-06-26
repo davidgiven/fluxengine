@@ -18,6 +18,11 @@ static SettableFlag fortyTrackMode(
     "set 48 tpi mode; only every other physical track is emitted"
 );
 
+static SettableFlag indexedMode(
+	{ "--indexed", "-i" },
+	"align data to track boundaries"
+);
+
 static SettableFlag singleSided(
     { "--single-sided", "-s" },
     "only emit side 0"
@@ -43,6 +48,13 @@ static void write_le32(uint8_t dest[4], uint32_t v)
     dest[1] = v >> 8;
     dest[2] = v >> 16;
     dest[3] = v >> 24;
+}
+
+static void appendChecksum(uint32_t& checksum, const Bytes& bytes)
+{
+	ByteReader br(bytes);
+	while (!br.eof())
+		checksum += br.read_8();
 }
 
 static int strackno(int track, int side)
@@ -90,7 +102,8 @@ int mainConvertFluxToScp(int argc, const char* argv[])
     fileheader.revolutions = 5;
     fileheader.start_track = 0;
     fileheader.end_track = maxStrack;
-    fileheader.flags = SCP_FLAG_INDEXED | (fortyTrackMode ? 0 : SCP_FLAG_96TPI);
+    fileheader.flags = (indexedMode ? SCP_FLAG_INDEXED : 0)
+			| (fortyTrackMode ? 0 : SCP_FLAG_96TPI);
     fileheader.cell_width = 0;
     fileheader.heads = singleSided ? 1 : 0;
 
@@ -116,6 +129,9 @@ int mainConvertFluxToScp(int argc, const char* argv[])
             FluxmapReader fmr(*fluxmap);
             Bytes fluxdata;
             ByteWriter fluxdataWriter(fluxdata);
+
+			if (indexedMode)
+				fmr.findEvent(F_BIT_INDEX);
 
             int revolution = 0;
             unsigned revTicks = 0;
@@ -167,6 +183,13 @@ int mainConvertFluxToScp(int argc, const char* argv[])
 
     sqlClose(inputDb);
     
+	uint32_t checksum = 0;
+	appendChecksum(checksum,
+		Bytes((const uint8_t*) &fileheader, sizeof(fileheader))
+			.slice(0x10));
+	appendChecksum(checksum, trackdata);
+	write_le32(fileheader.checksum, checksum);
+
     std::cout << "Writing output file...\n";
     std::ofstream of(filenames[1], std::ios::out | std::ios::binary);
     if (!of.is_open())
