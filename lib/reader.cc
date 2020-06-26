@@ -107,7 +107,7 @@ void Track::readFluxmap()
 	fluxmap = fluxsource->readFlux(physicalTrack, physicalSide);
 	std::cout << fmt::format(
 		"{0} ms in {1} bytes\n",
-            int(fluxmap->duration()/1e6),
+            fluxmap->duration()/1e6,
             fluxmap->bytes());
 	if (outputFluxSink)
 		outputFluxSink->writeFlux(physicalTrack, physicalSide, *fluxmap);
