@@ -47,8 +47,8 @@ void visualiseSectorsToFile(const SectorSet& sectors, const std::string& filenam
 
             auto drawArc = [&](const std::unique_ptr<Sector>& sector, nanoseconds_t start, nanoseconds_t end, const std::string& colour)
             {
-                start %= period*1000000;
-                end %= period*1000000;
+                start = fmod(start, period*1000000.0);
+                end = fmod(end, period*1000000.0);
                 if (end < start)
                     end += period*1000000;
                 

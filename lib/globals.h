@@ -12,7 +12,7 @@
 #include <set>
 #include <cassert>
 
-typedef int nanoseconds_t;
+typedef double nanoseconds_t;
 class Bytes;
 
 extern double getCurrentTime();
