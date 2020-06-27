@@ -41,6 +41,7 @@ private:
     std::vector<unsigned> _intervals;
     unsigned _length;
     unsigned _bits;
+	uint64_t _pattern;
     unsigned _highzeroes;
     bool _lowzero = false;
 
@@ -67,14 +68,8 @@ private:
 class FluxmapReader
 {
 public:
-    FluxmapReader(const Fluxmap& fluxmap):
-        _fluxmap(fluxmap),
-        _bytes(fluxmap.ptr()),
-        _size(fluxmap.bytes())
-    {
-        rewind();
-    }
-
+    FluxmapReader(const Fluxmap& fluxmap);
+    FluxmapReader(const Fluxmap& fluxmap, int bands, bool isInterleaved);
     FluxmapReader(const Fluxmap&& fluxmap) = delete;
 
     void rewind()
@@ -116,6 +111,8 @@ private:
     const uint8_t* _bytes;
     const size_t _size;
     Fluxmap::Position _pos;
+	const std::vector<float> _clusters;
+	const bool _isInterleaved;
 };
 
 #endif

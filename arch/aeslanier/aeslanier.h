@@ -8,7 +8,7 @@
 class Sector;
 class Fluxmap;
 
-class AesLanierDecoder : public AbstractDecoder
+class AesLanierDecoder : public AbstractMfmDecoder
 {
 public:
     virtual ~AesLanierDecoder() {}

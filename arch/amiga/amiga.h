@@ -13,7 +13,7 @@ class Sector;
 class Fluxmap;
 class SectorSet;
 
-class AmigaDecoder : public AbstractDecoder
+class AmigaDecoder : public AbstractMfmDecoder
 {
 public:
     virtual ~AmigaDecoder() {}

@@ -58,6 +58,9 @@ public:
 	virtual std::set<unsigned> requiredSectors(Track& track) const;
 
 protected:
+	virtual int getDecoderBands() const = 0;
+	virtual bool isInterleaved() const = 0;
+
     virtual void beginTrack() {};
     virtual RecordType advanceToNextRecord() = 0;
     virtual void decodeSectorRecord() = 0;
@@ -66,6 +69,27 @@ protected:
     FluxmapReader* _fmr;
     Track* _track;
     Sector* _sector;
+};
+
+class AbstractFmDecoder : public AbstractDecoder
+{
+protected:
+	int getDecoderBands() const { return 2; }
+	bool isInterleaved() const { return false; }
+};
+
+class AbstractMfmDecoder : public AbstractDecoder
+{
+protected:
+	int getDecoderBands() const { return 3; }
+	bool isInterleaved() const { return true; }
+};
+
+class AbstractGcrDecoder : public AbstractDecoder
+{
+protected:
+	int getDecoderBands() const { return 3; }
+	bool isInterleaved() const { return false; }
 };
 
 #endif

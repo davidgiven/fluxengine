@@ -9,7 +9,7 @@ class Sector;
 class Fluxmap;
 class Track;
 
-class Fb100Decoder : public AbstractDecoder
+class Fb100Decoder : public AbstractFmDecoder
 {
 public:
     virtual ~Fb100Decoder() {}

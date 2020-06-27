@@ -3,7 +3,7 @@
 
 #include "decoders/decoders.h"
 
-class MxDecoder : public AbstractDecoder
+class MxDecoder : public AbstractFmDecoder
 {
 public:
     virtual ~MxDecoder() {}

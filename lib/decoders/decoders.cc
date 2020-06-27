@@ -16,7 +16,7 @@ void AbstractDecoder::decodeToSectors(Track& track)
     Sector sector;
     sector.physicalSide = track.physicalSide;
     sector.physicalTrack = track.physicalTrack;
-    FluxmapReader fmr(*track.fluxmap);
+    FluxmapReader fmr(*track.fluxmap, getDecoderBands(), isInterleaved());
 
     _track = &track;
     _sector = &sector;

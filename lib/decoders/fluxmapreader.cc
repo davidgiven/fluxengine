@@ -3,6 +3,7 @@
 #include "decoders/fluxmapreader.h"
 #include "flags.h"
 #include "protocol.h"
+#include "kmedian.h"
 #include "fmt/format.h"
 #include <numeric>
 #include <math.h>
@@ -29,6 +30,25 @@ static DoubleFlag minimumClockUs(
     { "--minimum-clock-us" },
     "Refuse to detect clocks shorter than this, to avoid false positives.",
     0.75);
+
+FluxmapReader::FluxmapReader(const Fluxmap& fluxmap):
+	_fluxmap(fluxmap),
+	_bytes(fluxmap.ptr()),
+	_size(fluxmap.bytes()),
+	_isInterleaved(false)
+{
+	rewind();
+}
+
+FluxmapReader::FluxmapReader(const Fluxmap& fluxmap, int bands, bool isInterleaved):
+	_fluxmap(fluxmap),
+	_bytes(fluxmap.ptr()),
+	_size(fluxmap.bytes()),
+	_clusters(optimalKMedian(fluxmap, bands)),
+	_isInterleaved(isInterleaved)
+{
+	rewind();
+}
 
 uint8_t FluxmapReader::getNextEvent(unsigned& ticks)
 {
@@ -94,7 +114,8 @@ static int findLowestSetBit(uint64_t value)
 }
 
 FluxPattern::FluxPattern(unsigned bits, uint64_t pattern):
-    _bits(bits)
+    _bits(bits),
+	_pattern(pattern)
 {
     const uint64_t TOPBIT = 1ULL << 63;
 
@@ -261,12 +282,20 @@ bool FluxmapReader::readRawBit(nanoseconds_t clockPeriod)
         return false;
     }
 
-    nanoseconds_t interval = readInterval(clockPeriod)*NS_PER_TICK;
-    double clocks = (double)interval / clockPeriod + clockIntervalBias;
+    float interval = readInterval(clockPeriod)*US_PER_TICK;
+	int clocks = 0;
+	while (clocks < _clusters.size()-1)
+	{
+		float median = (_clusters[clocks] + _clusters[clocks+1])/2.0;
+		if (interval < median)
+			break;
+		clocks++;
+	}
+	clocks++;
 
-    if (clocks < 1.0)
-        clocks = 1.0;
-    _pos.zeroes = (int)round(clocks) - 1;
+	if (_isInterleaved)
+		clocks *= 2;
+    _pos.zeroes = clocks;
     return true;
 }
 

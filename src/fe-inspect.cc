@@ -127,7 +127,7 @@ static nanoseconds_t guessClock(const Fluxmap& fluxmap)
 
 	std::vector<float> centres = optimalKMedian(fluxmap, bands);
 	for (int i=0; i<bands; i++)
-		std::cout << fmt::format("Band:         {:.2f} us\n", centres[i]);
+		std::cout << fmt::format("Band #{}:      {:.2f} us\n", i, centres[i]);
 
     return centres[0] * 1000.0;
 }
@@ -152,7 +152,7 @@ int mainInspect(int argc, const char* argv[])
 	nanoseconds_t clockPeriod = guessClock(*track->fluxmap);
 	std::cout << fmt::format("{:.2f} us clock detected.", (double)clockPeriod/1000.0) << std::flush;
 
-	FluxmapReader fmr(*track->fluxmap);
+	FluxmapReader fmr(*track->fluxmap, bands, false);
 	fmr.seek(seekFlag*1000000.0);
 
 	if (dumpFluxFlag)
