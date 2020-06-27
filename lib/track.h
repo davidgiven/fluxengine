@@ -20,6 +20,7 @@ public:
     unsigned physicalSide;
     std::shared_ptr<FluxSource> fluxsource;
     std::unique_ptr<Fluxmap> fluxmap;
+	std::vector<nanoseconds_t> intervals;
 
     std::vector<RawRecord> rawrecords;
     std::vector<Sector> sectors;

@@ -85,8 +85,9 @@ unsigned FluxmapReader::findEvent(uint8_t target)
     }
 }
 
-unsigned FluxmapReader::readInterval(nanoseconds_t clock)
+unsigned FluxmapReader::readInterval()
 {
+	nanoseconds_t clock = _clusters.front() * 1000.0;
     unsigned thresholdTicks = (clock * pulseDebounceThreshold) / NS_PER_TICK;
     unsigned ticks = 0;
 
@@ -272,9 +273,9 @@ void FluxmapReader::seekToIndexMark()
     _pos.zeroes = 0;
 }
 
-bool FluxmapReader::readRawBit(nanoseconds_t clockPeriod)
+bool FluxmapReader::readRawBit()
 {
-    assert(clockPeriod != 0);
+    assert(!_clusters.empty());
 
     if (_pos.zeroes)
     {
@@ -282,7 +283,7 @@ bool FluxmapReader::readRawBit(nanoseconds_t clockPeriod)
         return false;
     }
 
-    float interval = readInterval(clockPeriod)*US_PER_TICK;
+    float interval = readInterval()*US_PER_TICK;
 	int clocks = 0;
 	while (clocks < _clusters.size()-1)
 	{
@@ -291,29 +292,37 @@ bool FluxmapReader::readRawBit(nanoseconds_t clockPeriod)
 			break;
 		clocks++;
 	}
-	clocks++;
 
 	if (_isInterleaved)
-		clocks *= 2;
+		clocks++;
     _pos.zeroes = clocks;
     return true;
 }
 
-std::vector<bool> FluxmapReader::readRawBits(unsigned count, nanoseconds_t clockPeriod)
+std::vector<bool> FluxmapReader::readRawBits(unsigned count)
 {
     std::vector<bool> result;
     while (!eof() && count--)
     {
-        bool b = readRawBit(clockPeriod);
+        bool b = readRawBit();
         result.push_back(b);
     }
     return result;
 }
 
-std::vector<bool> FluxmapReader::readRawBits(const Fluxmap::Position& until, nanoseconds_t clockPeriod)
+std::vector<bool> FluxmapReader::readRawBits(const Fluxmap::Position& until)
 {
     std::vector<bool> result;
     while (!eof() && (_pos.bytes < until.bytes))
-        result.push_back(readRawBit(clockPeriod));
+        result.push_back(readRawBit());
     return result;
 }
+
+const std::vector<nanoseconds_t> FluxmapReader::intervals() const
+{
+	std::vector<nanoseconds_t> n;
+	for (float us : _clusters)
+		n.push_back(us * 1000.0);
+	return n;
+}
+

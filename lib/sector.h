@@ -26,7 +26,7 @@ public:
 
 	Status status = Status::INTERNAL_ERROR;
     Fluxmap::Position position;
-    nanoseconds_t clock = 0;
+	std::vector<nanoseconds_t> intervals;
     nanoseconds_t headerStartTime = 0;
     nanoseconds_t headerEndTime = 0;
     nanoseconds_t dataStartTime = 0;

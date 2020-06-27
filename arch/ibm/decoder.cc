@@ -92,7 +92,7 @@ const FluxMatchers ANY_RECORD_PATTERN(
 AbstractDecoder::RecordType IbmDecoder::advanceToNextRecord()
 {
 	const FluxMatcher* matcher = nullptr;
-	_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
+	_fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
 
     /* If this is the MFM prefix byte, the the decoder is going to expect three
      * extra bytes on the front of the header. */

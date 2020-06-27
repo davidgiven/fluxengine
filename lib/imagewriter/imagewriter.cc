@@ -75,7 +75,6 @@ void ImageWriter::writeCsv(const std::string& filename)
 		"\"Logical track\","
 		"\"Logical side\","
 		"\"Logical sector\","
-		"\"Clock (ns)\","
 		"\"Header start (ns)\","
 		"\"Header end (ns)\","
 		"\"Data start (ns)\","
@@ -96,11 +95,10 @@ void ImageWriter::writeCsv(const std::string& filename)
 				if (!sector)
 					f << fmt::format(",,{},,,,,,,,MISSING\n", sectorId);
 				else
-					f << fmt::format("{},{},{},{},{},{},{},{},{},{},{}\n",
+					f << fmt::format("{},{},{},{},{},{},{},{},{},{}\n",
 						sector->logicalTrack,
 						sector->logicalSide,
 						sector->logicalSector,
-						sector->clock,
 						sector->headerStartTime,
 						sector->headerEndTime,
 						sector->dataStartTime,

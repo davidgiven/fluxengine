@@ -18,7 +18,7 @@ AbstractDecoder::RecordType ZilogMczDecoder::advanceToNextRecord()
 {
 	const FluxMatcher* matcher = nullptr;
     _fmr->seekToIndexMark();
-	_sector->clock = _fmr->seekToPattern(SECTOR_START_PATTERN, matcher);
+	_fmr->seekToPattern(SECTOR_START_PATTERN, matcher);
 	if (matcher == &SECTOR_START_PATTERN)
 		return SECTOR_RECORD;
 	return UNKNOWN_RECORD;

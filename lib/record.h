@@ -9,7 +9,7 @@ public:
 	RawRecord() {}
 
 	Fluxmap::Position position;
-	nanoseconds_t clock = 0;
+	std::vector<nanoseconds_t> intervals;
     int physicalTrack = 0;
     int physicalSide = 0;
 	Bytes data;

@@ -93,7 +93,7 @@ public:
 
     uint8_t getNextEvent(unsigned& ticks);
     unsigned findEvent(uint8_t bits);
-    unsigned readInterval(nanoseconds_t clock); /* with debounce support */
+    unsigned readInterval(); /* with debounce support */
 
     /* Important! You can only reliably seek to 1 bits. */
     void seek(nanoseconds_t ns);
@@ -102,9 +102,11 @@ public:
     nanoseconds_t seekToPattern(const FluxMatcher& pattern);
     nanoseconds_t seekToPattern(const FluxMatcher& pattern, const FluxMatcher*& matching);
 
-    bool readRawBit(nanoseconds_t clockPeriod);
-    std::vector<bool> readRawBits(unsigned count, nanoseconds_t clockPeriod);
-    std::vector<bool> readRawBits(const Fluxmap::Position& until, nanoseconds_t clockPeriod);
+    bool readRawBit();
+    std::vector<bool> readRawBits(unsigned count);
+    std::vector<bool> readRawBits(const Fluxmap::Position& until);
+
+	const std::vector<nanoseconds_t> intervals() const;
 
 private:
     const Fluxmap& _fluxmap;

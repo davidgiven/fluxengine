@@ -195,10 +195,26 @@ void readDiskCommand(AbstractDecoder& decoder)
 				std::cout << fmt::format("{} records, {} sectors; ",
 					track->rawrecords.size(),
 					track->sectors.size());
-				if (track->sectors.size() > 0)
-					std::cout << fmt::format("{:.2f}us clock ({:.0f}kHz); ",
-						track->sectors.begin()->clock / 1000.0,
-                        1000000.0 / track->sectors.begin()->clock);
+
+				const std::vector<nanoseconds_t>& intervals = track->intervals;
+				bool first = true;
+				for (nanoseconds_t i : intervals)
+				{
+					if (!first)
+						std::cout << "/";
+					first = false;
+					std::cout << fmt::format("{:.2f}", i / 1000.0);
+				}
+				std::cout << " us or ";
+				first = true;
+				for (nanoseconds_t i : intervals)
+				{
+					if (!first)
+						std::cout << "/";
+					first = false;
+					std::cout << fmt::format("{:.0f}", 1000000.0 / i);
+				}
+				std::cout << fmt::format(" kHz interval\n");
 
 				for (auto& sector : track->sectors)
 				{
@@ -251,8 +267,7 @@ void readDiskCommand(AbstractDecoder& decoder)
 			std::cout << "\nRaw (undecoded) records follow:\n\n";
 			for (auto& record : track->rawrecords)
 			{
-				std::cout << fmt::format("I+{:.2f}us with {:.2f}us clock\n",
-                            record.position.ns() / 1000.0, record.clock / 1000.0);
+				std::cout << fmt::format("I+{:.2f}us\n", record.position.ns() / 1000.0);
 				hexdump(std::cout, record.data);
 				std::cout << std::endl;
 			}
@@ -263,9 +278,9 @@ void readDiskCommand(AbstractDecoder& decoder)
             std::cout << "\nDecoded sectors follow:\n\n";
             for (auto& sector : track->sectors)
             {
-				std::cout << fmt::format("{}.{:02}.{:02}: I+{:.2f}us with {:.2f}us clock: status {}\n",
+				std::cout << fmt::format("{}.{:02}.{:02}: I+{:.2f}us: status {}\n",
                             sector.logicalTrack, sector.logicalSide, sector.logicalSector,
-                            sector.position.ns() / 1000.0, sector.clock / 1000.0,
+                            sector.position.ns() / 1000.0,
 							sector.status);
 				hexdump(std::cout, sector.data);
 				std::cout << std::endl;

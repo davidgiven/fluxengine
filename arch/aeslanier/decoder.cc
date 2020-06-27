@@ -26,8 +26,8 @@ static Bytes reverse_bits(const Bytes& input)
 
 AbstractDecoder::RecordType AesLanierDecoder::advanceToNextRecord()
 {
-    _sector->clock = _fmr->seekToPattern(SECTOR_PATTERN);
-    if (_fmr->eof() || !_sector->clock)
+    nanoseconds_t clock = _fmr->seekToPattern(SECTOR_PATTERN);
+    if (_fmr->eof() || !clock)
         return UNKNOWN_RECORD;
     return SECTOR_RECORD;
 }

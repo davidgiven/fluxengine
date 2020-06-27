@@ -224,7 +224,7 @@ int mainInspect(int argc, const char* argv[])
 			{
 				if (fmr.eof())
 					break;
-				bool b = fmr.readRawBit(clockPeriod);
+				bool b = fmr.readRawBit();
 				std::cout << (b ? 'X' : '-');
 			}
 

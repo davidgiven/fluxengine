@@ -35,7 +35,7 @@ AbstractDecoder::RecordType MxDecoder::advanceToNextRecord()
     {
         /* First sector in the track: look for the sync marker. */
         const FluxMatcher* matcher = nullptr;
-        _sector->clock = _clock = _fmr->seekToPattern(ID_PATTERN, matcher);
+        _fmr->seekToPattern(ID_PATTERN, matcher);
         readRawBits(32); /* skip the ID mark */
         _logicalTrack = decodeFmMfm(readRawBits(32)).slice(0, 32).reader().read_be16();
     }
@@ -43,13 +43,6 @@ AbstractDecoder::RecordType MxDecoder::advanceToNextRecord()
     {
         /* That was the last sector on the disk. */
         return UNKNOWN_RECORD;
-    }
-    else
-    {
-        /* Otherwise we assume the clock from the first sector is still valid.
-         * The decoder framwork will automatically stop when we hit the end of
-         * the track. */
-        _sector->clock = _clock;
     }
 
     _currentSector++;

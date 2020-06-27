@@ -127,7 +127,7 @@ uint8_t decode_side(uint8_t side)
 AbstractDecoder::RecordType MacintoshDecoder::advanceToNextRecord()
 {
 	const FluxMatcher* matcher = nullptr;
-	_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
+	_fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
 	if (matcher == &SECTOR_RECORD_PATTERN)
 		return SECTOR_RECORD;
 	if (matcher == &DATA_RECORD_PATTERN)

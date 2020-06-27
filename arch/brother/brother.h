@@ -16,10 +16,13 @@
 class Sector;
 class Fluxmap;
 
-class BrotherDecoder : public AbstractGcrDecoder
+class BrotherDecoder : public AbstractDecoder
 {
 public:
     virtual ~BrotherDecoder() {}
+
+	int getDecoderBands() const { return 2; }
+	bool isInterleaved() const { return false; }
 
     RecordType advanceToNextRecord();
     void decodeSectorRecord();

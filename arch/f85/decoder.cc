@@ -55,7 +55,7 @@ static Bytes decode(const std::vector<bool>& bits)
 AbstractDecoder::RecordType DurangoF85Decoder::advanceToNextRecord()
 {
 	const FluxMatcher* matcher = nullptr;
-	_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
+	_fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
 	if (matcher == &SECTOR_RECORD_PATTERN)
 		return RecordType::SECTOR_RECORD;
 	if (matcher == &DATA_RECORD_PATTERN)

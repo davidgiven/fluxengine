@@ -44,7 +44,7 @@ public:
     void pushRecord(const Fluxmap::Position& start, const Fluxmap::Position& end);
 
     std::vector<bool> readRawBits(unsigned count)
-    { return _fmr->readRawBits(count, _sector->clock); }
+    { return _fmr->readRawBits(count); }
 
     Fluxmap::Position tell()
     { return _fmr->tell(); } 

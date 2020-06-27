@@ -57,7 +57,7 @@ static int decode_header_gcr(uint16_t word)
 AbstractDecoder::RecordType BrotherDecoder::advanceToNextRecord()
 {
 	const FluxMatcher* matcher = nullptr;
-	_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
+	_fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
 	if (matcher == &SECTOR_RECORD_PATTERN)
 		return RecordType::SECTOR_RECORD;
 	if (matcher == &DATA_RECORD_PATTERN)

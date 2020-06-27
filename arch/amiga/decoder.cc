@@ -23,8 +23,8 @@ static const FluxPattern SECTOR_PATTERN(48, AMIGA_SECTOR_RECORD);
 
 AbstractDecoder::RecordType AmigaDecoder::advanceToNextRecord()
 {
-    _sector->clock = _fmr->seekToPattern(SECTOR_PATTERN);
-    if (_fmr->eof() || !_sector->clock)
+    _fmr->seekToPattern(SECTOR_PATTERN);
+    if (_fmr->eof())
         return UNKNOWN_RECORD;
     return SECTOR_RECORD;
 }

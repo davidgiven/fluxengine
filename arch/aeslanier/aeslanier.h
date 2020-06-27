@@ -8,10 +8,13 @@
 class Sector;
 class Fluxmap;
 
-class AesLanierDecoder : public AbstractMfmDecoder
+class AesLanierDecoder : public AbstractDecoder
 {
 public:
     virtual ~AesLanierDecoder() {}
+
+	int getDecoderBands() const { return 4; }
+	bool isInterleaved() const { return true; }
 
     RecordType advanceToNextRecord();
     void decodeSectorRecord();

@@ -21,17 +21,18 @@ void AbstractDecoder::decodeToSectors(Track& track)
     _track = &track;
     _sector = &sector;
     _fmr = &fmr;
+	_track->intervals = fmr.intervals();
 
     beginTrack();
     for (;;)
     {
         Fluxmap::Position recordStart = fmr.tell();
-        sector.clock = 0;
+		sector.intervals = fmr.intervals();
         sector.status = Sector::MISSING;
         sector.data.clear();
         sector.logicalSector = sector.logicalSide = sector.logicalTrack = 0;
         RecordType r = advanceToNextRecord();
-        if (fmr.eof() || !sector.clock)
+        if (fmr.eof() || sector.intervals.empty())
             return;
         if ((r == UNKNOWN_RECORD) || (r == DATA_RECORD))
         {
@@ -80,11 +81,11 @@ void AbstractDecoder::pushRecord(const Fluxmap::Position& start, const Fluxmap::
     RawRecord record;
     record.physicalSide = _track->physicalSide;
     record.physicalTrack = _track->physicalTrack;
-    record.clock = _sector->clock;
+    record.intervals = _sector->intervals;
     record.position = start;
 
     _fmr->seek(start);
-    record.data = toBytes(_fmr->readRawBits(end, _sector->clock));
+    record.data = toBytes(_fmr->readRawBits(end));
     _track->rawrecords.push_back(record);
     _fmr->seek(here);
 }
