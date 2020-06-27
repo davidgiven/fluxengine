@@ -51,6 +51,11 @@ static DoubleFlag signalLevelFactor(
     "Clock detection signal level (min + (max-min)*factor).",
     0.05);
 
+static IntFlag bands(
+    { "--bands" },
+    "Number of bands to use for k-median interval classification.",
+    3);
+
 void setDecoderManualClockRate(double clockrate_us)
 {
     manualClockRate.setDefaultValue(clockrate_us);
@@ -83,54 +88,6 @@ static nanoseconds_t guessClock(const Fluxmap& fluxmap)
     uint32_t min = *std::min_element(std::begin(buckets), std::end(buckets));
     uint32_t noise_floor = min + (max-min)*noiseFloorFactor;
     uint32_t signal_level = min + (max-min)*signalLevelFactor;
-
-    /* Find a point solidly within the first pulse. */
-
-    int pulseindex = 0;
-    while (pulseindex < 256)
-    {
-        if (buckets[pulseindex] > signal_level)
-            break;
-        pulseindex++;
-    }
-    if (pulseindex == -1)
-        return 0;
-
-    /* Find the upper and lower bounds of the pulse. */
-
-    int peaklo = pulseindex;
-    while (peaklo > 0)
-    {
-        if (buckets[peaklo] < noise_floor)
-            break;
-        peaklo--;
-    }
-
-    int peakhi = pulseindex;
-    while (peakhi < 255)
-    {
-        if (buckets[peakhi] < noise_floor)
-            break;
-        peakhi++;
-    }
-
-    /* Find the total accumulated size of the pulse. */
-
-    uint32_t total_size = 0;
-    for (int i = peaklo; i < peakhi; i++)
-        total_size += buckets[i];
-
-    /* Now find the median. */
-
-    uint32_t count = 0;
-    int median = peaklo;
-    while (median < peakhi)
-    {
-        count += buckets[median];
-        if (count > (total_size/2))
-            break;
-        median++;
-    }
 
 	std::cout << "\nClock detection histogram:" << std::endl;
 
@@ -167,21 +124,12 @@ static nanoseconds_t guessClock(const Fluxmap& fluxmap)
 
 	std::cout << fmt::format("Noise floor:  {}", noise_floor) << std::endl;
 	std::cout << fmt::format("Signal level: {}", signal_level) << std::endl;
-	std::cout << fmt::format("Peak start:   {} ({:.2f} us)", peaklo, peaklo*US_PER_TICK) << std::endl;
-	std::cout << fmt::format("Peak end:     {} ({:.2f} us)", peakhi, peakhi*US_PER_TICK) << std::endl;
-	std::cout << fmt::format("Median:       {} ({:.2f} us)", median, median*US_PER_TICK) << std::endl;
 
-	std::cout << "\nCalculating centres for 3 bands...\n";
-	std::vector<float> centres = optimalKMedian(fluxmap, 3);
-	for (int i=0; i<3; i++)
-		std::cout << fmt::format("center #{} = {:.2f} us\n", i, centres[i]);
+	std::vector<float> centres = optimalKMedian(fluxmap, bands);
+	for (int i=0; i<bands; i++)
+		std::cout << fmt::format("Band:         {:.2f} us\n", centres[i]);
 
-    /* 
-     * Okay, the median should now be a good candidate for the (or a) clock.
-     * How this maps onto the actual clock rate depends on the encoding.
-     */
-
-    return median * NS_PER_TICK;
+    return centres[0] * 1000.0;
 }
 
 int mainInspect(int argc, const char* argv[])
