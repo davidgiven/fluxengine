@@ -28,15 +28,11 @@ static void check_for_error()
 
 static int trackno(int strack)
 {
-    if (startSide == endSide)
-        return strack;
     return strack >> 1;
 }
 
 static int headno(int strack)
 {
-    if (startSide == endSide)
-        return startSide;
     return strack & 1;
 }
 
@@ -65,6 +61,8 @@ static void read_header()
 static void read_track(int strack)
 {
     uint32_t offset = Bytes(header.track[strack], 4).reader().read_le32();
+	if (offset == 0)
+		return;
 
     ScpTrack trackheader;
     inputFile.seekg(offset, std::ios::beg);
@@ -112,7 +110,7 @@ static void read_track(int strack)
         inputBytes += datalength*2;
     }
 
-    std::cout << fmt::format(" {} ms in {} input bytes and {} output bytes\n",
+    std::cout << fmt::format(" {:.3f} ms in {} input bytes and {} output bytes\n",
         fluxmap.duration() / 1e6, inputBytes, fluxmap.bytes());
     sqlWriteFlux(outputDb, trackno(strack), headno(strack), fluxmap);
 }
