@@ -2,6 +2,7 @@
 #include "fluxmap.h"
 #include "decoders/fluxmapreader.h"
 #include "protocol.h"
+#include "kmedian.h"
 #include <algorithm>
 #include <numeric>
 #include <math.h>
@@ -30,22 +31,22 @@ public:
     struct CDF
     {
         int pointsSoFar;
-        float sumToHere;
-        float thisValue;
+        KValue sumToHere;
+        KValue thisValue;
     };
         
     int uniquePoints;            /* number of unique points */
     std::vector<struct CDF> cdf; /* cumulative sum of points */
 
-    KCluster(const std::vector<float>& inputPoints)
+    KCluster(const std::vector<KValue>& inputPoints)
     {
-        std::vector<float> points = inputPoints;
+        std::vector<KValue> points = inputPoints;
         std::sort(points.begin(), points.end());
 
-        float current = NAN;
+        KValue current = NAN;
         int count = 0;
-        float sum = 0.0;
-        for (float point : points)
+        KValue sum = 0.0;
+        for (KValue point : points)
         {
             if (point != current)
             {
@@ -71,7 +72,7 @@ public:
      * reconstruct clusters later.
      */
 
-    float medianPoint(int i, int j)
+    KValue medianPoint(int i, int j)
     {
         if (i >= j)
             return 0;
@@ -84,7 +85,7 @@ public:
         /* Note, this is not the index, but number of points start inclusive,
          * which is why the -1 has to be turned into +1. */
 
-        float medianPoint = (lowerCount + upperCount + 1) / 2.0;
+        KValue medianPoint = (lowerCount + upperCount + 1) / 2.0;
         
         auto lowerMedian = std::lower_bound(cdf.begin(), cdf.end(), (int)medianPoint,
             [&](const struct CDF& lhs, int rhs) {
@@ -108,10 +109,10 @@ public:
      * algorithm. Algorithmica, 1987, 2.1-4: 195-208.
      */
 
-    void monotoneMatrixIndices(std::function<float(int, int)>& M,
+    void monotoneMatrixIndices(std::function<KValue(int, int)>& M,
             int minRow, int maxRow, int minCol, int maxCol, 
             std::vector<int>& Tout,
-            std::vector<float>& Dout)
+            std::vector<KValue>& Dout)
     {
         if (maxRow == minRow)
             return;
@@ -120,11 +121,11 @@ public:
 
         /* Find the minimum column for this row. */
 
-        float minValue = INT_MAX;
+        KValue minValue = INT_MAX;
         int minHere = minCol;
         for (int i = minCol; i<=maxCol; i++)
         {
-            float v = M(currentRow, i);
+            KValue v = M(currentRow, i);
             if (v < minValue)
             {
                 minValue = v;
@@ -153,9 +154,9 @@ public:
      * underlying sorted points list.
      */
 
-    float cumulativeAt(std::vector<struct CDF>::iterator item, int i)
+    KValue cumulativeAt(std::vector<struct CDF>::iterator item, int i)
     {
-        float sumBelow = 0.0;
+        KValue sumBelow = 0.0;
         int numPointsBelow = 0;
 
         if (item != cdf.begin())
@@ -181,7 +182,7 @@ public:
      * CC([0, 0, 1, 1], 0, 5).
      */
 
-    float CC(int i, int j)
+    KValue CC(int i, int j)
     {
         if (i >= j)
             return 0;
@@ -194,7 +195,7 @@ public:
         /* Note, this is not the index, but number of points start inclusive,
          * which is why the -1 has to be turned into +1. */
 
-        float medianPoint = (lowerCount + upperCount + 1) / 2.0;
+        KValue medianPoint = (lowerCount + upperCount + 1) / 2.0;
         
         auto lowerMedian = std::lower_bound(cdf.begin(), cdf.end(), (int)medianPoint,
             [&](const struct CDF& lhs, int rhs) {
@@ -202,7 +203,7 @@ public:
             }
         );
 
-        float mu;
+        KValue mu;
         if (((int)ceil(medianPoint) == (int)floor(medianPoint))
                 || ((int)floor(medianPoint) != lowerMedian->pointsSoFar))
             mu = lowerMedian->thisValue;
@@ -229,9 +230,9 @@ public:
 
     /* Calculate C_i[m][j] given D_previous = D[i-1]. p. 4 */
 
-    float C_i(int i, const std::vector<float>& D_previous, int m, int j)
+    KValue C_i(int i, const std::vector<KValue>& D_previous, int m, int j)
     {
-        float f;
+        KValue f;
         if (i == 1)
             f = CC(0, m);
         else
@@ -241,21 +242,21 @@ public:
 
     /* Calculates the optimal cluster centres for the points. */
 
-    std::vector<float> optimalKMedian(int numClusters)
+    std::vector<KValue> optimalKMedian(int numClusters)
     {
         std::vector<std::vector<int>> T(numClusters+1, std::vector<int>(uniquePoints+1, 0));
-        std::vector<std::vector<float>> D(numClusters+1, std::vector<float>(uniquePoints+1, 0.0));
+        std::vector<std::vector<KValue>> D(numClusters+1, std::vector<KValue>(uniquePoints+1, 0.0));
 
         for (int i=1; i<numClusters+1; i++)
         {
             /* Stop if we achieve optimal clustering with fewer clusters than the
              * user asked for. */
             
-            std::vector<float>& lastD = D[i-1];
+            std::vector<KValue>& lastD = D[i-1];
             if ((i != 1) && (lastD.back() == 0.0))
                 continue;
 
-            std::function<float(int, int)> M = [&](int m, int j) {
+            std::function<KValue(int, int)> M = [&](int m, int j) {
                 return C_i(i, lastD, m, j);
             };
 
@@ -271,7 +272,7 @@ public:
          */
 
         int currentClusteringRange = uniquePoints;
-        std::vector<float> centres;
+        std::vector<KValue> centres;
 
         for (int i=numClusters; i>0; i--)
         {
@@ -290,13 +291,13 @@ public:
 
 };
     
-static std::vector<float> getPointsFromFluxmap(const Fluxmap& fluxmap)
+static std::vector<KValue> getPointsFromFluxmap(const Fluxmap& fluxmap)
 {
     FluxmapReader fmr(fluxmap);
-    std::vector<float> points;
+    std::vector<KValue> points;
     while (!fmr.eof())
     {
-        float point = fmr.findEvent(F_BIT_PULSE) * US_PER_TICK;
+        KValue point = fmr.findEvent(F_BIT_PULSE);
         points.push_back(point);
     }
     return points;
@@ -305,14 +306,17 @@ static std::vector<float> getPointsFromFluxmap(const Fluxmap& fluxmap)
 /* Analyses the fluxmap and determines the optimal cluster centres for it. The
  * number of clusters is taken from the size of the output array. */
 
-std::vector<float> optimalKMedian(const std::vector<float>& points, int clusters)
+std::vector<KValue> optimalKMedian(const std::vector<KValue>& points, int clusters)
 {
     KCluster kcluster(points);
     return kcluster.optimalKMedian(clusters);
 }
 
-std::vector<float> optimalKMedian(const Fluxmap& fluxmap, int clusters)
+std::vector<unsigned> optimalKMedian(const Fluxmap& fluxmap, int clusters)
 {
-    return optimalKMedian(getPointsFromFluxmap(fluxmap), clusters);
+	 std::vector<unsigned> ticks;
+     for (KValue t : optimalKMedian(getPointsFromFluxmap(fluxmap), clusters))
+	 	ticks.push_back(t);
+	return ticks;
 }
 

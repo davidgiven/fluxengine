@@ -44,9 +44,10 @@ FluxmapReader::FluxmapReader(const Fluxmap& fluxmap, int bands, bool isInterleav
 	_fluxmap(fluxmap),
 	_bytes(fluxmap.ptr()),
 	_size(fluxmap.bytes()),
-	_clusters(optimalKMedian(fluxmap, bands)),
 	_isInterleaved(isInterleaved)
 {
+	for (unsigned ticks : optimalKMedian(fluxmap, bands))
+		_intervals.push_back(ticks * NS_PER_TICK);
 	rewind();
 }
 
@@ -87,7 +88,7 @@ unsigned FluxmapReader::findEvent(uint8_t target)
 
 unsigned FluxmapReader::readInterval()
 {
-	nanoseconds_t clock = _clusters.front() * 1000.0;
+	nanoseconds_t clock = _intervals.front();
     unsigned thresholdTicks = (clock * pulseDebounceThreshold) / NS_PER_TICK;
     unsigned ticks = 0;
 
@@ -275,7 +276,7 @@ void FluxmapReader::seekToIndexMark()
 
 bool FluxmapReader::readRawBit()
 {
-    assert(!_clusters.empty());
+    assert(!_intervals.empty());
 
     if (_pos.zeroes)
     {
@@ -283,11 +284,11 @@ bool FluxmapReader::readRawBit()
         return false;
     }
 
-    float interval = readInterval()*US_PER_TICK;
+    nanoseconds_t interval = readInterval()*NS_PER_TICK;
 	int clocks = 0;
-	while (clocks < _clusters.size()-1)
+	while (clocks < _intervals.size()-1)
 	{
-		float median = (_clusters[clocks] + _clusters[clocks+1])/2.0;
+		float median = (_intervals[clocks] + _intervals[clocks+1])/2.0;
 		if (interval < median)
 			break;
 		clocks++;
@@ -316,13 +317,5 @@ std::vector<bool> FluxmapReader::readRawBits(const Fluxmap::Position& until)
     while (!eof() && (_pos.bytes < until.bytes))
         result.push_back(readRawBit());
     return result;
-}
-
-const std::vector<nanoseconds_t> FluxmapReader::intervals() const
-{
-	std::vector<nanoseconds_t> n;
-	for (float us : _clusters)
-		n.push_back(us * 1000.0);
-	return n;
 }
 

@@ -125,11 +125,12 @@ static nanoseconds_t guessClock(const Fluxmap& fluxmap)
 	std::cout << fmt::format("Noise floor:  {}", noise_floor) << std::endl;
 	std::cout << fmt::format("Signal level: {}", signal_level) << std::endl;
 
-	std::vector<float> centres = optimalKMedian(fluxmap, bands);
+	std::vector<unsigned> centres = optimalKMedian(fluxmap, bands);
 	for (int i=0; i<bands; i++)
-		std::cout << fmt::format("Band #{}:      {:.2f} us\n", i, centres[i]);
+		std::cout << fmt::format("Band #{}:      {} {:.2f} us\n",
+			i, centres[i], centres[i] * US_PER_TICK);
 
-    return centres[0] * 1000.0;
+    return centres[0] * NS_PER_TICK;
 }
 
 int mainInspect(int argc, const char* argv[])

@@ -106,14 +106,14 @@ public:
     std::vector<bool> readRawBits(unsigned count);
     std::vector<bool> readRawBits(const Fluxmap::Position& until);
 
-	const std::vector<nanoseconds_t> intervals() const;
+	const std::vector<nanoseconds_t> intervals() const { return _intervals; };
 
 private:
     const Fluxmap& _fluxmap;
     const uint8_t* _bytes;
     const size_t _size;
     Fluxmap::Position _pos;
-	const std::vector<float> _clusters;
+	std::vector<nanoseconds_t> _intervals;
 	const bool _isInterleaved;
 };
 

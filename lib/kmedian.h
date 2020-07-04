@@ -1,8 +1,10 @@
 #ifndef KMEDIAN_H
 #define KMEDIAN_H
 
-extern std::vector<float> optimalKMedian(const std::vector<float>& points, int clusters);
-extern std::vector<float> optimalKMedian(const Fluxmap& fluxmap, int clusters);
+typedef float KValue;
+
+extern std::vector<KValue> optimalKMedian(const std::vector<KValue>& points, int clusters);
+extern std::vector<unsigned> optimalKMedian(const Fluxmap& fluxmap, int clusters);
 
 #endif
 
