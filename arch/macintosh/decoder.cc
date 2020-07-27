@@ -121,7 +121,7 @@ uint8_t decode_side(uint8_t side)
      * bit 5) and also whether we're above track 0x3f (in bit 6).
      */
 
-    return !!(side & 0x40);
+    return !!(side & 0x20);
 }
 
 AbstractDecoder::RecordType MacintoshDecoder::advanceToNextRecord()
