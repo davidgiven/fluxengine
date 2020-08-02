@@ -117,6 +117,10 @@ exact format varies according to the extension:
     FluxEngine's D64 support is currently limited to write only. It will work
     with up to 40 logical tracks.
 
+  - `.diskcopy`: a Macintosh DiskCopy 4.2 file. This is a special-purpose
+	format due to the weird layout of Mac GCR disks, but it can also support
+	720kB and 1440kB IBM disks (although there's no real benefit).
+
 ### High density disks
 
 High density disks use a different magnetic medium to low and double density
