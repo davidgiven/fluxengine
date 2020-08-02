@@ -29,6 +29,8 @@ private:
 		const SectorSet& sectors, const ImageSpec& spec);
     static std::unique_ptr<ImageWriter> createD64ImageWriter(
 		const SectorSet& sectors, const ImageSpec& spec);
+    static std::unique_ptr<ImageWriter> createDiskCopyImageWriter(
+		const SectorSet& sectors, const ImageSpec& spec);
 
 	static Constructor findConstructor(const ImageSpec& spec);
 

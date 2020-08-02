@@ -1,6 +1,8 @@
 #ifndef BYTES_H
 #define BYTES_H
 
+#include <string.h>
+
 class ByteReader;
 class ByteWriter;
 
@@ -10,6 +12,7 @@ public:
     Bytes();
     Bytes(unsigned size);
     Bytes(const uint8_t* ptr, size_t len);
+    Bytes(const std::string& data);
     Bytes(std::initializer_list<uint8_t> data);
     Bytes(std::shared_ptr<std::vector<uint8_t>> data);
     Bytes(std::shared_ptr<std::vector<uint8_t>> data, unsigned start, unsigned end);
@@ -270,6 +273,16 @@ public:
     }
 
     ByteWriter& operator += (std::istream& stream);
+
+	ByteWriter& append(const char* data)
+	{
+		return *this += Bytes((const uint8_t*)data, strlen(data));
+	}
+
+	ByteWriter& append(const std::string& data)
+	{
+		return *this += Bytes(data);
+	}
 
     ByteWriter& append(const Bytes data)
     {

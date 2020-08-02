@@ -45,22 +45,20 @@ Reading discs
 Just do:
 
 ```
-fluxengine read mac
+fluxengine read mac -o mac.diskcopy
 ```
 
-You should end up with an `mac.img` which is 1001888 bytes long (for a normal
-DD disk). If you want the single-sided variety, use `-s :s=0`.
+You should end up with a `mac.diskcopy` file which is compatible with DiskCopy
+4.2, which most Mac emulators support.
 
-**Big warning!** The image may not work in an emulator. Mac disk images are
-complicated due to the way the tracks are different sizes and the odd sector
-size. FluxEngine chooses to store them in a simple 524 x 12 x 2 x 80 layout,
-with holes where missing sectors should be. This was easiest. If anyone can
-suggest a better way, please [get in
-touch](https://github.com/davidgiven/fluxengine/issues/new).
-
-The 12 bytes of metadata _follow_ the 512 bytes of user payload in the sector
-image. If you don't want it, specify a geometry in the output file with a
-512-byte sectore size like `-o mac.img:c=80:h=1:s=12:b=512`.
+**Big warning!** Mac disk images are complicated due to the way the tracks are
+different sizes and the odd sector size. If you use a normal `.img` file, then
+FluxEngine will store them in a simple 524 x 12 x 2 x 80 layout, with holes
+where missing sectors should be; this was easiest, but is unlikely to work with
+most Mac emulators and other software. In these files, the The 12 bytes of
+metadata _follow_ the 512 bytes of user payload in the sector image. If you
+don't want it, specify a geometry in the output file with a 512-byte sectore
+size like `-o mac.img:c=80:h=1:s=12:b=512`.
 
 Useful references
 -----------------
@@ -74,3 +72,7 @@ Useful references
 
   - [Les Disquettes et le drive Disk II](http://www.hackzapple.com/DISKII/DISKIITECH.HTM), an
     epicly detailed writeup of the Apple II disk format (which is closely related)
+
+  - [The DiskCopy 4.2
+	format](https://www.discferret.com/wiki/Apple_DiskCopy_4.2), described on
+	the DiskFerret website.
