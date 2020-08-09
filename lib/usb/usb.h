@@ -4,6 +4,7 @@
 #include "bytes.h"
 
 class Fluxmap;
+class libusb_device_handle;
 
 class USB
 {
@@ -21,9 +22,16 @@ public:
 	virtual void erase(int side) = 0;
 	virtual void setDrive(int drive, bool high_density, int index_mode) = 0;
 	virtual void measureVoltages(struct voltages_frame* voltages) = 0;
+
+protected:
+	std::string usberror(int i);
+
+	libusb_device_handle* _device;
 };
 
 extern USB& getUsb();
+
+extern USB* createFluxengineUsb();
 
 static inline int usbGetVersion()     { return getUsb().getVersion(); }
 static inline void usbRecalibrate()   { getUsb().recalibrate(); }

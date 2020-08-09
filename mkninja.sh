@@ -191,6 +191,7 @@ buildlibrary libbackend.a \
     lib/fluxsource/sqlitefluxsource.cc \
     lib/fluxsource/streamfluxsource.cc \
     lib/usb/usb.cc \
+    lib/usb/fluxengineusb.cc \
     lib/globals.cc \
     lib/hexdump.cc \
     lib/ldbs.cc \
