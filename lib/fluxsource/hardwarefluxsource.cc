@@ -1,7 +1,7 @@
 #include "globals.h"
 #include "flags.h"
 #include "fluxmap.h"
-#include "usb.h"
+#include "usb/usb.h"
 #include "fluxsource/fluxsource.h"
 #include "fmt/format.h"
 
