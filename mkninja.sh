@@ -191,6 +191,8 @@ buildlibrary libbackend.a \
     lib/fluxsource/kryoflux.cc \
     lib/fluxsource/sqlitefluxsource.cc \
     lib/fluxsource/streamfluxsource.cc \
+    lib/usb/usb.cc \
+    lib/usb/fluxengineusb.cc \
     lib/globals.cc \
     lib/hexdump.cc \
     lib/ldbs.cc \
@@ -198,7 +200,6 @@ buildlibrary libbackend.a \
     lib/sector.cc \
     lib/sectorset.cc \
     lib/sql.cc \
-    lib/usb.cc \
     lib/visualiser.cc \
     lib/writer.cc \
 

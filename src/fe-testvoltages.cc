@@ -1,10 +1,12 @@
 #include "globals.h"
 #include "flags.h"
-#include "usb.h"
+#include "usb/usb.h"
 #include "protocol.h"
 #include <fmt/format.h>
 
-static FlagGroup flags;
+static FlagGroup flags = {
+	&usbFlags,
+};
 
 static std::string display_voltages(struct voltages& v)
 {

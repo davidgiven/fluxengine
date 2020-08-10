@@ -4,7 +4,7 @@
 #include "writer.h"
 #include "sql.h"
 #include "protocol.h"
-#include "usb.h"
+#include "usb/usb.h"
 #include "dataspec.h"
 #include "encoders/encoders.h"
 #include "fluxsource/fluxsource.h"

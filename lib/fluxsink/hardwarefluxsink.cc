@@ -1,10 +1,12 @@
 #include "globals.h"
 #include "flags.h"
 #include "fluxmap.h"
-#include "usb.h"
+#include "usb/usb.h"
 #include "fluxsink/fluxsink.h"
 
-FlagGroup hardwareFluxSinkFlags;
+FlagGroup hardwareFluxSinkFlags = {
+	&usbFlags,
+};
 
 static bool high_density = false;
 

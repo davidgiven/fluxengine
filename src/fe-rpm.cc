@@ -1,10 +1,12 @@
 #include "globals.h"
 #include "flags.h"
-#include "usb.h"
+#include "usb/usb.h"
 #include "dataspec.h"
 #include "protocol.h"
 
-static FlagGroup flags;
+static FlagGroup flags = {
+	&usbFlags,
+};
 
 static DataSpecFlag source(
     { "--source", "-s" },
