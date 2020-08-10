@@ -37,6 +37,15 @@ std::string USB::usberror(int i)
     return libusb_strerror((libusb_error) i);
 }
 
+static const char* device_type(int i)
+{
+	switch (i)
+	{
+		case DEV_FLUXENGINE: return "FluxEngine";
+		default: assert(false);
+	}
+}
+
 static std::map<std::string, std::unique_ptr<CandidateDevice>> get_candidates(libusb_device** devices, int numdevices)
 {
 	std::map<std::string, std::unique_ptr<CandidateDevice>> candidates;
@@ -75,6 +84,7 @@ static void open_device(CandidateDevice& candidate)
 	if (i < 0)
 		Error() << "cannot open USB device: " << libusb_strerror((libusb_error) i);
 	
+	std::cout << "Using " << device_type(candidate.type) << " with serial number " << candidate.serial << '\n';
 	usb = createFluxengineUsb(handle);
 }
 
@@ -90,14 +100,7 @@ static CandidateDevice& select_candidate(const std::map<std::string, std::unique
 
 		std::cout << "More than one USB device detected. Use --device to specify which one to use:\n";
 		for (auto& i : devices)
-		{
-			std::cout << "  " << i.first << ": ";
-			switch (i.second->type)
-			{
-				case DEV_FLUXENGINE: std::cout << "FluxEngine";
-			}
-			std::cout << '\n';
-		}
+			std::cout << "  " << device_type(i.second->type) << ": " << i.first << '\n';
 		Error() << "specify USB device";
 	}
 	else
