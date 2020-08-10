@@ -54,16 +54,11 @@ private:
 	}
 
 public:
-	FluxEngineUsb()
+	FluxEngineUsb(libusb_device_handle* device)
 	{
-		int i = libusb_init(NULL);
-		if (i < 0)
-			Error() << "could not start libusb: " << usberror(i);
+		_device = device;
 
-		_device = libusb_open_device_with_vid_pid(NULL, FLUXENGINE_VID, FLUXENGINE_PID);
-		if (!_device)
-			Error() << "cannot find the FluxEngine (is it plugged in?)";
-		
+		int i;
 		int cfg = -1;
 		libusb_get_configuration(_device, &cfg);
 		if (cfg != 1)
@@ -77,7 +72,7 @@ public:
 		if (i < 0)
 			Error() << "could not claim interface: " << usberror(i);
 
-		int version = usbGetVersion();
+		int version = getVersion();
 		if (version != FLUXENGINE_VERSION)
 			Error() << "your FluxEngine firmware is at version " << version
 					<< " but the client is for version " << FLUXENGINE_VERSION
@@ -324,8 +319,8 @@ public:
 	}
 };
 
-USB* createFluxengineUsb()
+USB* createFluxengineUsb(libusb_device_handle* device)
 {
-	return new FluxEngineUsb();
+	return new FluxEngineUsb(device);
 }
 

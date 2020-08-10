@@ -3,7 +3,9 @@
 #include "usb/usb.h"
 #include "protocol.h"
 
-static FlagGroup flags;
+static FlagGroup flags = {
+	&usbFlags,
+};
 
 static IntFlag drive(
     { "--drive", "-d" },

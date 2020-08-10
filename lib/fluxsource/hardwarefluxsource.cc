@@ -5,7 +5,9 @@
 #include "fluxsource/fluxsource.h"
 #include "fmt/format.h"
 
-FlagGroup hardwareFluxSourceFlags;
+FlagGroup hardwareFluxSourceFlags = {
+	&usbFlags
+};
 
 static DoubleFlag revolutions(
     { "--revolutions" },

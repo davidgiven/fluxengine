@@ -4,7 +4,9 @@
 #include "usb/usb.h"
 #include "fluxsink/fluxsink.h"
 
-FlagGroup hardwareFluxSinkFlags;
+FlagGroup hardwareFluxSinkFlags = {
+	&usbFlags,
+};
 
 static bool high_density = false;
 

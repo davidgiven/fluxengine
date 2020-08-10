@@ -4,7 +4,9 @@
 #include "dataspec.h"
 #include "protocol.h"
 
-static FlagGroup flags;
+static FlagGroup flags = {
+	&usbFlags,
+};
 
 static DataSpecFlag source(
     { "--source", "-s" },

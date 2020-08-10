@@ -2,6 +2,7 @@
 #define USB_H
 
 #include "bytes.h"
+#include "flags.h"
 
 class Fluxmap;
 class libusb_device_handle;
@@ -29,9 +30,10 @@ protected:
 	libusb_device_handle* _device;
 };
 
+extern FlagGroup usbFlags;
 extern USB& getUsb();
 
-extern USB* createFluxengineUsb();
+extern USB* createFluxengineUsb(libusb_device_handle* device);
 
 static inline int usbGetVersion()     { return getUsb().getVersion(); }
 static inline void usbRecalibrate()   { getUsb().recalibrate(); }

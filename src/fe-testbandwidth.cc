@@ -2,7 +2,9 @@
 #include "flags.h"
 #include "usb/usb.h"
 
-static FlagGroup flags;
+static FlagGroup flags = {
+	&usbFlags,
+};
 
 int mainTestBandwidth(int argc, const char* argv[])
 {
