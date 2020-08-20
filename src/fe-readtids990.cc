@@ -13,8 +13,8 @@ static FlagGroup flags { &readerFlags };
 
 int mainReadTiDs990(int argc, const char* argv[])
 {
-	setReaderDefaultSource(":t=0-79:s=0");
-	setReaderDefaultOutput("dfs.img");
+	setReaderDefaultSource(":t=0-76");
+	setReaderDefaultOutput("tids990.img");
     setReaderRevolutions(2);
     flags.parseFlags(argc, argv);
 
