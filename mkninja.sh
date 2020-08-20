@@ -172,6 +172,7 @@ buildlibrary libbackend.a \
     arch/ibm/encoder.cc \
     arch/macintosh/decoder.cc \
     arch/mx/decoder.cc \
+	arch/tids990/decoder.cc \
     arch/victor9k/decoder.cc \
     arch/zilogmcz/decoder.cc \
     lib/bytes.cc \
@@ -223,6 +224,7 @@ buildlibrary libfrontend.a \
     src/fe-readibm.cc \
     src/fe-readmac.cc \
     src/fe-readmx.cc \
+	src/fe-readtids990.cc \
     src/fe-readvictor9k.cc \
     src/fe-readzilogmcz.cc \
     src/fe-rpm.cc \
