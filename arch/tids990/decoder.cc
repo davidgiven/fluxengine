@@ -1,5 +1,6 @@
 #include "globals.h"
 #include "decoders/decoders.h"
+#include "encoders/encoders.h"
 #include "tids990/tids990.h"
 #include "crc.h"
 #include "fluxmap.h"

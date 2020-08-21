@@ -6,6 +6,7 @@
 #define TIDS990_DATA_RECORD_SIZE   (TIDS990_PAYLOAD_SIZE + 4) /* bytes */
 
 class Sector;
+class SectorSet;
 class Fluxmap;
 class Track;
 
@@ -18,6 +19,17 @@ public:
     void decodeSectorRecord();
 	void decodeDataRecord();
 };
+
+class TiDs990Encoder : public AbstractEncoder
+{
+public:
+	virtual ~TiDs990Encoder() {}
+
+public:
+    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors);
+};
+
+extern FlagGroup tids990EncoderFlags;
 
 #endif
 
