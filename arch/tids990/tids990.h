@@ -25,8 +25,19 @@ class TiDs990Encoder : public AbstractEncoder
 public:
 	virtual ~TiDs990Encoder() {}
 
+private:
+	void writeRawBits(uint32_t data, int width);
+	void writeBytes(const Bytes& bytes);
+	void writeBytes(int count, uint8_t value);
+	void writeSync();
+
 public:
     std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors);
+
+private:
+	std::vector<bool> _bits;
+	unsigned _cursor;
+	bool _lastBit;
 };
 
 extern FlagGroup tids990EncoderFlags;
