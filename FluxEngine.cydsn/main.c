@@ -249,6 +249,8 @@ static void seek_to(int track)
         CyWdtClear();
     }
     CyDelay(STEP_SETTLING_TIME);
+    
+    TK43_REG_Write(track < 43); /* high if 0..42, low if 43 or up */
     print("finished seek");
 }
 

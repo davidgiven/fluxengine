@@ -292,7 +292,7 @@ INDEX300 ---+ 3.0|     | GND+--------------------------+
             +----+     +----+                 +--+--+  |
 INDEX360 ---+ 3.1|     | 1.7+------ DISKCHG --+34+33+--+
             +----+     +----+                 +--+--+
-            + 3.2|     | 1.6+------- SIDE1 ---+32+31+
+    TK43 ---+ 3.2|     | 1.6+------- SIDE1 ---+32+31+
             +----+     +----+                 +--+--+
             + 3.3|     | 1.5+------- RDATA ---+30+29+
             +----+     +----+                 +--+--+
@@ -364,6 +364,10 @@ Notes:
   timing pulses for 300 and 360 RPM drives. These are useful for certain
   rather exotic things. See the section on flippy disks [in the FAQ](faq.md)
   for more details; you can normally ignore these.
+
+  - `TK43` is an optional output pin which goes low when the drive is seeking
+  to track 43 or above. This is useful when using 8" floppy drives, which
+  require reduced write current when writing to these tracks.
 
 ## Next steps
 
