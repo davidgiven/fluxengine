@@ -306,7 +306,7 @@ INDEX360 ---+ 3.1|     | 1.7+------ DISKCHG --+34+33+--+
             +----+     +----+                 +--+--+
             +15.0|     | 1.0+------- STEP ----+20+19+
             +----+     +----+                 +--+--+
-            +15.1|     |12.0+-------- DIR ----+18+17+
+            +15.1|     |12.0+--- DIR/SIDE1 ---+18+17+
             +----+     +----+                 +--+--+
             +15.2|     |12.1+------- MOTEB ---+16+15+
             +----+     +----+                 +--+--+
@@ -342,6 +342,10 @@ INDEX360 ---+ 3.1|     | 1.7+------ DISKCHG --+34+33+--+
 ```
 
 Notes:
+
+  - `DIR/SIDE1` is the step direction pin. During reads or writes, `SIDE1` is
+  also multiplexed onto it, because some drives expect this. This is harmless
+  on other drives because the `DIR` pin is ignored during reads or writes.
 
   - `TX` is the debug UART port. It's on pin 12.7 because the board routes it
   to the USB serial port on the programmer, so you can get debug information
