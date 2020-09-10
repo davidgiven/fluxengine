@@ -22,6 +22,7 @@ extern command_cb mainReadFB100;
 extern command_cb mainReadIBM;
 extern command_cb mainReadMac;
 extern command_cb mainReadMx;
+extern command_cb mainReadTiDs990;
 extern command_cb mainReadVictor9K;
 extern command_cb mainReadZilogMCZ;
 extern command_cb mainRpm;
@@ -32,6 +33,7 @@ extern command_cb mainUpgradeFluxFile;
 extern command_cb mainWriteAmiga;
 extern command_cb mainWriteBrother;
 extern command_cb mainWriteIbm;
+extern command_cb mainWriteTiDs990;
 extern command_cb mainWriteFlux;
 extern command_cb mainWriteTestPattern;
 
@@ -77,6 +79,7 @@ static std::vector<Command> readables =
     { "ibm",           mainReadIBM,       "Reads the ubiquitous IBM format disks.", },
     { "mac",           mainReadMac,       "Reads Apple Macintosh disks.", },
     { "mx",            mainReadMx,        "Reads MX disks.", },
+	{ "tids990",       mainReadTiDs990,   "Reads Texas Instruments DS990 disks.", },
     { "victor9k",      mainReadVictor9K,  "Reads Victor 9000 disks.", },
     { "zilogmcz",      mainReadZilogMCZ,  "Reads Zilog MCZ disks.", },
 };
@@ -86,6 +89,7 @@ static std::vector<Command> writeables =
     { "amiga",         mainWriteAmiga,    "Writes Amiga disks.", },
     { "brother",       mainWriteBrother,  "Writes 120kB and 240kB Brother word processor disks.", },
     { "ibm",           mainWriteIbm,      "Writes the ubiquitous IBM format disks.", },
+	{ "tids990",       mainWriteTiDs990,  "Writes Texas Instruments DS990 disks.", },
 };
 
 static std::vector<Command> convertables =
