@@ -13,6 +13,7 @@ std::map<std::string, ImageWriter::Constructor> ImageWriter::formats =
 	{".adf", ImageWriter::createImgImageWriter},
 	{".d64", ImageWriter::createD64ImageWriter},
 	{".d81", ImageWriter::createImgImageWriter},
+	{".diskcopy", ImageWriter::createDiskCopyImageWriter},
 	{".img", ImageWriter::createImgImageWriter},
 	{".ldbs", ImageWriter::createLDBSImageWriter},
 };

@@ -103,8 +103,9 @@ at least, check the CRC so what data's there is probably good.
 | [AES Superplus / No Problem](doc/disk-aeslanier.md) |  🦖   | | hard sectors! |
 | [Durango F85](doc/disk-durangof85.md)    |  🦖   |        | 5.25" |
 | [DVK MX](doc/disk-mx.md)                 |  🦖   |        | Soviet PDP-11 clone |
-| [Victor 9000](doc/disk-victor9k.md)      |  🦖   |        | 8-inch        |
-| [Zilog MCZ](doc/disk-zilogmcz.md)        |  🦖   |        | 8-inch _and_ hard sectors |
+| [TI DS990 FD1000](doc/disk-tids990.md)   |  🦄   |  🦄    | 8" |
+| [Victor 9000](doc/disk-victor9k.md)      |  🦖   |        | 8" |
+| [Zilog MCZ](doc/disk-zilogmcz.md)        |  🦖   |        | 8" _and_ hard sectors |
 {: .datatable }
 
 ### Notes
