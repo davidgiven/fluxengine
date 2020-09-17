@@ -7,6 +7,7 @@ extern command_cb mainConvertCwfToFlux;
 extern command_cb mainConvertFluxToAu;
 extern command_cb mainConvertFluxToScp;
 extern command_cb mainConvertFluxToVcd;
+extern command_cb mainConvertImage;
 extern command_cb mainConvertScpToFlux;
 extern command_cb mainInspect;
 extern command_cb mainReadADFS;
@@ -99,6 +100,7 @@ static std::vector<Command> convertables =
     { "fluxtoau",      mainConvertFluxToAu,  "Converts (one track of a) flux file to an .au audio file.", },
     { "fluxtoscp",     mainConvertFluxToScp, "Converrt a flux file to a Supercard Pro file.", },
     { "fluxtovcd",     mainConvertFluxToVcd, "Converts (one track of a) flux file to a VCD file.", },
+	{ "image",         mainConvertImage,     "Converts one disk image to another.", },
 };
 
 static std::vector<Command> testables =

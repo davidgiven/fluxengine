@@ -228,20 +228,15 @@ directory.
 	format in a non-backwards-compatible way; this tool will upgrade flux files
 	to the new format.
 
-  - `fluxengine convert`: converts flux files from various formats to various
-	other formats. You can use this to convert Catweasel flux files to
+  - `fluxengine convert`: converts files from various formats to various other
+	formats. The main use of this is probably `fluxengine convert image`, which
+	will convert a disk image from one format to another.
+
+	There are also subcommands for converting Catweasel flux files to
 	FluxEngine's native format, FluxEngine flux files to various other formats
 	useful for debugging (including VCD which can be loaded into
 	[sigrok](http://sigrok.org)), and bidirectional conversion to and from
 	Supercard Pro `.scp` format.
-
-	**Important SCP note:** import (`fluxengine convert scptoflux`) should be
-	fairly robust, but export (`fluxengine convert fluxtoscp`) should only be
-	done with great caution as FluxEngine files contain features which can't be
-	represented very well in `.scp` format and they're probably pretty dubious.
-	As ever, please [get in
-	touch](https://github.com/davidgiven/fluxengine/issues/new) with any
-	reports.
 
 Commands which normally take `--source` or `--dest` get a sensible default if
 left unspecified. `fluxengine read ibm` on its own will read drive 0 and

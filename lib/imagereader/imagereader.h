@@ -24,6 +24,7 @@ private:
 	static std::map<std::string, Constructor> formats;
 
     static std::unique_ptr<ImageReader> createImgImageReader(const ImageSpec& spec);
+    static std::unique_ptr<ImageReader> createJv3ImageReader(const ImageSpec& spec);
 
 	static Constructor findConstructor(const ImageSpec& spec);
 
