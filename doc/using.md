@@ -136,6 +136,10 @@ exact format varies according to the extension:
 	format due to the weird layout of Mac GCR disks, but it can also support
 	720kB and 1440kB IBM disks (although there's no real benefit).
 
+  - `.jv3`: a disk image format mainly used by the TRS-80. These images can be
+	read, but not yet written. You only get the data; the density and DAM bits
+	are ignored.
+
 ### High density disks
 
 High density disks use a different magnetic medium to low and double density
