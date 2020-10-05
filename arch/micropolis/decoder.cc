@@ -22,13 +22,18 @@ AbstractDecoder::RecordType MicropolisDecoder::advanceToNextRecord()
 	return UNKNOWN_RECORD;
 }
 
+/* Adds all bytes, with carry. */
 static uint8_t checksum(const Bytes& bytes) {
 	ByteReader br(bytes);
 	uint16_t sum = 0;
 	while (!br.eof()) {
+		if (sum > 0xFF) {
+			sum -= 0x100 - 1;
+		}
 		sum += br.read_8();
 	}
-	return (sum & 0xFF) + (sum >> 8);
+	/* The last carry is ignored */
+	return sum & 0xFF;
 }
 
 void MicropolisDecoder::decodeSectorRecord()
