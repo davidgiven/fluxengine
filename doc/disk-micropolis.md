@@ -10,6 +10,12 @@ Some later systems were Micropolis-compatible and so were also 100 TPI, like
 the Vector Graphic Dual-Mode Disk Controller which was paired with a Tandon
 drive.
 
+**Important note:** You _cannot_ read these disks with a normal PC drive, as
+these drives are 96tpi.The track spacing is determined by the physical geometry
+of the drive and can't be changed in software. You'll need to get hold of a
+100tpi Micropolis drive. Luckily these seem to use the same connector and
+pinout as a 96tpi PC 5.25" drive. In use they should be identical.
+
 Reading disks
 -------------
 
@@ -26,10 +32,10 @@ or single-sided disks, you can use `-s :s=0` to read only one side of the disk
 which works around the problem.
 
 The [CP/M BIOS](https://www.seasip.info/Cpm/bios.html) defined SELDSK, SETTRK,
-and SETSEC, but no function to select the head/side. This caused dual-sided
-floppies to be represented as twice the number of tracks with the second side's
-tracks logically following the first side (e.g., tracks 77-153). That produces
-results mostly indistinguishable from HCS.
+and SETSEC, but no function to select the head/side. Double-sided floppies
+could be represented as having either twice the number of sectors, for CHS, or
+twice the number of tracks, HCS; the second side's tracks logically followed
+the first side (e.g., tracks 77-153). Micropolis disks tended to be the latter.
 
 Useful references
 -----------------
