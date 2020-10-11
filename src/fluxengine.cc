@@ -21,6 +21,7 @@ extern command_cb mainReadF85;
 extern command_cb mainReadFB100;
 extern command_cb mainReadIBM;
 extern command_cb mainReadMac;
+extern command_cb mainReadMicropolis;
 extern command_cb mainReadMx;
 extern command_cb mainReadTiDs990;
 extern command_cb mainReadVictor9K;
@@ -78,6 +79,7 @@ static std::vector<Command> readables =
     { "fb100",         mainReadFB100,     "Reads FB100 disks.", },
     { "ibm",           mainReadIBM,       "Reads the ubiquitous IBM format disks.", },
     { "mac",           mainReadMac,       "Reads Apple Macintosh disks.", },
+    { "micropolis",    mainReadMicropolis, "Reads Micropolis disks.", },
     { "mx",            mainReadMx,        "Reads MX disks.", },
 	{ "tids990",       mainReadTiDs990,   "Reads Texas Instruments DS990 disks.", },
     { "victor9k",      mainReadVictor9K,  "Reads Victor 9000 disks.", },
