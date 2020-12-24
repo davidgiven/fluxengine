@@ -3,7 +3,7 @@
 
 enum 
 {
-    FLUXENGINE_VERSION = 14,
+    FLUXENGINE_VERSION = 15,
 
     FLUXENGINE_VID = 0x1209,
     FLUXENGINE_PID = 0x6e00,
@@ -48,7 +48,7 @@ enum
     F_FRAME_GET_VERSION_REPLY,    /* version_frame */
     F_FRAME_SEEK_CMD,             /* seek_frame */
     F_FRAME_SEEK_REPLY,           /* any_frame */
-    F_FRAME_MEASURE_SPEED_CMD,    /* any_frame */
+    F_FRAME_MEASURE_SPEED_CMD,    /* measurespeed_frame */
     F_FRAME_MEASURE_SPEED_REPLY,  /* speed_frame */
     F_FRAME_BULK_WRITE_TEST_CMD,   /* any_frame */
     F_FRAME_BULK_WRITE_TEST_REPLY, /* any_frame */
@@ -125,6 +125,12 @@ struct seek_frame
     uint8_t track;
 };
 
+struct measurespeed_frame 
+{
+    struct frame_header f;
+	uint8_t hard_sector_count;
+};
+
 struct speed_frame
 {
     struct frame_header f;
@@ -137,6 +143,7 @@ struct read_frame
     uint8_t side;
     uint8_t synced;
     uint16_t milliseconds;
+    uint8_t hardsec_threshold_ms;
 };
 
 struct write_frame
@@ -144,12 +151,14 @@ struct write_frame
     struct frame_header f;
     uint8_t side;
     uint32_t bytes_to_write;
+    uint8_t hardsec_threshold_ms;
 };
 
 struct erase_frame
 {
     struct frame_header f;
     uint8_t side;
+    uint8_t hardsec_threshold_ms;
 };
 
 struct set_drive_frame

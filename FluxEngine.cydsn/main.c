@@ -21,6 +21,10 @@ static bool drive1_present;
 
 static volatile uint32_t clock = 0; /* ms */
 static volatile bool index_irq = false;
+/* Duration in ms. 0 causes every pulse to be an index pulse. Durations since
+ * last pulse greater than this value imply sector pulse. Otherwise is an index
+ * pulse. */
+static volatile uint32_t hardsec_index_threshold = 0;
 
 static bool motor_on = false;
 static uint32_t motor_on_time = 0;
@@ -69,12 +73,34 @@ static void system_timer_cb(void)
 
 CY_ISR(index_irq_cb)
 {
-    index_irq = true;
+    /* Hard sectored media has sector pulses at the beginning of every sector
+     * and the index pulse is an extra pulse in the middle of the last sector.
+     * When the extra pulse is seen, the next sector pulse is also the start of
+     * the track. */
+    static bool hardsec_index_irq_primed = false;
+    static uint32_t hardsec_last_pulse_time = 0;
+
+    if (!hardsec_index_threshold)
+    {
+        index_irq = true;
+        hardsec_index_irq_primed = false;
+    }
+    else
+    {
+        index_irq = hardsec_index_irq_primed;
+        if (index_irq)
+            hardsec_index_irq_primed = false;
+        else
+            hardsec_index_irq_primed =
+                clock - hardsec_last_pulse_time <= hardsec_index_threshold;
+        hardsec_last_pulse_time = clock;
+    }
     
     /* Stop writing the instant the index pulse comes along; it may take a few
      * moments for the main code to notice the pulse, and we don't want to overwrite
      * the beginning of the track. */
-    ERASE_REG_Write(0);
+    if (index_irq)
+        ERASE_REG_Write(0);
 }
 
 CY_ISR(capture_dma_finished_irq_cb)
@@ -267,7 +293,7 @@ static void cmd_recalibrate(void)
     send_reply(&r);    
 }
     
-static void cmd_measure_speed(struct any_frame* f)
+static void cmd_measure_speed(struct measurespeed_frame* f)
 {
     start_motor();
     
@@ -286,10 +312,14 @@ static void cmd_measure_speed(struct any_frame* f)
 
     if (elapsed != 0)
     {
-        index_irq = false;
+        int target_pulse_count = f->hard_sector_count + 1;
         start_clock = clock;
-        while (!index_irq)
-            elapsed = clock - start_clock;
+        for (int x=0; x<target_pulse_count; x++)
+        {
+            index_irq = false;
+            while (!index_irq)
+                elapsed = clock - start_clock;
+        }
     }
     
     DECLARE_REPLY_FRAME(struct speed_frame, F_FRAME_MEASURE_SPEED_REPLY);
@@ -401,10 +431,12 @@ static void cmd_read(struct read_frame* f)
         
     if (f->synced)
     {
+        hardsec_index_threshold = f->hardsec_threshold_ms;
         index_irq = false;
         while (!index_irq)
             ;
         index_irq = false;
+        hardsec_index_threshold = 0;
     }
     
     dma_writing_to_td = 0;
@@ -591,6 +623,7 @@ static void cmd_write(struct write_frame* f)
                 /* Wait for the index marker. While this happens, the DMA engine
                  * will prime the FIFO. */
 
+                hardsec_index_threshold = f->hardsec_threshold_ms;
                 index_irq = false;
                 while (!index_irq)
                     ;
@@ -625,6 +658,7 @@ abort:
     }
     
     print("p=%d cr=%d cw=%d f=%d w=%d index=%d underrun=%d", packets, count_read, count_written, finished, writing, index_irq, dma_underrun);
+    hardsec_index_threshold = 0;
     if (!finished)
     {
         /* There's still some data to read, so just read and blackhole it ---
@@ -657,6 +691,7 @@ static void cmd_erase(struct erase_frame* f)
     /* Disk is now spinning. */
     
     print("start erasing");
+    hardsec_index_threshold = f->hardsec_threshold_ms;
     index_irq = false;
     while (!index_irq)
         ;
@@ -665,6 +700,7 @@ static void cmd_erase(struct erase_frame* f)
     while (!index_irq)
         ;
     ERASE_REG_Write(0);
+    hardsec_index_threshold = 0;
     print("stop erasing");
 
     DECLARE_REPLY_FRAME(struct any_frame, F_FRAME_ERASE_REPLY);
@@ -790,7 +826,7 @@ static void handle_command(void)
             break;
         
         case F_FRAME_MEASURE_SPEED_CMD:
-            cmd_measure_speed(f);
+            cmd_measure_speed((struct measurespeed_frame*) f);
             break;
             
         case F_FRAME_BULK_WRITE_TEST_CMD:

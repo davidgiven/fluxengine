@@ -24,6 +24,11 @@ static IntFlag indexMode(
     "index pulse source (0=drive, 1=300 RPM fake source, 2=360 RPM fake source",
     0);
 
+static IntFlag hardSectorCount(
+    { "--hard-sector-count" },
+    "number of hard sectors on the disk (0=soft sectors)",
+    0);
+
 static bool high_density = false;
 
 void setHardwareFluxSourceDensity(bool high_density)
@@ -39,7 +44,8 @@ public:
     {
         usbSetDrive(_drive, high_density, indexMode);
         std::cerr << "Measuring rotational speed... " << std::flush;
-        _oneRevolution = usbGetRotationalPeriod();
+        _oneRevolution = usbGetRotationalPeriod(hardSectorCount);
+        _hardSectorThreshold = _oneRevolution * 3 / (4 * hardSectorCount);
         std::cerr << fmt::format("{}ms\n", _oneRevolution / 1e6);
     }
 
@@ -52,7 +58,8 @@ public:
     {
         usbSetDrive(_drive, high_density, indexMode);
         usbSeek(track);
-        Bytes data = usbRead(side, synced, revolutions * _oneRevolution);
+        Bytes data = usbRead(
+			side, synced, revolutions * _oneRevolution, _hardSectorThreshold);
         auto fluxmap = std::make_unique<Fluxmap>();
         fluxmap->appendBytes(data);
         return fluxmap;
@@ -72,6 +79,7 @@ private:
     unsigned _drive;
     unsigned _revolutions;
     nanoseconds_t _oneRevolution;
+    nanoseconds_t _hardSectorThreshold;
 };
 
 void setHardwareFluxSourceRevolutions(double revolutions)
@@ -82,6 +90,11 @@ void setHardwareFluxSourceRevolutions(double revolutions)
 void setHardwareFluxSourceSynced(bool synced)
 {
     ::synced.setDefaultValue(synced);
+}
+
+void setHardwareFluxSourceHardSectorCount(int sectorCount)
+{
+    ::hardSectorCount.setDefaultValue(sectorCount);
 }
 
 std::unique_ptr<FluxSource> FluxSource::createHardwareFluxSource(unsigned drive)
