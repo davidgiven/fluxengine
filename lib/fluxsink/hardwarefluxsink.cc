@@ -39,6 +39,7 @@ public:
     {
 		if (hardSectorCount.get())
 		{
+			usbSetDrive(_drive, high_density, indexMode);
 			std::cerr << "Measuring rotational speed... " << std::flush;
 			nanoseconds_t oneRevolution = usbGetRotationalPeriod(hardSectorCount);
 			_hardSectorThreshold = oneRevolution * 3 / (4 * hardSectorCount);
