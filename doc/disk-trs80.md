@@ -32,3 +32,11 @@ If you've got a 40-track disk, use `-s :t=0-79x2`.
 
 If you've got a single density disk, use `--read-fm=true`. (Double density is
 the default.)
+
+
+Useful references
+-----------------
+
+  - [The JV3 file format](https://www.tim-mann.org/trs80/dskspec.html):
+	documents the most popular emulator disk image.
+

@@ -153,6 +153,7 @@ buildlibrary libfmt.a \
 buildlibrary libbackend.a \
 	lib/imagereader/imagereader.cc \
 	lib/imagereader/imgimagereader.cc \
+	lib/imagereader/jv3imagereader.cc \
 	lib/imagewriter/d64imagewriter.cc \
 	lib/imagewriter/diskcopyimagewriter.cc \
 	lib/imagewriter/imagewriter.cc \
@@ -212,6 +213,7 @@ buildlibrary libfrontend.a \
     src/fe-fluxtoau.cc \
     src/fe-fluxtoscp.cc \
     src/fe-fluxtovcd.cc \
+    src/fe-image.cc \
     src/fe-inspect.cc \
     src/fe-readadfs.cc \
     src/fe-readaeslanier.cc \
