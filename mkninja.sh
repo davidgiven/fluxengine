@@ -151,6 +151,7 @@ buildlibrary libfmt.a \
     dep/fmt/posix.cc \
 
 buildlibrary libbackend.a \
+	lib/imagereader/diskcopyimagereader.cc \
 	lib/imagereader/imagereader.cc \
 	lib/imagereader/imgimagereader.cc \
 	lib/imagewriter/d64imagewriter.cc \

@@ -47,7 +47,6 @@ public:
 		else
 			Error() << "this image is not compatible with the DiskCopy 4.2 format";
 
-
 		std::cout << "writing DiskCopy 4.2 image\n"
 		          << fmt::format("{} tracks, {} heads, {} sectors, {} bytes per sector; {}\n",
 				  		spec.cylinders, spec.heads, spec.sectors, spec.bytes,
