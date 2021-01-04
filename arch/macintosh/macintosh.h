@@ -9,6 +9,7 @@
 
 #define MAC_SECTOR_LENGTH   524 /* yes, really */
 #define MAC_ENCODED_SECTOR_LENGTH 703
+#define MAC_FORMAT_BYTE     0x22
 
 #define MAC_TRACKS_PER_DISK 80
 

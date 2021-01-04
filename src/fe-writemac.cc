@@ -11,8 +11,8 @@ static FlagGroup flags { &writerFlags, &macintoshEncoderFlags };
 
 int mainWriteMac(int argc, const char* argv[])
 {
-    setWriterDefaultInput(":c=77:h=2:s=26:b=288");
-	setWriterDefaultDest(":d=0:t=0-76:s=0-1");
+    setWriterDefaultInput(":c=80:h=2:s=12:b=524");
+	setWriterDefaultDest(":d=0:t=0-79:s=0-1");
     flags.parseFlags(argc, argv);
 
 	MacintoshEncoder encoder;
