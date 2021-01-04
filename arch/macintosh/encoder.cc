@@ -132,10 +132,10 @@ static Bytes encode_crazy_data(const Bytes& input)
 			bw.write_8(w3);
 	}
 
-	bw.write_8(c1 & 0x3f);
-	bw.write_8(c2 & 0x3f);
-	bw.write_8(c3 & 0x3f);
 	bw.write_8(c4 & 0x3f);
+	bw.write_8(c3 & 0x3f);
+	bw.write_8(c2 & 0x3f);
+	bw.write_8(c1 & 0x3f);
 
 	return output;
 }
