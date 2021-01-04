@@ -34,6 +34,7 @@ extern command_cb mainTestBandwidth;
 extern command_cb mainTestVoltages;
 extern command_cb mainUpgradeFluxFile;
 extern command_cb mainWriteAmiga;
+extern command_cb mainWriteAtariST;
 extern command_cb mainWriteBrother;
 extern command_cb mainWriteIbm;
 extern command_cb mainWriteMac;
@@ -98,6 +99,7 @@ static std::vector<Command> writeables =
     { "ibm",           mainWriteIbm,      "Writes the ubiquitous IBM format disks.", },
 	{ "mac", 		   mainWriteMac,      "Writes Apple Macintosh disks.", },
 	{ "tids990",       mainWriteTiDs990,  "Writes Texas Instruments DS990 disks.", },
+    { "atarist",       mainWriteAtariST,  "Writes Atari ST disks."}
 };
 
 static std::vector<Command> convertables =

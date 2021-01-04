@@ -251,6 +251,7 @@ buildlibrary libfrontend.a \
     src/fe-testvoltages.cc \
     src/fe-upgradefluxfile.cc \
     src/fe-writeamiga.cc \
+    src/fe-writeatarist.cc \
     src/fe-writebrother.cc \
     src/fe-writeibm.cc \
     src/fe-writemac.cc \
