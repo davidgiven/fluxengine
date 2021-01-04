@@ -41,6 +41,12 @@ Bytes::Bytes(const uint8_t* ptr, size_t len):
     _high(len)
 {}
 
+Bytes::Bytes(const std::string& s):
+	_data(createVector((const uint8_t*)&s[0], s.size())),
+	_low(0),
+	_high(s.size())
+{}
+
 Bytes::Bytes(std::initializer_list<uint8_t> data):
     _data(createVector(data)),
     _low(0),
