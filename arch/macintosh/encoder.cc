@@ -14,7 +14,12 @@ FlagGroup macintoshEncoderFlags;
 static DoubleFlag postIndexGapUs(
 	{ "--post-index-gap-us" },
 	"Post-index gap before first sector header (microseconds).",
-	500);
+	0);
+
+static DoubleFlag clockCompensation(
+	{ "--clock-compensation-factor" },
+	"Scale the output clock by this much.",
+	.9724);
 
 static bool lastBit;
 
@@ -211,7 +216,7 @@ std::unique_ptr<Fluxmap> MacintoshEncoder::encode(
 	if ((physicalTrack < 0) || (physicalTrack >= MAC_TRACKS_PER_DISK))
 		return std::unique_ptr<Fluxmap>();
 
-	double clockRateUs = clockRateUsForTrack(physicalTrack);
+	double clockRateUs = clockRateUsForTrack(physicalTrack) * clockCompensation;
 	int bitsPerRevolution = 200000.0 / clockRateUs;
 	std::vector<bool> bits(bitsPerRevolution);
 	unsigned cursor = 0;
@@ -228,7 +233,7 @@ std::unique_ptr<Fluxmap> MacintoshEncoder::encode(
 
 	if (cursor >= bits.size())
 		Error() << fmt::format("track data overrun by {} bits", cursor - bits.size());
-	//fillBitmapTo(bits, cursor, bits.size(), { true, false });
+	fillBitmapTo(bits, cursor, bits.size(), { true, false });
 
 	std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
 	fluxmap->appendBits(bits, clockRateUs*1e3);
