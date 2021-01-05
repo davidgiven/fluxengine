@@ -164,7 +164,7 @@ static void write_bits(std::vector<bool>& bits, unsigned& cursor, uint64_t data,
 static uint8_t encode_side(uint8_t track, uint8_t side)
 {
     /* Mac disks, being weird, use the side byte to encode both the side (in
-     * bit 5) and also whether we're above track 0x3f (in bit 6).
+     * bit 5) and also whether we're above track 0x3f (in bit 0).
      */
 
 	return (side ? 0x20 : 0x00) | ((track>0x3f) ? 0x01 : 0x00);
