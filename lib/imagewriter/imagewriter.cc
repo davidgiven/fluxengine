@@ -47,7 +47,7 @@ std::unique_ptr<ImageWriter> ImageWriter::create(const SectorSet& sectors, const
 void ImageWriter::verifyImageSpec(const ImageSpec& spec)
 {
 	if (!findConstructor(spec))
-		Error() << "unrecognised image filename extension";
+		Error() << "unrecognised output image filename extension";
 }
 
 ImageWriter::ImageWriter(const SectorSet& sectors, const ImageSpec& spec):

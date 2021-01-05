@@ -15,6 +15,8 @@ std::map<std::string, ImageReader::Constructor> ImageReader::formats =
 	{".diskcopy", ImageReader::createDiskCopyImageReader},
 	{".img", ImageReader::createImgImageReader},
 	{".ima", ImageReader::createImgImageReader},
+	{".jv1", ImageReader::createImgImageReader},
+	{".jv3", ImageReader::createJv3ImageReader},
 };
 
 static bool ends_with(const std::string& value, const std::string& ending)
@@ -46,7 +48,7 @@ std::unique_ptr<ImageReader> ImageReader::create(const ImageSpec& spec)
 void ImageReader::verifyImageSpec(const ImageSpec& spec)
 {
     if (!findConstructor(spec))
-        Error() << "unrecognised image filename extension";
+        Error() << "unrecognised input image filename extension";
 }
 
 ImageReader::ImageReader(const ImageSpec& spec):

@@ -871,6 +871,7 @@
       <Data key="c5367cde-21d5-4866-9a32-d16abfea0c61" value="WPT" />
       <Data key="d19368c5-6855-41bb-a9ff-808938abef00" value="INDEX" />
       <Data key="e9f14b5a-b2bf-49b8-98f3-d7b5a43ace8d" value="DRVSB" />
+      <Data key="e16b5ef8-00d3-40a4-bc1c-194983c8eb3d" value="LOW_CURRENT" />
       <Data key="e851a3b9-efb8-48be-bbb8-b303b216c393" value="INDEX300" />
       <Data key="e51063a9-4fad-40c7-a06b-7cc4b137dc18" value="DSKCHG" />
       <Data key="ea7ee228-8b3f-426c-8bb8-cd7a81937769" value="DIR" />
@@ -4159,6 +4160,11 @@
     <Group key="e9f14b5a-b2bf-49b8-98f3-d7b5a43ace8d">
       <Group key="0">
         <Data key="Port Format" value="12,3" />
+      </Group>
+    </Group>
+    <Group key="e16b5ef8-00d3-40a4-bc1c-194983c8eb3d">
+      <Group key="0">
+        <Data key="Port Format" value="3,2" />
       </Group>
     </Group>
     <Group key="e851a3b9-efb8-48be-bbb8-b303b216c393">

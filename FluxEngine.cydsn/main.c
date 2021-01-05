@@ -13,8 +13,8 @@
 #define DISKSTATUS_WPT    1
 #define DISKSTATUS_DSKCHG 2
 
-#define STEP_TOWARDS0 1
-#define STEP_AWAYFROM0 0
+#define STEP_TOWARDS0 0
+#define STEP_AWAYFROM0 1
 
 static bool drive0_present;
 static bool drive1_present;
@@ -249,6 +249,8 @@ static void seek_to(int track)
         CyWdtClear();
     }
     CyDelay(STEP_SETTLING_TIME);
+    
+    TK43_REG_Write(track < 43); /* high if 0..42, low if 43 or up */
     print("finished seek");
 }
 
@@ -381,8 +383,9 @@ static void init_capture_dma(void)
 
 static void cmd_read(struct read_frame* f)
 {
-    SIDE_REG_Write(f->side);
     seek_to(current_track);
+    SIDE_REG_Write(f->side);
+    STEP_REG_Write(f->side); /* for drives which multiplex SIDE and DIR */
     
     /* Do slow setup *before* we go into the real-time bit. */
     
@@ -478,6 +481,7 @@ abort:;
     wait_until_writeable(FLUXENGINE_DATA_IN_EP_NUM);
     deinit_dma();
 
+    STEP_REG_Write(0);
     if (saved_dma_underrun)
     {
         print("underrun after %d packets");
@@ -523,9 +527,11 @@ static void cmd_write(struct write_frame* f)
         return;
     }
     
-    SEQUENCER_CONTROL_Write(1); /* put the sequencer into reset */
-
+    seek_to(current_track);    
     SIDE_REG_Write(f->side);
+    STEP_REG_Write(f->side); /* for drives which multiplex SIDE and DIR */
+    
+    SEQUENCER_CONTROL_Write(1); /* put the sequencer into reset */
     {
         uint8_t i = CyEnterCriticalSection();        
         REPLAY_FIFO_SET_LEVEL_MID;
@@ -533,7 +539,6 @@ static void cmd_write(struct write_frame* f)
         REPLAY_FIFO_SINGLE_BUFFER_UNSET;
         CyExitCriticalSection(i);
     }
-    seek_to(current_track);    
 
     init_replay_dma();
     bool writing = false; /* to the disk */
@@ -638,6 +643,7 @@ abort:
     
     deinit_dma();
     
+    STEP_REG_Write(0);
     if (dma_underrun)
     {
         print("underrun!");

@@ -292,7 +292,7 @@ INDEX300 ---+ 3.0|     | GND+--------------------------+
             +----+     +----+                 +--+--+  |
 INDEX360 ---+ 3.1|     | 1.7+------ DISKCHG --+34+33+--+
             +----+     +----+                 +--+--+
-            + 3.2|     | 1.6+------- SIDE1 ---+32+31+
+    TK43 ---+ 3.2|     | 1.6+------- SIDE1 ---+32+31+
             +----+     +----+                 +--+--+
             + 3.3|     | 1.5+------- RDATA ---+30+29+
             +----+     +----+                 +--+--+
@@ -306,7 +306,7 @@ INDEX360 ---+ 3.1|     | 1.7+------ DISKCHG --+34+33+--+
             +----+     +----+                 +--+--+
             +15.0|     | 1.0+------- STEP ----+20+19+
             +----+     +----+                 +--+--+
-            +15.1|     |12.0+-------- DIR ----+18+17+
+            +15.1|     |12.0+--- DIR/SIDE1 ---+18+17+
             +----+     +----+                 +--+--+
             +15.2|     |12.1+------- MOTEB ---+16+15+
             +----+     +----+                 +--+--+
@@ -343,6 +343,10 @@ INDEX360 ---+ 3.1|     | 1.7+------ DISKCHG --+34+33+--+
 
 Notes:
 
+  - `DIR/SIDE1` is the step direction pin. During reads or writes, `SIDE1` is
+  also multiplexed onto it, because some drives expect this. This is harmless
+  on other drives because the `DIR` pin is ignored during reads or writes.
+
   - `TX` is the debug UART port. It's on pin 12.7 because the board routes it
   to the USB serial port on the programmer, so you can get debug information
   from the FluxEngine by just plugging the programming end into a USB port
@@ -364,6 +368,10 @@ Notes:
   timing pulses for 300 and 360 RPM drives. These are useful for certain
   rather exotic things. See the section on flippy disks [in the FAQ](faq.md)
   for more details; you can normally ignore these.
+
+  - `TK43` is an optional output pin which goes low when the drive is seeking
+  to track 43 or above. This is useful when using 8" floppy drives, which
+  require reduced write current when writing to these tracks.
 
 ## Next steps
 
