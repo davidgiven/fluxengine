@@ -41,6 +41,8 @@ public:
     uint8_t* begin()              { checkWritable(); return &(*_data)[_low]; }
     uint8_t* end()                { checkWritable(); return &(*_data)[_high]; }
 
+	operator const std::string () const { return std::string(cbegin(), cend()); }
+
     void boundsCheck(unsigned pos) const;
     void checkWritable();
     void adjustBounds(unsigned pos);

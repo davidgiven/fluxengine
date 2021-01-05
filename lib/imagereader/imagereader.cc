@@ -12,6 +12,7 @@ std::map<std::string, ImageReader::Constructor> ImageReader::formats =
 {
 	{".adf", ImageReader::createImgImageReader},
 	{".d81", ImageReader::createImgImageReader},
+	{".diskcopy", ImageReader::createDiskCopyImageReader},
 	{".img", ImageReader::createImgImageReader},
 	{".ima", ImageReader::createImgImageReader},
 	{".jv1", ImageReader::createImgImageReader},

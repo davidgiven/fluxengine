@@ -118,7 +118,7 @@ static Bytes decode_crazy_data(const Bytes& input, Sector::Status& status)
 uint8_t decode_side(uint8_t side)
 {
     /* Mac disks, being weird, use the side byte to encode both the side (in
-     * bit 5) and also whether we're above track 0x3f (in bit 6).
+     * bit 5) and also whether we're above track 0x3f (in bit 0).
      */
 
     return !!(side & 0x20);

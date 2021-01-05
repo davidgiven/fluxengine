@@ -44,6 +44,7 @@ static const char* device_type(int i)
 		case DEV_FLUXENGINE: return "FluxEngine";
 		default: assert(false);
 	}
+	return NULL;
 }
 
 static std::map<std::string, std::unique_ptr<CandidateDevice>> get_candidates(libusb_device** devices, int numdevices)
