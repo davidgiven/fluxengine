@@ -65,7 +65,8 @@ begin
                 if (dataclocked)
                 begin
                     pulsepending <= opcode[7];
-                    countdown <= opcode[5:0] - 1; /* compensate for delay in last tick */
+                    countdown <= opcode[5:0];
+                    
                     state <= STATE_WRITING;
                 end
             end
