@@ -12,6 +12,8 @@
 #include <set>
 #include <cassert>
 
+#define packed __attribute((packed))
+
 typedef double nanoseconds_t;
 class Bytes;
 
