@@ -1,0 +1,8 @@
+#ifndef GREASEWEAZLE_H
+#define GREASEWEAZLE_H
+
+#define GREASEWEAZLE_VID 0x1209
+#define GREASEWEAZLE_PID 0x4d69
+
+#endif
+

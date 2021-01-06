@@ -199,6 +199,7 @@ buildlibrary libbackend.a \
     lib/fluxsource/streamfluxsource.cc \
     lib/usb/usb.cc \
     lib/usb/fluxengineusb.cc \
+    lib/usb/greaseweazleusb.cc \
     lib/globals.cc \
     lib/hexdump.cc \
     lib/ldbs.cc \

@@ -34,6 +34,7 @@ extern FlagGroup usbFlags;
 extern USB& getUsb();
 
 extern USB* createFluxengineUsb(libusb_device_handle* device);
+extern USB* createGreaseWeazleUsb(libusb_device_handle* device);
 
 static inline int usbGetVersion()     { return getUsb().getVersion(); }
 static inline void usbRecalibrate()   { getUsb().recalibrate(); }
