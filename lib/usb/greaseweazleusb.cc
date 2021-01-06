@@ -31,6 +31,7 @@ static const char* gw_error(int e)
 
 class GreaseWeazleUsb : public USB
 {
+private:
     uint8_t _readbuffer[4096];
     int _readbuffer_ptr = 0;
     int _readbuffer_fill = 0;
@@ -72,6 +73,13 @@ class GreaseWeazleUsb : public USB
     {
         Bytes b(len);
         read_bytes(b);
+        return b;
+    }
+
+    uint8_t read_byte()
+    {
+        uint8_t b;
+        read_bytes(&b, 1);
         return b;
     }
 
@@ -153,11 +161,21 @@ public:
 
         Bytes response = read_bytes(32);
         ByteReader br(response);
+
+        br.seek(4);
+        nanoseconds_t freq = br.read_le32();
+        std::cout << fmt::format("freq={}\n", freq);
+        _clock = 1000000000 / freq;
+        std::cout << fmt::format("_clock={}\n", _clock);
+
+        br.seek(0);
         return br.read_be16();
     }
 
     void recalibrate()
-    { Error() << "unsupported operation"; }
+    {
+        seek(0);
+    }
     
     void seek(int track)
     {
@@ -165,7 +183,9 @@ public:
     }
     
     nanoseconds_t getRotationalPeriod()
-    { Error() << "unsupported operation"; }
+    {
+        return 200e9;
+    }
     
     void testBulkWrite()
     {
@@ -216,15 +236,87 @@ public:
 				  << " kB/s)"
 				  << std::endl;
     }
-    
+
+private:
+    uint32_t read_28()
+    {
+        return ((read_byte() & 0xfe) >> 1)
+            | ((read_byte() & 0xfe) << 6)
+            | ((read_byte() & 0xfe) << 13)
+            | ((read_byte() & 0xfe) << 20);
+    }
+
+public:
     Bytes read(int side, bool synced, nanoseconds_t readTime)
-    { Error() << "unsupported operation"; }
+    {
+        do_command({ CMD_HEAD, 3, (uint8_t)side });
+
+        {
+            Bytes cmd(2);
+            ByteWriter bw(cmd);
+            bw.write_8(CMD_READ_FLUX);
+            bw.write_8(cmd.size());
+            do_command(cmd);
+        }
+
+		Bytes buffer(1024*1024);
+        ByteWriter bw(buffer);
+        {
+            uint64_t ticks_gw = 0;
+            uint64_t lastevent_fl = 0;
+            for (;;)
+            {
+                uint8_t b = read_byte();
+                if (!b)
+                    break;
+
+                if (b == 255)
+                {
+                    switch (read_byte())
+                    {
+                        case FLUXOP_INDEX:
+                            break;
+
+                        case FLUXOP_SPACE:
+                            ticks_gw += read_28();
+                            break;
+
+                        default:
+                            Error() << "bad opcode in GreaseWeazle stream";
+                    }
+                }
+                else
+                {
+                    if (b < 250)
+                        ticks_gw += b;
+                    else
+                    {
+                        int delta = 250 + (b-250)*255 + read_byte() - 1;
+                        ticks_gw += delta;
+                    }
+
+                    uint64_t ticks_fl = (ticks_gw * _clock) / NS_PER_TICK;
+                    uint64_t delta_fl = ticks_fl - lastevent_fl;
+                    while (delta_fl > 0x3f)
+                    {
+                        bw.write_8(0x3f);
+                        delta_fl -= 0x3f;
+                    }
+                    bw.write_8(delta_fl | F_BIT_PULSE);
+                    lastevent_fl = ticks_fl;
+                }
+            }
+        }
+
+        do_command({ CMD_GET_FLUX_STATUS, 2 });
+        return buffer.slice(0, bw.pos);
+    }
     
     void write(int side, const Bytes& bytes)
-    { Error() << "unsupported operation"; }
+    { Error() << "unsupported operation write"; }
     
     void erase(int side)
-    { Error() << "unsupported operation"; }
+    { Error() << "unsupported operation erase"; }
     
     void setDrive(int drive, bool high_density, int index_mode)
     {
@@ -234,6 +326,9 @@ public:
 
     void measureVoltages(struct voltages_frame* voltages)
     { Error() << "unsupported operation on the GreaseWeazle"; }
+
+private:
+    nanoseconds_t _clock;
 };
 
 USB* createGreaseWeazleUsb(libusb_device_handle* device)
