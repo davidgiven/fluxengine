@@ -89,16 +89,21 @@ class GreaseWeazleUsb : public USB
         }
     }
 
-    void do_command(std::initializer_list<uint8_t> data)
+    void write_bytes(const Bytes& bytes)
     {
-        int cmd = *data.begin();
-        write_bytes(data.begin(), data.end() - data.begin());
+        write_bytes(bytes.cbegin(), bytes.size());
+    }
+
+    void do_command(const Bytes& command)
+    {
+        write_bytes(command);
 
         uint8_t buffer[2];
         read_bytes(buffer, sizeof(buffer));
 
-        if (buffer[0] != cmd)
-            Error() << fmt::format("command returned garbage (0x{:x} != 0x{:x} with status 0x{:x})", buffer[0], cmd, buffer[1]);
+        if (buffer[0] != command[0])
+            Error() << fmt::format("command returned garbage (0x{:x} != 0x{:x} with status 0x{:x})",
+                buffer[0], command[0], buffer[1]);
         if (buffer[1])
             Error() << fmt::format("GreaseWeazle error: {}", gw_error(buffer[1]));
     }
@@ -163,10 +168,54 @@ public:
     { Error() << "unsupported operation"; }
     
     void testBulkWrite()
-    { Error() << "unsupported operation"; }
+    {
+        const int LEN = 10*1024*1024;
+        Bytes cmd(6);
+        ByteWriter bw(cmd);
+        bw.write_8(CMD_SINK_BYTES);
+        bw.write_8(cmd.size());
+        bw.write_le32(LEN);
+        do_command(cmd);
+
+        Bytes junk(LEN);
+		double start_time = getCurrentTime();
+        write_bytes(LEN);
+        read_bytes(1);
+		double elapsed_time = getCurrentTime() - start_time;
+
+		std::cout << "Transferred "
+				  << LEN
+				  << " bytes from PC -> GreaseWeazle in "
+				  << int(elapsed_time * 1000.0)
+				  << " ms ("
+				  << int((LEN / 1024.0) / elapsed_time)
+				  << " kB/s)"
+				  << std::endl;
+    }
     
     void testBulkRead()
-    { Error() << "unsupported operation"; }
+    {
+        const int LEN = 10*1024*1024;
+        Bytes cmd(6);
+        ByteWriter bw(cmd);
+        bw.write_8(CMD_SOURCE_BYTES);
+        bw.write_8(cmd.size());
+        bw.write_le32(LEN);
+        do_command(cmd);
+
+		double start_time = getCurrentTime();
+        read_bytes(LEN);
+		double elapsed_time = getCurrentTime() - start_time;
+
+		std::cout << "Transferred "
+				  << LEN
+				  << " bytes from GreaseWeazle -> PC in "
+				  << int(elapsed_time * 1000.0)
+				  << " ms ("
+				  << int((LEN / 1024.0) / elapsed_time)
+				  << " kB/s)"
+				  << std::endl;
+    }
     
     Bytes read(int side, bool synced, nanoseconds_t readTime)
     { Error() << "unsupported operation"; }
@@ -180,10 +229,11 @@ public:
     void setDrive(int drive, bool high_density, int index_mode)
     {
         do_command({ CMD_SELECT, 3, (uint8_t)drive });
+        do_command({ CMD_MOTOR, 4, (uint8_t)drive, 1 });
     }
 
     void measureVoltages(struct voltages_frame* voltages)
-    { Error() << "unsupported operation"; }
+    { Error() << "unsupported operation on the GreaseWeazle"; }
 };
 
 USB* createGreaseWeazleUsb(libusb_device_handle* device)
