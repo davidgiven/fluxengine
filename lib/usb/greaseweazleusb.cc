@@ -83,6 +83,14 @@ private:
         return b;
     }
 
+    uint32_t read_28()
+    {
+        return ((read_byte() & 0xfe) >> 1)
+            | ((read_byte() & 0xfe) << 6)
+            | ((read_byte() & 0xfe) << 13)
+            | ((read_byte() & 0xfe) << 20);
+    }
+
     void write_bytes(const uint8_t* buffer, int len)
     {
         while (len > 0)
@@ -182,7 +190,59 @@ public:
     
     nanoseconds_t getRotationalPeriod()
     {
-        return 200e9;
+        /* The GreaseWeazle doesn't have a command to fetch the period directly,
+         * so we have to do a flux read. */
+
+        do_command({ CMD_READ_FLUX, 2 });
+
+        uint32_t ticks_gw = 0;
+        uint32_t firstindex = ~0;
+        uint32_t secondindex = ~0;
+        for (;;)
+        {
+            uint8_t b = read_byte();
+            if (!b)
+                break;
+
+            if (b == 255)
+            {
+                switch (read_byte())
+                {
+                    case FLUXOP_INDEX:
+                    {
+                        uint32_t index = read_28() + ticks_gw;
+                        if (firstindex == ~0)
+                            firstindex = index;
+                        else if (secondindex == ~0)
+                            secondindex = index;
+                        break;
+                    }
+
+                    case FLUXOP_SPACE:
+                        read_bytes(4);
+                        break;
+
+                    default:
+                        Error() << "bad opcode in GreaseWeazle stream";
+                }
+            }
+            else
+            {
+                if (b < 250)
+                    ticks_gw += b;
+                else
+                {
+                    int delta = 250 + (b-250)*255 + read_byte() - 1;
+                    ticks_gw += delta;
+                }
+            }
+        }
+
+        if (secondindex == ~0)
+            Error() << "unable to determine disk rotational period (is a disk in the drive?)";
+        do_command({ CMD_GET_FLUX_STATUS, 2 });
+
+        return (nanoseconds_t)(secondindex - firstindex) * _clock;
     }
     
     void testBulkWrite()
@@ -235,58 +295,32 @@ public:
 				  << std::endl;
     }
 
-private:
-    uint32_t read_28()
-    {
-        return ((read_byte() & 0xfe) >> 1)
-            | ((read_byte() & 0xfe) << 6)
-            | ((read_byte() & 0xfe) << 13)
-            | ((read_byte() & 0xfe) << 20);
-    }
-
-public:
     Bytes read(int side, bool synced, nanoseconds_t readTime)
     {
         do_command({ CMD_HEAD, 3, (uint8_t)side });
-
-        {
-            Bytes cmd(2);
-            ByteWriter bw(cmd);
-            bw.write_8(CMD_READ_FLUX);
-            bw.write_8(cmd.size());
-            do_command(cmd);
-        }
+        do_command({ CMD_READ_FLUX, 2 });
 
 		Bytes buffer(1024*1024);
         ByteWriter bw(buffer);
         {
-            uint64_t ticks_gw = 0;
-            uint64_t lastevent_fl = 0;
-            uint64_t indexticks_gw = 0;
+            uint32_t ticks_gw = 0;
+            uint32_t lastevent_fl = 0;
+            uint32_t index_gw = ~0;
+
             for (;;)
             {
                 uint8_t b = read_byte();
                 if (!b)
                     break;
 
+                uint8_t event = 0;
                 if (b == 255)
                 {
                     switch (read_byte())
                     {
                         case FLUXOP_INDEX:
-                        {
-                            indexticks_gw += read_28();
-                            uint64_t ticks_fl = (indexticks_gw * _clock) / NS_PER_TICK;
-                            uint64_t delta_fl = ticks_fl - lastevent_fl;
-                            while (delta_fl > 0x3f)
-                            {
-                                bw.write_8(0x3f);
-                                delta_fl -= 0x3f;
-                            }
-                            bw.write_8(delta_fl | F_BIT_INDEX);
-                            lastevent_fl = ticks_fl;
+                            index_gw = ticks_gw + read_28();
                             break;
-                        }
 
                         case FLUXOP_SPACE:
                             ticks_gw += read_28();
@@ -305,15 +339,38 @@ public:
                         int delta = 250 + (b-250)*255 + read_byte() - 1;
                         ticks_gw += delta;
                     }
+                    event = F_BIT_PULSE;
+                }
 
-                    uint64_t ticks_fl = (ticks_gw * _clock) / NS_PER_TICK;
-                    uint64_t delta_fl = ticks_fl - lastevent_fl;
+                if (event)
+                {
+                    uint32_t index_fl = (index_gw * _clock) / NS_PER_TICK;
+                    uint32_t ticks_fl = (ticks_gw * _clock) / NS_PER_TICK;
+                    if (index_gw != ~0)
+                    {
+                        if (index_fl < ticks_fl)
+                        {
+                            uint32_t delta_fl = index_fl - lastevent_fl;
+                            while (delta_fl > 0x3f)
+                            {
+                                bw.write_8(0x3f);
+                                delta_fl -= 0x3f;
+                            }
+                            bw.write_8(delta_fl | F_BIT_INDEX);
+                            lastevent_fl = index_fl;
+                            index_gw = ~0;
+                        }
+                        else if (index_fl == ticks_fl)
+                            event |= F_BIT_INDEX;
+                    }
+
+                    uint32_t delta_fl = ticks_fl - lastevent_fl;
                     while (delta_fl > 0x3f)
                     {
                         bw.write_8(0x3f);
                         delta_fl -= 0x3f;
                     }
-                    bw.write_8(delta_fl | F_BIT_PULSE);
+                    bw.write_8(delta_fl | event);
                     lastevent_fl = ticks_fl;
                 }
             }

@@ -7,7 +7,7 @@
 #define EP_OUT 0x02
 #define EP_IN 0x83
 
-#define GREASEWEAZLE_VERSION 20
+#define GREASEWEAZLE_VERSION 22
 
 /* Copied from https://github.com/keirf/Greaseweazle/blob/master/inc/cdc_acm_protocol.h. */
 
