@@ -164,9 +164,7 @@ public:
 
         br.seek(4);
         nanoseconds_t freq = br.read_le32();
-        std::cout << fmt::format("freq={}\n", freq);
         _clock = 1000000000 / freq;
-        std::cout << fmt::format("_clock={}\n", _clock);
 
         br.seek(0);
         return br.read_be16();
@@ -264,6 +262,7 @@ public:
         {
             uint64_t ticks_gw = 0;
             uint64_t lastevent_fl = 0;
+            uint64_t indexticks_gw = 0;
             for (;;)
             {
                 uint8_t b = read_byte();
@@ -275,7 +274,19 @@ public:
                     switch (read_byte())
                     {
                         case FLUXOP_INDEX:
+                        {
+                            indexticks_gw += read_28();
+                            uint64_t ticks_fl = (indexticks_gw * _clock) / NS_PER_TICK;
+                            uint64_t delta_fl = ticks_fl - lastevent_fl;
+                            while (delta_fl > 0x3f)
+                            {
+                                bw.write_8(0x3f);
+                                delta_fl -= 0x3f;
+                            }
+                            bw.write_8(delta_fl | F_BIT_INDEX);
+                            lastevent_fl = ticks_fl;
                             break;
+                        }
 
                         case FLUXOP_SPACE:
                             ticks_gw += read_28();
