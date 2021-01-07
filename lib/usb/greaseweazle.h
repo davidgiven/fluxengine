@@ -12,7 +12,12 @@
 extern Bytes fluxEngineToGreaseWeazle(const Bytes& fldata, nanoseconds_t clock);
 extern Bytes greaseWeazleToFluxEngine(const Bytes& gwdata, nanoseconds_t clock);
 
-/* Copied from https://github.com/keirf/Greaseweazle/blob/master/inc/cdc_acm_protocol.h. */
+/* Copied from https://github.com/keirf/Greaseweazle/blob/master/inc/cdc_acm_protocol.h.
+ *
+ * WANING: these headers were originally defined with 'packed', which is a gccism so it's
+ * been dummied out. Don't use them expecting wire protocol structures. */
+
+#define packed /* */
 
 /*
  * GREASEWEAZLE COMMAND SET
