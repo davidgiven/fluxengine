@@ -325,7 +325,19 @@ public:
     }
     
     void erase(int side)
-    { Error() << "unsupported operation erase"; }
+    {
+        do_command({ CMD_HEAD, 3, (uint8_t)side });
+
+        Bytes cmd(6);
+        ByteWriter bw(cmd);
+        bw.write_8(CMD_ERASE_FLUX);
+        bw.write_8(cmd.size());
+        bw.write_le32(200e6 / _clock);
+        do_command(cmd);
+        read_byte(); /* synchronise */
+
+        do_command({ CMD_GET_FLUX_STATUS, 2 });
+    }
     
     void setDrive(int drive, bool high_density, int index_mode)
     {
