@@ -300,7 +300,7 @@ public:
         do_command({ CMD_HEAD, 3, (uint8_t)side });
         do_command({ CMD_READ_FLUX, 2 });
 
-		Bytes buffer(1024*1024);
+		Bytes buffer;
         ByteWriter bw(buffer);
         {
             uint32_t ticks_gw = 0;
@@ -377,11 +377,62 @@ public:
         }
 
         do_command({ CMD_GET_FLUX_STATUS, 2 });
-        return buffer.slice(0, bw.pos);
+        return buffer;
     }
     
-    void write(int side, const Bytes& bytes)
-    { Error() << "unsupported operation write"; }
+    void write(int side, const Bytes& fldata)
+    {
+        Bytes gwdata;
+        ByteWriter bw(gwdata);
+        ByteReader br(fldata);
+        uint32_t ticks_fl = 0;
+        uint32_t ticks_gw = 0;
+
+        auto write_28 = [&](uint32_t val) {
+            bw.write_8(1 | (val<<1) & 255);
+            bw.write_8(1 | (val>>6) & 255);
+            bw.write_8(1 | (val>>13) & 255);
+            bw.write_8(1 | (val>>20) & 255);
+        };
+
+        while (!br.eof())
+        {
+            uint8_t b = br.read_8();
+            ticks_fl += b & 0x3f;
+            if (b & F_BIT_PULSE)
+            {
+                uint32_t newticks_gw = ticks_fl * NS_PER_TICK / _clock;
+                uint32_t delta = newticks_gw - ticks_gw;
+                if (delta < 250)
+                    bw.write_8(delta);
+                else
+                {
+                    int high = (delta-250) / 255;
+                    if (high < 5)
+                    {
+                        bw.write_8(250 + high);
+                        bw.write_8(1 + (delta-250) % 255);
+                    }
+                    else
+                    {
+                        bw.write_8(255);
+                        bw.write_8(FLUXOP_SPACE);
+                        write_28(delta - 249);
+                        bw.write_8(249);
+                    }
+                }
+                ticks_gw = newticks_gw;
+            }
+        }
+        bw.write_8(0); /* end of stream */
+
+        do_command({ CMD_HEAD, 3, (uint8_t)side });
+        do_command({ CMD_WRITE_FLUX, 3, 1 });
+        write_bytes(gwdata);
+        read_byte(); /* synchronise */
+
+        do_command({ CMD_GET_FLUX_STATUS, 2 });
+    }
     
     void erase(int side)
     { Error() << "unsupported operation erase"; }
