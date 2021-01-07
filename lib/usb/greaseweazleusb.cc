@@ -302,133 +302,23 @@ public:
 
 		Bytes buffer;
         ByteWriter bw(buffer);
+        for (;;)
         {
-            uint32_t ticks_gw = 0;
-            uint32_t lastevent_fl = 0;
-            uint32_t index_gw = ~0;
-
-            for (;;)
-            {
-                uint8_t b = read_byte();
-                if (!b)
-                    break;
-
-                uint8_t event = 0;
-                if (b == 255)
-                {
-                    switch (read_byte())
-                    {
-                        case FLUXOP_INDEX:
-                            index_gw = ticks_gw + read_28();
-                            break;
-
-                        case FLUXOP_SPACE:
-                            ticks_gw += read_28();
-                            break;
-
-                        default:
-                            Error() << "bad opcode in GreaseWeazle stream";
-                    }
-                }
-                else
-                {
-                    if (b < 250)
-                        ticks_gw += b;
-                    else
-                    {
-                        int delta = 250 + (b-250)*255 + read_byte() - 1;
-                        ticks_gw += delta;
-                    }
-                    event = F_BIT_PULSE;
-                }
-
-                if (event)
-                {
-                    uint32_t index_fl = (index_gw * _clock) / NS_PER_TICK;
-                    uint32_t ticks_fl = (ticks_gw * _clock) / NS_PER_TICK;
-                    if (index_gw != ~0)
-                    {
-                        if (index_fl < ticks_fl)
-                        {
-                            uint32_t delta_fl = index_fl - lastevent_fl;
-                            while (delta_fl > 0x3f)
-                            {
-                                bw.write_8(0x3f);
-                                delta_fl -= 0x3f;
-                            }
-                            bw.write_8(delta_fl | F_BIT_INDEX);
-                            lastevent_fl = index_fl;
-                            index_gw = ~0;
-                        }
-                        else if (index_fl == ticks_fl)
-                            event |= F_BIT_INDEX;
-                    }
-
-                    uint32_t delta_fl = ticks_fl - lastevent_fl;
-                    while (delta_fl > 0x3f)
-                    {
-                        bw.write_8(0x3f);
-                        delta_fl -= 0x3f;
-                    }
-                    bw.write_8(delta_fl | event);
-                    lastevent_fl = ticks_fl;
-                }
-            }
+            uint8_t b = read_byte();
+            if (!b)
+                break;
+            bw.write_8(b);
         }
 
         do_command({ CMD_GET_FLUX_STATUS, 2 });
-        return buffer;
+        return greaseWeazleToFluxEngine(buffer, _clock);
     }
     
     void write(int side, const Bytes& fldata)
     {
-        Bytes gwdata;
-        ByteWriter bw(gwdata);
-        ByteReader br(fldata);
-        uint32_t ticks_fl = 0;
-        uint32_t ticks_gw = 0;
-
-        auto write_28 = [&](uint32_t val) {
-            bw.write_8(1 | (val<<1) & 255);
-            bw.write_8(1 | (val>>6) & 255);
-            bw.write_8(1 | (val>>13) & 255);
-            bw.write_8(1 | (val>>20) & 255);
-        };
-
-        while (!br.eof())
-        {
-            uint8_t b = br.read_8();
-            ticks_fl += b & 0x3f;
-            if (b & F_BIT_PULSE)
-            {
-                uint32_t newticks_gw = ticks_fl * NS_PER_TICK / _clock;
-                uint32_t delta = newticks_gw - ticks_gw;
-                if (delta < 250)
-                    bw.write_8(delta);
-                else
-                {
-                    int high = (delta-250) / 255;
-                    if (high < 5)
-                    {
-                        bw.write_8(250 + high);
-                        bw.write_8(1 + (delta-250) % 255);
-                    }
-                    else
-                    {
-                        bw.write_8(255);
-                        bw.write_8(FLUXOP_SPACE);
-                        write_28(delta - 249);
-                        bw.write_8(249);
-                    }
-                }
-                ticks_gw = newticks_gw;
-            }
-        }
-        bw.write_8(0); /* end of stream */
-
         do_command({ CMD_HEAD, 3, (uint8_t)side });
         do_command({ CMD_WRITE_FLUX, 3, 1 });
-        write_bytes(gwdata);
+        write_bytes(fluxEngineToGreaseWeazle(fldata, _clock));
         read_byte(); /* synchronise */
 
         do_command({ CMD_GET_FLUX_STATUS, 2 });

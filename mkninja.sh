@@ -199,6 +199,7 @@ buildlibrary libbackend.a \
     lib/fluxsource/streamfluxsource.cc \
     lib/usb/usb.cc \
     lib/usb/fluxengineusb.cc \
+    lib/usb/greaseweazle.cc \
     lib/usb/greaseweazleusb.cc \
     lib/globals.cc \
     lib/hexdump.cc \
@@ -272,6 +273,7 @@ buildsimpleprogram brother240tool \
     libemu.a \
     libfmt.a \
 
+runtest amiga-test          tests/amiga.cc
 runtest bitaccumulator-test tests/bitaccumulator.cc
 runtest bytes-test          tests/bytes.cc
 runtest compression-test    tests/compression.cc
@@ -279,6 +281,6 @@ runtest dataspec-test       tests/dataspec.cc
 runtest flags-test          tests/flags.cc
 runtest fluxpattern-test    tests/fluxpattern.cc
 runtest fmmfm-test          tests/fmmfm.cc
+runtest greaseweazle-test   tests/greaseweazle.cc
 runtest kryoflux-test       tests/kryoflux.cc
 runtest ldbs-test           tests/ldbs.cc
-runtest amiga-test          tests/amiga.cc
