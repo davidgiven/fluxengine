@@ -14,6 +14,27 @@ FluxEngine makes things complicated when you're not using the FluxEngine client
 software with a FluxEngine board, but I'm afraid it's too late to change that
 now. Sorry.
 
+If you're using Windows
+-----------------------
+
+In order to access the GreaseWeazle from Windows, you need to install a WinUSB
+driver for it. You can do this with the [Zadig](https://zadig.akeo.ie/)
+program. Download it, plug in the GreaseWeazle, and run it; select Options,
+List All Devices, and then open the big dropdown box and select the
+GreaseWeazle. You should see something like this.
+
+<div style="text-align: center">
+<img src="zagig.png" style="width:80%" alt="Zadig screenshot"></a>
+</div>
+
+Ensure that the Driver boxes say `usbser` and `WinUSB`. Then press 'Replace
+Driver'. Once done, the GreaseWeazle will be visible to the FluxEngine client.
+
+**Important note!** Unfortunately, now, the original GreaseWeazle client won't
+work --- you can't use both drivers at once. I'm working on this. To switch
+back to the original driver, for using the GreaseWeazle client software
+instead, open up Zadig again, go through the same process, but make sure the left Driver box says `WinUSB` and the right one says `USB Serial (CDC)`. Now, when you press 'Replace Driver' the original driver will be restored.
+
 What works
 ----------
 
@@ -31,8 +52,6 @@ What doesn't work
 see what I can do.)
 
   - voltage measurement. Unsupported and errors out.
-  - Windows. FluxEngine uses libusb to talk to its hardware, and currently
-    this can't be used on Windows to talk to the GreaseWeazle.
 
 Who to contact
 --------------
