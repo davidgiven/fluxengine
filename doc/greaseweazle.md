@@ -19,7 +19,7 @@ What works
 
 Supported features with the GreaseWeazle include:
 
-  - simple reading and writing of disks
+  - simple reading and writing of disks, seeking etc
   - erasing disks
   - determining disk rotation speed
 
@@ -32,7 +32,6 @@ see what I can do.)
 
   - `--revolutions`. This parameter is ignored; reads always do two revolutions.
   - `--sync-with-index`. This is ignored and treated as off.
-  - `--high-density`. The GreaseWeazle autodetects this.
   - voltage measurement. Unsupported and errors out.
 
 Who to contact
