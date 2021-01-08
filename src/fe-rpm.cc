@@ -13,13 +13,18 @@ static DataSpecFlag source(
     "source for data",
     ":d=0:t=0:s=0");
 
+static IntFlag hardSectorCount(
+    { "--hard-sector-count" },
+    "number of hard sectors on the disk (0=soft sectors)",
+    0);
+
 int mainRpm(int argc, const char* argv[])
 {
     flags.parseFlags(argc, argv);
 
     FluxSpec spec(source);
     usbSetDrive(spec.drive, false, F_INDEX_REAL);
-    nanoseconds_t period = usbGetRotationalPeriod();
+    nanoseconds_t period = usbGetRotationalPeriod(hardSectorCount);
     if (period != 0)
         std::cout << "Rotational period is " << period/1000000 << " ms (" << 60e9/period << " rpm)" << std::endl;
     else

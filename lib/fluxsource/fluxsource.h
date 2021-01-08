@@ -30,6 +30,7 @@ public:
 extern void setHardwareFluxSourceRevolutions(double revolutions);
 extern void setHardwareFluxSourceDensity(bool high_density);
 extern void setHardwareFluxSourceSynced(bool synced);
+extern void setHardwareFluxSourceHardSectorCount(int sectorCount);
 
 #endif
 

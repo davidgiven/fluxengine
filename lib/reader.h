@@ -13,6 +13,7 @@ extern FlagGroup readerFlags;
 extern void setReaderDefaultSource(const std::string& source);
 extern void setReaderDefaultOutput(const std::string& output);
 extern void setReaderRevolutions(int revolutions);
+extern void setReaderHardSectorCount(int sectorCount);
 
 extern std::vector<std::unique_ptr<Track>> readTracks();
 

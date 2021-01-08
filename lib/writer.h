@@ -11,6 +11,7 @@ class Geometry;
 
 extern void setWriterDefaultDest(const std::string& dest);
 extern void setWriterDefaultInput(const std::string& input);
+extern void setWriterHardSectorCount(int sectorCount);
 
 extern void writeTracks(const std::function<std::unique_ptr<Fluxmap>(int track, int side)> producer);
 
