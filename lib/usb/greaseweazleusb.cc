@@ -188,8 +188,11 @@ public:
         do_command({ CMD_SEEK, 3, (uint8_t)track });
     }
     
-    nanoseconds_t getRotationalPeriod()
+    nanoseconds_t getRotationalPeriod(int hardSectorCount)
     {
+        if (hardSectorCount != 0)
+            Error() << "hard sectors are currently unsupported on the GreaseWeazel";
+
         /* The GreaseWeazle doesn't have a command to fetch the period directly,
          * so we have to do a flux read. */
 
@@ -296,8 +299,11 @@ public:
 				  << std::endl;
     }
 
-    Bytes read(int side, bool synced, nanoseconds_t readTime)
+    Bytes read(int side, bool synced, nanoseconds_t readTime, nanoseconds_t hardSectorThreshold)
     {
+        if (hardSectorThreshold != 0)
+            Error() << "hard sectors are currently unsupported on the GreaseWeazel";
+
         int revolutions = (readTime+_revolutions-1) / _revolutions;
 
         do_command({ CMD_HEAD, 3, (uint8_t)side });
@@ -329,8 +335,11 @@ public:
         return fldata;
     }
     
-    void write(int side, const Bytes& fldata)
+    void write(int side, const Bytes& fldata, nanoseconds_t hardSectorThreshold)
     {
+        if (hardSectorThreshold != 0)
+            Error() << "hard sectors are currently unsupported on the GreaseWeazel";
+
         do_command({ CMD_HEAD, 3, (uint8_t)side });
         do_command({ CMD_WRITE_FLUX, 3, 1 });
         write_bytes(fluxEngineToGreaseWeazle(fldata, _clock));
@@ -339,8 +348,11 @@ public:
         do_command({ CMD_GET_FLUX_STATUS, 2 });
     }
     
-    void erase(int side)
+    void erase(int side, nanoseconds_t hardSectorThreshold)
     {
+        if (hardSectorThreshold != 0)
+            Error() << "hard sectors are currently unsupported on the GreaseWeazel";
+
         do_command({ CMD_HEAD, 3, (uint8_t)side });
 
         Bytes cmd(6);

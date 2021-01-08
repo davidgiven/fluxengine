@@ -37,7 +37,7 @@ public:
     HardwareFluxSink(unsigned drive):
         _drive(drive)
     {
-		if (hardSectorCount.get())
+		if (hardSectorCount != 0)
 		{
 			usbSetDrive(_drive, high_density, indexMode);
 			std::cerr << "Measuring rotational speed... " << std::flush;
@@ -45,6 +45,8 @@ public:
 			_hardSectorThreshold = oneRevolution * 3 / (4 * hardSectorCount);
 			std::cerr << fmt::format("{}ms\n", oneRevolution / 1e6);
 		}
+		else
+			_hardSectorThreshold = 0;
     }
 
     ~HardwareFluxSink()

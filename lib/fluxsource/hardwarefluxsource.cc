@@ -45,7 +45,10 @@ public:
         usbSetDrive(_drive, high_density, indexMode);
         std::cerr << "Measuring rotational speed... " << std::flush;
         _oneRevolution = usbGetRotationalPeriod(hardSectorCount);
-        _hardSectorThreshold = _oneRevolution * 3 / (4 * hardSectorCount);
+	if (hardSectorCount != 0)
+		_hardSectorThreshold = _oneRevolution * 3 / (4 * hardSectorCount);
+	else
+		_hardSectorThreshold = 0;
         std::cerr << fmt::format("{}ms\n", _oneRevolution / 1e6);
     }
 
