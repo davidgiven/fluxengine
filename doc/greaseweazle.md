@@ -51,7 +51,9 @@ What doesn't work
 [file an issue](https://github.com/davidgiven/fluxengine/issues/new) and I'll
 see what I can do.)
 
-  - voltage measurement. Unsupported and errors out.
+  - voltage measurement
+  - hard sectored disks (you can still read these, but you can't use
+	`--hard-sector-count`).
 
 Who to contact
 --------------
