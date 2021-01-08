@@ -91,6 +91,11 @@ void setReaderRevolutions(int revolutions)
 	setHardwareFluxSourceRevolutions(revolutions);
 }
 
+void setReaderHardSectorCount(int sectorCount)
+{
+    setHardwareFluxSourceHardSectorCount(sectorCount);
+}
+
 static void writeSectorsToFile(const SectorSet& sectors, const ImageSpec& spec)
 {
 	std::unique_ptr<ImageWriter> writer(ImageWriter::create(sectors, spec));

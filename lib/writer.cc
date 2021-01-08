@@ -43,6 +43,11 @@ void setWriterDefaultInput(const std::string& input)
     ::input.set(input);
 }
 
+void setWriterHardSectorCount(int sectorCount)
+{
+	setHardwareFluxSinkHardSectorCount(sectorCount);
+}
+
 static SectorSet readSectorsFromFile(const ImageSpec& spec)
 {
 	return ImageReader::create(spec)->readImage();

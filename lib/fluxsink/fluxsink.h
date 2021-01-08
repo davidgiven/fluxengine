@@ -24,6 +24,7 @@ public:
 };
 
 extern void setHardwareFluxSinkDensity(bool high_density);
+extern void setHardwareFluxSinkHardSectorCount(int sectorCount);
 
 #endif
 

@@ -16,7 +16,7 @@ int mainReadMicropolis(int argc, const char* argv[])
 {
 	setReaderDefaultSource(":t=0-76");
 	setReaderDefaultOutput("micropolis.img");
-	setReaderRevolutions(21); /* 17 index holes * 1.25 */
+	setReaderHardSectorCount(16);
 	flags.parseFlags(argc, argv);
 
 	MicropolisDecoder decoder;
