@@ -30,8 +30,6 @@ What doesn't work
 [file an issue](https://github.com/davidgiven/fluxengine/issues/new) and I'll
 see what I can do.)
 
-  - `--revolutions`. This parameter is ignored; reads always do two revolutions.
-  - `--sync-with-index`. This is ignored and treated as off.
   - voltage measurement. Unsupported and errors out.
 
 Who to contact

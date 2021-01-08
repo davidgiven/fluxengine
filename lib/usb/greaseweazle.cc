@@ -141,4 +141,16 @@ Bytes greaseWeazleToFluxEngine(const Bytes& gwdata, nanoseconds_t clock)
 	return fldata;
 }
 
+/* Left-truncates at the first index mark, so the resulting data as aligned at
+ * the index. */
+Bytes stripPartialRotation(const Bytes& fldata)
+{
+	for (unsigned i=0; i<fldata.size(); i++)
+	{
+		uint8_t b = fldata[i];
+		if (b & F_BIT_INDEX)
+			return fldata.slice(i);
+	}
+	return fldata;
+}
 

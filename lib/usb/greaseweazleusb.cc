@@ -242,7 +242,8 @@ public:
             Error() << "unable to determine disk rotational period (is a disk in the drive?)";
         do_command({ CMD_GET_FLUX_STATUS, 2 });
 
-        return (nanoseconds_t)(secondindex - firstindex) * _clock;
+        _revolutions = (nanoseconds_t)(secondindex - firstindex) * _clock;
+        return _revolutions;
     }
     
     void testBulkWrite()
@@ -297,8 +298,18 @@ public:
 
     Bytes read(int side, bool synced, nanoseconds_t readTime)
     {
+        int revolutions = (readTime+_revolutions-1) / _revolutions;
+
         do_command({ CMD_HEAD, 3, (uint8_t)side });
-        do_command({ CMD_READ_FLUX, 2 });
+
+        {
+            Bytes cmd(4);
+            cmd.writer()
+                .write_8(CMD_READ_FLUX)
+                .write_8(cmd.size())
+                .write_le32(revolutions + (synced ? 1 : 0));
+            do_command(cmd);
+        }
 
 		Bytes buffer;
         ByteWriter bw(buffer);
@@ -311,7 +322,11 @@ public:
         }
 
         do_command({ CMD_GET_FLUX_STATUS, 2 });
-        return greaseWeazleToFluxEngine(buffer, _clock);
+
+        Bytes fldata = greaseWeazleToFluxEngine(buffer, _clock);
+        if (synced)
+            fldata = stripPartialRotation(fldata);
+        return fldata;
     }
     
     void write(int side, const Bytes& fldata)
@@ -351,6 +366,7 @@ public:
 
 private:
     nanoseconds_t _clock;
+    nanoseconds_t _revolutions;
 };
 
 USB* createGreaseWeazleUsb(libusb_device_handle* device)
