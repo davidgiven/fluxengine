@@ -31,6 +31,8 @@ What doesn't work
 see what I can do.)
 
   - voltage measurement. Unsupported and errors out.
+  - Windows. FluxEngine uses libusb to talk to its hardware, and currently
+    this can't be used on Windows to talk to the GreaseWeazle.
 
 Who to contact
 --------------
