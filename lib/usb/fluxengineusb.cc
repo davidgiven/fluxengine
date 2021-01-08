@@ -259,12 +259,12 @@ public:
 	{
 		unsigned safelen = bytes.size() & ~(FRAME_SIZE-1);
 		Bytes safeBytes = bytes.slice(0, safelen);
-		hardSectorThreshold += 5e5; /* Round to nearest ms. */
 
+		uint8_t threshold_ms = (hardSectorThreshold + 5e5) / 1e6; /* round to nearest ms */
 		struct write_frame f = {
 			.f = { .type = F_FRAME_WRITE_CMD, .size = sizeof(f) },
 			.side = (uint8_t) side,
-			.hardsec_threshold_ms = (uint8_t) (hardSectorThreshold / 1e6),
+			.hardsec_threshold_ms = threshold_ms,
 		};
 		((uint8_t*)&f.bytes_to_write)[0] = safelen;
 		((uint8_t*)&f.bytes_to_write)[1] = safelen >> 8;
@@ -279,11 +279,11 @@ public:
 
 	void erase(int side, nanoseconds_t hardSectorThreshold)
 	{
-		hardSectorThreshold += 5e5; /* Round to nearest ms. */
+		uint8_t threshold_ms = (hardSectorThreshold + 5e5) / 1e6; /* round to nearest ms */
 		struct erase_frame f = {
 			.f = { .type = F_FRAME_ERASE_CMD, .size = sizeof(f) },
 			.side = (uint8_t) side,
-			.hardsec_threshold_ms = (uint8_t) (hardSectorThreshold / 1e6),
+			.hardsec_threshold_ms = threshold_ms,
 		};
 		usb_cmd_send(&f, f.f.size);
 
