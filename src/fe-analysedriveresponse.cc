@@ -36,7 +36,7 @@ static DoubleFlag intervalStep(
 static StringFlag writeCsv(
 	{ "--write-csv" },
 	"Write detailed CSV data",
-	"");
+	"driveresponse.csv");
 
 int mainAnalyseDriveResponse(int argc, const char* argv[])
 {
@@ -60,43 +60,47 @@ int mainAnalyseDriveResponse(int argc, const char* argv[])
 
 	for (double interval = minInterval; interval<maxInterval; interval += intervalStep)
 	{
-		unsigned ticksPerInterval = (unsigned) (interval * TICKS_PER_US);
-		std::cout << fmt::format("Interval {:.2f}: ", ticksPerInterval * US_PER_TICK);
+		unsigned ticks = (unsigned) (interval * TICKS_PER_US);
+		std::cout << fmt::format("Interval {:.2f}: ", ticks * US_PER_TICK);
 		std::cout << std::flush;
 
-		/* Write the test pattern. */
+		std::vector<int> frequencies(512);
 
-		Fluxmap outFluxmap;
-		while (outFluxmap.duration() < period)
+		if (interval >= 2.0)
 		{
-			outFluxmap.appendInterval(ticksPerInterval);
-			outFluxmap.appendPulse();
-		}
-		usbWrite(spec.locations[0].side, outFluxmap.rawBytes(), 0);
+			/* Write the test pattern. */
 
-		/* Read the test pattern in again. */
+			Fluxmap outFluxmap;
+			while (outFluxmap.duration() < period)
+			{
+				outFluxmap.appendInterval(ticks);
+				outFluxmap.appendPulse();
+			}
+			usbWrite(spec.locations[0].side, outFluxmap.rawBytes(), 0);
 
-		Fluxmap inFluxmap;
-		inFluxmap.appendBytes(usbRead(spec.locations[0].side, true, period, 0));
+			/* Read the test pattern in again. */
 
-		/* Compute histogram. */
+			Fluxmap inFluxmap;
+			inFluxmap.appendBytes(usbRead(spec.locations[0].side, true, period, 0));
 
-		FluxmapReader fmr(inFluxmap);
-		fmr.seek((double)period*0.1); /* skip first 10% and last 10% as contains junk */
-		fmr.findEvent(F_BIT_PULSE);
-		int frequencies[256] = {};
-		while (fmr.tell().ns() < ((double)period*0.9))
-		{
-			unsigned ticks = fmr.findEvent(F_BIT_PULSE);
-			if (ticks < 256)
-				frequencies[ticks]++;
+			/* Compute histogram. */
+
+			FluxmapReader fmr(inFluxmap);
+			fmr.seek((double)period*0.1); /* skip first 10% and last 10% as contains junk */
+			fmr.findEvent(F_BIT_PULSE);
+			while (fmr.tell().ns() < ((double)period*0.9))
+			{
+				unsigned ticks = fmr.findEvent(F_BIT_PULSE);
+				if (ticks < frequencies.size())
+					frequencies[ticks]++;
+			}
 		}
 
 		/* Compute standard deviation. */
 
 		int sum = 0;
 		int prod = 0;
-		for (int i=0; i<256; i++)
+		for (int i=0; i<frequencies.size(); i++)
 		{
 			sum += frequencies[i];
 			prod += i * frequencies[i];
@@ -107,7 +111,7 @@ int mainAnalyseDriveResponse(int argc, const char* argv[])
 		{
 			double mean = prod / sum;
 			double sqsum = 0;
-			for (int i=0; i<256; i++)
+			for (int i=0; i<frequencies.size(); i++)
 			{
 				double dx = (double)i - mean;
 				sqsum += (double)frequencies[i] * dx * dx;
@@ -115,13 +119,14 @@ int mainAnalyseDriveResponse(int argc, const char* argv[])
 			double stdv = sqrt(sqsum / sum);
 			std::cout << fmt::format("{:.4f} {:.4f}\n", stdv, mean/TICKS_PER_US);
 
-			if (writeCsv.get() != "")
-			{
-				csv << interval;
-				for (int i=0; i<256; i++)
-					csv << "," << frequencies[i];
-				csv << '\n';
-			}
+		}
+
+		if (writeCsv.get() != "")
+		{
+			csv << interval;
+			for (int i : frequencies)
+				csv << "," << i;
+			csv << '\n';
 		}
 	}
 
