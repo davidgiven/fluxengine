@@ -233,13 +233,12 @@ public:
 	Bytes read(int side, bool synced, nanoseconds_t readTime,
 	           nanoseconds_t hardSectorThreshold)
 	{
-		hardSectorThreshold += 5e5; /* Round to nearest ms. */
 		struct read_frame f = {
 			.f = { .type = F_FRAME_READ_CMD, .size = sizeof(f) },
 			.side = (uint8_t) side,
 			.synced = (uint8_t) synced,
-			.hardsec_threshold_ms = (uint8_t) (hardSectorThreshold / 1e6),
 		};
+		f.hardsec_threshold_ms = (hardSectorThreshold + 5e5) / 1e6; /* round to nearest ms */
 		uint16_t milliseconds = readTime / 1e6;
 		((uint8_t*)&f.milliseconds)[0] = milliseconds;
 		((uint8_t*)&f.milliseconds)[1] = milliseconds >> 8;
@@ -259,13 +258,12 @@ public:
 	{
 		unsigned safelen = bytes.size() & ~(FRAME_SIZE-1);
 		Bytes safeBytes = bytes.slice(0, safelen);
-		hardSectorThreshold += 5e5; /* Round to nearest ms. */
 
 		struct write_frame f = {
 			.f = { .type = F_FRAME_WRITE_CMD, .size = sizeof(f) },
 			.side = (uint8_t) side,
-			.hardsec_threshold_ms = (uint8_t) (hardSectorThreshold / 1e6),
 		};
+		f.hardsec_threshold_ms = (hardSectorThreshold + 5e5) / 1e6; /* round to nearest ms */
 		((uint8_t*)&f.bytes_to_write)[0] = safelen;
 		((uint8_t*)&f.bytes_to_write)[1] = safelen >> 8;
 		((uint8_t*)&f.bytes_to_write)[2] = safelen >> 16;
@@ -279,12 +277,11 @@ public:
 
 	void erase(int side, nanoseconds_t hardSectorThreshold)
 	{
-		hardSectorThreshold += 5e5; /* Round to nearest ms. */
 		struct erase_frame f = {
 			.f = { .type = F_FRAME_ERASE_CMD, .size = sizeof(f) },
 			.side = (uint8_t) side,
-			.hardsec_threshold_ms = (uint8_t) (hardSectorThreshold / 1e6),
 		};
+		f.hardsec_threshold_ms = (hardSectorThreshold + 5e5) / 1e6; /* round to nearest ms */
 		usb_cmd_send(&f, f.f.size);
 
 		await_reply<struct any_frame>(F_FRAME_ERASE_REPLY);

@@ -6,6 +6,7 @@
 #include "bytes.h"
 #include <libusb.h>
 #include "fmt/format.h"
+#include "greaseweazle.h"
 
 FlagGroup usbFlags;
 
@@ -19,6 +20,7 @@ static USB* usb = NULL;
 enum
 {
 	DEV_FLUXENGINE,
+	DEV_GREASEWEAZLE,
 };
 
 struct CandidateDevice
@@ -42,9 +44,26 @@ static const char* device_type(int i)
 	switch (i)
 	{
 		case DEV_FLUXENGINE: return "FluxEngine";
+		case DEV_GREASEWEAZLE: return "GreaseWeazle";
 		default: assert(false);
 	}
 	return NULL;
+}
+
+static const std::string get_serial_number(libusb_device* device, libusb_device_descriptor* desc)
+{
+	std::string serial;
+
+	libusb_device_handle* handle;
+	if (libusb_open(device, &handle) == 0)
+	{
+		unsigned char buffer[64];
+		libusb_get_string_descriptor_ascii(handle, desc->iSerialNumber, buffer, sizeof(buffer));
+		serial = (const char*) buffer;
+		libusb_close(handle);
+	}
+
+	return serial;
 }
 
 static std::map<std::string, std::unique_ptr<CandidateDevice>> get_candidates(libusb_device** devices, int numdevices)
@@ -56,22 +75,24 @@ static std::map<std::string, std::unique_ptr<CandidateDevice>> get_candidates(li
 		candidate->device = devices[i];
 		(void) libusb_get_device_descriptor(devices[i], &candidate->desc);
 
-		if ((candidate->desc.idVendor == FLUXENGINE_VID) && (candidate->desc.idProduct == FLUXENGINE_PID))
+		uint32_t id = (candidate->desc.idVendor << 16) | candidate->desc.idProduct;
+		switch (id)
 		{
-			candidate->type = DEV_FLUXENGINE;
-			candidate->serial = "";
-
-			libusb_device_handle* handle;
-			if (libusb_open(candidate->device, &handle) == 0)
+			case (FLUXENGINE_VID<<16) | FLUXENGINE_PID:
 			{
-				unsigned char buffer[64];
-				libusb_get_string_descriptor_ascii(handle,
-					candidate->desc.iSerialNumber, buffer, sizeof(buffer));
-				candidate->serial = (const char*) buffer;
-				libusb_close(handle);
+				candidate->type = DEV_FLUXENGINE;
+				candidate->serial = get_serial_number(candidate->device, &candidate->desc);
+				candidates[candidate->serial] = std::move(candidate);
+				break;
 			}
 
-			candidates[candidate->serial] = std::move(candidate);
+			case (GREASEWEAZLE_VID<<16) | GREASEWEAZLE_PID:
+			{
+				candidate->type = DEV_GREASEWEAZLE;
+				candidate->serial = get_serial_number(candidate->device, &candidate->desc);
+				candidates[candidate->serial] = std::move(candidate);
+				break;
+			}
 		}
 	}
 
@@ -86,7 +107,16 @@ static void open_device(CandidateDevice& candidate)
 		Error() << "cannot open USB device: " << libusb_strerror((libusb_error) i);
 	
 	std::cout << "Using " << device_type(candidate.type) << " with serial number " << candidate.serial << '\n';
-	usb = createFluxengineUsb(handle);
+	switch (candidate.type)
+	{
+		case DEV_FLUXENGINE:
+			usb = createFluxengineUsb(handle);
+			break;
+
+		case DEV_GREASEWEAZLE:
+			usb = createGreaseWeazleUsb(handle);
+			break;
+	}
 }
 
 static CandidateDevice& select_candidate(const std::map<std::string, std::unique_ptr<CandidateDevice>>& devices)

@@ -24,6 +24,14 @@ Don't believe me? Watch the demo reel!
 <iframe width="373" height="210" src="https://www.youtube.com/embed/m_s1iw8eW7o" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </div>
 
+**New!** The FluxEngine client software now works with
+[GreaseWeazle](https://github.com/keirf/Greaseweazle/wiki) hardware. So, if you
+can't find a PSoC5 development kit, or don't want to use the Cypress Windows
+tools for programming it, you can use one of these instead. Very nearly all
+FluxEngine features are available with the GreaseWeazle and it works out-of-the
+box. See the [dedicated GreaseWeazle documentation page](doc/greaseweazle.md)
+for more information.
+
 **Important note.** On 2020-04-02 I changed the bytecode format (and firmware).
 Flux files will need to be upgraded with `fluxengine upgradefluxfile`. The new
 format should be more reliable and use way, way less bandwidth. Sorry for the
@@ -51,6 +59,11 @@ following friendly articles:
 
   - [Using a FluxEngine](doc/using.md) ∾ what to do with your new hardware ∾
     flux files and image files ∾ knowing what you're doing
+
+  - [Using GreaseWeazle hardware with the FluxEngine client
+	software](doc/greaseweazle.md) ∾ what works ∾ what doesn't work ∾ where to
+	go for help
+
 
   - [Troubleshooting dubious disks](doc/problems.md) ∾ it's not an exact science ∾
     the sector map ∾ clock detection and the histogram

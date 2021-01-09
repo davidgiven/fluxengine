@@ -19,7 +19,7 @@ static DoubleFlag postIndexGapUs(
 static DoubleFlag clockCompensation(
 	{ "--clock-compensation-factor" },
 	"Scale the output clock by this much.",
-	.9724);
+	1.0);
 
 static bool lastBit;
 
