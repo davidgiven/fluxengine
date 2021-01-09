@@ -2,6 +2,7 @@
 
 typedef int command_cb(int agrc, const char* argv[]);
 
+extern command_cb mainAnalyseDriveResponse;
 extern command_cb mainErase;
 extern command_cb mainConvertCwfToFlux;
 extern command_cb mainConvertFluxToAu;
@@ -50,6 +51,7 @@ struct Command
 static command_cb mainRead;
 static command_cb mainWrite;
 static command_cb mainConvert;
+static command_cb mainAnalyse;
 static command_cb mainTest;
 
 static std::vector<Command> commands =
@@ -57,6 +59,7 @@ static std::vector<Command> commands =
     { "erase",             mainErase,             "Permanently but rapidly erases some or all of a disk." },
     { "convert",           mainConvert,           "Converts various types of data file.", },
     { "inspect",           mainInspect,           "Low-level analysis and inspection of a disk." },
+	{ "analyse",           mainAnalyse,           "Disk and drive analysis tools." },
     { "read",              mainRead,              "Reads a disk, producing a sector image.", },
     { "rpm",               mainRpm,               "Measures the disk rotational speed.", },
     { "seek",              mainSeek,              "Moves the disk head.", },
@@ -107,6 +110,11 @@ static std::vector<Command> convertables =
 	{ "image",         mainConvertImage,     "Converts one disk image to another.", },
 };
 
+static std::vector<Command> analysables =
+{
+	{ "driveresponse", mainAnalyseDriveResponse, "Measures the drive's ability to read and write pulses.", }
+};
+
 static std::vector<Command> testables =
 {
     { "bandwidth",     mainTestBandwidth, "Measures your USB bandwidth.", },
@@ -152,6 +160,9 @@ static int mainWrite(int argc, const char* argv[])
 
 static int mainConvert(int argc, const char* argv[])
 { return mainExtended(convertables, "convert", argc, argv); }
+
+static int mainAnalyse(int argc, const char* argv[])
+{ return mainExtended(analysables, "analyse", argc, argv); }
 
 static int mainTest(int argc, const char* argv[])
 { return mainExtended(testables, "test", argc, argv); }

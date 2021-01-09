@@ -212,6 +212,7 @@ buildlibrary libbackend.a \
     lib/writer.cc \
 
 buildlibrary libfrontend.a \
+	src/fe-analysedriveresponse.cc \
     src/fe-cwftoflux.cc \
     src/fe-erase.cc \
     src/fe-fluxtoau.cc \
