@@ -10,6 +10,11 @@ been written to be largely fire-and-forget and is mostly self-adjusting.
 However, there are still some things that can be tuned to produce better
 reads.
 
+Also, it's important to remember that some drives are problematic --- in
+particular, some 3.5" floppy drives are designed to work with just IBM scheme
+disks with a certain set of pulse intervals. There's a tool to let you diagnose
+this; see [the drive response](driveresponse.md) page.
+
 The sector map
 --------------
 

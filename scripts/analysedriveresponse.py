@@ -30,6 +30,7 @@ plt.imshow(scaledfreq, extent=[0, 512/TICKS_PER_US, labels[0], labels[-1]], cmap
 plt.colorbar()
 plt.ylabel("Interval period (us)")
 plt.xlabel("Response (us)")
+plt.grid(True, dashes=(2, 2))
 plt.show()
 
 plt.show()
