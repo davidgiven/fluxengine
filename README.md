@@ -205,6 +205,12 @@ contributions from many other people. It is licensed under the terms of the
 BSD license. Please see the contents of the directory for the full text.
 
 As an exception, `dep/emu` contains parts of the OpenBSD C library
-code, Todd Miller and William A. Rowe (and probably others). It is licensed
+code, maintained by Todd Miller and William A. Rowe (and probably others). It is licensed
 under the terms of the 3-clause BSD license. Please see the contents of the
 directory for the full text. It's been lightly modified by me.
+
+As an exception, `dep/agg` contains parts of the Anti-Grain Antialiasing
+library, written by Maxim Semanarev (and others). It is licensed under the
+terms of the 3-clause BSD license. Please see the contents of the directory for
+the full text. It's been lightly modified by me.
+
