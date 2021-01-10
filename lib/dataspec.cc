@@ -2,6 +2,8 @@
 #include "flags.h"
 #include "dataspec.h"
 #include "fmt/format.h"
+#include "dep/agg/include/agg2d.h"
+#include "dep/stb/stb_image_write.h"
 #include <regex>
 #include <sstream>
 
@@ -203,3 +205,58 @@ DataSpec::operator std::string(void) const
 
     return ss.str();
 }
+
+BitmapSpec::BitmapSpec(const DataSpec& spec)
+{
+    try
+    {
+        filename = spec.filename;
+
+        if (!spec.has("w") && !spec.has("h"))
+        {
+            width = height = 0;
+            initialised = false;
+        }
+        else
+        {
+            width = spec.at("w").only();
+            height = spec.at("h").only();
+            initialised = true;
+        }
+    }
+    catch (const MissingModifierException& e)
+    {
+        Error() << e.what() << " in imagespec '" << spec << "'";
+    }
+
+    for (const auto& e : spec.modifiers)
+    {
+        const auto name = e.second.name;
+        if ((name != "w") && (name != "h"))
+            Error() << fmt::format("unknown fluxspec modifier '{}'", name);
+    }
+}
+
+BitmapSpec::BitmapSpec(const std::string filename, unsigned width, unsigned height):
+    filename(filename),
+    width(width),
+    height(height),
+    initialised(true)
+{}
+
+Agg2D& BitmapSpec::painter()
+{
+	if (!_painter)
+	{
+		_bitmap.resize(width * height * 4, 255);
+		_painter.reset(new Agg2D());
+		_painter->attach(&_bitmap[0], width, height, width*4);
+	}
+	return *_painter;
+}
+
+void BitmapSpec::save()
+{
+	stbi_write_png(filename.c_str(), width, height, 4, &_bitmap[0], width*4);
+}
+

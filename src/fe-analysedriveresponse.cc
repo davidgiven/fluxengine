@@ -7,6 +7,8 @@
 #include "writer.h"
 #include "protocol.h"
 #include "fmt/format.h"
+#include "dep/agg/include/agg2d.h"
+#include "dep/stb/stb_image_write.h"
 #include <fstream>
 
 static FlagGroup flags = {
@@ -36,7 +38,36 @@ static DoubleFlag intervalStep(
 static StringFlag writeCsv(
 	{ "--write-csv" },
 	"Write detailed CSV data",
-	"driveresponse.csv");
+	"");
+
+static DataSpecFlag writeImg(
+	{ "--write-img" },
+	"Draw a graph of the response data",
+	":w=640:h=480");
+
+static agg::srgba8 hsvToRgb(double h, double s, double v)
+{
+	h = fmod(h, 360.0);
+	double hh = h / 60.0;
+	int i = (int)hh;
+	double ff = hh - i;
+	double p = v * (1.0 - s);
+	double q = v * (1.0 - s*ff);
+	double t = v * (1.0 - s*(1.0 - ff));
+
+	double r, g, b;
+    switch (i) {
+		case 0: r = v; g = t; b = p; break;
+		case 1: r = q; g = v; b = p; break;
+		case 2: r = p; g = v; b = t; break;
+		case 3: r = p; g = q; b = v; break;
+		case 4: r = t; g = p; b = v; break;
+		case 5:
+		default: r = v; g = p; b = q; break;
+    }
+
+	return agg::srgba8(b*255.0, g*255.0, r*255.0, 255);
+}
 
 int mainAnalyseDriveResponse(int argc, const char* argv[])
 {
@@ -58,13 +89,16 @@ int mainAnalyseDriveResponse(int argc, const char* argv[])
 	if (writeCsv.get() != "")
 		csv.open(writeCsv);
 
-	for (double interval = minInterval; interval<maxInterval; interval += intervalStep)
+	int numRows = (maxInterval - minInterval) / intervalStep;
+	const int numColumns = 512;
+	double frequencies[numRows][numColumns] = {};
+
+	int row = 0;
+	for (double interval = minInterval; interval<maxInterval; interval += intervalStep, row++)
 	{
 		unsigned ticks = (unsigned) (interval * TICKS_PER_US);
 		std::cout << fmt::format("Interval {:.2f}: ", ticks * US_PER_TICK);
 		std::cout << std::flush;
-
-		std::vector<int> frequencies(512);
 
 		if (interval >= 2.0)
 		{
@@ -91,43 +125,84 @@ int mainAnalyseDriveResponse(int argc, const char* argv[])
 			while (fmr.tell().ns() < ((double)period*0.9))
 			{
 				unsigned ticks = fmr.findEvent(F_BIT_PULSE);
-				if (ticks < frequencies.size())
-					frequencies[ticks]++;
+				if (ticks < numColumns)
+					frequencies[row][ticks]++;
 			}
 		}
 
-		/* Compute standard deviation. */
+		/* Compute mean and normalise. */
 
-		int sum = 0;
-		int prod = 0;
-		for (int i=0; i<frequencies.size(); i++)
+		double sum = 0.0;
+		double prod = 0.0;
+		double max = 0.0;
+		for (int i=0; i<numColumns; i++)
 		{
-			sum += frequencies[i];
-			prod += i * frequencies[i];
+			sum += frequencies[row][i];
+			prod += i * frequencies[row][i];
+			max = std::max(max, frequencies[row][i]);
 		}
+		if (max != 0.0)
+			for (int i=0; i<numColumns; i++)
+				frequencies[row][i] /= max;
+
 		if (sum == 0)
 			std::cout << "failed\n";
 		else
 		{
 			double mean = prod / sum;
-			double sqsum = 0;
-			for (int i=0; i<frequencies.size(); i++)
-			{
-				double dx = (double)i - mean;
-				sqsum += (double)frequencies[i] * dx * dx;
-			}
-			double stdv = sqrt(sqsum / sum);
-			std::cout << fmt::format("{:.4f} {:.4f}\n", stdv, mean/TICKS_PER_US);
+			std::cout << fmt::format("{:.4f}\n", mean/TICKS_PER_US);
 
 		}
 
 		if (writeCsv.get() != "")
 		{
 			csv << interval;
-			for (int i : frequencies)
-				csv << "," << i;
+			for (double d : frequencies[row])
+				csv << "," << d;
 			csv << '\n';
 		}
+	}
+
+	BitmapSpec bitmapSpec(writeImg);
+	if (!bitmapSpec.filename.empty())
+	{
+		Agg2D& painter = bitmapSpec.painter();
+		painter.clearAll(0xdd, 0xdd, 0xdd);
+
+		const double MARGIN = 20;
+		agg::rect_d drawableBounds = {
+			MARGIN, MARGIN,
+			bitmapSpec.width - MARGIN, bitmapSpec.height - MARGIN
+		};
+		agg::rect_d colourbarBounds = {
+			drawableBounds.x2 - MARGIN*4, drawableBounds.y1,
+			drawableBounds.x2, drawableBounds.y2
+		};
+		agg::rect_d graphBounds = {
+			drawableBounds.x1, drawableBounds.y1,
+			colourbarBounds.x1, drawableBounds.y2
+		};
+		double blockWidth = (graphBounds.x2 - graphBounds.x1) / numColumns;
+		double blockHeight = (graphBounds.y2 - graphBounds.y1) / numRows;
+
+		painter.noLine();
+		for (int x=0; x<numColumns; x++)
+		{
+			for (int y=0; y<numRows; y++)
+			{
+				double xx = graphBounds.x1 + x*blockWidth;
+				double yy = graphBounds.y2 - y*blockHeight;
+
+				painter.fillColor(hsvToRgb(360.0 * ((double)x/numColumns), 1.0, 1.0));
+				painter.rectangle(xx, yy-blockHeight, xx+blockWidth, yy);
+			}
+		}
+
+		painter.noFill();
+		painter.lineColor(0, 0, 0);
+		painter.rectangle(graphBounds.x1, drawableBounds.y1, drawableBounds.x2, drawableBounds.y2);
+		painter.rectangle(colourbarBounds.x1, drawableBounds.y1, drawableBounds.x2, drawableBounds.y2);
+		bitmapSpec.save();
 	}
 
     return 0;
