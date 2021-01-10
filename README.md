@@ -64,9 +64,9 @@ following friendly articles:
 	software](doc/greaseweazle.md) ∾ what works ∾ what doesn't work ∾ where to
 	go for help
 
-
-  - [Troubleshooting dubious disks](doc/problems.md) ∾ it's not an exact science ∾
-    the sector map ∾ clock detection and the histogram
+  - [Troubleshooting dubious disks](doc/problems.md) ∾ it's not an exact
+	science ∾ the sector map ∾ clock detection and the histogram ~
+	(doc/driveresponse.md)[checking your drive]
 
 Which?
 ------
