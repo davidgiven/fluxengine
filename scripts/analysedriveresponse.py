@@ -7,7 +7,7 @@ TICKS_PER_US = TICK_FREQUENCY / 1e6
 print(TICKS_PER_US)
 
 # Load data.
-data = numpy.loadtxt(open("analysis.csv", "rb"), delimiter=",", skiprows=1)
+data = numpy.loadtxt(open("driveresponse.csv", "rb"), delimiter=",", skiprows=1)
 
 labels = data[:, 0]
 frequencies = data[:, 1:]
