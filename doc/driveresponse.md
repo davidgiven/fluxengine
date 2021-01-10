@@ -46,8 +46,8 @@ MPF-920](https://docs.sony.com/release/MPF920Z.pdf) 3.5" drive I mostly use for
 testing. The left-hand image shows the result from a DD disk, while the right
 hand image shows the result from a HD disk.
 
-The vertical access is the width of pulse being written; the horizontal axis
-and heatmap shows the distribution of pulses being read back. Yoou can see the
+The vertical axis is the width of pulse being written; the horizontal axis
+and heatmap shows the distribution of pulses being read back. You can see the
 diagonal line, which represents correct pulses. The triangular smear in the top
 left shows spurious pulses which are being read back because the interval is
 too great; these start at about 12us for DD disks and 7us for HD disks. This is
