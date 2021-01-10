@@ -175,6 +175,7 @@ buildlibrary libbackend.a \
     arch/macintosh/decoder.cc \
     arch/macintosh/encoder.cc \
     arch/micropolis/decoder.cc \
+    arch/micropolis/encoder.cc \
     arch/mx/decoder.cc \
 	arch/tids990/decoder.cc \
 	arch/tids990/encoder.cc \
@@ -246,6 +247,7 @@ buildlibrary libfrontend.a \
     src/fe-writebrother.cc \
     src/fe-writeibm.cc \
     src/fe-writemac.cc \
+    src/fe-writemicropolis.cc \
     src/fe-writetids990.cc \
     src/fe-writeflux.cc \
     src/fe-writetestpattern.cc \
