@@ -214,3 +214,8 @@ library, written by Maxim Semanarev (and others). It is licensed under the
 terms of the 3-clause BSD license. Please see the contents of the directory for
 the full text. It's been lightly modified by me.
 
+As an exception, `dep/stb` contains parts of the libstb utility library,
+written by Sean T Barett (and others). It is public domain/Unlicense/MIT
+licensed, at your choice. Please see the contents of the directory for the full
+text.
+

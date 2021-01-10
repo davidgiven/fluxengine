@@ -149,6 +149,7 @@ runtest() {
 
 buildlibrary libagg.a \
 	-Idep/agg/include \
+	dep/stb/stb_image_write.c \
 	dep/agg/src/*.cpp
 
 buildlibrary libfmt.a \
