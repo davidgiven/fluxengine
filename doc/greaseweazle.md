@@ -24,7 +24,7 @@ List All Devices, and then open the big dropdown box and select the
 GreaseWeazle. You should see something like this.
 
 <div style="text-align: center">
-<img src="zadig.png" style="width:80%" alt="Zadig screenshot"></a>
+<img src="zadig.png" style="width:80%" alt="Zadig screenshot">
 </div>
 
 Ensure that the Driver boxes say `usbser` and `WinUSB`. Then press 'Replace

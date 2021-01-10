@@ -65,8 +65,10 @@ following friendly articles:
 	go for help
 
   - [Troubleshooting dubious disks](doc/problems.md) ∾ it's not an exact
-	science ∾ the sector map ∾ clock detection and the histogram ~
-	(doc/driveresponse.md)[checking your drive]
+	science ∾ the sector map ∾ clock detection and the histogram
+
+  - [Checking your drive](doc/driveresponse.md) ∾ you can't do that with that ∾
+	measuring your drive's ability to work with exotic formats
 
 Which?
 ------

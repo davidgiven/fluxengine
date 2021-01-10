@@ -34,9 +34,11 @@ This will scan all intervals from 0us to 30us, at 0.1us steps, and write the
 result as a CSV file. Then the Python script uses matplotlib to render the
 result as a heatmap. They look like this.
 
+(Click to expand)
+
 <div style="text-align: center">
-<img src="sony-mpf920-dd.png" style="width:40%" alt="Sony MPF-920, DD"></a>
-<img src="sony-mpf920-hd.png" style="width:40%" alt="Sony MPF-920, HD"></a>
+<a href="sony-mpf920-dd.png"><img src="sony-mpf920-dd.png" style="width:40%" alt="Sony MPF-920, DD"></a>
+<a href="sony-mpf920-hd.png"><img src="sony-mpf920-hd.png" style="width:40%" alt="Sony MPF-920, HD"></a>
 </div>
 
 This is the analysis from the [Sony
@@ -62,8 +64,8 @@ drive, which will simply refuse to report pulse intervals shorter than about
 For comparison purposes, here's another set of graphs.
 
 <div style="text-align: center">
-<img src="fdd-90206-dd.png" style="width:40%" alt="FDD-90206, DD"></a>
-<img src="fdd-90206-hd.png" style="width:40%" alt="FDD-90206, HD"></a>
+<a href="fdd-90206-dd.png"><img src="fdd-90206-dd.png" style="width:40%" alt="FDD-90206, DD"></a>
+<a href="fdd-90206-hd.png"><img src="fdd-90206-hd.png" style="width:40%" alt="FDD-90206, HD"></a>
 </div>
 
 This is from another drive I have; it's an unbranded combo
