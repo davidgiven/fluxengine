@@ -16,6 +16,7 @@ extern command_cb mainReadAESLanier;
 extern command_cb mainReadAmiga;
 extern command_cb mainReadAmpro;
 extern command_cb mainReadApple2;
+extern command_cb mainReadAtariST;
 extern command_cb mainReadBrother;
 extern command_cb mainReadC64;
 extern command_cb mainReadDFS;
@@ -78,6 +79,7 @@ static std::vector<Command> readables =
     { "amiga",         mainReadAmiga,     "Reads Commodore Amiga disks.", },
     { "ampro",         mainReadAmpro,     "Reads Ampro disks.", },
     { "apple2",        mainReadApple2,    "Reads Apple II disks.", },
+    { "atarist",       mainReadAtariST,   "Reads Atari ST disks.", },
     { "brother",       mainReadBrother,   "Reads 120kB and 240kB Brother word processor disks.", },
     { "c64",           mainReadC64,       "Reads Commodore 64 disks.", },
     { "dfs",           mainReadDFS,       "Reads Acorn DFS disks.", },
@@ -95,11 +97,11 @@ static std::vector<Command> readables =
 static std::vector<Command> writeables =
 {
     { "amiga",         mainWriteAmiga,    "Writes Amiga disks.", },
+    { "atarist",       mainWriteAtariST,  "Writes Atari ST disks.", },
     { "brother",       mainWriteBrother,  "Writes 120kB and 240kB Brother word processor disks.", },
     { "ibm",           mainWriteIbm,      "Writes the ubiquitous IBM format disks.", },
-	{ "mac", 		   mainWriteMac,      "Writes Apple Macintosh disks.", },
+	{ "mac",           mainWriteMac,      "Writes Apple Macintosh disks.", },
 	{ "tids990",       mainWriteTiDs990,  "Writes Texas Instruments DS990 disks.", },
-    { "atarist",       mainWriteAtariST,  "Writes Atari ST disks."}
 };
 
 static std::vector<Command> convertables =

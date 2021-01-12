@@ -17,6 +17,7 @@ std::map<std::string, ImageWriter::Constructor> ImageWriter::formats =
 	{".diskcopy", ImageWriter::createDiskCopyImageWriter},
 	{".img", ImageWriter::createImgImageWriter},
 	{".ldbs", ImageWriter::createLDBSImageWriter},
+	{".st", ImageWriter::createImgImageWriter},
 };
 
 ImageWriter::Constructor ImageWriter::findConstructor(const ImageSpec& spec)

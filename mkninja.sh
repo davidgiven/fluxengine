@@ -232,6 +232,7 @@ buildlibrary libfrontend.a \
     src/fe-readamiga.cc \
     src/fe-readampro.cc \
     src/fe-readapple2.cc \
+    src/fe-readatarist.cc \
     src/fe-readbrother.cc \
     src/fe-readc64.cc \
     src/fe-readdfs.cc \
