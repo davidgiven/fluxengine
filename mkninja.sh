@@ -214,6 +214,7 @@ buildlibrary libbackend.a \
     lib/sector.cc \
     lib/sectorset.cc \
     lib/sql.cc \
+	lib/utils.cc \
     lib/visualiser.cc \
     lib/writer.cc \
 

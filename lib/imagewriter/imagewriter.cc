@@ -4,6 +4,7 @@
 #include "sector.h"
 #include "sectorset.h"
 #include "imagewriter/imagewriter.h"
+#include "utils.h"
 #include "fmt/format.h"
 #include <iostream>
 #include <fstream>
@@ -18,20 +19,13 @@ std::map<std::string, ImageWriter::Constructor> ImageWriter::formats =
 	{".ldbs", ImageWriter::createLDBSImageWriter},
 };
 
-static bool ends_with(const std::string& value, const std::string& ending)
-{
-    if (ending.size() > value.size())
-        return false;
-    return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
-}
-
 ImageWriter::Constructor ImageWriter::findConstructor(const ImageSpec& spec)
 {
     const auto& filename = spec.filename;
 
 	for (const auto& e : formats)
 	{
-		if (ends_with(filename, e.first))
+		if (endsWith(filename, e.first))
 			return e.second;
 	}
 
