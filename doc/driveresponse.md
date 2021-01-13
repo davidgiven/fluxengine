@@ -26,13 +26,13 @@ by writing a sequence of timed pulses to the disk, then reading them back and
 seeing what the drive actually reports. To use it, do:
 
 ```
-fluxengine analyse driveresponse -d :d=1:t=0 --min-interval-us=0 --max-interval-us=30 --interval-step-us=.1 --write-csv=driveresponse.csv
-python3 scripts/driveresponse.csv
+fluxengine analyse driveresponse -d :d=1:t=0 \
+    --min-interval-us=0 --max-interval-us=30 --interval-step-us=.1 \
+	--write-img=driveresponse.png
 ```
 
-This will scan all intervals from 0us to 30us, at 0.1us steps, and write the
-result as a CSV file. Then the Python script uses matplotlib to render the
-result as a heatmap. They look like this.
+This will scan all intervals from 0us to 30us, at 0.1us steps, draw a graph,
+and write out the result. The graphs look like this.
 
 (Click to expand)
 
@@ -46,12 +46,13 @@ MPF-920](https://docs.sony.com/release/MPF920Z.pdf) 3.5" drive I mostly use for
 testing. The left-hand image shows the result from a DD disk, while the right
 hand image shows the result from a HD disk.
 
-The vertical axis is the width of pulse being written; the horizontal axis
-and heatmap shows the distribution of pulses being read back. You can see the
-diagonal line, which represents correct pulses. The triangular smear in the top
-left shows spurious pulses which are being read back because the interval is
-too great; these start at about 12us for DD disks and 7us for HD disks. This is
-an artifact of the different magnetic media for the two types of disk.
+The horizontal axis is the width of pulse being written; the vertical axis and
+heatmap shows the distribution of pulses being read back. You can see the
+diagonal line, which represents correct pulses. The triangular smear in the
+bottom right shows spurious pulses which are being read back because the
+interval is too great; these start at about 12us for DD disks and 7us for HD
+disks. This is an artifact of the different magnetic media for the two types of
+disk.
 
 (This, by the way, is why you shouldn't use DD formats on HD disks. The
 intervals on a DD disk can go up to 8us, which is on the edge of the ability of
@@ -70,12 +71,8 @@ For comparison purposes, here's another set of graphs.
 
 This is from another drive I have; it's an unbranded combo
 card-reader-and-floppy drive unit; the 90206 is the only identification mark it
-has. I don't use this because it's problematic, and the graph shows why; you
-can just see some ghosting on the HD graph at at 3us, where some pulses are
-coming back reported at 6us. This won't affect IBM scheme disks because they
-don't use 3us as an interval, but it might effect other formats. And the DD
-graph shows that intervals below about 4us are reported as double what they
-should be: so, this drive won't work on [Macintosh 800kB
+has.  The DD graph shows that intervals below about 4us are reported as double
+what they should be: so, this drive won't work on [Macintosh 800kB
 formats](disk-macintosh.md) at all, because they use intervals starting at
 2.6us, below this limit. But it should work on PC formats --- just.
 
