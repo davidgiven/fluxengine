@@ -24,6 +24,7 @@
 //----------------------------------------------------------------------------
 
 #include "agg2d.h"
+#include "agg_gsv_text.h"
 
 static const double g_approxScale = 2.0;
 
@@ -79,14 +80,9 @@ Agg2D::Agg2D() :
     m_fillGradientD2(100.0),
     m_lineGradientD2(100.0),
 
-    m_textAngle(0.0),
-    m_textAlignX(AlignLeft),
-    m_textAlignY(AlignBottom),
-    m_textHints(true),
-    m_fontHeight(0.0),
-    m_fontAscent(0.0),
-    m_fontDescent(0.0),
-    m_fontCacheType(RasterFontCache),
+    m_textAlignment(AlignLeft),
+	m_textSizeX(10.0),
+	m_textSizeY(10.0),
 
     m_imageFilter(Bilinear),
     m_imageResample(NoResample),
@@ -138,15 +134,9 @@ void Agg2D::attach(unsigned char* buf, unsigned width, unsigned height, int stri
     lineWidth(1.0),
     lineColor(0,0,0);
     fillColor(255,255,255);
-#ifdef AGG_USE_FONTS
-    textAlignment(AlignLeft, AlignBottom);
-#endif
     clipBox(0, 0, width, height);
     lineCap(CapRound);
     lineJoin(JoinRound);
-#ifdef AGG_USE_FONTS
-    flipText(false);
-#endif
     imageFilter(Bilinear);
     imageResample(NoResample);
     m_masterAlpha = 1.0;
@@ -908,183 +898,19 @@ void Agg2D::polyline(double* xy, int numPoints)
     drawPath(StrokeOnly);
 }
 
-#ifdef AGG_USE_FONTS
 //------------------------------------------------------------------------
-void Agg2D::flipText(bool flip)
+void Agg2D::textSize(double sizeX, double sizeY)
 {
-    m_fontEngine.flip_y(flip);
+	m_textSizeX = sizeX;
+	m_textSizeY = sizeY;
 }
 
 //------------------------------------------------------------------------
-void Agg2D::font(const char* fontName,
-                 double height,
-                 bool bold,
-                 bool italic,
-                 FontCacheType ch,
-                 double angle)
+void Agg2D::textAlignment(TextAlignment alignment)
 {
-    m_textAngle = angle;
-    m_fontHeight = height;
-    m_fontCacheType = ch;
-
-#ifdef AGG2D_USE_FREETYPE
-    m_fontEngine.load_font(fontName,
-                           0,
-                           (ch == VectorFontCache) ?
-                                agg::glyph_ren_outline :
-                                agg::glyph_ren_agg_gray8);
-    m_fontEngine.hinting(m_textHints);
-    m_fontEngine.height((ch == VectorFontCache) ? height : worldToScreen(height));
-#else
-    m_fontEngine.hinting(m_textHints);
-
-    m_fontEngine.create_font(fontName,
-                             (ch == VectorFontCache) ?
-                                agg::glyph_ren_outline :
-                                agg::glyph_ren_agg_gray8,
-                              (ch == VectorFontCache) ? height : worldToScreen(height),
-                              0.0,
-                              bold ? 700 : 400,
-                              italic);
-#endif
+	m_textAlignment = alignment;
 }
 
-
-//------------------------------------------------------------------------
-double Agg2D::fontHeight() const
-{
-   return m_fontHeight;
-}
-
-//------------------------------------------------------------------------
-void Agg2D::textAlignment(TextAlignment alignX, TextAlignment alignY)
-{
-   m_textAlignX = alignX;
-   m_textAlignY = alignY;
-}
-
-//------------------------------------------------------------------------
-double Agg2D::textWidth(const char* str)
-{
-    double x = 0;
-    double y = 0;
-    bool first = true;
-    while(*str)
-    {
-        const agg::glyph_cache* glyph = m_fontCacheManager.glyph(*str);
-        if(glyph)
-        {
-            if(!first) m_fontCacheManager.add_kerning(&x, &y);
-            x += glyph->advance_x;
-            y += glyph->advance_y;
-            first = false;
-        }
-        ++str;
-    }
-    return (m_fontCacheType == VectorFontCache) ? x : screenToWorld(x);
-}
-
-//------------------------------------------------------------------------
-bool Agg2D::textHints() const
-{
-   return m_textHints;
-}
-
-//------------------------------------------------------------------------
-void Agg2D::textHints(bool hints)
-{
-   m_textHints = hints;
-}
-
-
-
-//------------------------------------------------------------------------
-void Agg2D::text(double x, double y, const char* str, bool roundOff, double ddx, double ddy)
-{
-   double dx = 0.0;
-   double dy = 0.0;
-
-   switch(m_textAlignX)
-   {
-       case AlignCenter:  dx = -textWidth(str) * 0.5; break;
-       case AlignRight:   dx = -textWidth(str);       break;
-       default: break;
-   }
-
-
-   double asc = fontHeight();
-   const agg::glyph_cache* glyph = m_fontCacheManager.glyph('H');
-   if(glyph)
-   {
-       asc = glyph->bounds.y2 - glyph->bounds.y1;
-   }
-
-   if(m_fontCacheType == RasterFontCache)
-   {
-       asc = screenToWorld(asc);
-   }
-
-   switch(m_textAlignY)
-   {
-       case AlignCenter:  dy = -asc * 0.5; break;
-       case AlignTop:     dy = -asc;       break;
-       default: break;
-   }
-
-   if(m_fontEngine.flip_y()) dy = -dy;
-
-   agg::trans_affine  mtx;
-
-    double start_x = x + dx;
-    double start_y = y + dy;
-
-    if (roundOff)
-    {
-        start_x = int(start_x);
-        start_y = int(start_y);
-    }
-    start_x += ddx;
-    start_y += ddy;
-
-    mtx *= agg::trans_affine_translation(-x, -y);
-    mtx *= agg::trans_affine_rotation(m_textAngle);
-    mtx *= agg::trans_affine_translation(x, y);
-
-    agg::conv_transform<FontCacheManager::path_adaptor_type> tr(m_fontCacheManager.path_adaptor(), mtx);
-
-    if(m_fontCacheType == RasterFontCache)
-    {
-        worldToScreen(start_x, start_y);
-    }
-
-    int i;
-    for (i = 0; str[i]; i++)
-    {
-        glyph = m_fontCacheManager.glyph(str[i]);
-        if(glyph)
-        {
-            if(i) m_fontCacheManager.add_kerning(&start_x, &start_y);
-            m_fontCacheManager.init_embedded_adaptors(glyph, start_x, start_y);
-
-            if(glyph->data_type == agg::glyph_data_outline)
-            {
-                m_path.remove_all();
-                //m_path.add_path(tr, 0, false);
-				m_path.concat_path(tr,0); // JME
-                drawPath();
-            }
-
-            if(glyph->data_type == agg::glyph_data_gray8)
-            {
-                render(m_fontCacheManager.gray8_adaptor(),
-                       m_fontCacheManager.gray8_scanline());
-            }
-            start_x += glyph->advance_x;
-            start_y += glyph->advance_y;
-        }
-    }
-}
-#endif // AGG_USE_FONTS
 //------------------------------------------------------------------------
 void Agg2D::resetPath() { m_path.remove_all(); }
 
@@ -1235,6 +1061,33 @@ void Agg2D::addEllipse(double cx, double cy, double rx, double ry, Direction dir
     //m_path.add_path(arc, 0, false);
 	m_path.concat_path(arc,0); // JME
     m_path.close_polygon();
+}
+
+//------------------------------------------------------------------------
+void Agg2D::text(double x, double y, const std::string& text)
+{
+	agg::gsv_text t;
+	t.flip(true);
+	t.size(m_textSizeX, m_textSizeY);
+	t.text(text.c_str());
+	double w = t.text_width();
+	switch (m_textAlignment)
+	{
+		case AlignLeft:
+			break;
+
+		case AlignRight:
+			x -= w;
+			break;
+
+		case AlignCenter:
+			x -= w/2.0;
+			break;
+	}
+
+	t.start_point(x, y);
+	m_path.concat_path(t);
+	drawPath();
 }
 
 //------------------------------------------------------------------------

@@ -22,9 +22,6 @@
 #ifndef AGG2D_INCLUDED
 #define AGG2D_INCLUDED
 
-// With this define uncommented you can use FreeType font engine
-//#define AGG2D_USE_FREETYPE
-
 // With this define uncommented you can use floating-point pixel format
 //#define AGG2D_USE_FLOAT_FORMAT
 
@@ -50,18 +47,9 @@
 #include "agg_rounded_rect.h"
 #include "agg_font_cache_manager.h"
 
-// Font drawing is deactivated here because the implementation is platform-dependent and incomplete.
-//#define AGG_USE_FONTS
-#ifdef AGG_USE_FONTS
-# ifdef AGG2D_USE_FREETYPE
-#   include "agg_font_freetype.h"
-# else
-#   include "agg_font_win32_tt.h"
-# endif
-#endif
-
 #include "agg_pixfmt_rgba.h"
 #include "agg_image_accessors.h"
+#include <string>
 
 class Agg2D
 {
@@ -95,16 +83,6 @@ class Agg2D
     typedef agg::span_gradient<ColorType, agg::span_interpolator_linear<>, agg::gradient_x,      GradientArray> LinearGradientSpan;
     typedef agg::span_gradient<ColorType, agg::span_interpolator_linear<>, agg::gradient_circle, GradientArray> RadialGradientSpan;
 
-#ifdef AGG_USE_FONTS
-# ifdef AGG2D_USE_FREETYPE
-    typedef agg::font_engine_freetype_int32       FontEngine;
-# else
-    typedef agg::font_engine_win32_tt_int32       FontEngine;
-# endif
-    typedef agg::font_cache_manager<FontEngine>   FontCacheManager;
-    typedef FontCacheManager::gray8_adaptor_type  FontRasterizer;
-    typedef FontCacheManager::gray8_scanline_type FontScanline;
-#endif
     typedef agg::conv_curve<agg::path_storage>    ConvCurve;
     typedef agg::conv_stroke<ConvCurve>           ConvStroke;
     typedef agg::conv_transform<ConvCurve>        PathTransform;
@@ -147,8 +125,6 @@ public:
         AlignLeft,
         AlignRight,
         AlignCenter,
-        AlignTop = AlignRight,
-        AlignBottom = AlignLeft
     };
 
 
@@ -337,6 +313,10 @@ public:
     void fillEvenOdd(bool evenOddFlag);
     bool fillEvenOdd() const;
 
+	void textAlignment(TextAlignment alignment);
+	void textSize(double sizeX, double sizeY);
+	inline void textSize(double size) { textSize(size, size); }
+
     // Transformations
     //-----------------------
     Transformations transformations() const;
@@ -370,23 +350,6 @@ public:
     void curve(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4);
     void polygon(double* xy, int numPoints);
     void polyline(double* xy, int numPoints);
-
-#ifdef AGG_USE_FONTS
-    // Text
-    //-----------------------
-    void   flipText(bool flip);
-    void   font(const char* fileName, double height,
-                bool bold = false,
-                bool italic = false,
-                FontCacheType ch = RasterFontCache,
-                double angle = 0.0);
-    double fontHeight() const;
-    void   textAlignment(TextAlignment alignX, TextAlignment alignY);
-    bool   textHints() const;
-    void   textHints(bool hints);
-    double textWidth(const char* str);
-    void   text(double x, double y, const char* str, bool roundOff=false, double dx=0.0, double dy=0.0);
-#endif
 
     // Path commands
     //-----------------------
@@ -438,6 +401,7 @@ public:
                        double xTo,    double yTo);
 
     void addEllipse(double cx, double cy, double rx, double ry, Direction dir);
+	void text(double x, double y, const std::string& text);
     void closePolygon();
 
     void drawPath(DrawPathFlag flag = FillAndStroke);
@@ -552,14 +516,9 @@ private:
     double                          m_fillGradientD2;
     double                          m_lineGradientD2;
 
-    double                          m_textAngle;
-    TextAlignment                   m_textAlignX;
-    TextAlignment                   m_textAlignY;
-    bool                            m_textHints;
-    double                          m_fontHeight;
-    double                          m_fontAscent;
-    double                          m_fontDescent;
-    FontCacheType                   m_fontCacheType;
+    TextAlignment                   m_textAlignment;
+    double                          m_textSizeX;
+    double                          m_textSizeY;
 
     ImageFilter                     m_imageFilter;
     ImageResample                   m_imageResample;

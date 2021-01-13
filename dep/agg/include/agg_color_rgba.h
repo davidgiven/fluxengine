@@ -173,6 +173,9 @@ namespace agg
         static rgba from_wavelength(double wl, double gamma = 1.0);
     
         //--------------------------------------------------------------------
+        static rgba from_hsv(double h, double s, double v);
+    
+        //--------------------------------------------------------------------
         explicit rgba(double wavelen, double gamma=1.0)
         {
             *this = from_wavelength(wavelen, gamma);
@@ -234,6 +237,30 @@ namespace agg
         t.b = std::pow(t.b * s, gamma);
         return t;
     }
+
+	inline rgba rgba::from_hsv(double h, double s, double v)
+	{
+		h = fmod(h, 360.0);
+		double hh = h / 60.0;
+		int i = (int)hh;
+		double ff = hh - i;
+		double p = v * (1.0 - s);
+		double q = v * (1.0 - s*ff);
+		double t = v * (1.0 - s*(1.0 - ff));
+
+		double r, g, b;
+		switch (i) {
+			case 0: r = v; g = t; b = p; break;
+			case 1: r = q; g = v; b = p; break;
+			case 2: r = p; g = v; b = t; break;
+			case 3: r = p; g = q; b = v; break;
+			case 4: r = t; g = p; b = v; break;
+			case 5:
+			default: r = v; g = p; b = q; break;
+		}
+
+		return rgba(r, g, b, 1.0);
+	}
 
     inline rgba rgba_pre(double r, double g, double b, double a)
     {
