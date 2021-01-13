@@ -200,11 +200,14 @@ int mainAnalyseDriveResponse(int argc, const char* argv[])
 
 	int numRows = (maxInterval - minInterval) / intervalStep;
 	const int numColumns = 512;
-	double frequencies[numRows+1][numColumns];
+	double frequencies[numRows][numColumns];
+	memset(frequencies, 0, sizeof(frequencies));
 
-	int row = 0;
-	for (double interval = minInterval; interval<maxInterval; interval += intervalStep, row++)
+	double interval;
+	for (int row=0; row<numRows; row++)
 	{
+		interval = minInterval + (double)row * intervalStep;
+
 		unsigned ticks = (unsigned) (interval * TICKS_PER_US);
 		std::cout << fmt::format("Interval {:.2f}: ", ticks * US_PER_TICK);
 		std::cout << std::flush;
