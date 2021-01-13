@@ -200,7 +200,7 @@ int mainAnalyseDriveResponse(int argc, const char* argv[])
 
 	int numRows = (maxInterval - minInterval) / intervalStep;
 	const int numColumns = 512;
-	double frequencies[numRows+1][numColumns] = {};
+	double frequencies[numRows+1][numColumns];
 
 	int row = 0;
 	for (double interval = minInterval; interval<maxInterval; interval += intervalStep, row++)
