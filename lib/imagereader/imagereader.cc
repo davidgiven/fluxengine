@@ -4,6 +4,7 @@
 #include "sector.h"
 #include "sectorset.h"
 #include "imagereader/imagereader.h"
+#include "utils.h"
 #include "fmt/format.h"
 #include <algorithm>
 #include <ctype.h>
@@ -19,20 +20,13 @@ std::map<std::string, ImageReader::Constructor> ImageReader::formats =
 	{".jv3", ImageReader::createJv3ImageReader},
 };
 
-static bool ends_with(const std::string& value, const std::string& ending)
-{
-    if (ending.size() > value.size())
-        return false;
-    return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
-}
-
 ImageReader::Constructor ImageReader::findConstructor(const ImageSpec& spec)
 {
     const auto& filename = spec.filename;
 
 	for (const auto& e : formats)
 	{
-		if (ends_with(filename, e.first))
+		if (endsWith(filename, e.first))
 			return e.second;
 	}
 

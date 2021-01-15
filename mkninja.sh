@@ -141,10 +141,16 @@ runtest() {
     buildprogram $OBJDIR/$prog \
         lib$prog.a \
         libbackend.a \
+		libagg.a \
         libfmt.a
 
     echo build $OBJDIR/$prog.stamp : test $OBJDIR/$prog-debug$EXTENSION
 }
+
+buildlibrary libagg.a \
+	-Idep/agg/include \
+	dep/stb/stb_image_write.c \
+	dep/agg/src/*.cpp
 
 buildlibrary libfmt.a \
     dep/fmt/format.cc \
@@ -208,6 +214,7 @@ buildlibrary libbackend.a \
     lib/sector.cc \
     lib/sectorset.cc \
     lib/sql.cc \
+	lib/utils.cc \
     lib/visualiser.cc \
     lib/writer.cc \
 
@@ -256,6 +263,7 @@ buildprogram fluxengine \
     libfrontend.a \
     libbackend.a \
     libfmt.a \
+	libagg.a \
 
 buildlibrary libemu.a \
     dep/emu/fnmatch.c
@@ -274,6 +282,7 @@ buildsimpleprogram brother240tool \
     libemu.a \
     libfmt.a \
 
+runtest agg-test			tests/agg.cc
 runtest amiga-test          tests/amiga.cc
 runtest bitaccumulator-test tests/bitaccumulator.cc
 runtest bytes-test          tests/bytes.cc
@@ -285,3 +294,4 @@ runtest fmmfm-test          tests/fmmfm.cc
 runtest greaseweazle-test   tests/greaseweazle.cc
 runtest kryoflux-test       tests/kryoflux.cc
 runtest ldbs-test           tests/ldbs.cc
+

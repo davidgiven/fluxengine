@@ -149,4 +149,25 @@ private:
     std::set<unsigned> _value;
 };
 
+class Agg2D;
+
+class BitmapSpec
+{
+public:
+    BitmapSpec(const DataSpec& dataSpec);
+    BitmapSpec(const std::string filename, unsigned width, unsigned height);
+
+	Agg2D& painter();
+	void save();
+
+private:
+	std::vector<uint8_t> _bitmap;
+	std::unique_ptr<Agg2D> _painter;
+public:
+    std::string filename;
+    unsigned width;
+    unsigned height;
+    bool initialised : 1;
+};
+
 #endif
