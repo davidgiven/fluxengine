@@ -205,7 +205,6 @@ std::unique_ptr<Fluxmap> IbmEncoder::encode(
 
 			Bytes truncatedData = sectorData->data.slice(0, _parameters.sectorSize);
 			bw += truncatedData;
-			hexdump(std::cout, data.slice(0, 64));
 			uint16_t crc = crc16(CCITT_POLY, data);
 			bw.write_be16(crc);
 
