@@ -232,6 +232,7 @@ buildlibrary libfrontend.a \
     src/fe-readamiga.cc \
     src/fe-readampro.cc \
     src/fe-readapple2.cc \
+    src/fe-readatarist.cc \
     src/fe-readbrother.cc \
     src/fe-readc64.cc \
     src/fe-readdfs.cc \
@@ -251,6 +252,7 @@ buildlibrary libfrontend.a \
     src/fe-testvoltages.cc \
     src/fe-upgradefluxfile.cc \
     src/fe-writeamiga.cc \
+    src/fe-writeatarist.cc \
     src/fe-writebrother.cc \
     src/fe-writeibm.cc \
     src/fe-writemac.cc \

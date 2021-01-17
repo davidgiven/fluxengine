@@ -116,7 +116,7 @@ then change some settings. To see the values for a preset, simply append
   - `--ibm-sector-skew=0123...`: a string representing the order in which to
   write sectors: each character represents on sector, with `0` being the
   first (always, regardless of `--ibm-start-sector-id` above). Sectors 10 and
-  above are represented as latters from `A` up.
+  above are represented as letters from `A` up.
 
 Mixed-format disks
 ------------------
