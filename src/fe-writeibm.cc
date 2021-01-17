@@ -95,6 +95,7 @@ static ActionFlag preset1440(
 		gap2.setDefaultValue(22);
 		gap3.setDefaultValue(80);
 		sectorSkew.setDefaultValue("0123456789abcdefgh");
+		swapSides.setDefaultValue(false);
 	});
 
 static ActionFlag preset720(
@@ -113,6 +114,27 @@ static ActionFlag preset720(
 		gap2.setDefaultValue(22);
 		gap3.setDefaultValue(80);
 		sectorSkew.setDefaultValue("012345678");
+		swapSides.setDefaultValue(false);
+	});
+
+static ActionFlag presetCBM1581(
+	{ "--ibm-preset-cbm1581" },
+	"Preset parameters to a 3.5\" 800kB disk.",
+	[] {
+		setWriterDefaultInput(":c=80:h=2:s=10:b=512");
+		trackLengthMs.setDefaultValue(200);
+		sectorSize.setDefaultValue(512);
+		startSectorId.setDefaultValue(1);
+		emitIam.setDefaultValue(false);
+		clockRateKhz.setDefaultValue(250);
+		idamByte.setDefaultValue(0x5554);
+		damByte.setDefaultValue(0x5545);
+		gap0.setDefaultValue(80);
+		gap1.setDefaultValue(80); //as emitIam is false this value remains unused
+		gap2.setDefaultValue(22);
+		gap3.setDefaultValue(34);
+		sectorSkew.setDefaultValue("0123456789");
+		swapSides.setDefaultValue(true);
 	});
 
 int mainWriteIbm(int argc, const char* argv[])
