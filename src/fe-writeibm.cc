@@ -93,7 +93,7 @@ static ActionFlag preset1440(
 		gap0.setDefaultValue(80);
 		gap1.setDefaultValue(50);
 		gap2.setDefaultValue(22);
-		gap3.setDefaultValue(108);
+		gap3.setDefaultValue(80);
 		sectorSkew.setDefaultValue("0123456789abcdefgh");
 	});
 
