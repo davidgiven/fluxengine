@@ -69,6 +69,7 @@ struct IbmParameters
 	int gap2;
 	int gap3;
 	std::string sectorSkew;
+	bool swapSides;
 };
 
 class IbmEncoder : public AbstractEncoder

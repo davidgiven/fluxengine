@@ -102,6 +102,8 @@ static uint8_t decodeUint16(uint16_t raw)
 std::unique_ptr<Fluxmap> IbmEncoder::encode(
 	int physicalTrack, int physicalSide, const SectorSet& allSectors)
 {
+	if (_parameters.swapSides)
+		physicalSide = 1 - physicalSide;
 	double clockRateUs = 1e3 / _parameters.clockRateKhz;
 	if (!_parameters.useFm)
 		clockRateUs /= 2.0;
