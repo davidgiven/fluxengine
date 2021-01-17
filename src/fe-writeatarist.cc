@@ -33,6 +33,11 @@ static StringFlag sectorSkew(
 	"Order to emit sectors.",
 	"");
 
+static BoolFlag swapSides(
+	{ "--ibm-swap-sides" },
+	"Swap sides while writing.",
+	false);
+
 static ActionFlag preset360(
 	{ "--st-preset-360" },
 	"Preset parameters to a 3.5\" 360kB disk (1 side, 80 tracks, 9 sectors).",
@@ -124,6 +129,7 @@ int mainWriteAtariST(int argc, const char* argv[])
 	parameters.gap2 = gap2;
 	parameters.gap3 = gap3;
 	parameters.sectorSkew = sectorSkew;
+	parameters.swapSides = swapSides;
 
 	IbmEncoder encoder(parameters);
 	writeDiskCommand(encoder);
