@@ -196,7 +196,13 @@ public:
         /* The GreaseWeazle doesn't have a command to fetch the period directly,
          * so we have to do a flux read. */
 
-        do_command({ CMD_READ_FLUX, 2 });
+        Bytes cmd(8);
+        cmd.writer()
+            .write_8(CMD_READ_FLUX)
+            .write_8(cmd.size())
+            .write_le32(0) //ticks default value (guessed)
+            .write_le32(2);//guessed
+        do_command(cmd);
 
         uint32_t ticks_gw = 0;
         uint32_t firstindex = ~0;
@@ -309,10 +315,11 @@ public:
         do_command({ CMD_HEAD, 3, (uint8_t)side });
 
         {
-            Bytes cmd(4);
+            Bytes cmd(8);
             cmd.writer()
                 .write_8(CMD_READ_FLUX)
                 .write_8(cmd.size())
+                .write_le32(0) //ticks default value (guessed)
                 .write_le32(revolutions + (synced ? 1 : 0));
             do_command(cmd);
         }
@@ -334,20 +341,20 @@ public:
             fldata = stripPartialRotation(fldata);
         return fldata;
     }
-    
+
     void write(int side, const Bytes& fldata, nanoseconds_t hardSectorThreshold)
     {
         if (hardSectorThreshold != 0)
             Error() << "hard sectors are currently unsupported on the GreaseWeazel";
 
         do_command({ CMD_HEAD, 3, (uint8_t)side });
-        do_command({ CMD_WRITE_FLUX, 3, 1 });
+        do_command({ CMD_WRITE_FLUX, 4, 1, 1 });
         write_bytes(fluxEngineToGreaseWeazle(fldata, _clock));
         read_byte(); /* synchronise */
 
         do_command({ CMD_GET_FLUX_STATUS, 2 });
     }
-    
+
     void erase(int side, nanoseconds_t hardSectorThreshold)
     {
         if (hardSectorThreshold != 0)
