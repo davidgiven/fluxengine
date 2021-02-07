@@ -366,7 +366,8 @@ public:
         do_command({ CMD_GET_FLUX_STATUS, 2 });
     }
     
-    void setDrive(int drive, bool high_density, int index_mode)
+    void setDrive(int drive, bool high_density, int index_mode,
+                  int stepIntervalTime, int stepSettlingTime, bool double_step)
     {
         do_command({ CMD_SELECT, 3, (uint8_t)drive });
         do_command({ CMD_MOTOR, 4, (uint8_t)drive, 1 });

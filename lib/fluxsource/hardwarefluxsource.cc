@@ -29,6 +29,21 @@ static IntFlag hardSectorCount(
     "number of hard sectors on the disk (0=soft sectors)",
     0);
 
+static BoolFlag doubleStep(
+    { "--double-step" },
+    "double-step 96tpi drives for 48tpi media",
+    false);
+
+static IntFlag stepIntervalTime(
+    { "--step-interval-time" },
+    "Head step interval time in milliseconds",
+    6);
+
+static IntFlag stepSettlingTime(
+    { "--step-settling-time" },
+    "Head step settling time in milliseconds",
+    50);
+
 static bool high_density = false;
 
 void setHardwareFluxSourceDensity(bool high_density)
@@ -42,7 +57,8 @@ public:
     HardwareFluxSource(unsigned drive):
         _drive(drive)
     {
-        usbSetDrive(_drive, high_density, indexMode);
+        usbSetDrive(_drive, high_density, indexMode,
+            stepIntervalTime, stepSettlingTime, doubleStep);
         std::cerr << "Measuring rotational speed... " << std::flush;
         _oneRevolution = usbGetRotationalPeriod(hardSectorCount);
 	if (hardSectorCount != 0)
@@ -59,7 +75,8 @@ public:
 public:
     std::unique_ptr<Fluxmap> readFlux(int track, int side)
     {
-        usbSetDrive(_drive, high_density, indexMode);
+        usbSetDrive(_drive, high_density, indexMode, stepIntervalTime,
+            stepSettlingTime, doubleStep);
         usbSeek(track);
         Bytes data = usbRead(
 			side, synced, revolutions * _oneRevolution, _hardSectorThreshold);

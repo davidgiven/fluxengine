@@ -23,7 +23,8 @@ public:
 	virtual void write(int side, const Bytes& bytes,
 	                   nanoseconds_t hardSectorThreshold) = 0;
 	virtual void erase(int side, nanoseconds_t hardSectorThreshold) = 0;
-	virtual void setDrive(int drive, bool high_density, int index_mode) = 0;
+	virtual void setDrive(int drive, bool high_density, int index_mode,
+		int step_interval_time, int step_settling_time, bool double_step) = 0;
 	virtual void measureVoltages(struct voltages_frame* voltages) = 0;
 
 protected:
@@ -58,8 +59,10 @@ static inline void usbWrite(int side, const Bytes& bytes,
                             nanoseconds_t hardSectorThreshold)
 { getUsb().write(side, bytes, hardSectorThreshold); }
 
-static inline void usbSetDrive(int drive, bool high_density, int index_mode)
-{ getUsb().setDrive(drive, high_density, index_mode); }
+static inline void usbSetDrive(int drive, bool high_density, int index_mode,
+	int step_interval_time, int step_settling_time, bool double_step)
+{ getUsb().setDrive(drive, high_density, index_mode,
+	step_interval_time, step_settling_time, double_step); }
 
 static inline void usbMeasureVoltages(struct voltages_frame* voltages)
 { getUsb().measureVoltages(voltages); }

@@ -287,13 +287,17 @@ public:
 		await_reply<struct any_frame>(F_FRAME_ERASE_REPLY);
 	}
 
-	void setDrive(int drive, bool high_density, int index_mode)
+	void setDrive(int drive, bool high_density, int index_mode,
+		      int step_interval_time, int step_settling_time, bool double_step)
 	{
 		struct set_drive_frame f = {
-			{ .type = F_FRAME_SET_DRIVE_CMD, .size = sizeof(f) },
-			.drive = (uint8_t) drive,
+			{.type = F_FRAME_SET_DRIVE_CMD, .size = sizeof(f) },
+			.drive = (uint8_t)drive,
 			.high_density = high_density,
-			.index_mode = (uint8_t) index_mode
+			.index_mode = (uint8_t)index_mode,
+			.step_interval_time = (uint8_t) step_interval_time,
+			.step_settling_time = (uint8_t) step_settling_time,
+			.double_step = (uint8_t)double_step
 		};
 		usb_cmd_send(&f, f.f.size);
 		await_reply<struct any_frame>(F_FRAME_SET_DRIVE_REPLY);

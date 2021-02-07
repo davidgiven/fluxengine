@@ -186,7 +186,7 @@ int mainAnalyseDriveResponse(int argc, const char* argv[])
 	if (spec.locations.size() != 1)
 		Error() << "the destination dataspec must contain exactly one track (two sides count as two tracks)";
 
-    usbSetDrive(spec.drive, false, F_INDEX_REAL);
+    usbSetDrive(spec.drive, false, F_INDEX_REAL, 6, 50, false);
 	usbSeek(spec.locations[0].track);
 
 	std::cout << "Measuring rotational speed...\n";
