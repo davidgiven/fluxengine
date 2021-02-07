@@ -115,7 +115,17 @@ void ImageWriter::printMap()
 	int badSectors = 0;
 	int missingSectors = 0;
 	int totalSectors = 0;
-	std::cout << "H.SS Tracks --->" << std::endl;
+	std::cout << "     Tracks -> 1         2         3         ";
+	if (spec.cylinders > 40) {
+			std::cout << "4         5         6         7         8";
+	}
+	std::cout << std::endl;
+	std::cout << "H.SS 0123456789012345678901234567890123456789";
+	if (spec.cylinders > 40) {
+		std::cout << "01234567890123456789012345678901234567890123";
+	}
+	std::cout << std::endl;
+
 	for (int head = 0; head < spec.heads; head++)
 	{
 		for (int sectorId = 0; sectorId < spec.sectors; sectorId++)
