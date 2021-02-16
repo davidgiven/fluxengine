@@ -23,4 +23,5 @@ fluxengine read dfs
 ```
 
 You should end up with an `dfs.img` of the appropriate size for your disk
-format.
+format. This is an alias for `fluxengine read ibm` with preconfigured
+parameters.

@@ -12,17 +12,17 @@
 
 static FlagGroup flags { &readerFlags };
 
-static IntFlag sectorIdBase(
+IntFlag sectorIdBase(
 	{ "--ibm-sector-id-base" },
 	"Sector ID of the first sector.",
 	1);
 
-static BoolFlag ignoreSideByte(
+BoolFlag ignoreSideByte(
 	{ "--ibm-ignore-side-byte" },
 	"Ignore the side byte in the sector ID, and use the physical side instead.",
 	false);
 
-static RangeFlag requiredSectors(
+RangeFlag requiredSectors(
 	{ "--ibm-required-sectors" },
 	"A comma seperated list or range of sectors which must be on each track.",
 	"");

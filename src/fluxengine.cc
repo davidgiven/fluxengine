@@ -35,7 +35,6 @@ extern command_cb mainTestBandwidth;
 extern command_cb mainTestVoltages;
 extern command_cb mainUpgradeFluxFile;
 extern command_cb mainWriteAmiga;
-extern command_cb mainWriteAtariST;
 extern command_cb mainWriteBrother;
 extern command_cb mainWriteIbm;
 extern command_cb mainWriteMac;
@@ -97,7 +96,6 @@ static std::vector<Command> readables =
 static std::vector<Command> writeables =
 {
     { "amiga",         mainWriteAmiga,    "Writes Amiga disks.", },
-    { "atarist",       mainWriteAtariST,  "Writes Atari ST disks.", },
     { "brother",       mainWriteBrother,  "Writes 120kB and 240kB Brother word processor disks.", },
     { "ibm",           mainWriteIbm,      "Writes the ubiquitous IBM format disks.", },
 	{ "mac",           mainWriteMac,      "Writes Apple Macintosh disks.", },
