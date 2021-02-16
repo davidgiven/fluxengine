@@ -79,47 +79,47 @@ static BoolFlag swapSides(
 	"Swap sides while writing. Needed for Commodore 1581, CMD FD-2000, Thomson TO7.",
 	false);
 
+/* --- IBM disks ----------------------------------------------------------- */
+
+static void set_ibm_defaults()
+{
+	sectorSize.setDefaultValue(512);
+	emitIam.setDefaultValue(true);
+	idamByte.setDefaultValue(0x5554);
+	damByte.setDefaultValue(0x5545);
+	gap0.setDefaultValue(80);
+	gap1.setDefaultValue(50);
+	gap2.setDefaultValue(22);
+	gap3.setDefaultValue(80);
+	swapSides.setDefaultValue(false);
+}
+
 static ActionFlag preset1440(
 	{ "--ibm-preset-1440" },
-	"Preset parameters to a 3.5\" 1440kB disk.",
+	"Preset parameters to a PC 3.5\" 1440kB disk.",
 	[] {
 		setWriterDefaultInput(":c=80:h=2:s=18:b=512");
 		trackLengthMs.setDefaultValue(200);
-		sectorSize.setDefaultValue(512);
-		emitIam.setDefaultValue(true);
 		clockRateKhz.setDefaultValue(500);
-		idamByte.setDefaultValue(0x5554);
-		damByte.setDefaultValue(0x5545);
-		gap0.setDefaultValue(80);
-		gap1.setDefaultValue(50);
-		gap2.setDefaultValue(22);
-		gap3.setDefaultValue(80);
 		sectorSkew.setDefaultValue("0123456789abcdefgh");
-		swapSides.setDefaultValue(false);
+		set_ibm_defaults();
 	});
 
 static ActionFlag preset720(
 	{ "--ibm-preset-720" },
-	"Preset parameters to a 3.5\" 720kB disk.",
+	"Preset parameters to a PC 3.5\" 720kB disk.",
 	[] {
 		setWriterDefaultInput(":c=80:h=2:s=9:b=512");
 		trackLengthMs.setDefaultValue(200);
-		sectorSize.setDefaultValue(512);
-		emitIam.setDefaultValue(true);
 		clockRateKhz.setDefaultValue(250);
-		idamByte.setDefaultValue(0x5554);
-		damByte.setDefaultValue(0x5545);
-		gap0.setDefaultValue(80);
-		gap1.setDefaultValue(50);
-		gap2.setDefaultValue(22);
-		gap3.setDefaultValue(80);
 		sectorSkew.setDefaultValue("012345678");
-		swapSides.setDefaultValue(false);
 	});
 
+/* --- Commodore disks ----------------------------------------------------- */
+
 static ActionFlag presetCBM1581(
-	{ "--ibm-preset-cbm1581" },
-	"Preset parameters to a 3.5\" 800kB disk.",
+	{ "--ibm-preset-commodore-1581" },
+	"Preset parameters to a Commodore 3.5\" 800kB 1581 disk.",
 	[] {
 		setWriterDefaultInput(":c=80:h=2:s=10:b=512");
 		trackLengthMs.setDefaultValue(200);
@@ -135,6 +135,104 @@ static ActionFlag presetCBM1581(
 		gap3.setDefaultValue(34);
 		sectorSkew.setDefaultValue("0123456789");
 		swapSides.setDefaultValue(true);
+	});
+
+/* --- Atari ST disks ------------------------------------------------------ */
+
+static void set_atari_defaults()
+{
+		trackLengthMs.setDefaultValue(200);
+		sectorSize.setDefaultValue(512);
+		startSectorId.setDefaultValue(1);
+		emitIam.setDefaultValue(false);
+		clockRateKhz.setDefaultValue(250);
+		idamByte.setDefaultValue(0x5554);
+		damByte.setDefaultValue(0x5545);
+		gap0.setDefaultValue(80);
+		gap1.setDefaultValue(80); //as emitIam is false this value remains unused
+		gap2.setDefaultValue(22);
+		gap3.setDefaultValue(34);
+		swapSides.setDefaultValue(true);
+}
+
+static ActionFlag presetAtariST360(
+	{ "--ibm-preset-atarist-360" },
+	"Preset parameters to an Atari ST 3.5\" 360kB disk.",
+	[] {
+		setWriterDefaultDest(":d=0:s=0:t=0-79");
+		setWriterDefaultInput(":c=80:h=1:s=9:b=512");
+		sectorSkew.setDefaultValue("012345678");
+		set_atari_defaults();
+	});
+
+static ActionFlag presetAtariST370(
+	{ "--ibm-preset-atarist-380" },
+	"Preset parameters to an Atari ST 3.5\" 370kB disk.",
+	[] {
+		setWriterDefaultDest(":d=0:s=0:t=0-81");
+		setWriterDefaultInput(":c=82:h=1:s=9:b=512");
+		sectorSkew.setDefaultValue("012345678");
+		set_atari_defaults();
+	});
+
+static ActionFlag presetAtariST400(
+	{ "--ibm-preset-atarist-400" },
+	"Preset parameters to an Atari ST 3.5\" 400kB disk.",
+	[] {
+		setWriterDefaultDest(":d=0:s=0:t=0-79");
+		setWriterDefaultInput(":c=80:h=1:s=10:b=512");
+		sectorSkew.setDefaultValue("0123456789");
+		set_atari_defaults();
+	});
+
+static ActionFlag presetAtariST410(
+	{ "--ibm-preset-atarist-410" },
+	"Preset parameters to an Atari ST 3.5\" 410kB disk.",
+	[] {
+		setWriterDefaultDest(":d=0:s=0:t=0-81");
+		setWriterDefaultInput(":c=82:h=1:s=10:b=512");
+		sectorSkew.setDefaultValue("0123456789");
+		set_atari_defaults();
+	});
+
+static ActionFlag presetAtariST720(
+	{ "--ibm-preset-atarist-720" },
+	"Preset parameters to an Atari ST 3.5\" 720kB disk.",
+	[] {
+		setWriterDefaultDest(":d=0:s=0-1:t=0-79");
+		setWriterDefaultInput(":c=80:h=2:s=9:b=512");
+		sectorSkew.setDefaultValue("012345678");
+		set_atari_defaults();
+	});
+
+static ActionFlag presetAtariST740(
+	{ "--ibm-preset-atarist-740" },
+	"Preset parameters to an Atari ST 3.5\" 740kB disk.",
+	[] {
+		setWriterDefaultDest(":d=0:s=0-1:t=0-81");
+		setWriterDefaultInput(":c=82:h=2:s=9:b=512");
+		sectorSkew.setDefaultValue("012345678");
+		set_atari_defaults();
+	});
+
+static ActionFlag presetAtariST800(
+	{ "--ibm-preset-atarist-800" },
+	"Preset parameters to an Atari ST 3.5\" 800kB disk.",
+	[] {
+		setWriterDefaultDest(":d=0:s=0-1:t=0-79");
+		setWriterDefaultInput(":c=80:h=2:s=10:b=512");
+		sectorSkew.setDefaultValue("0123456789");
+		set_atari_defaults();
+	});
+
+static ActionFlag presetAtariST820(
+	{ "--ibm-preset-atarist-820" },
+	"Preset parameters to an Atari ST 3.5\" 820kB disk.",
+	[] {
+		setWriterDefaultDest(":d=0:s=0-1:t=0-81");
+		setWriterDefaultInput(":c=82:h=2:s=10:b=512");
+		sectorSkew.setDefaultValue("0123456789");
+		set_atari_defaults();
 	});
 
 int mainWriteIbm(int argc, const char* argv[])
