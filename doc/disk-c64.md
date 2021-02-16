@@ -25,8 +25,8 @@ quickly.)
 
 A standard 1541 disk has 35 tracks of 17 to 21 sectors, each 256 bytes long.
 
-Reading discs
--------------
+Reading 1541 disks
+------------------
 
 Just do:
 
@@ -42,6 +42,24 @@ load this straight into a Commodore 64 emulator such as
 complicated due to the way the tracks are different sizes and the odd sector
 size, so you need the special D64 or LDBS output formats to represent them
 sensibly. Don't use IMG unless you know what you're doing.
+
+Reading 1581 disks
+------------------
+
+These are handled by the IBM reader. Just do:
+
+```
+fluxengine read ibm
+```
+
+Writing 1581 disks
+------------------
+
+These are handled by the IBM writer. Just do:
+
+```
+fluxengine write ibm --ibm-preset-cbm1581 -i file.img
+```
 
 Useful references
 -----------------
