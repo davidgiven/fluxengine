@@ -61,7 +61,7 @@ public:
 				break;
 
 			default:
-				Error() << fmt::format("don't understant DiskCopy disks of type {}", encoding);
+				Error() << fmt::format("don't understand DiskCopy disks of type {}", encoding);
 		}
 
 		std::cout << "reading DiskCopy 4.2 image\n"
