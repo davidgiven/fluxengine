@@ -3,6 +3,7 @@
 typedef int command_cb(int agrc, const char* argv[]);
 
 extern command_cb mainAnalyseDriveResponse;
+extern command_cb mainAnalyseLayout;
 extern command_cb mainErase;
 extern command_cb mainConvertCwfToFlux;
 extern command_cb mainConvertFluxToAu;
@@ -114,7 +115,8 @@ static std::vector<Command> convertables =
 
 static std::vector<Command> analysables =
 {
-	{ "driveresponse", mainAnalyseDriveResponse, "Measures the drive's ability to read and write pulses.", }
+	{ "driveresponse", mainAnalyseDriveResponse, "Measures the drive's ability to read and write pulses.", },
+	{ "layout",        mainAnalyseLayout,        "Produces a visualisation of the track/sector layout.", },
 };
 
 static std::vector<Command> testables =
