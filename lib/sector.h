@@ -23,6 +23,7 @@ public:
 	};
 
     static const std::string statusToString(Status status);
+    static Status stringToStatus(const std::string& value);
 
 	Status status = Status::INTERNAL_ERROR;
     Fluxmap::Position position;

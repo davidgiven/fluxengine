@@ -14,3 +14,18 @@ const std::string Sector::statusToString(Status status)
         default:                   return fmt::format("unknown error {}", status);
     }
 }
+
+Sector::Status Sector::stringToStatus(const std::string& value)
+{
+	if (value == "OK")
+		return Status::OK;
+	if (value == "bad checksum")
+		return Status::BAD_CHECKSUM;
+	if ((value == "sector not found") || (value == "MISSING"))
+		return Status::MISSING;
+	if (value == "present but no data found")
+		return Status::DATA_MISSING;
+	if (value == "conflicting data")
+		return Status::CONFLICT;
+	return Status::INTERNAL_ERROR;
+}

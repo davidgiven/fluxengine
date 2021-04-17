@@ -17,6 +17,8 @@ public:
 	std::unique_ptr<Sector>& get(int track, int head, int sector);
 	Sector* get(int track, int head, int sector) const;
 
+	Sector* add(int track, int head, int sector);
+		
 	const std::map<const key_t, std::unique_ptr<Sector>>& get() const
 	{ return _data; }
 
