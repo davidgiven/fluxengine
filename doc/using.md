@@ -160,7 +160,7 @@ exact format varies according to the extension:
   	0.0: Error: track data overrun
     ```
  	
-	For input files you normally have to specify it yourself.
+	For input files you normally have to specify it yourself. So in this case  	append `:c=76:h=2:s=5:b=1024` to set the geometry.
 
 
 ### High density disks
