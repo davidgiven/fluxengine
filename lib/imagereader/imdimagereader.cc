@@ -89,6 +89,24 @@ public:
 	{}
 
 	SectorSet readImage()
+	/*
+	IMAGE FILE FORMAT
+	The overall layout of an ImageDisk .IMD image file is:
+	IMD v.vv: dd/mm/yyyy hh:mm:ss
+	Comment (ASCII only - unlimited size)
+	1A byte - ASCII EOF character
+	- For each track on the disk:
+	1 byte Mode value							see getModulationspeed for definition		
+	1 byte Cylinder
+	1 byte Head
+	1 byte number of sectors in track			
+	1 byte sector size							see getsectorsize for definition
+	sector numbering map
+	sector cylinder map (optional)				definied in high byte of head (since head is 0 or 1)
+	sector head map (optional)					definied in high byte of head (since head is 0 or 1)
+	sector data records
+	<End of file>
+	*/
 	{
 		//Read File
         std::ifstream inputFile(spec.filename, std::ios::in | std::ios::binary);
@@ -111,7 +129,7 @@ public:
 		unsigned sectorSize = 0;
 		std::string sector_skew;
 		int b; 	
-		unsigned char comment[8192];
+		unsigned char comment[8192]; //i choose a fixed value. dont know how to make dynamic arrays in C++. This should be enough
 		// Read comment
 		while ((b = br.read_8()) != EOF && b != 0x1A)
 		{
