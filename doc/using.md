@@ -1,4 +1,4 @@
-Using a FluxEngine
+﻿Using a FluxEngine
 ==================
 
 So you've [built the hardware](building.md), programmed and tested it! What
@@ -139,6 +139,10 @@ exact format varies according to the extension:
   - `.jv3`: a disk image format mainly used by the TRS-80. These images can be
 	read, but not yet written. You only get the data; the density and DAM bits
 	are ignored.
+
+  - `.imd`: a disk image format created by [David Dunfield](http://dunfield.classiccmp.org/img/index.htm).
+	These images can be used as input image for writing a disk. If you don’t 	know the diskformat, Fluxengine will show the stored comment and 	display the geometry to use. For input files you normally have to 	specify it yourself.
+
 
 ### High density disks
 
