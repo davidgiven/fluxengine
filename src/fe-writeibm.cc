@@ -159,6 +159,29 @@ static ActionFlag presetHPLIF(
 		swapSides.setDefaultValue(false);
 	});
 
+/* --- HP-LIF ----------------------------------------------------- */
+
+static ActionFlag presetHPLIF(
+	{ "--ibm-preset-hp-lif" },
+	"Preset parameters to a HP-LIF 3.5\" 770kB HP disk.",
+	[] {
+		setWriterDefaultDest(":d=0:s=0-1:t=0-76");
+		setWriterDefaultInput(":c=77:h=2:s=5:b=1024");
+		trackLengthMs.setDefaultValue(200);
+		sectorSize.setDefaultValue(1024);
+		startSectorId.setDefaultValue(1);
+		emitIam.setDefaultValue(true);
+		clockRateKhz.setDefaultValue(250);
+		idamByte.setDefaultValue(0x5554);
+		damByte.setDefaultValue(0x5545);
+		gap0.setDefaultValue(80);
+		gap1.setDefaultValue(50); //as emitIam is false this value remains unused
+		gap2.setDefaultValue(22);
+		gap3.setDefaultValue(44);
+		sectorSkew.setDefaultValue("01234");
+		swapSides.setDefaultValue(false);
+	});
+
 /* --- Atari ST disks ------------------------------------------------------ */
 
 static void set_atari_defaults()
