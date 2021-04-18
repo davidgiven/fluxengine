@@ -40,5 +40,5 @@ jobs:
         pacman -S --noconfirm --needed make ninja mingw-w64-i686-libusb mingw-w64-i686-sqlite3 mingw-w64-i686-zlib mingw-w64-i686-gcc zip
     - name: build
       run: |
-        make
+        make CXX=/opt/bin/i686-w64-mingw32-gcc.exe CFLAGS="-I/mingw32/include" LDFLAGS="-L/mingw32/lib"
 
