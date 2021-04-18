@@ -19,14 +19,19 @@ static StringFlag source(
     "");
 
 static DataSpecFlag writeImg(
-	{ "--write-img" },
+	{ "--img", "-o" },
 	"Draw a graph of the disk layout",
-	":w=640:h=480");
+	":w=800:h=600");
 
 static IntFlag period(
     { "--visualiser-period" },
     "rotational period for use by the visualiser (milliseconds)",
     200);
+
+static IntFlag sideToDraw(
+	{ "--side" },
+	"side to draw; -1 for both",
+	-1);
 
 static std::ifstream inputFile;
 
@@ -39,27 +44,41 @@ static const double TRACK_SPACING = double(RADIUS-CORE) / TRACKS;
 
 void visualiseSectorsToFile(const SectorSet& sectors, const std::string& filename)
 {
-    std::cout << "writing visualisation\n";
-    std::ofstream f(filename, std::ios::out);
-    if (!f.is_open())
-        Error() << "cannot open visualisation file";
+	BitmapSpec bitmapSpec(writeImg);
+	if (bitmapSpec.filename.empty())
+		Error() << "you must specify an image filename to write to";
 
-    f << fmt::format("<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"{0} {1} {2} {3}\">",
-        0, 0, SIZE*2, SIZE);
+	Agg2D& painter = bitmapSpec.painter();
+	painter.clearAll(0xff, 0xff, 0xff);
 
     const double radians_per_ns = 2.0*M_PI / (period*1e6);
+	const double available_width = bitmapSpec.width;
+	const double available_height = bitmapSpec.height;
+	const double panel_centre = (sideToDraw == -1)
+			? (available_width / 4)
+			: (available_width / 2);
+	const double panel_size = (sideToDraw == -1)
+			? std::min(available_width / 2, available_height)
+			: std::min(available_width, available_height);
+	const double disk_radius = (panel_size-BORDER) / 2;
 
     auto drawSide = [&](int side)
     {
-        f << fmt::format("<g transform='matrix(1 0 0 -1 {} {})'>", SIZE/2 + (side*SIZE), SIZE/2);
-        f << fmt::format("<circle cx='0' cy='0' r='{}' stroke='none' fill='#ccc'/>", RADIUS);
+		int xpos = BORDER +
+			(sideToDraw == -1)
+				? (panel_centre + side*panel_size)
+				: panel_centre;
 
         for (int physicalTrack = 0; physicalTrack < TRACKS; physicalTrack++)
         {
-            double radius = CORE + physicalTrack*TRACK_SPACING;
-            f << fmt::format("<circle cx='0' cy='0' r='{}' stroke='#888' stroke-width='0.5' fill='none'/>", radius);
+			double visibleDistance = (TRACKS * 0.5) + (TRACKS - physicalTrack);
+			double radius = (disk_radius*visibleDistance)/(TRACKS * 1.5);
+			painter.noFill();
+			painter.lineColor(0x88, 0x88, 0x88);
+			painter.lineWidth(disk_radius/(TRACKS*2));
+			painter.ellipse(xpos, available_height/2, radius, radius);
 
-            auto drawArc = [&](const std::unique_ptr<Sector>& sector, nanoseconds_t start, nanoseconds_t end, const std::string& colour)
+            auto drawArc = [&](const std::unique_ptr<Sector>& sector, nanoseconds_t start, nanoseconds_t end)
             {
                 start = fmod(start, period*1000000.0);
                 end = fmod(end, period*1000000.0);
@@ -70,13 +89,7 @@ void visualiseSectorsToFile(const SectorSet& sectors, const std::string& filenam
                 double theta2 = end * radians_per_ns;
                 int large = (theta2 - theta1) >= M_PI;
 
-                f << fmt::format("\n<!-- {} {} = {} {} -->", start, end, theta1, theta2);
-                f << fmt::format("<path fill='none' stroke='{}' stroke-width='1.5' d='", colour);
-                f << fmt::format("M {} {} ", cos(theta1)*radius, sin(theta1)*radius);
-                f << fmt::format("A {0} {0} 0 {3} 1 {1} {2}", radius, cos(theta2)*radius, sin(theta2)*radius, large);
-                f << fmt::format("'><title>Track {} Head {} Sector {}; {}ms to {}ms</title></path>",
-                    sector->logicalTrack, sector->logicalSide, sector->logicalSector,
-                    start/1e6, end/1e6);
+				painter.arc(xpos, available_height/2, radius, radius, theta1, theta2-theta1);
             };
 
             /* Sadly, SectorSets aren't indexable by physical track. */
@@ -85,27 +98,40 @@ void visualiseSectorsToFile(const SectorSet& sectors, const std::string& filenam
                 const auto& sector = e.second;
                 if ((sector->physicalSide == side) && (sector->physicalTrack == physicalTrack))
                 {
-                    const char* colour = "#f00";
+					painter.lineColor(0xff, 0x00, 0x00);
                     if (sector->status == Sector::OK)
-                        colour = "#00f";
-                    if (sector->headerStartTime && sector->headerEndTime)
-                        drawArc(sector, sector->headerStartTime, sector->headerEndTime, "#0ff");
+						painter.lineColor(0x00, 0x00, 0xff);
                     if (sector->dataStartTime && sector->dataEndTime)
-                        drawArc(sector, sector->dataStartTime, sector->dataEndTime, colour);
+                        drawArc(sector, sector->dataStartTime, sector->dataEndTime);
+                    if (sector->headerStartTime && sector->headerEndTime)
+					{
+						painter.lineColor(0x00, 0xff, 0xff);
+                        drawArc(sector, sector->headerStartTime, sector->headerEndTime);
+					}
                 }
             }
         }
-
-        f << "</g>";
     };
 
-    f << fmt::format("<rect x='0' y='0' width='{}' height='{}' stroke='none' fill='#fff'/>", SIZE*2, SIZE);
+	switch (sideToDraw)
+	{
+		case -1:
+			drawSide(0);
+			drawSide(1);
+			break;
 
-    drawSide(0);
-    drawSide(1);
+		case 0:
+			drawSide(0);
+			break;
 
-    f << "</svg>";
+		case 1:
+			drawSide(1);
+			break;
+	}
+
+	bitmapSpec.save();
 }
+
 static void check_for_error()
 {
     if (inputFile.fail())
