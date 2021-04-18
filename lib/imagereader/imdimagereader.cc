@@ -264,7 +264,7 @@ public:
 
 		std::cout 	<< "reading IMD image\n"
 					<< fmt::format("{} tracks, {} heads; {}; {} kbps; {} sectoren; sectorsize {}; sectormap {}; {} kB total \n",
-					header.track+1, header.Head + 1,
+					header.track, header.Head + 1,
 					mfm ? "MFM" : "FM",
 					Modulation_Speed, header.numSectors, sectorSize, sector_skew, (header.track+1) * trackSize / 1024);
 
