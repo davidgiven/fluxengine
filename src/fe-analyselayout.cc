@@ -37,12 +37,8 @@ static IntFlag sideToDraw(
 
 static std::ifstream inputFile;
 
-static const int SIZE = 480;
 static const int BORDER = 10;
-static const int RADIUS = (SIZE/2) - (BORDER/2);
-static const int CORE = 50;
 static const int TRACKS = 83;
-static const double TRACK_SPACING = double(RADIUS-CORE) / TRACKS;
 
 void visualiseSectorsToFile(const SectorSet& sectors, const std::string& filename)
 {
