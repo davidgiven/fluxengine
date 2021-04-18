@@ -1,3 +1,4 @@
+#define _USE_MATH_DEFINES
 #include "globals.h"
 #include "flags.h"
 #include "dataspec.h"
@@ -9,6 +10,7 @@
 #include "dep/agg/include/agg2d.h"
 #include "dep/stb/stb_image_write.h"
 #include "fmt/format.h"
+#include <math.h>
 #include <fstream>
 
 static FlagGroup flags = {};
