@@ -30,12 +30,11 @@ jobs:
       with:
         tag-name: dev
         description: >
-          This is an automatically built version of the FluxEngine Windows client
-          which is generated whenever a significant checkin has happened. It's had
-          no testing whatsoever.
-
-          To use, download it, put it somewhere, and then run it from a cmd window
-          or other command line shell.
+          This is an automatically built version of the FluxEngine Windows
+          client which is generated whenever a significant checkin has
+          happened. It's had no testing whatsoever. To use, download it, put it
+          somewhere, and then run it from a cmd window or other command line
+          shell.
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
     - name: delete-old-assets
