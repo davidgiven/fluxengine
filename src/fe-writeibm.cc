@@ -140,8 +140,8 @@ static ActionFlag presetCBM1581(
 
 /* --- HP-LIF ----------------------------------------------------- */
 
-static ActionFlag presetHPLIF(
-	{ "--ibm-preset-hp-lif" },
+static ActionFlag presetHPLIF770(
+	{ "--ibm-preset-hp-lif-770" },
 	"Preset parameters to a HP-LIF 3.5\" 770kB HP disk.",
 	[] {
 		setWriterDefaultDest(":d=0:s=0-1:t=0-76");
