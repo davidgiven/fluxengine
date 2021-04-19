@@ -38,6 +38,7 @@ jobs:
         tag: dev
         assets: | 
           fluxengine.zip
+        fail-if-no-assets: false
     - name: release
       uses: softprops/action-gh-release@v1
       with:
