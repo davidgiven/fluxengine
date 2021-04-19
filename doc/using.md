@@ -141,26 +141,8 @@ exact format varies according to the extension:
 	are ignored.
 
   - `.imd`: a disk image format created by [David Dunfield](http://dunfield.classiccmp.org/img/index.htm).
-	These images can be used as input image for writing a disk. If you don’t 	know the diskformat, Fluxengine will show the stored comment and display 	the geometry to use. Just give a command like:
-
-    ```
-    $ ./fluxengine write ibm -i filenaam.imd
-	Comment in IMD image:
-	*** DOUBLE SIDED FORMAT ***                                   
-	HP-IB,RS-232C & RS-449 PREPROCESSOR                           
-	For HP1650A, HP1651A & HP16500A                               
-	10342-13017                                                   
-	Rev 2749 Ver 1.1                                              
-	Copyright (c) 1987, Hewlett-Packard                           
-                                                              
-                                                               
-	reading IMD image
-	77 tracks, 2 heads; MFM; 250 kbps; 5 sectoren; sectorsize 1024; sectormap 	12345; 770 kB total 
-	Writing to: :d=0:s=0-1:t=0-79
-  	0.0: Error: track data overrun
-    ```
- 	
-	For input files you normally have to specify it yourself. So in this case  	append `:c=76:h=2:s=5:b=1024` to set the geometry.
+	These images can be read, but not yet written. The stored comment will also
+	be shown on read. The geometry in the file will be used.
 
 
 ### High density disks
