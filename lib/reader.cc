@@ -10,7 +10,6 @@
 #include "decoders/decoders.h"
 #include "sector.h"
 #include "sectorset.h"
-#include "visualiser.h"
 #include "record.h"
 #include "bytes.h"
 #include "decoders/rawbits.h"
@@ -25,7 +24,6 @@ FlagGroup readerFlags
 	&hardwareFluxSourceFlags,
 	&sqliteFluxSinkFlags,
 	&fluxmapReaderFlags,
-	&visualiserFlags
 };
 
 static DataSpecFlag source(
@@ -42,11 +40,6 @@ static StringFlag destination(
     { "--write-flux", "-f" },
     "write the raw magnetic flux to this file",
     "");
-
-static StringFlag visualise(
-	{ "--write-svg" },
-	"write a visualisation of the disk to this file",
-	"");
 
 static SettableFlag justRead(
 	{ "--just-read" },
@@ -299,9 +292,6 @@ void readDiskCommand(AbstractDecoder& decoder)
         std::cout << size << " bytes decoded." << std::endl;
     }
 
-	if (!visualise.get().empty())
-		visualiseSectorsToFile(allSectors, visualise.get());
-	
     writeSectorsToFile(allSectors, outputSpec);
 	if (failures)
 		std::cerr << "Warning: some sectors could not be decoded." << std::endl;

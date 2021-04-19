@@ -249,10 +249,12 @@ write an `ibm.img` file.
 ## Visualisation
 
 When doing a read (either from a real disk or from a flux file) you can use
-`--write-svg=output.svg` to write out a graphical visualisation of where the
-sectors are on the disk. Here's a IBM PC 1232kB disk:
+`--write-csv=output.csv` to write out CSV file containing information about the
+location of every sector on the disk. You can then use `fluxengine analyse
+layout` to produce a graphical visualisation of this.  Here's a IBM PC 1232kB
+disk:
 
-![A disk visualisation](./visualiser.svg)
+![A disk visualisation](./visualiser.jpg)
 
 Blue represents data, light blue a header, and red is a bad sector. Side zero
 is on the left and side one is on the right.
@@ -278,12 +280,12 @@ containing valuable historical data, and you want to read them.
 Typically I do this:
 
 ```
-$ fluxengine read brother -s :d=0 -o brother.img --write-flux=brother.flux --overwrite --write-svg=brother.svg
+$ fluxengine read brother -s :d=0 -o brother.img --write-flux=brother.flux --overwrite --write-csv=brother.csv
 ```
 
-This will read the disk in drive 0 and write out a filesystem image. It'll also
-copy the flux to `brother.flux` (replacing any old one) and write out an SVG
-visualisation. If I then need to tweak the settings, I can rerun the decode
+This will read the disk in drive 0 and write out an information CSV file. It'll
+also copy the flux to `brother.flux` (replacing any old one) and write out an
+SVG visualisation. If I then need to tweak the settings, I can rerun the decode
 without having to physically touch the disk like this:
 
 ```

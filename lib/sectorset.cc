@@ -17,6 +17,18 @@ Sector* SectorSet::get(int track, int head, int sector) const
 	return i->second.get();
 }
 
+Sector* SectorSet::add(int track, int head, int sector)
+{
+    key_t key(track, head, sector);
+	auto i = _data.find(key);
+	if (i != _data.end())
+		return i->second.get();
+	
+	Sector* s = new Sector;
+	_data[key].reset(s);
+	return s;
+}
+
 void SectorSet::calculateSize(
 	unsigned& numTracks, unsigned& numHeads,
 	unsigned& numSectors, unsigned& sectorSize) const

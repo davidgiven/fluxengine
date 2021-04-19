@@ -40,6 +40,7 @@ export OBJDIR = .obj
 
 all: .obj/build.ninja
 	@ninja -f .obj/build.ninja
+	@-cscope -bRq
 
 clean:
 	@echo CLEAN

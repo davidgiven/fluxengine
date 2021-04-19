@@ -215,11 +215,12 @@ buildlibrary libbackend.a \
     lib/sectorset.cc \
     lib/sql.cc \
 	lib/utils.cc \
-    lib/visualiser.cc \
     lib/writer.cc \
+	lib/csvreader.cc \
 
 buildlibrary libfrontend.a \
 	src/fe-analysedriveresponse.cc \
+	src/fe-analyselayout.cc \
     src/fe-cwftoflux.cc \
     src/fe-erase.cc \
     src/fe-fluxtoau.cc \
@@ -288,6 +289,7 @@ runtest amiga-test          tests/amiga.cc
 runtest bitaccumulator-test tests/bitaccumulator.cc
 runtest bytes-test          tests/bytes.cc
 runtest compression-test    tests/compression.cc
+runtest csvreader-test		tests/csvreader.cc
 runtest dataspec-test       tests/dataspec.cc
 runtest flags-test          tests/flags.cc
 runtest fluxpattern-test    tests/fluxpattern.cc
