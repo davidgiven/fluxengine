@@ -35,6 +35,11 @@ static IntFlag sideToDraw(
 	"side to draw; -1 for both",
 	-1);
 
+static IntFlag alignWithSector(
+	{ "--align" },
+	"sector to align to; -1 to align to index mark",
+	-1);
+
 static std::ifstream inputFile;
 
 static const int BORDER = 10;
@@ -76,15 +81,32 @@ void visualiseSectorsToFile(const SectorSet& sectors, const std::string& filenam
 			painter.lineWidth(disk_radius/(TRACKS*2));
 			painter.ellipse(xpos, available_height/2, radius, radius);
 
-            auto drawArc = [&](const std::unique_ptr<Sector>& sector, nanoseconds_t start, nanoseconds_t end)
+			nanoseconds_t offset = 0;
+			if (alignWithSector != -1)
+			{
+				for (const auto& e : sectors.get())
+				{
+					const auto& sector = e.second;
+					if ((sector->physicalSide == side) && (sector->physicalTrack == physicalTrack)
+							&& (sector->logicalSector == alignWithSector))
+					{
+						offset = sector->headerStartTime;
+						if (!offset)
+							offset = sector->dataStartTime;
+						break;
+					}
+				}
+			}
+
+            auto drawArc = [&](nanoseconds_t start, nanoseconds_t end)
             {
                 start = fmod(start, period*1000000.0);
                 end = fmod(end, period*1000000.0);
                 if (end < start)
                     end += period*1000000;
                 
-                double theta1 = start * radians_per_ns;
-                double theta2 = end * radians_per_ns;
+                double theta1 = (start - offset) * radians_per_ns;
+                double theta2 = (end - offset) * radians_per_ns;
                 int large = (theta2 - theta1) >= M_PI;
 
 				painter.arc(xpos, available_height/2, radius, radius, theta1, theta2-theta1);
@@ -100,14 +122,17 @@ void visualiseSectorsToFile(const SectorSet& sectors, const std::string& filenam
                     if (sector->status == Sector::OK)
 						painter.lineColor(0x00, 0x00, 0xff);
                     if (sector->dataStartTime && sector->dataEndTime)
-                        drawArc(sector, sector->dataStartTime, sector->dataEndTime);
+                        drawArc(sector->dataStartTime, sector->dataEndTime);
                     if (sector->headerStartTime && sector->headerEndTime)
 					{
 						painter.lineColor(0x00, 0xff, 0xff);
-                        drawArc(sector, sector->headerStartTime, sector->headerEndTime);
+                        drawArc(sector->headerStartTime, sector->headerEndTime);
 					}
                 }
             }
+
+			painter.lineColor(0xff, 0xff, 0x00);
+			drawArc(0, 2000);
         }
     };
 
