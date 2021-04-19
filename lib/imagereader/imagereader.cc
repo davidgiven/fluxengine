@@ -19,6 +19,8 @@ std::map<std::string, ImageReader::Constructor> ImageReader::formats =
 	{".jv1", ImageReader::createImgImageReader},
 	{".jv3", ImageReader::createJv3ImageReader},
 	{".st", ImageReader::createImgImageReader},
+	{".imd", ImageReader::createIMDImageReader},
+	{".IMD", ImageReader::createIMDImageReader},
 };
 
 ImageReader::Constructor ImageReader::findConstructor(const ImageSpec& spec)

@@ -113,6 +113,7 @@ static ActionFlag preset720(
 		trackLengthMs.setDefaultValue(200);
 		clockRateKhz.setDefaultValue(250);
 		sectorSkew.setDefaultValue("012345678");
+		set_ibm_defaults();
 	});
 
 /* --- Commodore disks ----------------------------------------------------- */

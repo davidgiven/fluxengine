@@ -161,6 +161,7 @@ buildlibrary libbackend.a \
 	lib/imagereader/imagereader.cc \
 	lib/imagereader/imgimagereader.cc \
 	lib/imagereader/jv3imagereader.cc \
+	lib/imagereader/imdimagereader.cc \
 	lib/imagewriter/d64imagewriter.cc \
 	lib/imagewriter/diskcopyimagewriter.cc \
 	lib/imagewriter/imagewriter.cc \
