@@ -30,6 +30,9 @@ public:
                         spec.sectors, spec.bytes,
                         spec.cylinders * trackSize / 1024)
                 << std::endl;
+		if ((spec.physicalOffset != 0) || (spec.physicalStep != 1))
+			std::cout << fmt::format("logical to physical track mapping: physical = logical*{} + {}\n",
+				spec.physicalStep, spec.physicalOffset);
 
         SectorSet sectors;
         for (int track = 0; track < spec.cylinders; track++)
@@ -46,7 +49,8 @@ public:
                     std::unique_ptr<Sector>& sector = sectors.get(track, head, sectorId);
                     sector.reset(new Sector);
                     sector->status = Sector::OK;
-                    sector->logicalTrack = sector->physicalTrack = track;
+                    sector->logicalTrack = track;
+					sector->physicalTrack = track*spec.physicalStep + spec.physicalOffset;
                     sector->logicalSide = sector->physicalSide = head;
                     sector->logicalSector = sectorId;
                     sector->data = data;

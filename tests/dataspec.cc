@@ -111,15 +111,28 @@ static void test_fluxspec(void)
 
 static void test_imagespec(void)
 {
-    DataSpec spec("foo:c=9:h=2:s=99:b=256");
-
     {
+		DataSpec spec("foo:c=9:h=2:s=99:b=256");
         ImageSpec ispec(spec);
         assert(ispec.filename == "foo");
         assert(ispec.cylinders == 9);
         assert(ispec.heads == 2);
         assert(ispec.sectors == 99);
-        assert(ispec.bytes = 256);
+        assert(ispec.bytes == 256);
+		assert(ispec.physicalOffset == 0);
+		assert(ispec.physicalStep == 1);
+    }
+
+    {
+		DataSpec spec("foo:c=9:h=2:s=99:b=256:o=2:t=9");
+        ImageSpec ispec(spec);
+        assert(ispec.filename == "foo");
+        assert(ispec.cylinders == 9);
+        assert(ispec.heads == 2);
+        assert(ispec.sectors == 99);
+        assert(ispec.bytes == 256);
+		assert(ispec.physicalOffset == 2);
+		assert(ispec.physicalStep == 9);
     }
 }
 

@@ -29,6 +29,11 @@ static IntFlag hardSectorCount(
     "number of hard sectors on the disk (0=soft sectors)",
     0);
 
+static BoolFlag fortyTrack(
+	{ "--read-40-track" },
+	"indicates a 40 track drive for reading",
+	false);
+
 static bool high_density = false;
 
 void setHardwareFluxSourceDensity(bool high_density)
@@ -60,7 +65,15 @@ public:
     std::unique_ptr<Fluxmap> readFlux(int track, int side)
     {
         usbSetDrive(_drive, high_density, indexMode);
-        usbSeek(track);
+		if (fortyTrack)
+		{
+			if (track & 1)
+				Error() << "cannot read from odd physical tracks in 40-track mode";
+			usbSeek(track / 2);
+		}
+		else
+			usbSeek(track);
+
         Bytes data = usbRead(
 			side, synced, revolutions * _oneRevolution, _hardSectorThreshold);
         auto fluxmap = std::make_unique<Fluxmap>();

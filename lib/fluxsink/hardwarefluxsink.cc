@@ -21,6 +21,11 @@ static IntFlag hardSectorCount(
     "number of hard sectors on the disk (0=soft sectors)",
     0);
 
+static BoolFlag fortyTrack(
+	{ "--write-40-track" },
+	"indicates a 40 track drive when writing",
+	false);
+
 void setHardwareFluxSinkDensity(bool high_density)
 {
 	::high_density = high_density;
@@ -57,7 +62,14 @@ public:
     void writeFlux(int track, int side, Fluxmap& fluxmap)
     {
         usbSetDrive(_drive, high_density, indexMode);
-        usbSeek(track);
+		if (fortyTrack)
+		{
+			if (track & 1)
+				Error() << "cannot write to odd physical tracks in 40-track mode";
+			usbSeek(track / 2);
+		}
+		else
+			usbSeek(track);
 
         return usbWrite(side, fluxmap.rawBytes(), _hardSectorThreshold);
     }

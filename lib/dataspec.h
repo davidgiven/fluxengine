@@ -48,6 +48,9 @@ public:
     const Modifier& at(const std::string& mod) const;
     bool has(const std::string& mod) const;
 
+	unsigned atOr(const std::string& mod, unsigned value) const
+	{ return has(mod) ? at(mod).only() : value; }
+
     std::string filename;
     std::map<std::string, Modifier> modifiers;
 };
@@ -82,7 +85,8 @@ class ImageSpec
 public:
     ImageSpec(const DataSpec& dataspec);
     ImageSpec(const std::string filename,
-        unsigned cylinders, unsigned heads, unsigned sectors, unsigned bytes);
+        unsigned cylinders, unsigned heads, unsigned sectors, unsigned bytes,
+		int physicalOffset=0, int physicalStep=1);
 
 public:
     std::string filename;
@@ -90,6 +94,8 @@ public:
     unsigned heads;
     unsigned sectors;
     unsigned bytes;
+	int physicalOffset;
+	int physicalStep;
     bool initialised : 1;
 };
 

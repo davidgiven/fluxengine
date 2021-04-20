@@ -104,6 +104,11 @@ exact format varies according to the extension:
     geometry will be autodetected if left unspecified. For input files you
     normally have to specify it.
 
+	If one image track does not map directly onto on physical track, you can
+	change this with `:o=1:t=2`: `o` specifies the offset, and `t` specifies
+	the step. So, with this format, cylinder 1 in the image will be written to
+	track 3 on the disk.
+
   - `.ldbs`: John Elliott's [LDBS disk image
     format](http://www.seasip.info/Unix/LibDsk/ldbs.html), which is
     consumable by the [libdsk](http://www.seasip.info/Unix/LibDsk/) suite of
