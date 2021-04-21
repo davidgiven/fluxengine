@@ -90,7 +90,7 @@ void ImageWriter::writeCsv(const std::string& filename)
 				f << fmt::format("{},{},", track, head);
 				const auto& sector = sectors.get(track, head, sectorId);
 				if (!sector)
-					f << fmt::format(",,{},,,,,,,,MISSING\n", sectorId);
+					f << fmt::format(",,{},,,,,,,,sector not found\n", sectorId);
 				else
 					f << fmt::format("{},{},{},{},{},{},{},{},{},{},{}\n",
 						sector->logicalTrack,

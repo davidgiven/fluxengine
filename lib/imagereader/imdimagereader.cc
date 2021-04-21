@@ -167,7 +167,7 @@ public:
 			//Read optional sector head map To Do
 
 			//read sector numbering map
-			unsigned int sector_map[header.numSectors]= {};
+			unsigned int sector_map[header.numSectors];
 			bool blnBaseOne = false; 
 			sector_skew.clear();
 			for (b = 0;  b < header.numSectors; b++)

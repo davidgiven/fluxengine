@@ -141,26 +141,8 @@ exact format varies according to the extension:
 	are ignored.
 
   - `.imd`: a disk image format created by [David Dunfield](http://dunfield.classiccmp.org/img/index.htm).
-	These images can be used as input image for writing a disk. If you don’t 	know the diskformat, Fluxengine will show the stored comment and display 	the geometry to use. Just give a command like:
-
-    ```
-    $ ./fluxengine write ibm -i filenaam.imd
-	Comment in IMD image:
-	*** DOUBLE SIDED FORMAT ***                                   
-	HP-IB,RS-232C & RS-449 PREPROCESSOR                           
-	For HP1650A, HP1651A & HP16500A                               
-	10342-13017                                                   
-	Rev 2749 Ver 1.1                                              
-	Copyright (c) 1987, Hewlett-Packard                           
-                                                              
-                                                               
-	reading IMD image
-	77 tracks, 2 heads; MFM; 250 kbps; 5 sectoren; sectorsize 1024; sectormap 	12345; 770 kB total 
-	Writing to: :d=0:s=0-1:t=0-79
-  	0.0: Error: track data overrun
-    ```
- 	
-	For input files you normally have to specify it yourself. So in this case  	append `:c=76:h=2:s=5:b=1024` to set the geometry.
+	These images can be read, but not yet written. The stored comment will also
+	be shown on read. The geometry in the file will be used.
 
 
 ### High density disks
@@ -272,10 +254,12 @@ write an `ibm.img` file.
 ## Visualisation
 
 When doing a read (either from a real disk or from a flux file) you can use
-`--write-svg=output.svg` to write out a graphical visualisation of where the
-sectors are on the disk. Here's a IBM PC 1232kB disk:
+`--write-csv=output.csv` to write out CSV file containing information about the
+location of every sector on the disk. You can then use `fluxengine analyse
+layout` to produce a graphical visualisation of this.  Here's a IBM PC 1232kB
+disk:
 
-![A disk visualisation](./visualiser.svg)
+![A disk visualisation](./visualiser.jpg)
 
 Blue represents data, light blue a header, and red is a bad sector. Side zero
 is on the left and side one is on the right.
@@ -301,12 +285,12 @@ containing valuable historical data, and you want to read them.
 Typically I do this:
 
 ```
-$ fluxengine read brother -s :d=0 -o brother.img --write-flux=brother.flux --overwrite --write-svg=brother.svg
+$ fluxengine read brother -s :d=0 -o brother.img --write-flux=brother.flux --overwrite --write-csv=brother.csv
 ```
 
-This will read the disk in drive 0 and write out a filesystem image. It'll also
-copy the flux to `brother.flux` (replacing any old one) and write out an SVG
-visualisation. If I then need to tweak the settings, I can rerun the decode
+This will read the disk in drive 0 and write out an information CSV file. It'll
+also copy the flux to `brother.flux` (replacing any old one) and write out an
+SVG visualisation. If I then need to tweak the settings, I can rerun the decode
 without having to physically touch the disk like this:
 
 ```

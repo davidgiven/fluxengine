@@ -13,9 +13,9 @@ ifeq ($(OS), Windows_NT)
 export CXX = /mingw32/bin/g++
 export AR = /mingw32/bin/ar rcs
 export STRIP = /mingw32/bin/strip
-export CFLAGS += -I/mingw32/include/libusb-1.0
+export CFLAGS += -I/mingw32/include/libusb-1.0 -I/mingw32/include
 export LDFLAGS +=
-export LIBS = -static -lz -lsqlite3 -lusb-1.0
+export LIBS = -L/mingw32/lib -static -lz -lsqlite3 -lusb-1.0
 export EXTENSION = .exe
 else
 
@@ -40,6 +40,7 @@ export OBJDIR = .obj
 
 all: .obj/build.ninja
 	@ninja -f .obj/build.ninja
+	@-cscope -bRq
 
 clean:
 	@echo CLEAN
