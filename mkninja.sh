@@ -162,11 +162,13 @@ buildlibrary libbackend.a \
 	lib/imagereader/imgimagereader.cc \
 	lib/imagereader/jv3imagereader.cc \
 	lib/imagereader/imdimagereader.cc \
+	lib/imagereader/nsiimagereader.cc \
 	lib/imagewriter/d64imagewriter.cc \
 	lib/imagewriter/diskcopyimagewriter.cc \
 	lib/imagewriter/imagewriter.cc \
 	lib/imagewriter/imgimagewriter.cc \
 	lib/imagewriter/ldbsimagewriter.cc \
+	lib/imagewriter/nsiimagewriter.cc \
     arch/aeslanier/decoder.cc \
     arch/amiga/decoder.cc \
     arch/amiga/encoder.cc \
@@ -185,6 +187,8 @@ buildlibrary libbackend.a \
     arch/mx/decoder.cc \
 	arch/tids990/decoder.cc \
 	arch/tids990/encoder.cc \
+    arch/northstar/decoder.cc \
+    arch/northstar/encoder.cc \
     arch/victor9k/decoder.cc \
     arch/zilogmcz/decoder.cc \
     lib/bytes.cc \
@@ -246,6 +250,7 @@ buildlibrary libfrontend.a \
     src/fe-readmicropolis.cc \
     src/fe-readmx.cc \
 	src/fe-readtids990.cc \
+    src/fe-readnorthstar.cc \
     src/fe-readvictor9k.cc \
     src/fe-readzilogmcz.cc \
     src/fe-rpm.cc \
@@ -258,6 +263,7 @@ buildlibrary libfrontend.a \
     src/fe-writebrother.cc \
     src/fe-writeibm.cc \
     src/fe-writemac.cc \
+    src/fe-writenorthstar.cc \
     src/fe-writetids990.cc \
     src/fe-writeflux.cc \
     src/fe-writetestpattern.cc \

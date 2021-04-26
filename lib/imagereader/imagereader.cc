@@ -18,6 +18,7 @@ std::map<std::string, ImageReader::Constructor> ImageReader::formats =
 	{".ima", ImageReader::createImgImageReader},
 	{".jv1", ImageReader::createImgImageReader},
 	{".jv3", ImageReader::createJv3ImageReader},
+	{".nsi", ImageReader::createNsiImageReader},
 	{".st", ImageReader::createImgImageReader},
 	{".imd", ImageReader::createIMDImageReader},
 	{".IMD", ImageReader::createIMDImageReader},

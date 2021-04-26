@@ -85,6 +85,11 @@ void setReaderHardSectorCount(int sectorCount)
     setHardwareFluxSourceHardSectorCount(sectorCount);
 }
 
+void setReaderFluxSourceSynced(bool synced)
+{
+	setHardwareFluxSourceSynced(synced);
+}
+
 static void writeSectorsToFile(const SectorSet& sectors, const ImageSpec& spec)
 {
 	std::unique_ptr<ImageWriter> writer(ImageWriter::create(sectors, spec));

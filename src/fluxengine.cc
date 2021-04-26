@@ -27,6 +27,7 @@ extern command_cb mainReadIBM;
 extern command_cb mainReadMac;
 extern command_cb mainReadMicropolis;
 extern command_cb mainReadMx;
+extern command_cb mainReadNorthstar;
 extern command_cb mainReadTiDs990;
 extern command_cb mainReadVictor9K;
 extern command_cb mainReadZilogMCZ;
@@ -39,6 +40,7 @@ extern command_cb mainWriteAmiga;
 extern command_cb mainWriteBrother;
 extern command_cb mainWriteIbm;
 extern command_cb mainWriteMac;
+extern command_cb mainWriteNorthstar;
 extern command_cb mainWriteTiDs990;
 extern command_cb mainWriteFlux;
 extern command_cb mainWriteTestPattern;
@@ -89,6 +91,7 @@ static std::vector<Command> readables =
     { "mac",           mainReadMac,       "Reads Apple Macintosh disks.", },
     { "micropolis",    mainReadMicropolis, "Reads Micropolis disks.", },
     { "mx",            mainReadMx,        "Reads MX disks.", },
+    { "northstar",     mainReadNorthstar, "Reads Northstar disks.", },
 	{ "tids990",       mainReadTiDs990,   "Reads Texas Instruments DS990 disks.", },
     { "victor9k",      mainReadVictor9K,  "Reads Victor 9000 disks.", },
     { "zilogmcz",      mainReadZilogMCZ,  "Reads Zilog MCZ disks.", },
@@ -100,6 +103,7 @@ static std::vector<Command> writeables =
     { "brother",       mainWriteBrother,  "Writes 120kB and 240kB Brother word processor disks.", },
     { "ibm",           mainWriteIbm,      "Writes the ubiquitous IBM format disks.", },
 	{ "mac",           mainWriteMac,      "Writes Apple Macintosh disks.", },
+    { "northstar",     mainWriteNorthstar,"Writes Northstar disks.", },
 	{ "tids990",       mainWriteTiDs990,  "Writes Texas Instruments DS990 disks.", },
 };
 
