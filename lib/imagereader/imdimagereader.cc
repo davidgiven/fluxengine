@@ -131,15 +131,16 @@ public:
 		unsigned int Modulation_Speed = 0;
 		unsigned int sectorSize = 0;
 		std::string sector_skew;
-		int b; 	
-		unsigned char comment[8192]; //i choose a fixed value. dont know how to make dynamic arrays in C++. This should be enough
+		uint8_t b; 	
+		std::string comment;
 		// Read comment
+		comment.clear();
 		while ((b = br.read_8()) != EOF && b != END_OF_FILE)
 		{
-			comment[n++] = (unsigned char)b;
+			comment.push_back(b);
+			n++;
 		}
 		headerPtr = n; //set pointer to after comment
-		comment[n] = '\0'; // null-terminate the string
 		//write comment to screen
 		std::cout 	<< "Comment in IMD image:\n"
 					<< fmt::format("{}\n",
