@@ -277,7 +277,7 @@ public:
 		writerinput= fmt::format(":c={}:h={}:s={}:b={}", header.track + 1, header.Head + 1, header.numSectors, sectorSize);
 		setWriterDefaultInput(writerinput);
 		std::string writerdest;
-		writerdest= fmt::format(":d={}:s={}:t=0-{}", "0" , header.Head ? "0-1" : "0", header.track);
+		writerdest= fmt::format(":s={}:t=0-{}", header.Head ? "0-1" : "0", header.track);
 		setWriterDefaultDest(writerdest);
 		
 		//Set de (IBM) parameters from within the class IMD read image
