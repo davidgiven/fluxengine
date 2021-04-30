@@ -5,11 +5,13 @@
 #include "sectorset.h"
 #include "imagereader/imagereader.h"
 #include "fmt/format.h"
+#include "writer.h"
+#include "arch/ibm/ibm.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>
 
-static unsigned getModulationandSpeed(uint8_t flags, bool *mfm)
+static unsigned int getModulationandSpeed(uint8_t flags, bool *mfm)
 {
 	switch (flags)
 		{
@@ -59,7 +61,7 @@ struct TrackHeader
 	uint8_t SectorSize;
 };
 
-static unsigned getSectorSize(uint8_t flags)
+static unsigned int getSectorSize(uint8_t flags)
 {
 	switch (flags)
 	{
@@ -113,6 +115,7 @@ public:
         if (!inputFile.is_open())
             Error() << "cannot open input file";
 		//define some variables
+		int startSectorId = 0;
 		bool mfm = false;	//define coding just to show in comment for setting the right write parameters
 		inputFile.seekg(0, inputFile.end);
 		int inputFileSize = inputFile.tellg();	// determine filesize
@@ -125,13 +128,13 @@ public:
 
 		unsigned n = 0;
 		unsigned headerPtr = 0;
-		unsigned Modulation_Speed = 0;
-		unsigned sectorSize = 0;
+		unsigned int Modulation_Speed = 0;
+		unsigned int sectorSize = 0;
 		std::string sector_skew;
 		int b; 	
 		unsigned char comment[8192]; //i choose a fixed value. dont know how to make dynamic arrays in C++. This should be enough
 		// Read comment
-		while ((b = br.read_8()) != EOF && b != 0x1A)
+		while ((b = br.read_8()) != EOF && b != END_OF_FILE)
 		{
 			comment[n++] = (unsigned char)b;
 		}
@@ -143,6 +146,7 @@ public:
 					comment);
 
 		//first read header
+		bool blnBaseOne = false; 
 		for (;;)
 		{
 			if (headerPtr >= inputFileSize-1)
@@ -168,23 +172,24 @@ public:
 
 			//read sector numbering map
 			unsigned int sector_map[header.numSectors];
-			bool blnBaseOne = false; 
 			sector_skew.clear();
 			for (b = 0;  b < header.numSectors; b++)
 			{	
 				sector_map[b] = br.read_8();
-				sector_skew.push_back(sector_map[b] + '0');
 				if (b == 0) //first sector see if base is 0 or 1 Fluxengine wants 0
 					{
 					if (sector_map[b]==1)
 						{
 							blnBaseOne = true;
+							startSectorId = 1;
 						}
 					}
 				if (blnBaseOne==true)
 				{
 					sector_map[b] = (sector_map[b]-1);
+					startSectorId = 0;
 				}
+				sector_skew.push_back(sector_map[b] + '0');
 				headerPtr++;
 			}
 			//read the sectors
@@ -257,8 +262,7 @@ public:
 			}
 
   		}
-		//Write format detected in IMD image to screen to help user set the right write parameters
-
+		//Write format detected in IMD image to screen to help user set the right write parameters in case of failures
 		size_t headSize = header.numSectors * sectorSize;
         size_t trackSize = headSize * (header.Head + 1);
 
@@ -267,8 +271,40 @@ public:
 					header.track, header.Head + 1,
 					mfm ? "MFM" : "FM",
 					Modulation_Speed, header.numSectors, sectorSize, sector_skew, (header.track+1) * trackSize / 1024);
+		
+		//Set the writer settings based on the read IMD image
+		std::string writerinput;
+		writerinput= fmt::format(":c={}:h={}:s={}:b={}", header.track + 1, header.Head + 1, header.numSectors, sectorSize);
+		setWriterDefaultInput(writerinput);
+		std::string writerdest;
+		writerdest= fmt::format(":d={}:s={}:t=0-{}", "0" , header.Head ? "0-1" : "0", header.track);
+		setWriterDefaultDest(writerdest);
+		
+		//Set de (IBM) parameters from within the class IMD read image
+		IbmEncoder::setsectorSize(sectorSize);
+		IbmEncoder::setstartSectorId(startSectorId);
+		IbmEncoder::setuseFm(!mfm);
+		IbmEncoder::setclockRateKhz(Modulation_Speed);
+		IbmEncoder::setsectorSkew(fmt::format(sector_skew));
 
-        return sectors;
+		//set the rest with the deault (IBM) parameters (because no option was set all these are not filled)
+		//First check if these settings have been set bij een flag from the user or we will overwrite them
+		//if gap3 ==0 then not initialised so initialise the rest
+
+		if (IbmEncoder::getgap3() == 0)
+		{
+			IbmEncoder::settrackLengthMs(200);
+			IbmEncoder::setemitIam(true);
+			IbmEncoder::setidamByte(0x5554);
+			IbmEncoder::setdamByte(0x5545);
+			IbmEncoder::setgap0(80);
+			IbmEncoder::setgap1(50);
+			IbmEncoder::setgap2(22);
+			IbmEncoder::setgap3(80);
+			IbmEncoder::setswapSides(false);
+		}
+
+		return sectors;
  	}
 };
 

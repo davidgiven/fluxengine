@@ -6,6 +6,7 @@
 #include "writer.h"
 #include "fmt/format.h"
 #include <fstream>
+#include <iostream> //for debug
 
 static FlagGroup flags { &writerFlags };
 
@@ -264,23 +265,22 @@ int mainWriteIbm(int argc, const char* argv[])
 	setWriterDefaultDest(":d=0:t=0-79:s=0-1");
     flags.parseFlags(argc, argv);
 
-	IbmParameters parameters;
-	parameters.trackLengthMs = trackLengthMs;
-	parameters.sectorSize = sectorSize;
-	parameters.emitIam = emitIam;
-	parameters.startSectorId = startSectorId;
-	parameters.clockRateKhz = clockRateKhz;
-	parameters.useFm = useFm;
-	parameters.idamByte = idamByte;
-	parameters.damByte = damByte;
-	parameters.gap0 = gap0;
-	parameters.gap1 = gap1;
-	parameters.gap2 = gap2;
-	parameters.gap3 = gap3;
-	parameters.sectorSkew = sectorSkew;
-	parameters.swapSides = swapSides;
+	IbmEncoder::setsectorSize(sectorSize);
+	IbmEncoder::setstartSectorId(startSectorId);
+	IbmEncoder::setuseFm(useFm);
+	IbmEncoder::setclockRateKhz(clockRateKhz);
+	IbmEncoder::setsectorSkew(sectorSkew);
+	IbmEncoder::settrackLengthMs(trackLengthMs);
+	IbmEncoder::setemitIam(emitIam);
+	IbmEncoder::setidamByte(idamByte);
+	IbmEncoder::setdamByte(damByte);
+	IbmEncoder::setgap0(gap0);
+	IbmEncoder::setgap1(gap1);
+	IbmEncoder::setgap2(gap2);
+	IbmEncoder::setgap3(gap3);
+	IbmEncoder::setswapSides(swapSides);
 
-	IbmEncoder encoder(parameters);
+	IbmEncoder encoder(trackLengthMs, sectorSize, emitIam, startSectorId, clockRateKhz, useFm, idamByte, damByte, gap0, gap1, gap2, gap3, sectorSkew, swapSides);
 	writeDiskCommand(encoder);
 
     return 0;

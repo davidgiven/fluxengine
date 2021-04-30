@@ -55,6 +55,160 @@
  * data:    1  1  1  1  1  0  1  1  = 0xfb
  * mfm:     01 01 01 01 01 00 01 01 = 0x5545
  */
+//initialize static class members
+int IbmEncoder::_trackLengthMs=0;
+int IbmEncoder::_sectorSize=0;
+bool IbmEncoder::_emitIam=true;
+int IbmEncoder::_startSectorId=0;
+int IbmEncoder::_clockRateKhz=0;
+bool IbmEncoder::_useFm=false;
+uint16_t IbmEncoder::_idamByte=0x5554;
+uint16_t IbmEncoder::_damByte=0x5545;
+int IbmEncoder::_gap0=0;
+int IbmEncoder::_gap1=0;
+int IbmEncoder::_gap2=0;
+int IbmEncoder::_gap3=0;
+std::string IbmEncoder::_sectorSkew="0";
+bool IbmEncoder::_swapSides=false;
+
+int IbmEncoder::getsectorSize()
+{
+	return _sectorSize;
+}
+int IbmEncoder::getstartSectorId()
+{
+	return _startSectorId;
+}
+
+bool IbmEncoder::getuseFm()
+{
+	return _useFm;
+}
+
+int IbmEncoder::getclockRateKhz()
+{
+	return _clockRateKhz;
+}
+
+std::string IbmEncoder::getsectorSkew()
+{
+	return _sectorSkew;
+}
+
+int IbmEncoder::gettrackLengthMs()
+{
+	return _trackLengthMs;
+}
+
+bool IbmEncoder::getemitIam()
+{
+	return _emitIam;
+}
+
+uint16_t IbmEncoder::getidamByte()
+{
+	return _idamByte;
+}
+
+uint16_t IbmEncoder::getdamByte()
+{
+	return _damByte;
+}
+
+int IbmEncoder::getgap0()
+{
+	return _gap0;
+}
+
+int IbmEncoder::getgap1()
+{
+	return _gap1;
+}
+
+int IbmEncoder::getgap2()
+{
+	return _gap2;
+}
+
+int IbmEncoder::getgap3()
+{
+	return _gap3;
+}
+
+bool IbmEncoder::getswapSides()
+{
+	return _swapSides;
+}
+
+void IbmEncoder::setsectorSize(int newsectorSize)
+{
+	_sectorSize = newsectorSize;
+}
+
+void IbmEncoder::setstartSectorId(int newstartSectorId)
+{
+	_startSectorId = newstartSectorId;
+}
+
+void IbmEncoder::setuseFm(bool newuseFm)
+{
+	_useFm = newuseFm;
+}
+
+void IbmEncoder::setclockRateKhz(int newclockRateKhz)
+{
+	_clockRateKhz = newclockRateKhz;
+}
+
+void IbmEncoder::setsectorSkew(std::string newsectorSkew)
+{
+	_sectorSkew = newsectorSkew;
+}
+
+void IbmEncoder::settrackLengthMs(int newtrackLengthMs)
+{
+	_trackLengthMs = newtrackLengthMs;
+}
+
+void IbmEncoder::setemitIam(bool newemitIam)
+{
+	_emitIam = newemitIam;
+}
+
+void IbmEncoder::setidamByte(uint16_t newidamByte)
+{
+	_idamByte = newidamByte;
+}
+
+void IbmEncoder::setdamByte(uint16_t newdamByte)
+{
+	_damByte = newdamByte;
+}
+
+void IbmEncoder::setgap0(int newgap0)
+{
+	_gap0 = newgap0;
+}
+
+void IbmEncoder::setgap1(int newgap1)
+{
+	_gap1 = newgap1;
+}
+
+void IbmEncoder::setgap2(int newgap2)
+{
+	_gap2 = newgap2;
+}
+
+void IbmEncoder::setgap3(int newgap3)
+{
+	_gap3 = newgap3;
+}
+
+void IbmEncoder::setswapSides(bool newswapSides)
+{
+	_swapSides = newswapSides;
+}
 
 static int charToInt(char c)
 {
@@ -78,7 +232,7 @@ void IbmEncoder::writeRawBits(uint32_t data, int width)
 
 void IbmEncoder::writeBytes(const Bytes& bytes)
 {
-	if (_parameters.useFm)
+	if (_useFm)
 		encodeFm(_bits, _cursor, bytes);
 	else
 		encodeMfm(_bits, _cursor, bytes, _lastBit);
@@ -102,21 +256,21 @@ static uint8_t decodeUint16(uint16_t raw)
 std::unique_ptr<Fluxmap> IbmEncoder::encode(
 	int physicalTrack, int physicalSide, const SectorSet& allSectors)
 {
-	if (_parameters.swapSides)
+	if (_swapSides)
 		physicalSide = 1 - physicalSide;
-	double clockRateUs = 1e3 / _parameters.clockRateKhz;
-	if (!_parameters.useFm)
+	double clockRateUs = 1e3 / _clockRateKhz;
+	if (!_useFm)
 		clockRateUs /= 2.0;
-	int bitsPerRevolution = (_parameters.trackLengthMs * 1000.0) / clockRateUs;
+	int bitsPerRevolution = (_trackLengthMs * 1000.0) / clockRateUs;
 	_bits.resize(bitsPerRevolution);
 	_cursor = 0;
 
-	uint8_t idamUnencoded = decodeUint16(_parameters.idamByte);
-	uint8_t damUnencoded = decodeUint16(_parameters.damByte);
+	uint8_t idamUnencoded = decodeUint16(_idamByte);
+	uint8_t damUnencoded = decodeUint16(_damByte);
 
 	uint8_t sectorSize = 0;
 	{
-		int s = _parameters.sectorSize >> 7;
+		int s = _sectorSize >> 7;
 		while (s > 1)
 		{
 			s >>= 1;
@@ -124,27 +278,27 @@ std::unique_ptr<Fluxmap> IbmEncoder::encode(
 		}
 	}
 
-	uint8_t gapFill = _parameters.useFm ? 0x00 : 0x4e;
+	uint8_t gapFill = _useFm ? 0x00 : 0x4e;
 
-	writeBytes(_parameters.gap0, gapFill);
-	if (_parameters.emitIam)
+	writeBytes(_gap0, gapFill);
+	if (_emitIam)
 	{
-		writeBytes(_parameters.useFm ? 6 : 12, 0x00);
-		if (!_parameters.useFm)
+		writeBytes(_useFm ? 6 : 12, 0x00);
+		if (!_useFm)
 		{
 			for (int i=0; i<3; i++)
 				writeRawBits(MFM_IAM_SEPARATOR, 16);
 		}
-		writeRawBits(_parameters.useFm ? FM_IAM_RECORD : MFM_IAM_RECORD, 16);
-		writeBytes(_parameters.gap1, gapFill);
+		writeRawBits(_useFm ? FM_IAM_RECORD : MFM_IAM_RECORD, 16);
+		writeBytes(_gap1, gapFill);
 	}
 
 	bool first = true;
-	for (char sectorChar : _parameters.sectorSkew)
+	for (char sectorChar : _sectorSkew)
 	{
 		int sectorId = charToInt(sectorChar);
 		if (!first)
-			writeBytes(_parameters.gap3, gapFill);
+			writeBytes(_gap3, gapFill);
 		first = false;
 
 		const auto& sectorData = allSectors.get(physicalTrack, physicalSide, sectorId);
@@ -163,8 +317,8 @@ std::unique_ptr<Fluxmap> IbmEncoder::encode(
 			Bytes header;
 			ByteWriter bw(header);
 
-			writeBytes(_parameters.useFm ? 6 : 12, 0x00);
-			if (!_parameters.useFm)
+			writeBytes(_useFm ? 6 : 12, 0x00);
+			if (!_useFm)
 			{
 				for (int i=0; i<3; i++)
 					bw.write_8(MFM_RECORD_SEPARATOR_BYTE);
@@ -172,53 +326,53 @@ std::unique_ptr<Fluxmap> IbmEncoder::encode(
 			bw.write_8(idamUnencoded);
 			bw.write_8(sectorData->logicalTrack);
 			bw.write_8(sectorData->logicalSide);
-			bw.write_8(sectorData->logicalSector + _parameters.startSectorId);
+			bw.write_8(sectorData->logicalSector + _startSectorId);
 			bw.write_8(sectorSize);
 			uint16_t crc = crc16(CCITT_POLY, header);
 			bw.write_be16(crc);
 
 			int conventionalHeaderStart = 0;
-			if (!_parameters.useFm)
+			if (!_useFm)
 			{
 				for (int i=0; i<3; i++)
 					writeRawBits(MFM_RECORD_SEPARATOR, 16);
 				conventionalHeaderStart += 3;
 
 			}
-			writeRawBits(_parameters.idamByte, 16);
+			writeRawBits(_idamByte, 16);
 			conventionalHeaderStart += 1;
 
 			writeBytes(header.slice(conventionalHeaderStart));
 		}
 
-		writeBytes(_parameters.gap2, gapFill);
+		writeBytes(_gap2, gapFill);
 
 		{
 			Bytes data;
 			ByteWriter bw(data);
 
-			writeBytes(_parameters.useFm ? 6 : 12, 0x00);
-			if (!_parameters.useFm)
+			writeBytes(_useFm ? 6 : 12, 0x00);
+			if (!_useFm)
 			{
 				for (int i=0; i<3; i++)
 					bw.write_8(MFM_RECORD_SEPARATOR_BYTE);
 			}
 			bw.write_8(damUnencoded);
 
-			Bytes truncatedData = sectorData->data.slice(0, _parameters.sectorSize);
+			Bytes truncatedData = sectorData->data.slice(0, _sectorSize);
 			bw += truncatedData;
 			uint16_t crc = crc16(CCITT_POLY, data);
 			bw.write_be16(crc);
 
 			int conventionalHeaderStart = 0;
-			if (!_parameters.useFm)
+			if (!_useFm)
 			{
 				for (int i=0; i<3; i++)
 					writeRawBits(MFM_RECORD_SEPARATOR, 16);
 				conventionalHeaderStart += 3;
 
 			}
-			writeRawBits(_parameters.damByte, 16);
+			writeRawBits(_damByte, 16);
 			conventionalHeaderStart += 1;
 
 			writeBytes(data.slice(conventionalHeaderStart));
