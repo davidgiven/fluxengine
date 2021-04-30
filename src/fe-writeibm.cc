@@ -157,7 +157,7 @@ static ActionFlag presetHPLIF770(
 		gap0.setDefaultValue(80);
 		gap1.setDefaultValue(50); //as emitIam is false this value remains unused
 		gap2.setDefaultValue(22);
-		gap3.setDefaultValue(44);
+		gap3.setDefaultValue(80);
 		sectorSkew.setDefaultValue("01234");
 		swapSides.setDefaultValue(false);
 	});
