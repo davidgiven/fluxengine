@@ -166,9 +166,28 @@ public:
 			headerPtr++;
 			sectorSize = getSectorSize(header.SectorSize);
 
-			//Read optional cylinder map To Do
-
-			//Read optional sector head map To Do
+			unsigned int optionalsector_map[header.numSectors];
+			//Read optional cylinder map
+			//The Sector Cylinder Map has one entry for each sector, and contains the logical Cylinder ID for the corresponding sector in the Sector Numbering Map.
+			if (header.Head & SEC_CYL_MAP_FLAG) 
+			{
+				//Read optional cylinder map
+				for (b = 0;  b < header.numSectors; b++)
+				{
+					optionalsector_map[b] = br.read_8();
+				}		
+			}
+			//Read optional sector head map
+			//The Sector Head Map has one entry for each sector, and contains the logical Head ID for the corresponding sector in the Sector Numbering Map.
+			unsigned int optionalhead_map[header.numSectors];
+			if (header.Head & SEC_HEAD_MAP_FLAG) 
+			{
+				//Read optional sector head map 
+				for (b = 0;  b < header.numSectors; b++)
+				{
+					optionalhead_map[b] = br.read_8();
+				}		
+			}
 
 			//read sector numbering map
 			unsigned int sector_map[header.numSectors];
@@ -206,20 +225,21 @@ public:
 				{
 					case 0: /* Sector data unavailable - could not be read */
 
+						sector->status = Sector::DATA_MISSING;
 						break;
 
 					case 1: /* Normal data: (Sector Size) bytes follow */
 						sectordata = br.read(sectorSize);
 						headerPtr += sectorSize;
 						sector->data.writer().append(sectordata);
-
+						sector->status = Sector::OK;
 						break;
 
 					case 2: /* Compressed: All bytes in sector have same value (xx) */
 						sectordata = br.read(1);
 						headerPtr++;
 						sector->data.writer().append(sectordata);
-
+						sector->status = Sector::OK;
 						for (int k = 1; k < sectorSize; k++)
 						{
 							//fill data till sector is full
@@ -229,35 +249,57 @@ public:
 						break;
 
 					case 3: /* Normal data with "Deleted-Data address mark" */
+						sector->status = Sector::DATA_MISSING;
 
 						break;
 
 					case 4: /* Compressed with "Deleted-Data address mark"*/
+						sector->status = Sector::DATA_MISSING;
 					
 						break;
 
-					case 5: /* Normal data read with data error */
+					case 5: /* Normal data read with data error - could not be read*/
+						sector->status = Sector::DATA_MISSING;
 					
 						break;
 
-					case 6: /* Compressed read with data error" */
+					case 6: /* Compressed read with data error - could not be read */
+						sector->status = Sector::DATA_MISSING;
 
 						break;
 
-					case 7: /* Deleted data read with data error" */
+					case 7: /* Deleted data read with data error - could not be read */
+						sector->status = Sector::DATA_MISSING;
 					
 						break;
 
-					case 8: /* Compressed, Deleted read with data error" */
+					case 8: /* Compressed, Deleted read with data error - could not be read */
+						sector->status = Sector::DATA_MISSING;
 					
 						break;
 
 					default:
 						Error() << fmt::format("don't understand IMD disks with sector status {}", Status_Sector);
 				}		
-				sector->status = Sector::OK;
-				sector->logicalTrack = sector->physicalTrack = header.track;
-				sector->logicalSide = sector->physicalSide = header.Head;
+				if (header.Head & SEC_CYL_MAP_FLAG) 
+				//The Sector Cylinder Map has one entry for each sector, and contains the logical Cylinder ID for the corresponding sector in the Sector Numbering Map.
+				{
+					sector->physicalTrack = header.track;
+					sector->logicalTrack = optionalsector_map[s];
+				}
+				else {
+
+					sector->logicalTrack = sector->physicalTrack = header.track;
+				}
+				if (header.Head & SEC_HEAD_MAP_FLAG)
+				//The Sector Head Map has one entry for each sector, and contains the logical Head ID for the corresponding sector in the Sector Numbering Map.
+				{
+					sector->physicalSide = header.Head;
+					sector->logicalSide = optionalhead_map[s];
+				}
+				else {
+					sector->logicalSide = sector->physicalSide = header.Head;
+				}
 				sector->logicalSector = (sector_map[s]);
 			}
 
