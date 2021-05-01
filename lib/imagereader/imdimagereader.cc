@@ -198,16 +198,15 @@ public:
 				sector_map[b] = br.read_8();
 				if (b == 0) //first sector see if base is 0 or 1 Fluxengine wants 0
 					{
+					startSectorId = sector_map[b];
 					if (sector_map[b]==1)
 						{
 							blnBaseOne = true;
-							startSectorId = 1;
 						}
 					}
 				if (blnBaseOne==true)
 				{
 					sector_map[b] = (sector_map[b]-1);
-					startSectorId = 0;
 				}
 				sector_skew.push_back(sector_map[b] + '0');
 				headerPtr++;
