@@ -122,11 +122,11 @@ public:
 	{
 		IbmDecoder::setuseFm(false);
 		uint32_t offset = 0;
-		unsigned int numCylinders = spec.cylinders;
-		unsigned int numHeads = spec.heads;
-		unsigned int numSectors = spec.sectors;
-		unsigned int numBytes = spec.bytes;
-		unsigned int numSectorsinTrack = 0;
+		unsigned numCylinders = spec.cylinders;
+		unsigned numHeads = spec.heads;
+		unsigned numSectors = spec.sectors;
+		unsigned numBytes = spec.bytes;
+		unsigned numSectorsinTrack = 0;
 
 		size_t headSize = numSectors * numBytes;
 		size_t trackSize = headSize * numHeads;
@@ -154,7 +154,7 @@ public:
 		bw.write_8(END_OF_FILE);
 		std::string sector_skew;
 		sector_skew.clear();
-		unsigned int Status_Sector = 1;
+		unsigned Status_Sector = 1;
 		bool blnOptionalCylinderMap = false;
 		bool blnOptionalHeadMap = false;
 
@@ -163,8 +163,8 @@ public:
 		{
 			for (int head = 0; head < spec.heads; head++)
 			{
-				unsigned int sectorIdBase = 0; //assume sectors start numbering with 0;
-				unsigned int sectorId = 0;
+				unsigned sectorIdBase = 0; //assume sectors start numbering with 0;
+				unsigned sectorId = 0;
 				TrackHeader header = {0, 0, 0, 0, 0}; //define something to hold the header values
 				const auto& sector = sectors.get(track, head, sectorId);
 				if (!sector)  
@@ -183,8 +183,6 @@ public:
 				{
 					/* Get the header information */
 					numBytes = sector->data.size();		//number of bytes can change per sector per track
-					std::cout << fmt::format("Writing {} bytes per sector\n", numBytes);
-
 					header.track = track;
 					header.Head = head;
 					header.SectorSize = setSectorSize(numBytes);
@@ -323,9 +321,9 @@ public:
 						*	Statussen fluxengine									|	Status IMD		
 						*--------------------------------------------------------------------------------------------------------------------
 						*  	OK,														|	1, 2 (Normal data: (Sector Size) of (compressed) bytes follow)
-						*	BAD_CHECKSUM,											|	
+						*	BAD_CHECKSUM,											|	5, (6, 7, 8)
 						*	MISSING,		sector not found						|	0 (Sector data unavailable - could not be read)
-						*	DATA_MISSING, 	sector present but no data found		|	3, 4, 5, 6, 7, 8
+						*	DATA_MISSING, 	sector present but no data found		|	3, (4)
 						*	CONFLICT,												|
 						*	INTERNAL_ERROR											|
 						*/
@@ -350,7 +348,10 @@ public:
 							// case 2: /* Compressed: All bytes in sector have same value (xx) */
 							// case 3: /* Normal data with "Deleted-Data address mark" */
 							// case 4: /* Compressed with "Deleted-Data address mark"*/
+							case Sector::BAD_CHECKSUM:
 							// case 5: /* Normal data read with data error - could not be read*/
+								Status_Sector = 5; 
+								break;
 							// case 6: /* Compressed read with data error - could not be read */
 							// case 7: /* Deleted data read with data error - could not be read */
 							// case 8: /* Compressed, Deleted read with data error - could not be read */

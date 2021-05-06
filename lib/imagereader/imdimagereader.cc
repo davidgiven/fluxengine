@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 static unsigned int getModulationandSpeed(uint8_t flags, bool *mfm)
 {
@@ -60,7 +61,80 @@ struct TrackHeader
 	uint8_t SectorSize;
 };
 
-static unsigned int getSectorSize(uint8_t flags)
+static std::string copytostring(std::vector<char> tocopy)
+{
+	std::string result;
+	 for (int i = 0; i< tocopy.size(); i++)
+	 {
+
+	 	result.push_back(tocopy[i]);
+	 }
+	return result;
+}
+
+static uint8_t setsectorskew(int sectornumber)
+{
+	switch (sectornumber)
+	{
+		case 0:
+			return '0';
+			break;
+		case 1:
+			return '1';
+			break;
+		case 2:
+			return '2';
+			break;
+		case 3:
+			return '3';
+			break;
+		case 4:
+			return '4';
+			break;
+		case 5:
+			return '5';
+			break;
+		case 6:
+			return '6';
+			break;
+		case 7:
+			return '7';
+			break;
+		case 8:
+			return '8';
+			break;
+		case 9:
+			return '9';
+			break;
+		case 10:
+			return 'a';
+			break;
+		case 11:
+			return 'b';
+			break;
+		case 12:
+			return 'c';
+			break;
+		case 13:
+			return 'd';
+			break;
+		case 14:
+			return 'e';
+			break;
+		case 15:
+			return 'f';
+			break;
+		case 16:
+			return 'g';
+			break;
+		case 17:
+			return 'h';
+			break;
+	}
+	Error() << fmt::format("Sector skew {} not in standard range (0-17).", sectornumber);
+}
+
+static unsigned getSectorSize(uint8_t flags)
 {
 	switch (flags)
 	{
@@ -125,13 +199,13 @@ public:
 		TrackHeader header = {0, 0, 0, 0, 0};
 		TrackHeader previousheader = {0, 0, 0, 0, 0};
 
-		unsigned int n = 0;
-		unsigned int headerPtr = 0;
-		unsigned int Modulation_Speed = 0;
-		unsigned int sectorSize = 0;
-		unsigned int previoussectorSize = 0;
-		std::string sector_skew;
-		std::string previous_sector_skew;
+		unsigned n = 0;
+		unsigned headerPtr = 0;
+		unsigned Modulation_Speed = 0;
+		unsigned sectorSize = 0;
+		unsigned previoussectorSize = 0;
+		std::vector<char> sector_skew;
+		std::vector<char> previous_sector_skew;
 		previous_sector_skew.clear();	//added because fluxengine cannot handle different sector_skew in an image
 		sector_skew.clear();
 		uint8_t b; 	
@@ -173,7 +247,7 @@ public:
 			headerPtr++;
 			sectorSize = getSectorSize(header.SectorSize);
 
-			unsigned int optionalsector_map[header.numSectors];
+			unsigned optionalsector_map[header.numSectors];
 			//Read optional cylinder map
 			//The Sector Cylinder Map has one entry for each sector, and contains the logical Cylinder ID for the corresponding sector in the Sector Numbering Map.
 			if (header.Head & SEC_CYL_MAP_FLAG) 
@@ -189,7 +263,7 @@ public:
 			}
 			//Read optional sector head map
 			//The Sector Head Map has one entry for each sector, and contains the logical Head ID for the corresponding sector in the Sector Numbering Map.
-			unsigned int optionalhead_map[header.numSectors];
+			unsigned optionalhead_map[header.numSectors];
 			if (header.Head & SEC_HEAD_MAP_FLAG) 
 			{
 				//Read optional sector head map 
@@ -202,26 +276,20 @@ public:
 				header.Head = header.Head^SEC_HEAD_MAP_FLAG; //remove flag 01000001 ^ 01000001 = 00000001 and 01000000 ^ 0100000 = 00000000 for writing sector head later
 			}
 			//read sector numbering map
-			unsigned int sector_map[header.numSectors];
+			unsigned sector_map[header.numSectors];
 			sector_skew.clear();
+//			startSectorId = sector_map[b];		//the start sectorID is for IBM disks always 1. so while we can only write IBM disks with IMD set this default to 1
+			startSectorId = 1;		//the start sectorID is for IBM disks is always 1. so while we can only write IBM disks with IMD set this default to 1
 			for (b = 0;  b < header.numSectors; b++)
 			{	
-				sector_map[b] = br.read_8();
+				uint8_t t;
+				t = br.read_8();
 				headerPtr++;
-				if (b == 0) //first sector see if base is 0 or 1 Fluxengine wants 0
-					{
-//					startSectorId = sector_map[b];		//the start sectorID is for IBM disks always 1. so while we can only write IBM disks with IMD set this default to 1
-					startSectorId = 1;		//the start sectorID is for IBM disks is always 1. so while we can only write IBM disks with IMD set this default to 1
-					if (sector_map[b]==1)
-						{
-							blnBaseOne = true;
-						}
-					}
-				if (blnBaseOne==true)
-				{
-					sector_map[b] = (sector_map[b]-1);
-				}
-				sector_skew.push_back(sector_map[b] + '0');
+				sector_map[b] = b;	//fluxengine always starts with 0
+				sector_skew.push_back(setsectorskew(t));
+				// std::cout 	<< "Sector skew\n"
+				// 			<< fmt::format("sectormap {}, sectorskew {} \n", sector_map[b], copytostring(sector_skew));
+
 			}
 			if ((header.Head == 0) and (header.track == 0)) //first read set previous sector skew
 			{
@@ -229,15 +297,15 @@ public:
 				previousheader = header;
 				previoussectorSize = sectorSize;
 			}
-			if (!sector_skew.compare(previous_sector_skew) == 0)
+			if (sector_skew != previous_sector_skew)
 			{
 				/* Get the previous information and give a warning
 				* I had a problem with DD disks written in HP-LIF format and consisting of only 76 tracks. When i read them, the default is 79 tracks so there are 3 tracks in the normal IBM DD format.
 				* to make it easier for the user (not having to specify all the tracks he/she wants) i wrote this.
 				* the IMD image generated is capable of storing different sector skews per track but fluxengine specifies the sector_skew for IBM disks for the whole image at once
 				*/
-				std::cout	<< fmt::format("\nWarning as of track {} there is a different sectorskew. New sectorskew {}, old sectorskew {}.\nFluxengine can't write IMD images back to disk with a different sectorskew.\nIgnoring rest of image as of track {}. \n\n",
-							header.track, sector_skew, previous_sector_skew, header.track);
+				// std::cout	<< fmt::format("\nWarning as of track {} there is a different sectorskew. New sectorskew {}, old sectorskew {}.\nFluxengine can't write IMD images back to disk with a different sectorskew.\nIgnoring rest of image as of track {}. \n\n",
+				// 			header.track, sector_skew, previous_sector_skew, header.track);
 
 				header = previousheader;
 				sector_skew = previous_sector_skew;
@@ -253,7 +321,7 @@ public:
 					std::unique_ptr<Sector>& sector = sectors.get(header.track, header.Head, sector_map[s]);
 					sector.reset(new Sector);
 					//read the status of the sector
-					unsigned int Status_Sector = br.read_8();
+					uint8_t Status_Sector = br.read_8();
 					headerPtr++;
 
 					switch (Status_Sector)
@@ -263,9 +331,9 @@ public:
 					*	Statussen fluxengine									|	Status IMD		
 					*--------------------------------------------------------------------------------------------------------------------
 					*  	OK,														|	1, 2 (Normal data: (Sector Size) of (compressed) bytes follow)
-					*	BAD_CHECKSUM,											|	
+					*	BAD_CHECKSUM,											|	5, 6, 7, 8
 					*	MISSING,		sector not found						|	0 (Sector data unavailable - could not be read)
-					*	DATA_MISSING, 	sector present but no data found		|	3, 4, 5, 6, 7, 8
+					*	DATA_MISSING, 	sector present but no data found		|	3, 4
 					*	CONFLICT,												|
 					*	INTERNAL_ERROR											|
 					*/
@@ -296,36 +364,48 @@ public:
 
 						case 3: /* Normal data with "Deleted-Data address mark" */
 							sector->status = Sector::DATA_MISSING;
-
+							sectordata = br.read(sectorSize);
+							headerPtr += sectorSize;
+							sector->data = sectordata;						
 							break;
 
 						case 4: /* Compressed with "Deleted-Data address mark"*/
 							sector->status = Sector::DATA_MISSING;
-						
+							sectordata = br.read(sectorSize);
+							headerPtr += sectorSize;
+							sector->data = sectordata;						
 							break;
 
-						case 5: /* Normal data read with data error - could not be read*/
-							sector->status = Sector::DATA_MISSING;
-						
+						case 5: /* Normal data read with data error*/
+							sectordata = br.read(sectorSize);
+							headerPtr += sectorSize;
+							sector->status = Sector::BAD_CHECKSUM;
+							sector->data = sectordata;						
 							break;
 
-						case 6: /* Compressed read with data error - could not be read */
-							sector->status = Sector::DATA_MISSING;
-
+						case 6: /* Compressed read with data error*/
+							sectordata = br.read(sectorSize);
+							headerPtr += sectorSize;
+							sector->status = Sector::BAD_CHECKSUM;
+							sector->data = sectordata;						
 							break;
 
-						case 7: /* Deleted data read with data error - could not be read */
-							sector->status = Sector::DATA_MISSING;
-						
+						case 7: /* Deleted data read with data error*/
+							sectordata = br.read(sectorSize);
+							headerPtr += sectorSize;
+							sector->status = Sector::BAD_CHECKSUM;
+							sector->data = sectordata;						
 							break;
 
-						case 8: /* Compressed, Deleted read with data error - could not be read */
-							sector->status = Sector::DATA_MISSING;
-						
+						case 8: /* Compressed, Deleted read with data error*/
+							sectordata = br.read(sectorSize);
+							headerPtr += sectorSize;
+							sector->status = Sector::BAD_CHECKSUM;
+							sector->data = sectordata;						
 							break;
 
 						default:
-							Error() << fmt::format("Don't understand IMD disks with sector status {}", Status_Sector);
+							Error() << fmt::format("Don't understand IMD disks with sector status {}, track {}, sector {}", Status_Sector, header.track, s);
 					}		
 					if (blnOptionalCylinderMap) //there was een optional cylinder map. write is to the sector
 					//The Sector Cylinder Map has one entry for each sector, and contains the logical Cylinder ID for the corresponding sector in the Sector Numbering Map.
@@ -363,7 +443,7 @@ public:
 					<< fmt::format("{} tracks, {} heads; {}; {} kbps; {} sectoren; sectorsize {}; sectormap {}; {} kB total \n",
 					header.track + 1, header.Head + 1,
 					mfm ? "MFM" : "FM",
-					Modulation_Speed, header.numSectors, sectorSize, sector_skew, (header.track+1) * trackSize / 1024);
+					Modulation_Speed, header.numSectors, sectorSize, copytostring(sector_skew), (header.track+1) * trackSize / 1024);
 		
 		//Set the writer settings based on the read IMD image
 		std::string writerinput;
@@ -378,7 +458,7 @@ public:
 		IbmEncoder::setstartSectorId(startSectorId);
 		IbmEncoder::setuseFm(!mfm);
 		IbmEncoder::setclockRateKhz(Modulation_Speed);
-		IbmEncoder::setsectorSkew(fmt::format(sector_skew));
+		IbmEncoder::setsectorSkew(fmt::format(copytostring(sector_skew)));
 
 		//set the rest with the default (IBM) parameters (because no option was set all these are not filled)
 		//First check if these settings have been set bij een flag from the user or we will overwrite them
