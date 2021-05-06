@@ -5,7 +5,8 @@
 
 extern FlagGroup fluxSourceSinkFlags;
 
-extern BoolFlag fluxSourceSinkFortyTrack;
+extern SettableFlag fluxSourceSinkFortyTrack;
+extern SettableFlag fluxSourceSinkHighDensity;
 
 #endif
 

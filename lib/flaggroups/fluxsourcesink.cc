@@ -4,9 +4,12 @@
 
 FlagGroup fluxSourceSinkFlags;
 
-BoolFlag fluxSourceSinkFortyTrack(
+SettableFlag fluxSourceSinkFortyTrack(
 	{ "--40-track" },
-	"indicates a 40 track drive",
-	false);
+	"indicates a 40 track drive");
+
+SettableFlag fluxSourceSinkHighDensity(
+	{ "--high-density", "-H" },
+	"set the drive to high density mode");
 
 

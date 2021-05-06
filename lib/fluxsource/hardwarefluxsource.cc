@@ -31,20 +31,13 @@ static IntFlag hardSectorCount(
     "number of hard sectors on the disk (0=soft sectors)",
     0);
 
-static bool high_density = false;
-
-void setHardwareFluxSourceDensity(bool high_density)
-{
-	::high_density = high_density;
-}
-
 class HardwareFluxSource : public FluxSource
 {
 public:
     HardwareFluxSource(unsigned drive):
         _drive(drive)
     {
-        usbSetDrive(_drive, high_density, indexMode);
+        usbSetDrive(_drive, fluxSourceSinkHighDensity, indexMode);
         std::cerr << "Measuring rotational speed... " << std::flush;
         _oneRevolution = usbGetRotationalPeriod(hardSectorCount);
 	if (hardSectorCount != 0)
@@ -61,7 +54,7 @@ public:
 public:
     std::unique_ptr<Fluxmap> readFlux(int track, int side)
     {
-        usbSetDrive(_drive, high_density, indexMode);
+        usbSetDrive(_drive, fluxSourceSinkHighDensity, indexMode);
 		if (fluxSourceSinkFortyTrack)
 		{
 			if (track & 1)

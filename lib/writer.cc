@@ -27,10 +27,6 @@ static DataSpecFlag input(
     "input image file to read from",
     "");
 
-static SettableFlag highDensityFlag(
-	{ "--high-density", "-H" },
-	"set the drive to high density mode");
-
 static sqlite3* outdb;
 
 void setWriterDefaultDest(const std::string& dest)
@@ -59,9 +55,6 @@ void writeTracks(
     const FluxSpec spec(dest);
 
     std::cout << "Writing to: " << dest << std::endl;
-
-	setHardwareFluxSourceDensity(highDensityFlag);
-	setHardwareFluxSinkDensity(highDensityFlag);
 
 	std::shared_ptr<FluxSink> fluxSink = FluxSink::create(spec);
 

@@ -11,8 +11,6 @@ FlagGroup hardwareFluxSinkFlags = {
 	&usbFlags,
 };
 
-static bool high_density = false;
-
 static IntFlag indexMode(
     { "--write-index-mode" },
     "index pulse source (0=drive, 1=300 RPM fake source, 2=360 RPM fake source",
@@ -22,11 +20,6 @@ static IntFlag hardSectorCount(
     { "--write-hard-sector-count" },
     "number of hard sectors on the disk (0=soft sectors)",
     0);
-
-void setHardwareFluxSinkDensity(bool high_density)
-{
-	::high_density = high_density;
-}
 
 void setHardwareFluxSinkHardSectorCount(int sectorCount)
 {
@@ -41,7 +34,7 @@ public:
     {
 		if (hardSectorCount != 0)
 		{
-			usbSetDrive(_drive, high_density, indexMode);
+			usbSetDrive(_drive, fluxSourceSinkHighDensity, indexMode);
 			std::cerr << "Measuring rotational speed... " << std::flush;
 			nanoseconds_t oneRevolution = usbGetRotationalPeriod(hardSectorCount);
 			_hardSectorThreshold = oneRevolution * 3 / (4 * hardSectorCount);
@@ -58,7 +51,7 @@ public:
 public:
     void writeFlux(int track, int side, Fluxmap& fluxmap)
     {
-        usbSetDrive(_drive, high_density, indexMode);
+        usbSetDrive(_drive, fluxSourceSinkHighDensity, indexMode);
 		if (fluxSourceSinkFortyTrack)
 		{
 			if (track & 1)
