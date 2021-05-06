@@ -11,6 +11,8 @@
 static_assert(std::is_trivially_copyable<IbmIdam>::value,
 		"IbmIdam is not trivially copyable");
 
+bool IbmDecoder::_useFm=false;
+
 /*
  * The markers at the beginning of records are special, and have
  * missing clock pulses, allowing them to be found by the logic.
@@ -89,6 +91,16 @@ const FluxMatchers ANY_RECORD_PATTERN(
     }
 );
 
+bool IbmDecoder::getuseFm()
+{
+	return _useFm;
+}
+
+void IbmDecoder::setuseFm(bool newuseFm)
+{
+	_useFm = newuseFm;
+}
+
 AbstractDecoder::RecordType IbmDecoder::advanceToNextRecord()
 {
 	const FluxMatcher* matcher = nullptr;
@@ -97,10 +109,17 @@ AbstractDecoder::RecordType IbmDecoder::advanceToNextRecord()
     /* If this is the MFM prefix byte, the the decoder is going to expect three
      * extra bytes on the front of the header. */
     _currentHeaderLength = (matcher == &MFM_PATTERN) ? 3 : 0;
-
+    //MFM prefix byte found. so encoding is with MFM
+    
     Fluxmap::Position here = tell();
     if (_currentHeaderLength > 0)
+    {
         readRawBits(_currentHeaderLength*16);
+        _useFm = false;
+    } else
+    {   
+        _useFm = true;
+    }
     auto idbits = readRawBits(16);
     const Bytes idbytes = decodeFmMfm(idbits);
     uint8_t id = idbytes.slice(0, 1)[0];
