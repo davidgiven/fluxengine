@@ -42,11 +42,14 @@ public:
     RecordType advanceToNextRecord();
     void decodeSectorRecord();
     void decodeDataRecord();
+	static bool getuseFm();
+	static void setuseFm(bool newuseFm);
 
 	std::set<unsigned> requiredSectors(Track& track) const
 	{ return _requiredSectors; }
 
 private:
+	static bool _useFm;
     unsigned _sectorBase;
     bool _ignoreSideByte;
 	std::set<unsigned> _requiredSectors;
