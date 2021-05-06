@@ -1,12 +1,18 @@
 #include "globals.h"
 #include "decoders/decoders.h"
+#include "arch/ibm/ibm.h"
+#include <iostream> //debug
+#include <fstream>  //debug
+#include "fmt/format.h" //debug
+
+#define HIGH_VALUE 0xFF
 
 Bytes decodeFmMfm(
         std::vector<bool>::const_iterator ii, std::vector<bool>::const_iterator end)
 {
     /* 
      * FM is dumb as rocks, consisting on regular clock pulses with data pulses in
-     * the gaps. 0x00 is:
+     * the gaps. 0x00 is: The basic encoding rule for FM is that all clock bits are 1: zeros are encoded as 10, ones are encoded as 11.
      * 
      *     X-X-X-X-X-X-X-X-
      * 
@@ -20,6 +26,11 @@ Bytes decodeFmMfm(
      * pair can be either 0 or 1... but the second bit is always the data bit,
      * and at this point we simply don't care what the first bit is, so
      * decoding MFM uses just the same code!
+     * 
+     *  Data:        0 0 0 1 1 0 1 1 ...
+     *  FM encoded: 10101011111011111...
+     *  MFM clock:  ? 1 1 0 0 0 0 0 0...
+     *  FM encoded: ?0101001010001010...
      */
 
     Bytes bytes;
