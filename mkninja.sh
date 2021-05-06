@@ -194,6 +194,7 @@ buildlibrary libbackend.a \
     lib/decoders/fluxmapreader.cc \
     lib/decoders/fmmfm.cc \
     lib/encoders/encoders.cc \
+	lib/flaggroups/fluxsourcesink.cc \
     lib/flags.cc \
     lib/fluxmap.cc \
     lib/fluxsink/fluxsink.cc \

@@ -3,9 +3,11 @@
 #include "fluxmap.h"
 #include "usb/usb.h"
 #include "fluxsink/fluxsink.h"
+#include "flaggroups/fluxsourcesink.h"
 #include "fmt/format.h"
 
 FlagGroup hardwareFluxSinkFlags = {
+	&fluxSourceSinkFlags,
 	&usbFlags,
 };
 
@@ -20,11 +22,6 @@ static IntFlag hardSectorCount(
     { "--write-hard-sector-count" },
     "number of hard sectors on the disk (0=soft sectors)",
     0);
-
-static BoolFlag fortyTrack(
-	{ "--write-40-track" },
-	"indicates a 40 track drive when writing",
-	false);
 
 void setHardwareFluxSinkDensity(bool high_density)
 {
@@ -62,7 +59,7 @@ public:
     void writeFlux(int track, int side, Fluxmap& fluxmap)
     {
         usbSetDrive(_drive, high_density, indexMode);
-		if (fortyTrack)
+		if (fluxSourceSinkFortyTrack)
 		{
 			if (track & 1)
 				Error() << "cannot write to odd physical tracks in 40-track mode";
