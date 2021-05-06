@@ -141,8 +141,8 @@ exact format varies according to the extension:
 	are ignored.
 
   - `.imd`: a disk image format created by [David Dunfield](http://dunfield.classiccmp.org/img/index.htm).
-	These images can be read, but not yet written. The stored comment will also
-	be shown on read. The geometry in the file will be used.
+	These images can be read and written. The stored comment will
+	be shown on read. A comment can be stored in the file on write. IMD works for IBM and geometry in the file will be used.
 
 
 ### High density disks
