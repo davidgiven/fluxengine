@@ -46,6 +46,10 @@ You should end up with a `brother.img` which is 239616 bytes long.
 Writing disks
 -------------
 
+Only 240kB disks can be written, currently ( [get in
+touch](https://github.com/davidgiven/fluxengine/issues/new) if you want to
+write 120kB disks).
+
 Just do:
 
 ```
