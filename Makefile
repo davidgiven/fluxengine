@@ -10,6 +10,7 @@ export CDBGFLAGS = -O0 -g
 export LDDBGFLAGS = -O0 -g
 
 ifeq ($(OS), Windows_NT)
+export PROTOC = protoc
 export CXX = /mingw32/bin/g++
 export AR = /mingw32/bin/ar rcs
 export STRIP = /mingw32/bin/strip
@@ -25,6 +26,7 @@ $(warning These pkg-config packages are installed: $(shell pkg-config --list-all
 $(error You must have these pkg-config packages installed: $(PACKAGES))
 endif
 
+export PROTOC = protoc
 export CXX = g++
 export AR = ar rcs
 export STRIP = strip

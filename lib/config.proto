@@ -1,0 +1,6 @@
+syntax = "proto2";
+
+message Config {
+	optional string thing = 1;
+}
+

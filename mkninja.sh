@@ -8,6 +8,10 @@ rule cxx
     depfile = \$out.d
     deps = gcc
     
+rule proto
+    command = $PROTOC \$flags \$in
+    description = PROTOC \$in
+
 rule library
     command = $AR \$out \$in
     description = AR \$in
@@ -45,9 +49,9 @@ buildlibrary() {
     done
 
     local oobjs
-	local dobjs
+    local dobjs
     oobjs=
-	dobjs=
+    dobjs=
     for src in "$@"; do
         local obj
         obj="$OBJDIR/opt/${src%%.c*}.o"
@@ -65,6 +69,38 @@ buildlibrary() {
 
     echo build $OBJDIR/opt/$lib : library $oobjs
     echo build $OBJDIR/dbg/$lib : library $dobjs
+}
+
+buildproto() {
+    local lib
+    lib=$1
+    shift
+
+    local flags
+    flags=--cpp_out=$OBJDIR/proto
+    while true; do
+        case $1 in
+            -*)
+                flags="$flags $1"
+                shift
+                ;;
+
+            *)
+                break
+        esac
+    done
+
+    local cfiles
+    cfiles=
+    for src in "$@"; do
+        local cfile
+        cfile="$OBJDIR/proto/${src%%.proto}.pb.cc"
+        cfiles="$cfiles $cfile"
+    done
+
+    echo build $cfiles : proto $@
+    echo "    flags=$flags"
+    buildlibrary $lib -I$OBJDIR/proto $cfiles
 }
 
 buildprogram() {
@@ -87,9 +123,9 @@ buildprogram() {
     done
 
     local oobjs
-	local dobjs
+    local dobjs
     oobjs=
-	dobjs=
+    dobjs=
     for src in "$@"; do
         oobjs="$oobjs $OBJDIR/opt/$src"
         dobjs="$dobjs $OBJDIR/dbg/$src"
@@ -104,9 +140,9 @@ buildprogram() {
 }
 
 buildsimpleprogram() {
-	local prog
-	prog=$1
-	shift
+    local prog
+    prog=$1
+    shift
 
     local flags
     flags=
@@ -122,12 +158,12 @@ buildsimpleprogram() {
         esac
     done
 
-	local src
-	src=$1
-	shift
+    local src
+    src=$1
+    shift
 
-	buildlibrary lib$prog.a $flags $src
-	buildprogram $prog lib$prog.a "$@"
+    buildlibrary lib$prog.a $flags $src
+    buildprogram $prog lib$prog.a "$@"
 }
 
 runtest() {
@@ -141,32 +177,35 @@ runtest() {
     buildprogram $OBJDIR/$prog \
         lib$prog.a \
         libbackend.a \
-		libagg.a \
+        libagg.a \
         libfmt.a
 
     echo build $OBJDIR/$prog.stamp : test $OBJDIR/$prog-debug$EXTENSION
 }
 
 buildlibrary libagg.a \
-	-Idep/agg/include \
-	dep/stb/stb_image_write.c \
-	dep/agg/src/*.cpp
+    -Idep/agg/include \
+    dep/stb/stb_image_write.c \
+    dep/agg/src/*.cpp
 
 buildlibrary libfmt.a \
     dep/fmt/format.cc \
     dep/fmt/posix.cc \
 
+buildproto libconfig.a \
+    lib/config.proto
+
 buildlibrary libbackend.a \
-	lib/imagereader/diskcopyimagereader.cc \
-	lib/imagereader/imagereader.cc \
-	lib/imagereader/imgimagereader.cc \
-	lib/imagereader/jv3imagereader.cc \
-	lib/imagereader/imdimagereader.cc \
-	lib/imagewriter/d64imagewriter.cc \
-	lib/imagewriter/diskcopyimagewriter.cc \
-	lib/imagewriter/imagewriter.cc \
-	lib/imagewriter/imgimagewriter.cc \
-	lib/imagewriter/ldbsimagewriter.cc \
+    lib/imagereader/diskcopyimagereader.cc \
+    lib/imagereader/imagereader.cc \
+    lib/imagereader/imgimagereader.cc \
+    lib/imagereader/jv3imagereader.cc \
+    lib/imagereader/imdimagereader.cc \
+    lib/imagewriter/d64imagewriter.cc \
+    lib/imagewriter/diskcopyimagewriter.cc \
+    lib/imagewriter/imagewriter.cc \
+    lib/imagewriter/imgimagewriter.cc \
+    lib/imagewriter/ldbsimagewriter.cc \
     arch/aeslanier/decoder.cc \
     arch/amiga/decoder.cc \
     arch/amiga/encoder.cc \
@@ -183,8 +222,8 @@ buildlibrary libbackend.a \
     arch/macintosh/encoder.cc \
     arch/micropolis/decoder.cc \
     arch/mx/decoder.cc \
-	arch/tids990/decoder.cc \
-	arch/tids990/encoder.cc \
+    arch/tids990/decoder.cc \
+    arch/tids990/encoder.cc \
     arch/victor9k/decoder.cc \
     arch/zilogmcz/decoder.cc \
     lib/bytes.cc \
@@ -215,13 +254,13 @@ buildlibrary libbackend.a \
     lib/sector.cc \
     lib/sectorset.cc \
     lib/sql.cc \
-	lib/utils.cc \
+    lib/utils.cc \
     lib/writer.cc \
-	lib/csvreader.cc \
+    lib/csvreader.cc \
 
 buildlibrary libfrontend.a \
-	src/fe-analysedriveresponse.cc \
-	src/fe-analyselayout.cc \
+    src/fe-analysedriveresponse.cc \
+    src/fe-analyselayout.cc \
     src/fe-cwftoflux.cc \
     src/fe-erase.cc \
     src/fe-fluxtoau.cc \
@@ -244,7 +283,7 @@ buildlibrary libfrontend.a \
     src/fe-readmac.cc \
     src/fe-readmicropolis.cc \
     src/fe-readmx.cc \
-	src/fe-readtids990.cc \
+    src/fe-readtids990.cc \
     src/fe-readvictor9k.cc \
     src/fe-readzilogmcz.cc \
     src/fe-rpm.cc \
@@ -266,31 +305,31 @@ buildprogram fluxengine \
     libfrontend.a \
     libbackend.a \
     libfmt.a \
-	libagg.a \
+    libagg.a \
 
 buildlibrary libemu.a \
     dep/emu/fnmatch.c
 
 buildsimpleprogram brother120tool \
-	-Idep/emu \
+    -Idep/emu \
     tools/brother120tool.cc \
     libbackend.a \
     libemu.a \
     libfmt.a \
 
 buildsimpleprogram brother240tool \
-	-Idep/emu \
+    -Idep/emu \
     tools/brother240tool.cc \
     libbackend.a \
     libemu.a \
     libfmt.a \
 
-runtest agg-test			tests/agg.cc
+runtest agg-test            tests/agg.cc
 runtest amiga-test          tests/amiga.cc
 runtest bitaccumulator-test tests/bitaccumulator.cc
 runtest bytes-test          tests/bytes.cc
 runtest compression-test    tests/compression.cc
-runtest csvreader-test		tests/csvreader.cc
+runtest csvreader-test      tests/csvreader.cc
 runtest dataspec-test       tests/dataspec.cc
 runtest flags-test          tests/flags.cc
 runtest fluxpattern-test    tests/fluxpattern.cc
@@ -298,4 +337,6 @@ runtest fmmfm-test          tests/fmmfm.cc
 runtest greaseweazle-test   tests/greaseweazle.cc
 runtest kryoflux-test       tests/kryoflux.cc
 runtest ldbs-test           tests/ldbs.cc
+
+# vim: sw=4 ts=4 et
 
