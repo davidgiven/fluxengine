@@ -10,7 +10,7 @@ export CDBGFLAGS = -O0 -g
 export LDDBGFLAGS = -O0 -g
 
 ifeq ($(OS), Windows_NT)
-export PROTOC = protoc
+export PROTOC = /mingw32/bin/protoc
 export CXX = /mingw32/bin/g++
 export AR = /mingw32/bin/ar rcs
 export STRIP = /mingw32/bin/strip
