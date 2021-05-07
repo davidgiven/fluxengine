@@ -22,10 +22,6 @@ static StringFlag output(
     "output VCD file to write",
     "output.vcd");
 
-static SettableFlag highDensityFlag(
-    { "--high-density", "--hd" },
-    "set the drive to high density mode");
-
 int mainConvertFluxToVcd(int argc, const char* argv[])
 {
     flags.parseFlags(argc, argv);
@@ -37,7 +33,6 @@ int mainConvertFluxToVcd(int argc, const char* argv[])
     const auto& location = *(locations.begin());
 
     std::cerr << "Reading source flux...\n";
-    setHardwareFluxSourceDensity(highDensityFlag);
     std::shared_ptr<FluxSource> fluxsource = FluxSource::create(spec);
     const auto& fluxmap = fluxsource->readFlux(location.track, location.side);
 

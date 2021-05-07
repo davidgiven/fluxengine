@@ -23,7 +23,6 @@ public:
     virtual void writeFlux(int track, int side, Fluxmap& fluxmap) = 0;
 };
 
-extern void setHardwareFluxSinkDensity(bool high_density);
 extern void setHardwareFluxSinkHardSectorCount(int sectorCount);
 
 #endif
