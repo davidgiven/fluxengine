@@ -46,11 +46,12 @@ public:
                     Bytes data(spec.bytes);
                     inputFile.read((char*) data.begin(), spec.bytes);
 
-                    std::unique_ptr<Sector>& sector = sectors.get(track, head, sectorId);
+					int physicalTrack = track*spec.physicalStep + spec.physicalOffset;
+                    std::unique_ptr<Sector>& sector = sectors.get(physicalTrack, head, sectorId);
                     sector.reset(new Sector);
                     sector->status = Sector::OK;
                     sector->logicalTrack = track;
-					sector->physicalTrack = track*spec.physicalStep + spec.physicalOffset;
+					sector->physicalTrack = physicalTrack;
                     sector->logicalSide = sector->physicalSide = head;
                     sector->logicalSector = sectorId;
                     sector->data = data;
