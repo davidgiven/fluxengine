@@ -5,7 +5,7 @@
 FlagGroup fluxSourceSinkFlags;
 
 SettableFlag fluxSourceSinkFortyTrack(
-	{ "--40-track" },
+	{ "--40-track", "-4" },
 	"indicates a 40 track drive");
 
 SettableFlag fluxSourceSinkHighDensity(
