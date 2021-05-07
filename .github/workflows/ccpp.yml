@@ -37,7 +37,7 @@ jobs:
         fetch-depth: 1
     - name: pacman
       run: |
-        pacman -S --noconfirm --needed make ninja mingw-w64-i686-libusb mingw-w64-i686-sqlite3 mingw-w64-i686-zlib mingw-w64-cross-gcc zip protobuf mingw-w64-i686-protobuf
+        pacman -S --noconfirm --needed make ninja mingw-w64-i686-libusb mingw-w64-i686-sqlite3 mingw-w64-i686-zlib mingw-w64-cross-gcc zip mingw-w64-i686-protobuf
     - name: build
       run: |
         make CXX=/opt/bin/i686-w64-mingw32-g++.exe AR="/opt/bin/i686-w64-mingw32-ar.exe rcs"
