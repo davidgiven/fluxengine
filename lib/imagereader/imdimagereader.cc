@@ -305,7 +305,7 @@ public:
 				* the IMD image generated is capable of storing different sector skews per track but fluxengine specifies the sector_skew for IBM disks for the whole image at once
 				*/
 				std::cout	<< fmt::format("\nWarning as of track {} a different sectorskew is used. New sectorskew {}, old sectorskew {}.\nFluxengine can't write IMD images back to disk with a different sectorskew.\nIgnoring rest of image as of track {}. \n\n",
-							header.track, sector_skew, previous_sector_skew, header.track);
+							header.track, copytostring(sector_skew), copytostring(previous_sector_skew), header.track);
 
 				header = previousheader;
 				sector_skew = previous_sector_skew;
