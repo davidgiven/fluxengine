@@ -298,7 +298,7 @@ public:
 						ByteReader br(sector->data); //read the sector data							
 						int i;
 						//determine if all bytes are the same -> compress and sector status = 2
-						for (i=0 ; i<header.SectorSize ; i++)
+						for (i=0 ; i<numBytes ; i++)
 						{
 							byte = br.read_8();
 							if (i == 0)
