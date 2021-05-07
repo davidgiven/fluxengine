@@ -64,16 +64,21 @@ void writeTracks(
         std::unique_ptr<Fluxmap> fluxmap = producer(location.track, location.side);
         if (!fluxmap)
         {
-            /* Create an empty fluxmap for writing. */
-            fluxmap.reset(new Fluxmap());
-        }
+			/* Erase this track rather than writing. */
 
-        /* Precompensation actually seems to make things worse, so let's leave
-            * it disabled for now. */
-        //fluxmap->precompensate(PRECOMPENSATION_THRESHOLD_TICKS, 2);
-        fluxSink->writeFlux(location.track, location.side, *fluxmap);
-        std::cout << fmt::format(
-            "{0} ms in {1} bytes", int(fluxmap->duration()/1e6), fluxmap->bytes()) << std::endl;
+            fluxmap.reset(new Fluxmap());
+			fluxSink->writeFlux(location.track, location.side, *fluxmap);
+			std::cout << "erased\n";
+        }
+		else
+		{
+			/* Precompensation actually seems to make things worse, so let's leave
+				* it disabled for now. */
+			//fluxmap->precompensate(PRECOMPENSATION_THRESHOLD_TICKS, 2);
+			fluxSink->writeFlux(location.track, location.side, *fluxmap);
+			std::cout << fmt::format(
+				"{0} ms in {1} bytes", int(fluxmap->duration()/1e6), fluxmap->bytes()) << std::endl;
+		}
     }
 }
 
