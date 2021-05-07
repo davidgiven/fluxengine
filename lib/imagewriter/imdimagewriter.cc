@@ -316,17 +316,17 @@ public:
 						}
 						switch (sector->status)
 						{
-						/*fluxengine knows of a few sector statussen but not all of the statussen in IMD.
-						*  // the statussen are in sector.h. Translation to fluxengine is as follows:
-						*	Statussen fluxengine									|	Status IMD		
-						*--------------------------------------------------------------------------------------------------------------------
-						*  	OK,														|	1, 2 (Normal data: (Sector Size) of (compressed) bytes follow)
-						*	BAD_CHECKSUM,											|	5, (6, 7, 8)
-						*	MISSING,		sector not found						|	0 (Sector data unavailable - could not be read)
-						*	DATA_MISSING, 	sector present but no data found		|	3, (4)
-						*	CONFLICT,												|
-						*	INTERNAL_ERROR											|
-						*/
+							/*fluxengine knows of a few sector statussen but not all of the statussen in IMD.
+							*  // the statussen are in sector.h. Translation to fluxengine is as follows:
+							*	Statussen fluxengine							|	Status IMD		
+							*--------------------------------------------------------------------------------------------------------------------
+							*  	OK,												|	1, 2 (Normal data: (Sector Size) of (compressed) bytes follow)
+							*	BAD_CHECKSUM,									|	5, 6, 7, 8
+							*	MISSING,	  sector not found					|	0 (Sector data unavailable - could not be read)
+							*	DATA_MISSING, sector present but no data found	|	3, 4
+							*	CONFLICT,										|
+							*	INTERNAL_ERROR									|
+							*/
 							case Sector::MISSING: /* Sector data unavailable - could not be read */
 
 								Status_Sector = 0;

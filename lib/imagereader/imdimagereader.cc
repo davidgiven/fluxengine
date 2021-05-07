@@ -222,7 +222,7 @@ public:
 		}
 		headerPtr = n; //set pointer to after comment
 		//write comment to screen
-		std::cout 	<< "Comment in IMD image:\n"
+		std::cout 	<< "Comment in IMD file:\n"
 					<< fmt::format("{}\n\n",
 					comment);
 
@@ -304,7 +304,7 @@ public:
 				* to make it easier for the user (not having to specify all the tracks he/she wants) i wrote this.
 				* the IMD image generated is capable of storing different sector skews per track but fluxengine specifies the sector_skew for IBM disks for the whole image at once
 				*/
-				std::cout	<< fmt::format("\nWarning as of track {} a different sectorskew is used. New sectorskew {}, old sectorskew {}.\nFluxengine can't write IMD images back to disk with a different sectorskew.\nIgnoring rest of image as of track {}. \n\n",
+				std::cout	<< fmt::format("\nWarning as of track {} a different sectorskew is used. New sectorskew {}, old sectorskew {}.\nFluxengine can't write IMD files back to disk with a different sectorskew.\nIgnoring rest of image as of track {}. \n\n",
 							header.track, copytostring(sector_skew), copytostring(previous_sector_skew), header.track);
 
 				header = previousheader;
@@ -328,14 +328,14 @@ public:
 					{ 
 					/*fluxengine knows of a few sector statussen but not all of the statussen in IMD.
 					*  // the statussen are in sector.h. Translation to fluxengine is as follows:
-					*	Statussen fluxengine									|	Status IMD		
+					*	Statussen fluxengine							|	Status IMD		
 					*--------------------------------------------------------------------------------------------------------------------
-					*  	OK,														|	1, 2 (Normal data: (Sector Size) of (compressed) bytes follow)
-					*	BAD_CHECKSUM,											|	5, 6, 7, 8
-					*	MISSING,		sector not found						|	0 (Sector data unavailable - could not be read)
-					*	DATA_MISSING, 	sector present but no data found		|	3, 4
-					*	CONFLICT,												|
-					*	INTERNAL_ERROR											|
+					*  	OK,												|	1, 2 (Normal data: (Sector Size) of (compressed) bytes follow)
+					*	BAD_CHECKSUM,									|	5, 6, 7, 8
+					*	MISSING,	  sector not found					|	0 (Sector data unavailable - could not be read)
+					*	DATA_MISSING, sector present but no data found	|	3, 4
+					*	CONFLICT,										|
+					*	INTERNAL_ERROR									|
 					*/
 						case 0: /* Sector data unavailable - could not be read */
 
@@ -405,7 +405,7 @@ public:
 							break;
 
 						default:
-							Error() << fmt::format("Don't understand IMD disks with sector status {}, track {}, sector {}", Status_Sector, header.track, s);
+							Error() << fmt::format("Don't understand IMD files with sector status {}, track {}, sector {}", Status_Sector, header.track, s);
 					}		
 					if (blnOptionalCylinderMap) //there was een optional cylinder map. write is to the sector
 					//The Sector Cylinder Map has one entry for each sector, and contains the logical Cylinder ID for the corresponding sector in the Sector Numbering Map.
@@ -439,7 +439,7 @@ public:
 		size_t headSize = ((header.numSectors) * (sectorSize));
         size_t trackSize = (headSize * (header.Head + 1));
 
-		std::cout 	<< "Reading IMD image\n"
+		std::cout 	<< "Reading IMD file\n"
 					<< fmt::format("{} tracks, {} heads; {}; {} kbps; {} sectoren; sectorsize {}; sectormap {}; {} kB total \n",
 					header.track + 1, header.Head + 1,
 					mfm ? "MFM" : "FM",
