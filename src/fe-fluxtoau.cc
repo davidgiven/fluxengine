@@ -22,10 +22,6 @@ static StringFlag output(
     "output AU file to write",
     "output.au");
 
-static SettableFlag highDensityFlag(
-    { "--high-density", "--hd" },
-    "set the drive to high density mode");
-
 static SettableFlag withIndex(
     { "--with-index" },
     "place index markers in the right hand channel");
@@ -41,7 +37,6 @@ int mainConvertFluxToAu(int argc, const char* argv[])
     const auto& location = *(locations.begin());
 
     std::cerr << "Reading source flux...\n";
-    setHardwareFluxSourceDensity(highDensityFlag);
     std::shared_ptr<FluxSource> fluxsource = FluxSource::create(spec);
     const auto& fluxmap = fluxsource->readFlux(location.track, location.side);
     unsigned totalTicks = fluxmap->ticks() + 2;

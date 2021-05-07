@@ -149,7 +149,10 @@ std::unique_ptr<Fluxmap> IbmEncoder::encode(
 
 		const auto& sectorData = allSectors.get(physicalTrack, physicalSide, sectorId);
 		if (!sectorData)
-			Error() << fmt::format("format tried to find sector {} which wasn't in the input file", sectorId);
+		{
+			/* If there are any missing sectors, this is an empty track. */
+			return std::unique_ptr<Fluxmap>();
+		}
 
 		/* Writing the sector and data records are fantastically annoying.
 		 * The CRC is calculated from the *very start* of the record, and

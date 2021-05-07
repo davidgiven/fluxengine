@@ -49,6 +49,34 @@ You _can_ work with more than one FluxEngine at the same time, using different
 invocations of the client; but be careful of USB bandwidth. If the devices are
 connected via the same hub, the bandwidth will be shared.
 
+### Logical and physical tracks
+
+In general, FluxEngine will read one track off disk, and write it to one track
+in a file, or vice versa. Sometimes these don't match. Two important FluxEngine
+concepts are that of the _physical track_ and the _logical track_.
+
+_Physical tracks_ are how FluxEngine locates tracks on the disk. The numbering
+used by 80-track drives is always used, even if you actually have a 40-track
+drive attached (this actually makes things simpler).
+
+_Logical tracks_ are where the data is in the filesystem. This doesn't need to
+match the physical track. The logical track number is usually encoded on the
+disk itself in the sector header. FluxEngine uses this for placing the data in
+the output file.
+
+The most common situation where these won't match is when you have a 40-track
+disk in an 80-track drive. Because each 40-track track is twice the width of an
+80-track track, you'll see logical track 0 on physical tracks 0 and 1, and
+logical track 1 on physical tracks 2 and 3, and logical track 2 on physical
+tracks 4 and 5, etc.
+
+When reading from a disk, this will usually take care of itself as disks are
+mostly self-describing --- FluxEngine can tell which logical track data is
+located at from the sector header. However, when writing to a disk, this isn't
+the case, and you may to supply extra parameters to tell FluxEngine the mapping
+from data in the image to physical tracks. This is most likely to happen when
+using 40-track disks.
+
 ### Source and destination specifiers
 
 When reading from or writing _flux_ (either from or to a real disk, or a flux
@@ -78,11 +106,11 @@ fluxengine read ibm -s fakedisk.flux:t=0-79:s=0
     `some/files/:t=0-10`. There must be a files for a single disk only
     in the directory.
 
-Source and destination specifiers work entirely in *physical units*.
-FluxEngine is intended to be connected to an 80 (or 82) track double sided
-drive, and these are the units used. If the format you're trying to access
-lays out its tracks differently, then you'll need a specifier which tells
-FluxEngine how to find those tracks. See the 40-track disk example above.
+Source and destination specifiers work entirely in *physical units*.  As
+described above, FluxEngine is intended to be connected to an 80 (or 82) track
+double sided drive, and these are the units used. If the format you're trying
+to access lays out its tracks differently, then you'll need a specifier which
+tells FluxEngine how to find those tracks. See the 40-track disk example above.
 
 If you _don't_ specify a modifier, you'll get the default, which should be
 sensible for the command you're using.
@@ -103,6 +131,11 @@ exact format varies according to the extension:
     heads, 9 sectors, 512 bytes per sector. For output files (`--output`) the
     geometry will be autodetected if left unspecified. For input files you
     normally have to specify it.
+
+	If one logical track does not map directly onto on physical track, you can
+	change this with `:o=1:t=2`: `o` specifies the offset, and `t` specifies
+	the step. So, with this format, cylinder 1 in the image will be written to
+	track 3 on the disk.
 
   - `.ldbs`: John Elliott's [LDBS disk image
     format](http://www.seasip.info/Unix/LibDsk/ldbs.html), which is
@@ -152,7 +185,7 @@ disks, and have different magnetic properties. 3.5" drives can usually
 autodetect what kind of medium is inserted into the drive based on the hole
 in the disk casing, but 5.25" drives can't. As a result, you need to
 explicitly tell FluxEngine on the command line whether you're using a high
-density disk or not with the `--hd` flag.
+density disk or not with the `-H` flag.
 **If you don't do this, your disks may not read correctly and will _certainly_
 fail to write correctly.**
 
@@ -163,6 +196,31 @@ case, and reading the disk label is much more reliable.
 
 [Lots more information on high density vs double density disks can be found
 here.](http://www.retrotechnology.com/herbs_stuff/guzis.html)
+
+### 40-track disks and drives
+
+These require special handling.
+
+  - reading a 40-track disk from an 80-track drive: everything should just work
+	via autodetection.
+
+  - writing a 40-track disk to an 80-track drive: you want to write _all
+	physical tracks_, so `-d :t=0-79`. For `.img` files you will also need `-i
+	:t=2` to set the mapping between logical tracks in the image and physical
+	tracks on the disk.
+
+  - reading a 40-track disk from a 40-track drive: use `--40-track` to tell
+	FluxEngine you have a 40-track drive; everything should just work via
+	autodetection.
+
+  - writing a 40-track disk to a 40-track drive: you want to write _even tracks
+	only_, so `-d :t=0-79x2`, and for `.img` files you will also need `-i
+	:t=2`.
+
+The `--40-track` or `-4` option tells FluxEngine that it's plugged into a
+40-track drive. It will assume that each step of the drive corresponds to two
+physical tracks. Only even tracks are accessible in this mode.
+
 
 ### Other important flags
 

@@ -162,6 +162,8 @@ ImageSpec::ImageSpec(const DataSpec& spec)
         if (!spec.has("c") && !spec.has("h") && !spec.has("s") && !spec.has("b"))
         {
             cylinders = heads = sectors = bytes = 0;
+			physicalOffset = 0;
+			physicalStep = 1;
             initialised = false;
         }
         else
@@ -170,6 +172,8 @@ ImageSpec::ImageSpec(const DataSpec& spec)
             heads = spec.at("h").only();
             sectors = spec.at("s").only();
             bytes = spec.at("b").only();
+			physicalOffset = spec.atOr("o", 0);
+			physicalStep = spec.atOr("t", 1);
             initialised = true;
         }
     }
@@ -181,18 +185,22 @@ ImageSpec::ImageSpec(const DataSpec& spec)
     for (const auto& e : spec.modifiers)
     {
         const auto name = e.second.name;
-        if ((name != "c") && (name != "h") && (name != "s") && (name != "b"))
-            Error() << fmt::format("unknown fluxspec modifier '{}'", name);
+		static const std::set<std::string> modifiers { "c", "h", "s", "b", "o", "t" };
+        if (modifiers.find(name) == modifiers.end())
+            Error() << fmt::format("unknown imagespec modifier '{}'", name);
     }
 }
 
 ImageSpec::ImageSpec(const std::string filename,
-        unsigned cylinders, unsigned heads, unsigned sectors, unsigned bytes):
+        unsigned cylinders, unsigned heads, unsigned sectors, unsigned bytes,
+		int physicalOffset, int physicalStep):
     filename(filename),
     cylinders(cylinders),
     heads(heads),
     sectors(sectors),
     bytes(bytes),
+	physicalOffset(physicalOffset),
+	physicalStep(physicalStep),
     initialised(true)
 {}
 

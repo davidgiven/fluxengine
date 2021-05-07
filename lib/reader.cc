@@ -58,10 +58,6 @@ static IntFlag retries(
 	"How many times to retry each track in the event of a read failure.",
 	5);
 
-static SettableFlag highDensityFlag(
-	{ "--high-density", "--hd" },
-	"set the drive to high density mode");
-
 static StringFlag csvFile(
 	{ "--write-csv" },
 	"write a CSV report of the disk state",
@@ -116,8 +112,6 @@ std::vector<std::unique_ptr<Track>> readTracks()
     const FluxSpec spec(source);
 
     std::cout << "Reading from: " << source << std::endl;
-
-	setHardwareFluxSourceDensity(highDensityFlag);
 
 	if (!destination.get().empty())
 	{

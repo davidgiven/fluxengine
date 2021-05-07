@@ -7,11 +7,13 @@
 #include "writer.h"
 #include "protocol.h"
 #include "fmt/format.h"
+#include "flaggroups/fluxsourcesink.h"
 #include "dep/agg/include/agg2d.h"
 #include "dep/stb/stb_image_write.h"
 #include <fstream>
 
 static FlagGroup flags = {
+	&fluxSourceSinkFlags,
 	&usbFlags,
 };
 
@@ -186,8 +188,15 @@ int mainAnalyseDriveResponse(int argc, const char* argv[])
 	if (spec.locations.size() != 1)
 		Error() << "the destination dataspec must contain exactly one track (two sides count as two tracks)";
 
-    usbSetDrive(spec.drive, false, F_INDEX_REAL);
-	usbSeek(spec.locations[0].track);
+    usbSetDrive(spec.drive, fluxSourceSinkHighDensity, F_INDEX_REAL);
+	int track = spec.locations[0].track;
+	if (fluxSourceSinkFortyTrack)
+	{
+		if (track & 1)
+			Error() << "you can only seek to even tracks on a 40-track disk";
+		track /= 2;
+	}
+	usbSeek(track);
 
 	std::cout << "Measuring rotational speed...\n";
     nanoseconds_t period = usbGetRotationalPeriod(0);
