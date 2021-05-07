@@ -10,7 +10,7 @@ jobs:
       with:
         fetch-depth: 1
     - name: apt
-      run: sudo apt update && sudo apt install libusb-1.0-0-dev libsqlite3-dev ninja-build
+      run: sudo apt update && sudo apt install libusb-1.0-0-dev libsqlite3-dev ninja-build protobuf-compiler
     - name: make
       run: make
 
@@ -21,7 +21,7 @@ jobs:
       with:
         fetch-depth: 1
     - name: brew
-      run: brew install sqlite pkg-config libusb ninja
+      run: brew install sqlite pkg-config libusb ninja protobuf
     - name: make
       run: make
 
@@ -37,7 +37,7 @@ jobs:
         fetch-depth: 1
     - name: pacman
       run: |
-        pacman -S --noconfirm --needed make ninja mingw-w64-i686-libusb mingw-w64-i686-sqlite3 mingw-w64-i686-zlib mingw-w64-cross-gcc zip
+        pacman -S --noconfirm --needed make ninja mingw-w64-i686-libusb mingw-w64-i686-sqlite3 mingw-w64-i686-zlib mingw-w64-cross-gcc zip protobuf mingw-w64-i686-protobuf
     - name: build
       run: |
         make CXX=/opt/bin/i686-w64-mingw32-g++.exe AR="/opt/bin/i686-w64-mingw32-ar.exe rcs"

@@ -177,6 +177,7 @@ runtest() {
     buildprogram $OBJDIR/$prog \
         lib$prog.a \
         libbackend.a \
+        libproto.a \
         libagg.a \
         libfmt.a
 
@@ -192,10 +193,15 @@ buildlibrary libfmt.a \
     dep/fmt/format.cc \
     dep/fmt/posix.cc \
 
-buildproto libconfig.a \
-    lib/config.proto
+buildproto libproto.a \
+    arch/brother/brother.proto \
+    arch/ibm/ibm.proto \
+    lib/config.proto \
+    lib/decoders/decoder.proto \
+    lib/imagereader/img.proto \
 
 buildlibrary libbackend.a \
+    -I$OBJDIR/proto \
     lib/imagereader/diskcopyimagereader.cc \
     lib/imagereader/imagereader.cc \
     lib/imagereader/imgimagereader.cc \
@@ -260,6 +266,7 @@ buildlibrary libbackend.a \
     lib/csvreader.cc \
 
 buildlibrary libfrontend.a \
+    -I$OBJDIR/proto \
     src/fe-analysedriveresponse.cc \
     src/fe-analyselayout.cc \
     src/fe-cwftoflux.cc \
@@ -305,6 +312,7 @@ buildlibrary libfrontend.a \
 buildprogram fluxengine \
     libfrontend.a \
     libbackend.a \
+    libproto.a \
     libfmt.a \
     libagg.a \
 
@@ -338,6 +346,7 @@ runtest fmmfm-test          tests/fmmfm.cc
 runtest greaseweazle-test   tests/greaseweazle.cc
 runtest kryoflux-test       tests/kryoflux.cc
 runtest ldbs-test           tests/ldbs.cc
+runtest proto-test          -I$OBJDIR/proto tests/proto.cc
 
 # vim: sw=4 ts=4 et
 

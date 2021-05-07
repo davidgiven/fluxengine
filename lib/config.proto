@@ -1,6 +1,31 @@
 syntax = "proto2";
 
+import "arch/brother/brother.proto";
+import "arch/ibm/ibm.proto";
+import "lib/decoders/decoder.proto";
+import "lib/imagereader/img.proto";
+
+message DiskEncoding {
+	optional int32 cylinder = 1;
+	optional int32 head = 2;
+	oneof format {
+		IBM ibm = 3;
+		Brother brother = 4;
+	}
+}
+
+message FileEncoding {
+	optional string filename = 1;
+	oneof format {
+		Img img = 2;
+	}
+}
+
 message Config {
 	optional string thing = 1;
+
+	repeated DiskEncoding disk = 2;
+	optional FileEncoding file = 3;
+	optional Decoder decoder = 4;
 }
 

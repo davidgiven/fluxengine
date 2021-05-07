@@ -1,0 +1,17 @@
+syntax = "proto2";
+
+message Img {
+	message Format {
+		optional int32 track = 1;
+		optional int32 side = 2;
+
+		optional int64 file_offset = 3;
+		optional int32 sector_size = 4;
+	}
+
+	optional int32 tracks = 1;
+	optional int32 heads = 2;
+	optional int32 sectors = 3;
+	repeated Format format = 4;
+}
+

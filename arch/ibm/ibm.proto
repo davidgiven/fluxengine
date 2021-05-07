@@ -1,0 +1,24 @@
+syntax = "proto2";
+
+message IBM {
+	enum FmMfm {
+		USE_MFM = 0;
+		USE_FM = 1;
+	}
+	
+	optional double track_length_ms = 1;
+	optional int32 sector_size_bytes = 2;
+	optional bool emit_iam = 3;
+	optional int32 start_sector_id = 4;
+	optional double clock_rate_khz = 5;
+	optional FmMfm use_fm = 6 [default = USE_MFM];
+	optional int32 idam_byte = 7;
+	optional int32 dam_byte = 8;
+	optional int32 gap0 = 9;
+	optional int32 gap1 = 10;
+	optional int32 gap2 = 11;
+	optional int32 gap3 = 12;
+	optional string sector_skew = 13;
+	optional bool swap_sizes = 14;
+}
+
