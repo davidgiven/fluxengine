@@ -254,16 +254,17 @@ buildlibrary libbackend.a \
     lib/usb/fluxengineusb.cc \
     lib/usb/greaseweazle.cc \
     lib/usb/greaseweazleusb.cc \
+    lib/csvreader.cc \
     lib/globals.cc \
     lib/hexdump.cc \
     lib/ldbs.cc \
+    lib/proto.cc \
     lib/reader.cc \
     lib/sector.cc \
     lib/sectorset.cc \
     lib/sql.cc \
     lib/utils.cc \
     lib/writer.cc \
-    lib/csvreader.cc \
 
 buildlibrary libfrontend.a \
     -I$OBJDIR/proto \

@@ -4,6 +4,12 @@ import "arch/brother/brother.proto";
 import "arch/ibm/ibm.proto";
 import "lib/decoders/decoder.proto";
 import "lib/imagereader/img.proto";
+import "google/protobuf/descriptor.proto";
+
+extend google.protobuf.FieldOptions {
+  optional string help = 50000;
+  repeated string parameter = 50001;
+}
 
 message DiskEncoding {
 	optional int32 cylinder = 1;
@@ -22,10 +28,10 @@ message FileEncoding {
 }
 
 message Config {
-	optional string thing = 1;
+	optional string thing = 1 [(help) = "this is some help", (parameter) = "-q", (parameter) = "--q"];
 
 	repeated DiskEncoding disk = 2;
 	optional FileEncoding file = 3;
-	optional Decoder decoder = 4;
+	optional Decoder decoder = 4 [(help) = "Options for the flux decoder process"];
 }
 
