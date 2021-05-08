@@ -88,12 +88,12 @@ static uint8_t setSectorSize(int flags)
 	*Comment (ASCII only - unlimited size)
 	*1A byte - ASCII EOF character
 	*- For each track on the disk:
-	*1 byte Mode value							see getModulationspeed for definition		
-	*1 byte Cylinder
-	*1 byte Head
-	*1 byte number of sectors in track			
-	*1 byte sector size							see getsectorsize for definition
-	*sector numbering map
+	*1 byte Mode value							(0-5) see getModulationspeed for definition		
+	*1 byte Cylinder							(0-n)
+	*1 byte Head								(0-1)
+	*1 byte number of sectors in track			(1-n)
+	*1 byte sector size							(0-6) see getsectorsize for definition
+	*sector numbering map						IMD start numbering sectors with 1.
 	*sector cylinder map (optional)				definied in high byte of head (since head is 0 or 1)
 	*sector head map (optional)					definied in high byte of head (since head is 0 or 1)
 	*sector data records	For each data record:
@@ -123,7 +123,7 @@ public:
 		try
   		{
 			IbmDecoder::setuseFm(false);
-			uint32_t offset = 0;
+//			uint32_t offset = 0;
 			unsigned numCylinders = spec.cylinders;
 			unsigned numHeads = spec.heads;
 			unsigned numSectors = spec.sectors;
@@ -165,22 +165,13 @@ public:
 			{
 				for (int head = 0; head < spec.heads; head++)
 				{
-					unsigned sectorIdBase = 0; //assume sectors start numbering with 0;
+					unsigned sectorIdBase = 1; //IMD starts sector numbering with 1;
 					unsigned sectorId = 0;
 					TrackHeader header = {0, 0, 0, 0, 0}; //define something to hold the header values
 					const auto& sector = sectors.get(track, head, sectorId);
 					if (!sector)  
-					{//sector 0 doesnt exist so assume numbering starts with 1 if sector 0 or 1 does not exist exit with error
-						sectorIdBase++;
-						sectorId++;
-						const auto& sector = sectors.get(track, head, sectorId);
-						if (!sector) //still no sector found exit with error
-						{
-							std::cout << fmt::format("sector {} not found\n", sectorId);
-							Error() << "Sector 0 or 1 not found";
-						}
-						header.ModeValue = getModulationandSpeed(1000000.0 / sector->clock);
-
+					{//sector 0 doesnt exist exit with error
+						Error() << fmt::format("sector {} not found\n", sectorId);
 					} else
 					{
 						/* Get the header information */
@@ -194,7 +185,7 @@ public:
 
 					}
 					//determine number of sectors in track
-					for (int sectorId = 0 + sectorIdBase; sectorId < spec.sectors; sectorId++)
+					for (int sectorId = 0; sectorId < spec.sectors; sectorId++)
 					{
 						const auto& sector = sectors.get(track, head, sectorId);
 						if (!sector)
@@ -206,7 +197,7 @@ public:
 						}
 					}
 					//determine sector skew and if there are optional cylindermaps or headermaps
-					for (int sectorId = 0 + sectorIdBase; sectorId < numSectorsinTrack; sectorId++)
+					for (int sectorId = 0; sectorId < numSectorsinTrack; sectorId++)
 					{
 						const auto& sector = sectors.get(track, head, sectorId);
 						if (!sector)
@@ -214,7 +205,7 @@ public:
 							break;
 						} else
 						{	
-							sector_skew.push_back(sectorId + '0'); //fill sectorskew
+							sector_skew.push_back((sectorId + sectorIdBase) + '0'); //fill sectorskew start with 1
 							if 	((sector->physicalTrack) != (sector->logicalTrack))	//different physicaltrack fromn logicaltrack
 							{
 								blnOptionalCylinderMap = true;
@@ -239,9 +230,9 @@ public:
 					bw.write_8(head); //1 byte Head
 					bw.write_8(numSectorsinTrack); //1 byte number of sectors in track
 					bw.write_8(header.SectorSize); //1 byte sector size
-					for (int sectorId = 0 + sectorIdBase; sectorId < numSectorsinTrack; sectorId++)
+					for (int sectorId = 0; sectorId < numSectorsinTrack; sectorId++)
 					{
-						bw.write_8(sectorId); //sector numbering map
+						bw.write_8((sectorId+ sectorIdBase)); //sector numbering map
 					}
 					//Write optional cylinder map
 					//The Sector Cylinder Map has one entry for each sector, and contains the logical Cylinder ID for the corresponding sector in the Sector Numbering Map.
@@ -249,7 +240,7 @@ public:
 						{
 							//determine how the optional cylinder map looks like
 							//write the corresponding logical ID
-							for (int sectorId = 0 + sectorIdBase; sectorId < numSectorsinTrack; sectorId++)
+							for (int sectorId = 0; sectorId < numSectorsinTrack; sectorId++)
 							{
 								const auto& sector = sectors.get(track, head, sectorId);
 								bw.write_8(sector->logicalTrack); //1 byte logical track
@@ -262,14 +253,14 @@ public:
 						{
 							//determine how the optional head map looks like
 							//write the corresponding logical ID
-							for (int sectorId = 0 + sectorIdBase; sectorId < numSectorsinTrack; sectorId++)
+							for (int sectorId = 0; sectorId < numSectorsinTrack; sectorId++)
 							{
 								const auto& sector = sectors.get(track, head, sectorId);
 								bw.write_8(sector->logicalSide); //1 byte logical side
 							}
 						}
 					//Now read data and write to file
-					for (int sectorId = 0 + sectorIdBase; sectorId < numSectorsinTrack; sectorId++)
+					for (int sectorId = 0; sectorId < numSectorsinTrack; sectorId++)
 					{
 	/* 					For each data record:
 	*					1 byte Sector status 					
