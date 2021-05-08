@@ -73,7 +73,7 @@ static std::string copytostring(std::vector<char> tocopy)
 }
 
 static uint8_t setsectorskew(int sectornumber)
-{//IMD expects the sector map to start with 1 so everything we read in the sectormap has to be 1 less
+{//IMD lets the sector map start with 1 so everything we read in the sectormap has to be 1 less for fluxengine
 	sectornumber--;
 	switch (sectornumber)
 	{
