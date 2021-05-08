@@ -73,7 +73,8 @@ static std::string copytostring(std::vector<char> tocopy)
 }
 
 static uint8_t setsectorskew(int sectornumber)
-{
+{//IMD expects the sector map to start with 1 so everything we read in the sectormap has to be 1 less
+	sectornumber--;
 	switch (sectornumber)
 	{
 		case 0:
