@@ -27,6 +27,29 @@ RangeFlag requiredSectors(
 	"A comma seperated list or range of sectors which must be on each track.",
 	"");
 
+static ActionFlag preset360(
+	{ "--ibm-preset-360" },
+	"Preset parameters for reading a 5.25\" 360kB disk in a 48tpi drive.",
+	[] {
+		setReaderDefaultSource(":t=0-39");
+		requiredSectors.set("0,1,2,3,4,5,6,7,8");
+	});
+
+static ActionFlag preset360hd(
+	{ "--ibm-preset-360-96tpi" },
+	"Preset parameters for reading a 5.25\" 360kB disk in a 96tpi drive.",
+	[] {
+		setReaderDefaultSource(":t=0-79x2");
+		requiredSectors.set("0,1,2,3,4,5,6,7,8");
+	});
+
+static ActionFlag preset1200(
+	{ "--ibm-preset-1200" },
+	"Preset parameters for reading a 5.25\" 1.2MB disk.",
+	[] {
+		requiredSectors.set("0,1,2,3,4,5,6,7,8,9,10,11,12,13,14");
+	});
+
 int mainReadIBM(int argc, const char* argv[])
 {
 	setReaderDefaultSource(":t=0-79:s=0-1");
