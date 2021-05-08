@@ -1,0 +1,16 @@
+syntax = "proto2";
+
+message TestProto {
+	message SubMessage {
+		optional string s = 1;
+	}
+
+	optional int64 i64 = 1;
+	optional int32 i32 = 2;
+	optional uint64 u64 = 3;
+	optional uint32 u32 = 4;
+	optional double d = 5;
+	optional SubMessage m = 6;
+	repeated SubMessage r = 7;
+}
+

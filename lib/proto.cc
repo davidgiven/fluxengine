@@ -48,7 +48,20 @@ void setProtoByString(google::protobuf::Message* message, const std::string& pat
 			Error() << fmt::format("config field '{}' in '{}' is not a message", item, path);
 
 		const auto* reflection = message->GetReflection();
-		message = reflection->MutableMessage(message, field);
+		switch (field->label())
+		{
+			case google::protobuf::FieldDescriptor::LABEL_OPTIONAL:
+				message = reflection->MutableMessage(message, field);
+				break;
+
+			case google::protobuf::FieldDescriptor::LABEL_REPEATED:
+				if (reflection->FieldSize(*message, field) == 0)
+					message = reflection->AddMessage(message, field);
+				else
+					message = reflection->MutableRepeatedMessage(message, field, 0);
+				break;
+		}
+
 		descriptor = message->GetDescriptor();
     }
 

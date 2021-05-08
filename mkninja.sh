@@ -172,12 +172,14 @@ runtest() {
     shift
 
     buildlibrary lib$prog.a \
+        -Idep/snowhouse/include \
         "$@"
 
     buildprogram $OBJDIR/$prog \
         lib$prog.a \
         libbackend.a \
         libproto.a \
+        libtestproto.a \
         libagg.a \
         libfmt.a
 
@@ -333,6 +335,9 @@ buildsimpleprogram brother240tool \
     libbackend.a \
     libemu.a \
     libfmt.a \
+
+buildproto libtestproto.a \
+    tests/testproto.proto \
 
 runtest agg-test            tests/agg.cc
 runtest amiga-test          tests/amiga.cc

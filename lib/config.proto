@@ -28,8 +28,6 @@ message FileEncoding {
 }
 
 message Config {
-	optional string thing = 1 [(help) = "this is some help", (parameter) = "-q", (parameter) = "--q"];
-
 	repeated DiskEncoding disk = 2;
 	optional FileEncoding file = 3;
 	optional Decoder decoder = 4 [(help) = "Options for the flux decoder process"];
