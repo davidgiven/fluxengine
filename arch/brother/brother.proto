@@ -1,6 +1,8 @@
 syntax = "proto2";
 
-message Brother {
+message BrotherInput {}
+
+message BrotherOutput {
 	optional double clock_rate_us = 1 [default = 3.83];
 	optional double post_index_gap_ms = 2 [default = 1.0];
 	optional double sector_spacing_ms = 3 [default = 16.2];

@@ -1,6 +1,8 @@
 syntax = "proto2";
 
-message IBM {
+message IBMInput {}
+
+message IBMOutput {
 	enum FmMfm {
 		USE_MFM = 0;
 		USE_FM = 1;

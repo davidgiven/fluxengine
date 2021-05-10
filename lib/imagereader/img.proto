@@ -1,6 +1,6 @@
 syntax = "proto2";
 
-message Img {
+message ImgInputOutput {
 	message Format {
 		optional int32 track = 1;
 		optional int32 side = 2;

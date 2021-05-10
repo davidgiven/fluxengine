@@ -8,28 +8,55 @@ import "google/protobuf/descriptor.proto";
 
 extend google.protobuf.FieldOptions {
   optional string help = 50000;
-  repeated string parameter = 50001;
-}
-
-message DiskEncoding {
-	optional int32 cylinder = 1;
-	optional int32 head = 2;
-	oneof format {
-		IBM ibm = 3;
-		Brother brother = 4;
-	}
-}
-
-message FileEncoding {
-	optional string filename = 1;
-	oneof format {
-		Img img = 2;
-	}
 }
 
 message Config {
-	repeated DiskEncoding disk = 2;
-	optional FileEncoding file = 3;
-	optional Decoder decoder = 4 [(help) = "Options for the flux decoder process"];
+	message InputFile {
+		optional string filename = 1;
+		oneof format {
+			ImgInputOutput img = 2;
+		}
+	}
+
+	message InputDisk {
+		optional int32 drive = 1;
+		oneof format {
+			IBMInput ibm = 2;
+			BrotherInput brother = 3;
+		}
+	}
+
+	message OutputFile {
+		optional string filename = 1;
+		oneof format {
+			ImgInputOutput img = 2;
+		}
+	}
+
+	message OutputDisk {
+		optional int32 drive = 1;
+		oneof format {
+			IBMOutput ibm = 2;
+			BrotherOutput brother = 3;
+		}
+	}
+
+	message Input {
+		oneof input {
+			InputFile file = 1;
+			InputDisk disk = 2;
+		}
+	}
+
+	message Output {
+		oneof output {
+			OutputFile file = 1;
+			OutputDisk disk = 2;
+		}
+	}
+
+	optional Input input = 1;
+	optional Output output = 2;
+	optional Decoder decoder = 3;
 }
 
