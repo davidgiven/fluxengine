@@ -10,11 +10,11 @@
 #include <fstream>
 #include <ctype.h>
 
-static FlagGroup flags { &writerFlags };
+static FlagGroup flags { &readerFlags, &writerFlags };
 
 int mainWriteFlux(int argc, const char* argv[])
 {
-    setReaderDefaultSource(":t=0-81:h=0-1");
+    setReaderDefaultSource(":t=0-81:s=0-1");
     setWriterDefaultDest(":t=0-81:s=0-1");
     flags.parseFlags(argc, argv);
 
