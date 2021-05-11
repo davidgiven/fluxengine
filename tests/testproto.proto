@@ -12,5 +12,10 @@ message TestProto {
 	optional double d = 5;
 	optional SubMessage m = 6;
 	repeated SubMessage r = 7;
+
+	oneof alt {
+		SubMessage firstoption = 8;
+		SubMessage secondoption = 9;
+	}
 }
 

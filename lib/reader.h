@@ -3,9 +3,10 @@
 
 #include "flags.h"
 
-class Fluxmap;
-class FluxSource;
 class AbstractDecoder;
+class FluxSource;
+class Fluxmap;
+class ImageWriter;
 class Track;
 
 extern FlagGroup readerFlags;
@@ -17,6 +18,6 @@ extern void setReaderHardSectorCount(int sectorCount);
 
 extern std::vector<std::unique_ptr<Track>> readTracks();
 
-extern void readDiskCommand(AbstractDecoder& decoder);
+extern void readDiskCommand(FluxSource& source, AbstractDecoder& decoder, ImageWriter& writer);
 
 #endif

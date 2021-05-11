@@ -182,6 +182,7 @@ int mainInspect(int argc, const char* argv[])
 {
     flags.parseFlags(argc, argv);
 
+#if 0
 	const auto& tracks = readTracks();
 	if (tracks.size() != 1)
 		Error() << "the source dataspec must contain exactly one track (two sides count as two tracks)";
@@ -287,6 +288,7 @@ int mainInspect(int argc, const char* argv[])
         const auto& bytes = track->fluxmap->rawBytes();
         hexdump(std::cout, bytes);
     }
+#endif
 
     return 0;
 }

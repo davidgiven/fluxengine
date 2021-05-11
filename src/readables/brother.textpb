@@ -4,3 +4,20 @@ input {
 	}
 }
 
+output {
+	file {
+		filename: "brother.img"
+		img {}
+	}
+}
+
+cylinders {
+	start: 0
+	end: 81
+}
+
+sides {
+	start: 0
+	end: 0
+}
+

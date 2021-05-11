@@ -14,6 +14,7 @@ static FlagGroup flags { &writerFlags };
 
 int mainWriteFlux(int argc, const char* argv[])
 {
+	#if 0
     setReaderDefaultSource(":t=0-81:h=0-1");
     setWriterDefaultDest(":t=0-81:s=0-1");
     flags.parseFlags(argc, argv);
@@ -41,6 +42,7 @@ int mainWriteFlux(int argc, const char* argv[])
             throw "unreachable";
         }
     );
+	#endif
 
     return 0;
 }

@@ -10,6 +10,13 @@ extend google.protobuf.FieldOptions {
   optional string help = 50000;
 }
 
+message Range {
+	optional int32 start = 1;
+	optional int32 step = 2 [default = 1];
+	optional int32 end = 3;
+	repeated int32 also = 4;
+}
+
 message Config {
 	message InputFile {
 		optional string filename = 1;
@@ -19,10 +26,13 @@ message Config {
 	}
 
 	message InputDisk {
-		optional int32 drive = 1;
+		oneof source {
+			string fluxfile = 1;
+			int32 drive = 2 [default = 0];
+		}
 		oneof format {
-			IBMInput ibm = 2;
-			BrotherInput brother = 3;
+			IBMInput ibm = 3;
+			BrotherInput brother = 4;
 		}
 	}
 
@@ -34,10 +44,13 @@ message Config {
 	}
 
 	message OutputDisk {
-		optional int32 drive = 1;
+		oneof dest {
+			string fluxfile = 1;
+			int32 drive = 2;
+		}
 		oneof format {
-			IBMOutput ibm = 2;
-			BrotherOutput brother = 3;
+			IBMOutput ibm = 3;
+			BrotherOutput brother = 4;
 		}
 	}
 
@@ -58,5 +71,8 @@ message Config {
 	optional Input input = 1;
 	optional Output output = 2;
 	optional Decoder decoder = 3;
+
+	optional Range cylinders = 4;
+	optional Range sides = 5;
 }
 

@@ -73,8 +73,30 @@ static void test_load(void)
 	std::string s;
 	google::protobuf::TextFormat::PrintToString(proto, &s);
 	s = cleanup(s);
-	AssertThat(s, Equals("u64: 42"));
+	AssertThat(s, Equals("u64: 42 r { } secondoption { }"));
 	AssertThat(r, Equals(true));
+	AssertThat(proto.has_secondoption(), Equals(true));
+}
+
+static void test_range(void)
+{
+	{
+		Range r;
+		r.set_start(0);
+		r.set_end(3);
+		r.add_also(5);
+
+		AssertThat(iterate(r), Equals(std::set<int>{0, 1, 2, 3, 5}));
+	}
+
+	{
+		Range r;
+		r.set_start(1);
+		r.set_end(1);
+		r.add_also(5);
+
+		AssertThat(iterate(r), Equals(std::set<int>{1, 5}));
+	}
 }
 
 int main(int argc, const char* argv[])
@@ -82,6 +104,7 @@ int main(int argc, const char* argv[])
 	test_setting();
 	test_config();
 	test_load();
+	test_range();
     return 0;
 }
 

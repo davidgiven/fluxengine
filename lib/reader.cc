@@ -16,6 +16,7 @@
 #include "track.h"
 #include "imagewriter/imagewriter.h"
 #include "fmt/format.h"
+#include "proto.h"
 #include <iostream>
 #include <fstream>
 
@@ -26,15 +27,15 @@ FlagGroup readerFlags
 	&fluxmapReaderFlags,
 };
 
-static DataSpecFlag source(
-    { "--source", "-s" },
-    "source for data",
-    ":t=0-79:s=0-1:d=0");
-
-static DataSpecFlag output(
-	{ "--output", "-o" },
-	"output image file to write to",
-	"");
+//static DataSpecFlag source(
+//    { "--source", "-s" },
+//    "source for data",
+//    ":t=0-79:s=0-1:d=0");
+//
+//static DataSpecFlag output(
+//	{ "--output", "-o" },
+//	"output image file to write to",
+//	"");
 
 static StringFlag destination(
     { "--write-flux", "-f" },
@@ -65,26 +66,6 @@ static StringFlag csvFile(
 
 static std::unique_ptr<FluxSink> outputFluxSink;
 
-void setReaderDefaultSource(const std::string& source)
-{
-    ::source.set(source);
-}
-
-void setReaderDefaultOutput(const std::string& output)
-{
-    ::output.set(output);
-}
-
-void setReaderRevolutions(int revolutions)
-{
-	setHardwareFluxSourceRevolutions(revolutions);
-}
-
-void setReaderHardSectorCount(int sectorCount)
-{
-    setHardwareFluxSourceHardSectorCount(sectorCount);
-}
-
 static void writeSectorsToFile(const SectorSet& sectors, const ImageSpec& spec)
 {
 	std::unique_ptr<ImageWriter> writer(ImageWriter::create(sectors, spec));
@@ -107,7 +88,8 @@ void Track::readFluxmap()
 		outputFluxSink->writeFlux(physicalTrack, physicalSide, *fluxmap);
 }
 
-std::vector<std::unique_ptr<Track>> readTracks()
+#if 0
+std::vector<std::unique_ptr<Track>> readTracks(FluxSource& fluxSource)
 {
     const FluxSpec spec(source);
 
@@ -140,6 +122,7 @@ std::vector<std::unique_ptr<Track>> readTracks()
 
 	return tracks;
 }
+#endif
 
 static bool conflictable(Sector::Status status)
 {
@@ -167,16 +150,27 @@ static void replace_sector(std::unique_ptr<Sector>& replacing, Sector& replaceme
 	}
 }
 
-void readDiskCommand(AbstractDecoder& decoder)
+void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWriter& writer)
 {
-	const ImageSpec outputSpec(output);
-	ImageWriter::verifyImageSpec(outputSpec);
-        
 	bool failures = false;
 	SectorSet allSectors;
-	auto tracks = readTracks();
-    for (const auto& track : tracks)
+	for (int cylinder : iterate(config.cylinders()))
 	{
+		for (int side : iterate(config.sides()))
+		{
+#if 0
+		auto track = std::make_unique<Track>(location
+	std::vector<std::unique_ptr<Track>> tracks;
+    for (const auto& location : spec.locations)
+	{
+		auto track = std::make_unique<Track>(location.track, location.side);
+		track->fluxsource = fluxSource;
+		tracks.push_back(std::move(track));
+	}
+#endif
+		auto track = std::make_unique<Track>(cylinder, side);
+		track->fluxsource = &fluxsource;
+
 		std::map<int, std::unique_ptr<Sector>> readSectors;
 		for (int retry = ::retries; retry >= 0; retry--)
 		{
@@ -284,9 +278,11 @@ void readDiskCommand(AbstractDecoder& decoder)
 			}
         }
         std::cout << size << " bytes decoded." << std::endl;
+	}
     }
 
-    writeSectorsToFile(allSectors, outputSpec);
+	Error() << "write to image not done";
+    //writeSectorsToFile(allSectors, outputSpec);
 	if (failures)
 		std::cerr << "Warning: some sectors could not be decoded." << std::endl;
 }
