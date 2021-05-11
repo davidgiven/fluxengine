@@ -21,6 +21,8 @@ std::map<std::string, ImageReader::Constructor> ImageReader::formats =
 	{".st", ImageReader::createImgImageReader},
 	{".imd", ImageReader::createIMDImageReader},
 	{".IMD", ImageReader::createIMDImageReader},
+	{".d64", ImageReader::createD64ImageReader},
+	{".D64", ImageReader::createD64ImageReader},
 };
 
 ImageReader::Constructor ImageReader::findConstructor(const ImageSpec& spec)

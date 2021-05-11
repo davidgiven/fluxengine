@@ -27,6 +27,7 @@ private:
     static std::unique_ptr<ImageReader> createImgImageReader(const ImageSpec& spec);
     static std::unique_ptr<ImageReader> createJv3ImageReader(const ImageSpec& spec);
     static std::unique_ptr<ImageReader> createIMDImageReader(const ImageSpec& spec);
+    static std::unique_ptr<ImageReader> createD64ImageReader(const ImageSpec& spec);
 
 	static Constructor findConstructor(const ImageSpec& spec);
 

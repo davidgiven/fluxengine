@@ -162,6 +162,7 @@ buildlibrary libbackend.a \
 	lib/imagereader/imgimagereader.cc \
 	lib/imagereader/jv3imagereader.cc \
 	lib/imagereader/imdimagereader.cc \
+	lib/imagereader/d64imagereader.cc \
 	lib/imagewriter/d64imagewriter.cc \
 	lib/imagewriter/diskcopyimagewriter.cc \
 	lib/imagewriter/imagewriter.cc \
@@ -176,6 +177,7 @@ buildlibrary libbackend.a \
     arch/brother/decoder.cc \
     arch/brother/encoder.cc \
     arch/c64/decoder.cc \
+    arch/c64/encoder.cc \
     arch/f85/decoder.cc \
     arch/fb100/decoder.cc \
     arch/ibm/decoder.cc \
@@ -256,6 +258,7 @@ buildlibrary libfrontend.a \
     src/fe-upgradefluxfile.cc \
     src/fe-writeamiga.cc \
     src/fe-writebrother.cc \
+    src/fe-writec64.cc \
     src/fe-writeibm.cc \
     src/fe-writemac.cc \
     src/fe-writetids990.cc \

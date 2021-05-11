@@ -58,6 +58,25 @@ Fluxmap& Fluxmap::appendIndex()
 
 void Fluxmap::precompensate(int threshold_ticks, int amount_ticks)
 {
+
+/*     PRECOMP 432PRECOMPENSATION DELAY https://www.mouser.com/datasheet/2/268/37c78-468028.pdf
+    111     0.00 ns-DISABLED
+    001     41.67 ns
+    010     83.34 ns 
+    011     125.00 ns 
+    100     166.67 ns 
+    101     208.33 ns 
+    110     250.00 ns 
+    000     Default (See Table 12)
+
+    Table 12 - Default Precompensation Delays
+    DATA RATEPRECOMPENSATION DELAYS
+    2 Mbps      20.8 ns 
+    1 Mbps      41.67 ns 
+    500 Kbps    125 ns 
+    300 Kbps    125 ns 
+    250 Kbps    125 ns
+ */    
     uint8_t junk = 0xff;
 
     for (unsigned i=0; i<_bytes.size(); i++)
