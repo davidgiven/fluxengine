@@ -35,6 +35,7 @@ export LDFLAGS +=
 export LIBS = $(shell pkg-config --libs $(PACKAGES))
 export EXTENSION =
 endif
+export XXD = xxd
 
 CFLAGS += -Ilib -Idep/fmt -Iarch
 

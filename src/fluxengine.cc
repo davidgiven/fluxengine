@@ -50,7 +50,7 @@ struct Command
     std::string help;
 };
 
-static command_cb mainRead;
+extern command_cb mainRead;
 static command_cb mainWrite;
 static command_cb mainConvert;
 static command_cb mainAnalyse;
@@ -74,33 +74,33 @@ static std::vector<Command> commands =
 
 static std::vector<Command> readables =
 {
-    { "adfs",          mainReadADFS,      "Reads Acorn ADFS disks.", },
-    { "aeslanier",     mainReadAESLanier, "Reads AES Lanier disks.", },
-    { "amiga",         mainReadAmiga,     "Reads Commodore Amiga disks.", },
-    { "ampro",         mainReadAmpro,     "Reads Ampro disks.", },
-    { "apple2",        mainReadApple2,    "Reads Apple II disks.", },
-    { "atarist",       mainReadAtariST,   "Reads Atari ST disks.", },
-    { "brother",       mainReadBrother,   "Reads 120kB and 240kB Brother word processor disks.", },
-    { "c64",           mainReadC64,       "Reads Commodore 64 disks.", },
-    { "dfs",           mainReadDFS,       "Reads Acorn DFS disks.", },
-    { "f85",           mainReadF85,       "Reads Durango F85 disks.", },
-    { "fb100",         mainReadFB100,     "Reads FB100 disks.", },
-    { "ibm",           mainReadIBM,       "Reads the ubiquitous IBM format disks.", },
-    { "mac",           mainReadMac,       "Reads Apple Macintosh disks.", },
-    { "micropolis",    mainReadMicropolis, "Reads Micropolis disks.", },
-    { "mx",            mainReadMx,        "Reads MX disks.", },
-	{ "tids990",       mainReadTiDs990,   "Reads Texas Instruments DS990 disks.", },
-    { "victor9k",      mainReadVictor9K,  "Reads Victor 9000 disks.", },
-    { "zilogmcz",      mainReadZilogMCZ,  "Reads Zilog MCZ disks.", },
+//    { "adfs",          mainReadADFS,      "Reads Acorn ADFS disks.", },
+//    { "aeslanier",     mainReadAESLanier, "Reads AES Lanier disks.", },
+//    { "amiga",         mainReadAmiga,     "Reads Commodore Amiga disks.", },
+//    { "ampro",         mainReadAmpro,     "Reads Ampro disks.", },
+//    { "apple2",        mainReadApple2,    "Reads Apple II disks.", },
+//    { "atarist",       mainReadAtariST,   "Reads Atari ST disks.", },
+//    { "brother",       mainReadBrother,   "Reads 120kB and 240kB Brother word processor disks.", },
+//    { "c64",           mainReadC64,       "Reads Commodore 64 disks.", },
+//    { "dfs",           mainReadDFS,       "Reads Acorn DFS disks.", },
+//    { "f85",           mainReadF85,       "Reads Durango F85 disks.", },
+//    { "fb100",         mainReadFB100,     "Reads FB100 disks.", },
+//    { "ibm",           mainReadIBM,       "Reads the ubiquitous IBM format disks.", },
+//    { "mac",           mainReadMac,       "Reads Apple Macintosh disks.", },
+//    { "micropolis",    mainReadMicropolis, "Reads Micropolis disks.", },
+//    { "mx",            mainReadMx,        "Reads MX disks.", },
+//	{ "tids990",       mainReadTiDs990,   "Reads Texas Instruments DS990 disks.", },
+//    { "victor9k",      mainReadVictor9K,  "Reads Victor 9000 disks.", },
+//    { "zilogmcz",      mainReadZilogMCZ,  "Reads Zilog MCZ disks.", },
 };
 
 static std::vector<Command> writeables =
 {
-    { "amiga",         mainWriteAmiga,    "Writes Amiga disks.", },
-    { "brother",       mainWriteBrother,  "Writes 120kB and 240kB Brother word processor disks.", },
-    { "ibm",           mainWriteIbm,      "Writes the ubiquitous IBM format disks.", },
-	{ "mac",           mainWriteMac,      "Writes Apple Macintosh disks.", },
-	{ "tids990",       mainWriteTiDs990,  "Writes Texas Instruments DS990 disks.", },
+//    { "amiga",         mainWriteAmiga,    "Writes Amiga disks.", },
+//    { "brother",       mainWriteBrother,  "Writes 120kB and 240kB Brother word processor disks.", },
+//    { "ibm",           mainWriteIbm,      "Writes the ubiquitous IBM format disks.", },
+//	{ "mac",           mainWriteMac,      "Writes Apple Macintosh disks.", },
+//	{ "tids990",       mainWriteTiDs990,  "Writes Texas Instruments DS990 disks.", },
 };
 
 static std::vector<Command> convertables =
@@ -156,8 +156,8 @@ static int mainExtended(std::vector<Command>& subcommands, const std::string& co
     return 1;
 }
 
-static int mainRead(int argc, const char* argv[])
-{ return mainExtended(readables, "read", argc, argv); }
+//static int mainRead(int argc, const char* argv[])
+//{ return mainExtended(readables, "read", argc, argv); }
 
 static int mainWrite(int argc, const char* argv[])
 { return mainExtended(writeables, "write", argc, argv); }

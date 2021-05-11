@@ -2,6 +2,8 @@
 #include "proto.h"
 #include "fmt/format.h"
 
+Config config;
+
 static double toDouble(const std::string& value)
 {
 	size_t idx;

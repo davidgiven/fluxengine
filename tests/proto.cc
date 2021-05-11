@@ -62,10 +62,26 @@ static void test_config(void)
 	AssertThat(cleanup(s), Equals(cleanup(text)));
 }
 
+static void test_load(void)
+{
+	extern const char testproto_pb[];
+	extern const int testproto_pb_size;
+
+	TestProto proto;
+	bool r = proto.ParseFromString(std::string(testproto_pb, testproto_pb_size));
+
+	std::string s;
+	google::protobuf::TextFormat::PrintToString(proto, &s);
+	s = cleanup(s);
+	AssertThat(s, Equals("u64: 42"));
+	AssertThat(r, Equals(true));
+}
+
 int main(int argc, const char* argv[])
 {
 	test_setting();
 	test_config();
+	test_load();
     return 0;
 }
 

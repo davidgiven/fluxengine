@@ -9,8 +9,16 @@ rule cxx
     deps = gcc
     
 rule proto
-    command = $PROTOC \$flags \$in
-    description = PROTOC \$in
+    command = $PROTOC \$flags \$in && (echo \$in > \$def)
+    description = PROTO \$in
+
+rule protoencode
+    command = (echo 'extern const char '\$name'[];' && echo 'const char '\$name'[] = {' && ($PROTOC \$flags --encode=\$messagetype \$\$(cat \$def)< \$in | $XXD -i) && echo '}; extern const int '\$name'_size;' && echo 'const int '\$name'_size = sizeof('\$name');') > \$out
+    description = PROTOENCODE \$in
+
+rule binencode
+    command = xxd -i \$in > \$out
+    description = XXD \$in
 
 rule library
     command = $AR \$out \$in
@@ -76,8 +84,11 @@ buildproto() {
     lib=$1
     shift
 
+    local def
+    def=$OBJDIR/proto/${lib%%.a}.def
+
     local flags
-    flags=--cpp_out=$OBJDIR/proto
+    flags=
     while true; do
         case $1 in
             -*)
@@ -98,9 +109,29 @@ buildproto() {
         cfiles="$cfiles $cfile"
     done
 
-    echo build $cfiles : proto $@
-    echo "    flags=$flags"
+    echo build $cfiles $def : proto $@
+    echo "    flags=$flags --cpp_out=$OBJDIR/proto"
+    echo "    def=$def"
+
     buildlibrary $lib -I$OBJDIR/proto $cfiles
+}
+
+buildencodedproto() {
+    local def
+    local message
+    local name
+    local input
+    local output
+    def=$1
+    message=$2
+    name=$3
+    input=$4
+    output=$5
+
+    echo "build $output : protoencode $input | $def"
+    echo "    name=$name"
+    echo "    def=$def"
+    echo "    messagetype=$message"
 }
 
 buildprogram() {
@@ -268,6 +299,8 @@ buildlibrary libbackend.a \
     lib/utils.cc \
     lib/writer.cc \
 
+buildencodedproto $OBJDIR/proto/libproto.def Config readables_brother_pb src/readables/brother.textpb $OBJDIR/proto/src/readables/brother.cc
+
 buildlibrary libfrontend.a \
     -I$OBJDIR/proto \
     src/fe-analysedriveresponse.cc \
@@ -279,38 +312,41 @@ buildlibrary libfrontend.a \
     src/fe-fluxtovcd.cc \
     src/fe-image.cc \
     src/fe-inspect.cc \
-    src/fe-readadfs.cc \
-    src/fe-readaeslanier.cc \
-    src/fe-readamiga.cc \
-    src/fe-readampro.cc \
-    src/fe-readapple2.cc \
-    src/fe-readatarist.cc \
-    src/fe-readbrother.cc \
-    src/fe-readc64.cc \
-    src/fe-readdfs.cc \
-    src/fe-readf85.cc \
-    src/fe-readfb100.cc \
-    src/fe-readibm.cc \
-    src/fe-readmac.cc \
-    src/fe-readmicropolis.cc \
-    src/fe-readmx.cc \
-    src/fe-readtids990.cc \
-    src/fe-readvictor9k.cc \
-    src/fe-readzilogmcz.cc \
     src/fe-rpm.cc \
     src/fe-scptoflux.cc \
     src/fe-seek.cc \
     src/fe-testbandwidth.cc \
     src/fe-testvoltages.cc \
     src/fe-upgradefluxfile.cc \
-    src/fe-writeamiga.cc \
-    src/fe-writebrother.cc \
-    src/fe-writeibm.cc \
-    src/fe-writemac.cc \
-    src/fe-writetids990.cc \
     src/fe-writeflux.cc \
     src/fe-writetestpattern.cc \
+    src/fe-read.cc \
     src/fluxengine.cc \
+    $OBJDIR/proto/src/readables/brother.cc \
+
+#    src/fe-readadfs.cc \
+#    src/fe-readaeslanier.cc \
+#    src/fe-readamiga.cc \
+#    src/fe-readampro.cc \
+#    src/fe-readapple2.cc \
+#    src/fe-readatarist.cc \
+#    src/fe-readbrother.cc \
+#    src/fe-readc64.cc \
+#    src/fe-readdfs.cc \
+#    src/fe-readf85.cc \
+#    src/fe-readfb100.cc \
+#    src/fe-readibm.cc \
+#    src/fe-readmac.cc \
+#    src/fe-readmicropolis.cc \
+#    src/fe-readmx.cc \
+#    src/fe-readtids990.cc \
+#    src/fe-readvictor9k.cc \
+#    src/fe-readzilogmcz.cc \
+#    src/fe-writeamiga.cc \
+#    src/fe-writebrother.cc \
+#    src/fe-writeibm.cc \
+#    src/fe-writemac.cc \
+#    src/fe-writetids990.cc \
 
 buildprogram fluxengine \
     libfrontend.a \
@@ -339,6 +375,8 @@ buildsimpleprogram brother240tool \
 buildproto libtestproto.a \
     tests/testproto.proto \
 
+buildencodedproto $OBJDIR/proto/libtestproto.def TestProto testproto_pb tests/testproto.textpb $OBJDIR/proto/tests/testproto.cc
+
 runtest agg-test            tests/agg.cc
 runtest amiga-test          tests/amiga.cc
 runtest bitaccumulator-test tests/bitaccumulator.cc
@@ -352,7 +390,7 @@ runtest fmmfm-test          tests/fmmfm.cc
 runtest greaseweazle-test   tests/greaseweazle.cc
 runtest kryoflux-test       tests/kryoflux.cc
 runtest ldbs-test           tests/ldbs.cc
-runtest proto-test          -I$OBJDIR/proto tests/proto.cc
+runtest proto-test          -I$OBJDIR/proto tests/proto.cc $OBJDIR/proto/tests/testproto.cc
 
 # vim: sw=4 ts=4 et
 
