@@ -15,10 +15,12 @@
 
 class Sector;
 class Fluxmap;
+class BrotherInput;
 
 class BrotherDecoder : public AbstractDecoder
 {
 public:
+    BrotherDecoder(const BrotherInput& config) {}
     virtual ~BrotherDecoder() {}
 
     RecordType advanceToNextRecord();

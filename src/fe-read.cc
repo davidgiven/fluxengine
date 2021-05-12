@@ -11,6 +11,7 @@
 #include "dataspec.h"
 #include "fluxsource/fluxsource.h"
 #include "arch/brother/brother.h"
+#include "arch/ibm/ibm.h"
 #include "imagewriter/imagewriter.h"
 #include "fmt/format.h"
 #include <google/protobuf/text_format.h>
@@ -34,9 +35,12 @@ int mainRead(int argc, const char* argv[])
 
 	std::unique_ptr<FluxSource> fluxSource(FluxSource::create(config.input().disk()));
 
+	const Config_InputDisk& disk = config.input().disk();
 	std::unique_ptr<AbstractDecoder> decoder;
-	if (config.input().disk().has_brother())
-		decoder.reset(new BrotherDecoder());
+	if (disk.has_brother())
+		decoder.reset(new BrotherDecoder(disk.brother()));
+	else if (disk.has_ibm())
+		decoder.reset(new IbmDecoder(disk.ibm()));
 	else
 		Error() << "no input disk format specified";
 

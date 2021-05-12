@@ -4,6 +4,8 @@
 #include "decoders/decoders.h"
 #include "encoders/encoders.h"
 
+class IBMInput;
+
 /* IBM format (i.e. ordinary PC floppies). */
 
 #define IBM_MFM_SYNC   0xA1   /* sync byte for MFM */
@@ -32,24 +34,18 @@ struct IbmIdam
 class IbmDecoder : public AbstractDecoder
 {
 public:
-    IbmDecoder(unsigned sectorBase, bool ignoreSideByte=false,
-			const std::set<unsigned> requiredSectors=std::set<unsigned>()):
-        _sectorBase(sectorBase),
-        _ignoreSideByte(ignoreSideByte),
-		_requiredSectors(requiredSectors)
+    IbmDecoder(const IBMInput& config):
+		_config(config)
     {}
 
     RecordType advanceToNextRecord();
     void decodeSectorRecord();
     void decodeDataRecord();
 
-	std::set<unsigned> requiredSectors(Track& track) const
-	{ return _requiredSectors; }
+	std::set<unsigned> requiredSectors(Track& track) const;
 
 private:
-    unsigned _sectorBase;
-    bool _ignoreSideByte;
-	std::set<unsigned> _requiredSectors;
+	const IBMInput& _config;
     unsigned _currentSectorSize;
     unsigned _currentHeaderLength;
 };

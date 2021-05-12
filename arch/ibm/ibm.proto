@@ -1,6 +1,12 @@
 syntax = "proto2";
 
-message IBMInput {}
+import "lib/range.proto";
+
+message IBMInput {
+	optional int32 sector_base = 1 [default=0];
+	optional bool ignore_side_byte = 2 [default=false];
+	optional Range required_sectors = 3;
+}
 
 message IBMOutput {
 	enum FmMfm {

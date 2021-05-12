@@ -6,7 +6,7 @@
 
 extern void setProtoByString(google::protobuf::Message* message, const std::string& path, const std::string& value);
 
-extern std::set<int> iterate(const Range& range);
+extern std::set<unsigned> iterate(const Range& range);
 
 extern Config config;
 

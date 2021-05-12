@@ -232,6 +232,7 @@ buildproto libproto.a \
     lib/config.proto \
     lib/decoders/decoder.proto \
     lib/imagereader/img.proto \
+    lib/range.proto \
 
 buildlibrary libbackend.a \
     -I$OBJDIR/proto \
@@ -299,7 +300,13 @@ buildlibrary libbackend.a \
     lib/utils.cc \
     lib/writer.cc \
 
-buildencodedproto $OBJDIR/proto/libproto.def Config readables_brother_pb src/readables/brother.textpb $OBJDIR/proto/src/readables/brother.cc
+for pb in \
+    brother \
+    ibm \
+; do
+    buildencodedproto $OBJDIR/proto/libproto.def Config \
+        readables_${pb}_pb src/readables/$pb.textpb $OBJDIR/proto/src/readables/$pb.cc
+done
 
 buildlibrary libfrontend.a \
     -I$OBJDIR/proto \
@@ -323,6 +330,7 @@ buildlibrary libfrontend.a \
     src/fe-read.cc \
     src/fluxengine.cc \
     $OBJDIR/proto/src/readables/brother.cc \
+    $OBJDIR/proto/src/readables/ibm.cc \
 
 #    src/fe-readadfs.cc \
 #    src/fe-readaeslanier.cc \

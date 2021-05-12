@@ -100,13 +100,13 @@ void setProtoByString(google::protobuf::Message* message, const std::string& pat
 	}
 }
 
-std::set<int> iterate(const Range& range)
+std::set<unsigned> iterate(const Range& range)
 {
-	std::set<int> set;
-	for (int i=range.start(); i<=range.end(); i+=range.step())
+	std::set<unsigned> set;
+	for (unsigned i=range.start(); i<=range.end(); i+=range.step())
 		set.insert(i);
 
-	for (const int i : range.also())
+	for (const unsigned i : range.also())
 		set.insert(i);
 
 	return set;

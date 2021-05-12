@@ -86,7 +86,7 @@ static void test_range(void)
 		r.set_end(3);
 		r.add_also(5);
 
-		AssertThat(iterate(r), Equals(std::set<int>{0, 1, 2, 3, 5}));
+		AssertThat(iterate(r), Equals(std::set<unsigned>{0, 1, 2, 3, 5}));
 	}
 
 	{
@@ -95,7 +95,7 @@ static void test_range(void)
 		r.set_end(1);
 		r.add_also(5);
 
-		AssertThat(iterate(r), Equals(std::set<int>{1, 5}));
+		AssertThat(iterate(r), Equals(std::set<unsigned>{1, 5}));
 	}
 }
 

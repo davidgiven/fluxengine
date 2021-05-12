@@ -1,0 +1,24 @@
+input {
+	disk {
+		ibm {}
+	}
+}
+
+output {
+	file {
+		filename: "ibm.img"
+		img {}
+	}
+}
+
+cylinders {
+	start: 0
+	end: 81
+}
+
+sides {
+	start: 0
+	end: 1
+}
+
+
