@@ -6,6 +6,7 @@
 #include "imagewriter/imagewriter.h"
 #include "fmt/format.h"
 #include "ldbs.h"
+#include "lib/config.pb.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -27,35 +28,44 @@ static void write_and_update_checksum(ByteWriter& bw, uint32_t& checksum, const 
 class DiskCopyImageWriter : public ImageWriter
 {
 public:
-	DiskCopyImageWriter(const SectorSet& sectors, const ImageSpec& spec):
-		ImageWriter(sectors, spec)
+	DiskCopyImageWriter(const Config_OutputFile& config):
+		ImageWriter(config)
 	{}
 
-	void writeImage()
+	void writeImage(const SectorSet& sectors)
 	{
+		unsigned numCylinders;
+		unsigned numHeads;
+		unsigned numSectors;
+		unsigned numBytes;
+		sectors.calculateSize(numCylinders, numHeads, numSectors, numBytes);
+
 		bool mfm = false;
 
-		if (spec.bytes == 524)
+		switch (numBytes)
 		{
-			/* GCR disk */
+			case 524:
+				/* GCR disk */
+				break;
+
+			case 512:
+				/* MFM disk */
+				mfm = true;
+				break;
+
+			default:
+				Error() << "this image is not compatible with the DiskCopy 4.2 format";
 		}
-		else if (spec.bytes == 512)
-		{
-			/* MFM disk */
-			mfm = true;
-		}
-		else
-			Error() << "this image is not compatible with the DiskCopy 4.2 format";
 
 		std::cout << "writing DiskCopy 4.2 image\n"
 		          << fmt::format("{} tracks, {} heads, {} sectors, {} bytes per sector; {}\n",
-				  		spec.cylinders, spec.heads, spec.sectors, spec.bytes,
+				  		numCylinders, numHeads, numSectors, numBytes,
 						mfm ? "MFM" : "GCR");
 
 		auto sectors_per_track = [&](int track) -> int
 		{
 			if (mfm)
-				return spec.sectors;
+				return numSectors;
 
 			if (track < 16)
 				return 12;
@@ -77,9 +87,9 @@ public:
 		uint32_t tagChecksum = 0;
 		uint32_t offset = 0x54;
 		uint32_t sectorDataStart = offset;
-		for (int track = 0; track < spec.cylinders; track++)
+		for (int track = 0; track < numCylinders; track++)
 		{
-			for (int head = 0; head < spec.heads; head++)
+			for (int head = 0; head < numHeads; head++)
 			{
 				int sectorCount = sectors_per_track(track);
 				for (int sectorId = 0; sectorId < sectorCount; sectorId++)
@@ -97,9 +107,9 @@ public:
 		uint32_t sectorDataEnd = offset;
 		if (!mfm)
 		{
-			for (int track = 0; track < spec.cylinders; track++)
+			for (int track = 0; track < numCylinders; track++)
 			{
-				for (int head = 0; head < spec.heads; head++)
+				for (int head = 0; head < numHeads; head++)
 				{
 					int sectorCount = sectors_per_track(track);
 					for (int sectorId = 0; sectorId < sectorCount; sectorId++)
@@ -124,14 +134,14 @@ public:
 		if (mfm)
 		{
 			format = 0x22;
-			if (spec.sectors == 18)
+			if (numSectors == 18)
 				encoding = 3;
 			else
 				encoding = 2;
 		}
 		else
 		{
-			if (spec.heads == 2)
+			if (numHeads == 2)
 			{
 				encoding = 1;
 				format = 0x22;
@@ -155,14 +165,14 @@ public:
 		bw.write_8(format); /* format byte */
 		bw.write_be16(0x0100); /* magic number */
 
-		image.writeToFile(spec.filename);
+		image.writeToFile(_config.filename());
     }
 };
 
 std::unique_ptr<ImageWriter> ImageWriter::createDiskCopyImageWriter(
-	const SectorSet& sectors, const ImageSpec& spec)
+	const Config_OutputFile& config)
 {
-    return std::unique_ptr<ImageWriter>(new DiskCopyImageWriter(sectors, spec));
+    return std::unique_ptr<ImageWriter>(new DiskCopyImageWriter(config));
 }
 
 

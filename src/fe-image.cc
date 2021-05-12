@@ -18,6 +18,8 @@ static void syntax()
 
 int mainConvertImage(int argc, const char* argv[])
 {
+Error() << "unimplemented";
+#if 0
     auto filenames = flags.parseFlagsWithFilenames(argc, argv);
     if (filenames.size() != 2)
         syntax();
@@ -32,6 +34,7 @@ int mainConvertImage(int argc, const char* argv[])
 	writer->adjustGeometry();
 	writer->printMap();
 	writer->writeImage();
+#endif
 
     return 0;
 }

@@ -40,11 +40,7 @@ int mainRead(int argc, const char* argv[])
 	else
 		Error() << "no input disk format specified";
 
-	std::unique_ptr<ImageWriter> writer;
-//	if (config.output().file().has_img())
-//		write.reset(new ImgImageWriter());
-//	else
-//		Error() << "no output image format specified";
+	std::unique_ptr<ImageWriter> writer(ImageWriter::create(config.output().file()));
 
 	readDiskCommand(*fluxSource, *decoder, *writer);
 

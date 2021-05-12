@@ -4,6 +4,7 @@
 #include "sector.h"
 #include "sectorset.h"
 #include "imagewriter/imagewriter.h"
+#include "lib/config.pb.h"
 #include "fmt/format.h"
 #include <algorithm>
 #include <iostream>
@@ -12,16 +13,17 @@
 class ImgImageWriter : public ImageWriter
 {
 public:
-	ImgImageWriter(const SectorSet& sectors, const ImageSpec& spec):
-		ImageWriter(sectors, spec)
+	ImgImageWriter(const Config_OutputFile& config):
+		ImageWriter(config)
 	{}
 
-	void writeImage()
+	void writeImage(const SectorSet& sectors)
 	{
-		unsigned numCylinders = spec.cylinders;
-		unsigned numHeads = spec.heads;
-		unsigned numSectors = spec.sectors;
-		unsigned numBytes = spec.bytes;
+		unsigned numCylinders;
+		unsigned numHeads;
+		unsigned numSectors;
+		unsigned numBytes;
+		sectors.calculateSize(numCylinders, numHeads, numSectors, numBytes);
 
 		size_t headSize = numSectors * numBytes;
 		size_t trackSize = headSize * numHeads;
@@ -32,7 +34,7 @@ public:
 						numCylinders * trackSize / 1024)
 				<< std::endl;
 
-		std::ofstream outputFile(spec.filename, std::ios::out | std::ios::binary);
+		std::ofstream outputFile(_config.filename(), std::ios::out | std::ios::binary);
 		if (!outputFile.is_open())
 			Error() << "cannot open output file";
 
@@ -55,7 +57,7 @@ public:
 };
 
 std::unique_ptr<ImageWriter> ImageWriter::createImgImageWriter(
-	const SectorSet& sectors, const ImageSpec& spec)
+	const Config_OutputFile& config)
 {
-    return std::unique_ptr<ImageWriter>(new ImgImageWriter(sectors, spec));
+    return std::unique_ptr<ImageWriter>(new ImgImageWriter(config));
 }

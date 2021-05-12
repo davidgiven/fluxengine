@@ -9,9 +9,6 @@ message ImgInputOutput {
 		optional int32 sector_size = 4;
 	}
 
-	optional int32 tracks = 1;
-	optional int32 heads = 2;
-	optional int32 sectors = 3;
 	repeated Format format = 4;
 }
 

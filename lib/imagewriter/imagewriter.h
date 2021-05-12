@@ -2,47 +2,33 @@
 #define IMAGEWRITER_H
 
 class SectorSet;
-class ImageSpec;
+class Config_OutputFile;
 
 class ImageWriter
 {
 public:
-	ImageWriter(const SectorSet& sectors, const ImageSpec& spec);
+	ImageWriter(const Config_OutputFile& config);
 	virtual ~ImageWriter() {};
 
 public:
-    static std::unique_ptr<ImageWriter> create(const SectorSet& sectors, const ImageSpec& spec);
-	static void verifyImageSpec(const ImageSpec& filename);
-
-private:
-	typedef 
-		std::function<
-			std::unique_ptr<ImageWriter>(const SectorSet& sectors, const ImageSpec& spec)
-		>
-		Constructor;
-
-	static std::map<std::string, Constructor> formats;
+    static std::unique_ptr<ImageWriter> create(const Config_OutputFile& config);
 
     static std::unique_ptr<ImageWriter> createImgImageWriter(
-		const SectorSet& sectors, const ImageSpec& spec);
+		const Config_OutputFile& config);
     static std::unique_ptr<ImageWriter> createLDBSImageWriter(
-		const SectorSet& sectors, const ImageSpec& spec);
+		const Config_OutputFile& config);
     static std::unique_ptr<ImageWriter> createD64ImageWriter(
-		const SectorSet& sectors, const ImageSpec& spec);
+		const Config_OutputFile& config);
     static std::unique_ptr<ImageWriter> createDiskCopyImageWriter(
-		const SectorSet& sectors, const ImageSpec& spec);
-
-	static Constructor findConstructor(const ImageSpec& spec);
+		const Config_OutputFile& config);
 
 public:
-	virtual void adjustGeometry();
-	void printMap();
-	void writeCsv(const std::string& filename);
-	virtual void writeImage() = 0;
+	void printMap(const SectorSet& sectors);
+	void writeCsv(const SectorSet& sectors, const std::string& filename);
+	virtual void writeImage(const SectorSet& sectors) = 0;
 
 protected:
-	const SectorSet& sectors;
-	ImageSpec spec;
+	const Config_OutputFile& _config;
 };
 
 #endif

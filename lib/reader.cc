@@ -27,16 +27,6 @@ FlagGroup readerFlags
 	&fluxmapReaderFlags,
 };
 
-//static DataSpecFlag source(
-//    { "--source", "-s" },
-//    "source for data",
-//    ":t=0-79:s=0-1:d=0");
-//
-//static DataSpecFlag output(
-//	{ "--output", "-o" },
-//	"output image file to write to",
-//	"");
-
 static StringFlag destination(
     { "--write-flux", "-f" },
     "write the raw magnetic flux to this file",
@@ -65,16 +55,6 @@ static StringFlag csvFile(
 	"");
 
 static std::unique_ptr<FluxSink> outputFluxSink;
-
-static void writeSectorsToFile(const SectorSet& sectors, const ImageSpec& spec)
-{
-	std::unique_ptr<ImageWriter> writer(ImageWriter::create(sectors, spec));
-	writer->adjustGeometry();
-	writer->printMap();
-	if (!csvFile.get().empty())
-		writer->writeCsv(csvFile.get());
-	writer->writeImage();
-}
 
 void Track::readFluxmap()
 {
@@ -158,131 +138,124 @@ void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWrit
 	{
 		for (int side : iterate(config.sides()))
 		{
-#if 0
-		auto track = std::make_unique<Track>(location
-	std::vector<std::unique_ptr<Track>> tracks;
-    for (const auto& location : spec.locations)
-	{
-		auto track = std::make_unique<Track>(location.track, location.side);
-		track->fluxsource = fluxSource;
-		tracks.push_back(std::move(track));
-	}
-#endif
-		auto track = std::make_unique<Track>(cylinder, side);
-		track->fluxsource = &fluxsource;
+			auto track = std::make_unique<Track>(cylinder, side);
+			track->fluxsource = &fluxsource;
 
-		std::map<int, std::unique_ptr<Sector>> readSectors;
-		for (int retry = ::retries; retry >= 0; retry--)
-		{
-			track->readFluxmap();
-			decoder.decodeToSectors(*track);
+			std::map<int, std::unique_ptr<Sector>> readSectors;
+			for (int retry = ::retries; retry >= 0; retry--)
+			{
+				track->readFluxmap();
+				decoder.decodeToSectors(*track);
 
-			std::cout << "       ";
-				std::cout << fmt::format("{} records, {} sectors; ",
-					track->rawrecords.size(),
-					track->sectors.size());
-				if (track->sectors.size() > 0)
-					std::cout << fmt::format("{:.2f}us clock ({:.0f}kHz); ",
-						track->sectors.begin()->clock / 1000.0,
-                        1000000.0 / track->sectors.begin()->clock);
+				std::cout << "       ";
+					std::cout << fmt::format("{} records, {} sectors; ",
+						track->rawrecords.size(),
+						track->sectors.size());
+					if (track->sectors.size() > 0)
+						std::cout << fmt::format("{:.2f}us clock ({:.0f}kHz); ",
+							track->sectors.begin()->clock / 1000.0,
+							1000000.0 / track->sectors.begin()->clock);
 
-				for (auto& sector : track->sectors)
-				{
-					auto& replacing = readSectors[sector.logicalSector];
-					replace_sector(replacing, sector);
-				}
-
-				bool hasBadSectors = false;
-				std::set<unsigned> requiredSectors = decoder.requiredSectors(*track);
-				for (const auto& i : readSectors)
-				{
-					const auto& sector = i.second;
-					requiredSectors.erase(sector->logicalSector);
-
-					if (sector->status != Sector::OK)
+					for (auto& sector : track->sectors)
 					{
-						std::cout << std::endl
-								<< "       Failed to read sector " << sector->logicalSector
-								<< " (" << Sector::statusToString((Sector::Status)sector->status) << "); ";
+						auto& replacing = readSectors[sector.logicalSector];
+						replace_sector(replacing, sector);
+					}
+
+					bool hasBadSectors = false;
+					std::set<unsigned> requiredSectors = decoder.requiredSectors(*track);
+					for (const auto& i : readSectors)
+					{
+						const auto& sector = i.second;
+						requiredSectors.erase(sector->logicalSector);
+
+						if (sector->status != Sector::OK)
+						{
+							std::cout << std::endl
+									<< "       Failed to read sector " << sector->logicalSector
+									<< " (" << Sector::statusToString((Sector::Status)sector->status) << "); ";
+							hasBadSectors = true;
+						}
+					}
+					for (unsigned logicalSector : requiredSectors)
+					{
+						std::cout << "\n"
+								  << "       Required sector " << logicalSector << " missing; ";
 						hasBadSectors = true;
 					}
-				}
-				for (unsigned logicalSector : requiredSectors)
-				{
-					std::cout << "\n"
-					          << "       Required sector " << logicalSector << " missing; ";
-					hasBadSectors = true;
-				}
 
-				if (hasBadSectors)
-					failures = false;
+					if (hasBadSectors)
+						failures = false;
 
-				std::cout << std::endl
-						<< "       ";
+					std::cout << std::endl
+							<< "       ";
 
-				if (!hasBadSectors)
+					if (!hasBadSectors)
+						break;
+
+				if (!track->fluxsource->retryable())
 					break;
-
-			if (!track->fluxsource->retryable())
-				break;
-            if (retry == 0)
-                std::cout << "giving up" << std::endl
-                          << "       ";
-            else
-				std::cout << retry << " retries remaining" << std::endl;
-		}
-
-		if (dumpRecords)
-		{
-			std::cout << "\nRaw (undecoded) records follow:\n\n";
-			for (auto& record : track->rawrecords)
-			{
-				std::cout << fmt::format("I+{:.2f}us with {:.2f}us clock\n",
-                            record.position.ns() / 1000.0, record.clock / 1000.0);
-				hexdump(std::cout, record.data);
-				std::cout << std::endl;
+				if (retry == 0)
+					std::cout << "giving up" << std::endl
+							  << "       ";
+				else
+					std::cout << retry << " retries remaining" << std::endl;
 			}
-		}
 
-        if (dumpSectors)
-        {
-            std::cout << "\nDecoded sectors follow:\n\n";
-            for (auto& sector : track->sectors)
-            {
-				std::cout << fmt::format("{}.{:02}.{:02}: I+{:.2f}us with {:.2f}us clock: status {}\n",
-                            sector.logicalTrack, sector.logicalSide, sector.logicalSector,
-                            sector.position.ns() / 1000.0, sector.clock / 1000.0,
-							sector.status);
-				hexdump(std::cout, sector.data);
-				std::cout << std::endl;
-            }
-        }
-
-        int size = 0;
-		bool printedTrack = false;
-        for (auto& i : readSectors)
-        {
-			auto& sector = i.second;
-			if (sector)
+			if (dumpRecords)
 			{
-				if (!printedTrack)
+				std::cout << "\nRaw (undecoded) records follow:\n\n";
+				for (auto& record : track->rawrecords)
 				{
-					std::cout << fmt::format("logical track {}.{}; ", sector->logicalTrack, sector->logicalSide);
-					printedTrack = true;
+					std::cout << fmt::format("I+{:.2f}us with {:.2f}us clock\n",
+								record.position.ns() / 1000.0, record.clock / 1000.0);
+					hexdump(std::cout, record.data);
+					std::cout << std::endl;
 				}
-
-				size += sector->data.size();
-
-				std::unique_ptr<Sector>& replacing = allSectors.get(sector->logicalTrack, sector->logicalSide, sector->logicalSector);
-				replace_sector(replacing, *sector);
 			}
-        }
-        std::cout << size << " bytes decoded." << std::endl;
-	}
+
+			if (dumpSectors)
+			{
+				std::cout << "\nDecoded sectors follow:\n\n";
+				for (auto& sector : track->sectors)
+				{
+					std::cout << fmt::format("{}.{:02}.{:02}: I+{:.2f}us with {:.2f}us clock: status {}\n",
+								sector.logicalTrack, sector.logicalSide, sector.logicalSector,
+								sector.position.ns() / 1000.0, sector.clock / 1000.0,
+								sector.status);
+					hexdump(std::cout, sector.data);
+					std::cout << std::endl;
+				}
+			}
+
+			int size = 0;
+			bool printedTrack = false;
+			for (auto& i : readSectors)
+			{
+				auto& sector = i.second;
+				if (sector)
+				{
+					if (!printedTrack)
+					{
+						std::cout << fmt::format("logical track {}.{}; ", sector->logicalTrack, sector->logicalSide);
+						printedTrack = true;
+					}
+
+					size += sector->data.size();
+
+					std::unique_ptr<Sector>& replacing = allSectors.get(sector->logicalTrack, sector->logicalSide, sector->logicalSector);
+					replace_sector(replacing, *sector);
+				}
+			}
+			std::cout << size << " bytes decoded." << std::endl;
+		}
     }
 
-	Error() << "write to image not done";
-    //writeSectorsToFile(allSectors, outputSpec);
+	writer.printMap(allSectors);
+	if (!csvFile.get().empty())
+		writer.writeCsv(allSectors, csvFile.get());
+	writer.writeImage(allSectors);
+
 	if (failures)
 		std::cerr << "Warning: some sectors could not be decoded." << std::endl;
 }

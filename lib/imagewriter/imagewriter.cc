@@ -5,10 +5,12 @@
 #include "sectorset.h"
 #include "imagewriter/imagewriter.h"
 #include "utils.h"
+#include "lib/config.pb.h"
 #include "fmt/format.h"
 #include <iostream>
 #include <fstream>
 
+#if 0
 std::map<std::string, ImageWriter::Constructor> ImageWriter::formats =
 {
 	{".adf", ImageWriter::createImgImageWriter},
@@ -19,48 +21,27 @@ std::map<std::string, ImageWriter::Constructor> ImageWriter::formats =
 	{".ldbs", ImageWriter::createLDBSImageWriter},
 	{".st", ImageWriter::createImgImageWriter},
 };
+#endif
 
-ImageWriter::Constructor ImageWriter::findConstructor(const ImageSpec& spec)
+std::unique_ptr<ImageWriter> ImageWriter::create(const Config_OutputFile& config)
 {
-    const auto& filename = spec.filename;
-
-	for (const auto& e : formats)
-	{
-		if (endsWith(filename, e.first))
-			return e.second;
-	}
-
-	return NULL;
+	if (config.has_img())
+		return ImageWriter::createImgImageWriter(config);
+	else
+		Error() << "bad output image config";
 }
 
-std::unique_ptr<ImageWriter> ImageWriter::create(const SectorSet& sectors, const ImageSpec& spec)
-{
-	verifyImageSpec(spec);
-	return findConstructor(spec)(sectors, spec);
-}
+//void ImageWriter::verifyImageSpec(const ImageSpec& spec)
+//{
+//	if (!findConstructor(spec))
+//		Error() << "unrecognised output image filename extension";
+//}
 
-void ImageWriter::verifyImageSpec(const ImageSpec& spec)
-{
-	if (!findConstructor(spec))
-		Error() << "unrecognised output image filename extension";
-}
-
-ImageWriter::ImageWriter(const SectorSet& sectors, const ImageSpec& spec):
-    sectors(sectors),
-    spec(spec)
+ImageWriter::ImageWriter(const Config_OutputFile& config):
+	_config(config)
 {}
 
-void ImageWriter::adjustGeometry()
-{
-	if (!spec.initialised)
-	{
-		sectors.calculateSize(spec.cylinders, spec.heads, spec.sectors, spec.bytes);
-        spec.initialised = true;
-		std::cout << "Autodetecting output geometry\n";
-	}
-}
-
-void ImageWriter::writeCsv(const std::string& filename)
+void ImageWriter::writeCsv(const SectorSet& sectors, const std::string& filename)
 {
 	std::ofstream f(filename, std::ios::out);
 	if (!f.is_open())
@@ -81,47 +62,45 @@ void ImageWriter::writeCsv(const std::string& filename)
 		"\"Status\""
 		"\n";
 
-	for (int track = 0; track < spec.cylinders; track++)
+	for (const auto& it : sectors.get())
 	{
-		for (int head = 0; head < spec.heads; head++)
-		{
-			for (int sectorId = 0; sectorId < spec.sectors; sectorId++)
-			{
-				f << fmt::format("{},{},", track, head);
-				const auto& sector = sectors.get(track, head, sectorId);
-				if (!sector)
-					f << fmt::format(",,{},,,,,,,,sector not found\n", sectorId);
-				else
-					f << fmt::format("{},{},{},{},{},{},{},{},{},{},{}\n",
-						sector->logicalTrack,
-						sector->logicalSide,
-						sector->logicalSector,
-						sector->clock,
-						sector->headerStartTime,
-						sector->headerEndTime,
-						sector->dataStartTime,
-						sector->dataEndTime,
-						sector->position.bytes,
-						sector->data.size(),
-						Sector::statusToString(sector->status)
-					);
-			}
-		}
+		const auto& sector = it.second;
+		f << fmt::format("{},{},{},{},{},{},{},{},{},{},{},{},{}\n",
+			sector->physicalTrack,
+			sector->physicalSide,
+			sector->logicalTrack,
+			sector->logicalSide,
+			sector->logicalSector,
+			sector->clock,
+			sector->headerStartTime,
+			sector->headerEndTime,
+			sector->dataStartTime,
+			sector->dataEndTime,
+			sector->position.bytes,
+			sector->data.size(),
+			Sector::statusToString(sector->status)
+		);
 	}
 }
 
-void ImageWriter::printMap()
+void ImageWriter::printMap(const SectorSet& sectors)
 {
+	unsigned numCylinders;
+	unsigned numHeads;
+	unsigned numSectors;
+	unsigned numBytes;
+	sectors.calculateSize(numCylinders, numHeads, numSectors, numBytes);
+
 	int badSectors = 0;
 	int missingSectors = 0;
 	int totalSectors = 0;
 	std::cout << "H.SS Tracks --->" << std::endl;
-	for (int head = 0; head < spec.heads; head++)
+	for (int head = 0; head < numHeads; head++)
 	{
-		for (int sectorId = 0; sectorId < spec.sectors; sectorId++)
+		for (int sectorId = 0; sectorId < numSectors; sectorId++)
 		{
 			std::cout << fmt::format("{}.{:2} ", head, sectorId);
-			for (int track = 0; track < spec.cylinders; track++)
+			for (int track = 0; track < numCylinders; track++)
 			{
 				const auto& sector = sectors.get(track, head, sectorId);
 				if (!sector)
