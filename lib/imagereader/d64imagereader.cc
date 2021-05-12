@@ -61,9 +61,6 @@ public:
             {
                 for (int sectorId = 0; sectorId < numSectors; sectorId++)
                 {
-                    std::cout << "reading D64 image\n"
-                                << fmt::format("{} cylinders, {} heads, {} sectors\n",
-                                track, head, sectorId);
                    if ((offset < inputFileSize))
                    {    //still data available sector OK
                         br.seek(offset);
