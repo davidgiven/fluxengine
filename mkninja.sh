@@ -13,7 +13,7 @@ rule proto
     description = PROTO \$in
 
 rule protoencode
-    command = (echo 'extern const char '\$name'[];' && echo 'const char '\$name'[] = {' && ($PROTOC \$flags --encode=\$messagetype \$\$(cat \$def)< \$in | $XXD -i) && echo '}; extern const int '\$name'_size;' && echo 'const int '\$name'_size = sizeof('\$name');') > \$out
+    command = (echo '#include <string>' && echo 'static const char data[] = {' && ($PROTOC \$flags --encode=\$messagetype \$\$(cat \$def)< \$in | $XXD -i) && echo '}; extern std::string \$name(); std::string \$name() { return std::string(data, sizeof(data)); }') > \$out
     description = PROTOENCODE \$in
 
 rule binencode

@@ -19,15 +19,30 @@
 
 static FlagGroup flags { &readerFlags };
 
-extern const char readables_brother_pb[];
-extern const int readables_brother_pb_size;
+extern std::string readables_brother_pb();
+extern std::string readables_ibm_pb();
+
+static std::map<std::string, std::function<std::string()>> readables = {
+	{ "brother", readables_brother_pb },
+	{ "ibm",     readables_ibm_pb },
+};
 
 int mainRead(int argc, const char* argv[])
 {
-    flags.parseFlags(argc, argv);
+    std::vector<std::string> filenames = flags.parseFlagsWithFilenames(argc, argv);
+	for (const auto& filename : filenames)
+	{
+		if (readables.find(filename) != readables.end())
+		{
+			if (!config.ParseFromString(readables[filename]()))
+				Error() << "couldn't load config proto";
+		}
+		else
+			Error() << "configs in files not supported yet";
+	}
 
-	if (!config.ParseFromString(std::string(readables_brother_pb, readables_brother_pb_size)))
-		Error() << "couldn't load config proto";
+	if (!config.has_input() || !config.has_output())
+		Error() << "incomplete config (did you remember to specify the format?)";
 
 	std::string s;
 	google::protobuf::TextFormat::PrintToString(config, &s);

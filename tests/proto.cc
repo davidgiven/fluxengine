@@ -64,11 +64,10 @@ static void test_config(void)
 
 static void test_load(void)
 {
-	extern const char testproto_pb[];
-	extern const int testproto_pb_size;
+	extern std::string testproto_pb();
 
 	TestProto proto;
-	bool r = proto.ParseFromString(std::string(testproto_pb, testproto_pb_size));
+	bool r = proto.ParseFromString(testproto_pb());
 
 	std::string s;
 	google::protobuf::TextFormat::PrintToString(proto, &s);
