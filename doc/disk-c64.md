@@ -47,9 +47,9 @@ Writing 1541 disks
 ------------------
 
 Just do:
-...
+```
 fluxengine write c64 -i file.d64
-...
+```
 
 Reading 1581 disks
 ------------------
