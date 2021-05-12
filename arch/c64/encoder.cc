@@ -5,6 +5,7 @@
 #include "c64.h"
 #include "crc.h"
 #include "sectorset.h"
+#include "sector.h"
 #include "writer.h"
 #include "fmt/format.h"
 #include <ctype.h>
@@ -216,74 +217,78 @@ try
    6. Inter-sector gap  55 55 55 55...55 55 (4 to 12 bytes, never read)
    1. Header sync       (SYNC for the next sector)
 */
-	if ((sector->data.size() != C64_SECTOR_LENGTH))
-		Error() << fmt::format("unsupported sector size {} --- you must pick 256", sector->data.size());	
+	if ((sector->status == Sector::OK) or (sector->status == Sector::BAD_CHECKSUM))
+	{	//There is data to encode to disk.
+		if ((sector->data.size() != C64_SECTOR_LENGTH))
+			Error() << fmt::format("unsupported sector size {} --- you must pick 256", sector->data.size());	
 
-	//1. Write header Sync (not GCR)
-	for (int i=0; i<6; i++)
-		write_bits(bits, cursor, C64_HEADER_DATA_SYNC, 1*8); /* sync */
+		//1. Write header Sync (not GCR)
+		for (int i=0; i<6; i++)
+			write_bits(bits, cursor, C64_HEADER_DATA_SYNC, 1*8); /* sync */
 
-	//2. Write Header info 10 GCR bytes
-/*
-	The 10 byte header info (#2) is GCR encoded and must be decoded  to  it's
-	normal 8 bytes to be understood. Once decoded, its breakdown is as follows:
+		//2. Write Header info 10 GCR bytes
+	/*
+		The 10 byte header info (#2) is GCR encoded and must be decoded  to  it's
+		normal 8 bytes to be understood. Once decoded, its breakdown is as follows:
 
-	Byte    	$00 - header block ID 			($08)
-				01 - header block checksum 16	(EOR of $02-$05)
-				02 - Sector
-				03 - Track
-				04 - Format ID byte #2
-				05 - Format ID byte #1
-				06-07 - $0F ("off" bytes)
-*/
-    uint8_t encodedTrack = ((sector->logicalTrack) + 1); // C64 track numbering starts with 1. Fluxengine with 0.
-	uint8_t encodedSector = sector->logicalSector;
-	uint8_t formatByte1 = C64_FORMAT_ID_BYTE1;
-	uint8_t formatByte2 = C64_FORMAT_ID_BYTE2;
-	uint8_t headerChecksum = (encodedTrack ^ encodedSector ^ formatByte1 ^ formatByte2);
-	write_bits(bits, cursor, encode_data(C64_HEADER_BLOCK_ID));
-	write_bits(bits, cursor, encode_data(headerChecksum));
-	write_bits(bits, cursor, encode_data(encodedSector));
-	write_bits(bits, cursor, encode_data(encodedTrack));
-	write_bits(bits, cursor, encode_data(formatByte1));
-	write_bits(bits, cursor, encode_data(formatByte2));
-	write_bits(bits, cursor, encode_data(C64_PADDING));
-	write_bits(bits, cursor, encode_data(C64_PADDING));
+		Byte    	$00 - header block ID 			($08)
+					01 - header block checksum 16	(EOR of $02-$05)
+					02 - Sector
+					03 - Track
+					04 - Format ID byte #2
+					05 - Format ID byte #1
+					06-07 - $0F ("off" bytes)
+	*/
+		uint8_t encodedTrack = ((sector->logicalTrack) + 1); // C64 track numbering starts with 1. Fluxengine with 0.
+		uint8_t encodedSector = sector->logicalSector;
+		uint8_t formatByte1 = C64_FORMAT_ID_BYTE1;
+		uint8_t formatByte2 = C64_FORMAT_ID_BYTE2;
+		uint8_t headerChecksum = (encodedTrack ^ encodedSector ^ formatByte1 ^ formatByte2);
+		write_bits(bits, cursor, encode_data(C64_HEADER_BLOCK_ID));
+		write_bits(bits, cursor, encode_data(headerChecksum));
+		write_bits(bits, cursor, encode_data(encodedSector));
+		write_bits(bits, cursor, encode_data(encodedTrack));
+		write_bits(bits, cursor, encode_data(formatByte1));
+		write_bits(bits, cursor, encode_data(formatByte2));
+		write_bits(bits, cursor, encode_data(C64_PADDING));
+		write_bits(bits, cursor, encode_data(C64_PADDING));
 
-	//3. Write header GAP not GCR
-	for (int i=0; i<9; i++)
-		write_bits(bits, cursor, C64_HEADER_GAP, 1*8); /* header gap */
+		//3. Write header GAP not GCR
+		for (int i=0; i<9; i++)
+			write_bits(bits, cursor, C64_HEADER_GAP, 1*8); /* header gap */
 
-	//4. Write Data sync not GCR
-	for (int i=0; i<6; i++)
-		write_bits(bits, cursor, C64_HEADER_DATA_SYNC, 1*8); /* sync */
+		//4. Write Data sync not GCR
+		for (int i=0; i<6; i++)
+			write_bits(bits, cursor, C64_HEADER_DATA_SYNC, 1*8); /* sync */
 
-	//5. Write data block 325 GCR bytes
-/*
-	The 325 byte data block (#5) is GCR encoded and must be  decoded  to  its
-	normal 260 bytes to be understood. The data block is made up of the following:
+		//5. Write data block 325 GCR bytes
+	/*
+		The 325 byte data block (#5) is GCR encoded and must be  decoded  to  its
+		normal 260 bytes to be understood. The data block is made up of the following:
 
-	Byte    $00 - data block ID ($07)
-			01-100 - 256 bytes data
-			101 - data block checksum (EOR of $01-100)
-			102-103 - $00 ("off" bytes, to make the sector size a multiple of 5)
-*/
-	write_bits(bits, cursor, encode_data(C64_DATA_BLOCK_ID));
-	uint8_t dataChecksum = xorBytes(sector->data);
-	ByteReader br(sector->data);
-	int i = 0;
-	for (i = 0; i < C64_SECTOR_LENGTH; i++)
-	{
-		uint8_t val = br.read_8();
-		write_bits(bits, cursor, encode_data(val));		
+		Byte    $00 - data block ID ($07)
+				01-100 - 256 bytes data
+				101 - data block checksum (EOR of $01-100)
+				102-103 - $00 ("off" bytes, to make the sector size a multiple of 5)
+	*/
+		write_bits(bits, cursor, encode_data(C64_DATA_BLOCK_ID));
+		uint8_t dataChecksum = xorBytes(sector->data);
+		ByteReader br(sector->data);
+		int i = 0;
+		for (i = 0; i < C64_SECTOR_LENGTH; i++)
+		{
+			uint8_t val = br.read_8();
+			write_bits(bits, cursor, encode_data(val));		
+		}
+		write_bits(bits, cursor, encode_data(dataChecksum));
+		write_bits(bits, cursor, encode_data(C64_PADDING));
+		write_bits(bits, cursor, encode_data(C64_PADDING));
+
+		//6. Write inter-sector gap 9 - 12 bytes nor gcr
+		for (int i=0; i<9; i++)
+			write_bits(bits, cursor, C64_INTER_SECTOR_GAP, 1*8); /* sync */
+
 	}
-	write_bits(bits, cursor, encode_data(dataChecksum));
-	write_bits(bits, cursor, encode_data(C64_PADDING));
-	write_bits(bits, cursor, encode_data(C64_PADDING));
-
-	//6. Write inter-sector gap 9 - 12 bytes nor gcr
-	for (int i=0; i<9; i++)
-		write_bits(bits, cursor, C64_INTER_SECTOR_GAP, 1*8); /* sync */
 }
 catch(const std::exception& e)
 {
