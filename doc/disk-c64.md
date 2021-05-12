@@ -43,6 +43,14 @@ complicated due to the way the tracks are different sizes and the odd sector
 size, so you need the special D64 or LDBS output formats to represent them
 sensibly. Don't use IMG unless you know what you're doing.
 
+Writing 1541 disks
+------------------
+
+Just do:
+...
+fluxengine write c64 -i file.d64
+...
+
 Reading 1581 disks
 ------------------
 
