@@ -11,6 +11,9 @@
 #include <ctype.h>
 #include "bytes.h"
 
+uint8_t formatByte1;
+uint8_t formatByte2;
+
 FlagGroup Commodore64EncoderFlags;
 
 static DoubleFlag postIndexGapUs(
@@ -241,15 +244,15 @@ try
 	*/
 		uint8_t encodedTrack = ((sector->logicalTrack) + 1); // C64 track numbering starts with 1. Fluxengine with 0.
 		uint8_t encodedSector = sector->logicalSector;
-		uint8_t formatByte1 = C64_FORMAT_ID_BYTE1;
-		uint8_t formatByte2 = C64_FORMAT_ID_BYTE2;
+		// uint8_t formatByte1 = C64_FORMAT_ID_BYTE1;
+		// uint8_t formatByte2 = C64_FORMAT_ID_BYTE2;
 		uint8_t headerChecksum = (encodedTrack ^ encodedSector ^ formatByte1 ^ formatByte2);
 		write_bits(bits, cursor, encode_data(C64_HEADER_BLOCK_ID));
 		write_bits(bits, cursor, encode_data(headerChecksum));
 		write_bits(bits, cursor, encode_data(encodedSector));
 		write_bits(bits, cursor, encode_data(encodedTrack));
-		write_bits(bits, cursor, encode_data(formatByte1));
 		write_bits(bits, cursor, encode_data(formatByte2));
+		write_bits(bits, cursor, encode_data(formatByte1));
 		write_bits(bits, cursor, encode_data(C64_PADDING));
 		write_bits(bits, cursor, encode_data(C64_PADDING));
 
@@ -298,12 +301,20 @@ catch(const std::exception& e)
 
 std::unique_ptr<Fluxmap> Commodore64Encoder::encode(
 	int physicalTrack, int physicalSide, const SectorSet& allSectors)
-{
+{ 	//the format ID Character # 1 and # 2 are in the .d64 image only present in track 18 sector zero which contains the BAM info in byte 162 and 163.
+	//it is written in every header of every sector and track. headers are not stored in a d64 disk image so we have to get it from track 18 which contains the BAM.
 	try
 	{
 		if ((physicalTrack < 0) || (physicalTrack >= C64_TRACKS_PER_DISK))
 			return std::unique_ptr<Fluxmap>();
 
+		const auto& sectorData = allSectors.get(C64_BAM_TRACK, 0, 0); //Read de BAM to get the DISK ID bytes
+
+		ByteReader br(sectorData->data);
+		br.seek(162); //goto position of the first Disk ID Byte
+		formatByte1 = br.read_8();
+		formatByte2 = br.read_8();
+		
 		double clockRateUs = clockRateUsForTrack(physicalTrack) * clockCompensation;
 
 		int bitsPerRevolution = 200000.0 / clockRateUs;
