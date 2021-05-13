@@ -1,6 +1,6 @@
 syntax = "proto2";
 
-import "lib/range.proto";
+import "lib/common.proto";
 
 message IBMInput {
 	optional int32 sector_base = 1 [default=0];
@@ -9,24 +9,19 @@ message IBMInput {
 }
 
 message IBMOutput {
-	enum FmMfm {
-		USE_MFM = 0;
-		USE_FM = 1;
-	}
-	
 	optional double track_length_ms = 1;
-	optional int32 sector_size_bytes = 2;
-	optional bool emit_iam = 3;
-	optional int32 start_sector_id = 4;
+	optional int32 sector_size = 2 [default=512];
+	optional bool emit_iam = 3 [default=true];
+	optional int32 start_sector_id = 4 [default=1];
 	optional double clock_rate_khz = 5;
-	optional FmMfm use_fm = 6 [default = USE_MFM];
-	optional int32 idam_byte = 7;
-	optional int32 dam_byte = 8;
-	optional int32 gap0 = 9;
-	optional int32 gap1 = 10;
-	optional int32 gap2 = 11;
-	optional int32 gap3 = 12;
+	optional bool use_fm = 6 [default=false];
+	optional int32 idam_byte = 7 [default=0x5554];
+	optional int32 dam_byte = 8 [default=0x5545];
+	optional int32 gap0 = 9 [default=80];
+	optional int32 gap1 = 10 [default=50];
+	optional int32 gap2 = 11 [default=22];
+	optional int32 gap3 = 12 [default=80];
 	optional string sector_skew = 13;
-	optional bool swap_sizes = 14;
+	optional bool swap_sides = 14 [default=false];
 }
 

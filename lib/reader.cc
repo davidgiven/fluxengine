@@ -136,9 +136,9 @@ void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWrit
 	SectorSet allSectors;
 	for (int cylinder : iterate(config.cylinders()))
 	{
-		for (int side : iterate(config.sides()))
+		for (int head : iterate(config.heads()))
 		{
-			auto track = std::make_unique<Track>(cylinder, side);
+			auto track = std::make_unique<Track>(cylinder, head);
 			track->fluxsource = &fluxsource;
 
 			std::map<int, std::unique_ptr<Sector>> readSectors;

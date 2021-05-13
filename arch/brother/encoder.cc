@@ -6,6 +6,7 @@
 #include "crc.h"
 #include "sectorset.h"
 #include "writer.h"
+#include "arch/brother/brother.pb.h"
 
 FlagGroup brotherEncoderFlags;
 
@@ -132,17 +133,17 @@ std::unique_ptr<Fluxmap> BrotherEncoder::encode(
 	int logicalTrack;
 	if (physicalSide != 0)
 		return std::unique_ptr<Fluxmap>();
-	physicalTrack -= _bias;
-	switch (_format)
+	physicalTrack -= _config.bias();
+	switch (_config.format())
 	{
-		case 120:
+		case BROTHER120:
 			if ((physicalTrack < 0) || (physicalTrack >= (BROTHER_TRACKS_PER_120KB_DISK*2))
 					|| (physicalTrack & 1))
 				return std::unique_ptr<Fluxmap>();
 			logicalTrack = physicalTrack/2;
 			break;
 
-		case 240:
+		case BROTHER240:
 			if ((physicalTrack < 0) || (physicalTrack >= BROTHER_TRACKS_PER_240KB_DISK))
 				return std::unique_ptr<Fluxmap>();
 			logicalTrack = physicalTrack;

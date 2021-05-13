@@ -1,0 +1,28 @@
+input {
+	file {
+		filename: "brother240.img"
+		img {
+			format {
+				sectors: 12
+				sector_size: 256
+			}
+		}
+	}
+}
+
+output {
+	disk {
+		brother {}
+	}
+}
+
+cylinders {
+	start: 0
+	end: 77
+}
+
+heads {
+	start: 0
+	end: 0
+}
+

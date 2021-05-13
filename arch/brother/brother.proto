@@ -2,11 +2,19 @@ syntax = "proto2";
 
 message BrotherInput {}
 
+enum BrotherFormat {
+	BROTHER240 = 0;
+	BROTHER120 = 1;
+};
+
 message BrotherOutput {
 	optional double clock_rate_us = 1 [default = 3.83];
 	optional double post_index_gap_ms = 2 [default = 1.0];
 	optional double sector_spacing_ms = 3 [default = 16.2];
 	optional double post_header_spacing_ms = 4 [default = 0.69];
 	optional string sector_skew = 5 [default = "05a3816b4927"];
+
+	optional BrotherFormat format = 6 [default = BROTHER240];
+	optional int32 bias = 7 [default = 0];
 }
 

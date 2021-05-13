@@ -4,7 +4,7 @@ import "arch/brother/brother.proto";
 import "arch/ibm/ibm.proto";
 import "lib/decoders/decoder.proto";
 import "lib/imagereader/img.proto";
-import "lib/range.proto";
+import "lib/common.proto";
 import "google/protobuf/descriptor.proto";
 
 extend google.protobuf.FieldOptions {
@@ -67,6 +67,6 @@ message Config {
 	optional Decoder decoder = 3;
 
 	optional Range cylinders = 4;
-	optional Range sides = 5;
+	optional Range heads = 5;
 }
 

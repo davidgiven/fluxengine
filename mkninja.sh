@@ -13,7 +13,7 @@ rule proto
     description = PROTO \$in
 
 rule protoencode
-    command = (echo '#include <string>' && echo 'static const char data[] = {' && ($PROTOC \$flags --encode=\$messagetype \$\$(cat \$def)< \$in | $XXD -i) && echo '}; extern std::string \$name(); std::string \$name() { return std::string(data, sizeof(data)); }') > \$out
+    command = (echo '#include <string>' && echo 'static const unsigned char data[] = {' && ($PROTOC \$flags --encode=\$messagetype \$\$(cat \$def)< \$in | $XXD -i) && echo '}; extern std::string \$name(); std::string \$name() { return std::string((const char*)data, sizeof(data)); }') > \$out
     description = PROTOENCODE \$in
 
 rule binencode
@@ -232,7 +232,7 @@ buildproto libproto.a \
     lib/config.proto \
     lib/decoders/decoder.proto \
     lib/imagereader/img.proto \
-    lib/range.proto \
+    lib/common.proto \
 
 buildlibrary libbackend.a \
     -I$OBJDIR/proto \
@@ -308,6 +308,14 @@ for pb in \
         readables_${pb}_pb src/readables/$pb.textpb $OBJDIR/proto/src/readables/$pb.cc
 done
 
+for pb in \
+    brother240 \
+    ibm1440 \
+; do
+    buildencodedproto $OBJDIR/proto/libproto.def Config \
+        writables_${pb}_pb src/writables/$pb.textpb $OBJDIR/proto/src/writables/$pb.cc
+done
+
 buildlibrary libfrontend.a \
     -I$OBJDIR/proto \
     src/fe-analysedriveresponse.cc \
@@ -319,18 +327,21 @@ buildlibrary libfrontend.a \
     src/fe-fluxtovcd.cc \
     src/fe-image.cc \
     src/fe-inspect.cc \
+    src/fe-read.cc \
     src/fe-rpm.cc \
     src/fe-scptoflux.cc \
     src/fe-seek.cc \
     src/fe-testbandwidth.cc \
     src/fe-testvoltages.cc \
     src/fe-upgradefluxfile.cc \
+    src/fe-write.cc \
     src/fe-writeflux.cc \
     src/fe-writetestpattern.cc \
-    src/fe-read.cc \
     src/fluxengine.cc \
     $OBJDIR/proto/src/readables/brother.cc \
     $OBJDIR/proto/src/readables/ibm.cc \
+    $OBJDIR/proto/src/writables/brother240.cc \
+    $OBJDIR/proto/src/writables/ibm1440.cc \
 
 #    src/fe-readadfs.cc \
 #    src/fe-readaeslanier.cc \

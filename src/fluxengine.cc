@@ -4,42 +4,21 @@ typedef int command_cb(int agrc, const char* argv[]);
 
 extern command_cb mainAnalyseDriveResponse;
 extern command_cb mainAnalyseLayout;
-extern command_cb mainErase;
 extern command_cb mainConvertCwfToFlux;
 extern command_cb mainConvertFluxToAu;
 extern command_cb mainConvertFluxToScp;
 extern command_cb mainConvertFluxToVcd;
 extern command_cb mainConvertImage;
 extern command_cb mainConvertScpToFlux;
+extern command_cb mainErase;
 extern command_cb mainInspect;
-extern command_cb mainReadADFS;
-extern command_cb mainReadAESLanier;
-extern command_cb mainReadAmiga;
-extern command_cb mainReadAmpro;
-extern command_cb mainReadApple2;
-extern command_cb mainReadAtariST;
-extern command_cb mainReadBrother;
-extern command_cb mainReadC64;
-extern command_cb mainReadDFS;
-extern command_cb mainReadF85;
-extern command_cb mainReadFB100;
-extern command_cb mainReadIBM;
-extern command_cb mainReadMac;
-extern command_cb mainReadMicropolis;
-extern command_cb mainReadMx;
-extern command_cb mainReadTiDs990;
-extern command_cb mainReadVictor9K;
-extern command_cb mainReadZilogMCZ;
+extern command_cb mainRead;
 extern command_cb mainRpm;
 extern command_cb mainSeek;
 extern command_cb mainTestBandwidth;
 extern command_cb mainTestVoltages;
 extern command_cb mainUpgradeFluxFile;
-extern command_cb mainWriteAmiga;
-extern command_cb mainWriteBrother;
-extern command_cb mainWriteIbm;
-extern command_cb mainWriteMac;
-extern command_cb mainWriteTiDs990;
+extern command_cb mainWrite;
 extern command_cb mainWriteFlux;
 extern command_cb mainWriteTestPattern;
 
@@ -50,8 +29,6 @@ struct Command
     std::string help;
 };
 
-extern command_cb mainRead;
-static command_cb mainWrite;
 static command_cb mainConvert;
 static command_cb mainAnalyse;
 static command_cb mainTest;
@@ -155,12 +132,6 @@ static int mainExtended(std::vector<Command>& subcommands, const std::string& co
     std::cerr << "fluxengine: unrecognised format (try --help)\n";
     return 1;
 }
-
-//static int mainRead(int argc, const char* argv[])
-//{ return mainExtended(readables, "read", argc, argv); }
-
-static int mainWrite(int argc, const char* argv[])
-{ return mainExtended(writeables, "write", argc, argv); }
 
 static int mainConvert(int argc, const char* argv[])
 { return mainExtended(convertables, "convert", argc, argv); }

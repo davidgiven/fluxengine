@@ -5,10 +5,12 @@ message ImgInputOutput {
 		optional int32 track = 1;
 		optional int32 side = 2;
 
-		optional int64 file_offset = 3;
-		optional int32 sector_size = 4;
+		optional int32 sector_size = 3 [default=512];
+		optional int32 sectors = 4;
 	}
 
 	repeated Format format = 4;
+	optional int32 tracks = 5 [default=80];
+	optional int32 sides = 6 [default=2];
 }
 

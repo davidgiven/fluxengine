@@ -16,6 +16,7 @@
 class Sector;
 class Fluxmap;
 class BrotherInput;
+class BrotherOutput;
 
 class BrotherDecoder : public AbstractDecoder
 {
@@ -31,20 +32,17 @@ public:
 class BrotherEncoder : public AbstractEncoder
 {
 public:
-	BrotherEncoder(int format, int bias):
-		_format(format),
-		_bias(bias)
+	BrotherEncoder(const BrotherOutput& config):
+		_config(config)
 	{}
 
 	virtual ~BrotherEncoder() {}
 
 private:
-	int _format;
-	int _bias;
+	const BrotherOutput& _config;
+
 public:
     std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors);
 };
-
-extern FlagGroup brotherEncoderFlags;
 
 #endif

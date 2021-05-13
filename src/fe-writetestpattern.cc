@@ -22,11 +22,12 @@ static DoubleFlag sequenceLength(
 
 int mainWriteTestPattern(int argc, const char* argv[])
 {
-    setWriterDefaultDest(":t=0-81:s=0-1");
     flags.parseFlags(argc, argv);
 
     unsigned ticksPerInterval = (unsigned) (interval * TICKS_PER_US);
 
+	Error() << "TODO";
+	#if 0
     writeTracks(
         [&](int physicalTrack, int physicalSide) -> std::unique_ptr<Fluxmap>
         {
@@ -41,6 +42,7 @@ int mainWriteTestPattern(int argc, const char* argv[])
 			return fluxmap;
         }
     );
+	#endif
 
     return 0;
 }

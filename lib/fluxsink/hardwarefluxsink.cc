@@ -64,6 +64,11 @@ public:
         return usbWrite(side, fluxmap.rawBytes(), _hardSectorThreshold);
     }
 
+	operator std::string () const
+	{
+		return fmt::format("drive {}", _drive);
+	}
+
 private:
     unsigned _drive;
     nanoseconds_t _hardSectorThreshold;

@@ -5,6 +5,7 @@
 #include "encoders/encoders.h"
 
 class IBMInput;
+class IBMOutput;
 
 /* IBM format (i.e. ordinary PC floppies). */
 
@@ -50,29 +51,11 @@ private:
     unsigned _currentHeaderLength;
 };
 
-struct IbmParameters
-{
-	int trackLengthMs;
-	int sectorSize;
-	bool emitIam;
-	int startSectorId;
-	int clockRateKhz;
-	bool useFm;
-	uint16_t idamByte;
-	uint16_t damByte;
-	int gap0;
-	int gap1;
-	int gap2;
-	int gap3;
-	std::string sectorSkew;
-	bool swapSides;
-};
-
 class IbmEncoder : public AbstractEncoder
 {
 public:
-	IbmEncoder(const IbmParameters& parameters):
-		_parameters(parameters)
+	IbmEncoder(const IBMOutput& config):
+		_config(config)
 	{}
 
 	virtual ~IbmEncoder() {}
@@ -87,7 +70,7 @@ private:
 	void writeSync();
 	
 private:
-	IbmParameters _parameters;
+	const IBMOutput& _config;
 	std::vector<bool> _bits;
 	unsigned _cursor;
 	bool _lastBit;

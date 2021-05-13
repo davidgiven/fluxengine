@@ -4,6 +4,7 @@
 #include "sector.h"
 #include "sectorset.h"
 #include "imagereader/imagereader.h"
+#include "lib/config.pb.h"
 #include "fmt/format.h"
 #include <algorithm>
 #include <iostream>
@@ -12,13 +13,13 @@
 class DiskCopyImageReader : public ImageReader
 {
 public:
-	DiskCopyImageReader(const ImageSpec& spec):
-		ImageReader(spec)
+	DiskCopyImageReader(const Config_InputFile& config):
+		ImageReader(config)
 	{}
 
 	SectorSet readImage()
 	{
-        std::ifstream inputFile(spec.filename, std::ios::in | std::ios::binary);
+        std::ifstream inputFile(_config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
             Error() << "cannot open input file";
 
@@ -120,9 +121,9 @@ public:
 };
 
 std::unique_ptr<ImageReader> ImageReader::createDiskCopyImageReader(
-	const ImageSpec& spec)
+	const Config_InputFile& config)
 {
-    return std::unique_ptr<ImageReader>(new DiskCopyImageReader(spec));
+    return std::unique_ptr<ImageReader>(new DiskCopyImageReader(config));
 }
 
 

@@ -16,7 +16,7 @@ cylinders {
 	end: 81
 }
 
-sides {
+heads {
 	start: 0
 	end: 1
 }

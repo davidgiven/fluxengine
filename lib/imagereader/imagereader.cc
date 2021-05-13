@@ -6,49 +6,20 @@
 #include "imagereader/imagereader.h"
 #include "utils.h"
 #include "fmt/format.h"
+#include "lib/config.pb.h"
 #include <algorithm>
 #include <ctype.h>
 
-std::map<std::string, ImageReader::Constructor> ImageReader::formats =
+std::unique_ptr<ImageReader> ImageReader::create(const Config_InputFile& config)
 {
-	{".adf", ImageReader::createImgImageReader},
-	{".d81", ImageReader::createImgImageReader},
-	{".diskcopy", ImageReader::createDiskCopyImageReader},
-	{".img", ImageReader::createImgImageReader},
-	{".ima", ImageReader::createImgImageReader},
-	{".jv1", ImageReader::createImgImageReader},
-	{".jv3", ImageReader::createJv3ImageReader},
-	{".st", ImageReader::createImgImageReader},
-	{".imd", ImageReader::createIMDImageReader},
-	{".IMD", ImageReader::createIMDImageReader},
-};
-
-ImageReader::Constructor ImageReader::findConstructor(const ImageSpec& spec)
-{
-    const auto& filename = spec.filename;
-
-	for (const auto& e : formats)
-	{
-		if (endsWith(filename, e.first))
-			return e.second;
-	}
-
-	return NULL;
+	if (config.has_img())
+		return ImageReader::createImgImageReader(config);
+	else
+		Error() << "bad input file config";
+	return std::unique_ptr<ImageReader>();
 }
 
-std::unique_ptr<ImageReader> ImageReader::create(const ImageSpec& spec)
-{
-    verifyImageSpec(spec);
-    return findConstructor(spec)(spec);
-}
-
-void ImageReader::verifyImageSpec(const ImageSpec& spec)
-{
-    if (!findConstructor(spec))
-        Error() << "unrecognised input image filename extension";
-}
-
-ImageReader::ImageReader(const ImageSpec& spec):
-    spec(spec)
+ImageReader::ImageReader(const Config_InputFile& config):
+    _config(config)
 {}
 

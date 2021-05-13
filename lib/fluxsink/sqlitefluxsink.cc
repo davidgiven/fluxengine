@@ -19,7 +19,8 @@ static SettableFlag overwriteFlag(
 class SqliteFluxSink : public FluxSink
 {
 public:
-    SqliteFluxSink(const std::string& filename)
+    SqliteFluxSink(const std::string& filename):
+		_filename(filename)
     {
 		if (mergeFlag && overwriteFlag)
 			Error() << "you can't specify --merge and --overwrite";
@@ -58,8 +59,15 @@ public:
         return sqlWriteFlux(_outdb, track, side, fluxmap);
     }
 
+
+	operator std::string () const
+	{
+		return fmt::format("fluxfile {}", _filename);
+	}
+
 private:
     sqlite3* _outdb;
+	std::string _filename;
 };
 
 std::unique_ptr<FluxSink> FluxSink::createSqliteFluxSink(const std::string& filename)
