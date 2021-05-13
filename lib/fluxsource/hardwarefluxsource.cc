@@ -9,7 +9,6 @@
 
 FlagGroup hardwareFluxSourceFlags = {
     &fluxSourceSinkFlags,
-    &usbFlags
 };
 
 class HardwareFluxSource : public FluxSource

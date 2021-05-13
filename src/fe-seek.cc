@@ -6,7 +6,6 @@
 
 static FlagGroup flags = {
 	&fluxSourceSinkFlags,
-	&usbFlags,
 };
 
 static IntFlag drive(
@@ -21,7 +20,7 @@ static IntFlag track(
 
 int mainSeek(int argc, const char* argv[])
 {
-    flags.parseFlags(argc, argv);
+    flags.parseFlagsWithConfigFiles(argc, argv, {});
 
     usbSetDrive(drive, false, F_INDEX_REAL);
 	if (fluxSourceSinkFortyTrack)

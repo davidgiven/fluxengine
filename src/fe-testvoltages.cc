@@ -4,9 +4,7 @@
 #include "protocol.h"
 #include <fmt/format.h>
 
-static FlagGroup flags = {
-	&usbFlags,
-};
+static FlagGroup flags;
 
 static std::string display_voltages(struct voltages& v)
 {
@@ -18,7 +16,7 @@ static std::string display_voltages(struct voltages& v)
 
 int mainTestVoltages(int argc, const char* argv[])
 {
-    flags.parseFlags(argc, argv);
+    flags.parseFlagsWithConfigFiles(argc, argv, {});
     struct voltages_frame f;
     usbMeasureVoltages(&f);
 

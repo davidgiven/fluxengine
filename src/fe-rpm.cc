@@ -4,9 +4,7 @@
 #include "dataspec.h"
 #include "protocol.h"
 
-static FlagGroup flags = {
-	&usbFlags,
-};
+static FlagGroup flags;
 
 static DataSpecFlag source(
     { "--source", "-s" },
@@ -20,7 +18,7 @@ static IntFlag hardSectorCount(
 
 int mainRpm(int argc, const char* argv[])
 {
-    flags.parseFlags(argc, argv);
+    flags.parseFlagsWithConfigFiles(argc, argv, {});
 
     FluxSpec spec(source);
     usbSetDrive(spec.drive, false, F_INDEX_REAL);

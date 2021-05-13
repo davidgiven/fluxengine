@@ -4,16 +4,10 @@
 #include "protocol.h"
 #include "fluxmap.h"
 #include "bytes.h"
+#include "proto.h"
 #include <libusb.h>
 #include "fmt/format.h"
 #include "greaseweazle.h"
-
-FlagGroup usbFlags;
-
-static StringFlag device(
-    { "--device" },
-    "serial number of hardware device to use",
-	"");
 
 static USB* usb = NULL;
 
@@ -124,23 +118,23 @@ static CandidateDevice& select_candidate(const std::map<std::string, std::unique
 	if (devices.size() == 0)
 		Error() << "no USB devices found (is one plugged in? Do you have permission to access USB devices?)";
 
-	if (device.get() == "")
+	if (!config.usb().has_device())
 	{
 		if (devices.size() == 1)
 			return *devices.begin()->second;
 
-		std::cout << "More than one USB device detected. Use --device to specify which one to use:\n";
+		std::cout << "More than one USB device detected. Use --usb.device to specify which one to use:\n";
 		for (auto& i : devices)
 			std::cout << "  " << device_type(i.second->type) << ": " << i.first << '\n';
 		Error() << "specify USB device";
 	}
 	else
 	{
-		const auto& i = devices.find(device);
+		const auto& i = devices.find(config.usb().device());
 		if (i != devices.end())
 			return *i->second;
 
-		Error() << "device with serial number '" << device.get() << "' not found";
+		Error() << "device with serial number '" << config.usb().device() << "' not found";
 	}
 }
 

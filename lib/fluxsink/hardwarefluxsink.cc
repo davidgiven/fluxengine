@@ -8,7 +8,6 @@
 
 FlagGroup hardwareFluxSinkFlags = {
 	&fluxSourceSinkFlags,
-	&usbFlags,
 };
 
 static IntFlag indexMode(

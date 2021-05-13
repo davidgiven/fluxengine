@@ -14,7 +14,6 @@
 
 static FlagGroup flags = {
 	&fluxSourceSinkFlags,
-	&usbFlags,
 };
 
 static DataSpecFlag dest(
@@ -182,7 +181,7 @@ static void draw_x_graticules(Agg2D& painter, double x1, double y1, double x2, d
 
 int mainAnalyseDriveResponse(int argc, const char* argv[])
 {
-    flags.parseFlags(argc, argv);
+    flags.parseFlagsWithConfigFiles(argc, argv, {});
 
     FluxSpec spec(dest);
 	if (spec.locations.size() != 1)

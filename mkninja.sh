@@ -248,12 +248,13 @@ buildlibrary libfmt.a \
 buildproto libproto.a \
     arch/brother/brother.proto \
     arch/ibm/ibm.proto \
-    lib/config.proto \
-    lib/encoders/encoders.proto \
-    lib/decoders/decoders.proto \
-    lib/imagereader/img.proto \
-    lib/fluxsource/fluxsource.proto \
     lib/common.proto \
+    lib/config.proto \
+    lib/decoders/decoders.proto \
+    lib/encoders/encoders.proto \
+    lib/fluxsource/fluxsource.proto \
+    lib/imagereader/img.proto \
+    lib/usb/usb.proto \
 
 buildlibrary libbackend.a \
     -I$OBJDIR/proto \
