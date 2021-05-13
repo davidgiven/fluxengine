@@ -31,7 +31,7 @@ static uint64_t toUint64(const std::string& value)
 	return d;
 }
 
-void setProtoByString(google::protobuf::Message* message, const std::string& path, const std::string& value)
+ProtoField resolveProtoPath(google::protobuf::Message* message, const std::string& path)
 {
 	std::string::size_type dot = path.rfind('.');
 	std::string leading = (dot == std::string::npos) ? "" : path.substr(0, dot);
@@ -62,6 +62,9 @@ void setProtoByString(google::protobuf::Message* message, const std::string& pat
 				else
 					message = reflection->MutableRepeatedMessage(message, field, 0);
 				break;
+
+			default:
+				Error() << "bad proto label " << field->label();
 		}
 
 		descriptor = message->GetDescriptor();
@@ -69,7 +72,15 @@ void setProtoByString(google::protobuf::Message* message, const std::string& pat
 
 	const auto* field = descriptor->FindFieldByName(trailing);
 	if (!field)
-		Error() << fmt::format("no such config field '{}' in '{}'", item, path);
+		Error() << fmt::format("no such config field '{}' in '{}'", trailing, path);
+
+	return std::make_pair(message, field);
+}
+
+void setProtoFieldFromString(ProtoField& protoField, const std::string& value)
+{
+	google::protobuf::Message* message = protoField.first;
+	const google::protobuf::FieldDescriptor* field = protoField.second;
 
 	const auto* reflection = message->GetReflection();
 	switch (field->type())
@@ -97,7 +108,16 @@ void setProtoByString(google::protobuf::Message* message, const std::string& pat
 		case google::protobuf::FieldDescriptor::TYPE_STRING:
 			reflection->SetString(message, field, value);
 			break;
+
+		default:
+			Error() << "can't set this config value type";
 	}
+}
+
+void setProtoByString(google::protobuf::Message* message, const std::string& path, const std::string& value)
+{
+	ProtoField protoField = resolveProtoPath(message, path);
+	setProtoFieldFromString(protoField, value);
 }
 
 std::set<unsigned> iterate(const RangeProto& range)

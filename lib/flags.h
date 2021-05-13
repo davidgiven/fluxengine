@@ -13,8 +13,14 @@ public:
     FlagGroup();
 
 public:
-    void parseFlags(int argc, const char* argv[]);
-    std::vector<std::string> parseFlagsWithFilenames(int argc, const char* argv[]);
+    void parseFlags(int argc, const char* argv[],
+		std::function<bool(const std::string&)> callback =
+			[](const auto&){ return false; });
+    std::vector<std::string> parseFlagsWithFilenames(int argc, const char* argv[],
+		std::function<bool(const std::string&)> callback =
+			[](const auto&){ return false; });
+	void parseFlagsWithConfigFiles(int argc, const char* argv[],
+			const std::map<std::string, std::string>& configFiles);
     void addFlag(Flag* flag);
     void checkInitialised() const;
 

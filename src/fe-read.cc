@@ -23,18 +23,7 @@ extern const std::map<std::string, std::string> readables;
 
 int mainRead(int argc, const char* argv[])
 {
-    std::vector<std::string> filenames = flags.parseFlagsWithFilenames(argc, argv);
-	for (const auto& filename : filenames)
-	{
-		const auto& it = readables.find(filename);
-		if (it != readables.end())
-		{
-			if (!config.ParseFromString(it->second))
-				Error() << "couldn't load config proto";
-		}
-		else
-			Error() << "configs in files not supported yet";
-	}
+    flags.parseFlagsWithConfigFiles(argc, argv, readables);
 
 	if (!config.has_input() || !config.has_output())
 		Error() << "incomplete config (did you remember to specify the format?)";
@@ -42,6 +31,7 @@ int mainRead(int argc, const char* argv[])
 	std::string s;
 	google::protobuf::TextFormat::PrintToString(config, &s);
 	std::cout << s << '\n';
+	exit(0);
 
 	std::unique_ptr<FluxSource> fluxSource(FluxSource::create(config.input().disk()));
 	std::unique_ptr<AbstractDecoder> decoder(AbstractDecoder::create(config.decoder()));

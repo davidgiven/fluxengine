@@ -1,6 +1,9 @@
 #include "globals.h"
 #include "flags.h"
+#include "proto.h"
+#include "utils.h"
 #include "fmt/format.h"
+#include <regex>
 
 static FlagGroup* currentFlagGroup;
 static std::vector<Flag*> all_flags;
@@ -30,7 +33,19 @@ void FlagGroup::addFlag(Flag* flag)
     _flags.push_back(flag);
 }
 
-std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc, const char* argv[])
+static bool setFallbackFlag(const std::string& key, const std::string& value, bool uses_that)
+{
+	if (!beginsWith(key, "--"))
+		Error() << "unrecognised flag; try --help";
+
+	std::string path = key.substr(2);
+	ProtoField protoField = resolveProtoPath(&config, path);
+	setProtoFieldFromString(protoField, value);
+	return true;
+}
+
+std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc, const char* argv[],
+		std::function<bool(const std::string&)> callback)
 {
     if (_initialised)
         throw std::runtime_error("called parseFlags() twice");
@@ -84,8 +99,9 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc, const char
         }
         else if (thisarg[0] != '-')
         {
-            /* This is a filename. */
-            filenames.push_back(thisarg);
+            /* This is a filename. Pass it to the callback, and if not consumed queue it. */
+			if (!callback(thisarg))
+				filenames.push_back(thisarg);
         }
         else
         {
@@ -127,11 +143,16 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc, const char
 
             auto flag = flags_by_name.find(key);
             if (flag == flags_by_name.end())
-                Error() << "unknown flag '" << key << "'; try --help";
-
-            flag->second->set(value);
-            if (usesthat && flag->second->hasArgument())
-                index++;
+			{
+				if (setFallbackFlag(key, value, usesthat))
+					index++;
+			}
+			else
+			{
+				flag->second->set(value);
+				if (usesthat && flag->second->hasArgument())
+					index++;
+			}
         }
 
         index++;
@@ -140,11 +161,30 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc, const char
     return filenames;
 }
 
-void FlagGroup::parseFlags(int argc, const char* argv[])
+void FlagGroup::parseFlags(int argc, const char* argv[],
+		std::function<bool(const std::string&)> callback)
 {
-    auto filenames = parseFlagsWithFilenames(argc, argv);
+    auto filenames = parseFlagsWithFilenames(argc, argv, callback);
     if (!filenames.empty())
         Error() << "non-option parameter " << *filenames.begin() << " seen (try --help)";
+}
+
+void FlagGroup::parseFlagsWithConfigFiles(int argc, const char* argv[],
+		const std::map<std::string, std::string>& configFiles)
+{
+    parseFlags(argc, argv,
+		[&](const auto& filename) {
+			const auto& it = configFiles.find(filename);
+			if (it != configFiles.end())
+			{
+				if (!config.ParseFromString(it->second))
+					Error() << "couldn't load config proto";
+			}
+			else
+				Error() << "configs in files not supported yet";
+			return true;
+		}
+	);
 }
 
 void FlagGroup::checkInitialised() const

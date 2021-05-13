@@ -29,11 +29,13 @@ static void test_setting(void)
 	setProtoByString(&config, "m.s", "string");
 	setProtoByString(&config, "r.s", "val1");
 	setProtoByString(&config, "r.s", "val2");
+	setProtoByString(&config, "firstoption.s", "1");
+	setProtoByString(&config, "secondoption.s", "2");
 
 	std::string s;
 	google::protobuf::TextFormat::PrintToString(config, &s);
 	s = cleanup(s);
-	AssertThat(s, Equals("i64: -1 i32: -2 u64: 3 u32: 4 d: 5.5 m { s: \"string\" } r { s: \"val2\" }"));
+	AssertThat(s, Equals("i64: -1 i32: -2 u64: 3 u32: 4 d: 5.5 m { s: \"string\" } r { s: \"val2\" } secondoption { s: \"2\" }"));
 }
 
 static void test_config(void)

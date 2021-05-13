@@ -23,18 +23,7 @@ extern const std::map<std::string, std::string> writables;
 
 int mainWrite(int argc, const char* argv[])
 {
-    std::vector<std::string> filenames = flags.parseFlagsWithFilenames(argc, argv);
-	for (const auto& filename : filenames)
-	{
-		const auto& it = writables.find(filename);
-		if (it != writables.end())
-		{
-			if (!config.ParseFromString(it->second))
-				Error() << "couldn't load config proto";
-		}
-		else
-			Error() << "configs in files not supported yet";
-	}
+    flags.parseFlagsWithConfigFiles(argc, argv, writables);
 
 	if (!config.has_input() || !config.has_output())
 		Error() << "incomplete config (did you remember to specify the format?)";
