@@ -2,7 +2,7 @@ syntax = "proto2";
 
 import "arch/brother/brother.proto";
 import "arch/ibm/ibm.proto";
-import "lib/common.proto";
+//import "lib/common.proto";
 
 message Encoder {
 	oneof format {

@@ -19,12 +19,14 @@
 
 static FlagGroup flags { &readerFlags };
 
+extern std::string readables_acorndfs_pb();
 extern std::string readables_brother_pb();
 extern std::string readables_ibm_pb();
 
 static std::map<std::string, std::function<std::string()>> readables = {
-	{ "brother", readables_brother_pb },
-	{ "ibm",     readables_ibm_pb },
+	{ "acorndfs", readables_acorndfs_pb },
+	{ "brother",  readables_brother_pb },
+	{ "ibm",      readables_ibm_pb },
 };
 
 int mainRead(int argc, const char* argv[])

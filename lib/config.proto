@@ -17,7 +17,7 @@ message Config {
 	message InputDisk {
 		oneof source {
 			string fluxfile = 1;
-			int32 drive = 2 [default = 0];
+			HardwareInput drive = 2;
 			TestPatternInput test_pattern = 3;
 		}
 	}

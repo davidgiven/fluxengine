@@ -8,6 +8,7 @@ extern FlagGroup hardwareFluxSourceFlags;
 class Fluxmap;
 class FluxSpec;
 class Config_InputDisk;
+class HardwareInput;
 class TestPatternInput;
 
 class FluxSource
@@ -17,7 +18,7 @@ public:
 
 private:
     static std::unique_ptr<FluxSource> createSqliteFluxSource(const std::string& filename);
-    static std::unique_ptr<FluxSource> createHardwareFluxSource(unsigned drive);
+    static std::unique_ptr<FluxSource> createHardwareFluxSource(const HardwareInput& config);
     static std::unique_ptr<FluxSource> createStreamFluxSource(const std::string& path);
     static std::unique_ptr<FluxSource> createTestPatternFluxSource(const TestPatternInput& config);
 

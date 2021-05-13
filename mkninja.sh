@@ -304,6 +304,7 @@ buildlibrary libbackend.a \
     lib/writer.cc \
 
 for pb in \
+    acorndfs \
     brother \
     ibm \
 ; do
@@ -321,6 +322,11 @@ done
 
 buildlibrary libfrontend.a \
     -I$OBJDIR/proto \
+    $OBJDIR/proto/src/readables/acorndfs.cc \
+    $OBJDIR/proto/src/readables/brother.cc \
+    $OBJDIR/proto/src/readables/ibm.cc \
+    $OBJDIR/proto/src/writables/brother240.cc \
+    $OBJDIR/proto/src/writables/ibm1440.cc \
     src/fe-analysedriveresponse.cc \
     src/fe-analyselayout.cc \
     src/fe-cwftoflux.cc \
@@ -340,10 +346,6 @@ buildlibrary libfrontend.a \
     src/fe-write.cc \
     src/fe-writeflux.cc \
     src/fluxengine.cc \
-    $OBJDIR/proto/src/readables/brother.cc \
-    $OBJDIR/proto/src/readables/ibm.cc \
-    $OBJDIR/proto/src/writables/brother240.cc \
-    $OBJDIR/proto/src/writables/ibm1440.cc \
 
 #    src/fe-readadfs.cc \
 #    src/fe-readaeslanier.cc \
@@ -353,7 +355,6 @@ buildlibrary libfrontend.a \
 #    src/fe-readatarist.cc \
 #    src/fe-readbrother.cc \
 #    src/fe-readc64.cc \
-#    src/fe-readdfs.cc \
 #    src/fe-readf85.cc \
 #    src/fe-readfb100.cc \
 #    src/fe-readibm.cc \
