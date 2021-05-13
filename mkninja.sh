@@ -35,6 +35,10 @@ rule test
 rule strip
     command = cp -f \$in \$out && $STRIP \$out
     description = STRIP \$in
+
+rule mktable
+    command = sh scripts/mktable.sh \$kind \$words > \$out
+    description = MKTABLE \$kind
 EOF
 
 buildlibrary() {
@@ -105,8 +109,10 @@ buildproto() {
     cfiles=
     for src in "$@"; do
         local cfile
+        local hfile
         cfile="$OBJDIR/proto/${src%%.proto}.pb.cc"
-        cfiles="$cfiles $cfile"
+        hfile="$OBJDIR/proto/${src%%.proto}.pb.h"
+        cfiles="$cfiles $cfile $hfile"
     done
 
     echo build $cfiles $def : proto $@
@@ -195,6 +201,19 @@ buildsimpleprogram() {
 
     buildlibrary lib$prog.a $flags $src
     buildprogram $prog lib$prog.a "$@"
+}
+
+buildmktable() {
+    local kind
+    local out
+    kind=$1
+    out=$2
+    shift
+    shift
+
+    echo "build $out : mktable scripts/mktable.sh"
+    echo "    words=$@"
+    echo "    kind=$kind"
 }
 
 runtest() {
@@ -303,30 +322,37 @@ buildlibrary libbackend.a \
     lib/utils.cc \
     lib/writer.cc \
 
-for pb in \
+READABLES="\
+    acornadfs \
     acorndfs \
     brother \
     ibm \
-; do
+    "
+
+WRITABLES="\
+    brother240 \
+    ibm1440 \
+    "
+
+for pb in $READABLES; do
     buildencodedproto $OBJDIR/proto/libproto.def ConfigProto \
         readables_${pb}_pb src/readables/$pb.textpb $OBJDIR/proto/src/readables/$pb.cc
 done
 
-for pb in \
-    brother240 \
-    ibm1440 \
-; do
+for pb in $WRITABLES; do
     buildencodedproto $OBJDIR/proto/libproto.def ConfigProto \
         writables_${pb}_pb src/writables/$pb.textpb $OBJDIR/proto/src/writables/$pb.cc
 done
 
+buildmktable readables $OBJDIR/readables.cc $READABLES
+buildmktable writables $OBJDIR/writables.cc $WRITABLES
+
 buildlibrary libfrontend.a \
     -I$OBJDIR/proto \
-    $OBJDIR/proto/src/readables/acorndfs.cc \
-    $OBJDIR/proto/src/readables/brother.cc \
-    $OBJDIR/proto/src/readables/ibm.cc \
-    $OBJDIR/proto/src/writables/brother240.cc \
-    $OBJDIR/proto/src/writables/ibm1440.cc \
+    $(for a in $READABLES; do echo $OBJDIR/proto/src/readables/$a.cc; done) \
+    $(for a in $WRITABLES; do echo $OBJDIR/proto/src/writables/$a.cc; done) \
+    $OBJDIR/readables.cc \
+    $OBJDIR/writables.cc \
     src/fe-analysedriveresponse.cc \
     src/fe-analyselayout.cc \
     src/fe-cwftoflux.cc \
@@ -347,7 +373,6 @@ buildlibrary libfrontend.a \
     src/fe-writeflux.cc \
     src/fluxengine.cc \
 
-#    src/fe-readadfs.cc \
 #    src/fe-readaeslanier.cc \
 #    src/fe-readamiga.cc \
 #    src/fe-readampro.cc \

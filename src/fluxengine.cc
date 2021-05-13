@@ -20,7 +20,6 @@ extern command_cb mainTestVoltages;
 extern command_cb mainUpgradeFluxFile;
 extern command_cb mainWrite;
 extern command_cb mainWriteFlux;
-extern command_cb mainWriteTestPattern;
 
 struct Command
 {
@@ -46,7 +45,6 @@ static std::vector<Command> commands =
     { "upgradefluxfile",   mainUpgradeFluxFile,   "Upgrades a flux file from a previous version of this software.", },
     { "write",             mainWrite,             "Writes a sector image to a disk.", },
     { "writeflux",         mainWriteFlux,         "Writes a raw flux file. Warning: you can't use this to copy disks.", },
-    { "writetestpattern",  mainWriteTestPattern,  "Writes a machine-generated test pattern to a disk.", },
 };
 
 static std::vector<Command> readables =

@@ -6,7 +6,7 @@ input {
 
 output {
 	file {
-		filename: "acorndfs.img"
+		filename: "acornadfs.img"
 		img {}
 	}
 }
@@ -24,7 +24,6 @@ cylinders {
 
 heads {
 	start: 0
-	end: 0
+	end: 1
 }
-
 

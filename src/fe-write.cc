@@ -19,22 +19,17 @@
 
 static FlagGroup flags { &writerFlags };
 
-extern std::string writables_brother240_pb();
-extern std::string writables_ibm1440_pb();
-
-static std::map<std::string, std::function<std::string()>> writables = {
-	{ "brother240", writables_brother240_pb },
-	{ "ibm1440",    writables_ibm1440_pb },
-};
+extern const std::map<std::string, std::string> writables;
 
 int mainWrite(int argc, const char* argv[])
 {
     std::vector<std::string> filenames = flags.parseFlagsWithFilenames(argc, argv);
 	for (const auto& filename : filenames)
 	{
-		if (writables.find(filename) != writables.end())
+		const auto& it = writables.find(filename);
+		if (it != writables.end())
 		{
-			if (!config.ParseFromString(writables[filename]()))
+			if (!config.ParseFromString(it->second))
 				Error() << "couldn't load config proto";
 		}
 		else

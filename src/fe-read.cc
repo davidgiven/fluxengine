@@ -19,24 +19,17 @@
 
 static FlagGroup flags { &readerFlags };
 
-extern std::string readables_acorndfs_pb();
-extern std::string readables_brother_pb();
-extern std::string readables_ibm_pb();
-
-static std::map<std::string, std::function<std::string()>> readables = {
-	{ "acorndfs", readables_acorndfs_pb },
-	{ "brother",  readables_brother_pb },
-	{ "ibm",      readables_ibm_pb },
-};
+extern const std::map<std::string, std::string> readables;
 
 int mainRead(int argc, const char* argv[])
 {
     std::vector<std::string> filenames = flags.parseFlagsWithFilenames(argc, argv);
 	for (const auto& filename : filenames)
 	{
-		if (readables.find(filename) != readables.end())
+		const auto& it = readables.find(filename);
+		if (it != readables.end())
 		{
-			if (!config.ParseFromString(readables[filename]()))
+			if (!config.ParseFromString(it->second))
 				Error() << "couldn't load config proto";
 		}
 		else
