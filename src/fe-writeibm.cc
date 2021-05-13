@@ -116,6 +116,54 @@ static ActionFlag preset720(
 		set_ibm_defaults();
 	});
 
+static ActionFlag preset1200(
+	{ "--ibm-preset-1200" },
+	"Preset parameters to a PC 5.25\" 1.2MB disk.",
+	[] {
+		setWriterDefaultInput(":c=80:h=2:s=15:b=512");
+		setWriterDefaultDest(":t=0-79");
+		trackLengthMs.setDefaultValue(167);
+		clockRateKhz.setDefaultValue(500);
+		sectorSkew.setDefaultValue("0123456789abcde");
+		set_ibm_defaults();
+	});
+
+static ActionFlag preset720_qd(
+	{ "--ibm-preset-720-qd" },
+	"Preset parameters to a PC 5.25\" 720kB disk in a high-density drive.",
+	[] {
+		setWriterDefaultInput(":c=80:h=2:s=9:b=512");
+		setWriterDefaultDest(":t=0-79");
+		trackLengthMs.setDefaultValue(167);
+		clockRateKhz.setDefaultValue(300);
+		sectorSkew.setDefaultValue("012345678");
+		set_ibm_defaults();
+	});
+
+static ActionFlag preset360_hd(
+	{ "--ibm-preset-360-hd" },
+	"Preset parameters to a PC 5.25\" 360kB disk in a high-density drive.",
+	[] {
+		setWriterDefaultInput(":c=40:h=2:s=9:b=512");
+		setWriterDefaultDest(":t=0-79x2");
+		trackLengthMs.setDefaultValue(167);
+		clockRateKhz.setDefaultValue(300);
+		sectorSkew.setDefaultValue("012345678");
+		set_ibm_defaults();
+	});
+
+static ActionFlag preset360_dd(
+	{ "--ibm-preset-360-dd" },
+	"Preset parameters to a PC 5.25\" 360kB disk in a double-density drive.",
+	[] {
+		setWriterDefaultInput(":c=40:h=2:s=9:b=512");
+		setWriterDefaultDest(":t=0-39");
+		trackLengthMs.setDefaultValue(200);
+		clockRateKhz.setDefaultValue(250);
+		sectorSkew.setDefaultValue("012345678");
+		set_ibm_defaults();
+	});
+
 /* --- Commodore disks ----------------------------------------------------- */
 
 static ActionFlag presetCBM1581(
