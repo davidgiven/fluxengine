@@ -6,7 +6,7 @@ enum IndexMode {
 	INDEXMODE_360 = 2;
 }
 
-message HardwareInput {
+message HardwareInputProto {
 	optional int32 drive = 1 [default = 0];
 	optional double revolutions = 2 [default = 1.2];
 
@@ -16,7 +16,7 @@ message HardwareInput {
 	optional bool high_density = 6 [default = true];
 }
 
-message TestPatternInput {
+message TestPatternInputProto {
 	optional double interval_us = 1 [default = 4.0];
 	optional double sequence_length_us = 2 [default = 200.0];
 }

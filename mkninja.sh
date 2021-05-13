@@ -308,7 +308,7 @@ for pb in \
     brother \
     ibm \
 ; do
-    buildencodedproto $OBJDIR/proto/libproto.def Config \
+    buildencodedproto $OBJDIR/proto/libproto.def ConfigProto \
         readables_${pb}_pb src/readables/$pb.textpb $OBJDIR/proto/src/readables/$pb.cc
 done
 
@@ -316,7 +316,7 @@ for pb in \
     brother240 \
     ibm1440 \
 ; do
-    buildencodedproto $OBJDIR/proto/libproto.def Config \
+    buildencodedproto $OBJDIR/proto/libproto.def ConfigProto \
         writables_${pb}_pb src/writables/$pb.textpb $OBJDIR/proto/src/writables/$pb.cc
 done
 

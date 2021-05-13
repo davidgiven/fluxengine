@@ -15,7 +15,7 @@ FlagGroup hardwareFluxSourceFlags = {
 class HardwareFluxSource : public FluxSource
 {
 public:
-    HardwareFluxSource(const HardwareInput& config):
+    HardwareFluxSource(const HardwareInputProto& config):
         _config(config)
     {
         usbSetDrive(_config.drive(), fluxSourceSinkHighDensity, _config.index_mode());
@@ -56,12 +56,12 @@ public:
     }
 
 private:
-    const HardwareInput& _config;
+    const HardwareInputProto& _config;
     nanoseconds_t _oneRevolution;
     nanoseconds_t _hardSectorThreshold;
 };
 
-std::unique_ptr<FluxSource> FluxSource::createHardwareFluxSource(const HardwareInput& config)
+std::unique_ptr<FluxSource> FluxSource::createHardwareFluxSource(const HardwareInputProto& config)
 {
     return std::unique_ptr<FluxSource>(new HardwareFluxSource(config));
 }

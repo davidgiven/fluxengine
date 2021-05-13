@@ -2,7 +2,7 @@
 #include "proto.h"
 #include "fmt/format.h"
 
-Config config;
+ConfigProto config;
 
 static double toDouble(const std::string& value)
 {
@@ -100,7 +100,7 @@ void setProtoByString(google::protobuf::Message* message, const std::string& pat
 	}
 }
 
-std::set<unsigned> iterate(const Range& range)
+std::set<unsigned> iterate(const RangeProto& range)
 {
 	std::set<unsigned> set;
 	for (unsigned i=range.start(); i<=range.end(); i+=range.step())

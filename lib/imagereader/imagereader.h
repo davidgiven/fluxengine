@@ -3,28 +3,28 @@
 
 class SectorSet;
 class ImageSpec;
-class Config_InputFile;
+class InputFileProto;
 
 class ImageReader
 {
 public:
-	ImageReader(const Config_InputFile& config);
+	ImageReader(const InputFileProto& config);
 	virtual ~ImageReader() {};
 
 public:
-    static std::unique_ptr<ImageReader> create(const Config_InputFile& config);
+    static std::unique_ptr<ImageReader> create(const InputFileProto& config);
 
 public:
-    static std::unique_ptr<ImageReader> createDiskCopyImageReader(const Config_InputFile& config);
-    static std::unique_ptr<ImageReader> createImgImageReader(const Config_InputFile& config);
-    static std::unique_ptr<ImageReader> createJv3ImageReader(const Config_InputFile& config);
-    static std::unique_ptr<ImageReader> createIMDImageReader(const Config_InputFile& config);
+    static std::unique_ptr<ImageReader> createDiskCopyImageReader(const InputFileProto& config);
+    static std::unique_ptr<ImageReader> createImgImageReader(const InputFileProto& config);
+    static std::unique_ptr<ImageReader> createJv3ImageReader(const InputFileProto& config);
+    static std::unique_ptr<ImageReader> createIMDImageReader(const InputFileProto& config);
 
 public:
 	virtual SectorSet readImage() = 0;
 
 protected:
-	const Config_InputFile& _config;
+	const InputFileProto& _config;
 };
 
 #endif

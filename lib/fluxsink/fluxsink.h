@@ -8,7 +8,7 @@ extern FlagGroup hardwareFluxSinkFlags;
 extern FlagGroup sqliteFluxSinkFlags;
 
 class Fluxmap;
-class Config_OutputDisk;
+class OutputDiskProto;
 
 class FluxSink
 {
@@ -18,7 +18,7 @@ public:
     static std::unique_ptr<FluxSink> createSqliteFluxSink(const std::string& filename);
     static std::unique_ptr<FluxSink> createHardwareFluxSink(unsigned drive);
 
-    static std::unique_ptr<FluxSink> create(const Config_OutputDisk& config);
+    static std::unique_ptr<FluxSink> create(const OutputDiskProto& config);
 
 public:
     virtual void writeFlux(int track, int side, Fluxmap& fluxmap) = 0;

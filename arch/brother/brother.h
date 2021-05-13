@@ -16,13 +16,13 @@
 class Sector;
 class SectorSet;
 class Fluxmap;
-class BrotherInput;
-class BrotherOutput;
+class BrotherInputProto;
+class BrotherOutputProto;
 
 class BrotherDecoder : public AbstractDecoder
 {
 public:
-    BrotherDecoder(const BrotherInput& config) {}
+    BrotherDecoder(const BrotherInputProto& config) {}
     virtual ~BrotherDecoder() {}
 
     RecordType advanceToNextRecord();
@@ -33,14 +33,14 @@ public:
 class BrotherEncoder : public AbstractEncoder
 {
 public:
-	BrotherEncoder(const BrotherOutput& config):
+	BrotherEncoder(const BrotherOutputProto& config):
 		_config(config)
 	{}
 
 	virtual ~BrotherEncoder() {}
 
 private:
-	const BrotherOutput& _config;
+	const BrotherOutputProto& _config;
 
 public:
     std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors);

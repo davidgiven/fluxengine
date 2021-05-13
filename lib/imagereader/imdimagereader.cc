@@ -85,7 +85,7 @@ static unsigned getSectorSize(uint8_t flags)
 class IMDImageReader : public ImageReader
 {
 public:
-	IMDImageReader(const Config_InputFile& config):
+	IMDImageReader(const InputFileProto& config):
 		ImageReader(config)
 	{}
 
@@ -274,7 +274,7 @@ public:
 };
 
 std::unique_ptr<ImageReader> ImageReader::createIMDImageReader(
-	const Config_InputFile& config)
+	const InputFileProto& config)
 {
     return std::unique_ptr<ImageReader>(new IMDImageReader(config));
 }

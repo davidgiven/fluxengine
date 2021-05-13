@@ -3,14 +3,14 @@
 
 class Fluxmap;
 class SectorSet;
-class Encoder;
+class EncoderProto;
 
 class AbstractEncoder
 {
 public:
     virtual ~AbstractEncoder() {}
 
-	static std::unique_ptr<AbstractEncoder> create(const Encoder& config);
+	static std::unique_ptr<AbstractEncoder> create(const EncoderProto& config);
 
 public:
     virtual std::unique_ptr<Fluxmap> encode(

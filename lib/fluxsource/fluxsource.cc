@@ -11,17 +11,17 @@ static bool ends_with(const std::string& value, const std::string& ending)
     return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
 }
 
-std::unique_ptr<FluxSource> FluxSource::create(const Config_InputDisk& config)
+std::unique_ptr<FluxSource> FluxSource::create(const InputDiskProto& config)
 {
 	switch (config.source_case())
 	{
-		case Config_InputDisk::kFluxfile:
+		case InputDiskProto::kFluxfile:
 			return createSqliteFluxSource(config.fluxfile());
 
-		case Config_InputDisk::kDrive:
+		case InputDiskProto::kDrive:
 			return createHardwareFluxSource(config.drive());
 
-		case Config_InputDisk::kTestPattern:
+		case InputDiskProto::kTestPattern:
 			return createTestPatternFluxSource(config.test_pattern());
 	}
 

@@ -13,7 +13,7 @@
 class ImgImageReader : public ImageReader
 {
 public:
-	ImgImageReader(const Config_InputFile& config):
+	ImgImageReader(const InputFileProto& config):
 		ImageReader(config)
 	{}
 
@@ -28,7 +28,7 @@ public:
         {
             for (int side = 0; side < _config.img().sides(); side++)
             {
-				ImgInputOutput::Format format;
+				ImgInputOutputProto::FormatProto format;
 				getTrackFormat(format, track, side);
 
                 for (int sectorId = 0; sectorId < format.sectors(); sectorId++)
@@ -58,10 +58,10 @@ public:
 	}
 
 private:
-	void getTrackFormat(ImgInputOutput::Format& format, unsigned track, unsigned side)
+	void getTrackFormat(ImgInputOutputProto::FormatProto& format, unsigned track, unsigned side)
 	{
 		format.Clear();
-		for (const ImgInputOutput::Format& f : _config.img().format())
+		for (const ImgInputOutputProto::FormatProto& f : _config.img().format())
 		{
 			if (f.has_track() && (f.track() != track))
 				continue;
@@ -74,7 +74,7 @@ private:
 };
 
 std::unique_ptr<ImageReader> ImageReader::createImgImageReader(
-	const Config_InputFile& config)
+	const InputFileProto& config)
 {
     return std::unique_ptr<ImageReader>(new ImgImageReader(config));
 }

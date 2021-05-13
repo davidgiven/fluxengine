@@ -7,7 +7,7 @@
 class TestPatternFluxSource : public FluxSource
 {
 public:
-    TestPatternFluxSource(const TestPatternInput& config):
+    TestPatternFluxSource(const TestPatternInputProto& config):
 		_config(config)
     {}
 
@@ -30,10 +30,10 @@ public:
     void recalibrate() {}
 
 private:
-	const TestPatternInput& _config;
+	const TestPatternInputProto& _config;
 };
 
-std::unique_ptr<FluxSource> FluxSource::createTestPatternFluxSource(const TestPatternInput& config)
+std::unique_ptr<FluxSource> FluxSource::createTestPatternFluxSource(const TestPatternInputProto& config)
 {
     return std::unique_ptr<FluxSource>(new TestPatternFluxSource(config));
 }

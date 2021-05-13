@@ -1,7 +1,7 @@
 syntax = "proto2";
 
-message ImgInputOutput {
-	message Format {
+message ImgInputOutputProto {
+	message FormatProto {
 		optional int32 track = 1;
 		optional int32 side = 2;
 
@@ -9,7 +9,7 @@ message ImgInputOutput {
 		optional int32 sectors = 4;
 	}
 
-	repeated Format format = 4;
+	repeated FormatProto format = 4;
 	optional int32 tracks = 5 [default=80];
 	optional int32 sides = 6 [default=2];
 }

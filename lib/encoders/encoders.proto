@@ -4,9 +4,9 @@ import "arch/brother/brother.proto";
 import "arch/ibm/ibm.proto";
 //import "lib/common.proto";
 
-message Encoder {
+message EncoderProto {
 	oneof format {
-		IBMOutput ibm = 3;
-		BrotherOutput brother = 4;
+		IBMOutputProto ibm = 3;
+		BrotherOutputProto brother = 4;
 	}
 }

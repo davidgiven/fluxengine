@@ -38,7 +38,7 @@ static void test_setting(void)
 
 static void test_config(void)
 {
-	Config config;
+	ConfigProto config;
 
 	const std::string text = R"M(
 		input {
@@ -78,7 +78,7 @@ static void test_load(void)
 static void test_range(void)
 {
 	{
-		Range r;
+		RangeProto r;
 		r.set_start(0);
 		r.set_end(3);
 		r.add_also(5);
@@ -87,7 +87,7 @@ static void test_range(void)
 	}
 
 	{
-		Range r;
+		RangeProto r;
 		r.set_start(1);
 		r.set_end(1);
 		r.add_also(5);

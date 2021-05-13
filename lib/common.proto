@@ -2,9 +2,7 @@ syntax = "proto2";
 
 import "google/protobuf/descriptor.proto";
 
-message None {}
-
-message Range {
+message RangeProto {
 	optional int32 start = 1;
 	optional int32 step = 2 [default = 1];
 	optional int32 end = 3;

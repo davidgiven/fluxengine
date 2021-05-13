@@ -14,7 +14,7 @@
 class LDBSImageWriter : public ImageWriter
 {
 public:
-	LDBSImageWriter(const Config_OutputFile& config):
+	LDBSImageWriter(const OutputFileProto& config):
 		ImageWriter(config)
 	{}
 
@@ -102,7 +102,7 @@ public:
     }
 };
 
-std::unique_ptr<ImageWriter> ImageWriter::createLDBSImageWriter(const Config_OutputFile& config)
+std::unique_ptr<ImageWriter> ImageWriter::createLDBSImageWriter(const OutputFileProto& config)
 {
     return std::unique_ptr<ImageWriter>(new LDBSImageWriter(config));
 }

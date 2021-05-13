@@ -23,7 +23,7 @@ std::map<std::string, ImageWriter::Constructor> ImageWriter::formats =
 };
 #endif
 
-std::unique_ptr<ImageWriter> ImageWriter::create(const Config_OutputFile& config)
+std::unique_ptr<ImageWriter> ImageWriter::create(const OutputFileProto& config)
 {
 	if (config.has_img())
 		return ImageWriter::createImgImageWriter(config);
@@ -37,7 +37,7 @@ std::unique_ptr<ImageWriter> ImageWriter::create(const Config_OutputFile& config
 //		Error() << "unrecognised output image filename extension";
 //}
 
-ImageWriter::ImageWriter(const Config_OutputFile& config):
+ImageWriter::ImageWriter(const OutputFileProto& config):
 	_config(config)
 {}
 

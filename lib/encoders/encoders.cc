@@ -7,14 +7,14 @@
 #include "lib/encoders/encoders.pb.h"
 #include "protocol.h"
 
-std::unique_ptr<AbstractEncoder> AbstractEncoder::create(const Encoder& config)
+std::unique_ptr<AbstractEncoder> AbstractEncoder::create(const EncoderProto& config)
 {
 	switch (config.format_case())
 	{
-		case Encoder::kIbm:
+		case EncoderProto::kIbm:
 			return std::unique_ptr<AbstractEncoder>(new IbmEncoder(config.ibm()));
 
-		case Encoder::kBrother:
+		case EncoderProto::kBrother:
 			return std::unique_ptr<AbstractEncoder>(new BrotherEncoder(config.brother()));
 
 		default:

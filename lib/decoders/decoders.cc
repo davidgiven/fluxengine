@@ -15,14 +15,14 @@
 #include "fmt/format.h"
 #include <numeric>
 
-std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const Decoder& config)
+std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& config)
 {
 	switch (config.format_case())
 	{
-		case Decoder::kIbm:
+		case DecoderProto::kIbm:
 			return std::unique_ptr<AbstractDecoder>(new IbmDecoder(config.ibm()));
 
-		case Decoder::kBrother:
+		case DecoderProto::kBrother:
 			return std::unique_ptr<AbstractDecoder>(new BrotherDecoder(config.brother()));
 
 		default:

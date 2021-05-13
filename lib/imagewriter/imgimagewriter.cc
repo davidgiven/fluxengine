@@ -13,7 +13,7 @@
 class ImgImageWriter : public ImageWriter
 {
 public:
-	ImgImageWriter(const Config_OutputFile& config):
+	ImgImageWriter(const OutputFileProto& config):
 		ImageWriter(config)
 	{}
 
@@ -57,7 +57,7 @@ public:
 };
 
 std::unique_ptr<ImageWriter> ImageWriter::createImgImageWriter(
-	const Config_OutputFile& config)
+	const OutputFileProto& config)
 {
     return std::unique_ptr<ImageWriter>(new ImgImageWriter(config));
 }

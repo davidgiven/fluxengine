@@ -4,14 +4,14 @@
 #include "fluxsink/fluxsink.h"
 #include "lib/config.pb.h"
 
-std::unique_ptr<FluxSink> FluxSink::create(const Config_OutputDisk& config)
+std::unique_ptr<FluxSink> FluxSink::create(const OutputDiskProto& config)
 {
 	switch (config.dest_case())
 	{
-		case Config_OutputDisk::kFluxfile:
+		case OutputDiskProto::kFluxfile:
 			return createSqliteFluxSink(config.fluxfile());
 
-		case Config_OutputDisk::kDrive:
+		case OutputDiskProto::kDrive:
 			return createHardwareFluxSink(config.drive());
 	}
 

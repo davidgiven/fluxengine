@@ -12,7 +12,7 @@ class FluxmapReader;
 class RawRecord;
 class RawBits;
 class Track;
-class Decoder;
+class DecoderProto;
 
 typedef std::vector<std::unique_ptr<RawRecord>> RawRecordVector;
 typedef std::vector<std::unique_ptr<Sector>> SectorVector;
@@ -32,7 +32,7 @@ class AbstractDecoder
 public:
     virtual ~AbstractDecoder() {}
 
-	static std::unique_ptr<AbstractDecoder> create(const Decoder& config);
+	static std::unique_ptr<AbstractDecoder> create(const DecoderProto& config);
 
 public:
     enum RecordType

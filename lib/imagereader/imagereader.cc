@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <ctype.h>
 
-std::unique_ptr<ImageReader> ImageReader::create(const Config_InputFile& config)
+std::unique_ptr<ImageReader> ImageReader::create(const InputFileProto& config)
 {
 	if (config.has_img())
 		return ImageReader::createImgImageReader(config);
@@ -19,7 +19,7 @@ std::unique_ptr<ImageReader> ImageReader::create(const Config_InputFile& config)
 	return std::unique_ptr<ImageReader>();
 }
 
-ImageReader::ImageReader(const Config_InputFile& config):
+ImageReader::ImageReader(const InputFileProto& config):
     _config(config)
 {}
 

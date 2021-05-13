@@ -6,56 +6,56 @@ import "lib/imagereader/img.proto";
 import "lib/fluxsource/fluxsource.proto";
 import "lib/common.proto";
 
-message Config {
-	message InputFile {
-		optional string filename = 1;
-		oneof format {
-			ImgInputOutput img = 2;
-		}
+message InputFileProto {
+	optional string filename = 1;
+	oneof format {
+		ImgInputOutputProto img = 2;
 	}
+}
 
-	message InputDisk {
-		oneof source {
-			string fluxfile = 1;
-			HardwareInput drive = 2;
-			TestPatternInput test_pattern = 3;
-		}
+message InputDiskProto {
+	oneof source {
+		string fluxfile = 1;
+		HardwareInputProto drive = 2;
+		TestPatternInputProto test_pattern = 3;
 	}
+}
 
-	message OutputFile {
-		optional string filename = 1;
-		oneof format {
-			ImgInputOutput img = 2;
-		}
+message OutputFileProto {
+	optional string filename = 1;
+	oneof format {
+		ImgInputOutputProto img = 2;
 	}
+}
 
-	message OutputDisk {
-		oneof dest {
-			string fluxfile = 1;
-			int32 drive = 2;
-		}
+message OutputDiskProto {
+	oneof dest {
+		string fluxfile = 1;
+		int32 drive = 2;
 	}
+}
 
-	message Input {
-		oneof input {
-			InputFile file = 1;
-			InputDisk disk = 2;
-		}
+message InputProto {
+	oneof input {
+		InputFileProto file = 1;
+		InputDiskProto disk = 2;
 	}
+}
 
-	message Output {
-		oneof output {
-			OutputFile file = 1;
-			OutputDisk disk = 2;
-		}
+message OutputProto {
+	oneof output {
+		OutputFileProto file = 1;
+		OutputDiskProto disk = 2;
 	}
+}
 
-	optional Input input = 1;
-	optional Output output = 2;
-	optional Encoder encoder = 3;
-	optional Decoder decoder = 4;
+message ConfigProto {
+	optional InputProto input = 1;
+	optional OutputProto output = 2;
+	optional EncoderProto encoder = 3;
+	optional DecoderProto decoder = 4;
 
-	optional Range cylinders = 5;
-	optional Range heads = 6;
+	optional RangeProto cylinders = 5;
+	optional RangeProto heads = 6;
 }
 
