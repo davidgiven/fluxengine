@@ -12,8 +12,12 @@ input {
 
 output {
 	disk {
-		brother {}
+		drive: 0
 	}
+}
+
+encoder {
+	brother {}
 }
 
 cylinders {

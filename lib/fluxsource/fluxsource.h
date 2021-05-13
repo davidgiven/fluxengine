@@ -8,6 +8,7 @@ extern FlagGroup hardwareFluxSourceFlags;
 class Fluxmap;
 class FluxSpec;
 class Config_InputDisk;
+class TestPatternInput;
 
 class FluxSource
 {
@@ -18,6 +19,7 @@ private:
     static std::unique_ptr<FluxSource> createSqliteFluxSource(const std::string& filename);
     static std::unique_ptr<FluxSource> createHardwareFluxSource(unsigned drive);
     static std::unique_ptr<FluxSource> createStreamFluxSource(const std::string& path);
+    static std::unique_ptr<FluxSource> createTestPatternFluxSource(const TestPatternInput& config);
 
 public:
     static std::unique_ptr<FluxSource> create(const FluxSpec& spec);
@@ -28,10 +30,6 @@ public:
     virtual void recalibrate() {}
     virtual bool retryable() { return false; }
 };
-
-extern void setHardwareFluxSourceRevolutions(double revolutions);
-extern void setHardwareFluxSourceSynced(bool synced);
-extern void setHardwareFluxSourceHardSectorCount(int sectorCount);
 
 #endif
 

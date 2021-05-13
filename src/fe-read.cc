@@ -49,16 +49,7 @@ int mainRead(int argc, const char* argv[])
 	std::cout << s << '\n';
 
 	std::unique_ptr<FluxSource> fluxSource(FluxSource::create(config.input().disk()));
-
-	const Config_InputDisk& disk = config.input().disk();
-	std::unique_ptr<AbstractDecoder> decoder;
-	if (disk.has_brother())
-		decoder.reset(new BrotherDecoder(disk.brother()));
-	else if (disk.has_ibm())
-		decoder.reset(new IbmDecoder(disk.ibm()));
-	else
-		Error() << "no input disk format specified";
-
+	std::unique_ptr<AbstractDecoder> decoder(AbstractDecoder::create(config.decoder()));
 	std::unique_ptr<ImageWriter> writer(ImageWriter::create(config.output().file()));
 
 	readDiskCommand(*fluxSource, *decoder, *writer);

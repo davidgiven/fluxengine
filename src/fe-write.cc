@@ -49,16 +49,7 @@ int mainWrite(int argc, const char* argv[])
 	std::cout << s << '\n';
 
 	std::unique_ptr<ImageReader> reader(ImageReader::create(config.input().file()));
-
-	const auto& disk = config.output().disk();
-	std::unique_ptr<AbstractEncoder> encoder;
-	if (disk.has_brother())
-		encoder.reset(new BrotherEncoder(disk.brother()));
-	else if (disk.has_ibm())
-		encoder.reset(new IbmEncoder(disk.ibm()));
-	else
-		Error() << "no output disk format specified";
-
+	std::unique_ptr<AbstractEncoder> encoder(AbstractEncoder::create(config.encoder()));
 	std::unique_ptr<FluxSink> fluxSink(FluxSink::create(config.output().disk()));
 
 	writeDiskCommand(*reader, *encoder, *fluxSink);

@@ -1,15 +1,10 @@
 syntax = "proto2";
 
-import "arch/brother/brother.proto";
-import "arch/ibm/ibm.proto";
-import "lib/decoders/decoder.proto";
+import "lib/decoders/decoders.proto";
+import "lib/encoders/encoders.proto";
 import "lib/imagereader/img.proto";
+import "lib/fluxsource/fluxsource.proto";
 import "lib/common.proto";
-import "google/protobuf/descriptor.proto";
-
-extend google.protobuf.FieldOptions {
-  optional string help = 50000;
-}
 
 message Config {
 	message InputFile {
@@ -23,10 +18,7 @@ message Config {
 		oneof source {
 			string fluxfile = 1;
 			int32 drive = 2 [default = 0];
-		}
-		oneof format {
-			IBMInput ibm = 3;
-			BrotherInput brother = 4;
+			TestPatternInput test_pattern = 3;
 		}
 	}
 
@@ -41,10 +33,6 @@ message Config {
 		oneof dest {
 			string fluxfile = 1;
 			int32 drive = 2;
-		}
-		oneof format {
-			IBMOutput ibm = 3;
-			BrotherOutput brother = 4;
 		}
 	}
 
@@ -64,9 +52,10 @@ message Config {
 
 	optional Input input = 1;
 	optional Output output = 2;
-	optional Decoder decoder = 3;
+	optional Encoder encoder = 3;
+	optional Decoder decoder = 4;
 
-	optional Range cylinders = 4;
-	optional Range heads = 5;
+	optional Range cylinders = 5;
+	optional Range heads = 6;
 }
 

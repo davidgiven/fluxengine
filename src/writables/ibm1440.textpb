@@ -12,11 +12,15 @@ input {
 
 output {
 	disk {
-		ibm {
-			track_length_ms: 200
-			clock_rate_khz: 500
-			sector_skew: "0123456789abcdefgh"
-		}
+		drive: 0
+	}
+}
+
+encoder {
+	ibm {
+		track_length_ms: 200
+		clock_rate_khz: 500
+		sector_skew: "0123456789abcdefgh"
 	}
 }
 

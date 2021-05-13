@@ -1,7 +1,6 @@
 input {
 	disk {
-		fluxfile: "samples/brother-clean.flux"
-		brother {}
+		drive: 0
 	}
 }
 
@@ -10,6 +9,10 @@ output {
 		filename: "brother.img"
 		img {}
 	}
+}
+
+decoder {
+	brother {}
 }
 
 cylinders {

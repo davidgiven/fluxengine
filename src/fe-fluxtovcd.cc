@@ -26,6 +26,9 @@ int mainConvertFluxToVcd(int argc, const char* argv[])
 {
     flags.parseFlags(argc, argv);
 
+	Error() << "TODO";
+
+	#if 0
     const FluxSpec spec(source);
     const auto& locations = spec.locations;
     if (locations.size() != 1)
@@ -74,6 +77,7 @@ int mainConvertFluxToVcd(int argc, const char* argv[])
         lasttimestamp = timestamp;
     }
     of << "\n";
+	#endif
 
     return 0;
 }

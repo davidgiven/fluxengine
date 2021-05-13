@@ -14,6 +14,7 @@
 #define BROTHER_SECTORS_PER_TRACK        12
 
 class Sector;
+class SectorSet;
 class Fluxmap;
 class BrotherInput;
 class BrotherOutput;

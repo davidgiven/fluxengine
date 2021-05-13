@@ -1,9 +1,17 @@
 syntax = "proto2";
 
+import "arch/brother/brother.proto";
+import "arch/ibm/ibm.proto";
+
 message Decoder {
 	optional double pulse_debounce_threshold = 1 [default = 0.30];
 	optional double bit_error_threshold = 2 [default = 0.40];
 	optional double clock_interval_bias = 3 [default = -0.02];
 	optional double minimum_clock_us = 4 [default = 0.75];
+
+	oneof format {
+		IBMInput ibm = 5;
+		BrotherInput brother = 6;
+	}
 }
 

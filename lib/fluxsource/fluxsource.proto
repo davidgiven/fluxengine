@@ -1,0 +1,7 @@
+syntax = "proto2";
+
+message TestPatternInput {
+	optional double interval_us = 1 [default = 4.0];
+	optional double sequence_length_us = 2 [default = 200.0];
+}
+

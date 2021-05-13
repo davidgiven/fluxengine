@@ -230,8 +230,10 @@ buildproto libproto.a \
     arch/brother/brother.proto \
     arch/ibm/ibm.proto \
     lib/config.proto \
-    lib/decoders/decoder.proto \
+    lib/encoders/encoders.proto \
+    lib/decoders/decoders.proto \
     lib/imagereader/img.proto \
+    lib/fluxsource/fluxsource.proto \
     lib/common.proto \
 
 buildlibrary libbackend.a \
@@ -281,6 +283,7 @@ buildlibrary libbackend.a \
     lib/fluxsink/sqlitefluxsink.cc \
     lib/fluxsource/fluxsource.cc \
     lib/fluxsource/hardwarefluxsource.cc \
+    lib/fluxsource/testpatternfluxsource.cc \
     lib/fluxsource/kryoflux.cc \
     lib/fluxsource/sqlitefluxsource.cc \
     lib/fluxsource/streamfluxsource.cc \
@@ -336,7 +339,6 @@ buildlibrary libfrontend.a \
     src/fe-upgradefluxfile.cc \
     src/fe-write.cc \
     src/fe-writeflux.cc \
-    src/fe-writetestpattern.cc \
     src/fluxengine.cc \
     $OBJDIR/proto/src/readables/brother.cc \
     $OBJDIR/proto/src/readables/ibm.cc \

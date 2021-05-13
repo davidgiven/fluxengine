@@ -30,6 +30,9 @@ int mainConvertFluxToAu(int argc, const char* argv[])
 {
     flags.parseFlags(argc, argv);
 
+	Error() << "TODO";
+
+	#if 0
     FluxSpec spec(source);
     const auto& locations = spec.locations;
     if (locations.size() != 1)
@@ -92,5 +95,6 @@ int mainConvertFluxToAu(int argc, const char* argv[])
 
     std::cerr << "Done. Warning: do not play this file, or you will break your speakers"
 	         " and/or ears!\n";
+			 #endif
     return 0;
 }

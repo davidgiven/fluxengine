@@ -11,27 +11,19 @@ static bool ends_with(const std::string& value, const std::string& ending)
     return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
 }
 
-std::unique_ptr<FluxSource> FluxSource::create(const FluxSpec& spec)
-{
-    const auto& filename = spec.filename;
-
-    if (filename.empty())
-        return createHardwareFluxSource(spec.drive);
-    else if (ends_with(filename, ".flux"))
-        return createSqliteFluxSource(filename);
-    else if (ends_with(filename, "/"))
-        return createStreamFluxSource(filename);
-
-    Error() << "unrecognised flux filename extension";
-    return std::unique_ptr<FluxSource>();
-}
-
 std::unique_ptr<FluxSource> FluxSource::create(const Config_InputDisk& config)
 {
-	if (config.has_fluxfile())
-		return createSqliteFluxSource(config.fluxfile());
-	else
-		return createHardwareFluxSource(config.drive());
+	switch (config.source_case())
+	{
+		case Config_InputDisk::kFluxfile:
+			return createSqliteFluxSource(config.fluxfile());
+
+		case Config_InputDisk::kDrive:
+			return createHardwareFluxSource(config.drive());
+
+		case Config_InputDisk::kTestPattern:
+			return createTestPatternFluxSource(config.test_pattern());
+	}
 
 	Error() << "bad input disk configuration";
     return std::unique_ptr<FluxSource>();

@@ -50,8 +50,6 @@ static void test_config(void)
 		output {
 			disk {
 				drive: 0
-				ibm {
-				}
 			}
 		}
 	)M";

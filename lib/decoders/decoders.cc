@@ -1,15 +1,36 @@
 #include "globals.h"
 #include "flags.h"
 #include "fluxmap.h"
-#include "decoders/fluxmapreader.h"
 #include "decoders/decoders.h"
+#include "encoders/encoders.h"
+#include "arch/brother/brother.h"
+#include "arch/ibm/ibm.h"
+#include "decoders/fluxmapreader.h"
 #include "record.h"
 #include "protocol.h"
 #include "decoders/rawbits.h"
 #include "track.h"
 #include "sector.h"
+#include "lib/decoders/decoders.pb.h"
 #include "fmt/format.h"
 #include <numeric>
+
+std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const Decoder& config)
+{
+	switch (config.format_case())
+	{
+		case Decoder::kIbm:
+			return std::unique_ptr<AbstractDecoder>(new IbmDecoder(config.ibm()));
+
+		case Decoder::kBrother:
+			return std::unique_ptr<AbstractDecoder>(new BrotherDecoder(config.brother()));
+
+		default:
+			Error() << "no input disk format specified";
+	}
+
+	return std::unique_ptr<AbstractDecoder>();
+}
 
 void AbstractDecoder::decodeToSectors(Track& track)
 {
