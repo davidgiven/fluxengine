@@ -1,0 +1,13 @@
+syntax = "proto2";
+
+import "lib/common.proto";
+
+message AmigaInputProto {}
+
+message AmigaOutputProto {
+	optional double clock_rate_us = 1
+		[default=2.00, (help)="Encoded data clock rate."];
+	optional double post_index_gap_ms = 2
+		[default=0.5, (help)="Post-index gap before first sector header."];
+}
+

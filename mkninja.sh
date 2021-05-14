@@ -106,16 +106,19 @@ buildproto() {
     done
 
     local cfiles
+    local hfiles
     cfiles=
+    hfiles=
     for src in "$@"; do
         local cfile
         local hfile
         cfile="$OBJDIR/proto/${src%%.proto}.pb.cc"
         hfile="$OBJDIR/proto/${src%%.proto}.pb.h"
-        cfiles="$cfiles $cfile $hfile"
+        cfiles="$cfiles $cfile"
+        hfiles="$hfiles $hfile"
     done
 
-    echo build $cfiles $def : proto $@
+    echo build $cfiles $hfiles $def : proto $@
     echo "    flags=$flags --cpp_out=$OBJDIR/proto"
     echo "    def=$def"
 
@@ -246,6 +249,7 @@ buildlibrary libfmt.a \
     dep/fmt/posix.cc \
 
 buildproto libproto.a \
+    arch/amiga/amiga.proto \
     arch/aeslanier/aeslanier.proto \
     arch/brother/brother.proto \
     arch/ibm/ibm.proto \
@@ -325,6 +329,7 @@ buildlibrary libbackend.a \
     lib/writer.cc \
 
 READABLES="\
+    amiga \
     aeslanier \
     acornadfs \
     acorndfs \
@@ -333,6 +338,7 @@ READABLES="\
     "
 
 WRITABLES="\
+    amiga \
     brother240 \
     ibm1440 \
     "
@@ -376,11 +382,9 @@ buildlibrary libfrontend.a \
     src/fe-writeflux.cc \
     src/fluxengine.cc \
 
-#    src/fe-readamiga.cc \
 #    src/fe-readampro.cc \
 #    src/fe-readapple2.cc \
 #    src/fe-readatarist.cc \
-#    src/fe-readbrother.cc \
 #    src/fe-readc64.cc \
 #    src/fe-readf85.cc \
 #    src/fe-readfb100.cc \
@@ -391,8 +395,6 @@ buildlibrary libfrontend.a \
 #    src/fe-readtids990.cc \
 #    src/fe-readvictor9k.cc \
 #    src/fe-readzilogmcz.cc \
-#    src/fe-writeamiga.cc \
-#    src/fe-writebrother.cc \
 #    src/fe-writeibm.cc \
 #    src/fe-writemac.cc \
 #    src/fe-writetids990.cc \

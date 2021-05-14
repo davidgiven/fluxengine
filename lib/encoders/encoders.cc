@@ -2,6 +2,7 @@
 #include "fluxmap.h"
 #include "decoders/decoders.h"
 #include "encoders/encoders.h"
+#include "arch/amiga/amiga.h"
 #include "arch/brother/brother.h"
 #include "arch/ibm/ibm.h"
 #include "lib/encoders/encoders.pb.h"
@@ -11,6 +12,9 @@ std::unique_ptr<AbstractEncoder> AbstractEncoder::create(const EncoderProto& con
 {
 	switch (config.format_case())
 	{
+		case EncoderProto::kAmiga:
+			return std::unique_ptr<AbstractEncoder>(new AmigaEncoder(config.amiga()));
+
 		case EncoderProto::kIbm:
 			return std::unique_ptr<AbstractEncoder>(new IbmEncoder(config.ibm()));
 

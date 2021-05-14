@@ -4,6 +4,7 @@
 #include "decoders/decoders.h"
 #include "encoders/encoders.h"
 #include "arch/aeslanier/aeslanier.h"
+#include "arch/amiga/amiga.h"
 #include "arch/brother/brother.h"
 #include "arch/ibm/ibm.h"
 #include "decoders/fluxmapreader.h"
@@ -22,6 +23,9 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 	{
 		case DecoderProto::kAeslanier:
 			return std::unique_ptr<AbstractDecoder>(new AesLanierDecoder(config.aeslanier()));
+
+		case DecoderProto::kAmiga:
+			return std::unique_ptr<AbstractDecoder>(new AmigaDecoder(config.amiga()));
 
 		case DecoderProto::kBrother:
 			return std::unique_ptr<AbstractDecoder>(new BrotherDecoder(config.brother()));

@@ -1,0 +1,33 @@
+input {
+	file {
+		filename: "amiga.adf"
+		img {
+			format {
+				sectors: 11
+				sector_size: 512
+			}
+			tracks: 80
+			sides: 2
+		}
+	}
+}
+
+output {
+	disk {}
+}
+
+encoder {
+	amiga {}
+}
+
+cylinders {
+	start: 0
+	end: 79
+}
+
+heads {
+	start: 0
+	end: 1
+}
+
+
