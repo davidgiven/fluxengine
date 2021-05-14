@@ -252,13 +252,15 @@ buildproto libproto.a \
     arch/amiga/amiga.proto \
     arch/aeslanier/aeslanier.proto \
     arch/brother/brother.proto \
+    arch/c64/c64.proto \
     arch/ibm/ibm.proto \
     lib/common.proto \
     lib/config.proto \
     lib/decoders/decoders.proto \
     lib/encoders/encoders.proto \
     lib/fluxsource/fluxsource.proto \
-    lib/imagereader/img.proto \
+    lib/imagereader/imagereader.proto \
+    lib/imagewriter/imagewriter.proto \
     lib/usb/usb.proto \
 
 buildlibrary libbackend.a \
@@ -334,6 +336,7 @@ READABLES="\
     acornadfs \
     acorndfs \
     brother \
+    c64 \
     ibm \
     "
 
@@ -386,7 +389,6 @@ buildlibrary libfrontend.a \
 #    src/fe-readampro.cc \
 #    src/fe-readapple2.cc \
 #    src/fe-readatarist.cc \
-#    src/fe-readc64.cc \
 #    src/fe-readf85.cc \
 #    src/fe-readfb100.cc \
 #    src/fe-readibm.cc \

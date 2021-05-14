@@ -7,10 +7,12 @@
 
 class Sector;
 class Fluxmap;
+class Commodore64InputProto;
 
 class Commodore64Decoder : public AbstractDecoder
 {
 public:
+	Commodore64Decoder(const Commodore64InputProto&) {}
     virtual ~Commodore64Decoder() {}
 
     RecordType advanceToNextRecord();

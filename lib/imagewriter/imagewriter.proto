@@ -1,0 +1,18 @@
+syntax = "proto2";
+
+import "lib/imagereader/imagereader.proto";
+
+message D64OutputProto {}
+message LDBSOutputProto {}
+message DiskCopyOutputProto {}
+
+message OutputFileProto {
+	optional string filename = 1;
+	oneof format {
+		ImgInputOutputProto img = 2;
+		D64OutputProto d64 = 3;
+		LDBSOutputProto ldbs = 4;
+		DiskCopyOutputProto diskcopy = 5;
+	}
+}
+

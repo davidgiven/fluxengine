@@ -14,3 +14,10 @@ message ImgInputOutputProto {
 	optional int32 sides = 6 [default=2];
 }
 
+message InputFileProto {
+	optional string filename = 1;
+	oneof format {
+		ImgInputOutputProto img = 2;
+	}
+}
+

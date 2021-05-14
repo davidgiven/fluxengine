@@ -3,6 +3,7 @@ syntax = "proto2";
 import "arch/aeslanier/aeslanier.proto";
 import "arch/amiga/amiga.proto";
 import "arch/brother/brother.proto";
+import "arch/c64/c64.proto";
 import "arch/ibm/ibm.proto";
 
 message DecoderProto {
@@ -16,6 +17,7 @@ message DecoderProto {
 		BrotherInputProto brother = 6;
 		AesLanierInputProto aeslanier = 7;
 		AmigaInputProto amiga = 8;
+		Commodore64InputProto c64 = 9;
 	}
 }
 

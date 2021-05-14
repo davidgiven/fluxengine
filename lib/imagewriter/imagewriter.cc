@@ -25,10 +25,22 @@ std::map<std::string, ImageWriter::Constructor> ImageWriter::formats =
 
 std::unique_ptr<ImageWriter> ImageWriter::create(const OutputFileProto& config)
 {
-	if (config.has_img())
-		return ImageWriter::createImgImageWriter(config);
-	else
-		Error() << "bad output image config";
+	switch (config.format_case())
+	{
+		case OutputFileProto::kImg:
+			return ImageWriter::createImgImageWriter(config);
+
+		case OutputFileProto::kD64:
+			return ImageWriter::createD64ImageWriter(config);
+
+		case OutputFileProto::kLdbs:
+			return ImageWriter::createLDBSImageWriter(config);
+
+		case OutputFileProto::kDiskcopy:
+			return ImageWriter::createDiskCopyImageWriter(config);
+	}
+	Error() << "bad output image config";
+	return std::unique_ptr<ImageWriter>();
 }
 
 //void ImageWriter::verifyImageSpec(const ImageSpec& spec)

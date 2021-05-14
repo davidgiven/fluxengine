@@ -2,30 +2,17 @@ syntax = "proto2";
 
 import "lib/decoders/decoders.proto";
 import "lib/encoders/encoders.proto";
-import "lib/imagereader/img.proto";
+import "lib/imagereader/imagereader.proto";
+import "lib/imagewriter/imagewriter.proto";
 import "lib/fluxsource/fluxsource.proto";
 import "lib/usb/usb.proto";
 import "lib/common.proto";
-
-message InputFileProto {
-	optional string filename = 1;
-	oneof format {
-		ImgInputOutputProto img = 2;
-	}
-}
 
 message InputDiskProto {
 	oneof source {
 		string fluxfile = 1;
 		HardwareInputProto drive = 2;
 		TestPatternInputProto test_pattern = 3;
-	}
-}
-
-message OutputFileProto {
-	optional string filename = 1;
-	oneof format {
-		ImgInputOutputProto img = 2;
 	}
 }
 
