@@ -3,6 +3,7 @@
 #include "fluxmap.h"
 #include "decoders/decoders.h"
 #include "encoders/encoders.h"
+#include "arch/aeslanier/aeslanier.h"
 #include "arch/brother/brother.h"
 #include "arch/ibm/ibm.h"
 #include "decoders/fluxmapreader.h"
@@ -19,11 +20,14 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 {
 	switch (config.format_case())
 	{
-		case DecoderProto::kIbm:
-			return std::unique_ptr<AbstractDecoder>(new IbmDecoder(config.ibm()));
+		case DecoderProto::kAeslanier:
+			return std::unique_ptr<AbstractDecoder>(new AesLanierDecoder(config.aeslanier()));
 
 		case DecoderProto::kBrother:
 			return std::unique_ptr<AbstractDecoder>(new BrotherDecoder(config.brother()));
+
+		case DecoderProto::kIbm:
+			return std::unique_ptr<AbstractDecoder>(new IbmDecoder(config.ibm()));
 
 		default:
 			Error() << "no input disk format specified";
