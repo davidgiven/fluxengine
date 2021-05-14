@@ -3,6 +3,7 @@
 #include "proto.h"
 #include "utils.h"
 #include "fmt/format.h"
+#include <google/protobuf/text_format.h>
 #include <regex>
 
 static FlagGroup* currentFlagGroup;
@@ -10,12 +11,24 @@ static std::vector<Flag*> all_flags;
 static std::map<const std::string, Flag*> flags_by_name;
 
 static void doHelp();
+static void doShowConfig();
+static void doDoc();
 
 static FlagGroup helpGroup;
 static ActionFlag helpFlag = ActionFlag(
     { "--help", "-h" },
     "Shows the help.",
     doHelp);
+
+static ActionFlag showConfigFlag = ActionFlag(
+    { "--show-config", "-c" },
+    "Shows the currently set configuration and halts.",
+    doShowConfig);
+
+static ActionFlag docFlag = ActionFlag(
+    { "--doc" },
+    "Shows the available configuration options.",
+    doDoc);
 
 FlagGroup::FlagGroup(const std::initializer_list<FlagGroup*> groups):
     _groups(groups.begin(), groups.end())
@@ -238,4 +251,31 @@ static void doHelp()
         std::cout << ": " << flag->helptext() << std::endl;
     }
     exit(0);
+}
+
+static void doShowConfig()
+{
+	std::string s;
+	google::protobuf::TextFormat::PrintToString(config, &s);
+	std::cout << s << '\n';
+
+	exit(0);
+}
+
+static void doDoc()
+{
+	const auto fields = findAllProtoFields(&config);
+	for (const auto field : fields)
+	{
+		const std::string& path = field.first;
+		const google::protobuf::FieldDescriptor* f = field.second;
+
+		if (f->type() == google::protobuf::FieldDescriptor::TYPE_MESSAGE)
+			continue;
+
+		std::string helpText = f->options().GetExtension(help);
+		std::cout << fmt::format("{}: {}\n", path, helpText);
+	}
+
+	exit(0);
 }

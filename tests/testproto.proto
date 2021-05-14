@@ -1,11 +1,13 @@
 syntax = "proto2";
 
+import "lib/common.proto";
+
 message TestProto {
 	message SubMessageProto {
 		optional string s = 1;
 	}
 
-	optional int64 i64 = 1;
+	optional int64 i64 = 1 [(help)="i64"];
 	optional int32 i32 = 2;
 	optional uint64 u64 = 3;
 	optional uint32 u32 = 4;

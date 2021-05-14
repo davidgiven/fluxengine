@@ -98,12 +98,31 @@ static void test_range(void)
 	}
 }
 
+static void test_fields(void)
+{
+	TestProto proto;
+	auto fields = findAllProtoFields(&proto);
+	AssertThat(fields, HasLength(13));
+}
+
+static void test_options(void)
+{
+	TestProto proto;
+	const auto* descriptor = proto.descriptor();
+	const auto* field = descriptor->FindFieldByName("i64");
+	const auto& options = field->options();
+	const std::string s = options.GetExtension(help);
+	AssertThat(s, Equals("i64"));
+}
+
 int main(int argc, const char* argv[])
 {
 	test_setting();
 	test_config();
 	test_load();
 	test_range();
+	test_fields();
+	test_options();
     return 0;
 }
 

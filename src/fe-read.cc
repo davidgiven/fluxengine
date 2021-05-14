@@ -28,11 +28,6 @@ int mainRead(int argc, const char* argv[])
 	if (!config.has_input() || !config.has_output())
 		Error() << "incomplete config (did you remember to specify the format?)";
 
-	std::string s;
-	google::protobuf::TextFormat::PrintToString(config, &s);
-	std::cout << s << '\n';
-	exit(0);
-
 	std::unique_ptr<FluxSource> fluxSource(FluxSource::create(config.input().disk()));
 	std::unique_ptr<AbstractDecoder> decoder(AbstractDecoder::create(config.decoder()));
 	std::unique_ptr<ImageWriter> writer(ImageWriter::create(config.output().file()));

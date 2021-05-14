@@ -12,6 +12,9 @@ extern void setProtoByString(google::protobuf::Message* message, const std::stri
 
 extern std::set<unsigned> iterate(const RangeProto& range);
 
+extern std::map<std::string, const google::protobuf::FieldDescriptor*>
+		findAllProtoFields(google::protobuf::Message* message);
+
 extern ConfigProto config;
 
 #endif

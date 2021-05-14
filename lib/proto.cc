@@ -132,3 +132,24 @@ std::set<unsigned> iterate(const RangeProto& range)
 	return set;
 }
 
+std::map<std::string, const google::protobuf::FieldDescriptor*> findAllProtoFields(google::protobuf::Message* message)
+{
+	std::map<std::string, const google::protobuf::FieldDescriptor*> fields;
+	const auto* descriptor = message->GetDescriptor();
+
+	std::function<void(const google::protobuf::Descriptor*, const std::string&)> recurse =
+		[&](auto* d, const auto& s) {
+			for (int i=0; i<d->field_count(); i++)
+			{
+				const google::protobuf::FieldDescriptor* f = d->field(i);
+				std::string n = s + f->name();
+				if (f->type() == google::protobuf::FieldDescriptor::TYPE_MESSAGE)
+					recurse(f->message_type(), n + ".");
+				fields[n] = f;
+			}
+		};
+
+	recurse(descriptor, "");
+	return fields;
+}
+
