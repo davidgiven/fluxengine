@@ -246,6 +246,7 @@ buildlibrary libfmt.a \
     dep/fmt/posix.cc \
 
 buildproto libproto.a \
+    arch/aeslanier/aeslanier.proto \
     arch/brother/brother.proto \
     arch/ibm/ibm.proto \
     lib/common.proto \
@@ -324,6 +325,7 @@ buildlibrary libbackend.a \
     lib/writer.cc \
 
 READABLES="\
+    aeslanier \
     acornadfs \
     acorndfs \
     brother \
@@ -374,7 +376,6 @@ buildlibrary libfrontend.a \
     src/fe-writeflux.cc \
     src/fluxengine.cc \
 
-#    src/fe-readaeslanier.cc \
 #    src/fe-readamiga.cc \
 #    src/fe-readampro.cc \
 #    src/fe-readapple2.cc \

@@ -2,6 +2,7 @@ syntax = "proto2";
 
 import "arch/brother/brother.proto";
 import "arch/ibm/ibm.proto";
+import "arch/aeslanier/aeslanier.proto";
 
 message DecoderProto {
 	optional double pulse_debounce_threshold = 1 [default = 0.30];
@@ -12,6 +13,7 @@ message DecoderProto {
 	oneof format {
 		IBMInputProto ibm = 5;
 		BrotherInputProto brother = 6;
+		AesLanierInputProto aeslanier = 7;
 	}
 }
 
