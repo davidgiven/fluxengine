@@ -1,0 +1,36 @@
+input {
+	file {
+		filename: "brother120.img"
+		img {
+			format {
+				sectors: 12
+				sector_size: 256
+			}
+			tracks: 39
+			sides: 1
+		}
+	}
+}
+
+output {
+	disk {
+		drive: 0
+	}
+}
+
+encoder {
+	brother {
+		format: BROTHER120
+	}
+}
+
+cylinders {
+	start: 0
+	end: 39
+}
+
+heads {
+	start: 0
+	end: 0
+}
+

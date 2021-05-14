@@ -339,6 +339,7 @@ READABLES="\
 
 WRITABLES="\
     amiga \
+    brother120 \
     brother240 \
     ibm1440 \
     "
