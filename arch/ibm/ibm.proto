@@ -2,7 +2,7 @@ syntax = "proto2";
 
 import "lib/common.proto";
 
-message IBMInputProto {
+message IbmDecoderProto {
 	optional int32 sector_id_base = 1 [default = 1,
 		(help) = "ID of first sector"];
 	optional bool ignore_side_byte = 2 [default = false,
@@ -11,7 +11,7 @@ message IBMInputProto {
 		(help) = "require these sectors to exist for a good read"];
 }
 
-message IBMOutputProto {
+message IbmEncoderProto {
 	optional double track_length_ms = 1;
 	optional int32 sector_size = 2 [default=512];
 	optional bool emit_iam = 3 [default=true];

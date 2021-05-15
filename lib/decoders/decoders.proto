@@ -27,20 +27,20 @@ message DecoderProto {
 		(help) = "refuse to detect clocks shorter than this, to avoid false positives"];
 
 	oneof format {
-		IBMInputProto ibm = 5;
-		BrotherInputProto brother = 6;
-		AesLanierInputProto aeslanier = 7;
-		AmigaInputProto amiga = 8;
-		Commodore64InputProto c64 = 9;
-		F85InputProto f85 = 10;
-		Fb100InputProto fb100 = 11;
-		MacintoshInputProto macintosh = 12;
-		Apple2InputProto apple2 = 13;
-		MicropolisInputProto micropolis = 14;
-		MxInputProto mx = 15;
-		Tids990InputProto tids990 = 16;
-		Victor9kInputProto victor9k = 17;
-		ZilogMczInputProto zilogmcz = 18;
+		IbmDecoderProto ibm = 5;
+		BrotherDecoderProto brother = 6;
+		AesLanierDecoderProto aeslanier = 7;
+		AmigaDecoderProto amiga = 8;
+		Commodore64DecoderProto c64 = 9;
+		F85DecoderProto f85 = 10;
+		Fb100DecoderProto fb100 = 11;
+		MacintoshDecoderProto macintosh = 12;
+		Apple2DecoderProto apple2 = 13;
+		MicropolisDecoderProto micropolis = 14;
+		MxDecoderProto mx = 15;
+		Tids990DecoderProto tids990 = 16;
+		Victor9kDecoderProto victor9k = 17;
+		ZilogMczDecoderProto zilogmcz = 18;
 	}
 }
 

@@ -2,9 +2,9 @@ syntax = "proto2";
 
 import "lib/common.proto";
 
-message AmigaInputProto {}
+message AmigaDecoderProto {}
 
-message AmigaOutputProto {
+message AmigaEncoderProto {
 	optional double clock_rate_us = 1
 		[default=2.00, (help)="Encoded data clock rate."];
 	optional double post_index_gap_ms = 2

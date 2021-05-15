@@ -1,4 +1,4 @@
 syntax = "proto2";
 
-message Fb100InputProto {}
+message Fb100DecoderProto {}
 

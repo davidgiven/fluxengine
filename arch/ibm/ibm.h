@@ -4,8 +4,8 @@
 #include "decoders/decoders.h"
 #include "encoders/encoders.h"
 
-class IBMInputProto;
-class IBMOutputProto;
+class IbmDecoderProto;
+class IbmEncoderProto;
 
 /* IBM format (i.e. ordinary PC floppies). */
 
@@ -35,7 +35,7 @@ struct IbmIdam
 class IbmDecoder : public AbstractDecoder
 {
 public:
-    IbmDecoder(const IBMInputProto& config):
+    IbmDecoder(const IbmDecoderProto& config):
 		_config(config)
     {}
 
@@ -46,7 +46,7 @@ public:
 	std::set<unsigned> requiredSectors(Track& track) const;
 
 private:
-	const IBMInputProto& _config;
+	const IbmDecoderProto& _config;
     unsigned _currentSectorSize;
     unsigned _currentHeaderLength;
 };
@@ -54,7 +54,7 @@ private:
 class IbmEncoder : public AbstractEncoder
 {
 public:
-	IbmEncoder(const IBMOutputProto& config):
+	IbmEncoder(const IbmEncoderProto& config):
 		_config(config)
 	{}
 
@@ -70,7 +70,7 @@ private:
 	void writeSync();
 	
 private:
-	const IBMOutputProto& _config;
+	const IbmEncoderProto& _config;
 	std::vector<bool> _bits;
 	unsigned _cursor;
 	bool _lastBit;

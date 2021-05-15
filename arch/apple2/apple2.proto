@@ -1,4 +1,4 @@
 syntax = "proto2";
 
-message Apple2InputProto {}
+message Apple2DecoderProto {}
 

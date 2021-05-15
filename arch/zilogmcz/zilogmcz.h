@@ -3,12 +3,12 @@
 
 class Sector;
 class Fluxmap;
-class ZilogMczInputProto;
+class ZilogMczDecoderProto;
 
 class ZilogMczDecoder : public AbstractDecoder
 {
 public:
-	ZilogMczDecoder(const ZilogMczInputProto&) {}
+	ZilogMczDecoder(const ZilogMczDecoderProto&) {}
     virtual ~ZilogMczDecoder() {}
 
     RecordType advanceToNextRecord();

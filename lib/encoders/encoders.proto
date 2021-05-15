@@ -9,10 +9,10 @@ import "arch/tids990/tids990.proto";
 
 message EncoderProto {
 	oneof format {
-		IBMOutputProto ibm = 3;
-		BrotherOutputProto brother = 4;
-		AmigaOutputProto amiga = 5;
-		MacintoshOutputProto macintosh = 6;
-		Tids990OutputProto tids990 = 7;
+		IbmEncoderProto ibm = 3;
+		BrotherEncoderProto brother = 4;
+		AmigaEncoderProto amiga = 5;
+		MacintoshEncoderProto macintosh = 6;
+		Tids990EncoderProto tids990 = 7;
 	}
 }

@@ -1,4 +1,4 @@
 syntax = "proto2";
 
-message MxInputProto {}
+message MxDecoderProto {}
 

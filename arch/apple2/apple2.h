@@ -9,12 +9,12 @@
 
 class Sector;
 class Fluxmap;
-class Apple2InputProto;
+class Apple2DecoderProto;
 
 class Apple2Decoder : public AbstractDecoder
 {
 public:
-	Apple2Decoder(const Apple2InputProto&) {}
+	Apple2Decoder(const Apple2DecoderProto&) {}
     virtual ~Apple2Decoder() {}
 
     RecordType advanceToNextRecord();

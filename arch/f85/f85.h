@@ -7,12 +7,12 @@
 
 class Sector;
 class Fluxmap;
-class F85InputProto;
+class F85DecoderProto;
 
 class DurangoF85Decoder : public AbstractDecoder
 {
 public:
-	DurangoF85Decoder(const F85InputProto&) {}
+	DurangoF85Decoder(const F85DecoderProto&) {}
     virtual ~DurangoF85Decoder() {}
 
     RecordType advanceToNextRecord();

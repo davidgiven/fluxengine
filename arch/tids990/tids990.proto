@@ -2,8 +2,8 @@ syntax = "proto2";
 
 import "lib/common.proto";
 
-message Tids990InputProto {}
-message Tids990OutputProto {
+message Tids990DecoderProto {}
+message Tids990EncoderProto {
 	optional double track_length_ms = 1 [ default = 166,
 		(help) = "length of a track" ];
 	optional int32 sector_count = 2 [ default = 26,

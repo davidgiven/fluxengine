@@ -1,4 +1,4 @@
 syntax = "proto2";
 
-message F85InputProto {}
+message F85DecoderProto {}
 

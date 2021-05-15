@@ -7,12 +7,12 @@
 
 class Sector;
 class Fluxmap;
-class AesLanierInputProto;
+class AesLanierDecoderProto;
 
 class AesLanierDecoder : public AbstractDecoder
 {
 public:
-	AesLanierDecoder(const AesLanierInputProto&) {}
+	AesLanierDecoder(const AesLanierDecoderProto&) {}
     virtual ~AesLanierDecoder() {}
 
     RecordType advanceToNextRecord();

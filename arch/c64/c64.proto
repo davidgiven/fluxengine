@@ -1,4 +1,4 @@
 syntax = "proto2";
 
-message Commodore64InputProto {}
+message Commodore64DecoderProto {}
 
