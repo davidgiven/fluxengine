@@ -13,7 +13,7 @@
 class ImgImageReader : public ImageReader
 {
 public:
-	ImgImageReader(const InputFileProto& config):
+	ImgImageReader(const ImageReaderProto& config):
 		ImageReader(config)
 	{}
 
@@ -74,7 +74,7 @@ private:
 };
 
 std::unique_ptr<ImageReader> ImageReader::createImgImageReader(
-	const InputFileProto& config)
+	const ImageReaderProto& config)
 {
     return std::unique_ptr<ImageReader>(new ImgImageReader(config));
 }

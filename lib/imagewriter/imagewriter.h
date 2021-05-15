@@ -2,26 +2,26 @@
 #define IMAGEWRITER_H
 
 class SectorSet;
-class OutputFileProto;
+class ImageWriterProto;
 
 class ImageWriter
 {
 public:
-	ImageWriter(const OutputFileProto& config);
+	ImageWriter(const ImageWriterProto& config);
 	virtual ~ImageWriter() {};
 
 public:
-    static std::unique_ptr<ImageWriter> create(const OutputFileProto& config);
+    static std::unique_ptr<ImageWriter> create(const ImageWriterProto& config);
 	static void updateConfigForFilename(const std::string& filename);
 
     static std::unique_ptr<ImageWriter> createImgImageWriter(
-		const OutputFileProto& config);
+		const ImageWriterProto& config);
     static std::unique_ptr<ImageWriter> createLDBSImageWriter(
-		const OutputFileProto& config);
+		const ImageWriterProto& config);
     static std::unique_ptr<ImageWriter> createD64ImageWriter(
-		const OutputFileProto& config);
+		const ImageWriterProto& config);
     static std::unique_ptr<ImageWriter> createDiskCopyImageWriter(
-		const OutputFileProto& config);
+		const ImageWriterProto& config);
 
 public:
 	void printMap(const SectorSet& sectors);
@@ -29,7 +29,7 @@ public:
 	virtual void writeImage(const SectorSet& sectors) = 0;
 
 protected:
-	const OutputFileProto& _config;
+	const ImageWriterProto& _config;
 };
 
 #endif

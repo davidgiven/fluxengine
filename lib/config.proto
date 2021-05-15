@@ -11,14 +11,14 @@ import "lib/common.proto";
 
 message InputProto {
 	oneof input {
-		InputFileProto image = 1;
+		ImageReaderProto image = 1;
 		FluxSourceProto flux = 2;
 	}
 }
 
 message OutputProto {
 	oneof output {
-		OutputFileProto image = 1;
+		ImageWriterProto image = 1;
 		FluxSinkProto flux = 2;
 	}
 }

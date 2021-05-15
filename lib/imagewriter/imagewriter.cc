@@ -11,20 +11,20 @@
 #include <iostream>
 #include <fstream>
 
-std::unique_ptr<ImageWriter> ImageWriter::create(const OutputFileProto& config)
+std::unique_ptr<ImageWriter> ImageWriter::create(const ImageWriterProto& config)
 {
 	switch (config.format_case())
 	{
-		case OutputFileProto::kImg:
+		case ImageWriterProto::kImg:
 			return ImageWriter::createImgImageWriter(config);
 
-		case OutputFileProto::kD64:
+		case ImageWriterProto::kD64:
 			return ImageWriter::createD64ImageWriter(config);
 
-		case OutputFileProto::kLdbs:
+		case ImageWriterProto::kLdbs:
 			return ImageWriter::createLDBSImageWriter(config);
 
-		case OutputFileProto::kDiskcopy:
+		case ImageWriterProto::kDiskcopy:
 			return ImageWriter::createDiskCopyImageWriter(config);
 	}
 	Error() << "bad output image config";
@@ -33,7 +33,7 @@ std::unique_ptr<ImageWriter> ImageWriter::create(const OutputFileProto& config)
 
 void ImageWriter::updateConfigForFilename(const std::string& filename)
 {
-	OutputFileProto* f = config.mutable_output()->mutable_image();
+	ImageWriterProto* f = config.mutable_output()->mutable_image();
 	static const std::map<std::string, std::function<void(void)>> formats =
 	{
 		{".adf",      [&]() { f->mutable_img(); }},
@@ -58,7 +58,7 @@ void ImageWriter::updateConfigForFilename(const std::string& filename)
 	Error() << fmt::format("unrecognised image filename '{}'", filename);
 }
 
-ImageWriter::ImageWriter(const OutputFileProto& config):
+ImageWriter::ImageWriter(const ImageWriterProto& config):
 	_config(config)
 {}
 

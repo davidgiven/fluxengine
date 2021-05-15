@@ -6,7 +6,7 @@ message D64OutputProto {}
 message LDBSOutputProto {}
 message DiskCopyOutputProto {}
 
-message OutputFileProto {
+message ImageWriterProto {
 	optional string filename = 1;
 	oneof format {
 		ImgInputOutputProto img = 2;

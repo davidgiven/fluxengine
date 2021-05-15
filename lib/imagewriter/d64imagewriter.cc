@@ -25,7 +25,7 @@ static int sectors_per_track(int track)
 class D64ImageWriter : public ImageWriter
 {
 public:
-	D64ImageWriter(const OutputFileProto& config):
+	D64ImageWriter(const ImageWriterProto& config):
 		ImageWriter(config)
 	{}
 
@@ -56,7 +56,7 @@ public:
     }
 };
 
-std::unique_ptr<ImageWriter> ImageWriter::createD64ImageWriter(const OutputFileProto& config)
+std::unique_ptr<ImageWriter> ImageWriter::createD64ImageWriter(const ImageWriterProto& config)
 {
     return std::unique_ptr<ImageWriter>(new D64ImageWriter(config));
 }

@@ -78,7 +78,7 @@ static unsigned getSectorSize(uint8_t flags)
 class Jv3ImageReader : public ImageReader
 {
 public:
-	Jv3ImageReader(const InputFileProto& config):
+	Jv3ImageReader(const ImageReaderProto& config):
 		ImageReader(config)
 	{}
 
@@ -133,7 +133,7 @@ public:
 	}
 };
 
-std::unique_ptr<ImageReader> ImageReader::createJv3ImageReader(const InputFileProto& config)
+std::unique_ptr<ImageReader> ImageReader::createJv3ImageReader(const ImageReaderProto& config)
 {
     return std::unique_ptr<ImageReader>(new Jv3ImageReader(config));
 }

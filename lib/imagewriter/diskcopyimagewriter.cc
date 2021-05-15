@@ -28,7 +28,7 @@ static void write_and_update_checksum(ByteWriter& bw, uint32_t& checksum, const 
 class DiskCopyImageWriter : public ImageWriter
 {
 public:
-	DiskCopyImageWriter(const OutputFileProto& config):
+	DiskCopyImageWriter(const ImageWriterProto& config):
 		ImageWriter(config)
 	{}
 
@@ -170,7 +170,7 @@ public:
 };
 
 std::unique_ptr<ImageWriter> ImageWriter::createDiskCopyImageWriter(
-	const OutputFileProto& config)
+	const ImageWriterProto& config)
 {
     return std::unique_ptr<ImageWriter>(new DiskCopyImageWriter(config));
 }

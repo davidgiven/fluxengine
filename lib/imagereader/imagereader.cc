@@ -11,20 +11,20 @@
 #include <algorithm>
 #include <ctype.h>
 
-std::unique_ptr<ImageReader> ImageReader::create(const InputFileProto& config)
+std::unique_ptr<ImageReader> ImageReader::create(const ImageReaderProto& config)
 {
 	switch (config.format_case())
 	{
-		case InputFileProto::kImd:
+		case ImageReaderProto::kImd:
 			return ImageReader::createIMDImageReader(config);
 
-		case InputFileProto::kImg:
+		case ImageReaderProto::kImg:
 			return ImageReader::createImgImageReader(config);
 
-		case InputFileProto::kDiskcopy:
+		case ImageReaderProto::kDiskcopy:
 			return ImageReader::createDiskCopyImageReader(config);
 
-		case InputFileProto::kJv3:
+		case ImageReaderProto::kJv3:
 			return ImageReader::createJv3ImageReader(config);
 	}
 
@@ -34,7 +34,7 @@ std::unique_ptr<ImageReader> ImageReader::create(const InputFileProto& config)
 
 void ImageReader::updateConfigForFilename(const std::string& filename)
 {
-	InputFileProto* f = config.mutable_input()->mutable_image();
+	ImageReaderProto* f = config.mutable_input()->mutable_image();
 	static const std::map<std::string, std::function<void(void)>> formats =
 	{
 		{".adf",      [&]() { f->mutable_img(); }},
@@ -58,7 +58,7 @@ void ImageReader::updateConfigForFilename(const std::string& filename)
 	Error() << fmt::format("unrecognised image filename '{}'", filename);
 }
 
-ImageReader::ImageReader(const InputFileProto& config):
+ImageReader::ImageReader(const ImageReaderProto& config):
     _config(config)
 {}
 

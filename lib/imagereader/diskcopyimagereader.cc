@@ -13,7 +13,7 @@
 class DiskCopyImageReader : public ImageReader
 {
 public:
-	DiskCopyImageReader(const InputFileProto& config):
+	DiskCopyImageReader(const ImageReaderProto& config):
 		ImageReader(config)
 	{}
 
@@ -121,7 +121,7 @@ public:
 };
 
 std::unique_ptr<ImageReader> ImageReader::createDiskCopyImageReader(
-	const InputFileProto& config)
+	const ImageReaderProto& config)
 {
     return std::unique_ptr<ImageReader>(new DiskCopyImageReader(config));
 }
