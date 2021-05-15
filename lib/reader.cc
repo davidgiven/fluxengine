@@ -23,7 +23,6 @@
 FlagGroup readerFlags
 {
 	&sqliteFluxSinkFlags,
-	&fluxmapReaderFlags,
 };
 
 static StringFlag destination(

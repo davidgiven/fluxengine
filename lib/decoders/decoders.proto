@@ -8,12 +8,17 @@ import "arch/f85/f85.proto";
 import "arch/fb100/fb100.proto";
 import "arch/ibm/ibm.proto";
 import "arch/macintosh/macintosh.proto";
+import "lib/common.proto";
 
 message DecoderProto {
-	optional double pulse_debounce_threshold = 1 [default = 0.30];
-	optional double bit_error_threshold = 2 [default = 0.40];
-	optional double clock_interval_bias = 3 [default = -0.02];
-	optional double minimum_clock_us = 4 [default = 0.75];
+	optional double pulse_debounce_threshold = 1 [default = 0.30,
+		(help) = "ignore pulses with intervals shorter than this, in fractions of a clock"];
+	optional double bit_error_threshold = 2 [default = 0.40,
+		(help) = "amount of error to tolerate in pulse timing, in fractions of a clock"];
+	optional double clock_interval_bias = 3 [default = -0.02,
+		(help) = "adjust intervals between pulses by this many clocks before decoding"];
+	optional double minimum_clock_us = 4 [default = 0.75,
+		(help) = "refuse to detect clocks shorter than this, to avoid false positives"];
 
 	oneof format {
 		IBMInputProto ibm = 5;

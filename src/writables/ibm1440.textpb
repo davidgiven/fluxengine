@@ -12,7 +12,7 @@ input {
 
 output {
 	disk {
-		drive: 0
+		drive {}
 	}
 }
 
