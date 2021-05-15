@@ -1,11 +1,9 @@
 #include "globals.h"
 #include "flags.h"
 #include "usb/usb.h"
-#include "flaggroups/fluxsourcesink.h"
 #include "protocol.h"
 
 static FlagGroup flags = {
-	&fluxSourceSinkFlags,
 };
 
 static IntFlag drive(
@@ -21,7 +19,9 @@ static IntFlag track(
 int mainSeek(int argc, const char* argv[])
 {
     flags.parseFlagsWithConfigFiles(argc, argv, {});
+	Error() << "TODO";
 
+	#if 0
     usbSetDrive(drive, false, F_INDEX_REAL);
 	if (fluxSourceSinkFortyTrack)
 	{
@@ -31,5 +31,6 @@ int mainSeek(int argc, const char* argv[])
 	}
 	else
 		usbSeek(track);
+	#endif
     return 0;
 }

@@ -1,0 +1,22 @@
+syntax = "proto2";
+
+import "lib/common.proto";
+
+message HardwareOutputProto {
+	optional IndexMode index_mode = 1
+		[default = INDEXMODE_DRIVE, (help) = "index pulse source"];
+	optional int32 hard_sector_count = 2
+		[(help) = "number of hard sectors on the disk"];
+	optional bool high_density = 3
+		[default = true, (help) = "set if this is a high density disk"];
+	optional int32 drive = 4
+		[default = 0, (help) = "which drive to write to (0 or 1)"];
+}
+
+message OutputDiskProto {
+	oneof dest {
+		string fluxfile = 1;
+		HardwareOutputProto drive = 2;
+	}
+}
+

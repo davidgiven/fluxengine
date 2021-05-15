@@ -17,7 +17,7 @@
 #include "lib/config.pb.h"
 #include "proto.h"
 
-FlagGroup writerFlags { &hardwareFluxSourceFlags, &sqliteFluxSinkFlags, &hardwareFluxSinkFlags };
+FlagGroup writerFlags { &sqliteFluxSinkFlags };
 
 static sqlite3* outdb;
 

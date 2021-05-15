@@ -4,11 +4,11 @@
 #include "flags.h"
 #include <ostream>
 
-extern FlagGroup hardwareFluxSinkFlags;
 extern FlagGroup sqliteFluxSinkFlags;
 
 class Fluxmap;
 class OutputDiskProto;
+class HardwareOutputProto;
 
 class FluxSink
 {
@@ -16,7 +16,7 @@ public:
     virtual ~FluxSink() {}
 
     static std::unique_ptr<FluxSink> createSqliteFluxSink(const std::string& filename);
-    static std::unique_ptr<FluxSink> createHardwareFluxSink(unsigned drive);
+    static std::unique_ptr<FluxSink> createHardwareFluxSink(const HardwareOutputProto& config);
 
     static std::unique_ptr<FluxSink> create(const OutputDiskProto& config);
 

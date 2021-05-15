@@ -3,13 +3,8 @@
 #include "fluxmap.h"
 #include "usb/usb.h"
 #include "fluxsource/fluxsource.h"
-#include "flaggroups/fluxsourcesink.h"
 #include "lib/fluxsource/fluxsource.pb.h"
 #include "fmt/format.h"
-
-FlagGroup hardwareFluxSourceFlags = {
-    &fluxSourceSinkFlags,
-};
 
 class HardwareFluxSource : public FluxSource
 {
@@ -17,7 +12,7 @@ public:
     HardwareFluxSource(const HardwareInputProto& config):
         _config(config)
     {
-        usbSetDrive(_config.drive(), fluxSourceSinkHighDensity, _config.index_mode());
+        usbSetDrive(_config.drive(), _config.high_density(), _config.index_mode());
         std::cerr << "Measuring rotational speed... " << std::flush;
         _oneRevolution = usbGetRotationalPeriod(_config.hard_sector_count());
     if (_config.hard_sector_count() != 0)

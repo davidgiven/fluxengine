@@ -270,6 +270,7 @@ buildproto libproto.a \
     lib/decoders/decoders.proto \
     lib/encoders/encoders.proto \
     lib/fluxsource/fluxsource.proto \
+    lib/fluxsink/fluxsink.proto \
     lib/imagereader/imagereader.proto \
     lib/imagewriter/imagewriter.proto \
     lib/usb/usb.proto \
@@ -314,7 +315,6 @@ buildlibrary libbackend.a \
     lib/decoders/fluxmapreader.cc \
     lib/decoders/fmmfm.cc \
     lib/encoders/encoders.cc \
-	lib/flaggroups/fluxsourcesink.cc \
     lib/flags.cc \
     lib/fluxmap.cc \
     lib/fluxsink/fluxsink.cc \

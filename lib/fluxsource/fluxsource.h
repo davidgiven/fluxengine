@@ -3,8 +3,6 @@
 
 #include "flags.h"
 
-extern FlagGroup hardwareFluxSourceFlags;
-
 class Fluxmap;
 class FluxSpec;
 class InputDiskProto;

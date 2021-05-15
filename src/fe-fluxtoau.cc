@@ -10,7 +10,7 @@
 #include "fmt/format.h"
 #include <fstream>
 
-static FlagGroup flags { &hardwareFluxSourceFlags };
+static FlagGroup flags;
 
 static DataSpecFlag source(
     { "--source", "-s" },

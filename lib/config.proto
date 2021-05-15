@@ -5,6 +5,7 @@ import "lib/encoders/encoders.proto";
 import "lib/imagereader/imagereader.proto";
 import "lib/imagewriter/imagewriter.proto";
 import "lib/fluxsource/fluxsource.proto";
+import "lib/fluxsink/fluxsink.proto";
 import "lib/usb/usb.proto";
 import "lib/common.proto";
 
@@ -13,13 +14,6 @@ message InputDiskProto {
 		string fluxfile = 1;
 		HardwareInputProto drive = 2;
 		TestPatternInputProto test_pattern = 3;
-	}
-}
-
-message OutputDiskProto {
-	oneof dest {
-		string fluxfile = 1;
-		int32 drive = 2;
 	}
 }
 

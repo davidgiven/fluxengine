@@ -7,13 +7,11 @@
 #include "writer.h"
 #include "protocol.h"
 #include "fmt/format.h"
-#include "flaggroups/fluxsourcesink.h"
 #include "dep/agg/include/agg2d.h"
 #include "dep/stb/stb_image_write.h"
 #include <fstream>
 
 static FlagGroup flags = {
-	&fluxSourceSinkFlags,
 };
 
 static DataSpecFlag dest(
@@ -181,6 +179,8 @@ static void draw_x_graticules(Agg2D& painter, double x1, double y1, double x2, d
 
 int mainAnalyseDriveResponse(int argc, const char* argv[])
 {
+	Error() << "TODO";
+	#if 0
     flags.parseFlagsWithConfigFiles(argc, argv, {});
 
     FluxSpec spec(dest);
@@ -346,6 +346,7 @@ int mainAnalyseDriveResponse(int argc, const char* argv[])
 		painter.rectangle(colourbarBounds.x1, drawableBounds.y1, drawableBounds.x2, drawableBounds.y2);
 		bitmapSpec.save();
 	}
+	#endif
 
     return 0;
 }

@@ -13,4 +13,10 @@ extend google.protobuf.FieldOptions {
   optional string help = 50000;
 }
 
+enum IndexMode {
+	INDEXMODE_DRIVE = 0;
+	INDEXMODE_300 = 1;
+	INDEXMODE_360 = 2;
+}
+
 

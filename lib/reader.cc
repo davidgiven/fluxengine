@@ -22,7 +22,6 @@
 
 FlagGroup readerFlags
 {
-	&hardwareFluxSourceFlags,
 	&sqliteFluxSinkFlags,
 	&fluxmapReaderFlags,
 };
