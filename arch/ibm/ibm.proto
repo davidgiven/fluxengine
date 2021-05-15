@@ -3,9 +3,12 @@ syntax = "proto2";
 import "lib/common.proto";
 
 message IBMInputProto {
-	optional int32 sector_base = 1 [default=0];
-	optional bool ignore_side_byte = 2 [default=false];
-	optional RangeProto required_sectors = 3;
+	optional int32 sector_id_base = 1 [default = 1,
+		(help) = "ID of first sector"];
+	optional bool ignore_side_byte = 2 [default = false,
+		(help) = "ignore side byte in sector header"];
+	optional RangeProto required_sectors = 3 [
+		(help) = "require these sectors to exist for a good read"];
 }
 
 message IBMOutputProto {

@@ -13,7 +13,7 @@ output {
 
 decoder {
 	ibm {
-		sector_base: 0
+		sector_id_base: 0
 	}
 }
 

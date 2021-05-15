@@ -138,7 +138,7 @@ void IbmDecoder::decodeSectorRecord()
     br.read_8(); /* skip ID byte */
     _sector->logicalTrack = br.read_8();
     _sector->logicalSide = br.read_8();
-    _sector->logicalSector = br.read_8() - _config.sector_base();
+    _sector->logicalSector = br.read_8() - _config.sector_id_base();
     _currentSectorSize = 1 << (br.read_8() + 7);
     uint16_t wantCrc = br.read_be16();
     uint16_t gotCrc = crc16(CCITT_POLY, bytes.slice(0, _currentHeaderLength + 5));

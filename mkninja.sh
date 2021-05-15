@@ -346,6 +346,7 @@ READABLES="\
     acornadfs \
     acorndfs \
     aeslanier \
+    ampro \
     amiga \
     brother \
     c64 \
