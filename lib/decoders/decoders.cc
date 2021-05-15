@@ -14,6 +14,7 @@
 #include "arch/micropolis/micropolis.h"
 #include "arch/mx/mx.h"
 #include "arch/tids990/tids990.h"
+#include "arch/victor9k/victor9k.h"
 #include "decoders/fluxmapreader.h"
 #include "record.h"
 #include "protocol.h"
@@ -60,6 +61,9 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 
 		case DecoderProto::kTids990:
 			return std::unique_ptr<AbstractDecoder>(new Tids990Decoder(config.tids990()));
+
+		case DecoderProto::kVictor9K:
+			return std::unique_ptr<AbstractDecoder>(new Victor9kDecoder(config.victor9k()));
 
 		default:
 			Error() << "no input disk format specified";

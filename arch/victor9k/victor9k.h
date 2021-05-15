@@ -8,10 +8,12 @@
 
 class Sector;
 class Fluxmap;
+class Victor9kInputProto;
 
 class Victor9kDecoder : public AbstractDecoder
 {
 public:
+	Victor9kDecoder(const Victor9kInputProto&) {}
     virtual ~Victor9kDecoder() {}
 
     RecordType advanceToNextRecord();

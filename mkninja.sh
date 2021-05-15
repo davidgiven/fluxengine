@@ -269,6 +269,7 @@ buildproto libproto.a \
     arch/micropolis/micropolis.proto \
     arch/mx/mx.proto \
     arch/tids990/tids990.proto \
+    arch/victor9k/victor9k.proto \
     lib/common.proto \
     lib/config.proto \
     lib/decoders/decoders.proto \
@@ -363,6 +364,7 @@ READABLES="\
     micropolis \
     mx \
     tids990 \
+    victor9k \
     "
 
 WRITABLES="\
@@ -425,10 +427,7 @@ buildlibrary libfrontend.a \
     src/fe-writeflux.cc \
     src/fluxengine.cc \
 
-#    src/fe-readtids990.cc \
-#    src/fe-readvictor9k.cc \
 #    src/fe-readzilogmcz.cc \
-#    src/fe-writetids990.cc \
 
 buildprogram fluxengine \
     libfrontend.a \
