@@ -76,3 +76,14 @@ void writeDiskCommand(ImageReader& imageReader, AbstractEncoder& encoder, FluxSi
 		}
 	);
 }
+
+void writeRawDiskCommand(FluxSource& fluxSource, FluxSink& fluxSink)
+{
+	writeTracks(fluxSink,
+		[&](int track, int side) -> std::unique_ptr<Fluxmap>
+		{
+			return fluxSource.readFlux(track, side);
+		}
+	);
+}
+

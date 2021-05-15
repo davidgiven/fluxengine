@@ -18,11 +18,14 @@ message TestPatternFluxSourceProto {
 	optional double sequence_length_us = 2 [default = 200.0];
 }
 
+message EraseFluxSourceProto {}
+
 message FluxSourceProto {
 	oneof source {
 		string fluxfile = 1;
 		HardwareFluxSourceProto drive = 2;
 		TestPatternFluxSourceProto test_pattern = 3;
+		EraseFluxSourceProto erase = 4;
 	}
 }
 

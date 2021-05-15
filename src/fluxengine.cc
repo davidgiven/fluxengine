@@ -12,6 +12,7 @@ extern command_cb mainConvertImage;
 extern command_cb mainConvertScpToFlux;
 extern command_cb mainErase;
 extern command_cb mainInspect;
+extern command_cb mainRawWrite;
 extern command_cb mainRead;
 extern command_cb mainRpm;
 extern command_cb mainSeek;
@@ -19,7 +20,6 @@ extern command_cb mainTestBandwidth;
 extern command_cb mainTestVoltages;
 extern command_cb mainUpgradeFluxFile;
 extern command_cb mainWrite;
-extern command_cb mainWriteFlux;
 
 struct Command
 {
@@ -44,7 +44,7 @@ static std::vector<Command> commands =
     { "test",              mainTest,              "Various testing commands.", },
     { "upgradefluxfile",   mainUpgradeFluxFile,   "Upgrades a flux file from a previous version of this software.", },
     { "write",             mainWrite,             "Writes a sector image to a disk.", },
-    { "writeflux",         mainWriteFlux,         "Writes a raw flux file. Warning: you can't use this to copy disks.", },
+    { "rawwrite",          mainRawWrite,          "Writes a flux file to a disk. Warning: you can't use this to copy disks.", },
 };
 
 static std::vector<Command> readables =

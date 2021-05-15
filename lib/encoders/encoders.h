@@ -1,6 +1,7 @@
 #ifndef ENCODERS_H
 #define ENCODERS_H
 
+class FluxSource;
 class Fluxmap;
 class SectorSet;
 class EncoderProto;

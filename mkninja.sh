@@ -326,6 +326,7 @@ buildlibrary libbackend.a \
     lib/fluxsink/fluxsink.cc \
     lib/fluxsink/hardwarefluxsink.cc \
     lib/fluxsink/sqlitefluxsink.cc \
+    lib/fluxsource/erasefluxsource.cc \
     lib/fluxsource/fluxsource.cc \
     lib/fluxsource/hardwarefluxsource.cc \
     lib/fluxsource/testpatternfluxsource.cc \
@@ -412,12 +413,12 @@ buildlibrary libfrontend.a \
     src/fe-analysedriveresponse.cc \
     src/fe-analyselayout.cc \
     src/fe-cwftoflux.cc \
-    src/fe-erase.cc \
     src/fe-fluxtoau.cc \
     src/fe-fluxtoscp.cc \
     src/fe-fluxtovcd.cc \
     src/fe-image.cc \
     src/fe-inspect.cc \
+    src/fe-rawwrite.cc \
     src/fe-read.cc \
     src/fe-rpm.cc \
     src/fe-scptoflux.cc \
@@ -426,7 +427,6 @@ buildlibrary libfrontend.a \
     src/fe-testvoltages.cc \
     src/fe-upgradefluxfile.cc \
     src/fe-write.cc \
-    src/fe-writeflux.cc \
     src/fluxengine.cc \
 
 buildprogram fluxengine \

@@ -3,8 +3,8 @@
 
 class Fluxmap;
 class AbstractEncoder;
-class Geometry;
 class ImageReader;
+class FluxSource;
 class FluxSink;
 
 extern void writeTracks(FluxSink& fluxSink, const std::function<std::unique_ptr<Fluxmap>(int track, int side)> producer);
@@ -14,5 +14,6 @@ extern void fillBitmapTo(std::vector<bool>& bitmap,
 		const std::vector<bool>& pattern);
 	
 extern void writeDiskCommand(ImageReader& imageReader, AbstractEncoder& encoder, FluxSink& fluxSink);
+extern void writeRawDiskCommand(FluxSource& fluxSource, FluxSink& fluxSink);
 
 #endif

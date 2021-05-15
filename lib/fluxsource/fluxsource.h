@@ -8,6 +8,7 @@ class FluxSpec;
 class FluxSourceProto;
 class HardwareFluxSourceProto;
 class TestPatternFluxSourceProto;
+class EraseFluxSourceProto;
 
 class FluxSource
 {
@@ -19,6 +20,7 @@ private:
     static std::unique_ptr<FluxSource> createHardwareFluxSource(const HardwareFluxSourceProto& config);
     static std::unique_ptr<FluxSource> createStreamFluxSource(const std::string& path);
     static std::unique_ptr<FluxSource> createTestPatternFluxSource(const TestPatternFluxSourceProto& config);
+    static std::unique_ptr<FluxSource> createEraseFluxSource(const EraseFluxSourceProto& config);
 
 public:
     static std::unique_ptr<FluxSource> create(const FluxSourceProto& spec);

@@ -21,6 +21,9 @@ std::unique_ptr<FluxSource> FluxSource::create(const FluxSourceProto& config)
 		case FluxSourceProto::kDrive:
 			return createHardwareFluxSource(config.drive());
 
+		case FluxSourceProto::kErase:
+			return createEraseFluxSource(config.erase());
+
 		case FluxSourceProto::kTestPattern:
 			return createTestPatternFluxSource(config.test_pattern());
 	}
