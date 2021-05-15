@@ -55,50 +55,6 @@ public:
     std::map<std::string, Modifier> modifiers;
 };
 
-class FluxSpec
-{
-public:
-    struct Location
-    {
-        unsigned drive;
-        unsigned track;
-        unsigned side;
-
-        bool operator == (const Location& other) const
-        { return (drive == other.drive) && (track == other.track) && (side == other.side); }
-
-        bool operator != (const Location& other) const
-        { return (drive != other.drive) || (track != other.track) || (side != other.side); }
-    };
-
-public:
-    FluxSpec(const DataSpec& dataspec);
-
-public:
-    std::string filename;
-    std::vector<Location> locations;
-    unsigned drive;
-};
-
-class ImageSpec
-{
-public:
-    ImageSpec(const DataSpec& dataspec);
-    ImageSpec(const std::string filename,
-        unsigned cylinders, unsigned heads, unsigned sectors, unsigned bytes,
-		int physicalOffset=0, int physicalStep=1);
-
-public:
-    std::string filename;
-    unsigned cylinders;
-    unsigned heads;
-    unsigned sectors;
-    unsigned bytes;
-	int physicalOffset;
-	int physicalStep;
-    bool initialised : 1;
-};
-
 static inline std::ostream& operator << (std::ostream& os, const DataSpec& dataSpec)
 { os << (std::string)dataSpec; return os; }
 

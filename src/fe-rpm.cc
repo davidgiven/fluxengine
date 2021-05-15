@@ -20,6 +20,8 @@ int mainRpm(int argc, const char* argv[])
 {
     flags.parseFlagsWithConfigFiles(argc, argv, {});
 
+	Error() << "TODO";
+	#if 0
     FluxSpec spec(source);
     usbSetDrive(spec.drive, false, F_INDEX_REAL);
     nanoseconds_t period = usbGetRotationalPeriod(hardSectorCount);
@@ -33,6 +35,7 @@ int mainRpm(int argc, const char* argv[])
                      "  - the disk has no index holes (e.g. reversed flippy disks)\n"
                      "  - (most common) no disk is inserted in the drive!\n";
     }
+	#endif
 
     return 0;
 }
