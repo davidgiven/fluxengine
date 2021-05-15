@@ -1,5 +1,5 @@
 input {
-	file {
+	image {
 		filename: "brother240.img"
 		img {
 			format {
@@ -11,7 +11,7 @@ input {
 }
 
 output {
-	disk {
+	flux {
 		drive {}
 	}
 }

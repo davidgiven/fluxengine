@@ -5,8 +5,8 @@
 #include <ostream>
 
 class Fluxmap;
-class OutputDiskProto;
-class HardwareOutputProto;
+class FluxSinkProto;
+class HardwareFluxSinkProto;
 
 class FluxSink
 {
@@ -14,9 +14,9 @@ public:
     virtual ~FluxSink() {}
 
     static std::unique_ptr<FluxSink> createSqliteFluxSink(const std::string& filename);
-    static std::unique_ptr<FluxSink> createHardwareFluxSink(const HardwareOutputProto& config);
+    static std::unique_ptr<FluxSink> createHardwareFluxSink(const HardwareFluxSinkProto& config);
 
-    static std::unique_ptr<FluxSink> create(const OutputDiskProto& config);
+    static std::unique_ptr<FluxSink> create(const FluxSinkProto& config);
 
 public:
     virtual void writeFlux(int track, int side, Fluxmap& fluxmap) = 0;

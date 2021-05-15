@@ -34,7 +34,7 @@ std::unique_ptr<ImageReader> ImageReader::create(const InputFileProto& config)
 
 void ImageReader::updateConfigForFilename(const std::string& filename)
 {
-	InputFileProto* f = config.mutable_input()->mutable_file();
+	InputFileProto* f = config.mutable_input()->mutable_image();
 	static const std::map<std::string, std::function<void(void)>> formats =
 	{
 		{".adf",      [&]() { f->mutable_img(); }},

@@ -1,5 +1,5 @@
 input {
-	file {
+	image {
 		filename: "hplif770.img"
 		img {
 			format {
@@ -13,7 +13,7 @@ input {
 }
 
 output {
-	disk {
+	flux {
 		drive {}
 	}
 }

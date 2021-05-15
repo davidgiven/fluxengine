@@ -1,5 +1,5 @@
 input {
-	disk {
+	flux {
 		drive {
 			hard_sector_count: 16
 		}
@@ -7,7 +7,7 @@ input {
 }
 
 output {
-	file {
+	image {
 		filename: "micropolis.img"
 		img {}
 	}

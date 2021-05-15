@@ -1,12 +1,12 @@
 input {
-	file {
-		filename: "macintosh.diskcopy42"
+	image {
+		filename: "macintosh.diskcopy"
 		diskcopy {}
 	}
 }
 
 output {
-	disk {
+	flux {
 		drive {}
 	}
 }

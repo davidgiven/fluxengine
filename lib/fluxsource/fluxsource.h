@@ -5,9 +5,9 @@
 
 class Fluxmap;
 class FluxSpec;
-class InputDiskProto;
-class HardwareInputProto;
-class TestPatternInputProto;
+class FluxSourceProto;
+class HardwareFluxSourceProto;
+class TestPatternFluxSourceProto;
 
 class FluxSource
 {
@@ -16,12 +16,12 @@ public:
 
 private:
     static std::unique_ptr<FluxSource> createSqliteFluxSource(const std::string& filename);
-    static std::unique_ptr<FluxSource> createHardwareFluxSource(const HardwareInputProto& config);
+    static std::unique_ptr<FluxSource> createHardwareFluxSource(const HardwareFluxSourceProto& config);
     static std::unique_ptr<FluxSource> createStreamFluxSource(const std::string& path);
-    static std::unique_ptr<FluxSource> createTestPatternFluxSource(const TestPatternInputProto& config);
+    static std::unique_ptr<FluxSource> createTestPatternFluxSource(const TestPatternFluxSourceProto& config);
 
 public:
-    static std::unique_ptr<FluxSource> create(const InputDiskProto& spec);
+    static std::unique_ptr<FluxSource> create(const FluxSourceProto& spec);
 
 public:
     virtual std::unique_ptr<Fluxmap> readFlux(int track, int side) = 0;

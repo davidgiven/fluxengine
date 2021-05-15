@@ -44,13 +44,13 @@ static void test_config(void)
 
 	const std::string text = R"M(
 		input {
-			file {
+			image {
 				filename: "filename"
 			}
 		}
 
 		output {
-			disk {
+			flux {
 				drive { }
 			}
 		}

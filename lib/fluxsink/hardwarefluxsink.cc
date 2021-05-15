@@ -9,7 +9,7 @@
 class HardwareFluxSink : public FluxSink
 {
 public:
-    HardwareFluxSink(const HardwareOutputProto& config):
+    HardwareFluxSink(const HardwareFluxSinkProto& config):
         _config(config)
     {
 		if (config.has_hard_sector_count())
@@ -52,11 +52,11 @@ public:
 	}
 
 private:
-    const HardwareOutputProto& _config;
+    const HardwareFluxSinkProto& _config;
     nanoseconds_t _hardSectorThreshold;
 };
 
-std::unique_ptr<FluxSink> FluxSink::createHardwareFluxSink(const HardwareOutputProto& config)
+std::unique_ptr<FluxSink> FluxSink::createHardwareFluxSink(const HardwareFluxSinkProto& config)
 {
     return std::unique_ptr<FluxSink>(new HardwareFluxSink(config));
 }

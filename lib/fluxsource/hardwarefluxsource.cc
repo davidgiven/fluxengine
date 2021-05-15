@@ -9,7 +9,7 @@
 class HardwareFluxSource : public FluxSource
 {
 public:
-    HardwareFluxSource(const HardwareInputProto& config):
+    HardwareFluxSource(const HardwareFluxSourceProto& config):
         _config(config)
     {
         usbSetDrive(_config.drive(), _config.high_density(), _config.index_mode());
@@ -50,12 +50,12 @@ public:
     }
 
 private:
-    const HardwareInputProto& _config;
+    const HardwareFluxSourceProto& _config;
     nanoseconds_t _oneRevolution;
     nanoseconds_t _hardSectorThreshold;
 };
 
-std::unique_ptr<FluxSource> FluxSource::createHardwareFluxSource(const HardwareInputProto& config)
+std::unique_ptr<FluxSource> FluxSource::createHardwareFluxSource(const HardwareFluxSourceProto& config)
 {
     return std::unique_ptr<FluxSource>(new HardwareFluxSource(config));
 }

@@ -1,11 +1,11 @@
 input {
-	disk {
+	flux {
 		drive {}
 	}
 }
 
 output {
-	file {
+	image {
 		filename: "c64.d64"
 		d64 {}
 	}

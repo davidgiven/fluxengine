@@ -34,7 +34,7 @@ static StringFlag destFlux(
 	"",
 	[](const auto& value)
 	{
-		config.mutable_output()->mutable_disk()->set_fluxfile(value);
+		config.mutable_output()->mutable_flux()->set_fluxfile(value);
 	});
 
 static IntFlag destDrive(
@@ -43,7 +43,7 @@ static IntFlag destDrive(
 	0,
 	[](const auto& value)
 	{
-		config.mutable_output()->mutable_disk()->mutable_drive()->set_drive(value);
+		config.mutable_output()->mutable_flux()->mutable_drive()->set_drive(value);
 	});
 
 extern const std::map<std::string, std::string> writables;
@@ -52,12 +52,12 @@ int mainWrite(int argc, const char* argv[])
 {
     flags.parseFlagsWithConfigFiles(argc, argv, writables);
 
-	if (!config.input().has_disk() || !config.output().has_file())
+	if (!config.input().has_image() || !config.output().has_flux())
 		Error() << "incomplete config (did you remember to specify the format?)";
 
-	std::unique_ptr<ImageReader> reader(ImageReader::create(config.input().file()));
+	std::unique_ptr<ImageReader> reader(ImageReader::create(config.input().image()));
 	std::unique_ptr<AbstractEncoder> encoder(AbstractEncoder::create(config.encoder()));
-	std::unique_ptr<FluxSink> fluxSink(FluxSink::create(config.output().disk()));
+	std::unique_ptr<FluxSink> fluxSink(FluxSink::create(config.output().flux()));
 
 	writeDiskCommand(*reader, *encoder, *fluxSink);
 

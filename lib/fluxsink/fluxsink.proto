@@ -2,7 +2,7 @@ syntax = "proto2";
 
 import "lib/common.proto";
 
-message HardwareOutputProto {
+message HardwareFluxSinkProto {
 	optional IndexMode index_mode = 1
 		[default = INDEXMODE_DRIVE, (help) = "index pulse source"];
 	optional int32 hard_sector_count = 2
@@ -13,10 +13,10 @@ message HardwareOutputProto {
 		[default = 0, (help) = "which drive to write to (0 or 1)"];
 }
 
-message OutputDiskProto {
+message FluxSinkProto {
 	oneof dest {
 		string fluxfile = 1;
-		HardwareOutputProto drive = 2;
+		HardwareFluxSinkProto drive = 2;
 	}
 }
 

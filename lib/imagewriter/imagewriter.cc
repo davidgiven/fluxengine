@@ -33,7 +33,7 @@ std::unique_ptr<ImageWriter> ImageWriter::create(const OutputFileProto& config)
 
 void ImageWriter::updateConfigForFilename(const std::string& filename)
 {
-	OutputFileProto* f = config.mutable_output()->mutable_file();
+	OutputFileProto* f = config.mutable_output()->mutable_image();
 	static const std::map<std::string, std::function<void(void)>> formats =
 	{
 		{".adf",      [&]() { f->mutable_img(); }},

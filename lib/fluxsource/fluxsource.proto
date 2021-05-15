@@ -2,7 +2,7 @@ syntax = "proto2";
 
 import "lib/common.proto";
 
-message HardwareInputProto {
+message HardwareFluxSourceProto {
 	optional int32 drive = 1 [default = 0];
 	optional double revolutions = 2 [default = 1.2];
 
@@ -13,8 +13,16 @@ message HardwareInputProto {
 		[default = true, (help) = "set if this is a high density disk"];
 }
 
-message TestPatternInputProto {
+message TestPatternFluxSourceProto {
 	optional double interval_us = 1 [default = 4.0];
 	optional double sequence_length_us = 2 [default = 200.0];
+}
+
+message FluxSourceProto {
+	oneof source {
+		string fluxfile = 1;
+		HardwareFluxSourceProto drive = 2;
+		TestPatternFluxSourceProto test_pattern = 3;
+	}
 }
 

@@ -1,11 +1,11 @@
 input {
-	disk {
+	flux {
 		drive {}
 	}
 }
 
 output {
-	file {
+	image {
 		filename: "fb100.img"
 		img {}
 	}

@@ -13,15 +13,15 @@ static IntFlag driveFlag(
 	0,
 	[](const auto& value)
 	{
-		config.mutable_input()->mutable_disk()->mutable_drive()->set_drive(value);
+		config.mutable_input()->mutable_flux()->mutable_drive()->set_drive(value);
 	});
 
 int mainRpm(int argc, const char* argv[])
 {
     flags.parseFlagsWithConfigFiles(argc, argv, {});
 
-    usbSetDrive(config.input().disk().drive().drive(), false, F_INDEX_REAL);
-    nanoseconds_t period = usbGetRotationalPeriod(config.input().disk().drive().hard_sector_count());
+    usbSetDrive(config.input().flux().drive().drive(), false, F_INDEX_REAL);
+    nanoseconds_t period = usbGetRotationalPeriod(config.input().flux().drive().hard_sector_count());
     if (period != 0)
         std::cout << "Rotational period is " << period/1000000 << " ms (" << 60e9/period << " rpm)" << std::endl;
     else

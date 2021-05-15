@@ -9,25 +9,17 @@ import "lib/fluxsink/fluxsink.proto";
 import "lib/usb/usb.proto";
 import "lib/common.proto";
 
-message InputDiskProto {
-	oneof source {
-		string fluxfile = 1;
-		HardwareInputProto drive = 2;
-		TestPatternInputProto test_pattern = 3;
-	}
-}
-
 message InputProto {
 	oneof input {
-		InputFileProto file = 1;
-		InputDiskProto disk = 2;
+		InputFileProto image = 1;
+		FluxSourceProto flux = 2;
 	}
 }
 
 message OutputProto {
 	oneof output {
-		OutputFileProto file = 1;
-		OutputDiskProto disk = 2;
+		OutputFileProto image = 1;
+		FluxSinkProto flux = 2;
 	}
 }
 

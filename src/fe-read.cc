@@ -25,7 +25,7 @@ static StringFlag sourceFlux(
 	"",
 	[](const auto& value)
 	{
-		config.mutable_input()->mutable_disk()->set_fluxfile(value);
+		config.mutable_input()->mutable_flux()->set_fluxfile(value);
 	});
 
 static IntFlag sourceDrive(
@@ -34,7 +34,7 @@ static IntFlag sourceDrive(
 	0,
 	[](const auto& value)
 	{
-		config.mutable_input()->mutable_disk()->mutable_drive()->set_drive(value);
+		config.mutable_input()->mutable_flux()->mutable_drive()->set_drive(value);
 	});
 
 static StringFlag destImage(
@@ -52,12 +52,12 @@ int mainRead(int argc, const char* argv[])
 {
     flags.parseFlagsWithConfigFiles(argc, argv, readables);
 
-	if (!config.input().has_disk() || !config.output().has_file())
+	if (!config.input().has_flux() || !config.output().has_image())
 		Error() << "incomplete config (did you remember to specify the format?)";
 
-	std::unique_ptr<FluxSource> fluxSource(FluxSource::create(config.input().disk()));
+	std::unique_ptr<FluxSource> fluxSource(FluxSource::create(config.input().flux()));
 	std::unique_ptr<AbstractDecoder> decoder(AbstractDecoder::create(config.decoder()));
-	std::unique_ptr<ImageWriter> writer(ImageWriter::create(config.output().file()));
+	std::unique_ptr<ImageWriter> writer(ImageWriter::create(config.output().image()));
 
 	readDiskCommand(*fluxSource, *decoder, *writer);
 
