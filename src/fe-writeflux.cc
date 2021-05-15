@@ -10,10 +10,11 @@
 #include <fstream>
 #include <ctype.h>
 
-static FlagGroup flags { &writerFlags };
+static FlagGroup flags;
 
 int mainWriteFlux(int argc, const char* argv[])
 {
+	Error() << "TODO";
 	#if 0
     setReaderDefaultSource(":t=0-81:h=0-1");
     setWriterDefaultDest(":t=0-81:s=0-1");

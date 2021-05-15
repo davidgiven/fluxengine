@@ -3,7 +3,7 @@
 #include "fluxmap.h"
 #include "writer.h"
 
-static FlagGroup flags { &writerFlags };
+static FlagGroup flags;
 
 int mainErase(int argc, const char* argv[])
 {

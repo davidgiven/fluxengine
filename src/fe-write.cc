@@ -17,7 +17,7 @@
 #include <google/protobuf/text_format.h>
 #include <fstream>
 
-static FlagGroup flags { &writerFlags };
+static FlagGroup flags;
 
 extern const std::map<std::string, std::string> writables;
 
@@ -27,10 +27,6 @@ int mainWrite(int argc, const char* argv[])
 
 	if (!config.has_input() || !config.has_output())
 		Error() << "incomplete config (did you remember to specify the format?)";
-
-	std::string s;
-	google::protobuf::TextFormat::PrintToString(config, &s);
-	std::cout << s << '\n';
 
 	std::unique_ptr<ImageReader> reader(ImageReader::create(config.input().file()));
 	std::unique_ptr<AbstractEncoder> encoder(AbstractEncoder::create(config.encoder()));

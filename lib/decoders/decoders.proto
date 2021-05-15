@@ -42,5 +42,16 @@ message DecoderProto {
 		Victor9kDecoderProto victor9k = 17;
 		ZilogMczDecoderProto zilogmcz = 18;
 	}
+
+	optional string copy_flux_to = 19
+		[(help) = "while decoding, write a copy of the flux to this file"];
+	optional bool dump_records = 20 [default = false,
+		(help) = "if set, then dump the parsed but undecoded disk records"];
+	optional bool dump_sectors = 21 [default = false,
+		(help) = "if set, then dump the decoded sectors to this file"];
+	optional int32 retries = 22 [default = 5,
+		(help) = "how many times to retry each track in the event of a read failure"];
+	optional string write_csv_to = 23
+		[(help) = "if set, write a CSV report of the disk state"];
 }
 

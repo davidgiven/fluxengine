@@ -17,7 +17,7 @@
 #include <google/protobuf/text_format.h>
 #include <fstream>
 
-static FlagGroup flags { &readerFlags };
+static FlagGroup flags;
 
 extern const std::map<std::string, std::string> readables;
 

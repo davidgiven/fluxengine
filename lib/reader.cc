@@ -17,37 +17,9 @@
 #include "imagewriter/imagewriter.h"
 #include "fmt/format.h"
 #include "proto.h"
+#include "lib/decoders/decoders.pb.h"
 #include <iostream>
 #include <fstream>
-
-FlagGroup readerFlags;
-
-static StringFlag destination(
-    { "--write-flux", "-f" },
-    "write the raw magnetic flux to this file",
-    "");
-
-static SettableFlag justRead(
-	{ "--just-read" },
-	"just read the disk and do no further processing");
-
-static SettableFlag dumpRecords(
-	{ "--dump-records" },
-	"Dump the parsed but undecoded records.");
-
-static SettableFlag dumpSectors(
-	{ "--dump-sectors" },
-	"Dump the decoded sectors.");
-
-static IntFlag retries(
-	{ "--retries" },
-	"How many times to retry each track in the event of a read failure.",
-	5);
-
-static StringFlag csvFile(
-	{ "--write-csv" },
-	"write a CSV report of the disk state",
-	"");
 
 static std::unique_ptr<FluxSink> outputFluxSink;
 
@@ -137,7 +109,7 @@ void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWrit
 			track->fluxsource = &fluxsource;
 
 			std::map<int, std::unique_ptr<Sector>> readSectors;
-			for (int retry = ::retries; retry >= 0; retry--)
+			for (int retry = config.decoder().retries(); retry >= 0; retry--)
 			{
 				track->readFluxmap();
 				decoder.decodeToSectors(*track);
@@ -197,7 +169,7 @@ void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWrit
 					std::cout << retry << " retries remaining" << std::endl;
 			}
 
-			if (dumpRecords)
+			if (config.decoder().dump_records())
 			{
 				std::cout << "\nRaw (undecoded) records follow:\n\n";
 				for (auto& record : track->rawrecords)
@@ -209,7 +181,7 @@ void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWrit
 				}
 			}
 
-			if (dumpSectors)
+			if (config.decoder().dump_sectors())
 			{
 				std::cout << "\nDecoded sectors follow:\n\n";
 				for (auto& sector : track->sectors)
@@ -247,8 +219,8 @@ void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWrit
     }
 
 	writer.printMap(allSectors);
-	if (!csvFile.get().empty())
-		writer.writeCsv(allSectors, csvFile.get());
+	if (!config.decoder().has_write_csv_to())
+		writer.writeCsv(allSectors, config.decoder().write_csv_to());
 	writer.writeImage(allSectors);
 
 	if (failures)
