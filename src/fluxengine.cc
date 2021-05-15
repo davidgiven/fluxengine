@@ -10,7 +10,6 @@ extern command_cb mainConvertFluxToScp;
 extern command_cb mainConvertFluxToVcd;
 extern command_cb mainConvertImage;
 extern command_cb mainConvertScpToFlux;
-extern command_cb mainErase;
 extern command_cb mainInspect;
 extern command_cb mainRawWrite;
 extern command_cb mainRead;
@@ -34,7 +33,6 @@ static command_cb mainTest;
 
 static std::vector<Command> commands =
 {
-    { "erase",             mainErase,             "Permanently but rapidly erases some or all of a disk." },
     { "convert",           mainConvert,           "Converts various types of data file.", },
     { "inspect",           mainInspect,           "Low-level analysis and inspection of a disk." },
 	{ "analyse",           mainAnalyse,           "Disk and drive analysis tools." },
