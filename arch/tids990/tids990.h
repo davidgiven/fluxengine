@@ -9,21 +9,27 @@ class Sector;
 class SectorSet;
 class Fluxmap;
 class Track;
+class Tids990InputProto;
+class Tids990OutputProto;
 
-class TiDs990Decoder : public AbstractDecoder
+class Tids990Decoder : public AbstractDecoder
 {
 public:
-    virtual ~TiDs990Decoder() {}
+	Tids990Decoder(const Tids990InputProto&) {}
+    virtual ~Tids990Decoder() {}
 
     RecordType advanceToNextRecord();
     void decodeSectorRecord();
 	void decodeDataRecord();
 };
 
-class TiDs990Encoder : public AbstractEncoder
+class Tids990Encoder : public AbstractEncoder
 {
 public:
-	virtual ~TiDs990Encoder() {}
+	Tids990Encoder(const Tids990OutputProto& config):
+		_config(config)
+	{}
+	virtual ~Tids990Encoder() {}
 
 private:
 	void writeRawBits(uint32_t data, int width);
@@ -35,6 +41,7 @@ public:
     std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors);
 
 private:
+	const Tids990OutputProto& _config;
 	std::vector<bool> _bits;
 	unsigned _cursor;
 	bool _lastBit;

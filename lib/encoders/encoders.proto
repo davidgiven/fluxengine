@@ -4,6 +4,7 @@ import "arch/amiga/amiga.proto";
 import "arch/brother/brother.proto";
 import "arch/ibm/ibm.proto";
 import "arch/macintosh/macintosh.proto";
+import "arch/tids990/tids990.proto";
 //import "lib/common.proto";
 
 message EncoderProto {
@@ -12,5 +13,6 @@ message EncoderProto {
 		BrotherOutputProto brother = 4;
 		AmigaOutputProto amiga = 5;
 		MacintoshOutputProto macintosh = 6;
+		Tids990OutputProto tids990 = 7;
 	}
 }

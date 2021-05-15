@@ -6,6 +6,7 @@
 #include "arch/brother/brother.h"
 #include "arch/ibm/ibm.h"
 #include "arch/macintosh/macintosh.h"
+#include "arch/tids990/tids990.h"
 #include "lib/encoders/encoders.pb.h"
 #include "protocol.h"
 

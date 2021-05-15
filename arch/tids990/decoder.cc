@@ -40,7 +40,7 @@ const FluxPattern DATA_RECORD_PATTERN(32, 0x11112245);
 
 const FluxMatchers ANY_RECORD_PATTERN({ &SECTOR_RECORD_PATTERN, &DATA_RECORD_PATTERN });
 
-AbstractDecoder::RecordType TiDs990Decoder::advanceToNextRecord()
+AbstractDecoder::RecordType Tids990Decoder::advanceToNextRecord()
 {
 	const FluxMatcher* matcher = nullptr;
 	_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
@@ -51,7 +51,7 @@ AbstractDecoder::RecordType TiDs990Decoder::advanceToNextRecord()
 	return RecordType::UNKNOWN_RECORD;
 }
 
-void TiDs990Decoder::decodeSectorRecord()
+void Tids990Decoder::decodeSectorRecord()
 {
     auto bits = readRawBits(TIDS990_SECTOR_RECORD_SIZE*16);
     auto bytes = decodeFmMfm(bits).slice(0, TIDS990_SECTOR_RECORD_SIZE);
@@ -71,7 +71,7 @@ void TiDs990Decoder::decodeSectorRecord()
         _sector->status = Sector::DATA_MISSING; /* correct but unintuitive */
 }
 
-void TiDs990Decoder::decodeDataRecord()
+void Tids990Decoder::decodeDataRecord()
 {
 	auto bits = readRawBits(TIDS990_DATA_RECORD_SIZE*16);
 	auto bytes = decodeFmMfm(bits).slice(0, TIDS990_DATA_RECORD_SIZE);

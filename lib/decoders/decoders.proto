@@ -11,6 +11,7 @@ import "arch/ibm/ibm.proto";
 import "arch/macintosh/macintosh.proto";
 import "arch/micropolis/micropolis.proto";
 import "arch/mx/mx.proto";
+import "arch/tids990/tids990.proto";
 import "lib/common.proto";
 
 message DecoderProto {
@@ -35,6 +36,7 @@ message DecoderProto {
 		Apple2InputProto apple2 = 13;
 		MicropolisInputProto micropolis = 14;
 		MxInputProto mx = 15;
+		Tids990InputProto tids990 = 16;
 	}
 }
 

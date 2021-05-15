@@ -268,6 +268,7 @@ buildproto libproto.a \
     arch/macintosh/macintosh.proto \
     arch/micropolis/micropolis.proto \
     arch/mx/mx.proto \
+    arch/tids990/tids990.proto \
     lib/common.proto \
     lib/config.proto \
     lib/decoders/decoders.proto \
@@ -361,6 +362,7 @@ READABLES="\
     macintosh \
     micropolis \
     mx \
+    tids990 \
     "
 
 WRITABLES="\
@@ -380,6 +382,7 @@ WRITABLES="\
     atarist800 \
     atarist820 \
     macintosh \
+    tids990 \
     "
 
 for pb in $READABLES; do
