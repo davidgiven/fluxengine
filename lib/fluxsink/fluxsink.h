@@ -4,8 +4,6 @@
 #include "flags.h"
 #include <ostream>
 
-extern FlagGroup sqliteFluxSinkFlags;
-
 class Fluxmap;
 class OutputDiskProto;
 class HardwareOutputProto;

@@ -20,10 +20,7 @@
 #include <iostream>
 #include <fstream>
 
-FlagGroup readerFlags
-{
-	&sqliteFluxSinkFlags,
-};
+FlagGroup readerFlags;
 
 static StringFlag destination(
     { "--write-flux", "-f" },
