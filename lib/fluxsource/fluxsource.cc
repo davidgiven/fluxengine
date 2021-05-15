@@ -24,6 +24,9 @@ std::unique_ptr<FluxSource> FluxSource::create(const FluxSourceProto& config)
 		case FluxSourceProto::kErase:
 			return createEraseFluxSource(config.erase());
 
+		case FluxSourceProto::kKryoflux:
+			return createKryofluxFluxSource(config.kryoflux());
+
 		case FluxSourceProto::kTestPattern:
 			return createTestPatternFluxSource(config.test_pattern());
 	}

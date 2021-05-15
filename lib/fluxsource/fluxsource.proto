@@ -20,12 +20,17 @@ message TestPatternFluxSourceProto {
 
 message EraseFluxSourceProto {}
 
+message KryofluxFluxSourceProto {
+	optional string path = 1 [(help) = "path to Kryoflux stream directory"];
+}
+
 message FluxSourceProto {
 	oneof source {
 		string fluxfile = 1;
 		HardwareFluxSourceProto drive = 2;
 		TestPatternFluxSourceProto test_pattern = 3;
 		EraseFluxSourceProto erase = 4;
+		KryofluxFluxSourceProto kryoflux = 5;
 	}
 }
 

@@ -332,7 +332,7 @@ buildlibrary libbackend.a \
     lib/fluxsource/testpatternfluxsource.cc \
     lib/fluxsource/kryoflux.cc \
     lib/fluxsource/sqlitefluxsource.cc \
-    lib/fluxsource/streamfluxsource.cc \
+    lib/fluxsource/kryofluxfluxsource.cc \
     lib/usb/usb.cc \
     lib/usb/fluxengineusb.cc \
     lib/usb/greaseweazle.cc \
