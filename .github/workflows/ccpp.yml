@@ -32,12 +32,20 @@ jobs:
         shell: msys2 {0}
     steps:
     - uses: msys2/setup-msys2@v2
+      with:
+        update: true
+        install: >-
+          make
+          ninja
+          mingw-w64-i686-libusb
+          mingw-w64-i686-sqlite3
+          mingw-w64-i686-zlib
+          mingw-w64-cross-gcc
+          zip
+          mingw-w64-i686-protobuf
     - uses: actions/checkout@v1
       with:
         fetch-depth: 1
-    - name: pacman
-      run: |
-        pacman -S --noconfirm --needed make ninja mingw-w64-i686-libusb mingw-w64-i686-sqlite3 mingw-w64-i686-zlib mingw-w64-cross-gcc zip mingw-w64-i686-protobuf
     - name: build
       run: |
         make CXX=/opt/bin/i686-w64-mingw32-g++.exe AR="/opt/bin/i686-w64-mingw32-ar.exe rcs"
