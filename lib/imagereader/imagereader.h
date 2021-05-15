@@ -13,6 +13,7 @@ public:
 
 public:
     static std::unique_ptr<ImageReader> create(const InputFileProto& config);
+	static void updateConfigForFilename(const std::string& filename);
 
 public:
     static std::unique_ptr<ImageReader> createDiskCopyImageReader(const InputFileProto& config);

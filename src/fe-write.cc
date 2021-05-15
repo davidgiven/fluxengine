@@ -19,13 +19,40 @@
 
 static FlagGroup flags;
 
+static StringFlag sourceImage(
+	{ "-i", "--input" },
+	"source image to read from",
+	"",
+	[](const auto& value)
+	{
+		ImageReader::updateConfigForFilename(value);
+	});
+
+static StringFlag destFlux(
+	{ "-d", "--dest" },
+	"flux file to write to",
+	"",
+	[](const auto& value)
+	{
+		config.mutable_output()->mutable_disk()->set_fluxfile(value);
+	});
+
+static IntFlag destDrive(
+	{ "-D", "--drive" },
+	"drive to write to",
+	0,
+	[](const auto& value)
+	{
+		config.mutable_output()->mutable_disk()->mutable_drive()->set_drive(value);
+	});
+
 extern const std::map<std::string, std::string> writables;
 
 int mainWrite(int argc, const char* argv[])
 {
     flags.parseFlagsWithConfigFiles(argc, argv, writables);
 
-	if (!config.has_input() || !config.has_output())
+	if (!config.input().has_disk() || !config.output().has_file())
 		Error() << "incomplete config (did you remember to specify the format?)";
 
 	std::unique_ptr<ImageReader> reader(ImageReader::create(config.input().file()));

@@ -218,6 +218,7 @@ void BoolFlag::set(const std::string& value)
 		_value = false;
 	else
 		Error() << "can't parse '" << value << "'; try 'true' or 'false'";
+	_callback(_value);
 }
 
 const std::string HexIntFlag::defaultValueAsString() const

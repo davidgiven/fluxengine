@@ -6,22 +6,10 @@
 #include "imagewriter/imagewriter.h"
 #include "utils.h"
 #include "lib/config.pb.h"
+#include "proto.h"
 #include "fmt/format.h"
 #include <iostream>
 #include <fstream>
-
-#if 0
-std::map<std::string, ImageWriter::Constructor> ImageWriter::formats =
-{
-	{".adf", ImageWriter::createImgImageWriter},
-	{".d64", ImageWriter::createD64ImageWriter},
-	{".d81", ImageWriter::createImgImageWriter},
-	{".diskcopy", ImageWriter::createDiskCopyImageWriter},
-	{".img", ImageWriter::createImgImageWriter},
-	{".ldbs", ImageWriter::createLDBSImageWriter},
-	{".st", ImageWriter::createImgImageWriter},
-};
-#endif
 
 std::unique_ptr<ImageWriter> ImageWriter::create(const OutputFileProto& config)
 {
@@ -43,11 +31,32 @@ std::unique_ptr<ImageWriter> ImageWriter::create(const OutputFileProto& config)
 	return std::unique_ptr<ImageWriter>();
 }
 
-//void ImageWriter::verifyImageSpec(const ImageSpec& spec)
-//{
-//	if (!findConstructor(spec))
-//		Error() << "unrecognised output image filename extension";
-//}
+void ImageWriter::updateConfigForFilename(const std::string& filename)
+{
+	OutputFileProto* f = config.mutable_output()->mutable_file();
+	static const std::map<std::string, std::function<void(void)>> formats =
+	{
+		{".adf",      [&]() { f->mutable_img(); }},
+		{".d64",      [&]() { f->mutable_d64(); }},
+		{".d81",      [&]() { f->mutable_img(); }},
+		{".diskcopy", [&]() { f->mutable_diskcopy(); }},
+		{".img",      [&]() { f->mutable_img(); }},
+		{".ldbs",     [&]() { f->mutable_ldbs(); }},
+		{".st",       [&]() { f->mutable_img(); }},
+	};
+
+	for (const auto& it : formats)
+	{
+		if (endsWith(filename, it.first))
+		{
+			it.second();
+			f->set_filename(filename);
+			return;
+		}
+	}
+
+	Error() << fmt::format("unrecognised image filename '{}'", filename);
+}
 
 ImageWriter::ImageWriter(const OutputFileProto& config):
 	_config(config)

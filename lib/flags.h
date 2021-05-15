@@ -92,10 +92,12 @@ class ValueFlag : public Flag
 {
 public:
     ValueFlag(const std::vector<std::string>& names, const std::string helptext,
-            const T defaultValue):
+            const T defaultValue,
+			std::function<void(const T&)> callback = [](const T&) {}):
         Flag(names, helptext),
         _defaultValue(defaultValue),
-        _value(defaultValue)
+        _value(defaultValue),
+		_callback(callback)
     {}
 
     const T& get() const
@@ -114,38 +116,42 @@ public:
 protected:
     T _defaultValue;
     T _value;
+	std::function<void(const T&)> _callback;
 };
 
 class StringFlag : public ValueFlag<std::string>
 {
 public:
     StringFlag(const std::vector<std::string>& names, const std::string helptext,
-            const std::string defaultValue = ""):
-        ValueFlag(names, helptext, defaultValue)
+            const std::string defaultValue = "",
+			std::function<void(const std::string&)> callback = [](const std::string&) {}):
+        ValueFlag(names, helptext, defaultValue, callback)
     {}
 
     const std::string defaultValueAsString() const { return _defaultValue; }
-    void set(const std::string& value) { _value = value; }
+    void set(const std::string& value) { _value = value; _callback(_value); }
 };
 
 class IntFlag : public ValueFlag<int>
 {
 public:
     IntFlag(const std::vector<std::string>& names, const std::string helptext,
-            int defaultValue = 0):
-        ValueFlag(names, helptext, defaultValue)
+            int defaultValue = 0,
+			std::function<void(const int&)> callback = [](const int&) {}):
+        ValueFlag(names, helptext, defaultValue, callback)
     {}
 
     const std::string defaultValueAsString() const { return std::to_string(_defaultValue); }
-    void set(const std::string& value) { _value = std::stoi(value); }
+    void set(const std::string& value) { _value = std::stoi(value); _callback(_value); }
 };
 
 class HexIntFlag : public IntFlag
 {
 public:
     HexIntFlag(const std::vector<std::string>& names, const std::string helptext,
-            int defaultValue = 0):
-        IntFlag(names, helptext, defaultValue)
+            int defaultValue = 0,
+			std::function<void(const int&)> callback = [](const int&) {}):
+        IntFlag(names, helptext, defaultValue, callback)
     {}
 
     const std::string defaultValueAsString() const;
@@ -155,20 +161,22 @@ class DoubleFlag : public ValueFlag<double>
 {
 public:
     DoubleFlag(const std::vector<std::string>& names, const std::string helptext,
-            double defaultValue = 1.0):
-        ValueFlag(names, helptext, defaultValue)
+            double defaultValue = 1.0,
+			std::function<void(const double&)> callback = [](const double&) {}):
+        ValueFlag(names, helptext, defaultValue, callback)
     {}
 
     const std::string defaultValueAsString() const { return std::to_string(_defaultValue); }
-    void set(const std::string& value) { _value = std::stod(value); }
+    void set(const std::string& value) { _value = std::stod(value); _callback(_value); }
 };
 
 class BoolFlag : public ValueFlag<bool>
 {
 public:
     BoolFlag(const std::vector<std::string>& names, const std::string helptext,
-            bool defaultValue = false):
-        ValueFlag(names, helptext, defaultValue)
+            bool defaultValue = false,
+			std::function<void(const bool&)> callback = [](const bool&) {}):
+        ValueFlag(names, helptext, defaultValue, callback)
     {}
 
     const std::string defaultValueAsString() const { return _defaultValue ? "true" : "false"; }
