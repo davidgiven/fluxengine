@@ -366,6 +366,17 @@ WRITABLES="\
     brother120 \
     brother240 \
     ibm1440 \
+    ibm720 \
+    commodore1581 \
+    hplif770 \
+    atarist360 \
+    atarist370 \
+    atarist400 \
+    atarist410 \
+    atarist720 \
+    atarist740 \
+    atarist800 \
+    atarist820 \
     macintosh \
     "
 

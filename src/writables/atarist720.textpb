@@ -1,0 +1,43 @@
+input {
+	file {
+		filename: "atarist720.img"
+		img {
+			format {
+				sectors: 9
+				sector_size: 512
+			}
+			tracks: 80
+			sides: 2
+		}
+	}
+}
+
+output {
+	disk {
+		drive {}
+	}
+}
+
+encoder {
+	ibm {
+		track_length_ms: 200
+		clock_rate_khz: 250
+		emit_iam: false
+		gap0: 80
+		gap2: 22
+		gap3: 34
+		sector_skew: "012345678"
+		swap_sides: true
+	}
+}
+
+cylinders {
+	start: 0
+	end: 79
+}
+
+heads {
+	start: 0
+	end: 1
+}
+
