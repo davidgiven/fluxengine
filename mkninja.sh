@@ -48,8 +48,16 @@ buildlibrary() {
 
     local flags
     flags=
+    local deps
+    deps=
     while true; do
         case $1 in
+            -d)
+                deps="$deps $2"
+                shift
+                shift
+                ;;
+
             -*)
                 flags="$flags $1"
                 shift
@@ -75,7 +83,7 @@ buildlibrary() {
         obj="$OBJDIR/dbg/${src%%.c*}.o"
         dobjs="$dobjs $obj"
 
-        echo build $obj : cxx $src
+        echo "build $obj : cxx $src | $deps"
         echo "    flags=$flags $CDBGFLAGS"
     done
 
@@ -265,6 +273,7 @@ buildproto libproto.a \
 
 buildlibrary libbackend.a \
     -I$OBJDIR/proto \
+    -d $OBJDIR/proto/libproto.def \
     lib/imagereader/diskcopyimagereader.cc \
     lib/imagereader/imagereader.cc \
     lib/imagereader/imgimagereader.cc \
@@ -362,6 +371,7 @@ buildmktable writables $OBJDIR/writables.cc $WRITABLES
 
 buildlibrary libfrontend.a \
     -I$OBJDIR/proto \
+    -d $OBJDIR/proto/libproto.def \
     $(for a in $READABLES; do echo $OBJDIR/proto/src/readables/$a.cc; done) \
     $(for a in $WRITABLES; do echo $OBJDIR/proto/src/writables/$a.cc; done) \
     $OBJDIR/readables.cc \
@@ -444,7 +454,7 @@ runtest fmmfm-test          tests/fmmfm.cc
 runtest greaseweazle-test   tests/greaseweazle.cc
 runtest kryoflux-test       tests/kryoflux.cc
 runtest ldbs-test           tests/ldbs.cc
-runtest proto-test          -I$OBJDIR/proto tests/proto.cc $OBJDIR/proto/tests/testproto.cc
+runtest proto-test          -I$OBJDIR/proto -d $OBJDIR/proto/libproto.def tests/proto.cc $OBJDIR/proto/tests/testproto.cc
 
 # vim: sw=4 ts=4 et
 
