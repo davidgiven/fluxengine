@@ -21,13 +21,13 @@ static ActionFlag helpFlag = ActionFlag(
     doHelp);
 
 static ActionFlag showConfigFlag = ActionFlag(
-    { "--show-config", "-c" },
+    { "--config", "-C" },
     "Shows the currently set configuration and halts.",
     doShowConfig);
 
 static ActionFlag docFlag = ActionFlag(
     { "--doc" },
-    "Shows the available configuration options.",
+    "Shows the available configuration options and halts.",
     doDoc);
 
 FlagGroup::FlagGroup()
@@ -228,7 +228,8 @@ const std::string HexIntFlag::defaultValueAsString() const
 
 static void doHelp()
 {
-    std::cout << "FluxEngine options:" << std::endl;
+    std::cout << "FluxEngine options:\n";
+	std::cout << "Note: options are processed left to right and order matters!\n";
     for (auto flag : all_flags)
     {
         std::cout << "  ";
