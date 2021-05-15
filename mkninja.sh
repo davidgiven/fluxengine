@@ -348,6 +348,7 @@ READABLES="\
     aeslanier \
     ampro \
     amiga \
+    atarist \
     brother \
     c64 \
     f85 \
@@ -404,9 +405,7 @@ buildlibrary libfrontend.a \
     src/fe-writeflux.cc \
     src/fluxengine.cc \
 
-#    src/fe-readampro.cc \
 #    src/fe-readapple2.cc \
-#    src/fe-readatarist.cc \
 #    src/fe-readmicropolis.cc \
 #    src/fe-readmx.cc \
 #    src/fe-readtids990.cc \
