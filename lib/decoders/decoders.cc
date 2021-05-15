@@ -5,6 +5,7 @@
 #include "encoders/encoders.h"
 #include "arch/aeslanier/aeslanier.h"
 #include "arch/amiga/amiga.h"
+#include "arch/apple2/apple2.h"
 #include "arch/brother/brother.h"
 #include "arch/c64/c64.h"
 #include "arch/f85/f85.h"
@@ -29,6 +30,9 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 
 		case DecoderProto::kAmiga:
 			return std::unique_ptr<AbstractDecoder>(new AmigaDecoder(config.amiga()));
+
+		case DecoderProto::kApple2:
+			return std::unique_ptr<AbstractDecoder>(new Apple2Decoder(config.apple2()));
 
 		case DecoderProto::kBrother:
 			return std::unique_ptr<AbstractDecoder>(new BrotherDecoder(config.brother()));

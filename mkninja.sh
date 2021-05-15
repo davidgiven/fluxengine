@@ -259,6 +259,7 @@ buildlibrary libfmt.a \
 buildproto libproto.a \
     arch/aeslanier/aeslanier.proto \
     arch/amiga/amiga.proto \
+    arch/apple2/apple2.proto \
     arch/brother/brother.proto \
     arch/c64/c64.proto \
     arch/f85/f85.proto \
@@ -348,6 +349,7 @@ READABLES="\
     aeslanier \
     ampro \
     amiga \
+    apple2 \
     atarist \
     brother \
     c64 \

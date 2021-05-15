@@ -2,6 +2,7 @@ syntax = "proto2";
 
 import "arch/aeslanier/aeslanier.proto";
 import "arch/amiga/amiga.proto";
+import "arch/apple2/apple2.proto";
 import "arch/brother/brother.proto";
 import "arch/c64/c64.proto";
 import "arch/f85/f85.proto";
@@ -29,6 +30,7 @@ message DecoderProto {
 		F85InputProto f85 = 10;
 		Fb100InputProto fb100 = 11;
 		MacintoshInputProto macintosh = 12;
+		Apple2InputProto apple2 = 13;
 	}
 }
 
