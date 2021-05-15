@@ -7,6 +7,7 @@ import "arch/c64/c64.proto";
 import "arch/f85/f85.proto";
 import "arch/fb100/fb100.proto";
 import "arch/ibm/ibm.proto";
+import "arch/macintosh/macintosh.proto";
 
 message DecoderProto {
 	optional double pulse_debounce_threshold = 1 [default = 0.30];
@@ -22,6 +23,7 @@ message DecoderProto {
 		Commodore64InputProto c64 = 9;
 		F85InputProto f85 = 10;
 		Fb100InputProto fb100 = 11;
+		MacintoshInputProto macintosh = 12;
 	}
 }
 

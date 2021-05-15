@@ -5,6 +5,7 @@
 #include "arch/amiga/amiga.h"
 #include "arch/brother/brother.h"
 #include "arch/ibm/ibm.h"
+#include "arch/macintosh/macintosh.h"
 #include "lib/encoders/encoders.pb.h"
 #include "protocol.h"
 
@@ -20,6 +21,9 @@ std::unique_ptr<AbstractEncoder> AbstractEncoder::create(const EncoderProto& con
 
 		case EncoderProto::kBrother:
 			return std::unique_ptr<AbstractEncoder>(new BrotherEncoder(config.brother()));
+
+		case EncoderProto::kMacintosh:
+			return std::unique_ptr<AbstractEncoder>(new MacintoshEncoder(config.macintosh()));
 
 		default:
 			Error() << "no input disk format specified";

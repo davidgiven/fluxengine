@@ -1,0 +1,27 @@
+input {
+	file {
+		filename: "macintosh.diskcopy42"
+		diskcopy {}
+	}
+}
+
+output {
+	disk {
+		drive: 0
+	}
+}
+
+encoder {
+	macintosh {}
+}
+
+cylinders {
+	start: 0
+	end: 79
+}
+
+heads {
+	start: 0
+	end: 1
+}
+

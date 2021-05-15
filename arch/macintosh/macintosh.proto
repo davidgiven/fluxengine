@@ -1,0 +1,5 @@
+syntax = "proto2";
+
+message MacintoshInputProto {}
+message MacintoshOutputProto {}
+

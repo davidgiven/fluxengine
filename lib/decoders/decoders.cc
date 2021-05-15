@@ -9,6 +9,7 @@
 #include "arch/c64/c64.h"
 #include "arch/f85/f85.h"
 #include "arch/ibm/ibm.h"
+#include "arch/macintosh/macintosh.h"
 #include "decoders/fluxmapreader.h"
 #include "record.h"
 #include "protocol.h"
@@ -40,6 +41,9 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 
 		case DecoderProto::kIbm:
 			return std::unique_ptr<AbstractDecoder>(new IbmDecoder(config.ibm()));
+
+		case DecoderProto::kMacintosh:
+			return std::unique_ptr<AbstractDecoder>(new MacintoshDecoder(config.macintosh()));
 
 		default:
 			Error() << "no input disk format specified";

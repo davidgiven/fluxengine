@@ -3,6 +3,7 @@ syntax = "proto2";
 import "arch/amiga/amiga.proto";
 import "arch/brother/brother.proto";
 import "arch/ibm/ibm.proto";
+import "arch/macintosh/macintosh.proto";
 //import "lib/common.proto";
 
 message EncoderProto {
@@ -10,5 +11,6 @@ message EncoderProto {
 		IBMOutputProto ibm = 3;
 		BrotherOutputProto brother = 4;
 		AmigaOutputProto amiga = 5;
+		MacintoshOutputProto macintosh = 6;
 	}
 }

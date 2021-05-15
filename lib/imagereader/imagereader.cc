@@ -12,10 +12,22 @@
 
 std::unique_ptr<ImageReader> ImageReader::create(const InputFileProto& config)
 {
-	if (config.has_img())
-		return ImageReader::createImgImageReader(config);
-	else
-		Error() << "bad input file config";
+	switch (config.format_case())
+	{
+		case InputFileProto::kImd:
+			return ImageReader::createIMDImageReader(config);
+
+		case InputFileProto::kImg:
+			return ImageReader::createImgImageReader(config);
+
+		case InputFileProto::kDiskcopy:
+			return ImageReader::createDiskCopyImageReader(config);
+
+		case InputFileProto::kJv3:
+			return ImageReader::createJv3ImageReader(config);
+	}
+
+	Error() << "bad input file config";
 	return std::unique_ptr<ImageReader>();
 }
 

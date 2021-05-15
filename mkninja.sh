@@ -264,6 +264,7 @@ buildproto libproto.a \
     arch/f85/f85.proto \
     arch/fb100/fb100.proto \
     arch/ibm/ibm.proto \
+    arch/macintosh/macintosh.proto \
     lib/common.proto \
     lib/config.proto \
     lib/decoders/decoders.proto \
@@ -342,15 +343,16 @@ buildlibrary libbackend.a \
     lib/writer.cc \
 
 READABLES="\
-    amiga \
-    aeslanier \
     acornadfs \
     acorndfs \
+    aeslanier \
+    amiga \
     brother \
     c64 \
     f85 \
     fb100 \
     ibm \
+    macintosh \
     "
 
 WRITABLES="\
@@ -358,6 +360,7 @@ WRITABLES="\
     brother120 \
     brother240 \
     ibm1440 \
+    macintosh \
     "
 
 for pb in $READABLES; do
@@ -403,17 +406,11 @@ buildlibrary libfrontend.a \
 #    src/fe-readampro.cc \
 #    src/fe-readapple2.cc \
 #    src/fe-readatarist.cc \
-#    src/fe-readf85.cc \
-#    src/fe-readfb100.cc \
-#    src/fe-readibm.cc \
-#    src/fe-readmac.cc \
 #    src/fe-readmicropolis.cc \
 #    src/fe-readmx.cc \
 #    src/fe-readtids990.cc \
 #    src/fe-readvictor9k.cc \
 #    src/fe-readzilogmcz.cc \
-#    src/fe-writeibm.cc \
-#    src/fe-writemac.cc \
 #    src/fe-writetids990.cc \
 
 buildprogram fluxengine \
