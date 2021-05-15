@@ -8,10 +8,12 @@
 class Sector;
 class Fluxmap;
 class Track;
+class Fb100InputProto;
 
 class Fb100Decoder : public AbstractDecoder
 {
 public:
+	Fb100Decoder(const Fb100InputProto&) {}
     virtual ~Fb100Decoder() {}
 
     RecordType advanceToNextRecord();

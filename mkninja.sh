@@ -262,6 +262,7 @@ buildproto libproto.a \
     arch/brother/brother.proto \
     arch/c64/c64.proto \
     arch/f85/f85.proto \
+    arch/fb100/fb100.proto \
     arch/ibm/ibm.proto \
     lib/common.proto \
     lib/config.proto \
@@ -348,6 +349,7 @@ READABLES="\
     brother \
     c64 \
     f85 \
+    fb100 \
     ibm \
     "
 

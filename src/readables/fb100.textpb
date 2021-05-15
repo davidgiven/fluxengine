@@ -1,0 +1,29 @@
+input {
+	disk {
+		drive {}
+	}
+}
+
+output {
+	file {
+		filename: "fb100.img"
+		img {}
+	}
+}
+
+decoder {
+	fb100 {}
+}
+
+cylinders {
+	start: 0
+	end: 79
+	step: 2
+}
+
+heads {
+	start: 0
+	end: 0
+}
+
+
