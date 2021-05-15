@@ -3,9 +3,12 @@
 
 #include "decoders/decoders.h"
 
+class MxInputProto;
+
 class MxDecoder : public AbstractDecoder
 {
 public:
+	MxDecoder(const MxInputProto&) {}
     virtual ~MxDecoder() {}
 
     void beginTrack();

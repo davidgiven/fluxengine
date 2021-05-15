@@ -267,6 +267,7 @@ buildproto libproto.a \
     arch/ibm/ibm.proto \
     arch/macintosh/macintosh.proto \
     arch/micropolis/micropolis.proto \
+    arch/mx/mx.proto \
     lib/common.proto \
     lib/config.proto \
     lib/decoders/decoders.proto \
@@ -359,6 +360,7 @@ READABLES="\
     ibm \
     macintosh \
     micropolis \
+    mx \
     "
 
 WRITABLES="\
@@ -420,7 +422,6 @@ buildlibrary libfrontend.a \
     src/fe-writeflux.cc \
     src/fluxengine.cc \
 
-#    src/fe-readmx.cc \
 #    src/fe-readtids990.cc \
 #    src/fe-readvictor9k.cc \
 #    src/fe-readzilogmcz.cc \

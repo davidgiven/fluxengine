@@ -12,6 +12,7 @@
 #include "arch/ibm/ibm.h"
 #include "arch/macintosh/macintosh.h"
 #include "arch/micropolis/micropolis.h"
+#include "arch/mx/mx.h"
 #include "decoders/fluxmapreader.h"
 #include "record.h"
 #include "protocol.h"
@@ -52,6 +53,9 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 
 		case DecoderProto::kMicropolis:
 			return std::unique_ptr<AbstractDecoder>(new MicropolisDecoder(config.micropolis()));
+
+		case DecoderProto::kMx:
+			return std::unique_ptr<AbstractDecoder>(new MxDecoder(config.mx()));
 
 		default:
 			Error() << "no input disk format specified";
