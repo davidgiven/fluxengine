@@ -30,12 +30,6 @@ static ActionFlag docFlag = ActionFlag(
     "Shows the available configuration options.",
     doDoc);
 
-FlagGroup::FlagGroup(const std::initializer_list<FlagGroup*> groups):
-    _groups(groups.begin(), groups.end())
-{
-    currentFlagGroup = this;
-}
-
 FlagGroup::FlagGroup()
 {
     currentFlagGroup = this;

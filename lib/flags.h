@@ -9,7 +9,6 @@ class FlagGroup
 private:
     FlagGroup(const FlagGroup& group);
 public:
-    FlagGroup(const std::initializer_list<FlagGroup*> groups);
     FlagGroup();
 
 public:
