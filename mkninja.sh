@@ -270,6 +270,7 @@ buildproto libproto.a \
     arch/mx/mx.proto \
     arch/tids990/tids990.proto \
     arch/victor9k/victor9k.proto \
+    arch/zilogmcz/zilogmcz.proto \
     lib/common.proto \
     lib/config.proto \
     lib/decoders/decoders.proto \
@@ -365,6 +366,7 @@ READABLES="\
     mx \
     tids990 \
     victor9k \
+    zilogmcz \
     "
 
 WRITABLES="\
@@ -426,8 +428,6 @@ buildlibrary libfrontend.a \
     src/fe-write.cc \
     src/fe-writeflux.cc \
     src/fluxengine.cc \
-
-#    src/fe-readzilogmcz.cc \
 
 buildprogram fluxengine \
     libfrontend.a \

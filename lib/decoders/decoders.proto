@@ -13,6 +13,7 @@ import "arch/micropolis/micropolis.proto";
 import "arch/mx/mx.proto";
 import "arch/tids990/tids990.proto";
 import "arch/victor9k/victor9k.proto";
+import "arch/zilogmcz/zilogmcz.proto";
 import "lib/common.proto";
 
 message DecoderProto {
@@ -39,6 +40,7 @@ message DecoderProto {
 		MxInputProto mx = 15;
 		Tids990InputProto tids990 = 16;
 		Victor9kInputProto victor9k = 17;
+		ZilogMczInputProto zilogmcz = 18;
 	}
 }
 

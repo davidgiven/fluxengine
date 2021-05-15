@@ -1,5 +1,5 @@
-#ifndef ZILOGMCZ_H
-#define ZILOGMCZ_H
+#ifndef MICROPOLIS_H
+#define MICROPOLIS_H
 
 #define MICROPOLIS_ENCODED_SECTOR_SIZE (1+2+266+6)
 
