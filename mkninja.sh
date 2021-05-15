@@ -257,10 +257,11 @@ buildlibrary libfmt.a \
     dep/fmt/posix.cc \
 
 buildproto libproto.a \
-    arch/amiga/amiga.proto \
     arch/aeslanier/aeslanier.proto \
+    arch/amiga/amiga.proto \
     arch/brother/brother.proto \
     arch/c64/c64.proto \
+    arch/f85/f85.proto \
     arch/ibm/ibm.proto \
     lib/common.proto \
     lib/config.proto \
@@ -346,6 +347,7 @@ READABLES="\
     acorndfs \
     brother \
     c64 \
+    f85 \
     ibm \
     "
 

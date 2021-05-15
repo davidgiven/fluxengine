@@ -1,0 +1,27 @@
+input {
+	disk {
+		drive {}
+	}
+}
+
+output {
+	file {
+		filename: "f85.img"
+		img {}
+	}
+}
+
+decoder {
+	f85 {}
+}
+
+cylinders {
+	start: 0
+	end: 79
+}
+
+heads {
+	start: 0
+	end: 0
+}
+

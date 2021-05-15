@@ -7,6 +7,7 @@
 #include "arch/amiga/amiga.h"
 #include "arch/brother/brother.h"
 #include "arch/c64/c64.h"
+#include "arch/f85/f85.h"
 #include "arch/ibm/ibm.h"
 #include "decoders/fluxmapreader.h"
 #include "record.h"
@@ -33,6 +34,9 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 
 		case DecoderProto::kC64:
 			return std::unique_ptr<AbstractDecoder>(new Commodore64Decoder(config.c64()));
+
+		case DecoderProto::kF85:
+			return std::unique_ptr<AbstractDecoder>(new DurangoF85Decoder(config.f85()));
 
 		case DecoderProto::kIbm:
 			return std::unique_ptr<AbstractDecoder>(new IbmDecoder(config.ibm()));
