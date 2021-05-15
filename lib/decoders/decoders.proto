@@ -9,6 +9,7 @@ import "arch/f85/f85.proto";
 import "arch/fb100/fb100.proto";
 import "arch/ibm/ibm.proto";
 import "arch/macintosh/macintosh.proto";
+import "arch/micropolis/micropolis.proto";
 import "lib/common.proto";
 
 message DecoderProto {
@@ -31,6 +32,7 @@ message DecoderProto {
 		Fb100InputProto fb100 = 11;
 		MacintoshInputProto macintosh = 12;
 		Apple2InputProto apple2 = 13;
+		MicropolisInputProto micropolis = 14;
 	}
 }
 

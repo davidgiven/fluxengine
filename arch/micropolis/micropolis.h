@@ -5,10 +5,12 @@
 
 class Sector;
 class Fluxmap;
+class MicropolisInputProto;
 
 class MicropolisDecoder : public AbstractDecoder
 {
 public:
+	MicropolisDecoder(const MicropolisInputProto&) {}
 	virtual ~MicropolisDecoder() {}
 
 	RecordType advanceToNextRecord();
