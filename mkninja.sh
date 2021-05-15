@@ -77,7 +77,7 @@ buildlibrary() {
         obj="$OBJDIR/opt/${src%%.c*}.o"
         oobjs="$oobjs $obj"
 
-        echo build $obj : cxx $src
+        echo "build $obj : cxx $src | $deps"
         echo "    flags=$flags $COPTFLAGS"
 
         obj="$OBJDIR/dbg/${src%%.c*}.o"
