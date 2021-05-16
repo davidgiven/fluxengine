@@ -20,7 +20,7 @@
 static FlagGroup flags;
 
 static StringFlag sourceImage(
-	{ "-i", "--input" },
+	{ "--input", "-i" },
 	"source image to read from",
 	"",
 	[](const auto& value)
@@ -29,7 +29,7 @@ static StringFlag sourceImage(
 	});
 
 static StringFlag destFlux(
-	{ "-d", "--dest" },
+	{ "--dest", "-d" },
 	"flux file to write to",
 	"",
 	[](const auto& value)
@@ -38,12 +38,30 @@ static StringFlag destFlux(
 	});
 
 static IntFlag destDrive(
-	{ "-D", "--drive" },
+	{ "--drive", "-D" },
 	"drive to write to",
 	0,
 	[](const auto& value)
 	{
 		config.mutable_output()->mutable_flux()->mutable_drive()->set_drive(value);
+	});
+
+static StringFlag destCylinders(
+	{ "--cylinders", "-c" },
+	"cylinders to write to",
+	"",
+	[](const auto& value)
+	{
+		setRange(config.mutable_cylinders(), value);
+	});
+
+static StringFlag destHeads(
+	{ "--heads", "-h" },
+	"heads to write to",
+	"",
+	[](const auto& value)
+	{
+		setRange(config.mutable_heads(), value);
 	});
 
 extern const std::map<std::string, std::string> writables;

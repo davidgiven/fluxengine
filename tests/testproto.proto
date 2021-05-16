@@ -19,5 +19,7 @@ message TestProto {
 		SubMessageProto firstoption = 8;
 		SubMessageProto secondoption = 9;
 	}
+
+	optional RangeProto range = 10;
 }
 

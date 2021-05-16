@@ -4,6 +4,8 @@
 #include <google/protobuf/message.h>
 #include "lib/config.pb.h"
 
+extern void setRange(RangeProto* range, const std::string& data);
+
 typedef std::pair<google::protobuf::Message*, const google::protobuf::FieldDescriptor*> ProtoField;
 
 extern ProtoField resolveProtoPath(google::protobuf::Message* message, const std::string& path);

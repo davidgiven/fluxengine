@@ -46,6 +46,24 @@ static StringFlag destImage(
 		ImageWriter::updateConfigForFilename(value);
 	});
 
+static StringFlag srcCylinders(
+	{ "--cylinders", "-c" },
+	"cylinders to read from",
+	"",
+	[](const auto& value)
+	{
+		setRange(config.mutable_cylinders(), value);
+	});
+
+static StringFlag srcHeads(
+	{ "--heads", "-h" },
+	"heads to read from",
+	"",
+	[](const auto& value)
+	{
+		setRange(config.mutable_heads(), value);
+	});
+
 extern const std::map<std::string, std::string> readables;
 
 int mainRead(int argc, const char* argv[])

@@ -42,6 +42,24 @@ static IntFlag destDrive(
 		config.mutable_output()->mutable_flux()->mutable_drive()->set_drive(value);
 	});
 
+static StringFlag destCylinders(
+	{ "--cylinders", "-c" },
+	"cylinders to write to",
+	"",
+	[](const auto& value)
+	{
+		setRange(config.mutable_cylinders(), value);
+	});
+
+static StringFlag destHeads(
+	{ "--heads", "-h" },
+	"heads to write to",
+	"",
+	[](const auto& value)
+	{
+		setRange(config.mutable_heads(), value);
+	});
+
 static ActionFlag eraseFlag(
 	{ "--erase" },
 	"erases the destination",

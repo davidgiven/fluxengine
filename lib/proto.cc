@@ -1,6 +1,8 @@
 #include "globals.h"
 #include "proto.h"
+#include "lib/common.pb.h"
 #include "fmt/format.h"
+#include <regex>
 
 ConfigProto config;
 
@@ -29,6 +31,26 @@ static uint64_t toUint64(const std::string& value)
 	if (value[idx] != '\0')
 		Error() << fmt::format("invalid number '{}'", value);
 	return d;
+}
+
+void setRange(RangeProto* range, const std::string& data)
+{
+	static const std::regex DATA_REGEX("([0-9]+)(?:(?:-([0-9]+))|(?:\\+([0-9]+)))?(?:x([0-9]+))?");
+
+	std::smatch dmatch;
+	if (!std::regex_match(data, dmatch, DATA_REGEX))
+		Error() << "invalid range '" << data << "'";
+	
+	int start = std::stoi(dmatch[1]);
+	range->set_start(start);
+	range->set_end(start);
+	range->clear_step();
+	if (!dmatch[2].str().empty())
+		range->set_end(std::stoi(dmatch[2]));
+	if (!dmatch[3].str().empty())
+		range->set_end(std::stoi(dmatch[3]) - range->start());
+	if (!dmatch[4].str().empty())
+		range->set_step(std::stoi(dmatch[4]));
 }
 
 ProtoField resolveProtoPath(google::protobuf::Message* message, const std::string& path)
@@ -109,6 +131,13 @@ void setProtoFieldFromString(ProtoField& protoField, const std::string& value)
 			reflection->SetString(message, field, value);
 			break;
 
+		case google::protobuf::FieldDescriptor::TYPE_MESSAGE:
+			if (field->message_type() == RangeProto::descriptor())
+			{
+				setRange((RangeProto*)reflection->MutableMessage(message, field), value);
+				break;
+			}
+			/* fall through */
 		default:
 			Error() << "can't set this config value type";
 	}
@@ -125,10 +154,6 @@ std::set<unsigned> iterate(const RangeProto& range)
 	std::set<unsigned> set;
 	for (unsigned i=range.start(); i<=range.end(); i+=range.step())
 		set.insert(i);
-
-	for (const unsigned i : range.also())
-		set.insert(i);
-
 	return set;
 }
 

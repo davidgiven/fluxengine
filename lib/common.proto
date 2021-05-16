@@ -3,10 +3,9 @@ syntax = "proto2";
 import "google/protobuf/descriptor.proto";
 
 message RangeProto {
-	optional int32 start = 1;
+	optional int32 start = 1 [default = 0];
 	optional int32 step = 2 [default = 1];
 	optional int32 end = 3;
-	repeated int32 also = 4;
 }
 
 extend google.protobuf.FieldOptions {

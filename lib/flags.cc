@@ -16,7 +16,7 @@ static void doDoc();
 
 static FlagGroup helpGroup;
 static ActionFlag helpFlag = ActionFlag(
-    { "--help", "-h" },
+    { "--help" },
     "Shows the help.",
     doHelp);
 
