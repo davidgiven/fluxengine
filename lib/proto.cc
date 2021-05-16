@@ -131,6 +131,26 @@ void setProtoFieldFromString(ProtoField& protoField, const std::string& value)
 			reflection->SetString(message, field, value);
 			break;
 
+		case google::protobuf::FieldDescriptor::TYPE_BOOL:
+		{
+			static const std::map<std::string, bool> boolvalues = {
+				{ "false", false },
+				{ "f",     false },
+				{ "n",     false },
+				{ "0",     false },
+				{ "true",  true },
+				{ "t",     true },
+				{ "n",     true },
+				{ "1",     true },
+			};
+
+			const auto& it = boolvalues.find(value);
+			if (it == boolvalues.end())
+				Error() << "invalid boolean value";
+			reflection->SetBool(message, field, it->second);
+			break;
+		}
+
 		case google::protobuf::FieldDescriptor::TYPE_MESSAGE:
 			if (field->message_type() == RangeProto::descriptor())
 			{
