@@ -418,6 +418,7 @@ buildlibrary libfrontend.a \
     src/fe-fluxtovcd.cc \
     src/fe-image.cc \
     src/fe-inspect.cc \
+    src/fe-rawread.cc \
     src/fe-rawwrite.cc \
     src/fe-read.cc \
     src/fe-rpm.cc \

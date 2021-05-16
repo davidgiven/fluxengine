@@ -226,3 +226,18 @@ void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWrit
 	if (failures)
 		std::cerr << "Warning: some sectors could not be decoded." << std::endl;
 }
+
+void rawReadDiskCommand(FluxSource& fluxsource, FluxSink& fluxsink)
+{
+	for (int cylinder : iterate(config.cylinders()))
+	{
+		for (int head : iterate(config.heads()))
+		{
+			Track track(cylinder, head);
+			track.fluxsource = &fluxsource;
+			track.readFluxmap();
+
+			fluxsink.writeFlux(cylinder, head, *(track.fluxmap));
+		}
+    }
+}
