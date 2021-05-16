@@ -1,36 +1,35 @@
 #include "globals.h"
 #include "flags.h"
 #include "usb/usb.h"
+#include "proto.h"
 #include "protocol.h"
 
-static FlagGroup flags = {
-};
+static FlagGroup flags;
 
 static IntFlag drive(
-    { "--drive", "-d" },
-    "drive to use",
-    0);
+	{ "--drive", "-D" },
+	"drive to seek",
+	0,
+	[](const auto& value)
+	{
+		config.mutable_input()->mutable_flux()->mutable_drive()->set_drive(value);
+	});
 
-static IntFlag track(
-    { "--track", "-t" },
-    "track to seek to",
-    0);
+static IntFlag cylinder(
+	{ "--cylinder", "-c" },
+	"cylinder to seek to",
+	0);
+
+extern const std::map<std::string, std::string> readables;
 
 int mainSeek(int argc, const char* argv[])
 {
-    flags.parseFlagsWithConfigFiles(argc, argv, {});
-	Error() << "TODO";
+    flags.parseFlagsWithConfigFiles(argc, argv, readables);
 
-	#if 0
-    usbSetDrive(drive, false, F_INDEX_REAL);
-	if (fluxSourceSinkFortyTrack)
-	{
-		if (track & 1)
-			Error() << "you can only seek to even tracks on a 40-track drive";
-		usbSeek(track / 2);
-	}
-	else
-		usbSeek(track);
-	#endif
+	if (!config.input().flux().has_drive())
+		Error() << "incomplete config (did you remember to specify the format?)";
+
+    usbSetDrive(config.input().flux().drive().drive(), false, config.input().flux().drive().index_mode());
+	usbSeek(cylinder);
     return 0;
 }
