@@ -6,18 +6,32 @@
 #include "decoders/fluxmapreader.h"
 #include "writer.h"
 #include "protocol.h"
+#include "proto.h"
 #include "fmt/format.h"
 #include "dep/agg/include/agg2d.h"
 #include "dep/stb/stb_image_write.h"
 #include <fstream>
 
-static FlagGroup flags = {
-};
+static FlagGroup flags;
 
-static DataSpecFlag dest(
-    { "--dest", "-d" },
-    "destination to analyse",
-    ":d=0:t=0:s=0");
+static IntFlag destDrive(
+	{ "--drive", "-D" },
+	"drive to write to",
+	0,
+	[](const auto& value)
+	{
+		config.mutable_output()->mutable_flux()->mutable_drive()->set_drive(value);
+	});
+
+static IntFlag destCylinder(
+	{ "--cylinder", "-c" },
+	"cylinder to write to",
+	0);
+
+static IntFlag destHead(
+	{ "--head", "-h" },
+	"head to write to",
+	0);
 
 static DoubleFlag minInterval(
 	{ "--min-interval-us" },
@@ -179,23 +193,12 @@ static void draw_x_graticules(Agg2D& painter, double x1, double y1, double x2, d
 
 int mainAnalyseDriveResponse(int argc, const char* argv[])
 {
-	Error() << "TODO";
-	#if 0
     flags.parseFlagsWithConfigFiles(argc, argv, {});
 
-    FluxSpec spec(dest);
-	if (spec.locations.size() != 1)
-		Error() << "the destination dataspec must contain exactly one track (two sides count as two tracks)";
-
-    usbSetDrive(spec.drive, fluxSourceSinkHighDensity, F_INDEX_REAL);
-	int track = spec.locations[0].track;
-	if (fluxSourceSinkFortyTrack)
-	{
-		if (track & 1)
-			Error() << "you can only seek to even tracks on a 40-track disk";
-		track /= 2;
-	}
-	usbSeek(track);
+    usbSetDrive(config.output().flux().drive().drive(),
+		config.output().flux().drive().high_density(),
+		config.output().flux().drive().index_mode());
+	usbSeek(destCylinder);
 
 	std::cout << "Measuring rotational speed...\n";
     nanoseconds_t period = usbGetRotationalPeriod(0);
@@ -230,12 +233,12 @@ int mainAnalyseDriveResponse(int argc, const char* argv[])
 				outFluxmap.appendInterval(ticks);
 				outFluxmap.appendPulse();
 			}
-			usbWrite(spec.locations[0].side, outFluxmap.rawBytes(), 0);
+			usbWrite(destHead, outFluxmap.rawBytes(), 0);
 
 			/* Read the test pattern in again. */
 
 			Fluxmap inFluxmap;
-			inFluxmap.appendBytes(usbRead(spec.locations[0].side, true, period, 0));
+			inFluxmap.appendBytes(usbRead(destHead, true, period, 0));
 
 			/* Compute histogram. */
 
@@ -346,7 +349,6 @@ int mainAnalyseDriveResponse(int argc, const char* argv[])
 		painter.rectangle(colourbarBounds.x1, drawableBounds.y1, drawableBounds.x2, drawableBounds.y2);
 		bitmapSpec.save();
 	}
-	#endif
 
     return 0;
 }

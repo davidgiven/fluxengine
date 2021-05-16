@@ -30,7 +30,7 @@ static StringFlag sourceFlux(
 
 static IntFlag sourceDrive(
 	{ "-D", "--drive" },
-	"drive to write from",
+	"drive to read from",
 	0,
 	[](const auto& value)
 	{
