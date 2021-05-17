@@ -317,6 +317,7 @@ buildlibrary libbackend.a \
     lib/fluxsink/aufluxsink.cc \
     lib/fluxsink/fluxsink.cc \
     lib/fluxsink/hardwarefluxsink.cc \
+    lib/fluxsink/scpfluxsink.cc \
     lib/fluxsink/sqlitefluxsink.cc \
     lib/fluxsink/vcdfluxsink.cc \
     lib/fluxsource/erasefluxsource.cc \
@@ -415,14 +416,12 @@ buildlibrary libfrontend.a \
     src/fe-analysedriveresponse.cc \
     src/fe-analyselayout.cc \
     src/fe-cwftoflux.cc \
-    src/fe-fluxtoscp.cc \
     src/fe-image.cc \
     src/fe-inspect.cc \
     src/fe-rawread.cc \
     src/fe-rawwrite.cc \
     src/fe-read.cc \
     src/fe-rpm.cc \
-    src/fe-scptoflux.cc \
     src/fe-seek.cc \
     src/fe-testbandwidth.cc \
     src/fe-testvoltages.cc \

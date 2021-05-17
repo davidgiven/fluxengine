@@ -9,6 +9,7 @@ class FluxSinkProto;
 class HardwareFluxSinkProto;
 class AuFluxSinkProto;
 class VcdFluxSinkProto;
+class ScpFluxSinkProto;
 
 class FluxSink
 {
@@ -19,6 +20,7 @@ public:
     static std::unique_ptr<FluxSink> createHardwareFluxSink(const HardwareFluxSinkProto& config);
     static std::unique_ptr<FluxSink> createAuFluxSink(const AuFluxSinkProto& config);
     static std::unique_ptr<FluxSink> createVcdFluxSink(const VcdFluxSinkProto& config);
+    static std::unique_ptr<FluxSink> createScpFluxSink(const ScpFluxSinkProto& config);
 
     static std::unique_ptr<FluxSink> create(const FluxSinkProto& config);
 
