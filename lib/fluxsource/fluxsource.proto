@@ -21,7 +21,7 @@ message TestPatternFluxSourceProto {
 message EraseFluxSourceProto {}
 
 message KryofluxFluxSourceProto {
-	optional string path = 1 [(help) = "path to Kryoflux stream directory"];
+	optional string directory = 1 [(help) = "path to Kryoflux stream directory"];
 }
 
 message FluxSourceProto {

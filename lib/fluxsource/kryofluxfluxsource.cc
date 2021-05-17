@@ -8,7 +8,7 @@ class KryofluxFluxSource : public FluxSource
 {
 public:
     KryofluxFluxSource(const KryofluxFluxSourceProto& config):
-        _path(config.path())
+        _path(config.directory())
     {}
 
 public:

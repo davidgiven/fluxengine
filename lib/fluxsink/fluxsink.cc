@@ -6,6 +6,7 @@
 #include "proto.h"
 #include "utils.h"
 #include "fmt/format.h"
+#include <regex>
 
 std::unique_ptr<FluxSink> FluxSink::create(const FluxSinkProto& config)
 {
@@ -34,19 +35,20 @@ std::unique_ptr<FluxSink> FluxSink::create(const FluxSinkProto& config)
 void FluxSink::updateConfigForFilename(const std::string& filename)
 {
 	FluxSinkProto* f = config.mutable_output()->mutable_flux();
-	static const std::map<std::string, std::function<void(void)>> formats =
+	static const std::vector<std::pair<std::regex, std::function<void(const std::string&)>>> formats =
 	{
-		{".flux",     [&]() { f->set_fluxfile(filename); }},
-		{".scp",      [&]() { f->mutable_scp()->set_filename(filename); }},
-		{".vcd",      [&]() { f->mutable_vcd()->set_directory(filename); }},
-		{".au",       [&]() { f->mutable_au()->set_directory(filename); }},
+		{ std::regex("^(.*\\.flux)$"), [&](const auto& s) { f->set_fluxfile(s); }},
+		{ std::regex("^(.*\\.scp)$"),  [&](const auto& s) { f->mutable_scp()->set_filename(s); }},
+		{ std::regex("^vcd:(.*)$"),    [&](const auto& s) { f->mutable_vcd()->set_directory(s); }},
+		{ std::regex("^au:(.*)$"),     [&](const auto& s) { f->mutable_au()->set_directory(s); }},
 	};
 
 	for (const auto& it : formats)
 	{
-		if (endsWith(filename, it.first))
+		std::smatch match;
+		if (std::regex_match(filename, match, it.first))
 		{
-			it.second();
+			it.second(match[1]);
 			return;
 		}
 	}

@@ -25,6 +25,7 @@ private:
 
 public:
     static std::unique_ptr<FluxSource> create(const FluxSourceProto& spec);
+	static void updateConfigForFilename(const std::string& filename);
 
 public:
     virtual std::unique_ptr<Fluxmap> readFlux(int track, int side) = 0;
