@@ -24,6 +24,11 @@ message KryofluxFluxSourceProto {
 	optional string directory = 1 [(help) = "path to Kryoflux stream directory"];
 }
 
+message ScpFluxSourceProto {
+	optional string filename = 1 [default = "flux.scp",
+		(help) = ".scp file to read flux from"];
+}
+
 message FluxSourceProto {
 	oneof source {
 		string fluxfile = 1;
@@ -31,6 +36,7 @@ message FluxSourceProto {
 		TestPatternFluxSourceProto test_pattern = 3;
 		EraseFluxSourceProto erase = 4;
 		KryofluxFluxSourceProto kryoflux = 5;
+		ScpFluxSourceProto scp = 6;
 	}
 }
 

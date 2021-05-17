@@ -27,6 +27,8 @@ void Track::readFluxmap()
 {
 	std::cout << fmt::format("{0:>3}.{1}: ", physicalTrack, physicalSide) << std::flush;
 	fluxmap = fluxsource->readFlux(physicalTrack, physicalSide);
+	if (!fluxmap)
+		fluxmap.reset(new Fluxmap());
 	std::cout << fmt::format(
 		"{0} ms in {1} bytes\n",
             fluxmap->duration()/1e6,
@@ -34,42 +36,6 @@ void Track::readFluxmap()
 	if (outputFluxSink)
 		outputFluxSink->writeFlux(physicalTrack, physicalSide, *fluxmap);
 }
-
-#if 0
-std::vector<std::unique_ptr<Track>> readTracks(FluxSource& fluxSource)
-{
-    const FluxSpec spec(source);
-
-    std::cout << "Reading from: " << source << std::endl;
-
-	if (!destination.get().empty())
-	{
-		std::cout << "Writing a copy of the flux to " << destination.get() << std::endl;
-		outputFluxSink = FluxSink::createSqliteFluxSink(destination.get());
-	}
-
-	std::shared_ptr<FluxSource> fluxSource = FluxSource::create(spec);
-
-	std::vector<std::unique_ptr<Track>> tracks;
-    for (const auto& location : spec.locations)
-	{
-		auto track = std::make_unique<Track>(location.track, location.side);
-		track->fluxsource = fluxSource;
-		tracks.push_back(std::move(track));
-	}
-
-	if (justRead)
-	{
-		for (auto& track : tracks)
-			track->readFluxmap();
-		
-		std::cout << "--just-read specified, halting now" << std::endl;
-		exit(0);
-	}
-
-	return tracks;
-}
-#endif
 
 static bool conflictable(Sector::Status status)
 {

@@ -10,6 +10,7 @@ class HardwareFluxSourceProto;
 class TestPatternFluxSourceProto;
 class EraseFluxSourceProto;
 class KryofluxFluxSourceProto;
+class ScpFluxSourceProto;
 
 class FluxSource
 {
@@ -20,6 +21,7 @@ private:
     static std::unique_ptr<FluxSource> createSqliteFluxSource(const std::string& filename);
     static std::unique_ptr<FluxSource> createHardwareFluxSource(const HardwareFluxSourceProto& config);
     static std::unique_ptr<FluxSource> createKryofluxFluxSource(const KryofluxFluxSourceProto& config);
+    static std::unique_ptr<FluxSource> createScpFluxSource(const ScpFluxSourceProto& config);
     static std::unique_ptr<FluxSource> createTestPatternFluxSource(const TestPatternFluxSourceProto& config);
     static std::unique_ptr<FluxSource> createEraseFluxSource(const EraseFluxSourceProto& config);
 

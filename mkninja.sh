@@ -325,6 +325,7 @@ buildlibrary libbackend.a \
     lib/fluxsource/hardwarefluxsource.cc \
     lib/fluxsource/kryoflux.cc \
     lib/fluxsource/kryofluxfluxsource.cc \
+    lib/fluxsource/scpfluxsource.cc \
     lib/fluxsource/sqlitefluxsource.cc \
     lib/fluxsource/testpatternfluxsource.cc \
     lib/globals.cc \

@@ -26,7 +26,7 @@ static StringFlag sourceFlux(
 	"",
 	[](const auto& value)
 	{
-		config.mutable_input()->mutable_flux()->set_fluxfile(value);
+		FluxSource::updateConfigForFilename(value);
 	});
 
 static IntFlag sourceDrive(

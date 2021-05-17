@@ -47,7 +47,6 @@ static std::vector<Command> commands =
 static std::vector<Command> convertables =
 {
     { "cwftoflux",     mainConvertCwfToFlux, "Converts CatWeasel stream files to flux.", },
-    { "scptoflux",     mainConvertScpToFlux, "Converts Supercard Pro stream files to flux.", },
 	{ "image",         mainConvertImage,     "Converts one disk image to another.", },
 };
 
