@@ -284,20 +284,10 @@ buildproto libproto.a \
 buildlibrary libbackend.a \
     -I$OBJDIR/proto \
     -d $OBJDIR/proto/libproto.def \
-    lib/imagereader/diskcopyimagereader.cc \
-    lib/imagereader/imagereader.cc \
-    lib/imagereader/imgimagereader.cc \
-    lib/imagereader/jv3imagereader.cc \
-    lib/imagereader/imdimagereader.cc \
-    lib/imagewriter/d64imagewriter.cc \
-    lib/imagewriter/diskcopyimagewriter.cc \
-    lib/imagewriter/imagewriter.cc \
-    lib/imagewriter/imgimagewriter.cc \
-    lib/imagewriter/ldbsimagewriter.cc \
     arch/aeslanier/decoder.cc \
+    arch/amiga/amiga.cc \
     arch/amiga/decoder.cc \
     arch/amiga/encoder.cc \
-    arch/amiga/amiga.cc \
     arch/apple2/decoder.cc \
     arch/brother/decoder.cc \
     arch/brother/encoder.cc \
@@ -316,6 +306,7 @@ buildlibrary libbackend.a \
     arch/zilogmcz/decoder.cc \
     lib/bytes.cc \
     lib/crc.cc \
+    lib/csvreader.cc \
     lib/dataspec.cc \
     lib/decoders/decoders.cc \
     lib/decoders/fluxmapreader.cc \
@@ -323,30 +314,40 @@ buildlibrary libbackend.a \
     lib/encoders/encoders.cc \
     lib/flags.cc \
     lib/fluxmap.cc \
+    lib/fluxsink/aufluxsink.cc \
     lib/fluxsink/fluxsink.cc \
     lib/fluxsink/hardwarefluxsink.cc \
     lib/fluxsink/sqlitefluxsink.cc \
-    lib/fluxsink/aufluxsink.cc \
+    lib/fluxsink/vcdfluxsink.cc \
     lib/fluxsource/erasefluxsource.cc \
     lib/fluxsource/fluxsource.cc \
     lib/fluxsource/hardwarefluxsource.cc \
-    lib/fluxsource/testpatternfluxsource.cc \
     lib/fluxsource/kryoflux.cc \
-    lib/fluxsource/sqlitefluxsource.cc \
     lib/fluxsource/kryofluxfluxsource.cc \
-    lib/usb/usb.cc \
-    lib/usb/fluxengineusb.cc \
-    lib/usb/greaseweazle.cc \
-    lib/usb/greaseweazleusb.cc \
-    lib/csvreader.cc \
+    lib/fluxsource/sqlitefluxsource.cc \
+    lib/fluxsource/testpatternfluxsource.cc \
     lib/globals.cc \
     lib/hexdump.cc \
+    lib/imagereader/diskcopyimagereader.cc \
+    lib/imagereader/imagereader.cc \
+    lib/imagereader/imdimagereader.cc \
+    lib/imagereader/imgimagereader.cc \
+    lib/imagereader/jv3imagereader.cc \
+    lib/imagewriter/d64imagewriter.cc \
+    lib/imagewriter/diskcopyimagewriter.cc \
+    lib/imagewriter/imagewriter.cc \
+    lib/imagewriter/imgimagewriter.cc \
+    lib/imagewriter/ldbsimagewriter.cc \
     lib/ldbs.cc \
     lib/proto.cc \
     lib/reader.cc \
     lib/sector.cc \
     lib/sectorset.cc \
     lib/sql.cc \
+    lib/usb/fluxengineusb.cc \
+    lib/usb/greaseweazle.cc \
+    lib/usb/greaseweazleusb.cc \
+    lib/usb/usb.cc \
     lib/utils.cc \
     lib/writer.cc \
 
@@ -415,7 +416,6 @@ buildlibrary libfrontend.a \
     src/fe-analyselayout.cc \
     src/fe-cwftoflux.cc \
     src/fe-fluxtoscp.cc \
-    src/fe-fluxtovcd.cc \
     src/fe-image.cc \
     src/fe-inspect.cc \
     src/fe-rawread.cc \

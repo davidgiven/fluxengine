@@ -51,7 +51,6 @@ static std::vector<Command> convertables =
     { "cwftoflux",     mainConvertCwfToFlux, "Converts CatWeasel stream files to flux.", },
     { "scptoflux",     mainConvertScpToFlux, "Converts Supercard Pro stream files to flux.", },
     { "fluxtoscp",     mainConvertFluxToScp, "Converrt a flux file to a Supercard Pro file.", },
-    { "fluxtovcd",     mainConvertFluxToVcd, "Converts (one track of a) flux file to a VCD file.", },
 	{ "image",         mainConvertImage,     "Converts one disk image to another.", },
 };
 

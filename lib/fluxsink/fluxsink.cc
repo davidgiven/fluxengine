@@ -16,6 +16,9 @@ std::unique_ptr<FluxSink> FluxSink::create(const FluxSinkProto& config)
 
 		case FluxSinkProto::kAu:
 			return createAuFluxSink(config.au());
+
+		case FluxSinkProto::kVcd:
+			return createVcdFluxSink(config.vcd());
 	}
 
 	Error() << "bad output disk config";

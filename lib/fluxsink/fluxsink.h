@@ -8,6 +8,7 @@ class Fluxmap;
 class FluxSinkProto;
 class HardwareFluxSinkProto;
 class AuFluxSinkProto;
+class VcdFluxSinkProto;
 
 class FluxSink
 {
@@ -17,6 +18,7 @@ public:
     static std::unique_ptr<FluxSink> createSqliteFluxSink(const std::string& filename);
     static std::unique_ptr<FluxSink> createHardwareFluxSink(const HardwareFluxSinkProto& config);
     static std::unique_ptr<FluxSink> createAuFluxSink(const AuFluxSinkProto& config);
+    static std::unique_ptr<FluxSink> createVcdFluxSink(const VcdFluxSinkProto& config);
 
     static std::unique_ptr<FluxSink> create(const FluxSinkProto& config);
 

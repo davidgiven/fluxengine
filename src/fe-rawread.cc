@@ -56,6 +56,15 @@ static StringFlag auFile(
 		config.mutable_output()->mutable_flux()->mutable_au()->set_directory(value);
 	});
 
+static StringFlag vcdFile(
+	{ "--vcd" },
+	"write destination flux to .vcd files in this directory",
+	"",
+	[](const auto& value)
+	{
+		config.mutable_output()->mutable_flux()->mutable_vcd()->set_directory(value);
+	});
+
 static StringFlag srcCylinders(
 	{ "--cylinders", "-c" },
 	"cylinders to read from",
