@@ -47,6 +47,15 @@ static StringFlag destFlux(
 		config.mutable_output()->mutable_flux()->set_fluxfile(value);
 	});
 
+static StringFlag auFile(
+	{ "--au" },
+	"write a single track to a .au file",
+	"",
+	[](const auto& value)
+	{
+		config.mutable_output()->mutable_flux()->mutable_au()->set_filename(value);
+	});
+
 static StringFlag srcCylinders(
 	{ "--cylinders", "-c" },
 	"cylinders to read from",

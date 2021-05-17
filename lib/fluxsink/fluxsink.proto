@@ -13,10 +13,18 @@ message HardwareFluxSinkProto {
 		[default = 0, (help) = "which drive to write to (0 or 1)"];
 }
 
+message AuFluxSinkProto {
+	optional string filename = 1 [default = "flux.au",
+		(help) = ".au file to write to"];
+	optional bool index_markers = 2 [default = true,
+		(help) = "show index markers in the right-hand channel"];
+}
+
 message FluxSinkProto {
 	oneof dest {
 		string fluxfile = 1;
 		HardwareFluxSinkProto drive = 2;
+		AuFluxSinkProto au = 3;
 	}
 }
 

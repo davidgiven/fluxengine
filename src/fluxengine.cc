@@ -5,7 +5,6 @@ typedef int command_cb(int agrc, const char* argv[]);
 extern command_cb mainAnalyseDriveResponse;
 extern command_cb mainAnalyseLayout;
 extern command_cb mainConvertCwfToFlux;
-extern command_cb mainConvertFluxToAu;
 extern command_cb mainConvertFluxToScp;
 extern command_cb mainConvertFluxToVcd;
 extern command_cb mainConvertImage;
@@ -51,7 +50,6 @@ static std::vector<Command> convertables =
 {
     { "cwftoflux",     mainConvertCwfToFlux, "Converts CatWeasel stream files to flux.", },
     { "scptoflux",     mainConvertScpToFlux, "Converts Supercard Pro stream files to flux.", },
-    { "fluxtoau",      mainConvertFluxToAu,  "Converts (one track of a) flux file to an .au audio file.", },
     { "fluxtoscp",     mainConvertFluxToScp, "Converrt a flux file to a Supercard Pro file.", },
     { "fluxtovcd",     mainConvertFluxToVcd, "Converts (one track of a) flux file to a VCD file.", },
 	{ "image",         mainConvertImage,     "Converts one disk image to another.", },
