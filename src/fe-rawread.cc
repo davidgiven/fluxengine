@@ -44,7 +44,7 @@ static StringFlag destFlux(
 	"",
 	[](const auto& value)
 	{
-		config.mutable_output()->mutable_flux()->set_fluxfile(value);
+		FluxSink::updateConfigForFilename(value);
 	});
 
 static StringFlag auFile(
@@ -63,15 +63,6 @@ static StringFlag vcdFile(
 	[](const auto& value)
 	{
 		config.mutable_output()->mutable_flux()->mutable_vcd()->set_directory(value);
-	});
-
-static StringFlag scpFile(
-	{ "--scp" },
-	"write destination flux to this .scp file",
-	"",
-	[](const auto& value)
-	{
-		config.mutable_output()->mutable_flux()->mutable_scp()->set_filename(value);
 	});
 
 static StringFlag srcCylinders(

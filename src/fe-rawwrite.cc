@@ -30,7 +30,7 @@ static StringFlag destFlux(
 	"",
 	[](const auto& value)
 	{
-		config.mutable_output()->mutable_flux()->set_fluxfile(value);
+		FluxSink::updateConfigForFilename(value);
 	});
 
 static IntFlag destDrive(
