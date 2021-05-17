@@ -11,16 +11,20 @@
 #include "proto.h"
 #include "fmt/format.h"
 #include <fstream>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 class AuFluxSink : public FluxSink
 {
 public:
 	AuFluxSink(const AuFluxSinkProto& config):
 		_config(config)
+	{}
+
+	~AuFluxSink()
 	{
-		if ((::config.cylinders().start() != ::config.cylinders().end())
-			|| (::config.heads().start() != ::config.heads().end()))
-			Error() << "exactly one track must be written (two sides of one cylinder count as two tracks)";
+		std::cerr << "Warning: do not play these files, or you will break your speakers"
+				 " and/or ears!\n";
 	}
 
 public:
@@ -29,8 +33,10 @@ public:
 		unsigned totalTicks = fluxmap.ticks() + 2;
 		unsigned channels = _config.index_markers() ? 2 : 1;
 
-		std::cerr << "Writing output file...\n";
-		std::ofstream of(_config.filename(), std::ios::out | std::ios::binary);
+		mkdir(_config.directory().c_str(), 0744);
+		std::ofstream of(
+			fmt::format("{}/c{:02d}.h{:01d}.au", _config.directory(), cylinder, head),
+			std::ios::out | std::ios::binary);
 		if (!of.is_open())
 			Error() << "cannot open output file";
 
@@ -77,13 +83,11 @@ public:
 			of.write((const char*) data.cbegin(), data.size());
 		}
 
-		std::cerr << "Done. Warning: do not play this file, or you will break your speakers"
-				 " and/or ears!\n";
 	}
 
 	operator std::string () const
 	{
-		return fmt::format("au({})", _config.filename());
+		return fmt::format("au({})", _config.directory());
 	}
 
 private:

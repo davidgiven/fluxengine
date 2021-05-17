@@ -49,11 +49,11 @@ static StringFlag destFlux(
 
 static StringFlag auFile(
 	{ "--au" },
-	"write a single track to a .au file",
+	"write destination flux to .au files in this directory",
 	"",
 	[](const auto& value)
 	{
-		config.mutable_output()->mutable_flux()->mutable_au()->set_filename(value);
+		config.mutable_output()->mutable_flux()->mutable_au()->set_directory(value);
 	});
 
 static StringFlag srcCylinders(
