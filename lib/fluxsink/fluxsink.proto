@@ -3,40 +3,30 @@ syntax = "proto2";
 import "lib/common.proto";
 
 message HardwareFluxSinkProto {
-	optional IndexMode index_mode = 1
-		[default = INDEXMODE_DRIVE, (help) = "index pulse source"];
-	optional int32 hard_sector_count = 2
-		[(help) = "number of hard sectors on the disk"];
-	optional bool high_density = 3
-		[default = true, (help) = "set if this is a high density disk"];
-	optional int32 drive = 4
-		[default = 0, (help) = "which drive to write to (0 or 1)"];
+	optional IndexMode index_mode = 1    [default = INDEXMODE_DRIVE, (help) = "index pulse source"];
+	optional int32 hard_sector_count = 2 [(help) = "number of hard sectors on the disk"];
+	optional bool high_density = 3       [default = true, (help) = "set if this is a high density disk"];
+	optional int32 drive = 4             [default = 0, (help) = "which drive to write to (0 or 1)"];
 }
 
 message AuFluxSinkProto {
-	optional string directory = 1 [default = "aufiles",
-		(help) = "directory to write .au files to"];
-	optional bool index_markers = 2 [default = true,
-		(help) = "show index markers in the right-hand channel"];
+	optional string directory = 1  [default = "aufiles", (help) = "directory to write .au files to"];
+	optional bool index_markers = 2 [default = true, (help) = "show index markers in the right-hand channel"];
 }
 
 message VcdFluxSinkProto {
-	optional string directory = 1 [default = "vcdfiles",
-		(help) = "directory to write .vcd files to"];
+	optional string directory = 1 [default = "vcdfiles", (help) = "directory to write .vcd files to"];
 }
 
 message ScpFluxSinkProto {
-	optional string filename = 2 [default = "flux.scp",
-		(help) = ".scp file to write to"];
-	optional bool align_with_index = 3 [default = false,
-		(help) = "align data to track boundaries"];
-	optional int32 type_byte = 4 [default = 0xff,
-		(help) = "set the SCP disk type byte"];
+	optional string filename = 2       [default = "flux.scp", (help) = ".scp file to write to"];
+	optional bool align_with_index = 3 [default = false, (help) = "align data to track boundaries"];
+	optional int32 type_byte = 4       [default = 0xff, (help) = "set the SCP disk type byte"];
 }
 
 message FluxSinkProto {
 	oneof dest {
-		string fluxfile = 1;
+		string fluxfile = 1 [(help) = "name of destination flux file"];
 		HardwareFluxSinkProto drive = 2;
 		AuFluxSinkProto au = 3;
 		VcdFluxSinkProto vcd = 4;

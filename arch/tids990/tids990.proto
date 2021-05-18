@@ -13,7 +13,7 @@ message Tids990EncoderProto {
 	optional int32 am1_byte = 4 [ default = 0x2244,
 		(help) = "16-bit RAW bit pattern to use for the AM1 ID byte" ];
 	optional int32 am2_byte = 5 [ default = 0x2245,
-		(help) = "16-bit RAW bit pattern to use for the AM1 ID byte" ];
+		(help) = "16-bit RAW bit pattern to use for the AM2 ID byte" ];
 	optional int32 gap1_bytes = 6 [ default = 80,
 		(help) = "size of gap 1 (the post-index gap)" ];
 	optional int32 gap2_bytes = 7 [ default = 21,

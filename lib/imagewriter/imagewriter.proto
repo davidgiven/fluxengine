@@ -1,13 +1,14 @@
 syntax = "proto2";
 
 import "lib/imagereader/imagereader.proto";
+import "lib/common.proto";
 
 message D64OutputProto {}
 message LDBSOutputProto {}
 message DiskCopyOutputProto {}
 
 message ImageWriterProto {
-	optional string filename = 1;
+	optional string filename = 1 [(help) = "filename of output sector image"];
 	oneof format {
 		ImgInputOutputProto img = 2;
 		D64OutputProto d64 = 3;

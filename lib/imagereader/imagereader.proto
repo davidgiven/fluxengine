@@ -1,17 +1,19 @@
 syntax = "proto2";
 
+import "lib/common.proto";
+
 message ImgInputOutputProto {
 	message FormatProto {
-		optional int32 track = 1;
-		optional int32 side = 2;
+		optional int32 track = 1 [(help) = "if present, this format only applies to this track"];
+		optional int32 side = 2 [(help) = "if present, this format only applies to this side"];
 
-		optional int32 sector_size = 3 [default=512];
-		optional int32 sectors = 4;
+		optional int32 sector_size = 3 [default=512, (help) = "number of bytes per sector"];
+		optional int32 sectors = 4 [(help) = "number of sectors in this track"];
 	}
 
-	repeated FormatProto format = 4;
-	optional int32 tracks = 5 [default=80];
-	optional int32 sides = 6 [default=2];
+	repeated FormatProto format = 4 [(help) = "per-track format information (repeatable)"];
+	optional int32 tracks = 5 [default=80, (help) = "number of tracks in image"];
+	optional int32 sides = 6 [default=2, (help) = "number of sides in image"];
 }
 
 message DiskCopyInputProto {}
@@ -19,7 +21,7 @@ message ImdInputProto {}
 message Jv3InputProto {}
 
 message ImageReaderProto {
-	optional string filename = 1;
+	optional string filename = 1 [(help) = "filename of input sector image"];
 	oneof format {
 		ImgInputOutputProto img = 2;
 		DiskCopyInputProto diskcopy = 3;
