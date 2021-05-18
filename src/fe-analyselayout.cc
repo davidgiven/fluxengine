@@ -1,7 +1,7 @@
 #define _USE_MATH_DEFINES
 #include "globals.h"
 #include "flags.h"
-#include "dataspec.h"
+#include "bitmap.h"
 #include "fluxmap.h"
 #include "sector.h"
 #include "sectorset.h"
@@ -20,10 +20,20 @@ static StringFlag source(
     "CSV file produced by reader",
     "");
 
-static DataSpecFlag writeImg(
+static StringFlag writeImg(
 	{ "--img", "-o" },
 	"Draw a graph of the disk layout",
-	":w=800:h=600");
+	"disklayout.png");
+
+static IntFlag imgWidth(
+	{ "--width" },
+	"Width of output graph",
+	800);
+
+static IntFlag imgHeight(
+	{ "--height" },
+	"Height of output graph",
+	600);
 
 static IntFlag period(
     { "--visualiser-period" },
@@ -47,16 +57,16 @@ static const int TRACKS = 83;
 
 void visualiseSectorsToFile(const SectorSet& sectors, const std::string& filename)
 {
-	BitmapSpec bitmapSpec(writeImg);
-	if (bitmapSpec.filename.empty())
+	Bitmap bitmap(writeImg, imgWidth, imgHeight);
+	if (bitmap.filename.empty())
 		Error() << "you must specify an image filename to write to";
 
-	Agg2D& painter = bitmapSpec.painter();
+	Agg2D& painter = bitmap.painter();
 	painter.clearAll(0xff, 0xff, 0xff);
 
     const double radians_per_ns = 2.0*M_PI / (period*1e6);
-	const double available_width = bitmapSpec.width;
-	const double available_height = bitmapSpec.height;
+	const double available_width = bitmap.width;
+	const double available_height = bitmap.height;
 	const double panel_centre = (sideToDraw == -1)
 			? (available_width / 4)
 			: (available_width / 2);
@@ -152,7 +162,7 @@ void visualiseSectorsToFile(const SectorSet& sectors, const std::string& filenam
 			break;
 	}
 
-	bitmapSpec.save();
+	bitmap.save();
 }
 
 static void check_for_error()

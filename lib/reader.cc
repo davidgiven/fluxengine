@@ -6,7 +6,6 @@
 #include "reader.h"
 #include "fluxmap.h"
 #include "sql.h"
-#include "dataspec.h"
 #include "decoders/decoders.h"
 #include "sector.h"
 #include "sectorset.h"

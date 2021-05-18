@@ -8,7 +8,6 @@
 #include "sectorset.h"
 #include "record.h"
 #include "proto.h"
-#include "dataspec.h"
 #include "fluxsink/fluxsink.h"
 #include "fluxsource/fluxsource.h"
 #include "arch/brother/brother.h"

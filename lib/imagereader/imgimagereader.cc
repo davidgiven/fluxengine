@@ -1,6 +1,5 @@
 #include "globals.h"
 #include "flags.h"
-#include "dataspec.h"
 #include "sector.h"
 #include "sectorset.h"
 #include "imagereader/imagereader.h"

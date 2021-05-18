@@ -5,7 +5,6 @@
 #include "sql.h"
 #include "protocol.h"
 #include "usb/usb.h"
-#include "dataspec.h"
 #include "encoders/encoders.h"
 #include "fluxsource/fluxsource.h"
 #include "fluxsink/fluxsink.h"

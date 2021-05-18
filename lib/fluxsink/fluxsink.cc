@@ -1,6 +1,5 @@
 #include "globals.h"
 #include "flags.h"
-#include "dataspec.h"
 #include "fluxsink/fluxsink.h"
 #include "lib/config.pb.h"
 #include "proto.h"

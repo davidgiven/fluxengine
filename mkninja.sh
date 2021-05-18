@@ -304,10 +304,10 @@ buildlibrary libbackend.a \
     arch/tids990/encoder.cc \
     arch/victor9k/decoder.cc \
     arch/zilogmcz/decoder.cc \
+    lib/bitmap.cc \
     lib/bytes.cc \
     lib/crc.cc \
     lib/csvreader.cc \
-    lib/dataspec.cc \
     lib/decoders/decoders.cc \
     lib/decoders/fluxmapreader.cc \
     lib/decoders/fmmfm.cc \
@@ -465,7 +465,6 @@ runtest bitaccumulator-test tests/bitaccumulator.cc
 runtest bytes-test          tests/bytes.cc
 runtest compression-test    tests/compression.cc
 runtest csvreader-test      tests/csvreader.cc
-runtest dataspec-test       tests/dataspec.cc
 runtest flags-test          tests/flags.cc
 runtest fluxpattern-test    tests/fluxpattern.cc
 runtest fmmfm-test          tests/fmmfm.cc

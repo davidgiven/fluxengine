@@ -4,7 +4,6 @@
 #include "sql.h"
 #include "bytes.h"
 #include "protocol.h"
-#include "dataspec.h"
 #include "fluxsink/fluxsink.h"
 #include "decoders/fluxmapreader.h"
 #include "lib/fluxsink/fluxsink.pb.h"
