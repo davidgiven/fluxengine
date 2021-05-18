@@ -23,7 +23,7 @@ public:
     static std::unique_ptr<FluxSink> createScpFluxSink(const ScpFluxSinkProto& config);
 
     static std::unique_ptr<FluxSink> create(const FluxSinkProto& config);
-	static void updateConfigForFilename(const std::string& filename);
+	static void updateConfigForFilename(FluxSinkProto* proto, const std::string& filename);
 
 public:
     virtual void writeFlux(int track, int side, Fluxmap& fluxmap) = 0;

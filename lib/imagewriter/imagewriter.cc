@@ -31,18 +31,17 @@ std::unique_ptr<ImageWriter> ImageWriter::create(const ImageWriterProto& config)
 	return std::unique_ptr<ImageWriter>();
 }
 
-void ImageWriter::updateConfigForFilename(const std::string& filename)
+void ImageWriter::updateConfigForFilename(ImageWriterProto* proto, const std::string& filename)
 {
-	ImageWriterProto* f = config.mutable_output()->mutable_image();
 	static const std::map<std::string, std::function<void(void)>> formats =
 	{
-		{".adf",      [&]() { f->mutable_img(); }},
-		{".d64",      [&]() { f->mutable_d64(); }},
-		{".d81",      [&]() { f->mutable_img(); }},
-		{".diskcopy", [&]() { f->mutable_diskcopy(); }},
-		{".img",      [&]() { f->mutable_img(); }},
-		{".ldbs",     [&]() { f->mutable_ldbs(); }},
-		{".st",       [&]() { f->mutable_img(); }},
+		{".adf",      [&]() { proto->mutable_img(); }},
+		{".d64",      [&]() { proto->mutable_d64(); }},
+		{".d81",      [&]() { proto->mutable_img(); }},
+		{".diskcopy", [&]() { proto->mutable_diskcopy(); }},
+		{".img",      [&]() { proto->mutable_img(); }},
+		{".ldbs",     [&]() { proto->mutable_ldbs(); }},
+		{".st",       [&]() { proto->mutable_img(); }},
 	};
 
 	for (const auto& it : formats)
@@ -50,7 +49,7 @@ void ImageWriter::updateConfigForFilename(const std::string& filename)
 		if (endsWith(filename, it.first))
 		{
 			it.second();
-			f->set_filename(filename);
+			proto->set_filename(filename);
 			return;
 		}
 	}

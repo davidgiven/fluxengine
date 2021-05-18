@@ -25,7 +25,7 @@ static StringFlag sourceImage(
 	"",
 	[](const auto& value)
 	{
-		ImageReader::updateConfigForFilename(value);
+		ImageReader::updateConfigForFilename(config.mutable_input()->mutable_image(), value);
 	});
 
 static StringFlag destFlux(
@@ -34,7 +34,7 @@ static StringFlag destFlux(
 	"",
 	[](const auto& value)
 	{
-		FluxSink::updateConfigForFilename(value);
+		FluxSink::updateConfigForFilename(config.mutable_output()->mutable_flux(), value);
 	});
 
 static IntFlag destDrive(

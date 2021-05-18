@@ -12,7 +12,7 @@ public:
 
 public:
     static std::unique_ptr<ImageWriter> create(const ImageWriterProto& config);
-	static void updateConfigForFilename(const std::string& filename);
+	static void updateConfigForFilename(ImageWriterProto* proto, const std::string& filename);
 
     static std::unique_ptr<ImageWriter> createImgImageWriter(
 		const ImageWriterProto& config);

@@ -32,17 +32,16 @@ std::unique_ptr<ImageReader> ImageReader::create(const ImageReaderProto& config)
 	return std::unique_ptr<ImageReader>();
 }
 
-void ImageReader::updateConfigForFilename(const std::string& filename)
+void ImageReader::updateConfigForFilename(ImageReaderProto* proto, const std::string& filename)
 {
-	ImageReaderProto* f = config.mutable_input()->mutable_image();
 	static const std::map<std::string, std::function<void(void)>> formats =
 	{
-		{".adf",      [&]() { f->mutable_img(); }},
-		{".jv3",      [&]() { f->mutable_jv3(); }},
-		{".d81",      [&]() { f->mutable_img(); }},
-		{".diskcopy", [&]() { f->mutable_diskcopy(); }},
-		{".img",      [&]() { f->mutable_img(); }},
-		{".st",       [&]() { f->mutable_img(); }},
+		{".adf",      [&]() { proto->mutable_img(); }},
+		{".jv3",      [&]() { proto->mutable_jv3(); }},
+		{".d81",      [&]() { proto->mutable_img(); }},
+		{".diskcopy", [&]() { proto->mutable_diskcopy(); }},
+		{".img",      [&]() { proto->mutable_img(); }},
+		{".st",       [&]() { proto->mutable_img(); }},
 	};
 
 	for (const auto& it : formats)
@@ -50,7 +49,7 @@ void ImageReader::updateConfigForFilename(const std::string& filename)
 		if (endsWith(filename, it.first))
 		{
 			it.second();
-			f->set_filename(filename);
+			proto->set_filename(filename);
 			return;
 		}
 	}

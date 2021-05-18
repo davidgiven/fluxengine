@@ -25,7 +25,7 @@ static StringFlag sourceFlux(
 	"",
 	[](const auto& value)
 	{
-		FluxSource::updateConfigForFilename(value);
+		FluxSource::updateConfigForFilename(config.mutable_input()->mutable_flux(), value);
 	});
 
 static IntFlag sourceDrive(
@@ -43,7 +43,7 @@ static StringFlag destImage(
 	"",
 	[](const auto& value)
 	{
-		ImageWriter::updateConfigForFilename(value);
+		ImageWriter::updateConfigForFilename(config.mutable_output()->mutable_image(), value);
 	});
 
 static StringFlag srcCylinders(
