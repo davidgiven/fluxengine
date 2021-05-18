@@ -172,7 +172,8 @@ void setProtoByString(google::protobuf::Message* message, const std::string& pat
 std::set<unsigned> iterate(const RangeProto& range)
 {
 	std::set<unsigned> set;
-	for (unsigned i=range.start(); i<=range.end(); i+=range.step())
+	int end = range.has_end()? range.end() : range.start();
+	for (unsigned i=range.start(); i<=end; i+=range.step())
 		set.insert(i);
 	return set;
 }

@@ -127,6 +127,13 @@ static void test_range(void)
 
 	{
 		RangeProto r;
+		r.set_start(1);
+
+		AssertThat(iterate(r), Equals(std::set<unsigned>{1}));
+	}
+
+	{
+		RangeProto r;
 		setRange(&r, "1-3");
 
 		AssertThat(iterate(r), Equals(std::set<unsigned>{1, 2, 3}));
