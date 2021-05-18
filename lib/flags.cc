@@ -5,6 +5,7 @@
 #include "fmt/format.h"
 #include <google/protobuf/text_format.h>
 #include <regex>
+#include <fstream>
 
 static FlagGroup* currentFlagGroup;
 static std::vector<Flag*> all_flags;
@@ -188,7 +189,14 @@ void FlagGroup::parseFlagsWithConfigFiles(int argc, const char* argv[],
 					Error() << "couldn't load config proto";
 			}
 			else
-				Error() << "configs in files not supported yet";
+			{
+				std::ifstream f(filename, std::ios::out);
+				if (f.fail())
+					Error() << fmt::format("Cannot open '{}': {}", filename, strerror(errno));
+				if (!config.ParseFromIstream(&f))
+					Error() << "couldn't load config proto";
+			}
+
 			return true;
 		}
 	);
