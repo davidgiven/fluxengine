@@ -4,9 +4,7 @@ typedef int command_cb(int agrc, const char* argv[]);
 
 extern command_cb mainAnalyseDriveResponse;
 extern command_cb mainAnalyseLayout;
-extern command_cb mainConvertCwfToFlux;
 extern command_cb mainConvertImage;
-extern command_cb mainConvertScpToFlux;
 extern command_cb mainInspect;
 extern command_cb mainRawRead;
 extern command_cb mainRawWrite;
@@ -46,7 +44,6 @@ static std::vector<Command> commands =
 
 static std::vector<Command> convertables =
 {
-    { "cwftoflux",     mainConvertCwfToFlux, "Converts CatWeasel stream files to flux.", },
 	{ "image",         mainConvertImage,     "Converts one disk image to another.", },
 };
 

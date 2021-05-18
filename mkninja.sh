@@ -320,6 +320,7 @@ buildlibrary libbackend.a \
     lib/fluxsink/scpfluxsink.cc \
     lib/fluxsink/sqlitefluxsink.cc \
     lib/fluxsink/vcdfluxsink.cc \
+    lib/fluxsource/cwffluxsource.cc \
     lib/fluxsource/erasefluxsource.cc \
     lib/fluxsource/fluxsource.cc \
     lib/fluxsource/hardwarefluxsource.cc \
@@ -416,7 +417,6 @@ buildlibrary libfrontend.a \
     $OBJDIR/writables.cc \
     src/fe-analysedriveresponse.cc \
     src/fe-analyselayout.cc \
-    src/fe-cwftoflux.cc \
     src/fe-image.cc \
     src/fe-inspect.cc \
     src/fe-rawread.cc \
