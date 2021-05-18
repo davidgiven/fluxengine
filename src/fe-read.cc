@@ -10,6 +10,7 @@
 #include "proto.h"
 #include "dataspec.h"
 #include "fluxsource/fluxsource.h"
+#include "fluxsink/fluxsink.h"
 #include "arch/brother/brother.h"
 #include "arch/ibm/ibm.h"
 #include "imagewriter/imagewriter.h"
@@ -46,6 +47,15 @@ static StringFlag destImage(
 		ImageWriter::updateConfigForFilename(config.mutable_output()->mutable_image(), value);
 	});
 
+static StringFlag copyFluxTo(
+	{ "--copy-flux-to" },
+	"while reading, copy the read flux to this file",
+	"",
+	[](const auto& value)
+	{
+		FluxSink::updateConfigForFilename(config.mutable_decoder()->mutable_copy_flux_to(), value);
+	});
+
 static StringFlag srcCylinders(
 	{ "--cylinders", "-c" },
 	"cylinders to read from",
@@ -72,6 +82,9 @@ int mainRead(int argc, const char* argv[])
 
 	if (!config.input().has_flux() || !config.output().has_image())
 		Error() << "incomplete config (did you remember to specify the format?)";
+
+	if (config.decoder().copy_flux_to().has_drive())
+		Error() << "you cannot copy flux to a hardware device";
 
 	std::unique_ptr<FluxSource> fluxSource(FluxSource::create(config.input().flux()));
 	std::unique_ptr<AbstractDecoder> decoder(AbstractDecoder::create(config.decoder()));

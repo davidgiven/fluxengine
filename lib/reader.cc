@@ -65,6 +65,8 @@ static void replace_sector(std::unique_ptr<Sector>& replacing, Sector& replaceme
 
 void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWriter& writer)
 {
+	outputFluxSink = FluxSink::create(config.decoder().copy_flux_to());
+
 	bool failures = false;
 	SectorSet allSectors;
 	for (int cylinder : iterate(config.cylinders()))
@@ -185,7 +187,7 @@ void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWrit
     }
 
 	writer.printMap(allSectors);
-	if (!config.decoder().has_write_csv_to())
+	if (config.decoder().has_write_csv_to())
 		writer.writeCsv(allSectors, config.decoder().write_csv_to());
 	writer.writeImage(allSectors);
 

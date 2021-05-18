@@ -14,6 +14,7 @@ import "arch/mx/mx.proto";
 import "arch/tids990/tids990.proto";
 import "arch/victor9k/victor9k.proto";
 import "arch/zilogmcz/zilogmcz.proto";
+import "lib/fluxsink/fluxsink.proto";
 import "lib/common.proto";
 
 message DecoderProto {
@@ -43,8 +44,8 @@ message DecoderProto {
 		ZilogMczDecoderProto zilogmcz = 18;
 	}
 
-	optional string copy_flux_to = 19
-		[(help) = "while decoding, write a copy of the flux to this file"];
+	optional FluxSinkProto copy_flux_to = 19
+		[(help) = "while decoding, write a copy of the flux here"];
 	optional bool dump_records = 20 [default = false,
 		(help) = "if set, then dump the parsed but undecoded disk records"];
 	optional bool dump_sectors = 21 [default = false,
