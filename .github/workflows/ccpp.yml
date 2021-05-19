@@ -33,14 +33,14 @@ jobs:
     steps:
     - uses: msys2/setup-msys2@v2
       with:
-        update: true
+        update: false
         install: >-
           make
           ninja
           mingw-w64-i686-libusb
           mingw-w64-i686-sqlite3
           mingw-w64-i686-zlib
-          mingw-w64-cross-gcc
+          mingw-w64-i686-gcc
           zip
           mingw-w64-i686-protobuf
     - uses: actions/checkout@v1
