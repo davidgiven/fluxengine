@@ -2,7 +2,9 @@ input {
 	image {
 		filename: "brother240.img"
 		img {
-			format {
+			tracks: 78
+			sides: 1
+			trackdata {
 				sectors: 12
 				sector_size: 256
 			}
@@ -22,7 +24,7 @@ encoder {
 
 cylinders {
 	start: 0
-	end: 77
+	end: 80
 }
 
 heads {

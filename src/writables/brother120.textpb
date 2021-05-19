@@ -2,12 +2,12 @@ input {
 	image {
 		filename: "brother120.img"
 		img {
-			format {
+			tracks: 39
+			sides: 1
+			trackdata {
 				sectors: 12
 				sector_size: 256
 			}
-			tracks: 39
-			sides: 1
 		}
 	}
 }

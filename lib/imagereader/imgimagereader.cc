@@ -27,12 +27,12 @@ public:
         {
             for (int side = 0; side < _config.img().sides(); side++)
             {
-				ImgInputOutputProto::FormatProto format;
-				getTrackFormat(format, track, side);
+				ImgInputOutputProto::TrackdataProto trackdata;
+				getTrackFormat(trackdata, track, side);
 
-                for (int sectorId = 0; sectorId < format.sectors(); sectorId++)
+                for (int sectorId = 0; sectorId < trackdata.sectors(); sectorId++)
                 {
-                    Bytes data(format.sector_size());
+                    Bytes data(trackdata.sector_size());
                     inputFile.read((char*) data.begin(), data.size());
 
                     std::unique_ptr<Sector>& sector = sectors.get(track, side, sectorId);
@@ -57,17 +57,17 @@ public:
 	}
 
 private:
-	void getTrackFormat(ImgInputOutputProto::FormatProto& format, unsigned track, unsigned side)
+	void getTrackFormat(ImgInputOutputProto::TrackdataProto& trackdata, unsigned track, unsigned side)
 	{
-		format.Clear();
-		for (const ImgInputOutputProto::FormatProto& f : _config.img().format())
+		trackdata.Clear();
+		for (const ImgInputOutputProto::TrackdataProto& f : _config.img().trackdata())
 		{
 			if (f.has_track() && (f.track() != track))
 				continue;
 			if (f.has_side() && (f.side() != side))
 				continue;
 
-			format.MergeFrom(f);
+			trackdata.MergeFrom(f);
 		}
 	}
 };

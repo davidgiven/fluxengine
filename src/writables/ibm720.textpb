@@ -2,7 +2,9 @@ input {
 	image {
 		filename: "ibm720.img"
 		img {
-			format {
+			tracks: 80
+			sides: 2
+			trackdata {
 				sectors: 9
 				sector_size: 512
 			}
@@ -18,9 +20,11 @@ output {
 
 encoder {
 	ibm {
-		track_length_ms: 200
-		clock_rate_khz: 250
-		sector_skew: "012345678"
+		trackdata {
+			track_length_ms: 200
+			clock_rate_khz: 250
+			sector_skew: "012345678"
+		}
 	}
 }
 

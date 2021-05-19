@@ -10,7 +10,7 @@ output {
 		img {
 			tracks: 80
 			sides: 2
-			format {
+			trackdata {
 				sector_size: 512
 				sectors: 11
 			}

@@ -3,9 +3,7 @@
 
 #include "decoders/decoders.h"
 #include "encoders/encoders.h"
-
-class IbmDecoderProto;
-class IbmEncoderProto;
+#include "arch/ibm/ibm.pb.h"
 
 /* IBM format (i.e. ordinary PC floppies). */
 
@@ -65,10 +63,10 @@ public:
 
 private:
 	void writeRawBits(uint32_t data, int width);
-	void writeBytes(const Bytes& bytes);
-	void writeBytes(int count, uint8_t value);
 	void writeSync();
 	
+	void getTrackFormat(IbmEncoderProto::TrackdataProto& format, unsigned track, unsigned side);
+
 private:
 	const IbmEncoderProto& _config;
 	std::vector<bool> _bits;

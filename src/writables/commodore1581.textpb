@@ -2,7 +2,9 @@ input {
 	image {
 		filename: "commodore1581.img"
 		img {
-			format {
+			tracks: 80
+			sides: 2
+			trackdata {
 				sectors: 10
 				sector_size: 512
 			}
@@ -18,14 +20,16 @@ output {
 
 encoder {
 	ibm {
-		track_length_ms: 200
-		clock_rate_khz: 250
-		emit_iam: false
-		gap0: 80
-		gap2: 22
-		gap3: 34
-		sector_skew: "012345678"
-		swap_sides: true
+		trackdata {
+			track_length_ms: 200
+			clock_rate_khz: 250
+			emit_iam: false
+			gap0: 80
+			gap2: 22
+			gap3: 34
+			sector_skew: "012345678"
+			swap_sides: true
+		}
 	}
 }
 

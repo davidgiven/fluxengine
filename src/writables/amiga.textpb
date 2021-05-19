@@ -2,12 +2,12 @@ input {
 	image {
 		filename: "amiga.adf"
 		img {
-			format {
+			tracks: 80
+			sides: 2
+			trackdata {
 				sectors: 11
 				sector_size: 512
 			}
-			tracks: 80
-			sides: 2
 		}
 	}
 }

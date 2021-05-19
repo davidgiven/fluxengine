@@ -2,12 +2,12 @@ input {
 	image {
 		filename: "tids990.img"
 		img {
-			format {
+			tracks: 77
+			sides: 2
+			trackdata {
 				sectors: 26
 				sector_size: 288
 			}
-			tracks: 77
-			sides: 2
 		}
 	}
 }

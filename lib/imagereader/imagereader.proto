@@ -3,7 +3,7 @@ syntax = "proto2";
 import "lib/common.proto";
 
 message ImgInputOutputProto {
-	message FormatProto {
+	message TrackdataProto {
 		optional int32 track = 1 [(help) = "if present, this format only applies to this track"];
 		optional int32 side = 2 [(help) = "if present, this format only applies to this side"];
 
@@ -11,7 +11,7 @@ message ImgInputOutputProto {
 		optional int32 sectors = 4 [(help) = "number of sectors in this track"];
 	}
 
-	repeated FormatProto format = 4 [(help) = "per-track format information (repeatable)"];
+	repeated TrackdataProto trackdata = 4 [(help) = "per-track format information (repeatable)"];
 	optional int32 tracks = 5 [default=80, (help) = "number of tracks in image"];
 	optional int32 sides = 6 [default=2, (help) = "number of sides in image"];
 }
