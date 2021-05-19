@@ -34,6 +34,7 @@ jobs:
     - uses: msys2/setup-msys2@v2
       with:
         update: false
+        msystem: MINGW32
         install: >-
           make
           ninja
