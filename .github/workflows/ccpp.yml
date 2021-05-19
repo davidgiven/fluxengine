@@ -44,6 +44,7 @@ jobs:
           mingw-w64-i686-gcc
           zip
           mingw-w64-i686-protobuf
+          vim
     - uses: actions/checkout@v1
       with:
         fetch-depth: 1
