@@ -48,5 +48,5 @@ jobs:
         fetch-depth: 1
     - name: build
       run: |
-        make CXX=/opt/bin/i686-w64-mingw32-g++.exe AR="/opt/bin/i686-w64-mingw32-ar.exe rcs"
+        make
 
