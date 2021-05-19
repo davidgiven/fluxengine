@@ -26,6 +26,7 @@ std::unique_ptr<ImageWriter> ImageWriter::create(const ImageWriterProto& config)
 		case ImageWriterProto::kDiskcopy:
 			return ImageWriter::createDiskCopyImageWriter(config);
 	}
+
 	Error() << "bad output image config";
 	return std::unique_ptr<ImageWriter>();
 }

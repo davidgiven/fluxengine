@@ -1,0 +1,47 @@
+input {
+	flux {
+		drive {}
+	}
+}
+
+output {
+	image {
+		filename: "ibm.img"
+		img {
+			format {
+				sectors: 16
+				sector_size: 512
+			}
+			format {
+				track: 0
+				side: 0
+				sectors: 26
+				sector_size: 128
+			}
+			format {
+				track: 0
+				side: 1
+				sectors: 26
+				sector_size: 256
+			}
+			tracks: 77
+			sides: 2
+		}
+	}
+}
+
+decoder {
+	ibm {}
+}
+
+cylinders {
+	start: 0
+	end: 81
+}
+
+heads {
+	start: 0
+	end: 1
+}
+
+

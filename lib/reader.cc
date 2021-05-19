@@ -64,7 +64,8 @@ static void replace_sector(std::unique_ptr<Sector>& replacing, Sector& replaceme
 
 void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWriter& writer)
 {
-	outputFluxSink = FluxSink::create(config.decoder().copy_flux_to());
+	if (config.decoder().has_copy_flux_to())
+		outputFluxSink = FluxSink::create(config.decoder().copy_flux_to());
 
 	bool failures = false;
 	SectorSet allSectors;

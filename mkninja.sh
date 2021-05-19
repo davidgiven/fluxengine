@@ -364,6 +364,7 @@ READABLES="\
     atarist \
     brother \
     c64 \
+    eco1 \
     f85 \
     fb100 \
     ibm \
