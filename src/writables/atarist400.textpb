@@ -1,6 +1,6 @@
 input {
 	image {
-		filename: "atarist400.img"
+		filename: "atarist400.st"
 		img {
 			tracks: 80
 			sides: 1
