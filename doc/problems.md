@@ -84,7 +84,14 @@ example:
 Bits are then found by measuring the interval between pulses on the disk and
 comparing to this clock rate.
 
-However, floppy disk drives are extremely analogue devices and not necessarily calibrated very well, and the disk may be warped, or the rubber band which makes the drive work may have lost its bandiness, and so the bits are not necessarily precisely aligned. Because of this, FluxEngine can tolerate a certain amount of error. This is controlled by the `--bit-error-threshold` parameter. Varying this can have magical effects. For example, adding `--bit-error-threshold=0.4` turns the decode into this:
+However, floppy disk drives are extremely analogue devices and not necessarily
+calibrated very well, and the disk may be warped, or the rubber band which
+makes the drive work may have lost its bandiness, and so the bits are not
+necessarily precisely aligned. Because of this, FluxEngine can tolerate a
+certain amount of error. This is controlled by the
+`--decoder.bit_error_threshold` parameter. Varying this can have magical
+effects. For example, adding `--decoder.bit_error_threshold=0.4` turns the
+decode into this:
 
 ```
 H.SS Tracks --->
@@ -124,9 +131,9 @@ can actually _increase_ the error rate --- which is why 0.4 isn't the default
 
 That's the most common tuning parameter, but others are available:
 
-`--pulse-debounce-threshold` controls whether FluxEngine ignores pairs of pulses in rapid succession. This is common on some disks (I've observed them on Brother word processor disks).
+`--decoder.pulse_debounce_threshold` controls whether FluxEngine ignores pairs of pulses in rapid succession. This is common on some disks (I've observed them on Brother word processor disks).
 
-`--clock-interval-bias` adds a constant bias to the intervals between pulses
+`--decoder.clock_interval_bias` adds a constant bias to the intervals between pulses
 before doing decodes. This is very occasionally necessary to get clean reads
 --- for example, if the machine which wrote the disk always writes pulses
 late. If you try this, use very small numbers (e.g. 0.02). Negative values
@@ -145,7 +152,7 @@ of the pulse intervals on the disk. (Note that the tool only works on one
 track at a time.)
 
 ```
-$ fluxengine inspect -s good.flux:t=0:s=0
+$ fluxengine inspect -s good.flux -c 0 -h 0
 Clock detection histogram:
 3.58    737 ▉
 3.67   3838 ████▊
@@ -197,7 +204,7 @@ So, what does my Victor 9000 histogram look like? Let's look at the
 histogram for a single track:
 
 ```
-$ fluxengine inspect -s dubious.flux:t=0:s=0
+$ fluxengine inspect -s dubious.flux -c 0 -h 0
 Clock detection histogram:
 1.33   1904 █▉
 1.42  21669 ██████████████████████▌

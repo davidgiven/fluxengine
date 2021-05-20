@@ -28,8 +28,8 @@ fluxengine read micropolis
 You should end up with a `micropolis.img` which is 630784 bytes long (for a
 normal DD disk). The image is written in CHS order, but HCS is generally used
 by CP/M tools so the image needs to be post-processed. For only half-full disks
-or single-sided disks, you can use `-s :s=0` to read only one side of the disk
-which works around the problem.
+or single-sided disks, you can use `--heads 0` to read only one side of the
+disk which works around the problem.
 
 The [CP/M BIOS](https://www.seasip.info/Cpm/bios.html) defined SELDSK, SETTRK,
 and SETSEC, but no function to select the head/side. Double-sided floppies

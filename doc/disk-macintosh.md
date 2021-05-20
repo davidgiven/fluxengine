@@ -55,10 +55,10 @@ You should end up with a `mac.diskcopy` file which is compatible with DiskCopy
 different sizes and the odd sector size. If you use a normal `.img` file, then
 FluxEngine will store them in a simple 524 x 12 x 2 x 80 layout, with holes
 where missing sectors should be; this was easiest, but is unlikely to work with
-most Mac emulators and other software. In these files, the 12 bytes of
-metadata _follow_ the 512 bytes of user payload in the sector image. If you
-don't want it, specify a geometry in the output file with a 512-byte sectore
-size like `-o mac.img:c=80:h=1:s=12:b=512`.
+most Mac emulators and other software. In these files, the 12 bytes of metadata
+_follow_ the 512 bytes of user payload in the sector image. If you don't want
+it, specify that you want 512-byte sectors with
+`--output.image.img.trackdata.sector_size=512`.
 
 Writing discs
 -------------
