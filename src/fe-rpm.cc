@@ -1,25 +1,29 @@
 #include "globals.h"
 #include "flags.h"
 #include "usb/usb.h"
+#include "fluxsource/fluxsource.h"
 #include "protocol.h"
 #include "proto.h"
 
 static FlagGroup flags;
 
-static IntFlag driveFlag(
-    { "-d", "--drive" },
-    "drive to test",
-	0,
+static StringFlag sourceFlux(
+	{ "-s", "--source" },
+	"'drive:' flux source to use",
+	"",
 	[](const auto& value)
 	{
-		config.mutable_input()->mutable_flux()->mutable_drive()->set_drive(value);
+		FluxSource::updateConfigForFilename(config.mutable_input()->mutable_flux(), value);
 	});
 
 int mainRpm(int argc, const char* argv[])
 {
     flags.parseFlagsWithConfigFiles(argc, argv, {});
 
-    usbSetDrive(config.input().flux().drive().drive(), false, F_INDEX_REAL);
+	if (!config.input().flux().has_drive())
+		Error() << "this only makes sense with a real disk drive";
+
+    usbSetDrive(config.input().flux().drive().drive(), false, config.input().flux().drive().index_mode());
     nanoseconds_t period = usbGetRotationalPeriod(config.input().flux().drive().hard_sector_count());
     if (period != 0)
         std::cout << "Rotational period is " << period/1000000 << " ms (" << 60e9/period << " rpm)" << std::endl;

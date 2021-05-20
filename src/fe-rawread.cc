@@ -28,15 +28,6 @@ static StringFlag sourceFlux(
 		FluxSource::updateConfigForFilename(config.mutable_input()->mutable_flux(), value);
 	});
 
-static IntFlag sourceDrive(
-	{ "-D", "--drive" },
-	"drive to read from",
-	0,
-	[](const auto& value)
-	{
-		config.mutable_input()->mutable_flux()->mutable_drive()->set_drive(value);
-	});
-
 static StringFlag destFlux(
 	{ "-d", "--dest" },
 	"destination flux file to write to",
@@ -44,24 +35,6 @@ static StringFlag destFlux(
 	[](const auto& value)
 	{
 		FluxSink::updateConfigForFilename(config.mutable_output()->mutable_flux(), value);
-	});
-
-static StringFlag auFile(
-	{ "--au" },
-	"write destination flux to .au files in this directory",
-	"",
-	[](const auto& value)
-	{
-		config.mutable_output()->mutable_flux()->mutable_au()->set_directory(value);
-	});
-
-static StringFlag vcdFile(
-	{ "--vcd" },
-	"write destination flux to .vcd files in this directory",
-	"",
-	[](const auto& value)
-	{
-		config.mutable_output()->mutable_flux()->mutable_vcd()->set_directory(value);
 	});
 
 static StringFlag srcCylinders(
@@ -86,6 +59,9 @@ extern const std::map<std::string, std::string> readables;
 
 int mainRawRead(int argc, const char* argv[])
 {
+	config.mutable_input()->mutable_flux()->mutable_drive()->set_drive(0);
+	setRange(config.mutable_cylinders(), "0-79");
+	setRange(config.mutable_heads(), "0-1");
     flags.parseFlagsWithConfigFiles(argc, argv, readables);
 
 	if (!config.input().has_flux() || !config.output().has_flux())

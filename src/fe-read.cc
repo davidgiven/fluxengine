@@ -28,15 +28,6 @@ static StringFlag sourceFlux(
 		FluxSource::updateConfigForFilename(config.mutable_input()->mutable_flux(), value);
 	});
 
-static IntFlag sourceDrive(
-	{ "-D", "--drive" },
-	"drive to read from",
-	0,
-	[](const auto& value)
-	{
-		config.mutable_input()->mutable_flux()->mutable_drive()->set_drive(value);
-	});
-
 static StringFlag destImage(
 	{ "-o", "--output" },
 	"destination image to write",

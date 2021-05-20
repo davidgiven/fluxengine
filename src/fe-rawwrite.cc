@@ -26,20 +26,11 @@ static StringFlag sourceFlux(
 
 static StringFlag destFlux(
 	{ "--dest", "-d" },
-	"flux file to write to",
+	"flux destination to write to",
 	"",
 	[](const auto& value)
 	{
 		FluxSink::updateConfigForFilename(config.mutable_output()->mutable_flux(), value);
-	});
-
-static IntFlag destDrive(
-	{ "--drive", "-D" },
-	"drive to write to",
-	0,
-	[](const auto& value)
-	{
-		config.mutable_output()->mutable_flux()->mutable_drive()->set_drive(value);
 	});
 
 static StringFlag destCylinders(
@@ -72,6 +63,9 @@ extern const std::map<std::string, std::string> writables;
 
 int mainRawWrite(int argc, const char* argv[])
 {
+	config.mutable_output()->mutable_flux()->mutable_drive()->set_drive(0);
+	setRange(config.mutable_cylinders(), "0-79");
+	setRange(config.mutable_heads(), "0-1");
     flags.parseFlagsWithConfigFiles(argc, argv, writables);
 
 	if (!config.input().has_flux() || !config.output().has_flux())

@@ -39,6 +39,7 @@ void FluxSink::updateConfigForFilename(FluxSinkProto* proto, const std::string& 
 		{ std::regex("^(.*\\.scp)$"),  [&](const auto& s) { proto->mutable_scp()->set_filename(s); }},
 		{ std::regex("^vcd:(.*)$"),    [&](const auto& s) { proto->mutable_vcd()->set_directory(s); }},
 		{ std::regex("^au:(.*)$"),     [&](const auto& s) { proto->mutable_au()->set_directory(s); }},
+		{ std::regex("^drive:(.*)"),   [&](const auto& s) { proto->mutable_drive()->set_drive(std::stoi(s)); }},
 	};
 
 	for (const auto& it : formats)

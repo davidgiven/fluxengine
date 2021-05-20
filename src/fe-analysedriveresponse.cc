@@ -7,6 +7,7 @@
 #include "writer.h"
 #include "protocol.h"
 #include "proto.h"
+#include "fluxsink/fluxsink.h"
 #include "fmt/format.h"
 #include "dep/agg/include/agg2d.h"
 #include "dep/stb/stb_image_write.h"
@@ -14,13 +15,13 @@
 
 static FlagGroup flags;
 
-static IntFlag destDrive(
-	{ "--drive", "-D" },
-	"drive to write to",
-	0,
+static StringFlag destFlux(
+	{ "--dest", "-d" },
+	"'drive:' flux destination to analyse",
+	"",
 	[](const auto& value)
 	{
-		config.mutable_output()->mutable_flux()->mutable_drive()->set_drive(value);
+		FluxSink::updateConfigForFilename(config.mutable_output()->mutable_flux(), value);
 	});
 
 static IntFlag destCylinder(
@@ -204,6 +205,9 @@ static void draw_x_graticules(Agg2D& painter, double x1, double y1, double x2, d
 int mainAnalyseDriveResponse(int argc, const char* argv[])
 {
     flags.parseFlagsWithConfigFiles(argc, argv, {});
+
+	if (!config.output().flux().has_drive())
+		Error() << "this only makes sense with a real disk drive";
 
     usbSetDrive(config.output().flux().drive().drive(),
 		config.output().flux().drive().high_density(),
