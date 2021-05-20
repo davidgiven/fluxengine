@@ -25,6 +25,7 @@ extern const std::map<std::string, std::string> readables;
 
 int mainSeek(int argc, const char* argv[])
 {
+	config.mutable_input()->mutable_flux()->mutable_drive()->set_drive(0);
     flags.parseFlagsWithConfigFiles(argc, argv, readables);
 
 	if (!config.input().flux().has_drive())
