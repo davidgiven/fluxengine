@@ -418,7 +418,6 @@ buildlibrary libfrontend.a \
     $OBJDIR/writables.cc \
     src/fe-analysedriveresponse.cc \
     src/fe-analyselayout.cc \
-    src/fe-image.cc \
     src/fe-inspect.cc \
     src/fe-rawread.cc \
     src/fe-rawwrite.cc \

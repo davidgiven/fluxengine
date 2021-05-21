@@ -4,7 +4,6 @@ typedef int command_cb(int agrc, const char* argv[]);
 
 extern command_cb mainAnalyseDriveResponse;
 extern command_cb mainAnalyseLayout;
-extern command_cb mainConvertImage;
 extern command_cb mainInspect;
 extern command_cb mainRawRead;
 extern command_cb mainRawWrite;
@@ -23,13 +22,11 @@ struct Command
     std::string help;
 };
 
-static command_cb mainConvert;
 static command_cb mainAnalyse;
 static command_cb mainTest;
 
 static std::vector<Command> commands =
 {
-    { "convert",           mainConvert,           "Converts various types of data file.", },
     { "inspect",           mainInspect,           "Low-level analysis and inspection of a disk." },
 	{ "analyse",           mainAnalyse,           "Disk and drive analysis tools." },
     { "read",              mainRead,              "Reads a disk, producing a sector image.", },
@@ -40,11 +37,6 @@ static std::vector<Command> commands =
     { "seek",              mainSeek,              "Moves the disk head.", },
     { "test",              mainTest,              "Various testing commands.", },
     { "upgradefluxfile",   mainUpgradeFluxFile,   "Upgrades a flux file from a previous version of this software.", },
-};
-
-static std::vector<Command> convertables =
-{
-	{ "image",         mainConvertImage,     "Converts one disk image to another.", },
 };
 
 static std::vector<Command> analysables =
@@ -89,9 +81,6 @@ static int mainExtended(std::vector<Command>& subcommands, const std::string& co
     std::cerr << "fluxengine: unrecognised format (try --help)\n";
     return 1;
 }
-
-static int mainConvert(int argc, const char* argv[])
-{ return mainExtended(convertables, "convert", argc, argv); }
 
 static int mainAnalyse(int argc, const char* argv[])
 { return mainExtended(analysables, "analyse", argc, argv); }
