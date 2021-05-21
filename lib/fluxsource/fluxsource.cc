@@ -38,10 +38,11 @@ std::unique_ptr<FluxSource> FluxSource::create(const FluxSourceProto& config)
 
 		case FluxSourceProto::kCwf:
 			return createCwfFluxSource(config.cwf());
-	}
 
-	Error() << "bad input disk configuration";
-    return std::unique_ptr<FluxSource>();
+		default:
+			Error() << "bad input disk configuration";
+			return std::unique_ptr<FluxSource>();
+	}
 }
 
 void FluxSource::updateConfigForFilename(FluxSourceProto* proto, const std::string& filename)

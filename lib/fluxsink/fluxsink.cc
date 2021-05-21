@@ -25,10 +25,11 @@ std::unique_ptr<FluxSink> FluxSink::create(const FluxSinkProto& config)
 
 		case FluxSinkProto::kScp:
 			return createScpFluxSink(config.scp());
-	}
 
-	Error() << "bad output disk config";
-	return std::unique_ptr<FluxSink>();
+		default:
+			Error() << "bad output disk config";
+			return std::unique_ptr<FluxSink>();
+	}
 }
 
 void FluxSink::updateConfigForFilename(FluxSinkProto* proto, const std::string& filename)

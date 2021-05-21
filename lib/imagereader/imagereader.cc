@@ -25,10 +25,11 @@ std::unique_ptr<ImageReader> ImageReader::create(const ImageReaderProto& config)
 
 		case ImageReaderProto::kJv3:
 			return ImageReader::createJv3ImageReader(config);
-	}
 
-	Error() << "bad input file config";
-	return std::unique_ptr<ImageReader>();
+		default:
+			Error() << "bad input file config";
+			return std::unique_ptr<ImageReader>();
+	}
 }
 
 void ImageReader::updateConfigForFilename(ImageReaderProto* proto, const std::string& filename)

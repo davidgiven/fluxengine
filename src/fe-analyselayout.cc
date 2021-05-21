@@ -78,9 +78,9 @@ void visualiseSectorsToFile(const SectorSet& sectors, const std::string& filenam
     auto drawSide = [&](int side)
     {
 		int xpos = BORDER +
-			(sideToDraw == -1)
+			((sideToDraw == -1)
 				? (panel_centre + side*panel_size)
-				: panel_centre;
+				: panel_centre);
 
         for (int physicalTrack = 0; physicalTrack < TRACKS; physicalTrack++)
         {

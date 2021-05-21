@@ -11,14 +11,17 @@ rule cxx
 rule proto
     command = $PROTOC \$flags \$in && (echo \$in > \$def)
     description = PROTO \$in
+    restat = yes
 
 rule protoencode
     command = (echo '#include <string>' && echo 'static const unsigned char data[] = {' && ($PROTOC \$flags --encode=\$messagetype \$\$(cat \$def)< \$in | $XXD -i) && echo '}; extern std::string \$name(); std::string \$name() { return std::string((const char*)data, sizeof(data)); }') > \$out
     description = PROTOENCODE \$in
+    restat = yes
 
 rule binencode
     command = xxd -i \$in > \$out
     description = XXD \$in
+    restat = true
 
 rule library
     command = $AR \$out \$in
@@ -39,6 +42,7 @@ rule strip
 rule mktable
     command = sh scripts/mktable.sh \$kind \$words > \$out
     description = MKTABLE \$kind
+    restat = true
 EOF
 
 buildlibrary() {
