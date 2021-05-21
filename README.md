@@ -4,6 +4,11 @@ FluxEngine
 (If you're reading this on GitHub, the formatting's a bit messed up. [Try the
 version on cowlark.com instead.](http://cowlark.com/fluxengine/)
 
+**Breaking news!** As of 2021-05-21, the command line environment has changed
+_substantially_ (to make it more consistent and flexible, and allow some new
+backend features like multi-format IBM scheme disks, which are popular with
+CP/M). If things don't work the way you expect, please check the documentation.
+
 What?
 -----
 
