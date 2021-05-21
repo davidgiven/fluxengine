@@ -1,9 +1,11 @@
 Disk: VDS Eco1
 ==============
 
-The Eco1 is a Italian CP/M machine produced in 1982. It used twin 8" drives,
-each storing 1.2MB, which was quite impressive for a CP/M machine in those
-days. Visually it is best described as 'very brown'.
+The Eco1 is a Italian CP/M machine produced in 1982. It had 64kB of RAM, in
+later models expandable up to 384kB, and _two_ Z80 processors. One of these was
+used solely for managing the twin 8" drives, each storing 1.2MB, which was
+quite impressive for a CP/M machine in those days. Visually it is best
+described as 'very brown'.
 
 <div style="text-align: center">
 <a href="vds-eco1.jpg"> <img src="vds-eco1.jpg" alt="A contemporary advert for the Eco1"/></a>
