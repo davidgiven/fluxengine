@@ -6,7 +6,7 @@ input {
 
 output {
 	image {
-		filename: "ibm.img"
+		filename: "eco1.img"
 		img {
 			tracks: 77
 			sides: 2

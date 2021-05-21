@@ -97,9 +97,9 @@ people who've had it work).
 | [Acorn DFS](doc/disk-acorndfs.md)        |  🦄   |   🦖*  |                                     |
 | [Ampro Little Board](doc/disk-ampro.md)  |  🦖   |   🦖*   |                                     |
 | [Apple II DOS 3.3](doc/disk-apple2.md)   |  🦄   |        | doesn't do logical sector remapping |
-| [Amiga](doc/disk-amiga.md)               |  🦄   |        |                                     |
+| [Amiga](doc/disk-amiga.md)               |  🦄   |   🦖   |                                     |
 | [Commodore 64 1541](doc/disk-c64.md)     |  🦖   |        | and probably the other GCR formats  |
-| [Brother 120kB](doc/disk-brother.md)     |  🦄   |        |                                     |
+| [Brother 120kB](doc/disk-brother.md)     |  🦄   |   🦖   |                                     |
 | [Brother 240kB](doc/disk-brother.md)     |  🦄   |   🦄   |                                     |
 | [Brother FB-100](doc/disk-fb100.md)      |  🦖   |        | Tandy Model 100, Husky Hunter, knitting machines |
 | [Macintosh 800kB](doc/disk-macintosh.md) |  🦄   |   🦄   | and probably the 400kB too          |
@@ -123,6 +123,7 @@ at least, check the CRC so what data's there is probably good.
 | [AES Superplus / No Problem](doc/disk-aeslanier.md) |  🦖   | | hard sectors! |
 | [Durango F85](doc/disk-durangof85.md)    |  🦖   |        | 5.25" |
 | [DVK MX](doc/disk-mx.md)                 |  🦖   |        | Soviet PDP-11 clone |
+| [VDS Eco1](doc/disk-eco1.md)             |  🦖   |        | 8" mixed format |
 | [Micropolis](doc/disk-micropolis.md)     |  🦄   |        | Micropolis 100tpi drives |
 | [TI DS990 FD1000](doc/disk-tids990.md)   |  🦄   |  🦄    | 8" |
 | [Victor 9000](doc/disk-victor9k.md)      |  🦖   |        | 8" |
