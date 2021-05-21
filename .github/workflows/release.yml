@@ -31,7 +31,7 @@ jobs:
         fetch-depth: 1
     - name: build
       run: |
-        make CXX=/opt/bin/i686-w64-mingw32-g++.exe AR="/opt/bin/i686-w64-mingw32-ar.exe rcs"
+        make
     - name: zip
       run: |
         zip -9 fluxengine.zip fluxengine.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex
