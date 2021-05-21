@@ -153,6 +153,13 @@ more common tools.
 	encoding. You can specify a profile if you want to write a subset of the
 	disk.
 
+  - `fluxengine inspect -s <flux source> -c <cylinder> -h <head> -B`
+
+	Reads flux (possibly from a disk) and does various analyses of it to try
+	and detect the clock rate, display raw flux information, examine the
+	underlying data from the FluxEngine board, etc. There are lots of options
+	but the command above is the most useful.
+
   - `fluxengine rpm`
 
 	Measures the rotation speed of a drive. For hard-sectored disks, you
