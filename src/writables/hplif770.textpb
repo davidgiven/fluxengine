@@ -1,0 +1,44 @@
+input {
+	image {
+		filename: "hplif770.img"
+		img {
+			tracks: 77
+			sides: 2
+			trackdata {
+				sectors: 5
+				sector_size: 1024
+			}
+		}
+	}
+}
+
+output {
+	flux {
+		drive {}
+	}
+}
+
+encoder {
+	ibm {
+		trackdata {
+			track_length_ms: 200
+			clock_rate_khz: 250
+			sector_size: 1024
+			gap0: 80
+			gap2: 22
+			gap3: 44
+			sector_skew: "01234"
+		}
+	}
+}
+
+cylinders {
+	start: 0
+	end: 76
+}
+
+heads {
+	start: 0
+	end: 1
+}
+

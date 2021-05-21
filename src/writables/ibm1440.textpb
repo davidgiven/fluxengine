@@ -1,0 +1,40 @@
+input {
+	image {
+		filename: "ibm1440.img"
+		img {
+			tracks: 80
+			sides: 2
+			trackdata {
+				sectors: 18
+				sector_size: 512
+			}
+		}
+	}
+}
+
+output {
+	flux {
+		drive {}
+	}
+}
+
+encoder {
+	ibm {
+		trackdata {
+			track_length_ms: 200
+			clock_rate_khz: 500
+			sector_skew: "0123456789abcdefgh"
+		}
+	}
+}
+
+cylinders {
+	start: 0
+	end: 79
+}
+
+heads {
+	start: 0
+	end: 1
+}
+

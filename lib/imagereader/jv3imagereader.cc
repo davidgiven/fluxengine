@@ -1,10 +1,10 @@
 #include "globals.h"
 #include "flags.h"
-#include "dataspec.h"
 #include "sector.h"
 #include "sectorset.h"
 #include "imagereader/imagereader.h"
 #include "fmt/format.h"
+#include "lib/config.pb.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -13,7 +13,7 @@
  * in any order, followed by the same again for more sectors. To find the second data block
  * you need to know the size of the first data block, which requires parsing it.
  *
- * https://www.tim-mann.org/trs80/dskspec.html
+ * https://www.tim-mann.org/trs80/dskconfig.html
  *
  * typedef struct {
  *   SectorHeader headers1[2901];
@@ -77,13 +77,13 @@ static unsigned getSectorSize(uint8_t flags)
 class Jv3ImageReader : public ImageReader
 {
 public:
-	Jv3ImageReader(const ImageSpec& spec):
-		ImageReader(spec)
+	Jv3ImageReader(const ImageReaderProto& config):
+		ImageReader(config)
 	{}
 
 	SectorSet readImage()
 	{
-        std::ifstream inputFile(spec.filename, std::ios::in | std::ios::binary);
+        std::ifstream inputFile(_config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
             Error() << "cannot open input file";
 
@@ -132,10 +132,9 @@ public:
 	}
 };
 
-std::unique_ptr<ImageReader> ImageReader::createJv3ImageReader(
-	const ImageSpec& spec)
+std::unique_ptr<ImageReader> ImageReader::createJv3ImageReader(const ImageReaderProto& config)
 {
-    return std::unique_ptr<ImageReader>(new Jv3ImageReader(spec));
+    return std::unique_ptr<ImageReader>(new Jv3ImageReader(config));
 }
 
 

@@ -1,0 +1,45 @@
+input {
+	image {
+		filename: "atarist800.st"
+		img {
+			tracks: 80
+			sides: 2
+			trackdata {
+				sectors: 10
+				sector_size: 512
+			}
+		}
+	}
+}
+
+output {
+	flux {
+		drive {}
+	}
+}
+
+encoder {
+	ibm {
+		trackdata {
+			track_length_ms: 200
+			clock_rate_khz: 250
+			emit_iam: false
+			gap0: 80
+			gap2: 22
+			gap3: 34
+			sector_skew: "0123456789"
+			swap_sides: true
+		}
+	}
+}
+
+cylinders {
+	start: 0
+	end: 79
+}
+
+heads {
+	start: 0
+	end: 1
+}
+

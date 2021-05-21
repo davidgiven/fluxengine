@@ -1,54 +1,63 @@
 #include "globals.h"
 #include "flags.h"
-#include "dataspec.h"
 #include "sector.h"
 #include "sectorset.h"
 #include "imagereader/imagereader.h"
 #include "utils.h"
 #include "fmt/format.h"
+#include "proto.h"
+#include "lib/config.pb.h"
 #include <algorithm>
 #include <ctype.h>
 
-std::map<std::string, ImageReader::Constructor> ImageReader::formats =
+std::unique_ptr<ImageReader> ImageReader::create(const ImageReaderProto& config)
 {
-	{".adf", ImageReader::createImgImageReader},
-	{".d81", ImageReader::createImgImageReader},
-	{".diskcopy", ImageReader::createDiskCopyImageReader},
-	{".img", ImageReader::createImgImageReader},
-	{".ima", ImageReader::createImgImageReader},
-	{".jv1", ImageReader::createImgImageReader},
-	{".jv3", ImageReader::createJv3ImageReader},
-	{".st", ImageReader::createImgImageReader},
-	{".imd", ImageReader::createIMDImageReader},
-	{".IMD", ImageReader::createIMDImageReader},
-};
-
-ImageReader::Constructor ImageReader::findConstructor(const ImageSpec& spec)
-{
-    const auto& filename = spec.filename;
-
-	for (const auto& e : formats)
+	switch (config.format_case())
 	{
-		if (endsWith(filename, e.first))
-			return e.second;
+		case ImageReaderProto::kImd:
+			return ImageReader::createIMDImageReader(config);
+
+		case ImageReaderProto::kImg:
+			return ImageReader::createImgImageReader(config);
+
+		case ImageReaderProto::kDiskcopy:
+			return ImageReader::createDiskCopyImageReader(config);
+
+		case ImageReaderProto::kJv3:
+			return ImageReader::createJv3ImageReader(config);
+
+		default:
+			Error() << "bad input file config";
+			return std::unique_ptr<ImageReader>();
+	}
+}
+
+void ImageReader::updateConfigForFilename(ImageReaderProto* proto, const std::string& filename)
+{
+	static const std::map<std::string, std::function<void(void)>> formats =
+	{
+		{".adf",      [&]() { proto->mutable_img(); }},
+		{".jv3",      [&]() { proto->mutable_jv3(); }},
+		{".d81",      [&]() { proto->mutable_img(); }},
+		{".diskcopy", [&]() { proto->mutable_diskcopy(); }},
+		{".img",      [&]() { proto->mutable_img(); }},
+		{".st",       [&]() { proto->mutable_img(); }},
+	};
+
+	for (const auto& it : formats)
+	{
+		if (endsWith(filename, it.first))
+		{
+			it.second();
+			proto->set_filename(filename);
+			return;
+		}
 	}
 
-	return NULL;
+	Error() << fmt::format("unrecognised image filename '{}'", filename);
 }
 
-std::unique_ptr<ImageReader> ImageReader::create(const ImageSpec& spec)
-{
-    verifyImageSpec(spec);
-    return findConstructor(spec)(spec);
-}
-
-void ImageReader::verifyImageSpec(const ImageSpec& spec)
-{
-    if (!findConstructor(spec))
-        Error() << "unrecognised input image filename extension";
-}
-
-ImageReader::ImageReader(const ImageSpec& spec):
-    spec(spec)
+ImageReader::ImageReader(const ImageReaderProto& config):
+    _config(config)
 {}
 

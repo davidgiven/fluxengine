@@ -6,6 +6,7 @@
 #include "crc.h"
 #include "sectorset.h"
 #include "writer.h"
+#include "arch/ibm/ibm.pb.h"
 #include "fmt/format.h"
 #include <ctype.h>
 
@@ -76,21 +77,6 @@ void IbmEncoder::writeRawBits(uint32_t data, int width)
 	}
 }
 
-void IbmEncoder::writeBytes(const Bytes& bytes)
-{
-	if (_parameters.useFm)
-		encodeFm(_bits, _cursor, bytes);
-	else
-		encodeMfm(_bits, _cursor, bytes, _lastBit);
-}
-
-void IbmEncoder::writeBytes(int count, uint8_t byte)
-{
-	Bytes bytes = { byte };
-	for (int i=0; i<count; i++)
-		writeBytes(bytes);
-}
-
 static uint8_t decodeUint16(uint16_t raw)
 {
 	Bytes b;
@@ -99,24 +85,56 @@ static uint8_t decodeUint16(uint16_t raw)
 	return decodeFmMfm(b.toBits())[0];
 }
 
+void IbmEncoder::getTrackFormat(IbmEncoderProto::TrackdataProto& trackdata, unsigned cylinder, unsigned head)
+{
+	trackdata.Clear();
+	for (const auto& f : _config.trackdata())
+	{
+		if (f.has_cylinder() && (f.cylinder() != cylinder))
+			continue;
+		if (f.has_head() && (f.head() != head))
+			continue;
+
+		trackdata.MergeFrom(f);
+	}
+}
+
 std::unique_ptr<Fluxmap> IbmEncoder::encode(
 	int physicalTrack, int physicalSide, const SectorSet& allSectors)
 {
-	if (_parameters.swapSides)
+	IbmEncoderProto::TrackdataProto trackdata;
+	getTrackFormat(trackdata, physicalTrack, physicalSide);
+
+	auto writeBytes = [&](const Bytes& bytes)
+	{
+		if (trackdata.use_fm())
+			encodeFm(_bits, _cursor, bytes);
+		else
+			encodeMfm(_bits, _cursor, bytes, _lastBit);
+	};
+
+	auto writeFillerBytes = [&](int count, uint8_t byte)
+	{
+		Bytes bytes = { byte };
+		for (int i=0; i<count; i++)
+			writeBytes(bytes);
+	};
+
+	if (trackdata.swap_sides())
 		physicalSide = 1 - physicalSide;
-	double clockRateUs = 1e3 / _parameters.clockRateKhz;
-	if (!_parameters.useFm)
+	double clockRateUs = 1e3 / trackdata.clock_rate_khz();
+	if (!trackdata.use_fm())
 		clockRateUs /= 2.0;
-	int bitsPerRevolution = (_parameters.trackLengthMs * 1000.0) / clockRateUs;
+	int bitsPerRevolution = (trackdata.track_length_ms() * 1000.0) / clockRateUs;
 	_bits.resize(bitsPerRevolution);
 	_cursor = 0;
 
-	uint8_t idamUnencoded = decodeUint16(_parameters.idamByte);
-	uint8_t damUnencoded = decodeUint16(_parameters.damByte);
+	uint8_t idamUnencoded = decodeUint16(trackdata.idam_byte());
+	uint8_t damUnencoded = decodeUint16(trackdata.dam_byte());
 
 	uint8_t sectorSize = 0;
 	{
-		int s = _parameters.sectorSize >> 7;
+		int s = trackdata.sector_size() >> 7;
 		while (s > 1)
 		{
 			s >>= 1;
@@ -124,27 +142,27 @@ std::unique_ptr<Fluxmap> IbmEncoder::encode(
 		}
 	}
 
-	uint8_t gapFill = _parameters.useFm ? 0x00 : 0x4e;
+	uint8_t gapFill = trackdata.use_fm() ? 0x00 : 0x4e;
 
-	writeBytes(_parameters.gap0, gapFill);
-	if (_parameters.emitIam)
+	writeFillerBytes(trackdata.gap0(), gapFill);
+	if (trackdata.emit_iam())
 	{
-		writeBytes(_parameters.useFm ? 6 : 12, 0x00);
-		if (!_parameters.useFm)
+		writeFillerBytes(trackdata.use_fm() ? 6 : 12, 0x00);
+		if (!trackdata.use_fm())
 		{
 			for (int i=0; i<3; i++)
 				writeRawBits(MFM_IAM_SEPARATOR, 16);
 		}
-		writeRawBits(_parameters.useFm ? FM_IAM_RECORD : MFM_IAM_RECORD, 16);
-		writeBytes(_parameters.gap1, gapFill);
+		writeRawBits(trackdata.use_fm() ? FM_IAM_RECORD : MFM_IAM_RECORD, 16);
+		writeFillerBytes(trackdata.gap1(), gapFill);
 	}
 
 	bool first = true;
-	for (char sectorChar : _parameters.sectorSkew)
+	for (char sectorChar : trackdata.sector_skew())
 	{
 		int sectorId = charToInt(sectorChar);
 		if (!first)
-			writeBytes(_parameters.gap3, gapFill);
+			writeFillerBytes(trackdata.gap3(), gapFill);
 		first = false;
 
 		const auto& sectorData = allSectors.get(physicalTrack, physicalSide, sectorId);
@@ -166,8 +184,8 @@ std::unique_ptr<Fluxmap> IbmEncoder::encode(
 			Bytes header;
 			ByteWriter bw(header);
 
-			writeBytes(_parameters.useFm ? 6 : 12, 0x00);
-			if (!_parameters.useFm)
+			writeFillerBytes(trackdata.use_fm() ? 6 : 12, 0x00);
+			if (!trackdata.use_fm())
 			{
 				for (int i=0; i<3; i++)
 					bw.write_8(MFM_RECORD_SEPARATOR_BYTE);
@@ -175,53 +193,53 @@ std::unique_ptr<Fluxmap> IbmEncoder::encode(
 			bw.write_8(idamUnencoded);
 			bw.write_8(sectorData->logicalTrack);
 			bw.write_8(sectorData->logicalSide);
-			bw.write_8(sectorData->logicalSector + _parameters.startSectorId);
+			bw.write_8(sectorData->logicalSector + trackdata.start_sector_id());
 			bw.write_8(sectorSize);
 			uint16_t crc = crc16(CCITT_POLY, header);
 			bw.write_be16(crc);
 
 			int conventionalHeaderStart = 0;
-			if (!_parameters.useFm)
+			if (!trackdata.use_fm())
 			{
 				for (int i=0; i<3; i++)
 					writeRawBits(MFM_RECORD_SEPARATOR, 16);
 				conventionalHeaderStart += 3;
 
 			}
-			writeRawBits(_parameters.idamByte, 16);
+			writeRawBits(trackdata.idam_byte(), 16);
 			conventionalHeaderStart += 1;
 
 			writeBytes(header.slice(conventionalHeaderStart));
 		}
 
-		writeBytes(_parameters.gap2, gapFill);
+		writeFillerBytes(trackdata.gap2(), gapFill);
 
 		{
 			Bytes data;
 			ByteWriter bw(data);
 
-			writeBytes(_parameters.useFm ? 6 : 12, 0x00);
-			if (!_parameters.useFm)
+			writeFillerBytes(trackdata.use_fm() ? 6 : 12, 0x00);
+			if (!trackdata.use_fm())
 			{
 				for (int i=0; i<3; i++)
 					bw.write_8(MFM_RECORD_SEPARATOR_BYTE);
 			}
 			bw.write_8(damUnencoded);
 
-			Bytes truncatedData = sectorData->data.slice(0, _parameters.sectorSize);
+			Bytes truncatedData = sectorData->data.slice(0, trackdata.sector_size());
 			bw += truncatedData;
 			uint16_t crc = crc16(CCITT_POLY, data);
 			bw.write_be16(crc);
 
 			int conventionalHeaderStart = 0;
-			if (!_parameters.useFm)
+			if (!trackdata.use_fm())
 			{
 				for (int i=0; i<3; i++)
 					writeRawBits(MFM_RECORD_SEPARATOR, 16);
 				conventionalHeaderStart += 3;
 
 			}
-			writeRawBits(_parameters.damByte, 16);
+			writeRawBits(trackdata.dam_byte(), 16);
 			conventionalHeaderStart += 1;
 
 			writeBytes(data.slice(conventionalHeaderStart));
@@ -231,7 +249,7 @@ std::unique_ptr<Fluxmap> IbmEncoder::encode(
 	if (_cursor >= _bits.size())
 		Error() << "track data overrun";
 	while (_cursor < _bits.size())
-		writeBytes(1, gapFill);
+		writeFillerBytes(1, gapFill);
 
 	std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
 	fluxmap->appendBits(_bits, clockRateUs*1e3);

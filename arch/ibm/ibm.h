@@ -3,6 +3,7 @@
 
 #include "decoders/decoders.h"
 #include "encoders/encoders.h"
+#include "arch/ibm/ibm.pb.h"
 
 /* IBM format (i.e. ordinary PC floppies). */
 
@@ -32,51 +33,27 @@ struct IbmIdam
 class IbmDecoder : public AbstractDecoder
 {
 public:
-    IbmDecoder(unsigned sectorBase, bool ignoreSideByte=false,
-			const std::set<unsigned> requiredSectors=std::set<unsigned>()):
-        _sectorBase(sectorBase),
-        _ignoreSideByte(ignoreSideByte),
-		_requiredSectors(requiredSectors)
+    IbmDecoder(const IbmDecoderProto& config):
+		_config(config)
     {}
 
     RecordType advanceToNextRecord();
     void decodeSectorRecord();
     void decodeDataRecord();
 
-	std::set<unsigned> requiredSectors(Track& track) const
-	{ return _requiredSectors; }
+	std::set<unsigned> requiredSectors(Track& track) const;
 
 private:
-    unsigned _sectorBase;
-    bool _ignoreSideByte;
-	std::set<unsigned> _requiredSectors;
+	const IbmDecoderProto& _config;
     unsigned _currentSectorSize;
     unsigned _currentHeaderLength;
-};
-
-struct IbmParameters
-{
-	int trackLengthMs;
-	int sectorSize;
-	bool emitIam;
-	int startSectorId;
-	int clockRateKhz;
-	bool useFm;
-	uint16_t idamByte;
-	uint16_t damByte;
-	int gap0;
-	int gap1;
-	int gap2;
-	int gap3;
-	std::string sectorSkew;
-	bool swapSides;
 };
 
 class IbmEncoder : public AbstractEncoder
 {
 public:
-	IbmEncoder(const IbmParameters& parameters):
-		_parameters(parameters)
+	IbmEncoder(const IbmEncoderProto& config):
+		_config(config)
 	{}
 
 	virtual ~IbmEncoder() {}
@@ -86,12 +63,12 @@ public:
 
 private:
 	void writeRawBits(uint32_t data, int width);
-	void writeBytes(const Bytes& bytes);
-	void writeBytes(int count, uint8_t value);
 	void writeSync();
 	
+	void getTrackFormat(IbmEncoderProto::TrackdataProto& format, unsigned track, unsigned side);
+
 private:
-	IbmParameters _parameters;
+	const IbmEncoderProto& _config;
 	std::vector<bool> _bits;
 	unsigned _cursor;
 	bool _lastBit;

@@ -33,7 +33,9 @@ Driver'. Once done, the GreaseWeazle will be visible to the FluxEngine client.
 **Important note!** Unfortunately, now, the original GreaseWeazle client won't
 work --- you can't use both drivers at once. I'm working on this. To switch
 back to the original driver, for using the GreaseWeazle client software
-instead, open up Zadig again, go through the same process, but make sure the left Driver box says `WinUSB` and the right one says `USB Serial (CDC)`. Now, when you press 'Replace Driver' the original driver will be restored.
+instead, open up Zadig again, go through the same process, but make sure the
+left Driver box says `WinUSB` and the right one says `USB Serial (CDC)`. Now,
+when you press 'Replace Driver' the original driver will be restored.
 
 What works
 ----------

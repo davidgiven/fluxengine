@@ -15,10 +15,13 @@
 
 class Sector;
 class Fluxmap;
+class MacintoshDecoderProto;
+class MacintoshEncoderProto;
 
 class MacintoshDecoder : public AbstractDecoder
 {
 public:
+	MacintoshDecoder(const MacintoshDecoderProto&) {}
     virtual ~MacintoshDecoder() {}
 
     RecordType advanceToNextRecord();
@@ -31,6 +34,7 @@ public:
 class MacintoshEncoder : public AbstractEncoder
 {
 public:
+	MacintoshEncoder(const MacintoshEncoderProto&) {}
 	virtual ~MacintoshEncoder() {}
 
 public:

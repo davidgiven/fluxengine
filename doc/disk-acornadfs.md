@@ -16,8 +16,8 @@ Tested ones are:
 
 I expect the others to work, but haven't tried them; [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new) if you have any
-news. For ADFS S (single sided 40 track) you'll want `-s :s=0:t=0-79x2`. For
-ADFS M (single sided 80 track) you'll want `-s :s=0`.
+news. For ADFS S (single sided 40 track) you'll want `--heads 0 --cylinders
+0-79x2`. For ADFS M (single sided 80 track) you'll want `--heads 0`.
 
 Be aware that Acorn logical block numbering goes all the way up side 0 and
 then all the way up side 1. However, FluxEngine uses traditional disk images
@@ -31,9 +31,9 @@ Reading discs
 Just do:
 
 ```
-fluxengine read adfs
+fluxengine read acornadfs
 ```
 
-You should end up with an `adfs.img` of the appropriate size for your disk
+You should end up with an `acornadfs.img` of the appropriate size for your disk
 format. This is an alias for `fluxengine read ibm` with preconfigured
 parameters.

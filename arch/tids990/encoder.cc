@@ -6,54 +6,8 @@
 #include "crc.h"
 #include "sectorset.h"
 #include "writer.h"
+#include "arch/tids990/tids990.pb.h"
 #include <fmt/format.h>
-
-FlagGroup tids990EncoderFlags;
-
-static IntFlag trackLengthMs(
-	{ "--tids990-track-length-ms" },
-	"Length of a track in milliseconds.",
-	166);
-
-static IntFlag sectorCount(
-	{ "--tids990-sector-count" },
-	"Number of sectors per track.",
-	26);
-
-static IntFlag clockRateKhz(
-	{ "--tids990-clock-rate-khz" },
-	"Clock rate of data to write.",
-	500);
-
-static HexIntFlag am1Byte(
-	{ "--tids990-am1-byte" },
-	"16-bit RAW bit pattern to use for the AM1 ID byte",
-	0x2244);
-
-static HexIntFlag am2Byte(
-	{ "--tids990-am2-byte" },
-	"16-bit RAW bit pattern to use for the AM2 ID byte",
-	0x2245);
-
-static IntFlag gap1(
-	{ "--tids990-gap1-bytes" },
-	"Size of gap 1 (the post-index gap).",
-	80);
-
-static IntFlag gap2(
-	{ "--tids990-gap2-bytes" },
-	"Size of gap 2 (the post-ID gap).",
-	21);
-
-static IntFlag gap3(
-	{ "--tids990-gap3-bytes" },
-	"Size of gap 3 (the post-data or format gap).",
-	51);
-
-static StringFlag sectorSkew(
-	{ "--tids990-sector-skew" },
-	"Order to emit sectors.",
-	"1mhc72nid83oje94pkfa50lgb6");
 
 static int charToInt(char c)
 {
@@ -62,7 +16,7 @@ static int charToInt(char c)
 	return 10 + tolower(c) - 'a';
 }
 
-void TiDs990Encoder::writeRawBits(uint32_t data, int width)
+void Tids990Encoder::writeRawBits(uint32_t data, int width)
 {
 	_cursor += width;
 	_lastBit = data & 1;
@@ -75,12 +29,12 @@ void TiDs990Encoder::writeRawBits(uint32_t data, int width)
 	}
 }
 
-void TiDs990Encoder::writeBytes(const Bytes& bytes)
+void Tids990Encoder::writeBytes(const Bytes& bytes)
 {
 	encodeMfm(_bits, _cursor, bytes, _lastBit);
 }
 
-void TiDs990Encoder::writeBytes(int count, uint8_t byte)
+void Tids990Encoder::writeBytes(int count, uint8_t byte)
 {
 	Bytes bytes = { byte };
 	for (int i=0; i<count; i++)
@@ -95,25 +49,25 @@ static uint8_t decodeUint16(uint16_t raw)
 	return decodeFmMfm(b.toBits())[0];
 }
 
-std::unique_ptr<Fluxmap> TiDs990Encoder::encode(
+std::unique_ptr<Fluxmap> Tids990Encoder::encode(
 	int physicalTrack, int physicalSide, const SectorSet& allSectors)
 {
-	double clockRateUs = 1e3 / clockRateKhz / 2.0;
-	int bitsPerRevolution = (trackLengthMs * 1000.0) / clockRateUs;
+	double clockRateUs = 1e3 / _config.clock_rate_khz() / 2.0;
+	int bitsPerRevolution = (_config.track_length_ms() * 1000.0) / clockRateUs;
 	_bits.resize(bitsPerRevolution);
 	_cursor = 0;
 
-	uint8_t am1Unencoded = decodeUint16(am1Byte);
-	uint8_t am2Unencoded = decodeUint16(am2Byte);
+	uint8_t am1Unencoded = decodeUint16(_config.am1_byte());
+	uint8_t am2Unencoded = decodeUint16(_config.am2_byte());
 
-	writeBytes(gap1, 0x55);
+	writeBytes(_config.gap1_bytes(), 0x55);
 
 	bool first = true;
-	for (char sectorChar : sectorSkew.get())
+	for (char sectorChar : _config.sector_skew())
 	{
 		int sectorId = charToInt(sectorChar);
 		if (!first)
-			writeBytes(gap3, 0x55);
+			writeBytes(_config.gap3_bytes(), 0x55);
 		first = false;
 
 		const auto& sectorData = allSectors.get(physicalTrack, physicalSide, sectorId);
@@ -136,17 +90,17 @@ std::unique_ptr<Fluxmap> TiDs990Encoder::encode(
 			bw.write_8(am1Unencoded);
 			bw.write_8(sectorData->logicalSide << 3);
 			bw.write_8(sectorData->logicalTrack);
-			bw.write_8(sectorCount);
+			bw.write_8(_config.sector_count());
 			bw.write_8(sectorData->logicalSector);
 			bw.write_be16(sectorData->data.size());
 			uint16_t crc = crc16(CCITT_POLY, header);
 			bw.write_be16(crc);
 
-			writeRawBits(am1Byte, 16);
+			writeRawBits(_config.am1_byte(), 16);
 			writeBytes(header.slice(1));
 		}
 
-		writeBytes(gap2, 0x55);
+		writeBytes(_config.gap2_bytes(), 0x55);
 
 		{
 			Bytes data;
@@ -159,7 +113,7 @@ std::unique_ptr<Fluxmap> TiDs990Encoder::encode(
 			uint16_t crc = crc16(CCITT_POLY, data);
 			bw.write_be16(crc);
 
-			writeRawBits(am2Byte, 16);
+			writeRawBits(_config.am2_byte(), 16);
 			writeBytes(data.slice(1));
 		}
     }

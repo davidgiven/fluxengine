@@ -1,0 +1,28 @@
+input {
+	flux {
+		drive {}
+	}
+}
+
+output {
+	image {
+		filename: "atarist.st"
+		img {}
+	}
+}
+
+decoder {
+	ibm {}
+}
+
+cylinders {
+	start: 0
+	end: 81
+}
+
+heads {
+	start: 0
+	end: 1
+}
+
+

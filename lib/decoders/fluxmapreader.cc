@@ -3,32 +3,20 @@
 #include "decoders/fluxmapreader.h"
 #include "flags.h"
 #include "protocol.h"
+#include "proto.h"
 #include "fmt/format.h"
 #include <numeric>
 #include <math.h>
 #include <strings.h>
 
-FlagGroup fluxmapReaderFlags;
-
-DoubleFlag pulseDebounceThreshold(
-    { "--pulse-debounce-threshold" },
-    "Ignore pulses with intervals short than this, in fractions of a clock.",
-    0.30);
-
-static DoubleFlag clockDecodeThreshold(
-    { "--bit-error-threshold" },
-    "Amount of error to tolerate in pulse timing, in fractions of a clock.",
-    0.40);
-
-static DoubleFlag clockIntervalBias(
-    { "--clock-interval-bias" },
-    "Adjust intervals between pulses by this many clocks before decoding.",
-    -0.02);
-
-static DoubleFlag minimumClockUs(
-    { "--minimum-clock-us" },
-    "Refuse to detect clocks shorter than this, to avoid false positives.",
-    0.75);
+FluxmapReader::FluxmapReader(const Fluxmap& fluxmap):
+        _fluxmap(fluxmap),
+        _bytes(fluxmap.ptr()),
+        _size(fluxmap.bytes()),
+		_config(config.decoder())
+{
+	rewind();
+}
 
 uint8_t FluxmapReader::getNextEvent(unsigned& ticks)
 {
@@ -67,7 +55,7 @@ unsigned FluxmapReader::findEvent(uint8_t target)
 
 unsigned FluxmapReader::readInterval(nanoseconds_t clock)
 {
-    unsigned thresholdTicks = (clock * pulseDebounceThreshold) / NS_PER_TICK;
+    unsigned thresholdTicks = (clock * _config.pulse_debounce_threshold()) / NS_PER_TICK;
     unsigned ticks = 0;
 
     while (ticks < thresholdTicks)
@@ -134,6 +122,7 @@ FluxPattern::FluxPattern(unsigned bits, uint64_t pattern):
 
 bool FluxPattern::matches(const unsigned* end, FluxMatch& match) const
 {
+	const double clockDecodeThreshold = config.decoder().bit_error_threshold();
     const unsigned* start = end - _intervals.size();
     unsigned candidatelength = std::accumulate(start, end - _lowzero, 0);
     if (!candidatelength)
@@ -227,7 +216,7 @@ nanoseconds_t FluxmapReader::seekToPattern(const FluxMatcher& pattern, const Flu
             _pos.zeroes = match.zeroes;
             matching = match.matcher;
             nanoseconds_t detectedClock = match.clock * NS_PER_TICK;
-            if (detectedClock > (minimumClockUs*1000))
+            if (detectedClock > (_config.minimum_clock_us()*1000))
                 return match.clock * NS_PER_TICK;
         }
 
@@ -262,7 +251,7 @@ bool FluxmapReader::readRawBit(nanoseconds_t clockPeriod)
     }
 
     nanoseconds_t interval = readInterval(clockPeriod)*NS_PER_TICK;
-    double clocks = (double)interval / clockPeriod + clockIntervalBias;
+    double clocks = (double)interval / clockPeriod + _config.clock_interval_bias();
 
     if (clocks < 1.0)
         clocks = 1.0;

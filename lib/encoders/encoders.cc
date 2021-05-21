@@ -1,6 +1,37 @@
 #include "globals.h"
 #include "fluxmap.h"
+#include "decoders/decoders.h"
+#include "encoders/encoders.h"
+#include "arch/amiga/amiga.h"
+#include "arch/brother/brother.h"
+#include "arch/ibm/ibm.h"
+#include "arch/macintosh/macintosh.h"
+#include "arch/tids990/tids990.h"
+#include "lib/encoders/encoders.pb.h"
 #include "protocol.h"
+
+std::unique_ptr<AbstractEncoder> AbstractEncoder::create(const EncoderProto& config)
+{
+	switch (config.format_case())
+	{
+		case EncoderProto::kAmiga:
+			return std::unique_ptr<AbstractEncoder>(new AmigaEncoder(config.amiga()));
+
+		case EncoderProto::kIbm:
+			return std::unique_ptr<AbstractEncoder>(new IbmEncoder(config.ibm()));
+
+		case EncoderProto::kBrother:
+			return std::unique_ptr<AbstractEncoder>(new BrotherEncoder(config.brother()));
+
+		case EncoderProto::kMacintosh:
+			return std::unique_ptr<AbstractEncoder>(new MacintoshEncoder(config.macintosh()));
+
+		default:
+			Error() << "no input disk format specified";
+	}
+	return std::unique_ptr<AbstractEncoder>();
+}
+
 
 Fluxmap& Fluxmap::appendBits(const std::vector<bool>& bits, nanoseconds_t clock)
 {

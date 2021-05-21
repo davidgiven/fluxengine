@@ -1,0 +1,9 @@
+syntax = "proto2";
+
+import "lib/common.proto";
+
+message UsbProto {
+	optional string device = 1
+		[(help) = "serial number of hardware device to use"];
+}
+

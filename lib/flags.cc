@@ -1,24 +1,35 @@
 #include "globals.h"
 #include "flags.h"
+#include "proto.h"
+#include "utils.h"
 #include "fmt/format.h"
+#include <google/protobuf/text_format.h>
+#include <regex>
+#include <fstream>
 
 static FlagGroup* currentFlagGroup;
 static std::vector<Flag*> all_flags;
 static std::map<const std::string, Flag*> flags_by_name;
 
 static void doHelp();
+static void doShowConfig();
+static void doDoc();
 
 static FlagGroup helpGroup;
 static ActionFlag helpFlag = ActionFlag(
-    { "--help", "-h" },
+    { "--help" },
     "Shows the help.",
     doHelp);
 
-FlagGroup::FlagGroup(const std::initializer_list<FlagGroup*> groups):
-    _groups(groups.begin(), groups.end())
-{
-    currentFlagGroup = this;
-}
+static ActionFlag showConfigFlag = ActionFlag(
+    { "--config", "-C" },
+    "Shows the currently set configuration and halts.",
+    doShowConfig);
+
+static ActionFlag docFlag = ActionFlag(
+    { "--doc" },
+    "Shows the available configuration options and halts.",
+    doDoc);
 
 FlagGroup::FlagGroup()
 {
@@ -30,7 +41,19 @@ void FlagGroup::addFlag(Flag* flag)
     _flags.push_back(flag);
 }
 
-std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc, const char* argv[])
+static bool setFallbackFlag(const std::string& key, const std::string& value, bool uses_that)
+{
+	if (!beginsWith(key, "--"))
+		Error() << "unrecognised flag; try --help";
+
+	std::string path = key.substr(2);
+	ProtoField protoField = resolveProtoPath(&config, path);
+	setProtoFieldFromString(protoField, value);
+	return true;
+}
+
+std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc, const char* argv[],
+		std::function<bool(const std::string&)> callback)
 {
     if (_initialised)
         throw std::runtime_error("called parseFlags() twice");
@@ -84,8 +107,9 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc, const char
         }
         else if (thisarg[0] != '-')
         {
-            /* This is a filename. */
-            filenames.push_back(thisarg);
+            /* This is a filename. Pass it to the callback, and if not consumed queue it. */
+			if (!callback(thisarg))
+				filenames.push_back(thisarg);
         }
         else
         {
@@ -127,11 +151,16 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc, const char
 
             auto flag = flags_by_name.find(key);
             if (flag == flags_by_name.end())
-                Error() << "unknown flag '" << key << "'; try --help";
-
-            flag->second->set(value);
-            if (usesthat && flag->second->hasArgument())
-                index++;
+			{
+				if (setFallbackFlag(key, value, usesthat))
+					index++;
+			}
+			else
+			{
+				flag->second->set(value);
+				if (usesthat && flag->second->hasArgument())
+					index++;
+			}
         }
 
         index++;
@@ -140,11 +169,37 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc, const char
     return filenames;
 }
 
-void FlagGroup::parseFlags(int argc, const char* argv[])
+void FlagGroup::parseFlags(int argc, const char* argv[],
+		std::function<bool(const std::string&)> callback)
 {
-    auto filenames = parseFlagsWithFilenames(argc, argv);
+    auto filenames = parseFlagsWithFilenames(argc, argv, callback);
     if (!filenames.empty())
         Error() << "non-option parameter " << *filenames.begin() << " seen (try --help)";
+}
+
+void FlagGroup::parseFlagsWithConfigFiles(int argc, const char* argv[],
+		const std::map<std::string, std::string>& configFiles)
+{
+    parseFlags(argc, argv,
+		[&](const auto& filename) {
+			const auto& it = configFiles.find(filename);
+			if (it != configFiles.end())
+			{
+				if (!config.ParseFromString(it->second))
+					Error() << "couldn't load config proto";
+			}
+			else
+			{
+				std::ifstream f(filename, std::ios::out);
+				if (f.fail())
+					Error() << fmt::format("Cannot open '{}': {}", filename, strerror(errno));
+				if (!config.ParseFromIstream(&f))
+					Error() << "couldn't load config proto";
+			}
+
+			return true;
+		}
+	);
 }
 
 void FlagGroup::checkInitialised() const
@@ -171,6 +226,7 @@ void BoolFlag::set(const std::string& value)
 		_value = false;
 	else
 		Error() << "can't parse '" << value << "'; try 'true' or 'false'";
+	_callback(_value);
 }
 
 const std::string HexIntFlag::defaultValueAsString() const
@@ -180,7 +236,8 @@ const std::string HexIntFlag::defaultValueAsString() const
 
 static void doHelp()
 {
-    std::cout << "FluxEngine options:" << std::endl;
+    std::cout << "FluxEngine options:\n";
+	std::cout << "Note: options are processed left to right and order matters!\n";
     for (auto flag : all_flags)
     {
         std::cout << "  ";
@@ -198,4 +255,31 @@ static void doHelp()
         std::cout << ": " << flag->helptext() << std::endl;
     }
     exit(0);
+}
+
+static void doShowConfig()
+{
+	std::string s;
+	google::protobuf::TextFormat::PrintToString(config, &s);
+	std::cout << s << '\n';
+
+	exit(0);
+}
+
+static void doDoc()
+{
+	const auto fields = findAllProtoFields(&config);
+	for (const auto field : fields)
+	{
+		const std::string& path = field.first;
+		const google::protobuf::FieldDescriptor* f = field.second;
+
+		if (f->type() == google::protobuf::FieldDescriptor::TYPE_MESSAGE)
+			continue;
+
+		std::string helpText = f->options().GetExtension(help);
+		std::cout << fmt::format("{}: {}\n", path, helpText);
+	}
+
+	exit(0);
 }

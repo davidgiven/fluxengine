@@ -1,0 +1,29 @@
+input {
+	flux {
+		drive {
+			hard_sector_count: 16
+		}
+	}
+}
+
+output {
+	image {
+		filename: "micropolis.img"
+		img {}
+	}
+}
+
+decoder {
+	micropolis {}
+}
+
+cylinders {
+	start: 0
+	end: 76
+}
+
+heads {
+	start: 0
+	end: 1
+}
+

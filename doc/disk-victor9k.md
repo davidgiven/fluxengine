@@ -20,7 +20,7 @@ fluxengine read victor9k
 ```
 
 You should end up with an `victor9k.img` which is 774656 bytes long.
-if you want the double-sided variety, use `-s :s=0-1`.
+if you want the double-sided variety, use `--heads 0-1`.
 
 **Big warning!** The image may not work in an emulator. Victor disk images are
 complicated due to the way the tracks are different sizes and the odd sector

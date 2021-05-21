@@ -1,0 +1,47 @@
+input {
+	flux {
+		drive {}
+	}
+}
+
+output {
+	image {
+		filename: "eco1.img"
+		img {
+			tracks: 77
+			sides: 2
+			trackdata {
+				sectors: 16
+				sector_size: 512
+			}
+			trackdata {
+				track: 0
+				side: 0
+				sectors: 26
+				sector_size: 128
+			}
+			trackdata {
+				track: 0
+				side: 1
+				sectors: 26
+				sector_size: 256
+			}
+		}
+	}
+}
+
+decoder {
+	ibm {}
+}
+
+cylinders {
+	start: 0
+	end: 81
+}
+
+heads {
+	start: 0
+	end: 1
+}
+
+

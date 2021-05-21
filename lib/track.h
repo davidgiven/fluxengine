@@ -18,7 +18,7 @@ public:
 public:
     unsigned physicalTrack;
     unsigned physicalSide;
-    std::shared_ptr<FluxSource> fluxsource;
+	FluxSource* fluxsource;
     std::unique_ptr<Fluxmap> fluxmap;
 
     std::vector<RawRecord> rawrecords;

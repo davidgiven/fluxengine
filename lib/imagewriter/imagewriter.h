@@ -2,47 +2,34 @@
 #define IMAGEWRITER_H
 
 class SectorSet;
-class ImageSpec;
+class ImageWriterProto;
 
 class ImageWriter
 {
 public:
-	ImageWriter(const SectorSet& sectors, const ImageSpec& spec);
+	ImageWriter(const ImageWriterProto& config);
 	virtual ~ImageWriter() {};
 
 public:
-    static std::unique_ptr<ImageWriter> create(const SectorSet& sectors, const ImageSpec& spec);
-	static void verifyImageSpec(const ImageSpec& filename);
-
-private:
-	typedef 
-		std::function<
-			std::unique_ptr<ImageWriter>(const SectorSet& sectors, const ImageSpec& spec)
-		>
-		Constructor;
-
-	static std::map<std::string, Constructor> formats;
+    static std::unique_ptr<ImageWriter> create(const ImageWriterProto& config);
+	static void updateConfigForFilename(ImageWriterProto* proto, const std::string& filename);
 
     static std::unique_ptr<ImageWriter> createImgImageWriter(
-		const SectorSet& sectors, const ImageSpec& spec);
+		const ImageWriterProto& config);
     static std::unique_ptr<ImageWriter> createLDBSImageWriter(
-		const SectorSet& sectors, const ImageSpec& spec);
+		const ImageWriterProto& config);
     static std::unique_ptr<ImageWriter> createD64ImageWriter(
-		const SectorSet& sectors, const ImageSpec& spec);
+		const ImageWriterProto& config);
     static std::unique_ptr<ImageWriter> createDiskCopyImageWriter(
-		const SectorSet& sectors, const ImageSpec& spec);
-
-	static Constructor findConstructor(const ImageSpec& spec);
+		const ImageWriterProto& config);
 
 public:
-	virtual void adjustGeometry();
-	void printMap();
-	void writeCsv(const std::string& filename);
-	virtual void writeImage() = 0;
+	void printMap(const SectorSet& sectors);
+	void writeCsv(const SectorSet& sectors, const std::string& filename);
+	virtual void writeImage(const SectorSet& sectors) = 0;
 
 protected:
-	const SectorSet& sectors;
-	ImageSpec spec;
+	const ImageWriterProto& _config;
 };
 
 #endif

@@ -1,0 +1,36 @@
+input {
+	flux {
+		drive {}
+	}
+}
+
+output {
+	image {
+		filename: "amiga.adf"
+		img {
+			tracks: 80
+			sides: 2
+			trackdata {
+				sector_size: 512
+				sectors: 11
+			}
+		}
+	}
+}
+
+decoder {
+	amiga {}
+}
+
+cylinders {
+	start: 0
+	end: 79
+}
+
+heads {
+	start: 0
+	end: 1
+}
+
+
+

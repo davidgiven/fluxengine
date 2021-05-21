@@ -6,6 +6,8 @@
 #include "decoders/fluxmapreader.h"
 #include "sector.h"
 #include "record.h"
+#include "arch/ibm/ibm.pb.h"
+#include "proto.h"
 #include <string.h>
 
 static_assert(std::is_trivially_copyable<IbmIdam>::value,
@@ -89,6 +91,11 @@ const FluxMatchers ANY_RECORD_PATTERN(
     }
 );
 
+std::set<unsigned> IbmDecoder::requiredSectors(Track& track) const
+{
+	return iterate(_config.required_sectors());
+}
+
 AbstractDecoder::RecordType IbmDecoder::advanceToNextRecord()
 {
 	const FluxMatcher* matcher = nullptr;
@@ -131,14 +138,14 @@ void IbmDecoder::decodeSectorRecord()
     br.read_8(); /* skip ID byte */
     _sector->logicalTrack = br.read_8();
     _sector->logicalSide = br.read_8();
-    _sector->logicalSector = br.read_8() - _sectorBase;
+    _sector->logicalSector = br.read_8() - _config.sector_id_base();
     _currentSectorSize = 1 << (br.read_8() + 7);
     uint16_t wantCrc = br.read_be16();
     uint16_t gotCrc = crc16(CCITT_POLY, bytes.slice(0, _currentHeaderLength + 5));
     if (wantCrc == gotCrc)
         _sector->status = Sector::DATA_MISSING; /* correct but unintuitive */
 
-    if (_ignoreSideByte)
+    if (_config.ignore_side_byte())
         _sector->logicalSide = _sector->physicalSide;
 }
 

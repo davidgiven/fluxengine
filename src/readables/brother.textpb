@@ -1,0 +1,27 @@
+input {
+	flux {
+		drive {}
+	}
+}
+
+output {
+	image {
+		filename: "brother.img"
+		img {}
+	}
+}
+
+decoder {
+	brother {}
+}
+
+cylinders {
+	start: 0
+	end: 81
+}
+
+heads {
+	start: 0
+	end: 0
+}
+

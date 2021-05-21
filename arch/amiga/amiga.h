@@ -12,10 +12,13 @@
 class Sector;
 class Fluxmap;
 class SectorSet;
+class AmigaDecoderProto;
+class AmigaEncoderProto;
 
 class AmigaDecoder : public AbstractDecoder
 {
 public:
+	AmigaDecoder(const AmigaDecoderProto&) {}
     virtual ~AmigaDecoder() {}
 
     RecordType advanceToNextRecord();
@@ -27,13 +30,16 @@ public:
 class AmigaEncoder : public AbstractEncoder
 {
 public:
+	AmigaEncoder(const AmigaEncoderProto& config):
+		_config(config) {}
 	virtual ~AmigaEncoder() {}
 
 public:
     std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors);
-};
 
-extern FlagGroup amigaEncoderFlags;
+private:
+	const AmigaEncoderProto& _config;
+};
 
 extern uint32_t amigaChecksum(const Bytes& bytes);
 extern Bytes amigaInterleave(const Bytes& input);

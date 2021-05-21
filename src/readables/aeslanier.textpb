@@ -1,0 +1,28 @@
+input {
+	flux {
+		drive {}
+	}
+}
+
+output {
+	image {
+		filename: "aeslanier.img"
+		img {}
+	}
+}
+
+decoder {
+	aeslanier {}
+}
+
+cylinders {
+	start: 0
+	end: 76
+}
+
+heads {
+	start: 0
+	end: 0
+}
+
+

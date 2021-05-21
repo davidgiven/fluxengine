@@ -128,7 +128,7 @@ public:
 	void seek(int track)
 	{
 		struct seek_frame f = {
-			{ .type = F_FRAME_SEEK_CMD, .size = sizeof(f) },
+			.f = { .type = F_FRAME_SEEK_CMD, .size = sizeof(f) },
 			.track = (uint8_t) track
 		};
 		usb_cmd_send(&f, f.f.size);
@@ -138,7 +138,7 @@ public:
 	void recalibrate()
 	{
 		struct any_frame f = {
-			{ .type = F_FRAME_RECALIBRATE_CMD, .size = sizeof(f) },
+			.f = { .type = F_FRAME_RECALIBRATE_CMD, .size = sizeof(f) },
 		};
 		usb_cmd_send(&f, f.f.size);
 		await_reply<struct any_frame>(F_FRAME_RECALIBRATE_REPLY);
@@ -290,7 +290,7 @@ public:
 	void setDrive(int drive, bool high_density, int index_mode)
 	{
 		struct set_drive_frame f = {
-			{ .type = F_FRAME_SET_DRIVE_CMD, .size = sizeof(f) },
+			.f = { .type = F_FRAME_SET_DRIVE_CMD, .size = sizeof(f) },
 			.drive = (uint8_t) drive,
 			.high_density = high_density,
 			.index_mode = (uint8_t) index_mode

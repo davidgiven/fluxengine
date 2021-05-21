@@ -24,28 +24,26 @@ FluxEngine can also write Atari ST scheme disks.
 
 The syntax is:
 
-    fluxengine write ibm -i input.st <options>
+    fluxengine write <format> -i input.st
 
-The format of `input.st` will vary depending on the kind of disk you're
-writing, which is configured by the options.  You will almost certainly need to
-pass one of these:
+`<format>` can be one of these:
 
-  - `--ibm-preset-atarist-360`: a 360kB 3.5" disk, with 80 cylinders, 1 side,
-	and 9 sectors per track.
-  - `--ibm-preset-atarist-370`: a 370kB 3.5" disk, with 82 cylinders, 1 side,
-	and 9 sectors per track.
-  - `--ibm-preset-atarist-400`: a 400kB 3.5" disk, with 80 cylinders, 1 side,
-	and 10 sectors per track.
-  - `--ibm-preset-atarist-410`: a 410kB 3.5" disk, with 82 cylinders, 1 side,
-	and 10 sectors per track.
-  - `--ibm-preset-atarist-720`: a 720kB 3.5" disk, with 80 cylinders, 2 sides,
-	and 9 sectors per track.
-  - `--ibm-preset-atarist-740`: a 740kB 3.5" disk, with 82 cylinders, 2 sides,
-	and 9 sectors per track.
-  - `--ibm-preset-atarist-800`: a 800kB 3.5" disk, with 80 cylinders, 2 sides,
-	and 10 sectors per track.
-  - `--ibm-preset-atarist-820`: a 820kB 3.5" disk, with 82 cylinders, 2 sides,
-	and 10 sectors per track.
+  - `atarist360`: a 360kB 3.5" disk, with 80 cylinders, 1 side, and 9 sectors
+	per track.
+  - `atarist370`: a 370kB 3.5" disk, with 82 cylinders, 1 side, and 9 sectors
+	per track.
+  - `atarist400`: a 400kB 3.5" disk, with 80 cylinders, 1 side, and 10 sectors
+	per track.
+  - `atarist410`: a 410kB 3.5" disk, with 82 cylinders, 1 side, and 10 sectors
+	per track.
+  - `atarist720`: a 720kB 3.5" disk, with 80 cylinders, 2 sides, and 9 sectors
+	per track.
+  - `atarist740`: a 740kB 3.5" disk, with 82 cylinders, 2 sides, and 9 sectors
+	per track.
+  - `atarist800`: a 800kB 3.5" disk, with 80 cylinders, 2 sides, and 10 sectors
+	per track.
+  - `atarist820`: a 820kB 3.5" disk, with 82 cylinders, 2 sides, and 10 sectors
+	per track.
 
 See [the IBM format documentation](disk-ibm.md) for more information.
 

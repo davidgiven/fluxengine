@@ -32,7 +32,6 @@ protected:
 	libusb_device_handle* _device;
 };
 
-extern FlagGroup usbFlags;
 extern USB& getUsb();
 
 extern USB* createFluxengineUsb(libusb_device_handle* device);

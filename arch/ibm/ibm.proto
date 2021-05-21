@@ -1,0 +1,34 @@
+syntax = "proto2";
+
+import "lib/common.proto";
+
+message IbmDecoderProto {
+	optional int32 sector_id_base = 1        [default = 1, (help) = "ID of first sector"];
+	optional bool ignore_side_byte = 2       [default = false, (help) = "ignore side byte in sector header"];
+	optional RangeProto required_sectors = 3 [(help) = "require these sectors to exist for a good read"];
+}
+
+message IbmEncoderProto {
+	message TrackdataProto {
+		optional int32 cylinder = 15        [(help) = "if set, the format applies only to this track"];
+		optional int32 head = 16            [(help) = "if set, the format applies only to this head"];
+
+		optional double track_length_ms = 1 [(help) = "length of track"];
+		optional int32 sector_size = 2      [default=512, (help) = "number of bytes per sector"];
+		optional bool emit_iam = 3          [default=true, (help) = "whether to emit an IAM record"];
+		optional int32 start_sector_id = 4  [default=1, (help) = "ID of first sector"];
+		optional double clock_rate_khz = 5  [(help) = "data clock rate"];
+		optional bool use_fm = 6            [default=false, (help) = "whether to use FM encoding rather than MFM"];
+		optional int32 idam_byte = 7        [default=0x5554, (help) = "16-bit raw bit pattern of IDAM byte"];
+		optional int32 dam_byte = 8         [default=0x5545, (help) = "16-bit raw bit pattern of DAM byte"];
+		optional int32 gap0 = 9             [default=80, (help) = "size of gap 1 (the post-index gap)"];
+		optional int32 gap1 = 10            [default=50, (help) = "size of gap 2 (the post-ID gap)"];
+		optional int32 gap2 = 11            [default=22, (help) = "size of gap 3 (the pre-data gap)"];
+		optional int32 gap3 = 12            [default=80, (help) = "size of gap 4 (the post-data or format gap)"];
+		optional string sector_skew = 13    [(help) = "order to emit sectors"];
+		optional bool swap_sides = 14       [default=false, (help) = "swap side bytes when writing"];
+	}
+
+	repeated TrackdataProto trackdata = 1;
+}
+

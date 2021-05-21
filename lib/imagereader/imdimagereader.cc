@@ -1,9 +1,9 @@
 #include "globals.h"
 #include "flags.h"
-#include "dataspec.h"
 #include "sector.h"
 #include "sectorset.h"
 #include "imagereader/imagereader.h"
+#include "lib/config.pb.h"
 #include "fmt/format.h"
 #include <algorithm>
 #include <iostream>
@@ -84,8 +84,8 @@ static unsigned getSectorSize(uint8_t flags)
 class IMDImageReader : public ImageReader
 {
 public:
-	IMDImageReader(const ImageSpec& spec):
-		ImageReader(spec)
+	IMDImageReader(const ImageReaderProto& config):
+		ImageReader(config)
 	{}
 
 	SectorSet readImage()
@@ -109,7 +109,7 @@ public:
 	*/
 	{
 		//Read File
-        std::ifstream inputFile(spec.filename, std::ios::in | std::ios::binary);
+        std::ifstream inputFile(_config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
             Error() << "cannot open input file";
 		//define some variables
@@ -273,9 +273,9 @@ public:
 };
 
 std::unique_ptr<ImageReader> ImageReader::createIMDImageReader(
-	const ImageSpec& spec)
+	const ImageReaderProto& config)
 {
-    return std::unique_ptr<ImageReader>(new IMDImageReader(spec));
+    return std::unique_ptr<ImageReader>(new IMDImageReader(config));
 }
 
 

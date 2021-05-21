@@ -1,36 +1,37 @@
 #include "globals.h"
 #include "flags.h"
 #include "usb/usb.h"
-#include "flaggroups/fluxsourcesink.h"
+#include "fluxsource/fluxsource.cc"
+#include "proto.h"
 #include "protocol.h"
 
-static FlagGroup flags = {
-	&fluxSourceSinkFlags,
-	&usbFlags,
-};
+static FlagGroup flags;
 
-static IntFlag drive(
-    { "--drive", "-d" },
-    "drive to use",
-    0);
+static StringFlag sourceFlux(
+	{ "-s", "--source" },
+	"'drive:' flux source to use",
+	"",
+	[](const auto& value)
+	{
+		FluxSource::updateConfigForFilename(config.mutable_input()->mutable_flux(), value);
+	});
 
-static IntFlag track(
-    { "--track", "-t" },
-    "track to seek to",
-    0);
+static IntFlag cylinder(
+	{ "--cylinder", "-c" },
+	"cylinder to seek to",
+	0);
+
+extern const std::map<std::string, std::string> readables;
 
 int mainSeek(int argc, const char* argv[])
 {
-    flags.parseFlags(argc, argv);
+	config.mutable_input()->mutable_flux()->mutable_drive()->set_drive(0);
+    flags.parseFlagsWithConfigFiles(argc, argv, {});
 
-    usbSetDrive(drive, false, F_INDEX_REAL);
-	if (fluxSourceSinkFortyTrack)
-	{
-		if (track & 1)
-			Error() << "you can only seek to even tracks on a 40-track drive";
-		usbSeek(track / 2);
-	}
-	else
-		usbSeek(track);
+	if (!config.input().flux().has_drive())
+		Error() << "this only makes sense with a real disk drive";
+
+    usbSetDrive(config.input().flux().drive().drive(), false, config.input().flux().drive().index_mode());
+	usbSeek(cylinder);
     return 0;
 }

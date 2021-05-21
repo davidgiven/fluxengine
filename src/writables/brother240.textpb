@@ -1,0 +1,34 @@
+input {
+	image {
+		filename: "brother240.img"
+		img {
+			tracks: 78
+			sides: 1
+			trackdata {
+				sectors: 12
+				sector_size: 256
+			}
+		}
+	}
+}
+
+output {
+	flux {
+		drive {}
+	}
+}
+
+encoder {
+	brother {}
+}
+
+cylinders {
+	start: 0
+	end: 80
+}
+
+heads {
+	start: 0
+	end: 0
+}
+

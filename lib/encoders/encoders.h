@@ -1,13 +1,17 @@
 #ifndef ENCODERS_H
 #define ENCODERS_H
 
+class FluxSource;
 class Fluxmap;
 class SectorSet;
+class EncoderProto;
 
 class AbstractEncoder
 {
 public:
     virtual ~AbstractEncoder() {}
+
+	static std::unique_ptr<AbstractEncoder> create(const EncoderProto& config);
 
 public:
     virtual std::unique_ptr<Fluxmap> encode(

@@ -41,23 +41,19 @@ Just do:
 fluxengine read brother
 ```
 
-You should end up with a `brother.img` which is 239616 bytes long.
+You should end up with a `brother.img` which is either 119808 or 239616 bytes
+long.
 
 Writing disks
 -------------
 
-Only 240kB disks can be written, currently ( [get in
-touch](https://github.com/davidgiven/fluxengine/issues/new) if you want to
-write 120kB disks).
-
 Just do:
 
 ```
-fluxengine write brother
+fluxengine write `<format>` -i brother.img
 ```
 
-...and it'll write a `brother.img` file which is 239616 bytes long to the
-disk. (Use `-i` to specify a different input filename.)
+...where `<format>` can be `brother120` or `brother240`.
 
 Dealing with misaligned disks
 -----------------------------

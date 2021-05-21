@@ -1,11 +1,11 @@
 #include "globals.h"
 #include "flags.h"
-#include "dataspec.h"
 #include "sector.h"
 #include "sectorset.h"
 #include "imagewriter/imagewriter.h"
 #include "fmt/format.h"
 #include "ldbs.h"
+#include "lib/config.pb.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -24,15 +24,15 @@ static int sectors_per_track(int track)
 class D64ImageWriter : public ImageWriter
 {
 public:
-	D64ImageWriter(const SectorSet& sectors, const ImageSpec& spec):
-		ImageWriter(sectors, spec)
+	D64ImageWriter(const ImageWriterProto& config):
+		ImageWriter(config)
 	{}
 
-	void writeImage()
+	void writeImage(const SectorSet& sectors)
 	{
 		std::cout << "writing D64 triangular image\n";
 
-		std::ofstream outputFile(spec.filename, std::ios::out | std::ios::binary);
+		std::ofstream outputFile(_config.filename(), std::ios::out | std::ios::binary);
 		if (!outputFile.is_open())
 			Error() << "cannot open output file";
 
@@ -55,9 +55,8 @@ public:
     }
 };
 
-std::unique_ptr<ImageWriter> ImageWriter::createD64ImageWriter(
-	const SectorSet& sectors, const ImageSpec& spec)
+std::unique_ptr<ImageWriter> ImageWriter::createD64ImageWriter(const ImageWriterProto& config)
 {
-    return std::unique_ptr<ImageWriter>(new D64ImageWriter(sectors, spec));
+    return std::unique_ptr<ImageWriter>(new D64ImageWriter(config));
 }
 

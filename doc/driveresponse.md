@@ -26,7 +26,7 @@ by writing a sequence of timed pulses to the disk, then reading them back and
 seeing what the drive actually reports. To use it, do:
 
 ```
-fluxengine analyse driveresponse -d :d=1:t=0 \
+fluxengine analyse driveresponse --cylinder 0 \
     --min-interval-us=0 --max-interval-us=30 --interval-step-us=.1 \
 	--write-img=driveresponse.png
 ```

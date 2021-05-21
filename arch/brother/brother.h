@@ -14,11 +14,15 @@
 #define BROTHER_SECTORS_PER_TRACK        12
 
 class Sector;
+class SectorSet;
 class Fluxmap;
+class BrotherDecoderProto;
+class BrotherEncoderProto;
 
 class BrotherDecoder : public AbstractDecoder
 {
 public:
+    BrotherDecoder(const BrotherDecoderProto& config) {}
     virtual ~BrotherDecoder() {}
 
     RecordType advanceToNextRecord();
@@ -29,20 +33,17 @@ public:
 class BrotherEncoder : public AbstractEncoder
 {
 public:
-	BrotherEncoder(int format, int bias):
-		_format(format),
-		_bias(bias)
+	BrotherEncoder(const BrotherEncoderProto& config):
+		_config(config)
 	{}
 
 	virtual ~BrotherEncoder() {}
 
 private:
-	int _format;
-	int _bias;
+	const BrotherEncoderProto& _config;
+
 public:
     std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors);
 };
-
-extern FlagGroup brotherEncoderFlags;
 
 #endif

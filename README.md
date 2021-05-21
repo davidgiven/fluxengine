@@ -4,6 +4,11 @@ FluxEngine
 (If you're reading this on GitHub, the formatting's a bit messed up. [Try the
 version on cowlark.com instead.](http://cowlark.com/fluxengine/)
 
+**Breaking news!** As of 2021-05-21, the command line environment has changed
+_substantially_ (to make it more consistent and flexible, and allow some new
+backend features like multi-format IBM scheme disks, which are popular with
+CP/M). If things don't work the way you expect, please check the documentation.
+
 What?
 -----
 
@@ -92,9 +97,9 @@ people who've had it work).
 | [Acorn DFS](doc/disk-acorndfs.md)        |  🦄   |   🦖*  |                                     |
 | [Ampro Little Board](doc/disk-ampro.md)  |  🦖   |   🦖*   |                                     |
 | [Apple II DOS 3.3](doc/disk-apple2.md)   |  🦄   |        | doesn't do logical sector remapping |
-| [Amiga](doc/disk-amiga.md)               |  🦄   |        |                                     |
+| [Amiga](doc/disk-amiga.md)               |  🦄   |   🦖   |                                     |
 | [Commodore 64 1541](doc/disk-c64.md)     |  🦖   |        | and probably the other GCR formats  |
-| [Brother 120kB](doc/disk-brother.md)     |  🦄   |        |                                     |
+| [Brother 120kB](doc/disk-brother.md)     |  🦄   |   🦖   |                                     |
 | [Brother 240kB](doc/disk-brother.md)     |  🦄   |   🦄   |                                     |
 | [Brother FB-100](doc/disk-fb100.md)      |  🦖   |        | Tandy Model 100, Husky Hunter, knitting machines |
 | [Macintosh 800kB](doc/disk-macintosh.md) |  🦄   |   🦄   | and probably the 400kB too          |
@@ -118,6 +123,7 @@ at least, check the CRC so what data's there is probably good.
 | [AES Superplus / No Problem](doc/disk-aeslanier.md) |  🦖   | | hard sectors! |
 | [Durango F85](doc/disk-durangof85.md)    |  🦖   |        | 5.25" |
 | [DVK MX](doc/disk-mx.md)                 |  🦖   |        | Soviet PDP-11 clone |
+| [VDS Eco1](doc/disk-eco1.md)             |  🦖   |        | 8" mixed format |
 | [Micropolis](doc/disk-micropolis.md)     |  🦄   |        | Micropolis 100tpi drives |
 | [TI DS990 FD1000](doc/disk-tids990.md)   |  🦄   |  🦄    | 8" |
 | [Victor 9000](doc/disk-victor9k.md)      |  🦖   |        | 8" |
@@ -218,4 +224,8 @@ As an exception, `dep/stb` contains parts of the libstb utility library,
 written by Sean T Barett (and others). It is public domain/Unlicense/MIT
 licensed, at your choice. Please see the contents of the directory for the full
 text.
+
+As an exception, `dep/snowhouse` contains the snowhouse assertion library,
+taken from https://github.com/banditcpp/snowhouse. It is Boost Standard License
+1.0 licensed. Please see the contents of the directory for the full text.
 

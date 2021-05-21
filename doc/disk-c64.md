@@ -55,10 +55,10 @@ fluxengine read ibm
 Writing 1581 disks
 ------------------
 
-These are handled by the IBM writer. Just do:
+Just do:
 
 ```
-fluxengine write ibm --ibm-preset-cbm1581 -i file.img
+fluxengine write commodore1581 -i file.img
 ```
 
 Useful references

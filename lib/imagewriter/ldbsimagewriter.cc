@@ -1,11 +1,11 @@
 #include "globals.h"
 #include "flags.h"
-#include "dataspec.h"
 #include "sector.h"
 #include "sectorset.h"
 #include "imagewriter/imagewriter.h"
 #include "fmt/format.h"
 #include "ldbs.h"
+#include "lib/config.pb.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -13,18 +13,20 @@
 class LDBSImageWriter : public ImageWriter
 {
 public:
-	LDBSImageWriter(const SectorSet& sectors, const ImageSpec& spec):
-		ImageWriter(sectors, spec)
+	LDBSImageWriter(const ImageWriterProto& config):
+		ImageWriter(config)
 	{}
 
-	void writeImage()
+	void writeImage(const SectorSet& sectors)
 	{
         LDBS ldbs;
 
-		unsigned numCylinders = spec.cylinders;
-		unsigned numHeads = spec.heads;
-		unsigned numSectors = spec.sectors;
-		unsigned numBytes = spec.bytes;
+		unsigned numCylinders;
+		unsigned numHeads;
+		unsigned numSectors;
+		unsigned numBytes;
+		sectors.calculateSize(numCylinders, numHeads, numSectors, numBytes);
+
 		std::cout << fmt::format("writing {} tracks, {} heads, {} sectors, {} bytes per sector",
 						numCylinders, numHeads,
 						numSectors, numBytes)
@@ -95,12 +97,11 @@ public:
 
         uint32_t trackDirectoryAddress = ldbs.put(trackDirectory, LDBS_TRACK_BLOCK);
         Bytes data = ldbs.write(trackDirectoryAddress);
-        data.writeToFile(spec.filename);
+        data.writeToFile(_config.filename());
     }
 };
 
-std::unique_ptr<ImageWriter> ImageWriter::createLDBSImageWriter(
-	const SectorSet& sectors, const ImageSpec& spec)
+std::unique_ptr<ImageWriter> ImageWriter::createLDBSImageWriter(const ImageWriterProto& config)
 {
-    return std::unique_ptr<ImageWriter>(new LDBSImageWriter(sectors, spec));
+    return std::unique_ptr<ImageWriter>(new LDBSImageWriter(config));
 }
