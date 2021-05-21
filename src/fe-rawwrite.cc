@@ -10,6 +10,7 @@
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/fluxsink/fluxsink.h"
 #include "fmt/format.h"
+#include "fluxengine.h"
 #include <fstream>
 #include <ctype.h>
 
@@ -59,13 +60,14 @@ static ActionFlag eraseFlag(
 		config.mutable_input()->mutable_flux()->mutable_erase();
 	});
 
-extern const std::map<std::string, std::string> writables;
-
 int mainRawWrite(int argc, const char* argv[])
 {
 	config.mutable_output()->mutable_flux()->mutable_drive()->set_drive(0);
 	setRange(config.mutable_cylinders(), "0-79");
 	setRange(config.mutable_heads(), "0-1");
+
+	if (argc == 1)
+		showProfiles("rawwrite", writables);
     flags.parseFlagsWithConfigFiles(argc, argv, writables);
 
 	if (!config.input().has_flux() || !config.output().has_flux())

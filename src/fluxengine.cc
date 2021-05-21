@@ -99,6 +99,19 @@ static void help()
     exit(0);
 }
 
+void showProfiles(const std::string& command, const std::map<std::string, std::string>& profiles)
+{
+	std::cout << "syntax: fluxengine " << command << " <profile> [<options>...]\n"
+				 "Use --help for option help.\n"
+	             "Available profiles include:\n";
+
+	for (const auto& it : profiles)
+		std::cout << "  " << it.first << '\n';
+
+	std::cout << "Or use a text file containing your own configuration.\n";
+	exit(1);
+}
+
 int main(int argc, const char* argv[])
 {
     if (argc == 1)

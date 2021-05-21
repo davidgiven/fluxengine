@@ -26,7 +26,7 @@ extern const std::map<std::string, std::string> readables;
 int mainSeek(int argc, const char* argv[])
 {
 	config.mutable_input()->mutable_flux()->mutable_drive()->set_drive(0);
-    flags.parseFlagsWithConfigFiles(argc, argv, readables);
+    flags.parseFlagsWithConfigFiles(argc, argv, {});
 
 	if (!config.input().flux().has_drive())
 		Error() << "this only makes sense with a real disk drive";

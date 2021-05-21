@@ -14,6 +14,7 @@
 #include "arch/ibm/ibm.h"
 #include "imagewriter/imagewriter.h"
 #include "fmt/format.h"
+#include "fluxengine.h"
 #include <google/protobuf/text_format.h>
 #include <fstream>
 
@@ -55,13 +56,14 @@ static StringFlag srcHeads(
 		setRange(config.mutable_heads(), value);
 	});
 
-extern const std::map<std::string, std::string> readables;
-
 int mainRawRead(int argc, const char* argv[])
 {
 	config.mutable_input()->mutable_flux()->mutable_drive()->set_drive(0);
 	setRange(config.mutable_cylinders(), "0-79");
 	setRange(config.mutable_heads(), "0-1");
+
+	if (argc == 1)
+		showProfiles("rawread", readables);
     flags.parseFlagsWithConfigFiles(argc, argv, readables);
 
 	if (!config.input().has_flux() || !config.output().has_flux())

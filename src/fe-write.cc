@@ -12,6 +12,7 @@
 #include "arch/brother/brother.h"
 #include "arch/ibm/ibm.h"
 #include "imagereader/imagereader.h"
+#include "fluxengine.h"
 #include "fmt/format.h"
 #include <google/protobuf/text_format.h>
 #include <fstream>
@@ -54,10 +55,10 @@ static StringFlag destHeads(
 		setRange(config.mutable_heads(), value);
 	});
 
-extern const std::map<std::string, std::string> writables;
-
 int mainWrite(int argc, const char* argv[])
 {
+	if (argc == 1)
+		showProfiles("write", writables);
     flags.parseFlagsWithConfigFiles(argc, argv, writables);
 
 	if (!config.input().has_image() || !config.output().has_flux())

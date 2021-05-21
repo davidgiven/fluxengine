@@ -14,6 +14,7 @@
 #include "arch/ibm/ibm.h"
 #include "imagewriter/imagewriter.h"
 #include "fmt/format.h"
+#include "fluxengine.h"
 #include <google/protobuf/text_format.h>
 #include <fstream>
 
@@ -64,10 +65,10 @@ static StringFlag srcHeads(
 		setRange(config.mutable_heads(), value);
 	});
 
-extern const std::map<std::string, std::string> readables;
-
 int mainRead(int argc, const char* argv[])
 {
+	if (argc == 1)
+		showProfiles("read", readables);
     flags.parseFlagsWithConfigFiles(argc, argv, readables);
 
 	if (!config.input().has_flux() || !config.output().has_image())
