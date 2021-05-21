@@ -1,10 +1,10 @@
 #include "globals.h"
 #include "flags.h"
-#include "dataspec.h"
 #include "sector.h"
 #include "sectorset.h"
 #include "imagereader/imagereader.h"
 #include "fmt/format.h"
+#include "proto.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -12,13 +12,13 @@
 class D64ImageReader : public ImageReader
 {
 public:
-	D64ImageReader(const ImageSpec& spec):
-		ImageReader(spec)
+	D64ImageReader(const ImageReaderProto& config):
+		ImageReader(config)
 	{}
 
 	SectorSet readImage()
 	{
-        std::ifstream inputFile(spec.filename, std::ios::in | std::ios::binary);
+        std::ifstream inputFile(_config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
             Error() << "cannot open input file";
 
@@ -90,10 +90,9 @@ public:
 	}
 };
 
-std::unique_ptr<ImageReader> ImageReader::createD64ImageReader(
-	const ImageSpec& spec)
+std::unique_ptr<ImageReader> ImageReader::createD64ImageReader(const ImageReaderProto& config)
 {
-    return std::unique_ptr<ImageReader>(new D64ImageReader(spec));
+    return std::unique_ptr<ImageReader>(new D64ImageReader(config));
 }
 
 

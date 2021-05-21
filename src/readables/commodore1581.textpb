@@ -1,0 +1,35 @@
+input {
+	flux {
+		drive {}
+	}
+}
+
+output {
+	image {
+		filename: "commodore1581.d81"
+		img {
+			tracks: 80
+			sides: 2
+			trackdata {
+				sectors: 10
+				sector_size: 512
+			}
+		}
+	}
+}
+
+decoder {
+	ibm {}
+}
+
+cylinders {
+	start: 0
+	end: 79
+}
+
+heads {
+	start: 0
+	end: 1
+}
+
+

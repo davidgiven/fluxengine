@@ -2,10 +2,8 @@ Disk: Commodore 64
 ==================
 
 Commodore 64 disks come in two varieties: GCR, which are the overwhelming
-majority; and MFM, only used on the 1571 and 1581. The latter were (as far as
-I can tell) standard IBM PC format disks, so use `fluxengine read ibm` to
-read them (and then [let me know if it
-worked](https://github.com/davidgiven/fluxengine/issues/new).
+majority; and MFM, only used on the 1571 and 1581. The latter were (as far as I
+can tell) standard IBM PC format disks with a slightly odd sector count.
 
 The GCR disks are much more interesting. They could store 170kB on a
 single-sided disk (although later drives were double-sided), using a proprietary
@@ -25,39 +23,43 @@ quickly.)
 
 A standard 1541 disk has 35 tracks of 17 to 21 sectors, each 256 bytes long.
 
+A standard 1581 disk has 80 tracks and two sides, each with 10 sectors, 512
+bytes long.
+
 Reading 1541 disks
 ------------------
 
 Just do:
 
 ```
-fluxengine read c64
+fluxengine read commodore1541 -o commodore1541.d64
 ```
 
-You should end up with an `c64.d64` file which is 174848 bytes long. You can
-load this straight into a Commodore 64 emulator such as
+You should end up with an `commodore1541.d64` file which is 174848 bytes long.
+You can load this straight into a Commodore 64 emulator such as
 [VICE](http://vice-emu.sourceforge.net/).
 
-**Big warning!** Commodore 64 disk images are
-complicated due to the way the tracks are different sizes and the odd sector
-size, so you need the special D64 or LDBS output formats to represent them
-sensibly. Don't use IMG unless you know what you're doing.
+**Big warning!** Commodore 64 disk images are complicated due to the way the
+tracks are different sizes and the odd sector size, so you need the special D64
+or LDBS output formats to represent them sensibly. Don't use IMG unless you
+know what you're doing.
 
 Writing 1541 disks
 ------------------
 
 Just do:
 ```
-fluxengine write c64 -i file.d64
+fluxengine write commodore1541 -i file.d64
 ```
 
 Reading 1581 disks
 ------------------
 
-These are handled by the IBM reader. Just do:
+1581 disks are just another version of the standard B
+Just do:
 
 ```
-fluxengine read ibm
+fluxengine read commodore1581 -o commodore1581.d81
 ```
 
 Writing 1581 disks
@@ -66,7 +68,7 @@ Writing 1581 disks
 Just do:
 
 ```
-fluxengine write commodore1581 -i file.img
+fluxengine write commodore1581 -i commodore1581.img
 ```
 
 Useful references

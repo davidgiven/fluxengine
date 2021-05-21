@@ -31,6 +31,7 @@
 class Sector;
 class Fluxmap;
 class Commodore64DecoderProto;
+class Commodore64EncoderProto;
 
 class Commodore64Decoder : public AbstractDecoder
 {
@@ -46,13 +47,17 @@ public:
 class Commodore64Encoder : public AbstractEncoder
 {
 public:
+	Commodore64Encoder(const Commodore64EncoderProto& config):
+		_config(config)
+	{}
+
 	virtual ~Commodore64Encoder() {}
 
 public:
     std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors);
+
+private:
+	const Commodore64EncoderProto& _config;
 };
-
-extern FlagGroup Commodore64EncoderFlags;
-
 
 #endif

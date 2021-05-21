@@ -296,6 +296,7 @@ buildlibrary libbackend.a \
     arch/brother/decoder.cc \
     arch/brother/encoder.cc \
     arch/c64/decoder.cc \
+    arch/c64/encoder.cc \
     arch/f85/decoder.cc \
     arch/fb100/decoder.cc \
     arch/ibm/decoder.cc \
@@ -335,6 +336,7 @@ buildlibrary libbackend.a \
     lib/fluxsource/testpatternfluxsource.cc \
     lib/globals.cc \
     lib/hexdump.cc \
+    lib/imagereader/d64imagereader.cc \
     lib/imagereader/diskcopyimagereader.cc \
     lib/imagereader/imagereader.cc \
     lib/imagereader/imdimagereader.cc \
@@ -367,7 +369,8 @@ READABLES="\
     apple2 \
     atarist \
     brother \
-    c64 \
+    commodore1541 \
+    commodore1581 \
     eco1 \
     f85 \
     fb100 \
@@ -386,6 +389,7 @@ WRITABLES="\
     brother240 \
     ibm1440 \
     ibm720 \
+    commodore1541 \
     commodore1581 \
     hplif770 \
     atarist360 \

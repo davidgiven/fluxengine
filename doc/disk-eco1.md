@@ -8,7 +8,7 @@ quite impressive for a CP/M machine in those days. Visually it is best
 described as 'very brown'.
 
 <div style="text-align: center">
-<a href="vds-eco1.jpg"> <img src="vds-eco1.jpg" alt="A contemporary advert for the Eco1"/></a>
+<a href="vds-eco1.jpg"> <img src="vds-eco1.jpg" style="width:80%" alt="A contemporary advert for the Eco1"/></a>
 </div>
 
 Its format is standard IBM scheme, but with an interesting wrinkle: there are
