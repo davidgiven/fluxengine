@@ -6,7 +6,7 @@ input {
 
 output {
 	image {
-		filename: "c64.d64"
+		filename: "commodore1541.d64"
 		d64 {}
 	}
 }

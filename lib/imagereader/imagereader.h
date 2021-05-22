@@ -16,6 +16,7 @@ public:
 	static void updateConfigForFilename(ImageReaderProto* proto, const std::string& filename);
 
 public:
+    static std::unique_ptr<ImageReader> createD64ImageReader(const ImageReaderProto& config);
     static std::unique_ptr<ImageReader> createDiskCopyImageReader(const ImageReaderProto& config);
     static std::unique_ptr<ImageReader> createImgImageReader(const ImageReaderProto& config);
     static std::unique_ptr<ImageReader> createJv3ImageReader(const ImageReaderProto& config);

@@ -1,0 +1,27 @@
+input {
+	image {
+		filename: "commodore1541.img"
+		d64 {}
+	}
+}
+
+output {
+	flux {
+		drive {}
+	}
+}
+
+encoder {
+	c64 {}
+}
+
+cylinders {
+	start: 0
+	end: 79
+}
+
+heads {
+	start: 0
+	end: 0
+}
+

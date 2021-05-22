@@ -19,6 +19,7 @@ message ImgInputOutputProto {
 message DiskCopyInputProto {}
 message ImdInputProto {}
 message Jv3InputProto {}
+message D64InputProto {}
 
 message ImageReaderProto {
 	optional string filename = 1 [(help) = "filename of input sector image"];
@@ -27,6 +28,7 @@ message ImageReaderProto {
 		DiskCopyInputProto diskcopy = 3;
 		ImdInputProto imd = 4;
 		Jv3InputProto jv3 = 5;
+		D64InputProto d64 = 6;
 	}
 }
 
