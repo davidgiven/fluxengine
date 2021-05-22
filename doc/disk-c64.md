@@ -52,6 +52,9 @@ Just do:
 fluxengine write commodore1541 -i file.d64
 ```
 
+Note that only standard Commodore 64 BAM file systems can be written this way,
+as the disk ID in the BAM has to be copied to every sector on the disk.
+
 Reading 1581 disks
 ------------------
 
