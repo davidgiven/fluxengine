@@ -479,7 +479,8 @@ runtest fmmfm-test          tests/fmmfm.cc
 runtest greaseweazle-test   tests/greaseweazle.cc
 runtest kryoflux-test       tests/kryoflux.cc
 runtest ldbs-test           tests/ldbs.cc
-runtest proto-test          -I$OBJDIR/proto -d $OBJDIR/proto/libproto.def tests/proto.cc $OBJDIR/proto/tests/testproto.cc
+runtest proto-test          -I$OBJDIR/proto -d $OBJDIR/proto/libproto.def -d $OBJDIR/proto/libtestproto.def \
+                                tests/proto.cc $OBJDIR/proto/tests/testproto.cc
 
 # vim: sw=4 ts=4 et
 
