@@ -35,6 +35,9 @@ jobs:
     - name: zip
       run: |
         zip -9 fluxengine.zip fluxengine.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex
+    - name: date
+      run: |
+        echo "RELEASE_DATE=$(date --rfc-3339=date)" >> ${GITHUB_ENV}
     - name: tag
       uses: EndBug/latest-tag@latest
       with:
@@ -52,7 +55,7 @@ jobs:
     - name: release
       uses: softprops/action-gh-release@v1
       with:
-        name: Development build
+        name: Development build ${{ env.RELEASE_DATE }}
         files: |
           fluxengine.zip
         tag_name: dev
