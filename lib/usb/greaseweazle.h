@@ -7,7 +7,7 @@
 #define EP_OUT 0x02
 #define EP_IN 0x83
 
-#define GREASEWEAZLE_VERSION 22
+#define GREASEWEAZLE_VERSION 24
 
 extern Bytes fluxEngineToGreaseWeazle(const Bytes& fldata, nanoseconds_t clock);
 extern Bytes greaseWeazleToFluxEngine(const Bytes& gwdata, nanoseconds_t clock);
