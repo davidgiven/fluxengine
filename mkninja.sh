@@ -357,6 +357,7 @@ buildlibrary libbackend.a \
     lib/usb/greaseweazle.cc \
     lib/usb/greaseweazleusb.cc \
     lib/usb/usb.cc \
+    lib/usb/usbserial.cc \
     lib/utils.cc \
     lib/writer.cc \
 

@@ -3,11 +3,10 @@
 #include "protocol.h"
 #include "fluxmap.h"
 #include "bytes.h"
-#include <libusb.h>
 #include "fmt/format.h"
 #include "greaseweazle.h"
-
-#define TIMEOUT 5000
+#include "usbserial.h"
+#include <unistd.h>
 
 static const char* gw_error(int e)
 {
@@ -52,12 +51,9 @@ private:
             if (len == 0)
                 break;
 
-            int actual;
-            int rc = libusb_bulk_transfer(_device, EP_IN,
-                _readbuffer, sizeof(_readbuffer),
-                &actual, TIMEOUT);
-            if (rc < 0)
-                Error() << "failed to receive command reply: " << usberror(rc);
+            ssize_t actual = ::read(_fd, _readbuffer, sizeof(_readbuffer));
+            if (actual < 0)
+                Error() << "failed to receive command reply: " << strerror(actual);
 
             _readbuffer_fill = actual;
             _readbuffer_ptr = 0;
@@ -91,14 +87,13 @@ private:
             | ((read_byte() & 0xfe) << 20);
     }
 
-    void write_bytes(const uint8_t* buffer, int len)
+    void write_bytes(const uint8_t* buffer, size_t len)
     {
         while (len > 0)
         {
-            int actual;
-            int rc = libusb_bulk_transfer(_device, EP_OUT, (uint8_t*)buffer, len, &actual, 0);
-            if (rc < 0)
-                Error() << "failed to send command: " << usberror(rc);
+            ssize_t actual = ::write(_fd, buffer, len);
+            if (actual < 0)
+                Error() << "failed to send command: " << strerror(errno);
 
             buffer += actual;
             len -= actual;
@@ -127,30 +122,10 @@ private:
 public:
     GreaseWeazleUsb(libusb_device_handle* device)
     {
-        _device = device;
-
-        /* Configure the device. */
-
-        int i;
-        int cfg = -1;
-        libusb_get_configuration(_device, &cfg);
-        if (cfg != 1)
-        {
-            i = libusb_set_configuration(_device, 1);
-            if (i < 0)
-                Error() << "the GreaseWeazle would not accept configuration: " << usberror(i);
-        }
-
-        /* Detach the existing kernel serial port driver, if there is one, and claim it ourselves. */
-
-        for (int i = 0; i < 2; i++)
-        {
-            if (libusb_kernel_driver_active(_device, i))
-                libusb_detach_kernel_driver(_device, i);
-            int rc = libusb_claim_interface(_device, i);
-            if (rc < 0)
-                Error() << "unable to claim interface: " << libusb_error_name(rc);
-        }
+        _fd = openUsbSerialDevice(device);
+        if (_fd == -1)
+            Error() << "cannot autodetect GreaseWeazle serial device path on this platform;"
+                    << " please use --usb.serial=<path>";
 
         _version = getVersion();
         if ((_version != 22) && (_version != 24))
@@ -419,6 +394,7 @@ public:
     { Error() << "unsupported operation on the GreaseWeazle"; }
 
 private:
+    int _fd;
     int _version;
     nanoseconds_t _clock;
     nanoseconds_t _revolutions;
