@@ -152,11 +152,12 @@ public:
                 Error() << "unable to claim interface: " << libusb_error_name(rc);
         }
 
-        int version = getVersion();
-        if (version != GREASEWEAZLE_VERSION)
-            Error() << "your GreaseWeazle firmware is at version " << version
-                    << " but the client is for version " << GREASEWEAZLE_VERSION
-                    << "; please upgrade";
+        _version = getVersion();
+        if ((_version != 22) && (_version != 24))
+        {
+            Error() << "only GreaseWeazle firmware versions 22 and 24 are currently supported,"
+                    << " but you have version " << _version << ". Please file a bug.";
+        }
 
         /* Configure the hardware. */
 
@@ -196,13 +197,23 @@ public:
         /* The GreaseWeazle doesn't have a command to fetch the period directly,
          * so we have to do a flux read. */
 
-        Bytes cmd(8);
-        cmd.writer()
-            .write_8(CMD_READ_FLUX)
-            .write_8(cmd.size())
-            .write_le32(0) //ticks default value (guessed)
-            .write_le32(2);//guessed
-        do_command(cmd);
+        switch (_version)
+        {
+            case 22:
+                do_command({ CMD_READ_FLUX, 2 });
+                break;
+
+            case 24:
+            {
+                Bytes cmd(8);
+                cmd.writer()
+                    .write_8(CMD_READ_FLUX)
+                    .write_8(cmd.size())
+                    .write_le32(0) //ticks default value (guessed)
+                    .write_le32(2);//guessed
+                do_command(cmd);
+            }
+        }
 
         uint32_t ticks_gw = 0;
         uint32_t firstindex = ~0;
@@ -314,14 +325,29 @@ public:
 
         do_command({ CMD_HEAD, 3, (uint8_t)side });
 
+        switch (_version)
         {
-            Bytes cmd(8);
-            cmd.writer()
-                .write_8(CMD_READ_FLUX)
-                .write_8(cmd.size())
-                .write_le32(0) //ticks default value (guessed)
-                .write_le32(revolutions + (synced ? 1 : 0));
-            do_command(cmd);
+            case 22:
+            {
+                Bytes cmd(4);
+                cmd.writer()
+                    .write_8(CMD_READ_FLUX)
+                    .write_8(cmd.size())
+                    .write_le32(revolutions + (synced ? 1 : 0));
+                do_command(cmd);
+                break;
+            }
+
+            case 24:
+            {
+                Bytes cmd(8);
+                cmd.writer()
+                    .write_8(CMD_READ_FLUX)
+                    .write_8(cmd.size())
+                    .write_le32(0) //ticks default value (guessed)
+                    .write_le32(revolutions + (synced ? 1 : 0));
+                do_command(cmd);
+            }
         }
 
 		Bytes buffer;
@@ -348,7 +374,16 @@ public:
             Error() << "hard sectors are currently unsupported on the GreaseWeazel";
 
         do_command({ CMD_HEAD, 3, (uint8_t)side });
-        do_command({ CMD_WRITE_FLUX, 4, 1, 1 });
+        switch (_version)
+        {
+            case 22:
+                do_command({ CMD_WRITE_FLUX, 3, 1 });
+                break;
+
+            case 24:
+                do_command({ CMD_WRITE_FLUX, 4, 1, 1 });
+                break;
+        }
         write_bytes(fluxEngineToGreaseWeazle(fldata, _clock));
         read_byte(); /* synchronise */
 
@@ -384,6 +419,7 @@ public:
     { Error() << "unsupported operation on the GreaseWeazle"; }
 
 private:
+    int _version;
     nanoseconds_t _clock;
     nanoseconds_t _revolutions;
 };
