@@ -14,7 +14,16 @@
 int openUsbSerialDevice(libusb_device_handle* handle)
 {
 	if (!config.usb().has_serial())
+	{
+		#if defined(__linux__)
+			#error linux
+		#elif defined(WIN32)
+			#error win32
+		#elif defined(__APPLE__)
+			#error apple
+		#endif
 		return -1;
+	}
 
 	std::string path = config.usb().serial();
 	int fd = open(path.c_str(), O_RDWR);
