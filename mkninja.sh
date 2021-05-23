@@ -368,7 +368,8 @@ READABLES="\
     ampro \
     amiga \
     apple2 \
-    atarist \
+    atarists \
+    ataristd \
     brother \
     commodore1541 \
     commodore1581 \
@@ -390,6 +391,7 @@ WRITABLES="\
     brother240 \
     ibm1440 \
     ibm720 \
+    ibm360 \
     commodore1541 \
     commodore1581 \
     hplif770 \

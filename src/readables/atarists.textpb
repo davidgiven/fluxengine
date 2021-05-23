@@ -1,4 +1,4 @@
-comment: 'AES Lanier "No Problem" 616kB 5.25" 77-track single sided hard sectored'
+comment: 'Atari ST any 3.5" single sided'
 
 input {
 	flux {
@@ -8,18 +8,18 @@ input {
 
 output {
 	image {
-		filename: "aeslanier.img"
+		filename: "atarist.st"
 		img {}
 	}
 }
 
 decoder {
-	aeslanier {}
+	ibm {}
 }
 
 cylinders {
 	start: 0
-	end: 76
+	end: 81
 }
 
 heads {

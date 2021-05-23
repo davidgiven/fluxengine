@@ -1,3 +1,5 @@
+comment: 'Brother FB-100 100kB 3.5" 40-track single-sided'
+
 input {
 	flux {
 		drive {}

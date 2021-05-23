@@ -45,7 +45,8 @@ The syntax is:
   - `atarist820`: a 820kB 3.5" disk, with 82 cylinders, 2 sides, and 10 sectors
 	per track.
 
-See [the IBM format documentation](disk-ibm.md) for more information.
+See [the IBM format documentation](disk-ibm.md) for more information. Note that
+only some PC 3.5" floppy disk drives are capable of seeking to the 82nd track.
 
 
 Useful references

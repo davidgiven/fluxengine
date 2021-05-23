@@ -1,3 +1,5 @@
+comment: 'Atari ST any 3.5" double sided'
+
 input {
 	flux {
 		drive {}

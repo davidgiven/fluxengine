@@ -1,3 +1,5 @@
+comment: 'Macintosh 800kB 3.5" GCR double-sided'
+
 input {
 	flux {
 		drive {}

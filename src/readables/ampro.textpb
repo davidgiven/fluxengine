@@ -1,3 +1,5 @@
+comment: 'Ampro 400kB/800kB 5.25" 40/80 track double sided'
+
 input {
 	flux {
 		drive {}

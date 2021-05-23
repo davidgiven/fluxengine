@@ -1,3 +1,5 @@
+comment: 'Victor 9000 / Sirius One 1224kB GCR variable sector double-sided'
+
 input {
 	flux {
 		drive {}

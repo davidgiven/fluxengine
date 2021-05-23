@@ -1,3 +1,5 @@
+comment: 'Brother 120kB 3.5" 39-track GCR disks'
+
 input {
 	image {
 		filename: "brother120.img"

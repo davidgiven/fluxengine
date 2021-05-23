@@ -1,3 +1,5 @@
+comment: 'Atari ST 360kB 3.5" 80-track 9-sector single sided'
+
 input {
 	image {
 		filename: "atarist360.st"

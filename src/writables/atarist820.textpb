@@ -1,3 +1,5 @@
+comment: 'Atari ST 820kB 3.5" 82-track 10-sector double sided'
+
 input {
 	image {
 		filename: "atarist820.st"

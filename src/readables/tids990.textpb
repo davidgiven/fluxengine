@@ -1,3 +1,5 @@
+comment: 'Texas Instruments DS990 1126kB 8" double-sided'
+
 input {
 	flux {
 		drive {}
