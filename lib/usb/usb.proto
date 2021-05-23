@@ -3,9 +3,11 @@ syntax = "proto2";
 import "lib/common.proto";
 
 message UsbProto {
-	optional string device = 1
-		[(help) = "serial number of hardware device to use"];
-	optional string serial = 2
-		[(help) = "path to serial port to devices which need it"];
+	oneof device {
+		string fluxengine = 1
+			[(help) = "serial number of FluxEngine device to use"];
+		string greaseweazle = 2
+			[(help) = "serial port of GreaseWeazle device to use"];
+	}
 }
 

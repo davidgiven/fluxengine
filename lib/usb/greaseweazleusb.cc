@@ -5,8 +5,10 @@
 #include "bytes.h"
 #include "fmt/format.h"
 #include "greaseweazle.h"
-#include "usbserial.h"
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 static const char* gw_error(int e)
 {
@@ -120,12 +122,11 @@ private:
     }
 
 public:
-    GreaseWeazleUsb(libusb_device_descriptor* descriptor)
+    GreaseWeazleUsb(const std::string& port)
     {
-        _fd = openUsbSerialDevice(descriptor);
+        _fd = ::open(port.c_str(), O_RDWR);
         if (_fd == -1)
-            Error() << "cannot autodetect GreaseWeazle serial device path on this platform;"
-                    << " please use --usb.serial=<path>";
+            Error() << fmt::format("cannot open GreaseWeazel serial port: {}", strerror(errno));
 
         _version = getVersion();
         if ((_version != 22) && (_version != 24))
@@ -400,9 +401,9 @@ private:
     nanoseconds_t _revolutions;
 };
 
-USB* createGreaseWeazleUsb(libusb_device_descriptor* descriptor)
+USB* createGreaseWeazleUsb(const std::string& port)
 {
-    return new GreaseWeazleUsb(descriptor);
+    return new GreaseWeazleUsb(port);
 }
 
 // vim: sw=4 ts=4 et
