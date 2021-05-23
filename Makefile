@@ -9,6 +9,10 @@ export LDOPTFLAGS = -Os -s
 export CDBGFLAGS = -O0 -g
 export LDDBGFLAGS = -O0 -g
 
+ifeq ($(shell uname),Linux)
+LIBS += -ludev
+endif
+
 ifeq ($(OS), Windows_NT)
 export PROTOC = /mingw32/bin/protoc
 export CXX = /mingw32/bin/g++
@@ -16,7 +20,7 @@ export AR = /mingw32/bin/ar rcs
 export STRIP = /mingw32/bin/strip
 export CFLAGS += -I/mingw32/include/libusb-1.0 -I/mingw32/include
 export LDFLAGS +=
-export LIBS = -L/mingw32/lib -lz -lsqlite3 -lusb-1.0 -lprotobuf
+export LIBS += -L/mingw32/lib -lz -lsqlite3 -lusb-1.0 -lprotobuf
 export EXTENSION = .exe
 else
 
@@ -32,7 +36,7 @@ export AR = ar rcs
 export STRIP = strip
 export CFLAGS += $(shell pkg-config --cflags $(PACKAGES))
 export LDFLAGS +=
-export LIBS = $(shell pkg-config --libs $(PACKAGES))
+export LIBS += $(shell pkg-config --libs $(PACKAGES))
 export EXTENSION =
 endif
 export XXD = xxd

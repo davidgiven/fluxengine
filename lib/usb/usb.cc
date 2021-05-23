@@ -95,20 +95,21 @@ static std::map<std::string, std::unique_ptr<CandidateDevice>> get_candidates(li
 
 static void open_device(CandidateDevice& candidate)
 {
-	libusb_device_handle* handle;
-	int i = libusb_open(candidate.device, &handle);
-	if (i < 0)
-		Error() << "cannot open USB device: " << libusb_strerror((libusb_error) i);
-	
 	std::cout << "Using " << device_type(candidate.type) << " with serial number " << candidate.serial << '\n';
 	switch (candidate.type)
 	{
 		case DEV_FLUXENGINE:
+		{
+			libusb_device_handle* handle;
+			int i = libusb_open(candidate.device, &handle);
+			if (i < 0)
+				Error() << "cannot open USB device: " << libusb_strerror((libusb_error) i);
 			usb = createFluxengineUsb(handle);
 			break;
+		}
 
 		case DEV_GREASEWEAZLE:
-			usb = createGreaseWeazleUsb(handle);
+			usb = createGreaseWeazleUsb(&candidate.desc);
 			break;
 	}
 }

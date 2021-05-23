@@ -120,9 +120,9 @@ private:
     }
 
 public:
-    GreaseWeazleUsb(libusb_device_handle* device)
+    GreaseWeazleUsb(libusb_device_descriptor* descriptor)
     {
-        _fd = openUsbSerialDevice(device);
+        _fd = openUsbSerialDevice(descriptor);
         if (_fd == -1)
             Error() << "cannot autodetect GreaseWeazle serial device path on this platform;"
                     << " please use --usb.serial=<path>";
@@ -400,9 +400,9 @@ private:
     nanoseconds_t _revolutions;
 };
 
-USB* createGreaseWeazleUsb(libusb_device_handle* device)
+USB* createGreaseWeazleUsb(libusb_device_descriptor* descriptor)
 {
-    return new GreaseWeazleUsb(device);
+    return new GreaseWeazleUsb(descriptor);
 }
 
 // vim: sw=4 ts=4 et

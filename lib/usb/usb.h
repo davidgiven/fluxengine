@@ -6,6 +6,7 @@
 
 class Fluxmap;
 class libusb_device_handle;
+class libusb_device_descriptor;
 
 class USB
 {
@@ -35,7 +36,7 @@ protected:
 extern USB& getUsb();
 
 extern USB* createFluxengineUsb(libusb_device_handle* device);
-extern USB* createGreaseWeazleUsb(libusb_device_handle* device);
+extern USB* createGreaseWeazleUsb(libusb_device_descriptor* descriptor);
 
 static inline int usbGetVersion()     { return getUsb().getVersion(); }
 static inline void usbRecalibrate()   { getUsb().recalibrate(); }
