@@ -54,11 +54,12 @@ private:
 	}
 
 public:
-	FluxEngineUsb(libusb_device_handle* device)
+	FluxEngineUsb(libusb_device* device)
 	{
-		_device = device;
+		int i = libusb_open(device, &_device);
+		if (i < 0)
+			Error() << "cannot open USB device: " << libusb_strerror((libusb_error) i);
 
-		int i;
 		int cfg = -1;
 		libusb_get_configuration(_device, &cfg);
 		if (cfg != 1)
@@ -326,8 +327,7 @@ public:
 	}
 };
 
-USB* createFluxengineUsb(libusb_device_handle* device)
+USB* createFluxengineUsb(libusb_device* device)
 {
 	return new FluxEngineUsb(device);
 }
-

@@ -3,11 +3,12 @@
 #include "protocol.h"
 #include "fluxmap.h"
 #include "bytes.h"
-#include <libusb.h>
 #include "fmt/format.h"
 #include "greaseweazle.h"
-
-#define TIMEOUT 5000
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 static const char* gw_error(int e)
 {
@@ -52,12 +53,9 @@ private:
             if (len == 0)
                 break;
 
-            int actual;
-            int rc = libusb_bulk_transfer(_device, EP_IN,
-                _readbuffer, sizeof(_readbuffer),
-                &actual, TIMEOUT);
-            if (rc < 0)
-                Error() << "failed to receive command reply: " << usberror(rc);
+            ssize_t actual = ::read(_fd, _readbuffer, sizeof(_readbuffer));
+            if (actual < 0)
+                Error() << "failed to receive command reply: " << strerror(actual);
 
             _readbuffer_fill = actual;
             _readbuffer_ptr = 0;
@@ -91,14 +89,13 @@ private:
             | ((read_byte() & 0xfe) << 20);
     }
 
-    void write_bytes(const uint8_t* buffer, int len)
+    void write_bytes(const uint8_t* buffer, size_t len)
     {
         while (len > 0)
         {
-            int actual;
-            int rc = libusb_bulk_transfer(_device, EP_OUT, (uint8_t*)buffer, len, &actual, 0);
-            if (rc < 0)
-                Error() << "failed to send command: " << usberror(rc);
+            ssize_t actual = ::write(_fd, buffer, len);
+            if (actual < 0)
+                Error() << "failed to send command: " << strerror(errno);
 
             buffer += actual;
             len -= actual;
@@ -125,38 +122,18 @@ private:
     }
 
 public:
-    GreaseWeazleUsb(libusb_device_handle* device)
+    GreaseWeazleUsb(const std::string& port)
     {
-        _device = device;
+        _fd = ::open(port.c_str(), O_RDWR);
+        if (_fd == -1)
+            Error() << fmt::format("cannot open GreaseWeazel serial port: {}", strerror(errno));
 
-        /* Configure the device. */
-
-        int i;
-        int cfg = -1;
-        libusb_get_configuration(_device, &cfg);
-        if (cfg != 1)
+        _version = getVersion();
+        if ((_version != 22) && (_version != 24))
         {
-            i = libusb_set_configuration(_device, 1);
-            if (i < 0)
-                Error() << "the GreaseWeazle would not accept configuration: " << usberror(i);
+            Error() << "only GreaseWeazle firmware versions 22 and 24 are currently supported,"
+                    << " but you have version " << _version << ". Please file a bug.";
         }
-
-        /* Detach the existing kernel serial port driver, if there is one, and claim it ourselves. */
-
-        for (int i = 0; i < 2; i++)
-        {
-            if (libusb_kernel_driver_active(_device, i))
-                libusb_detach_kernel_driver(_device, i);
-            int rc = libusb_claim_interface(_device, i);
-            if (rc < 0)
-                Error() << "unable to claim interface: " << libusb_error_name(rc);
-        }
-
-        int version = getVersion();
-        if (version != GREASEWEAZLE_VERSION)
-            Error() << "your GreaseWeazle firmware is at version " << version
-                    << " but the client is for version " << GREASEWEAZLE_VERSION
-                    << "; please upgrade";
 
         /* Configure the hardware. */
 
@@ -196,7 +173,23 @@ public:
         /* The GreaseWeazle doesn't have a command to fetch the period directly,
          * so we have to do a flux read. */
 
-        do_command({ CMD_READ_FLUX, 2 });
+        switch (_version)
+        {
+            case 22:
+                do_command({ CMD_READ_FLUX, 2 });
+                break;
+
+            case 24:
+            {
+                Bytes cmd(8);
+                cmd.writer()
+                    .write_8(CMD_READ_FLUX)
+                    .write_8(cmd.size())
+                    .write_le32(0) //ticks default value (guessed)
+                    .write_le32(2);//guessed
+                do_command(cmd);
+            }
+        }
 
         uint32_t ticks_gw = 0;
         uint32_t firstindex = ~0;
@@ -308,13 +301,29 @@ public:
 
         do_command({ CMD_HEAD, 3, (uint8_t)side });
 
+        switch (_version)
         {
-            Bytes cmd(4);
-            cmd.writer()
-                .write_8(CMD_READ_FLUX)
-                .write_8(cmd.size())
-                .write_le32(revolutions + (synced ? 1 : 0));
-            do_command(cmd);
+            case 22:
+            {
+                Bytes cmd(4);
+                cmd.writer()
+                    .write_8(CMD_READ_FLUX)
+                    .write_8(cmd.size())
+                    .write_le32(revolutions + (synced ? 1 : 0));
+                do_command(cmd);
+                break;
+            }
+
+            case 24:
+            {
+                Bytes cmd(8);
+                cmd.writer()
+                    .write_8(CMD_READ_FLUX)
+                    .write_8(cmd.size())
+                    .write_le32(0) //ticks default value (guessed)
+                    .write_le32(revolutions + (synced ? 1 : 0));
+                do_command(cmd);
+            }
         }
 
 		Bytes buffer;
@@ -334,20 +343,29 @@ public:
             fldata = stripPartialRotation(fldata);
         return fldata;
     }
-    
+
     void write(int side, const Bytes& fldata, nanoseconds_t hardSectorThreshold)
     {
         if (hardSectorThreshold != 0)
             Error() << "hard sectors are currently unsupported on the GreaseWeazel";
 
         do_command({ CMD_HEAD, 3, (uint8_t)side });
-        do_command({ CMD_WRITE_FLUX, 3, 1 });
+        switch (_version)
+        {
+            case 22:
+                do_command({ CMD_WRITE_FLUX, 3, 1 });
+                break;
+
+            case 24:
+                do_command({ CMD_WRITE_FLUX, 4, 1, 1 });
+                break;
+        }
         write_bytes(fluxEngineToGreaseWeazle(fldata, _clock));
         read_byte(); /* synchronise */
 
         do_command({ CMD_GET_FLUX_STATUS, 2 });
     }
-    
+
     void erase(int side, nanoseconds_t hardSectorThreshold)
     {
         if (hardSectorThreshold != 0)
@@ -377,13 +395,15 @@ public:
     { Error() << "unsupported operation on the GreaseWeazle"; }
 
 private:
+    int _fd;
+    int _version;
     nanoseconds_t _clock;
     nanoseconds_t _revolutions;
 };
 
-USB* createGreaseWeazleUsb(libusb_device_handle* device)
+USB* createGreaseWeazleUsb(const std::string& port)
 {
-    return new GreaseWeazleUsb(device);
+    return new GreaseWeazleUsb(port);
 }
 
 // vim: sw=4 ts=4 et

@@ -7,6 +7,7 @@ enum
 
     FLUXENGINE_VID = 0x1209,
     FLUXENGINE_PID = 0x6e00,
+    FLUXENGINE_ID = (FLUXENGINE_VID<<16) | FLUXENGINE_PID,
 
     /* libusb uses these numbers */
     FLUXENGINE_DATA_OUT_EP = 0x01,
