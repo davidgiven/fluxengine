@@ -8,15 +8,14 @@ buy a prebuilt GreaseWeazle board), but provides completely open source
 hardware which doesn't require the use of the Cypress Windows-based tools that
 the FluxEngine does. Luckily, the FluxEngine software supports it almost
 out-of-the-box --- just plug it in and nearly everything should work. You will
-may need to tell FluxEngine which serial port the GreaseWeazle is plugged
-in with; this can only be detected on some platforms:
+need to tell FluxEngine which serial port the GreaseWeazle is plugged
+in with:
 
 ```
-fluxengine read ibm -o ibm.img --usb.serial=/dev/ttyACM3
+fluxengine read ibm -o ibm.img --usb.greaseweazle=/dev/ttyACM3
 ```
 
-Try it without the `--usb.serial` parameter and see whether it works. You'll
-get an error if it doesn't.
+On Windows, use COM1/COM2/COM3 etc for the port.
 
 I am aware that having _software_ called FluxEngine and _hardware_ called
 FluxEngine makes things complicated when you're not using the FluxEngine client
