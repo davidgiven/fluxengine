@@ -1,3 +1,5 @@
+comment: 'Brother 240kB 3.5" 78-track GCR disks'
+
 input {
 	image {
 		filename: "brother240.img"
@@ -24,7 +26,7 @@ encoder {
 
 cylinders {
 	start: 0
-	end: 80
+	end: 77
 }
 
 heads {

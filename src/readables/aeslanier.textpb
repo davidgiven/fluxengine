@@ -1,3 +1,5 @@
+comment: 'AES Lanier "No Problem" 616kB 5.25" 77-track single sided hard sectored'
+
 input {
 	flux {
 		drive {}

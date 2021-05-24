@@ -1,4 +1,6 @@
 #include "globals.h"
+#include "proto.h"
+#include "fmt/format.h"
 
 typedef int command_cb(int agrc, const char* argv[]);
 
@@ -88,7 +90,7 @@ static int mainAnalyse(int argc, const char* argv[])
 static int mainTest(int argc, const char* argv[])
 { return mainExtended(testables, "test", argc, argv); }
 
-static void help()
+static void globalHelp()
 {
     std::cout << "fluxengine: syntax: fluxengine <command> [<flags>...]\n"
                  "Try one of these commands:\n";
@@ -106,7 +108,12 @@ void showProfiles(const std::string& command, const std::map<std::string, std::s
 	             "Available profiles include:\n";
 
 	for (const auto& it : profiles)
-		std::cout << "  " << it.first << '\n';
+	{
+		ConfigProto config;
+		if (!config.ParseFromString(it.second))
+			Error() << "couldn't load config proto";
+		std::cout << fmt::format("  {}: {}\n", it.first, config.comment());
+	}
 
 	std::cout << "Or use a text file containing your own configuration.\n";
 	exit(1);
@@ -115,11 +122,11 @@ void showProfiles(const std::string& command, const std::map<std::string, std::s
 int main(int argc, const char* argv[])
 {
     if (argc == 1)
-        help();
+        globalHelp();
 
     std::string command = argv[1];
     if (command == "--help")
-        help();
+        globalHelp();
 
     for (Command& c : commands)
     {

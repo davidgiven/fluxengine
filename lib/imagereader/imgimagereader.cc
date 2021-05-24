@@ -39,7 +39,7 @@ public:
                     sector.reset(new Sector);
                     sector->status = Sector::OK;
                     sector->logicalTrack = track;
-					sector->physicalTrack = track;
+					sector->physicalTrack = track * _config.img().physical_step() + _config.img().physical_offset();
                     sector->logicalSide = sector->physicalSide = side;
                     sector->logicalSector = sectorId;
                     sector->data = data;

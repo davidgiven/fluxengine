@@ -1,3 +1,5 @@
+comment: 'Zilog MCZ 320kB 8" 77-track single-sided hard-sectored'
+
 input {
 	flux {
 		drive {}

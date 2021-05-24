@@ -1,13 +1,13 @@
-comment: 'PC 1440kB 3.5" 80-track 18-sector double-sided'
+comment: 'PC 1200kB 5.25" 80-track 15-sector double-sided'
 
 input {
 	image {
-		filename: "ibm1440.img"
+		filename: "ibm1200_525.img"
 		img {
 			tracks: 80
 			sides: 2
 			trackdata {
-				sectors: 18
+				sectors: 15
 				sector_size: 512
 			}
 		}
@@ -23,9 +23,9 @@ output {
 encoder {
 	ibm {
 		trackdata {
-			track_length_ms: 200
+			track_length_ms: 167
 			clock_rate_khz: 500
-			sector_skew: "0123456789abcdefgh"
+			sector_skew: "0123456789abcde"
 		}
 	}
 }

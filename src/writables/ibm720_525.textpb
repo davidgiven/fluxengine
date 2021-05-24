@@ -1,10 +1,10 @@
-comment: 'Atari ST 740kB 3.5" 82-track 9-sector double sided'
+comment: 'PC 720kB 5.25" 80-track 9-sector double-sided'
 
 input {
 	image {
-		filename: "atarist740.st"
+		filename: "ibm720_525.img"
 		img {
-			tracks: 82
+			tracks: 80
 			sides: 2
 			trackdata {
 				sectors: 9
@@ -23,21 +23,16 @@ output {
 encoder {
 	ibm {
 		trackdata {
-			track_length_ms: 200
-			clock_rate_khz: 250
-			emit_iam: false
-			gap0: 80
-			gap2: 22
-			gap3: 34
+			track_length_ms: 167
+			clock_rate_khz: 300
 			sector_skew: "012345678"
-			swap_sides: true
 		}
 	}
 }
 
 cylinders {
 	start: 0
-	end: 81
+	end: 79
 }
 
 heads {

@@ -1,3 +1,5 @@
+comment: 'Acorn DFS 100kB/200kB 3.5" or 5.25" 40- or 80-track singled sided'
+
 input {
 	flux {
 		drive {}

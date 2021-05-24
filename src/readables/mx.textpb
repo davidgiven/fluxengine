@@ -1,3 +1,5 @@
+comment: 'DVK MX 110kB/220kB/440kB 5.25"'
+
 input {
 	flux {
 		drive {}

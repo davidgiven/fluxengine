@@ -390,6 +390,10 @@ WRITABLES="\
     brother240 \
     ibm1440 \
     ibm720 \
+    ibm180_525 \
+    ibm360_525 \
+    ibm720_525 \
+    ibm1200_525 \
     commodore1541 \
     commodore1581 \
     hplif770 \

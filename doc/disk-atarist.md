@@ -17,6 +17,10 @@ Just do:
 vary depending on the format. This is an alias for `fluxengine read ibm` with
 preconfigured parameters.
 
+Note that the profile by default assumes a double-sided disk; if you're reading
+a single-sided disk, add `--heads 0` to prevent FluxEngine from looking at the
+other side and getting confused by any data it sees there.
+
 Writing disks
 -------------
 
@@ -45,7 +49,8 @@ The syntax is:
   - `atarist820`: a 820kB 3.5" disk, with 82 cylinders, 2 sides, and 10 sectors
 	per track.
 
-See [the IBM format documentation](disk-ibm.md) for more information.
+See [the IBM format documentation](disk-ibm.md) for more information. Note that
+only some PC 3.5" floppy disk drives are capable of seeking to the 82nd track.
 
 
 Useful references

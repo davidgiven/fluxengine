@@ -77,8 +77,9 @@ The syntax is:
     fluxengine write <format> -i input.img <options>
 
 The common PC formats are `ibm720` and `ibm1440`, but there are _many_ others,
-and there's too many configuration options to usefully list. Try `fluxengine
-write ibm1440 --config` to see a sample configuration.
+and there's too many configuration options to usefully list. Use `fluxengine
+write` to list all formats, and try `fluxengine write ibm1440 --config` to see
+a sample configuration.
 
 Mixed-format disks
 ------------------

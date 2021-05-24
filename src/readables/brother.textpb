@@ -1,3 +1,4 @@
+comment: 'Brother 120kB/240kB 3.5" GCR'
 input {
 	flux {
 		drive {}

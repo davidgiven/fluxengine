@@ -1,3 +1,5 @@
+comment: 'PC 720kB 3.5" 80-track 9-sector double-sided'
+
 input {
 	image {
 		filename: "ibm720.img"

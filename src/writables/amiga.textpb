@@ -1,3 +1,5 @@
+comment: 'Amiga 880kB 3.5" double sided'
+
 input {
 	image {
 		filename: "amiga.adf"

@@ -1,3 +1,5 @@
+comment: 'Commodore 1581 800kB 3.5" MFM disks'
+
 input {
 	flux {
 		drive {}
