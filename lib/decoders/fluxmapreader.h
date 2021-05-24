@@ -88,6 +88,11 @@ public:
         _pos = pos;
     }
 
+    int getDuration(void)
+    {
+        return (_fluxmap.duration());
+    }
+
     uint8_t getNextEvent(unsigned& ticks);
     unsigned findEvent(uint8_t bits);
     unsigned readInterval(nanoseconds_t clock); /* with debounce support */

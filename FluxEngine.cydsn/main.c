@@ -79,6 +79,7 @@ CY_ISR(index_irq_cb)
      * the track. */
     static bool hardsec_index_irq_primed = false;
     static uint32_t hardsec_last_pulse_time = 0;
+    uint32_t index_pulse_duration = clock - hardsec_last_pulse_time;
 
     if (!hardsec_index_threshold)
     {
@@ -87,12 +88,18 @@ CY_ISR(index_irq_cb)
     }
     else
     {
-        index_irq = hardsec_index_irq_primed;
+        /* It's only an index pulse if the previous pulse is less than
+         * the threshold.
+         */
+        index_irq = (index_pulse_duration <= hardsec_index_threshold) ?
+            hardsec_index_irq_primed : false;
+
         if (index_irq)
             hardsec_index_irq_primed = false;
         else
             hardsec_index_irq_primed =
-                clock - hardsec_last_pulse_time <= hardsec_index_threshold;
+                index_pulse_duration <= hardsec_index_threshold;
+
         hardsec_last_pulse_time = clock;
     }
     
@@ -275,7 +282,6 @@ static void seek_to(int track)
         CyWdtClear();
     }
     CyDelay(STEP_SETTLING_TIME);
-    
     TK43_REG_Write(track < 43); /* high if 0..42, low if 43 or up */
     print("finished seek");
 }
@@ -305,7 +311,7 @@ static void cmd_measure_speed(struct measurespeed_frame* f)
     while (!index_irq)
     {
         elapsed = clock - start_clock;
-        if (elapsed > 1000)
+        if (elapsed > 1500)
         {
             elapsed = 0;
             break;
@@ -416,7 +422,6 @@ static void cmd_read(struct read_frame* f)
     seek_to(current_track);
     SIDE_REG_Write(f->side);
     STEP_REG_Write(f->side); /* for drives which multiplex SIDE and DIR */
-    
     /* Do slow setup *before* we go into the real-time bit. */
     
     {
@@ -562,7 +567,6 @@ static void cmd_write(struct write_frame* f)
     seek_to(current_track);    
     SIDE_REG_Write(f->side);
     STEP_REG_Write(f->side); /* for drives which multiplex SIDE and DIR */
-    
     SEQUENCER_CONTROL_Write(1); /* put the sequencer into reset */
     {
         uint8_t i = CyEnterCriticalSection();        
@@ -627,7 +631,6 @@ static void cmd_write(struct write_frame* f)
 
                 /* Wait for the index marker. While this happens, the DMA engine
                  * will prime the FIFO. */
-
                 hardsec_index_threshold = f->hardsec_threshold_ms;
                 index_irq = false;
                 while (!index_irq)
@@ -693,7 +696,7 @@ abort:
 static void cmd_erase(struct erase_frame* f)
 {
     SIDE_REG_Write(f->side);
-    seek_to(current_track);    
+    seek_to(current_track);
     /* Disk is now spinning. */
     
     print("start erasing");
