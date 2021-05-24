@@ -17,6 +17,10 @@ Just do:
 vary depending on the format. This is an alias for `fluxengine read ibm` with
 preconfigured parameters.
 
+Note that the profile by default assumes a double-sided disk; if you're reading
+a single-sided disk, add `--heads 0` to prevent FluxEngine from looking at the
+other side and getting confused by any data it sees there.
+
 Writing disks
 -------------
 
