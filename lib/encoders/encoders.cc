@@ -7,6 +7,7 @@
 #include "arch/c64/c64.h"
 #include "arch/ibm/ibm.h"
 #include "arch/macintosh/macintosh.h"
+#include "arch/northstar/northstar.h"
 #include "arch/tids990/tids990.h"
 #include "lib/encoders/encoders.pb.h"
 #include "protocol.h"
@@ -29,6 +30,9 @@ std::unique_ptr<AbstractEncoder> AbstractEncoder::create(const EncoderProto& con
 
 		case EncoderProto::kC64:
 			return std::unique_ptr<AbstractEncoder>(new Commodore64Encoder(config.c64()));
+
+		case EncoderProto::kNorthstar:
+			return std::unique_ptr<AbstractEncoder>(new NorthstarEncoder(config.northstar()));
 
 		default:
 			Error() << "no input disk format specified";

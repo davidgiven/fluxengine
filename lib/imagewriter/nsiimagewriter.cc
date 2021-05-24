@@ -1,78 +1,70 @@
 #include "globals.h"
 #include "flags.h"
-#include "dataspec.h"
 #include "sector.h"
 #include "sectorset.h"
 #include "imagewriter/imagewriter.h"
 #include "fmt/format.h"
 #include "decoders/decoders.h"
 #include "arch/northstar/northstar.h"
+#include "lib/imagewriter/imagewriter.pb.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>
 
-class NSIImageWriter : public ImageWriter
+class NsiImageWriter : public ImageWriter
 {
 public:
-	NSIImageWriter(const SectorSet& sectors, const ImageSpec& spec):
-		ImageWriter(sectors, spec)
+	NsiImageWriter(const ImageWriterProto& config):
+		ImageWriter(config)
 	{}
 
-	void writeImage()
+	void writeImage(const SectorSet& sectors)
 	{
-		unsigned numCylinders = spec.cylinders;
-		unsigned numHeads = spec.heads;
-		unsigned numSectors = spec.sectors;
-		unsigned numTracks = numCylinders * numHeads;
-		unsigned numBytes = spec.bytes;
-		int head;
+		unsigned autoTracks;
+		unsigned autoSides;
+		unsigned autoSectors;
+		unsigned autoBytes;
+		sectors.calculateSize(autoTracks, autoSides, autoSectors, autoBytes);
 
-		size_t trackSize = numSectors * numBytes;
-
-		if ((numBytes != 256) && (numBytes != 512) && (numBytes != 257) && (numBytes != 513))
-			Error() << "Sector size must be 256 or 512.";
-
-		if (numCylinders != 35)
-			Error() << "Number of cylinders must be 35.";
+		size_t trackSize = autoSectors * autoBytes;
 
 		std::cout << fmt::format("Writing {} cylinders, {} heads, {} sectors, {} ({} bytes/sector), {} kB total",
-				numCylinders, numHeads,
-				numSectors, numBytes == 256 ? "SD" : "DD", numBytes,
-				numTracks * trackSize / 1024)
+				autoTracks, autoSides,
+				autoSectors, autoBytes == 256 ? "SD" : "DD", autoBytes,
+				autoTracks * trackSize / 1024)
 				<< std::endl;
 
-		std::ofstream outputFile(spec.filename, std::ios::out | std::ios::binary);
+		std::ofstream outputFile(_config.filename(), std::ios::out | std::ios::binary);
 		if (!outputFile.is_open())
 			Error() << "cannot open output file";
 
 		unsigned sectorFileOffset;
-
-		for (int track = 0; track < numCylinders * numHeads; track++)
+		for (int track = 0; track < autoTracks * autoSides; track++)
 		{
-			head = (track < numCylinders) ? 0 : 1;
-			for (int sectorId = 0; sectorId < numSectors; sectorId++)
+			int head = (track < autoTracks) ? 0 : 1;
+			for (int sectorId = 0; sectorId < autoSectors; sectorId++)
 			{
-				const auto& sector = sectors.get(track % numCylinders, head, sectorId);
+				const auto& sector = sectors.get(track % autoTracks, head, sectorId);
 				if (sector)
 				{
 					if (head == 0) { /* Side 0 is from track 0-34 */
-						sectorFileOffset = track * trackSize + sectorId * numBytes;
+						sectorFileOffset = track * trackSize + sectorId * autoBytes;
 					}
 					else { /* Side 1 is from track 70-35 */
-						sectorFileOffset = (numBytes * numSectors * numCylinders) + /* Skip over side 0 */
-							((numCylinders - 1) - (track % numCylinders)) * (numBytes * numSectors) +
-							(sectorId * numBytes); /* Sector offset from beginning of track. */
+						sectorFileOffset = (autoBytes * autoSectors * autoTracks) + /* Skip over side 0 */
+							((autoTracks - 1) - (track % autoTracks)) * (autoBytes * autoSectors) +
+							(sectorId * autoBytes); /* Sector offset from beginning of track. */
 					}
 					outputFile.seekp(sectorFileOffset, std::ios::beg);
-					sector->data.slice(0, numBytes).writeTo(outputFile);
+					sector->data.slice(0, autoBytes).writeTo(outputFile);
 				}
 			}
 		}
 	}
 };
 
-std::unique_ptr<ImageWriter> ImageWriter::createNSIImageWriter(
-	const SectorSet& sectors, const ImageSpec& spec)
+std::unique_ptr<ImageWriter> ImageWriter::createNsiImageWriter(
+	const ImageWriterProto& config)
 {
-    return std::unique_ptr<ImageWriter>(new NSIImageWriter(sectors, spec));
+    return std::unique_ptr<ImageWriter>(new NsiImageWriter(config));
 }

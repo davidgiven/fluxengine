@@ -28,10 +28,14 @@
 #define SECTOR_TYPE_MFM			(0)
 #define SECTOR_TYPE_FM				(1)
 
+class NorthstarEncoderProto;
+class NorthstarDecoderProto;
+
 class NorthstarDecoder : public AbstractDecoder
 {
 public:
-	NorthstarDecoder()
+	NorthstarDecoder(const NorthstarDecoderProto& config):
+		_config(config)
 	{
 		_sectorType = SECTOR_TYPE_MFM;
 	}
@@ -43,6 +47,7 @@ public:
 	std::set<unsigned> requiredSectors(Track& track) const;
 
 private:
+	const NorthstarDecoderProto& _config;
 	uint8_t _sectorType;
 	uint8_t _hardSectorId;
 };
@@ -50,8 +55,15 @@ private:
 class NorthstarEncoder : public AbstractEncoder
 {
 public:
+	NorthstarEncoder(const NorthstarEncoderProto& config):
+		_config(config)
+	{}
+
 	virtual ~NorthstarEncoder() {}
 	std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors);
+
+private:
+	const NorthstarEncoderProto& _config;
 };
 
 extern FlagGroup northstarEncoderFlags;

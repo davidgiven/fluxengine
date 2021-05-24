@@ -2,8 +2,6 @@
 #include "northstar.h"
 #include "sectorset.h"
 
-FlagGroup northstarEncoderFlags;
-
 #define GAP_FILL_SIZE_SD 30
 #define PRE_HEADER_GAP_FILL_SIZE_SD 9
 #define GAP_FILL_SIZE_DD 62

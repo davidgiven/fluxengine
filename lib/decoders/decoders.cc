@@ -13,6 +13,7 @@
 #include "arch/macintosh/macintosh.h"
 #include "arch/micropolis/micropolis.h"
 #include "arch/mx/mx.h"
+#include "arch/northstar/northstar.h"
 #include "arch/tids990/tids990.h"
 #include "arch/victor9k/victor9k.h"
 #include "arch/zilogmcz/zilogmcz.h"
@@ -68,6 +69,9 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 
 		case DecoderProto::kZilogmcz:
 			return std::unique_ptr<AbstractDecoder>(new ZilogMczDecoder(config.zilogmcz()));
+
+		case DecoderProto::kNorthstar:
+			return std::unique_ptr<AbstractDecoder>(new NorthstarDecoder(config.northstar()));
 
 		default:
 			Error() << "no input disk format specified";

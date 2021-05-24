@@ -32,7 +32,7 @@ fluxengine read northstar
 To read a single-sided North Star floppy, run:
 
 ```
-fluxengine read northstar -s:0
+fluxengine read northstar -heads 0
 ```
 
 You should end up with a `northstar.nsi` with a file size dependent on the floppy
@@ -53,15 +53,11 @@ sure that the drive's spindle speed is adjusted to exactly 300RPM.
 To write a double-sided North Star floppy, run:
 
 ```
-fluxengine write northstar -i image_to_write.nsi
+fluxengine write <format> -i image_to_write.nsi
 ```
 
-To write a single-sided North Star floppy, run:
-
-```
-fluxengine write northstar -i image_to_write.nsi -d:s=0
-```
-
+...where `<format>` is `northstar87`, `northstar175` or `northstar350`
+depending on the format you want to write.
 
 Useful references
 -----------------

@@ -21,6 +21,7 @@ public:
     static std::unique_ptr<ImageReader> createImgImageReader(const ImageReaderProto& config);
     static std::unique_ptr<ImageReader> createJv3ImageReader(const ImageReaderProto& config);
     static std::unique_ptr<ImageReader> createIMDImageReader(const ImageReaderProto& config);
+    static std::unique_ptr<ImageReader> createNsiImageReader(const ImageReaderProto& config);
 
 public:
 	virtual SectorSet readImage() = 0;
