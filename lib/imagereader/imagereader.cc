@@ -29,6 +29,9 @@ std::unique_ptr<ImageReader> ImageReader::create(const ImageReaderProto& config)
 		case ImageReaderProto::kD64:
 			return ImageReader::createD64ImageReader(config);
 
+		case ImageReaderProto::kNsi:
+			return ImageReader::createNsiImageReader(config);
+
 		default:
 			Error() << "bad input file config";
 			return std::unique_ptr<ImageReader>();
@@ -46,6 +49,7 @@ void ImageReader::updateConfigForFilename(ImageReaderProto* proto, const std::st
 		{".diskcopy", [&]() { proto->mutable_diskcopy(); }},
 		{".img",      [&]() { proto->mutable_img(); }},
 		{".st",       [&]() { proto->mutable_img(); }},
+		{".nsi",      [&]() { proto->mutable_nsi(); }},
 	};
 
 	for (const auto& it : formats)

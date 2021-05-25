@@ -6,6 +6,7 @@ import "lib/common.proto";
 message D64OutputProto {}
 message LDBSOutputProto {}
 message DiskCopyOutputProto {}
+message NsiOutputProto {}
 
 message ImageWriterProto {
 	optional string filename = 1 [(help) = "filename of output sector image"];
@@ -14,6 +15,7 @@ message ImageWriterProto {
 		D64OutputProto d64 = 3;
 		LDBSOutputProto ldbs = 4;
 		DiskCopyOutputProto diskcopy = 5;
+		NsiOutputProto nsi = 6;
 	}
 }
 

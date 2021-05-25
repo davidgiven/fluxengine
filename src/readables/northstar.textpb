@@ -1,0 +1,32 @@
+comment: 'Northstar 87kB/175kB/350kB 5.25" 35-track 10-sector hard sectored'
+
+input {
+	flux {
+		drive {
+			hard_sector_count: 10
+			sync_with_index: 1
+		}
+	}
+}
+
+output {
+	image {
+		filename: "northstar.nsi"
+		nsi {}
+	}
+}
+
+decoder {
+	northstar {}
+}
+
+cylinders {
+	start: 0
+	end: 34
+}
+
+heads {
+	start: 0
+	end: 1
+}
+

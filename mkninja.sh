@@ -272,6 +272,7 @@ buildproto libproto.a \
     arch/macintosh/macintosh.proto \
     arch/micropolis/micropolis.proto \
     arch/mx/mx.proto \
+    arch/northstar/northstar.proto \
     arch/tids990/tids990.proto \
     arch/victor9k/victor9k.proto \
     arch/zilogmcz/zilogmcz.proto \
@@ -305,6 +306,8 @@ buildlibrary libbackend.a \
     arch/macintosh/encoder.cc \
     arch/micropolis/decoder.cc \
     arch/mx/decoder.cc \
+    arch/northstar/decoder.cc \
+    arch/northstar/encoder.cc \
     arch/tids990/decoder.cc \
     arch/tids990/encoder.cc \
     arch/victor9k/decoder.cc \
@@ -342,11 +345,13 @@ buildlibrary libbackend.a \
     lib/imagereader/imdimagereader.cc \
     lib/imagereader/imgimagereader.cc \
     lib/imagereader/jv3imagereader.cc \
+    lib/imagereader/nsiimagereader.cc \
     lib/imagewriter/d64imagewriter.cc \
     lib/imagewriter/diskcopyimagewriter.cc \
     lib/imagewriter/imagewriter.cc \
     lib/imagewriter/imgimagewriter.cc \
     lib/imagewriter/ldbsimagewriter.cc \
+    lib/imagewriter/nsiimagewriter.cc \
     lib/ldbs.cc \
     lib/proto.cc \
     lib/reader.cc \
@@ -365,8 +370,8 @@ READABLES="\
     acornadfs \
     acorndfs \
     aeslanier \
-    ampro \
     amiga \
+    ampro \
     apple2 \
     atarist \
     brother \
@@ -379,6 +384,7 @@ READABLES="\
     macintosh \
     micropolis \
     mx \
+    northstar \
     tids990 \
     victor9k \
     zilogmcz \
@@ -386,17 +392,6 @@ READABLES="\
 
 WRITABLES="\
     amiga \
-    brother120 \
-    brother240 \
-    ibm1440 \
-    ibm720 \
-    ibm180_525 \
-    ibm360_525 \
-    ibm720_525 \
-    ibm1200_525 \
-    commodore1541 \
-    commodore1581 \
-    hplif770 \
     atarist360 \
     atarist370 \
     atarist400 \
@@ -405,7 +400,21 @@ WRITABLES="\
     atarist740 \
     atarist800 \
     atarist820 \
+    brother120 \
+    brother240 \
+    commodore1541 \
+    commodore1581 \
+    hplif770 \
+    ibm1200_525 \
+    ibm1440 \
+    ibm180_525 \
+    ibm360_525 \
+    ibm720 \
+    ibm720_525 \
     macintosh \
+    northstar87 \
+    northstar175 \
+    northstar350 \
     tids990 \
     "
 
