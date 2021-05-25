@@ -17,6 +17,7 @@ class Sector;
 class Fluxmap;
 class MacintoshDecoderProto;
 class MacintoshEncoderProto;
+class DisassemblingGeometryMapper;
 
 class MacintoshDecoder : public AbstractDecoder
 {
@@ -34,11 +35,17 @@ public:
 class MacintoshEncoder : public AbstractEncoder
 {
 public:
-	MacintoshEncoder(const MacintoshEncoderProto&) {}
+	MacintoshEncoder(const MacintoshEncoderProto&, const DisassemblingGeometryMapper& mapper):
+		_mapper(mapper)
+	{}
+
 	virtual ~MacintoshEncoder() {}
 
 public:
-    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors);
+    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide);
+
+private:
+	const DisassemblingGeometryMapper& _mapper;
 };
 
 extern FlagGroup macintoshEncoderFlags;

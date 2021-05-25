@@ -57,7 +57,7 @@ public:
 	}
 
 private:
-	void getTrackFormat(ImgInputOutputProto::TrackdataProto& trackdata, unsigned track, unsigned side)
+	void getTrackFormat(ImgInputOutputProto::TrackdataProto& trackdata, unsigned track, unsigned side) const
 	{
 		trackdata.Clear();
 		for (const ImgInputOutputProto::TrackdataProto& f : _config.img().trackdata())

@@ -65,13 +65,12 @@ void fillBitmapTo(std::vector<bool>& bitmap,
 	}
 }
 
-void writeDiskCommand(ImageReader& imageReader, AbstractEncoder& encoder, FluxSink& fluxSink)
+void writeDiskCommand(AbstractEncoder& encoder, FluxSink& fluxSink)
 {
-	SectorSet allSectors = imageReader.readImage();
 	writeTracks(fluxSink,
 		[&](int track, int side) -> std::unique_ptr<Fluxmap>
 		{
-			return encoder.encode(track, side, allSectors);
+			return encoder.encode(track, side);
 		}
 	);
 }

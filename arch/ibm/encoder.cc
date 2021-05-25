@@ -7,6 +7,7 @@
 #include "sectorset.h"
 #include "writer.h"
 #include "arch/ibm/ibm.pb.h"
+#include "geometry/geometry.h"
 #include "fmt/format.h"
 #include <ctype.h>
 
@@ -99,8 +100,7 @@ void IbmEncoder::getTrackFormat(IbmEncoderProto::TrackdataProto& trackdata, unsi
 	}
 }
 
-std::unique_ptr<Fluxmap> IbmEncoder::encode(
-	int physicalTrack, int physicalSide, const SectorSet& allSectors)
+std::unique_ptr<Fluxmap> IbmEncoder::encode(int physicalTrack, int physicalSide)
 {
 	IbmEncoderProto::TrackdataProto trackdata;
 	getTrackFormat(trackdata, physicalTrack, physicalSide);
@@ -165,7 +165,7 @@ std::unique_ptr<Fluxmap> IbmEncoder::encode(
 			writeFillerBytes(trackdata.gap3(), gapFill);
 		first = false;
 
-		const auto& sectorData = allSectors.get(physicalTrack, physicalSide, sectorId);
+		const auto* sectorData = _mapper.get(physicalTrack, physicalSide, sectorId);
 		if (!sectorData)
 		{
 			/* If there are any missing sectors, this is an empty track. */

@@ -282,6 +282,7 @@ buildproto libproto.a \
     lib/encoders/encoders.proto \
     lib/fluxsource/fluxsource.proto \
     lib/fluxsink/fluxsink.proto \
+    lib/geometry/geometry.proto \
     lib/imagereader/imagereader.proto \
     lib/imagewriter/imagewriter.proto \
     lib/usb/usb.proto \
@@ -337,6 +338,7 @@ buildlibrary libbackend.a \
     lib/fluxsource/scpfluxsource.cc \
     lib/fluxsource/sqlitefluxsource.cc \
     lib/fluxsource/testpatternfluxsource.cc \
+    lib/geometry/dgmapper.cc \
     lib/globals.cc \
     lib/hexdump.cc \
     lib/imagereader/d64imagereader.cc \

@@ -7,6 +7,7 @@ import "lib/imagewriter/imagewriter.proto";
 import "lib/fluxsource/fluxsource.proto";
 import "lib/fluxsink/fluxsink.proto";
 import "lib/usb/usb.proto";
+import "lib/geometry/geometry.proto";
 import "lib/common.proto";
 
 message InputProto {
@@ -24,15 +25,16 @@ message OutputProto {
 }
 
 message ConfigProto {
-	optional string comment = 8;
+	optional string comment = 1;
 
-	optional InputProto input = 1;
-	optional OutputProto output = 2;
-	optional EncoderProto encoder = 3;
-	optional DecoderProto decoder = 4;
-	optional UsbProto usb = 5;
+	optional InputProto input = 2;
+	optional OutputProto output = 3;
+	optional EncoderProto encoder = 4;
+	optional DecoderProto decoder = 5;
+	optional UsbProto usb = 6;
+	optional GeometryProto geometry = 7;
 
-	optional RangeProto cylinders = 6;
-	optional RangeProto heads = 7;
+	optional RangeProto cylinders = 8;
+	optional RangeProto heads = 9;
 }
 

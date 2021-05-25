@@ -9,6 +9,7 @@
 #include "writer.h"
 #include "fmt/format.h"
 #include "arch/c64/c64.pb.h"
+#include "geometry/geometry.h"
 #include <ctype.h>
 #include "bytes.h"
 
@@ -293,8 +294,7 @@ static void write_sector(std::vector<bool>& bits, unsigned& cursor, const Sector
     }
 }
 
-std::unique_ptr<Fluxmap> Commodore64Encoder::encode(
-    int physicalTrack, int physicalSide, const SectorSet& allSectors)
+std::unique_ptr<Fluxmap> Commodore64Encoder::encode(int physicalTrack, int physicalSide)
 {
     /* The format ID Character # 1 and # 2 are in the .d64 image only present
      * in track 18 sector zero which contains the BAM info in byte 162 and 163.
@@ -305,7 +305,7 @@ std::unique_ptr<Fluxmap> Commodore64Encoder::encode(
     if ((physicalTrack < 0) || (physicalTrack >= C64_TRACKS_PER_DISK))
         return std::unique_ptr<Fluxmap>();
 
-    const auto& sectorData = allSectors.get(C64_BAM_TRACK, 0, 0); //Read de BAM to get the DISK ID bytes
+    const auto* sectorData = _mapper.get(C64_BAM_TRACK, 0, 0); //Read de BAM to get the DISK ID bytes
 
     ByteReader br(sectorData->data);
     br.seek(162); //goto position of the first Disk ID Byte
@@ -325,7 +325,7 @@ std::unique_ptr<Fluxmap> Commodore64Encoder::encode(
     unsigned numSectors = sectorsForTrack(physicalTrack);
     for (int sectorId=0; sectorId<numSectors; sectorId++)
     {
-        const auto& sectorData = allSectors.get(physicalTrack, physicalSide, sectorId);
+        const auto& sectorData = _mapper.get(physicalTrack, physicalSide, sectorId);
         write_sector(bits, cursor, sectorData);
     }
 

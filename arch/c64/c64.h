@@ -32,6 +32,7 @@ class Sector;
 class Fluxmap;
 class Commodore64DecoderProto;
 class Commodore64EncoderProto;
+class DisassemblingGeometryMapper;
 
 class Commodore64Decoder : public AbstractDecoder
 {
@@ -47,17 +48,19 @@ public:
 class Commodore64Encoder : public AbstractEncoder
 {
 public:
-	Commodore64Encoder(const Commodore64EncoderProto& config):
-		_config(config)
+	Commodore64Encoder(const Commodore64EncoderProto& config, const DisassemblingGeometryMapper& mapper):
+		_config(config),
+		_mapper(mapper)
 	{}
 
 	virtual ~Commodore64Encoder() {}
 
 public:
-    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors);
+    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide);
 
 private:
 	const Commodore64EncoderProto& _config;
+	const DisassemblingGeometryMapper& _mapper;
 };
 
 #endif

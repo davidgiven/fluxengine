@@ -1,6 +1,7 @@
 #include "globals.h"
 #include "northstar.h"
 #include "sectorset.h"
+#include "geometry/geometry.h"
 
 #define GAP_FILL_SIZE_SD 30
 #define PRE_HEADER_GAP_FILL_SIZE_SD 9
@@ -95,8 +96,7 @@ static void write_sector(std::vector<bool>& bits, unsigned& cursor, const Sector
 	}
 }
 
-std::unique_ptr<Fluxmap> NorthstarEncoder::encode(
-	int physicalTrack, int physicalSide, const SectorSet& allSectors)
+std::unique_ptr<Fluxmap> NorthstarEncoder::encode(int physicalTrack, int physicalSide)
 {
 	int bitsPerRevolution = 100000;
 	double clockRateUs = 4.00;
@@ -104,7 +104,7 @@ std::unique_ptr<Fluxmap> NorthstarEncoder::encode(
 	if ((physicalTrack < 0) || (physicalTrack >= 35))
 		return std::unique_ptr<Fluxmap>();
 
-	const auto& sector = allSectors.get(physicalTrack, physicalSide, 0);
+	const auto* sector = _mapper.get(physicalTrack, physicalSide, 0);
 
 	if (sector->data.size() == NORTHSTAR_PAYLOAD_SIZE_SD) {
 		bitsPerRevolution /= 2;		// FM
@@ -117,7 +117,7 @@ std::unique_ptr<Fluxmap> NorthstarEncoder::encode(
 
 	for (int sectorId = 0; sectorId < 10; sectorId++)
 	{
-		const auto& sectorData = allSectors.get(physicalTrack, physicalSide, sectorId);
+		const auto* sectorData = _mapper.get(physicalTrack, physicalSide, sectorId);
 		write_sector(bits, cursor, sectorData);
 	}
 

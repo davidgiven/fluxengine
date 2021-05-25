@@ -6,6 +6,7 @@
 #include "crc.h"
 #include "sectorset.h"
 #include "writer.h"
+#include "geometry/geometry.h"
 
 FlagGroup amigaEncoderFlags;
 
@@ -99,8 +100,7 @@ static void write_sector(std::vector<bool>& bits, unsigned& cursor, const Sector
 	write_bits(bits, cursor, dataBits);
 }
 
-std::unique_ptr<Fluxmap> AmigaEncoder::encode(
-	int physicalTrack, int physicalSide, const SectorSet& allSectors)
+std::unique_ptr<Fluxmap> AmigaEncoder::encode(int physicalTrack, int physicalSide)
 {
 	if ((physicalTrack < 0) || (physicalTrack >= AMIGA_TRACKS_PER_DISK))
 		return std::unique_ptr<Fluxmap>();
@@ -114,7 +114,7 @@ std::unique_ptr<Fluxmap> AmigaEncoder::encode(
 
 	for (int sectorId=0; sectorId<AMIGA_SECTORS_PER_TRACK; sectorId++)
 	{
-		const auto& sectorData = allSectors.get(physicalTrack, physicalSide, sectorId);
+		const auto& sectorData = _mapper.get(physicalTrack, physicalSide, sectorId);
 		write_sector(bits, cursor, sectorData);
     }
 

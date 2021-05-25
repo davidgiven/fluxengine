@@ -30,6 +30,8 @@ struct IbmIdam
     uint8_t crc[2];
 };
 
+class DisassemblingGeometryMapper;
+
 class IbmDecoder : public AbstractDecoder
 {
 public:
@@ -52,14 +54,15 @@ private:
 class IbmEncoder : public AbstractEncoder
 {
 public:
-	IbmEncoder(const IbmEncoderProto& config):
-		_config(config)
+	IbmEncoder(const IbmEncoderProto& config, const DisassemblingGeometryMapper& mapper):
+		_config(config),
+		_mapper(mapper)
 	{}
 
 	virtual ~IbmEncoder() {}
 
 public:
-    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors);
+    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide);
 
 private:
 	void writeRawBits(uint32_t data, int width);
@@ -69,6 +72,7 @@ private:
 
 private:
 	const IbmEncoderProto& _config;
+	const DisassemblingGeometryMapper& _mapper;
 	std::vector<bool> _bits;
 	unsigned _cursor;
 	bool _lastBit;

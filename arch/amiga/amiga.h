@@ -14,6 +14,7 @@ class Fluxmap;
 class SectorSet;
 class AmigaDecoderProto;
 class AmigaEncoderProto;
+class DisassemblingGeometryMapper;
 
 class AmigaDecoder : public AbstractDecoder
 {
@@ -30,15 +31,18 @@ public:
 class AmigaEncoder : public AbstractEncoder
 {
 public:
-	AmigaEncoder(const AmigaEncoderProto& config):
-		_config(config) {}
+	AmigaEncoder(const AmigaEncoderProto& config, const DisassemblingGeometryMapper& mapper):
+		_config(config),
+		_mapper(mapper)
+	{}
 	virtual ~AmigaEncoder() {}
 
 public:
-    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors);
+    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide);
 
 private:
 	const AmigaEncoderProto& _config;
+	const DisassemblingGeometryMapper& _mapper;
 };
 
 extern uint32_t amigaChecksum(const Bytes& bytes);

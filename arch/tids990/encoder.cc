@@ -6,6 +6,7 @@
 #include "crc.h"
 #include "sectorset.h"
 #include "writer.h"
+#include "geometry/geometry.h"
 #include "arch/tids990/tids990.pb.h"
 #include <fmt/format.h>
 
@@ -49,8 +50,7 @@ static uint8_t decodeUint16(uint16_t raw)
 	return decodeFmMfm(b.toBits())[0];
 }
 
-std::unique_ptr<Fluxmap> Tids990Encoder::encode(
-	int physicalTrack, int physicalSide, const SectorSet& allSectors)
+std::unique_ptr<Fluxmap> Tids990Encoder::encode(int physicalTrack, int physicalSide)
 {
 	double clockRateUs = 1e3 / _config.clock_rate_khz() / 2.0;
 	int bitsPerRevolution = (_config.track_length_ms() * 1000.0) / clockRateUs;
@@ -70,7 +70,7 @@ std::unique_ptr<Fluxmap> Tids990Encoder::encode(
 			writeBytes(_config.gap3_bytes(), 0x55);
 		first = false;
 
-		const auto& sectorData = allSectors.get(physicalTrack, physicalSide, sectorId);
+		const auto* sectorData = _mapper.get(physicalTrack, physicalSide, sectorId);
 		if (!sectorData)
 			Error() << fmt::format("format tried to find sector {} which wasn't in the input file", sectorId);
 

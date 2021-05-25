@@ -18,6 +18,7 @@ class SectorSet;
 class Fluxmap;
 class BrotherDecoderProto;
 class BrotherEncoderProto;
+class DisassemblingGeometryMapper;
 
 class BrotherDecoder : public AbstractDecoder
 {
@@ -33,17 +34,19 @@ public:
 class BrotherEncoder : public AbstractEncoder
 {
 public:
-	BrotherEncoder(const BrotherEncoderProto& config):
-		_config(config)
+	BrotherEncoder(const BrotherEncoderProto& config, const DisassemblingGeometryMapper& mapper):
+		_config(config),
+		_mapper(mapper)
 	{}
 
 	virtual ~BrotherEncoder() {}
 
 private:
 	const BrotherEncoderProto& _config;
+	const DisassemblingGeometryMapper& _mapper;
 
 public:
-    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors);
+    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide);
 };
 
 #endif

@@ -13,6 +13,7 @@
 #include "arch/ibm/ibm.h"
 #include "imagereader/imagereader.h"
 #include "fluxengine.h"
+#include "geometry/geometry.h"
 #include "fmt/format.h"
 #include <google/protobuf/text_format.h>
 #include <fstream>
@@ -65,10 +66,11 @@ int mainWrite(int argc, const char* argv[])
 		Error() << "incomplete config (did you remember to specify the format?)";
 
 	std::unique_ptr<ImageReader> reader(ImageReader::create(config.input().image()));
-	std::unique_ptr<AbstractEncoder> encoder(AbstractEncoder::create(config.encoder()));
+	std::unique_ptr<DisassemblingGeometryMapper> geometryMapper(createSimpleDisassemblingGeometryMapper(config.geometry(), *reader));
+	std::unique_ptr<AbstractEncoder> encoder(AbstractEncoder::create(config.encoder(), *geometryMapper));
 	std::unique_ptr<FluxSink> fluxSink(FluxSink::create(config.output().flux()));
 
-	writeDiskCommand(*reader, *encoder, *fluxSink);
+	writeDiskCommand(*encoder, *fluxSink);
 
     return 0;
 }

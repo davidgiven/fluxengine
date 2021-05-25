@@ -30,6 +30,7 @@
 
 class NorthstarEncoderProto;
 class NorthstarDecoderProto;
+class DisassemblingGeometryMapper;
 
 class NorthstarDecoder : public AbstractDecoder
 {
@@ -55,15 +56,17 @@ private:
 class NorthstarEncoder : public AbstractEncoder
 {
 public:
-	NorthstarEncoder(const NorthstarEncoderProto& config):
-		_config(config)
+	NorthstarEncoder(const NorthstarEncoderProto& config, const DisassemblingGeometryMapper& mapper):
+		_config(config),
+		_mapper(mapper)
 	{}
 
 	virtual ~NorthstarEncoder() {}
-	std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors);
+	std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide);
 
 private:
 	const NorthstarEncoderProto& _config;
+	const DisassemblingGeometryMapper& _mapper;
 };
 
 extern FlagGroup northstarEncoderFlags;

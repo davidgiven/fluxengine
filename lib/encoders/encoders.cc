@@ -12,27 +12,28 @@
 #include "lib/encoders/encoders.pb.h"
 #include "protocol.h"
 
-std::unique_ptr<AbstractEncoder> AbstractEncoder::create(const EncoderProto& config)
+std::unique_ptr<AbstractEncoder> AbstractEncoder::create(
+		const EncoderProto& config, const DisassemblingGeometryMapper& mapper)
 {
 	switch (config.format_case())
 	{
 		case EncoderProto::kAmiga:
-			return std::unique_ptr<AbstractEncoder>(new AmigaEncoder(config.amiga()));
+			return std::unique_ptr<AbstractEncoder>(new AmigaEncoder(config.amiga(), mapper));
 
 		case EncoderProto::kIbm:
-			return std::unique_ptr<AbstractEncoder>(new IbmEncoder(config.ibm()));
+			return std::unique_ptr<AbstractEncoder>(new IbmEncoder(config.ibm(), mapper));
 
 		case EncoderProto::kBrother:
-			return std::unique_ptr<AbstractEncoder>(new BrotherEncoder(config.brother()));
+			return std::unique_ptr<AbstractEncoder>(new BrotherEncoder(config.brother(), mapper));
 
 		case EncoderProto::kMacintosh:
-			return std::unique_ptr<AbstractEncoder>(new MacintoshEncoder(config.macintosh()));
+			return std::unique_ptr<AbstractEncoder>(new MacintoshEncoder(config.macintosh(), mapper));
 
 		case EncoderProto::kC64:
-			return std::unique_ptr<AbstractEncoder>(new Commodore64Encoder(config.c64()));
+			return std::unique_ptr<AbstractEncoder>(new Commodore64Encoder(config.c64(), mapper));
 
 		case EncoderProto::kNorthstar:
-			return std::unique_ptr<AbstractEncoder>(new NorthstarEncoder(config.northstar()));
+			return std::unique_ptr<AbstractEncoder>(new NorthstarEncoder(config.northstar(), mapper));
 
 		default:
 			Error() << "no input disk format specified";

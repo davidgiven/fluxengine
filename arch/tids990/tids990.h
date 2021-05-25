@@ -11,6 +11,7 @@ class Fluxmap;
 class Track;
 class Tids990DecoderProto;
 class Tids990EncoderProto;
+class DisassemblingGeometryMapper;
 
 class Tids990Decoder : public AbstractDecoder
 {
@@ -26,8 +27,9 @@ public:
 class Tids990Encoder : public AbstractEncoder
 {
 public:
-	Tids990Encoder(const Tids990EncoderProto& config):
-		_config(config)
+	Tids990Encoder(const Tids990EncoderProto& config, const DisassemblingGeometryMapper& mapper):
+		_config(config),
+		_mapper(mapper)
 	{}
 	virtual ~Tids990Encoder() {}
 
@@ -38,10 +40,11 @@ private:
 	void writeSync();
 
 public:
-    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors);
+    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide);
 
 private:
 	const Tids990EncoderProto& _config;
+	const DisassemblingGeometryMapper& _mapper;
 	std::vector<bool> _bits;
 	unsigned _cursor;
 	bool _lastBit;

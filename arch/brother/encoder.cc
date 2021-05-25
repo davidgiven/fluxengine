@@ -7,6 +7,7 @@
 #include "sectorset.h"
 #include "writer.h"
 #include "arch/brother/brother.pb.h"
+#include "geometry/geometry.h"
 
 FlagGroup brotherEncoderFlags;
 
@@ -127,8 +128,7 @@ static int charToInt(char c)
 	return 10 + tolower(c) - 'a';
 }
 
-std::unique_ptr<Fluxmap> BrotherEncoder::encode(
-	int physicalTrack, int physicalSide, const SectorSet& allSectors)
+std::unique_ptr<Fluxmap> BrotherEncoder::encode(int physicalTrack, int physicalSide)
 {
 	int logicalTrack;
 	if (physicalSide != 0)
@@ -163,7 +163,7 @@ std::unique_ptr<Fluxmap> BrotherEncoder::encode(
 		double dataMs = headerMs + postHeaderSpacingMs;
 		unsigned dataCursor = dataMs*1e3 / clockRateUs;
 
-		const auto& sectorData = allSectors.get(logicalTrack, 0, sectorId);
+		const auto& sectorData = _mapper.get(logicalTrack, 0, sectorId);
 
 		fillBitmapTo(bits, cursor, headerCursor, { true, false });
 		write_sector_header(bits, cursor, logicalTrack, sectorId);
