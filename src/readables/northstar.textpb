@@ -4,6 +4,7 @@ input {
 	flux {
 		drive {
 			hard_sector_count: 10
+			sync_with_index: 1
 		}
 	}
 }
@@ -16,7 +17,7 @@ output {
 }
 
 decoder {
-	micropolis {}
+	northstar {}
 }
 
 cylinders {

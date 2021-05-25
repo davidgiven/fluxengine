@@ -9,7 +9,9 @@ input {
 
 output {
 	flux {
-		drive {}
+		drive {
+			hard_sector_count: 10
+		}
 	}
 }
 
