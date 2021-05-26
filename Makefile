@@ -20,7 +20,7 @@ export AR = /mingw32/bin/ar rcs
 export STRIP = /mingw32/bin/strip
 export CFLAGS += -I/mingw32/include/libusb-1.0 -I/mingw32/include
 export LDFLAGS +=
-export LIBS += -L/mingw32/lib -lz -lsqlite3 -lusb-1.0 -lprotobuf
+export LIBS += -L/mingw32/lib -static -lz -lsqlite3 -lusb-1.0 -lprotobuf
 export EXTENSION = .exe
 else
 
