@@ -33,7 +33,7 @@ jobs:
     steps:
     - uses: msys2/setup-msys2@v2
       with:
-        update: false
+        update: true
         msystem: MINGW32
         install: >-
           make
