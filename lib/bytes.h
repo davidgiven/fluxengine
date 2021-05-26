@@ -16,6 +16,7 @@ public:
     Bytes(std::initializer_list<uint8_t> data);
     Bytes(std::shared_ptr<std::vector<uint8_t>> data);
     Bytes(std::shared_ptr<std::vector<uint8_t>> data, unsigned start, unsigned end);
+	Bytes(std::istream& stream, size_t len);
 
     Bytes* operator = (const Bytes& other);
 

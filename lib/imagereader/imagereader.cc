@@ -14,23 +14,20 @@ std::unique_ptr<ImageReader> ImageReader::create(const ImageReaderProto& config)
 {
 	switch (config.format_case())
 	{
-		case ImageReaderProto::kImd:
-			return ImageReader::createIMDImageReader(config);
+//		case ImageReaderProto::kImd:
+//			return ImageReader::createIMDImageReader(config);
 
 		case ImageReaderProto::kImg:
 			return ImageReader::createImgImageReader(config);
 
-		case ImageReaderProto::kDiskcopy:
-			return ImageReader::createDiskCopyImageReader(config);
-
-		case ImageReaderProto::kJv3:
-			return ImageReader::createJv3ImageReader(config);
-
-		case ImageReaderProto::kD64:
-			return ImageReader::createD64ImageReader(config);
-
-		case ImageReaderProto::kNsi:
-			return ImageReader::createNsiImageReader(config);
+//		case ImageReaderProto::kDiskcopy:
+//			return ImageReader::createDiskCopyImageReader(config);
+//
+//		case ImageReaderProto::kJv3:
+//			return ImageReader::createJv3ImageReader(config);
+//
+//		case ImageReaderProto::kD64:
+//			return ImageReader::createD64ImageReader(config);
 
 		default:
 			Error() << "bad input file config";
@@ -49,7 +46,7 @@ void ImageReader::updateConfigForFilename(ImageReaderProto* proto, const std::st
 		{".diskcopy", [&]() { proto->mutable_diskcopy(); }},
 		{".img",      [&]() { proto->mutable_img(); }},
 		{".st",       [&]() { proto->mutable_img(); }},
-		{".nsi",      [&]() { proto->mutable_nsi(); }},
+		{".nsi",      [&]() { proto->mutable_img(); }},
 	};
 
 	for (const auto& it : formats)

@@ -65,6 +65,14 @@ Bytes::Bytes(std::shared_ptr<std::vector<uint8_t>> data, unsigned start, unsigne
     _high(end)
 {}
 
+Bytes::Bytes(std::istream& stream, size_t size):
+	_data(createVector(size)),
+	_low(0),
+	_high(size)
+{
+	stream.read((char*)begin(), size);
+}
+
 Bytes* Bytes::operator = (const Bytes& other)
 {
     _data = other._data;

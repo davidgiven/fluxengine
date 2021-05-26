@@ -3,20 +3,22 @@ comment: 'Atari ST 720kB 3.5" 80-track 9-sector double sided'
 input {
 	image {
 		filename: "atarist720.st"
-		img {
-			tracks: 80
-			sides: 2
-			trackdata {
-				sectors: 9
-				sector_size: 512
-			}
-		}
+		img {}
 	}
 }
 
 output {
 	flux {
 		drive {}
+	}
+}
+
+geometry {
+	cylinders: 80
+	heads: 2
+	trackdata {
+		sectors: 9
+		sector_size: 512
 	}
 }
 

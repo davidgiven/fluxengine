@@ -2,19 +2,21 @@ syntax = "proto2";
 
 import "lib/common.proto";
 
-message TrackdataProto {
-	optional int32 cylinder = 1 [(help) = "if set, this entry applies only to this cylinder"];
-	optional int32 head = 2 [(help) = "if set, this entry applies only to this head"];
-
-	optional int32 sector_size = 4 [(help) = "number of bytes in each sector of this track"];
-	optional int32 sectors = 3 [(help) = "number of sectors on this track"];
-}
-
-enum BlockOrdering {
-	ORDER_CHS = 0;
-}
-
 message GeometryProto {
+	enum BlockOrdering {
+		ORDER_CHS = 0 [(ehelp) = "head 0 interleaved with head 1"];
+		ORDER_HCS = 1 [(ehelp) = "all of head 0, then all of head 1"];
+		ORDER_NSI = 2 [(ehelp) = "all of head 0, then all of head 1 in reverse order"];
+	}
+
+	message TrackdataProto {
+		optional int32 cylinder = 1 [(help) = "if set, this entry applies only to this cylinder"];
+		optional int32 head = 2 [(help) = "if set, this entry applies only to this head"];
+
+		optional int32 sector_size = 4 [(help) = "number of bytes in each sector of this track"];
+		optional int32 sectors = 3 [(help) = "number of sectors on this track"];
+	}
+
 	optional int32 cylinders = 1 [(help) = "number of cylinders in the image"];
 	optional int32 heads = 2 [(help) = "number of sides in the image"];
 	repeated TrackdataProto trackdata = 3 [(help) = "descriptions of each track"];

@@ -16,6 +16,9 @@ public:
 		ImageReader(config)
 	{}
 
+	Bytes getBlock(size_t offset, size_t length) const
+	{}
+
 	SectorSet readImage()
 	{
         std::ifstream inputFile(_config.filename(), std::ios::in | std::ios::binary);

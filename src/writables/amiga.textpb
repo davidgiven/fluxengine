@@ -3,19 +3,21 @@ comment: 'Amiga 880kB 3.5" double sided'
 input {
 	image {
 		filename: "amiga.adf"
-		img {
-			tracks: 80
-			sides: 2
-			trackdata {
-				sectors: 11
-				sector_size: 512
-			}
-		}
+		img {}
 	}
 }
 
 output {
 	flux {}
+}
+
+geometry {
+	cylinders: 80
+	heads: 2
+	trackdata {
+		sectors: 11
+		sector_size: 512
+	}
 }
 
 encoder {

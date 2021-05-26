@@ -3,20 +3,22 @@ comment: 'Texas Instruments DS990 1126kB 8" double-sided'
 input {
 	image {
 		filename: "tids990.img"
-		img {
-			tracks: 77
-			sides: 2
-			trackdata {
-				sectors: 26
-				sector_size: 288
-			}
-		}
+		img {}
 	}
 }
 
 output {
 	flux {
 		drive {}
+	}
+}
+
+geometry {
+	cylinders: 77
+	heads: 2
+	trackdata {
+		sectors: 26
+		sector_size: 288
 	}
 }
 

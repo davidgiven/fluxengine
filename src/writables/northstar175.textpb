@@ -3,7 +3,7 @@ comment: 'Northstar 175kB 5.25" 35-track single-sided double-density hard-sector
 input {
 	image {
 		filename: "northstar.nsi"
-		nsi {}
+		img {}
 	}
 }
 
@@ -12,6 +12,16 @@ output {
 		drive {
 			hard_sector_count: 10
 		}
+	}
+}
+
+geometry {
+	cylinders: 35
+	heads: 1
+	block_ordering: ORDER_NSI
+	trackdata {
+		sectors: 10
+		sector_size: 512
 	}
 }
 

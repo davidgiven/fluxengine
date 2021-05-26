@@ -14,62 +14,24 @@ class ImgImageReader : public ImageReader
 public:
 	ImgImageReader(const ImageReaderProto& config):
 		ImageReader(config)
-	{}
-
-	SectorSet readImage()
 	{
-        std::ifstream inputFile(_config.filename(), std::ios::in | std::ios::binary);
-        if (!inputFile.is_open())
+		_if.open(_config.filename(), std::ios::in | std::ios::binary);
+        if (!_if.is_open())
             Error() << "cannot open input file";
 
-        SectorSet sectors;
-        for (int track = 0; track < _config.img().tracks(); track++)
-        {
-            for (int side = 0; side < _config.img().sides(); side++)
-            {
-				ImgInputOutputProto::TrackdataProto trackdata;
-				getTrackFormat(trackdata, track, side);
+		_if.seekg(0, std::ios::end);
+        std::cout << fmt::format("IMG: reading input image of {} kB total\n",
+						_if.tellg() / 1024);
+	}
 
-                for (int sectorId = 0; sectorId < trackdata.sectors(); sectorId++)
-                {
-                    Bytes data(trackdata.sector_size());
-                    inputFile.read((char*) data.begin(), data.size());
-
-                    std::unique_ptr<Sector>& sector = sectors.get(track, side, sectorId);
-                    sector.reset(new Sector);
-                    sector->status = Sector::OK;
-                    sector->logicalTrack = track;
-					sector->physicalTrack = track * _config.img().physical_step() + _config.img().physical_offset();
-                    sector->logicalSide = sector->physicalSide = side;
-                    sector->logicalSector = sectorId;
-                    sector->data = data;
-                }
-            }
-
-			if (inputFile.eof())
-				break;
-        }
-
-        std::cout << fmt::format("reading {} tracks, {} sides, {} kB total\n",
-                        _config.img().tracks(), _config.img().sides(),
-						inputFile.tellg() / 1024);
-        return sectors;
+	Bytes getBlock(size_t offset, size_t length) const
+	{
+		_if.seekg(offset);
+		return Bytes(_if, length);
 	}
 
 private:
-	void getTrackFormat(ImgInputOutputProto::TrackdataProto& trackdata, unsigned track, unsigned side) const
-	{
-		trackdata.Clear();
-		for (const ImgInputOutputProto::TrackdataProto& f : _config.img().trackdata())
-		{
-			if (f.has_track() && (f.track() != track))
-				continue;
-			if (f.has_side() && (f.side() != side))
-				continue;
-
-			trackdata.MergeFrom(f);
-		}
-	}
+	mutable std::ifstream _if;
 };
 
 std::unique_ptr<ImageReader> ImageReader::createImgImageReader(

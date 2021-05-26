@@ -3,20 +3,22 @@ comment: 'Atari ST 360kB 3.5" 80-track 9-sector single sided'
 input {
 	image {
 		filename: "atarist360.st"
-		img {
-			tracks: 80
-			sides: 1
-			trackdata {
-				sectors: 9
-				sector_size: 512
-			}
-		}
+		img {}
 	}
 }
 
 output {
 	flux {
 		drive {}
+	}
+}
+
+geometry {
+	cylinders: 80
+	heads: 1
+	trackdata {
+		sectors: 9
+		sector_size: 512
 	}
 }
 

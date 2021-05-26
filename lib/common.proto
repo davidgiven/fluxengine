@@ -12,10 +12,14 @@ extend google.protobuf.FieldOptions {
   optional string help = 50000;
 }
 
+extend google.protobuf.EnumValueOptions {
+  optional string ehelp = 50000;
+}
+
 enum IndexMode {
-	INDEXMODE_DRIVE = 0;
-	INDEXMODE_300 = 1;
-	INDEXMODE_360 = 2;
+	INDEXMODE_DRIVE = 0 [(ehelp) = "source index pulses from drive"];
+	INDEXMODE_300 = 1 [(ehelp) = "source index pulses from fake 300RPM source"];
+	INDEXMODE_360 = 2 [(ehelp) = "source index pulses from fake 360RPM source"];
 }
 
 

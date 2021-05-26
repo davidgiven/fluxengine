@@ -88,6 +88,9 @@ public:
 		ImageReader(config)
 	{}
 
+	Bytes getBlock(size_t offset, size_t length) const
+	{}
+
 	SectorSet readImage()
 	/*
 	IMAGE FILE FORMAT

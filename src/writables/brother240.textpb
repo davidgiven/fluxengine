@@ -3,20 +3,22 @@ comment: 'Brother 240kB 3.5" 78-track GCR disks'
 input {
 	image {
 		filename: "brother240.img"
-		img {
-			tracks: 78
-			sides: 1
-			trackdata {
-				sectors: 12
-				sector_size: 256
-			}
-		}
+		img {}
 	}
 }
 
 output {
 	flux {
 		drive {}
+	}
+}
+
+geometry {
+	cylinders: 78
+	heads: 1
+	trackdata {
+		sectors: 12
+		sector_size: 256
 	}
 }
 
