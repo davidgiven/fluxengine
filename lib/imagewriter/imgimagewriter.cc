@@ -52,7 +52,7 @@ public:
 			}
 		}
 
-		std::cout << fmt::format("written {} tracks, {} sides, {} kB total\n",
+		std::cout << fmt::format("wrote {} tracks, {} sides, {} kB total\n",
 						tracks, sides,
 						outputFile.tellp() / 1024);
 	}
