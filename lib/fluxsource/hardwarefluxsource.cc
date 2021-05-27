@@ -12,14 +12,27 @@ public:
     HardwareFluxSource(const HardwareFluxSourceProto& config):
         _config(config)
     {
+        int rotationalSpeedMs;
+        int retries = 5;
         usbSetDrive(_config.drive(), _config.high_density(), _config.index_mode());
-        std::cerr << "Measuring rotational speed... " << std::flush;
-        _oneRevolution = usbGetRotationalPeriod(_config.hard_sector_count());
-    if (_config.hard_sector_count() != 0)
-        _hardSectorThreshold = _oneRevolution * 3 / (4 * _config.hard_sector_count());
-    else
-        _hardSectorThreshold = 0;
-        std::cerr << fmt::format("{}ms\n", _oneRevolution / 1e6);
+        std::cout << "Measuring rotational speed... " << std::flush;
+ 
+        do {
+            _oneRevolution = usbGetRotationalPeriod(_config.hard_sector_count());
+            if (_config.hard_sector_count() != 0)
+                _hardSectorThreshold = _oneRevolution * 3 / (4 * _config.hard_sector_count());
+            else
+                _hardSectorThreshold = 0;
+
+            rotationalSpeedMs = _oneRevolution / 1e6;
+            retries--;
+        } while ((rotationalSpeedMs == 0) && (retries > 0));
+
+        if (rotationalSpeedMs == 0) {
+			Error() << "Failed\nIs a disk in the drive?";
+        }
+
+        std::cout << fmt::format("{}ms\n", rotationalSpeedMs);
     }
 
     ~HardwareFluxSource()
