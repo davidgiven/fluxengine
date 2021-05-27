@@ -188,7 +188,8 @@ install some support packages.
 	`libudev-dev`.
   - For OSX with Homebrew: `ninja`, `libusb`, `pkg-config`, `sqlite`.
   - For Windows with MSYS2: `make`, `ninja`, `mingw-w64-i686-libusb`,
-	`mingw-w64-i686-sqlite3`, `mingw-w64-i686-zlib`, `mingw-w64-i686-gcc`.
+	`mingw-w64-i686-protobuf`, `mingw-w64-i686-sqlite3`, `mingw-w64-i686-zlib`,
+	`mingw-w64-i686-gcc`.
 
 These lists are not necessarily exhaustive --- please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new) if I've missed
