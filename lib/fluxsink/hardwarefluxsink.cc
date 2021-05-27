@@ -14,11 +14,22 @@ public:
     {
 		if (config.has_hard_sector_count())
 		{
+			int rotationalSpeedMs;
+			int retries = 5;
 			usbSetDrive(_config.drive(), _config.high_density(), _config.index_mode());
-			std::cerr << "Measuring rotational speed... " << std::flush;
-			nanoseconds_t oneRevolution = usbGetRotationalPeriod(_config.hard_sector_count());
-			_hardSectorThreshold = oneRevolution * 3 / (4 * _config.hard_sector_count());
-			std::cerr << fmt::format("{}ms\n", oneRevolution / 1e6);
+			std::cout << "Measuring rotational speed... " << std::flush;
+
+			do {
+				nanoseconds_t oneRevolution = usbGetRotationalPeriod(_config.hard_sector_count());
+				_hardSectorThreshold = oneRevolution * 3 / (4 * _config.hard_sector_count());
+				rotationalSpeedMs = oneRevolution / 1e6;
+				retries--;
+			} while ((rotationalSpeedMs == 0) && (retries > 0));
+
+			if (rotationalSpeedMs == 0) {
+				Error() << "Failed\nIs a disk in the drive?";
+			}
+			std::cout << fmt::format("{}ms\n", rotationalSpeedMs);
 		}
 		else
 			_hardSectorThreshold = 0;
