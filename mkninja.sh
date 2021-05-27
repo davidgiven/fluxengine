@@ -341,7 +341,6 @@ buildlibrary libbackend.a \
     lib/geometry/dgmapper.cc \
     lib/globals.cc \
     lib/hexdump.cc \
-    lib/imagereader/d64imagereader.cc \
     lib/imagereader/diskcopyimagereader.cc \
     lib/imagereader/imagereader.cc \
     lib/imagereader/imdimagereader.cc \

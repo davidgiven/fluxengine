@@ -25,9 +25,6 @@ std::unique_ptr<ImageReader> ImageReader::create(const ImageReaderProto& config)
 //
 //		case ImageReaderProto::kJv3:
 //			return ImageReader::createJv3ImageReader(config);
-//
-//		case ImageReaderProto::kD64:
-//			return ImageReader::createD64ImageReader(config);
 
 		default:
 			Error() << "bad input file config";
@@ -41,7 +38,7 @@ void ImageReader::updateConfigForFilename(ImageReaderProto* proto, const std::st
 	{
 		{".adf",      [&]() { proto->mutable_img(); }},
 		{".jv3",      [&]() { proto->mutable_jv3(); }},
-		{".d64",      [&]() { proto->mutable_d64(); }},
+		{".d64",      [&]() { proto->mutable_img(); }},
 		{".d81",      [&]() { proto->mutable_img(); }},
 		{".diskcopy", [&]() { proto->mutable_diskcopy(); }},
 		{".img",      [&]() { proto->mutable_img(); }},
