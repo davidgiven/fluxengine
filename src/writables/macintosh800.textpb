@@ -1,0 +1,300 @@
+comment: 'Macintosh 800kB 3.5" GCR double-sided'
+
+input {
+	image {
+		filename: "macintosh.diskcopy"
+		diskcopy {}
+	}
+}
+
+output {
+	flux {
+		drive {}
+	}
+}
+
+encoder {
+	macintosh {}
+}
+
+geometry {
+	cylinders: 80
+	heads: 2
+	trackdata {
+		sectors: 8
+		sector_size: 524
+	}
+
+	# Cylinders 0..15: 12 sectors
+	#           16..31: 11 sectors
+	#           32..47: 10 sectors
+	#           48..63: 9 sectors
+	#           the rest: 8 sectors
+	trackdata {
+		cylinder: 0
+		sectors: 12
+	}
+	trackdata {
+		cylinder: 1
+		sectors: 12
+	}
+	trackdata {
+		cylinder: 2
+		sectors: 12
+	}
+	trackdata {
+		cylinder: 3
+		sectors: 12
+	}
+	trackdata {
+		cylinder: 4
+		sectors: 12
+	}
+	trackdata {
+		cylinder: 5
+		sectors: 12
+	}
+	trackdata {
+		cylinder: 6
+		sectors: 12
+	}
+	trackdata {
+		cylinder: 7
+		sectors: 12
+	}
+	trackdata {
+		cylinder: 8
+		sectors: 12
+	}
+	trackdata {
+		cylinder: 9
+		sectors: 12
+	}
+	trackdata {
+		cylinder: 10
+		sectors: 12
+	}
+	trackdata {
+		cylinder: 11
+		sectors: 12
+	}
+	trackdata {
+		cylinder: 12
+		sectors: 12
+	}
+	trackdata {
+		cylinder: 13
+		sectors: 12
+	}
+	trackdata {
+		cylinder: 14
+		sectors: 12
+	}
+	trackdata {
+		cylinder: 15
+		sectors: 12
+	}
+	trackdata {
+		cylinder: 16
+		sectors: 11
+	}
+	trackdata {
+		cylinder: 17
+		sectors: 11
+	}
+	trackdata {
+		cylinder: 18
+		sectors: 11
+	}
+	trackdata {
+		cylinder: 19
+		sectors: 11
+	}
+	trackdata {
+		cylinder: 20
+		sectors: 11
+	}
+	trackdata {
+		cylinder: 21
+		sectors: 11
+	}
+	trackdata {
+		cylinder: 22
+		sectors: 11
+	}
+	trackdata {
+		cylinder: 23
+		sectors: 11
+	}
+	trackdata {
+		cylinder: 24
+		sectors: 11
+	}
+	trackdata {
+		cylinder: 25
+		sectors: 11
+	}
+	trackdata {
+		cylinder: 26
+		sectors: 11
+	}
+	trackdata {
+		cylinder: 27
+		sectors: 11
+	}
+	trackdata {
+		cylinder: 28
+		sectors: 11
+	}
+	trackdata {
+		cylinder: 29
+		sectors: 11
+	}
+	trackdata {
+		cylinder: 30
+		sectors: 11
+	}
+	trackdata {
+		cylinder: 31
+		sectors: 11
+	}
+	trackdata {
+		cylinder: 32
+		sectors: 10
+	}
+	trackdata {
+		cylinder: 33
+		sectors: 10
+	}
+	trackdata {
+		cylinder: 34
+		sectors: 10
+	}
+	trackdata {
+		cylinder: 35
+		sectors: 10
+	}
+	trackdata {
+		cylinder: 36
+		sectors: 10
+	}
+	trackdata {
+		cylinder: 37
+		sectors: 10
+	}
+	trackdata {
+		cylinder: 38
+		sectors: 10
+	}
+	trackdata {
+		cylinder: 39
+		sectors: 10
+	}
+	trackdata {
+		cylinder: 40
+		sectors: 10
+	}
+	trackdata {
+		cylinder: 41
+		sectors: 10
+	}
+	trackdata {
+		cylinder: 42
+		sectors: 10
+	}
+	trackdata {
+		cylinder: 43
+		sectors: 10
+	}
+	trackdata {
+		cylinder: 44
+		sectors: 10
+	}
+	trackdata {
+		cylinder: 45
+		sectors: 10
+	}
+	trackdata {
+		cylinder: 46
+		sectors: 10
+	}
+	trackdata {
+		cylinder: 47
+		sectors: 10
+	}
+	trackdata {
+		cylinder: 48
+		sectors: 9
+	}
+	trackdata {
+		cylinder: 49
+		sectors: 9
+	}
+	trackdata {
+		cylinder: 50
+		sectors: 9
+	}
+	trackdata {
+		cylinder: 51
+		sectors: 9
+	}
+	trackdata {
+		cylinder: 52
+		sectors: 9
+	}
+	trackdata {
+		cylinder: 53
+		sectors: 9
+	}
+	trackdata {
+		cylinder: 54
+		sectors: 9
+	}
+	trackdata {
+		cylinder: 55
+		sectors: 9
+	}
+	trackdata {
+		cylinder: 56
+		sectors: 9
+	}
+	trackdata {
+		cylinder: 57
+		sectors: 9
+	}
+	trackdata {
+		cylinder: 58
+		sectors: 9
+	}
+	trackdata {
+		cylinder: 59
+		sectors: 9
+	}
+	trackdata {
+		cylinder: 60
+		sectors: 9
+	}
+	trackdata {
+		cylinder: 61
+		sectors: 9
+	}
+	trackdata {
+		cylinder: 62
+		sectors: 9
+	}
+	trackdata {
+		cylinder: 63
+		sectors: 9
+	}
+}
+
+cylinders {
+	start: 0
+	end: 79
+}
+
+heads {
+	start: 0
+	end: 1
+}
+

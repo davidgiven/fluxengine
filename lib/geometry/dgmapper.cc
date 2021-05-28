@@ -55,7 +55,7 @@ public:
 				break;
 		}
 
-		std::cout << fmt::format("GEOM: input {} image of {} heads, {} cylinders\n", 
+		std::cout << fmt::format("GEOM: input {} image of {} cylinders, {} heads\n", 
 			nameOf(_config.block_ordering()),
 			_config.cylinders(), _config.heads());
 	}

@@ -35,7 +35,8 @@ public:
 class MacintoshEncoder : public AbstractEncoder
 {
 public:
-	MacintoshEncoder(const MacintoshEncoderProto&, const DisassemblingGeometryMapper& mapper):
+	MacintoshEncoder(const MacintoshEncoderProto& config, const DisassemblingGeometryMapper& mapper):
+		_config(config),
 		_mapper(mapper)
 	{}
 
@@ -45,6 +46,7 @@ public:
     std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide);
 
 private:
+	const MacintoshEncoderProto& _config;
 	const DisassemblingGeometryMapper& _mapper;
 };
 

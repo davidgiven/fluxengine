@@ -411,7 +411,8 @@ WRITABLES="\
     ibm360_525 \
     ibm720 \
     ibm720_525 \
-    macintosh \
+    macintosh400 \
+    macintosh800 \
     northstar87 \
     northstar175 \
     northstar350 \

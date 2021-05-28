@@ -8,19 +8,8 @@
 #include "writer.h"
 #include "geometry/geometry.h"
 #include "fmt/format.h"
+#include "arch/macintosh/macintosh.pb.h"
 #include <ctype.h>
-
-FlagGroup macintoshEncoderFlags;
-
-static DoubleFlag postIndexGapUs(
-	{ "--post-index-gap-us" },
-	"Post-index gap before first sector header (microseconds).",
-	0);
-
-static DoubleFlag clockCompensation(
-	{ "--clock-compensation-factor" },
-	"Scale the output clock by this much.",
-	1.0);
 
 static bool lastBit;
 
@@ -216,19 +205,20 @@ std::unique_ptr<Fluxmap> MacintoshEncoder::encode(int physicalTrack, int physica
 	if ((physicalTrack < 0) || (physicalTrack >= MAC_TRACKS_PER_DISK))
 		return std::unique_ptr<Fluxmap>();
 
-	double clockRateUs = clockRateUsForTrack(physicalTrack) * clockCompensation;
-	int bitsPerRevolution = 200000.0 / clockRateUs;
+	double clockRateUs = clockRateUsForTrack(physicalTrack) * _config.clock_compensation_factor();
+	int bitsPerRevolution = 200000.0 / _config.clock_compensation_factor();
 	std::vector<bool> bits(bitsPerRevolution);
 	unsigned cursor = 0;
 
-    fillBitmapTo(bits, cursor, postIndexGapUs / clockRateUs, { true, false });
+    fillBitmapTo(bits, cursor, _config.post_index_gap_us() / _config.clock_compensation_factor(), { true, false });
 	lastBit = false;
 
 	unsigned numSectors = sectorsForTrack(physicalTrack);
 	for (int sectorId=0; sectorId<numSectors; sectorId++)
 	{
 		const auto* sectorData = _mapper.get(physicalTrack, physicalSide, sectorId);
-		write_sector(bits, cursor, sectorData);
+		if (sectorData)
+			write_sector(bits, cursor, sectorData);
     }
 
 	if (cursor >= bits.size())

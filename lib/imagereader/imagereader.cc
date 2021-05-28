@@ -20,9 +20,9 @@ std::unique_ptr<ImageReader> ImageReader::create(const ImageReaderProto& config)
 		case ImageReaderProto::kImg:
 			return ImageReader::createImgImageReader(config);
 
-//		case ImageReaderProto::kDiskcopy:
-//			return ImageReader::createDiskCopyImageReader(config);
-//
+		case ImageReaderProto::kDiskcopy:
+			return ImageReader::createDiskCopyImageReader(config);
+
 //		case ImageReaderProto::kJv3:
 //			return ImageReader::createJv3ImageReader(config);
 

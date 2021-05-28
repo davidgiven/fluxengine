@@ -9,117 +9,64 @@
 #include <iostream>
 #include <fstream>
 
+#define SECTOR_SIZE 512
+#define TAG_SIZE 12
+
 class DiskCopyImageReader : public ImageReader
 {
 public:
 	DiskCopyImageReader(const ImageReaderProto& config):
 		ImageReader(config)
-	{}
-
-	Bytes getBlock(size_t offset, size_t length) const
-	{}
-
-	SectorSet readImage()
 	{
-        std::ifstream inputFile(_config.filename(), std::ios::in | std::ios::binary);
-        if (!inputFile.is_open())
+		_if.open(_config.filename(), std::ios::in | std::ios::binary);
+        if (!_if.is_open())
             Error() << "cannot open input file";
 
-		Bytes data;
-		data.writer() += inputFile;
-		ByteReader br(data);
+		Bytes header(_if, 0x54);
+		ByteReader br(header);
 
-		br.seek(1);
-		std::string label = br.read(data[0]);
+		uint8_t labelLen = br.read_8();
+		std::string label = br.read(labelLen);
 
 		br.seek(0x40);
 		uint32_t dataSize = br.read_be32();
+		uint32_t tagSize = br.read_be32();
+		_numSectors = dataSize / SECTOR_SIZE;
+		_sectorOffset = 0x54;
+		_tagOffset = _sectorOffset + dataSize;
 
-		br.seek(0x50);
-		uint8_t encoding = br.read_8();
-		uint8_t formatByte = br.read_8();
+		_if.seekg(0, std::ios::end);
+        std::cout << fmt::format("DISKCOPY: reading input image '{}' of {} sectors",
+				label, _numSectors);
+	}
 
-		unsigned numCylinders = 80;
-		unsigned numHeads = 2;
-		unsigned numSectors = 0;
-		bool mfm = false;
+	Bytes getBlock(size_t offset, size_t length) const
+	{
+		if ((length != SECTOR_SIZE) && (length != (SECTOR_SIZE+TAG_SIZE)))
+			Error() << fmt::format("diskcopy files only support sector lengths of {} and {}\n",
+				SECTOR_SIZE, (SECTOR_SIZE+TAG_SIZE));
 
-		switch (encoding)
+		unsigned sectorNum = offset / length;
+		if (offset % length)
+			Error() << fmt::format("unaligned sector read");
+
+		_if.seekg(_sectorOffset + SECTOR_SIZE*sectorNum);
+		Bytes data(_if, SECTOR_SIZE);
+
+		if (length != SECTOR_SIZE)
 		{
-			case 0: /* GCR CLV 400kB */
-				numHeads = 1;
-				break;
-
-			case 1: /* GCR CLV 800kB */
-				break;
-
-			case 2: /* MFM CAV 720kB */
-				numSectors = 9;
-				mfm = true;
-				break;
-
-			case 3: /* MFM CAV 1440kB */
-				numSectors = 18;
-				mfm = true;
-				break;
-
-			default:
-				Error() << fmt::format("don't understand DiskCopy disks of type {}", encoding);
+			_if.seekg(_tagOffset + TAG_SIZE*sectorNum);
+			data.writer().seekToEnd().append(_if, TAG_SIZE);
 		}
 
-		std::cout << "reading DiskCopy 4.2 image\n"
-		          << fmt::format("{} cylinders, {} heads; {}; {}\n",
-				  		numCylinders, numHeads,
-						mfm ? "MFM" : "GCR",
-						label);
-
-		auto sectorsPerTrack = [&](int track) -> int
-		{
-			if (mfm)
-				return numSectors;
-
-			if (track < 16)
-				return 12;
-			if (track < 32)
-				return 11;
-			if (track < 48)
-				return 10;
-			if (track < 64)
-				return 9;
-			return 8;
-		};
-
-		uint32_t dataPtr = 0x54;
-		uint32_t tagPtr = dataPtr + dataSize;
-
-        SectorSet sectors;
-        for (int track = 0; track < numCylinders; track++)
-        {
-			int numSectors = sectorsPerTrack(track);
-            for (int head = 0; head < numHeads; head++)
-            {
-                for (int sectorId = 0; sectorId < numSectors; sectorId++)
-                {
-					br.seek(dataPtr);
-					Bytes payload = br.read(512);
-					dataPtr += 512;
-
-					br.seek(tagPtr);
-					Bytes tag = br.read(12);
-					tagPtr += 12;
-
-                    std::unique_ptr<Sector>& sector = sectors.get(track, head, sectorId);
-                    sector.reset(new Sector);
-                    sector->status = Sector::OK;
-                    sector->logicalTrack = sector->physicalTrack = track;
-                    sector->logicalSide = sector->physicalSide = head;
-                    sector->logicalSector = sectorId;
-                    sector->data.writer().append(payload).append(tag);
-                }
-            }
-        }
-        return sectors;
+		return data;
 	}
+
+private:
+	mutable std::ifstream _if;
+	unsigned _numSectors;
+	off_t _sectorOffset;
+	off_t _tagOffset;
 };
 
 std::unique_ptr<ImageReader> ImageReader::createDiskCopyImageReader(

@@ -297,6 +297,11 @@ public:
         return *this += stream;
     }
 
+	ByteWriter& append(std::istream& stream, size_t len)
+	{
+		return *this += Bytes(stream, len);
+	}
+
 private:
     Bytes& _bytes;
 };

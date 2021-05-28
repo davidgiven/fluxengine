@@ -114,8 +114,9 @@ std::unique_ptr<Fluxmap> AmigaEncoder::encode(int physicalTrack, int physicalSid
 
 	for (int sectorId=0; sectorId<AMIGA_SECTORS_PER_TRACK; sectorId++)
 	{
-		const auto& sectorData = _mapper.get(physicalTrack, physicalSide, sectorId);
-		write_sector(bits, cursor, sectorData);
+		const auto* sectorData = _mapper.get(physicalTrack, physicalSide, sectorId);
+		if (sectorData)
+			write_sector(bits, cursor, sectorData);
     }
 
 	if (cursor >= bits.size())
