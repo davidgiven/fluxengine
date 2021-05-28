@@ -338,7 +338,7 @@ buildlibrary libbackend.a \
     lib/fluxsource/scpfluxsource.cc \
     lib/fluxsource/sqlitefluxsource.cc \
     lib/fluxsource/testpatternfluxsource.cc \
-    lib/geometry/dgmapper.cc \
+    lib/geometry/sdgmapper.cc \
     lib/globals.cc \
     lib/hexdump.cc \
     lib/imagereader/diskcopyimagereader.cc \
