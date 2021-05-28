@@ -6,18 +6,7 @@
 #include "crc.h"
 #include "sectorset.h"
 #include "writer.h"
-
-FlagGroup amigaEncoderFlags;
-
-static DoubleFlag clockRateUs(
-	{ "--clock-rate" },
-	"Encoded data clock rate (microseconds).",
-	2.00);
-
-static DoubleFlag postIndexGapMs(
-	{ "--post-index-gap" },
-	"Post-index gap before first sector header (milliseconds).",
-	0.5);
+#include "arch/amiga/amiga.pb.h"
 
 static bool lastBit;
 
@@ -105,11 +94,11 @@ std::unique_ptr<Fluxmap> AmigaEncoder::encode(
 	if ((physicalTrack < 0) || (physicalTrack >= AMIGA_TRACKS_PER_DISK))
 		return std::unique_ptr<Fluxmap>();
 
-	int bitsPerRevolution = 200000.0 / clockRateUs;
+	int bitsPerRevolution = 200000.0 / _config.clock_rate_us();
 	std::vector<bool> bits(bitsPerRevolution);
 	unsigned cursor = 0;
 
-    fillBitmapTo(bits, cursor, postIndexGapMs * 1000 / clockRateUs, { true, false });
+    fillBitmapTo(bits, cursor, _config.post_index_gap_ms() * 1000 / _config.clock_rate_us(), { true, false });
 	lastBit = false;
 
 	for (int sectorId=0; sectorId<AMIGA_SECTORS_PER_TRACK; sectorId++)
@@ -123,7 +112,7 @@ std::unique_ptr<Fluxmap> AmigaEncoder::encode(
 	fillBitmapTo(bits, cursor, bits.size(), { true, false });
 
 	std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
-	fluxmap->appendBits(bits, clockRateUs*1e3);
+	fluxmap->appendBits(bits, _config.clock_rate_us()*1e3);
 	return fluxmap;
 }
 
