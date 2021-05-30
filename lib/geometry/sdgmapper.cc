@@ -23,6 +23,13 @@ public:
 			_config(config),
 			_reader(reader)
 	{
+		_proxy = reader.getGeometryMapper();
+		if (_proxy)
+		{
+			std::cout << "GEOM: geometry being overridden by input image\n";
+			return;
+		}
+
 		int offset = 0;
 
 		auto addBlock = [&](int cylinder, int head) {
@@ -62,6 +69,9 @@ public:
 
 	const Sector* get(unsigned cylinder, unsigned head, unsigned sector) const
 	{
+		if (_proxy)
+			return _proxy->get(cylinder, head, sector);
+
 		auto sit = _sectors.find(std::make_tuple(cylinder, head, sector));
 		if (sit == _sectors.end())
 		{
@@ -106,6 +116,7 @@ private:
 
 	const GeometryProto& _config;
 	const ImageReader& _reader;
+	const DisassemblingGeometryMapper* _proxy;
 	mutable std::map<std::pair<int, int>, Trackdata> _offsets;
 	mutable std::map<std::tuple<int, int, int>, Sector> _sectors;
 };

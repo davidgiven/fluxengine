@@ -23,8 +23,8 @@ std::unique_ptr<ImageReader> ImageReader::create(const ImageReaderProto& config)
 		case ImageReaderProto::kDiskcopy:
 			return ImageReader::createDiskCopyImageReader(config);
 
-//		case ImageReaderProto::kJv3:
-//			return ImageReader::createJv3ImageReader(config);
+		case ImageReaderProto::kJv3:
+			return ImageReader::createJv3ImageReader(config);
 
 		default:
 			Error() << "bad input file config";

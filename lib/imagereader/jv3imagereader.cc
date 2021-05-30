@@ -3,8 +3,10 @@
 #include "sector.h"
 #include "sectorset.h"
 #include "imagereader/imagereader.h"
+#include "geometry/geometry.h"
 #include "fmt/format.h"
 #include "lib/config.pb.h"
+#include "lib/imagereader/imagereader.pb.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -30,13 +32,6 @@
  *   unsigned char flags;
  * } SectorHeader;
  */
-
-struct SectorHeader
-{
-	uint8_t track;
-	uint8_t sector;
-	uint8_t flags;
-};
 
 #define JV3_DENSITY     0x80  /* 1=dden, 0=sden */
 #define JV3_DAM         0x60  /* data address mark code; see below */
@@ -72,26 +67,90 @@ static unsigned getSectorSize(uint8_t flags)
 		}
 	}
 	Error() << "not reachable";
+	throw 0;
 }
 
-class Jv3ImageReader : public ImageReader
+class Jv3ImageReader : public ImageReader, DisassemblingGeometryMapper
 {
 public:
 	Jv3ImageReader(const ImageReaderProto& config):
 		ImageReader(config)
-	{}
+	{
+		std::ifstream stream(_config.filename(), std::ios::in | std::ios::binary);
+        if (!stream.is_open())
+            Error() << "cannot open input file";
+
+		Bytes image;
+		image.writer() += stream;
+		ByteReader br(image);
+
+		off_t headerPtr = 0;
+		for (;;)
+		{
+			off_t dataPtr = headerPtr + 2901*3 + 1;
+			if (dataPtr >= image.size())
+				break;
+
+			br.seek(headerPtr);
+			for (unsigned i=0; i<2901; i++)
+			{
+				uint8_t track = br.read_8();
+				uint8_t sector = br.read_8();
+				uint8_t flags = br.read_8();
+
+				if ((flags & JV3_FREEF) != JV3_FREEF)
+				{
+					unsigned side = !!(flags & JV3_SIDE);
+					unsigned length = getSectorSize(flags);
+
+					std::unique_ptr<Sector> s(new Sector);
+					s->status = (flags & JV3_ERROR) ? Sector::BAD_CHECKSUM : Sector::OK;
+					s->physicalTrack = s->logicalTrack = track;
+					s->physicalSide = s->logicalSide = side;
+					s->logicalSector = sector;
+					s->data = image.slice(dataPtr, length);
+					_sectors[std::make_tuple(track, side, sector)] = std::move(s);
+					dataPtr += length;
+				}
+			}
+
+			/* dataPtr is now pointing at the beginning of the next chunk. */
+
+			headerPtr = dataPtr;
+		}
+
+        std::cout << fmt::format("JV3: reading input image of {} sectors total\n",
+						_sectors.size());
+	}
+
+	const DisassemblingGeometryMapper* getGeometryMapper() const
+	{
+		return this;
+	}
 
 	Bytes getBlock(size_t offset, size_t length) const
-	{}
+	{
+		Error() << "unimplemented";
+		throw 0;
+	}
+
+	const Sector* get(unsigned cylinder, unsigned head, unsigned sector) const
+	{
+		auto sit = _sectors.find(std::make_tuple(cylinder, head, sector));
+		if (sit == _sectors.end())
+			return nullptr;
+
+		return sit->second.get();
+	}
 
 	SectorSet readImage()
 	{
+		#if 0
         std::ifstream inputFile(_config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
             Error() << "cannot open input file";
 
-		inputFile.seekg( 0, std::ios::end);
-		unsigned inputFileSize = inputFile.tellg();
+		ByteReader br(
 		unsigned headerPtr = 0;
 		SectorSet sectors;
 		for (;;)
@@ -102,6 +161,8 @@ public:
 
 			for (unsigned i=0; i<2901; i++)
 			{
+				auto s = std::make_unique(new SectorData);
+
 				SectorHeader header = {0, 0, 0xff};
 				inputFile.seekg(headerPtr);
 				inputFile.read((char*) &header, 3);
@@ -132,7 +193,11 @@ public:
 		}
 
         return sectors;
+		#endif
 	}
+
+private:
+	std::map<std::tuple<int, int, int>, std::unique_ptr<Sector>> _sectors;
 };
 
 std::unique_ptr<ImageReader> ImageReader::createJv3ImageReader(const ImageReaderProto& config)

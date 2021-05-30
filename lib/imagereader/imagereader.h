@@ -4,6 +4,7 @@
 class SectorSet;
 class ImageSpec;
 class ImageReaderProto;
+class DisassemblingGeometryMapper;
 
 class ImageReader
 {
@@ -23,6 +24,7 @@ public:
 
 public:
 	virtual Bytes getBlock(size_t offset, size_t length) const = 0;
+	virtual const DisassemblingGeometryMapper* getGeometryMapper() const { return nullptr; }
 
 protected:
 	const ImageReaderProto& _config;
