@@ -65,6 +65,16 @@ public:
     void writeToFile(const std::string& filename) const;
 	void writeTo(std::ostream& stream) const;
 
+	template <class T> std::vector<T> toVector() const
+	{
+		std::vector<T> v(size());
+		for (int i=0; i<size(); i++)
+			v[i] = (*this)[i];
+		return v;
+	}
+
+	std::vector<uint8_t> toVector() const;
+
 private:
     std::shared_ptr<std::vector<uint8_t>> _data;
     unsigned _low;

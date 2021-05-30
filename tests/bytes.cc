@@ -1,5 +1,8 @@
 #include "globals.h"
 #include "bytes.h"
+#include "snowhouse/snowhouse.h"
+
+using namespace snowhouse;
 
 static void check_oob(Bytes& b, unsigned pos)
 {
@@ -113,6 +116,13 @@ static void test_slice()
     
     bs = b.slice(4, 2);
     assert((bs == Bytes{ 0, 0 }));
+    
+    bs = b.slice(2, 2);
+    assert((bs == Bytes{ 3, 0 }));
+
+	bs = b.slice(1, 4);
+	bs = bs.slice(1, 4);
+	AssertThat(bs.toVector<int>(), Equals(Bytes{ 3, 0, 0, 0 }.toVector<int>()));
 }
 
 static void test_tobits()

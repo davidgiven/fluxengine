@@ -138,14 +138,14 @@ uint8_t& Bytes::operator [] (unsigned pos)
 
 Bytes Bytes::slice(unsigned start, unsigned len) const
 {
-    start += _low;
-    unsigned end = start + len;
-    if (start >= _high)
+    unsigned datastart = _low + start;
+    unsigned dataend = datastart + len;
+    if (datastart >= _high)
     {
         /* Asking for a completely out-of-range slice --- just return zeroes. */
         return Bytes(len);
     }
-    else if (end > _high)
+    else if (dataend > _high)
     {
         /* Can't share the buffer, as we need to zero-pad the end. */
         Bytes b(len);
@@ -155,7 +155,7 @@ Bytes Bytes::slice(unsigned start, unsigned len) const
     else
     {
         /* Use the magic of shared_ptr to share the data. */
-        Bytes b(_data, start, end);
+        Bytes b(_data, datastart, dataend);
         return b;
     }
 }
