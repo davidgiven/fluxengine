@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <termios.h>
 
 static const char* gw_error(int e)
 {
@@ -127,6 +128,16 @@ public:
         _fd = ::open(port.c_str(), O_RDWR);
         if (_fd == -1)
             Error() << fmt::format("cannot open GreaseWeazel serial port: {}", strerror(errno));
+
+        struct termios t;
+        tcgetattr(_fd, &t);
+        t.c_iflag = 0;
+        t.c_oflag = 0;
+        t.c_cflag = CREAD;
+        t.c_lflag = 0;
+        t.c_cc[VMIN] = 1;
+        cfsetspeed(&t, 9600);
+        tcsetattr(_fd, TCSANOW, &t);
 
         _version = getVersion();
         if ((_version != 22) && (_version != 24))
