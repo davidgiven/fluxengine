@@ -104,7 +104,9 @@
 
 #else
     #include <termios.h>
-    static int open_serial_port(const std::string& name)
+
+    typedef int FileHandle;
+    static FileHandle open_serial_port(const std::string& name)
     {
         int fd = open(name.c_str(), O_RDWR);
         if (fd == -1)
