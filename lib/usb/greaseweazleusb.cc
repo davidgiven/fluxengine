@@ -10,6 +10,126 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#if defined __WIN32__
+    #include <windows.h>
+
+    typedef HANDLE FileHandle;
+
+    static std::string get_last_error_string()
+    {
+        DWORD error = GetLastError();
+        if (error == 0)
+            return "OK";
+
+        LPSTR buffer = nullptr;
+        size_t size = FormatMessageA(
+                /* dwFlags= */ FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS,
+                /* lpSource= */ nullptr,
+                /* dwMessageId= */ error,
+                /* dwLanguageId= */ MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                /* lpBuffer= */ (LPSTR) &buffer,
+                /* nSize= */ 0,
+                /* Arguments= */ nullptr);
+    
+        std::string message(buffer, size);
+        LocalFree(buffer);
+        return message;
+    }
+
+    static HANDLE open_serial_port(const std::string& name)
+    {
+        HANDLE h = CreateFileA(
+            name.c_str(),
+            /* dwDesiredAccess= */ GENERIC_READ|GENERIC_WRITE,
+            /* dwShareMode= */ 0,
+            /* lpSecurityAttribues= */ nullptr,
+            /* dwCreationDisposition= */ OPEN_EXISTING,
+            /* dwFlagsAndAttributes= */ FILE_ATTRIBUTE_NORMAL,
+            /* hTemplateFile= */ nullptr);
+        if (h == INVALID_HANDLE_VALUE)
+            Error() << fmt::format("cannot open GreaseWeazle serial port '{}': {}",
+                name, get_last_error_string());
+        
+        DCB dcb =
+        {
+            .DCBlength = sizeof(DCB),
+            .BaudRate = CBR_9600,
+            .fBinary = true,
+            .ByteSize = 8,
+            .Parity = NOPARITY,
+            .StopBits = ONESTOPBIT
+        };
+        SetCommState(h, &dcb);
+
+        COMMTIMEOUTS commtimeouts = {0};
+        commtimeouts.ReadIntervalTimeout = 100;
+        SetCommTimeouts(h, &commtimeouts);
+
+        PurgeComm(h, PURGE_RXABORT|PURGE_RXCLEAR|PURGE_TXABORT|PURGE_TXCLEAR);
+        return h;
+    }
+
+    static void close_serial_port(FileHandle h)
+    {
+        CloseHandle(h);
+    }
+
+    static ssize_t read_serial_port(FileHandle h, uint8_t* buffer, size_t len)
+    {
+        DWORD rlen;
+        bool r = ReadFile(
+                /* hFile= */ h,
+                /* lpBuffer= */ buffer,
+                /* nNumberOfBytesToRead= */ len,
+                /* lpNumberOfBytesRead= */ &rlen,
+                /* lpOverlapped= */ nullptr);
+        if (!r)
+            return -1;
+        return rlen;
+    }
+
+    static ssize_t write_serial_port(FileHandle h, const uint8_t* buffer, size_t len)
+    {
+        DWORD wlen;
+        bool r = WriteFile(
+                /* hFile= */ h,
+                /* lpBuffer= */ buffer,
+                /* nNumberOfBytesToWrite= */ len,
+                /* lpNumberOfBytesWritten= */ &wlen,
+                /* lpOverlapped= */ nullptr);
+        if (!r)
+            return -1;
+        return wlen;
+    }
+
+#else
+    #include <termios.h>
+
+    typedef int FileHandle;
+    static FileHandle open_serial_port(const std::string& name)
+    {
+        int fd = open(name.c_str(), O_RDWR);
+        if (fd == -1)
+            Error() << fmt::format("cannot open GreaseWeazle serial port '{}': {}",
+                name, strerror(errno));
+
+        struct termios t;
+        tcgetattr(fd, &t);
+        t.c_iflag = 0;
+        t.c_oflag = 0;
+        t.c_cflag = CREAD;
+        t.c_lflag = 0;
+        t.c_cc[VMIN] = 1;
+        cfsetspeed(&t, 9600);
+        tcsetattr(fd, TCSANOW, &t);
+        return fd;
+    }
+
+    #define close_serial_port(fd) ::close(fd)
+    #define read_serial_port(fd, buf, len) ::read(fd, buf, len)
+    #define write_serial_port(fd, buf, len) ::write(fd, buf, len)
+#endif
+
 static const char* gw_error(int e)
 {
     switch (e)
@@ -53,7 +173,7 @@ private:
             if (len == 0)
                 break;
 
-            ssize_t actual = ::read(_fd, _readbuffer, sizeof(_readbuffer));
+            ssize_t actual = read_serial_port(_fd, _readbuffer, sizeof(_readbuffer));
             if (actual < 0)
                 Error() << "failed to receive command reply: " << strerror(actual);
 
@@ -93,7 +213,7 @@ private:
     {
         while (len > 0)
         {
-            ssize_t actual = ::write(_fd, buffer, len);
+            ssize_t actual = write_serial_port(_fd, buffer, len);
             if (actual < 0)
                 Error() << "failed to send command: " << strerror(errno);
 
@@ -124,9 +244,7 @@ private:
 public:
     GreaseWeazleUsb(const std::string& port)
     {
-        _fd = ::open(port.c_str(), O_RDWR);
-        if (_fd == -1)
-            Error() << fmt::format("cannot open GreaseWeazel serial port: {}", strerror(errno));
+        _fd = open_serial_port(port);
 
         _version = getVersion();
         if ((_version != 22) && (_version != 24))
@@ -138,6 +256,11 @@ public:
         /* Configure the hardware. */
 
         do_command({ CMD_SET_BUS_TYPE, 3, BUS_IBMPC });
+    }
+
+    ~GreaseWeazleUsb()
+    {
+        close_serial_port(_fd);
     }
 
     int getVersion()
@@ -395,7 +518,7 @@ public:
     { Error() << "unsupported operation on the GreaseWeazle"; }
 
 private:
-    int _fd;
+    FileHandle _fd;
     int _version;
     nanoseconds_t _clock;
     nanoseconds_t _revolutions;

@@ -49,7 +49,7 @@ static bool setFallbackFlag(const std::string& key, const std::string& value, bo
 	std::string path = key.substr(2);
 	ProtoField protoField = resolveProtoPath(&config, path);
 	setProtoFieldFromString(protoField, value);
-	return true;
+	return uses_that;
 }
 
 std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc, const char* argv[],
