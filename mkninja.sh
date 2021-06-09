@@ -338,7 +338,8 @@ buildlibrary libbackend.a \
     lib/fluxsource/scpfluxsource.cc \
     lib/fluxsource/sqlitefluxsource.cc \
     lib/fluxsource/testpatternfluxsource.cc \
-    lib/geometry/sdgmapper.cc \
+    lib/geometry/simplemapper.cc \
+    lib/geometry/geometry.cc \
     lib/globals.cc \
     lib/hexdump.cc \
     lib/imagereader/diskcopyimagereader.cc \
@@ -346,7 +347,6 @@ buildlibrary libbackend.a \
     lib/imagereader/imdimagereader.cc \
     lib/imagereader/imgimagereader.cc \
     lib/imagereader/jv3imagereader.cc \
-    lib/imagewriter/d64imagewriter.cc \
     lib/imagewriter/diskcopyimagewriter.cc \
     lib/imagewriter/imagewriter.cc \
     lib/imagewriter/imgimagewriter.cc \

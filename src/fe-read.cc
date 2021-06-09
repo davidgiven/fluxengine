@@ -13,6 +13,7 @@
 #include "arch/brother/brother.h"
 #include "arch/ibm/ibm.h"
 #include "imagewriter/imagewriter.h"
+#include "geometry/geometry.h"
 #include "fmt/format.h"
 #include "fluxengine.h"
 #include <google/protobuf/text_format.h>
@@ -78,10 +79,11 @@ int mainRead(int argc, const char* argv[])
 		Error() << "you cannot copy flux to a hardware device";
 
 	std::unique_ptr<FluxSource> fluxSource(FluxSource::create(config.input().flux()));
-	std::unique_ptr<AbstractDecoder> decoder(AbstractDecoder::create(config.decoder()));
 	std::unique_ptr<ImageWriter> writer(ImageWriter::create(config.output().image()));
+	std::unique_ptr<AssemblingGeometryMapper> geometryMapper(createSimpleAssemblingGeometryMapper(config.geometry(), *writer));
+	std::unique_ptr<AbstractDecoder> decoder(AbstractDecoder::create(config.decoder()));
 
-	readDiskCommand(*fluxSource, *decoder, *writer);
+	readDiskCommand(*fluxSource, *decoder, *geometryMapper);
 
     return 0;
 }

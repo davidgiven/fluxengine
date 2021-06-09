@@ -14,63 +14,27 @@ class ImgImageWriter : public ImageWriter
 public:
 	ImgImageWriter(const ImageWriterProto& config):
 		ImageWriter(config)
-	{}
-
-	void writeImage(const SectorSet& sectors)
 	{
-		unsigned autoTracks;
-		unsigned autoSides;
-		unsigned autoSectors;
-		unsigned autoBytes;
-		sectors.calculateSize(autoTracks, autoSides, autoSectors, autoBytes);
+		_of.open(_config.filename(), std::ios::out | std::ios::trunc | std::ios::binary);
+        if (!_of.is_open())
+            Error() << "cannot open input file";
+	}
 
-		int tracks = _config.img().has_tracks() ? _config.img().tracks() : autoTracks;
-		int sides = _config.img().has_sides() ? _config.img().sides() : autoSides;
+	~ImgImageWriter()
+	{
+		_of.seekp(0, std::ios::end);
+        std::cout << fmt::format("IMG: written output image of {} kB total\n",
+						_of.tellp() / 1024);
+	}
 
-		std::ofstream outputFile(_config.filename(), std::ios::out | std::ios::binary);
-		if (!outputFile.is_open())
-			Error() << "cannot open output file";
-
-		for (int track = 0; track < tracks; track++)
-		{
-			for (int side = 0; side < sides; side++)
-			{
-				ImgInputOutputProto::TrackdataProto trackdata;
-				getTrackFormat(trackdata, track, side);
-
-				int numSectors = trackdata.has_sectors() ? trackdata.sectors() : autoSectors;
-				int sectorSize = trackdata.has_sector_size() ? trackdata.sector_size() : autoBytes;
-
-				for (int sectorId = 0; sectorId < numSectors; sectorId++)
-				{
-					const auto& sector = sectors.get(track, side, sectorId);
-					if (sector)
-						sector->data.slice(0, sectorSize).writeTo(outputFile);
-					else
-						outputFile.seekp(sectorSize, std::ios::cur);
-				}
-			}
-		}
-
-		std::cout << fmt::format("wrote {} tracks, {} sides, {} kB total\n",
-						tracks, sides,
-						outputFile.tellp() / 1024);
+	void putBlock(size_t offset, size_t length, const Bytes& data)
+	{
+		_of.seekp(offset);
+		data.slice(0, length).writeTo(_of);
 	}
 
 private:
-	void getTrackFormat(ImgInputOutputProto::TrackdataProto& trackdata, unsigned track, unsigned side)
-	{
-		trackdata.Clear();
-		for (const ImgInputOutputProto::TrackdataProto& f : _config.img().trackdata())
-		{
-			if (f.has_track() && (f.track() != track))
-				continue;
-			if (f.has_side() && (f.side() != side))
-				continue;
-
-			trackdata.MergeFrom(f);
-		}
-	}
+	std::ofstream _of;
 };
 
 std::unique_ptr<ImageWriter> ImageWriter::createImgImageWriter(

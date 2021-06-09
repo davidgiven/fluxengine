@@ -14,6 +14,7 @@
 #include "decoders/rawbits.h"
 #include "track.h"
 #include "imagewriter/imagewriter.h"
+#include "geometry/geometry.h"
 #include "fmt/format.h"
 #include "proto.h"
 #include "lib/decoders/decoders.pb.h"
@@ -62,7 +63,7 @@ static void replace_sector(std::unique_ptr<Sector>& replacing, Sector& replaceme
 	}
 }
 
-void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWriter& writer)
+void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, AssemblingGeometryMapper& geometryMapper)
 {
 	if (config.decoder().has_copy_flux_to())
 		outputFluxSink = FluxSink::create(config.decoder().copy_flux_to());
@@ -186,10 +187,10 @@ void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWrit
 		}
     }
 
-	writer.printMap(allSectors);
+	geometryMapper.printMap(allSectors);
 	if (config.decoder().has_write_csv_to())
-		writer.writeCsv(allSectors, config.decoder().write_csv_to());
-	writer.writeImage(allSectors);
+		geometryMapper.writeCsv(allSectors, config.decoder().write_csv_to());
+	geometryMapper.put(allSectors);
 
 	if (failures)
 		std::cerr << "Warning: some sectors could not be decoded." << std::endl;

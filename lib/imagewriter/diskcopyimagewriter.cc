@@ -166,6 +166,9 @@ public:
 
 		image.writeToFile(_config.filename());
     }
+
+	void putBlock(size_t offset, size_t length, const Bytes& data)
+	{ throw "unimplemented"; }
 };
 
 std::unique_ptr<ImageWriter> ImageWriter::createDiskCopyImageWriter(

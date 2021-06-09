@@ -9,12 +9,145 @@ input {
 output {
 	image {
 		filename: "commodore1541.d64"
-		d64 {}
+		img {}
 	}
 }
 
 decoder {
 	c64 {}
+}
+
+geometry {
+	cylinders: 41
+	heads: 1
+	trackdata {
+		sectors: 17
+		sector_size: 256
+	}
+	# Cylinders 0..16: 21 sectors
+	# Cylinders 17..23: 19 sectors
+	# Cylinders 24..29: 18 sectors
+	# Cylinders 30..41: 17 sectors (i.e. all the rest)
+	trackdata {
+		cylinder: 0
+		sectors: 21
+	}
+	trackdata {
+		cylinder: 1
+		sectors: 21
+	}
+	trackdata {
+		cylinder: 2
+		sectors: 21
+	}
+	trackdata {
+		cylinder: 3
+		sectors: 21
+	}
+	trackdata {
+		cylinder: 4
+		sectors: 21
+	}
+	trackdata {
+		cylinder: 5
+		sectors: 21
+	}
+	trackdata {
+		cylinder: 6
+		sectors: 21
+	}
+	trackdata {
+		cylinder: 7
+		sectors: 21
+	}
+	trackdata {
+		cylinder: 8
+		sectors: 21
+	}
+	trackdata {
+		cylinder: 9
+		sectors: 21
+	}
+	trackdata {
+		cylinder: 10
+		sectors: 21
+	}
+	trackdata {
+		cylinder: 11
+		sectors: 21
+	}
+	trackdata {
+		cylinder: 12
+		sectors: 21
+	}
+	trackdata {
+		cylinder: 13
+		sectors: 21
+	}
+	trackdata {
+		cylinder: 14
+		sectors: 21
+	}
+	trackdata {
+		cylinder: 15
+		sectors: 21
+	}
+	trackdata {
+		cylinder: 16
+		sectors: 21
+	}
+	trackdata {
+		cylinder: 17
+		sectors: 19
+	}
+	trackdata {
+		cylinder: 18
+		sectors: 19
+	}
+	trackdata {
+		cylinder: 19
+		sectors: 19
+	}
+	trackdata {
+		cylinder: 20
+		sectors: 19
+	}
+	trackdata {
+		cylinder: 21
+		sectors: 19
+	}
+	trackdata {
+		cylinder: 22
+		sectors: 19
+	}
+	trackdata {
+		cylinder: 23
+		sectors: 19
+	}
+	trackdata {
+		cylinder: 24
+		sectors: 18
+	}
+	trackdata {
+		cylinder: 25
+		sectors: 18
+	}
+	trackdata {
+		cylinder: 26
+		sectors: 18
+	}
+	trackdata {
+		cylinder: 27
+		sectors: 18
+	}
+	trackdata {
+		cylinder: 28
+		sectors: 18
+	}
+	trackdata {
+		cylinder: 29
+		sectors: 18
+	}
 }
 
 cylinders {

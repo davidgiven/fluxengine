@@ -18,7 +18,7 @@ encoder {
 }
 
 geometry {
-	cylinders: 35
+	cylinders: 41
 	heads: 1
 	trackdata {
 		sectors: 17
@@ -27,7 +27,7 @@ geometry {
 	# Cylinders 0..16: 21 sectors
 	# Cylinders 17..23: 19 sectors
 	# Cylinders 24..29: 18 sectors
-	# Cylinders 30..34: 17 sectors (i.e. all the rest)
+	# Cylinders 30..41: 17 sectors (i.e. all the rest)
 	trackdata {
 		cylinder: 0
 		sectors: 21
@@ -152,7 +152,7 @@ geometry {
 
 cylinders {
 	start: 0
-	end: 79
+	end: 81
 }
 
 heads {

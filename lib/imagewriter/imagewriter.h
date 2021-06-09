@@ -3,6 +3,7 @@
 
 class SectorSet;
 class ImageWriterProto;
+class AssemblingGeometryMapper;
 
 class ImageWriter
 {
@@ -18,17 +19,14 @@ public:
 		const ImageWriterProto& config);
     static std::unique_ptr<ImageWriter> createLDBSImageWriter(
 		const ImageWriterProto& config);
-    static std::unique_ptr<ImageWriter> createD64ImageWriter(
-		const ImageWriterProto& config);
     static std::unique_ptr<ImageWriter> createDiskCopyImageWriter(
 		const ImageWriterProto& config);
     static std::unique_ptr<ImageWriter> createNsiImageWriter(
 		const ImageWriterProto& config);
 
 public:
-	void printMap(const SectorSet& sectors);
-	void writeCsv(const SectorSet& sectors, const std::string& filename);
-	virtual void writeImage(const SectorSet& sectors) = 0;
+	virtual void putBlock(size_t offset, size_t length, const Bytes& data) = 0;
+	virtual const AssemblingGeometryMapper* getGeometryMapper() const { return nullptr; }
 
 protected:
 	const ImageWriterProto& _config;
