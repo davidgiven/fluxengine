@@ -3,6 +3,7 @@
 #include "sector.h"
 #include "sectorset.h"
 #include "imagereader/imagereader.h"
+#include "geometry/geometry.h"
 #include "lib/config.pb.h"
 #include "fmt/format.h"
 #include <algorithm>
@@ -50,16 +51,16 @@ static unsigned getModulationandSpeed(uint8_t flags, bool *mfm)
 		}
 }
 
-struct TrackHeader
+struct Trackheader
 {
-	uint8_t ModeValue;
+	uint8_t modeValue;
 	uint8_t track;
-	uint8_t Head;
+	uint8_t head;
 	uint8_t numSectors;
-	uint8_t SectorSize;
+	uint8_t sectorSize;
 };
 
-static unsigned getSectorSize(uint8_t flags)
+static unsigned getsectorSize(uint8_t flags)
 {
 	switch (flags)
 	{
@@ -81,181 +82,157 @@ static unsigned getSectorSize(uint8_t flags)
 #define END_OF_FILE       0x1A
 
 
-class IMDImageReader : public ImageReader
+class IMDImageReader : public ImageReader, DisassemblingGeometryMapper
 {
 public:
 	IMDImageReader(const ImageReaderProto& config):
 		ImageReader(config)
-	{}
-
-	Bytes getBlock(size_t offset, size_t length) const
-	{}
-
-	SectorSet readImage()
-	/*
-	IMAGE FILE FORMAT
-	The overall layout of an ImageDisk .IMD image file is:
-	IMD v.vv: dd/mm/yyyy hh:mm:ss
-	Comment (ASCII only - unlimited size)
-	1A byte - ASCII EOF character
-	- For each track on the disk:
-	1 byte Mode value							see getModulationspeed for definition		
-	1 byte Cylinder
-	1 byte Head
-	1 byte number of sectors in track			
-	1 byte sector size							see getsectorsize for definition
-	sector numbering map
-	sector cylinder map (optional)				definied in high byte of head (since head is 0 or 1)
-	sector head map (optional)					definied in high byte of head (since head is 0 or 1)
-	sector data records
-	<End of file>
-	*/
 	{
-		//Read File
+		/*
+		 * IMAGE FILE FORMAT
+		 * The overall layout of an ImageDisk .IMD image file is:
+		 * IMD v.vv: dd/mm/yyyy hh:mm:ss
+		 * Comment (ASCII only - unlimited size)
+		 * 1A byte - ASCII EOF character
+		 * - For each track on the disk:
+		 * 1 byte Mode value							see getModulationspeed for definition		
+		 * 1 byte Cylinder
+		 * 1 byte head
+		 * 1 byte number of sectors in track			
+		 * 1 byte sector size							see getsectorsize for definition
+		 * sector numbering map
+		 * sector cylinder map (optional)				definied in high byte of head (since head is 0 or 1)
+		 * sector head map (optional)					definied in high byte of head (since head is 0 or 1)
+		 * sector data records
+		 * <End of file>
+		 */
+
         std::ifstream inputFile(_config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
             Error() << "cannot open input file";
+		Bytes data;
+		data.writer().append(inputFile);
+		ByteReader br(data);
+
 		//define some variables
 		bool mfm = false;	//define coding just to show in comment for setting the right write parameters
-		inputFile.seekg(0, inputFile.end);
-		int inputFileSize = inputFile.tellg();	// determine filesize
-		inputFile.seekg(0, inputFile.beg);
-		Bytes data;
-		data.writer() += inputFile;
-		ByteReader br(data);
-		SectorSet sectors;
-		TrackHeader header = {0, 0, 0, 0, 0};
+		Trackheader header = {0, 0, 0, 0, 0};
 
 		unsigned n = 0;
-		unsigned headerPtr = 0;
-		unsigned Modulation_Speed = 0;
+		unsigned modulation_speed = 0;
 		unsigned sectorSize = 0;
 		std::string sector_skew;
-		int b; 	
-		unsigned char comment[8192]; //i choose a fixed value. dont know how to make dynamic arrays in C++. This should be enough
+
 		// Read comment
-		while ((b = br.read_8()) != EOF && b != 0x1A)
+		std::stringstream comment;
+		while (!br.eof())
 		{
-			comment[n++] = (unsigned char)b;
-		}
-		headerPtr = n; //set pointer to after comment
-		comment[n] = '\0'; // null-terminate the string
-		//write comment to screen
-		std::cout 	<< "Comment in IMD image:\n"
-					<< fmt::format("{}\n",
-					comment);
-
-		//first read header
-		for (;;)
-		{
-			if (headerPtr >= inputFileSize-1)
-			{
+			int b = br.read_8();
+			if (b == 0x1a)
 				break;
-			}
-			header.ModeValue = br.read_8();
-			headerPtr++;
-			Modulation_Speed = getModulationandSpeed(header.ModeValue, &mfm);
+			if (b == '\r')
+				continue;
+			if (b == '\n')
+				b = 32;
+			comment << (char) b;
+		}
+		std::cout << fmt::format("IMD: comment: {}\n", comment.str());
+
+		while (!br.eof())
+		{
+			header.modeValue = br.read_8();
+			modulation_speed = getModulationandSpeed(header.modeValue, &mfm);
 			header.track = br.read_8();
-			headerPtr++;
-			header.Head = br.read_8();
-			headerPtr++;
+			header.head = br.read_8();
+			int physicalHead = header.head & 0x3f;
 			header.numSectors = br.read_8();
-			headerPtr++;
-			header.SectorSize = br.read_8();
-			headerPtr++;
-			sectorSize = getSectorSize(header.SectorSize);
+			header.sectorSize = br.read_8();
+			sectorSize = getsectorSize(header.sectorSize);
 
-			//Read optional cylinder map To Do
+			/* Read optional cylinder map */
 
-			//Read optional sector head map To Do
+			if (header.head & 0x80)
+				Error() << "cylinder map";
+
+			/* Read optional sector head map */
+
+			if (header.head & 0x40)
+				Error() << "sector head map";
 
 			//read sector numbering map
 			unsigned int sector_map[header.numSectors];
 			bool blnBaseOne = false; 
 			sector_skew.clear();
-			for (b = 0;  b < header.numSectors; b++)
+			for (int b = 0;  b < header.numSectors; b++)
 			{	
 				sector_map[b] = br.read_8();
 				sector_skew.push_back(sector_map[b] + '0');
 				if (b == 0) //first sector see if base is 0 or 1 Fluxengine wants 0
-					{
-					if (sector_map[b]==1)
-						{
-							blnBaseOne = true;
-						}
-					}
-				if (blnBaseOne==true)
 				{
-					sector_map[b] = (sector_map[b]-1);
+					if (sector_map[b]==1)
+						blnBaseOne = true;
 				}
-				headerPtr++;
+				if (blnBaseOne==true)
+					sector_map[b] = (sector_map[b]-1);
 			}
 			//read the sectors
 			for (int s = 0; s < header.numSectors; s++)
 			{
-				Bytes sectordata;
-				std::unique_ptr<Sector>& sector = sectors.get(header.track, header.Head, sector_map[s]);
+				std::unique_ptr<Sector>& sector = _sectors.get(header.track, physicalHead, sector_map[s]);
 				sector.reset(new Sector);
 				//read the status of the sector
-				unsigned int Status_Sector = br.read_8();
-				headerPtr++;
+				unsigned int sector_status = br.read_8();
 
-				switch (Status_Sector)
+				switch (sector_status)
 				{
 					case 0: /* Sector data unavailable - could not be read */
-
 						break;
 
 					case 1: /* Normal data: (Sector Size) bytes follow */
-						sectordata = br.read(sectorSize);
-						headerPtr += sectorSize;
-						sector->data.writer().append(sectordata);
-
+					{
+						Bytes sectordata = br.read(sectorSize);
+						sector->data = sectordata;
 						break;
+					}
 
 					case 2: /* Compressed: All bytes in sector have same value (xx) */
-						sectordata = br.read(1);
-						headerPtr++;
+					{
+						uint8_t sectordata = br.read_8();
 						sector->data.writer().append(sectordata);
 
+						ByteWriter bw(sector->data);
 						for (int k = 1; k < sectorSize; k++)
 						{
 							//fill data till sector is full
-							sector->data.writer().append(sectordata);
+							bw.write_8(sectordata);
 						}
-
 						break;
+					}
 
 					case 3: /* Normal data with "Deleted-Data address mark" */
-
 						break;
 
 					case 4: /* Compressed with "Deleted-Data address mark"*/
-					
 						break;
 
 					case 5: /* Normal data read with data error */
-					
 						break;
 
 					case 6: /* Compressed read with data error" */
-
 						break;
 
 					case 7: /* Deleted data read with data error" */
-					
 						break;
 
 					case 8: /* Compressed, Deleted read with data error" */
-					
 						break;
 
 					default:
-						Error() << fmt::format("don't understand IMD disks with sector status {}", Status_Sector);
+						Error() << fmt::format("don't understand IMD disks with sector status {}", sector_status);
 				}		
 				sector->status = Sector::OK;
 				sector->logicalTrack = sector->physicalTrack = header.track;
-				sector->logicalSide = sector->physicalSide = header.Head;
+				sector->logicalSide = sector->physicalSide = physicalHead;
 				sector->logicalSector = (sector_map[s]);
 			}
 
@@ -263,16 +240,28 @@ public:
 		//Write format detected in IMD image to screen to help user set the right write parameters
 
 		size_t headSize = header.numSectors * sectorSize;
-        size_t trackSize = headSize * (header.Head + 1);
+        size_t trackSize = headSize * (header.head + 1);
 
-		std::cout 	<< "reading IMD image\n"
-					<< fmt::format("{} tracks, {} heads; {}; {} kbps; {} sectoren; sectorsize {}; sectormap {}; {} kB total \n",
-					header.track, header.Head + 1,
-					mfm ? "MFM" : "FM",
-					Modulation_Speed, header.numSectors, sectorSize, sector_skew, (header.track+1) * trackSize / 1024);
+		std::cout << fmt::format("IMD: reading image with {} tracks, {} heads, {};\n"
+								 "IMD: {} kbps; {} sectors; sectorsize {}; sectormap {}; {} kB total\n",
+				  header.track, header.head + 1,
+				  mfm ? "MFM" : "FM",
+				  modulation_speed, header.numSectors, sectorSize, sector_skew, (header.track+1) * trackSize / 1024);
 
-        return sectors;
- 	}
+	}
+
+	Bytes getBlock(size_t offset, size_t length) const
+	{
+		throw "unimplemented";
+	}
+
+	const Sector* get(unsigned cylinder, unsigned head, unsigned sector) const
+	{
+		return _sectors.get(cylinder, head, sector);
+	}
+
+private:
+	SectorSet _sectors;
 };
 
 std::unique_ptr<ImageReader> ImageReader::createIMDImageReader(

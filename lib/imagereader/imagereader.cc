@@ -14,8 +14,8 @@ std::unique_ptr<ImageReader> ImageReader::create(const ImageReaderProto& config)
 {
 	switch (config.format_case())
 	{
-//		case ImageReaderProto::kImd:
-//			return ImageReader::createIMDImageReader(config);
+		case ImageReaderProto::kImd:
+			return ImageReader::createIMDImageReader(config);
 
 		case ImageReaderProto::kImg:
 			return ImageReader::createImgImageReader(config);
@@ -44,6 +44,7 @@ void ImageReader::updateConfigForFilename(ImageReaderProto* proto, const std::st
 		{".img",      [&]() { proto->mutable_img(); }},
 		{".st",       [&]() { proto->mutable_img(); }},
 		{".nsi",      [&]() { proto->mutable_img(); }},
+		{".imd",      [&]() { proto->mutable_imd(); }},
 	};
 
 	for (const auto& it : formats)

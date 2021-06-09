@@ -130,8 +130,7 @@ public:
 
 	Bytes getBlock(size_t offset, size_t length) const
 	{
-		Error() << "unimplemented";
-		throw 0;
+		throw "unimplemented";
 	}
 
 	const Sector* get(unsigned cylinder, unsigned head, unsigned sector) const
@@ -141,59 +140,6 @@ public:
 			return nullptr;
 
 		return sit->second.get();
-	}
-
-	SectorSet readImage()
-	{
-		#if 0
-        std::ifstream inputFile(_config.filename(), std::ios::in | std::ios::binary);
-        if (!inputFile.is_open())
-            Error() << "cannot open input file";
-
-		ByteReader br(
-		unsigned headerPtr = 0;
-		SectorSet sectors;
-		for (;;)
-		{
-			unsigned dataPtr = headerPtr + 2901*3 + 1;
-			if (dataPtr >= inputFileSize)
-				break;
-
-			for (unsigned i=0; i<2901; i++)
-			{
-				auto s = std::make_unique(new SectorData);
-
-				SectorHeader header = {0, 0, 0xff};
-				inputFile.seekg(headerPtr);
-				inputFile.read((char*) &header, 3);
-				unsigned sectorSize = getSectorSize(header.flags);
-				if ((header.flags & JV3_FREEF) != JV3_FREEF)
-				{
-					Bytes data(sectorSize);
-					inputFile.seekg(dataPtr);
-					inputFile.read((char*) data.begin(), sectorSize);
-
-					unsigned head = !!(header.flags & JV3_SIDE);
-                    std::unique_ptr<Sector>& sector = sectors.get(header.track, head, header.sector);
-                    sector.reset(new Sector);
-                    sector->status = Sector::OK;
-                    sector->logicalTrack = sector->physicalTrack = header.track;
-                    sector->logicalSide = sector->physicalSide = head;
-                    sector->logicalSector = header.sector;
-                    sector->data = data;
-				}
-
-				headerPtr += 3;
-				dataPtr += sectorSize;
-			}
-
-			/* dataPtr is now pointing at the beginning of the next chunk. */
-
-			headerPtr = dataPtr;
-		}
-
-        return sectors;
-		#endif
 	}
 
 private:
