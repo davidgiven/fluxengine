@@ -32,8 +32,11 @@ fluxengine read northstar
 To read a single-sided North Star floppy, run:
 
 ```
-fluxengine read northstar -heads 0
+fluxengine read <format> -heads 0
 ```
+
+...where `<format>` is `northstar87`, `northstar175` or `northstar350`
+depending on the format you want to read.
 
 You should end up with a `northstar.nsi` with a file size dependent on the floppy
 disk type:

@@ -351,7 +351,6 @@ buildlibrary libbackend.a \
     lib/imagewriter/imagewriter.cc \
     lib/imagewriter/imgimagewriter.cc \
     lib/imagewriter/ldbsimagewriter.cc \
-    lib/imagewriter/nsiimagewriter.cc \
     lib/ldbs.cc \
     lib/proto.cc \
     lib/reader.cc \
@@ -384,7 +383,9 @@ READABLES="\
     macintosh \
     micropolis \
     mx \
-    northstar \
+    northstar87 \
+    northstar175 \
+    northstar350 \
     tids990 \
     victor9k \
     zilogmcz \

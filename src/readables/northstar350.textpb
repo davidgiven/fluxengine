@@ -1,4 +1,4 @@
-comment: 'Northstar 87kB/175kB/350kB 5.25" 35-track 10-sector hard sectored'
+comment: 'Northstar 350kB 5.25" 35-track double-sided double-density hard-sectored'
 
 input {
 	flux {
@@ -12,7 +12,7 @@ input {
 output {
 	image {
 		filename: "northstar.nsi"
-		nsi {}
+		img {}
 	}
 }
 
@@ -20,9 +20,19 @@ decoder {
 	northstar {}
 }
 
+geometry {
+	cylinders: 35
+	heads: 2
+	block_ordering: ORDER_NSI
+	trackdata {
+		sectors: 10
+		sector_size: 512
+	}
+}
+
 cylinders {
 	start: 0
-	end: 34
+	end: 39
 }
 
 heads {
