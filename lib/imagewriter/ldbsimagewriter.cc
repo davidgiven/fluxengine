@@ -3,6 +3,7 @@
 #include "sector.h"
 #include "sectorset.h"
 #include "imagewriter/imagewriter.h"
+#include "geometry/geometry.h"
 #include "fmt/format.h"
 #include "ldbs.h"
 #include "lib/config.pb.h"
@@ -10,14 +11,15 @@
 #include <iostream>
 #include <fstream>
 
-class LDBSImageWriter : public ImageWriter
+class LDBSImageWriter : public ImageWriter, public AssemblingGeometryMapper
 {
 public:
 	LDBSImageWriter(const ImageWriterProto& config):
 		ImageWriter(config)
-	{}
+	{
+	}
 
-	void writeImage(const SectorSet& sectors)
+	~LDBSImageWriter()
 	{
         LDBS ldbs;
 
@@ -25,12 +27,28 @@ public:
 		unsigned numHeads;
 		unsigned numSectors;
 		unsigned numBytes;
-		sectors.calculateSize(numCylinders, numHeads, numSectors, numBytes);
+		_sectors.calculateSize(numCylinders, numHeads, numSectors, numBytes);
 
-		std::cout << fmt::format("writing {} tracks, {} heads, {} sectors, {} bytes per sector",
+		std::cout << fmt::format("LDBS: writing {} tracks, {} heads, {} sectors, {} bytes per sector",
 						numCylinders, numHeads,
 						numSectors, numBytes)
 				<< std::endl;
+
+		Bytes geomBlock;
+		ByteWriter geomBlockWriter(geomBlock);
+		geomBlockWriter.write_8(0); /* alternating sides */
+		geomBlockWriter.write_le16(numCylinders);
+		geomBlockWriter.write_8(numHeads);
+		geomBlockWriter.write_8(numSectors);
+		geomBlockWriter.write_8(0); /* first sector ID */
+		geomBlockWriter.write_le16(numBytes);
+		geomBlockWriter.write_8(0); /* data rate */
+		geomBlockWriter.write_8(0); /* read/write gap */
+		geomBlockWriter.write_8(0); /* format gap */
+		geomBlockWriter.write_8(0); /* recording mode */
+		geomBlockWriter.write_8(0); /* complement flag */
+		geomBlockWriter.write_8(0); /* disable multitrack read/writes */
+		geomBlockWriter.write_8(0); /* do not skip deleted data */
 
         Bytes trackDirectory;
         ByteWriter trackDirectoryWriter(trackDirectory);
@@ -47,7 +65,7 @@ public:
                 int actualSectors = 0;
 				for (int sectorId = 0; sectorId < numSectors; sectorId++)
 				{
-					const auto& sector = sectors.get(track, head, sectorId);
+					const auto& sector = _sectors.get(track, head, sectorId);
 					if (sector)
                         actualSectors++;
                 }
@@ -63,7 +81,7 @@ public:
 
 				for (int sectorId = 0; sectorId < numSectors; sectorId++)
 				{
-					const auto& sector = sectors.get(track, head, sectorId);
+					const auto& sector = _sectors.get(track, head, sectorId);
 					if (sector)
 					{
                         uint32_t sectorLabel = (('S') << 24) | ((track & 0xff) << 16) | (head << 8) | sectorId;
@@ -92,16 +110,37 @@ public:
 			}
 		}
 
+		trackDirectoryWriter.write_be32(LDBS_GEOM_BLOCK);
+		trackDirectoryWriter.write_le32(ldbs.put(geomBlock, LDBS_GEOM_BLOCK));
+		trackDirectorySize++;
+
         trackDirectoryWriter.seek(0);
         trackDirectoryWriter.write_le16(trackDirectorySize);
 
         uint32_t trackDirectoryAddress = ldbs.put(trackDirectory, LDBS_TRACK_BLOCK);
         Bytes data = ldbs.write(trackDirectoryAddress);
         data.writeToFile(_config.filename());
-    }
+
+        std::cout << fmt::format("LDBS: written output image of {} kB total\n",
+						data.size() / 1024);
+	}
+
+	const AssemblingGeometryMapper* getGeometryMapper() const
+	{
+		return this;
+	}
+
+	void put(const Sector& sector) const
+	{
+		auto& ptr = _sectors.get(sector.logicalTrack, sector.logicalSide, sector.logicalSector);
+		ptr.reset(new Sector(sector));
+	}
 
 	void putBlock(size_t offset, size_t length, const Bytes& data)
 	{ throw "unimplemented"; }
+
+private:
+	mutable SectorSet _sectors;
 };
 
 std::unique_ptr<ImageWriter> ImageWriter::createLDBSImageWriter(const ImageWriterProto& config)

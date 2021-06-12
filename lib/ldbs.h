@@ -11,6 +11,7 @@ class Bytes;
 #define LDBS_FILE_TYPE 0x44534B02 /* "DSK\02" */
 #define LDBS_BLOCK_MAGIC 0x4C444201 /* "LDB\01" */
 #define LDBS_TRACK_BLOCK 0x44495201 /* "DIR\01" */
+#define LDBS_GEOM_BLOCK 0x47454f4d /* "GEOM" */
 
 class LDBS
 {

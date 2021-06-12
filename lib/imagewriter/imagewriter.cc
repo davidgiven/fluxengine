@@ -17,10 +17,10 @@ std::unique_ptr<ImageWriter> ImageWriter::create(const ImageWriterProto& config)
 		case ImageWriterProto::kImg:
 			return ImageWriter::createImgImageWriter(config);
 
-#if 0
 		case ImageWriterProto::kLdbs:
 			return ImageWriter::createLDBSImageWriter(config);
 
+#if 0
 		case ImageWriterProto::kDiskcopy:
 			return ImageWriter::createDiskCopyImageWriter(config);
 
