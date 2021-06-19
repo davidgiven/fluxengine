@@ -4,7 +4,7 @@ export CFLAGS = -x c++ --std=c++14 -ffunction-sections -fdata-sections
 export LDFLAGS = -pthread
 
 export COPTFLAGS = -Os
-export LDOPTFLAGS = -Os -s
+export LDOPTFLAGS = -Os
 
 export CDBGFLAGS = -O0 -g
 export LDDBGFLAGS = -O0 -g
@@ -16,7 +16,8 @@ endif
 ifeq ($(OS), Windows_NT)
 export PROTOC = /mingw32/bin/protoc
 export CXX = /mingw32/bin/g++
-export AR = /mingw32/bin/ar rcs
+export AR = /mingw32/bin/ar rc
+export RANLIB = /mingw32/bin/ranlib -c
 export STRIP = /mingw32/bin/strip
 export CFLAGS += -I/mingw32/include/libusb-1.0 -I/mingw32/include
 export LDFLAGS +=
@@ -32,7 +33,8 @@ endif
 
 export PROTOC = protoc
 export CXX = g++
-export AR = ar rcs
+export AR = ar rc
+export RANLIB = ranlib -c
 export STRIP = strip
 export CFLAGS += $(shell pkg-config --cflags $(PACKAGES))
 export LDFLAGS +=
@@ -41,13 +43,18 @@ export EXTENSION =
 endif
 export XXD = xxd
 
+ifeq ($(shell uname),Darwin)
+AR = ar rcS
+RANLIB += -no_warning_for_no_symbols
+endif
+
 CFLAGS += -Ilib -Idep/fmt -Iarch
 
 export OBJDIR = .obj
 
 all: .obj/build.ninja
 	@ninja -f .obj/build.ninja
-	@-cscope -bRq
+	@(command -v cscope > /dev/null) && cscope -bRq
 
 clean:
 	@echo CLEAN
