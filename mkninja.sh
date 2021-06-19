@@ -24,7 +24,7 @@ rule binencode
     restat = true
 
 rule library
-    command = $AR \$out \$in
+    command = $AR \$out \$in && $RANLIB \$out
     description = AR \$in
 
 rule link
@@ -186,9 +186,10 @@ buildprogram() {
     echo build $prog-debug$EXTENSION : link $dobjs
     echo "    flags=$flags $LDDBGFLAGS"
 
-    echo build $prog$EXTENSION : link $oobjs
+    echo build $prog$EXTENSION-unstripped : link $oobjs
     echo "    flags=$flags $LDOPTFLAGS"
 
+    echo build $prog$EXTENSION : strip $prog$EXTENSION-unstripped
 }
 
 buildsimpleprogram() {

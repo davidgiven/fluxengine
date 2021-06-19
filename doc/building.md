@@ -186,7 +186,8 @@ install some support packages.
   - For Linux (this is Ubuntu, but this should apply to Debian too):
 	`ninja-build`, `libusb-1.0-0-dev`, `libsqlite3-dev`, `zlib1g-dev`,
 	`libudev-dev`.
-  - For OSX with Homebrew: `ninja`, `libusb`, `pkg-config`, `sqlite`.
+  - For OSX with Homebrew: `ninja`, `libusb`, `pkg-config`, `sqlite`,
+    `protobuf`.
   - For Windows with MSYS2: `make`, `ninja`, `mingw-w64-i686-libusb`,
 	`mingw-w64-i686-protobuf`, `mingw-w64-i686-sqlite3`, `mingw-w64-i686-zlib`,
 	`mingw-w64-i686-gcc`.
