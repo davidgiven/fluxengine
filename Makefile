@@ -17,7 +17,7 @@ ifeq ($(OS), Windows_NT)
 export PROTOC = /mingw32/bin/protoc
 export CXX = /mingw32/bin/g++
 export AR = /mingw32/bin/ar rc
-export RANLIB = /mingw32/bin/ranlib -c
+export RANLIB = /mingw32/bin/ranlib
 export STRIP = /mingw32/bin/strip
 export CFLAGS += -I/mingw32/include/libusb-1.0 -I/mingw32/include
 export LDFLAGS +=
@@ -55,7 +55,7 @@ export OBJDIR = .obj
 
 all: .obj/build.ninja
 	@ninja -f .obj/build.ninja
-	@(command -v cscope > /dev/null) && cscope -bRq
+	@if command -v cscope > /dev/null; then cscope -bRq; fi
 
 clean:
 	@echo CLEAN
