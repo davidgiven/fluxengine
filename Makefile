@@ -34,19 +34,20 @@ endif
 export PROTOC = protoc
 export CXX = g++
 export AR = ar rc
-export RANLIB = ranlib -c
+export RANLIB = ranlib
 export STRIP = strip
 export CFLAGS += $(shell pkg-config --cflags $(PACKAGES))
 export LDFLAGS +=
 export LIBS += $(shell pkg-config --libs $(PACKAGES))
 export EXTENSION =
-endif
-export XXD = xxd
 
 ifeq ($(shell uname),Darwin)
 AR = ar rcS
-RANLIB += -no_warning_for_no_symbols
+RANLIB += -c -no_warning_for_no_symbols
 endif
+
+endif
+export XXD = xxd
 
 CFLAGS += -Ilib -Idep/fmt -Iarch
 
