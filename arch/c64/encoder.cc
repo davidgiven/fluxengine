@@ -299,10 +299,8 @@ std::unique_ptr<Fluxmap> Commodore64Encoder::encode(
      * stored in a d64 disk image so we have to get it from track 18 which
      * contains the BAM.
     */
-    if ((physicalTrack < 0) || (physicalTrack >= C64_TRACKS_PER_DISK))
-        return std::unique_ptr<Fluxmap>();
 
-    const auto& sectorData = allSectors.get(C64_BAM_TRACK, 0, 0); //Read de BAM to get the DISK ID bytes
+    const auto& sectorData = allSectors.get(C64_BAM_TRACK*2, 0, 0); //Read de BAM to get the DISK ID bytes
     if (sectorData)
     {
         ByteReader br(sectorData->data);
@@ -313,7 +311,8 @@ std::unique_ptr<Fluxmap> Commodore64Encoder::encode(
     else
         _formatByte1 = _formatByte2 = 0;
     
-    double clockRateUs = clockRateUsForTrack(physicalTrack) * _config.clock_compensation_factor();
+    int logicalTrack = physicalTrack / 2;
+    double clockRateUs = clockRateUsForTrack(logicalTrack) * _config.clock_compensation_factor();
 
     int bitsPerRevolution = 200000.0 / clockRateUs;
 
@@ -323,13 +322,19 @@ std::unique_ptr<Fluxmap> Commodore64Encoder::encode(
     fillBitmapTo(bits, cursor, _config.post_index_gap_us() / clockRateUs, { true, false });
     lastBit = false;
 
-    unsigned numSectors = sectorsForTrack(physicalTrack);
+    unsigned numSectors = sectorsForTrack(logicalTrack);
+    unsigned writtenSectors = 0;
     for (int sectorId=0; sectorId<numSectors; sectorId++)
     {
         const auto& sectorData = allSectors.get(physicalTrack, physicalSide, sectorId);
         if (sectorData)
+        {
             writeSector(bits, cursor, sectorData);
+            writtenSectors++;
+        }
     }
+    if (writtenSectors == 0)
+        return std::unique_ptr<Fluxmap>();
 
     if (cursor >= bits.size())
         Error() << fmt::format("track data overrun by {} bits", cursor - bits.size());

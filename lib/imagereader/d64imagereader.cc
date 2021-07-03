@@ -57,6 +57,7 @@ public:
         for (int track = 0; track < 40; track++)
         {
 			int numSectors = sectorsPerTrack(track);
+			int physicalTrack = track*2;
             for (int head = 0; head < numHeads; head++)
             {
                 for (int sectorId = 0; sectorId < numSectors; sectorId++)
@@ -67,19 +68,21 @@ public:
                         Bytes payload = br.read(256);
                         offset += 256;
 
-                        std::unique_ptr<Sector>& sector = sectors.get(track, head, sectorId);
+                        std::unique_ptr<Sector>& sector = sectors.get(physicalTrack, head, sectorId);
                         sector.reset(new Sector);
                         sector->status = Sector::OK;
-                        sector->logicalTrack = sector->physicalTrack = track;
+                        sector->logicalTrack = track;
+						sector->physicalTrack = physicalTrack;
                         sector->logicalSide = sector->physicalSide = head;
                         sector->logicalSector = sectorId;
                         sector->data.writer().append(payload);
                     } else
                     {   //no more data in input file. Write sectors with status: DATA_MISSING
-                        std::unique_ptr<Sector>& sector = sectors.get(track, head, sectorId);
+                        std::unique_ptr<Sector>& sector = sectors.get(physicalTrack, head, sectorId);
                         sector.reset(new Sector);
                         sector->status = Sector::DATA_MISSING;
-                        sector->logicalTrack = sector->physicalTrack = track;
+                        sector->logicalTrack = track;
+						sector->physicalTrack = physicalTrack;
                         sector->logicalSide = sector->physicalSide = head;
                         sector->logicalSector = sectorId;
                     }

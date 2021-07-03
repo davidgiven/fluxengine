@@ -23,8 +23,13 @@ public:
             Error() << "cannot open input file";
 
         SectorSet sectors;
+		int trackCount = 0;
         for (int track = 0; track < _config.img().tracks(); track++)
         {
+			if (inputFile.eof())
+				break;
+			int physicalTrack = track * _config.img().physical_step() + _config.img().physical_offset();
+
             for (int side = 0; side < _config.img().sides(); side++)
             {
 				ImgInputOutputProto::TrackdataProto trackdata;
@@ -35,23 +40,22 @@ public:
                     Bytes data(trackdata.sector_size());
                     inputFile.read((char*) data.begin(), data.size());
 
-                    std::unique_ptr<Sector>& sector = sectors.get(track, side, sectorId);
+                    std::unique_ptr<Sector>& sector = sectors.get(physicalTrack, side, sectorId);
                     sector.reset(new Sector);
                     sector->status = Sector::OK;
                     sector->logicalTrack = track;
-					sector->physicalTrack = track * _config.img().physical_step() + _config.img().physical_offset();
+					sector->physicalTrack = physicalTrack;
                     sector->logicalSide = sector->physicalSide = side;
                     sector->logicalSector = sectorId;
                     sector->data = data;
                 }
             }
 
-			if (inputFile.eof())
-				break;
+			trackCount++;
         }
 
         std::cout << fmt::format("reading {} tracks, {} sides, {} kB total\n",
-                        _config.img().tracks(), _config.img().sides(),
+                        trackCount, _config.img().sides(),
 						inputFile.tellg() / 1024);
         return sectors;
 	}
