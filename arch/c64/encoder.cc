@@ -12,9 +12,6 @@
 #include <ctype.h>
 #include "bytes.h"
 
-uint8_t formatByte1;
-uint8_t formatByte2;
-
 static bool lastBit;
 
 static double clockRateUsForTrack(unsigned track)
@@ -161,10 +158,10 @@ static std::vector<bool> encode_data(uint8_t input)
     */
 
     std::vector<bool> output(10, false);
-    uint8_t hi =0;
-    uint8_t lo =0;
-    uint8_t lo_GCR =0;
-    uint8_t hi_GCR =0;
+    uint8_t hi = 0;
+    uint8_t lo = 0;
+    uint8_t lo_GCR = 0;
+    uint8_t hi_GCR = 0;
 
     //Convert the byte in high and low nibble
     lo = input >> 4; //get the lo nibble shift the bits 4 to the right          
@@ -205,7 +202,7 @@ static std::vector<bool> encode_data(uint8_t input)
     return output;
 }
 
-static void write_sector(std::vector<bool>& bits, unsigned& cursor, const Sector* sector)
+void Commodore64Encoder::writeSector(std::vector<bool>& bits, unsigned& cursor, const Sector* sector) const
 {
     /* Source: http://www.unusedino.de/ec64/technical/formats/g64.html 
      * 1. Header sync       FF FF FF FF FF (40 'on' bits, not GCR)
@@ -244,13 +241,13 @@ static void write_sector(std::vector<bool>& bits, unsigned& cursor, const Sector
         uint8_t encodedSector = sector->logicalSector;
         // uint8_t formatByte1 = C64_FORMAT_ID_BYTE1;
         // uint8_t formatByte2 = C64_FORMAT_ID_BYTE2;
-        uint8_t headerChecksum = (encodedTrack ^ encodedSector ^ formatByte1 ^ formatByte2);
+        uint8_t headerChecksum = (encodedTrack ^ encodedSector ^ _formatByte1 ^ _formatByte2);
         write_bits(bits, cursor, encode_data(C64_HEADER_BLOCK_ID));
         write_bits(bits, cursor, encode_data(headerChecksum));
         write_bits(bits, cursor, encode_data(encodedSector));
         write_bits(bits, cursor, encode_data(encodedTrack));
-        write_bits(bits, cursor, encode_data(formatByte2));
-        write_bits(bits, cursor, encode_data(formatByte1));
+        write_bits(bits, cursor, encode_data(_formatByte2));
+        write_bits(bits, cursor, encode_data(_formatByte1));
         write_bits(bits, cursor, encode_data(C64_PADDING));
         write_bits(bits, cursor, encode_data(C64_PADDING));
 
@@ -306,11 +303,15 @@ std::unique_ptr<Fluxmap> Commodore64Encoder::encode(
         return std::unique_ptr<Fluxmap>();
 
     const auto& sectorData = allSectors.get(C64_BAM_TRACK, 0, 0); //Read de BAM to get the DISK ID bytes
-
-    ByteReader br(sectorData->data);
-    br.seek(162); //goto position of the first Disk ID Byte
-    formatByte1 = br.read_8();
-    formatByte2 = br.read_8();
+    if (sectorData)
+    {
+        ByteReader br(sectorData->data);
+        br.seek(162); //goto position of the first Disk ID Byte
+        _formatByte1 = br.read_8();
+        _formatByte2 = br.read_8();
+    }
+    else
+        _formatByte1 = _formatByte2 = 0;
     
     double clockRateUs = clockRateUsForTrack(physicalTrack) * _config.clock_compensation_factor();
 
@@ -326,7 +327,8 @@ std::unique_ptr<Fluxmap> Commodore64Encoder::encode(
     for (int sectorId=0; sectorId<numSectors; sectorId++)
     {
         const auto& sectorData = allSectors.get(physicalTrack, physicalSide, sectorId);
-        write_sector(bits, cursor, sectorData);
+        if (sectorData)
+            writeSector(bits, cursor, sectorData);
     }
 
     if (cursor >= bits.size())

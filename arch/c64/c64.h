@@ -57,7 +57,12 @@ public:
     std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors);
 
 private:
+	void writeSector(std::vector<bool>& bits, unsigned& cursor, const Sector* sector) const;
+	
+private:
 	const Commodore64EncoderProto& _config;
+	uint8_t _formatByte1;
+	uint8_t _formatByte2;
 };
 
 #endif
