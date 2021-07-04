@@ -299,8 +299,12 @@ std::unique_ptr<Fluxmap> Commodore64Encoder::encode(
      * stored in a d64 disk image so we have to get it from track 18 which
      * contains the BAM.
     */
-
-    const auto& sectorData = allSectors.get(C64_BAM_TRACK*2, 0, 0); //Read de BAM to get the DISK ID bytes
+   int offset = 2;
+   if (_config.forty_track_drive() == true)
+   {
+       offset = 1;
+   }
+    const auto& sectorData = allSectors.get(C64_BAM_TRACK*offset, 0, 0); //Read de BAM to get the DISK ID bytes
     if (sectorData)
     {
         ByteReader br(sectorData->data);
@@ -311,7 +315,7 @@ std::unique_ptr<Fluxmap> Commodore64Encoder::encode(
     else
         _formatByte1 = _formatByte2 = 0;
     
-    int logicalTrack = physicalTrack / 2;
+    int logicalTrack = physicalTrack / offset;
     double clockRateUs = clockRateUsForTrack(logicalTrack) * _config.clock_compensation_factor();
 
     int bitsPerRevolution = 200000.0 / clockRateUs;

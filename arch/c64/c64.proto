@@ -9,5 +9,6 @@ message Commodore64EncoderProto {
 		(help) = "post-index gap before first sector header."];
 	optional double clock_compensation_factor = 2 [default=1.0,
 		(help) = "scale the output clock by this much."];
+	optional bool forty_track_drive = 3 [default=false, (help) = "is a 40 track drive used."];
 }
 
