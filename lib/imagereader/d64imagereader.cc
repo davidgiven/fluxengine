@@ -54,7 +54,7 @@ public:
 		};
 
         SectorSet sectors;
-        for (int track = 0; track < numCylinders; track++)
+        for (int track = 0; track <= numCylinders; track++)
         {
 			int numSectors = sectorsPerTrack(track);
 			int physicalTrack = track * _config.d64().physical_step() + _config.d64().physical_offset();
