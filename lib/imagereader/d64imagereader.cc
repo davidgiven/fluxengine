@@ -32,12 +32,12 @@ public:
 		data.writer() += inputFile;
 		ByteReader br(data);
 
-		unsigned numCylinders = 39;
-		unsigned numHeads = 1;
+		unsigned numCylinders = _config.d64().tracks();
+		unsigned numHeads = _config.d64().sides();
 		unsigned numSectors = 0;
 
 		std::cout << "reading D64 image\n"
-		          << fmt::format("{} cylinders, {} heads\n",
+		          << fmt::format("{} cylinders, {} head(s)\n",
 				  		numCylinders, numHeads);
 
         uint32_t offset = 0;
@@ -54,10 +54,10 @@ public:
 		};
 
         SectorSet sectors;
-        for (int track = 0; track < 40; track++)
+        for (int track = 0; track < numCylinders; track++)
         {
 			int numSectors = sectorsPerTrack(track);
-			int physicalTrack = track*2;
+			int physicalTrack = track * _config.d64().physical_step() + _config.d64().physical_offset();
             for (int head = 0; head < numHeads; head++)
             {
                 for (int sectorId = 0; sectorId < numSectors; sectorId++)
