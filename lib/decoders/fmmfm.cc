@@ -96,3 +96,25 @@ void encodeMfm(std::vector<bool>& bits, unsigned& cursor, const Bytes& input, bo
         }
     }
 }
+
+Bytes encodeMfm(const Bytes& input, bool& lastBit)
+{
+	ByteReader br(input);
+	BitReader bitr(br);
+	Bytes b;
+	ByteWriter bw(b);
+	BitWriter bitw(bw);
+
+	while (!bitr.eof())
+	{
+		uint8_t bit = bitr.get();
+		
+		bitw.push(!lastBit && !bit);
+		bitw.push(bit);
+		lastBit = bit;
+    }
+
+	bitw.flush();
+	return b;
+}
+

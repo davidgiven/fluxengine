@@ -22,13 +22,14 @@ static void write_bits(std::vector<bool>& bits, unsigned& cursor, const std::vec
 	for (bool bit : src)
 	{
 		if (cursor < bits.size())
-			bits[cursor++] = bit;
+			lastBit = bits[cursor++] = bit;
 	}
 }
 
 static void write_bits(std::vector<bool>& bits, unsigned& cursor, uint64_t data, int width)
 {
 	cursor += width;
+	lastBit = data & 1;
 	for (int i=0; i<width; i++)
 	{
 		unsigned pos = cursor - i - 1;
@@ -38,19 +39,16 @@ static void write_bits(std::vector<bool>& bits, unsigned& cursor, uint64_t data,
 	}
 }
 
-static void write_interleaved_bytes(std::vector<bool>& bits, unsigned& cursor, const Bytes& bytes)
+static void write_bits(std::vector<bool>& bits, unsigned& cursor, const Bytes& bytes)
 {
-	assert(!(bytes.size() & 3));
-	Bytes interleaved = amigaInterleave(bytes);
-	encodeMfm(bits, cursor, interleaved, lastBit);
-}
+	ByteReader br(bytes);
+	BitReader bitr(br);
 
-static void write_interleaved_bytes(std::vector<bool>& bits, unsigned& cursor, uint32_t data)
-{
-	Bytes b(4);
-	ByteWriter bw(b);
-	bw.write_be32(data);
-	write_interleaved_bytes(bits, cursor, b);
+	while (!bitr.eof())
+	{
+		if (cursor < bits.size())
+			bits[cursor++] = bitr.get();
+	}
 }
 
 static void write_sector(std::vector<bool>& bits, unsigned& cursor, const Sector* sector)
@@ -58,11 +56,27 @@ static void write_sector(std::vector<bool>& bits, unsigned& cursor, const Sector
 	if ((sector->data.size() != 512) && (sector->data.size() != 528))
 		Error() << "unsupported sector size --- you must pick 512 or 528";
 
+	uint32_t checksum = 0;
+
+	auto write_interleaved_bytes = [&](const Bytes& bytes)
+	{
+		Bytes interleaved = amigaInterleave(bytes);
+		Bytes mfm = encodeMfm(interleaved, lastBit);
+		checksum ^= amigaChecksum(mfm);
+		checksum &= 0x55555555;
+		write_bits(bits, cursor, mfm);
+	};
+
+	auto write_interleaved_word = [&](uint32_t word)
+	{
+		Bytes b(4);
+		b.writer().write_be32(word);
+		write_interleaved_bytes(b);
+	};
+
     write_bits(bits, cursor, AMIGA_SECTOR_RECORD, 6*8);
 
-	std::vector<bool> headerBits(20*16);
-	unsigned headerCursor = 0;
-
+	checksum = 0;
 	Bytes header = 
 		{
 			0xff, /* Amiga 1.0 format byte */
@@ -70,22 +84,16 @@ static void write_sector(std::vector<bool>& bits, unsigned& cursor, const Sector
 			(uint8_t) sector->logicalSector,
 			(uint8_t) (AMIGA_SECTORS_PER_TRACK - sector->logicalSector)
 		};
-	write_interleaved_bytes(headerBits, headerCursor, header);
+	write_interleaved_bytes(header);
 	Bytes recoveryInfo(16);
 	if (sector->data.size() == 528)
 		recoveryInfo = sector->data.slice(512, 16);
-	write_interleaved_bytes(headerBits, headerCursor, recoveryInfo);
+	write_interleaved_bytes(recoveryInfo);
+	write_interleaved_word(checksum);
 
-	std::vector<bool> dataBits(512*16);
-	unsigned dataCursor = 0;
-	write_interleaved_bytes(dataBits, dataCursor, sector->data);
-
-	write_bits(bits, cursor, headerBits);
-	uint32_t headerChecksum = amigaChecksum(toBytes(headerBits));
-	write_interleaved_bytes(bits, cursor, headerChecksum);
-	uint32_t dataChecksum = amigaChecksum(toBytes(dataBits));
-	write_interleaved_bytes(bits, cursor, dataChecksum);
-	write_bits(bits, cursor, dataBits);
+	Bytes data = sector->data.slice(0, 512);
+	write_interleaved_word(amigaChecksum(encodeMfm(amigaInterleave(data), lastBit)));
+	write_interleaved_bytes(data);
 }
 
 std::unique_ptr<Fluxmap> AmigaEncoder::encode(

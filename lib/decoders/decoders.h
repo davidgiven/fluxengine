@@ -23,6 +23,7 @@ extern Bytes decodeFmMfm(std::vector<bool>::const_iterator start,
     std::vector<bool>::const_iterator end);
 extern void encodeMfm(std::vector<bool>& bits, unsigned& cursor, const Bytes& input, bool& lastBit);
 extern void encodeFm(std::vector<bool>& bits, unsigned& cursor, const Bytes& input);
+extern Bytes encodeMfm(const Bytes& input, bool& lastBit);
 
 static inline Bytes decodeFmMfm(const std::vector<bool> bits)
 { return decodeFmMfm(bits.begin(), bits.end()); }
