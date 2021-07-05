@@ -65,8 +65,8 @@ void visualiseSectorsToFile(const SectorSet& sectors, const std::string& filenam
 	painter.clearAll(0xff, 0xff, 0xff);
 
     const double radians_per_ns = 2.0*M_PI / (period*1e6);
-	const double available_width = bitmap.width;
-	const double available_height = bitmap.height;
+	const double available_width = bitmap.width - 2*BORDER;
+	const double available_height = bitmap.height - 2*Border;
 	const double panel_centre = (sideToDraw == -1)
 			? (available_width / 4)
 			: (available_width / 2);
