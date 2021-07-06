@@ -316,6 +316,22 @@ void BitWriter::flush()
     }
 }
 
+bool BitReader::eof()
+{
+	return (_bitcount == 0) && _br.eof();
+}
+
+bool BitReader::get()
+{
+	if (_bitcount == 0)
+		_fifo = _br.read_8();
+
+	bool bit = _fifo & 0x80;
+	_fifo <<= 1;
+	_bitcount = (_bitcount+1) & 7;
+	return bit;
+}
+
 std::vector<bool> reverseBits(const std::vector<bool>& bits)
 {
     std::vector<bool> output(bits.rbegin(), bits.rend());
