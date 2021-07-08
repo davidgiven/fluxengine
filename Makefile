@@ -9,10 +9,6 @@ export LDOPTFLAGS = -Os
 export CDBGFLAGS = -O0 -g
 export LDDBGFLAGS = -O0 -g
 
-ifeq ($(shell uname),Linux)
-LIBS += -ludev
-endif
-
 ifeq ($(OS), Windows_NT)
 export PROTOC = /mingw32/bin/protoc
 export CXX = /mingw32/bin/g++
