@@ -246,11 +246,15 @@ public:
     {
         _fd = open_serial_port(port);
 
-        _version = getVersion();
-        if ((_version != 22) && (_version != 24))
+        int version = getVersion();
+        if (version == 22)
+            _version = V22;
+        else if (version >= 24)
+            _version = V24;
+        else
         {
-            Error() << "only GreaseWeazle firmware versions 22 and 24 are currently supported,"
-                    << " but you have version " << _version << ". Please file a bug.";
+            Error() << "only GreaseWeazle firmware versions 22 and 24 or above are currently "
+                    << "supported, but you have version " << version << ". Please file a bug.";
         }
 
         /* Configure the hardware. */
@@ -298,11 +302,11 @@ public:
 
         switch (_version)
         {
-            case 22:
+            case V22:
                 do_command({ CMD_READ_FLUX, 2 });
                 break;
 
-            case 24:
+            case V24:
             {
                 Bytes cmd(8);
                 cmd.writer()
@@ -426,7 +430,7 @@ public:
 
         switch (_version)
         {
-            case 22:
+            case V22:
             {
                 Bytes cmd(4);
                 cmd.writer()
@@ -437,7 +441,7 @@ public:
                 break;
             }
 
-            case 24:
+            case V24:
             {
                 Bytes cmd(8);
                 cmd.writer()
@@ -475,11 +479,11 @@ public:
         do_command({ CMD_HEAD, 3, (uint8_t)side });
         switch (_version)
         {
-            case 22:
+            case V22:
                 do_command({ CMD_WRITE_FLUX, 3, 1 });
                 break;
 
-            case 24:
+            case V24:
                 do_command({ CMD_WRITE_FLUX, 4, 1, 1 });
                 break;
         }
@@ -518,6 +522,12 @@ public:
     { Error() << "unsupported operation on the GreaseWeazle"; }
 
 private:
+    enum
+    {
+	V22,
+	V24
+    };
+    
     FileHandle _fd;
     int _version;
     nanoseconds_t _clock;
