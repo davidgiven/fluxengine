@@ -24,9 +24,15 @@ public:
 		unsigned autoSides;
 		unsigned autoSectors;
 		unsigned autoBytes;
+		bool mixedDensity = false;
 		sectors.calculateSize(autoTracks, autoSides, autoSectors, autoBytes);
 
 		size_t trackSize = autoSectors * autoBytes;
+
+		if (autoTracks * trackSize == 0) {
+			std::cout << "No sectors in output; skipping .nsi image file generation." << std::endl;
+			return;
+		}
 
 		std::cout << fmt::format("Writing {} cylinders, {} heads, {} sectors, {} ({} bytes/sector), {} kB total",
 				autoTracks, autoSides,
@@ -56,7 +62,25 @@ public:
 							(sectorId * autoBytes); /* Sector offset from beginning of track. */
 					}
 					outputFile.seekp(sectorFileOffset, std::ios::beg);
-					sector->data.slice(0, autoBytes).writeTo(outputFile);
+					if ((autoBytes == 512) && (sector->data.size() == 256)) {
+						/* North Star DOS provided an upgrade path for disks formatted as single-
+						 * density to hold double-density data without reformatting.  In this
+						 * case, the four directory blocks will be single-density but other areas
+						 * of the disk are double-density.  This cannot be accurately represented
+						 * using a .nsi file, so in these cases, we pad the sector to 512-bytes,
+						 * filling with spaces.
+						 */
+						char fill[256];
+						memset(fill, ' ', sizeof(fill));
+						if (mixedDensity == false) {
+							std::cout << "Warning: Disk contains mixed single/double-density sectors." << std::endl;
+						}
+						mixedDensity = true;
+						sector->data.slice(0, 256).writeTo(outputFile);
+						outputFile.write(fill, sizeof(fill));
+					} else {
+						sector->data.slice(0, autoBytes).writeTo(outputFile);
+					}
 				}
 			}
 		}
