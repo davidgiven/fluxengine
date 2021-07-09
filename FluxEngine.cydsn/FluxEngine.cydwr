@@ -272,7 +272,7 @@
         <Data key="derive_type" value="AUTO" />
         <Data key="desired_freq" value="1600000" />
         <Data key="desired_unit" value="0" />
-        <Data key="divider" value="40" />
+        <Data key="divider" value="30" />
         <Data key="domain" value="DIGITAL" />
         <Data key="enabled" value="True" />
         <Data key="minus_accuracy" value="0.25" />
@@ -390,7 +390,7 @@
         <Data key="derive_type" value="AUTO" />
         <Data key="desired_freq" value="1600000" />
         <Data key="desired_unit" value="0" />
-        <Data key="divider" value="40" />
+        <Data key="divider" value="30" />
         <Data key="domain" value="DIGITAL" />
         <Data key="enabled" value="True" />
         <Data key="minus_accuracy" value="0.25" />
@@ -604,7 +604,7 @@
         <Data key="check_tolerance" value="True" />
         <Data key="clock_version" value="v1" />
         <Data key="derive_type" value="BUILTIN" />
-        <Data key="desired_freq" value="64" />
+        <Data key="desired_freq" value="48" />
         <Data key="desired_unit" value="6" />
         <Data key="divider" value="0" />
         <Data key="domain" value="0" />
@@ -4214,7 +4214,7 @@
   </Group>
   <Group key="System3">
     <Data key="CYDEV_CONFIG_FASTBOOT_ENABLED" value="True" />
-    <Data key="CYDEV_CONFIG_UNUSED_IO" value="AllowButWarn" />
+    <Data key="CYDEV_CONFIG_UNUSED_IO" value="Disallowed" />
     <Data key="CYDEV_CONFIGURATION_ECC" value="True" />
     <Data key="CYDEV_CONFIGURATION_MODE" value="COMPRESSED" />
     <Data key="CYDEV_DEBUGGING_DPS" value="Disable" />

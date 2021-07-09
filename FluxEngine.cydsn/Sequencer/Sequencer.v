@@ -20,13 +20,14 @@ module Sequencer (
 
 localparam STATE_LOAD = 0;
 localparam STATE_WRITING = 1;
+localparam STATE_WAITING = 2;
 
-reg state;
+reg [1:0] state;
 reg [5:0] countdown;
 reg pulsepending;
 
 assign req = (!reset && (state == STATE_LOAD));
-assign wdata = (!reset && (state == STATE_WRITING) && (countdown == 0) && pulsepending);
+assign wdata = (!reset && (state == STATE_WAITING) && (countdown == 0) && pulsepending);
 assign debug_state = 0;
 
 reg olddataclock;
@@ -36,11 +37,6 @@ assign dataclocked = !olddataclock && dataclock;
 
 reg oldsampleclock;
 reg sampleclocked;
-
-reg oldindex;
-wire indexed;
-always @(posedge clock) oldindex <= index;
-assign indexed = !oldindex && index;
 
 always @(posedge clock)
 begin
@@ -65,10 +61,7 @@ begin
                 if (dataclocked)
                 begin
                     pulsepending <= opcode[7];
-                    if (opcode[5:0] == 0)
-                        countdown <= 0;
-                    else
-                        countdown <= opcode[5:0] - 1; /* compensate for extra tick in state machine */
+                    countdown <= opcode[5:0] - 1; /* compensate for extra tick in state machine */
                     
                     state <= STATE_WRITING;
                 end
@@ -79,12 +72,15 @@ begin
                 if (sampleclocked)
                 begin
                     if (countdown == 0)
-                        state <= STATE_LOAD;
+                        state <= STATE_WAITING;
                     else
                         countdown <= countdown - 1;
                     sampleclocked <= 0;
                 end
             end
+            
+            STATE_WAITING:
+                state <= STATE_LOAD;
         endcase
     end
 end
