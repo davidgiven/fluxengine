@@ -37,6 +37,7 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 		{ DecoderProto::kApple2,    createApple2Decoder },
 		{ DecoderProto::kBrother,   createBrotherDecoder },
 		{ DecoderProto::kC64,       createCommodore64Decoder },
+		{ DecoderProto::kF85,       createDurangoF85Decoder },
 	};
 
 	auto decoder = decoders.find(config.format_case());
@@ -51,9 +52,6 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 {
 	switch (config.format_case())
 	{
-		case DecoderProto::kC64:
-			return std::unique_ptr<AbstractDecoder>(new Commodore64Decoder(config.c64()));
-
 		case DecoderProto::kF85:
 			return std::unique_ptr<AbstractDecoder>(new DurangoF85Decoder(config.f85()));
 
