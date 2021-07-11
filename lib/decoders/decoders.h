@@ -31,6 +31,9 @@ static inline Bytes decodeFmMfm(const std::vector<bool> bits)
 class AbstractDecoder
 {
 public:
+	AbstractDecoder() {} // REMOVE ME
+	AbstractDecoder(const DecoderProto& config) {}
+
     virtual ~AbstractDecoder() {}
 
 	static std::unique_ptr<AbstractDecoder> create(const DecoderProto& config);

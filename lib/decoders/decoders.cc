@@ -29,6 +29,22 @@
 
 std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& config)
 {
+	static const std::map<int,
+		std::function<std::unique_ptr<AbstractDecoder>(const DecoderProto&)>> decoders =
+	{
+		{ DecoderProto::kAmiga, createAmigaDecoder },
+	};
+
+	auto decoder = decoders.find(config.format_case());
+	if (decoder == decoders.end())
+		Error() << "no decoder specified";
+
+	return (decoder->second)(config);
+}
+
+#if 0
+std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& config)
+{
 	switch (config.format_case())
 	{
 		case DecoderProto::kAeslanier:
@@ -79,6 +95,7 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 
 	return std::unique_ptr<AbstractDecoder>();
 }
+#endif
 
 void AbstractDecoder::decodeToSectors(Track& track)
 {
