@@ -40,6 +40,7 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 		{ DecoderProto::kC64,       createCommodore64Decoder },
 		{ DecoderProto::kF85,       createDurangoF85Decoder },
 		{ DecoderProto::kFb100,     createFb100Decoder },
+		{ DecoderProto::kIbm,       createIbmDecoder },
 	};
 
 	auto decoder = decoders.find(config.format_case());
