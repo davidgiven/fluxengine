@@ -33,17 +33,6 @@ class Fluxmap;
 class Commodore64DecoderProto;
 class Commodore64EncoderProto;
 
-class Commodore64Decoder : public AbstractDecoder
-{
-public:
-	Commodore64Decoder(const Commodore64DecoderProto&) {}
-    virtual ~Commodore64Decoder() {}
-
-    RecordType advanceToNextRecord();
-    void decodeSectorRecord();
-    void decodeDataRecord();
-};
-
 class Commodore64Encoder : public AbstractEncoder
 {
 public:
