@@ -15,18 +15,6 @@ class SectorSet;
 class AmigaDecoderProto;
 class AmigaEncoderProto;
 
-class AmigaDecoder : public AbstractDecoder
-{
-public:
-	AmigaDecoder(const AmigaDecoderProto&) {}
-    virtual ~AmigaDecoder() {}
-
-    RecordType advanceToNextRecord();
-    void decodeSectorRecord();
-
-	std::set<unsigned> requiredSectors(Track& track) const;
-};
-
 class AmigaEncoder : public AbstractEncoder
 {
 public:
@@ -40,6 +28,8 @@ public:
 private:
 	const AmigaEncoderProto& _config;
 };
+
+extern std::unique_ptr<AbstractDecoder> createAmigaDecoder(const DecoderProto& config);
 
 extern uint32_t amigaChecksum(const Bytes& bytes);
 extern Bytes amigaInterleave(const Bytes& input);

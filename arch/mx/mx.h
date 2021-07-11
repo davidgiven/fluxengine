@@ -3,22 +3,6 @@
 
 #include "decoders/decoders.h"
 
-class MxDecoderProto;
-
-class MxDecoder : public AbstractDecoder
-{
-public:
-	MxDecoder(const MxDecoderProto&) {}
-    virtual ~MxDecoder() {}
-
-    void beginTrack();
-    RecordType advanceToNextRecord();
-    void decodeSectorRecord();
-
-private:
-    nanoseconds_t _clock;
-    int _currentSector;
-    int _logicalTrack;
-};
+extern std::unique_ptr<AbstractDecoder> createMxDecoder(const DecoderProto& config);
 
 #endif

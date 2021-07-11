@@ -52,41 +52,56 @@ static Bytes decode(const std::vector<bool>& bits)
     return output;
 }
 
-AbstractDecoder::RecordType Commodore64Decoder::advanceToNextRecord()
+class Commodore64Decoder : public AbstractDecoder
 {
-	const FluxMatcher* matcher = nullptr;
-	_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
-	if (matcher == &SECTOR_RECORD_PATTERN)
-		return RecordType::SECTOR_RECORD;
-	if (matcher == &DATA_RECORD_PATTERN)
-		return RecordType::DATA_RECORD;
-	return RecordType::UNKNOWN_RECORD;
+public:
+	Commodore64Decoder(const DecoderProto& config):
+		AbstractDecoder(config)
+	{}
+
+    RecordType advanceToNextRecord()
+	{
+		const FluxMatcher* matcher = nullptr;
+		_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
+		if (matcher == &SECTOR_RECORD_PATTERN)
+			return RecordType::SECTOR_RECORD;
+		if (matcher == &DATA_RECORD_PATTERN)
+			return RecordType::DATA_RECORD;
+		return RecordType::UNKNOWN_RECORD;
+	}
+
+    void decodeSectorRecord()
+	{
+		readRawBits(20);
+
+		const auto& bits = readRawBits(5*10);
+		const auto& bytes = decode(bits).slice(0, 5);
+
+		uint8_t checksum = bytes[0];
+		_sector->logicalSector = bytes[1];
+		_sector->logicalSide = 0;
+		_sector->logicalTrack = bytes[2] - 1;
+		if (checksum == xorBytes(bytes.slice(1, 4)))
+			_sector->status = Sector::DATA_MISSING; /* unintuitive but correct */
+	}
+
+    void decodeDataRecord()
+	{
+		readRawBits(20);
+
+		const auto& bits = readRawBits(259*10);
+		const auto& bytes = decode(bits).slice(0, 259);
+
+		_sector->data = bytes.slice(0, C64_SECTOR_LENGTH);
+		uint8_t gotChecksum = xorBytes(_sector->data);
+		uint8_t wantChecksum = bytes[256];
+		_sector->status = (wantChecksum == gotChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
+	}
+};
+
+std::unique_ptr<AbstractDecoder> createCommodore64Decoder(const DecoderProto& config)
+{
+	return std::unique_ptr<AbstractDecoder>(new Commodore64Decoder(config));
 }
 
-void Commodore64Decoder::decodeSectorRecord()
-{
-    readRawBits(20);
 
-    const auto& bits = readRawBits(5*10);
-    const auto& bytes = decode(bits).slice(0, 5);
-
-    uint8_t checksum = bytes[0];
-    _sector->logicalSector = bytes[1];
-    _sector->logicalSide = 0;
-    _sector->logicalTrack = bytes[2] - 1;
-    if (checksum == xorBytes(bytes.slice(1, 4)))
-        _sector->status = Sector::DATA_MISSING; /* unintuitive but correct */
-}
-
-void Commodore64Decoder::decodeDataRecord()
-{
-    readRawBits(20);
-
-    const auto& bits = readRawBits(259*10);
-    const auto& bytes = decode(bits).slice(0, 259);
-
-    _sector->data = bytes.slice(0, C64_SECTOR_LENGTH);
-    uint8_t gotChecksum = xorBytes(_sector->data);
-    uint8_t wantChecksum = bytes[256];
-    _sector->status = (wantChecksum == gotChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
-}

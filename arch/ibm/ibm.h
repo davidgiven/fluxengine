@@ -30,25 +30,6 @@ struct IbmIdam
     uint8_t crc[2];
 };
 
-class IbmDecoder : public AbstractDecoder
-{
-public:
-    IbmDecoder(const IbmDecoderProto& config):
-		_config(config)
-    {}
-
-    RecordType advanceToNextRecord();
-    void decodeSectorRecord();
-    void decodeDataRecord();
-
-	std::set<unsigned> requiredSectors(Track& track) const;
-
-private:
-	const IbmDecoderProto& _config;
-    unsigned _currentSectorSize;
-    unsigned _currentHeaderLength;
-};
-
 class IbmEncoder : public AbstractEncoder
 {
 public:
@@ -73,5 +54,7 @@ private:
 	unsigned _cursor;
 	bool _lastBit;
 };
+
+extern std::unique_ptr<AbstractDecoder> createIbmDecoder(const DecoderProto& config);
 
 #endif

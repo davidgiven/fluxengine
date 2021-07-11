@@ -18,19 +18,6 @@ class Fluxmap;
 class MacintoshDecoderProto;
 class MacintoshEncoderProto;
 
-class MacintoshDecoder : public AbstractDecoder
-{
-public:
-	MacintoshDecoder(const MacintoshDecoderProto&) {}
-    virtual ~MacintoshDecoder() {}
-
-    RecordType advanceToNextRecord();
-    void decodeSectorRecord();
-    void decodeDataRecord();
-
-	std::set<unsigned> requiredSectors(Track& track) const;
-};
-
 class MacintoshEncoder : public AbstractEncoder
 {
 public:
@@ -43,6 +30,7 @@ public:
 
 extern FlagGroup macintoshEncoderFlags;
 
+extern std::unique_ptr<AbstractDecoder> createMacintoshDecoder(const DecoderProto& config);
 
 #endif
 

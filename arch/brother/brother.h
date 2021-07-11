@@ -19,17 +19,6 @@ class Fluxmap;
 class BrotherDecoderProto;
 class BrotherEncoderProto;
 
-class BrotherDecoder : public AbstractDecoder
-{
-public:
-    BrotherDecoder(const BrotherDecoderProto& config) {}
-    virtual ~BrotherDecoder() {}
-
-    RecordType advanceToNextRecord();
-    void decodeSectorRecord();
-    void decodeDataRecord();
-};
-
 class BrotherEncoder : public AbstractEncoder
 {
 public:
@@ -45,5 +34,7 @@ private:
 public:
     std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors);
 };
+
+extern std::unique_ptr<AbstractDecoder> createBrotherDecoder(const DecoderProto& config);
 
 #endif

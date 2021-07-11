@@ -33,17 +33,6 @@ class Fluxmap;
 class Commodore64DecoderProto;
 class Commodore64EncoderProto;
 
-class Commodore64Decoder : public AbstractDecoder
-{
-public:
-	Commodore64Decoder(const Commodore64DecoderProto&) {}
-    virtual ~Commodore64Decoder() {}
-
-    RecordType advanceToNextRecord();
-    void decodeSectorRecord();
-    void decodeDataRecord();
-};
-
 class Commodore64Encoder : public AbstractEncoder
 {
 public:
@@ -64,5 +53,7 @@ private:
 	uint8_t _formatByte1;
 	uint8_t _formatByte2;
 };
+
+extern std::unique_ptr<AbstractDecoder> createCommodore64Decoder(const DecoderProto& config);
 
 #endif

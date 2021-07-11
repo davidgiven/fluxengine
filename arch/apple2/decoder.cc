@@ -60,53 +60,68 @@ static Bytes decode_crazy_data(const uint8_t* inp, Sector::Status& status)
     return output;
 }
 
-uint8_t combine(uint16_t word)
+static uint8_t combine(uint16_t word)
 {
     return word & (word >> 7);
 }
 
-AbstractDecoder::RecordType Apple2Decoder::advanceToNextRecord()
+class Apple2Decoder : public AbstractDecoder
 {
-	const FluxMatcher* matcher = nullptr;
-	_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
-	if (matcher == &SECTOR_RECORD_PATTERN)
-		return RecordType::SECTOR_RECORD;
-	if (matcher == &DATA_RECORD_PATTERN)
-		return RecordType::DATA_RECORD;
-	return RecordType::UNKNOWN_RECORD;
+public:
+	Apple2Decoder(const DecoderProto& config):
+		AbstractDecoder(config)
+	{}
+
+    RecordType advanceToNextRecord()
+	{
+		const FluxMatcher* matcher = nullptr;
+		_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
+		if (matcher == &SECTOR_RECORD_PATTERN)
+			return RecordType::SECTOR_RECORD;
+		if (matcher == &DATA_RECORD_PATTERN)
+			return RecordType::DATA_RECORD;
+		return RecordType::UNKNOWN_RECORD;
+	}
+
+    void decodeSectorRecord()
+	{
+		/* Skip ID (as we know it's a APPLE2_SECTOR_RECORD). */
+		readRawBits(24);
+
+		/* Read header. */
+
+		auto header = toBytes(readRawBits(8*8)).slice(0, 8);
+		ByteReader br(header);
+
+		uint8_t volume = combine(br.read_be16());
+		_sector->logicalTrack = combine(br.read_be16());
+		_sector->logicalSector = combine(br.read_be16());
+		uint8_t checksum = combine(br.read_be16());
+		if (checksum == (volume ^ _sector->logicalTrack ^ _sector->logicalSector))
+			_sector->status = Sector::DATA_MISSING; /* unintuitive but correct */
+	}
+
+    void decodeDataRecord()
+	{
+		/* Check ID. */
+
+		Bytes bytes = toBytes(readRawBits(3*8)).slice(0, 3);
+		if (bytes.reader().read_be24() != APPLE2_DATA_RECORD)
+			return;
+
+		/* Read and decode data. */
+
+		unsigned recordLength = APPLE2_ENCODED_SECTOR_LENGTH + 2;
+		bytes = toBytes(readRawBits(recordLength*8)).slice(0, recordLength);
+
+		_sector->status = Sector::BAD_CHECKSUM;
+		_sector->data = decode_crazy_data(&bytes[0], _sector->status);
+	}
+};
+
+std::unique_ptr<AbstractDecoder> createApple2Decoder(const DecoderProto& config)
+{
+	return std::unique_ptr<AbstractDecoder>(new Apple2Decoder(config));
 }
 
-void Apple2Decoder::decodeSectorRecord()
-{
-    /* Skip ID (as we know it's a APPLE2_SECTOR_RECORD). */
-    readRawBits(24);
 
-    /* Read header. */
-
-    auto header = toBytes(readRawBits(8*8)).slice(0, 8);
-    ByteReader br(header);
-
-    uint8_t volume = combine(br.read_be16());
-    _sector->logicalTrack = combine(br.read_be16());
-    _sector->logicalSector = combine(br.read_be16());
-    uint8_t checksum = combine(br.read_be16());
-    if (checksum == (volume ^ _sector->logicalTrack ^ _sector->logicalSector))
-        _sector->status = Sector::DATA_MISSING; /* unintuitive but correct */
-}
-
-void Apple2Decoder::decodeDataRecord()
-{
-    /* Check ID. */
-
-    Bytes bytes = toBytes(readRawBits(3*8)).slice(0, 3);
-    if (bytes.reader().read_be24() != APPLE2_DATA_RECORD)
-        return;
-
-    /* Read and decode data. */
-
-    unsigned recordLength = APPLE2_ENCODED_SECTOR_LENGTH + 2;
-    bytes = toBytes(readRawBits(recordLength*8)).slice(0, recordLength);
-
-    _sector->status = Sector::BAD_CHECKSUM;
-    _sector->data = decode_crazy_data(&bytes[0], _sector->status);
-}

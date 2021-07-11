@@ -9,6 +9,7 @@
 #include "arch/brother/brother.h"
 #include "arch/c64/c64.h"
 #include "arch/f85/f85.h"
+#include "arch/fb100/fb100.h"
 #include "arch/ibm/ibm.h"
 #include "arch/macintosh/macintosh.h"
 #include "arch/micropolis/micropolis.h"
@@ -29,55 +30,31 @@
 
 std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& config)
 {
-	switch (config.format_case())
+	static const std::map<int,
+		std::function<std::unique_ptr<AbstractDecoder>(const DecoderProto&)>> decoders =
 	{
-		case DecoderProto::kAeslanier:
-			return std::unique_ptr<AbstractDecoder>(new AesLanierDecoder(config.aeslanier()));
+		{ DecoderProto::kAeslanier,  createAesLanierDecoder },
+		{ DecoderProto::kAmiga,      createAmigaDecoder },
+		{ DecoderProto::kApple2,     createApple2Decoder },
+		{ DecoderProto::kBrother,    createBrotherDecoder },
+		{ DecoderProto::kC64,        createCommodore64Decoder },
+		{ DecoderProto::kF85,        createDurangoF85Decoder },
+		{ DecoderProto::kFb100,      createFb100Decoder },
+		{ DecoderProto::kIbm,        createIbmDecoder },
+		{ DecoderProto::kMacintosh,  createMacintoshDecoder },
+		{ DecoderProto::kMicropolis, createMicropolisDecoder },
+		{ DecoderProto::kMx,         createMxDecoder },
+		{ DecoderProto::kNorthstar,  createNorthstarDecoder },
+		{ DecoderProto::kTids990,    createTids990Decoder },
+		{ DecoderProto::kVictor9K,   createVictor9kDecoder },
+		{ DecoderProto::kZilogmcz,   createZilogMczDecoder },
+	};
 
-		case DecoderProto::kAmiga:
-			return std::unique_ptr<AbstractDecoder>(new AmigaDecoder(config.amiga()));
+	auto decoder = decoders.find(config.format_case());
+	if (decoder == decoders.end())
+		Error() << "no decoder specified";
 
-		case DecoderProto::kApple2:
-			return std::unique_ptr<AbstractDecoder>(new Apple2Decoder(config.apple2()));
-
-		case DecoderProto::kBrother:
-			return std::unique_ptr<AbstractDecoder>(new BrotherDecoder(config.brother()));
-
-		case DecoderProto::kC64:
-			return std::unique_ptr<AbstractDecoder>(new Commodore64Decoder(config.c64()));
-
-		case DecoderProto::kF85:
-			return std::unique_ptr<AbstractDecoder>(new DurangoF85Decoder(config.f85()));
-
-		case DecoderProto::kIbm:
-			return std::unique_ptr<AbstractDecoder>(new IbmDecoder(config.ibm()));
-
-		case DecoderProto::kMacintosh:
-			return std::unique_ptr<AbstractDecoder>(new MacintoshDecoder(config.macintosh()));
-
-		case DecoderProto::kMicropolis:
-			return std::unique_ptr<AbstractDecoder>(new MicropolisDecoder(config.micropolis()));
-
-		case DecoderProto::kMx:
-			return std::unique_ptr<AbstractDecoder>(new MxDecoder(config.mx()));
-
-		case DecoderProto::kTids990:
-			return std::unique_ptr<AbstractDecoder>(new Tids990Decoder(config.tids990()));
-
-		case DecoderProto::kVictor9K:
-			return std::unique_ptr<AbstractDecoder>(new Victor9kDecoder(config.victor9k()));
-
-		case DecoderProto::kZilogmcz:
-			return std::unique_ptr<AbstractDecoder>(new ZilogMczDecoder(config.zilogmcz()));
-
-		case DecoderProto::kNorthstar:
-			return std::unique_ptr<AbstractDecoder>(new NorthstarDecoder(config.northstar()));
-
-		default:
-			Error() << "no input disk format specified";
-	}
-
-	return std::unique_ptr<AbstractDecoder>();
+	return (decoder->second)(config);
 }
 
 void AbstractDecoder::decodeToSectors(Track& track)
