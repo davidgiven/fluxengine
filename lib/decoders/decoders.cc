@@ -33,15 +33,16 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 	static const std::map<int,
 		std::function<std::unique_ptr<AbstractDecoder>(const DecoderProto&)>> decoders =
 	{
-		{ DecoderProto::kAeslanier, createAesLanierDecoder },
-		{ DecoderProto::kAmiga,     createAmigaDecoder },
-		{ DecoderProto::kApple2,    createApple2Decoder },
-		{ DecoderProto::kBrother,   createBrotherDecoder },
-		{ DecoderProto::kC64,       createCommodore64Decoder },
-		{ DecoderProto::kF85,       createDurangoF85Decoder },
-		{ DecoderProto::kFb100,     createFb100Decoder },
-		{ DecoderProto::kIbm,       createIbmDecoder },
-		{ DecoderProto::kMacintosh, createMacintoshDecoder },
+		{ DecoderProto::kAeslanier,  createAesLanierDecoder },
+		{ DecoderProto::kAmiga,      createAmigaDecoder },
+		{ DecoderProto::kApple2,     createApple2Decoder },
+		{ DecoderProto::kBrother,    createBrotherDecoder },
+		{ DecoderProto::kC64,        createCommodore64Decoder },
+		{ DecoderProto::kF85,        createDurangoF85Decoder },
+		{ DecoderProto::kFb100,      createFb100Decoder },
+		{ DecoderProto::kIbm,        createIbmDecoder },
+		{ DecoderProto::kMacintosh,  createMacintoshDecoder },
+		{ DecoderProto::kMicropolis, createMicropolisDecoder },
 	};
 
 	auto decoder = decoders.find(config.format_case());
@@ -56,9 +57,6 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 {
 	switch (config.format_case())
 	{
-		case DecoderProto::kMicropolis:
-			return std::unique_ptr<AbstractDecoder>(new MicropolisDecoder(config.micropolis()));
-
 		case DecoderProto::kMx:
 			return std::unique_ptr<AbstractDecoder>(new MxDecoder(config.mx()));
 
