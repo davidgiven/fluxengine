@@ -44,6 +44,7 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 		{ DecoderProto::kMacintosh,  createMacintoshDecoder },
 		{ DecoderProto::kMicropolis, createMicropolisDecoder },
 		{ DecoderProto::kMx,         createMxDecoder },
+		{ DecoderProto::kNorthstar,  createNorthstarDecoder },
 		{ DecoderProto::kTids990,    createTids990Decoder },
 	};
 
@@ -64,9 +65,6 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 
 		case DecoderProto::kZilogmcz:
 			return std::unique_ptr<AbstractDecoder>(new ZilogMczDecoder(config.zilogmcz()));
-
-		case DecoderProto::kNorthstar:
-			return std::unique_ptr<AbstractDecoder>(new NorthstarDecoder(config.northstar()));
 
 		default:
 			Error() << "no input disk format specified";

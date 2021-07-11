@@ -31,27 +31,6 @@
 class NorthstarEncoderProto;
 class NorthstarDecoderProto;
 
-class NorthstarDecoder : public AbstractDecoder
-{
-public:
-	NorthstarDecoder(const NorthstarDecoderProto& config):
-		_config(config)
-	{
-		_sectorType = SECTOR_TYPE_MFM;
-	}
-
-	virtual ~NorthstarDecoder() {}
-
-	RecordType advanceToNextRecord();
-	void decodeSectorRecord();
-	std::set<unsigned> requiredSectors(Track& track) const;
-
-private:
-	const NorthstarDecoderProto& _config;
-	uint8_t _sectorType;
-	uint8_t _hardSectorId;
-};
-
 class NorthstarEncoder : public AbstractEncoder
 {
 public:
