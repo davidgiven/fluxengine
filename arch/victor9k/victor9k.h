@@ -6,19 +6,6 @@
 
 #define VICTOR9K_SECTOR_LENGTH 512
 
-class Sector;
-class Fluxmap;
-class Victor9kDecoderProto;
-
-class Victor9kDecoder : public AbstractDecoder
-{
-public:
-	Victor9kDecoder(const Victor9kDecoderProto&) {}
-    virtual ~Victor9kDecoder() {}
-
-    RecordType advanceToNextRecord();
-    void decodeSectorRecord();
-    void decodeDataRecord();
-};
+extern std::unique_ptr<AbstractDecoder> createVictor9kDecoder(const DecoderProto& config);
 
 #endif

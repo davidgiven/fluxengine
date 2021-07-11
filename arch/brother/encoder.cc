@@ -7,6 +7,7 @@
 #include "sectorset.h"
 #include "writer.h"
 #include "arch/brother/brother.pb.h"
+#include "lib/encoders/encoders.pb.h"
 
 FlagGroup brotherEncoderFlags;
 
@@ -127,58 +128,78 @@ static int charToInt(char c)
 	return 10 + tolower(c) - 'a';
 }
 
-std::unique_ptr<Fluxmap> BrotherEncoder::encode(
-	int physicalTrack, int physicalSide, const SectorSet& allSectors)
+class BrotherEncoder : public AbstractEncoder
 {
-	int logicalTrack;
-	if (physicalSide != 0)
-		return std::unique_ptr<Fluxmap>();
-	physicalTrack -= _config.bias();
-	switch (_config.format())
-	{
-		case BROTHER120:
-			if ((physicalTrack < 0) || (physicalTrack >= (BROTHER_TRACKS_PER_120KB_DISK*2))
-					|| (physicalTrack & 1))
-				return std::unique_ptr<Fluxmap>();
-			logicalTrack = physicalTrack/2;
-			break;
+public:
+	BrotherEncoder(const EncoderProto& config):
+		AbstractEncoder(config),
+		_config(config.brother())
+	{}
 
-		case BROTHER240:
-			if ((physicalTrack < 0) || (physicalTrack >= BROTHER_TRACKS_PER_240KB_DISK))
-				return std::unique_ptr<Fluxmap>();
-			logicalTrack = physicalTrack;
-			break;
+public:
+    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors)
+	{
+		int logicalTrack;
+		if (physicalSide != 0)
+			return std::unique_ptr<Fluxmap>();
+		physicalTrack -= _config.bias();
+		switch (_config.format())
+		{
+			case BROTHER120:
+				if ((physicalTrack < 0) || (physicalTrack >= (BROTHER_TRACKS_PER_120KB_DISK*2))
+						|| (physicalTrack & 1))
+					return std::unique_ptr<Fluxmap>();
+				logicalTrack = physicalTrack/2;
+				break;
+
+			case BROTHER240:
+				if ((physicalTrack < 0) || (physicalTrack >= BROTHER_TRACKS_PER_240KB_DISK))
+					return std::unique_ptr<Fluxmap>();
+				logicalTrack = physicalTrack;
+				break;
+		}
+
+		int bitsPerRevolution = 200000.0 / clockRateUs;
+		const std::string& skew = sectorSkew.get();
+		std::vector<bool> bits(bitsPerRevolution);
+		unsigned cursor = 0;
+
+		for (int sectorCount=0; sectorCount<BROTHER_SECTORS_PER_TRACK; sectorCount++)
+		{
+			int sectorId = charToInt(skew.at(sectorCount));
+			double headerMs = postIndexGapMs + sectorCount*sectorSpacingMs;
+			unsigned headerCursor = headerMs*1e3 / clockRateUs;
+			double dataMs = headerMs + postHeaderSpacingMs;
+			unsigned dataCursor = dataMs*1e3 / clockRateUs;
+
+			const auto& sectorData = allSectors.get(logicalTrack, 0, sectorId);
+
+			fillBitmapTo(bits, cursor, headerCursor, { true, false });
+			write_sector_header(bits, cursor, logicalTrack, sectorId);
+			fillBitmapTo(bits, cursor, dataCursor, { true, false });
+			write_sector_data(bits, cursor, sectorData->data);
+		}
+
+		if (cursor >= bits.size())
+			Error() << "track data overrun";
+		fillBitmapTo(bits, cursor, bits.size(), { true, false });
+
+		// The pre-index gap is not normally reported.
+		// std::cerr << "pre-index gap " << 200.0 - (double)cursor*clockRateUs/1e3 << std::endl;
+		
+		std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
+		fluxmap->appendBits(bits, clockRateUs*1e3);
+		return fluxmap;
 	}
 
-	int bitsPerRevolution = 200000.0 / clockRateUs;
-	const std::string& skew = sectorSkew.get();
-	std::vector<bool> bits(bitsPerRevolution);
-	unsigned cursor = 0;
+private:
+	const BrotherEncoderProto& _config;
 
-	for (int sectorCount=0; sectorCount<BROTHER_SECTORS_PER_TRACK; sectorCount++)
-	{
-		int sectorId = charToInt(skew.at(sectorCount));
-		double headerMs = postIndexGapMs + sectorCount*sectorSpacingMs;
-		unsigned headerCursor = headerMs*1e3 / clockRateUs;
-		double dataMs = headerMs + postHeaderSpacingMs;
-		unsigned dataCursor = dataMs*1e3 / clockRateUs;
+};
 
-		const auto& sectorData = allSectors.get(logicalTrack, 0, sectorId);
-
-		fillBitmapTo(bits, cursor, headerCursor, { true, false });
-		write_sector_header(bits, cursor, logicalTrack, sectorId);
-		fillBitmapTo(bits, cursor, dataCursor, { true, false });
-		write_sector_data(bits, cursor, sectorData->data);
-	}
-
-	if (cursor >= bits.size())
-		Error() << "track data overrun";
-	fillBitmapTo(bits, cursor, bits.size(), { true, false });
-
-	// The pre-index gap is not normally reported.
-	// std::cerr << "pre-index gap " << 200.0 - (double)cursor*clockRateUs/1e3 << std::endl;
-	
-	std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
-	fluxmap->appendBits(bits, clockRateUs*1e3);
-	return fluxmap;
+std::unique_ptr<AbstractEncoder> createBrotherEncoder(const EncoderProto& config)
+{
+	return std::unique_ptr<AbstractEncoder>(new BrotherEncoder(config));
 }
+
+

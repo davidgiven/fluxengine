@@ -9,6 +9,7 @@
 #include "writer.h"
 #include "fmt/format.h"
 #include "arch/c64/c64.pb.h"
+#include "lib/encoders/encoders.pb.h"
 #include <ctype.h>
 #include "bytes.h"
 
@@ -202,147 +203,167 @@ static std::vector<bool> encode_data(uint8_t input)
     return output;
 }
 
-void Commodore64Encoder::writeSector(std::vector<bool>& bits, unsigned& cursor, const Sector* sector) const
+class Commodore64Encoder : public AbstractEncoder
 {
-    /* Source: http://www.unusedino.de/ec64/technical/formats/g64.html 
-     * 1. Header sync       FF FF FF FF FF (40 'on' bits, not GCR)
-     * 2. Header info       52 54 B5 29 4B 7A 5E 95 55 55 (10 GCR bytes)
-     * 3. Header gap        55 55 55 55 55 55 55 55 55 (9 bytes, never read)
-     * 4. Data sync         FF FF FF FF FF (40 'on' bits, not GCR)
-     * 5. Data block        55...4A (325 GCR bytes)
-     * 6. Inter-sector gap  55 55 55 55...55 55 (4 to 12 bytes, never read)
-     * 1. Header sync       (SYNC for the next sector)
-    */
-    if ((sector->status == Sector::OK) or (sector->status == Sector::BAD_CHECKSUM))
+public:
+	Commodore64Encoder(const EncoderProto& config):
+        AbstractEncoder(config),
+		_config(config.c64())
+	{}
+
+public:
+    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors)
     {
-        // There is data to encode to disk.
-        if ((sector->data.size() != C64_SECTOR_LENGTH))
-            Error() << fmt::format("unsupported sector size {} --- you must pick 256", sector->data.size());    
+        /* The format ID Character # 1 and # 2 are in the .d64 image only present
+         * in track 18 sector zero which contains the BAM info in byte 162 and 163.
+         * it is written in every header of every sector and track. headers are not
+         * stored in a d64 disk image so we have to get it from track 18 which
+         * contains the BAM.
+        */
 
-        // 1. Write header Sync (not GCR)
-        for (int i=0; i<6; i++)
-            write_bits(bits, cursor, C64_HEADER_DATA_SYNC, 1*8); /* sync */
-
-        // 2. Write Header info 10 GCR bytes
-        /*
-         * The 10 byte header info (#2) is GCR encoded and must be decoded  to
-         * it's normal 8 bytes to be understood. Once decoded, its breakdown is
-         * as follows:
-         * 
-         * Byte $00 - header block ID           ($08)
-         *   01 - header block checksum 16  (EOR of $02-$05)
-         *   02 - Sector
-         *   03 - Track
-         *   04 - Format ID byte #2
-         *   05 - Format ID byte #1
-         *   06-07 - $0F ("off" bytes)
-         */
-        uint8_t encodedTrack = ((sector->logicalTrack) + 1); // C64 track numbering starts with 1. Fluxengine with 0.
-        uint8_t encodedSector = sector->logicalSector;
-        // uint8_t formatByte1 = C64_FORMAT_ID_BYTE1;
-        // uint8_t formatByte2 = C64_FORMAT_ID_BYTE2;
-        uint8_t headerChecksum = (encodedTrack ^ encodedSector ^ _formatByte1 ^ _formatByte2);
-        write_bits(bits, cursor, encode_data(C64_HEADER_BLOCK_ID));
-        write_bits(bits, cursor, encode_data(headerChecksum));
-        write_bits(bits, cursor, encode_data(encodedSector));
-        write_bits(bits, cursor, encode_data(encodedTrack));
-        write_bits(bits, cursor, encode_data(_formatByte2));
-        write_bits(bits, cursor, encode_data(_formatByte1));
-        write_bits(bits, cursor, encode_data(C64_PADDING));
-        write_bits(bits, cursor, encode_data(C64_PADDING));
-
-        // 3. Write header GAP not GCR
-        for (int i=0; i<9; i++)
-            write_bits(bits, cursor, C64_HEADER_GAP, 1*8); /* header gap */
-
-        // 4. Write Data sync not GCR
-        for (int i=0; i<6; i++)
-            write_bits(bits, cursor, C64_HEADER_DATA_SYNC, 1*8); /* sync */
-
-        // 5. Write data block 325 GCR bytes
-        /*
-         * The 325 byte data block (#5) is GCR encoded and must be  decoded  to  its
-         * normal 260 bytes to be understood. The data block is made up of the following:
-         * 
-         * Byte    $00 - data block ID ($07)
-         *      01-100 - 256 bytes data
-         *      101 - data block checksum (EOR of $01-100)
-         *      102-103 - $00 ("off" bytes, to make the sector size a multiple of 5)
-         */
-
-        write_bits(bits, cursor, encode_data(C64_DATA_BLOCK_ID));
-        uint8_t dataChecksum = xorBytes(sector->data);
-        ByteReader br(sector->data);
-        int i = 0;
-        for (i = 0; i < C64_SECTOR_LENGTH; i++)
-        {
-            uint8_t val = br.read_8();
-            write_bits(bits, cursor, encode_data(val));     
-        }
-        write_bits(bits, cursor, encode_data(dataChecksum));
-        write_bits(bits, cursor, encode_data(C64_PADDING));
-        write_bits(bits, cursor, encode_data(C64_PADDING));
-
-        //6. Write inter-sector gap 9 - 12 bytes nor gcr
-        for (int i=0; i<9; i++)
-            write_bits(bits, cursor, C64_INTER_SECTOR_GAP, 1*8); /* sync */
-
-    }
-}
-
-std::unique_ptr<Fluxmap> Commodore64Encoder::encode(
-    int physicalTrack, int physicalSide, const SectorSet& allSectors)
-{
-    /* The format ID Character # 1 and # 2 are in the .d64 image only present
-     * in track 18 sector zero which contains the BAM info in byte 162 and 163.
-     * it is written in every header of every sector and track. headers are not
-     * stored in a d64 disk image so we have to get it from track 18 which
-     * contains the BAM.
-    */
-
-    const auto& sectorData = allSectors.get(C64_BAM_TRACK*2, 0, 0); //Read de BAM to get the DISK ID bytes
-    if (sectorData)
-    {
-        ByteReader br(sectorData->data);
-        br.seek(162); //goto position of the first Disk ID Byte
-        _formatByte1 = br.read_8();
-        _formatByte2 = br.read_8();
-    }
-    else
-        _formatByte1 = _formatByte2 = 0;
-    
-    int logicalTrack = physicalTrack / 2;
-    double clockRateUs = clockRateUsForTrack(logicalTrack) * _config.clock_compensation_factor();
-
-    int bitsPerRevolution = 200000.0 / clockRateUs;
-
-    std::vector<bool> bits(bitsPerRevolution);
-    unsigned cursor = 0;
-
-    fillBitmapTo(bits, cursor, _config.post_index_gap_us() / clockRateUs, { true, false });
-    lastBit = false;
-
-    unsigned numSectors = sectorsForTrack(logicalTrack);
-    unsigned writtenSectors = 0;
-    for (int sectorId=0; sectorId<numSectors; sectorId++)
-    {
-        const auto& sectorData = allSectors.get(physicalTrack, physicalSide, sectorId);
+        const auto& sectorData = allSectors.get(C64_BAM_TRACK*2, 0, 0); //Read de BAM to get the DISK ID bytes
         if (sectorData)
         {
-            writeSector(bits, cursor, sectorData);
-            writtenSectors++;
+            ByteReader br(sectorData->data);
+            br.seek(162); //goto position of the first Disk ID Byte
+            _formatByte1 = br.read_8();
+            _formatByte2 = br.read_8();
+        }
+        else
+            _formatByte1 = _formatByte2 = 0;
+        
+        int logicalTrack = physicalTrack / 2;
+        double clockRateUs = clockRateUsForTrack(logicalTrack) * _config.clock_compensation_factor();
+
+        int bitsPerRevolution = 200000.0 / clockRateUs;
+
+        std::vector<bool> bits(bitsPerRevolution);
+        unsigned cursor = 0;
+
+        fillBitmapTo(bits, cursor, _config.post_index_gap_us() / clockRateUs, { true, false });
+        lastBit = false;
+
+        unsigned numSectors = sectorsForTrack(logicalTrack);
+        unsigned writtenSectors = 0;
+        for (int sectorId=0; sectorId<numSectors; sectorId++)
+        {
+            const auto& sectorData = allSectors.get(physicalTrack, physicalSide, sectorId);
+            if (sectorData)
+            {
+                writeSector(bits, cursor, sectorData);
+                writtenSectors++;
+            }
+        }
+        if (writtenSectors == 0)
+            return std::unique_ptr<Fluxmap>();
+
+        if (cursor >= bits.size())
+            Error() << fmt::format("track data overrun by {} bits", cursor - bits.size());
+        fillBitmapTo(bits, cursor, bits.size(), { true, false });
+
+        std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
+        fluxmap->appendBits(bits, clockRateUs*1e3);
+        return fluxmap;
+    }
+
+private:
+	void writeSector(std::vector<bool>& bits, unsigned& cursor, const Sector* sector) const
+    {
+        /* Source: http://www.unusedino.de/ec64/technical/formats/g64.html 
+         * 1. Header sync       FF FF FF FF FF (40 'on' bits, not GCR)
+         * 2. Header info       52 54 B5 29 4B 7A 5E 95 55 55 (10 GCR bytes)
+         * 3. Header gap        55 55 55 55 55 55 55 55 55 (9 bytes, never read)
+         * 4. Data sync         FF FF FF FF FF (40 'on' bits, not GCR)
+         * 5. Data block        55...4A (325 GCR bytes)
+         * 6. Inter-sector gap  55 55 55 55...55 55 (4 to 12 bytes, never read)
+         * 1. Header sync       (SYNC for the next sector)
+        */
+        if ((sector->status == Sector::OK) or (sector->status == Sector::BAD_CHECKSUM))
+        {
+            // There is data to encode to disk.
+            if ((sector->data.size() != C64_SECTOR_LENGTH))
+                Error() << fmt::format("unsupported sector size {} --- you must pick 256", sector->data.size());    
+
+            // 1. Write header Sync (not GCR)
+            for (int i=0; i<6; i++)
+                write_bits(bits, cursor, C64_HEADER_DATA_SYNC, 1*8); /* sync */
+
+            // 2. Write Header info 10 GCR bytes
+            /*
+             * The 10 byte header info (#2) is GCR encoded and must be decoded  to
+             * it's normal 8 bytes to be understood. Once decoded, its breakdown is
+             * as follows:
+             * 
+             * Byte $00 - header block ID           ($08)
+             *   01 - header block checksum 16  (EOR of $02-$05)
+             *   02 - Sector
+             *   03 - Track
+             *   04 - Format ID byte #2
+             *   05 - Format ID byte #1
+             *   06-07 - $0F ("off" bytes)
+             */
+            uint8_t encodedTrack = ((sector->logicalTrack) + 1); // C64 track numbering starts with 1. Fluxengine with 0.
+            uint8_t encodedSector = sector->logicalSector;
+            // uint8_t formatByte1 = C64_FORMAT_ID_BYTE1;
+            // uint8_t formatByte2 = C64_FORMAT_ID_BYTE2;
+            uint8_t headerChecksum = (encodedTrack ^ encodedSector ^ _formatByte1 ^ _formatByte2);
+            write_bits(bits, cursor, encode_data(C64_HEADER_BLOCK_ID));
+            write_bits(bits, cursor, encode_data(headerChecksum));
+            write_bits(bits, cursor, encode_data(encodedSector));
+            write_bits(bits, cursor, encode_data(encodedTrack));
+            write_bits(bits, cursor, encode_data(_formatByte2));
+            write_bits(bits, cursor, encode_data(_formatByte1));
+            write_bits(bits, cursor, encode_data(C64_PADDING));
+            write_bits(bits, cursor, encode_data(C64_PADDING));
+
+            // 3. Write header GAP not GCR
+            for (int i=0; i<9; i++)
+                write_bits(bits, cursor, C64_HEADER_GAP, 1*8); /* header gap */
+
+            // 4. Write Data sync not GCR
+            for (int i=0; i<6; i++)
+                write_bits(bits, cursor, C64_HEADER_DATA_SYNC, 1*8); /* sync */
+
+            // 5. Write data block 325 GCR bytes
+            /*
+             * The 325 byte data block (#5) is GCR encoded and must be  decoded  to  its
+             * normal 260 bytes to be understood. The data block is made up of the following:
+             * 
+             * Byte    $00 - data block ID ($07)
+             *      01-100 - 256 bytes data
+             *      101 - data block checksum (EOR of $01-100)
+             *      102-103 - $00 ("off" bytes, to make the sector size a multiple of 5)
+             */
+
+            write_bits(bits, cursor, encode_data(C64_DATA_BLOCK_ID));
+            uint8_t dataChecksum = xorBytes(sector->data);
+            ByteReader br(sector->data);
+            int i = 0;
+            for (i = 0; i < C64_SECTOR_LENGTH; i++)
+            {
+                uint8_t val = br.read_8();
+                write_bits(bits, cursor, encode_data(val));     
+            }
+            write_bits(bits, cursor, encode_data(dataChecksum));
+            write_bits(bits, cursor, encode_data(C64_PADDING));
+            write_bits(bits, cursor, encode_data(C64_PADDING));
+
+            //6. Write inter-sector gap 9 - 12 bytes nor gcr
+            for (int i=0; i<9; i++)
+                write_bits(bits, cursor, C64_INTER_SECTOR_GAP, 1*8); /* sync */
+
         }
     }
-    if (writtenSectors == 0)
-        return std::unique_ptr<Fluxmap>();
+        
+private:
+	const Commodore64EncoderProto& _config;
+	uint8_t _formatByte1;
+	uint8_t _formatByte2;
+};
 
-    if (cursor >= bits.size())
-        Error() << fmt::format("track data overrun by {} bits", cursor - bits.size());
-    fillBitmapTo(bits, cursor, bits.size(), { true, false });
-
-    std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
-    fluxmap->appendBits(bits, clockRateUs*1e3);
-    return fluxmap;
+std::unique_ptr<AbstractEncoder> createCommodore64Encoder(const EncoderProto& config)
+{
+	return std::unique_ptr<AbstractEncoder>(new Commodore64Encoder(config));
 }
 
 // vim: sw=4 ts=4 et

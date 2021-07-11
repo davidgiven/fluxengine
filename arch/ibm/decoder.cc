@@ -91,76 +91,96 @@ const FluxMatchers ANY_RECORD_PATTERN(
     }
 );
 
-std::set<unsigned> IbmDecoder::requiredSectors(Track& track) const
+class IbmDecoder : public AbstractDecoder
 {
-	return iterate(_config.required_sectors());
+public:
+    IbmDecoder(const DecoderProto& config):
+		AbstractDecoder(config),
+		_config(config.ibm())
+    {}
+
+    RecordType advanceToNextRecord()
+	{
+		const FluxMatcher* matcher = nullptr;
+		_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
+
+		/* If this is the MFM prefix byte, the the decoder is going to expect three
+		 * extra bytes on the front of the header. */
+		_currentHeaderLength = (matcher == &MFM_PATTERN) ? 3 : 0;
+
+		Fluxmap::Position here = tell();
+		if (_currentHeaderLength > 0)
+			readRawBits(_currentHeaderLength*16);
+		auto idbits = readRawBits(16);
+		const Bytes idbytes = decodeFmMfm(idbits);
+		uint8_t id = idbytes.slice(0, 1)[0];
+		seek(here);
+		
+		switch (id)
+		{
+			case IBM_IDAM:
+				return RecordType::SECTOR_RECORD;
+
+			case IBM_DAM1:
+			case IBM_DAM2:
+			case IBM_TRS80DAM1:
+			case IBM_TRS80DAM2:
+				return RecordType::DATA_RECORD;
+		}
+		return RecordType::UNKNOWN_RECORD;
+	}
+
+    void decodeSectorRecord()
+	{
+		unsigned recordSize = _currentHeaderLength + IBM_IDAM_LEN;
+		auto bits = readRawBits(recordSize*16);
+		auto bytes = decodeFmMfm(bits).slice(0, recordSize);
+
+		ByteReader br(bytes);
+		br.seek(_currentHeaderLength);
+		br.read_8(); /* skip ID byte */
+		_sector->logicalTrack = br.read_8();
+		_sector->logicalSide = br.read_8();
+		_sector->logicalSector = br.read_8() - _config.sector_id_base();
+		_currentSectorSize = 1 << (br.read_8() + 7);
+		uint16_t wantCrc = br.read_be16();
+		uint16_t gotCrc = crc16(CCITT_POLY, bytes.slice(0, _currentHeaderLength + 5));
+		if (wantCrc == gotCrc)
+			_sector->status = Sector::DATA_MISSING; /* correct but unintuitive */
+
+		if (_config.ignore_side_byte())
+			_sector->logicalSide = _sector->physicalSide;
+	}
+
+    void decodeDataRecord()
+	{
+		unsigned recordLength = _currentHeaderLength + _currentSectorSize + 3;
+		auto bits = readRawBits(recordLength*16);
+		auto bytes = decodeFmMfm(bits).slice(0, recordLength);
+
+		ByteReader br(bytes);
+		br.seek(_currentHeaderLength);
+		br.read_8(); /* skip ID byte */
+
+		_sector->data = br.read(_currentSectorSize);
+		uint16_t wantCrc = br.read_be16();
+		uint16_t gotCrc = crc16(CCITT_POLY, bytes.slice(0, recordLength-2));
+		_sector->status = (wantCrc == gotCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
+	}
+
+	std::set<unsigned> requiredSectors(Track& track) const
+	{
+		return iterate(_config.required_sectors());
+	}
+
+private:
+	const IbmDecoderProto& _config;
+    unsigned _currentSectorSize;
+    unsigned _currentHeaderLength;
+};
+
+std::unique_ptr<AbstractDecoder> createIbmDecoder(const DecoderProto& config)
+{
+	return std::unique_ptr<AbstractDecoder>(new IbmDecoder(config));
 }
 
-AbstractDecoder::RecordType IbmDecoder::advanceToNextRecord()
-{
-	const FluxMatcher* matcher = nullptr;
-	_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
-
-    /* If this is the MFM prefix byte, the the decoder is going to expect three
-     * extra bytes on the front of the header. */
-    _currentHeaderLength = (matcher == &MFM_PATTERN) ? 3 : 0;
-
-    Fluxmap::Position here = tell();
-    if (_currentHeaderLength > 0)
-        readRawBits(_currentHeaderLength*16);
-    auto idbits = readRawBits(16);
-    const Bytes idbytes = decodeFmMfm(idbits);
-    uint8_t id = idbytes.slice(0, 1)[0];
-    seek(here);
-    
-    switch (id)
-    {
-        case IBM_IDAM:
-            return RecordType::SECTOR_RECORD;
-
-        case IBM_DAM1:
-        case IBM_DAM2:
-        case IBM_TRS80DAM1:
-        case IBM_TRS80DAM2:
-            return RecordType::DATA_RECORD;
-    }
-    return RecordType::UNKNOWN_RECORD;
-}
-
-void IbmDecoder::decodeSectorRecord()
-{
-    unsigned recordSize = _currentHeaderLength + IBM_IDAM_LEN;
-    auto bits = readRawBits(recordSize*16);
-    auto bytes = decodeFmMfm(bits).slice(0, recordSize);
-
-    ByteReader br(bytes);
-    br.seek(_currentHeaderLength);
-    br.read_8(); /* skip ID byte */
-    _sector->logicalTrack = br.read_8();
-    _sector->logicalSide = br.read_8();
-    _sector->logicalSector = br.read_8() - _config.sector_id_base();
-    _currentSectorSize = 1 << (br.read_8() + 7);
-    uint16_t wantCrc = br.read_be16();
-    uint16_t gotCrc = crc16(CCITT_POLY, bytes.slice(0, _currentHeaderLength + 5));
-    if (wantCrc == gotCrc)
-        _sector->status = Sector::DATA_MISSING; /* correct but unintuitive */
-
-    if (_config.ignore_side_byte())
-        _sector->logicalSide = _sector->physicalSide;
-}
-
-void IbmDecoder::decodeDataRecord()
-{
-    unsigned recordLength = _currentHeaderLength + _currentSectorSize + 3;
-    auto bits = readRawBits(recordLength*16);
-    auto bytes = decodeFmMfm(bits).slice(0, recordLength);
-
-    ByteReader br(bytes);
-    br.seek(_currentHeaderLength);
-    br.read_8(); /* skip ID byte */
-
-    _sector->data = br.read(_currentSectorSize);
-    uint16_t wantCrc = br.read_be16();
-    uint16_t gotCrc = crc16(CCITT_POLY, bytes.slice(0, recordLength-2));
-    _sector->status = (wantCrc == gotCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
-}

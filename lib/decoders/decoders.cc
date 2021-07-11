@@ -5,18 +5,19 @@
 #include "encoders/encoders.h"
 //#include "arch/aeslanier/aeslanier.h"
 #include "arch/amiga/amiga.h"
-//#include "arch/apple2/apple2.h"
-//#include "arch/brother/brother.h"
-//#include "arch/c64/c64.h"
-//#include "arch/f85/f85.h"
-//#include "arch/ibm/ibm.h"
-//#include "arch/macintosh/macintosh.h"
-//#include "arch/micropolis/micropolis.h"
-//#include "arch/mx/mx.h"
-//#include "arch/northstar/northstar.h"
-//#include "arch/tids990/tids990.h"
-//#include "arch/victor9k/victor9k.h"
-//#include "arch/zilogmcz/zilogmcz.h"
+#include "arch/apple2/apple2.h"
+#include "arch/brother/brother.h"
+#include "arch/c64/c64.h"
+#include "arch/f85/f85.h"
+#include "arch/fb100/fb100.h"
+#include "arch/ibm/ibm.h"
+#include "arch/macintosh/macintosh.h"
+#include "arch/micropolis/micropolis.h"
+#include "arch/mx/mx.h"
+#include "arch/northstar/northstar.h"
+#include "arch/tids990/tids990.h"
+#include "arch/victor9k/victor9k.h"
+#include "arch/zilogmcz/zilogmcz.h"
 #include "decoders/fluxmapreader.h"
 #include "record.h"
 #include "protocol.h"
@@ -33,7 +34,21 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 	static const std::map<int,
 		std::function<std::unique_ptr<AbstractDecoder>(const DecoderProto&)>> decoders =
 	{
-		{ DecoderProto::kAmiga, constructor },
+		{ DecoderProto::kAeslanier,  createAesLanierDecoder },
+		{ DecoderProto::kAmiga,      createAmigaDecoder },
+		{ DecoderProto::kApple2,     createApple2Decoder },
+		{ DecoderProto::kBrother,    createBrotherDecoder },
+		{ DecoderProto::kC64,        createCommodore64Decoder },
+		{ DecoderProto::kF85,        createDurangoF85Decoder },
+		{ DecoderProto::kFb100,      createFb100Decoder },
+		{ DecoderProto::kIbm,        createIbmDecoder },
+		{ DecoderProto::kMacintosh,  createMacintoshDecoder },
+		{ DecoderProto::kMicropolis, createMicropolisDecoder },
+		{ DecoderProto::kMx,         createMxDecoder },
+		{ DecoderProto::kNorthstar,  createNorthstarDecoder },
+		{ DecoderProto::kTids990,    createTids990Decoder },
+		{ DecoderProto::kVictor9K,   createVictor9kDecoder },
+		{ DecoderProto::kZilogmcz,   createZilogMczDecoder },
 	};
 
 	auto decoder = decoders.find(config.format_case());

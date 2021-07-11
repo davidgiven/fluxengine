@@ -24,42 +24,57 @@ static Bytes reverse_bits(const Bytes& input)
     return output;
 }
 
-AbstractDecoder::RecordType AesLanierDecoder::advanceToNextRecord()
+class AesLanierDecoder : public AbstractDecoder
 {
-    _sector->clock = _fmr->seekToPattern(SECTOR_PATTERN);
-    if (_fmr->eof() || !_sector->clock)
-        return UNKNOWN_RECORD;
-    return SECTOR_RECORD;
+public:
+	AesLanierDecoder(const DecoderProto& config):
+		AbstractDecoder(config)
+	{}
+
+    RecordType advanceToNextRecord()
+	{
+		_sector->clock = _fmr->seekToPattern(SECTOR_PATTERN);
+		if (_fmr->eof() || !_sector->clock)
+			return UNKNOWN_RECORD;
+		return SECTOR_RECORD;
+	}
+
+    void decodeSectorRecord()
+	{
+		/* Skip ID mark. */
+
+		readRawBits(16);
+
+		const auto& rawbits = readRawBits(AESLANIER_RECORD_SIZE*16);
+		const auto& bytes = decodeFmMfm(rawbits).slice(0, AESLANIER_RECORD_SIZE);
+		const auto& reversed = reverse_bits(bytes);
+
+		_sector->logicalTrack = reversed[1];
+		_sector->logicalSide = 0;
+		_sector->logicalSector = reversed[2];
+
+		/* Check header 'checksum' (which seems far too simple to mean much). */
+
+		{
+			uint8_t wanted = reversed[3];
+			uint8_t got = reversed[1] + reversed[2];
+			if (wanted != got)
+				return;
+		}
+
+		/* Check data checksum, which also includes the header and is
+			* significantly better. */
+
+		_sector->data = reversed.slice(1, AESLANIER_SECTOR_LENGTH);
+		uint16_t wanted = reversed.reader().seek(0x101).read_le16();
+		uint16_t got = crc16ref(MODBUS_POLY_REF, _sector->data);
+		_sector->status = (wanted == got) ? Sector::OK : Sector::BAD_CHECKSUM;
+	}
+};
+
+std::unique_ptr<AbstractDecoder> createAesLanierDecoder(const DecoderProto& config)
+{
+	return std::unique_ptr<AbstractDecoder>(new AesLanierDecoder(config));
 }
 
-void AesLanierDecoder::decodeSectorRecord()
-{
-    /* Skip ID mark. */
 
-    readRawBits(16);
-
-    const auto& rawbits = readRawBits(AESLANIER_RECORD_SIZE*16);
-    const auto& bytes = decodeFmMfm(rawbits).slice(0, AESLANIER_RECORD_SIZE);
-    const auto& reversed = reverse_bits(bytes);
-
-    _sector->logicalTrack = reversed[1];
-    _sector->logicalSide = 0;
-    _sector->logicalSector = reversed[2];
-
-    /* Check header 'checksum' (which seems far too simple to mean much). */
-
-    {
-        uint8_t wanted = reversed[3];
-        uint8_t got = reversed[1] + reversed[2];
-        if (wanted != got)
-            return;
-    }
-
-    /* Check data checksum, which also includes the header and is
-        * significantly better. */
-
-    _sector->data = reversed.slice(1, AESLANIER_SECTOR_LENGTH);
-    uint16_t wanted = reversed.reader().seek(0x101).read_le16();
-    uint16_t got = crc16ref(MODBUS_POLY_REF, _sector->data);
-    _sector->status = (wanted == got) ? Sector::OK : Sector::BAD_CHECKSUM;
-}
