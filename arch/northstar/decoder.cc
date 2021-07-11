@@ -194,5 +194,3 @@ std::unique_ptr<AbstractDecoder> createNorthstarDecoder(const DecoderProto& conf
 	return std::unique_ptr<AbstractDecoder>(new NorthstarDecoder(config));
 }
 
-
-

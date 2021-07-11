@@ -218,4 +218,3 @@ std::unique_ptr<AbstractDecoder> createMacintoshDecoder(const DecoderProto& conf
 	return std::unique_ptr<AbstractDecoder>(new MacintoshDecoder(config));
 }
 
-
