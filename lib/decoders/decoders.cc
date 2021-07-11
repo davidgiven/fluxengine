@@ -47,6 +47,7 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 		{ DecoderProto::kNorthstar,  createNorthstarDecoder },
 		{ DecoderProto::kTids990,    createTids990Decoder },
 		{ DecoderProto::kVictor9K,   createVictor9kDecoder },
+		{ DecoderProto::kZilogmcz,   createZilogMczDecoder },
 	};
 
 	auto decoder = decoders.find(config.format_case());
@@ -55,22 +56,6 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 
 	return (decoder->second)(config);
 }
-
-#if 0
-std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& config)
-{
-	switch (config.format_case())
-	{
-		case DecoderProto::kZilogmcz:
-			return std::unique_ptr<AbstractDecoder>(new ZilogMczDecoder(config.zilogmcz()));
-
-		default:
-			Error() << "no input disk format specified";
-	}
-
-	return std::unique_ptr<AbstractDecoder>();
-}
-#endif
 
 void AbstractDecoder::decodeToSectors(Track& track)
 {
