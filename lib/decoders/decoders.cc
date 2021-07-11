@@ -43,6 +43,7 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 		{ DecoderProto::kIbm,        createIbmDecoder },
 		{ DecoderProto::kMacintosh,  createMacintoshDecoder },
 		{ DecoderProto::kMicropolis, createMicropolisDecoder },
+		{ DecoderProto::kMx,         createMxDecoder },
 	};
 
 	auto decoder = decoders.find(config.format_case());
@@ -57,9 +58,6 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 {
 	switch (config.format_case())
 	{
-		case DecoderProto::kMx:
-			return std::unique_ptr<AbstractDecoder>(new MxDecoder(config.mx()));
-
 		case DecoderProto::kTids990:
 			return std::unique_ptr<AbstractDecoder>(new Tids990Decoder(config.tids990()));
 
