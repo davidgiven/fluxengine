@@ -29,7 +29,7 @@ static void readFluxmap(FluxSource& fluxsource, FluxTrackProto& track)
 	int h = track.physical_head();
 	std::cout << fmt::format("{0:>3}.{1}: ", c, h) << std::flush;
 	std::unique_ptr<Fluxmap> fluxmap = fluxsource.readFlux(c, h);
-	track.set_data(fluxmap->rawBytes());
+	track.set_flux(fluxmap->rawBytes());
 	std::cout << fmt::format(
 		"{0} ms in {1} bytes\n",
             fluxmap->duration()/1e6,
@@ -155,8 +155,9 @@ void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWrit
 				for (const auto& record : track_records)
 				{
 					std::cout << fmt::format("I+{:.2f}us with {:.2f}us clock\n",
-								record.record_starttime_ns() / 1000.0, record.clock() / 1000.0);
-					hexdump(std::cout, record.data());
+								record->record_starttime_ns() / 1000.0,
+								record->clock() / 1000.0);
+					hexdump(std::cout, record->data());
 					std::cout << std::endl;
 				}
 			}
@@ -164,38 +165,31 @@ void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWrit
 			if (config.decoder().dump_sectors())
 			{
 				std::cout << "\nDecoded sectors follow:\n\n";
-				for (const auto& sector : track->sectors())
+				for (const auto& sector : track_sectors)
 				{
 					std::cout << fmt::format("{}.{:02}.{:02}: I+{:.2f}us with {:.2f}us clock: status {}\n",
-								sector.logical_track(),
-								sector.logical_side(),
-								sector.logical_sector(),
-								sector.position_ns() / 1000.0,
-								sector.clock() / 1000.0,
-								SectorStatus_Name(sector.status()));
-					hexdump(std::cout, sector.data());
+								sector->logical_track(),
+								sector->logical_side(),
+								sector->logical_sector(),
+								sector->header_starttime_ns() / 1000.0,
+								sector->clock() / 1000.0,
+								SectorStatus_Name(sector->status()));
+					hexdump(std::cout, sector->data());
 					std::cout << std::endl;
 				}
 			}
 
 			int size = 0;
 			bool printedTrack = false;
-			for (auto& i : readSectors)
+			for (auto& sector : track_sectors)
 			{
-				auto& sector = i.second;
-				if (sector)
+				if (!printedTrack)
 				{
-					if (!printedTrack)
-					{
-						std::cout << fmt::format("logical track {}.{}; ", sector->logicalTrack, sector->logicalSide);
-						printedTrack = true;
-					}
-
-					size += sector->data.size();
-
-					std::unique_ptr<Sector>& replacing = allSectors.get(sector->logicalTrack, sector->logicalSide, sector->logicalSector);
-					replace_sector(replacing, *sector);
+					std::cout << fmt::format("logical track {}.{}; ", sector->logical_track(), sector->logical_side());
+					printedTrack = true;
 				}
+
+				size += sector->data().size();
 			}
 			std::cout << size << " bytes decoded." << std::endl;
 		}
@@ -216,11 +210,13 @@ void rawReadDiskCommand(FluxSource& fluxsource, FluxSink& fluxsink)
 	{
 		for (int head : iterate(config.heads()))
 		{
-			Track track(cylinder, head);
-			track.fluxsource = &fluxsource;
-			track.readFluxmap();
+			FluxTrackProto track;
+			track.set_physical_cylinder(cylinder);
+			track.set_physical_head(head);
 
-			fluxsink.writeFlux(cylinder, head, *(track.fluxmap));
+			readFluxmap(fluxsource, track);
+			Fluxmap fluxmap(track.flux());
+			fluxsink.writeFlux(cylinder, head, fluxmap);
 		}
     }
 }

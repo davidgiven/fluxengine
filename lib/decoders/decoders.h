@@ -61,6 +61,8 @@ public:
     void seek(const Fluxmap::Position& pos)
     { return _fmr->seek(pos); } 
 
+	virtual std::set<unsigned> requiredSectors(FluxTrackProto& track) const;
+
 protected:
     virtual void beginTrack() {};
     virtual RecordType advanceToNextRecord() = 0;

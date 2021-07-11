@@ -14,7 +14,7 @@ message FluxRecordProto {
 message FluxTrackProto {
 	optional int32 physical_cylinder = 1;
 	optional int32 physical_head = 2;
-	optional bytes data = 3;
+	optional bytes flux = 3;
 
 	// Used to accumulate data during decoding.
 

@@ -34,8 +34,9 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 	static const std::map<int,
 		std::function<std::unique_ptr<AbstractDecoder>(const DecoderProto&)>> decoders =
 	{
-		{ DecoderProto::kAeslanier,  createAesLanierDecoder },
+		//{ DecoderProto::kAeslanier,  createAesLanierDecoder },
 		{ DecoderProto::kAmiga,      createAmigaDecoder },
+		#if 0
 		{ DecoderProto::kApple2,     createApple2Decoder },
 		{ DecoderProto::kBrother,    createBrotherDecoder },
 		{ DecoderProto::kC64,        createCommodore64Decoder },
@@ -49,6 +50,7 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 		{ DecoderProto::kTids990,    createTids990Decoder },
 		{ DecoderProto::kVictor9K,   createVictor9kDecoder },
 		{ DecoderProto::kZilogmcz,   createZilogMczDecoder },
+		#endif
 	};
 
 	auto decoder = decoders.find(config.format_case());
@@ -65,7 +67,7 @@ void AbstractDecoder::decodeToSectors(FluxTrackProto& track)
 
     _sector->set_physical_head(track.physical_head());
     _sector->set_physical_cylinder(track.physical_cylinder());
-	Fluxmap fm(track.data());
+	Fluxmap fm(track.flux());
     FluxmapReader fmr(fm);
 
     _track = &track;
@@ -139,5 +141,11 @@ void AbstractDecoder::pushRecord(const Fluxmap::Position& start, const Fluxmap::
 std::vector<bool> AbstractDecoder::readRawBits(unsigned count)
 {
 	return _fmr->readRawBits(count, _sector->clock());
+}
+
+std::set<unsigned> AbstractDecoder::requiredSectors(FluxTrackProto& track) const
+{
+	static std::set<unsigned> set;
+	return set;
 }
 
