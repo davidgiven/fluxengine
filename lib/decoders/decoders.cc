@@ -44,6 +44,7 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 		{ DecoderProto::kMacintosh,  createMacintoshDecoder },
 		{ DecoderProto::kMicropolis, createMicropolisDecoder },
 		{ DecoderProto::kMx,         createMxDecoder },
+		{ DecoderProto::kTids990,    createTids990Decoder },
 	};
 
 	auto decoder = decoders.find(config.format_case());
@@ -58,9 +59,6 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 {
 	switch (config.format_case())
 	{
-		case DecoderProto::kTids990:
-			return std::unique_ptr<AbstractDecoder>(new Tids990Decoder(config.tids990()));
-
 		case DecoderProto::kVictor9K:
 			return std::unique_ptr<AbstractDecoder>(new Victor9kDecoder(config.victor9k()));
 

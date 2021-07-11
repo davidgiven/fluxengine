@@ -12,17 +12,6 @@ class Track;
 class Tids990DecoderProto;
 class Tids990EncoderProto;
 
-class Tids990Decoder : public AbstractDecoder
-{
-public:
-	Tids990Decoder(const Tids990DecoderProto&) {}
-    virtual ~Tids990Decoder() {}
-
-    RecordType advanceToNextRecord();
-    void decodeSectorRecord();
-	void decodeDataRecord();
-};
-
 class Tids990Encoder : public AbstractEncoder
 {
 public:
