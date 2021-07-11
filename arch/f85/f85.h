@@ -20,4 +20,6 @@ public:
     void decodeDataRecord();
 };
 
+extern std::unique_ptr<AbstractDecoder> createDurangoF85Decoder(const DecoderProto& config);
+
 #endif

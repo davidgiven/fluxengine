@@ -19,4 +19,6 @@ public:
     void decodeSectorRecord();
 };
 
+extern std::unique_ptr<AbstractDecoder> createAesLanierDecoder(const DecoderProto& config);
+
 #endif

@@ -69,4 +69,6 @@ private:
 extern FlagGroup northstarEncoderFlags;
 extern uint8_t northstarChecksum(const Bytes& bytes);
 
+extern std::unique_ptr<AbstractDecoder> createNorthstarDecoder(const DecoderProto& config);
+
 #endif /* NORTHSTAR */

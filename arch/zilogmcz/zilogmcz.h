@@ -15,6 +15,8 @@ public:
     void decodeSectorRecord();
 };
 
+extern std::unique_ptr<AbstractDecoder> createZilogMczDecoder(const DecoderProto& config);
+
 #endif
 
 

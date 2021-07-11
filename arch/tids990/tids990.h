@@ -49,6 +49,8 @@ private:
 
 extern FlagGroup tids990EncoderFlags;
 
+extern std::unique_ptr<AbstractDecoder> createTids990Decoder(const DecoderProto& config);
+
 #endif
 
 

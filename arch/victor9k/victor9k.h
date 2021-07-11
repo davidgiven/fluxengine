@@ -21,4 +21,6 @@ public:
     void decodeDataRecord();
 };
 
+extern std::unique_ptr<AbstractDecoder> createVictor9kDecoder(const DecoderProto& config);
+
 #endif

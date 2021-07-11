@@ -74,4 +74,6 @@ private:
 	bool _lastBit;
 };
 
+extern std::unique_ptr<AbstractDecoder> createIbmDecoder(const DecoderProto& config);
+
 #endif

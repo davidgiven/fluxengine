@@ -21,4 +21,6 @@ private:
     int _logicalTrack;
 };
 
+extern std::unique_ptr<AbstractDecoder> createMxDecoder(const DecoderProto& config);
+
 #endif

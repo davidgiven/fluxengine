@@ -65,4 +65,6 @@ private:
 	uint8_t _formatByte2;
 };
 
+extern std::unique_ptr<AbstractDecoder> createCommodore64Decoder(const DecoderProto& config);
+
 #endif

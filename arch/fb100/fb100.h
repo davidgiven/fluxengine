@@ -20,5 +20,7 @@ public:
     void decodeSectorRecord();
 };
 
+extern std::unique_ptr<AbstractDecoder> createFb100Decoder(const DecoderProto& config);
+
 #endif
 

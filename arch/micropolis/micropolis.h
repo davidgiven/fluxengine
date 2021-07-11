@@ -17,4 +17,6 @@ public:
 	void decodeSectorRecord();
 };
 
+extern std::unique_ptr<AbstractDecoder> createMicropolisDecoder(const DecoderProto& config);
+
 #endif

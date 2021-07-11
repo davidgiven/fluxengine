@@ -43,6 +43,7 @@ public:
 
 extern FlagGroup macintoshEncoderFlags;
 
+extern std::unique_ptr<AbstractDecoder> createMacintoshDecoder(const DecoderProto& config);
 
 #endif
 

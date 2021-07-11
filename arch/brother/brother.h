@@ -46,4 +46,6 @@ public:
     std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors);
 };
 
+extern std::unique_ptr<AbstractDecoder> createBrotherDecoder(const DecoderProto& config);
+
 #endif

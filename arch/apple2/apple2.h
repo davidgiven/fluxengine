@@ -22,6 +22,7 @@ public:
     void decodeDataRecord();
 };
 
+extern std::unique_ptr<AbstractDecoder> createApple2Decoder(const DecoderProto& config);
 
 #endif
 
