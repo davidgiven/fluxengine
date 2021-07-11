@@ -7,19 +7,9 @@
 #include "sectorset.h"
 #include "writer.h"
 #include "fmt/format.h"
+#include "lib/encoders/encoders.pb.h"
+#include "arch/macintosh/macintosh.pb.h"
 #include <ctype.h>
-
-FlagGroup macintoshEncoderFlags;
-
-static DoubleFlag postIndexGapUs(
-	{ "--post-index-gap-us" },
-	"Post-index gap before first sector header (microseconds).",
-	0);
-
-static DoubleFlag clockCompensation(
-	{ "--clock-compensation-factor" },
-	"Scale the output clock by this much.",
-	1.0);
 
 static bool lastBit;
 
@@ -214,7 +204,8 @@ class MacintoshEncoder : public AbstractEncoder
 {
 public:
 	MacintoshEncoder(const EncoderProto& config):
-		AbstractEncoder(config)
+		AbstractEncoder(config),
+		_config(config.macintosh())
 	{}
 
 public:
@@ -223,12 +214,12 @@ public:
 		if ((physicalTrack < 0) || (physicalTrack >= MAC_TRACKS_PER_DISK))
 			return std::unique_ptr<Fluxmap>();
 
-		double clockRateUs = clockRateUsForTrack(physicalTrack) * clockCompensation;
+		double clockRateUs = clockRateUsForTrack(physicalTrack) * _config.clock_compensation_factor();
 		int bitsPerRevolution = 200000.0 / clockRateUs;
 		std::vector<bool> bits(bitsPerRevolution);
 		unsigned cursor = 0;
 
-		fillBitmapTo(bits, cursor, postIndexGapUs / clockRateUs, { true, false });
+		fillBitmapTo(bits, cursor, _config.post_index_gap_us() / clockRateUs, { true, false });
 		lastBit = false;
 
 		unsigned numSectors = sectorsForTrack(physicalTrack);
@@ -246,6 +237,9 @@ public:
 		fluxmap->appendBits(bits, clockRateUs*1e3);
 		return fluxmap;
 	}
+
+private:
+	const MacintoshEncoderProto& _config;
 };
 
 std::unique_ptr<AbstractEncoder> createMacintoshEncoder(const EncoderProto& config)
