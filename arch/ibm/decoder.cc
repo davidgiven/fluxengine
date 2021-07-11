@@ -184,5 +184,3 @@ std::unique_ptr<AbstractDecoder> createIbmDecoder(const DecoderProto& config)
 	return std::unique_ptr<AbstractDecoder>(new IbmDecoder(config));
 }
 
-
-
