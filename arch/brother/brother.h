@@ -19,17 +19,6 @@ class Fluxmap;
 class BrotherDecoderProto;
 class BrotherEncoderProto;
 
-class BrotherDecoder : public AbstractDecoder
-{
-public:
-    BrotherDecoder(const BrotherDecoderProto& config) {}
-    virtual ~BrotherDecoder() {}
-
-    RecordType advanceToNextRecord();
-    void decodeSectorRecord();
-    void decodeDataRecord();
-};
-
 class BrotherEncoder : public AbstractEncoder
 {
 public:
