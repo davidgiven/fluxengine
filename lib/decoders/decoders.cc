@@ -9,6 +9,7 @@
 #include "arch/brother/brother.h"
 #include "arch/c64/c64.h"
 #include "arch/f85/f85.h"
+#include "arch/fb100/fb100.h"
 #include "arch/ibm/ibm.h"
 #include "arch/macintosh/macintosh.h"
 #include "arch/micropolis/micropolis.h"
@@ -38,6 +39,7 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 		{ DecoderProto::kBrother,   createBrotherDecoder },
 		{ DecoderProto::kC64,       createCommodore64Decoder },
 		{ DecoderProto::kF85,       createDurangoF85Decoder },
+		{ DecoderProto::kFb100,     createFb100Decoder },
 	};
 
 	auto decoder = decoders.find(config.format_case());
@@ -52,9 +54,6 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 {
 	switch (config.format_case())
 	{
-		case DecoderProto::kF85:
-			return std::unique_ptr<AbstractDecoder>(new DurangoF85Decoder(config.f85()));
-
 		case DecoderProto::kIbm:
 			return std::unique_ptr<AbstractDecoder>(new IbmDecoder(config.ibm()));
 
