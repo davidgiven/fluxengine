@@ -32,7 +32,8 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 	static const std::map<int,
 		std::function<std::unique_ptr<AbstractDecoder>(const DecoderProto&)>> decoders =
 	{
-		{ DecoderProto::kAmiga, createAmigaDecoder },
+		{ DecoderProto::kAeslanier, createAesLanierDecoder },
+		{ DecoderProto::kAmiga,     createAmigaDecoder },
 	};
 
 	auto decoder = decoders.find(config.format_case());
@@ -49,9 +50,6 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 	{
 		case DecoderProto::kAeslanier:
 			return std::unique_ptr<AbstractDecoder>(new AesLanierDecoder(config.aeslanier()));
-
-		case DecoderProto::kAmiga:
-			return std::unique_ptr<AbstractDecoder>(new AmigaDecoder(config.amiga()));
 
 		case DecoderProto::kApple2:
 			return std::unique_ptr<AbstractDecoder>(new Apple2Decoder(config.apple2()));
