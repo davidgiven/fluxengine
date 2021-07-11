@@ -1,10 +1,6 @@
 #ifndef IBM_H
 #define IBM_H
 
-#include "decoders/decoders.h"
-#include "encoders/encoders.h"
-#include "arch/ibm/ibm.pb.h"
-
 /* IBM format (i.e. ordinary PC floppies). */
 
 #define IBM_MFM_SYNC   0xA1   /* sync byte for MFM */
@@ -30,31 +26,12 @@ struct IbmIdam
     uint8_t crc[2];
 };
 
-class IbmEncoder : public AbstractEncoder
-{
-public:
-	IbmEncoder(const IbmEncoderProto& config):
-		_config(config)
-	{}
-
-	virtual ~IbmEncoder() {}
-
-public:
-    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors);
-
-private:
-	void writeRawBits(uint32_t data, int width);
-	void writeSync();
-	
-	void getTrackFormat(IbmEncoderProto::TrackdataProto& format, unsigned track, unsigned side);
-
-private:
-	const IbmEncoderProto& _config;
-	std::vector<bool> _bits;
-	unsigned _cursor;
-	bool _lastBit;
-};
+class AbstractEncoder;
+class AbstractDecoder;
+class DecoderProto;
+class EncoderProto;
 
 extern std::unique_ptr<AbstractDecoder> createIbmDecoder(const DecoderProto& config);
+extern std::unique_ptr<AbstractEncoder> createIbmEncoder(const EncoderProto& config);
 
 #endif

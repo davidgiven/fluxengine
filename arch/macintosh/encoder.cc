@@ -210,33 +210,46 @@ static void write_sector(std::vector<bool>& bits, unsigned& cursor, const Sector
 	write_bits(bits, cursor, 0xdeaaff, 3*8);
 }
 
-std::unique_ptr<Fluxmap> MacintoshEncoder::encode(
-	int physicalTrack, int physicalSide, const SectorSet& allSectors)
+class MacintoshEncoder : public AbstractEncoder
 {
-	if ((physicalTrack < 0) || (physicalTrack >= MAC_TRACKS_PER_DISK))
-		return std::unique_ptr<Fluxmap>();
+public:
+	MacintoshEncoder(const EncoderProto& config):
+		AbstractEncoder(config)
+	{}
 
-	double clockRateUs = clockRateUsForTrack(physicalTrack) * clockCompensation;
-	int bitsPerRevolution = 200000.0 / clockRateUs;
-	std::vector<bool> bits(bitsPerRevolution);
-	unsigned cursor = 0;
-
-    fillBitmapTo(bits, cursor, postIndexGapUs / clockRateUs, { true, false });
-	lastBit = false;
-
-	unsigned numSectors = sectorsForTrack(physicalTrack);
-	for (int sectorId=0; sectorId<numSectors; sectorId++)
+public:
+    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors)
 	{
-		const auto& sectorData = allSectors.get(physicalTrack, physicalSide, sectorId);
-		write_sector(bits, cursor, sectorData);
-    }
+		if ((physicalTrack < 0) || (physicalTrack >= MAC_TRACKS_PER_DISK))
+			return std::unique_ptr<Fluxmap>();
 
-	if (cursor >= bits.size())
-		Error() << fmt::format("track data overrun by {} bits", cursor - bits.size());
-	fillBitmapTo(bits, cursor, bits.size(), { true, false });
+		double clockRateUs = clockRateUsForTrack(physicalTrack) * clockCompensation;
+		int bitsPerRevolution = 200000.0 / clockRateUs;
+		std::vector<bool> bits(bitsPerRevolution);
+		unsigned cursor = 0;
 
-	std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
-	fluxmap->appendBits(bits, clockRateUs*1e3);
-	return fluxmap;
+		fillBitmapTo(bits, cursor, postIndexGapUs / clockRateUs, { true, false });
+		lastBit = false;
+
+		unsigned numSectors = sectorsForTrack(physicalTrack);
+		for (int sectorId=0; sectorId<numSectors; sectorId++)
+		{
+			const auto& sectorData = allSectors.get(physicalTrack, physicalSide, sectorId);
+			write_sector(bits, cursor, sectorData);
+		}
+
+		if (cursor >= bits.size())
+			Error() << fmt::format("track data overrun by {} bits", cursor - bits.size());
+		fillBitmapTo(bits, cursor, bits.size(), { true, false });
+
+		std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
+		fluxmap->appendBits(bits, clockRateUs*1e3);
+		return fluxmap;
+	}
+};
+
+std::unique_ptr<AbstractEncoder> createMacintoshEncoder(const EncoderProto& config)
+{
+	return std::unique_ptr<AbstractEncoder>(new MacintoshEncoder(config));
 }
 

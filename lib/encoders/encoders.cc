@@ -14,32 +14,23 @@
 
 std::unique_ptr<AbstractEncoder> AbstractEncoder::create(const EncoderProto& config)
 {
-	switch (config.format_case())
+	static const std::map<int,
+		std::function<std::unique_ptr<AbstractEncoder>(const EncoderProto&)>> encoders =
 	{
-		case EncoderProto::kAmiga:
-			return std::unique_ptr<AbstractEncoder>(new AmigaEncoder(config.amiga()));
+		{ EncoderProto::kAmiga,     createAmigaEncoder },
+		{ EncoderProto::kBrother,   createBrotherEncoder },
+		{ EncoderProto::kC64,       createCommodore64Encoder },
+		{ EncoderProto::kIbm,       createIbmEncoder },
+		{ EncoderProto::kMacintosh, createMacintoshEncoder },
+		{ EncoderProto::kNorthstar, createNorthstarEncoder },
+	};
 
-		case EncoderProto::kIbm:
-			return std::unique_ptr<AbstractEncoder>(new IbmEncoder(config.ibm()));
+	auto encoder = encoders.find(config.format_case());
+	if (encoder == encoders.end())
+		Error() << "no encoder specified";
 
-		case EncoderProto::kBrother:
-			return std::unique_ptr<AbstractEncoder>(new BrotherEncoder(config.brother()));
-
-		case EncoderProto::kMacintosh:
-			return std::unique_ptr<AbstractEncoder>(new MacintoshEncoder(config.macintosh()));
-
-		case EncoderProto::kC64:
-			return std::unique_ptr<AbstractEncoder>(new Commodore64Encoder(config.c64()));
-
-		case EncoderProto::kNorthstar:
-			return std::unique_ptr<AbstractEncoder>(new NorthstarEncoder(config.northstar()));
-
-		default:
-			Error() << "no input disk format specified";
-	}
-	return std::unique_ptr<AbstractEncoder>();
+	return (encoder->second)(config);
 }
-
 
 Fluxmap& Fluxmap::appendBits(const std::vector<bool>& bits, nanoseconds_t clock)
 {

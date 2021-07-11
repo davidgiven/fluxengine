@@ -7,6 +7,7 @@
 #include "sectorset.h"
 #include "writer.h"
 #include "arch/amiga/amiga.pb.h"
+#include "lib/encoders/encoders.pb.h"
 
 static bool lastBit;
 
@@ -96,31 +97,48 @@ static void write_sector(std::vector<bool>& bits, unsigned& cursor, const Sector
 	write_interleaved_bytes(data);
 }
 
-std::unique_ptr<Fluxmap> AmigaEncoder::encode(
-	int physicalTrack, int physicalSide, const SectorSet& allSectors)
+class AmigaEncoder : public AbstractEncoder
 {
-	if ((physicalTrack < 0) || (physicalTrack >= AMIGA_TRACKS_PER_DISK))
-		return std::unique_ptr<Fluxmap>();
+public:
+	AmigaEncoder(const EncoderProto& config):
+		AbstractEncoder(config),
+		_config(config.amiga()) {}
 
-	int bitsPerRevolution = 200000.0 / _config.clock_rate_us();
-	std::vector<bool> bits(bitsPerRevolution);
-	unsigned cursor = 0;
-
-    fillBitmapTo(bits, cursor, _config.post_index_gap_ms() * 1000 / _config.clock_rate_us(), { true, false });
-	lastBit = false;
-
-	for (int sectorId=0; sectorId<AMIGA_SECTORS_PER_TRACK; sectorId++)
+public:
+    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors)
 	{
-		const auto& sectorData = allSectors.get(physicalTrack, physicalSide, sectorId);
-		write_sector(bits, cursor, sectorData);
-    }
+		if ((physicalTrack < 0) || (physicalTrack >= AMIGA_TRACKS_PER_DISK))
+			return std::unique_ptr<Fluxmap>();
 
-	if (cursor >= bits.size())
-		Error() << "track data overrun";
-	fillBitmapTo(bits, cursor, bits.size(), { true, false });
+		int bitsPerRevolution = 200000.0 / _config.clock_rate_us();
+		std::vector<bool> bits(bitsPerRevolution);
+		unsigned cursor = 0;
 
-	std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
-	fluxmap->appendBits(bits, _config.clock_rate_us()*1e3);
-	return fluxmap;
+		fillBitmapTo(bits, cursor, _config.post_index_gap_ms() * 1000 / _config.clock_rate_us(), { true, false });
+		lastBit = false;
+
+		for (int sectorId=0; sectorId<AMIGA_SECTORS_PER_TRACK; sectorId++)
+		{
+			const auto& sectorData = allSectors.get(physicalTrack, physicalSide, sectorId);
+			write_sector(bits, cursor, sectorData);
+		}
+
+		if (cursor >= bits.size())
+			Error() << "track data overrun";
+		fillBitmapTo(bits, cursor, bits.size(), { true, false });
+
+		std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
+		fluxmap->appendBits(bits, _config.clock_rate_us()*1e3);
+		return fluxmap;
+	}
+
+private:
+	const AmigaEncoderProto& _config;
+};
+
+std::unique_ptr<AbstractEncoder> createAmigaEncoder(const EncoderProto& config)
+{
+	return std::unique_ptr<AbstractEncoder>(new AmigaEncoder(config));
 }
+
 
