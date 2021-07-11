@@ -69,9 +69,9 @@ void writeDiskCommand(ImageReader& imageReader, AbstractEncoder& encoder, FluxSi
 {
 	SectorSet allSectors = imageReader.readImage();
 	writeTracks(fluxSink,
-		[&](int track, int side) -> std::unique_ptr<Fluxmap>
+		[&](int physicalTrack, int physicalSide) -> std::unique_ptr<Fluxmap>
 		{
-			return encoder.encode(track, side, allSectors);
+			return encoder.encode(physicalTrack, physicalSide, allSectors);
 		}
 	);
 }

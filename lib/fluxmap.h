@@ -20,6 +20,17 @@ public:
     };
 
 public:
+	Fluxmap() {}
+
+	Fluxmap(const std::string& s)
+	{
+		appendBytes((const uint8_t*) s.c_str(), s.size());
+	}
+
+	Fluxmap(const Bytes bytes):
+		_bytes(bytes)
+	{}
+
     nanoseconds_t duration() const { return _duration; }
     unsigned ticks() const { return _ticks; }
     size_t bytes() const { return _bytes.size(); }

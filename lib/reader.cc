@@ -17,49 +17,55 @@
 #include "fmt/format.h"
 #include "proto.h"
 #include "lib/decoders/decoders.pb.h"
+#include "lib/data.pb.h"
 #include <iostream>
 #include <fstream>
 
 static std::unique_ptr<FluxSink> outputFluxSink;
 
-void Track::readFluxmap()
+static void readFluxmap(FluxSource& fluxsource, FluxTrackProto& track)
 {
-	std::cout << fmt::format("{0:>3}.{1}: ", physicalTrack, physicalSide) << std::flush;
-	fluxmap = fluxsource->readFlux(physicalTrack, physicalSide);
-	if (!fluxmap)
-		fluxmap.reset(new Fluxmap());
+	int c = track.physical_cylinder();
+	int h = track.physical_head();
+	std::cout << fmt::format("{0:>3}.{1}: ", c, h) << std::flush;
+	std::unique_ptr<Fluxmap> fluxmap = fluxsource.readFlux(c, h);
+	track.set_data(fluxmap->rawBytes());
 	std::cout << fmt::format(
 		"{0} ms in {1} bytes\n",
             fluxmap->duration()/1e6,
             fluxmap->bytes());
 	if (outputFluxSink)
-		outputFluxSink->writeFlux(physicalTrack, physicalSide, *fluxmap);
+		outputFluxSink->writeFlux(c, h, *fluxmap);
 }
 
-static bool conflictable(Sector::Status status)
+static bool conflictable(SectorStatus status)
 {
-	return (status == Sector::OK) || (status == Sector::CONFLICT);
+	return (status == SectorStatus::OK) || (status == SectorStatus::CONFLICT);
 }
 
-static void replace_sector(std::unique_ptr<Sector>& replacing, Sector& replacement)
+static std::map<int, SectorProto*> collect_sectors(std::vector<SectorProto*>& track_sectors)
 {
-	if (replacing && conflictable(replacing->status) && conflictable(replacement.status))
+	std::map<int, SectorProto*> sectors;
+
+	for (auto* replacement : track_sectors)
 	{
-		if (replacement.data != replacing->data)
+		int sectorid = replacement->logical_sector();
+		SectorProto* replacing = sectors[sectorid];
+		if (replacing && conflictable(replacing->status()) && conflictable(replacement->status()))
 		{
-			std::cout << std::endl
-						<< "       multiple conflicting copies of sector " << replacing->logicalSector
-						<< " seen; ";
-			replacing->status = Sector::CONFLICT;
-			return;
+			if (replacement->data() != replacing->data())
+			{
+				std::cout << std::endl
+							<< "       multiple conflicting copies of sector " << replacing->logical_sector()
+							<< " seen; ";
+				replacing->set_status(SectorStatus::CONFLICT);
+			}
 		}
+		if (!replacing || ((replacing->status() != SectorStatus::OK) && (replacement->status() == SectorStatus::OK)))
+			sectors[sectorid] = replacement;
 	}
-	if (!replacing || ((replacing->status != Sector::OK) && (replacement.status == Sector::OK)))
-	{
-		if (!replacing)
-			replacing.reset(new Sector);
-		*replacing = replacement;
-	}
+
+	return sectors;
 }
 
 void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWriter& writer)
@@ -69,66 +75,72 @@ void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWrit
 
 	bool failures = false;
 	SectorSet allSectors;
+	FluxProto fluxProto;
 	for (int cylinder : iterate(config.cylinders()))
 	{
 		for (int head : iterate(config.heads()))
 		{
-			auto track = std::make_unique<Track>(cylinder, head);
-			track->fluxsource = &fluxsource;
+			std::vector<SectorProto*> track_sectors;
+			std::vector<const FluxRecordProto*> track_records;
 
-			std::map<int, std::unique_ptr<Sector>> readSectors;
 			for (int retry = config.decoder().retries(); retry >= 0; retry--)
 			{
-				track->readFluxmap();
+				FluxTrackProto* track = fluxProto.add_track();
+				track->set_physical_cylinder(cylinder);
+				track->set_physical_head(head);
+
+				readFluxmap(fluxsource, *track);
 				decoder.decodeToSectors(*track);
 
 				std::cout << "       ";
 					std::cout << fmt::format("{} records, {} sectors; ",
-						track->rawrecords.size(),
-						track->sectors.size());
-					if (track->sectors.size() > 0)
-						std::cout << fmt::format("{:.2f}us clock ({:.0f}kHz); ",
-							track->sectors.begin()->clock / 1000.0,
-							1000000.0 / track->sectors.begin()->clock);
+						track->record_size(),
+						track->sector_size());
+				if (track->sector_size() > 0)
+				{
+					const auto clock = track->sector(0).clock();
+					std::cout << fmt::format("{:.2f}us clock ({:.0f}kHz); ",
+						clock / 1000.0, 1000000.0 / clock);
+				}
 
-					for (auto& sector : track->sectors)
-					{
-						auto& replacing = readSectors[sector.logicalSector];
-						replace_sector(replacing, sector);
-					}
+				for (auto& record : track->record())
+					track_records.push_back(&record);
+				for (auto& sector : *track->mutable_sector())
+					track_sectors.push_back(&sector);
+				auto collected_sectors = collect_sectors(track_sectors);
 
-					bool hasBadSectors = false;
-					std::set<unsigned> requiredSectors = decoder.requiredSectors(*track);
-					for (const auto& i : readSectors)
-					{
-						const auto& sector = i.second;
-						requiredSectors.erase(sector->logicalSector);
+				bool hasBadSectors = false;
+				std::set<unsigned> required_sectors = decoder.requiredSectors(*track);
+				for (const auto& i : collected_sectors)
+				{
+					const auto& sector = i.second;
+					required_sectors.erase(sector->logical_sector());
 
-						if (sector->status != Sector::OK)
-						{
-							std::cout << std::endl
-									<< "       Failed to read sector " << sector->logicalSector
-									<< " (" << Sector::statusToString((Sector::Status)sector->status) << "); ";
-							hasBadSectors = true;
-						}
-					}
-					for (unsigned logicalSector : requiredSectors)
+					if (sector->status() != SectorStatus::OK)
 					{
-						std::cout << "\n"
-								  << "       Required sector " << logicalSector << " missing; ";
+						std::cout << std::endl
+								<< "       Failed to read sector " << i.first
+								<< " (" << SectorStatus_Name(sector->status()) << "); ";
 						hasBadSectors = true;
 					}
+				}
+				for (unsigned logical_sector : required_sectors)
+				{
+					std::cout << "\n"
+							  << "       Required sector " << logical_sector << " missing; ";
+					hasBadSectors = true;
+				}
 
-					if (hasBadSectors)
-						failures = false;
+				if (hasBadSectors)
+					failures = false;
 
-					std::cout << std::endl
-							<< "       ";
+				std::cout << std::endl
+						<< "       ";
 
-					if (!hasBadSectors)
-						break;
+				if (!hasBadSectors)
+					break;
 
-				if (!track->fluxsource->retryable())
+				if (!fluxsource.retryable())
 					break;
 				if (retry == 0)
 					std::cout << "giving up" << std::endl
@@ -140,11 +152,11 @@ void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWrit
 			if (config.decoder().dump_records())
 			{
 				std::cout << "\nRaw (undecoded) records follow:\n\n";
-				for (auto& record : track->rawrecords)
+				for (const auto& record : track_records)
 				{
 					std::cout << fmt::format("I+{:.2f}us with {:.2f}us clock\n",
-								record.position.ns() / 1000.0, record.clock / 1000.0);
-					hexdump(std::cout, record.data);
+								record.record_starttime_ns() / 1000.0, record.clock() / 1000.0);
+					hexdump(std::cout, record.data());
 					std::cout << std::endl;
 				}
 			}
@@ -152,13 +164,16 @@ void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWrit
 			if (config.decoder().dump_sectors())
 			{
 				std::cout << "\nDecoded sectors follow:\n\n";
-				for (auto& sector : track->sectors)
+				for (const auto& sector : track->sectors())
 				{
 					std::cout << fmt::format("{}.{:02}.{:02}: I+{:.2f}us with {:.2f}us clock: status {}\n",
-								sector.logicalTrack, sector.logicalSide, sector.logicalSector,
-								sector.position.ns() / 1000.0, sector.clock / 1000.0,
-								sector.status);
-					hexdump(std::cout, sector.data);
+								sector.logical_track(),
+								sector.logical_side(),
+								sector.logical_sector(),
+								sector.position_ns() / 1000.0,
+								sector.clock() / 1000.0,
+								SectorStatus_Name(sector.status()));
+					hexdump(std::cout, sector.data());
 					std::cout << std::endl;
 				}
 			}

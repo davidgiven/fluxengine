@@ -13,8 +13,6 @@ public:
         physicalSide(side)
     {}
 
-    void readFluxmap();
-
 public:
     unsigned physicalTrack;
     unsigned physicalSide;

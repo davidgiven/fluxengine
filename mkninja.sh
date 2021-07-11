@@ -239,12 +239,15 @@ runtest() {
 
     buildlibrary lib$prog.a \
         -Idep/snowhouse/include \
+        -d $OBJDIR/proto/libconfig.def \
+        -d $OBJDIR/proto/libdata.def \
         "$@"
 
     buildprogram $OBJDIR/$prog \
         lib$prog.a \
         libbackend.a \
-        libproto.a \
+        libconfig.a \
+        libdata.a \
         libtestproto.a \
         libagg.a \
         libfmt.a
@@ -261,7 +264,7 @@ buildlibrary libfmt.a \
     dep/fmt/format.cc \
     dep/fmt/posix.cc \
 
-buildproto libproto.a \
+buildproto libconfig.a \
     arch/aeslanier/aeslanier.proto \
     arch/amiga/amiga.proto \
     arch/apple2/apple2.proto \
@@ -287,32 +290,16 @@ buildproto libproto.a \
     lib/imagewriter/imagewriter.proto \
     lib/usb/usb.proto \
 
+buildproto libdata.a \
+    lib/data.proto
+
 buildlibrary libbackend.a \
     -I$OBJDIR/proto \
-    -d $OBJDIR/proto/libproto.def \
-    arch/aeslanier/decoder.cc \
+    -d $OBJDIR/proto/libconfig.def \
+    -d $OBJDIR/proto/libdata.def \
     arch/amiga/amiga.cc \
     arch/amiga/decoder.cc \
     arch/amiga/encoder.cc \
-    arch/apple2/decoder.cc \
-    arch/brother/decoder.cc \
-    arch/brother/encoder.cc \
-    arch/c64/decoder.cc \
-    arch/c64/encoder.cc \
-    arch/f85/decoder.cc \
-    arch/fb100/decoder.cc \
-    arch/ibm/decoder.cc \
-    arch/ibm/encoder.cc \
-    arch/macintosh/decoder.cc \
-    arch/macintosh/encoder.cc \
-    arch/micropolis/decoder.cc \
-    arch/mx/decoder.cc \
-    arch/northstar/decoder.cc \
-    arch/northstar/encoder.cc \
-    arch/tids990/decoder.cc \
-    arch/tids990/encoder.cc \
-    arch/victor9k/decoder.cc \
-    arch/zilogmcz/decoder.cc \
     lib/bitmap.cc \
     lib/bytes.cc \
     lib/crc.cc \
@@ -367,6 +354,27 @@ buildlibrary libbackend.a \
     lib/utils.cc \
     lib/writer.cc \
 
+#    arch/aeslanier/decoder.cc \
+#    arch/apple2/decoder.cc \
+#    arch/brother/decoder.cc \
+#    arch/brother/encoder.cc \
+#    arch/c64/decoder.cc \
+#    arch/c64/encoder.cc \
+#    arch/f85/decoder.cc \
+#    arch/fb100/decoder.cc \
+#    arch/ibm/decoder.cc \
+#    arch/ibm/encoder.cc \
+#    arch/macintosh/decoder.cc \
+#    arch/macintosh/encoder.cc \
+#    arch/micropolis/decoder.cc \
+#    arch/mx/decoder.cc \
+#    arch/northstar/decoder.cc \
+#    arch/northstar/encoder.cc \
+#    arch/tids990/decoder.cc \
+#    arch/tids990/encoder.cc \
+#    arch/victor9k/decoder.cc \
+#    arch/zilogmcz/decoder.cc \
+
 READABLES="\
     acornadfs \
     acorndfs \
@@ -420,12 +428,12 @@ WRITABLES="\
     "
 
 for pb in $READABLES; do
-    buildencodedproto $OBJDIR/proto/libproto.def ConfigProto \
+    buildencodedproto $OBJDIR/proto/libconfig.def ConfigProto \
         readables_${pb}_pb src/readables/$pb.textpb $OBJDIR/proto/src/readables/$pb.cc
 done
 
 for pb in $WRITABLES; do
-    buildencodedproto $OBJDIR/proto/libproto.def ConfigProto \
+    buildencodedproto $OBJDIR/proto/libconfig.def ConfigProto \
         writables_${pb}_pb src/writables/$pb.textpb $OBJDIR/proto/src/writables/$pb.cc
 done
 
@@ -434,7 +442,8 @@ buildmktable writables $OBJDIR/writables.cc $WRITABLES
 
 buildlibrary libfrontend.a \
     -I$OBJDIR/proto \
-    -d $OBJDIR/proto/libproto.def \
+    -d $OBJDIR/proto/libconfig.def \
+    -d $OBJDIR/proto/libdata.def \
     $(for a in $READABLES; do echo $OBJDIR/proto/src/readables/$a.cc; done) \
     $(for a in $WRITABLES; do echo $OBJDIR/proto/src/writables/$a.cc; done) \
     $OBJDIR/readables.cc \
@@ -456,7 +465,8 @@ buildlibrary libfrontend.a \
 buildprogram fluxengine \
     libfrontend.a \
     libbackend.a \
-    libproto.a \
+    libconfig.a \
+    libdata.a \
     libfmt.a \
     libagg.a \
 
@@ -494,8 +504,12 @@ runtest fmmfm-test          tests/fmmfm.cc
 runtest greaseweazle-test   tests/greaseweazle.cc
 runtest kryoflux-test       tests/kryoflux.cc
 runtest ldbs-test           tests/ldbs.cc
-runtest proto-test          -I$OBJDIR/proto -d $OBJDIR/proto/libproto.def -d $OBJDIR/proto/libtestproto.def \
-                                tests/proto.cc $OBJDIR/proto/tests/testproto.cc
+runtest proto-test          -I$OBJDIR/proto \
+                            -d $OBJDIR/proto/libconfig.def \
+                            -d $OBJDIR/proto/libdata.def \
+                            -d $OBJDIR/proto/libtestproto.def \
+                            tests/proto.cc \
+                            $OBJDIR/proto/tests/testproto.cc
 
 # vim: sw=4 ts=4 et
 

@@ -13,6 +13,8 @@ class RawRecord;
 class RawBits;
 class Track;
 class DecoderProto;
+class SectorProto;
+class FluxTrackProto;
 
 typedef std::vector<std::unique_ptr<RawRecord>> RawRecordVector;
 typedef std::vector<std::unique_ptr<Sector>> SectorVector;
@@ -44,22 +46,17 @@ public:
     };
 
 public:
-    void decodeToSectors(Track& track);
+    void decodeToSectors(FluxTrackProto& track);
     void pushRecord(const Fluxmap::Position& start, const Fluxmap::Position& end);
 
-    std::vector<bool> readRawBits(unsigned count)
-    { return _fmr->readRawBits(count, _sector->clock); }
+    std::vector<bool> readRawBits(unsigned count);
+    //{ return _fmr->readRawBits(count, _sector->clock); }
 
     Fluxmap::Position tell()
     { return _fmr->tell(); } 
 
     void seek(const Fluxmap::Position& pos)
     { return _fmr->seek(pos); } 
-
-	/* Returns a set of sectors required to exist on this track. If the reader
-	 * sees any missing, it will consider this to be an error and will retry
-	 * the read. */
-	virtual std::set<unsigned> requiredSectors(Track& track) const;
 
 protected:
     virtual void beginTrack() {};
@@ -68,8 +65,8 @@ protected:
     virtual void decodeDataRecord() {};
 
     FluxmapReader* _fmr;
-    Track* _track;
-    Sector* _sector;
+    FluxTrackProto* _track;
+    SectorProto* _sector;
 };
 
 #endif
