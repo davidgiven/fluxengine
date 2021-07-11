@@ -34,6 +34,7 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 	{
 		{ DecoderProto::kAeslanier, createAesLanierDecoder },
 		{ DecoderProto::kAmiga,     createAmigaDecoder },
+		{ DecoderProto::kApple2,    createApple2Decoder },
 	};
 
 	auto decoder = decoders.find(config.format_case());
@@ -48,9 +49,6 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 {
 	switch (config.format_case())
 	{
-		case DecoderProto::kAeslanier:
-			return std::unique_ptr<AbstractDecoder>(new AesLanierDecoder(config.aeslanier()));
-
 		case DecoderProto::kApple2:
 			return std::unique_ptr<AbstractDecoder>(new Apple2Decoder(config.apple2()));
 

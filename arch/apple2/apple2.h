@@ -7,21 +7,6 @@
 #define APPLE2_SECTOR_LENGTH   256
 #define APPLE2_ENCODED_SECTOR_LENGTH 342
 
-class Sector;
-class Fluxmap;
-class Apple2DecoderProto;
-
-class Apple2Decoder : public AbstractDecoder
-{
-public:
-	Apple2Decoder(const Apple2DecoderProto&) {}
-    virtual ~Apple2Decoder() {}
-
-    RecordType advanceToNextRecord();
-    void decodeSectorRecord();
-    void decodeDataRecord();
-};
-
 extern std::unique_ptr<AbstractDecoder> createApple2Decoder(const DecoderProto& config);
 
 #endif
