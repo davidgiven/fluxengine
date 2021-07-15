@@ -6,6 +6,7 @@
 #include "sector.h"
 #include "sectorset.h"
 #include "csvreader.h"
+#include "image.h"
 #include "decoders/fluxmapreader.h"
 #include "dep/agg/include/agg2d.h"
 #include "dep/stb/stb_image_write.h"
@@ -55,7 +56,7 @@ static std::ifstream inputFile;
 static const int BORDER = 10;
 static const int TRACKS = 83;
 
-void visualiseSectorsToFile(const SectorSet& sectors, const std::string& filename)
+void visualiseSectorsToFile(const Image& image, const std::string& filename)
 {
 	Bitmap bitmap(writeImg, imgWidth, imgHeight);
 	if (bitmap.filename.empty())
@@ -82,9 +83,9 @@ void visualiseSectorsToFile(const SectorSet& sectors, const std::string& filenam
 				? (panel_centre + side*panel_size)
 				: panel_centre);
 
-        for (int physicalTrack = 0; physicalTrack < TRACKS; physicalTrack++)
+        for (int physicalCylinder = 0; physicalCylinder < TRACKS; physicalCylinder++)
         {
-			double visibleDistance = (TRACKS * 0.5) + (TRACKS - physicalTrack);
+			double visibleDistance = (TRACKS * 0.5) + (TRACKS - physicalCylinder);
 			double radius = (disk_radius*visibleDistance)/(TRACKS * 1.5);
 			painter.noFill();
 			painter.lineColor(0x88, 0x88, 0x88);
@@ -94,10 +95,9 @@ void visualiseSectorsToFile(const SectorSet& sectors, const std::string& filenam
 			nanoseconds_t offset = 0;
 			if (alignWithSector != -1)
 			{
-				for (const auto& e : sectors.get())
+				for (const auto& sector : image)
 				{
-					const auto& sector = e.second;
-					if ((sector->physicalSide == side) && (sector->physicalTrack == physicalTrack)
+					if ((sector->physicalHead == side) && (sector->physicalCylinder == physicalCylinder)
 							&& (sector->logicalSector == alignWithSector))
 					{
 						offset = sector->headerStartTime;
@@ -122,11 +122,10 @@ void visualiseSectorsToFile(const SectorSet& sectors, const std::string& filenam
 				painter.arc(xpos, available_height/2, radius, radius, theta1, theta2-theta1);
             };
 
-            /* Sadly, SectorSets aren't indexable by physical track. */
-            for (const auto& e : sectors.get())
+            /* Sadly, Images aren't indexable by physical track. */
+            for (const auto& sector : image)
             {
-                const auto& sector = e.second;
-                if ((sector->physicalSide == side) && (sector->physicalTrack == physicalTrack))
+                if ((sector->physicalHead == side) && (sector->physicalCylinder == physicalCylinder))
                 {
 					painter.lineColor(0xff, 0x00, 0x00);
                     if (sector->status == Sector::OK)
@@ -176,7 +175,7 @@ static void bad_csv()
 	Error() << "bad CSV file format";
 }
 
-static void readRow(const std::vector<std::string>& row, SectorSet& sectors)
+static void readRow(const std::vector<std::string>& row, Image& image)
 {
 	if (row.size() != 13)
 		bad_csv();
@@ -189,15 +188,15 @@ static void readRow(const std::vector<std::string>& row, SectorSet& sectors)
 		if (status == Sector::Status::MISSING)
 			return;
 
-		int physicalTrack = std::stoi(row[0]);
-		int physicalSide = std::stoi(row[1]);
+		int logicalTrack = std::stoi(row[2]);
+		int logicalSide = std::stoi(row[3]);
 		int logicalSector = std::stoi(row[4]);
 
-		Sector* sector = sectors.add(physicalTrack, physicalSide, logicalSector);
-		sector->physicalTrack = physicalTrack;
-		sector->physicalSide = physicalSide;
-		sector->logicalTrack = std::stoi(row[2]);
-		sector->logicalSide = std::stoi(row[3]);
+		Sector* sector = image.put(logicalTrack, logicalSide, logicalSector);
+		sector->physicalCylinder = std::stoi(row[0]);
+		sector->physicalHead = std::stoi(row[1]);
+		sector->logicalTrack = logicalTrack;
+		sector->logicalSide = logicalSide;
 		sector->logicalSector = logicalSector;
 		sector->clock = std::stod(row[5]);
 		sector->headerStartTime = std::stod(row[6]);
@@ -212,7 +211,7 @@ static void readRow(const std::vector<std::string>& row, SectorSet& sectors)
 	}
 }
 
-static SectorSet readCsv(const std::string& filename)
+static Image readCsv(const std::string& filename)
 {
 	if (filename == "")
 		Error() << "you must specify an input CSV file";
@@ -225,25 +224,26 @@ static SectorSet readCsv(const std::string& filename)
 	if (row.size() != 13)
 		bad_csv();
 
-	SectorSet sectors;
+	Image image;
 	for (;;)
 	{
 		row = csvReader.readLine();
 		if (row.size() == 0)
 			break;
 
-		readRow(row, sectors);
+		readRow(row, image);
 	}
 
-	return sectors;
+	image.calculateSize();
+	return image;
 }
 
 int mainAnalyseLayout(int argc, const char* argv[])
 {
     flags.parseFlags(argc, argv);
 
-	SectorSet sectors = readCsv(source.get());
-	visualiseSectorsToFile(sectors, "out.svg");
+	Image image = readCsv(source.get());
+	visualiseSectorsToFile(image, "out.svg");
 
 	return 0;
 }

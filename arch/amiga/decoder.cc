@@ -33,8 +33,8 @@ public:
 
     RecordType advanceToNextRecord()
 	{
-		_sector->set_clock(_fmr->seekToPattern(SECTOR_PATTERN));
-		if (_fmr->eof() || !_sector->clock())
+		_sector->clock = _fmr->seekToPattern(SECTOR_PATTERN);
+		if (_fmr->eof() || !_sector->clock)
 			return UNKNOWN_RECORD;
 		return SECTOR_RECORD;
 	}
@@ -52,9 +52,9 @@ public:
 		Bytes header = amigaDeinterleave(ptr, 4);
 		Bytes recoveryinfo = amigaDeinterleave(ptr, 16);
 
-		_sector->set_logical_track(header[1] >> 1);
-		_sector->set_logical_side(header[1] & 1);
-		_sector->set_logical_sector(header[2]);
+		_sector->logicalTrack = header[1] >> 1;
+		_sector->logicalSide = header[1] & 1;
+		_sector->logicalSector = header[2];
 
 		uint32_t wantedheaderchecksum = amigaDeinterleave(ptr, 4).reader().read_be32();
 		uint32_t gotheaderchecksum = amigaChecksum(rawbytes.slice(6, 40));
@@ -66,8 +66,8 @@ public:
 
 		Bytes data;
 		data.writer().append(amigaDeinterleave(ptr, 512)).append(recoveryinfo);
-		_sector->set_data(data);
-		_sector->set_status((gotdatachecksum == wanteddatachecksum) ? SectorStatus::OK : SectorStatus::BAD_CHECKSUM);
+		_sector->data = data;
+		_sector->status = (gotdatachecksum == wanteddatachecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
 	}
 
 	std::set<unsigned> requiredSectors(Track& track) const

@@ -251,8 +251,8 @@ public:
 						Error() << fmt::format("don't understand IMD disks with sector status {}", Status_Sector);
 				}		
 				sector->status = Sector::OK;
-				sector->logicalTrack = sector->physicalTrack = header.track;
-				sector->logicalSide = sector->physicalSide = header.Head;
+				sector->logicalTrack = sector->physicalCylinder = header.track;
+				sector->logicalSide = sector->physicalHead = header.Head;
 				sector->logicalSector = (sector_map[s]);
 			}
 

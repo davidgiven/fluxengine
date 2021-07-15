@@ -13,8 +13,8 @@ class RawRecord;
 class RawBits;
 class Track;
 class DecoderProto;
-class SectorProto;
-class FluxTrackProto;
+
+#include "flux.h"
 
 typedef std::vector<std::unique_ptr<RawRecord>> RawRecordVector;
 typedef std::vector<std::unique_ptr<Sector>> SectorVector;
@@ -33,8 +33,9 @@ static inline Bytes decodeFmMfm(const std::vector<bool> bits)
 class AbstractDecoder
 {
 public:
-	AbstractDecoder() {} // REMOVE ME
-	AbstractDecoder(const DecoderProto& config) {}
+	AbstractDecoder(const DecoderProto& config):
+		_config(config)
+	{}
 
     virtual ~AbstractDecoder() {}
 
@@ -49,7 +50,7 @@ public:
     };
 
 public:
-    void decodeToSectors(FluxTrackProto& track);
+    std::unique_ptr<TrackDataFlux> decodeToSectors(std::shared_ptr<const Fluxmap> fluxmap, unsigned cylinder, unsigned head);
     void pushRecord(const Fluxmap::Position& start, const Fluxmap::Position& end);
 
     std::vector<bool> readRawBits(unsigned count);
@@ -61,7 +62,7 @@ public:
     void seek(const Fluxmap::Position& pos)
     { return _fmr->seek(pos); } 
 
-	virtual std::set<unsigned> requiredSectors(FluxTrackProto& track) const;
+	virtual std::set<unsigned> requiredSectors(unsigned cylinder, unsigned head) const;
 
 protected:
     virtual void beginTrack() {};
@@ -69,9 +70,10 @@ protected:
     virtual void decodeSectorRecord() = 0;
     virtual void decodeDataRecord() {};
 
-    FluxmapReader* _fmr;
-    FluxTrackProto* _track;
-    SectorProto* _sector;
+	const DecoderProto& _config;
+    FluxmapReader* _fmr = nullptr;
+	std::unique_ptr<TrackDataFlux> _trackdata;
+    std::shared_ptr<Sector> _sector;
 };
 
 #endif

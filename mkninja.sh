@@ -327,6 +327,7 @@ buildlibrary libbackend.a \
     lib/fluxsource/testpatternfluxsource.cc \
     lib/globals.cc \
     lib/hexdump.cc \
+    lib/image.cc \
     lib/imagereader/d64imagereader.cc \
     lib/imagereader/diskcopyimagereader.cc \
     lib/imagereader/imagereader.cc \

@@ -3,6 +3,7 @@
 #include "sector.h"
 #include "sectorset.h"
 #include "imagewriter/imagewriter.h"
+#include "image.h"
 #include "utils.h"
 #include "lib/config.pb.h"
 #include "proto.h"
@@ -66,7 +67,7 @@ ImageWriter::ImageWriter(const ImageWriterProto& config):
 	_config(config)
 {}
 
-void ImageWriter::writeCsv(const SectorSet& sectors, const std::string& filename)
+void ImageWriter::writeCsv(const Image& image, const std::string& filename)
 {
 	std::ofstream f(filename, std::ios::out);
 	if (!f.is_open())
@@ -87,12 +88,11 @@ void ImageWriter::writeCsv(const SectorSet& sectors, const std::string& filename
 		"\"Status\""
 		"\n";
 
-	for (const auto& it : sectors.get())
+	for (const auto& sector : image)
 	{
-		const auto& sector = it.second;
 		f << fmt::format("{},{},{},{},{},{},{},{},{},{},{},{},{}\n",
-			sector->physicalTrack,
-			sector->physicalSide,
+			sector->physicalCylinder,
+			sector->physicalHead,
 			sector->logicalTrack,
 			sector->logicalSide,
 			sector->logicalSector,
@@ -108,37 +108,31 @@ void ImageWriter::writeCsv(const SectorSet& sectors, const std::string& filename
 	}
 }
 
-void ImageWriter::printMap(const SectorSet& sectors)
+void ImageWriter::printMap(const Image& image)
 {
-	unsigned numCylinders;
-	unsigned numHeads;
-	unsigned numSectors;
-	unsigned numBytes;
-	sectors.calculateSize(numCylinders, numHeads, numSectors, numBytes);
+	Geometry geometry = image.getGeometry();
 
 	int badSectors = 0;
 	int missingSectors = 0;
 	int totalSectors = 0;
 
-	std::cout << "     Tracks -> 1         2         3         ";
-	if (numCylinders > 40) {
-		std::cout << "4         5         6         7         8";
-	}
+	std::cout << "     Tracks -> ";
+	for (unsigned i = 10; i < geometry.numTracks; i += 10)
+		std::cout << fmt::format("{:<10d}", i/10);
 	std::cout << std::endl;
-	std::cout << "H.SS 0123456789012345678901234567890123456789";
-	if (numCylinders > 40) {
-		std::cout << "01234567890123456789012345678901234567890123";
-	}
+	std::cout << "H.SS ";
+	for (unsigned i = 0; i < geometry.numTracks; i++)
+		std::cout << fmt::format("{}", i%10);
 	std::cout << std::endl;
 
-	for (int head = 0; head < numHeads; head++)
+	for (int side = 0; side < geometry.numSides; side++)
 	{
-		for (int sectorId = 0; sectorId < numSectors; sectorId++)
+		for (int sectorId = 0; sectorId < geometry.numSectors; sectorId++)
 		{
-			std::cout << fmt::format("{}.{:2} ", head, sectorId);
-			for (int track = 0; track < numCylinders; track++)
+			std::cout << fmt::format("{}.{:2} ", side, sectorId);
+			for (int track = 0; track < geometry.numTracks; track++)
 			{
-				const auto& sector = sectors.get(track, head, sectorId);
+				const auto* sector = image.get(track, side, sectorId);
 				if (!sector)
 				{
 					std::cout << 'X';

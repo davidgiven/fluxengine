@@ -28,7 +28,7 @@ public:
         {
 			if (inputFile.eof())
 				break;
-			int physicalTrack = track * _config.img().physical_step() + _config.img().physical_offset();
+			int physicalCylinder = track * _config.img().physical_step() + _config.img().physical_offset();
 
             for (int side = 0; side < _config.img().sides(); side++)
             {
@@ -40,12 +40,12 @@ public:
                     Bytes data(trackdata.sector_size());
                     inputFile.read((char*) data.begin(), data.size());
 
-                    std::unique_ptr<Sector>& sector = sectors.get(physicalTrack, side, sectorId);
+                    std::unique_ptr<Sector>& sector = sectors.get(physicalCylinder, side, sectorId);
                     sector.reset(new Sector);
                     sector->status = Sector::OK;
                     sector->logicalTrack = track;
-					sector->physicalTrack = physicalTrack;
-                    sector->logicalSide = sector->physicalSide = side;
+					sector->physicalCylinder = physicalCylinder;
+                    sector->logicalSide = sector->physicalHead = side;
                     sector->logicalSector = sectorId;
                     sector->data = data;
                 }

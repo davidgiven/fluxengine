@@ -3,6 +3,7 @@
 
 class SectorSet;
 class ImageWriterProto;
+class Image;
 
 class ImageWriter
 {
@@ -26,9 +27,9 @@ public:
 		const ImageWriterProto& config);
 
 public:
-	void printMap(const SectorSet& sectors);
-	void writeCsv(const SectorSet& sectors, const std::string& filename);
-	virtual void writeImage(const SectorSet& sectors) = 0;
+	void printMap(const Image& sectors);
+	void writeCsv(const Image& sectors, const std::string& filename);
+	virtual void writeImage(const Image& sectors) = 0;
 
 protected:
 	const ImageWriterProto& _config;

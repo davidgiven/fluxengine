@@ -29,3 +29,4 @@ Sector::Status Sector::stringToStatus(const std::string& value)
 		return Status::CONFLICT;
 	return Status::INTERNAL_ERROR;
 }
+

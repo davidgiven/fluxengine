@@ -20,10 +20,12 @@
 #include "arch/zilogmcz/zilogmcz.h"
 #include "decoders/fluxmapreader.h"
 #include "record.h"
+#include "flux.h"
 #include "protocol.h"
 #include "decoders/rawbits.h"
 #include "track.h"
 #include "sector.h"
+#include "image.h"
 #include "lib/decoders/decoders.pb.h"
 #include "lib/data.pb.h"
 #include "fmt/format.h"
@@ -60,28 +62,27 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 	return (decoder->second)(config);
 }
 
-void AbstractDecoder::decodeToSectors(FluxTrackProto& track)
+std::unique_ptr<TrackDataFlux> AbstractDecoder::decodeToSectors(
+		std::shared_ptr<const Fluxmap> fluxmap, unsigned cylinder, unsigned head)
 {
-	SectorProto sector;
-	_sector = &sector;
-
-    _sector->set_physical_head(track.physical_head());
-    _sector->set_physical_cylinder(track.physical_cylinder());
-	Fluxmap fm(track.flux());
-    FluxmapReader fmr(fm);
-
-    _track = &track;
+	_trackdata = std::make_unique<TrackDataFlux>();
+	_trackdata->fluxmap = fluxmap;
+	
+    FluxmapReader fmr(*fluxmap);
     _fmr = &fmr;
 
     beginTrack();
     for (;;)
     {
+		_sector = std::make_shared<Sector>();
+		_sector->status = Sector::MISSING;
+		_sector->physicalCylinder = cylinder;
+		_sector->physicalHead = head;
+
         Fluxmap::Position recordStart = fmr.tell();
-		_sector->Clear();
-        _sector->set_status(SectorStatus::MISSING);
         RecordType r = advanceToNextRecord();
-        if (fmr.eof() || !sector.clock())
-            return;
+        if (fmr.eof() || !_sector->clock)
+            return std::move(_trackdata);
         if ((r == UNKNOWN_RECORD) || (r == DATA_RECORD))
         {
             fmr.findEvent(F_BIT_PULSE);
@@ -94,12 +95,12 @@ void AbstractDecoder::decodeToSectors(FluxTrackProto& track)
         decodeSectorRecord();
         Fluxmap::Position recordEnd = fmr.tell();
         pushRecord(recordStart, recordEnd);
-        if (sector.status() == SectorStatus::DATA_MISSING)
+        if (_sector->status == Sector::DATA_MISSING)
         {
             /* The data is in a separate record. */
 
-            sector.set_header_starttime_ns(recordStart.ns());
-            sector.set_header_endtime_ns(recordEnd.ns());
+            _sector->headerStartTime = recordStart.ns();
+            _sector->headerEndTime = recordEnd.ns();
 			for (;;)
 			{
 				r = advanceToNextRecord();
@@ -114,11 +115,11 @@ void AbstractDecoder::decodeToSectors(FluxTrackProto& track)
             recordEnd = fmr.tell();
             pushRecord(recordStart, recordEnd);
         }
-        sector.set_data_starttime_ns(recordStart.ns());
-        sector.set_data_endtime_ns(recordEnd.ns());
+        _sector->dataStartTime = recordStart.ns();
+        _sector->dataEndTime = recordEnd.ns();
 
-        if (sector.status() != SectorStatus::MISSING)
-			*(_track->add_sector()) = sector;
+        if (_sector->status != Sector::MISSING)
+			_trackdata->sectors.push_back(_sector);
     }
 }
 
@@ -126,24 +127,24 @@ void AbstractDecoder::pushRecord(const Fluxmap::Position& start, const Fluxmap::
 {
     Fluxmap::Position here = _fmr->tell();
 
-	FluxRecordProto* record = _track->add_record();
-	record->set_record_starttime_ns(start.ns());
-	record->set_record_endtime_ns(end.ns());
-    record->set_physical_head(_track->physical_head());
-    record->set_physical_cylinder(_track->physical_cylinder());
-    record->set_clock(_sector->clock());
+	auto record = std::make_shared<Record>();
+	_trackdata->records.push_back(record);
+	
+	record->startTime = start.ns();
+	record->endTime = end.ns();
+    record->clock = _sector->clock;
 
     _fmr->seek(start);
-    record->set_data(toBytes(_fmr->readRawBits(end, _sector->clock())));
+    record->rawData = toBytes(_fmr->readRawBits(end, _sector->clock));
     _fmr->seek(here);
 }
 
 std::vector<bool> AbstractDecoder::readRawBits(unsigned count)
 {
-	return _fmr->readRawBits(count, _sector->clock());
+	return _fmr->readRawBits(count, _sector->clock);
 }
 
-std::set<unsigned> AbstractDecoder::requiredSectors(FluxTrackProto& track) const
+std::set<unsigned> AbstractDecoder::requiredSectors(unsigned cylinder, unsigned head) const
 {
 	static std::set<unsigned> set;
 	return set;

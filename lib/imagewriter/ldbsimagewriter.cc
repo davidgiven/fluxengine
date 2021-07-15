@@ -5,6 +5,7 @@
 #include "imagewriter/imagewriter.h"
 #include "fmt/format.h"
 #include "ldbs.h"
+#include "image.h"
 #include "lib/config.pb.h"
 #include <algorithm>
 #include <iostream>
@@ -17,19 +18,15 @@ public:
 		ImageWriter(config)
 	{}
 
-	void writeImage(const SectorSet& sectors)
+	void writeImage(const Image& image)
 	{
         LDBS ldbs;
 
-		unsigned numCylinders;
-		unsigned numHeads;
-		unsigned numSectors;
-		unsigned numBytes;
-		sectors.calculateSize(numCylinders, numHeads, numSectors, numBytes);
+		const Geometry geometry = image.getGeometry();
 
-		std::cout << fmt::format("writing {} tracks, {} heads, {} sectors, {} bytes per sector",
-						numCylinders, numHeads,
-						numSectors, numBytes)
+		std::cout << fmt::format("writing {} tracks, {} sides, {} sectors, {} bytes per sector",
+						geometry.numTracks, geometry.numSides, geometry.numSectors,
+						geometry.sectorSize)
 				<< std::endl;
 
         Bytes trackDirectory;
@@ -37,22 +34,22 @@ public:
         int trackDirectorySize = 0;
         trackDirectoryWriter.write_le16(0);
 
-		for (int track = 0; track < numCylinders; track++)
+		for (int track = 0; track < geometry.numTracks; track++)
 		{
-			for (int head = 0; head < numHeads; head++)
+			for (int side = 0; side < geometry.numSides; side++)
 			{
                 Bytes trackHeader;
                 ByteWriter trackHeaderWriter(trackHeader);
 
                 int actualSectors = 0;
-				for (int sectorId = 0; sectorId < numSectors; sectorId++)
+				for (int sectorId = 0; sectorId < geometry.numSectors; sectorId++)
 				{
-					const auto& sector = sectors.get(track, head, sectorId);
+					const auto* sector = image.get(track, side, sectorId);
 					if (sector)
                         actualSectors++;
                 }
 
-                trackHeaderWriter.write_le16(0x000C); /* offset of sector headers */
+                trackHeaderWriter.write_le16(0x000C); /* offset of sector sideers */
                 trackHeaderWriter.write_le16(0x0012); /* length of each sector descriptor */
                 trackHeaderWriter.write_le16(actualSectors);
                 trackHeaderWriter.write_8(0); /* data rate unknown */
@@ -61,16 +58,16 @@ public:
                 trackHeaderWriter.write_8(0); /* filler byte */
                 trackHeaderWriter.write_le16(0); /* approximate track length */
 
-				for (int sectorId = 0; sectorId < numSectors; sectorId++)
+				for (int sectorId = 0; sectorId < geometry.numSectors; sectorId++)
 				{
-					const auto& sector = sectors.get(track, head, sectorId);
+					const auto* sector = image.get(track, side, sectorId);
 					if (sector)
 					{
-                        uint32_t sectorLabel = (('S') << 24) | ((track & 0xff) << 16) | (head << 8) | sectorId;
+                        uint32_t sectorLabel = (('S') << 24) | ((track & 0xff) << 16) | (side << 8) | sectorId;
                         uint32_t sectorAddress = ldbs.put(sector->data, sectorLabel);
 
                         trackHeaderWriter.write_8(track);
-                        trackHeaderWriter.write_8(head);
+                        trackHeaderWriter.write_8(side);
                         trackHeaderWriter.write_8(sectorId);
                         trackHeaderWriter.write_8(0); /* power-of-two size */
                         trackHeaderWriter.write_8((sector->status == Sector::OK) ? 0x00 : 0x20); /* 8272 status 1 */
@@ -84,7 +81,7 @@ public:
 					}
 				}
 
-                uint32_t trackLabel = (('T') << 24) | ((track & 0xff) << 16) | ((track >> 8) << 8) | head;
+                uint32_t trackLabel = (('T') << 24) | ((track & 0xff) << 16) | ((track >> 8) << 8) | side;
                 uint32_t trackHeaderAddress = ldbs.put(trackHeader, trackLabel);
                 trackDirectoryWriter.write_be32(trackLabel);
                 trackDirectoryWriter.write_le32(trackHeaderAddress);

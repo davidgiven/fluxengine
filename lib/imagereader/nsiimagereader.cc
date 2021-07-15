@@ -90,8 +90,8 @@ public:
                     std::unique_ptr<Sector>& sector = sectors.get(track, head, sectorId);
                     sector.reset(new Sector);
                     sector->status = Sector::OK;
-                    sector->logicalTrack = sector->physicalTrack = track;
-                    sector->logicalSide = sector->physicalSide = head;
+                    sector->logicalTrack = sector->physicalCylinder = track;
+                    sector->logicalSide = sector->physicalHead = head;
                     sector->logicalSector = sectorId;
                     sector->data = data;
                 }

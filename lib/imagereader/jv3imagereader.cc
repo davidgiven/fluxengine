@@ -113,8 +113,8 @@ public:
                     std::unique_ptr<Sector>& sector = sectors.get(header.track, head, header.sector);
                     sector.reset(new Sector);
                     sector->status = Sector::OK;
-                    sector->logicalTrack = sector->physicalTrack = header.track;
-                    sector->logicalSide = sector->physicalSide = head;
+                    sector->logicalTrack = sector->physicalCylinder = header.track;
+                    sector->logicalSide = sector->physicalHead = head;
                     sector->logicalSector = header.sector;
                     sector->data = data;
 				}

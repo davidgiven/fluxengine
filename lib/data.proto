@@ -1,31 +1,5 @@
 syntax = "proto2";
 
-// Flux data
-
-message FluxRecordProto {
-	optional uint64 record_starttime_ns = 1;
-	optional uint64 record_endtime_ns = 2;
-	optional uint64 clock = 3;
-	optional int32 physical_cylinder = 4;
-	optional int32 physical_head = 5;
-	optional bytes data = 6;
-}
-
-message FluxTrackProto {
-	optional int32 physical_cylinder = 1;
-	optional int32 physical_head = 2;
-	optional bytes flux = 3;
-
-	// Used to accumulate data during decoding.
-
-	repeated FluxRecordProto record = 4;
-	repeated SectorProto sector = 5;
-}
-
-message FluxProto {
-	repeated FluxTrackProto track = 1;
-}
-
 // Images
 
 enum SectorStatus {
