@@ -1,10 +1,9 @@
 #ifndef ENCODERS_H
 #define ENCODERS_H
 
-class FluxSource;
 class Fluxmap;
-class SectorSet;
 class EncoderProto;
+class Image;
 
 class AbstractEncoder
 {
@@ -15,7 +14,7 @@ public:
 
 public:
     virtual std::unique_ptr<Fluxmap> encode(
-        int physicalTrack, int physicalSide, const SectorSet& allSectors) = 0;
+        int physicalCylinder, int physicalHead, const Image& image) = 0;
 };
 
 #endif

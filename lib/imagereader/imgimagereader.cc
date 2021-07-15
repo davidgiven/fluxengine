@@ -3,6 +3,7 @@
 #include "sector.h"
 #include "sectorset.h"
 #include "imagereader/imagereader.h"
+#include "image.h"
 #include "lib/config.pb.h"
 #include "fmt/format.h"
 #include <algorithm>
@@ -16,13 +17,13 @@ public:
 		ImageReader(config)
 	{}
 
-	SectorSet readImage()
+	Image readImage()
 	{
         std::ifstream inputFile(_config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
             Error() << "cannot open input file";
 
-        SectorSet sectors;
+        Image image;
 		int trackCount = 0;
         for (int track = 0; track < _config.img().tracks(); track++)
         {
@@ -40,8 +41,7 @@ public:
                     Bytes data(trackdata.sector_size());
                     inputFile.read((char*) data.begin(), data.size());
 
-                    std::unique_ptr<Sector>& sector = sectors.get(physicalCylinder, side, sectorId);
-                    sector.reset(new Sector);
+					Sector* sector = image.put(physicalCylinder, side, sectorId);
                     sector->status = Sector::OK;
                     sector->logicalTrack = track;
 					sector->physicalCylinder = physicalCylinder;
@@ -54,10 +54,12 @@ public:
 			trackCount++;
         }
 
+		image.calculateSize();
+		const Geometry& geometry = image.getGeometry();
         std::cout << fmt::format("reading {} tracks, {} sides, {} kB total\n",
-                        trackCount, _config.img().sides(),
+                        geometry.numTracks, geometry.numSides,
 						inputFile.tellg() / 1024);
-        return sectors;
+        return image;
 	}
 
 private:

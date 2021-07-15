@@ -3,6 +3,7 @@
 #include "sector.h"
 #include "sectorset.h"
 #include "imagereader/imagereader.h"
+#include "image.h"
 #include "lib/config.pb.h"
 #include "fmt/format.h"
 #include <algorithm>
@@ -16,7 +17,7 @@ public:
 		ImageReader(config)
 	{}
 
-	SectorSet readImage()
+	Image readImage()
 	{
         std::ifstream inputFile(_config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
@@ -89,7 +90,7 @@ public:
 		uint32_t dataPtr = 0x54;
 		uint32_t tagPtr = dataPtr + dataSize;
 
-        SectorSet sectors;
+        Image image;
         for (int track = 0; track < numCylinders; track++)
         {
 			int numSectors = sectorsPerTrack(track);
@@ -105,8 +106,7 @@ public:
 					Bytes tag = br.read(12);
 					tagPtr += 12;
 
-                    std::unique_ptr<Sector>& sector = sectors.get(track, head, sectorId);
-                    sector.reset(new Sector);
+                    Sector* sector = image.put(track, head, sectorId);
                     sector->status = Sector::OK;
                     sector->logicalTrack = sector->physicalCylinder = track;
                     sector->logicalSide = sector->physicalHead = head;
@@ -115,7 +115,15 @@ public:
                 }
             }
         }
-        return sectors;
+
+		image.setGeometry({
+			.numTracks = numCylinders,
+			.numSides = numHeads,
+			.numSectors = 12,
+			.sectorSize = 512 + 12,
+			.irregular = true
+		});
+        return image;
 	}
 };
 

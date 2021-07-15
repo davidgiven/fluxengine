@@ -6,6 +6,7 @@
 #include "crc.h"
 #include "sectorset.h"
 #include "writer.h"
+#include "image.h"
 #include "fmt/format.h"
 #include "lib/encoders/encoders.pb.h"
 #include "arch/macintosh/macintosh.pb.h"
@@ -209,7 +210,7 @@ public:
 	{}
 
 public:
-    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors)
+    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const Image& image)
 	{
 		if ((physicalTrack < 0) || (physicalTrack >= MAC_TRACKS_PER_DISK))
 			return std::unique_ptr<Fluxmap>();
@@ -225,7 +226,7 @@ public:
 		unsigned numSectors = sectorsForTrack(physicalTrack);
 		for (int sectorId=0; sectorId<numSectors; sectorId++)
 		{
-			const auto& sectorData = allSectors.get(physicalTrack, physicalSide, sectorId);
+			const auto* sectorData = image.get(physicalTrack, physicalSide, sectorId);
 			write_sector(bits, cursor, sectorData);
 		}
 

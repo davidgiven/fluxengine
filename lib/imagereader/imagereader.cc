@@ -6,6 +6,7 @@
 #include "utils.h"
 #include "fmt/format.h"
 #include "proto.h"
+#include "image.h"
 #include "lib/config.pb.h"
 #include <algorithm>
 #include <ctype.h>

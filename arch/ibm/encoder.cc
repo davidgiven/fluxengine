@@ -6,6 +6,7 @@
 #include "crc.h"
 #include "sectorset.h"
 #include "writer.h"
+#include "image.h"
 #include "arch/ibm/ibm.pb.h"
 #include "lib/encoders/encoders.pb.h"
 #include "fmt/format.h"
@@ -110,7 +111,7 @@ private:
 	}
 
 public:
-    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors)
+    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const Image& image)
 	{
 		IbmEncoderProto::TrackdataProto trackdata;
 		getTrackFormat(trackdata, physicalTrack, physicalSide);
@@ -175,7 +176,7 @@ public:
 				writeFillerBytes(trackdata.gap3(), gapFill);
 			first = false;
 
-			const auto& sectorData = allSectors.get(physicalTrack, physicalSide, sectorId);
+			const auto* sectorData = image.get(physicalTrack, physicalSide, sectorId);
 			if (!sectorData)
 			{
 				/* If there are any missing sectors, this is an empty track. */

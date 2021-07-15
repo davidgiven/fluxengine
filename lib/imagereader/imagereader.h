@@ -4,6 +4,7 @@
 class SectorSet;
 class ImageSpec;
 class ImageReaderProto;
+class Image;
 
 class ImageReader
 {
@@ -24,7 +25,7 @@ public:
     static std::unique_ptr<ImageReader> createNsiImageReader(const ImageReaderProto& config);
 
 public:
-	virtual SectorSet readImage() = 0;
+	virtual Image readImage() = 0;
 
 protected:
 	const ImageReaderProto& _config;

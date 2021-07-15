@@ -6,6 +6,7 @@
 #include "crc.h"
 #include "sectorset.h"
 #include "writer.h"
+#include "image.h"
 #include "arch/tids990/tids990.pb.h"
 #include "lib/encoders/encoders.pb.h"
 #include <fmt/format.h>
@@ -60,7 +61,7 @@ private:
 	}
 
 public:
-    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors)
+    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const Image& image)
 	{
 		double clockRateUs = 1e3 / _config.clock_rate_khz() / 2.0;
 		int bitsPerRevolution = (_config.track_length_ms() * 1000.0) / clockRateUs;
@@ -80,7 +81,7 @@ public:
 				writeBytes(_config.gap3_bytes(), 0x55);
 			first = false;
 
-			const auto& sectorData = allSectors.get(physicalTrack, physicalSide, sectorId);
+			const auto* sectorData = image.get(physicalTrack, physicalSide, sectorId);
 			if (!sectorData)
 				Error() << fmt::format("format tried to find sector {} which wasn't in the input file", sectorId);
 

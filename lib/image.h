@@ -3,10 +3,11 @@
 
 struct Geometry
 {
-	unsigned numTracks;
-	unsigned numSides;
-	unsigned numSectors;
-	unsigned sectorSize;
+	unsigned numTracks = 0;
+	unsigned numSides = 0;
+	unsigned numSectors = 0;
+	unsigned sectorSize = 0;
+	bool irregular = false;
 };
 
 class Image
@@ -43,7 +44,7 @@ public:
 	const_iterator begin() const { return const_iterator(_sectors.cbegin()); }
 	const_iterator end() const { return const_iterator(_sectors.cend()); }
 
-	void setGeometry(Geometry& geometry) { _geometry = geometry; }
+	void setGeometry(Geometry geometry) { _geometry = geometry; }
 	const Geometry& getGeometry() const { return _geometry; }
 
 private:

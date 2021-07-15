@@ -7,6 +7,7 @@
 #include "sectorset.h"
 #include "sector.h"
 #include "writer.h"
+#include "image.h"
 #include "fmt/format.h"
 #include "arch/c64/c64.pb.h"
 #include "lib/encoders/encoders.pb.h"
@@ -212,7 +213,7 @@ public:
 	{}
 
 public:
-    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors)
+    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const Image& image)
     {
         /* The format ID Character # 1 and # 2 are in the .d64 image only present
          * in track 18 sector zero which contains the BAM info in byte 162 and 163.
@@ -221,7 +222,7 @@ public:
          * contains the BAM.
         */
 
-        const auto& sectorData = allSectors.get(C64_BAM_TRACK*2, 0, 0); //Read de BAM to get the DISK ID bytes
+        const auto* sectorData = image.get(C64_BAM_TRACK*2, 0, 0); //Read de BAM to get the DISK ID bytes
         if (sectorData)
         {
             ByteReader br(sectorData->data);
@@ -247,7 +248,7 @@ public:
         unsigned writtenSectors = 0;
         for (int sectorId=0; sectorId<numSectors; sectorId++)
         {
-            const auto& sectorData = allSectors.get(physicalTrack, physicalSide, sectorId);
+            const auto* sectorData = image.get(physicalTrack, physicalSide, sectorId);
             if (sectorData)
             {
                 writeSector(bits, cursor, sectorData);

@@ -6,6 +6,7 @@
 #include "crc.h"
 #include "sectorset.h"
 #include "writer.h"
+#include "image.h"
 #include "arch/amiga/amiga.pb.h"
 #include "lib/encoders/encoders.pb.h"
 
@@ -105,7 +106,7 @@ public:
 		_config(config.amiga()) {}
 
 public:
-    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors)
+    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const Image& image)
 	{
 		if ((physicalTrack < 0) || (physicalTrack >= AMIGA_TRACKS_PER_DISK))
 			return std::unique_ptr<Fluxmap>();
@@ -119,7 +120,7 @@ public:
 
 		for (int sectorId=0; sectorId<AMIGA_SECTORS_PER_TRACK; sectorId++)
 		{
-			const auto& sectorData = allSectors.get(physicalTrack, physicalSide, sectorId);
+			const auto* sectorData = image.get(physicalTrack, physicalSide, sectorId);
 			write_sector(bits, cursor, sectorData);
 		}
 

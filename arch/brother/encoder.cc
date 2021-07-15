@@ -6,6 +6,7 @@
 #include "crc.h"
 #include "sectorset.h"
 #include "writer.h"
+#include "image.h"
 #include "arch/brother/brother.pb.h"
 #include "lib/encoders/encoders.pb.h"
 
@@ -137,7 +138,7 @@ public:
 	{}
 
 public:
-    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors)
+    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const Image& image)
 	{
 		int logicalTrack;
 		if (physicalSide != 0)
@@ -172,7 +173,7 @@ public:
 			double dataMs = headerMs + postHeaderSpacingMs;
 			unsigned dataCursor = dataMs*1e3 / clockRateUs;
 
-			const auto& sectorData = allSectors.get(logicalTrack, 0, sectorId);
+			const auto* sectorData = image.get(logicalTrack, 0, sectorId);
 
 			fillBitmapTo(bits, cursor, headerCursor, { true, false });
 			write_sector_header(bits, cursor, logicalTrack, sectorId);
