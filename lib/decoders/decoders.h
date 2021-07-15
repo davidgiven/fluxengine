@@ -9,7 +9,6 @@ class Sector;
 class Fluxmap;
 class FluxmapReader;
 class RawBits;
-class Track;
 class DecoderProto;
 
 #include "flux.h"

@@ -167,7 +167,7 @@ public:
 		_sector->status = (wantCrc == gotCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
 	}
 
-	std::set<unsigned> requiredSectors(Track& track) const
+	std::set<unsigned> requiredSectors(unsigned cylinder, unsigned head) const override
 	{
 		return iterate(_config.required_sectors());
 	}

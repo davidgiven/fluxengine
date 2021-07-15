@@ -4,7 +4,6 @@
 #include "protocol.h"
 #include "decoders/decoders.h"
 #include "sector.h"
-#include "track.h"
 #include "macintosh.h"
 #include "bytes.h"
 #include "fmt/format.h"
@@ -191,16 +190,16 @@ public:
 		_sector->data.writer().append(userData.slice(12, 512)).append(userData.slice(0, 12));
 	}
 
-	std::set<unsigned> requiredSectors(Track& track) const
+	std::set<unsigned> requiredSectors(unsigned cylinder, unsigned head) const
 	{
 		int count;
-		if (track.physicalTrack < 16)
+		if (cylinder < 16)
 			count = 12;
-		else if (track.physicalTrack < 32)
+		else if (cylinder < 32)
 			count = 11;
-		else if (track.physicalTrack < 48)
+		else if (cylinder < 48)
 			count = 10;
-		else if (track.physicalTrack < 64)
+		else if (cylinder < 64)
 			count = 9;
 		else
 			count = 8;

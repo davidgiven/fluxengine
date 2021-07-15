@@ -22,7 +22,6 @@
 #include "flux.h"
 #include "protocol.h"
 #include "decoders/rawbits.h"
-#include "track.h"
 #include "sector.h"
 #include "image.h"
 #include "lib/decoders/decoders.pb.h"

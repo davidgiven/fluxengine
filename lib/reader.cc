@@ -10,7 +10,6 @@
 #include "sector.h"
 #include "bytes.h"
 #include "decoders/rawbits.h"
-#include "track.h"
 #include "flux.h"
 #include "image.h"
 #include "imagewriter/imagewriter.h"

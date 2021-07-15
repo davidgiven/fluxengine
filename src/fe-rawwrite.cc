@@ -4,7 +4,6 @@
 #include "fluxmap.h"
 #include "writer.h"
 #include "sector.h"
-#include "track.h"
 #include "proto.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/fluxsink/fluxsink.h"
