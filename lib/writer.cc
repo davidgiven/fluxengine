@@ -12,7 +12,6 @@
 #include "fmt/format.h"
 #include "record.h"
 #include "sector.h"
-#include "sectorset.h"
 #include "image.h"
 #include "lib/config.pb.h"
 #include "proto.h"

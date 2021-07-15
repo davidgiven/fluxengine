@@ -1,7 +1,6 @@
 #include "globals.h"
 #include "northstar.h"
 #include "sector.h"
-#include "sectorset.h"
 #include "bytes.h"
 #include "decoders/decoders.h"
 #include "encoders/encoders.h"

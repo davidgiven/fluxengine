@@ -1,7 +1,6 @@
 #include "globals.h"
 #include "flags.h"
 #include "sector.h"
-#include "sectorset.h"
 #include "imagereader/imagereader.h"
 #include "image.h"
 #include "lib/config.pb.h"

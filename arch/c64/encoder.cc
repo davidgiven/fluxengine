@@ -4,7 +4,6 @@
 #include "encoders/encoders.h"
 #include "c64.h"
 #include "crc.h"
-#include "sectorset.h"
 #include "sector.h"
 #include "writer.h"
 #include "image.h"

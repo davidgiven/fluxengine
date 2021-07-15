@@ -4,7 +4,6 @@
 #include "encoders/encoders.h"
 #include "tids990.h"
 #include "crc.h"
-#include "sectorset.h"
 #include "writer.h"
 #include "image.h"
 #include "arch/tids990/tids990.pb.h"

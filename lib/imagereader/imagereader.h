@@ -1,7 +1,6 @@
 #ifndef IMAGEREADER_H
 #define IMAGEREADER_H
 
-class SectorSet;
 class ImageSpec;
 class ImageReaderProto;
 class Image;

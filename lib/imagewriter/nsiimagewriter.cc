@@ -1,7 +1,6 @@
 #include "globals.h"
 #include "flags.h"
 #include "sector.h"
-#include "sectorset.h"
 #include "imagewriter/imagewriter.h"
 #include "fmt/format.h"
 #include "decoders/decoders.h"

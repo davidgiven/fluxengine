@@ -4,7 +4,6 @@
 #include "encoders/encoders.h"
 #include "brother.h"
 #include "crc.h"
-#include "sectorset.h"
 #include "writer.h"
 #include "image.h"
 #include "arch/brother/brother.pb.h"

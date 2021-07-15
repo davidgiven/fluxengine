@@ -1,7 +1,6 @@
 #ifndef IMAGEWRITER_H
 #define IMAGEWRITER_H
 
-class SectorSet;
 class ImageWriterProto;
 class Image;
 

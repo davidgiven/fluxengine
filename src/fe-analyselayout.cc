@@ -4,7 +4,6 @@
 #include "bitmap.h"
 #include "fluxmap.h"
 #include "sector.h"
-#include "sectorset.h"
 #include "csvreader.h"
 #include "image.h"
 #include "decoders/fluxmapreader.h"

@@ -5,7 +5,6 @@
 #include "encoders/encoders.h"
 #include "decoders/decoders.h"
 #include "sector.h"
-#include "sectorset.h"
 #include "record.h"
 #include "northstar/northstar.h"
 #include "fmt/format.h"

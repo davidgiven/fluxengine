@@ -365,7 +365,6 @@ buildlibrary libbackend.a \
     lib/proto.cc \
     lib/reader.cc \
     lib/sector.cc \
-    lib/sectorset.cc \
     lib/sql.cc \
     lib/usb/fluxengineusb.cc \
     lib/usb/greaseweazle.cc \
