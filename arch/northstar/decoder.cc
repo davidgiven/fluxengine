@@ -160,9 +160,9 @@ public:
 		ByteReader br(bytes);
 		uint8_t sync_char;
 
-		_sector->logicalSide = _sector->physicalSide;
+		_sector->logicalSide = _sector->physicalHead;
 		_sector->logicalSector = _hardSectorId;
-		_sector->logicalTrack = _sector->physicalTrack;
+		_sector->logicalTrack = _sector->physicalCylinder;
 
 		sync_char = br.read_8();	/* Sync char: 0xFB */
 		if (_sectorType == SECTOR_TYPE_MFM) {

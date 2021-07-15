@@ -175,9 +175,9 @@ static void write_sector(std::vector<bool>& bits, unsigned& cursor, const Sector
 		write_bits(bits, cursor, 0xff3fcff3fcffLL, 6*8); /* sync */
 	write_bits(bits, cursor, MAC_SECTOR_RECORD, 3*8);
 
-    uint8_t encodedTrack = sector->physicalTrack & 0x3f;
+    uint8_t encodedTrack = sector->physicalHead & 0x3f;
 	uint8_t encodedSector = sector->logicalSector;
-	uint8_t encodedSide = encode_side(sector->physicalTrack, sector->logicalSide);
+	uint8_t encodedSide = encode_side(sector->physicalCylinder, sector->logicalSide);
 	uint8_t formatByte = MAC_FORMAT_BYTE;
 	uint8_t headerChecksum = (encodedTrack ^ encodedSector ^ encodedSide ^ formatByte) & 0x3f;
 

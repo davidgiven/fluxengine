@@ -17,14 +17,12 @@ std::unique_ptr<AbstractEncoder> AbstractEncoder::create(const EncoderProto& con
 	static const std::map<int,
 		std::function<std::unique_ptr<AbstractEncoder>(const EncoderProto&)>> encoders =
 	{
-		#if 0
 		{ EncoderProto::kAmiga,     createAmigaEncoder },
 		{ EncoderProto::kBrother,   createBrotherEncoder },
 		{ EncoderProto::kC64,       createCommodore64Encoder },
 		{ EncoderProto::kIbm,       createIbmEncoder },
 		{ EncoderProto::kMacintosh, createMacintoshEncoder },
 		{ EncoderProto::kNorthstar, createNorthstarEncoder },
-		#endif
 	};
 
 	auto encoder = encoders.find(config.format_case());

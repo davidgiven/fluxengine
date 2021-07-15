@@ -38,7 +38,6 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 	{
 		//{ DecoderProto::kAeslanier,  createAesLanierDecoder },
 		{ DecoderProto::kAmiga,      createAmigaDecoder },
-		#if 0
 		{ DecoderProto::kApple2,     createApple2Decoder },
 		{ DecoderProto::kBrother,    createBrotherDecoder },
 		{ DecoderProto::kC64,        createCommodore64Decoder },
@@ -52,7 +51,6 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 		{ DecoderProto::kTids990,    createTids990Decoder },
 		{ DecoderProto::kVictor9K,   createVictor9kDecoder },
 		{ DecoderProto::kZilogmcz,   createZilogMczDecoder },
-		#endif
 	};
 
 	auto decoder = decoders.find(config.format_case());
@@ -67,6 +65,8 @@ std::unique_ptr<TrackDataFlux> AbstractDecoder::decodeToSectors(
 {
 	_trackdata = std::make_unique<TrackDataFlux>();
 	_trackdata->fluxmap = fluxmap;
+	_trackdata->physicalCylinder = cylinder;
+	_trackdata->physicalHead = head;
 	
     FluxmapReader fmr(*fluxmap);
     _fmr = &fmr;

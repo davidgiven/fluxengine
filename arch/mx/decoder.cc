@@ -75,7 +75,7 @@ public:
 		uint16_t wantChecksum = br.read_le16();
 
 		_sector->logicalTrack = _logicalTrack;
-		_sector->logicalSide = _track->physicalSide;
+		_sector->logicalSide = _sector->physicalHead;
 		_sector->logicalSector = _currentSector;
 		_sector->data = bytes.slice(0, SECTOR_SIZE);
 		_sector->status = (gotChecksum == wantChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;

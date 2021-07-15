@@ -297,9 +297,29 @@ buildlibrary libbackend.a \
     -I$OBJDIR/proto \
     -d $OBJDIR/proto/libconfig.def \
     -d $OBJDIR/proto/libdata.def \
+    arch/aeslanier/decoder.cc \
     arch/amiga/amiga.cc \
     arch/amiga/decoder.cc \
     arch/amiga/encoder.cc \
+    arch/apple2/decoder.cc \
+    arch/brother/decoder.cc \
+    arch/brother/encoder.cc \
+    arch/c64/decoder.cc \
+    arch/c64/encoder.cc \
+    arch/f85/decoder.cc \
+    arch/fb100/decoder.cc \
+    arch/ibm/decoder.cc \
+    arch/ibm/encoder.cc \
+    arch/macintosh/decoder.cc \
+    arch/macintosh/encoder.cc \
+    arch/micropolis/decoder.cc \
+    arch/mx/decoder.cc \
+    arch/northstar/decoder.cc \
+    arch/northstar/encoder.cc \
+    arch/tids990/decoder.cc \
+    arch/tids990/encoder.cc \
+    arch/victor9k/decoder.cc \
+    arch/zilogmcz/decoder.cc \
     lib/bitmap.cc \
     lib/bytes.cc \
     lib/crc.cc \
@@ -354,27 +374,6 @@ buildlibrary libbackend.a \
     lib/usb/usbfinder.cc \
     lib/utils.cc \
     lib/writer.cc \
-
-#    arch/aeslanier/decoder.cc \
-#    arch/apple2/decoder.cc \
-#    arch/brother/decoder.cc \
-#    arch/brother/encoder.cc \
-#    arch/c64/decoder.cc \
-#    arch/c64/encoder.cc \
-#    arch/f85/decoder.cc \
-#    arch/fb100/decoder.cc \
-#    arch/ibm/decoder.cc \
-#    arch/ibm/encoder.cc \
-#    arch/macintosh/decoder.cc \
-#    arch/macintosh/encoder.cc \
-#    arch/micropolis/decoder.cc \
-#    arch/mx/decoder.cc \
-#    arch/northstar/decoder.cc \
-#    arch/northstar/encoder.cc \
-#    arch/tids990/decoder.cc \
-#    arch/tids990/encoder.cc \
-#    arch/victor9k/decoder.cc \
-#    arch/zilogmcz/decoder.cc \
 
 READABLES="\
     acornadfs \

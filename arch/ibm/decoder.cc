@@ -149,7 +149,7 @@ public:
 			_sector->status = Sector::DATA_MISSING; /* correct but unintuitive */
 
 		if (_config.ignore_side_byte())
-			_sector->logicalSide = _sector->physicalSide;
+			_sector->logicalSide = _sector->physicalHead;
 	}
 
     void decodeDataRecord()

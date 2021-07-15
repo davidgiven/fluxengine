@@ -14,6 +14,8 @@ struct Record
 
 struct TrackDataFlux
 {
+	unsigned physicalCylinder;
+	unsigned physicalHead;
 	std::shared_ptr<const Fluxmap> fluxmap;
 	std::vector<std::shared_ptr<Record>> records;
 	std::vector<std::shared_ptr<Sector>> sectors;
