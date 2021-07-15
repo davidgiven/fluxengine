@@ -3,21 +3,16 @@
 
 #include "bytes.h"
 #include "sector.h"
-#include "record.h"
 #include "decoders/fluxmapreader.h"
 
 class Sector;
 class Fluxmap;
 class FluxmapReader;
-class RawRecord;
 class RawBits;
 class Track;
 class DecoderProto;
 
 #include "flux.h"
-
-typedef std::vector<std::unique_ptr<RawRecord>> RawRecordVector;
-typedef std::vector<std::unique_ptr<Sector>> SectorVector;
 
 extern void setDecoderManualClockRate(double clockrate_us);
 

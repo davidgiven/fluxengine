@@ -2,7 +2,6 @@
 #include "fluxmap.h"
 #include "decoders/fluxmapreader.h"
 #include "protocol.h"
-#include "record.h"
 #include "decoders/decoders.h"
 #include "sector.h"
 #include "victor9k.h"

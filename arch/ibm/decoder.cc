@@ -5,7 +5,6 @@
 #include "fluxmap.h"
 #include "decoders/fluxmapreader.h"
 #include "sector.h"
-#include "record.h"
 #include "arch/ibm/ibm.pb.h"
 #include "proto.h"
 #include <string.h>

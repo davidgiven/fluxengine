@@ -10,7 +10,6 @@
 #include "fluxsink/fluxsink.h"
 #include "imagereader/imagereader.h"
 #include "fmt/format.h"
-#include "record.h"
 #include "sector.h"
 #include "image.h"
 #include "lib/config.pb.h"

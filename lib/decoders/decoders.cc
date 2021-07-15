@@ -19,7 +19,6 @@
 #include "arch/victor9k/victor9k.h"
 #include "arch/zilogmcz/zilogmcz.h"
 #include "decoders/fluxmapreader.h"
-#include "record.h"
 #include "flux.h"
 #include "protocol.h"
 #include "decoders/rawbits.h"

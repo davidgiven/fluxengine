@@ -19,7 +19,6 @@ public:
 	FluxSource* fluxsource;
     std::unique_ptr<Fluxmap> fluxmap;
 
-    std::vector<RawRecord> rawrecords;
     std::vector<Sector> sectors;
 };
 
