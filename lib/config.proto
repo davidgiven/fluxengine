@@ -9,25 +9,16 @@ import "lib/fluxsink/fluxsink.proto";
 import "lib/usb/usb.proto";
 import "lib/common.proto";
 
-message InputProto {
-	oneof input {
-		ImageReaderProto image = 1;
-		FluxSourceProto flux = 2;
-	}
-}
-
-message OutputProto {
-	oneof output {
-		ImageWriterProto image = 1;
-		FluxSinkProto flux = 2;
-	}
-}
-
+// NEXT_TAG: 13
 message ConfigProto {
 	optional string comment = 8;
 
-	optional InputProto input = 1;
-	optional OutputProto output = 2;
+	optional ImageReaderProto image_reader = 12;
+	optional ImageWriterProto image_writer = 9;
+	
+	optional FluxSourceProto flux_source = 10;
+	optional FluxSinkProto flux_sink = 11;
+
 	optional EncoderProto encoder = 3;
 	optional DecoderProto decoder = 4;
 	optional UsbProto usb = 5;

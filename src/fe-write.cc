@@ -23,7 +23,7 @@ static StringFlag sourceImage(
 	"",
 	[](const auto& value)
 	{
-		ImageReader::updateConfigForFilename(config.mutable_input()->mutable_image(), value);
+		ImageReader::updateConfigForFilename(config.mutable_image_reader(), value);
 	});
 
 static StringFlag destFlux(
@@ -32,7 +32,7 @@ static StringFlag destFlux(
 	"",
 	[](const auto& value)
 	{
-		FluxSink::updateConfigForFilename(config.mutable_output()->mutable_flux(), value);
+		FluxSink::updateConfigForFilename(config.mutable_flux_sink(), value);
 	});
 
 static StringFlag destCylinders(
@@ -59,12 +59,9 @@ int mainWrite(int argc, const char* argv[])
 		showProfiles("write", writables);
     flags.parseFlagsWithConfigFiles(argc, argv, writables);
 
-	if (!config.input().has_image() || !config.output().has_flux())
-		Error() << "incomplete config (did you remember to specify the format?)";
-
-	std::unique_ptr<ImageReader> reader(ImageReader::create(config.input().image()));
+	std::unique_ptr<ImageReader> reader(ImageReader::create(config.image_reader()));
 	std::unique_ptr<AbstractEncoder> encoder(AbstractEncoder::create(config.encoder()));
-	std::unique_ptr<FluxSink> fluxSink(FluxSink::create(config.output().flux()));
+	std::unique_ptr<FluxSink> fluxSink(FluxSink::create(config.flux_sink()));
 
 	writeDiskCommand(*reader, *encoder, *fluxSink);
 

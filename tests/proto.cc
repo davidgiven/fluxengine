@@ -64,16 +64,12 @@ static void test_config(void)
 	ConfigProto config;
 
 	const std::string text = R"M(
-		input {
-			image {
-				filename: "filename"
-			}
+		flux_sink {
+			drive { }
 		}
 
-		output {
-			flux {
-				drive { }
-			}
+		image_reader {
+			filename: "filename"
 		}
 	)M";
 	google::protobuf::TextFormat::MergeFromString(text, &config);

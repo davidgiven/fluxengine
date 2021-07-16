@@ -13,7 +13,7 @@ static StringFlag sourceFlux(
 	"",
 	[](const auto& value)
 	{
-		FluxSource::updateConfigForFilename(config.mutable_input()->mutable_flux(), value);
+		FluxSource::updateConfigForFilename(config.mutable_flux_source(), value);
 	});
 
 static IntFlag cylinder(
@@ -25,13 +25,12 @@ extern const std::map<std::string, std::string> readables;
 
 int mainSeek(int argc, const char* argv[])
 {
-	config.mutable_input()->mutable_flux()->mutable_drive()->set_drive(0);
     flags.parseFlagsWithConfigFiles(argc, argv, {});
 
-	if (!config.input().flux().has_drive())
+	if (!config.flux_source().has_drive())
 		Error() << "this only makes sense with a real disk drive";
 
-    usbSetDrive(config.input().flux().drive().drive(), false, config.input().flux().drive().index_mode());
+    usbSetDrive(config.flux_source().drive().drive(), false, config.flux_source().drive().index_mode());
 	usbSeek(cylinder);
     return 0;
 }

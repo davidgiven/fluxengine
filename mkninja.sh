@@ -9,12 +9,12 @@ rule cxx
     deps = gcc
     
 rule proto
-    command = $PROTOC \$flags \$in && (echo \$in > \$def)
+    command = (echo \$in > \$def) && $PROTOC \$flags \$in
     description = PROTO \$in
     restat = yes
 
 rule protoencode
-    command = (echo '#include <string>' && echo 'static const unsigned char data[] = {' && ($PROTOC \$flags --encode=\$messagetype \$\$(cat \$def)< \$in | $XXD -i) && echo '}; extern std::string \$name(); std::string \$name() { return std::string((const char*)data, sizeof(data)); }') > \$out
+    command = (echo '#include <string>' && echo 'static const unsigned char data[] = {' && $PROTOC \$flags --encode=\$messagetype \$\$(cat \$def)< \$in > \$out.bin && $XXD -i < \$out.bin && echo '}; extern std::string \$name(); std::string \$name() { return std::string((const char*)data, sizeof(data)); }') > \$out
     description = PROTOENCODE \$in
     restat = yes
 
@@ -375,56 +375,59 @@ buildlibrary libbackend.a \
     lib/writer.cc \
 
 READABLES="\
-    acornadfs \
-    acorndfs \
-    aeslanier \
     amiga \
-    ampro \
-    apple2 \
-    atarist \
-    brother \
-    commodore1541 \
-    commodore1581 \
-    eco1 \
-    f85 \
-    fb100 \
-    ibm \
-    macintosh \
-    micropolis \
-    mx \
-    northstar \
-    tids990 \
-    victor9k \
-    zilogmcz \
     "
+#    acornadfs \
+#    acorndfs \
+#    aeslanier \
+#    amiga \
+#    ampro \
+#    apple2 \
+#    atarist \
+#    brother \
+#    commodore1541 \
+#    commodore1581 \
+#    eco1 \
+#    f85 \
+#    fb100 \
+#    ibm \
+#    macintosh \
+#    micropolis \
+#    mx \
+#    northstar \
+#    tids990 \
+#    victor9k \
+#    zilogmcz \
+#    "
 
 WRITABLES="\
     amiga \
-    atarist360 \
-    atarist370 \
-    atarist400 \
-    atarist410 \
-    atarist720 \
-    atarist740 \
-    atarist800 \
-    atarist820 \
-    brother120 \
-    brother240 \
-    commodore1541 \
-    commodore1581 \
-    hplif770 \
-    ibm1200_525 \
-    ibm1440 \
-    ibm180_525 \
-    ibm360_525 \
-    ibm720 \
-    ibm720_525 \
-    macintosh \
-    northstar87 \
-    northstar175 \
-    northstar350 \
-    tids990 \
-    "
+"
+#    atarist360 \
+#    atarist370 \
+#    atarist400 \
+#    atarist410 \
+#    atarist720 \
+#    atarist740 \
+#    atarist800 \
+#    atarist820 \
+#    brother120 \
+#    brother240 \
+#    commodore1541 \
+#    commodore1581 \
+#    hplif770 \
+#    ibm1200_525 \
+#    ibm1440 \
+#    ibm180_525 \
+#    ibm360_525 \
+#    ibm720 \
+#    ibm720_525 \
+#    macintosh \
+#    northstar87 \
+#    northstar175 \
+#    northstar350 \
+#    tids990 \
+#    "
 
 for pb in $READABLES; do
     buildencodedproto $OBJDIR/proto/libconfig.def ConfigProto \

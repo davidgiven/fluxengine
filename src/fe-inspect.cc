@@ -19,7 +19,7 @@ static StringFlag sourceFlux(
 	"",
 	[](const auto& value)
 	{
-		FluxSource::updateConfigForFilename(config.mutable_input()->mutable_flux(), value);
+		FluxSource::updateConfigForFilename(config.mutable_flux_source(), value);
 	});
 
 static IntFlag cylinderFlag(
@@ -199,10 +199,9 @@ static nanoseconds_t guessClock(const Fluxmap& fluxmap)
 
 int mainInspect(int argc, const char* argv[])
 {
-	config.mutable_input()->mutable_flux()->mutable_drive()->set_drive(0);
     flags.parseFlagsWithConfigFiles(argc, argv, {});
 
-	std::unique_ptr<FluxSource> fluxSource(FluxSource::create(config.input().flux()));
+	std::unique_ptr<FluxSource> fluxSource(FluxSource::create(config.flux_source()));
 	const auto fluxmap = fluxSource->readFlux(cylinderFlag, headFlag);
 
 	std::cout << fmt::format("0x{:x} bytes of data in {:.3f}ms\n",

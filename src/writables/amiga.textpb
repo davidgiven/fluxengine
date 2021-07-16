@@ -1,24 +1,42 @@
 comment: 'Amiga 880kB 3.5" double sided'
 
-input {
-	image {
-		filename: "amiga.adf"
-		img {
-			tracks: 80
-			sides: 2
-			trackdata {
-				sectors: 11
-				sector_size: 512
-			}
+flux_source {
+	drive {}
+}
+
+flux_sink {
+	drive {}
+}
+
+image_reader {
+	filename: "amiga.adf"
+	img {
+		tracks: 80
+		sides: 2
+		trackdata {
+			sectors: 11
+			sector_size: 512
 		}
 	}
 }
 
-output {
-	flux {}
+image_writer {
+	filename: "amiga.adf"
+	img {
+		tracks: 80
+		sides: 2
+		trackdata {
+			sector_size: 512
+			sectors: 11
+		}
+	}
 }
 
 encoder {
+	amiga {}
+}
+
+decoder {
 	amiga {}
 }
 

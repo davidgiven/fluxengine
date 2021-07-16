@@ -1,21 +1,17 @@
 comment: 'Amiga 880kB 3.5" double sided'
 
-input {
-	flux {
-		drive {}
-	}
+flux_source {
+	drive {}
 }
 
-output {
-	image {
-		filename: "amiga.adf"
-		img {
-			tracks: 80
-			sides: 2
-			trackdata {
-				sector_size: 512
-				sectors: 11
-			}
+image_writer {
+	filename: "amiga.adf"
+	img {
+		tracks: 80
+		sides: 2
+		trackdata {
+			sector_size: 512
+			sectors: 11
 		}
 	}
 }

@@ -24,7 +24,7 @@ static StringFlag sourceFlux(
 	"",
 	[](const auto& value)
 	{
-		FluxSource::updateConfigForFilename(config.mutable_input()->mutable_flux(), value);
+		FluxSource::updateConfigForFilename(config.mutable_flux_source(), value);
 	});
 
 static StringFlag destImage(
@@ -33,7 +33,7 @@ static StringFlag destImage(
 	"",
 	[](const auto& value)
 	{
-		ImageWriter::updateConfigForFilename(config.mutable_output()->mutable_image(), value);
+		ImageWriter::updateConfigForFilename(config.mutable_image_writer(), value);
 	});
 
 static StringFlag copyFluxTo(
@@ -69,15 +69,12 @@ int mainRead(int argc, const char* argv[])
 		showProfiles("read", readables);
     flags.parseFlagsWithConfigFiles(argc, argv, readables);
 
-	if (!config.input().has_flux() || !config.output().has_image())
-		Error() << "incomplete config (did you remember to specify the format?)";
-
 	if (config.decoder().copy_flux_to().has_drive())
 		Error() << "you cannot copy flux to a hardware device";
 
-	std::unique_ptr<FluxSource> fluxSource(FluxSource::create(config.input().flux()));
+	std::unique_ptr<FluxSource> fluxSource(FluxSource::create(config.flux_source()));
 	std::unique_ptr<AbstractDecoder> decoder(AbstractDecoder::create(config.decoder()));
-	std::unique_ptr<ImageWriter> writer(ImageWriter::create(config.output().image()));
+	std::unique_ptr<ImageWriter> writer(ImageWriter::create(config.image_writer()));
 
 	readDiskCommand(*fluxSource, *decoder, *writer);
 

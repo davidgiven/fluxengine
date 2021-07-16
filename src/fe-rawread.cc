@@ -24,7 +24,7 @@ static StringFlag sourceFlux(
 	"",
 	[](const auto& value)
 	{
-		FluxSource::updateConfigForFilename(config.mutable_input()->mutable_flux(), value);
+		FluxSource::updateConfigForFilename(config.mutable_flux_source(), value);
 	});
 
 static StringFlag destFlux(
@@ -33,7 +33,7 @@ static StringFlag destFlux(
 	"",
 	[](const auto& value)
 	{
-		FluxSink::updateConfigForFilename(config.mutable_output()->mutable_flux(), value);
+		FluxSink::updateConfigForFilename(config.mutable_flux_sink(), value);
 	});
 
 static StringFlag srcCylinders(
@@ -56,7 +56,6 @@ static StringFlag srcHeads(
 
 int mainRawRead(int argc, const char* argv[])
 {
-	config.mutable_input()->mutable_flux()->mutable_drive()->set_drive(0);
 	setRange(config.mutable_cylinders(), "0-79");
 	setRange(config.mutable_heads(), "0-1");
 
@@ -64,13 +63,11 @@ int mainRawRead(int argc, const char* argv[])
 		showProfiles("rawread", readables);
     flags.parseFlagsWithConfigFiles(argc, argv, readables);
 
-	if (!config.input().has_flux() || !config.output().has_flux())
-		Error() << "incomplete config (did you remember to specify the format?)";
-	if (config.output().flux().has_drive())
+	if (config.flux_sink().has_drive())
 		Error() << "you can't use rawread to write to hardware";
 
-	std::unique_ptr<FluxSource> fluxSource(FluxSource::create(config.input().flux()));
-	std::unique_ptr<FluxSink> fluxSink(FluxSink::create(config.output().flux()));
+	std::unique_ptr<FluxSource> fluxSource(FluxSource::create(config.flux_source()));
+	std::unique_ptr<FluxSink> fluxSink(FluxSink::create(config.flux_sink()));
 
 	rawReadDiskCommand(*fluxSource, *fluxSink);
 
