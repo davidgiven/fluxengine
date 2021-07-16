@@ -1,16 +1,8 @@
 comment: 'Macintosh 800kB 3.5" GCR double-sided'
 
-input {
-	image {
-		filename: "macintosh.diskcopy"
-		diskcopy {}
-	}
-}
-
-output {
-	flux {
-		drive {}
-	}
+image_writer {
+	filename: "macintosh.diskcopy"
+	diskcopy {}
 }
 
 encoder {

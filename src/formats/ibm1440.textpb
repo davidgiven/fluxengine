@@ -1,22 +1,14 @@
 comment: 'PC 1440kB 3.5" 80-track 18-sector double-sided'
 
-input {
-	image {
-		filename: "ibm1440.img"
-		img {
-			tracks: 80
-			sides: 2
-			trackdata {
-				sectors: 18
-				sector_size: 512
-			}
+image_writer {
+	filename: "ibm1440.img"
+	img {
+		tracks: 80
+		sides: 2
+		trackdata {
+			sectors: 18
+			sector_size: 512
 		}
-	}
-}
-
-output {
-	flux {
-		drive {}
 	}
 }
 

@@ -1,23 +1,15 @@
 comment: 'PC 360kB 5.25" 40-track 9-sector double-sided'
 
-input {
-	image {
-		filename: "ibm360_525.img"
-		img {
-			tracks: 40
-			sides: 2
-			physical_step: 2
-			trackdata {
-				sectors: 9
-				sector_size: 512
-			}
+image_writer {
+	filename: "ibm360_525.img"
+	img {
+		tracks: 40
+		sides: 2
+		physical_step: 2
+		trackdata {
+			sectors: 9
+			sector_size: 512
 		}
-	}
-}
-
-output {
-	flux {
-		drive {}
 	}
 }
 

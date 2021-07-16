@@ -1,22 +1,14 @@
-comment: 'Atari ST 820kB 3.5" 82-track 10-sector double sided'
+comment: 'Atari ST 800kB 3.5" 80-track 10-sector double sided'
 
-input {
-	image {
-		filename: "atarist820.st"
-		img {
-			tracks: 82
-			sides: 2
-			trackdata {
-				sectors: 10
-				sector_size: 512
-			}
+image_writer {
+	filename: "atarist800.st"
+	img {
+		tracks: 80
+		sides: 2
+		trackdata {
+			sectors: 10
+			sector_size: 512
 		}
-	}
-}
-
-output {
-	flux {
-		drive {}
 	}
 }
 
@@ -37,7 +29,7 @@ encoder {
 
 cylinders {
 	start: 0
-	end: 81
+	end: 79
 }
 
 heads {

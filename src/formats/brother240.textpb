@@ -1,0 +1,28 @@
+comment: 'Brother 240kB 3.5" 78-track GCR disks'
+
+image_writer {
+	filename: "brother240.img"
+	img {
+		tracks: 78
+		sides: 1
+		trackdata {
+			sectors: 12
+			sector_size: 256
+		}
+	}
+}
+
+encoder {
+	brother {}
+}
+
+cylinders {
+	start: 0
+	end: 77
+}
+
+heads {
+	start: 0
+	end: 0
+}
+

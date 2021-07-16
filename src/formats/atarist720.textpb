@@ -1,22 +1,14 @@
-comment: 'Atari ST 360kB 3.5" 80-track 9-sector single sided'
+comment: 'Atari ST 720kB 3.5" 80-track 9-sector double sided'
 
-input {
-	image {
-		filename: "atarist360.st"
-		img {
-			tracks: 80
-			sides: 1
-			trackdata {
-				sectors: 9
-				sector_size: 512
-			}
+image_writer {
+	filename: "atarist720.st"
+	img {
+		tracks: 80
+		sides: 2
+		trackdata {
+			sectors: 9
+			sector_size: 512
 		}
-	}
-}
-
-output {
-	flux {
-		drive {}
 	}
 }
 
@@ -42,6 +34,6 @@ cylinders {
 
 heads {
 	start: 0
-	end: 0
+	end: 1
 }
 

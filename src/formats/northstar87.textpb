@@ -1,17 +1,13 @@
 comment: 'Northstar 87.5kB 5.25" 35-track single-sided single-density hard-sectored'
 
-input {
-	image {
-		filename: "northstar.nsi"
-		nsi {}
-	}
+image_writer {
+	filename: "northstar.nsi"
+	nsi {}
 }
 
-output {
-	flux {
-		drive {
-			hard_sector_count: 10
-		}
+flux_sink {
+	drive {
+		hard_sector_count: 10
 	}
 }
 

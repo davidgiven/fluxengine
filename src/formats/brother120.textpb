@@ -1,22 +1,14 @@
 comment: 'Brother 120kB 3.5" 39-track GCR disks'
 
-input {
-	image {
-		filename: "brother120.img"
-		img {
-			tracks: 39
-			sides: 1
-			trackdata {
-				sectors: 12
-				sector_size: 256
-			}
+image_writer {
+	filename: "brother120.img"
+	img {
+		tracks: 39
+		sides: 1
+		trackdata {
+			sectors: 12
+			sector_size: 256
 		}
-	}
-}
-
-output {
-	flux {
-		drive {}
 	}
 }
 

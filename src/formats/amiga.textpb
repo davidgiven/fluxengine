@@ -1,13 +1,5 @@
 comment: 'Amiga 880kB 3.5" double sided'
 
-flux_source {
-	drive {}
-}
-
-flux_sink {
-	drive {}
-}
-
 image_reader {
 	filename: "amiga.adf"
 	img {

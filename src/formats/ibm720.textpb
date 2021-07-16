@@ -1,22 +1,14 @@
 comment: 'PC 720kB 3.5" 80-track 9-sector double-sided'
 
-input {
-	image {
-		filename: "ibm720.img"
-		img {
-			tracks: 80
-			sides: 2
-			trackdata {
-				sectors: 9
-				sector_size: 512
-			}
+image_writer {
+	filename: "ibm720.img"
+	img {
+		tracks: 80
+		sides: 2
+		trackdata {
+			sectors: 9
+			sector_size: 512
 		}
-	}
-}
-
-output {
-	flux {
-		drive {}
 	}
 }
 

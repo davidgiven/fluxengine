@@ -1,22 +1,14 @@
 comment: 'Atari ST 410kB 3.5" 82-track 10-sector single sided'
 
-input {
-	image {
-		filename: "atarist410.st"
-		img {
-			tracks: 82
-			sides: 1
-			trackdata {
-				sectors: 10
-				sector_size: 512
-			}
+image_writer {
+	filename: "atarist410.st"
+	img {
+		tracks: 82
+		sides: 1
+		trackdata {
+			sectors: 10
+			sector_size: 512
 		}
-	}
-}
-
-output {
-	flux {
-		drive {}
 	}
 }
 

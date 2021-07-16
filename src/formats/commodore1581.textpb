@@ -1,22 +1,14 @@
 comment: 'Commodore 1581 800kB 3.5" MFM disks'
 
-input {
-	image {
-		filename: "commodore1581.d81"
-		img {
-			tracks: 80
-			sides: 2
-			trackdata {
-				sectors: 10
-				sector_size: 512
-			}
+image_writer {
+	filename: "commodore1581.d81"
+	img {
+		tracks: 80
+		sides: 2
+		trackdata {
+			sectors: 10
+			sector_size: 512
 		}
-	}
-}
-
-output {
-	flux {
-		drive {}
 	}
 }
 

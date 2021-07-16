@@ -1,22 +1,14 @@
 comment: 'Hewlett-Packard LIF 770kB 3.5" disks'
 
-input {
-	image {
-		filename: "hplif770.img"
-		img {
-			tracks: 77
-			sides: 2
-			trackdata {
-				sectors: 5
-				sector_size: 1024
-			}
+image_writer {
+	filename: "hplif770.img"
+	img {
+		tracks: 77
+		sides: 2
+		trackdata {
+			sectors: 5
+			sector_size: 1024
 		}
-	}
-}
-
-output {
-	flux {
-		drive {}
 	}
 }
 

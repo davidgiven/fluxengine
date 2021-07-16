@@ -400,43 +400,42 @@ READABLES="\
 #    zilogmcz \
 #    "
 
-WRITABLES="\
+FORMATS="\
     amiga \
-"
-#    atarist360 \
-#    atarist370 \
-#    atarist400 \
-#    atarist410 \
-#    atarist720 \
-#    atarist740 \
-#    atarist800 \
-#    atarist820 \
-#    brother120 \
-#    brother240 \
-#    commodore1541 \
-#    commodore1581 \
-#    hplif770 \
-#    ibm1200_525 \
-#    ibm1440 \
-#    ibm180_525 \
-#    ibm360_525 \
-#    ibm720 \
-#    ibm720_525 \
-#    macintosh \
-#    northstar87 \
-#    northstar175 \
-#    northstar350 \
-#    tids990 \
-#    "
+    atarist360 \
+    atarist370 \
+    atarist400 \
+    atarist410 \
+    atarist720 \
+    atarist740 \
+    atarist800 \
+    atarist820 \
+    brother120 \
+    brother240 \
+    commodore1541 \
+    commodore1581 \
+    hplif770 \
+    ibm1200_525 \
+    ibm1440 \
+    ibm180_525 \
+    ibm360_525 \
+    ibm720 \
+    ibm720_525 \
+    macintosh \
+    northstar87 \
+    northstar175 \
+    northstar350 \
+    tids990 \
+    "
 
 for pb in $READABLES; do
     buildencodedproto $OBJDIR/proto/libconfig.def ConfigProto \
         readables_${pb}_pb src/readables/$pb.textpb $OBJDIR/proto/src/readables/$pb.cc
 done
 
-for pb in $WRITABLES; do
+for pb in $FORMATS; do
     buildencodedproto $OBJDIR/proto/libconfig.def ConfigProto \
-        writables_${pb}_pb src/writables/$pb.textpb $OBJDIR/proto/src/writables/$pb.cc
+        formats_${pb}_pb src/formats/$pb.textpb $OBJDIR/proto/src/formats/$pb.cc
 done
 
 buildmktable readables $OBJDIR/readables.cc $READABLES
