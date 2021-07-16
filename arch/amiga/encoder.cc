@@ -119,7 +119,8 @@ public:
 		for (int sectorId=0; sectorId<AMIGA_SECTORS_PER_TRACK; sectorId++)
 		{
 			const auto* sectorData = image.get(physicalTrack, physicalSide, sectorId);
-			write_sector(bits, cursor, sectorData);
+			if (sectorData)
+				write_sector(bits, cursor, sectorData);
 		}
 
 		if (cursor >= bits.size())
