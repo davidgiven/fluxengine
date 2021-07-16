@@ -3,19 +3,15 @@
 
 #include "bytes.h"
 #include "sector.h"
-#include "record.h"
 #include "decoders/fluxmapreader.h"
 
 class Sector;
 class Fluxmap;
 class FluxmapReader;
-class RawRecord;
 class RawBits;
-class Track;
 class DecoderProto;
 
-typedef std::vector<std::unique_ptr<RawRecord>> RawRecordVector;
-typedef std::vector<std::unique_ptr<Sector>> SectorVector;
+#include "flux.h"
 
 extern void setDecoderManualClockRate(double clockrate_us);
 
@@ -31,8 +27,9 @@ static inline Bytes decodeFmMfm(const std::vector<bool> bits)
 class AbstractDecoder
 {
 public:
-	AbstractDecoder() {} // REMOVE ME
-	AbstractDecoder(const DecoderProto& config) {}
+	AbstractDecoder(const DecoderProto& config):
+		_config(config)
+	{}
 
     virtual ~AbstractDecoder() {}
 
@@ -47,11 +44,11 @@ public:
     };
 
 public:
-    void decodeToSectors(Track& track);
+    std::unique_ptr<TrackDataFlux> decodeToSectors(std::shared_ptr<const Fluxmap> fluxmap, unsigned cylinder, unsigned head);
     void pushRecord(const Fluxmap::Position& start, const Fluxmap::Position& end);
 
-    std::vector<bool> readRawBits(unsigned count)
-    { return _fmr->readRawBits(count, _sector->clock); }
+    std::vector<bool> readRawBits(unsigned count);
+    //{ return _fmr->readRawBits(count, _sector->clock); }
 
     Fluxmap::Position tell()
     { return _fmr->tell(); } 
@@ -59,10 +56,7 @@ public:
     void seek(const Fluxmap::Position& pos)
     { return _fmr->seek(pos); } 
 
-	/* Returns a set of sectors required to exist on this track. If the reader
-	 * sees any missing, it will consider this to be an error and will retry
-	 * the read. */
-	virtual std::set<unsigned> requiredSectors(Track& track) const;
+	virtual std::set<unsigned> requiredSectors(unsigned cylinder, unsigned head) const;
 
 protected:
     virtual void beginTrack() {};
@@ -70,9 +64,10 @@ protected:
     virtual void decodeSectorRecord() = 0;
     virtual void decodeDataRecord() {};
 
-    FluxmapReader* _fmr;
-    Track* _track;
-    Sector* _sector;
+	const DecoderProto& _config;
+    FluxmapReader* _fmr = nullptr;
+	std::unique_ptr<TrackDataFlux> _trackdata;
+    std::shared_ptr<Sector> _sector;
 };
 
 #endif

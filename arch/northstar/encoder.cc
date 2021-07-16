@@ -1,10 +1,10 @@
 #include "globals.h"
 #include "northstar.h"
 #include "sector.h"
-#include "sectorset.h"
 #include "bytes.h"
 #include "decoders/decoders.h"
 #include "encoders/encoders.h"
+#include "image.h"
 #include "lib/encoders/encoders.pb.h"
 
 #define GAP_FILL_SIZE_SD 30
@@ -108,7 +108,7 @@ public:
 		_config(config.northstar())
 	{}
 
-	std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors)
+	std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const Image& image)
 	{
 		int bitsPerRevolution = 100000;
 		double clockRateUs = 4.00;
@@ -116,7 +116,7 @@ public:
 		if ((physicalTrack < 0) || (physicalTrack >= 35))
 			return std::unique_ptr<Fluxmap>();
 
-		const auto& sector = allSectors.get(physicalTrack, physicalSide, 0);
+		const auto* sector = image.get(physicalTrack, physicalSide, 0);
 
 		if (sector->data.size() == NORTHSTAR_PAYLOAD_SIZE_SD) {
 			bitsPerRevolution /= 2;		// FM
@@ -129,7 +129,7 @@ public:
 
 		for (int sectorId = 0; sectorId < 10; sectorId++)
 		{
-			const auto& sectorData = allSectors.get(physicalTrack, physicalSide, sectorId);
+			const auto* sectorData = image.get(physicalTrack, physicalSide, sectorId);
 			write_sector(bits, cursor, sectorData);
 		}
 

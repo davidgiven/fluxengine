@@ -1,8 +1,8 @@
 #include "globals.h"
 #include "flags.h"
 #include "sector.h"
-#include "sectorset.h"
 #include "imagereader/imagereader.h"
+#include "image.h"
 #include "lib/config.pb.h"
 #include "fmt/format.h"
 #include <algorithm>
@@ -16,19 +16,19 @@ public:
 		ImageReader(config)
 	{}
 
-	SectorSet readImage()
+	Image readImage()
 	{
         std::ifstream inputFile(_config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
             Error() << "cannot open input file";
 
-        SectorSet sectors;
+        Image image;
 		int trackCount = 0;
         for (int track = 0; track < _config.img().tracks(); track++)
         {
 			if (inputFile.eof())
 				break;
-			int physicalTrack = track * _config.img().physical_step() + _config.img().physical_offset();
+			int physicalCylinder = track * _config.img().physical_step() + _config.img().physical_offset();
 
             for (int side = 0; side < _config.img().sides(); side++)
             {
@@ -40,12 +40,11 @@ public:
                     Bytes data(trackdata.sector_size());
                     inputFile.read((char*) data.begin(), data.size());
 
-                    std::unique_ptr<Sector>& sector = sectors.get(physicalTrack, side, sectorId);
-                    sector.reset(new Sector);
+					Sector* sector = image.put(physicalCylinder, side, sectorId);
                     sector->status = Sector::OK;
                     sector->logicalTrack = track;
-					sector->physicalTrack = physicalTrack;
-                    sector->logicalSide = sector->physicalSide = side;
+					sector->physicalCylinder = physicalCylinder;
+                    sector->logicalSide = sector->physicalHead = side;
                     sector->logicalSector = sectorId;
                     sector->data = data;
                 }
@@ -54,10 +53,12 @@ public:
 			trackCount++;
         }
 
+		image.calculateSize();
+		const Geometry& geometry = image.getGeometry();
         std::cout << fmt::format("reading {} tracks, {} sides, {} kB total\n",
-                        trackCount, _config.img().sides(),
+                        geometry.numTracks, geometry.numSides,
 						inputFile.tellg() / 1024);
-        return sectors;
+        return image;
 	}
 
 private:

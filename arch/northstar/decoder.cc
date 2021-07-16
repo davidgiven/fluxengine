@@ -160,9 +160,9 @@ public:
 		ByteReader br(bytes);
 		uint8_t sync_char;
 
-		_sector->logicalSide = _sector->physicalSide;
+		_sector->logicalSide = _sector->physicalHead;
 		_sector->logicalSector = _hardSectorId;
-		_sector->logicalTrack = _sector->physicalTrack;
+		_sector->logicalTrack = _sector->physicalCylinder;
 
 		sync_char = br.read_8();	/* Sync char: 0xFB */
 		if (_sectorType == SECTOR_TYPE_MFM) {
@@ -177,7 +177,7 @@ public:
 		_sector->status = (wantChecksum == gotChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
 	}
 
-	std::set<unsigned> requiredSectors(Track& track) const
+	std::set<unsigned> requiredSectors(unsigned cylinder, unsigned head) const override
 	{
 		static std::set<unsigned> sectors = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 		return sectors;

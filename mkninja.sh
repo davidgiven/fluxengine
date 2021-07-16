@@ -239,12 +239,15 @@ runtest() {
 
     buildlibrary lib$prog.a \
         -Idep/snowhouse/include \
+        -d $OBJDIR/proto/libconfig.def \
+        -d $OBJDIR/proto/libdata.def \
         "$@"
 
     buildprogram $OBJDIR/$prog \
         lib$prog.a \
         libbackend.a \
-        libproto.a \
+        libconfig.a \
+        libdata.a \
         libtestproto.a \
         libagg.a \
         libfmt.a
@@ -261,7 +264,7 @@ buildlibrary libfmt.a \
     dep/fmt/format.cc \
     dep/fmt/posix.cc \
 
-buildproto libproto.a \
+buildproto libconfig.a \
     arch/aeslanier/aeslanier.proto \
     arch/amiga/amiga.proto \
     arch/apple2/apple2.proto \
@@ -287,9 +290,13 @@ buildproto libproto.a \
     lib/imagewriter/imagewriter.proto \
     lib/usb/usb.proto \
 
+buildproto libdata.a \
+    lib/data.proto
+
 buildlibrary libbackend.a \
     -I$OBJDIR/proto \
-    -d $OBJDIR/proto/libproto.def \
+    -d $OBJDIR/proto/libconfig.def \
+    -d $OBJDIR/proto/libdata.def \
     arch/aeslanier/decoder.cc \
     arch/amiga/amiga.cc \
     arch/amiga/decoder.cc \
@@ -340,6 +347,7 @@ buildlibrary libbackend.a \
     lib/fluxsource/testpatternfluxsource.cc \
     lib/globals.cc \
     lib/hexdump.cc \
+    lib/image.cc \
     lib/imagereader/d64imagereader.cc \
     lib/imagereader/diskcopyimagereader.cc \
     lib/imagereader/imagereader.cc \
@@ -357,7 +365,6 @@ buildlibrary libbackend.a \
     lib/proto.cc \
     lib/reader.cc \
     lib/sector.cc \
-    lib/sectorset.cc \
     lib/sql.cc \
     lib/usb/fluxengineusb.cc \
     lib/usb/greaseweazle.cc \
@@ -420,12 +427,12 @@ WRITABLES="\
     "
 
 for pb in $READABLES; do
-    buildencodedproto $OBJDIR/proto/libproto.def ConfigProto \
+    buildencodedproto $OBJDIR/proto/libconfig.def ConfigProto \
         readables_${pb}_pb src/readables/$pb.textpb $OBJDIR/proto/src/readables/$pb.cc
 done
 
 for pb in $WRITABLES; do
-    buildencodedproto $OBJDIR/proto/libproto.def ConfigProto \
+    buildencodedproto $OBJDIR/proto/libconfig.def ConfigProto \
         writables_${pb}_pb src/writables/$pb.textpb $OBJDIR/proto/src/writables/$pb.cc
 done
 
@@ -434,7 +441,8 @@ buildmktable writables $OBJDIR/writables.cc $WRITABLES
 
 buildlibrary libfrontend.a \
     -I$OBJDIR/proto \
-    -d $OBJDIR/proto/libproto.def \
+    -d $OBJDIR/proto/libconfig.def \
+    -d $OBJDIR/proto/libdata.def \
     $(for a in $READABLES; do echo $OBJDIR/proto/src/readables/$a.cc; done) \
     $(for a in $WRITABLES; do echo $OBJDIR/proto/src/writables/$a.cc; done) \
     $OBJDIR/readables.cc \
@@ -456,7 +464,8 @@ buildlibrary libfrontend.a \
 buildprogram fluxengine \
     libfrontend.a \
     libbackend.a \
-    libproto.a \
+    libconfig.a \
+    libdata.a \
     libfmt.a \
     libagg.a \
 
@@ -494,8 +503,12 @@ runtest fmmfm-test          tests/fmmfm.cc
 runtest greaseweazle-test   tests/greaseweazle.cc
 runtest kryoflux-test       tests/kryoflux.cc
 runtest ldbs-test           tests/ldbs.cc
-runtest proto-test          -I$OBJDIR/proto -d $OBJDIR/proto/libproto.def -d $OBJDIR/proto/libtestproto.def \
-                                tests/proto.cc $OBJDIR/proto/tests/testproto.cc
+runtest proto-test          -I$OBJDIR/proto \
+                            -d $OBJDIR/proto/libconfig.def \
+                            -d $OBJDIR/proto/libdata.def \
+                            -d $OBJDIR/proto/libtestproto.def \
+                            tests/proto.cc \
+                            $OBJDIR/proto/tests/testproto.cc
 
 # vim: sw=4 ts=4 et
 

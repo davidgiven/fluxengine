@@ -2,13 +2,13 @@
 #include "fluxmap.h"
 #include "decoders/fluxmapreader.h"
 #include "protocol.h"
-#include "record.h"
 #include "decoders/decoders.h"
 #include "sector.h"
 #include "amiga.h"
 #include "bytes.h"
 #include "fmt/format.h"
 #include "lib/decoders/decoders.pb.h"
+#include "lib/data.pb.h"
 #include <string.h>
 #include <algorithm>
 
@@ -63,12 +63,13 @@ public:
 		uint32_t wanteddatachecksum = amigaDeinterleave(ptr, 4).reader().read_be32();
 		uint32_t gotdatachecksum = amigaChecksum(rawbytes.slice(62, 1024));
 
-		_sector->data.clear();
-		_sector->data.writer().append(amigaDeinterleave(ptr, 512)).append(recoveryinfo);
+		Bytes data;
+		data.writer().append(amigaDeinterleave(ptr, 512)).append(recoveryinfo);
+		_sector->data = data;
 		_sector->status = (gotdatachecksum == wanteddatachecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
 	}
 
-	std::set<unsigned> requiredSectors(Track& track) const
+	std::set<unsigned> requiredSectors(unsigned cylinder, unsigned head) const override
 	{
 		static std::set<unsigned> sectors = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 		return sectors;

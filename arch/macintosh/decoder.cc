@@ -2,10 +2,8 @@
 #include "fluxmap.h"
 #include "decoders/fluxmapreader.h"
 #include "protocol.h"
-#include "record.h"
 #include "decoders/decoders.h"
 #include "sector.h"
-#include "track.h"
 #include "macintosh.h"
 #include "bytes.h"
 #include "fmt/format.h"
@@ -152,7 +150,7 @@ public:
 		auto header = toBytes(readRawBits(7*8)).slice(0, 7);
 					
 		uint8_t encodedTrack = decode_data_gcr(header[0]);
-		if (encodedTrack != (_track->physicalTrack & 0x3f))
+		if (encodedTrack != (_sector->physicalCylinder & 0x3f))
 			return;
 					
 		uint8_t encodedSector = decode_data_gcr(header[1]);
@@ -163,7 +161,7 @@ public:
 		if (encodedSector > 11)
 			return;
 
-		_sector->logicalTrack = _track->physicalTrack;
+		_sector->logicalTrack = _sector->physicalCylinder;
 		_sector->logicalSide = decode_side(encodedSide);
 		_sector->logicalSector = encodedSector;
 		uint8_t gotsum = (encodedTrack ^ encodedSector ^ encodedSide ^ formatByte) & 0x3f;
@@ -192,16 +190,16 @@ public:
 		_sector->data.writer().append(userData.slice(12, 512)).append(userData.slice(0, 12));
 	}
 
-	std::set<unsigned> requiredSectors(Track& track) const
+	std::set<unsigned> requiredSectors(unsigned cylinder, unsigned head) const
 	{
 		int count;
-		if (track.physicalTrack < 16)
+		if (cylinder < 16)
 			count = 12;
-		else if (track.physicalTrack < 32)
+		else if (cylinder < 32)
 			count = 11;
-		else if (track.physicalTrack < 48)
+		else if (cylinder < 48)
 			count = 10;
-		else if (track.physicalTrack < 64)
+		else if (cylinder < 64)
 			count = 9;
 		else
 			count = 8;

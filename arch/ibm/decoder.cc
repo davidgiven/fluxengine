@@ -5,7 +5,6 @@
 #include "fluxmap.h"
 #include "decoders/fluxmapreader.h"
 #include "sector.h"
-#include "record.h"
 #include "arch/ibm/ibm.pb.h"
 #include "proto.h"
 #include <string.h>
@@ -149,7 +148,7 @@ public:
 			_sector->status = Sector::DATA_MISSING; /* correct but unintuitive */
 
 		if (_config.ignore_side_byte())
-			_sector->logicalSide = _sector->physicalSide;
+			_sector->logicalSide = _sector->physicalHead;
 	}
 
     void decodeDataRecord()
@@ -168,7 +167,7 @@ public:
 		_sector->status = (wantCrc == gotCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
 	}
 
-	std::set<unsigned> requiredSectors(Track& track) const
+	std::set<unsigned> requiredSectors(unsigned cylinder, unsigned head) const override
 	{
 		return iterate(_config.required_sectors());
 	}

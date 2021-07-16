@@ -1,8 +1,8 @@
 #include "globals.h"
 #include "flags.h"
 #include "sector.h"
-#include "sectorset.h"
 #include "imagereader/imagereader.h"
+#include "image.h"
 #include "lib/config.pb.h"
 #include "fmt/format.h"
 #include <algorithm>
@@ -47,6 +47,7 @@ static unsigned getModulationandSpeed(uint8_t flags, bool *mfm)
 
 			default:
 				Error() << fmt::format("don't understand IMD disks with this modulation and speed {}", flags);
+				throw 0;
 		}
 }
 
@@ -88,7 +89,7 @@ public:
 		ImageReader(config)
 	{}
 
-	SectorSet readImage()
+	Image readImage()
 	/*
 	IMAGE FILE FORMAT
 	The overall layout of an ImageDisk .IMD image file is:
@@ -120,7 +121,7 @@ public:
 		Bytes data;
 		data.writer() += inputFile;
 		ByteReader br(data);
-		SectorSet sectors;
+		Image image;
 		TrackHeader header = {0, 0, 0, 0, 0};
 
 		unsigned n = 0;
@@ -191,8 +192,7 @@ public:
 			for (int s = 0; s < header.numSectors; s++)
 			{
 				Bytes sectordata;
-				std::unique_ptr<Sector>& sector = sectors.get(header.track, header.Head, sector_map[s]);
-				sector.reset(new Sector);
+				Sector* sector = image.put(header.track, header.Head, sector_map[s]);
 				//read the status of the sector
 				unsigned int Status_Sector = br.read_8();
 				headerPtr++;
@@ -251,13 +251,20 @@ public:
 						Error() << fmt::format("don't understand IMD disks with sector status {}", Status_Sector);
 				}		
 				sector->status = Sector::OK;
-				sector->logicalTrack = sector->physicalTrack = header.track;
-				sector->logicalSide = sector->physicalSide = header.Head;
+				sector->logicalTrack = sector->physicalCylinder = header.track;
+				sector->logicalSide = sector->physicalHead = header.Head;
 				sector->logicalSector = (sector_map[s]);
 			}
 
   		}
 		//Write format detected in IMD image to screen to help user set the right write parameters
+
+		image.setGeometry({
+			.numTracks = header.track,
+			.numSides = header.Head + 1U,
+			.numSectors = header.numSectors,
+			.sectorSize = sectorSize
+		});
 
 		size_t headSize = header.numSectors * sectorSize;
         size_t trackSize = headSize * (header.Head + 1);
@@ -268,7 +275,7 @@ public:
 					mfm ? "MFM" : "FM",
 					Modulation_Speed, header.numSectors, sectorSize, sector_skew, (header.track+1) * trackSize / 1024);
 
-        return sectors;
+        return image;
  	}
 };
 

@@ -5,8 +5,6 @@
 #include "decoders/decoders.h"
 #include "macintosh/macintosh.h"
 #include "sector.h"
-#include "sectorset.h"
-#include "record.h"
 #include "proto.h"
 #include "fluxsource/fluxsource.h"
 #include "fluxsink/fluxsink.h"

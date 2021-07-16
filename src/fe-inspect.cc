@@ -7,9 +7,7 @@
 #include "fluxsource/fluxsource.h"
 #include "protocol.h"
 #include "decoders/rawbits.h"
-#include "record.h"
 #include "sector.h"
-#include "track.h"
 #include "proto.h"
 #include "fmt/format.h"
 

@@ -1,8 +1,8 @@
 #include "globals.h"
 #include "flags.h"
 #include "sector.h"
-#include "sectorset.h"
 #include "imagewriter/imagewriter.h"
+#include "image.h"
 #include "lib/config.pb.h"
 #include "fmt/format.h"
 #include <algorithm>
@@ -16,16 +16,12 @@ public:
 		ImageWriter(config)
 	{}
 
-	void writeImage(const SectorSet& sectors)
+	void writeImage(const Image& image)
 	{
-		unsigned autoTracks;
-		unsigned autoSides;
-		unsigned autoSectors;
-		unsigned autoBytes;
-		sectors.calculateSize(autoTracks, autoSides, autoSectors, autoBytes);
+		const Geometry geometry = image.getGeometry();
 
-		int tracks = _config.img().has_tracks() ? _config.img().tracks() : autoTracks;
-		int sides = _config.img().has_sides() ? _config.img().sides() : autoSides;
+		int tracks = _config.img().has_tracks() ? _config.img().tracks() : geometry.numTracks;
+		int sides = _config.img().has_sides() ? _config.img().sides() : geometry.numSides;
 
 		std::ofstream outputFile(_config.filename(), std::ios::out | std::ios::binary);
 		if (!outputFile.is_open())
@@ -38,12 +34,12 @@ public:
 				ImgInputOutputProto::TrackdataProto trackdata;
 				getTrackFormat(trackdata, track, side);
 
-				int numSectors = trackdata.has_sectors() ? trackdata.sectors() : autoSectors;
-				int sectorSize = trackdata.has_sector_size() ? trackdata.sector_size() : autoBytes;
+				int numSectors = trackdata.has_sectors() ? trackdata.sectors() : geometry.numSectors;
+				int sectorSize = trackdata.has_sector_size() ? trackdata.sector_size() : geometry.sectorSize;
 
 				for (int sectorId = 0; sectorId < numSectors; sectorId++)
 				{
-					const auto& sector = sectors.get(track, side, sectorId);
+					const auto* sector = image.get(track, side, sectorId);
 					if (sector)
 						sector->data.slice(0, sectorSize).writeTo(outputFile);
 					else

@@ -8,32 +8,31 @@
 #include "sql.h"
 #include "decoders/decoders.h"
 #include "sector.h"
-#include "sectorset.h"
-#include "record.h"
 #include "bytes.h"
 #include "decoders/rawbits.h"
-#include "track.h"
+#include "flux.h"
+#include "image.h"
 #include "imagewriter/imagewriter.h"
 #include "fmt/format.h"
 #include "proto.h"
 #include "lib/decoders/decoders.pb.h"
+#include "lib/data.pb.h"
 #include <iostream>
 #include <fstream>
 
 static std::unique_ptr<FluxSink> outputFluxSink;
 
-void Track::readFluxmap()
+static std::shared_ptr<Fluxmap> readFluxmap(FluxSource& fluxsource, unsigned cylinder, unsigned head)
 {
-	std::cout << fmt::format("{0:>3}.{1}: ", physicalTrack, physicalSide) << std::flush;
-	fluxmap = fluxsource->readFlux(physicalTrack, physicalSide);
-	if (!fluxmap)
-		fluxmap.reset(new Fluxmap());
+	std::cout << fmt::format("{0:>3}.{1}: ", cylinder, head) << std::flush;
+	std::shared_ptr<Fluxmap> fluxmap = fluxsource.readFlux(cylinder, head);
 	std::cout << fmt::format(
 		"{0} ms in {1} bytes\n",
             fluxmap->duration()/1e6,
             fluxmap->bytes());
 	if (outputFluxSink)
-		outputFluxSink->writeFlux(physicalTrack, physicalSide, *fluxmap);
+		outputFluxSink->writeFlux(cylinder, head, *fluxmap);
+	return fluxmap;
 }
 
 static bool conflictable(Sector::Status status)
@@ -41,25 +40,33 @@ static bool conflictable(Sector::Status status)
 	return (status == Sector::OK) || (status == Sector::CONFLICT);
 }
 
-static void replace_sector(std::unique_ptr<Sector>& replacing, Sector& replacement)
+static std::set<std::shared_ptr<Sector>> collect_sectors(std::set<std::shared_ptr<Sector>>& track_sectors)
 {
-	if (replacing && conflictable(replacing->status) && conflictable(replacement.status))
+	typedef std::tuple<unsigned, unsigned, unsigned> key_t;
+	std::map<key_t, std::shared_ptr<Sector>> sectors;
+
+	for (auto& replacement : track_sectors)
 	{
-		if (replacement.data != replacing->data)
+		key_t sectorid = {replacement->logicalTrack, replacement->logicalSide, replacement->logicalSector};
+		auto replacing = sectors[sectorid];
+		if (replacing && conflictable(replacing->status) && conflictable(replacement->status))
 		{
-			std::cout << std::endl
-						<< "       multiple conflicting copies of sector " << replacing->logicalSector
-						<< " seen; ";
-			replacing->status = Sector::CONFLICT;
-			return;
+			if (replacement->data != replacing->data)
+			{
+				std::cout << fmt::format(
+						"\n       multiple conflicting copies of sector {} seen; ",
+						std::get<0>(sectorid), std::get<1>(sectorid), std::get<2>(sectorid));
+				replacing->status = replacement->status = Sector::CONFLICT;
+			}
 		}
+		if (!replacing || ((replacing->status != Sector::OK) && (replacement->status == Sector::OK)))
+			sectors[sectorid] = replacement;
 	}
-	if (!replacing || ((replacing->status != Sector::OK) && (replacement.status == Sector::OK)))
-	{
-		if (!replacing)
-			replacing.reset(new Sector);
-		*replacing = replacement;
-	}
+
+	std::set<std::shared_ptr<Sector>> sector_set;
+	for (auto& i : sectors)
+		sector_set.insert(i.second);
+	return sector_set;
 }
 
 void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWriter& writer)
@@ -67,68 +74,71 @@ void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWrit
 	if (config.decoder().has_copy_flux_to())
 		outputFluxSink = FluxSink::create(config.decoder().copy_flux_to());
 
+	auto diskflux = std::make_unique<DiskFlux>();
 	bool failures = false;
-	SectorSet allSectors;
 	for (int cylinder : iterate(config.cylinders()))
 	{
 		for (int head : iterate(config.heads()))
 		{
-			auto track = std::make_unique<Track>(cylinder, head);
-			track->fluxsource = &fluxsource;
+			auto track = std::make_unique<TrackFlux>();
+			std::set<std::shared_ptr<Sector>> track_sectors;
+			std::set<std::shared_ptr<Record>> track_records;
 
-			std::map<int, std::unique_ptr<Sector>> readSectors;
 			for (int retry = config.decoder().retries(); retry >= 0; retry--)
 			{
-				track->readFluxmap();
-				decoder.decodeToSectors(*track);
+				auto fluxmap = readFluxmap(fluxsource, cylinder, head);
+				{
+					auto trackdata = decoder.decodeToSectors(fluxmap, cylinder, head);
 
-				std::cout << "       ";
-					std::cout << fmt::format("{} records, {} sectors; ",
-						track->rawrecords.size(),
-						track->sectors.size());
-					if (track->sectors.size() > 0)
+					std::cout << "       ";
+						std::cout << fmt::format("{} records, {} sectors; ",
+							trackdata->records.size(),
+							trackdata->sectors.size());
+					if (trackdata->sectors.size() > 0)
+					{
+						nanoseconds_t clock = (*trackdata->sectors.begin())->clock;
 						std::cout << fmt::format("{:.2f}us clock ({:.0f}kHz); ",
-							track->sectors.begin()->clock / 1000.0,
-							1000000.0 / track->sectors.begin()->clock);
-
-					for (auto& sector : track->sectors)
-					{
-						auto& replacing = readSectors[sector.logicalSector];
-						replace_sector(replacing, sector);
+							clock / 1000.0, 1000000.0 / clock);
 					}
 
-					bool hasBadSectors = false;
-					std::set<unsigned> requiredSectors = decoder.requiredSectors(*track);
-					for (const auto& i : readSectors)
-					{
-						const auto& sector = i.second;
-						requiredSectors.erase(sector->logicalSector);
+					track_sectors.insert(trackdata->sectors.begin(), trackdata->sectors.end());
+					track_records.insert(trackdata->records.begin(), trackdata->records.end());
+					track->trackDatas.push_back(std::move(trackdata));
+				}
+				auto collected_sectors = collect_sectors(track_sectors);
+				std::cout << fmt::format("{} distinct sectors; ", collected_sectors.size());
 
-						if (sector->status != Sector::OK)
-						{
-							std::cout << std::endl
-									<< "       Failed to read sector " << sector->logicalSector
-									<< " (" << Sector::statusToString((Sector::Status)sector->status) << "); ";
-							hasBadSectors = true;
-						}
-					}
-					for (unsigned logicalSector : requiredSectors)
+				bool hasBadSectors = false;
+				std::set<unsigned> required_sectors = decoder.requiredSectors(cylinder, head);
+				for (const auto& sector : collected_sectors)
+				{
+					required_sectors.erase(sector->logicalSector);
+
+					if (sector->status != Sector::OK)
 					{
-						std::cout << "\n"
-								  << "       Required sector " << logicalSector << " missing; ";
+						std::cout << std::endl
+								<< "       Failed to read sector " << sector->logicalSector
+								<< " (" << Sector::statusToString(sector->status) << "); ";
 						hasBadSectors = true;
 					}
+				}
+				for (unsigned logical_sector : required_sectors)
+				{
+					std::cout << "\n"
+							  << "       Required sector " << logical_sector << " missing; ";
+					hasBadSectors = true;
+				}
 
-					if (hasBadSectors)
-						failures = false;
+				if (hasBadSectors)
+					failures = false;
 
-					std::cout << std::endl
-							<< "       ";
+				std::cout << std::endl
+						<< "       ";
 
-					if (!hasBadSectors)
-						break;
+				if (!hasBadSectors)
+					break;
 
-				if (!track->fluxsource->retryable())
+				if (!fluxsource.retryable())
 					break;
 				if (retry == 0)
 					std::cout << "giving up" << std::endl
@@ -140,11 +150,12 @@ void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWrit
 			if (config.decoder().dump_records())
 			{
 				std::cout << "\nRaw (undecoded) records follow:\n\n";
-				for (auto& record : track->rawrecords)
+				for (const auto& record : track_records)
 				{
 					std::cout << fmt::format("I+{:.2f}us with {:.2f}us clock\n",
-								record.position.ns() / 1000.0, record.clock / 1000.0);
-					hexdump(std::cout, record.data);
+								record->startTime / 1000.0,
+								record->clock / 1000.0);
+					hexdump(std::cout, record->rawData);
 					std::cout << std::endl;
 				}
 			}
@@ -152,44 +163,52 @@ void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWrit
 			if (config.decoder().dump_sectors())
 			{
 				std::cout << "\nDecoded sectors follow:\n\n";
-				for (auto& sector : track->sectors)
+				for (const auto& sector : track_sectors)
 				{
 					std::cout << fmt::format("{}.{:02}.{:02}: I+{:.2f}us with {:.2f}us clock: status {}\n",
-								sector.logicalTrack, sector.logicalSide, sector.logicalSector,
-								sector.position.ns() / 1000.0, sector.clock / 1000.0,
-								sector.status);
-					hexdump(std::cout, sector.data);
+								sector->logicalTrack,
+								sector->logicalSide,
+								sector->logicalSector,
+								sector->headerStartTime / 1000.0,
+								sector->clock / 1000.0,
+								Sector::statusToString(sector->status));
+					hexdump(std::cout, sector->data);
 					std::cout << std::endl;
 				}
 			}
 
 			int size = 0;
-			bool printedTrack = false;
-			for (auto& i : readSectors)
+			std::set<std::pair<int, int>> track_ids;
+			for (const auto& sector : track_sectors)
 			{
-				auto& sector = i.second;
-				if (sector)
-				{
-					if (!printedTrack)
-					{
-						std::cout << fmt::format("logical track {}.{}; ", sector->logicalTrack, sector->logicalSide);
-						printedTrack = true;
-					}
-
-					size += sector->data.size();
-
-					std::unique_ptr<Sector>& replacing = allSectors.get(sector->logicalTrack, sector->logicalSide, sector->logicalSector);
-					replace_sector(replacing, *sector);
-				}
+				track_ids.insert(std::make_pair(sector->logicalTrack, sector->logicalSide));
+				size += sector->data.size();
 			}
+
+			if (!track_ids.empty())
+			{
+				std::cout << "logical track ";
+				for (const auto& i : track_ids)
+					std::cout << fmt::format("{}.{}; ", i.first, i.second);
+			}
+
 			std::cout << size << " bytes decoded." << std::endl;
+			track->sectors = collect_sectors(track_sectors);
+			diskflux->tracks.push_back(std::move(track));
 		}
     }
 
-	writer.printMap(allSectors);
+	std::set<std::shared_ptr<Sector>> all_sectors;
+	for (auto& track : diskflux->tracks)
+		for (auto& sector : track->sectors)
+			all_sectors.insert(sector);
+	all_sectors = collect_sectors(all_sectors);
+	diskflux->image.reset(new Image(all_sectors));
+
+	writer.printMap(*diskflux->image);
 	if (config.decoder().has_write_csv_to())
-		writer.writeCsv(allSectors, config.decoder().write_csv_to());
-	writer.writeImage(allSectors);
+		writer.writeCsv(*diskflux->image, config.decoder().write_csv_to());
+	writer.writeImage(*diskflux->image);
 
 	if (failures)
 		std::cerr << "Warning: some sectors could not be decoded." << std::endl;
@@ -201,11 +220,8 @@ void rawReadDiskCommand(FluxSource& fluxsource, FluxSink& fluxsink)
 	{
 		for (int head : iterate(config.heads()))
 		{
-			Track track(cylinder, head);
-			track.fluxsource = &fluxsource;
-			track.readFluxmap();
-
-			fluxsink.writeFlux(cylinder, head, *(track.fluxmap));
+			auto fluxmap = readFluxmap(fluxsource, cylinder, head);
+			fluxsink.writeFlux(cylinder, head, *fluxmap);
 		}
     }
 }

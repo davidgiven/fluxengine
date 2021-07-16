@@ -1,10 +1,10 @@
 #include "globals.h"
 #include "flags.h"
 #include "sector.h"
-#include "sectorset.h"
 #include "imagewriter/imagewriter.h"
 #include "fmt/format.h"
 #include "ldbs.h"
+#include "image.h"
 #include "lib/config.pb.h"
 #include <algorithm>
 #include <iostream>
@@ -31,17 +31,13 @@ public:
 		ImageWriter(config)
 	{}
 
-	void writeImage(const SectorSet& sectors)
+	void writeImage(const Image& image)
 	{
-		unsigned numCylinders;
-		unsigned numHeads;
-		unsigned numSectors;
-		unsigned numBytes;
-		sectors.calculateSize(numCylinders, numHeads, numSectors, numBytes);
+		const Geometry& geometry = image.getGeometry();
 
 		bool mfm = false;
 
-		switch (numBytes)
+		switch (geometry.sectorSize)
 		{
 			case 524:
 				/* GCR disk */
@@ -57,14 +53,14 @@ public:
 		}
 
 		std::cout << "writing DiskCopy 4.2 image\n"
-		          << fmt::format("{} tracks, {} heads, {} sectors, {} bytes per sector; {}\n",
-				  		numCylinders, numHeads, numSectors, numBytes,
+		          << fmt::format("{} tracks, {} sides, {} sectors, {} bytes per sector; {}\n",
+				  		geometry.numTracks, geometry.numSides, geometry.numSectors, geometry.sectorSize,
 						mfm ? "MFM" : "GCR");
 
 		auto sectors_per_track = [&](int track) -> int
 		{
 			if (mfm)
-				return numSectors;
+				return geometry.numSectors;
 
 			if (track < 16)
 				return 12;
@@ -77,8 +73,8 @@ public:
 			return 8;
 		};
 
-		Bytes image;
-		ByteWriter bw(image);
+		Bytes data;
+		ByteWriter bw(data);
 
 		/* Write the actual sectr data. */
 
@@ -86,14 +82,14 @@ public:
 		uint32_t tagChecksum = 0;
 		uint32_t offset = 0x54;
 		uint32_t sectorDataStart = offset;
-		for (int track = 0; track < numCylinders; track++)
+		for (int track = 0; track < geometry.numTracks; track++)
 		{
-			for (int head = 0; head < numHeads; head++)
+			for (int side = 0; side < geometry.numSides; side++)
 			{
 				int sectorCount = sectors_per_track(track);
 				for (int sectorId = 0; sectorId < sectorCount; sectorId++)
 				{
-					const auto& sector = sectors.get(track, head, sectorId);
+					const auto* sector = image.get(track, side, sectorId);
 					if (sector)
 					{
 						bw.seek(offset);
@@ -106,14 +102,14 @@ public:
 		uint32_t sectorDataEnd = offset;
 		if (!mfm)
 		{
-			for (int track = 0; track < numCylinders; track++)
+			for (int track = 0; track < geometry.numTracks; track++)
 			{
-				for (int head = 0; head < numHeads; head++)
+				for (int side = 0; side < geometry.numSides; side++)
 				{
 					int sectorCount = sectors_per_track(track);
 					for (int sectorId = 0; sectorId < sectorCount; sectorId++)
 					{
-						const auto& sector = sectors.get(track, head, sectorId);
+						const auto& sector = image.get(track, side, sectorId);
 						if (sector)
 						{
 							bw.seek(offset);
@@ -133,14 +129,14 @@ public:
 		if (mfm)
 		{
 			format = 0x22;
-			if (numSectors == 18)
+			if (geometry.numSectors == 18)
 				encoding = 3;
 			else
 				encoding = 2;
 		}
 		else
 		{
-			if (numHeads == 2)
+			if (geometry.numSides == 2)
 			{
 				encoding = 1;
 				format = 0x22;
@@ -164,7 +160,7 @@ public:
 		bw.write_8(format); /* format byte */
 		bw.write_be16(0x0100); /* magic number */
 
-		image.writeToFile(_config.filename());
+		data.writeToFile(_config.filename());
     }
 };
 

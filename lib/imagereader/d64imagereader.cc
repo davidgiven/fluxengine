@@ -1,9 +1,9 @@
 #include "globals.h"
 #include "flags.h"
 #include "sector.h"
-#include "sectorset.h"
 #include "imagereader/imagereader.h"
 #include "fmt/format.h"
+#include "image.h"
 #include "proto.h"
 #include <algorithm>
 #include <iostream>
@@ -16,7 +16,7 @@ public:
 		ImageReader(config)
 	{}
 
-	SectorSet readImage()
+	Image readImage()
 	{
         std::ifstream inputFile(_config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
@@ -53,43 +53,43 @@ public:
             return 17;
 		};
 
-        SectorSet sectors;
+        Image image;
         for (int track = 0; track < 40; track++)
         {
 			int numSectors = sectorsPerTrack(track);
-			int physicalTrack = track*2;
+			int physicalCylinder = track*2;
             for (int head = 0; head < numHeads; head++)
             {
                 for (int sectorId = 0; sectorId < numSectors; sectorId++)
                 {
-                   if ((offset < inputFileSize))
-                   {    //still data available sector OK
-                        br.seek(offset);
+					Sector* sector = image.put(track, head, sectorId);
+                    if ((offset < inputFileSize))
+                    {    //still data available sector OK
+						br.seek(offset);
                         Bytes payload = br.read(256);
                         offset += 256;
 
-                        std::unique_ptr<Sector>& sector = sectors.get(physicalTrack, head, sectorId);
-                        sector.reset(new Sector);
                         sector->status = Sector::OK;
                         sector->logicalTrack = track;
-						sector->physicalTrack = physicalTrack;
-                        sector->logicalSide = sector->physicalSide = head;
+						sector->physicalCylinder = physicalCylinder;
+                        sector->logicalSide = sector->physicalHead = head;
                         sector->logicalSector = sectorId;
                         sector->data.writer().append(payload);
-                    } else
+                    }
+					else
                     {   //no more data in input file. Write sectors with status: DATA_MISSING
-                        std::unique_ptr<Sector>& sector = sectors.get(physicalTrack, head, sectorId);
-                        sector.reset(new Sector);
                         sector->status = Sector::DATA_MISSING;
                         sector->logicalTrack = track;
-						sector->physicalTrack = physicalTrack;
-                        sector->logicalSide = sector->physicalSide = head;
+						sector->physicalCylinder = physicalCylinder;
+                        sector->logicalSide = sector->physicalHead = head;
                         sector->logicalSector = sectorId;
                     }
                 }
             }
         }
-        return sectors;
+
+		image.calculateSize();
+        return image;
 	}
 };
 

@@ -10,9 +10,8 @@
 #include "fluxsink/fluxsink.h"
 #include "imagereader/imagereader.h"
 #include "fmt/format.h"
-#include "record.h"
 #include "sector.h"
-#include "sectorset.h"
+#include "image.h"
 #include "lib/config.pb.h"
 #include "proto.h"
 
@@ -67,11 +66,11 @@ void fillBitmapTo(std::vector<bool>& bitmap,
 
 void writeDiskCommand(ImageReader& imageReader, AbstractEncoder& encoder, FluxSink& fluxSink)
 {
-	SectorSet allSectors = imageReader.readImage();
+	Image image = imageReader.readImage();
 	writeTracks(fluxSink,
-		[&](int track, int side) -> std::unique_ptr<Fluxmap>
+		[&](int physicalTrack, int physicalSide) -> std::unique_ptr<Fluxmap>
 		{
-			return encoder.encode(track, side, allSectors);
+			return encoder.encode(physicalTrack, physicalSide, image);
 		}
 	);
 }

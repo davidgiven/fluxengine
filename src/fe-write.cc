@@ -5,8 +5,6 @@
 #include "decoders/decoders.h"
 #include "encoders/encoders.h"
 #include "sector.h"
-#include "sectorset.h"
-#include "record.h"
 #include "proto.h"
 #include "fluxsink/fluxsink.h"
 #include "arch/brother/brother.h"

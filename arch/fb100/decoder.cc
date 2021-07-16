@@ -2,14 +2,12 @@
 #include "fluxmap.h"
 #include "decoders/fluxmapreader.h"
 #include "protocol.h"
-#include "record.h"
 #include "decoders/decoders.h"
 #include "sector.h"
 #include "fb100.h"
 #include "crc.h"
 #include "bytes.h"
 #include "decoders/rawbits.h"
-#include "track.h"
 #include "fmt/format.h"
 #include <string.h>
 #include <algorithm>

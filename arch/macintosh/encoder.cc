@@ -1,11 +1,10 @@
 #include "globals.h"
-#include "record.h"
 #include "decoders/decoders.h"
 #include "encoders/encoders.h"
 #include "macintosh.h"
 #include "crc.h"
-#include "sectorset.h"
 #include "writer.h"
+#include "image.h"
 #include "fmt/format.h"
 #include "lib/encoders/encoders.pb.h"
 #include "arch/macintosh/macintosh.pb.h"
@@ -175,9 +174,9 @@ static void write_sector(std::vector<bool>& bits, unsigned& cursor, const Sector
 		write_bits(bits, cursor, 0xff3fcff3fcffLL, 6*8); /* sync */
 	write_bits(bits, cursor, MAC_SECTOR_RECORD, 3*8);
 
-    uint8_t encodedTrack = sector->physicalTrack & 0x3f;
+    uint8_t encodedTrack = sector->physicalHead & 0x3f;
 	uint8_t encodedSector = sector->logicalSector;
-	uint8_t encodedSide = encode_side(sector->physicalTrack, sector->logicalSide);
+	uint8_t encodedSide = encode_side(sector->physicalCylinder, sector->logicalSide);
 	uint8_t formatByte = MAC_FORMAT_BYTE;
 	uint8_t headerChecksum = (encodedTrack ^ encodedSector ^ encodedSide ^ formatByte) & 0x3f;
 
@@ -209,7 +208,7 @@ public:
 	{}
 
 public:
-    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors)
+    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const Image& image)
 	{
 		if ((physicalTrack < 0) || (physicalTrack >= MAC_TRACKS_PER_DISK))
 			return std::unique_ptr<Fluxmap>();
@@ -225,7 +224,7 @@ public:
 		unsigned numSectors = sectorsForTrack(physicalTrack);
 		for (int sectorId=0; sectorId<numSectors; sectorId++)
 		{
-			const auto& sectorData = allSectors.get(physicalTrack, physicalSide, sectorId);
+			const auto* sectorData = image.get(physicalTrack, physicalSide, sectorId);
 			write_sector(bits, cursor, sectorData);
 		}
 
