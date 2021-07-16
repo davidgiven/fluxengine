@@ -1,6 +1,6 @@
-comment: 'Atari ST 820kB 3.5" 82-track 10-sector double sided'
+comment: 'Atari ST 820kB 3.5" 82-track 10-sector DSDD'
 
-image_writer {
+image_reader {
 	filename: "atarist820.st"
 	img {
 		tracks: 82
@@ -10,6 +10,11 @@ image_writer {
 			sector_size: 512
 		}
 	}
+}
+
+image_writer {
+	filename: "atarist820.st"
+	img {}
 }
 
 encoder {
@@ -25,6 +30,10 @@ encoder {
 			swap_sides: true
 		}
 	}
+}
+
+decoder {
+	ibm {}
 }
 
 cylinders {

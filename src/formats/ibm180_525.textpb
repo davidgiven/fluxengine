@@ -1,6 +1,6 @@
-comment: 'PC 180kB 5.25" 40-track 9-sector single-sided'
+comment: 'PC 180kB 5.25" 40-track 9-sector SSDD'
 
-image_writer {
+image_reader {
 	filename: "ibm180_525.img"
 	img {
 		tracks: 40
@@ -13,6 +13,11 @@ image_writer {
 	}
 }
 
+image_writer {
+	filename: "ibm180_525.img"
+	img {}
+}
+
 encoder {
 	ibm {
 		trackdata {
@@ -21,6 +26,10 @@ encoder {
 			sector_skew: "012345678"
 		}
 	}
+}
+
+decoder {
+	ibm {}
 }
 
 cylinders {

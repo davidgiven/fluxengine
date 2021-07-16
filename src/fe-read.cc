@@ -66,8 +66,8 @@ static StringFlag srcHeads(
 int mainRead(int argc, const char* argv[])
 {
 	if (argc == 1)
-		showProfiles("read", readables);
-    flags.parseFlagsWithConfigFiles(argc, argv, readables);
+		showProfiles("read", formats);
+    flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
 	if (config.decoder().copy_flux_to().has_drive())
 		Error() << "you cannot copy flux to a hardware device";

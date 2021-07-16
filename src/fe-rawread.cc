@@ -60,8 +60,8 @@ int mainRawRead(int argc, const char* argv[])
 	setRange(config.mutable_heads(), "0-1");
 
 	if (argc == 1)
-		showProfiles("rawread", readables);
-    flags.parseFlagsWithConfigFiles(argc, argv, readables);
+		showProfiles("rawread", formats);
+    flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
 	if (config.flux_sink().has_drive())
 		Error() << "you can't use rawread to write to hardware";

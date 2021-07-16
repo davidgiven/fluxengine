@@ -1,0 +1,21 @@
+comment: 'DVK MX 110kB/220kB/440kB 5.25" (ro)'
+
+image_writer {
+	filename: "mx.img"
+	img {}
+}
+
+decoder {
+	mx {}
+}
+
+cylinders {
+	start: 0
+	end: 79
+}
+
+heads {
+	start: 0
+	end: 1
+}
+

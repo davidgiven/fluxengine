@@ -1,0 +1,24 @@
+comment: 'Ampro 400kB/800kB 5.25" 40/80 track SSDD/DSDD (ro)'
+
+image_writer {
+	filename: "ampro.img"
+	img {}
+}
+
+decoder {
+	ibm {
+		sector_id_base: 17
+	}
+}
+
+cylinders {
+	start: 0
+	end: 79
+}
+
+heads {
+	start: 0
+	end: 0
+}
+
+

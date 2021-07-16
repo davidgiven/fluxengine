@@ -1,6 +1,6 @@
-comment: 'Texas Instruments DS990 1126kB 8" double-sided'
+comment: 'Texas Instruments DS990 1126kB 8" DSSD'
 
-image_writer {
+image_reader {
 	filename: "tids990.img"
 	img {
 		tracks: 77
@@ -12,7 +12,16 @@ image_writer {
 	}
 }
 
+image_writer {
+	filename: "tids990.img"
+	img {}
+}
+
 encoder {
+	tids990 {}
+}
+
+decoder {
 	tids990 {}
 }
 

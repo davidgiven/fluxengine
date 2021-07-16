@@ -64,8 +64,8 @@ int mainRawWrite(int argc, const char* argv[])
 	setRange(config.mutable_heads(), "0-1");
 
 	if (argc == 1)
-		showProfiles("rawwrite", writables);
-    flags.parseFlagsWithConfigFiles(argc, argv, writables);
+		showProfiles("rawwrite", formats);
+    flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
 	if (config.flux_source().has_drive())
 		Error() << "you can't use rawwrite to read from hardware";

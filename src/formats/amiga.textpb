@@ -1,4 +1,4 @@
-comment: 'Amiga 880kB 3.5" double sided'
+comment: 'Amiga 880kB 3.5" DSDD'
 
 image_reader {
 	filename: "amiga.adf"

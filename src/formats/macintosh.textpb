@@ -1,4 +1,9 @@
-comment: 'Macintosh 800kB 3.5" GCR double-sided'
+comment: 'Macintosh 800kB 3.5" DSDD GCR'
+
+image_reader {
+	filename: "macintosh.diskcopy"
+	diskcopy {}
+}
 
 image_writer {
 	filename: "macintosh.diskcopy"
@@ -6,6 +11,10 @@ image_writer {
 }
 
 encoder {
+	macintosh {}
+}
+
+decoder {
 	macintosh {}
 }
 

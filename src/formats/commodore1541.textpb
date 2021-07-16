@@ -1,4 +1,9 @@
-comment: 'Commodore 1541 170kB 5.25" GCR disks'
+comment: 'Commodore 1541 170kB 5.25" SS GCR'
+
+image_reader {
+	filename: "commodore1541.img"
+	d64 {}
+}
 
 image_writer {
 	filename: "commodore1541.img"
@@ -6,6 +11,10 @@ image_writer {
 }
 
 encoder {
+	c64 {}
+}
+
+decoder {
 	c64 {}
 }
 

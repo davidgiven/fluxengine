@@ -374,34 +374,13 @@ buildlibrary libbackend.a \
     lib/utils.cc \
     lib/writer.cc \
 
-READABLES="\
-    amiga \
-    "
-#    acornadfs \
-#    acorndfs \
-#    aeslanier \
-#    amiga \
-#    ampro \
-#    apple2 \
-#    atarist \
-#    brother \
-#    commodore1541 \
-#    commodore1581 \
-#    eco1 \
-#    f85 \
-#    fb100 \
-#    ibm \
-#    macintosh \
-#    micropolis \
-#    mx \
-#    northstar \
-#    tids990 \
-#    victor9k \
-#    zilogmcz \
-#    "
-
 FORMATS="\
+    acornadfs \
+    acorndfs \
+    aeslanier \
     amiga \
+    ampro \
+    apple2 \
     atarist360 \
     atarist370 \
     atarist400 \
@@ -414,7 +393,11 @@ FORMATS="\
     brother240 \
     commodore1541 \
     commodore1581 \
+    eco1 \
+    f85 \
+    fb100 \
     hplif770 \
+    ibm \
     ibm1200_525 \
     ibm1440 \
     ibm180_525 \
@@ -422,33 +405,29 @@ FORMATS="\
     ibm720 \
     ibm720_525 \
     macintosh \
+    micropolis \
+    mx \
     northstar87 \
     northstar175 \
     northstar350 \
     tids990 \
+    victor9k \
+    zilogmcz \
     "
-
-for pb in $READABLES; do
-    buildencodedproto $OBJDIR/proto/libconfig.def ConfigProto \
-        readables_${pb}_pb src/readables/$pb.textpb $OBJDIR/proto/src/readables/$pb.cc
-done
 
 for pb in $FORMATS; do
     buildencodedproto $OBJDIR/proto/libconfig.def ConfigProto \
         formats_${pb}_pb src/formats/$pb.textpb $OBJDIR/proto/src/formats/$pb.cc
 done
 
-buildmktable readables $OBJDIR/readables.cc $READABLES
-buildmktable writables $OBJDIR/writables.cc $WRITABLES
+buildmktable formats $OBJDIR/formats.cc $FORMATS
 
 buildlibrary libfrontend.a \
     -I$OBJDIR/proto \
     -d $OBJDIR/proto/libconfig.def \
     -d $OBJDIR/proto/libdata.def \
-    $(for a in $READABLES; do echo $OBJDIR/proto/src/readables/$a.cc; done) \
-    $(for a in $WRITABLES; do echo $OBJDIR/proto/src/writables/$a.cc; done) \
-    $OBJDIR/readables.cc \
-    $OBJDIR/writables.cc \
+    $(for a in $FORMATS; do echo $OBJDIR/proto/src/formats/$a.cc; done) \
+    $OBJDIR/formats.cc \
     src/fe-analysedriveresponse.cc \
     src/fe-analyselayout.cc \
     src/fe-inspect.cc \

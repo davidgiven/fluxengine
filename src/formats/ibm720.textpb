@@ -1,6 +1,6 @@
-comment: 'PC 720kB 3.5" 80-track 9-sector double-sided'
+comment: 'PC 720kB 3.5" 80-track 9-sector DSDD'
 
-image_writer {
+image_reader {
 	filename: "ibm720.img"
 	img {
 		tracks: 80
@@ -12,6 +12,11 @@ image_writer {
 	}
 }
 
+image_writer {
+	filename: "ibm720.img"
+	img {}
+}
+
 encoder {
 	ibm {
 		trackdata {
@@ -20,6 +25,10 @@ encoder {
 			sector_skew: "012345678"
 		}
 	}
+}
+
+decoder {
+	ibm {}
 }
 
 cylinders {

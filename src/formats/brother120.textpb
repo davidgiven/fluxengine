@@ -1,6 +1,6 @@
-comment: 'Brother 120kB 3.5" 39-track GCR disks'
+comment: 'Brother 120kB 3.5" 39-track SS GCR'
 
-image_writer {
+image_reader {
 	filename: "brother120.img"
 	img {
 		tracks: 39
@@ -12,10 +12,19 @@ image_writer {
 	}
 }
 
+image_writer {
+	filename: "brother120.img"
+	img {}
+}
+
 encoder {
 	brother {
 		format: BROTHER120
 	}
+}
+
+decoder {
+	brother {}
 }
 
 cylinders {

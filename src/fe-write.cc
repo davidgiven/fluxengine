@@ -56,8 +56,8 @@ static StringFlag destHeads(
 int mainWrite(int argc, const char* argv[])
 {
 	if (argc == 1)
-		showProfiles("write", writables);
-    flags.parseFlagsWithConfigFiles(argc, argv, writables);
+		showProfiles("write", formats);
+    flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
 	std::unique_ptr<ImageReader> reader(ImageReader::create(config.image_reader()));
 	std::unique_ptr<AbstractEncoder> encoder(AbstractEncoder::create(config.encoder()));

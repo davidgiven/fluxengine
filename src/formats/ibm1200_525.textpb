@@ -1,6 +1,6 @@
-comment: 'PC 1200kB 5.25" 80-track 15-sector double-sided'
+comment: 'PC 1200kB 5.25" 80-track 15-sector DSHD'
 
-image_writer {
+image_reader {
 	filename: "ibm1200_525.img"
 	img {
 		tracks: 80
@@ -12,6 +12,11 @@ image_writer {
 	}
 }
 
+image_writer {
+	filename: "ibm1200_525.img"
+	img {}
+}
+
 encoder {
 	ibm {
 		trackdata {
@@ -20,6 +25,10 @@ encoder {
 			sector_skew: "0123456789abcde"
 		}
 	}
+}
+
+decoder {
+	ibm {}
 }
 
 cylinders {

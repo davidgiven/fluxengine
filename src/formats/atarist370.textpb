@@ -1,6 +1,6 @@
-comment: 'Atari ST 370kB 3.5" 82-track 9-sector single sided'
+comment: 'Atari ST 370kB 3.5" 82-track 9-sector SSDD'
 
-image_writer {
+image_reader {
 	filename: "atarist370.st"
 	img {
 		tracks: 82
@@ -10,6 +10,11 @@ image_writer {
 			sector_size: 512
 		}
 	}
+}
+
+image_writer {
+	filename: "atarist370.st"
+	img {}
 }
 
 encoder {
@@ -25,6 +30,10 @@ encoder {
 			swap_sides: true
 		}
 	}
+}
+
+decoder {
+	ibm {}
 }
 
 cylinders {

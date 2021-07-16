@@ -1,6 +1,6 @@
-comment: 'PC 1440kB 3.5" 80-track 18-sector double-sided'
+comment: 'PC 1440kB 3.5" 80-track 18-sector DSHD'
 
-image_writer {
+image_reader {
 	filename: "ibm1440.img"
 	img {
 		tracks: 80
@@ -12,6 +12,11 @@ image_writer {
 	}
 }
 
+image_writer {
+	filename: "ibm1440.img"
+	img {}
+}
+
 encoder {
 	ibm {
 		trackdata {
@@ -20,6 +25,10 @@ encoder {
 			sector_skew: "0123456789abcdefgh"
 		}
 	}
+}
+
+decoder {
+	ibm {}
 }
 
 cylinders {
