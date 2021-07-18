@@ -79,7 +79,7 @@ public:
 				writeBytes(_config.gap3_bytes(), 0x55);
 			first = false;
 
-			const auto* sectorData = image.get(physicalTrack, physicalSide, sectorId);
+			const auto& sectorData = image.get(physicalTrack, physicalSide, sectorId);
 			if (!sectorData)
 				Error() << fmt::format("format tried to find sector {} which wasn't in the input file", sectorId);
 

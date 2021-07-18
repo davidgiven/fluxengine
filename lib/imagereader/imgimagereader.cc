@@ -40,7 +40,7 @@ public:
                     Bytes data(trackdata.sector_size());
                     inputFile.read((char*) data.begin(), data.size());
 
-					Sector* sector = image.put(physicalCylinder, side, sectorId);
+					const auto& sector = image.put(physicalCylinder, side, sectorId);
                     sector->status = Sector::OK;
                     sector->logicalTrack = track;
 					sector->physicalCylinder = physicalCylinder;

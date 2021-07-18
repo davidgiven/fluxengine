@@ -171,7 +171,7 @@ public:
 			double dataMs = headerMs + postHeaderSpacingMs;
 			unsigned dataCursor = dataMs*1e3 / clockRateUs;
 
-			const auto* sectorData = image.get(logicalTrack, 0, sectorId);
+			const auto& sectorData = image.get(logicalTrack, 0, sectorId);
 
 			fillBitmapTo(bits, cursor, headerCursor, { true, false });
 			write_sector_header(bits, cursor, logicalTrack, sectorId);

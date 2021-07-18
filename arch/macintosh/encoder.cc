@@ -164,7 +164,7 @@ static uint8_t encode_side(uint8_t track, uint8_t side)
 	return (side ? 0x20 : 0x00) | ((track>0x3f) ? 0x01 : 0x00);
 }
 
-static void write_sector(std::vector<bool>& bits, unsigned& cursor, const Sector* sector)
+static void write_sector(std::vector<bool>& bits, unsigned& cursor, const std::shared_ptr<Sector>& sector)
 {
 	if ((sector->data.size() != 512) && (sector->data.size() != 524))
 		Error() << "unsupported sector size --- you must pick 512 or 524";
@@ -224,7 +224,7 @@ public:
 		unsigned numSectors = sectorsForTrack(physicalTrack);
 		for (int sectorId=0; sectorId<numSectors; sectorId++)
 		{
-			const auto* sectorData = image.get(physicalTrack, physicalSide, sectorId);
+			const auto& sectorData = image.get(physicalTrack, physicalSide, sectorId);
 			write_sector(bits, cursor, sectorData);
 		}
 

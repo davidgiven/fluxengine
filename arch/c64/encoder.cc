@@ -220,7 +220,7 @@ public:
          * contains the BAM.
         */
 
-        const auto* sectorData = image.get(C64_BAM_TRACK*2, 0, 0); //Read de BAM to get the DISK ID bytes
+        const auto& sectorData = image.get(C64_BAM_TRACK*2, 0, 0); //Read de BAM to get the DISK ID bytes
         if (sectorData)
         {
             ByteReader br(sectorData->data);
@@ -246,7 +246,7 @@ public:
         unsigned writtenSectors = 0;
         for (int sectorId=0; sectorId<numSectors; sectorId++)
         {
-            const auto* sectorData = image.get(physicalTrack, physicalSide, sectorId);
+            const auto& sectorData = image.get(physicalTrack, physicalSide, sectorId);
             if (sectorData)
             {
                 writeSector(bits, cursor, sectorData);
@@ -266,7 +266,7 @@ public:
     }
 
 private:
-	void writeSector(std::vector<bool>& bits, unsigned& cursor, const Sector* sector) const
+	void writeSector(std::vector<bool>& bits, unsigned& cursor, const std::shared_ptr<Sector>& sector) const
     {
         /* Source: http://www.unusedino.de/ec64/technical/formats/g64.html 
          * 1. Header sync       FF FF FF FF FF (40 'on' bits, not GCR)

@@ -7,6 +7,7 @@
 #include "sector.h"
 #include "proto.h"
 #include "fluxsink/fluxsink.h"
+#include "fluxsource/fluxsource.h"
 #include "arch/brother/brother.h"
 #include "arch/ibm/ibm.h"
 #include "imagereader/imagereader.h"
@@ -33,6 +34,7 @@ static StringFlag destFlux(
 	[](const auto& value)
 	{
 		FluxSink::updateConfigForFilename(config.mutable_flux_sink(), value);
+		FluxSource::updateConfigForFilename(config.mutable_flux_source(), value);
 	});
 
 static StringFlag destCylinders(
@@ -63,7 +65,15 @@ int mainWrite(int argc, const char* argv[])
 	std::unique_ptr<AbstractEncoder> encoder(AbstractEncoder::create(config.encoder()));
 	std::unique_ptr<FluxSink> fluxSink(FluxSink::create(config.flux_sink()));
 
-	writeDiskCommand(*reader, *encoder, *fluxSink);
+	std::unique_ptr<AbstractDecoder> decoder;
+	if (config.has_decoder())
+		decoder = AbstractDecoder::create(config.decoder());
+
+	std::unique_ptr<FluxSource> fluxSource;
+	if (config.has_flux_source())
+		fluxSource = FluxSource::create(config.flux_source());
+
+	writeDiskCommand(*reader, *encoder, *fluxSink, decoder.get(), fluxSource.get());
 
     return 0;
 }

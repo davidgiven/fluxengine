@@ -174,7 +174,7 @@ public:
 				writeFillerBytes(trackdata.gap3(), gapFill);
 			first = false;
 
-			const auto* sectorData = image.get(physicalTrack, physicalSide, sectorId);
+			const auto& sectorData = image.get(physicalTrack, physicalSide, sectorId);
 			if (!sectorData)
 			{
 				/* If there are any missing sectors, this is an empty track. */

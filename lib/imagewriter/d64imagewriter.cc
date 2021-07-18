@@ -42,7 +42,7 @@ public:
             int sectorCount = sectors_per_track(track);
             for (int sectorId = 0; sectorId < sectorCount; sectorId++)
             {
-                const auto* sector = image.get(track, 0, sectorId);
+                const auto& sector = image.get(track, 0, sectorId);
                 if (sector)
                 {
                     outputFile.seekp(offset);

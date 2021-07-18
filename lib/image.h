@@ -38,8 +38,8 @@ public:
 public:
 	void calculateSize();
 
-	Sector* get(unsigned track, unsigned side, unsigned sectorId) const;
-	Sector* put(unsigned track, unsigned side, unsigned sectorId);
+	const std::shared_ptr<Sector>& get(unsigned track, unsigned side, unsigned sectorId) const;
+	const std::shared_ptr<Sector>& put(unsigned track, unsigned side, unsigned sectorId);
 
 	const_iterator begin() const { return const_iterator(_sectors.cbegin()); }
 	const_iterator end() const { return const_iterator(_sectors.cend()); }

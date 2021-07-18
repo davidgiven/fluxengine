@@ -191,7 +191,7 @@ static void readRow(const std::vector<std::string>& row, Image& image)
 		int logicalSide = std::stoi(row[3]);
 		int logicalSector = std::stoi(row[4]);
 
-		Sector* sector = image.put(logicalTrack, logicalSide, logicalSector);
+		const auto& sector = image.put(logicalTrack, logicalSide, logicalSector);
 		sector->physicalCylinder = std::stoi(row[0]);
 		sector->physicalHead = std::stoi(row[1]);
 		sector->logicalTrack = logicalTrack;

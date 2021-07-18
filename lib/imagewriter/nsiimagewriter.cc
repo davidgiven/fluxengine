@@ -46,7 +46,7 @@ public:
 			int side = (track < geometry.numTracks) ? 0 : 1;
 			for (int sectorId = 0; sectorId < geometry.numSectors; sectorId++)
 			{
-				const auto* sector = image.get(track % geometry.numTracks, side, sectorId);
+				const auto& sector = image.get(track % geometry.numTracks, side, sectorId);
 				if (sector)
 				{
 					if (side == 0) { /* Side 0 is from track 0-34 */

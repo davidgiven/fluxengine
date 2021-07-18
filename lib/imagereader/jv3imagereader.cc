@@ -110,7 +110,7 @@ public:
 					inputFile.read((char*) data.begin(), sectorSize);
 
 					unsigned head = !!(header.flags & JV3_SIDE);
-					Sector* sector = image.put(header.track, head, header.sector);
+					const auto& sector = image.put(header.track, head, header.sector);
                     sector->status = Sector::OK;
                     sector->logicalTrack = sector->physicalCylinder = header.track;
                     sector->logicalSide = sector->physicalHead = head;

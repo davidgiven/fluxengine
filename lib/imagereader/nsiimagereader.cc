@@ -87,7 +87,7 @@ public:
                     Bytes data(sectorSize);
                     inputFile.read((char*) data.begin(), sectorSize);
 
-                    Sector* sector = image.put(track, head, sectorId);
+                    const auto& sector = image.put(track, head, sectorId);
                     sector->status = Sector::OK;
                     sector->logicalTrack = sector->physicalCylinder = track;
                     sector->logicalSide = sector->physicalHead = head;

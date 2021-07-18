@@ -39,7 +39,7 @@ public:
 
 				for (int sectorId = 0; sectorId < numSectors; sectorId++)
 				{
-					const auto* sector = image.get(track, side, sectorId);
+					const auto& sector = image.get(track, side, sectorId);
 					if (sector)
 						sector->data.slice(0, sectorSize).writeTo(outputFile);
 					else
