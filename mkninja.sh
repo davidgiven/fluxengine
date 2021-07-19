@@ -404,7 +404,8 @@ FORMATS="\
     ibm360_525 \
     ibm720 \
     ibm720_525 \
-    macintosh \
+    mac400 \
+    mac800 \
     micropolis \
     mx \
     northstar87 \
