@@ -70,7 +70,7 @@ int mainWrite(int argc, const char* argv[])
 		decoder = AbstractDecoder::create(config.decoder());
 
 	std::unique_ptr<FluxSource> fluxSource;
-	if (config.has_flux_source())
+	if (config.has_flux_source() && config.flux_source().has_drive())
 		fluxSource = FluxSource::create(config.flux_source());
 
 	writeDiskCommand(*reader, *encoder, *fluxSink, decoder.get(), fluxSource.get());
