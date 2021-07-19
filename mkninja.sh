@@ -404,6 +404,7 @@ FORMATS="\
     ibm360_525 \
     ibm720 \
     ibm720_525 \
+    kaypro2 \
     mac400 \
     mac800 \
     micropolis \
