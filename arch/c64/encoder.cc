@@ -265,19 +265,8 @@ public:
         fillBitmapTo(bits, cursor, _config.post_index_gap_us() / clockRateUs, { true, false });
         lastBit = false;
 
-        unsigned numSectors = sectorsForTrack(logicalTrack);
-        unsigned writtenSectors = 0;
-        for (int sectorId=0; sectorId<numSectors; sectorId++)
-        {
-            const auto& sectorData = image.get(logicalTrack, 0, sectorId);
-            if (sectorData)
-            {
-                writeSector(bits, cursor, sectorData);
-                writtenSectors++;
-            }
-        }
-        if (writtenSectors == 0)
-            return std::unique_ptr<Fluxmap>();
+        for (const auto& sector : sectors)
+            writeSector(bits, cursor, sector);
 
         if (cursor >= bits.size())
             Error() << fmt::format("track data overrun by {} bits", cursor - bits.size());
