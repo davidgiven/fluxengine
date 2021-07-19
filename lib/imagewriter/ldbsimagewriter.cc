@@ -43,7 +43,7 @@ public:
                 int actualSectors = 0;
 				for (int sectorId = 0; sectorId < geometry.numSectors; sectorId++)
 				{
-					const auto* sector = image.get(track, side, sectorId);
+					const auto& sector = image.get(track, side, sectorId);
 					if (sector)
                         actualSectors++;
                 }
@@ -59,7 +59,7 @@ public:
 
 				for (int sectorId = 0; sectorId < geometry.numSectors; sectorId++)
 				{
-					const auto* sector = image.get(track, side, sectorId);
+					const auto& sector = image.get(track, side, sectorId);
 					if (sector)
 					{
                         uint32_t sectorLabel = (('S') << 24) | ((track & 0xff) << 16) | (side << 8) | sectorId;

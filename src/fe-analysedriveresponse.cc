@@ -21,7 +21,7 @@ static StringFlag destFlux(
 	"",
 	[](const auto& value)
 	{
-		FluxSink::updateConfigForFilename(config.mutable_output()->mutable_flux(), value);
+		FluxSink::updateConfigForFilename(config.mutable_flux_sink(), value);
 	});
 
 static IntFlag destCylinder(
@@ -206,12 +206,12 @@ int mainAnalyseDriveResponse(int argc, const char* argv[])
 {
     flags.parseFlagsWithConfigFiles(argc, argv, {});
 
-	if (!config.output().flux().has_drive())
+	if (!config.flux_sink().has_drive())
 		Error() << "this only makes sense with a real disk drive";
 
-    usbSetDrive(config.output().flux().drive().drive(),
-		config.output().flux().drive().high_density(),
-		config.output().flux().drive().index_mode());
+    usbSetDrive(config.flux_sink().drive().drive(),
+		config.flux_sink().drive().high_density(),
+		config.flux_sink().drive().index_mode());
 	usbSeek(destCylinder);
 
 	std::cout << "Measuring rotational speed...\n";

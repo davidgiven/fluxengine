@@ -4,7 +4,12 @@
 #include "fmt/format.h"
 #include <regex>
 
-ConfigProto config;
+ConfigProto config = []() {
+	ConfigProto config;
+	config.mutable_flux_source()->mutable_drive()->set_drive(0);
+	config.mutable_flux_sink()->mutable_drive()->set_drive(0);
+	return config;
+}();
 
 static double toDouble(const std::string& value)
 {

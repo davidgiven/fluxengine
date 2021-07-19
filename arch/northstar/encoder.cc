@@ -17,7 +17,7 @@
 
 #define TOTAL_SECTOR_BYTES ()
 
-static void write_sector(std::vector<bool>& bits, unsigned& cursor, const Sector* sector)
+static void write_sector(std::vector<bool>& bits, unsigned& cursor, const std::shared_ptr<Sector>& sector)
 {
 	int preambleSize = 0;
 	int encodedSectorSize = 0;
@@ -108,7 +108,25 @@ public:
 		_config(config.northstar())
 	{}
 
-	std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const Image& image)
+	std::vector<std::shared_ptr<Sector>> collectSectors(int physicalTrack, int physicalSide, const Image& image) override
+	{
+		std::vector<std::shared_ptr<Sector>> sectors;
+
+		if ((physicalTrack >= 0) && (physicalTrack < 35))
+		{
+			for (int sectorId = 0; sectorId < 10; sectorId++)
+			{
+				const auto& sector = image.get(physicalTrack, physicalSide, sectorId);
+				if (sector)
+					sectors.push_back(sector);
+			}
+		}
+
+		return sectors;
+	}
+
+	std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide,
+			const std::vector<std::shared_ptr<Sector>>& sectors, const Image& image) override
 	{
 		int bitsPerRevolution = 100000;
 		double clockRateUs = 4.00;
@@ -116,7 +134,7 @@ public:
 		if ((physicalTrack < 0) || (physicalTrack >= 35))
 			return std::unique_ptr<Fluxmap>();
 
-		const auto* sector = image.get(physicalTrack, physicalSide, 0);
+		const auto& sector = image.get(physicalTrack, physicalSide, 0);
 
 		if (sector->data.size() == NORTHSTAR_PAYLOAD_SIZE_SD) {
 			bitsPerRevolution /= 2;		// FM
@@ -129,7 +147,7 @@ public:
 
 		for (int sectorId = 0; sectorId < 10; sectorId++)
 		{
-			const auto* sectorData = image.get(physicalTrack, physicalSide, sectorId);
+			const auto& sectorData = image.get(physicalTrack, physicalSide, sectorId);
 			write_sector(bits, cursor, sectorData);
 		}
 

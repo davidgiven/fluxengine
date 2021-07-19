@@ -62,7 +62,7 @@ public:
             {
                 for (int sectorId = 0; sectorId < numSectors; sectorId++)
                 {
-					Sector* sector = image.put(track, head, sectorId);
+					const auto& sector = image.put(track, head, sectorId);
                     if ((offset < inputFileSize))
                     {    //still data available sector OK
 						br.seek(offset);

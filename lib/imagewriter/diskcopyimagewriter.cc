@@ -89,7 +89,7 @@ public:
 				int sectorCount = sectors_per_track(track);
 				for (int sectorId = 0; sectorId < sectorCount; sectorId++)
 				{
-					const auto* sector = image.get(track, side, sectorId);
+					const auto& sector = image.get(track, side, sectorId);
 					if (sector)
 					{
 						bw.seek(offset);

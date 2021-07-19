@@ -1,0 +1,37 @@
+comment: 'Brother 240kB 3.5" 78-track SS GCR'
+
+image_reader {
+	filename: "brother240.img"
+	img {
+		tracks: 78
+		sides: 1
+		trackdata {
+			sectors: 12
+			sector_size: 256
+		}
+	}
+}
+
+image_writer {
+	filename: "brother240.img"
+	img {}
+}
+
+encoder {
+	brother {}
+}
+
+decoder {
+	brother {}
+}
+
+cylinders {
+	start: 0
+	end: 77
+}
+
+heads {
+	start: 0
+	end: 0
+}
+

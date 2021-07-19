@@ -131,7 +131,7 @@ void ImageWriter::printMap(const Image& image)
 			std::cout << fmt::format("{}.{:2} ", side, sectorId);
 			for (int track = 0; track < geometry.numTracks; track++)
 			{
-				const auto* sector = image.get(track, side, sectorId);
+				const auto& sector = image.get(track, side, sectorId);
 				if (!sector)
 				{
 					std::cout << 'X';

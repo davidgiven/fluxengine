@@ -192,7 +192,7 @@ public:
 			for (int s = 0; s < header.numSectors; s++)
 			{
 				Bytes sectordata;
-				Sector* sector = image.put(header.track, header.Head, sector_map[s]);
+				const auto& sector = image.put(header.track, header.Head, sector_map[s]);
 				//read the status of the sector
 				unsigned int Status_Sector = br.read_8();
 				headerPtr++;

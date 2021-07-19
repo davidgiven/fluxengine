@@ -38,10 +38,23 @@ public:
     int logicalSide = 0;
     int logicalSector = 0;
     Bytes data;
+
+	std::tuple<int, int, int, Status> key() const
+	{ return std::make_tuple(logicalTrack, logicalSide, logicalSector, status); }
+
+	bool operator == (const Sector& rhs) const
+	{ return key() == rhs.key(); }
+
+	bool operator != (const Sector& rhs) const
+	{ return key() != rhs.key(); }
+
+	bool operator < (const Sector& rhs) const
+	{ return key() < rhs.key(); }
+
 };
 
-inline Sector& getSector(const std::set<std::shared_ptr<Sector>>& sectors,
-		unsigned track, unsigned side, unsigned sector);
+extern bool sectorPointerSortPredicate(std::shared_ptr<Sector>& lhs, std::shared_ptr<Sector>& rhs);
+extern bool sectorPointerEqualsPredicate(std::shared_ptr<Sector>& lhs, std::shared_ptr<Sector>& rhs);
 
 #endif
 

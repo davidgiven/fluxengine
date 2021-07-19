@@ -211,7 +211,27 @@ public:
 	{}
 
 public:
-    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const Image& image)
+	std::vector<std::shared_ptr<Sector>> collectSectors(int physicalTrack, int physicalSide, const Image& image) override
+	{
+		std::vector<std::shared_ptr<Sector>> sectors;
+
+        if (physicalSide == 0)
+        {
+            int logicalTrack = physicalTrack / 2;
+            unsigned numSectors = sectorsForTrack(logicalTrack);
+            for (int sectorId=0; sectorId<numSectors; sectorId++)
+            {
+                const auto& sector = image.get(logicalTrack, 0, sectorId);
+                if (sector)
+                    sectors.push_back(sector);
+            }
+        }
+
+		return sectors;
+	}
+
+    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide,
+            const std::vector<std::shared_ptr<Sector>>& sectors, const Image& image)
     {
         /* The format ID Character # 1 and # 2 are in the .d64 image only present
          * in track 18 sector zero which contains the BAM info in byte 162 and 163.
@@ -220,7 +240,10 @@ public:
          * contains the BAM.
         */
 
-        const auto* sectorData = image.get(C64_BAM_TRACK*2, 0, 0); //Read de BAM to get the DISK ID bytes
+        if (physicalSide != 0)
+            return std::unique_ptr<Fluxmap>();
+
+        const auto& sectorData = image.get(C64_BAM_TRACK*2, 0, 0); //Read de BAM to get the DISK ID bytes
         if (sectorData)
         {
             ByteReader br(sectorData->data);
@@ -242,19 +265,8 @@ public:
         fillBitmapTo(bits, cursor, _config.post_index_gap_us() / clockRateUs, { true, false });
         lastBit = false;
 
-        unsigned numSectors = sectorsForTrack(logicalTrack);
-        unsigned writtenSectors = 0;
-        for (int sectorId=0; sectorId<numSectors; sectorId++)
-        {
-            const auto* sectorData = image.get(physicalTrack, physicalSide, sectorId);
-            if (sectorData)
-            {
-                writeSector(bits, cursor, sectorData);
-                writtenSectors++;
-            }
-        }
-        if (writtenSectors == 0)
-            return std::unique_ptr<Fluxmap>();
+        for (const auto& sector : sectors)
+            writeSector(bits, cursor, sector);
 
         if (cursor >= bits.size())
             Error() << fmt::format("track data overrun by {} bits", cursor - bits.size());
@@ -266,7 +278,7 @@ public:
     }
 
 private:
-	void writeSector(std::vector<bool>& bits, unsigned& cursor, const Sector* sector) const
+	void writeSector(std::vector<bool>& bits, unsigned& cursor, const std::shared_ptr<Sector>& sector) const
     {
         /* Source: http://www.unusedino.de/ec64/technical/formats/g64.html 
          * 1. Header sync       FF FF FF FF FF (40 'on' bits, not GCR)

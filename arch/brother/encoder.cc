@@ -136,7 +136,42 @@ public:
 	{}
 
 public:
-    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const Image& image)
+	std::vector<std::shared_ptr<Sector>> collectSectors(int physicalTrack, int physicalSide, const Image& image) override
+	{
+		std::vector<std::shared_ptr<Sector>> sectors;
+
+		int logicalTrack;
+		if (physicalSide != 0)
+			return sectors;
+		physicalTrack -= _config.bias();
+		switch (_config.format())
+		{
+			case BROTHER120:
+				if ((physicalTrack < 0) || (physicalTrack >= (BROTHER_TRACKS_PER_120KB_DISK*2))
+						|| (physicalTrack & 1))
+					return sectors;
+				logicalTrack = physicalTrack/2;
+				break;
+
+			case BROTHER240:
+				if ((physicalTrack < 0) || (physicalTrack >= BROTHER_TRACKS_PER_240KB_DISK))
+					return sectors;
+				logicalTrack = physicalTrack;
+				break;
+		}
+
+        for (int sectorId=0; sectorId<BROTHER_SECTORS_PER_TRACK; sectorId++)
+        {
+            const auto& sector = image.get(logicalTrack, 0, sectorId);
+            if (sector)
+                sectors.push_back(sector);
+		}
+
+		return sectors;
+	}
+
+    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide,
+			const std::vector<std::shared_ptr<Sector>>& sectors, const Image& image)
 	{
 		int logicalTrack;
 		if (physicalSide != 0)
@@ -171,7 +206,7 @@ public:
 			double dataMs = headerMs + postHeaderSpacingMs;
 			unsigned dataCursor = dataMs*1e3 / clockRateUs;
 
-			const auto* sectorData = image.get(logicalTrack, 0, sectorId);
+			const auto& sectorData = image.get(logicalTrack, 0, sectorId);
 
 			fillBitmapTo(bits, cursor, headerCursor, { true, false });
 			write_sector_header(bits, cursor, logicalTrack, sectorId);

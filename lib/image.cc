@@ -15,21 +15,22 @@ Image::Image(std::set<std::shared_ptr<Sector>>& sectors)
 	calculateSize();
 }
 
-Sector* Image::get(unsigned track, unsigned side, unsigned sectorid) const
+const std::shared_ptr<Sector>& Image::get(unsigned track, unsigned side, unsigned sectorid) const
 {
+	const static std::shared_ptr<Sector> NONE;
+
 	key_t key = std::make_tuple(track, side, sectorid);
 	auto i = _sectors.find(key);
 	if (i == _sectors.end())
-		return nullptr;
-	return i->second.get();
+		return NONE;
+	return i->second;
 }
 
-Sector* Image::put(unsigned track, unsigned side, unsigned sectorid)
+const std::shared_ptr<Sector>& Image::put(unsigned track, unsigned side, unsigned sectorid)
 {
 	key_t key = std::make_tuple(track, side, sectorid);
 	std::shared_ptr<Sector> sector = std::make_shared<Sector>();
-	_sectors[key] = sector;
-	return sector.get();
+	return _sectors[key] = sector;
 }
 
 void Image::calculateSize()

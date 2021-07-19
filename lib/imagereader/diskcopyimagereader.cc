@@ -105,7 +105,7 @@ public:
 					Bytes tag = br.read(12);
 					tagPtr += 12;
 
-                    Sector* sector = image.put(track, head, sectorId);
+                    const auto& sector = image.put(track, head, sectorId);
                     sector->status = Sector::OK;
                     sector->logicalTrack = sector->physicalCylinder = track;
                     sector->logicalSide = sector->physicalHead = head;

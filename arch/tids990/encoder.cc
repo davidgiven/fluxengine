@@ -59,7 +59,23 @@ private:
 	}
 
 public:
-    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const Image& image)
+	std::vector<std::shared_ptr<Sector>> collectSectors(int physicalTrack, int physicalSide, const Image& image) override
+	{
+		std::vector<std::shared_ptr<Sector>> sectors;
+
+		for (char sectorChar : _config.sector_skew())
+        {
+			int sectorId = charToInt(sectorChar);
+			const auto& sector = image.get(physicalTrack, physicalSide, sectorId);
+			if (sector)
+				sectors.push_back(sector);
+        }
+
+		return sectors;
+	}
+
+    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide,
+			const std::vector<std::shared_ptr<Sector>>& sectors, const Image& image) override
 	{
 		double clockRateUs = 1e3 / _config.clock_rate_khz() / 2.0;
 		int bitsPerRevolution = (_config.track_length_ms() * 1000.0) / clockRateUs;
@@ -79,7 +95,7 @@ public:
 				writeBytes(_config.gap3_bytes(), 0x55);
 			first = false;
 
-			const auto* sectorData = image.get(physicalTrack, physicalSide, sectorId);
+			const auto& sectorData = image.get(physicalTrack, physicalSide, sectorId);
 			if (!sectorData)
 				Error() << fmt::format("format tried to find sector {} which wasn't in the input file", sectorId);
 

@@ -1,0 +1,45 @@
+comment: 'Amiga 880kB 3.5" DSDD'
+
+image_reader {
+	filename: "amiga.adf"
+	img {
+		tracks: 80
+		sides: 2
+		trackdata {
+			sectors: 11
+			sector_size: 512
+		}
+	}
+}
+
+image_writer {
+	filename: "amiga.adf"
+	img {
+		tracks: 80
+		sides: 2
+		trackdata {
+			sector_size: 512
+			sectors: 11
+		}
+	}
+}
+
+encoder {
+	amiga {}
+}
+
+decoder {
+	amiga {}
+}
+
+cylinders {
+	start: 0
+	end: 79
+}
+
+heads {
+	start: 0
+	end: 1
+}
+
+

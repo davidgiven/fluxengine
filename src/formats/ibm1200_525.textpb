@@ -1,0 +1,55 @@
+comment: 'PC 1200kB 5.25" 80-track 15-sector DSHD'
+
+flux_sink {
+	drive {
+		high_density: true
+	}
+}
+
+flux_source {
+	drive {
+		high_density: true
+	}
+}
+
+image_reader {
+	filename: "ibm1200_525.img"
+	img {
+		tracks: 80
+		sides: 2
+		trackdata {
+			sectors: 15
+			sector_size: 512
+		}
+	}
+}
+
+image_writer {
+	filename: "ibm1200_525.img"
+	img {}
+}
+
+encoder {
+	ibm {
+		trackdata {
+			track_length_ms: 167
+			clock_rate_khz: 500
+			sector_skew: "0123456789abcde"
+		}
+	}
+}
+
+decoder {
+	ibm {}
+}
+
+cylinders {
+	start: 0
+	end: 79
+}
+
+heads {
+	start: 0
+	end: 1
+}
+

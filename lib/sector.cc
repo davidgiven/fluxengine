@@ -30,3 +30,18 @@ Sector::Status Sector::stringToStatus(const std::string& value)
 	return Status::INTERNAL_ERROR;
 }
 
+bool sectorPointerSortPredicate(std::shared_ptr<Sector>& lhs, std::shared_ptr<Sector>& rhs)
+{
+	return *lhs < *rhs;
+}
+
+bool sectorPointerEqualsPredicate(std::shared_ptr<Sector>& lhs, std::shared_ptr<Sector>& rhs)
+{
+	if (!lhs && !rhs)
+		return true;
+	if (!lhs || !rhs)
+		return false;
+	return *lhs == *rhs;
+}
+
+
