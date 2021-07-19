@@ -121,7 +121,8 @@ public:
 		return sectors;
 	}
 
-    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const Image& image) override
+    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide,
+			const std::vector<std::shared_ptr<Sector>>& sectors, const Image& image) override
 	{
 		if ((physicalTrack < 0) || (physicalTrack >= AMIGA_TRACKS_PER_DISK))
 			return std::unique_ptr<Fluxmap>();

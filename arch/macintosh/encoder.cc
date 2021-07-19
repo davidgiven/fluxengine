@@ -208,7 +208,26 @@ public:
 	{}
 
 public:
-    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const Image& image)
+	std::vector<std::shared_ptr<Sector>> collectSectors(int physicalTrack, int physicalSide, const Image& image) override
+	{
+		std::vector<std::shared_ptr<Sector>> sectors;
+
+		if ((physicalTrack >= 0) && (physicalTrack < MAC_TRACKS_PER_DISK))
+        {
+            unsigned numSectors = sectorsForTrack(physicalTrack);
+            for (int sectorId=0; sectorId<numSectors; sectorId++)
+            {
+                const auto& sector = image.get(physicalTrack, physicalSide, sectorId);
+                if (sector)
+                    sectors.push_back(sector);
+            }
+        }
+
+		return sectors;
+	}
+
+    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide,
+			const std::vector<std::shared_ptr<Sector>>& sectors, const Image& image) override
 	{
 		if ((physicalTrack < 0) || (physicalTrack >= MAC_TRACKS_PER_DISK))
 			return std::unique_ptr<Fluxmap>();
@@ -221,12 +240,8 @@ public:
 		fillBitmapTo(bits, cursor, _config.post_index_gap_us() / clockRateUs, { true, false });
 		lastBit = false;
 
-		unsigned numSectors = sectorsForTrack(physicalTrack);
-		for (int sectorId=0; sectorId<numSectors; sectorId++)
-		{
-			const auto& sectorData = image.get(physicalTrack, physicalSide, sectorId);
-			write_sector(bits, cursor, sectorData);
-		}
+		for (const auto& sector : collectSectors(physicalTrack, physicalSide, image))
+			write_sector(bits, cursor, sector);
 
 		if (cursor >= bits.size())
 			Error() << fmt::format("track data overrun by {} bits", cursor - bits.size());

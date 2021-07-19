@@ -108,7 +108,25 @@ public:
 		_config(config.northstar())
 	{}
 
-	std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const Image& image)
+	std::vector<std::shared_ptr<Sector>> collectSectors(int physicalTrack, int physicalSide, const Image& image) override
+	{
+		std::vector<std::shared_ptr<Sector>> sectors;
+
+		if ((physicalTrack >= 0) && (physicalTrack < 35))
+		{
+			for (int sectorId = 0; sectorId < 10; sectorId++)
+			{
+				const auto& sector = image.get(physicalTrack, physicalSide, sectorId);
+				if (sector)
+					sectors.push_back(sector);
+			}
+		}
+
+		return sectors;
+	}
+
+	std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide,
+			const std::vector<std::shared_ptr<Sector>>& sectors, const Image& image) override
 	{
 		int bitsPerRevolution = 100000;
 		double clockRateUs = 4.00;

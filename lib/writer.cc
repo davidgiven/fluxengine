@@ -64,8 +64,9 @@ void writeTracksAndVerify(
 	{
 		for (unsigned head : iterate(config.heads()))
 		{
-			std::cout << fmt::format("{0:>3}.{1}: Write:  ", cylinder, head) << std::flush;
-			std::unique_ptr<Fluxmap> fluxmap = encoder.encode(cylinder, head, image);
+			std::cout << fmt::format("{0:>3}.{1}: Write:   ", cylinder, head) << std::flush;
+			auto sectors = encoder.collectSectors(cylinder, head, image);
+			std::unique_ptr<Fluxmap> fluxmap = encoder.encode(cylinder, head, sectors, image);
 			if (!fluxmap)
 			{
 				/* Erase this track rather than writing. */
@@ -76,6 +77,8 @@ void writeTracksAndVerify(
 			}
 			else
 			{
+				std::sort(sectors.begin(), sectors.end(), sectorPointerSortPredicate);
+
 				for (int retry = 0;; retry++)
 				{
 					/* Precompensation actually seems to make things worse, so let's leave
@@ -85,22 +88,20 @@ void writeTracksAndVerify(
 					std::cout << fmt::format(
 						"{0} ms in {1} bytes\n", int(fluxmap->duration()/1e6), fluxmap->bytes());
 
-					std::cout << fmt::format("       Verify: ", cylinder, head) << std::flush;
+					std::cout << fmt::format("       Verify:  ", cylinder, head) << std::flush;
 					std::shared_ptr<Fluxmap> writtenFluxmap = fluxSource.readFlux(cylinder, head);
 						std::cout << fmt::format(
 							"{0} ms in {1} bytes\n", int(writtenFluxmap->duration()/1e6), writtenFluxmap->bytes());
 					const auto trackdata = decoder.decodeToSectors(writtenFluxmap, cylinder, head);
 
 					std::vector<std::shared_ptr<Sector>> gotSectors = trackdata->sectors;
-					std::remove_if(gotSectors.begin(), gotSectors.end(), [](const auto& s) { return s->status != Sector::OK; });
+					gotSectors.erase(std::remove_if(gotSectors.begin(), gotSectors.end(),
+							[](const auto& s) { return s->status != Sector::OK; }), gotSectors.end());
 					std::sort(gotSectors.begin(), gotSectors.end(), sectorPointerSortPredicate);
-					auto newLast = std::unique(gotSectors.begin(), gotSectors.end(), sectorPointerEqualsPredicate);
-					gotSectors.erase(newLast, gotSectors.end());
+					gotSectors.erase(std::unique(gotSectors.begin(), gotSectors.end(),
+							sectorPointerEqualsPredicate), gotSectors.end());
 
-					std::vector<std::shared_ptr<Sector>> wantedSectors = encoder.collectSectors(cylinder, head, image);
-					std::sort(wantedSectors.begin(), wantedSectors.end(), sectorPointerSortPredicate);
-
-					if (std::equal(gotSectors.begin(), gotSectors.end(), wantedSectors.begin(), wantedSectors.end(),
+					if (std::equal(gotSectors.begin(), gotSectors.end(), sectors.begin(), sectors.end(),
 							sectorPointerEqualsPredicate))
 						break;
 
@@ -138,7 +139,8 @@ void writeDiskCommand(ImageReader& imageReader, AbstractEncoder& encoder, FluxSi
 		writeTracks(fluxSink,
 			[&](int physicalTrack, int physicalSide) -> std::unique_ptr<Fluxmap>
 			{
-				return encoder.encode(physicalTrack, physicalSide, image);
+				const auto& sectors = encoder.collectSectors(physicalTrack, physicalSide, image);
+				return encoder.encode(physicalTrack, physicalSide, sectors, image);
 			}
 		);
 }
