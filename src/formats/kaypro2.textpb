@@ -1,8 +1,16 @@
-comment: 'Kaypro II 5.25" single-sided 48 tpi'
+comment: 'Kaypro II 5.25" 40-track 10-sector SSDD'
 
 image_reader {
 	filename: "kaypro2.img"
-	img {}
+	img {
+		trackdata {
+			sector_size: 512
+			sectors: 10
+		}
+		tracks: 40
+		sides: 1
+		physical_step: 1
+	}
 }
 
 image_writer {
@@ -21,8 +29,8 @@ image_writer {
 encoder {
 	ibm {
 		trackdata {
-			track_length_ms: 195
-			clock_rate_khz: 500
+			track_length_ms: 167
+			clock_rate_khz: 300
 			sector_skew: "0123456789"
 		}
 	}
