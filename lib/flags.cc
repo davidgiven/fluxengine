@@ -196,8 +196,11 @@ void FlagGroup::parseFlagsWithConfigFiles(int argc, const char* argv[],
 				ss << f.rdbuf();
 				data = ss.str();
 			}
-			if (!config.MergeFromString(data))
+
+			ConfigProto newConfig;
+			if (!newConfig.ParseFromString(data))
 				Error() << "couldn't load config proto";
+			config.MergeFrom(newConfig);
 
 			return true;
 		}
