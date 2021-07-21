@@ -10,6 +10,7 @@ class AbstractEncoder
 {
 public:
     AbstractEncoder(const EncoderProto& config) {}
+	virtual ~AbstractEncoder() {}
 
 	static std::unique_ptr<AbstractEncoder> create(const EncoderProto& config);
 
