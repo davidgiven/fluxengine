@@ -246,6 +246,12 @@ FluxEngine also supports a number of file system image formats. When using the
 	4.2](https://en.wikipedia.org/wiki/Disk_Copy) image file, commonly used by
 	Apple Macintosh emulators.
   
+  - `<filename.td0>`
+
+	Read a [Sydex Teledisk TD0
+	file](https://web.archive.org/web/20210420224336/http://dunfield.classiccmp.org/img47321/teledisk.htm)
+	image file. Note that only uncompressed images are supported (so far).
+
   - `<filename.jv3>`
 
 	Read from a JV3 image file, commonly used by TRS-80 emulators. **Read

@@ -30,6 +30,9 @@ const std::shared_ptr<Sector>& Image::put(unsigned track, unsigned side, unsigne
 {
 	key_t key = std::make_tuple(track, side, sectorid);
 	std::shared_ptr<Sector> sector = std::make_shared<Sector>();
+	sector->logicalTrack = track;
+	sector->logicalSide = side;
+	sector->logicalSector = sectorid;
 	return _sectors[key] = sector;
 }
 

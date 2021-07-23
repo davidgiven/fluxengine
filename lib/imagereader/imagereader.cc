@@ -32,6 +32,9 @@ std::unique_ptr<ImageReader> ImageReader::create(const ImageReaderProto& config)
 		case ImageReaderProto::kNsi:
 			return ImageReader::createNsiImageReader(config);
 
+		case ImageReaderProto::kTd0:
+			return ImageReader::createTd0ImageReader(config);
+
 		default:
 			Error() << "bad input file config";
 			return std::unique_ptr<ImageReader>();
@@ -50,6 +53,7 @@ void ImageReader::updateConfigForFilename(ImageReaderProto* proto, const std::st
 		{".img",      [&]() { proto->mutable_img(); }},
 		{".st",       [&]() { proto->mutable_img(); }},
 		{".nsi",      [&]() { proto->mutable_nsi(); }},
+		{".td0",      [&]() { proto->mutable_td0(); }},
 	};
 
 	for (const auto& it : formats)
