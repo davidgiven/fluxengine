@@ -141,7 +141,7 @@ Bytes Bytes::slice(unsigned start, unsigned len) const
     {
         /* Can't share the buffer, as we need to zero-pad the end. */
         Bytes b(len);
-        std::uninitialized_copy(cbegin()+start, cend(), b.begin());
+        std::uninitialized_copy(_data->cbegin()+start, _data->cbegin()+_high, b._data->begin());
         return b;
     }
     else
