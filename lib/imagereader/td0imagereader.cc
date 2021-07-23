@@ -93,9 +93,10 @@ public:
 			comment.erase(nl.base(), comment.end());
 		}
 
-		std::cout << fmt::format("TD0: TeleDisk {:.1}: {}\n",
-			(double)version / 10.0, comment);
+		std::cout << fmt::format("TD0: TeleDisk {}.{}: {}\n",
+			version / 10, version % 10, comment);
 
+		unsigned totalSize = 0;
 		Image image;
 		for (;;)
 		{
@@ -181,14 +182,16 @@ public:
 				sector->physicalCylinder = physicalCylinder;
 				sector->physicalHead = physicalHead;
 				sector->data = data.slice(0, sectorSize);
+				totalSize += sectorSize;
 			}
 		}
 
 		image.calculateSize();
 		const Geometry& geometry = image.getGeometry();
-        std::cout << fmt::format("TD0: found {} tracks, {} sides, {} kB total\n",
-                        geometry.numTracks, geometry.numSides,
-						input.size() / 1024);
+        std::cout << fmt::format("TD0: found {} tracks, {} sides, {} sectors, {} bytes per sector, {} kB total\n",
+                        geometry.numTracks, geometry.numSides, geometry.numSectors,
+						geometry.sectorSize,
+						totalSize / 1024);
         return image;
 	}
 };

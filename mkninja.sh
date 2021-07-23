@@ -397,6 +397,7 @@ FORMATS="\
     eco1 \
     f85 \
     fb100 \
+    hp9121 \
     hplif770 \
     ibm \
     ibm1200_525 \

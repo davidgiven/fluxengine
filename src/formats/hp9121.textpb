@@ -1,0 +1,57 @@
+comment: 'Hewlett-Packard 9121 270kB 3.5" SSDD'
+
+image_reader {
+	filename: "hp9121.img"
+	img {
+		tracks: 70
+		sides: 1
+		trackdata {
+			sectors: 18
+			sector_size: 256
+		}
+	}
+}
+
+image_writer {
+	img {
+		tracks: 70
+		sides: 1
+		trackdata {
+			sectors: 18
+			sector_size: 256
+		}
+	}
+}
+
+encoder {
+	ibm {
+		trackdata {
+			emit_iam: false
+			track_length_ms: 200
+			clock_rate_khz: 250
+			sector_size: 256
+			gap0: 80
+			gap2: 22
+			gap3: 44
+			sector_skew: "0123456789abcdefgh"
+			start_sector_id: 0
+		}
+	}
+}
+
+decoder {
+	ibm {
+		sector_id_base: 0
+	}
+}
+		
+cylinders {
+	start: 0
+	end: 69
+}
+
+heads {
+	start: 0
+	end: 0
+}
+
