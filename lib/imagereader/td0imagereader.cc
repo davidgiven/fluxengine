@@ -184,7 +184,7 @@ public:
 			}
 		}
 
-		//image.calculateSize();
+		image.calculateSize();
 		const Geometry& geometry = image.getGeometry();
         std::cout << fmt::format("TD0: found {} tracks, {} sides, {} kB total\n",
                         geometry.numTracks, geometry.numSides,
