@@ -188,16 +188,14 @@ public:
 		for (char sectorChar : trackdata.sector_skew())
 		{
 			int sectorId = charToInt(sectorChar);
+			const auto& sectorData = image.get(physicalTrack, physicalSide, sectorId);
+			if (!sectorData)
+				continue;
+
 			if (!first)
 				writeFillerBytes(trackdata.gap3(), gapFill);
 			first = false;
 
-			const auto& sectorData = image.get(physicalTrack, physicalSide, sectorId);
-			if (!sectorData)
-			{
-				/* If there are any missing sectors, this is an empty track. */
-				return std::unique_ptr<Fluxmap>();
-			}
 
 			/* Writing the sector and data records are fantastically annoying.
 			 * The CRC is calculated from the *very start* of the record, and
