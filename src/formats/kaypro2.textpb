@@ -29,9 +29,14 @@ image_writer {
 encoder {
 	ibm {
 		trackdata {
+			emit_iam: false
 			track_length_ms: 167
 			clock_rate_khz: 300
 			sector_skew: "0123456789"
+			start_sector_id: 0
+			gap0: 80
+			gap2: 22
+			gap3: 44
 		}
 	}
 }
