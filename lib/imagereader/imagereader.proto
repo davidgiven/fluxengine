@@ -3,12 +3,25 @@ syntax = "proto2";
 import "lib/common.proto";
 
 message ImgInputOutputProto {
+	message SectorsProto {
+		repeated int32 sector = 1 [(help) = "sector ID"];
+	}
+
+	message SectorRangeProto {
+		optional int32 start_sector = 1 [default=0, (help) = "first sector ID"];
+		optional int32 sector_count = 2 [default=1, (help) = "total number of sectors"];
+	}
+
 	message TrackdataProto {
 		optional int32 track = 1 [(help) = "if present, this format only applies to this track"];
 		optional int32 side = 2 [(help) = "if present, this format only applies to this side"];
 
 		optional int32 sector_size = 3 [default=512, (help) = "number of bytes per sector"];
-		optional int32 sectors = 4 [(help) = "number of sectors in this track"];
+
+		oneof sectors_oneof {
+			SectorsProto sectors = 4 [(help) = "use a list of sector IDs"];
+			SectorRangeProto sector_range = 5 [(help) = "use a range of contiguous IDs"];
+		}
 	}
 
 	repeated TrackdataProto trackdata = 4 [(help) = "per-track format information (repeatable)"];

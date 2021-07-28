@@ -6,8 +6,11 @@ image_reader {
 		tracks: 80
 		sides: 2
 		trackdata {
-			sectors: 18
 			sector_size: 512
+			sector_range {
+				start_sector: 1
+				sector_count: 18
+			}
 		}
 	}
 }
@@ -23,7 +26,6 @@ encoder {
 			track_length_ms: 200
 			clock_rate_khz: 500
 			sectors {
-				sector: 0
 				sector: 1
 				sector: 2
 				sector: 3
@@ -41,6 +43,7 @@ encoder {
 				sector: 15
 				sector: 16
 				sector: 17
+				sector: 18
 			}
 		}
 	}

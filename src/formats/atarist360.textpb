@@ -6,15 +6,28 @@ image_reader {
 		tracks: 80
 		sides: 1
 		trackdata {
-			sectors: 9
 			sector_size: 512
+			sector_range {
+				start_sector: 0
+				sector_count: 9
+			}
 		}
 	}
 }
 
 image_writer {
 	filename: "atarist360.st"
-	img {}
+	img {
+		tracks: 80
+		sides: 1
+		trackdata {
+			sector_size: 512
+			sector_range {
+				start_sector: 0
+				sector_count: 9
+			}
+		}
+	}
 }
 
 encoder {

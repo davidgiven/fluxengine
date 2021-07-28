@@ -6,8 +6,11 @@ image_reader {
 		tracks: 77
 		sides: 2
 		trackdata {
-			sectors: 26
 			sector_size: 288
+			sector_range {
+				start_sector: 0
+				sector_count: 26
+			}
 		}
 	}
 }
