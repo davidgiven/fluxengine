@@ -171,7 +171,10 @@ public:
 
 	std::set<unsigned> requiredSectors(unsigned cylinder, unsigned head) const override
 	{
-		return iterate(_config.required_sectors());
+		std::set<unsigned> s;
+		for (int sectorId : _config.sectors().sector())
+			s.insert(sectorId);
+		return s;
 	}
 
 private:

@@ -57,13 +57,6 @@
  * mfm:     01 01 01 01 01 00 01 01 = 0x5545
  */
 
-static int charToInt(char c)
-{
-	if (isdigit(c))
-		return c - '0';
-	return 10 + tolower(c) - 'a';
-}
-
 static uint8_t decodeUint16(uint16_t raw)
 {
 	Bytes b;
@@ -115,9 +108,8 @@ public:
 		IbmEncoderProto::TrackdataProto trackdata;
 		getTrackFormat(trackdata, physicalTrack, physicalSide);
 
-		for (char sectorChar : trackdata.sector_skew())
+		for (int sectorId : trackdata.sectors().sector())
         {
-			int sectorId = charToInt(sectorChar);
 			const auto& sector = image.get(physicalTrack, physicalSide, sectorId);
 			if (sector)
 				sectors.push_back(sector);
@@ -185,19 +177,15 @@ public:
 		}
 
 		bool first = true;
-		for (char sectorChar : trackdata.sector_skew())
+		for (int sectorId : trackdata.sectors().sector())
 		{
-			int sectorId = charToInt(sectorChar);
 			if (!first)
 				writeFillerBytes(trackdata.gap3(), gapFill);
 			first = false;
 
 			const auto& sectorData = image.get(physicalTrack, physicalSide, sectorId);
 			if (!sectorData)
-			{
-				/* If there are any missing sectors, this is an empty track. */
-				return std::unique_ptr<Fluxmap>();
-			}
+				continue;
 
 			/* Writing the sector and data records are fantastically annoying.
 			 * The CRC is calculated from the *very start* of the record, and

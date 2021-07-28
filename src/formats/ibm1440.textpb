@@ -22,7 +22,26 @@ encoder {
 		trackdata {
 			track_length_ms: 200
 			clock_rate_khz: 500
-			sector_skew: "0123456789abcdefgh"
+			sectors {
+				sector: 0
+				sector: 1
+				sector: 2
+				sector: 3
+				sector: 4
+				sector: 5
+				sector: 6
+				sector: 7
+				sector: 8
+				sector: 9
+				sector: 10
+				sector: 11
+				sector: 12
+				sector: 13
+				sector: 14
+				sector: 15
+				sector: 16
+				sector: 17
+			}
 		}
 	}
 }
