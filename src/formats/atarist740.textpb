@@ -34,7 +34,7 @@ encoder {
 
 decoder {
 	ibm {
-		swap_sides: true
+		swap_sides: false
 	}
 }
 

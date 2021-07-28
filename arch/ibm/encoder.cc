@@ -115,10 +115,11 @@ public:
 		IbmEncoderProto::TrackdataProto trackdata;
 		getTrackFormat(trackdata, physicalTrack, physicalSide);
 
+		int logicalSide = physicalSide ^ trackdata.swap_sides();
 		for (char sectorChar : trackdata.sector_skew())
         {
 			int sectorId = charToInt(sectorChar);
-			const auto& sector = image.get(physicalTrack, physicalSide, sectorId);
+			const auto& sector = image.get(physicalTrack, logicalSide, sectorId);
 			if (sector)
 				sectors.push_back(sector);
         }
@@ -147,8 +148,6 @@ public:
 				writeBytes(bytes);
 		};
 
-		if (trackdata.swap_sides())
-			physicalSide = 1 - physicalSide;
 		double clockRateUs = 1e3 / trackdata.clock_rate_khz();
 		if (!trackdata.use_fm())
 			clockRateUs /= 2.0;
@@ -184,6 +183,7 @@ public:
 			writeFillerBytes(trackdata.gap1(), gapFill);
 		}
 
+		int logicalSide = physicalSide ^ trackdata.swap_sides();
 		bool first = true;
 		for (char sectorChar : trackdata.sector_skew())
 		{
@@ -192,7 +192,7 @@ public:
 				writeFillerBytes(trackdata.gap3(), gapFill);
 			first = false;
 
-			const auto& sectorData = image.get(physicalTrack, physicalSide, sectorId);
+			const auto& sectorData = image.get(physicalTrack, logicalSide, sectorId);
 			if (!sectorData)
 			{
 				/* If there are any missing sectors, this is an empty track. */
