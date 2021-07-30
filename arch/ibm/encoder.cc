@@ -115,6 +115,8 @@ public:
 		IbmEncoderProto::TrackdataProto trackdata;
 		getTrackFormat(trackdata, physicalTrack, physicalSide);
 
+		if (trackdata.swap_sides())
+			physicalSide = 1 - physicalSide;
 		for (char sectorChar : trackdata.sector_skew())
         {
 			int sectorId = charToInt(sectorChar);

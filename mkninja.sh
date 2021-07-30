@@ -35,6 +35,10 @@ rule test
     command = \$in && touch \$out
     description = TEST \$in
 
+rule encodedecode
+    command = sh scripts/encodedecodetest.sh \$format > \$out
+    description = ENCODEDECODE \$format
+
 rule strip
     command = cp -f \$in \$out && $STRIP \$out
     description = STRIP \$in
@@ -255,6 +259,14 @@ runtest() {
     echo build $OBJDIR/$prog.stamp : test $OBJDIR/$prog-debug$EXTENSION
 }
 
+encodedecodetest() {
+    local format
+    format=$1
+
+    echo "build $OBJDIR/$format.encodedecode.stamp : encodedecode | fluxengine scripts/encodedecodetest.sh"
+    echo "    format=$format"
+}
+
 buildlibrary libagg.a \
     -Idep/agg/include \
     dep/stb/stb_image_write.c \
@@ -374,13 +386,8 @@ buildlibrary libbackend.a \
     lib/utils.cc \
     lib/writer.cc \
 
-FORMATS="\
-    acornadfs \
-    acorndfs \
-    aeslanier \
+RWFORMATS="\
     amiga \
-    ampro \
-    apple2 \
     atarist360 \
     atarist370 \
     atarist400 \
@@ -393,41 +400,49 @@ FORMATS="\
     brother240 \
     commodore1541 \
     commodore1581 \
-    eco1 \
-    f85 \
-    fb100 \
-    hplif770 \
-    ibm \
     ibm1200_525 \
     ibm1440 \
     ibm180_525 \
     ibm360_525 \
     ibm720 \
     ibm720_525 \
-    mac400 \
     mac800 \
-    micropolis \
-    mx \
     northstar87 \
     northstar175 \
     northstar350 \
     tids990 \
+    "
+
+ROFORMATS="\
+    acornadfs \
+    acorndfs \
+    aeslanier \
+    ampro \
+    apple2 \
+    eco1 \
+    f85 \
+    fb100 \
+    hplif770 \
+    ibm \
+    mac400 \
+    micropolis \
+    mx \
     victor9k \
     zilogmcz \
     "
 
-for pb in $FORMATS; do
+for pb in $RWFORMATS $ROFORMATS; do
     buildencodedproto $OBJDIR/proto/libconfig.def ConfigProto \
         formats_${pb}_pb src/formats/$pb.textpb $OBJDIR/proto/src/formats/$pb.cc
 done
 
-buildmktable formats $OBJDIR/formats.cc $FORMATS
+buildmktable formats $OBJDIR/formats.cc $RWFORMATS $ROFORMATS
 
 buildlibrary libfrontend.a \
     -I$OBJDIR/proto \
     -d $OBJDIR/proto/libconfig.def \
     -d $OBJDIR/proto/libdata.def \
-    $(for a in $FORMATS; do echo $OBJDIR/proto/src/formats/$a.cc; done) \
+    $(for a in $RWFORMATS $ROFORMATS; do echo $OBJDIR/proto/src/formats/$a.cc; done) \
     $OBJDIR/formats.cc \
     src/fe-analysedriveresponse.cc \
     src/fe-analyselayout.cc \
@@ -491,6 +506,10 @@ runtest proto-test          -I$OBJDIR/proto \
                             -d $OBJDIR/proto/libtestproto.def \
                             tests/proto.cc \
                             $OBJDIR/proto/tests/testproto.cc
+
+for f in $RWFORMATS; do
+    encodedecodetest $f
+done
 
 # vim: sw=4 ts=4 et
 
