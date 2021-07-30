@@ -27,15 +27,13 @@ encoder {
 			gap2: 22
 			gap3: 34
 			sector_skew: "012345678"
-			swap_sides: true
+			sector_size: 512
 		}
 	}
 }
 
 decoder {
-	ibm {
-		swap_sides: true
-	}
+	ibm {}
 }
 
 cylinders {
