@@ -162,7 +162,7 @@ void setProtoFieldFromString(ProtoField& protoField, const std::string& value)
 				setRange((RangeProto*)reflection->MutableMessage(message, field), value);
 				break;
 			}
-			if (field->real_containing_oneof() && value.empty())
+			if (field->containing_oneof() && value.empty())
 			{
 				reflection->MutableMessage(message, field);
 				break;
