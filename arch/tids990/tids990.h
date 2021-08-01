@@ -11,6 +11,7 @@ class DecoderProto;
 class EncoderProto;
 
 extern std::unique_ptr<AbstractDecoder> createTids990Decoder(const DecoderProto& config);
+extern std::unique_ptr<AbstractEncoder> createTids990Encoder(const EncoderProto& config);
 
 #endif
 

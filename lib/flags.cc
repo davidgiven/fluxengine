@@ -185,16 +185,22 @@ void FlagGroup::parseFlagsWithConfigFiles(int argc, const char* argv[],
 			const auto& it = configFiles.find(filename);
 			if (it != configFiles.end())
 			{
-				if (!config.ParseFromString(it->second))
-					Error() << "couldn't load config proto";
+				ConfigProto newConfig;
+				if (!newConfig.ParseFromString(it->second))
+					Error() << "couldn't load built-in config proto";
+				config.MergeFrom(newConfig);
 			}
 			else
 			{
 				std::ifstream f(filename, std::ios::out);
 				if (f.fail())
 					Error() << fmt::format("Cannot open '{}': {}", filename, strerror(errno));
-				if (!config.ParseFromIstream(&f))
-					Error() << "couldn't load config proto";
+
+				std::ostringstream ss;
+				ss << f.rdbuf();
+
+				if (!google::protobuf::TextFormat::MergeFromString(ss.str(), &config))
+					Error() << "couldn't load external config proto";
 			}
 
 			return true;

@@ -40,7 +40,9 @@ encoder {
 }
 
 decoder {
-	ibm {}
+	ibm {
+		swap_sides: false
+	}
 }
 
 cylinders {

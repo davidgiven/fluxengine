@@ -35,6 +35,10 @@ rule test
     command = \$in && touch \$out
     description = TEST \$in
 
+rule encodedecode
+    command = sh scripts/encodedecodetest.sh \$format \$configs > \$out
+    description = ENCODEDECODE \$format
+
 rule strip
     command = cp -f \$in \$out && $STRIP \$out
     description = STRIP \$in
@@ -255,6 +259,16 @@ runtest() {
     echo build $OBJDIR/$prog.stamp : test $OBJDIR/$prog-debug$EXTENSION
 }
 
+encodedecodetest() {
+    local format
+    format=$1
+    shift
+
+    echo "build $OBJDIR/$format.encodedecode.stamp : encodedecode | fluxengine$EXTENSION scripts/encodedecodetest.sh $*"
+    echo "    format=$format"
+    echo "    configs=$*"
+}
+
 buildlibrary libagg.a \
     -Idep/agg/include \
     dep/stb/stb_image_write.c \
@@ -409,9 +423,9 @@ FORMATS="\
     mac800 \
     micropolis \
     mx \
-    northstar87 \
     northstar175 \
     northstar350 \
+    northstar87 \
     tids990 \
     victor9k \
     zilogmcz \
@@ -492,6 +506,29 @@ runtest proto-test          -I$OBJDIR/proto \
                             -d $OBJDIR/proto/libtestproto.def \
                             tests/proto.cc \
                             $OBJDIR/proto/tests/testproto.cc
+
+encodedecodetest amiga
+encodedecodetest atarist360
+encodedecodetest atarist370
+encodedecodetest atarist400
+encodedecodetest atarist410
+encodedecodetest atarist720
+encodedecodetest atarist740
+encodedecodetest atarist800
+encodedecodetest atarist820
+encodedecodetest brother120
+encodedecodetest brother240
+encodedecodetest ibm1200_525
+encodedecodetest ibm1440
+encodedecodetest ibm180_525
+encodedecodetest ibm360_525
+encodedecodetest ibm720
+encodedecodetest ibm720_525
+encodedecodetest tids990
+encodedecodetest commodore1581
+encodedecodetest commodore1541 scripts/commodore1541_test.textpb
+encodedecodetest mac400 scripts/mac400_test.textpb
+encodedecodetest mac800 scripts/mac800_test.textpb
 
 # vim: sw=4 ts=4 et
 

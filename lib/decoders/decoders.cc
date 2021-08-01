@@ -59,12 +59,12 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 }
 
 std::unique_ptr<TrackDataFlux> AbstractDecoder::decodeToSectors(
-		std::shared_ptr<const Fluxmap> fluxmap, unsigned cylinder, unsigned head)
+		std::shared_ptr<const Fluxmap> fluxmap, unsigned physicalCylinder, unsigned physicalHead)
 {
 	_trackdata = std::make_unique<TrackDataFlux>();
 	_trackdata->fluxmap = fluxmap;
-	_trackdata->physicalCylinder = cylinder;
-	_trackdata->physicalHead = head;
+	_trackdata->physicalCylinder = physicalCylinder;
+	_trackdata->physicalHead = physicalHead;
 	
     FluxmapReader fmr(*fluxmap);
     _fmr = &fmr;
@@ -74,8 +74,8 @@ std::unique_ptr<TrackDataFlux> AbstractDecoder::decodeToSectors(
     {
 		_sector = std::make_shared<Sector>();
 		_sector->status = Sector::MISSING;
-		_sector->physicalCylinder = cylinder;
-		_sector->physicalHead = head;
+		_sector->physicalCylinder = physicalCylinder;
+		_sector->physicalHead = physicalHead;
 
         Fluxmap::Position recordStart = fmr.tell();
         RecordType r = advanceToNextRecord();
