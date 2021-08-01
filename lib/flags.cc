@@ -183,9 +183,13 @@ void FlagGroup::parseFlagsWithConfigFiles(int argc, const char* argv[],
     parseFlags(argc, argv,
 		[&](const auto& filename) {
 			const auto& it = configFiles.find(filename);
-			std::string data;
 			if (it != configFiles.end())
-				data = it->second;
+			{
+				ConfigProto newConfig;
+				if (!newConfig.ParseFromString(it->second))
+					Error() << "couldn't load built-in config proto";
+				config.MergeFrom(newConfig);
+			}
 			else
 			{
 				std::ifstream f(filename, std::ios::out);
@@ -194,13 +198,10 @@ void FlagGroup::parseFlagsWithConfigFiles(int argc, const char* argv[],
 
 				std::ostringstream ss;
 				ss << f.rdbuf();
-				data = ss.str();
-			}
 
-			ConfigProto newConfig;
-			if (!newConfig.ParseFromString(data))
-				Error() << "couldn't load config proto";
-			config.MergeFrom(newConfig);
+				if (!google::protobuf::TextFormat::MergeFromString(ss.str(), &config))
+					Error() << "couldn't load external config proto";
+			}
 
 			return true;
 		}

@@ -4,6 +4,7 @@
 #include "imagewriter/imagewriter.h"
 #include "image.h"
 #include "lib/config.pb.h"
+#include "imagereader/imagereaderimpl.h"
 #include "fmt/format.h"
 #include <algorithm>
 #include <iostream>
@@ -32,7 +33,7 @@ public:
 			for (int side = 0; side < sides; side++)
 			{
 				ImgInputOutputProto::TrackdataProto trackdata;
-				getTrackFormat(trackdata, track, side);
+				getTrackFormat(_config.img(), trackdata, track, side);
 
 				int numSectors = trackdata.has_sectors() ? trackdata.sectors() : geometry.numSectors;
 				int sectorSize = trackdata.has_sector_size() ? trackdata.sector_size() : geometry.sectorSize;
@@ -48,24 +49,9 @@ public:
 			}
 		}
 
-		std::cout << fmt::format("wrote {} tracks, {} sides, {} kB total\n",
+		std::cout << fmt::format("IMG: wrote {} tracks, {} sides, {} kB total\n",
 						tracks, sides,
 						outputFile.tellp() / 1024);
-	}
-
-private:
-	void getTrackFormat(ImgInputOutputProto::TrackdataProto& trackdata, unsigned track, unsigned side)
-	{
-		trackdata.Clear();
-		for (const ImgInputOutputProto::TrackdataProto& f : _config.img().trackdata())
-		{
-			if (f.has_track() && (f.track() != track))
-				continue;
-			if (f.has_side() && (f.side() != side))
-				continue;
-
-			trackdata.MergeFrom(f);
-		}
 	}
 };
 

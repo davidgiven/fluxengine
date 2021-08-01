@@ -23,6 +23,7 @@ std::unique_ptr<AbstractEncoder> AbstractEncoder::create(const EncoderProto& con
 		{ EncoderProto::kIbm,       createIbmEncoder },
 		{ EncoderProto::kMacintosh, createMacintoshEncoder },
 		{ EncoderProto::kNorthstar, createNorthstarEncoder },
+		{ EncoderProto::kTids990,   createTids990Encoder },
 	};
 
 	auto encoder = encoders.find(config.format_case());
