@@ -1,5 +1,11 @@
 #!/bin/sh
 set -e
+
+if [ $(uname) != "Linux" ]; then
+	echo "Skipping test as not on Linux"
+	exit 0
+fi
+
 tmp=/tmp/$$
 srcfile=$tmp.src.img
 fluxfile=$tmp.flux
