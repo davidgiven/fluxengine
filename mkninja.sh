@@ -264,7 +264,7 @@ encodedecodetest() {
     format=$1
     shift
 
-    echo "build $OBJDIR/$format.encodedecode.stamp : encodedecode | fluxengine scripts/encodedecodetest.sh $*"
+    echo "build $OBJDIR/$format.encodedecode.stamp : encodedecode | fluxengine$EXTENSION scripts/encodedecodetest.sh $*"
     echo "    format=$format"
     echo "    configs=$*"
 }
