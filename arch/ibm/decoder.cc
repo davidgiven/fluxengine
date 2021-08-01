@@ -148,7 +148,7 @@ public:
 			_sector->status = Sector::DATA_MISSING; /* correct but unintuitive */
 
 		if (_config.swap_sides())
-			_sector->logicalSide = 1 - _sector->logicalSide;
+			_sector->logicalSide ^= 1;
 		if (_config.ignore_side_byte())
 			_sector->logicalSide = _sector->physicalHead;
 	}
