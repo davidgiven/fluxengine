@@ -524,6 +524,7 @@ encodedecodetest ibm180_525
 encodedecodetest ibm360_525
 encodedecodetest ibm720
 encodedecodetest ibm720_525
+encodedecodetest kaypro2
 encodedecodetest tids990
 encodedecodetest commodore1581
 encodedecodetest commodore1541 scripts/commodore1541_test.textpb
