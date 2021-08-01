@@ -21,7 +21,7 @@ message ImgInputOutputProto {
 
 		oneof sectors_oneof {
 			SectorsProto sectors = 4 [(help) = "use a list of sector IDs"];
-			SectorRangeProto sector_range = 5 [(help) = "use a range of contiguous IDs"];
+			SectorRangeProto sector_range = 6 [(help) = "use a range of contiguous IDs"];
 		}
 	}
 

@@ -8,7 +8,7 @@ image_reader {
 		trackdata {
 			sector_size: 512
 			sector_range {
-				start_sector: 1
+				start_sector: 0
 				sector_count: 11
 			}
 		}
@@ -23,7 +23,7 @@ image_writer {
 		trackdata {
 			sector_size: 512
 			sector_range {
-				start_sector: 1
+				start_sector: 0
 				sector_count: 11
 			}
 		}
