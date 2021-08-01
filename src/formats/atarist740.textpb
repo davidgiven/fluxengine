@@ -39,7 +39,6 @@ encoder {
 			gap0: 80
 			gap2: 22
 			gap3: 34
-			swap_sides: true
 			sectors {
 				sector: 0
 				sector: 1
@@ -56,9 +55,7 @@ encoder {
 }
 
 decoder {
-	ibm {
-		swap_sides: true
-	}
+	ibm {}
 }
 
 cylinders {

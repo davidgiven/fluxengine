@@ -131,11 +131,10 @@ public:
 		int bitsPerRevolution = 100000;
 		double clockRateUs = 4.00;
 
-		if ((physicalTrack < 0) || (physicalTrack >= 35))
+		if ((physicalTrack < 0) || (physicalTrack >= 35) || sectors.empty())
 			return std::unique_ptr<Fluxmap>();
 
-		const auto& sector = image.get(physicalTrack, physicalSide, 0);
-
+		const auto& sector = *sectors.begin();
 		if (sector->data.size() == NORTHSTAR_PAYLOAD_SIZE_SD) {
 			bitsPerRevolution /= 2;		// FM
 		} else {
@@ -145,11 +144,8 @@ public:
 		std::vector<bool> bits(bitsPerRevolution);
 		unsigned cursor = 0;
 
-		for (int sectorId = 0; sectorId < 10; sectorId++)
-		{
-			const auto& sectorData = image.get(physicalTrack, physicalSide, sectorId);
+		for (const auto& sectorData : sectors)
 			write_sector(bits, cursor, sectorData);
-		}
 
 		if (cursor > bits.size())
 			Error() << "track data overrun";

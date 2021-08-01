@@ -4,6 +4,7 @@
 #include "imagereader/imagereader.h"
 #include "image.h"
 #include "lib/config.pb.h"
+#include "imagereader/imagereaderimpl.h"
 #include "fmt/format.h"
 #include <algorithm>
 #include <iostream>
@@ -22,6 +23,9 @@ public:
         if (!inputFile.is_open())
             Error() << "cannot open input file";
 
+		if (!_config.img().tracks() || !_config.img().sides())
+			Error() << "IMG: bad configuration; did you remember to set the tracks, sides and trackdata fields?";
+
         Image image;
 		int trackCount = 0;
         for (int track = 0; track < _config.img().tracks(); track++)
@@ -33,7 +37,7 @@ public:
             for (int side = 0; side < _config.img().sides(); side++)
             {
 				ImgInputOutputProto::TrackdataProto trackdata;
-				getTrackFormat(trackdata, track, side);
+				getTrackFormat(_config.img(), trackdata, track, side);
 
                 for (int sectorId : getSectors(trackdata))
                 {
@@ -55,25 +59,10 @@ public:
 
 		image.calculateSize();
 		const Geometry& geometry = image.getGeometry();
-        std::cout << fmt::format("reading {} tracks, {} sides, {} kB total\n",
+        std::cout << fmt::format("IMG: read {} tracks, {} sides, {} kB total\n",
                         geometry.numTracks, geometry.numSides,
 						inputFile.tellg() / 1024);
         return image;
-	}
-
-private:
-	void getTrackFormat(ImgInputOutputProto::TrackdataProto& trackdata, unsigned track, unsigned side)
-	{
-		trackdata.Clear();
-		for (const ImgInputOutputProto::TrackdataProto& f : _config.img().trackdata())
-		{
-			if (f.has_track() && (f.track() != track))
-				continue;
-			if (f.has_side() && (f.side() != side))
-				continue;
-
-			trackdata.MergeFrom(f);
-		}
 	}
 
 	std::vector<unsigned> getSectors(const ImgInputOutputProto::TrackdataProto& trackdata)

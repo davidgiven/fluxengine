@@ -13,8 +13,9 @@ message ImgInputOutputProto {
 	}
 
 	message TrackdataProto {
-		optional int32 track = 1 [(help) = "if present, this format only applies to this track"];
-		optional int32 side = 2 [(help) = "if present, this format only applies to this side"];
+		optional int32 track = 1       [(help) = "if present, this format only applies to this track"];
+		optional int32 up_to_track = 5 [(help) = "if present, forms a range with track"];
+		optional int32 side = 2        [(help) = "if present, this format only applies to this side"];
 
 		optional int32 sector_size = 3 [default=512, (help) = "number of bytes per sector"];
 
@@ -25,8 +26,8 @@ message ImgInputOutputProto {
 	}
 
 	repeated TrackdataProto trackdata = 4 [(help) = "per-track format information (repeatable)"];
-	optional int32 tracks = 5 [default=80, (help) = "number of tracks in image"];
-	optional int32 sides = 6 [default=2, (help) = "number of sides in image"];
+	optional int32 tracks = 5 [default=0, (help) = "number of tracks in image"];
+	optional int32 sides = 6 [default=0, (help) = "number of sides in image"];
 	optional int32 physical_offset = 7 [default=0, (help) = "logical:physical track offset"];
 	optional int32 physical_step = 8 [default=1, (help) = "logical:physical track step"];
 }

@@ -51,12 +51,15 @@ encoder {
 				sector: 8
 				sector: 9
 			}
+			swap_sides: true
 		}
 	}
 }
 
 decoder {
-	ibm {}
+	ibm {
+		swap_sides: false
+	}
 }
 
 cylinders {

@@ -9,7 +9,7 @@ message IbmDecoderProto {
 	}
 
 	optional bool ignore_side_byte = 2       [default = false, (help) = "ignore side byte in sector header"];
-	optional bool swap_sides = 4             [default = false, (help) = "swap side bytes when reading"];
+	optional bool swap_sides = 4             [default = false, (help) = "put logical side 1 on physical side 0"];
 	optional SectorsProto sectors = 5        [(help) = "require these sectors to exist for a good read"];
 }
 

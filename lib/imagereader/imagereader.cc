@@ -69,3 +69,20 @@ ImageReader::ImageReader(const ImageReaderProto& config):
     _config(config)
 {}
 
+void getTrackFormat(const ImgInputOutputProto& config,
+		ImgInputOutputProto::TrackdataProto& trackdata, unsigned track, unsigned side)
+{
+	trackdata.Clear();
+	for (const ImgInputOutputProto::TrackdataProto& f : config.trackdata())
+	{
+		if (f.has_track() && f.has_up_to_track() && ((track < f.track()) || (track > f.up_to_track())))
+			continue;
+		if (f.has_track() && !f.has_up_to_track() && (track != f.track()))
+			continue;
+		if (f.has_side() && (f.side() != side))
+			continue;
+
+		trackdata.MergeFrom(f);
+	}
+}
+
