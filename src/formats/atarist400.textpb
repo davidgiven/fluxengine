@@ -6,15 +6,28 @@ image_reader {
 		tracks: 80
 		sides: 1
 		trackdata {
-			sectors: 10
 			sector_size: 512
+			sector_range {
+				start_sector: 0
+				sector_count: 10
+			}
 		}
 	}
 }
 
 image_writer {
 	filename: "atarist400.st"
-	img {}
+	img {
+		tracks: 80
+		sides: 1
+		trackdata {
+			sector_size: 512
+			sector_range {
+				start_sector: 0
+				sector_count: 10
+			}
+		}
+	}
 }
 
 encoder {
@@ -26,7 +39,18 @@ encoder {
 			gap0: 80
 			gap2: 22
 			gap3: 34
-			sector_skew: "0123456789"
+			sectors {
+				sector: 0
+				sector: 1
+				sector: 2
+				sector: 3
+				sector: 4
+				sector: 5
+				sector: 6
+				sector: 7
+				sector: 8
+				sector: 9
+			}
 		}
 	}
 }

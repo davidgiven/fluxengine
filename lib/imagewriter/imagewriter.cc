@@ -126,8 +126,12 @@ void ImageWriter::printMap(const Image& image)
 
 	for (int side = 0; side < geometry.numSides; side++)
 	{
-		for (int sectorId = 0; sectorId < geometry.numSectors; sectorId++)
+		int maxSector = geometry.firstSector + geometry.numSectors - 1;
+		for (int sectorId = 0; sectorId <= maxSector; sectorId++)
 		{
+			if (sectorId < geometry.firstSector)
+				continue;
+
 			std::cout << fmt::format("{}.{:2} ", side, sectorId);
 			for (int track = 0; track < geometry.numTracks; track++)
 			{

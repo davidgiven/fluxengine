@@ -39,7 +39,7 @@ public:
 				ImgInputOutputProto::TrackdataProto trackdata;
 				getTrackFormat(_config.img(), trackdata, track, side);
 
-                for (int sectorId = 0; sectorId < trackdata.sectors(); sectorId++)
+                for (int sectorId : getSectors(trackdata))
                 {
                     Bytes data(trackdata.sector_size());
                     inputFile.read((char*) data.begin(), data.size());
@@ -63,6 +63,32 @@ public:
                         geometry.numTracks, geometry.numSides,
 						inputFile.tellg() / 1024);
         return image;
+	}
+
+	std::vector<unsigned> getSectors(const ImgInputOutputProto::TrackdataProto& trackdata)
+	{
+		std::vector<unsigned> sectors;
+		switch (trackdata.sectors_oneof_case())
+		{
+			case ImgInputOutputProto::TrackdataProto::SectorsOneofCase::kSectors:
+			{
+				for (int sectorId : trackdata.sectors().sector())
+					sectors.push_back(sectorId);
+				break;
+			}
+
+			case ImgInputOutputProto::TrackdataProto::SectorsOneofCase::kSectorRange:
+			{
+				int sectorId = trackdata.sector_range().start_sector();
+				for (int i=0; i<trackdata.sector_range().sector_count(); i++)
+					sectors.push_back(sectorId + i);
+				break;
+			}
+
+			default:
+				Error() << "no list of sectors provided in track format";
+		}
+		return sectors;
 	}
 };
 

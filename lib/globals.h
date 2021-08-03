@@ -11,6 +11,7 @@
 #include <vector>
 #include <set>
 #include <cassert>
+#include <climits>
 
 #if defined(_WIN32) || defined(__WIN32__)
 #include <direct.h>

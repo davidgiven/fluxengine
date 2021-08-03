@@ -35,10 +35,17 @@ public:
 				ImgInputOutputProto::TrackdataProto trackdata;
 				getTrackFormat(_config.img(), trackdata, track, side);
 
-				int numSectors = trackdata.has_sectors() ? trackdata.sectors() : geometry.numSectors;
+				auto sectors = getSectors(trackdata);
+				if (sectors.empty())
+				{
+					int maxSector = geometry.firstSector + geometry.numSectors - 1;
+					for (int i=geometry.firstSector; i<=maxSector; i++)
+						sectors.push_back(i);
+				}
+
 				int sectorSize = trackdata.has_sector_size() ? trackdata.sector_size() : geometry.sectorSize;
 
-				for (int sectorId = 0; sectorId < numSectors; sectorId++)
+				for (int sectorId : sectors)
 				{
 					const auto& sector = image.get(track, side, sectorId);
 					if (sector)
@@ -52,6 +59,29 @@ public:
 		std::cout << fmt::format("IMG: wrote {} tracks, {} sides, {} kB total\n",
 						tracks, sides,
 						outputFile.tellp() / 1024);
+	}
+
+	std::vector<unsigned> getSectors(const ImgInputOutputProto::TrackdataProto& trackdata)
+	{
+		std::vector<unsigned> sectors;
+		switch (trackdata.sectors_oneof_case())
+		{
+			case ImgInputOutputProto::TrackdataProto::SectorsOneofCase::kSectors:
+			{
+				for (int sectorId : trackdata.sectors().sector())
+					sectors.push_back(sectorId);
+				break;
+			}
+
+			case ImgInputOutputProto::TrackdataProto::SectorsOneofCase::kSectorRange:
+			{
+				int sectorId = trackdata.sector_range().start_sector();
+				for (int i=0; i<trackdata.sector_range().sector_count(); i++)
+					sectors.push_back(sectorId + i);
+				break;
+			}
+		}
+		return sectors;
 	}
 };
 

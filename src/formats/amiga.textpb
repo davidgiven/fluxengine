@@ -6,8 +6,11 @@ image_reader {
 		tracks: 80
 		sides: 2
 		trackdata {
-			sectors: 11
 			sector_size: 512
+			sector_range {
+				start_sector: 0
+				sector_count: 11
+			}
 		}
 	}
 }
@@ -19,7 +22,10 @@ image_writer {
 		sides: 2
 		trackdata {
 			sector_size: 512
-			sectors: 11
+			sector_range {
+				start_sector: 0
+				sector_count: 11
+			}
 		}
 	}
 }

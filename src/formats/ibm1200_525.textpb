@@ -18,8 +18,11 @@ image_reader {
 		tracks: 80
 		sides: 2
 		trackdata {
-			sectors: 15
 			sector_size: 512
+			sector_range {
+				start_sector: 1
+				sector_count: 15
+			}
 		}
 	}
 }
@@ -34,7 +37,23 @@ encoder {
 		trackdata {
 			track_length_ms: 167
 			clock_rate_khz: 500
-			sector_skew: "0123456789abcde"
+			sectors {
+				sector: 1
+				sector: 2
+				sector: 3
+				sector: 4
+				sector: 5
+				sector: 6
+				sector: 7
+				sector: 8
+				sector: 9
+				sector: 10
+				sector: 11
+				sector: 12
+				sector: 13
+				sector: 14
+				sector: 15
+			}
 		}
 	}
 }
