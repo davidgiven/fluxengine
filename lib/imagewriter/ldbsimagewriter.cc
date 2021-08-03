@@ -23,7 +23,7 @@ public:
 
 		const Geometry geometry = image.getGeometry();
 
-		std::cout << fmt::format("writing {} tracks, {} sides, {} sectors, {} bytes per sector",
+		std::cout << fmt::format("LDBS: writing {} tracks, {} sides, {} sectors, {} bytes per sector",
 						geometry.numTracks, geometry.numSides, geometry.numSectors,
 						geometry.sectorSize)
 				<< std::endl;
@@ -32,6 +32,22 @@ public:
         ByteWriter trackDirectoryWriter(trackDirectory);
         int trackDirectorySize = 0;
         trackDirectoryWriter.write_le16(0);
+
+		LDBSOutputProto::DataRate dataRate = _config.ldbs().data_rate();
+		if (dataRate == LDBSOutputProto::RATE_GUESS)
+		{
+			dataRate = (geometry.numSectors > 10) ? LDBSOutputProto::RATE_HD : LDBSOutputProto::RATE_DD;
+			if (geometry.sectorSize <= 256)
+				dataRate = LDBSOutputProto::RATE_SD;
+			std::cout << fmt::format("LDBS: guessing data rate as {}\n", LDBSOutputProto::DataRate_Name(dataRate));
+		}
+
+		LDBSOutputProto::RecordingMode recordingMode = _config.ldbs().recording_mode();
+		if (recordingMode == LDBSOutputProto::RECMODE_GUESS)
+		{
+			recordingMode = LDBSOutputProto::RECMODE_MFM;
+			std::cout << fmt::format("LDBS: guessing recording mode as {}\n", LDBSOutputProto::RecordingMode_Name(recordingMode));
+		}
 
 		for (int track = 0; track < geometry.numTracks; track++)
 		{
@@ -51,8 +67,8 @@ public:
                 trackHeaderWriter.write_le16(0x000C); /* offset of sector sideers */
                 trackHeaderWriter.write_le16(0x0012); /* length of each sector descriptor */
                 trackHeaderWriter.write_le16(actualSectors);
-                trackHeaderWriter.write_8(0); /* data rate unknown */
-                trackHeaderWriter.write_8(0); /* recording mode unknown */
+                trackHeaderWriter.write_8(dataRate);
+                trackHeaderWriter.write_8(recordingMode);
                 trackHeaderWriter.write_8(0); /* format gap length */
                 trackHeaderWriter.write_8(0); /* filler byte */
                 trackHeaderWriter.write_le16(0); /* approximate track length */
