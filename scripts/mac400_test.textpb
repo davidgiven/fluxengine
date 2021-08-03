@@ -4,31 +4,44 @@ image_reader {
 		sides: 1
 		trackdata {
 			sector_size: 524
+			sector_range {
+				start_sector: 0
+			}
 		}
 		trackdata {
 			track: 0
 			up_to_track: 15
-			sectors: 12
+			sector_range {
+				sector_count: 12
+			}
 		}
 		trackdata {
 			track: 16
 			up_to_track: 31
-			sectors: 11
+			sector_range {
+				sector_count: 11
+			}
 		}
 		trackdata {
 			track: 32
 			up_to_track: 47
-			sectors: 10
+			sector_range {
+				sector_count: 10
+			}
 		}
 		trackdata {
 			track: 48
 			up_to_track: 63
-			sectors: 9
+			sector_range {
+				sector_count: 9
+			}
 		}
 		trackdata {
 			track: 64
 			up_to_track: 79
-			sectors: 8
+			sector_range {
+				sector_count: 8
+			}
 		}
 	}
 }
@@ -39,31 +52,44 @@ image_writer {
 		sides: 1
 		trackdata {
 			sector_size: 524
+			sector_range {
+				start_sector: 0
+			}
 		}
 		trackdata {
 			track: 0
 			up_to_track: 15
-			sectors: 12
+			sector_range {
+				sector_count: 12
+			}
 		}
 		trackdata {
 			track: 16
 			up_to_track: 31
-			sectors: 11
+			sector_range {
+				sector_count: 11
+			}
 		}
 		trackdata {
 			track: 32
 			up_to_track: 47
-			sectors: 10
+			sector_range {
+				sector_count: 10
+			}
 		}
 		trackdata {
 			track: 48
 			up_to_track: 63
-			sectors: 9
+			sector_range {
+				sector_count: 9
+			}
 		}
 		trackdata {
 			track: 64
 			up_to_track: 79
-			sectors: 8
+			sector_range {
+				sector_count: 8
+			}
 		}
 	}
 }

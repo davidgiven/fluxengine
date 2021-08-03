@@ -4,7 +4,29 @@ import "lib/imagereader/imagereader.proto";
 import "lib/common.proto";
 
 message D64OutputProto {}
-message LDBSOutputProto {}
+
+message LDBSOutputProto {
+	enum DataRate {
+		RATE_HD = 0;
+		RATE_DD = 1;
+		RATE_SD = 2;
+		RATE_ED = 3;
+		RATE_GUESS = -1;
+	}
+
+	enum RecordingMode {
+		RECMODE_MFM = 0;
+		RECMODE_FM = 1;
+		RECMODE_GCR_MAC = 0x12;
+		RECMODE_GCR_PRODOS = 0x14;
+		RECMODE_GCR_LISA = 0x22;
+		RECMODE_GUESS = -1;
+	}
+
+	optional DataRate data_rate = 1 [default=RATE_GUESS, (help) = "data rate to use in LDBS file"];
+	optional RecordingMode recording_mode = 2 [default=RECMODE_GUESS, (help) = "recording mode to use in LDBS file"];
+}
+
 message DiskCopyOutputProto {}
 message NsiOutputProto {}
 
