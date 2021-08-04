@@ -39,7 +39,7 @@ static int decode_data_gcr(uint8_t gcr)
 		#undef GCR_ENTRY
     }
     return -1;
-};
+}
 
 static int decode_header_gcr(uint16_t word)
 {
@@ -51,7 +51,7 @@ static int decode_header_gcr(uint16_t word)
 		#undef GCR_ENTRY
 	}                       
 	return -1;             
-};
+}
 
 class BrotherDecoder : public AbstractDecoder
 {

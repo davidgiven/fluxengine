@@ -18,7 +18,7 @@ static int encode_header_gcr(uint16_t word)
 		#undef GCR_ENTRY
 	}                       
 	return -1;             
-};
+}
 
 static int encode_data_gcr(uint8_t data)
 {
@@ -30,7 +30,7 @@ static int encode_data_gcr(uint8_t data)
 		#undef GCR_ENTRY
 	}                       
 	return -1;             
-};
+}
 
 static void write_bits(std::vector<bool>& bits, unsigned& cursor, uint32_t data, int width)
 {
