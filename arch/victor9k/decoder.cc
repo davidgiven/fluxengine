@@ -25,7 +25,7 @@ static int decode_data_gcr(uint8_t gcr)
 		#undef GCR_ENTRY
     }
     return -1;
-};
+}
 
 static Bytes decode(const std::vector<bool>& bits)
 {

@@ -198,8 +198,8 @@ nanoseconds_t FluxmapReader::seekToPattern(const FluxMatcher& pattern)
 nanoseconds_t FluxmapReader::seekToPattern(const FluxMatcher& pattern, const FluxMatcher*& matching)
 {
     unsigned intervalCount = pattern.intervals();
-    unsigned candidates[intervalCount+1];
-    Fluxmap::Position positions[intervalCount+1];
+	std::vector<unsigned> candidates(intervalCount+1);
+	std::vector<Fluxmap::Position> positions(intervalCount+1);
 
     for (unsigned i=0; i<=intervalCount; i++)
     {

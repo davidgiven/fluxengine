@@ -64,7 +64,7 @@ static int encode_data_gcr(uint8_t data)
         #undef GCR_ENTRY
     }
     return -1;
-};
+}
 
 static void write_bits(std::vector<bool>& bits, unsigned& cursor, const std::vector<bool>& src)
 {

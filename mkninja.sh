@@ -276,7 +276,7 @@ buildlibrary libagg.a \
 
 buildlibrary libfmt.a \
     dep/fmt/format.cc \
-    dep/fmt/posix.cc \
+    dep/fmt/os.cc \
 
 buildproto libconfig.a \
     arch/aeslanier/aeslanier.proto \
