@@ -115,13 +115,13 @@ public:
             }
         }
 
-		image.setGeometry({
-			.numTracks = numCylinders,
-			.numSides = numHeads,
-			.numSectors = 12,
-			.sectorSize = 512 + 12,
-			.irregular = true
-		});
+		Geometry g;
+		g.numTracks = numCylinders;
+		g.numSides = numHeads;
+		g.numSectors = 12;
+		g.sectorSize = 512 + 12;
+		g.irregular = true;
+		image.setGeometry(g);
         return image;
 	}
 };

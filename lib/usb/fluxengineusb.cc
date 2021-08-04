@@ -120,7 +120,9 @@ private:
 public:
 	int getVersion()
 	{
-		struct any_frame f = { .f = {.type = F_FRAME_GET_VERSION_CMD, .size = sizeof(f)} };
+		struct any_frame f;
+		f.f.type = F_FRAME_GET_VERSION_CMD;
+		f.f.size = sizeof(f);
 		usb_cmd_send(&f, f.f.size);
 		auto r = await_reply<struct version_frame>(F_FRAME_GET_VERSION_REPLY);
 		return r->version;
@@ -128,29 +130,29 @@ public:
 
 	void seek(int track)
 	{
-		struct seek_frame f = {
-			.f = { .type = F_FRAME_SEEK_CMD, .size = sizeof(f) },
-			.track = (uint8_t) track
-		};
+		struct seek_frame f;
+		f.f.type = F_FRAME_SEEK_CMD;
+		f.f.size = sizeof(f);
+		f.track = (uint8_t) track;
 		usb_cmd_send(&f, f.f.size);
 		await_reply<struct any_frame>(F_FRAME_SEEK_REPLY);
 	}
 
 	void recalibrate()
 	{
-		struct any_frame f = {
-			.f = { .type = F_FRAME_RECALIBRATE_CMD, .size = sizeof(f) },
-		};
+		struct any_frame f;
+		f.f.type = F_FRAME_RECALIBRATE_CMD;
+		f.f.size = sizeof(f);
 		usb_cmd_send(&f, f.f.size);
 		await_reply<struct any_frame>(F_FRAME_RECALIBRATE_REPLY);
 	}
 
 	nanoseconds_t getRotationalPeriod(int hardSectorCount)
 	{
-		struct measurespeed_frame f = {
-			.f = {.type = F_FRAME_MEASURE_SPEED_CMD, .size = sizeof(f)},
-			.hard_sector_count = (uint8_t) hardSectorCount,
-		};
+		struct measurespeed_frame f;
+		f.f.type = F_FRAME_MEASURE_SPEED_CMD;
+		f.f.size = sizeof(f);
+		f.hard_sector_count = (uint8_t) hardSectorCount;
 		usb_cmd_send(&f, f.f.size);
 
 		auto r = await_reply<struct speed_frame>(F_FRAME_MEASURE_SPEED_REPLY);
@@ -159,7 +161,9 @@ public:
 
 	void testBulkWrite()
 	{
-		struct any_frame f = { .f = {.type = F_FRAME_BULK_WRITE_TEST_CMD, .size = sizeof(f)} };
+		struct any_frame f;
+		f.f.type = F_FRAME_BULK_WRITE_TEST_CMD;
+		f.f.size = sizeof(f);
 		usb_cmd_send(&f, f.f.size);
 
 		/* These must match the device. */
@@ -198,7 +202,9 @@ public:
 
 	void testBulkRead()
 	{
-		struct any_frame f = { .f = {.type = F_FRAME_BULK_READ_TEST_CMD, .size = sizeof(f)} };
+		struct any_frame f;
+		f.f.type = F_FRAME_BULK_READ_TEST_CMD;
+		f.f.size = sizeof(f);
 		usb_cmd_send(&f, f.f.size);
 
 		/* These must match the device. */
@@ -234,11 +240,11 @@ public:
 	Bytes read(int side, bool synced, nanoseconds_t readTime,
 	           nanoseconds_t hardSectorThreshold)
 	{
-		struct read_frame f = {
-			.f = { .type = F_FRAME_READ_CMD, .size = sizeof(f) },
-			.side = (uint8_t) side,
-			.synced = (uint8_t) synced,
-		};
+		struct read_frame f;
+		f.f.type = F_FRAME_READ_CMD;
+		f.f.size = sizeof(f);
+		f.side = (uint8_t) side;
+		f.synced = (uint8_t) synced;
 		f.hardsec_threshold_ms = (hardSectorThreshold + 5e5) / 1e6; /* round to nearest ms */
 		uint16_t milliseconds = readTime / 1e6;
 		((uint8_t*)&f.milliseconds)[0] = milliseconds;
@@ -260,10 +266,10 @@ public:
 		unsigned safelen = bytes.size() & ~(FRAME_SIZE-1);
 		Bytes safeBytes = bytes.slice(0, safelen);
 
-		struct write_frame f = {
-			.f = { .type = F_FRAME_WRITE_CMD, .size = sizeof(f) },
-			.side = (uint8_t) side,
-		};
+		struct write_frame f;
+		f.f.type = F_FRAME_WRITE_CMD;
+		f.f.size = sizeof(f);
+		f.side = (uint8_t) side;
 		f.hardsec_threshold_ms = (hardSectorThreshold + 5e5) / 1e6; /* round to nearest ms */
 		((uint8_t*)&f.bytes_to_write)[0] = safelen;
 		((uint8_t*)&f.bytes_to_write)[1] = safelen >> 8;
@@ -278,10 +284,10 @@ public:
 
 	void erase(int side, nanoseconds_t hardSectorThreshold)
 	{
-		struct erase_frame f = {
-			.f = { .type = F_FRAME_ERASE_CMD, .size = sizeof(f) },
-			.side = (uint8_t) side,
-		};
+		struct erase_frame f;
+		f.f.type = F_FRAME_ERASE_CMD;
+		f.f.size = sizeof(f);
+		f.side = (uint8_t) side;
 		f.hardsec_threshold_ms = (hardSectorThreshold + 5e5) / 1e6; /* round to nearest ms */
 		usb_cmd_send(&f, f.f.size);
 
@@ -290,21 +296,21 @@ public:
 
 	void setDrive(int drive, bool high_density, int index_mode)
 	{
-		struct set_drive_frame f = {
-			.f = { .type = F_FRAME_SET_DRIVE_CMD, .size = sizeof(f) },
-			.drive = (uint8_t) drive,
-			.high_density = high_density,
-			.index_mode = (uint8_t) index_mode
-		};
+		struct set_drive_frame f;
+		f.f.type = F_FRAME_SET_DRIVE_CMD;
+		f.f.size = sizeof(f);
+		f.drive = (uint8_t) drive;
+		f.high_density = high_density;
+		f.index_mode = (uint8_t) index_mode;
 		usb_cmd_send(&f, f.f.size);
 		await_reply<struct any_frame>(F_FRAME_SET_DRIVE_REPLY);
 	}
 
 	void measureVoltages(struct voltages_frame* voltages)
 	{
-		struct any_frame f = {
-			{ .type = F_FRAME_MEASURE_VOLTAGES_CMD, .size = sizeof(f) },
-		};
+		struct any_frame f;
+		f.f.type = F_FRAME_MEASURE_VOLTAGES_CMD;
+		f.f.size = sizeof(f);
 		usb_cmd_send(&f, f.f.size);
 
 		auto convert_voltages_from_usb = [&](const struct voltages& vin, struct voltages& vout)

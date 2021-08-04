@@ -97,12 +97,12 @@ public:
             }
         }
 
-		image.setGeometry({
-			.numTracks = numCylinders,
-			.numSides = numHeads,
-			.numSectors = numSectors,
-			.sectorSize = sectorSize
-		});
+		Geometry g;
+		g.numTracks = numCylinders;
+		g.numSides = numHeads;
+		g.numSectors = numSectors;
+		g.sectorSize = sectorSize;
+		image.setGeometry(g);
         return image;
 	}
 };

@@ -259,12 +259,12 @@ public:
   		}
 		//Write format detected in IMD image to screen to help user set the right write parameters
 
-		image.setGeometry({
-			.numTracks = header.track,
-			.numSides = header.Head + 1U,
-			.numSectors = header.numSectors,
-			.sectorSize = sectorSize
-		});
+		Geometry g;
+		g.numTracks = header.track;
+		g.numSides = header.Head + 1U;
+		g.numSectors = header.numSectors;
+		g.sectorSize = sectorSize;
+		image.setGeometry(g);
 
 		size_t headSize = header.numSectors * sectorSize;
         size_t trackSize = headSize * (header.Head + 1);
