@@ -48,7 +48,7 @@ static int encode_data_gcr(uint8_t gcr)
 		#undef GCR_ENTRY
     }
     return -1;
-};
+}
 
 /* This is extremely inspired by the MESS implementation, written by Nathan Woods
  * and R. Belmont: https://github.com/mamedev/mame/blob/4263a71e64377db11392c458b580c5ae83556bc7/src/lib/formats/ap_dsk35.cpp
