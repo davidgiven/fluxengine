@@ -156,6 +156,17 @@ void setProtoFieldFromString(ProtoField& protoField, const std::string& value)
 			break;
 		}
 
+		case google::protobuf::FieldDescriptor::TYPE_ENUM:
+		{
+			const auto* enumfield = field->enum_type();
+			const auto* enumvalue = enumfield->FindValueByName(value);
+			if (!enumvalue)
+				Error() << fmt::format("unrecognised enum value '{}'", value);
+
+			reflection->SetEnum(message, field, enumvalue);
+			break;
+		}
+
 		case google::protobuf::FieldDescriptor::TYPE_MESSAGE:
 			if (field->message_type() == RangeProto::descriptor())
 			{
