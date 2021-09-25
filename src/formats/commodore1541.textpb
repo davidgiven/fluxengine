@@ -1,12 +1,12 @@
 comment: 'Commodore 1541 170kB 5.25" SS GCR'
 
 image_reader {
-	filename: "commodore1541.img"
+	filename: "commodore1541.d64"
 	d64 {}
 }
 
 image_writer {
-	filename: "commodore1541.img"
+	filename: "commodore1541.d64"
 	d64 {}
 }
 
