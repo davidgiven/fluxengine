@@ -6,10 +6,6 @@
 #include "project.h"
 #include "../protocol.h"
 
-#define MOTOR_ON_TIME 5000 /* milliseconds */
-#define STEP_INTERVAL_TIME 6 /* ms */
-#define STEP_SETTLING_TIME 50 /* ms */
-
 #define DISKSTATUS_WPT    1
 #define DISKSTATUS_DSKCHG 2
 
@@ -18,6 +14,11 @@
 
 static bool drive0_present;
 static bool drive1_present;
+
+static uint16_t motor_powerdown_time_ms = 5000;
+static uint16_t step_interval_time_ms = 6;
+static uint16_t step_settling_time_ms = 50;
+static uint16_t motor_spinup_time_ms = 1000;
 
 static volatile uint32_t clock = 0; /* ms */
 static volatile bool index_irq = false;
@@ -157,7 +158,7 @@ static void start_motor(void)
     {
         set_drive_flags(&current_drive_flags);
         MOTOR_REG_Write(1);
-        CyDelay(1000);
+        CyDelay(motor_spinup_time_ms);
         homed = false;
     }
 
@@ -232,7 +233,7 @@ static void step(int dir)
     STEP_REG_Write(dir | 2); /* step low */
     CyDelayUs(6);
     STEP_REG_Write(dir); /* step high again, drive moves now */
-    CyDelay(STEP_INTERVAL_TIME);
+    CyDelay(step_interval_time_ms);
 }
 
 /* returns true if it looks like a drive is attached */
@@ -281,7 +282,7 @@ static void seek_to(int track)
         }
         CyWdtClear();
     }
-    CyDelay(STEP_SETTLING_TIME);
+    CyDelay(step_settling_time_ms);
     TK43_REG_Write(track < 43); /* high if 0..42, low if 43 or up */
     print("finished seek");
 }
@@ -817,6 +818,21 @@ static void cmd_measure_voltages(void)
     send_reply((struct any_frame*) &r);
 }
 
+static void cmd_set_timings(struct set_timings_frame* f)
+{
+    if (f->motor_powerdown_time_ms)
+        motor_powerdown_time_ms = f->motor_powerdown_time_ms;
+    if (f->step_interval_time_ms)
+        step_interval_time_ms = f->step_interval_time_ms;
+    if (f->step_settling_time_ms)
+        step_settling_time_ms = f->step_settling_time_ms;
+    if (f->motor_spinup_time_ms)
+        motor_spinup_time_ms = f->motor_spinup_time_ms;
+    
+    DECLARE_REPLY_FRAME(struct any_frame, F_FRAME_SET_TIMINGS_REPLY);
+    send_reply((struct any_frame*) &r);
+}
+
 static void handle_command(void)
 {
     static uint8_t input_buffer[FRAME_SIZE];
@@ -870,6 +886,10 @@ static void handle_command(void)
             cmd_measure_voltages();
             break;
             
+        case F_FRAME_SET_TIMINGS_CMD:
+            cmd_set_timings((struct set_timings_frame*) f);
+            break;
+            
         default:
             send_error(F_ERROR_BAD_COMMAND);
     }
@@ -915,7 +935,7 @@ int main(void)
         if (motor_on)
         {
             uint32_t time_on = clock - motor_on_time;
-            if (time_on > MOTOR_ON_TIME)
+            if (time_on > motor_powerdown_time_ms)
                 stop_motor();
         }
         

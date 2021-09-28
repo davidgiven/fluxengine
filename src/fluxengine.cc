@@ -30,10 +30,10 @@ static command_cb mainTest;
 static std::vector<Command> commands =
 {
     { "inspect",           mainInspect,           "Low-level analysis and inspection of a disk." },
-	{ "analyse",           mainAnalyse,           "Disk and drive analysis tools." },
+    { "analyse",           mainAnalyse,           "Disk and drive analysis tools." },
     { "read",              mainRead,              "Reads a disk, producing a sector image.", },
     { "write",             mainWrite,             "Writes a sector image to a disk.", },
-	{ "rawread",           mainRawRead,           "Reads raw flux from a disk. Warning: you can't use this to copy disks.", },
+    { "rawread",           mainRawRead,           "Reads raw flux from a disk. Warning: you can't use this to copy disks.", },
     { "rawwrite",          mainRawWrite,          "Writes a flux file to a disk. Warning: you can't use this to copy disks.", },
     { "rpm",               mainRpm,               "Measures the disk rotational speed.", },
     { "seek",              mainSeek,              "Moves the disk head.", },
@@ -43,8 +43,8 @@ static std::vector<Command> commands =
 
 static std::vector<Command> analysables =
 {
-	{ "driveresponse", mainAnalyseDriveResponse, "Measures the drive's ability to read and write pulses.", },
-	{ "layout",        mainAnalyseLayout,        "Produces a visualisation of the track/sector layout.", },
+    { "driveresponse", mainAnalyseDriveResponse, "Measures the drive's ability to read and write pulses.", },
+    { "layout",        mainAnalyseLayout,        "Produces a visualisation of the track/sector layout.", },
 };
 
 static std::vector<Command> testables =
@@ -103,20 +103,20 @@ static void globalHelp()
 
 void showProfiles(const std::string& command, const std::map<std::string, std::string>& profiles)
 {
-	std::cout << "syntax: fluxengine " << command << " <profile> [<options>...]\n"
-				 "Use --help for option help.\n"
-	             "Available profiles include:\n";
+    std::cout << "syntax: fluxengine " << command << " <profile> [<options>...]\n"
+                 "Use --help for option help.\n"
+                 "Available profiles include:\n";
 
-	for (const auto& it : profiles)
-	{
-		ConfigProto config;
-		if (!config.ParseFromString(it.second))
-			Error() << "couldn't load config proto";
-		std::cout << fmt::format("  {}: {}\n", it.first, config.comment());
-	}
+    for (const auto& it : profiles)
+    {
+        ConfigProto config;
+        if (!config.ParseFromString(it.second))
+            Error() << "couldn't load config proto";
+        std::cout << fmt::format("  {}: {}\n", it.first, config.comment());
+    }
 
-	std::cout << "Or use a text file containing your own configuration.\n";
-	exit(1);
+    std::cout << "Or use a text file containing your own configuration.\n";
+    exit(1);
 }
 
 int main(int argc, const char* argv[])
@@ -137,3 +137,6 @@ int main(int argc, const char* argv[])
     std::cerr << "fluxengine: unrecognised command (try --help)\n";
     return 1;
 }
+
+/* vim: set ts=4 sw=4 et: */
+

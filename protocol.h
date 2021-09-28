@@ -3,7 +3,7 @@
 
 enum 
 {
-    FLUXENGINE_VERSION = 15,
+    FLUXENGINE_VERSION = 16,
 
     FLUXENGINE_VID = 0x1209,
     FLUXENGINE_PID = 0x6e00,
@@ -67,6 +67,8 @@ enum
     F_FRAME_SET_DRIVE_REPLY,      /* any_frame */
     F_FRAME_MEASURE_VOLTAGES_CMD, /* any_frame */
     F_FRAME_MEASURE_VOLTAGES_REPLY, /* voltages_frame */
+    F_FRAME_SET_TIMINGS_CMD,      /* settimings_frame */
+    F_FRAME_SET_TIMINGS_REPLY,    /* any_frame */
 };
 
 enum
@@ -189,6 +191,15 @@ struct voltages_frame
     struct voltages input_drive_1_selected;
     struct voltages input_drive_0_running;
     struct voltages input_drive_1_running;
+};
+
+struct set_timings_frame
+{
+    struct frame_header f;
+    uint16_t motor_powerdown_time_ms;
+    uint16_t step_interval_time_ms;
+    uint16_t step_settling_time_ms;
+    uint16_t motor_spinup_time_ms;
 };
 
 #endif
