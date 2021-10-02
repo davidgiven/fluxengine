@@ -15,7 +15,7 @@ shift
 
 trap "rm -f $srcfile $fluxfile $destfile" EXIT
 
-dd if=/dev/urandom of=$srcfile bs=1M count=2 2>1
+dd if=/dev/urandom of=$srcfile bs=1M count=2 2>&1
 
 ./fluxengine write $format -i $srcfile -d $fluxfile "$@"
 ./fluxengine read $format -s $fluxfile -o $destfile "$@"
