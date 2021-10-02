@@ -31,22 +31,16 @@ disk spun instead to achieve the same effect...
 _Anyway_: FluxEngine will read them fine on conventional drives.
 Because it's clever.
 
-**Big note.** Apparently --- and I'm still getting to the bottom of this ---
-some drives work and some don't. My drives produce about 90% good reads of
-known good disks. One rumour I've heard is that drives sometimes include
-filters which damage the signals at very particular intervals which Mac disks
-use, but frankly this seems unlikely; it could be a software issue at my end
-and I'm investigating. If you have any insight, please [get in
-touch](https://github.com/davidgiven/fluxengine/issues/new).
-
 Reading discs
 -------------
 
 Just do:
 
 ```
-fluxengine read mac -o mac.diskcopy
+fluxengine read <format> -o mac.diskcopy
 ```
+
+...where `<format>` can be `mac400` or `mac800`.
 
 You should end up with a `mac.diskcopy` file which is compatible with DiskCopy
 4.2, which most Mac emulators support.
@@ -55,10 +49,10 @@ You should end up with a `mac.diskcopy` file which is compatible with DiskCopy
 different sizes and the odd sector size. If you use a normal `.img` file, then
 FluxEngine will store them in a simple 524 x 12 x 2 x 80 layout, with holes
 where missing sectors should be; this was easiest, but is unlikely to work with
-most Mac emulators and other software. In these files, the 12 bytes of
-metadata _follow_ the 512 bytes of user payload in the sector image. If you
-don't want it, specify a geometry in the output file with a 512-byte sectore
-size like `-o mac.img:c=80:h=1:s=12:b=512`.
+most Mac emulators and other software. In these files, the 12 bytes of metadata
+_follow_ the 512 bytes of user payload in the sector image. If you don't want
+it, specify that you want 512-byte sectors with
+`--output.image.img.trackdata.sector_size=512`.
 
 Writing discs
 -------------
@@ -66,8 +60,10 @@ Writing discs
 Just do:
 
 ```
-fluxengine write mac -i mac.diskcopy
+fluxengine write <format> -i mac.diskcopy
 ```
+
+...where `<format>` can be `mac400` or `mac800`.
 
 It'll read the DiskCopy 4.2 file and write it out.
 

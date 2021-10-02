@@ -5,9 +5,8 @@
 #include "protocol.h"
 #include "flags.h"
 
-extern FlagGroup fluxmapReaderFlags;
-
 class FluxMatcher;
+class DecoderProto;
 
 struct FluxMatch
 {
@@ -67,14 +66,7 @@ private:
 class FluxmapReader
 {
 public:
-    FluxmapReader(const Fluxmap& fluxmap):
-        _fluxmap(fluxmap),
-        _bytes(fluxmap.ptr()),
-        _size(fluxmap.bytes())
-    {
-        rewind();
-    }
-
+    FluxmapReader(const Fluxmap& fluxmap);
     FluxmapReader(const Fluxmap&& fluxmap) = delete;
 
     void rewind()
@@ -94,6 +86,11 @@ public:
     void seek(const Fluxmap::Position& pos)
     {
         _pos = pos;
+    }
+
+    int getDuration(void)
+    {
+        return (_fluxmap.duration());
     }
 
     uint8_t getNextEvent(unsigned& ticks);
@@ -116,6 +113,7 @@ private:
     const uint8_t* _bytes;
     const size_t _size;
     Fluxmap::Position _pos;
+	const DecoderProto& _config;
 };
 
 #endif

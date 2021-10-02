@@ -1,0 +1,21 @@
+comment: 'Zilog MCZ 320kB 8" 77-track SS hard-sectored (ro)'
+
+image_writer {
+	filename: "zilogmcz.img"
+	img {}
+}
+
+decoder {
+	zilogmcz {}
+}
+
+cylinders {
+	start: 0
+	end: 76
+}
+
+heads {
+	start: 0
+	end: 0
+}
+

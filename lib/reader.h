@@ -1,22 +1,16 @@
 #ifndef READER_H
 #define READER_H
 
-#include "flags.h"
-
-class Fluxmap;
-class FluxSource;
 class AbstractDecoder;
-class Track;
+class FluxSink;
+class FluxSource;
+class Fluxmap;
+class ImageWriter;
+class TrackDataFlux;
 
-extern FlagGroup readerFlags;
-
-extern void setReaderDefaultSource(const std::string& source);
-extern void setReaderDefaultOutput(const std::string& output);
-extern void setReaderRevolutions(int revolutions);
-extern void setReaderHardSectorCount(int sectorCount);
-
-extern std::vector<std::unique_ptr<Track>> readTracks();
-
-extern void readDiskCommand(AbstractDecoder& decoder);
+extern std::unique_ptr<TrackDataFlux> readAndDecodeTrack(
+		FluxSource& source, AbstractDecoder& decoder, unsigned cylinder, unsigned head);
+extern void readDiskCommand(FluxSource& source, AbstractDecoder& decoder, ImageWriter& writer);
+extern void rawReadDiskCommand(FluxSource& source, FluxSink& sink);
 
 #endif

@@ -1,0 +1,63 @@
+name: Autorelease
+
+on:
+  push:
+    branches:
+      - "master"
+
+jobs:
+  dev-release:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+    - uses: msys2/setup-msys2@v2
+      with:
+        update: true
+        msystem: MINGW32
+        install: >-
+          make
+          ninja
+          mingw-w64-i686-libusb
+          mingw-w64-i686-sqlite3
+          mingw-w64-i686-zlib
+          mingw-w64-i686-gcc
+          zip
+          mingw-w64-i686-protobuf
+          vim
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+    - name: build
+      run: |
+        make
+    - name: zip
+      run: |
+        zip -9 fluxengine.zip fluxengine.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex
+    - name: date
+      run: |
+        echo "RELEASE_DATE=$(date --rfc-3339=date)" >> ${GITHUB_ENV}
+    - name: tag
+      uses: EndBug/latest-tag@latest
+      with:
+        tag-name: dev
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: delete-old-assets
+      uses: mknejp/delete-release-assets@v1
+      with:
+        token: ${{ github.token }}
+        tag: dev
+        assets: | 
+          fluxengine.zip
+        fail-if-no-assets: false
+    - name: release
+      uses: softprops/action-gh-release@v1
+      with:
+        name: Development build ${{ env.RELEASE_DATE }}
+        files: |
+          fluxengine.zip
+        tag_name: dev
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

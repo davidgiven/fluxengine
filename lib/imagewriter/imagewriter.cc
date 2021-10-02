@@ -1,71 +1,72 @@
 #include "globals.h"
 #include "flags.h"
-#include "dataspec.h"
 #include "sector.h"
-#include "sectorset.h"
 #include "imagewriter/imagewriter.h"
+#include "image.h"
+#include "utils.h"
+#include "lib/config.pb.h"
+#include "proto.h"
 #include "fmt/format.h"
 #include <iostream>
 #include <fstream>
 
-std::map<std::string, ImageWriter::Constructor> ImageWriter::formats =
+std::unique_ptr<ImageWriter> ImageWriter::create(const ImageWriterProto& config)
 {
-	{".adf", ImageWriter::createImgImageWriter},
-	{".d64", ImageWriter::createD64ImageWriter},
-	{".d81", ImageWriter::createImgImageWriter},
-	{".diskcopy", ImageWriter::createDiskCopyImageWriter},
-	{".img", ImageWriter::createImgImageWriter},
-	{".ldbs", ImageWriter::createLDBSImageWriter},
-};
+	switch (config.format_case())
+	{
+		case ImageWriterProto::kImg:
+			return ImageWriter::createImgImageWriter(config);
 
-static bool ends_with(const std::string& value, const std::string& ending)
-{
-    if (ending.size() > value.size())
-        return false;
-    return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
+		case ImageWriterProto::kD64:
+			return ImageWriter::createD64ImageWriter(config);
+
+		case ImageWriterProto::kLdbs:
+			return ImageWriter::createLDBSImageWriter(config);
+
+		case ImageWriterProto::kDiskcopy:
+			return ImageWriter::createDiskCopyImageWriter(config);
+
+		case ImageWriterProto::kNsi:
+			return ImageWriter::createNsiImageWriter(config);
+
+		default:
+			Error() << "bad output image config";
+			return std::unique_ptr<ImageWriter>();
+	}
 }
 
-ImageWriter::Constructor ImageWriter::findConstructor(const ImageSpec& spec)
+void ImageWriter::updateConfigForFilename(ImageWriterProto* proto, const std::string& filename)
 {
-    const auto& filename = spec.filename;
-
-	for (const auto& e : formats)
+	static const std::map<std::string, std::function<void(void)>> formats =
 	{
-		if (ends_with(filename, e.first))
-			return e.second;
+		{".adf",      [&]() { proto->mutable_img(); }},
+		{".d64",      [&]() { proto->mutable_d64(); }},
+		{".d81",      [&]() { proto->mutable_img(); }},
+		{".diskcopy", [&]() { proto->mutable_diskcopy(); }},
+		{".img",      [&]() { proto->mutable_img(); }},
+		{".ldbs",     [&]() { proto->mutable_ldbs(); }},
+		{".st",       [&]() { proto->mutable_img(); }},
+		{".nsi",      [&]() { proto->mutable_nsi(); }},
+	};
+
+	for (const auto& it : formats)
+	{
+		if (endsWith(filename, it.first))
+		{
+			it.second();
+			proto->set_filename(filename);
+			return;
+		}
 	}
 
-	return NULL;
+	Error() << fmt::format("unrecognised image filename '{}'", filename);
 }
 
-std::unique_ptr<ImageWriter> ImageWriter::create(const SectorSet& sectors, const ImageSpec& spec)
-{
-	verifyImageSpec(spec);
-	return findConstructor(spec)(sectors, spec);
-}
-
-void ImageWriter::verifyImageSpec(const ImageSpec& spec)
-{
-	if (!findConstructor(spec))
-		Error() << "unrecognised output image filename extension";
-}
-
-ImageWriter::ImageWriter(const SectorSet& sectors, const ImageSpec& spec):
-    sectors(sectors),
-    spec(spec)
+ImageWriter::ImageWriter(const ImageWriterProto& config):
+	_config(config)
 {}
 
-void ImageWriter::adjustGeometry()
-{
-	if (!spec.initialised)
-	{
-		sectors.calculateSize(spec.cylinders, spec.heads, spec.sectors, spec.bytes);
-        spec.initialised = true;
-		std::cout << "Autodetecting output geometry\n";
-	}
-}
-
-void ImageWriter::writeCsv(const std::string& filename)
+void ImageWriter::writeCsv(const Image& image, const std::string& filename)
 {
 	std::ofstream f(filename, std::ios::out);
 	if (!f.is_open())
@@ -86,49 +87,55 @@ void ImageWriter::writeCsv(const std::string& filename)
 		"\"Status\""
 		"\n";
 
-	for (int track = 0; track < spec.cylinders; track++)
+	for (const auto& sector : image)
 	{
-		for (int head = 0; head < spec.heads; head++)
-		{
-			for (int sectorId = 0; sectorId < spec.sectors; sectorId++)
-			{
-				f << fmt::format("{},{},", track, head);
-				const auto& sector = sectors.get(track, head, sectorId);
-				if (!sector)
-					f << fmt::format(",,{},,,,,,,,MISSING\n", sectorId);
-				else
-					f << fmt::format("{},{},{},{},{},{},{},{},{},{},{}\n",
-						sector->logicalTrack,
-						sector->logicalSide,
-						sector->logicalSector,
-						sector->clock,
-						sector->headerStartTime,
-						sector->headerEndTime,
-						sector->dataStartTime,
-						sector->dataEndTime,
-						sector->position.bytes,
-						sector->data.size(),
-						Sector::statusToString(sector->status)
-					);
-			}
-		}
+		f << fmt::format("{},{},{},{},{},{},{},{},{},{},{},{},{}\n",
+			sector->physicalCylinder,
+			sector->physicalHead,
+			sector->logicalTrack,
+			sector->logicalSide,
+			sector->logicalSector,
+			sector->clock,
+			sector->headerStartTime,
+			sector->headerEndTime,
+			sector->dataStartTime,
+			sector->dataEndTime,
+			sector->position.bytes,
+			sector->data.size(),
+			Sector::statusToString(sector->status)
+		);
 	}
 }
 
-void ImageWriter::printMap()
+void ImageWriter::printMap(const Image& image)
 {
+	Geometry geometry = image.getGeometry();
+
 	int badSectors = 0;
 	int missingSectors = 0;
 	int totalSectors = 0;
-	std::cout << "H.SS Tracks --->" << std::endl;
-	for (int head = 0; head < spec.heads; head++)
+
+	std::cout << "     Tracks -> ";
+	for (unsigned i = 10; i < geometry.numTracks; i += 10)
+		std::cout << fmt::format("{:<10d}", i/10);
+	std::cout << std::endl;
+	std::cout << "H.SS ";
+	for (unsigned i = 0; i < geometry.numTracks; i++)
+		std::cout << fmt::format("{}", i%10);
+	std::cout << std::endl;
+
+	for (int side = 0; side < geometry.numSides; side++)
 	{
-		for (int sectorId = 0; sectorId < spec.sectors; sectorId++)
+		int maxSector = geometry.firstSector + geometry.numSectors - 1;
+		for (int sectorId = 0; sectorId <= maxSector; sectorId++)
 		{
-			std::cout << fmt::format("{}.{:2} ", head, sectorId);
-			for (int track = 0; track < spec.cylinders; track++)
+			if (sectorId < geometry.firstSector)
+				continue;
+
+			std::cout << fmt::format("{}.{:2} ", side, sectorId);
+			for (int track = 0; track < geometry.numTracks; track++)
 			{
-				const auto& sector = sectors.get(track, head, sectorId);
+				const auto& sector = image.get(track, side, sectorId);
 				if (!sector)
 				{
 					std::cout << 'X';

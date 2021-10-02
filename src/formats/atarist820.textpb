@@ -1,0 +1,71 @@
+comment: 'Atari ST 820kB 3.5" 82-track 10-sector DSDD'
+
+image_reader {
+	filename: "atarist820.st"
+	img {
+		tracks: 82
+		sides: 2
+		trackdata {
+			sector_size: 512
+			sector_range {
+				start_sector: 0
+				sector_count: 10
+			}
+		}
+	}
+}
+
+image_writer {
+	filename: "atarist820.st"
+	img {
+		tracks: 82
+		sides: 2
+		trackdata {
+			sector_size: 512
+			sector_range {
+				start_sector: 0
+				sector_count: 10
+			}
+		}
+	}
+}
+
+encoder {
+	ibm {
+		trackdata {
+			track_length_ms: 200
+			clock_rate_khz: 250
+			emit_iam: false
+			gap0: 80
+			gap2: 22
+			gap3: 34
+			sectors {
+				sector: 0
+				sector: 1
+				sector: 2
+				sector: 3
+				sector: 4
+				sector: 5
+				sector: 6
+				sector: 7
+				sector: 8
+				sector: 9
+			}
+		}
+	}
+}
+
+decoder {
+	ibm {}
+}
+
+cylinders {
+	start: 0
+	end: 81
+}
+
+heads {
+	start: 0
+	end: 1
+}
+

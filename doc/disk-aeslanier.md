@@ -36,6 +36,8 @@ Just do:
 fluxengine read aeslanier
 ```
 
+You'll end up with an `aeslanier.img` file.
+
 Useful references
 -----------------
 

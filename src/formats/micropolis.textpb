@@ -1,0 +1,27 @@
+comment: 'Micropolis MetaFloppy 630kB 5.25" DSDD hard-sectored (ro)'
+
+flux_source {
+	drive {
+		hard_sector_count: 16
+	}
+}
+
+image_writer {
+	filename: "micropolis.img"
+	img {}
+}
+
+decoder {
+	micropolis {}
+}
+
+cylinders {
+	start: 0
+	end: 76
+}
+
+heads {
+	start: 0
+	end: 1
+}
+

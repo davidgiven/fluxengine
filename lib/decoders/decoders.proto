@@ -1,0 +1,60 @@
+syntax = "proto2";
+
+import "arch/aeslanier/aeslanier.proto";
+import "arch/amiga/amiga.proto";
+import "arch/apple2/apple2.proto";
+import "arch/brother/brother.proto";
+import "arch/c64/c64.proto";
+import "arch/f85/f85.proto";
+import "arch/fb100/fb100.proto";
+import "arch/ibm/ibm.proto";
+import "arch/macintosh/macintosh.proto";
+import "arch/micropolis/micropolis.proto";
+import "arch/mx/mx.proto";
+import "arch/northstar/northstar.proto";
+import "arch/tids990/tids990.proto";
+import "arch/victor9k/victor9k.proto";
+import "arch/zilogmcz/zilogmcz.proto";
+import "lib/fluxsink/fluxsink.proto";
+import "lib/common.proto";
+
+message DecoderProto {
+	optional double pulse_debounce_threshold = 1 [default = 0.30,
+		(help) = "ignore pulses with intervals shorter than this, in fractions of a clock"];
+	optional double bit_error_threshold = 2 [default = 0.40,
+		(help) = "amount of error to tolerate in pulse timing, in fractions of a clock"];
+	optional double clock_interval_bias = 3 [default = -0.02,
+		(help) = "adjust intervals between pulses by this many clocks before decoding"];
+	optional double minimum_clock_us = 4 [default = 0.75,
+		(help) = "refuse to detect clocks shorter than this, to avoid false positives"];
+
+	oneof format {
+		IbmDecoderProto ibm = 5;
+		BrotherDecoderProto brother = 6;
+		AesLanierDecoderProto aeslanier = 7;
+		AmigaDecoderProto amiga = 8;
+		Commodore64DecoderProto c64 = 9;
+		F85DecoderProto f85 = 10;
+		Fb100DecoderProto fb100 = 11;
+		MacintoshDecoderProto macintosh = 12;
+		Apple2DecoderProto apple2 = 13;
+		MicropolisDecoderProto micropolis = 14;
+		MxDecoderProto mx = 15;
+		Tids990DecoderProto tids990 = 16;
+		Victor9kDecoderProto victor9k = 17;
+		ZilogMczDecoderProto zilogmcz = 18;
+		NorthstarDecoderProto northstar = 24;
+	}
+
+	optional FluxSinkProto copy_flux_to = 19
+		[(help) = "while decoding, write a copy of the flux here"];
+	optional bool dump_records = 20 [default = false,
+		(help) = "if set, then dump the parsed but undecoded disk records"];
+	optional bool dump_sectors = 21 [default = false,
+		(help) = "if set, then dump the decoded sectors to this file"];
+	optional int32 retries = 22 [default = 5,
+		(help) = "how many times to retry each track in the event of a read failure"];
+	optional string write_csv_to = 23
+		[(help) = "if set, write a CSV report of the disk state"];
+}
+

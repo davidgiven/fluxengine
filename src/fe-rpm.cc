@@ -1,30 +1,30 @@
 #include "globals.h"
 #include "flags.h"
 #include "usb/usb.h"
-#include "dataspec.h"
+#include "fluxsource/fluxsource.h"
 #include "protocol.h"
+#include "proto.h"
 
-static FlagGroup flags = {
-	&usbFlags,
-};
+static FlagGroup flags;
 
-static DataSpecFlag source(
-    { "--source", "-s" },
-    "source for data",
-    ":d=0:t=0:s=0");
-
-static IntFlag hardSectorCount(
-    { "--hard-sector-count" },
-    "number of hard sectors on the disk (0=soft sectors)",
-    0);
+static StringFlag sourceFlux(
+	{ "-s", "--source" },
+	"'drive:' flux source to use",
+	"",
+	[](const auto& value)
+	{
+		FluxSource::updateConfigForFilename(config.mutable_flux_source(), value);
+	});
 
 int mainRpm(int argc, const char* argv[])
 {
-    flags.parseFlags(argc, argv);
+    flags.parseFlagsWithConfigFiles(argc, argv, {});
 
-    FluxSpec spec(source);
-    usbSetDrive(spec.drive, false, F_INDEX_REAL);
-    nanoseconds_t period = usbGetRotationalPeriod(hardSectorCount);
+	if (!config.flux_source().has_drive())
+		Error() << "this only makes sense with a real disk drive";
+
+    usbSetDrive(config.flux_source().drive().drive(), false, config.flux_source().drive().index_mode());
+    nanoseconds_t period = usbGetRotationalPeriod(config.flux_source().drive().hard_sector_count());
     if (period != 0)
         std::cout << "Rotational period is " << period/1000000 << " ms (" << 60e9/period << " rpm)" << std::endl;
     else

@@ -127,10 +127,11 @@ Programmer](https://www.cypress.com/products/psoc-programming-solutions).
 **Note:** _not_ the Cypress Programmer, which is for a different board!
 Cypress will make you register.
 
-Once done, run it. Plug the blunt end of the FluxEngine board into a USB
-port (the end which is a USB connector). The programmer should detect it
-and report it as a KitProg. You may be prompted to upgrade the programmer
-hardware; if so, follow the instructions and do it.
+Once done, run it. Plug the blunt end of the FluxEngine board into a USB port
+(the end which is a USB plug, with exposed traces; this is on the smaller
+section of the board). The programmer should detect it and report it as a
+KitProg. You may be prompted to upgrade the programmer hardware; if so, follow
+the instructions and do it.
 
 Now go to File -> File Load and open
 `FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex` in the
@@ -151,10 +152,11 @@ CY8CKIT-059 Kit Setup (Kit Design Files, Creator, Programmer, Documentation,
 Examples)'. I'm not linking to it in case the URL changes when they update
 it.
 
-Once this is done, I'd strongly recommend working through the initial
-tutorial and making the LED on your board flash. It'll tell you where all the
-controls are and how to program the board. Remember that the big end of the
-board plugs into your computer for programming.
+Once this is done, I'd strongly recommend working through the initial tutorial
+and making the LED on your board flash. It'll tell you where all the controls
+are and how to program the board. Remember that you have to plug the
+programming connector into your computer to flash it; the microusb socket is
+used only for application control.
 
 When you're ready, open the `FluxEngine.cydsn/FluxEngine.cyprj` project,
 pick 'Program' from the menu, and the firmware should compile and be
@@ -184,10 +186,13 @@ well, although on Windows it'll need MSYS2 and mingw32. You'll need to
 install some support packages.
 
   - For Linux (this is Ubuntu, but this should apply to Debian too):
-	`ninja-build`, `libusb-1.0-0-dev`, `libsqlite3-dev`.
-  - For OSX with Homebrew: `ninja`, `libusb`, `pkg-config`, `sqlite`.
+	`ninja-build`, `libusb-1.0-0-dev`, `libsqlite3-dev`, `zlib1g-dev`,
+	`libudev-dev`.
+  - For OSX with Homebrew: `ninja`, `libusb`, `pkg-config`, `sqlite`,
+    `protobuf`.
   - For Windows with MSYS2: `make`, `ninja`, `mingw-w64-i686-libusb`,
-	`mingw-w64-i686-sqlite3`, `mingw-w64-i686-zlib`, `mingw-w64-i686-gcc`.
+	`mingw-w64-i686-protobuf`, `mingw-w64-i686-sqlite3`, `mingw-w64-i686-zlib`,
+	`mingw-w64-i686-gcc`.
 
 These lists are not necessarily exhaustive --- please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new) if I've missed

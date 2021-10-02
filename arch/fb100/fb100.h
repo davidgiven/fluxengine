@@ -5,18 +5,7 @@
 #define FB100_ID_SIZE 17
 #define FB100_PAYLOAD_SIZE 0x500
 
-class Sector;
-class Fluxmap;
-class Track;
-
-class Fb100Decoder : public AbstractDecoder
-{
-public:
-    virtual ~Fb100Decoder() {}
-
-    RecordType advanceToNextRecord();
-    void decodeSectorRecord();
-};
+extern std::unique_ptr<AbstractDecoder> createFb100Decoder(const DecoderProto& config);
 
 #endif
 

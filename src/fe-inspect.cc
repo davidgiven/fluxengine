@@ -4,14 +4,33 @@
 #include "fluxmap.h"
 #include "decoders/fluxmapreader.h"
 #include "decoders/decoders.h"
+#include "fluxsource/fluxsource.h"
 #include "protocol.h"
 #include "decoders/rawbits.h"
-#include "record.h"
 #include "sector.h"
-#include "track.h"
+#include "proto.h"
 #include "fmt/format.h"
 
-static FlagGroup flags { &readerFlags };
+static FlagGroup flags;
+
+static StringFlag sourceFlux(
+	{ "--source", "-s" },
+	"'drive:' flux source to use",
+	"",
+	[](const auto& value)
+	{
+		FluxSource::updateConfigForFilename(config.mutable_flux_source(), value);
+	});
+
+static IntFlag cylinderFlag(
+	{ "--cylinder", "-c" },
+	"Cylinder to read.",
+	0);
+
+static IntFlag headFlag(
+	{ "--head", "-h" },
+	"Head to read.",
+	0);
 
 static SettableFlag dumpFluxFlag(
 	{ "--dump-flux", "-F" },
@@ -180,25 +199,21 @@ static nanoseconds_t guessClock(const Fluxmap& fluxmap)
 
 int mainInspect(int argc, const char* argv[])
 {
-    flags.parseFlags(argc, argv);
+    flags.parseFlagsWithConfigFiles(argc, argv, {});
 
-	const auto& tracks = readTracks();
-	if (tracks.size() != 1)
-		Error() << "the source dataspec must contain exactly one track (two sides count as two tracks)";
-
-	auto& track = *tracks.begin();
-	track->readFluxmap();
+	std::unique_ptr<FluxSource> fluxSource(FluxSource::create(config.flux_source()));
+	const auto fluxmap = fluxSource->readFlux(cylinderFlag, headFlag);
 
 	std::cout << fmt::format("0x{:x} bytes of data in {:.3f}ms\n",
-			track->fluxmap->bytes(),
-			track->fluxmap->duration() / 1e6);
+			fluxmap->bytes(),
+			fluxmap->duration() / 1e6);
 	std::cout << fmt::format("Required USB bandwidth: {}kB/s\n",
-			track->fluxmap->bytes()/1024.0 / (track->fluxmap->duration() / 1e9));
+			fluxmap->bytes()/1024.0 / (fluxmap->duration() / 1e9));
 
-	nanoseconds_t clockPeriod = guessClock(*track->fluxmap);
+	nanoseconds_t clockPeriod = guessClock(*fluxmap);
 	std::cout << fmt::format("{:.2f} us clock detected.", (double)clockPeriod/1000.0) << std::flush;
 
-	FluxmapReader fmr(*track->fluxmap);
+	FluxmapReader fmr(*fluxmap);
 	fmr.seek(seekFlag*1000000.0);
 
 	if (dumpFluxFlag)
@@ -276,15 +291,14 @@ int mainInspect(int argc, const char* argv[])
 
 			std::cout << std::endl;
 		}
-
-		std::cout << std::endl;
 	}
+	std::cout << std::endl;
 
     if (dumpBytecodesFlag)
     {
         std::cout << "Raw FluxEngine bytecodes follow:" << std::endl;
 
-        const auto& bytes = track->fluxmap->rawBytes();
+        const auto& bytes = fluxmap->rawBytes();
         hexdump(std::cout, bytes);
     }
 

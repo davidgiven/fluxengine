@@ -54,11 +54,12 @@ private:
 	}
 
 public:
-	FluxEngineUsb(libusb_device_handle* device)
+	FluxEngineUsb(libusb_device* device)
 	{
-		_device = device;
+		int i = libusb_open(device, &_device);
+		if (i < 0)
+			Error() << "cannot open USB device: " << libusb_strerror((libusb_error) i);
 
-		int i;
 		int cfg = -1;
 		libusb_get_configuration(_device, &cfg);
 		if (cfg != 1)
@@ -128,7 +129,7 @@ public:
 	void seek(int track)
 	{
 		struct seek_frame f = {
-			{ .type = F_FRAME_SEEK_CMD, .size = sizeof(f) },
+			.f = { .type = F_FRAME_SEEK_CMD, .size = sizeof(f) },
 			.track = (uint8_t) track
 		};
 		usb_cmd_send(&f, f.f.size);
@@ -138,7 +139,7 @@ public:
 	void recalibrate()
 	{
 		struct any_frame f = {
-			{ .type = F_FRAME_RECALIBRATE_CMD, .size = sizeof(f) },
+			.f = { .type = F_FRAME_RECALIBRATE_CMD, .size = sizeof(f) },
 		};
 		usb_cmd_send(&f, f.f.size);
 		await_reply<struct any_frame>(F_FRAME_RECALIBRATE_REPLY);
@@ -290,7 +291,7 @@ public:
 	void setDrive(int drive, bool high_density, int index_mode)
 	{
 		struct set_drive_frame f = {
-			{ .type = F_FRAME_SET_DRIVE_CMD, .size = sizeof(f) },
+			.f = { .type = F_FRAME_SET_DRIVE_CMD, .size = sizeof(f) },
 			.drive = (uint8_t) drive,
 			.high_density = high_density,
 			.index_mode = (uint8_t) index_mode
@@ -326,8 +327,7 @@ public:
 	}
 };
 
-USB* createFluxengineUsb(libusb_device_handle* device)
+USB* createFluxengineUsb(libusb_device* device)
 {
 	return new FluxEngineUsb(device);
 }
-

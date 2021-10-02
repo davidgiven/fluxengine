@@ -24,10 +24,10 @@ static Bytes operator * (const Bytes& left, size_t count)
 }
 
 #define E28(val) \
-	(1 | (val<<1) & 0xff), \
-	(1 | (val>>6) & 0xff), \
-	(1 | (val>>13) & 0xff), \
-	(1 | (val>>20) & 0xff)
+	(1 | ((val)<<1) & 0xff), \
+	(1 | ((val)>>6) & 0xff), \
+	(1 | ((val)>>13) & 0xff), \
+	(1 | ((val)>>20) & 0xff)
 
 
 static void test_convert(const Bytes& gwbytes, const Bytes& flbytes)

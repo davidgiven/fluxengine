@@ -1,0 +1,52 @@
+syntax = "proto2";
+
+import "lib/common.proto";
+
+message ImgInputOutputProto {
+	message SectorsProto {
+		repeated int32 sector = 1 [(help) = "sector ID"];
+	}
+
+	message SectorRangeProto {
+		optional int32 start_sector = 1 [default=0, (help) = "first sector ID"];
+		optional int32 sector_count = 2 [default=1, (help) = "total number of sectors"];
+	}
+
+	message TrackdataProto {
+		optional int32 track = 1       [(help) = "if present, this format only applies to this track"];
+		optional int32 up_to_track = 5 [(help) = "if present, forms a range with track"];
+		optional int32 side = 2        [(help) = "if present, this format only applies to this side"];
+
+		optional int32 sector_size = 3 [default=512, (help) = "number of bytes per sector"];
+
+		oneof sectors_oneof {
+			SectorsProto sectors = 4 [(help) = "use a list of sector IDs"];
+			SectorRangeProto sector_range = 6 [(help) = "use a range of contiguous IDs"];
+		}
+	}
+
+	repeated TrackdataProto trackdata = 4 [(help) = "per-track format information (repeatable)"];
+	optional int32 tracks = 5 [default=0, (help) = "number of tracks in image"];
+	optional int32 sides = 6 [default=0, (help) = "number of sides in image"];
+	optional int32 physical_offset = 7 [default=0, (help) = "logical:physical track offset"];
+	optional int32 physical_step = 8 [default=1, (help) = "logical:physical track step"];
+}
+
+message DiskCopyInputProto {}
+message ImdInputProto {}
+message Jv3InputProto {}
+message D64InputProto {}
+message NsiInputProto {}
+
+message ImageReaderProto {
+	optional string filename = 1 [(help) = "filename of input sector image"];
+	oneof format {
+		ImgInputOutputProto img = 2;
+		DiskCopyInputProto diskcopy = 3;
+		ImdInputProto imd = 4;
+		Jv3InputProto jv3 = 5;
+		D64InputProto d64 = 6;
+		NsiInputProto nsi = 7;
+	}
+}
+

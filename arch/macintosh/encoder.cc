@@ -1,25 +1,14 @@
 #include "globals.h"
-#include "record.h"
 #include "decoders/decoders.h"
 #include "encoders/encoders.h"
 #include "macintosh.h"
 #include "crc.h"
-#include "sectorset.h"
 #include "writer.h"
+#include "image.h"
 #include "fmt/format.h"
+#include "lib/encoders/encoders.pb.h"
+#include "arch/macintosh/macintosh.pb.h"
 #include <ctype.h>
-
-FlagGroup macintoshEncoderFlags;
-
-static DoubleFlag postIndexGapUs(
-	{ "--post-index-gap-us" },
-	"Post-index gap before first sector header (microseconds).",
-	0);
-
-static DoubleFlag clockCompensation(
-	{ "--clock-compensation-factor" },
-	"Scale the output clock by this much.",
-	1.0);
 
 static bool lastBit;
 
@@ -59,7 +48,7 @@ static int encode_data_gcr(uint8_t gcr)
 		#undef GCR_ENTRY
     }
     return -1;
-};
+}
 
 /* This is extremely inspired by the MESS implementation, written by Nathan Woods
  * and R. Belmont: https://github.com/mamedev/mame/blob/4263a71e64377db11392c458b580c5ae83556bc7/src/lib/formats/ap_dsk35.cpp
@@ -175,7 +164,7 @@ static uint8_t encode_side(uint8_t track, uint8_t side)
 	return (side ? 0x20 : 0x00) | ((track>0x3f) ? 0x01 : 0x00);
 }
 
-static void write_sector(std::vector<bool>& bits, unsigned& cursor, const Sector* sector)
+static void write_sector(std::vector<bool>& bits, unsigned& cursor, const std::shared_ptr<Sector>& sector)
 {
 	if ((sector->data.size() != 512) && (sector->data.size() != 524))
 		Error() << "unsupported sector size --- you must pick 512 or 524";
@@ -185,9 +174,9 @@ static void write_sector(std::vector<bool>& bits, unsigned& cursor, const Sector
 		write_bits(bits, cursor, 0xff3fcff3fcffLL, 6*8); /* sync */
 	write_bits(bits, cursor, MAC_SECTOR_RECORD, 3*8);
 
-    uint8_t encodedTrack = sector->physicalTrack & 0x3f;
+    uint8_t encodedTrack = sector->logicalTrack & 0x3f;
 	uint8_t encodedSector = sector->logicalSector;
-	uint8_t encodedSide = encode_side(sector->physicalTrack, sector->logicalSide);
+	uint8_t encodedSide = encode_side(sector->logicalTrack, sector->logicalSide);
 	uint8_t formatByte = MAC_FORMAT_BYTE;
 	uint8_t headerChecksum = (encodedTrack ^ encodedSector ^ encodedSide ^ formatByte) & 0x3f;
 
@@ -210,33 +199,65 @@ static void write_sector(std::vector<bool>& bits, unsigned& cursor, const Sector
 	write_bits(bits, cursor, 0xdeaaff, 3*8);
 }
 
-std::unique_ptr<Fluxmap> MacintoshEncoder::encode(
-	int physicalTrack, int physicalSide, const SectorSet& allSectors)
+class MacintoshEncoder : public AbstractEncoder
 {
-	if ((physicalTrack < 0) || (physicalTrack >= MAC_TRACKS_PER_DISK))
-		return std::unique_ptr<Fluxmap>();
+public:
+	MacintoshEncoder(const EncoderProto& config):
+		AbstractEncoder(config),
+		_config(config.macintosh())
+	{}
 
-	double clockRateUs = clockRateUsForTrack(physicalTrack) * clockCompensation;
-	int bitsPerRevolution = 200000.0 / clockRateUs;
-	std::vector<bool> bits(bitsPerRevolution);
-	unsigned cursor = 0;
-
-    fillBitmapTo(bits, cursor, postIndexGapUs / clockRateUs, { true, false });
-	lastBit = false;
-
-	unsigned numSectors = sectorsForTrack(physicalTrack);
-	for (int sectorId=0; sectorId<numSectors; sectorId++)
+public:
+	std::vector<std::shared_ptr<Sector>> collectSectors(int physicalTrack, int physicalSide, const Image& image) override
 	{
-		const auto& sectorData = allSectors.get(physicalTrack, physicalSide, sectorId);
-		write_sector(bits, cursor, sectorData);
-    }
+		std::vector<std::shared_ptr<Sector>> sectors;
 
-	if (cursor >= bits.size())
-		Error() << fmt::format("track data overrun by {} bits", cursor - bits.size());
-	fillBitmapTo(bits, cursor, bits.size(), { true, false });
+		if ((physicalTrack >= 0) && (physicalTrack < MAC_TRACKS_PER_DISK))
+        {
+            unsigned numSectors = sectorsForTrack(physicalTrack);
+            for (int sectorId=0; sectorId<numSectors; sectorId++)
+            {
+                const auto& sector = image.get(physicalTrack, physicalSide, sectorId);
+                if (sector)
+                    sectors.push_back(sector);
+            }
+        }
 
-	std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
-	fluxmap->appendBits(bits, clockRateUs*1e3);
-	return fluxmap;
+		return sectors;
+	}
+
+    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide,
+			const std::vector<std::shared_ptr<Sector>>& sectors, const Image& image) override
+	{
+		if ((physicalTrack < 0) || (physicalTrack >= MAC_TRACKS_PER_DISK))
+			return std::unique_ptr<Fluxmap>();
+
+		double clockRateUs = clockRateUsForTrack(physicalTrack) * _config.clock_compensation_factor();
+		int bitsPerRevolution = 200000.0 / clockRateUs;
+		std::vector<bool> bits(bitsPerRevolution);
+		unsigned cursor = 0;
+
+		fillBitmapTo(bits, cursor, _config.post_index_gap_us() / clockRateUs, { true, false });
+		lastBit = false;
+
+		for (const auto& sector : sectors)
+			write_sector(bits, cursor, sector);
+
+		if (cursor >= bits.size())
+			Error() << fmt::format("track data overrun by {} bits", cursor - bits.size());
+		fillBitmapTo(bits, cursor, bits.size(), { true, false });
+
+		std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
+		fluxmap->appendBits(bits, clockRateUs*1e3);
+		return fluxmap;
+	}
+
+private:
+	const MacintoshEncoderProto& _config;
+};
+
+std::unique_ptr<AbstractEncoder> createMacintoshEncoder(const EncoderProto& config)
+{
+	return std::unique_ptr<AbstractEncoder>(new MacintoshEncoder(config));
 }
 

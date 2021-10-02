@@ -1,0 +1,22 @@
+syntax = "proto2";
+
+import "arch/amiga/amiga.proto";
+import "arch/brother/brother.proto";
+import "arch/c64/c64.proto";
+import "arch/ibm/ibm.proto";
+import "arch/macintosh/macintosh.proto";
+import "arch/northstar/northstar.proto";
+import "arch/tids990/tids990.proto";
+//import "lib/common.proto";
+
+message EncoderProto {
+	oneof format {
+		IbmEncoderProto ibm = 3;
+		BrotherEncoderProto brother = 4;
+		AmigaEncoderProto amiga = 5;
+		MacintoshEncoderProto macintosh = 6;
+		Tids990EncoderProto tids990 = 7;
+		Commodore64EncoderProto c64 = 8;
+		NorthstarEncoderProto northstar = 9;
+	}
+}

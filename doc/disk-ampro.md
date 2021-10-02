@@ -23,7 +23,8 @@ fluxengine read ampro
 ```
 
 You should end up with an `ampro.img` which is 409600 or 819200 bytes long.
-You can pass this straight into [cpmtools](http://www.moria.de/~michael/cpmtools/):
+This is an alias for `fluxengine read ibm` with preconfigured parameters.  You
+can pass this straight into [cpmtools](http://www.moria.de/~michael/cpmtools/):
 
 ```
 $ cpmls -f ampdsdd ampro.img

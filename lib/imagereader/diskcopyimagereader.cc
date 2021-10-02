@@ -1,9 +1,9 @@
 #include "globals.h"
 #include "flags.h"
-#include "dataspec.h"
 #include "sector.h"
-#include "sectorset.h"
 #include "imagereader/imagereader.h"
+#include "image.h"
+#include "lib/config.pb.h"
 #include "fmt/format.h"
 #include <algorithm>
 #include <iostream>
@@ -12,13 +12,13 @@
 class DiskCopyImageReader : public ImageReader
 {
 public:
-	DiskCopyImageReader(const ImageSpec& spec):
-		ImageReader(spec)
+	DiskCopyImageReader(const ImageReaderProto& config):
+		ImageReader(config)
 	{}
 
-	SectorSet readImage()
+	Image readImage()
 	{
-        std::ifstream inputFile(spec.filename, std::ios::in | std::ios::binary);
+        std::ifstream inputFile(_config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
             Error() << "cannot open input file";
 
@@ -61,7 +61,7 @@ public:
 				break;
 
 			default:
-				Error() << fmt::format("don't understant DiskCopy disks of type {}", encoding);
+				Error() << fmt::format("don't understand DiskCopy disks of type {}", encoding);
 		}
 
 		std::cout << "reading DiskCopy 4.2 image\n"
@@ -89,7 +89,7 @@ public:
 		uint32_t dataPtr = 0x54;
 		uint32_t tagPtr = dataPtr + dataSize;
 
-        SectorSet sectors;
+        Image image;
         for (int track = 0; track < numCylinders; track++)
         {
 			int numSectors = sectorsPerTrack(track);
@@ -105,24 +105,31 @@ public:
 					Bytes tag = br.read(12);
 					tagPtr += 12;
 
-                    std::unique_ptr<Sector>& sector = sectors.get(track, head, sectorId);
-                    sector.reset(new Sector);
+                    const auto& sector = image.put(track, head, sectorId);
                     sector->status = Sector::OK;
-                    sector->logicalTrack = sector->physicalTrack = track;
-                    sector->logicalSide = sector->physicalSide = head;
+                    sector->logicalTrack = sector->physicalCylinder = track;
+                    sector->logicalSide = sector->physicalHead = head;
                     sector->logicalSector = sectorId;
                     sector->data.writer().append(payload).append(tag);
                 }
             }
         }
-        return sectors;
+
+		image.setGeometry({
+			.numTracks = numCylinders,
+			.numSides = numHeads,
+			.numSectors = 12,
+			.sectorSize = 512 + 12,
+			.irregular = true
+		});
+        return image;
 	}
 };
 
 std::unique_ptr<ImageReader> ImageReader::createDiskCopyImageReader(
-	const ImageSpec& spec)
+	const ImageReaderProto& config)
 {
-    return std::unique_ptr<ImageReader>(new DiskCopyImageReader(spec));
+    return std::unique_ptr<ImageReader>(new DiskCopyImageReader(config));
 }
 
 

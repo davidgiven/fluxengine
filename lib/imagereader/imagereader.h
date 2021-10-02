@@ -1,39 +1,33 @@
 #ifndef IMAGEREADER_H
 #define IMAGEREADER_H
 
-class SectorSet;
 class ImageSpec;
+class ImageReaderProto;
+class Image;
 
 class ImageReader
 {
 public:
-	ImageReader(const ImageSpec& spec);
+	ImageReader(const ImageReaderProto& config);
 	virtual ~ImageReader() {};
 
 public:
-    static std::unique_ptr<ImageReader> create(const ImageSpec& spec);
-	static void verifyImageSpec(const ImageSpec& spec);
-
-private:
-	typedef 
-		std::function<
-			std::unique_ptr<ImageReader>(const ImageSpec& spec)
-		>
-		Constructor;
-
-	static std::map<std::string, Constructor> formats;
-
-    static std::unique_ptr<ImageReader> createDiskCopyImageReader(const ImageSpec& spec);
-    static std::unique_ptr<ImageReader> createImgImageReader(const ImageSpec& spec);
-    static std::unique_ptr<ImageReader> createJv3ImageReader(const ImageSpec& spec);
-
-	static Constructor findConstructor(const ImageSpec& spec);
+    static std::unique_ptr<ImageReader> create(const ImageReaderProto& config);
+	static void updateConfigForFilename(ImageReaderProto* proto, const std::string& filename);
 
 public:
-	virtual SectorSet readImage() = 0;
+    static std::unique_ptr<ImageReader> createD64ImageReader(const ImageReaderProto& config);
+    static std::unique_ptr<ImageReader> createDiskCopyImageReader(const ImageReaderProto& config);
+    static std::unique_ptr<ImageReader> createImgImageReader(const ImageReaderProto& config);
+    static std::unique_ptr<ImageReader> createJv3ImageReader(const ImageReaderProto& config);
+    static std::unique_ptr<ImageReader> createIMDImageReader(const ImageReaderProto& config);
+    static std::unique_ptr<ImageReader> createNsiImageReader(const ImageReaderProto& config);
+
+public:
+	virtual Image readImage() = 0;
 
 protected:
-	ImageSpec spec;
+	const ImageReaderProto& _config;
 };
 
 #endif

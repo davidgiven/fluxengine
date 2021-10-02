@@ -6,34 +6,27 @@ The FluxEngine isn't the only project which does this; another one is the
 completely open source solution. This requires more work to set up (or you can
 buy a prebuilt GreaseWeazle board), but provides completely open source
 hardware which doesn't require the use of the Cypress Windows-based tools that
-the FluxEngine does. Luckily, the FluxEngine software supports it
-out-of-the-box --- just plug it in and nearly everything should work.
+the FluxEngine does. Luckily, the FluxEngine software supports it almost
+out-of-the-box --- just plug it in and nearly everything should work. You will
+need to tell FluxEngine which serial port the GreaseWeazle is plugged
+in with:
+
+```
+fluxengine read ibm -o ibm.img --usb.greaseweazle=/dev/ttyACM3
+```
+
+On Windows, use `COM1`/`COM2`/`COM3` etc for the port.
 
 I am aware that having _software_ called FluxEngine and _hardware_ called
 FluxEngine makes things complicated when you're not using the FluxEngine client
 software with a FluxEngine board, but I'm afraid it's too late to change that
 now. Sorry.
 
-If you're using Windows
------------------------
-
-In order to access the GreaseWeazle from Windows, you need to install a WinUSB
-driver for it. You can do this with the [Zadig](https://zadig.akeo.ie/)
-program. Download it, plug in the GreaseWeazle, and run it; select Options,
-List All Devices, and then open the big dropdown box and select the
-GreaseWeazle. You should see something like this.
-
-<div style="text-align: center">
-<img src="zadig.png" style="width:80%" alt="Zadig screenshot"></a>
-</div>
-
-Ensure that the Driver boxes say `usbser` and `WinUSB`. Then press 'Replace
-Driver'. Once done, the GreaseWeazle will be visible to the FluxEngine client.
-
-**Important note!** Unfortunately, now, the original GreaseWeazle client won't
-work --- you can't use both drivers at once. I'm working on this. To switch
-back to the original driver, for using the GreaseWeazle client software
-instead, open up Zadig again, go through the same process, but make sure the left Driver box says `WinUSB` and the right one says `USB Serial (CDC)`. Now, when you press 'Replace Driver' the original driver will be restored.
+**If you were using a previous version on Windows** you might have installed
+the WinUSB driver. That's no longer needed, and will in fact not work. You'll
+need to use Zadig to restore the old driver; to do this, make sure the left
+Driver box says `WinUSB` and the right one says `USB Serial (CDC)`. Then press
+`Replace Driver`. You won't need Zadig any more.
 
 What works
 ----------
@@ -53,7 +46,7 @@ see what I can do.)
 
   - voltage measurement
   - hard sectored disks (you can still read these, but you can't use
-	`--hard-sector-count`).
+	`--fluxsource.drive.hard_sector_count`).
 
 Who to contact
 --------------

@@ -1,10 +1,10 @@
 #include "globals.h"
 #include "flags.h"
-#include "dataspec.h"
 #include "sector.h"
-#include "sectorset.h"
 #include "imagereader/imagereader.h"
+#include "image.h"
 #include "fmt/format.h"
+#include "lib/config.pb.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -13,7 +13,7 @@
  * in any order, followed by the same again for more sectors. To find the second data block
  * you need to know the size of the first data block, which requires parsing it.
  *
- * https://www.tim-mann.org/trs80/dskspec.html
+ * https://www.tim-mann.org/trs80/dskconfig.html
  *
  * typedef struct {
  *   SectorHeader headers1[2901];
@@ -77,20 +77,20 @@ static unsigned getSectorSize(uint8_t flags)
 class Jv3ImageReader : public ImageReader
 {
 public:
-	Jv3ImageReader(const ImageSpec& spec):
-		ImageReader(spec)
+	Jv3ImageReader(const ImageReaderProto& config):
+		ImageReader(config)
 	{}
 
-	SectorSet readImage()
+	Image readImage()
 	{
-        std::ifstream inputFile(spec.filename, std::ios::in | std::ios::binary);
+        std::ifstream inputFile(_config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
             Error() << "cannot open input file";
 
 		inputFile.seekg( 0, std::ios::end);
 		unsigned inputFileSize = inputFile.tellg();
 		unsigned headerPtr = 0;
-		SectorSet sectors;
+		Image image;
 		for (;;)
 		{
 			unsigned dataPtr = headerPtr + 2901*3 + 1;
@@ -110,11 +110,10 @@ public:
 					inputFile.read((char*) data.begin(), sectorSize);
 
 					unsigned head = !!(header.flags & JV3_SIDE);
-                    std::unique_ptr<Sector>& sector = sectors.get(header.track, head, header.sector);
-                    sector.reset(new Sector);
+					const auto& sector = image.put(header.track, head, header.sector);
                     sector->status = Sector::OK;
-                    sector->logicalTrack = sector->physicalTrack = header.track;
-                    sector->logicalSide = sector->physicalSide = head;
+                    sector->logicalTrack = sector->physicalCylinder = header.track;
+                    sector->logicalSide = sector->physicalHead = head;
                     sector->logicalSector = header.sector;
                     sector->data = data;
 				}
@@ -128,14 +127,14 @@ public:
 			headerPtr = dataPtr;
 		}
 
-        return sectors;
+		image.calculateSize();
+        return image;
 	}
 };
 
-std::unique_ptr<ImageReader> ImageReader::createJv3ImageReader(
-	const ImageSpec& spec)
+std::unique_ptr<ImageReader> ImageReader::createJv3ImageReader(const ImageReaderProto& config)
 {
-    return std::unique_ptr<ImageReader>(new Jv3ImageReader(spec));
+    return std::unique_ptr<ImageReader>(new Jv3ImageReader(config));
 }
 
 

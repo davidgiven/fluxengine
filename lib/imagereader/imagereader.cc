@@ -1,57 +1,88 @@
 #include "globals.h"
 #include "flags.h"
-#include "dataspec.h"
 #include "sector.h"
-#include "sectorset.h"
 #include "imagereader/imagereader.h"
+#include "utils.h"
 #include "fmt/format.h"
+#include "proto.h"
+#include "image.h"
+#include "lib/config.pb.h"
 #include <algorithm>
 #include <ctype.h>
 
-std::map<std::string, ImageReader::Constructor> ImageReader::formats =
+std::unique_ptr<ImageReader> ImageReader::create(const ImageReaderProto& config)
 {
-	{".adf", ImageReader::createImgImageReader},
-	{".d81", ImageReader::createImgImageReader},
-	{".diskcopy", ImageReader::createDiskCopyImageReader},
-	{".img", ImageReader::createImgImageReader},
-	{".ima", ImageReader::createImgImageReader},
-	{".jv1", ImageReader::createImgImageReader},
-	{".jv3", ImageReader::createJv3ImageReader},
-};
+	switch (config.format_case())
+	{
+		case ImageReaderProto::kImd:
+			return ImageReader::createIMDImageReader(config);
 
-static bool ends_with(const std::string& value, const std::string& ending)
-{
-    if (ending.size() > value.size())
-        return false;
-    return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
+		case ImageReaderProto::kImg:
+			return ImageReader::createImgImageReader(config);
+
+		case ImageReaderProto::kDiskcopy:
+			return ImageReader::createDiskCopyImageReader(config);
+
+		case ImageReaderProto::kJv3:
+			return ImageReader::createJv3ImageReader(config);
+
+		case ImageReaderProto::kD64:
+			return ImageReader::createD64ImageReader(config);
+
+		case ImageReaderProto::kNsi:
+			return ImageReader::createNsiImageReader(config);
+
+		default:
+			Error() << "bad input file config";
+			return std::unique_ptr<ImageReader>();
+	}
 }
 
-ImageReader::Constructor ImageReader::findConstructor(const ImageSpec& spec)
+void ImageReader::updateConfigForFilename(ImageReaderProto* proto, const std::string& filename)
 {
-    const auto& filename = spec.filename;
-
-	for (const auto& e : formats)
+	static const std::map<std::string, std::function<void(void)>> formats =
 	{
-		if (ends_with(filename, e.first))
-			return e.second;
+		{".adf",      [&]() { proto->mutable_img(); }},
+		{".jv3",      [&]() { proto->mutable_jv3(); }},
+		{".d64",      [&]() { proto->mutable_d64(); }},
+		{".d81",      [&]() { proto->mutable_img(); }},
+		{".diskcopy", [&]() { proto->mutable_diskcopy(); }},
+		{".img",      [&]() { proto->mutable_img(); }},
+		{".st",       [&]() { proto->mutable_img(); }},
+		{".nsi",      [&]() { proto->mutable_nsi(); }},
+	};
+
+	for (const auto& it : formats)
+	{
+		if (endsWith(filename, it.first))
+		{
+			it.second();
+			proto->set_filename(filename);
+			return;
+		}
 	}
 
-	return NULL;
+	Error() << fmt::format("unrecognised image filename '{}'", filename);
 }
 
-std::unique_ptr<ImageReader> ImageReader::create(const ImageSpec& spec)
-{
-    verifyImageSpec(spec);
-    return findConstructor(spec)(spec);
-}
-
-void ImageReader::verifyImageSpec(const ImageSpec& spec)
-{
-    if (!findConstructor(spec))
-        Error() << "unrecognised input image filename extension";
-}
-
-ImageReader::ImageReader(const ImageSpec& spec):
-    spec(spec)
+ImageReader::ImageReader(const ImageReaderProto& config):
+    _config(config)
 {}
+
+void getTrackFormat(const ImgInputOutputProto& config,
+		ImgInputOutputProto::TrackdataProto& trackdata, unsigned track, unsigned side)
+{
+	trackdata.Clear();
+	for (const ImgInputOutputProto::TrackdataProto& f : config.trackdata())
+	{
+		if (f.has_track() && f.has_up_to_track() && ((track < f.track()) || (track > f.up_to_track())))
+			continue;
+		if (f.has_track() && !f.has_up_to_track() && (track != f.track()))
+			continue;
+		if (f.has_side() && (f.side() != side))
+			continue;
+
+		trackdata.MergeFrom(f);
+	}
+}
 

@@ -1,9 +1,10 @@
 #include "globals.h"
 #include "flags.h"
-#include "dataspec.h"
 #include "sector.h"
-#include "sectorset.h"
 #include "imagewriter/imagewriter.h"
+#include "image.h"
+#include "lib/config.pb.h"
+#include "imagereader/imagereaderimpl.h"
 #include "fmt/format.h"
 #include <algorithm>
 #include <iostream>
@@ -12,50 +13,80 @@
 class ImgImageWriter : public ImageWriter
 {
 public:
-	ImgImageWriter(const SectorSet& sectors, const ImageSpec& spec):
-		ImageWriter(sectors, spec)
+	ImgImageWriter(const ImageWriterProto& config):
+		ImageWriter(config)
 	{}
 
-	void writeImage()
+	void writeImage(const Image& image)
 	{
-		unsigned numCylinders = spec.cylinders;
-		unsigned numHeads = spec.heads;
-		unsigned numSectors = spec.sectors;
-		unsigned numBytes = spec.bytes;
+		const Geometry geometry = image.getGeometry();
 
-		size_t headSize = numSectors * numBytes;
-		size_t trackSize = headSize * numHeads;
+		int tracks = _config.img().has_tracks() ? _config.img().tracks() : geometry.numTracks;
+		int sides = _config.img().has_sides() ? _config.img().sides() : geometry.numSides;
 
-		std::cout << fmt::format("writing {} tracks, {} heads, {} sectors, {} bytes per sector, {} kB total",
-						numCylinders, numHeads,
-						numSectors, numBytes,
-						numCylinders * trackSize / 1024)
-				<< std::endl;
-
-		std::ofstream outputFile(spec.filename, std::ios::out | std::ios::binary);
+		std::ofstream outputFile(_config.filename(), std::ios::out | std::ios::binary);
 		if (!outputFile.is_open())
 			Error() << "cannot open output file";
 
-		for (int track = 0; track < numCylinders; track++)
+		for (int track = 0; track < tracks; track++)
 		{
-			for (int head = 0; head < numHeads; head++)
+			for (int side = 0; side < sides; side++)
 			{
-				for (int sectorId = 0; sectorId < numSectors; sectorId++)
+				ImgInputOutputProto::TrackdataProto trackdata;
+				getTrackFormat(_config.img(), trackdata, track, side);
+
+				auto sectors = getSectors(trackdata);
+				if (sectors.empty())
 				{
-					const auto& sector = sectors.get(track, head, sectorId);
+					int maxSector = geometry.firstSector + geometry.numSectors - 1;
+					for (int i=geometry.firstSector; i<=maxSector; i++)
+						sectors.push_back(i);
+				}
+
+				int sectorSize = trackdata.has_sector_size() ? trackdata.sector_size() : geometry.sectorSize;
+
+				for (int sectorId : sectors)
+				{
+					const auto& sector = image.get(track, side, sectorId);
 					if (sector)
-					{
-						outputFile.seekp(sector->logicalTrack*trackSize + sector->logicalSide*headSize + sector->logicalSector*numBytes, std::ios::beg);
-						sector->data.slice(0, numBytes).writeTo(outputFile);
-					}
+						sector->data.slice(0, sectorSize).writeTo(outputFile);
+					else
+						outputFile.seekp(sectorSize, std::ios::cur);
 				}
 			}
 		}
+
+		std::cout << fmt::format("IMG: wrote {} tracks, {} sides, {} kB total\n",
+						tracks, sides,
+						outputFile.tellp() / 1024);
+	}
+
+	std::vector<unsigned> getSectors(const ImgInputOutputProto::TrackdataProto& trackdata)
+	{
+		std::vector<unsigned> sectors;
+		switch (trackdata.sectors_oneof_case())
+		{
+			case ImgInputOutputProto::TrackdataProto::SectorsOneofCase::kSectors:
+			{
+				for (int sectorId : trackdata.sectors().sector())
+					sectors.push_back(sectorId);
+				break;
+			}
+
+			case ImgInputOutputProto::TrackdataProto::SectorsOneofCase::kSectorRange:
+			{
+				int sectorId = trackdata.sector_range().start_sector();
+				for (int i=0; i<trackdata.sector_range().sector_count(); i++)
+					sectors.push_back(sectorId + i);
+				break;
+			}
+		}
+		return sectors;
 	}
 };
 
 std::unique_ptr<ImageWriter> ImageWriter::createImgImageWriter(
-	const SectorSet& sectors, const ImageSpec& spec)
+	const ImageWriterProto& config)
 {
-    return std::unique_ptr<ImageWriter>(new ImgImageWriter(sectors, spec));
+    return std::unique_ptr<ImageWriter>(new ImgImageWriter(config));
 }

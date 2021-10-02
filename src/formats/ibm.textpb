@@ -1,0 +1,22 @@
+comment: 'PC 3.5"/5.25" autodetect double sided format (ro)'
+
+image_writer {
+	filename: "ibm.img"
+	img {}
+}
+
+decoder {
+	ibm {}
+}
+
+cylinders {
+	start: 0
+	end: 81
+}
+
+heads {
+	start: 0
+	end: 1
+}
+
+
