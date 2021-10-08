@@ -1,6 +1,6 @@
 PACKAGES = zlib sqlite3 libusb-1.0 protobuf
 
-export CFLAGS = -x c++ --std=c++2a -ffunction-sections -fdata-sections
+export CFLAGS = -x c++ --std=c++14 -ffunction-sections -fdata-sections
 export LDFLAGS = -pthread
 
 export COPTFLAGS = -Os

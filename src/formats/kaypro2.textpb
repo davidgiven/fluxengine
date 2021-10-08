@@ -1,0 +1,73 @@
+comment: 'Kaypro II 5.25" 40-track 10-sector SSDD'
+
+image_reader {
+	filename: "kaypro2.img"
+	img {
+		trackdata {
+			sector_size: 512
+			sector_range {
+				start_sector: 0
+				sector_count: 10
+			}
+		}
+		tracks: 40
+		sides: 1
+		physical_step: 1
+	}
+}
+
+image_writer {
+	filename: "kaypro2.img"
+	img {
+		trackdata {
+			sector_size: 512
+			sector_range {
+				start_sector: 0
+				sector_count: 10
+			}
+		}
+		tracks: 40
+		sides: 1
+		physical_step: 1
+	}
+}
+
+encoder {
+	ibm {
+		trackdata {
+			emit_iam: false
+			track_length_ms: 167
+			clock_rate_khz: 300
+			sectors {
+				sector: 0
+				sector: 1
+				sector: 2
+				sector: 3
+				sector: 4
+				sector: 5
+				sector: 6
+				sector: 7
+				sector: 8
+				sector: 9
+			}
+			gap0: 80
+			gap2: 22
+			gap3: 44
+		}
+	}
+}
+
+decoder {
+	ibm {}
+}
+
+cylinders {
+	start: 0
+	end: 39
+}
+
+heads {
+	start: 0
+	end: 0
+}
+

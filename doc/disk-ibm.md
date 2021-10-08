@@ -14,6 +14,7 @@ metadata. Systems which use IBM scheme disks include but are not limited to:
   - the TRS-80
   - late era Commodore machines (the 1571 and so on)
   - most CP/M machines
+  - the Kaypro II
   - etc
 
 FluxEngine supports reading these. However, some variants are more peculiar

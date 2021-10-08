@@ -144,7 +144,7 @@ public:
 		if (!trackdata.use_fm())
 			clockRateUs /= 2.0;
 		int bitsPerRevolution = (trackdata.track_length_ms() * 1000.0) / clockRateUs;
-		_bits.resize(bitsPerRevolution);
+		_bits.resize(bitsPerRevolution*2);
 		_cursor = 0;
 
 		uint8_t idamUnencoded = decodeUint16(trackdata.idam_byte());
@@ -261,12 +261,15 @@ public:
 			}
 		}
 
-		if (_cursor >= _bits.size())
-			Error() << "track data overrun";
+		if (_cursor >= bitsPerRevolution)
+			Error() << fmt::format("track data overrun by {} bits ({:.3} ms)",
+					_cursor - bitsPerRevolution,
+					(_cursor - bitsPerRevolution) / (clockRateUs*1000.0));
 		while (_cursor < _bits.size())
 			writeFillerBytes(1, gapFill);
 
 		std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
+		_bits.resize(bitsPerRevolution);
 		fluxmap->appendBits(_bits, clockRateUs*1e3);
 		return fluxmap;
 	}
