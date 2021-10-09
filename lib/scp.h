@@ -27,17 +27,24 @@ enum
     SCP_FLAG_FOOTER     = (1<<5)
 };
 
+struct ScpTrackStart
+{
+    char track_id[3];      // 'TRK'
+    uint8_t strack;        // SCP track number
+};
+
+struct ScpTrackRevolution
+{
+    uint8_t index[4];  // time for one revolution
+    uint8_t length[4]; // number of bitcells
+    uint8_t offset[4]; // offset to bitcell data, relative to track header
+};
+
 struct ScpTrack
 {
     char track_id[3];      // 'TRK'
     uint8_t strack;        // SCP track number
-    struct
-    {
-        uint8_t index[4];  // time for one revolution
-        uint8_t length[4]; // number of bitcells
-        uint8_t offset[4]; // offset to bitcell data, relative to track header
-    }
-    revolution[5];
+    struct ScpTrackRevolution revolution[5];
 };
 
 #endif

@@ -2,6 +2,7 @@
 #include "fluxmap.h"
 #include "kryoflux.h"
 #include "lib/fluxsource/fluxsource.pb.h"
+#include "lib/utils.h"
 #include "fluxsource/fluxsource.h"
 #include "scp.h"
 #include "proto.h"
@@ -57,19 +58,30 @@ public:
     std::unique_ptr<Fluxmap> readFlux(int track, int side)
     {
 		int strack = strackno(track, side);
+		if (strack >= ARRAY_SIZE(_header.track))
+			return std::unique_ptr<Fluxmap>();
 		uint32_t offset = Bytes(_header.track[strack], 4).reader().read_le32();
 		if (offset == 0)
 			return std::unique_ptr<Fluxmap>();
 
-		ScpTrack trackheader;
+		ScpTrackStart trackstart;
 		_if.seekg(offset, std::ios::beg);
-		_if.read((char*) &trackheader, sizeof(trackheader));
+		_if.read((char*) &trackstart, sizeof(trackstart));
 		check_for_error();
 
-		if ((trackheader.track_id[0] != 'T')
-				|| (trackheader.track_id[1] != 'R')
-				|| (trackheader.track_id[2] != 'K'))
+		if ((trackstart.track_id[0] != 'T')
+				|| (trackstart.track_id[1] != 'R')
+				|| (trackstart.track_id[2] != 'K'))
 			Error() << "corrupt SCP file";
+
+		std::vector<ScpTrackRevolution> revs(_header.revolutions);
+		for (int revolution = 0; revolution < _header.revolutions; revolution++)
+		{
+			ScpTrackRevolution trackrev;
+			_if.read((char*) &trackrev, sizeof(trackrev));
+			check_for_error();
+			revs[revolution] = trackrev;
+		}
 
 		std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
 		nanoseconds_t pending = 0;
@@ -79,8 +91,8 @@ public:
 			if (revolution != 0)
 				fluxmap->appendIndex();
 
-			uint32_t datalength = Bytes(trackheader.revolution[revolution].length, 4).reader().read_le32();
-			uint32_t dataoffset = Bytes(trackheader.revolution[revolution].offset, 4).reader().read_le32();
+			uint32_t datalength = Bytes(revs[revolution].length, 4).reader().read_le32();
+			uint32_t dataoffset = Bytes(revs[revolution].offset, 4).reader().read_le32();
 
 			Bytes data(datalength*2);
 			_if.seekg(dataoffset + offset, std::ios::beg);
