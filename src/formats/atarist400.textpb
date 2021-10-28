@@ -8,7 +8,7 @@ image_reader {
 		trackdata {
 			sector_size: 512
 			sector_range {
-				start_sector: 0
+				start_sector: 1
 				sector_count: 10
 			}
 		}
@@ -23,7 +23,7 @@ image_writer {
 		trackdata {
 			sector_size: 512
 			sector_range {
-				start_sector: 0
+				start_sector: 1
 				sector_count: 10
 			}
 		}
@@ -40,7 +40,6 @@ encoder {
 			gap2: 22
 			gap3: 34
 			sectors {
-				sector: 0
 				sector: 1
 				sector: 2
 				sector: 3
@@ -50,6 +49,7 @@ encoder {
 				sector: 7
 				sector: 8
 				sector: 9
+				sector: 10
 			}
 		}
 	}
