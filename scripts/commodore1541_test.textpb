@@ -1,0 +1,8 @@
+image_reader {
+	d64 {}
+}
+
+image_writer {
+	d64 {}
+}
+

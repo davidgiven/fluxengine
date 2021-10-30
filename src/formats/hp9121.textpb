@@ -6,19 +6,11 @@ image_reader {
 		tracks: 70
 		sides: 1
 		trackdata {
-			sectors: 18
 			sector_size: 256
-		}
-	}
-}
-
-image_writer {
-	img {
-		tracks: 70
-		sides: 1
-		trackdata {
-			sectors: 18
-			sector_size: 256
+			sector_range {
+				start_sector: 0
+				sector_count: 18
+			}
 		}
 	}
 }
@@ -33,18 +25,30 @@ encoder {
 			gap0: 80
 			gap2: 22
 			gap3: 44
-			sector_skew: "0123456789abcdefgh"
-			start_sector_id: 0
+			sectors {
+				sector: 0
+				sector: 1
+				sector: 2
+				sector: 3
+				sector: 4
+				sector: 5
+				sector: 6
+				sector: 7
+				sector: 8
+				sector: 9
+				sector: 10
+				sector: 11
+				sector: 12
+				sector: 13
+				sector: 14
+				sector: 15
+				sector: 16
+				sector: 17
+			}
 		}
 	}
 }
 
-decoder {
-	ibm {
-		sector_id_base: 0
-	}
-}
-		
 cylinders {
 	start: 0
 	end: 69

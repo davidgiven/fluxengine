@@ -39,6 +39,7 @@ const std::shared_ptr<Sector>& Image::put(unsigned track, unsigned side, unsigne
 void Image::calculateSize()
 {
 	_geometry = {};
+	unsigned maxSector = 0;
 	for (const auto& i : _sectors)
 	{
 		const auto& sector = i.second;
@@ -46,9 +47,11 @@ void Image::calculateSize()
 		{
 			_geometry.numTracks = std::max(_geometry.numTracks, (unsigned)sector->logicalTrack+1);
 			_geometry.numSides = std::max(_geometry.numSides, (unsigned)sector->logicalSide+1);
-			_geometry.numSectors = std::max(_geometry.numSectors, (unsigned)sector->logicalSector+1);
+			_geometry.firstSector = std::min(_geometry.firstSector, (unsigned)sector->logicalSector);
+			maxSector = std::max(maxSector, (unsigned)sector->logicalSector);
 			_geometry.sectorSize = std::max(_geometry.sectorSize, (unsigned)sector->data.size());
 		}
 	}
+	_geometry.numSectors = maxSector - _geometry.firstSector + 1;
 }
 

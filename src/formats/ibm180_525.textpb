@@ -7,8 +7,11 @@ image_reader {
 		sides: 1
 		physical_step: 2
 		trackdata {
-			sectors: 9
 			sector_size: 512
+			sector_range {
+				start_sector: 1
+				sector_count: 9
+			}
 		}
 	}
 }
@@ -23,7 +26,17 @@ encoder {
 		trackdata {
 			track_length_ms: 167
 			clock_rate_khz: 300
-			sector_skew: "012345678"
+			sectors {
+				sector: 1
+				sector: 2
+				sector: 3
+				sector: 4
+				sector: 5
+				sector: 6
+				sector: 7
+				sector: 8
+				sector: 9
+			}
 		}
 	}
 }

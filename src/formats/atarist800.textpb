@@ -6,15 +6,28 @@ image_reader {
 		tracks: 80
 		sides: 2
 		trackdata {
-			sectors: 10
 			sector_size: 512
+			sector_range {
+				start_sector: 1
+				sector_count: 10
+			}
 		}
 	}
 }
 
 image_writer {
 	filename: "atarist800.st"
-	img {}
+	img {
+		tracks: 80
+		sides: 2
+		trackdata {
+			sector_size: 512
+			sector_range {
+				start_sector: 1
+				sector_count: 10
+			}
+		}
+	}
 }
 
 encoder {
@@ -26,16 +39,24 @@ encoder {
 			gap0: 80
 			gap2: 22
 			gap3: 34
-			sector_skew: "0123456789"
-			swap_sides: true
+			sectors {
+				sector: 1
+				sector: 2
+				sector: 3
+				sector: 4
+				sector: 5
+				sector: 6
+				sector: 7
+				sector: 8
+				sector: 9
+				sector: 10
+			}
 		}
 	}
 }
 
 decoder {
-	ibm {
-		swap_sides: true
-	}
+	ibm {}
 }
 
 cylinders {

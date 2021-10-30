@@ -275,7 +275,7 @@ disks, and have different magnetic properties. 3.5" drives can usually
 autodetect what kind of medium is inserted into the drive based on the hole in
 the disk casing, but 5.25" drives can't. As a result, you need to explicitly
 tell FluxEngine on the command line whether you're using a high density disk or
-not with the `--input/output.flux.drive.high_density` configuration setting.
+not with the `--flux_source/sink.drive.high_density` configuration setting.
 **If you don't do this, your disks may not read correctly and will _certainly_
 fail to write correctly.**
 
@@ -292,14 +292,14 @@ here.](http://www.retrotechnology.com/herbs_stuff/guzis.html)
 These flags apply to many operations and are useful for modifying the overall
 behaviour.
 
-  - `--input.flux.drive.revolutions=X`
+  - `--flux_source.drive.revolutions=X`
 
     When reading, spin the disk X times. X
 	can be a floating point number. The default is usually 1.2. Some formats
 	default to 1.  Increasing the number will sample more data, and can be
 	useful on dubious disks to try and get a better read.
 
-  - `--input.flux.drive.sync_with_index=true|false`
+  - `--flux_source.drive.sync_with_index=true|false`
 
     Wait for an index pulse
 	before starting to read the disk. (Ignored for write operations.) By
@@ -307,7 +307,7 @@ behaviour.
 	disk problems it's helpful to have all your data start at the same place
 	each time.
 
-  - `--input.flux.drive.index_source=X`, `--output.flux.drive.index_source=X`
+  - `--flux_source.drive.index_source=X`, `--flux_sink.drive.index_source=X`
 
 	Set the source of index pulses when reading or writing respectively. This
 	is for use with drives which don't produce index pulse data. `X` can be

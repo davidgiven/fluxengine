@@ -4,6 +4,7 @@
 #include "imagereader/imagereader.h"
 #include "image.h"
 #include "lib/config.pb.h"
+#include "imagereader/imagereaderimpl.h"
 #include "fmt/format.h"
 #include <algorithm>
 #include <iostream>
@@ -22,6 +23,9 @@ public:
         if (!inputFile.is_open())
             Error() << "cannot open input file";
 
+		if (!_config.img().tracks() || !_config.img().sides())
+			Error() << "IMG: bad configuration; did you remember to set the tracks, sides and trackdata fields?";
+
         Image image;
 		int trackCount = 0;
         for (int track = 0; track < _config.img().tracks(); track++)
@@ -33,9 +37,9 @@ public:
             for (int side = 0; side < _config.img().sides(); side++)
             {
 				ImgInputOutputProto::TrackdataProto trackdata;
-				getTrackFormat(trackdata, track, side);
+				getTrackFormat(_config.img(), trackdata, track, side);
 
-                for (int sectorId = 0; sectorId < trackdata.sectors(); sectorId++)
+                for (int sectorId : getSectors(trackdata))
                 {
                     Bytes data(trackdata.sector_size());
                     inputFile.read((char*) data.begin(), data.size());
@@ -55,25 +59,36 @@ public:
 
 		image.calculateSize();
 		const Geometry& geometry = image.getGeometry();
-        std::cout << fmt::format("reading {} tracks, {} sides, {} kB total\n",
+        std::cout << fmt::format("IMG: read {} tracks, {} sides, {} kB total\n",
                         geometry.numTracks, geometry.numSides,
 						inputFile.tellg() / 1024);
         return image;
 	}
 
-private:
-	void getTrackFormat(ImgInputOutputProto::TrackdataProto& trackdata, unsigned track, unsigned side)
+	std::vector<unsigned> getSectors(const ImgInputOutputProto::TrackdataProto& trackdata)
 	{
-		trackdata.Clear();
-		for (const ImgInputOutputProto::TrackdataProto& f : _config.img().trackdata())
+		std::vector<unsigned> sectors;
+		switch (trackdata.sectors_oneof_case())
 		{
-			if (f.has_track() && (f.track() != track))
-				continue;
-			if (f.has_side() && (f.side() != side))
-				continue;
+			case ImgInputOutputProto::TrackdataProto::SectorsOneofCase::kSectors:
+			{
+				for (int sectorId : trackdata.sectors().sector())
+					sectors.push_back(sectorId);
+				break;
+			}
 
-			trackdata.MergeFrom(f);
+			case ImgInputOutputProto::TrackdataProto::SectorsOneofCase::kSectorRange:
+			{
+				int sectorId = trackdata.sector_range().start_sector();
+				for (int i=0; i<trackdata.sector_range().sector_count(); i++)
+					sectors.push_back(sectorId + i);
+				break;
+			}
+
+			default:
+				Error() << "no list of sectors provided in track format";
 		}
+		return sectors;
 	}
 };
 

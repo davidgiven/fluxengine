@@ -8,33 +8,6 @@
 #include "arch/brother/brother.pb.h"
 #include "lib/encoders/encoders.pb.h"
 
-FlagGroup brotherEncoderFlags;
-
-static DoubleFlag clockRateUs(
-	{ "--clock-rate" },
-	"Encoded data clock rate (microseconds).",
-	3.83);
-
-static DoubleFlag postIndexGapMs(
-	{ "--post-index-gap" },
-	"Post-index gap before first sector header (milliseconds).",
-	1.0);
-
-static DoubleFlag sectorSpacingMs(
-	{ "--sector-spacing" },
-	"Time between successive sector headers (milliseconds).",
-	16.2);
-
-static DoubleFlag postHeaderSpacingMs(
-	{ "--post-header-spacing" },
-	"Time between a sector's header and data records (milliseconds).",
-	0.69);
-
-static StringFlag sectorSkew(
-	{ "--sector-skew" },
-	"Order in which to write sectors.",
-	"05a3816b4927");
-
 static int encode_header_gcr(uint16_t word)
 {
 	switch (word)
@@ -45,7 +18,7 @@ static int encode_header_gcr(uint16_t word)
 		#undef GCR_ENTRY
 	}                       
 	return -1;             
-};
+}
 
 static int encode_data_gcr(uint8_t data)
 {
@@ -57,7 +30,7 @@ static int encode_data_gcr(uint8_t data)
 		#undef GCR_ENTRY
 	}                       
 	return -1;             
-};
+}
 
 static void write_bits(std::vector<bool>& bits, unsigned& cursor, uint32_t data, int width)
 {
@@ -193,18 +166,18 @@ public:
 				break;
 		}
 
-		int bitsPerRevolution = 200000.0 / clockRateUs;
-		const std::string& skew = sectorSkew.get();
+		int bitsPerRevolution = 200000.0 / _config.clock_rate_us();
+		const std::string& skew = _config.sector_skew();
 		std::vector<bool> bits(bitsPerRevolution);
 		unsigned cursor = 0;
 
 		for (int sectorCount=0; sectorCount<BROTHER_SECTORS_PER_TRACK; sectorCount++)
 		{
 			int sectorId = charToInt(skew.at(sectorCount));
-			double headerMs = postIndexGapMs + sectorCount*sectorSpacingMs;
-			unsigned headerCursor = headerMs*1e3 / clockRateUs;
-			double dataMs = headerMs + postHeaderSpacingMs;
-			unsigned dataCursor = dataMs*1e3 / clockRateUs;
+			double headerMs = _config.post_index_gap_ms() + sectorCount*_config.sector_spacing_ms();
+			unsigned headerCursor = headerMs*1e3 / _config.clock_rate_us();
+			double dataMs = headerMs + _config.post_header_spacing_ms();
+			unsigned dataCursor = dataMs*1e3 / _config.clock_rate_us();
 
 			const auto& sectorData = image.get(logicalTrack, 0, sectorId);
 
@@ -222,7 +195,7 @@ public:
 		// std::cerr << "pre-index gap " << 200.0 - (double)cursor*clockRateUs/1e3 << std::endl;
 		
 		std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
-		fluxmap->appendBits(bits, clockRateUs*1e3);
+		fluxmap->appendBits(bits, _config.clock_rate_us()*1e3);
 		return fluxmap;
 	}
 

@@ -57,13 +57,6 @@
  * mfm:     01 01 01 01 01 00 01 01 = 0x5545
  */
 
-static int charToInt(char c)
-{
-	if (isdigit(c))
-		return c - '0';
-	return 10 + tolower(c) - 'a';
-}
-
 static uint8_t decodeUint16(uint16_t raw)
 {
 	Bytes b;
@@ -115,10 +108,10 @@ public:
 		IbmEncoderProto::TrackdataProto trackdata;
 		getTrackFormat(trackdata, physicalTrack, physicalSide);
 
-		for (char sectorChar : trackdata.sector_skew())
+		int logicalSide = physicalSide ^ trackdata.swap_sides();
+		for (int sectorId : trackdata.sectors().sector())
         {
-			int sectorId = charToInt(sectorChar);
-			const auto& sector = image.get(physicalTrack, physicalSide, sectorId);
+			const auto& sector = image.get(physicalTrack, logicalSide, sectorId);
 			if (sector)
 				sectors.push_back(sector);
         }
@@ -147,8 +140,6 @@ public:
 				writeBytes(bytes);
 		};
 
-		if (trackdata.swap_sides())
-			physicalSide = 1 - physicalSide;
 		double clockRateUs = 1e3 / trackdata.clock_rate_khz();
 		if (!trackdata.use_fm())
 			clockRateUs /= 2.0;
@@ -184,18 +175,17 @@ public:
 			writeFillerBytes(trackdata.gap1(), gapFill);
 		}
 
+		int logicalSide = physicalSide ^ trackdata.swap_sides();
 		bool first = true;
-		for (char sectorChar : trackdata.sector_skew())
+		for (int sectorId : trackdata.sectors().sector())
 		{
-			int sectorId = charToInt(sectorChar);
-			const auto& sectorData = image.get(physicalTrack, physicalSide, sectorId);
-			if (!sectorData)
-				continue;
-
 			if (!first)
 				writeFillerBytes(trackdata.gap3(), gapFill);
 			first = false;
 
+			const auto& sectorData = image.get(physicalTrack, logicalSide, sectorId);
+			if (!sectorData)
+				continue;
 
 			/* Writing the sector and data records are fantastically annoying.
 			 * The CRC is calculated from the *very start* of the record, and
@@ -218,7 +208,7 @@ public:
 				bw.write_8(idamUnencoded);
 				bw.write_8(sectorData->logicalTrack);
 				bw.write_8(sectorData->logicalSide);
-				bw.write_8(sectorData->logicalSector + trackdata.start_sector_id());
+				bw.write_8(sectorData->logicalSector);
 				bw.write_8(sectorSize);
 				uint16_t crc = crc16(CCITT_POLY, header);
 				bw.write_be16(crc);
