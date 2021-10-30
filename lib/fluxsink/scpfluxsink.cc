@@ -88,10 +88,10 @@ public:
 		int strack = strackno(cylinder, head);
 
 		ScpTrack trackheader = {0};
-		trackheader.track_id[0] = 'T';
-		trackheader.track_id[1] = 'R';
-		trackheader.track_id[2] = 'K';
-		trackheader.strack = strack;
+		trackheader.header.track_id[0] = 'T';
+		trackheader.header.track_id[1] = 'R';
+		trackheader.header.track_id[2] = 'K';
+		trackheader.header.strack = strack;
 
 		FluxmapReader fmr(fluxmap);
 		Bytes fluxdata;
