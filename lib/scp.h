@@ -27,7 +27,7 @@ enum
     SCP_FLAG_FOOTER     = (1<<5)
 };
 
-struct ScpTrackStart
+struct ScpTrackHeader
 {
     char track_id[3];      // 'TRK'
     uint8_t strack;        // SCP track number
@@ -42,9 +42,8 @@ struct ScpTrackRevolution
 
 struct ScpTrack
 {
-    char track_id[3];      // 'TRK'
-    uint8_t strack;        // SCP track number
-    struct ScpTrackRevolution revolution[5];
+    ScpTrackHeader header;
+    ScpTrackRevolution revolution[5];
 };
 
 #endif

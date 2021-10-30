@@ -64,14 +64,14 @@ public:
 		if (offset == 0)
 			return std::unique_ptr<Fluxmap>();
 
-		ScpTrackStart trackstart;
+		ScpTrackHeader trackheader;
 		_if.seekg(offset, std::ios::beg);
-		_if.read((char*) &trackstart, sizeof(trackstart));
+		_if.read((char*) &trackheader, sizeof(trackheader));
 		check_for_error();
 
-		if ((trackstart.track_id[0] != 'T')
-				|| (trackstart.track_id[1] != 'R')
-				|| (trackstart.track_id[2] != 'K'))
+		if ((trackheader.track_id[0] != 'T')
+				|| (trackheader.track_id[1] != 'R')
+				|| (trackheader.track_id[2] != 'K'))
 			Error() << "corrupt SCP file";
 
 		std::vector<ScpTrackRevolution> revs(_header.revolutions);
