@@ -11,7 +11,7 @@
 static const FluxPattern SECTOR_SYNC_PATTERN(32, 0xaaaa5555);
 
 /* Adds all bytes, with carry. */
-static uint8_t checksum(const Bytes& bytes) {
+uint8_t micropolisChecksum(const Bytes& bytes) {
 	ByteReader br(bytes);
 	uint16_t sum = 0;
 	while (!br.eof()) {
@@ -61,7 +61,7 @@ public:
 		br.read(10);  /* OS data or padding */
 		_sector->data = br.read(256);
 		uint8_t wantChecksum = br.read_8();
-		uint8_t gotChecksum = checksum(bytes.slice(1, 2+266));
+		uint8_t gotChecksum = micropolisChecksum(bytes.slice(1, 2+266));
 		br.read(5);  /* 4 byte ECC and ECC-present flag */
 
 		_sector->status = (wantChecksum == gotChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;

@@ -327,6 +327,7 @@ buildlibrary libbackend.a \
     arch/macintosh/decoder.cc \
     arch/macintosh/encoder.cc \
     arch/micropolis/decoder.cc \
+    arch/micropolis/encoder.cc \
     arch/mx/decoder.cc \
     arch/northstar/decoder.cc \
     arch/northstar/encoder.cc \

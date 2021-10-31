@@ -1,4 +1,4 @@
-comment: 'Micropolis MetaFloppy 630kB 5.25" DSDD hard-sectored (ro)'
+comment: 'Micropolis MetaFloppy 630kB 5.25" DSDD hard-sectored'
 
 flux_source {
 	drive {
@@ -6,9 +6,34 @@ flux_source {
 	}
 }
 
+flux_sink {
+	drive {
+		hard_sector_count: 16
+	}
+}
+
+image_reader {
+	filename: "micropolis.img"
+	img {
+		tracks: 77
+		sides: 2
+		trackdata {
+			sector_size: 256
+			sector_range {
+				start_sector: 0
+				sector_count: 16
+			}
+		}
+	}
+}
+
 image_writer {
 	filename: "micropolis.img"
 	img {}
+}
+
+encoder {
+	micropolis {}
 }
 
 decoder {

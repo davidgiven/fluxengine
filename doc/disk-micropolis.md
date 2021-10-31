@@ -37,6 +37,15 @@ could be represented as having either twice the number of sectors, for CHS, or
 twice the number of tracks, HCS; the second side's tracks logically followed
 the first side (e.g., tracks 77-153). Micropolis disks tended to be the latter.
 
+Writing disks
+-------------
+
+Just do:
+
+```
+fluxengine write micropolis -i micropolis.img
+```
+
 Useful references
 -----------------
 

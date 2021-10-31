@@ -7,6 +7,7 @@
 #include "arch/c64/c64.h"
 #include "arch/ibm/ibm.h"
 #include "arch/macintosh/macintosh.h"
+#include "arch/micropolis/micropolis.h"
 #include "arch/northstar/northstar.h"
 #include "arch/tids990/tids990.h"
 #include "lib/encoders/encoders.pb.h"
@@ -22,6 +23,7 @@ std::unique_ptr<AbstractEncoder> AbstractEncoder::create(const EncoderProto& con
 		{ EncoderProto::kC64,       createCommodore64Encoder },
 		{ EncoderProto::kIbm,       createIbmEncoder },
 		{ EncoderProto::kMacintosh, createMacintoshEncoder },
+		{ EncoderProto::kMicropolis,createMicropolisEncoder },
 		{ EncoderProto::kNorthstar, createNorthstarEncoder },
 		{ EncoderProto::kTids990,   createTids990Encoder },
 	};
