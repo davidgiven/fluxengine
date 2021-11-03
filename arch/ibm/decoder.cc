@@ -151,6 +151,8 @@ public:
 			_sector->logicalSide ^= 1;
 		if (_config.ignore_side_byte())
 			_sector->logicalSide = _sector->physicalHead;
+		if (_config.ignore_track_byte())
+			_sector->logicalTrack = _sector->physicalCylinder;
 	}
 
     void decodeDataRecord()

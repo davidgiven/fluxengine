@@ -2,13 +2,14 @@ syntax = "proto2";
 
 import "lib/common.proto";
 
-// Next: 6
+// Next: 7
 message IbmDecoderProto {
 	message SectorsProto {
 		repeated int32 sector = 1            [(help) = "require these sectors to exist for a good read"];
 	}
 
 	optional bool ignore_side_byte = 2       [default = false, (help) = "ignore side byte in sector header"];
+	optional bool ignore_track_byte = 6      [default = false, (help) = "ignore track byte in sector header"];
 	optional bool swap_sides = 4             [default = false, (help) = "put logical side 1 on physical side 0"];
 	optional SectorsProto sectors = 5        [(help) = "require these sectors to exist for a good read"];
 }
