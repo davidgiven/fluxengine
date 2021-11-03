@@ -35,7 +35,7 @@ public:
 				ImgInputOutputProto::TrackdataProto trackdata;
 				getTrackFormat(_config.img(), trackdata, track, side);
 
-				auto sectors = getSectors(trackdata);
+				auto sectors = getSectors(trackdata, geometry.numSectors);
 				if (sectors.empty())
 				{
 					int maxSector = geometry.firstSector + geometry.numSectors - 1;
@@ -61,7 +61,7 @@ public:
 						outputFile.tellp() / 1024);
 	}
 
-	std::vector<unsigned> getSectors(const ImgInputOutputProto::TrackdataProto& trackdata)
+	std::vector<unsigned> getSectors(const ImgInputOutputProto::TrackdataProto& trackdata, unsigned numSectors)
 	{
 		std::vector<unsigned> sectors;
 		switch (trackdata.sectors_oneof_case())
@@ -76,7 +76,9 @@ public:
 			case ImgInputOutputProto::TrackdataProto::SectorsOneofCase::kSectorRange:
 			{
 				int sectorId = trackdata.sector_range().start_sector();
-				for (int i=0; i<trackdata.sector_range().sector_count(); i++)
+				if (trackdata.sector_range().has_sector_count())
+					numSectors = trackdata.sector_range().sector_count();
+				for (int i=0; i<numSectors; i++)
 					sectors.push_back(sectorId + i);
 				break;
 			}
