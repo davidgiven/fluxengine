@@ -26,3 +26,9 @@ fluxengine read acorndfs
 You should end up with an `acorndfs.img` of the appropriate size for your disk
 format. This is an alias for `fluxengine read ibm` with preconfigured
 parameters.
+
+References
+----------
+
+  - [The Acord DFS disc format](https://beebwiki.mdfs.net/Acorn_DFS_disc_format)
+
