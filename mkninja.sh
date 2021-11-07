@@ -422,7 +422,10 @@ FORMATS="\
     mac400 \
     mac800 \
     micropolis \
-    micropolis275 \
+    micropolis143 \
+    micropolis287 \
+    micropolis315 \
+    micropolis630 \
     mx \
     northstar175 \
     northstar350 \

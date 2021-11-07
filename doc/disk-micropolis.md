@@ -1,10 +1,11 @@
 Disk: Micropolis
 ================
 
-Micropolis MetaFloppy disks use MFM and hard sectors. They were 100 TPI and
-stored 315k per side. Each of the 16 sectors contains 266 bytes of "user data,"
-allowing 10 bytes of metadata for use by the operating system. Micropolis DOS
-(MDOS) used the metadata bytes, but CP/M did not.
+Micropolis MetaFloppy disks use MFM and hard sectors. Mod I was 48 TPI and
+stored 143k per side. Mod II was 100 TPI and stored 315k per side. Each of the
+16 sectors contains 266 bytes of "user data," allowing 10 bytes of metadata for
+use by the operating system. Micropolis DOS (MDOS) used the metadata bytes, but
+CP/M did not.
 
 Some later systems were Micropolis-compatible and so were also 100 TPI, like
 the Vector Graphic Dual-Mode Disk Controller which was paired with a Tandon
@@ -19,31 +20,56 @@ pinout as a 96tpi PC 5.25" drive. In use they should be identical.
 Reading disks
 -------------
 
-Just do:
+Based on your floppy drive, just do one of:
 
 ```
-fluxengine read micropolis
+fluxengine read micropolis143 # single-sided Mod I
+fluxengine read micropolis287 # double-sided Mod I
+fluxengine read micropolis315 # single-sided Mod II
+fluxengine read micropolis630 # double-sided Mod II
 ```
 
-You should end up with a `micropolis.img` which is 630784 bytes long (for a
-normal DD disk). The image is written in CHS order, but HCS is generally used
-by CP/M tools so the image needs to be post-processed. For only half-full disks
-or single-sided disks, you can use `--heads 0` to read only one side of the
-disk which works around the problem.
+You should end up with a `micropolis.vgi` which is 198000, 396000, 338800, or
+677600 bytes. Each sector in VGI consumes 275 bytes, to retain the full
+information stored on disk.
+
+It's also possible to output to IMG, which is more suitable for generic tooling
+than emulation or preservation:
+```
+fluxengine read micropolis -c 0-34 --image_writer.img.tracks=35 -h 0 --image_writer.img.sides=1 # single-sided Mod I
+fluxengine read micropolis -c 0-34 --image_writer.img.tracks=35 # double-sided Mod I
+fluxengine read micropolis -h 0 --image_writer.img.sides=1 # single-sided Mod II
+fluxengine read micropolis # double-sided Mod II
+```
+
+You should end up with a `micropolis.img` which is 143360, 286720, 315392, or
+630784 bytes long. The image is written in CHS order, but HCS is generally used
+by CP/M tools so double-sided disk images may need to be post-processed.
+Half-full double-sided disks can be read as single-sided disks to work around
+the problem.
 
 The [CP/M BIOS](https://www.seasip.info/Cpm/bios.html) defined SELDSK, SETTRK,
 and SETSEC, but no function to select the head/side. Double-sided floppies
 could be represented as having either twice the number of sectors, for CHS, or
-twice the number of tracks, HCS; the second side's tracks logically followed
-the first side (e.g., tracks 77-153). Micropolis disks tended to be the latter.
+twice the number of tracks, HCS; the second side's tracks in opposite order
+logically followed the first side (e.g., tracks 77-153). Micropolis disks
+tended to be the latter.
 
 Writing disks
 -------------
 
-Just do:
+Just do one of:
 
 ```
-fluxengine write micropolis -i micropolis.img
+fluxengine write micropolis143 # single-sided Mod I
+fluxengine write micropolis287 # double-sided Mod I
+fluxengine write micropolis315 # single-sided Mod II
+fluxengine write micropolis630 # double-sided Mod II
+
+fluxengine write micropolis -c 0-34 --image_reader.img.tracks=35 -h 0 --image_reader.img.sides=1 # single-sided Mod I
+fluxengine write micropolis -c 0-34 --image_reader.img.tracks=35 # double-sided Mod I
+fluxengine write micropolis -h 0 --image_reader.img.sides=1 # single-sided Mod II
+fluxengine write micropolis # double-sided Mod II using IMG
 ```
 
 Useful references
