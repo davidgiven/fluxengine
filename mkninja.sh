@@ -340,6 +340,7 @@ buildlibrary libbackend.a \
     lib/crc.cc \
     lib/csvreader.cc \
     lib/decoders/decoders.cc \
+    lib/decoders/fluxdecoder.cc \
     lib/decoders/fluxmapreader.cc \
     lib/decoders/fmmfm.cc \
     lib/encoders/encoders.cc \

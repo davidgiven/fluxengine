@@ -58,7 +58,7 @@ unsigned FluxmapReader::readInterval(nanoseconds_t clock)
     unsigned thresholdTicks = (clock * _config.pulse_debounce_threshold()) / NS_PER_TICK;
     unsigned ticks = 0;
 
-    while (ticks < thresholdTicks)
+    while (ticks <= thresholdTicks)
     {
         unsigned thisTicks = findEvent(F_BIT_PULSE);
         if (!thisTicks)
@@ -240,40 +240,3 @@ void FluxmapReader::seekToIndexMark()
     _pos.zeroes = 0;
 }
 
-bool FluxmapReader::readRawBit(nanoseconds_t clockPeriod)
-{
-    assert(clockPeriod != 0);
-
-    if (_pos.zeroes)
-    {
-        _pos.zeroes--;
-        return false;
-    }
-
-    nanoseconds_t interval = readInterval(clockPeriod)*NS_PER_TICK;
-    double clocks = (double)interval / clockPeriod + _config.clock_interval_bias();
-
-    if (clocks < 1.0)
-        clocks = 1.0;
-    _pos.zeroes = (int)round(clocks) - 1;
-    return true;
-}
-
-std::vector<bool> FluxmapReader::readRawBits(unsigned count, nanoseconds_t clockPeriod)
-{
-    std::vector<bool> result;
-    while (!eof() && count--)
-    {
-        bool b = readRawBit(clockPeriod);
-        result.push_back(b);
-    }
-    return result;
-}
-
-std::vector<bool> FluxmapReader::readRawBits(const Fluxmap::Position& until, nanoseconds_t clockPeriod)
-{
-    std::vector<bool> result;
-    while (!eof() && (_pos.bytes < until.bytes))
-        result.push_back(readRawBit(clockPeriod));
-    return result;
-}

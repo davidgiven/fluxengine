@@ -104,10 +104,6 @@ public:
     nanoseconds_t seekToPattern(const FluxMatcher& pattern);
     nanoseconds_t seekToPattern(const FluxMatcher& pattern, const FluxMatcher*& matching);
 
-    bool readRawBit(nanoseconds_t clockPeriod);
-    std::vector<bool> readRawBits(unsigned count, nanoseconds_t clockPeriod);
-    std::vector<bool> readRawBits(const Fluxmap::Position& until, nanoseconds_t clockPeriod);
-
 private:
     const Fluxmap& _fluxmap;
     const uint8_t* _bytes;

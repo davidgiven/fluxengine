@@ -4,6 +4,7 @@
 #include "bytes.h"
 #include "sector.h"
 #include "decoders/fluxmapreader.h"
+#include "decoders/fluxdecoder.h"
 
 class Sector;
 class Fluxmap;
@@ -68,6 +69,7 @@ protected:
     FluxmapReader* _fmr = nullptr;
 	std::unique_ptr<TrackDataFlux> _trackdata;
     std::shared_ptr<Sector> _sector;
+	std::unique_ptr<FluxDecoder> _decoder;
 };
 
 #endif
