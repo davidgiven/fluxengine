@@ -3,6 +3,7 @@
 #include "reader.h"
 #include "fluxmap.h"
 #include "decoders/fluxmapreader.h"
+#include "decoders/fluxdecoder.h"
 #include "decoders/decoders.h"
 #include "fluxsource/fluxsource.h"
 #include "protocol.h"
@@ -277,6 +278,7 @@ int mainInspect(int argc, const char* argv[])
 		std::cout << fmt::format("\n\nAligned bitstream from {:.3f}ms follows:\n",
 				fmr.tell().ns() / 1000000.0);
 
+		FluxDecoder decoder(&fmr, clockPeriod, config.decoder());
 		while (!fmr.eof())
 		{
 			std::cout << fmt::format("{:06x} {: 10.3f} : ",
@@ -285,7 +287,7 @@ int mainInspect(int argc, const char* argv[])
 			{
 				if (fmr.eof())
 					break;
-				bool b = fmr.readRawBit(clockPeriod);
+				bool b = decoder.readBit();
 				std::cout << (b ? 'X' : '-');
 			}
 

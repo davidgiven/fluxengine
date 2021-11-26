@@ -2,7 +2,77 @@ comment: 'Victor 9000 / Sirius One 1224kB SSHD GCR variable sector (ro)'
 
 image_writer {
 	filename: "victor9k.img"
-	img {}
+	img {
+		tracks: 80
+		sides: 1
+		trackdata {
+			sector_size: 512
+		}
+		trackdata {
+			track: 0
+			up_to_track: 3
+			sector_range {
+				start_sector: 1
+				sector_count: 19
+			}
+		}
+		trackdata {
+			track: 4
+			up_to_track: 15
+			sector_range {
+				start_sector: 1
+				sector_count: 18
+			}
+		}
+		trackdata {
+			track: 16
+			up_to_track: 26
+			sector_range {
+				start_sector: 1
+				sector_count: 17
+			}
+		}
+		trackdata {
+			track: 27
+			up_to_track: 37
+			sector_range {
+				start_sector: 1
+				sector_count: 16
+			}
+		}
+		trackdata {
+			track: 38
+			up_to_track: 47
+			sector_range {
+				start_sector: 1
+				sector_count: 15
+			}
+		}
+		trackdata {
+			track: 48
+			up_to_track: 59
+			sector_range {
+				start_sector: 1
+				sector_count: 14
+			}
+		}
+		trackdata {
+			track: 60
+			up_to_track: 70
+			sector_range {
+				start_sector: 1
+				sector_count: 13
+			}
+		}
+		trackdata {
+			track: 71
+			up_to_track: 79
+			sector_range {
+				start_sector: 1
+				sector_count: 12
+			}
+		}
+	}
 }
 
 decoder {
