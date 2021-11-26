@@ -256,6 +256,11 @@ FluxEngine also supports a number of file system image formats. When using the
 
 	Read from a JV3 image file, commonly used by TRS-80 emulators. **Read
 	only.**
+
+  - `<filename.dim>`
+
+  Read from a [DIM image file](https://www.pc98.org/project/doc/dim.html),
+  commonly used by X68000 emulators. **Read Only.**
   
   - `<filename.ldbs>`
 

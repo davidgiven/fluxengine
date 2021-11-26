@@ -14,6 +14,9 @@ std::unique_ptr<ImageReader> ImageReader::create(const ImageReaderProto& config)
 {
 	switch (config.format_case())
 	{
+		case ImageReaderProto::kDim:
+			return ImageReader::createDimImageReader(config);
+
 		case ImageReaderProto::kImd:
 			return ImageReader::createIMDImageReader(config);
 
@@ -49,6 +52,7 @@ void ImageReader::updateConfigForFilename(ImageReaderProto* proto, const std::st
 		{".jv3",      [&]() { proto->mutable_jv3(); }},
 		{".d64",      [&]() { proto->mutable_d64(); }},
 		{".d81",      [&]() { proto->mutable_img(); }},
+		{".dim",      [&]() { proto->mutable_dim(); }},
 		{".diskcopy", [&]() { proto->mutable_diskcopy(); }},
 		{".img",      [&]() { proto->mutable_img(); }},
 		{".st",       [&]() { proto->mutable_img(); }},
