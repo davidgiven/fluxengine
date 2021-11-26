@@ -4,6 +4,14 @@
 #include "decoders/fluxdecoder.h"
 #include "lib/decoders/decoders.pb.h"
 
+/* This is a port of the samdisk code:
+ *
+ * https://github.com/simonowen/samdisk/blob/master/src/FluxDecoder.cpp
+ *
+ * I'm not actually terribly sure how it works, but it does, and much better
+ * than my code.
+ */
+
 FluxDecoder::FluxDecoder(FluxmapReader* fmr, nanoseconds_t bitcell,
 		const DecoderProto& config):
 	_fmr(fmr),
@@ -70,6 +78,12 @@ bool FluxDecoder::readBit()
 	/* Clamp the clock's adjustment range. */
 
 	_clock = std::min(std::max(_clock_min, _clock), _clock_max);
+
+	/* I'm not sure what this does, but the original comment is:
+     * Authentic PLL: Do not snap the timing window to each flux transition
+	 */
+
+    _flux = _flux * (1.0 - _pll_phase);
 
 	_goodbits++;
 	return true;
