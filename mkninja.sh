@@ -417,6 +417,7 @@ FORMATS="\
     hplif770 \
     ibm \
     ibm1200_525 \
+    ibm1232 \
     ibm1440 \
     ibm180_525 \
     ibm360_525 \
@@ -522,6 +523,7 @@ encodedecodetest atarist820
 encodedecodetest brother120
 encodedecodetest brother240
 encodedecodetest ibm1200_525
+encodedecodetest ibm1232
 encodedecodetest ibm1440
 encodedecodetest ibm180_525
 encodedecodetest ibm360_525
