@@ -108,6 +108,7 @@ public:
 		_currentHeaderLength = (matcher == &MFM_PATTERN) ? 3 : 0;
 
 		Fluxmap::Position here = tell();
+		resetFluxDecoder();
 		if (_currentHeaderLength > 0)
 			readRawBits(_currentHeaderLength*16);
 		auto idbits = readRawBits(16);

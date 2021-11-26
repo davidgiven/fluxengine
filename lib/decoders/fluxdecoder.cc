@@ -14,15 +14,21 @@ FluxDecoder::FluxDecoder(FluxmapReader* fmr, nanoseconds_t bitcell,
 	_clock_centre(bitcell),
 	_clock_min(bitcell * (1.0 - _pll_adjust)),
 	_clock_max(bitcell * (1.0 + _pll_adjust)),
-	_flux(0)
+	_flux(0),
+	_leading_zeroes(fmr->tell().zeroes)
 {}
 
 
 bool FluxDecoder::readBit()
 {
-	if (_first_bit)
+	if (_leading_zeroes > 0)
 	{
-		_first_bit = false;
+		_leading_zeroes--;
+		return false;
+	}
+	else if (_leading_zeroes == 0)
+	{
+		_leading_zeroes--;
 		return true;
 	}
 

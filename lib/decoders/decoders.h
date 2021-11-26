@@ -48,8 +48,8 @@ public:
     std::unique_ptr<TrackDataFlux> decodeToSectors(std::shared_ptr<const Fluxmap> fluxmap, unsigned cylinder, unsigned head);
     void pushRecord(const Fluxmap::Position& start, const Fluxmap::Position& end);
 
+	void resetFluxDecoder();
     std::vector<bool> readRawBits(unsigned count);
-    //{ return _fmr->readRawBits(count, _sector->clock); }
 
     Fluxmap::Position tell()
     { return _fmr->tell(); } 
