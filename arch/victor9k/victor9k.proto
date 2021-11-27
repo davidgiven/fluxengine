@@ -1,4 +1,5 @@
 syntax = "proto2";
 
 message Victor9kDecoderProto {}
+message Victor9kEncoderProto {}
 

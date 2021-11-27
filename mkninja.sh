@@ -334,6 +334,7 @@ buildlibrary libbackend.a \
     arch/tids990/decoder.cc \
     arch/tids990/encoder.cc \
     arch/victor9k/decoder.cc \
+    arch/victor9k/encoder.cc \
     arch/zilogmcz/decoder.cc \
     lib/bitmap.cc \
     lib/bytes.cc \

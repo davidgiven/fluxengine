@@ -76,7 +76,8 @@ image_writer {
 }
 
 decoder {
-	victor9k {}
+	victor9k {
+	}
 }
 
 cylinders {
