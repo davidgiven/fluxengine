@@ -535,6 +535,7 @@ encodedecodetest commodore1581
 encodedecodetest commodore1541 scripts/commodore1541_test.textpb
 encodedecodetest mac400 scripts/mac400_test.textpb
 encodedecodetest mac800 scripts/mac800_test.textpb
+encodedecodetest victor9k
 
 # vim: sw=4 ts=4 et
 

@@ -1,5 +1,25 @@
 syntax = "proto2";
 
+import "lib/common.proto";
+
 message Victor9kDecoderProto {}
-message Victor9kEncoderProto {}
+
+message Victor9kEncoderProto {
+	message TrackdataProto {
+		message SectorsProto {
+			repeated int32 sector = 1 [(help) = "write these sectors (in order) on each track"];
+		}
+
+		optional int32 min_cylinder = 1        [(help) = "minimum cylinder this format applies to"];
+		optional int32 max_cylinder = 2        [(help) = "maximum cylinder this format applies to"];
+		optional int32 head = 3                [(help) = "which head this format applies to"];
+
+		optional int32 bits_per_revolution = 4 [(help) = "number of bits on this cylinder"];
+		optional double post_index_gap_us = 5  [(help) = "size of post-index gap"];
+
+		optional SectorsProto sectors = 6 [(help) = "write these sectors (in order) on each track"];
+	}
+
+	repeated TrackdataProto trackdata = 1;
+}
 
