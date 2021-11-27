@@ -47,8 +47,9 @@ public:
 		Victor9kEncoderProto::TrackdataProto trackdata;
 		getTrackFormat(trackdata, physicalTrack, physicalSide);
 
-		for (int sectorId : trackdata.sectors().sector())
+        for (int i = 0; i < trackdata.sector_range().sector_count(); i++)
         {
+            int sectorId = trackdata.sector_range().start_sector() + i;
 			const auto& sector = image.get(physicalTrack, physicalSide, sectorId);
 			if (sector)
 				sectors.push_back(sector);
@@ -63,8 +64,9 @@ public:
 		Victor9kEncoderProto::TrackdataProto trackdata;
 		getTrackFormat(trackdata, physicalTrack, physicalSide);
 
-        std::vector<bool> bits(trackdata.bits_per_revolution());
-        unsigned clockRateUs = 166666.0 / trackdata.bits_per_revolution();
+        unsigned bitsPerRevolution = trackdata.original_data_rate_khz() * trackdata.original_period_ms();
+        std::vector<bool> bits(bitsPerRevolution);
+        double clockRateUs = 166666.0 / bitsPerRevolution;
         unsigned cursor = 0;
 
         fillBitmapTo(bits, cursor, trackdata.post_index_gap_us() / clockRateUs, { true, false });
