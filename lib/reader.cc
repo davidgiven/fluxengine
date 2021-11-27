@@ -27,7 +27,7 @@ static std::shared_ptr<Fluxmap> readFluxmap(FluxSource& fluxsource, unsigned cyl
 	std::cout << fmt::format("{0:>3}.{1}: ", cylinder, head) << std::flush;
 	std::shared_ptr<Fluxmap> fluxmap = fluxsource.readFlux(cylinder, head);
 	std::cout << fmt::format(
-		"{0} ms in {1} bytes\n",
+		"{0:.0} ms in {1} bytes\n",
             fluxmap->duration()/1e6,
             fluxmap->bytes());
 	if (outputFluxSink)
