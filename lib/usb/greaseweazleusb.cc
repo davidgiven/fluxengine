@@ -515,7 +515,7 @@ public:
     {
         do_command({ CMD_SELECT, 3, (uint8_t)drive });
         do_command({ CMD_MOTOR, 4, (uint8_t)drive, 1 });
-        do_command({ CMD_SET_PIN, 4, 2, (uint8_t)(high_density ? 0 : 1) });
+        do_command({ CMD_SET_PIN, 4, 2, (uint8_t)(high_density ? 1 : 0) });
     }
 
     void measureVoltages(struct voltages_frame* voltages)
