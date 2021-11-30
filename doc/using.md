@@ -233,7 +233,7 @@ FluxEngine supports a number of ways to get or put flux. When using the `-s` or
 FluxEngine also supports a number of file system image formats. When using the
 `-i` or `-o` options (for input and output), you can use any of these strings:
 
-  - `<filename.adf>`, `<filename.d81>`, `<filename.img>`, `<filename.st>`
+  - `<filename.adf>`, `<filename.d81>`, `<filename.img>`, `<filename.st>`, `<filename.xdf>`
 
 	Read from or write to a simple headerless image file (all these formats are
 	the same). This will probably want configuration via the
