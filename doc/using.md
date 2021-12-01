@@ -267,6 +267,17 @@ FluxEngine also supports a number of file system image formats. When using the
   Read from a [FDI image file](https://www.pc98.org/project/doc/hdi.html),
   commonly used by PC-98 emulators. **Read Only.**
   
+  - `<filename.d88>`
+
+  Read from a [D88 image file](https://www.pc98.org/project/doc/d88.html),
+  commonly used by various Japanese PC emulators, including the NEC PC-88. **Read Only.**
+  
+  FluxEngine is currently limited to reading only the first floppy image in a
+  D88 file.
+  
+  In addition, it only supports a limited subset of D88 features and will
+  reject files not in that subset.
+  
   - `<filename.ldbs>`
 
 	Write to a [LDBS generic image

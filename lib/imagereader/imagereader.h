@@ -26,6 +26,7 @@ public:
     static std::unique_ptr<ImageReader> createTd0ImageReader(const ImageReaderProto& config);
     static std::unique_ptr<ImageReader> createDimImageReader(const ImageReaderProto& config);
     static std::unique_ptr<ImageReader> createFdiImageReader(const ImageReaderProto& config);
+    static std::unique_ptr<ImageReader> createD88ImageReader(const ImageReaderProto& config);
 
 public:
 	virtual std::unique_ptr<Image> readImage() = 0;
