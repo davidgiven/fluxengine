@@ -100,7 +100,7 @@ public:
 		const Geometry& geometry = image.getGeometry();
         std::cout << fmt::format("DIM: read {} tracks, {} sides, {} kB total\n",
                         geometry.numTracks, geometry.numSides,
-						inputFile.tellg() / 1024);
+						((int)inputFile.tellg() - 256) / 1024);
         return image;
 	}
 
