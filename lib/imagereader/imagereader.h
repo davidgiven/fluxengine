@@ -23,6 +23,7 @@ public:
     static std::unique_ptr<ImageReader> createIMDImageReader(const ImageReaderProto& config);
     static std::unique_ptr<ImageReader> createNsiImageReader(const ImageReaderProto& config);
     static std::unique_ptr<ImageReader> createTd0ImageReader(const ImageReaderProto& config);
+    static std::unique_ptr<ImageReader> createDimImageReader(const ImageReaderProto& config);
 
 public:
 	virtual Image readImage() = 0;
