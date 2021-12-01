@@ -58,12 +58,10 @@ void ImageReader::updateConfigForFilename(ImageReaderProto* proto, const std::st
 		{".dim",      [&]() { proto->mutable_dim(); }},
 		{".diskcopy", [&]() { proto->mutable_diskcopy(); }},
 		{".fdi",      [&]() { proto->mutable_fdi(); }},
-		{".FDI",      [&]() { proto->mutable_fdi(); }},
 		{".img",      [&]() { proto->mutable_img(); }},
 		{".st",       [&]() { proto->mutable_img(); }},
 		{".nsi",      [&]() { proto->mutable_nsi(); }},
 		{".td0",      [&]() { proto->mutable_td0(); }},
-		{".TD0",      [&]() { proto->mutable_td0(); }},
 		{".xdf",      [&]() { proto->mutable_img(); }},
 	};
 
