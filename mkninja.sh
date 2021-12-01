@@ -373,6 +373,7 @@ buildlibrary libbackend.a \
     lib/imagereader/nsiimagereader.cc \
     lib/imagereader/td0imagereader.cc \
     lib/imagereader/dimimagereader.cc \
+    lib/imagereader/fdiimagereader.cc \
     lib/imagewriter/d64imagewriter.cc \
     lib/imagewriter/diskcopyimagewriter.cc \
     lib/imagewriter/imagewriter.cc \

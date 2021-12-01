@@ -262,6 +262,11 @@ FluxEngine also supports a number of file system image formats. When using the
   Read from a [DIM image file](https://www.pc98.org/project/doc/dim.html),
   commonly used by X68000 emulators. **Read Only.**
   
+  - `<filename.fdi>`
+
+  Read from a [FDI image file](https://www.pc98.org/project/doc/hdi.html),
+  commonly used by PC-98 emulators. **Read Only.**
+  
   - `<filename.ldbs>`
 
 	Write to a [LDBS generic image
