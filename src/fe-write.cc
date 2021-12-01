@@ -62,6 +62,8 @@ int mainWrite(int argc, const char* argv[])
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
 	std::unique_ptr<ImageReader> reader(ImageReader::create(config.image_reader()));
+	reader->preloadImage();
+
 	std::unique_ptr<AbstractEncoder> encoder(AbstractEncoder::create(config.encoder()));
 	std::unique_ptr<FluxSink> fluxSink(FluxSink::create(config.flux_sink()));
 

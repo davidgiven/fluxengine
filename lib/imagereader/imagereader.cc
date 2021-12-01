@@ -82,6 +82,18 @@ ImageReader::ImageReader(const ImageReaderProto& config):
     _config(config)
 {}
 
+const Image& ImageReader::readImage()
+{
+	preloadImage();
+	return *_image;
+}
+
+void ImageReader::preloadImage()
+{
+	if (!_image)
+		_image = readImageImpl();
+}
+
 void getTrackFormat(const ImgInputOutputProto& config,
 		ImgInputOutputProto::TrackdataProto& trackdata, unsigned track, unsigned side)
 {

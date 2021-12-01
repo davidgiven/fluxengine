@@ -1,9 +1,10 @@
 #ifndef IMAGEREADER_H
 #define IMAGEREADER_H
 
+#include "image.h"
+
 class ImageSpec;
 class ImageReaderProto;
-class Image;
 
 class ImageReader
 {
@@ -27,10 +28,15 @@ public:
     static std::unique_ptr<ImageReader> createFdiImageReader(const ImageReaderProto& config);
 
 public:
-	virtual Image readImage() = 0;
+	const Image& readImage();
+	void preloadImage();
+
+protected:
+	virtual std::unique_ptr<Image> readImageImpl() = 0;
 
 protected:
 	const ImageReaderProto& _config;
+	std::unique_ptr<Image> _image;
 };
 
 #endif

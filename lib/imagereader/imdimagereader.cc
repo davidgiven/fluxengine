@@ -89,7 +89,7 @@ public:
 		ImageReader(config)
 	{}
 
-	Image readImage()
+	std::unique_ptr<Image> readImageImpl()
 	/*
 	IMAGE FILE FORMAT
 	The overall layout of an ImageDisk .IMD image file is:
@@ -121,7 +121,7 @@ public:
 		Bytes data;
 		data.writer() += inputFile;
 		ByteReader br(data);
-		Image image;
+        std::unique_ptr<Image> image(new Image);
 		TrackHeader header = {0, 0, 0, 0, 0};
 
 		unsigned n = 0;
@@ -192,7 +192,7 @@ public:
 			for (int s = 0; s < header.numSectors; s++)
 			{
 				Bytes sectordata;
-				const auto& sector = image.put(header.track, header.Head, sector_map[s]);
+				const auto& sector = image->put(header.track, header.Head, sector_map[s]);
 				//read the status of the sector
 				unsigned int Status_Sector = br.read_8();
 				headerPtr++;
@@ -259,7 +259,7 @@ public:
   		}
 		//Write format detected in IMD image to screen to help user set the right write parameters
 
-		image.setGeometry({
+		image->setGeometry({
 			.numTracks = header.track,
 			.numSides = header.Head + 1U,
 			.numSectors = header.numSectors,

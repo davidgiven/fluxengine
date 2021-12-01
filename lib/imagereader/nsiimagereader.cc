@@ -18,7 +18,7 @@ public:
 		ImageReader(config)
 	{}
 
-	Image readImage()
+	std::unique_ptr<Image> readImageImpl()
 	{
         std::ifstream inputFile(_config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
@@ -64,7 +64,7 @@ public:
                         numCylinders * numHeads * trackSize / 1024)
                 << std::endl;
 
-        Image image;
+        std::unique_ptr<Image> image(new Image);
         unsigned sectorFileOffset;
 
         for (unsigned head = 0; head < numHeads; head++)
@@ -87,7 +87,7 @@ public:
                     Bytes data(sectorSize);
                     inputFile.read((char*) data.begin(), sectorSize);
 
-                    const auto& sector = image.put(track, head, sectorId);
+                    const auto& sector = image->put(track, head, sectorId);
                     sector->status = Sector::OK;
                     sector->logicalTrack = sector->physicalCylinder = track;
                     sector->logicalSide = sector->physicalHead = head;
@@ -97,7 +97,7 @@ public:
             }
         }
 
-		image.setGeometry({
+		image->setGeometry({
 			.numTracks = numCylinders,
 			.numSides = numHeads,
 			.numSectors = numSectors,
