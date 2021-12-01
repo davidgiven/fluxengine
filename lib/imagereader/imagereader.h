@@ -28,15 +28,10 @@ public:
     static std::unique_ptr<ImageReader> createFdiImageReader(const ImageReaderProto& config);
 
 public:
-	const Image& readImage();
-	void preloadImage();
-
-protected:
-	virtual std::unique_ptr<Image> readImageImpl() = 0;
+	virtual std::unique_ptr<Image> readImage() = 0;
 
 protected:
 	const ImageReaderProto& _config;
-	std::unique_ptr<Image> _image;
 };
 
 #endif

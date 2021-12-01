@@ -18,7 +18,7 @@ public:
 		ImageReader(config)
 	{}
 
-	std::unique_ptr<Image> readImageImpl()
+	std::unique_ptr<Image> readImage()
 	{
         std::ifstream inputFile(_config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())

@@ -90,7 +90,7 @@ public:
         ImageReader(config)
     {}
 
-    std::unique_ptr<Image> readImageImpl()
+    std::unique_ptr<Image> readImage()
     /*
     IMAGE FILE FORMAT
     The overall layout of an ImageDisk .IMD image file is:
