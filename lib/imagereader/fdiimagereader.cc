@@ -20,7 +20,7 @@ public:
 		ImageReader(config)
 	{}
 
-	Image readImage()
+	std::unique_ptr<Image> readImage()
 	{
         std::ifstream inputFile(_config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
@@ -44,7 +44,7 @@ public:
 
         inputFile.seekg(headerSize);
 
-        Image image;
+        std::unique_ptr<Image> image(new Image);
 		int trackCount = 0;
         for (int track = 0; track < tracks; track++)
         {
@@ -63,7 +63,7 @@ public:
                     Bytes data(sectorSize);
                     inputFile.read((char*) data.begin(), data.size());
 
-					const auto& sector = image.put(physicalCylinder, side, sectorId);
+					const auto& sector = image->put(physicalCylinder, side, sectorId);
                     sector->status = Sector::OK;
                     sector->logicalTrack = track;
 					sector->physicalCylinder = physicalCylinder;
@@ -76,8 +76,8 @@ public:
 			trackCount++;
         }
 
-		image.calculateSize();
-		const Geometry& geometry = image.getGeometry();
+		image->calculateSize();
+		const Geometry& geometry = image->getGeometry();
         std::cout << fmt::format("FDI: read {} tracks, {} sides, {} kB total\n",
                         geometry.numTracks, geometry.numSides,
 						((int)inputFile.tellg() - headerSize) / 1024);
