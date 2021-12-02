@@ -243,31 +243,6 @@ public:
                     mfm ? "MFM" : "FM",
                     Modulation_Speed, header.numSectors, sectorSize, sector_skew, (header.track+1) * trackSize / 1024);
 
-        if (config.encoder().format_case() == EncoderProto::FormatCase::FORMAT_NOT_SET)
-        {
-            std::cout << "IMD: setting encoder format automatically\n";
-
-            auto ibm = config.mutable_encoder()->mutable_ibm();
-            auto trackdata = ibm->add_trackdata();
-            trackdata->set_track_length_ms(200);
-
-            bool mfm;
-            int clock_rate_khz = getModulationandSpeed(header.ModeValue, &mfm);
-            trackdata->set_clock_rate_khz(clock_rate_khz);
-            trackdata->set_use_fm(!mfm);
-
-            auto sectors = trackdata->mutable_sectors();
-            for (int i=0; i<header.numSectors; i++)
-                sectors->add_sector(i);
-        }
-
-        if (config.decoder().format_case() == DecoderProto::FormatCase::FORMAT_NOT_SET)
-        {
-            std::cout << "IMD: setting decoder format automatically\n";
-
-            config.mutable_decoder()->mutable_ibm();
-        }
-
         return image;
     }
 };
