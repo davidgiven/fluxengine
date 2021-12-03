@@ -3,18 +3,16 @@
 
 #include "bytes.h"
 #include "sector.h"
-#include "record.h"
 #include "decoders/fluxmapreader.h"
+#include "decoders/fluxdecoder.h"
 
 class Sector;
 class Fluxmap;
 class FluxmapReader;
-class RawRecord;
 class RawBits;
-class Track;
+class DecoderProto;
 
-typedef std::vector<std::unique_ptr<RawRecord>> RawRecordVector;
-typedef std::vector<std::unique_ptr<Sector>> SectorVector;
+#include "flux.h"
 
 extern void setDecoderManualClockRate(double clockrate_us);
 
@@ -22,6 +20,7 @@ extern Bytes decodeFmMfm(std::vector<bool>::const_iterator start,
     std::vector<bool>::const_iterator end);
 extern void encodeMfm(std::vector<bool>& bits, unsigned& cursor, const Bytes& input, bool& lastBit);
 extern void encodeFm(std::vector<bool>& bits, unsigned& cursor, const Bytes& input);
+extern Bytes encodeMfm(const Bytes& input, bool& lastBit);
 
 static inline Bytes decodeFmMfm(const std::vector<bool> bits)
 { return decodeFmMfm(bits.begin(), bits.end()); }
@@ -29,7 +28,13 @@ static inline Bytes decodeFmMfm(const std::vector<bool> bits)
 class AbstractDecoder
 {
 public:
+	AbstractDecoder(const DecoderProto& config):
+		_config(config)
+	{}
+
     virtual ~AbstractDecoder() {}
+
+	static std::unique_ptr<AbstractDecoder> create(const DecoderProto& config);
 
 public:
     enum RecordType
@@ -40,11 +45,11 @@ public:
     };
 
 public:
-    void decodeToSectors(Track& track);
+    std::unique_ptr<TrackDataFlux> decodeToSectors(std::shared_ptr<const Fluxmap> fluxmap, unsigned cylinder, unsigned head);
     void pushRecord(const Fluxmap::Position& start, const Fluxmap::Position& end);
 
-    std::vector<bool> readRawBits(unsigned count)
-    { return _fmr->readRawBits(count, _sector->clock); }
+	void resetFluxDecoder();
+    std::vector<bool> readRawBits(unsigned count);
 
     Fluxmap::Position tell()
     { return _fmr->tell(); } 
@@ -52,10 +57,7 @@ public:
     void seek(const Fluxmap::Position& pos)
     { return _fmr->seek(pos); } 
 
-	/* Returns a set of sectors required to exist on this track. If the reader
-	 * sees any missing, it will consider this to be an error and will retry
-	 * the read. */
-	virtual std::set<unsigned> requiredSectors(Track& track) const;
+	virtual std::set<unsigned> requiredSectors(unsigned cylinder, unsigned head) const;
 
 protected:
     virtual void beginTrack() {};
@@ -63,9 +65,11 @@ protected:
     virtual void decodeSectorRecord() = 0;
     virtual void decodeDataRecord() {};
 
-    FluxmapReader* _fmr;
-    Track* _track;
-    Sector* _sector;
+	const DecoderProto& _config;
+    FluxmapReader* _fmr = nullptr;
+	std::unique_ptr<TrackDataFlux> _trackdata;
+    std::shared_ptr<Sector> _sector;
+	std::unique_ptr<FluxDecoder> _decoder;
 };
 
 #endif

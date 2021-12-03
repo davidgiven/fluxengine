@@ -6,21 +6,17 @@
 
 #define MAC_SECTOR_LENGTH   524 /* yes, really */
 #define MAC_ENCODED_SECTOR_LENGTH 703
+#define MAC_FORMAT_BYTE     0x22
 
-class Sector;
-class Fluxmap;
+#define MAC_TRACKS_PER_DISK 80
 
-class MacintoshDecoder : public AbstractDecoder
-{
-public:
-    virtual ~MacintoshDecoder() {}
+class AbstractEncoder;
+class AbstractDecoder;
+class DecoderProto;
+class EncoderProto;
 
-    RecordType advanceToNextRecord();
-    void decodeSectorRecord();
-    void decodeDataRecord();
-
-	std::set<unsigned> requiredSectors(Track& track) const;
-};
+extern std::unique_ptr<AbstractDecoder> createMacintoshDecoder(const DecoderProto& config);
+extern std::unique_ptr<AbstractEncoder> createMacintoshEncoder(const EncoderProto& config);
 
 #endif
 

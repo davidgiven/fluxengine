@@ -1,44 +1,38 @@
 #include "globals.h"
 #include "flags.h"
 #include "fluxmap.h"
-#include "usb.h"
+#include "usb/usb.h"
 #include "fluxsource/fluxsource.h"
+#include "lib/fluxsource/fluxsource.pb.h"
 #include "fmt/format.h"
-
-FlagGroup hardwareFluxSourceFlags;
-
-static DoubleFlag revolutions(
-    { "--revolutions" },
-    "read this many revolutions of the disk",
-    1.25);
-
-static BoolFlag synced(
-    { "--sync-with-index" },
-    "whether to wait for an index pulse before started to read",
-    false);
-
-static IntFlag indexMode(
-    { "--index-mode" },
-    "index pulse source (0=drive, 1=300 RPM fake source, 2=360 RPM fake source",
-    0);
-
-static bool high_density = false;
-
-void setHardwareFluxSourceDensity(bool high_density)
-{
-	::high_density = high_density;
-}
 
 class HardwareFluxSource : public FluxSource
 {
 public:
-    HardwareFluxSource(unsigned drive):
-        _drive(drive)
+    HardwareFluxSource(const HardwareFluxSourceProto& config):
+        _config(config)
     {
-        usbSetDrive(_drive, high_density, indexMode);
-        std::cerr << "Measuring rotational speed... " << std::flush;
-        _oneRevolution = usbGetRotationalPeriod();
-        std::cerr << fmt::format("{}ms\n", _oneRevolution / 1e6);
+        int rotationalSpeedMs;
+        int retries = 5;
+        usbSetDrive(_config.drive(), _config.high_density(), _config.index_mode());
+        std::cout << "Measuring rotational speed... " << std::flush;
+ 
+        do {
+            _oneRevolution = usbGetRotationalPeriod(_config.hard_sector_count());
+            if (_config.hard_sector_count() != 0)
+                _hardSectorThreshold = _oneRevolution * 3 / (4 * _config.hard_sector_count());
+            else
+                _hardSectorThreshold = 0;
+
+            rotationalSpeedMs = _oneRevolution / 1e6;
+            retries--;
+        } while ((rotationalSpeedMs == 0) && (retries > 0));
+
+        if (rotationalSpeedMs == 0) {
+			Error() << "Failed\nIs a disk in the drive?";
+        }
+
+        std::cout << fmt::format("{}ms\n", rotationalSpeedMs);
     }
 
     ~HardwareFluxSource()
@@ -48,9 +42,11 @@ public:
 public:
     std::unique_ptr<Fluxmap> readFlux(int track, int side)
     {
-        usbSetDrive(_drive, high_density, indexMode);
+        usbSetDrive(_config.drive(), _config.high_density(), _config.index_mode());
         usbSeek(track);
-        Bytes data = usbRead(side, synced, revolutions * _oneRevolution);
+
+        Bytes data = usbRead(
+            side, _config.sync_with_index(), _config.revolutions() * _oneRevolution, _hardSectorThreshold);
         auto fluxmap = std::make_unique<Fluxmap>();
         fluxmap->appendBytes(data);
         return fluxmap;
@@ -67,24 +63,14 @@ public:
     }
 
 private:
-    unsigned _drive;
-    unsigned _revolutions;
+    const HardwareFluxSourceProto& _config;
     nanoseconds_t _oneRevolution;
+    nanoseconds_t _hardSectorThreshold;
 };
 
-void setHardwareFluxSourceRevolutions(double revolutions)
+std::unique_ptr<FluxSource> FluxSource::createHardwareFluxSource(const HardwareFluxSourceProto& config)
 {
-    ::revolutions.setDefaultValue(revolutions);
-}
-
-void setHardwareFluxSourceSynced(bool synced)
-{
-    ::synced.setDefaultValue(synced);
-}
-
-std::unique_ptr<FluxSource> FluxSource::createHardwareFluxSource(unsigned drive)
-{
-    return std::unique_ptr<FluxSource>(new HardwareFluxSource(drive));
+    return std::unique_ptr<FluxSource>(new HardwareFluxSource(config));
 }
 
 

@@ -1,0 +1,21 @@
+comment: 'Durango F85 461kB 5.25" 77-track SS (ro)'
+
+image_writer {
+	filename: "f85.img"
+	img {}
+}
+
+decoder {
+	f85 {}
+}
+
+cylinders {
+	start: 0
+	end: 79
+}
+
+heads {
+	start: 0
+	end: 0
+}
+

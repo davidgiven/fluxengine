@@ -20,14 +20,11 @@ fluxengine read victor9k
 ```
 
 You should end up with an `victor9k.img` which is 774656 bytes long.
-if you want the double-sided variety, use `-s :s=0-1`.
+if you want the double-sided variety, use `--heads 0-1`.
 
-**Big warning!** The image may not work in an emulator. Victor disk images are
-complicated due to the way the tracks are different sizes and the odd sector
-size. FluxEngine chooses to store them in a simple 512 x 19 x 1 x 80 layout,
-with holes where missing sectors should be. This was easiest. If anyone can
-suggest a better way, please [get in
-touch](https://github.com/davidgiven/fluxengine/issues/new).
+**Big warning!** The image is triangular, where each track occupies a different
+amount of space. Victor disk images are complicated due to the way the tracks
+are different sizes and the odd sector size.
 
 
 Useful references

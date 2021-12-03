@@ -1,39 +1,21 @@
 #include "globals.h"
+#include "proto.h"
+#include "fmt/format.h"
 
 typedef int command_cb(int agrc, const char* argv[]);
 
-extern command_cb mainErase;
-extern command_cb mainConvertCwfToFlux;
-extern command_cb mainConvertFluxToAu;
-extern command_cb mainConvertFluxToScp;
-extern command_cb mainConvertFluxToVcd;
-extern command_cb mainConvertScpToFlux;
+extern command_cb mainAnalyseDriveResponse;
+extern command_cb mainAnalyseLayout;
 extern command_cb mainInspect;
-extern command_cb mainReadADFS;
-extern command_cb mainReadAESLanier;
-extern command_cb mainReadAmiga;
-extern command_cb mainReadAmpro;
-extern command_cb mainReadApple2;
-extern command_cb mainReadBrother;
-extern command_cb mainReadC64;
-extern command_cb mainReadDFS;
-extern command_cb mainReadF85;
-extern command_cb mainReadFB100;
-extern command_cb mainReadIBM;
-extern command_cb mainReadMac;
-extern command_cb mainReadMx;
-extern command_cb mainReadVictor9K;
-extern command_cb mainReadZilogMCZ;
+extern command_cb mainRawRead;
+extern command_cb mainRawWrite;
+extern command_cb mainRead;
 extern command_cb mainRpm;
 extern command_cb mainSeek;
 extern command_cb mainTestBandwidth;
 extern command_cb mainTestVoltages;
 extern command_cb mainUpgradeFluxFile;
-extern command_cb mainWriteAmiga;
-extern command_cb mainWriteBrother;
-extern command_cb mainWriteIbm;
-extern command_cb mainWriteFlux;
-extern command_cb mainWriteTestPattern;
+extern command_cb mainWrite;
 
 struct Command
 {
@@ -42,59 +24,27 @@ struct Command
     std::string help;
 };
 
-static command_cb mainRead;
-static command_cb mainWrite;
-static command_cb mainConvert;
+static command_cb mainAnalyse;
 static command_cb mainTest;
 
 static std::vector<Command> commands =
 {
-    { "erase",             mainErase,             "Permanently but rapidly erases some or all of a disk." },
-    { "convert",           mainConvert,           "Converts various types of data file.", },
     { "inspect",           mainInspect,           "Low-level analysis and inspection of a disk." },
+	{ "analyse",           mainAnalyse,           "Disk and drive analysis tools." },
     { "read",              mainRead,              "Reads a disk, producing a sector image.", },
+    { "write",             mainWrite,             "Writes a sector image to a disk.", },
+	{ "rawread",           mainRawRead,           "Reads raw flux from a disk. Warning: you can't use this to copy disks.", },
+    { "rawwrite",          mainRawWrite,          "Writes a flux file to a disk. Warning: you can't use this to copy disks.", },
     { "rpm",               mainRpm,               "Measures the disk rotational speed.", },
     { "seek",              mainSeek,              "Moves the disk head.", },
     { "test",              mainTest,              "Various testing commands.", },
     { "upgradefluxfile",   mainUpgradeFluxFile,   "Upgrades a flux file from a previous version of this software.", },
-    { "write",             mainWrite,             "Writes a sector image to a disk.", },
-    { "writeflux",         mainWriteFlux,         "Writes a raw flux file. Warning: you can't use this to copy disks.", },
-    { "writetestpattern",  mainWriteTestPattern,  "Writes a machine-generated test pattern to a disk.", },
 };
 
-static std::vector<Command> readables =
+static std::vector<Command> analysables =
 {
-    { "adfs",          mainReadADFS,      "Reads Acorn ADFS disks.", },
-    { "aeslanier",     mainReadAESLanier, "Reads AES Lanier disks.", },
-    { "amiga",         mainReadAmiga,     "Reads Commodore Amiga disks.", },
-    { "ampro",         mainReadAmpro,     "Reads Ampro disks.", },
-    { "apple2",        mainReadApple2,    "Reads Apple II disks.", },
-    { "brother",       mainReadBrother,   "Reads 120kB and 240kB Brother word processor disks.", },
-    { "c64",           mainReadC64,       "Reads Commodore 64 disks.", },
-    { "dfs",           mainReadDFS,       "Reads Acorn DFS disks.", },
-    { "f85",           mainReadF85,       "Reads Durango F85 disks.", },
-    { "fb100",         mainReadFB100,     "Reads FB100 disks.", },
-    { "ibm",           mainReadIBM,       "Reads the ubiquitous IBM format disks.", },
-    { "mac",           mainReadMac,       "Reads Apple Macintosh disks.", },
-    { "mx",            mainReadMx,        "Reads MX disks.", },
-    { "victor9k",      mainReadVictor9K,  "Reads Victor 9000 disks.", },
-    { "zilogmcz",      mainReadZilogMCZ,  "Reads Zilog MCZ disks.", },
-};
-
-static std::vector<Command> writeables =
-{
-    { "amiga",         mainWriteAmiga,    "Writes Amiga disks.", },
-    { "brother",       mainWriteBrother,  "Writes 120kB and 240kB Brother word processor disks.", },
-    { "ibm",           mainWriteIbm,      "Writes the ubiquitous IBM format disks.", },
-};
-
-static std::vector<Command> convertables =
-{
-    { "cwftoflux",     mainConvertCwfToFlux, "Converts CatWeasel stream files to flux.", },
-    { "scptoflux",     mainConvertScpToFlux, "Converts Supercard Pro stream files to flux.", },
-    { "fluxtoau",      mainConvertFluxToAu,  "Converts (one track of a) flux file to an .au audio file.", },
-    { "fluxtoscp",     mainConvertFluxToScp, "Converrt a flux file to a Supercard Pro file.", },
-    { "fluxtovcd",     mainConvertFluxToVcd, "Converts (one track of a) flux file to a VCD file.", },
+	{ "driveresponse", mainAnalyseDriveResponse, "Measures the drive's ability to read and write pulses.", },
+	{ "layout",        mainAnalyseLayout,        "Produces a visualisation of the track/sector layout.", },
 };
 
 static std::vector<Command> testables =
@@ -134,19 +84,13 @@ static int mainExtended(std::vector<Command>& subcommands, const std::string& co
     return 1;
 }
 
-static int mainRead(int argc, const char* argv[])
-{ return mainExtended(readables, "read", argc, argv); }
-
-static int mainWrite(int argc, const char* argv[])
-{ return mainExtended(writeables, "write", argc, argv); }
-
-static int mainConvert(int argc, const char* argv[])
-{ return mainExtended(convertables, "convert", argc, argv); }
+static int mainAnalyse(int argc, const char* argv[])
+{ return mainExtended(analysables, "analyse", argc, argv); }
 
 static int mainTest(int argc, const char* argv[])
 { return mainExtended(testables, "test", argc, argv); }
 
-static void help()
+static void globalHelp()
 {
     std::cout << "fluxengine: syntax: fluxengine <command> [<flags>...]\n"
                  "Try one of these commands:\n";
@@ -157,14 +101,32 @@ static void help()
     exit(0);
 }
 
+void showProfiles(const std::string& command, const std::map<std::string, std::string>& profiles)
+{
+	std::cout << "syntax: fluxengine " << command << " <profile> [<options>...]\n"
+				 "Use --help for option help.\n"
+	             "Available profiles include:\n";
+
+	for (const auto& it : profiles)
+	{
+		ConfigProto config;
+		if (!config.ParseFromString(it.second))
+			Error() << "couldn't load config proto";
+		std::cout << fmt::format("  {}: {}\n", it.first, config.comment());
+	}
+
+	std::cout << "Or use a text file containing your own configuration.\n";
+	exit(1);
+}
+
 int main(int argc, const char* argv[])
 {
     if (argc == 1)
-        help();
+        globalHelp();
 
     std::string command = argv[1];
     if (command == "--help")
-        help();
+        globalHelp();
 
     for (Command& c : commands)
     {

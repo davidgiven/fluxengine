@@ -5,9 +5,8 @@
 #include "protocol.h"
 #include "flags.h"
 
-extern FlagGroup fluxmapReaderFlags;
-
 class FluxMatcher;
+class DecoderProto;
 
 struct FluxMatch
 {
@@ -67,14 +66,7 @@ private:
 class FluxmapReader
 {
 public:
-    FluxmapReader(const Fluxmap& fluxmap):
-        _fluxmap(fluxmap),
-        _bytes(fluxmap.ptr()),
-        _size(fluxmap.bytes())
-    {
-        rewind();
-    }
-
+    FluxmapReader(const Fluxmap& fluxmap);
     FluxmapReader(const Fluxmap&& fluxmap) = delete;
 
     void rewind()
@@ -96,6 +88,11 @@ public:
         _pos = pos;
     }
 
+    int getDuration(void)
+    {
+        return (_fluxmap.duration());
+    }
+
     uint8_t getNextEvent(unsigned& ticks);
     unsigned findEvent(uint8_t bits);
     unsigned readInterval(nanoseconds_t clock); /* with debounce support */
@@ -107,15 +104,12 @@ public:
     nanoseconds_t seekToPattern(const FluxMatcher& pattern);
     nanoseconds_t seekToPattern(const FluxMatcher& pattern, const FluxMatcher*& matching);
 
-    bool readRawBit(nanoseconds_t clockPeriod);
-    std::vector<bool> readRawBits(unsigned count, nanoseconds_t clockPeriod);
-    std::vector<bool> readRawBits(const Fluxmap::Position& until, nanoseconds_t clockPeriod);
-
 private:
     const Fluxmap& _fluxmap;
     const uint8_t* _bytes;
     const size_t _size;
     Fluxmap::Position _pos;
+	const DecoderProto& _config;
 };
 
 #endif

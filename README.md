@@ -4,6 +4,11 @@ FluxEngine
 (If you're reading this on GitHub, the formatting's a bit messed up. [Try the
 version on cowlark.com instead.](http://cowlark.com/fluxengine/)
 
+**Breaking news!** As of 2021-05-21, the command line environment has changed
+_substantially_ (to make it more consistent and flexible, and allow some new
+backend features like multi-format IBM scheme disks, which are popular with
+CP/M). If things don't work the way you expect, please check the documentation.
+
 What?
 -----
 
@@ -23,6 +28,14 @@ Don't believe me? Watch the demo reel!
 <div style="text-align: center">
 <iframe width="373" height="210" src="https://www.youtube.com/embed/m_s1iw8eW7o" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </div>
+
+**New!** The FluxEngine client software now works with
+[GreaseWeazle](https://github.com/keirf/Greaseweazle/wiki) hardware. So, if you
+can't find a PSoC5 development kit, or don't want to use the Cypress Windows
+tools for programming it, you can use one of these instead. Very nearly all
+FluxEngine features are available with the GreaseWeazle and it works out-of-the
+box. See the [dedicated GreaseWeazle documentation page](doc/greaseweazle.md)
+for more information.
 
 **Important note.** On 2020-04-02 I changed the bytecode format (and firmware).
 Flux files will need to be upgraded with `fluxengine upgradefluxfile`. The new
@@ -52,8 +65,15 @@ following friendly articles:
   - [Using a FluxEngine](doc/using.md) ∾ what to do with your new hardware ∾
     flux files and image files ∾ knowing what you're doing
 
-  - [Troubleshooting dubious disks](doc/problems.md) ∾ it's not an exact science ∾
-    the sector map ∾ clock detection and the histogram
+  - [Using GreaseWeazle hardware with the FluxEngine client
+	software](doc/greaseweazle.md) ∾ what works ∾ what doesn't work ∾ where to
+	go for help
+
+  - [Troubleshooting dubious disks](doc/problems.md) ∾ it's not an exact
+	science ∾ the sector map ∾ clock detection and the histogram
+
+  - [Checking your drive](doc/driveresponse.md) ∾ you can't do that with that ∾
+	measuring your drive's ability to work with exotic formats
 
 Which?
 ------
@@ -70,20 +90,20 @@ people who've had it work).
 
 ### Old disk formats
 
-| Format                                   | Read? | Write? | Notes |
-|:-----------------------------------------|:-----:|:------:|-------|
-| [IBM PC compatible](doc/disk-ibm.md)     |  🦄   |   🦄   | and compatibles (like the Atari ST) |
-| [Acorn ADFS](doc/disk-acornadfs.md)      |  🦄   |   🦖*  | single- and double- sided           |
-| [Acorn DFS](doc/disk-acorndfs.md)        |  🦄   |   🦖*  |                                     |
-| [Ampro Little Board](doc/disk-ampro.md)  |  🦖   |   🦖*   |                                     |
-| [Apple II DOS 3.3](doc/disk-apple2.md)   |  🦄   |        | doesn't do logical sector remapping |
-| [Amiga](doc/disk-amiga.md)               |  🦄   |        |                                     |
-| [Commodore 64 1541](doc/disk-c64.md)     |  🦖   |        | and probably the other GCR formats  |
-| [Brother 120kB](doc/disk-brother.md)     |  🦄   |        |                                     |
-| [Brother 240kB](doc/disk-brother.md)     |  🦄   |   🦄   |                                     |
-| [Brother FB-100](doc/disk-fb100.md)      |  🦖   |        | Tandy Model 100, Husky Hunter, knitting machines |
-| [Macintosh 800kB](doc/disk-macintosh.md) |  🦖   |        | and probably the 400kB too          |
-| [TRS-80](doc/disk-trs80.md)              |  🦖   |   🦖*  | a minor variation of the IBM scheme |
+| Format                                    | Read? | Write? | Notes |
+|:------------------------------------------|:-----:|:------:|-------|
+| [IBM PC compatible](doc/disk-ibm.md)      |  🦄   |   🦄   | and compatibles (like the Atari ST) |
+| [Acorn ADFS](doc/disk-acornadfs.md)       |  🦄   |   🦖*  | single- and double- sided           |
+| [Acorn DFS](doc/disk-acorndfs.md)         |  🦄   |   🦖*  |                                     |
+| [Ampro Little Board](doc/disk-ampro.md)   |  🦖   |   🦖*  |                                     |
+| [Apple II DOS 3.3](doc/disk-apple2.md)    |  🦄   |        | doesn't do logical sector remapping |
+| [Amiga](doc/disk-amiga.md)                |  🦄   |   🦄   |                                     |
+| [Commodore 64 1541/1581](doc/disk-c64.md) |  🦄   |   🦄   | and probably the other formats      |
+| [Brother 120kB](doc/disk-brother.md)      |  🦄   |   🦖   |                                     |
+| [Brother 240kB](doc/disk-brother.md)      |  🦄   |   🦄   |                                     |
+| [Brother FB-100](doc/disk-fb100.md)       |  🦖   |        | Tandy Model 100, Husky Hunter, knitting machines |
+| [Macintosh 800kB](doc/disk-macintosh.md)  |  🦄   |   🦄   | and probably the 400kB too          |
+| [TRS-80](doc/disk-trs80.md)               |  🦖   |   🦖*  | a minor variation of the IBM scheme |
 {: .datatable }
 
 `*`: these formats are variations of the generic IBM format, and since the
@@ -103,8 +123,12 @@ at least, check the CRC so what data's there is probably good.
 | [AES Superplus / No Problem](doc/disk-aeslanier.md) |  🦖   | | hard sectors! |
 | [Durango F85](doc/disk-durangof85.md)    |  🦖   |        | 5.25" |
 | [DVK MX](doc/disk-mx.md)                 |  🦖   |        | Soviet PDP-11 clone |
-| [Victor 9000](doc/disk-victor9k.md)      |  🦖   |        | 8-inch        |
-| [Zilog MCZ](doc/disk-zilogmcz.md)        |  🦖   |        | 8-inch _and_ hard sectors |
+| [VDS Eco1](doc/disk-eco1.md)             |  🦖   |        | 8" mixed format |
+| [Micropolis](doc/disk-micropolis.md)     |  🦄   |        | Micropolis 100tpi drives |
+| [Northstar(doc/disk-northstar.md)        |  🦖   |   🦖   | 5.25" hard sectors |
+| [TI DS990 FD1000](doc/disk-tids990.md)   |  🦄   |  🦄    | 8" |
+| [Victor 9000](doc/disk-victor9k.md)      |  🦖   |        | 8" |
+| [Zilog MCZ](doc/disk-zilogmcz.md)        |  🦖   |        | 8" _and_ hard sectors |
 {: .datatable }
 
 ### Notes
@@ -188,6 +212,21 @@ contributions from many other people. It is licensed under the terms of the
 BSD license. Please see the contents of the directory for the full text.
 
 As an exception, `dep/emu` contains parts of the OpenBSD C library
-code, Todd Miller and William A. Rowe (and probably others). It is licensed
+code, maintained by Todd Miller and William A. Rowe (and probably others). It is licensed
 under the terms of the 3-clause BSD license. Please see the contents of the
 directory for the full text. It's been lightly modified by me.
+
+As an exception, `dep/agg` contains parts of the Anti-Grain Antialiasing
+library, written by Maxim Semanarev (and others). It is licensed under the
+terms of the 3-clause BSD license. Please see the contents of the directory for
+the full text. It's been lightly modified by me.
+
+As an exception, `dep/stb` contains parts of the libstb utility library,
+written by Sean T Barett (and others). It is public domain/Unlicense/MIT
+licensed, at your choice. Please see the contents of the directory for the full
+text.
+
+As an exception, `dep/snowhouse` contains the snowhouse assertion library,
+taken from https://github.com/banditcpp/snowhouse. It is Boost Standard License
+1.0 licensed. Please see the contents of the directory for the full text.
+

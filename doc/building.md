@@ -127,10 +127,11 @@ Programmer](https://www.cypress.com/products/psoc-programming-solutions).
 **Note:** _not_ the Cypress Programmer, which is for a different board!
 Cypress will make you register.
 
-Once done, run it. Plug the blunt end of the FluxEngine board into a USB
-port (the end which is a USB connector). The programmer should detect it
-and report it as a KitProg. You may be prompted to upgrade the programmer
-hardware; if so, follow the instructions and do it.
+Once done, run it. Plug the blunt end of the FluxEngine board into a USB port
+(the end which is a USB plug, with exposed traces; this is on the smaller
+section of the board). The programmer should detect it and report it as a
+KitProg. You may be prompted to upgrade the programmer hardware; if so, follow
+the instructions and do it.
 
 Now go to File -> File Load and open
 `FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex` in the
@@ -151,10 +152,11 @@ CY8CKIT-059 Kit Setup (Kit Design Files, Creator, Programmer, Documentation,
 Examples)'. I'm not linking to it in case the URL changes when they update
 it.
 
-Once this is done, I'd strongly recommend working through the initial
-tutorial and making the LED on your board flash. It'll tell you where all the
-controls are and how to program the board. Remember that the big end of the
-board plugs into your computer for programming.
+Once this is done, I'd strongly recommend working through the initial tutorial
+and making the LED on your board flash. It'll tell you where all the controls
+are and how to program the board. Remember that you have to plug the
+programming connector into your computer to flash it; the microusb socket is
+used only for application control.
 
 When you're ready, open the `FluxEngine.cydsn/FluxEngine.cyprj` project,
 pick 'Program' from the menu, and the firmware should compile and be
@@ -184,10 +186,13 @@ well, although on Windows it'll need MSYS2 and mingw32. You'll need to
 install some support packages.
 
   - For Linux (this is Ubuntu, but this should apply to Debian too):
-	`ninja-build`, `libusb-1.0-0-dev`, `libsqlite3-dev`.
-  - For OSX with Homebrew: `ninja`, `libusb`, `pkg-config`, `sqlite`.
+	`ninja-build`, `libusb-1.0-0-dev`, `libsqlite3-dev`, `zlib1g-dev`,
+	`libudev-dev`.
+  - For OSX with Homebrew: `ninja`, `libusb`, `pkg-config`, `sqlite`,
+    `protobuf`.
   - For Windows with MSYS2: `make`, `ninja`, `mingw-w64-i686-libusb`,
-	`mingw-w64-i686-sqlite3`, `mingw-w64-i686-zlib`, `mingw-w64-i686-gcc`.
+	`mingw-w64-i686-protobuf`, `mingw-w64-i686-sqlite3`, `mingw-w64-i686-zlib`,
+	`mingw-w64-i686-gcc`.
 
 These lists are not necessarily exhaustive --- please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new) if I've missed
@@ -292,7 +297,7 @@ INDEX300 ---+ 3.0|     | GND+--------------------------+
             +----+     +----+                 +--+--+  |
 INDEX360 ---+ 3.1|     | 1.7+------ DISKCHG --+34+33+--+
             +----+     +----+                 +--+--+
-            + 3.2|     | 1.6+------- SIDE1 ---+32+31+
+    TK43 ---+ 3.2|     | 1.6+------- SIDE1 ---+32+31+
             +----+     +----+                 +--+--+
             + 3.3|     | 1.5+------- RDATA ---+30+29+
             +----+     +----+                 +--+--+
@@ -306,7 +311,7 @@ INDEX360 ---+ 3.1|     | 1.7+------ DISKCHG --+34+33+--+
             +----+     +----+                 +--+--+
             +15.0|     | 1.0+------- STEP ----+20+19+
             +----+     +----+                 +--+--+
-            +15.1|     |12.0+-------- DIR ----+18+17+
+            +15.1|     |12.0+--- DIR/SIDE1 ---+18+17+
             +----+     +----+                 +--+--+
             +15.2|     |12.1+------- MOTEB ---+16+15+
             +----+     +----+                 +--+--+
@@ -343,6 +348,10 @@ INDEX360 ---+ 3.1|     | 1.7+------ DISKCHG --+34+33+--+
 
 Notes:
 
+  - `DIR/SIDE1` is the step direction pin. During reads or writes, `SIDE1` is
+  also multiplexed onto it, because some drives expect this. This is harmless
+  on other drives because the `DIR` pin is ignored during reads or writes.
+
   - `TX` is the debug UART port. It's on pin 12.7 because the board routes it
   to the USB serial port on the programmer, so you can get debug information
   from the FluxEngine by just plugging the programming end into a USB port
@@ -364,6 +373,10 @@ Notes:
   timing pulses for 300 and 360 RPM drives. These are useful for certain
   rather exotic things. See the section on flippy disks [in the FAQ](faq.md)
   for more details; you can normally ignore these.
+
+  - `TK43` is an optional output pin which goes low when the drive is seeking
+  to track 43 or above. This is useful when using 8" floppy drives, which
+  require reduced write current when writing to these tracks.
 
 ## Next steps
 

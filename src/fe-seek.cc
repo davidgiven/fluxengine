@@ -1,25 +1,36 @@
 #include "globals.h"
 #include "flags.h"
-#include "usb.h"
+#include "usb/usb.h"
+#include "fluxsource/fluxsource.cc"
+#include "proto.h"
 #include "protocol.h"
 
 static FlagGroup flags;
 
-static IntFlag drive(
-    { "--drive", "-d" },
-    "drive to use",
-    0);
+static StringFlag sourceFlux(
+	{ "-s", "--source" },
+	"'drive:' flux source to use",
+	"",
+	[](const auto& value)
+	{
+		FluxSource::updateConfigForFilename(config.mutable_flux_source(), value);
+	});
 
-static IntFlag track(
-    { "--track", "-t" },
-    "track to seek to",
-    0);
+static IntFlag cylinder(
+	{ "--cylinder", "-c" },
+	"cylinder to seek to",
+	0);
+
+extern const std::map<std::string, std::string> readables;
 
 int mainSeek(int argc, const char* argv[])
 {
-    flags.parseFlags(argc, argv);
+    flags.parseFlagsWithConfigFiles(argc, argv, {});
 
-    usbSetDrive(drive, false, F_INDEX_REAL);
-    usbSeek(track);
+	if (!config.flux_source().has_drive())
+		Error() << "this only makes sense with a real disk drive";
+
+    usbSetDrive(config.flux_source().drive().drive(), false, config.flux_source().drive().index_mode());
+	usbSeek(cylinder);
     return 0;
 }

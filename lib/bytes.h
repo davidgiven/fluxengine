@@ -1,6 +1,8 @@
 #ifndef BYTES_H
 #define BYTES_H
 
+#include <string.h>
+
 class ByteReader;
 class ByteWriter;
 
@@ -10,6 +12,7 @@ public:
     Bytes();
     Bytes(unsigned size);
     Bytes(const uint8_t* ptr, size_t len);
+    Bytes(const std::string& data);
     Bytes(std::initializer_list<uint8_t> data);
     Bytes(std::shared_ptr<std::vector<uint8_t>> data);
     Bytes(std::shared_ptr<std::vector<uint8_t>> data, unsigned start, unsigned end);
@@ -37,6 +40,8 @@ public:
     uint8_t& operator [] (unsigned offset);
     uint8_t* begin()              { checkWritable(); return &(*_data)[_low]; }
     uint8_t* end()                { checkWritable(); return &(*_data)[_high]; }
+
+	operator std::string () const { return std::string(cbegin(), cend()); }
 
     void boundsCheck(unsigned pos) const;
     void checkWritable();
@@ -271,6 +276,16 @@ public:
 
     ByteWriter& operator += (std::istream& stream);
 
+	ByteWriter& append(const char* data)
+	{
+		return *this += Bytes((const uint8_t*)data, strlen(data));
+	}
+
+	ByteWriter& append(const std::string& data)
+	{
+		return *this += Bytes(data);
+	}
+
     ByteWriter& append(const Bytes data)
     {
         return *this += data;
@@ -295,12 +310,31 @@ public:
     BitWriter(ByteWriter&&) = delete;
 
     void push(uint32_t bits, size_t size);
+	void push(bool bit) { push(bit, 1); }
     void flush();
 
 private:
     uint8_t _fifo = 0;
     size_t _bitcount = 0;
     ByteWriter& _bw;
+};
+
+class BitReader
+{
+public:
+	BitReader(ByteReader& br):
+		_br(br)
+	{}
+
+	BitReader(ByteReader&&) = delete;
+
+	bool get();
+	bool eof();
+
+private:
+	uint8_t _fifo = 0;
+	size_t _bitcount = 0;
+	ByteReader& _br;
 };
 
 static inline uint8_t reverse_bits(uint8_t b)

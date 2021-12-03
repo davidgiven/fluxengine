@@ -27,7 +27,7 @@ If you want the metadata as well, specify a 528 byte sector size for the
 output image:
 
 ```
-fluxengine read amiga -o amiga.adf:b=528
+fluxengine read amiga -o amiga.adf --output.image.img.trackdata.sector_size=528
 ```
 
 You will end up with a 929280 byte long image which you probably _can't_ use
@@ -43,7 +43,7 @@ Just do:
 fluxengine write amiga -i amiga.adf
 ```
 
-This will rake a normal 901120 byte long ADF file and write it to a DD disk.
+This will take a normal 901120 byte long ADF file and write it to a DD disk.
 Note that writing to an HD disk will probably not work (this will depend on
 your drive and disk and potential FluxEngine bugs I'm still working on ---
 please [get in touch](https://github.com/davidgiven/fluxengine/issues/new) if
@@ -53,7 +53,7 @@ If you want to write the metadata as well, specify a 528 byte sector size for
 the output image and supply a 929280 byte long file as described above.
 
 ```
-fluxengine write amiga -i amiga.adf:b=528
+fluxengine write amiga -i amiga.adf --input.image.img.trackdata.sector_size=528
 ```
 
 Useful references

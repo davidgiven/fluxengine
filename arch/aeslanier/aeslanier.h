@@ -5,16 +5,6 @@
 #define AESLANIER_SECTOR_LENGTH    256
 #define AESLANIER_RECORD_SIZE      (AESLANIER_SECTOR_LENGTH + 5)
 
-class Sector;
-class Fluxmap;
-
-class AesLanierDecoder : public AbstractDecoder
-{
-public:
-    virtual ~AesLanierDecoder() {}
-
-    RecordType advanceToNextRecord();
-    void decodeSectorRecord();
-};
+extern std::unique_ptr<AbstractDecoder> createAesLanierDecoder(const DecoderProto& config);
 
 #endif

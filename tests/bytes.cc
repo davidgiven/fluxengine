@@ -124,6 +124,13 @@ static void test_tobits()
 	}));
 }
 
+static void test_tostring()
+{
+	std::string s = "Hello, world";
+	Bytes b(s);
+	assert(b == s);
+}
+
 int main(int argc, const char* argv[])
 {
     test_bounds();
@@ -133,5 +140,6 @@ int main(int argc, const char* argv[])
     test_writes();
     test_slice();
 	test_tobits();
+	test_tostring();
     return 0;
 }

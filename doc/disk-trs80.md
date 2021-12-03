@@ -22,13 +22,21 @@ Reading discs
 Just do:
 
 ```
-fluxengine read ibm
+fluxengine read ibm -o trs80.jv3
 ```
 
-You should end up with an `ibm.img` of the appropriate size. It's a simple
-array of sectors in JV1 format.
+You should end up with an `trs80.jv3` of the appropriate size. It's a simple
+array of sectors in JV3 format.
 
-If you've got a 40-track disk, use `-s :t=0-79x2`.
+If you've got a 40-track disk, use `--cylinders=0-79x2`.
 
-If you've got a single density disk, use `--read-fm=true`. (Double density is
-the default.)
+If you've got a single density disk, use
+`--decoder.ibm.trackdata.read_fm=true`. (Double density is the default.)
+
+
+Useful references
+-----------------
+
+  - [The JV3 file format](https://www.tim-mann.org/trs80/dskspec.html):
+	documents the most popular emulator disk image.
+

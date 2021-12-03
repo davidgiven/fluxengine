@@ -38,10 +38,11 @@ Reading disks
 Just do:
 
 ```
-fluxengine read brother
+fluxengine read `<format>`
 ```
 
-You should end up with a `brother.img` which is 239616 bytes long.
+... where `<format>` can be `brother120` or `brother240`. You should end up
+with a `brother.img` which is either 119808 or 239616 bytes long.
 
 Writing disks
 -------------
@@ -49,11 +50,10 @@ Writing disks
 Just do:
 
 ```
-fluxengine write brother
+fluxengine write `<format>` -i brother.img
 ```
 
-...and it'll write a `brother.img` file which is 239616 bytes long to the
-disk. (Use `-i` to specify a different input filename.)
+...where `<format>` can be `brother120` or `brother240`.
 
 Dealing with misaligned disks
 -----------------------------

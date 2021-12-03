@@ -16,11 +16,6 @@ sectors, unlike the Macintosh. Like the Macintosh, there's a crazy encoding
 scheme applied to the data before it goes down on disk to speed up
 checksumming.
 
-Macintosh disks come in two varieties: the newer 1440kB ones, which are
-perfectly ordinary PC disks you should use `fluxengine read ibm` to read, and
-the older 800kB disks (and 400kB for the single sides ones). They have 80
-tracks and up to 12 sectors per track.
-
 In addition, a lot of the behaviour of the drive was handled in software.
 This means that Apple II disks can do all kinds of weird things, including
 having spiral tracks! Copy protection for the Apple II was even madder than

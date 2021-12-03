@@ -2,10 +2,8 @@
 #include "fluxmap.h"
 #include "decoders/fluxmapreader.h"
 #include "protocol.h"
-#include "record.h"
 #include "decoders/decoders.h"
 #include "sector.h"
-#include "track.h"
 #include "macintosh.h"
 #include "bytes.h"
 #include "fmt/format.h"
@@ -26,7 +24,7 @@ static int decode_data_gcr(uint8_t gcr)
 		#undef GCR_ENTRY
     }
     return -1;
-};
+}
 
 /* This is extremely inspired by the MESS implementation, written by Nathan Woods
  * and R. Belmont: https://github.com/mamedev/mame/blob/4263a71e64377db11392c458b580c5ae83556bc7/src/lib/formats/ap_dsk35.cpp
@@ -118,91 +116,103 @@ static Bytes decode_crazy_data(const Bytes& input, Sector::Status& status)
 uint8_t decode_side(uint8_t side)
 {
     /* Mac disks, being weird, use the side byte to encode both the side (in
-     * bit 5) and also whether we're above track 0x3f (in bit 6).
+     * bit 5) and also whether we're above track 0x3f (in bit 0).
      */
 
-    return !!(side & 0x40);
+    return !!(side & 0x20);
 }
 
-AbstractDecoder::RecordType MacintoshDecoder::advanceToNextRecord()
+class MacintoshDecoder : public AbstractDecoder
 {
-	const FluxMatcher* matcher = nullptr;
-	_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
-	if (matcher == &SECTOR_RECORD_PATTERN)
-		return SECTOR_RECORD;
-	if (matcher == &DATA_RECORD_PATTERN)
-		return DATA_RECORD;
-	return UNKNOWN_RECORD;
-}
+public:
+	MacintoshDecoder(const DecoderProto& config):
+		AbstractDecoder(config)
+	{}
 
-void MacintoshDecoder::decodeSectorRecord()
+    RecordType advanceToNextRecord()
+	{
+		const FluxMatcher* matcher = nullptr;
+		_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
+		if (matcher == &SECTOR_RECORD_PATTERN)
+			return SECTOR_RECORD;
+		if (matcher == &DATA_RECORD_PATTERN)
+			return DATA_RECORD;
+		return UNKNOWN_RECORD;
+	}
+
+    void decodeSectorRecord()
+	{
+		/* Skip ID (as we know it's a MAC_SECTOR_RECORD). */
+		readRawBits(24);
+
+		/* Read header. */
+
+		auto header = toBytes(readRawBits(7*8)).slice(0, 7);
+					
+		uint8_t encodedTrack = decode_data_gcr(header[0]);
+		if (encodedTrack != (_sector->physicalCylinder & 0x3f))
+			return;
+					
+		uint8_t encodedSector = decode_data_gcr(header[1]);
+		uint8_t encodedSide = decode_data_gcr(header[2]);
+		uint8_t formatByte = decode_data_gcr(header[3]);
+		uint8_t wantedsum = decode_data_gcr(header[4]);
+
+		if (encodedSector > 11)
+			return;
+
+		_sector->logicalTrack = _sector->physicalCylinder;
+		_sector->logicalSide = decode_side(encodedSide);
+		_sector->logicalSector = encodedSector;
+		uint8_t gotsum = (encodedTrack ^ encodedSector ^ encodedSide ^ formatByte) & 0x3f;
+		if (wantedsum == gotsum)
+			_sector->status = Sector::DATA_MISSING; /* unintuitive but correct */
+	}
+
+    void decodeDataRecord()
+	{
+		auto id = toBytes(readRawBits(24)).reader().read_be24();
+		if (id != MAC_DATA_RECORD)
+			return;
+
+		/* Read data. */
+
+		readRawBits(8); /* skip spare byte */
+		auto inputbuffer = toBytes(readRawBits(MAC_ENCODED_SECTOR_LENGTH*8))
+			.slice(0, MAC_ENCODED_SECTOR_LENGTH);
+
+		for (unsigned i=0; i<inputbuffer.size(); i++)
+			inputbuffer[i] = decode_data_gcr(inputbuffer[i]);
+			
+		_sector->status = Sector::BAD_CHECKSUM;
+		Bytes userData = decode_crazy_data(inputbuffer, _sector->status);
+		_sector->data.clear();
+		_sector->data.writer().append(userData.slice(12, 512)).append(userData.slice(0, 12));
+	}
+
+	std::set<unsigned> requiredSectors(unsigned cylinder, unsigned head) const
+	{
+		int count;
+		if (cylinder < 16)
+			count = 12;
+		else if (cylinder < 32)
+			count = 11;
+		else if (cylinder < 48)
+			count = 10;
+		else if (cylinder < 64)
+			count = 9;
+		else
+			count = 8;
+
+		std::set<unsigned> sectors;
+		while (count--)
+			sectors.insert(count);
+		return sectors;
+	}
+};
+
+std::unique_ptr<AbstractDecoder> createMacintoshDecoder(const DecoderProto& config)
 {
-    /* Skip ID (as we know it's a MAC_SECTOR_RECORD). */
-    readRawBits(24);
-
-    /* Read header. */
-
-    auto header = toBytes(readRawBits(7*8)).slice(0, 7);
-                
-    uint8_t encodedTrack = decode_data_gcr(header[0]);
-    if (encodedTrack != (_track->physicalTrack & 0x3f))
-        return;
-                
-    uint8_t encodedSector = decode_data_gcr(header[1]);
-    uint8_t encodedSide = decode_data_gcr(header[2]);
-    uint8_t formatByte = decode_data_gcr(header[3]);
-    uint8_t wantedsum = decode_data_gcr(header[4]);
-
-    if (encodedSector > 11)
-        return;
-
-    _sector->logicalTrack = _track->physicalTrack;
-    _sector->logicalSide = decode_side(encodedSide);
-    _sector->logicalSector = encodedSector;
-    uint8_t gotsum = (encodedTrack ^ encodedSector ^ encodedSide ^ formatByte) & 0x3f;
-    if (wantedsum == gotsum)
-        _sector->status = Sector::DATA_MISSING; /* unintuitive but correct */
+	return std::unique_ptr<AbstractDecoder>(new MacintoshDecoder(config));
 }
-
-void MacintoshDecoder::decodeDataRecord()
-{
-    auto id = toBytes(readRawBits(24)).reader().read_be24();
-    if (id != MAC_DATA_RECORD)
-        return;
-
-    /* Read data. */
-
-    readRawBits(8); /* skip spare byte */
-    auto inputbuffer = toBytes(readRawBits(MAC_ENCODED_SECTOR_LENGTH*8))
-        .slice(0, MAC_ENCODED_SECTOR_LENGTH);
-
-    for (unsigned i=0; i<inputbuffer.size(); i++)
-        inputbuffer[i] = decode_data_gcr(inputbuffer[i]);
-        
-    _sector->status = Sector::BAD_CHECKSUM;
-    Bytes userData = decode_crazy_data(inputbuffer, _sector->status);
-    _sector->data.clear();
-    _sector->data.writer().append(userData.slice(12, 512)).append(userData.slice(0, 12));
-}
-
-std::set<unsigned> MacintoshDecoder::requiredSectors(Track& track) const
-{
-	int count;
-	if (track.physicalTrack < 16)
-		count = 12;
-	else if (track.physicalTrack < 32)
-		count = 11;
-	else if (track.physicalTrack < 48)
-		count = 10;
-	else if (track.physicalTrack < 64)
-		count = 9;
-	else
-		count = 8;
-
-	std::set<unsigned> sectors;
-	while (count--)
-		sectors.insert(count);
-	return sectors;
-}
-
 

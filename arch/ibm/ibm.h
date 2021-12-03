@@ -1,9 +1,6 @@
 #ifndef IBM_H
 #define IBM_H
 
-#include "decoders/decoders.h"
-#include "encoders/encoders.h"
-
 /* IBM format (i.e. ordinary PC floppies). */
 
 #define IBM_MFM_SYNC   0xA1   /* sync byte for MFM */
@@ -29,71 +26,12 @@ struct IbmIdam
     uint8_t crc[2];
 };
 
-class IbmDecoder : public AbstractDecoder
-{
-public:
-    IbmDecoder(unsigned sectorBase, bool ignoreSideByte=false,
-			const std::set<unsigned> requiredSectors=std::set<unsigned>()):
-        _sectorBase(sectorBase),
-        _ignoreSideByte(ignoreSideByte),
-		_requiredSectors(requiredSectors)
-    {}
+class AbstractEncoder;
+class AbstractDecoder;
+class DecoderProto;
+class EncoderProto;
 
-    RecordType advanceToNextRecord();
-    void decodeSectorRecord();
-    void decodeDataRecord();
-
-	std::set<unsigned> requiredSectors(Track& track) const
-	{ return _requiredSectors; }
-
-private:
-    unsigned _sectorBase;
-    bool _ignoreSideByte;
-	std::set<unsigned> _requiredSectors;
-    unsigned _currentSectorSize;
-    unsigned _currentHeaderLength;
-};
-
-struct IbmParameters
-{
-	int trackLengthMs;
-	int sectorSize;
-	bool emitIam;
-	int startSectorId;
-	int clockRateKhz;
-	bool useFm;
-	uint16_t idamByte;
-	uint16_t damByte;
-	int gap0;
-	int gap1;
-	int gap2;
-	int gap3;
-	std::string sectorSkew;
-};
-
-class IbmEncoder : public AbstractEncoder
-{
-public:
-	IbmEncoder(const IbmParameters& parameters):
-		_parameters(parameters)
-	{}
-
-	virtual ~IbmEncoder() {}
-
-public:
-    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors);
-
-private:
-	void writeRawBits(uint32_t data, int width);
-	void writeBytes(const Bytes& bytes);
-	void writeBytes(int count, uint8_t value);
-	void writeSync();
-	
-private:
-	IbmParameters _parameters;
-	std::vector<bool> _bits;
-	unsigned _cursor;
-	bool _lastBit;
-};
+extern std::unique_ptr<AbstractDecoder> createIbmDecoder(const DecoderProto& config);
+extern std::unique_ptr<AbstractEncoder> createIbmEncoder(const EncoderProto& config);
 
 #endif

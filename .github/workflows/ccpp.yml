@@ -10,32 +10,45 @@ jobs:
       with:
         fetch-depth: 1
     - name: apt
-      run: sudo apt update && sudo apt install libusb-1.0-0-dev libsqlite3-dev ninja-build
+      run: sudo apt update && sudo apt install libusb-1.0-0-dev libsqlite3-dev ninja-build protobuf-compiler
     - name: make
       run: make
 
   build-macos:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
       with:
         fetch-depth: 1
     - name: brew
-      run: brew install sqlite pkg-config libusb ninja
+      run: brew install sqlite pkg-config libusb ninja protobuf
     - name: make
       run: make
 
-#  build-windows:
-#    runs-on: windows-latest
-#    steps:
-#    - uses: numworks/setup-msys2@v1
-#      with:
-#        path-type: inherit
-#    - uses: actions/checkout@v1
-#    - name: pacman
-#      run: |
-#        msys2do pacman -S --noconfirm --needed make ninja mingw-w64-i686-libusb mingw-w64-i686-sqlite3 mingw-w64-i686-zlib mingw-w64-i686-gcc zip
-#    - name: build
-#      run: |
-#        msys2do make
+  build-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+    - uses: msys2/setup-msys2@v2
+      with:
+        update: true
+        msystem: MINGW32
+        install: >-
+          make
+          ninja
+          mingw-w64-i686-libusb
+          mingw-w64-i686-sqlite3
+          mingw-w64-i686-zlib
+          mingw-w64-i686-gcc
+          zip
+          mingw-w64-i686-protobuf
+          vim
+    - uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+    - name: build
+      run: |
+        make
 
