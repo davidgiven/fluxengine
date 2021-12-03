@@ -16,7 +16,7 @@ public:
 		ImageReader(config)
 	{}
 
-	Image readImage()
+	std::unique_ptr<Image> readImage()
 	{
         std::ifstream inputFile(_config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
@@ -53,7 +53,7 @@ public:
             return 17;
 		};
 
-        Image image;
+        std::unique_ptr<Image> image(new Image);
         for (int track = 0; track < 40; track++)
         {
 			int numSectors = sectorsPerTrack(track);
@@ -62,7 +62,7 @@ public:
             {
                 for (int sectorId = 0; sectorId < numSectors; sectorId++)
                 {
-					const auto& sector = image.put(track, head, sectorId);
+					const auto& sector = image->put(track, head, sectorId);
                     if ((offset < inputFileSize))
                     {    //still data available sector OK
 						br.seek(offset);
@@ -88,7 +88,7 @@ public:
             }
         }
 
-		image.calculateSize();
+		image->calculateSize();
         return image;
 	}
 };

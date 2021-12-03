@@ -233,7 +233,7 @@ FluxEngine supports a number of ways to get or put flux. When using the `-s` or
 FluxEngine also supports a number of file system image formats. When using the
 `-i` or `-o` options (for input and output), you can use any of these strings:
 
-  - `<filename.adf>`, `<filename.d81>`, `<filename.img>`, `<filename.st>`
+  - `<filename.adf>`, `<filename.d81>`, `<filename.img>`, `<filename.st>`, `<filename.xdf>`
 
 	Read from or write to a simple headerless image file (all these formats are
 	the same). This will probably want configuration via the
@@ -256,6 +256,27 @@ FluxEngine also supports a number of file system image formats. When using the
 
 	Read from a JV3 image file, commonly used by TRS-80 emulators. **Read
 	only.**
+
+  - `<filename.dim>`
+
+  Read from a [DIM image file](https://www.pc98.org/project/doc/dim.html),
+  commonly used by X68000 emulators. **Read Only.**
+  
+  - `<filename.fdi>`
+
+  Read from a [FDI image file](https://www.pc98.org/project/doc/hdi.html),
+  commonly used by PC-98 emulators. **Read Only.**
+  
+  - `<filename.d88>`
+
+  Read from a [D88 image file](https://www.pc98.org/project/doc/d88.html),
+  commonly used by various Japanese PC emulators, including the NEC PC-88. **Read Only.**
+  
+  FluxEngine is currently limited to reading only the first floppy image in a
+  D88 file.
+  
+  In addition, it only supports a limited subset of D88 features and will
+  reject files not in that subset.
   
   - `<filename.ldbs>`
 

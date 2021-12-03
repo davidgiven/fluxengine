@@ -56,7 +56,7 @@ void writeTracksAndVerify(
 	AbstractEncoder& encoder,
 	FluxSource& fluxSource,
 	AbstractDecoder& decoder,
-	Image& image)
+	const Image& image)
 {
     std::cout << "Writing to: " << fluxSink << std::endl;
 
@@ -129,10 +129,9 @@ void fillBitmapTo(std::vector<bool>& bitmap,
 	}
 }
 
-void writeDiskCommand(ImageReader& imageReader, AbstractEncoder& encoder, FluxSink& fluxSink,
+void writeDiskCommand(const Image& image, AbstractEncoder& encoder, FluxSink& fluxSink,
 		AbstractDecoder* decoder, FluxSource* fluxSource)
 {
-	Image image = imageReader.readImage();
 	if (fluxSource && decoder)
 		writeTracksAndVerify(fluxSink, encoder, *fluxSource, *decoder, image);
 	else
