@@ -36,8 +36,8 @@ rule test
     description = TEST \$in
 
 rule encodedecode
-    command = sh scripts/encodedecodetest.sh \$format \$configs > \$out
-    description = ENCODEDECODE \$format
+    command = sh scripts/encodedecodetest.sh \$format \$fluxx \$configs > \$out
+    description = ENCODEDECODE \$fluxx \$format
 
 rule strip
     command = cp -f \$in \$out && $STRIP \$out
@@ -264,9 +264,14 @@ encodedecodetest() {
     format=$1
     shift
 
-    echo "build $OBJDIR/$format.encodedecode.stamp : encodedecode | fluxengine$EXTENSION scripts/encodedecodetest.sh $*"
+    echo "build $OBJDIR/$format.encodedecode.flux.stamp : encodedecode | fluxengine$EXTENSION scripts/encodedecodetest.sh $*"
     echo "    format=$format"
     echo "    configs=$*"
+    echo "    fluxx=flux"
+    echo "build $OBJDIR/$format.encodedecode.scp.stamp : encodedecode | fluxengine$EXTENSION scripts/encodedecodetest.sh $*"
+    echo "    format=$format"
+    echo "    configs=$*"
+    echo "    fluxx=scp"
 }
 
 buildlibrary libagg.a \
