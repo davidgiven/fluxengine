@@ -3,6 +3,7 @@
 #include "sector.h"
 #include "imagereader/imagereader.h"
 #include "image.h"
+#include "proto.h"
 #include "lib/config.pb.h"
 #include "imagereader/imagereaderimpl.h"
 #include "fmt/format.h"
@@ -94,6 +95,41 @@ public:
             }
 
 			trackCount++;
+        }
+
+        if (config.encoder().format_case() == EncoderProto::FormatCase::FORMAT_NOT_SET)
+        {
+            auto ibm = config.mutable_encoder()->mutable_ibm();
+            auto trackdata = ibm->add_trackdata();
+            trackdata->set_clock_rate_khz(500);
+            auto sectors = trackdata->mutable_sectors();
+            switch (mediaByte) {
+                case 0x00:
+                    std::cout << "DIM: automatically setting format to 1.2MB (1024 byte sectors)\n";
+                    config.mutable_cylinders()->set_end(76);
+                    trackdata->set_track_length_ms(167);
+                    trackdata->set_sector_size(1024);
+                    for (int i = 0; i < 9; i++)
+                        sectors->add_sector(i);
+                    break;
+                case 0x02:
+                    std::cout << "DIM: automatically setting format to 1.2MB (512 byte sectors)\n";
+                    trackdata->set_track_length_ms(167);
+                    trackdata->set_sector_size(512);
+                    for (int i = 0; i < 15; i++)
+                        sectors->add_sector(i);
+                    break;
+                case 0x03:
+                    std::cout << "DIM: automatically setting format to 1.44MB\n";
+                    trackdata->set_track_length_ms(200);
+                    trackdata->set_sector_size(512);
+                    for (int i = 0; i < 18; i++)
+                        sectors->add_sector(i);
+                    break;
+                default:
+                    Error() << fmt::format("DIM: unknown media byte 0x%02x, could not determine write profile automatically", mediaByte);
+                    break;
+            }
         }
 
 		image->calculateSize();

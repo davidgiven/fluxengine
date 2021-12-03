@@ -103,4 +103,3 @@ void getTrackFormat(const ImgInputOutputProto& config,
 		trackdata.MergeFrom(f);
 	}
 }
-

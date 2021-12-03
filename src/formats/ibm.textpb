@@ -1,4 +1,4 @@
-comment: 'PC 3.5"/5.25" autodetect double sided format (ro)'
+comment: 'PC 3.5"/5.25" autodetect double sided format'
 
 image_writer {
 	filename: "ibm.img"
