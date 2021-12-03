@@ -26,7 +26,8 @@ the speed zone allocation on head 1 differ from head 0...
 FluxEngine, the disk always spins at 360 rpm, which corresponds to a rotational
 period of 166 ms.)
 
-FluxEngine reads these.
+FluxEngine can read and write the single-sided variant of these. (Double-sided
+will be trivial to do, it's just not done yet.)
 
 Reading discs
 -------------
@@ -34,15 +35,25 @@ Reading discs
 Just do:
 
 ```
-fluxengine read victor9k
+fluxengine read victor9k-ss
 ```
 
-You should end up with an `victor9k.img` which is 774656 bytes long.
-if you want the double-sided variety, use `--heads 0-1`.
+You should end up with an `victor9k.img` which is 627200 bytes long.
 
 **Big warning!** The image is triangular, where each track occupies a different
 amount of space. Victor disk images are complicated due to the way the tracks
 are different sizes and the odd sector size.
+
+Writing discs
+-------------
+
+Just do:
+
+```
+fluxengine read victor9k-ss -i victor9k.img
+```
+
+**Big warning!** This uses the same triangular disk image that reading uses.
 
 
 Useful references
