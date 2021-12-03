@@ -4,7 +4,7 @@ set -e
 cat <<EOF
 rule cxx
     command = $CXX $CFLAGS \$flags -I. -c -o \$out \$in -MMD -MF \$out.d
-    description = CXX \$in
+    description = CXX \$out
     depfile = \$out.d
     deps = gcc
     
@@ -339,6 +339,7 @@ buildlibrary libbackend.a \
     arch/tids990/decoder.cc \
     arch/tids990/encoder.cc \
     arch/victor9k/decoder.cc \
+    arch/victor9k/encoder.cc \
     arch/zilogmcz/decoder.cc \
     lib/bitmap.cc \
     lib/bytes.cc \
@@ -439,7 +440,7 @@ FORMATS="\
     northstar350 \
     northstar87 \
     tids990 \
-    victor9k \
+    victor9k_ss \
     zilogmcz \
     "
 
@@ -542,6 +543,7 @@ encodedecodetest commodore1581
 encodedecodetest commodore1541 scripts/commodore1541_test.textpb
 encodedecodetest mac400 scripts/mac400_test.textpb
 encodedecodetest mac800 scripts/mac800_test.textpb
+encodedecodetest victor9k_ss
 
 # vim: sw=4 ts=4 et
 
