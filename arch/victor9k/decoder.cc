@@ -73,7 +73,7 @@ public:
     void decodeSectorRecord()
 	{
 		/* Skip the sync marker bit. */
-		readRawBits(23);
+		readRawBits(22);
 
 		/* Read header. */
 
@@ -96,7 +96,7 @@ public:
     void decodeDataRecord()
 	{
 		/* Skip the sync marker bit. */
-		readRawBits(23);
+		readRawBits(22);
 
 		/* Read data. */
 

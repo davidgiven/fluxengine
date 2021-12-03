@@ -6,13 +6,13 @@ class AbstractDecoder;
 class EncoderProto;
 class DecoderProto;
 
-/* ... 1110 1010 1011
+/* ... 1101 0101 0111
  *       ^^ ^^^^ ^^^^ ten bit IO byte */
-#define VICTOR9K_SECTOR_RECORD 0xfffffeab 
+#define VICTOR9K_SECTOR_RECORD 0xfffffd57 
 
-/* ... 1110 1010 0010
+/* ... 1101 0100 1001
  *       ^^ ^^^^ ^^^^ ten bit IO byte */
-#define VICTOR9K_DATA_RECORD   0xfffffea4
+#define VICTOR9K_DATA_RECORD   0xfffffd49
 
 #define VICTOR9K_SECTOR_LENGTH 512
 

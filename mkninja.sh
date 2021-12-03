@@ -4,7 +4,7 @@ set -e
 cat <<EOF
 rule cxx
     command = $CXX $CFLAGS \$flags -I. -c -o \$out \$in -MMD -MF \$out.d
-    description = CXX \$in
+    description = CXX \$out
     depfile = \$out.d
     deps = gcc
     

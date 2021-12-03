@@ -14,6 +14,15 @@
 
 static bool lastBit;
 
+static void write_zero_bits(std::vector<bool>& bits, unsigned& cursor, unsigned count)
+{
+    while (count--)
+	{
+		if (cursor < bits.size())
+			lastBit = bits[cursor++] = 0;
+	}
+}
+
 static void write_one_bits(std::vector<bool>& bits, unsigned& cursor, unsigned count)
 {
     while (count--)
@@ -59,7 +68,7 @@ static void write_bits(std::vector<bool>& bits, unsigned& cursor, const Bytes& b
 
 static int encode_data_gcr(uint8_t data)
 {
-    switch (data)
+    switch (data & 0x0f)
     {
         #define GCR_ENTRY(gcr, data) \
             case data: return gcr;
@@ -73,10 +82,8 @@ static void write_bytes(std::vector<bool>& bits, unsigned& cursor, const Bytes& 
 {
     for (uint8_t b : bytes)
     {
-        uint8_t gcr = encode_data_gcr(b>>4);
-        write_bits(bits, cursor, gcr, 5);
-        gcr = encode_data_gcr(b&0x0f);
-        write_bits(bits, cursor, gcr, 5);
+        write_bits(bits, cursor, encode_data_gcr(b>>4), 5);
+        write_bits(bits, cursor, encode_data_gcr(b),    5);
     }
 }
 
@@ -84,19 +91,21 @@ static void write_sector(std::vector<bool>& bits, unsigned& cursor,
 		const Victor9kEncoderProto::TrackdataProto& trackdata,
         const Sector& sector)
 {
-    write_bits(bits, cursor, VICTOR9K_SECTOR_RECORD, 32);
+    write_one_bits(bits, cursor, trackdata.pre_header_sync_bits());
+    write_bits(bits, cursor, VICTOR9K_SECTOR_RECORD, 10);
 
     uint8_t encodedTrack = sector.logicalTrack | (sector.logicalSide<<7);
-    uint8_t encodedSector = sector.logicalSide;
+    uint8_t encodedSector = sector.logicalSector;
     write_bytes(bits, cursor, Bytes {
-        0,
         encodedTrack,
         encodedSector,
         (uint8_t)(encodedTrack + encodedSector),
     });
 
-    write_one_bits(bits, cursor, trackdata.post_header_gap_bits() - 22);
-    write_bits(bits, cursor, VICTOR9K_DATA_RECORD, 32);
+
+    write_zero_bits(bits, cursor, trackdata.post_header_gap_bits());
+    write_one_bits(bits, cursor, trackdata.pre_data_sync_bits());
+    write_bits(bits, cursor, VICTOR9K_DATA_RECORD, 10);
 
     write_bytes(bits, cursor, sector.data);
 
@@ -104,6 +113,7 @@ static void write_sector(std::vector<bool>& bits, unsigned& cursor,
     checksum.writer().write_le16(sumBytes(sector.data));
     write_bytes(bits, cursor, checksum);
 
+    write_zero_bits(bits, cursor, trackdata.post_data_gap_bits());
 }
 
 class Victor9kEncoder : public AbstractEncoder
