@@ -3,6 +3,7 @@
 #include "sector.h"
 #include "imagereader/imagereader.h"
 #include "image.h"
+#include "proto.h"
 #include "lib/config.pb.h"
 #include "imagereader/imagereaderimpl.h"
 #include "fmt/format.h"
@@ -59,7 +60,12 @@ public:
         ByteReader trackTableReader(trackTable);
 
         int diskSectorsPerTrack = -1;
-        int diskSectorSize = -1;
+
+        if (config.encoder().format_case() != EncoderProto::FormatCase::FORMAT_NOT_SET)
+            std::cout << "D88: overriding configured format";
+
+        auto ibm = config.mutable_encoder()->mutable_ibm();
+        config.mutable_cylinders()->set_end(0);
 
         std::unique_ptr<Image> image(new Image);
         for (int track = 0; track < trackTableSize / 4; track++)
@@ -70,21 +76,32 @@ public:
             int currentTrackOffset = trackOffset;
             int currentTrackCylinder = -1;
             int currentSectorsInTrack = 0xffff; // don't know # of sectors until we read the first one
+            int trackSectorSize = -1;
+            int trackMfm = -1;
+
+            auto trackdata = ibm->add_trackdata();
+            trackdata->set_clock_rate_khz(500);
+            trackdata->set_track_length_ms(167);
+            auto sectors = trackdata->mutable_sectors();
+
             for (int sectorInTrack = 0; sectorInTrack < currentSectorsInTrack; sectorInTrack++){
                 Bytes sectorHeader(0x10);
                 inputFile.read((char*) sectorHeader.begin(), sectorHeader.size());
                 ByteReader sectorHeaderReader(sectorHeader);
-                char cylinder = sectorHeaderReader.seek(0).read_8();
-                char head = sectorHeaderReader.seek(1).read_8();
-                char sectorId = sectorHeaderReader.seek(2).read_8();
+                int cylinder = sectorHeaderReader.seek(0).read_8();
+                int head = sectorHeaderReader.seek(1).read_8();
+                int sectorId = sectorHeaderReader.seek(2).read_8();
                 int sectorSize = 128 << sectorHeaderReader.seek(3).read_8();
                 int sectorsInTrack = sectorHeaderReader.seek(4).read_le16();
-                int mfm = sectorHeaderReader.seek(6).read_8();
+                int fm = sectorHeaderReader.seek(6).read_8();
                 int ddam = sectorHeaderReader.seek(7).read_8();
                 int fddStatusCode = sectorHeaderReader.seek(8).read_8();
+                int rpm = sectorHeaderReader.seek(13).read_8();
                 // D88 provides much more sector information that is currently ignored
                 if (ddam != 0)
                     Error() << "D88: nonzero ddam currently unsupported";
+                if (rpm != 0)
+                    Error() << "D88: 1.44MB 300rpm formats currently unsupported";
                 if (fddStatusCode != 0)
                     Error() << "D88: nonzero fdd status codes are currently unsupported";
                 if (currentSectorsInTrack == 0xffff) {
@@ -97,17 +114,34 @@ public:
                 } else if (diskSectorsPerTrack != sectorsInTrack) {
                     Error() << "D88: varying numbers of sectors per track is currently unsupported";
                 }
-                if (diskSectorSize < 0) {
-                    diskSectorSize = sectorSize;
-                } else if (diskSectorSize != sectorSize) {
-                    Error() << "D88: variable sector sizes are currently unsupported";
-                }
-                if (mfm != 0)
-                    Error() << "D88: Non-MFM sectors are currenty unsupported";
                 if (currentTrackCylinder < 0) {
                     currentTrackCylinder = cylinder;
                 } else if (currentTrackCylinder != cylinder) {
                     Error() << "D88: all sectors in a track must belong to the same cylinder";
+                }
+                if (trackSectorSize < 0) {
+                    trackSectorSize = sectorSize;
+                    // this is the first sector we've read, use it settings for per-track data
+                    trackdata->set_cylinder(cylinder);
+                    trackdata->set_head(head);
+                    trackdata->set_sector_size(sectorSize);
+                    trackdata->set_use_fm(fm);
+                    if (fm) {
+                        //trackdata->set_clock_rate_khz(250*300/360);
+                        trackdata->set_idam_byte(0xf57e);
+                        trackdata->set_dam_byte(0xf56f);
+                    }
+                    // create timings to approximately match N88-BASIC
+                    if (sectorSize <= 128) {
+                        trackdata->set_gap0(0x1b);
+                        trackdata->set_gap2(0x09);
+                        trackdata->set_gap3(0x1b);
+                    } else if (sectorSize <= 256) {
+                        trackdata->set_gap0(0x36);
+                        trackdata->set_gap3(0x36);
+                    }
+                } else if (trackSectorSize != sectorSize) {
+                    Error() << "D88: multiple sector sizes per track are currently unsupported";
                 }
                 Bytes data(sectorSize);
                 inputFile.read((char*) data.begin(), data.size());
@@ -118,6 +152,10 @@ public:
                 sector->logicalSide = sector->physicalHead = head;
                 sector->logicalSector = sectorId;
                 sector->data = data;
+
+                sectors->add_sector(sectorId);
+                if (config.cylinders().end() < cylinder)
+                    config.mutable_cylinders()->set_end(cylinder);
             }
         }
 

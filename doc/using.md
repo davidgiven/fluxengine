@@ -276,8 +276,8 @@ FluxEngine also supports a number of file system image formats. When using the
   FluxEngine is currently limited to reading only the first floppy image in a
   D88 file.
   
-  In addition, it only supports a limited subset of D88 features and will
-  reject files not in that subset.
+  The D88 reader should be used with the `ibm` profile and will override
+  most encoding parameters on a track-by-track basis.
   
   - `<filename.ldbs>`
 
