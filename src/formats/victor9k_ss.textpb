@@ -1,4 +1,4 @@
-comment: 'Victor 9000 / Sirius One 1224kB SSHD GCR variable sector (ro)'
+comment: 'Victor 9000 / Sirius One 612kB SSHD GCR variable sector)'
 
 image_reader {
 	filename: "victor9k.img"
