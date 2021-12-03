@@ -47,7 +47,7 @@ public:
 		_fileheader.file_id[2] = 'P';
 		_fileheader.version = 0x18; /* Version 1.8 of the spec */
 		_fileheader.type = _config.type_byte();
-		_fileheader.revolutions = 5;
+		_fileheader.revolutions = 1;
 		_fileheader.start_track = strackno(config.cylinders().start(), config.heads().start());
 		_fileheader.end_track = strackno(config.cylinders().end(), config.heads().end());
 		_fileheader.flags = (_config.align_with_index() ? SCP_FLAG_INDEXED : 0)
@@ -105,7 +105,7 @@ public:
 		unsigned totalTicks = 0;
 		unsigned ticksSinceLastPulse = 0;
 		uint32_t startOffset = 0;
-		while (revolution < 5)
+		while (revolution < 1)
 		{
 			unsigned ticks;
 			uint8_t bits = fmr.getNextEvent(ticks);
@@ -123,6 +123,9 @@ public:
 				revheader++;
 				revTicks = 0;
 				startOffset = fluxdataWriter.pos;
+
+				if (fmr.eof())
+					break;
 			}
 
 			if (bits & F_BIT_PULSE)
