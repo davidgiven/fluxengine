@@ -86,6 +86,10 @@ and there's too many configuration options to usefully list. Use `fluxengine
 write` to list all formats, and try `fluxengine write ibm1440 --config` to see
 a sample configuration.
 
+Some image formats, such as DIM, specify the image format, For these you can
+specify the `ibm` format and FluxEngine will automatically determine the
+correct format to use.
+
 Mixed-format disks
 ------------------
 
