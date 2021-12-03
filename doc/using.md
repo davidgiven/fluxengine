@@ -196,7 +196,8 @@ FluxEngine supports a number of ways to get or put flux. When using the `-s` or
   
   - `<filename.scp>`
 
-	Read from or write to a Supercard Pro `.scp` flux file.
+	Read from or write to a Supercard Pro `.scp` flux file. Note that only the
+	first revolution is written to `.scp` files.
   
   - `<filename.cwf>`
 
