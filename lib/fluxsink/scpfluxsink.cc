@@ -47,6 +47,7 @@ public:
 		_fileheader.file_id[2] = 'P';
 		_fileheader.version = 0x18; /* Version 1.8 of the spec */
 		_fileheader.type = _config.type_byte();
+		_fileheader.revolutions = 5;
 		_fileheader.start_track = strackno(config.cylinders().start(), config.heads().start());
 		_fileheader.end_track = strackno(config.cylinders().end(), config.heads().end());
 		_fileheader.flags = (_config.align_with_index() ? SCP_FLAG_INDEXED : 0)
@@ -54,7 +55,7 @@ public:
 		_fileheader.cell_width = 0;
 		_fileheader.heads = singlesided;
 
-		std::cout << fmt::format("SCP: writing 96 tpi {} file containing {} tracks\n",
+		std::cout << fmt::format("Writing 96 tpi {} SCP file containing {} SCP tracks\n",
 			singlesided ? "single sided" : "double sided",
 			_fileheader.end_track - _fileheader.start_track + 1
 		);
@@ -70,7 +71,7 @@ public:
 		appendChecksum(checksum, _trackdata);
 		write_le32(_fileheader.checksum, checksum);
 
-		std::cout << "SCP: writing output file...\n";
+		std::cout << "Writing output file...\n";
 		std::ofstream of(_config.filename(), std::ios::out | std::ios::binary);
 		if (!of.is_open())
 			Error() << "cannot open output file";
@@ -137,7 +138,6 @@ public:
 			}
 		}
 
-		_fileheader.revolutions = revolution - 1;
 		write_le32(_fileheader.track[strack], trackdataWriter.pos + sizeof(ScpHeader));
 		trackdataWriter += Bytes((uint8_t*)&trackheader, sizeof(trackheader));
 		trackdataWriter += fluxdata;
