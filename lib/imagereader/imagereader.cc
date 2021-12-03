@@ -17,6 +17,9 @@ std::unique_ptr<ImageReader> ImageReader::create(const ImageReaderProto& config)
 		case ImageReaderProto::kDim:
 			return ImageReader::createDimImageReader(config);
 
+		case ImageReaderProto::kD88:
+			return ImageReader::createD88ImageReader(config);
+
 		case ImageReaderProto::kFdi:
 			return ImageReader::createFdiImageReader(config);
 
@@ -55,6 +58,7 @@ void ImageReader::updateConfigForFilename(ImageReaderProto* proto, const std::st
 		{".jv3",      [&]() { proto->mutable_jv3(); }},
 		{".d64",      [&]() { proto->mutable_d64(); }},
 		{".d81",      [&]() { proto->mutable_img(); }},
+		{".d88",      [&]() { proto->mutable_d88(); }},
 		{".dim",      [&]() { proto->mutable_dim(); }},
 		{".diskcopy", [&]() { proto->mutable_diskcopy(); }},
 		{".fdi",      [&]() { proto->mutable_fdi(); }},
