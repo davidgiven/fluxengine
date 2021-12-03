@@ -14,6 +14,98 @@
 
 static bool lastBit;
 
+static void write_one_bits(std::vector<bool>& bits, unsigned& cursor, unsigned count)
+{
+    while (count--)
+	{
+		if (cursor < bits.size())
+			lastBit = bits[cursor++] = 1;
+	}
+}
+
+static void write_bits(std::vector<bool>& bits, unsigned& cursor, const std::vector<bool>& src)
+{
+	for (bool bit : src)
+	{
+		if (cursor < bits.size())
+			lastBit = bits[cursor++] = bit;
+	}
+}
+
+static void write_bits(std::vector<bool>& bits, unsigned& cursor, uint64_t data, int width)
+{
+	cursor += width;
+	lastBit = data & 1;
+	for (int i=0; i<width; i++)
+	{
+		unsigned pos = cursor - i - 1;
+		if (pos < bits.size())
+			bits[pos] = data & 1;
+		data >>= 1;
+	}
+}
+
+static void write_bits(std::vector<bool>& bits, unsigned& cursor, const Bytes& bytes)
+{
+	ByteReader br(bytes);
+	BitReader bitr(br);
+
+	while (!bitr.eof())
+	{
+		if (cursor < bits.size())
+			bits[cursor++] = bitr.get();
+	}
+}
+
+static int encode_data_gcr(uint8_t data)
+{
+    switch (data)
+    {
+        #define GCR_ENTRY(gcr, data) \
+            case data: return gcr;
+        #include "data_gcr.h"
+        #undef GCR_ENTRY
+    }
+    return -1;
+}
+
+static void write_bytes(std::vector<bool>& bits, unsigned& cursor, const Bytes& bytes)
+{
+    for (uint8_t b : bytes)
+    {
+        uint8_t gcr = encode_data_gcr(b>>4);
+        write_bits(bits, cursor, gcr, 5);
+        gcr = encode_data_gcr(b&0x0f);
+        write_bits(bits, cursor, gcr, 5);
+    }
+}
+
+static void write_sector(std::vector<bool>& bits, unsigned& cursor,
+		const Victor9kEncoderProto::TrackdataProto& trackdata,
+        const Sector& sector)
+{
+    write_bits(bits, cursor, VICTOR9K_SECTOR_RECORD, 32);
+
+    uint8_t encodedTrack = sector.logicalTrack | (sector.logicalSide<<7);
+    uint8_t encodedSector = sector.logicalSide;
+    write_bytes(bits, cursor, Bytes {
+        0,
+        encodedTrack,
+        encodedSector,
+        (uint8_t)(encodedTrack + encodedSector),
+    });
+
+    write_one_bits(bits, cursor, trackdata.post_header_gap_bits() - 22);
+    write_bits(bits, cursor, VICTOR9K_DATA_RECORD, 32);
+
+    write_bytes(bits, cursor, sector.data);
+
+    Bytes checksum(2);
+    checksum.writer().write_le16(sumBytes(sector.data));
+    write_bytes(bits, cursor, checksum);
+
+}
+
 class Victor9kEncoder : public AbstractEncoder
 {
 public:
@@ -23,6 +115,7 @@ public:
 	{}
 
 private:
+
 	void getTrackFormat(Victor9kEncoderProto::TrackdataProto& trackdata, unsigned cylinder, unsigned head)
 	{
 		trackdata.Clear();
@@ -73,7 +166,7 @@ public:
         lastBit = false;
 
         for (const auto& sector : sectors)
-            writeSector(bits, cursor, trackdata, *sector);
+            write_sector(bits, cursor, trackdata, *sector);
 
         if (cursor >= bits.size())
             Error() << fmt::format("track data overrun by {} bits", cursor - bits.size());
@@ -82,12 +175,6 @@ public:
         std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
         fluxmap->appendBits(bits, clockRateUs*1e3);
         return fluxmap;
-    }
-
-private:
-    void writeSector(std::vector<bool>& bits, unsigned& cursor,
-        const Victor9kEncoderProto::TrackdataProto& trackdata, const Sector& sector)
-    {
     }
 
 private:

@@ -154,6 +154,7 @@ encoder {
 	victor9k {
 		trackdata {
 			original_data_rate_khz: 500
+			post_header_gap_bits: 50
 		}
 		trackdata {
 			head: 0
