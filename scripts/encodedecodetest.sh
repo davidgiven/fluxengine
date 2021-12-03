@@ -8,9 +8,10 @@ fi
 
 tmp=/tmp/$$
 srcfile=$tmp.src.img
-fluxfile=$tmp.flux
+fluxfile=$tmp.$2
 destfile=$tmp.dest.img
 format=$1
+shift
 shift
 
 trap "rm -f $srcfile $fluxfile $destfile" EXIT
