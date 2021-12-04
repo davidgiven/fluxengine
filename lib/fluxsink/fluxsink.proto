@@ -24,6 +24,10 @@ message ScpFluxSinkProto {
 	optional int32 type_byte = 4       [default = 0xff, (help) = "set the SCP disk type byte"];
 }
 
+message Fl2FluxSinkProto {
+	optional string filename = 1       [default = "flux.fl2", (help) = ".fl2 file to write to"];
+}
+
 message FluxSinkProto {
 	oneof dest {
 		string fluxfile = 1 [(help) = "name of destination flux file"];
@@ -31,6 +35,7 @@ message FluxSinkProto {
 		AuFluxSinkProto au = 3;
 		VcdFluxSinkProto vcd = 4;
 		ScpFluxSinkProto scp = 5;
+		Fl2FluxSinkProto fl2 = 6;
 	}
 }
 

@@ -244,14 +244,12 @@ runtest() {
     buildlibrary lib$prog.a \
         -Idep/snowhouse/include \
         -d $OBJDIR/proto/libconfig.def \
-        -d $OBJDIR/proto/libdata.def \
         "$@"
 
     buildprogram $OBJDIR/$prog \
         lib$prog.a \
         libbackend.a \
         libconfig.a \
-        libdata.a \
         libtestproto.a \
         libagg.a \
         libfmt.a
@@ -309,13 +307,13 @@ buildproto libconfig.a \
     lib/imagewriter/imagewriter.proto \
     lib/usb/usb.proto \
 
-buildproto libdata.a \
-    lib/data.proto
+buildproto libfl2.a \
+    lib/fl2.proto
 
 buildlibrary libbackend.a \
     -I$OBJDIR/proto \
     -d $OBJDIR/proto/libconfig.def \
-    -d $OBJDIR/proto/libdata.def \
+    -d $OBJDIR/proto/libfl2.def \
     arch/aeslanier/decoder.cc \
     arch/amiga/amiga.cc \
     arch/amiga/decoder.cc \
@@ -353,6 +351,7 @@ buildlibrary libbackend.a \
     lib/flags.cc \
     lib/fluxmap.cc \
     lib/fluxsink/aufluxsink.cc \
+    lib/fluxsink/fl2fluxsink.cc \
     lib/fluxsink/fluxsink.cc \
     lib/fluxsink/hardwarefluxsink.cc \
     lib/fluxsink/scpfluxsink.cc \
@@ -454,7 +453,6 @@ buildmktable formats $OBJDIR/formats.cc $FORMATS
 buildlibrary libfrontend.a \
     -I$OBJDIR/proto \
     -d $OBJDIR/proto/libconfig.def \
-    -d $OBJDIR/proto/libdata.def \
     $(for a in $FORMATS; do echo $OBJDIR/proto/src/formats/$a.cc; done) \
     $OBJDIR/formats.cc \
     src/fe-analysedriveresponse.cc \
@@ -475,7 +473,7 @@ buildprogram fluxengine \
     libfrontend.a \
     libbackend.a \
     libconfig.a \
-    libdata.a \
+    libfl2.a \
     libfmt.a \
     libagg.a \
 
@@ -515,7 +513,6 @@ runtest kryoflux-test       tests/kryoflux.cc
 runtest ldbs-test           tests/ldbs.cc
 runtest proto-test          -I$OBJDIR/proto \
                             -d $OBJDIR/proto/libconfig.def \
-                            -d $OBJDIR/proto/libdata.def \
                             -d $OBJDIR/proto/libtestproto.def \
                             tests/proto.cc \
                             $OBJDIR/proto/tests/testproto.cc

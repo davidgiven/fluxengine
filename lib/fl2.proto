@@ -1,0 +1,17 @@
+syntax = "proto2";
+
+enum FluxFileVersion {
+	VERSION_1 = 1;
+}
+
+message TrackFluxProto {
+	optional int32 cylinder = 1;
+	optional int32 head = 2;
+	optional bytes flux = 3;
+}
+
+message FluxFileProto {
+	optional FluxFileVersion version = 1;
+	repeated TrackFluxProto track = 2;
+}
+
