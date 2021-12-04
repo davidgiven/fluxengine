@@ -40,7 +40,6 @@ public:
 
         ByteReader headerReader(header);
 
-        // media flag indicates media density, currently unused
         char mediaFlag = headerReader.seek(0x1b).read_8();
 
         inputFile.seekg( 0, std::ios::end );
@@ -66,6 +65,17 @@ public:
 
         auto ibm = config.mutable_encoder()->mutable_ibm();
         config.mutable_cylinders()->set_end(0);
+        if (mediaFlag == 0x20) {
+            std::cout << "D88: high density mode\n";
+            if (config.flux_sink().dest_case() == FluxSinkProto::DestCase::kDrive) {
+                config.mutable_flux_sink()->mutable_drive()->set_high_density(true);
+            }
+        } else {
+            std::cout << "D88: single/double density mode\n";
+            if (config.flux_sink().dest_case() == FluxSinkProto::DestCase::kDrive) {
+                config.mutable_flux_sink()->mutable_drive()->set_high_density(false);
+            }
+        }
 
         std::unique_ptr<Image> image(new Image);
         for (int track = 0; track < trackTableSize / 4; track++)
