@@ -108,6 +108,11 @@
     typedef int FileHandle;
     static FileHandle open_serial_port(const std::string& name)
     {
+        #ifdef __APPLE__
+            if (name.find("/dev/tty.") != std::string::npos)
+                std::cerr << "Warning: you probably want to be using a /dev/cu.* device\n";
+        #endif
+
         int fd = open(name.c_str(), O_RDWR);
         if (fd == -1)
             Error() << fmt::format("cannot open GreaseWeazle serial port '{}': {}",
