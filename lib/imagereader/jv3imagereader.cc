@@ -1,8 +1,8 @@
 #include "globals.h"
 #include "flags.h"
 #include "sector.h"
-#include "sectorset.h"
 #include "imagereader/imagereader.h"
+#include "image.h"
 #include "fmt/format.h"
 #include "lib/config.pb.h"
 #include <algorithm>
@@ -81,7 +81,7 @@ public:
 		ImageReader(config)
 	{}
 
-	SectorSet readImage()
+	std::unique_ptr<Image> readImage()
 	{
         std::ifstream inputFile(_config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
@@ -90,7 +90,7 @@ public:
 		inputFile.seekg( 0, std::ios::end);
 		unsigned inputFileSize = inputFile.tellg();
 		unsigned headerPtr = 0;
-		SectorSet sectors;
+        std::unique_ptr<Image> image(new Image);
 		for (;;)
 		{
 			unsigned dataPtr = headerPtr + 2901*3 + 1;
@@ -110,11 +110,10 @@ public:
 					inputFile.read((char*) data.begin(), sectorSize);
 
 					unsigned head = !!(header.flags & JV3_SIDE);
-                    std::unique_ptr<Sector>& sector = sectors.get(header.track, head, header.sector);
-                    sector.reset(new Sector);
+					const auto& sector = image->put(header.track, head, header.sector);
                     sector->status = Sector::OK;
-                    sector->logicalTrack = sector->physicalTrack = header.track;
-                    sector->logicalSide = sector->physicalSide = head;
+                    sector->logicalTrack = sector->physicalCylinder = header.track;
+                    sector->logicalSide = sector->physicalHead = head;
                     sector->logicalSector = header.sector;
                     sector->data = data;
 				}
@@ -128,7 +127,8 @@ public:
 			headerPtr = dataPtr;
 		}
 
-        return sectors;
+		image->calculateSize();
+        return image;
 	}
 };
 

@@ -4,7 +4,12 @@
 #include "fmt/format.h"
 #include <regex>
 
-ConfigProto config;
+ConfigProto config = []() {
+	ConfigProto config;
+	config.mutable_flux_source()->mutable_drive()->set_drive(0);
+	config.mutable_flux_sink()->mutable_drive()->set_drive(0);
+	return config;
+}();
 
 static double toDouble(const std::string& value)
 {
@@ -151,10 +156,26 @@ void setProtoFieldFromString(ProtoField& protoField, const std::string& value)
 			break;
 		}
 
+		case google::protobuf::FieldDescriptor::TYPE_ENUM:
+		{
+			const auto* enumfield = field->enum_type();
+			const auto* enumvalue = enumfield->FindValueByName(value);
+			if (!enumvalue)
+				Error() << fmt::format("unrecognised enum value '{}'", value);
+
+			reflection->SetEnum(message, field, enumvalue);
+			break;
+		}
+
 		case google::protobuf::FieldDescriptor::TYPE_MESSAGE:
 			if (field->message_type() == RangeProto::descriptor())
 			{
 				setRange((RangeProto*)reflection->MutableMessage(message, field), value);
+				break;
+			}
+			if (field->containing_oneof() && value.empty())
+			{
+				reflection->MutableMessage(message, field);
 				break;
 			}
 			/* fall through */

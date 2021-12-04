@@ -21,7 +21,7 @@ static StringFlag destFlux(
 	"",
 	[](const auto& value)
 	{
-		FluxSink::updateConfigForFilename(config.mutable_output()->mutable_flux(), value);
+		FluxSink::updateConfigForFilename(config.mutable_flux_sink(), value);
 	});
 
 static IntFlag destCylinder(
@@ -206,12 +206,12 @@ int mainAnalyseDriveResponse(int argc, const char* argv[])
 {
     flags.parseFlagsWithConfigFiles(argc, argv, {});
 
-	if (!config.output().flux().has_drive())
+	if (!config.flux_sink().has_drive())
 		Error() << "this only makes sense with a real disk drive";
 
-    usbSetDrive(config.output().flux().drive().drive(),
-		config.output().flux().drive().high_density(),
-		config.output().flux().drive().index_mode());
+    usbSetDrive(config.flux_sink().drive().drive(),
+		config.flux_sink().drive().high_density(),
+		config.flux_sink().drive().index_mode());
 	usbSeek(destCylinder);
 
 	std::cout << "Measuring rotational speed...\n";
@@ -225,8 +225,7 @@ int mainAnalyseDriveResponse(int argc, const char* argv[])
 
 	int numRows = (maxInterval - minInterval) / intervalStep;
 	const int numColumns = 512;
-	double frequencies[numRows][numColumns];
-	memset(frequencies, 0, sizeof(frequencies));
+	std::vector<std::vector<double>> frequencies(numRows, std::vector<double>(numColumns, 0.0));
 
 	double interval;
 	for (int row=0; row<numRows; row++)
@@ -330,24 +329,24 @@ int mainAnalyseDriveResponse(int argc, const char* argv[])
 		{
 			const int width = numRows; /* input interval on X axis */
 			const int height = numColumns; /* response spread on Y axis */
-			agg::srgba8 rbufdata[height][width];
+			std::vector<agg::srgba8> rbufdata(height*width);
 			for (int y=0; y<height; y++)
 				for (int x=0; x<width; x++)
-					palette(frequencies[x][y], &rbufdata[y][x]);
+					palette(frequencies[x][y], &rbufdata[x + y*width]);
 
-			Agg2D::Image image((uint8_t*)&rbufdata[0][0], width, height, width*sizeof(agg::srgba8));
+			Agg2D::Image image((uint8_t*)&rbufdata[0], width, height, width*sizeof(agg::srgba8));
 			painter.transformImage(image, graphBounds.x1, graphBounds.y2, graphBounds.x2, graphBounds.y1);
 		}
 
 		/* Likewise for the colour bar. */
 
 		{
-			const int HEIGHT = graphBounds.y2 - graphBounds.y1;
-			agg::srgba8 rbufdata[HEIGHT];
-			for (int y=0; y<HEIGHT; y++)
-				palette((double)y / HEIGHT, &rbufdata[y]);
+			const int height = graphBounds.y2 - graphBounds.y1;
+			std::vector<agg::srgba8> rbufdata(height);
+			for (int y=0; y<height; y++)
+				palette((double)y / height, &rbufdata[y]);
 
-			Agg2D::Image image((uint8_t*)&rbufdata[0], 1, HEIGHT, sizeof(agg::srgba8));
+			Agg2D::Image image((uint8_t*)&rbufdata[0], 1, height, sizeof(agg::srgba8));
 			painter.transformImage(image, colourbarBounds.x1, colourbarBounds.y2, colourbarBounds.x2, colourbarBounds.y1);
 		}
 

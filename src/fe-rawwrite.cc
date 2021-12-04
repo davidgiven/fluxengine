@@ -3,9 +3,7 @@
 #include "reader.h"
 #include "fluxmap.h"
 #include "writer.h"
-#include "record.h"
 #include "sector.h"
-#include "track.h"
 #include "proto.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/fluxsink/fluxsink.h"
@@ -22,7 +20,7 @@ static StringFlag sourceFlux(
 	"",
 	[](const auto& value)
 	{
-		FluxSource::updateConfigForFilename(config.mutable_input()->mutable_flux(), value);
+		FluxSource::updateConfigForFilename(config.mutable_flux_source(), value);
 	});
 
 static StringFlag destFlux(
@@ -31,7 +29,7 @@ static StringFlag destFlux(
 	"",
 	[](const auto& value)
 	{
-		FluxSink::updateConfigForFilename(config.mutable_output()->mutable_flux(), value);
+		FluxSink::updateConfigForFilename(config.mutable_flux_sink(), value);
 	});
 
 static StringFlag destCylinders(
@@ -57,28 +55,23 @@ static ActionFlag eraseFlag(
 	"erases the destination",
 	[]()
 	{
-		config.mutable_input()->mutable_flux()->mutable_erase();
+		config.mutable_flux_source()->mutable_erase();
 	});
 
 int mainRawWrite(int argc, const char* argv[])
 {
-	config.mutable_output()->mutable_flux()->mutable_drive()->set_drive(0);
 	setRange(config.mutable_cylinders(), "0-79");
 	setRange(config.mutable_heads(), "0-1");
 
 	if (argc == 1)
-		showProfiles("rawwrite", writables);
-    flags.parseFlagsWithConfigFiles(argc, argv, writables);
+		showProfiles("rawwrite", formats);
+    flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
-	if (!config.input().has_flux() || !config.output().has_flux())
-		Error() << "incomplete config (did you remember to specify the format?)";
-	if (config.input().flux().has_drive())
+	if (config.flux_source().has_drive())
 		Error() << "you can't use rawwrite to read from hardware";
-	if (config.input().flux().source_case() == FluxSourceProto::SOURCE_NOT_SET)
-		Error() << "no source flux specified";
 
-	std::unique_ptr<FluxSource> fluxSource(FluxSource::create(config.input().flux()));
-	std::unique_ptr<FluxSink> fluxSink(FluxSink::create(config.output().flux()));
+	std::unique_ptr<FluxSource> fluxSource(FluxSource::create(config.flux_source()));
+	std::unique_ptr<FluxSink> fluxSink(FluxSink::create(config.flux_sink()));
 
 	writeRawDiskCommand(*fluxSource, *fluxSink);
     return 0;

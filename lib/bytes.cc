@@ -141,7 +141,7 @@ Bytes Bytes::slice(unsigned start, unsigned len) const
     {
         /* Can't share the buffer, as we need to zero-pad the end. */
         Bytes b(len);
-        std::uninitialized_copy(cbegin()+start, cend(), b.begin());
+        std::uninitialized_copy(_data->cbegin()+start, _data->cbegin()+_high, b._data->begin());
         return b;
     }
     else
@@ -314,6 +314,22 @@ void BitWriter::flush()
         _bw.write_8(_fifo);
         _bitcount = 0;
     }
+}
+
+bool BitReader::eof()
+{
+	return (_bitcount == 0) && _br.eof();
+}
+
+bool BitReader::get()
+{
+	if (_bitcount == 0)
+		_fifo = _br.read_8();
+
+	bool bit = _fifo & 0x80;
+	_fifo <<= 1;
+	_bitcount = (_bitcount+1) & 7;
+	return bit;
 }
 
 std::vector<bool> reverseBits(const std::vector<bool>& bits)

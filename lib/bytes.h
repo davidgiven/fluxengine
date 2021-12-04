@@ -41,7 +41,7 @@ public:
     uint8_t* begin()              { checkWritable(); return &(*_data)[_low]; }
     uint8_t* end()                { checkWritable(); return &(*_data)[_high]; }
 
-	operator const std::string () const { return std::string(cbegin(), cend()); }
+	operator std::string () const { return std::string(cbegin(), cend()); }
 
     void boundsCheck(unsigned pos) const;
     void checkWritable();
@@ -310,12 +310,31 @@ public:
     BitWriter(ByteWriter&&) = delete;
 
     void push(uint32_t bits, size_t size);
+	void push(bool bit) { push(bit, 1); }
     void flush();
 
 private:
     uint8_t _fifo = 0;
     size_t _bitcount = 0;
     ByteWriter& _bw;
+};
+
+class BitReader
+{
+public:
+	BitReader(ByteReader& br):
+		_br(br)
+	{}
+
+	BitReader(ByteReader&&) = delete;
+
+	bool get();
+	bool eof();
+
+private:
+	uint8_t _fifo = 0;
+	size_t _bitcount = 0;
+	ByteReader& _br;
 };
 
 static inline uint8_t reverse_bits(uint8_t b)

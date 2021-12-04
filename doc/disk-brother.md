@@ -38,11 +38,11 @@ Reading disks
 Just do:
 
 ```
-fluxengine read brother
+fluxengine read `<format>`
 ```
 
-You should end up with a `brother.img` which is either 119808 or 239616 bytes
-long.
+... where `<format>` can be `brother120` or `brother240`. You should end up
+with a `brother.img` which is either 119808 or 239616 bytes long.
 
 Writing disks
 -------------

@@ -3,13 +3,12 @@
 #include "reader.h"
 #include "fluxmap.h"
 #include "decoders/fluxmapreader.h"
+#include "decoders/fluxdecoder.h"
 #include "decoders/decoders.h"
 #include "fluxsource/fluxsource.h"
 #include "protocol.h"
 #include "decoders/rawbits.h"
-#include "record.h"
 #include "sector.h"
-#include "track.h"
 #include "proto.h"
 #include "fmt/format.h"
 
@@ -21,7 +20,7 @@ static StringFlag sourceFlux(
 	"",
 	[](const auto& value)
 	{
-		FluxSource::updateConfigForFilename(config.mutable_input()->mutable_flux(), value);
+		FluxSource::updateConfigForFilename(config.mutable_flux_source(), value);
 	});
 
 static IntFlag cylinderFlag(
@@ -201,10 +200,9 @@ static nanoseconds_t guessClock(const Fluxmap& fluxmap)
 
 int mainInspect(int argc, const char* argv[])
 {
-	config.mutable_input()->mutable_flux()->mutable_drive()->set_drive(0);
     flags.parseFlagsWithConfigFiles(argc, argv, {});
 
-	std::unique_ptr<FluxSource> fluxSource(FluxSource::create(config.input().flux()));
+	std::unique_ptr<FluxSource> fluxSource(FluxSource::create(config.flux_source()));
 	const auto fluxmap = fluxSource->readFlux(cylinderFlag, headFlag);
 
 	std::cout << fmt::format("0x{:x} bytes of data in {:.3f}ms\n",
@@ -280,6 +278,7 @@ int mainInspect(int argc, const char* argv[])
 		std::cout << fmt::format("\n\nAligned bitstream from {:.3f}ms follows:\n",
 				fmr.tell().ns() / 1000000.0);
 
+		FluxDecoder decoder(&fmr, clockPeriod, config.decoder());
 		while (!fmr.eof())
 		{
 			std::cout << fmt::format("{:06x} {: 10.3f} : ",
@@ -288,7 +287,7 @@ int mainInspect(int argc, const char* argv[])
 			{
 				if (fmr.eof())
 					break;
-				bool b = fmr.readRawBit(clockPeriod);
+				bool b = decoder.readBit();
 				std::cout << (b ? 'X' : '-');
 			}
 

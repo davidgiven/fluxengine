@@ -233,7 +233,7 @@ FluxEngine supports a number of ways to get or put flux. When using the `-s` or
 FluxEngine also supports a number of file system image formats. When using the
 `-i` or `-o` options (for input and output), you can use any of these strings:
 
-  - `<filename.adf>`, `<filename.d81>`, `<filename.img>`, `<filename.st>`
+  - `<filename.adf>`, `<filename.d81>`, `<filename.img>`, `<filename.st>`, `<filename.xdf>`
 
 	Read from or write to a simple headerless image file (all these formats are
 	the same). This will probably want configuration via the
@@ -246,10 +246,38 @@ FluxEngine also supports a number of file system image formats. When using the
 	4.2](https://en.wikipedia.org/wiki/Disk_Copy) image file, commonly used by
 	Apple Macintosh emulators.
   
+  - `<filename.td0>`
+
+	Read a [Sydex Teledisk TD0
+	file](https://web.archive.org/web/20210420224336/http://dunfield.classiccmp.org/img47321/teledisk.htm)
+	image file. Note that only uncompressed images are supported (so far).
+
   - `<filename.jv3>`
 
 	Read from a JV3 image file, commonly used by TRS-80 emulators. **Read
 	only.**
+
+  - `<filename.dim>`
+
+  Read from a [DIM image file](https://www.pc98.org/project/doc/dim.html),
+  commonly used by X68000 emulators. Supports automatically configuring
+  the encoder. **Read Only.**
+  
+  - `<filename.fdi>`
+
+  Read from a [FDI image file](https://www.pc98.org/project/doc/hdi.html),
+  commonly used by PC-98 emulators. **Read Only.**
+  
+  - `<filename.d88>`
+
+  Read from a [D88 image file](https://www.pc98.org/project/doc/d88.html),
+  commonly used by various Japanese PC emulators, including the NEC PC-88. **Read Only.**
+  
+  FluxEngine is currently limited to reading only the first floppy image in a
+  D88 file.
+  
+  The D88 reader should be used with the `ibm` profile and will override
+  most encoding parameters on a track-by-track basis.
   
   - `<filename.ldbs>`
 
@@ -269,7 +297,7 @@ disks, and have different magnetic properties. 3.5" drives can usually
 autodetect what kind of medium is inserted into the drive based on the hole in
 the disk casing, but 5.25" drives can't. As a result, you need to explicitly
 tell FluxEngine on the command line whether you're using a high density disk or
-not with the `--input/output.flux.drive.high_density` configuration setting.
+not with the `--flux_source/sink.drive.high_density` configuration setting.
 **If you don't do this, your disks may not read correctly and will _certainly_
 fail to write correctly.**
 
@@ -286,14 +314,14 @@ here.](http://www.retrotechnology.com/herbs_stuff/guzis.html)
 These flags apply to many operations and are useful for modifying the overall
 behaviour.
 
-  - `--input.flux.drive.revolutions=X`
+  - `--flux_source.drive.revolutions=X`
 
     When reading, spin the disk X times. X
 	can be a floating point number. The default is usually 1.2. Some formats
 	default to 1.  Increasing the number will sample more data, and can be
 	useful on dubious disks to try and get a better read.
 
-  - `--input.flux.drive.sync_with_index=true|false`
+  - `--flux_source.drive.sync_with_index=true|false`
 
     Wait for an index pulse
 	before starting to read the disk. (Ignored for write operations.) By
@@ -301,7 +329,7 @@ behaviour.
 	disk problems it's helpful to have all your data start at the same place
 	each time.
 
-  - `--input.flux.drive.index_source=X`, `--output.flux.drive.index_source=X`
+  - `--flux_source.drive.index_source=X`, `--flux_sink.drive.index_source=X`
 
 	Set the source of index pulses when reading or writing respectively. This
 	is for use with drives which don't produce index pulse data. `X` can be

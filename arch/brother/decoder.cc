@@ -4,7 +4,6 @@
 #include "decoders/fluxmapreader.h"
 #include "decoders/decoders.h"
 #include "encoders/encoders.h"
-#include "record.h"
 #include "brother.h"
 #include "sector.h"
 #include "bytes.h"
@@ -40,7 +39,7 @@ static int decode_data_gcr(uint8_t gcr)
 		#undef GCR_ENTRY
     }
     return -1;
-};
+}
 
 static int decode_header_gcr(uint16_t word)
 {
@@ -52,58 +51,73 @@ static int decode_header_gcr(uint16_t word)
 		#undef GCR_ENTRY
 	}                       
 	return -1;             
+}
+
+class BrotherDecoder : public AbstractDecoder
+{
+public:
+    BrotherDecoder(const DecoderProto& config):
+		AbstractDecoder(config)
+	{}
+
+    RecordType advanceToNextRecord()
+	{
+		const FluxMatcher* matcher = nullptr;
+		_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
+		if (matcher == &SECTOR_RECORD_PATTERN)
+			return RecordType::SECTOR_RECORD;
+		if (matcher == &DATA_RECORD_PATTERN)
+			return RecordType::DATA_RECORD;
+		return RecordType::UNKNOWN_RECORD;
+	}
+
+    void decodeSectorRecord()
+	{
+		readRawBits(32);
+		const auto& rawbits = readRawBits(32);
+		const auto& bytes = toBytes(rawbits).slice(0, 4);
+
+		ByteReader br(bytes);
+		_sector->logicalTrack = decode_header_gcr(br.read_be16());
+		_sector->logicalSector = decode_header_gcr(br.read_be16());
+
+		/* Sanity check the values read; there's no header checksum and
+			* occasionally we get garbage due to bit errors. */
+		if (_sector->logicalSector > 11)
+			return;
+		if (_sector->logicalTrack > 79)
+			return;
+
+		_sector->status = Sector::DATA_MISSING;
+	}
+	
+    void decodeDataRecord()
+	{
+		readRawBits(32);
+
+		const auto& rawbits = readRawBits(BROTHER_DATA_RECORD_ENCODED_SIZE*8);
+		const auto& rawbytes = toBytes(rawbits).slice(0, BROTHER_DATA_RECORD_ENCODED_SIZE);
+
+		Bytes bytes;
+		ByteWriter bw(bytes);
+		BitWriter bitw(bw);
+		for (uint8_t b : rawbytes)
+		{
+			uint32_t nibble = decode_data_gcr(b);
+			bitw.push(nibble, 5);
+		}
+		bitw.flush();
+
+		_sector->data = bytes.slice(0, BROTHER_DATA_RECORD_PAYLOAD);
+		uint32_t realCrc = crcbrother(_sector->data);
+		uint32_t wantCrc = bytes.reader().seek(BROTHER_DATA_RECORD_PAYLOAD).read_be24();
+		_sector->status = (realCrc == wantCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
+	}
 };
 
-AbstractDecoder::RecordType BrotherDecoder::advanceToNextRecord()
+std::unique_ptr<AbstractDecoder> createBrotherDecoder(const DecoderProto& config)
 {
-	const FluxMatcher* matcher = nullptr;
-	_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
-	if (matcher == &SECTOR_RECORD_PATTERN)
-		return RecordType::SECTOR_RECORD;
-	if (matcher == &DATA_RECORD_PATTERN)
-		return RecordType::DATA_RECORD;
-	return RecordType::UNKNOWN_RECORD;
+	return std::unique_ptr<AbstractDecoder>(new BrotherDecoder(config));
 }
 
-void BrotherDecoder::decodeSectorRecord()
-{
-	readRawBits(32);
-	const auto& rawbits = readRawBits(32);
-	const auto& bytes = toBytes(rawbits).slice(0, 4);
 
-	ByteReader br(bytes);
-	_sector->logicalTrack = decode_header_gcr(br.read_be16());
-	_sector->logicalSector = decode_header_gcr(br.read_be16());
-
-	/* Sanity check the values read; there's no header checksum and
-		* occasionally we get garbage due to bit errors. */
-	if (_sector->logicalSector > 11)
-		return;
-	if (_sector->logicalTrack > 79)
-		return;
-
-	_sector->status = Sector::DATA_MISSING;
-}
-
-void BrotherDecoder::decodeDataRecord()
-{
-	readRawBits(32);
-
-	const auto& rawbits = readRawBits(BROTHER_DATA_RECORD_ENCODED_SIZE*8);
-	const auto& rawbytes = toBytes(rawbits).slice(0, BROTHER_DATA_RECORD_ENCODED_SIZE);
-
-	Bytes bytes;
-	ByteWriter bw(bytes);
-	BitWriter bitw(bw);
-	for (uint8_t b : rawbytes)
-	{
-		uint32_t nibble = decode_data_gcr(b);
-		bitw.push(nibble, 5);
-	}
-	bitw.flush();
-
-	_sector->data = bytes.slice(0, BROTHER_DATA_RECORD_PAYLOAD);
-	uint32_t realCrc = crcbrother(_sector->data);
-	uint32_t wantCrc = bytes.reader().seek(BROTHER_DATA_RECORD_PAYLOAD).read_be24();
-	_sector->status = (realCrc == wantCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
-}

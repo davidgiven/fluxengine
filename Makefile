@@ -1,6 +1,8 @@
 PACKAGES = zlib sqlite3 libusb-1.0 protobuf
 
-export CFLAGS = -x c++ --std=c++14 -ffunction-sections -fdata-sections
+export CFLAGS = -x c++ --std=gnu++2a -ffunction-sections -fdata-sections \
+	-Wno-deprecated-enum-enum-conversion \
+	-Wno-deprecated-enum-float-conversion
 export LDFLAGS = -pthread
 
 export COPTFLAGS = -Os
@@ -8,10 +10,6 @@ export LDOPTFLAGS = -Os
 
 export CDBGFLAGS = -O0 -g
 export LDDBGFLAGS = -O0 -g
-
-ifeq ($(shell uname),Linux)
-LIBS += -ludev
-endif
 
 ifeq ($(OS), Windows_NT)
 export PROTOC = /mingw32/bin/protoc
@@ -54,7 +52,7 @@ CFLAGS += -Ilib -Idep/fmt -Iarch
 export OBJDIR = .obj
 
 all: .obj/build.ninja
-	@ninja -f .obj/build.ninja
+	@ninja -f .obj/build.ninja -k 0
 	@if command -v cscope > /dev/null; then cscope -bRq; fi
 
 clean:

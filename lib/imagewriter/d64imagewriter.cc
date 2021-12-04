@@ -1,9 +1,9 @@
 #include "globals.h"
 #include "flags.h"
 #include "sector.h"
-#include "sectorset.h"
 #include "imagewriter/imagewriter.h"
 #include "fmt/format.h"
+#include "image.h"
 #include "ldbs.h"
 #include "lib/config.pb.h"
 #include <algorithm>
@@ -28,7 +28,7 @@ public:
 		ImageWriter(config)
 	{}
 
-	void writeImage(const SectorSet& sectors)
+	void writeImage(const Image& image)
 	{
 		std::cout << "writing D64 triangular image\n";
 
@@ -42,7 +42,7 @@ public:
             int sectorCount = sectors_per_track(track);
             for (int sectorId = 0; sectorId < sectorCount; sectorId++)
             {
-                const auto& sector = sectors.get(track, 0, sectorId);
+                const auto& sector = image.get(track, 0, sectorId);
                 if (sector)
                 {
                     outputFile.seekp(offset);

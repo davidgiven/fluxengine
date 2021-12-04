@@ -18,15 +18,18 @@ import "arch/zilogmcz/zilogmcz.proto";
 import "lib/fluxsink/fluxsink.proto";
 import "lib/common.proto";
 
+//NEXT: 27
 message DecoderProto {
 	optional double pulse_debounce_threshold = 1 [default = 0.30,
 		(help) = "ignore pulses with intervals shorter than this, in fractions of a clock"];
 	optional double bit_error_threshold = 2 [default = 0.40,
 		(help) = "amount of error to tolerate in pulse timing, in fractions of a clock"];
-	optional double clock_interval_bias = 3 [default = -0.02,
-		(help) = "adjust intervals between pulses by this many clocks before decoding"];
 	optional double minimum_clock_us = 4 [default = 0.75,
 		(help) = "refuse to detect clocks shorter than this, to avoid false positives"];
+
+	optional double pll_adjust = 25 [default = 0.04];
+	optional double pll_phase = 26 [default = 0.60];
+	optional double flux_scale = 27 [default = 1.0];
 
 	oneof format {
 		IbmDecoderProto ibm = 5;

@@ -1,0 +1,40 @@
+syntax = "proto2";
+
+// Images
+
+enum SectorStatus {
+	UNKNOWN = 0;
+	OK = 1;
+	BAD_CHECKSUM = 2;
+	MISSING = 3;
+	DATA_MISSING = 4;
+	CONFLICT = 5;
+	INTERNAL_ERROR = 6;
+}
+
+message SectorProto {
+	optional int32 logical_sector = 1;
+	optional bytes data = 2;
+	optional SectorStatus status = 3;
+
+    optional uint64 clock = 4;
+    optional uint64 header_starttime_ns = 5;
+    optional uint64 header_endtime_ns = 6;
+    optional uint64 data_starttime_ns = 7;
+    optional uint64 data_endtime_ns = 8;
+    optional int32 physical_cylinder = 9;
+    optional int32 physical_head = 10;
+    optional int32 logical_track = 11;
+    optional int32 logical_side = 12;
+}
+
+message TrackProto {
+	map<int32, SectorProto> sectors = 1;
+	optional int32 logical_track = 2;
+	optional int32 logical_side = 3;
+}
+
+message ImageProto {
+	map<int32, TrackProto> tracks = 1;
+}
+

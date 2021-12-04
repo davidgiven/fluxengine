@@ -1,11 +1,11 @@
 #include "globals.h"
 #include "flags.h"
 #include "sector.h"
-#include "sectorset.h"
 #include "imagereader/imagereader.h"
 #include "utils.h"
 #include "fmt/format.h"
 #include "proto.h"
+#include "image.h"
 #include "lib/config.pb.h"
 #include <algorithm>
 #include <ctype.h>
@@ -14,6 +14,15 @@ std::unique_ptr<ImageReader> ImageReader::create(const ImageReaderProto& config)
 {
 	switch (config.format_case())
 	{
+		case ImageReaderProto::kDim:
+			return ImageReader::createDimImageReader(config);
+
+		case ImageReaderProto::kD88:
+			return ImageReader::createD88ImageReader(config);
+
+		case ImageReaderProto::kFdi:
+			return ImageReader::createFdiImageReader(config);
+
 		case ImageReaderProto::kImd:
 			return ImageReader::createIMDImageReader(config);
 
@@ -32,6 +41,9 @@ std::unique_ptr<ImageReader> ImageReader::create(const ImageReaderProto& config)
 		case ImageReaderProto::kNsi:
 			return ImageReader::createNsiImageReader(config);
 
+		case ImageReaderProto::kTd0:
+			return ImageReader::createTd0ImageReader(config);
+
 		default:
 			Error() << "bad input file config";
 			return std::unique_ptr<ImageReader>();
@@ -46,10 +58,16 @@ void ImageReader::updateConfigForFilename(ImageReaderProto* proto, const std::st
 		{".jv3",      [&]() { proto->mutable_jv3(); }},
 		{".d64",      [&]() { proto->mutable_d64(); }},
 		{".d81",      [&]() { proto->mutable_img(); }},
+		{".d88",      [&]() { proto->mutable_d88(); }},
+		{".dim",      [&]() { proto->mutable_dim(); }},
 		{".diskcopy", [&]() { proto->mutable_diskcopy(); }},
+		{".fdi",      [&]() { proto->mutable_fdi(); }},
+		{".imd",      [&]() { proto->mutable_imd(); }},
 		{".img",      [&]() { proto->mutable_img(); }},
 		{".st",       [&]() { proto->mutable_img(); }},
 		{".nsi",      [&]() { proto->mutable_nsi(); }},
+		{".td0",      [&]() { proto->mutable_td0(); }},
+		{".xdf",      [&]() { proto->mutable_img(); }},
 	};
 
 	for (const auto& it : formats)
@@ -69,3 +87,19 @@ ImageReader::ImageReader(const ImageReaderProto& config):
     _config(config)
 {}
 
+void getTrackFormat(const ImgInputOutputProto& config,
+		ImgInputOutputProto::TrackdataProto& trackdata, unsigned track, unsigned side)
+{
+	trackdata.Clear();
+	for (const ImgInputOutputProto::TrackdataProto& f : config.trackdata())
+	{
+		if (f.has_track() && f.has_up_to_track() && ((track < f.track()) || (track > f.up_to_track())))
+			continue;
+		if (f.has_track() && !f.has_up_to_track() && (track != f.track()))
+			continue;
+		if (f.has_side() && (f.side() != side))
+			continue;
+
+		trackdata.MergeFrom(f);
+	}
+}

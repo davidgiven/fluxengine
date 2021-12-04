@@ -1,6 +1,11 @@
 #include "globals.h"
 #include "northstar.h"
-#include "sectorset.h"
+#include "sector.h"
+#include "bytes.h"
+#include "decoders/decoders.h"
+#include "encoders/encoders.h"
+#include "image.h"
+#include "lib/encoders/encoders.pb.h"
 
 #define GAP_FILL_SIZE_SD 30
 #define PRE_HEADER_GAP_FILL_SIZE_SD 9
@@ -12,7 +17,7 @@
 
 #define TOTAL_SECTOR_BYTES ()
 
-static void write_sector(std::vector<bool>& bits, unsigned& cursor, const Sector* sector)
+static void write_sector(std::vector<bool>& bits, unsigned& cursor, const std::shared_ptr<Sector>& sector)
 {
 	int preambleSize = 0;
 	int encodedSectorSize = 0;
@@ -95,36 +100,67 @@ static void write_sector(std::vector<bool>& bits, unsigned& cursor, const Sector
 	}
 }
 
-std::unique_ptr<Fluxmap> NorthstarEncoder::encode(
-	int physicalTrack, int physicalSide, const SectorSet& allSectors)
+class NorthstarEncoder : public AbstractEncoder
 {
-	int bitsPerRevolution = 100000;
-	double clockRateUs = 4.00;
+public:
+	NorthstarEncoder(const EncoderProto& config):
+		AbstractEncoder(config),
+		_config(config.northstar())
+	{}
 
-	if ((physicalTrack < 0) || (physicalTrack >= 35))
-		return std::unique_ptr<Fluxmap>();
-
-	const auto& sector = allSectors.get(physicalTrack, physicalSide, 0);
-
-	if (sector->data.size() == NORTHSTAR_PAYLOAD_SIZE_SD) {
-		bitsPerRevolution /= 2;		// FM
-	} else {
-		clockRateUs /= 2.00;
-	}
-
-	std::vector<bool> bits(bitsPerRevolution);
-	unsigned cursor = 0;
-
-	for (int sectorId = 0; sectorId < 10; sectorId++)
+	std::vector<std::shared_ptr<Sector>> collectSectors(int physicalTrack, int physicalSide, const Image& image) override
 	{
-		const auto& sectorData = allSectors.get(physicalTrack, physicalSide, sectorId);
-		write_sector(bits, cursor, sectorData);
+		std::vector<std::shared_ptr<Sector>> sectors;
+
+		if ((physicalTrack >= 0) && (physicalTrack < 35))
+		{
+			for (int sectorId = 0; sectorId < 10; sectorId++)
+			{
+				const auto& sector = image.get(physicalTrack, physicalSide, sectorId);
+				if (sector)
+					sectors.push_back(sector);
+			}
+		}
+
+		return sectors;
 	}
 
-	if (cursor > bits.size())
-		Error() << "track data overrun";
+	std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide,
+			const std::vector<std::shared_ptr<Sector>>& sectors, const Image& image) override
+	{
+		int bitsPerRevolution = 100000;
+		double clockRateUs = 4.00;
 
-	std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
-	fluxmap->appendBits(bits, clockRateUs * 1e3);
-	return fluxmap;
+		if ((physicalTrack < 0) || (physicalTrack >= 35) || sectors.empty())
+			return std::unique_ptr<Fluxmap>();
+
+		const auto& sector = *sectors.begin();
+		if (sector->data.size() == NORTHSTAR_PAYLOAD_SIZE_SD) {
+			bitsPerRevolution /= 2;		// FM
+		} else {
+			clockRateUs /= 2.00;
+		}
+
+		std::vector<bool> bits(bitsPerRevolution);
+		unsigned cursor = 0;
+
+		for (const auto& sectorData : sectors)
+			write_sector(bits, cursor, sectorData);
+
+		if (cursor > bits.size())
+			Error() << "track data overrun";
+
+		std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
+		fluxmap->appendBits(bits, clockRateUs * 1e3);
+		return fluxmap;
+	}
+
+private:
+	const NorthstarEncoderProto& _config;
+};
+
+std::unique_ptr<AbstractEncoder> createNorthstarEncoder(const EncoderProto& config)
+{
+	return std::unique_ptr<AbstractEncoder>(new NorthstarEncoder(config));
 }
+

@@ -4,17 +4,17 @@ set -e
 cat <<EOF
 rule cxx
     command = $CXX $CFLAGS \$flags -I. -c -o \$out \$in -MMD -MF \$out.d
-    description = CXX \$in
+    description = CXX \$out
     depfile = \$out.d
     deps = gcc
     
 rule proto
-    command = $PROTOC \$flags \$in && (echo \$in > \$def)
+    command = (echo \$in > \$def) && $PROTOC \$flags \$in
     description = PROTO \$in
     restat = yes
 
 rule protoencode
-    command = (echo '#include <string>' && echo 'static const unsigned char data[] = {' && ($PROTOC \$flags --encode=\$messagetype \$\$(cat \$def)< \$in | $XXD -i) && echo '}; extern std::string \$name(); std::string \$name() { return std::string((const char*)data, sizeof(data)); }') > \$out
+    command = (echo '#include <string>' && echo 'static const unsigned char data[] = {' && $PROTOC \$flags --encode=\$messagetype \$\$(cat \$def)< \$in > \$out.bin && $XXD -i < \$out.bin && echo '}; extern std::string \$name(); std::string \$name() { return std::string((const char*)data, sizeof(data)); }') > \$out
     description = PROTOENCODE \$in
     restat = yes
 
@@ -34,6 +34,10 @@ rule link
 rule test
     command = \$in && touch \$out
     description = TEST \$in
+
+rule encodedecode
+    command = sh scripts/encodedecodetest.sh \$format \$fluxx \$configs > \$out
+    description = ENCODEDECODE \$fluxx \$format
 
 rule strip
     command = cp -f \$in \$out && $STRIP \$out
@@ -239,17 +243,35 @@ runtest() {
 
     buildlibrary lib$prog.a \
         -Idep/snowhouse/include \
+        -d $OBJDIR/proto/libconfig.def \
+        -d $OBJDIR/proto/libdata.def \
         "$@"
 
     buildprogram $OBJDIR/$prog \
         lib$prog.a \
         libbackend.a \
-        libproto.a \
+        libconfig.a \
+        libdata.a \
         libtestproto.a \
         libagg.a \
         libfmt.a
 
     echo build $OBJDIR/$prog.stamp : test $OBJDIR/$prog-debug$EXTENSION
+}
+
+encodedecodetest() {
+    local format
+    format=$1
+    shift
+
+    echo "build $OBJDIR/$format.encodedecode.flux.stamp : encodedecode | fluxengine$EXTENSION scripts/encodedecodetest.sh $*"
+    echo "    format=$format"
+    echo "    configs=$*"
+    echo "    fluxx=flux"
+    echo "build $OBJDIR/$format.encodedecode.scp.stamp : encodedecode | fluxengine$EXTENSION scripts/encodedecodetest.sh $*"
+    echo "    format=$format"
+    echo "    configs=$*"
+    echo "    fluxx=scp"
 }
 
 buildlibrary libagg.a \
@@ -259,9 +281,9 @@ buildlibrary libagg.a \
 
 buildlibrary libfmt.a \
     dep/fmt/format.cc \
-    dep/fmt/posix.cc \
+    dep/fmt/os.cc \
 
-buildproto libproto.a \
+buildproto libconfig.a \
     arch/aeslanier/aeslanier.proto \
     arch/amiga/amiga.proto \
     arch/apple2/apple2.proto \
@@ -287,9 +309,13 @@ buildproto libproto.a \
     lib/imagewriter/imagewriter.proto \
     lib/usb/usb.proto \
 
+buildproto libdata.a \
+    lib/data.proto
+
 buildlibrary libbackend.a \
     -I$OBJDIR/proto \
-    -d $OBJDIR/proto/libproto.def \
+    -d $OBJDIR/proto/libconfig.def \
+    -d $OBJDIR/proto/libdata.def \
     arch/aeslanier/decoder.cc \
     arch/amiga/amiga.cc \
     arch/amiga/decoder.cc \
@@ -306,18 +332,21 @@ buildlibrary libbackend.a \
     arch/macintosh/decoder.cc \
     arch/macintosh/encoder.cc \
     arch/micropolis/decoder.cc \
+    arch/micropolis/encoder.cc \
     arch/mx/decoder.cc \
     arch/northstar/decoder.cc \
     arch/northstar/encoder.cc \
     arch/tids990/decoder.cc \
     arch/tids990/encoder.cc \
     arch/victor9k/decoder.cc \
+    arch/victor9k/encoder.cc \
     arch/zilogmcz/decoder.cc \
     lib/bitmap.cc \
     lib/bytes.cc \
     lib/crc.cc \
     lib/csvreader.cc \
     lib/decoders/decoders.cc \
+    lib/decoders/fluxdecoder.cc \
     lib/decoders/fluxmapreader.cc \
     lib/decoders/fmmfm.cc \
     lib/encoders/encoders.cc \
@@ -340,6 +369,7 @@ buildlibrary libbackend.a \
     lib/fluxsource/testpatternfluxsource.cc \
     lib/globals.cc \
     lib/hexdump.cc \
+    lib/image.cc \
     lib/imagereader/d64imagereader.cc \
     lib/imagereader/diskcopyimagereader.cc \
     lib/imagereader/imagereader.cc \
@@ -347,6 +377,10 @@ buildlibrary libbackend.a \
     lib/imagereader/imgimagereader.cc \
     lib/imagereader/jv3imagereader.cc \
     lib/imagereader/nsiimagereader.cc \
+    lib/imagereader/td0imagereader.cc \
+    lib/imagereader/dimimagereader.cc \
+    lib/imagereader/fdiimagereader.cc \
+    lib/imagereader/d88imagereader.cc \
     lib/imagewriter/d64imagewriter.cc \
     lib/imagewriter/diskcopyimagewriter.cc \
     lib/imagewriter/imagewriter.cc \
@@ -357,7 +391,6 @@ buildlibrary libbackend.a \
     lib/proto.cc \
     lib/reader.cc \
     lib/sector.cc \
-    lib/sectorset.cc \
     lib/sql.cc \
     lib/usb/fluxengineusb.cc \
     lib/usb/greaseweazle.cc \
@@ -367,32 +400,13 @@ buildlibrary libbackend.a \
     lib/utils.cc \
     lib/writer.cc \
 
-READABLES="\
+FORMATS="\
     acornadfs \
     acorndfs \
     aeslanier \
     amiga \
     ampro \
     apple2 \
-    atarist \
-    brother \
-    commodore1541 \
-    commodore1581 \
-    eco1 \
-    f85 \
-    fb100 \
-    ibm \
-    macintosh \
-    micropolis \
-    mx \
-    northstar \
-    tids990 \
-    victor9k \
-    zilogmcz \
-    "
-
-WRITABLES="\
-    amiga \
     atarist360 \
     atarist370 \
     atarist400 \
@@ -405,40 +419,44 @@ WRITABLES="\
     brother240 \
     commodore1541 \
     commodore1581 \
+    eco1 \
+    f85 \
+    fb100 \
+    hp9121 \
     hplif770 \
+    ibm \
     ibm1200_525 \
+    ibm1232 \
     ibm1440 \
     ibm180_525 \
     ibm360_525 \
     ibm720 \
     ibm720_525 \
-    macintosh \
-    northstar87 \
+    mac400 \
+    mac800 \
+    micropolis \
+    mx \
     northstar175 \
     northstar350 \
+    northstar87 \
     tids990 \
+    victor9k_ss \
+    zilogmcz \
     "
 
-for pb in $READABLES; do
-    buildencodedproto $OBJDIR/proto/libproto.def ConfigProto \
-        readables_${pb}_pb src/readables/$pb.textpb $OBJDIR/proto/src/readables/$pb.cc
+for pb in $FORMATS; do
+    buildencodedproto $OBJDIR/proto/libconfig.def ConfigProto \
+        formats_${pb}_pb src/formats/$pb.textpb $OBJDIR/proto/src/formats/$pb.cc
 done
 
-for pb in $WRITABLES; do
-    buildencodedproto $OBJDIR/proto/libproto.def ConfigProto \
-        writables_${pb}_pb src/writables/$pb.textpb $OBJDIR/proto/src/writables/$pb.cc
-done
-
-buildmktable readables $OBJDIR/readables.cc $READABLES
-buildmktable writables $OBJDIR/writables.cc $WRITABLES
+buildmktable formats $OBJDIR/formats.cc $FORMATS
 
 buildlibrary libfrontend.a \
     -I$OBJDIR/proto \
-    -d $OBJDIR/proto/libproto.def \
-    $(for a in $READABLES; do echo $OBJDIR/proto/src/readables/$a.cc; done) \
-    $(for a in $WRITABLES; do echo $OBJDIR/proto/src/writables/$a.cc; done) \
-    $OBJDIR/readables.cc \
-    $OBJDIR/writables.cc \
+    -d $OBJDIR/proto/libconfig.def \
+    -d $OBJDIR/proto/libdata.def \
+    $(for a in $FORMATS; do echo $OBJDIR/proto/src/formats/$a.cc; done) \
+    $OBJDIR/formats.cc \
     src/fe-analysedriveresponse.cc \
     src/fe-analyselayout.cc \
     src/fe-inspect.cc \
@@ -456,7 +474,8 @@ buildlibrary libfrontend.a \
 buildprogram fluxengine \
     libfrontend.a \
     libbackend.a \
-    libproto.a \
+    libconfig.a \
+    libdata.a \
     libfmt.a \
     libagg.a \
 
@@ -494,8 +513,37 @@ runtest fmmfm-test          tests/fmmfm.cc
 runtest greaseweazle-test   tests/greaseweazle.cc
 runtest kryoflux-test       tests/kryoflux.cc
 runtest ldbs-test           tests/ldbs.cc
-runtest proto-test          -I$OBJDIR/proto -d $OBJDIR/proto/libproto.def -d $OBJDIR/proto/libtestproto.def \
-                                tests/proto.cc $OBJDIR/proto/tests/testproto.cc
+runtest proto-test          -I$OBJDIR/proto \
+                            -d $OBJDIR/proto/libconfig.def \
+                            -d $OBJDIR/proto/libdata.def \
+                            -d $OBJDIR/proto/libtestproto.def \
+                            tests/proto.cc \
+                            $OBJDIR/proto/tests/testproto.cc
+
+encodedecodetest amiga
+encodedecodetest atarist360
+encodedecodetest atarist370
+encodedecodetest atarist400
+encodedecodetest atarist410
+encodedecodetest atarist720
+encodedecodetest atarist740
+encodedecodetest atarist800
+encodedecodetest atarist820
+encodedecodetest brother120
+encodedecodetest brother240
+encodedecodetest ibm1200_525
+encodedecodetest ibm1232
+encodedecodetest ibm1440
+encodedecodetest ibm180_525
+encodedecodetest ibm360_525
+encodedecodetest ibm720
+encodedecodetest ibm720_525
+encodedecodetest tids990
+encodedecodetest commodore1581
+encodedecodetest commodore1541 scripts/commodore1541_test.textpb
+encodedecodetest mac400 scripts/mac400_test.textpb
+encodedecodetest mac800 scripts/mac800_test.textpb
+encodedecodetest victor9k_ss
 
 # vim: sw=4 ts=4 et
 

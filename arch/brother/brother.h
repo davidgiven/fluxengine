@@ -13,37 +13,7 @@
 #define BROTHER_TRACKS_PER_120KB_DISK    39
 #define BROTHER_SECTORS_PER_TRACK        12
 
-class Sector;
-class SectorSet;
-class Fluxmap;
-class BrotherDecoderProto;
-class BrotherEncoderProto;
-
-class BrotherDecoder : public AbstractDecoder
-{
-public:
-    BrotherDecoder(const BrotherDecoderProto& config) {}
-    virtual ~BrotherDecoder() {}
-
-    RecordType advanceToNextRecord();
-    void decodeSectorRecord();
-    void decodeDataRecord();
-};
-
-class BrotherEncoder : public AbstractEncoder
-{
-public:
-	BrotherEncoder(const BrotherEncoderProto& config):
-		_config(config)
-	{}
-
-	virtual ~BrotherEncoder() {}
-
-private:
-	const BrotherEncoderProto& _config;
-
-public:
-    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide, const SectorSet& allSectors);
-};
+extern std::unique_ptr<AbstractDecoder> createBrotherDecoder(const DecoderProto& config);
+extern std::unique_ptr<AbstractEncoder> createBrotherEncoder(const EncoderProto& config);
 
 #endif

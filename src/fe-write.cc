@@ -5,10 +5,9 @@
 #include "decoders/decoders.h"
 #include "encoders/encoders.h"
 #include "sector.h"
-#include "sectorset.h"
-#include "record.h"
 #include "proto.h"
 #include "fluxsink/fluxsink.h"
+#include "fluxsource/fluxsource.h"
 #include "arch/brother/brother.h"
 #include "arch/ibm/ibm.h"
 #include "imagereader/imagereader.h"
@@ -25,7 +24,7 @@ static StringFlag sourceImage(
 	"",
 	[](const auto& value)
 	{
-		ImageReader::updateConfigForFilename(config.mutable_input()->mutable_image(), value);
+		ImageReader::updateConfigForFilename(config.mutable_image_reader(), value);
 	});
 
 static StringFlag destFlux(
@@ -34,7 +33,8 @@ static StringFlag destFlux(
 	"",
 	[](const auto& value)
 	{
-		FluxSink::updateConfigForFilename(config.mutable_output()->mutable_flux(), value);
+		FluxSink::updateConfigForFilename(config.mutable_flux_sink(), value);
+		FluxSource::updateConfigForFilename(config.mutable_flux_source(), value);
 	});
 
 static StringFlag destCylinders(
@@ -58,17 +58,24 @@ static StringFlag destHeads(
 int mainWrite(int argc, const char* argv[])
 {
 	if (argc == 1)
-		showProfiles("write", writables);
-    flags.parseFlagsWithConfigFiles(argc, argv, writables);
+		showProfiles("write", formats);
+    flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
-	if (!config.input().has_image() || !config.output().has_flux())
-		Error() << "incomplete config (did you remember to specify the format?)";
+	std::unique_ptr<ImageReader> reader(ImageReader::create(config.image_reader()));
+	std::unique_ptr<Image> image = reader->readImage();
 
-	std::unique_ptr<ImageReader> reader(ImageReader::create(config.input().image()));
 	std::unique_ptr<AbstractEncoder> encoder(AbstractEncoder::create(config.encoder()));
-	std::unique_ptr<FluxSink> fluxSink(FluxSink::create(config.output().flux()));
+	std::unique_ptr<FluxSink> fluxSink(FluxSink::create(config.flux_sink()));
 
-	writeDiskCommand(*reader, *encoder, *fluxSink);
+	std::unique_ptr<AbstractDecoder> decoder;
+	if (config.has_decoder())
+		decoder = AbstractDecoder::create(config.decoder());
+
+	std::unique_ptr<FluxSource> fluxSource;
+	if (config.has_flux_source() && config.flux_source().has_drive())
+		fluxSource = FluxSource::create(config.flux_source());
+
+	writeDiskCommand(*image, *encoder, *fluxSink, decoder.get(), fluxSource.get());
 
     return 0;
 }

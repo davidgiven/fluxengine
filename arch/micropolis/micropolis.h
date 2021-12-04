@@ -3,18 +3,14 @@
 
 #define MICROPOLIS_ENCODED_SECTOR_SIZE (1+2+266+6)
 
-class Sector;
-class Fluxmap;
-class MicropolisDecoderProto;
+class AbstractDecoder;
+class AbstractEncoder;
+class EncoderProto;
+class DecoderProto;
 
-class MicropolisDecoder : public AbstractDecoder
-{
-public:
-	MicropolisDecoder(const MicropolisDecoderProto&) {}
-	virtual ~MicropolisDecoder() {}
+extern std::unique_ptr<AbstractDecoder> createMicropolisDecoder(const DecoderProto& config);
+extern std::unique_ptr<AbstractEncoder> createMicropolisEncoder(const EncoderProto& config);
 
-	RecordType advanceToNextRecord();
-	void decodeSectorRecord();
-};
+extern uint8_t micropolisChecksum(const Bytes& bytes);
 
 #endif

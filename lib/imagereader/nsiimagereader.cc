@@ -3,8 +3,8 @@
 #include "globals.h"
 #include "flags.h"
 #include "sector.h"
-#include "sectorset.h"
 #include "imagereader/imagereader.h"
+#include "image.h"
 #include "fmt/format.h"
 #include "lib/imagereader/imagereader.pb.h"
 #include <algorithm>
@@ -18,7 +18,7 @@ public:
 		ImageReader(config)
 	{}
 
-	SectorSet readImage()
+	std::unique_ptr<Image> readImage()
 	{
         std::ifstream inputFile(_config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
@@ -31,10 +31,10 @@ public:
 
 		std::cout << "NSI: Autodetecting geometry based on file size: " << fsize << std::endl;
 
-		int numCylinders = 35;
-		int numSectors = 10;
-		int numHeads = 2;
-		int sectorSize = 512;
+		unsigned numCylinders = 35;
+		unsigned numSectors = 10;
+		unsigned numHeads = 2;
+		unsigned sectorSize = 512;
 
 		switch (fsize) {
 			case 358400:
@@ -64,14 +64,14 @@ public:
                         numCylinders * numHeads * trackSize / 1024)
                 << std::endl;
 
-        SectorSet sectors;
+        std::unique_ptr<Image> image(new Image);
         unsigned sectorFileOffset;
 
-        for (int head = 0; head < numHeads; head++)
+        for (unsigned head = 0; head < numHeads; head++)
         {
-            for (int track = 0; track < numCylinders; track++)
+            for (unsigned track = 0; track < numCylinders; track++)
             {
-                for (int sectorId = 0; sectorId < numSectors; sectorId++)
+                for (unsigned sectorId = 0; sectorId < numSectors; sectorId++)
                 {
                     if (head == 0) { /* Head 0 is from track 0-34 */
                         sectorFileOffset = track * trackSize + sectorId * sectorSize;
@@ -87,17 +87,23 @@ public:
                     Bytes data(sectorSize);
                     inputFile.read((char*) data.begin(), sectorSize);
 
-                    std::unique_ptr<Sector>& sector = sectors.get(track, head, sectorId);
-                    sector.reset(new Sector);
+                    const auto& sector = image->put(track, head, sectorId);
                     sector->status = Sector::OK;
-                    sector->logicalTrack = sector->physicalTrack = track;
-                    sector->logicalSide = sector->physicalSide = head;
+                    sector->logicalTrack = sector->physicalCylinder = track;
+                    sector->logicalSide = sector->physicalHead = head;
                     sector->logicalSector = sectorId;
                     sector->data = data;
                 }
             }
         }
-        return sectors;
+
+		image->setGeometry({
+			.numTracks = numCylinders,
+			.numSides = numHeads,
+			.numSectors = numSectors,
+			.sectorSize = sectorSize
+		});
+        return image;
 	}
 };
 

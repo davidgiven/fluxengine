@@ -11,7 +11,7 @@ Reading disks
 
 Just do:
 
-    fluxengine read atarist
+    fluxengine read <format>
 
 ...and you'll end up with an `atarist.st` file. The size of the disk image will
 vary depending on the format. This is an alias for `fluxengine read ibm` with
@@ -29,6 +29,9 @@ FluxEngine can also write Atari ST scheme disks.
 The syntax is:
 
     fluxengine write <format> -i input.st
+
+Available formats
+-----------------
 
 `<format>` can be one of these:
 

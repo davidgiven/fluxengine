@@ -3,7 +3,6 @@
 
 extern void showProfiles(const std::string& command, const std::map<std::string, std::string>& profiles);
 
-extern const std::map<std::string, std::string> writables;
-extern const std::map<std::string, std::string> readables;
+extern const std::map<std::string, std::string> formats;
 
 #endif

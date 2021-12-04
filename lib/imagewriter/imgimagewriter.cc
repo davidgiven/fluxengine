@@ -1,9 +1,10 @@
 #include "globals.h"
 #include "flags.h"
 #include "sector.h"
-#include "sectorset.h"
 #include "imagewriter/imagewriter.h"
+#include "image.h"
 #include "lib/config.pb.h"
+#include "imagereader/imagereaderimpl.h"
 #include "fmt/format.h"
 #include <algorithm>
 #include <iostream>
@@ -16,16 +17,12 @@ public:
 		ImageWriter(config)
 	{}
 
-	void writeImage(const SectorSet& sectors)
+	void writeImage(const Image& image)
 	{
-		unsigned autoTracks;
-		unsigned autoSides;
-		unsigned autoSectors;
-		unsigned autoBytes;
-		sectors.calculateSize(autoTracks, autoSides, autoSectors, autoBytes);
+		const Geometry geometry = image.getGeometry();
 
-		int tracks = _config.img().has_tracks() ? _config.img().tracks() : autoTracks;
-		int sides = _config.img().has_sides() ? _config.img().sides() : autoSides;
+		int tracks = _config.img().has_tracks() ? _config.img().tracks() : geometry.numTracks;
+		int sides = _config.img().has_sides() ? _config.img().sides() : geometry.numSides;
 
 		std::ofstream outputFile(_config.filename(), std::ios::out | std::ios::binary);
 		if (!outputFile.is_open())
@@ -36,14 +33,21 @@ public:
 			for (int side = 0; side < sides; side++)
 			{
 				ImgInputOutputProto::TrackdataProto trackdata;
-				getTrackFormat(trackdata, track, side);
+				getTrackFormat(_config.img(), trackdata, track, side);
 
-				int numSectors = trackdata.has_sectors() ? trackdata.sectors() : autoSectors;
-				int sectorSize = trackdata.has_sector_size() ? trackdata.sector_size() : autoBytes;
-
-				for (int sectorId = 0; sectorId < numSectors; sectorId++)
+				auto sectors = getSectors(trackdata, geometry.numSectors);
+				if (sectors.empty())
 				{
-					const auto& sector = sectors.get(track, side, sectorId);
+					int maxSector = geometry.firstSector + geometry.numSectors - 1;
+					for (int i=geometry.firstSector; i<=maxSector; i++)
+						sectors.push_back(i);
+				}
+
+				int sectorSize = trackdata.has_sector_size() ? trackdata.sector_size() : geometry.sectorSize;
+
+				for (int sectorId : sectors)
+				{
+					const auto& sector = image.get(track, side, sectorId);
 					if (sector)
 						sector->data.slice(0, sectorSize).writeTo(outputFile);
 					else
@@ -52,24 +56,34 @@ public:
 			}
 		}
 
-		std::cout << fmt::format("wrote {} tracks, {} sides, {} kB total\n",
+		std::cout << fmt::format("IMG: wrote {} tracks, {} sides, {} kB total\n",
 						tracks, sides,
 						outputFile.tellp() / 1024);
 	}
 
-private:
-	void getTrackFormat(ImgInputOutputProto::TrackdataProto& trackdata, unsigned track, unsigned side)
+	std::vector<unsigned> getSectors(const ImgInputOutputProto::TrackdataProto& trackdata, unsigned numSectors)
 	{
-		trackdata.Clear();
-		for (const ImgInputOutputProto::TrackdataProto& f : _config.img().trackdata())
+		std::vector<unsigned> sectors;
+		switch (trackdata.sectors_oneof_case())
 		{
-			if (f.has_track() && (f.track() != track))
-				continue;
-			if (f.has_side() && (f.side() != side))
-				continue;
+			case ImgInputOutputProto::TrackdataProto::SectorsOneofCase::kSectors:
+			{
+				for (int sectorId : trackdata.sectors().sector())
+					sectors.push_back(sectorId);
+				break;
+			}
 
-			trackdata.MergeFrom(f);
+			case ImgInputOutputProto::TrackdataProto::SectorsOneofCase::kSectorRange:
+			{
+				int sectorId = trackdata.sector_range().start_sector();
+				if (trackdata.sector_range().has_sector_count())
+					numSectors = trackdata.sector_range().sector_count();
+				for (int i=0; i<numSectors; i++)
+					sectors.push_back(sectorId + i);
+				break;
+			}
 		}
+		return sectors;
 	}
 };
 
