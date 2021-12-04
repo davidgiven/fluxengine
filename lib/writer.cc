@@ -40,6 +40,7 @@ void writeTracks(
 			}
 			else
 			{
+				fluxmap->rescale(config.flux_sink().rescale());
 				/* Precompensation actually seems to make things worse, so let's leave
 					* it disabled for now. */
 				//fluxmap->precompensate(PRECOMPENSATION_THRESHOLD_TICKS, 2);
@@ -77,6 +78,7 @@ void writeTracksAndVerify(
 			}
 			else
 			{
+				fluxmap->rescale(config.flux_sink().rescale());
 				std::sort(sectors.begin(), sectors.end(), sectorPointerSortPredicate);
 
 				for (int retry = 0;; retry++)

@@ -60,6 +60,7 @@ public:
 
     void precompensate(int threshold_ticks, int amount_ticks);
     std::vector<Fluxmap> split();
+    void rescale(double scale);
 
 private:
 	uint8_t& findLastByte();
