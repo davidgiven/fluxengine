@@ -45,5 +45,4 @@ private:
     std::stringstream _stream;
 };
 
-
 #endif
