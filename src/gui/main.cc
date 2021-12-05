@@ -1,8 +1,23 @@
 #include "globals.h"
 #include "ui.h"
+#include "uipp.h"
+#include "fmt/format.h"
 
 static uiWindow* mainwin;
 static uiArea* area;
+
+static uiDrawStrokeParams STROKE = {
+	uiDrawLineCapFlat,
+	uiDrawLineJoinMiter,
+	0.5,
+	1.0,
+	nullptr,
+	0,
+	0.0
+};
+
+static uiDrawBrush WHITE = { uiDrawBrushTypeSolid, 1.0, 0.0, 1.0, 1.0 };
+static uiDrawBrush BLACK = { uiDrawBrushTypeSolid, 0.0, 0.0, 0.0, 1.0 };
 
 static int close_cb(uiWindow* window, void* data)
 {
@@ -17,6 +32,8 @@ static int quit_cb(void* data)
 
 static void handlerDraw(uiAreaHandler *a, uiArea *area, uiAreaDrawParams *p)
 {
+	UIPath(p).rectangle(0, 0, p->AreaWidth, p->AreaHeight).fill(WHITE);
+	UIPath(p).begin(0, 0).lineTo(p->AreaWidth, p->AreaHeight).end().stroke(BLACK, STROKE);
 }
 
 static void handlerMouseEvent(uiAreaHandler *a, uiArea *area, uiAreaMouseEvent *
