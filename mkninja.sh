@@ -43,8 +43,8 @@ rule link
     command = $CXX $LDFLAGS -o \$out \$in \$flags $LIBS
     description = LINK \$in
 
-rule linkobjc
-    command = $COBJC $LDFLAGS $OBJCLDFLAGS -o \$out \$in \$flags $LIBS
+rule linkgui
+    command = $CXX $LDFLAGS $GUILDFLAGS -o \$out \$in \$flags $LIBS $GUILIBS
     description = LINK-OBJC \$in
 
 rule test
@@ -325,17 +325,28 @@ buildlibrary libagg.a \
     dep/stb/stb_image_write.c \
     dep/agg/src/*.cpp
 
-if [ "$(uname)" = "Darwin" ]; then
-    buildlibrary libui.a \
-        -Idep/libui \
-        dep/libui/common/*.c \
-        dep/libui/darwin/*.m
-else
-    buildlibrary libui.a \
-        -Idep/libui \
-        dep/libui/common/*.c \
-        dep/libui/unix/*.c
-fi
+case "$(uname)" in
+    Darwin)
+        buildlibrary libui.a \
+            -Idep/libui \
+            dep/libui/common/*.c \
+            dep/libui/darwin/*.m
+        ;;
+
+    MINGW*)
+        buildlibrary libui.a \
+            -Idep/libui \
+            dep/libui/common/*.c \
+            dep/libui/windows/*.cpp
+    ;;
+
+    *)
+        buildlibrary libui.a \
+            -Idep/libui \
+            dep/libui/common/*.c \
+            dep/libui/unix/*.c
+    ;;
+esac
 
 buildlibrary libfmt.a \
     dep/fmt/format.cc \
@@ -547,28 +558,16 @@ buildprogram fluxengine \
     libfmt.a \
     libagg.a \
 
-if [ "$(uname)" = "Darwin" ]; then
-    buildprogram fluxengine-gui \
-        -rule linkobjc \
-        libgui.a \
-        libformats.a \
-        libbackend.a \
-        libconfig.a \
-        libfl2.a \
-        libfmt.a \
-        libui.a \
-        libagg.a
-else
-    buildprogram fluxengine-gui \
-        libgui.a \
-        libformats.a \
-        libbackend.a \
-        libconfig.a \
-        libfl2.a \
-        libfmt.a \
-        libui.a \
-        libagg.a
-fi
+buildprogram fluxengine-gui \
+    -rule linkgui \
+    libgui.a \
+    libformats.a \
+    libbackend.a \
+    libconfig.a \
+    libfl2.a \
+    libfmt.a \
+    libui.a \
+    libagg.a
 
 buildlibrary libemu.a \
     dep/emu/fnmatch.c

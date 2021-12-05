@@ -27,6 +27,9 @@ export STRIP = /mingw32/bin/strip
 export CFLAGS += -I/mingw32/include/libusb-1.0 -I/mingw32/include
 export LDFLAGS +=
 export LIBS += -L/mingw32/lib -static -lz -lsqlite3 -lusb-1.0 -lprotobuf
+export GUILIBS += -luser32 -lkernel32 -lgdi32 -lcomctl32 -luxtheme -lmsimg32 \
+	-lcomdlg32 -ld2d1 -ldwrite -lole32 -loleaut32 -loleacc -luuid \
+	-lwindowscodecs
 export EXTENSION = .exe
 else
 
@@ -54,7 +57,7 @@ RANLIB += -c -no_warning_for_no_symbols
 export CC = clang
 export CXX = clang++
 export COBJC = clang
-export OBJCLDFLAGS = -framework Foundation -framework AppKit
+export GUILIBS = -framework Foundation -framework AppKit
 endif
 
 endif
