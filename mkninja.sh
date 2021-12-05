@@ -3,8 +3,14 @@ set -e
 
 cat <<EOF
 rule cxx
-    command = $CXX $CFLAGS \$flags -I. -c -o \$out \$in -MMD -MF \$out.d
+    command = $CXX $CXXFLAGS \$flags -I. -c -o \$out \$in -MMD -MF \$out.d
     description = CXX \$out
+    depfile = \$out.d
+    deps = gcc
+    
+rule cc
+    command = $CC $CFLAGS \$flags -I. -c -o \$out \$in -MMD -MF \$out.d
+    description = CC \$out
     depfile = \$out.d
     deps = gcc
     
@@ -82,17 +88,34 @@ buildlibrary() {
     dobjs=
     for src in "$@"; do
         local obj
+        local dobj
         obj="$OBJDIR/opt/${src%%.c*}.o"
         oobjs="$oobjs $obj"
+        dobj="$OBJDIR/dbg/${src%%.c*}.o"
+        dobjs="$dobjs $dobj"
 
-        echo "build $obj : cxx $src | $deps"
-        echo "    flags=$flags $COPTFLAGS"
 
-        obj="$OBJDIR/dbg/${src%%.c*}.o"
-        dobjs="$dobjs $obj"
+        case "${src##*.}" in
+            c)
+                echo "build $obj : cc $src | $deps"
+                echo "    flags=$flags $COPTFLAGS"
+                echo "build $dobj : cc $src | $deps"
+                echo "    flags=$flags $CDBGFLAGS"
+                ;;
 
-        echo "build $obj : cxx $src | $deps"
-        echo "    flags=$flags $CDBGFLAGS"
+            cc|cpp)
+                echo "build $obj : cxx $src | $deps"
+                echo "    flags=$flags $COPTFLAGS"
+                echo "build $dobj : cxx $src | $deps"
+                echo "    flags=$flags $CDBGFLAGS"
+                ;;
+
+            *)
+                echo "Unknown file extension" >&2
+                exit 1
+                ;;
+        esac
+
     done
 
     echo build $OBJDIR/opt/$lib : library $oobjs
@@ -277,6 +300,11 @@ buildlibrary libagg.a \
     dep/stb/stb_image_write.c \
     dep/agg/src/*.cpp
 
+buildlibrary libui.a \
+    -Idep/libui \
+    dep/libui/common/*.c \
+    dep/libui/unix/*.c \
+
 buildlibrary libfmt.a \
     dep/fmt/format.cc \
     dep/fmt/os.cc \
@@ -451,11 +479,15 @@ done
 
 buildmktable formats $OBJDIR/formats.cc $FORMATS
 
-buildlibrary libfrontend.a \
+buildlibrary libformats.a \
     -I$OBJDIR/proto \
     -d $OBJDIR/proto/libconfig.def \
     $(for a in $FORMATS; do echo $OBJDIR/proto/src/formats/$a.cc; done) \
     $OBJDIR/formats.cc \
+
+buildlibrary libfrontend.a \
+    -I$OBJDIR/proto \
+    -d $OBJDIR/proto/libconfig.def \
     src/fe-analysedriveresponse.cc \
     src/fe-analyselayout.cc \
     src/fe-inspect.cc \
@@ -470,12 +502,27 @@ buildlibrary libfrontend.a \
     src/fe-write.cc \
     src/fluxengine.cc \
 
+buildlibrary libgui.a \
+    -Idep/libui \
+    src/gui/main.cc
+
 buildprogram fluxengine \
     libfrontend.a \
+    libformats.a \
     libbackend.a \
     libconfig.a \
     libfl2.a \
     libfmt.a \
+    libagg.a \
+
+buildprogram fluxengine-gui \
+    libgui.a \
+    libformats.a \
+    libbackend.a \
+    libconfig.a \
+    libfl2.a \
+    libfmt.a \
+    libui.a \
     libagg.a \
 
 buildlibrary libemu.a \
