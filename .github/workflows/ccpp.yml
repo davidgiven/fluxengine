@@ -10,7 +10,7 @@ jobs:
       with:
         fetch-depth: 1
     - name: apt
-      run: sudo apt update && sudo apt install libusb-1.0-0-dev libsqlite3-dev ninja-build protobuf-compiler
+      run: sudo apt update && sudo apt install libusb-1.0-0-dev libsqlite3-dev ninja-build protobuf-compiler libgtk-3.0-dev
     - name: make
       run: make
 
