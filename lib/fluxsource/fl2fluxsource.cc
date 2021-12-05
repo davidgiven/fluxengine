@@ -50,6 +50,13 @@ private:
 
 std::unique_ptr<FluxSource> FluxSource::createFl2FluxSource(const Fl2FluxSourceProto& config)
 {
+	char buffer[16];
+	std::ifstream(config.filename(), std::ios::in | std::ios::binary).read(buffer, 16);
+	if (strncmp(buffer, "SQLite format 3", 16) == 0)
+	{
+		std::cerr << "Warning: reading a deprecated flux file format; please upgrade it\n";
+		return FluxSource::createSqliteFluxSource(config.filename());
+	}
     return std::unique_ptr<FluxSource>(new Fl2FluxSource(config));
 }
 

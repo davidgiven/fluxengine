@@ -28,6 +28,7 @@ public:
 	~Fl2FluxSink()
 	{
 		FluxFileProto proto;
+		proto.set_magic(FluxMagic::MAGIC);
 		proto.set_version(FluxFileVersion::VERSION_1);
 		for (const auto& e : _data)
 		{
