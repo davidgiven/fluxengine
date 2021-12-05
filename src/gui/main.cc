@@ -66,11 +66,10 @@ int main(int argc, const char* argv[])
         uiBoxSetPadded(hbox, 1);
         uiWindowSetChild(mainwin, uiControl(hbox));
 
-	uiControlShow(uiControl(mainwin));
-
 	area = uiNewArea((uiAreaHandler*) &handler);
 	uiBoxAppend(hbox, uiControl(area), 1);
 
+	uiControlShow(uiControl(mainwin));
 	uiMain();
 	return 0;
 }
