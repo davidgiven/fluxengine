@@ -1,5 +1,9 @@
 syntax = "proto2";
 
+enum FluxMagic {
+	MAGIC = 0x466c7578;
+}
+
 enum FluxFileVersion {
 	VERSION_1 = 1;
 }
@@ -11,7 +15,8 @@ message TrackFluxProto {
 }
 
 message FluxFileProto {
-	optional FluxFileVersion version = 1;
-	repeated TrackFluxProto track = 2;
+	optional int32 magic = 1;
+	optional FluxFileVersion version = 2;
+	repeated TrackFluxProto track = 3;
 }
 

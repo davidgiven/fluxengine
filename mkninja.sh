@@ -270,10 +270,6 @@ encodedecodetest() {
     echo "    format=$format"
     echo "    configs=$*"
     echo "    fluxx=scp"
-    echo "build $OBJDIR/$format.encodedecode.fl2.stamp : encodedecode | fluxengine$EXTENSION scripts/encodedecodetest.sh $*"
-    echo "    format=$format"
-    echo "    configs=$*"
-    echo "    fluxx=fl2"
 }
 
 buildlibrary libagg.a \
