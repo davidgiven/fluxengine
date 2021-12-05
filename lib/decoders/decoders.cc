@@ -25,7 +25,6 @@
 #include "sector.h"
 #include "image.h"
 #include "lib/decoders/decoders.pb.h"
-#include "lib/data.pb.h"
 #include "fmt/format.h"
 #include <numeric>
 

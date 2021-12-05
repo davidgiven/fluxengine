@@ -8,7 +8,6 @@
 #include "bytes.h"
 #include "fmt/format.h"
 #include "lib/decoders/decoders.pb.h"
-#include "lib/data.pb.h"
 #include <string.h>
 #include <algorithm>
 
