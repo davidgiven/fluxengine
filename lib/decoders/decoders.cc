@@ -25,7 +25,6 @@
 #include "sector.h"
 #include "image.h"
 #include "lib/decoders/decoders.pb.h"
-#include "lib/data.pb.h"
 #include "fmt/format.h"
 #include <numeric>
 
@@ -84,7 +83,7 @@ std::unique_ptr<TrackDataFlux> AbstractDecoder::decodeToSectors(
             return std::move(_trackdata);
         if ((r == UNKNOWN_RECORD) || (r == DATA_RECORD))
         {
-            fmr.findEvent(F_BIT_PULSE);
+            fmr.skipToEvent(F_BIT_PULSE);
             continue;
         }
 
@@ -106,7 +105,7 @@ std::unique_ptr<TrackDataFlux> AbstractDecoder::decodeToSectors(
 				r = advanceToNextRecord();
 				if (r != UNKNOWN_RECORD)
 					break;
-				if (fmr.findEvent(F_BIT_PULSE) == 0)
+				if (fmr.eof())
                     break;
 			}
             recordStart = fmr.tell();

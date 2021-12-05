@@ -56,6 +56,12 @@ Fluxmap& Fluxmap::appendIndex()
     return *this;
 }
 
+Fluxmap& Fluxmap::appendDesync()
+{
+	appendByte(F_DESYNC);
+    return *this;
+}
+
 void Fluxmap::precompensate(int threshold_ticks, int amount_ticks)
 {
     uint8_t junk = 0xff;

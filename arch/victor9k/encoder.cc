@@ -162,7 +162,7 @@ public:
 	}
 
     std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide,
-            const std::vector<std::shared_ptr<Sector>>& sectors, const Image& image)
+            const std::vector<std::shared_ptr<Sector>>& sectors, const Image& image) override
     {
 		Victor9kEncoderProto::TrackdataProto trackdata;
 		getTrackFormat(trackdata, physicalTrack, physicalSide);

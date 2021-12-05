@@ -257,10 +257,11 @@ int mainAnalyseDriveResponse(int argc, const char* argv[])
 
 			FluxmapReader fmr(inFluxmap);
 			fmr.seek((double)period*0.1); /* skip first 10% and last 10% as contains junk */
-			fmr.findEvent(F_BIT_PULSE);
+			fmr.skipToEvent(F_BIT_PULSE);
 			while (fmr.tell().ns() < ((double)period*0.9))
 			{
-				unsigned ticks = fmr.findEvent(F_BIT_PULSE);
+				unsigned ticks;
+				fmr.findEvent(F_BIT_PULSE, ticks);
 				if (ticks < numColumns)
 					frequencies[row][ticks]++;
 			}

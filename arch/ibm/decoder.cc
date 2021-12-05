@@ -98,7 +98,7 @@ public:
 		_config(config.ibm())
     {}
 
-    RecordType advanceToNextRecord()
+    RecordType advanceToNextRecord() override
 	{
 		const FluxMatcher* matcher = nullptr;
 		_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
@@ -130,7 +130,7 @@ public:
 		return RecordType::UNKNOWN_RECORD;
 	}
 
-    void decodeSectorRecord()
+    void decodeSectorRecord() override
 	{
 		unsigned recordSize = _currentHeaderLength + IBM_IDAM_LEN;
 		auto bits = readRawBits(recordSize*16);
@@ -156,7 +156,7 @@ public:
 			_sector->logicalTrack = _sector->physicalCylinder;
 	}
 
-    void decodeDataRecord()
+    void decodeDataRecord() override
 	{
 		unsigned recordLength = _currentHeaderLength + _currentSectorSize + 3;
 		auto bits = readRawBits(recordLength*16);

@@ -97,7 +97,7 @@ public:
 		ByteWriter fluxdataWriter(fluxdata);
 
 		if (_config.align_with_index())
-			fmr.findEvent(F_BIT_INDEX);
+			fmr.skipToEvent(F_BIT_INDEX);
 
 		int revolution = 0;
 		unsigned revTicks = 0;
@@ -107,12 +107,14 @@ public:
 		while (revolution < 5)
 		{
 			unsigned ticks;
-			uint8_t bits = fmr.getNextEvent(ticks);
+			int event;
+			fmr.getNextEvent(event, ticks);
+
 			ticksSinceLastPulse += ticks;
 			totalTicks += ticks;
 			revTicks += ticks;
 
-			if (fmr.eof() || (bits & F_BIT_INDEX))
+			if (fmr.eof() || (event & F_BIT_INDEX))
 			{
 				auto* revheader = &trackheader.revolution[revolution];
 				write_le32(revheader->offset, startOffset + sizeof(ScpTrack));
@@ -124,7 +126,7 @@ public:
 				startOffset = fluxdataWriter.pos;
 			}
 
-			if (bits & F_BIT_PULSE)
+			if (event & F_BIT_PULSE)
 			{
 				unsigned t = ticksSinceLastPulse * NS_PER_TICK / 25;
 				while (t >= 0x10000)

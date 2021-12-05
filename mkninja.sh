@@ -244,14 +244,12 @@ runtest() {
     buildlibrary lib$prog.a \
         -Idep/snowhouse/include \
         -d $OBJDIR/proto/libconfig.def \
-        -d $OBJDIR/proto/libdata.def \
         "$@"
 
     buildprogram $OBJDIR/$prog \
         lib$prog.a \
         libbackend.a \
         libconfig.a \
-        libdata.a \
         libtestproto.a \
         libagg.a \
         libfmt.a
@@ -272,6 +270,10 @@ encodedecodetest() {
     echo "    format=$format"
     echo "    configs=$*"
     echo "    fluxx=scp"
+    echo "build $OBJDIR/$format.encodedecode.fl2.stamp : encodedecode | fluxengine$EXTENSION scripts/encodedecodetest.sh $*"
+    echo "    format=$format"
+    echo "    configs=$*"
+    echo "    fluxx=fl2"
 }
 
 buildlibrary libagg.a \
@@ -309,13 +311,13 @@ buildproto libconfig.a \
     lib/imagewriter/imagewriter.proto \
     lib/usb/usb.proto \
 
-buildproto libdata.a \
-    lib/data.proto
+buildproto libfl2.a \
+    lib/fl2.proto
 
 buildlibrary libbackend.a \
     -I$OBJDIR/proto \
     -d $OBJDIR/proto/libconfig.def \
-    -d $OBJDIR/proto/libdata.def \
+    -d $OBJDIR/proto/libfl2.def \
     arch/aeslanier/decoder.cc \
     arch/amiga/amiga.cc \
     arch/amiga/decoder.cc \
@@ -353,6 +355,7 @@ buildlibrary libbackend.a \
     lib/flags.cc \
     lib/fluxmap.cc \
     lib/fluxsink/aufluxsink.cc \
+    lib/fluxsink/fl2fluxsink.cc \
     lib/fluxsink/fluxsink.cc \
     lib/fluxsink/hardwarefluxsink.cc \
     lib/fluxsink/scpfluxsink.cc \
@@ -360,6 +363,7 @@ buildlibrary libbackend.a \
     lib/fluxsink/vcdfluxsink.cc \
     lib/fluxsource/cwffluxsource.cc \
     lib/fluxsource/erasefluxsource.cc \
+    lib/fluxsource/fl2fluxsource.cc \
     lib/fluxsource/fluxsource.cc \
     lib/fluxsource/hardwarefluxsource.cc \
     lib/fluxsource/kryoflux.cc \
@@ -454,7 +458,6 @@ buildmktable formats $OBJDIR/formats.cc $FORMATS
 buildlibrary libfrontend.a \
     -I$OBJDIR/proto \
     -d $OBJDIR/proto/libconfig.def \
-    -d $OBJDIR/proto/libdata.def \
     $(for a in $FORMATS; do echo $OBJDIR/proto/src/formats/$a.cc; done) \
     $OBJDIR/formats.cc \
     src/fe-analysedriveresponse.cc \
@@ -475,7 +478,7 @@ buildprogram fluxengine \
     libfrontend.a \
     libbackend.a \
     libconfig.a \
-    libdata.a \
+    libfl2.a \
     libfmt.a \
     libagg.a \
 
@@ -508,6 +511,7 @@ runtest bytes-test          tests/bytes.cc
 runtest compression-test    tests/compression.cc
 runtest csvreader-test      tests/csvreader.cc
 runtest flags-test          tests/flags.cc
+runtest fluxmapreader-test  tests/fluxmapreader.cc
 runtest fluxpattern-test    tests/fluxpattern.cc
 runtest fmmfm-test          tests/fmmfm.cc
 runtest greaseweazle-test   tests/greaseweazle.cc
@@ -515,7 +519,6 @@ runtest kryoflux-test       tests/kryoflux.cc
 runtest ldbs-test           tests/ldbs.cc
 runtest proto-test          -I$OBJDIR/proto \
                             -d $OBJDIR/proto/libconfig.def \
-                            -d $OBJDIR/proto/libdata.def \
                             -d $OBJDIR/proto/libtestproto.def \
                             tests/proto.cc \
                             $OBJDIR/proto/tests/testproto.cc

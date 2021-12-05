@@ -39,6 +39,9 @@ std::unique_ptr<FluxSource> FluxSource::create(const FluxSourceProto& config)
 		case FluxSourceProto::kCwf:
 			return createCwfFluxSource(config.cwf());
 
+		case FluxSourceProto::kFl2:
+			return createFl2FluxSource(config.fl2());
+
 		default:
 			Error() << "bad input disk configuration";
 			return std::unique_ptr<FluxSource>();
@@ -52,6 +55,7 @@ void FluxSource::updateConfigForFilename(FluxSourceProto* proto, const std::stri
 		{ std::regex("^(.*\\.flux)$"),     [&](const auto& s) { proto->set_fluxfile(s); }},
 		{ std::regex("^(.*\\.scp)$"),      [&](const auto& s) { proto->mutable_scp()->set_filename(s); }},
 		{ std::regex("^(.*\\.cwf)$"),      [&](const auto& s) { proto->mutable_cwf()->set_filename(s); }},
+		{ std::regex("^(.*\\.fl2)$"),      [&](const auto& s) { proto->mutable_fl2()->set_filename(s); }},
 		{ std::regex("^erase:$"),          [&](const auto& s) { proto->mutable_erase(); }},
 		{ std::regex("^kryoflux:(.*)$"),   [&](const auto& s) { proto->mutable_kryoflux()->set_directory(s); }},
 		{ std::regex("^testpattern:(.*)"), [&](const auto& s) { proto->mutable_test_pattern(); }},

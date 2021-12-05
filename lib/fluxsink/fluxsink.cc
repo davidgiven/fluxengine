@@ -26,6 +26,9 @@ std::unique_ptr<FluxSink> FluxSink::create(const FluxSinkProto& config)
 		case FluxSinkProto::kScp:
 			return createScpFluxSink(config.scp());
 
+		case FluxSinkProto::kFl2:
+			return createFl2FluxSink(config.fl2());
+
 		default:
 			Error() << "bad output disk config";
 			return std::unique_ptr<FluxSink>();
@@ -38,6 +41,7 @@ void FluxSink::updateConfigForFilename(FluxSinkProto* proto, const std::string& 
 	{
 		{ std::regex("^(.*\\.flux)$"), [&](const auto& s) { proto->set_fluxfile(s); }},
 		{ std::regex("^(.*\\.scp)$"),  [&](const auto& s) { proto->mutable_scp()->set_filename(s); }},
+		{ std::regex("^(.*\\.fl2)$"),  [&](const auto& s) { proto->mutable_fl2()->set_filename(s); }},
 		{ std::regex("^vcd:(.*)$"),    [&](const auto& s) { proto->mutable_vcd()->set_directory(s); }},
 		{ std::regex("^au:(.*)$"),     [&](const auto& s) { proto->mutable_au()->set_directory(s); }},
 		{ std::regex("^drive:(.*)"),   [&](const auto& s) { proto->mutable_drive()->set_drive(std::stoi(s)); }},
