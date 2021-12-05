@@ -1,17 +1,21 @@
-PACKAGES = zlib sqlite3 libusb-1.0 protobuf gtk+-3.0
+PACKAGES = zlib sqlite3 libusb-1.0 protobuf
+ifeq ($(shell uname),Linux)
+PACKAGES += gtk+-3.0
+endif
 
-export CFLAGS = -ffunction-sections -fdata-sections
+export CFLAGS = \
+	-ffunction-sections -fdata-sections
 export CXXFLAGS = $(CFLAGS) \
 	--std=gnu++2a \
 	-Wno-deprecated-enum-enum-conversion \
 	-Wno-deprecated-enum-float-conversion
-export LDFLAGS = -pthread
+export LDFLAGS = -pthread -ldl
 
 export COPTFLAGS = -Os
-export LDOPTFLAGS = -Os -ldl
+export LDOPTFLAGS = -Os
 
 export CDBGFLAGS = -O0 -g
-export LDDBGFLAGS = -O0 -g -ldl
+export LDDBGFLAGS = -O0 -g
 
 ifeq ($(OS), Windows_NT)
 export PROTOC = /mingw32/bin/protoc
@@ -35,6 +39,7 @@ endif
 export PROTOC = protoc
 export CC = gcc
 export CXX = g++
+export COBJC = clang
 export AR = ar rc
 export RANLIB = ranlib
 export STRIP = strip
@@ -46,6 +51,10 @@ export EXTENSION =
 ifeq ($(shell uname),Darwin)
 AR = ar rcS
 RANLIB += -c -no_warning_for_no_symbols
+export CC = clang
+export CXX = clang++
+export COBJC = clang
+export OBJCLDFLAGS = -framework Foundation -framework AppKit
 endif
 
 endif

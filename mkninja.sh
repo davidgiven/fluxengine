@@ -14,6 +14,12 @@ rule cc
     depfile = \$out.d
     deps = gcc
     
+rule cobjc
+    command = $COBJC $CFLAGS \$flags -I. -c -o \$out \$in -MMD -MF \$out.d
+    description = COBJC \$out
+    depfile = \$out.d
+    deps = gcc
+    
 rule proto
     command = (echo \$in > \$def) && $PROTOC \$flags \$in
     description = PROTO \$in
@@ -36,6 +42,10 @@ rule library
 rule link
     command = $CXX $LDFLAGS -o \$out \$in \$flags $LIBS
     description = LINK \$in
+
+rule linkobjc
+    command = $COBJC $LDFLAGS $OBJCLDFLAGS -o \$out \$in \$flags $LIBS
+    description = LINK-OBJC \$in
 
 rule test
     command = \$in && touch \$out
@@ -96,6 +106,13 @@ buildlibrary() {
 
 
         case "${src##*.}" in
+            m)
+                echo "build $obj : cobjc $src | $deps"
+                echo "    flags=$flags $COPTFLAGS"
+                echo "build $dobj : cobjc $src | $deps"
+                echo "    flags=$flags $CDBGFLAGS"
+                ;;
+
             c)
                 echo "build $obj : cc $src | $deps"
                 echo "    flags=$flags $COPTFLAGS"
@@ -189,8 +206,16 @@ buildprogram() {
 
     local flags
     flags=
+    local rule
+    rule=link
     while true; do
         case $1 in
+            -rule)
+                rule=$2
+                shift
+                shift
+                ;;
+
             -*)
                 flags="$flags $1"
                 shift
@@ -210,10 +235,10 @@ buildprogram() {
         dobjs="$dobjs $OBJDIR/dbg/$src"
     done
 
-    echo build $prog-debug$EXTENSION : link $dobjs
+    echo build $prog-debug$EXTENSION : $rule $dobjs
     echo "    flags=$flags $LDDBGFLAGS"
 
-    echo build $prog$EXTENSION-unstripped : link $oobjs
+    echo build $prog$EXTENSION-unstripped : $rule $oobjs
     echo "    flags=$flags $LDOPTFLAGS"
 
     echo build $prog$EXTENSION : strip $prog$EXTENSION-unstripped
@@ -300,10 +325,17 @@ buildlibrary libagg.a \
     dep/stb/stb_image_write.c \
     dep/agg/src/*.cpp
 
-buildlibrary libui.a \
-    -Idep/libui \
-    dep/libui/common/*.c \
-    dep/libui/unix/*.c \
+if [ "$(uname)" = "Darwin" ]; then
+    buildlibrary libui.a \
+        -Idep/libui \
+        dep/libui/common/*.c \
+        dep/libui/darwin/*.m
+else
+    buildlibrary libui.a \
+        -Idep/libui \
+        dep/libui/common/*.c \
+        dep/libui/unix/*.c
+fi
 
 buildlibrary libfmt.a \
     dep/fmt/format.cc \
@@ -515,15 +547,28 @@ buildprogram fluxengine \
     libfmt.a \
     libagg.a \
 
-buildprogram fluxengine-gui \
-    libgui.a \
-    libformats.a \
-    libbackend.a \
-    libconfig.a \
-    libfl2.a \
-    libfmt.a \
-    libui.a \
-    libagg.a \
+if [ "$(uname)" = "Darwin" ]; then
+    buildprogram fluxengine-gui \
+        -rule linkobjc \
+        libgui.a \
+        libformats.a \
+        libbackend.a \
+        libconfig.a \
+        libfl2.a \
+        libfmt.a \
+        libui.a \
+        libagg.a
+else
+    buildprogram fluxengine-gui \
+        libgui.a \
+        libformats.a \
+        libbackend.a \
+        libconfig.a \
+        libfl2.a \
+        libfmt.a \
+        libui.a \
+        libagg.a
+fi
 
 buildlibrary libemu.a \
     dep/emu/fnmatch.c
