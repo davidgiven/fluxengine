@@ -46,6 +46,7 @@ public:
     Fluxmap& appendInterval(uint32_t ticks);
     Fluxmap& appendPulse();
     Fluxmap& appendIndex();
+	Fluxmap& appendDesync();
 
     Fluxmap& appendBytes(const Bytes& bytes);
     Fluxmap& appendBytes(const uint8_t* ptr, size_t len);

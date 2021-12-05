@@ -30,7 +30,7 @@ public:
 		_config(config.amiga())
 	{}
 
-    RecordType advanceToNextRecord()
+    RecordType advanceToNextRecord() override
 	{
 		_sector->clock = _fmr->seekToPattern(SECTOR_PATTERN);
 		if (_fmr->eof() || !_sector->clock)
@@ -38,7 +38,7 @@ public:
 		return SECTOR_RECORD;
 	}
 
-    void decodeSectorRecord()
+    void decodeSectorRecord() override
 	{
 		const auto& rawbits = readRawBits(AMIGA_RECORD_SIZE*16);
 		if (rawbits.size() < (AMIGA_RECORD_SIZE*16))

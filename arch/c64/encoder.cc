@@ -231,7 +231,7 @@ public:
 	}
 
     std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide,
-            const std::vector<std::shared_ptr<Sector>>& sectors, const Image& image)
+            const std::vector<std::shared_ptr<Sector>>& sectors, const Image& image) override
     {
         /* The format ID Character # 1 and # 2 are in the .d64 image only present
          * in track 18 sector zero which contains the BAM info in byte 162 and 163.

@@ -511,6 +511,7 @@ runtest bytes-test          tests/bytes.cc
 runtest compression-test    tests/compression.cc
 runtest csvreader-test      tests/csvreader.cc
 runtest flags-test          tests/flags.cc
+runtest fluxmapreader-test  tests/fluxmapreader.cc
 runtest fluxpattern-test    tests/fluxpattern.cc
 runtest fmmfm-test          tests/fmmfm.cc
 runtest greaseweazle-test   tests/greaseweazle.cc

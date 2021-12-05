@@ -92,7 +92,8 @@ static nanoseconds_t guessClock(const Fluxmap& fluxmap)
 
     while (!fr.eof())
     {
-        unsigned interval = fr.findEvent(F_BIT_PULSE);
+        unsigned interval;
+		fr.findEvent(F_BIT_PULSE, interval);
         if (interval > 0xff)
             continue;
         buckets[interval]++;
@@ -234,7 +235,9 @@ int mainInspect(int argc, const char* argv[])
 		nanoseconds_t lasttransition = 0;
 		while (!fmr.eof())
 		{
-			ticks += fmr.findEvent(F_BIT_PULSE);
+			unsigned thisTicks;
+			fmr.findEvent(F_BIT_PULSE, thisTicks);
+			ticks += thisTicks;
 
 			nanoseconds_t transition = ticks*NS_PER_TICK;
 			nanoseconds_t next;

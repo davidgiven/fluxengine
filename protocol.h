@@ -89,7 +89,8 @@ enum
 {
     F_BIT_PULSE = 0x80,
     F_BIT_INDEX = 0x40,
-	F_DESYNC = 0xc0
+	F_DESYNC = 0x00,
+	F_EOF = 0x100 /* synthetic, only produced by library */
 };
 
 struct frame_header

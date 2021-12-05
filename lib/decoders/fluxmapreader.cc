@@ -18,7 +18,7 @@ FluxmapReader::FluxmapReader(const Fluxmap& fluxmap):
 	rewind();
 }
 
-uint8_t FluxmapReader::getNextEvent(unsigned& ticks)
+void FluxmapReader::getNextEvent(int& event, unsigned& ticks)
 {
     ticks = 0;
 
@@ -26,30 +26,42 @@ uint8_t FluxmapReader::getNextEvent(unsigned& ticks)
     {
         uint8_t b = _bytes[_pos.bytes++];
 		ticks += b & 0x3f;
-		if (b & (F_BIT_PULSE|F_BIT_INDEX))
+		if (!b || (b & (F_BIT_PULSE|F_BIT_INDEX)))
         {
             _pos.ticks += ticks;
-            return b;
+			event = b & 0xc0;
+            return;
         }
     }
 
     _pos.ticks += ticks;
-    return 0;
+	event = F_EOF;
 }
 
-unsigned FluxmapReader::findEvent(uint8_t target)
+void FluxmapReader::skipToEvent(int event)
 {
-    unsigned ticks = 0;
+	unsigned ticks;
+	findEvent(event, ticks);
+}
+
+bool FluxmapReader::findEvent(int event, unsigned& ticks)
+{
+    ticks = 0;
 
     for (;;)
     {
         unsigned thisTicks;
-        uint8_t bits = getNextEvent(thisTicks);
-        ticks += thisTicks;
+		int thisEvent;
+		getNextEvent(thisEvent, thisTicks);
+		ticks += thisTicks;
+
+		if (thisEvent == F_EOF)
+			return false;
+
         if (eof())
-            return 0;
-        if (bits & target)
-            return ticks;
+            return false;
+		if ((event == thisEvent) || (event & thisEvent))
+			return true;
     }
 }
 
@@ -60,8 +72,8 @@ unsigned FluxmapReader::readInterval(nanoseconds_t clock)
 
     while (ticks <= thresholdTicks)
     {
-        unsigned thisTicks = findEvent(F_BIT_PULSE);
-        if (!thisTicks)
+        unsigned thisTicks;
+		if (!findEvent(F_BIT_PULSE, thisTicks))
             break;
         ticks += thisTicks;
     }
@@ -183,8 +195,9 @@ void FluxmapReader::seek(nanoseconds_t ns)
 
     while (!eof() && (_pos.ticks < ticks))
     {
+		int e;
         unsigned t;
-        getNextEvent(t);
+        getNextEvent(e, t);
     }
     _pos.zeroes = 0;
 }
@@ -225,7 +238,7 @@ nanoseconds_t FluxmapReader::seekToPattern(const FluxMatcher& pattern, const Flu
             positions[i] = positions[i+1];
             candidates[i] = candidates[i+1];
         }
-        candidates[intervalCount] = findEvent(F_BIT_PULSE);
+		findEvent(F_BIT_PULSE, candidates[intervalCount]);
         positions[intervalCount] = tell();
 
     }
@@ -236,7 +249,7 @@ nanoseconds_t FluxmapReader::seekToPattern(const FluxMatcher& pattern, const Flu
 
 void FluxmapReader::seekToIndexMark()
 {
-    findEvent(F_BIT_INDEX);
+    skipToEvent(F_BIT_INDEX);
     _pos.zeroes = 0;
 }
 

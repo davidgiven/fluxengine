@@ -93,8 +93,9 @@ public:
         return (_fluxmap.duration());
     }
 
-    uint8_t getNextEvent(unsigned& ticks);
-    unsigned findEvent(uint8_t bits);
+    void getNextEvent(int& event, unsigned& ticks);
+	void skipToEvent(int event);
+    bool findEvent(int event, unsigned& ticks);
     unsigned readInterval(nanoseconds_t clock); /* with debounce support */
 
     /* Important! You can only reliably seek to 1 bits. */
