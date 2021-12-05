@@ -270,6 +270,10 @@ encodedecodetest() {
     echo "    format=$format"
     echo "    configs=$*"
     echo "    fluxx=scp"
+    echo "build $OBJDIR/$format.encodedecode.fl2.stamp : encodedecode | fluxengine$EXTENSION scripts/encodedecodetest.sh $*"
+    echo "    format=$format"
+    echo "    configs=$*"
+    echo "    fluxx=fl2"
 }
 
 buildlibrary libagg.a \
@@ -359,6 +363,7 @@ buildlibrary libbackend.a \
     lib/fluxsink/vcdfluxsink.cc \
     lib/fluxsource/cwffluxsource.cc \
     lib/fluxsource/erasefluxsource.cc \
+    lib/fluxsource/fl2fluxsource.cc \
     lib/fluxsource/fluxsource.cc \
     lib/fluxsource/hardwarefluxsource.cc \
     lib/fluxsource/kryoflux.cc \

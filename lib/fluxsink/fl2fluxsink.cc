@@ -19,28 +19,35 @@ class Fl2FluxSink : public FluxSink
 public:
 	Fl2FluxSink(const Fl2FluxSinkProto& lconfig):
 		_config(lconfig),
-		_of(lconfig.filename())
+		_of(lconfig.filename(), std::ios::out | std::ios::binary)
 	{
 		if (!_of.is_open())
 			Error() << "cannot open output file";
-		_proto.set_version(FluxFileVersion::VERSION_1);
 	}
 
 	~Fl2FluxSink()
 	{
-		std::cerr << "FL2: writing output file\n";
-		if (!_proto.SerializeToOstream(&_of))
+		FluxFileProto proto;
+		proto.set_version(FluxFileVersion::VERSION_1);
+		for (const auto& e : _data)
+		{
+			auto track = proto.add_track();
+			track->set_cylinder(e.first.first);
+			track->set_head(e.first.second);
+			track->set_flux(e.second);
+		}
+
+		if (!proto.SerializeToOstream(&_of))
 			Error() << "unable to write output file";
 		_of.close();
+		if (_of.fail())
+			Error() << "FL2 write I/O error: " << strerror(errno);
 	}
 
 public:
 	void writeFlux(int cylinder, int head, Fluxmap& fluxmap)
 	{
-		auto track = _proto.add_track();
-		track->set_cylinder(cylinder);
-		track->set_head(head);
-		track->set_flux(fluxmap.rawBytes());
+		_data[std::make_pair(cylinder, head)] = fluxmap.rawBytes();
 	}
 
 	operator std::string () const
@@ -51,7 +58,7 @@ public:
 private:
 	const Fl2FluxSinkProto& _config;
 	std::ofstream _of;
-	FluxFileProto _proto;
+	std::map<std::pair<unsigned, unsigned>, Bytes> _data;
 };
 
 std::unique_ptr<FluxSink> FluxSink::createFl2FluxSink(const Fl2FluxSinkProto& config)
