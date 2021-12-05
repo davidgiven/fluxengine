@@ -3,6 +3,7 @@
 #include "reader.h"
 #include "fluxmap.h"
 #include "decoders/fluxmapreader.h"
+#include "decoders/fluxdecoder.h"
 #include "decoders/decoders.h"
 #include "fluxsource/fluxsource.h"
 #include "protocol.h"
@@ -91,7 +92,8 @@ static nanoseconds_t guessClock(const Fluxmap& fluxmap)
 
     while (!fr.eof())
     {
-        unsigned interval = fr.findEvent(F_BIT_PULSE);
+        unsigned interval;
+		fr.findEvent(F_BIT_PULSE, interval);
         if (interval > 0xff)
             continue;
         buckets[interval]++;
@@ -233,7 +235,9 @@ int mainInspect(int argc, const char* argv[])
 		nanoseconds_t lasttransition = 0;
 		while (!fmr.eof())
 		{
-			ticks += fmr.findEvent(F_BIT_PULSE);
+			unsigned thisTicks;
+			fmr.findEvent(F_BIT_PULSE, thisTicks);
+			ticks += thisTicks;
 
 			nanoseconds_t transition = ticks*NS_PER_TICK;
 			nanoseconds_t next;
@@ -277,6 +281,7 @@ int mainInspect(int argc, const char* argv[])
 		std::cout << fmt::format("\n\nAligned bitstream from {:.3f}ms follows:\n",
 				fmr.tell().ns() / 1000000.0);
 
+		FluxDecoder decoder(&fmr, clockPeriod, config.decoder());
 		while (!fmr.eof())
 		{
 			std::cout << fmt::format("{:06x} {: 10.3f} : ",
@@ -285,7 +290,7 @@ int mainInspect(int argc, const char* argv[])
 			{
 				if (fmr.eof())
 					break;
-				bool b = fmr.readRawBit(clockPeriod);
+				bool b = decoder.readBit();
 				std::cout << (b ? 'X' : '-');
 			}
 

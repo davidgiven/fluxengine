@@ -52,7 +52,7 @@ CFLAGS += -Ilib -Idep/fmt -Iarch
 export OBJDIR = .obj
 
 all: .obj/build.ninja
-	@ninja -f .obj/build.ninja
+	@ninja -f .obj/build.ninja -k 0
 	@if command -v cscope > /dev/null; then cscope -bRq; fi
 
 clean:

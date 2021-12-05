@@ -43,7 +43,8 @@ public:
 		while (!fmr.eof())
 		{
 			unsigned ticks;
-			uint8_t bits = fmr.getNextEvent(ticks);
+			int event;
+			fmr.getNextEvent(event, ticks);
 			if (fmr.eof())
 				break;
 
@@ -55,9 +56,9 @@ public:
 				of << fmt::format("#{} ", (uint64_t)(timestamp * NS_PER_TICK));
 			}
 
-			if (bits & F_BIT_PULSE)
+			if (event & F_BIT_PULSE)
 				of << "1p ";
-			if (bits & F_BIT_INDEX)
+			if (event & F_BIT_INDEX)
 				of << "1i ";
 
 			lasttimestamp = timestamp;

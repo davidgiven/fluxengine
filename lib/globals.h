@@ -18,6 +18,10 @@
 #define mkdir(A, B) _mkdir(A)
 #endif
 
+template <class T>
+static inline std::vector<T> vector_of(T item)
+{ return std::vector<T> { item }; }
+
 typedef double nanoseconds_t;
 class Bytes;
 
@@ -44,6 +48,5 @@ public:
 private:
     std::stringstream _stream;
 };
-
 
 #endif

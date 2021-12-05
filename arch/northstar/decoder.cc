@@ -74,7 +74,7 @@ public:
 	{}
 
 	/* Search for FM or MFM sector record */
-	RecordType advanceToNextRecord()
+	RecordType advanceToNextRecord() override
 	{
 		nanoseconds_t now = _fmr->tell().ns();
 
@@ -140,7 +140,7 @@ public:
 		return UNKNOWN_RECORD;
 	}
 
-	void decodeSectorRecord()
+	void decodeSectorRecord() override
 	{
 		unsigned recordSize, payloadSize, headerSize;
 

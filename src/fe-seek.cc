@@ -1,7 +1,7 @@
 #include "globals.h"
 #include "flags.h"
 #include "usb/usb.h"
-#include "fluxsource/fluxsource.cc"
+#include "fluxsource/fluxsource.h"
 #include "proto.h"
 #include "protocol.h"
 

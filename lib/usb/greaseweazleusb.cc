@@ -108,6 +108,11 @@
     typedef int FileHandle;
     static FileHandle open_serial_port(const std::string& name)
     {
+        #ifdef __APPLE__
+            if (name.find("/dev/tty.") != std::string::npos)
+                std::cerr << "Warning: you probably want to be using a /dev/cu.* device\n";
+        #endif
+
         int fd = open(name.c_str(), O_RDWR);
         if (fd == -1)
             Error() << fmt::format("cannot open GreaseWeazle serial port '{}': {}",
@@ -515,7 +520,7 @@ public:
     {
         do_command({ CMD_SELECT, 3, (uint8_t)drive });
         do_command({ CMD_MOTOR, 4, (uint8_t)drive, 1 });
-        do_command({ CMD_SET_PIN, 4, 2, (uint8_t)(high_density ? 0 : 1) });
+        do_command({ CMD_SET_PIN, 4, 2, (uint8_t)(high_density ? 1 : 0) });
     }
 
     void measureVoltages(struct voltages_frame* voltages)

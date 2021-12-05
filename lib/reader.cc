@@ -16,7 +16,6 @@
 #include "fmt/format.h"
 #include "proto.h"
 #include "lib/decoders/decoders.pb.h"
-#include "lib/data.pb.h"
 #include <iostream>
 #include <fstream>
 
@@ -27,11 +26,9 @@ static std::shared_ptr<Fluxmap> readFluxmap(FluxSource& fluxsource, unsigned cyl
 	std::cout << fmt::format("{0:>3}.{1}: ", cylinder, head) << std::flush;
 	std::shared_ptr<Fluxmap> fluxmap = fluxsource.readFlux(cylinder, head);
 	std::cout << fmt::format(
-		"{0} ms in {1} bytes\n",
+		"{0:.0} ms in {1} bytes\n",
             fluxmap->duration()/1e6,
             fluxmap->bytes());
-	if (outputFluxSink)
-		outputFluxSink->writeFlux(cylinder, head, *fluxmap);
 	return fluxmap;
 }
 
@@ -83,10 +80,13 @@ void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWrit
 			auto track = std::make_unique<TrackFlux>();
 			std::set<std::shared_ptr<Sector>> track_sectors;
 			std::set<std::shared_ptr<Record>> track_records;
+			Fluxmap totalFlux;
 
 			for (int retry = config.decoder().retries(); retry >= 0; retry--)
 			{
 				auto fluxmap = readFluxmap(fluxsource, cylinder, head);
+				totalFlux.appendDesync().appendBytes(fluxmap->rawBytes());
+
 				{
 					auto trackdata = decoder.decodeToSectors(fluxmap, cylinder, head);
 
@@ -105,6 +105,7 @@ void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWrit
 					track_records.insert(trackdata->records.begin(), trackdata->records.end());
 					track->trackDatas.push_back(std::move(trackdata));
 				}
+
 				auto collected_sectors = collect_sectors(track_sectors);
 				std::cout << fmt::format("{} distinct sectors; ", collected_sectors.size());
 
@@ -146,6 +147,9 @@ void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWrit
 				else
 					std::cout << retry << " retries remaining" << std::endl;
 			}
+
+			if (outputFluxSink)
+				outputFluxSink->writeFlux(cylinder, head, totalFlux);
 
 			if (config.decoder().dump_records())
 			{
