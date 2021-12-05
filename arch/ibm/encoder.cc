@@ -133,11 +133,17 @@ public:
 				encodeMfm(_bits, _cursor, bytes, _lastBit);
 		};
 
+		auto writeFillerRawBytes = [&](int count, uint16_t byte)
+		{
+			for (int i=0; i<count; i++)
+				writeRawBits(byte, 16);
+		};
+
 		auto writeFillerBytes = [&](int count, uint8_t byte)
 		{
-			Bytes bytes = { byte };
+			Bytes b { byte };
 			for (int i=0; i<count; i++)
-				writeBytes(bytes);
+				writeBytes(b);
 		};
 
 		double clockRateUs = 1e3 / trackdata.clock_rate_khz();
@@ -160,9 +166,9 @@ public:
 			}
 		}
 
-		uint8_t gapFill = trackdata.use_fm() ? 0x00 : 0x4e;
+		uint16_t gapFill = trackdata.gap_fill_byte();
 
-		writeFillerBytes(trackdata.gap0(), gapFill);
+		writeFillerRawBytes(trackdata.gap0(), gapFill);
 		if (trackdata.emit_iam())
 		{
 			writeFillerBytes(trackdata.use_fm() ? 6 : 12, 0x00);
@@ -172,7 +178,7 @@ public:
 					writeRawBits(MFM_IAM_SEPARATOR, 16);
 			}
 			writeRawBits(trackdata.use_fm() ? FM_IAM_RECORD : MFM_IAM_RECORD, 16);
-			writeFillerBytes(trackdata.gap1(), gapFill);
+			writeFillerRawBytes(trackdata.gap1(), gapFill);
 		}
 
 		int logicalSide = physicalSide ^ trackdata.swap_sides();
@@ -180,7 +186,7 @@ public:
 		for (int sectorId : trackdata.sectors().sector())
 		{
 			if (!first)
-				writeFillerBytes(trackdata.gap3(), gapFill);
+				writeFillerRawBytes(trackdata.gap3(), gapFill);
 			first = false;
 
 			const auto& sectorData = image.get(physicalTrack, logicalSide, sectorId);
@@ -227,7 +233,7 @@ public:
 				writeBytes(header.slice(conventionalHeaderStart));
 			}
 
-			writeFillerBytes(trackdata.gap2(), gapFill);
+			writeFillerRawBytes(trackdata.gap2(), gapFill);
 
 			{
 				Bytes data;
@@ -264,7 +270,7 @@ public:
 		if (_cursor >= _bits.size())
 			Error() << "track data overrun";
 		while (_cursor < _bits.size())
-			writeFillerBytes(1, gapFill);
+			writeFillerRawBytes(1, gapFill);
 
 		std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
 		fluxmap->appendBits(_bits, clockRateUs*1e3);
