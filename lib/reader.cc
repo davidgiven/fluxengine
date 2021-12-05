@@ -16,7 +16,6 @@
 #include "fmt/format.h"
 #include "proto.h"
 #include "lib/decoders/decoders.pb.h"
-#include "lib/data.pb.h"
 #include <iostream>
 #include <fstream>
 
