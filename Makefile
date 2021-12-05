@@ -9,7 +9,7 @@ export CXXFLAGS = $(CFLAGS) \
 	--std=gnu++2a \
 	-Wno-deprecated-enum-enum-conversion \
 	-Wno-deprecated-enum-float-conversion
-export LDFLAGS = -pthread -ldl
+export LDFLAGS = -pthread
 
 export COPTFLAGS = -Os
 export LDOPTFLAGS = -Os
@@ -45,7 +45,7 @@ export RANLIB = ranlib
 export STRIP = strip
 export CFLAGS += $(shell pkg-config --cflags $(PACKAGES))
 export LDFLAGS +=
-export LIBS += $(shell pkg-config --libs $(PACKAGES))
+export LIBS += $(shell pkg-config --libs $(PACKAGES)) -ldl
 export EXTENSION =
 
 ifeq ($(shell uname),Darwin)
