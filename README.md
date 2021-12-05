@@ -230,3 +230,7 @@ As an exception, `dep/snowhouse` contains the snowhouse assertion library,
 taken from https://github.com/banditcpp/snowhouse. It is Boost Standard License
 1.0 licensed. Please see the contents of the directory for the full text.
 
+As an exception, `dep/libui` contains the libui GUI library, taken from
+https://github.com/andlabs/libui. It is MIT licensed. Please see the contents
+of the directory for the full text.
+
