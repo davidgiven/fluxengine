@@ -1,8 +1,8 @@
 #!/bin/sh
 set -e
 
-if [ $(uname) != "Linux" ]; then
-	echo "Skipping test as not on Linux"
+if [ "$(uname)" != "Linux" -a "$(uname)" != "Darwin" ]; then
+	echo "Skipping test as not on Linux" >&2
 	exit 0
 fi
 
@@ -16,7 +16,7 @@ shift
 
 trap "rm -f $srcfile $fluxfile $destfile" EXIT
 
-dd if=/dev/urandom of=$srcfile bs=1M count=2 2>&1
+dd if=/dev/urandom of=$srcfile bs=1048576 count=2 2>&1
 
 ./fluxengine write $format -i $srcfile -d $fluxfile "$@"
 ./fluxengine read $format -s $fluxfile -o $destfile "$@"

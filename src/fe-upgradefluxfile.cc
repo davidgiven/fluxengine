@@ -2,133 +2,35 @@
 #include "flags.h"
 #include "sql.h"
 #include "fluxmap.h"
+#include "writer.h"
+#include "proto.h"
+#include "lib/fluxsource/fluxsource.h"
+#include "lib/fluxsink/fluxsink.h"
+#include "lib/fluxsource/fluxsource.pb.h"
+#include "lib/fluxsink/fluxsink.pb.h"
 #include "fmt/format.h"
-
-static sqlite3* db;
-
-static void update_version_1_to_3()
-{
-    for (const auto i : sqlFindFlux(db))
-    {
-        Fluxmap after;
-        const auto before = sqlReadFlux(db, i.first, i.second);
-
-        /* Remember, before does not contain valid opcodes! */
-        unsigned pending = 0;
-        for (uint8_t b : before->rawBytes())
-        {
-            if (b < 0x80)
-            {
-                after.appendInterval(b + pending);
-                after.appendPulse();
-                pending = 0;
-            }
-            else
-                pending += 0x80;
-        }
-
-        sqlWriteFlux(db, i.first, i.second, after);
-        std::cout << '.' << std::flush;
-    }
-    std::cout << std::endl;
-}
-
-static void update_version_2_to_3()
-{
-	for (const auto i : sqlFindFlux(db))
-	{
-		Fluxmap after;
-        const auto before = sqlReadFlux(db, i.first, i.second);
-
-        /* Remember, before does not contain valid opcodes! */
-        unsigned pending = 0;
-        for (uint8_t b : before->rawBytes())
-        {
-			switch (b)
-			{
-				case 0x80: /* pulse */
-					after.appendInterval(pending);
-					after.appendPulse();
-					pending = 0;
-					break;
-
-				case 0x81: /* index */
-					after.appendInterval(pending);
-					after.appendIndex();
-					pending = 0;
-					break;
-
-				default:
-					pending += b;
-					break;
-			}
-        }
-		after.appendInterval(pending);
-
-        sqlWriteFlux(db, i.first, i.second, after);
-        std::cout << '.' << std::flush;
-    }
-    std::cout << std::endl;
-}
+#include <fstream>
 
 int mainUpgradeFluxFile(int argc, const char* argv[])
 {
     if (argc != 2)
-        Error() << "syntax: fe-upgradefluxfile <fluxfile>";
+        Error() << "syntax: fluxengine upgradefluxfile <fluxfile>";
     std::string filename = argv[1];
+	std::string newfilename = filename + ".new";
     
-    db = sqlOpen(filename, SQLITE_OPEN_READWRITE);
-    atexit([]()
-        {
-            sqlClose(db);
-        }
-    );
+    setRange(config.mutable_cylinders(), "0-79");
+    setRange(config.mutable_heads(), "0-1");
 
-    int version = sqlGetVersion(db);
-    std::cout << fmt::format("File at version {}\n", version);
-    if (version == FLUX_VERSION_CURRENT)
-    {
-        std::cout << "Up to date!\n";
-        return 0;
-    }
+	FluxSourceProto fluxSourceProto;
+	fluxSourceProto.mutable_fl2()->set_filename(filename);
 
-    if (version == FLUX_VERSION_0)
-    {
-        std::cout << "Upgrading to version 1\n";
-        sqlPrepareFlux(db);
-        sqlStmt(db, "BEGIN;");
-        sqlStmt(db,
-            "INSERT INTO zdata"
-            " SELECT track, side, data, 0 AS compression FROM rawdata;"
-        );
-        sqlStmt(db, "DROP TABLE rawdata;");
-        version = FLUX_VERSION_1;
-        sqlWriteIntProperty(db, "version", version);
-        sqlStmt(db, "COMMIT;");
-    }
+	FluxSinkProto fluxSinkProto;
+	fluxSinkProto.mutable_fl2()->set_filename(newfilename);
 
-    if (version == FLUX_VERSION_1)
-    {
-        std::cout << "Upgrading to version 3\n";
-        sqlStmt(db, "BEGIN;");
-        update_version_1_to_3();
-        version = FLUX_VERSION_3;
-        sqlWriteIntProperty(db, "version", version);
-        sqlStmt(db, "COMMIT;");
-    }
+	auto fluxSource = FluxSource::create(fluxSourceProto);
+	auto fluxSink = FluxSink::create(fluxSinkProto);
+	writeRawDiskCommand(*fluxSource, *fluxSink);
 
-	if (version == FLUX_VERSION_2)
-	{
-        std::cout << "Upgrading to version 3\n";
-        sqlStmt(db, "BEGIN;");
-        update_version_2_to_3();
-        version = FLUX_VERSION_3;
-        sqlWriteIntProperty(db, "version", version);
-        sqlStmt(db, "COMMIT;");
-	}
-
-    std::cout << "Vacuuming\n";
-    sqlStmt(db, "VACUUM;");
-    std::cout << "Upgrade done\n";
+	rename(newfilename.c_str(), filename.c_str());
     return 0;
 }

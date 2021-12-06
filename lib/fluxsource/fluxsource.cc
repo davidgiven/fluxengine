@@ -50,12 +50,12 @@ std::unique_ptr<FluxSource> FluxSource::create(const FluxSourceProto& config)
 
 void FluxSource::updateConfigForFilename(FluxSourceProto* proto, const std::string& filename)
 {
+
 	static const std::vector<std::pair<std::regex, std::function<void(const std::string&)>>> formats =
 	{
-		{ std::regex("^(.*\\.flux)$"),     [&](const auto& s) { proto->set_fluxfile(s); }},
+		{ std::regex("^(.*\\.flux)$"),     [&](const auto& s) { proto->mutable_fl2()->set_filename(s); }},
 		{ std::regex("^(.*\\.scp)$"),      [&](const auto& s) { proto->mutable_scp()->set_filename(s); }},
 		{ std::regex("^(.*\\.cwf)$"),      [&](const auto& s) { proto->mutable_cwf()->set_filename(s); }},
-		{ std::regex("^(.*\\.fl2)$"),      [&](const auto& s) { proto->mutable_fl2()->set_filename(s); }},
 		{ std::regex("^erase:$"),          [&](const auto& s) { proto->mutable_erase(); }},
 		{ std::regex("^kryoflux:(.*)$"),   [&](const auto& s) { proto->mutable_kryoflux()->set_directory(s); }},
 		{ std::regex("^testpattern:(.*)"), [&](const auto& s) { proto->mutable_test_pattern(); }},
