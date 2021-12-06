@@ -59,8 +59,6 @@ public:
         inputFile.read((char*) trackTable.begin(), trackTable.size());
         ByteReader trackTableReader(trackTable);
 
-        int diskSectorsPerTrack = -1;
-
         if (config.encoder().format_case() != EncoderProto::FormatCase::FORMAT_NOT_SET)
             std::cout << "D88: overriding configured format";
 
@@ -108,11 +106,6 @@ public:
                     currentSectorsInTrack = sectorsInTrack;
                 } else if (currentSectorsInTrack != sectorsInTrack) {
                     Error() << "D88: mismatched number of sectors in track";
-                }
-                if (diskSectorsPerTrack < 0) {
-                    diskSectorsPerTrack = sectorsInTrack;
-                } else if (diskSectorsPerTrack != sectorsInTrack) {
-                    Error() << "D88: varying numbers of sectors per track is currently unsupported";
                 }
                 if (currentTrackCylinder < 0) {
                     currentTrackCylinder = cylinder;
