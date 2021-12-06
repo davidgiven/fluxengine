@@ -49,7 +49,7 @@ public:
 		_fileheader.type = _config.type_byte();
 		_fileheader.start_track = strackno(config.cylinders().start(), config.heads().start());
 		_fileheader.end_track = strackno(config.cylinders().end(), config.heads().end());
-		_fileheader.flags = (_config.align_with_index() ? SCP_FLAG_INDEXED : 0)
+		_fileheader.flags = SCP_FLAG_INDEXED
 				| SCP_FLAG_96TPI;
 		_fileheader.cell_width = 0;
 		_fileheader.heads = singlesided;
@@ -96,10 +96,11 @@ public:
 		Bytes fluxdata;
 		ByteWriter fluxdataWriter(fluxdata);
 
-		if (_config.align_with_index())
+		int revolution = -1; // -1 indicates that we are before the first index pulse
+		if (_config.align_with_index()) {
 			fmr.skipToEvent(F_BIT_INDEX);
-
-		int revolution = 0;
+			revolution = 0;
+		}
 		unsigned revTicks = 0;
 		unsigned totalTicks = 0;
 		unsigned ticksSinceLastPulse = 0;
@@ -114,17 +115,25 @@ public:
 			totalTicks += ticks;
 			revTicks += ticks;
 
-			if (fmr.eof() || (event & F_BIT_INDEX))
+			// if we haven't output any revolutions yet by the end of the track,
+			// assume that the whole track is one rev
+			// also discard any duplicate index pulses
+			if (((fmr.eof() && revolution <= 0) || ((event & F_BIT_INDEX)) && revTicks > 0))
 			{
-				auto* revheader = &trackheader.revolution[revolution];
-				write_le32(revheader->offset, startOffset + sizeof(ScpTrack));
-				write_le32(revheader->length, (fluxdataWriter.pos - startOffset) / 2);
-				write_le32(revheader->index, revTicks * NS_PER_TICK / 25);
+				if (fmr.eof() && revolution == -1)
+					revolution = 0;
+				if (revolution >= 0) {
+					auto* revheader = &trackheader.revolution[revolution];
+					write_le32(revheader->offset, startOffset + sizeof(ScpTrack));
+					write_le32(revheader->length, (fluxdataWriter.pos - startOffset) / 2);
+					write_le32(revheader->index, revTicks * NS_PER_TICK / 25);
+					revheader++;
+				}
 				revolution++;
-				revheader++;
 				revTicks = 0;
 				startOffset = fluxdataWriter.pos;
 			}
+			if (fmr.eof()) break;
 
 			if (event & F_BIT_PULSE)
 			{
@@ -139,7 +148,7 @@ public:
 			}
 		}
 
-		_fileheader.revolutions = revolution - 1;
+		_fileheader.revolutions = revolution;
 		write_le32(_fileheader.track[strack], trackdataWriter.pos + sizeof(ScpHeader));
 		trackdataWriter += Bytes((uint8_t*)&trackheader, sizeof(trackheader));
 		trackdataWriter += fluxdata;
