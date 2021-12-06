@@ -3,9 +3,6 @@
 #include "uipp.h"
 #include "fmt/format.h"
 
-static uiWindow* mainwin;
-static uiArea* area;
-
 static uiDrawStrokeParams STROKE = {
 	uiDrawLineCapFlat,
 	uiDrawLineJoinMiter,
@@ -19,52 +16,34 @@ static uiDrawStrokeParams STROKE = {
 static uiDrawBrush WHITE = { uiDrawBrushTypeSolid, 1.0, 0.0, 1.0, 1.0 };
 static uiDrawBrush BLACK = { uiDrawBrushTypeSolid, 0.0, 0.0, 0.0, 1.0 };
 
-static int close_cb(uiWindow* window, void* data)
-{
-	uiQuit();
-	return 1;
-}
-
 static int quit_cb(void* data)
 {
 	return 1;
 }
 
-static void handlerDraw(uiAreaHandler *a, uiArea *area, uiAreaDrawParams *p)
+class MainWindow : public UIWindow
 {
-	UIPath(p).rectangle(0, 0, p->AreaWidth, p->AreaHeight).fill(WHITE);
-	UIPath(p).begin(0, 0).lineTo(p->AreaWidth, p->AreaHeight).end().stroke(BLACK, STROKE);
-}
+public:
+	MainWindow():
+		UIWindow("FluxEngine", 640, 480)
+	{}
 
-static void handlerMouseEvent(uiAreaHandler *a, uiArea *area, uiAreaMouseEvent *
-e)
-{
-}
-
-static void handlerMouseCrossed(uiAreaHandler *ah, uiArea *a, int left)
-{
-        // do nothing
-}
-
-static void handlerDragBroken(uiAreaHandler *ah, uiArea *a)
-{
-        // do nothing
-}
-
-static int handlerKeyEvent(uiAreaHandler *ah, uiArea *a, uiAreaKeyEvent *e)
-{
-        // reject all keys
-        return 0;
-}
-
-static const uiAreaHandler handler = {
-	handlerDraw,
-	handlerMouseEvent,
-	handlerMouseCrossed,
-	handlerDragBroken,
-	handlerKeyEvent
+	int onClose() override
+	{
+		uiQuit();
+		return 1;
+	}
 };
 
+class MainArea : public UIArea
+{
+public:
+	void onRedraw(uiAreaDrawParams* p)
+	{
+		UIPath(p).rectangle(0, 0, p->AreaWidth, p->AreaHeight).fill(WHITE);
+		UIPath(p).begin(0, 0).lineTo(p->AreaWidth, p->AreaHeight).end().stroke(BLACK, STROKE);
+	}
+};
 
 int main(int argc, const char* argv[])
 {
@@ -75,18 +54,18 @@ int main(int argc, const char* argv[])
 	uiMenuItem* item = uiMenuAppendQuitItem(menu);
 	uiOnShouldQuit(quit_cb, NULL);
 
-	mainwin = uiNewWindow("example", 640, 480, 1);
-	uiWindowOnClosing(mainwin, close_cb, NULL);
+	MainWindow window;
 	uiOnShouldQuit(quit_cb, NULL);
 
-	uiBox* hbox = uiNewHorizontalBox();
-        uiBoxSetPadded(hbox, 1);
-        uiWindowSetChild(mainwin, uiControl(hbox));
+	UIVBox vbox;
+	UIHBox hbox;
+	vbox.append(hbox);
+	window.setChild(vbox);
 
-	area = uiNewArea((uiAreaHandler*) &handler);
-	uiBoxAppend(hbox, uiControl(area), 1);
+	MainArea area;
+	vbox.append(area, true);
 
-	uiControlShow(uiControl(mainwin));
+	window.show();
 	uiMain();
 	return 0;
 }
