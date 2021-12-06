@@ -127,7 +127,7 @@ public:
                     trackdata->set_sector_size(sectorSize);
                     trackdata->set_use_fm(fm);
                     if (fm) {
-                        //trackdata->set_clock_rate_khz(250*300/360);
+                        trackdata->set_gap_fill_byte(0xffff);
                         trackdata->set_idam_byte(0xf57e);
                         trackdata->set_dam_byte(0xf56f);
                     }
