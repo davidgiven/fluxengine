@@ -6,7 +6,7 @@ class Image;
 
 struct Record
 {
-	nanoseconds_t clock = 0;
+	nanoseconds_t bitcell = 0;
 	nanoseconds_t startTime = 0;
 	nanoseconds_t endTime = 0;
 	Bytes rawData;

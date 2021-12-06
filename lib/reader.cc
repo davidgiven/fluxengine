@@ -156,9 +156,9 @@ void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWrit
 				std::cout << "\nRaw (undecoded) records follow:\n\n";
 				for (const auto& record : track_records)
 				{
-					std::cout << fmt::format("I+{:.2f}us with {:.2f}us clock\n",
+					std::cout << fmt::format("I+{:.2f}us with {:.2f}us bitcell\n",
 								record->startTime / 1000.0,
-								record->clock / 1000.0);
+								record->bitcell / 1000.0);
 					hexdump(std::cout, record->rawData);
 					std::cout << std::endl;
 				}

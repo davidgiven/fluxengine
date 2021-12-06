@@ -24,7 +24,8 @@ public:
 	{
 		const FluxMatcher* matcher = nullptr;
 		_fmr->seekToIndexMark();
-		_sector->clock = _fmr->seekToPattern(SECTOR_START_PATTERN, matcher);
+		_sector->bitcell = _fmr->seekToPattern(SECTOR_START_PATTERN, matcher);
+		_sector->clock = _sector->bitcell * 2;
 		if (matcher == &SECTOR_START_PATTERN)
 			return SECTOR_RECORD;
 		return UNKNOWN_RECORD;

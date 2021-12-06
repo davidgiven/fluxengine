@@ -105,7 +105,8 @@ public:
 		 * past one or more sector pulses.  For this reason, calculate
 		 * _hardSectorId after the sector header is found.
 		 */
-		_sector->clock = _fmr->seekToPattern(ANY_SECTOR_PATTERN, matcher);
+		_sector->bitcell = _fmr->seekToPattern(ANY_SECTOR_PATTERN, matcher);
+		_sector->clock = _sector->bitcell * 2;
 
 		int sectorFoundTimeRaw = std::round((_fmr->tell().ns()) / 1e6);
 		int sectorFoundTime;

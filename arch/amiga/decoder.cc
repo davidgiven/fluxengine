@@ -31,8 +31,9 @@ public:
 
     RecordType advanceToNextRecord() override
 	{
-		_sector->clock = _fmr->seekToPattern(SECTOR_PATTERN);
-		if (_fmr->eof() || !_sector->clock)
+		_sector->bitcell = _fmr->seekToPattern(SECTOR_PATTERN);
+		_sector->clock = _sector->bitcell * 2;
+		if (_fmr->eof() || !_sector->bitcell)
 			return UNKNOWN_RECORD;
 		return SECTOR_RECORD;
 	}

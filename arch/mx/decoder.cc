@@ -31,7 +31,7 @@ public:
     void beginTrack()
 	{
 		_currentSector = -1;
-		_clock = 0;
+		_bitcell = 0;
 	}
 
     RecordType advanceToNextRecord()
@@ -40,8 +40,9 @@ public:
 		{
 			/* First sector in the track: look for the sync marker. */
 			const FluxMatcher* matcher = nullptr;
-			_sector->clock = _clock = _fmr->seekToPattern(ID_PATTERN, matcher);
-			readRawBits(32); /* skip the ID mark */
+			_sector->bitcell = _bitcell = _fmr->seekToPattern(ID_PATTERN, matcher);
+			_sector->clock = _sector->bitcell * 2;
+			 readRawBits(32); /* skip the ID mark */
 			_logicalTrack = decodeFmMfm(readRawBits(32)).slice(0, 32).reader().read_be16();
 		}
 		else if (_currentSector == 10)
@@ -54,7 +55,7 @@ public:
 			/* Otherwise we assume the clock from the first sector is still valid.
 			 * The decoder framwork will automatically stop when we hit the end of
 			 * the track. */
-			_sector->clock = _clock;
+			_sector->bitcell = _bitcell;
 		}
 
 		_currentSector++;
@@ -80,7 +81,7 @@ public:
 	}
 
 private:
-    nanoseconds_t _clock;
+    nanoseconds_t _bitcell;
     int _currentSector;
     int _logicalTrack;
 };

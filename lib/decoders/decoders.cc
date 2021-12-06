@@ -77,9 +77,9 @@ std::unique_ptr<TrackDataFlux> AbstractDecoder::decodeToSectors(
 		_sector->physicalHead = physicalHead;
 
         Fluxmap::Position recordStart = fmr.tell();
-		_decoder.reset(new FluxDecoder(&fmr, _sector->clock, _config));
+		_decoder.reset(new FluxDecoder(&fmr, _sector->bitcell, _config));
         RecordType r = advanceToNextRecord();
-        if (fmr.eof() || !_sector->clock)
+        if (fmr.eof() || !_sector->bitcell)
             return std::move(_trackdata);
         if ((r == UNKNOWN_RECORD) || (r == DATA_RECORD))
         {
@@ -134,17 +134,17 @@ void AbstractDecoder::pushRecord(const Fluxmap::Position& start, const Fluxmap::
 	
 	record->startTime = start.ns();
 	record->endTime = end.ns();
-    record->clock = _sector->clock;
+    record->bitcell = _sector->bitcell;
 
     _fmr->seek(start);
-	FluxDecoder decoder(_fmr, _sector->clock, _config);
+	FluxDecoder decoder(_fmr, _sector->bitcell, _config);
     record->rawData = toBytes(decoder.readBits(end));
     _fmr->seek(here);
 }
 
 void AbstractDecoder::resetFluxDecoder()
 {
-	_decoder.reset(new FluxDecoder(_fmr, _sector->clock, _config));
+	_decoder.reset(new FluxDecoder(_fmr, _sector->bitcell, _config));
 }
 
 std::vector<bool> AbstractDecoder::readRawBits(unsigned count)

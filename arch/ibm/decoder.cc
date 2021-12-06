@@ -101,7 +101,8 @@ public:
     RecordType advanceToNextRecord() override
 	{
 		const FluxMatcher* matcher = nullptr;
-		_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
+		_sector->bitcell = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
+		_sector->clock = _sector->bitcell * 2;
 
 		/* If this is the MFM prefix byte, the the decoder is going to expect three
 		 * extra bytes on the front of the header. */

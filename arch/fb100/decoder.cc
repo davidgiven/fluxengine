@@ -107,7 +107,8 @@ public:
     RecordType advanceToNextRecord()
 	{
 		const FluxMatcher* matcher = nullptr;
-		_sector->clock = _fmr->seekToPattern(SECTOR_ID_PATTERN, matcher);
+		_sector->bitcell = _fmr->seekToPattern(SECTOR_ID_PATTERN, matcher);
+		_sector->clock = _sector->bitcell * 2;
 		if (matcher == &SECTOR_ID_PATTERN)
 			return RecordType::SECTOR_RECORD;
 		return RecordType::UNKNOWN_RECORD;
