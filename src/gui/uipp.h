@@ -77,7 +77,7 @@ private:
 class UIControl
 {
 public:
-	~UIControl()
+	virtual ~UIControl()
 	{
 		if (_owned && _control)
 			uiControlDestroy(_control);
