@@ -24,6 +24,7 @@ export CXX = /mingw32/bin/g++
 export AR = /mingw32/bin/ar rc
 export RANLIB = /mingw32/bin/ranlib
 export STRIP = /mingw32/bin/strip
+export WINDRES = /mingw32/bin/windres
 export CFLAGS += -I/mingw32/include/libusb-1.0 -I/mingw32/include
 export LDFLAGS +=
 export LIBS += -L/mingw32/lib -static -lz -lsqlite3 -lusb-1.0 -lprotobuf

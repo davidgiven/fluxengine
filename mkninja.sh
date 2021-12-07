@@ -1,5 +1,6 @@
 #!/bin/sh
 set -e
+UNAME=$(uname)
 
 cat <<EOF
 rule cxx
@@ -45,7 +46,7 @@ rule link
 
 rule linkgui
     command = $CXX $LDFLAGS $GUILDFLAGS -o \$out \$in \$flags $LIBS $GUILIBS
-    description = LINK-OBJC \$in
+    description = LINKGUI \$in
 
 rule test
     command = \$in && touch \$out
@@ -63,6 +64,9 @@ rule mktable
     command = sh scripts/mktable.sh \$kind \$words > \$out
     description = MKTABLE \$kind
     restat = true
+
+rule windres
+    command = $WINDRES \$in -o \$out
 EOF
 
 buildlibrary() {
@@ -103,7 +107,6 @@ buildlibrary() {
         oobjs="$oobjs $obj"
         dobj="$OBJDIR/dbg/${src%%.c*}.o"
         dobjs="$dobjs $dobj"
-
 
         case "${src##*.}" in
             m)
@@ -231,8 +234,17 @@ buildprogram() {
     oobjs=
     dobjs=
     for src in "$@"; do
-        oobjs="$oobjs $OBJDIR/opt/$src"
-        dobjs="$dobjs $OBJDIR/dbg/$src"
+        case "$src" in
+            .obj/*)
+                oobjs="$oobjs $src"
+                dobjs="$dobjs $src"
+                ;;
+
+            *)
+                oobjs="$oobjs $OBJDIR/opt/$src"
+                dobjs="$dobjs $OBJDIR/dbg/$src"
+                ;;
+        esac
     done
 
     echo build $prog-debug$EXTENSION : $rule $dobjs
@@ -325,7 +337,7 @@ buildlibrary libagg.a \
     dep/stb/stb_image_write.c \
     dep/agg/src/*.cpp
 
-case "$(uname)" in
+case "$UNAME" in
     Darwin)
         buildlibrary libui.a \
             -Idep/libui \
@@ -337,7 +349,7 @@ case "$(uname)" in
         buildlibrary libui.a \
             -Idep/libui \
             dep/libui/common/*.c \
-            dep/libui/windows/*.cpp
+            dep/libui/windows/*.cpp \
     ;;
 
     *)
@@ -547,7 +559,8 @@ buildlibrary libfrontend.a \
 
 buildlibrary libgui.a \
     -Idep/libui \
-    src/gui/main.cc
+    src/gui/main.cc \
+    src/gui/threads.cc \
 
 buildprogram fluxengine \
     libfrontend.a \
@@ -558,16 +571,36 @@ buildprogram fluxengine \
     libfmt.a \
     libagg.a \
 
-buildprogram fluxengine-gui \
-    -rule linkgui \
-    libgui.a \
-    libformats.a \
-    libbackend.a \
-    libconfig.a \
-    libfl2.a \
-    libfmt.a \
-    libui.a \
-    libagg.a
+case "$UNAME" in
+    MINGW*)
+        echo "build .obj/fluxengine.rc.o : windres src/gui/windows/fluxengine.rc | src/gui/windows/manifest.xml"
+        buildprogram fluxengine-gui \
+            -rule linkgui \
+            .obj/fluxengine.rc.o \
+            libgui.a \
+            libformats.a \
+            libbackend.a \
+            libconfig.a \
+            libfl2.a \
+            libfmt.a \
+            libui.a \
+            libagg.a
+        ;;
+
+    *)
+        buildprogram fluxengine-gui \
+            -rule linkgui \
+            libgui.a \
+            libformats.a \
+            libbackend.a \
+            libconfig.a \
+            libfl2.a \
+            libfmt.a \
+            libui.a \
+            libagg.a
+        ;;
+esac
+
 
 buildlibrary libemu.a \
     dep/emu/fnmatch.c
