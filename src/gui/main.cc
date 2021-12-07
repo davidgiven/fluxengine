@@ -54,18 +54,20 @@ int main(int argc, const char* argv[])
 	uiMenuItem* item = uiMenuAppendQuitItem(menu);
 	uiOnShouldQuit(quit_cb, NULL);
 
-	MainWindow window;
+	UIAllocator a;
+	
+	auto window =
+		a.make<MainWindow>()
+			->setChild(
+				a.make<UIVBox>()
+					->add(a.make<UIButton>("press me!")->build())
+					->add(a.make<MainArea>()->setStretchy(true)->build())
+					->add(a.make<UIButton>("press me again!")->build())
+					->build())
+			->build();
 	uiOnShouldQuit(quit_cb, NULL);
 
-	UIVBox vbox;
-	UIHBox hbox;
-	vbox.append(hbox);
-	window.setChild(vbox);
-
-	MainArea area;
-	vbox.append(area, true);
-
-	window.show();
+	window->show();
 	uiMain();
 	return 0;
 }

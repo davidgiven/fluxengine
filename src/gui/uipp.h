@@ -77,15 +77,15 @@ private:
 class UIControl
 {
 public:
-	UIControl(uiControl* control):
-		_control(control),
-		_owned(true)
-	{}
-
 	~UIControl()
 	{
-		if (_owned)
+		if (_owned && _control)
 			uiControlDestroy(_control);
+	}
+
+	void setControl(uiControl* control)
+	{
+		_control = control;
 	}
 
 	uiControl* control() const
@@ -99,66 +99,113 @@ public:
 		return _control;
 	}
 
+	virtual UIControl* build() = 0;
+
+	bool stretchy() const
+	{
+		return _stretchy;
+	}
+
+	UIControl* setStretchy(bool stretchy)
+	{
+		_stretchy = stretchy;
+		return this;
+	}
+
+	bool built() const
+	{
+		return !!_control;
+	}
+
 private:
-	uiControl* _control;
-	bool _owned;
+	uiControl* _control = nullptr;
+	bool _owned = true;
+	bool _stretchy = false;
 };
 
-template <class T>
+template <class T, class B>
 class UITypedControl : public UIControl
 {
 public:
-	UITypedControl(T* control):
-		UIControl(uiControl(control))
-	{}
+	void setControl(T* control)
+	{
+		UIControl::setControl(uiControl(control));
+	}
 
-	T* self() const
+	T* typedControl() const
 	{
 		return (T*) control();
 	}
 };
 
-class UIBox : public UITypedControl<uiBox>
+template <class T, class B>
+class UIContainerControl : public UITypedControl<T, B>
 {
 public:
-	UIBox(uiBox* box):
-		UITypedControl(box)
-	{}
-
-	UIBox& append(UIControl& control, bool stretchy=false)
+	B* add(UIControl* child)
 	{
-		uiBoxAppend(self(), control.claim(), stretchy);
-		return *this;
+		_children.push_back(child);
+		return (B*) this;
+	}
+
+	const std::vector<UIControl*>& children() const { return _children; }
+
+private:
+	std::vector<UIControl*> _children;
+};
+
+template <class B>
+class UIBox : public UIContainerControl<uiBox, B>
+{
+public:
+	UIBox* build()
+	{
+		for (auto& child : this->children())
+			uiBoxAppend(this->typedControl(), child->claim(), child->stretchy());
+		return this;
 	}
 };
 
-class UIHBox : public UIBox
+class UIHBox : public UIBox<UIHBox>
 {
 public:
-	UIHBox():
-		UIBox(uiNewHorizontalBox())
-	{}
+	UIHBox* build()
+	{
+		setControl(uiNewHorizontalBox());
+		UIBox::build();
+		return this;
+	}
 };
 
-class UIVBox : public UIBox
+class UIVBox : public UIBox<UIVBox>
 {
 public:
-	UIVBox():
-		UIBox(uiNewVerticalBox())
-	{}
+	UIVBox* build()
+	{
+		setControl(uiNewVerticalBox());
+		UIBox::build();
+		return this;
+	}
 };
 
-class UIArea : public UITypedControl<uiArea>
+class UIArea : public UITypedControl<uiArea, UIArea>
 {
 public:
 	UIArea():
-		UITypedControl(uiNewArea(&_handler)),
 		_selfptr(this)
 	{}
 
-	virtual void onRedraw(uiAreaDrawParams* params)
+	UIArea* build()
 	{
+		setControl(uiNewArea(&_handler));
+		return this;
 	}
+
+	virtual void onRedraw(uiAreaDrawParams* params) {}
+	virtual void onMouseEvent(uiAreaMouseEvent* event) {}
+	virtual void onMouseEntryExit(bool exit) {}
+	virtual void onDragBroken() {}
+	virtual int onKeyEvent(uiAreaKeyEvent* event) { return 0; }
 
 private:
 	static UIArea* _getarea(uiAreaHandler* a)
@@ -173,21 +220,26 @@ private:
 
 	static void _mouse_event_cb(uiAreaHandler* a, uiArea* area, uiAreaMouseEvent* event)
 	{
+		_getarea(a)->onMouseEvent(event);
 	}
 
 	static void _mouse_crossed_cb(uiAreaHandler* a, uiArea* area, int left)
 	{
+		_getarea(a)->onMouseEntryExit(!left);
 	}
 
 	static void _drag_broken_cb(uiAreaHandler* a, uiArea* area)
 	{
+		_getarea(a)->onDragBroken();
 	}
 
 	static int _key_event_cb(uiAreaHandler* a, uiArea* area, uiAreaKeyEvent* event)
 	{
-			return 0;
+		return _getarea(a)->onKeyEvent(event);
 	}
 
+	/* These two fields must be next to each other to allow _getarea to find the area
+	 * instance pointer. */
 	uiAreaHandler _handler = {
 		_draw_cb,
 		_mouse_event_cb,
@@ -198,25 +250,34 @@ private:
 	UIArea* _selfptr;
 };
 
-class UIWindow : public UITypedControl<uiWindow>
+class UIWindow : public UITypedControl<uiWindow, UIWindow>
 {
 public:
 	UIWindow(const std::string& title, double width, double height):
-		UITypedControl(uiNewWindow(title.c_str(), width, height, 1))
+		_title(title),
+		_width(width),
+		_height(height)
+	{}
+
+	UIWindow* build()
 	{
-		uiWindowOnClosing(self(), _close_cb, this);
+		setControl(uiNewWindow(_title.c_str(), _width, _height, 1));
+		uiWindowOnClosing(this->typedControl(), _close_cb, this);
+		if (_child)
+			uiWindowSetChild(this->typedControl(), _child->claim());
+		return this;
 	}
 
-	UIWindow& setChild(UIControl& control)
+	UIWindow* setChild(UIControl* child)
 	{
-		uiWindowSetChild(self(), control.claim());
-		return *this;
+		_child = child;
+		return this;
 	}
 
-	UIWindow& show()
+	UIWindow* show()
 	{
 		uiControlShow(claim());
-		return *this;
+		return this;
 	}
 
 	virtual int onClose()
@@ -229,6 +290,54 @@ private:
 	{
 		return ((UIWindow*)ptr)->onClose();
 	}
+
+private:
+	std::string _title;
+	double _width;
+	double _height;
+	UIControl* _child = nullptr;
+};
+
+class UIButton : public UITypedControl<uiButton, UIButton>
+{
+public:
+	UIButton(const std::string& text):
+		_text(text)
+	{}
+
+	UIButton* build()
+	{
+		setControl(uiNewButton(_text.c_str()));
+		uiButtonOnClicked(this->typedControl(), _clicked_cb, this);
+		return this;
+	}
+
+	virtual void onClick() {}
+
+private:
+	static void _clicked_cb(uiButton*, void* ptr)
+	{
+		((UIButton*)ptr)->onClick();
+	}
+
+private:
+	std::string _text;
+};
+
+class UIAllocator
+{
+public:
+	template <class T, typename... Args>
+	T* make(Args&&... args)
+	{
+		auto uptr = std::make_unique<T>(args...);
+		T* ptr = uptr.get();
+		_pointers.push_back(std::move(uptr));
+		return ptr;
+	}
+
+private:
+	std::vector<std::unique_ptr<UIControl>> _pointers;
 };
 
 #endif
