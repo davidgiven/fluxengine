@@ -1,6 +1,7 @@
 #include "globals.h"
 #include "ui.h"
 #include "uipp.h"
+#include "threads.h"
 #include "fmt/format.h"
 
 static uiDrawStrokeParams STROKE = {
@@ -49,6 +50,7 @@ int main(int argc, const char* argv[])
 {
 	uiInitOptions o = {0};
 	uiInit(&o);
+	UIInitThreading();
 
 	uiMenu* menu = uiNewMenu("File");
 	uiMenuItem* item = uiMenuAppendQuitItem(menu);
