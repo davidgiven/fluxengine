@@ -127,13 +127,11 @@ public:
 
 		if (matcher == &MFM_PATTERN) {
 			_sectorType = SECTOR_TYPE_MFM;
-			readRawBits(48);
 			return SECTOR_RECORD;
 		}
 
 		if (matcher == &FM_PATTERN) {
 			_sectorType = SECTOR_TYPE_FM;
-			readRawBits(48);
 			return SECTOR_RECORD;
 		}
 
@@ -154,6 +152,8 @@ public:
 			payloadSize = NORTHSTAR_PAYLOAD_SIZE_SD;
 			headerSize = NORTHSTAR_HEADER_SIZE_SD;
 		}
+
+		readRawBits(48);
 
 		auto rawbits = readRawBits(recordSize * 16);
 		auto bytes = decodeFmMfm(rawbits).slice(0, recordSize);
