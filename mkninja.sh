@@ -561,6 +561,7 @@ buildlibrary libgui.a \
     -Idep/libui \
     src/gui/main.cc \
     src/gui/threads.cc \
+    src/gui/mainwindow.cc \
 
 buildprogram fluxengine \
     libfrontend.a \

@@ -77,42 +77,30 @@ private:
 class UIControl
 {
 public:
+	UIControl(uiControl* control):
+		_control(control)
+	{}
+
 	virtual ~UIControl()
 	{
 		if (_owned && _control)
 			uiControlDestroy(_control);
 	}
 
-	void setControl(uiControl* control)
-	{
-		_control = control;
-	}
-
 	uiControl* control() const
 	{
-		assert(_control);
 		return _control;
 	}
 
 	uiControl* claim()
 	{
-		if (!_control)
-			build();
 		_owned = false;
 		return _control;
 	}
 
-	virtual UIControl* build() = 0;
-
 	bool stretchy() const
 	{
 		return _stretchy;
-	}
-
-	UIControl* setStretchy(bool stretchy)
-	{
-		_stretchy = stretchy;
-		return this;
 	}
 
 	bool built() const
@@ -120,20 +108,28 @@ public:
 		return !!_control;
 	}
 
+public:
+	UIControl* setStretchy(bool stretchy) { _stretchy = stretchy; return this; }
+
+	UIControl* show()    { uiControlShow(control()); return this; }
+	UIControl* hide()    { uiControlHide(control()); return this; }
+	UIControl* enable()  { uiControlEnable(control()); return this; }
+	UIControl* disable() { uiControlDisable(control()); return this; }
+
 private:
-	uiControl* _control = nullptr;
+	uiControl* _control;
 	bool _owned = true;
 	bool _stretchy = false;
+	bool _enabled = true;
 };
 
 template <class T, class B>
 class UITypedControl : public UIControl
 {
 public:
-	void setControl(T* control)
-	{
-		UIControl::setControl(uiControl(control));
-	}
+	UITypedControl(T* control):
+		UIControl(uiControl(control))
+	{}
 
 	T* typedControl() const
 	{
@@ -145,8 +141,13 @@ template <class T, class B>
 class UIContainerControl : public UITypedControl<T, B>
 {
 public:
+	UIContainerControl(T* control):
+		UITypedControl<T, B>(control)
+	{}
+
 	B* add(UIControl* child)
 	{
+		uiBoxAppend(this->typedControl(), child->claim(), child->stretchy());
 		_children.push_back(child);
 		return (B*) this;
 	}
@@ -161,48 +162,34 @@ template <class B>
 class UIBox : public UIContainerControl<uiBox, B>
 {
 public:
-	UIBox* build()
-	{
-		for (auto& child : this->children())
-			uiBoxAppend(this->typedControl(), child->claim(), child->stretchy());
-		return this;
-	}
+	UIBox(uiBox* control):
+		UIContainerControl<uiBox, B>(control)
+	{}
 };
 
 class UIHBox : public UIBox<UIHBox>
 {
 public:
-	UIHBox* build()
-	{
-		setControl(uiNewHorizontalBox());
-		UIBox::build();
-		return this;
-	}
+	UIHBox():
+		UIBox(uiNewHorizontalBox())
+	{}
 };
 
 class UIVBox : public UIBox<UIVBox>
 {
 public:
-	UIVBox* build()
-	{
-		setControl(uiNewVerticalBox());
-		UIBox::build();
-		return this;
-	}
+	UIVBox():
+		UIBox(uiNewVerticalBox())
+	{}
 };
 
 class UIArea : public UITypedControl<uiArea, UIArea>
 {
 public:
 	UIArea():
+		UITypedControl(uiNewArea(&_handler)),
 		_selfptr(this)
 	{}
-
-	UIArea* build()
-	{
-		setControl(uiNewArea(&_handler));
-		return this;
-	}
 
 public:
 	UIArea* setOnDraw(std::function<void(uiAreaDrawParams*)> cb)
@@ -290,35 +277,20 @@ class UIWindow : public UITypedControl<uiWindow, UIWindow>
 {
 public:
 	UIWindow(const std::string& title, double width, double height):
-		_title(title),
-		_width(width),
-		_height(height)
-	{}
-
-	UIWindow* build()
+		UITypedControl<uiWindow, UIWindow>(uiNewWindow(title.c_str(), width, height, 1))
 	{
-		setControl(uiNewWindow(_title.c_str(), _width, _height, 1));
 		uiWindowOnClosing(this->typedControl(), _close_cb, this);
-		if (_child)
-			uiWindowSetChild(this->typedControl(), _child->claim());
-		return this;
 	}
 
 	UIWindow* setChild(UIControl* child)
 	{
-		_child = child;
+		uiWindowSetChild(this->typedControl(), child->claim());
 		return this;
 	}
 
 	UIWindow* setOnClose(std::function<int()> cb)
 	{
 		_onClose = cb;
-		return this;
-	}
-
-	UIWindow* show()
-	{
-		uiControlShow(claim());
 		return this;
 	}
 
@@ -333,9 +305,6 @@ private:
 
 private:
 	std::string _title;
-	double _width;
-	double _height;
-	UIControl* _child = nullptr;
 	std::function<int()> _onClose;
 };
 
@@ -343,27 +312,18 @@ class UIButton : public UITypedControl<uiButton, UIButton>
 {
 public:
 	UIButton(const std::string& text):
-		_text(text)
+		UITypedControl(uiNewButton(text.c_str()))
 	{}
 
 	UIButton* setText(const std::string& text)
 	{
-		_text = text;
-		if (this->built())
-			uiButtonSetText(this->typedControl(), _text.c_str());
+		uiButtonSetText(this->typedControl(), text.c_str());
 		return this;
 	}
 
 	UIButton* setOnClick(const std::function<void(void)>& onClick)
 	{
 		_onclick = onClick;
-		return this;
-	}
-
-	UIButton* build()
-	{
-		setControl(uiNewButton(_text.c_str()));
-		uiButtonOnClicked(this->typedControl(), _clicked_cb, this);
 		return this;
 	}
 
