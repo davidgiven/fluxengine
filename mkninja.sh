@@ -559,6 +559,8 @@ buildlibrary libfrontend.a \
 
 buildlibrary libgui.a \
     -Idep/libui \
+    -I$OBJDIR/proto \
+    -d $OBJDIR/proto/libconfig.def \
     src/gui/main.cc \
     src/gui/threads.cc \
     src/gui/mainwindow.cc \

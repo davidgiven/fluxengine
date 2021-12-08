@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <functional>
+#include <optional>
 #include <iostream>
 #include <map>
 #include <memory>
@@ -48,5 +49,7 @@ public:
 private:
     std::stringstream _stream;
 };
+
+extern const std::map<std::string, std::string> formats;
 
 #endif

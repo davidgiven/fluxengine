@@ -340,6 +340,65 @@ private:
 	std::function<void(void)> _onclick;
 };
 
+template <typename T>
+class UICombo : public UITypedControl<uiCombobox, UICombo<T>>
+{
+public:
+	UICombo():
+		UITypedControl<uiCombobox, UICombo<T>>(uiNewCombobox())
+	{
+		uiComboboxOnSelected(this->typedControl(), _selected_cb, this);
+	}
+
+	UICombo<T>* setOptions(const std::vector<std::pair<std::string, T>>& options)
+	{
+		assert(_forwards.empty());
+		int count = 0;
+		for (auto& p : options)
+		{
+			uiComboboxAppend(this->typedControl(), p.first.c_str());
+			_forwards[count] = p.second;
+			_backwards[p.second] = count;
+			count++;
+		}
+		return this;
+	}
+
+	UICombo<T>* select(T item)
+	{
+		auto it = _backwards.find(item);
+		if (it != _backwards.end())
+			uiComboboxSelect(this->typedControl(), it->second);
+		return this;
+	}
+
+	std::optional<T> getSelected()
+	{
+		int i = uiComboboxSelected(this->typedControl());
+		auto it = _forwards.find(i);
+		if (it != _forwards.end())
+			return std::make_optional<T>(it->second);
+		return std::make_optional<T>();
+	}
+
+private:
+	static void _selected_cb(uiCombobox*, void* p)
+	{
+		auto combo = ((UICombo<T>*)p);
+		if (combo->_onselected)
+		{
+			auto value = combo->getSelected();
+			if (value)
+				combo->_onselected(*value);
+		}
+	}
+
+private:
+	std::map<int, T> _forwards;
+	std::map<T, int> _backwards;
+	std::function<void(T)> _onselected;
+};
+
 class UIAllocator
 {
 public:
