@@ -4,6 +4,7 @@
 #include "gui.h"
 #include "threads.h"
 #include "proto.h"
+#include <unistd.h>
 
 using namespace std::placeholders;
 
@@ -28,7 +29,7 @@ public:
 	{
 		auto configs = findConfigs();
 		_window = make<UIWindow>("FluxEngine", 640, 480)
-			->setOnClose(std::bind(&MainApp::onClose, this))
+			->setOnClose(_onclose_cb)
 			->setChild(
 				make<UIVBox>()
 					->add(make<UIHBox>()
@@ -37,14 +38,13 @@ public:
 						->add(make<UIButton>("press me!"))
 					)
 					->add(make<UIArea>()
-						->setOnDraw(std::bind(&MainApp::redrawArea, this, _1))
-						->setStretchy(true))
+						->setOnDraw(_onredraw_cb)
+						->setStretchy(true)
+						->disable())
 					->add(make<UIButton>("press me again!"))
 			);
 
-		UIStartAppThread(
-			std::bind(&MainApp::appThread, this),
-			std::bind(&MainApp::appThreadExited, this));
+		UIStartAppThread(_appthread_cb, _appthreadexit_cb);
 	}
 
 	void show()
@@ -58,28 +58,28 @@ public:
 	}
 
 private:
-	int onClose()
-	{
-		uiQuit();
-		return 1;
-	}
+	std::function<int()> _onclose_cb =
+		[&] {
+			uiQuit();
+			return 1;
+		};
 
-	void redrawArea(uiAreaDrawParams* p)
-	{
-		UIPath(p).rectangle(0, 0, p->AreaWidth, p->AreaHeight).fill(WHITE);
-		UIPath(p).begin(0, 0).lineTo(p->AreaWidth, p->AreaHeight).end().stroke(BLACK, STROKE);
-	}
+	std::function<void(uiAreaDrawParams*)> _onredraw_cb =
+		[&](auto p) {
+			UIPath(p).rectangle(0, 0, p->AreaWidth, p->AreaHeight).fill(WHITE);
+			UIPath(p).begin(0, 0).lineTo(p->AreaWidth, p->AreaHeight).end().stroke(BLACK, STROKE);
+		};
 
-	void appThread()
-	{
-		UIRunOnUIThread([&] { _busyButton->setText("Busy"); });
-		sleep(5);
-	}
+	std::function<void()> _appthread_cb =
+		[&] {
+			UIRunOnUIThread([&] { _busyButton->setText("Busy"); });
+			sleep(5);
+		};
 
-	void appThreadExited()
-	{
-		_busyButton->setText("Not busy");
-	}
+	std::function<void()> _appthreadexit_cb =
+		[&] {
+			_busyButton->setText("Not busy");
+		};
 
 private:
 	std::vector<std::pair<std::string, ConfigProto*>> findConfigs()

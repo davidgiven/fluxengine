@@ -111,7 +111,7 @@ public:
 public:
 	UIControl* setStretchy(bool stretchy) { _stretchy = stretchy; return this; }
 
-	UIControl* show()    { uiControlShow(control()); return this; }
+	UIControl* show()    { uiControlShow(claim()); return this; }
 	UIControl* hide()    { uiControlHide(control()); return this; }
 	UIControl* enable()  { uiControlEnable(control()); return this; }
 	UIControl* disable() { uiControlDisable(control()); return this; }
