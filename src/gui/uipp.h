@@ -90,11 +90,14 @@ public:
 
 	uiControl* control() const
 	{
+		assert(_control);
 		return _control;
 	}
 
 	uiControl* claim()
 	{
+		if (!_control)
+			build();
 		_owned = false;
 		return _control;
 	}
@@ -201,11 +204,44 @@ public:
 		return this;
 	}
 
-	virtual void onRedraw(uiAreaDrawParams* params) {}
-	virtual void onMouseEvent(uiAreaMouseEvent* event) {}
-	virtual void onMouseEntryExit(bool exit) {}
-	virtual void onDragBroken() {}
-	virtual int onKeyEvent(uiAreaKeyEvent* event) { return 0; }
+public:
+	UIArea* setOnDraw(std::function<void(uiAreaDrawParams*)> cb)
+	{ _onRedraw = cb; return this; }
+
+	UIArea* setOnMouseEvent(std::function<void(uiAreaMouseEvent*)> cb)
+	{ _onMouseEvent = cb; return this; }
+
+	UIArea* setOnMouseEntryExit(std::function<void(bool)> cb)
+	{ _onMouseEntryExit = cb; return this; }
+
+	UIArea* setOnDragBroken(std::function<void()> cb)
+	{ _onDragBroken = cb; return this; }
+
+	UIArea* setOnKeyEvent(std::function<int(uiAreaKeyEvent*)> cb)
+	{ _onKeyEvent = cb; return this; }
+
+private:
+	std::function<void(uiAreaDrawParams*)> _onRedraw;
+	std::function<void(uiAreaMouseEvent*)> _onMouseEvent;
+	std::function<void(bool)> _onMouseEntryExit;
+	std::function<void()> _onDragBroken;
+	std::function<int(uiAreaKeyEvent*)> _onKeyEvent;
+
+protected:
+	virtual void onRedraw(uiAreaDrawParams* params)
+	{ if (_onRedraw) _onRedraw(params); }
+
+	virtual void onMouseEvent(uiAreaMouseEvent* event)
+	{ if (_onMouseEvent) _onMouseEvent(event); }
+
+	virtual void onMouseEntryExit(bool exit)
+	{ if (_onMouseEntryExit) _onMouseEntryExit(exit); }
+
+	virtual void onDragBroken()
+	{ if (_onDragBroken) _onDragBroken(); }
+
+	virtual int onKeyEvent(uiAreaKeyEvent* event)
+	{ if (_onKeyEvent) return _onKeyEvent(event); else return 0; }
 
 private:
 	static UIArea* _getarea(uiAreaHandler* a)
@@ -274,21 +310,25 @@ public:
 		return this;
 	}
 
+	UIWindow* setOnClose(std::function<int()> cb)
+	{
+		_onClose = cb;
+		return this;
+	}
+
 	UIWindow* show()
 	{
 		uiControlShow(claim());
 		return this;
 	}
 
-	virtual int onClose()
-	{
-		return 0;
-	}
-
 private:
 	static int _close_cb(uiWindow*, void* ptr)
 	{
-		return ((UIWindow*)ptr)->onClose();
+		auto cb = ((UIWindow*)ptr)->_onClose;
+		if (cb)
+			return cb();
+		return 0;
 	}
 
 private:
@@ -296,6 +336,7 @@ private:
 	double _width;
 	double _height;
 	UIControl* _child = nullptr;
+	std::function<int()> _onClose;
 };
 
 class UIButton : public UITypedControl<uiButton, UIButton>
@@ -305,6 +346,20 @@ public:
 		_text(text)
 	{}
 
+	UIButton* setText(const std::string& text)
+	{
+		_text = text;
+		if (this->built())
+			uiButtonSetText(this->typedControl(), _text.c_str());
+		return this;
+	}
+
+	UIButton* setOnClick(const std::function<void(void)>& onClick)
+	{
+		_onclick = onClick;
+		return this;
+	}
+
 	UIButton* build()
 	{
 		setControl(uiNewButton(_text.c_str()));
@@ -312,16 +367,17 @@ public:
 		return this;
 	}
 
-	virtual void onClick() {}
-
 private:
 	static void _clicked_cb(uiButton*, void* ptr)
 	{
-		((UIButton*)ptr)->onClick();
+		const std::function<void(void)> cb = ((UIButton*)ptr)->_onclick;
+		if (cb)
+			cb();
 	}
 
 private:
 	std::string _text;
+	std::function<void(void)> _onclick;
 };
 
 class UIAllocator

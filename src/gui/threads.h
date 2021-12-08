@@ -3,6 +3,7 @@
 
 extern void UIInitThreading();
 extern void UIRunOnUIThread(std::function<void(void)> callback);
-extern void UIStartAppThread(std::function<void(void)> callback);
+extern void UIStartAppThread(std::function<void(void)> runCallback,
+	std::function<void(void)> exitCallback);
 
 #endif

@@ -9,6 +9,7 @@
 static sem_t* semaphore;
 static std::function<void(void)> appCallback;
 static std::function<void(void)> uiCallback;
+static std::function<void(void)> exitCallback;
 static pthread_t appThread = 0;
 
 void UIInitThreading()
@@ -38,16 +39,18 @@ static void* appthread_cb(void*)
 {
     appCallback();
     appThread = 0;
+	UIRunOnUIThread(exitCallback);
     return nullptr;
 }
 
-void UIStartAppThread(std::function<void(void)> callback)
+void UIStartAppThread(std::function<void(void)> runCallback, std::function<void(void)> exitCallback)
 {
     if (appThread)
         Error() << "application thread already running";
-    appCallback = callback;
+    ::appCallback = runCallback;
+	::exitCallback = exitCallback;
     int res = pthread_create(&appThread, nullptr, appthread_cb, nullptr);
-    if (!res)
-        Error() << "could not start application thread";
+    if (res)
+        Error() << fmt::format("could not start application thread: {}", strerror(errno));
     pthread_detach(appThread);
 }
