@@ -1,80 +1,29 @@
 #ifndef UIPP_H
 #define UIPP_H
 
-class UIPath
+class Closeable
 {
-	class Figure
-	{
-	public:
-		Figure(UIPath& path, double x, double y):
-			_path(path)
-		{
-			uiDrawPathNewFigure(path._path, x, y);
-		}
-
-		Figure& lineTo(double x, double y)
-		{
-			uiDrawPathLineTo(_path._path, x, y);
-			return *this;
-		}
-
-		UIPath& end()
-		{
-			uiDrawPathCloseFigure(_path._path);
-			return _path;
-		}
-
-	private:
-		UIPath& _path;
-	};
-
 public:
-	UIPath(uiAreaDrawParams* params):
-		_params(params),
-		_path(uiDrawNewPath(uiDrawFillModeWinding))
-	{}
-
-	UIPath& rectangle(double x, double y, double w, double h)
-	{
-		uiDrawPathAddRectangle(_path, x, y, w, h);
-		return *this;
-	}
-
-	Figure begin(double x, double y)
-	{
-		return Figure(*this, x, y);
-	}
-
-	void fill(uiDrawBrush& fillBrush)
-	{
-		uiDrawPathEnd(_path);
-		uiDrawFill(_params->Context, _path, &fillBrush);
-	}
-
-	void stroke(uiDrawBrush& strokeBrush, uiDrawStrokeParams& strokeParams)
-	{
-		uiDrawPathEnd(_path);
-		uiDrawStroke(_params->Context, _path, &strokeBrush, &strokeParams);
-	}
-
-	void fill(uiDrawBrush& strokeBrush, uiDrawStrokeParams& strokeParams, uiDrawBrush& fillBrush)
-	{
-		uiDrawPathEnd(_path);
-		uiDrawFill(_params->Context, _path, &fillBrush);
-		uiDrawStroke(_params->Context, _path, &strokeBrush, &strokeParams);
-	}
-
-	~UIPath()
-	{
-		uiDrawFreePath(_path);
-	}
-	
-private:
-	uiAreaDrawParams* _params;
-	uiDrawPath* _path;
+	~Closeable() {}
 };
 
-class UIControl
+class UIAllocator
+{
+public:
+	template <class T, typename... Args>
+	T* make(Args&&... args)
+	{
+		auto uptr = std::make_unique<T>(args...);
+		T* ptr = uptr.get();
+		_pointers.push_back(std::move(uptr));
+		return ptr;
+	}
+
+private:
+	std::vector<std::unique_ptr<Closeable>> _pointers;
+};
+
+class UIControl : public Closeable
 {
 public:
 	UIControl(uiControl* control):
@@ -397,22 +346,6 @@ private:
 	std::map<int, T> _forwards;
 	std::map<T, int> _backwards;
 	std::function<void(T)> _onselected;
-};
-
-class UIAllocator
-{
-public:
-	template <class T, typename... Args>
-	T* make(Args&&... args)
-	{
-		auto uptr = std::make_unique<T>(args...);
-		T* ptr = uptr.get();
-		_pointers.push_back(std::move(uptr));
-		return ptr;
-	}
-
-private:
-	std::vector<std::unique_ptr<UIControl>> _pointers;
 };
 
 #endif

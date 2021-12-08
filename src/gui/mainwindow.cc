@@ -1,6 +1,7 @@
 #include "globals.h"
 #include "ui.h"
 #include "uipp.h"
+#include "uipppath.h"
 #include "gui.h"
 #include "threads.h"
 #include "proto.h"

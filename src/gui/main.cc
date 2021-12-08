@@ -1,6 +1,7 @@
 #include "globals.h"
 #include "ui.h"
 #include "uipp.h"
+#include "uippmenu.h"
 #include "threads.h"
 #include "gui.h"
 #include "fmt/format.h"
@@ -17,8 +18,10 @@ int main(int argc, const char* argv[])
 	uiInit(&o);
 	UIInitThreading();
 
-	uiMenu* menu = uiNewMenu("File");
-	uiMenuItem* item = uiMenuAppendQuitItem(menu);
+	auto menu = UIMenu("File");
+	menu.add("Test menu item!")->disable();
+	menu.addQuit();
+
 	uiOnShouldQuit(quit_cb, NULL);
 
 	auto app = createMainApp();
