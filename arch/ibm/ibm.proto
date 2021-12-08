@@ -15,7 +15,7 @@ message IbmDecoderProto {
 }
 
 message IbmEncoderProto {
-	// Next: 18
+	// Next: 19
 	message TrackdataProto {
 		message SectorsProto {
 			repeated int32 sector = 1		[(help) = "write these sectors (in order) on each track"];
@@ -37,6 +37,7 @@ message IbmEncoderProto {
 		optional int32 gap3 = 12            [default=80, (help) = "size of gap 4 (the post-data or format gap)"];
 		optional bool swap_sides = 14       [default=false, (help) = "swap side bytes when writing"];
 		optional SectorsProto sectors = 17	[(help) = "write these sectors (in order) on each track"];
+		optional int32 gap_fill_byte = 18   [default=0x9254, (help) = "16-bit raw bit pattern of gap fill byte"];
 	}
 
 	repeated TrackdataProto trackdata = 1;

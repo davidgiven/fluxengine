@@ -58,7 +58,8 @@ public:
 
 	Fluxmap& appendBits(const std::vector<bool>& bits, nanoseconds_t clock);
 
-	void precompensate(int threshold_ticks, int amount_ticks);
+    void precompensate(int threshold_ticks, int amount_ticks);
+    std::vector<Fluxmap> split();
 
 private:
 	uint8_t& findLastByte();

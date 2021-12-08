@@ -40,7 +40,6 @@ public:
 
         ByteReader headerReader(header);
 
-        // media flag indicates media density, currently unused
         char mediaFlag = headerReader.seek(0x1b).read_8();
 
         inputFile.seekg( 0, std::ios::end );
@@ -59,13 +58,22 @@ public:
         inputFile.read((char*) trackTable.begin(), trackTable.size());
         ByteReader trackTableReader(trackTable);
 
-        int diskSectorsPerTrack = -1;
-
         if (config.encoder().format_case() != EncoderProto::FormatCase::FORMAT_NOT_SET)
             std::cout << "D88: overriding configured format";
 
         auto ibm = config.mutable_encoder()->mutable_ibm();
         config.mutable_cylinders()->set_end(0);
+        if (mediaFlag == 0x20) {
+            std::cout << "D88: high density mode\n";
+            if (config.flux_sink().dest_case() == FluxSinkProto::DestCase::kDrive) {
+                config.mutable_flux_sink()->mutable_drive()->set_high_density(true);
+            }
+        } else {
+            std::cout << "D88: single/double density mode\n";
+            if (config.flux_sink().dest_case() == FluxSinkProto::DestCase::kDrive) {
+                config.mutable_flux_sink()->mutable_drive()->set_high_density(false);
+            }
+        }
 
         std::unique_ptr<Image> image(new Image);
         for (int track = 0; track < trackTableSize / 4; track++)
@@ -109,11 +117,6 @@ public:
                 } else if (currentSectorsInTrack != sectorsInTrack) {
                     Error() << "D88: mismatched number of sectors in track";
                 }
-                if (diskSectorsPerTrack < 0) {
-                    diskSectorsPerTrack = sectorsInTrack;
-                } else if (diskSectorsPerTrack != sectorsInTrack) {
-                    Error() << "D88: varying numbers of sectors per track is currently unsupported";
-                }
                 if (currentTrackCylinder < 0) {
                     currentTrackCylinder = cylinder;
                 } else if (currentTrackCylinder != cylinder) {
@@ -127,7 +130,7 @@ public:
                     trackdata->set_sector_size(sectorSize);
                     trackdata->set_use_fm(fm);
                     if (fm) {
-                        //trackdata->set_clock_rate_khz(250*300/360);
+                        trackdata->set_gap_fill_byte(0xffff);
                         trackdata->set_idam_byte(0xf57e);
                         trackdata->set_dam_byte(0xf56f);
                     }

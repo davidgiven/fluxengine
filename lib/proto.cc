@@ -141,11 +141,13 @@ void setProtoFieldFromString(ProtoField& protoField, const std::string& value)
 			static const std::map<std::string, bool> boolvalues = {
 				{ "false", false },
 				{ "f",     false },
+				{ "no",    false },
 				{ "n",     false },
 				{ "0",     false },
 				{ "true",  true },
 				{ "t",     true },
-				{ "n",     true },
+				{ "yes",   true },
+				{ "y",     true },
 				{ "1",     true },
 			};
 

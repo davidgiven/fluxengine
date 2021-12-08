@@ -92,7 +92,9 @@ public:
 		trackheader.header.track_id[2] = 'K';
 		trackheader.header.strack = strack;
 
-		FluxmapReader fmr(fluxmap);
+		auto lastFluxmap = fluxmap.split().back();
+
+		FluxmapReader fmr(lastFluxmap);
 		Bytes fluxdata;
 		ByteWriter fluxdataWriter(fluxdata);
 
