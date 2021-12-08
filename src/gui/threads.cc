@@ -1,30 +1,37 @@
 #include "globals.h"
+#include "fmt/format.h"
 #include <pthread.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 #include <semaphore.h>
 #include "ui.h"
 
-static sem_t semaphore;
+static sem_t* semaphore;
 static std::function<void(void)> appCallback;
 static std::function<void(void)> uiCallback;
 static pthread_t appThread = 0;
 
 void UIInitThreading()
 {
-    sem_init(&semaphore, 0, 0);
+	std::string name = fmt::format("/com.cowlark.fluxengine.{}", getpid());
+	semaphore = sem_open(name.c_str(), O_CREAT|O_EXCL, 0, 0);
+	if (!semaphore)
+		Error() << fmt::format("cannot create semaphore: {}", strerror(errno));
+	sem_unlink(name.c_str());
 }
 
 /* Run on the UI thread. */
 static void queue_cb(void*)
 {
     uiCallback();
-    sem_post(&semaphore);
+    sem_post(semaphore);
 }
 
 void UIRunOnUIThread(std::function<void(void)> callback)
 {
     uiCallback = callback;
     uiQueueMain(queue_cb, nullptr);
-    sem_wait(&semaphore);
+    sem_wait(semaphore);
 }
 
 static void* appthread_cb(void*)
