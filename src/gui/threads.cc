@@ -4,6 +4,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <semaphore.h>
+#include <unistd.h>
 #include "ui.h"
 
 static sem_t* semaphore;

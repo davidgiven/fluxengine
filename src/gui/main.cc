@@ -3,6 +3,8 @@
 #include "uipp.h"
 #include "threads.h"
 #include "fmt/format.h"
+#include <unistd.h>
+
 using namespace std::placeholders;
 
 static uiDrawStrokeParams STROKE = {
