@@ -15,11 +15,19 @@ static pthread_t appThread = 0;
 
 void UIInitThreading()
 {
-	std::string name = fmt::format("/com.cowlark.fluxengine.{}", getpid());
-	semaphore = sem_open(name.c_str(), O_CREAT|O_EXCL, 0, 0);
-	if (!semaphore)
-		Error() << fmt::format("cannot create semaphore: {}", strerror(errno));
-	sem_unlink(name.c_str());
+	#ifdef WIN32
+		static sem_t s;
+		int r = sem_init(&s, 0, 0);
+		if (r)
+			Error() << fmt::format("cannot create semaphore: {}", strerror(errno));
+		semaphore = &s;
+	#else
+		std::string name = fmt::format("/com.cowlark.fluxengine.{}", getpid());
+		semaphore = sem_open(name.c_str(), O_CREAT|O_EXCL, 0, 0);
+		if (!semaphore)
+			Error() << fmt::format("cannot create semaphore: {}", strerror(errno));
+		sem_unlink(name.c_str());
+	#endif
 }
 
 /* Run on the UI thread. */
