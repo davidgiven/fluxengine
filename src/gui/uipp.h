@@ -1,6 +1,23 @@
 #ifndef UIPP_H
 #define UIPP_H
 
+struct UIGridParams
+{
+	int x = 0;
+	int y = 0;
+	int xspan = 1;
+	int yspan = 1;
+	bool hexpand = false;
+	uiAlign halign = uiAlignFill;
+	bool vexpand = false;
+	uiAlign valign = uiAlignFill;
+};
+
+struct UIBoxParams
+{
+	bool expand = false;
+};
+
 class Closeable
 {
 public:
@@ -47,29 +64,46 @@ public:
 		return _control;
 	}
 
-	bool stretchy() const
-	{
-		return _stretchy;
-	}
-
 	bool built() const
 	{
 		return !!_control;
 	}
 
 public:
-	UIControl* setStretchy(bool stretchy) { _stretchy = stretchy; return this; }
-
 	UIControl* show()    { uiControlShow(claim()); return this; }
 	UIControl* hide()    { uiControlHide(control()); return this; }
 	UIControl* enable()  { uiControlEnable(control()); return this; }
 	UIControl* disable() { uiControlDisable(control()); return this; }
 
+public:
+	UIGridParams& getGridParams() {
+		if (!_gridParams)
+			_gridParams = UIGridParams();
+		return *_gridParams;
+	}
+
+	UIBoxParams& getBoxParams() {
+		if (!_boxParams)
+			_boxParams = UIBoxParams();
+		return *_boxParams;
+	}
+
+	UIControl* setGridParams(UIGridParams params) {
+		_gridParams = params;
+		return this;
+	}
+
+	UIControl* setBoxParams(UIBoxParams params) {
+		_boxParams = params;
+		return this;
+	}
+
 private:
 	uiControl* _control;
 	bool _owned = true;
-	bool _stretchy = false;
 	bool _enabled = true;
+	std::optional<UIGridParams> _gridParams;
+	std::optional<UIBoxParams> _boxParams;
 };
 
 template <class T, class B>
@@ -86,34 +120,20 @@ public:
 	}
 };
 
-template <class T, class B>
-class UIContainerControl : public UITypedControl<T, B>
+template <class B>
+class UIBox : public UITypedControl<uiBox, B>
 {
 public:
-	UIContainerControl(T* control):
-		UITypedControl<T, B>(control)
+	UIBox(uiBox* control):
+		UITypedControl<uiBox, B>(control)
 	{}
 
 	B* add(UIControl* child)
 	{
-		uiBoxAppend(this->typedControl(), child->claim(), child->stretchy());
-		_children.push_back(child);
+		const auto& params = child->getBoxParams();
+		uiBoxAppend(this->typedControl(), child->claim(), params.expand);
 		return (B*) this;
 	}
-
-	const std::vector<UIControl*>& children() const { return _children; }
-
-private:
-	std::vector<UIControl*> _children;
-};
-
-template <class B>
-class UIBox : public UIContainerControl<uiBox, B>
-{
-public:
-	UIBox(uiBox* control):
-		UIContainerControl<uiBox, B>(control)
-	{}
 };
 
 class UIHBox : public UIBox<UIHBox>
@@ -129,6 +149,49 @@ class UIVBox : public UIBox<UIVBox>
 public:
 	UIVBox():
 		UIBox(uiNewVerticalBox())
+	{}
+};
+
+class UIGrid : public UITypedControl<uiGrid, UIGrid>
+{
+public:
+	UIGrid():
+		UITypedControl<uiGrid, UIGrid>(uiNewGrid())
+	{}
+
+	UIGrid* add(UIControl* child)
+	{
+		const auto& params = child->getGridParams();
+		uiGridAppend(this->typedControl(), child->claim(),
+			params.x, params.y,
+			params.xspan, params.yspan,
+			params.hexpand, params.halign,
+			params.vexpand, params.valign);
+		return this;
+	}
+};
+
+class UILabel : public UITypedControl<uiLabel, UILabel>
+{
+public:
+	UILabel(const std::string& text):
+		UITypedControl(uiNewLabel(text.c_str()))
+	{}
+};
+
+class UITextEntry : public UITypedControl<uiEntry, UITextEntry>
+{
+public:
+	UITextEntry():
+		UITypedControl(uiNewEntry())
+	{}
+};
+
+class UICheckBox : public UITypedControl<uiCheckbox, UICheckBox>
+{
+public:
+	UICheckBox(const std::string& text):
+		UITypedControl(uiNewCheckbox(text.c_str()))
 	{}
 };
 
@@ -290,16 +353,16 @@ private:
 };
 
 template <typename T>
-class UICombo : public UITypedControl<uiCombobox, UICombo<T>>
+class UISelect : public UITypedControl<uiCombobox, UISelect<T>>
 {
 public:
-	UICombo():
-		UITypedControl<uiCombobox, UICombo<T>>(uiNewCombobox())
+	UISelect():
+		UITypedControl<uiCombobox, UISelect<T>>(uiNewCombobox())
 	{
 		uiComboboxOnSelected(this->typedControl(), _selected_cb, this);
 	}
 
-	UICombo<T>* setOptions(const std::vector<std::pair<std::string, T>>& options)
+	UISelect<T>* setOptions(const std::vector<std::pair<std::string, T>>& options)
 	{
 		assert(_forwards.empty());
 		int count = 0;
@@ -313,7 +376,7 @@ public:
 		return this;
 	}
 
-	UICombo<T>* select(T item)
+	UISelect<T>* select(T item)
 	{
 		auto it = _backwards.find(item);
 		if (it != _backwards.end())
@@ -333,12 +396,12 @@ public:
 private:
 	static void _selected_cb(uiCombobox*, void* p)
 	{
-		auto combo = ((UICombo<T>*)p);
-		if (combo->_onselected)
+		auto c = ((UISelect<T>*)p);
+		if (c->_onselected)
 		{
-			auto value = combo->getSelected();
+			auto value = c->getSelected();
 			if (value)
-				combo->_onselected(*value);
+				c->_onselected(*value);
 		}
 	}
 
@@ -348,5 +411,46 @@ private:
 	std::function<void(T)> _onselected;
 };
 
+class UICombo : public UITypedControl<uiEditableCombobox, UICombo>
+{
+public:
+	UICombo():
+		UITypedControl<uiEditableCombobox, UICombo>(uiNewEditableCombobox())
+	{
+		uiEditableComboboxOnChanged(this->typedControl(), _changed_cb, this);
+	}
+
+	UICombo* setOptions(const std::vector<std::string>& options)
+	{
+		for (auto& p : options)
+			uiEditableComboboxAppend(this->typedControl(), p.c_str());
+		return this;
+	}
+
+	UICombo* setText(const std::string& text)
+	{
+		uiEditableComboboxSetText(this->typedControl(), text.c_str());
+		return this;
+	}
+
+	std::string getText()
+	{
+		return uiEditableComboboxText(this->typedControl());
+	}
+
+private:
+	static void _changed_cb(uiEditableCombobox*, void* p)
+	{
+		auto c = ((UICombo*)p);
+		if (c->_onchanged)
+		{
+			auto value = c->getText();
+			c->_onchanged(value);
+		}
+	}
+
+private:
+	std::function<void(const std::string&)> _onchanged;
+};
 #endif
 
