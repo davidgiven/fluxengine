@@ -23,6 +23,8 @@ module Sampler (
 
 reg [5:0] counter;
 
+reg rdata_conformed_q;
+
 reg index_q;
 reg rdata_q;
 
@@ -30,6 +32,14 @@ reg index_edge;
 reg rdata_edge;
 
 reg req_toggle;
+
+always @(posedge clock)
+begin
+    if (rdata)
+        rdata_conformed_q <= 1;
+    else if (!sampleclock)
+        rdata_conformed_q <= 0;
+end
 
 always @(posedge sampleclock)
 begin
@@ -51,8 +61,8 @@ begin
         index_edge <= index && !index_q;
         index_q <= index;
         
-        rdata_edge <= rdata && !rdata_q;
-        rdata_q <= rdata;
+        rdata_edge <= rdata_conformed_q && !rdata_q;
+        rdata_q <= rdata_conformed_q;
         
         if (rdata_edge || index_edge || (counter == 6'h3f)) begin
             opcode <= { rdata_edge, index_edge, counter };
