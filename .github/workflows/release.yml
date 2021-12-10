@@ -26,6 +26,7 @@ jobs:
           zip
           mingw-w64-i686-protobuf
           vim
+          diffutils
     - uses: actions/checkout@v2
       with:
         fetch-depth: 1
