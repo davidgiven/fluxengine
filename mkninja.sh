@@ -395,6 +395,7 @@ buildlibrary libbackend.a \
     lib/usb/fluxengineusb.cc \
     lib/usb/greaseweazle.cc \
     lib/usb/greaseweazleusb.cc \
+    lib/usb/serial.cc \
     lib/usb/usb.cc \
     lib/usb/usbfinder.cc \
     lib/utils.cc \
