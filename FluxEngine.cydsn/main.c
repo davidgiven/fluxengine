@@ -147,7 +147,7 @@ static void set_drive_flags(struct set_drive_frame* flags)
     
     current_drive_flags = *flags;
     DRIVESELECT_REG_Write(flags->drive ? 2 : 1); /* select drive 1 or 0 */
-    DENSITY_REG_Write(flags->high_density); /* density bit */
+    DENSITY_REG_Write(!flags->high_density); /* double density bit */
     INDEX_REG_Write(flags->index_mode);
 }
 
