@@ -107,6 +107,7 @@ std::unique_ptr<TrackDataFlux> AbstractDecoder::decodeToSectors(
 					break;
 				if (fmr.eof())
                     break;
+				fmr.skipToEvent(F_BIT_PULSE);
 			}
             recordStart = fmr.tell();
             if (r == DATA_RECORD)

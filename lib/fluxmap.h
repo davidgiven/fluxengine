@@ -3,6 +3,7 @@
 
 #include "bytes.h"
 #include "protocol.h"
+#include "fmt/format.h"
 
 class RawBits;
 
@@ -17,6 +18,10 @@ public:
 
         nanoseconds_t ns() const
         { return ticks * NS_PER_TICK; }
+
+        operator std::string () {
+            return fmt::format("[b:{}, t:{}, z:{}]", bytes, ticks, zeroes);
+        }
     };
 
 public:

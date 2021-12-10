@@ -114,6 +114,8 @@ public:
 		auto idbits = readRawBits(16);
 		const Bytes idbytes = decodeFmMfm(idbits);
 		uint8_t id = idbytes.slice(0, 1)[0];
+		if (eof())
+			return RecordType::UNKNOWN_RECORD;
 		seek(here);
 		
 		switch (id)
