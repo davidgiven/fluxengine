@@ -119,7 +119,7 @@
 		SerialPortImpl(const std::string& path)
 		{
 			#ifdef __APPLE__
-				if (name.find("/dev/tty.") != std::string::npos)
+				if (path.find("/dev/tty.") != std::string::npos)
 					std::cerr << "Warning: you probably want to be using a /dev/cu.* device\n";
 			#endif
 
