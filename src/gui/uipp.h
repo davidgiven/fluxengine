@@ -452,5 +452,20 @@ private:
 private:
 	std::function<void(const std::string&)> _onchanged;
 };
+
+class UITab : public UITypedControl<uiTab, UITab>
+{
+public:
+	UITab():
+		UITypedControl<uiTab, UITab>(uiNewTab())
+	{}
+
+	UITab* add(const std::string& name, UIControl* control)
+	{
+		uiTabAppend(this->typedControl(), name.c_str(), control->claim());
+		return this;
+	}
+};
+
 #endif
 
