@@ -1,0 +1,5 @@
+EXPORTS
+    libusbp_install_inf
+    libusbp_install_infW
+    libusbp_broadcast_setting_change
+    libusbp_broadcast_setting_changeW
