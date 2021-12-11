@@ -50,7 +50,7 @@
 
 		~SerialPortImpl() override
 		{
-			CloseHandle(h);
+			CloseHandle(_handle);
 		}
 
 	public:
@@ -71,6 +71,8 @@
 		ssize_t write(const uint8_t* buffer, size_t len) override
 		{
 			DWORD wlen;
+			/* Windows gets unhappy if we try to transfer too much... */
+			len = std::min(4096U, len);
 			bool r = WriteFile(
 					/* hFile= */ _handle,
 					/* lpBuffer= */ buffer,
@@ -117,7 +119,7 @@
 		SerialPortImpl(const std::string& path)
 		{
 			#ifdef __APPLE__
-				if (name.find("/dev/tty.") != std::string::npos)
+				if (path.find("/dev/tty.") != std::string::npos)
 					std::cerr << "Warning: you probably want to be using a /dev/cu.* device\n";
 			#endif
 
