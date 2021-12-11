@@ -101,6 +101,27 @@ private:
 		}
 	}
 
+private:
+	static std::set<unsigned> getSectorIds(const IbmEncoderProto::TrackdataProto& trackdata)
+	{
+		std::set<unsigned> s;
+		if (trackdata.has_sectors())
+		{
+			for (int sectorId : trackdata.sectors().sector())
+				s.insert(sectorId);
+		}
+		else if (trackdata.has_sector_range())
+		{
+			int sectorId = trackdata.sector_range().min_sector();
+			while (sectorId <= trackdata.sector_range().max_sector())
+			{
+				s.insert(sectorId);
+				sectorId++;
+			}
+		}
+		return s;
+	}
+
 public:
 	std::vector<std::shared_ptr<Sector>> collectSectors(int physicalTrack, int physicalSide, const Image& image) override
 	{
@@ -109,7 +130,7 @@ public:
 		getTrackFormat(trackdata, physicalTrack, physicalSide);
 
 		int logicalSide = physicalSide ^ trackdata.swap_sides();
-		for (int sectorId : trackdata.sectors().sector())
+		for (int sectorId : getSectorIds(trackdata))
         {
 			const auto& sector = image.get(physicalTrack, logicalSide, sectorId);
 			if (sector)

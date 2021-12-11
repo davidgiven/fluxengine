@@ -13,7 +13,9 @@ image_writer {
 
 decoder {
 	ibm {
-		ignore_side_byte: true
+		trackdata {
+			ignore_side_byte: true
+		}
 	}
 }
 
