@@ -138,6 +138,9 @@ public:
 		auto bits = readRawBits(recordSize*16);
 		auto bytes = decodeFmMfm(bits).slice(0, recordSize);
 
+		IbmDecoderProto::TrackdataProto trackdata;
+		getTrackFormat(trackdata, _sector->physicalCylinder, _sector->physicalHead);
+
 		ByteReader br(bytes);
 		br.seek(_currentHeaderLength);
 		br.read_8(); /* skip ID byte */
@@ -150,11 +153,11 @@ public:
 		if (wantCrc == gotCrc)
 			_sector->status = Sector::DATA_MISSING; /* correct but unintuitive */
 
-		if (_config.swap_sides())
+		if (trackdata.swap_sides())
 			_sector->logicalSide ^= 1;
-		if (_config.ignore_side_byte())
+		if (trackdata.ignore_side_byte())
 			_sector->logicalSide = _sector->physicalHead;
-		if (_config.ignore_track_byte())
+		if (trackdata.ignore_track_byte())
 			_sector->logicalTrack = _sector->physicalCylinder;
 	}
 
@@ -176,10 +179,40 @@ public:
 
 	std::set<unsigned> requiredSectors(unsigned cylinder, unsigned head) const override
 	{
+		IbmDecoderProto::TrackdataProto trackdata;
+		getTrackFormat(trackdata, cylinder, head);
+
 		std::set<unsigned> s;
-		for (int sectorId : _config.sectors().sector())
-			s.insert(sectorId);
+		if (trackdata.has_sectors())
+		{
+			for (int sectorId : trackdata.sectors().sector())
+				s.insert(sectorId);
+		}
+		else if (trackdata.has_sector_range())
+		{
+			int sectorId = trackdata.sector_range().min_sector();
+			while (sectorId <= trackdata.sector_range().max_sector())
+			{
+				s.insert(sectorId);
+				sectorId++;
+			}
+		}
 		return s;
+	}
+
+private:
+	void getTrackFormat(IbmDecoderProto::TrackdataProto& trackdata, unsigned cylinder, unsigned head) const
+	{
+		trackdata.Clear();
+		for (const auto& f : _config.trackdata())
+		{
+			if (f.has_cylinder() && (f.cylinder() != cylinder))
+				continue;
+			if (f.has_head() && (f.head() != head))
+				continue;
+
+			trackdata.MergeFrom(f);
+		}
 	}
 
 private:

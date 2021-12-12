@@ -395,6 +395,7 @@ buildlibrary libbackend.a \
     lib/usb/fluxengineusb.cc \
     lib/usb/greaseweazle.cc \
     lib/usb/greaseweazleusb.cc \
+    lib/usb/serial.cc \
     lib/usb/usb.cc \
     lib/usb/usbfinder.cc \
     lib/utils.cc \
@@ -531,6 +532,9 @@ encodedecodetest atarist800
 encodedecodetest atarist820
 encodedecodetest brother120
 encodedecodetest brother240
+encodedecodetest commodore1541 scripts/commodore1541_test.textpb
+encodedecodetest commodore1581
+encodedecodetest hp9121
 encodedecodetest ibm1200_525
 encodedecodetest ibm1232
 encodedecodetest ibm1440
@@ -538,12 +542,10 @@ encodedecodetest ibm180_525
 encodedecodetest ibm360_525
 encodedecodetest ibm720
 encodedecodetest ibm720_525
-encodedecodetest n88basic
-encodedecodetest tids990
-encodedecodetest commodore1581
-encodedecodetest commodore1541 scripts/commodore1541_test.textpb
 encodedecodetest mac400 scripts/mac400_test.textpb
 encodedecodetest mac800 scripts/mac800_test.textpb
+encodedecodetest n88basic
+encodedecodetest tids990
 encodedecodetest victor9k_ss
 
 # vim: sw=4 ts=4 et

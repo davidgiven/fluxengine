@@ -42,7 +42,14 @@ encoder {
 }
 
 decoder {
-	ibm {}
+	ibm {
+		trackdata {
+			sector_range {
+				min_sector: 1
+				max_sector: 9
+			}
+		}
+	}
 }
 
 cylinders {
