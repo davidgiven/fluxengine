@@ -937,3 +937,75 @@ int main(void)
         }
     }
 }
+
+const uint8_t USBFS_MSOS_CONFIGURATION_DESCR[USBFS_MSOS_CONF_DESCR_LENGTH] = {
+/*  Length of the descriptor 4 bytes       */   0x28u, 0x00u, 0x00u, 0x00u,
+/*  Version of the descriptor 2 bytes      */   0x00u, 0x01u,
+/*  wIndex - Fixed:INDEX_CONFIG_DESCRIPTOR */   0x04u, 0x00u,
+/*  bCount - Count of device functions.    */   0x01u,
+/*  Reserved : 7 bytes                     */   0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u,
+/*  bFirstInterfaceNumber                  */   0x00u,
+/*  Reserved                               */   0x01u,
+/*  compatibleId - "WINUSB\0\0"            */   'W', 'I', 'N', 'U', 'S', 'B', 0, 0,
+/*  subcompatibleID - "00001\0\0"          */   '0', '0', '0', '0', '1',
+                                                0x00u, 0x00u, 0x00u,
+/*  Reserved : 6 bytes                     */   0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u
+};
+
+const uint8_t USBFS_MSOS_EXTENDED_PROPERTIES_DESCR[224] = {
+    /* Length; 4 bytes       */   224, 0, 0, 0,
+    /* Version; 2 bytes      */   0x00, 0x01, /* 1.0 */
+    /* wIndex                */   0x05, 0x00,
+    /* Number of sections    */   0x01, 0x00,
+    /* Property section size */   214, 0, 0, 0,
+    /* Property data type    */   0x07, 0x00, 0x00, 0x00, /* 7 = REG_MULTI_SZ Unicode */
+    /* Property name length  */   42, 0,
+    /* Property name         */   'D', 0, 'e', 0, 'v', 0, 'i', 0, 'c', 0, 'e', 0,
+                                  'I', 0, 'n', 0, 't', 0, 'e', 0, 'r', 0, 'f', 0,
+                                  'a', 0, 'c', 0, 'e', 0, 'G', 0, 'U', 0, 'I', 0,
+                                  'D', 0, 's', 0, 0,   0,
+    /* Property data length  */   158, 0, 0, 0,
+    /* GUID #1 data          */   '{', 0, '3', 0, 'd', 0, '2', 0, '7', 0, '5', 0,
+                                  'c', 0, 'f', 0, 'e', 0, '-', 0, '5', 0, '4', 0,
+                                  '3', 0, '5', 0, '-', 0, '4', 0, 'd', 0, 'd', 0,
+                                  '5', 0, '-', 0, 'a', 0, 'c', 0, 'c', 0, 'a', 0,
+                                  '-', 0, '9', 0, 'f', 0, 'b', 0, '9', 0, '9', 0,
+                                  '5', 0, 'e', 0, '2', 0, 'f', 0, '6', 0, '3', 0,
+                                  '8', 0, '}', 0, '\0', 0,
+    /* GUID #2 data          */   '{', 0, '3', 0, 'd', 0, '2', 0, '7', 0, '5', 0,
+                                  'c', 0, 'f', 0, 'e', 0, '-', 0, '5', 0, '4', 0,
+                                  '3', 0, '5', 0, '-', 0, '4', 0, 'd', 0, 'd', 0,
+                                  '5', 0, '-', 0, 'a', 0, 'c', 0, 'c', 0, 'a', 0,
+                                  '-', 0, '9', 0, 'f', 0, 'b', 0, '9', 0, '9', 0,
+                                  '5', 0, 'e', 0, '2', 0, 'f', 0, '6', 0, '3', 0,
+                                  '8', 0, '}', 0, '\0', 0, '\0', 0
+};
+
+uint8 USBFS_HandleVendorRqst(void)
+{
+    if (!(USBFS_bmRequestTypeReg & USBFS_RQST_DIR_D2H))
+        return false;
+
+    switch (USBFS_bRequestReg)
+    {
+        case USBFS_GET_EXTENDED_CONFIG_DESCRIPTOR:
+            switch (USBFS_wIndexLoReg)
+            {
+                case 4:
+                    USBFS_currentTD.pData = (volatile uint8 *) &USBFS_MSOS_CONFIGURATION_DESCR[0u];
+                    USBFS_currentTD.count = USBFS_MSOS_CONFIGURATION_DESCR[0u];
+                    return USBFS_InitControlRead();
+                    
+                case 5:
+                    USBFS_currentTD.pData = (volatile uint8 *) &USBFS_MSOS_EXTENDED_PROPERTIES_DESCR[0u];
+                    USBFS_currentTD.count = USBFS_MSOS_EXTENDED_PROPERTIES_DESCR[0u];
+                    return USBFS_InitControlRead();
+            }
+
+        default:
+            break;
+    }
+
+    return true;
+}
+

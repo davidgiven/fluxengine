@@ -41,6 +41,7 @@ extern "C" {
 #ifdef LIBUSBP_STATIC
 #  define LIBUSBP_API
 #else
+#error not static
 #  ifdef LIBUSBP_EXPORTS
 #    define LIBUSBP_API LIBUSBP_DLL_EXPORT
 #  else

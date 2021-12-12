@@ -3,6 +3,7 @@
 #include "protocol.h"
 #include "fluxmap.h"
 #include "bytes.h"
+#include "libusbp_config.h"
 #include "libusbp.hpp"
 #include "fmt/format.h"
 

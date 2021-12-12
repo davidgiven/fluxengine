@@ -1,6 +1,7 @@
 #ifndef USBSERIAL_H
 #define USBSERIAL_H
 
+#include "libusbp_config.h"
 #include "libusbp.hpp"
 
 struct CandidateDevice
