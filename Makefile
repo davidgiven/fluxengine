@@ -1,4 +1,4 @@
-PACKAGES = zlib sqlite3 protobuf libudev
+PACKAGES = zlib sqlite3 protobuf
 
 export CFLAGS = \
 	-ffunction-sections -fdata-sections
@@ -13,6 +13,14 @@ export LDOPTFLAGS = -Os
 
 export CDBGFLAGS = -O0 -g
 export LDDBGFLAGS = -O0 -g
+
+ifeq ($(OS), Windows_NT)
+else
+ifeq ($(shell uname),Darwin)
+else
+	PACKAGES += libudev
+endif
+endif
 
 ifeq ($(OS), Windows_NT)
 export PROTOC = /mingw32/bin/protoc
@@ -50,6 +58,7 @@ RANLIB += -c -no_warning_for_no_symbols
 export CC = clang
 export CXX = clang++
 export COBJC = clang
+export LDFLAGS += -framework IOKit -framework CoreFoundation
 endif
 
 endif

@@ -6,7 +6,6 @@
 #include "libusbp.hpp"
 #include "fmt/format.h"
 
-#define TIMEOUT 5000
 #define MAX_TRANSFER (32*1024)
 
 /* Hacky: the board always operates in little-endian mode. */
@@ -70,11 +69,6 @@ public:
 		_interface(_device, 0, false),
 		_handle(_interface)
 	{
-		_handle.set_timeout(FLUXENGINE_CMD_OUT_EP, TIMEOUT);
-		_handle.set_timeout(FLUXENGINE_CMD_IN_EP, TIMEOUT);
-		_handle.set_timeout(FLUXENGINE_DATA_OUT_EP, TIMEOUT);
-		_handle.set_timeout(FLUXENGINE_DATA_IN_EP, TIMEOUT);
-
 		int version = getVersion();
 		if (version != FLUXENGINE_VERSION)
 			Error() << "your FluxEngine firmware is at version " << version
