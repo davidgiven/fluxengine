@@ -6,18 +6,12 @@
 #include "bytes.h"
 #include "proto.h"
 #include "usbfinder.h"
-#include <libusb.h>
 #include "fmt/format.h"
 
 static USB* usb = NULL;
 
 USB::~USB()
 {}
-
-std::string USB::usberror(int i)
-{
-    return libusb_strerror((libusb_error) i);
-}
 
 USB* get_usb_impl()
 {

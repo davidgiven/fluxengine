@@ -1,12 +1,11 @@
 #ifndef USBSERIAL_H
 #define USBSERIAL_H
 
-#include <libusb.h>
+#include "libusbp.hpp"
 
 struct CandidateDevice
 {
-	libusb_device* device;
-	libusb_device_descriptor desc;
+	libusbp::device device;
 	uint32_t id;
 	std::string serial;
 };

@@ -1,6 +1,9 @@
-PACKAGES = zlib sqlite3 libusb-1.0 protobuf
+PACKAGES = zlib sqlite3 protobuf libudev
 
-export CFLAGS = -x c++ --std=gnu++2a -ffunction-sections -fdata-sections \
+export CFLAGS = \
+	-ffunction-sections -fdata-sections
+export CXXFLAGS = $(CFLAGS) \
+	-x c++ --std=gnu++2a \
 	-Wno-deprecated-enum-enum-conversion \
 	-Wno-deprecated-enum-float-conversion
 export LDFLAGS = -pthread
@@ -13,6 +16,7 @@ export LDDBGFLAGS = -O0 -g
 
 ifeq ($(OS), Windows_NT)
 export PROTOC = /mingw32/bin/protoc
+export CC = /mingw32/bin/gcc
 export CXX = /mingw32/bin/g++
 export AR = /mingw32/bin/ar rc
 export RANLIB = /mingw32/bin/ranlib
@@ -30,6 +34,7 @@ $(error You must have these pkg-config packages installed: $(PACKAGES))
 endif
 
 export PROTOC = protoc
+export CC = gcc
 export CXX = g++
 export AR = ar rc
 export RANLIB = ranlib
@@ -42,6 +47,9 @@ export EXTENSION =
 ifeq ($(shell uname),Darwin)
 AR = ar rcS
 RANLIB += -c -no_warning_for_no_symbols
+export CC = clang
+export CXX = clang++
+export COBJC = clang
 endif
 
 endif
