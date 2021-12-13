@@ -9,9 +9,10 @@ struct CandidateDevice
 	libusbp::device device;
 	uint32_t id;
 	std::string serial;
+	std::string serialPort;
 };
 
-extern std::vector<std::unique_ptr<CandidateDevice>> findUsbDevices(uint32_t id);
+extern std::vector<std::unique_ptr<CandidateDevice>> findUsbDevices(const std::set<uint32_t>& id);
 
 #endif
 

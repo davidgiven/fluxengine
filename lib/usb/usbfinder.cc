@@ -4,6 +4,7 @@
 #include "bytes.h"
 #include "fmt/format.h"
 #include "usbfinder.h"
+#include "greaseweazle.h"
 #include "libusbp.hpp"
 
 static const std::string get_serial_number(const libusbp::device& device)
@@ -20,7 +21,7 @@ static const std::string get_serial_number(const libusbp::device& device)
 	}
 }
 
-std::vector<std::unique_ptr<CandidateDevice>> findUsbDevices(uint32_t candidateId)
+std::vector<std::unique_ptr<CandidateDevice>> findUsbDevices(const std::set<uint32_t>& ids)
 {
 	std::vector<std::unique_ptr<CandidateDevice>> candidates;
 	for (const auto& it : libusbp::list_connected_devices())
@@ -29,10 +30,17 @@ std::vector<std::unique_ptr<CandidateDevice>> findUsbDevices(uint32_t candidateI
 		candidate->device = it;
 
 		uint32_t id = (it.get_vendor_id() << 16) | it.get_product_id();
-		if (id == candidateId)
+		if (ids.contains(id))
 		{
-			candidate->id = candidateId;
+			candidate->id = id;
 			candidate->serial = get_serial_number(it);
+
+			if (id == GREASEWEAZLE_ID)
+			{
+				libusbp::serial_port port(candidate->device);
+				candidate->serialPort = port.get_name();
+			}
+
 			candidates.push_back(std::move(candidate));
 		}
 	}
