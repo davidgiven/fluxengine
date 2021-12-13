@@ -61,9 +61,11 @@ USB* get_usb_impl()
 	switch (candidate->id)
 	{
 		case FLUXENGINE_ID:
+			std::cerr << fmt::format("Using FluxEngine {}\n", candidate->serial);
 			return createFluxengineUsb(candidate->device);
 
 		case GREASEWEAZLE_ID:
+			std::cerr << fmt::format("Using GreaseWeazle {} on {}\n", candidate->serial, candidate->serialPort);
 			return createGreaseWeazleUsb(candidate->serialPort);
 
 		default:
