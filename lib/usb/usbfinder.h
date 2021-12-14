@@ -1,17 +1,18 @@
 #ifndef USBSERIAL_H
 #define USBSERIAL_H
 
-#include <libusb.h>
+#include "libusbp_config.h"
+#include "libusbp.hpp"
 
 struct CandidateDevice
 {
-	libusb_device* device;
-	libusb_device_descriptor desc;
+	libusbp::device device;
 	uint32_t id;
 	std::string serial;
+	std::string serialPort;
 };
 
-extern std::vector<std::unique_ptr<CandidateDevice>> findUsbDevices(uint32_t id);
+extern std::vector<std::unique_ptr<CandidateDevice>> findUsbDevices(const std::set<uint32_t>& id);
 
 #endif
 

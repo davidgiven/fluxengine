@@ -27,6 +27,11 @@ static const char* gw_error(int e)
     }
 }
 
+static uint32_t ss_rand_next(uint32_t x)
+{
+    return (x&1) ? (x>>1) ^ 0x80000062 : x>>1;
+}
+
 class GreaseWeazleUsb : public USB
 {
 private:
@@ -182,6 +187,7 @@ public:
     
     void testBulkWrite()
     {
+        std::cout << "Writing data: " << std::flush;
         const int LEN = 10*1024*1024;
         Bytes cmd;
         switch (_version)
@@ -211,23 +217,24 @@ public:
         do_command(cmd);
 
         Bytes junk(LEN);
+        uint32_t seed = 0;
+        for (int i=0; i<LEN; i++)
+        {
+            junk[i] = seed;
+            seed = ss_rand_next(seed);
+        }
 		double start_time = getCurrentTime();
         _serial->write(junk);
         _serial->readBytes(1);
 		double elapsed_time = getCurrentTime() - start_time;
 
-		std::cout << "Transferred "
-				  << LEN
-				  << " bytes from PC -> GreaseWeazle in "
-				  << int(elapsed_time * 1000.0)
-				  << " ms ("
-				  << int((LEN / 1024.0) / elapsed_time)
-				  << " kB/s)"
-				  << std::endl;
+        std::cout << fmt::format("transferred {} bytes from PC -> device in {} ms ({} kb/s)\n",
+                LEN, int(elapsed_time * 1000.0), int((LEN / 1024.0) / elapsed_time));
     }
     
     void testBulkRead()
     {
+        std::cout << "Reading data: " << std::flush;
         const int LEN = 10*1024*1024;
         Bytes cmd;
         switch (_version)
@@ -260,14 +267,8 @@ public:
         _serial->readBytes(LEN);
 		double elapsed_time = getCurrentTime() - start_time;
 
-		std::cout << "Transferred "
-				  << LEN
-				  << " bytes from GreaseWeazle -> PC in "
-				  << int(elapsed_time * 1000.0)
-				  << " ms ("
-				  << int((LEN / 1024.0) / elapsed_time)
-				  << " kB/s)"
-				  << std::endl;
+        std::cout << fmt::format("transferred {} bytes from device -> PC in {} ms ({} kb/s)\n",
+                LEN, int(elapsed_time * 1000.0), int((LEN / 1024.0) / elapsed_time));
     }
 
     Bytes read(int side, bool synced, nanoseconds_t readTime, nanoseconds_t hardSectorThreshold)
@@ -394,4 +395,3 @@ USB* createGreaseWeazleUsb(const std::string& port)
 }
 
 // vim: sw=4 ts=4 et
-

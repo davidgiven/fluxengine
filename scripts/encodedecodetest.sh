@@ -1,11 +1,6 @@
 #!/bin/sh
 set -e
 
-if [ "$(uname)" != "Linux" -a "$(uname)" != "Darwin" ]; then
-	echo "Skipping test as not on Linux" >&2
-	exit 0
-fi
-
 tmp=/tmp/$$
 srcfile=$tmp.src.img
 fluxfile=$tmp.$2

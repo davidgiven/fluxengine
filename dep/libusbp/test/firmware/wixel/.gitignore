@@ -1,0 +1,16 @@
+/wixel-sdk
+*.hex
+*.ihx
+*.rel
+*.d
+*.sym
+*.cdb
+*.mem
+*.rst
+*.map
+*.lst
+*.lk
+*.asm
+*.omf
+*.adb
+*.cdb
