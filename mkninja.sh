@@ -337,8 +337,6 @@ buildlibrary libagg.a \
     dep/stb/stb_image_write.c \
     dep/agg/src/*.cpp
 
-esac
-
 case "$UNAME" in
     Darwin)
         buildlibrary libusbp.a \
