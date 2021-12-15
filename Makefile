@@ -1,4 +1,4 @@
-PACKAGES = zlib sqlite3 libusb-1.0 protobuf
+PACKAGES = zlib sqlite3 protobuf
 ifeq ($(shell uname),Linux)
 PACKAGES += gtk+-3.0
 endif
@@ -18,6 +18,14 @@ export CDBGFLAGS = -O0 -g
 export LDDBGFLAGS = -O0 -g
 
 ifeq ($(OS), Windows_NT)
+else
+ifeq ($(shell uname),Darwin)
+else
+	PACKAGES += libudev
+endif
+endif
+
+ifeq ($(OS), Windows_NT)
 export PROTOC = /mingw32/bin/protoc
 export CC = /mingw32/bin/gcc
 export CXX = /mingw32/bin/g++
@@ -27,7 +35,8 @@ export STRIP = /mingw32/bin/strip
 export WINDRES = /mingw32/bin/windres
 export CFLAGS += -I/mingw32/include/libusb-1.0 -I/mingw32/include
 export LDFLAGS +=
-export LIBS += -L/mingw32/lib -static -lz -lsqlite3 -lusb-1.0 -lprotobuf
+export LIBS += -L/mingw32/lib -static -lz -lsqlite3 \
+	-lsetupapi -lwinusb -lole32 -lprotobuf -luuid
 export GUILIBS += -luser32 -lkernel32 -lgdi32 -lcomctl32 -luxtheme -lmsimg32 \
 	-lcomdlg32 -ld2d1 -ldwrite -lole32 -loleaut32 -loleacc -luuid \
 	-lwindowscodecs
@@ -58,7 +67,11 @@ RANLIB += -c -no_warning_for_no_symbols
 export CC = clang
 export CXX = clang++
 export COBJC = clang
-export GUILIBS = -framework Foundation -framework AppKit
+export LDFLAGS += \
+	-framework Foundation \
+	-framework AppKit \
+	-framework IOKit \
+	-framework CoreFoundation
 endif
 
 endif

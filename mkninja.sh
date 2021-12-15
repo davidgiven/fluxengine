@@ -337,6 +337,34 @@ buildlibrary libagg.a \
     dep/stb/stb_image_write.c \
     dep/agg/src/*.cpp
 
+esac
+
+case "$UNAME" in
+    Darwin)
+        buildlibrary libusbp.a \
+            -Idep/libusbp/include \
+            -Idep/libusbp/src \
+            dep/libusbp/src/*.c \
+            dep/libusbp/src/mac/*.c
+        ;;
+
+    MINGW*)
+        buildlibrary libusbp.a \
+            -Idep/libusbp/include \
+            -Idep/libusbp/src \
+            dep/libusbp/src/*.c \
+            dep/libusbp/src/windows/*.c
+        ;;
+
+    *)
+        buildlibrary libusbp.a \
+            -Idep/libusbp/include \
+            -Idep/libusbp/src \
+            dep/libusbp/src/*.c \
+            dep/libusbp/src/linux/*.c
+        ;;
+esac
+
 case "$UNAME" in
     Darwin)
         buildlibrary libui.a \
@@ -395,6 +423,7 @@ buildproto libfl2.a \
 
 buildlibrary libbackend.a \
     -I$OBJDIR/proto \
+    -Idep/libusbp/include \
     -d $OBJDIR/proto/libconfig.def \
     -d $OBJDIR/proto/libfl2.def \
     arch/aeslanier/decoder.cc \
@@ -573,6 +602,7 @@ buildprogram fluxengine \
     libbackend.a \
     libconfig.a \
     libfl2.a \
+    libusbp.a \
     libfmt.a \
     libagg.a \
 

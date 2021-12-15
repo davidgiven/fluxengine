@@ -57,6 +57,9 @@ public:
     void seek(const Fluxmap::Position& pos)
     { return _fmr->seek(pos); } 
 
+    bool eof() const
+    { return _fmr->eof(); }
+
 	virtual std::set<unsigned> requiredSectors(unsigned cylinder, unsigned head) const;
 
 protected:

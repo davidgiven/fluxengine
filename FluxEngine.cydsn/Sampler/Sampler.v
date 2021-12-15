@@ -23,36 +23,49 @@ module Sampler (
 
 reg [5:0] counter;
 
-reg index_q;
-reg rdata_q;
-
 reg index_edge;
 reg rdata_edge;
 
 reg req_toggle;
 
+reg rdata_toggle;
+reg old_rdata_toggle;
+
+reg index_toggle;
+reg old_index_toggle;
+
+always @(posedge rdata)
+begin
+    rdata_toggle <= ~rdata_toggle;
+end
+
+always @(posedge index)
+begin
+    index_toggle <= ~index_toggle;
+end
+
 always @(posedge sampleclock)
 begin
     if (reset)
     begin
+        old_rdata_toggle <= 0;
+        old_index_toggle <= 0;
+        
         index_edge <= 0;
         rdata_edge <= 0;
-        index_q <= 0;
-        rdata_q <= 0;
         counter <= 0;
         req_toggle <= 0;
     end
     else
     begin
-        /* Both index and rdata are active high -- positive-going edges
-         * indicate the start of an index pulse and read pulse, respectively.
-         */
+        /* If data_toggle or index_toggle have changed state, this means that they've
+         * gone high since the last sampleclock. */
          
-        index_edge <= index && !index_q;
-        index_q <= index;
+        index_edge <= index_toggle != old_index_toggle;
+        old_index_toggle <= index_toggle;
         
-        rdata_edge <= rdata && !rdata_q;
-        rdata_q <= rdata;
+        rdata_edge <= rdata_toggle != old_rdata_toggle;
+        old_rdata_toggle <= rdata_toggle;
         
         if (rdata_edge || index_edge || (counter == 6'h3f)) begin
             opcode <= { rdata_edge, index_edge, counter };

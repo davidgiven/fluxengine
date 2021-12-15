@@ -43,13 +43,14 @@ file while changing the decoder options, to save disk wear. It's also much faste
 
 ### Connecting it up
 
-To use, simply plug your FluxEngine into your computer and run the client. If a
-single device is plugged in, it will be automatically detected and used.
+To use, simply plug your FluxEngine (or [GreaseWeazle](greaseweazle.doc) into
+your computer and run the client. If a single device is plugged in, it will be
+automatically detected and used.
 
 If _more_ than one device is plugged in, you need to specify which one to use
-with the `--usb.fluxengine` parameter, which takes the device serial number as a
+with the `--usb.serial` parameter, which takes the device serial number as a
 parameter.  You can find out the serial numbers by running the command without
-the `--usb.fluxengine` parameter, and if more than one device is attached they will
+the `--usb.serial` parameter, and if more than one device is attached they will
 be listed. The serial number is also shown whenever a connection is made.
 
 You _can_ work with more than one FluxEngine at the same time, using different
