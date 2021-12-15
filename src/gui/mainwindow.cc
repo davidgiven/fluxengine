@@ -22,6 +22,13 @@ static uiDrawStrokeParams STROKE = {
 static uiDrawBrush WHITE = { uiDrawBrushTypeSolid, 1.0, 0.0, 1.0, 1.0 };
 static uiDrawBrush BLACK = { uiDrawBrushTypeSolid, 0.0, 0.0, 0.0, 1.0 };
 
+static const UIGridStyle GRID_LEFT = { .halign = uiAlignStart, .valign = uiAlignCenter };
+static const UIGridStyle GRID_RIGHT = { .halign = uiAlignEnd, .valign = uiAlignCenter };
+static const UIGridStyle GRID_FILLX = { .hexpand = true, .vexpand = false };
+static const UIGridStyle GRID_FILLXY = { .hexpand = true, .vexpand = true };
+static const UIGridStyle GRID_SPAN1 = { .xspan = 2, .hexpand = true, .vexpand = true };
+static const UIGridStyle GRID_CENTRE = { .halign = uiAlignCenter, .valign = uiAlignCenter };
+static const UIGridStyle GRID_TOPLEFT = { .halign = uiAlignStart, .valign = uiAlignStart };
 
 class MainApp : public UIAllocator, public Showable
 {
@@ -33,39 +40,32 @@ public:
 			->setOnClose(_onclose_cb)
 			->setChild(
 				make<UITab>()
-					->add("Configuration", make<UIVBox>()
-						->add(make<UIHBox>()
-							->add(make<UISelect<ConfigProto*>>()
-								->setOptions(configs)
-								->setBoxParams({ .expand = true }))
-							->add(make<UICombo>()
-								->setOptions({
-									"drive:0",
-									"drive:1",
-								})
-								->setBoxParams({ .expand = true }))
-						)
+					->add("Configuration", make<UIForm>()
+						->setPadding(2)
+						->add("Interface:", false, make<UISelect<std::string>>())
+						->add("Drive:", false, make<UICombo>()
+							->setOptions({
+								"drive:0",
+								"drive:1"
+							}))
+						->add("Format:", false, make<UISelect<ConfigProto*>>()->setOptions(configs))
+						->add("", true, make<UIGrid>()
+							->add(0, 0, GRID_TOPLEFT, make<UIButton>("Next"))))
+					->add("Flux", make<UIVBox>()
 						->add(make<UIGrid>()
-							->add(make<UIButton>("Load image")->setGridParams({ .x = 0 }))
-							->add(make<UIButton>("Write disk")->setGridParams({ .x = 1 }))
-							->add(make<UIHBox>()
-								->add(make<UILabel>("Cylinders:"))
-								->add(make<UITextEntry>())
-								->add(make<UILabel>("Heads:"))
-								->add(make<UITextEntry>())
-								->add(make<UICheckBox>("HD"))
-								->setGridParams({ .x = 2, .hexpand = true, .vexpand = true }))
-							->add(make<UIButton>("Read disk")->setGridParams({ .x = 3 }))
-							->add(make<UIButton>("Save image")->setGridParams({ .x = 4 }))
-						)
-						->add(make<UIArea>()
+							->setPadding(2)
+							->add(0, 0, GRID_LEFT, make<UILabel>("Cylinder:"))
+							->add(1, 0, GRID_LEFT, make<UILabel>("0"))
+							->add(2, 0, GRID_FILLX, make<UILabel>(""))
+							->add(3, 0, GRID_RIGHT, make<UILabel>("Head:"))
+							->add(4, 0, GRID_LEFT, make<UILabel>("0")))
+						->add(true, make<UIArea>()
 							->setOnDraw(_onredraw_cb)
-							->disable()
-							->setBoxParams({ .expand = true }))
-						->add(_busyButton = make<UIButton>("busy button"))
-						->add(make<UIButton>("press me again!")))
-					->add("Flux", make<UILabel>("label"))
-					->add("Sectors", make<UILabel>("label"))
+							->disable())
+						->add(true, make<UIArea>()
+							->setOnDraw(_onredraw_cb)
+							->disable()))
+					->add("Sectors", make<UILabel>("Sectors"))
 			);
 
 		UIStartAppThread(_appthread_cb, _appthreadexit_cb);
@@ -96,13 +96,13 @@ private:
 
 	std::function<void()> _appthread_cb =
 		[&] {
-			UIRunOnUIThread([&] { _busyButton->setText("Busy"); });
-			sleep(5);
+			//UIRunOnUIThread([&] { _busyButton->setText("Busy"); });
+			//sleep(5);
 		};
 
 	std::function<void()> _appthreadexit_cb =
 		[&] {
-			_busyButton->setText("Not busy");
+			//_busyButton->setText("Not busy");
 		};
 
 private:

@@ -1,21 +1,14 @@
 #ifndef UIPP_H
 #define UIPP_H
 
-struct UIGridParams
+struct UIGridStyle
 {
-	int x = 0;
-	int y = 0;
 	int xspan = 1;
 	int yspan = 1;
 	bool hexpand = false;
 	uiAlign halign = uiAlignFill;
 	bool vexpand = false;
 	uiAlign valign = uiAlignFill;
-};
-
-struct UIBoxParams
-{
-	bool expand = false;
 };
 
 class Closeable
@@ -75,35 +68,10 @@ public:
 	UIControl* enable()  { uiControlEnable(control()); return this; }
 	UIControl* disable() { uiControlDisable(control()); return this; }
 
-public:
-	UIGridParams& getGridParams() {
-		if (!_gridParams)
-			_gridParams = UIGridParams();
-		return *_gridParams;
-	}
-
-	UIBoxParams& getBoxParams() {
-		if (!_boxParams)
-			_boxParams = UIBoxParams();
-		return *_boxParams;
-	}
-
-	UIControl* setGridParams(UIGridParams params) {
-		_gridParams = params;
-		return this;
-	}
-
-	UIControl* setBoxParams(UIBoxParams params) {
-		_boxParams = params;
-		return this;
-	}
-
 private:
 	uiControl* _control;
 	bool _owned = true;
 	bool _enabled = true;
-	std::optional<UIGridParams> _gridParams;
-	std::optional<UIBoxParams> _boxParams;
 };
 
 template <class T, class B>
@@ -128,11 +96,15 @@ public:
 		UITypedControl<uiBox, B>(control)
 	{}
 
+	B* add(bool expand, UIControl* child)
+	{
+		uiBoxAppend(this->typedControl(), child->claim(), expand);
+		return (B*) this;
+	}
+
 	B* add(UIControl* child)
 	{
-		const auto& params = child->getBoxParams();
-		uiBoxAppend(this->typedControl(), child->claim(), params.expand);
-		return (B*) this;
+		return add(false, child);
 	}
 };
 
@@ -159,14 +131,19 @@ public:
 		UITypedControl<uiGrid, UIGrid>(uiNewGrid())
 	{}
 
-	UIGrid* add(UIControl* child)
+	UIGrid* add(int x, int y, const UIGridStyle& style, UIControl* child)
 	{
-		const auto& params = child->getGridParams();
 		uiGridAppend(this->typedControl(), child->claim(),
-			params.x, params.y,
-			params.xspan, params.yspan,
-			params.hexpand, params.halign,
-			params.vexpand, params.valign);
+			x, y,
+			style.xspan, style.yspan,
+			style.hexpand, style.halign,
+			style.vexpand, style.valign);
+		return this;
+	}
+
+	UIGrid* setPadding(int padding)
+	{
+		uiGridSetPadded(this->typedControl(), padding);
 		return this;
 	}
 };
@@ -463,6 +440,26 @@ public:
 	UITab* add(const std::string& name, UIControl* control)
 	{
 		uiTabAppend(this->typedControl(), name.c_str(), control->claim());
+		return this;
+	}
+};
+
+class UIForm : public UITypedControl<uiForm, UIForm>
+{
+public:
+	UIForm():
+		UITypedControl<uiForm, UIForm>(uiNewForm())
+	{}
+
+	UIForm* add(const std::string& name, bool expand, UIControl* control)
+	{
+		uiFormAppend(this->typedControl(), name.c_str(), control->claim(), expand);
+		return this;
+	}
+
+	UIForm* setPadding(int padding)
+	{
+		uiFormSetPadded(this->typedControl(), padding);
 		return this;
 	}
 };
