@@ -551,6 +551,9 @@ buildlibrary libfrontend.a \
     src/fe-write.cc \
     src/fluxengine.cc \
 
+buildlibrary libgui.a \
+    src/gui/main.cc
+
 buildprogram fluxengine \
     libfrontend.a \
     libformats.a \
@@ -560,6 +563,10 @@ buildprogram fluxengine \
     libusbp.a \
     libfmt.a \
     libagg.a \
+
+buildprogram fluxengine-gui \
+    -rule linkgui \
+    libgui.a
 
 buildlibrary libemu.a \
     dep/emu/fnmatch.c

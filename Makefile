@@ -48,9 +48,10 @@ export CXX = g++
 export AR = ar rc
 export RANLIB = ranlib
 export STRIP = strip
-export CFLAGS += $(shell pkg-config --cflags $(PACKAGES))
+export CFLAGS += $(shell pkg-config --cflags $(PACKAGES)) $(shell wx-config --cflags)
 export LDFLAGS +=
 export LIBS += $(shell pkg-config --libs $(PACKAGES))
+export GUILIBS += $(shell wx-config --libs)
 export EXTENSION =
 
 ifeq ($(shell uname),Darwin)
