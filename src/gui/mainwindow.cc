@@ -59,7 +59,7 @@ public:
 							->add(2, 0, GRID_FILLX, make<UILabel>(""))
 							->add(3, 0, GRID_RIGHT, make<UILabel>("Head:"))
 							->add(4, 0, GRID_LEFT, make<UILabel>("0")))
-						->add(true, make<UIArea>()
+						->add(false, make<UIArea>()
 							->setOnDraw(_onredraw_cb)
 							->disable())
 						->add(true, make<UIArea>()

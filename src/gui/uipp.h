@@ -180,6 +180,12 @@ public:
 		_selfptr(this)
 	{}
 
+	UIArea* setSize(int width, int height)
+	{
+		uiAreaSetSize(this->typedControl(), width, height);
+		return this;
+	}
+
 public:
 	UIArea* setOnDraw(std::function<void(uiAreaDrawParams*)> cb)
 	{ _onRedraw = cb; return this; }
