@@ -82,6 +82,9 @@ public:
 					sectors.push_back(sectorId + i);
 				break;
 			}
+
+			default:
+				break;
 		}
 		return sectors;
 	}
