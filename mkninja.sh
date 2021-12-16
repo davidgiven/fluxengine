@@ -149,8 +149,16 @@ buildproto() {
 
     local flags
     flags=
+    local deps
+    deps=
     while true; do
         case $1 in
+            -d)
+                deps="$deps $2"
+                shift
+                shift
+                ;;
+
             -*)
                 flags="$flags $1"
                 shift
@@ -174,7 +182,7 @@ buildproto() {
         hfiles="$hfiles $hfile"
     done
 
-    echo build $cfiles $hfiles $def : proto $@
+    echo "build $cfiles $hfiles $def : proto $@ | $deps"
     echo "    flags=$flags --cpp_out=$OBJDIR/proto"
     echo "    def=$def"
 
@@ -579,6 +587,7 @@ buildsimpleprogram brother240tool \
     libfmt.a \
 
 buildproto libtestproto.a \
+    -d $OBJDIR/proto/lib/common.pb.h \
     tests/testproto.proto \
 
 buildencodedproto $OBJDIR/proto/libtestproto.def TestProto testproto_pb tests/testproto.textpb $OBJDIR/proto/tests/testproto.cc
