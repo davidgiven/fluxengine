@@ -60,6 +60,7 @@ export CC = clang
 export CXX = clang++
 export COBJC = clang
 export LDFLAGS += -framework IOKit -framework CoreFoundation
+export CFLAGS += -Wno-deprecated-declarations
 endif
 
 endif
