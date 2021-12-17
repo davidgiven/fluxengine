@@ -27,6 +27,7 @@ jobs:
           mingw-w64-i686-protobuf
           vim
           diffutils
+          mingw-w64-i686-wxWidgets
     - uses: actions/checkout@v2
       with:
         fetch-depth: 1
