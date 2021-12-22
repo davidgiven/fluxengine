@@ -443,6 +443,7 @@ FORMATS="\
     northstar87 \
     tids990 \
     victor9k_ss \
+    victor9k_ds \
     zilogmcz \
     "
 
@@ -547,6 +548,7 @@ encodedecodetest mac800 scripts/mac800_test.textpb
 encodedecodetest n88basic
 encodedecodetest tids990
 encodedecodetest victor9k_ss
+encodedecodetest victor9k_ds
 
 # vim: sw=4 ts=4 et
 
