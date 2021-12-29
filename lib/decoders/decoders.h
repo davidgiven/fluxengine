@@ -4,6 +4,7 @@
 #include "bytes.h"
 #include "sector.h"
 #include "decoders/fluxmapreader.h"
+#include "decoders/fluxdecoder.h"
 
 class Sector;
 class Fluxmap;
@@ -47,14 +48,17 @@ public:
     std::unique_ptr<TrackDataFlux> decodeToSectors(std::shared_ptr<const Fluxmap> fluxmap, unsigned cylinder, unsigned head);
     void pushRecord(const Fluxmap::Position& start, const Fluxmap::Position& end);
 
+	void resetFluxDecoder();
     std::vector<bool> readRawBits(unsigned count);
-    //{ return _fmr->readRawBits(count, _sector->clock); }
 
     Fluxmap::Position tell()
     { return _fmr->tell(); } 
 
     void seek(const Fluxmap::Position& pos)
     { return _fmr->seek(pos); } 
+
+    bool eof() const
+    { return _fmr->eof(); }
 
 	virtual std::set<unsigned> requiredSectors(unsigned cylinder, unsigned head) const;
 
@@ -68,6 +72,7 @@ protected:
     FluxmapReader* _fmr = nullptr;
 	std::unique_ptr<TrackDataFlux> _trackdata;
     std::shared_ptr<Sector> _sector;
+	std::unique_ptr<FluxDecoder> _decoder;
 };
 
 #endif

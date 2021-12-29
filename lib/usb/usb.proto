@@ -4,9 +4,7 @@ import "lib/common.proto";
 
 message UsbProto {
 	oneof device {
-		string fluxengine = 1
-			[(help) = "serial number of FluxEngine device to use"];
-		string greaseweazle = 2
-			[(help) = "serial port of GreaseWeazle device to use"];
+		string serial = 1
+			[(help) = "serial number of FluxEngine or GreaseWeazle device to use"];
 	}
 }

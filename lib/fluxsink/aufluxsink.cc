@@ -68,14 +68,15 @@ public:
 			while (!fmr.eof())
 			{
 				unsigned ticks;
-				uint8_t bits = fmr.getNextEvent(ticks);
+				int event;
+				fmr.getNextEvent(event, ticks);
 				if (fmr.eof())
 					break;
 				timestamp += ticks;
 
-				if (bits & F_BIT_PULSE)
+				if (event & F_BIT_PULSE)
 					data[timestamp*channels + 0] = 0x7f;
-				if (_config.index_markers() && (bits & F_BIT_INDEX))
+				if (_config.index_markers() && (event & F_BIT_INDEX))
 					data[timestamp*channels + 1] = 0x7f;
 			}
 

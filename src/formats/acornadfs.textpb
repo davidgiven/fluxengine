@@ -12,7 +12,11 @@ image_writer {
 }
 
 decoder {
-	ibm {}
+	ibm {
+		trackdata {
+			ignore_side_byte: true
+		}
+	}
 }
 
 cylinders {

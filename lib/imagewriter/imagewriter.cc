@@ -48,6 +48,7 @@ void ImageWriter::updateConfigForFilename(ImageWriterProto* proto, const std::st
 		{".st",       [&]() { proto->mutable_img(); }},
 		{".nsi",      [&]() { proto->mutable_nsi(); }},
 		{".vgi",      [&]() { proto->mutable_img(); }},
+		{".xdf",      [&]() { proto->mutable_img(); }},
 	};
 
 	for (const auto& it : formats)

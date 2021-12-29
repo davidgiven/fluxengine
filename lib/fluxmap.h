@@ -3,6 +3,7 @@
 
 #include "bytes.h"
 #include "protocol.h"
+#include "fmt/format.h"
 
 class RawBits;
 
@@ -17,6 +18,10 @@ public:
 
         nanoseconds_t ns() const
         { return ticks * NS_PER_TICK; }
+
+        operator std::string () {
+            return fmt::format("[b:{}, t:{}, z:{}]", bytes, ticks, zeroes);
+        }
     };
 
 public:
@@ -46,6 +51,7 @@ public:
     Fluxmap& appendInterval(uint32_t ticks);
     Fluxmap& appendPulse();
     Fluxmap& appendIndex();
+	Fluxmap& appendDesync();
 
     Fluxmap& appendBytes(const Bytes& bytes);
     Fluxmap& appendBytes(const uint8_t* ptr, size_t len);
@@ -57,7 +63,8 @@ public:
 
 	Fluxmap& appendBits(const std::vector<bool>& bits, nanoseconds_t clock);
 
-	void precompensate(int threshold_ticks, int amount_ticks);
+    void precompensate(int threshold_ticks, int amount_ticks);
+    std::vector<Fluxmap> split();
 
 private:
 	uint8_t& findLastByte();

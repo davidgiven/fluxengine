@@ -43,13 +43,14 @@ file while changing the decoder options, to save disk wear. It's also much faste
 
 ### Connecting it up
 
-To use, simply plug your FluxEngine into your computer and run the client. If a
-single device is plugged in, it will be automatically detected and used.
+To use, simply plug your FluxEngine (or [GreaseWeazle](greaseweazle.doc) into
+your computer and run the client. If a single device is plugged in, it will be
+automatically detected and used.
 
 If _more_ than one device is plugged in, you need to specify which one to use
-with the `--usb.fluxengine` parameter, which takes the device serial number as a
+with the `--usb.serial` parameter, which takes the device serial number as a
 parameter.  You can find out the serial numbers by running the command without
-the `--usb.fluxengine` parameter, and if more than one device is attached they will
+the `--usb.serial` parameter, and if more than one device is attached they will
 be listed. The serial number is also shown whenever a connection is made.
 
 You _can_ work with more than one FluxEngine at the same time, using different
@@ -233,7 +234,7 @@ FluxEngine supports a number of ways to get or put flux. When using the `-s` or
 FluxEngine also supports a number of file system image formats. When using the
 `-i` or `-o` options (for input and output), you can use any of these strings:
 
-  - `<filename.adf>`, `<filename.d81>`, `<filename.img>`, `<filename.st>`
+  - `<filename.adf>`, `<filename.d81>`, `<filename.img>`, `<filename.st>`, `<filename.xdf>`
 
 	Read from or write to a simple headerless image file (all these formats are
 	the same). This will probably want configuration via the
@@ -246,10 +247,38 @@ FluxEngine also supports a number of file system image formats. When using the
 	4.2](https://en.wikipedia.org/wiki/Disk_Copy) image file, commonly used by
 	Apple Macintosh emulators.
   
+  - `<filename.td0>`
+
+	Read a [Sydex Teledisk TD0
+	file](https://web.archive.org/web/20210420224336/http://dunfield.classiccmp.org/img47321/teledisk.htm)
+	image file. Note that only uncompressed images are supported (so far).
+
   - `<filename.jv3>`
 
 	Read from a JV3 image file, commonly used by TRS-80 emulators. **Read
 	only.**
+
+  - `<filename.dim>`
+
+  Read from a [DIM image file](https://www.pc98.org/project/doc/dim.html),
+  commonly used by X68000 emulators. Supports automatically configuring
+  the encoder. **Read Only.**
+  
+  - `<filename.fdi>`
+
+  Read from a [FDI image file](https://www.pc98.org/project/doc/hdi.html),
+  commonly used by PC-98 emulators. **Read Only.**
+  
+  - `<filename.d88>`
+
+  Read from a [D88 image file](https://www.pc98.org/project/doc/d88.html),
+  commonly used by various Japanese PC emulators, including the NEC PC-88. **Read Only.**
+  
+  FluxEngine is currently limited to reading only the first floppy image in a
+  D88 file.
+  
+  The D88 reader should be used with the `ibm` profile and will override
+  most encoding parameters on a track-by-track basis.
   
   - `<filename.ldbs>`
 

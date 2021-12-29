@@ -33,7 +33,7 @@ public:
 		std::cout << fmt::format("Writing {} cylinders, {} sides, {} sectors, {} ({} bytes/sector), {} kB total",
 				geometry.numTracks, geometry.numSides,
 				geometry.numSectors, geometry.sectorSize == 256 ? "SD" : "DD", geometry.sectorSize,
-				geometry.numTracks * geometry.sectorSize / 1024)
+				geometry.numTracks * geometry.numSides * geometry.numSectors * geometry.sectorSize / 1024)
 				<< std::endl;
 
 		std::ofstream outputFile(_config.filename(), std::ios::out | std::ios::binary);

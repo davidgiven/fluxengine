@@ -39,7 +39,6 @@ public:
 		const FluxMatcher* matcher = nullptr;
 		_sector->clock = _fmr->seekToPattern(SECTOR_SYNC_PATTERN, matcher);
 		if (matcher == &SECTOR_SYNC_PATTERN) {
-			readRawBits(16);
 			return SECTOR_RECORD;
 		}
 		return UNKNOWN_RECORD;
@@ -47,6 +46,7 @@ public:
 
 	void decodeSectorRecord()
 	{
+		readRawBits(16);
 		auto rawbits = readRawBits(MICROPOLIS_ENCODED_SECTOR_SIZE*16);
 		auto bytes = decodeFmMfm(rawbits).slice(0, MICROPOLIS_ENCODED_SECTOR_SIZE);
 		ByteReader br(bytes);

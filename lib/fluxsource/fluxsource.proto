@@ -29,8 +29,13 @@ message ScpFluxSourceProto {
 }
 
 message CwfFluxSourceProto {
-	optional string filename = 1 [default = "flux.xwf",
+	optional string filename = 1 [default = "flux.cwf",
 		(help) = ".cwf file to read flux from"];
+}
+
+message Fl2FluxSourceProto {
+	optional string filename = 1 [default = "flux.fl2",
+		(help) = ".fl2 file to read flux from"];
 }
 
 message FluxSourceProto {
@@ -42,6 +47,7 @@ message FluxSourceProto {
 		KryofluxFluxSourceProto kryoflux = 5;
 		ScpFluxSourceProto scp = 6;
 		CwfFluxSourceProto cwf = 7;
+		Fl2FluxSourceProto fl2 = 8;
 	}
 }
 

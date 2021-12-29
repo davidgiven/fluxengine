@@ -81,7 +81,7 @@ public:
 		ImageReader(config)
 	{}
 
-	Image readImage()
+	std::unique_ptr<Image> readImage()
 	{
         std::ifstream inputFile(_config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
@@ -90,7 +90,7 @@ public:
 		inputFile.seekg( 0, std::ios::end);
 		unsigned inputFileSize = inputFile.tellg();
 		unsigned headerPtr = 0;
-		Image image;
+        std::unique_ptr<Image> image(new Image);
 		for (;;)
 		{
 			unsigned dataPtr = headerPtr + 2901*3 + 1;
@@ -110,7 +110,7 @@ public:
 					inputFile.read((char*) data.begin(), sectorSize);
 
 					unsigned head = !!(header.flags & JV3_SIDE);
-					const auto& sector = image.put(header.track, head, header.sector);
+					const auto& sector = image->put(header.track, head, header.sector);
                     sector->status = Sector::OK;
                     sector->logicalTrack = sector->physicalCylinder = header.track;
                     sector->logicalSide = sector->physicalHead = head;
@@ -127,7 +127,7 @@ public:
 			headerPtr = dataPtr;
 		}
 
-		image.calculateSize();
+		image->calculateSize();
         return image;
 	}
 };

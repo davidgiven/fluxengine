@@ -74,7 +74,7 @@ public:
 	{}
 
 	/* Search for FM or MFM sector record */
-	RecordType advanceToNextRecord()
+	RecordType advanceToNextRecord() override
 	{
 		nanoseconds_t now = _fmr->tell().ns();
 
@@ -127,20 +127,18 @@ public:
 
 		if (matcher == &MFM_PATTERN) {
 			_sectorType = SECTOR_TYPE_MFM;
-			readRawBits(48);
 			return SECTOR_RECORD;
 		}
 
 		if (matcher == &FM_PATTERN) {
 			_sectorType = SECTOR_TYPE_FM;
-			readRawBits(48);
 			return SECTOR_RECORD;
 		}
 
 		return UNKNOWN_RECORD;
 	}
 
-	void decodeSectorRecord()
+	void decodeSectorRecord() override
 	{
 		unsigned recordSize, payloadSize, headerSize;
 
@@ -154,6 +152,8 @@ public:
 			payloadSize = NORTHSTAR_PAYLOAD_SIZE_SD;
 			headerSize = NORTHSTAR_HEADER_SIZE_SD;
 		}
+
+		readRawBits(48);
 
 		auto rawbits = readRawBits(recordSize * 16);
 		auto bytes = decodeFmMfm(rawbits).slice(0, recordSize);

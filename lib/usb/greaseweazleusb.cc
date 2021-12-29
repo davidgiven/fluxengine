@@ -5,130 +5,7 @@
 #include "bytes.h"
 #include "fmt/format.h"
 #include "greaseweazle.h"
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-
-#if defined __WIN32__
-    #include <windows.h>
-
-    typedef HANDLE FileHandle;
-
-    static std::string get_last_error_string()
-    {
-        DWORD error = GetLastError();
-        if (error == 0)
-            return "OK";
-
-        LPSTR buffer = nullptr;
-        size_t size = FormatMessageA(
-                /* dwFlags= */ FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS,
-                /* lpSource= */ nullptr,
-                /* dwMessageId= */ error,
-                /* dwLanguageId= */ MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                /* lpBuffer= */ (LPSTR) &buffer,
-                /* nSize= */ 0,
-                /* Arguments= */ nullptr);
-    
-        std::string message(buffer, size);
-        LocalFree(buffer);
-        return message;
-    }
-
-    static HANDLE open_serial_port(const std::string& name)
-    {
-        HANDLE h = CreateFileA(
-            name.c_str(),
-            /* dwDesiredAccess= */ GENERIC_READ|GENERIC_WRITE,
-            /* dwShareMode= */ 0,
-            /* lpSecurityAttribues= */ nullptr,
-            /* dwCreationDisposition= */ OPEN_EXISTING,
-            /* dwFlagsAndAttributes= */ FILE_ATTRIBUTE_NORMAL,
-            /* hTemplateFile= */ nullptr);
-        if (h == INVALID_HANDLE_VALUE)
-            Error() << fmt::format("cannot open GreaseWeazle serial port '{}': {}",
-                name, get_last_error_string());
-        
-        DCB dcb =
-        {
-            .DCBlength = sizeof(DCB),
-            .BaudRate = CBR_9600,
-            .fBinary = true,
-            .ByteSize = 8,
-            .Parity = NOPARITY,
-            .StopBits = ONESTOPBIT
-        };
-        SetCommState(h, &dcb);
-
-        COMMTIMEOUTS commtimeouts = {0};
-        commtimeouts.ReadIntervalTimeout = 100;
-        SetCommTimeouts(h, &commtimeouts);
-
-        PurgeComm(h, PURGE_RXABORT|PURGE_RXCLEAR|PURGE_TXABORT|PURGE_TXCLEAR);
-        return h;
-    }
-
-    static void close_serial_port(FileHandle h)
-    {
-        CloseHandle(h);
-    }
-
-    static ssize_t read_serial_port(FileHandle h, uint8_t* buffer, size_t len)
-    {
-        DWORD rlen;
-        bool r = ReadFile(
-                /* hFile= */ h,
-                /* lpBuffer= */ buffer,
-                /* nNumberOfBytesToRead= */ len,
-                /* lpNumberOfBytesRead= */ &rlen,
-                /* lpOverlapped= */ nullptr);
-        if (!r)
-            return -1;
-        return rlen;
-    }
-
-    static ssize_t write_serial_port(FileHandle h, const uint8_t* buffer, size_t len)
-    {
-        DWORD wlen;
-        bool r = WriteFile(
-                /* hFile= */ h,
-                /* lpBuffer= */ buffer,
-                /* nNumberOfBytesToWrite= */ len,
-                /* lpNumberOfBytesWritten= */ &wlen,
-                /* lpOverlapped= */ nullptr);
-        if (!r)
-            return -1;
-        return wlen;
-    }
-
-#else
-    #include <termios.h>
-
-    typedef int FileHandle;
-    static FileHandle open_serial_port(const std::string& name)
-    {
-        int fd = open(name.c_str(), O_RDWR);
-        if (fd == -1)
-            Error() << fmt::format("cannot open GreaseWeazle serial port '{}': {}",
-                name, strerror(errno));
-
-        struct termios t;
-        tcgetattr(fd, &t);
-        t.c_iflag = 0;
-        t.c_oflag = 0;
-        t.c_cflag = CREAD;
-        t.c_lflag = 0;
-        t.c_cc[VMIN] = 1;
-        cfsetspeed(&t, 9600);
-        tcsetattr(fd, TCSANOW, &t);
-        return fd;
-    }
-
-    #define close_serial_port(fd) ::close(fd)
-    #define read_serial_port(fd, buf, len) ::read(fd, buf, len)
-    #define write_serial_port(fd, buf, len) ::write(fd, buf, len)
-#endif
+#include "serial.h"
 
 static const char* gw_error(int e)
 {
@@ -150,89 +27,31 @@ static const char* gw_error(int e)
     }
 }
 
+static uint32_t ss_rand_next(uint32_t x)
+{
+    return (x&1) ? (x>>1) ^ 0x80000062 : x>>1;
+}
+
 class GreaseWeazleUsb : public USB
 {
 private:
-    uint8_t _readbuffer[4096];
-    int _readbuffer_ptr = 0;
-    int _readbuffer_fill = 0;
-
-    void read_bytes(uint8_t* buffer, int len)
-    {
-        while (len > 0)
-        {
-            if (_readbuffer_ptr < _readbuffer_fill)
-            {
-                int buffered = std::min(len, _readbuffer_fill - _readbuffer_ptr);
-                memcpy(buffer, _readbuffer + _readbuffer_ptr, buffered);
-                _readbuffer_ptr += buffered;
-                buffer += buffered;
-                len -= buffered;
-            }
-
-            if (len == 0)
-                break;
-
-            ssize_t actual = read_serial_port(_fd, _readbuffer, sizeof(_readbuffer));
-            if (actual < 0)
-                Error() << "failed to receive command reply: " << strerror(actual);
-
-            _readbuffer_fill = actual;
-            _readbuffer_ptr = 0;
-        }
-    }
-
-    void read_bytes(Bytes& bytes)
-    {
-        read_bytes(bytes.begin(), bytes.size());
-    }
-
-    Bytes read_bytes(unsigned len)
-    {
-        Bytes b(len);
-        read_bytes(b);
-        return b;
-    }
-
-    uint8_t read_byte()
-    {
-        uint8_t b;
-        read_bytes(&b, 1);
-        return b;
-    }
-
     uint32_t read_28()
     {
-        return ((read_byte() & 0xfe) >> 1)
-            | ((read_byte() & 0xfe) << 6)
-            | ((read_byte() & 0xfe) << 13)
-            | ((read_byte() & 0xfe) << 20);
-    }
+        uint8_t buffer[4];
+        _serial->read(buffer, sizeof(buffer));
 
-    void write_bytes(const uint8_t* buffer, size_t len)
-    {
-        while (len > 0)
-        {
-            ssize_t actual = write_serial_port(_fd, buffer, len);
-            if (actual < 0)
-                Error() << "failed to send command: " << strerror(errno);
-
-            buffer += actual;
-            len -= actual;
-        }
-    }
-
-    void write_bytes(const Bytes& bytes)
-    {
-        write_bytes(bytes.cbegin(), bytes.size());
+        return ((buffer[0] & 0xfe) >> 1)
+            | ((buffer[1] & 0xfe) << 6)
+            | ((buffer[2] & 0xfe) << 13)
+            | ((buffer[3] & 0xfe) << 20);
     }
 
     void do_command(const Bytes& command)
     {
-        write_bytes(command);
+        _serial->write(command);
 
         uint8_t buffer[2];
-        read_bytes(buffer, sizeof(buffer));
+        _serial->read(buffer, sizeof(buffer));
 
         if (buffer[0] != command[0])
             Error() << fmt::format("command returned garbage (0x{:x} != 0x{:x} with status 0x{:x})",
@@ -242,15 +61,16 @@ private:
     }
 
 public:
-    GreaseWeazleUsb(const std::string& port)
+    GreaseWeazleUsb(const std::string& port):
+            _serial(SerialPort::openSerialPort(port))
     {
-        _fd = open_serial_port(port);
-
         int version = getVersion();
-        if (version == 22)
-            _version = V22;
+        if (version >= 29)
+            _version = V29;
         else if (version >= 24)
             _version = V24;
+        else if (version == 22)
+            _version = V22;
         else
         {
             Error() << "only GreaseWeazle firmware versions 22 and 24 or above are currently "
@@ -262,16 +82,11 @@ public:
         do_command({ CMD_SET_BUS_TYPE, 3, BUS_IBMPC });
     }
 
-    ~GreaseWeazleUsb()
-    {
-        close_serial_port(_fd);
-    }
-
     int getVersion()
     {
         do_command({ CMD_GET_INFO, 3, GETINFO_FIRMWARE });
 
-        Bytes response = read_bytes(32);
+        Bytes response = _serial->readBytes(32);
         ByteReader br(response);
 
         br.seek(4);
@@ -307,6 +122,7 @@ public:
                 break;
 
             case V24:
+            case V29:
             {
                 Bytes cmd(8);
                 cmd.writer()
@@ -323,13 +139,13 @@ public:
         uint32_t secondindex = ~0;
         for (;;)
         {
-            uint8_t b = read_byte();
+            uint8_t b = _serial->readByte();
             if (!b)
                 break;
 
             if (b == 255)
             {
-                switch (read_byte())
+                switch (_serial->readByte())
                 {
                     case FLUXOP_INDEX:
                     {
@@ -342,7 +158,7 @@ public:
                     }
 
                     case FLUXOP_SPACE:
-                        read_bytes(4);
+                        _serial->readBytes(4);
                         break;
 
                     default:
@@ -355,7 +171,7 @@ public:
                     ticks_gw += b;
                 else
                 {
-                    int delta = 250 + (b-250)*255 + read_byte() - 1;
+                    int delta = 250 + (b-250)*255 + _serial->readByte() - 1;
                     ticks_gw += delta;
                 }
             }
@@ -371,52 +187,88 @@ public:
     
     void testBulkWrite()
     {
+        std::cout << "Writing data: " << std::flush;
         const int LEN = 10*1024*1024;
-        Bytes cmd(6);
-        ByteWriter bw(cmd);
-        bw.write_8(CMD_SINK_BYTES);
-        bw.write_8(cmd.size());
-        bw.write_le32(LEN);
+        Bytes cmd;
+        switch (_version)
+        {
+            case V22:
+            case V24:
+            {
+                cmd.resize(6);
+                ByteWriter bw(cmd);
+                bw.write_8(CMD_SINK_BYTES);
+                bw.write_8(cmd.size());
+                bw.write_le32(LEN);
+                break;
+            }
+
+            case V29:
+            {
+                cmd.resize(10);
+                ByteWriter bw(cmd);
+                bw.write_8(CMD_SINK_BYTES);
+                bw.write_8(cmd.size());
+                bw.write_le32(LEN);
+                bw.write_le32(0); // seed
+                break;
+            }
+        }
         do_command(cmd);
 
         Bytes junk(LEN);
+        uint32_t seed = 0;
+        for (int i=0; i<LEN; i++)
+        {
+            junk[i] = seed;
+            seed = ss_rand_next(seed);
+        }
 		double start_time = getCurrentTime();
-        write_bytes(LEN);
-        read_bytes(1);
+        _serial->write(junk);
+        _serial->readBytes(1);
 		double elapsed_time = getCurrentTime() - start_time;
 
-		std::cout << "Transferred "
-				  << LEN
-				  << " bytes from PC -> GreaseWeazle in "
-				  << int(elapsed_time * 1000.0)
-				  << " ms ("
-				  << int((LEN / 1024.0) / elapsed_time)
-				  << " kB/s)"
-				  << std::endl;
+        std::cout << fmt::format("transferred {} bytes from PC -> device in {} ms ({} kb/s)\n",
+                LEN, int(elapsed_time * 1000.0), int((LEN / 1024.0) / elapsed_time));
     }
     
     void testBulkRead()
     {
+        std::cout << "Reading data: " << std::flush;
         const int LEN = 10*1024*1024;
-        Bytes cmd(6);
-        ByteWriter bw(cmd);
-        bw.write_8(CMD_SOURCE_BYTES);
-        bw.write_8(cmd.size());
-        bw.write_le32(LEN);
+        Bytes cmd;
+        switch (_version)
+        {
+            case V22:
+            case V24:
+            {
+                cmd.resize(6);
+                ByteWriter bw(cmd);
+                bw.write_8(CMD_SOURCE_BYTES);
+                bw.write_8(cmd.size());
+                bw.write_le32(LEN);
+                break;
+            }
+
+            case V29:
+            {
+                cmd.resize(10);
+                ByteWriter bw(cmd);
+                bw.write_8(CMD_SOURCE_BYTES);
+                bw.write_8(cmd.size());
+                bw.write_le32(LEN);
+                bw.write_le32(0); // seed
+                break;
+            }
+        }
         do_command(cmd);
 
 		double start_time = getCurrentTime();
-        read_bytes(LEN);
+        _serial->readBytes(LEN);
 		double elapsed_time = getCurrentTime() - start_time;
 
-		std::cout << "Transferred "
-				  << LEN
-				  << " bytes from GreaseWeazle -> PC in "
-				  << int(elapsed_time * 1000.0)
-				  << " ms ("
-				  << int((LEN / 1024.0) / elapsed_time)
-				  << " kB/s)"
-				  << std::endl;
+        std::cout << fmt::format("transferred {} bytes from device -> PC in {} ms ({} kb/s)\n",
+                LEN, int(elapsed_time * 1000.0), int((LEN / 1024.0) / elapsed_time));
     }
 
     Bytes read(int side, bool synced, nanoseconds_t readTime, nanoseconds_t hardSectorThreshold)
@@ -442,6 +294,7 @@ public:
             }
 
             case V24:
+            case V29:
             {
                 Bytes cmd(8);
                 cmd.writer()
@@ -457,7 +310,7 @@ public:
         ByteWriter bw(buffer);
         for (;;)
         {
-            uint8_t b = read_byte();
+            uint8_t b = _serial->readByte();
             if (!b)
                 break;
             bw.write_8(b);
@@ -484,11 +337,12 @@ public:
                 break;
 
             case V24:
+            case V29:
                 do_command({ CMD_WRITE_FLUX, 4, 1, 1 });
                 break;
         }
-        write_bytes(fluxEngineToGreaseWeazle(fldata, _clock));
-        read_byte(); /* synchronise */
+        _serial->write(fluxEngineToGreaseWeazle(fldata, _clock));
+        _serial->readByte(); /* synchronise */
 
         do_command({ CMD_GET_FLUX_STATUS, 2 });
     }
@@ -506,7 +360,7 @@ public:
         bw.write_8(cmd.size());
         bw.write_le32(200e6 / _clock);
         do_command(cmd);
-        read_byte(); /* synchronise */
+        _serial->readByte(); /* synchronise */
 
         do_command({ CMD_GET_FLUX_STATUS, 2 });
     }
@@ -515,7 +369,7 @@ public:
     {
         do_command({ CMD_SELECT, 3, (uint8_t)drive });
         do_command({ CMD_MOTOR, 4, (uint8_t)drive, 1 });
-        do_command({ CMD_SET_PIN, 4, 2, (uint8_t)(high_density ? 0 : 1) });
+        do_command({ CMD_SET_PIN, 4, 2, (uint8_t)(high_density ? 1 : 0) });
     }
 
     void measureVoltages(struct voltages_frame* voltages)
@@ -524,11 +378,12 @@ public:
 private:
     enum
     {
-	V22,
-	V24
+        V22,
+        V24,
+        V29
     };
     
-    FileHandle _fd;
+    std::unique_ptr<SerialPort> _serial;
     int _version;
     nanoseconds_t _clock;
     nanoseconds_t _revolutions;
@@ -540,4 +395,3 @@ USB* createGreaseWeazleUsb(const std::string& port)
 }
 
 // vim: sw=4 ts=4 et
-

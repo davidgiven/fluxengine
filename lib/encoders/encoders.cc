@@ -10,6 +10,7 @@
 #include "arch/micropolis/micropolis.h"
 #include "arch/northstar/northstar.h"
 #include "arch/tids990/tids990.h"
+#include "arch/victor9k/victor9k.h"
 #include "lib/encoders/encoders.pb.h"
 #include "protocol.h"
 
@@ -26,6 +27,7 @@ std::unique_ptr<AbstractEncoder> AbstractEncoder::create(const EncoderProto& con
 		{ EncoderProto::kMicropolis,createMicropolisEncoder },
 		{ EncoderProto::kNorthstar, createNorthstarEncoder },
 		{ EncoderProto::kTids990,   createTids990Encoder },
+		{ EncoderProto::kVictor9K,  createVictor9kEncoder },
 	};
 
 	auto encoder = encoders.find(config.format_case());

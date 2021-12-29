@@ -47,15 +47,14 @@ public:
 		_fileheader.file_id[2] = 'P';
 		_fileheader.version = 0x18; /* Version 1.8 of the spec */
 		_fileheader.type = _config.type_byte();
-		_fileheader.revolutions = 5;
 		_fileheader.start_track = strackno(config.cylinders().start(), config.heads().start());
 		_fileheader.end_track = strackno(config.cylinders().end(), config.heads().end());
-		_fileheader.flags = (_config.align_with_index() ? SCP_FLAG_INDEXED : 0)
+		_fileheader.flags = SCP_FLAG_INDEXED
 				| SCP_FLAG_96TPI;
 		_fileheader.cell_width = 0;
 		_fileheader.heads = singlesided;
 
-		std::cout << fmt::format("Writing 96 tpi {} SCP file containing {} SCP tracks\n",
+		std::cout << fmt::format("SCP: writing 96 tpi {} file containing {} tracks\n",
 			singlesided ? "single sided" : "double sided",
 			_fileheader.end_track - _fileheader.start_track + 1
 		);
@@ -71,7 +70,7 @@ public:
 		appendChecksum(checksum, _trackdata);
 		write_le32(_fileheader.checksum, checksum);
 
-		std::cout << "Writing output file...\n";
+		std::cout << "SCP: writing output file...\n";
 		std::ofstream of(_config.filename(), std::ios::out | std::ios::binary);
 		if (!of.is_open())
 			Error() << "cannot open output file";
@@ -88,19 +87,22 @@ public:
 		int strack = strackno(cylinder, head);
 
 		ScpTrack trackheader = {0};
-		trackheader.track_id[0] = 'T';
-		trackheader.track_id[1] = 'R';
-		trackheader.track_id[2] = 'K';
-		trackheader.strack = strack;
+		trackheader.header.track_id[0] = 'T';
+		trackheader.header.track_id[1] = 'R';
+		trackheader.header.track_id[2] = 'K';
+		trackheader.header.strack = strack;
 
-		FluxmapReader fmr(fluxmap);
+		auto lastFluxmap = fluxmap.split().back();
+
+		FluxmapReader fmr(lastFluxmap);
 		Bytes fluxdata;
 		ByteWriter fluxdataWriter(fluxdata);
 
-		if (_config.align_with_index())
-			fmr.findEvent(F_BIT_INDEX);
-
-		int revolution = 0;
+		int revolution = -1; // -1 indicates that we are before the first index pulse
+		if (_config.align_with_index()) {
+			fmr.skipToEvent(F_BIT_INDEX);
+			revolution = 0;
+		}
 		unsigned revTicks = 0;
 		unsigned totalTicks = 0;
 		unsigned ticksSinceLastPulse = 0;
@@ -108,24 +110,34 @@ public:
 		while (revolution < 5)
 		{
 			unsigned ticks;
-			uint8_t bits = fmr.getNextEvent(ticks);
+			int event;
+			fmr.getNextEvent(event, ticks);
+
 			ticksSinceLastPulse += ticks;
 			totalTicks += ticks;
 			revTicks += ticks;
 
-			if (fmr.eof() || (bits & F_BIT_INDEX))
+			// if we haven't output any revolutions yet by the end of the track,
+			// assume that the whole track is one rev
+			// also discard any duplicate index pulses
+			if (((fmr.eof() && revolution <= 0) || ((event & F_BIT_INDEX)) && revTicks > 0))
 			{
-				auto* revheader = &trackheader.revolution[revolution];
-				write_le32(revheader->offset, startOffset + sizeof(ScpTrack));
-				write_le32(revheader->length, (fluxdataWriter.pos - startOffset) / 2);
-				write_le32(revheader->index, revTicks * NS_PER_TICK / 25);
+				if (fmr.eof() && revolution == -1)
+					revolution = 0;
+				if (revolution >= 0) {
+					auto* revheader = &trackheader.revolution[revolution];
+					write_le32(revheader->offset, startOffset + sizeof(ScpTrack));
+					write_le32(revheader->length, (fluxdataWriter.pos - startOffset) / 2);
+					write_le32(revheader->index, revTicks * NS_PER_TICK / 25);
+					revheader++;
+				}
 				revolution++;
-				revheader++;
 				revTicks = 0;
 				startOffset = fluxdataWriter.pos;
 			}
+			if (fmr.eof()) break;
 
-			if (bits & F_BIT_PULSE)
+			if (event & F_BIT_PULSE)
 			{
 				unsigned t = ticksSinceLastPulse * NS_PER_TICK / 25;
 				while (t >= 0x10000)
@@ -138,6 +150,7 @@ public:
 			}
 		}
 
+		_fileheader.revolutions = revolution;
 		write_le32(_fileheader.track[strack], trackdataWriter.pos + sizeof(ScpHeader));
 		trackdataWriter += Bytes((uint8_t*)&trackheader, sizeof(trackheader));
 		trackdataWriter += fluxdata;

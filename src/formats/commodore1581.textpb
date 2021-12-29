@@ -58,7 +58,13 @@ encoder {
 
 decoder {
 	ibm {
-		swap_sides: false
+		trackdata {
+			swap_sides: false
+			sector_range: {
+				min_sector: 0
+				max_sector: 9
+			}
+		}
 	}
 }
 

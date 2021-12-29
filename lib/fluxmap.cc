@@ -56,6 +56,12 @@ Fluxmap& Fluxmap::appendIndex()
     return *this;
 }
 
+Fluxmap& Fluxmap::appendDesync()
+{
+	appendByte(F_DESYNC);
+    return *this;
+}
+
 void Fluxmap::precompensate(int threshold_ticks, int amount_ticks)
 {
     uint8_t junk = 0xff;
@@ -86,4 +92,19 @@ void Fluxmap::precompensate(int threshold_ticks, int amount_ticks)
             }
         }
     }
+}
+
+std::vector<Fluxmap> Fluxmap::split() {
+    std::vector<Fluxmap> maps;
+    Fluxmap map;
+    for (unsigned i=0; i<_bytes.size(); i++) {
+        if (_bytes[i] == F_DESYNC) {
+            maps.push_back(map);
+            map = Fluxmap();
+        } else {
+            map.appendByte(_bytes[i]);
+        }
+    }
+    maps.push_back(map);
+    return maps;
 }
