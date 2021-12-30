@@ -1,7 +1,7 @@
 comment: 'Victor 9000 / Sirius One 612kB SSHD GCR variable sector)'
 
 image_reader {
-	filename: "victor9k.img"
+	filename: "victor9k_ss.img"
 	img {
 		tracks: 80
 		sides: 1
@@ -71,7 +71,7 @@ image_reader {
 }
 
 image_writer {
-	filename: "victor9k.img"
+	filename: "victor9k_ss.img"
 	img {
 		tracks: 80
 		sides: 1

@@ -92,11 +92,14 @@ static void write_sector(std::vector<bool>& bits, unsigned& cursor,
         const Sector& sector)
 {
     write_one_bits(bits, cursor, trackdata.pre_header_sync_bits());
-    write_bits(bits, cursor, VICTOR9K_SECTOR_RECORD, 10);
 
-    uint8_t encodedTrack = sector.logicalTrack | (sector.logicalSide<<7);
+    //header identifier is hardcoded integer indicates header follows
+    uint8_t header_identifier = 8;
+
+    uint8_t encodedTrack = sector.logicalTrack;
     uint8_t encodedSector = sector.logicalSector;
     write_bytes(bits, cursor, Bytes {
+    	header_identifier,
         encodedTrack,
         encodedSector,
         (uint8_t)(encodedTrack + encodedSector),
@@ -105,7 +108,10 @@ static void write_sector(std::vector<bool>& bits, unsigned& cursor,
 
     write_zero_bits(bits, cursor, trackdata.post_header_gap_bits());
     write_one_bits(bits, cursor, trackdata.pre_data_sync_bits());
-    write_bits(bits, cursor, VICTOR9K_DATA_RECORD, 10);
+    
+    //data identifier is hardcoded integer indicates data follows
+    uint8_t data_identifier = 8;
+    write_bytes(bits, cursor, data_identifier);
 
     write_bytes(bits, cursor, sector.data);
 

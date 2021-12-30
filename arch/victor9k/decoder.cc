@@ -72,13 +72,17 @@ public:
 
     void decodeSectorRecord()
 	{
-		/* Skip the sync marker bit. */
-		readRawBits(22);
+		/* Skip the sync marker bits, a series of 1s. */
+		while (readRawBits(1)[0]) { };
 
+		//get next bits and recover above false bit from while exit 
+		auto firstBytes = readRawBits(9 + (3*10));
+		firstBytes.insert(firstBytes.begin(), false);
+	
 		/* Read header. */
-
-		auto bytes = decode(readRawBits(4*10)).slice(0, 4);
-
+		auto bytes = decode(firstBytes).slice(0, 4);
+    	
+		uint8_t headerID = bytes[0];
 		uint8_t rawTrack = bytes[1];
 		_sector->logicalSector = bytes[2];
 		uint8_t gotChecksum = bytes[3];
@@ -96,7 +100,7 @@ public:
     void decodeDataRecord()
 	{
 		/* Skip the sync marker bit. */
-		readRawBits(22);
+		std::vector<bool> startbits = readRawBits(22);
 
 		/* Read data. */
 
