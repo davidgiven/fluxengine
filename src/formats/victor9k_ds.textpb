@@ -12,6 +12,7 @@ image_reader {
 			}
 		}
 		trackdata {
+		    side: 0
 			track: 0
 			up_to_track: 3
 			sector_range {
@@ -19,6 +20,7 @@ image_reader {
 			}
 		}
 		trackdata {
+		    side: 0
 			track: 4
 			up_to_track: 15
 			sector_range {
@@ -26,6 +28,7 @@ image_reader {
 			}
 		}
 		trackdata {
+		    side: 0
 			track: 16
 			up_to_track: 26
 			sector_range {
@@ -33,6 +36,7 @@ image_reader {
 			}
 		}
 		trackdata {
+		    side: 0
 			track: 27
 			up_to_track: 37
 			sector_range {
@@ -40,6 +44,7 @@ image_reader {
 			}
 		}
 		trackdata {
+		    side: 0
 			track: 38
 			up_to_track: 47
 			sector_range {
@@ -47,6 +52,7 @@ image_reader {
 			}
 		}
 		trackdata {
+		    side: 0
 			track: 48
 			up_to_track: 59
 			sector_range {
@@ -54,6 +60,7 @@ image_reader {
 			}
 		}
 		trackdata {
+		    side: 0
 			track: 60
 			up_to_track: 70
 			sector_range {
@@ -61,6 +68,7 @@ image_reader {
 			}
 		}
 		trackdata {
+		    side: 0
 			track: 71
 			up_to_track: 79
 			sector_range {
@@ -68,57 +76,65 @@ image_reader {
 			}
 		}
 		trackdata {
-			track: 80
-			up_to_track: 87
+			side: 1
+			track: 0
+			up_to_track: 7
 			sector_range {
 				sector_count: 18
 			}
 		}
 		trackdata {
-			track: 88
-			up_to_track: 98
+			side: 1
+			track: 8
+			up_to_track: 18
 			sector_range {
 				sector_count: 17
 			}
 		}
 		trackdata {
-			track: 99
-			up_to_track: 109
+			side: 1
+			track: 19
+			up_to_track: 29
 			sector_range {
 				sector_count: 16
 			}
 		}
 		trackdata {
-			track: 110
-			up_to_track: 119
+			side: 1
+			track: 30
+			up_to_track: 40
 			sector_range {
 				sector_count: 15
 			}
 		}
 		trackdata {
-			track: 120
-			up_to_track: 131
+			side: 1
+			track: 41
+			up_to_track: 51
 			sector_range {
 				sector_count: 14
 			}
 		}
 		trackdata {
-			track: 132
-			up_to_track: 142
+			side: 1
+			track: 52
+			up_to_track: 62
 			sector_range {
 				sector_count: 13
 			}
 		}
 		trackdata {
-			track: 143
-			up_to_track: 154
+			side: 1
+			track: 63
+			up_to_track: 74
 			sector_range {
 				sector_count: 12
 			}
 		}
 		trackdata {
-			track: 155
-			up_to_track: 159
+			side: 1
+			track: 75
+			up_to_track: 79
 			sector_range {
 				sector_count: 11
 			}
@@ -129,7 +145,7 @@ image_reader {
 image_writer {
 	filename: "victor9k_ds.img"
 	img {
-		tracks: 160
+		tracks: 80
 		sides: 2
 		trackdata {
 			sector_size: 512
@@ -138,6 +154,7 @@ image_writer {
 			}
 		}
 		trackdata {
+			side: 0
 			track: 0
 			up_to_track: 3
 			sector_range {
@@ -145,6 +162,7 @@ image_writer {
 			}
 		}
 		trackdata {
+			side: 0
 			track: 4
 			up_to_track: 15
 			sector_range {
@@ -152,6 +170,7 @@ image_writer {
 			}
 		}
 		trackdata {
+			side: 0
 			track: 16
 			up_to_track: 26
 			sector_range {
@@ -159,6 +178,7 @@ image_writer {
 			}
 		}
 		trackdata {
+			side: 0
 			track: 27
 			up_to_track: 37
 			sector_range {
@@ -166,6 +186,7 @@ image_writer {
 			}
 		}
 		trackdata {
+			side: 0
 			track: 38
 			up_to_track: 47
 			sector_range {
@@ -173,6 +194,7 @@ image_writer {
 			}
 		}
 		trackdata {
+			side: 0
 			track: 48
 			up_to_track: 59
 			sector_range {
@@ -180,6 +202,7 @@ image_writer {
 			}
 		}
 		trackdata {
+			side: 0
 			track: 60
 			up_to_track: 70
 			sector_range {
@@ -187,6 +210,7 @@ image_writer {
 			}
 		}
 		trackdata {
+			side: 0
 			track: 71
 			up_to_track: 79
 			sector_range {
@@ -194,57 +218,65 @@ image_writer {
 			}
 		}
 		trackdata {
-			track: 80
-			up_to_track: 87
+			side: 1
+			track: 0
+			up_to_track: 7
 			sector_range {
 				sector_count: 18
 			}
 		}
 		trackdata {
-			track: 88
-			up_to_track: 98
+			side: 1
+			track: 8
+			up_to_track: 18
 			sector_range {
 				sector_count: 17
 			}
 		}
 		trackdata {
-			track: 99
-			up_to_track: 109
+			side: 1
+			track: 19
+			up_to_track: 29
 			sector_range {
 				sector_count: 16
 			}
 		}
 		trackdata {
-			track: 110
-			up_to_track: 119
+			side: 1
+			track: 30
+			up_to_track: 40
 			sector_range {
 				sector_count: 15
 			}
 		}
 		trackdata {
-			track: 120
-			up_to_track: 131
+			side: 1
+			track: 41
+			up_to_track: 51
 			sector_range {
 				sector_count: 14
 			}
 		}
 		trackdata {
-			track: 132
-			up_to_track: 142
+			side: 1
+			track: 52
+			up_to_track: 62
 			sector_range {
 				sector_count: 13
 			}
 		}
 		trackdata {
-			track: 143
-			up_to_track: 154
+			side: 1
+			track: 63
+			up_to_track: 74
 			sector_range {
 				sector_count: 12
 			}
 		}
 		trackdata {
-			track: 155
-			up_to_track: 159
+			side: 1
+			track: 75
+			up_to_track: 79
 			sector_range {
 				sector_count: 11
 			}
@@ -366,7 +398,7 @@ encoder {
 		trackdata {
 			head: 1
 			min_cylinder: 30
-			max_cylinder: 39
+			max_cylinder: 40
 			original_period_ms: 187.6
 			sector_range {
 				sector_count: 15
@@ -374,7 +406,7 @@ encoder {
 		}
 		trackdata {
 			head: 1
-			min_cylinder: 40
+			min_cylinder: 41
 			max_cylinder: 51
 			original_period_ms: 175.3
 			sector_range {
