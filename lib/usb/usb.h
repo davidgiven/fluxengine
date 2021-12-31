@@ -5,9 +5,7 @@
 #include "flags.h"
 
 class Fluxmap;
-class libusb_device;
-class libusb_device_handle;
-class libusb_device_descriptor;
+namespace libusbp { class device; }
 
 class USB
 {
@@ -30,13 +28,11 @@ public:
 
 protected:
 	std::string usberror(int i);
-
-	libusb_device_handle* _device;
 };
 
 extern USB& getUsb();
 
-extern USB* createFluxengineUsb(libusb_device* device);
+extern USB* createFluxengineUsb(libusbp::device& device);
 extern USB* createGreaseWeazleUsb(const std::string& serialPort);
 
 static inline int usbGetVersion()     { return getUsb().getVersion(); }

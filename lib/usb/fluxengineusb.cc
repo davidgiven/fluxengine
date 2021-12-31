@@ -3,10 +3,11 @@
 #include "protocol.h"
 #include "fluxmap.h"
 #include "bytes.h"
-#include <libusb.h>
+#include "libusbp_config.h"
+#include "libusbp.hpp"
 #include "fmt/format.h"
 
-#define TIMEOUT 5000
+#define MAX_TRANSFER (32*1024)
 
 /* Hacky: the board always operates in little-endian mode. */
 static uint16_t read_short_from_usb(uint16_t usb)
@@ -20,65 +21,66 @@ class FluxEngineUsb : public USB
 private:
 	uint8_t _buffer[FRAME_SIZE];
 
-	int usb_cmd_send(void* ptr, int len)
+	void usb_cmd_send(void* ptr, size_t len)
 	{
-		//std::cerr << "send:\n";
-		//hexdump(std::cerr, Bytes((const uint8_t*)ptr, len));
-		int i = libusb_interrupt_transfer(_device, FLUXENGINE_CMD_OUT_EP,
-			(uint8_t*) ptr, len, &len, TIMEOUT);
-		if (i < 0)
-			Error() << "failed to send command: " << usberror(i);
-		return len;
+		size_t rlen;
+		_handle.write_pipe(FLUXENGINE_CMD_OUT_EP, ptr, len, &rlen);
 	}
 
-	void usb_cmd_recv(void* ptr, int len)
+	void usb_cmd_recv(void* ptr, size_t len)
 	{
-		int i = libusb_interrupt_transfer(_device, FLUXENGINE_CMD_IN_EP,
-		   (uint8_t*)  ptr, len, &len, TIMEOUT);
-		if (i < 0)
-			Error() << "failed to receive command reply: " << usberror(i);
-		//std::cerr << "recv:\n";
-		//hexdump(std::cerr, Bytes((const uint8_t*)ptr, len));
+		size_t rlen;
+		_handle.read_pipe(FLUXENGINE_CMD_IN_EP, ptr, len, &rlen);
 	}
 
-	int large_bulk_transfer(int ep, Bytes& bytes)
+	void usb_data_send(const Bytes& bytes)
 	{
-		if (bytes.size() == 0)
-			return 0;
-
-		int len;
-		int i = libusb_bulk_transfer(_device, ep, bytes.begin(), bytes.size(), &len, TIMEOUT);
-		if (i < 0)
-			Error() << fmt::format("data transfer failed at {} bytes: {}", len, usberror(i));
-		return len;
-	}
-
-public:
-	FluxEngineUsb(libusb_device* device)
-	{
-		int i = libusb_open(device, &_device);
-		if (i < 0)
-			Error() << "cannot open USB device: " << libusb_strerror((libusb_error) i);
-
-		int cfg = -1;
-		libusb_get_configuration(_device, &cfg);
-		if (cfg != 1)
+		size_t ptr = 0;
+		while (ptr < bytes.size())
 		{
-			i = libusb_set_configuration(_device, 1);
-			if (i < 0)
-				Error() << "the FluxEngine would not accept configuration: " << usberror(i);
+			size_t rlen = bytes.size() - ptr;
+			if (rlen > MAX_TRANSFER)
+				rlen = MAX_TRANSFER;
+			_handle.write_pipe(FLUXENGINE_DATA_OUT_EP, bytes.cbegin() + ptr, rlen, &rlen);
+			ptr += rlen;
+		}
+	}
+
+	void usb_data_recv(Bytes& bytes)
+	{
+		size_t ptr = 0;
+		while (ptr < bytes.size())
+		{
+			size_t rlen = bytes.size() - ptr;
+			if (rlen > MAX_TRANSFER)
+				rlen = MAX_TRANSFER;
+			_handle.read_pipe(FLUXENGINE_DATA_IN_EP, bytes.begin() + ptr, rlen, &rlen);
+			ptr += rlen;
+			if (rlen < MAX_TRANSFER)
+				break;
 		}
 
-		i = libusb_claim_interface(_device, 0);
-		if (i < 0)
-			Error() << "could not claim interface: " << usberror(i);
+		bytes.resize(ptr);
+	}
 
+
+public:
+	FluxEngineUsb(libusbp::device& device):
+		_device(device),
+		_interface(_device, 0, false),
+		_handle(_interface)
+	{
 		int version = getVersion();
 		if (version != FLUXENGINE_VERSION)
 			Error() << "your FluxEngine firmware is at version " << version
 					<< " but the client is for version " << FLUXENGINE_VERSION
 					<< "; please upgrade";
 	}
+
+private:
+	libusbp::device _device;
+	libusbp::generic_interface _interface;
+	libusbp::generic_handle _handle;
 
 private:
 	void bad_reply(void)
@@ -167,14 +169,15 @@ public:
 		const int YSIZE = 256;
 		const int ZSIZE = 64;
 
+		std::cout << "Reading data: " << std::flush;
 		Bytes bulk_buffer(XSIZE*YSIZE*ZSIZE);
 		double start_time = getCurrentTime();
-		large_bulk_transfer(FLUXENGINE_DATA_IN_EP, bulk_buffer);
+		usb_data_recv(bulk_buffer);
 		double elapsed_time = getCurrentTime() - start_time;
 
-		std::cout << "Transferred "
+		std::cout << "transferred "
 				  << bulk_buffer.size()
-				  << " bytes from FluxEngine -> PC in "
+				  << " bytes from device -> PC in "
 				  << int(elapsed_time * 1000.0)
 				  << " ms ("
 				  << int((bulk_buffer.size() / 1024.0) / elapsed_time)
@@ -215,13 +218,14 @@ public:
 					bulk_buffer[offset] = uint8_t(x+y+z);
 				}
 
+		std::cout << "Writing data: " << std::flush;
 		double start_time = getCurrentTime();
-		large_bulk_transfer(FLUXENGINE_DATA_OUT_EP, bulk_buffer);
+		usb_data_send(bulk_buffer);
 		double elapsed_time = getCurrentTime() - start_time;
 
-		std::cout << "Transferred "
+		std::cout << "transferred "
 				  << bulk_buffer.size()
-				  << " bytes from PC -> FluxEngine in "
+				  << " bytes from PC -> device in "
 				  << int(elapsed_time * 1000.0)
 				  << " ms ("
 				  << int((bulk_buffer.size() / 1024.0) / elapsed_time)
@@ -248,8 +252,7 @@ public:
 		auto fluxmap = std::unique_ptr<Fluxmap>(new Fluxmap);
 
 		Bytes buffer(1024*1024);
-		int len = large_bulk_transfer(FLUXENGINE_DATA_IN_EP, buffer);
-		buffer.resize(len);
+		usb_data_recv(buffer);
 
 		await_reply<struct any_frame>(F_FRAME_READ_REPLY);
 		return buffer;
@@ -271,7 +274,7 @@ public:
 		((uint8_t*)&f.bytes_to_write)[3] = safelen >> 24;
 
 		usb_cmd_send(&f, f.f.size);
-		large_bulk_transfer(FLUXENGINE_DATA_OUT_EP, safeBytes);
+		usb_data_send(safeBytes);
 		
 		await_reply<struct any_frame>(F_FRAME_WRITE_REPLY);
 	}
@@ -327,7 +330,7 @@ public:
 	}
 };
 
-USB* createFluxengineUsb(libusb_device* device)
+USB* createFluxengineUsb(libusbp::device& device)
 {
 	return new FluxEngineUsb(device);
 }

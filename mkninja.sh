@@ -3,8 +3,20 @@ set -e
 
 cat <<EOF
 rule cxx
-    command = $CXX $CFLAGS \$flags -I. -c -o \$out \$in -MMD -MF \$out.d
+    command = $CXX $CXXFLAGS \$flags -I. -c -o \$out \$in -MMD -MF \$out.d
     description = CXX \$out
+    depfile = \$out.d
+    deps = gcc
+    
+rule cc
+    command = $CC $CFLAGS \$flags -I. -c -o \$out \$in -MMD -MF \$out.d
+    description = CC \$out
+    depfile = \$out.d
+    deps = gcc
+    
+rule cobjc
+    command = $COBJC $CFLAGS \$flags -I. -c -o \$out \$in -MMD -MF \$out.d
+    description = COBJC \$out
     depfile = \$out.d
     deps = gcc
     
@@ -30,6 +42,10 @@ rule library
 rule link
     command = $CXX $LDFLAGS -o \$out \$in \$flags $LIBS
     description = LINK \$in
+
+rule linkgui
+    command = $CXX $LDFLAGS $GUILDFLAGS -o \$out \$in \$flags $LIBS $GUILIBS
+    description = LINK-OBJC \$in
 
 rule test
     command = \$in && touch \$out
@@ -82,17 +98,41 @@ buildlibrary() {
     dobjs=
     for src in "$@"; do
         local obj
+        local dobj
         obj="$OBJDIR/opt/${src%%.c*}.o"
         oobjs="$oobjs $obj"
+        dobj="$OBJDIR/dbg/${src%%.c*}.o"
+        dobjs="$dobjs $dobj"
 
-        echo "build $obj : cxx $src | $deps"
-        echo "    flags=$flags $COPTFLAGS"
 
-        obj="$OBJDIR/dbg/${src%%.c*}.o"
-        dobjs="$dobjs $obj"
+        case "${src##*.}" in
+            m)
+                echo "build $obj : cobjc $src | $deps"
+                echo "    flags=$flags $COPTFLAGS"
+                echo "build $dobj : cobjc $src | $deps"
+                echo "    flags=$flags $CDBGFLAGS"
+                ;;
 
-        echo "build $obj : cxx $src | $deps"
-        echo "    flags=$flags $CDBGFLAGS"
+            c)
+                echo "build $obj : cc $src | $deps"
+                echo "    flags=$flags $COPTFLAGS"
+                echo "build $dobj : cc $src | $deps"
+                echo "    flags=$flags $CDBGFLAGS"
+                ;;
+
+            cc|cpp)
+                echo "build $obj : cxx $src | $deps"
+                echo "    flags=$flags $COPTFLAGS"
+                echo "build $dobj : cxx $src | $deps"
+                echo "    flags=$flags $CDBGFLAGS"
+                ;;
+
+            *)
+                echo "Unknown file extension" >&2
+                exit 1
+                ;;
+        esac
+
     done
 
     echo build $OBJDIR/opt/$lib : library $oobjs
@@ -109,8 +149,16 @@ buildproto() {
 
     local flags
     flags=
+    local deps
+    deps=
     while true; do
         case $1 in
+            -d)
+                deps="$deps $2"
+                shift
+                shift
+                ;;
+
             -*)
                 flags="$flags $1"
                 shift
@@ -134,7 +182,7 @@ buildproto() {
         hfiles="$hfiles $hfile"
     done
 
-    echo build $cfiles $hfiles $def : proto $@
+    echo "build $cfiles $hfiles $def : proto $@ | $deps"
     echo "    flags=$flags --cpp_out=$OBJDIR/proto"
     echo "    def=$def"
 
@@ -166,8 +214,16 @@ buildprogram() {
 
     local flags
     flags=
+    local rule
+    rule=link
     while true; do
         case $1 in
+            -rule)
+                rule=$2
+                shift
+                shift
+                ;;
+
             -*)
                 flags="$flags $1"
                 shift
@@ -187,10 +243,10 @@ buildprogram() {
         dobjs="$dobjs $OBJDIR/dbg/$src"
     done
 
-    echo build $prog-debug$EXTENSION : link $dobjs
+    echo build $prog-debug$EXTENSION : $rule $dobjs
     echo "    flags=$flags $LDDBGFLAGS"
 
-    echo build $prog$EXTENSION-unstripped : link $oobjs
+    echo build $prog$EXTENSION-unstripped : $rule $oobjs
     echo "    flags=$flags $LDOPTFLAGS"
 
     echo build $prog$EXTENSION : strip $prog$EXTENSION-unstripped
@@ -277,6 +333,32 @@ buildlibrary libagg.a \
     dep/stb/stb_image_write.c \
     dep/agg/src/*.cpp
 
+case "$(uname)" in
+    Darwin)
+        buildlibrary libusbp.a \
+            -Idep/libusbp/include \
+            -Idep/libusbp/src \
+            dep/libusbp/src/*.c \
+            dep/libusbp/src/mac/*.c
+        ;;
+
+    MINGW*)
+        buildlibrary libusbp.a \
+            -Idep/libusbp/include \
+            -Idep/libusbp/src \
+            dep/libusbp/src/*.c \
+            dep/libusbp/src/windows/*.c
+        ;;
+
+    *)
+        buildlibrary libusbp.a \
+            -Idep/libusbp/include \
+            -Idep/libusbp/src \
+            dep/libusbp/src/*.c \
+            dep/libusbp/src/linux/*.c
+        ;;
+esac
+
 buildlibrary libfmt.a \
     dep/fmt/format.cc \
     dep/fmt/os.cc \
@@ -312,6 +394,7 @@ buildproto libfl2.a \
 
 buildlibrary libbackend.a \
     -I$OBJDIR/proto \
+    -Idep/libusbp/include \
     -d $OBJDIR/proto/libconfig.def \
     -d $OBJDIR/proto/libfl2.def \
     arch/aeslanier/decoder.cc \
@@ -454,11 +537,15 @@ done
 
 buildmktable formats $OBJDIR/formats.cc $FORMATS
 
-buildlibrary libfrontend.a \
+buildlibrary libformats.a \
     -I$OBJDIR/proto \
     -d $OBJDIR/proto/libconfig.def \
     $(for a in $FORMATS; do echo $OBJDIR/proto/src/formats/$a.cc; done) \
     $OBJDIR/formats.cc \
+
+buildlibrary libfrontend.a \
+    -I$OBJDIR/proto \
+    -d $OBJDIR/proto/libconfig.def \
     src/fe-analysedriveresponse.cc \
     src/fe-analyselayout.cc \
     src/fe-inspect.cc \
@@ -475,9 +562,11 @@ buildlibrary libfrontend.a \
 
 buildprogram fluxengine \
     libfrontend.a \
+    libformats.a \
     libbackend.a \
     libconfig.a \
     libfl2.a \
+    libusbp.a \
     libfmt.a \
     libagg.a \
 
@@ -499,6 +588,7 @@ buildsimpleprogram brother240tool \
     libfmt.a \
 
 buildproto libtestproto.a \
+    -d $OBJDIR/proto/lib/common.pb.h \
     tests/testproto.proto \
 
 buildencodedproto $OBJDIR/proto/libtestproto.def TestProto testproto_pb tests/testproto.textpb $OBJDIR/proto/tests/testproto.cc

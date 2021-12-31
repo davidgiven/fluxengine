@@ -1,6 +1,9 @@
-PACKAGES = zlib sqlite3 libusb-1.0 protobuf
+PACKAGES = zlib sqlite3 protobuf
 
-export CFLAGS = -x c++ --std=gnu++2a -ffunction-sections -fdata-sections \
+export CFLAGS = \
+	-ffunction-sections -fdata-sections
+export CXXFLAGS = $(CFLAGS) \
+	-x c++ --std=gnu++2a \
 	-Wno-deprecated-enum-enum-conversion \
 	-Wno-deprecated-enum-float-conversion
 export LDFLAGS = -pthread
@@ -12,14 +15,24 @@ export CDBGFLAGS = -O0 -g
 export LDDBGFLAGS = -O0 -g
 
 ifeq ($(OS), Windows_NT)
+else
+ifeq ($(shell uname),Darwin)
+else
+	PACKAGES += libudev
+endif
+endif
+
+ifeq ($(OS), Windows_NT)
 export PROTOC = /mingw32/bin/protoc
+export CC = /mingw32/bin/gcc
 export CXX = /mingw32/bin/g++
 export AR = /mingw32/bin/ar rc
 export RANLIB = /mingw32/bin/ranlib
 export STRIP = /mingw32/bin/strip
 export CFLAGS += -I/mingw32/include/libusb-1.0 -I/mingw32/include
 export LDFLAGS +=
-export LIBS += -L/mingw32/lib -static -lz -lsqlite3 -lusb-1.0 -lprotobuf
+export LIBS += -L/mingw32/lib -static -lz -lsqlite3 \
+	-lsetupapi -lwinusb -lole32 -lprotobuf -luuid
 export EXTENSION = .exe
 else
 
@@ -30,6 +43,7 @@ $(error You must have these pkg-config packages installed: $(PACKAGES))
 endif
 
 export PROTOC = protoc
+export CC = gcc
 export CXX = g++
 export AR = ar rc
 export RANLIB = ranlib
@@ -42,6 +56,11 @@ export EXTENSION =
 ifeq ($(shell uname),Darwin)
 AR = ar rcS
 RANLIB += -c -no_warning_for_no_symbols
+export CC = clang
+export CXX = clang++
+export COBJC = clang
+export LDFLAGS += -framework IOKit -framework CoreFoundation
+export CFLAGS += -Wno-deprecated-declarations
 endif
 
 endif
