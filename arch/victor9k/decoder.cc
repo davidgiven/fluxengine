@@ -92,26 +92,33 @@ public:
 		uint8_t wantChecksum = bytes[1] + bytes[2];
 		if ((_sector->logicalSector > 20) || (_sector->logicalTrack > 85) || (_sector->logicalSide > 1))
 			return;
-					
+
+		//  unintuitive but correct 
+		// _sector->status = (gotChecksum == wantChecksum) ? _sector->status = Sector::DATA_MISSING : Sector::BAD_CHECKSUM; 
 		if (wantChecksum == gotChecksum)
 			_sector->status = Sector::DATA_MISSING; /* unintuitive but correct */
 	}
 
     void decodeDataRecord()
 	{
-		/* Skip the sync marker bit. */
-		std::vector<bool> startbits = readRawBits(22);
+		/* Skip the sync marker bits, a series of 1s. */
+		while (readRawBits(1)[0]) { };
 
-		/* Read data. */
+		/* Read data header. */
+		auto dataIDBits = readRawBits(9);
+		dataIDBits.insert(dataIDBits.begin(), false);   //recover above false bit from while exit 
 
-		auto bytes = decode(readRawBits((VICTOR9K_SECTOR_LENGTH+5)*10))
-			.slice(0, VICTOR9K_SECTOR_LENGTH+5);
-		ByteReader br(bytes);
+		auto dataIDbyte = decode(dataIDBits).slice(0, 1);
 
 		/* Check that this is actually a data record. */
-		
-		if (br.read_8() != 8)
+		if (dataIDbyte[0] != 8)
 			return;
+
+		/* Read data. */
+		const uint8_t checksum_length = 2; 
+		auto bytes = decode(readRawBits((VICTOR9K_SECTOR_LENGTH+checksum_length)*10))
+			.slice(0, VICTOR9K_SECTOR_LENGTH+checksum_length);
+		ByteReader br(bytes);
 
 		_sector->data = br.read(VICTOR9K_SECTOR_LENGTH);
 		uint16_t gotChecksum = sumBytes(_sector->data);

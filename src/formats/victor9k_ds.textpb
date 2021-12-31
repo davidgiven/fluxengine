@@ -1,9 +1,9 @@
-comment: 'Victor 9000 / Sirius One 612kB DSHD GCR variable sector)'
+comment: 'Victor 9000 / Sirius One 1224kB DSHD GCR variable sector)'
 
 image_reader {
 	filename: "victor9k_ds.img"
 	img {
-		tracks: 160
+		tracks: 80
 		sides: 2
 		trackdata {
 			sector_size: 512
