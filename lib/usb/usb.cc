@@ -66,7 +66,7 @@ USB* get_usb_impl()
 
 		case GREASEWEAZLE_ID:
 			std::cerr << fmt::format("Using GreaseWeazle {} on {}\n", candidate->serial, candidate->serialPort);
-			return createGreaseWeazleUsb(candidate->serialPort);
+			return createGreaseWeazleUsb(candidate->serialPort, config.usb().greaseweazle());
 
 		default:
 			Error() << "internal";

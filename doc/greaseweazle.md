@@ -30,6 +30,8 @@ Supported features with the GreaseWeazle include:
   - simple reading and writing of disks, seeking etc
   - erasing disks
   - determining disk rotation speed
+  - both Shugart and normal IBM buses (via
+	`--usb.greaseweazle.bus_type=SHUGART` or `IBMPC`; the default is `IBMPC`)
 
 What doesn't work
 -----------------
