@@ -4,6 +4,7 @@
 #include "fluxmap.h"
 #include "bytes.h"
 #include "fmt/format.h"
+#include "lib/usb/usb.pb.h"
 #include "greaseweazle.h"
 #include "serial.h"
 
@@ -61,8 +62,9 @@ private:
     }
 
 public:
-    GreaseWeazleUsb(const std::string& port):
-            _serial(SerialPort::openSerialPort(port))
+    GreaseWeazleUsb(const std::string& port, const GreaseWeazleProto& config):
+            _serial(SerialPort::openSerialPort(port)),
+            _config(config)
     {
         int version = getVersion();
         if (version >= 29)
@@ -79,7 +81,7 @@ public:
 
         /* Configure the hardware. */
 
-        do_command({ CMD_SET_BUS_TYPE, 3, BUS_IBMPC });
+        do_command({ CMD_SET_BUS_TYPE, 3, (uint8_t)config.bus_type() });
     }
 
     int getVersion()
@@ -384,14 +386,15 @@ private:
     };
     
     std::unique_ptr<SerialPort> _serial;
+    const GreaseWeazleProto& _config;
     int _version;
     nanoseconds_t _clock;
     nanoseconds_t _revolutions;
 };
 
-USB* createGreaseWeazleUsb(const std::string& port)
+USB* createGreaseWeazleUsb(const std::string& port, const GreaseWeazleProto& config)
 {
-    return new GreaseWeazleUsb(port);
+    return new GreaseWeazleUsb(port, config);
 }
 
 // vim: sw=4 ts=4 et

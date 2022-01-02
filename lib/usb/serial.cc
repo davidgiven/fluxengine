@@ -18,8 +18,9 @@
 	public:
 		SerialPortImpl(const std::string& name)
 		{
+			std::string dos_name = "\\\\.\\" + name;
 			_handle = CreateFileA(
-				name.c_str(),
+				dos_name.c_str(),
 				/* dwDesiredAccess= */ GENERIC_READ|GENERIC_WRITE,
 				/* dwShareMode= */ 0,
 				/* lpSecurityAttribues= */ nullptr,
