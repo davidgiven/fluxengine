@@ -132,6 +132,7 @@ void AbstractDecoder::pushRecord(const Fluxmap::Position& start, const Fluxmap::
 
 	auto record = std::make_shared<Record>();
 	_trackdata->records.push_back(record);
+	_sector->records.push_back(record);
 	
 	record->startTime = start.ns();
 	record->endTime = end.ns();

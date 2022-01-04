@@ -4,6 +4,8 @@
 #include "bytes.h"
 #include "fluxmap.h"
 
+class Record;
+
 /* 
  * Note that sectors here used zero-based numbering throughout (to make the
  * maths easier); traditionally floppy disk use 0-based track numbering and
@@ -38,6 +40,7 @@ public:
     int logicalSide = 0;
     int logicalSector = 0;
     Bytes data;
+	std::vector<std::shared_ptr<Record>> records;
 
 	std::tuple<int, int, int, Status> key() const
 	{ return std::make_tuple(logicalTrack, logicalSide, logicalSector, status); }

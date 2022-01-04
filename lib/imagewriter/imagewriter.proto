@@ -29,6 +29,7 @@ message LDBSOutputProto {
 
 message DiskCopyOutputProto {}
 message NsiOutputProto {}
+message RawOutputProto {}
 
 message ImageWriterProto {
 	optional string filename = 1 [(help) = "filename of output sector image"];
@@ -38,6 +39,7 @@ message ImageWriterProto {
 		LDBSOutputProto ldbs = 4;
 		DiskCopyOutputProto diskcopy = 5;
 		NsiOutputProto nsi = 6;
+		RawOutputProto raw = 7;
 	}
 }
 

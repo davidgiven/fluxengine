@@ -470,6 +470,7 @@ buildlibrary libbackend.a \
     lib/imagewriter/imgimagewriter.cc \
     lib/imagewriter/ldbsimagewriter.cc \
     lib/imagewriter/nsiimagewriter.cc \
+    lib/imagewriter/rawimagewriter.cc \
     lib/ldbs.cc \
     lib/proto.cc \
     lib/reader.cc \
