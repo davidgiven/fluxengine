@@ -94,12 +94,12 @@ static void write_sector(std::vector<bool>& bits, unsigned& cursor,
     write_one_bits(bits, cursor, trackdata.pre_header_sync_bits());
 
     //header identifier is hardcoded integer indicates header follows
-    uint8_t headerID = 7;
+    uint8_t headerId = VICTOR9K_HEADER_ID;
 
     uint8_t encodedTrack = sector.logicalTrack;
     uint8_t encodedSector = sector.logicalSector;
     write_bytes(bits, cursor, Bytes {
-    	headerID,
+    	headerId,
         encodedTrack,
         encodedSector,
         (uint8_t)(encodedTrack + encodedSector),
@@ -109,8 +109,8 @@ static void write_sector(std::vector<bool>& bits, unsigned& cursor,
     write_one_bits(bits, cursor, trackdata.pre_data_sync_bits());
     
     //data identifier is hardcoded integer indicates data follows
-    uint8_t dataID = 8;
-    write_bytes(bits, cursor, dataID);
+    uint8_t dataId = VICTOR9K_SECTOR_ID;
+    write_bytes(bits, cursor, dataId);
 
     write_bytes(bits, cursor, sector.data);
 

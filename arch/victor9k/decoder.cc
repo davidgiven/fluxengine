@@ -82,7 +82,7 @@ public:
 		/* Read header. */
 		auto bytes = decode(firstBytes).slice(0, 4);
     	
-		uint8_t headerID = bytes[0];
+		uint8_t headerId = bytes[0];
 		uint8_t rawTrack = bytes[1];
 		_sector->logicalSector = bytes[2];
 		uint8_t gotChecksum = bytes[3];
@@ -95,8 +95,11 @@ public:
 
 		//  unintuitive but correct 
 		// _sector->status = (gotChecksum == wantChecksum) ? _sector->status = Sector::DATA_MISSING : Sector::BAD_CHECKSUM; 
-		if (wantChecksum == gotChecksum)
+		if (wantChecksum == gotChecksum) {
 			_sector->status = Sector::DATA_MISSING; /* unintuitive but correct */
+		} else {
+			_sector->status = Sector::BAD_CHECKSUM; 	
+		}
 	}
 
     void decodeDataRecord()
