@@ -4,7 +4,6 @@
 #include "imagereader/imagereader.h"
 #include "image.h"
 #include "lib/config.pb.h"
-#include "imagereader/imagereaderimpl.h"
 #include "fmt/format.h"
 #include <algorithm>
 #include <iostream>
