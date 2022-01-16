@@ -69,7 +69,9 @@ USB* get_usb_impl()
 			return createGreaseWeazleUsb(candidate->serialPort, config.usb().greaseweazle());
 
 		default:
-			Error() << "internal";
+			std::cerr << fmt::format("Using Unknown GW Compatible {} on {}\n", candidate->serial, candidate->serialPort);
+			GreaseWeazleProto gwconfig = config.usb().greaseweazle();
+			return createGreaseWeazleUsb(candidate->serialPort, gwconfig );
 	}
 }
 

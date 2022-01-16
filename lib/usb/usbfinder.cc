@@ -45,5 +45,30 @@ std::vector<std::unique_ptr<CandidateDevice>> findUsbDevices(const std::set<uint
 		}
 	}
 
+    if (candidates.size() == 0) {
+      for (const auto& it : libusbp::list_connected_devices())
+        {
+          auto candidate = std::make_unique<CandidateDevice>();
+          candidate->device = it;
+          uint32_t id = (it.get_vendor_id() << 16) | it.get_product_id();
+          candidate->id = id;
+          candidate->serial = get_serial_number(it);
+          printf("USB ID %04x %04x: ", it.get_vendor_id(), it.get_product_id());
+          try
+            {
+              libusbp::serial_port port(candidate->device, 0, true);
+              candidate->serialPort = port.get_name();
+              printf("generic serialPort found\n");
+              candidates.push_back(std::move(candidate));
+            }
+          catch(const libusbp::error & error)
+            {
+              // not a serial port!
+              printf("not a port!\n");
+              continue;
+            }
+
+		}
+	}
 	return candidates;
 }
