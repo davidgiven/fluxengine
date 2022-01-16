@@ -45,8 +45,16 @@
 			COMMTIMEOUTS commtimeouts = {0};
 			commtimeouts.ReadIntervalTimeout = 100;
 			SetCommTimeouts(_handle, &commtimeouts);
+            
+			if (!EscapeCommFunction(_handle, CLRDTR))
+			  Error() << fmt::format("Couldn't clear DTR: {}",
+                                     get_last_error_string());
+			Sleep(200);
+			if (!EscapeCommFunction(_handle, SETDTR))
+			  Error() << fmt::format("Couldn't set DTR: {}",
+                                     get_last_error_string());
 
-			PurgeComm(_handle, PURGE_RXABORT|PURGE_RXCLEAR|PURGE_TXABORT|PURGE_TXCLEAR);
+            PurgeComm(_handle, PURGE_RXABORT|PURGE_RXCLEAR|PURGE_TXABORT|PURGE_TXCLEAR);
 		}
 
 		~SerialPortImpl() override
