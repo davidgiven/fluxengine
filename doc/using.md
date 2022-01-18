@@ -348,13 +348,15 @@ behaviour.
 	useful for using very old drives with FluxEngine itself. If you use this
 	option, then any index marks in the sampled flux are, of course, garbage.
   
-  - `--flux_sink.rescale=X`
+  - `--flux_source.rescale=X, --flux_sink.rescale=X`
   
-  When writing a floppy on a drive that doesn't match the source file rpm,
-  the flux periods can be scaled to compensate. For example, to write
-  a PC-98 1.2MB (360rpm) floppy using a 300rpm floppy drive:
+  When reading or writing a floppy on a drive that doesn't match the
+  original drive RPM, the flux periods can be scaled to compensate.
   
-  `--flux_sink.rescale=1.2`
+  For example, to read or write a PC-98 1.2MB (360rpm) floppy using a 300rpm
+  floppy drive:
+  
+  `--flux_source.rescale=1.2 --flux_sink.rescale=1.2`
 
 ## Visualisation
 
