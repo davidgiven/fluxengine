@@ -267,7 +267,8 @@ FluxEngine also supports a number of file system image formats. When using the
   - `<filename.fdi>`
 
   Read from a [FDI image file](https://www.pc98.org/project/doc/hdi.html),
-  commonly used by PC-98 emulators. **Read Only.**
+  commonly used by PC-98 emulators. Supports automatically configuring
+  the encoder. **Read Only.**
   
   - `<filename.d88>`
 
