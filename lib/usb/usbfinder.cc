@@ -4,52 +4,46 @@
 #include "bytes.h"
 #include "fmt/format.h"
 #include "usbfinder.h"
-#include <libusb.h>
+#include "greaseweazle.h"
+#include "libusbp.hpp"
 
-static const std::string get_serial_number(libusb_device* device, libusb_device_descriptor* desc)
+static const std::string get_serial_number(const libusbp::device& device)
 {
-	std::string serial;
-
-	libusb_device_handle* handle;
-	if (libusb_open(device, &handle) == 0)
+	try
 	{
-		unsigned char buffer[64];
-		libusb_get_string_descriptor_ascii(handle, desc->iSerialNumber, buffer, sizeof(buffer));
-		serial = (const char*) buffer;
-		libusb_close(handle);
+		return device.get_serial_number();
 	}
-
-	return serial;
+	catch (const libusbp::error& e)
+	{
+		if (e.has_code(LIBUSBP_ERROR_NO_SERIAL_NUMBER))
+			return "n/a";
+		throw;
+	}
 }
 
-std::vector<std::unique_ptr<CandidateDevice>> findUsbDevices(uint32_t candidateId)
+std::vector<std::unique_ptr<CandidateDevice>> findUsbDevices(const std::set<uint32_t>& ids)
 {
-	int i = libusb_init(NULL);
-	if (i < 0)
-		Error() << "could not start libusb: " << libusb_strerror((libusb_error) i);
-
-	libusb_device** devices;
-	int numdevices = libusb_get_device_list(NULL, &devices);
-	if (numdevices < 0)
-		Error() << "could not enumerate USB bus: " << libusb_strerror((libusb_error) numdevices);
-
 	std::vector<std::unique_ptr<CandidateDevice>> candidates;
-	for (int i=0; i<numdevices; i++)
+	for (const auto& it : libusbp::list_connected_devices())
 	{
-		std::unique_ptr<CandidateDevice> candidate(new CandidateDevice());
-		candidate->device = devices[i];
-		(void) libusb_get_device_descriptor(candidate->device, &candidate->desc);
+		auto candidate = std::make_unique<CandidateDevice>();
+		candidate->device = it;
 
-		uint32_t id = (candidate->desc.idVendor << 16) | candidate->desc.idProduct;
-		if (id == candidateId)
+		uint32_t id = (it.get_vendor_id() << 16) | it.get_product_id();
+		if (ids.contains(id))
 		{
-			libusb_ref_device(candidate->device);
-			candidate->id = candidateId;
-			candidate->serial = get_serial_number(candidate->device, &candidate->desc);
+			candidate->id = id;
+			candidate->serial = get_serial_number(it);
+
+			if (id == GREASEWEAZLE_ID)
+			{
+				libusbp::serial_port port(candidate->device);
+				candidate->serialPort = port.get_name();
+			}
+
 			candidates.push_back(std::move(candidate));
 		}
 	}
 
-	libusb_free_device_list(devices, true);
 	return candidates;
 }

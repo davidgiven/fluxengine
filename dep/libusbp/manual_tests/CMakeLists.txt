@@ -1,0 +1,4 @@
+add_subdirectory(test_async_in)
+add_subdirectory(test_long_read)
+add_subdirectory(test_long_write)
+add_subdirectory(test_transitions)

@@ -18,8 +18,9 @@
 	public:
 		SerialPortImpl(const std::string& name)
 		{
+			std::string dos_name = "\\\\.\\" + name;
 			_handle = CreateFileA(
-				name.c_str(),
+				dos_name.c_str(),
 				/* dwDesiredAccess= */ GENERIC_READ|GENERIC_WRITE,
 				/* dwShareMode= */ 0,
 				/* lpSecurityAttribues= */ nullptr,
@@ -170,22 +171,13 @@ SerialPort::~SerialPort()
 
 void SerialPort::read(uint8_t* buffer, size_t len)
 {
-	while (len > 0)
+	while (len != 0)
 	{
-		if (_readbuffer_ptr < _readbuffer_fill)
-		{
-			int buffered = std::min(len, _readbuffer_fill - _readbuffer_ptr);
-			memcpy(buffer, _readbuffer + _readbuffer_ptr, buffered);
-			_readbuffer_ptr += buffered;
-			buffer += buffered;
-			len -= buffered;
-		}
-
-		if (len == 0)
-			break;
-
-		_readbuffer_fill = this->readImpl(_readbuffer, sizeof(_readbuffer));
-		_readbuffer_ptr = 0;
+		//std::cout << "want " << len << " " << std::flush;
+		size_t rlen = this->readImpl(buffer, len);
+		//std::cout << "got " << rlen << "\n" << std::flush;
+		buffer += rlen;
+		len -= rlen;
 	}
 }
 

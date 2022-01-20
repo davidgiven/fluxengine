@@ -52,7 +52,7 @@ static std::set<std::shared_ptr<Sector>> collect_sectors(std::set<std::shared_pt
 			{
 				std::cout << fmt::format(
 						"\n       multiple conflicting copies of sector {} seen; ",
-						std::get<0>(sectorid), std::get<1>(sectorid), std::get<2>(sectorid));
+						std::get<2>(sectorid));
 				replacing->status = replacement->status = Sector::CONFLICT;
 			}
 		}

@@ -5,9 +5,8 @@
 #include "flags.h"
 
 class Fluxmap;
-class libusb_device;
-class libusb_device_handle;
-class libusb_device_descriptor;
+class GreaseWeazleProto;
+namespace libusbp { class device; }
 
 class USB
 {
@@ -30,14 +29,12 @@ public:
 
 protected:
 	std::string usberror(int i);
-
-	libusb_device_handle* _device;
 };
 
 extern USB& getUsb();
 
-extern USB* createFluxengineUsb(libusb_device* device);
-extern USB* createGreaseWeazleUsb(const std::string& serialPort);
+extern USB* createFluxengineUsb(libusbp::device& device);
+extern USB* createGreaseWeazleUsb(const std::string& serialPort, const GreaseWeazleProto& config);
 
 static inline int usbGetVersion()     { return getUsb().getVersion(); }
 static inline void usbRecalibrate()   { getUsb().recalibrate(); }

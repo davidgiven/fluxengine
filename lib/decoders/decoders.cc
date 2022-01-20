@@ -107,6 +107,7 @@ std::unique_ptr<TrackDataFlux> AbstractDecoder::decodeToSectors(
 					break;
 				if (fmr.eof())
                     break;
+				fmr.skipToEvent(F_BIT_PULSE);
 			}
             recordStart = fmr.tell();
             if (r == DATA_RECORD)
@@ -131,6 +132,7 @@ void AbstractDecoder::pushRecord(const Fluxmap::Position& start, const Fluxmap::
 
 	auto record = std::make_shared<Record>();
 	_trackdata->records.push_back(record);
+	_sector->records.push_back(record);
 	
 	record->startTime = start.ns();
 	record->endTime = end.ns();

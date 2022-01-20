@@ -4,6 +4,7 @@
 #include "fluxmap.h"
 #include "bytes.h"
 #include "fmt/format.h"
+#include "lib/usb/usb.pb.h"
 #include "greaseweazle.h"
 #include "serial.h"
 
@@ -25,6 +26,11 @@ static const char* gw_error(int e)
         case ACK_BAD_CYLINDER:   return "Invalid cylinder";
         default:                 return "Unknown error";
     }
+}
+
+static uint32_t ss_rand_next(uint32_t x)
+{
+    return (x&1) ? (x>>1) ^ 0x80000062 : x>>1;
 }
 
 class GreaseWeazleUsb : public USB
@@ -56,8 +62,9 @@ private:
     }
 
 public:
-    GreaseWeazleUsb(const std::string& port):
-            _serial(SerialPort::openSerialPort(port))
+    GreaseWeazleUsb(const std::string& port, const GreaseWeazleProto& config):
+            _serial(SerialPort::openSerialPort(port)),
+            _config(config)
     {
         int version = getVersion();
         if (version >= 29)
@@ -74,7 +81,7 @@ public:
 
         /* Configure the hardware. */
 
-        do_command({ CMD_SET_BUS_TYPE, 3, BUS_IBMPC });
+        do_command({ CMD_SET_BUS_TYPE, 3, (uint8_t)config.bus_type() });
     }
 
     int getVersion()
@@ -182,6 +189,7 @@ public:
     
     void testBulkWrite()
     {
+        std::cout << "Writing data: " << std::flush;
         const int LEN = 10*1024*1024;
         Bytes cmd;
         switch (_version)
@@ -211,23 +219,24 @@ public:
         do_command(cmd);
 
         Bytes junk(LEN);
+        uint32_t seed = 0;
+        for (int i=0; i<LEN; i++)
+        {
+            junk[i] = seed;
+            seed = ss_rand_next(seed);
+        }
 		double start_time = getCurrentTime();
         _serial->write(junk);
         _serial->readBytes(1);
 		double elapsed_time = getCurrentTime() - start_time;
 
-		std::cout << "Transferred "
-				  << LEN
-				  << " bytes from PC -> GreaseWeazle in "
-				  << int(elapsed_time * 1000.0)
-				  << " ms ("
-				  << int((LEN / 1024.0) / elapsed_time)
-				  << " kB/s)"
-				  << std::endl;
+        std::cout << fmt::format("transferred {} bytes from PC -> device in {} ms ({} kb/s)\n",
+                LEN, int(elapsed_time * 1000.0), int((LEN / 1024.0) / elapsed_time));
     }
     
     void testBulkRead()
     {
+        std::cout << "Reading data: " << std::flush;
         const int LEN = 10*1024*1024;
         Bytes cmd;
         switch (_version)
@@ -260,14 +269,8 @@ public:
         _serial->readBytes(LEN);
 		double elapsed_time = getCurrentTime() - start_time;
 
-		std::cout << "Transferred "
-				  << LEN
-				  << " bytes from GreaseWeazle -> PC in "
-				  << int(elapsed_time * 1000.0)
-				  << " ms ("
-				  << int((LEN / 1024.0) / elapsed_time)
-				  << " kB/s)"
-				  << std::endl;
+        std::cout << fmt::format("transferred {} bytes from device -> PC in {} ms ({} kb/s)\n",
+                LEN, int(elapsed_time * 1000.0), int((LEN / 1024.0) / elapsed_time));
     }
 
     Bytes read(int side, bool synced, nanoseconds_t readTime, nanoseconds_t hardSectorThreshold)
@@ -383,15 +386,15 @@ private:
     };
     
     std::unique_ptr<SerialPort> _serial;
+    const GreaseWeazleProto& _config;
     int _version;
     nanoseconds_t _clock;
     nanoseconds_t _revolutions;
 };
 
-USB* createGreaseWeazleUsb(const std::string& port)
+USB* createGreaseWeazleUsb(const std::string& port, const GreaseWeazleProto& config)
 {
-    return new GreaseWeazleUsb(port);
+    return new GreaseWeazleUsb(port, config);
 }
 
 // vim: sw=4 ts=4 et
-

@@ -7,15 +7,9 @@ completely open source solution. This requires more work to set up (or you can
 buy a prebuilt GreaseWeazle board), but provides completely open source
 hardware which doesn't require the use of the Cypress Windows-based tools that
 the FluxEngine does. Luckily, the FluxEngine software supports it almost
-out-of-the-box --- just plug it in and nearly everything should work. You will
-need to tell FluxEngine which serial port the GreaseWeazle is plugged
-in with:
-
-```
-fluxengine read ibm -o ibm.img --usb.greaseweazle=/dev/ttyACM3
-```
-
-On Windows, use `COM1`/`COM2`/`COM3` etc for the port.
+out-of-the-box --- just plug it in and nearly everything should work. The
+FluxEngine software will autodetect it. If you have more than one device
+plugged in, use `--usb.serial=` to specify which one you want to use.
 
 I am aware that having _software_ called FluxEngine and _hardware_ called
 FluxEngine makes things complicated when you're not using the FluxEngine client
@@ -36,6 +30,8 @@ Supported features with the GreaseWeazle include:
   - simple reading and writing of disks, seeking etc
   - erasing disks
   - determining disk rotation speed
+  - both Shugart and normal IBM buses (via
+	`--usb.greaseweazle.bus_type=SHUGART` or `IBMPC`; the default is `IBMPC`)
 
 What doesn't work
 -----------------

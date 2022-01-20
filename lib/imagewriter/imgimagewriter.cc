@@ -4,7 +4,7 @@
 #include "imagewriter/imagewriter.h"
 #include "image.h"
 #include "lib/config.pb.h"
-#include "imagereader/imagereaderimpl.h"
+#include "imginputoutpututils.h"
 #include "fmt/format.h"
 #include <algorithm>
 #include <iostream>
@@ -28,31 +28,31 @@ public:
 		if (!outputFile.is_open())
 			Error() << "cannot open output file";
 
-		for (int track = 0; track < tracks; track++)
+		for (const auto& p : getTrackOrdering(_config.img(), tracks, sides))
 		{
-			for (int side = 0; side < sides; side++)
+			int track = p.first;
+			int side = p.second;
+
+			ImgInputOutputProto::TrackdataProto trackdata;
+			getTrackFormat(_config.img(), trackdata, track, side);
+
+			auto sectors = getSectors(trackdata, geometry.numSectors);
+			if (sectors.empty())
 			{
-				ImgInputOutputProto::TrackdataProto trackdata;
-				getTrackFormat(_config.img(), trackdata, track, side);
+				int maxSector = geometry.firstSector + geometry.numSectors - 1;
+				for (int i=geometry.firstSector; i<=maxSector; i++)
+					sectors.push_back(i);
+			}
 
-				auto sectors = getSectors(trackdata, geometry.numSectors);
-				if (sectors.empty())
-				{
-					int maxSector = geometry.firstSector + geometry.numSectors - 1;
-					for (int i=geometry.firstSector; i<=maxSector; i++)
-						sectors.push_back(i);
-				}
+			int sectorSize = trackdata.has_sector_size() ? trackdata.sector_size() : geometry.sectorSize;
 
-				int sectorSize = trackdata.has_sector_size() ? trackdata.sector_size() : geometry.sectorSize;
-
-				for (int sectorId : sectors)
-				{
-					const auto& sector = image.get(track, side, sectorId);
-					if (sector)
-						sector->data.slice(0, sectorSize).writeTo(outputFile);
-					else
-						outputFile.seekp(sectorSize, std::ios::cur);
-				}
+			for (int sectorId : sectors)
+			{
+				const auto& sector = image.get(track, side, sectorId);
+				if (sector)
+					sector->data.slice(0, sectorSize).writeTo(outputFile);
+				else
+					outputFile.seekp(sectorSize, std::ios::cur);
 			}
 		}
 
@@ -82,6 +82,9 @@ public:
 					sectors.push_back(sectorId + i);
 				break;
 			}
+
+			default:
+				break;
 		}
 		return sectors;
 	}

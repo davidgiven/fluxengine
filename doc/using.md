@@ -43,13 +43,14 @@ file while changing the decoder options, to save disk wear. It's also much faste
 
 ### Connecting it up
 
-To use, simply plug your FluxEngine into your computer and run the client. If a
-single device is plugged in, it will be automatically detected and used.
+To use, simply plug your FluxEngine (or [GreaseWeazle](greaseweazle.doc) into
+your computer and run the client. If a single device is plugged in, it will be
+automatically detected and used.
 
 If _more_ than one device is plugged in, you need to specify which one to use
-with the `--usb.fluxengine` parameter, which takes the device serial number as a
+with the `--usb.serial` parameter, which takes the device serial number as a
 parameter.  You can find out the serial numbers by running the command without
-the `--usb.fluxengine` parameter, and if more than one device is attached they will
+the `--usb.serial` parameter, and if more than one device is attached they will
 be listed. The serial number is also shown whenever a connection is made.
 
 You _can_ work with more than one FluxEngine at the same time, using different
@@ -266,7 +267,8 @@ FluxEngine also supports a number of file system image formats. When using the
   - `<filename.fdi>`
 
   Read from a [FDI image file](https://www.pc98.org/project/doc/hdi.html),
-  commonly used by PC-98 emulators. **Read Only.**
+  commonly used by PC-98 emulators. Supports automatically configuring
+  the encoder. **Read Only.**
   
   - `<filename.d88>`
 
@@ -281,14 +283,22 @@ FluxEngine also supports a number of file system image formats. When using the
   
   - `<filename.ldbs>`
 
-	Write to a [LDBS generic image
-	file](https://www.seasip.info/Unix/LibDsk/ldbs.html). **Write only.**
-  
-  - `<filename.d64>`
+  Write to a [LDBS generic image
+  file](https://www.seasip.info/Unix/LibDsk/ldbs.html). **Write only.**
 
-	Write to a [D64 image
-	file](http://unusedino.de/ec64/technical/formats/d64.html), commonly used
-	by Commodore 64 emulators. **Write only.**
+  - `<filename.d64>`
+  
+  Write to a [D64 image
+  file](http://unusedino.de/ec64/technical/formats/d64.html), commonly used by
+  Commodore 64 emulators. **Write only.**
+
+  - `<filename.raw>`
+
+  Write undecoded data to a raw binary file. **Write only.** This gives you the
+  underlying MFM, FM or GCR stream, without actually doing the decode into
+  user-visible bytes. However, the decode is still done in order to check for
+  correctness. Individual records are separated by three `\\0` bytes and tracks
+  are seperated by four `\\0` bytes; tracks are emitted in CHS order.
 
 ### High density disks
 
@@ -338,6 +348,14 @@ behaviour.
 	has no effect on the _drive_, so it doesn't help with flippy disks, but is
 	useful for using very old drives with FluxEngine itself. If you use this
 	option, then any index marks in the sampled flux are, of course, garbage.
+  
+  - `--flux_sink.rescale=X`
+  
+  When writing a floppy on a drive that doesn't match the source file rpm,
+  the flux periods can be scaled to compensate. For example, to write
+  a PC-98 1.2MB (360rpm) floppy using a 300rpm floppy drive:
+  
+  `--flux_sink.rescale=1.2`
 
 ## Visualisation
 
