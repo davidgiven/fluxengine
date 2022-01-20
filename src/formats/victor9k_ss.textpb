@@ -41,13 +41,13 @@ image_reader {
 		}
 		trackdata {
 			track: 38
-			up_to_track: 48
+			up_to_track: 47
 			sector_range {
 				sector_count: 15
 			}
 		}
 		trackdata {
-			track: 49
+			track: 48
 			up_to_track: 59
 			sector_range {
 				sector_count: 14
@@ -111,13 +111,13 @@ image_writer {
 		}
 		trackdata {
 			track: 38
-			up_to_track: 48
+			up_to_track: 47
 			sector_range {
 				sector_count: 15
 			}
 		}
 		trackdata {
-			track: 49
+			track: 48
 			up_to_track: 59
 			sector_range {
 				sector_count: 14
@@ -190,7 +190,7 @@ encoder {
 		trackdata {
 			head: 0
 			min_cylinder: 38
-			max_cylinder: 48
+			max_cylinder: 47
 			original_period_ms: 187.6
 			sector_range {
 				sector_count: 15
@@ -198,7 +198,7 @@ encoder {
 		}
 		trackdata {
 			head: 0
-			min_cylinder: 49
+			min_cylinder: 48
 			max_cylinder: 59
 			original_period_ms: 175.3
 			sector_range {

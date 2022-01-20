@@ -127,7 +127,7 @@ at least, check the CRC so what data's there is probably good.
 | [Micropolis](doc/disk-micropolis.md)     |  🦄   |        | Micropolis 100tpi drives |
 | [Northstar](doc/disk-northstar.md)       |  🦖   |   🦖   | 5.25" hard sectors |
 | [TI DS990 FD1000](doc/disk-tids990.md)   |  🦄   |  🦄    | 8" |
-| [Victor 9000](doc/disk-victor9k.md)      |  🦖   |        | 8" |
+| [Victor 9000](doc/disk-victor9k.md)      |  🦖   |        | 5.25" GCR encoded |
 | [Zilog MCZ](doc/disk-zilogmcz.md)        |  🦖   |        | 8" _and_ hard sectors |
 {: .datatable }
 
