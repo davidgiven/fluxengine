@@ -36,6 +36,7 @@ public:
 		if (!outputFile.is_open())
 			Error() << "cannot open output file";
 
+        bool any_error = false;
         uint32_t offset = 0;
 		for (int track = 0; track < 40; track++)
 		{
@@ -43,15 +44,34 @@ public:
             for (int sectorId = 0; sectorId < sectorCount; sectorId++)
             {
                 const auto& sector = image.get(track, 0, sectorId);
+                outputFile.seekp(offset);
                 if (sector)
                 {
-                    outputFile.seekp(offset);
                     outputFile.write((const char*) sector->data.cbegin(), 256);
+                } else {
+                    any_error = true;
+                    char buf[256];
+                    memset(buf, 0, sizeof(buf));
+                    outputFile.write((const char*) buf, 256);
                 }
 
                 offset += 256;
             }
 		}
+        if (any_error) {
+            for (int track = 0; track < 40; track++)
+            {
+                int sectorCount = sectors_per_track(track);
+                for (int sectorId = 0; sectorId < sectorCount; sectorId++)
+                {
+                    const auto& sector = image.get(track, 0, sectorId);
+                    outputFile.seekp(offset);
+                    char code = sector ? 0 : 21;
+                    outputFile.write(&code, 1);
+                    offset += 1;
+                }
+            }
+        }
     }
 };
 
