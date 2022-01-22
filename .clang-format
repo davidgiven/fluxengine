@@ -30,6 +30,7 @@ IndentWrappedFunctionNames: 'false'
 KeepEmptyLinesAtTheStartOfBlocks: 'true'
 PointerAlignment: Left
 ReflowComments: 'true'
+SortIncludes: 'false'
 SortUsingDeclarations: 'true'
 SpaceAfterTemplateKeyword: 'true'
 SpaceBeforeAssignmentOperators: 'true'
