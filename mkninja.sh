@@ -318,13 +318,18 @@ encodedecodetest() {
     format=$1
     shift
 
+    args="$*"
+    case "${1-}" in
+    ([0-9]*) shift
+    esac
+
     echo "build $OBJDIR/$format.encodedecode.flux.stamp : encodedecode | fluxengine$EXTENSION scripts/encodedecodetest.sh $*"
     echo "    format=$format"
-    echo "    configs=$*"
+    echo "    configs=$args"
     echo "    fluxx=flux"
     echo "build $OBJDIR/$format.encodedecode.scp.stamp : encodedecode | fluxengine$EXTENSION scripts/encodedecodetest.sh $*"
     echo "    format=$format"
-    echo "    configs=$*"
+    echo "    configs=$args"
     echo "    fluxx=scp"
 }
 
@@ -626,7 +631,7 @@ encodedecodetest atarist800
 encodedecodetest atarist820
 encodedecodetest brother120
 encodedecodetest brother240
-encodedecodetest commodore1541 scripts/commodore1541_test.textpb
+encodedecodetest commodore1541 $((768*256)) scripts/commodore1541_test.textpb
 encodedecodetest commodore1581
 encodedecodetest hp9121
 encodedecodetest ibm1200_525

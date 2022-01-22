@@ -9,6 +9,14 @@
 #include <iostream>
 #include <fstream>
 
+enum {
+    SIZE_35T = 683*256,
+    SIZE_35T_ERRORS = 683*257,
+    SIZE_40T = 768*256,
+    SIZE_40T_ERRORS = 768*257,
+};
+
+
 class D64ImageReader : public ImageReader
 {
 public:
@@ -35,7 +43,25 @@ public:
 		unsigned numCylinders = 39;
 		unsigned numHeads = 1;
 		unsigned numSectors = 0;
+        bool errors = false;
 
+        switch(inputFileSize) {
+            case SIZE_35T_ERRORS:
+                errors = true;
+                [[fallthrough]];
+            case SIZE_35T:
+                numCylinders = 34;
+                break;
+            case SIZE_40T_ERRORS:
+                errors = true;
+                [[fallthrough]];
+            case SIZE_40T:
+                break;
+
+            default:
+                Error() << fmt::format("Invalid d64 file size {} bytes",
+                            inputFileSize);
+        }
 		std::cout << "reading D64 image\n"
 		          << fmt::format("{} cylinders, {} heads\n",
 				  		numCylinders, numHeads);

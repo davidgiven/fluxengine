@@ -10,8 +10,13 @@ shift
 shift
 
 trap "rm -f $srcfile $fluxfile $destfile" EXIT
+bs=1048576
+count=2
+case "${1-}" in
+([0-9]*) bs=$1; count=1; shift;
+esac
 
-dd if=/dev/urandom of=$srcfile bs=1048576 count=2 2>&1
+dd if=/dev/urandom of=$srcfile bs=$bs count=$count 2>&1
 
 ./fluxengine write $format -i $srcfile -d $fluxfile "$@"
 ./fluxengine read $format -s $fluxfile -o $destfile "$@"
