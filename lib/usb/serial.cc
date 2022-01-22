@@ -9,8 +9,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <sys/ioctl.h>
-#include <termios.h>
 
 #if defined __WIN32__
     #include <windows.h>
@@ -123,6 +121,7 @@
 
 #else
     #include <termios.h>
+	#include <sys/ioctl.h>
 
 	class SerialPortImpl : public SerialPort
 	{
