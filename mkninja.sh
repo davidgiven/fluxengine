@@ -469,6 +469,7 @@ buildlibrary libbackend.a \
     lib/imagewriter/imagewriter.cc \
     lib/imagewriter/imgimagewriter.cc \
     lib/imagewriter/ldbsimagewriter.cc \
+    lib/imagereader/nfdimagereader.cc \
     lib/imagewriter/nsiimagewriter.cc \
     lib/imagewriter/rawimagewriter.cc \
     lib/imginputoutpututils.cc \
