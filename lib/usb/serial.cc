@@ -9,6 +9,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <sys/ioctl.h>
+#include <termios.h>
 
 #if defined __WIN32__
     #include <windows.h>
@@ -146,6 +148,15 @@
 			t.c_cc[VMIN] = 1;
 			cfsetspeed(&t, 9600);
 			tcsetattr(_fd, TCSANOW, &t);
+
+			/* Toggle DTR to reset the device. */
+
+			int flag = TIOCM_DTR;
+			if (ioctl(_fd, TIOCMBIC, &flag) == -1)
+				Error() << fmt::format("cannot clear DTR on serial port: {}", strerror(errno));
+			usleep(200000);
+			if (ioctl(_fd, TIOCMBIS, &flag) == -1)
+				Error() << fmt::format("cannot set DTR on serial port: {}", strerror(errno));
 		}
 
 		~SerialPortImpl() override
