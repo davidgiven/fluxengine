@@ -281,6 +281,16 @@ FluxEngine also supports a number of file system image formats. When using the
   The D88 reader should be used with the `ibm` profile and will override
   most encoding parameters on a track-by-track basis.
   
+  - `<filename.nfd>`
+
+  Read from a [NFD r0 image file](https://www.pc98.org/project/doc/nfdr0.html),
+  commonly used by various Japanese PC emulators, including the NEC PC-98. **Read Only.**
+
+  Only r0 version files are currently supported.
+  
+  The NFD reader should be used with the `ibm` profile and will override
+  most encoding parameters on a track-by-track basis.
+  
   - `<filename.ldbs>`
 
   Write to a [LDBS generic image

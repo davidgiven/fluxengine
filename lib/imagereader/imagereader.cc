@@ -38,6 +38,9 @@ std::unique_ptr<ImageReader> ImageReader::create(const ImageReaderProto& config)
 		case ImageReaderProto::kD64:
 			return ImageReader::createD64ImageReader(config);
 
+		case ImageReaderProto::kNfd:
+			return ImageReader::createNFDImageReader(config);
+
 		case ImageReaderProto::kNsi:
 			return ImageReader::createNsiImageReader(config);
 
@@ -65,6 +68,7 @@ void ImageReader::updateConfigForFilename(ImageReaderProto* proto, const std::st
 		{".imd",      [&]() { proto->mutable_imd(); }},
 		{".img",      [&]() { proto->mutable_img(); }},
 		{".st",       [&]() { proto->mutable_img(); }},
+		{".nfd",      [&]() { proto->mutable_nfd(); }},
 		{".nsi",      [&]() { proto->mutable_nsi(); }},
 		{".td0",      [&]() { proto->mutable_td0(); }},
 		{".xdf",      [&]() { proto->mutable_img(); }},
