@@ -26,11 +26,11 @@ IndentCaseLabels: 'true'
 IndentWidth: '4'
 ColumnLimit: '80'
 ConstructorInitializerAllOnOneLineOrOnePerLine: 'true'
+IncludeBlocks: Preserve
 IndentWrappedFunctionNames: 'false'
 KeepEmptyLinesAtTheStartOfBlocks: 'true'
 PointerAlignment: Left
 ReflowComments: 'true'
-IncludeBlocks: Preserve
 SortIncludes: 'false'
 SortUsingDeclarations: 'true'
 SpaceAfterTemplateKeyword: 'true'

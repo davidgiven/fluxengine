@@ -9,6 +9,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <sys/ioctl.h>
+#include <termios.h>
 
 #if defined __WIN32__
     #include <windows.h>
@@ -45,8 +47,16 @@
 			COMMTIMEOUTS commtimeouts = {0};
 			commtimeouts.ReadIntervalTimeout = 100;
 			SetCommTimeouts(_handle, &commtimeouts);
+            
+			if (!EscapeCommFunction(_handle, CLRDTR))
+			  Error() << fmt::format("Couldn't clear DTR: {}",
+                                     get_last_error_string());
+			Sleep(200);
+			if (!EscapeCommFunction(_handle, SETDTR))
+			  Error() << fmt::format("Couldn't set DTR: {}",
+                                     get_last_error_string());
 
-			PurgeComm(_handle, PURGE_RXABORT|PURGE_RXCLEAR|PURGE_TXABORT|PURGE_TXCLEAR);
+            PurgeComm(_handle, PURGE_RXABORT|PURGE_RXCLEAR|PURGE_TXABORT|PURGE_TXCLEAR);
 		}
 
 		~SerialPortImpl() override
@@ -138,6 +148,15 @@
 			t.c_cc[VMIN] = 1;
 			cfsetspeed(&t, 9600);
 			tcsetattr(_fd, TCSANOW, &t);
+
+			/* Toggle DTR to reset the device. */
+
+			int flag = TIOCM_DTR;
+			if (ioctl(_fd, TIOCMBIC, &flag) == -1)
+				Error() << fmt::format("cannot clear DTR on serial port: {}", strerror(errno));
+			usleep(200000);
+			if (ioctl(_fd, TIOCMBIS, &flag) == -1)
+				Error() << fmt::format("cannot set DTR on serial port: {}", strerror(errno));
 		}
 
 		~SerialPortImpl() override

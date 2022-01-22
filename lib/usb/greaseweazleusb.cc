@@ -131,7 +131,7 @@ public:
                     .write_8(CMD_READ_FLUX)
                     .write_8(cmd.size())
                     .write_le32(0) //ticks default value (guessed)
-                    .write_le32(2);//guessed
+                    .write_le16(2);//revolutions
                 do_command(cmd);
             }
         }
