@@ -9,7 +9,9 @@ message GreaseWeazleProto {
 		SHUGART = 2;
 	};
 
-	optional BusType bus_type = 1
+	optional string port = 1
+		[(help) = "GreaseWeazle serial port to use"];
+	optional BusType bus_type = 2
 		[(help) = "which FDD bus type is in use", default = IBMPC];
 }
 
@@ -19,5 +21,7 @@ message UsbProto {
 			[(help) = "serial number of FluxEngine or GreaseWeazle device to use"];
 	}
 
-	optional GreaseWeazleProto greaseweazle = 2 [(help) = "GreaseWeazle-specific options"];
+	oneof config {
+		GreaseWeazleProto greaseweazle = 2 [(help) = "GreaseWeazle-specific options"];
+	}
 }
