@@ -55,6 +55,13 @@ static StringFlag destHeads(
 		setRange(config.mutable_heads(), value);
 	});
 
+static ActionFlag noVerifyFlag(
+	{ "--no-verify", "-n" },
+	"skip verification of write",
+	[]{
+		config.clear_decoder();
+	});
+
 int mainWrite(int argc, const char* argv[])
 {
 	if (argc == 1)
