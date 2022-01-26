@@ -31,7 +31,7 @@ public:
 				return std::make_unique<Fluxmap>(track.flux());
 		}
 
-		return std::unique_ptr<Fluxmap>();
+		return std::make_unique<Fluxmap>();
     }
 
     void recalibrate() {}
