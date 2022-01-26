@@ -129,6 +129,8 @@ public:
                     Error() << fmt::format("DIM: unknown media byte 0x%02x, could not determine write profile automatically", mediaByte);
                     break;
             }
+
+			config.mutable_decoder()->mutable_ibm();
         }
 
 		image->calculateSize();
