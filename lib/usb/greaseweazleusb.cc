@@ -278,14 +278,13 @@ public:
         if (hardSectorThreshold != 0)
             Error() << "hard sectors are currently unsupported on the GreaseWeazel";
 
-        int revolutions = (readTime+_revolutions-1) / _revolutions;
-
         do_command({ CMD_HEAD, 3, (uint8_t)side });
 
         switch (_version)
         {
             case V22:
             {
+                int revolutions = (readTime+_revolutions-1) / _revolutions;
                 Bytes cmd(4);
                 cmd.writer()
                     .write_8(CMD_READ_FLUX)
@@ -302,8 +301,8 @@ public:
                 cmd.writer()
                     .write_8(CMD_READ_FLUX)
                     .write_8(cmd.size())
-                    .write_le32(0) //ticks default value (guessed)
-                    .write_le32(revolutions + (synced ? 1 : 0));
+                    .write_le32((readTime + (synced ? _revolutions : 0)) / _clock)
+                    .write_le32(0);
                 do_command(cmd);
             }
         }
