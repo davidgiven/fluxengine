@@ -42,7 +42,8 @@ public:
 			const FluxMatcher* matcher = nullptr;
 			_sector->clock = _clock = _fmr->seekToPattern(ID_PATTERN, matcher);
 			readRawBits(32); /* skip the ID mark */
-			_logicalTrack = decodeFmMfm(readRawBits(32)).slice(0, 32).reader().read_be16();
+			//_logicalTrack = decodeFmMfm(readRawBits(32)).slice(0, 32).reader().read_be16();
+			_logicalTrack = _sector->physicalCylinder;
 		}
 		else if (_currentSector == 10)
 		{
@@ -63,23 +64,45 @@ public:
 
     void decodeSectorRecord()
 	{
-		auto bits = readRawBits((SECTOR_SIZE+2)*16);
-		auto bytes = decodeFmMfm(bits).slice(0, SECTOR_SIZE+2).swab();
+		if(_currentSector==0) {
+		
+			bits.clear();
+			bytes.clear();
+		
+			/*  Preread an entire track, which is technically just a single
+			 * giant sector. (and avoid syncing problems in the meantime) */
+			bits = readRawBits(tracksize_bytes*16);
+			bytes = decodeFmMfm(bits).slice(0, tracksize_bytes).swab();
+	    }
 
+		unsigned start = 4+(SECTOR_SIZE+2)*_currentSector;
+		auto sectorBytes = bytes.slice(start, SECTOR_SIZE+2);
+
+		/* Accumulate checksum */
 		uint16_t gotChecksum = 0;
-		ByteReader br(bytes);
+		ByteReader br(sectorBytes);
 		for (int i=0; i<(SECTOR_SIZE/2); i++)
 			gotChecksum += br.read_le16();
 		uint16_t wantChecksum = br.read_le16();
 
-		_sector->logicalTrack = _logicalTrack;
+		/* We'll match logical parameters to physical since track number may
+		 * not be present in track data depending on MX driver version that 
+		 * wrote to that disk originally 
+		 * (or worse, many different drivers on same disk) */
+		_sector->logicalTrack = _sector->physicalCylinder;
 		_sector->logicalSide = _sector->physicalHead;
 		_sector->logicalSector = _currentSector;
-		_sector->data = bytes.slice(0, SECTOR_SIZE);
+		_sector->data = bytes.slice(start, SECTOR_SIZE);
+
 		_sector->status = (gotChecksum == wantChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
 	}
 
 private:
+
+    std::vector<bool> bits;
+    Bytes bytes;
+
+    const int tracksize_bytes = ((SECTOR_SIZE+2)*11)+4;
     nanoseconds_t _clock;
     int _currentSector;
     int _logicalTrack;

@@ -5,6 +5,14 @@ image_writer {
 	img {}
 }
 
+flux_source {
+	drive {
+		sync_with_index: true
+		high_density: false
+		revolutions: 3
+	}
+}
+
 decoder {
 	mx {}
 }
