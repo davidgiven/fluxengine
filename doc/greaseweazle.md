@@ -16,6 +16,13 @@ FluxEngine makes things complicated when you're not using the FluxEngine client
 software with a FluxEngine board, but I'm afraid it's too late to change that
 now. Sorry.
 
+**If you are using GreaseWeazle-compatible hardware** such as the
+[adafruit-floppy](https://github.com/adafruit/Adafruit_Floppy) project, then
+FluxEngine will still work; however, as the USB VID/PID won't be that of a real
+GreaseWeazle, the the FluxEngine client can't autodetect it. Instead, you'll
+need to specify the serial port manually with something like
+`--usb.greaseweazle.port=/dev/ttyACM0` or `--usb.greaseweazle.port=COM5`.
+
 **If you were using a previous version on Windows** you might have installed
 the WinUSB driver. That's no longer needed, and will in fact not work. You'll
 need to use Zadig to restore the old driver; to do this, make sure the left
@@ -30,6 +37,8 @@ Supported features with the GreaseWeazle include:
   - simple reading and writing of disks, seeking etc
   - erasing disks
   - determining disk rotation speed
+  - both Shugart and normal IBM buses (via
+	`--usb.greaseweazle.bus_type=SHUGART` or `IBMPC`; the default is `IBMPC`)
 
 What doesn't work
 -----------------

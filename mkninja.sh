@@ -469,7 +469,10 @@ buildlibrary libbackend.a \
     lib/imagewriter/imagewriter.cc \
     lib/imagewriter/imgimagewriter.cc \
     lib/imagewriter/ldbsimagewriter.cc \
+    lib/imagereader/nfdimagereader.cc \
     lib/imagewriter/nsiimagewriter.cc \
+    lib/imagewriter/rawimagewriter.cc \
+    lib/imginputoutpututils.cc \
     lib/ldbs.cc \
     lib/proto.cc \
     lib/reader.cc \
@@ -528,8 +531,9 @@ FORMATS="\
     northstar350 \
     northstar87 \
     tids990 \
-    victor9k_ss \
     vgi \
+    victor9k_ss \
+    victor9k_ds \
     zilogmcz \
     "
 
@@ -641,6 +645,7 @@ encodedecodetest mac800 scripts/mac800_test.textpb
 encodedecodetest n88basic
 encodedecodetest tids990
 encodedecodetest victor9k_ss
+encodedecodetest victor9k_ds
 
 # vim: sw=4 ts=4 et
 

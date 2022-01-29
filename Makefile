@@ -83,3 +83,5 @@ clean:
 	@mkdir -p $(OBJDIR)
 	@sh $< > $@
 
+compdb:
+	@ninja -f .obj/build.ninja -t compdb > compile_commands.json

@@ -267,7 +267,8 @@ FluxEngine also supports a number of file system image formats. When using the
   - `<filename.fdi>`
 
   Read from a [FDI image file](https://www.pc98.org/project/doc/hdi.html),
-  commonly used by PC-98 emulators. **Read Only.**
+  commonly used by PC-98 emulators. Supports automatically configuring
+  the encoder. **Read Only.**
   
   - `<filename.d88>`
 
@@ -280,16 +281,34 @@ FluxEngine also supports a number of file system image formats. When using the
   The D88 reader should be used with the `ibm` profile and will override
   most encoding parameters on a track-by-track basis.
   
+  - `<filename.nfd>`
+
+  Read from a [NFD r0 image file](https://www.pc98.org/project/doc/nfdr0.html),
+  commonly used by various Japanese PC emulators, including the NEC PC-98. **Read Only.**
+
+  Only r0 version files are currently supported.
+  
+  The NFD reader should be used with the `ibm` profile and will override
+  most encoding parameters on a track-by-track basis.
+  
   - `<filename.ldbs>`
 
-	Write to a [LDBS generic image
-	file](https://www.seasip.info/Unix/LibDsk/ldbs.html). **Write only.**
-  
-  - `<filename.d64>`
+  Write to a [LDBS generic image
+  file](https://www.seasip.info/Unix/LibDsk/ldbs.html). **Write only.**
 
-	Write to a [D64 image
-	file](http://unusedino.de/ec64/technical/formats/d64.html), commonly used
-	by Commodore 64 emulators. **Write only.**
+  - `<filename.d64>`
+  
+  Write to a [D64 image
+  file](http://unusedino.de/ec64/technical/formats/d64.html), commonly used by
+  Commodore 64 emulators. **Write only.**
+
+  - `<filename.raw>`
+
+  Write undecoded data to a raw binary file. **Write only.** This gives you the
+  underlying MFM, FM or GCR stream, without actually doing the decode into
+  user-visible bytes. However, the decode is still done in order to check for
+  correctness. Individual records are separated by three `\\0` bytes and tracks
+  are seperated by four `\\0` bytes; tracks are emitted in CHS order.
 
 ### High density disks
 
@@ -339,6 +358,16 @@ behaviour.
 	has no effect on the _drive_, so it doesn't help with flippy disks, but is
 	useful for using very old drives with FluxEngine itself. If you use this
 	option, then any index marks in the sampled flux are, of course, garbage.
+  
+  - `--flux_source.rescale=X, --flux_sink.rescale=X`
+  
+  When reading or writing a floppy on a drive that doesn't match the
+  original drive RPM, the flux periods can be scaled to compensate.
+  
+  For example, to read or write a PC-98 1.2MB (360rpm) floppy using a 300rpm
+  floppy drive:
+  
+  `--flux_source.rescale=1.2 --flux_sink.rescale=1.2`
 
 ## Visualisation
 

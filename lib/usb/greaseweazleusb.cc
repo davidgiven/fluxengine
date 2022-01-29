@@ -4,6 +4,7 @@
 #include "fluxmap.h"
 #include "bytes.h"
 #include "fmt/format.h"
+#include "lib/usb/usb.pb.h"
 #include "greaseweazle.h"
 #include "serial.h"
 
@@ -61,8 +62,9 @@ private:
     }
 
 public:
-    GreaseWeazleUsb(const std::string& port):
-            _serial(SerialPort::openSerialPort(port))
+    GreaseWeazleUsb(const std::string& port, const GreaseWeazleProto& config):
+            _serial(SerialPort::openSerialPort(port)),
+            _config(config)
     {
         int version = getVersion();
         if (version >= 29)
@@ -79,7 +81,7 @@ public:
 
         /* Configure the hardware. */
 
-        do_command({ CMD_SET_BUS_TYPE, 3, BUS_IBMPC });
+        do_command({ CMD_SET_BUS_TYPE, 3, (uint8_t)config.bus_type() });
     }
 
     int getVersion()
@@ -129,7 +131,7 @@ public:
                     .write_8(CMD_READ_FLUX)
                     .write_8(cmd.size())
                     .write_le32(0) //ticks default value (guessed)
-                    .write_le32(2);//guessed
+                    .write_le16(2);//revolutions
                 do_command(cmd);
             }
         }
@@ -276,14 +278,13 @@ public:
         if (hardSectorThreshold != 0)
             Error() << "hard sectors are currently unsupported on the GreaseWeazel";
 
-        int revolutions = (readTime+_revolutions-1) / _revolutions;
-
         do_command({ CMD_HEAD, 3, (uint8_t)side });
 
         switch (_version)
         {
             case V22:
             {
+                int revolutions = (readTime+_revolutions-1) / _revolutions;
                 Bytes cmd(4);
                 cmd.writer()
                     .write_8(CMD_READ_FLUX)
@@ -300,8 +301,8 @@ public:
                 cmd.writer()
                     .write_8(CMD_READ_FLUX)
                     .write_8(cmd.size())
-                    .write_le32(0) //ticks default value (guessed)
-                    .write_le32(revolutions + (synced ? 1 : 0));
+                    .write_le32((readTime + (synced ? _revolutions : 0)) / _clock)
+                    .write_le32(0);
                 do_command(cmd);
             }
         }
@@ -384,14 +385,15 @@ private:
     };
     
     std::unique_ptr<SerialPort> _serial;
+    const GreaseWeazleProto& _config;
     int _version;
     nanoseconds_t _clock;
     nanoseconds_t _revolutions;
 };
 
-USB* createGreaseWeazleUsb(const std::string& port)
+USB* createGreaseWeazleUsb(const std::string& port, const GreaseWeazleProto& config)
 {
-    return new GreaseWeazleUsb(port);
+    return new GreaseWeazleUsb(port, config);
 }
 
 // vim: sw=4 ts=4 et

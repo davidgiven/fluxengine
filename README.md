@@ -103,6 +103,8 @@ people who've had it work).
 | [Brother 240kB](doc/disk-brother.md)      |  🦄   |   🦄   |                                     |
 | [Brother FB-100](doc/disk-fb100.md)       |  🦖   |        | Tandy Model 100, Husky Hunter, knitting machines |
 | [Macintosh 800kB](doc/disk-macintosh.md)  |  🦄   |   🦄   | and probably the 400kB too          |
+| [NEC PC-98](doc/disk-ibm.md)              |  🦄   |   🦄   | trimode drive not required          |
+| [Sharp X68000](doc/disk-ibm.md)           |  🦄   |   🦄   |                                     |
 | [TRS-80](doc/disk-trs80.md)               |  🦖   |   🦖*  | a minor variation of the IBM scheme |
 {: .datatable }
 
@@ -125,9 +127,9 @@ at least, check the CRC so what data's there is probably good.
 | [DVK MX](doc/disk-mx.md)                 |  🦖   |        | Soviet PDP-11 clone |
 | [VDS Eco1](doc/disk-eco1.md)             |  🦖   |        | 8" mixed format |
 | [Micropolis](doc/disk-micropolis.md)     |  🦄   |        | Micropolis 100tpi drives |
-| [Northstar(doc/disk-northstar.md)        |  🦖   |   🦖   | 5.25" hard sectors |
+| [Northstar](doc/disk-northstar.md)       |  🦖   |   🦖   | 5.25" hard sectors |
 | [TI DS990 FD1000](doc/disk-tids990.md)   |  🦄   |  🦄    | 8" |
-| [Victor 9000](doc/disk-victor9k.md)      |  🦖   |        | 8" |
+| [Victor 9000](doc/disk-victor9k.md)      |  🦖   |        | 5.25" GCR encoded |
 | [Zilog MCZ](doc/disk-zilogmcz.md)        |  🦖   |        | 8" _and_ hard sectors |
 {: .datatable }
 

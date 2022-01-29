@@ -4,7 +4,7 @@
 #include "imagereader/imagereader.h"
 #include "image.h"
 #include "lib/config.pb.h"
-#include "imagereader/imagereaderimpl.h"
+#include "imginputoutpututils.h"
 #include "fmt/format.h"
 #include <algorithm>
 #include <iostream>
@@ -27,34 +27,31 @@ public:
 			Error() << "IMG: bad configuration; did you remember to set the tracks, sides and trackdata fields?";
 
         std::unique_ptr<Image> image(new Image);
-		int trackCount = 0;
-        for (int track = 0; track < _config.img().tracks(); track++)
-        {
+		for (const auto& p : getTrackOrdering(_config.img()))
+		{
+			int track = p.first;
+			int side = p.second;
+
 			if (inputFile.eof())
 				break;
 			int physicalCylinder = track * _config.img().physical_step() + _config.img().physical_offset();
 
-            for (int side = 0; side < _config.img().sides(); side++)
-            {
-				ImgInputOutputProto::TrackdataProto trackdata;
-				getTrackFormat(_config.img(), trackdata, track, side);
+			ImgInputOutputProto::TrackdataProto trackdata;
+			getTrackFormat(_config.img(), trackdata, track, side);
 
-                for (int sectorId : getSectors(trackdata))
-                {
-                    Bytes data(trackdata.sector_size());
-                    inputFile.read((char*) data.begin(), data.size());
+			for (int sectorId : getSectors(trackdata))
+			{
+				Bytes data(trackdata.sector_size());
+				inputFile.read((char*) data.begin(), data.size());
 
-					const auto& sector = image->put(physicalCylinder, side, sectorId);
-                    sector->status = Sector::OK;
-                    sector->logicalTrack = track;
-					sector->physicalCylinder = physicalCylinder;
-                    sector->logicalSide = sector->physicalHead = side;
-                    sector->logicalSector = sectorId;
-                    sector->data = data;
-                }
-            }
-
-			trackCount++;
+				const auto& sector = image->put(physicalCylinder, side, sectorId);
+				sector->status = Sector::OK;
+				sector->logicalTrack = track;
+				sector->physicalCylinder = physicalCylinder;
+				sector->logicalSide = sector->physicalHead = side;
+				sector->logicalSector = sectorId;
+				sector->data = data;
+			}
         }
 
 		image->calculateSize();

@@ -25,6 +25,7 @@ static std::shared_ptr<Fluxmap> readFluxmap(FluxSource& fluxsource, unsigned cyl
 {
 	std::cout << fmt::format("{0:>3}.{1}: ", cylinder, head) << std::flush;
 	std::shared_ptr<Fluxmap> fluxmap = fluxsource.readFlux(cylinder, head);
+	fluxmap->rescale(1.0/config.flux_source().rescale());
 	std::cout << fmt::format(
 		"{0:.0} ms in {1} bytes\n",
             fluxmap->duration()/1e6,
@@ -52,7 +53,7 @@ static std::set<std::shared_ptr<Sector>> collect_sectors(std::set<std::shared_pt
 			{
 				std::cout << fmt::format(
 						"\n       multiple conflicting copies of sector {} seen; ",
-						std::get<0>(sectorid), std::get<1>(sectorid), std::get<2>(sectorid));
+						std::get<2>(sectorid));
 				replacing->status = replacement->status = Sector::CONFLICT;
 			}
 		}

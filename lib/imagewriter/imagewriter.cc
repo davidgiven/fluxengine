@@ -29,6 +29,9 @@ std::unique_ptr<ImageWriter> ImageWriter::create(const ImageWriterProto& config)
 		case ImageWriterProto::kNsi:
 			return ImageWriter::createNsiImageWriter(config);
 
+		case ImageWriterProto::kRaw:
+			return ImageWriter::createRawImageWriter(config);
+
 		default:
 			Error() << "bad output image config";
 			return std::unique_ptr<ImageWriter>();
@@ -45,8 +48,9 @@ void ImageWriter::updateConfigForFilename(ImageWriterProto* proto, const std::st
 		{".diskcopy", [&]() { proto->mutable_diskcopy(); }},
 		{".img",      [&]() { proto->mutable_img(); }},
 		{".ldbs",     [&]() { proto->mutable_ldbs(); }},
-		{".st",       [&]() { proto->mutable_img(); }},
 		{".nsi",      [&]() { proto->mutable_nsi(); }},
+		{".raw",      [&]() { proto->mutable_raw(); }},
+		{".st",       [&]() { proto->mutable_img(); }},
 		{".vgi",      [&]() { proto->mutable_img(); }},
 		{".xdf",      [&]() { proto->mutable_img(); }},
 	};

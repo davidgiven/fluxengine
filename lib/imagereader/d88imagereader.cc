@@ -5,7 +5,6 @@
 #include "image.h"
 #include "proto.h"
 #include "lib/config.pb.h"
-#include "imagereader/imagereaderimpl.h"
 #include "fmt/format.h"
 #include <algorithm>
 #include <iostream>
@@ -166,6 +165,21 @@ public:
         const Geometry& geometry = image->getGeometry();
         std::cout << fmt::format("D88: read {} tracks, {} sides\n",
                         geometry.numTracks, geometry.numSides);
+
+		if (!config.has_heads())
+		{
+			auto* heads = config.mutable_heads();
+			heads->set_start(0);
+			heads->set_end(geometry.numSides - 1);
+		}
+
+		if (!config.has_cylinders())
+		{
+			auto* cylinders = config.mutable_cylinders();
+			cylinders->set_start(0);
+			cylinders->set_end(geometry.numTracks - 1);
+		}
+
         return image;
     }
 

@@ -38,6 +38,9 @@ std::unique_ptr<ImageReader> ImageReader::create(const ImageReaderProto& config)
 		case ImageReaderProto::kD64:
 			return ImageReader::createD64ImageReader(config);
 
+		case ImageReaderProto::kNfd:
+			return ImageReader::createNFDImageReader(config);
+
 		case ImageReaderProto::kNsi:
 			return ImageReader::createNsiImageReader(config);
 
@@ -65,6 +68,7 @@ void ImageReader::updateConfigForFilename(ImageReaderProto* proto, const std::st
 		{".imd",      [&]() { proto->mutable_imd(); }},
 		{".img",      [&]() { proto->mutable_img(); }},
 		{".st",       [&]() { proto->mutable_img(); }},
+		{".nfd",      [&]() { proto->mutable_nfd(); }},
 		{".nsi",      [&]() { proto->mutable_nsi(); }},
 		{".td0",      [&]() { proto->mutable_td0(); }},
 		{".vgi",      [&]() { proto->mutable_img(); }},
@@ -87,20 +91,3 @@ void ImageReader::updateConfigForFilename(ImageReaderProto* proto, const std::st
 ImageReader::ImageReader(const ImageReaderProto& config):
     _config(config)
 {}
-
-void getTrackFormat(const ImgInputOutputProto& config,
-		ImgInputOutputProto::TrackdataProto& trackdata, unsigned track, unsigned side)
-{
-	trackdata.Clear();
-	for (const ImgInputOutputProto::TrackdataProto& f : config.trackdata())
-	{
-		if (f.has_track() && f.has_up_to_track() && ((track < f.track()) || (track > f.up_to_track())))
-			continue;
-		if (f.has_track() && !f.has_up_to_track() && (track != f.track()))
-			continue;
-		if (f.has_side() && (f.side() != side))
-			continue;
-
-		trackdata.MergeFrom(f);
-	}
-}
