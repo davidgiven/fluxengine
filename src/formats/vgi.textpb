@@ -1,0 +1,26 @@
+comment: 'Adjust a Micropolis profile to use the VGI image format'
+
+image_reader {
+	filename: "micropolis.vgi"
+	img {
+		trackdata {
+			sector_size: 275
+		}
+	}
+}
+
+image_writer {
+	filename: "micropolis.vgi"
+	img {
+		trackdata {
+			sector_size: 275
+		}
+	}
+}
+
+decoder {
+	micropolis {
+		sector_output_size: 275
+	}
+}
+

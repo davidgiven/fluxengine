@@ -29,24 +29,10 @@ fluxengine read micropolis315 # single-sided Mod II
 fluxengine read micropolis630 # double-sided Mod II
 ```
 
-You should end up with a `micropolis.vgi` which is 198000, 396000, 338800, or
-677600 bytes. Each sector in VGI consumes 275 bytes, to retain the full
-information stored on disk.
-
-It's also possible to output to IMG, which is more suitable for generic tooling
-than emulation or preservation:
-```
-fluxengine read micropolis -c 0-34 --image_writer.img.tracks=35 -h 0 --image_writer.img.sides=1 # single-sided Mod I
-fluxengine read micropolis -c 0-34 --image_writer.img.tracks=35 # double-sided Mod I
-fluxengine read micropolis -h 0 --image_writer.img.sides=1 # single-sided Mod II
-fluxengine read micropolis # double-sided Mod II
-```
-
-You should end up with a `micropolis.img` which is 143360, 286720, 315392, or
-630784 bytes long. The image is written in CHS order, but HCS is generally used
-by CP/M tools so double-sided disk images may need to be post-processed.
-Half-full double-sided disks can be read as single-sided disks to work around
-the problem.
+You should end up with a `micropolis.img` of the corresponding size. The image
+is written in CHS order, but HCS is generally used by CP/M tools so
+double-sided disk images may need to be post-processed. Half-full double-sided
+disks can be read as single-sided disks to work around the problem.
 
 The [CP/M BIOS](https://www.seasip.info/Cpm/bios.html) defined SELDSK, SETTRK,
 and SETSEC, but no function to select the head/side. Double-sided floppies
@@ -54,6 +40,19 @@ could be represented as having either twice the number of sectors, for CHS, or
 twice the number of tracks, HCS; the second side's tracks in opposite order
 logically followed the first side (e.g., tracks 77-153). Micropolis disks
 tended to be the latter.
+
+It's also possible to output to VGI, which retains OS-specific "user data" and
+machine-specific ECC. Add "vgi" to the command line after the chosen Micropolis
+profile:
+```
+fluxengine read micropolis143 vgi # single-sided Mod I
+fluxengine read micropolis287 vgi # double-sided Mod I
+fluxengine read micropolis315 vgi # single-sided Mod II
+fluxengine read micropolis630 vgi # double-sided Mod II
+```
+
+You should end up with a `micropolis.vgi` instead. The format is well-defined
+for double-sided disks so post-processing is not necessary.
 
 Writing disks
 -------------
@@ -66,10 +65,10 @@ fluxengine write micropolis287 # double-sided Mod I
 fluxengine write micropolis315 # single-sided Mod II
 fluxengine write micropolis630 # double-sided Mod II
 
-fluxengine write micropolis -c 0-34 --image_reader.img.tracks=35 -h 0 --image_reader.img.sides=1 # single-sided Mod I
-fluxengine write micropolis -c 0-34 --image_reader.img.tracks=35 # double-sided Mod I
-fluxengine write micropolis -h 0 --image_reader.img.sides=1 # single-sided Mod II
-fluxengine write micropolis # double-sided Mod II using IMG
+fluxengine write micropolis143 vgi # single-sided Mod I
+fluxengine write micropolis287 vgi # double-sided Mod I
+fluxengine write micropolis315 vgi # single-sided Mod II
+fluxengine write micropolis630 vgi # double-sided Mod II
 ```
 
 Useful references

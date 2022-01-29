@@ -13,12 +13,12 @@ flux_sink {
 }
 
 image_reader {
-	filename: "micropolis.vgi"
+	filename: "micropolis.img"
 	img {
 		tracks: 77
 		sides: 1
 		trackdata {
-			sector_size: 275
+			sector_size: 256
 			sector_range {
 				start_sector: 0
 				sector_count: 16
@@ -28,11 +28,11 @@ image_reader {
 }
 
 image_writer {
-	filename: "micropolis.vgi"
+	filename: "micropolis.img"
 	img {
 		tracks: 77
 		trackdata {
-			sector_size: 275
+			sector_size: 256
 			sector_range {
 				start_sector: 0
 				sector_count: 16
@@ -46,9 +46,7 @@ encoder {
 }
 
 decoder {
-	micropolis {
-		sector_output_size: 275
-	}
+	micropolis {}
 }
 
 cylinders {
