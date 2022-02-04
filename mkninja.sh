@@ -591,6 +591,7 @@ buildsimpleprogram upgrade-flux-file \
     tools/upgrade-flux-file.cc \
     libbackend.a \
     libfl2.a \
+    libconfig.a \
     libemu.a \
     libfmt.a \
 
