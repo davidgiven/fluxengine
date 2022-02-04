@@ -5,7 +5,6 @@
 #include "fluxsink/fluxsink.h"
 #include "reader.h"
 #include "fluxmap.h"
-#include "sql.h"
 #include "decoders/decoders.h"
 #include "sector.h"
 #include "bytes.h"

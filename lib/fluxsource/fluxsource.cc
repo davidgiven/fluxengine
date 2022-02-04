@@ -18,9 +18,6 @@ std::unique_ptr<FluxSource> FluxSource::create(const FluxSourceProto& config)
 {
 	switch (config.source_case())
 	{
-		case FluxSourceProto::kFluxfile:
-			return createSqliteFluxSource(config.fluxfile());
-
 		case FluxSourceProto::kDrive:
 			return createHardwareFluxSource(config.drive());
 
