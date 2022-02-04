@@ -1,5 +1,4 @@
 #include "globals.h"
-#include "sql.h"
 #include "fluxmap.h"
 #include "decoders/fluxmapreader.h"
 #include "decoders/decoders.h"

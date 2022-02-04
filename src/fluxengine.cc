@@ -14,7 +14,6 @@ extern command_cb mainRpm;
 extern command_cb mainSeek;
 extern command_cb mainTestBandwidth;
 extern command_cb mainTestVoltages;
-extern command_cb mainUpgradeFluxFile;
 extern command_cb mainWrite;
 
 struct Command
@@ -38,7 +37,6 @@ static std::vector<Command> commands =
     { "rpm",               mainRpm,               "Measures the disk rotational speed.", },
     { "seek",              mainSeek,              "Moves the disk head.", },
     { "test",              mainTest,              "Various testing commands.", },
-    { "upgradefluxfile",   mainUpgradeFluxFile,   "Upgrades a flux file from a previous version of this software.", },
 };
 
 static std::vector<Command> analysables =
