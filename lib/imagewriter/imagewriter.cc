@@ -51,6 +51,7 @@ void ImageWriter::updateConfigForFilename(ImageWriterProto* proto, const std::st
 		{".nsi",      [&]() { proto->mutable_nsi(); }},
 		{".raw",      [&]() { proto->mutable_raw(); }},
 		{".st",       [&]() { proto->mutable_img(); }},
+		{".vgi",      [&]() { proto->mutable_img(); }},
 		{".xdf",      [&]() { proto->mutable_img(); }},
 	};
 

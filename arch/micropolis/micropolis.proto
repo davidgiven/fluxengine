@@ -1,5 +1,11 @@
 syntax = "proto2";
 
-message MicropolisDecoderProto {}
+import "lib/common.proto";
+
+message MicropolisDecoderProto {
+	optional int32 sector_output_size = 1 [default = 256,
+		(help) = "How much of the raw sector should be saved. Must be 256 or 275"];
+}
+
 message MicropolisEncoderProto {}
 

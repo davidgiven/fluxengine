@@ -71,6 +71,7 @@ void ImageReader::updateConfigForFilename(ImageReaderProto* proto, const std::st
 		{".nfd",      [&]() { proto->mutable_nfd(); }},
 		{".nsi",      [&]() { proto->mutable_nsi(); }},
 		{".td0",      [&]() { proto->mutable_td0(); }},
+		{".vgi",      [&]() { proto->mutable_img(); }},
 		{".xdf",      [&]() { proto->mutable_img(); }},
 	};
 

@@ -518,13 +518,17 @@ FORMATS="\
     ibm720_525 \
     mac400 \
     mac800 \
-    micropolis \
+    micropolis143 \
+    micropolis287 \
+    micropolis315 \
+    micropolis630 \
     mx \
     n88basic \
     northstar175 \
     northstar350 \
     northstar87 \
     tids990 \
+    vgi \
     victor9k_ss \
     victor9k_ds \
     zilogmcz \
