@@ -1,4 +1,5 @@
 comment: 'Adjust a Micropolis profile to use the VGI image format'
+is_extension: true
 
 image_reader {
 	filename: "micropolis.vgi"
