@@ -26,6 +26,9 @@ std::unique_ptr<ImageWriter> ImageWriter::create(const ImageWriterProto& config)
 		case ImageWriterProto::kDiskcopy:
 			return ImageWriter::createDiskCopyImageWriter(config);
 
+		case ImageWriterProto::kDsk:
+			return ImageWriter::createDSKImageWriter(config);
+
 		case ImageWriterProto::kNsi:
 			return ImageWriter::createNsiImageWriter(config);
 
@@ -46,6 +49,7 @@ void ImageWriter::updateConfigForFilename(ImageWriterProto* proto, const std::st
 		{".d64",      [&]() { proto->mutable_d64(); }},
 		{".d81",      [&]() { proto->mutable_img(); }},
 		{".diskcopy", [&]() { proto->mutable_diskcopy(); }},
+		{".dsk",      [&]() { proto->mutable_dsk(); }},
 		{".img",      [&]() { proto->mutable_img(); }},
 		{".ldbs",     [&]() { proto->mutable_ldbs(); }},
 		{".nsi",      [&]() { proto->mutable_nsi(); }},

@@ -28,6 +28,7 @@ message LDBSOutputProto {
 }
 
 message DiskCopyOutputProto {}
+message DSKOutputProto {}
 message NsiOutputProto {}
 message RawOutputProto {}
 
@@ -40,6 +41,7 @@ message ImageWriterProto {
 		DiskCopyOutputProto diskcopy = 5;
 		NsiOutputProto nsi = 6;
 		RawOutputProto raw = 7;
+		DSKOutputProto dsk = 8;
 	}
 }
 

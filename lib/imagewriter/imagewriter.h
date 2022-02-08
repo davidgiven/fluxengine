@@ -16,6 +16,7 @@ public:
 
     static std::unique_ptr<ImageWriter> createD64ImageWriter(const ImageWriterProto& config);
     static std::unique_ptr<ImageWriter> createDiskCopyImageWriter(const ImageWriterProto& config);
+    static std::unique_ptr<ImageWriter> createDSKImageWriter(const ImageWriterProto& config);
     static std::unique_ptr<ImageWriter> createImgImageWriter(const ImageWriterProto& config);
     static std::unique_ptr<ImageWriter> createLDBSImageWriter(const ImageWriterProto& config);
     static std::unique_ptr<ImageWriter> createNsiImageWriter(const ImageWriterProto& config);

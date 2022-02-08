@@ -464,6 +464,7 @@ buildlibrary libbackend.a \
     lib/imagereader/d88imagereader.cc \
     lib/imagewriter/d64imagewriter.cc \
     lib/imagewriter/diskcopyimagewriter.cc \
+    lib/imagewriter/dskimagewriter.cc \
     lib/imagewriter/imagewriter.cc \
     lib/imagewriter/imgimagewriter.cc \
     lib/imagewriter/ldbsimagewriter.cc \
