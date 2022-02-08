@@ -19,6 +19,7 @@ public:
 public:
     static std::unique_ptr<ImageReader> createD64ImageReader(const ImageReaderProto& config);
     static std::unique_ptr<ImageReader> createDiskCopyImageReader(const ImageReaderProto& config);
+    static std::unique_ptr<ImageReader> createDSKImageReader(const ImageReaderProto& config);
     static std::unique_ptr<ImageReader> createImgImageReader(const ImageReaderProto& config);
     static std::unique_ptr<ImageReader> createJv3ImageReader(const ImageReaderProto& config);
     static std::unique_ptr<ImageReader> createIMDImageReader(const ImageReaderProto& config);

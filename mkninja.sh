@@ -453,6 +453,7 @@ buildlibrary libbackend.a \
     lib/image.cc \
     lib/imagereader/d64imagereader.cc \
     lib/imagereader/diskcopyimagereader.cc \
+    lib/imagereader/dskimagereader.cc \
     lib/imagereader/imagereader.cc \
     lib/imagereader/imdimagereader.cc \
     lib/imagereader/imgimagereader.cc \

@@ -49,6 +49,7 @@ message DimInputProto {}
 message FdiInputProto {}
 message D88InputProto {}
 message NFDInputProto {}
+message DSKInputProto {}
 
 message ImageReaderProto {
 	optional string filename = 1 [(help) = "filename of input sector image"];
@@ -64,6 +65,7 @@ message ImageReaderProto {
 		FdiInputProto fdi = 10;
 		D88InputProto d88 = 11;
         NFDInputProto nfd = 12;
+		DSKInputProto dsk = 13;
 	}
 }
 
