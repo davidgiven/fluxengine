@@ -37,22 +37,26 @@ Reading discs
 Just do:
 
 ```
-fluxengine read <format> -o mac.diskcopy
+fluxengine read <format> -o mac.dsk
 ```
 
 ...where `<format>` can be `mac400` or `mac800`.
 
-You should end up with a `mac.diskcopy` file which is compatible with DiskCopy
-4.2, which most Mac emulators support.
+You should end up with a `mac.dsk` file containing a raw sector image
+(equivalent to `.img`).
 
 **Big warning!** Mac disk images are complicated due to the way the tracks are
-different sizes and the odd sector size. If you use a normal `.img` file, then
-FluxEngine will store them in a simple 524 x 12 x 2 x 80 layout, with holes
-where missing sectors should be; this was easiest, but is unlikely to work with
-most Mac emulators and other software. In these files, the 12 bytes of metadata
-_follow_ the 512 bytes of user payload in the sector image. If you don't want
-it, specify that you want 512-byte sectors with
-`--output.image.img.trackdata.sector_size=512`.
+different sizes and the odd sector size. What you get above is a triangular
+disk image, which contains all the 512-byte user data areas concatenated
+together in filesystem order. It does not contain the twelve bytes of metadata.
+If you want these as well, specify that you want 524 byte sectors with
+`--output.image.img.trackdata.sector_size=512`. The metadata will follow the
+512 bytes of user data.
+
+FluxEngine also supports DiskCopy 4.2 disk images, which may be a better option
+if you're going to be using the image on a real Macintosh (or with other
+tooling which supports it). To get one of these, use a filename like
+`mac.diskcopy`. This will contain both user data and metadata.
 
 Writing discs
 -------------
@@ -60,15 +64,15 @@ Writing discs
 Just do:
 
 ```
-fluxengine write <format> -i mac.diskcopy
+fluxengine write <format> -i mac.dsk
 ```
 
 ...where `<format>` can be `mac400` or `mac800`.
 
-It'll read the DiskCopy 4.2 file and write it out.
+It'll read the image file and write it out.
 
-The same warning as above applies --- you can use normal `.img` files but it's
-problematic. Use DiskCopy 4.2 files instead.
+The same warning as above applies --- you can use normal `.dsk` files but it's
+problematic. Consider using DiskCopy 4.2 files instead.
 
 Useful references
 -----------------

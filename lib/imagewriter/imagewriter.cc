@@ -46,6 +46,7 @@ void ImageWriter::updateConfigForFilename(ImageWriterProto* proto, const std::st
 		{".d64",      [&]() { proto->mutable_d64(); }},
 		{".d81",      [&]() { proto->mutable_img(); }},
 		{".diskcopy", [&]() { proto->mutable_diskcopy(); }},
+		{".dsk",      [&]() { proto->mutable_img(); }},
 		{".img",      [&]() { proto->mutable_img(); }},
 		{".ldbs",     [&]() { proto->mutable_ldbs(); }},
 		{".nsi",      [&]() { proto->mutable_nsi(); }},
