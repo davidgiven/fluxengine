@@ -302,7 +302,7 @@ public:
                     .write_8(CMD_READ_FLUX)
                     .write_8(cmd.size())
                     .write_le32((readTime + (synced ? _revolutions : 0)) / _clock)
-                    .write_le32(0);
+                    .write_le16(0);
                 do_command(cmd);
             }
         }
