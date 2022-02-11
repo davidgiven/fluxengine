@@ -57,22 +57,30 @@ public:
     void seek(const Fluxmap::Position& pos)
     { return _fmr->seek(pos); } 
 
+	nanoseconds_t seekToPattern(const FluxMatcher& pattern);
+	void seekToIndexMark();
+
     bool eof() const
     { return _fmr->eof(); }
+
+	nanoseconds_t getFluxmapDuration() const
+	{ return _fmr->getDuration(); }
 
 	virtual std::set<unsigned> requiredSectors(unsigned cylinder, unsigned head) const;
 
 protected:
     virtual void beginTrack() {};
-    virtual RecordType advanceToNextRecord() = 0;
+    virtual nanoseconds_t advanceToNextRecord() = 0;
     virtual void decodeSectorRecord() = 0;
     virtual void decodeDataRecord() {};
 
 	const DecoderProto& _config;
-    FluxmapReader* _fmr = nullptr;
 	std::unique_ptr<TrackDataFlux> _trackdata;
     std::shared_ptr<Sector> _sector;
 	std::unique_ptr<FluxDecoder> _decoder;
+
+private:
+    FluxmapReader* _fmr = nullptr;
 };
 
 #endif

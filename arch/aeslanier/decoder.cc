@@ -30,17 +30,14 @@ public:
 		AbstractDecoder(config)
 	{}
 
-    RecordType advanceToNextRecord()
+    nanoseconds_t advanceToNextRecord() override
 	{
-		_sector->clock = _fmr->seekToPattern(SECTOR_PATTERN);
-		if (_fmr->eof() || !_sector->clock)
-			return UNKNOWN_RECORD;
-		return SECTOR_RECORD;
+		return seekToPattern(SECTOR_PATTERN);
 	}
 
     void decodeSectorRecord()
 	{
-		/* Skip ID mark. */
+		/* Skip ID mark (we know it's a AESLANIER_RECORD_SEPARATOR). */
 
 		readRawBits(16);
 
