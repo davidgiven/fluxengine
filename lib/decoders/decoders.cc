@@ -88,7 +88,10 @@ std::unique_ptr<TrackDataFlux> AbstractDecoder::decodeToSectors(
 
         /* Read the sector record. */
 
+		Fluxmap::Position before = fmr.tell();
         decodeSectorRecord();
+		pushRecord(before, fmr.tell());
+
         if (_sector->status == Sector::DATA_MISSING)
         {
             /* The data is in a separate record. */
@@ -99,10 +102,14 @@ std::unique_ptr<TrackDataFlux> AbstractDecoder::decodeToSectors(
 				if (fmr.eof() || !_sector->clock)
 					break;
 
+				before = fmr.tell();
 				decodeDataRecord();
 
 				if (_sector->status != Sector::DATA_MISSING)
+				{
+					pushRecord(before, fmr.tell());
 					break;
+				}
 
 				fmr.skipToEvent(F_BIT_PULSE);
 				resetFluxDecoder();
@@ -126,10 +133,8 @@ void AbstractDecoder::pushRecord(const Fluxmap::Position& start, const Fluxmap::
 	record->endTime = end.ns();
     record->clock = _sector->clock;
 
-    _fmr->seek(start);
-	FluxDecoder decoder(_fmr, _sector->clock, _config);
-    record->rawData = toBytes(decoder.readBits(end));
-    _fmr->seek(here);
+	record->rawData = toBytes(_recordBits);
+	_recordBits.clear();
 }
 
 void AbstractDecoder::resetFluxDecoder()
@@ -153,7 +158,9 @@ void AbstractDecoder::seekToIndexMark()
 
 std::vector<bool> AbstractDecoder::readRawBits(unsigned count)
 {
-	return _decoder->readBits(count);
+	auto bits = _decoder->readBits(count);
+	_recordBits.insert(_recordBits.end(), bits.begin(), bits.end());
+	return bits;
 }
 
 uint8_t AbstractDecoder::readRaw8()

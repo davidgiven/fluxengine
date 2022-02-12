@@ -85,6 +85,7 @@ protected:
 	std::unique_ptr<TrackDataFlux> _trackdata;
     std::shared_ptr<Sector> _sector;
 	std::unique_ptr<FluxDecoder> _decoder;
+	std::vector<bool> _recordBits;
 
 private:
     FluxmapReader* _fmr = nullptr;
