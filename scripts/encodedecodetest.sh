@@ -1,11 +1,11 @@
 #!/bin/sh
 set -e
 
-tmp=/tmp/$$
+format=$1
+tmp=/tmp/$$-$format
 srcfile=$tmp.src.img
 fluxfile=$tmp.$2
 destfile=$tmp.dest.img
-format=$1
 shift
 shift
 

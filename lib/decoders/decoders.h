@@ -50,6 +50,13 @@ public:
 
 	void resetFluxDecoder();
     std::vector<bool> readRawBits(unsigned count);
+	uint8_t readRaw8();
+	uint16_t readRaw16();
+	uint32_t readRaw20();
+	uint32_t readRaw24();
+	uint32_t readRaw32();
+	uint64_t readRaw48();
+	uint64_t readRaw64();
 
     Fluxmap::Position tell()
     { return _fmr->tell(); } 
@@ -57,22 +64,31 @@ public:
     void seek(const Fluxmap::Position& pos)
     { return _fmr->seek(pos); } 
 
+	nanoseconds_t seekToPattern(const FluxMatcher& pattern);
+	void seekToIndexMark();
+
     bool eof() const
     { return _fmr->eof(); }
+
+	nanoseconds_t getFluxmapDuration() const
+	{ return _fmr->getDuration(); }
 
 	virtual std::set<unsigned> requiredSectors(unsigned cylinder, unsigned head) const;
 
 protected:
     virtual void beginTrack() {};
-    virtual RecordType advanceToNextRecord() = 0;
+    virtual nanoseconds_t advanceToNextRecord() = 0;
     virtual void decodeSectorRecord() = 0;
     virtual void decodeDataRecord() {};
 
 	const DecoderProto& _config;
-    FluxmapReader* _fmr = nullptr;
 	std::unique_ptr<TrackDataFlux> _trackdata;
     std::shared_ptr<Sector> _sector;
 	std::unique_ptr<FluxDecoder> _decoder;
+	std::vector<bool> _recordBits;
+
+private:
+    FluxmapReader* _fmr = nullptr;
 };
 
 #endif

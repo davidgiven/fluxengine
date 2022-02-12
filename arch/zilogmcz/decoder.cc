@@ -20,14 +20,10 @@ public:
 		AbstractDecoder(config)
 	{}
 
-    RecordType advanceToNextRecord()
+    nanoseconds_t advanceToNextRecord() override
 	{
-		const FluxMatcher* matcher = nullptr;
-		_fmr->seekToIndexMark();
-		_sector->clock = _fmr->seekToPattern(SECTOR_START_PATTERN, matcher);
-		if (matcher == &SECTOR_START_PATTERN)
-			return SECTOR_RECORD;
-		return UNKNOWN_RECORD;
+		seekToIndexMark();
+		return seekToPattern(SECTOR_START_PATTERN);
 	}
 
     void decodeSectorRecord()

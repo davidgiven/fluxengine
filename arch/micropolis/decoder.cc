@@ -33,15 +33,10 @@ public:
 		_config(config.micropolis())
 	{}
 
-	RecordType advanceToNextRecord()
+	nanoseconds_t advanceToNextRecord() override
 	{
-		_fmr->seekToIndexMark();
-		const FluxMatcher* matcher = nullptr;
-		_sector->clock = _fmr->seekToPattern(SECTOR_SYNC_PATTERN, matcher);
-		if (matcher == &SECTOR_SYNC_PATTERN) {
-			return SECTOR_RECORD;
-		}
-		return UNKNOWN_RECORD;
+		seekToIndexMark();
+		return seekToPattern(SECTOR_SYNC_PATTERN);
 	}
 
 	void decodeSectorRecord()

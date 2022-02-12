@@ -129,21 +129,15 @@ public:
 		AbstractDecoder(config)
 	{}
 
-    RecordType advanceToNextRecord()
+    nanoseconds_t advanceToNextRecord() override
 	{
-		const FluxMatcher* matcher = nullptr;
-		_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
-		if (matcher == &SECTOR_RECORD_PATTERN)
-			return SECTOR_RECORD;
-		if (matcher == &DATA_RECORD_PATTERN)
-			return DATA_RECORD;
-		return UNKNOWN_RECORD;
+		return seekToPattern(ANY_RECORD_PATTERN);
 	}
 
     void decodeSectorRecord()
 	{
-		/* Skip ID (as we know it's a MAC_SECTOR_RECORD). */
-		readRawBits(24);
+		if (readRaw24() != MAC_SECTOR_RECORD)
+			return;
 
 		/* Read header. */
 
@@ -171,8 +165,7 @@ public:
 
     void decodeDataRecord()
 	{
-		auto id = toBytes(readRawBits(24)).reader().read_be24();
-		if (id != MAC_DATA_RECORD)
+		if (readRaw24() != MAC_DATA_RECORD)
 			return;
 
 		/* Read data. */
