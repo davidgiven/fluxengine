@@ -136,8 +136,8 @@ public:
 
     void decodeSectorRecord()
 	{
-		/* Skip ID (as we know it's a MAC_SECTOR_RECORD). */
-		readRawBits(24);
+		if (readRaw24() != MAC_SECTOR_RECORD)
+			return;
 
 		/* Read header. */
 
@@ -165,8 +165,7 @@ public:
 
     void decodeDataRecord()
 	{
-		auto id = toBytes(readRawBits(24)).reader().read_be24();
-		if (id != MAC_DATA_RECORD)
+		if (readRaw24() != MAC_DATA_RECORD)
 			return;
 
 		/* Read data. */

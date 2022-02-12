@@ -66,7 +66,9 @@ public:
 
     void decodeSectorRecord()
 	{
-		readRawBits(32);
+		if (readRaw32() != BROTHER_SECTOR_RECORD)
+			return;
+
 		const auto& rawbits = readRawBits(32);
 		const auto& bytes = toBytes(rawbits).slice(0, 4);
 
@@ -86,7 +88,8 @@ public:
 	
     void decodeDataRecord()
 	{
-		readRawBits(32);
+		if (readRaw32() != BROTHER_DATA_RECORD)
+			return;
 
 		const auto& rawbits = readRawBits(BROTHER_DATA_RECORD_ENCODED_SIZE*8);
 		const auto& rawbytes = toBytes(rawbits).slice(0, BROTHER_DATA_RECORD_ENCODED_SIZE);

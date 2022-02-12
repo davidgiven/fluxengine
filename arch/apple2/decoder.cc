@@ -78,8 +78,8 @@ public:
 
     void decodeSectorRecord()
 	{
-		/* Skip ID (as we know it's a APPLE2_SECTOR_RECORD). */
-		readRawBits(24);
+		if (readRaw24() != APPLE2_SECTOR_RECORD)
+			return;
 
 		/* Read header. */
 
@@ -98,14 +98,13 @@ public:
 	{
 		/* Check ID. */
 
-		Bytes bytes = toBytes(readRawBits(3*8)).slice(0, 3);
-		if (bytes.reader().read_be24() != APPLE2_DATA_RECORD)
+		if (readRaw24() != APPLE2_DATA_RECORD)
 			return;
 
 		/* Read and decode data. */
 
 		unsigned recordLength = APPLE2_ENCODED_SECTOR_LENGTH + 2;
-		bytes = toBytes(readRawBits(recordLength*8)).slice(0, recordLength);
+		Bytes bytes = toBytes(readRawBits(recordLength*8)).slice(0, recordLength);
 
 		_sector->status = Sector::BAD_CHECKSUM;
 		_sector->data = decode_crazy_data(&bytes[0], _sector->status);

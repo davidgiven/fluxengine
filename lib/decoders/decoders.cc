@@ -156,6 +156,46 @@ std::vector<bool> AbstractDecoder::readRawBits(unsigned count)
 	return _decoder->readBits(count);
 }
 
+uint8_t AbstractDecoder::readRaw8()
+{
+	return toBytes(readRawBits(8)).reader().read_8();
+}
+
+uint16_t AbstractDecoder::readRaw16()
+{
+	return toBytes(readRawBits(16)).reader().read_be16();
+}
+
+uint32_t AbstractDecoder::readRaw20()
+{
+	std::vector<bool> bits(4);
+	for (bool b : readRawBits(20))
+		bits.push_back(b);
+
+	return toBytes(bits).reader().read_be24();
+}
+
+uint32_t AbstractDecoder::readRaw24()
+{
+	return toBytes(readRawBits(24)).reader().read_be24();
+}
+
+uint32_t AbstractDecoder::readRaw32()
+{
+	return toBytes(readRawBits(32)).reader().read_be32();
+}
+
+uint64_t AbstractDecoder::readRaw48()
+{
+	return toBytes(readRawBits(48)).reader().read_be48();
+}
+
+uint64_t AbstractDecoder::readRaw64()
+{
+	return toBytes(readRawBits(64)).reader().read_be64();
+}
+
+
 std::set<unsigned> AbstractDecoder::requiredSectors(unsigned cylinder, unsigned head) const
 {
 	static std::set<unsigned> set;

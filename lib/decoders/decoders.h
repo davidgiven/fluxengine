@@ -50,6 +50,13 @@ public:
 
 	void resetFluxDecoder();
     std::vector<bool> readRawBits(unsigned count);
+	uint8_t readRaw8();
+	uint16_t readRaw16();
+	uint32_t readRaw20();
+	uint32_t readRaw24();
+	uint32_t readRaw32();
+	uint64_t readRaw48();
+	uint64_t readRaw64();
 
     Fluxmap::Position tell()
     { return _fmr->tell(); } 

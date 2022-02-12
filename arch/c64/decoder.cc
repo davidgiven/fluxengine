@@ -65,7 +65,8 @@ public:
 
     void decodeSectorRecord()
 	{
-		readRawBits(20);
+		if (readRaw20() != C64_SECTOR_RECORD)
+			return;
 
 		const auto& bits = readRawBits(5*10);
 		const auto& bytes = decode(bits).slice(0, 5);
@@ -80,7 +81,8 @@ public:
 
     void decodeDataRecord()
 	{
-		readRawBits(20);
+		if (readRaw20() != C64_DATA_RECORD)
+			return;
 
 		const auto& bits = readRawBits(259*10);
 		const auto& bytes = decode(bits).slice(0, 259);

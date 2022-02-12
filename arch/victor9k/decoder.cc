@@ -66,20 +66,22 @@ public:
 
     void decodeSectorRecord()
 	{
-		/* Skip the sync marker bit. */
-		readRawBits(22);
+		/* Check the ID. */
+
+		if (readRaw32() != VICTOR9K_SECTOR_RECORD)
+			return;
 
 		/* Read header. */
 
-		auto bytes = decode(readRawBits(4*10)).slice(0, 4);
+		auto bytes = decode(readRawBits(3*10)).slice(0, 3);
 
-		uint8_t rawTrack = bytes[1];
-		_sector->logicalSector = bytes[2];
-		uint8_t gotChecksum = bytes[3];
+		uint8_t rawTrack = bytes[0];
+		_sector->logicalSector = bytes[1];
+		uint8_t gotChecksum = bytes[2];
 
 		_sector->logicalTrack = rawTrack & 0x7f;
 		_sector->logicalSide = rawTrack >> 7;
-		uint8_t wantChecksum = bytes[1] + bytes[2];
+		uint8_t wantChecksum = bytes[0] + bytes[1];
 		if ((_sector->logicalSector > 20) || (_sector->logicalTrack > 85) || (_sector->logicalSide > 1))
 			return;
 					
@@ -89,19 +91,16 @@ public:
 
     void decodeDataRecord()
 	{
-		/* Skip the sync marker bit. */
-		readRawBits(22);
+		/* Check the ID. */
+
+		if (readRaw32() != VICTOR9K_DATA_RECORD)
+			return;
 
 		/* Read data. */
 
-		auto bytes = decode(readRawBits((VICTOR9K_SECTOR_LENGTH+5)*10))
-			.slice(0, VICTOR9K_SECTOR_LENGTH+5);
+		auto bytes = decode(readRawBits((VICTOR9K_SECTOR_LENGTH+4)*10))
+			.slice(0, VICTOR9K_SECTOR_LENGTH+4);
 		ByteReader br(bytes);
-
-		/* Check that this is actually a data record. */
-		
-		if (br.read_8() != 8)
-			return;
 
 		_sector->data = br.read(VICTOR9K_SECTOR_LENGTH);
 		uint16_t gotChecksum = sumBytes(_sector->data);

@@ -67,7 +67,8 @@ public:
 	{
 		/* Skip sync bits and ID byte. */
 
-		readRawBits(24);
+		if (readRaw24() != F85_SECTOR_RECORD)
+			return;
 
 		/* Read header. */
 
@@ -87,7 +88,8 @@ public:
 	{
 		/* Skip sync bits ID byte. */
 
-		readRawBits(24);
+		if (readRaw24() != F85_DATA_RECORD)
+			return;
 
 		const auto& bytes = decode(readRawBits((F85_SECTOR_LENGTH+3)*10))
 			.slice(0, F85_SECTOR_LENGTH+3);
