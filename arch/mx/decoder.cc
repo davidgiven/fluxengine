@@ -49,6 +49,13 @@ public:
 
     void decodeSectorRecord()
 	{
+		/* Skip the ID pattern and track word, which is only present on the
+		 * first sector. We don't trust the track word because some driver
+		 * don't write it correctly. */
+
+		if (_currentSector == 0)
+			readRawBits(64);
+
 		auto bits = readRawBits((SECTOR_SIZE+2)*16);
 		auto bytes = decodeFmMfm(bits).slice(0, SECTOR_SIZE+2);
 
