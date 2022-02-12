@@ -29,43 +29,23 @@ public:
 		_config(config.amiga())
 	{}
 
-	void beginTrack() override
-	{
-		/* Force a seek for the first sector. */
-
-		_bad = true;
-	}
-
     nanoseconds_t advanceToNextRecord() override
 	{
-		/* seekToPattern always advances one pulse, but Amiga sectors are
-		 * usually right next each other (they're written out with no gaps).
-		 * So, only actually do a seek if we haven't just read a reasonably
-		 * good sector. */
-
-		if (_bad)
-			_clock = seekToPattern(SECTOR_PATTERN);
-		_bad = false;
-		return _clock;
+		return seekToPattern(SECTOR_PATTERN);
 	}
 
     void decodeSectorRecord() override
 	{
+		if (readRaw48() != AMIGA_SECTOR_RECORD)
+			return;
+			
 		const auto& rawbits = readRawBits(AMIGA_RECORD_SIZE*16);
 		if (rawbits.size() < (AMIGA_RECORD_SIZE*16))
-		{
-			_bad = true;
 			return;
-		}
 		const auto& rawbytes = toBytes(rawbits).slice(0, AMIGA_RECORD_SIZE*2);
-		if (rawbytes.reader().read_be48() != AMIGA_SECTOR_RECORD)
-		{
-			_bad = true;
-			return;
-		}
 		const auto& bytes = decodeFmMfm(rawbits).slice(0, AMIGA_RECORD_SIZE);
 
-		const uint8_t* ptr = bytes.begin() + 3;
+		const uint8_t* ptr = bytes.begin();
 
 		Bytes header = amigaDeinterleave(ptr, 4);
 		Bytes recoveryinfo = amigaDeinterleave(ptr, 16);
@@ -75,12 +55,12 @@ public:
 		_sector->logicalSector = header[2];
 
 		uint32_t wantedheaderchecksum = amigaDeinterleave(ptr, 4).reader().read_be32();
-		uint32_t gotheaderchecksum = amigaChecksum(rawbytes.slice(6, 40));
+		uint32_t gotheaderchecksum = amigaChecksum(rawbytes.slice(0, 40));
 		if (gotheaderchecksum != wantedheaderchecksum)
 			return;
 
 		uint32_t wanteddatachecksum = amigaDeinterleave(ptr, 4).reader().read_be32();
-		uint32_t gotdatachecksum = amigaChecksum(rawbytes.slice(62, 1024));
+		uint32_t gotdatachecksum = amigaChecksum(rawbytes.slice(56, 1024));
 
 		Bytes data;
 		data.writer().append(amigaDeinterleave(ptr, 512)).append(recoveryinfo);
@@ -97,7 +77,6 @@ public:
 private:
 	const AmigaDecoderProto& _config;
 	nanoseconds_t _clock;
-	bool _bad;
 };
 
 std::unique_ptr<AbstractDecoder> createAmigaDecoder(const DecoderProto& config)
