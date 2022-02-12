@@ -90,24 +90,38 @@ std::unique_ptr<TrackDataFlux> AbstractDecoder::decodeToSectors(
 
 		Fluxmap::Position before = fmr.tell();
         decodeSectorRecord();
-		pushRecord(before, fmr.tell());
+		Fluxmap::Position after = fmr.tell();
+		pushRecord(before, after);
 
-        if (_sector->status == Sector::DATA_MISSING)
+        if (_sector->status != Sector::DATA_MISSING)
+		{
+			_sector->position = before.bytes;
+			_sector->dataStartTime = before.ns();
+			_sector->dataEndTime = after.ns();
+		}
+		else
         {
             /* The data is in a separate record. */
 
 			for (;;)
 			{
+				_sector->headerStartTime = before.ns();
+				_sector->headerEndTime = after.ns();
+
 				_sector->clock = advanceToNextRecord();
 				if (fmr.eof() || !_sector->clock)
 					break;
 
 				before = fmr.tell();
 				decodeDataRecord();
+				after = fmr.tell();
 
 				if (_sector->status != Sector::DATA_MISSING)
 				{
-					pushRecord(before, fmr.tell());
+					_sector->position = before.bytes;
+					_sector->dataStartTime = before.ns();
+					_sector->dataEndTime = after.ns();
+					pushRecord(before, after);
 					break;
 				}
 
@@ -144,7 +158,6 @@ void AbstractDecoder::resetFluxDecoder()
 
 nanoseconds_t AbstractDecoder::seekToPattern(const FluxMatcher& pattern)
 {
-	_fmr->skipToEvent(F_BIT_PULSE);
 	nanoseconds_t clock = _fmr->seekToPattern(pattern);
 	_decoder.reset(new FluxDecoder(_fmr, clock, _config));
 	return clock;

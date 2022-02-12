@@ -28,7 +28,7 @@ public:
     static Status stringToStatus(const std::string& value);
 
 	Status status = Status::INTERNAL_ERROR;
-    Fluxmap::Position position;
+    uint32_t position;
     nanoseconds_t clock = 0;
     nanoseconds_t headerStartTime = 0;
     nanoseconds_t headerEndTime = 0;
