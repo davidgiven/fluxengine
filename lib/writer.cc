@@ -2,7 +2,6 @@
 #include "flags.h"
 #include "fluxmap.h"
 #include "writer.h"
-#include "sql.h"
 #include "protocol.h"
 #include "usb/usb.h"
 #include "encoders/encoders.h"
@@ -15,8 +14,6 @@
 #include "image.h"
 #include "lib/config.pb.h"
 #include "proto.h"
-
-static sqlite3* outdb;
 
 void writeTracks(
 	FluxSink& fluxSink,
@@ -40,6 +37,7 @@ void writeTracks(
 			}
 			else
 			{
+				fluxmap->rescale(config.flux_sink().rescale());
 				/* Precompensation actually seems to make things worse, so let's leave
 					* it disabled for now. */
 				//fluxmap->precompensate(PRECOMPENSATION_THRESHOLD_TICKS, 2);
@@ -77,6 +75,7 @@ void writeTracksAndVerify(
 			}
 			else
 			{
+				fluxmap->rescale(config.flux_sink().rescale());
 				std::sort(sectors.begin(), sectors.end(), sectorPointerSortPredicate);
 
 				for (int retry = 0;; retry++)

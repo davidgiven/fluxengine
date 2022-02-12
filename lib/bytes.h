@@ -131,6 +131,9 @@ public:
         return (b1<<24) | (b2<<16) | (b3<<8) | b4;
     }
 
+    uint64_t read_be48();
+    uint64_t read_be64();
+
     uint16_t read_le16()
     {
         uint8_t b1 = _bytes[pos++];

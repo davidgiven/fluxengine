@@ -39,8 +39,8 @@ message Fl2FluxSourceProto {
 }
 
 message FluxSourceProto {
+	optional double rescale = 9 [ default = 1.0, (help) = "amount to divide pulse periods by" ];
 	oneof source {
-		string fluxfile = 1 [default = "name of source flux file"];
 		HardwareFluxSourceProto drive = 2;
 		TestPatternFluxSourceProto test_pattern = 3;
 		EraseFluxSourceProto erase = 4;

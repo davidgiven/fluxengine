@@ -58,20 +58,15 @@ public:
 		AbstractDecoder(config)
 	{}
 
-    RecordType advanceToNextRecord()
+    nanoseconds_t advanceToNextRecord() override
 	{
-		const FluxMatcher* matcher = nullptr;
-		_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
-		if (matcher == &SECTOR_RECORD_PATTERN)
-			return RecordType::SECTOR_RECORD;
-		if (matcher == &DATA_RECORD_PATTERN)
-			return RecordType::DATA_RECORD;
-		return RecordType::UNKNOWN_RECORD;
+		return seekToPattern(ANY_RECORD_PATTERN);
 	}
 
     void decodeSectorRecord()
 	{
-		readRawBits(20);
+		if (readRaw20() != C64_SECTOR_RECORD)
+			return;
 
 		const auto& bits = readRawBits(5*10);
 		const auto& bytes = decode(bits).slice(0, 5);
@@ -86,7 +81,8 @@ public:
 
     void decodeDataRecord()
 	{
-		readRawBits(20);
+		if (readRaw20() != C64_DATA_RECORD)
+			return;
 
 		const auto& bits = readRawBits(259*10);
 		const auto& bytes = decode(bits).slice(0, 259);

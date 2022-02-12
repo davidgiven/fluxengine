@@ -9,9 +9,10 @@ import "lib/fluxsink/fluxsink.proto";
 import "lib/usb/usb.proto";
 import "lib/common.proto";
 
-// NEXT_TAG: 13
+// NEXT_TAG: 14
 message ConfigProto {
 	optional string comment = 8;
+	optional bool is_extension = 13;
 
 	optional ImageReaderProto image_reader = 12;
 	optional ImageWriterProto image_writer = 9;

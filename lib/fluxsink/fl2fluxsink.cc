@@ -1,7 +1,6 @@
 #include "globals.h"
 #include "flags.h"
 #include "fluxmap.h"
-#include "sql.h"
 #include "bytes.h"
 #include "protocol.h"
 #include "fluxsink/fluxsink.h"
@@ -18,8 +17,13 @@ class Fl2FluxSink : public FluxSink
 {
 public:
 	Fl2FluxSink(const Fl2FluxSinkProto& lconfig):
-		_config(lconfig),
-		_of(lconfig.filename(), std::ios::out | std::ios::binary)
+		Fl2FluxSink(lconfig.filename())
+	{
+	}
+
+	Fl2FluxSink(const std::string& filename):
+		_filename(filename),
+		_of(_filename, std::ios::out | std::ios::binary)
 	{
 		if (!_of.is_open())
 			Error() << "cannot open output file";
@@ -53,11 +57,11 @@ public:
 
 	operator std::string () const
 	{
-		return fmt::format("fl2({})", _config.filename());
+		return fmt::format("fl2({})", _filename);
 	}
 
 private:
-	const Fl2FluxSinkProto& _config;
+	std::string _filename;
 	std::ofstream _of;
 	std::map<std::pair<unsigned, unsigned>, Bytes> _data;
 };
@@ -65,6 +69,11 @@ private:
 std::unique_ptr<FluxSink> FluxSink::createFl2FluxSink(const Fl2FluxSinkProto& config)
 {
     return std::unique_ptr<FluxSink>(new Fl2FluxSink(config));
+}
+
+std::unique_ptr<FluxSink> FluxSink::createFl2FluxSink(const std::string& filename)
+{
+    return std::unique_ptr<FluxSink>(new Fl2FluxSink(filename));
 }
 
 

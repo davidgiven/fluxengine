@@ -17,6 +17,7 @@
 #include <fstream>
 
 static FlagGroup flags;
+static bool verify = true;
 
 static StringFlag sourceImage(
 	{ "--input", "-i" },
@@ -55,6 +56,13 @@ static StringFlag destHeads(
 		setRange(config.mutable_heads(), value);
 	});
 
+static ActionFlag noVerifyFlag(
+	{ "--no-verify", "-n" },
+	"skip verification of write",
+	[]{
+		verify = false;
+	});
+
 int mainWrite(int argc, const char* argv[])
 {
 	if (argc == 1)
@@ -68,7 +76,7 @@ int mainWrite(int argc, const char* argv[])
 	std::unique_ptr<FluxSink> fluxSink(FluxSink::create(config.flux_sink()));
 
 	std::unique_ptr<AbstractDecoder> decoder;
-	if (config.has_decoder())
+	if (config.has_decoder() && verify)
 		decoder = AbstractDecoder::create(config.decoder());
 
 	std::unique_ptr<FluxSource> fluxSource;

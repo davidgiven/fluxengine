@@ -71,21 +71,15 @@ public:
 		AbstractDecoder(config)
 	{}
 
-    RecordType advanceToNextRecord()
+    nanoseconds_t advanceToNextRecord() override
 	{
-		const FluxMatcher* matcher = nullptr;
-		_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
-		if (matcher == &SECTOR_RECORD_PATTERN)
-			return RecordType::SECTOR_RECORD;
-		if (matcher == &DATA_RECORD_PATTERN)
-			return RecordType::DATA_RECORD;
-		return RecordType::UNKNOWN_RECORD;
+		return seekToPattern(ANY_RECORD_PATTERN);
 	}
 
     void decodeSectorRecord()
 	{
-		/* Skip ID (as we know it's a APPLE2_SECTOR_RECORD). */
-		readRawBits(24);
+		if (readRaw24() != APPLE2_SECTOR_RECORD)
+			return;
 
 		/* Read header. */
 
@@ -104,14 +98,13 @@ public:
 	{
 		/* Check ID. */
 
-		Bytes bytes = toBytes(readRawBits(3*8)).slice(0, 3);
-		if (bytes.reader().read_be24() != APPLE2_DATA_RECORD)
+		if (readRaw24() != APPLE2_DATA_RECORD)
 			return;
 
 		/* Read and decode data. */
 
 		unsigned recordLength = APPLE2_ENCODED_SECTOR_LENGTH + 2;
-		bytes = toBytes(readRawBits(recordLength*8)).slice(0, recordLength);
+		Bytes bytes = toBytes(readRawBits(recordLength*8)).slice(0, recordLength);
 
 		_sector->status = Sector::BAD_CHECKSUM;
 		_sector->data = decode_crazy_data(&bytes[0], _sector->status);

@@ -279,6 +279,16 @@ ByteWriter Bytes::writer()
     return ByteWriter(*this);
 }
 
+uint64_t ByteReader::read_be48()
+{
+	return ((uint64_t)read_be16() << 32) | read_be32();
+}
+
+uint64_t ByteReader::read_be64()
+{
+	return ((uint64_t)read_be32() << 32) | read_be32();
+}
+
 ByteWriter& ByteWriter::operator +=(std::istream& stream)
 {
     Bytes buffer(4096);

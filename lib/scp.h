@@ -14,7 +14,7 @@ struct ScpHeader
     uint8_t heads;         // 0 = both, 1 = side 0 only, 2 = side 1 only
     uint8_t resolution;    // 25ns * (resolution+1)
     uint8_t checksum[4];   // of data after this point
-    uint8_t track[165][4]; // track offsets, not necessarily 165
+    uint8_t track[168][4]; // track offsets, not necessarily 168
 };
 
 enum

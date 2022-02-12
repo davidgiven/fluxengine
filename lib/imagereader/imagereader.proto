@@ -3,6 +3,12 @@ syntax = "proto2";
 import "lib/common.proto";
 
 message ImgInputOutputProto {
+	enum Order {
+		UNDEFINED = 0;
+		CHS = 1;
+		HCS = 2;
+	}
+
 	message SectorsProto {
 		repeated int32 sector = 1 [(help) = "sector ID"];
 	}
@@ -30,6 +36,7 @@ message ImgInputOutputProto {
 	optional int32 sides = 6 [default=0, (help) = "number of sides in image"];
 	optional int32 physical_offset = 7 [default=0, (help) = "logical:physical track offset"];
 	optional int32 physical_step = 8 [default=1, (help) = "logical:physical track step"];
+	optional Order order = 9 [default=CHS, (help) = "the order in which to emit tracks in the image"];
 }
 
 message DiskCopyInputProto {}
@@ -41,6 +48,7 @@ message Td0InputProto {}
 message DimInputProto {}
 message FdiInputProto {}
 message D88InputProto {}
+message NFDInputProto {}
 
 message ImageReaderProto {
 	optional string filename = 1 [(help) = "filename of input sector image"];
@@ -55,6 +63,7 @@ message ImageReaderProto {
 		DimInputProto dim = 9;
 		FdiInputProto fdi = 10;
 		D88InputProto d88 = 11;
+        NFDInputProto nfd = 12;
 	}
 }
 

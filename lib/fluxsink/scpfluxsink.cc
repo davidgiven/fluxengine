@@ -1,7 +1,6 @@
 #include "globals.h"
 #include "flags.h"
 #include "fluxmap.h"
-#include "sql.h"
 #include "bytes.h"
 #include "protocol.h"
 #include "fluxsink/fluxsink.h"
@@ -86,6 +85,12 @@ public:
 		trackdataWriter.seekToEnd();
 		int strack = strackno(cylinder, head);
 
+                if (strack >= std::size(_fileheader.track)) {
+                    std::cout << fmt::format("SCP: cannot write track {} head {}, "
+                            "there are not not enough Track Data Headers.\n",
+                            cylinder, head);
+                    return;
+                }
 		ScpTrack trackheader = {0};
 		trackheader.header.track_id[0] = 'T';
 		trackheader.header.track_id[1] = 'R';

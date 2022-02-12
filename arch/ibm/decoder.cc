@@ -98,58 +98,55 @@ public:
 		_config(config.ibm())
     {}
 
-    RecordType advanceToNextRecord() override
+    nanoseconds_t advanceToNextRecord() override
 	{
-		const FluxMatcher* matcher = nullptr;
-		_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
-
-		/* If this is the MFM prefix byte, the the decoder is going to expect three
-		 * extra bytes on the front of the header. */
-		_currentHeaderLength = (matcher == &MFM_PATTERN) ? 3 : 0;
-
-		Fluxmap::Position here = tell();
-		resetFluxDecoder();
-		if (_currentHeaderLength > 0)
-			readRawBits(_currentHeaderLength*16);
-		auto idbits = readRawBits(16);
-		const Bytes idbytes = decodeFmMfm(idbits);
-		uint8_t id = idbytes.slice(0, 1)[0];
-		if (eof())
-			return RecordType::UNKNOWN_RECORD;
-		seek(here);
-		
-		switch (id)
-		{
-			case IBM_IDAM:
-				return RecordType::SECTOR_RECORD;
-
-			case IBM_DAM1:
-			case IBM_DAM2:
-			case IBM_TRS80DAM1:
-			case IBM_TRS80DAM2:
-				return RecordType::DATA_RECORD;
-		}
-		return RecordType::UNKNOWN_RECORD;
+		return seekToPattern(ANY_RECORD_PATTERN);
 	}
 
     void decodeSectorRecord() override
 	{
-		unsigned recordSize = _currentHeaderLength + IBM_IDAM_LEN;
-		auto bits = readRawBits(recordSize*16);
-		auto bytes = decodeFmMfm(bits).slice(0, recordSize);
+		/* This is really annoying because the IBM record scheme has a
+		 * variable-sized header _and_ the checksum covers this header too. So
+		 * we have to read and decode a byte at a time until we know where the
+		 * record itself starts, saving the bytes for the checksumming later.
+		 */
+
+		Bytes bytes;
+		ByteWriter bw(bytes);
+
+		auto readByte = [&]() {
+			auto bits = readRawBits(16);
+			auto bytes = decodeFmMfm(bits).slice(0, 1);
+			uint8_t byte = bytes[0];
+			bw.write_8(byte);
+			return byte;
+		};
+
+		uint8_t id = readByte();
+		if (id == 0xa1)
+		{
+			readByte();
+			readByte();
+			id = readByte();
+		}
+		if (id != IBM_IDAM)
+			return;
+
+		ByteReader br(bytes);
+		br.seek(bw.pos);
+
+		auto bits = readRawBits(IBM_IDAM_LEN*16);
+		bw += decodeFmMfm(bits).slice(0, IBM_IDAM_LEN);
 
 		IbmDecoderProto::TrackdataProto trackdata;
 		getTrackFormat(trackdata, _sector->physicalCylinder, _sector->physicalHead);
 
-		ByteReader br(bytes);
-		br.seek(_currentHeaderLength);
-		br.read_8(); /* skip ID byte */
 		_sector->logicalTrack = br.read_8();
 		_sector->logicalSide = br.read_8();
 		_sector->logicalSector = br.read_8();
 		_currentSectorSize = 1 << (br.read_8() + 7);
+		uint16_t gotCrc = crc16(CCITT_POLY, bytes.slice(0, br.pos));
 		uint16_t wantCrc = br.read_be16();
-		uint16_t gotCrc = crc16(CCITT_POLY, bytes.slice(0, _currentHeaderLength + 5));
 		if (wantCrc == gotCrc)
 			_sector->status = Sector::DATA_MISSING; /* correct but unintuitive */
 
@@ -163,17 +160,39 @@ public:
 
     void decodeDataRecord() override
 	{
-		unsigned recordLength = _currentHeaderLength + _currentSectorSize + 3;
-		auto bits = readRawBits(recordLength*16);
-		auto bytes = decodeFmMfm(bits).slice(0, recordLength);
+		/* This is the same deal as the sector record. */
+
+		Bytes bytes;
+		ByteWriter bw(bytes);
+
+		auto readByte = [&]() {
+			auto bits = readRawBits(16);
+			auto bytes = decodeFmMfm(bits).slice(0, 1);
+			uint8_t byte = bytes[0];
+			bw.write_8(byte);
+			return byte;
+		};
+
+		uint8_t id = readByte();
+		if (id == 0xa1)
+		{
+			readByte();
+			readByte();
+			id = readByte();
+		}
+		if ((id != IBM_DAM1) && (id != IBM_DAM2)
+			&& (id != IBM_TRS80DAM1) && (id != IBM_TRS80DAM2))
+			return;
 
 		ByteReader br(bytes);
-		br.seek(_currentHeaderLength);
-		br.read_8(); /* skip ID byte */
+		br.seek(bw.pos);
+
+		auto bits = readRawBits((_currentSectorSize + 2) * 16);
+		bw += decodeFmMfm(bits).slice(0, _currentSectorSize+2);
 
 		_sector->data = br.read(_currentSectorSize);
+		uint16_t gotCrc = crc16(CCITT_POLY, bytes.slice(0, br.pos));
 		uint16_t wantCrc = br.read_be16();
-		uint16_t gotCrc = crc16(CCITT_POLY, bytes.slice(0, recordLength-2));
 		_sector->status = (wantCrc == gotCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
 	}
 

@@ -108,3 +108,22 @@ std::vector<Fluxmap> Fluxmap::split() {
     maps.push_back(map);
     return maps;
 }
+
+void Fluxmap::rescale(double scale) {
+    if (scale != 1.0) {
+        auto bytesOrig = _bytes;
+        _bytes = Bytes();
+        _duration = 0;
+        _ticks = 0;
+        int lastEvent = 0;
+        for (unsigned i=0; i<bytesOrig.size(); i++)
+        {
+            lastEvent += bytesOrig[i] & 0x3f;
+            if (bytesOrig[i] & 0xc0) {
+                appendInterval(lastEvent * scale + 0.5);
+                findLastByte() |= bytesOrig[i] & 0xc0;
+                lastEvent = 0;
+            }
+        }
+    }
+}

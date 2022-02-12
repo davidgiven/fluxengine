@@ -29,20 +29,40 @@ public:
 		_config(config.amiga())
 	{}
 
-    RecordType advanceToNextRecord() override
+	void beginTrack() override
 	{
-		_sector->clock = _fmr->seekToPattern(SECTOR_PATTERN);
-		if (_fmr->eof() || !_sector->clock)
-			return UNKNOWN_RECORD;
-		return SECTOR_RECORD;
+		/* Force a seek for the first sector. */
+
+		_bad = true;
+	}
+
+    nanoseconds_t advanceToNextRecord() override
+	{
+		/* seekToPattern always advances one pulse, but Amiga sectors are
+		 * usually right next each other (they're written out with no gaps).
+		 * So, only actually do a seek if we haven't just read a reasonably
+		 * good sector. */
+
+		if (_bad)
+			_clock = seekToPattern(SECTOR_PATTERN);
+		_bad = false;
+		return _clock;
 	}
 
     void decodeSectorRecord() override
 	{
 		const auto& rawbits = readRawBits(AMIGA_RECORD_SIZE*16);
 		if (rawbits.size() < (AMIGA_RECORD_SIZE*16))
+		{
+			_bad = true;
 			return;
+		}
 		const auto& rawbytes = toBytes(rawbits).slice(0, AMIGA_RECORD_SIZE*2);
+		if (rawbytes.reader().read_be48() != AMIGA_SECTOR_RECORD)
+		{
+			_bad = true;
+			return;
+		}
 		const auto& bytes = decodeFmMfm(rawbits).slice(0, AMIGA_RECORD_SIZE);
 
 		const uint8_t* ptr = bytes.begin() + 3;
@@ -76,6 +96,8 @@ public:
 
 private:
 	const AmigaDecoderProto& _config;
+	nanoseconds_t _clock;
+	bool _bad;
 };
 
 std::unique_ptr<AbstractDecoder> createAmigaDecoder(const DecoderProto& config)

@@ -5,7 +5,6 @@
 #include "image.h"
 #include "proto.h"
 #include "lib/config.pb.h"
-#include "imagereader/imagereaderimpl.h"
 #include "fmt/format.h"
 #include <algorithm>
 #include <iostream>
@@ -59,10 +58,11 @@ public:
         ByteReader trackTableReader(trackTable);
 
         if (config.encoder().format_case() != EncoderProto::FormatCase::FORMAT_NOT_SET)
-            std::cout << "D88: overriding configured format";
+            std::cout << "D88: overriding configured format\n";
 
         auto ibm = config.mutable_encoder()->mutable_ibm();
-        config.mutable_cylinders()->set_end(0);
+        int physicalStep = 1;
+        int clockRate = 500;
         if (mediaFlag == 0x20) {
             std::cout << "D88: high density mode\n";
             if (config.flux_sink().dest_case() == FluxSinkProto::DestCase::kDrive) {
@@ -70,6 +70,8 @@ public:
             }
         } else {
             std::cout << "D88: single/double density mode\n";
+            physicalStep = 2;
+            clockRate = 300;
             if (config.flux_sink().dest_case() == FluxSinkProto::DestCase::kDrive) {
                 config.mutable_flux_sink()->mutable_drive()->set_high_density(false);
             }
@@ -88,7 +90,7 @@ public:
             int trackMfm = -1;
 
             auto trackdata = ibm->add_trackdata();
-            trackdata->set_clock_rate_khz(500);
+            trackdata->set_clock_rate_khz(clockRate);
             trackdata->set_track_length_ms(167);
             auto sectors = trackdata->mutable_sectors();
 
@@ -125,7 +127,7 @@ public:
                 if (trackSectorSize < 0) {
                     trackSectorSize = sectorSize;
                     // this is the first sector we've read, use it settings for per-track data
-                    trackdata->set_cylinder(cylinder);
+                    trackdata->set_cylinder(cylinder * physicalStep);
                     trackdata->set_head(head);
                     trackdata->set_sector_size(sectorSize);
                     trackdata->set_use_fm(fm);
@@ -148,17 +150,21 @@ public:
                 }
                 Bytes data(sectorSize);
                 inputFile.read((char*) data.begin(), data.size());
-                const auto& sector = image->put(cylinder, head, sectorId);
+                const auto& sector = image->put(cylinder * physicalStep, head, sectorId);
                 sector->status = Sector::OK;
                 sector->logicalTrack = cylinder;
-                sector->physicalCylinder = cylinder;
+                sector->physicalCylinder = cylinder * physicalStep;
                 sector->logicalSide = sector->physicalHead = head;
                 sector->logicalSector = sectorId;
                 sector->data = data;
 
                 sectors->add_sector(sectorId);
-                if (config.cylinders().end() < cylinder)
-                    config.mutable_cylinders()->set_end(cylinder);
+            }
+
+            if (physicalStep == 2) {
+                auto trackdata = ibm->add_trackdata();
+                trackdata->set_clock_rate_khz(clockRate);
+                trackdata->set_track_length_ms(167);
             }
         }
 
@@ -166,6 +172,21 @@ public:
         const Geometry& geometry = image->getGeometry();
         std::cout << fmt::format("D88: read {} tracks, {} sides\n",
                         geometry.numTracks, geometry.numSides);
+
+		if (!config.has_heads())
+		{
+			auto* heads = config.mutable_heads();
+			heads->set_start(0);
+			heads->set_end(geometry.numSides - 1);
+		}
+
+		if (!config.has_cylinders())
+		{
+			auto* cylinders = config.mutable_cylinders();
+			cylinders->set_start(0);
+			cylinders->set_end(geometry.numTracks - 1);
+		}
+
         return image;
     }
 

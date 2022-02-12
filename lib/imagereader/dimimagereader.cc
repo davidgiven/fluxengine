@@ -5,7 +5,6 @@
 #include "image.h"
 #include "proto.h"
 #include "lib/config.pb.h"
-#include "imagereader/imagereaderimpl.h"
 #include "fmt/format.h"
 #include <algorithm>
 #include <iostream>
@@ -130,6 +129,8 @@ public:
                     Error() << fmt::format("DIM: unknown media byte 0x%02x, could not determine write profile automatically", mediaByte);
                     break;
             }
+
+			config.mutable_decoder()->mutable_ibm();
         }
 
 		image->calculateSize();
@@ -137,6 +138,21 @@ public:
         std::cout << fmt::format("DIM: read {} tracks, {} sides, {} kB total\n",
                         geometry.numTracks, geometry.numSides,
 						((int)inputFile.tellg() - 256) / 1024);
+
+		if (!config.has_heads())
+		{
+			auto* heads = config.mutable_heads();
+			heads->set_start(0);
+			heads->set_end(geometry.numSides - 1);
+		}
+
+		if (!config.has_cylinders())
+		{
+			auto* cylinders = config.mutable_cylinders();
+			cylinders->set_start(0);
+			cylinders->set_end(geometry.numTracks - 1);
+		}
+
         return image;
 	}
 
