@@ -7,7 +7,7 @@
 
 #define AMIGA_TRACKS_PER_DISK 80
 #define AMIGA_SECTORS_PER_TRACK 11
-#define AMIGA_RECORD_SIZE 0x21f
+#define AMIGA_RECORD_SIZE 0x21c
 
 extern std::unique_ptr<AbstractDecoder> createAmigaDecoder(const DecoderProto& config);
 extern std::unique_ptr<AbstractEncoder> createAmigaEncoder(const EncoderProto& config);
