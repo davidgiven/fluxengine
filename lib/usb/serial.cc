@@ -156,6 +156,9 @@
 			usleep(200000);
 			if (ioctl(_fd, TIOCMBIS, &flag) == -1)
 				Error() << fmt::format("cannot set DTR on serial port: {}", strerror(errno));
+
+			/* Flush pending input from a generic greaseweazel device */
+			tcsetattr(_fd, TCSAFLUSH, &t);
 		}
 
 		~SerialPortImpl() override
@@ -167,6 +170,8 @@
 		ssize_t readImpl(uint8_t* buffer, size_t len) override
 		{
 			ssize_t rlen = ::read(_fd, buffer, len);
+			if (rlen == 0)
+				Error() << "serial read returned no data (device removed?)";
 			if (rlen == -1)
 				Error() << fmt::format("serial read I/O error: {}", strerror(errno));
 			return rlen;
