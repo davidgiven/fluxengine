@@ -45,8 +45,16 @@
 			COMMTIMEOUTS commtimeouts = {0};
 			commtimeouts.ReadIntervalTimeout = 100;
 			SetCommTimeouts(_handle, &commtimeouts);
+            
+			if (!EscapeCommFunction(_handle, CLRDTR))
+			  Error() << fmt::format("Couldn't clear DTR: {}",
+                                     get_last_error_string());
+			Sleep(200);
+			if (!EscapeCommFunction(_handle, SETDTR))
+			  Error() << fmt::format("Couldn't set DTR: {}",
+                                     get_last_error_string());
 
-			PurgeComm(_handle, PURGE_RXABORT|PURGE_RXCLEAR|PURGE_TXABORT|PURGE_TXCLEAR);
+            PurgeComm(_handle, PURGE_RXABORT|PURGE_RXCLEAR|PURGE_TXABORT|PURGE_TXCLEAR);
 		}
 
 		~SerialPortImpl() override
@@ -113,6 +121,7 @@
 
 #else
     #include <termios.h>
+	#include <sys/ioctl.h>
 
 	class SerialPortImpl : public SerialPort
 	{
@@ -138,6 +147,18 @@
 			t.c_cc[VMIN] = 1;
 			cfsetspeed(&t, 9600);
 			tcsetattr(_fd, TCSANOW, &t);
+
+			/* Toggle DTR to reset the device. */
+
+			int flag = TIOCM_DTR;
+			if (ioctl(_fd, TIOCMBIC, &flag) == -1)
+				Error() << fmt::format("cannot clear DTR on serial port: {}", strerror(errno));
+			usleep(200000);
+			if (ioctl(_fd, TIOCMBIS, &flag) == -1)
+				Error() << fmt::format("cannot set DTR on serial port: {}", strerror(errno));
+
+			/* Flush pending input from a generic greaseweazel device */
+			tcsetattr(_fd, TCSAFLUSH, &t);
 		}
 
 		~SerialPortImpl() override
@@ -149,6 +170,8 @@
 		ssize_t readImpl(uint8_t* buffer, size_t len) override
 		{
 			ssize_t rlen = ::read(_fd, buffer, len);
+			if (rlen == 0)
+				Error() << "serial read returned no data (device removed?)";
 			if (rlen == -1)
 				Error() << fmt::format("serial read I/O error: {}", strerror(errno));
 			return rlen;

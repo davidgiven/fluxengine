@@ -14,7 +14,6 @@ extern command_cb mainRpm;
 extern command_cb mainSeek;
 extern command_cb mainTestBandwidth;
 extern command_cb mainTestVoltages;
-extern command_cb mainUpgradeFluxFile;
 extern command_cb mainWrite;
 
 struct Command
@@ -38,7 +37,6 @@ static std::vector<Command> commands =
     { "rpm",               mainRpm,               "Measures the disk rotational speed.", },
     { "seek",              mainSeek,              "Moves the disk head.", },
     { "test",              mainTest,              "Various testing commands.", },
-    { "upgradefluxfile",   mainUpgradeFluxFile,   "Upgrades a flux file from a previous version of this software.", },
 };
 
 static std::vector<Command> analysables =
@@ -103,7 +101,7 @@ static void globalHelp()
 
 void showProfiles(const std::string& command, const std::map<std::string, std::string>& profiles)
 {
-	std::cout << "syntax: fluxengine " << command << " <profile> [<options>...]\n"
+	std::cout << "syntax: fluxengine " << command << " <profile> [<extensions...>] [<options>...]\n"
 				 "Use --help for option help.\n"
 	             "Available profiles include:\n";
 
@@ -112,10 +110,22 @@ void showProfiles(const std::string& command, const std::map<std::string, std::s
 		ConfigProto config;
 		if (!config.ParseFromString(it.second))
 			Error() << "couldn't load config proto";
-		std::cout << fmt::format("  {}: {}\n", it.first, config.comment());
+		if (!config.is_extension())
+			std::cout << fmt::format("  {}: {}\n", it.first, config.comment());
 	}
 
-	std::cout << "Or use a text file containing your own configuration.\n";
+	std::cout << "Available profile options include:\n";
+
+	for (const auto& it : profiles)
+	{
+		ConfigProto config;
+		if (!config.ParseFromString(it.second))
+			Error() << "couldn't load config proto";
+		if (config.is_extension())
+			std::cout << fmt::format("  {}: {}\n", it.first, config.comment());
+	}
+
+	std::cout << "Profiles and extensions may also be textpb files .\n";
 	exit(1);
 }
 

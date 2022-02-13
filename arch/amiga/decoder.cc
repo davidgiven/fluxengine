@@ -29,23 +29,23 @@ public:
 		_config(config.amiga())
 	{}
 
-    RecordType advanceToNextRecord() override
+    nanoseconds_t advanceToNextRecord() override
 	{
-		_sector->clock = _fmr->seekToPattern(SECTOR_PATTERN);
-		if (_fmr->eof() || !_sector->clock)
-			return UNKNOWN_RECORD;
-		return SECTOR_RECORD;
+		return seekToPattern(SECTOR_PATTERN);
 	}
 
     void decodeSectorRecord() override
 	{
+		if (readRaw48() != AMIGA_SECTOR_RECORD)
+			return;
+			
 		const auto& rawbits = readRawBits(AMIGA_RECORD_SIZE*16);
 		if (rawbits.size() < (AMIGA_RECORD_SIZE*16))
 			return;
 		const auto& rawbytes = toBytes(rawbits).slice(0, AMIGA_RECORD_SIZE*2);
 		const auto& bytes = decodeFmMfm(rawbits).slice(0, AMIGA_RECORD_SIZE);
 
-		const uint8_t* ptr = bytes.begin() + 3;
+		const uint8_t* ptr = bytes.begin();
 
 		Bytes header = amigaDeinterleave(ptr, 4);
 		Bytes recoveryinfo = amigaDeinterleave(ptr, 16);
@@ -55,12 +55,12 @@ public:
 		_sector->logicalSector = header[2];
 
 		uint32_t wantedheaderchecksum = amigaDeinterleave(ptr, 4).reader().read_be32();
-		uint32_t gotheaderchecksum = amigaChecksum(rawbytes.slice(6, 40));
+		uint32_t gotheaderchecksum = amigaChecksum(rawbytes.slice(0, 40));
 		if (gotheaderchecksum != wantedheaderchecksum)
 			return;
 
 		uint32_t wanteddatachecksum = amigaDeinterleave(ptr, 4).reader().read_be32();
-		uint32_t gotdatachecksum = amigaChecksum(rawbytes.slice(62, 1024));
+		uint32_t gotdatachecksum = amigaChecksum(rawbytes.slice(56, 1024));
 
 		Bytes data;
 		data.writer().append(amigaDeinterleave(ptr, 512)).append(recoveryinfo);
@@ -76,6 +76,7 @@ public:
 
 private:
 	const AmigaDecoderProto& _config;
+	nanoseconds_t _clock;
 };
 
 std::unique_ptr<AbstractDecoder> createAmigaDecoder(const DecoderProto& config)

@@ -14,6 +14,10 @@ metadata. Systems which use IBM scheme disks include but are not limited to:
   - the TRS-80
   - late era Commodore machines (the 1571 and so on)
   - most CP/M machines
+  - NEC PC-88 series
+  - NEC PC-98 series
+  - Sharp X68000
+  - Fujitsu FM Towns
   - etc
 
 FluxEngine supports reading these. However, some variants are more peculiar
@@ -93,11 +97,12 @@ correct format to use.
 Mixed-format disks
 ------------------
 
-Some disks, usually those belonging to early CP/M machines, have more than one
-format on the disk at once. Typically, the first few tracks will be low-density
-FM encoded and will be read by the machine's ROM; those tracks contain new
-floppy drive handling code capable of coping with MFM data, and so the rest of
-the disk will use that, allowing them to store more data.
+Some disks, such as those belonging to early CP/M machines, or N88-Basic disks
+(for PC-88 and PC-98), have more than one format on the disk at once. Typically,
+the first few tracks will be low-density FM encoded and will be read by the
+machine's ROM; those tracks contain new floppy drive handling code capable of
+coping with MFM data, and so the rest of the disk will use that, allowing them
+to store more data.
 
 FluxEngine can read these fine, but it tends to get a bit confused when it sees
 tracks with differing numbers of sectors --- if track 0 has 32 sectors but
@@ -105,6 +110,31 @@ track 1 has 16, it will assume that sectors 16..31 are missing on track 1 and
 size the image file accordingly. This can be worked around by specifying the
 size of each track; see the `eco1` read profile for an example.
 
-Writing can be made to work too, but there is currently no example. Please [get
-in touch](https://github.com/davidgiven/fluxengine/issues/new) if you have
-specific requirements (nothing's come up yet).
+N88-Basic format floppies can be written by either specifying the `n88basic`
+format, or by using D88 or NFD format images which include explicit sector
+layout information.
+
+Writing other formats can be made to work too, by creating a custom format
+specifier, using the `n88basic` format as an example.
+Please [get in touch](https://github.com/davidgiven/fluxengine/issues/new) if
+you have specific requirements.
+
+360rpm 3.5" disks
+-----------------
+
+Japanese PCs (NEC PC-98, Sharp X68000, Fujitsu FM Towns) spin their floppy
+drives at 360rpm rather than the more typical 300rpm. This was done in order
+to be fully backwards compatible with 5.25" disks, while using the exact
+same floppy controller. Later models of the PC-9821, as well as most USB floppy
+drives, feature "tri-mode" support which in addition to normal 300rpm modes,
+can change their speed to read and write 360rpm DD and HD disks.
+
+Neither the FluxEngine or Greaseweazle hardware can currently command a
+tri-mode drive to spin at 360rpm, however an older 360rpm-only drive will work
+to read these formats.
+
+Alternately, the FluxEngine software can resale the flux pulses to enable
+reading and writing these formats with a plain 300rpm drive. To do this,
+specify the following two additional options:
+
+    --flux_source.rescale=1.2 --flux_sink.rescale=1.2

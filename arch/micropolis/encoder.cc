@@ -19,7 +19,15 @@ static void write_sector(std::vector<bool>& bits, unsigned& cursor, const std::s
 		fullSector->push_back(0);
 	Bytes sectorData;
 	if (sector->data.size() == MICROPOLIS_ENCODED_SECTOR_SIZE)
+	{
+		if (sector->data[0] != 0xFF)
+			Error() << "275 byte sector doesn't start with sync byte 0xFF. Corrupted sector";
+		uint8_t wantChecksum = sector->data[1+2+266];
+		uint8_t gotChecksum = micropolisChecksum(sector->data.slice(1, 2+266));
+		if (wantChecksum != gotChecksum)
+			std::cerr << "Warning: checksum incorrect. Sector: " << sector->logicalSector << std::endl;
 		sectorData = sector->data;
+	}
 	else
 	{
 		ByteWriter writer(sectorData);

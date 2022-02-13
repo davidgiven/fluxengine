@@ -1,7 +1,6 @@
 #include "globals.h"
 #include "flags.h"
 #include "fluxmap.h"
-#include "sql.h"
 #include "bytes.h"
 #include "protocol.h"
 #include "fluxsink/fluxsink.h"

@@ -38,6 +38,9 @@ std::unique_ptr<ImageReader> ImageReader::create(const ImageReaderProto& config)
 		case ImageReaderProto::kD64:
 			return ImageReader::createD64ImageReader(config);
 
+		case ImageReaderProto::kNfd:
+			return ImageReader::createNFDImageReader(config);
+
 		case ImageReaderProto::kNsi:
 			return ImageReader::createNsiImageReader(config);
 
@@ -55,18 +58,21 @@ void ImageReader::updateConfigForFilename(ImageReaderProto* proto, const std::st
 	static const std::map<std::string, std::function<void(void)>> formats =
 	{
 		{".adf",      [&]() { proto->mutable_img(); }},
-		{".jv3",      [&]() { proto->mutable_jv3(); }},
 		{".d64",      [&]() { proto->mutable_d64(); }},
 		{".d81",      [&]() { proto->mutable_img(); }},
 		{".d88",      [&]() { proto->mutable_d88(); }},
 		{".dim",      [&]() { proto->mutable_dim(); }},
 		{".diskcopy", [&]() { proto->mutable_diskcopy(); }},
+		{".dsk",      [&]() { proto->mutable_img(); }},
 		{".fdi",      [&]() { proto->mutable_fdi(); }},
 		{".imd",      [&]() { proto->mutable_imd(); }},
 		{".img",      [&]() { proto->mutable_img(); }},
-		{".st",       [&]() { proto->mutable_img(); }},
+		{".jv3",      [&]() { proto->mutable_jv3(); }},
+		{".nfd",      [&]() { proto->mutable_nfd(); }},
 		{".nsi",      [&]() { proto->mutable_nsi(); }},
+		{".st",       [&]() { proto->mutable_img(); }},
 		{".td0",      [&]() { proto->mutable_td0(); }},
+		{".vgi",      [&]() { proto->mutable_img(); }},
 		{".xdf",      [&]() { proto->mutable_img(); }},
 	};
 

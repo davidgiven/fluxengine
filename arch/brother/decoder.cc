@@ -1,5 +1,4 @@
 #include "globals.h"
-#include "sql.h"
 #include "fluxmap.h"
 #include "decoders/fluxmapreader.h"
 #include "decoders/decoders.h"
@@ -60,20 +59,16 @@ public:
 		AbstractDecoder(config)
 	{}
 
-    RecordType advanceToNextRecord()
+    nanoseconds_t advanceToNextRecord() override
 	{
-		const FluxMatcher* matcher = nullptr;
-		_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
-		if (matcher == &SECTOR_RECORD_PATTERN)
-			return RecordType::SECTOR_RECORD;
-		if (matcher == &DATA_RECORD_PATTERN)
-			return RecordType::DATA_RECORD;
-		return RecordType::UNKNOWN_RECORD;
+		return seekToPattern(ANY_RECORD_PATTERN);
 	}
 
     void decodeSectorRecord()
 	{
-		readRawBits(32);
+		if (readRaw32() != BROTHER_SECTOR_RECORD)
+			return;
+
 		const auto& rawbits = readRawBits(32);
 		const auto& bytes = toBytes(rawbits).slice(0, 4);
 
@@ -93,7 +88,8 @@ public:
 	
     void decodeDataRecord()
 	{
-		readRawBits(32);
+		if (readRaw32() != BROTHER_DATA_RECORD)
+			return;
 
 		const auto& rawbits = readRawBits(BROTHER_DATA_RECORD_ENCODED_SIZE*8);
 		const auto& rawbytes = toBytes(rawbits).slice(0, BROTHER_DATA_RECORD_ENCODED_SIZE);

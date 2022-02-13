@@ -31,7 +31,6 @@ message Fl2FluxSinkProto {
 message FluxSinkProto {
     optional double rescale = 7 [ default = 1.0, (help) = "amount to multiply pulse periods by" ];
 	oneof dest {
-		string fluxfile = 1 [(help) = "name of destination flux file"];
 		HardwareFluxSinkProto drive = 2;
 		AuFluxSinkProto au = 3;
 		VcdFluxSinkProto vcd = 4;

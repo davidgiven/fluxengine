@@ -104,13 +104,9 @@ public:
 		AbstractDecoder(config)
 	{}
 
-    RecordType advanceToNextRecord()
+    nanoseconds_t advanceToNextRecord() override
 	{
-		const FluxMatcher* matcher = nullptr;
-		_sector->clock = _fmr->seekToPattern(SECTOR_ID_PATTERN, matcher);
-		if (matcher == &SECTOR_ID_PATTERN)
-			return RecordType::SECTOR_RECORD;
-		return RecordType::UNKNOWN_RECORD;
+		return seekToPattern(SECTOR_ID_PATTERN);
 	}
 
     void decodeSectorRecord()

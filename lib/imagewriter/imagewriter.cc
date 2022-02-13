@@ -46,11 +46,13 @@ void ImageWriter::updateConfigForFilename(ImageWriterProto* proto, const std::st
 		{".d64",      [&]() { proto->mutable_d64(); }},
 		{".d81",      [&]() { proto->mutable_img(); }},
 		{".diskcopy", [&]() { proto->mutable_diskcopy(); }},
+		{".dsk",      [&]() { proto->mutable_img(); }},
 		{".img",      [&]() { proto->mutable_img(); }},
 		{".ldbs",     [&]() { proto->mutable_ldbs(); }},
 		{".nsi",      [&]() { proto->mutable_nsi(); }},
 		{".raw",      [&]() { proto->mutable_raw(); }},
 		{".st",       [&]() { proto->mutable_img(); }},
+		{".vgi",      [&]() { proto->mutable_img(); }},
 		{".xdf",      [&]() { proto->mutable_img(); }},
 	};
 
@@ -105,7 +107,7 @@ void ImageWriter::writeCsv(const Image& image, const std::string& filename)
 			sector->headerEndTime,
 			sector->dataStartTime,
 			sector->dataEndTime,
-			sector->position.bytes,
+			sector->position,
 			sector->data.size(),
 			Sector::statusToString(sector->status)
 		);

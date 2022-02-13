@@ -2,7 +2,6 @@
 #include "flags.h"
 #include "fluxmap.h"
 #include "writer.h"
-#include "sql.h"
 #include "protocol.h"
 #include "usb/usb.h"
 #include "encoders/encoders.h"
@@ -15,8 +14,6 @@
 #include "image.h"
 #include "lib/config.pb.h"
 #include "proto.h"
-
-static sqlite3* outdb;
 
 void writeTracks(
 	FluxSink& fluxSink,

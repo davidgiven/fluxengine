@@ -438,7 +438,6 @@ buildlibrary libbackend.a \
     lib/fluxsink/fluxsink.cc \
     lib/fluxsink/hardwarefluxsink.cc \
     lib/fluxsink/scpfluxsink.cc \
-    lib/fluxsink/sqlitefluxsink.cc \
     lib/fluxsink/vcdfluxsink.cc \
     lib/fluxsource/cwffluxsource.cc \
     lib/fluxsource/erasefluxsource.cc \
@@ -448,7 +447,6 @@ buildlibrary libbackend.a \
     lib/fluxsource/kryoflux.cc \
     lib/fluxsource/kryofluxfluxsource.cc \
     lib/fluxsource/scpfluxsource.cc \
-    lib/fluxsource/sqlitefluxsource.cc \
     lib/fluxsource/testpatternfluxsource.cc \
     lib/globals.cc \
     lib/hexdump.cc \
@@ -469,6 +467,7 @@ buildlibrary libbackend.a \
     lib/imagewriter/imagewriter.cc \
     lib/imagewriter/imgimagewriter.cc \
     lib/imagewriter/ldbsimagewriter.cc \
+    lib/imagereader/nfdimagereader.cc \
     lib/imagewriter/nsiimagewriter.cc \
     lib/imagewriter/rawimagewriter.cc \
     lib/imginputoutpututils.cc \
@@ -476,7 +475,6 @@ buildlibrary libbackend.a \
     lib/proto.cc \
     lib/reader.cc \
     lib/sector.cc \
-    lib/sql.cc \
     lib/usb/fluxengineusb.cc \
     lib/usb/greaseweazle.cc \
     lib/usb/greaseweazleusb.cc \
@@ -520,13 +518,17 @@ FORMATS="\
     ibm720_525 \
     mac400 \
     mac800 \
-    micropolis \
+    micropolis143 \
+    micropolis287 \
+    micropolis315 \
+    micropolis630 \
     mx \
     n88basic \
     northstar175 \
     northstar350 \
     northstar87 \
     tids990 \
+    vgi \
     victor9k_ss \
     victor9k_ds \
     zilogmcz \
@@ -558,7 +560,6 @@ buildlibrary libfrontend.a \
     src/fe-seek.cc \
     src/fe-testbandwidth.cc \
     src/fe-testvoltages.cc \
-    src/fe-upgradefluxfile.cc \
     src/fe-write.cc \
     src/fluxengine.cc \
 
@@ -586,6 +587,15 @@ buildsimpleprogram brother240tool \
     -Idep/emu \
     tools/brother240tool.cc \
     libbackend.a \
+    libemu.a \
+    libfmt.a \
+
+buildsimpleprogram upgrade-flux-file \
+    -Idep/emu \
+    tools/upgrade-flux-file.cc \
+    libbackend.a \
+    libfl2.a \
+    libconfig.a \
     libemu.a \
     libfmt.a \
 
