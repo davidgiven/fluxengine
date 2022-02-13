@@ -63,10 +63,9 @@ public:
 			return;
 
 		Bytes bytes = decodeFmMfm(readRawBits((AGAT_SECTOR_SIZE+2)*16)).slice(0, AGAT_SECTOR_SIZE+2);
-		ByteReader br(bytes);
 
-		_sector->data = br.read(AGAT_SECTOR_SIZE);
-		uint8_t wantChecksum = br.read_8();
+		_sector->data = bytes.slice(0, AGAT_SECTOR_SIZE);
+		uint8_t wantChecksum = bytes[AGAT_SECTOR_SIZE];
 		uint8_t gotChecksum = agatChecksum(_sector->data);
 		_sector->status = (wantChecksum = gotChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
 	}
