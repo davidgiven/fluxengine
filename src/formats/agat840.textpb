@@ -1,0 +1,28 @@
+comment: 'Agat 840kB 5.25" 80-track DS (ro)'
+
+image_writer {
+	filename: "agat.img"
+	img {
+		trackdata {
+			sector_range {
+				start_sector: 0
+			}
+		}
+	}
+}
+
+decoder {
+	agat {}
+}
+
+cylinders {
+	start: 0
+	end: 79
+}
+
+heads {
+	start: 0
+	end: 1
+}
+
+
