@@ -5,6 +5,10 @@ Atari ST disks are standard MFM encoded IBM scheme disks without an IAM header.
 Disks are typically formatted 512 bytes per sector with between 9-10 (sometimes
 11!) sectors per track and 80-82 tracks per side.
 
+For some reason, occasionally formatting software will put an extra IDAM record
+with a sector number of 66 on a disk, which can horribly confuse things. The
+Atari profiles below are configured to ignore these.
+
 
 Reading disks
 -------------
