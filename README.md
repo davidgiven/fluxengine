@@ -93,6 +93,7 @@ people who've had it work).
 | Format                                    | Read? | Write? | Notes |
 |:------------------------------------------|:-----:|:------:|-------|
 | [IBM PC compatible](doc/disk-ibm.md)      |  🦄   |   🦄   | and compatibles (like the Atari ST) |
+| [Atari ST](doc/disk-atarist.md)           |  🦄   |   🦄   | technically the same as IBM, almost |
 | [Acorn ADFS](doc/disk-acornadfs.md)       |  🦄   |   🦖*  | single- and double- sided           |
 | [Acorn DFS](doc/disk-acorndfs.md)         |  🦄   |   🦖*  |                                     |
 | [Ampro Little Board](doc/disk-ampro.md)   |  🦖   |   🦖*  |                                     |
@@ -102,7 +103,7 @@ people who've had it work).
 | [Brother 120kB](doc/disk-brother.md)      |  🦄   |   🦖   |                                     |
 | [Brother 240kB](doc/disk-brother.md)      |  🦄   |   🦄   |                                     |
 | [Brother FB-100](doc/disk-fb100.md)       |  🦖   |        | Tandy Model 100, Husky Hunter, knitting machines |
-| [Macintosh 800kB](doc/disk-macintosh.md)  |  🦄   |   🦄   | and probably the 400kB too          |
+| [Macintosh 400kB/800kB](doc/disk-macintosh.md)  |  🦄   |   🦄   |                                     |
 | [NEC PC-98](doc/disk-ibm.md)              |  🦄   |   🦄   | trimode drive not required          |
 | [Sharp X68000](doc/disk-ibm.md)           |  🦄   |   🦄   |                                     |
 | [TRS-80](doc/disk-trs80.md)               |  🦖   |   🦖*  | a minor variation of the IBM scheme |

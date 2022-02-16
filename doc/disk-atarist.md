@@ -9,6 +9,7 @@ For some reason, occasionally formatting software will put an extra IDAM record
 with a sector number of 66 on a disk, which can horribly confuse things. The
 Atari profiles below are configured to ignore these.
 
+Be aware that many PC drives (including mine) won't do the 82 track formats. 
 
 Reading disks
 -------------
