@@ -156,6 +156,13 @@ public:
 			_sector->logicalSide = _sector->physicalHead;
 		if (trackdata.ignore_track_byte())
 			_sector->logicalTrack = _sector->physicalCylinder;
+
+		for (int sector : trackdata.ignore_sector())
+			if (_sector->logicalSector == sector)
+			{
+				_sector->status = Sector::MISSING;
+				break;
+			}
 	}
 
     void decodeDataRecord() override

@@ -3,7 +3,7 @@ syntax = "proto2";
 import "lib/common.proto";
 
 message IbmDecoderProto {
-	// Next: 10
+	// Next: 11
 	message TrackdataProto {
 		message SectorsProto {
 			repeated int32 sector = 1            [(help) = "require these sectors to exist for a good read"];
@@ -19,6 +19,8 @@ message IbmDecoderProto {
 		optional bool ignore_side_byte = 2       [default = false, (help) = "ignore side byte in sector header"];
 		optional bool ignore_track_byte = 6      [default = false, (help) = "ignore track byte in sector header"];
 		optional bool swap_sides = 4             [default = false, (help) = "put logical side 1 on physical side 0"];
+
+		repeated int32 ignore_sector = 10        [(help) = "sectors with these IDs will not be read"];
 
 		oneof required_sectors {
 			SectorsProto sectors = 5             [(help) = "require these sectors to exist for a good read"];
