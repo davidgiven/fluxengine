@@ -23,8 +23,12 @@ image_writer {
 encoder {
 	ibm {
 		trackdata {
-			track_length_ms: 250
-			clock_rate_khz: 600
+			track_length_ms: 167
+			clock_rate_khz: 300
+			emit_iam: false
+			gap0: 80
+			gap2: 22
+			gap3: 34
 			sectors {
 				sector: 1
 				sector: 2
