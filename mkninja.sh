@@ -516,6 +516,8 @@ FORMATS="\
     ibm360_525 \
     ibm720 \
     ibm720_525 \
+    bk800 \
+    bk800_525 \
     mac400 \
     mac800 \
     micropolis143 \
