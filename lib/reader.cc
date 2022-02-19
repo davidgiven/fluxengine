@@ -115,7 +115,7 @@ void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWrit
 					hasBadSectors = true;
 				}
 
-				Logger() << SingleReadLogMessage(trackdataflux, result_sectors);
+				Logger() << SingleReadLogMessage { trackdataflux, result_sectors };
 
 				if (hasBadSectors)
 					failures = false;
@@ -165,7 +165,7 @@ void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWrit
 			}
 
 			track->sectors = collect_sectors(track_sectors);
-			Logger() << TrackReadLogMessage(track);
+			Logger() << TrackReadLogMessage { track };
 			diskflux->tracks.push_back(track);
 		}
     }
