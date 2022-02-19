@@ -8,8 +8,16 @@
 #include "fmt/format.h"
 #include "lib/decoders/decoders.pb.h"
 
-/* The sector has a preamble of MFM 0x00s and uses 0xFF as a sync pattern. */
-static const FluxPattern SECTOR_SYNC_PATTERN(32, 0xaaaa5555);
+/* The sector has a preamble of MFM 0x00s and uses 0xFF as a sync pattern.
+ *
+ * 00        00        00        F         F
+ * 0000 0000 0000 0000 0000 0000 0101 0101 0101 0101
+ * A    A    A    A    A    A    5    5    5    5
+ */
+static const FluxPattern SECTOR_SYNC_PATTERN(64, 0xAAAAAAAAAAAA5555LL);
+
+/* Pattern to skip past current SYNC. */
+static const FluxPattern SECTOR_ADVANCE_PATTERN(64, 0xAAAAAAAAAAAAAAAALL);
 
 /* Adds all bytes, with carry. */
 uint8_t micropolisChecksum(const Bytes& bytes) {
@@ -35,24 +43,65 @@ public:
 
 	nanoseconds_t advanceToNextRecord() override
 	{
-		seekToIndexMark();
-		return seekToPattern(SECTOR_SYNC_PATTERN);
+		nanoseconds_t now = tell().ns();
+
+		/* For all but the first sector, seek to the next sector pulse.
+		 * The first sector does not contain the sector pulse in the fluxmap.
+		 */
+		if (now != 0) {
+			seekToIndexMark();
+			now = tell().ns();
+		}
+
+		/* Discard a possible partial sector at the end of the track.
+		 * This partial sector could be mistaken for a conflicted sector, if
+		 * whatever data read happens to match the checksum of 0, which is
+		 * rare, but has been observed on some disks.
+		 */
+		if (now > (getFluxmapDuration() - 12.5e6)) {
+			seekToIndexMark();
+			return 0;
+		}
+
+		nanoseconds_t clock = seekToPattern(SECTOR_SYNC_PATTERN);
+
+		auto syncDelta = tell().ns() - now;
+		/* Due to the weak nature of the Micropolis SYNC patern,
+		 * it's possible to detect a false SYNC during the gap
+		 * between the sector pulse and the write gate.  If the SYNC
+		 * is detected less than 100uS after the sector pulse, search
+		 * for another valid SYNC.
+		 *
+		 * Reference: Vector Micropolis Disk Controller Board Technical
+		 * Information Manual, pp. 1-16.
+		 */
+		if ((syncDelta > 0) && (syncDelta < 100e3)) {
+			seekToPattern(SECTOR_ADVANCE_PATTERN);
+			clock = seekToPattern(SECTOR_SYNC_PATTERN);
+		}
+
+		return clock;
 	}
 
 	void decodeSectorRecord()
 	{
-		readRawBits(16);
+		readRawBits(48);
 		auto rawbits = readRawBits(MICROPOLIS_ENCODED_SECTOR_SIZE*16);
 		auto bytes = decodeFmMfm(rawbits).slice(0, MICROPOLIS_ENCODED_SECTOR_SIZE);
 		ByteReader br(bytes);
 
-		br.read_8();  /* sync */
+		int syncByte = br.read_8();  /* sync */
+		if (syncByte != 0xFF)
+			return;
+
 		_sector->logicalTrack = br.read_8();
 		_sector->logicalSide = _sector->physicalHead;
 		_sector->logicalSector = br.read_8();
 		if (_sector->logicalSector > 15)
 			return;
-		if (_sector->logicalTrack > 77)
+		if (_sector->logicalTrack > 76)
+			return;
+		if (_sector->logicalTrack != _sector->physicalCylinder)
 			return;
 
 		br.read(10);  /* OS data or padding */
