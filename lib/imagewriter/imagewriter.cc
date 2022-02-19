@@ -107,7 +107,7 @@ void ImageWriter::writeCsv(const Image& image, const std::string& filename)
 			sector->headerEndTime,
 			sector->dataStartTime,
 			sector->dataEndTime,
-			sector->position.bytes,
+			sector->position,
 			sector->data.size(),
 			Sector::statusToString(sector->status)
 		);

@@ -300,6 +300,12 @@ int main(int argc, const char* argv[])
         std::cout << "Writing output file...\n";
     }
 
+    sqlite3_close(db);
+
+    if (remove(filename.c_str()) != 0)
+        Error() << fmt::format(
+            "couldn't remove input file: {}", strerror(errno));
+
     if (rename(outFilename.c_str(), filename.c_str()) != 0)
         Error() << fmt::format(
             "couldn't replace input file: {}", strerror(errno));

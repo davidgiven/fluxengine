@@ -74,6 +74,7 @@ static void write_sector(std::vector<bool>& bits, unsigned& cursor, const std::s
 		write_interleaved_bytes(b);
 	};
 
+	write_bits(bits, cursor, 0xaaaa, 2*8);
     write_bits(bits, cursor, AMIGA_SECTOR_RECORD, 6*8);
 
 	checksum = 0;
