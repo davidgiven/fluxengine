@@ -5,6 +5,8 @@ import "lib/common.proto";
 message MicropolisDecoderProto {
 	optional int32 sector_output_size = 1 [default = 256,
 		(help) = "How much of the raw sector should be saved. Must be 256 or 275"];
+	optional int32 checksum_type = 2 [default = 0,
+		(help) = "Checksum type to use: 0 = automatically detect, 1 = Micropolis, 2 = MZOS"];
 }
 
 message MicropolisEncoderProto {}

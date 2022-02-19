@@ -19,7 +19,7 @@ static const FluxPattern SECTOR_SYNC_PATTERN(64, 0xAAAAAAAAAAAA5555LL);
 /* Pattern to skip past current SYNC. */
 static const FluxPattern SECTOR_ADVANCE_PATTERN(64, 0xAAAAAAAAAAAAAAAALL);
 
-/* Adds all bytes, with carry. */
+/* Standard Micropolis checksum.  Adds all bytes, with carry. */
 uint8_t micropolisChecksum(const Bytes& bytes) {
 	ByteReader br(bytes);
 	uint16_t sum = 0;
@@ -33,13 +33,36 @@ uint8_t micropolisChecksum(const Bytes& bytes) {
 	return sum & 0xFF;
 }
 
+/* Vector MZOS does not use the standard Micropolis checksum.
+ * The checksum is initially 0.
+ * For each data byte in the 256-byte payload, rotate left,
+ * carrying bit 7 to bit 0.  XOR with the current checksum.
+ *
+ * Unlike the Micropolis checksum, this does not cover the 12-byte
+ * header (track, sector, 10 OS-specific bytes.)
+ */
+uint8_t mzosChecksum(const Bytes& bytes) {
+	ByteReader br(bytes);
+	uint8_t checksum = 0;
+	uint8_t databyte;
+
+	while (!br.eof()) {
+		databyte = br.read_8();
+	checksum ^= ((databyte << 1) | (databyte >> 7));
+	}
+
+	return checksum;
+}
+
 class MicropolisDecoder : public AbstractDecoder
 {
 public:
 	MicropolisDecoder(const DecoderProto& config):
 		AbstractDecoder(config),
 		_config(config.micropolis())
-	{}
+	{
+		_checksumType = _config.checksum_type();
+	}
 
 	nanoseconds_t advanceToNextRecord() override
 	{
@@ -105,12 +128,34 @@ public:
 			return;
 
 		br.read(10);  /* OS data or padding */
-		auto data = br.read(256);
+		auto data = br.read(MICROPOLIS_PAYLOAD_SIZE);
 		uint8_t wantChecksum = br.read_8();
-		uint8_t gotChecksum = micropolisChecksum(bytes.slice(1, 2+266));
+
+		/* If not specified, automatically determine the checksum type.
+		* Once the checksum type is determined, it will be used for the
+		* entire disk.
+		*/
+		if (_checksumType == 0) {
+			/* Calculate both standard Micropolis (MDOS, CP/M, OASIS) and MZOS checksums */
+			if (wantChecksum == micropolisChecksum(bytes.slice(1, 2+266))) {
+				_checksumType = 1;
+			} else if (wantChecksum == mzosChecksum(bytes.slice(MICROPOLIS_HEADER_SIZE, MICROPOLIS_PAYLOAD_SIZE))) {
+				_checksumType = 2;
+				std::cout << "Note: MZOS checksum detected." << std::endl;
+			}
+		}
+
+		uint8_t gotChecksum;
+
+		if (_checksumType == 2) {
+			gotChecksum = mzosChecksum(bytes.slice(MICROPOLIS_HEADER_SIZE, MICROPOLIS_PAYLOAD_SIZE));
+		} else {
+			gotChecksum = micropolisChecksum(bytes.slice(1, 2+266));
+		}
+
 		br.read(5);  /* 4 byte ECC and ECC-present flag */
 
-		if (_config.sector_output_size() == 256)
+		if (_config.sector_output_size() == MICROPOLIS_PAYLOAD_SIZE)
 			_sector->data = data;
 		else if (_config.sector_output_size() == MICROPOLIS_ENCODED_SECTOR_SIZE)
 			_sector->data = bytes;
@@ -127,6 +172,7 @@ public:
 
 private:
 	const MicropolisDecoderProto& _config;
+	int _checksumType;	/* -1 = auto, 1 = Micropolis, 2=MZOS */
 };
 
 std::unique_ptr<AbstractDecoder> createMicropolisDecoder(const DecoderProto& config)
