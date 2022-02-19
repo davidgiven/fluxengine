@@ -25,13 +25,13 @@ struct TrackFlux
 {
 	unsigned physicalCylinder;
 	unsigned physicalHead;
-	std::vector<std::unique_ptr<TrackDataFlux>> trackDatas;
+	std::vector<std::shared_ptr<TrackDataFlux>> trackDatas;
 	std::set<std::shared_ptr<Sector>> sectors;
 };
 
 struct DiskFlux
 {
-	std::vector<std::unique_ptr<TrackFlux>> tracks;
+	std::vector<std::shared_ptr<TrackFlux>> tracks;
 	std::unique_ptr<Image> image;
 };
 

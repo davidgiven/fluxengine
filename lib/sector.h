@@ -24,7 +24,8 @@ public:
         INTERNAL_ERROR
 	};
 
-    static const std::string statusToString(Status status);
+    static std::string statusToString(Status status);
+    static std::string statusToChar(Status status);
     static Status stringToStatus(const std::string& value);
 
 	Status status = Status::INTERNAL_ERROR;

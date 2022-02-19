@@ -3,46 +3,54 @@
 
 #include "fmt/format.h"
 
-struct LogMessage
+class TrackDataFlux;
+class TrackFlux;
+class Sector;
+
+struct DiskContextLogMessage
 {
-	virtual const std::string toString() const = 0;
+    unsigned cylinder;
+    unsigned head;
 };
 
-struct DiskContextLogMessage : public LogMessage
+struct SingleReadLogMessage
 {
-	unsigned cylinder;
-	unsigned head;
-
-	DiskContextLogMessage(unsigned cylinder, unsigned head):
-		cylinder(cylinder),
-		head(head)
-	{}
-
-	const std::string toString() const override;
+	std::shared_ptr<TrackDataFlux> trackDataFlux;
+	std::set<std::shared_ptr<Sector>> sectors;
 };
 
-struct StringLogMessage : public LogMessage
+struct TrackReadLogMessage
 {
-	const std::string message;
-
-	StringLogMessage(const std::string& message):
-		message(message)
-	{}
-
-	const std::string toString() const override
-	{ return message; }
+	std::shared_ptr<TrackFlux> track;
 };
 
-extern void log(std::unique_ptr<LogMessage> message);
-extern void logString(fmt::string_view format, fmt::format_args args);
+struct BeginReadOperationLogMessage { };
+struct EndReadOperationLogMessage { };
+struct BeginWriteOperationLogMessage { };
+struct EndWriteOperationLogMessage { };
 
-template <typename... Args>
-static inline void log(const std::string& format, Args&&... args)
-{ logString(format, fmt::make_format_args(args...)); }
+class TrackFlux;
 
-template <typename T, typename... Args>
-static inline void log(Args&&... args)
-{ log(std::make_unique<T>(args...)); }
+typedef std::variant<std::string,
+	SingleReadLogMessage,
+	TrackReadLogMessage,
+    DiskContextLogMessage,
+    BeginReadOperationLogMessage,
+    EndReadOperationLogMessage,
+	BeginWriteOperationLogMessage,
+	EndWriteOperationLogMessage>
+    AnyLogMessage;
+
+class Logger
+{
+public:
+    Logger& operator<<(std::shared_ptr<AnyLogMessage> message);
+
+    template <class T>
+    Logger& operator<<(const T& message)
+    {
+        return *this << std::make_shared<AnyLogMessage>(message);
+    }
+};
 
 #endif
-
