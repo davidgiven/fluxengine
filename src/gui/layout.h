@@ -9,16 +9,21 @@
 
 #include <wx/artprov.h>
 #include <wx/xrc/xmlres.h>
-#include <wx/sizer.h>
+#include "visualisation.h"
 #include <wx/gdicmn.h>
-#include <wx/statusbr.h>
 #include <wx/font.h>
 #include <wx/colour.h>
 #include <wx/settings.h>
 #include <wx/string.h>
+#include <wx/button.h>
 #include <wx/bitmap.h>
 #include <wx/image.h>
 #include <wx/icon.h>
+#include <wx/sizer.h>
+#include <wx/stattext.h>
+#include <wx/choice.h>
+#include <wx/checkbox.h>
+#include <wx/textctrl.h>
 #include <wx/menu.h>
 #include <wx/frame.h>
 
@@ -33,7 +38,23 @@ class MainWindowGen : public wxFrame
 		wxBoxSizer* bSizer1;
 
 	protected:
-		wxStatusBar* statusBar;
+		VisualisationControl* visualiser;
+		wxButton* stopButton;
+		wxStaticText* m_staticText4;
+		wxChoice* deviceChoice;
+		wxStaticText* m_staticText5;
+		wxChoice* fluxSourceSinkChoice;
+		wxStaticText* m_staticText51;
+		wxChoice* formatChoice;
+		wxCheckBox* highDensityToggle;
+		wxStaticText* m_staticText7;
+		wxTextCtrl* cylindersText;
+		wxStaticText* m_staticText9;
+		wxTextCtrl* headsText;
+		wxButton* readFluxButton;
+		wxButton* readImageButton;
+		wxButton* writeFluxButton;
+		wxButton* writeImageButton;
 		wxMenuBar* m_menubar1;
 		wxMenu* m_menu1;
 
@@ -44,7 +65,7 @@ class MainWindowGen : public wxFrame
 
 	public:
 
-		MainWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+		MainWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 466,528 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 
 		~MainWindowGen();
 

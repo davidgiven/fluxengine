@@ -565,7 +565,8 @@ buildlibrary libfrontend.a \
 
 buildlibrary libgui.a \
     src/gui/main.cc \
-    src/gui/layout.cpp
+    src/gui/layout.cpp \
+    src/gui/visualisation.cc 
 
 buildprogram fluxengine \
     libfrontend.a \
