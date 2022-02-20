@@ -564,9 +564,12 @@ buildlibrary libfrontend.a \
     src/fluxengine.cc \
 
 buildlibrary libgui.a \
+    -I$OBJDIR/proto \
+    -d $OBJDIR/proto/libconfig.def \
     src/gui/main.cc \
     src/gui/layout.cpp \
     src/gui/visualisation.cc \
+    src/gui/mainwindow.cc \
 
 buildprogram fluxengine \
     libfrontend.a \
@@ -580,7 +583,13 @@ buildprogram fluxengine \
 
 buildprogram fluxengine-gui \
     -rule linkgui \
-    libgui.a
+    libgui.a \
+    libformats.a \
+    libbackend.a \
+    libconfig.a \
+    libfl2.a \
+    libusbp.a \
+    libfmt.a \
 
 buildlibrary libemu.a \
     dep/emu/fnmatch.c

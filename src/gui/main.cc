@@ -1,6 +1,6 @@
 #include "globals.h"
 #include <wx/wx.h>
-#include "layout.h"
+#include "mainwindow.h"
 #include "gui.h"
 
 class MyApp;
@@ -24,18 +24,6 @@ private:
 	std::function<void()> _callback;
 };
 wxDECLARE_APP(MyApp);
-
-class MainWindow : public MainWindowGen
-{
-public:
-    MainWindow(): MainWindowGen(nullptr) {}
-
-public:
-    void OnExit(wxCommandEvent& event)
-    {
-        Close(true);
-    }
-};
 
 wxDEFINE_EVENT(EXEC_EVENT_TYPE, ExecEvent);
 class ExecEvent : public wxThreadEvent

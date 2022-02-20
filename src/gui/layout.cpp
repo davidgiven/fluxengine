@@ -49,7 +49,7 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	fgSizer3->SetFlexibleDirection( wxBOTH );
 	fgSizer3->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 
-	m_staticText4 = new wxStaticText( this, wxID_ANY, wxT("Device"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText4 = new wxStaticText( this, wxID_ANY, wxT("Device:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText4->Wrap( -1 );
 	fgSizer3->Add( m_staticText4, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_LEFT|wxALL, 5 );
 
@@ -58,7 +58,7 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	deviceChoice->SetSelection( 0 );
 	fgSizer3->Add( deviceChoice, 0, wxALL|wxEXPAND, 5 );
 
-	m_staticText5 = new wxStaticText( this, wxID_ANY, wxT("Flux source/sink"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText5 = new wxStaticText( this, wxID_ANY, wxT("Flux source/sink:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText5->Wrap( -1 );
 	fgSizer3->Add( m_staticText5, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_LEFT|wxALL, 5 );
 
@@ -68,12 +68,12 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	fluxSourceSinkChoice->SetSelection( 0 );
 	fgSizer3->Add( fluxSourceSinkChoice, 0, wxALL|wxEXPAND, 5 );
 
-	m_staticText51 = new wxStaticText( this, wxID_ANY, wxT("Format"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText51 = new wxStaticText( this, wxID_ANY, wxT("Format:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText51->Wrap( -1 );
-	fgSizer3->Add( m_staticText51, 0, wxALL, 5 );
+	fgSizer3->Add( m_staticText51, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_LEFT|wxALL, 5 );
 
 	wxArrayString formatChoiceChoices;
-	formatChoice = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, formatChoiceChoices, 0 );
+	formatChoice = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, formatChoiceChoices, wxCB_SORT );
 	formatChoice->SetSelection( 0 );
 	fgSizer3->Add( formatChoice, 0, wxALL|wxEXPAND, 5 );
 
@@ -83,14 +83,14 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	highDensityToggle = new wxCheckBox( this, wxID_ANY, wxT("High density disk"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer3->Add( highDensityToggle, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_LEFT|wxALL, 5 );
 
-	m_staticText7 = new wxStaticText( this, wxID_ANY, wxT("Cylinders"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText7 = new wxStaticText( this, wxID_ANY, wxT("Cylinders:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText7->Wrap( -1 );
 	fgSizer3->Add( m_staticText7, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_LEFT|wxALL, 5 );
 
 	cylindersText = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer3->Add( cylindersText, 0, wxALL|wxEXPAND, 5 );
 
-	m_staticText9 = new wxStaticText( this, wxID_ANY, wxT("Heads"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText9 = new wxStaticText( this, wxID_ANY, wxT("Heads:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText9->Wrap( -1 );
 	fgSizer3->Add( m_staticText9, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_LEFT|wxALL, 5 );
 
