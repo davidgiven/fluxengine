@@ -472,6 +472,7 @@ buildlibrary libbackend.a \
     lib/imagewriter/rawimagewriter.cc \
     lib/imginputoutpututils.cc \
     lib/ldbs.cc \
+    lib/logger.cc \
     lib/proto.cc \
     lib/reader.cc \
     lib/sector.cc \

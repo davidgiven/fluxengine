@@ -57,10 +57,10 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 	return (decoder->second)(config);
 }
 
-std::unique_ptr<TrackDataFlux> AbstractDecoder::decodeToSectors(
+std::shared_ptr<TrackDataFlux> AbstractDecoder::decodeToSectors(
 		std::shared_ptr<const Fluxmap> fluxmap, unsigned physicalCylinder, unsigned physicalHead)
 {
-	_trackdata = std::make_unique<TrackDataFlux>();
+	_trackdata = std::make_shared<TrackDataFlux>();
 	_trackdata->fluxmap = fluxmap;
 	_trackdata->physicalCylinder = physicalCylinder;
 	_trackdata->physicalHead = physicalHead;
