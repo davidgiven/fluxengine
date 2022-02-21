@@ -7,6 +7,12 @@ class TrackDataFlux;
 class TrackFlux;
 class Sector;
 
+struct BeginSpeedOperationLogMessage {};
+struct EndSpeedOperationLogMessage
+{
+	nanoseconds_t rotationalPeriod;
+};
+	
 struct DiskContextLogMessage
 {
     unsigned cylinder;
@@ -35,6 +41,8 @@ typedef std::variant<std::string,
 	SingleReadLogMessage,
 	TrackReadLogMessage,
     DiskContextLogMessage,
+	BeginSpeedOperationLogMessage,
+	EndSpeedOperationLogMessage,
     BeginReadOperationLogMessage,
     EndReadOperationLogMessage,
 	BeginWriteOperationLogMessage,

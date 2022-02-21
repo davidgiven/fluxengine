@@ -1,6 +1,7 @@
 #include "globals.h"
 #include "flags.h"
 #include "fluxmap.h"
+#include "logger.h"
 #include "usb/usb.h"
 #include "fluxsink/fluxsink.h"
 #include "lib/fluxsink/fluxsink.pb.h"
@@ -14,22 +15,22 @@ public:
     {
 		if (config.has_hard_sector_count())
 		{
-			int rotationalSpeedMs;
+			nanoseconds_t oneRevolution;
 			int retries = 5;
 			usbSetDrive(_config.drive(), _config.high_density(), _config.index_mode());
-			std::cout << "Measuring rotational speed... " << std::flush;
+			Logger() << BeginSpeedOperationLogMessage();
 
 			do {
-				nanoseconds_t oneRevolution = usbGetRotationalPeriod(_config.hard_sector_count());
+				oneRevolution = usbGetRotationalPeriod(_config.hard_sector_count());
 				_hardSectorThreshold = oneRevolution * 3 / (4 * _config.hard_sector_count());
-				rotationalSpeedMs = oneRevolution / 1e6;
 				retries--;
-			} while ((rotationalSpeedMs == 0) && (retries > 0));
+			} while ((oneRevolution == 0) && (retries > 0));
 
-			if (rotationalSpeedMs == 0) {
+			if (oneRevolution == 0) {
 				Error() << "Failed\nIs a disk in the drive?";
 			}
-			std::cout << fmt::format("{}ms\n", rotationalSpeedMs);
+
+			Logger() << EndSpeedOperationLogMessage(oneRevolution);
 		}
 		else
 			_hardSectorThreshold = 0;

@@ -32,6 +32,20 @@ Logger& Logger::operator<<(std::shared_ptr<AnyLogMessage> message)
             {
             },
 
+			/* Start measuring the rotational speed */
+			[](const BeginSpeedOperationLogMessage& m)
+			{
+				std::cout << "Measuring rotational speed... " << std::flush;
+			},
+
+			/* Finish measuring the rotational speed */
+			[](const EndSpeedOperationLogMessage& m)
+			{
+				std::cout << fmt::format("{:.1f}ms ({:.1f}rpm)\n",
+					m.rotationalPeriod / 1e6,
+					60e9 / m.rotationalPeriod);
+			},
+
             /* Indicates that we're working on a given cylinder and head */
             [](const DiskContextLogMessage& m)
             {
