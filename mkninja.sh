@@ -565,6 +565,7 @@ buildlibrary libfrontend.a \
 
 buildlibrary libgui.a \
     -I$OBJDIR/proto \
+    -Idep/libusbp/include \
     -d $OBJDIR/proto/libconfig.def \
     src/gui/main.cc \
     src/gui/layout.cpp \

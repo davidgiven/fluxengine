@@ -21,6 +21,7 @@
 #include <wx/icon.h>
 #include <wx/sizer.h>
 #include <wx/stattext.h>
+#include <wx/combobox.h>
 #include <wx/choice.h>
 #include <wx/checkbox.h>
 #include <wx/textctrl.h>
@@ -41,9 +42,9 @@ class MainWindowGen : public wxFrame
 		VisualisationControl* visualiser;
 		wxButton* stopButton;
 		wxStaticText* m_staticText4;
-		wxChoice* deviceChoice;
+		wxComboBox* deviceCombo;
 		wxStaticText* m_staticText5;
-		wxChoice* fluxSourceSinkChoice;
+		wxComboBox* fluxSourceSinkCombo;
 		wxStaticText* m_staticText51;
 		wxChoice* formatChoice;
 		wxCheckBox* highDensityToggle;

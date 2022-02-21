@@ -17,7 +17,7 @@ USB::~USB() {}
 
 static std::unique_ptr<CandidateDevice> selectDevice()
 {
-    auto candidates = findUsbDevices({FLUXENGINE_ID, GREASEWEAZLE_ID});
+    auto candidates = findUsbDevices();
     if (candidates.size() == 0)
         Error() << "no devices found (is one plugged in? Do you have the "
                    "appropriate permissions?";

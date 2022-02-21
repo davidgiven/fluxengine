@@ -46,8 +46,8 @@ $(error You must have these pkg-config packages installed: $(PACKAGES))
 endif
 
 export PROTOC = protoc
-export CC = gcc
-export CXX = g++
+export CC = clang
+export CXX = clang++
 export AR = ar rc
 export RANLIB = ranlib
 export STRIP = strip

@@ -3,7 +3,9 @@
 
 #include "layout.h"
 
+class CandidateDevice;
 class ConfigProto;
+
 class MainWindow : public MainWindowGen
 {
 public:
@@ -11,11 +13,13 @@ public:
 
 private:
     void OnExit(wxCommandEvent& event);
+	void OnReadFluxButton(wxCommandEvent&);
 
 	void UpdateDevices();
 
 private:
-	std::map<std::string, std::unique_ptr<ConfigProto>> _formats;
+	std::vector<std::unique_ptr<ConfigProto>> _formats;
+	std::vector<std::unique_ptr<CandidateDevice>> _devices;
 };
 
 #endif

@@ -53,20 +53,17 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	m_staticText4->Wrap( -1 );
 	fgSizer3->Add( m_staticText4, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_LEFT|wxALL, 5 );
 
-	wxArrayString deviceChoiceChoices;
-	deviceChoice = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, deviceChoiceChoices, 0 );
-	deviceChoice->SetSelection( 0 );
-	fgSizer3->Add( deviceChoice, 0, wxALL|wxEXPAND, 5 );
+	deviceCombo = new wxComboBox( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_SORT );
+	fgSizer3->Add( deviceCombo, 0, wxALL, 5 );
 
 	m_staticText5 = new wxStaticText( this, wxID_ANY, wxT("Flux source/sink:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText5->Wrap( -1 );
 	fgSizer3->Add( m_staticText5, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_LEFT|wxALL, 5 );
 
-	wxString fluxSourceSinkChoiceChoices[] = { wxT("drive:0"), wxT("drive:1"), wxT("file") };
-	int fluxSourceSinkChoiceNChoices = sizeof( fluxSourceSinkChoiceChoices ) / sizeof( wxString );
-	fluxSourceSinkChoice = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, fluxSourceSinkChoiceNChoices, fluxSourceSinkChoiceChoices, 0 );
-	fluxSourceSinkChoice->SetSelection( 0 );
-	fgSizer3->Add( fluxSourceSinkChoice, 0, wxALL|wxEXPAND, 5 );
+	fluxSourceSinkCombo = new wxComboBox( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, NULL, 0 );
+	fluxSourceSinkCombo->Append( wxT("drive:0") );
+	fluxSourceSinkCombo->Append( wxT("drive:1") );
+	fgSizer3->Add( fluxSourceSinkCombo, 0, wxALL|wxEXPAND, 5 );
 
 	m_staticText51 = new wxStaticText( this, wxID_ANY, wxT("Format:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText51->Wrap( -1 );
