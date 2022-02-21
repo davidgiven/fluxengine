@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "layout.h"
+#include "logger.h"
 
 class CandidateDevice;
 class ConfigProto;
@@ -14,6 +15,7 @@ public:
 private:
     void OnExit(wxCommandEvent& event);
 	void OnReadFluxButton(wxCommandEvent&);
+	void OnLogMessage(std::unique_ptr<AnyLogMessage> message);
 
 	void UpdateDevices();
 

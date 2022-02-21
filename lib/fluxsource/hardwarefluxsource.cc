@@ -31,7 +31,7 @@ public:
 			Error() << "Failed\nIs a disk in the drive?";
         }
 
-		Logger() << EndSpeedOperationLogMessage(_oneRevolution);
+		Logger() << EndSpeedOperationLogMessage { _oneRevolution };
     }
 
     ~HardwareFluxSource()

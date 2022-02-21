@@ -1,6 +1,7 @@
 #include "globals.h"
 #include "proto.h"
 #include "gui.h"
+#include "logger.h"
 #include "fluxsource/fluxsource.h"
 #include "decoders/decoders.h"
 #include "lib/usb/usbfinder.h"
@@ -12,6 +13,19 @@ extern const std::map<std::string, std::string> formats;
 
 MainWindow::MainWindow(): MainWindowGen(nullptr)
 {
+	Logger::setLogger(
+		[&](std::shared_ptr<const AnyLogMessage> message) {
+			runOnUiThread(
+				[message, this]() {
+					std::cout << "UI thread got message "
+						<< Logger::toString(*message)
+						<< '\n'
+						<< std::flush;
+				}
+			);
+		}
+	);
+
 	for (const auto& it : formats)
 	{
 		auto config = std::make_unique<ConfigProto>();

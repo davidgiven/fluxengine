@@ -7,12 +7,14 @@ class TrackDataFlux;
 class TrackFlux;
 class Sector;
 
-struct BeginSpeedOperationLogMessage {};
+struct BeginSpeedOperationLogMessage
+{
+};
 struct EndSpeedOperationLogMessage
 {
-	nanoseconds_t rotationalPeriod;
+    nanoseconds_t rotationalPeriod;
 };
-	
+
 struct DiskContextLogMessage
 {
     unsigned cylinder;
@@ -21,44 +23,58 @@ struct DiskContextLogMessage
 
 struct SingleReadLogMessage
 {
-	std::shared_ptr<TrackDataFlux> trackDataFlux;
-	std::set<std::shared_ptr<Sector>> sectors;
+    std::shared_ptr<TrackDataFlux> trackDataFlux;
+    std::set<std::shared_ptr<Sector>> sectors;
 };
 
 struct TrackReadLogMessage
 {
-	std::shared_ptr<TrackFlux> track;
+    std::shared_ptr<TrackFlux> track;
 };
 
-struct BeginReadOperationLogMessage { };
-struct EndReadOperationLogMessage { };
-struct BeginWriteOperationLogMessage { };
-struct EndWriteOperationLogMessage { };
+struct BeginReadOperationLogMessage
+{
+};
+struct EndReadOperationLogMessage
+{
+};
+struct BeginWriteOperationLogMessage
+{
+};
+struct EndWriteOperationLogMessage
+{
+};
 
 class TrackFlux;
 
 typedef std::variant<std::string,
-	SingleReadLogMessage,
-	TrackReadLogMessage,
+    SingleReadLogMessage,
+    TrackReadLogMessage,
     DiskContextLogMessage,
-	BeginSpeedOperationLogMessage,
-	EndSpeedOperationLogMessage,
+    BeginSpeedOperationLogMessage,
+    EndSpeedOperationLogMessage,
     BeginReadOperationLogMessage,
     EndReadOperationLogMessage,
-	BeginWriteOperationLogMessage,
-	EndWriteOperationLogMessage>
+    BeginWriteOperationLogMessage,
+    EndWriteOperationLogMessage>
     AnyLogMessage;
 
 class Logger
 {
 public:
-    Logger& operator<<(std::shared_ptr<AnyLogMessage> message);
+    Logger& operator<<(std::shared_ptr<const AnyLogMessage> message);
 
     template <class T>
     Logger& operator<<(const T& message)
     {
-        return *this << std::make_shared<AnyLogMessage>(message);
+        return *this << std::make_shared<const AnyLogMessage>(message);
     }
+
+    static void setLogger(
+        std::function<void(std::shared_ptr<const AnyLogMessage>)> cb);
+
+    static std::string toString(const AnyLogMessage&);
+    static void textLogger(std::shared_ptr<const AnyLogMessage>);
 };
 
 #endif

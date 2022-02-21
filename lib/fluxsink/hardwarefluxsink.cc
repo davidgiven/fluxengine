@@ -30,7 +30,7 @@ public:
 				Error() << "Failed\nIs a disk in the drive?";
 			}
 
-			Logger() << EndSpeedOperationLogMessage(oneRevolution);
+			Logger() << EndSpeedOperationLogMessage { oneRevolution };
 		}
 		else
 			_hardSectorThreshold = 0;
