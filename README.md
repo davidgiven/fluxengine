@@ -149,7 +149,7 @@ at least, check the CRC so what data's there is probably good.
     There hasn't been a lot of demand for this yet; if you have a pressing
     need to write weird disks, [please
     ask](https://github.com/davidgiven/fluxengine/issues/new). I haven't
-    implement write support for PC disks because they're boring and I'm lazy,
+    implemented write support for PC disks because they're boring and I'm lazy,
     and also because they vary so much that figuring out how to specify them
     is hard.
 
