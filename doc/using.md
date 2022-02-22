@@ -262,18 +262,18 @@ FluxEngine also supports a number of file system image formats. When using the
 
   Read from a [DIM image file](https://www.pc98.org/project/doc/dim.html),
   commonly used by X68000 emulators. Supports automatically configuring
-  the encoder. **Read Only.**
+  the encoder. **Read only.**
   
   - `<filename.fdi>`
 
   Read from a [FDI image file](https://www.pc98.org/project/doc/hdi.html),
   commonly used by PC-98 emulators. Supports automatically configuring
-  the encoder. **Read Only.**
+  the encoder. **Read only.**
   
   - `<filename.d88>`
 
   Read from a [D88 image file](https://www.pc98.org/project/doc/d88.html),
-  commonly used by various Japanese PC emulators, including the NEC PC-88. **Read Only.**
+  commonly used by various Japanese PC emulators, including the NEC PC-88. **Read only.**
   
   FluxEngine is currently limited to reading only the first floppy image in a
   D88 file.
@@ -284,7 +284,7 @@ FluxEngine also supports a number of file system image formats. When using the
   - `<filename.nfd>`
 
   Read from a [NFD r0 image file](https://www.pc98.org/project/doc/nfdr0.html),
-  commonly used by various Japanese PC emulators, including the NEC PC-98. **Read Only.**
+  commonly used by various Japanese PC emulators, including the NEC PC-98. **Read only.**
 
   Only r0 version files are currently supported.
   
