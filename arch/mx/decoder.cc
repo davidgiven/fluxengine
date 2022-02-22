@@ -38,7 +38,7 @@ public:
 
     nanoseconds_t advanceToNextRecord() override
 	{
-		if (_currentSector == 10)
+		if (_currentSector == 11)
 		{
 			/* That was the last sector on the disk. */
 			return 0;
