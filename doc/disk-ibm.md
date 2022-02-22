@@ -133,7 +133,7 @@ Neither the FluxEngine or Greaseweazle hardware can currently command a
 tri-mode drive to spin at 360rpm, however an older 360rpm-only drive will work
 to read these formats.
 
-Alternately, the FluxEngine software can resale the flux pulses to enable
+Alternately, the FluxEngine software can rescale the flux pulses to enable
 reading and writing these formats with a plain 300rpm drive. To do this,
 specify the following two additional options:
 
