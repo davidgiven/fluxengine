@@ -82,7 +82,7 @@ $ fluxengine read eco1 -s copy.flux -o eco1.ldbs --cylinders=1
 
 ### Configuration
 
-Configuration options are reperesented as a hierarchical structure. You can
+Configuration options are represented as a hierarchical structure. You can
 either put them in a text file and load them from the command line:
 
 ```
