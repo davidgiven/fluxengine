@@ -308,7 +308,7 @@ FluxEngine also supports a number of file system image formats. When using the
   underlying MFM, FM or GCR stream, without actually doing the decode into
   user-visible bytes. However, the decode is still done in order to check for
   correctness. Individual records are separated by three `\\0` bytes and tracks
-  are seperated by four `\\0` bytes; tracks are emitted in CHS order.
+  are separated by four `\\0` bytes; tracks are emitted in CHS order.
 
 ### High density disks
 
