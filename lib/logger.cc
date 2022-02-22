@@ -6,24 +6,9 @@
 #include "fmt/format.h"
 #include "logger.h"
 
-template <class... Ts>
-struct overloaded : Ts...
-{
-    using Ts::operator()...;
-};
-template <class... Ts>
-overloaded(Ts...) -> overloaded<Ts...>;
-
 static bool indented = false;
 static std::function<void(std::shared_ptr<const AnyLogMessage>)> loggerImpl =
     Logger::textLogger;
-
-static void indent()
-{
-    if (!indented)
-        std::cout << "      ";
-    indented = false;
-}
 
 Logger& Logger::operator<<(std::shared_ptr<const AnyLogMessage> message)
 {
@@ -45,6 +30,13 @@ void Logger::textLogger(std::shared_ptr<const AnyLogMessage> message)
 std::string Logger::toString(const AnyLogMessage& message)
 {
     std::stringstream stream;
+
+	auto indent = [&]() {
+		if (!indented)
+			stream << "      ";
+		indented = false;
+	};
+
     std::visit(
         overloaded{
             /* Fallback --- do nothing */
@@ -66,8 +58,15 @@ std::string Logger::toString(const AnyLogMessage& message)
                     60e9 / m.rotationalPeriod);
             },
 
-            /* Indicates that we're working on a given cylinder and head */
-            [&](const DiskContextLogMessage& m)
+            /* Indicates that we're starting a write operation. */
+            [&](const BeginWriteOperationLogMessage& m)
+            {
+                stream << fmt::format("{:2}.{}: ", m.cylinder, m.head);
+                indented = true;
+            },
+
+            /* Indicates that we're starting a read operation. */
+            [&](const BeginReadOperationLogMessage& m)
             {
                 stream << fmt::format("{:2}.{}: ", m.cylinder, m.head);
                 indented = true;

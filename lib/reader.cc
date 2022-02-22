@@ -23,8 +23,7 @@ static std::unique_ptr<FluxSink> outputFluxSink;
 
 static std::shared_ptr<Fluxmap> readFluxmap(FluxSource& fluxsource, unsigned cylinder, unsigned head)
 {
-	Logger() << DiskContextLogMessage { cylinder, head }
-			 << BeginReadOperationLogMessage();
+	Logger() << BeginReadOperationLogMessage { cylinder, head };
 	std::shared_ptr<Fluxmap> fluxmap = fluxsource.readFlux(cylinder, head);
 	fluxmap->rescale(1.0/config.flux_source().rescale());
 	Logger() << EndReadOperationLogMessage()
@@ -65,12 +64,12 @@ static std::set<std::shared_ptr<Sector>> collect_sectors(std::set<std::shared_pt
 	return sector_set;
 }
 
-void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWriter& writer)
+std::shared_ptr<DiskFlux> readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder)
 {
 	if (config.decoder().has_copy_flux_to())
 		outputFluxSink = FluxSink::create(config.decoder().copy_flux_to());
 
-	auto diskflux = std::make_unique<DiskFlux>();
+	auto diskflux = std::make_shared<DiskFlux>();
 	bool failures = false;
 	for (int cylinder : iterate(config.cylinders()))
 	{
@@ -177,13 +176,20 @@ void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWrit
 	all_sectors = collect_sectors(all_sectors);
 	diskflux->image.reset(new Image(all_sectors));
 
+	if (failures)
+		Logger() << "Warning: some sectors could not be decoded.";
+
+	return diskflux;
+}
+
+void readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder, ImageWriter& writer)
+{
+	auto diskflux = readDiskCommand(fluxsource, decoder);
+
 	writer.printMap(*diskflux->image);
 	if (config.decoder().has_write_csv_to())
 		writer.writeCsv(*diskflux->image, config.decoder().write_csv_to());
 	writer.writeImage(*diskflux->image);
-
-	if (failures)
-		std::cerr << "Warning: some sectors could not be decoded." << std::endl;
 }
 
 void rawReadDiskCommand(FluxSource& fluxsource, FluxSink& fluxsink)

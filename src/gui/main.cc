@@ -64,12 +64,6 @@ bool MyApp::OnInit()
 	Bind(EXEC_EVENT_TYPE, &MyApp::OnExec, this);
     MainWindow* frame = new MainWindow();
     frame->Show(true);
-
-	runOnWorkerThread(
-		[] {
-			printf("I'm a worker thread!\n");
-		}
-	);
     return true;
 }
 
@@ -105,7 +99,6 @@ void runOnWorkerThread(std::function<void()> callback)
 
 void MyApp::OnExec(const ExecEvent& event)
 {
-	printf("exec handler\n");
 	event.RunCallback();
 	execSemaphore.Post();
 }

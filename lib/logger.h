@@ -15,12 +15,6 @@ struct EndSpeedOperationLogMessage
     nanoseconds_t rotationalPeriod;
 };
 
-struct DiskContextLogMessage
-{
-    unsigned cylinder;
-    unsigned head;
-};
-
 struct SingleReadLogMessage
 {
     std::shared_ptr<TrackDataFlux> trackDataFlux;
@@ -34,13 +28,20 @@ struct TrackReadLogMessage
 
 struct BeginReadOperationLogMessage
 {
+    unsigned cylinder;
+    unsigned head;
 };
+
 struct EndReadOperationLogMessage
 {
 };
+
 struct BeginWriteOperationLogMessage
 {
+    unsigned cylinder;
+    unsigned head;
 };
+
 struct EndWriteOperationLogMessage
 {
 };
@@ -50,7 +51,6 @@ class TrackFlux;
 typedef std::variant<std::string,
     SingleReadLogMessage,
     TrackReadLogMessage,
-    DiskContextLogMessage,
     BeginSpeedOperationLogMessage,
     EndSpeedOperationLogMessage,
     BeginReadOperationLogMessage,

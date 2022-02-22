@@ -1,10 +1,13 @@
 #include "globals.h"
 #include "visualisation.h"
+#include "fmt/format.h"
 #include <wx/wx.h>
 
 #define BORDER 20
 #define TICK 10
 #define TRACKS 82
+
+#define SECTORSIZE 4
 
 VisualisationControl::VisualisationControl(wxWindow* parent,
     wxWindowID id,
@@ -43,11 +46,46 @@ void VisualisationControl::OnPaint(wxPaintEvent&)
 
 	dc.DrawLine({ w2, scaletop }, { w2, scalebottom });
 	dc.DrawLine({ w2-TICK, scaletop }, { w2+TICK, scaletop });
-	dc.DrawLine({ w2-TICK, scalebottom }, { w2+TICK, scalebottom });
+	dc.DrawLine(
+		{ w2-TICK, int(scaletop + 80*trackstep) },
+		{ w2+TICK, int(scaletop + 80*trackstep) });
 
-	for (int track = 0; track < TRACKS; track++)
+	if (_mode != VISMODE_NOTHING)
+	{
+		if (_mode == VISMODE_READING)
+			dc.SetBrush(*wxGREEN_BRUSH);
+		else if (_mode == VISMODE_WRITING)
+			dc.SetBrush(*wxRED_BRUSH);
+
+		int factor = (_head == 0) ? -1 : 1;
+
+		dc.SetPen(*wxTRANSPARENT_PEN);
+		int y = scaletop + (_cylinder * trackstep) - trackstep / 2;
+		dc.DrawRectangle(
+			{ w2 + factor*SECTORSIZE*2, y },
+			{ factor*SECTORSIZE*82, (int)trackstep }
+		);
+	}
+
+	dc.SetPen(*wxBLACK_PEN);
+	for (int track = 0; track <= TRACKS; track++)
 	{
 		int y = (double)track * trackstep;
 		dc.DrawLine({ w2-TICK/2, scaletop+y }, { w2+TICK/2, scaletop+y });
 	}
 }
+
+void VisualisationControl::SetMode(int cylinder, int head, int mode)
+{
+	_cylinder = cylinder;
+	_head = head;
+	_mode = mode;
+	Refresh();
+}
+
+void VisualisationControl::SetDiskFlux(std::shared_ptr<DiskFlux>& disk)
+{
+	_disk = disk;
+	Refresh();
+}
+

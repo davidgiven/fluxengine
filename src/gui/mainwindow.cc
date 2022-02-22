@@ -2,12 +2,15 @@
 #include "proto.h"
 #include "gui.h"
 #include "logger.h"
+#include "reader.h"
 #include "fluxsource/fluxsource.h"
 #include "decoders/decoders.h"
 #include "lib/usb/usbfinder.h"
 #include "fmt/format.h"
 #include <wx/wx.h>
 #include "mainwindow.h"
+#include <google/protobuf/text_format.h>
+
 
 extern const std::map<std::string, std::string> formats;
 
@@ -17,10 +20,7 @@ MainWindow::MainWindow(): MainWindowGen(nullptr)
 		[&](std::shared_ptr<const AnyLogMessage> message) {
 			runOnUiThread(
 				[message, this]() {
-					std::cout << "UI thread got message "
-						<< Logger::toString(*message)
-						<< '\n'
-						<< std::flush;
+					OnLogMessage(message);
 				}
 			);
 		}
@@ -42,6 +42,8 @@ MainWindow::MainWindow(): MainWindowGen(nullptr)
 	if (deviceCombo->GetCount() > 0)
 		deviceCombo->SetValue(deviceCombo->GetString(0));
 
+	fluxSourceSinkCombo->SetValue(fluxSourceSinkCombo->GetString(0));
+
 	readFluxButton->Bind(wxEVT_BUTTON, &MainWindow::OnReadFluxButton, this);
 }
 
@@ -58,19 +60,70 @@ void MainWindow::OnReadFluxButton(wxCommandEvent&)
 		fluxSourceSinkCombo->GetValue().ToStdString());
 
 	auto serial = deviceCombo->GetValue().ToStdString();
-	if (!serial.empty() && (serial[0] = '/'))
+	if (!serial.empty() && (serial[0] == '/'))
 		setProtoByString(&config, "usb.greaseweazle.port", serial);
 	else
 		setProtoByString(&config, "usb.serial", serial);
 
 	runOnWorkerThread(
-		/* Must make another copy of all local parameters. */
-		[=]() {
+		[config, this]() {
+			::config = config;
 			auto fluxSource = FluxSource::create(config.flux_source());
 			auto decoder = AbstractDecoder::create(config.decoder());
-			printf("Worker thread!\n");
+			auto diskflux = readDiskCommand(*fluxSource, *decoder);
+			runOnUiThread(
+				[&]() {
+					UpdateVisualisedFlux(diskflux);
+				}
+			);
 		}
 	);
+}
+
+void MainWindow::OnLogMessage(std::shared_ptr<const AnyLogMessage> message)
+{
+	std::cout << "UI thread got message "
+		<< Logger::toString(*message)
+		<< '\n'
+		<< std::flush;
+
+    std::visit(
+        overloaded{
+            /* Fallback --- do nothing */
+            [&](const auto& m)
+            {
+            },
+
+            /* Indicates that we're starting a write operation. */
+            [&](const BeginWriteOperationLogMessage& m)
+            {
+				visualiser->SetMode(m.cylinder, m.head, VISMODE_WRITING);
+            },
+
+            [&](const EndWriteOperationLogMessage& m)
+            {
+				visualiser->SetMode(0, 0, VISMODE_NOTHING);
+            },
+
+            /* Indicates that we're starting a read operation. */
+            [&](const BeginReadOperationLogMessage& m)
+            {
+				visualiser->SetMode(m.cylinder, m.head, VISMODE_READING);
+            },
+
+            [&](const EndReadOperationLogMessage& m)
+            {
+				visualiser->SetMode(0, 0, VISMODE_NOTHING);
+            },
+
+        },
+        *message);
+}
+
+void MainWindow::UpdateVisualisedFlux(std::shared_ptr<DiskFlux>& flux)
+{
+	_currentDisk = flux;
+	visualiser->SetDiskFlux(flux);
 }
 
 void MainWindow::UpdateDevices()

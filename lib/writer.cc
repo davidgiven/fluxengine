@@ -23,9 +23,7 @@ void writeTracks(FluxSink& fluxSink,
     {
         for (unsigned head : iterate(config.heads()))
         {
-            Logger() << DiskContextLogMessage { cylinder, head }
-                     << fmt::format("{0:>3}.{1}: writing", cylinder, head)
-                     << BeginWriteOperationLogMessage();
+			Logger() << BeginWriteOperationLogMessage { cylinder, head };
 
             std::unique_ptr<Fluxmap> fluxmap = producer(cylinder, head);
             if (!fluxmap)
@@ -64,9 +62,6 @@ void writeTracksAndVerify(FluxSink& fluxSink,
     {
         for (unsigned head : iterate(config.heads()))
         {
-            Logger() << DiskContextLogMessage { cylinder, head }
-                     << fmt::format("{0:>3}.{1}", cylinder, head);
-
             auto sectors = encoder.collectSectors(cylinder, head, image);
             std::unique_ptr<Fluxmap> fluxmap =
                 encoder.encode(cylinder, head, sectors, image);
@@ -74,7 +69,7 @@ void writeTracksAndVerify(FluxSink& fluxSink,
             {
                 /* Erase this track rather than writing. */
 
-                Logger() << BeginWriteOperationLogMessage() << "erasing";
+                Logger() << BeginWriteOperationLogMessage { cylinder, head };
                 fluxmap.reset(new Fluxmap());
                 fluxSink.writeFlux(cylinder, head, *fluxmap);
                 Logger() << EndWriteOperationLogMessage();
@@ -91,14 +86,14 @@ void writeTracksAndVerify(FluxSink& fluxSink,
                      * let's leave it disabled for now. */
                     // fluxmap->precompensate(PRECOMPENSATION_THRESHOLD_TICKS,
                     // 2);
-                    Logger() << BeginWriteOperationLogMessage() << "writing";
+                    Logger() << BeginWriteOperationLogMessage { cylinder, head };
                     fluxSink.writeFlux(cylinder, head, *fluxmap);
                     Logger() << EndWriteOperationLogMessage()
                              << fmt::format("{0} ms in {1} bytes",
                                     int(fluxmap->duration() / 1e6),
                                     fluxmap->bytes());
 
-                    Logger() << "verifying" << BeginReadOperationLogMessage();
+                    Logger() << BeginReadOperationLogMessage { cylinder, head };
                     std::shared_ptr<Fluxmap> writtenFluxmap =
                         fluxSource.readFlux(cylinder, head);
                     Logger() << EndReadOperationLogMessage()
