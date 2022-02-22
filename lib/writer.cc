@@ -23,7 +23,7 @@ void writeTracks(FluxSink& fluxSink,
     {
         for (unsigned head : iterate(config.heads()))
         {
-            Logger() << DiskContextLogMessage(cylinder, head)
+            Logger() << DiskContextLogMessage { cylinder, head }
                      << fmt::format("{0:>3}.{1}: writing", cylinder, head)
                      << BeginWriteOperationLogMessage();
 
