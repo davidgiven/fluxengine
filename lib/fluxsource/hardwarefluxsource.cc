@@ -1,6 +1,7 @@
 #include "globals.h"
 #include "flags.h"
 #include "fluxmap.h"
+#include "logger.h"
 #include "usb/usb.h"
 #include "fluxsource/fluxsource.h"
 #include "lib/fluxsource/fluxsource.pb.h"
@@ -12,10 +13,9 @@ public:
     HardwareFluxSource(const HardwareFluxSourceProto& config):
         _config(config)
     {
-        int rotationalSpeedMs;
         int retries = 5;
         usbSetDrive(_config.drive(), _config.high_density(), _config.index_mode());
-        std::cout << "Measuring rotational speed... " << std::flush;
+		Logger() << BeginSpeedOperationLogMessage();
  
         do {
             _oneRevolution = usbGetRotationalPeriod(_config.hard_sector_count());
@@ -24,15 +24,14 @@ public:
             else
                 _hardSectorThreshold = 0;
 
-            rotationalSpeedMs = _oneRevolution / 1e6;
             retries--;
-        } while ((rotationalSpeedMs == 0) && (retries > 0));
+        } while ((_oneRevolution == 0) && (retries > 0));
 
-        if (rotationalSpeedMs == 0) {
+        if (_oneRevolution == 0) {
 			Error() << "Failed\nIs a disk in the drive?";
         }
 
-        std::cout << fmt::format("{}ms\n", rotationalSpeedMs);
+		Logger() << EndSpeedOperationLogMessage { _oneRevolution };
     }
 
     ~HardwareFluxSource()

@@ -2,7 +2,7 @@
 #include "sector.h"
 #include "fmt/format.h"
 
-const std::string Sector::statusToString(Status status)
+std::string Sector::statusToString(Status status)
 {
     switch (status)
     {
@@ -12,6 +12,19 @@ const std::string Sector::statusToString(Status status)
         case Status::DATA_MISSING: return "present but no data found";
         case Status::CONFLICT:     return "conflicting data";
         default:                   return fmt::format("unknown error {}", status);
+    }
+}
+
+std::string Sector::statusToChar(Status status)
+{
+    switch (status)
+    {
+        case Status::OK:           return "";
+        case Status::MISSING:      return "?";
+        case Status::BAD_CHECKSUM: return "!";
+        case Status::DATA_MISSING: return "!";
+        case Status::CONFLICT:     return "*";
+        default:                   return "?";
     }
 }
 
