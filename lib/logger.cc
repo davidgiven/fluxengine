@@ -6,124 +6,141 @@
 #include "fmt/format.h"
 #include "logger.h"
 
-template <class... Ts>
-struct overloaded : Ts...
-{
-    using Ts::operator()...;
-};
-template <class... Ts>
-overloaded(Ts...) -> overloaded<Ts...>;
-
 static bool indented = false;
+static std::function<void(std::shared_ptr<const AnyLogMessage>)> loggerImpl =
+    Logger::textLogger;
 
-static void indent()
+Logger& Logger::operator<<(std::shared_ptr<const AnyLogMessage> message)
 {
-    if (!indented)
-        std::cout << "      ";
-    indented = false;
+    loggerImpl(message);
+    return *this;
 }
 
-Logger& Logger::operator<<(std::shared_ptr<AnyLogMessage> message)
+void Logger::setLogger(
+    std::function<void(std::shared_ptr<const AnyLogMessage>)> cb)
 {
+    loggerImpl = cb;
+}
+
+void Logger::textLogger(std::shared_ptr<const AnyLogMessage> message)
+{
+    std::cout << toString(*message) << std::flush;
+}
+
+std::string Logger::toString(const AnyLogMessage& message)
+{
+    std::stringstream stream;
+
+	auto indent = [&]() {
+		if (!indented)
+			stream << "      ";
+		indented = false;
+	};
+
     std::visit(
         overloaded{
             /* Fallback --- do nothing */
-            [](const auto& m)
+            [&](const auto& m)
             {
             },
 
-			/* Start measuring the rotational speed */
-			[](const BeginSpeedOperationLogMessage& m)
-			{
-				std::cout << "Measuring rotational speed... " << std::flush;
-			},
-
-			/* Finish measuring the rotational speed */
-			[](const EndSpeedOperationLogMessage& m)
-			{
-				std::cout << fmt::format("{:.1f}ms ({:.1f}rpm)\n",
-					m.rotationalPeriod / 1e6,
-					60e9 / m.rotationalPeriod);
-			},
-
-            /* Indicates that we're working on a given cylinder and head */
-            [](const DiskContextLogMessage& m)
+            /* Start measuring the rotational speed */
+            [&](const BeginSpeedOperationLogMessage& m)
             {
-                std::cout << fmt::format("{:2}.{}: ", m.cylinder, m.head)
-                          << std::flush;
+                stream << "Measuring rotational speed... ";
+            },
+
+            /* Finish measuring the rotational speed */
+            [&](const EndSpeedOperationLogMessage& m)
+            {
+                stream << fmt::format("{:.1f}ms ({:.1f}rpm)\n",
+                    m.rotationalPeriod / 1e6,
+                    60e9 / m.rotationalPeriod);
+            },
+
+			/* Indicates that we're working on a given cylinder and head */
+            [&](const DiskContextLogMessage& m)
+            {
+                stream << fmt::format("{:2}.{}: ", m.cylinder, m.head);
                 indented = true;
             },
 
             /* A single read has happened */
-            [](const SingleReadLogMessage& m)
+            [&](const SingleReadLogMessage& m)
             {
-				const auto& trackdataflux = m.trackDataFlux;
+                const auto& trackdataflux = m.trackDataFlux;
 
                 indent();
-                std::cout << fmt::format("{} records, {} sectors",
+                stream << fmt::format("{} records, {} sectors",
                     trackdataflux->records.size(),
                     trackdataflux->sectors.size());
                 if (trackdataflux->sectors.size() > 0)
                 {
                     nanoseconds_t clock =
                         (*trackdataflux->sectors.begin())->clock;
-                    std::cout << fmt::format("; {:.2f}us clock ({:.0f}kHz)",
+                    stream << fmt::format("; {:.2f}us clock ({:.0f}kHz)",
                         clock / 1000.0,
                         1000000.0 / clock);
                 }
 
-                std::cout << '\n';
+                stream << '\n';
 
-				indent();
-				std::cout << "sectors:";
+                indent();
+                stream << "sectors:";
 
-				std::vector<std::shared_ptr<Sector>> sectors(m.sectors.begin(), m.sectors.end());
-				std::sort(sectors.begin(), sectors.end(),
-					[](const std::shared_ptr<Sector>& s1, const std::shared_ptr<Sector>&s2)
-					{
-						return s1->logicalSector < s2->logicalSector;
-					}
-				);
+                std::vector<std::shared_ptr<Sector>> sectors(
+                    m.sectors.begin(), m.sectors.end());
+                std::sort(sectors.begin(),
+                    sectors.end(),
+                    [](const std::shared_ptr<Sector>& s1,
+                        const std::shared_ptr<Sector>& s2)
+                    {
+                        return s1->logicalSector < s2->logicalSector;
+                    });
 
-				for (const auto& sector : sectors)
-					std::cout << fmt::format(" {}{}", sector->logicalSector, Sector::statusToChar(sector->status));
+                for (const auto& sector : sectors)
+                    stream << fmt::format(" {}{}",
+                        sector->logicalSector,
+                        Sector::statusToChar(sector->status));
 
-				std::cout << '\n';
+                stream << '\n';
             },
 
-			/* We've finished reading a track */
-			[](const TrackReadLogMessage& m)
-			{
-				int size = 0;
-				std::set<std::pair<int, int>> track_ids;
-				for (const auto& sector : m.track->sectors)
-				{
-					track_ids.insert(std::make_pair(sector->logicalTrack, sector->logicalSide));
-					size += sector->data.size();
-				}
+            /* We've finished reading a track */
+            [&](const TrackReadLogMessage& m)
+            {
+                int size = 0;
+                std::set<std::pair<int, int>> track_ids;
+                for (const auto& sector : m.track->sectors)
+                {
+                    track_ids.insert(std::make_pair(
+                        sector->logicalTrack, sector->logicalSide));
+                    size += sector->data.size();
+                }
 
-				if (!track_ids.empty())
-				{
-					std::vector<std::string> ids;
+                if (!track_ids.empty())
+                {
+                    std::vector<std::string> ids;
 
-					for (const auto& i : track_ids)
-						ids.push_back(fmt::format("{}.{}", i.first, i.second));
+                    for (const auto& i : track_ids)
+                        ids.push_back(fmt::format("{}.{}", i.first, i.second));
 
-					indent();
-					std::cout << fmt::format("logical track {}\n", fmt::join(ids, "; "));
-				}
+                    indent();
+                    stream << fmt::format(
+                        "logical track {}\n", fmt::join(ids, "; "));
+                }
 
-				indent();
-				std::cout << fmt::format("{} bytes decoded\n", size);
-			},
+                indent();
+                stream << fmt::format("{} bytes decoded\n", size);
+            },
 
             /* Generic text message */
-            [](const std::string& s)
+            [&](const std::string& s)
             {
                 indent();
-				std::cout << s << '\n';
+                stream << s << '\n';
             },
         },
-        *message);
-    return *this;
+        message);
+    return stream.str();
 }
