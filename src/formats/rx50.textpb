@@ -1,0 +1,76 @@
+comment: 'RX50 450kB 5.25" 80-track 10-sector SSHD'
+
+flux_sink {
+	drive {
+		high_density: true
+	}
+}
+
+flux_source {
+	drive {
+		high_density: true
+	}
+}
+
+image_reader {
+	filename: "ibm1200_525.img"
+	img {
+		tracks: 80
+		sides: 2
+		trackdata {
+			sector_size: 512
+			sector_range {
+				start_sector: 1
+				sector_count: 10
+			}
+		}
+	}
+}
+
+image_writer {
+	filename: "ibm1200_525.img"
+	img {}
+}
+
+encoder {
+	ibm {
+		trackdata {
+			track_length_ms: 167
+			clock_rate_khz: 500
+			sectors {
+				sector: 1
+				sector: 2
+				sector: 3
+				sector: 4
+				sector: 5
+				sector: 6
+				sector: 7
+				sector: 8
+				sector: 9
+				sector: 10
+			}
+		}
+	}
+}
+
+decoder {
+	ibm {
+		trackdata {
+			sector_range {
+				min_sector: 1
+				max_sector: 10
+			}
+		}
+	}
+}
+
+cylinders {
+	start: 0
+	end: 79
+}
+
+heads {
+	start: 0
+	end: 0
+}
+

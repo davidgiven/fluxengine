@@ -530,6 +530,7 @@ FORMATS="\
     northstar87 \
     tids990 \
     vgi \
+    rx50 \
     victor9k_ss \
     victor9k_ds \
     zilogmcz \
