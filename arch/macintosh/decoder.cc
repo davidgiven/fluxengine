@@ -134,7 +134,7 @@ public:
 		return seekToPattern(ANY_RECORD_PATTERN);
 	}
 
-    void decodeSectorRecord()
+    void decodeSectorRecord() override
 	{
 		if (readRaw24() != MAC_SECTOR_RECORD)
 			return;
@@ -163,7 +163,7 @@ public:
 			_sector->status = Sector::DATA_MISSING; /* unintuitive but correct */
 	}
 
-    void decodeDataRecord()
+    void decodeDataRecord() override
 	{
 		if (readRaw24() != MAC_DATA_RECORD)
 			return;
@@ -183,7 +183,7 @@ public:
 		_sector->data.writer().append(userData.slice(12, 512)).append(userData.slice(0, 12));
 	}
 
-	std::set<unsigned> requiredSectors(unsigned cylinder, unsigned head) const
+	std::set<unsigned> requiredSectors(unsigned cylinder, unsigned head) const override
 	{
 		int count;
 		if (cylinder < 16)

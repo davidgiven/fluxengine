@@ -106,7 +106,7 @@ public:
 		return clock;
 	}
 
-	void decodeSectorRecord()
+	void decodeSectorRecord() override
 	{
 		readRawBits(48);
 		auto rawbits = readRawBits(MICROPOLIS_ENCODED_SECTOR_SIZE*16);

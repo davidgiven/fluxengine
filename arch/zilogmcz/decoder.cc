@@ -26,7 +26,7 @@ public:
 		return seekToPattern(SECTOR_START_PATTERN);
 	}
 
-    void decodeSectorRecord()
+    void decodeSectorRecord() override
 	{
 		readRawBits(14);
 
