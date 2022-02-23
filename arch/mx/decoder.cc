@@ -30,7 +30,7 @@ public:
 		AbstractDecoder(config)
 	{}
 
-    void beginTrack()
+    void beginTrack() override
 	{
 		_clock = _sector->clock = seekToPattern(ID_PATTERN);
 		_currentSector = 0;
@@ -47,7 +47,7 @@ public:
 			return _clock;
 	}
 
-    void decodeSectorRecord()
+    void decodeSectorRecord() override
 	{
 		/* Skip the ID pattern and track word, which is only present on the
 		 * first sector. We don't trust the track word because some driver

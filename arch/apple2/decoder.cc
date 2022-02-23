@@ -76,7 +76,7 @@ public:
 		return seekToPattern(ANY_RECORD_PATTERN);
 	}
 
-    void decodeSectorRecord()
+    void decodeSectorRecord() override
 	{
 		if (readRaw24() != APPLE2_SECTOR_RECORD)
 			return;
@@ -94,7 +94,7 @@ public:
 			_sector->status = Sector::DATA_MISSING; /* unintuitive but correct */
 	}
 
-    void decodeDataRecord()
+    void decodeDataRecord() override
 	{
 		/* Check ID. */
 
