@@ -3,8 +3,8 @@ Disk: Generic IBM
 
 IBM scheme disks are _the_ most common disk format, ever. They're used by a
 huge variety of different systems, and they come in a huge variety of different
-forms, but they're all fundamentally the same: either FM or MFM, either single
-or double sided, with distinct sector header and data records and no sector
+forms, but they're all fundamentally the same: either FM or MFM, either single-
+or double-sided, with distinct sector header and data records and no sector
 metadata. Systems which use IBM scheme disks include but are not limited to:
 
   - IBM PCs (naturally)
