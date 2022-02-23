@@ -63,7 +63,7 @@ public:
 		return seekToPattern(ANY_RECORD_PATTERN);
 	}
 
-    void decodeSectorRecord()
+    void decodeSectorRecord() override
 	{
 		if (readRaw20() != C64_SECTOR_RECORD)
 			return;
@@ -79,7 +79,7 @@ public:
 			_sector->status = Sector::DATA_MISSING; /* unintuitive but correct */
 	}
 
-    void decodeDataRecord()
+    void decodeDataRecord() override
 	{
 		if (readRaw20() != C64_DATA_RECORD)
 			return;

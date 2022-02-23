@@ -58,17 +58,11 @@ std::string Logger::toString(const AnyLogMessage& message)
                     60e9 / m.rotationalPeriod);
             },
 
-            /* Indicates that we're starting a write operation. */
-            [&](const BeginWriteOperationLogMessage& m)
+(??)            /* Indicates that we're working on a given cylinder and head */
+(??)            [](const DiskContextLogMessage& m)
             {
-                stream << fmt::format("{:2}.{}: ", m.cylinder, m.head);
-                indented = true;
-            },
-
-            /* Indicates that we're starting a read operation. */
-            [&](const BeginReadOperationLogMessage& m)
-            {
-                stream << fmt::format("{:2}.{}: ", m.cylinder, m.head);
+(??)                std::cout << fmt::format("{:2}.{}: ", m.cylinder, m.head)
+(??)                          << std::flush;
                 indented = true;
             },
 

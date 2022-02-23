@@ -64,7 +64,7 @@ public:
 		return seekToPattern(ANY_RECORD_PATTERN);
 	}
 
-    void decodeSectorRecord()
+    void decodeSectorRecord() override
 	{
 		if (readRaw32() != BROTHER_SECTOR_RECORD)
 			return;
@@ -86,7 +86,7 @@ public:
 		_sector->status = Sector::DATA_MISSING;
 	}
 	
-    void decodeDataRecord()
+    void decodeDataRecord() override
 	{
 		if (readRaw32() != BROTHER_DATA_RECORD)
 			return;
