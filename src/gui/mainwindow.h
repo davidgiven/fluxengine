@@ -15,6 +15,7 @@ public:
 
 private:
     void OnExit(wxCommandEvent& event);
+	void OnStopButton(wxCommandEvent&);
 	void OnReadFluxButton(wxCommandEvent&);
 	void OnLogMessage(std::shared_ptr<const AnyLogMessage> message);
 

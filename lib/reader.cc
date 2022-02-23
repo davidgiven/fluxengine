@@ -15,6 +15,7 @@
 #include "logger.h"
 #include "fmt/format.h"
 #include "proto.h"
+#include "utils.h"
 #include "lib/decoders/decoders.pb.h"
 #include <iostream>
 #include <fstream>
@@ -76,12 +77,17 @@ std::shared_ptr<DiskFlux> readDiskCommand(FluxSource& fluxsource, AbstractDecode
 		for (int head : iterate(config.heads()))
 		{
 			auto track = std::make_shared<TrackFlux>();
+			track->physicalCylinder = cylinder;
+			track->physicalHead = head;
+
 			std::set<std::shared_ptr<Sector>> track_sectors;
 			std::set<std::shared_ptr<Record>> track_records;
 			Fluxmap totalFlux;
 
 			for (int retry = config.decoder().retries(); retry >= 0; retry--)
 			{
+				testForEmergencyStop();
+
 				auto fluxmap = readFluxmap(fluxsource, cylinder, head);
 				totalFlux.appendDesync().appendBytes(fluxmap->rawBytes());
 
@@ -114,7 +120,8 @@ std::shared_ptr<DiskFlux> readDiskCommand(FluxSource& fluxsource, AbstractDecode
 					hasBadSectors = true;
 				}
 
-				Logger() << SingleReadLogMessage { trackdataflux, result_sectors };
+				track->sectors = collect_sectors(track_sectors);
+				Logger() << TrackReadLogMessage { track };
 
 				if (hasBadSectors)
 					failures = false;
@@ -163,8 +170,6 @@ std::shared_ptr<DiskFlux> readDiskCommand(FluxSource& fluxsource, AbstractDecode
 				}
 			}
 
-			track->sectors = collect_sectors(track_sectors);
-			Logger() << TrackReadLogMessage { track };
 			diskflux->tracks.push_back(track);
 		}
     }
@@ -179,6 +184,7 @@ std::shared_ptr<DiskFlux> readDiskCommand(FluxSource& fluxsource, AbstractDecode
 	if (failures)
 		Logger() << "Warning: some sectors could not be decoded.";
 
+	Logger() << DiskReadLogMessage { diskflux };
 	return diskflux;
 }
 
@@ -198,6 +204,7 @@ void rawReadDiskCommand(FluxSource& fluxsource, FluxSink& fluxsink)
 	{
 		for (int head : iterate(config.heads()))
 		{
+			testForEmergencyStop();
 			auto fluxmap = readFluxmap(fluxsource, cylinder, head);
 			fluxsink.writeFlux(cylinder, head, *fluxmap);
 		}

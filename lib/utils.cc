@@ -1,4 +1,7 @@
 #include "globals.h"
+#include "utils.h"
+
+bool emergencyStop = false;
 
 bool beginsWith(const std::string& value, const std::string& ending)
 {
@@ -18,4 +21,9 @@ bool endsWith(const std::string& value, const std::string& ending)
         std::equal(ending.rbegin(), ending.rend(), lowercase.begin());
 }
 
+void testForEmergencyStop()
+{
+	if (emergencyStop)
+		throw EmergencyStopException();
+}
 

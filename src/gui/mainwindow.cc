@@ -7,6 +7,7 @@
 #include "decoders/decoders.h"
 #include "lib/usb/usbfinder.h"
 #include "fmt/format.h"
+#include "utils.h"
 #include <wx/wx.h>
 #include "mainwindow.h"
 #include <google/protobuf/text_format.h>
@@ -45,11 +46,17 @@ MainWindow::MainWindow(): MainWindowGen(nullptr)
 	fluxSourceSinkCombo->SetValue(fluxSourceSinkCombo->GetString(0));
 
 	readFluxButton->Bind(wxEVT_BUTTON, &MainWindow::OnReadFluxButton, this);
+	stopButton->Bind(wxEVT_BUTTON, &MainWindow::OnStopButton, this);
 }
 
 void MainWindow::OnExit(wxCommandEvent& event)
 {
     Close(true);
+}
+
+void MainWindow::OnStopButton(wxCommandEvent&)
+{
+	emergencyStop = true;
 }
 
 void MainWindow::OnReadFluxButton(wxCommandEvent&)
@@ -115,7 +122,6 @@ void MainWindow::OnLogMessage(std::shared_ptr<const AnyLogMessage> message)
             {
 				visualiser->SetMode(0, 0, VISMODE_NOTHING);
             },
-
         },
         *message);
 }

@@ -36,7 +36,7 @@
 class MainWindowGen : public wxFrame
 {
 	private:
-		wxBoxSizer* bSizer1;
+		wxFlexGridSizer* bSizer1;
 
 	protected:
 		VisualisationControl* visualiser;
@@ -66,7 +66,7 @@ class MainWindowGen : public wxFrame
 
 	public:
 
-		MainWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 466,528 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+		MainWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("FluxEngine"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 587,595 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 
 		~MainWindowGen();
 

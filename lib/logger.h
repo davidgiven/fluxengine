@@ -3,6 +3,7 @@
 
 #include "fmt/format.h"
 
+class DiskFlux;
 class TrackDataFlux;
 class TrackFlux;
 class Sector;
@@ -15,15 +16,14 @@ struct EndSpeedOperationLogMessage
     nanoseconds_t rotationalPeriod;
 };
 
-struct SingleReadLogMessage
-{
-    std::shared_ptr<TrackDataFlux> trackDataFlux;
-    std::set<std::shared_ptr<Sector>> sectors;
-};
-
 struct TrackReadLogMessage
 {
     std::shared_ptr<TrackFlux> track;
+};
+
+struct DiskReadLogMessage
+{
+	std::shared_ptr<DiskFlux> disk;
 };
 
 struct BeginReadOperationLogMessage
@@ -49,8 +49,8 @@ struct EndWriteOperationLogMessage
 class TrackFlux;
 
 typedef std::variant<std::string,
-    SingleReadLogMessage,
     TrackReadLogMessage,
+	DiskReadLogMessage,
     BeginSpeedOperationLogMessage,
     EndSpeedOperationLogMessage,
     BeginReadOperationLogMessage,

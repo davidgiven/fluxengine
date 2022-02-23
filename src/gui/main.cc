@@ -2,6 +2,7 @@
 #include <wx/wx.h>
 #include "mainwindow.h"
 #include "gui.h"
+#include "utils.h"
 
 class MyApp;
 class ExecEvent;
@@ -88,6 +89,7 @@ void MyApp::RunOnWorkerThread(std::function<void()> callback)
 	if (GetThread())
 		GetThread()->Wait();
 
+	emergencyStop = false;
 	CreateThread(wxTHREAD_JOINABLE);
 	GetThread()->Run();
 }

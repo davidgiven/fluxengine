@@ -13,28 +13,32 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 {
 	this->SetSizeHints( wxSize( 450,500 ), wxDefaultSize );
 
-	bSizer1 = new wxBoxSizer( wxVERTICAL );
+	bSizer1 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	bSizer1->AddGrowableCol( 1 );
+	bSizer1->AddGrowableRow( 0 );
+	bSizer1->SetFlexibleDirection( wxHORIZONTAL );
+	bSizer1->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 
-	wxBoxSizer* bSizer2;
-	bSizer2 = new wxBoxSizer( wxHORIZONTAL );
+	wxFlexGridSizer* fgSizer4;
+	fgSizer4 = new wxFlexGridSizer( 2, 1, 0, 0 );
+	fgSizer4->AddGrowableRow( 0 );
+	fgSizer4->SetFlexibleDirection( wxBOTH );
+	fgSizer4->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 
-	wxBoxSizer* bSizer3;
-	bSizer3 = new wxBoxSizer( wxVERTICAL );
-
-	visualiser = new VisualisationControl( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_THEME );
+	visualiser = new VisualisationControl( this, wxID_ANY, wxDefaultPosition, wxSize( 200,480 ), wxBORDER_THEME );
 	visualiser->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_BTNTEXT ) );
 	visualiser->SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_APPWORKSPACE ) );
-	visualiser->SetMinSize( wxSize( 200,300 ) );
+	visualiser->SetMinSize( wxSize( 200,480 ) );
 
-	bSizer3->Add( visualiser, 999, wxALL|wxEXPAND, 5 );
+	fgSizer4->Add( visualiser, 1, wxALL|wxEXPAND, 5 );
 
 	stopButton = new wxButton( this, wxID_ANY, wxT("Stop"), wxDefaultPosition, wxDefaultSize, 0 );
-	stopButton->SetBackgroundColour( wxColour( 255, 128, 128 ) );
+	stopButton->SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_BTNFACE ) );
 
-	bSizer3->Add( stopButton, 0, wxALIGN_CENTER|wxALL, 5 );
+	fgSizer4->Add( stopButton, 0, wxALIGN_CENTER|wxALL, 5 );
 
 
-	bSizer2->Add( bSizer3, 1, wxEXPAND, 5 );
+	bSizer1->Add( fgSizer4, 1, wxEXPAND, 5 );
 
 	wxFlexGridSizer* fgSizer2;
 	fgSizer2 = new wxFlexGridSizer( 0, 1, 0, 0 );
@@ -54,7 +58,7 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	fgSizer3->Add( m_staticText4, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_LEFT|wxALL, 5 );
 
 	deviceCombo = new wxComboBox( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_SORT );
-	fgSizer3->Add( deviceCombo, 0, wxALL, 5 );
+	fgSizer3->Add( deviceCombo, 0, wxALL|wxEXPAND, 5 );
 
 	m_staticText5 = new wxStaticText( this, wxID_ANY, wxT("Flux source/sink:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText5->Wrap( -1 );
@@ -104,6 +108,8 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	m_sizer = new wxGridSizer( 0, 2, 0, 0 );
 
 	readFluxButton = new wxButton( this, wxID_ANY, wxT("Read flux"), wxDefaultPosition, wxDefaultSize, 0 );
+	readFluxButton->SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_BTNFACE ) );
+
 	m_sizer->Add( readFluxButton, 0, wxALL|wxEXPAND, 5 );
 
 	readImageButton = new wxButton( this, wxID_ANY, wxT("Read image"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -119,10 +125,7 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	fgSizer2->Add( m_sizer, 1, wxEXPAND|wxFIXED_MINSIZE, 5 );
 
 
-	bSizer2->Add( fgSizer2, 1, wxEXPAND, 5 );
-
-
-	bSizer1->Add( bSizer2, 1, wxEXPAND, 5 );
+	bSizer1->Add( fgSizer2, 1, wxEXPAND, 5 );
 
 
 	this->SetSizer( bSizer1 );

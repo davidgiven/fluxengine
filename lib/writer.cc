@@ -13,6 +13,7 @@
 #include "sector.h"
 #include "image.h"
 #include "logger.h"
+#include "utils.h"
 #include "lib/config.pb.h"
 #include "proto.h"
 
@@ -23,6 +24,7 @@ void writeTracks(FluxSink& fluxSink,
     {
         for (unsigned head : iterate(config.heads()))
         {
+			testForEmergencyStop();
 			Logger() << BeginWriteOperationLogMessage { cylinder, head };
 
             std::unique_ptr<Fluxmap> fluxmap = producer(cylinder, head);
@@ -62,6 +64,8 @@ void writeTracksAndVerify(FluxSink& fluxSink,
     {
         for (unsigned head : iterate(config.heads()))
         {
+			testForEmergencyStop();
+
             auto sectors = encoder.collectSectors(cylinder, head, image);
             std::unique_ptr<Fluxmap> fluxmap =
                 encoder.encode(cylinder, head, sectors, image);

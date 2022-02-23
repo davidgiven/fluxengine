@@ -4,10 +4,14 @@
 #include <wx/wx.h>
 
 #define BORDER 20
-#define TICK 10
+#define TICK 3
 #define TRACKS 82
 
-#define SECTORSIZE 4
+#define SECTORSIZE 5
+
+static const wxColour DARK_GREY(0x80, 0x80, 0x80);
+static const wxBrush DARK_GREY_BRUSH(DARK_GREY);
+static const wxPen DARK_GREY_PEN(DARK_GREY);
 
 VisualisationControl::VisualisationControl(wxWindow* parent,
     wxWindowID id,
@@ -29,13 +33,12 @@ void VisualisationControl::OnPaint(wxPaintEvent&)
 	int w2 = w/2;
 	int h = size.GetHeight();
 
-	int scaleheight = h - BORDER*4;
 	int centrey = h * 1.5;
 	int outerradius = centrey - BORDER;
 	int innerradius = centrey - h + BORDER;
-	int scaletop = BORDER*2;
-	int scalebottom = h - BORDER*2;
-	double trackstep = (double)scaleheight / TRACKS;
+	int scalesize = TRACKS*SECTORSIZE;
+	int scaletop = h/2 - scalesize/2;
+	int scalebottom = scaletop + scalesize;
 
 	wxPaintDC dc(this);
 	dc.SetPen(*wxBLACK_PEN);
@@ -44,11 +47,8 @@ void VisualisationControl::OnPaint(wxPaintEvent&)
 	dc.SetBrush(dc.GetBackground());
 	dc.DrawCircle({ w2, centrey }, innerradius);
 
+	dc.SetPen(DARK_GREY_PEN);
 	dc.DrawLine({ w2, scaletop }, { w2, scalebottom });
-	dc.DrawLine({ w2-TICK, scaletop }, { w2+TICK, scaletop });
-	dc.DrawLine(
-		{ w2-TICK, int(scaletop + 80*trackstep) },
-		{ w2+TICK, int(scaletop + 80*trackstep) });
 
 	if (_mode != VISMODE_NOTHING)
 	{
@@ -60,18 +60,22 @@ void VisualisationControl::OnPaint(wxPaintEvent&)
 		int factor = (_head == 0) ? -1 : 1;
 
 		dc.SetPen(*wxTRANSPARENT_PEN);
-		int y = scaletop + (_cylinder * trackstep) - trackstep / 2;
+		int y = scaletop + _cylinder * SECTORSIZE;
 		dc.DrawRectangle(
-			{ w2 + factor*SECTORSIZE*2, y },
-			{ factor*SECTORSIZE*82, (int)trackstep }
+			{ w2 + factor*SECTORSIZE, y },
+			{ factor*SECTORSIZE*82, SECTORSIZE-1 }
 		);
 	}
 
-	dc.SetPen(*wxBLACK_PEN);
+	dc.SetBrush(DARK_GREY_BRUSH);
+	dc.SetPen(DARK_GREY_PEN);
 	for (int track = 0; track <= TRACKS; track++)
 	{
-		int y = (double)track * trackstep;
-		dc.DrawLine({ w2-TICK/2, scaletop+y }, { w2+TICK/2, scaletop+y });
+		int y = scaletop + track*SECTORSIZE;
+		dc.DrawRectangle(
+			{ w2-TICK/2, y },
+			{ TICK, SECTORSIZE-1 }
+		);
 	}
 }
 
