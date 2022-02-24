@@ -21,8 +21,8 @@ struct DiskContextLogMessage
 
 struct SingleReadLogMessage
 {
-	std::shared_ptr<TrackDataFlux> trackDataFlux;
-	std::set<std::shared_ptr<Sector>> sectors;
+	std::shared_ptr<const TrackDataFlux> trackDataFlux;
+	std::set<std::shared_ptr<const Sector>> sectors;
 };
 
 struct TrackReadLogMessage

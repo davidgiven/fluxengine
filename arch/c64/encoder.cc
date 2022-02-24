@@ -211,9 +211,9 @@ public:
 	{}
 
 public:
-	std::vector<std::shared_ptr<Sector>> collectSectors(int physicalTrack, int physicalSide, const Image& image) override
+	std::vector<std::shared_ptr<const Sector>> collectSectors(int physicalTrack, int physicalSide, const Image& image) override
 	{
-		std::vector<std::shared_ptr<Sector>> sectors;
+		std::vector<std::shared_ptr<const Sector>> sectors;
 
         if (physicalSide == 0)
         {
@@ -231,7 +231,7 @@ public:
 	}
 
     std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide,
-            const std::vector<std::shared_ptr<Sector>>& sectors, const Image& image) override
+            const std::vector<std::shared_ptr<const Sector>>& sectors, const Image& image) override
     {
         /* The format ID Character # 1 and # 2 are in the .d64 image only present
          * in track 18 sector zero which contains the BAM info in byte 162 and 163.
@@ -278,7 +278,7 @@ public:
     }
 
 private:
-	void writeSector(std::vector<bool>& bits, unsigned& cursor, const std::shared_ptr<Sector>& sector) const
+	void writeSector(std::vector<bool>& bits, unsigned& cursor, std::shared_ptr<const Sector> sector) const
     {
         /* Source: http://www.unusedino.de/ec64/technical/formats/g64.html 
          * 1. Header sync       FF FF FF FF FF (40 'on' bits, not GCR)

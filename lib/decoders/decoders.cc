@@ -57,7 +57,7 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 	return (decoder->second)(config);
 }
 
-std::shared_ptr<TrackDataFlux> AbstractDecoder::decodeToSectors(
+std::shared_ptr<const TrackDataFlux> AbstractDecoder::decodeToSectors(
 		std::shared_ptr<const Fluxmap> fluxmap, unsigned physicalCylinder, unsigned physicalHead)
 {
 	_trackdata = std::make_shared<TrackDataFlux>();
@@ -84,7 +84,7 @@ std::shared_ptr<TrackDataFlux> AbstractDecoder::decodeToSectors(
         Fluxmap::Position recordStart = fmr.tell();
         _sector->clock = advanceToNextRecord();
 		if (fmr.eof() || !_sector->clock)
-            return std::move(_trackdata);
+            return _trackdata;
 
         /* Read the sector record. */
 
