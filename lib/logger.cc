@@ -88,12 +88,12 @@ std::string Logger::toString(const AnyLogMessage& message)
                 indent();
                 stream << "sectors:";
 
-                std::vector<std::shared_ptr<Sector>> sectors(
+                std::vector<std::shared_ptr<const Sector>> sectors(
                     m.sectors.begin(), m.sectors.end());
                 std::sort(sectors.begin(),
                     sectors.end(),
-                    [](const std::shared_ptr<Sector>& s1,
-                        const std::shared_ptr<Sector>& s2)
+                    [](const std::shared_ptr<const Sector>& s1,
+                        const std::shared_ptr<const Sector>& s2)
                     {
                         return s1->logicalSector < s2->logicalSector;
                     });

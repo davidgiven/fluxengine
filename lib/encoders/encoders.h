@@ -10,17 +10,18 @@ class AbstractEncoder
 {
 public:
     AbstractEncoder(const EncoderProto& config) {}
-	virtual ~AbstractEncoder() {}
+    virtual ~AbstractEncoder() {}
 
-	static std::unique_ptr<AbstractEncoder> create(const EncoderProto& config);
+    static std::unique_ptr<AbstractEncoder> create(const EncoderProto& config);
 
 public:
-	virtual std::vector<std::shared_ptr<Sector>> collectSectors(
-		int physicalCylinder, int physicalHead, const Image& image) = 0;
+    virtual std::vector<std::shared_ptr<const Sector>> collectSectors(
+        int physicalCylinder, int physicalHead, const Image& image) = 0;
 
-	virtual std::unique_ptr<Fluxmap> encode(
-		int physicalCylinder, int physicalHead, const std::vector<std::shared_ptr<Sector>>& sectors, const Image& image) = 0;
+    virtual std::unique_ptr<Fluxmap> encode(int physicalCylinder,
+        int physicalHead,
+        const std::vector<std::shared_ptr<const Sector>>& sectors,
+        const Image& image) = 0;
 };
 
 #endif
-
