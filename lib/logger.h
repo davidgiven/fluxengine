@@ -18,12 +18,12 @@ struct EndSpeedOperationLogMessage
 
 struct TrackReadLogMessage
 {
-    std::shared_ptr<TrackFlux> track;
+    std::shared_ptr<const TrackFlux> track;
 };
 
 struct DiskReadLogMessage
 {
-	std::shared_ptr<DiskFlux> disk;
+	std::shared_ptr<const DiskFlux> disk;
 };
 
 struct BeginReadOperationLogMessage
@@ -34,6 +34,8 @@ struct BeginReadOperationLogMessage
 
 struct EndReadOperationLogMessage
 {
+	std::shared_ptr<const TrackDataFlux> trackDataFlux;
+	std::set<std::shared_ptr<const Sector>> sectors;
 };
 
 struct BeginWriteOperationLogMessage

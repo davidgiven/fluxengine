@@ -108,8 +108,8 @@ void writeTracksAndVerify(FluxSink& fluxSink,
                     const auto trackdata =
                         decoder.decodeToSectors(writtenFluxmap, cylinder, head);
 
-                    std::vector<std::shared_ptr<Sector>> gotSectors =
-                        trackdata->sectors;
+                    std::vector<std::shared_ptr<const Sector>> gotSectors(
+						trackdata->sectors.begin(), trackdata->sectors.end());
                     gotSectors.erase(std::remove_if(gotSectors.begin(),
                                          gotSectors.end(),
                                          [](const auto& s)

@@ -126,7 +126,7 @@ void MainWindow::OnLogMessage(std::shared_ptr<const AnyLogMessage> message)
         *message);
 }
 
-void MainWindow::UpdateVisualisedFlux(std::shared_ptr<DiskFlux>& flux)
+void MainWindow::UpdateVisualisedFlux(std::shared_ptr<const DiskFlux>& flux)
 {
 	_currentDisk = flux;
 	visualiser->SetDiskFlux(flux);

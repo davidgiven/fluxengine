@@ -23,7 +23,7 @@ public:
 
 public:
 	void SetMode(int head, int cylinder, int mode);
-	void SetDiskFlux(std::shared_ptr<DiskFlux>& disk);
+	void SetDiskFlux(std::shared_ptr<const DiskFlux>& disk);
 
 private:
 	void OnPaint(wxPaintEvent & evt);
@@ -32,7 +32,7 @@ private:
 	int _head;
 	int _cylinder;
 	int _mode = VISMODE_NOTHING;
-	std::shared_ptr<DiskFlux> _disk;
+	std::shared_ptr<const DiskFlux> _disk;
     wxDECLARE_EVENT_TABLE();
 };
 

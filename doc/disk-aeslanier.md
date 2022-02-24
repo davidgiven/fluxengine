@@ -11,8 +11,8 @@ of nearly £50,000 in 2018!).
 processing software off twin 5.25" drive units, but apparently other software
 was available.
 
-The disk format is exceptionally weird. They used 77 track, 32 sector, single
-sided _hard_ sectored disks, where there were multiple index holes,
+The disk format is exceptionally weird. They used 77 track, 32 sector, single-sided
+_hard_ sectored disks, where there were multiple index holes,
 indicating to the hardware where the sectors start. The encoding scheme
 itself is [MMFM (aka
 M2FM)](http://www.retrotechnology.com/herbs_stuff/m2fm.html), an early

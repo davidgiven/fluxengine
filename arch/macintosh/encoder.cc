@@ -164,7 +164,7 @@ static uint8_t encode_side(uint8_t track, uint8_t side)
 	return (side ? 0x20 : 0x00) | ((track>0x3f) ? 0x01 : 0x00);
 }
 
-static void write_sector(std::vector<bool>& bits, unsigned& cursor, const std::shared_ptr<Sector>& sector)
+static void write_sector(std::vector<bool>& bits, unsigned& cursor, const std::shared_ptr<const Sector>& sector)
 {
 	if ((sector->data.size() != 512) && (sector->data.size() != 524))
 		Error() << "unsupported sector size --- you must pick 512 or 524";
@@ -208,9 +208,9 @@ public:
 	{}
 
 public:
-	std::vector<std::shared_ptr<Sector>> collectSectors(int physicalTrack, int physicalSide, const Image& image) override
+	std::vector<std::shared_ptr<const Sector>> collectSectors(int physicalTrack, int physicalSide, const Image& image) override
 	{
-		std::vector<std::shared_ptr<Sector>> sectors;
+		std::vector<std::shared_ptr<const Sector>> sectors;
 
 		if ((physicalTrack >= 0) && (physicalTrack < MAC_TRACKS_PER_DISK))
         {
@@ -227,7 +227,7 @@ public:
 	}
 
     std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide,
-			const std::vector<std::shared_ptr<Sector>>& sectors, const Image& image) override
+			const std::vector<std::shared_ptr<const Sector>>& sectors, const Image& image) override
 	{
 		if ((physicalTrack < 0) || (physicalTrack >= MAC_TRACKS_PER_DISK))
 			return std::unique_ptr<Fluxmap>();

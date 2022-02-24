@@ -12,7 +12,7 @@ the Vector Graphic Dual-Mode Disk Controller which was paired with a Tandon
 drive.
 
 **Important note:** You _cannot_ read these disks with a normal PC drive, as
-these drives are 96tpi.The track spacing is determined by the physical geometry
+these drives are 96tpi. The track spacing is determined by the physical geometry
 of the drive and can't be changed in software. You'll need to get hold of a
 100tpi Micropolis drive. Luckily these seem to use the same connector and
 pinout as a 96tpi PC 5.25" drive. In use they should be identical.

@@ -19,13 +19,13 @@ private:
 	void OnReadFluxButton(wxCommandEvent&);
 	void OnLogMessage(std::shared_ptr<const AnyLogMessage> message);
 
-	void UpdateVisualisedFlux(std::shared_ptr<DiskFlux>& flux);
+	void UpdateVisualisedFlux(std::shared_ptr<const DiskFlux>& flux);
 	void UpdateDevices();
 
 private:
 	std::vector<std::unique_ptr<ConfigProto>> _formats;
 	std::vector<std::unique_ptr<CandidateDevice>> _devices;
-	std::shared_ptr<DiskFlux> _currentDisk;
+	std::shared_ptr<const DiskFlux> _currentDisk;
 };
 
 #endif

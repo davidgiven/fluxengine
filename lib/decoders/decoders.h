@@ -45,7 +45,7 @@ public:
     };
 
 public:
-    std::shared_ptr<TrackDataFlux> decodeToSectors(std::shared_ptr<const Fluxmap> fluxmap, unsigned cylinder, unsigned head);
+    std::shared_ptr<const TrackDataFlux> decodeToSectors(std::shared_ptr<const Fluxmap> fluxmap, unsigned cylinder, unsigned head);
     void pushRecord(const Fluxmap::Position& start, const Fluxmap::Position& end);
 
 	void resetFluxDecoder();

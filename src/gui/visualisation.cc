@@ -87,7 +87,7 @@ void VisualisationControl::SetMode(int cylinder, int head, int mode)
 	Refresh();
 }
 
-void VisualisationControl::SetDiskFlux(std::shared_ptr<DiskFlux>& disk)
+void VisualisationControl::SetDiskFlux(std::shared_ptr<const DiskFlux>& disk)
 {
 	_disk = disk;
 	Refresh();
