@@ -32,7 +32,7 @@ struct TrackFlux
 struct DiskFlux
 {
 	std::vector<std::shared_ptr<const TrackFlux>> tracks;
-	std::unique_ptr<const Image> image;
+	std::shared_ptr<const Image> image;
 };
 
 #endif

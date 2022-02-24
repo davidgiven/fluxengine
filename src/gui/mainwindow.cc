@@ -72,6 +72,7 @@ void MainWindow::OnReadFluxButton(wxCommandEvent&)
 	else
 		setProtoByString(&config, "usb.serial", serial);
 
+	visualiser->Clear();
 	runOnWorkerThread(
 		[config, this]() {
 			::config = config;
@@ -80,7 +81,7 @@ void MainWindow::OnReadFluxButton(wxCommandEvent&)
 			auto diskflux = readDiskCommand(*fluxSource, *decoder);
 			runOnUiThread(
 				[&]() {
-					UpdateVisualisedFlux(diskflux);
+					visualiser->SetDiskData(diskflux);
 				}
 			);
 		}
@@ -122,14 +123,13 @@ void MainWindow::OnLogMessage(std::shared_ptr<const AnyLogMessage> message)
             {
 				visualiser->SetMode(0, 0, VISMODE_NOTHING);
             },
+
+            [&](const TrackReadLogMessage& m)
+            {
+				visualiser->SetTrackData(m.track);
+            },
         },
         *message);
-}
-
-void MainWindow::UpdateVisualisedFlux(std::shared_ptr<const DiskFlux>& flux)
-{
-	_currentDisk = flux;
-	visualiser->SetDiskFlux(flux);
 }
 
 void MainWindow::UpdateDevices()

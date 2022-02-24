@@ -19,7 +19,6 @@ private:
 	void OnReadFluxButton(wxCommandEvent&);
 	void OnLogMessage(std::shared_ptr<const AnyLogMessage> message);
 
-	void UpdateVisualisedFlux(std::shared_ptr<const DiskFlux>& flux);
 	void UpdateDevices();
 
 private:

@@ -1,5 +1,7 @@
 #include "globals.h"
 #include "visualisation.h"
+#include "fluxmap.h"
+#include "flux.h"
 #include "fmt/format.h"
 #include <wx/wx.h>
 
@@ -87,9 +89,19 @@ void VisualisationControl::SetMode(int cylinder, int head, int mode)
 	Refresh();
 }
 
-void VisualisationControl::SetDiskFlux(std::shared_ptr<const DiskFlux>& disk)
+void VisualisationControl::Clear()
 {
-	_disk = disk;
+	_sectors.clear();
+	Refresh();
+}
+
+void VisualisationControl::SetTrackData(std::shared_ptr<const TrackFlux> track)
+{
+	Refresh();
+}
+
+void VisualisationControl::SetDiskData(std::shared_ptr<const DiskFlux> disk)
+{
 	Refresh();
 }
 

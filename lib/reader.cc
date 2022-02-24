@@ -96,7 +96,11 @@ std::shared_ptr<const DiskFlux> readDiskCommand(FluxSource& fluxsource, Abstract
     {
         for (int head : iterate(config.heads()))
         {
+			testForEmergencyStop();
+
             auto track = std::make_shared<TrackFlux>();
+			diskflux->tracks.push_back(track);
+
             std::set<std::shared_ptr<const Sector>> track_sectors;
             std::set<std::shared_ptr<const Record>> track_records;
             Fluxmap totalFlux;
@@ -138,6 +142,8 @@ std::shared_ptr<const DiskFlux> readDiskCommand(FluxSource& fluxsource, Abstract
                 }
 
 				track->sectors = collect_sectors(result_sectors);
+
+				/* track can't be modified below this point. */
                 Logger() << TrackReadLogMessage { track };
 
                 if (hasBadSectors)
@@ -189,21 +195,20 @@ std::shared_ptr<const DiskFlux> readDiskCommand(FluxSource& fluxsource, Abstract
                     std::cout << std::endl;
                 }
             }
-
-			diskflux->tracks.push_back(track);
 		}
     }
-
-    std::set<std::shared_ptr<const Sector>> all_sectors;
-    for (auto& track : diskflux->tracks)
-        for (auto& sector : track->sectors)
-            all_sectors.insert(sector);
-    all_sectors = collect_sectors(all_sectors);
-    diskflux->image.reset(new Image(all_sectors));
 
 	if (failures)
 		Logger() << "Warning: some sectors could not be decoded.";
 
+	std::set<std::shared_ptr<const Sector>> all_sectors;
+	for (auto& track : diskflux->tracks)
+		for (auto& sector : track->sectors)
+			all_sectors.insert(sector);
+	all_sectors = collect_sectors(all_sectors);
+	diskflux->image = std::make_shared<Image>(all_sectors);
+
+	/* diskflux can't be modified below this point. */
 	Logger() << DiskReadLogMessage { diskflux };
 	return diskflux;
 }

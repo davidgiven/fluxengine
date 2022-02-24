@@ -2,9 +2,12 @@
 #define VISUALISATION_H
 
 #include <memory>
+#include <map>
 #include <wx/control.h>
 
+class Sector;
 class DiskFlux;
+class TrackFlux;
 
 enum {
 	VISMODE_NOTHING,
@@ -22,17 +25,21 @@ public:
         long style = 0);
 
 public:
+	void Clear();
 	void SetMode(int head, int cylinder, int mode);
-	void SetDiskFlux(std::shared_ptr<const DiskFlux>& disk);
+	void SetTrackData(std::shared_ptr<const TrackFlux> track);
+	void SetDiskData(std::shared_ptr<const DiskFlux> disk);
 
 private:
 	void OnPaint(wxPaintEvent & evt);
 
 private:
+	typedef std::pair<unsigned, unsigned> key_t;
+
 	int _head;
 	int _cylinder;
 	int _mode = VISMODE_NOTHING;
-	std::shared_ptr<const DiskFlux> _disk;
+	std::multimap<key_t, std::shared_ptr<const Sector>> _sectors;
     wxDECLARE_EVENT_TABLE();
 };
 

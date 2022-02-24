@@ -70,8 +70,16 @@ bool MyApp::OnInit()
 
 wxThread::ExitCode MyApp::Entry()
 {
-	if (_callback)
-		_callback();
+	try
+	{
+		if (_callback)
+			_callback();
+	}
+	catch (const EmergencyStopException& e)
+	{
+		std::cerr << "worker thread emergency stop\n";
+	}
+
 	runOnUiThread(
 		[&] {
 			_callback = nullptr;
