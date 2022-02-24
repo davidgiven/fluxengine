@@ -3,8 +3,8 @@ Disk: Generic IBM
 
 IBM scheme disks are _the_ most common disk format, ever. They're used by a
 huge variety of different systems, and they come in a huge variety of different
-forms, but they're all fundamentally the same: either FM or MFM, either single
-or double sided, with distinct sector header and data records and no sector
+forms, but they're all fundamentally the same: either FM or MFM, either single-
+or double-sided, with distinct sector header and data records and no sector
 metadata. Systems which use IBM scheme disks include but are not limited to:
 
   - IBM PCs (naturally)
@@ -133,7 +133,7 @@ Neither the FluxEngine or Greaseweazle hardware can currently command a
 tri-mode drive to spin at 360rpm, however an older 360rpm-only drive will work
 to read these formats.
 
-Alternately, the FluxEngine software can resale the flux pulses to enable
+Alternately, the FluxEngine software can rescale the flux pulses to enable
 reading and writing these formats with a plain 300rpm drive. To do this,
 specify the following two additional options:
 

@@ -43,7 +43,7 @@ file while changing the decoder options, to save disk wear. It's also much faste
 
 ### Connecting it up
 
-To use, simply plug your FluxEngine (or [GreaseWeazle](greaseweazle.doc) into
+To use, simply plug your FluxEngine (or [GreaseWeazle](greaseweazle.md)) into
 your computer and run the client. If a single device is plugged in, it will be
 automatically detected and used.
 
@@ -82,7 +82,7 @@ $ fluxengine read eco1 -s copy.flux -o eco1.ldbs --cylinders=1
 
 ### Configuration
 
-Configuration options are reperesented as a hierarchical structure. You can
+Configuration options are represented as a hierarchical structure. You can
 either put them in a text file and load them from the command line:
 
 ```
@@ -262,18 +262,18 @@ FluxEngine also supports a number of file system image formats. When using the
 
   Read from a [DIM image file](https://www.pc98.org/project/doc/dim.html),
   commonly used by X68000 emulators. Supports automatically configuring
-  the encoder. **Read Only.**
+  the encoder. **Read only.**
   
   - `<filename.fdi>`
 
   Read from a [FDI image file](https://www.pc98.org/project/doc/hdi.html),
   commonly used by PC-98 emulators. Supports automatically configuring
-  the encoder. **Read Only.**
+  the encoder. **Read only.**
   
   - `<filename.d88>`
 
   Read from a [D88 image file](https://www.pc98.org/project/doc/d88.html),
-  commonly used by various Japanese PC emulators, including the NEC PC-88. **Read Only.**
+  commonly used by various Japanese PC emulators, including the NEC PC-88. **Read only.**
   
   FluxEngine is currently limited to reading only the first floppy image in a
   D88 file.
@@ -284,7 +284,7 @@ FluxEngine also supports a number of file system image formats. When using the
   - `<filename.nfd>`
 
   Read from a [NFD r0 image file](https://www.pc98.org/project/doc/nfdr0.html),
-  commonly used by various Japanese PC emulators, including the NEC PC-98. **Read Only.**
+  commonly used by various Japanese PC emulators, including the NEC PC-98. **Read only.**
 
   Only r0 version files are currently supported.
   
@@ -308,7 +308,7 @@ FluxEngine also supports a number of file system image formats. When using the
   underlying MFM, FM or GCR stream, without actually doing the decode into
   user-visible bytes. However, the decode is still done in order to check for
   correctness. Individual records are separated by three `\\0` bytes and tracks
-  are seperated by four `\\0` bytes; tracks are emitted in CHS order.
+  are separated by four `\\0` bytes; tracks are emitted in CHS order.
 
 ### High density disks
 

@@ -2,7 +2,7 @@ FluxEngine
 ==========
 
 (If you're reading this on GitHub, the formatting's a bit messed up. [Try the
-version on cowlark.com instead.](http://cowlark.com/fluxengine/)
+version on cowlark.com instead.](http://cowlark.com/fluxengine/))
 
 **Breaking news!** As of 2021-05-21, the command line environment has changed
 _substantially_ (to make it more consistent and flexible, and allow some new
@@ -149,7 +149,7 @@ at least, check the CRC so what data's there is probably good.
     There hasn't been a lot of demand for this yet; if you have a pressing
     need to write weird disks, [please
     ask](https://github.com/davidgiven/fluxengine/issues/new). I haven't
-    implement write support for PC disks because they're boring and I'm lazy,
+    implemented write support for PC disks because they're boring and I'm lazy,
     and also because they vary so much that figuring out how to specify them
     is hard.
 
