@@ -99,7 +99,8 @@ std::vector<Fluxmap> Fluxmap::split() {
     Fluxmap map;
     for (unsigned i=0; i<_bytes.size(); i++) {
         if (_bytes[i] == F_DESYNC) {
-            maps.push_back(map);
+            if (i > 0)
+                maps.push_back(map);
             map = Fluxmap();
         } else {
             map.appendByte(_bytes[i]);
