@@ -31,11 +31,12 @@ std::string Logger::toString(const AnyLogMessage& message)
 {
     std::stringstream stream;
 
-	auto indent = [&]() {
-		if (!indented)
-			stream << "      ";
-		indented = false;
-	};
+    auto indent = [&]()
+    {
+        if (!indented)
+            stream << "      ";
+        indented = false;
+    };
 
     std::visit(
         overloaded{
@@ -58,7 +59,7 @@ std::string Logger::toString(const AnyLogMessage& message)
                     60e9 / m.rotationalPeriod);
             },
 
-			/* Indicates that we're starting a write operation. */
+            /* Indicates that we're starting a write operation. */
             [&](const BeginWriteOperationLogMessage& m)
             {
                 stream << fmt::format("{:2}.{}: ", m.cylinder, m.head);
@@ -72,10 +73,11 @@ std::string Logger::toString(const AnyLogMessage& message)
                 indented = true;
             },
 
-            /* We've just read a track (we might reread it if there are errors) */
+            /* We've just read a track (we might reread it if there are errors)
+             */
             [&](const TrackReadLogMessage& m)
             {
-				const auto& track = *m.track;
+                const auto& track = *m.track;
                 const auto& trackdataflux = track.trackDatas.end()[-1];
 
                 indent();
@@ -98,13 +100,8 @@ std::string Logger::toString(const AnyLogMessage& message)
 
                 std::vector<std::shared_ptr<const Sector>> sectors(
                     track.sectors.begin(), track.sectors.end());
-                std::sort(sectors.begin(),
-                    sectors.end(),
-                    [](const std::shared_ptr<const Sector>& s1,
-                        const std::shared_ptr<const Sector>& s2)
-                    {
-                        return s1->logicalSector < s2->logicalSector;
-                    });
+                std::sort(
+                    sectors.begin(), sectors.end(), sectorPointerSortPredicate);
 
                 for (const auto& sector : sectors)
                     stream << fmt::format(" {}{}",

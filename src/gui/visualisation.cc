@@ -2,6 +2,7 @@
 #include "visualisation.h"
 #include "fluxmap.h"
 #include "flux.h"
+#include "sector.h"
 #include "fmt/format.h"
 #include <wx/wx.h>
 
@@ -69,15 +70,43 @@ void VisualisationControl::OnPaint(wxPaintEvent&)
 		);
 	}
 
-	dc.SetBrush(DARK_GREY_BRUSH);
-	dc.SetPen(DARK_GREY_PEN);
 	for (int track = 0; track <= TRACKS; track++)
 	{
 		int y = scaletop + track*SECTORSIZE;
+		dc.SetBrush(DARK_GREY_BRUSH);
+		dc.SetPen(DARK_GREY_PEN);
 		dc.DrawRectangle(
 			{ w2-TICK/2, y },
 			{ TICK, SECTORSIZE-1 }
 		);
+
+		auto drawSectors =
+			[&](int head) {
+				key_t key = { track, head };
+				std::vector<std::shared_ptr<const Sector>> sectors;
+				for (auto it = _sectors.lower_bound(key); it != _sectors.upper_bound(key); it++)
+					sectors.push_back(it->second);
+				std::sort(sectors.begin(), sectors.end(), sectorPointerSortPredicate);
+
+				int x = 1;
+				for (const auto& sector : sectors)
+				{
+					if (head == 0)
+						dc.DrawRectangle(
+							{ w2 - x*SECTORSIZE - (SECTORSIZE-1), y },
+							{ SECTORSIZE-1, SECTORSIZE-1 }
+						);
+					else
+						dc.DrawRectangle(
+							{ w2 + x*SECTORSIZE, y },
+							{ SECTORSIZE-1, SECTORSIZE-1 }
+						);
+					x++;
+				}
+			};
+
+		drawSectors(0);
+		drawSectors(1);
 	}
 }
 
@@ -97,6 +126,11 @@ void VisualisationControl::Clear()
 
 void VisualisationControl::SetTrackData(std::shared_ptr<const TrackFlux> track)
 {
+	key_t key = { track->physicalCylinder, track->physicalHead };
+	_sectors.erase(key);
+	for (auto& sector : track->sectors)
+		_sectors.insert({ key, sector });
+
 	Refresh();
 }
 

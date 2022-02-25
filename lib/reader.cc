@@ -99,6 +99,8 @@ std::shared_ptr<const DiskFlux> readDiskCommand(FluxSource& fluxsource, Abstract
 			testForEmergencyStop();
 
             auto track = std::make_shared<TrackFlux>();
+			track->physicalCylinder = cylinder;
+			track->physicalHead = head;
 			diskflux->tracks.push_back(track);
 
             std::set<std::shared_ptr<const Sector>> track_sectors;
