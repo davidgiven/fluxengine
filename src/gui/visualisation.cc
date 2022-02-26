@@ -31,6 +31,7 @@ VisualisationControl::VisualisationControl(wxWindow* parent,
     long style):
     wxWindow(parent, id, pos, size, style, "VisualisationControl")
 {
+	SetDoubleBuffered(true);
 }
 
 wxBEGIN_EVENT_TABLE(VisualisationControl, wxPanel)
