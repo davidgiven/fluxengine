@@ -1,4 +1,4 @@
-comment: 'Digital RX50 400kB 5.25" 80-track 10-sector SSHD'
+comment: 'Digital RX50 400kB 5.25" 80-track 10-sector SSQD'
 
 flux_sink {
 	drive {
