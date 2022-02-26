@@ -10,7 +10,7 @@ extern void runOnUiThread(std::function<void()> callback);
 extern void runOnWorkerThread(std::function<void()> callback);
 
 template <typename R>
-static inline R runOnUiThread(std::function<R()>& callback)
+static inline R runOnUiThread(std::function<R()> callback)
 {
 	R retvar;
 	runOnUiThread(

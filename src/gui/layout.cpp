@@ -135,7 +135,7 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	m_panel3->SetSizer( fgSizer9 );
 	m_panel3->Layout();
 	fgSizer9->Fit( m_panel3 );
-	notebook->AddPage( m_panel3, wxT("Proto config"), false );
+	notebook->AddPage( m_panel3, wxT("Debug info"), false );
 
 	fgSizer2->Add( notebook, 1, wxEXPAND | wxALL, 5 );
 

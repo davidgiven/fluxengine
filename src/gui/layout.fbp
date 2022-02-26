@@ -1034,7 +1034,7 @@
                                 </object>
                                 <object class="notebookpage" expanded="1">
                                     <property name="bitmap"></property>
-                                    <property name="label">Proto config</property>
+                                    <property name="label">Debug info</property>
                                     <property name="select">0</property>
                                     <object class="wxPanel" expanded="1">
                                         <property name="BottomDockable">1</property>

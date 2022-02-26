@@ -18,6 +18,7 @@ private:
 	void OnStopButton(wxCommandEvent&);
 	void OnReadFluxButton(wxCommandEvent&);
 	void OnReadImageButton(wxCommandEvent&);
+	void OnWriteImageButton(wxCommandEvent&);
 	void OnLogMessage(std::shared_ptr<const AnyLogMessage> message);
 
 public:
