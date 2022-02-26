@@ -4,6 +4,7 @@
 #include "fluxmap.h"
 #include "flux.h"
 #include "sector.h"
+#include "image.h"
 #include "fmt/format.h"
 
 #define BORDER 20
@@ -164,5 +165,12 @@ void VisualisationControl::SetTrackData(std::shared_ptr<const TrackFlux> track)
 
 void VisualisationControl::SetDiskData(std::shared_ptr<const DiskFlux> disk)
 {
+	_sectors.clear();
+	for (const auto& sector : *(disk->image))
+	{
+		key_t key = {sector->physicalCylinder, sector->physicalHead};
+		_sectors.insert({key, sector});
+	}
+
     Refresh();
 }

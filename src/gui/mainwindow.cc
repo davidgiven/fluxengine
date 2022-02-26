@@ -4,6 +4,7 @@
 #include "logger.h"
 #include "reader.h"
 #include "fluxsource/fluxsource.h"
+#include "imagereader/imagereader.h"
 #include "decoders/decoders.h"
 #include "lib/usb/usbfinder.h"
 #include "fmt/format.h"
@@ -44,6 +45,7 @@ MainWindow::MainWindow(): MainWindowGen(nullptr)
 	fluxSourceSinkCombo->SetValue(fluxSourceSinkCombo->GetString(0));
 
 	readFluxButton->Bind(wxEVT_BUTTON, &MainWindow::OnReadFluxButton, this);
+	readImageButton->Bind(wxEVT_BUTTON, &MainWindow::OnReadImageButton, this);
 	stopButton->Bind(wxEVT_BUTTON, &MainWindow::OnStopButton, this);
 
 	UpdateState();
@@ -63,33 +65,11 @@ void MainWindow::OnReadFluxButton(wxCommandEvent&)
 {
 	try
 	{
-		auto formatSelection = formatChoice->GetSelection();
-		if (formatSelection == wxNOT_FOUND)
-			Error() << "no format selected";
-
-		ConfigProto config = *_formats[formatChoice->GetSelection()];
+		ConfigProto config = PrepareConfig();
 
 		FluxSource::updateConfigForFilename(config.mutable_flux_source(),
 			fluxSourceSinkCombo->GetValue().ToStdString());
 
-		auto serial = deviceCombo->GetValue().ToStdString();
-		if (!serial.empty() && (serial[0] == '/'))
-			setProtoByString(&config, "usb.greaseweazle.port", serial);
-		else
-			setProtoByString(&config, "usb.serial", serial);
-
-		ApplyCustomSettings(config);
-
-		{
-			std::string s;
-			google::protobuf::TextFormat::PrintToString(config, &s);
-			protoConfigEntry->Clear();
-			protoConfigEntry->AppendText(s);
-		}
-
-		visualiser->Clear();
-		logEntry->Clear();
-		_currentDisk = nullptr;
 		runOnWorkerThread(
 			[config, this]() {
 				::config = config;
@@ -108,6 +88,74 @@ void MainWindow::OnReadFluxButton(wxCommandEvent&)
 	{
 		wxMessageBox(e.message, "Error", wxOK | wxICON_ERROR);
 	}
+}
+
+void MainWindow::OnReadImageButton(wxCommandEvent&)
+{
+	auto filename = wxFileSelector("Choose a file to open");
+	if (filename.empty())
+		return;
+
+	try
+	{
+		ConfigProto config = PrepareConfig();
+		if (!config.has_image_reader())
+			Error() << "This format is read-only.";
+
+		ImageReader::updateConfigForFilename(
+			config.mutable_image_reader(), filename.ToStdString());
+
+		runOnWorkerThread(
+			[config, this]() {
+				::config = config;
+				auto imageReader = ImageReader::create(config.image_reader());
+				std::unique_ptr<const Image> image = imageReader->readImage();
+				runOnUiThread(
+					[&]() {
+						auto disk = std::make_shared<DiskFlux>();
+						disk = std::make_shared<DiskFlux>();
+						disk->image = std::move(image);
+						_currentDisk = disk;
+						visualiser->SetDiskData(_currentDisk);
+					}
+				);
+			}
+		);
+	}
+	catch (const ErrorException& e)
+	{
+		wxMessageBox(e.message, "Error", wxOK | wxICON_ERROR);
+	}
+}
+
+ConfigProto MainWindow::PrepareConfig()
+{
+	auto formatSelection = formatChoice->GetSelection();
+	if (formatSelection == wxNOT_FOUND)
+		Error() << "no format selected";
+
+	ConfigProto config = *_formats[formatChoice->GetSelection()];
+
+	auto serial = deviceCombo->GetValue().ToStdString();
+	if (!serial.empty() && (serial[0] == '/'))
+		setProtoByString(&config, "usb.greaseweazle.port", serial);
+	else
+		setProtoByString(&config, "usb.serial", serial);
+
+	ApplyCustomSettings(config);
+
+	{
+		std::string s;
+		google::protobuf::TextFormat::PrintToString(config, &s);
+		protoConfigEntry->Clear();
+		protoConfigEntry->AppendText(s);
+	}
+
+	visualiser->Clear();
+	logEntry->Clear();
+	_currentDisk = nullptr;
+
+	return config;
 }
 
 void MainWindow::ApplyCustomSettings(ConfigProto& config)
@@ -142,6 +190,12 @@ void MainWindow::OnLogMessage(std::shared_ptr<const AnyLogMessage> message)
             [&](const auto& m)
             {
             },
+
+			/* A fatal error. */
+			[&](const ErrorLogMessage& m)
+			{
+				wxMessageBox(m.message, "Error", wxOK | wxICON_ERROR);
+			},
 
             /* Indicates that we're starting a write operation. */
             [&](const BeginWriteOperationLogMessage& m)

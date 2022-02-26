@@ -59,7 +59,7 @@ wxThread::ExitCode FluxEngineApp::Entry()
 	}
 	catch (const ErrorException& e)
 	{
-		Logger() << (e.message + '\n');
+		Logger() << ErrorLogMessage { e.message+'\n' };
 	}
 	catch (const EmergencyStopException& e)
 	{

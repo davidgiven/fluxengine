@@ -17,11 +17,13 @@ private:
     void OnExit(wxCommandEvent& event);
 	void OnStopButton(wxCommandEvent&);
 	void OnReadFluxButton(wxCommandEvent&);
+	void OnReadImageButton(wxCommandEvent&);
 	void OnLogMessage(std::shared_ptr<const AnyLogMessage> message);
 
 public:
 	void UpdateState();
 	void UpdateDevices();
+	ConfigProto PrepareConfig();
 	void ApplyCustomSettings(ConfigProto& config);
 
 private:

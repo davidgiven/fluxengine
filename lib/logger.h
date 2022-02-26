@@ -8,9 +8,15 @@ class TrackDataFlux;
 class TrackFlux;
 class Sector;
 
+struct ErrorLogMessage
+{
+	std::string message;
+};
+
 struct BeginSpeedOperationLogMessage
 {
 };
+
 struct EndSpeedOperationLogMessage
 {
     nanoseconds_t rotationalPeriod;
@@ -50,7 +56,9 @@ struct EndWriteOperationLogMessage
 
 class TrackFlux;
 
-typedef std::variant<std::string,
+typedef std::variant<
+	std::string,
+	ErrorLogMessage,
     TrackReadLogMessage,
 	DiskReadLogMessage,
     BeginSpeedOperationLogMessage,
