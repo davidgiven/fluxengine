@@ -182,30 +182,36 @@ void FlagGroup::parseFlagsWithConfigFiles(int argc, const char* argv[],
 {
     parseFlags(argc, argv,
 		[&](const auto& filename) {
-			const auto& it = configFiles.find(filename);
-			if (it != configFiles.end())
-			{
-				ConfigProto newConfig;
-				if (!newConfig.ParseFromString(it->second))
-					Error() << "couldn't load built-in config proto";
-				config.MergeFrom(newConfig);
-			}
-			else
-			{
-				std::ifstream f(filename, std::ios::out);
-				if (f.fail())
-					Error() << fmt::format("Cannot open '{}': {}", filename, strerror(errno));
-
-				std::ostringstream ss;
-				ss << f.rdbuf();
-
-				if (!google::protobuf::TextFormat::MergeFromString(ss.str(), &config))
-					Error() << "couldn't load external config proto";
-			}
-
+			parseConfigFile(filename, configFiles);
 			return true;
 		}
 	);
+}
+
+void FlagGroup::parseConfigFile(
+		const std::string& filename,
+		const std::map<std::string, std::string>& configFiles)
+{
+	const auto& it = configFiles.find(filename);
+	if (it != configFiles.end())
+	{
+		ConfigProto newConfig;
+		if (!newConfig.ParseFromString(it->second))
+			Error() << "couldn't load built-in config proto";
+		config.MergeFrom(newConfig);
+	}
+	else
+	{
+		std::ifstream f(filename, std::ios::out);
+		if (f.fail())
+			Error() << fmt::format("Cannot open '{}': {}", filename, strerror(errno));
+
+		std::ostringstream ss;
+		ss << f.rdbuf();
+
+		if (!google::protobuf::TextFormat::MergeFromString(ss.str(), &config))
+			Error() << "couldn't load external config proto";
+	}
 }
 
 void FlagGroup::checkInitialised() const

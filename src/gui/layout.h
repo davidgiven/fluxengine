@@ -50,15 +50,13 @@ class MainWindowGen : public wxFrame
 		wxStaticText* m_staticText51;
 		wxChoice* formatChoice;
 		wxCheckBox* highDensityToggle;
-		wxStaticText* m_staticText7;
-		wxTextCtrl* cylindersText;
-		wxStaticText* m_staticText9;
-		wxTextCtrl* headsText;
 		wxNotebook* notebook;
 		wxPanel* m_panel1;
-		wxTextCtrl* additionSettingsEntry;
+		wxTextCtrl* additionalSettingsEntry;
 		wxPanel* m_panel2;
 		wxTextCtrl* logEntry;
+		wxPanel* m_panel3;
+		wxTextCtrl* protoConfigEntry;
 		wxButton* readFluxButton;
 		wxButton* readImageButton;
 		wxButton* writeFluxButton;

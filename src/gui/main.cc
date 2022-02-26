@@ -59,7 +59,7 @@ wxThread::ExitCode FluxEngineApp::Entry()
 	}
 	catch (const EmergencyStopException& e)
 	{
-		std::cerr << "worker thread emergency stop\n";
+		Logger() << "Emergency stop!\n";
 	}
 
 	runOnUiThread(

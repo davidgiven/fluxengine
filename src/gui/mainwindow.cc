@@ -72,7 +72,18 @@ void MainWindow::OnReadFluxButton(wxCommandEvent&)
 	else
 		setProtoByString(&config, "usb.serial", serial);
 
+	ApplyCustomSettings(config);
+
+	{
+		std::string s;
+		google::protobuf::TextFormat::PrintToString(config, &s);
+		protoConfigEntry->Clear();
+		protoConfigEntry->AppendText(s);
+	}
+
 	visualiser->Clear();
+	logEntry->Clear();
+	_currentDisk = nullptr;
 	runOnWorkerThread(
 		[config, this]() {
 			::config = config;
@@ -86,6 +97,27 @@ void MainWindow::OnReadFluxButton(wxCommandEvent&)
 			);
 		}
 	);
+}
+
+void MainWindow::ApplyCustomSettings(ConfigProto& config)
+{
+	for (int i=0; i < additionalSettingsEntry->GetNumberOfLines(); i++)
+	{
+		auto setting = additionalSettingsEntry->GetLineText(i).ToStdString();
+		trimWhitespace(setting);
+		if (setting.size() == 0)
+			continue;
+
+		auto equals = setting.find('=');
+		if (equals != std::string::npos)
+		{
+			auto key = setting.substr(0, equals);
+			auto value = setting.substr(equals+1);
+			setProtoByString(&config, key, value);
+		}
+		else
+			FlagGroup::parseConfigFile(setting, formats);
+	}
 }
 
 void MainWindow::OnLogMessage(std::shared_ptr<const AnyLogMessage> message)

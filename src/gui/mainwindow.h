@@ -22,6 +22,7 @@ private:
 public:
 	void UpdateState();
 	void UpdateDevices();
+	void ApplyCustomSettings(ConfigProto& config);
 
 private:
 	std::vector<std::unique_ptr<ConfigProto>> _formats;

@@ -84,20 +84,6 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	highDensityToggle = new wxCheckBox( this, wxID_ANY, wxT("High density disk"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer3->Add( highDensityToggle, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_LEFT|wxALL, 5 );
 
-	m_staticText7 = new wxStaticText( this, wxID_ANY, wxT("Cylinders:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText7->Wrap( -1 );
-	fgSizer3->Add( m_staticText7, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_LEFT|wxALL, 5 );
-
-	cylindersText = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	fgSizer3->Add( cylindersText, 0, wxALL|wxEXPAND, 5 );
-
-	m_staticText9 = new wxStaticText( this, wxID_ANY, wxT("Heads:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText9->Wrap( -1 );
-	fgSizer3->Add( m_staticText9, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_LEFT|wxALL, 5 );
-
-	headsText = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	fgSizer3->Add( headsText, 0, wxALL|wxEXPAND, 5 );
-
 
 	fgSizer2->Add( fgSizer3, 1, wxEXPAND, 5 );
 
@@ -110,8 +96,8 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	fgSizer5->SetFlexibleDirection( wxBOTH );
 	fgSizer5->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 
-	additionSettingsEntry = new wxTextCtrl( m_panel1, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE );
-	fgSizer5->Add( additionSettingsEntry, 0, wxALL|wxEXPAND, 5 );
+	additionalSettingsEntry = new wxTextCtrl( m_panel1, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE );
+	fgSizer5->Add( additionalSettingsEntry, 0, wxALL|wxEXPAND, 5 );
 
 
 	m_panel1->SetSizer( fgSizer5 );
@@ -134,6 +120,22 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	m_panel2->Layout();
 	fgSizer8->Fit( m_panel2 );
 	notebook->AddPage( m_panel2, wxT("Logs"), false );
+	m_panel3 = new wxPanel( notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxFlexGridSizer* fgSizer9;
+	fgSizer9 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer9->AddGrowableCol( 0 );
+	fgSizer9->AddGrowableRow( 0 );
+	fgSizer9->SetFlexibleDirection( wxBOTH );
+	fgSizer9->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	protoConfigEntry = new wxTextCtrl( m_panel3, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY );
+	fgSizer9->Add( protoConfigEntry, 0, wxALL|wxEXPAND, 5 );
+
+
+	m_panel3->SetSizer( fgSizer9 );
+	m_panel3->Layout();
+	fgSizer9->Fit( m_panel3 );
+	notebook->AddPage( m_panel3, wxT("Proto config"), false );
 
 	fgSizer2->Add( notebook, 1, wxEXPAND | wxALL, 5 );
 
