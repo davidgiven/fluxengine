@@ -87,6 +87,18 @@ static void write_bytes(std::vector<bool>& bits, unsigned& cursor, const Bytes& 
     }
 }
 
+static void write_gap(std::vector<bool>& bits, unsigned& cursor, int length)
+{
+	std::string zero("0");
+	std::string gap(""); 
+	for (int i = 0; i < length/10; i++)
+	{
+		gap += zero;
+	}	
+	Bytes byte_gap(gap);
+	write_bytes(bits, cursor, byte_gap);
+}
+
 static void write_sector(std::vector<bool>& bits, unsigned& cursor,
 		const Victor9kEncoderProto::TrackdataProto& trackdata,
         const Sector& sector)
@@ -102,8 +114,8 @@ static void write_sector(std::vector<bool>& bits, unsigned& cursor,
         (uint8_t)(encodedTrack + encodedSector),
     });
 
+    write_gap(bits, cursor, trackdata.post_header_gap_bits());
 
-    write_zero_bits(bits, cursor, trackdata.post_header_gap_bits());
     write_one_bits(bits, cursor, trackdata.pre_data_sync_bits());
     write_bits(bits, cursor, VICTOR9K_DATA_RECORD, 10);
 
@@ -113,7 +125,9 @@ static void write_sector(std::vector<bool>& bits, unsigned& cursor,
     checksum.writer().write_le16(sumBytes(sector.data));
     write_bytes(bits, cursor, checksum);
 
-    write_zero_bits(bits, cursor, trackdata.post_data_gap_bits());
+    // Bytes post_data_gap_bytes("000000000000000000000000000000");
+    // write_bytes(bits, cursor, post_data_gap_bytes);
+    write_gap(bits, cursor, trackdata.post_data_gap_bits());
 }
 
 class Victor9kEncoder : public AbstractEncoder
