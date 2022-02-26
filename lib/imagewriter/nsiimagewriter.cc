@@ -5,6 +5,7 @@
 #include "fmt/format.h"
 #include "decoders/decoders.h"
 #include "image.h"
+#include "logger.h"
 #include "arch/northstar/northstar.h"
 #include "lib/imagewriter/imagewriter.pb.h"
 #include <algorithm>
@@ -26,15 +27,14 @@ public:
 		size_t trackSize = geometry.numSectors * geometry.sectorSize;
 
 		if (geometry.numTracks * trackSize == 0) {
-			std::cout << "No sectors in output; skipping .nsi image file generation." << std::endl;
+			Logger() << "No sectors in output; skipping .nsi image file generation.";
 			return;
 		}
 
-		std::cout << fmt::format("Writing {} cylinders, {} sides, {} sectors, {} ({} bytes/sector), {} kB total",
+		Logger() << fmt::format("Writing {} cylinders, {} sides, {} sectors, {} ({} bytes/sector), {} kB total",
 				geometry.numTracks, geometry.numSides,
 				geometry.numSectors, geometry.sectorSize == 256 ? "SD" : "DD", geometry.sectorSize,
-				geometry.numTracks * geometry.numSides * geometry.numSectors * geometry.sectorSize / 1024)
-				<< std::endl;
+				geometry.numTracks * geometry.numSides * geometry.numSectors * geometry.sectorSize / 1024);
 
 		std::ofstream outputFile(_config.filename(), std::ios::out | std::ios::binary);
 		if (!outputFile.is_open())
@@ -69,7 +69,7 @@ public:
 						char fill[256];
 						memset(fill, ' ', sizeof(fill));
 						if (mixedDensity == false) {
-							std::cout << "Warning: Disk contains mixed single/double-density sectors." << std::endl;
+							Logger() << "Warning: Disk contains mixed single/double-density sectors.";
 						}
 						mixedDensity = true;
 						sector->data.slice(0, 256).writeTo(outputFile);
