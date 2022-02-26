@@ -1,4 +1,4 @@
-comment: 'RX50 450kB 5.25" 80-track 10-sector SSHD'
+comment: 'Digital RX50 400kB 5.25" 80-track 10-sector SSHD'
 
 flux_sink {
 	drive {
@@ -13,7 +13,7 @@ flux_source {
 }
 
 image_reader {
-	filename: "ibm1200_525.img"
+	filename: "rx50.img"
 	img {
 		tracks: 80
 		sides: 2
@@ -28,7 +28,7 @@ image_reader {
 }
 
 image_writer {
-	filename: "ibm1200_525.img"
+	filename: "rx50.img"
 	img {}
 }
 

@@ -18,6 +18,7 @@ metadata. Systems which use IBM scheme disks include but are not limited to:
   - NEC PC-98 series
   - Sharp X68000
   - Fujitsu FM Towns
+  - VAX & PDP-11
   - etc
 
 FluxEngine supports reading these. However, some variants are more peculiar
