@@ -1,10 +1,10 @@
 #include "globals.h"
+#include "gui.h"
 #include "visualisation.h"
 #include "fluxmap.h"
 #include "flux.h"
 #include "sector.h"
 #include "fmt/format.h"
-#include <wx/wx.h>
 
 #define BORDER 20
 #define TICK 3

@@ -1,7 +1,6 @@
 #include "globals.h"
-#include <wx/wx.h>
-#include "mainwindow.h"
 #include "gui.h"
+#include "mainwindow.h"
 #include "utils.h"
 
 class MyApp;

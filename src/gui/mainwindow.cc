@@ -8,10 +8,8 @@
 #include "lib/usb/usbfinder.h"
 #include "fmt/format.h"
 #include "utils.h"
-#include <wx/wx.h>
 #include "mainwindow.h"
 #include <google/protobuf/text_format.h>
-
 
 extern const std::map<std::string, std::string> formats;
 
