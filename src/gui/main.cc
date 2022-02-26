@@ -3,27 +3,10 @@
 #include "mainwindow.h"
 #include "utils.h"
 
-class MyApp;
+class FluxEngineApp;
 class ExecEvent;
 
 static wxSemaphore execSemaphore(0);
-
-class MyApp : public wxApp, public wxThreadHelper
-{
-public:
-    virtual bool OnInit();
-	void RunOnWorkerThread(std::function<void()> callback);
-
-private:
-	void OnExec(const ExecEvent& event);
-
-protected:
-	virtual wxThread::ExitCode Entry();
-
-private:
-	std::function<void()> _callback;
-};
-wxDECLARE_APP(MyApp);
 
 wxDEFINE_EVENT(EXEC_EVENT_TYPE, ExecEvent);
 class ExecEvent : public wxThreadEvent
@@ -59,15 +42,15 @@ private:
     std::function<void()> _callback;
 };
 
-bool MyApp::OnInit()
+bool FluxEngineApp::OnInit()
 {
-	Bind(EXEC_EVENT_TYPE, &MyApp::OnExec, this);
-    MainWindow* frame = new MainWindow();
-    frame->Show(true);
+	Bind(EXEC_EVENT_TYPE, &FluxEngineApp::OnExec, this);
+    _mainWindow = new MainWindow();
+    _mainWindow->Show(true);
     return true;
 }
 
-wxThread::ExitCode MyApp::Entry()
+wxThread::ExitCode FluxEngineApp::Entry()
 {
 	try
 	{
@@ -82,12 +65,13 @@ wxThread::ExitCode MyApp::Entry()
 	runOnUiThread(
 		[&] {
 			_callback = nullptr;
+			_mainWindow->UpdateState();
 		}
 	);
 	return 0;
 }
 
-void MyApp::RunOnWorkerThread(std::function<void()> callback)
+void FluxEngineApp::RunOnWorkerThread(std::function<void()> callback)
 {
 	if (_callback)
 		std::cerr << "Cannot start new worker task as one is already running\n";
@@ -99,6 +83,7 @@ void MyApp::RunOnWorkerThread(std::function<void()> callback)
 	emergencyStop = false;
 	CreateThread(wxTHREAD_JOINABLE);
 	GetThread()->Run();
+	_mainWindow->UpdateState();
 }
 
 void runOnWorkerThread(std::function<void()> callback)
@@ -106,7 +91,12 @@ void runOnWorkerThread(std::function<void()> callback)
 	wxGetApp().RunOnWorkerThread(callback);
 }
 
-void MyApp::OnExec(const ExecEvent& event)
+bool FluxEngineApp::IsWorkerThreadRunning() const
+{
+	return !!_callback;
+}
+
+void FluxEngineApp::OnExec(const ExecEvent& event)
 {
 	event.RunCallback();
 	execSemaphore.Post();
@@ -120,4 +110,4 @@ void runOnUiThread(std::function<void()> callback)
 	execSemaphore.Wait();
 }
 
-wxIMPLEMENT_APP(MyApp);
+wxIMPLEMENT_APP(FluxEngineApp);

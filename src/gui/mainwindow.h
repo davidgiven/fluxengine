@@ -19,6 +19,8 @@ private:
 	void OnReadFluxButton(wxCommandEvent&);
 	void OnLogMessage(std::shared_ptr<const AnyLogMessage> message);
 
+public:
+	void UpdateState();
 	void UpdateDevices();
 
 private:

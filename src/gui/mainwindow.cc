@@ -45,6 +45,8 @@ MainWindow::MainWindow(): MainWindowGen(nullptr)
 
 	readFluxButton->Bind(wxEVT_BUTTON, &MainWindow::OnReadFluxButton, this);
 	stopButton->Bind(wxEVT_BUTTON, &MainWindow::OnStopButton, this);
+
+	UpdateState();
 }
 
 void MainWindow::OnExit(wxCommandEvent& event)
@@ -126,8 +128,22 @@ void MainWindow::OnLogMessage(std::shared_ptr<const AnyLogMessage> message)
             {
 				visualiser->SetTrackData(m.track);
             },
+
+            [&](const DiskReadLogMessage& m)
+            {
+				_currentDisk = m.disk;
+            },
         },
         *message);
+}
+
+void MainWindow::UpdateState()
+{
+	writeImageButton->Enable(!!_currentDisk);
+	writeFluxButton->Enable(!!_currentDisk);
+	stopButton->Enable(wxGetApp().IsWorkerThreadRunning());
+	readFluxButton->Enable(!wxGetApp().IsWorkerThreadRunning());
+	readImageButton->Enable(!wxGetApp().IsWorkerThreadRunning());
 }
 
 void MainWindow::UpdateDevices()
