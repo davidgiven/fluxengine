@@ -61,42 +61,53 @@ void MainWindow::OnStopButton(wxCommandEvent&)
 
 void MainWindow::OnReadFluxButton(wxCommandEvent&)
 {
-	ConfigProto config = *_formats[formatChoice->GetSelection()];
-
-	FluxSource::updateConfigForFilename(config.mutable_flux_source(),
-		fluxSourceSinkCombo->GetValue().ToStdString());
-
-	auto serial = deviceCombo->GetValue().ToStdString();
-	if (!serial.empty() && (serial[0] == '/'))
-		setProtoByString(&config, "usb.greaseweazle.port", serial);
-	else
-		setProtoByString(&config, "usb.serial", serial);
-
-	ApplyCustomSettings(config);
-
+	try
 	{
-		std::string s;
-		google::protobuf::TextFormat::PrintToString(config, &s);
-		protoConfigEntry->Clear();
-		protoConfigEntry->AppendText(s);
-	}
+		auto formatSelection = formatChoice->GetSelection();
+		if (formatSelection == wxNOT_FOUND)
+			Error() << "no format selected";
 
-	visualiser->Clear();
-	logEntry->Clear();
-	_currentDisk = nullptr;
-	runOnWorkerThread(
-		[config, this]() {
-			::config = config;
-			auto fluxSource = FluxSource::create(config.flux_source());
-			auto decoder = AbstractDecoder::create(config.decoder());
-			auto diskflux = readDiskCommand(*fluxSource, *decoder);
-			runOnUiThread(
-				[&]() {
-					visualiser->SetDiskData(diskflux);
-				}
-			);
+		ConfigProto config = *_formats[formatChoice->GetSelection()];
+
+		FluxSource::updateConfigForFilename(config.mutable_flux_source(),
+			fluxSourceSinkCombo->GetValue().ToStdString());
+
+		auto serial = deviceCombo->GetValue().ToStdString();
+		if (!serial.empty() && (serial[0] == '/'))
+			setProtoByString(&config, "usb.greaseweazle.port", serial);
+		else
+			setProtoByString(&config, "usb.serial", serial);
+
+		ApplyCustomSettings(config);
+
+		{
+			std::string s;
+			google::protobuf::TextFormat::PrintToString(config, &s);
+			protoConfigEntry->Clear();
+			protoConfigEntry->AppendText(s);
 		}
-	);
+
+		visualiser->Clear();
+		logEntry->Clear();
+		_currentDisk = nullptr;
+		runOnWorkerThread(
+			[config, this]() {
+				::config = config;
+				auto fluxSource = FluxSource::create(config.flux_source());
+				auto decoder = AbstractDecoder::create(config.decoder());
+				auto diskflux = readDiskCommand(*fluxSource, *decoder);
+				runOnUiThread(
+					[&]() {
+						visualiser->SetDiskData(diskflux);
+					}
+				);
+			}
+		);
+	}
+	catch (const ErrorException& e)
+	{
+		wxMessageBox(e.message, "Error", wxOK | wxICON_ERROR);
+	}
 }
 
 void MainWindow::ApplyCustomSettings(ConfigProto& config)

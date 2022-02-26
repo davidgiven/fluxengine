@@ -31,13 +31,22 @@ extern double getCurrentTime();
 extern void hexdump(std::ostream& stream, const Bytes& bytes);
 extern void hexdumpForSrp16(std::ostream& stream, const Bytes& bytes);
 
+struct ErrorException
+{
+	const std::string message;
+};
+
 class Error
 {
 public:
-    [[ noreturn ]] ~Error()
+	Error()
+	{
+		_stream << "Error: ";
+	}
+
+    [[ noreturn ]] ~Error() noexcept(false)
     {
-        std::cerr << "Error: " << _stream.str() << std::endl;
-        exit(1);
+		throw ErrorException { _stream.str() };
     }
 
     template <typename T>

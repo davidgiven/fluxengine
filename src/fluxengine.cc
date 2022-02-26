@@ -141,7 +141,17 @@ int main(int argc, const char* argv[])
     for (Command& c : commands)
     {
         if (command == c.name)
-            return c.main(argc-1, argv+1);
+		{
+			try
+			{
+				return c.main(argc-1, argv+1);
+			}
+			catch (const ErrorException& e)
+			{
+				std::cerr << e.message << '\n';
+				exit(1);
+			}
+		}
     }
 
     std::cerr << "fluxengine: unrecognised command (try --help)\n";

@@ -57,6 +57,10 @@ wxThread::ExitCode FluxEngineApp::Entry()
 		if (_callback)
 			_callback();
 	}
+	catch (const ErrorException& e)
+	{
+		Logger() << (e.message + '\n');
+	}
 	catch (const EmergencyStopException& e)
 	{
 		Logger() << "Emergency stop!\n";
