@@ -33,7 +33,7 @@ export CFLAGS += -I/mingw32/include
 export CXXFLAGS += $(shell wx-config --cxxflags --static=yes)
 export GUILDFLAGS += -lmingw32
 export LIBS += -L/mingw32/lib -static -lsqlite3 \
-	$(shell wx-config --libs --static=yes) -lz \
+	$(shell wx-config --libs --static=yes core base richtext) -lz \
 	-lcomctl32 -loleaut32 -lspoolss -loleacc -lwinspool \
 	-lsetupapi -lwinusb -lole32 -lprotobuf -luuid
 export EXTENSION = .exe
@@ -54,7 +54,7 @@ export STRIP = strip
 export CFLAGS += $(shell pkg-config --cflags $(PACKAGES)) $(shell wx-config --cxxflags)
 export LDFLAGS +=
 export LIBS += $(shell pkg-config --libs $(PACKAGES))
-export GUILIBS += $(shell wx-config --libs)
+export GUILIBS += $(shell wx-config --libs core base richtext)
 export EXTENSION =
 
 ifeq ($(shell uname),Darwin)

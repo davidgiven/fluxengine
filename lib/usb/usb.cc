@@ -8,6 +8,7 @@
 #include "bytes.h"
 #include "proto.h"
 #include "usbfinder.h"
+#include "logger.h"
 #include "greaseweazle.h"
 #include "fmt/format.h"
 
@@ -65,7 +66,7 @@ USB* get_usb_impl()
         config.usb().greaseweazle().has_port())
     {
         const auto& conf = config.usb().greaseweazle();
-        std::cerr << fmt::format(
+        Logger() << fmt::format(
             "Using GreaseWeazle on serial port {}\n", conf.port());
         return createGreaseWeazleUsb(conf.port(), conf);
     }
@@ -76,12 +77,12 @@ USB* get_usb_impl()
     switch (candidate->id)
     {
         case FLUXENGINE_ID:
-            std::cerr << fmt::format(
+            Logger() << fmt::format(
                 "Using FluxEngine {}\n", candidate->serial);
             return createFluxengineUsb(candidate->device);
 
         case GREASEWEAZLE_ID:
-            std::cerr << fmt::format("Using GreaseWeazle {} on {}\n",
+            Logger() << fmt::format("Using GreaseWeazle {} on {}\n",
                 candidate->serial,
                 candidate->serialPort);
             return createGreaseWeazleUsb(

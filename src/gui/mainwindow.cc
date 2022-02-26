@@ -90,10 +90,8 @@ void MainWindow::OnReadFluxButton(wxCommandEvent&)
 
 void MainWindow::OnLogMessage(std::shared_ptr<const AnyLogMessage> message)
 {
-	std::cout << "UI thread got message "
-		<< Logger::toString(*message)
-		<< '\n'
-		<< std::flush;
+	logEntry->AppendText(Logger::toString(*message));
+	notebook->SetSelection(1);
 
     std::visit(
         overloaded{

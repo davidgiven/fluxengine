@@ -25,6 +25,8 @@
 #include <wx/choice.h>
 #include <wx/checkbox.h>
 #include <wx/textctrl.h>
+#include <wx/panel.h>
+#include <wx/notebook.h>
 #include <wx/menu.h>
 #include <wx/frame.h>
 
@@ -52,6 +54,11 @@ class MainWindowGen : public wxFrame
 		wxTextCtrl* cylindersText;
 		wxStaticText* m_staticText9;
 		wxTextCtrl* headsText;
+		wxNotebook* notebook;
+		wxPanel* m_panel1;
+		wxTextCtrl* additionSettingsEntry;
+		wxPanel* m_panel2;
+		wxTextCtrl* logEntry;
 		wxButton* readFluxButton;
 		wxButton* readImageButton;
 		wxButton* writeFluxButton;

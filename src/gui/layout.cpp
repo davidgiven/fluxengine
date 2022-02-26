@@ -101,8 +101,41 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 
 	fgSizer2->Add( fgSizer3, 1, wxEXPAND, 5 );
 
+	notebook = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	m_panel1 = new wxPanel( notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxFlexGridSizer* fgSizer5;
+	fgSizer5 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer5->AddGrowableCol( 0 );
+	fgSizer5->AddGrowableRow( 0 );
+	fgSizer5->SetFlexibleDirection( wxBOTH );
+	fgSizer5->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 
-	fgSizer2->Add( 0, 0, 1, wxEXPAND, 5 );
+	additionSettingsEntry = new wxTextCtrl( m_panel1, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE );
+	fgSizer5->Add( additionSettingsEntry, 0, wxALL|wxEXPAND, 5 );
+
+
+	m_panel1->SetSizer( fgSizer5 );
+	m_panel1->Layout();
+	fgSizer5->Fit( m_panel1 );
+	notebook->AddPage( m_panel1, wxT("Additional settings"), true );
+	m_panel2 = new wxPanel( notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxFlexGridSizer* fgSizer8;
+	fgSizer8 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer8->AddGrowableCol( 0 );
+	fgSizer8->AddGrowableRow( 0 );
+	fgSizer8->SetFlexibleDirection( wxBOTH );
+	fgSizer8->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	logEntry = new wxTextCtrl( m_panel2, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY|wxTE_RICH );
+	fgSizer8->Add( logEntry, 0, wxALL|wxEXPAND, 5 );
+
+
+	m_panel2->SetSizer( fgSizer8 );
+	m_panel2->Layout();
+	fgSizer8->Fit( m_panel2 );
+	notebook->AddPage( m_panel2, wxT("Logs"), false );
+
+	fgSizer2->Add( notebook, 1, wxEXPAND | wxALL, 5 );
 
 	wxGridSizer* m_sizer;
 	m_sizer = new wxGridSizer( 0, 2, 0, 0 );

@@ -45,7 +45,7 @@ rule link
 
 rule linkgui
     command = $CXX $LDFLAGS $GUILDFLAGS -o \$out \$in \$flags $LIBS $GUILIBS
-    description = LINK-OBJC \$in
+    description = LINK-GUI \$in
 
 rule test
     command = \$in && touch \$out
