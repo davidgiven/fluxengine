@@ -103,6 +103,15 @@ public:
 			clock = seekToPattern(SECTOR_SYNC_PATTERN);
 		}
 
+		_sector->headerStartTime = tell().ns();
+
+		/* seekToPattern() can skip past the index hole, if this happens
+		 * too close to the end of the Fluxmap, discard the sector.
+		 */
+		if (_sector->headerStartTime > (getFluxmapDuration() - 12.5e6)) {
+			return 0;
+		}
+
 		return clock;
 	}
 

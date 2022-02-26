@@ -106,8 +106,14 @@ public:
 		 * _hardSectorId after the sector header is found.
 		 */
 		nanoseconds_t clock = seekToPattern(ANY_SECTOR_PATTERN);
+		_sector->headerStartTime = tell().ns();
 
-		int sectorFoundTimeRaw = std::round((tell().ns()) / 1e6);
+		/* Discard a possible partial sector. */
+		if (_sector->headerStartTime > (getFluxmapDuration() - 21e6)) {
+			return 0;
+		}
+
+		int sectorFoundTimeRaw = std::round(_sector->headerStartTime / 1e6);
 		int sectorFoundTime;
 
 		/* Round time to the nearest 20ms */
