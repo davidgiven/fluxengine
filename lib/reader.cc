@@ -110,39 +110,49 @@ void readDiskCommand(
                 auto fluxmap = readFluxmap(fluxsource, cylinder, head);
                 totalFlux.appendDesync().appendBytes(fluxmap->rawBytes());
 
-                auto trackdataflux =
-                    decoder.decodeToSectors(fluxmap, cylinder, head);
-                track->trackDatas.push_back(trackdataflux);
+                auto maps = fluxmap->split();
 
-                track_sectors.insert(trackdataflux->sectors.begin(),
-                    trackdataflux->sectors.end());
-                track_records.insert(trackdataflux->records.begin(),
-                    trackdataflux->records.end());
-
+                std::shared_ptr<const TrackDataFlux> trackdataflux;
                 bool hasBadSectors = false;
-                std::set<unsigned> required_sectors =
-                    decoder.requiredSectors(cylinder, head);
-                std::set<std::shared_ptr<const Sector>> result_sectors;
-                for (const auto& sector : collect_sectors(track_sectors))
-                {
-                    result_sectors.insert(sector);
-                    required_sectors.erase(sector->logicalSector);
 
-                    if (sector->status != Sector::OK)
+                for (auto& map : maps)
+                {
+                    {
+                        auto fm = std::make_shared<Fluxmap>();
+                        fm->appendBytes(map.rawBytes());
+
+                        trackdataflux = decoder.decodeToSectors(fm, cylinder, head);
+                        track->trackDatas.push_back(trackdataflux);
+					}
+
+                    track_sectors.insert(trackdataflux->sectors.begin(),
+                        trackdataflux->sectors.end());
+                    track_records.insert(trackdataflux->records.begin(),
+                        trackdataflux->records.end());
+
+                    std::set<unsigned> required_sectors =
+                        decoder.requiredSectors(cylinder, head);
+                    std::set<std::shared_ptr<const Sector>> result_sectors;
+                    for (const auto& sector : collect_sectors(track_sectors))
+                    {
+                        result_sectors.insert(sector);
+                        required_sectors.erase(sector->logicalSector);
+
+                        if (sector->status != Sector::OK)
+                            hasBadSectors = true;
+                    }
+                    for (unsigned logical_sector : required_sectors)
+                    {
+                        auto sector = std::make_shared<Sector>();
+                        sector->logicalSector = logical_sector;
+                        sector->status = Sector::MISSING;
+                        result_sectors.insert(sector);
+
                         hasBadSectors = true;
+                    }
+
+                    Logger() << SingleReadLogMessage{trackdataflux, result_sectors};
                 }
-                for (unsigned logical_sector : required_sectors)
-                {
-                    auto sector = std::make_shared<Sector>();
-                    sector->logicalSector = logical_sector;
-                    sector->status = Sector::MISSING;
-                    result_sectors.insert(sector);
-
-                    hasBadSectors = true;
-                }
-
-                Logger() << SingleReadLogMessage{trackdataflux, result_sectors};
-
                 if (hasBadSectors)
                     failures = false;
 
