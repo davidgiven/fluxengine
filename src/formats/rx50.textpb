@@ -16,7 +16,7 @@ image_reader {
 	filename: "rx50.img"
 	img {
 		tracks: 80
-		sides: 2
+		sides: 1
 		trackdata {
 			sector_size: 512
 			sector_range {
@@ -36,7 +36,8 @@ encoder {
 	ibm {
 		trackdata {
 			track_length_ms: 167
-			clock_rate_khz: 500
+			clock_rate_khz: 300
+			gap3: 30
 			sectors {
 				sector: 1
 				sector: 2

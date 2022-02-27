@@ -650,6 +650,7 @@ encodedecodetest ibm720_525
 encodedecodetest mac400 scripts/mac400_test.textpb
 encodedecodetest mac800 scripts/mac800_test.textpb
 encodedecodetest n88basic
+encodedecodetest rx50
 encodedecodetest tids990
 encodedecodetest victor9k_ss
 encodedecodetest victor9k_ds
