@@ -12,6 +12,7 @@
 MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
 {
 	this->SetSizeHints( wxSize( 450,500 ), wxDefaultSize );
+	this->SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_FRAMEBK ) );
 
 	bSizer1 = new wxFlexGridSizer( 0, 2, 0, 0 );
 	bSizer1->AddGrowableCol( 1 );
@@ -26,15 +27,11 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	fgSizer4->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 
 	visualiser = new VisualisationControl( this, wxID_ANY, wxDefaultPosition, wxSize( 200,480 ), wxBORDER_THEME );
-	visualiser->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_BTNTEXT ) );
-	visualiser->SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_APPWORKSPACE ) );
 	visualiser->SetMinSize( wxSize( 200,480 ) );
 
 	fgSizer4->Add( visualiser, 1, wxALL|wxEXPAND, 5 );
 
 	stopButton = new wxButton( this, wxID_ANY, wxT("Stop"), wxDefaultPosition, wxDefaultSize, 0 );
-	stopButton->SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_BTNFACE ) );
-
 	fgSizer4->Add( stopButton, 0, wxALIGN_CENTER|wxALL, 5 );
 
 
@@ -143,8 +140,6 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	m_sizer = new wxGridSizer( 0, 2, 0, 0 );
 
 	readFluxButton = new wxButton( this, wxID_ANY, wxT("Read flux"), wxDefaultPosition, wxDefaultSize, 0 );
-	readFluxButton->SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_BTNFACE ) );
-
 	m_sizer->Add( readFluxButton, 0, wxALL|wxEXPAND, 5 );
 
 	readImageButton = new wxButton( this, wxID_ANY, wxT("Read image"), wxDefaultPosition, wxDefaultSize, 0 );

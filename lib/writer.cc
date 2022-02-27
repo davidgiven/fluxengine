@@ -24,8 +24,8 @@ void writeTracks(FluxSink& fluxSink,
     {
         for (unsigned head : iterate(config.heads()))
         {
-			testForEmergencyStop();
-			Logger() << BeginWriteOperationLogMessage { cylinder, head };
+            testForEmergencyStop();
+            Logger() << BeginWriteOperationLogMessage{cylinder, head};
 
             std::unique_ptr<Fluxmap> fluxmap = producer(cylinder, head);
             if (!fluxmap)
@@ -44,8 +44,8 @@ void writeTracks(FluxSink& fluxSink,
                 // fluxmap->precompensate(PRECOMPENSATION_THRESHOLD_TICKS, 2);
                 fluxSink.writeFlux(cylinder, head, *fluxmap);
                 Logger() << fmt::format("{0} ms in {1} bytes",
-                                int(fluxmap->duration() / 1e6),
-                                fluxmap->bytes());
+                    int(fluxmap->duration() / 1e6),
+                    fluxmap->bytes());
             }
             Logger() << EndWriteOperationLogMessage();
         }
@@ -58,13 +58,13 @@ void writeTracksAndVerify(FluxSink& fluxSink,
     AbstractDecoder& decoder,
     const Image& image)
 {
-    std::cout << "Writing to: " << fluxSink << std::endl;
+    Logger() << fmt::format("Writing to: {}", (std::string)fluxSink);
 
     for (unsigned cylinder : iterate(config.cylinders()))
     {
         for (unsigned head : iterate(config.heads()))
         {
-			testForEmergencyStop();
+            testForEmergencyStop();
 
             auto sectors = encoder.collectSectors(cylinder, head, image);
             std::unique_ptr<Fluxmap> fluxmap =
@@ -73,7 +73,7 @@ void writeTracksAndVerify(FluxSink& fluxSink,
             {
                 /* Erase this track rather than writing. */
 
-                Logger() << BeginWriteOperationLogMessage { cylinder, head };
+                Logger() << BeginWriteOperationLogMessage{cylinder, head};
                 fluxmap.reset(new Fluxmap());
                 fluxSink.writeFlux(cylinder, head, *fluxmap);
                 Logger() << EndWriteOperationLogMessage();
@@ -90,18 +90,18 @@ void writeTracksAndVerify(FluxSink& fluxSink,
                      * let's leave it disabled for now. */
                     // fluxmap->precompensate(PRECOMPENSATION_THRESHOLD_TICKS,
                     // 2);
-                    Logger() << BeginWriteOperationLogMessage { cylinder, head };
+                    Logger() << BeginWriteOperationLogMessage{cylinder, head};
                     fluxSink.writeFlux(cylinder, head, *fluxmap);
                     Logger() << EndWriteOperationLogMessage()
-                             << fmt::format("{0} ms in {1} bytes",
+                             << fmt::format("writing {0} ms in {1} bytes",
                                     int(fluxmap->duration() / 1e6),
                                     fluxmap->bytes());
 
-                    Logger() << BeginReadOperationLogMessage { cylinder, head };
+                    Logger() << BeginReadOperationLogMessage{cylinder, head};
                     std::shared_ptr<Fluxmap> writtenFluxmap =
                         fluxSource.readFlux(cylinder, head);
                     Logger() << EndReadOperationLogMessage()
-                             << fmt::format("{0} ms in {1} bytes",
+                             << fmt::format("verifying {0} ms in {1} bytes",
                                     int(writtenFluxmap->duration() / 1e6),
                                     writtenFluxmap->bytes());
 
@@ -109,7 +109,7 @@ void writeTracksAndVerify(FluxSink& fluxSink,
                         decoder.decodeToSectors(writtenFluxmap, cylinder, head);
 
                     std::vector<std::shared_ptr<const Sector>> gotSectors(
-						trackdata->sectors.begin(), trackdata->sectors.end());
+                        trackdata->sectors.begin(), trackdata->sectors.end());
                     gotSectors.erase(std::remove_if(gotSectors.begin(),
                                          gotSectors.end(),
                                          [](const auto& s)

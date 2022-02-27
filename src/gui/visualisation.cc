@@ -53,6 +53,9 @@ wxBEGIN_EVENT_TABLE(VisualisationControl, wxPanel)
     int scalebottom = scaletop + scalesize - 1;
 
     wxPaintDC dc(this);
+	dc.SetBackground(*wxWHITE_BRUSH);
+	dc.Clear();
+
     dc.SetPen(*wxBLACK_PEN);
     dc.SetBrush(*wxLIGHT_GREY_BRUSH);
     dc.DrawCircle({w2, centrey}, outerradius);

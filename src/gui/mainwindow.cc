@@ -3,9 +3,12 @@
 #include "gui.h"
 #include "logger.h"
 #include "reader.h"
+#include "writer.h"
 #include "fluxsource/fluxsource.h"
+#include "fluxsink/fluxsink.h"
 #include "imagereader/imagereader.h"
 #include "imagewriter/imagewriter.h"
+#include "encoders/encoders.h"
 #include "decoders/decoders.h"
 #include "lib/usb/usbfinder.h"
 #include "fmt/format.h"
@@ -47,6 +50,7 @@ MainWindow::MainWindow(): MainWindowGen(nullptr)
 
     readFluxButton->Bind(wxEVT_BUTTON, &MainWindow::OnReadFluxButton, this);
     readImageButton->Bind(wxEVT_BUTTON, &MainWindow::OnReadImageButton, this);
+	writeFluxButton->Bind(wxEVT_BUTTON, &MainWindow::OnWriteFluxButton, this);
     writeImageButton->Bind(wxEVT_BUTTON, &MainWindow::OnWriteImageButton, this);
     stopButton->Bind(wxEVT_BUTTON, &MainWindow::OnStopButton, this);
 
@@ -67,17 +71,17 @@ void MainWindow::OnReadFluxButton(wxCommandEvent&)
 {
     try
     {
-        ConfigProto config = PrepareConfig();
+        PrepareConfig();
 
         FluxSource::updateConfigForFilename(config.mutable_flux_source(),
             fluxSourceSinkCombo->GetValue().ToStdString());
 		visualiser->Clear();
 		_currentDisk = nullptr;
 
+		ShowConfig();
         runOnWorkerThread(
-            [config, this]()
+            [this]()
             {
-                ::config = config;
                 auto fluxSource = FluxSource::create(config.flux_source());
                 auto decoder = AbstractDecoder::create(config.decoder());
                 auto diskflux = readDiskCommand(*fluxSource, *decoder);
@@ -94,11 +98,46 @@ void MainWindow::OnReadFluxButton(wxCommandEvent&)
     }
 }
 
+void MainWindow::OnWriteFluxButton(wxCommandEvent&)
+{
+    try
+    {
+        PrepareConfig();
+
+        FluxSink::updateConfigForFilename(config.mutable_flux_sink(),
+            fluxSourceSinkCombo->GetValue().ToStdString());
+        FluxSource::updateConfigForFilename(config.mutable_flux_source(),
+            fluxSourceSinkCombo->GetValue().ToStdString());
+
+		ShowConfig();
+		auto image = _currentDisk->image;
+        runOnWorkerThread(
+            [image, this]()
+            {
+				auto encoder = AbstractEncoder::create(config.encoder());
+				auto fluxSink = FluxSink::create(config.flux_sink());
+
+				std::unique_ptr<AbstractDecoder> decoder;
+				std::unique_ptr<FluxSource> fluxSource;
+				if (config.has_decoder())
+				{
+					decoder = AbstractDecoder::create(config.decoder());
+					fluxSource = FluxSource::create(config.flux_source());
+				}
+				writeDiskCommand(*image, *encoder, *fluxSink, decoder.get(), fluxSource.get());
+            });
+    }
+    catch (const ErrorException& e)
+    {
+        wxMessageBox(e.message, "Error", wxOK | wxICON_ERROR);
+    }
+}
+
 void MainWindow::OnReadImageButton(wxCommandEvent&)
 {
     try
     {
-        ConfigProto config = PrepareConfig();
+        PrepareConfig();
         if (!config.has_image_reader())
             Error() << "This format is read-only.";
 
@@ -117,10 +156,10 @@ void MainWindow::OnReadImageButton(wxCommandEvent&)
 		visualiser->Clear();
 		_currentDisk = nullptr;
 
+		ShowConfig();
         runOnWorkerThread(
-            [config, this]()
+            [this]()
             {
-                ::config = config;
                 auto imageReader = ImageReader::create(config.image_reader());
                 std::unique_ptr<const Image> image = imageReader->readImage();
                 runOnUiThread(
@@ -144,7 +183,7 @@ void MainWindow::OnWriteImageButton(wxCommandEvent&)
 {
     try
     {
-        ConfigProto config = PrepareConfig();
+        PrepareConfig();
         if (!config.has_image_writer())
             Error() << "This format is write-only.";
 
@@ -161,11 +200,11 @@ void MainWindow::OnWriteImageButton(wxCommandEvent&)
         ImageWriter::updateConfigForFilename(
             config.mutable_image_writer(), filename.ToStdString());
 
+		ShowConfig();
 		auto image = _currentDisk->image;
         runOnWorkerThread(
-            [config, image, this]()
+            [image, this]()
             {
-                ::config = config;
 				auto imageWriter = ImageWriter::create(config.image_writer());
 				imageWriter->writeImage(*image);
             });
@@ -176,13 +215,17 @@ void MainWindow::OnWriteImageButton(wxCommandEvent&)
     }
 }
 
-ConfigProto MainWindow::PrepareConfig()
+/* This sets the *global* config object. That's safe provided the worker thread
+ * isn't running, otherwise you'll get a race. */
+void MainWindow::PrepareConfig()
 {
+	assert(!wxGetApp().IsWorkerThreadRunning());
+
     auto formatSelection = formatChoice->GetSelection();
     if (formatSelection == wxNOT_FOUND)
         Error() << "no format selected";
 
-    ConfigProto config = *_formats[formatChoice->GetSelection()];
+	config = *_formats[formatChoice->GetSelection()];
 
     auto serial = deviceCombo->GetValue().ToStdString();
     if (!serial.empty() && (serial[0] == '/'))
@@ -190,21 +233,19 @@ ConfigProto MainWindow::PrepareConfig()
     else
         setProtoByString(&config, "usb.serial", serial);
 
-    ApplyCustomSettings(config);
-
-    {
-        std::string s;
-        google::protobuf::TextFormat::PrintToString(config, &s);
-        protoConfigEntry->Clear();
-        protoConfigEntry->AppendText(s);
-    }
-
+    ApplyCustomSettings();
     logEntry->Clear();
-
-    return config;
 }
 
-void MainWindow::ApplyCustomSettings(ConfigProto& config)
+void MainWindow::ShowConfig()
+{
+	std::string s;
+	google::protobuf::TextFormat::PrintToString(config, &s);
+	protoConfigEntry->Clear();
+	protoConfigEntry->AppendText(s);
+}
+
+void MainWindow::ApplyCustomSettings()
 {
     for (int i = 0; i < additionalSettingsEntry->GetNumberOfLines(); i++)
     {
@@ -280,11 +321,13 @@ void MainWindow::OnLogMessage(std::shared_ptr<const AnyLogMessage> message)
 
 void MainWindow::UpdateState()
 {
-    writeImageButton->Enable(!!_currentDisk);
-    writeFluxButton->Enable(!!_currentDisk);
-    stopButton->Enable(wxGetApp().IsWorkerThreadRunning());
-    readFluxButton->Enable(!wxGetApp().IsWorkerThreadRunning());
-    readImageButton->Enable(!wxGetApp().IsWorkerThreadRunning());
+	bool running = wxGetApp().IsWorkerThreadRunning();
+
+    writeImageButton->Enable(!running && !!_currentDisk);
+    writeFluxButton->Enable(!running && !!_currentDisk);
+    stopButton->Enable(running);
+    readFluxButton->Enable(!running);
+    readImageButton->Enable(!running);
 }
 
 void MainWindow::UpdateDevices()
