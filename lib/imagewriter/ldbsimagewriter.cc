@@ -5,6 +5,7 @@
 #include "fmt/format.h"
 #include "ldbs.h"
 #include "image.h"
+#include "logger.h"
 #include "lib/config.pb.h"
 #include <algorithm>
 #include <iostream>
@@ -23,10 +24,9 @@ public:
 
 		const Geometry geometry = image.getGeometry();
 
-		std::cout << fmt::format("LDBS: writing {} tracks, {} sides, {} sectors, {} bytes per sector",
+		Logger() << fmt::format("LDBS: writing {} tracks, {} sides, {} sectors, {} bytes per sector",
 						geometry.numTracks, geometry.numSides, geometry.numSectors,
-						geometry.sectorSize)
-				<< std::endl;
+						geometry.sectorSize);
 
         Bytes trackDirectory;
         ByteWriter trackDirectoryWriter(trackDirectory);
@@ -39,14 +39,14 @@ public:
 			dataRate = (geometry.numSectors > 10) ? LDBSOutputProto::RATE_HD : LDBSOutputProto::RATE_DD;
 			if (geometry.sectorSize <= 256)
 				dataRate = LDBSOutputProto::RATE_SD;
-			std::cout << fmt::format("LDBS: guessing data rate as {}\n", LDBSOutputProto::DataRate_Name(dataRate));
+			Logger() << fmt::format("LDBS: guessing data rate as {}", LDBSOutputProto::DataRate_Name(dataRate));
 		}
 
 		LDBSOutputProto::RecordingMode recordingMode = _config.ldbs().recording_mode();
 		if (recordingMode == LDBSOutputProto::RECMODE_GUESS)
 		{
 			recordingMode = LDBSOutputProto::RECMODE_MFM;
-			std::cout << fmt::format("LDBS: guessing recording mode as {}\n", LDBSOutputProto::RecordingMode_Name(recordingMode));
+			Logger() << fmt::format("LDBS: guessing recording mode as {}", LDBSOutputProto::RecordingMode_Name(recordingMode));
 		}
 
 		for (int track = 0; track < geometry.numTracks; track++)

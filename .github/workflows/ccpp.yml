@@ -10,7 +10,7 @@ jobs:
       with:
         fetch-depth: 1
     - name: apt
-      run: sudo apt update && sudo apt install libudev-dev libsqlite3-dev ninja-build protobuf-compiler
+      run: sudo apt update && sudo apt install libudev-dev libsqlite3-dev ninja-build protobuf-compiler libwxgtk3.0-gtk3-dev
     - name: make
       run: make
 
@@ -21,7 +21,7 @@ jobs:
       with:
         fetch-depth: 1
     - name: brew
-      run: brew install sqlite pkg-config libusb ninja protobuf truncate
+      run: brew install sqlite pkg-config libusb ninja protobuf truncate wxwidgets
     - name: make
       run: make
 
@@ -46,6 +46,7 @@ jobs:
           mingw-w64-i686-protobuf
           vim
           diffutils
+          mingw-w64-i686-wxWidgets
     - uses: actions/checkout@v1
       with:
         fetch-depth: 1
@@ -55,7 +56,7 @@ jobs:
 
     - name: zip
       run: |
-        zip -9 fluxengine.zip fluxengine.exe upgrade-flux-file.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex
+        zip -9 fluxengine.zip fluxengine.exe fluxengine-debug.exe fluxengine-gui.exe fluxengine-gui-debug.exe upgrade-flux-file.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v2

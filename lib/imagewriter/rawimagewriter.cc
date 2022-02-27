@@ -5,6 +5,7 @@
 #include "fmt/format.h"
 #include "decoders/decoders.h"
 #include "image.h"
+#include "logger.h"
 #include "arch/northstar/northstar.h"
 #include "lib/imagewriter/imagewriter.pb.h"
 #include <algorithm>
@@ -25,11 +26,11 @@ public:
 		size_t trackSize = geometry.numSectors * geometry.sectorSize;
 
 		if (geometry.numTracks * trackSize == 0) {
-			std::cout << "RAW: no sectors in output; skipping image file generation." << std::endl;
+			Logger() << "RAW: no sectors in output; skipping image file generation.";
 			return;
 		}
 
-		std::cout << fmt::format("RAW: writing {} cylinders, {} sides\n",
+		Logger() << fmt::format("RAW: writing {} cylinders, {} sides",
 				geometry.numTracks, geometry.numSides);
 
 		std::ofstream outputFile(_config.filename(), std::ios::out | std::ios::binary);

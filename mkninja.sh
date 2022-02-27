@@ -45,7 +45,7 @@ rule link
 
 rule linkgui
     command = $CXX $LDFLAGS $GUILDFLAGS -o \$out \$in \$flags $LIBS $GUILIBS
-    description = LINK-OBJC \$in
+    description = LINK-GUI \$in
 
 rule test
     command = \$in && touch \$out
@@ -564,6 +564,15 @@ buildlibrary libfrontend.a \
     src/fe-write.cc \
     src/fluxengine.cc \
 
+buildlibrary libgui.a \
+    -I$OBJDIR/proto \
+    -Idep/libusbp/include \
+    -d $OBJDIR/proto/libconfig.def \
+    src/gui/main.cc \
+    src/gui/layout.cpp \
+    src/gui/visualisation.cc \
+    src/gui/mainwindow.cc \
+
 buildprogram fluxengine \
     libfrontend.a \
     libformats.a \
@@ -573,6 +582,16 @@ buildprogram fluxengine \
     libusbp.a \
     libfmt.a \
     libagg.a \
+
+buildprogram fluxengine-gui \
+    -rule linkgui \
+    libgui.a \
+    libformats.a \
+    libbackend.a \
+    libconfig.a \
+    libfl2.a \
+    libusbp.a \
+    libfmt.a \
 
 buildlibrary libemu.a \
     dep/emu/fnmatch.c

@@ -3,50 +3,70 @@
 
 #include "fmt/format.h"
 
+class DiskFlux;
 class TrackDataFlux;
 class TrackFlux;
 class Sector;
 
-struct BeginSpeedOperationLogMessage {};
+struct ErrorLogMessage
+{
+	std::string message;
+};
+
+struct BeginSpeedOperationLogMessage
+{
+};
+
 struct EndSpeedOperationLogMessage
 {
-	nanoseconds_t rotationalPeriod;
+    nanoseconds_t rotationalPeriod;
 };
-	
-struct DiskContextLogMessage
+
+struct TrackReadLogMessage
+{
+    std::shared_ptr<const TrackFlux> track;
+};
+
+struct DiskReadLogMessage
+{
+	std::shared_ptr<const DiskFlux> disk;
+};
+
+struct BeginReadOperationLogMessage
 {
     unsigned cylinder;
     unsigned head;
 };
 
-struct SingleReadLogMessage
+struct EndReadOperationLogMessage
 {
 	std::shared_ptr<const TrackDataFlux> trackDataFlux;
 	std::set<std::shared_ptr<const Sector>> sectors;
 };
 
-struct TrackReadLogMessage
+struct BeginWriteOperationLogMessage
 {
-	std::shared_ptr<TrackFlux> track;
+    unsigned cylinder;
+    unsigned head;
 };
 
-struct BeginReadOperationLogMessage { };
-struct EndReadOperationLogMessage { };
-struct BeginWriteOperationLogMessage { };
-struct EndWriteOperationLogMessage { };
+struct EndWriteOperationLogMessage
+{
+};
 
 class TrackFlux;
 
-typedef std::variant<std::string,
-	SingleReadLogMessage,
-	TrackReadLogMessage,
-    DiskContextLogMessage,
-	BeginSpeedOperationLogMessage,
-	EndSpeedOperationLogMessage,
+typedef std::variant<
+	std::string,
+	ErrorLogMessage,
+    TrackReadLogMessage,
+	DiskReadLogMessage,
+    BeginSpeedOperationLogMessage,
+    EndSpeedOperationLogMessage,
     BeginReadOperationLogMessage,
     EndReadOperationLogMessage,
-	BeginWriteOperationLogMessage,
-	EndWriteOperationLogMessage>
+    BeginWriteOperationLogMessage,
+    EndWriteOperationLogMessage>
     AnyLogMessage;
 
 class Logger

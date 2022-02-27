@@ -8,6 +8,7 @@
 #include "bytes.h"
 #include "proto.h"
 #include "usbfinder.h"
+#include "logger.h"
 #include "greaseweazle.h"
 #include "fmt/format.h"
 
@@ -17,7 +18,7 @@ USB::~USB() {}
 
 static std::unique_ptr<CandidateDevice> selectDevice()
 {
-    auto candidates = findUsbDevices({FLUXENGINE_ID, GREASEWEAZLE_ID});
+    auto candidates = findUsbDevices();
     if (candidates.size() == 0)
         Error() << "no devices found (is one plugged in? Do you have the "
                    "appropriate permissions?";
@@ -65,8 +66,8 @@ USB* get_usb_impl()
         config.usb().greaseweazle().has_port())
     {
         const auto& conf = config.usb().greaseweazle();
-        std::cerr << fmt::format(
-            "Using GreaseWeazle on serial port {}\n", conf.port());
+        Logger() << fmt::format(
+            "Using GreaseWeazle on serial port {}", conf.port());
         return createGreaseWeazleUsb(conf.port(), conf);
     }
 
@@ -76,12 +77,12 @@ USB* get_usb_impl()
     switch (candidate->id)
     {
         case FLUXENGINE_ID:
-            std::cerr << fmt::format(
-                "Using FluxEngine {}\n", candidate->serial);
+            Logger() << fmt::format(
+                "Using FluxEngine {}", candidate->serial);
             return createFluxengineUsb(candidate->device);
 
         case GREASEWEAZLE_ID:
-            std::cerr << fmt::format("Using GreaseWeazle {} on {}\n",
+            Logger() << fmt::format("Using GreaseWeazle {} on {}",
                 candidate->serial,
                 candidate->serialPort);
             return createGreaseWeazleUsb(

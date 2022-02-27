@@ -4,6 +4,7 @@
 #include "imagereader/imagereader.h"
 #include "image.h"
 #include "proto.h"
+#include "logger.h"
 #include "lib/config.pb.h"
 #include "fmt/format.h"
 #include <algorithm>
@@ -140,9 +141,7 @@ public:
         headerPtr = n; //set pointer to after comment
         comment[n] = '\0'; // null-terminate the string
         //write comment to screen
-        std::cout   << "Comment in IMD image:\n"
-                    << fmt::format("{}\n",
-                    comment);
+        Logger()   << fmt::format("IMD: comment: {}", comment);
 
         //first read header
         for (;;)
@@ -237,7 +236,7 @@ public:
         size_t headSize = header.numSectors * sectorSize;
         size_t trackSize = headSize * (header.Head + 1);
 
-        std::cout << fmt::format("IMD: {} tracks, {} heads; {}; {} kbps; {} sectors; sectorsize {};\n"
+        Logger() << fmt::format("IMD: {} tracks, {} heads; {}; {} kbps; {} sectors; sectorsize {};"
                                  "     sectormap {}; {} kB total\n",
                     header.track, header.Head + 1,
                     mfm ? "MFM" : "FM",

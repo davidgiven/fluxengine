@@ -55,32 +55,32 @@ std::unique_ptr<ImageReader> ImageReader::create(const ImageReaderProto& config)
 
 void ImageReader::updateConfigForFilename(ImageReaderProto* proto, const std::string& filename)
 {
-	static const std::map<std::string, std::function<void(void)>> formats =
+	static const std::map<std::string, std::function<void(ImageReaderProto*)>> formats =
 	{
-		{".adf",      [&]() { proto->mutable_img(); }},
-		{".d64",      [&]() { proto->mutable_d64(); }},
-		{".d81",      [&]() { proto->mutable_img(); }},
-		{".d88",      [&]() { proto->mutable_d88(); }},
-		{".dim",      [&]() { proto->mutable_dim(); }},
-		{".diskcopy", [&]() { proto->mutable_diskcopy(); }},
-		{".dsk",      [&]() { proto->mutable_img(); }},
-		{".fdi",      [&]() { proto->mutable_fdi(); }},
-		{".imd",      [&]() { proto->mutable_imd(); }},
-		{".img",      [&]() { proto->mutable_img(); }},
-		{".jv3",      [&]() { proto->mutable_jv3(); }},
-		{".nfd",      [&]() { proto->mutable_nfd(); }},
-		{".nsi",      [&]() { proto->mutable_nsi(); }},
-		{".st",       [&]() { proto->mutable_img(); }},
-		{".td0",      [&]() { proto->mutable_td0(); }},
-		{".vgi",      [&]() { proto->mutable_img(); }},
-		{".xdf",      [&]() { proto->mutable_img(); }},
+		{".adf",      [](auto* proto) { proto->mutable_img(); }},
+		{".d64",      [](auto* proto) { proto->mutable_d64(); }},
+		{".d81",      [](auto* proto) { proto->mutable_img(); }},
+		{".d88",      [](auto* proto) { proto->mutable_d88(); }},
+		{".dim",      [](auto* proto) { proto->mutable_dim(); }},
+		{".diskcopy", [](auto* proto) { proto->mutable_diskcopy(); }},
+		{".dsk",      [](auto* proto) { proto->mutable_img(); }},
+		{".fdi",      [](auto* proto) { proto->mutable_fdi(); }},
+		{".imd",      [](auto* proto) { proto->mutable_imd(); }},
+		{".img",      [](auto* proto) { proto->mutable_img(); }},
+		{".jv3",      [](auto* proto) { proto->mutable_jv3(); }},
+		{".nfd",      [](auto* proto) { proto->mutable_nfd(); }},
+		{".nsi",      [](auto* proto) { proto->mutable_nsi(); }},
+		{".st",       [](auto* proto) { proto->mutable_img(); }},
+		{".td0",      [](auto* proto) { proto->mutable_td0(); }},
+		{".vgi",      [](auto* proto) { proto->mutable_img(); }},
+		{".xdf",      [](auto* proto) { proto->mutable_img(); }},
 	};
 
 	for (const auto& it : formats)
 	{
 		if (endsWith(filename, it.first))
 		{
-			it.second();
+			it.second(proto);
 			proto->set_filename(filename);
 			return;
 		}

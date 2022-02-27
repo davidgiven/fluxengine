@@ -29,9 +29,12 @@ export CXX = /mingw32/bin/g++
 export AR = /mingw32/bin/ar rc
 export RANLIB = /mingw32/bin/ranlib
 export STRIP = /mingw32/bin/strip
-export CFLAGS += -I/mingw32/include/libusb-1.0 -I/mingw32/include
-export LDFLAGS +=
-export LIBS += -L/mingw32/lib -static -lz -lsqlite3 \
+export CFLAGS += -I/mingw32/include
+export CXXFLAGS += $(shell wx-config --cxxflags --static=yes)
+export GUILDFLAGS += -lmingw32
+export LIBS += -L/mingw32/lib -static -lsqlite3 \
+	$(shell wx-config --libs --static=yes core base) -lz \
+	-lcomctl32 -loleaut32 -lspoolss -loleacc -lwinspool \
 	-lsetupapi -lwinusb -lole32 -lprotobuf -luuid
 export EXTENSION = .exe
 else
@@ -48,9 +51,10 @@ export CXX = g++
 export AR = ar rc
 export RANLIB = ranlib
 export STRIP = strip
-export CFLAGS += $(shell pkg-config --cflags $(PACKAGES))
+export CFLAGS += $(shell pkg-config --cflags $(PACKAGES)) $(shell wx-config --cxxflags)
 export LDFLAGS +=
 export LIBS += $(shell pkg-config --libs $(PACKAGES))
+export GUILIBS += $(shell wx-config --libs core base)
 export EXTENSION =
 
 ifeq ($(shell uname),Darwin)

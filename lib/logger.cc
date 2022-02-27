@@ -31,11 +31,12 @@ std::string Logger::toString(const AnyLogMessage& message)
 {
     std::stringstream stream;
 
-	auto indent = [&]() {
-		if (!indented)
-			stream << "      ";
-		indented = false;
-	};
+    auto indent = [&]()
+    {
+        if (!indented)
+            stream << "      ";
+        indented = false;
+    };
 
     std::visit(
         overloaded{
@@ -58,20 +59,29 @@ std::string Logger::toString(const AnyLogMessage& message)
                     60e9 / m.rotationalPeriod);
             },
 
-			/* Indicates that we're working on a given cylinder and head */
-            [&](const DiskContextLogMessage& m)
+            /* Indicates that we're starting a write operation. */
+            [&](const BeginWriteOperationLogMessage& m)
             {
                 stream << fmt::format("{:2}.{}: ", m.cylinder, m.head);
                 indented = true;
             },
 
-            /* A single read has happened */
-            [&](const SingleReadLogMessage& m)
+            /* Indicates that we're starting a read operation. */
+            [&](const BeginReadOperationLogMessage& m)
             {
-                const auto& trackdataflux = m.trackDataFlux;
+                stream << fmt::format("{:2}.{}: ", m.cylinder, m.head);
+                indented = true;
+            },
+
+            /* We've just read a track (we might reread it if there are errors)
+             */
+            [&](const TrackReadLogMessage& m)
+            {
+                const auto& track = *m.track;
+                const auto& trackdataflux = track.trackDatas.end()[-1];
 
                 indent();
-                stream << fmt::format("{} records, {} sectors",
+                stream << fmt::format("{} raw records, {} raw sectors",
                     trackdataflux->records.size(),
                     trackdataflux->sectors.size());
                 if (trackdataflux->sectors.size() > 0)
@@ -89,14 +99,9 @@ std::string Logger::toString(const AnyLogMessage& message)
                 stream << "sectors:";
 
                 std::vector<std::shared_ptr<const Sector>> sectors(
-                    m.sectors.begin(), m.sectors.end());
-                std::sort(sectors.begin(),
-                    sectors.end(),
-                    [](const std::shared_ptr<const Sector>& s1,
-                        const std::shared_ptr<const Sector>& s2)
-                    {
-                        return s1->logicalSector < s2->logicalSector;
-                    });
+                    track.sectors.begin(), track.sectors.end());
+                std::sort(
+                    sectors.begin(), sectors.end(), sectorPointerSortPredicate);
 
                 for (const auto& sector : sectors)
                     stream << fmt::format(" {}{}",
@@ -104,11 +109,7 @@ std::string Logger::toString(const AnyLogMessage& message)
                         Sector::statusToChar(sector->status));
 
                 stream << '\n';
-            },
 
-            /* We've finished reading a track */
-            [&](const TrackReadLogMessage& m)
-            {
                 int size = 0;
                 std::set<std::pair<int, int>> track_ids;
                 for (const auto& sector : m.track->sectors)

@@ -18,7 +18,7 @@ struct TrackDataFlux
 	unsigned physicalHead;
 	std::shared_ptr<const Fluxmap> fluxmap;
 	std::vector<std::shared_ptr<const Record>> records;
-	std::vector<std::shared_ptr<Sector>> sectors;
+	std::vector<std::shared_ptr<const Sector>> sectors;
 };
 
 struct TrackFlux
@@ -32,7 +32,7 @@ struct TrackFlux
 struct DiskFlux
 {
 	std::vector<std::shared_ptr<const TrackFlux>> tracks;
-	std::unique_ptr<const Image> image;
+	std::shared_ptr<const Image> image;
 };
 
 #endif

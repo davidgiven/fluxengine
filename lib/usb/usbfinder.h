@@ -12,7 +12,7 @@ struct CandidateDevice
 	std::string serialPort;
 };
 
-extern std::vector<std::unique_ptr<CandidateDevice>> findUsbDevices(const std::set<uint32_t>& id);
+extern std::vector<std::unique_ptr<CandidateDevice>> findUsbDevices();
 
 #endif
 
