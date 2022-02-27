@@ -56,7 +56,7 @@ jobs:
 
     - name: zip
       run: |
-        zip -9 fluxengine.zip fluxengine.exe upgrade-flux-file.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex
+        zip -9 fluxengine.zip fluxengine.exe fluxengine-debug.exe fluxengine-gui.exe fluxengine-gui-debug.exe upgrade-flux-file.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v2
