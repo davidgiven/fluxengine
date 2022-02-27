@@ -30,6 +30,9 @@ public:
 	void ApplyCustomSettings();
 
 private:
+	void SetHighDensity();
+
+private:
 	std::vector<std::unique_ptr<const ConfigProto>> _formats;
 	std::vector<std::unique_ptr<const CandidateDevice>> _devices;
 	std::shared_ptr<const DiskFlux> _currentDisk;

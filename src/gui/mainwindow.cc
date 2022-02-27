@@ -78,6 +78,7 @@ void MainWindow::OnReadFluxButton(wxCommandEvent&)
 		visualiser->Clear();
 		_currentDisk = nullptr;
 
+		SetHighDensity();
 		ShowConfig();
         runOnWorkerThread(
             [this]()
@@ -109,6 +110,7 @@ void MainWindow::OnWriteFluxButton(wxCommandEvent&)
         FluxSource::updateConfigForFilename(config.mutable_flux_source(),
             fluxSourceSinkCombo->GetValue().ToStdString());
 
+		SetHighDensity();
 		ShowConfig();
 		auto image = _currentDisk->image;
         runOnWorkerThread(
@@ -235,6 +237,15 @@ void MainWindow::PrepareConfig()
 
     ApplyCustomSettings();
     logEntry->Clear();
+}
+
+void MainWindow::SetHighDensity()
+{
+	bool hd = highDensityToggle->GetValue();
+	if (config.flux_source().has_drive())
+		config.mutable_flux_source()->mutable_drive()->set_high_density(hd);
+	if (config.flux_sink().has_drive())
+		config.mutable_flux_sink()->mutable_drive()->set_high_density(hd);
 }
 
 void MainWindow::ShowConfig()
