@@ -3,6 +3,7 @@
 #include "decoders/decoders.h"
 #include "encoders/encoders.h"
 #include "arch/amiga/amiga.h"
+#include "arch/apple2/apple2.h"
 #include "arch/brother/brother.h"
 #include "arch/c64/c64.h"
 #include "arch/ibm/ibm.h"
@@ -20,6 +21,7 @@ std::unique_ptr<AbstractEncoder> AbstractEncoder::create(const EncoderProto& con
 		std::function<std::unique_ptr<AbstractEncoder>(const EncoderProto&)>> encoders =
 	{
 		{ EncoderProto::kAmiga,     createAmigaEncoder },
+		{ EncoderProto::kApple2,    createApple2Encoder },
 		{ EncoderProto::kBrother,   createBrotherEncoder },
 		{ EncoderProto::kC64,       createCommodore64Encoder },
 		{ EncoderProto::kIbm,       createIbmEncoder },
