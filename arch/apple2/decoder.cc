@@ -90,6 +90,9 @@ public:
 		_sector->logicalTrack = combine(br.read_be16());
 		_sector->logicalSector = combine(br.read_be16());
 		uint8_t checksum = combine(br.read_be16());
+
+		// If the checksum is correct, upgrade the sector from MISSING
+		// to DATA_MISSING in anticipation of its data record
 		if (checksum == (volume ^ _sector->logicalTrack ^ _sector->logicalSector))
 			_sector->status = Sector::DATA_MISSING; /* unintuitive but correct */
 	}
@@ -106,6 +109,9 @@ public:
 		unsigned recordLength = APPLE2_ENCODED_SECTOR_LENGTH + 2;
 		Bytes bytes = toBytes(readRawBits(recordLength*8)).slice(0, recordLength);
 
+		// Upgrade the sector from MISSING to BAD_CHECKSUM.
+		// If decode_crazy_data succeeds, it upgrades the sector to
+		// OK.
 		_sector->status = Sector::BAD_CHECKSUM;
 		_sector->data = decode_crazy_data(&bytes[0], _sector->status);
 	}
