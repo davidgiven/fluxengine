@@ -104,6 +104,20 @@ public:
 		if (readRaw24() != APPLE2_DATA_RECORD)
 			return;
 
+		// Sometimes there's a 1-bit gap between APPLE2_DATA_RECORD and
+		// the data itself.  This has been seen on real world disks
+		// such as the Apple II Operating System Kit from Apple2Online.
+		// However, I haven't seen it described in any of the various
+		// references.
+		//
+		// This extra '0' bit would not affect the real disk interface,
+		// as it was a '1' reaching the top bit of a shift register
+		// that triggered a byte to be available, but it affects the
+		// way the data is read here.
+		auto p = tell();
+		auto b = readRawBits(1);
+		if(b[0]) seek(p);
+
 		/* Read and decode data. */
 
 		unsigned recordLength = APPLE2_ENCODED_SECTOR_LENGTH + 2;
