@@ -44,6 +44,10 @@ ifneq ($(packages-exist),yes)
 $(warning These pkg-config packages are installed: $(shell pkg-config --list-all | sort | awk '{print $$1}'))
 $(error You must have these pkg-config packages installed: $(PACKAGES))
 endif
+wx-exist = $(shell wx-config --cflags > /dev/null && echo yes)
+ifneq ($(wx-exist),yes)
+$(error You must have these wx-config installed)
+endif
 
 export PROTOC = protoc
 export CC = gcc
