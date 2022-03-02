@@ -76,7 +76,8 @@ void writeTracksAndVerify(FluxSink& fluxSink,
                 Logger() << BeginWriteOperationLogMessage{cylinder, head};
                 fluxmap.reset(new Fluxmap());
                 fluxSink.writeFlux(cylinder, head, *fluxmap);
-                Logger() << EndWriteOperationLogMessage();
+                Logger() << EndWriteOperationLogMessage()
+                         << fmt::format("erased");
             }
             else
             {
