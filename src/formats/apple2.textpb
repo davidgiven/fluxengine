@@ -1,4 +1,4 @@
-comment: 'Apple II 140kB DOS 3.3 5.25" 40 track SSSD (ro)'
+comment: 'Apple II 140kB DOS 3.3 5.25" 40 track SSSD'
 
 image_reader {
 	filename: "apple2.img"
