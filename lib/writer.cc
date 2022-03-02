@@ -76,7 +76,8 @@ void writeTracksAndVerify(FluxSink& fluxSink,
                 Logger() << BeginWriteOperationLogMessage{cylinder, head};
                 fluxmap.reset(new Fluxmap());
                 fluxSink.writeFlux(cylinder, head, *fluxmap);
-                Logger() << EndWriteOperationLogMessage();
+                Logger() << EndWriteOperationLogMessage()
+                         << fmt::format("erased");
             }
             else
             {
@@ -172,6 +173,8 @@ void writeDiskCommand(const Image& image,
             {
                 const auto& sectors =
                     encoder.collectSectors(physicalTrack, physicalSide, image);
+				if (sectors.empty())
+					return std::make_unique<Fluxmap>();
                 return encoder.encode(
                     physicalTrack, physicalSide, sectors, image);
             });
