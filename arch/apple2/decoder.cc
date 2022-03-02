@@ -114,14 +114,28 @@ public:
 		// as it was a '1' reaching the top bit of a shift register
 		// that triggered a byte to be available, but it affects the
 		// way the data is read here.
-		auto p = tell();
-		auto b = readRawBits(1);
-		if(b[0]) seek(p);
+		//
+		// While the floppies tested only seemed to need this applied
+		// to the first byte of the data record, applying it
+		// consistently to all of them doesn't seem to hurt, and
+		// simplifies the code.
 
 		/* Read and decode data. */
 
-		unsigned recordLength = APPLE2_ENCODED_SECTOR_LENGTH + 2;
-		Bytes bytes = toBytes(readRawBits(recordLength*8)).slice(0, recordLength);
+		auto readApple8 = [&]() {
+		    auto result = readRaw8();
+		    while(result & 0x80 == 0) {
+			auto b = readRawBits(1);
+			result = (result << 1) | b[0];
+		    }
+		    return result;
+		};
+
+		constexpr unsigned recordLength = APPLE2_ENCODED_SECTOR_LENGTH + 2;
+                uint8_t bytes[recordLength];
+                for(auto &byte : bytes) {
+                    byte = readApple8();
+                }
 
 		// Upgrade the sector from MISSING to BAD_CHECKSUM.
 		// If decode_crazy_data succeeds, it upgrades the sector to
