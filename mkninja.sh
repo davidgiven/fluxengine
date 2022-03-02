@@ -495,6 +495,7 @@ FORMATS="\
     amiga \
     ampro \
     apple2 \
+    appledos \
     atarist360 \
     atarist370 \
     atarist400 \
