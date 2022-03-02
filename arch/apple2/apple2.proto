@@ -2,3 +2,4 @@ syntax = "proto2";
 
 message Apple2DecoderProto {}
 
+message Apple2EncoderProto {}

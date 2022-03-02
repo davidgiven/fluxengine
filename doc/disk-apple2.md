@@ -45,6 +45,18 @@ You should end up with an `apple2.img` which is 143360 bytes long.
 **Big warning!** The image may not work in an emulator, due to the
 logical sector mapping issue described above.
 
+Writing discs
+-------------
+
+Just do:
+```
+fluxengine write apple2 -i apple2.img
+```
+
+**Big warning!** An image designed for an emulator may not work, due to the
+logical sector mapping issue described above.
+
+
 Useful references
 -----------------
 

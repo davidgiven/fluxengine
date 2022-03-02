@@ -403,6 +403,7 @@ buildlibrary libbackend.a \
     arch/amiga/decoder.cc \
     arch/amiga/encoder.cc \
     arch/apple2/decoder.cc \
+    arch/apple2/encoder.cc \
     arch/brother/decoder.cc \
     arch/brother/encoder.cc \
     arch/c64/decoder.cc \
@@ -648,6 +649,7 @@ runtest proto-test          -I$OBJDIR/proto \
                             $OBJDIR/proto/tests/testproto.cc
 
 encodedecodetest amiga
+encodedecodetest apple2
 encodedecodetest atarist360
 encodedecodetest atarist370
 encodedecodetest atarist400
