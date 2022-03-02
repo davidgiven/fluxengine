@@ -5,6 +5,7 @@ image_reader {
 	img {
 		tracks: 39
 		sides: 1
+		physical_step: 2
 		trackdata {
 			sector_size: 256
 			sector_range {
