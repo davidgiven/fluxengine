@@ -20,6 +20,7 @@ image_writer {
 	img {
 		tracks: 39
 		sides: 1
+		physical_step: 2
 		trackdata {
 			sector_size: 256
 			sector_range {
@@ -37,12 +38,13 @@ encoder {
 }
 
 decoder {
+	retries: 1
 	brother {}
 }
 
 cylinders {
 	start: 0
-	end: 39
+	end: 77
 }
 
 heads {
