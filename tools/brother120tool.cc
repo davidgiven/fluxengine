@@ -1,10 +1,21 @@
 #include "globals.h"
+#include "bytes.h"
 #include "fmt/format.h"
+#include "utils.h"
 #include <fstream>
 #include "fnmatch.h"
 
-/* Theoretical maximum number of sectors. */
-static const int SECTOR_COUNT = 640;
+/* Number of sectors on a 120kB disk. */
+static constexpr int SECTOR_COUNT = 468;
+
+/* Start sector for data (after the directory */
+static constexpr int DATA_START_SECTOR = 14;
+
+/* Size of a sector */
+static constexpr int SECTOR_SIZE = 256;
+
+/* Number of dirents in a directory. */
+static constexpr int DIRECTORY_SIZE = 128;
 
 struct Dirent
 {
@@ -14,19 +25,14 @@ struct Dirent
     int sectorCount;
 };
 
-static std::ifstream inputFile;
+static std::fstream file;
 static std::map<std::string, std::unique_ptr<Dirent>> directory;
 static std::map<uint16_t, uint16_t> allocationTable;
-
-static std::string& rtrim(std::string& s, const char* t = " \t\n\r\f\v")
-{
-    s.erase(s.find_last_not_of(t) + 1);
-    return s;
-}
 
 void syntax()
 {
     std::cout << "Syntax: brother120tool <image> [<filenames...>]\n"
+	             "        brother120tool --create <image> <filenames...>\n"
                  "If you specify a filename, it's extracted into the current directory.\n"
                  "Wildcards are allowed. If you don't, the directory is listed instead.\n";
     exit(0);
@@ -34,24 +40,62 @@ void syntax()
 
 void readDirectory()
 {
-    for (int i=0; i<0x80; i++)
+    for (int i=0; i<DIRECTORY_SIZE; i++)
     {
-        inputFile.seekg(i*16, std::ifstream::beg);
+        file.seekg(i*16, std::ifstream::beg);
 
-        uint8_t buffer[16];
-        inputFile.read((char*) buffer, sizeof(buffer));
+		Bytes buffer(16);
+        file.read((char*) &buffer[0], buffer.size());
         if (buffer[0] == 0xf0)
             continue;
         
-        std::string filename((const char*)buffer, 8);
-        filename = rtrim(filename);
+		ByteReader br(buffer);
+		std::string filename = br.read(8);
+		filename = filename.substr(0, filename.find(" "));
+
         std::unique_ptr<Dirent> dirent(new Dirent);
-        dirent->filename = filename;
-        dirent->type = buffer[8];
-        dirent->startSector = buffer[9]*256 + buffer[10];
-        dirent->sectorCount = buffer[11];
+		dirent->filename = filename;
+		dirent->type = br.read_8();
+		dirent->startSector = br.read_be16();
+		dirent->sectorCount = br.read_8();
         directory[filename] = std::move(dirent);
     }
+}
+
+void writeDirectory()
+{
+	Bytes buffer(2048);
+	ByteWriter bw(buffer);
+
+	int count = 0;
+	for (const auto& it : directory)
+	{
+		const auto& dirent = it.second;
+
+		if (count == DIRECTORY_SIZE)
+			Error() << "too many files on disk";
+
+		bw.append(dirent->filename);
+		for (int i=dirent->filename.size(); i<8; i++)
+			bw.write_8(' ');
+
+		bw.write_8(dirent->type);
+		bw.write_be16(dirent->startSector);
+		bw.write_8(dirent->sectorCount);
+		bw.write_be32(0); /* unknown */
+		count++;
+	}
+
+	static const Bytes padding(15);
+	while (count < DIRECTORY_SIZE)
+	{
+		bw.write_8(0xf0);
+		bw.append(padding);
+		count++;
+	}
+
+	file.seekp(0, std::ifstream::beg);
+	buffer.writeTo(file);
 }
 
 static bool isValidFile(const Dirent& dirent)
@@ -61,15 +105,45 @@ static bool isValidFile(const Dirent& dirent)
 
 void readAllocationTable()
 {
-    for (int sector=14; sector!=SECTOR_COUNT; sector++)
+    for (int sector=1; sector!=SECTOR_COUNT; sector++)
     {
-        inputFile.seekg((sector-1)*2 + 0x800, std::ifstream::beg);
-        uint8_t buffer[2];
-        inputFile.read((char*) buffer, sizeof(buffer));
+        file.seekg((sector-1)*2 + 0x800, std::ifstream::beg);
+		Bytes buffer(2);
+        file.read((char*) &buffer[0], buffer.size());
 
-        uint16_t nextSector = (buffer[0]*256) + buffer[1];
+        uint16_t nextSector = buffer.reader().read_be16();
         allocationTable[sector] = nextSector;
     }
+}
+
+void writeAllocationTable()
+{
+	Bytes buffer(SECTOR_COUNT*2);
+	ByteWriter bw(buffer);
+
+	for (int sector=1; sector<(DATA_START_SECTOR-2); sector++)
+		bw.write_le16(sector+1);
+	bw.write_le16(0xffff);
+	bw.write_le16(0xffff);
+	for (int sector=DATA_START_SECTOR; sector!=SECTOR_COUNT; sector++)
+		bw.write_be16(allocationTable[sector]);
+	
+	file.seekp(0x800, std::ifstream::beg);
+	buffer.writeTo(file);
+}
+
+uint16_t allocateSector()
+{
+    for (int sector=DATA_START_SECTOR; sector!=SECTOR_COUNT; sector++)
+    {
+		if (allocationTable[sector] == 0)
+		{
+			allocationTable[sector] = 0xffff;
+			return sector;
+		}
+    }
+	Error() << "unable to allocate sector --- disk full";
+	return 0;
 }
 
 void checkConsistency()
@@ -121,6 +195,54 @@ void listDirectory()
     }
 }
 
+void insertFile(const std::string& filename)
+{
+	auto leafname = getLeafname(filename);
+	if (leafname.size() > 8)
+		Error() << "filename too long";
+	std::cout << fmt::format("Inserting '{}'\n", leafname);
+
+	std::ifstream inputFile(filename, std::ios::in | std::ios::binary);
+	if (!inputFile)
+		Error() << fmt::format("unable to open input file: {}", strerror(errno));
+
+	if (directory.find(leafname) != directory.end())
+		Error() << fmt::format("duplicate filename: {}", leafname);
+
+	auto dirent = std::make_unique<Dirent>();
+	dirent->filename = leafname;
+	dirent->type = 0;
+	dirent->startSector = 0xffff;
+	dirent->sectorCount = 0;
+
+	uint16_t lastSector = 0xffff;
+	while (!inputFile.eof())
+	{
+		char buffer[SECTOR_SIZE];
+		inputFile.read(buffer, sizeof(buffer));
+		if (inputFile.gcount() == 0)
+			break;
+		if (inputFile.bad())
+			Error() << fmt::format("I/O error on read: {}", strerror(errno));
+
+		uint16_t thisSector = allocateSector();
+		if (lastSector == 0xffff)
+			dirent->startSector = thisSector;
+		else
+			allocationTable[lastSector] = thisSector;
+		dirent->sectorCount++;
+
+		file.seekp((thisSector-1) * 0x100, std::ifstream::beg);
+		file.write(buffer, sizeof(buffer));
+		if (file.bad())
+			Error() << fmt::format("I/O error on write: {}", strerror(errno));
+
+		lastSector = thisSector;
+	}
+
+	directory[leafname] = std::move(dirent);
+}
+
 void extractFile(const std::string& pattern)
 {
     for (const auto& i : directory)
@@ -143,8 +265,8 @@ void extractFile(const std::string& pattern)
         while ((sector != 0) && (sector != 0xffff))
         {
             uint8_t buffer[256];
-            inputFile.seekg((sector-1) * 0x100, std::ifstream::beg);
-            if (!inputFile.read((char*) buffer, sizeof(buffer)))
+            file.seekg((sector-1) * 0x100, std::ifstream::beg);
+            if (!file.read((char*) buffer, sizeof(buffer)))
                 Error() << fmt::format("I/O error on read: {}", strerror(errno));
             if (!outputFile.write((const char*) buffer, sizeof(buffer)))
                 Error() << fmt::format("I/O error on write: {}", strerror(errno));
@@ -154,27 +276,66 @@ void extractFile(const std::string& pattern)
     }
 }
 
-int main(int argc, const char* argv[])
+static void doCreate(int argc, const char* argv[])
 {
-    if (argc < 2)
-        syntax();
-    
-    inputFile.open(argv[1], std::ios::in | std::ios::binary);
-    if (!inputFile.is_open())
+	if (argc < 3)
+		syntax();
+
+	file.open(argv[1], std::ios::out | std::ios::binary | std::ios::trunc);
+	if (!file.is_open())
+		Error() << fmt::format("cannot open output file '{}'", argv[1]);
+
+	file.seekp(SECTOR_COUNT*SECTOR_SIZE - 1, std::ifstream::beg);
+	file.put(0);
+
+	for (int i=2; i<argc; i++)
+		insertFile(argv[i]);
+	
+	writeDirectory();
+	writeAllocationTable();
+	checkConsistency();
+
+	file.close();
+}
+
+static void doExtract(int argc, const char* argv[])
+{
+
+	if (argc < 2)
+		syntax();
+	
+	file.open(argv[1], std::ios::in | std::ios::binary);
+	if (!file.is_open())
 		Error() << fmt::format("cannot open input file '{}'", argv[1]);
 
-    readDirectory();
-    readAllocationTable();
-    checkConsistency();
+	readDirectory();
+	readAllocationTable();
+	checkConsistency();
 
-    if (argc == 2)
-        listDirectory();
-    else
-    {
-        for (int i=2; i<argc; i++)
-            extractFile(argv[i]);
-    }
+	if (argc == 2)
+		listDirectory();
+	else
+	{
+		for (int i=2; i<argc; i++)
+			extractFile(argv[i]);
+	}
 
-    inputFile.close();
+	file.close();
+}
+
+int main(int argc, const char* argv[])
+{
+	try
+	{
+		if ((argc > 1) && (strcmp(argv[1], "--create") == 0))
+			doCreate(argc-1, argv+1);
+		else
+			doExtract(argc, argv);
+	}
+	catch (const ErrorException& e)
+	{
+		e.print();
+		exit(1);
+	}
     return 0;
 }

@@ -4,6 +4,12 @@
 bool emergencyStop = false;
 
 static const char* WHITESPACE = " \t\n\r\f\v";
+static const char* SEPARATORS = "/\\";
+
+void ErrorException::print() const
+{
+	std::cerr << message << '\n';
+}
 
 bool beginsWith(const std::string& value, const std::string& ending)
 {
@@ -23,20 +29,36 @@ bool endsWith(const std::string& value, const std::string& ending)
         std::equal(ending.rbegin(), ending.rend(), lowercase.begin());
 }
 
-void leftTrimWhitespace(std::string& value)
+std::string leftTrimWhitespace(std::string value)
 {
 	value.erase(0, value.find_first_not_of(WHITESPACE));
+	return value;
 }
 
-void rightTrimWhitespace(std::string& value)
+std::string rightTrimWhitespace(std::string value)
 {
 	value.erase(value.find_last_not_of(WHITESPACE) + 1);
+	return value;
 }
 
-void trimWhitespace(std::string& value)
+std::string trimWhitespace(const std::string& value)
 {
-	leftTrimWhitespace(value);
-	rightTrimWhitespace(value);
+	return leftTrimWhitespace(rightTrimWhitespace(value));
+}
+
+std::string getLeafname(const std::string& value)
+{
+	constexpr char sep = '/';
+	#ifdef _WIN32
+		sep = '\\';
+	#endif
+
+   size_t i = value.find_last_of(SEPARATORS);
+   if (i != std::string::npos) {
+      return value.substr(i+1, value.length() - i);
+   }
+
+   return value;
 }
 
 void testForEmergencyStop()
