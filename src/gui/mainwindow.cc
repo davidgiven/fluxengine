@@ -261,7 +261,7 @@ void MainWindow::ApplyCustomSettings()
     for (int i = 0; i < additionalSettingsEntry->GetNumberOfLines(); i++)
     {
         auto setting = additionalSettingsEntry->GetLineText(i).ToStdString();
-        trimWhitespace(setting);
+		setting = trimWhitespace(setting);
         if (setting.size() == 0)
             continue;
 

@@ -111,13 +111,13 @@ with an obvious directory and allocation table. I have reversed engineered
 a very simple tool for extracting files from it. To show the directory, do:
 
 ```
-.obj/brother120tool image.img
+brother120tool image.img
 ```
 
 To extract a file, do:
 
 ```
-.obj/brother120tool image.img filename
+brother120tool image.img filename
 ```
 
 Wildcards are supported, so use `'*'` for the filename (remember to quote it)
@@ -130,6 +130,13 @@ format](https://mathesoft.eu/brother-wp-1-dokumente/) and has produced a
 (Windows-only, but runs in Wine) [tool which will convert these files into
 RTF](https://mathesoft.eu/sdm_downloads/wp2rtf/). This will only work on WP-1
 files.
+
+To create a disk image (note: this creates a _new_ disk image, overwriting the
+previous image), do:
+
+```
+brother120tool --create image.img filename1 filename2...
+```
 
 Any questions? please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new).
