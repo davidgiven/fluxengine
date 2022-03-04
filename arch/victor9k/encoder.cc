@@ -78,25 +78,22 @@ static int encode_data_gcr(uint8_t data)
     return -1;
 }
 
+static void write_byte(std::vector<bool>& bits, unsigned& cursor, uint8_t b)
+{
+    write_bits(bits, cursor, encode_data_gcr(b>>4), 5);
+    write_bits(bits, cursor, encode_data_gcr(b),    5);
+}
+
 static void write_bytes(std::vector<bool>& bits, unsigned& cursor, const Bytes& bytes)
 {
     for (uint8_t b : bytes)
-    {
-        write_bits(bits, cursor, encode_data_gcr(b>>4), 5);
-        write_bits(bits, cursor, encode_data_gcr(b),    5);
-    }
+        write_byte(bits, cursor, b);
 }
 
 static void write_gap(std::vector<bool>& bits, unsigned& cursor, int length)
 {
-	std::string zero("0");
-	std::string gap(""); 
 	for (int i = 0; i < length/10; i++)
-	{
-		gap += zero;
-	}	
-	Bytes byte_gap(gap);
-	write_bytes(bits, cursor, byte_gap);
+        write_byte(bits, cursor, '0');
 }
 
 static void write_sector(std::vector<bool>& bits, unsigned& cursor,
@@ -124,9 +121,6 @@ static void write_sector(std::vector<bool>& bits, unsigned& cursor,
     Bytes checksum(2);
     checksum.writer().write_le16(sumBytes(sector.data));
     write_bytes(bits, cursor, checksum);
-
-    // Bytes post_data_gap_bytes("000000000000000000000000000000");
-    // write_bytes(bits, cursor, post_data_gap_bytes);
     write_gap(bits, cursor, trackdata.post_data_gap_bits());
 }
 
