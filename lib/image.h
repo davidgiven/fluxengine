@@ -27,7 +27,7 @@ public:
 
 	public:
 		const_iterator(const wrapped_iterator_t& it): _it(it) {}
-		const Sector* operator* () { return _it->second.get(); }
+		std::shared_ptr<const Sector> operator* () { return _it->second; }
 		void operator++ () { _it++; }
 		bool operator== (const const_iterator& other) const { return _it == other._it; }
 		bool operator!= (const const_iterator& other) const { return _it != other._it; }

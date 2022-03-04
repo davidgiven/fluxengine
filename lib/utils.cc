@@ -1,4 +1,9 @@
 #include "globals.h"
+#include "utils.h"
+
+bool emergencyStop = false;
+
+static const char* WHITESPACE = " \t\n\r\f\v";
 
 bool beginsWith(const std::string& value, const std::string& ending)
 {
@@ -18,4 +23,25 @@ bool endsWith(const std::string& value, const std::string& ending)
         std::equal(ending.rbegin(), ending.rend(), lowercase.begin());
 }
 
+void leftTrimWhitespace(std::string& value)
+{
+	value.erase(0, value.find_first_not_of(WHITESPACE));
+}
+
+void rightTrimWhitespace(std::string& value)
+{
+	value.erase(value.find_last_not_of(WHITESPACE) + 1);
+}
+
+void trimWhitespace(std::string& value)
+{
+	leftTrimWhitespace(value);
+	rightTrimWhitespace(value);
+}
+
+void testForEmergencyStop()
+{
+	if (emergencyStop)
+		throw EmergencyStopException();
+}
 

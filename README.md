@@ -97,10 +97,10 @@ people who've had it work).
 | [Acorn ADFS](doc/disk-acornadfs.md)       |  🦄   |   🦖*  | single- and double- sided           |
 | [Acorn DFS](doc/disk-acorndfs.md)         |  🦄   |   🦖*  |                                     |
 | [Ampro Little Board](doc/disk-ampro.md)   |  🦖   |   🦖*  |                                     |
-| [Apple II DOS 3.3](doc/disk-apple2.md)    |  🦄   |        | doesn't do logical sector remapping |
+| [Apple II DOS 3.3](doc/disk-apple2.md)    |  🦄   |   🦖   | doesn't do logical sector remapping |
 | [Amiga](doc/disk-amiga.md)                |  🦄   |   🦄   |                                     |
 | [Commodore 64 1541/1581](doc/disk-c64.md) |  🦄   |   🦄   | and probably the other formats      |
-| [Brother 120kB](doc/disk-brother.md)      |  🦄   |   🦖   |                                     |
+| [Brother 120kB](doc/disk-brother.md)      |  🦄   |   🦄   |                                     |
 | [Brother 240kB](doc/disk-brother.md)      |  🦄   |   🦄   |                                     |
 | [Brother FB-100](doc/disk-fb100.md)       |  🦖   |        | Tandy Model 100, Husky Hunter, knitting machines |
 | [Macintosh 400kB/800kB](doc/disk-macintosh.md)  |  🦄   |   🦄   |                                     |

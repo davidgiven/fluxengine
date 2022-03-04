@@ -6,6 +6,7 @@
 #include "lib/config.pb.h"
 #include "imginputoutpututils.h"
 #include "fmt/format.h"
+#include "logger.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -56,7 +57,7 @@ public:
 			}
 		}
 
-		std::cout << fmt::format("IMG: wrote {} tracks, {} sides, {} kB total\n",
+		Logger() << fmt::format("IMG: wrote {} tracks, {} sides, {} kB total",
 						tracks, sides,
 						outputFile.tellp() / 1024);
 	}

@@ -45,7 +45,7 @@ rule link
 
 rule linkgui
     command = $CXX $LDFLAGS $GUILDFLAGS -o \$out \$in \$flags $LIBS $GUILIBS
-    description = LINK-OBJC \$in
+    description = LINK-GUI \$in
 
 rule test
     command = \$in && touch \$out
@@ -402,6 +402,7 @@ buildlibrary libbackend.a \
     arch/amiga/decoder.cc \
     arch/amiga/encoder.cc \
     arch/apple2/decoder.cc \
+    arch/apple2/encoder.cc \
     arch/brother/decoder.cc \
     arch/brother/encoder.cc \
     arch/c64/decoder.cc \
@@ -528,6 +529,7 @@ FORMATS="\
     northstar175 \
     northstar350 \
     northstar87 \
+    rx50 \
     tids990 \
     vgi \
     victor9k_ss \
@@ -564,6 +566,15 @@ buildlibrary libfrontend.a \
     src/fe-write.cc \
     src/fluxengine.cc \
 
+buildlibrary libgui.a \
+    -I$OBJDIR/proto \
+    -Idep/libusbp/include \
+    -d $OBJDIR/proto/libconfig.def \
+    src/gui/main.cc \
+    src/gui/layout.cpp \
+    src/gui/visualisation.cc \
+    src/gui/mainwindow.cc \
+
 buildprogram fluxengine \
     libfrontend.a \
     libformats.a \
@@ -573,6 +584,16 @@ buildprogram fluxengine \
     libusbp.a \
     libfmt.a \
     libagg.a \
+
+buildprogram fluxengine-gui \
+    -rule linkgui \
+    libgui.a \
+    libformats.a \
+    libbackend.a \
+    libconfig.a \
+    libfl2.a \
+    libusbp.a \
+    libfmt.a \
 
 buildlibrary libemu.a \
     dep/emu/fnmatch.c
@@ -626,6 +647,7 @@ runtest proto-test          -I$OBJDIR/proto \
                             $OBJDIR/proto/tests/testproto.cc
 
 encodedecodetest amiga
+encodedecodetest apple2
 encodedecodetest atarist360
 encodedecodetest atarist370
 encodedecodetest atarist400
@@ -649,6 +671,7 @@ encodedecodetest ibm720_525
 encodedecodetest mac400 scripts/mac400_test.textpb
 encodedecodetest mac800 scripts/mac800_test.textpb
 encodedecodetest n88basic
+encodedecodetest rx50
 encodedecodetest tids990
 encodedecodetest victor9k_ss
 encodedecodetest victor9k_ds

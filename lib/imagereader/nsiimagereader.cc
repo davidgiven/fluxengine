@@ -6,6 +6,7 @@
 #include "imagereader/imagereader.h"
 #include "image.h"
 #include "fmt/format.h"
+#include "logger.h"
 #include "lib/imagereader/imagereader.pb.h"
 #include <algorithm>
 #include <iostream>
@@ -14,55 +15,59 @@
 class NsiImageReader : public ImageReader
 {
 public:
-	NsiImageReader(const ImageReaderProto& config):
-		ImageReader(config)
-	{}
+    NsiImageReader(const ImageReaderProto& config): ImageReader(config) {}
 
-	std::unique_ptr<Image> readImage()
-	{
-        std::ifstream inputFile(_config.filename(), std::ios::in | std::ios::binary);
+    std::unique_ptr<Image> readImage()
+    {
+        std::ifstream inputFile(
+            _config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
             Error() << "cannot open input file";
 
-		const auto begin = inputFile.tellg();
-		inputFile.seekg(0, std::ios::end);
-		const auto end = inputFile.tellg();
-		const auto fsize = (end - begin);
+        const auto begin = inputFile.tellg();
+        inputFile.seekg(0, std::ios::end);
+        const auto end = inputFile.tellg();
+        const auto fsize = (end - begin);
 
-		std::cout << "NSI: Autodetecting geometry based on file size: " << fsize << std::endl;
+        Logger() << fmt::format(
+            "NSI: Autodetecting geometry based on file size: {}", fsize);
 
-		unsigned numCylinders = 35;
-		unsigned numSectors = 10;
-		unsigned numHeads = 2;
-		unsigned sectorSize = 512;
+        unsigned numCylinders = 35;
+        unsigned numSectors = 10;
+        unsigned numHeads = 2;
+        unsigned sectorSize = 512;
 
-		switch (fsize) {
-			case 358400:
-				numHeads = 2;
-				sectorSize = 512;
-				break;
+        switch (fsize)
+        {
+            case 358400:
+                numHeads = 2;
+                sectorSize = 512;
+                break;
 
-			case 179200:
-				numHeads = 1;
-				sectorSize = 512;
-				break;
-				
-			case 89600:
-				numHeads = 1;
-				sectorSize = 256;
-				break;
+            case 179200:
+                numHeads = 1;
+                sectorSize = 512;
+                break;
 
-			default:
-				Error() << "NSI: unknown file size";
-		}
+            case 89600:
+                numHeads = 1;
+                sectorSize = 256;
+                break;
+
+            default:
+                Error() << "NSI: unknown file size";
+        }
 
         size_t trackSize = numSectors * sectorSize;
 
-        std::cout << fmt::format("reading {} tracks, {} heads, {} sectors, {} bytes per sector, {} kB total",
-                        numCylinders, numHeads,
-                        numSectors, sectorSize,
-                        numCylinders * numHeads * trackSize / 1024)
-                << std::endl;
+        Logger() << fmt::format(
+            "reading {} tracks, {} heads, {} sectors, {} bytes per sector, {} "
+            "kB total",
+            numCylinders,
+            numHeads,
+            numSectors,
+            sectorSize,
+            numCylinders * numHeads * trackSize / 1024);
 
         std::unique_ptr<Image> image(new Image);
         unsigned sectorFileOffset;
@@ -73,19 +78,24 @@ public:
             {
                 for (unsigned sectorId = 0; sectorId < numSectors; sectorId++)
                 {
-                    if (head == 0) { /* Head 0 is from track 0-34 */
-                        sectorFileOffset = track * trackSize + sectorId * sectorSize;
+                    if (head == 0)
+                    { /* Head 0 is from track 0-34 */
+                        sectorFileOffset =
+                            track * trackSize + sectorId * sectorSize;
                     }
-                    else { /* Head 1 is from track 70-35 */
-                        sectorFileOffset = (trackSize * numCylinders) + /* Skip over side 0 */
+                    else
+                    { /* Head 1 is from track 70-35 */
+                        sectorFileOffset =
+                            (trackSize * numCylinders) + /* Skip over side 0 */
                             ((numCylinders - track - 1) * trackSize) +
-                            (sectorId * sectorSize); /* Sector offset from beginning of track. */
+                            (sectorId * sectorSize); /* Sector offset from
+                                                        beginning of track. */
                     }
 
                     inputFile.seekg(sectorFileOffset, std::ios::beg);
 
                     Bytes data(sectorSize);
-                    inputFile.read((char*) data.begin(), sectorSize);
+                    inputFile.read((char*)data.begin(), sectorSize);
 
                     const auto& sector = image->put(track, head, sectorId);
                     sector->status = Sector::OK;
@@ -97,19 +107,16 @@ public:
             }
         }
 
-		image->setGeometry({
-			.numTracks = numCylinders,
-			.numSides = numHeads,
-			.numSectors = numSectors,
-			.sectorSize = sectorSize
-		});
+        image->setGeometry({.numTracks = numCylinders,
+            .numSides = numHeads,
+            .numSectors = numSectors,
+            .sectorSize = sectorSize});
         return image;
-	}
+    }
 };
 
 std::unique_ptr<ImageReader> ImageReader::createNsiImageReader(
-	const ImageReaderProto& config)
+    const ImageReaderProto& config)
 {
     return std::unique_ptr<ImageReader>(new NsiImageReader(config));
 }
-
