@@ -211,7 +211,7 @@ void insertFile(const std::string& filename)
 
 	auto dirent = std::make_unique<Dirent>();
 	dirent->filename = leafname;
-	dirent->type = 0;
+	dirent->type = (leafname.find('*') != std::string::npos);
 	dirent->startSector = 0xffff;
 	dirent->sectorCount = 0;
 
@@ -248,7 +248,7 @@ void extractFile(const std::string& pattern)
     for (const auto& i : directory)
     {
         const Dirent& dirent = *i.second;
-        if (dirent.type != 0)
+        if ((dirent.type == 0xf0) || (dirent.type == 0xe5))
             continue;
 
         if (fnmatch(pattern.c_str(), dirent.filename.c_str(), 0))
@@ -300,7 +300,6 @@ static void doCreate(int argc, const char* argv[])
 
 static void doExtract(int argc, const char* argv[])
 {
-
 	if (argc < 2)
 		syntax();
 	
