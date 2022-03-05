@@ -33,7 +33,7 @@ public:
 	{
 		FluxFileProto proto;
 		proto.set_magic(FluxMagic::MAGIC);
-		proto.set_version(FluxFileVersion::VERSION_1);
+		proto.set_version(FluxFileVersion::VERSION_2);
 		for (const auto& e : _data)
 		{
 			auto track = proto.add_track();

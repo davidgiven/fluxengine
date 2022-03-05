@@ -20,6 +20,7 @@ public:
 
         if (!_proto.ParseFromIstream(&ifs))
             Error() << "unable to read input file";
+		upgradeFluxFile();
     }
 
 public:
@@ -42,6 +43,29 @@ private:
         if (ifs.fail())
             Error() << fmt::format("FL2 read I/O error: {}", strerror(errno));
     }
+
+	void upgradeFluxFile()
+	{
+		if (_proto.version() == FluxFileVersion::VERSION_1)
+		{
+			/* Change a flux datastream with multiple segments separated by F_DESYNC into multiple
+			 * flux segments. */
+
+			for (auto* track = _proto.mutable_track())
+			{
+				Fluxmap old_flux(track.flux(0));
+				auto split_flux = old_flux.split();
+
+				track.clear_flux();
+				for (const auto& flux : split_flux)
+					track.add_flux(flux.rawBytes());
+			}
+
+			_proto.set_version(FluxFileVersion::VERSION_2);
+		}
+		if (_proto.version() > FluxFileVersion::VERSION_2)
+			Error() << fmt::format("this is a version {} flux file, but this build of the client can only handle up to version {} --- please upgrade", _proto.version(), FluxFileVersion::VERSION_2);
+	}
 
 private:
     const Fl2FluxSourceProto& _config;
