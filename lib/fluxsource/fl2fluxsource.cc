@@ -91,9 +91,7 @@ private:
 
 			for (auto& track : *_proto.mutable_track())
 			{
-				if (track.flux_size() == 0)
-					track.clear_flux();
-				else
+				if (track.flux_size() != 0)
 				{
 					Fluxmap oldFlux(track.flux(0));
 
