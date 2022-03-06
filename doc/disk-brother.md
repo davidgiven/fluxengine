@@ -138,6 +138,11 @@ previous image), do:
 brother120tool --create image.img filename1 filename2...
 ```
 
+Any files whose names begin with an asterisk (`*`) will be marked as hidden. If
+the file is named `*boot`, then a boot sector will be created which will load
+and run the file at 0x7000 if the machine is started with CODE+Q pressed. So
+far this has only been confirmed to work on a WP-1.
+
 Any questions? please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new).
 
