@@ -51,6 +51,8 @@ public:
     Bytes& clear()
     { resize(0); return *this; }
 
+	std::vector<Bytes> split(uint8_t separator) const;
+
     Bytes slice(unsigned start, unsigned len) const;
     Bytes slice(unsigned start) const;
     Bytes swab() const;

@@ -5,7 +5,45 @@
 #include "fluxsource/fluxsource.h"
 #include "proto.h"
 #include "fmt/format.h"
+#include "fluxmap.h"
 #include <fstream>
+
+class Fl2FluxSourceIterator : public FluxSourceIterator
+{
+public:
+	Fl2FluxSourceIterator(const TrackFluxProto& proto):
+		_proto(proto)
+	{}
+
+	bool hasNext() const override
+	{
+		return _count < _proto.flux_size();
+	}
+
+	std::unique_ptr<const Fluxmap> next() override
+	{
+		auto bytes = _proto.flux(_count);
+		_count++;
+		return std::make_unique<Fluxmap>(bytes);
+	}
+
+private:
+	const TrackFluxProto& _proto;
+	int _count = 0;
+};
+
+class EmptyFluxSourceIterator : public FluxSourceIterator
+{
+	bool hasNext() const override
+	{
+		return false;
+	}
+
+	std::unique_ptr<const Fluxmap> next() override
+	{
+		Error() << "no flux to read";
+	}
+};
 
 class Fl2FluxSource : public FluxSource
 {
@@ -24,15 +62,15 @@ public:
     }
 
 public:
-    std::unique_ptr<Fluxmap> readFlux(int cylinder, int head)
+    std::unique_ptr<FluxSourceIterator> readFlux(int cylinder, int head) override
     {
         for (const auto& track : _proto.track())
         {
             if ((track.cylinder() == cylinder) && (track.head() == head))
-                return std::make_unique<Fluxmap>(track.flux());
+				return std::make_unique<Fl2FluxSourceIterator>(track);
         }
 
-        return std::make_unique<Fluxmap>();
+        return std::make_unique<EmptyFluxSourceIterator>();
     }
 
     void recalibrate() {}
@@ -51,14 +89,18 @@ private:
 			/* Change a flux datastream with multiple segments separated by F_DESYNC into multiple
 			 * flux segments. */
 
-			for (auto* track = _proto.mutable_track())
+			for (auto& track : *_proto.mutable_track())
 			{
-				Fluxmap old_flux(track.flux(0));
-				auto split_flux = old_flux.split();
+				if (track.flux_size() == 0)
+					track.clear_flux();
+				else
+				{
+					Fluxmap oldFlux(track.flux(0));
 
-				track.clear_flux();
-				for (const auto& flux : split_flux)
-					track.add_flux(flux.rawBytes());
+					track.clear_flux();
+					for (const auto& flux : oldFlux.split())
+						track.add_flux(flux->rawBytes());
+				}
 			}
 
 			_proto.set_version(FluxFileVersion::VERSION_2);

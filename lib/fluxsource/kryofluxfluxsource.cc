@@ -4,7 +4,7 @@
 #include "lib/fluxsource/fluxsource.pb.h"
 #include "fluxsource/fluxsource.h"
 
-class KryofluxFluxSource : public FluxSource
+class KryofluxFluxSource : public TrivialFluxSource
 {
 public:
     KryofluxFluxSource(const KryofluxFluxSourceProto& config):
@@ -12,7 +12,7 @@ public:
     {}
 
 public:
-    std::unique_ptr<Fluxmap> readFlux(int track, int side)
+    std::unique_ptr<const Fluxmap> readSingleFlux(int track, int side) override
     {
         return readStream(_path, track, side);
     }
@@ -25,5 +25,5 @@ private:
 
 std::unique_ptr<FluxSource> FluxSource::createKryofluxFluxSource(const KryofluxFluxSourceProto& config)
 {
-    return std::unique_ptr<FluxSource>(new KryofluxFluxSource(config));
+    return std::make_unique<KryofluxFluxSource>(config);
 }

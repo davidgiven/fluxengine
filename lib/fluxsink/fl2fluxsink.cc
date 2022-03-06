@@ -39,7 +39,8 @@ public:
 			auto track = proto.add_track();
 			track->set_cylinder(e.first.first);
 			track->set_head(e.first.second);
-			track->set_flux(e.second);
+			for (const auto& fluxBytes : e.second)
+				track->add_flux(fluxBytes);
 		}
 
 		if (!proto.SerializeToOstream(&_of))
@@ -50,9 +51,10 @@ public:
 	}
 
 public:
-	void writeFlux(int cylinder, int head, Fluxmap& fluxmap)
+	void writeFlux(int cylinder, int head, const Fluxmap& fluxmap) override
 	{
-		_data[std::make_pair(cylinder, head)] = fluxmap.rawBytes();
+		auto& vector = _data[std::make_pair(cylinder, head)];
+		vector.push_back(fluxmap.rawBytes());
 	}
 
 	operator std::string () const
@@ -63,7 +65,7 @@ public:
 private:
 	std::string _filename;
 	std::ofstream _of;
-	std::map<std::pair<unsigned, unsigned>, Bytes> _data;
+	std::map<std::pair<unsigned, unsigned>, std::vector<Bytes>> _data;
 };
 
 std::unique_ptr<FluxSink> FluxSink::createFl2FluxSink(const Fl2FluxSinkProto& config)
