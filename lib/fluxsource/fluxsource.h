@@ -14,6 +14,15 @@ class KryofluxFluxSourceProto;
 class ScpFluxSourceProto;
 class TestPatternFluxSourceProto;
 
+class FluxSourceIterator
+{
+public:
+	virtual ~FluxSourceIterator() {}
+
+	virtual bool hasNext() const = 0;
+	virtual std::unique_ptr<const Fluxmap> next() = 0;
+};
+
 class FluxSource
 {
 public:
@@ -33,9 +42,16 @@ public:
 	static void updateConfigForFilename(FluxSourceProto* proto, const std::string& filename);
 
 public:
-    virtual std::unique_ptr<Fluxmap> readFlux(int track, int side) = 0;
+    virtual std::unique_ptr<FluxSourceIterator> readFlux(int track, int side) = 0;
     virtual void recalibrate() {}
-    virtual bool retryable() { return false; }
+	virtual bool isHardware() { return false; }
+};
+
+class TrivialFluxSource : public FluxSource
+{
+public:
+    std::unique_ptr<FluxSourceIterator> readFlux(int track, int side);
+	virtual std::unique_ptr<const Fluxmap> readSingleFlux(int track, int side) = 0;
 };
 
 #endif

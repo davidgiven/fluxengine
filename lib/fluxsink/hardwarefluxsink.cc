@@ -41,7 +41,7 @@ public:
     }
 
 public:
-    void writeFlux(int track, int side, Fluxmap& fluxmap)
+    void writeFlux(int track, int side, const Fluxmap& fluxmap) override
     {
         usbSetDrive(_config.drive(), _config.high_density(), _config.index_mode());
 		#if 0

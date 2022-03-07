@@ -1,6 +1,7 @@
 #include "globals.h"
 #include "flags.h"
 #include "fluxsource/fluxsource.h"
+#include "fluxmap.h"
 #include "lib/config.pb.h"
 #include "proto.h"
 #include "utils.h"
@@ -72,5 +73,36 @@ void FluxSource::updateConfigForFilename(FluxSourceProto* proto, const std::stri
 	Error() << fmt::format("unrecognised flux filename '{}'", filename);
 }
 
+class TrivialFluxSourceIterator : public FluxSourceIterator
+{
+public:
+	TrivialFluxSourceIterator(TrivialFluxSource* fluxSource, int cylinder, int head):
+		_fluxSource(fluxSource),
+		_cylinder(cylinder),
+		_head(head)
+	{}
+
+	bool hasNext() const override
+	{
+		return !!_fluxSource;
+	}
+
+	std::unique_ptr<const Fluxmap> next() override
+	{
+		auto fluxmap = _fluxSource->readSingleFlux(_cylinder, _head);
+		_fluxSource = nullptr;
+		return fluxmap;
+	}
+
+private:
+	TrivialFluxSource* _fluxSource;
+	int _cylinder;
+	int _head;
+};
+
+std::unique_ptr<FluxSourceIterator> TrivialFluxSource::readFlux(int cylinder, int head)
+{
+	return std::make_unique<TrivialFluxSourceIterator>(this, cylinder, head);
+}
 
 
