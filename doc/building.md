@@ -187,12 +187,12 @@ install some support packages.
 
   - For Linux (this is Ubuntu, but this should apply to Debian too):
 	`ninja-build`, `libusb-1.0-0-dev`, `libsqlite3-dev`, `zlib1g-dev`,
-	`libudev-dev`.
+	`libudev-dev`, `protobuf-compiler`, `libwxgtk3.0-gtk3-dev`.
   - For OSX with Homebrew: `ninja`, `libusb`, `pkg-config`, `sqlite`,
-    `protobuf`.
+    `protobuf`, `truncate`, `wxwidgets`.
   - For Windows with MSYS2: `make`, `ninja`, `mingw-w64-i686-libusb`,
 	`mingw-w64-i686-protobuf`, `mingw-w64-i686-sqlite3`, `mingw-w64-i686-zlib`,
-	`mingw-w64-i686-gcc`.
+	`mingw-w64-i686-gcc`, `vim`, `diffutils`, `mingw-w64-i686-wxWidgets`.
 
 These lists are not necessarily exhaustive --- please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new) if I've missed

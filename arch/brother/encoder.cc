@@ -113,7 +113,6 @@ public:
 	{
 		std::vector<std::shared_ptr<const Sector>> sectors;
 
-		int logicalTrack;
 		if (physicalSide != 0)
 			return sectors;
 		physicalTrack -= _config.bias();
@@ -123,19 +122,17 @@ public:
 				if ((physicalTrack < 0) || (physicalTrack >= (BROTHER_TRACKS_PER_120KB_DISK*2))
 						|| (physicalTrack & 1))
 					return sectors;
-				logicalTrack = physicalTrack/2;
 				break;
 
 			case BROTHER240:
 				if ((physicalTrack < 0) || (physicalTrack >= BROTHER_TRACKS_PER_240KB_DISK))
 					return sectors;
-				logicalTrack = physicalTrack;
 				break;
 		}
 
         for (int sectorId=0; sectorId<BROTHER_SECTORS_PER_TRACK; sectorId++)
         {
-            const auto& sector = image.get(logicalTrack, 0, sectorId);
+            const auto& sector = image.get(physicalTrack, 0, sectorId);
             if (sector)
                 sectors.push_back(sector);
 		}
@@ -146,7 +143,6 @@ public:
     std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide,
 			const std::vector<std::shared_ptr<const Sector>>& sectors, const Image& image) override
 	{
-		int logicalTrack;
 		if (physicalSide != 0)
 			return std::unique_ptr<Fluxmap>();
 		physicalTrack -= _config.bias();
@@ -156,13 +152,11 @@ public:
 				if ((physicalTrack < 0) || (physicalTrack >= (BROTHER_TRACKS_PER_120KB_DISK*2))
 						|| (physicalTrack & 1))
 					return std::unique_ptr<Fluxmap>();
-				logicalTrack = physicalTrack/2;
 				break;
 
 			case BROTHER240:
 				if ((physicalTrack < 0) || (physicalTrack >= BROTHER_TRACKS_PER_240KB_DISK))
 					return std::unique_ptr<Fluxmap>();
-				logicalTrack = physicalTrack;
 				break;
 		}
 
@@ -179,10 +173,10 @@ public:
 			double dataMs = headerMs + _config.post_header_spacing_ms();
 			unsigned dataCursor = dataMs*1e3 / _config.clock_rate_us();
 
-			const auto& sectorData = image.get(logicalTrack, 0, sectorId);
+			const auto& sectorData = image.get(physicalTrack, 0, sectorId);
 
 			fillBitmapTo(bits, cursor, headerCursor, { true, false });
-			write_sector_header(bits, cursor, logicalTrack, sectorId);
+			write_sector_header(bits, cursor, sectorData->logicalTrack, sectorId);
 			fillBitmapTo(bits, cursor, dataCursor, { true, false });
 			write_sector_data(bits, cursor, sectorData->data);
 		}

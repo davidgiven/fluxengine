@@ -8,6 +8,7 @@
 #include "lib/fluxsink/fluxsink.pb.h"
 #include "proto.h"
 #include "fmt/format.h"
+#include "fluxmap.h"
 #include "scp.h"
 #include <fstream>
 #include <sys/stat.h>
@@ -79,7 +80,7 @@ public:
 	}
 
 public:
-	void writeFlux(int cylinder, int head, Fluxmap& fluxmap)
+	void writeFlux(int cylinder, int head, const Fluxmap& fluxmap) override
 	{
 		ByteWriter trackdataWriter(_trackdata);
 		trackdataWriter.seekToEnd();
@@ -97,9 +98,7 @@ public:
 		trackheader.header.track_id[2] = 'K';
 		trackheader.header.strack = strack;
 
-		auto lastFluxmap = fluxmap.split().back();
-
-		FluxmapReader fmr(lastFluxmap);
+		FluxmapReader fmr(fluxmap);
 		Bytes fluxdata;
 		ByteWriter fluxdataWriter(fluxdata);
 

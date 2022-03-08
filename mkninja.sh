@@ -640,6 +640,7 @@ runtest fmmfm-test          tests/fmmfm.cc
 runtest greaseweazle-test   tests/greaseweazle.cc
 runtest kryoflux-test       tests/kryoflux.cc
 runtest ldbs-test           tests/ldbs.cc
+runtest utils-test          tests/utils.cc
 runtest proto-test          -I$OBJDIR/proto \
                             -d $OBJDIR/proto/libconfig.def \
                             -d $OBJDIR/proto/libtestproto.def \

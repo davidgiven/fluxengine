@@ -20,7 +20,7 @@ public:
 	{}
 
 public:
-	void writeFlux(int cylinder, int head, Fluxmap& fluxmap)
+	void writeFlux(int cylinder, int head, const Fluxmap& fluxmap) override
 	{
 		mkdir(_config.directory().c_str(), 0744);
 		std::ofstream of(
