@@ -532,6 +532,7 @@ FORMATS="\
     northstar175 \
     northstar350 \
     northstar87 \
+    prodos \
     rx50 \
     tids990 \
     vgi \
