@@ -97,7 +97,7 @@ people who've had it work).
 | [Acorn ADFS](doc/disk-acornadfs.md)       |  🦄   |   🦖*  | single- and double- sided           |
 | [Acorn DFS](doc/disk-acorndfs.md)         |  🦄   |   🦖*  |                                     |
 | [Ampro Little Board](doc/disk-ampro.md)   |  🦖   |   🦖*  |                                     |
-| [Apple II DOS 3.3](doc/disk-apple2.md)    |  🦄   |   🦖   | doesn't do logical sector remapping |
+| [Apple II](doc/disk-apple2.md)            |  🦄   |   🦄   |                                     |
 | [Amiga](doc/disk-amiga.md)                |  🦄   |   🦄   |                                     |
 | [Commodore 64 1541/1581](doc/disk-c64.md) |  🦄   |   🦄   | and probably the other formats      |
 | [Brother 120kB](doc/disk-brother.md)      |  🦄   |   🦄   |                                     |
