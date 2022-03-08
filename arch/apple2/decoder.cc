@@ -123,15 +123,16 @@ public:
 		/* Read and decode data. */
 
 		auto readApple8 = [&]() {
-		    auto result = readRaw8();
-		    while(result & 0x80 == 0) {
+		    auto result = 0;
+		    while((result & 0x80) == 0) {
 			auto b = readRawBits(1);
+                        if(b.empty()) break;
 			result = (result << 1) | b[0];
 		    }
 		    return result;
 		};
 
-		constexpr unsigned recordLength = APPLE2_ENCODED_SECTOR_LENGTH + 2;
+		constexpr unsigned recordLength = APPLE2_ENCODED_SECTOR_LENGTH+2;
                 uint8_t bytes[recordLength];
                 for(auto &byte : bytes) {
                     byte = readApple8();
