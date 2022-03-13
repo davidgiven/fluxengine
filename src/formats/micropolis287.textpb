@@ -1,15 +1,7 @@
 comment: 'Micropolis MetaFloppy Mod I 287kB 5.25" DSDD hard-sectored'
 
-flux_source {
-	drive {
-		hard_sector_count: 16
-	}
-}
-
-flux_sink {
-	drive {
-		hard_sector_count: 16
-	}
+drive {
+	hard_sector_count: 16
 }
 
 image_reader {

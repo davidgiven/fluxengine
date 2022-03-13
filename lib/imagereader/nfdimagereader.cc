@@ -57,10 +57,8 @@ public:
         auto ibm = config.mutable_encoder()->mutable_ibm();
         config.mutable_cylinders()->set_end(0);
         Logger() << "NFD: HD 1.2MB mode";
-        if (config.flux_sink().dest_case() == FluxSinkProto::DestCase::kDrive)
-        {
-            config.mutable_flux_sink()->mutable_drive()->set_high_density(true);
-        }
+        if (!config.drive().has_drive())
+            config.mutable_drive()->set_high_density(true);
 
         std::unique_ptr<Image> image(new Image);
         for (int track = 0; track < 163; track++)

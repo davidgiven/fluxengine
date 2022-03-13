@@ -204,14 +204,15 @@ static void draw_x_graticules(Agg2D& painter, double x1, double y1, double x2, d
 
 int mainAnalyseDriveResponse(int argc, const char* argv[])
 {
+	config.mutable_flux_source()->mutable_drive();
     flags.parseFlagsWithConfigFiles(argc, argv, {});
 
 	if (!config.flux_sink().has_drive())
 		Error() << "this only makes sense with a real disk drive";
 
-    usbSetDrive(config.flux_sink().drive().drive(),
-		config.flux_sink().drive().high_density(),
-		config.flux_sink().drive().index_mode());
+    usbSetDrive(config.drive().drive(),
+		config.drive().high_density(),
+		config.drive().index_mode());
 	usbSeek(destCylinder);
 
 	std::cout << "Measuring rotational speed...\n";
