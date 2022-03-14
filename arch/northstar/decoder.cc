@@ -88,16 +88,6 @@ public:
 			now = tell().ns();
 		}
 
-		/* Discard a possible partial sector at the end of the track.
-		 * This partial sector could be mistaken for a conflicted sector, if
-		 * whatever data read happens to match the checksum of 0, which is
-		 * rare, but has been observed on some disks.
-		 */
-		if (now > (getFluxmapDuration() - 21e6)) {
-			seekToIndexMark();
-			return 0;
-		}
-
 		int msSinceIndex = std::round(now / 1e6);
 
 		/* Note that the seekToPattern ignores the sector pulses, so if
@@ -107,11 +97,6 @@ public:
 		 */
 		nanoseconds_t clock = seekToPattern(ANY_SECTOR_PATTERN);
 		_sector->headerStartTime = tell().ns();
-
-		/* Discard a possible partial sector. */
-		if (_sector->headerStartTime > (getFluxmapDuration() - 21e6)) {
-			return 0;
-		}
 
 		int sectorFoundTimeRaw = std::round(_sector->headerStartTime / 1e6);
 		int sectorFoundTime;
@@ -132,7 +117,16 @@ public:
 
 	void decodeSectorRecord() override
 	{
+		nanoseconds_t before = tell().ns();
 		uint64_t id = toBytes(readRawBits(64)).reader().read_be64();
+		nanoseconds_t after = tell().ns();
+
+		/* Discard any sectors which span the end of a revolution. This can sometimes
+		 * cause spurious bad sectors which can trigger conflicts. */
+
+		if (int(before / 200e9) != int(after / 200e9))
+			return;
+
 		unsigned recordSize, payloadSize, headerSize;
 
 		if (id == MFM_ID) {
