@@ -322,10 +322,10 @@ encodedecodetest() {
     echo "    format=$format"
     echo "    configs=$*"
     echo "    fluxx=flux"
-    echo "build $OBJDIR/$format.encodedecode.scp.stamp : encodedecode | fluxengine$EXTENSION scripts/encodedecodetest.sh $*"
-    echo "    format=$format"
-    echo "    configs=$*"
-    echo "    fluxx=scp"
+    #echo "build $OBJDIR/$format.encodedecode.scp.stamp : encodedecode | fluxengine$EXTENSION scripts/encodedecodetest.sh $*"
+    #echo "    format=$format"
+    #echo "    configs=$*"
+    #echo "    fluxx=scp"
 }
 
 buildlibrary libagg.a \
@@ -677,6 +677,7 @@ encodedecodetest rx50
 encodedecodetest tids990
 encodedecodetest victor9k_ss
 encodedecodetest victor9k_ds
+encodedecodetest northstar87 scripts/northstar87_test.textpb
 
 # vim: sw=4 ts=4 et
 

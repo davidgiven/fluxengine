@@ -56,4 +56,3 @@ Fluxmap& Fluxmap::appendBits(const std::vector<bool>& bits, nanoseconds_t clock)
 	return *this;
 }
 
-
