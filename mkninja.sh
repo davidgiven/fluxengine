@@ -382,9 +382,10 @@ buildproto libconfig.a \
     lib/common.proto \
     lib/config.proto \
     lib/decoders/decoders.proto \
+    lib/drive.proto \
     lib/encoders/encoders.proto \
-    lib/fluxsource/fluxsource.proto \
     lib/fluxsink/fluxsink.proto \
+    lib/fluxsource/fluxsource.proto \
     lib/imagereader/imagereader.proto \
     lib/imagewriter/imagewriter.proto \
     lib/usb/usb.proto \

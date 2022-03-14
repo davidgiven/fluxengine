@@ -57,7 +57,7 @@ void FluxSource::updateConfigForFilename(FluxSourceProto* proto, const std::stri
 		{ std::regex("^erase:$"),          [](auto& s, auto* proto) { proto->mutable_erase(); }},
 		{ std::regex("^kryoflux:(.*)$"),   [](auto& s, auto* proto) { proto->mutable_kryoflux()->set_directory(s); }},
 		{ std::regex("^testpattern:(.*)"), [](auto& s, auto* proto) { proto->mutable_test_pattern(); }},
-		{ std::regex("^drive:(.*)"),       [](auto& s, auto* proto) { proto->mutable_drive()->set_drive(std::stoi(s)); }},
+		{ std::regex("^drive:(.*)"),       [](auto& s, auto* proto) { proto->mutable_drive(); config.mutable_drive()->set_drive(std::stoi(s)); }},
 	};
 
 	for (const auto& it : formats)

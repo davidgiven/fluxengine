@@ -67,24 +67,16 @@ public:
         if (mediaFlag == 0x20)
         {
             Logger() << "D88: high density mode";
-            if (config.flux_sink().dest_case() ==
-                FluxSinkProto::DestCase::kDrive)
-            {
-                config.mutable_flux_sink()->mutable_drive()->set_high_density(
-                    true);
-            }
+			if (!config.drive().has_drive())
+				config.mutable_drive()->set_high_density(true);
         }
         else
         {
             Logger() << "D88: single/double density mode";
             physicalStep = 2;
             clockRate = 300;
-            if (config.flux_sink().dest_case() ==
-                FluxSinkProto::DestCase::kDrive)
-            {
-                config.mutable_flux_sink()->mutable_drive()->set_high_density(
-                    false);
-            }
+			if (!config.drive().has_drive())
+				config.mutable_drive()->set_high_density(false);
         }
 
         std::unique_ptr<Image> image(new Image);

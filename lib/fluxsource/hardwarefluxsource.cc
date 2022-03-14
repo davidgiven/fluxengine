@@ -2,6 +2,7 @@
 #include "flags.h"
 #include "fluxmap.h"
 #include "logger.h"
+#include "proto.h"
 #include "usb/usb.h"
 #include "fluxsource/fluxsource.h"
 #include "lib/fluxsource/fluxsource.pb.h"
@@ -28,14 +29,12 @@ private:
 
         std::unique_ptr<const Fluxmap> next()
         {
-            usbSetDrive(_fluxsource._config.drive(),
-                _fluxsource._config.high_density(),
-                _fluxsource._config.index_mode());
+            usbSetDrive(config.drive().drive(), config.drive().high_density(), config.drive().index_mode());
             usbSeek(_cylinder);
 
             Bytes data = usbRead(_head,
-                _fluxsource._config.sync_with_index(),
-                _fluxsource._config.revolutions() * _fluxsource._oneRevolution,
+                config.drive().sync_with_index(),
+                config.drive().revolutions() * _fluxsource._oneRevolution,
                 _fluxsource._hardSectorThreshold);
             auto fluxmap = std::make_unique<Fluxmap>();
             fluxmap->appendBytes(data);
@@ -49,20 +48,19 @@ private:
     };
 
 public:
-    HardwareFluxSource(const HardwareFluxSourceProto& config): _config(config)
+    HardwareFluxSource(const HardwareFluxSourceProto& conf): _config(conf)
     {
         int retries = 5;
-        usbSetDrive(
-            _config.drive(), _config.high_density(), _config.index_mode());
+        usbSetDrive(config.drive().drive(), config.drive().high_density(), config.drive().index_mode());
         Logger() << BeginSpeedOperationLogMessage();
 
         do
         {
             _oneRevolution =
-                usbGetRotationalPeriod(_config.hard_sector_count());
-            if (_config.hard_sector_count() != 0)
+                usbGetRotationalPeriod(config.drive().hard_sector_count());
+            if (config.drive().hard_sector_count() != 0)
                 _hardSectorThreshold =
-                    _oneRevolution * 3 / (4 * _config.hard_sector_count());
+                    _oneRevolution * 3 / (4 * config.drive().hard_sector_count());
             else
                 _hardSectorThreshold = 0;
 

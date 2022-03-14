@@ -1,15 +1,7 @@
 comment: 'Japanese PC 1232kB 5.25"/3.5" 77-track 8-sector DSHD'
 
-flux_sink {
-	drive {
-		high_density: true
-	}
-}
-
-flux_source {
-	drive {
-		high_density: true
-	}
+drive {
+	high_density: true
 }
 
 image_reader {
