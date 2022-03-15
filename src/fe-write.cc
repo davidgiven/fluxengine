@@ -68,6 +68,7 @@ int mainWrite(int argc, const char* argv[])
 	if (argc == 1)
 		showProfiles("write", formats);
 	config.mutable_flux_sink()->mutable_drive();
+	config.mutable_flux_source()->mutable_drive();
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
 	std::unique_ptr<ImageReader> reader(ImageReader::create(config.image_reader()));
