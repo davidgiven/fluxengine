@@ -13,6 +13,10 @@ public:
     std::vector<bool> readBits(unsigned count);
     std::vector<bool> readBits(const Fluxmap::Position& until);
 
+    std::vector<bool> readBits()
+	{
+		return readBits(UINT_MAX);
+	}
 private:
 	nanoseconds_t nextFlux();
 
