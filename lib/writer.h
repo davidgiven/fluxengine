@@ -10,7 +10,7 @@ class FluxSink;
 class Image;
 
 extern void writeTracks(FluxSink& fluxSink,
-    const std::function<std::unique_ptr<Fluxmap>(int track, int side)>
+    const std::function<std::unique_ptr<const Fluxmap>(int track, int side)>
         producer);
 
 extern void fillBitmapTo(std::vector<bool>& bitmap,

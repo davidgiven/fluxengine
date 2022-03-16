@@ -148,7 +148,7 @@ int main(int argc, const char* argv[])
 			}
 			catch (const ErrorException& e)
 			{
-				std::cerr << e.message << '\n';
+				e.print();
 				exit(1);
 			}
 		}

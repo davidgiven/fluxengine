@@ -242,10 +242,7 @@ void MainWindow::PrepareConfig()
 void MainWindow::SetHighDensity()
 {
 	bool hd = highDensityToggle->GetValue();
-	if (config.flux_source().has_drive())
-		config.mutable_flux_source()->mutable_drive()->set_high_density(hd);
-	if (config.flux_sink().has_drive())
-		config.mutable_flux_sink()->mutable_drive()->set_high_density(hd);
+	config.mutable_drive()->set_high_density(hd);
 }
 
 void MainWindow::ShowConfig()
@@ -261,7 +258,7 @@ void MainWindow::ApplyCustomSettings()
     for (int i = 0; i < additionalSettingsEntry->GetNumberOfLines(); i++)
     {
         auto setting = additionalSettingsEntry->GetLineText(i).ToStdString();
-        trimWhitespace(setting);
+		setting = trimWhitespace(setting);
         if (setting.size() == 0)
             continue;
 

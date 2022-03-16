@@ -57,6 +57,7 @@ public:
 	int logicalTrack = physicalTrack / 2;
 	double clockRateUs = 4.;
 
+	// apple2 drives spin at 300rpm.  300/minute in us = 200000.
 	int bitsPerRevolution = 200000.0 / clockRateUs;
 
 	std::vector<bool> bits(bitsPerRevolution);
@@ -110,26 +111,28 @@ private:
 		write_bits(encode_data_gcr(value), 8);
 	    };
 
-	    auto write_ff40 = [&]() {
-		write_bits(0xff0, 12);
-	    };
-
-	    auto write_ff36 = [&]() {
-		write_bits(0xff << 2, 10);
-	    };
-
-	    auto write_ff32 = [&]() {
-		write_bits(0xff, 8);
+	    // The special "FF40" sequence is used to synchronize the receiving
+	    // shift register. It's written as "1111 1111 00"; FF indicates the
+	    // 8 consecutive 1-bits, while "40" indicates the total number of
+	    // microseconds.
+	    auto write_ff40 = [&](int n=1) {
+		for(;n--;) {
+		    write_bits(0xff << 2, 10);
+		}
 	    };
 
 	    // There is data to encode to disk.
 	    if ((sector.data.size() != APPLE2_SECTOR_LENGTH))
 		Error() << fmt::format("unsupported sector size {} --- you must pick 256", sector.data.size());    
 
-	    // Write address syncing leader : A sequence of "FF40"s followed by an "FF32", 5 to 40 of them
-	    // "FF40" seems to indicate that the actual data written is "1111 1111 0000" i.e., 8 1s and a total of 40 microseconds
-	    for(int i=0; i<4; i++) { write_ff40(); }
-	    write_ff32();
+	    // Write address syncing leader : A sequence of "FF40"s; 5 of them
+	    // are said to suffice to synchronize the decoder.
+	    // "FF40" indicates that the actual data written is "1111
+	    // 1111 00" i.e., 8 1s and a total of 40 microseconds
+	    //
+	    // In standard formatting, the first logical sector apparently gets
+	    // extra padding.
+	    write_ff40(sector.logicalSector == 0 ? 32 : 8);
 
 	    // Write address field: APPLE2_SECTOR_RECORD + sector identifier + DE AA EB
 	    write_bits(APPLE2_SECTOR_RECORD, 24);
@@ -139,13 +142,8 @@ private:
 	    write_gcr44(volume_id ^ sector.logicalTrack ^ sector.logicalSector);
 	    write_bits(0xDEAAEB, 24);
 
-	    // Write the "zip": a gap of 50 (we actually do 52, hopefully it's OK).
-	    // In real HW this is actually turning OFF the write head for 50 cycles
-	    write_bits(0, 13);
-
-	    // Write data syncing leader: FF40 x4 + FF36 + APPLE2_DATA_RECORD + sector data + sum + DE AA EB (+ mystery bits cut off of the scan?)
-	    for(int i=0; i<4; i++) write_ff40();
-	    write_ff36();
+	    // Write data syncing leader: FF40 + APPLE2_DATA_RECORD + sector data + sum + DE AA EB (+ mystery bits cut off of the scan?)
+	    write_ff40(8);
 	    write_bits(APPLE2_DATA_RECORD, 24);
 
 	    // Convert the sector data to GCR, append the checksum, and write it out

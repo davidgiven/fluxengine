@@ -19,7 +19,7 @@
 #include "proto.h"
 
 void writeTracks(FluxSink& fluxSink,
-    const std::function<std::unique_ptr<Fluxmap>(int track, int side)> producer)
+    const std::function<std::unique_ptr<const Fluxmap>(int track, int side)> producer)
 {
     for (unsigned cylinder : iterate(config.cylinders()))
     {
@@ -28,7 +28,7 @@ void writeTracks(FluxSink& fluxSink,
             testForEmergencyStop();
             Logger() << BeginWriteOperationLogMessage{cylinder, head};
 
-            std::unique_ptr<Fluxmap> fluxmap = producer(cylinder, head);
+            auto fluxmap = producer(cylinder, head);
             if (!fluxmap)
             {
                 /* Erase this track rather than writing. */
@@ -39,11 +39,11 @@ void writeTracks(FluxSink& fluxSink,
             }
             else
             {
-                fluxmap->rescale(config.flux_sink().rescale());
+                auto scaled = fluxmap->rescale(config.flux_sink().rescale());
                 /* Precompensation actually seems to make things worse, so let's
                  * leave it disabled for now. */
                 // fluxmap->precompensate(PRECOMPENSATION_THRESHOLD_TICKS, 2);
-                fluxSink.writeFlux(cylinder, head, *fluxmap);
+                fluxSink.writeFlux(cylinder, head, *scaled);
                 Logger() << fmt::format("{0} ms in {1} bytes",
                     int(fluxmap->duration() / 1e6),
                     fluxmap->bytes());
@@ -100,8 +100,7 @@ void writeTracksAndVerify(FluxSink& fluxSink,
                                     fluxmap->bytes());
 
                     Logger() << BeginReadOperationLogMessage{cylinder, head};
-                    std::shared_ptr<Fluxmap> writtenFluxmap =
-                        fluxSource.readFlux(cylinder, head);
+                    std::shared_ptr<const Fluxmap> writtenFluxmap = fluxSource.readFlux(cylinder, head)->next();
                     Logger() << EndReadOperationLogMessage()
                              << fmt::format("verifying {0} ms in {1} bytes",
                                     int(writtenFluxmap->duration() / 1e6),
@@ -188,8 +187,8 @@ void writeDiskCommand(
 void writeRawDiskCommand(FluxSource& fluxSource, FluxSink& fluxSink)
 {
     writeTracks(fluxSink,
-        [&](int track, int side) -> std::unique_ptr<Fluxmap>
+        [&](int track, int side) -> std::unique_ptr<const Fluxmap>
         {
-            return fluxSource.readFlux(track, side);
+            return fluxSource.readFlux(track, side)->next();
         });
 }

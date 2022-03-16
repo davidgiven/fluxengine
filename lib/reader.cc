@@ -23,11 +23,10 @@
 
 static std::unique_ptr<FluxSink> outputFluxSink;
 
-static std::shared_ptr<Fluxmap> readFluxmap(FluxSource& fluxsource, unsigned cylinder, unsigned head)
+static std::shared_ptr<const Fluxmap> readFluxmap(FluxSourceIterator& fluxsourceIterator, unsigned cylinder, unsigned head)
 {
 	Logger() << BeginReadOperationLogMessage { cylinder, head };
-	std::shared_ptr<Fluxmap> fluxmap = fluxsource.readFlux(cylinder, head);
-	fluxmap->rescale(1.0/config.flux_source().rescale());
+	auto fluxmap = fluxsourceIterator.next()->rescale(1.0/config.flux_source().rescale());
 	Logger() << EndReadOperationLogMessage()
 			 << fmt::format("{0:.0} ms in {1} bytes", fluxmap->duration()/1e6, fluxmap->bytes());
 	return fluxmap;
@@ -108,9 +107,11 @@ std::shared_ptr<const DiskFlux> readDiskCommand(FluxSource& fluxsource, Abstract
             std::set<std::shared_ptr<const Record>> track_records;
             Fluxmap totalFlux;
 
-            for (int retry = config.decoder().retries(); retry >= 0; retry--)
+			auto fluxsourceIterator = fluxsource.readFlux(cylinder, head);
+			int retry = 0;
+			while (fluxsourceIterator->hasNext())
             {
-                auto fluxmap = readFluxmap(fluxsource, cylinder, head);
+                auto fluxmap = readFluxmap(*fluxsourceIterator, cylinder, head);
                 totalFlux.appendDesync().appendBytes(fluxmap->rawBytes());
 
                 auto trackdataflux =
@@ -155,13 +156,17 @@ std::shared_ptr<const DiskFlux> readDiskCommand(FluxSource& fluxsource, Abstract
                 if (!hasBadSectors)
                     break;
 
-                if (!fluxsource.retryable())
+                if (!fluxsourceIterator->hasNext())
                     break;
-                if (retry == 0)
-                    Logger() << fmt::format("giving up");
-                else
-                    Logger()
-                        << fmt::format("retrying; {} retries remaining", retry);
+				if (fluxsource.isHardware())
+				{
+					retry++;
+					if (retry == 0)
+						Logger() << fmt::format("giving up");
+					else
+						Logger()
+							<< fmt::format("retrying; {} retries remaining", retry);
+				}
             }
 
             if (outputFluxSink)
@@ -236,7 +241,8 @@ void rawReadDiskCommand(FluxSource& fluxsource, FluxSink& fluxsink)
 		for (int head : iterate(config.heads()))
 		{
 			testForEmergencyStop();
-			auto fluxmap = readFluxmap(fluxsource, cylinder, head);
+			auto fluxsourceIterator = fluxsource.readFlux(cylinder, head);
+			auto fluxmap = readFluxmap(*fluxsourceIterator, cylinder, head);
 			fluxsink.writeFlux(cylinder, head, *fluxmap);
 		}
     }

@@ -1,15 +1,7 @@
 comment: 'Digital RX50 400kB 5.25" 80-track 10-sector SSQD'
 
-flux_sink {
-	drive {
-		high_density: true
-	}
-}
-
-flux_source {
-	drive {
-		high_density: true
-	}
+drive {
+	high_density: true
 }
 
 image_reader {

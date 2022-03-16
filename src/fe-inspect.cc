@@ -201,10 +201,11 @@ static nanoseconds_t guessClock(const Fluxmap& fluxmap)
 
 int mainInspect(int argc, const char* argv[])
 {
+	config.mutable_flux_source()->mutable_drive();
     flags.parseFlagsWithConfigFiles(argc, argv, {});
 
 	std::unique_ptr<FluxSource> fluxSource(FluxSource::create(config.flux_source()));
-	const auto fluxmap = fluxSource->readFlux(cylinderFlag, headFlag);
+	const auto fluxmap = fluxSource->readFlux(cylinderFlag, headFlag)->next();
 
 	std::cout << fmt::format("0x{:x} bytes of data in {:.3f}ms\n",
 			fluxmap->bytes(),
