@@ -16,6 +16,7 @@
 #include "fmt/format.h"
 #include "proto.h"
 #include "utils.h"
+#include "mapper.h"
 #include "lib/decoders/decoders.pb.h"
 #include <iostream>
 #include <fstream>
@@ -214,6 +215,9 @@ std::shared_ptr<const DiskFlux> readDiskCommand(FluxSource& fluxsource, Abstract
 			all_sectors.insert(sector);
 	all_sectors = collect_sectors(all_sectors);
 	diskflux->image = std::make_shared<Image>(all_sectors);
+
+	if (config.has_sector_mapping())
+		diskflux->image = std::move(Mapper::remapPhysicalToLogical(*diskflux->image, config.sector_mapping()));
 
 	/* diskflux can't be modified below this point. */
 	Logger() << DiskReadLogMessage { diskflux };

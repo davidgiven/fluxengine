@@ -18,11 +18,12 @@ extern void fillBitmapTo(std::vector<bool>& bitmap,
     unsigned terminateAt,
     const std::vector<bool>& pattern);
 
-extern void writeDiskCommand(const Image& image,
+extern void writeDiskCommand(std::shared_ptr<const Image> image,
     AbstractEncoder& encoder,
     FluxSink& fluxSink,
     AbstractDecoder* decoder = nullptr,
     FluxSource* fluxSource = nullptr);
+
 extern void writeRawDiskCommand(FluxSource& fluxSource, FluxSink& fluxSink);
 
 #endif

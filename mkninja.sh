@@ -388,6 +388,7 @@ buildproto libconfig.a \
     lib/fluxsource/fluxsource.proto \
     lib/imagereader/imagereader.proto \
     lib/imagewriter/imagewriter.proto \
+    lib/mapper.proto \
     lib/usb/usb.proto \
 
 buildproto libfl2.a \
@@ -475,6 +476,7 @@ buildlibrary libbackend.a \
     lib/imginputoutpututils.cc \
     lib/ldbs.cc \
     lib/logger.cc \
+    lib/mapper.cc \
     lib/proto.cc \
     lib/reader.cc \
     lib/sector.cc \
@@ -494,6 +496,7 @@ FORMATS="\
     amiga \
     ampro \
     apple2 \
+    appledos \
     atarist360 \
     atarist370 \
     atarist400 \
@@ -530,6 +533,7 @@ FORMATS="\
     northstar175 \
     northstar350 \
     northstar87 \
+    prodos \
     rx50 \
     tids990 \
     vgi \

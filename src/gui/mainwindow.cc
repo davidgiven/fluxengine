@@ -126,7 +126,7 @@ void MainWindow::OnWriteFluxButton(wxCommandEvent&)
 					decoder = AbstractDecoder::create(config.decoder());
 					fluxSource = FluxSource::create(config.flux_source());
 				}
-				writeDiskCommand(*image, *encoder, *fluxSink, decoder.get(), fluxSource.get());
+				writeDiskCommand(image, *encoder, *fluxSink, decoder.get(), fluxSource.get());
             });
     }
     catch (const ErrorException& e)

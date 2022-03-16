@@ -13,6 +13,7 @@
 #include "sector.h"
 #include "image.h"
 #include "logger.h"
+#include "mapper.h"
 #include "utils.h"
 #include "lib/config.pb.h"
 #include "proto.h"
@@ -158,24 +159,28 @@ void fillBitmapTo(std::vector<bool>& bitmap,
     }
 }
 
-void writeDiskCommand(const Image& image,
+void writeDiskCommand(
+	std::shared_ptr<const Image> image,
     AbstractEncoder& encoder,
     FluxSink& fluxSink,
     AbstractDecoder* decoder,
     FluxSource* fluxSource)
 {
+	if (config.has_sector_mapping())
+		image = std::move(Mapper::remapLogicalToPhysical(*image, config.sector_mapping()));
+
     if (fluxSource && decoder)
-        writeTracksAndVerify(fluxSink, encoder, *fluxSource, *decoder, image);
+        writeTracksAndVerify(fluxSink, encoder, *fluxSource, *decoder, *image);
     else
         writeTracks(fluxSink,
             [&](int physicalTrack, int physicalSide) -> std::unique_ptr<Fluxmap>
             {
                 const auto& sectors =
-                    encoder.collectSectors(physicalTrack, physicalSide, image);
+                    encoder.collectSectors(physicalTrack, physicalSide, *image);
 				if (sectors.empty())
 					return std::make_unique<Fluxmap>();
                 return encoder.encode(
-                    physicalTrack, physicalSide, sectors, image);
+                    physicalTrack, physicalSide, sectors, *image);
             });
 }
 
