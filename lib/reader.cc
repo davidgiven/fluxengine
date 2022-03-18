@@ -108,7 +108,7 @@ std::shared_ptr<const DiskFlux> readDiskCommand(FluxSource& fluxsource, Abstract
             Fluxmap totalFlux;
 
 			auto fluxsourceIterator = fluxsource.readFlux(cylinder, head);
-			int retry = 0;
+			int retriesRemaining = config.decoder().retries();
 			while (fluxsourceIterator->hasNext())
             {
                 auto fluxmap = readFluxmap(*fluxsourceIterator, cylinder, head);
@@ -160,12 +160,15 @@ std::shared_ptr<const DiskFlux> readDiskCommand(FluxSource& fluxsource, Abstract
                     break;
 				if (fluxsource.isHardware())
 				{
-					retry++;
-					if (retry == 0)
+					retriesRemaining--;
+					if (retriesRemaining == 0)
+					{
 						Logger() << fmt::format("giving up");
+						break;
+					}
 					else
 						Logger()
-							<< fmt::format("retrying; {} retries remaining", retry);
+							<< fmt::format("retrying; {} retries remaining", retriesRemaining);
 				}
             }
 
