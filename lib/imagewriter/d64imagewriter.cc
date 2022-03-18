@@ -5,6 +5,7 @@
 #include "fmt/format.h"
 #include "image.h"
 #include "ldbs.h"
+#include "logger.h"
 #include "lib/config.pb.h"
 #include <algorithm>
 #include <iostream>
@@ -30,7 +31,7 @@ public:
 
 	void writeImage(const Image& image)
 	{
-		std::cout << "writing D64 triangular image\n";
+		Logger() << "D64: writing triangular image";
 
 		std::ofstream outputFile(_config.filename(), std::ios::out | std::ios::binary);
 		if (!outputFile.is_open())

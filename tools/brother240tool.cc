@@ -26,31 +26,39 @@ void putbyte(uint32_t offset, uint8_t value)
 
 int main(int argc, const char* argv[])
 {
-    if (argc < 2)
-        syntax();
-    
-    inputFile.open(argv[1], std::ios::in | std::ios::out | std::ios::binary);
-    if (!inputFile.is_open())
-		Error() << fmt::format("cannot open input file '{}'", argv[1]);
+	try
+	{
+		if (argc < 2)
+			syntax();
+		
+		inputFile.open(argv[1], std::ios::in | std::ios::out | std::ios::binary);
+		if (!inputFile.is_open())
+			Error() << fmt::format("cannot open input file '{}'", argv[1]);
 
-    uint8_t b1 = getbyte(0x015);
-    uint8_t b2 = getbyte(0x100);
-    if ((b1 == 0x58) && (b2 == 0x58))
-    {
-        std::cerr << "Flipping from Brother to DOS.\n";
-        putbyte(0x015, 0xf0);
-        putbyte(0x100, 0xf0);
-    }
-    else if ((b1 == 0xf0) && (b2 == 0xf0))
-    {
-        std::cerr << "Flipping from DOS to Brother.\n";
-        putbyte(0x015, 0x58);
-        putbyte(0x100, 0x58);
-    }
-    else
-        Error() << "Unknown image format.";
+		uint8_t b1 = getbyte(0x015);
+		uint8_t b2 = getbyte(0x100);
+		if ((b1 == 0x58) && (b2 == 0x58))
+		{
+			std::cerr << "Flipping from Brother to DOS.\n";
+			putbyte(0x015, 0xf0);
+			putbyte(0x100, 0xf0);
+		}
+		else if ((b1 == 0xf0) && (b2 == 0xf0))
+		{
+			std::cerr << "Flipping from DOS to Brother.\n";
+			putbyte(0x015, 0x58);
+			putbyte(0x100, 0x58);
+		}
+		else
+			Error() << "Unknown image format.";
 
-    inputFile.close();
-    return 0;
+		inputFile.close();
+		return 0;
+	}
+	catch (const ErrorException& e)
+	{
+		e.print();
+		exit(1);
+	}
 }
 

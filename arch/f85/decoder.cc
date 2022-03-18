@@ -63,7 +63,7 @@ public:
 		return seekToPattern(ANY_RECORD_PATTERN);
 	}
 
-    void decodeSectorRecord()
+    void decodeSectorRecord() override
 	{
 		/* Skip sync bits and ID byte. */
 
@@ -84,7 +84,7 @@ public:
 			_sector->status = Sector::DATA_MISSING; /* unintuitive but correct */
 	}
 
-    void decodeDataRecord()
+    void decodeDataRecord() override
 	{
 		/* Skip sync bits ID byte. */
 

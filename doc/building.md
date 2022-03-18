@@ -187,12 +187,12 @@ install some support packages.
 
   - For Linux (this is Ubuntu, but this should apply to Debian too):
 	`ninja-build`, `libusb-1.0-0-dev`, `libsqlite3-dev`, `zlib1g-dev`,
-	`libudev-dev`.
+	`libudev-dev`, `protobuf-compiler`, `libwxgtk3.0-gtk3-dev`.
   - For OSX with Homebrew: `ninja`, `libusb`, `pkg-config`, `sqlite`,
-    `protobuf`.
+    `protobuf`, `truncate`, `wxwidgets`.
   - For Windows with MSYS2: `make`, `ninja`, `mingw-w64-i686-libusb`,
 	`mingw-w64-i686-protobuf`, `mingw-w64-i686-sqlite3`, `mingw-w64-i686-zlib`,
-	`mingw-w64-i686-gcc`.
+	`mingw-w64-i686-gcc`, `vim`, `diffutils`, `mingw-w64-i686-wxWidgets`.
 
 These lists are not necessarily exhaustive --- please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new) if I've missed
@@ -231,7 +231,7 @@ You should now have a working board, so it's time to test it.
      have a single 3.5" connector, after the twist.)
      
      If you have **two** drives, plug them into both connectors. FluxEngine,
-     sadly, non-standard disk numbering (there are reasons). Drive 0 is the
+     sadly, uses non-standard disk numbering (there are reasons). Drive 0 is the
      one nearest the motherboard; that is, before the twist. Drive 1 is the
      one at the end of the cable; that is, after the twist. Drive 0 is the
      default. You can tell the client to select drive 1 by using `-s :d=1`.

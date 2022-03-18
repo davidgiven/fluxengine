@@ -52,7 +52,7 @@ public:
 		return seekToPattern(ANY_RECORD_PATTERN);
 	}
 
-    void decodeSectorRecord()
+    void decodeSectorRecord() override
 	{
 		auto bits = readRawBits(TIDS990_SECTOR_RECORD_SIZE*16);
 		auto bytes = decodeFmMfm(bits).slice(0, TIDS990_SECTOR_RECORD_SIZE);
@@ -74,7 +74,7 @@ public:
 			_sector->status = Sector::DATA_MISSING; /* correct but unintuitive */
 	}
 
-	void decodeDataRecord()
+	void decodeDataRecord() override
 	{
 		auto bits = readRawBits(TIDS990_DATA_RECORD_SIZE*16);
 		auto bytes = decodeFmMfm(bits).slice(0, TIDS990_DATA_RECORD_SIZE);

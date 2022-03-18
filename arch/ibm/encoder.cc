@@ -123,9 +123,9 @@ private:
 	}
 
 public:
-	std::vector<std::shared_ptr<Sector>> collectSectors(int physicalTrack, int physicalSide, const Image& image) override
+	std::vector<std::shared_ptr<const Sector>> collectSectors(int physicalTrack, int physicalSide, const Image& image) override
 	{
-		std::vector<std::shared_ptr<Sector>> sectors;
+		std::vector<std::shared_ptr<const Sector>> sectors;
 		IbmEncoderProto::TrackdataProto trackdata;
 		getTrackFormat(trackdata, physicalTrack, physicalSide);
 
@@ -141,7 +141,7 @@ public:
 	}
 
     std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide,
-			const std::vector<std::shared_ptr<Sector>>& sectors, const Image& image) override
+			const std::vector<std::shared_ptr<const Sector>>& sectors, const Image& image) override
 	{
 		IbmEncoderProto::TrackdataProto trackdata;
 		getTrackFormat(trackdata, physicalTrack, physicalSide);

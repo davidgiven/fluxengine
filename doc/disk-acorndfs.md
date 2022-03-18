@@ -5,7 +5,7 @@ Acorn DFS disks are pretty standard FM encoded IBM scheme disks, with
 256-sectors and 0-based sector identifiers. There's nothing particularly
 special here.
 
-DFS disks are all single sided, but allow the other side of the disk to be
+DFS disks are all single-sided, but allow the other side of the disk to be
 used as another drive. FluxEngine supports these; read one side at a time
 with `--heads 0` or `--heads 1`.
 

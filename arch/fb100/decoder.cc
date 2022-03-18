@@ -109,7 +109,7 @@ public:
 		return seekToPattern(SECTOR_ID_PATTERN);
 	}
 
-    void decodeSectorRecord()
+    void decodeSectorRecord() override
 	{
 		auto rawbits = readRawBits(FB100_RECORD_SIZE*16);
 

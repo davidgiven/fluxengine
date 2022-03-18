@@ -65,6 +65,7 @@ int mainRawWrite(int argc, const char* argv[])
 
 	if (argc == 1)
 		showProfiles("rawwrite", formats);
+	config.mutable_flux_sink()->mutable_drive();
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
 	if (config.flux_source().has_drive())

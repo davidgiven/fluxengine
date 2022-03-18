@@ -1,5 +1,8 @@
 #include "globals.h"
 #include "bytes.h"
+#include "snowhouse/snowhouse.h"
+
+using namespace snowhouse;
 
 static void check_oob(Bytes& b, unsigned pos)
 {
@@ -115,6 +118,49 @@ static void test_slice()
     assert((bs == Bytes{ 0, 0 }));
 }
 
+static void test_split()
+{
+	AssertThat(
+		(Bytes{ }).split(0),
+		Equals(std::vector<Bytes> {
+			Bytes{}
+		}));
+
+	AssertThat(
+		(Bytes{ 0 }).split(0),
+		Equals(std::vector<Bytes> {
+			Bytes{},
+			Bytes{}
+		}));
+
+	AssertThat(
+		(Bytes{ 1 }).split(0),
+		Equals(std::vector<Bytes> {
+			Bytes{ 1 }
+		}));
+
+	AssertThat(
+		(Bytes{ 1, 0 }).split(0),
+		Equals(std::vector<Bytes> {
+			Bytes{ 1 },
+			Bytes{ }
+		}));
+
+	AssertThat(
+		(Bytes{ 0, 1 }).split(0),
+		Equals(std::vector<Bytes> {
+			Bytes{ },
+			Bytes{ 1 }
+		}));
+
+	AssertThat(
+		(Bytes{ 1, 0, 1 }).split(0),
+		Equals(std::vector<Bytes> {
+			Bytes{ 1 },
+			Bytes{ 1 }
+		}));
+}
+
 static void test_tobits()
 {
 	Bytes b = {1, 2};
@@ -139,6 +185,7 @@ int main(int argc, const char* argv[])
     test_reads();
     test_writes();
     test_slice();
+	test_split();
 	test_tobits();
 	test_tostring();
     return 0;

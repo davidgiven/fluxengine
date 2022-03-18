@@ -26,7 +26,7 @@ public:
 	}
 
 public:
-	void writeFlux(int cylinder, int head, Fluxmap& fluxmap)
+	void writeFlux(int cylinder, int head, const Fluxmap& fluxmap) override
 	{
 		unsigned totalTicks = fluxmap.ticks() + 2;
 		unsigned channels = _config.index_markers() ? 2 : 1;

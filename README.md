@@ -2,7 +2,7 @@ FluxEngine
 ==========
 
 (If you're reading this on GitHub, the formatting's a bit messed up. [Try the
-version on cowlark.com instead.](http://cowlark.com/fluxengine/)
+version on cowlark.com instead.](http://cowlark.com/fluxengine/))
 
 **Breaking news!** As of 2021-05-21, the command line environment has changed
 _substantially_ (to make it more consistent and flexible, and allow some new
@@ -93,16 +93,17 @@ people who've had it work).
 | Format                                    | Read? | Write? | Notes |
 |:------------------------------------------|:-----:|:------:|-------|
 | [IBM PC compatible](doc/disk-ibm.md)      |  🦄   |   🦄   | and compatibles (like the Atari ST) |
+| [Atari ST](doc/disk-atarist.md)           |  🦄   |   🦄   | technically the same as IBM, almost |
 | [Acorn ADFS](doc/disk-acornadfs.md)       |  🦄   |   🦖*  | single- and double- sided           |
 | [Acorn DFS](doc/disk-acorndfs.md)         |  🦄   |   🦖*  |                                     |
 | [Ampro Little Board](doc/disk-ampro.md)   |  🦖   |   🦖*  |                                     |
-| [Apple II DOS 3.3](doc/disk-apple2.md)    |  🦄   |        | doesn't do logical sector remapping |
+| [Apple II](doc/disk-apple2.md)            |  🦄   |   🦄   |                                     |
 | [Amiga](doc/disk-amiga.md)                |  🦄   |   🦄   |                                     |
 | [Commodore 64 1541/1581](doc/disk-c64.md) |  🦄   |   🦄   | and probably the other formats      |
-| [Brother 120kB](doc/disk-brother.md)      |  🦄   |   🦖   |                                     |
+| [Brother 120kB](doc/disk-brother.md)      |  🦄   |   🦄   |                                     |
 | [Brother 240kB](doc/disk-brother.md)      |  🦄   |   🦄   |                                     |
 | [Brother FB-100](doc/disk-fb100.md)       |  🦖   |        | Tandy Model 100, Husky Hunter, knitting machines |
-| [Macintosh 800kB](doc/disk-macintosh.md)  |  🦄   |   🦄   | and probably the 400kB too          |
+| [Macintosh 400kB/800kB](doc/disk-macintosh.md)  |  🦄   |   🦄   |                                     |
 | [NEC PC-98](doc/disk-ibm.md)              |  🦄   |   🦄   | trimode drive not required          |
 | [Sharp X68000](doc/disk-ibm.md)           |  🦄   |   🦄   |                                     |
 | [TRS-80](doc/disk-trs80.md)               |  🦖   |   🦖*  | a minor variation of the IBM scheme |
@@ -148,7 +149,7 @@ at least, check the CRC so what data's there is probably good.
     There hasn't been a lot of demand for this yet; if you have a pressing
     need to write weird disks, [please
     ask](https://github.com/davidgiven/fluxengine/issues/new). I haven't
-    implement write support for PC disks because they're boring and I'm lazy,
+    implemented write support for PC disks because they're boring and I'm lazy,
     and also because they vary so much that figuring out how to specify them
     is hard.
 

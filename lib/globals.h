@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <functional>
+#include <numeric>
 #include <iostream>
 #include <map>
 #include <memory>
@@ -12,6 +13,7 @@
 #include <set>
 #include <cassert>
 #include <climits>
+#include <variant>
 
 #if defined(_WIN32) || defined(__WIN32__)
 #include <direct.h>
@@ -29,13 +31,24 @@ extern double getCurrentTime();
 extern void hexdump(std::ostream& stream, const Bytes& bytes);
 extern void hexdumpForSrp16(std::ostream& stream, const Bytes& bytes);
 
+struct ErrorException
+{
+	const std::string message;
+
+	void print() const;
+};
+
 class Error
 {
 public:
-    [[ noreturn ]] ~Error()
+	Error()
+	{
+		_stream << "Error: ";
+	}
+
+    [[ noreturn ]] ~Error() noexcept(false)
     {
-        std::cerr << "Error: " << _stream.str() << std::endl;
-        exit(1);
+		throw ErrorException { _stream.str() };
     }
 
     template <typename T>
@@ -48,5 +61,8 @@ public:
 private:
     std::stringstream _stream;
 };
+
+template <class... Ts> struct overloaded : Ts...  { using Ts::operator()...; };
+template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
 #endif

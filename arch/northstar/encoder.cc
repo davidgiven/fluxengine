@@ -17,7 +17,7 @@
 
 #define TOTAL_SECTOR_BYTES ()
 
-static void write_sector(std::vector<bool>& bits, unsigned& cursor, const std::shared_ptr<Sector>& sector)
+static void write_sector(std::vector<bool>& bits, unsigned& cursor, const std::shared_ptr<const Sector>& sector)
 {
 	int preambleSize = 0;
 	int encodedSectorSize = 0;
@@ -108,9 +108,9 @@ public:
 		_config(config.northstar())
 	{}
 
-	std::vector<std::shared_ptr<Sector>> collectSectors(int physicalTrack, int physicalSide, const Image& image) override
+	std::vector<std::shared_ptr<const Sector>> collectSectors(int physicalTrack, int physicalSide, const Image& image) override
 	{
-		std::vector<std::shared_ptr<Sector>> sectors;
+		std::vector<std::shared_ptr<const Sector>> sectors;
 
 		if ((physicalTrack >= 0) && (physicalTrack < 35))
 		{
@@ -126,7 +126,7 @@ public:
 	}
 
 	std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide,
-			const std::vector<std::shared_ptr<Sector>>& sectors, const Image& image) override
+			const std::vector<std::shared_ptr<const Sector>>& sectors, const Image& image) override
 	{
 		int bitsPerRevolution = 100000;
 		double clockRateUs = 4.00;

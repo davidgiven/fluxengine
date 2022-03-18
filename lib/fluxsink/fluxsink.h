@@ -29,7 +29,7 @@ public:
 	static void updateConfigForFilename(FluxSinkProto* proto, const std::string& filename);
 
 public:
-    virtual void writeFlux(int track, int side, Fluxmap& fluxmap) = 0;
+    virtual void writeFlux(int track, int side, const Fluxmap& fluxmap) = 0;
 
 	virtual operator std::string () const = 0;
 };

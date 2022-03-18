@@ -35,7 +35,7 @@ public:
 		return seekToPattern(SECTOR_PATTERN);
 	}
 
-    void decodeSectorRecord()
+    void decodeSectorRecord() override
 	{
 		/* Skip ID mark (we know it's a AESLANIER_RECORD_SEPARATOR). */
 

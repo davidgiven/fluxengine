@@ -30,7 +30,7 @@ struct CwfTrack
     uint8_t length[4]; // little-endian
 };
 
-class CwfFluxSource : public FluxSource
+class CwfFluxSource : public TrivialFluxSource
 {
 public:
     CwfFluxSource(const CwfFluxSourceProto& config):
@@ -79,11 +79,11 @@ public:
 	}
 
 public:
-    std::unique_ptr<Fluxmap> readFlux(int track, int side)
+    std::unique_ptr<const Fluxmap> readSingleFlux(int track, int side)
     {
 		const auto& p = _trackOffsets.find(std::make_pair(track, side));
 		if (p == _trackOffsets.end())
-			return std::unique_ptr<Fluxmap>();
+			return std::make_unique<const Fluxmap>();
 
 		off_t pos = p->second.first;;
 		size_t length = p->second.second;

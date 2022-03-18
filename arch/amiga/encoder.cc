@@ -51,7 +51,7 @@ static void write_bits(std::vector<bool>& bits, unsigned& cursor, const Bytes& b
 	}
 }
 
-static void write_sector(std::vector<bool>& bits, unsigned& cursor, const std::shared_ptr<Sector>& sector)
+static void write_sector(std::vector<bool>& bits, unsigned& cursor, const std::shared_ptr<const Sector>& sector)
 {
 	if ((sector->data.size() != 512) && (sector->data.size() != 528))
 		Error() << "unsupported sector size --- you must pick 512 or 528";
@@ -105,9 +105,9 @@ public:
 		_config(config.amiga()) {}
 
 public:
-	std::vector<std::shared_ptr<Sector>> collectSectors(int physicalTrack, int physicalSide, const Image& image) override
+	std::vector<std::shared_ptr<const Sector>> collectSectors(int physicalTrack, int physicalSide, const Image& image) override
 	{
-		std::vector<std::shared_ptr<Sector>> sectors;
+		std::vector<std::shared_ptr<const Sector>> sectors;
 
 		if ((physicalTrack >= 0) && (physicalTrack < AMIGA_TRACKS_PER_DISK))
 		{
@@ -123,7 +123,7 @@ public:
 	}
 
     std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide,
-			const std::vector<std::shared_ptr<Sector>>& sectors, const Image& image) override
+			const std::vector<std::shared_ptr<const Sector>>& sectors, const Image& image) override
 	{
 		if ((physicalTrack < 0) || (physicalTrack >= AMIGA_TRACKS_PER_DISK))
 			return std::unique_ptr<Fluxmap>();

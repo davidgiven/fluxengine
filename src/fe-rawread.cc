@@ -61,6 +61,7 @@ int mainRawRead(int argc, const char* argv[])
 
 	if (argc == 1)
 		showProfiles("rawread", formats);
+	config.mutable_flux_source()->mutable_drive();
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
 	if (config.flux_sink().has_drive())

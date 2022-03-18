@@ -6,7 +6,7 @@
 #include "image.h"
 #include "lib/encoders/encoders.pb.h"
 
-static void write_sector(std::vector<bool>& bits, unsigned& cursor, const std::shared_ptr<Sector>& sector)
+static void write_sector(std::vector<bool>& bits, unsigned& cursor, const std::shared_ptr<const Sector>& sector)
 {
 	if ((sector->data.size() != 256) && (sector->data.size() != MICROPOLIS_ENCODED_SECTOR_SIZE))
 		Error() << "unsupported sector size --- you must pick 256 or 275";
@@ -70,9 +70,9 @@ public:
 		_config(config.micropolis())
 	{}
 
-	std::vector<std::shared_ptr<Sector>> collectSectors(int physicalTrack, int physicalSide, const Image& image) override
+	std::vector<std::shared_ptr<const Sector>> collectSectors(int physicalTrack, int physicalSide, const Image& image) override
 	{
-		std::vector<std::shared_ptr<Sector>> sectors;
+		std::vector<std::shared_ptr<const Sector>> sectors;
 
 		if ((physicalTrack >= 0) && (physicalTrack < 77))
 		{
@@ -88,7 +88,7 @@ public:
 	}
 
 	std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide,
-			const std::vector<std::shared_ptr<Sector>>& sectors, const Image& image) override
+			const std::vector<std::shared_ptr<const Sector>>& sectors, const Image& image) override
 	{
 		int bitsPerRevolution = 100000;
 		double clockRateUs = 2.00;

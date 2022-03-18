@@ -78,13 +78,22 @@ static int encode_data_gcr(uint8_t data)
     return -1;
 }
 
+static void write_byte(std::vector<bool>& bits, unsigned& cursor, uint8_t b)
+{
+    write_bits(bits, cursor, encode_data_gcr(b>>4), 5);
+    write_bits(bits, cursor, encode_data_gcr(b),    5);
+}
+
 static void write_bytes(std::vector<bool>& bits, unsigned& cursor, const Bytes& bytes)
 {
     for (uint8_t b : bytes)
-    {
-        write_bits(bits, cursor, encode_data_gcr(b>>4), 5);
-        write_bits(bits, cursor, encode_data_gcr(b),    5);
-    }
+        write_byte(bits, cursor, b);
+}
+
+static void write_gap(std::vector<bool>& bits, unsigned& cursor, int length)
+{
+	for (int i = 0; i < length/10; i++)
+        write_byte(bits, cursor, '0');
 }
 
 static void write_sector(std::vector<bool>& bits, unsigned& cursor,
@@ -102,8 +111,8 @@ static void write_sector(std::vector<bool>& bits, unsigned& cursor,
         (uint8_t)(encodedTrack + encodedSector),
     });
 
+    write_gap(bits, cursor, trackdata.post_header_gap_bits());
 
-    write_zero_bits(bits, cursor, trackdata.post_header_gap_bits());
     write_one_bits(bits, cursor, trackdata.pre_data_sync_bits());
     write_bits(bits, cursor, VICTOR9K_DATA_RECORD, 10);
 
@@ -112,8 +121,7 @@ static void write_sector(std::vector<bool>& bits, unsigned& cursor,
     Bytes checksum(2);
     checksum.writer().write_le16(sumBytes(sector.data));
     write_bytes(bits, cursor, checksum);
-
-    write_zero_bits(bits, cursor, trackdata.post_data_gap_bits());
+    write_gap(bits, cursor, trackdata.post_data_gap_bits());
 }
 
 class Victor9kEncoder : public AbstractEncoder
@@ -143,9 +151,9 @@ private:
 	}
 
 public:
-	std::vector<std::shared_ptr<Sector>> collectSectors(int physicalTrack, int physicalSide, const Image& image) override
+	std::vector<std::shared_ptr<const Sector>> collectSectors(int physicalTrack, int physicalSide, const Image& image) override
 	{
-		std::vector<std::shared_ptr<Sector>> sectors;
+		std::vector<std::shared_ptr<const Sector>> sectors;
 
 		Victor9kEncoderProto::TrackdataProto trackdata;
 		getTrackFormat(trackdata, physicalTrack, physicalSide);
@@ -162,7 +170,7 @@ public:
 	}
 
     std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide,
-            const std::vector<std::shared_ptr<Sector>>& sectors, const Image& image) override
+            const std::vector<std::shared_ptr<const Sector>>& sectors, const Image& image) override
     {
 		Victor9kEncoderProto::TrackdataProto trackdata;
 		getTrackFormat(trackdata, physicalTrack, physicalSide);

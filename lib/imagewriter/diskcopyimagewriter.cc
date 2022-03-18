@@ -5,6 +5,7 @@
 #include "fmt/format.h"
 #include "ldbs.h"
 #include "image.h"
+#include "logger.h"
 #include "lib/config.pb.h"
 #include <algorithm>
 #include <iostream>
@@ -52,8 +53,8 @@ public:
 				Error() << "this image is not compatible with the DiskCopy 4.2 format";
 		}
 
-		std::cout << "writing DiskCopy 4.2 image\n"
-		          << fmt::format("{} tracks, {} sides, {} sectors, {} bytes per sector; {}\n",
+		Logger() << "DC42: writing DiskCopy 4.2 image"
+		          << fmt::format("DC42: {} tracks, {} sides, {} sectors, {} bytes per sector; {}",
 				  		geometry.numTracks, geometry.numSides, geometry.numSectors, geometry.sectorSize,
 						mfm ? "MFM" : "GCR");
 

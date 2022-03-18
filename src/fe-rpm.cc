@@ -23,8 +23,8 @@ int mainRpm(int argc, const char* argv[])
 	if (!config.flux_source().has_drive())
 		Error() << "this only makes sense with a real disk drive";
 
-    usbSetDrive(config.flux_source().drive().drive(), false, config.flux_source().drive().index_mode());
-    nanoseconds_t period = usbGetRotationalPeriod(config.flux_source().drive().hard_sector_count());
+    usbSetDrive(config.drive().drive(), false, config.drive().index_mode());
+    nanoseconds_t period = usbGetRotationalPeriod(config.drive().hard_sector_count());
     if (period != 0)
         std::cout << "Rotational period is " << period/1000000 << " ms (" << 60e9/period << " rpm)" << std::endl;
     else

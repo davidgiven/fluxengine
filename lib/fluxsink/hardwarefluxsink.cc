@@ -1,6 +1,8 @@
 #include "globals.h"
 #include "flags.h"
 #include "fluxmap.h"
+#include "logger.h"
+#include "proto.h"
 #include "usb/usb.h"
 #include "fluxsink/fluxsink.h"
 #include "lib/fluxsink/fluxsink.pb.h"
@@ -9,27 +11,27 @@
 class HardwareFluxSink : public FluxSink
 {
 public:
-    HardwareFluxSink(const HardwareFluxSinkProto& config):
-        _config(config)
+    HardwareFluxSink(const HardwareFluxSinkProto& conf):
+        _config(conf)
     {
-		if (config.has_hard_sector_count())
+		if (config.drive().has_hard_sector_count())
 		{
-			int rotationalSpeedMs;
+			nanoseconds_t oneRevolution;
 			int retries = 5;
-			usbSetDrive(_config.drive(), _config.high_density(), _config.index_mode());
-			std::cout << "Measuring rotational speed... " << std::flush;
+			usbSetDrive(config.drive().drive(), config.drive().high_density(), config.drive().index_mode());
+			Logger() << BeginSpeedOperationLogMessage();
 
 			do {
-				nanoseconds_t oneRevolution = usbGetRotationalPeriod(_config.hard_sector_count());
-				_hardSectorThreshold = oneRevolution * 3 / (4 * _config.hard_sector_count());
-				rotationalSpeedMs = oneRevolution / 1e6;
+				oneRevolution = usbGetRotationalPeriod(config.drive().hard_sector_count());
+				_hardSectorThreshold = oneRevolution * 3 / (4 * config.drive().hard_sector_count());
 				retries--;
-			} while ((rotationalSpeedMs == 0) && (retries > 0));
+			} while ((oneRevolution == 0) && (retries > 0));
 
-			if (rotationalSpeedMs == 0) {
+			if (oneRevolution == 0) {
 				Error() << "Failed\nIs a disk in the drive?";
 			}
-			std::cout << fmt::format("{}ms\n", rotationalSpeedMs);
+
+			Logger() << EndSpeedOperationLogMessage { oneRevolution };
 		}
 		else
 			_hardSectorThreshold = 0;
@@ -40,9 +42,9 @@ public:
     }
 
 public:
-    void writeFlux(int track, int side, Fluxmap& fluxmap)
+    void writeFlux(int track, int side, const Fluxmap& fluxmap) override
     {
-        usbSetDrive(_config.drive(), _config.high_density(), _config.index_mode());
+        usbSetDrive(config.drive().drive(), config.drive().high_density(), config.drive().index_mode());
 		#if 0
 		if (fluxSourceSinkFortyTrack)
 		{
@@ -59,7 +61,7 @@ public:
 
 	operator std::string () const
 	{
-		return fmt::format("drive {}", _config.drive());
+		return fmt::format("drive {}", config.drive().drive());
 	}
 
 private:

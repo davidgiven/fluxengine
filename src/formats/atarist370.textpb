@@ -57,6 +57,7 @@ encoder {
 decoder {
 	ibm {
 		trackdata {
+			ignore_sector: 66
 			sector_range {
 				min_sector: 1
 				max_sector: 9

@@ -17,22 +17,22 @@ struct TrackDataFlux
 	unsigned physicalCylinder;
 	unsigned physicalHead;
 	std::shared_ptr<const Fluxmap> fluxmap;
-	std::vector<std::shared_ptr<Record>> records;
-	std::vector<std::shared_ptr<Sector>> sectors;
+	std::vector<std::shared_ptr<const Record>> records;
+	std::vector<std::shared_ptr<const Sector>> sectors;
 };
 
 struct TrackFlux
 {
 	unsigned physicalCylinder;
 	unsigned physicalHead;
-	std::vector<std::unique_ptr<TrackDataFlux>> trackDatas;
-	std::set<std::shared_ptr<Sector>> sectors;
+	std::vector<std::shared_ptr<const TrackDataFlux>> trackDatas;
+	std::set<std::shared_ptr<const Sector>> sectors;
 };
 
 struct DiskFlux
 {
-	std::vector<std::unique_ptr<TrackFlux>> tracks;
-	std::unique_ptr<Image> image;
+	std::vector<std::shared_ptr<const TrackFlux>> tracks;
+	std::shared_ptr<const Image> image;
 };
 
 #endif

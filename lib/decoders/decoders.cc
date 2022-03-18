@@ -59,10 +59,10 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 	return (decoder->second)(config);
 }
 
-std::unique_ptr<TrackDataFlux> AbstractDecoder::decodeToSectors(
+std::shared_ptr<const TrackDataFlux> AbstractDecoder::decodeToSectors(
 		std::shared_ptr<const Fluxmap> fluxmap, unsigned physicalCylinder, unsigned physicalHead)
 {
-	_trackdata = std::make_unique<TrackDataFlux>();
+	_trackdata = std::make_shared<TrackDataFlux>();
 	_trackdata->fluxmap = fluxmap;
 	_trackdata->physicalCylinder = physicalCylinder;
 	_trackdata->physicalHead = physicalHead;
@@ -86,7 +86,7 @@ std::unique_ptr<TrackDataFlux> AbstractDecoder::decodeToSectors(
         Fluxmap::Position recordStart = fmr.tell();
         _sector->clock = advanceToNextRecord();
 		if (fmr.eof() || !_sector->clock)
-			break;
+            return _trackdata;
 
         /* Read the sector record. */
 
@@ -105,31 +105,36 @@ std::unique_ptr<TrackDataFlux> AbstractDecoder::decodeToSectors(
         {
             /* The data is in a separate record. */
 
-			_sector->headerStartTime = before.ns();
-			_sector->headerEndTime = after.ns();
-
-			_sector->clock = advanceToNextRecord();
-			if (fmr.eof() || !_sector->clock)
-				break;
-
-			before = fmr.tell();
-			decodeDataRecord();
-			after = fmr.tell();
-
-			if (_sector->status != Sector::DATA_MISSING)
+			for (;;)
 			{
-				_sector->position = before.bytes;
-				_sector->dataStartTime = before.ns();
-				_sector->dataEndTime = after.ns();
-				pushRecord(before, after);
+				_sector->headerStartTime = before.ns();
+				_sector->headerEndTime = after.ns();
+
+				_sector->clock = advanceToNextRecord();
+				if (fmr.eof() || !_sector->clock)
+					break;
+
+				before = fmr.tell();
+				decodeDataRecord();
+				after = fmr.tell();
+
+				if (_sector->status != Sector::DATA_MISSING)
+				{
+					_sector->position = before.bytes;
+					_sector->dataStartTime = before.ns();
+					_sector->dataEndTime = after.ns();
+					pushRecord(before, after);
+					break;
+				}
+
+				fmr.skipToEvent(F_BIT_PULSE);
+				resetFluxDecoder();
 			}
         }
 
         if (_sector->status != Sector::MISSING)
 			_trackdata->sectors.push_back(_sector);
     }
-
-	return std::move(_trackdata);
 }
 
 void AbstractDecoder::pushRecord(const Fluxmap::Position& start, const Fluxmap::Position& end)

@@ -7,9 +7,11 @@ import "lib/imagewriter/imagewriter.proto";
 import "lib/fluxsource/fluxsource.proto";
 import "lib/fluxsink/fluxsink.proto";
 import "lib/usb/usb.proto";
+import "lib/drive.proto";
+import "lib/mapper.proto";
 import "lib/common.proto";
 
-// NEXT_TAG: 14
+// NEXT_TAG: 16
 message ConfigProto {
 	optional string comment = 8;
 	optional bool is_extension = 13;
@@ -19,6 +21,7 @@ message ConfigProto {
 	
 	optional FluxSourceProto flux_source = 10;
 	optional FluxSinkProto flux_sink = 11;
+	optional DriveProto drive = 15;
 
 	optional EncoderProto encoder = 3;
 	optional DecoderProto decoder = 4;
@@ -26,5 +29,7 @@ message ConfigProto {
 
 	optional RangeProto cylinders = 6;
 	optional RangeProto heads = 7;
+
+	optional SectorMappingProto sector_mapping = 14;
 }
 

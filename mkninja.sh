@@ -45,7 +45,7 @@ rule link
 
 rule linkgui
     command = $CXX $LDFLAGS $GUILDFLAGS -o \$out \$in \$flags $LIBS $GUILIBS
-    description = LINK-OBJC \$in
+    description = LINK-GUI \$in
 
 rule test
     command = \$in && touch \$out
@@ -383,11 +383,13 @@ buildproto libconfig.a \
     lib/common.proto \
     lib/config.proto \
     lib/decoders/decoders.proto \
+    lib/drive.proto \
     lib/encoders/encoders.proto \
-    lib/fluxsource/fluxsource.proto \
     lib/fluxsink/fluxsink.proto \
+    lib/fluxsource/fluxsource.proto \
     lib/imagereader/imagereader.proto \
     lib/imagewriter/imagewriter.proto \
+    lib/mapper.proto \
     lib/usb/usb.proto \
 
 buildproto libfl2.a \
@@ -405,6 +407,7 @@ buildlibrary libbackend.a \
     arch/amiga/decoder.cc \
     arch/amiga/encoder.cc \
     arch/apple2/decoder.cc \
+    arch/apple2/encoder.cc \
     arch/brother/decoder.cc \
     arch/brother/encoder.cc \
     arch/c64/decoder.cc \
@@ -475,6 +478,8 @@ buildlibrary libbackend.a \
     lib/imagewriter/rawimagewriter.cc \
     lib/imginputoutpututils.cc \
     lib/ldbs.cc \
+    lib/logger.cc \
+    lib/mapper.cc \
     lib/proto.cc \
     lib/reader.cc \
     lib/sector.cc \
@@ -495,6 +500,7 @@ FORMATS="\
     amiga \
     ampro \
     apple2 \
+    appledos \
     atarist360 \
     atarist370 \
     atarist400 \
@@ -531,6 +537,8 @@ FORMATS="\
     northstar175 \
     northstar350 \
     northstar87 \
+    prodos \
+    rx50 \
     tids990 \
     vgi \
     victor9k_ss \
@@ -567,6 +575,15 @@ buildlibrary libfrontend.a \
     src/fe-write.cc \
     src/fluxengine.cc \
 
+buildlibrary libgui.a \
+    -I$OBJDIR/proto \
+    -Idep/libusbp/include \
+    -d $OBJDIR/proto/libconfig.def \
+    src/gui/main.cc \
+    src/gui/layout.cpp \
+    src/gui/visualisation.cc \
+    src/gui/mainwindow.cc \
+
 buildprogram fluxengine \
     libfrontend.a \
     libformats.a \
@@ -576,6 +593,16 @@ buildprogram fluxengine \
     libusbp.a \
     libfmt.a \
     libagg.a \
+
+buildprogram fluxengine-gui \
+    -rule linkgui \
+    libgui.a \
+    libformats.a \
+    libbackend.a \
+    libconfig.a \
+    libfl2.a \
+    libusbp.a \
+    libfmt.a \
 
 buildlibrary libemu.a \
     dep/emu/fnmatch.c
@@ -622,6 +649,7 @@ runtest fmmfm-test          tests/fmmfm.cc
 runtest greaseweazle-test   tests/greaseweazle.cc
 runtest kryoflux-test       tests/kryoflux.cc
 runtest ldbs-test           tests/ldbs.cc
+runtest utils-test          tests/utils.cc
 runtest proto-test          -I$OBJDIR/proto \
                             -d $OBJDIR/proto/libconfig.def \
                             -d $OBJDIR/proto/libtestproto.def \
@@ -629,6 +657,7 @@ runtest proto-test          -I$OBJDIR/proto \
                             $OBJDIR/proto/tests/testproto.cc
 
 encodedecodetest amiga
+encodedecodetest apple2
 encodedecodetest atarist360
 encodedecodetest atarist370
 encodedecodetest atarist400
@@ -652,6 +681,7 @@ encodedecodetest ibm720_525
 encodedecodetest mac400 scripts/mac400_test.textpb
 encodedecodetest mac800 scripts/mac800_test.textpb
 encodedecodetest n88basic
+encodedecodetest rx50
 encodedecodetest tids990
 encodedecodetest victor9k_ss
 encodedecodetest victor9k_ds
