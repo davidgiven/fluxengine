@@ -75,7 +75,7 @@ public:
 		_sector->data = bytes.slice(0, AGAT_SECTOR_SIZE);
 		uint8_t wantChecksum = bytes[AGAT_SECTOR_SIZE];
 		uint8_t gotChecksum = agatChecksum(_sector->data);
-		_sector->status = (wantChecksum = gotChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
+		_sector->status = (wantChecksum == gotChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
 	}
 };
 
