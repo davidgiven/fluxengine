@@ -97,6 +97,7 @@ people who've had it work).
 | [Acorn ADFS](doc/disk-acornadfs.md)       |  🦄   |   🦖*  | single- and double- sided           |
 | [Acorn DFS](doc/disk-acorndfs.md)         |  🦄   |   🦖*  |                                     |
 | [Ampro Little Board](doc/disk-ampro.md)   |  🦖   |   🦖*  |                                     |
+| [Agat](doc/disk-agat.md)                  |  🦖   |        | Soviet Union Apple-II-like computer |
 | [Apple II](doc/disk-apple2.md)            |  🦄   |   🦄   |                                     |
 | [Amiga](doc/disk-amiga.md)                |  🦄   |   🦄   |                                     |
 | [Commodore 64 1541/1581](doc/disk-c64.md) |  🦄   |   🦄   | and probably the other formats      |
