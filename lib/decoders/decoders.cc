@@ -3,7 +3,8 @@
 #include "fluxmap.h"
 #include "decoders/decoders.h"
 #include "encoders/encoders.h"
-//#include "arch/aeslanier/aeslanier.h"
+#include "arch/agat/agat.h"
+#include "arch/aeslanier/aeslanier.h"
 #include "arch/amiga/amiga.h"
 #include "arch/apple2/apple2.h"
 #include "arch/brother/brother.h"
@@ -33,7 +34,8 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 	static const std::map<int,
 		std::function<std::unique_ptr<AbstractDecoder>(const DecoderProto&)>> decoders =
 	{
-		//{ DecoderProto::kAeslanier,  createAesLanierDecoder },
+		{ DecoderProto::kAgat,       createAgatDecoder },
+		{ DecoderProto::kAeslanier,  createAesLanierDecoder },
 		{ DecoderProto::kAmiga,      createAmigaDecoder },
 		{ DecoderProto::kApple2,     createApple2Decoder },
 		{ DecoderProto::kBrother,    createBrotherDecoder },

@@ -38,7 +38,7 @@ static bool conflictable(Sector::Status status)
 }
 
 static std::set<std::shared_ptr<const Sector>> collect_sectors(
-    std::set<std::shared_ptr<const Sector>>& track_sectors)
+    std::set<std::shared_ptr<const Sector>>& track_sectors, bool collapse_conflicts = true)
 {
     typedef std::tuple<unsigned, unsigned, unsigned> key_t;
     std::multimap<key_t, std::shared_ptr<const Sector>> sectors;
@@ -65,6 +65,12 @@ static std::set<std::shared_ptr<const Sector>> collect_sectors(
                     (right->status == Sector::OK) &&
                     (left->data != right->data))
                 {
+					if (!collapse_conflicts)
+					{
+						auto s = std::make_shared<Sector>(*right);
+						s->status = Sector::CONFLICT;
+						sector_set.insert(s);
+					}
                     auto s = std::make_shared<Sector>(*left);
                     s->status = Sector::CONFLICT;
                     return s;
@@ -177,8 +183,14 @@ std::shared_ptr<const DiskFlux> readDiskCommand(FluxSource& fluxsource, Abstract
 
             if (config.decoder().dump_records())
             {
+				std::vector<std::shared_ptr<const Record>> sorted_records(track_records.begin(), track_records.end());
+				std::sort(sorted_records.begin(), sorted_records.end(),
+					[](const auto& o1, const auto& o2) {
+						return o1->startTime < o2->startTime;
+					});
+
                 std::cout << "\nRaw (undecoded) records follow:\n\n";
-                for (const auto& record : track_records)
+                for (const auto& record : sorted_records)
                 {
                     std::cout << fmt::format("I+{:.2f}us with {:.2f}us clock\n",
                         record->startTime / 1000.0,
@@ -190,8 +202,15 @@ std::shared_ptr<const DiskFlux> readDiskCommand(FluxSource& fluxsource, Abstract
 
             if (config.decoder().dump_sectors())
             {
+				auto collected_sectors = collect_sectors(track_sectors, false);
+				std::vector<std::shared_ptr<const Sector>> sorted_sectors(collected_sectors.begin(), collected_sectors.end());
+				std::sort(sorted_sectors.begin(), sorted_sectors.end(),
+					[](const auto& o1, const auto& o2) {
+						return *o1 < *o2;
+					});
+
                 std::cout << "\nDecoded sectors follow:\n\n";
-                for (const auto& sector : track_sectors)
+                for (const auto& sector : sorted_sectors)
                 {
                     std::cout << fmt::format(
                         "{}.{:02}.{:02}: I+{:.2f}us with {:.2f}us clock: "

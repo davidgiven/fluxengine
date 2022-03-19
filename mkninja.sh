@@ -322,10 +322,6 @@ encodedecodetest() {
     echo "    format=$format"
     echo "    configs=$*"
     echo "    fluxx=flux"
-    echo "build $OBJDIR/$format.encodedecode.scp.stamp : encodedecode | fluxengine$EXTENSION scripts/encodedecodetest.sh $*"
-    echo "    format=$format"
-    echo "    configs=$*"
-    echo "    fluxx=scp"
 }
 
 buildlibrary libagg.a \
@@ -364,6 +360,7 @@ buildlibrary libfmt.a \
     dep/fmt/os.cc \
 
 buildproto libconfig.a \
+    arch/agat/agat.proto \
     arch/aeslanier/aeslanier.proto \
     arch/amiga/amiga.proto \
     arch/apple2/apple2.proto \
@@ -399,6 +396,8 @@ buildlibrary libbackend.a \
     -Idep/libusbp/include \
     -d $OBJDIR/proto/libconfig.def \
     -d $OBJDIR/proto/libfl2.def \
+    arch/agat/agat.cc \
+    arch/agat/decoder.cc \
     arch/aeslanier/decoder.cc \
     arch/amiga/amiga.cc \
     arch/amiga/decoder.cc \
@@ -492,6 +491,7 @@ buildlibrary libbackend.a \
 FORMATS="\
     acornadfs \
     acorndfs \
+    agat840 \
     aeslanier \
     amiga \
     ampro \
