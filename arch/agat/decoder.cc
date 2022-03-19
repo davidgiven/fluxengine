@@ -18,7 +18,10 @@
  * 
  * Each pattern is prefixed with this one:
  *
- * flux:   10 00  10 01  00 10  01 00 = 8924
+ * data:    -  -   -  X   -  -   X  - = 12
+ * flux:   10 10  10 01  00 10  01 00 = a924
+ * magic:  10 00  10 01  00 10  01 00 = 8924
+ *            ^
  */
 
 static const uint64_t SECTOR_ID = 0x8924555549111444;
