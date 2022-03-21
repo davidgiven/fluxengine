@@ -32,7 +32,10 @@ export STRIP = /mingw32/bin/strip
 export CFLAGS += -I/mingw32/include
 export CXXFLAGS += $(shell wx-config --cxxflags --static=yes)
 export GUILDFLAGS += -lmingw32
-export LIBS += -L/mingw32/lib -static -lsqlite3 \
+export LIBS += -L/mingw32/lib -static\
+	-lsqlite3 -lz \
+	-lsetupapi -lwinusb -lole32 -lprotobuf -luuid
+export GUILIBS += -L/mingw32/lib -static -lsqlite3 \
 	$(shell wx-config --libs --static=yes core base) -lz \
 	-lcomctl32 -loleaut32 -lspoolss -loleacc -lwinspool \
 	-lsetupapi -lwinusb -lole32 -lprotobuf -luuid
@@ -79,7 +82,7 @@ CFLAGS += -Ilib -Idep/fmt -Iarch
 export OBJDIR = .obj
 
 all: .obj/build.ninja
-	@ninja -f .obj/build.ninja -k 0
+	@ninja -f .obj/build.ninja
 	@if command -v cscope > /dev/null; then cscope -bRq; fi
 
 clean:
