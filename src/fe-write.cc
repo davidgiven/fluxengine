@@ -68,7 +68,8 @@ int mainWrite(int argc, const char* argv[])
 	if (argc == 1)
 		showProfiles("write", formats);
 	config.mutable_flux_sink()->mutable_drive();
-	config.mutable_flux_source()->mutable_drive();
+	if (verify)
+		config.mutable_flux_source()->mutable_drive();
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
 	std::unique_ptr<ImageReader> reader(ImageReader::create(config.image_reader()));
@@ -82,7 +83,7 @@ int mainWrite(int argc, const char* argv[])
 		decoder = AbstractDecoder::create(config.decoder());
 
 	std::unique_ptr<FluxSource> fluxSource;
-	if (config.has_flux_source() && config.flux_source().has_drive())
+	if (verify && config.has_flux_source() && config.flux_source().has_drive())
 		fluxSource = FluxSource::create(config.flux_source());
 
 	writeDiskCommand(image, *encoder, *fluxSink, decoder.get(), fluxSource.get());
