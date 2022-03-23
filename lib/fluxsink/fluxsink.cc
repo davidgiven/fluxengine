@@ -14,6 +14,9 @@ std::unique_ptr<FluxSink> FluxSink::create(const FluxSinkProto& config)
 		case FluxSinkProto::kDrive:
 			return createHardwareFluxSink(config.drive());
 
+		case FluxSinkProto::kA2R:
+			return createA2RFluxSink(config.a2r());
+
 		case FluxSinkProto::kAu:
 			return createAuFluxSink(config.au());
 
@@ -36,6 +39,7 @@ void FluxSink::updateConfigForFilename(FluxSinkProto* proto, const std::string& 
 {
 	static const std::vector<std::pair<std::regex, std::function<void(const std::string&, FluxSinkProto*)>>> formats =
 	{
+		{ std::regex("^(.*\\.a2r)$"),  [](auto& s, auto* proto) { proto->mutable_a2r()->set_filename(s); }},
 		{ std::regex("^(.*\\.flux)$"), [](auto& s, auto* proto) { proto->mutable_fl2()->set_filename(s); }},
 		{ std::regex("^(.*\\.scp)$"),  [](auto& s, auto* proto) { proto->mutable_scp()->set_filename(s); }},
 		{ std::regex("^vcd:(.*)$"),    [](auto& s, auto* proto) { proto->mutable_vcd()->set_directory(s); }},

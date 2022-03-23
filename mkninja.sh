@@ -435,6 +435,7 @@ buildlibrary libbackend.a \
     lib/encoders/encoders.cc \
     lib/flags.cc \
     lib/fluxmap.cc \
+    lib/fluxsink/a2rfluxsink.cc \
     lib/fluxsink/aufluxsink.cc \
     lib/fluxsink/fl2fluxsink.cc \
     lib/fluxsink/fluxsink.cc \
