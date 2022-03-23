@@ -81,10 +81,12 @@ CFLAGS += -Ilib -Idep/fmt -Iarch
 
 export OBJDIR = .obj
 
+.PHONY: all
 all: .obj/build.ninja
 	@ninja -f .obj/build.ninja
 	@if command -v cscope > /dev/null; then cscope -bRq; fi
 
+.PHONY: clean
 clean:
 	@echo CLEAN
 	@rm -rf $(OBJDIR)
@@ -94,5 +96,10 @@ clean:
 	@mkdir -p $(OBJDIR)
 	@sh $< > $@
 
+.PHONY: compdb
 compdb:
 	@ninja -f .obj/build.ninja -t compdb > compile_commands.json
+
+.PHONY: fluxengine fluxengine-debug
+fluxengine fluxengine-debug: .obj/build.ninja
+	@ninja -f .obj/build.ninja "$@"
