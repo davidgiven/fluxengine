@@ -15,6 +15,7 @@
 #include <climits>
 #include <variant>
 #include <optional>
+#include <compare>
 
 #if defined(_WIN32) || defined(__WIN32__)
 #include <direct.h>
