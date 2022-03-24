@@ -211,17 +211,16 @@ public:
 	{}
 
 public:
-	std::vector<std::shared_ptr<const Sector>> collectSectors(int physicalTrack, int physicalSide, const Image& image) override
+	std::vector<std::shared_ptr<const Sector>> collectSectors(const Location& location, const Image& image) override
 	{
 		std::vector<std::shared_ptr<const Sector>> sectors;
 
-        if (physicalSide == 0)
+        if (location.head == 0)
         {
-            int logicalTrack = physicalTrack / 2;
-            unsigned numSectors = sectorsForTrack(logicalTrack);
+            unsigned numSectors = sectorsForTrack(location.logicalCylinder);
             for (int sectorId=0; sectorId<numSectors; sectorId++)
             {
-                const auto& sector = image.get(logicalTrack, 0, sectorId);
+                const auto& sector = image.get(location.logicalCylinder, 0, sectorId);
                 if (sector)
                     sectors.push_back(sector);
             }
@@ -230,7 +229,7 @@ public:
 		return sectors;
 	}
 
-    std::unique_ptr<Fluxmap> encode(int physicalTrack, int physicalSide,
+    std::unique_ptr<Fluxmap> encode(const Location& location,
             const std::vector<std::shared_ptr<const Sector>>& sectors, const Image& image) override
     {
         /* The format ID Character # 1 and # 2 are in the .d64 image only present
@@ -239,9 +238,6 @@ public:
          * stored in a d64 disk image so we have to get it from track 18 which
          * contains the BAM.
         */
-
-        if (physicalSide != 0)
-            return std::unique_ptr<Fluxmap>();
 
         const auto& sectorData = image.get(C64_BAM_TRACK*2, 0, 0); //Read de BAM to get the DISK ID bytes
         if (sectorData)
@@ -254,8 +250,7 @@ public:
         else
             _formatByte1 = _formatByte2 = 0;
         
-        int logicalTrack = physicalTrack / 2;
-        double clockRateUs = clockRateUsForTrack(logicalTrack) * _config.clock_compensation_factor();
+        double clockRateUs = clockRateUsForTrack(location.logicalCylinder) * _config.clock_compensation_factor();
 
         int bitsPerRevolution = 200000.0 / clockRateUs;
 

@@ -477,7 +477,6 @@ buildlibrary libbackend.a \
     lib/logger.cc \
     lib/mapper.cc \
     lib/proto.cc \
-    lib/reader.cc \
     lib/sector.cc \
     lib/usb/fluxengineusb.cc \
     lib/usb/greaseweazle.cc \
@@ -489,13 +488,15 @@ buildlibrary libbackend.a \
     lib/writer.cc \
 
 FORMATS="\
+    40trackdrive \
     acornadfs \
     acorndfs \
-    agat840 \
     aeslanier \
+    agat840 \
     amiga \
     ampro \
     apple2 \
+    apple2drive \
     appledos \
     atarist360 \
     atarist370 \
@@ -535,10 +536,11 @@ FORMATS="\
     northstar87 \
     prodos \
     rx50 \
+    shugartdrive \
     tids990 \
     vgi \
-    victor9k_ss \
     victor9k_ds \
+    victor9k_ss \
     zilogmcz \
     "
 

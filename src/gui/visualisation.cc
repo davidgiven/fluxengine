@@ -158,7 +158,7 @@ void VisualisationControl::Clear()
 
 void VisualisationControl::SetTrackData(std::shared_ptr<const TrackFlux> track)
 {
-    key_t key = {track->physicalCylinder, track->physicalHead};
+    key_t key = {track->location.physicalCylinder, track->location.head};
     _sectors.erase(key);
     for (auto& sector : track->sectors)
         _sectors.insert({key, sector});

@@ -12,6 +12,7 @@
 #include "decoders/decoders.h"
 #include "lib/usb/usbfinder.h"
 #include "fmt/format.h"
+#include "mapper.h"
 #include "utils.h"
 #include "mainwindow.h"
 #include <google/protobuf/text_format.h>
@@ -86,6 +87,7 @@ void MainWindow::OnReadFluxButton(wxCommandEvent&)
                 auto fluxSource = FluxSource::create(config.flux_source());
                 auto decoder = AbstractDecoder::create(config.decoder());
                 auto diskflux = readDiskCommand(*fluxSource, *decoder);
+
                 runOnUiThread(
                     [&]()
                     {

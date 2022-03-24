@@ -60,12 +60,11 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 }
 
 std::shared_ptr<const TrackDataFlux> AbstractDecoder::decodeToSectors(
-		std::shared_ptr<const Fluxmap> fluxmap, unsigned physicalCylinder, unsigned physicalHead)
+		std::shared_ptr<const Fluxmap> fluxmap, const Location& location)
 {
 	_trackdata = std::make_shared<TrackDataFlux>();
 	_trackdata->fluxmap = fluxmap;
-	_trackdata->physicalCylinder = physicalCylinder;
-	_trackdata->physicalHead = physicalHead;
+	_trackdata->location = location;
 	
     FluxmapReader fmr(*fluxmap);
     _fmr = &fmr;
@@ -73,8 +72,8 @@ std::shared_ptr<const TrackDataFlux> AbstractDecoder::decodeToSectors(
 	auto newSector = [&] {
 		_sector = std::make_shared<Sector>();
 		_sector->status = Sector::MISSING;
-		_sector->physicalCylinder = physicalCylinder;
-		_sector->physicalHead = physicalHead;
+		_sector->physicalCylinder = location.physicalCylinder;
+		_sector->physicalHead = location.head;
 	};
 
 	newSector();
@@ -218,7 +217,7 @@ uint64_t AbstractDecoder::readRaw64()
 }
 
 
-std::set<unsigned> AbstractDecoder::requiredSectors(unsigned cylinder, unsigned head) const
+std::set<unsigned> AbstractDecoder::requiredSectors(const Location& location) const
 {
 	static std::set<unsigned> set;
 	return set;

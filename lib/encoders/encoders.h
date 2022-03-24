@@ -1,9 +1,10 @@
 #ifndef ENCODERS_H
 #define ENCODERS_H
 
-class Fluxmap;
 class EncoderProto;
+class Fluxmap;
 class Image;
+class Location;
 class Sector;
 
 class AbstractEncoder
@@ -16,10 +17,9 @@ public:
 
 public:
     virtual std::vector<std::shared_ptr<const Sector>> collectSectors(
-        int physicalCylinder, int physicalHead, const Image& image) = 0;
+        const Location& location, const Image& image) = 0;
 
-    virtual std::unique_ptr<Fluxmap> encode(int physicalCylinder,
-        int physicalHead,
+    virtual std::unique_ptr<Fluxmap> encode(const Location& location,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) = 0;
 };

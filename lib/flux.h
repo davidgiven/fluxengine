@@ -12,10 +12,25 @@ struct Record
 	Bytes rawData;
 };
 
+struct Location
+{
+    unsigned physicalCylinder;
+    unsigned logicalCylinder;
+	unsigned head;
+	unsigned groupSize;
+
+    std::strong_ordering operator<=>(const Location& other) const
+    {
+		auto i = physicalCylinder <=> other.physicalCylinder;
+		if (i == std::strong_ordering::equal)
+			i = head <=> other.head;
+		return i;
+    }
+};
+
 struct TrackDataFlux
 {
-	unsigned physicalCylinder;
-	unsigned physicalHead;
+	Location location;
 	std::shared_ptr<const Fluxmap> fluxmap;
 	std::vector<std::shared_ptr<const Record>> records;
 	std::vector<std::shared_ptr<const Sector>> sectors;
@@ -23,8 +38,7 @@ struct TrackDataFlux
 
 struct TrackFlux
 {
-	unsigned physicalCylinder;
-	unsigned physicalHead;
+	Location location;
 	std::vector<std::shared_ptr<const TrackDataFlux>> trackDatas;
 	std::set<std::shared_ptr<const Sector>> sectors;
 };

@@ -66,8 +66,10 @@ public:
 };
 
 extern bool sectorPointerSortPredicate(
-    std::shared_ptr<const Sector>& lhs, std::shared_ptr<const Sector>& rhs);
+	const std::shared_ptr<const Sector>& lhs,
+    const std::shared_ptr<const Sector>& rhs);
 extern bool sectorPointerEqualsPredicate(
-    std::shared_ptr<const Sector>& lhs, std::shared_ptr<const Sector>& rhs);
+    const std::shared_ptr<const Sector>& lhs,
+    const std::shared_ptr<const Sector>& rhs);
 
 #endif

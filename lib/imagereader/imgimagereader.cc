@@ -35,8 +35,6 @@ public:
 
             if (inputFile.eof())
                 break;
-            int physicalCylinder = track * _config.img().physical_step() +
-                                   _config.img().physical_offset();
 
             ImgInputOutputProto::TrackdataProto trackdata;
             getTrackFormat(_config.img(), trackdata, track, side);
@@ -46,11 +44,10 @@ public:
                 Bytes data(trackdata.sector_size());
                 inputFile.read((char*)data.begin(), data.size());
 
-                const auto& sector =
-                    image->put(physicalCylinder, side, sectorId);
+                const auto& sector = image->put(track, side, sectorId);
                 sector->status = Sector::OK;
                 sector->logicalTrack = track;
-                sector->physicalCylinder = physicalCylinder;
+                sector->physicalCylinder = track;
                 sector->logicalSide = sector->physicalHead = side;
                 sector->logicalSector = sectorId;
                 sector->data = data;

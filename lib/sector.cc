@@ -55,14 +55,14 @@ Sector::Status Sector::stringToStatus(const std::string& value)
     return Status::INTERNAL_ERROR;
 }
 
-bool sectorPointerSortPredicate(
-    std::shared_ptr<const Sector>& lhs, std::shared_ptr<const Sector>& rhs)
+bool sectorPointerSortPredicate(const std::shared_ptr<const Sector>& lhs,
+    const std::shared_ptr<const Sector>& rhs)
 {
     return *lhs < *rhs;
 }
 
-bool sectorPointerEqualsPredicate(
-    std::shared_ptr<const Sector>& lhs, std::shared_ptr<const Sector>& rhs)
+bool sectorPointerEqualsPredicate(const std::shared_ptr<const Sector>& lhs,
+    const std::shared_ptr<const Sector>& rhs)
 {
     if (!lhs && !rhs)
         return true;

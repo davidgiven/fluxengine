@@ -1,16 +1,17 @@
 #ifndef WRITER_H
 #define WRITER_H
 
-class Fluxmap;
 class AbstractDecoder;
 class AbstractEncoder;
-class ImageReader;
-class FluxSource;
 class FluxSink;
+class FluxSource;
+class Fluxmap;
 class Image;
+class ImageReader;
+class Location;
 
 extern void writeTracks(FluxSink& fluxSink,
-    const std::function<std::unique_ptr<const Fluxmap>(int track, int side)>
+    const std::function<std::unique_ptr<const Fluxmap>(const Location& location)>
         producer);
 
 extern void fillBitmapTo(std::vector<bool>& bitmap,

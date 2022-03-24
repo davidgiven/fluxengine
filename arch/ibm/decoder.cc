@@ -203,10 +203,10 @@ public:
 		_sector->status = (wantCrc == gotCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
 	}
 
-	std::set<unsigned> requiredSectors(unsigned cylinder, unsigned head) const override
+	std::set<unsigned> requiredSectors(const Location& location) const override
 	{
 		IbmDecoderProto::TrackdataProto trackdata;
-		getTrackFormat(trackdata, cylinder, head);
+		getTrackFormat(trackdata, location.logicalCylinder, location.head);
 
 		std::set<unsigned> s;
 		if (trackdata.has_sectors())

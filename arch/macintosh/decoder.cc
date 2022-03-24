@@ -183,8 +183,10 @@ public:
 		_sector->data.writer().append(userData.slice(12, 512)).append(userData.slice(0, 12));
 	}
 
-	std::set<unsigned> requiredSectors(unsigned cylinder, unsigned head) const override
+	std::set<unsigned> requiredSectors(const Location& location) const override
 	{
+		unsigned cylinder = location.logicalCylinder;
+
 		int count;
 		if (cylinder < 16)
 			count = 12;
