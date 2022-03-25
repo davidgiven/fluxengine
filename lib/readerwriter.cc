@@ -231,6 +231,7 @@ void writeTracksAndVerify(FluxSink& fluxSink,
         [&](const Location& location)
         {
 			auto trackFlux = std::make_shared<TrackFlux>();
+            trackFlux->location = location;
             readGroup(fluxSource, location, *trackFlux, decoder);
 			Logger() << TrackReadLogMessage{ trackFlux };
 
@@ -294,13 +295,14 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
     {
         testForEmergencyStop();
 
-        auto track = std::make_shared<TrackFlux>();
-        diskflux->tracks.push_back(track);
+        auto trackFlux = std::make_shared<TrackFlux>();
+        trackFlux->location = location;
+        diskflux->tracks.push_back(trackFlux);
 
         int retriesRemaining = config.decoder().retries();
         for (;;)
         {
-            if (!readGroup(fluxSource, location, *track, decoder))
+            if (!readGroup(fluxSource, location, *trackFlux, decoder))
                 break;
 
             if (retriesRemaining == 0)
@@ -317,7 +319,7 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
 
         if (outputFluxSink)
         {
-            for (const auto& data : track->trackDatas)
+            for (const auto& data : trackFlux->trackDatas)
                 outputFluxSink->writeFlux(
                     location.physicalTrack, location.head, *data->fluxmap);
         }
@@ -326,7 +328,7 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
         {
             std::vector<std::shared_ptr<const Record>> sorted_records;
 
-            for (const auto& data : track->trackDatas)
+            for (const auto& data : trackFlux->trackDatas)
                 sorted_records.insert(sorted_records.end(),
                     data->records.begin(),
                     data->records.end());
@@ -351,7 +353,7 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
 
         if (config.decoder().dump_sectors())
         {
-            auto collected_sectors = collectSectors(track->sectors, false);
+            auto collected_sectors = collectSectors(trackFlux->sectors, false);
             std::vector<std::shared_ptr<const Sector>> sorted_sectors(
                 collected_sectors.begin(), collected_sectors.end());
             std::sort(sorted_sectors.begin(),
@@ -379,7 +381,7 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
         }
 
         /* track can't be modified below this point. */
-        Logger() << TrackReadLogMessage{track};
+        Logger() << TrackReadLogMessage{trackFlux};
     }
 
     if (failures)
