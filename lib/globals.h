@@ -30,7 +30,7 @@
 #include <variant>
 #include <optional>
 
-#if defined CPP20_COMPARISONS_PRESENT
+#if CPP20_COMPARISONS_PRESENT
     #include <compare>
 #endif
 
