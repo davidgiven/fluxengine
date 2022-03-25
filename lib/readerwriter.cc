@@ -27,6 +27,32 @@ enum ReadResult
     BAD_AND_CAN_NOT_RETRY
 };
 
+/* In order to allow rereads in file-based flux sources, we need to persist the
+ * FluxSourceIterator (as that's where the state for which read to return is
+ * held). This class handles that. */
+
+class FluxSourceIteratorHolder
+{
+public:
+    FluxSourceIteratorHolder(FluxSource& fluxSource): _fluxSource(fluxSource) {}
+
+    FluxSourceIterator& getIterator(unsigned physicalCylinder, unsigned head)
+    {
+        auto& it = _cache[std::make_pair(physicalCylinder, head)];
+        if (!it)
+            it = _fluxSource.readFlux(physicalCylinder, head);
+        return *it;
+    }
+
+private:
+    FluxSource& _fluxSource;
+    std::map<std::pair<unsigned, unsigned>, std::unique_ptr<FluxSourceIterator>>
+        _cache;
+};
+
+/* Given a set of sectors, deduplicates them sensibly (e.g. if there is a good
+ * and bad version of the same sector, the bad version is dropped). */
+
 static std::set<std::shared_ptr<const Sector>> collectSectors(
     std::set<std::shared_ptr<const Sector>>& track_sectors,
     bool collapse_conflicts = true)
@@ -110,7 +136,7 @@ bool combineRecordAndSectors(
     return false;
 }
 
-ReadResult readGroup(FluxSource& fluxSource,
+ReadResult readGroup(FluxSourceIteratorHolder& fluxSourceIteratorHolder,
     const Location& location,
     TrackFlux& trackFlux,
     AbstractDecoder& decoder)
@@ -120,15 +146,15 @@ ReadResult readGroup(FluxSource& fluxSource,
     for (unsigned offset = 0; offset < location.groupSize;
          offset += config.drive().head_width())
     {
-        auto fluxSourceIterator =
-            fluxSource.readFlux(location.physicalTrack + offset, location.head);
-        if (!fluxSourceIterator->hasNext())
+        auto& fluxSourceIterator = fluxSourceIteratorHolder.getIterator(
+            location.physicalTrack + offset, location.head);
+        if (!fluxSourceIterator.hasNext())
             continue;
 
         Logger() << BeginReadOperationLogMessage{
             location.physicalTrack + offset, location.head};
         std::shared_ptr<const Fluxmap> fluxmap =
-            fluxSourceIterator->next()->rescale(
+            fluxSourceIterator.next()->rescale(
                 1.0 / config.flux_source().rescale());
         Logger() << EndReadOperationLogMessage()
                  << fmt::format("{0:.0} ms in {1} bytes",
@@ -139,7 +165,7 @@ ReadResult readGroup(FluxSource& fluxSource,
         trackFlux.trackDatas.push_back(trackdataflux);
         if (!combineRecordAndSectors(trackFlux, decoder, location))
             return GOOD_READ;
-        if (fluxSourceIterator->hasNext())
+        if (fluxSourceIterator.hasNext())
             result = BAD_AND_CAN_RETRY;
     }
 
@@ -246,7 +272,8 @@ void writeTracksAndVerify(FluxSink& fluxSink,
         {
             auto trackFlux = std::make_shared<TrackFlux>();
             trackFlux->location = location;
-            readGroup(fluxSource, location, *trackFlux, decoder);
+            FluxSourceIteratorHolder fluxSourceIteratorHolder(fluxSource);
+            readGroup(fluxSourceIteratorHolder, location, *trackFlux, decoder);
             Logger() << TrackReadLogMessage{trackFlux};
 
             auto wantedSectors = encoder.collectSectors(location, image);
@@ -306,6 +333,7 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
     auto diskflux = std::make_shared<DiskFlux>();
     bool failures = false;
 
+    FluxSourceIteratorHolder fluxSourceIteratorHolder(fluxSource);
     for (const auto& location : Mapper::computeLocations())
     {
         testForEmergencyStop();
@@ -317,7 +345,8 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
         int retriesRemaining = config.decoder().retries();
         for (;;)
         {
-            auto result = readGroup(fluxSource, location, *trackFlux, decoder);
+            auto result = readGroup(
+                fluxSourceIteratorHolder, location, *trackFlux, decoder);
             if (result == GOOD_READ)
                 break;
             if (result == BAD_AND_CAN_NOT_RETRY)
