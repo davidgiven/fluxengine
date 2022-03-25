@@ -1,6 +1,20 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
+#if defined(_MSVC_LANG)
+    #define CPP_VERSION _MSVC_LANG
+#else
+    #define CPP_VERSION __cplusplus
+#endif
+
+#define CPP20_PRESENT (CPP_VERSION >= 202002L)
+
+#if defined(__cpp_impl_three_way_comparison) && defined(__cpp_lib_three_way_comparison)
+    #define CPP20_COMPARISONS_PRESENT ((__cpp_impl_three_way_comparison >= 201907L) && (__cpp_lib_three_way_comparison >= 201907L))
+#else
+    #define CPP20_COMPARISONS_PRESENT CPP20_PRESENT
+#endif
+
 #include <stddef.h>
 #include <functional>
 #include <numeric>
@@ -15,7 +29,10 @@
 #include <climits>
 #include <variant>
 #include <optional>
-#include <compare>
+
+#if defined CPP20_COMPARISONS_PRESENT
+    #include <compare>
+#endif
 
 #if defined(_WIN32) || defined(__WIN32__)
 #include <direct.h>
