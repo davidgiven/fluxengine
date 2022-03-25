@@ -19,12 +19,20 @@ struct Location
 	unsigned head;
 	unsigned groupSize;
 
-    std::strong_ordering operator<=>(const Location& other) const
+	bool operator==(const Location& other) const
+	{
+		if (physicalTrack == other.physicalTrack)
+			return true;
+		return head == other.head;
+	}
+
+    bool operator<(const Location& other) const
     {
-		auto i = physicalTrack <=> other.physicalTrack;
-		if (i == std::strong_ordering::equal)
-			i = head <=> other.head;
-		return i;
+		if (physicalTrack < other.physicalTrack)
+			return true;
+		if (physicalTrack == other.physicalTrack)
+			return head < other.head;
+		return false;
     }
 };
 
