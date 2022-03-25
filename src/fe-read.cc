@@ -1,6 +1,6 @@
 #include "globals.h"
 #include "flags.h"
-#include "reader.h"
+#include "readerwriter.h"
 #include "fluxmap.h"
 #include "decoders/decoders.h"
 #include "macintosh/macintosh.h"

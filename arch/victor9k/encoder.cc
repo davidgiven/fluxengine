@@ -4,7 +4,7 @@
 #include "victor9k.h"
 #include "crc.h"
 #include "sector.h"
-#include "writer.h"
+#include "readerwriter.h"
 #include "image.h"
 #include "fmt/format.h"
 #include "arch/victor9k/victor9k.pb.h"

@@ -4,7 +4,7 @@
 #include "c64.h"
 #include "crc.h"
 #include "sector.h"
-#include "writer.h"
+#include "readerwriter.h"
 #include "image.h"
 #include "fmt/format.h"
 #include "arch/c64/c64.pb.h"

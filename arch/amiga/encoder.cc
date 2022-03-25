@@ -3,7 +3,7 @@
 #include "encoders/encoders.h"
 #include "amiga.h"
 #include "crc.h"
-#include "writer.h"
+#include "readerwriter.h"
 #include "image.h"
 #include "arch/amiga/amiga.pb.h"
 #include "lib/encoders/encoders.pb.h"

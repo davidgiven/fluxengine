@@ -3,7 +3,7 @@
 #include "encoders/encoders.h"
 #include "brother.h"
 #include "crc.h"
-#include "writer.h"
+#include "readerwriter.h"
 #include "image.h"
 #include "arch/brother/brother.pb.h"
 #include "lib/encoders/encoders.pb.h"

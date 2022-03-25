@@ -3,7 +3,7 @@
 #include "encoders/encoders.h"
 #include "ibm.h"
 #include "crc.h"
-#include "writer.h"
+#include "readerwriter.h"
 #include "image.h"
 #include "arch/ibm/ibm.pb.h"
 #include "lib/encoders/encoders.pb.h"

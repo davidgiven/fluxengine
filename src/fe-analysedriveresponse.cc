@@ -4,7 +4,7 @@
 #include "bitmap.h"
 #include "fluxmap.h"
 #include "decoders/fluxmapreader.h"
-#include "writer.h"
+#include "readerwriter.h"
 #include "protocol.h"
 #include "proto.h"
 #include "fluxsink/fluxsink.h"

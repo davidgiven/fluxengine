@@ -477,6 +477,7 @@ buildlibrary libbackend.a \
     lib/logger.cc \
     lib/mapper.cc \
     lib/proto.cc \
+    lib/readerwriter.cc \
     lib/sector.cc \
     lib/usb/fluxengineusb.cc \
     lib/usb/greaseweazle.cc \
@@ -485,7 +486,6 @@ buildlibrary libbackend.a \
     lib/usb/usb.cc \
     lib/usb/usbfinder.cc \
     lib/utils.cc \
-    lib/writer.cc \
 
 FORMATS="\
     40trackdrive \

@@ -1,6 +1,6 @@
 #include "globals.h"
 #include "flags.h"
-#include "writer.h"
+#include "readerwriter.h"
 #include "fluxmap.h"
 #include "decoders/decoders.h"
 #include "encoders/encoders.h"

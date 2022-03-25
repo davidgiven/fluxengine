@@ -1,7 +1,7 @@
 #include "globals.h"
 #include "flags.h"
 #include "fluxmap.h"
-#include "writer.h"
+#include "readerwriter.h"
 #include "protocol.h"
 #include "usb/usb.h"
 #include "encoders/encoders.h"

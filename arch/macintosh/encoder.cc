@@ -3,7 +3,7 @@
 #include "encoders/encoders.h"
 #include "macintosh.h"
 #include "crc.h"
-#include "writer.h"
+#include "readerwriter.h"
 #include "image.h"
 #include "fmt/format.h"
 #include "lib/encoders/encoders.pb.h"
