@@ -115,14 +115,14 @@ public:
     {
         std::vector<std::shared_ptr<const Sector>> sectors;
 
-        if ((location.logicalCylinder >= 0) &&
-            (location.logicalCylinder < AMIGA_TRACKS_PER_DISK))
+        if ((location.logicalTrack >= 0) &&
+            (location.logicalTrack < AMIGA_TRACKS_PER_DISK))
         {
             for (int sectorId = 0; sectorId < AMIGA_SECTORS_PER_TRACK;
                  sectorId++)
             {
                 const auto& sector = image.get(
-                    location.logicalCylinder, location.head, sectorId);
+                    location.logicalTrack, location.head, sectorId);
                 if (sector)
                     sectors.push_back(sector);
             }

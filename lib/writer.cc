@@ -112,10 +112,10 @@ bool readGroup(FluxSource& fluxSource,
          offset += config.drive().head_width())
     {
         auto fluxSourceIterator = fluxSource.readFlux(
-            location.physicalCylinder + offset, location.head);
+            location.physicalTrack + offset, location.head);
 
         Logger() << BeginReadOperationLogMessage{
-            location.physicalCylinder + offset, location.head};
+            location.physicalTrack + offset, location.head};
         std::shared_ptr<const Fluxmap> fluxmap =
             fluxSourceIterator->next()->rescale(
                 1.0 / config.flux_source().rescale());
@@ -150,9 +150,9 @@ void writeTracks(FluxSink& fluxSink,
             for (unsigned offset = 0; offset < location.groupSize;
                  offset += config.drive().head_width())
             {
-				unsigned physicalCylinder = location.physicalCylinder + offset;
+				unsigned physicalTrack = location.physicalTrack + offset;
 
-                Logger() << BeginWriteOperationLogMessage{physicalCylinder, location.head};
+                Logger() << BeginWriteOperationLogMessage{physicalTrack, location.head};
 
                 if (offset == 0)
                 {
@@ -166,7 +166,7 @@ void writeTracks(FluxSink& fluxSink,
                      * let's leave it disabled for now. */
                     // fluxmap->precompensate(PRECOMPENSATION_THRESHOLD_TICKS,
                     // 2);
-                    fluxSink.writeFlux(physicalCylinder, location.head, *scaled);
+                    fluxSink.writeFlux(physicalTrack, location.head, *scaled);
                     Logger() << fmt::format("writing {0} ms in {1} bytes",
                         int(fluxmap->duration() / 1e6),
                         fluxmap->bytes());
@@ -177,7 +177,7 @@ void writeTracks(FluxSink& fluxSink,
                     /* Erase this track rather than writing. */
 
                     Fluxmap blank;
-                    fluxSink.writeFlux(physicalCylinder, location.head, blank);
+                    fluxSink.writeFlux(physicalTrack, location.head, blank);
                     Logger() << "erased";
                 }
 
@@ -274,7 +274,7 @@ void writeRawDiskCommand(FluxSource& fluxSource, FluxSink& fluxSink)
         [&](const Location& location)
         {
             return fluxSource
-                .readFlux(location.physicalCylinder, location.head)
+                .readFlux(location.physicalTrack, location.head)
                 ->next();
         },
         dontVerify);
@@ -319,7 +319,7 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
         {
             for (const auto& data : track->trackDatas)
                 outputFluxSink->writeFlux(
-                    location.physicalCylinder, location.head, *data->fluxmap);
+                    location.physicalTrack, location.head, *data->fluxmap);
         }
 
         if (config.decoder().dump_records())
@@ -414,14 +414,14 @@ void readDiskCommand(
 
 void rawReadDiskCommand(FluxSource& fluxsource, FluxSink& fluxsink)
 {
-    for (unsigned cylinder : iterate(config.cylinders()))
+    for (unsigned track : iterate(config.tracks()))
     {
         for (unsigned head : iterate(config.heads()))
         {
             testForEmergencyStop();
-            auto fluxSourceIterator = fluxsource.readFlux(cylinder, head);
+            auto fluxSourceIterator = fluxsource.readFlux(track, head);
 
-            Logger() << BeginReadOperationLogMessage{cylinder, head};
+            Logger() << BeginReadOperationLogMessage{track, head};
             auto fluxmap = fluxSourceIterator->next()->rescale(
                 1.0 / config.flux_source().rescale());
             Logger() << EndReadOperationLogMessage()
@@ -429,7 +429,7 @@ void rawReadDiskCommand(FluxSource& fluxsource, FluxSink& fluxsink)
                             fluxmap->duration() / 1e6,
                             fluxmap->bytes());
 
-            fluxsink.writeFlux(cylinder, head, *fluxmap);
+            fluxsink.writeFlux(track, head, *fluxmap);
         }
     }
 }

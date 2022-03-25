@@ -24,9 +24,9 @@
 static std::unique_ptr<FluxSink> outputFluxSink;
 
 static std::shared_ptr<const Fluxmap> readFluxmap(
-    FluxSourceIterator& fluxsourceIterator, unsigned cylinder, unsigned head)
+    FluxSourceIterator& fluxsourceIterator, unsigned track, unsigned head)
 {
-    Logger() << BeginReadOperationLogMessage{cylinder, head};
+    Logger() << BeginReadOperationLogMessage{track, head};
     auto fluxmap = fluxsourceIterator.next()->rescale(
         1.0 / config.flux_source().rescale());
     Logger() << EndReadOperationLogMessage()
@@ -118,12 +118,12 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
         Fluxmap totalFlux;
 
         auto fluxsourceIterator =
-            fluxsource.readFlux(location.physicalCylinder, location.head);
+            fluxsource.readFlux(location.physicalTrack, location.head);
         int retriesRemaining = config.decoder().retries();
         while (fluxsourceIterator->hasNext())
         {
             auto fluxmap = readFluxmap(
-                *fluxsourceIterator, location.physicalCylinder, location.head);
+                *fluxsourceIterator, location.physicalTrack, location.head);
             totalFlux.appendDesync().appendBytes(fluxmap->rawBytes());
 
             auto trackdataflux = decoder.decodeToSectors(fluxmap, location);
@@ -185,7 +185,7 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
 
         if (outputFluxSink)
             outputFluxSink->writeFlux(
-                location.physicalCylinder, location.head, totalFlux);
+                location.physicalTrack, location.head, totalFlux);
 
         if (config.decoder().dump_records())
         {
@@ -271,14 +271,14 @@ void readDiskCommand(
 
 void rawReadDiskCommand(FluxSource& fluxsource, FluxSink& fluxsink)
 {
-    for (int cylinder : iterate(config.cylinders()))
+    for (int track : iterate(config.tracks()))
     {
         for (int head : iterate(config.heads()))
         {
             testForEmergencyStop();
-            auto fluxsourceIterator = fluxsource.readFlux(cylinder, head);
-            auto fluxmap = readFluxmap(*fluxsourceIterator, cylinder, head);
-            fluxsink.writeFlux(cylinder, head, *fluxmap);
+            auto fluxsourceIterator = fluxsource.readFlux(track, head);
+            auto fluxmap = readFluxmap(*fluxsourceIterator, track, head);
+            fluxsink.writeFlux(track, head, *fluxmap);
         }
     }
 }

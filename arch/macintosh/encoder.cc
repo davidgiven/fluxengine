@@ -224,14 +224,14 @@ public:
     {
         std::vector<std::shared_ptr<const Sector>> sectors;
 
-        if ((location.logicalCylinder >= 0) &&
-            (location.logicalCylinder < MAC_TRACKS_PER_DISK))
+        if ((location.logicalTrack >= 0) &&
+            (location.logicalTrack < MAC_TRACKS_PER_DISK))
         {
-            unsigned numSectors = sectorsForTrack(location.logicalCylinder);
+            unsigned numSectors = sectorsForTrack(location.logicalTrack);
             for (int sectorId = 0; sectorId < numSectors; sectorId++)
             {
                 const auto& sector = image.get(
-                    location.logicalCylinder, location.head, sectorId);
+                    location.logicalTrack, location.head, sectorId);
                 if (sector)
                     sectors.push_back(sector);
             }
@@ -244,7 +244,7 @@ public:
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
-        double clockRateUs = clockRateUsForTrack(location.logicalCylinder) *
+        double clockRateUs = clockRateUsForTrack(location.logicalTrack) *
                              _config.clock_compensation_factor();
         int bitsPerRevolution = 200000.0 / clockRateUs;
         std::vector<bool> bits(bitsPerRevolution);

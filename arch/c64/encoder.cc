@@ -217,10 +217,10 @@ public:
 
         if (location.head == 0)
         {
-            unsigned numSectors = sectorsForTrack(location.logicalCylinder);
+            unsigned numSectors = sectorsForTrack(location.logicalTrack);
             for (int sectorId=0; sectorId<numSectors; sectorId++)
             {
-                const auto& sector = image.get(location.logicalCylinder, 0, sectorId);
+                const auto& sector = image.get(location.logicalTrack, 0, sectorId);
                 if (sector)
                     sectors.push_back(sector);
             }
@@ -250,7 +250,7 @@ public:
         else
             _formatByte1 = _formatByte2 = 0;
         
-        double clockRateUs = clockRateUsForTrack(location.logicalCylinder) * _config.clock_compensation_factor();
+        double clockRateUs = clockRateUsForTrack(location.logicalTrack) * _config.clock_compensation_factor();
 
         int bitsPerRevolution = 200000.0 / clockRateUs;
 

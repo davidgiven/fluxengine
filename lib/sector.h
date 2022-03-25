@@ -35,7 +35,7 @@ public:
     nanoseconds_t headerEndTime = 0;
     nanoseconds_t dataStartTime = 0;
     nanoseconds_t dataEndTime = 0;
-    unsigned physicalCylinder = 0;
+    unsigned physicalTrack = 0;
     unsigned physicalHead = 0;
     unsigned logicalTrack = 0;
     unsigned logicalSide = 0;

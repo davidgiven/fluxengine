@@ -133,7 +133,7 @@ public:
 			return;
 		if (_sector->logicalTrack > 76)
 			return;
-		if (_sector->logicalTrack != _sector->physicalCylinder)
+		if (_sector->logicalTrack != _sector->physicalTrack)
 			return;
 
 		br.read(10);  /* OS data or padding */

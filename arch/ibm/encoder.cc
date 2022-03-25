@@ -89,13 +89,13 @@ private:
     }
 
     void getTrackFormat(IbmEncoderProto::TrackdataProto& trackdata,
-        unsigned cylinder,
+        unsigned track,
         unsigned head)
     {
         trackdata.Clear();
         for (const auto& f : _config.trackdata())
         {
-            if (f.has_cylinder() && (f.cylinder() != cylinder))
+            if (f.has_track() && (f.track() != track))
                 continue;
             if (f.has_head() && (f.head() != head))
                 continue;
@@ -132,12 +132,12 @@ public:
     {
         std::vector<std::shared_ptr<const Sector>> sectors;
         IbmEncoderProto::TrackdataProto trackdata;
-        getTrackFormat(trackdata, location.logicalCylinder, location.head);
+        getTrackFormat(trackdata, location.logicalTrack, location.head);
 
         int logicalSide = location.head ^ trackdata.swap_sides();
         for (int sectorId : getSectorIds(trackdata))
         {
-            const auto& sector = image.get(location.logicalCylinder, logicalSide, sectorId);
+            const auto& sector = image.get(location.logicalTrack, logicalSide, sectorId);
             if (sector)
                 sectors.push_back(sector);
         }
@@ -151,7 +151,7 @@ public:
         const Image& image) override
     {
         IbmEncoderProto::TrackdataProto trackdata;
-        getTrackFormat(trackdata, location.logicalCylinder, location.head);
+        getTrackFormat(trackdata, location.logicalTrack, location.head);
 
         auto writeBytes = [&](const Bytes& bytes)
         {

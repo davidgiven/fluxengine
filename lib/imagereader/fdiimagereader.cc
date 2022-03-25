@@ -50,7 +50,7 @@ public:
         {
             if (inputFile.eof())
                 break;
-            int physicalCylinder = track;
+            int physicalTrack = track;
 
             for (int side = 0; side < sides; side++)
             {
@@ -64,10 +64,10 @@ public:
                     inputFile.read((char*)data.begin(), data.size());
 
                     const auto& sector =
-                        image->put(physicalCylinder, side, sectorId);
+                        image->put(physicalTrack, side, sectorId);
                     sector->status = Sector::OK;
                     sector->logicalTrack = track;
-                    sector->physicalCylinder = physicalCylinder;
+                    sector->physicalTrack = physicalTrack;
                     sector->logicalSide = sector->physicalHead = side;
                     sector->logicalSector = sectorId;
                     sector->data = data;
@@ -89,7 +89,7 @@ public:
                 case 0x90:
                     Logger() << "FDI: automatically setting format to 1.2MB "
                                 "(1024 byte sectors)";
-                    config.mutable_cylinders()->set_end(76);
+                    config.mutable_tracks()->set_end(76);
                     trackdata->set_track_length_ms(167);
                     trackdata->set_sector_size(1024);
                     for (int i = 0; i < 9; i++)
@@ -125,11 +125,11 @@ public:
             heads->set_end(geometry.numSides - 1);
         }
 
-        if (!config.has_cylinders())
+        if (!config.has_tracks())
         {
-            auto* cylinders = config.mutable_cylinders();
-            cylinders->set_start(0);
-            cylinders->set_end(geometry.numTracks - 1);
+            auto* tracks = config.mutable_tracks();
+            tracks->set_start(0);
+            tracks->set_end(geometry.numTracks - 1);
         }
 
         return image;

@@ -24,9 +24,9 @@ static StringFlag destFlux(
 		FluxSink::updateConfigForFilename(config.mutable_flux_sink(), value);
 	});
 
-static IntFlag destCylinder(
+static IntFlag destTrack(
 	{ "--cylinder", "-c" },
-	"cylinder to write to",
+	"track to write to",
 	0);
 
 static IntFlag destHead(
@@ -213,7 +213,7 @@ int mainAnalyseDriveResponse(int argc, const char* argv[])
     usbSetDrive(config.drive().drive(),
 		config.drive().high_density(),
 		config.drive().index_mode());
-	usbSeek(destCylinder);
+	usbSeek(destTrack);
 
 	std::cout << "Measuring rotational speed...\n";
     nanoseconds_t period = usbGetRotationalPeriod(0);

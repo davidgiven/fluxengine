@@ -297,7 +297,7 @@ void MainWindow::OnLogMessage(std::shared_ptr<const AnyLogMessage> message)
             /* Indicates that we're starting a write operation. */
             [&](const BeginWriteOperationLogMessage& m)
             {
-                visualiser->SetMode(m.cylinder, m.head, VISMODE_WRITING);
+                visualiser->SetMode(m.track, m.head, VISMODE_WRITING);
             },
 
             [&](const EndWriteOperationLogMessage& m)
@@ -308,7 +308,7 @@ void MainWindow::OnLogMessage(std::shared_ptr<const AnyLogMessage> message)
             /* Indicates that we're starting a read operation. */
             [&](const BeginReadOperationLogMessage& m)
             {
-                visualiser->SetMode(m.cylinder, m.head, VISMODE_READING);
+                visualiser->SetMode(m.track, m.head, VISMODE_READING);
             },
 
             [&](const EndReadOperationLogMessage& m)

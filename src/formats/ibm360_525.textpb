@@ -51,7 +51,7 @@ decoder {
 	}
 }
 
-cylinders {
+tracks {
 	start: 0
 	end: 39
 }

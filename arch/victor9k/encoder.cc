@@ -145,15 +145,15 @@ public:
 
 private:
     void getTrackFormat(Victor9kEncoderProto::TrackdataProto& trackdata,
-        unsigned cylinder,
+        unsigned track,
         unsigned head)
     {
         trackdata.Clear();
         for (const auto& f : _config.trackdata())
         {
-            if (f.has_min_cylinder() && (cylinder < f.min_cylinder()))
+            if (f.has_min_track() && (track < f.min_track()))
                 continue;
-            if (f.has_max_cylinder() && (cylinder > f.max_cylinder()))
+            if (f.has_max_track() && (track > f.max_track()))
                 continue;
             if (f.has_head() && (head != f.head()))
                 continue;
@@ -169,13 +169,13 @@ public:
         std::vector<std::shared_ptr<const Sector>> sectors;
 
         Victor9kEncoderProto::TrackdataProto trackdata;
-        getTrackFormat(trackdata, location.logicalCylinder, location.head);
+        getTrackFormat(trackdata, location.logicalTrack, location.head);
 
         for (int i = 0; i < trackdata.sector_range().sector_count(); i++)
         {
             int sectorId = trackdata.sector_range().start_sector() + i;
             const auto& sector =
-                image.get(location.logicalCylinder, location.head, sectorId);
+                image.get(location.logicalTrack, location.head, sectorId);
             if (sector)
                 sectors.push_back(sector);
         }
@@ -188,7 +188,7 @@ public:
         const Image& image) override
     {
         Victor9kEncoderProto::TrackdataProto trackdata;
-        getTrackFormat(trackdata, location.logicalCylinder, location.head);
+        getTrackFormat(trackdata, location.logicalTrack, location.head);
 
         unsigned bitsPerRevolution =
             trackdata.original_data_rate_khz() * trackdata.original_period_ms();

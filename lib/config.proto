@@ -27,7 +27,7 @@ message ConfigProto {
 	optional DecoderProto decoder = 4;
 	optional UsbProto usb = 5;
 
-	optional RangeProto cylinders = 6;
+	optional RangeProto tracks = 6;
 	optional RangeProto heads = 7;
 	optional int32 tpi = 16 [ (help) = "TPI of image; if 0, use TPI of drive" ];
 

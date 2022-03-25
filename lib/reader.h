@@ -10,7 +10,7 @@ class ImageWriter;
 class TrackDataFlux;
 
 extern std::unique_ptr<TrackDataFlux> readAndDecodeTrack(
-		FluxSource& source, AbstractDecoder& decoder, unsigned cylinder, unsigned head);
+		FluxSource& source, AbstractDecoder& decoder, unsigned track, unsigned head);
 
 extern std::shared_ptr<const DiskFlux> readDiskCommand(FluxSource& fluxsource, AbstractDecoder& decoder);
 extern void readDiskCommand(FluxSource& source, AbstractDecoder& decoder, ImageWriter& writer);

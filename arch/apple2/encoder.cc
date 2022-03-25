@@ -39,7 +39,7 @@ public:
             unsigned numSectors = 16;
             for (int sectorId = 0; sectorId < numSectors; sectorId++)
             {
-                const auto& sector = image.get(location.logicalCylinder, 0, sectorId);
+                const auto& sector = image.get(location.logicalTrack, 0, sectorId);
                 if (sector)
                     sectors.push_back(sector);
             }

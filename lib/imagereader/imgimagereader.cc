@@ -47,7 +47,7 @@ public:
                 const auto& sector = image->put(track, side, sectorId);
                 sector->status = Sector::OK;
                 sector->logicalTrack = track;
-                sector->physicalCylinder = track;
+                sector->physicalTrack = track;
                 sector->logicalSide = sector->physicalHead = side;
                 sector->logicalSector = sectorId;
                 sector->data = data;

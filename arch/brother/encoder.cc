@@ -126,12 +126,12 @@ public:
         switch (_config.format())
         {
             case BROTHER120:
-                if (location.logicalCylinder >= BROTHER_TRACKS_PER_120KB_DISK)
+                if (location.logicalTrack >= BROTHER_TRACKS_PER_120KB_DISK)
                     return sectors;
                 break;
 
             case BROTHER240:
-                if (location.logicalCylinder >= BROTHER_TRACKS_PER_240KB_DISK)
+                if (location.logicalTrack >= BROTHER_TRACKS_PER_240KB_DISK)
                     return sectors;
                 break;
         }
@@ -141,7 +141,7 @@ public:
              sectorCount++)
         {
             int sectorId = charToInt(skew.at(sectorCount));
-            const auto& sector = image.get(location.logicalCylinder, 0, sectorId);
+            const auto& sector = image.get(location.logicalTrack, 0, sectorId);
             if (sector)
                 sectors.push_back(sector);
         }

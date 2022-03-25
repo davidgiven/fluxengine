@@ -19,7 +19,7 @@
 struct IbmIdam
 {
     uint8_t id;
-    uint8_t cylinder;
+    uint8_t track;
     uint8_t side;
     uint8_t sector;
     uint8_t sectorSize;

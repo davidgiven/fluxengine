@@ -12,12 +12,12 @@ message Victor9kEncoderProto {
 			optional int32 sector_count = 2 [(help) = "number of sectors on track"];
 		}
 
-		optional int32 min_cylinder = 1            [(help) = "minimum cylinder this format applies to"];
-		optional int32 max_cylinder = 2            [(help) = "maximum cylinder this format applies to"];
+		optional int32 min_track = 1            [(help) = "minimum track this format applies to"];
+		optional int32 max_track = 2            [(help) = "maximum track this format applies to"];
 		optional int32 head = 3                    [(help) = "which head this format applies to"];
 
-		optional double original_period_ms = 4     [(help) = "original rotational period of this cylinder"];
-		optional double original_data_rate_khz = 5 [(help) = "original data rate of this cylinder"];
+		optional double original_period_ms = 4     [(help) = "original rotational period of this track"];
+		optional double original_data_rate_khz = 5 [(help) = "original data rate of this track"];
 		optional double post_index_gap_us = 6      [(help) = "size of post-index gap"];
 		optional int32 pre_header_sync_bits = 10   [(help) = "number of sync bits before the sector header"];
 		optional int32 pre_data_sync_bits = 8      [(help) = "number of sync bits before the sector data"];

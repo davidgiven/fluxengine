@@ -62,14 +62,14 @@ std::string Logger::toString(const AnyLogMessage& message)
             /* Indicates that we're starting a write operation. */
             [&](const BeginWriteOperationLogMessage& m)
             {
-                stream << fmt::format("{:2}.{}: ", m.cylinder, m.head);
+                stream << fmt::format("{:2}.{}: ", m.track, m.head);
                 indented = true;
             },
 
             /* Indicates that we're starting a read operation. */
             [&](const BeginReadOperationLogMessage& m)
             {
-                stream << fmt::format("{:2}.{}: ", m.cylinder, m.head);
+                stream << fmt::format("{:2}.{}: ", m.track, m.head);
                 indented = true;
             },
 

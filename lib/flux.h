@@ -14,14 +14,14 @@ struct Record
 
 struct Location
 {
-    unsigned physicalCylinder;
-    unsigned logicalCylinder;
+    unsigned physicalTrack;
+    unsigned logicalTrack;
 	unsigned head;
 	unsigned groupSize;
 
     std::strong_ordering operator<=>(const Location& other) const
     {
-		auto i = physicalCylinder <=> other.physicalCylinder;
+		auto i = physicalTrack <=> other.physicalTrack;
 		if (i == std::strong_ordering::equal)
 			i = head <=> other.head;
 		return i;

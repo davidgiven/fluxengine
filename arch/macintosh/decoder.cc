@@ -144,7 +144,7 @@ public:
 		auto header = toBytes(readRawBits(7*8)).slice(0, 7);
 					
 		uint8_t encodedTrack = decode_data_gcr(header[0]);
-		if (encodedTrack != (_sector->physicalCylinder & 0x3f))
+		if (encodedTrack != (_sector->physicalTrack & 0x3f))
 			return;
 					
 		uint8_t encodedSector = decode_data_gcr(header[1]);
@@ -155,7 +155,7 @@ public:
 		if (encodedSector > 11)
 			return;
 
-		_sector->logicalTrack = _sector->physicalCylinder;
+		_sector->logicalTrack = _sector->physicalTrack;
 		_sector->logicalSide = decode_side(encodedSide);
 		_sector->logicalSector = encodedSector;
 		uint8_t gotsum = (encodedTrack ^ encodedSector ^ encodedSide ^ formatByte) & 0x3f;
@@ -185,16 +185,16 @@ public:
 
 	std::set<unsigned> requiredSectors(const Location& location) const override
 	{
-		unsigned cylinder = location.logicalCylinder;
+		unsigned track = location.logicalTrack;
 
 		int count;
-		if (cylinder < 16)
+		if (track < 16)
 			count = 12;
-		else if (cylinder < 32)
+		else if (track < 32)
 			count = 11;
-		else if (cylinder < 48)
+		else if (track < 48)
 			count = 10;
-		else if (cylinder < 64)
+		else if (track < 64)
 			count = 9;
 		else
 			count = 8;

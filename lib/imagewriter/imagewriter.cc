@@ -97,7 +97,7 @@ void ImageWriter::writeCsv(const Image& image, const std::string& filename)
 	for (const auto& sector : image)
 	{
 		f << fmt::format("{},{},{},{},{},{},{},{},{},{},{},{},{}\n",
-			sector->physicalCylinder,
+			sector->physicalTrack,
 			sector->physicalHead,
 			sector->logicalTrack,
 			sector->logicalSide,

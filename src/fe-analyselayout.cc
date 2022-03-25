@@ -82,9 +82,9 @@ void visualiseSectorsToFile(const Image& image, const std::string& filename)
 				? (panel_centre + side*panel_size)
 				: panel_centre);
 
-        for (int physicalCylinder = 0; physicalCylinder < TRACKS; physicalCylinder++)
+        for (int physicalTrack = 0; physicalTrack < TRACKS; physicalTrack++)
         {
-			double visibleDistance = (TRACKS * 0.5) + (TRACKS - physicalCylinder);
+			double visibleDistance = (TRACKS * 0.5) + (TRACKS - physicalTrack);
 			double radius = (disk_radius*visibleDistance)/(TRACKS * 1.5);
 			painter.noFill();
 			painter.lineColor(0x88, 0x88, 0x88);
@@ -96,7 +96,7 @@ void visualiseSectorsToFile(const Image& image, const std::string& filename)
 			{
 				for (const auto& sector : image)
 				{
-					if ((sector->physicalHead == side) && (sector->physicalCylinder == physicalCylinder)
+					if ((sector->physicalHead == side) && (sector->physicalTrack == physicalTrack)
 							&& (sector->logicalSector == alignWithSector))
 					{
 						offset = sector->headerStartTime;
@@ -124,7 +124,7 @@ void visualiseSectorsToFile(const Image& image, const std::string& filename)
             /* Sadly, Images aren't indexable by physical track. */
             for (const auto& sector : image)
             {
-                if ((sector->physicalHead == side) && (sector->physicalCylinder == physicalCylinder))
+                if ((sector->physicalHead == side) && (sector->physicalTrack == physicalTrack))
                 {
 					painter.lineColor(0xff, 0x00, 0x00);
                     if (sector->status == Sector::OK)
@@ -192,7 +192,7 @@ static void readRow(const std::vector<std::string>& row, Image& image)
 		int logicalSector = std::stoi(row[4]);
 
 		const auto& sector = image.put(logicalTrack, logicalSide, logicalSector);
-		sector->physicalCylinder = std::stoi(row[0]);
+		sector->physicalTrack = std::stoi(row[0]);
 		sector->physicalHead = std::stoi(row[1]);
 		sector->logicalTrack = logicalTrack;
 		sector->logicalSide = logicalSide;

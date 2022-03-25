@@ -72,7 +72,7 @@ std::shared_ptr<const TrackDataFlux> AbstractDecoder::decodeToSectors(
 	auto newSector = [&] {
 		_sector = std::make_shared<Sector>();
 		_sector->status = Sector::MISSING;
-		_sector->physicalCylinder = location.physicalCylinder;
+		_sector->physicalTrack = location.physicalTrack;
 		_sector->physicalHead = location.head;
 	};
 

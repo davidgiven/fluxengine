@@ -42,7 +42,7 @@ drive {
 	head_bias: 1
 }
 
-cylinders {
+tracks {
 	start: 0
 	end: 77
 }

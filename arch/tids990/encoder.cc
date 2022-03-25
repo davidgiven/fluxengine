@@ -69,7 +69,7 @@ public:
         {
             int sectorId = charToInt(sectorChar);
             const auto& sector =
-                image.get(location.logicalCylinder, location.head, sectorId);
+                image.get(location.logicalTrack, location.head, sectorId);
             if (sector)
                 sectors.push_back(sector);
         }

@@ -133,12 +133,12 @@ public:
     {
         std::vector<std::shared_ptr<const Sector>> sectors;
 
-        if ((location.logicalCylinder >= 0) && (location.logicalCylinder < 35))
+        if ((location.logicalTrack >= 0) && (location.logicalTrack < 35))
         {
             for (int sectorId = 0; sectorId < 10; sectorId++)
             {
                 const auto& sector = image.get(
-                    location.logicalCylinder, location.head, sectorId);
+                    location.logicalTrack, location.head, sectorId);
                 if (sector)
                     sectors.push_back(sector);
             }

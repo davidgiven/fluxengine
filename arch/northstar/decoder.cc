@@ -152,7 +152,7 @@ public:
 
 		_sector->logicalSide = _sector->physicalHead;
 		_sector->logicalSector = _hardSectorId;
-		_sector->logicalTrack = _sector->physicalCylinder;
+		_sector->logicalTrack = _sector->physicalTrack;
 
 		if (headerSize == NORTHSTAR_HEADER_SIZE_DD) {
 			br.read_8();	/* MFM second Sync char, usually 0xFB */

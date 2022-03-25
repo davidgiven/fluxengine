@@ -152,8 +152,8 @@ encoder {
 		}
 		trackdata {
 			head: 0
-			min_cylinder: 0
-			max_cylinder: 3
+			min_track: 0
+			max_track: 3
 			original_period_ms: 237.9
 			sector_range {
 				start_sector: 0
@@ -162,8 +162,8 @@ encoder {
 		}
 		trackdata {
 			head: 0
-			min_cylinder: 4
-			max_cylinder: 15
+			min_track: 4
+			max_track: 15
 			original_period_ms: 224.5
 			sector_range {
 				sector_count: 18
@@ -171,8 +171,8 @@ encoder {
 		}
 		trackdata {
 			head: 0
-			min_cylinder: 16
-			max_cylinder: 26
+			min_track: 16
+			max_track: 26
 			original_period_ms: 212.2
 			sector_range {
 				sector_count: 17
@@ -180,8 +180,8 @@ encoder {
 		}
 		trackdata {
 			head: 0
-			min_cylinder: 27
-			max_cylinder: 37
+			min_track: 27
+			max_track: 37
 			original_period_ms: 199.9
 			sector_range {
 				sector_count: 16
@@ -189,8 +189,8 @@ encoder {
 		}
 		trackdata {
 			head: 0
-			min_cylinder: 38
-			max_cylinder: 47
+			min_track: 38
+			max_track: 47
 			original_period_ms: 187.6
 			sector_range {
 				sector_count: 15
@@ -198,8 +198,8 @@ encoder {
 		}
 		trackdata {
 			head: 0
-			min_cylinder: 48
-			max_cylinder: 59
+			min_track: 48
+			max_track: 59
 			original_period_ms: 175.3
 			sector_range {
 				sector_count: 14
@@ -207,8 +207,8 @@ encoder {
 		}
 		trackdata {
 			head: 0
-			min_cylinder: 60
-			max_cylinder: 70
+			min_track: 60
+			max_track: 70
 			original_period_ms: 163.0
 			sector_range {
 				sector_count: 13
@@ -216,8 +216,8 @@ encoder {
 		}
 		trackdata {
 			head: 0
-			min_cylinder: 71
-			max_cylinder: 79
+			min_track: 71
+			max_track: 79
 			original_period_ms: 149.6
 			sector_range {
 				sector_count: 12
@@ -230,7 +230,7 @@ decoder {
 	victor9k {}
 }
 
-cylinders {
+tracks {
 	start: 0
 	end: 79
 }

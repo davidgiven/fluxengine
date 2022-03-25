@@ -80,7 +80,7 @@ wxBEGIN_EVENT_TABLE(VisualisationControl, wxPanel)
 
         int factor = (_head == 0) ? -1 : 1;
 
-        int y = scaletop + _cylinder * SECTORSIZE;
+        int y = scaletop + _track * SECTORSIZE;
 		wxPoint points[] = {
 			{ w2 + factor*TICK, y-1 },
 			{ w2 + factor*TICK, y+SECTORSIZE-1 },
@@ -142,9 +142,9 @@ wxBEGIN_EVENT_TABLE(VisualisationControl, wxPanel)
     }
 }
 
-void VisualisationControl::SetMode(int cylinder, int head, int mode)
+void VisualisationControl::SetMode(int track, int head, int mode)
 {
-    _cylinder = cylinder;
+    _track = track;
     _head = head;
     _mode = mode;
     Refresh();
@@ -158,7 +158,7 @@ void VisualisationControl::Clear()
 
 void VisualisationControl::SetTrackData(std::shared_ptr<const TrackFlux> track)
 {
-    key_t key = {track->location.physicalCylinder, track->location.head};
+    key_t key = {track->location.physicalTrack, track->location.head};
     _sectors.erase(key);
     for (auto& sector : track->sectors)
         _sectors.insert({key, sector});
@@ -171,7 +171,7 @@ void VisualisationControl::SetDiskData(std::shared_ptr<const DiskFlux> disk)
 	_sectors.clear();
 	for (const auto& sector : *(disk->image))
 	{
-		key_t key = {sector->physicalCylinder, sector->physicalHead};
+		key_t key = {sector->physicalTrack, sector->physicalHead};
 		_sectors.insert({key, sector});
 	}
 

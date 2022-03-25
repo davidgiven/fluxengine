@@ -123,7 +123,7 @@ public:
                     const auto& sector =
                         image->put(header.track, head, header.sector);
                     sector->status = Sector::OK;
-                    sector->logicalTrack = sector->physicalCylinder =
+                    sector->logicalTrack = sector->physicalTrack =
                         header.track;
                     sector->logicalSide = sector->physicalHead = head;
                     sector->logicalSector = header.sector;

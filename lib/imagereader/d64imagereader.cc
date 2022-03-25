@@ -32,11 +32,11 @@ public:
         data.writer() += inputFile;
         ByteReader br(data);
 
-        unsigned numCylinders = 39;
+        unsigned numTracks = 39;
         unsigned numHeads = 1;
         unsigned numSectors = 0;
 
-        Logger() << fmt::format("D64: reading image with {} cylinders, {} heads", numCylinders, numHeads);
+        Logger() << fmt::format("D64: reading image with {} tracks, {} heads", numTracks, numHeads);
 
         uint32_t offset = 0;
 
@@ -55,7 +55,7 @@ public:
         for (int track = 0; track < 40; track++)
         {
             int numSectors = sectorsPerTrack(track);
-            int physicalCylinder = track * 2;
+            int physicalTrack = track * 2;
             for (int head = 0; head < numHeads; head++)
             {
                 for (int sectorId = 0; sectorId < numSectors; sectorId++)
@@ -69,7 +69,7 @@ public:
 
                         sector->status = Sector::OK;
                         sector->logicalTrack = track;
-                        sector->physicalCylinder = physicalCylinder;
+                        sector->physicalTrack = physicalTrack;
                         sector->logicalSide = sector->physicalHead = head;
                         sector->logicalSector = sectorId;
                         sector->data.writer().append(payload);
@@ -79,7 +79,7 @@ public:
                       // DATA_MISSING
                         sector->status = Sector::DATA_MISSING;
                         sector->logicalTrack = track;
-                        sector->physicalCylinder = physicalCylinder;
+                        sector->physicalTrack = physicalTrack;
                         sector->logicalSide = sector->physicalHead = head;
                         sector->logicalSector = sectorId;
                     }

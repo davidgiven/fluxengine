@@ -13,8 +13,8 @@ public:
     static std::unique_ptr<const Image> remapSectorsLogicalToPhysical(
         const Image& source, const SectorMappingProto& mapping);
 
-    static unsigned remapCylinderPhysicalToLogical(unsigned cylinder);
-    static unsigned remapCylinderLogicalToPhysical(unsigned cylinder);
+    static unsigned remapTrackPhysicalToLogical(unsigned track);
+    static unsigned remapTrackLogicalToPhysical(unsigned track);
 
 	static std::set<Location> computeLocations();
 };

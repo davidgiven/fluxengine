@@ -105,16 +105,16 @@ std::unique_ptr<const Image> Mapper::remapSectorsLogicalToPhysical(
         });
 }
 
-unsigned Mapper::remapCylinderPhysicalToLogical(unsigned pcylinder)
+unsigned Mapper::remapTrackPhysicalToLogical(unsigned ptrack)
 {
-    return (pcylinder - config.drive().head_bias()) /
+    return (ptrack - config.drive().head_bias()) /
            config.drive().head_width();
 }
 
-unsigned Mapper::remapCylinderLogicalToPhysical(unsigned lcylinder)
+unsigned Mapper::remapTrackLogicalToPhysical(unsigned ltrack)
 {
 	Error() << "not working yet";
-    return config.drive().head_bias() + lcylinder * config.drive().head_width();
+    return config.drive().head_bias() + ltrack * config.drive().head_width();
 }
 
 std::set<Location> Mapper::computeLocations()
@@ -128,14 +128,14 @@ std::set<Location> Mapper::computeLocations()
         Error()
             << "this drive can't write this image, because the head is too big";
 
-    for (unsigned logicalCylinder : iterate(config.cylinders()))
+    for (unsigned logicalTrack : iterate(config.tracks()))
     {
         for (unsigned head : iterate(config.heads()))
         {
-			unsigned physicalCylinder = config.drive().head_bias() + logicalCylinder * track_step;
+			unsigned physicalTrack = config.drive().head_bias() + logicalTrack * track_step;
 
-            locations.insert({.physicalCylinder = physicalCylinder,
-                .logicalCylinder = logicalCylinder,
+            locations.insert({.physicalTrack = physicalTrack,
+                .logicalTrack = logicalTrack,
                 .head = head,
                 .groupSize = track_step});
         }
