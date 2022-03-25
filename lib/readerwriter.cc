@@ -83,7 +83,8 @@ static std::set<std::shared_ptr<const Sector>> collectSectors(
 }
 
 /* Returns true if the result contains bad sectors. */
-bool combineRecordAndSectors(TrackFlux& trackFlux, AbstractDecoder& decoder, const Location& location)
+bool combineRecordAndSectors(
+    TrackFlux& trackFlux, AbstractDecoder& decoder, const Location& location)
 {
     std::set<std::shared_ptr<const Sector>> track_sectors;
 
@@ -91,25 +92,24 @@ bool combineRecordAndSectors(TrackFlux& trackFlux, AbstractDecoder& decoder, con
         track_sectors.insert(
             trackdataflux->sectors.begin(), trackdataflux->sectors.end());
 
-	for (unsigned logical_sector : decoder.requiredSectors(trackFlux.location))
-	{
+    for (unsigned logical_sector : decoder.requiredSectors(trackFlux.location))
+    {
         auto sector = std::make_shared<Sector>(location);
         sector->logicalSector = logical_sector;
         sector->status = Sector::MISSING;
-		track_sectors.insert(sector);
-	}
+        track_sectors.insert(sector);
+    }
 
     trackFlux.sectors = collectSectors(track_sectors);
-	if (trackFlux.sectors.empty())
-		return true;
-	for (const auto& sector : trackFlux.sectors)
-		if (sector->status != Sector::OK)
-			return true;
+    if (trackFlux.sectors.empty())
+        return true;
+    for (const auto& sector : trackFlux.sectors)
+        if (sector->status != Sector::OK)
+            return true;
 
-	return false;
+    return false;
 }
 
-/* Returns true if the result contains bad sectors. */
 ReadResult readGroup(FluxSource& fluxSource,
     const Location& location,
     TrackFlux& trackFlux,
@@ -120,8 +120,8 @@ ReadResult readGroup(FluxSource& fluxSource,
     for (unsigned offset = 0; offset < location.groupSize;
          offset += config.drive().head_width())
     {
-        auto fluxSourceIterator = fluxSource.readFlux(
-            location.physicalTrack + offset, location.head);
+        auto fluxSourceIterator =
+            fluxSource.readFlux(location.physicalTrack + offset, location.head);
         if (!fluxSourceIterator->hasNext())
             continue;
 
@@ -143,7 +143,7 @@ ReadResult readGroup(FluxSource& fluxSource,
             result = BAD_AND_CAN_RETRY;
     }
 
-	return result;
+    return result;
 }
 
 void writeTracks(FluxSink& fluxSink,
@@ -163,9 +163,10 @@ void writeTracks(FluxSink& fluxSink,
             for (unsigned offset = 0; offset < location.groupSize;
                  offset += config.drive().head_width())
             {
-				unsigned physicalTrack = location.physicalTrack + offset;
+                unsigned physicalTrack = location.physicalTrack + offset;
 
-                Logger() << BeginWriteOperationLogMessage{physicalTrack, location.head};
+                Logger() << BeginWriteOperationLogMessage{
+                    physicalTrack, location.head};
 
                 if (offset == 0)
                 {
@@ -243,19 +244,21 @@ void writeTracksAndVerify(FluxSink& fluxSink,
         },
         [&](const Location& location)
         {
-			auto trackFlux = std::make_shared<TrackFlux>();
+            auto trackFlux = std::make_shared<TrackFlux>();
             trackFlux->location = location;
             readGroup(fluxSource, location, *trackFlux, decoder);
-			Logger() << TrackReadLogMessage{ trackFlux };
+            Logger() << TrackReadLogMessage{trackFlux};
 
             auto wantedSectors = encoder.collectSectors(location, image);
-			std::sort(wantedSectors.begin(), wantedSectors.end(),
-				sectorPointerSortPredicate);
+            std::sort(wantedSectors.begin(),
+                wantedSectors.end(),
+                sectorPointerSortPredicate);
 
-			std::vector<std::shared_ptr<const Sector>> gotSectors(
-				trackFlux->sectors.begin(), trackFlux->sectors.end());
-			std::sort(gotSectors.begin(), gotSectors.end(),
-				sectorPointerSortPredicate);
+            std::vector<std::shared_ptr<const Sector>> gotSectors(
+                trackFlux->sectors.begin(), trackFlux->sectors.end());
+            std::sort(gotSectors.begin(),
+                gotSectors.end(),
+                sectorPointerSortPredicate);
 
             return std::equal(gotSectors.begin(),
                 gotSectors.end(),
@@ -287,8 +290,7 @@ void writeRawDiskCommand(FluxSource& fluxSource, FluxSink& fluxSink)
         fluxSink,
         [&](const Location& location)
         {
-            return fluxSource
-                .readFlux(location.physicalTrack, location.head)
+            return fluxSource.readFlux(location.physicalTrack, location.head)
                 ->next();
         },
         dontVerify);
