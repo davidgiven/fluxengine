@@ -1,6 +1,14 @@
 #include "globals.h"
+#include "flux.h"
 #include "sector.h"
 #include "fmt/format.h"
+
+Sector::Sector(const Location& location):
+    physicalTrack(location.physicalTrack),
+    physicalHead(location.head),
+    logicalTrack(location.logicalTrack),
+    logicalSide(location.head)
+{}
 
 std::string Sector::statusToString(Status status)
 {

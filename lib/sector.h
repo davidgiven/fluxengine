@@ -5,6 +5,7 @@
 #include "fluxmap.h"
 
 class Record;
+class Location;
 
 /*
  * Note that sectors here used zero-based numbering throughout (to make the
@@ -42,6 +43,10 @@ public:
     unsigned logicalSector = 0;
     Bytes data;
     std::vector<std::shared_ptr<Record>> records;
+
+    Sector() {}
+
+    Sector(const Location& location);
 
     std::tuple<int, int, int, Status> key() const
     {

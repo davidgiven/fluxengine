@@ -20,6 +20,13 @@
 #include "proto.h"
 #include <optional>
 
+enum ReadResult
+{
+    GOOD_READ,
+    BAD_AND_CAN_RETRY,
+    BAD_AND_CAN_NOT_RETRY
+};
+
 static std::set<std::shared_ptr<const Sector>> collectSectors(
     std::set<std::shared_ptr<const Sector>>& track_sectors,
     bool collapse_conflicts = true)
@@ -76,7 +83,7 @@ static std::set<std::shared_ptr<const Sector>> collectSectors(
 }
 
 /* Returns true if the result contains bad sectors. */
-bool combineRecordAndSectors(TrackFlux& trackFlux, AbstractDecoder& decoder)
+bool combineRecordAndSectors(TrackFlux& trackFlux, AbstractDecoder& decoder, const Location& location)
 {
     std::set<std::shared_ptr<const Sector>> track_sectors;
 
@@ -86,7 +93,7 @@ bool combineRecordAndSectors(TrackFlux& trackFlux, AbstractDecoder& decoder)
 
 	for (unsigned logical_sector : decoder.requiredSectors(trackFlux.location))
 	{
-        auto sector = std::make_shared<Sector>();
+        auto sector = std::make_shared<Sector>(location);
         sector->logicalSector = logical_sector;
         sector->status = Sector::MISSING;
 		track_sectors.insert(sector);
@@ -103,16 +110,20 @@ bool combineRecordAndSectors(TrackFlux& trackFlux, AbstractDecoder& decoder)
 }
 
 /* Returns true if the result contains bad sectors. */
-bool readGroup(FluxSource& fluxSource,
+ReadResult readGroup(FluxSource& fluxSource,
     const Location& location,
     TrackFlux& trackFlux,
     AbstractDecoder& decoder)
 {
+    ReadResult result = BAD_AND_CAN_NOT_RETRY;
+
     for (unsigned offset = 0; offset < location.groupSize;
          offset += config.drive().head_width())
     {
         auto fluxSourceIterator = fluxSource.readFlux(
             location.physicalTrack + offset, location.head);
+        if (!fluxSourceIterator->hasNext())
+            continue;
 
         Logger() << BeginReadOperationLogMessage{
             location.physicalTrack + offset, location.head};
@@ -126,11 +137,13 @@ bool readGroup(FluxSource& fluxSource,
 
         auto trackdataflux = decoder.decodeToSectors(fluxmap, location);
         trackFlux.trackDatas.push_back(trackdataflux);
-        if (!combineRecordAndSectors(trackFlux, decoder))
-			return false;
+        if (!combineRecordAndSectors(trackFlux, decoder, location))
+            return GOOD_READ;
+        if (fluxSourceIterator->hasNext())
+            result = BAD_AND_CAN_RETRY;
     }
 
-	return true;
+	return result;
 }
 
 void writeTracks(FluxSink& fluxSink,
@@ -302,8 +315,15 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
         int retriesRemaining = config.decoder().retries();
         for (;;)
         {
-            if (!readGroup(fluxSource, location, *trackFlux, decoder))
+            auto result = readGroup(fluxSource, location, *trackFlux, decoder);
+            if (result == GOOD_READ)
                 break;
+            if (result == BAD_AND_CAN_NOT_RETRY)
+            {
+                failures = true;
+                Logger() << fmt::format("no more data; giving up");
+                break;
+            }
 
             if (retriesRemaining == 0)
             {
