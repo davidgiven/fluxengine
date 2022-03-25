@@ -4,6 +4,7 @@
 #include "imagereader/imagereader.h"
 #include "image.h"
 #include "logger.h"
+#include "mapper.h"
 #include "proto.h"
 #include "lib/config.pb.h"
 #include "fmt/format.h"
@@ -71,7 +72,6 @@ public:
         {
             if (inputFile.eof())
                 break;
-            int physicalTrack = track;
 
             for (int side = 0; side < 2; side++)
             {
@@ -84,11 +84,10 @@ public:
                     Bytes data(sectorSize);
                     inputFile.read((char*)data.begin(), data.size());
 
-                    const auto& sector =
-                        image->put(physicalTrack, side, sectorId);
+                    const auto& sector = image->put(track, side, sectorId);
                     sector->status = Sector::OK;
                     sector->logicalTrack = track;
-                    sector->physicalTrack = physicalTrack;
+                    sector->physicalTrack = Mapper::remapTrackLogicalToPhysical(track);
                     sector->logicalSide = sector->physicalHead = side;
                     sector->logicalSector = sectorId;
                     sector->data = data;

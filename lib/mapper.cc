@@ -111,23 +111,27 @@ unsigned Mapper::remapTrackPhysicalToLogical(unsigned ptrack)
            config.drive().head_width();
 }
 
-unsigned Mapper::remapTrackLogicalToPhysical(unsigned ltrack)
+static unsigned getTrackStep()
 {
-	Error() << "not working yet";
-    return config.drive().head_bias() + ltrack * config.drive().head_width();
-}
-
-std::set<Location> Mapper::computeLocations()
-{
-    std::set<Location> locations;
-
     unsigned track_step =
 		(config.tpi() == 0) ? 1 : (config.drive().tpi() / config.tpi());
 
     if (track_step == 0)
         Error()
             << "this drive can't write this image, because the head is too big";
+    return track_step;
+}
 
+unsigned Mapper::remapTrackLogicalToPhysical(unsigned ltrack)
+{
+    return config.drive().head_bias() + ltrack*getTrackStep();
+}
+
+std::set<Location> Mapper::computeLocations()
+{
+    std::set<Location> locations;
+
+    unsigned track_step = getTrackStep();
     for (unsigned logicalTrack : iterate(config.tracks()))
     {
         for (unsigned head : iterate(config.heads()))

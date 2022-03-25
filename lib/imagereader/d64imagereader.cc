@@ -5,6 +5,7 @@
 #include "fmt/format.h"
 #include "image.h"
 #include "logger.h"
+#include "mapper.h"
 #include "proto.h"
 #include <algorithm>
 #include <iostream>
@@ -55,7 +56,7 @@ public:
         for (int track = 0; track < 40; track++)
         {
             int numSectors = sectorsPerTrack(track);
-            int physicalTrack = track * 2;
+            int physicalTrack = Mapper::remapTrackLogicalToPhysical(track);
             for (int head = 0; head < numHeads; head++)
             {
                 for (int sectorId = 0; sectorId < numSectors; sectorId++)

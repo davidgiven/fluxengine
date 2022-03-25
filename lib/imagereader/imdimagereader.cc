@@ -5,6 +5,7 @@
 #include "image.h"
 #include "proto.h"
 #include "logger.h"
+#include "mapper.h"
 #include "lib/config.pb.h"
 #include "fmt/format.h"
 #include <algorithm>
@@ -218,7 +219,8 @@ public:
                         Error() << fmt::format("don't understand IMD disks with sector status {}", Status_Sector);
                 }       
                 sector->status = Sector::OK;
-                sector->logicalTrack = sector->physicalTrack = header.track;
+                sector->logicalTrack = header.track;
+                sector->physicalTrack = Mapper::remapTrackLogicalToPhysical(header.track);
                 sector->logicalSide = sector->physicalHead = header.Head;
                 sector->logicalSector = (sector_map[s]);
             }

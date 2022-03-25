@@ -4,6 +4,7 @@
 #include "imagereader/imagereader.h"
 #include "image.h"
 #include "logger.h"
+#include "mapper.h"
 #include "lib/config.pb.h"
 #include "imginputoutpututils.h"
 #include "fmt/format.h"
@@ -47,7 +48,7 @@ public:
                 const auto& sector = image->put(track, side, sectorId);
                 sector->status = Sector::OK;
                 sector->logicalTrack = track;
-                sector->physicalTrack = track;
+                sector->physicalTrack = Mapper::remapTrackLogicalToPhysical(track);
                 sector->logicalSide = sector->physicalHead = side;
                 sector->logicalSector = sectorId;
                 sector->data = data;
