@@ -58,9 +58,9 @@ decoder {
 	}
 }
 
-cylinders {
+tracks {
 	start: 0
-	end: 69
+	end: 65
 }
 
 heads {

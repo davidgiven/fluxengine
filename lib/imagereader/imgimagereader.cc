@@ -4,6 +4,7 @@
 #include "imagereader/imagereader.h"
 #include "image.h"
 #include "logger.h"
+#include "mapper.h"
 #include "lib/config.pb.h"
 #include "imginputoutpututils.h"
 #include "fmt/format.h"
@@ -35,8 +36,6 @@ public:
 
             if (inputFile.eof())
                 break;
-            int physicalCylinder = track * _config.img().physical_step() +
-                                   _config.img().physical_offset();
 
             ImgInputOutputProto::TrackdataProto trackdata;
             getTrackFormat(_config.img(), trackdata, track, side);
@@ -46,11 +45,10 @@ public:
                 Bytes data(trackdata.sector_size());
                 inputFile.read((char*)data.begin(), data.size());
 
-                const auto& sector =
-                    image->put(physicalCylinder, side, sectorId);
+                const auto& sector = image->put(track, side, sectorId);
                 sector->status = Sector::OK;
                 sector->logicalTrack = track;
-                sector->physicalCylinder = physicalCylinder;
+                sector->physicalTrack = Mapper::remapTrackLogicalToPhysical(track);
                 sector->logicalSide = sector->physicalHead = side;
                 sector->logicalSector = sectorId;
                 sector->data = data;

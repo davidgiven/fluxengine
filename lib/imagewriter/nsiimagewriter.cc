@@ -31,7 +31,7 @@ public:
 			return;
 		}
 
-		Logger() << fmt::format("Writing {} cylinders, {} sides, {} sectors, {} ({} bytes/sector), {} kB total",
+		Logger() << fmt::format("Writing {} tracks, {} sides, {} sectors, {} ({} bytes/sector), {} kB total",
 				geometry.numTracks, geometry.numSides,
 				geometry.numSectors, geometry.sectorSize == 256 ? "SD" : "DD", geometry.sectorSize,
 				geometry.numTracks * geometry.numSides * geometry.numSectors * geometry.sectorSize / 1024);

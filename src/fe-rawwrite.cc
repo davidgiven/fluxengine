@@ -1,8 +1,7 @@
 #include "globals.h"
 #include "flags.h"
-#include "reader.h"
+#include "readerwriter.h"
 #include "fluxmap.h"
-#include "writer.h"
 #include "sector.h"
 #include "proto.h"
 #include "lib/fluxsource/fluxsource.h"
@@ -32,13 +31,13 @@ static StringFlag destFlux(
 		FluxSink::updateConfigForFilename(config.mutable_flux_sink(), value);
 	});
 
-static StringFlag destCylinders(
+static StringFlag destTracks(
 	{ "--cylinders", "-c" },
-	"cylinders to write to",
+	"tracks to write to",
 	"",
 	[](const auto& value)
 	{
-		setRange(config.mutable_cylinders(), value);
+		setRange(config.mutable_tracks(), value);
 	});
 
 static StringFlag destHeads(
@@ -60,7 +59,7 @@ static ActionFlag eraseFlag(
 
 int mainRawWrite(int argc, const char* argv[])
 {
-	setRange(config.mutable_cylinders(), "0-79");
+	setRange(config.mutable_tracks(), "0-79");
 	setRange(config.mutable_heads(), "0-1");
 
 	if (argc == 1)

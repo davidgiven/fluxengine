@@ -5,7 +5,6 @@ image_reader {
 	img {
 		tracks: 40
 		sides: 1
-		physical_step: 2
 		trackdata {
 			sector_size: 512
 			sector_range {
@@ -52,9 +51,9 @@ decoder {
 	}
 }
 
-cylinders {
+tracks {
 	start: 0
-	end: 79
+	end: 39
 }
 
 heads {
@@ -62,3 +61,4 @@ heads {
 	end: 0
 }
 
+tpi: 48

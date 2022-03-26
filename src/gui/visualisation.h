@@ -26,7 +26,7 @@ public:
 
 public:
 	void Clear();
-	void SetMode(int head, int cylinder, int mode);
+	void SetMode(int head, int track, int mode);
 	void SetTrackData(std::shared_ptr<const TrackFlux> track);
 	void SetDiskData(std::shared_ptr<const DiskFlux> disk);
 
@@ -37,7 +37,7 @@ private:
 	typedef std::pair<unsigned, unsigned> key_t;
 
 	int _head;
-	int _cylinder;
+	int _track;
 	int _mode = VISMODE_NOTHING;
 	std::multimap<key_t, std::shared_ptr<const Sector>> _sectors;
     wxDECLARE_EVENT_TABLE();

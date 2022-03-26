@@ -9,7 +9,7 @@ decoder {
 	fb100 {}
 }
 
-cylinders {
+tracks {
 	start: 0
 	end: 79
 	step: 2

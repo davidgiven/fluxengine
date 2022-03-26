@@ -26,14 +26,14 @@ public:
 	}
 
 public:
-	void writeFlux(int cylinder, int head, const Fluxmap& fluxmap) override
+	void writeFlux(int track, int head, const Fluxmap& fluxmap) override
 	{
 		unsigned totalTicks = fluxmap.ticks() + 2;
 		unsigned channels = _config.index_markers() ? 2 : 1;
 
 		mkdir(_config.directory().c_str(), 0744);
 		std::ofstream of(
-			fmt::format("{}/c{:02d}.h{:01d}.au", _config.directory(), cylinder, head),
+			fmt::format("{}/c{:02d}.h{:01d}.au", _config.directory(), track, head),
 			std::ios::out | std::ios::binary);
 		if (!of.is_open())
 			Error() << "cannot open output file";

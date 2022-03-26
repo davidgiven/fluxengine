@@ -1,6 +1,6 @@
 #include "globals.h"
 #include "flags.h"
-#include "reader.h"
+#include "readerwriter.h"
 #include "fluxmap.h"
 #include "decoders/fluxmapreader.h"
 #include "decoders/fluxdecoder.h"
@@ -23,9 +23,9 @@ static StringFlag sourceFlux(
 		FluxSource::updateConfigForFilename(config.mutable_flux_source(), value);
 	});
 
-static IntFlag cylinderFlag(
+static IntFlag trackFlag(
 	{ "--cylinder", "-c" },
-	"Cylinder to read.",
+	"Track to read.",
 	0);
 
 static IntFlag headFlag(
@@ -205,7 +205,7 @@ int mainInspect(int argc, const char* argv[])
     flags.parseFlagsWithConfigFiles(argc, argv, {});
 
 	std::unique_ptr<FluxSource> fluxSource(FluxSource::create(config.flux_source()));
-	const auto fluxmap = fluxSource->readFlux(cylinderFlag, headFlag)->next();
+	const auto fluxmap = fluxSource->readFlux(trackFlag, headFlag)->next();
 
 	std::cout << fmt::format("0x{:x} bytes of data in {:.3f}ms\n",
 			fluxmap->bytes(),
