@@ -71,9 +71,9 @@ public:
 		_handle(_interface)
 	{
 		int version = getVersion();
-		if (version != FLUXENGINE_VERSION)
+		if (version != FLUXENGINE_PROTOCOL_VERSION)
 			Error() << "your FluxEngine firmware is at version " << version
-					<< " but the client is for version " << FLUXENGINE_VERSION
+					<< " but the client is for version " << FLUXENGINE_PROTOCOL_VERSION
 					<< "; please upgrade";
 	}
 
