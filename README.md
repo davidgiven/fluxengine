@@ -37,11 +37,6 @@ FluxEngine features are available with the GreaseWeazle and it works out-of-the
 box. See the [dedicated GreaseWeazle documentation page](doc/greaseweazle.md)
 for more information.
 
-**Important note.** On 2020-04-02 I changed the bytecode format (and firmware).
-Flux files will need to be upgraded with `fluxengine upgradefluxfile`. The new
-format should be more reliable and use way, way less bandwidth. Sorry for the
-inconvenience.
-
 Where?
 ------
 
