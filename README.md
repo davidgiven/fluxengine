@@ -66,14 +66,17 @@ following friendly articles:
     flux files and image files ∾ knowing what you're doing
 
   - [Using GreaseWeazle hardware with the FluxEngine client
-	software](doc/greaseweazle.md) ∾ what works ∾ what doesn't work ∾ where to
-	go for help
+    software](doc/greaseweazle.md) ∾ what works ∾ what doesn't work ∾ where to
+    go for help
+
+  - [Configuring for your drive](doc/drives.md) ∾ but I don't have a 80 track
+    drive! ∾ reading and writing 40 track disks ∾ Shugart and Apple II
 
   - [Troubleshooting dubious disks](doc/problems.md) ∾ it's not an exact
-	science ∾ the sector map ∾ clock detection and the histogram
+    science ∾ the sector map ∾ clock detection and the histogram
 
   - [Checking your drive](doc/driveresponse.md) ∾ you can't do that with that ∾
-	measuring your drive's ability to work with exotic formats
+    measuring your drive's ability to work with exotic formats
 
 Which?
 ------
