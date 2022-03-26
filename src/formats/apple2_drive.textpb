@@ -11,7 +11,7 @@ drive {
     tracks: 160
     heads: 1
     head_width: 4
-	tpi: 48
+	tpi: 192
 }
 
 
