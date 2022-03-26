@@ -488,7 +488,7 @@ buildlibrary libbackend.a \
     lib/utils.cc \
 
 FORMATS="\
-    40trackdrive \
+    40track_drive \
     acornadfs \
     acorndfs \
     aeslanier \
@@ -496,7 +496,7 @@ FORMATS="\
     amiga \
     ampro \
     apple2 \
-    apple2drive \
+    apple2_drive \
     appledos \
     atarist360 \
     atarist370 \
@@ -536,7 +536,7 @@ FORMATS="\
     northstar87 \
     prodos \
     rx50 \
-    shugartdrive \
+    shugart_drive \
     tids990 \
     vgi \
     victor9k_ds \
