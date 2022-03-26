@@ -221,7 +221,7 @@ static int usb_read(int ep, uint8_t buffer[FRAME_SIZE])
 static void cmd_get_version(struct any_frame* f)
 {
     DECLARE_REPLY_FRAME(struct version_frame, F_FRAME_GET_VERSION_REPLY);
-    r.version = FLUXENGINE_VERSION;
+    r.version = FLUXENGINE_PROTOCOL_VERSION;
     send_reply((struct any_frame*) &r);
 }
 
