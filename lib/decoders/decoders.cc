@@ -3,7 +3,8 @@
 #include "fluxmap.h"
 #include "decoders/decoders.h"
 #include "encoders/encoders.h"
-//#include "arch/aeslanier/aeslanier.h"
+#include "arch/agat/agat.h"
+#include "arch/aeslanier/aeslanier.h"
 #include "arch/amiga/amiga.h"
 #include "arch/apple2/apple2.h"
 #include "arch/brother/brother.h"
@@ -33,7 +34,8 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 	static const std::map<int,
 		std::function<std::unique_ptr<AbstractDecoder>(const DecoderProto&)>> decoders =
 	{
-		//{ DecoderProto::kAeslanier,  createAesLanierDecoder },
+		{ DecoderProto::kAgat,       createAgatDecoder },
+		{ DecoderProto::kAeslanier,  createAesLanierDecoder },
 		{ DecoderProto::kAmiga,      createAmigaDecoder },
 		{ DecoderProto::kApple2,     createApple2Decoder },
 		{ DecoderProto::kBrother,    createBrotherDecoder },
@@ -58,12 +60,11 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 }
 
 std::shared_ptr<const TrackDataFlux> AbstractDecoder::decodeToSectors(
-		std::shared_ptr<const Fluxmap> fluxmap, unsigned physicalCylinder, unsigned physicalHead)
+		std::shared_ptr<const Fluxmap> fluxmap, const Location& location)
 {
 	_trackdata = std::make_shared<TrackDataFlux>();
 	_trackdata->fluxmap = fluxmap;
-	_trackdata->physicalCylinder = physicalCylinder;
-	_trackdata->physicalHead = physicalHead;
+	_trackdata->location = location;
 	
     FluxmapReader fmr(*fluxmap);
     _fmr = &fmr;
@@ -71,8 +72,8 @@ std::shared_ptr<const TrackDataFlux> AbstractDecoder::decodeToSectors(
 	auto newSector = [&] {
 		_sector = std::make_shared<Sector>();
 		_sector->status = Sector::MISSING;
-		_sector->physicalCylinder = physicalCylinder;
-		_sector->physicalHead = physicalHead;
+		_sector->physicalTrack = location.physicalTrack;
+		_sector->physicalHead = location.head;
 	};
 
 	newSector();
@@ -216,7 +217,7 @@ uint64_t AbstractDecoder::readRaw64()
 }
 
 
-std::set<unsigned> AbstractDecoder::requiredSectors(unsigned cylinder, unsigned head) const
+std::set<unsigned> AbstractDecoder::requiredSectors(const Location& location) const
 {
 	static std::set<unsigned> set;
 	return set;

@@ -2,8 +2,7 @@
 #include "proto.h"
 #include "gui.h"
 #include "logger.h"
-#include "reader.h"
-#include "writer.h"
+#include "readerwriter.h"
 #include "fluxsource/fluxsource.h"
 #include "fluxsink/fluxsink.h"
 #include "imagereader/imagereader.h"
@@ -12,6 +11,7 @@
 #include "decoders/decoders.h"
 #include "lib/usb/usbfinder.h"
 #include "fmt/format.h"
+#include "mapper.h"
 #include "utils.h"
 #include "mainwindow.h"
 #include <google/protobuf/text_format.h>
@@ -86,6 +86,7 @@ void MainWindow::OnReadFluxButton(wxCommandEvent&)
                 auto fluxSource = FluxSource::create(config.flux_source());
                 auto decoder = AbstractDecoder::create(config.decoder());
                 auto diskflux = readDiskCommand(*fluxSource, *decoder);
+
                 runOnUiThread(
                     [&]()
                     {
@@ -126,7 +127,7 @@ void MainWindow::OnWriteFluxButton(wxCommandEvent&)
 					decoder = AbstractDecoder::create(config.decoder());
 					fluxSource = FluxSource::create(config.flux_source());
 				}
-				writeDiskCommand(*image, *encoder, *fluxSink, decoder.get(), fluxSource.get());
+				writeDiskCommand(image, *encoder, *fluxSink, decoder.get(), fluxSource.get());
             });
     }
     catch (const ErrorException& e)
@@ -295,7 +296,7 @@ void MainWindow::OnLogMessage(std::shared_ptr<const AnyLogMessage> message)
             /* Indicates that we're starting a write operation. */
             [&](const BeginWriteOperationLogMessage& m)
             {
-                visualiser->SetMode(m.cylinder, m.head, VISMODE_WRITING);
+                visualiser->SetMode(m.track, m.head, VISMODE_WRITING);
             },
 
             [&](const EndWriteOperationLogMessage& m)
@@ -306,7 +307,7 @@ void MainWindow::OnLogMessage(std::shared_ptr<const AnyLogMessage> message)
             /* Indicates that we're starting a read operation. */
             [&](const BeginReadOperationLogMessage& m)
             {
-                visualiser->SetMode(m.cylinder, m.head, VISMODE_READING);
+                visualiser->SetMode(m.track, m.head, VISMODE_READING);
             },
 
             [&](const EndReadOperationLogMessage& m)

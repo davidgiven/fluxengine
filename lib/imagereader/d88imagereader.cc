@@ -5,6 +5,7 @@
 #include "image.h"
 #include "proto.h"
 #include "logger.h"
+#include "mapper.h"
 #include "lib/config.pb.h"
 #include "fmt/format.h"
 #include <algorithm>
@@ -62,21 +63,23 @@ public:
             Logger() << "D88: overriding configured format";
 
         auto ibm = config.mutable_encoder()->mutable_ibm();
-        int physicalStep = 1;
         int clockRate = 500;
         if (mediaFlag == 0x20)
         {
             Logger() << "D88: high density mode";
 			if (!config.drive().has_drive())
 				config.mutable_drive()->set_high_density(true);
+            if (!config.has_tpi())
+                config.set_tpi(96);
         }
         else
         {
             Logger() << "D88: single/double density mode";
-            physicalStep = 2;
             clockRate = 300;
 			if (!config.drive().has_drive())
 				config.mutable_drive()->set_high_density(false);
+            if (!config.has_tpi())
+                config.set_tpi(48);
         }
 
         std::unique_ptr<Image> image(new Image);
@@ -87,7 +90,7 @@ public:
                 continue;
 
             int currentTrackOffset = trackOffset;
-            int currentTrackCylinder = -1;
+            int currentTrackTrack = -1;
             int currentSectorsInTrack =
                 0xffff; // don't know # of sectors until we read the first one
             int trackSectorSize = -1;
@@ -105,7 +108,7 @@ public:
                 inputFile.read(
                     (char*)sectorHeader.begin(), sectorHeader.size());
                 ByteReader sectorHeaderReader(sectorHeader);
-                int cylinder = sectorHeaderReader.seek(0).read_8();
+                int track = sectorHeaderReader.seek(0).read_8();
                 int head = sectorHeaderReader.seek(1).read_8();
                 int sectorId = sectorHeaderReader.seek(2).read_8();
                 int sectorSize = 128 << sectorHeaderReader.seek(3).read_8();
@@ -132,21 +135,21 @@ public:
                 {
                     Error() << "D88: mismatched number of sectors in track";
                 }
-                if (currentTrackCylinder < 0)
+                if (currentTrackTrack < 0)
                 {
-                    currentTrackCylinder = cylinder;
+                    currentTrackTrack = track;
                 }
-                else if (currentTrackCylinder != cylinder)
+                else if (currentTrackTrack != track)
                 {
                     Error() << "D88: all sectors in a track must belong to the "
-                               "same cylinder";
+                               "same track";
                 }
                 if (trackSectorSize < 0)
                 {
                     trackSectorSize = sectorSize;
                     // this is the first sector we've read, use it settings for
                     // per-track data
-                    trackdata->set_cylinder(cylinder * physicalStep);
+                    trackdata->set_track(track);
                     trackdata->set_head(head);
                     trackdata->set_sector_size(sectorSize);
                     trackdata->set_use_fm(fm);
@@ -176,11 +179,10 @@ public:
                 }
                 Bytes data(sectorSize);
                 inputFile.read((char*)data.begin(), data.size());
-                const auto& sector =
-                    image->put(cylinder * physicalStep, head, sectorId);
+                const auto& sector = image->put(track, head, sectorId);
                 sector->status = Sector::OK;
-                sector->logicalTrack = cylinder;
-                sector->physicalCylinder = cylinder * physicalStep;
+                sector->logicalTrack = track;
+                sector->physicalTrack = Mapper::remapTrackLogicalToPhysical(track);
                 sector->logicalSide = sector->physicalHead = head;
                 sector->logicalSector = sectorId;
                 sector->data = data;
@@ -188,7 +190,7 @@ public:
                 sectors->add_sector(sectorId);
             }
 
-            if (physicalStep == 2)
+            if (mediaFlag != 0x20)
             {
                 auto trackdata = ibm->add_trackdata();
                 trackdata->set_clock_rate_khz(clockRate);
@@ -209,11 +211,11 @@ public:
             heads->set_end(geometry.numSides - 1);
         }
 
-        if (!config.has_cylinders())
+        if (!config.has_tracks())
         {
-            auto* cylinders = config.mutable_cylinders();
-            cylinders->set_start(0);
-            cylinders->set_end(geometry.numTracks - 1);
+            auto* tracks = config.mutable_tracks();
+            tracks->set_start(0);
+            tracks->set_end(geometry.numTracks - 1);
         }
 
         return image;

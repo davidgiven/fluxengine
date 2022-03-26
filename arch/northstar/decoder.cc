@@ -152,7 +152,7 @@ public:
 
 		_sector->logicalSide = _sector->physicalHead;
 		_sector->logicalSector = _hardSectorId;
-		_sector->logicalTrack = _sector->physicalCylinder;
+		_sector->logicalTrack = _sector->physicalTrack;
 
 		if (headerSize == NORTHSTAR_HEADER_SIZE_DD) {
 			br.read_8();	/* MFM second Sync char, usually 0xFB */
@@ -164,7 +164,7 @@ public:
 		_sector->status = (wantChecksum == gotChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
 	}
 
-	std::set<unsigned> requiredSectors(unsigned cylinder, unsigned head) const override
+	std::set<unsigned> requiredSectors(const Location&) const override
 	{
 		static std::set<unsigned> sectors = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 		return sectors;

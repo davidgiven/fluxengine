@@ -32,9 +32,10 @@ public:
 		appendBytes((const uint8_t*) s.c_str(), s.size());
 	}
 
-	Fluxmap(const Bytes bytes):
-		_bytes(bytes)
-	{}
+	Fluxmap(const Bytes bytes)
+	{
+		appendBytes(bytes);
+	}
 
     nanoseconds_t duration() const { return _duration; }
     unsigned ticks() const { return _ticks; }

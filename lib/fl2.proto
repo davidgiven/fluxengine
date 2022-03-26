@@ -10,7 +10,7 @@ enum FluxFileVersion {
 }
 
 message TrackFluxProto {
-	optional int32 cylinder = 1;
+	optional int32 track = 1;
 	optional int32 head = 2;
 	repeated bytes flux = 3;
 }

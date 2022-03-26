@@ -37,7 +37,7 @@ public:
 		for (const auto& e : _data)
 		{
 			auto track = proto.add_track();
-			track->set_cylinder(e.first.first);
+			track->set_track(e.first.first);
 			track->set_head(e.first.second);
 			for (const auto& fluxBytes : e.second)
 				track->add_flux(fluxBytes);
@@ -51,9 +51,9 @@ public:
 	}
 
 public:
-	void writeFlux(int cylinder, int head, const Fluxmap& fluxmap) override
+	void writeFlux(int track, int head, const Fluxmap& fluxmap) override
 	{
-		auto& vector = _data[std::make_pair(cylinder, head)];
+		auto& vector = _data[std::make_pair(track, head)];
 		vector.push_back(fluxmap.rawBytes());
 	}
 

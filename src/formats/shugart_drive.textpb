@@ -1,0 +1,9 @@
+comment: 'Adjust configuration for a Shugart drive'
+is_extension: true
+
+usb {
+    greaseweazle {
+        bus_type: SHUGART
+    }
+}
+

@@ -2,7 +2,7 @@ Disk: Apple II
 ==============
 
 Apple II disks are nominally fairly sensible 40-track, single-sided, 256
-bytes-per-sector jobs. However, they come in two varieties: DOS 3.3 and
+bytes-per-sector jobs. However, they come in two varieties: DOS 3.3/ProDOS and
 above, and pre-DOS 3.3. They use different GCR encoding systems, dubbed
 6-and-2 and 5-and-3, and are mutually incompatible (although in some rare
 cases you can mix 6-and-2 and 5-and-3 sectors on the same disk).
@@ -21,14 +21,14 @@ This means that Apple II disks can do all kinds of weird things, including
 having spiral tracks! Copy protection for the Apple II was even madder than
 on other systems.
 
-FluxEngine can only read well-behaved, DOS 3.3 6-and-2 disks. It doesn't even
-try to handle the weird stuff.
+FluxEngine can only read well-behaved 6-and-2 disks. It doesn't even try to
+handle the weird stuff.
 
-Sadly, DOS 3.3 also applies logical sector remapping on top of the physical
-sector numbering on the disk, and this _varies_ depending on what the disk is
-for. FluxEngine doesn't attempt to remap sectors, instead giving you an exact
-copy of what's on the disk, so you may need to do some work before the images
-are usable in emulators.
+Apple DOS also applies logical sector remapping on top of the physical sector
+numbering on the disk, and this _varies_ depending on what the disk is for.
+FluxEngine can remap the sectors from physical to logical using modifiers.  If
+you don't specify a remapping modifier, you get the sectors in the order they
+appear on the disk.
 
 
 Reading discs
@@ -41,9 +41,13 @@ fluxengine read apple2
 ```
 
 You should end up with an `apple2.img` which is 143360 bytes long.
+It will be in physical sector ordering. You can specify a sector ordering,
+`appledos` or `prodos` to get an image intended for use in an emulator,
+due to the logical sector mapping issue described above:
 
-**Big warning!** The image may not work in an emulator, due to the
-logical sector mapping issue described above.
+```
+fluxengine read apple2 prodos
+```
 
 Writing discs
 -------------
@@ -53,8 +57,12 @@ Just do:
 fluxengine write apple2 -i apple2.img
 ```
 
-**Big warning!** An image designed for an emulator may not work, due to the
-logical sector mapping issue described above.
+If your image is in logical sector ordering (images intended for emulators
+usually are), specify a modifier of `appledos` or `prodos`:
+
+```
+fluxengine write apple2 prodos -i apple2.img
+```
 
 
 Useful references

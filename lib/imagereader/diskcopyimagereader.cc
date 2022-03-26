@@ -4,6 +4,7 @@
 #include "imagereader/imagereader.h"
 #include "image.h"
 #include "logger.h"
+#include "mapper.h"
 #include "lib/config.pb.h"
 #include "fmt/format.h"
 #include <algorithm>
@@ -36,7 +37,7 @@ public:
         uint8_t encoding = br.read_8();
         uint8_t formatByte = br.read_8();
 
-        unsigned numCylinders = 80;
+        unsigned numTracks = 80;
         unsigned numHeads = 2;
         unsigned numSectors = 0;
         bool mfm = false;
@@ -66,8 +67,8 @@ public:
         }
 
         Logger() << fmt::format(
-            "DC42: reading image with {} cylinders, {} heads; {}; {}",
-            numCylinders,
+            "DC42: reading image with {} tracks, {} heads; {}; {}",
+            numTracks,
             numHeads,
             mfm ? "MFM" : "GCR",
             label);
@@ -92,7 +93,7 @@ public:
         uint32_t tagPtr = dataPtr + dataSize;
 
         std::unique_ptr<Image> image(new Image);
-        for (int track = 0; track < numCylinders; track++)
+        for (int track = 0; track < numTracks; track++)
         {
             int numSectors = sectorsPerTrack(track);
             for (int head = 0; head < numHeads; head++)
@@ -109,7 +110,8 @@ public:
 
                     const auto& sector = image->put(track, head, sectorId);
                     sector->status = Sector::OK;
-                    sector->logicalTrack = sector->physicalCylinder = track;
+                    sector->logicalTrack = track;
+                    sector->physicalTrack = Mapper::remapTrackLogicalToPhysical(track);
                     sector->logicalSide = sector->physicalHead = head;
                     sector->logicalSector = sectorId;
                     sector->data.writer().append(payload).append(tag);
@@ -117,7 +119,7 @@ public:
             }
         }
 
-        image->setGeometry({.numTracks = numCylinders,
+        image->setGeometry({.numTracks = numTracks,
             .numSides = numHeads,
             .numSectors = 12,
             .sectorSize = 512 + 12,

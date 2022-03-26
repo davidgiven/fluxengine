@@ -62,12 +62,12 @@ public:
     }
 
 public:
-    std::unique_ptr<FluxSourceIterator> readFlux(int cylinder, int head) override
+    std::unique_ptr<FluxSourceIterator> readFlux(int track, int head) override
     {
-        for (const auto& track : _proto.track())
+        for (const auto& trackFlux : _proto.track())
         {
-            if ((track.cylinder() == cylinder) && (track.head() == head))
-				return std::make_unique<Fl2FluxSourceIterator>(track);
+            if ((trackFlux.track() == track) && (trackFlux.head() == head))
+				return std::make_unique<Fl2FluxSourceIterator>(trackFlux);
         }
 
         return std::make_unique<EmptyFluxSourceIterator>();

@@ -37,11 +37,6 @@ FluxEngine features are available with the GreaseWeazle and it works out-of-the
 box. See the [dedicated GreaseWeazle documentation page](doc/greaseweazle.md)
 for more information.
 
-**Important note.** On 2020-04-02 I changed the bytecode format (and firmware).
-Flux files will need to be upgraded with `fluxengine upgradefluxfile`. The new
-format should be more reliable and use way, way less bandwidth. Sorry for the
-inconvenience.
-
 Where?
 ------
 
@@ -66,14 +61,17 @@ following friendly articles:
     flux files and image files ∾ knowing what you're doing
 
   - [Using GreaseWeazle hardware with the FluxEngine client
-	software](doc/greaseweazle.md) ∾ what works ∾ what doesn't work ∾ where to
-	go for help
+    software](doc/greaseweazle.md) ∾ what works ∾ what doesn't work ∾ where to
+    go for help
+
+  - [Configuring for your drive](doc/drives.md) ∾ but I don't have a 80 track
+    drive! ∾ reading and writing 40 track disks ∾ Shugart and Apple II
 
   - [Troubleshooting dubious disks](doc/problems.md) ∾ it's not an exact
-	science ∾ the sector map ∾ clock detection and the histogram
+    science ∾ the sector map ∾ clock detection and the histogram
 
   - [Checking your drive](doc/driveresponse.md) ∾ you can't do that with that ∾
-	measuring your drive's ability to work with exotic formats
+    measuring your drive's ability to work with exotic formats
 
 Which?
 ------
@@ -97,7 +95,8 @@ people who've had it work).
 | [Acorn ADFS](doc/disk-acornadfs.md)       |  🦄   |   🦖*  | single- and double- sided           |
 | [Acorn DFS](doc/disk-acorndfs.md)         |  🦄   |   🦖*  |                                     |
 | [Ampro Little Board](doc/disk-ampro.md)   |  🦖   |   🦖*  |                                     |
-| [Apple II DOS 3.3](doc/disk-apple2.md)    |  🦄   |   🦖   | doesn't do logical sector remapping |
+| [Agat](doc/disk-agat.md)                  |  🦖   |        | Soviet Union Apple-II-like computer |
+| [Apple II](doc/disk-apple2.md)            |  🦄   |   🦄   |                                     |
 | [Amiga](doc/disk-amiga.md)                |  🦄   |   🦄   |                                     |
 | [Commodore 64 1541/1581](doc/disk-c64.md) |  🦄   |   🦄   | and probably the other formats      |
 | [Brother 120kB](doc/disk-brother.md)      |  🦄   |   🦄   |                                     |

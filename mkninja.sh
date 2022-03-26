@@ -322,10 +322,6 @@ encodedecodetest() {
     echo "    format=$format"
     echo "    configs=$*"
     echo "    fluxx=flux"
-    echo "build $OBJDIR/$format.encodedecode.scp.stamp : encodedecode | fluxengine$EXTENSION scripts/encodedecodetest.sh $*"
-    echo "    format=$format"
-    echo "    configs=$*"
-    echo "    fluxx=scp"
 }
 
 buildlibrary libagg.a \
@@ -364,6 +360,7 @@ buildlibrary libfmt.a \
     dep/fmt/os.cc \
 
 buildproto libconfig.a \
+    arch/agat/agat.proto \
     arch/aeslanier/aeslanier.proto \
     arch/amiga/amiga.proto \
     arch/apple2/apple2.proto \
@@ -388,6 +385,7 @@ buildproto libconfig.a \
     lib/fluxsource/fluxsource.proto \
     lib/imagereader/imagereader.proto \
     lib/imagewriter/imagewriter.proto \
+    lib/mapper.proto \
     lib/usb/usb.proto \
 
 buildproto libfl2.a \
@@ -398,6 +396,8 @@ buildlibrary libbackend.a \
     -Idep/libusbp/include \
     -d $OBJDIR/proto/libconfig.def \
     -d $OBJDIR/proto/libfl2.def \
+    arch/agat/agat.cc \
+    arch/agat/decoder.cc \
     arch/aeslanier/decoder.cc \
     arch/amiga/amiga.cc \
     arch/amiga/decoder.cc \
@@ -475,8 +475,9 @@ buildlibrary libbackend.a \
     lib/imginputoutpututils.cc \
     lib/ldbs.cc \
     lib/logger.cc \
+    lib/mapper.cc \
     lib/proto.cc \
-    lib/reader.cc \
+    lib/readerwriter.cc \
     lib/sector.cc \
     lib/usb/fluxengineusb.cc \
     lib/usb/greaseweazle.cc \
@@ -485,15 +486,18 @@ buildlibrary libbackend.a \
     lib/usb/usb.cc \
     lib/usb/usbfinder.cc \
     lib/utils.cc \
-    lib/writer.cc \
 
 FORMATS="\
+    40track_drive \
     acornadfs \
     acorndfs \
     aeslanier \
+    agat840 \
     amiga \
     ampro \
     apple2 \
+    apple2_drive \
+    appledos \
     atarist360 \
     atarist370 \
     atarist400 \
@@ -530,11 +534,13 @@ FORMATS="\
     northstar175 \
     northstar350 \
     northstar87 \
+    prodos \
     rx50 \
+    shugart_drive \
     tids990 \
     vgi \
-    victor9k_ss \
     victor9k_ds \
+    victor9k_ss \
     zilogmcz \
     "
 
