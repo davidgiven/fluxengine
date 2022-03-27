@@ -318,7 +318,7 @@ encodedecodetest() {
     format=$1
     shift
 
-    echo "build $OBJDIR/$format.encodedecode.flux.stamp : encodedecode | fluxengine$EXTENSION scripts/encodedecodetest.sh $*"
+    echo "build $OBJDIR/$format.encodedecode.flux.stamp : encodedecode | fluxengine$EXTENSION fluxengine-debug$EXTENSION scripts/encodedecodetest.sh $*"
     echo "    format=$format"
     echo "    configs=$*"
     echo "    fluxx=flux"
@@ -406,6 +406,7 @@ buildlibrary libbackend.a \
     arch/apple2/encoder.cc \
     arch/brother/decoder.cc \
     arch/brother/encoder.cc \
+    arch/c64/c64.cc \
     arch/c64/decoder.cc \
     arch/c64/encoder.cc \
     arch/f85/decoder.cc \

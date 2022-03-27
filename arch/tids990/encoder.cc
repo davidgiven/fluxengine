@@ -5,6 +5,7 @@
 #include "crc.h"
 #include "readerwriter.h"
 #include "image.h"
+#include "mapper.h"
 #include "arch/tids990/tids990.pb.h"
 #include "lib/encoders/encoders.pb.h"
 #include <fmt/format.h>
@@ -81,9 +82,9 @@ public:
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
-        double clockRateUs = 1e3 / _config.clock_rate_khz() / 2.0;
+        double clockRateUs = _config.target_clock_period_us() / 2.0;
         int bitsPerRevolution =
-            (_config.track_length_ms() * 1000.0) / clockRateUs;
+            (_config.target_rotational_period_ms() * 1000.0) / clockRateUs;
         _bits.resize(bitsPerRevolution);
         _cursor = 0;
 
@@ -148,8 +149,10 @@ public:
         while (_cursor < _bits.size())
             writeBytes(1, 0x55);
 
-        std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
-        fluxmap->appendBits(_bits, clockRateUs * 1e3);
+        auto fluxmap = std::make_unique<Fluxmap>();
+        fluxmap->appendBits(_bits,
+            Mapper::calculatePhysicalClockPeriod(clockRateUs * 1e3,
+                _config.target_rotational_period_ms() * 1e6));
         return fluxmap;
     }
 

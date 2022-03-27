@@ -5,6 +5,7 @@
 #include "sector.h"
 #include "readerwriter.h"
 #include "image.h"
+#include "mapper.h"
 #include "fmt/format.h"
 #include "lib/encoders/encoders.pb.h"
 #include <ctype.h>
@@ -26,20 +27,26 @@ static int encode_data_gcr(uint8_t data)
 class Apple2Encoder : public AbstractEncoder
 {
 public:
-    Apple2Encoder(const EncoderProto& config): AbstractEncoder(config) {}
+    Apple2Encoder(const EncoderProto& config):
+        AbstractEncoder(config),
+        _config(config.apple2())
+    {
+    }
+
+private:
+    const Apple2EncoderProto& _config;
 
 public:
     std::vector<std::shared_ptr<const Sector>> collectSectors(
         const Location& location, const Image& image) override
     {
         std::vector<std::shared_ptr<const Sector>> sectors;
-        constexpr auto numSectors = 16;
         if (location.head == 0)
         {
-            unsigned numSectors = 16;
-            for (int sectorId = 0; sectorId < numSectors; sectorId++)
+            for (int sectorId = 0; sectorId < APPLE2_SECTORS; sectorId++)
             {
-                const auto& sector = image.get(location.logicalTrack, 0, sectorId);
+                const auto& sector =
+                    image.get(location.logicalTrack, 0, sectorId);
                 if (sector)
                     sectors.push_back(sector);
             }
@@ -48,15 +55,12 @@ public:
         return sectors;
     }
 
-    std::unique_ptr<Fluxmap> encode(
-		const Location& location,
+    std::unique_ptr<Fluxmap> encode(const Location& location,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
-        double clockRateUs = 4.;
-
-        // apple2 drives spin at 300rpm.  300/minute in us = 200000.
-        int bitsPerRevolution = 200000.0 / clockRateUs;
+        int bitsPerRevolution =
+            (_config.rotational_period_ms() * 1e3) / _config.clock_rate_us();
 
         std::vector<bool> bits(bitsPerRevolution);
         unsigned cursor = 0;
@@ -70,7 +74,10 @@ public:
         fillBitmapTo(bits, cursor, bits.size(), {true, false});
 
         std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
-        fluxmap->appendBits(bits, clockRateUs * 1e3);
+        fluxmap->appendBits(bits,
+            Mapper::calculatePhysicalClockPeriod(
+                _config.clock_rate_us() * 1e3,
+                _config.rotational_period_ms() * 1e6));
         return fluxmap;
     }
 

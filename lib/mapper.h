@@ -16,7 +16,10 @@ public:
     static unsigned remapTrackPhysicalToLogical(unsigned track);
     static unsigned remapTrackLogicalToPhysical(unsigned track);
 
-	static std::set<Location> computeLocations();
+    static std::set<Location> computeLocations();
+
+    static nanoseconds_t calculatePhysicalClockPeriod(
+        nanoseconds_t targetClockPeriod, nanoseconds_t targetRotationalPeriod);
 };
 
 #endif

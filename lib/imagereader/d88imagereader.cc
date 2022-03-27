@@ -97,8 +97,8 @@ public:
             int trackMfm = -1;
 
             auto trackdata = ibm->add_trackdata();
-            trackdata->set_clock_rate_khz(clockRate);
-            trackdata->set_track_length_ms(167);
+            trackdata->set_target_clock_period_us(1e3 / clockRate);
+            trackdata->set_target_rotational_period_ms(167);
             auto sectors = trackdata->mutable_sectors();
 
             for (int sectorInTrack = 0; sectorInTrack < currentSectorsInTrack;
@@ -193,8 +193,8 @@ public:
             if (mediaFlag != 0x20)
             {
                 auto trackdata = ibm->add_trackdata();
-                trackdata->set_clock_rate_khz(clockRate);
-                trackdata->set_track_length_ms(167);
+                trackdata->set_target_clock_period_us(1e3 / clockRate);
+                trackdata->set_target_rotational_period_ms(167);
             }
         }
 

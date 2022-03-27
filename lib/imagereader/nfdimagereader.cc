@@ -65,8 +65,8 @@ public:
         for (int track = 0; track < 163; track++)
         {
             auto trackdata = ibm->add_trackdata();
-            trackdata->set_clock_rate_khz(500);
-            trackdata->set_track_length_ms(167);
+            trackdata->set_target_clock_period_us(2);
+            trackdata->set_target_rotational_period_ms(167);
             auto sectors = trackdata->mutable_sectors();
             int currentTrackTrack = -1;
             int currentTrackHead = -1;

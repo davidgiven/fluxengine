@@ -28,8 +28,8 @@ encoder {
 	ibm {
 		trackdata {
             sector_size: 1024
-			track_length_ms: 167
-			clock_rate_khz: 500
+			target_rotational_period_ms: 167
+			target_clock_period_us: 2
 			sectors {
 				sector: 1
 				sector: 2

@@ -5,6 +5,7 @@
 #include "crc.h"
 #include "readerwriter.h"
 #include "image.h"
+#include "mapper.h"
 #include "arch/amiga/amiga.pb.h"
 #include "lib/encoders/encoders.pb.h"
 
@@ -121,8 +122,8 @@ public:
             for (int sectorId = 0; sectorId < AMIGA_SECTORS_PER_TRACK;
                  sectorId++)
             {
-                const auto& sector = image.get(
-                    location.logicalTrack, location.head, sectorId);
+                const auto& sector =
+                    image.get(location.logicalTrack, location.head, sectorId);
                 if (sector)
                     sectors.push_back(sector);
             }
@@ -135,7 +136,8 @@ public:
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
-        int bitsPerRevolution = 200000.0 / _config.clock_rate_us();
+        /* Number of bits for one nominal revolution of a real 200ms Amiga disk. */
+        int bitsPerRevolution = 200e3 / _config.clock_rate_us();
         std::vector<bool> bits(bitsPerRevolution);
         unsigned cursor = 0;
 
@@ -152,8 +154,10 @@ public:
             Error() << "track data overrun";
         fillBitmapTo(bits, cursor, bits.size(), {true, false});
 
-        std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
-        fluxmap->appendBits(bits, _config.clock_rate_us() * 1e3);
+        auto fluxmap = std::make_unique<Fluxmap>();
+        fluxmap->appendBits(bits,
+            Mapper::calculatePhysicalClockPeriod(
+                _config.clock_rate_us() * 1e3, 200e6));
         return fluxmap;
     }
 

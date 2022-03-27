@@ -6,6 +6,7 @@
 #include "sector.h"
 #include "readerwriter.h"
 #include "image.h"
+#include "mapper.h"
 #include "fmt/format.h"
 #include "arch/c64/c64.pb.h"
 #include "lib/encoders/encoders.pb.h"
@@ -13,46 +14,6 @@
 #include "bytes.h"
 
 static bool lastBit;
-
-static double clockRateUsForTrack(unsigned track)
-{
-    /*
-     * Track   # Sectors/Track Speed Zone  bits/rotation       
-     * 1 – 17          21          3       61,538.4
-     * 18 – 24         19          2       57,142.8
-     * 25 – 30         18          1       53,333.4
-     * 31 – 35         17          0       50,000.0
-    */
-    if (track < 17)
-        return 200000.0/61538.4;
-    if (track < 24)
-        return 200000.0/57142.8;
-    if (track < 30)
-        return 200000.0/53333.4;
-    return 200000.0/50000.0;
-
-}
-
-static unsigned sectorsForTrack(unsigned track)
-{
-    /*
-     * Track   Sectors/track   # Sectors   Storage in Bytes
-     *   -----   -------------   ---------   ----------------
-     *    1-17        21            357           7820
-     *   18-24        19            133           7170
-     *   25-30        18            108           6300
-     *   31-40(*)     17             85           6020
-     *                              ---
-     *                              683 (for a 35 track image)
-     */
-    if (track < 17)
-        return 21;
-    if (track < 24)
-        return 19;
-    if (track < 30)
-        return 18;
-    return 17;
-}
 
 static int encode_data_gcr(uint8_t data)
 {
@@ -217,7 +178,7 @@ public:
 
         if (location.head == 0)
         {
-            unsigned numSectors = sectorsForTrack(location.logicalTrack);
+            unsigned numSectors = sectorsForC64Track(location.logicalTrack);
             for (int sectorId=0; sectorId<numSectors; sectorId++)
             {
                 const auto& sector = image.get(location.logicalTrack, 0, sectorId);
@@ -250,8 +211,7 @@ public:
         else
             _formatByte1 = _formatByte2 = 0;
         
-        double clockRateUs = clockRateUsForTrack(location.logicalTrack) * _config.clock_compensation_factor();
-
+        double clockRateUs = clockPeriodForC64Track(location.logicalTrack);
         int bitsPerRevolution = 200000.0 / clockRateUs;
 
         std::vector<bool> bits(bitsPerRevolution);
@@ -268,7 +228,8 @@ public:
         fillBitmapTo(bits, cursor, bits.size(), { true, false });
 
         std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
-        fluxmap->appendBits(bits, clockRateUs*1e3);
+        fluxmap->appendBits(bits,
+            Mapper::calculatePhysicalClockPeriod(clockRateUs*1e3, 200e6));
         return fluxmap;
     }
 
