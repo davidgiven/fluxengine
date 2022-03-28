@@ -5,6 +5,7 @@
 #include "decoders/decoders.h"
 #include "encoders/encoders.h"
 #include "image.h"
+#include "mapper.h"
 #include "lib/encoders/encoders.pb.h"
 
 #define GAP_FILL_SIZE_SD 30
@@ -137,8 +138,8 @@ public:
         {
             for (int sectorId = 0; sectorId < 10; sectorId++)
             {
-                const auto& sector = image.get(
-                    location.logicalTrack, location.head, sectorId);
+                const auto& sector =
+                    image.get(location.logicalTrack, location.head, sectorId);
                 if (sector)
                     sectors.push_back(sector);
             }
@@ -152,17 +153,13 @@ public:
         const Image& image) override
     {
         int bitsPerRevolution = 100000;
-        double clockRateUs = 4.00;
+        double clockRateUs = _config.clock_period_us();
 
         const auto& sector = *sectors.begin();
         if (sector->data.size() == NORTHSTAR_PAYLOAD_SIZE_SD)
-        {
             bitsPerRevolution /= 2; // FM
-        }
         else
-        {
             clockRateUs /= 2.00;
-        }
 
         std::vector<bool> bits(bitsPerRevolution);
         unsigned cursor = 0;
@@ -174,7 +171,9 @@ public:
             Error() << "track data overrun";
 
         std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
-        fluxmap->appendBits(bits, clockRateUs * 1e3);
+        fluxmap->appendBits(bits,
+            Mapper::calculatePhysicalClockPeriod(
+                clockRateUs * 1e3, _config.rotational_period_ms() * 1e6));
         return fluxmap;
     }
 

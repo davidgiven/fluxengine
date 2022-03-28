@@ -60,7 +60,7 @@ public:
         const Image& image) override
     {
         int bitsPerRevolution =
-            (_config.rotational_period_ms() * 1e3) / _config.clock_rate_us();
+            (_config.rotational_period_ms() * 1e3) / _config.clock_period_us();
 
         std::vector<bool> bits(bitsPerRevolution);
         unsigned cursor = 0;
@@ -76,7 +76,7 @@ public:
         std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
         fluxmap->appendBits(bits,
             Mapper::calculatePhysicalClockPeriod(
-                _config.clock_rate_us() * 1e3,
+                _config.clock_period_us() * 1e3,
                 _config.rotational_period_ms() * 1e6));
         return fluxmap;
     }

@@ -82,9 +82,9 @@ public:
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
-        double clockRateUs = _config.target_clock_period_us() / 2.0;
+        double clockRateUs = _config.clock_period_us() / 2.0;
         int bitsPerRevolution =
-            (_config.target_rotational_period_ms() * 1000.0) / clockRateUs;
+            (_config.rotational_period_ms() * 1000.0) / clockRateUs;
         _bits.resize(bitsPerRevolution);
         _cursor = 0;
 
@@ -152,7 +152,7 @@ public:
         auto fluxmap = std::make_unique<Fluxmap>();
         fluxmap->appendBits(_bits,
             Mapper::calculatePhysicalClockPeriod(clockRateUs * 1e3,
-                _config.target_rotational_period_ms() * 1e6));
+                _config.rotational_period_ms() * 1e6));
         return fluxmap;
     }
 

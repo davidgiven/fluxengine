@@ -4,6 +4,7 @@
 #include "decoders/decoders.h"
 #include "encoders/encoders.h"
 #include "image.h"
+#include "mapper.h"
 #include "lib/encoders/encoders.pb.h"
 
 static void write_sector(std::vector<bool>& bits,
@@ -86,8 +87,8 @@ public:
         {
             for (int sectorId = 0; sectorId < 16; sectorId++)
             {
-                const auto& sector = image.get(
-                    location.logicalTrack, location.head, sectorId);
+                const auto& sector =
+                    image.get(location.logicalTrack, location.head, sectorId);
                 if (sector)
                     sectors.push_back(sector);
             }
@@ -100,8 +101,8 @@ public:
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
-        int bitsPerRevolution = 100000;
-        double clockRateUs = 2.00;
+        int bitsPerRevolution =
+            (_config.rotational_period_ms() * 1e3) / _config.clock_period_us();
 
         std::vector<bool> bits(bitsPerRevolution);
         unsigned cursor = 0;
@@ -113,7 +114,10 @@ public:
             Error() << "track data mismatched length";
 
         std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
-        fluxmap->appendBits(bits, clockRateUs * 1e3);
+        fluxmap->appendBits(bits,
+            Mapper::calculatePhysicalClockPeriod(
+                _config.clock_period_us() * 1e3,
+                _config.rotational_period_ms() * 1e6));
         return fluxmap;
     }
 

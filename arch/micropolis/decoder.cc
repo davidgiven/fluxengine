@@ -144,19 +144,19 @@ public:
 		* Once the checksum type is determined, it will be used for the
 		* entire disk.
 		*/
-		if (_checksumType == 0) {
+		if (_checksumType == MicropolisDecoderProto::AUTO) {
 			/* Calculate both standard Micropolis (MDOS, CP/M, OASIS) and MZOS checksums */
 			if (wantChecksum == micropolisChecksum(bytes.slice(1, 2+266))) {
-				_checksumType = 1;
+				_checksumType = MicropolisDecoderProto::MICROPOLIS;
 			} else if (wantChecksum == mzosChecksum(bytes.slice(MICROPOLIS_HEADER_SIZE, MICROPOLIS_PAYLOAD_SIZE))) {
-				_checksumType = 2;
+				_checksumType = MicropolisDecoderProto::MZOS;
 				std::cout << "Note: MZOS checksum detected." << std::endl;
 			}
 		}
 
 		uint8_t gotChecksum;
 
-		if (_checksumType == 2) {
+		if (_checksumType == MicropolisDecoderProto::MZOS) {
 			gotChecksum = mzosChecksum(bytes.slice(MICROPOLIS_HEADER_SIZE, MICROPOLIS_PAYLOAD_SIZE));
 		} else {
 			gotChecksum = micropolisChecksum(bytes.slice(1, 2+266));
@@ -181,7 +181,7 @@ public:
 
 private:
 	const MicropolisDecoderProto& _config;
-	int _checksumType;	/* -1 = auto, 1 = Micropolis, 2=MZOS */
+	MicropolisDecoderProto_ChecksumType _checksumType;	/* -1 = auto, 1 = Micropolis, 2=MZOS */
 };
 
 std::unique_ptr<AbstractDecoder> createMicropolisDecoder(const DecoderProto& config)

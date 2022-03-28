@@ -58,7 +58,8 @@ as the disk ID in the BAM has to be copied to every sector on the disk.
 Reading 1581 disks
 ------------------
 
-1581 disks are just another version of the standard B
+1581 disks are just another version of the standard IBM scheme.
+
 Just do:
 
 ```

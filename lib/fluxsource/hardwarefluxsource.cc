@@ -55,6 +55,7 @@ public:
         Logger() << BeginSpeedOperationLogMessage();
 
 		_oneRevolution = config.drive().rotational_period_ms() * 1e6;
+        _hardSectorThreshold = 0;
 		if (_oneRevolution == 0)
 		{
 			do

@@ -186,8 +186,8 @@ void writeTracks(FluxSink& fluxSink,
         int retriesRemaining = config.decoder().retries();
         for (;;)
         {
-            for (int offset = location.groupSize - 1; offset >= 0;
-                 offset -= config.drive().head_width())
+            for (int offset = 0; offset < location.groupSize;
+                 offset += config.drive().head_width())
             {
                 unsigned physicalTrack = location.physicalTrack + offset;
 
