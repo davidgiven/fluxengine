@@ -200,7 +200,7 @@ public:
          * contains the BAM.
         */
 
-        const auto& sectorData = image.get(C64_BAM_TRACK*2, 0, 0); //Read de BAM to get the DISK ID bytes
+        const auto& sectorData = image.get(C64_BAM_TRACK, 0, 0); //Read de BAM to get the DISK ID bytes
         if (sectorData)
         {
             ByteReader br(sectorData->data);
