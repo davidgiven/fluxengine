@@ -102,7 +102,7 @@ public:
         {
             auto ibm = config.mutable_encoder()->mutable_ibm();
             auto trackdata = ibm->add_trackdata();
-            trackdata->set_clock_rate_khz(500);
+            trackdata->set_target_clock_period_us(2);
             auto sectors = trackdata->mutable_sectors();
             switch (mediaByte)
             {
@@ -110,7 +110,7 @@ public:
                     Logger() << "DIM: automatically setting format to 1.2MB "
                                 "(1024 byte sectors)";
                     config.mutable_tracks()->set_end(76);
-                    trackdata->set_track_length_ms(167);
+                    trackdata->set_target_rotational_period_ms(167);
                     trackdata->set_sector_size(1024);
                     for (int i = 0; i < 9; i++)
                         sectors->add_sector(i);
@@ -118,14 +118,14 @@ public:
                 case 0x02:
                     Logger() << "DIM: automatically setting format to 1.2MB "
                                 "(512 byte sectors)";
-                    trackdata->set_track_length_ms(167);
+                    trackdata->set_target_rotational_period_ms(167);
                     trackdata->set_sector_size(512);
                     for (int i = 0; i < 15; i++)
                         sectors->add_sector(i);
                     break;
                 case 0x03:
                     Logger() << "DIM: automatically setting format to 1.44MB";
-                    trackdata->set_track_length_ms(200);
+                    trackdata->set_target_rotational_period_ms(200);
                     trackdata->set_sector_size(512);
                     for (int i = 0; i < 18; i++)
                         sectors->add_sector(i);

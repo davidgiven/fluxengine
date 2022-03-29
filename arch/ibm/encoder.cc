@@ -5,6 +5,7 @@
 #include "crc.h"
 #include "readerwriter.h"
 #include "image.h"
+#include "mapper.h"
 #include "arch/ibm/ibm.pb.h"
 #include "lib/encoders/encoders.pb.h"
 #include "fmt/format.h"
@@ -137,7 +138,8 @@ public:
         int logicalSide = location.head ^ trackdata.swap_sides();
         for (int sectorId : getSectorIds(trackdata))
         {
-            const auto& sector = image.get(location.logicalTrack, logicalSide, sectorId);
+            const auto& sector =
+                image.get(location.logicalTrack, logicalSide, sectorId);
             if (sector)
                 sectors.push_back(sector);
         }
@@ -145,8 +147,7 @@ public:
         return sectors;
     }
 
-    std::unique_ptr<Fluxmap> encode(
-		const Location& location,
+    std::unique_ptr<Fluxmap> encode(const Location& location,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
@@ -174,11 +175,11 @@ public:
                 writeBytes(b);
         };
 
-        double clockRateUs = 1e3 / trackdata.clock_rate_khz();
+        double clockRateUs = trackdata.target_clock_period_us();
         if (!trackdata.use_fm())
             clockRateUs /= 2.0;
         int bitsPerRevolution =
-            (trackdata.track_length_ms() * 1000.0) / clockRateUs;
+            (trackdata.target_rotational_period_ms() * 1000.0) / clockRateUs;
         _bits.resize(bitsPerRevolution);
         _cursor = 0;
 
@@ -297,7 +298,9 @@ public:
             writeFillerRawBytes(1, gapFill);
 
         std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
-        fluxmap->appendBits(_bits, clockRateUs * 1e3);
+        fluxmap->appendBits(_bits,
+            Mapper::calculatePhysicalClockPeriod(clockRateUs * 1e3,
+                trackdata.target_rotational_period_ms() * 1e6));
         return fluxmap;
     }
 

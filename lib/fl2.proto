@@ -19,5 +19,6 @@ message FluxFileProto {
 	optional int32 magic = 1;
 	optional FluxFileVersion version = 2;
 	repeated TrackFluxProto track = 3;
+	optional double rotational_period_ms = 4;
 }
 

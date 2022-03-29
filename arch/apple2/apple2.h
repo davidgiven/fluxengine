@@ -11,6 +11,8 @@
 #define APPLE2_SECTOR_LENGTH   256
 #define APPLE2_ENCODED_SECTOR_LENGTH 342
 
+#define APPLE2_SECTORS         16
+
 extern std::unique_ptr<AbstractDecoder> createApple2Decoder(const DecoderProto& config);
 extern std::unique_ptr<AbstractEncoder> createApple2Encoder(const EncoderProto& config);
 

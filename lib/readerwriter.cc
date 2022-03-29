@@ -153,9 +153,9 @@ ReadResult readGroup(FluxSourceIteratorHolder& fluxSourceIteratorHolder,
 
         Logger() << BeginReadOperationLogMessage{
             location.physicalTrack + offset, location.head};
-        std::shared_ptr<const Fluxmap> fluxmap =
-            fluxSourceIterator.next()->rescale(
-                1.0 / config.flux_source().rescale());
+        std::shared_ptr<const Fluxmap> fluxmap = fluxSourceIterator.next();
+        // ->rescale(
+        //     1.0 / config.flux_source().rescale());
         Logger() << EndReadOperationLogMessage()
                  << fmt::format("{0:.0} ms in {1} bytes",
                         fluxmap->duration() / 1e6,
@@ -186,7 +186,7 @@ void writeTracks(FluxSink& fluxSink,
         int retriesRemaining = config.decoder().retries();
         for (;;)
         {
-            for (unsigned offset = 0; offset < location.groupSize;
+            for (int offset = 0; offset < location.groupSize;
                  offset += config.drive().head_width())
             {
                 unsigned physicalTrack = location.physicalTrack + offset;
@@ -200,13 +200,7 @@ void writeTracks(FluxSink& fluxSink,
                     if (!fluxmap)
                         goto erase;
 
-                    auto scaled =
-                        fluxmap->rescale(config.flux_sink().rescale());
-                    /* Precompensation actually seems to make things worse, so
-                     * let's leave it disabled for now. */
-                    // fluxmap->precompensate(PRECOMPENSATION_THRESHOLD_TICKS,
-                    // 2);
-                    fluxSink.writeFlux(physicalTrack, location.head, *scaled);
+                    fluxSink.writeFlux(physicalTrack, location.head, *fluxmap);
                     Logger() << fmt::format("writing {0} ms in {1} bytes",
                         int(fluxmap->duration() / 1e6),
                         fluxmap->bytes());
@@ -273,8 +267,15 @@ void writeTracksAndVerify(FluxSink& fluxSink,
             auto trackFlux = std::make_shared<TrackFlux>();
             trackFlux->location = location;
             FluxSourceIteratorHolder fluxSourceIteratorHolder(fluxSource);
-            readGroup(fluxSourceIteratorHolder, location, *trackFlux, decoder);
+            auto result = readGroup(
+                fluxSourceIteratorHolder, location, *trackFlux, decoder);
             Logger() << TrackReadLogMessage{trackFlux};
+
+            if (result != GOOD_READ)
+            {
+                Logger() << "bad read";
+                return false;
+            }
 
             auto wantedSectors = encoder.collectSectors(location, image);
             std::sort(wantedSectors.begin(),
@@ -287,11 +288,16 @@ void writeTracksAndVerify(FluxSink& fluxSink,
                 gotSectors.end(),
                 sectorPointerSortPredicate);
 
-            return std::equal(gotSectors.begin(),
-                gotSectors.end(),
-                wantedSectors.begin(),
-                wantedSectors.end(),
-                sectorPointerEqualsPredicate);
+            if (!std::equal(gotSectors.begin(),
+                    gotSectors.end(),
+                    wantedSectors.begin(),
+                    wantedSectors.end(),
+                    sectorPointerEqualsPredicate))
+            {
+                Logger() << "good read but the data doesn't match";
+                return false;
+            }
+            return true;
         });
 }
 
@@ -475,8 +481,7 @@ void rawReadDiskCommand(FluxSource& fluxsource, FluxSink& fluxsink)
             auto fluxSourceIterator = fluxsource.readFlux(track, head);
 
             Logger() << BeginReadOperationLogMessage{track, head};
-            auto fluxmap = fluxSourceIterator->next()->rescale(
-                1.0 / config.flux_source().rescale());
+            auto fluxmap = fluxSourceIterator->next();
             Logger() << EndReadOperationLogMessage()
                      << fmt::format("{0:.0} ms in {1} bytes",
                             fluxmap->duration() / 1e6,

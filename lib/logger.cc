@@ -78,16 +78,27 @@ std::string Logger::toString(const AnyLogMessage& message)
             [&](const TrackReadLogMessage& m)
             {
                 const auto& track = *m.track;
-                const auto& trackdataflux = track.trackDatas.end()[-1];
+
+                std::set<std::shared_ptr<const Sector>> rawSectors;
+                std::set<std::shared_ptr<const Record>> rawRecords;
+                for (const auto& trackDataFlux : track.trackDatas)
+                {
+                    rawSectors.insert(trackDataFlux->sectors.begin(), trackDataFlux->sectors.end());
+                    rawRecords.insert(trackDataFlux->records.begin(), trackDataFlux->records.end());
+                }
+
+                nanoseconds_t clock = 0;
+                for (const auto& sector : rawSectors)
+                    clock += sector->clock;
+                if (!rawSectors.empty())
+                    clock /= rawSectors.size();
 
                 indent();
                 stream << fmt::format("{} raw records, {} raw sectors",
-                    trackdataflux->records.size(),
-                    trackdataflux->sectors.size());
-                if (trackdataflux->sectors.size() > 0)
+                    rawRecords.size(),
+                    rawSectors.size());
+                if (clock != 0)
                 {
-                    nanoseconds_t clock =
-                        (*trackdataflux->sectors.begin())->clock;
                     stream << fmt::format("; {:.2f}us clock ({:.0f}kHz)",
                         clock / 1000.0,
                         1000000.0 / clock);
@@ -104,7 +115,9 @@ std::string Logger::toString(const AnyLogMessage& message)
                     sectors.begin(), sectors.end(), sectorPointerSortPredicate);
 
                 for (const auto& sector : sectors)
-                    stream << fmt::format(" {}{}",
+                    stream << fmt::format(" {}.{}.{}{}",
+                        sector->logicalTrack,
+                        sector->logicalSide,
                         sector->logicalSector,
                         Sector::statusToChar(sector->status));
 
@@ -117,18 +130,6 @@ std::string Logger::toString(const AnyLogMessage& message)
                     track_ids.insert(std::make_pair(
                         sector->logicalTrack, sector->logicalSide));
                     size += sector->data.size();
-                }
-
-                if (!track_ids.empty())
-                {
-                    std::vector<std::string> ids;
-
-                    for (const auto& i : track_ids)
-                        ids.push_back(fmt::format("{}.{}", i.first, i.second));
-
-                    indent();
-                    stream << fmt::format(
-                        "logical track {}\n", fmt::join(ids, "; "));
                 }
 
                 indent();

@@ -33,8 +33,8 @@ image_writer {
 encoder {
 	ibm {
 		trackdata {
-			track_length_ms: 200
-			clock_rate_khz: 250
+			target_rotational_period_ms: 200
+			target_clock_period_us: 4
 			emit_iam: false
 			gap0: 80
 			gap2: 22

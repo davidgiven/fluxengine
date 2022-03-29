@@ -6,6 +6,7 @@
 #include "sector.h"
 #include "readerwriter.h"
 #include "image.h"
+#include "mapper.h"
 #include "fmt/format.h"
 #include "arch/victor9k/victor9k.pb.h"
 #include "lib/encoders/encoders.pb.h"
@@ -190,15 +191,17 @@ public:
         Victor9kEncoderProto::TrackdataProto trackdata;
         getTrackFormat(trackdata, location.logicalTrack, location.head);
 
-        unsigned bitsPerRevolution =
-            trackdata.original_data_rate_khz() * trackdata.original_period_ms();
+        unsigned bitsPerRevolution = (trackdata.rotational_period_ms() * 1e3) /
+                                     trackdata.clock_period_us();
         std::vector<bool> bits(bitsPerRevolution);
-        double clockRateUs = 166666.0 / bitsPerRevolution;
+        nanoseconds_t clockPeriod = Mapper::calculatePhysicalClockPeriod(
+            trackdata.clock_period_us() * 1e3,
+            trackdata.rotational_period_ms() * 1e6);
         unsigned cursor = 0;
 
         fillBitmapTo(bits,
             cursor,
-            trackdata.post_index_gap_us() / clockRateUs,
+            trackdata.post_index_gap_us() * 1e3 / clockPeriod,
             {true, false});
         lastBit = false;
 
@@ -211,7 +214,7 @@ public:
         fillBitmapTo(bits, cursor, bits.size(), {true, false});
 
         std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
-        fluxmap->appendBits(bits, clockRateUs * 1e3);
+        fluxmap->appendBits(bits, clockPeriod);
         return fluxmap;
     }
 

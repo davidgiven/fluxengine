@@ -2,7 +2,7 @@ syntax = "proto2";
 
 import "lib/common.proto";
 
-// Next: 13
+// Next: 14
 message DriveProto
 {
     optional int32 drive = 1
@@ -22,13 +22,15 @@ message DriveProto
         [ default = 81, (help) = "Number of tracks supported by drive" ];
     optional int32 heads = 8
         [ default = 2, (help) = "Number of heads supported by drive" ];
-    optional int32 head_bias = 10 [
+    optional int32 head_bias = 9 [
         default = 0,
         (help) = "Bias to apply to the head position (in tracks)"
     ];
-    optional int32 head_width = 11
+    optional int32 head_width = 10
         [ default = 1, (help) = "Width of the head (in tracks)" ];
-    optional int32 tpi = 9 [ default = 96, (help) = "TPI of drive" ];
+    optional int32 tpi = 11 [ default = 96, (help) = "TPI of drive" ];
+    optional double rotational_period_ms = 12
+        [ default = 0, (help) = "Rotational period of the drive in milliseconds (0 to autodetect)"];
 }
 
 // vim: ts=4 sw=4 et

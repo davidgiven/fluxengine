@@ -1,4 +1,4 @@
-comment: 'PC 720kB 3.5" 80-track 9-sector DSDD'
+comment: 'PC 720kB 5.25"/3.5" 80-track 9-sector DSDD'
 
 image_reader {
 	filename: "ibm720.img"
@@ -23,8 +23,10 @@ image_writer {
 encoder {
 	ibm {
 		trackdata {
-			track_length_ms: 200
-			clock_rate_khz: 250
+			# This also works on 166ms drives (producing a physical clock of
+			# 3.33us).
+			target_rotational_period_ms: 200
+			target_clock_period_us: 4
 			sectors {
 				sector: 1
 				sector: 2
@@ -49,6 +51,10 @@ decoder {
 			}
 		}
 	}
+}
+
+drive {
+	high_density: false
 }
 
 tracks {

@@ -70,8 +70,9 @@ following friendly articles:
   - [Troubleshooting dubious disks](doc/problems.md) ∾ it's not an exact
     science ∾ the sector map ∾ clock detection and the histogram
 
-  - [Checking your drive](doc/driveresponse.md) ∾ you can't do that with that ∾
-    measuring your drive's ability to work with exotic formats
+  - [Disk densities](doc/driveresponse.md) ∾ what's the difference between an HD
+    and DD disk? ∾ you can't do that with that ∾ measuring your drive's ability to
+    work with exotic formats ∾ I think my drive is broken
 
 Which?
 ------

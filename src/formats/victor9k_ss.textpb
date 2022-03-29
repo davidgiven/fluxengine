@@ -143,7 +143,7 @@ image_writer {
 encoder {
 	victor9k {
 		trackdata {
-			original_data_rate_khz: 468
+			clock_period_us: 2.1367 # 468kHz
 			post_index_gap_us: 500.0
 			pre_header_sync_bits: 150
 			post_header_gap_bits: 60
@@ -154,7 +154,7 @@ encoder {
 			head: 0
 			min_track: 0
 			max_track: 3
-			original_period_ms: 237.9
+			rotational_period_ms: 237.9
 			sector_range {
 				start_sector: 0
 				sector_count: 19
@@ -164,7 +164,7 @@ encoder {
 			head: 0
 			min_track: 4
 			max_track: 15
-			original_period_ms: 224.5
+			rotational_period_ms: 224.5
 			sector_range {
 				sector_count: 18
 			}
@@ -173,7 +173,7 @@ encoder {
 			head: 0
 			min_track: 16
 			max_track: 26
-			original_period_ms: 212.2
+			rotational_period_ms: 212.2
 			sector_range {
 				sector_count: 17
 			}
@@ -182,7 +182,7 @@ encoder {
 			head: 0
 			min_track: 27
 			max_track: 37
-			original_period_ms: 199.9
+			rotational_period_ms: 199.9
 			sector_range {
 				sector_count: 16
 			}
@@ -191,7 +191,7 @@ encoder {
 			head: 0
 			min_track: 38
 			max_track: 47
-			original_period_ms: 187.6
+			rotational_period_ms: 187.6
 			sector_range {
 				sector_count: 15
 			}
@@ -200,7 +200,7 @@ encoder {
 			head: 0
 			min_track: 48
 			max_track: 59
-			original_period_ms: 175.3
+			rotational_period_ms: 175.3
 			sector_range {
 				sector_count: 14
 			}
@@ -209,7 +209,7 @@ encoder {
 			head: 0
 			min_track: 60
 			max_track: 70
-			original_period_ms: 163.0
+			rotational_period_ms: 163.0
 			sector_range {
 				sector_count: 13
 			}
@@ -218,7 +218,7 @@ encoder {
 			head: 0
 			min_track: 71
 			max_track: 79
-			original_period_ms: 149.6
+			rotational_period_ms: 149.6
 			sector_range {
 				sector_count: 12
 			}

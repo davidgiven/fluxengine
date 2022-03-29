@@ -144,6 +144,14 @@ public:
 		_sector->status = Sector::BAD_CHECKSUM;
 		_sector->data = decode_crazy_data(&bytes[0], _sector->status);
 	}
+
+	std::set<unsigned> requiredSectors(const Location& location) const override
+	{
+		std::set<unsigned> sectors;
+		for (int sectorId = 0; sectorId < APPLE2_SECTORS; sectorId++)
+			sectors.insert(sectorId);
+		return sectors;
+	}
 };
 
 std::unique_ptr<AbstractDecoder> createApple2Decoder(const DecoderProto& config)

@@ -47,7 +47,7 @@ public:
                 if (sector)
                 {
                     outputFile.seekp(offset);
-                    outputFile.write((const char*) sector->data.cbegin(), 256);
+                    outputFile.write((const char*) sector->data.cbegin(), sector->data.size());
                 }
 
                 offset += 256;

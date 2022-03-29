@@ -54,18 +54,24 @@ public:
         usbSetDrive(config.drive().drive(), config.drive().high_density(), config.drive().index_mode());
         Logger() << BeginSpeedOperationLogMessage();
 
-        do
-        {
-            _oneRevolution =
-                usbGetRotationalPeriod(config.drive().hard_sector_count());
-            if (config.drive().hard_sector_count() != 0)
-                _hardSectorThreshold =
-                    _oneRevolution * 3 / (4 * config.drive().hard_sector_count());
-            else
-                _hardSectorThreshold = 0;
+		_oneRevolution = config.drive().rotational_period_ms() * 1e6;
+        _hardSectorThreshold = 0;
+		if (_oneRevolution == 0)
+		{
+			do
+			{
+				_oneRevolution =
+					usbGetRotationalPeriod(config.drive().hard_sector_count());
+				if (config.drive().hard_sector_count() != 0)
+					_hardSectorThreshold =
+						_oneRevolution * 3 / (4 * config.drive().hard_sector_count());
+				else
+					_hardSectorThreshold = 0;
 
-            retries--;
-        } while ((_oneRevolution == 0) && (retries > 0));
+				retries--;
+			} while ((_oneRevolution == 0) && (retries > 0));
+			config.mutable_drive()->set_rotational_period_ms(_oneRevolution / 1e6);
+		}
 
         if (_oneRevolution == 0)
             Error() << "Failed\nIs a disk in the drive?";
