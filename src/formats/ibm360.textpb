@@ -1,7 +1,7 @@
 comment: 'PC 360kB 5.25" 40-track 9-sector DSDD'
 
 image_reader {
-	filename: "ibm360_525.img"
+	filename: "ibm360.img"
 	img {
 		tracks: 40
 		sides: 2
@@ -16,7 +16,7 @@ image_reader {
 }
 
 image_writer {
-	filename: "ibm360_525.img"
+	filename: "ibm360.img"
 	img {}
 }
 

@@ -1,7 +1,7 @@
 comment: 'PC 180kB 5.25" 40-track 9-sector SSDD'
 
 image_reader {
-	filename: "ibm180_525.img"
+	filename: "ibm180.img"
 	img {
 		tracks: 40
 		sides: 1
@@ -16,7 +16,7 @@ image_reader {
 }
 
 image_writer {
-	filename: "ibm180_525.img"
+	filename: "ibm180.img"
 	img {}
 }
 
@@ -49,6 +49,10 @@ decoder {
 			}
 		}
 	}
+}
+
+drive {
+	high_density: false
 }
 
 tracks {
