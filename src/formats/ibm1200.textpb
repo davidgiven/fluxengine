@@ -1,31 +1,30 @@
-comment: 'PC 360kB 5.25" 40-track 9-sector DSDD'
+comment: 'PC 1200kB 5.25" 80-track 15-sector DSHD'
 
 image_reader {
-	filename: "ibm360_525.img"
+	filename: "ibm1200.img"
 	img {
-		tracks: 40
+		tracks: 80
 		sides: 2
-		physical_step: 2
 		trackdata {
 			sector_size: 512
 			sector_range {
 				start_sector: 1
-				sector_count: 9
+				sector_count: 15
 			}
 		}
 	}
 }
 
 image_writer {
-	filename: "ibm360_525.img"
+	filename: "ibm1200.img"
 	img {}
 }
 
 encoder {
 	ibm {
 		trackdata {
-			track_length_ms: 167
-			clock_rate_khz: 300
+			target_rotational_period_ms: 167
+			target_clock_period_us: 2
 			sectors {
 				sector: 1
 				sector: 2
@@ -36,6 +35,12 @@ encoder {
 				sector: 7
 				sector: 8
 				sector: 9
+				sector: 10
+				sector: 11
+				sector: 12
+				sector: 13
+				sector: 14
+				sector: 15
 			}
 		}
 	}
@@ -46,13 +51,17 @@ decoder {
 		trackdata {
 			sector_range {
 				min_sector: 1
-				max_sector: 9
+				max_sector: 15
 			}
 		}
 	}
 }
 
-cylinders {
+drive {
+	high_density: true
+}
+
+tracks {
 	start: 0
 	end: 79
 }

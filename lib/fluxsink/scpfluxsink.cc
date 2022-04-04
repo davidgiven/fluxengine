@@ -8,6 +8,7 @@
 #include "lib/fluxsink/fluxsink.pb.h"
 #include "proto.h"
 #include "fmt/format.h"
+#include "fluxmap.h"
 #include "scp.h"
 #include <fstream>
 #include <sys/stat.h>
@@ -46,8 +47,8 @@ public:
 		_fileheader.file_id[2] = 'P';
 		_fileheader.version = 0x18; /* Version 1.8 of the spec */
 		_fileheader.type = _config.type_byte();
-		_fileheader.start_track = strackno(config.cylinders().start(), config.heads().start());
-		_fileheader.end_track = strackno(config.cylinders().end(), config.heads().end());
+		_fileheader.start_track = strackno(config.tracks().start(), config.heads().start());
+		_fileheader.end_track = strackno(config.tracks().end(), config.heads().end());
 		_fileheader.flags = SCP_FLAG_INDEXED
 				| SCP_FLAG_96TPI;
 		_fileheader.cell_width = 0;
@@ -79,16 +80,16 @@ public:
 	}
 
 public:
-	void writeFlux(int cylinder, int head, Fluxmap& fluxmap)
+	void writeFlux(int track, int head, const Fluxmap& fluxmap) override
 	{
 		ByteWriter trackdataWriter(_trackdata);
 		trackdataWriter.seekToEnd();
-		int strack = strackno(cylinder, head);
+		int strack = strackno(track, head);
 
                 if (strack >= std::size(_fileheader.track)) {
                     std::cout << fmt::format("SCP: cannot write track {} head {}, "
                             "there are not not enough Track Data Headers.\n",
-                            cylinder, head);
+                            track, head);
                     return;
                 }
 		ScpTrack trackheader = {0};
@@ -97,9 +98,7 @@ public:
 		trackheader.header.track_id[2] = 'K';
 		trackheader.header.strack = strack;
 
-		auto lastFluxmap = fluxmap.split().back();
-
-		FluxmapReader fmr(lastFluxmap);
+		FluxmapReader fmr(fluxmap);
 		Bytes fluxdata;
 		ByteWriter fluxdataWriter(fluxdata);
 

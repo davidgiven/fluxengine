@@ -29,9 +29,15 @@ export CXX = /mingw32/bin/g++
 export AR = /mingw32/bin/ar rc
 export RANLIB = /mingw32/bin/ranlib
 export STRIP = /mingw32/bin/strip
-export CFLAGS += -I/mingw32/include/libusb-1.0 -I/mingw32/include
-export LDFLAGS +=
-export LIBS += -L/mingw32/lib -static -lz -lsqlite3 \
+export CFLAGS += -I/mingw32/include
+export CXXFLAGS += $(shell wx-config --cxxflags --static=yes)
+export GUILDFLAGS += -lmingw32
+export LIBS += -L/mingw32/lib -static\
+	-lsqlite3 -lz \
+	-lsetupapi -lwinusb -lole32 -lprotobuf -luuid
+export GUILIBS += -L/mingw32/lib -static -lsqlite3 \
+	$(shell wx-config --libs --static=yes core base) -lz \
+	-lcomctl32 -loleaut32 -lspoolss -loleacc -lwinspool \
 	-lsetupapi -lwinusb -lole32 -lprotobuf -luuid
 export EXTENSION = .exe
 else
@@ -41,6 +47,10 @@ ifneq ($(packages-exist),yes)
 $(warning These pkg-config packages are installed: $(shell pkg-config --list-all | sort | awk '{print $$1}'))
 $(error You must have these pkg-config packages installed: $(PACKAGES))
 endif
+wx-exist = $(shell wx-config --cflags > /dev/null && echo yes)
+ifneq ($(wx-exist),yes)
+$(error You must have these wx-config installed)
+endif
 
 export PROTOC = protoc
 export CC = gcc
@@ -48,9 +58,10 @@ export CXX = g++
 export AR = ar rc
 export RANLIB = ranlib
 export STRIP = strip
-export CFLAGS += $(shell pkg-config --cflags $(PACKAGES))
+export CFLAGS += $(shell pkg-config --cflags $(PACKAGES)) $(shell wx-config --cxxflags)
 export LDFLAGS +=
 export LIBS += $(shell pkg-config --libs $(PACKAGES))
+export GUILIBS += $(shell wx-config --libs core base)
 export EXTENSION =
 
 ifeq ($(shell uname),Darwin)
@@ -71,7 +82,7 @@ CFLAGS += -Ilib -Idep/fmt -Iarch
 export OBJDIR = .obj
 
 all: .obj/build.ninja
-	@ninja -f .obj/build.ninja -k 0
+	@ninja -f .obj/build.ninja
 	@if command -v cscope > /dev/null; then cscope -bRq; fi
 
 clean:

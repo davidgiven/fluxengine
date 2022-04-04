@@ -40,9 +40,13 @@ decoder {
 	brother {}
 }
 
-cylinders {
+drive {
+	head_bias: 1
+}
+
+tracks {
 	start: 0
-	end: 39
+	end: 38
 }
 
 heads {
@@ -50,3 +54,4 @@ heads {
 	end: 0
 }
 
+tpi: 48

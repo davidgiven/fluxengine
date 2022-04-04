@@ -3,6 +3,8 @@
 #include "sector.h"
 #include "imagereader/imagereader.h"
 #include "image.h"
+#include "logger.h"
+#include "mapper.h"
 #include "proto.h"
 #include "lib/config.pb.h"
 #include "fmt/format.h"
@@ -16,18 +18,17 @@
 class DimImageReader : public ImageReader
 {
 public:
-	DimImageReader(const ImageReaderProto& config):
-		ImageReader(config)
-	{}
+    DimImageReader(const ImageReaderProto& config): ImageReader(config) {}
 
-	std::unique_ptr<Image> readImage()
-	{
-        std::ifstream inputFile(_config.filename(), std::ios::in | std::ios::binary);
+    std::unique_ptr<Image> readImage()
+    {
+        std::ifstream inputFile(
+            _config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
             Error() << "cannot open input file";
 
         Bytes header(256);
-        inputFile.read((char*) header.begin(), header.size());
+        inputFile.read((char*)header.begin(), header.size());
         if (header.slice(0xAB, 13) != Bytes("DIFC HEADER  "))
             Error() << "DIM: could not find DIM header, is this a DIM file?";
 
@@ -38,7 +39,8 @@ public:
         int tracks;
         int sectorsPerTrack;
         int sectorSize;
-        switch (mediaByte) {
+        switch (mediaByte)
+        {
             case 0:
                 tracks = 77;
                 sectorsPerTrack = 8;
@@ -65,12 +67,11 @@ public:
         }
 
         std::unique_ptr<Image> image(new Image);
-		int trackCount = 0;
+        int trackCount = 0;
         for (int track = 0; track < tracks; track++)
         {
-			if (inputFile.eof())
-				break;
-			int physicalCylinder = track;
+            if (inputFile.eof())
+                break;
 
             for (int side = 0; side < 2; side++)
             {
@@ -81,86 +82,92 @@ public:
                 for (int sectorId : sectors)
                 {
                     Bytes data(sectorSize);
-                    inputFile.read((char*) data.begin(), data.size());
+                    inputFile.read((char*)data.begin(), data.size());
 
-					const auto& sector = image->put(physicalCylinder, side, sectorId);
+                    const auto& sector = image->put(track, side, sectorId);
                     sector->status = Sector::OK;
                     sector->logicalTrack = track;
-					sector->physicalCylinder = physicalCylinder;
+                    sector->physicalTrack = Mapper::remapTrackLogicalToPhysical(track);
                     sector->logicalSide = sector->physicalHead = side;
                     sector->logicalSector = sectorId;
                     sector->data = data;
                 }
             }
 
-			trackCount++;
+            trackCount++;
         }
 
-        if (config.encoder().format_case() == EncoderProto::FormatCase::FORMAT_NOT_SET)
+        if (config.encoder().format_case() ==
+            EncoderProto::FormatCase::FORMAT_NOT_SET)
         {
             auto ibm = config.mutable_encoder()->mutable_ibm();
             auto trackdata = ibm->add_trackdata();
-            trackdata->set_clock_rate_khz(500);
+            trackdata->set_target_clock_period_us(2);
             auto sectors = trackdata->mutable_sectors();
-            switch (mediaByte) {
+            switch (mediaByte)
+            {
                 case 0x00:
-                    std::cout << "DIM: automatically setting format to 1.2MB (1024 byte sectors)\n";
-                    config.mutable_cylinders()->set_end(76);
-                    trackdata->set_track_length_ms(167);
+                    Logger() << "DIM: automatically setting format to 1.2MB "
+                                "(1024 byte sectors)";
+                    config.mutable_tracks()->set_end(76);
+                    trackdata->set_target_rotational_period_ms(167);
                     trackdata->set_sector_size(1024);
                     for (int i = 0; i < 9; i++)
                         sectors->add_sector(i);
                     break;
                 case 0x02:
-                    std::cout << "DIM: automatically setting format to 1.2MB (512 byte sectors)\n";
-                    trackdata->set_track_length_ms(167);
+                    Logger() << "DIM: automatically setting format to 1.2MB "
+                                "(512 byte sectors)";
+                    trackdata->set_target_rotational_period_ms(167);
                     trackdata->set_sector_size(512);
                     for (int i = 0; i < 15; i++)
                         sectors->add_sector(i);
                     break;
                 case 0x03:
-                    std::cout << "DIM: automatically setting format to 1.44MB\n";
-                    trackdata->set_track_length_ms(200);
+                    Logger() << "DIM: automatically setting format to 1.44MB";
+                    trackdata->set_target_rotational_period_ms(200);
                     trackdata->set_sector_size(512);
                     for (int i = 0; i < 18; i++)
                         sectors->add_sector(i);
                     break;
                 default:
-                    Error() << fmt::format("DIM: unknown media byte 0x%02x, could not determine write profile automatically", mediaByte);
+                    Error() << fmt::format(
+                        "DIM: unknown media byte 0x%02x, could not determine "
+                        "write profile automatically",
+                        mediaByte);
                     break;
             }
 
-			config.mutable_decoder()->mutable_ibm();
+            config.mutable_decoder()->mutable_ibm();
         }
 
-		image->calculateSize();
-		const Geometry& geometry = image->getGeometry();
-        std::cout << fmt::format("DIM: read {} tracks, {} sides, {} kB total\n",
-                        geometry.numTracks, geometry.numSides,
-						((int)inputFile.tellg() - 256) / 1024);
+        image->calculateSize();
+        const Geometry& geometry = image->getGeometry();
+        Logger() << fmt::format("DIM: read {} tracks, {} sides, {} kB total",
+            geometry.numTracks,
+            geometry.numSides,
+            ((int)inputFile.tellg() - 256) / 1024);
 
-		if (!config.has_heads())
-		{
-			auto* heads = config.mutable_heads();
-			heads->set_start(0);
-			heads->set_end(geometry.numSides - 1);
-		}
+        if (!config.has_heads())
+        {
+            auto* heads = config.mutable_heads();
+            heads->set_start(0);
+            heads->set_end(geometry.numSides - 1);
+        }
 
-		if (!config.has_cylinders())
-		{
-			auto* cylinders = config.mutable_cylinders();
-			cylinders->set_start(0);
-			cylinders->set_end(geometry.numTracks - 1);
-		}
+        if (!config.has_tracks())
+        {
+            auto* tracks = config.mutable_tracks();
+            tracks->set_start(0);
+            tracks->set_end(geometry.numTracks - 1);
+        }
 
         return image;
-	}
-
+    }
 };
 
 std::unique_ptr<ImageReader> ImageReader::createDimImageReader(
-	const ImageReaderProto& config)
+    const ImageReaderProto& config)
 {
     return std::unique_ptr<ImageReader>(new DimImageReader(config));
 }
-

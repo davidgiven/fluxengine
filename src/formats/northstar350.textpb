@@ -10,17 +10,9 @@ image_writer {
 	nsi {}
 }
 
-flux_source {
-	drive {
-		hard_sector_count: 10
-		sync_with_index: 1
-	}
-}
-
-flux_sink {
-	drive {
-		hard_sector_count: 10
-	}
+drive {
+	hard_sector_count: 10
+	sync_with_index: true
 }
 
 encoder {
@@ -31,7 +23,7 @@ decoder {
 	northstar {}
 }
 
-cylinders {
+tracks {
 	start: 0
 	end: 39
 }

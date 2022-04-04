@@ -15,10 +15,14 @@ public:
     void parseFlags(int argc, const char* argv[],
 		std::function<bool(const std::string&)> callback =
 			[](const auto&){ return false; });
-    std::vector<std::string> parseFlagsWithFilenames(int argc, const char* argv[],
+    std::vector<std::string> parseFlagsWithFilenames(
+		int argc, const char* argv[],
 		std::function<bool(const std::string&)> callback =
 			[](const auto&){ return false; });
 	void parseFlagsWithConfigFiles(int argc, const char* argv[],
+			const std::map<std::string, std::string>& configFiles);
+	static void parseConfigFile(
+			const std::string& filename,
 			const std::map<std::string, std::string>& configFiles);
     void addFlag(Flag* flag);
     void checkInitialised() const;
@@ -106,6 +110,9 @@ public:
     operator const T& () const 
     { return get(); }
 
+	bool isSet() const
+	{ return _isSet; }
+
     void setDefaultValue(T value)
     {
         _value = _defaultValue = value;
@@ -116,6 +123,7 @@ public:
 protected:
     T _defaultValue;
     T _value;
+	bool _isSet = false;
 	std::function<void(const T&)> _callback;
 };
 
@@ -129,7 +137,7 @@ public:
     {}
 
     const std::string defaultValueAsString() const { return _defaultValue; }
-    void set(const std::string& value) { _value = value; _callback(_value); }
+    void set(const std::string& value) { _value = value; _callback(_value); _isSet = true; }
 };
 
 class IntFlag : public ValueFlag<int>
@@ -142,7 +150,7 @@ public:
     {}
 
     const std::string defaultValueAsString() const { return std::to_string(_defaultValue); }
-    void set(const std::string& value) { _value = std::stoi(value); _callback(_value); }
+    void set(const std::string& value) { _value = std::stoi(value); _callback(_value); _isSet = true; }
 };
 
 class HexIntFlag : public IntFlag
@@ -167,7 +175,7 @@ public:
     {}
 
     const std::string defaultValueAsString() const { return std::to_string(_defaultValue); }
-    void set(const std::string& value) { _value = std::stod(value); _callback(_value); }
+    void set(const std::string& value) { _value = std::stod(value); _callback(_value); _isSet = true; }
 };
 
 class BoolFlag : public ValueFlag<bool>

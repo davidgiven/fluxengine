@@ -1,6 +1,6 @@
 #include "globals.h"
 #include "flags.h"
-#include "reader.h"
+#include "readerwriter.h"
 #include "fluxmap.h"
 #include "decoders/decoders.h"
 #include "macintosh/macintosh.h"
@@ -36,13 +36,13 @@ static StringFlag destFlux(
 		FluxSink::updateConfigForFilename(config.mutable_flux_sink(), value);
 	});
 
-static StringFlag srcCylinders(
+static StringFlag srcTracks(
 	{ "--cylinders", "-c" },
-	"cylinders to read from",
+	"tracks to read from",
 	"",
 	[](const auto& value)
 	{
-		setRange(config.mutable_cylinders(), value);
+		setRange(config.mutable_tracks(), value);
 	});
 
 static StringFlag srcHeads(
@@ -56,11 +56,12 @@ static StringFlag srcHeads(
 
 int mainRawRead(int argc, const char* argv[])
 {
-	setRange(config.mutable_cylinders(), "0-79");
+	setRange(config.mutable_tracks(), "0-79");
 	setRange(config.mutable_heads(), "0-1");
 
 	if (argc == 1)
 		showProfiles("rawread", formats);
+	config.mutable_flux_source()->mutable_drive();
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
 	if (config.flux_sink().has_drive())

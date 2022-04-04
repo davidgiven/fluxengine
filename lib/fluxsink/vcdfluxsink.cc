@@ -20,11 +20,11 @@ public:
 	{}
 
 public:
-	void writeFlux(int cylinder, int head, Fluxmap& fluxmap)
+	void writeFlux(int track, int head, const Fluxmap& fluxmap) override
 	{
 		mkdir(_config.directory().c_str(), 0744);
 		std::ofstream of(
-			fmt::format("{}/c{:02d}.h{:01d}.vcd", _config.directory(), cylinder, head),
+			fmt::format("{}/c{:02d}.h{:01d}.vcd", _config.directory(), track, head),
 			std::ios::out | std::ios::binary);
 		if (!of.is_open())
 			Error() << "cannot open output file";

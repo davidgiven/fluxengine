@@ -1,6 +1,6 @@
 #include "globals.h"
 #include "flags.h"
-#include "reader.h"
+#include "readerwriter.h"
 #include "fluxmap.h"
 #include "decoders/fluxmapreader.h"
 #include "decoders/fluxdecoder.h"
@@ -23,9 +23,9 @@ static StringFlag sourceFlux(
 		FluxSource::updateConfigForFilename(config.mutable_flux_source(), value);
 	});
 
-static IntFlag cylinderFlag(
+static IntFlag trackFlag(
 	{ "--cylinder", "-c" },
-	"Cylinder to read.",
+	"Track to read.",
 	0);
 
 static IntFlag headFlag(
@@ -40,6 +40,15 @@ static SettableFlag dumpFluxFlag(
 static SettableFlag dumpBitstreamFlag(
 	{ "--dump-bitstream", "-B" },
 	"Dump aligned bitstream.");
+
+static IntFlag dumpRawFlag(
+	{ "--dump-raw", "-R" },
+	"Dump raw binary with offset.",
+	0);
+
+static SettableFlag dumpMfmFm(
+	{ "--mfmfm" },
+	"When dumping raw binary, do MFM/FM decoding first.");
 
 static SettableFlag dumpBytecodesFlag(
     { "--dump-bytecodes", "-H" },
@@ -56,7 +65,7 @@ static DoubleFlag seekFlag(
 	0.0);
 
 static DoubleFlag manualClockRate(
-	{ "--manual-clock-rate-us" },
+	{ "--manual-clock-rate-us", "-u" },
 	"If not zero, force this clock rate; if zero, try to autodetect it.",
 	0.0);
 
@@ -201,10 +210,11 @@ static nanoseconds_t guessClock(const Fluxmap& fluxmap)
 
 int mainInspect(int argc, const char* argv[])
 {
+	config.mutable_flux_source()->mutable_drive();
     flags.parseFlagsWithConfigFiles(argc, argv, {});
 
 	std::unique_ptr<FluxSource> fluxSource(FluxSource::create(config.flux_source()));
-	const auto fluxmap = fluxSource->readFlux(cylinderFlag, headFlag);
+	const auto fluxmap = fluxSource->readFlux(trackFlag, headFlag)->next();
 
 	std::cout << fmt::format("0x{:x} bytes of data in {:.3f}ms\n",
 			fluxmap->bytes(),
@@ -292,6 +302,40 @@ int mainInspect(int argc, const char* argv[])
 					break;
 				bool b = decoder.readBit();
 				std::cout << (b ? 'X' : '-');
+			}
+
+			std::cout << std::endl;
+		}
+	}
+
+	if (dumpRawFlag.isSet())
+	{
+		std::cout << fmt::format("\n\nRaw binary with offset {} from {:.3f}ms follows:\n",
+				dumpRawFlag.get(),
+				fmr.tell().ns() / 1000000.0);
+
+		FluxDecoder decoder(&fmr, clockPeriod, config.decoder());
+		for (int i=0; i<dumpRawFlag; i++)
+			decoder.readBit();
+
+		while (!fmr.eof())
+		{
+			std::cout << fmt::format("{:06x} {: 10.3f} : ",
+				fmr.tell().bytes, fmr.tell().ns() / 1000000.0);
+
+			Bytes bytes;
+			if (dumpMfmFm)
+				bytes = decodeFmMfm(decoder.readBits(32*8));
+			else
+				bytes = toBytes(decoder.readBits(16*8));
+
+			ByteReader br(bytes);
+
+			for (unsigned i=0; i<16; i++)
+			{
+				if (br.eof())
+					break;
+				std::cout << fmt::format("{:02x} ", br.read_8());
 			}
 
 			std::cout << std::endl;

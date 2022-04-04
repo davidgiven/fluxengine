@@ -106,8 +106,14 @@ public:
 		 * _hardSectorId after the sector header is found.
 		 */
 		nanoseconds_t clock = seekToPattern(ANY_SECTOR_PATTERN);
+		_sector->headerStartTime = tell().ns();
 
-		int sectorFoundTimeRaw = std::round((tell().ns()) / 1e6);
+		/* Discard a possible partial sector. */
+		if (_sector->headerStartTime > (getFluxmapDuration() - 21e6)) {
+			return 0;
+		}
+
+		int sectorFoundTimeRaw = std::round(_sector->headerStartTime / 1e6);
 		int sectorFoundTime;
 
 		/* Round time to the nearest 20ms */
@@ -127,9 +133,9 @@ public:
 	void decodeSectorRecord() override
 	{
 		uint64_t id = toBytes(readRawBits(64)).reader().read_be64();
-
 		unsigned recordSize, payloadSize, headerSize;
-		if (id == SECTOR_TYPE_MFM) {
+
+		if (id == MFM_ID) {
 			recordSize = NORTHSTAR_ENCODED_SECTOR_SIZE_DD;
 			payloadSize = NORTHSTAR_PAYLOAD_SIZE_DD;
 			headerSize = NORTHSTAR_HEADER_SIZE_DD;
@@ -143,26 +149,22 @@ public:
 		auto rawbits = readRawBits(recordSize * 16);
 		auto bytes = decodeFmMfm(rawbits).slice(0, recordSize);
 		ByteReader br(bytes);
-		uint8_t sync_char;
 
 		_sector->logicalSide = _sector->physicalHead;
 		_sector->logicalSector = _hardSectorId;
-		_sector->logicalTrack = _sector->physicalCylinder;
+		_sector->logicalTrack = _sector->physicalTrack;
 
-		sync_char = br.read_8();	/* Sync char: 0xFB */
-		if (_sectorType == SECTOR_TYPE_MFM) {
-			sync_char = br.read_8();/* MFM second Sync char, usually 0xFB */
+		if (headerSize == NORTHSTAR_HEADER_SIZE_DD) {
+			br.read_8();	/* MFM second Sync char, usually 0xFB */
 		}
 
 		_sector->data = br.read(payloadSize);
-
 		uint8_t wantChecksum = br.read_8();
-		uint8_t gotChecksum = northstarChecksum(bytes.slice(headerSize, payloadSize));
-
+		uint8_t gotChecksum = northstarChecksum(bytes.slice(headerSize - 1, payloadSize));
 		_sector->status = (wantChecksum == gotChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
 	}
 
-	std::set<unsigned> requiredSectors(unsigned cylinder, unsigned head) const override
+	std::set<unsigned> requiredSectors(const Location&) const override
 	{
 		static std::set<unsigned> sectors = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 		return sectors;
@@ -170,7 +172,6 @@ public:
 
 private:
 	const NorthstarDecoderProto& _config;
-	uint8_t _sectorType = SECTOR_TYPE_MFM;
 	uint8_t _hardSectorId;
 };
 

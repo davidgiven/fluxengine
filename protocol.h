@@ -3,7 +3,7 @@
 
 enum 
 {
-    FLUXENGINE_VERSION = 16,
+    FLUXENGINE_PROTOCOL_VERSION = 17,
 
     FLUXENGINE_VID = 0x1209,
     FLUXENGINE_PID = 0x6e00,
@@ -89,7 +89,7 @@ enum
 {
     F_BIT_PULSE = 0x80,
     F_BIT_INDEX = 0x40,
-	F_DESYNC = 0x00,
+	F_DESYNC = 0x00, /* obsolete */
 	F_EOF = 0x100 /* synthetic, only produced by library */
 };
 

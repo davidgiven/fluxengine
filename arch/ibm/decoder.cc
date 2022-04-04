@@ -139,7 +139,7 @@ public:
 		bw += decodeFmMfm(bits).slice(0, IBM_IDAM_LEN);
 
 		IbmDecoderProto::TrackdataProto trackdata;
-		getTrackFormat(trackdata, _sector->physicalCylinder, _sector->physicalHead);
+		getTrackFormat(trackdata, _sector->physicalTrack, _sector->physicalHead);
 
 		_sector->logicalTrack = br.read_8();
 		_sector->logicalSide = br.read_8();
@@ -155,7 +155,14 @@ public:
 		if (trackdata.ignore_side_byte())
 			_sector->logicalSide = _sector->physicalHead;
 		if (trackdata.ignore_track_byte())
-			_sector->logicalTrack = _sector->physicalCylinder;
+			_sector->logicalTrack = _sector->physicalTrack;
+
+		for (int sector : trackdata.ignore_sector())
+			if (_sector->logicalSector == sector)
+			{
+				_sector->status = Sector::MISSING;
+				break;
+			}
 	}
 
     void decodeDataRecord() override
@@ -196,10 +203,10 @@ public:
 		_sector->status = (wantCrc == gotCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
 	}
 
-	std::set<unsigned> requiredSectors(unsigned cylinder, unsigned head) const override
+	std::set<unsigned> requiredSectors(const Location& location) const override
 	{
 		IbmDecoderProto::TrackdataProto trackdata;
-		getTrackFormat(trackdata, cylinder, head);
+		getTrackFormat(trackdata, location.logicalTrack, location.head);
 
 		std::set<unsigned> s;
 		if (trackdata.has_sectors())
@@ -220,12 +227,12 @@ public:
 	}
 
 private:
-	void getTrackFormat(IbmDecoderProto::TrackdataProto& trackdata, unsigned cylinder, unsigned head) const
+	void getTrackFormat(IbmDecoderProto::TrackdataProto& trackdata, unsigned track, unsigned head) const
 	{
 		trackdata.Clear();
 		for (const auto& f : _config.trackdata())
 		{
-			if (f.has_cylinder() && (f.cylinder() != cylinder))
+			if (f.has_track() && (f.track() != track))
 				continue;
 			if (f.has_head() && (f.head() != head))
 				continue;

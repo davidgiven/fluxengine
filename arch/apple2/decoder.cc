@@ -76,7 +76,7 @@ public:
 		return seekToPattern(ANY_RECORD_PATTERN);
 	}
 
-    void decodeSectorRecord()
+    void decodeSectorRecord() override
 	{
 		if (readRaw24() != APPLE2_SECTOR_RECORD)
 			return;
@@ -90,24 +90,67 @@ public:
 		_sector->logicalTrack = combine(br.read_be16());
 		_sector->logicalSector = combine(br.read_be16());
 		uint8_t checksum = combine(br.read_be16());
+
+		// If the checksum is correct, upgrade the sector from MISSING
+		// to DATA_MISSING in anticipation of its data record
 		if (checksum == (volume ^ _sector->logicalTrack ^ _sector->logicalSector))
 			_sector->status = Sector::DATA_MISSING; /* unintuitive but correct */
 	}
 
-    void decodeDataRecord()
+    void decodeDataRecord() override
 	{
 		/* Check ID. */
 
 		if (readRaw24() != APPLE2_DATA_RECORD)
 			return;
 
+		// Sometimes there's a 1-bit gap between APPLE2_DATA_RECORD and
+		// the data itself.  This has been seen on real world disks
+		// such as the Apple II Operating System Kit from Apple2Online.
+		// However, I haven't seen it described in any of the various
+		// references.
+		//
+		// This extra '0' bit would not affect the real disk interface,
+		// as it was a '1' reaching the top bit of a shift register
+		// that triggered a byte to be available, but it affects the
+		// way the data is read here.
+		//
+		// While the floppies tested only seemed to need this applied
+		// to the first byte of the data record, applying it
+		// consistently to all of them doesn't seem to hurt, and
+		// simplifies the code.
+
 		/* Read and decode data. */
 
-		unsigned recordLength = APPLE2_ENCODED_SECTOR_LENGTH + 2;
-		Bytes bytes = toBytes(readRawBits(recordLength*8)).slice(0, recordLength);
+		auto readApple8 = [&]() {
+		    auto result = 0;
+		    while((result & 0x80) == 0) {
+			auto b = readRawBits(1);
+                        if(b.empty()) break;
+			result = (result << 1) | b[0];
+		    }
+		    return result;
+		};
 
+		constexpr unsigned recordLength = APPLE2_ENCODED_SECTOR_LENGTH+2;
+                uint8_t bytes[recordLength];
+                for(auto &byte : bytes) {
+                    byte = readApple8();
+                }
+
+		// Upgrade the sector from MISSING to BAD_CHECKSUM.
+		// If decode_crazy_data succeeds, it upgrades the sector to
+		// OK.
 		_sector->status = Sector::BAD_CHECKSUM;
 		_sector->data = decode_crazy_data(&bytes[0], _sector->status);
+	}
+
+	std::set<unsigned> requiredSectors(const Location& location) const override
+	{
+		std::set<unsigned> sectors;
+		for (int sectorId = 0; sectorId < APPLE2_SECTORS; sectorId++)
+			sectors.insert(sectorId);
+		return sectors;
 	}
 };
 

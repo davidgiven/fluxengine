@@ -2,12 +2,7 @@ syntax = "proto2";
 
 import "lib/common.proto";
 
-message HardwareFluxSinkProto {
-	optional IndexMode index_mode = 1    [default = INDEXMODE_DRIVE, (help) = "index pulse source"];
-	optional int32 hard_sector_count = 2 [(help) = "number of hard sectors on the disk"];
-	optional bool high_density = 3       [default = true, (help) = "set if this is a high density disk"];
-	optional int32 drive = 4             [default = 0, (help) = "which drive to write to (0 or 1)"];
-}
+message HardwareFluxSinkProto {}
 
 message AuFluxSinkProto {
 	optional string directory = 1  [default = "aufiles", (help) = "directory to write .au files to"];
@@ -29,7 +24,6 @@ message Fl2FluxSinkProto {
 }
 
 message FluxSinkProto {
-    optional double rescale = 7 [ default = 1.0, (help) = "amount to multiply pulse periods by" ];
 	oneof dest {
 		HardwareFluxSinkProto drive = 2;
 		AuFluxSinkProto au = 3;

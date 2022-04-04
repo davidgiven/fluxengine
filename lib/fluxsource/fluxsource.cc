@@ -1,6 +1,7 @@
 #include "globals.h"
 #include "flags.h"
 #include "fluxsource/fluxsource.h"
+#include "fluxmap.h"
 #include "lib/config.pb.h"
 #include "proto.h"
 #include "utils.h"
@@ -48,15 +49,15 @@ std::unique_ptr<FluxSource> FluxSource::create(const FluxSourceProto& config)
 void FluxSource::updateConfigForFilename(FluxSourceProto* proto, const std::string& filename)
 {
 
-	static const std::vector<std::pair<std::regex, std::function<void(const std::string&)>>> formats =
+	static const std::vector<std::pair<std::regex, std::function<void(const std::string&, FluxSourceProto*)>>> formats =
 	{
-		{ std::regex("^(.*\\.flux)$"),     [&](const auto& s) { proto->mutable_fl2()->set_filename(s); }},
-		{ std::regex("^(.*\\.scp)$"),      [&](const auto& s) { proto->mutable_scp()->set_filename(s); }},
-		{ std::regex("^(.*\\.cwf)$"),      [&](const auto& s) { proto->mutable_cwf()->set_filename(s); }},
-		{ std::regex("^erase:$"),          [&](const auto& s) { proto->mutable_erase(); }},
-		{ std::regex("^kryoflux:(.*)$"),   [&](const auto& s) { proto->mutable_kryoflux()->set_directory(s); }},
-		{ std::regex("^testpattern:(.*)"), [&](const auto& s) { proto->mutable_test_pattern(); }},
-		{ std::regex("^drive:(.*)"),       [&](const auto& s) { proto->mutable_drive()->set_drive(std::stoi(s)); }},
+		{ std::regex("^(.*\\.flux)$"),     [](auto& s, auto* proto) { proto->mutable_fl2()->set_filename(s); }},
+		{ std::regex("^(.*\\.scp)$"),      [](auto& s, auto* proto) { proto->mutable_scp()->set_filename(s); }},
+		{ std::regex("^(.*\\.cwf)$"),      [](auto& s, auto* proto) { proto->mutable_cwf()->set_filename(s); }},
+		{ std::regex("^erase:$"),          [](auto& s, auto* proto) { proto->mutable_erase(); }},
+		{ std::regex("^kryoflux:(.*)$"),   [](auto& s, auto* proto) { proto->mutable_kryoflux()->set_directory(s); }},
+		{ std::regex("^testpattern:(.*)"), [](auto& s, auto* proto) { proto->mutable_test_pattern(); }},
+		{ std::regex("^drive:(.*)"),       [](auto& s, auto* proto) { proto->mutable_drive(); config.mutable_drive()->set_drive(std::stoi(s)); }},
 	};
 
 	for (const auto& it : formats)
@@ -64,7 +65,7 @@ void FluxSource::updateConfigForFilename(FluxSourceProto* proto, const std::stri
 		std::smatch match;
 		if (std::regex_match(filename, match, it.first))
 		{
-			it.second(match[1]);
+			it.second(match[1], proto);
 			return;
 		}
 	}
@@ -72,5 +73,36 @@ void FluxSource::updateConfigForFilename(FluxSourceProto* proto, const std::stri
 	Error() << fmt::format("unrecognised flux filename '{}'", filename);
 }
 
+class TrivialFluxSourceIterator : public FluxSourceIterator
+{
+public:
+	TrivialFluxSourceIterator(TrivialFluxSource* fluxSource, int track, int head):
+		_fluxSource(fluxSource),
+		_track(track),
+		_head(head)
+	{}
+
+	bool hasNext() const override
+	{
+		return !!_fluxSource;
+	}
+
+	std::unique_ptr<const Fluxmap> next() override
+	{
+		auto fluxmap = _fluxSource->readSingleFlux(_track, _head);
+		_fluxSource = nullptr;
+		return fluxmap;
+	}
+
+private:
+	TrivialFluxSource* _fluxSource;
+	int _track;
+	int _head;
+};
+
+std::unique_ptr<FluxSourceIterator> TrivialFluxSource::readFlux(int track, int head)
+{
+	return std::make_unique<TrivialFluxSourceIterator>(this, track, head);
+}
 
 

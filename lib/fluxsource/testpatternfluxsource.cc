@@ -4,7 +4,7 @@
 #include "lib/fluxsource/fluxsource.pb.h"
 #include "fmt/format.h"
 
-class TestPatternFluxSource : public FluxSource
+class TestPatternFluxSource : public TrivialFluxSource
 {
 public:
     TestPatternFluxSource(const TestPatternFluxSourceProto& config):
@@ -14,9 +14,9 @@ public:
     ~TestPatternFluxSource() {}
 
 public:
-    std::unique_ptr<Fluxmap> readFlux(int track, int side)
+    std::unique_ptr<const Fluxmap> readSingleFlux(int track, int side) override
     {
-		std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
+		auto fluxmap = std::make_unique<Fluxmap>();
 
 		while (fluxmap->duration() < (_config.sequence_length_us()*1000000.0))
 		{
@@ -35,7 +35,7 @@ private:
 
 std::unique_ptr<FluxSource> FluxSource::createTestPatternFluxSource(const TestPatternFluxSourceProto& config)
 {
-    return std::unique_ptr<FluxSource>(new TestPatternFluxSource(config));
+    return std::make_unique<TestPatternFluxSource>(config);
 }
 
 

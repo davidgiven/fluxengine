@@ -30,7 +30,7 @@ public:
 		AbstractDecoder(config)
 	{}
 
-    void beginTrack()
+    void beginTrack() override
 	{
 		_clock = _sector->clock = seekToPattern(ID_PATTERN);
 		_currentSector = 0;
@@ -38,7 +38,7 @@ public:
 
     nanoseconds_t advanceToNextRecord() override
 	{
-		if (_currentSector == 10)
+		if (_currentSector == 11)
 		{
 			/* That was the last sector on the disk. */
 			return 0;
@@ -47,7 +47,7 @@ public:
 			return _clock;
 	}
 
-    void decodeSectorRecord()
+    void decodeSectorRecord() override
 	{
 		/* Skip the ID pattern and track word, which is only present on the
 		 * first sector. We don't trust the track word because some driver
@@ -65,7 +65,7 @@ public:
 			gotChecksum += br.read_be16();
 		uint16_t wantChecksum = br.read_be16();
 
-		_sector->logicalTrack = _sector->physicalCylinder;
+		_sector->logicalTrack = _sector->physicalTrack;
 		_sector->logicalSide = _sector->physicalHead;
 		_sector->logicalSector = _currentSector;
 		_sector->data = bytes.slice(0, SECTOR_SIZE).swab();

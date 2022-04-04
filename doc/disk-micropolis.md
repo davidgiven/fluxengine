@@ -12,7 +12,7 @@ the Vector Graphic Dual-Mode Disk Controller which was paired with a Tandon
 drive.
 
 **Important note:** You _cannot_ read these disks with a normal PC drive, as
-these drives are 96tpi.The track spacing is determined by the physical geometry
+these drives are 96tpi. The track spacing is determined by the physical geometry
 of the drive and can't be changed in software. You'll need to get hold of a
 100tpi Micropolis drive. Luckily these seem to use the same connector and
 pinout as a 96tpi PC 5.25" drive. In use they should be identical.
@@ -53,6 +53,18 @@ fluxengine read micropolis630 vgi # double-sided Mod II
 
 You should end up with a `micropolis.vgi` instead. The format is well-defined
 for double-sided disks so post-processing is not necessary.
+
+While most operating systems use the standard Micropolis checksum, Vector
+Graphic MZOS uses a unique checksum.  The decoder will automatically detect
+the checksum type in use; however, a specific checksum type may be forced
+using the `--decoder.micropolis.checksum_type=n` where the type is one of:
+
+| Type | Description                             |
+|------|-----------------------------------------|
+| 0    | Automatically detect                    |
+| 1    | Standard Micropolis (MDOS, CP/M, OASIS) |
+| 2    | Vector Graphic MZOS                     |
+
 
 Writing disks
 -------------

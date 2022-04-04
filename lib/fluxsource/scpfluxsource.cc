@@ -24,7 +24,7 @@ static int strackno(int track, int side)
 	return (track << 1) | side;
 }
 
-class ScpFluxSource : public FluxSource
+class ScpFluxSource : public TrivialFluxSource
 {
 public:
     ScpFluxSource(const ScpFluxSourceProto& config):
@@ -55,14 +55,14 @@ public:
 	}
 
 public:
-    std::unique_ptr<Fluxmap> readFlux(int track, int side)
+    std::unique_ptr<const Fluxmap> readSingleFlux(int track, int side) override
     {
 		int strack = strackno(track, side);
 		if (strack >= ARRAY_SIZE(_header.track))
-			return std::unique_ptr<Fluxmap>();
+			return std::make_unique<Fluxmap>();
 		uint32_t offset = Bytes(_header.track[strack], 4).reader().read_le32();
 		if (offset == 0)
-			return std::unique_ptr<Fluxmap>();
+			return std::make_unique<Fluxmap>();
 
 		ScpTrackHeader trackheader;
 		_if.seekg(offset, std::ios::beg);
@@ -83,7 +83,7 @@ public:
 			revs[revolution] = trackrev;
 		}
 
-		std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
+		auto fluxmap = std::make_unique<Fluxmap>();
 		nanoseconds_t pending = 0;
 		unsigned inputBytes = 0;
 		for (int revolution = 0; revolution < _header.revolutions; revolution++)

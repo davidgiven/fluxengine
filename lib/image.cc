@@ -5,9 +5,9 @@
 Image::Image()
 {}
 
-Image::Image(std::set<std::shared_ptr<Sector>>& sectors)
+Image::Image(std::set<std::shared_ptr<const Sector>>& sectors)
 {
-	for (std::shared_ptr<Sector> sector : sectors)
+	for (auto& sector : sectors)
 	{
 		key_t key = std::make_tuple(sector->logicalTrack, sector->logicalSide, sector->logicalSector);
 		_sectors[key] = sector;
@@ -15,9 +15,9 @@ Image::Image(std::set<std::shared_ptr<Sector>>& sectors)
 	calculateSize();
 }
 
-const std::shared_ptr<Sector>& Image::get(unsigned track, unsigned side, unsigned sectorid) const
+std::shared_ptr<const Sector> Image::get(unsigned track, unsigned side, unsigned sectorid) const
 {
-	const static std::shared_ptr<Sector> NONE;
+	static std::shared_ptr<const Sector> NONE;
 
 	key_t key = std::make_tuple(track, side, sectorid);
 	auto i = _sectors.find(key);
@@ -26,14 +26,15 @@ const std::shared_ptr<Sector>& Image::get(unsigned track, unsigned side, unsigne
 	return i->second;
 }
 
-const std::shared_ptr<Sector>& Image::put(unsigned track, unsigned side, unsigned sectorid)
+std::shared_ptr<Sector> Image::put(unsigned track, unsigned side, unsigned sectorid)
 {
 	key_t key = std::make_tuple(track, side, sectorid);
 	std::shared_ptr<Sector> sector = std::make_shared<Sector>();
 	sector->logicalTrack = track;
 	sector->logicalSide = side;
 	sector->logicalSector = sectorid;
-	return _sectors[key] = sector;
+	_sectors[key] = sector;
+	return sector;
 }
 
 void Image::calculateSize()

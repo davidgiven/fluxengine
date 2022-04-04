@@ -1,4 +1,4 @@
-comment: 'BK 800kB 3.5" 80-track 10-sector DSDD'
+comment: 'BK 800kB 5.25"/3.5" 80-track 10-sector DSDD'
 
 image_reader {
 	filename: "bk800.img"
@@ -23,8 +23,8 @@ image_writer {
 encoder {
 	ibm {
 		trackdata {
-			track_length_ms: 200
-			clock_rate_khz: 250
+			target_rotational_period_ms: 200
+			target_clock_period_us: 4.0
 			emit_iam: false
 			gap0: 80
 			gap2: 22
@@ -56,7 +56,7 @@ decoder {
 	}
 }
 
-cylinders {
+tracks {
 	start: 0
 	end: 79
 }

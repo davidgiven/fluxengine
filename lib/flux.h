@@ -1,6 +1,9 @@
 #ifndef FLUX_H
 #define FLUX_H
 
+#include "bytes.h"
+
+class Fluxmap;
 class Sector;
 class Image;
 
@@ -12,27 +15,49 @@ struct Record
 	Bytes rawData;
 };
 
+struct Location
+{
+    unsigned physicalTrack;
+    unsigned logicalTrack;
+	unsigned head;
+	unsigned groupSize;
+
+	bool operator==(const Location& other) const
+	{
+		if (physicalTrack == other.physicalTrack)
+			return true;
+		return head == other.head;
+	}
+
+    bool operator<(const Location& other) const
+    {
+		if (physicalTrack < other.physicalTrack)
+			return true;
+		if (physicalTrack == other.physicalTrack)
+			return head < other.head;
+		return false;
+    }
+};
+
 struct TrackDataFlux
 {
-	unsigned physicalCylinder;
-	unsigned physicalHead;
+	Location location;
 	std::shared_ptr<const Fluxmap> fluxmap;
-	std::vector<std::shared_ptr<Record>> records;
-	std::vector<std::shared_ptr<Sector>> sectors;
+	std::vector<std::shared_ptr<const Record>> records;
+	std::vector<std::shared_ptr<const Sector>> sectors;
 };
 
 struct TrackFlux
 {
-	unsigned physicalCylinder;
-	unsigned physicalHead;
-	std::vector<std::unique_ptr<TrackDataFlux>> trackDatas;
-	std::set<std::shared_ptr<Sector>> sectors;
+	Location location;
+	std::vector<std::shared_ptr<const TrackDataFlux>> trackDatas;
+	std::set<std::shared_ptr<const Sector>> sectors;
 };
 
 struct DiskFlux
 {
-	std::vector<std::unique_ptr<TrackFlux>> tracks;
-	std::unique_ptr<Image> image;
+	std::vector<std::shared_ptr<const TrackFlux>> tracks;
+	std::shared_ptr<const Image> image;
 };
 
 #endif

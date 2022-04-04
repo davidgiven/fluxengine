@@ -88,6 +88,54 @@ GreaseWeazle hardware interchangeably with FluxEngine hardware. See the
 [dedicated page](greaseweazle.md) for more information.
 
 
+## Drive interface pinouts
+
+For reference, here are the FDC pinouts:
+
+```ditaa
+:-E -s 0.75
+
+                +--+--+                   +--+--+   
+     DISKCHG ---+34+33+        DISKCHG ---+34+33+
+                +--+--+                   +--+--+
+       SIDE1 ---+32+31+          SIDE1 ---+32+31+
+                +--+--+                   +--+--+
+       RDATA ---+30+29+          RDATA ---+30+29+
+                +--+--+                   +--+--+
+         WPT ---+28+27+            WPT ---+28+27+
+                +--+--+                   +--+--+
+       TRK00 ---+26+25+          TRK00 ---+26+25+
+                +--+--+                   +--+--+
+       WGATE ---+24+23+          WGATE ---+24+23+
+                +--+--+                   +--+--+
+       WDATA ---+22+21+          WDATA ---+22+21+
+                +--+--+                   +--+--+
+        STEP ---+20+19+           STEP ---+20+19+
+                +--+--+                   +--+--+
+   DIR/SIDE1 ---+18+17+      DIR/SIDE1 ---+18+17+
+                +--+--+                   +--+--+
+       MOTEB ---+16+15+          MOTEB ---+16+15+
+                +--+--+                   +--+--+
+       DRVSA ---+14+13+            DS3 ---+14+13+
+                +--+--+                   +--+--+
+       DRVSB ---+12+11+            DS2 ---+12+11+
+                +--+--+                   +--+--+
+       MOTEA ---+10+9 +            DS1 ---+10+9 +
+                +--+--+                   +--+--+
+       INDEX ---+8 +7 +          INDEX ---+8 +7 +
+                +--+--+                   +--+--+
+         n/c ---+6 +5 +            DS4 ---+6 +5 +
+                +--+--+                   +--+--+
+         n/c ---+4 +3 +            INU ---+4 +3 +
+                +--+--+                   +--+--+
+       REDWC ---+2 +1 +          REDWC ---+2 +1 +
+                +--+--+                   +--+--+
+                           
+              PC interface           Shugart interface
+ 
+               Odd numbered pins are always grounded
+```
+
 ### Some useful links
 
   - [The floppy disk user's

@@ -18,16 +18,16 @@ private:
 
 public:
 	Image();
-	Image(std::set<std::shared_ptr<Sector>>& sectors);
+	Image(std::set<std::shared_ptr<const Sector>>& sectors);
 
 public:
 	class const_iterator
 	{
-		typedef std::map<key_t, std::shared_ptr<Sector>>::const_iterator wrapped_iterator_t;
+		typedef std::map<key_t, std::shared_ptr<const Sector>>::const_iterator wrapped_iterator_t;
 
 	public:
 		const_iterator(const wrapped_iterator_t& it): _it(it) {}
-		Sector* operator* () { return _it->second.get(); }
+		std::shared_ptr<const Sector> operator* () { return _it->second; }
 		void operator++ () { _it++; }
 		bool operator== (const const_iterator& other) const { return _it == other._it; }
 		bool operator!= (const const_iterator& other) const { return _it != other._it; }
@@ -39,8 +39,8 @@ public:
 public:
 	void calculateSize();
 
-	const std::shared_ptr<Sector>& get(unsigned track, unsigned side, unsigned sectorId) const;
-	const std::shared_ptr<Sector>& put(unsigned track, unsigned side, unsigned sectorId);
+	std::shared_ptr<const Sector> get(unsigned track, unsigned side, unsigned sectorId) const;
+	std::shared_ptr<Sector> put(unsigned track, unsigned side, unsigned sectorId);
 
 	const_iterator begin() const { return const_iterator(_sectors.cbegin()); }
 	const_iterator end() const { return const_iterator(_sectors.cend()); }
@@ -50,7 +50,7 @@ public:
 
 private:
 	Geometry _geometry = {0, 0, 0};
-	std::map<key_t, std::shared_ptr<Sector>> _sectors;
+	std::map<key_t, std::shared_ptr<const Sector>> _sectors;
 };
 
 #endif

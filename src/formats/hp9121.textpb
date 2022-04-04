@@ -19,8 +19,8 @@ encoder {
 	ibm {
 		trackdata {
 			emit_iam: false
-			track_length_ms: 200
-			clock_rate_khz: 250
+			target_rotational_period_ms: 200
+			target_clock_period_us: 4
 			sector_size: 256
 			gap0: 80
 			gap2: 22
@@ -58,9 +58,9 @@ decoder {
 	}
 }
 
-cylinders {
+tracks {
 	start: 0
-	end: 69
+	end: 65
 }
 
 heads {

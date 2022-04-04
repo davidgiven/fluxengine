@@ -1,4 +1,19 @@
-comment: 'Apple II 140kB DOS 3.3 5.25" 40 track SSSD (ro)'
+comment: 'Apple II 140kB DOS 3.3 5.25" 40 track SSSD'
+
+image_reader {
+	filename: "apple2.img"
+	img {
+		tracks: 40
+		sides: 1
+		trackdata {
+			sector_size: 256
+			sector_range {
+				start_sector: 0
+				sector_count: 16
+			}
+		}
+	}
+}
 
 image_writer {
 	filename: "apple2.img"
@@ -9,14 +24,19 @@ decoder {
 	apple2 {}
 }
 
-cylinders {
+encoder {
+	apple2 {}
+}
+
+tracks {
 	start: 0
-	end: 79
-	step: 2
+	end: 39
 }
 
 heads {
 	start: 0
 	end: 0
 }
+
+tpi: 48
 

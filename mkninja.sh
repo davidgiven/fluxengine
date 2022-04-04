@@ -45,7 +45,7 @@ rule link
 
 rule linkgui
     command = $CXX $LDFLAGS $GUILDFLAGS -o \$out \$in \$flags $LIBS $GUILIBS
-    description = LINK-OBJC \$in
+    description = LINK-GUI \$in
 
 rule test
     command = \$in && touch \$out
@@ -318,14 +318,10 @@ encodedecodetest() {
     format=$1
     shift
 
-    echo "build $OBJDIR/$format.encodedecode.flux.stamp : encodedecode | fluxengine$EXTENSION scripts/encodedecodetest.sh $*"
+    echo "build $OBJDIR/$format.encodedecode.flux.stamp : encodedecode | fluxengine$EXTENSION fluxengine-debug$EXTENSION scripts/encodedecodetest.sh $*"
     echo "    format=$format"
     echo "    configs=$*"
     echo "    fluxx=flux"
-    echo "build $OBJDIR/$format.encodedecode.scp.stamp : encodedecode | fluxengine$EXTENSION scripts/encodedecodetest.sh $*"
-    echo "    format=$format"
-    echo "    configs=$*"
-    echo "    fluxx=scp"
 }
 
 buildlibrary libagg.a \
@@ -364,6 +360,7 @@ buildlibrary libfmt.a \
     dep/fmt/os.cc \
 
 buildproto libconfig.a \
+    arch/agat/agat.proto \
     arch/aeslanier/aeslanier.proto \
     arch/amiga/amiga.proto \
     arch/apple2/apple2.proto \
@@ -382,11 +379,13 @@ buildproto libconfig.a \
     lib/common.proto \
     lib/config.proto \
     lib/decoders/decoders.proto \
+    lib/drive.proto \
     lib/encoders/encoders.proto \
-    lib/fluxsource/fluxsource.proto \
     lib/fluxsink/fluxsink.proto \
+    lib/fluxsource/fluxsource.proto \
     lib/imagereader/imagereader.proto \
     lib/imagewriter/imagewriter.proto \
+    lib/mapper.proto \
     lib/usb/usb.proto \
 
 buildproto libfl2.a \
@@ -397,13 +396,17 @@ buildlibrary libbackend.a \
     -Idep/libusbp/include \
     -d $OBJDIR/proto/libconfig.def \
     -d $OBJDIR/proto/libfl2.def \
+    arch/agat/agat.cc \
+    arch/agat/decoder.cc \
     arch/aeslanier/decoder.cc \
     arch/amiga/amiga.cc \
     arch/amiga/decoder.cc \
     arch/amiga/encoder.cc \
     arch/apple2/decoder.cc \
+    arch/apple2/encoder.cc \
     arch/brother/decoder.cc \
     arch/brother/encoder.cc \
+    arch/c64/c64.cc \
     arch/c64/decoder.cc \
     arch/c64/encoder.cc \
     arch/f85/decoder.cc \
@@ -472,8 +475,10 @@ buildlibrary libbackend.a \
     lib/imagewriter/rawimagewriter.cc \
     lib/imginputoutpututils.cc \
     lib/ldbs.cc \
+    lib/logger.cc \
+    lib/mapper.cc \
     lib/proto.cc \
-    lib/reader.cc \
+    lib/readerwriter.cc \
     lib/sector.cc \
     lib/usb/fluxengineusb.cc \
     lib/usb/greaseweazle.cc \
@@ -482,15 +487,18 @@ buildlibrary libbackend.a \
     lib/usb/usb.cc \
     lib/usb/usbfinder.cc \
     lib/utils.cc \
-    lib/writer.cc \
 
 FORMATS="\
+    40track_drive \
     acornadfs \
     acorndfs \
     aeslanier \
+    agat840 \
     amiga \
     ampro \
     apple2 \
+    apple2_drive \
+    appledos \
     atarist360 \
     atarist370 \
     atarist400 \
@@ -509,15 +517,13 @@ FORMATS="\
     hp9121 \
     hplif770 \
     ibm \
-    ibm1200_525 \
+    ibm1200 \
     ibm1232 \
     ibm1440 \
-    ibm180_525 \
-    ibm360_525 \
+    ibm180 \
+    ibm360 \
     ibm720 \
-    ibm720_525 \
     bk800 \
-    bk800_525 \
     mac400 \
     mac800 \
     micropolis143 \
@@ -529,10 +535,13 @@ FORMATS="\
     northstar175 \
     northstar350 \
     northstar87 \
+    prodos \
+    rx50 \
+    shugart_drive \
     tids990 \
     vgi \
-    victor9k_ss \
     victor9k_ds \
+    victor9k_ss \
     zilogmcz \
     "
 
@@ -565,6 +574,15 @@ buildlibrary libfrontend.a \
     src/fe-write.cc \
     src/fluxengine.cc \
 
+buildlibrary libgui.a \
+    -I$OBJDIR/proto \
+    -Idep/libusbp/include \
+    -d $OBJDIR/proto/libconfig.def \
+    src/gui/main.cc \
+    src/gui/layout.cpp \
+    src/gui/visualisation.cc \
+    src/gui/mainwindow.cc \
+
 buildprogram fluxengine \
     libfrontend.a \
     libformats.a \
@@ -574,6 +592,16 @@ buildprogram fluxengine \
     libusbp.a \
     libfmt.a \
     libagg.a \
+
+buildprogram fluxengine-gui \
+    -rule linkgui \
+    libgui.a \
+    libformats.a \
+    libbackend.a \
+    libconfig.a \
+    libfl2.a \
+    libusbp.a \
+    libfmt.a \
 
 buildlibrary libemu.a \
     dep/emu/fnmatch.c
@@ -620,6 +648,7 @@ runtest fmmfm-test          tests/fmmfm.cc
 runtest greaseweazle-test   tests/greaseweazle.cc
 runtest kryoflux-test       tests/kryoflux.cc
 runtest ldbs-test           tests/ldbs.cc
+runtest utils-test          tests/utils.cc
 runtest proto-test          -I$OBJDIR/proto \
                             -d $OBJDIR/proto/libconfig.def \
                             -d $OBJDIR/proto/libtestproto.def \
@@ -627,6 +656,7 @@ runtest proto-test          -I$OBJDIR/proto \
                             $OBJDIR/proto/tests/testproto.cc
 
 encodedecodetest amiga
+encodedecodetest apple2
 encodedecodetest atarist360
 encodedecodetest atarist370
 encodedecodetest atarist400
@@ -635,21 +665,22 @@ encodedecodetest atarist720
 encodedecodetest atarist740
 encodedecodetest atarist800
 encodedecodetest atarist820
+encodedecodetest bk800
 encodedecodetest brother120
 encodedecodetest brother240
 encodedecodetest commodore1541 scripts/commodore1541_test.textpb
 encodedecodetest commodore1581
 encodedecodetest hp9121
-encodedecodetest ibm1200_525
+encodedecodetest ibm1200
 encodedecodetest ibm1232
 encodedecodetest ibm1440
-encodedecodetest ibm180_525
-encodedecodetest ibm360_525
+encodedecodetest ibm180
+encodedecodetest ibm360
 encodedecodetest ibm720
-encodedecodetest ibm720_525
 encodedecodetest mac400 scripts/mac400_test.textpb
 encodedecodetest mac800 scripts/mac800_test.textpb
 encodedecodetest n88basic
+encodedecodetest rx50
 encodedecodetest tids990
 encodedecodetest victor9k_ss
 encodedecodetest victor9k_ds
