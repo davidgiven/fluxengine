@@ -523,6 +523,7 @@ FORMATS="\
     ibm180 \
     ibm360 \
     ibm720 \
+    bk800 \
     mac400 \
     mac800 \
     micropolis143 \
@@ -664,6 +665,7 @@ encodedecodetest atarist720
 encodedecodetest atarist740
 encodedecodetest atarist800
 encodedecodetest atarist820
+encodedecodetest bk800
 encodedecodetest brother120
 encodedecodetest brother240
 encodedecodetest commodore1541 scripts/commodore1541_test.textpb

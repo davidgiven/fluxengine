@@ -103,6 +103,7 @@ people who've had it work).
 | [Brother 120kB](doc/disk-brother.md)      |  🦄   |   🦄   |                                     |
 | [Brother 240kB](doc/disk-brother.md)      |  🦄   |   🦄   |                                     |
 | [Brother FB-100](doc/disk-fb100.md)       |  🦖   |        | Tandy Model 100, Husky Hunter, knitting machines |
+| [Elektronika BK](doc/disk-bd.md)          |  🦄   |   🦄   | Soviet Union PDP-11 clone           |
 | [Macintosh 400kB/800kB](doc/disk-macintosh.md)  |  🦄   |   🦄   |                                     |
 | [NEC PC-98](doc/disk-ibm.md)              |  🦄   |   🦄   | trimode drive not required          |
 | [Sharp X68000](doc/disk-ibm.md)           |  🦄   |   🦄   |                                     |
