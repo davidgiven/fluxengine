@@ -10,7 +10,7 @@ enum FluxFileVersion {
 }
 
 message TrackFluxProto {
-	optional int32 cylinder = 1;
+	optional int32 track = 1;
 	optional int32 head = 2;
 	repeated bytes flux = 3;
 }
@@ -19,5 +19,6 @@ message FluxFileProto {
 	optional int32 magic = 1;
 	optional FluxFileVersion version = 2;
 	repeated TrackFluxProto track = 3;
+	optional double rotational_period_ms = 4;
 }
 

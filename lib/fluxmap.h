@@ -32,9 +32,10 @@ public:
 		appendBytes((const uint8_t*) s.c_str(), s.size());
 	}
 
-	Fluxmap(const Bytes bytes):
-		_bytes(bytes)
-	{}
+	Fluxmap(const Bytes bytes)
+	{
+		appendBytes(bytes);
+	}
 
     nanoseconds_t duration() const { return _duration; }
     unsigned ticks() const { return _ticks; }
@@ -63,9 +64,8 @@ public:
 
 	Fluxmap& appendBits(const std::vector<bool>& bits, nanoseconds_t clock);
 
-    void precompensate(int threshold_ticks, int amount_ticks);
+    std::unique_ptr<const Fluxmap> precompensate(int threshold_ticks, int amount_ticks);
     std::vector<std::unique_ptr<const Fluxmap>> split() const;
-    std::unique_ptr<const Fluxmap> rescale(double scale) const;
 
 private:
 	uint8_t& findLastByte();

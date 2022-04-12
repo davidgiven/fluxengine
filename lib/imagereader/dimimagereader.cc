@@ -4,6 +4,7 @@
 #include "imagereader/imagereader.h"
 #include "image.h"
 #include "logger.h"
+#include "mapper.h"
 #include "proto.h"
 #include "lib/config.pb.h"
 #include "fmt/format.h"
@@ -71,7 +72,6 @@ public:
         {
             if (inputFile.eof())
                 break;
-            int physicalCylinder = track;
 
             for (int side = 0; side < 2; side++)
             {
@@ -84,11 +84,10 @@ public:
                     Bytes data(sectorSize);
                     inputFile.read((char*)data.begin(), data.size());
 
-                    const auto& sector =
-                        image->put(physicalCylinder, side, sectorId);
+                    const auto& sector = image->put(track, side, sectorId);
                     sector->status = Sector::OK;
                     sector->logicalTrack = track;
-                    sector->physicalCylinder = physicalCylinder;
+                    sector->physicalTrack = Mapper::remapTrackLogicalToPhysical(track);
                     sector->logicalSide = sector->physicalHead = side;
                     sector->logicalSector = sectorId;
                     sector->data = data;
@@ -103,15 +102,15 @@ public:
         {
             auto ibm = config.mutable_encoder()->mutable_ibm();
             auto trackdata = ibm->add_trackdata();
-            trackdata->set_clock_rate_khz(500);
+            trackdata->set_target_clock_period_us(2);
             auto sectors = trackdata->mutable_sectors();
             switch (mediaByte)
             {
                 case 0x00:
                     Logger() << "DIM: automatically setting format to 1.2MB "
                                 "(1024 byte sectors)";
-                    config.mutable_cylinders()->set_end(76);
-                    trackdata->set_track_length_ms(167);
+                    config.mutable_tracks()->set_end(76);
+                    trackdata->set_target_rotational_period_ms(167);
                     trackdata->set_sector_size(1024);
                     for (int i = 0; i < 9; i++)
                         sectors->add_sector(i);
@@ -119,14 +118,14 @@ public:
                 case 0x02:
                     Logger() << "DIM: automatically setting format to 1.2MB "
                                 "(512 byte sectors)";
-                    trackdata->set_track_length_ms(167);
+                    trackdata->set_target_rotational_period_ms(167);
                     trackdata->set_sector_size(512);
                     for (int i = 0; i < 15; i++)
                         sectors->add_sector(i);
                     break;
                 case 0x03:
                     Logger() << "DIM: automatically setting format to 1.44MB";
-                    trackdata->set_track_length_ms(200);
+                    trackdata->set_target_rotational_period_ms(200);
                     trackdata->set_sector_size(512);
                     for (int i = 0; i < 18; i++)
                         sectors->add_sector(i);
@@ -156,11 +155,11 @@ public:
             heads->set_end(geometry.numSides - 1);
         }
 
-        if (!config.has_cylinders())
+        if (!config.has_tracks())
         {
-            auto* cylinders = config.mutable_cylinders();
-            cylinders->set_start(0);
-            cylinders->set_end(geometry.numTracks - 1);
+            auto* tracks = config.mutable_tracks();
+            tracks->set_start(0);
+            tracks->set_end(geometry.numTracks - 1);
         }
 
         return image;

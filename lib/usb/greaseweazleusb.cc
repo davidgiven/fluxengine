@@ -23,7 +23,7 @@ static const char* gw_error(int e)
         case ACK_NO_BUS:         return "No bus";
         case ACK_BAD_UNIT:       return "Invalid unit";
         case ACK_BAD_PIN:        return "Invalid pin";
-        case ACK_BAD_CYLINDER:   return "Invalid cylinder";
+        case ACK_BAD_CYLINDER:   return "Invalid track";
         default:                 return "Unknown error";
     }
 }

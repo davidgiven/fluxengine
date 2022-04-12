@@ -29,7 +29,6 @@ message Fl2FluxSinkProto {
 
 // Next: 9
 message FluxSinkProto {
-    optional double rescale = 7 [ default = 1.0, (help) = "amount to multiply pulse periods by" ];
 	oneof dest {
 		HardwareFluxSinkProto drive = 2;
 		A2RFluxSinkProto a2r = 8;

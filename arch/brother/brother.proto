@@ -15,6 +15,5 @@ message BrotherEncoderProto {
 	optional string sector_skew = 5 [default = "05a3816b4927"];
 
 	optional BrotherFormat format = 6 [default = BROTHER240];
-	optional int32 bias = 7 [default = 0];
 }
 

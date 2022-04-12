@@ -37,7 +37,7 @@ public:
 
 		Logger() << fmt::format("A2R: writing A2R {} file containing {} tracks\n",
 			singlesided() ? "single sided" : "double sided",
-			config.cylinders().end() - config.cylinders().start() + 1
+			config.tracks().end() - config.tracks().start() + 1
 		);
 
 		time_t now{std::time(nullptr)};
@@ -82,8 +82,7 @@ private:
 		    1,
 		    1,
 		};
-		auto version_str = fmt::format("Fluxengine {}", FLUXENGINE_VERSION);
-		auto version_str_padded = fmt::format("{: <32}", version_str);
+		auto version_str_padded = fmt::format("{: <32}", "fluxengine");
 		assert(version_str_padded.size() == sizeof(info.creator));
 		memcpy(info.creator, version_str_padded.data(), sizeof(info.creator));
 		writeChunkAndData(A2R_CHUNK_INFO, &info, sizeof(info));

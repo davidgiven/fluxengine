@@ -5,6 +5,7 @@
 #include "fluxmap.h"
 
 class Record;
+class Location;
 
 /*
  * Note that sectors here used zero-based numbering throughout (to make the
@@ -35,13 +36,17 @@ public:
     nanoseconds_t headerEndTime = 0;
     nanoseconds_t dataStartTime = 0;
     nanoseconds_t dataEndTime = 0;
-    unsigned physicalCylinder = 0;
+    unsigned physicalTrack = 0;
     unsigned physicalHead = 0;
     unsigned logicalTrack = 0;
     unsigned logicalSide = 0;
     unsigned logicalSector = 0;
     Bytes data;
     std::vector<std::shared_ptr<Record>> records;
+
+    Sector() {}
+
+    Sector(const Location& location);
 
     std::tuple<int, int, int, Status> key() const
     {
@@ -66,8 +71,10 @@ public:
 };
 
 extern bool sectorPointerSortPredicate(
-    std::shared_ptr<const Sector>& lhs, std::shared_ptr<const Sector>& rhs);
+	const std::shared_ptr<const Sector>& lhs,
+    const std::shared_ptr<const Sector>& rhs);
 extern bool sectorPointerEqualsPredicate(
-    std::shared_ptr<const Sector>& lhs, std::shared_ptr<const Sector>& rhs);
+    const std::shared_ptr<const Sector>& lhs,
+    const std::shared_ptr<const Sector>& rhs);
 
 #endif

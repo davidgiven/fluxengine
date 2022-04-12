@@ -1,9 +1,5 @@
 comment: 'Japanese PC 1232kB 5.25"/3.5" 77-track 8-sector DSHD'
 
-drive {
-	high_density: true
-}
-
 image_reader {
 	filename: "ibm1232.img"
 	img {
@@ -28,8 +24,8 @@ encoder {
 	ibm {
 		trackdata {
             sector_size: 1024
-			track_length_ms: 167
-			clock_rate_khz: 500
+			target_rotational_period_ms: 167
+			target_clock_period_us: 2
 			sectors {
 				sector: 1
 				sector: 2
@@ -55,7 +51,11 @@ decoder {
 	}
 }
 
-cylinders {
+drive {
+	high_density: true
+}
+
+tracks {
 	start: 0
 	end: 76
 }

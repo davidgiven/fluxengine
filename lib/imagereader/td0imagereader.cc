@@ -5,6 +5,7 @@
 #include "image.h"
 #include "crc.h"
 #include "logger.h"
+#include "mapper.h"
 #include "fmt/format.h"
 #include "lib/config.pb.h"
 #include "fmt/format.h"
@@ -111,7 +112,7 @@ public:
             if (sectorCount == 0xff)
                 break;
 
-            uint8_t physicalCylinder = br.read_8();
+            uint8_t physicalTrack = br.read_8();
             uint8_t physicalHead = br.read_8() & 1;
             br.skip(1); /* crc */
 
@@ -185,7 +186,7 @@ public:
                 const auto& sector =
                     image->put(logicalTrack, logicalSide, sectorId);
                 sector->status = Sector::OK;
-                sector->physicalCylinder = physicalCylinder;
+                sector->physicalTrack = physicalTrack;
                 sector->physicalHead = physicalHead;
                 sector->data = data.slice(0, sectorSize);
                 totalSize += sectorSize;

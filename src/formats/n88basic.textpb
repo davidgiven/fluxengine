@@ -56,8 +56,8 @@ encoder {
 	ibm {
         trackdata {
             sector_size: 256
-			track_length_ms: 167
-			clock_rate_khz: 500
+			target_rotational_period_ms: 167
+			target_clock_period_us: 2
             gap0: 0x36
             gap2: 22
             gap3: 0x36
@@ -96,8 +96,8 @@ encoder {
 		}
         trackdata {
             sector_size: 128
-			track_length_ms: 167
-			clock_rate_khz: 500
+			target_rotational_period_ms: 167
+			target_clock_period_us: 2
             use_fm: true
             gap0: 0x10
             gap2: 0x09
@@ -105,7 +105,7 @@ encoder {
             idam_byte: 0xf57e
             dam_byte: 0xf56f
             gap_fill_byte: 0xffff
-            cylinder: 0
+            track: 0
             head: 0
 		}
 	}
@@ -122,7 +122,7 @@ decoder {
 	}
 }
 
-cylinders {
+tracks {
 	start: 0
 	end: 76
 }

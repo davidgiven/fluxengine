@@ -9,7 +9,7 @@ decoder {
 	f85 {}
 }
 
-cylinders {
+tracks {
 	start: 0
 	end: 79
 }

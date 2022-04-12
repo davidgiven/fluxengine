@@ -16,9 +16,9 @@ static StringFlag sourceFlux(
 		FluxSource::updateConfigForFilename(config.mutable_flux_source(), value);
 	});
 
-static IntFlag cylinder(
+static IntFlag track(
 	{ "--cylinder", "-c" },
-	"cylinder to seek to",
+	"track to seek to",
 	0);
 
 extern const std::map<std::string, std::string> readables;
@@ -31,6 +31,6 @@ int mainSeek(int argc, const char* argv[])
 		Error() << "this only makes sense with a real disk drive";
 
     usbSetDrive(config.drive().drive(), false, config.drive().index_mode());
-	usbSeek(cylinder);
+	usbSeek(track);
     return 0;
 }

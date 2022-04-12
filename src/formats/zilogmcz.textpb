@@ -9,7 +9,7 @@ decoder {
 	zilogmcz {}
 }
 
-cylinders {
+tracks {
 	start: 0
 	end: 76
 }

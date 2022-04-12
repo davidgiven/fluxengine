@@ -133,7 +133,7 @@ public:
 			return;
 		if (_sector->logicalTrack > 76)
 			return;
-		if (_sector->logicalTrack != _sector->physicalCylinder)
+		if (_sector->logicalTrack != _sector->physicalTrack)
 			return;
 
 		br.read(10);  /* OS data or padding */
@@ -144,19 +144,19 @@ public:
 		* Once the checksum type is determined, it will be used for the
 		* entire disk.
 		*/
-		if (_checksumType == 0) {
+		if (_checksumType == MicropolisDecoderProto::AUTO) {
 			/* Calculate both standard Micropolis (MDOS, CP/M, OASIS) and MZOS checksums */
 			if (wantChecksum == micropolisChecksum(bytes.slice(1, 2+266))) {
-				_checksumType = 1;
+				_checksumType = MicropolisDecoderProto::MICROPOLIS;
 			} else if (wantChecksum == mzosChecksum(bytes.slice(MICROPOLIS_HEADER_SIZE, MICROPOLIS_PAYLOAD_SIZE))) {
-				_checksumType = 2;
+				_checksumType = MicropolisDecoderProto::MZOS;
 				std::cout << "Note: MZOS checksum detected." << std::endl;
 			}
 		}
 
 		uint8_t gotChecksum;
 
-		if (_checksumType == 2) {
+		if (_checksumType == MicropolisDecoderProto::MZOS) {
 			gotChecksum = mzosChecksum(bytes.slice(MICROPOLIS_HEADER_SIZE, MICROPOLIS_PAYLOAD_SIZE));
 		} else {
 			gotChecksum = micropolisChecksum(bytes.slice(1, 2+266));
@@ -173,7 +173,7 @@ public:
 		_sector->status = (wantChecksum == gotChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
 	}
 
-	std::set<unsigned> requiredSectors(unsigned cylinder, unsigned head) const override
+	std::set<unsigned> requiredSectors(const Location& location) const override
 	{
 		static std::set<unsigned> sectors = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
 		return sectors;
@@ -181,7 +181,7 @@ public:
 
 private:
 	const MicropolisDecoderProto& _config;
-	int _checksumType;	/* -1 = auto, 1 = Micropolis, 2=MZOS */
+	MicropolisDecoderProto_ChecksumType _checksumType;	/* -1 = auto, 1 = Micropolis, 2=MZOS */
 };
 
 std::unique_ptr<AbstractDecoder> createMicropolisDecoder(const DecoderProto& config)

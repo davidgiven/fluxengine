@@ -66,12 +66,12 @@ Configurations can be specified either on the command line or in text files.
 Here are some sample invocations:
 
 ```
-# Read an PC disk, producing a disk image with the default name (ibm.img),
-# autodetecting all parameters
-$ fluxengine read ibm
+# Read an PC 1440kB disk, producing a disk image with the default name
+# (ibm.img)
+$ fluxengine read ibm1440
 
 # Write a PC 1440kB disk to drive 1
-$ fluxengine write ibm -i image.img -d drive:1
+$ fluxengine write ibm1440 -i image.img -d drive:1
 
 # Read a Eco1 CP/M disk, making a copy of the flux into a file
 $ fluxengine read eco1 --copy-flux-to copy.flux -o eco1.ldbs
@@ -108,8 +108,9 @@ protobuf syntax](https://developers.google.com/protocol-buffers), which is
 hierarchical, type-safe, and easy to read.
 
 The `ibm1440` string above is actually a reference to an internal configuration
-file containing all the settings for writing PC 1440kB disks. You can see all
-these settings by doing:
+file containing all the settings for writing PC 1440kB disks. You may specify
+as many profile names or textpb files as you wish; they are all merged left to
+right.  You can see all these settings by doing:
 
 ```
 $ fluxengine write ibm1440 --config
@@ -404,7 +405,7 @@ containing valuable historical data, and you want to read them.
 Typically I do this:
 
 ```
-$ fluxengine read brother -s drive:0 -o brother.img --copy-flux-to=brother.flux --decoder.write_csv_to=brother.csv
+$ fluxengine read brother240 -s drive:0 -o brother.img --copy-flux-to=brother.flux --decoder.write_csv_to=brother.csv
 ```
 
 This will read the disk in drive 0 and write out an information CSV file. It'll

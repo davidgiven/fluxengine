@@ -7,6 +7,7 @@
 #include "image.h"
 #include "fmt/format.h"
 #include "logger.h"
+#include "mapper.h"
 #include "lib/imagereader/imagereader.pb.h"
 #include <algorithm>
 #include <iostream>
@@ -32,7 +33,7 @@ public:
         Logger() << fmt::format(
             "NSI: Autodetecting geometry based on file size: {}", fsize);
 
-        unsigned numCylinders = 35;
+        unsigned numTracks = 35;
         unsigned numSectors = 10;
         unsigned numHeads = 2;
         unsigned sectorSize = 512;
@@ -63,18 +64,18 @@ public:
         Logger() << fmt::format(
             "reading {} tracks, {} heads, {} sectors, {} bytes per sector, {} "
             "kB total",
-            numCylinders,
+            numTracks,
             numHeads,
             numSectors,
             sectorSize,
-            numCylinders * numHeads * trackSize / 1024);
+            numTracks * numHeads * trackSize / 1024);
 
         std::unique_ptr<Image> image(new Image);
         unsigned sectorFileOffset;
 
         for (unsigned head = 0; head < numHeads; head++)
         {
-            for (unsigned track = 0; track < numCylinders; track++)
+            for (unsigned track = 0; track < numTracks; track++)
             {
                 for (unsigned sectorId = 0; sectorId < numSectors; sectorId++)
                 {
@@ -86,8 +87,8 @@ public:
                     else
                     { /* Head 1 is from track 70-35 */
                         sectorFileOffset =
-                            (trackSize * numCylinders) + /* Skip over side 0 */
-                            ((numCylinders - track - 1) * trackSize) +
+                            (trackSize * numTracks) + /* Skip over side 0 */
+                            ((numTracks - track - 1) * trackSize) +
                             (sectorId * sectorSize); /* Sector offset from
                                                         beginning of track. */
                     }
@@ -99,7 +100,8 @@ public:
 
                     const auto& sector = image->put(track, head, sectorId);
                     sector->status = Sector::OK;
-                    sector->logicalTrack = sector->physicalCylinder = track;
+                    sector->logicalTrack = track;
+                    sector->physicalTrack = Mapper::remapTrackLogicalToPhysical(track);
                     sector->logicalSide = sector->physicalHead = head;
                     sector->logicalSector = sectorId;
                     sector->data = data;
@@ -107,7 +109,7 @@ public:
             }
         }
 
-        image->setGeometry({.numTracks = numCylinders,
+        image->setGeometry({.numTracks = numTracks,
             .numSides = numHeads,
             .numSectors = numSectors,
             .sectorSize = sectorSize});

@@ -1,11 +1,10 @@
 comment: 'PC 180kB 5.25" 40-track 9-sector SSDD'
 
 image_reader {
-	filename: "ibm180_525.img"
+	filename: "ibm180.img"
 	img {
 		tracks: 40
 		sides: 1
-		physical_step: 2
 		trackdata {
 			sector_size: 512
 			sector_range {
@@ -17,15 +16,15 @@ image_reader {
 }
 
 image_writer {
-	filename: "ibm180_525.img"
+	filename: "ibm180.img"
 	img {}
 }
 
 encoder {
 	ibm {
 		trackdata {
-			track_length_ms: 167
-			clock_rate_khz: 300
+			target_rotational_period_ms: 167
+			target_clock_period_us: 3.333
 			sectors {
 				sector: 1
 				sector: 2
@@ -52,9 +51,13 @@ decoder {
 	}
 }
 
-cylinders {
+drive {
+	high_density: false
+}
+
+tracks {
 	start: 0
-	end: 79
+	end: 39
 }
 
 heads {
@@ -62,3 +65,4 @@ heads {
 	end: 0
 }
 
+tpi: 48

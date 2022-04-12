@@ -1,31 +1,34 @@
-comment: 'PC 360kB 5.25" 40-track 9-sector DSDD'
+comment: 'BK 800kB 5.25"/3.5" 80-track 10-sector DSDD'
 
 image_reader {
-	filename: "ibm360_525.img"
+	filename: "bk800.img"
 	img {
-		tracks: 40
+		tracks: 80
 		sides: 2
-		physical_step: 2
 		trackdata {
 			sector_size: 512
 			sector_range {
 				start_sector: 1
-				sector_count: 9
+				sector_count: 10
 			}
 		}
 	}
 }
 
 image_writer {
-	filename: "ibm360_525.img"
+	filename: "bk800.img"
 	img {}
 }
 
 encoder {
 	ibm {
 		trackdata {
-			track_length_ms: 167
-			clock_rate_khz: 300
+			target_rotational_period_ms: 200
+			target_clock_period_us: 4.0
+			emit_iam: false
+			gap0: 80
+			gap2: 22
+			gap3: 34
 			sectors {
 				sector: 1
 				sector: 2
@@ -36,6 +39,7 @@ encoder {
 				sector: 7
 				sector: 8
 				sector: 9
+				sector: 10
 			}
 		}
 	}
@@ -46,13 +50,13 @@ decoder {
 		trackdata {
 			sector_range {
 				min_sector: 1
-				max_sector: 9
+				max_sector: 10
 			}
 		}
 	}
 }
 
-cylinders {
+tracks {
 	start: 0
 	end: 79
 }

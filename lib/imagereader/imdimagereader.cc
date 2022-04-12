@@ -5,6 +5,7 @@
 #include "image.h"
 #include "proto.h"
 #include "logger.h"
+#include "mapper.h"
 #include "lib/config.pb.h"
 #include "fmt/format.h"
 #include <algorithm>
@@ -100,12 +101,12 @@ public:
     1A byte - ASCII EOF character
     - For each track on the disk:
     1 byte Mode value                           see getModulationspeed for definition       
-    1 byte Cylinder
+    1 byte Track
     1 byte Head
     1 byte number of sectors in track           
     1 byte sector size                          see getsectorsize for definition
     sector numbering map
-    sector cylinder map (optional)              definied in high byte of head (since head is 0 or 1)
+    sector track map (optional)              definied in high byte of head (since head is 0 or 1)
     sector head map (optional)                  definied in high byte of head (since head is 0 or 1)
     sector data records
     <End of file>
@@ -163,7 +164,7 @@ public:
             headerPtr++;
             sectorSize = getSectorSize(header.SectorSize);
 
-            //Read optional cylinder map To Do
+            //Read optional track map To Do
 
             //Read optional sector head map To Do
 
@@ -218,7 +219,8 @@ public:
                         Error() << fmt::format("don't understand IMD disks with sector status {}", Status_Sector);
                 }       
                 sector->status = Sector::OK;
-                sector->logicalTrack = sector->physicalCylinder = header.track;
+                sector->logicalTrack = header.track;
+                sector->physicalTrack = Mapper::remapTrackLogicalToPhysical(header.track);
                 sector->logicalSide = sector->physicalHead = header.Head;
                 sector->logicalSector = (sector_map[s]);
             }

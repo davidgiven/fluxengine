@@ -41,7 +41,7 @@ decoder {
 	micropolis {}
 }
 
-cylinders {
+tracks {
 	start: 0
 	end: 34
 }

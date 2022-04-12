@@ -14,6 +14,7 @@
 #include <cassert>
 #include <climits>
 #include <variant>
+#include <optional>
 
 #if defined(_WIN32) || defined(__WIN32__)
 #include <direct.h>

@@ -15,9 +15,9 @@ private:
     {
     public:
         HardwareFluxSourceIterator(
-            const HardwareFluxSource& fluxsource, int cylinder, int head):
+            const HardwareFluxSource& fluxsource, int track, int head):
             _fluxsource(fluxsource),
-            _cylinder(cylinder),
+            _track(track),
             _head(head)
         {
         }
@@ -30,7 +30,7 @@ private:
         std::unique_ptr<const Fluxmap> next()
         {
             usbSetDrive(config.drive().drive(), config.drive().high_density(), config.drive().index_mode());
-            usbSeek(_cylinder);
+            usbSeek(_track);
 
             Bytes data = usbRead(_head,
                 config.drive().sync_with_index(),
@@ -43,7 +43,7 @@ private:
 
     private:
         const HardwareFluxSource& _fluxsource;
-        int _cylinder;
+        int _track;
         int _head;
     };
 
@@ -54,18 +54,24 @@ public:
         usbSetDrive(config.drive().drive(), config.drive().high_density(), config.drive().index_mode());
         Logger() << BeginSpeedOperationLogMessage();
 
-        do
-        {
-            _oneRevolution =
-                usbGetRotationalPeriod(config.drive().hard_sector_count());
-            if (config.drive().hard_sector_count() != 0)
-                _hardSectorThreshold =
-                    _oneRevolution * 3 / (4 * config.drive().hard_sector_count());
-            else
-                _hardSectorThreshold = 0;
+		_oneRevolution = config.drive().rotational_period_ms() * 1e6;
+        _hardSectorThreshold = 0;
+		if (_oneRevolution == 0)
+		{
+			do
+			{
+				_oneRevolution =
+					usbGetRotationalPeriod(config.drive().hard_sector_count());
+				if (config.drive().hard_sector_count() != 0)
+					_hardSectorThreshold =
+						_oneRevolution * 3 / (4 * config.drive().hard_sector_count());
+				else
+					_hardSectorThreshold = 0;
 
-            retries--;
-        } while ((_oneRevolution == 0) && (retries > 0));
+				retries--;
+			} while ((_oneRevolution == 0) && (retries > 0));
+			config.mutable_drive()->set_rotational_period_ms(_oneRevolution / 1e6);
+		}
 
         if (_oneRevolution == 0)
             Error() << "Failed\nIs a disk in the drive?";
@@ -76,10 +82,10 @@ public:
     ~HardwareFluxSource() {}
 
 public:
-    std::unique_ptr<FluxSourceIterator> readFlux(int cylinder, int head) override
+    std::unique_ptr<FluxSourceIterator> readFlux(int track, int head) override
     {
         return std::make_unique<HardwareFluxSourceIterator>(
-            *this, cylinder, head);
+            *this, track, head);
     }
 
     void recalibrate() override

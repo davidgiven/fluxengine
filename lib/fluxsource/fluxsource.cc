@@ -77,9 +77,9 @@ void FluxSource::updateConfigForFilename(FluxSourceProto* proto, const std::stri
 class TrivialFluxSourceIterator : public FluxSourceIterator
 {
 public:
-	TrivialFluxSourceIterator(TrivialFluxSource* fluxSource, int cylinder, int head):
+	TrivialFluxSourceIterator(TrivialFluxSource* fluxSource, int track, int head):
 		_fluxSource(fluxSource),
-		_cylinder(cylinder),
+		_track(track),
 		_head(head)
 	{}
 
@@ -90,20 +90,20 @@ public:
 
 	std::unique_ptr<const Fluxmap> next() override
 	{
-		auto fluxmap = _fluxSource->readSingleFlux(_cylinder, _head);
+		auto fluxmap = _fluxSource->readSingleFlux(_track, _head);
 		_fluxSource = nullptr;
 		return fluxmap;
 	}
 
 private:
 	TrivialFluxSource* _fluxSource;
-	int _cylinder;
+	int _track;
 	int _head;
 };
 
-std::unique_ptr<FluxSourceIterator> TrivialFluxSource::readFlux(int cylinder, int head)
+std::unique_ptr<FluxSourceIterator> TrivialFluxSource::readFlux(int track, int head)
 {
-	return std::make_unique<TrivialFluxSourceIterator>(this, cylinder, head);
+	return std::make_unique<TrivialFluxSourceIterator>(this, track, head);
 }
 
 

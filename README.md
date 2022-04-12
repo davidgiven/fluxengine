@@ -37,11 +37,6 @@ FluxEngine features are available with the GreaseWeazle and it works out-of-the
 box. See the [dedicated GreaseWeazle documentation page](doc/greaseweazle.md)
 for more information.
 
-**Important note.** On 2020-04-02 I changed the bytecode format (and firmware).
-Flux files will need to be upgraded with `fluxengine upgradefluxfile`. The new
-format should be more reliable and use way, way less bandwidth. Sorry for the
-inconvenience.
-
 Where?
 ------
 
@@ -66,14 +61,18 @@ following friendly articles:
     flux files and image files ∾ knowing what you're doing
 
   - [Using GreaseWeazle hardware with the FluxEngine client
-	software](doc/greaseweazle.md) ∾ what works ∾ what doesn't work ∾ where to
-	go for help
+    software](doc/greaseweazle.md) ∾ what works ∾ what doesn't work ∾ where to
+    go for help
+
+  - [Configuring for your drive](doc/drives.md) ∾ but I don't have a 80 track
+    drive! ∾ reading and writing 40 track disks ∾ Shugart and Apple II
 
   - [Troubleshooting dubious disks](doc/problems.md) ∾ it's not an exact
-	science ∾ the sector map ∾ clock detection and the histogram
+    science ∾ the sector map ∾ clock detection and the histogram
 
-  - [Checking your drive](doc/driveresponse.md) ∾ you can't do that with that ∾
-	measuring your drive's ability to work with exotic formats
+  - [Disk densities](doc/driveresponse.md) ∾ what's the difference between an HD
+    and DD disk? ∾ you can't do that with that ∾ measuring your drive's ability to
+    work with exotic formats ∾ I think my drive is broken
 
 Which?
 ------
@@ -104,6 +103,7 @@ people who've had it work).
 | [Brother 120kB](doc/disk-brother.md)      |  🦄   |   🦄   |                                     |
 | [Brother 240kB](doc/disk-brother.md)      |  🦄   |   🦄   |                                     |
 | [Brother FB-100](doc/disk-fb100.md)       |  🦖   |        | Tandy Model 100, Husky Hunter, knitting machines |
+| [Elektronika BK](doc/disk-bd.md)          |  🦄   |   🦄   | Soviet Union PDP-11 clone           |
 | [Macintosh 400kB/800kB](doc/disk-macintosh.md)  |  🦄   |   🦄   |                                     |
 | [NEC PC-98](doc/disk-ibm.md)              |  🦄   |   🦄   | trimode drive not required          |
 | [Sharp X68000](doc/disk-ibm.md)           |  🦄   |   🦄   |                                     |

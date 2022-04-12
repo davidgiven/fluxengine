@@ -4,7 +4,7 @@
 #include "bitmap.h"
 #include "fluxmap.h"
 #include "decoders/fluxmapreader.h"
-#include "writer.h"
+#include "readerwriter.h"
 #include "protocol.h"
 #include "proto.h"
 #include "fluxsink/fluxsink.h"
@@ -24,9 +24,9 @@ static StringFlag destFlux(
 		FluxSink::updateConfigForFilename(config.mutable_flux_sink(), value);
 	});
 
-static IntFlag destCylinder(
+static IntFlag destTrack(
 	{ "--cylinder", "-c" },
-	"cylinder to write to",
+	"track to write to",
 	0);
 
 static IntFlag destHead(
@@ -68,6 +68,11 @@ static IntFlag imgHeight(
 	{ "--height" },
 	"Height of output graph",
 	600);
+
+static IntFlag buckets(
+	{ "--buckets" },
+	"Number of heatmap buckets",
+	250);
 
 /* This is the Turbo colourmap.
  * https://ai.googleblog.com/2019/08/turbo-improved-rainbow-colormap-for.html
@@ -213,7 +218,7 @@ int mainAnalyseDriveResponse(int argc, const char* argv[])
     usbSetDrive(config.drive().drive(),
 		config.drive().high_density(),
 		config.drive().index_mode());
-	usbSeek(destCylinder);
+	usbSeek(destTrack);
 
 	std::cout << "Measuring rotational speed...\n";
     nanoseconds_t period = usbGetRotationalPeriod(0);
@@ -225,7 +230,7 @@ int mainAnalyseDriveResponse(int argc, const char* argv[])
 		csv.open(writeCsv);
 
 	int numRows = (maxInterval - minInterval) / intervalStep;
-	const int numColumns = 512;
+	const int numColumns = buckets;
 	std::vector<std::vector<double>> frequencies(numRows, std::vector<double>(numColumns, 0.0));
 
 	double interval;
@@ -237,16 +242,17 @@ int mainAnalyseDriveResponse(int argc, const char* argv[])
 		std::cout << fmt::format("Interval {:.2f}: ", ticks * US_PER_TICK);
 		std::cout << std::flush;
 
+		/* Write the test pattern. */
+
 		if (interval >= 2.0)
 		{
-			/* Write the test pattern. */
-
 			Fluxmap outFluxmap;
 			while (outFluxmap.duration() < period)
 			{
 				outFluxmap.appendInterval(ticks);
 				outFluxmap.appendPulse();
 			}
+
 			usbWrite(destHead, outFluxmap.rawBytes(), 0);
 
 			/* Read the test pattern in again. */
@@ -353,8 +359,8 @@ int mainAnalyseDriveResponse(int argc, const char* argv[])
 		}
 
 		draw_y_axis(painter, colourbarBounds.x1-5, colourbarBounds.y2, colourbarBounds.y1, 0.0, 1.0, 0.1, "{:.1f}");
-		draw_y_axis(painter, graphBounds.x1-5, graphBounds.y2, graphBounds.y1, 0.0, 512.0/TICKS_PER_US, 5.0, "{:.0f}");
-		draw_y_graticules(painter, graphBounds.x1, graphBounds.y2, graphBounds.x2, graphBounds.y1, 0.0, 512.0/TICKS_PER_US, 5.0);
+		draw_y_axis(painter, graphBounds.x1-5, graphBounds.y2, graphBounds.y1, 0.0, buckets/TICKS_PER_US, 5.0, "{:.0f}");
+		draw_y_graticules(painter, graphBounds.x1, graphBounds.y2, graphBounds.x2, graphBounds.y1, 0.0, buckets/TICKS_PER_US, 5.0);
 		draw_x_axis(painter, graphBounds.x1, graphBounds.x2, graphBounds.y2+5, minInterval, maxInterval, 5.0, "{:.0f}");
 		draw_x_graticules(painter, graphBounds.x1, graphBounds.y1, graphBounds.x2, graphBounds.y2, minInterval, maxInterval, 5.0);
 

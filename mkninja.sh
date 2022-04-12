@@ -318,7 +318,7 @@ encodedecodetest() {
     format=$1
     shift
 
-    echo "build $OBJDIR/$format.encodedecode.flux.stamp : encodedecode | fluxengine$EXTENSION scripts/encodedecodetest.sh $*"
+    echo "build $OBJDIR/$format.encodedecode.flux.stamp : encodedecode | fluxengine$EXTENSION fluxengine-debug$EXTENSION scripts/encodedecodetest.sh $*"
     echo "    format=$format"
     echo "    configs=$*"
     echo "    fluxx=flux"
@@ -406,6 +406,7 @@ buildlibrary libbackend.a \
     arch/apple2/encoder.cc \
     arch/brother/decoder.cc \
     arch/brother/encoder.cc \
+    arch/c64/c64.cc \
     arch/c64/decoder.cc \
     arch/c64/encoder.cc \
     arch/f85/decoder.cc \
@@ -478,7 +479,7 @@ buildlibrary libbackend.a \
     lib/logger.cc \
     lib/mapper.cc \
     lib/proto.cc \
-    lib/reader.cc \
+    lib/readerwriter.cc \
     lib/sector.cc \
     lib/usb/fluxengineusb.cc \
     lib/usb/greaseweazle.cc \
@@ -487,16 +488,17 @@ buildlibrary libbackend.a \
     lib/usb/usb.cc \
     lib/usb/usbfinder.cc \
     lib/utils.cc \
-    lib/writer.cc \
 
 FORMATS="\
+    40track_drive \
     acornadfs \
     acorndfs \
-    agat840 \
     aeslanier \
+    agat840 \
     amiga \
     ampro \
     apple2 \
+    apple2_drive \
     appledos \
     atarist360 \
     atarist370 \
@@ -516,13 +518,13 @@ FORMATS="\
     hp9121 \
     hplif770 \
     ibm \
-    ibm1200_525 \
+    ibm1200 \
     ibm1232 \
     ibm1440 \
-    ibm180_525 \
-    ibm360_525 \
+    ibm180 \
+    ibm360 \
     ibm720 \
-    ibm720_525 \
+    bk800 \
     mac400 \
     mac800 \
     micropolis143 \
@@ -536,10 +538,11 @@ FORMATS="\
     northstar87 \
     prodos \
     rx50 \
+    shugart_drive \
     tids990 \
     vgi \
-    victor9k_ss \
     victor9k_ds \
+    victor9k_ss \
     zilogmcz \
     "
 
@@ -663,18 +666,18 @@ encodedecodetest atarist720
 encodedecodetest atarist740
 encodedecodetest atarist800
 encodedecodetest atarist820
+encodedecodetest bk800
 encodedecodetest brother120
 encodedecodetest brother240
 encodedecodetest commodore1541 scripts/commodore1541_test.textpb
 encodedecodetest commodore1581
 encodedecodetest hp9121
-encodedecodetest ibm1200_525
+encodedecodetest ibm1200
 encodedecodetest ibm1232
 encodedecodetest ibm1440
-encodedecodetest ibm180_525
-encodedecodetest ibm360_525
+encodedecodetest ibm180
+encodedecodetest ibm360
 encodedecodetest ibm720
-encodedecodetest ibm720_525
 encodedecodetest mac400 scripts/mac400_test.textpb
 encodedecodetest mac800 scripts/mac800_test.textpb
 encodedecodetest n88basic

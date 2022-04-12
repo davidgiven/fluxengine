@@ -3,6 +3,7 @@
 #include "sector.h"
 #include "imagereader/imagereader.h"
 #include "image.h"
+#include "mapper.h"
 #include "logger.h"
 #include "fmt/format.h"
 #include "lib/config.pb.h"
@@ -123,8 +124,8 @@ public:
                     const auto& sector =
                         image->put(header.track, head, header.sector);
                     sector->status = Sector::OK;
-                    sector->logicalTrack = sector->physicalCylinder =
-                        header.track;
+                    sector->logicalTrack = header.track;
+                    sector->physicalTrack = Mapper::remapTrackLogicalToPhysical(header.track);
                     sector->logicalSide = sector->physicalHead = head;
                     sector->logicalSector = header.sector;
                     sector->data = data;

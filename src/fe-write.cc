@@ -1,6 +1,6 @@
 #include "globals.h"
 #include "flags.h"
-#include "writer.h"
+#include "readerwriter.h"
 #include "fluxmap.h"
 #include "decoders/decoders.h"
 #include "encoders/encoders.h"
@@ -38,13 +38,13 @@ static StringFlag destFlux(
 		FluxSource::updateConfigForFilename(config.mutable_flux_source(), value);
 	});
 
-static StringFlag destCylinders(
+static StringFlag destTracks(
 	{ "--cylinders", "-c" },
-	"cylinders to write to",
+	"tracks to write to",
 	"",
 	[](const auto& value)
 	{
-		setRange(config.mutable_cylinders(), value);
+		setRange(config.mutable_tracks(), value);
 	});
 
 static StringFlag destHeads(

@@ -34,7 +34,7 @@ struct DiskReadLogMessage
 
 struct BeginReadOperationLogMessage
 {
-    unsigned cylinder;
+    unsigned track;
     unsigned head;
 };
 
@@ -46,7 +46,7 @@ struct EndReadOperationLogMessage
 
 struct BeginWriteOperationLogMessage
 {
-    unsigned cylinder;
+    unsigned track;
     unsigned head;
 };
 

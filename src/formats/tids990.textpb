@@ -28,7 +28,7 @@ decoder {
 	tids990 {}
 }
 
-cylinders {
+tracks {
 	start: 0
 	end: 76
 }

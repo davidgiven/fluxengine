@@ -30,7 +30,7 @@ public:
 			return;
 		}
 
-		Logger() << fmt::format("RAW: writing {} cylinders, {} sides",
+		Logger() << fmt::format("RAW: writing {} tracks, {} sides",
 				geometry.numTracks, geometry.numSides);
 
 		std::ofstream outputFile(_config.filename(), std::ios::out | std::ios::binary);

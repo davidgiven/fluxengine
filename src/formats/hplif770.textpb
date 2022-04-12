@@ -18,8 +18,8 @@ image_reader {
 encoder {
 	ibm {
 		trackdata {
-			track_length_ms: 200
-			clock_rate_khz: 250
+			target_rotational_period_ms: 200
+			target_clock_period_us: 4
 			sector_size: 1024
 			gap0: 80
 			gap2: 22
@@ -35,7 +35,7 @@ encoder {
 	}
 }
 
-cylinders {
+tracks {
 	start: 0
 	end: 76
 }
