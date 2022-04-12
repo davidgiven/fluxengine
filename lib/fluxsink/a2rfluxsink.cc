@@ -194,7 +194,7 @@ private:
 		_strmWriter += trackBytes;
 	}
 
-	operator std::string () const
+	operator std::string () const override
 	{
 		return fmt::format("a2r({})", _config.filename());
 	}

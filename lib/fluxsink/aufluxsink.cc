@@ -84,7 +84,7 @@ public:
 
 	}
 
-	operator std::string () const
+	operator std::string () const override
 	{
 		return fmt::format("au({})", _config.directory());
 	}
