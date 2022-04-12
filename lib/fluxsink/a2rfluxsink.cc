@@ -78,7 +78,7 @@ private:
 		A2RInfoData info{
 		    A2R_INFO_CHUNK_VERSION,
 		    {}, // to be filled
-		    singlesided() ? A2R_DISK_525 : A2R_DISK_35,
+		    (uint8_t)(singlesided() ? A2R_DISK_525 : A2R_DISK_35),
 		    1,
 		    1,
 		};
