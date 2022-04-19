@@ -3,7 +3,7 @@ syntax = "proto2";
 import "lib/common.proto";
 
 message GreaseWeazleProto {
-	enum BusType {
+	enum BusType { /* note that these must match CMD_SET_BUS codes */
 		BUSTYPE_INVALID = 0;
 		IBMPC = 1;
 		SHUGART = 2;
