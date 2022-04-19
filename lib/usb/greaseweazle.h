@@ -75,9 +75,10 @@ extern Bytes stripPartialRotation(const Bytes& fldata);
 /*
  * CMD_SET_BUS CODES
  */
-#define BUS_NONE            0
-#define BUS_IBMPC           1
-#define BUS_SHUGART         2
+#define BUS_NONE              0
+#define BUS_IBMPC             1
+#define BUS_SHUGART           2
+#define BUS_APPLE2            3
 
 
 /*

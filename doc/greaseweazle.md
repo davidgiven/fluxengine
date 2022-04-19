@@ -37,8 +37,12 @@ Supported features with the GreaseWeazle include:
   - simple reading and writing of disks, seeking etc
   - erasing disks
   - determining disk rotation speed
-  - both Shugart and normal IBM buses (via
+  - Shugart and normal IBM buses (via
 	`--usb.greaseweazle.bus_type=SHUGART` or `IBMPC`; the default is `IBMPC`)
+  - Apple 5.25 floppy interfaces (via `--usb.greaseweazle.bus_type=APPLE2`)
+
+Which device types are supported depend on the hardware. Genuine Greaseweazle hardware supports SHUGART and IBMPC.
+APPLE2 is only supported with hand wiring and the Adafruit\_Floppy greaseweazle-compatible firmware.
 
 What doesn't work
 -----------------
