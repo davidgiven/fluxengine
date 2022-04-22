@@ -19,7 +19,7 @@
 namespace
 {
 uint32_t ticks_to_a2r(uint32_t ticks) {
-    return ticks * NS_PER_TICK / A2R_NS_PER_TICK;
+	return ticks * NS_PER_TICK / A2R_NS_PER_TICK;
 }
 
 bool singlesided(void) {
@@ -109,14 +109,14 @@ private:
 		unsigned location = cylinder * 2 + head;
 
 		if(!fluxmap.bytes()) {
-		    return;
+			return;
 		}
 
 		if (location > 255) {
-		    Error() << fmt::format("A2R: cannot write track {} head {}, "
-			    "{} does not fit within the location field\n",
-			    cylinder, head, location);
-		    return;
+			Error() << fmt::format("A2R: cannot write track {} head {}, "
+				"{} does not fit within the location field\n",
+				cylinder, head, location);
+			return;
 		}
 
 
@@ -211,7 +211,7 @@ private:
 
 std::unique_ptr<FluxSink> FluxSink::createA2RFluxSink(const A2RFluxSinkProto& config)
 {
-    return std::unique_ptr<FluxSink>(new A2RFluxSink(config));
+	return std::unique_ptr<FluxSink>(new A2RFluxSink(config));
 }
 
 const uint8_t a2r2_fileheader[] = {'A', '2', 'R', '2', 0xff, 0x0a, 0x0d, 0x0a };
