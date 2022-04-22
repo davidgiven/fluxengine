@@ -61,46 +61,46 @@ public:
 	}
 
 private:
-	void writeData(const auto data, size_t size) {
-		_writer += Bytes(reinterpret_cast<const uint8_t*>(data), size);
-	}
-	void writeChunkAndData(uint32_t chunk_id, const auto data, size_t size) {
+	void writeChunkAndData(uint32_t chunk_id, const Bytes &data) {
 		_writer.write_le32(chunk_id);
-		_writer.write_le32(size);
-		writeData(data, size);
+		_writer.write_le32(data.size());
+		_writer += data;
 	}
 
 	void writeHeader() {
-		writeData(a2r2_fileheader, sizeof(a2r2_fileheader));		  
+		_writer += Bytes(a2r2_fileheader, sizeof(a2r2_fileheader));
 	}
 
 	void writeInfo() {
-		A2RInfoData info{
-		    A2R_INFO_CHUNK_VERSION,
-		    {}, // to be filled
-		    (uint8_t)(singlesided() ? A2R_DISK_525 : A2R_DISK_35),
-		    1,
-		    1,
-		};
-		auto version_str_padded = fmt::format("{: <32}", "fluxengine");
-		assert(version_str_padded.size() == sizeof(info.creator));
-		memcpy(info.creator, version_str_padded.data(), sizeof(info.creator));
-		writeChunkAndData(A2R_CHUNK_INFO, &info, sizeof(info));
+		Bytes info;
+		auto writer = info.writer();
+		writer.write_8(A2R_INFO_CHUNK_VERSION);
+		auto version_str_padded = fmt::format("{: <32}", "Fluxengine");
+		assert(version_str_padded.size() == 32);
+		writer.append(version_str_padded);
+		writer.write_8(singlesided() ? A2R_DISK_525 : A2R_DISK_35);
+		writer.write_8(1); // write protected
+		writer.write_8(1); // synchronized
+		writeChunkAndData(A2R_CHUNK_INFO, info);
 	}
 
 	void writeMeta() {
-		std::stringstream ss;
+		Bytes meta;
+		auto writer = meta.writer();
 		for(auto &i : _metadata) {
-			ss << i.first << '\t' << i.second << '\n';
+			writer.append(i.first);
+			writer.write_8('\t');
+			writer.append(i.second);
+			writer.write_8('\n');
 		}
-		writeChunkAndData(A2R_CHUNK_META, ss.str().data(), ss.str().size());
+		writeChunkAndData(A2R_CHUNK_META, meta);
 	}
 
 	void writeStream() {
 		// A STRM always ends with a 255, even though this could ALSO indicate the first byte of a multi-byte sequence
 		_strmWriter.write_8(255);
 
-		writeChunkAndData(A2R_CHUNK_STRM, _strmBytes.cbegin(), _strmBytes.size());
+		writeChunkAndData(A2R_CHUNK_STRM, _strmBytes);
 	}
 
 	void writeFlux(int cylinder, int head, const Fluxmap& fluxmap) override
@@ -201,7 +201,6 @@ private:
 
 private:
 	const A2RFluxSinkProto& _config;
-	A2RHeader _fileheader = {0};
 	Bytes _bytes;
 	ByteWriter _writer;
 	Bytes _strmBytes;
@@ -215,4 +214,4 @@ std::unique_ptr<FluxSink> FluxSink::createA2RFluxSink(const A2RFluxSinkProto& co
     return std::unique_ptr<FluxSink>(new A2RFluxSink(config));
 }
 
-uint8_t a2r2_fileheader[] = {'A', '2', 'R', '2', 0xff, 0x0a, 0x0d, 0x0a };
+const uint8_t a2r2_fileheader[] = {'A', '2', 'R', '2', 0xff, 0x0a, 0x0d, 0x0a };
