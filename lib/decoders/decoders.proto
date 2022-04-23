@@ -19,7 +19,7 @@ import "arch/zilogmcz/zilogmcz.proto";
 import "lib/fluxsink/fluxsink.proto";
 import "lib/common.proto";
 
-//NEXT: 29
+//NEXT: 30
 message DecoderProto {
 	optional double pulse_debounce_threshold = 1 [default = 0.30,
 		(help) = "ignore pulses with intervals shorter than this, in fractions of a clock"];
@@ -61,5 +61,7 @@ message DecoderProto {
 		(help) = "how many times to retry each track in the event of a read failure"];
 	optional string write_csv_to = 23
 		[(help) = "if set, write a CSV report of the disk state"];
+	optional bool skip_unnecessary_tracks = 29 [default = true,
+		(help) = "don't read tracks if we already have all necessary sectors"];
 }
 
