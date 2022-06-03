@@ -27,6 +27,12 @@ enum ReadResult
     BAD_AND_CAN_NOT_RETRY
 };
 
+enum BadSectorsState
+{
+	HAS_NO_BAD_SECTORS,
+	HAS_BAD_SECTORS
+};
+
 /* In order to allow rereads in file-based flux sources, we need to persist the
  * FluxSourceIterator (as that's where the state for which read to return is
  * held). This class handles that. */
@@ -108,8 +114,7 @@ static std::set<std::shared_ptr<const Sector>> collectSectors(
     return sector_set;
 }
 
-/* Returns true if the result contains bad sectors. */
-bool combineRecordAndSectors(
+BadSectorsState combineRecordAndSectors(
     TrackFlux& trackFlux, AbstractDecoder& decoder, const Location& location)
 {
     std::set<std::shared_ptr<const Sector>> track_sectors;
@@ -128,12 +133,12 @@ bool combineRecordAndSectors(
 
     trackFlux.sectors = collectSectors(track_sectors);
     if (trackFlux.sectors.empty())
-        return true;
+        return HAS_BAD_SECTORS;
     for (const auto& sector : trackFlux.sectors)
         if (sector->status != Sector::OK)
-            return true;
+            return HAS_BAD_SECTORS;
 
-    return false;
+    return HAS_NO_BAD_SECTORS;
 }
 
 ReadResult readGroup(FluxSourceIteratorHolder& fluxSourceIteratorHolder,
@@ -163,9 +168,13 @@ ReadResult readGroup(FluxSourceIteratorHolder& fluxSourceIteratorHolder,
 
         auto trackdataflux = decoder.decodeToSectors(fluxmap, location);
         trackFlux.trackDatas.push_back(trackdataflux);
-        if (!combineRecordAndSectors(trackFlux, decoder, location))
-            return GOOD_READ;
-        if (fluxSourceIterator.hasNext())
+        if (combineRecordAndSectors(trackFlux, decoder, location) == HAS_NO_BAD_SECTORS)
+		{
+			result = GOOD_READ;
+			if (config.decoder().skip_unnecessary_tracks())
+				return result;
+		}
+        else if (fluxSourceIterator.hasNext())
             result = BAD_AND_CAN_RETRY;
     }
 
