@@ -274,13 +274,18 @@ FluxEngine also supports a number of file system image formats. When using the
   - `<filename.d88>`
 
   Read from a [D88 image file](https://www.pc98.org/project/doc/d88.html),
-  commonly used by various Japanese PC emulators, including the NEC PC-88. **Read only.**
+  commonly used by various Japanese PC emulators, including the NEC PC-88.
   
   FluxEngine is currently limited to reading only the first floppy image in a
-  D88 file.
+  D88 file. When writing, a single unnamed floppy will be created
+  within the image file.
   
   The D88 reader should be used with the `ibm` profile and will override
   most encoding parameters on a track-by-track basis.
+  
+  The D88 writer should likewise be used with the `ibm` profile in most
+  circumstances as it can represent arbitrary sector layouts as read
+  from the floppy.
   
   - `<filename.nfd>`
 
