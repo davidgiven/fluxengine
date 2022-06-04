@@ -69,8 +69,10 @@ jobs:
         path: | 
           ~/.cache/bazel
         key: ${{ runner.os }}-{{ env.version }}-bazel-cache
-    - name: install bazel
-      run: choco install bazel
+    - name: install bazelisk
+      uses: crazy-max/ghaction-chocolatey@v2
+      with:
+        args: install bazelisk
     - uses: actions/checkout@v1
     - name: build
       run: |
