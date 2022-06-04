@@ -76,7 +76,7 @@ jobs:
     - uses: actions/checkout@v1
     - name: build
       run: |
-        make
+        PATH=$PATH:/c/ProgramData/chocolatey/lib/bazelisk make
 
     - name: zip
       run: |
