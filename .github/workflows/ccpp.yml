@@ -8,14 +8,14 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: populate bazel cache
-        id: bazel-cache
-        uses: actions/cache@v2
-        env:
-          version: 4.2.1
-        with:
-          path: | 
-            ~/.cache/bazel
-          key: ${{ runner.os }}-{{ env.version }}-bazel-cache
+      id: bazel-cache
+      uses: actions/cache@v2
+      env:
+        version: 4.2.1
+      with:
+        path: | 
+          ~/.cache/bazel
+        key: ${{ runner.os }}-{{ env.version }}-bazel-cache
     - name: apt
       run: sudo apt update && sudo apt install libudev-dev libsqlite3-dev bazel-bootstrap protobuf-compiler libwxgtk3.0-gtk3-dev
     - name: make
@@ -26,14 +26,14 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: populate bazel cache
-        id: bazel-cache
-        uses: actions/cache@v2
-        env:
-          version: 4.2.1
-        with:
-          path: | 
-            ~/.cache/bazel
-          key: ${{ runner.os }}-{{ env.version }}-bazel-cache
+      id: bazel-cache
+      uses: actions/cache@v2
+      env:
+        version: 4.2.1
+      with:
+        path: | 
+          ~/.cache/bazel
+        key: ${{ runner.os }}-{{ env.version }}-bazel-cache
     - name: brew
       run: brew install sqlite pkg-config libusb bazelisk protobuf truncate wxwidgets
     - name: make
@@ -60,18 +60,18 @@ jobs:
           vim
           diffutils
           mingw-w64-i686-wxWidgets
+    - name: populate bazel cache
+      id: bazel-cache
+      uses: actions/cache@v2
+      env:
+        version: 4.2.1
+      with:
+        path: | 
+          ~/.cache/bazel
+        key: ${{ runner.os }}-{{ env.version }}-bazel-cache
     - name: install bazel
       run: choco install bazel
     - uses: actions/checkout@v1
-    - name: populate bazel cache
-        id: bazel-cache
-        uses: actions/cache@v2
-        env:
-          version: 4.2.1
-        with:
-          path: | 
-            ~/.cache/bazel
-          key: ${{ runner.os }}-{{ env.version }}-bazel-cache
     - name: build
       run: |
         make
