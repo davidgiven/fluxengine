@@ -11,13 +11,13 @@
  * sure that the hardSectorId is correct.
  */
 
-#include "globals.h"
-#include "fluxmap.h"
-#include "decoders/fluxmapreader.h"
-#include "decoders/decoders.h"
-#include "sector.h"
+#include "lib/globals.h"
+#include "lib/fluxmap.h"
+#include "lib/decoders/fluxmapreader.h"
+#include "lib/decoders/decoders.h"
+#include "lib/sector.h"
 #include "northstar.h"
-#include "bytes.h"
+#include "lib/bytes.h"
 #include "lib/decoders/decoders.pb.h"
 #include "fmt/format.h"
 

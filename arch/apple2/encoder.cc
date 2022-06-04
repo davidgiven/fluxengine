@@ -1,15 +1,15 @@
-#include "globals.h"
+#include "lib/globals.h"
 #include "arch/apple2/apple2.h"
-#include "decoders/decoders.h"
-#include "encoders/encoders.h"
-#include "sector.h"
-#include "readerwriter.h"
-#include "image.h"
-#include "mapper.h"
+#include "lib/decoders/decoders.h"
+#include "lib/encoders/encoders.h"
+#include "lib/sector.h"
+#include "lib/readerwriter.h"
+#include "lib/image.h"
+#include "lib/mapper.h"
 #include "fmt/format.h"
 #include "lib/encoders/encoders.pb.h"
 #include <ctype.h>
-#include "bytes.h"
+#include "lib/bytes.h"
 
 static int encode_data_gcr(uint8_t data)
 {

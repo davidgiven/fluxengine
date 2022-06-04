@@ -1,5 +1,5 @@
-#include "globals.h"
-#include "bytes.h"
+#include "lib/globals.h"
+#include "lib/bytes.h"
 #include "fmt/format.h"
 
 void hexdump(std::ostream& stream, const Bytes& buffer)

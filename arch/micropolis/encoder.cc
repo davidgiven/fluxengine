@@ -1,10 +1,10 @@
-#include "globals.h"
+#include "lib/globals.h"
 #include "micropolis.h"
-#include "sector.h"
-#include "decoders/decoders.h"
-#include "encoders/encoders.h"
-#include "image.h"
-#include "mapper.h"
+#include "lib/sector.h"
+#include "lib/decoders/decoders.h"
+#include "lib/encoders/encoders.h"
+#include "lib/image.h"
+#include "lib/mapper.h"
 #include "lib/encoders/encoders.pb.h"
 
 static void write_sector(std::vector<bool>& bits,

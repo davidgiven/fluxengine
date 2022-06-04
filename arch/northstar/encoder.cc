@@ -1,11 +1,11 @@
-#include "globals.h"
+#include "lib/globals.h"
 #include "northstar.h"
-#include "sector.h"
-#include "bytes.h"
-#include "decoders/decoders.h"
-#include "encoders/encoders.h"
-#include "image.h"
-#include "mapper.h"
+#include "lib/sector.h"
+#include "lib/bytes.h"
+#include "lib/decoders/decoders.h"
+#include "lib/encoders/encoders.h"
+#include "lib/image.h"
+#include "lib/mapper.h"
 #include "lib/encoders/encoders.pb.h"
 
 #define GAP_FILL_SIZE_SD 30

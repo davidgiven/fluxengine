@@ -1,7 +1,7 @@
 #ifndef FLUXSOURCE_H
 #define FLUXSOURCE_H
 
-#include "flags.h"
+#include "lib/flags.h"
 
 class CwfFluxSourceProto;
 class EraseFluxSourceProto;

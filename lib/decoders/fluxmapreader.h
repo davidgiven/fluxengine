@@ -1,9 +1,9 @@
 #ifndef FLUXMAPREADER_H
 #define FLUXMAPREADER_H
 
-#include "fluxmap.h"
+#include "lib/fluxmap.h"
 #include "protocol.h"
-#include "flags.h"
+#include "lib/flags.h"
 
 class FluxMatcher;
 class DecoderProto;

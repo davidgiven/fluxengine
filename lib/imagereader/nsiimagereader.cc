@@ -1,13 +1,13 @@
 /* Image reader for Northstar floppy disk images */
 
-#include "globals.h"
-#include "flags.h"
-#include "sector.h"
-#include "imagereader/imagereader.h"
-#include "image.h"
+#include "lib/globals.h"
+#include "lib/flags.h"
+#include "lib/sector.h"
+#include "lib/imagereader/imagereader.h"
+#include "lib/image.h"
 #include "fmt/format.h"
-#include "logger.h"
-#include "mapper.h"
+#include "lib/logger.h"
+#include "lib/mapper.h"
 #include "lib/imagereader/imagereader.pb.h"
 #include <algorithm>
 #include <iostream>

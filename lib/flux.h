@@ -1,7 +1,7 @@
 #ifndef FLUX_H
 #define FLUX_H
 
-#include "bytes.h"
+#include "lib/bytes.h"
 
 class Fluxmap;
 class Sector;

@@ -1,4 +1,4 @@
-#include "globals.h"
+#include "lib/globals.h"
 #include "c64.h"
 
 /*

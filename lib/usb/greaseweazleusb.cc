@@ -1,11 +1,11 @@
-#include "globals.h"
+#include "lib/globals.h"
 #include "usb.h"
 #include "protocol.h"
-#include "fluxmap.h"
-#include "bytes.h"
+#include "lib/fluxmap.h"
+#include "lib/bytes.h"
 #include "fmt/format.h"
 #include "lib/usb/usb.pb.h"
-#include "greaseweazle.h"
+#include "lib/usb/greaseweazle.h"
 #include "serial.h"
 
 static const char* gw_error(int e)

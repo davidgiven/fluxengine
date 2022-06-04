@@ -1,10 +1,10 @@
-#include "globals.h"
-#include "flags.h"
-#include "fluxsource/fluxsource.h"
-#include "fluxmap.h"
+#include "lib/globals.h"
+#include "lib/flags.h"
+#include "lib/fluxsource/fluxsource.h"
+#include "lib/fluxmap.h"
 #include "lib/config.pb.h"
-#include "proto.h"
-#include "utils.h"
+#include "lib/proto.h"
+#include "lib/utils.h"
 #include "fmt/format.h"
 #include <regex>
 

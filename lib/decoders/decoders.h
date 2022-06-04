@@ -1,10 +1,10 @@
 #ifndef DECODERS_H
 #define DECODERS_H
 
-#include "bytes.h"
-#include "sector.h"
-#include "decoders/fluxmapreader.h"
-#include "decoders/fluxdecoder.h"
+#include "lib/bytes.h"
+#include "lib/sector.h"
+#include "lib/decoders/fluxmapreader.h"
+#include "lib/decoders/fluxdecoder.h"
 
 class Sector;
 class Fluxmap;
@@ -12,7 +12,7 @@ class FluxmapReader;
 class RawBits;
 class DecoderProto;
 
-#include "flux.h"
+#include "lib/flux.h"
 
 extern void setDecoderManualClockRate(double clockrate_us);
 

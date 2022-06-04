@@ -1,10 +1,10 @@
-#include "globals.h"
-#include "flags.h"
+#include "lib/globals.h"
+#include "lib/flags.h"
 #include "fmt/format.h"
 #include "dep/agg/include/agg2d.h"
 #include "dep/stb/stb_image_write.h"
-#include "utils.h"
-#include "bitmap.h"
+#include "lib/utils.h"
+#include "lib/bitmap.h"
 #include <regex>
 #include <sstream>
 

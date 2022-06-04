@@ -1,11 +1,11 @@
-#include "globals.h"
-#include "fluxmap.h"
-#include "kryoflux.h"
+#include "lib/globals.h"
+#include "lib/fluxmap.h"
+#include "lib/fluxsource/kryoflux.h"
 #include "lib/fluxsource/fluxsource.pb.h"
 #include "lib/utils.h"
-#include "fluxsource/fluxsource.h"
-#include "scp.h"
-#include "proto.h"
+#include "lib/fluxsource/fluxsource.h"
+#include "lib/scp.h"
+#include "lib/proto.h"
 #include "fmt/format.h"
 #include <fstream>
 

@@ -1,6 +1,6 @@
-#include "globals.h"
-#include "bytes.h"
-#include "crc.h"
+#include "lib/globals.h"
+#include "lib/bytes.h"
+#include "lib/crc.h"
 
 template <class T>
 T reflect(T bin, unsigned width = sizeof(T)*8)

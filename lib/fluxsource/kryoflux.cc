@@ -1,6 +1,6 @@
-#include "globals.h"
-#include "fluxmap.h"
-#include "kryoflux.h"
+#include "lib/globals.h"
+#include "lib/fluxmap.h"
+#include "lib/fluxsource/kryoflux.h"
 #include "protocol.h"
 #include "fmt/format.h"
 #include <fstream>

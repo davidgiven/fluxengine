@@ -1,7 +1,7 @@
-#include "globals.h"
-#include "fluxmap.h"
-#include "decoders/fluxmapreader.h"
-#include "decoders/fluxdecoder.h"
+#include "lib/globals.h"
+#include "lib/fluxmap.h"
+#include "lib/decoders/fluxmapreader.h"
+#include "lib/decoders/fluxdecoder.h"
 #include "lib/decoders/decoders.pb.h"
 
 /* This is a port of the samdisk code:

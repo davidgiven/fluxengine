@@ -1,9 +1,9 @@
-#include "globals.h"
-#include "flags.h"
-#include "fluxsink/fluxsink.h"
+#include "lib/globals.h"
+#include "lib/flags.h"
+#include "lib/fluxsink/fluxsink.h"
 #include "lib/config.pb.h"
-#include "proto.h"
-#include "utils.h"
+#include "lib/proto.h"
+#include "lib/utils.h"
 #include "fmt/format.h"
 #include <regex>
 

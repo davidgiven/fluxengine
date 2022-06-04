@@ -1,0 +1,2 @@
+build --action_env=BAZEL_CXXOPTS="-std=c++2a"
+

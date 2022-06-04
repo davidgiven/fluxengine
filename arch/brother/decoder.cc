@@ -1,12 +1,12 @@
-#include "globals.h"
-#include "fluxmap.h"
-#include "decoders/fluxmapreader.h"
-#include "decoders/decoders.h"
-#include "encoders/encoders.h"
+#include "lib/globals.h"
+#include "lib/fluxmap.h"
+#include "lib/decoders/fluxmapreader.h"
+#include "lib/decoders/decoders.h"
+#include "lib/encoders/encoders.h"
 #include "brother.h"
-#include "sector.h"
-#include "bytes.h"
-#include "crc.h"
+#include "lib/sector.h"
+#include "lib/bytes.h"
+#include "lib/crc.h"
 #include <ctype.h>
 
 const FluxPattern SECTOR_RECORD_PATTERN(32, BROTHER_SECTOR_RECORD);

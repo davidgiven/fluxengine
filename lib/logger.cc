@@ -1,10 +1,10 @@
-#include "globals.h"
-#include "bytes.h"
-#include "fluxmap.h"
-#include "sector.h"
-#include "flux.h"
+#include "lib/globals.h"
+#include "lib/bytes.h"
+#include "lib/fluxmap.h"
+#include "lib/sector.h"
+#include "lib/flux.h"
 #include "fmt/format.h"
-#include "logger.h"
+#include "lib/logger.h"
 
 static bool indented = false;
 static std::function<void(std::shared_ptr<const AnyLogMessage>)> loggerImpl =

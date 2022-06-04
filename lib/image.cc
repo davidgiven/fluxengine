@@ -1,6 +1,6 @@
-#include "globals.h"
-#include "sector.h"
-#include "image.h"
+#include "lib/globals.h"
+#include "lib/sector.h"
+#include "lib/image.h"
 
 Image::Image()
 {}

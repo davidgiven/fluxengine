@@ -1,8 +1,8 @@
-#include "globals.h"
-#include "fluxmap.h"
-#include "kryoflux.h"
+#include "lib/globals.h"
+#include "lib/fluxmap.h"
+#include "lib/fluxsource/kryoflux.h"
 #include "lib/fluxsource/fluxsource.pb.h"
-#include "fluxsource/fluxsource.h"
+#include "lib/fluxsource/fluxsource.h"
 
 class KryofluxFluxSource : public TrivialFluxSource
 {

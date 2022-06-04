@@ -1,7 +1,7 @@
 #ifndef IMAGEREADER_H
 #define IMAGEREADER_H
 
-#include "image.h"
+#include "lib/image.h"
 
 class ImageSpec;
 class ImageReaderProto;

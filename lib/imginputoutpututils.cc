@@ -1,6 +1,6 @@
-#include "globals.h"
+#include "lib/globals.h"
 #include "lib/imagereader/imagereader.pb.h"
-#include "imginputoutpututils.h"
+#include "lib/imginputoutpututils.h"
 
 std::vector<std::pair<int, int>> getTrackOrdering(const ImgInputOutputProto& config,
 	unsigned numTracks, unsigned numSides)

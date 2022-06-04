@@ -1,9 +1,9 @@
-#include "globals.h"
-#include "fluxmap.h"
-#include "decoders/fluxmapreader.h"
-#include "flags.h"
+#include "lib/globals.h"
+#include "lib/fluxmap.h"
+#include "lib/decoders/fluxmapreader.h"
+#include "lib/flags.h"
 #include "protocol.h"
-#include "proto.h"
+#include "lib/proto.h"
 #include "fmt/format.h"
 #include <numeric>
 #include <math.h>

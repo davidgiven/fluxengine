@@ -1,10 +1,10 @@
-#include "globals.h"
+#include "lib/globals.h"
 #include "gui.h"
 #include "visualisation.h"
-#include "fluxmap.h"
-#include "flux.h"
-#include "sector.h"
-#include "image.h"
+#include "lib/fluxmap.h"
+#include "lib/flux.h"
+#include "lib/sector.h"
+#include "lib/image.h"
 #include "fmt/format.h"
 
 #define BORDER 20

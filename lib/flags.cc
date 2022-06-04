@@ -1,7 +1,7 @@
-#include "globals.h"
-#include "flags.h"
-#include "proto.h"
-#include "utils.h"
+#include "lib/globals.h"
+#include "lib/flags.h"
+#include "lib/proto.h"
+#include "lib/utils.h"
 #include "fmt/format.h"
 #include <google/protobuf/text_format.h>
 #include <regex>

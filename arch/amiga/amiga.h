@@ -1,7 +1,7 @@
 #ifndef AMIGA_H
 #define AMIGA_H
 
-#include "encoders/encoders.h"
+#include "lib/encoders/encoders.h"
 
 #define AMIGA_SECTOR_RECORD 0xaaaa44894489LL
 

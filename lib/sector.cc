@@ -1,6 +1,6 @@
-#include "globals.h"
-#include "flux.h"
-#include "sector.h"
+#include "lib/globals.h"
+#include "lib/flux.h"
+#include "lib/sector.h"
 #include "fmt/format.h"
 
 Sector::Sector(const Location& location):

@@ -1,5 +1,5 @@
-#include "globals.h"
-#include "proto.h"
+#include "lib/globals.h"
+#include "lib/proto.h"
 #include "fmt/format.h"
 
 typedef int command_cb(int agrc, const char* argv[]);

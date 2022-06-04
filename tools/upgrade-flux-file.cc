@@ -1,7 +1,7 @@
-#include "globals.h"
-#include "fluxmap.h"
-#include "fluxsink/fluxsink.h"
-#include "bytes.h"
+#include "lib/globals.h"
+#include "lib/fluxmap.h"
+#include "lib/fluxsink/fluxsink.h"
+#include "lib/bytes.h"
 #include "fmt/format.h"
 #include <string.h>
 #include <fstream>

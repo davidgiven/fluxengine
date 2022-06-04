@@ -1,8 +1,8 @@
-#include "globals.h"
+#include "lib/globals.h"
 #include "usb.h"
 #include "protocol.h"
-#include "fluxmap.h"
-#include "bytes.h"
+#include "lib/fluxmap.h"
+#include "lib/bytes.h"
 #include "fmt/format.h"
 #include "serial.h"
 #include <unistd.h>

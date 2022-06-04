@@ -1,11 +1,11 @@
-#include "globals.h"
-#include "sector.h"
-#include "image.h"
+#include "lib/globals.h"
+#include "lib/sector.h"
+#include "lib/image.h"
 #include "fmt/format.h"
-#include "logger.h"
-#include "proto.h"
-#include "mapper.h"
-#include "flux.h"
+#include "lib/logger.h"
+#include "lib/proto.h"
+#include "lib/mapper.h"
+#include "lib/flux.h"
 #include "lib/mapper.pb.h"
 
 typedef std::function<void(

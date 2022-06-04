@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include "layout.h"
-#include "logger.h"
+#include "lib/logger.h"
 
 class CandidateDevice;
 class ConfigProto;

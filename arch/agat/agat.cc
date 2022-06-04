@@ -1,7 +1,7 @@
-#include "globals.h"
-#include "decoders/decoders.h"
+#include "lib/globals.h"
+#include "lib/decoders/decoders.h"
 #include "agat.h"
-#include "bytes.h"
+#include "lib/bytes.h"
 #include "fmt/format.h"
 
 uint8_t agatChecksum(const Bytes& bytes)
