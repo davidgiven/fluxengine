@@ -19,6 +19,7 @@ jobs:
         install: >-
           make
           ninja
+          mingw-w64-i686-meson
           mingw-w64-i686-libusb
           mingw-w64-i686-sqlite3
           mingw-w64-i686-zlib
