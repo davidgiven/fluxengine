@@ -49,12 +49,30 @@ def cc_binary_both(name, srcs, linkopts=[], deps=[]):
     )
 
 def proto_encode(name, src, message, proto, deps=[]):
+    native.proto_library(
+        name = name + "_proto",
+        deps = deps
+    )
+
+    native.cc_proto_library(
+        name = name + "_cc_proto",
+        deps = [ name + "_proto" ]
+    )
+
+    exe = name + "_encoder"
+    native.cc_binary(
+        name = exe,
+        srcs = [ "//scripts:proto_encode.cc" ],
+        defines = [ "PROTO=" + message ],
+        deps = [ name + "_cc_proto" ]
+    )
+
     native.genrule(
         name = name,
-        srcs = [ src ] + deps,
+        tools = [ exe ],
+        srcs = [ src ],
         outs = [ name + ".binpb" ],
-        cmd = "protoc --encode={} --descriptor_set_in={} {} < $(location {}) > $@".format(
-            message, ":".join(["$(location {})".format(n) for n in deps]), proto, src)
+        cmd = "$(location :{}) < $< > $@".format(exe)
     )
 
 def objectify(name, src, identifier=None):

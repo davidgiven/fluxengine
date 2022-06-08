@@ -1,2 +1,7 @@
 build --cxxopt=--std=c++2a
+build:mingw32 --host_crosstool_top=@bazel_tools//tools/cpp:toolchain
+build:mingw32 --host_compiler=msys-gcc
+build:mingw32 --crosstool_top=//scripts:mingw-toolchain
+build:mingw32 --cpu=i386_windows
+build:mingw32 --action_env=MINGW32
 

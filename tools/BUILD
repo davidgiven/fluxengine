@@ -7,7 +7,8 @@ cc_binary_both(
     srcs = [ "brother120tool.cc" ],
     deps = [
         "//:fluxengine_hdrs",
-        "//:fluxengine_lib"
+        "//:fluxengine_lib",
+        "//dep/emu",
     ]
 )
 
@@ -16,7 +17,8 @@ cc_binary_both(
     srcs = [ "brother240tool.cc" ],
     deps = [
         "//:fluxengine_hdrs",
-        "//:fluxengine_lib"
+        "//:fluxengine_lib",
+        "//dep/emu",
     ]
 )
 
@@ -32,4 +34,8 @@ cc_binary_both(
     ]
 )
 
+cc_binary(
+    name = "mkproto",
+    srcs = [ "mkproto.c" ]
+)
 

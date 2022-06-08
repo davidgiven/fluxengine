@@ -5,5 +5,8 @@ cc_library(
 	hdrs = glob(["fmt/*.h"]),
 	srcs = glob(["*.cc"]),
 	strip_include_prefix = ".",
+	copts = [
+		"-fext-numeric-literals"
+	]
 )
 

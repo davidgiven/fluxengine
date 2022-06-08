@@ -1,10 +1,23 @@
 PACKAGES = zlib sqlite3 protobuf
 
+
+ifeq ($(OS), Windows_NT)
+	BAZEL_PREOPTS = --output_user_root=bazel-tmp
+	BAZEL_POSTOPTS = --config=mingw32 \
+		--action_env=MINGW32=$(shell cygpath -w /mingw32)
+else
+	BAZEL_PREOPTS =
+	BAZEL_POSTOPTS =
+endif
+
 all:
-	bazel build //:commands
+	bazel $(BAZEL_PREOPTS) build $(BAZEL_POSTOPTS) //:commands --verbose_failures
 
 clean:
-	bazel clean
+	bazel $(BAZEL_PREOPTS) clean
+
+info:
+	bazel $(BAZEL_PREOPTS) info
 
 #export CFLAGS = \
 #	-ffunction-sections -fdata-sections
