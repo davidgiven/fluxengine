@@ -1,4 +1,5 @@
 subdir('formats')
+subdir('gui')
 
 executable(
   'fluxengine',
