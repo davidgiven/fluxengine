@@ -1,6 +1,9 @@
 project('fluxengine', 'cpp', 'c',
   default_options: ['cpp_std=c++2a']
 )
+add_global_arguments('-fext-numeric-literals', language: 'cpp')
+add_global_arguments('-Wno-deprecated-enum-enum-conversion', language: 'cpp')
+add_global_arguments('-Wno-deprecated-enum-float-conversion', language: 'cpp')
 
 zlib_dep = dependency('zlib')
 protobuf_dep = dependency('protobuf')
@@ -30,7 +33,6 @@ config_proto_h_cc = protoc_generator.process(
   'lib/config.proto',
   'lib/mapper.proto',
   'lib/drive.proto',
-  'lib/flux.proto',
   'arch/aeslanier/aeslanier.proto',
   'arch/amiga/amiga.proto',
   'arch/apple2/apple2.proto',
