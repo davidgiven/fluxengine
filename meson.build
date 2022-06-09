@@ -20,6 +20,7 @@ subdir('dep/agg')
 subdir('dep/fmt')
 subdir('dep/libusbp')
 subdir('dep/stb')
+subdir('dep/snowhouse')
 
 config_proto_h_cc = protoc_generator.process(
   'lib/decoders/decoders.proto',
@@ -192,4 +193,5 @@ libfluxengine_dep = declare_dependency(
 )
 
 subdir('src')
+subdir('tests')
 
