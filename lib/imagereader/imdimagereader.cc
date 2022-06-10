@@ -63,86 +63,6 @@ struct TrackHeader
     uint8_t SectorSize;
 };
 
-// static std::string copytostring(std::vector<unsigned char> tocopy)
-// {
-// 	std::string result;
-// 	 for (int i = 0; i< tocopy.size(); i++)
-// 	 {
-
-// 	 	result.push_back(tocopy[i]);
-// //		Logger() 	<< "IMD DEBUG: sector map:" << fmt::format("{}", tocopy[i]);
-
-// 	 }
-// 	Logger() 	<< "IMD DEBUG: sector map:" << fmt::format("{}", result);
-	 
-// 	return result;
-// }
-
-static uint8_t setsectorskew(int sectornumber)
-{//IMD lets the sector map start with 1 so everything we read in the sectormap has to be 1 less for fluxengine
-	switch (sectornumber)
-	{
-		case 0:
-			return '0';
-			break;
-		case 1:
-			return '1';
-			break;
-		case 2:
-			return '2';
-			break;
-		case 3:
-			return '3';
-			break;
-		case 4:
-			return '4';
-			break;
-		case 5:
-			return '5';
-			break;
-		case 6:
-			return '6';
-			break;
-		case 7:
-			return '7';
-			break;
-		case 8:
-			return '8';
-			break;
-		case 9:
-			return '9';
-			break;
-		case 10:
-			return 'a';
-			break;
-		case 11:
-			return 'b';
-			break;
-		case 12:
-			return 'c';
-			break;
-		case 13:
-			return 'd';
-			break;
-		case 14:
-			return 'e';
-			break;
-		case 15:
-			return 'f';
-			break;
-		case 16:
-			return 'g';
-			break;
-		case 17:
-			return 'h';
-			break;
-		case 18:
-			return 'i';
-			break;
-	}
-	Error() << fmt::format("IMD: Sector skew {} not in standard range (0-17).", sectornumber);
-}
-
 static unsigned getSectorSize(uint8_t flags)
 {
     switch (flags)
@@ -210,16 +130,13 @@ public:
         unsigned headerPtr = 0;
         unsigned Modulation_Speed = 0;
         unsigned sectorSize = 0;
-        //std::string sector_skew;
     	std::string sector_skew;
-		// sector_skew.clear();
 
         int b;  
         std::string comment;
 		bool blnOptionalCylinderMap = false;
 		bool blnOptionalHeadMap = false;
-		bool blnBase0 = false;
- //       unsigned char comment[8192]; //i choose a fixed value. dont know how to make dynamic arrays in C++. This should be enough
+		int trackSectorSize = -1;
 		// Read comment
 		comment.clear();
 		while ((b = br.read_8()) != EOF && b != END_OF_FILE)
@@ -228,9 +145,6 @@ public:
 			n++;
 		}        
 		headerPtr = n; //set pointer to after comment
-//        comment[n] = '\0'; // null-terminate the string
-        //write comment to screen
-//        Logger()   << fmt::format("IMD: comment: {}", comment);
 		Logger() 	<< "Comment in IMD file:"
 					<< fmt::format("{}",
 					comment);
@@ -283,40 +197,35 @@ public:
 				header.Head = header.Head^SEC_HEAD_MAP_FLAG; //remove flag 01000001 ^ 01000001 = 00000001 and 01000000 ^ 0100000 = 00000000 for writing sector head later
 			}            
             //read sector numbering map
-//            std::vector<unsigned> sector_map(header.numSectors);
-			blnBase0 = false;
 			sector_skew.clear();
-			uint8_t t_low = 1;
-			uint8_t t_high = 1;
 			for (b = 0;  b < header.numSectors; b++)
 			{	
 				uint8_t t;
 				t = br.read_8();
-//				Logger() 	<< "IMD DEBUG: t:" << fmt::format(" {0:d}", t);
-				if (t < t_low) t_low = t;
-				if (t > t_high) t_high = t;
-//				if (t == 0) blnBase0 = true;
-				sector_skew.push_back(setsectorskew(t));
+				sector_skew.push_back(t);
 				headerPtr++;
-//				sector_map[b] = b;
             }
 
-//			for (int i = 0;  i < header.numSectors; i++)
-//			{	
-//				Logger() 	<< "IMD DEBUG: sector map:", sector_skew[1];
-//			}
 		    auto ibm = config.mutable_encoder()->mutable_ibm();
            
- 			// if (!config.drive().has_rotational_period_ms())
-    		// 	config.mutable_drive()->set_rotational_period_ms(200);
-    
             auto trackdata = ibm->add_trackdata();
             trackdata->set_target_clock_period_us(1e3 / Modulation_Speed);
             trackdata->set_target_rotational_period_ms(200);
-			//trackdata->sector_range().max_sector()=t_high;
-            trackdata->set_use_fm(fm);
-			//trackdata->set_allocated_sector_range(_IbmDecoderProto_TrackdataProto_SectorRangeProto_default_instance_)
-
+			if (trackSectorSize < 0)
+			{
+				trackSectorSize = sectorSize;
+				// this is the first sector we've read, use it settings for
+				// per-track data
+				trackdata->set_track(header.track);
+				trackdata->set_head(header.Head);
+				trackdata->set_sector_size(sectorSize);
+				trackdata->set_use_fm(fm);
+			}
+			else if (trackSectorSize != sectorSize)
+			{
+				Error() << "IMD: multiple sector sizes per track are "
+							"currently unsupported";
+			}
             auto sectors = trackdata->mutable_sectors();
             
             //read the sectors
@@ -324,31 +233,10 @@ public:
             {
                 Bytes sectordata;
    				Bytes compressed(sectorSize);
-				unsigned int SectorID;
-				switch (sector_skew[s])
-				{
-					case '0': SectorID = 0; break;
-					case '1': SectorID = 1;	break;
-					case '2': SectorID = 2;	break;
-					case '3': SectorID = 3;	break;
-					case '4': SectorID = 4;	break;
-					case '5': SectorID = 5;	break;
-					case '6': SectorID = 6;	break;
-					case '7': SectorID = 7;	break;
-					case '8': SectorID = 8;	break;
-					case '9': SectorID = 9;	break;
-					case 'a': SectorID = 10;	break;
-					case 'b': SectorID = 11;	break;
-					case 'c': SectorID = 12;	break;
-					case 'd': SectorID = 13;	break;
-					case 'e': SectorID = 14;	break;
-					case 'f': SectorID = 15;	break;
-					case 'g': SectorID = 16;	break;
-					case 'h': SectorID = 17;	break;
-					case 'i': SectorID = 18;
-				}
-//                const auto& sector = image->put(header.track, header.Head, sector_map[s]);
+				int SectorID;
+				SectorID = sector_skew[s];
                 const auto& sector = image->put(header.track, header.Head, SectorID);
+				sector->logicalSector = SectorID;
                 //read the status of the sector
                 unsigned int Status_Sector = br.read_8();
                 headerPtr++;
@@ -458,14 +346,11 @@ public:
 				//The Sector Cylinder Map has one entry for each sector, and contains the logical Cylinder ID for the corresponding sector in the Sector Numbering Map.
 				{
 					sector->physicalTrack = Mapper::remapTrackLogicalToPhysical(header.track);
-					//sector->physicalTrack = header.track;
 					sector->logicalTrack = optionalsector_map[s];
 					blnOptionalCylinderMap = false;
 				}
 				else 
 				{
-
-					//sector->logicalTrack = sector->physicalTrack = header.track;
 					sector->logicalTrack = header.track;
                     sector->physicalTrack = Mapper::remapTrackLogicalToPhysical(header.track);
 				}
@@ -481,13 +366,11 @@ public:
 					sector->logicalSide = header.Head;
                     sector->physicalHead = header.Head;
 				}
-				sector->logicalSector = SectorID;
             }
 
         }
         
-        if (config.encoder().format_case() !=
-            EncoderProto::FormatCase::FORMAT_NOT_SET)
+        if (config.encoder().format_case() != EncoderProto::FormatCase::FORMAT_NOT_SET)
             Logger() << "IMD: overriding configured format";
 
 
@@ -498,10 +381,10 @@ public:
 
 
     	Logger() << "IMD: read "
-				<< fmt::format("{} tracks, {} heads; {}; {} kbps; {} sectoren; sectorsize {}; sectormap {}; {} kB total.",
+				<< fmt::format("{} tracks, {} heads; {}; {} kbps; {} sectoren; sectorsize {}; {} kB total.",
 				header.track + 1, header.Head + 1,
 				fm ? "FM" : "MFM",
-				Modulation_Speed, header.numSectors, sectorSize, sector_skew, (header.track+1) * trackSize / 1024);
+				Modulation_Speed, header.numSectors, sectorSize, (header.track+1) * trackSize / 1024);
 
         if (!config.has_heads())
         {
@@ -516,10 +399,6 @@ public:
             tracks->set_start(0);
             tracks->set_end(geometry.numTracks - 1);
         }
-		if (!config.has_sector_mapping())
-		{
-
-		}
 
         return image;
 
