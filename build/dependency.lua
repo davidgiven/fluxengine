@@ -1,0 +1,35 @@
+local function unnl(s)
+	return (s:gsub("[\n\r]+", " "))
+end
+
+definerule("dependency",
+	{
+		pkg_config = { type="string", optional=true },
+		fallback = { type="targets", optional=true }
+	},
+	function (e)
+		local fallback = e.fallback and targetsof(e.fallback) or {}
+		if #fallback > 1 then
+			error("fallback must be a single target")
+		end
+
+		local cflags, _, _, e1 = shell(vars.PKG_CONFIG, "--silence-errors", "--cflags", e.pkg_config)
+		local libs, _, _, e2 = shell(vars.PKG_CONFIG, "--silence-errors", "--libs", e.pkg_config)
+		local version, _, _, e3 = shell(vars.PKG_CONFIG, "--silence-errors", "--modversion", e.pkg_config)
+		if (e1 ~= 0) or (e2 ~= 0) or (e3 ~= 0) then
+			if #fallback == 0 then
+				error(string.format("required dependency '%s' missing", e.pkg_config))
+			end
+			print("dependency ", e.pkg_config, ": internal")
+			return inherit(fallback[1], {})
+		else
+			print("dependency ", e.pkg_config, ": pkg-config ", unnl(version))
+			return {
+				is = { clibrary = true },
+				dep_cflags = unnl(cflags),
+				dep_libs = unnl(libs),
+			}
+		end
+	end
+)
+
