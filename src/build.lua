@@ -18,7 +18,7 @@ cprogram {
 		"~+libfluxengine",
 		"src/formats+formats",
 		"dep/agg+agg",
-		"dep/stb+stb",
+		"~+stb_dep",
 	},
 	vars = {
 		["+cflags"] = { "-Ilib", "-Iarch", "-I." }

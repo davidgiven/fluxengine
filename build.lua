@@ -13,6 +13,12 @@ dependency {
 }
 
 dependency {
+	name = "stb_dep",
+	pkg_config = "stb",
+	fallback = "dep/stb+stb"
+}
+
+dependency {
 	name = "protobuf_dep",
 	pkg_config = "protobuf"
 }
