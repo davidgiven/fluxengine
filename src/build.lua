@@ -1,6 +1,19 @@
 cprogram {
 	name = "fluxengine",
-	srcs = { "src/*.cc" },
+	srcs = {
+		"./fe-analysedriveresponse.cc",
+		"./fe-analyselayout.cc",
+		"./fe-inspect.cc",
+		"./fe-rawread.cc",
+		"./fe-rawwrite.cc",
+		"./fe-read.cc",
+		"./fe-rpm.cc",
+		"./fe-seek.cc",
+		"./fe-testbandwidth.cc",
+		"./fe-testvoltages.cc",
+		"./fe-write.cc",
+		"./fluxengine.cc",
+	},
 	deps = {
 		".+libfluxengine",
 		".+config_lib",
@@ -12,7 +25,6 @@ cprogram {
 		"dep/agg+agg",
 		"dep/stb+stb",
 		"dep/libusbp+libusbp",
-		".+libudev_dep",
 	},
 	vars = {
 		["+cflags"] = { "-Ilib", "-Iarch", "-I." }

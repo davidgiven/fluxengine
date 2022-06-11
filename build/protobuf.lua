@@ -26,7 +26,7 @@ definerule("proto_cc_library",
 			ins = ins,
 			outleaves = outleaves,
 			commands = {
-				"protoc --cpp_out=%{dir} %{ins}"
+				"%{PROTOC} --cpp_out=%{dir} %{ins}"
 			}
 		}
 

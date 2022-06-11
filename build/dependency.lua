@@ -37,6 +37,7 @@ definerule("wxwidgets",
 	{
 		static = { type="boolean", default=false },
 		modules = { type="strings", default={} },
+		optional = { type="boolean", default=false },
 	},
 	function (e)
 		local static = e.static and "--static=yes" or ""
@@ -45,13 +46,20 @@ definerule("wxwidgets",
 		local libs, _, _, e2 = shell(vars.WX_CONFIG, static, "--libs", modules)
 		local version, _, _, e3 = shell(vars.PKG_CONFIG, "--silence-errors", "--version", e.pkg_config)
 		if (e1 ~= 0) or (e2 ~= 0) or (e3 ~= 0) then
-			error(string.format("required dependency '%s' missing", e.pkg_config))
+			if e.optional then
+				return {
+					is = { clibrary = true },
+					found = false
+				}
+			end
+			error("required dependency 'wxwidgets' missing")
 		else
 			print("dependency wxwidgets: wx-config ", unnl(version))
 			return {
 				is = { clibrary = true },
 				dep_cxxflags = unnl(cxxflags),
 				dep_libs = unnl(libs),
+				found = true
 			}
 		end
 	end

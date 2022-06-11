@@ -1,6 +1,6 @@
 clibrary {
 	name = "stb",
-	srcs = { "./*.c" },
-	hdrs = { "./*.h" }
+	srcs = { "./stb_image_write.c" },
+	hdrs = { "./stb_image_write.h" }
 }
 

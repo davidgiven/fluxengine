@@ -7,7 +7,6 @@
 --   is = { set of rule types which made the target }
 -- }
 
-local posix = require("posix")
 local emitter = {}
 local rules = {}
 local targets = {}
@@ -126,8 +125,14 @@ local function asstring(o)
 end
 
 local function concatpath(...)
-	local p = table.concat({...}, "/")
-	return (p:gsub("/+", "/"):gsub("^%./", ""):gsub("/%./", "/"))
+	local p = {}
+	for _, f in ipairs({...}) do
+		if f ~= "" then
+			p[#p+1] = f
+		end
+	end
+	p = table.concat(p, "/")
+	return (p:gsub("/+", "/"):gsub("/%./", "/"))
 end
 
 -- Returns a list of the targets within the given collection; the keys of any
@@ -413,11 +418,7 @@ loadtarget = function(targetname)
 
 		local files
 		if targetname:find("[?*]") then
-			files = posix.glob(targetname)
-			if not files then
-				error(string.format(
-					"glob '%s' returned no files (this is almost certainly an error", targetname))
-			end
+			error("globbing not supported")
 		else
 			files = {targetname}
 		end
@@ -724,6 +725,12 @@ definerule("simplerule",
 	end
 )
 
+definerule("empty",
+	{},
+	function (e)
+	end
+)
+
 definerule("installable",
 	{
 		map = { type="targets", default={} },
@@ -746,14 +753,14 @@ definerule("installable",
 				error("only references to other installables can be missing a destination")
 			else
 				local f = filenamesof(src)
-				if (#f ~= 1) then
+				if #f > 1 then
 					error("installable can only cope with targets emitting single files")
+				elseif #f == 1 then
+					deps[#deps+1] = f
+					dests[#dests+1] = dest
+					outs[#outs+1] = dest
+					commands[#commands+1] = "cp "..f[1].." "..dest
 				end
-
-				deps[#deps+1] = f
-				dests[#dests+1] = dest
-				outs[#outs+1] = dest
-				commands[#commands+1] = "cp "..f[1].." "..dest
 			end
 		end
 
@@ -820,8 +827,6 @@ local function parse_arguments(argmap, arg)
 end
 
 globals = {
-	posix = posix,
-
 	asstring = asstring,
 	basename = basename,
 	concat = concat,

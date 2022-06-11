@@ -1,3 +1,5 @@
+# Normal settings.
+
 OBJDIR = .obj
 LUA = lua
 CC = gcc
@@ -5,11 +7,24 @@ CXX = g++
 AR = ar
 PKG_CONFIG = pkg-config
 WX_CONFIG = wx-config
+PROTOC = protoc
 CFLAGS = -g
 CXXFLAGS = -std=c++2a \
 	-Wno-deprecated-enum-float-conversion \
 	-Wno-deprecated-enum-enum-conversion
 LDFLAGS =
+PLATFORM = UNIX
+
+# Apply special Windows settings.
+
+ifeq ($(OS), Windows_NT)
+	MINGWBIN = /mingw32/bin
+	LUA = $(MINGWBIN)/lua
+	PKG_CONFIG = $(MINGWBIN)/pkg-config
+	WX_CONFIG = $(MINGWBIN)/wx-config
+	PROTOC = $(MINGWBIN)/protoc
+	PLATFORM = WINDOWS
+endif
 
 all: $(OBJDIR)/build.ninja
 	@ninja -f $<
@@ -26,6 +41,8 @@ $(OBJDIR)/build.ninja: Makefile $(shell find . -name '*.lua')
 		LDFLAGS="$(LDFLAGS)" \
 		OBJDIR="$(OBJDIR)" \
 		PKG_CONFIG="$(PKG_CONFIG)" \
+		PLATFORM="$(PLATFORM)" \
+		PROTOC="$(PROTOC)" \
 		WX_CONFIG="$(WX_CONFIG)" \
 		> $@
 
