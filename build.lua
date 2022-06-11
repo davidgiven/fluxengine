@@ -4,6 +4,7 @@ vars.ldflags = { "-pthread" }
 
 include "build/protobuf.lua"
 include "build/dependency.lua"
+include "build/tests.lua"
 
 dependency {
 	name = "fmt_dep",
@@ -181,4 +182,6 @@ installable {
 		["upgrade-flux-file"] = "tools+upgrade-flux-file",
 	}
 }
+
+include "tests/build.lua"
 
