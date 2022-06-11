@@ -4,6 +4,7 @@ CC = gcc
 CXX = g++
 AR = ar
 PKG_CONFIG = pkg-config
+WX_CONFIG = wx-config
 CFLAGS = -g
 CXXFLAGS = -std=c++2a \
 	-Wno-deprecated-enum-float-conversion \
@@ -25,6 +26,7 @@ $(OBJDIR)/build.ninja: Makefile $(shell find . -name '*.lua')
 		LDFLAGS="$(LDFLAGS)" \
 		OBJDIR="$(OBJDIR)" \
 		PKG_CONFIG="$(PKG_CONFIG)" \
+		WX_CONFIG="$(WX_CONFIG)" \
 		> $@
 
 clean:
