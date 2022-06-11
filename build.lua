@@ -165,6 +165,7 @@ clibrary {
 		"+zlib_dep",
 		"dep/libusbp+libusbp",
 	},
+	dep_cflags = { "-Ilib", "-Iarch", "-I." },
 	vars = {
 		["+cflags"] = { "-Ilib", "-Iarch", "-I." }
 	}
@@ -175,6 +176,9 @@ installable {
 	map = {
 		["fluxengine"] = "src+fluxengine",
 		["fluxengine-gui"] = "src/gui+fluxengine",
+		["brother120tool"] = "tools+brother120tool",
+		["brother240tool"] = "tools+brother240tool",
+		["upgrade-flux-file"] = "tools+upgrade-flux-file",
 	}
 }
 
