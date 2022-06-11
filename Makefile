@@ -1,5 +1,5 @@
 OBJDIR = .obj
-LUA = lua5.3
+LUA = lua
 CC = gcc
 CXX = g++
 AR = ar
