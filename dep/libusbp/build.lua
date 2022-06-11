@@ -13,13 +13,24 @@ if vars.PLATFORM == "WINDOWS" then
 		"./src/windows/list_windows.c",
 		"./src/windows/serial_port_windows.c",
 	}
+elseif vars.PLATFORM == "OSX" then
+	sys_srcs = {
+		"./src/mac/async_in_transfer_mac.c",
+		"./src/mac/device_mac.c",
+		"./src/mac/error_mac.c",
+		"./src/mac/generic_handle_mac.c",
+		"./src/mac/generic_interface_mac.c",
+		"./src/mac/iokit_mac.c",
+		"./src/mac/list_mac.c",
+		"./src/mac/serial_port_mac.c",
+	}
 else
 	dependency {
 		name = "libudev_dep",
 		pkg_config = "libudev"
 	}
 
-	sys_deps[#sys_deps+1] = ":libudev_dep"
+	sys_deps = { "+libudev_dep" }
 	sys_srcs = {
 		"./src/linux/async_in_transfer_linux.c",
 		"./src/linux/device_linux.c",
@@ -41,14 +52,6 @@ clibrary {
 		"./src/error_hresult.c",
 		"./src/find_device.c",
 		"./src/list.c",
-		--"./src/mac/async_in_transfer_mac.c",
-		--"./src/mac/device_mac.c",
-		--"./src/mac/error_mac.c",
-		--"./src/mac/generic_handle_mac.c",
-		--"./src/mac/generic_interface_mac.c",
-		--"./src/mac/iokit_mac.c",
-		--"./src/mac/list_mac.c",
-		--"./src/mac/serial_port_mac.c",
 		"./src/pipe_id.c",
 		"./src/string.c",
 		sys_srcs,

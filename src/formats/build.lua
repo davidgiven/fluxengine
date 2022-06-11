@@ -59,9 +59,9 @@ cprogram {
 	name = "protoencode",
 	srcs = { "scripts/protoencode.cc" },
 	deps = {
-		".+config_lib",
-		".+protobuf_dep",
-		".+fmt_dep",
+		"~+config_lib",
+		"~+protobuf_dep",
+		"~+fmt_dep",
 	},
 }
 

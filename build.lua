@@ -57,7 +57,7 @@ proto_cc_library {
 
 clibrary {
 	name = "protocol_lib",
-	hdrs = { "protocol.h" }
+	hdrs = { "./protocol.h" }
 }
 
 clibrary {

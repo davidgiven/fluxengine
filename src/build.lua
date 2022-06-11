@@ -15,16 +15,10 @@ cprogram {
 		"./fluxengine.cc",
 	},
 	deps = {
-		".+libfluxengine",
-		".+config_lib",
-		".+protocol_lib",
-		".+fmt_dep",
-		".+protobuf_dep",
-		".+zlib_dep",
+		"~+libfluxengine",
 		"src/formats+formats",
 		"dep/agg+agg",
 		"dep/stb+stb",
-		"dep/libusbp+libusbp",
 	},
 	vars = {
 		["+cflags"] = { "-Ilib", "-Iarch", "-I." }

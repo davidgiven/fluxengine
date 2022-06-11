@@ -113,6 +113,9 @@ definerule("clibrary",
 		deps = { type="targets", default={} },
 		hdrs = { type="targets", default={} },
 		dep_cflags = { type="strings", default={} },
+		dep_cxxflags = { type="strings", default={} },
+		dep_ldflags = { type="strings", default={} },
+		dep_libs = { type="strings", default={} },
 	},
 	function (e)
 		local ins = do_cfiles(e)
@@ -148,7 +151,6 @@ definerule("clibrary",
 				commands[#commands+1] = string.format("install -D %s %%{dir}/%s", v[1], k)
 			end
 		end
-		--table.sort(commands)
 
 		local lib = normalrule {
 			name = e.name,
@@ -159,9 +161,21 @@ definerule("clibrary",
 			label = e.label,
 			commands = sorted(commands),
 		}
-
+		
 		lib.dep_cflags = concat(e.dep_cflags, "-I"..lib.dir)
+		lib.dep_cxxflags = e.dep_cxxflags
+		lib.dep_ldflags = e.dep_ldflags
+		lib.dep_libs = concat(e.dep_libs, filenamesof(lib))
 		lib.dep_cxx = cxx
+
+		for _, d in pairs(targetsof(e.deps)) do
+			lib.dep_cflags = concat(lib.dep_cflags, d.dep_cflags)
+			lib.dep_cxxflags = concat(lib.dep_cxxflags, d.dep_cxxflags)
+			lib.dep_ldflags = concat(lib.dep_ldflags, d.dep_ldflags)
+			lib.dep_libs = concat(lib.dep_libs, d.dep_libs)
+			lib.dep_cxx = lib.dep_cxx or d.dep_cxx
+		end
+
 		return lib
 	end
 )
@@ -185,20 +199,16 @@ definerule("cprogram",
 			end
 		end
 
-		ins = concat(ins, matching(filenamesof(e.deps), "%.a$"))
-
-		local ldflags = e.vars.ldflags or {}
 		local libs = {}
-		for _, lib in pairs(targetsof(e.deps)) do
-			if lib.dep_cxx then
-				cxx = true
-			end
-			if lib.dep_ldflags then
-				ldflags = concat(ldflags, lib.dep_ldflags)
-			end
-			if lib.dep_libs then
-				libs = concat(libs, lib.dep_libs)
-			end
+		local cflags = {}
+		local cxxflags = {}
+		local ldflags = {}
+		for _, lib in pairs(e.deps) do
+			cflags = concat(cflags, lib.dep_cflags)
+			cxxflags = concat(cxxflags, lib.dep_cxxflags)
+			ldflags = concat(ldflags, lib.dep_ldflags)
+			libs = concat(libs, lib.dep_libs)
+			cxx = cxx or lib.dep_cxx
 		end
 
 		local command
@@ -216,6 +226,8 @@ definerule("cprogram",
 			outleaves = { e.name },
 			commands = { command },
 			vars = {
+				cflags = cflags,
+				cxxflags = cxxflags,
 				ldflags = ldflags,
 				libs = libs,
 			}

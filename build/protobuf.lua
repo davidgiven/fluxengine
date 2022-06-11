@@ -41,8 +41,9 @@ definerule("proto_cc_library",
 			srcs = { protosrcs },
 			hdrs = hdrs,
 			dep_cflags = { "-I"..protosrcs.dir },
+			dep_ldflags = { "-pthread" },
 			vars = {
-				["+cflags"] = { "-I"..protosrcs.dir }
+				["+cflags"] = { "-I"..protosrcs.dir, "-pthread" }
 			}
 		}
 

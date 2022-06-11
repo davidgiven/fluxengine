@@ -12,7 +12,7 @@ local rules = {}
 local targets = {}
 local buildfiles = {}
 local globals
-local cwd = "."
+local cwd = ""
 local vars = {}
 local parente = {}
 local loadingstack = {}
@@ -125,13 +125,7 @@ local function asstring(o)
 end
 
 local function concatpath(...)
-	local p = {}
-	for _, f in ipairs({...}) do
-		if f ~= "" then
-			p[#p+1] = f
-		end
-	end
-	p = table.concat(p, "/")
+	p = table.concat({...}, "/")
 	return (p:gsub("/+", "/"):gsub("/%./", "/"))
 end
 
@@ -155,7 +149,9 @@ local function targetsof(...)
 				if item:find("^%+") then
 					item = cwd..item
 				elseif item:find("^%./") then
-					item = concatpath(cwd, item)
+					if cwd ~= "" then
+						item = concatpath(cwd, item)
+					end
 				end
 				o[#o+1] = loadtarget(item)
 			else
@@ -405,7 +401,7 @@ local function loadbuildfile(filename)
 end
 
 local function loadbuildfilefor(filepart, targetpart)
-	local normalname = concatpath(filepart, "/build.lua")
+	local normalname = concatpath(filepart, "build.lua")
 	loadbuildfile(normalname)
 end
 
@@ -437,7 +433,7 @@ loadtarget = function(targetname)
 		end
 		if filepart == "" then
 			filepart = cwd
-		elseif filepart == "." then
+		elseif filepart == "~" then
 			filepart = ""
 		end
 		targetname = filepart.."+"..targetpart

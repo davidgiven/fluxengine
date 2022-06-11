@@ -9,19 +9,15 @@ if wxwidgets_dep.found then
 	cprogram {
 		name = "fluxengine",
 		srcs = {
-			"./*.cpp",
-			"./*.cc"
+			"src/gui/main.cc",
+			"src/gui/mainwindow.cc",
+			"src/gui/visualisation.cc",
+			"src/gui/layout.cpp",
 		},
 		deps = {
-			".+libfluxengine",
-			"src/formats+formats",
-			".+config_lib",
+			"~+libfluxengine",
 			"+wxwidgets_dep",
-			".+zlib_dep",
-			".+libudev_dep",
-			".+protobuf_dep",
-			".+fmt_dep",
-			"dep/libusbp+libusbp",
+			"src/formats+formats",
 		},
 		vars = {
 			["+cflags"] = { "-Ilib", "-Iarch", "-I." }

@@ -1,5 +1,9 @@
 local function unnl(s)
-	return (s:gsub("[\n\r]+", " "))
+	s = (s:gsub("[\n\r]+", " "))
+	if s == "" then
+		return nil
+	end
+	return s
 end
 
 definerule("dependency",
@@ -26,8 +30,8 @@ definerule("dependency",
 			print("dependency ", e.pkg_config, ": pkg-config ", unnl(version))
 			return {
 				is = { clibrary = true },
-				dep_cflags = unnl(cflags),
-				dep_libs = unnl(libs),
+				dep_cflags = { unnl(cflags) },
+				dep_libs = { unnl(libs) },
 			}
 		end
 	end
