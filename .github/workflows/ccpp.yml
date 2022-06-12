@@ -21,7 +21,7 @@ jobs:
       with:
         fetch-depth: 1
     - name: brew
-      run: brew install sqlite pkg-config libusb lua@5.3 ninja protobuf truncate wxwidgets fmt
+      run: brew install sqlite pkg-config libusb lua ninja protobuf truncate wxwidgets fmt
     - name: make
       run: make
 
