@@ -9,7 +9,6 @@ include "build/tests.lua"
 dependency {
 	name = "fmt_dep",
 	pkg_config = "fmt",
-	fallback = "dep/fmt+fmt"
 }
 
 dependency {
