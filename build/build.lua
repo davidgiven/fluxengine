@@ -127,9 +127,12 @@ definerule("clibrary",
 			end
 		end
 
-		local commands = {
-			"rm -f %{outs[1]} && $(AR) cqs %{outs[1]} %{ins}"
-		}
+		local mkdirs = {}
+		local copies = {}
+		local function copy_file(src, dest)
+			mkdirs[#mkdirs+1] = "mkdir -p %{dir}/"..dirname(dest)
+			copies[#copies+1] = "cp "..src.." %{dir}/"..dest
+		end
 
 		local deps = {}
 		for k, v in pairs(e.hdrs) do
@@ -141,14 +144,14 @@ definerule("clibrary",
 						error(string.format("filename '%s' is not local to '%s' --- "..
 							"you'll have to specify the output filename manually", v, e.cwd))
 					end
-					commands[#commands+1] = string.format("install -D %s %%{dir}/%s", v, v:gsub("^"..e.cwd, ""))
+					copy_file(v, v:gsub("^"..e.cwd, ""))
 				end
 			else
 				v = filenamesof(v)
 				if #v ~= 1 then
 					error("each mapped hdrs item can only cope with a single file")
 				end
-				commands[#commands+1] = string.format("install -D %s %%{dir}/%s", v[1], k)
+				copy_file(v[1], k)
 			end
 		end
 
@@ -159,7 +162,11 @@ definerule("clibrary",
 			deps = deps,
 			outleaves = { e.name..".a" },
 			label = e.label,
-			commands = sorted(commands),
+			commands = {
+				"rm -f %{outs[1]} && $(AR) cqs %{outs[1]} %{ins}",
+				sorted(mkdirs),
+				sorted(copies)
+			}
 		}
 		
 		lib.dep_cflags = concat(e.dep_cflags, "-I"..lib.dir)
