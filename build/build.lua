@@ -213,9 +213,9 @@ definerule("cprogram",
 
 		local command
 		if cxx then
-			command = "$(CXX) $(LDFLAGS) %{ldflags} -o %{outs[1]} %{ins} %{libs}"
+			command = "$(CXX) $(LDFLAGS) %{ldflags} -o %{outs[1]} %{ins} %{libs} %{libs}"
 		else
-			command = "$(CC) $(LDFLAGS) %{ldflags} -o %{outs[1]} %{ins} %{libs}"
+			command = "$(CC) $(LDFLAGS) %{ldflags} -o %{outs[1]} %{ins} %{libs} %{libs}"
 		end
 
 		return normalrule {

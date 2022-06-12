@@ -2,20 +2,32 @@
 
 ifeq ($(OS), Windows_NT)
 	MINGWBIN = /mingw32/bin
+	CCPREFIX = $(MINGWBIN)/
 	LUA = $(MINGWBIN)/lua
 	PKG_CONFIG = $(MINGWBIN)/pkg-config
-	WX_CONFIG = $(MINGWBIN)/wx-config
+	WX_CONFIG = /usr/bin/sh $(MINGWBIN)/wx-config
 	PROTOC = $(MINGWBIN)/protoc
 	PLATFORM = WINDOWS
+	LDFLAGS += \
+		-static
+	CXXFLAGS += \
+		-std=c++2a \
+		-fext-numeric-literals \
+		-Wno-deprecated-enum-float-conversion \
+		-Wno-deprecated-enum-enum-conversion
+
+	# Required to get the gcc run-time libraries on the path.
+	export PATH := $(PATH):$(MINGWBIN)
 endif
 
 # Normal settings.
 
 OBJDIR ?= .obj
+CCPREFIX ?=
 LUA ?= lua
-CC ?= gcc
-CXX ?= g++
-AR ?= ar
+CC = $(CCPREFIX)gcc
+CXX = $(CCPREFIX)g++
+AR = $(CCPREFIX)ar
 PKG_CONFIG ?= pkg-config
 WX_CONFIG ?= wx-config
 PROTOC ?= protoc
@@ -27,7 +39,7 @@ LDFLAGS ?=
 PLATFORM ?= UNIX
 TESTS ?= yes
 
-all:: $(OBJDIR)/build.ninja compile_commands.json
+all:: $(OBJDIR)/build.ninja
 	@ninja -f $< -t compdb > compile_commands.json
 	@ninja -f $<
 

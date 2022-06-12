@@ -36,18 +36,18 @@ jobs:
         update: true
         msystem: MINGW32
         install: >-
+          diffutils
           make
-          ninja
-          mingw-w64-i686-libusb
-          mingw-w64-i686-sqlite3
-          mingw-w64-i686-zlib
+          mingw-w64-i686-fmt
           mingw-w64-i686-gcc
-          zip
+          mingw-w64-i686-libusb
           mingw-w64-i686-lua
           mingw-w64-i686-protobuf
-          vim
-          diffutils
+          mingw-w64-i686-sqlite3
           mingw-w64-i686-wxWidgets
+          mingw-w64-i686-zlib
+          ninja
+          zip
     - uses: actions/checkout@v1
       with:
         fetch-depth: 1

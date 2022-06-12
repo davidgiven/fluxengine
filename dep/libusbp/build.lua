@@ -13,6 +13,18 @@ if vars.PLATFORM == "WINDOWS" then
 		"./src/windows/list_windows.c",
 		"./src/windows/serial_port_windows.c",
 	}
+
+	sys_deps = {
+		clibrary {
+			name = "windeps",
+			dep_libs = {
+				"-lsetupapi",
+				"-lwinusb",
+				"-lole32",
+				"-luuid",
+			}
+		}
+	}
 elseif vars.PLATFORM == "OSX" then
 	sys_srcs = {
 		"./src/mac/async_in_transfer_mac.c",

@@ -6,6 +6,8 @@ local function unnl(s)
 	return s
 end
 
+local NOSTDERR = "2>/dev/null"
+
 definerule("dependency",
 	{
 		pkg_config = { type="string", optional=true },
@@ -37,6 +39,7 @@ definerule("dependency",
 	end
 )
 
+
 definerule("wxwidgets",
 	{
 		static = { type="boolean", default=false },
@@ -48,9 +51,10 @@ definerule("wxwidgets",
 		local modules = table.concat(e.modules, " ")
 		local cxxflags, _, _, e1 = shell(vars.WX_CONFIG, static, "--cxxflags")
 		local libs, _, _, e2 = shell(vars.WX_CONFIG, static, "--libs", modules)
-		local version, _, _, e3 = shell(vars.PKG_CONFIG, "--silence-errors", "--version", e.pkg_config)
+		local version, _, _, e3 = shell(vars.WX_CONFIG, "--version", e.pkg_config)
 		if (e1 ~= 0) or (e2 ~= 0) or (e3 ~= 0) then
 			if e.optional then
+				print("dependency wxwidgets: missing (but optional)")
 				return {
 					is = { clibrary = true },
 					found = false

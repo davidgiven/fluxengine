@@ -1,6 +1,6 @@
 clibrary {
 	name = "emu",
-	srcs = { "./*.c" },
+	srcs = { "./fnmatch.c" },
 	hdrs = {
 		"./fnmatch.h"
 	}

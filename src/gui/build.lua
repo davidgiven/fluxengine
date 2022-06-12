@@ -1,6 +1,6 @@
 local wxwidgets_dep = wxwidgets {
 	name = "wxwidgets_dep",
-	static = false,
+	static = (vars.PLATFORM == "WINDOWS"),
 	modules = { "core", "base" },
 	optional = true
 }
