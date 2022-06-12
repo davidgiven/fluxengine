@@ -24,7 +24,7 @@ called `build.lua`:
 
     cprogram {
       name = 'prog',
-      srcs = { "./*.c" },
+      srcs = { "./source1.c", "./source2.c" },
     }
 
 This defines a rule `prog` which, when built, compiles all the source files in
@@ -61,7 +61,8 @@ If we move the library into another directory, we can invoke it like this:
   * Targets containing a `+` refer to a named target in another build file. So,
     on encountering the library in `prog3` above, ackbuilder will look for
     `path/to/library/build.lua`, load it, and then try to find a target in it
-    called `library`.
+    called `library`. If you want to refer to a named target in the root
+    build file do `~+targetname`.
 
 **Warning**: files are interpreted from top to bottom; every time a target
 referring to another build file is seen for the first time, that file is
@@ -320,7 +321,7 @@ Easiest to explain with an example:
 
     cprogram {
       name = 'another_test',
-      srcs = { './*.c' },
+      srcs = { './source.c' },
       vars = {
         cflags = { '-g', '-O3' }
       }
@@ -336,7 +337,7 @@ stack. However, you can do this:
 
     cprogram {
       name = 'another_test',
-      srcs = { './*.c' },
+      srcs = { './source.c' },
       vars = {
         ["+cflags"] = { '-O3' }
       }
