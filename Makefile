@@ -11,13 +11,22 @@ ifeq ($(OS), Windows_NT)
 	LDFLAGS += \
 		-static
 	CXXFLAGS += \
-		-std=c++2a \
+		-std=c++17 \
 		-fext-numeric-literals \
 		-Wno-deprecated-enum-float-conversion \
 		-Wno-deprecated-enum-enum-conversion
 
 	# Required to get the gcc run-time libraries on the path.
 	export PATH := $(PATH):$(MINGWBIN)
+endif
+
+# Special OSX settings.
+
+ifeq ($(shell uname),Darwin)
+	PLATFORM = OSX
+	LDFLAGS += \
+		-framework IOKit \
+		-framework Foundation
 endif
 
 # Normal settings.
@@ -32,7 +41,7 @@ PKG_CONFIG ?= pkg-config
 WX_CONFIG ?= wx-config
 PROTOC ?= protoc
 CFLAGS ?= -g -Os
-CXXFLAGS ?= -std=c++2a \
+CXXFLAGS ?= -std=c++17 \
 	-Wno-deprecated-enum-float-conversion \
 	-Wno-deprecated-enum-enum-conversion
 LDFLAGS ?=
