@@ -8,6 +8,7 @@ definerule("normalrule",
 	{
 		ins = { type="targets" },
 		deps = { type="targets", default={} },
+		outs = { type="targets", default={} },
 		outleaves = { type="strings" },
 		label = { type="string", optional=true },
 		objdir = { type="string", optional=true },
@@ -28,7 +29,7 @@ definerule("normalrule",
 			name = e.name,
 			ins = e.ins,
 			deps = e.deps,
-			outs = realouts,
+			outs = concat(realouts, filenamesof(e.outs)),
 			label = e.label,
 			commands = e.commands,
 			vars = vars,
@@ -129,9 +130,11 @@ definerule("clibrary",
 
 		local mkdirs = {}
 		local copies = {}
+		local outs = {}
 		local function copy_file(src, dest)
 			mkdirs[#mkdirs+1] = "mkdir -p %{dir}/"..dirname(dest)
 			copies[#copies+1] = "cp "..src.." %{dir}/"..dest
+			outs[#outs+1] = objdir(e).."/"..dest
 		end
 
 		local deps = {}
@@ -155,24 +158,27 @@ definerule("clibrary",
 			end
 		end
 
+		ins = sorted(filenamesof(ins))
+		local has_ar = (#ins ~= 0)
 		local lib = normalrule {
 			name = e.name,
 			cwd = e.cwd,
 			ins = sorted(filenamesof(ins)),
 			deps = deps,
+			outs = outs,
 			outleaves = { e.name..".a" },
 			label = e.label,
 			commands = {
-				"rm -f %{outs[1]} && $(AR) cqs %{outs[1]} %{ins}",
 				sorted(mkdirs),
-				sorted(copies)
+				sorted(copies),
+				has_ar and "rm -f %{outs[1]} && $(AR) cqs %{outs[1]} %{ins}" or {},
 			}
 		}
 		
 		lib.dep_cflags = concat(e.dep_cflags, "-I"..lib.dir)
 		lib.dep_cxxflags = e.dep_cxxflags
 		lib.dep_ldflags = e.dep_ldflags
-		lib.dep_libs = concat(e.dep_libs, filenamesof(lib))
+		lib.dep_libs = concat(e.dep_libs, has_ar and matching(filenamesof(lib), "%.a$") or {})
 		lib.dep_cxx = cxx
 
 		for _, d in pairs(targetsof(e.deps)) do
@@ -198,11 +204,12 @@ definerule("cprogram",
 		local cxx = false
 
 		if (#e.srcs > 0) then
-			ins = do_cfiles(e)
-			for _, obj in pairs(ins) do
+			local objs = do_cfiles(e)
+			for _, obj in pairs(objs) do
 				if obj.is.cxxfile then
 					cxx = true
 				end
+				ins[#ins+1] = obj
 			end
 		end
 
