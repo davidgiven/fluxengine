@@ -121,6 +121,7 @@ include dep/fmt/build.mk
 include lib/build.mk
 include arch/build.mk
 include src/build.mk
+include src/gui/build.mk
 
 $(OBJDIR)/%.a:
 	@mkdir -p $(dir $@)

@@ -40,8 +40,8 @@ endif
 LIBUSBP_OBJS = $(patsubst %.c, $(OBJDIR)/%.o, $(LIBUSBP_SRCS))
 $(LIBUSBP_OBJS): CFLAGS += -Idep/libusbp/src -Idep/libusbp/include
 LIBUSBP_LIB = $(OBJDIR)/libusbp.a
-LIBUSBP_CFLAGS = -Idep/libusbp/include
-LIBUSBP_LDFLAGS = $(LIBUSBP_LIB)
+LIBUSBP_CFLAGS += -Idep/libusbp/include
+LIBUSBP_LDFLAGS += $(LIBUSBP_LIB)
 $(LIBUSBP_LIB): $(LIBUSBP_OBJS)
 
 
