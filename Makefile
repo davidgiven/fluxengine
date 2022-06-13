@@ -69,7 +69,7 @@ $(1): private LDFLAGS += $(call $(3)_LDFLAGS)
 $(2): private CFLAGS += $(call $(3)_CFLAGS)
 endef
 
-all: $(OBJDIR) fluxengine.exe
+all: fluxengine.exe
 
 PROTOS = \
 	arch/aeslanier/aeslanier.proto \
@@ -130,7 +130,7 @@ $(OBJDIR)/%.a:
 %.exe:
 	@mkdir -p $(dir $@)
 	@echo LINK $@
-	@$(CXX) -o $@ $^ -Wl,--start-group $(LDFLAGS) -Wl,--end-group
+	@$(CXX) -o $@ $^ $(LDFLAGS) $(LDFLAGS)
 
 $(OBJDIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
