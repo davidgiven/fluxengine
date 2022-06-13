@@ -12,7 +12,7 @@ jobs:
     - name: apt
       run: sudo apt update && sudo apt install lua5.3 lua-posix libudev-dev libsqlite3-dev ninja-build protobuf-compiler libwxgtk3.0-gtk3-dev libfmt-dev
     - name: make
-      run: make -j$(expr $(nproc) + 1)
+      run: make
 
   build-macos:
     runs-on: macos-latest
@@ -23,7 +23,7 @@ jobs:
     - name: brew
       run: brew install sqlite pkg-config libusb lua ninja protobuf truncate wxwidgets fmt make
     - name: make
-      run: gmake -j$(expr $(nproc) + 1)
+      run: gmake
 
   build-windows:
     runs-on: windows-latest
@@ -54,7 +54,7 @@ jobs:
         fetch-depth: 1
     - name: build
       run: |
-        make -j$(expr $(nproc) + 1)
+        make
 
     - name: zip
       run: |
