@@ -27,3 +27,5 @@ $(call use-library, fluxengine.exe, $(FLUXENGINE_OBJS), LIBUSBP)
 $(call use-library, fluxengine.exe, $(FLUXENGINE_OBJS), PROTO)
 $(call use-library, fluxengine.exe, $(FLUXENGINE_OBJS), STB)
 
+all: fluxengine.exe
+

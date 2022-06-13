@@ -61,6 +61,11 @@ LDFLAGS += \
 	-lfmt
 
 .SUFFIXES:
+.DELETE_ON_ERROR:
+
+define nl
+
+endef
 
 use-library = $(eval $(use-library-impl))
 define use-library-impl
@@ -79,7 +84,7 @@ $(1): private LDFLAGS += $(shell $(PKG_CONFIG) --libs $(3))
 $(2): private CFLAGS += $(shell $(PKG_CONFIG) --cflags $(3))
 endef
 
-all: fluxengine.exe
+all: tests
 
 PROTOS = \
 	arch/aeslanier/aeslanier.proto \
@@ -133,6 +138,7 @@ include arch/build.mk
 include src/build.mk
 include src/gui/build.mk
 include tools/build.mk
+include tests/build.mk
 
 $(OBJDIR)/%.a:
 	@mkdir -p $(dir $@)
