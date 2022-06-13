@@ -8,6 +8,19 @@ LIBUSBP_SRCS = \
 	dep/libusbp/src/string.c \
 	
 ifeq ($(OS), Windows_NT)
+
+LIBUSBP_LDFLAGS += -lsetupapi -lwinusb -lole32 -luuid
+LIBUSBP_SRCS += \
+	dep/libusbp/src/windows/async_in_transfer_windows.c \
+	dep/libusbp/src/windows/device_instance_id_windows.c \
+	dep/libusbp/src/windows/device_windows.c \
+	dep/libusbp/src/windows/error_windows.c \
+	dep/libusbp/src/windows/generic_handle_windows.c \
+	dep/libusbp/src/windows/generic_interface_windows.c \
+	dep/libusbp/src/windows/interface_windows.c \
+	dep/libusbp/src/windows/list_windows.c \
+	dep/libusbp/src/windows/serial_port_windows.c \
+
 else ifeq ($(shell uname),Darwin)
 
 LIBUSBP_SRCS += \

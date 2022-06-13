@@ -5,7 +5,7 @@ ifeq ($(OS), Windows_NT)
 	CCPREFIX = $(MINGWBIN)/
 	LUA = $(MINGWBIN)/lua
 	PKG_CONFIG = $(MINGWBIN)/pkg-config
-	WX_CONFIG = /usr/bin/sh $(MINGWBIN)/wx-config
+	WX_CONFIG = /usr/bin/sh $(MINGWBIN)/wx-config --static=yes
 	PROTOC = $(MINGWBIN)/protoc
 	PLATFORM = WINDOWS
 	LDFLAGS += \
@@ -105,12 +105,12 @@ PROTOS = \
 PROTO_HDRS = $(patsubst %.proto, $(OBJDIR)/%.pb.h, $(PROTOS))
 PROTO_SRCS = $(patsubst %.proto, $(OBJDIR)/%.pb.cc, $(PROTOS))
 PROTO_OBJS = $(patsubst %.cc, %.o, $(PROTO_SRCS))
-PROTO_CFLAGS = $(shell pkg-config --cflags protobuf)
+PROTO_CFLAGS = $(shell $(PKG_CONFIG) --cflags protobuf)
 $(PROTO_SRCS): | $(PROTO_HDRS)
 $(PROTO_OBJS): CFLAGS += $(PROTO_CFLAGS)
 PROTO_LIB = $(OBJDIR)/libproto.a
 $(PROTO_LIB): $(PROTO_OBJS)
-PROTO_LDFLAGS = $(shell pkg-config --libs protobuf) -pthread $(PROTO_LIB)
+PROTO_LDFLAGS = $(shell $(PKG_CONFIG) --libs protobuf) -pthread $(PROTO_LIB)
 .PRECIOUS: $(PROTO_HDRS) $(PROTO_SRCS)
 
 include dep/agg/build.mk
