@@ -48,30 +48,119 @@ LDFLAGS ?=
 PLATFORM ?= UNIX
 TESTS ?= yes
 
-all:: $(OBJDIR)/build.ninja
-	@ninja -f $< -t compdb > compile_commands.json
-	@ninja -f $<
+CFLAGS += \
+	-Iarch \
+	-Ilib \
+	-I. \
+	-I$(OBJDIR)/arch \
+	-I$(OBJDIR)/lib \
+	-I$(OBJDIR) \
 
-$(OBJDIR)/build.ninja: Makefile $(shell find . -name '*.lua')
-	@mkdir -p $(OBJDIR)
-	@$(LUA) build/ackbuilder.lua build/build.lua build.lua \
-		--ninja \
-		AR="$(AR)" \
-		CC="$(CC)" \
-		CFLAGS="$(CFLAGS)" \
-		CXX="$(CXX)" \
-		CXXFLAGS="$(CXXFLAGS)" \
-		LDFLAGS="$(LDFLAGS)" \
-		OBJDIR="$(OBJDIR)" \
-		PKG_CONFIG="$(PKG_CONFIG)" \
-		PLATFORM="$(PLATFORM)" \
-		PROTOC="$(PROTOC)" \
-		TESTS="$(TESTS)" \
-		WX_CONFIG="$(WX_CONFIG)" \
-		> $@
+LDFLAGS += \
+	-lz \
+	-lfmt
+
+.SUFFIXES:
+
+use-library = $(eval $(use-library-impl))
+define use-library-impl
+$(1): | $(call $(3)_LIB)
+$(1): private LDFLAGS += $(call $(3)_LDFLAGS)
+$(2): private CFLAGS += $(call $(3)_CFLAGS)
+endef
+
+all: $(OBJDIR) fluxengine.exe
+
+PROTOS = \
+	arch/aeslanier/aeslanier.proto \
+	arch/amiga/amiga.proto \
+	arch/apple2/apple2.proto \
+	arch/brother/brother.proto \
+	arch/c64/c64.proto \
+	arch/f85/f85.proto \
+	arch/fb100/fb100.proto \
+	arch/ibm/ibm.proto \
+	arch/macintosh/macintosh.proto \
+	arch/mx/mx.proto \
+	arch/victor9k/victor9k.proto \
+	arch/zilogmcz/zilogmcz.proto \
+	arch/tids990/tids990.proto \
+	arch/micropolis/micropolis.proto \
+	arch/northstar/northstar.proto \
+	arch/agat/agat.proto \
+	lib/decoders/decoders.proto \
+	lib/encoders/encoders.proto \
+	lib/fluxsink/fluxsink.proto \
+	lib/fluxsource/fluxsource.proto \
+	lib/imagereader/imagereader.proto \
+	lib/imagewriter/imagewriter.proto \
+	lib/usb/usb.proto \
+	lib/common.proto \
+	lib/fl2.proto \
+	lib/config.proto \
+	lib/mapper.proto \
+	lib/drive.proto \
+	tests/testproto.proto \
+
+PROTO_HDRS = $(patsubst %.proto, $(OBJDIR)/%.pb.h, $(PROTOS))
+PROTO_SRCS = $(patsubst %.proto, $(OBJDIR)/%.pb.cc, $(PROTOS))
+PROTO_OBJS = $(patsubst %.cc, %.o, $(PROTO_SRCS))
+PROTO_CFLAGS = $(shell pkg-config --cflags protobuf)
+$(PROTO_SRCS): | $(PROTO_HDRS)
+$(PROTO_OBJS): CFLAGS += $(PROTO_CFLAGS)
+PROTO_LIB = $(OBJDIR)/libproto.a
+$(PROTO_LIB): $(PROTO_OBJS)
+PROTO_LDFLAGS = $(shell pkg-config --libs protobuf) -pthread $(PROTO_LIB)
+.PRECIOUS: $(PROTO_HDRS) $(PROTO_SRCS)
+
+include dep/agg/build.mk
+include dep/libusbp/build.mk
+include dep/stb/build.mk
+include dep/fmt/build.mk
+
+include lib/build.mk
+include arch/build.mk
+include src/build.mk
+
+$(OBJDIR)/%.a:
+	@mkdir -p $(dir $@)
+	@echo AR $@
+	@$(AR) rc $@ $^
+
+%.exe:
+	@mkdir -p $(dir $@)
+	@echo LINK $@
+	@$(CXX) -o $@ $^ -Wl,--start-group $(LDFLAGS) -Wl,--end-group
+
+$(OBJDIR)/%.o: %.cpp
+	@mkdir -p $(dir $@)
+	@echo CXX $<
+	@$(CXX) $(CFLAGS) $(CXXFLAGS) -MMD -MP -MF $(@:.o=.d) -c -o $@ $<
+
+$(OBJDIR)/%.o: %.cc
+	@mkdir -p $(dir $@)
+	@echo CXX $<
+	@$(CXX) $(CFLAGS) $(CXXFLAGS) -MMD -MP -MF $(@:.o=.d) -c -o $@ $<
+
+$(OBJDIR)/%.o: $(OBJDIR)/%.cc
+	@mkdir -p $(dir $@)
+	@echo CXX $<
+	@$(CXX) $(CFLAGS) $(CXXFLAGS) -MMD -MP -MF $(@:.o=.d) -c -o $@ $<
+
+$(OBJDIR)/%.o: %.c
+	@mkdir -p $(dir $@)
+	@echo CC $<
+	@$(CC) $(CFLAGS) $(CFLAGS) -MMD -MP -MF $(@:.o=.d) -c -o $@ $<
+
+$(OBJDIR)/%.pb.h: %.proto
+	@mkdir -p $(dir $@)
+	@echo PROTOC $@
+	@$(PROTOC) -I. --cpp_out=$(OBJDIR) $<
 
 clean:
 	rm -rf $(OBJDIR)
+
+-include $(LIB_OBJS:%.o=%.d)
 
 #PACKAGES = zlib sqlite3 protobuf
 #
