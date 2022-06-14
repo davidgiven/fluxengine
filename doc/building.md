@@ -200,9 +200,14 @@ These lists are not necessarily exhaustive --- please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new) if I've missed
 anything.
 
-All systems build by just doing `make`. You should end up with a single
-executable in the current directory, called `fluxengine`. It has minimal
-dependencies and you should be able to put it anywhere.
+Windows and Linux (and other Unixes) build by just doing `make`. OSX builds by
+doing `gmake` (we're using a feature which the elderly default make in OSX
+doesn't have). You should end up with some executables in the current
+directory, one of which is called `fluxengine.exe`. It has minimal dependencies
+and you should be able to put it anywhere. The others may also be of interest.
+
+**Note:** The executable is called `fluxengine.exe` on Linux and OSX because
+that makes the build simpler. Feel free to rename it to `fluxengine`.
 
 If it doesn't build, please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new).
