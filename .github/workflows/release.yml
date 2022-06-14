@@ -22,17 +22,13 @@ jobs:
           mingw-w64-i686-fmt
           mingw-w64-i686-gcc
           mingw-w64-i686-libusb
-          mingw-w64-i686-lua
           mingw-w64-i686-pkg-config
           mingw-w64-i686-protobuf
           mingw-w64-i686-sqlite3
           mingw-w64-i686-wxWidgets
           mingw-w64-i686-zlib
-          ninja
           zip
     - uses: actions/checkout@v1
-      with:
-        fetch-depth: 1
     - name: build
       run: |
         make
