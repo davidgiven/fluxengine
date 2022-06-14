@@ -29,9 +29,15 @@ $(call declare-test,fmmfm)
 $(call declare-test,greaseweazle)
 $(call declare-test,kryoflux)
 $(call declare-test,ldbs)
-#$(call declare-test,proto)
+$(call declare-test,proto)
 $(call declare-test,utils)
 
 $(call use-library, $(OBJDIR)/tests/agg.exe, $(OBJDIR)/tests/agg.o, AGG)
 $(call use-library, $(OBJDIR)/tests/agg.exe, $(OBJDIR)/tests/agg.o, STB)
+
+$(OBJDIR)/tests/proto.exe: $(OBJDIR)/tests/testproto.o
+$(OBJDIR)/tests/testproto.cc: $(OBJDIR)/protoencode_TestProto.exe tests/testproto.textpb
+	@mkdir -p $(dir $@)
+	@echo PROTOENCODE $@
+	@$^ $@ testproto_pb
 

@@ -3,13 +3,14 @@
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <fstream>
 #include "fmt/format.h"
+#include "tests/testproto.pb.h"
 #include "lib/config.pb.h"
 
 #define STRINGIFY(s) #s
 
 int main(int argc, const char* argv[])
 {
-	ConfigProto message;
+	PROTO message;
 
 	std::ifstream input(argv[1]);
 	if (!input)

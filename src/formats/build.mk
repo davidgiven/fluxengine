@@ -54,11 +54,8 @@ FORMATS = \
 	victor9k_ss \
 	zilogmcz \
 
-$(OBJDIR)/protoencode.exe: $(OBJDIR)/scripts/protoencode.o
-$(call use-library, $(OBJDIR)/protoencode.exe, $(OBJDIR)/scripts/protoencode.o, PROTO)
-
 $(OBJDIR)/src/formats/format_%.o: $(OBJDIR)/src/formats/format_%.cc
-$(OBJDIR)/src/formats/format_%.cc: $(OBJDIR)/protoencode.exe src/formats/%.textpb
+$(OBJDIR)/src/formats/format_%.cc: $(OBJDIR)/protoencode_ConfigProto.exe src/formats/%.textpb
 	@mkdir -p $(dir $@)
 	@echo PROTOENCODE $*
 	@$^ $@ formats_$*_pb
