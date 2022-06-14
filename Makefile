@@ -140,6 +140,47 @@ include src/gui/build.mk
 include tools/build.mk
 include tests/build.mk
 
+do-encodedecodetest = $(eval $(do-encodedecodetest-impl))
+define do-encodedecodetest-impl
+
+tests: $(OBJDIR)/$1.encodedecode
+$(OBJDIR)/$1.encodedecode: scripts/encodedecodetest.sh fluxengine.exe $2
+	@mkdir -p $(dir $$@)
+	@echo ENCODEDECODETEST $1
+	@scripts/encodedecodetest.sh $1 flux $2 > $$@
+
+endef
+
+$(call do-encodedecodetest,amiga)
+$(call do-encodedecodetest,apple2)
+$(call do-encodedecodetest,atarist360)
+$(call do-encodedecodetest,atarist370)
+$(call do-encodedecodetest,atarist400)
+$(call do-encodedecodetest,atarist410)
+$(call do-encodedecodetest,atarist720)
+$(call do-encodedecodetest,atarist740)
+$(call do-encodedecodetest,atarist800)
+$(call do-encodedecodetest,atarist820)
+$(call do-encodedecodetest,bk800)
+$(call do-encodedecodetest,brother120)
+$(call do-encodedecodetest,brother240)
+$(call do-encodedecodetest,commodore1541,scripts/commodore1541_test.textpb)
+$(call do-encodedecodetest,commodore1581)
+$(call do-encodedecodetest,hp9121)
+$(call do-encodedecodetest,ibm1200)
+$(call do-encodedecodetest,ibm1232)
+$(call do-encodedecodetest,ibm1440)
+$(call do-encodedecodetest,ibm180)
+$(call do-encodedecodetest,ibm360)
+$(call do-encodedecodetest,ibm720)
+$(call do-encodedecodetest,mac400,scripts/mac400_test.textpb)
+$(call do-encodedecodetest,mac800,scripts/mac800_test.textpb)
+$(call do-encodedecodetest,n88basic)
+$(call do-encodedecodetest,rx50)
+$(call do-encodedecodetest,tids990)
+$(call do-encodedecodetest,victor9k_ss)
+$(call do-encodedecodetest,victor9k_ds)
+
 $(OBJDIR)/%.a:
 	@mkdir -p $(dir $@)
 	@echo AR $@
