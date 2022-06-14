@@ -11,6 +11,17 @@
 #include <iostream>
 #include <fstream>
 
+static int countl_zero(uint32_t value)
+{
+	int count = 0;
+	while (!(value & 0x8000000))
+	{
+		value <<= 1;
+		count++;
+	}
+	return count;
+}
+
 class D88ImageWriter : public ImageWriter
 {
 public:
@@ -72,7 +83,7 @@ public:
 				sectorWriter.write_8(sector->logicalTrack);
 				sectorWriter.write_8(sector->logicalSide);
 				sectorWriter.write_8(sector->logicalSector);
-				sectorWriter.write_8(24 - std::countl_zero(uint32_t(sector->data.size())));
+				sectorWriter.write_8(24 - countl_zero(uint32_t(sector->data.size())));
 				sectorWriter.write_le16(sectors.size());
 				sectorWriter.write_8(0x00); // always write mfm
 				sectorWriter.write_8(0x00); // always write not deleted data

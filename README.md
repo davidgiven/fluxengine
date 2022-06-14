@@ -209,12 +209,6 @@ Given and is licensed under the MIT open source license. Please see
 [COPYING](COPYING) for the full text. The tl;dr is: you can do what you like
 with it provided you don't claim you wrote it.
 
-As an exception, `dep/fmt` contains a copy of [fmt](http://fmtlib.net),
-maintained by Victor Zverovich (`vitaut <https://github.com/vitaut>`) and
-Jonathan Müller (`foonathan <https://github.com/foonathan>`) with
-contributions from many other people. It is licensed under the terms of the
-BSD license. Please see the contents of the directory for the full text.
-
 As an exception, `dep/emu` contains parts of the OpenBSD C library
 code, maintained by Todd Miller and William A. Rowe (and probably others). It is licensed
 under the terms of the 3-clause BSD license. Please see the contents of the

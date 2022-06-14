@@ -186,21 +186,28 @@ well, although on Windows it'll need MSYS2 and mingw32. You'll need to
 install some support packages.
 
   - For Linux (this is Ubuntu, but this should apply to Debian too):
-	`ninja-build`, `libusb-1.0-0-dev`, `libsqlite3-dev`, `zlib1g-dev`,
-	`libudev-dev`, `protobuf-compiler`, `libwxgtk3.0-gtk3-dev`.
-  - For OSX with Homebrew: `ninja`, `libusb`, `pkg-config`, `sqlite`,
-    `protobuf`, `truncate`, `wxwidgets`.
-  - For Windows with MSYS2: `make`, `ninja`, `mingw-w64-i686-libusb`,
+	`libusb-1.0-0-dev`, `libsqlite3-dev`, `zlib1g-dev`,
+	`libudev-dev`, `protobuf-compiler`, `libwxgtk3.0-gtk3-dev`,
+	`libfmt-dev`.
+  - For OSX with Homebrew: `libusb`, `pkg-config`, `sqlite`,
+    `protobuf`, `truncate`, `wxwidgets`, `fmt`.
+  - For Windows with MSYS2: `make`, `mingw-w64-i686-libusb`,
 	`mingw-w64-i686-protobuf`, `mingw-w64-i686-sqlite3`, `mingw-w64-i686-zlib`,
-	`mingw-w64-i686-gcc`, `vim`, `diffutils`, `mingw-w64-i686-wxWidgets`.
+	`mingw-w64-i686-gcc`, `vim`, `diffutils`, `mingw-w64-i686-wxWidgets`,
+	`mingw-w64-i686-fmt`, `mingw-w64-i686-pkg-config`.
 
 These lists are not necessarily exhaustive --- please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new) if I've missed
 anything.
 
-All systems build by just doing `make`. You should end up with a single
-executable in the current directory, called `fluxengine`. It has minimal
-dependencies and you should be able to put it anywhere.
+Windows and Linux (and other Unixes) build by just doing `make`. OSX builds by
+doing `gmake` (we're using a feature which the elderly default make in OSX
+doesn't have). You should end up with some executables in the current
+directory, one of which is called `fluxengine.exe`. It has minimal dependencies
+and you should be able to put it anywhere. The others may also be of interest.
+
+**Note:** The executable is called `fluxengine.exe` on Linux and OSX because
+that makes the build simpler. Feel free to rename it to `fluxengine`.
 
 If it doesn't build, please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new).
