@@ -131,7 +131,6 @@ PROTO_LDFLAGS = $(shell $(PKG_CONFIG) --libs protobuf) -pthread $(PROTO_LIB)
 include dep/agg/build.mk
 include dep/libusbp/build.mk
 include dep/stb/build.mk
-include dep/fmt/build.mk
 include dep/emu/build.mk
 
 include lib/build.mk

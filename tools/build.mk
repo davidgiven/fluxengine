@@ -12,7 +12,6 @@ $(call use-library, brother240tool.exe, $(OBJDIR)/tools/brother240tool.o, LIBFLU
 $(call use-library, brother240tool.exe, $(OBJDIR)/tools/brother240tool.o, EMU)
 
 $(call use-pkgconfig, upgrade-flux-file.exe, $(OBJDIR)/tools/upgrade-flux-file.o, sqlite3)
-$(call use-pkgconfig, upgrade-flux-file.exe, $(OBJDIR)/tools/upgrade-flux-file.o, zlib)
 $(call use-library, upgrade-flux-file.exe, $(OBJDIR)/tools/upgrade-flux-file.o, LIBFLUXENGINE)
 $(call use-library, upgrade-flux-file.exe, $(OBJDIR)/tools/upgrade-flux-file.o, PROTO)
 

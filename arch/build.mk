@@ -37,3 +37,4 @@ $(LIBARCH_LIB): $(LIBARCH_OBJS)
 
 LIBARCH_LDFLAGS = $(LIBARCH_LIB)
 
+$(call use-pkgconfig, $(LIBARCH_LIB), $(LIBARCH_OBJS), fmt)
