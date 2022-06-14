@@ -69,9 +69,9 @@ endef
 
 use-library = $(eval $(use-library-impl))
 define use-library-impl
-$(1): | $(call $(3)_LIB)
-$(1): private LDFLAGS += $(call $(3)_LDFLAGS)
-$(2): private CFLAGS += $(call $(3)_CFLAGS)
+$1: $(call $3_LIB)
+$1: private LDFLAGS += $(call $3_LDFLAGS)
+$2: private CFLAGS += $(call $3_CFLAGS)
 endef
 
 use-pkgconfig = $(eval $(use-pkgconfig-impl))
