@@ -42,8 +42,6 @@ jobs:
       uses: EndBug/latest-tag@latest
       with:
         ref: dev
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: delete-old-assets
       uses: mknejp/delete-release-assets@v1
       with:
