@@ -10,7 +10,7 @@ jobs:
       with:
         fetch-depth: 1
     - name: apt
-      run: sudo apt update && sudo apt install lua5.3 lua-posix libudev-dev libsqlite3-dev ninja-build protobuf-compiler libwxgtk3.0-gtk3-dev libfmt-dev
+      run: sudo apt update && sudo apt install libudev-dev libsqlite3-dev protobuf-compiler libwxgtk3.0-gtk3-dev libfmt-dev
     - name: make
       run: make
 
@@ -21,7 +21,7 @@ jobs:
       with:
         fetch-depth: 1
     - name: brew
-      run: brew install sqlite pkg-config libusb lua ninja protobuf truncate wxwidgets fmt make
+      run: brew install sqlite pkg-config libusb protobuf truncate wxwidgets fmt make
     - name: make
       run: gmake
 
@@ -41,13 +41,11 @@ jobs:
           mingw-w64-i686-fmt
           mingw-w64-i686-gcc
           mingw-w64-i686-libusb
-          mingw-w64-i686-lua
           mingw-w64-i686-pkg-config
           mingw-w64-i686-protobuf
           mingw-w64-i686-sqlite3
           mingw-w64-i686-wxWidgets
           mingw-w64-i686-zlib
-          ninja
           zip
     - uses: actions/checkout@v1
       with:

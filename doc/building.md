@@ -186,12 +186,12 @@ well, although on Windows it'll need MSYS2 and mingw32. You'll need to
 install some support packages.
 
   - For Linux (this is Ubuntu, but this should apply to Debian too):
-	`ninja-build`, `libusb-1.0-0-dev`, `libsqlite3-dev`, `zlib1g-dev`,
+	`libusb-1.0-0-dev`, `libsqlite3-dev`, `zlib1g-dev`,
 	`libudev-dev`, `protobuf-compiler`, `libwxgtk3.0-gtk3-dev`,
 	`libfmt-dev`.
-  - For OSX with Homebrew: `ninja`, `libusb`, `pkg-config`, `sqlite`,
+  - For OSX with Homebrew: `libusb`, `pkg-config`, `sqlite`,
     `protobuf`, `truncate`, `wxwidgets`, `fmt`.
-  - For Windows with MSYS2: `make`, `ninja`, `mingw-w64-i686-libusb`,
+  - For Windows with MSYS2: `make`, `mingw-w64-i686-libusb`,
 	`mingw-w64-i686-protobuf`, `mingw-w64-i686-sqlite3`, `mingw-w64-i686-zlib`,
 	`mingw-w64-i686-gcc`, `vim`, `diffutils`, `mingw-w64-i686-wxWidgets`,
 	`mingw-w64-i686-fmt`, `mingw-w64-i686-pkg-config`.
