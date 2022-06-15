@@ -16,16 +16,22 @@ FLUXENGINE_SRCS = \
  
 FLUXENGINE_OBJS = $(patsubst %.cc, $(OBJDIR)/%.o, $(FLUXENGINE_SRCS))
 $(FLUXENGINE_SRCS): | $(PROTO_HDRS)
-fluxengine.exe: $(FLUXENGINE_OBJS)
+FLUXENGINE_BIN = $(OBJDIR)/fluxengine.exe
+$(FLUXENGINE_BIN): $(FLUXENGINE_OBJS)
 
-$(call use-pkgconfig, fluxengine.exe, $(FLUXENGINE_OBJS), fmt)
-$(call use-library, fluxengine.exe, $(FLUXENGINE_OBJS), AGG)
-$(call use-library, fluxengine.exe, $(FLUXENGINE_OBJS), LIBARCH)
-$(call use-library, fluxengine.exe, $(FLUXENGINE_OBJS), LIBFLUXENGINE)
-$(call use-library, fluxengine.exe, $(FLUXENGINE_OBJS), LIBFORMATS)
-$(call use-library, fluxengine.exe, $(FLUXENGINE_OBJS), LIBUSBP)
-$(call use-library, fluxengine.exe, $(FLUXENGINE_OBJS), PROTO)
-$(call use-library, fluxengine.exe, $(FLUXENGINE_OBJS), STB)
+$(call use-pkgconfig, $(FLUXENGINE_BIN), $(FLUXENGINE_OBJS), fmt)
+$(call use-library, $(FLUXENGINE_BIN), $(FLUXENGINE_OBJS), AGG)
+$(call use-library, $(FLUXENGINE_BIN), $(FLUXENGINE_OBJS), LIBARCH)
+$(call use-library, $(FLUXENGINE_BIN), $(FLUXENGINE_OBJS), LIBFLUXENGINE)
+$(call use-library, $(FLUXENGINE_BIN), $(FLUXENGINE_OBJS), LIBFORMATS)
+$(call use-library, $(FLUXENGINE_BIN), $(FLUXENGINE_OBJS), LIBUSBP)
+$(call use-library, $(FLUXENGINE_BIN), $(FLUXENGINE_OBJS), PROTO)
+$(call use-library, $(FLUXENGINE_BIN), $(FLUXENGINE_OBJS), STB)
 
-all: fluxengine.exe
+all: fluxengine$(EXT)
+
+fluxengine$(EXT): $(FLUXENGINE_BIN)
+	@echo CP $@
+	@cp $< $@
+
 
