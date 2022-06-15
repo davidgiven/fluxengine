@@ -57,7 +57,7 @@ public:
 		vector.push_back(fluxmap.rawBytes());
 	}
 
-	operator std::string () const
+	operator std::string () const override
 	{
 		return fmt::format("fl2({})", _filename);
 	}

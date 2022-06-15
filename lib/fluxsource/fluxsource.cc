@@ -51,6 +51,7 @@ void FluxSource::updateConfigForFilename(FluxSourceProto* proto, const std::stri
 
 	static const std::vector<std::pair<std::regex, std::function<void(const std::string&, FluxSourceProto*)>>> formats =
 	{
+		{ std::regex("^(.*\\.a2r)$"),  [](auto& s, auto* proto) { }},
 		{ std::regex("^(.*\\.flux)$"),     [](auto& s, auto* proto) { proto->mutable_fl2()->set_filename(s); }},
 		{ std::regex("^(.*\\.scp)$"),      [](auto& s, auto* proto) { proto->mutable_scp()->set_filename(s); }},
 		{ std::regex("^(.*\\.cwf)$"),      [](auto& s, auto* proto) { proto->mutable_cwf()->set_filename(s); }},

@@ -8,6 +8,7 @@ class Fluxmap;
 class FluxSinkProto;
 class HardwareFluxSinkProto;
 class AuFluxSinkProto;
+class A2RFluxSinkProto;
 class VcdFluxSinkProto;
 class ScpFluxSinkProto;
 class Fl2FluxSinkProto;
@@ -19,6 +20,7 @@ public:
 
     static std::unique_ptr<FluxSink> createHardwareFluxSink(const HardwareFluxSinkProto& config);
     static std::unique_ptr<FluxSink> createAuFluxSink(const AuFluxSinkProto& config);
+    static std::unique_ptr<FluxSink> createA2RFluxSink(const A2RFluxSinkProto& config);
     static std::unique_ptr<FluxSink> createVcdFluxSink(const VcdFluxSinkProto& config);
     static std::unique_ptr<FluxSink> createScpFluxSink(const ScpFluxSinkProto& config);
     static std::unique_ptr<FluxSink> createFl2FluxSink(const Fl2FluxSinkProto& config);
