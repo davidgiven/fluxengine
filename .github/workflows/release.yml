@@ -39,7 +39,7 @@ jobs:
       run: |
         echo "RELEASE_DATE=$(date --rfc-3339=date)" >> ${GITHUB_ENV}
     - name: tag
-      uses: EndBug/latest-tag@1.4.0
+      uses: EndBug/latest-tag@v1.4.0
       with:
         tag-name: dev
       env:
