@@ -105,20 +105,9 @@ private:
 
 	void writeFlux(int cylinder, int head, const Fluxmap& fluxmap) override
 	{
-		// Note: this assumes that 'cylinder' numbers are in the PC high density 5.25 drive numbering, NOT apple numbering
-		unsigned location = cylinder * 2 + head;
-
 		if(!fluxmap.bytes()) {
 			return;
 		}
-
-		if (location > 255) {
-			Error() << fmt::format("A2R: cannot write track {} head {}, "
-				"{} does not fit within the location field\n",
-				cylinder, head, location);
-			return;
-		}
-
 
 		// Writing from an image (as opposed to from a floppy) will contain exactly one revolution and no index events.
 		auto is_image = [](auto &fluxmap) {
@@ -187,7 +176,7 @@ private:
 
 		uint32_t chunk_size = 10 + trackBytes.size();
 
-		_strmWriter.write_8(location);
+		_strmWriter.write_8(cylinder);
 		_strmWriter.write_8(A2R_TIMING);
 		_strmWriter.write_le32(trackBytes.size());
 		_strmWriter.write_le32(ticks_to_a2r(loopPoint));
