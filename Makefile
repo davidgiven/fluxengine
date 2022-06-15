@@ -18,6 +18,7 @@ ifeq ($(OS), Windows_NT)
 
 	# Required to get the gcc run-time libraries on the path.
 	export PATH := $(PATH):$(MINGWBIN)
+	EXT ?= .exe
 endif
 
 # Special OSX settings.
@@ -47,6 +48,7 @@ CXXFLAGS ?= -std=c++17 \
 LDFLAGS ?=
 PLATFORM ?= UNIX
 TESTS ?= yes
+EXT ?= 
 
 CFLAGS += \
 	-Iarch \
@@ -84,6 +86,7 @@ $(1): private LDFLAGS += $(shell $(PKG_CONFIG) --libs $(3))
 $(2): private CFLAGS += $(shell $(PKG_CONFIG) --cflags $(3))
 endef
 
+.PHONY: all tests
 all: tests
 
 PROTOS = \
@@ -145,10 +148,10 @@ do-encodedecodetest = $(eval $(do-encodedecodetest-impl))
 define do-encodedecodetest-impl
 
 tests: $(OBJDIR)/$1.encodedecode
-$(OBJDIR)/$1.encodedecode: scripts/encodedecodetest.sh fluxengine.exe $2
+$(OBJDIR)/$1.encodedecode: scripts/encodedecodetest.sh $(FLUXENGINE_BIN) $2
 	@mkdir -p $(dir $$@)
 	@echo ENCODEDECODETEST $1
-	@scripts/encodedecodetest.sh $1 flux $2 > $$@
+	@scripts/encodedecodetest.sh $1 flux $(FLUXENGINE_BIN) $2 > $$@
 
 endef
 
