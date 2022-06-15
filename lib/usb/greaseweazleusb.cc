@@ -160,7 +160,7 @@ public:
                     }
 
                     case FLUXOP_SPACE:
-                        _serial->readBytes(4);
+                        ticks_gw += read_28();
                         break;
 
                     default:

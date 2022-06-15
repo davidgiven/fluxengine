@@ -6,6 +6,8 @@ tmp=/tmp/$$-$format
 srcfile=$tmp.src.img
 fluxfile=$tmp.$2
 destfile=$tmp.dest.img
+fluxengine=$3
+shift
 shift
 shift
 
@@ -13,8 +15,8 @@ trap "rm -f $srcfile $fluxfile $destfile" EXIT
 
 dd if=/dev/urandom of=$srcfile bs=1048576 count=2 2>&1
 
-./fluxengine write $format -i $srcfile -d $fluxfile --drive.rotational_period_ms=200 "$@"
-./fluxengine read $format -s $fluxfile -o $destfile --drive.rotational_period_ms=200 "$@"
+$fluxengine write $format -i $srcfile -d $fluxfile --drive.rotational_period_ms=200 "$@"
+$fluxengine read $format -s $fluxfile -o $destfile --drive.rotational_period_ms=200 "$@"
 if [ ! -s $destfile ]; then
 	echo "Zero length output file!" >&2
 	exit 1

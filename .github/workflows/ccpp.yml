@@ -4,13 +4,11 @@ on: [push]
 
 jobs:
   build-linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v1
-      with:
-        fetch-depth: 1
     - name: apt
-      run: sudo apt update && sudo apt install libudev-dev libsqlite3-dev ninja-build protobuf-compiler libwxgtk3.0-gtk3-dev
+      run: sudo apt update && sudo apt install libudev-dev libsqlite3-dev protobuf-compiler libwxgtk3.0-gtk3-dev libfmt-dev
     - name: make
       run: make
 
@@ -18,12 +16,10 @@ jobs:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
-      with:
-        fetch-depth: 1
     - name: brew
-      run: brew install sqlite pkg-config libusb ninja protobuf truncate wxwidgets
+      run: brew install sqlite pkg-config libusb protobuf truncate wxwidgets fmt make
     - name: make
-      run: make
+      run: gmake
 
   build-windows:
     runs-on: windows-latest
@@ -36,27 +32,25 @@ jobs:
         update: true
         msystem: MINGW32
         install: >-
-          make
-          ninja
-          mingw-w64-i686-libusb
-          mingw-w64-i686-sqlite3
-          mingw-w64-i686-zlib
-          mingw-w64-i686-gcc
-          zip
-          mingw-w64-i686-protobuf
-          vim
           diffutils
+          make
+          mingw-w64-i686-fmt
+          mingw-w64-i686-gcc
+          mingw-w64-i686-libusb
+          mingw-w64-i686-pkg-config
+          mingw-w64-i686-protobuf
+          mingw-w64-i686-sqlite3
           mingw-w64-i686-wxWidgets
+          mingw-w64-i686-zlib
+          zip
     - uses: actions/checkout@v1
-      with:
-        fetch-depth: 1
     - name: build
       run: |
         make
 
     - name: zip
       run: |
-        zip -9 fluxengine.zip fluxengine.exe fluxengine-debug.exe fluxengine-gui.exe fluxengine-gui-debug.exe upgrade-flux-file.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex
+        zip -9 fluxengine.zip fluxengine.exe fluxengine-gui.exe upgrade-flux-file.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v2
