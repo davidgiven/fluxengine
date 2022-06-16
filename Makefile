@@ -87,7 +87,7 @@ $(2): private CFLAGS += $(shell $(PKG_CONFIG) --cflags $(3))
 endef
 
 .PHONY: all tests
-all: tests
+all: binaries tests
 
 PROTOS = \
 	arch/aeslanier/aeslanier.proto \
@@ -223,5 +223,5 @@ $(OBJDIR)/%.pb.h: %.proto
 clean:
 	rm -rf $(OBJDIR)
 
--include $(LIB_OBJS:%.o=%.d)
+-include $(OBJS:%.o=%.d)
 

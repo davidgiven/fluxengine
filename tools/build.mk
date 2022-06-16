@@ -2,6 +2,11 @@ $(OBJDIR)/brother120tool.exe: $(OBJDIR)/tools/brother120tool.o
 $(OBJDIR)/brother240tool.exe: $(OBJDIR)/tools/brother240tool.o
 $(OBJDIR)/upgrade-flux-file.exe: $(OBJDIR)/tools/upgrade-flux-file.o
 
+OBJS += \
+	$(OBJDIR)/tools/brother120tool.o \
+	$(OBJDIR)/tools/brother240tool.o \
+	$(OBJDIR)/tools/upgrade-flux-file.o \
+
 $(call use-library, $(OBJDIR)/brother120tool.exe, $(OBJDIR)/tools/brother120tool.o, PROTO)
 $(call use-library, $(OBJDIR)/brother120tool.exe, $(OBJDIR)/tools/brother120tool.o, LIBFLUXENGINE)
 $(call use-library, $(OBJDIR)/brother120tool.exe, $(OBJDIR)/tools/brother120tool.o, PROTO)
@@ -27,5 +32,5 @@ upgrade-flux-file$(EXT): $(OBJDIR)/upgrade-flux-file.exe
 	@echo CP $@
 	@cp $< $@
 
-all: brother120tool$(EXT) brother240tool$(EXT) upgrade-flux-file$(EXT)
+binaries: brother120tool$(EXT) brother240tool$(EXT) upgrade-flux-file$(EXT)
 

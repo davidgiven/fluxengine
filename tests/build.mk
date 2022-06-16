@@ -10,6 +10,7 @@ define declare-test-impl
 tests: $(OBJDIR)/tests/$1.log
 $(OBJDIR)/tests/$1.exe: $(OBJDIR)/tests/$1.o
 $(OBJDIR)/tests/$1.o: private CFLAGS += -Idep/snowhouse/include
+OBJS += $(OBJDIR)/tests/$1.o
 $(call use-library, $(OBJDIR)/tests/$1.exe, $(OBJDIR)/tests/$1.o, LIBFLUXENGINE)
 $(call use-library, $(OBJDIR)/tests/$1.exe, $(OBJDIR)/tests/$1.o, LIBARCH)
 $(call use-library, $(OBJDIR)/tests/$1.exe, $(OBJDIR)/tests/$1.o, PROTO)

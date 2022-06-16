@@ -15,6 +15,7 @@ FLUXENGINE_SRCS = \
 	src/fluxengine.cc \
  
 FLUXENGINE_OBJS = $(patsubst %.cc, $(OBJDIR)/%.o, $(FLUXENGINE_SRCS))
+OBJS += $(FLUXENGINE_OBJS)
 $(FLUXENGINE_SRCS): | $(PROTO_HDRS)
 FLUXENGINE_BIN = $(OBJDIR)/fluxengine.exe
 $(FLUXENGINE_BIN): $(FLUXENGINE_OBJS)
@@ -28,7 +29,7 @@ $(call use-library, $(FLUXENGINE_BIN), $(FLUXENGINE_OBJS), LIBUSBP)
 $(call use-library, $(FLUXENGINE_BIN), $(FLUXENGINE_OBJS), PROTO)
 $(call use-library, $(FLUXENGINE_BIN), $(FLUXENGINE_OBJS), STB)
 
-all: fluxengine$(EXT)
+binaries: fluxengine$(EXT)
 
 fluxengine$(EXT): $(FLUXENGINE_BIN)
 	@echo CP $@
