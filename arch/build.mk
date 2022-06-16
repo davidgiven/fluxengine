@@ -30,6 +30,7 @@ LIBARCH_SRCS = \
 	arch/agat/decoder.cc \
 
 LIBARCH_OBJS = $(patsubst %.cc, $(OBJDIR)/%.o, $(LIBARCH_SRCS))
+OBJS += $(LIBARCH_OBJS)
 $(LIBARCH_SRCS): | $(PROTO_HDRS)
 $(LIBARCH_SRCS): CFLAGS += $(PROTO_CFLAGS)
 LIBARCH_LIB = $(OBJDIR)/libarch.a

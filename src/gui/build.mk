@@ -10,6 +10,7 @@ FLUXENGINE_GUI_OBJS = \
 	$(patsubst %.cpp, $(OBJDIR)/%.o, \
 	$(patsubst %.cc, $(OBJDIR)/%.o, $(FLUXENGINE_GUI_SRCS)) \
 	)
+OBJS += $(FLUXENGINE_GUI_OBJS)
 $(FLUXENGINE_GUI_SRCS): | $(PROTO_HDRS)
 $(FLUXENGINE_GUI_OBJS): CFLAGS += $(shell $(WX_CONFIG) --cxxflags core base)
 FLUXENGINE_GUI_BIN = $(OBJDIR)/fluxengine-gui.exe

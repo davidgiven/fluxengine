@@ -223,5 +223,5 @@ $(OBJDIR)/%.pb.h: %.proto
 clean:
 	rm -rf $(OBJDIR)
 
--include $(LIB_OBJS:%.o=%.d)
+-include $(OBJS:%.o=%.d)
 
