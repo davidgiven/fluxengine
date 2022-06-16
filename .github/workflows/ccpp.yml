@@ -10,7 +10,7 @@ jobs:
     - name: apt
       run: sudo apt update && sudo apt install libudev-dev libsqlite3-dev protobuf-compiler libwxgtk3.0-gtk3-dev libfmt-dev
     - name: make
-      run: make
+      run: CXXFLAGS="-Wp,-D_GLIBCXX_ASSERTIONS" make
 
   build-macos:
     runs-on: macos-latest
@@ -45,8 +45,7 @@ jobs:
           zip
     - uses: actions/checkout@v1
     - name: build
-      run: |
-        make
+      run: make
 
     - name: zip
       run: |
