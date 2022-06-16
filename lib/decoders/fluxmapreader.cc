@@ -223,7 +223,7 @@ nanoseconds_t FluxmapReader::seekToPattern(const FluxMatcher& pattern, const Flu
     while (!eof())
     {
         FluxMatch match;
-        if (pattern.matches(&candidates[intervalCount+1], match))
+        if (pattern.matches(&*candidates.end(), match))
         {
             seek(positions[intervalCount-match.intervals]);
             _pos.zeroes = match.zeroes;
