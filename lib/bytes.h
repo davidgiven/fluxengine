@@ -32,14 +32,14 @@ public:
     { return !(*this == other); }
 
     const uint8_t& operator [] (unsigned offset) const;
-    const uint8_t* cbegin() const { return &(*_data)[_low]; }
-    const uint8_t* cend() const   { return &(*_data)[_high]; }
-    const uint8_t* begin() const  { return &(*_data)[_low]; }
-    const uint8_t* end() const    { return &(*_data)[_high]; }
+    const uint8_t* cbegin() const { return _data->data() + _low; }
+    const uint8_t* cend() const   { return _data->data() + _high; }
+    const uint8_t* begin() const  { return _data->data() + _low; }
+    const uint8_t* end() const    { return _data->data() + _high; }
 
     uint8_t& operator [] (unsigned offset);
-    uint8_t* begin()              { checkWritable(); return &(*_data)[_low]; }
-    uint8_t* end()                { checkWritable(); return &(*_data)[_high]; }
+    uint8_t* begin()              { checkWritable(); return _data->data() + _low; }
+    uint8_t* end()                { checkWritable(); return _data->data() + _high; }
 
 	operator std::string () const { return std::string(cbegin(), cend()); }
 
