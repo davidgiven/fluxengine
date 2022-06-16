@@ -24,7 +24,7 @@ $(call use-library, $(FLUXENGINE_GUI_BIN), $(FLUXENGINE_GUI_OBJS), LIBFORMATS)
 $(call use-library, $(FLUXENGINE_GUI_BIN), $(FLUXENGINE_GUI_OBJS), LIBUSBP)
 $(call use-library, $(FLUXENGINE_GUI_BIN), $(FLUXENGINE_GUI_OBJS), PROTO)
 
-all: fluxengine-gui$(EXT)
+binaries: fluxengine-gui$(EXT)
 
 fluxengine-gui$(EXT): $(FLUXENGINE_GUI_BIN)
 	@echo CP $@

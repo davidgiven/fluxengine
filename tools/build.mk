@@ -32,5 +32,5 @@ upgrade-flux-file$(EXT): $(OBJDIR)/upgrade-flux-file.exe
 	@echo CP $@
 	@cp $< $@
 
-all: brother120tool$(EXT) brother240tool$(EXT) upgrade-flux-file$(EXT)
+binaries: brother120tool$(EXT) brother240tool$(EXT) upgrade-flux-file$(EXT)
 

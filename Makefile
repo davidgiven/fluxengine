@@ -87,7 +87,7 @@ $(2): private CFLAGS += $(shell $(PKG_CONFIG) --cflags $(3))
 endef
 
 .PHONY: all tests
-all: tests
+all: binaries tests
 
 PROTOS = \
 	arch/aeslanier/aeslanier.proto \

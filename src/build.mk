@@ -29,7 +29,7 @@ $(call use-library, $(FLUXENGINE_BIN), $(FLUXENGINE_OBJS), LIBUSBP)
 $(call use-library, $(FLUXENGINE_BIN), $(FLUXENGINE_OBJS), PROTO)
 $(call use-library, $(FLUXENGINE_BIN), $(FLUXENGINE_OBJS), STB)
 
-all: fluxengine$(EXT)
+binaries: fluxengine$(EXT)
 
 fluxengine$(EXT): $(FLUXENGINE_BIN)
 	@echo CP $@
