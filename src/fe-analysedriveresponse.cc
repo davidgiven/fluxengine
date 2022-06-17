@@ -152,7 +152,7 @@ static void do_in_steps(double c1, double c2, double lo, double hi,
 }
 
 static void draw_y_axis(Agg2D& painter, double x, double y1, double y2,
-		double lo, double hi, double step, const char* format)
+		double lo, double hi, double step, const std::string& format)
 {
 	painter.noFill();
 	painter.lineColor(0, 0, 0);
@@ -164,12 +164,12 @@ static void draw_y_axis(Agg2D& painter, double x, double y1, double y2,
 	{
 		painter.line(x, y, x-5, y);
 		painter.text(
-			x-8, y+5.0, fmt::format(fmt::runtime(format), v));
+			x-8, y+5.0, fmt::format(format, v));
 	});
 }
 
 static void draw_x_axis(Agg2D& painter, double x1, double x2, double y,
-		double lo, double hi, double step, const char* format)
+		double lo, double hi, double step, const std::string& format)
 {
 	painter.noFill();
 	painter.lineColor(0, 0, 0);
@@ -181,7 +181,7 @@ static void draw_x_axis(Agg2D& painter, double x1, double x2, double y,
 	{
 		painter.line(x, y, x, y+5);
 		painter.text(
-			x, y+18, fmt::format(fmt::runtime(format), v));
+			x, y+18, fmt::format(format, v));
 	});
 }
 
