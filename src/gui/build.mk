@@ -1,4 +1,4 @@
-ifneq ($(shell command -v $(WX_CONFIG)),)
+ifneq ($(shell $(WX_CONFIG) --version),)
 
 FLUXENGINE_GUI_SRCS = \
 	src/gui/main.cc \
