@@ -42,9 +42,7 @@ PKG_CONFIG ?= pkg-config
 WX_CONFIG ?= wx-config
 PROTOC ?= protoc
 CFLAGS ?= -g -Os
-CXXFLAGS += -std=c++17 \
-	-Wno-deprecated-enum-float-conversion \
-	-Wno-deprecated-enum-enum-conversion
+CXXFLAGS += -std=c++17
 LDFLAGS ?=
 PLATFORM ?= UNIX
 TESTS ?= yes
