@@ -15,12 +15,12 @@
 *	Where to get the type of encoding?? FM or MFM??
 *
 */
-static const char LABEL[] = "IMD file by fluxengine"; //22 karakters
+static const char LABEL[] = "IMD archive by fluxengine on"; //22 karakters
 static uint8_t getModulationandSpeed(int flags)
 {
 	if (flags == 0)
 	{
-			Error() << fmt::format("Can't write IMD files with this speed {}, and modulation {}. Try another format.", flags, false);
+			Error() << fmt::format("Can't write IMD files with this speed {}, and modulation {}. Did you read a real disk?", flags, false);
 	} 
 	else{
 		flags = 1000000.0 / flags;	
@@ -64,7 +64,6 @@ static uint8_t getModulationandSpeed(int flags)
 				return 5;
 			}
 		} else {
-//			Error() << fmt::format("Can't write IMD files with this speed {}, and modulation {}. Try another format.", flags, IbmDecoder::getuseFm());
 			Error() << fmt::format("Can't write IMD files with this speed {}, and modulation {}. Try another format.", flags, false);
 		}
 }
@@ -170,14 +169,18 @@ public:
 //		getline (std::cin, comment);
 		if (comment.size() == 0)
 		{
-			comment = LABEL;
+			comment = LABEL ;
+			comment.append(" date: ");
+			comment.append(__DATE__);
+			comment.append(" time: ");
+			comment.append(__TIME__);
 		} else
 		{
 			comment.insert(0,"IMD ");
 		}
 		bw.seek(0);
 
-//		bw.append(comment);
+		bw.append(comment);
 		bw.write_8(END_OF_FILE);
 		std::string sector_skew;
 		sector_skew.clear();
@@ -214,8 +217,6 @@ public:
 					numSectorsinTrack = 0;
 //					Logger() << fmt::format("clock {} \n", sector->clock);
 					header.ModeValue = getModulationandSpeed(sector->clock);
-					
-
 				}
 				//determine number of sectors in track
 				for (int sectorId = 0; sectorId < numSectors; sectorId++)
@@ -407,7 +408,6 @@ public:
 				numCylinders, numHeads,
 				numSectors, numBytes,
 				outputFile.tellp() / 1024);
-		//<< std::endl;
  	}
 };
 
