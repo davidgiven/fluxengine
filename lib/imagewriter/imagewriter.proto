@@ -31,6 +31,7 @@ message DiskCopyOutputProto {}
 message NsiOutputProto {}
 message RawOutputProto {}
 message D88OutputProto {}
+message ImdOutputProto {}
 
 message ImageWriterProto {
 	optional string filename = 1 [(help) = "filename of output sector image"];
@@ -42,6 +43,7 @@ message ImageWriterProto {
 		NsiOutputProto nsi = 6;
 		RawOutputProto raw = 7;
 		D88OutputProto d88 = 8;
+		ImdOutputProto imd = 9;
 	}
 }
 

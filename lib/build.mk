@@ -36,6 +36,7 @@ LIBFLUXENGINE_SRCS = \
 	lib/imagewriter/diskcopyimagewriter.cc \
 	lib/imagewriter/imagewriter.cc \
 	lib/imagewriter/imgimagewriter.cc \
+	lib/imagewriter/imdimagewriter.cc \
 	lib/imagewriter/ldbsimagewriter.cc \
 	lib/imagewriter/nsiimagewriter.cc \
 	lib/imagewriter/rawimagewriter.cc \

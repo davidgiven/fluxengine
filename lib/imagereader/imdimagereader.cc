@@ -198,10 +198,16 @@ public:
 			}            
             //read sector numbering map
 			sector_skew.clear();
+			bool blnBase0 = false; //check what first start number of the sector is. Fluxengine expects 1.
 			for (b = 0;  b < header.numSectors; b++)
 			{	
 				uint8_t t;
 				t = br.read_8();
+				if (t == 0x00) blnBase0 = true;
+				if (blnBase0)
+				{
+					t=t+1;
+				}
 				sector_skew.push_back(t);
 				headerPtr++;
             }
