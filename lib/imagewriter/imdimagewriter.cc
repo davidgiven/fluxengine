@@ -16,7 +16,7 @@
 *
 */
 static const char LABEL[] = "IMD archive by fluxengine on"; //22 karakters
-static uint8_t getModulationandSpeed(int flags)
+static uint8_t getModulationandSpeed(int flags, ImdOutputProto::RecordingMode mode)
 {
 	if (flags == 0)
 	{
@@ -27,11 +27,10 @@ static uint8_t getModulationandSpeed(int flags)
 	}
 	 
 
-	if ((flags>950) and (flags<1050)) //HD disk 5% discrepency is ok 1000*5% = 50
+	if ((flags>950) and (flags<1050)) //HD disk 5% discrepency is ok 1000*5% = 50 1 us
 	{
 		/* 500 kbps */
-//		if (IbmDecoder::getuseFm() == true)
-		if (false)
+		if (mode == ImdOutputProto::RECMODE_FM)
 		{
 			return 0;
 		}
@@ -42,8 +41,7 @@ static uint8_t getModulationandSpeed(int flags)
 	} else if ((flags>570) and (flags<630))//dont know exactly what the clock is for 300kbps assuming twice just as 500kbps en 250kbps
 		/* 300 kbps*/
 	{
-//		if (IbmDecoder::getuseFm() == true)
-		if (false)
+		if (mode == ImdOutputProto::RECMODE_FM)
 		{
 			return 1;
 		}
@@ -54,8 +52,7 @@ static uint8_t getModulationandSpeed(int flags)
 	} else if ((flags>475) and (flags<525)) //DD disk
 		 /* 250 kbps */
 		{
-//		if (IbmDecoder::getuseFm() == true)
-		if (false)
+		if (mode == ImdOutputProto::RECMODE_FM)
 			{
 				return 2;
 			}
@@ -64,7 +61,7 @@ static uint8_t getModulationandSpeed(int flags)
 				return 5;
 			}
 		} else {
-			Error() << fmt::format("Can't write IMD files with this speed {}, and modulation {}. Try another format.", flags, false);
+			Error() << fmt::format("IMD: Can't write IMD files with this speed {}, and modulation {}. Try another format.", flags, false);
 		}
 }
 
@@ -89,7 +86,7 @@ static uint8_t setSectorSize(int flags)
 		case 4096: return 5;
 		case 8192: return 6;
 	}
-	Error() << fmt::format("Sector size {} not in standard range (128, 256, 512, 1024, 2048, 4096, 8192).", flags);
+	Error() << fmt::format("IMD: Sector size {} not in standard range (128, 256, 512, 1024, 2048, 4096, 8192).", flags);
 }
 
 
@@ -142,13 +139,9 @@ public:
 		unsigned numHeads;
 		unsigned numSectors;
 		unsigned numBytes;
-		//const Geometry& geometry = image.getGeometry();
-		//image.calculateSize(numCylinders, numHeads, numSectors, numBytes); //this gets the maximum size of each.. 
-//		_config.PrintDebugString();
 		std::ofstream outputFile(_config.filename(), std::ios::out | std::ios::binary);
 		if (!outputFile.is_open())
-			Error() << "cannot open output file";
-		//IbmDecoder::setuseFm(false);
+			Error() << "IMD: cannot open output file";
 		uint32_t offset = 0;
 		unsigned numSectorsinTrack = 0;
 
@@ -158,15 +151,29 @@ public:
 
 		size_t headSize = geometry.numSectors * geometry.sectorSize;
 		size_t trackSize = headSize * geometry.numSides;
-
-
+		
 		Bytes imagenew;
 		ByteWriter bw(imagenew);
 
+		ImdOutputProto::DataRate dataRate = _config.imd().data_rate();
+		if (dataRate == ImdOutputProto::RATE_GUESS)
+		{
+			dataRate = (geometry.numSectors > 10) ? ImdOutputProto::RATE_HD : ImdOutputProto::RATE_DD;
+			if (geometry.sectorSize <= 256)
+				dataRate = ImdOutputProto::RATE_SD;
+			Logger() << fmt::format("IMD: guessing data rate as {}", ImdOutputProto::DataRate_Name(dataRate));
+		}
+
+		ImdOutputProto::RecordingMode recordingMode = _config.imd().recording_mode();
+		if (recordingMode == ImdOutputProto::RECMODE_GUESS)
+		{
+			recordingMode = ImdOutputProto::RECMODE_MFM;
+			Logger() << fmt::format("IMD: guessing recording mode as {}", ImdOutputProto::RecordingMode_Name(recordingMode));
+		}
+
+
 		//Give the user a option to give a comment in the IMD file for archive purposes.
-		std::string comment;
-//		std::cout << ("\nWrite a comment to store in de IMD file.\nIf no comment is given the default (IMD file by fluxengine) will be put in the file.\nPush Enter to store comment: \n");
-//		getline (std::cin, comment);
+		std::string comment = _config.imd().comment();
 		if (comment.size() == 0)
 		{
 			comment = LABEL ;
@@ -187,8 +194,6 @@ public:
 		unsigned Status_Sector = 1;
 		bool blnOptionalCylinderMap = false;
 		bool blnOptionalHeadMap = false;
-//		int emptyCylinders = 0;
-
 
 		/* Write the actual sector data. */
 		for (int track = 0; track < geometry.numTracks; track++)
@@ -203,7 +208,7 @@ public:
 				{//sector 0 doesnt exist exit with error
 					//this track, head has no sectors
 					Status_Sector = 0;
-					Logger() << fmt::format("sector {} not found on track {}, head {}\n", sectorId+1, track, head);
+					Logger() << fmt::format("IMD: sector {} not found on track {}, head {}\n", sectorId+1, track, head);
 //					emptyCylinders++;
 					break;
 				} else
@@ -216,7 +221,21 @@ public:
 					sector_skew.clear();
 					numSectorsinTrack = 0;
 //					Logger() << fmt::format("clock {} \n", sector->clock);
-					header.ModeValue = getModulationandSpeed(sector->clock);
+				nanoseconds_t RATE = 0;
+//				Logger() << fmt::format("IMD: Clock {} \n", sector->clock);
+				if (sector->clock > 0)
+				{
+					RATE = 1000000.0 / sector->clock;
+				} else
+				{
+					switch (dataRate)
+					{
+					case ImdOutputProto::RATE_HD : RATE = 1000;
+					case ImdOutputProto::RATE_SD : RATE = 1500;
+					case ImdOutputProto::RATE_DD : RATE = 2000;
+					}
+				}
+					header.ModeValue = getModulationandSpeed(RATE, recordingMode);
 				}
 				//determine number of sectors in track
 				for (int sectorId = 0; sectorId < numSectors; sectorId++)
@@ -384,7 +403,7 @@ public:
 							// case 8: /* Compressed, Deleted read with data error - could not be read */
 
 							default:
-								Error() << fmt::format("Don't understand IMD files with sector status {}", Status_Sector);
+								Error() << fmt::format("IMD: Don't understand IMD files with sector status {}", Status_Sector);
 						}
 						bw.write_8(Status_Sector); //1 byte status sector
 						if (blnCompressable)
@@ -404,7 +423,7 @@ public:
 		}
 		numCylinders = geometry.numTracks; //-emptyCylinders; //calculate the cylinders with sectors and hence data. Otherwise the calculation of kB goes wrong
 		imagenew.writeTo(outputFile);
-		Logger() << fmt::format("Writing {} tracks, {} heads, {} sectors, {} bytes per sector, {} kB total",
+		Logger() << fmt::format("IMD: Written {} tracks, {} heads, {} sectors, {} bytes per sector, {} kB total",
 				numCylinders, numHeads,
 				numSectors, numBytes,
 				outputFile.tellp() / 1024);

@@ -31,7 +31,23 @@ message DiskCopyOutputProto {}
 message NsiOutputProto {}
 message RawOutputProto {}
 message D88OutputProto {}
-message ImdOutputProto {}
+message ImdOutputProto {
+	enum DataRate {
+		RATE_HD = 0;
+		RATE_DD = 1;
+		RATE_SD = 2;
+		RATE_GUESS = -1;
+	}
+
+	enum RecordingMode {
+		RECMODE_MFM = 0;
+		RECMODE_FM = 1;
+		RECMODE_GUESS = -1;
+	}
+	optional DataRate data_rate = 1 [default=RATE_GUESS, (help) = "data rate to use in IMD file"];
+	optional RecordingMode recording_mode = 2 [default=RECMODE_GUESS, (help) = "recording mode (FM or MFM encoding) to use in IMD file"];	
+	optional string comment = 3 [(help) = "comment to set in IMD file"];
+}
 
 message ImageWriterProto {
 	optional string filename = 1 [(help) = "filename of output sector image"];
