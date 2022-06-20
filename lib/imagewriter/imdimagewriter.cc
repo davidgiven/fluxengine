@@ -12,7 +12,7 @@
 #include <fstream>
 
 /*
-*	Where to get the type of encoding?? FM or MFM??
+*	Where to get the type of encoding FM or MFM? Now solved with options in proto config
 *
 */
 static const char LABEL[] = "IMD archive by fluxengine on"; //22 karakters
@@ -141,7 +141,6 @@ public:
 		std::ofstream outputFile(_config.filename(), std::ios::out | std::ios::binary);
 		if (!outputFile.is_open())
 			Error() << "IMD: cannot open output file";
-//		uint32_t offset = 0;
 		unsigned numSectorsinTrack = 0;
 
 		numHeads = geometry.numSides;
@@ -205,7 +204,6 @@ public:
 					//this track, head has no sectors
 					Status_Sector = 0;
 					Logger() << fmt::format("IMD: sector {} not found on track {}, head {}\n", sectorId+1, track, head);
-//					emptyCylinders++;
 					break;
 				} else
 				{
@@ -216,9 +214,7 @@ public:
 					header.SectorSize = setSectorSize(numBytes);
 					sector_skew.clear();
 					numSectorsinTrack = 0;
-//					Logger() << fmt::format("clock {} \n", sector->clock);
 				nanoseconds_t RATE = 0;
-//				Logger() << fmt::format("IMD: Clock {} \n", sector->clock);
 				if (sector->clock > 0)
 				{
 					RATE = 1000000.0 / sector->clock;
