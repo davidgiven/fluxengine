@@ -35,9 +35,9 @@ endif
 OBJDIR ?= .obj
 CCPREFIX ?=
 LUA ?= lua
-CC = $(CCPREFIX)gcc
-CXX = $(CCPREFIX)g++
-AR = $(CCPREFIX)ar
+CC ?= $(CCPREFIX)gcc
+CXX ?= $(CCPREFIX)g++
+AR ?= $(CCPREFIX)ar
 PKG_CONFIG ?= pkg-config
 WX_CONFIG ?= wx-config
 PROTOC ?= protoc
