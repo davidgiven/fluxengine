@@ -135,23 +135,19 @@ public:
 	void writeImage(const Image& image)
 	{
  		const Geometry& geometry = image.getGeometry();
-		unsigned numCylinders;
 		unsigned numHeads;
 		unsigned numSectors;
 		unsigned numBytes;
 		std::ofstream outputFile(_config.filename(), std::ios::out | std::ios::binary);
 		if (!outputFile.is_open())
 			Error() << "IMD: cannot open output file";
-		uint32_t offset = 0;
+//		uint32_t offset = 0;
 		unsigned numSectorsinTrack = 0;
 
 		numHeads = geometry.numSides;
 		numSectors = geometry.numSectors;
 		numBytes = geometry.sectorSize;
 
-		size_t headSize = geometry.numSectors * geometry.sectorSize;
-		size_t trackSize = headSize * geometry.numSides;
-		
 		Bytes imagenew;
 		ByteWriter bw(imagenew);
 
@@ -421,10 +417,9 @@ public:
 				}
 			}
 		}
-		numCylinders = geometry.numTracks; //-emptyCylinders; //calculate the cylinders with sectors and hence data. Otherwise the calculation of kB goes wrong
 		imagenew.writeTo(outputFile);
 		Logger() << fmt::format("IMD: Written {} tracks, {} heads, {} sectors, {} bytes per sector, {} kB total",
-				numCylinders, numHeads,
+				geometry.numTracks, numHeads,
 				numSectors, numBytes,
 				outputFile.tellp() / 1024);
  	}

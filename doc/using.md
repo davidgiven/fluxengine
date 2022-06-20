@@ -291,6 +291,29 @@ FluxEngine also supports a number of file system image formats. When using the
   circumstances as it can represent arbitrary sector layouts as read
   from the floppy.
   
+  - `<filename.imd>`
+
+  Read from a [imd image file](http://dunfield.classiccmp.org/img/index.htm),
+  imd images are entire diskette images read into a file (type .IMD),
+  it's purpose is to recreate a copy of the diskette from that image. A detailed analysis
+  is performed on the diskette, and information about the formatting is recorded
+  in the image file. This allows ImageDisk to work with virtually any soft-
+  sectored diskette format that is compatible with the PC's type 765 floppy
+  diskette controller and drives.
+  
+  FluxEngine is able to read from and write to an imd image file.
+  
+  The imd reader should mostly be used with the `ibm` profile or ibm deratives 
+  and will override most encoding parameters on a track-by-track basis.
+  
+  The imd writer should likewise mostly be used with the `ibm` profile in most
+  circumstances as it can represent arbitrary sector layouts as read
+  from the floppy.
+
+  With options it is possible to add a comment for the resulting image when archiving
+  floppies. By default imd images assume MFM encoding, but this can by changed
+  by suppling the option RECMODE_FM. 
+
   - `<filename.nfd>`
 
   Read from a [NFD r0 image file](https://www.pc98.org/project/doc/nfdr0.html),
