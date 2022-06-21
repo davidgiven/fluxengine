@@ -46,7 +46,10 @@ CXXFLAGS += -std=c++17
 LDFLAGS ?=
 PLATFORM ?= UNIX
 TESTS ?= yes
-EXT ?= 
+EXT ?=
+DESTDIR ?=
+PREFIX ?= /usr/local
+BINDIR ?= $(PREFIX)/bin
 
 CFLAGS += \
 	-Iarch \
@@ -84,7 +87,7 @@ $(1): private LDFLAGS += $(shell $(PKG_CONFIG) --libs $(3))
 $(2): private CFLAGS += $(shell $(PKG_CONFIG) --cflags $(3))
 endef
 
-.PHONY: all tests
+.PHONY: all binaries tests clean install install-bin
 all: binaries tests
 
 PROTOS = \
@@ -221,5 +224,12 @@ $(OBJDIR)/%.pb.h: %.proto
 clean:
 	rm -rf $(OBJDIR)
 
--include $(OBJS:%.o=%.d)
+install: install-bin # install-man install-docs ...
 
+install-bin: fluxengine$(EXT) fluxengine-gui$(EXT) brother120tool$(EXT) brother240tool$(EXT) upgrade-flux-file$(EXT)
+	install -d "$(DESTDIR)$(BINDIR)"
+	for target in $^; do \
+		install $$target "$(DESTDIR)$(BINDIR)/$$target"; \
+	done
+
+-include $(OBJS:%.o=%.d)
