@@ -67,15 +67,31 @@ static unsigned getSectorSize(uint8_t flags)
 {
     switch (flags)
     {
-        case 0: return 128;
-        case 1: return 256;
-        case 2: return 512;
-        case 3: return 1024;
-        case 4: return 2048;
-        case 5: return 4096;
-        case 6: return 8192;
-    }
-    Error() << "not reachable";
+        case 0: 
+			return 128;
+			break;
+        case 1: 
+			return 256;
+			break;
+        case 2: 
+			return 512;
+			break;
+        case 3: 
+			return 1024;
+			break;
+        case 4: 
+			return 2048;
+			break;
+        case 5: 
+			return 4096;
+			break;
+        case 6: 
+			return 8192;
+			break;
+		default:
+	    	Error() << "not reachable";
+			throw 0;
+	}
 }
 
 

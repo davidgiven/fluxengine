@@ -222,9 +222,15 @@ public:
 				{
 					switch (dataRate)
 					{
-					case ImdOutputProto::RATE_HD : RATE = 1000;
-					case ImdOutputProto::RATE_SD : RATE = 1500;
-					case ImdOutputProto::RATE_DD : RATE = 2000;
+					case ImdOutputProto::RATE_HD : 
+						RATE = 1000;
+						break;
+					case ImdOutputProto::RATE_SD : 
+						RATE = 1500;
+						break;
+					case ImdOutputProto::RATE_DD : 
+						RATE = 2000;
+						break;
 					}
 				}
 					header.ModeValue = getModulationandSpeed(RATE, recordingMode);
