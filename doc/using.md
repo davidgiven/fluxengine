@@ -22,8 +22,8 @@ sector-by-sector record of the _decoded_ data on the disk. For example, on a
 disk with 512 byte sectors, one sector will occupy 512 bytes. These are
 typically what you want in everyday life. FluxEngine supports a variety of file
 system image formats, including
-[LDBS](http://www.seasip.info/Unix/LibDsk/ldbs.html), Macintosh's [DiskCopy
-4.2](https://en.wikipedia.org/wiki/Disk_Copy) and some others, including
+[LDBS](http://www.seasip.info/Unix/LibDsk/ldbs.html), [imd](http://dunfield.classiccmp.org/img/index.htm),
+ Macintosh's [DiskCopy 4.2](https://en.wikipedia.org/wiki/Disk_Copy) and some others, including
 Amiga's `.adf`, Atari ST's `.st`, and so on.
 
 Flux, however, is different. It represents the actual magnetic data on the
