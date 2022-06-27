@@ -40,6 +40,16 @@ encoder {
 	}
 }
 
+image_writer {
+	filename: "hplif770.img"
+	img {}
+}
+
+decoder {
+	ibm {
+	}
+}
+
 tracks {
 	start: 0
 	end: 76

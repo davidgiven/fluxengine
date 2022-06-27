@@ -21,6 +21,7 @@ public:
     static std::unique_ptr<ImageWriter> createNsiImageWriter(const ImageWriterProto& config);
     static std::unique_ptr<ImageWriter> createRawImageWriter(const ImageWriterProto& config);
     static std::unique_ptr<ImageWriter> createD88ImageWriter(const ImageWriterProto& config);
+    static std::unique_ptr<ImageWriter> createImdImageWriter(const ImageWriterProto& config);
 
 public:
 	void printMap(const Image& sectors);

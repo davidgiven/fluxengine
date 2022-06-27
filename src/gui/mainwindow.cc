@@ -30,6 +30,8 @@ MainWindow::MainWindow(): MainWindowGen(nullptr)
                 });
         });
 
+    int DefaultFormat = 0;
+    int i = 0;
     for (const auto& it : formats)
     {
         auto config = std::make_unique<ConfigProto>();
@@ -39,12 +41,17 @@ MainWindow::MainWindow(): MainWindowGen(nullptr)
             continue;
 
         formatChoice->Append(it.first);
+        if (it.first == "ibm") DefaultFormat=i;
         _formats.push_back(std::move(config));
+        i++;
     }
 
     UpdateDevices();
     if (deviceCombo->GetCount() > 0)
         deviceCombo->SetValue(deviceCombo->GetString(0));
+
+    if (MainWindow::formatChoice->GetCount() > 0)
+        formatChoice->SetSelection(DefaultFormat);
 
     fluxSourceSinkCombo->SetValue(fluxSourceSinkCombo->GetString(0));
 

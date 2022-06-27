@@ -35,6 +35,9 @@ std::unique_ptr<ImageWriter> ImageWriter::create(const ImageWriterProto& config)
 		case ImageWriterProto::kD88:
 			return ImageWriter::createD88ImageWriter(config);
 
+		case ImageWriterProto::kImd:
+			return ImageWriter::createImdImageWriter(config);
+			
 		default:
 			Error() << "bad output image config";
 			return std::unique_ptr<ImageWriter>();
@@ -52,6 +55,7 @@ void ImageWriter::updateConfigForFilename(ImageWriterProto* proto, const std::st
 		{".diskcopy", [](auto* proto) { proto->mutable_diskcopy(); }},
 		{".dsk",      [](auto* proto) { proto->mutable_img(); }},
 		{".img",      [](auto* proto) { proto->mutable_img(); }},
+		{".imd",      [](auto* proto) { proto->mutable_imd(); }},
 		{".ldbs",     [](auto* proto) { proto->mutable_ldbs(); }},
 		{".nsi",      [](auto* proto) { proto->mutable_nsi(); }},
 		{".raw",      [](auto* proto) { proto->mutable_raw(); }},
