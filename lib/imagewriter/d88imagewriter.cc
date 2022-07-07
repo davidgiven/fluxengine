@@ -14,7 +14,7 @@
 static int countl_zero(uint32_t value)
 {
 	int count = 0;
-	while (!(value & 0x8000000))
+	while (!(value & 0x80000000))
 	{
 		value <<= 1;
 		count++;
