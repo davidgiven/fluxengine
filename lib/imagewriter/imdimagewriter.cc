@@ -10,6 +10,8 @@
 #include <algorithm>
 #include <iostream>
 #include <fstream>
+#include <chrono>
+#include <ctime>
 
 /*
 *	Where to get the type of encoding FM or MFM? Now solved with options in proto config
@@ -168,14 +170,17 @@ public:
 
 
 		//Give the user a option to give a comment in the IMD file for archive purposes.
+		auto start = std::chrono::system_clock::now();
+		std::time_t time = std::chrono::system_clock::to_time_t(start);
+
 		std::string comment = _config.imd().comment();
 		if (comment.size() == 0)
 		{
 			comment = LABEL ;
 			comment.append(" date: ");
-			comment.append(__DATE__);
-			comment.append(" time: ");
-			comment.append(__TIME__);
+			comment.append(std::ctime(&time));
+//			comment.append(" time: ");
+//			comment.append(__TIME__);
 		} else
 		{
 			comment.insert(0,"IMD ");
