@@ -905,7 +905,6 @@ int main(void)
     USBFS_Start(0, USBFS_DWR_VDDD_OPERATION);
     USBFS_DisableOutEP(FLUXENGINE_DATA_OUT_EP_NUM);
     
-    detect_drives();
     CyWdtStart(CYWDT_1024_TICKS, CYWDT_LPMODE_DISABLED);
     
     for (;;)
@@ -926,6 +925,8 @@ int main(void)
                 CyWdtClear();
             print("USB ready");
             USBFS_EnableOutEP(FLUXENGINE_CMD_OUT_EP_NUM);
+            print("Scanning drives...");
+            detect_drives();
         }
         
         if (USBFS_GetEPState(FLUXENGINE_CMD_OUT_EP_NUM) == USBFS_OUT_BUFFER_FULL)
