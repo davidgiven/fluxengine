@@ -203,7 +203,7 @@ void writeTracks(FluxSink& fluxSink,
                 Logger() << BeginWriteOperationLogMessage{
                     physicalTrack, location.head};
 
-                if (offset == 0)
+                if (offset == config.drive().group_offset())
                 {
                     auto fluxmap = producer(location);
                     if (!fluxmap)
