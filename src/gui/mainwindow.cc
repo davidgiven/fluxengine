@@ -19,6 +19,9 @@
 
 extern const std::map<std::string, std::string> formats;
 
+#define CONFIG_FORMAT "Format"
+#define CONFIG_FLUX "FluxSourceSink"
+
 MainWindow::MainWindow():
 	MainWindowGen(nullptr),
 	_config("FluxEngine")
@@ -34,7 +37,7 @@ MainWindow::MainWindow():
         });
 
 	wxString defaultFormatName = "ibm";
-	_config.Read("Format", &defaultFormatName);
+	_config.Read(CONFIG_FORMAT, &defaultFormatName);
 
     int defaultFormat = 0;
     int i = 0;
@@ -60,9 +63,12 @@ MainWindow::MainWindow():
     if (MainWindow::formatChoice->GetCount() > 0)
         formatChoice->SetSelection(defaultFormat);
 
-    fluxSourceSinkCombo->SetValue(fluxSourceSinkCombo->GetString(0));
+	wxString defaultFluxSourceSink = fluxSourceSinkCombo->GetString(0);
+	_config.Read(CONFIG_FLUX, &defaultFluxSourceSink);
+    fluxSourceSinkCombo->SetValue(defaultFluxSourceSink);
 
 	formatChoice->Bind(wxEVT_COMMAND_CHOICE_SELECTED, &MainWindow::OnControlsChanged, this);
+	fluxSourceSinkCombo->Bind(wxEVT_TEXT, &MainWindow::OnControlsChanged, this);
     readFluxButton->Bind(wxEVT_BUTTON, &MainWindow::OnReadFluxButton, this);
     readImageButton->Bind(wxEVT_BUTTON, &MainWindow::OnReadImageButton, this);
 	writeFluxButton->Bind(wxEVT_BUTTON, &MainWindow::OnWriteFluxButton, this);
@@ -80,9 +86,10 @@ void MainWindow::OnExit(wxCommandEvent& event)
 
 void MainWindow::OnControlsChanged(wxCommandEvent& event)
 {
-	_config.Write("Format",
+	_config.Write(CONFIG_FORMAT,
 		formatChoice->GetString(formatChoice->GetSelection()));
-	_config.Flush();
+	_config.Write(CONFIG_FLUX,
+		fluxSourceSinkCombo->GetValue());
 }
 
 void MainWindow::OnStopButton(wxCommandEvent&)
