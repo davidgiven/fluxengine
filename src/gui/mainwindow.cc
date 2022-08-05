@@ -19,7 +19,9 @@
 
 extern const std::map<std::string, std::string> formats;
 
-MainWindow::MainWindow(): MainWindowGen(nullptr)
+MainWindow::MainWindow():
+	MainWindowGen(nullptr),
+	_config("FluxEngine")
 {
     Logger::setLogger(
         [&](std::shared_ptr<const AnyLogMessage> message)
@@ -31,7 +33,10 @@ MainWindow::MainWindow(): MainWindowGen(nullptr)
                 });
         });
 
-    int DefaultFormat = 0;
+	wxString defaultFormatName = "ibm";
+	_config.Read("Format", &defaultFormatName);
+
+    int defaultFormat = 0;
     int i = 0;
     for (const auto& it : formats)
     {
@@ -42,7 +47,8 @@ MainWindow::MainWindow(): MainWindowGen(nullptr)
             continue;
 
         formatChoice->Append(it.first);
-        if (it.first == "ibm") DefaultFormat=i;
+        if (it.first == defaultFormatName)
+			defaultFormat = i;
         _formats.push_back(std::move(config));
         i++;
     }
@@ -52,10 +58,11 @@ MainWindow::MainWindow(): MainWindowGen(nullptr)
         deviceCombo->SetValue(deviceCombo->GetString(0));
 
     if (MainWindow::formatChoice->GetCount() > 0)
-        formatChoice->SetSelection(DefaultFormat);
+        formatChoice->SetSelection(defaultFormat);
 
     fluxSourceSinkCombo->SetValue(fluxSourceSinkCombo->GetString(0));
 
+	formatChoice->Bind(wxEVT_COMMAND_CHOICE_SELECTED, &MainWindow::OnControlsChanged, this);
     readFluxButton->Bind(wxEVT_BUTTON, &MainWindow::OnReadFluxButton, this);
     readImageButton->Bind(wxEVT_BUTTON, &MainWindow::OnReadImageButton, this);
 	writeFluxButton->Bind(wxEVT_BUTTON, &MainWindow::OnWriteFluxButton, this);
@@ -69,6 +76,13 @@ MainWindow::MainWindow(): MainWindowGen(nullptr)
 void MainWindow::OnExit(wxCommandEvent& event)
 {
     Close(true);
+}
+
+void MainWindow::OnControlsChanged(wxCommandEvent& event)
+{
+	_config.Write("Format",
+		formatChoice->GetString(formatChoice->GetSelection()));
+	_config.Flush();
 }
 
 void MainWindow::OnStopButton(wxCommandEvent&)

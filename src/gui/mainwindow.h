@@ -3,6 +3,7 @@
 
 #include "layout.h"
 #include "logger.h"
+#include <wx/config.h>
 
 class CandidateDevice;
 class ConfigProto;
@@ -22,6 +23,7 @@ private:
 	void OnWriteImageButton(wxCommandEvent&);
 	void OnLogMessage(std::shared_ptr<const AnyLogMessage> message);
 	void OnTrackSelection(TrackSelectionEvent&);
+	void OnControlsChanged(wxCommandEvent&);
 
 public:
 	void UpdateState();
@@ -34,6 +36,7 @@ private:
 	void SetHighDensity();
 
 private:
+	wxConfig _config;
 	std::vector<std::unique_ptr<const ConfigProto>> _formats;
 	std::vector<std::unique_ptr<const CandidateDevice>> _devices;
 	std::shared_ptr<const DiskFlux> _currentDisk;
