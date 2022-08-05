@@ -24,6 +24,7 @@ DECLARE_COLOUR(BAD_SECTOR, 213, 94, 0);
 DECLARE_COLOUR(MISSING_SECTOR, 86, 180, 233);
 DECLARE_COLOUR(READ_ARROW, 0, 128, 0);
 DECLARE_COLOUR(WRITE_ARROW, 128, 0, 0);
+DECLARE_COLOUR(SELECTION_BOX, 64, 64, 255);
 
 VisualisationControl::VisualisationControl(wxWindow* parent,
     wxWindowID id,
@@ -36,9 +37,12 @@ VisualisationControl::VisualisationControl(wxWindow* parent,
 }
 
 wxBEGIN_EVENT_TABLE(VisualisationControl, wxPanel)
-    EVT_PAINT(VisualisationControl::OnPaint) wxEND_EVENT_TABLE()
+    EVT_PAINT(VisualisationControl::OnPaint)
+	EVT_MOTION(VisualisationControl::OnMotion)
+	EVT_LEAVE_WINDOW(VisualisationControl::OnLeaveWindow)
+wxEND_EVENT_TABLE()
 
-        void VisualisationControl::OnPaint(wxPaintEvent&)
+void VisualisationControl::OnPaint(wxPaintEvent&)
 {
     auto size = GetSize();
     int w = size.GetWidth();
@@ -140,6 +144,74 @@ wxBEGIN_EVENT_TABLE(VisualisationControl, wxPanel)
         drawSectors(0);
         drawSectors(1);
     }
+
+	if (_selectedTrack != -1)
+	{
+		int x = (_selectedHead ? (w2-1) : 0) + SECTORSIZE;
+        int y = scaletop + _selectedTrack * SECTORSIZE - 1;
+		int bw = w/2 - SECTORSIZE*2 + 2;
+		int bh = SECTORSIZE + 3;
+		dc.SetPen(SELECTION_BOX_PEN);
+		dc.SetBrush(*wxTRANSPARENT_BRUSH);
+		dc.DrawRectangle({x, y-1, bw, bh});
+
+		static wxFont font(8, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+		dc.SetFont(font);
+		dc.SetBackgroundMode(wxTRANSPARENT);
+		dc.SetTextForeground(*wxBLACK);
+
+		auto centreText = [&](const std::string& text, int y)
+		{
+			auto size = dc.GetTextExtent(text);
+			dc.DrawText(text, { w2 - size.x/2 , y });
+		};
+
+		centreText(
+			fmt::format("physical: {}.{}", _selectedTrack, _selectedHead),
+			scalebottom + 5);
+
+		key_t key = {_selectedTrack, _selectedHead};
+        auto sector = _sectors.find(key);
+		std::string logicalText = "logical: (none)";
+		if (sector != _sectors.end())
+			logicalText = fmt::format("logical: {}.{}",
+					sector->second->logicalTrack, sector->second->logicalSide);
+
+		centreText(logicalText, scalebottom + 15);
+	}
+}
+
+void VisualisationControl::OnMotion(wxMouseEvent& event)
+{
+    wxClientDC dc(this);
+	auto loc = event.GetLogicalPosition(dc);
+    auto size = GetSize();
+    int w = size.GetWidth();
+    int w2 = w / 2;
+    int h = size.GetHeight();
+
+    int centrey = h * 1.5;
+    int scalesize = TRACKS * SECTORSIZE;
+    int scaletop = h / 2 - scalesize / 2;
+    int scalebottom = scaletop + scalesize - 1;
+
+	int headno = loc.x > w2;
+
+	int trackno = (loc.y - scaletop) / SECTORSIZE;
+	if ((trackno < 0) || (trackno >= TRACKS))
+		trackno = -1;
+	if ((_selectedHead != headno) || (_selectedTrack != trackno))
+	{
+		_selectedTrack = trackno;
+		_selectedHead = headno;
+		Refresh();
+	}
+}
+
+void VisualisationControl::OnLeaveWindow(wxMouseEvent&)
+{
+	_selectedTrack = _selectedHead = -1;
+	Refresh();
 }
 
 void VisualisationControl::SetMode(int track, int head, int mode)

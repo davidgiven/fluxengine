@@ -31,7 +31,9 @@ public:
 	void SetDiskData(std::shared_ptr<const DiskFlux> disk);
 
 private:
-	void OnPaint(wxPaintEvent & evt);
+	void OnPaint(wxPaintEvent& evt);
+	void OnMotion(wxMouseEvent& evt);
+	void OnLeaveWindow(wxMouseEvent& evt);
 
 private:
 	typedef std::pair<unsigned, unsigned> key_t;
@@ -39,6 +41,8 @@ private:
 	int _head;
 	int _track;
 	int _mode = VISMODE_NOTHING;
+	int _selectedHead = -1;
+	int _selectedTrack = -1;
 	std::multimap<key_t, std::shared_ptr<const Sector>> _sectors;
     wxDECLARE_EVENT_TABLE();
 };
