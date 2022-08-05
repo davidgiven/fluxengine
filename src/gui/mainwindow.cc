@@ -377,9 +377,6 @@ void MainWindow::UpdateDevices()
 
 void MainWindow::OnTrackSelection(TrackSelectionEvent& event)
 {
-	fmt::print("track selection {}.{}\n",
-		event.trackFlux->location.physicalTrack, event.trackFlux->location.head);
-
-    (new FluxViewerWindow())->Show(true);
+    (new FluxViewerWindow(event.trackFlux))->Show(true);
 }
 

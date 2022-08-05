@@ -31,6 +31,7 @@
 #include <wx/frame.h>
 #include "fluxviewercontrol.h"
 #include <wx/scrolbar.h>
+#include <wx/statusbr.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -89,8 +90,9 @@ class FluxViewerWindowGen : public wxFrame
 	protected:
 		wxMenuBar* m_menubar2;
 		wxMenu* m_menu1;
-		FluxViewerControl* m_fluxViewer;
-		wxScrollBar* m_scrollBar1;
+		FluxViewerControl* fluxviewer;
+		wxScrollBar* scrollbar;
+		wxStatusBar* statusbar;
 
 		// Virtual event handlers, override them in your derived class
 		virtual void OnExit( wxCommandEvent& event ) { event.Skip(); }

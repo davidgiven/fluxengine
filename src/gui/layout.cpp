@@ -203,15 +203,16 @@ FluxViewerWindowGen::FluxViewerWindowGen( wxWindow* parent, wxWindowID id, const
 	wxBoxSizer* bSizer1;
 	bSizer1 = new wxBoxSizer( wxVERTICAL );
 
-	m_fluxViewer = new FluxViewerControl( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer1->Add( m_fluxViewer, 1, wxEXPAND, 5 );
+	fluxviewer = new FluxViewerControl( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer1->Add( fluxviewer, 1, wxEXPAND, 5 );
 
-	m_scrollBar1 = new wxScrollBar( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSB_HORIZONTAL );
-	bSizer1->Add( m_scrollBar1, 0, wxALIGN_BOTTOM|wxEXPAND, 5 );
+	scrollbar = new wxScrollBar( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSB_HORIZONTAL );
+	bSizer1->Add( scrollbar, 0, wxALIGN_BOTTOM|wxEXPAND, 5 );
 
 
 	this->SetSizer( bSizer1 );
 	this->Layout();
+	statusbar = this->CreateStatusBar( 1, wxSTB_SIZEGRIP, wxID_ANY );
 
 	this->Centre( wxBOTH );
 

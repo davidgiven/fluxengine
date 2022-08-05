@@ -15,11 +15,6 @@
 
 wxDEFINE_EVENT(TRACK_SELECTION_EVENT, TrackSelectionEvent);
 
-#define DECLARE_COLOUR(name, red, green, blue)             \
-    static const wxColour name##_COLOUR(red, green, blue); \
-    static const wxBrush name##_BRUSH(name##_COLOUR);      \
-    static const wxPen name##_PEN(name##_COLOUR)
-
 DECLARE_COLOUR(AXIS, 128, 128, 128);
 DECLARE_COLOUR(GOOD_SECTOR, 0, 158, 115);
 DECLARE_COLOUR(BAD_SECTOR, 213, 94, 0);

@@ -3,15 +3,18 @@
 
 #include "layout.h"
 
+class TrackFlux;
+
 class FluxViewerWindow : public FluxViewerWindowGen
 {
 public:
-    FluxViewerWindow();
+    FluxViewerWindow(std::shared_ptr<const TrackFlux> flux);
 
 private:
     void OnExit(wxCommandEvent& event);
 
-public:
+private:
+	std::shared_ptr<const TrackFlux> _flux;
 };
 
 #endif

@@ -42,5 +42,10 @@ private:
 };
 wxDECLARE_APP(FluxEngineApp);
 
+#define DECLARE_COLOUR(name, red, green, blue)             \
+    static const wxColour name##_COLOUR(red, green, blue); \
+    static const wxBrush name##_BRUSH(name##_COLOUR);      \
+    static const wxPen name##_PEN(name##_COLOUR)
+
 #endif
 
