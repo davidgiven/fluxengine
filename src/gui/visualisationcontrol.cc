@@ -1,6 +1,6 @@
 #include "globals.h"
 #include "gui.h"
-#include "visualisation.h"
+#include "visualisationcontrol.h"
 #include "fluxmap.h"
 #include "flux.h"
 #include "sector.h"

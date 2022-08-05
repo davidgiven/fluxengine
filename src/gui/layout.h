@@ -9,7 +9,7 @@
 
 #include <wx/artprov.h>
 #include <wx/xrc/xmlres.h>
-#include "visualisation.h"
+#include "visualisationcontrol.h"
 #include <wx/gdicmn.h>
 #include <wx/font.h>
 #include <wx/colour.h>

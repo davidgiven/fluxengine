@@ -1,5 +1,5 @@
-#ifndef VISUALISATION_H
-#define VISUALISATION_H
+#ifndef VISUALISATIONCONTROL_H
+#define VISUALISATIONCONTROL_H
 
 #include <memory>
 #include <map>
