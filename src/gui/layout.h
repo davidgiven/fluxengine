@@ -29,6 +29,8 @@
 #include <wx/notebook.h>
 #include <wx/menu.h>
 #include <wx/frame.h>
+#include "fluxviewercontrol.h"
+#include <wx/scrolbar.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -74,6 +76,31 @@ class MainWindowGen : public wxFrame
 		MainWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("FluxEngine"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 587,595 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 
 		~MainWindowGen();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class FluxViewerWindowGen
+///////////////////////////////////////////////////////////////////////////////
+class FluxViewerWindowGen : public wxFrame
+{
+	private:
+
+	protected:
+		wxMenuBar* m_menubar2;
+		wxMenu* m_menu1;
+		FluxViewerControl* m_fluxViewer;
+		wxScrollBar* m_scrollBar1;
+
+		// Virtual event handlers, override them in your derived class
+		virtual void OnExit( wxCommandEvent& event ) { event.Skip(); }
+
+
+	public:
+
+		FluxViewerWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Flux Viewer"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+
+		~FluxViewerWindowGen();
 
 };
 

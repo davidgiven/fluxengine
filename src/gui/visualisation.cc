@@ -13,6 +13,8 @@
 
 #define SECTORSIZE 5
 
+wxDEFINE_EVENT(TRACK_SELECTION_EVENT, TrackSelectionEvent);
+
 #define DECLARE_COLOUR(name, red, green, blue)             \
     static const wxColour name##_COLOUR(red, green, blue); \
     static const wxBrush name##_BRUSH(name##_COLOUR);      \
@@ -39,6 +41,7 @@ VisualisationControl::VisualisationControl(wxWindow* parent,
 wxBEGIN_EVENT_TABLE(VisualisationControl, wxPanel)
     EVT_PAINT(VisualisationControl::OnPaint)
 	EVT_MOTION(VisualisationControl::OnMotion)
+	EVT_LEFT_DOWN(VisualisationControl::OnLeftDown)
 	EVT_LEAVE_WINDOW(VisualisationControl::OnLeaveWindow)
 wxEND_EVENT_TABLE()
 
@@ -171,11 +174,13 @@ void VisualisationControl::OnPaint(wxPaintEvent&)
 			scalebottom + 5);
 
 		key_t key = {_selectedTrack, _selectedHead};
-        auto sector = _sectors.find(key);
+        auto it = _tracks.find(key);
 		std::string logicalText = "logical: (none)";
-		if (sector != _sectors.end())
-			logicalText = fmt::format("logical: {}.{}",
-					sector->second->logicalTrack, sector->second->logicalSide);
+		if (it != _tracks.end())
+			logicalText = fmt::format(
+					"logical: {}.{}",
+					it->second->location.logicalTrack,
+					it->second->location.head);
 
 		centreText(logicalText, scalebottom + 15);
 	}
@@ -208,6 +213,25 @@ void VisualisationControl::OnMotion(wxMouseEvent& event)
 	}
 }
 
+void VisualisationControl::OnLeftDown(wxMouseEvent& event)
+{
+	event.Skip();
+	OnMotion(event);
+
+	if ((_selectedHead != -1) && (_selectedTrack != -1))
+	{
+		key_t key = {_selectedTrack, _selectedHead};
+        auto it = _tracks.find(key);
+		if (it != _tracks.end())
+		{
+			TrackSelectionEvent event(TRACK_SELECTION_EVENT, GetId());
+			event.SetEventObject(this);
+			event.trackFlux = it->second;
+			ProcessWindowEvent(event);
+		}
+	}
+}
+
 void VisualisationControl::OnLeaveWindow(wxMouseEvent&)
 {
 	_selectedTrack = _selectedHead = -1;
@@ -225,12 +249,14 @@ void VisualisationControl::SetMode(int track, int head, int mode)
 void VisualisationControl::Clear()
 {
     _sectors.clear();
+	_tracks.clear();
     Refresh();
 }
 
 void VisualisationControl::SetTrackData(std::shared_ptr<const TrackFlux> track)
 {
     key_t key = {track->location.physicalTrack, track->location.head};
+	_tracks[key] = track;
     _sectors.erase(key);
     for (auto& sector : track->sectors)
         _sectors.insert({key, sector});
@@ -241,6 +267,12 @@ void VisualisationControl::SetTrackData(std::shared_ptr<const TrackFlux> track)
 void VisualisationControl::SetDiskData(std::shared_ptr<const DiskFlux> disk)
 {
 	_sectors.clear();
+	for (const auto& track : disk->tracks)
+	{
+		key_t key = {track->location.physicalTrack, track->location.head};
+		_tracks[key] = track;
+	}
+
 	for (const auto& sector : *(disk->image))
 	{
 		key_t key = {sector->physicalTrack, sector->physicalHead};

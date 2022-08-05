@@ -1,6 +1,8 @@
 ifneq ($(shell $(WX_CONFIG) --version),)
 
 FLUXENGINE_GUI_SRCS = \
+	src/gui/fluxviewerwindow.cc \
+	src/gui/fluxviewercontrol.cc \
 	src/gui/main.cc \
 	src/gui/mainwindow.cc \
 	src/gui/visualisation.cc \

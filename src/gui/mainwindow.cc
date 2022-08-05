@@ -14,6 +14,7 @@
 #include "mapper.h"
 #include "utils.h"
 #include "mainwindow.h"
+#include "fluxviewerwindow.h"
 #include <google/protobuf/text_format.h>
 
 extern const std::map<std::string, std::string> formats;
@@ -60,6 +61,7 @@ MainWindow::MainWindow(): MainWindowGen(nullptr)
 	writeFluxButton->Bind(wxEVT_BUTTON, &MainWindow::OnWriteFluxButton, this);
     writeImageButton->Bind(wxEVT_BUTTON, &MainWindow::OnWriteImageButton, this);
     stopButton->Bind(wxEVT_BUTTON, &MainWindow::OnStopButton, this);
+	visualiser->Bind(TRACK_SELECTION_EVENT, &MainWindow::OnTrackSelection, this);
 
     UpdateState();
 }
@@ -358,3 +360,12 @@ void MainWindow::UpdateDevices()
         _devices.push_back(std::move(candidate));
     }
 }
+
+void MainWindow::OnTrackSelection(TrackSelectionEvent& event)
+{
+	fmt::print("track selection {}.{}\n",
+		event.trackFlux->location.physicalTrack, event.trackFlux->location.head);
+
+    (new FluxViewerWindow())->Show(true);
+}
+

@@ -21,6 +21,7 @@ private:
 	void OnWriteFluxButton(wxCommandEvent&);
 	void OnWriteImageButton(wxCommandEvent&);
 	void OnLogMessage(std::shared_ptr<const AnyLogMessage> message);
+	void OnTrackSelection(TrackSelectionEvent&);
 
 public:
 	void UpdateState();

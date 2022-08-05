@@ -15,6 +15,21 @@ enum {
 	VISMODE_WRITING
 };
 
+class TrackSelectionEvent : public wxEvent
+{
+public:
+	TrackSelectionEvent(wxEventType eventType, int winId):
+		wxEvent(winId, eventType)
+	{}
+
+	wxEvent *Clone() const
+	{ return new TrackSelectionEvent(*this); }
+
+	std::shared_ptr<const TrackFlux> trackFlux;
+};
+
+wxDECLARE_EVENT(TRACK_SELECTION_EVENT, TrackSelectionEvent);
+
 class VisualisationControl : public wxWindow
 {
 public:
@@ -33,6 +48,7 @@ public:
 private:
 	void OnPaint(wxPaintEvent& evt);
 	void OnMotion(wxMouseEvent& evt);
+	void OnLeftDown(wxMouseEvent& evt);
 	void OnLeaveWindow(wxMouseEvent& evt);
 
 private:
@@ -44,6 +60,7 @@ private:
 	int _selectedHead = -1;
 	int _selectedTrack = -1;
 	std::multimap<key_t, std::shared_ptr<const Sector>> _sectors;
+	std::map<key_t, std::shared_ptr<const TrackFlux>> _tracks;
     wxDECLARE_EVENT_TABLE();
 };
 
