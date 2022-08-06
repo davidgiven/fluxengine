@@ -209,14 +209,24 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
 
 			/* Sector blocks. */
 
+			dc.SetPen(FOREGROUND_PEN);
+			dc.SetBrush(RECORD_BRUSH);
+			dc.SetBackgroundMode(wxTRANSPARENT);
+			dc.SetTextForeground(*wxBLACK);
 			for (const auto& sector : trackdata->sectors)
 			{
 				int sp = sector->headerStartTime / _nanosecondsPerPixel;
 				int sw = (sector->dataEndTime - sector->headerStartTime) / _nanosecondsPerPixel;
 
-				dc.SetPen(FOREGROUND_PEN);
-				dc.SetBrush(RECORD_BRUSH);
-				dc.DrawRectangle({x+sp, t1y - ch2}, {sw, ch});
+				wxRect rect = {x+sp, t1y - ch2, sw, ch};
+				dc.DrawRectangle(rect);
+				wxDCClipper clipper(dc, rect);
+
+				auto text = fmt::format("c{}.h{}.s{} {}",
+					sector->logicalTrack, sector->logicalSide, sector->logicalSector,
+					Sector::statusToString(sector->status));
+				auto size = dc.GetTextExtent(text);
+				dc.DrawText(text, { x+sp+BORDER, t1y - size.GetHeight()/2 });
 			}
 
 			/* Record blocks. */
@@ -226,8 +236,6 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
 				int rp = record->startTime / _nanosecondsPerPixel;
 				int rw = (record->endTime - record->startTime) / _nanosecondsPerPixel;
 
-				dc.SetPen(FOREGROUND_PEN);
-				dc.SetBrush(RECORD_BRUSH);
 				dc.DrawRectangle({x+rp, t2y - ch2}, {rw, ch});
 			}
 
