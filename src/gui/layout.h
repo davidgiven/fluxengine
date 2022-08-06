@@ -106,3 +106,27 @@ class FluxViewerWindowGen : public wxFrame
 
 };
 
+///////////////////////////////////////////////////////////////////////////////
+/// Class HexViewerWindowGen
+///////////////////////////////////////////////////////////////////////////////
+class HexViewerWindowGen : public wxFrame
+{
+	private:
+
+	protected:
+		wxMenuBar* m_menubar2;
+		wxMenu* m_menu1;
+		wxTextCtrl* hexEntry;
+
+		// Virtual event handlers, override them in your derived class
+		virtual void OnExit( wxCommandEvent& event ) { event.Skip(); }
+
+
+	public:
+
+		HexViewerWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Hex Viewer"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+
+		~HexViewerWindowGen();
+
+};
+
