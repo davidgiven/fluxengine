@@ -11,7 +11,8 @@ DECLARE_COLOUR(READ_SEPARATOR, 255, 0, 0);
 DECLARE_COLOUR(INDEX_SEPARATOR, 255, 255, 0);
 DECLARE_COLOUR(FOREGROUND, 0, 0, 0);
 DECLARE_COLOUR(FLUX, 64, 64, 255);
-DECLARE_COLOUR(RECORD, 255, 255, 255);
+DECLARE_COLOUR(SECTOR, 255, 255, 255);
+DECLARE_COLOUR(RECORD, 200, 200, 200);
 
 const int BORDER = 4;
 const int MINIMUM_TICK_DISTANCE = 10;
@@ -210,7 +211,7 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
 			/* Sector blocks. */
 
 			dc.SetPen(FOREGROUND_PEN);
-			dc.SetBrush(RECORD_BRUSH);
+			dc.SetBrush(SECTOR_BRUSH);
 			dc.SetBackgroundMode(wxTRANSPARENT);
 			dc.SetTextForeground(*wxBLACK);
 			for (const auto& sector : trackdata->sectors)
@@ -231,6 +232,7 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
 
 			/* Record blocks. */
 
+			dc.SetBrush(RECORD_BRUSH);
 			for (const auto& record : trackdata->records)
 			{
 				int rp = record->startTime / _nanosecondsPerPixel;
