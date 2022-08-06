@@ -116,7 +116,7 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
 	int t4y = th*3 + th/2;
 
 	int x = -_scrollPosition / _nanosecondsPerPixel;
-	bool first = true;
+	nanoseconds_t fluxStartTime = 0;
 	for (const auto& trackdata : _flux->trackDatas)
 	{
 		nanoseconds_t duration = trackdata->fluxmap->duration();
@@ -124,12 +124,11 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
 
 		if (((x+fw) > 0) && (x < w))
 		{
-			if (!first)
+			if (fluxStartTime != 0)
 			{
 				dc.SetPen(READ_SEPARATOR_PEN);
 				dc.DrawLine({x, 0}, {x, h});
 			}
-			first = false;
 
 			dc.SetPen(FOREGROUND_PEN);
 			dc.DrawLine({x, t1y}, {x+fw, t1y});
@@ -193,16 +192,17 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
 				tick += tickStep;
 			}
 
+			double relativeScrollPosition = _scrollPosition - fluxStartTime;
 			if (x <= 0)
 				dc.DrawText(
-					fmt::format("{}us", (int)(_scrollPosition / 1000LL)),
+					fmt::format("{}us", (int)(relativeScrollPosition / 1000LL)),
 					{ BORDER, t3y + ch2/2 }
 				);
 
 			if ((x+fw) >= w)
 			{
 				wxString text = fmt::format(
-					"{}us", (int)((_scrollPosition + (w * _nanosecondsPerPixel)) / 1000LL));
+					"{}us", (int)((relativeScrollPosition + (w * _nanosecondsPerPixel)) / 1000LL));
 				auto size = dc.GetTextExtent(text);
 				dc.DrawText(text, { w - size.GetWidth() - BORDER, t3y + ch2/2 });
 			}
@@ -239,11 +239,11 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
 				/* Draw using density map. */
 
 				dc.SetPen(*wxTRANSPARENT_PEN);
-				for (int fx = 0; fx < _densityMap.size(); fx++)
+				for (int fx = 0; fx < fw; fx++)
 				{
 					if (((x+fx) > 0) && ((x+fx) < w))
 					{
-						float density = _densityMap[fx];
+						float density = _densityMap[(fluxStartTime/_nanosecondsPerPixel) + fx];
 						wxColour colour(
 							interpolate(BACKGROUND_COLOUR.Red(), FLUX_COLOUR.Red(), density),
 							interpolate(BACKGROUND_COLOUR.Green(), FLUX_COLOUR.Green(), density),
@@ -277,7 +277,8 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
 			dc.DrawLine({x, t4y}, {x+fw, t4y});
 		}
 
-		x += w;
+		x += fw;
+		fluxStartTime += duration;
 	}
 }
 
