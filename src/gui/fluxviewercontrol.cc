@@ -105,7 +105,7 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
 	int w = size.GetWidth();
 	int h = size.GetHeight();
 	int th = h / 4;
-	int ch = th * 3 / 4;
+	int ch = th * 2 / 3;
 	int ch2 = ch / 2;
 	int t1y = th/2;
 	int t2y = th + th/2;
@@ -113,6 +113,7 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
 	int t4y = th*3 + th/2;
 
 	int x = -_scrollPosition / _nanosecondsPerPixel;
+	bool first = true;
 	for (const auto& trackdata : _flux->trackDatas)
 	{
 		nanoseconds_t duration = trackdata->fluxmap->duration();
@@ -120,17 +121,41 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
 
 		if (((x+fw) > 0) && (x < w))
 		{
-			dc.SetPen(READ_SEPARATOR_PEN);
-			dc.DrawLine({x, 0}, {x, h});
+			if (!first)
+			{
+				dc.SetPen(READ_SEPARATOR_PEN);
+				dc.DrawLine({x, 0}, {x, h});
+			}
+			first = false;
 
 			dc.SetPen(FOREGROUND_PEN);
 			dc.DrawLine({x, t1y}, {x+fw, t1y});
 			dc.DrawLine({x, t2y}, {x+fw, t2y});
 			dc.DrawLine({x, t3y}, {x+fw, t3y});
 
+			/* Index lines. */
+
+			{
+				dc.SetPen(INDEX_SEPARATOR_PEN);
+				FluxmapReader fmr(*trackdata->fluxmap);
+				for (;;)
+				{
+					unsigned ticks;
+					if (!fmr.findEvent(F_BIT_INDEX, ticks))
+						break;
+
+					int fx = fmr.tell().ns() / _nanosecondsPerPixel;
+					if (((x+fx) > 0) && ((x+fx) < w))
+						dc.DrawLine({x+fx, 0}, {x+fx, h});
+
+					if ((x+fx) >= w)
+						break;
+				}
+			}
+
 			/* Draw the horizontal scale. */
 
-			nanoseconds_t tickStep = 1000;
+			uint64_t tickStep = 1000;
 			while ((tickStep / _nanosecondsPerPixel) < MINIMUM_TICK_DISTANCE)
 				tickStep *= 10;
 
@@ -138,19 +163,23 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
 			dc.SetFont(font);
 			dc.SetBackgroundMode(wxTRANSPARENT);
 			dc.SetTextForeground(*wxBLACK);
+			dc.SetPen(FOREGROUND_PEN);
 
-			nanoseconds_t tick = 0;
-			int tickCount = 0;
+			uint64_t tick = 0;
+			if (x < 0)
+				tick = floor(-x * _nanosecondsPerPixel / tickStep) * tickStep;
 			while (tick < duration)
 			{
 				int xx = tick / _nanosecondsPerPixel;
+				if ((x+xx) > w)
+					break;
 				int ts = ch2/3;
-				if ((tickCount % 10) == 0)
+				if ((tick % (10*tickStep)) == 0)
 					ts = ch2/2;
-				if ((tickCount % 100) == 0)
+				if ((tick % (100*tickStep)) == 0)
 					ts = ch2;
 				dc.DrawLine({x+xx, t3y - ts}, {x+xx, t3y + ts});
-				if ((tickCount % 10) == 0)
+				if ((tick % (10*tickStep)) == 0)
 				{
 					dc.DrawText(
 						fmt::format("{}us", tick / 1000LL),
@@ -159,7 +188,6 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
 				}
 
 				tick += tickStep;
-				tickCount++;
 			}
 
 			if (x <= 0)
@@ -230,23 +258,15 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
 				FluxmapReader fmr(*trackdata->fluxmap);
 				while (!fmr.eof())
 				{
-					int event;
 					unsigned ticks;
-					fmr.getNextEvent(event, ticks);
+					if (!fmr.findEvent(F_BIT_PULSE, ticks))
+						break;
 
 					int fx = fmr.tell().ns() / _nanosecondsPerPixel;
 					if (((x+fx) > 0) && ((x+fx) < w))
-					{
-						if (event & F_BIT_INDEX)
-						{
-							dc.SetPen(INDEX_SEPARATOR_PEN);
-							dc.DrawLine({x+fx, 0}, {x+fx, h});
-							dc.SetPen(FLUX_PEN);
-						}
-
-						if (event & F_BIT_PULSE)
-							dc.DrawLine({x+fx, t4y - ch2}, {x+fx, t4y + ch2});
-					}
+						dc.DrawLine({x+fx, t4y - ch2}, {x+fx, t4y + ch2});
+					if ((x+fx) >= w)
+						break;
 				}
 			}
 
