@@ -21,7 +21,7 @@ public:
 	void SetFlux(std::shared_ptr<const TrackFlux> flux);
 
 private:
-	void ResizeScrollbar();
+	void UpdateScale();
 
 private:
 	void OnPaint(wxPaintEvent&);
@@ -34,6 +34,7 @@ private:
 	nanoseconds_t _scrollPosition;
 	nanoseconds_t _totalDuration;
 	double _nanosecondsPerPixel;
+	std::vector<float> _densityMap;
     wxDECLARE_EVENT_TABLE();
 };
 
