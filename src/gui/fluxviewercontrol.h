@@ -27,6 +27,7 @@ private:
 	void OnPaint(wxPaintEvent&);
 	void OnMouseWheel(wxMouseEvent&);
 	void OnScrollbarChanged(wxScrollEvent&);
+	void OnMouseMotion(wxMouseEvent&);
 
 private:
 	wxScrollBar* _scrollbar;
@@ -35,6 +36,8 @@ private:
 	nanoseconds_t _totalDuration;
 	double _nanosecondsPerPixel;
 	std::vector<float> _densityMap;
+	int _dragStartX;
+	nanoseconds_t _dragStartPosition;
     wxDECLARE_EVENT_TABLE();
 };
 

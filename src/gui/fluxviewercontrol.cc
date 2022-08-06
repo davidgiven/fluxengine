@@ -30,6 +30,9 @@ FluxViewerControl::FluxViewerControl(wxWindow* parent,
 wxBEGIN_EVENT_TABLE(FluxViewerControl, wxPanel)
     EVT_PAINT(FluxViewerControl::OnPaint)
 	EVT_MOUSEWHEEL(FluxViewerControl::OnMouseWheel)
+	EVT_LEFT_DOWN(FluxViewerControl::OnMouseMotion)
+	EVT_LEFT_UP(FluxViewerControl::OnMouseMotion)
+	EVT_MOTION(FluxViewerControl::OnMouseMotion)
 wxEND_EVENT_TABLE()
 
 void FluxViewerControl::SetScrollbar(wxScrollBar* scrollbar)
@@ -298,5 +301,29 @@ void FluxViewerControl::OnScrollbarChanged(wxScrollEvent& event)
 {
 	_scrollPosition = event.GetPosition() * 1000LL;
 	Refresh();
+}
+
+void FluxViewerControl::OnMouseMotion(wxMouseEvent& event)
+{
+    wxClientDC dc(this);
+	event.Skip();
+
+	if (event.ButtonDown(wxMOUSE_BTN_LEFT))
+	{
+		_dragStartX = event.GetLogicalPosition(dc).x;
+		_dragStartPosition = _scrollPosition;
+	}
+	else if (event.ButtonUp(wxMOUSE_BTN_LEFT))
+	{
+		/* end drag, do nothing */
+	}
+	else if (event.Dragging())
+	{
+		int dx = _dragStartX - event.GetLogicalPosition(dc).x;
+		nanoseconds_t dt = dx * _nanosecondsPerPixel;
+		_scrollPosition = _dragStartPosition + dt;
+		UpdateScale();
+		Refresh();
+	}
 }
 
