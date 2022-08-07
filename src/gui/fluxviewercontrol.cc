@@ -327,6 +327,7 @@ void FluxViewerControl::OnMouseWheel(wxMouseEvent& event)
 		_nanosecondsPerPixel /= 1.2;
 	else
 		_nanosecondsPerPixel *= 1.2;
+	_nanosecondsPerPixel = std::max(30.0, _nanosecondsPerPixel);
 	_scrollPosition -= x * _nanosecondsPerPixel;
 
 	UpdateScale();
