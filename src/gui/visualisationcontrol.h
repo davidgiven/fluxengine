@@ -1,5 +1,5 @@
-#ifndef VISUALISATION_H
-#define VISUALISATION_H
+#ifndef VISUALISATIONCONTROL_H
+#define VISUALISATIONCONTROL_H
 
 #include <memory>
 #include <map>
@@ -14,6 +14,21 @@ enum {
 	VISMODE_READING,
 	VISMODE_WRITING
 };
+
+class TrackSelectionEvent : public wxEvent
+{
+public:
+	TrackSelectionEvent(wxEventType eventType, int winId):
+		wxEvent(winId, eventType)
+	{}
+
+	wxEvent *Clone() const
+	{ return new TrackSelectionEvent(*this); }
+
+	std::shared_ptr<const TrackFlux> trackFlux;
+};
+
+wxDECLARE_EVENT(TRACK_SELECTION_EVENT, TrackSelectionEvent);
 
 class VisualisationControl : public wxWindow
 {
@@ -31,7 +46,10 @@ public:
 	void SetDiskData(std::shared_ptr<const DiskFlux> disk);
 
 private:
-	void OnPaint(wxPaintEvent & evt);
+	void OnPaint(wxPaintEvent& evt);
+	void OnMotion(wxMouseEvent& evt);
+	void OnLeftDown(wxMouseEvent& evt);
+	void OnLeaveWindow(wxMouseEvent& evt);
 
 private:
 	typedef std::pair<unsigned, unsigned> key_t;
@@ -39,7 +57,10 @@ private:
 	int _head;
 	int _track;
 	int _mode = VISMODE_NOTHING;
+	int _selectedHead = -1;
+	int _selectedTrack = -1;
 	std::multimap<key_t, std::shared_ptr<const Sector>> _sectors;
+	std::map<key_t, std::shared_ptr<const TrackFlux>> _tracks;
     wxDECLARE_EVENT_TABLE();
 };
 

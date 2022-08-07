@@ -14,11 +14,17 @@
 #include "mapper.h"
 #include "utils.h"
 #include "mainwindow.h"
+#include "fluxviewerwindow.h"
 #include <google/protobuf/text_format.h>
 
 extern const std::map<std::string, std::string> formats;
 
-MainWindow::MainWindow(): MainWindowGen(nullptr)
+#define CONFIG_FORMAT "Format"
+#define CONFIG_FLUX "FluxSourceSink"
+
+MainWindow::MainWindow():
+	MainWindowGen(nullptr),
+	_config("FluxEngine")
 {
     Logger::setLogger(
         [&](std::shared_ptr<const AnyLogMessage> message)
@@ -30,7 +36,10 @@ MainWindow::MainWindow(): MainWindowGen(nullptr)
                 });
         });
 
-    int DefaultFormat = 0;
+	wxString defaultFormatName = "ibm";
+	_config.Read(CONFIG_FORMAT, &defaultFormatName);
+
+    int defaultFormat = 0;
     int i = 0;
     for (const auto& it : formats)
     {
@@ -41,7 +50,8 @@ MainWindow::MainWindow(): MainWindowGen(nullptr)
             continue;
 
         formatChoice->Append(it.first);
-        if (it.first == "ibm") DefaultFormat=i;
+        if (it.first == defaultFormatName)
+			defaultFormat = i;
         _formats.push_back(std::move(config));
         i++;
     }
@@ -51,15 +61,20 @@ MainWindow::MainWindow(): MainWindowGen(nullptr)
         deviceCombo->SetValue(deviceCombo->GetString(0));
 
     if (MainWindow::formatChoice->GetCount() > 0)
-        formatChoice->SetSelection(DefaultFormat);
+        formatChoice->SetSelection(defaultFormat);
 
-    fluxSourceSinkCombo->SetValue(fluxSourceSinkCombo->GetString(0));
+	wxString defaultFluxSourceSink = fluxSourceSinkCombo->GetString(0);
+	_config.Read(CONFIG_FLUX, &defaultFluxSourceSink);
+    fluxSourceSinkCombo->SetValue(defaultFluxSourceSink);
 
+	formatChoice->Bind(wxEVT_COMMAND_CHOICE_SELECTED, &MainWindow::OnControlsChanged, this);
+	fluxSourceSinkCombo->Bind(wxEVT_TEXT, &MainWindow::OnControlsChanged, this);
     readFluxButton->Bind(wxEVT_BUTTON, &MainWindow::OnReadFluxButton, this);
     readImageButton->Bind(wxEVT_BUTTON, &MainWindow::OnReadImageButton, this);
 	writeFluxButton->Bind(wxEVT_BUTTON, &MainWindow::OnWriteFluxButton, this);
     writeImageButton->Bind(wxEVT_BUTTON, &MainWindow::OnWriteImageButton, this);
     stopButton->Bind(wxEVT_BUTTON, &MainWindow::OnStopButton, this);
+	visualiser->Bind(TRACK_SELECTION_EVENT, &MainWindow::OnTrackSelection, this);
 
     UpdateState();
 }
@@ -67,6 +82,14 @@ MainWindow::MainWindow(): MainWindowGen(nullptr)
 void MainWindow::OnExit(wxCommandEvent& event)
 {
     Close(true);
+}
+
+void MainWindow::OnControlsChanged(wxCommandEvent& event)
+{
+	_config.Write(CONFIG_FORMAT,
+		formatChoice->GetString(formatChoice->GetSelection()));
+	_config.Write(CONFIG_FLUX,
+		fluxSourceSinkCombo->GetValue());
 }
 
 void MainWindow::OnStopButton(wxCommandEvent&)
@@ -358,3 +381,9 @@ void MainWindow::UpdateDevices()
         _devices.push_back(std::move(candidate));
     }
 }
+
+void MainWindow::OnTrackSelection(TrackSelectionEvent& event)
+{
+    (new FluxViewerWindow(this, event.trackFlux))->Show(true);
+}
+

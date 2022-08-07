@@ -41,7 +41,8 @@ decoder {
 }
 
 drive {
-	head_bias: 1
+	head_bias: 0
+	group_offset: 1
 }
 
 tracks {

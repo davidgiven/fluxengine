@@ -185,3 +185,84 @@ MainWindowGen::~MainWindowGen()
 	// Disconnect Events
 
 }
+
+FluxViewerWindowGen::FluxViewerWindowGen( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+
+	m_menubar2 = new wxMenuBar( 0 );
+	m_menu1 = new wxMenu();
+	wxMenuItem* m_menuItem1;
+	m_menuItem1 = new wxMenuItem( m_menu1, wxID_CLOSE, wxString( wxT("&Close") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu1->Append( m_menuItem1 );
+
+	m_menubar2->Append( m_menu1, wxT("&Window") );
+
+	this->SetMenuBar( m_menubar2 );
+
+	wxBoxSizer* bSizer1;
+	bSizer1 = new wxBoxSizer( wxVERTICAL );
+
+	fluxviewer = new FluxViewerControl( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer1->Add( fluxviewer, 1, wxEXPAND, 5 );
+
+	scrollbar = new wxScrollBar( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSB_HORIZONTAL );
+	bSizer1->Add( scrollbar, 0, wxALIGN_BOTTOM|wxEXPAND, 5 );
+
+
+	this->SetSizer( bSizer1 );
+	this->Layout();
+
+	this->Centre( wxBOTH );
+
+	// Connect Events
+	m_menu1->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( FluxViewerWindowGen::OnExit ), this, m_menuItem1->GetId());
+}
+
+FluxViewerWindowGen::~FluxViewerWindowGen()
+{
+	// Disconnect Events
+
+}
+
+HexViewerWindowGen::HexViewerWindowGen( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+
+	m_menubar2 = new wxMenuBar( 0 );
+	m_menu1 = new wxMenu();
+	wxMenuItem* m_menuItem1;
+	m_menuItem1 = new wxMenuItem( m_menu1, wxID_CLOSE, wxString( wxT("&Close") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu1->Append( m_menuItem1 );
+
+	m_menubar2->Append( m_menu1, wxT("&Window") );
+
+	this->SetMenuBar( m_menubar2 );
+
+	wxFlexGridSizer* fgSizer8;
+	fgSizer8 = new wxFlexGridSizer( 1, 1, 0, 0 );
+	fgSizer8->AddGrowableCol( 0 );
+	fgSizer8->AddGrowableRow( 0 );
+	fgSizer8->SetFlexibleDirection( wxHORIZONTAL );
+	fgSizer8->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_ALL );
+
+	hexEntry = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY|wxTE_RICH );
+	hexEntry->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
+
+	fgSizer8->Add( hexEntry, 0, wxALL|wxEXPAND, 5 );
+
+
+	this->SetSizer( fgSizer8 );
+	this->Layout();
+
+	this->Centre( wxBOTH );
+
+	// Connect Events
+	m_menu1->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( HexViewerWindowGen::OnExit ), this, m_menuItem1->GetId());
+}
+
+HexViewerWindowGen::~HexViewerWindowGen()
+{
+	// Disconnect Events
+
+}

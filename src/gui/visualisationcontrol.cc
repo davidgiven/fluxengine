@@ -1,6 +1,6 @@
 #include "globals.h"
 #include "gui.h"
-#include "visualisation.h"
+#include "visualisationcontrol.h"
 #include "fluxmap.h"
 #include "flux.h"
 #include "sector.h"
@@ -13,10 +13,7 @@
 
 #define SECTORSIZE 5
 
-#define DECLARE_COLOUR(name, red, green, blue)             \
-    static const wxColour name##_COLOUR(red, green, blue); \
-    static const wxBrush name##_BRUSH(name##_COLOUR);      \
-    static const wxPen name##_PEN(name##_COLOUR)
+wxDEFINE_EVENT(TRACK_SELECTION_EVENT, TrackSelectionEvent);
 
 DECLARE_COLOUR(AXIS, 128, 128, 128);
 DECLARE_COLOUR(GOOD_SECTOR, 0, 158, 115);
@@ -24,6 +21,7 @@ DECLARE_COLOUR(BAD_SECTOR, 213, 94, 0);
 DECLARE_COLOUR(MISSING_SECTOR, 86, 180, 233);
 DECLARE_COLOUR(READ_ARROW, 0, 128, 0);
 DECLARE_COLOUR(WRITE_ARROW, 128, 0, 0);
+DECLARE_COLOUR(SELECTION_BOX, 64, 64, 255);
 
 VisualisationControl::VisualisationControl(wxWindow* parent,
     wxWindowID id,
@@ -36,9 +34,13 @@ VisualisationControl::VisualisationControl(wxWindow* parent,
 }
 
 wxBEGIN_EVENT_TABLE(VisualisationControl, wxPanel)
-    EVT_PAINT(VisualisationControl::OnPaint) wxEND_EVENT_TABLE()
+    EVT_PAINT(VisualisationControl::OnPaint)
+	EVT_MOTION(VisualisationControl::OnMotion)
+	EVT_LEFT_DOWN(VisualisationControl::OnLeftDown)
+	EVT_LEAVE_WINDOW(VisualisationControl::OnLeaveWindow)
+wxEND_EVENT_TABLE()
 
-        void VisualisationControl::OnPaint(wxPaintEvent&)
+void VisualisationControl::OnPaint(wxPaintEvent&)
 {
     auto size = GetSize();
     int w = size.GetWidth();
@@ -140,6 +142,94 @@ wxBEGIN_EVENT_TABLE(VisualisationControl, wxPanel)
         drawSectors(0);
         drawSectors(1);
     }
+
+	if (_selectedTrack != -1)
+	{
+		int x = (_selectedHead ? (w2-1) : 0) + SECTORSIZE;
+        int y = scaletop + _selectedTrack * SECTORSIZE - 1;
+		int bw = w/2 - SECTORSIZE*2 + 2;
+		int bh = SECTORSIZE + 3;
+		dc.SetPen(SELECTION_BOX_PEN);
+		dc.SetBrush(*wxTRANSPARENT_BRUSH);
+		dc.DrawRectangle({x, y-1, bw, bh});
+
+		static wxFont font(8, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+		dc.SetFont(font);
+		dc.SetBackgroundMode(wxTRANSPARENT);
+		dc.SetTextForeground(*wxBLACK);
+
+		auto centreText = [&](const std::string& text, int y)
+		{
+			auto size = dc.GetTextExtent(text);
+			dc.DrawText(text, { w2 - size.x/2 , y });
+		};
+
+		centreText(
+			fmt::format("physical: {}.{}", _selectedTrack, _selectedHead),
+			scalebottom + 5);
+
+		key_t key = {_selectedTrack, _selectedHead};
+        auto it = _tracks.find(key);
+		std::string logicalText = "logical: (none)";
+		if (it != _tracks.end())
+			logicalText = fmt::format(
+					"logical: {}.{}",
+					it->second->location.logicalTrack,
+					it->second->location.head);
+
+		centreText(logicalText, scalebottom + 15);
+	}
+}
+
+void VisualisationControl::OnMotion(wxMouseEvent& event)
+{
+    auto size = GetSize();
+    int w = size.GetWidth();
+    int w2 = w / 2;
+    int h = size.GetHeight();
+
+    int centrey = h * 1.5;
+    int scalesize = TRACKS * SECTORSIZE;
+    int scaletop = h / 2 - scalesize / 2;
+    int scalebottom = scaletop + scalesize - 1;
+
+	int headno = event.GetX() > w2;
+
+	int trackno = (event.GetY() - scaletop) / SECTORSIZE;
+	if ((trackno < 0) || (trackno >= TRACKS))
+		trackno = -1;
+	if ((_selectedHead != headno) || (_selectedTrack != trackno))
+	{
+		_selectedTrack = trackno;
+		_selectedHead = headno;
+		Refresh();
+	}
+}
+
+void VisualisationControl::OnLeftDown(wxMouseEvent& event)
+{
+	OnMotion(event);
+
+	if ((_selectedHead != -1) && (_selectedTrack != -1))
+	{
+		key_t key = {_selectedTrack, _selectedHead};
+        auto it = _tracks.find(key);
+		if (it != _tracks.end())
+		{
+			TrackSelectionEvent event(TRACK_SELECTION_EVENT, GetId());
+			event.SetEventObject(this);
+			event.trackFlux = it->second;
+			ProcessWindowEvent(event);
+		}
+	}
+    else
+        event.Skip();
+}
+
+void VisualisationControl::OnLeaveWindow(wxMouseEvent&)
+{
+	_selectedTrack = _selectedHead = -1;
+	Refresh();
 }
 
 void VisualisationControl::SetMode(int track, int head, int mode)
@@ -153,12 +243,14 @@ void VisualisationControl::SetMode(int track, int head, int mode)
 void VisualisationControl::Clear()
 {
     _sectors.clear();
+	_tracks.clear();
     Refresh();
 }
 
 void VisualisationControl::SetTrackData(std::shared_ptr<const TrackFlux> track)
 {
     key_t key = {track->location.physicalTrack, track->location.head};
+	_tracks[key] = track;
     _sectors.erase(key);
     for (auto& sector : track->sectors)
         _sectors.insert({key, sector});
@@ -169,6 +261,12 @@ void VisualisationControl::SetTrackData(std::shared_ptr<const TrackFlux> track)
 void VisualisationControl::SetDiskData(std::shared_ptr<const DiskFlux> disk)
 {
 	_sectors.clear();
+	for (const auto& track : disk->tracks)
+	{
+		key_t key = {track->location.physicalTrack, track->location.head};
+		_tracks[key] = track;
+	}
+
 	for (const auto& sector : *(disk->image))
 	{
 		key_t key = {sector->physicalTrack, sector->physicalHead};

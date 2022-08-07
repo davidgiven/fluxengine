@@ -2,7 +2,7 @@ syntax = "proto2";
 
 import "lib/common.proto";
 
-// Next: 14
+// Next: 15
 message DriveProto
 {
     optional int32 drive = 1
@@ -25,6 +25,10 @@ message DriveProto
     optional int32 head_bias = 9 [
         default = 0,
         (help) = "Bias to apply to the head position (in tracks)"
+    ];
+    optional int32 group_offset = 14 [
+        default = 0,
+        (help) = "When writing groups, erase all tracks except this one in each group"
     ];
     optional int32 head_width = 10
         [ default = 1, (help) = "Width of the head (in tracks)" ];
