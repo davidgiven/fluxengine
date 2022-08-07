@@ -183,8 +183,6 @@ void VisualisationControl::OnPaint(wxPaintEvent&)
 
 void VisualisationControl::OnMotion(wxMouseEvent& event)
 {
-    wxClientDC dc(this);
-	auto loc = event.GetLogicalPosition(dc);
     auto size = GetSize();
     int w = size.GetWidth();
     int w2 = w / 2;
@@ -195,9 +193,9 @@ void VisualisationControl::OnMotion(wxMouseEvent& event)
     int scaletop = h / 2 - scalesize / 2;
     int scalebottom = scaletop + scalesize - 1;
 
-	int headno = loc.x > w2;
+	int headno = event.GetX() > w2;
 
-	int trackno = (loc.y - scaletop) / SECTORSIZE;
+	int trackno = (event.GetY() - scaletop) / SECTORSIZE;
 	if ((trackno < 0) || (trackno >= TRACKS))
 		trackno = -1;
 	if ((_selectedHead != headno) || (_selectedTrack != trackno))
@@ -210,7 +208,6 @@ void VisualisationControl::OnMotion(wxMouseEvent& event)
 
 void VisualisationControl::OnLeftDown(wxMouseEvent& event)
 {
-	event.Skip();
 	OnMotion(event);
 
 	if ((_selectedHead != -1) && (_selectedTrack != -1))
@@ -225,6 +222,8 @@ void VisualisationControl::OnLeftDown(wxMouseEvent& event)
 			ProcessWindowEvent(event);
 		}
 	}
+    else
+        event.Skip();
 }
 
 void VisualisationControl::OnLeaveWindow(wxMouseEvent&)

@@ -8,7 +8,7 @@ class TrackFlux;
 class FluxViewerWindow : public FluxViewerWindowGen
 {
 public:
-    FluxViewerWindow(std::shared_ptr<const TrackFlux> flux);
+    FluxViewerWindow(wxWindow* parent, std::shared_ptr<const TrackFlux> flux);
 
 private:
     void OnExit(wxCommandEvent& event);

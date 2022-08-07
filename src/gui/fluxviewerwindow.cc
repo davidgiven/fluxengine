@@ -4,8 +4,8 @@
 #include "fluxviewerwindow.h"
 #include "fluxviewercontrol.h"
 
-FluxViewerWindow::FluxViewerWindow(std::shared_ptr<const TrackFlux> flux):
-	FluxViewerWindowGen(nullptr),
+FluxViewerWindow::FluxViewerWindow(wxWindow* parent, std::shared_ptr<const TrackFlux> flux):
+	FluxViewerWindowGen(parent),
 	_flux(flux)
 {
 	fluxviewer->SetScrollbar(scrollbar);

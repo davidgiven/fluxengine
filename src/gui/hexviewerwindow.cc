@@ -4,8 +4,8 @@
 #include "hexviewerwindow.h"
 #include "fmt/format.h"
 
-HexViewerWindow::HexViewerWindow(const std::string& text):
-	HexViewerWindowGen(nullptr)
+HexViewerWindow::HexViewerWindow(wxWindow* parent, const std::string& text):
+	HexViewerWindowGen(parent)
 {
 	auto size = hexEntry->GetTextExtent("M");
 	SetSize(size.Scale(85, 25));

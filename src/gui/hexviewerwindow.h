@@ -6,7 +6,7 @@
 class HexViewerWindow : public HexViewerWindowGen
 {
 public:
-    HexViewerWindow(const std::string& text);
+    HexViewerWindow(wxWindow* parent, const std::string& text);
 
 private:
     void OnExit(wxCommandEvent& event);

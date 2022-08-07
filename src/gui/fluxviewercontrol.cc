@@ -441,7 +441,7 @@ void FluxViewerControl::DisplayDecodedData(std::shared_ptr<const Sector> sector)
 
 	hexdump(s, sector->data);
 
-	(new HexViewerWindow(s.str()))->Show(true);
+	(new HexViewerWindow(this, s.str()))->Show(true);
 }
 
 void FluxViewerControl::DisplayRawData(std::shared_ptr<const Sector> sector)
@@ -459,7 +459,7 @@ void FluxViewerControl::DisplayRawData(std::shared_ptr<const Sector> sector)
 		hexdump(s, record->rawData);
 	}
 
-	(new HexViewerWindow(s.str()))->Show(true);
+	(new HexViewerWindow(this, s.str()))->Show(true);
 }
 
 void FluxViewerControl::DisplayRawData(const Location& location, std::shared_ptr<const Record> record)
@@ -472,5 +472,5 @@ void FluxViewerControl::DisplayRawData(const Location& location, std::shared_ptr
 
 	hexdump(s, record->rawData);
 
-	(new HexViewerWindow(s.str()))->Show(true);
+	(new HexViewerWindow(this, s.str()))->Show(true);
 }

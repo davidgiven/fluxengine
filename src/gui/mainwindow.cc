@@ -384,6 +384,6 @@ void MainWindow::UpdateDevices()
 
 void MainWindow::OnTrackSelection(TrackSelectionEvent& event)
 {
-    (new FluxViewerWindow(event.trackFlux))->Show(true);
+    (new FluxViewerWindow(this, event.trackFlux))->Show(true);
 }
 
