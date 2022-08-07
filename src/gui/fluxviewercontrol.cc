@@ -25,7 +25,9 @@ FluxViewerControl::FluxViewerControl(wxWindow* parent,
     const wxPoint& pos,
     const wxSize& size,
     long style):
-    wxWindow(parent, id, pos, size, style, "FluxViewerControl")
+    wxWindow(parent, id, pos, size,
+		style | wxFULL_REPAINT_ON_RESIZE,
+		"FluxViewerControl")
 {
 	SetDoubleBuffered(true);
 }
