@@ -219,8 +219,12 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
 			dc.SetTextForeground(*wxBLACK);
 			for (const auto& sector : trackdata->sectors)
 			{
+				nanoseconds_t sr = sector->dataEndTime;
+				if (!sr)
+					sr = sector->headerEndTime;
+
 				int sp = sector->headerStartTime / _nanosecondsPerPixel;
-				int sw = (sector->dataEndTime - sector->headerStartTime) / _nanosecondsPerPixel;
+				int sw = (sr - sector->headerStartTime) / _nanosecondsPerPixel;
 
 				wxRect rect = {x+sp, t1y - ch2, sw, ch};
 				bool hovered = rect.Contains(_mouseX, _mouseY);
