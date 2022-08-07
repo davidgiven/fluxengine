@@ -1,6 +1,7 @@
 #include "globals.h"
 #include "gui.h"
 #include "fluxviewercontrol.h"
+#include "hexviewerwindow.h"
 #include "lib/flux.h"
 #include "lib/fluxmap.h"
 #include "lib/sector.h"
@@ -12,6 +13,7 @@ DECLARE_COLOUR(INDEX_SEPARATOR, 255, 255, 0);
 DECLARE_COLOUR(FOREGROUND, 0, 0, 0);
 DECLARE_COLOUR(FLUX, 64, 64, 255);
 DECLARE_COLOUR(SECTOR, 255, 255, 255);
+DECLARE_COLOUR(BAD_SECTOR, 213, 94, 0);
 DECLARE_COLOUR(RECORD, 200, 200, 200);
 
 const int BORDER = 4;
@@ -34,6 +36,7 @@ wxBEGIN_EVENT_TABLE(FluxViewerControl, wxPanel)
 	EVT_LEFT_DOWN(FluxViewerControl::OnMouseMotion)
 	EVT_LEFT_UP(FluxViewerControl::OnMouseMotion)
 	EVT_MOTION(FluxViewerControl::OnMouseMotion)
+	EVT_CONTEXT_MENU(FluxViewerControl::OnContextMenu)
 wxEND_EVENT_TABLE()
 
 void FluxViewerControl::SetScrollbar(wxScrollBar* scrollbar)
@@ -185,7 +188,7 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
 				if ((tick % (10*tickStep)) == 0)
 				{
 					dc.DrawText(
-						fmt::format("{}us", tick / 1000LL),
+						fmt::format("{:.3f}ms", tick / 1e6),
 						{ x+xx, t3y - ch2 }
 					);
 				}
@@ -196,22 +199,20 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
 			double relativeScrollPosition = _scrollPosition - fluxStartTime;
 			if (x <= 0)
 				dc.DrawText(
-					fmt::format("{}us", (int)(relativeScrollPosition / 1000LL)),
+					fmt::format("{:.3f}ms", relativeScrollPosition / 1e6),
 					{ BORDER, t3y + ch2/2 }
 				);
 
 			if ((x+fw) >= w)
 			{
 				wxString text = fmt::format(
-					"{}us", (int)((relativeScrollPosition + (w * _nanosecondsPerPixel)) / 1000LL));
+					"{:.3f}ms", (relativeScrollPosition + (w * _nanosecondsPerPixel)) / 1e6);
 				auto size = dc.GetTextExtent(text);
 				dc.DrawText(text, { w - size.GetWidth() - BORDER, t3y + ch2/2 });
 			}
 
 			/* Sector blocks. */
 
-			dc.SetPen(FOREGROUND_PEN);
-			dc.SetBrush(SECTOR_BRUSH);
 			dc.SetBackgroundMode(wxTRANSPARENT);
 			dc.SetTextForeground(*wxBLACK);
 			for (const auto& sector : trackdata->sectors)
@@ -220,6 +221,12 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
 				int sw = (sector->dataEndTime - sector->headerStartTime) / _nanosecondsPerPixel;
 
 				wxRect rect = {x+sp, t1y - ch2, sw, ch};
+				bool hovered = rect.Contains(_mouseX, _mouseY);
+				wxPen pen(FOREGROUND_COLOUR, hovered ? 2 : 1);
+				dc.SetPen(pen);
+
+				dc.SetBrush((sector->status == Sector::OK) ? SECTOR_BRUSH : BAD_SECTOR_BRUSH);
+
 				dc.DrawRectangle(rect);
 				wxDCClipper clipper(dc, rect);
 
@@ -228,17 +235,34 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
 					Sector::statusToString(sector->status));
 				auto size = dc.GetTextExtent(text);
 				dc.DrawText(text, { x+sp+BORDER, t1y - size.GetHeight()/2 });
+
+				if (_rightClicked && hovered)
+					ShowSectorMenu(sector);
 			}
 
 			/* Record blocks. */
 
+			dc.SetPen(FOREGROUND_PEN);
 			dc.SetBrush(RECORD_BRUSH);
 			for (const auto& record : trackdata->records)
 			{
 				int rp = record->startTime / _nanosecondsPerPixel;
 				int rw = (record->endTime - record->startTime) / _nanosecondsPerPixel;
 
-				dc.DrawRectangle({x+rp, t2y - ch2}, {rw, ch});
+				wxRect rect = {x+rp, t2y - ch2, rw, ch};
+				bool hovered = rect.Contains(_mouseX, _mouseY);
+				wxPen pen(FOREGROUND_COLOUR, hovered ? 2 : 1);
+				dc.SetPen(pen);
+
+				dc.DrawRectangle(rect);
+				wxDCClipper clipper(dc, rect);
+
+				auto text = fmt::format("+{:.3f}ms", record->startTime / 1e6);
+				auto size = dc.GetTextExtent(text);
+				dc.DrawText(text, { x+rp+BORDER, t2y - size.GetHeight()/2 });
+
+				if (_rightClicked && hovered)
+					ShowRecordMenu(trackdata->location, record);
 			}
 
 			/* Flux chart. */
@@ -290,12 +314,13 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
 		x += fw;
 		fluxStartTime += duration;
 	}
+
+	_rightClicked = false;
 }
 
 void FluxViewerControl::OnMouseWheel(wxMouseEvent& event)
 {
-    wxClientDC dc(this);
-	int x = event.GetLogicalPosition(dc).x;
+	int x = event.GetX();
 	
 	_scrollPosition += x * _nanosecondsPerPixel;
 	if (event.GetWheelRotation() > 0)
@@ -316,12 +341,19 @@ void FluxViewerControl::OnScrollbarChanged(wxScrollEvent& event)
 
 void FluxViewerControl::OnMouseMotion(wxMouseEvent& event)
 {
-    wxClientDC dc(this);
 	event.Skip();
+
+	if (event.Leaving())
+		_mouseX = _mouseY = -1;
+	else
+	{
+		_mouseX = event.GetX();
+		_mouseY = event.GetY();
+	}
 
 	if (event.ButtonDown(wxMOUSE_BTN_LEFT))
 	{
-		_dragStartX = event.GetLogicalPosition(dc).x;
+		_dragStartX = event.GetX();
 		_dragStartPosition = _scrollPosition;
 	}
 	else if (event.ButtonUp(wxMOUSE_BTN_LEFT))
@@ -330,11 +362,108 @@ void FluxViewerControl::OnMouseMotion(wxMouseEvent& event)
 	}
 	else if (event.Dragging())
 	{
-		int dx = _dragStartX - event.GetLogicalPosition(dc).x;
+		int dx = _dragStartX - event.GetX();
 		nanoseconds_t dt = dx * _nanosecondsPerPixel;
 		_scrollPosition = _dragStartPosition + dt;
 		UpdateScale();
-		Refresh();
 	}
+
+	Refresh();
 }
 
+void FluxViewerControl::OnContextMenu(wxContextMenuEvent& event)
+{
+	_rightClicked = true;
+	Refresh();
+}
+
+void FluxViewerControl::ShowSectorMenu(std::shared_ptr<const Sector> sector)
+{
+	wxMenu menu;
+
+	menu.Bind(wxEVT_COMMAND_MENU_SELECTED,
+		[&] (wxCommandEvent&) {
+			DisplayDecodedData(sector);
+		},
+		menu.Append(wxID_ANY, "Show decoded data")->GetId()
+	);
+
+	menu.Bind(wxEVT_COMMAND_MENU_SELECTED,
+		[&] (wxCommandEvent&) {
+			DisplayRawData(sector);
+		},
+		menu.Append(wxID_ANY, "Show raw data")->GetId()
+	);
+
+	PopupMenu(&menu, _mouseX, _mouseY);
+}
+
+void FluxViewerControl::ShowRecordMenu(const Location& location, std::shared_ptr<const Record> record)
+{
+	wxMenu menu;
+
+	menu.Bind(wxEVT_COMMAND_MENU_SELECTED,
+		[&] (wxCommandEvent&) {
+			DisplayRawData(location, record);
+		},
+		menu.Append(wxID_ANY, "Show record data")->GetId()
+	);
+
+	PopupMenu(&menu, _mouseX, _mouseY);
+}
+
+static void dumpSectorMetadata(std::ostream& s, std::shared_ptr<const Sector> sector)
+{
+	s << fmt::format("Sector status:     {}\n",
+			Sector::statusToString(sector->status))
+	  << fmt::format("Physical location: c{}.h{}\n",
+			sector->physicalTrack, sector->physicalHead)
+	  << fmt::format("Clock:             {:.2f}us / {:.0f}kHz\n",
+	  		sector->clock / 1000.0,
+			1000000.0 / sector->clock);
+}
+
+void FluxViewerControl::DisplayDecodedData(std::shared_ptr<const Sector> sector)
+{
+	std::stringstream s;
+
+	s << fmt::format("Decoded user data for c{}.h{}.s{}\n",
+			sector->logicalTrack, sector->logicalSide, sector->logicalSector);
+	dumpSectorMetadata(s, sector);
+	s << '\n';
+
+	hexdump(s, sector->data);
+
+	(new HexViewerWindow(s.str()))->Show(true);
+}
+
+void FluxViewerControl::DisplayRawData(std::shared_ptr<const Sector> sector)
+{
+	std::stringstream s;
+
+	s << fmt::format("Raw undecoded data for c{}.h{}.s{}\n",
+			sector->logicalTrack, sector->logicalSide, sector->logicalSector);
+	dumpSectorMetadata(s, sector);
+	s << fmt::format("Number of records: {}\n", sector->records.size());
+
+	for (auto& record : sector->records)
+	{
+		s << '\n';
+		hexdump(s, record->rawData);
+	}
+
+	(new HexViewerWindow(s.str()))->Show(true);
+}
+
+void FluxViewerControl::DisplayRawData(const Location& location, std::shared_ptr<const Record> record)
+{
+	std::stringstream s;
+
+	s << fmt::format("Raw undecoded data for record c{}.h{} + {:.3f}ms\n",
+			location.physicalTrack, location.head, record->startTime / 1e6)
+	  << '\n';
+
+	hexdump(s, record->rawData);
+
+	(new HexViewerWindow(s.str()))->Show(true);
+}

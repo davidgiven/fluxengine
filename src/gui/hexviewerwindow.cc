@@ -6,6 +6,10 @@
 HexViewerWindow::HexViewerWindow(const std::string& text):
 	HexViewerWindowGen(nullptr)
 {
+	auto size = hexEntry->GetFont().GetPixelSize();
+
+	SetSize(size.Scale(85, 25));
+	hexEntry->SetValue(text);
 }
 
 void HexViewerWindow::OnExit(wxCommandEvent& event)

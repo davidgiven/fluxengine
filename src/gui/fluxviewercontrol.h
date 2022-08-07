@@ -6,6 +6,9 @@
 class TrackFlux;
 class wxScrollBar;
 class wxScrollEvent;
+class Sector;
+class Record;
+class Location;
 
 class FluxViewerControl : public wxWindow
 {
@@ -22,12 +25,18 @@ public:
 
 private:
 	void UpdateScale();
+	void ShowSectorMenu(std::shared_ptr<const Sector> sector);
+	void ShowRecordMenu(const Location& location, std::shared_ptr<const Record> record);
+	void DisplayDecodedData(std::shared_ptr<const Sector> sector);
+	void DisplayRawData(std::shared_ptr<const Sector> sector);
+	void DisplayRawData(const Location& location, std::shared_ptr<const Record> record);
 
 private:
 	void OnPaint(wxPaintEvent&);
 	void OnMouseWheel(wxMouseEvent&);
 	void OnScrollbarChanged(wxScrollEvent&);
 	void OnMouseMotion(wxMouseEvent&);
+	void OnContextMenu(wxContextMenuEvent&);
 
 private:
 	wxScrollBar* _scrollbar;
@@ -38,6 +47,9 @@ private:
 	std::vector<float> _densityMap;
 	int _dragStartX;
 	nanoseconds_t _dragStartPosition;
+	int _mouseX;
+	int _mouseY;
+	bool _rightClicked;
     wxDECLARE_EVENT_TABLE();
 };
 
