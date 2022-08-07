@@ -212,7 +212,6 @@ FluxViewerWindowGen::FluxViewerWindowGen( wxWindow* parent, wxWindowID id, const
 
 	this->SetSizer( bSizer1 );
 	this->Layout();
-	statusbar = this->CreateStatusBar( 1, wxSTB_SIZEGRIP, wxID_ANY );
 
 	this->Centre( wxBOTH );
 
