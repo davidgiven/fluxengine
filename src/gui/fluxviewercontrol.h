@@ -41,15 +41,15 @@ private:
 private:
 	wxScrollBar* _scrollbar;
 	std::shared_ptr<const TrackFlux> _flux;
-	nanoseconds_t _scrollPosition;
-	nanoseconds_t _totalDuration;
-	double _nanosecondsPerPixel;
+	nanoseconds_t _scrollPosition = 0;
+	nanoseconds_t _totalDuration = 0;
+	double _nanosecondsPerPixel = 0;
 	std::vector<float> _densityMap;
-	int _dragStartX;
-	nanoseconds_t _dragStartPosition;
-	int _mouseX;
-	int _mouseY;
-	bool _rightClicked;
+	int _dragStartX = -1;
+	nanoseconds_t _dragStartPosition = -1;
+	int _mouseX = -1;
+	int _mouseY = -1;
+	bool _rightClicked = false;
     wxDECLARE_EVENT_TABLE();
 };
 

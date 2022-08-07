@@ -365,9 +365,10 @@ void FluxViewerControl::OnMouseMotion(wxMouseEvent& event)
 	}
 	else if (event.ButtonUp(wxMOUSE_BTN_LEFT))
 	{
-		/* end drag, do nothing */
+		_dragStartX = -1;
+		_dragStartPosition = -1;
 	}
-	else if (event.Dragging() && event.LeftIsDown())
+	else if (event.Dragging() && event.LeftIsDown() && (_dragStartX != -1))
 	{
 		int dx = _dragStartX - event.GetX();
 		nanoseconds_t dt = dx * _nanosecondsPerPixel;
@@ -434,22 +435,24 @@ void FluxViewerControl::DisplayDecodedData(std::shared_ptr<const Sector> sector)
 {
 	std::stringstream s;
 
-	s << fmt::format("Decoded user data for c{}.h{}.s{}\n",
+	auto title = fmt::format("User data for c{}.h{}.s{}",
 			sector->logicalTrack, sector->logicalSide, sector->logicalSector);
+	s << title << '\n';
 	dumpSectorMetadata(s, sector);
 	s << '\n';
 
 	hexdump(s, sector->data);
 
-	(new HexViewerWindow(this, s.str()))->Show(true);
+	HexViewerWindow::Create(this, title, s.str());
 }
 
 void FluxViewerControl::DisplayRawData(std::shared_ptr<const Sector> sector)
 {
 	std::stringstream s;
 
-	s << fmt::format("Raw undecoded data for c{}.h{}.s{}\n",
+	auto title = fmt::format("Raw data for c{}.h{}.s{}",
 			sector->logicalTrack, sector->logicalSide, sector->logicalSector);
+	s << title << '\n';
 	dumpSectorMetadata(s, sector);
 	s << fmt::format("Number of records: {}\n", sector->records.size());
 
@@ -459,18 +462,17 @@ void FluxViewerControl::DisplayRawData(std::shared_ptr<const Sector> sector)
 		hexdump(s, record->rawData);
 	}
 
-	(new HexViewerWindow(this, s.str()))->Show(true);
+	HexViewerWindow::Create(this, title, s.str());
 }
 
 void FluxViewerControl::DisplayRawData(const Location& location, std::shared_ptr<const Record> record)
 {
 	std::stringstream s;
 
-	s << fmt::format("Raw undecoded data for record c{}.h{} + {:.3f}ms\n",
-			location.physicalTrack, location.head, record->startTime / 1e6)
-	  << '\n';
-
+	auto title = fmt::format("Raw data for record c{}.h{} + {:.3f}ms",
+			location.physicalTrack, location.head, record->startTime / 1e6);
+	s << title << "\n\n";
 	hexdump(s, record->rawData);
 
-	(new HexViewerWindow(this, s.str()))->Show(true);
+	HexViewerWindow::Create(this, title, s.str());
 }
