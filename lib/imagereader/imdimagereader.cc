@@ -403,7 +403,7 @@ public:
 
 
     	Logger() << "IMD: read "
-				<< fmt::format("{} tracks, {} heads; {}; {} kbps; {} sectoren; sectorsize {}; {} kB total.",
+				<< fmt::format("{} tracks, {} heads; {}; {} kbps; {} sectors; sectorsize {}; {} kB total.",
 				header.track + 1, header.Head + 1,
 				fm ? "FM" : "MFM",
 				Modulation_Speed, header.numSectors, sectorSize, (header.track+1) * trackSize / 1024);
