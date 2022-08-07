@@ -363,7 +363,7 @@ void FluxViewerControl::OnMouseMotion(wxMouseEvent& event)
 	{
 		/* end drag, do nothing */
 	}
-	else if (event.Dragging())
+	else if (event.Dragging() && event.LeftIsDown())
 	{
 		int dx = _dragStartX - event.GetX();
 		nanoseconds_t dt = dx * _nanosecondsPerPixel;
