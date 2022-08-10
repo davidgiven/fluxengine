@@ -91,6 +91,14 @@ public:
 
     virtual std::set<unsigned> requiredSectors(const Location& location) const;
 
+    /* Indicates whether records have a unique start pattern, e.g. whether
+     * must be read contiguously (Amiga) or can be search for from any
+     * position (IBM). */
+    virtual bool recordsSeekable() const
+    {
+        return true;
+    }
+
 protected:
     virtual void beginTrack(){};
     virtual nanoseconds_t advanceToNextRecord() = 0;

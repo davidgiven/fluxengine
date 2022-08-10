@@ -89,40 +89,42 @@ std::shared_ptr<const TrackDataFlux> AbstractDecoder::decodeToSectors(
 
         /* Read the sector record. */
 
-		Fluxmap::Position before = fmr.tell();
+		Fluxmap::Position before_sector = fmr.tell();
         decodeSectorRecord();
-		Fluxmap::Position after = fmr.tell();
-		pushRecord(before, after);
+		Fluxmap::Position after_sector = fmr.tell();
+		pushRecord(before_sector, after_sector);
 
         if (_sector->status != Sector::DATA_MISSING)
 		{
-			_sector->position = before.bytes;
-			_sector->dataStartTime = before.ns();
-			_sector->dataEndTime = after.ns();
+			_sector->position = before_sector.bytes;
+			_sector->dataStartTime = before_sector.ns();
+			_sector->dataEndTime = after_sector.ns();
 		}
 		else
         {
             /* The data is in a separate record. */
+			Fluxmap::Position before_data = before_sector;
+			Fluxmap::Position after_data = after_sector;
 
 			for (;;)
 			{
-				_sector->headerStartTime = before.ns();
-				_sector->headerEndTime = after.ns();
+				_sector->headerStartTime = before_data.ns();
+				_sector->headerEndTime = after_data.ns();
 
 				_sector->clock = advanceToNextRecord();
 				if (fmr.eof() || !_sector->clock)
 					break;
 
-				before = fmr.tell();
+				before_data = fmr.tell();
 				decodeDataRecord();
-				after = fmr.tell();
+				after_data = fmr.tell();
 
 				if (_sector->status != Sector::DATA_MISSING)
 				{
-					_sector->position = before.bytes;
-					_sector->dataStartTime = before.ns();
-					_sector->dataEndTime = after.ns();
-					pushRecord(before, after);
+					_sector->position = before_data.bytes;
+					_sector->dataStartTime = before_data.ns();
+					_sector->dataEndTime = after_data.ns();
+					pushRecord(before_data, after_data);
 					break;
 				}
 
@@ -130,6 +132,13 @@ std::shared_ptr<const TrackDataFlux> AbstractDecoder::decodeToSectors(
 				resetFluxDecoder();
 			}
         }
+
+		/* Allow decode of overlapping records.
+		 * Note that this seeks to after the sector record, but before
+		 * the data record, so it relies on a lone data record being
+		 * ignored. */
+		if (this->recordsSeekable())
+			fmr.seek(after_sector);
 
         if (_sector->status != Sector::MISSING)
 			_trackdata->sectors.push_back(_sector);
