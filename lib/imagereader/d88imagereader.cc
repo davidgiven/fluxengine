@@ -160,16 +160,25 @@ public:
                         trackdata->set_dam_byte(0xf56f);
                     }
                     // create timings to approximately match N88-BASIC
-                    if (sectorSize <= 128)
-                    {
-                        trackdata->set_gap0(0x1b);
-                        trackdata->set_gap2(0x09);
-                        trackdata->set_gap3(0x1b);
-                    }
-                    else if (sectorSize <= 256)
-                    {
-                        trackdata->set_gap0(0x36);
-                        trackdata->set_gap3(0x36);
+                    if (clockRate == 300) {
+                        if (sectorSize <= 256)
+                        {
+                            trackdata->set_gap0(0x1b);
+                            trackdata->set_gap2(0x14);
+                            trackdata->set_gap3(0x1b);
+                        }
+                    } else {
+                        if (sectorSize <= 128)
+                        {
+                            trackdata->set_gap0(0x1b);
+                            trackdata->set_gap2(0x09);
+                            trackdata->set_gap3(0x1b);
+                        }
+                        else if (sectorSize <= 256)
+                        {
+                            trackdata->set_gap0(0x36);
+                            trackdata->set_gap3(0x36);
+                        }
                     }
                 }
                 else if (trackSectorSize != sectorSize)
