@@ -65,7 +65,7 @@ public:
 			headerWriter.write_le32(trackOffset);
 			int side = track & 1;
 			std::vector<std::shared_ptr<const Sector>> sectors;
-			for (int sectorId = 0; sectorId < geometry.numSectors; sectorId++)
+			for (int sectorId = geometry.firstSector; sectorId <= geometry.numSectors; sectorId++)
 			{
 				const auto& sector = image.get(track >> 1, side, sectorId);
 				if (sector)
