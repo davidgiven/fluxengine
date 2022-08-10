@@ -33,5 +33,6 @@ class EncoderProto;
 
 extern std::unique_ptr<AbstractDecoder> createIbmDecoder(const DecoderProto& config);
 extern std::unique_ptr<AbstractEncoder> createIbmEncoder(const EncoderProto& config);
+extern std::unique_ptr<AbstractEncoder> createIbmEncoderFromImage(EncoderProto& config, const Image& image);
 
 #endif

@@ -3,6 +3,7 @@
 #include "readerwriter.h"
 #include "fluxmap.h"
 #include "decoders/decoders.h"
+#include "encoders/encoders.h"
 #include "macintosh/macintosh.h"
 #include "sector.h"
 #include "proto.h"
@@ -45,6 +46,15 @@ static StringFlag copyFluxTo(
 		FluxSink::updateConfigForFilename(config.mutable_decoder()->mutable_copy_flux_to(), value);
 	});
 
+static StringFlag solvedFlux(
+	{ "-r", "--solved" },
+	"after reading, write a reconstructed/solved fluxmap to this file",
+	"",
+	[](const auto& value)
+	{
+		FluxSink::updateConfigForFilename(config.mutable_solved_flux(), value);
+	});
+
 static StringFlag srcTracks(
 	{ "--cylinders", "-c" },
 	"tracks to read from",
@@ -76,8 +86,12 @@ int mainRead(int argc, const char* argv[])
 	std::unique_ptr<FluxSource> fluxSource(FluxSource::create(config.flux_source()));
 	std::unique_ptr<AbstractDecoder> decoder(AbstractDecoder::create(config.decoder()));
 	std::unique_ptr<ImageWriter> writer(ImageWriter::create(config.image_writer()));
+	std::unique_ptr<FluxSink> solvedFlux;
+	std::unique_ptr<AbstractEncoder> solvedEncoder;
+	if (config.has_solved_flux()) {
+		solvedFlux = FluxSink::create(config.solved_flux());	}
 
-	readDiskCommand(*fluxSource, *decoder, *writer);
+	readDiskCommand(*fluxSource, *decoder, *writer, solvedFlux.get());
 
     return 0;
 }

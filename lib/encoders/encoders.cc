@@ -13,6 +13,8 @@
 #include "arch/tids990/tids990.h"
 #include "arch/victor9k/victor9k.h"
 #include "lib/encoders/encoders.pb.h"
+#include "lib/decoders/decoders.pb.h"
+#include "lib/image.h"
 #include "protocol.h"
 
 std::unique_ptr<AbstractEncoder> AbstractEncoder::create(
@@ -38,6 +40,22 @@ std::unique_ptr<AbstractEncoder> AbstractEncoder::create(
         Error() << "no encoder specified";
 
     return (encoder->second)(config);
+}
+
+std::unique_ptr<AbstractEncoder> AbstractEncoder::createFromImage(EncoderProto& encoderConfig,
+    const DecoderProto& decoderConfig, const Image& image)
+{
+        static const std::map<int,
+        std::function<std::unique_ptr<AbstractEncoder>(EncoderProto&, const Image&)>>
+        encoders = {
+            {DecoderProto::kIbm, createIbmEncoderFromImage},
+    };
+
+    auto encoder = encoders.find(decoderConfig.format_case());
+    if (encoder == encoders.end())
+        Error() << "solved fluxmaps not supported for this format";
+
+    return (encoder->second)(encoderConfig, image);
 }
 
 Fluxmap& Fluxmap::appendBits(const std::vector<bool>& bits, nanoseconds_t clock)

@@ -11,7 +11,7 @@ import "lib/drive.proto";
 import "lib/mapper.proto";
 import "lib/common.proto";
 
-// NEXT_TAG: 17
+// NEXT_TAG: 19
 message ConfigProto {
 	optional string comment = 8;
 	optional bool is_extension = 13;
@@ -21,9 +21,11 @@ message ConfigProto {
 	
 	optional FluxSourceProto flux_source = 10;
 	optional FluxSinkProto flux_sink = 11;
+	optional FluxSinkProto solved_flux = 17;
 	optional DriveProto drive = 15;
 
 	optional EncoderProto encoder = 3;
+	optional EncoderProto solved_encoder = 18;
 	optional DecoderProto decoder = 4;
 	optional UsbProto usb = 5;
 

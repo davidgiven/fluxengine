@@ -470,7 +470,7 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
 }
 
 void readDiskCommand(
-    FluxSource& fluxsource, AbstractDecoder& decoder, ImageWriter& writer)
+    FluxSource& fluxsource, AbstractDecoder& decoder, ImageWriter& writer,FluxSink* solvedFlux)
 {
     auto diskflux = readDiskCommand(fluxsource, decoder);
 
@@ -478,6 +478,11 @@ void readDiskCommand(
     if (config.decoder().has_write_csv_to())
         writer.writeCsv(*diskflux->image, config.decoder().write_csv_to());
     writer.writeImage(*diskflux->image);
+    if (config.has_solved_flux()) {
+        std::unique_ptr<AbstractEncoder> solvedEncoder = AbstractEncoder::createFromImage(*config.mutable_encoder(),
+    config.decoder(), *diskflux->image);
+        writeTracks(*solvedFlux, *solvedEncoder, *diskflux->image);
+    }
 }
 
 void rawReadDiskCommand(FluxSource& fluxsource, FluxSink& fluxsink)
