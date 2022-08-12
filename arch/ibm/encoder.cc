@@ -315,3 +315,33 @@ std::unique_ptr<AbstractEncoder> createIbmEncoder(const EncoderProto& config)
 {
     return std::unique_ptr<AbstractEncoder>(new IbmEncoder(config));
 }
+
+std::unique_ptr<AbstractEncoder> createIbmEncoderFromImage(EncoderProto& config, const Image& image)
+{
+    IbmEncoderProto* ibm;
+    Geometry geometry;
+    ibm = config.mutable_ibm();
+    geometry = image.getGeometry();
+    std::map<int,std::map<int,std::vector<const Sector*>>> tracks_heads;
+    for (const auto& sector : image) {
+        tracks_heads[sector->logicalTrack][sector->logicalSide].push_back(sector.get());
+    }
+    for (const auto& track: tracks_heads) {
+        for (const auto& head : track.second) {
+            auto trackdata = ibm->mutable_trackdata()->Add();
+            for (const auto& sector : head.second) {
+                trackdata->mutable_sectors()->mutable_sector()->Add(sector->logicalSector);
+                trackdata->set_sector_size(sector->data.size());
+                // note: this currently only uses the last sector's parameters
+                trackdata->set_target_clock_period_us(sector->clock / 1000.0 * 2.0);
+            }
+            trackdata->set_track(track.first);
+            trackdata->set_head(head.first);
+            trackdata->set_gap0(0x1b);
+            trackdata->set_gap2(0x09);
+            trackdata->set_gap3(0x1b);
+            trackdata->set_target_rotational_period_ms(167);
+        }
+    }
+    return createIbmEncoder(config);
+}

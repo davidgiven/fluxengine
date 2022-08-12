@@ -2,6 +2,7 @@
 #define ENCODERS_H
 
 class EncoderProto;
+class DecoderProto;
 class Fluxmap;
 class Image;
 class Location;
@@ -14,6 +15,8 @@ public:
     virtual ~AbstractEncoder() {}
 
     static std::unique_ptr<AbstractEncoder> create(const EncoderProto& config);
+    static std::unique_ptr<AbstractEncoder> createFromImage(EncoderProto& encoderConfig,
+    const DecoderProto& decoderConfig, const Image& image);
 
 public:
     virtual std::vector<std::shared_ptr<const Sector>> collectSectors(
