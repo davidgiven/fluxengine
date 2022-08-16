@@ -181,11 +181,6 @@ public:
                         }
                     }
                 }
-                else if (trackSectorSize != sectorSize)
-                {
-                    Error() << "D88: multiple sector sizes per track are "
-                               "currently unsupported";
-                }
                 Bytes data(sectorSize);
                 inputFile.read((char*)data.begin(), data.size());
                 const auto& sector = image->put(track, head, sectorId);
@@ -207,7 +202,7 @@ public:
             }
         }
 
-        image->calculateSize();
+        image->calculateSize(true);
         const Geometry& geometry = image->getGeometry();
         Logger() << fmt::format("D88: read {} tracks, {} sides",
             geometry.numTracks,
