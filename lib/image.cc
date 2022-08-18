@@ -37,7 +37,7 @@ std::shared_ptr<Sector> Image::put(unsigned track, unsigned side, unsigned secto
 	return sector;
 }
 
-void Image::calculateSize()
+void Image::calculateSize(bool variableSectorSize)
 {
 	_geometry = {};
 	unsigned maxSector = 0;
@@ -53,6 +53,6 @@ void Image::calculateSize()
 			_geometry.sectorSize = std::max(_geometry.sectorSize, (unsigned)sector->data.size());
 		}
 	}
+	_geometry.variableSectorSize = variableSectorSize;
 	_geometry.numSectors = maxSector - _geometry.firstSector + 1;
 }
-

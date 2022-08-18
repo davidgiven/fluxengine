@@ -9,6 +9,7 @@ struct Geometry
 	unsigned numSectors = 0;
 	unsigned sectorSize = 0;
 	bool irregular = false;
+	bool variableSectorSize = false;
 };
 
 class Image
@@ -37,7 +38,7 @@ public:
 	};
 
 public:
-	void calculateSize();
+	void calculateSize(bool variableSectorSize = false);
 
 	std::shared_ptr<const Sector> get(unsigned track, unsigned side, unsigned sectorId) const;
 	std::shared_ptr<Sector> put(unsigned track, unsigned side, unsigned sectorId);

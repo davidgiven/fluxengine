@@ -215,6 +215,17 @@ public:
         bool first = true;
         for (const auto& sectorData : sectors)
         {
+            if (image.getGeometry().variableSectorSize)
+            {
+                sectorSize = 0;
+                int s = sectorData->data.size() >> 7;
+                while (s > 1)
+                {
+                    s >>= 1;
+                    sectorSize += 1;
+                }
+            }
+
             if (!first)
                 writeFillerRawBytes(trackdata.gap3(), gapFill);
             first = false;
@@ -274,6 +285,10 @@ public:
 
                 Bytes truncatedData =
                     sectorData->data.slice(0, trackdata.sector_size());
+                if (image.getGeometry().variableSectorSize) {
+                    truncatedData = sectorData->data;
+                }
+
                 bw += truncatedData;
                 uint16_t crc = crc16(CCITT_POLY, data);
                 bw.write_be16(crc);
