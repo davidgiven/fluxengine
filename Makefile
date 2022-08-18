@@ -28,6 +28,7 @@ ifeq ($(shell uname),Darwin)
 	LDFLAGS += \
 		-framework IOKit \
 		-framework Foundation
+	CXXFLAGS += -D_LIBCPP_DISABLE_AVAILABILITY
 endif
 
 # Normal settings.
@@ -45,7 +46,7 @@ CFLAGS ?= -g -Os
 CXXFLAGS += -std=c++17
 LDFLAGS ?=
 PLATFORM ?= UNIX
-TESTS ?= yes
+TESTS ?= no
 EXT ?=
 DESTDIR ?=
 PREFIX ?= /usr/local
@@ -73,8 +74,10 @@ endef
 use-library = $(eval $(use-library-impl))
 define use-library-impl
 $1: $(call $3_LIB)
-$1: private LDFLAGS += $(call $3_LDFLAGS)
-$2: private CFLAGS += $(call $3_CFLAGS)
+#$1: private LDFLAGS += $(call $3_LDFLAGS)
+#$2: private CFLAGS += $(call $3_CFLAGS)
+$1: LDFLAGS += $(call $3_LDFLAGS)
+$2: CFLAGS += $(call $3_CFLAGS)
 endef
 
 use-pkgconfig = $(eval $(use-pkgconfig-impl))
@@ -83,12 +86,15 @@ ifneq ($(strip $(shell $(PKG_CONFIG) $3; echo $$?)),0)
 $$(error Missing required pkg-config dependency: $3)
 endif
 
-$(1): private LDFLAGS += $(shell $(PKG_CONFIG) --libs $(3))
-$(2): private CFLAGS += $(shell $(PKG_CONFIG) --cflags $(3))
+#$(1): private LDFLAGS += $(shell $(PKG_CONFIG) --libs $(3))
+#$(2): private CFLAGS += $(shell $(PKG_CONFIG) --cflags $(3))
+$(1): LDFLAGS += $(shell $(PKG_CONFIG) --libs $(3))
+$(2): CFLAGS += $(shell $(PKG_CONFIG) --cflags $(3))
 endef
 
 .PHONY: all binaries tests clean install install-bin
-all: binaries tests
+#all: binaries tests
+all: .PRECIOUS .libs binaries
 
 PROTOS = \
 	arch/aeslanier/aeslanier.proto \
@@ -186,6 +192,9 @@ $(call do-encodedecodetest,tids990)
 $(call do-encodedecodetest,victor9k_ss)
 $(call do-encodedecodetest,victor9k_ds)
 
+.libs: .obj/libagg.a .obj/libformats.a .obj/libusbp.a .obj/libarch.a .obj/libproto.a .obj/libfluxengine.a .obj/libstb.a
+	@touch .libs
+
 $(OBJDIR)/%.a:
 	@mkdir -p $(dir $@)
 	@echo AR $@
@@ -223,6 +232,7 @@ $(OBJDIR)/%.pb.h: %.proto
 
 clean:
 	rm -rf $(OBJDIR)
+	rm -rf .libs
 
 install: install-bin # install-man install-docs ...
 
