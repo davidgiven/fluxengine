@@ -233,6 +233,9 @@ $(OBJDIR)/%.pb.h: %.proto
 clean:
 	rm -rf $(OBJDIR)
 	rm -rf .libs
+ifeq ($(shell uname),Darwin)
+	rm -rf FluxEngine.app
+endif
 
 install: install-bin # install-man install-docs ...
 
@@ -241,5 +244,8 @@ install-bin: fluxengine$(EXT) fluxengine-gui$(EXT) brother120tool$(EXT) brother2
 	for target in $^; do \
 		install $$target "$(DESTDIR)$(BINDIR)/$$target"; \
 	done
+ifeq ($(shell uname),Darwin)
+	./makeapp.sh
+endif
 
 -include $(OBJS:%.o=%.d)
