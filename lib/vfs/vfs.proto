@@ -1,0 +1,13 @@
+syntax = "proto2";
+
+import "lib/common.proto";
+
+message DfsProto {
+	enum Flavour {
+		UNDEFINED = 0;
+		ACORN_DFS = 1;
+	}
+
+	optional Flavour flavour = 1 [default = ACORN_DFS, (help) = "which flavour of DFS to implement"];
+}
+
