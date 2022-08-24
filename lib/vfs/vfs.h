@@ -5,6 +5,9 @@
 
 class Sector;
 class Image;
+class Brother120Proto;
+class DfsProto;
+class FilesystemProto;
 
 struct File
 {
@@ -37,6 +40,7 @@ enum FilesystemStatus
 class Filesystem
 {
 public:
+	virtual void create();
     virtual FilesystemStatus check();
     virtual std::vector<Dirent> list(std::vector<std::string> path);
 
@@ -45,8 +49,13 @@ public:
         std::vector<std::string> path, const Bytes& data);
 
 public:
+    static std::unique_ptr<Filesystem> createBrother120Filesystem(
+        const Brother120Proto& config, std::shared_ptr<Image> image);
     static std::unique_ptr<Filesystem> createDfsFilesystem(
-        std::shared_ptr<Image> image);
+        const DfsProto& config, std::shared_ptr<Image> image);
+
+	static std::unique_ptr<Filesystem> createFilesystem(
+		const FilesystemProto& config, std::shared_ptr<Image> image);
 };
 
 #endif

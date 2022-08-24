@@ -1,10 +1,15 @@
 #include "globals.h"
 #include "vfs.h"
+#include "lib/config.pb.h"
 
 class DfsFilesystem : public Filesystem
 {
 public:
-    DfsFilesystem(std::shared_ptr<Image> image): _image(image) {}
+    DfsFilesystem(const DfsProto& config, std::shared_ptr<Image> image): _config(config), _image(image) {}
+
+	void create()
+	{
+	}
 
     FilesystemStatus check()
     {
@@ -24,11 +29,12 @@ public:
     }
 
 private:
+	const DfsProto& _config;
     std::shared_ptr<Image> _image;
 };
 
 std::unique_ptr<Filesystem> Filesystem::createDfsFilesystem(
-    std::shared_ptr<Image> image)
+    const DfsProto& config, std::shared_ptr<Image> image)
 {
-    return std::make_unique<DfsFilesystem>(image);
+    return std::make_unique<DfsFilesystem>(config, image);
 }

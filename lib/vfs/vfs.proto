@@ -11,3 +11,11 @@ message DfsProto {
 	optional Flavour flavour = 1 [default = ACORN_DFS, (help) = "which flavour of DFS to implement"];
 }
 
+message Brother120FsProto {
+}
+
+message FilesystemProto {
+	optional DfsProto dfs = 1;
+	optional Brother120FsProto brother120fs = 2;
+}
+
