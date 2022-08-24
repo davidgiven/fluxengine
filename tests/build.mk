@@ -32,6 +32,7 @@ $(call declare-test,kryoflux)
 $(call declare-test,ldbs)
 $(call declare-test,proto)
 $(call declare-test,utils)
+$(call declare-test,vfs)
 
 $(call use-library, $(OBJDIR)/tests/agg.exe, $(OBJDIR)/tests/agg.o, AGG)
 $(call use-library, $(OBJDIR)/tests/agg.exe, $(OBJDIR)/tests/agg.o, STB)

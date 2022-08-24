@@ -56,3 +56,8 @@ heads {
 }
 
 tpi: 48
+
+filesystem {
+	brother120 {}
+}
+

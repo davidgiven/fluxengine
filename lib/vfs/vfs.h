@@ -8,6 +8,7 @@ class Image;
 class Brother120Proto;
 class DfsProto;
 class FilesystemProto;
+class SectorInterface;
 
 struct File
 {
@@ -37,25 +38,32 @@ enum FilesystemStatus
     FS_BAD
 };
 
+extern std::vector<std::string> parsePath(const std::string& path);
+
+class FilesystemException {};
+class BadPathException : public FilesystemException {};
+class FileNotFoundException : public FilesystemException {};
+class BadFilesystemException : public FilesystemException {};
+
 class Filesystem
 {
 public:
-	virtual void create();
-    virtual FilesystemStatus check();
-    virtual std::vector<Dirent> list(std::vector<std::string> path);
+	virtual void create() = 0;
+    virtual FilesystemStatus check() = 0;
+    virtual std::vector<std::unique_ptr<Dirent>> list(std::vector<std::string> path) = 0;
 
-    virtual std::unique_ptr<File> read(std::vector<std::string> path);
+    virtual std::unique_ptr<File> read(std::vector<std::string> path) = 0;
     virtual std::vector<std::shared_ptr<const Sector>> write(
-        std::vector<std::string> path, const Bytes& data);
+        std::vector<std::string> path, const Bytes& data) = 0;
 
 public:
     static std::unique_ptr<Filesystem> createBrother120Filesystem(
-        const Brother120Proto& config, std::shared_ptr<Image> image);
+        const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
     static std::unique_ptr<Filesystem> createDfsFilesystem(
-        const DfsProto& config, std::shared_ptr<Image> image);
+        const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
 
 	static std::unique_ptr<Filesystem> createFilesystem(
-		const FilesystemProto& config, std::shared_ptr<Image> image);
+		const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
 };
 
 #endif

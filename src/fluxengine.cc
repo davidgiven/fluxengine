@@ -7,6 +7,7 @@ typedef int command_cb(int agrc, const char* argv[]);
 extern command_cb mainAnalyseDriveResponse;
 extern command_cb mainAnalyseLayout;
 extern command_cb mainInspect;
+extern command_cb mainLs;
 extern command_cb mainRawRead;
 extern command_cb mainRawWrite;
 extern command_cb mainRead;
@@ -34,6 +35,7 @@ static std::vector<Command> commands =
     { "write",             mainWrite,             "Writes a sector image to a disk.", },
 	{ "rawread",           mainRawRead,           "Reads raw flux from a disk. Warning: you can't use this to copy disks.", },
     { "rawwrite",          mainRawWrite,          "Writes a flux file to a disk. Warning: you can't use this to copy disks.", },
+	{ "ls",                mainLs,                "Show files on disk.", },
     { "rpm",               mainRpm,               "Measures the disk rotational speed.", },
     { "seek",              mainSeek,              "Moves the disk head.", },
     { "test",              mainTest,              "Various testing commands.", },

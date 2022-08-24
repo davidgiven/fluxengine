@@ -4,6 +4,7 @@ FLUXENGINE_SRCS = \
 	src/fe-analysedriveresponse.cc \
 	src/fe-analyselayout.cc \
 	src/fe-inspect.cc \
+	src/fe-ls.cc \
 	src/fe-rawread.cc \
 	src/fe-rawwrite.cc \
 	src/fe-read.cc \
