@@ -13,12 +13,12 @@ import "lib/mapper.proto";
 import "lib/common.proto";
 import "lib/layout.proto";
 
-// NEXT_TAG: 18
+// NEXT_TAG: 19
 message ConfigProto {
 	optional string comment = 8;
 	optional bool is_extension = 13;
 
-	optional LayoutProto layout = 17;
+	optional LayoutProto layout = 18;
 
 	optional ImageReaderProto image_reader = 12;
 	optional ImageWriterProto image_writer = 9;
