@@ -56,9 +56,9 @@ int mainGetFileInfo(int argc, const char* argv[])
         Filesystem::createFilesystem(config.filesystem(), sectorInterface);
 
     Path path(directory);
-	auto dirent = filesystem->getMetadata(path);
+	auto attributes = filesystem->getMetadata(path);
 
-	for (const auto& e : dirent->attributes)
+	for (const auto& e : attributes)
 		fmt::print("{} = {}\n", e.first, e.second);
 
     return 0;

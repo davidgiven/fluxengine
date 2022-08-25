@@ -23,15 +23,6 @@ public:
 		locked = bytes0[7] & 0x80;
 		length = ((bytes1[6] & 0x30) << 12) | (bytes1[5] << 8) | bytes1[4];
 		file_type = TYPE_FILE;
-
-		attributes["filename"] = filename;
-		attributes["length"] = fmt::format("{}", length);
-		attributes["type"] = "file";
-		attributes["acorndfs.inode"] = fmt::format("{}", inode);
-		attributes["acorndfs.start_sector"] = fmt::format("{}", start_sector);
-		attributes["acorndfs.load_address"] = fmt::format("0x{:x}", load_address);
-		attributes["acorndfs.exec_address"] = fmt::format("0x{:x}", exec_address);
-		attributes["acorndfs.locked"] = fmt::format("{}", locked);
 	}
 
 public:
@@ -65,6 +56,33 @@ public:
             throw FileNotFoundException();
 
         std::vector<std::unique_ptr<Dirent>> result;
+		for (auto& dirent : findAllFiles())
+			result.push_back(std::move(dirent));
+
+        return result;
+    }
+
+	std::map<std::string, std::string> getMetadata(const Path& path)
+	{
+		std::map<std::string, std::string> attributes;
+
+		auto dirent = findFile(path);
+		attributes["filename"] = dirent->filename;
+		attributes["length"] = fmt::format("{}", dirent->length);
+		attributes["type"] = "file";
+		attributes["acorndfs.inode"] = fmt::format("{}", dirent->inode);
+		attributes["acorndfs.start_sector"] = fmt::format("{}", dirent->start_sector);
+		attributes["acorndfs.load_address"] = fmt::format("0x{:x}", dirent->load_address);
+		attributes["acorndfs.exec_address"] = fmt::format("0x{:x}", dirent->exec_address);
+		attributes["acorndfs.locked"] = fmt::format("{}", dirent->locked);
+
+		return attributes;
+	}
+
+private:
+    std::vector<std::unique_ptr<AcornDfsDirent>> findAllFiles()
+    {
+        std::vector<std::unique_ptr<AcornDfsDirent>> result;
         auto sector0 = getSector(0);
         auto sector1 = getSector(1);
 
@@ -77,26 +95,18 @@ public:
             auto bytes0 = sector0.slice(i * 8 + 8, 8);
             auto bytes1 = sector1.slice(i * 8 + 8, 8);
 
-            auto dirent = std::make_unique<AcornDfsDirent>(i, bytes0, bytes1);
-            result.push_back(std::move(dirent));
+            result.push_back(std::make_unique<AcornDfsDirent>(i, bytes0, bytes1));
         }
 
         return result;
     }
 
-	std::unique_ptr<Dirent> getMetadata(const Path& path)
-	{
-		return findFile(path);
-	}
-
-private:
-	std::unique_ptr<Dirent> findFile(const Path& path)
+	std::unique_ptr<AcornDfsDirent> findFile(const Path& path)
 	{
 		if (path.size() != 1)
 			throw BadPathException();
 
-		auto files = list(Path());
-		for (auto& dirent : files)
+		for (auto& dirent : findAllFiles())
         {
 			if (dirent->filename == path[0])
 				return std::move(dirent);

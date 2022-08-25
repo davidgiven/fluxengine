@@ -10,12 +10,6 @@ class DfsProto;
 class FilesystemProto;
 class SectorInterface;
 
-struct File
-{
-    Bytes data;
-    std::vector<std::shared_ptr<const Sector>> sectors;
-};
-
 enum FileType
 {
     TYPE_FILE,
@@ -24,7 +18,6 @@ enum FileType
 
 struct Dirent
 {
-	std::map<std::string, std::string> attributes;
     std::string filename;
     FileType file_type;
     uint64_t length;
@@ -65,14 +58,13 @@ public:
     virtual std::vector<std::unique_ptr<Dirent>> list(const Path& path)
 	{ throw UnimplementedFilesystemException(); }
 
-    virtual std::unique_ptr<File> read(const Path& path)
+    virtual Bytes read(const Path& path)
 	{ throw UnimplementedFilesystemException(); }
 
-    virtual std::vector<std::shared_ptr<const Sector>> write(
-        const Path& path, const Bytes& data)
+    virtual void write(const Path& path, const Bytes& data)
 	{ throw UnimplementedFilesystemException(); }
 
-	virtual std::unique_ptr<Dirent> getMetadata(const Path& path)
+	virtual std::map<std::string, std::string> getMetadata(const Path& path)
 	{ throw UnimplementedFilesystemException(); }
 
 	virtual void setMetadata(const Path& path, const std::map<std::string, std::string>& metadata)

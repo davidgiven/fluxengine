@@ -34,13 +34,6 @@ public:
 		start_sector = br.read_be16(); 
 		length = br.read_8() * SECTOR_SIZE;
 		file_type = TYPE_FILE;
-
-		attributes["filename"] = filename;
-		attributes["length"] = fmt::format("{}", length);
-		attributes["type"] = "file";
-		attributes["brother120.inode"] = fmt::format("{}", inode);
-		attributes["brother120.start_sector"] = fmt::format("{}", start_sector);
-		attributes["brother120.type"] = fmt::format("{}", brother_type);
 	}
 
 public:
@@ -72,6 +65,31 @@ public:
 			throw FileNotFoundException();
 
 		std::vector<std::unique_ptr<Dirent>> result;
+		for (auto& dirent : findAllFiles())
+			result.push_back(std::move(dirent));
+
+        return result;
+    }
+
+	std::map<std::string, std::string> getMetadata(const Path& path)
+	{
+		std::map<std::string, std::string> attributes;
+
+		auto dirent = findFile(path);
+		attributes["filename"] = dirent->filename;
+		attributes["length"] = fmt::format("{}", dirent->length);
+		attributes["type"] = "file";
+		attributes["brother120.inode"] = fmt::format("{}", dirent->inode);
+		attributes["brother120.start_sector"] = fmt::format("{}", dirent->start_sector);
+		attributes["brother120.type"] = fmt::format("{}", dirent->brother_type);
+
+		return attributes;
+	}
+
+private:
+    std::vector<std::unique_ptr<Brother120Dirent>> findAllFiles()
+    {
+		std::vector<std::unique_ptr<Brother120Dirent>> result;
 		int inode = 0;
 		for (int block = 0; block < DIRECTORY_SECTORS; block++)
 		{
@@ -82,27 +100,21 @@ public:
 				if (buffer[0] == 0xf0)
 					continue;
 
-				auto dirent = std::make_unique<Brother120Dirent>(inode, buffer);
-				result.push_back(std::move(dirent));
+				result.push_back(
+				std::make_unique<Brother120Dirent>(inode, buffer));
 			}
 		}
 
         return result;
     }
 
-	std::unique_ptr<Dirent> getMetadata(const Path& path)
-	{
-		return findFile(path);
-	}
 
-private:
-	std::unique_ptr<Dirent> findFile(const Path& path)
+	std::unique_ptr<Brother120Dirent> findFile(const Path& path)
 	{
 		if (path.size() != 1)
 			throw BadPathException();
 
-		auto files = list(Path());
-		for (auto& dirent : files)
+		for (auto& dirent : findAllFiles())
         {
 			if (dirent->filename == path[0])
 				return std::move(dirent);
