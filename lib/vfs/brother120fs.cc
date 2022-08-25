@@ -1,9 +1,7 @@
 #include "lib/globals.h"
 #include "lib/vfs/vfs.h"
-#include "lib/sector.h"
-#include "lib/image.h"
-#include "lib/sectorinterface.h"
 #include "lib/config.pb.h"
+#include <fmt/format.h>
 
 /* Number of sectors on a 120kB disk. */
 static constexpr int SECTOR_COUNT = 468;
@@ -47,12 +45,10 @@ class Brother120Filesystem : public Filesystem
 public:
     Brother120Filesystem(
         const Brother120FsProto& config, std::shared_ptr<SectorInterface> sectors):
-        _config(config),
-        _sectors(sectors)
+		Filesystem(sectors),
+        _config(config)
     {
     }
-
-    void create() {}
 
     FilesystemStatus check()
     {
@@ -93,7 +89,7 @@ private:
 		int inode = 0;
 		for (int block = 0; block < DIRECTORY_SECTORS; block++)
 		{
-			auto bytes = getSector(block);
+			auto bytes = getLogicalSector(block);
 			for (int d = 0; d < SECTOR_SIZE/16; d++, inode++)
 			{
 				Bytes buffer = bytes.slice(d*16, 16);
@@ -107,7 +103,6 @@ private:
 
         return result;
     }
-
 
 	std::unique_ptr<Brother120Dirent> findFile(const Path& path)
 	{
@@ -123,23 +118,8 @@ private:
 		throw FileNotFoundException();
 	}
 
-	Bytes getSector(uint32_t block)
-	{
-		uint32_t track = block / 12;
-		uint32_t sector = block % 12;
-		return _sectors->get(track, 0, sector)->data;
-	}
-
-	void putSector(uint32_t block, const Bytes& bytes)
-	{
-		uint32_t track = block / 12;
-		uint32_t sector = block % 12;
-		_sectors->put(track, 0, sector)->data = bytes;
-	}
-
 private:
     const Brother120FsProto& _config;
-    std::shared_ptr<SectorInterface> _sectors;
 };
 
 std::unique_ptr<Filesystem> Filesystem::createBrother120Filesystem(

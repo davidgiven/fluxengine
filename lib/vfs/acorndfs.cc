@@ -1,9 +1,7 @@
 #include "lib/globals.h"
 #include "lib/vfs/vfs.h"
-#include "lib/sector.h"
-#include "lib/image.h"
-#include "lib/sectorinterface.h"
 #include "lib/config.pb.h"
+#include <fmt/format.h>
 
 class AcornDfsDirent : public Dirent
 {
@@ -38,12 +36,10 @@ class AcornDfsFilesystem : public Filesystem
 public:
     AcornDfsFilesystem(
         const AcornDfsProto& config, std::shared_ptr<SectorInterface> sectors):
-        _config(config),
-        _sectors(sectors)
+		Filesystem(sectors),
+        _config(config)
     {
     }
-
-    void create() {}
 
     FilesystemStatus check()
     {
@@ -83,8 +79,8 @@ private:
     std::vector<std::unique_ptr<AcornDfsDirent>> findAllFiles()
     {
         std::vector<std::unique_ptr<AcornDfsDirent>> result;
-        auto sector0 = getSector(0);
-        auto sector1 = getSector(1);
+        auto sector0 = getLogicalSector(0);
+        auto sector1 = getLogicalSector(1);
 
         if (sector1[5] & 7)
             throw BadFilesystemException();
@@ -115,23 +111,8 @@ private:
 		throw FileNotFoundException();
 	}
 
-    Bytes getSector(uint32_t block)
-    {
-        uint32_t track = block / _config.sectors_per_track();
-        uint32_t sector = block % _config.sectors_per_track();
-        return _sectors->get(track, 0, sector)->data;
-    }
-
-    void putSector(uint32_t block, const Bytes& bytes)
-    {
-        uint32_t track = block / _config.sectors_per_track();
-        uint32_t sector = block % _config.sectors_per_track();
-        _sectors->put(track, 0, sector)->data = bytes;
-    }
-
 private:
     const AcornDfsProto& _config;
-    std::shared_ptr<SectorInterface> _sectors;
 };
 
 std::unique_ptr<Filesystem> Filesystem::createAcornDfsFilesystem(

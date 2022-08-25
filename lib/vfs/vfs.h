@@ -32,7 +32,7 @@ enum FilesystemStatus
     FS_BAD
 };
 
-class FilesystemException {};
+class FilesystemException : public ErrorException {};
 class BadPathException : public FilesystemException {};
 class FileNotFoundException : public FilesystemException {};
 class BadFilesystemException : public FilesystemException {};
@@ -69,6 +69,17 @@ public:
 
 	virtual void setMetadata(const Path& path, const std::map<std::string, std::string>& metadata)
 	{ throw UnimplementedFilesystemException(); }
+
+protected:
+	Filesystem(std::shared_ptr<SectorInterface> sectors);
+
+	Bytes getLogicalSector(uint32_t number);
+	void putLogicalSector(uint32_t number, const Bytes& data);
+
+private:
+	typedef std::tuple<unsigned, unsigned, unsigned> location_t;
+	std::vector<location_t> _locations;
+	std::shared_ptr<SectorInterface> _sectors;
 
 public:
     static std::unique_ptr<Filesystem> createBrother120Filesystem(

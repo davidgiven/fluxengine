@@ -9,7 +9,6 @@ message AcornDfsProto {
 	}
 
 	optional Flavour flavour = 1 [default = ACORN_DFS, (help) = "which flavour of DFS to implement"];
-	optional int32 sectors_per_track = 2 [default = 10, (help) = "number of sectors per filesystem track"];
 }
 
 message Brother120FsProto {
