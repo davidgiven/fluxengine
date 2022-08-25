@@ -256,14 +256,14 @@
 
 
 /* Definitions of sector size */
-#if (FF_MAX_SS < FF_MIN_SS) || (FF_MAX_SS != 512 && FF_MAX_SS != 1024 && FF_MAX_SS != 2048 && FF_MAX_SS != 4096) || (FF_MIN_SS != 512 && FF_MIN_SS != 1024 && FF_MIN_SS != 2048 && FF_MIN_SS != 4096)
-#error Wrong sector size configuration
-#endif
-#if FF_MAX_SS == FF_MIN_SS
-#define SS(fs)	((UINT)FF_MAX_SS)	/* Fixed sector size */
-#else
+//#if (FF_MAX_SS < FF_MIN_SS) || (FF_MAX_SS != 512 && FF_MAX_SS != 1024 && FF_MAX_SS != 2048 && FF_MAX_SS != 4096) || (FF_MIN_SS != 512 && FF_MIN_SS != 1024 && FF_MIN_SS != 2048 && FF_MIN_SS != 4096)
+//#error Wrong sector size configuration
+//#endif
+//#if FF_MAX_SS == FF_MIN_SS
+//#define SS(fs)	((UINT)FF_MAX_SS)	/* Fixed sector size */
+//#else
 #define SS(fs)	((fs)->ssize)	/* Variable sector size */
-#endif
+//#endif
 
 
 /* Timestamp */

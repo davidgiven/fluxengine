@@ -138,6 +138,7 @@ include dep/agg/build.mk
 include dep/libusbp/build.mk
 include dep/stb/build.mk
 include dep/emu/build.mk
+include dep/fatfs/build.mk
 include scripts/build.mk
 
 include lib/build.mk
