@@ -67,6 +67,7 @@ LIBFLUXENGINE_SRCS = \
 	lib/vfs/brother120fs.cc \
 	lib/vfs/acorndfs.cc \
 	lib/vfs/vfs.cc \
+	lib/vfs/imagesectorinterface.cc \
 
 LIBFLUXENGINE_OBJS = $(patsubst %.cc, $(OBJDIR)/%.o, $(LIBFLUXENGINE_SRCS))
 OBJS += $(LIBFLUXENGINE_OBJS)

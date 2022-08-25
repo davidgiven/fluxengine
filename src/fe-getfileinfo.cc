@@ -51,7 +51,7 @@ int mainGetFileInfo(int argc, const char* argv[])
 
     auto reader = ImageReader::create(config.image_reader());
     std::shared_ptr<Image> image(std::move(reader->readImage()));
-    sectorInterface = std::make_shared<ImageSectorInterface>(image);
+    sectorInterface = SectorInterface::createImageSectorInterface(image);
     auto filesystem =
         Filesystem::createFilesystem(config.filesystem(), sectorInterface);
 
