@@ -5,7 +5,7 @@
 #include "lib/imginputoutpututils.h"
 #include "lib/image.h"
 #include "lib/sector.h"
-#include "lib/sectorinterface.h"
+#include "lib/vfs/sectorinterface.h"
 #include "lib/config.pb.h"
 
 Path::Path(const std::string& path)

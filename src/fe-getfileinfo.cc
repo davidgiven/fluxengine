@@ -8,7 +8,7 @@
 #include "imagewriter/imagewriter.h"
 #include "fmt/format.h"
 #include "fluxengine.h"
-#include "lib/sectorinterface.h"
+#include "lib/vfs/sectorinterface.h"
 #include "lib/vfs/vfs.h"
 #include <google/protobuf/text_format.h>
 #include <fstream>
