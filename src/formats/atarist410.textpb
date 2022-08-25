@@ -2,30 +2,22 @@ comment: 'Atari ST 410kB 3.5" 82-track 10-sector SSDD'
 
 image_reader {
 	filename: "atarist410.st"
-	img {
-		tracks: 82
-		sides: 1
-		trackdata {
-			sector_size: 512
-			sector_range {
-				start_sector: 1
-				sector_count: 10
-			}
-		}
-	}
+	img {}
 }
 
 image_writer {
 	filename: "atarist410.st"
-	img {
-		tracks: 82
-		sides: 1
-		trackdata {
-			sector_size: 512
-			sector_range {
-				start_sector: 1
-				sector_count: 10
-			}
+	img {}
+}
+
+layout {
+	tracks: 82
+	sides: 1
+	trackdata {
+		sector_size: 512
+		sector_range {
+			start_sector: 1
+			sector_count: 10
 		}
 	}
 }

@@ -2,11 +2,13 @@ comment: 'Acorn ADFS L/D/E/F 640kB/800kB/1600kB 3.5" or 5.25" 80-track DS (ro)'
 
 image_writer {
 	filename: "acornadfs.img"
-	img {
-		trackdata {
-			sector_range {
-				start_sector: 0
-			}
+	img {}
+}
+
+layout {
+	trackdata {
+		sector_range {
+			start_sector: 0
 		}
 	}
 }

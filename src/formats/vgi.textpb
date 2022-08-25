@@ -3,19 +3,17 @@ is_extension: true
 
 image_reader {
 	filename: "micropolis.vgi"
-	img {
-		trackdata {
-			sector_size: 275
-		}
-	}
+	img {}
 }
 
 image_writer {
 	filename: "micropolis.vgi"
-	img {
-		trackdata {
-			sector_size: 275
-		}
+	img {}
+}
+
+layout {
+	trackdata {
+		sector_size: 275
 	}
 }
 

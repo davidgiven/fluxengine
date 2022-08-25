@@ -2,30 +2,22 @@ comment: 'Atari ST 370kB 3.5" 82-track 9-sector SSDD'
 
 image_reader {
 	filename: "atarist370.st"
-	img {
-		tracks: 82
-		sides: 1
-		trackdata {
-			sector_size: 512
-			sector_range {
-				start_sector: 1
-				sector_count: 9
-			}
-		}
-	}
+	img {}
 }
 
 image_writer {
 	filename: "atarist370.st"
-	img {
-		tracks: 82
-		sides: 1
-		trackdata {
-			sector_size: 512
-			sector_range {
-				start_sector: 1
-				sector_count: 9
-			}
+	img {}
+}
+
+layout {
+	tracks: 82
+	sides: 1
+	trackdata {
+		sector_size: 512
+		sector_range {
+			start_sector: 1
+			sector_count: 9
 		}
 	}
 }
