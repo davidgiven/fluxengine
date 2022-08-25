@@ -2,30 +2,22 @@ comment: 'Atari ST 360kB 3.5" 80-track 9-sector SSDD'
 
 image_reader {
 	filename: "atarist360.st"
-	img {
-		tracks: 80
-		sides: 1
-		trackdata {
-			sector_size: 512
-			sector_range {
-				start_sector: 1
-				sector_count: 9
-			}
-		}
-	}
+	img {}
 }
 
 image_writer {
 	filename: "atarist360.st"
-	img {
-		tracks: 80
-		sides: 1
-		trackdata {
-			sector_size: 512
-			sector_range {
-				start_sector: 1
-				sector_count: 9
-			}
+	img {}
+}
+
+layout {
+	tracks: 80
+	sides: 1
+	trackdata {
+		sector_size: 512
+		sector_range {
+			start_sector: 1
+			sector_count: 9
 		}
 	}
 }

@@ -2,30 +2,22 @@ comment: 'Atari ST 400kB 3.5" 80-track 10-sector SSDD'
 
 image_reader {
 	filename: "atarist400.st"
-	img {
-		tracks: 80
-		sides: 1
-		trackdata {
-			sector_size: 512
-			sector_range {
-				start_sector: 1
-				sector_count: 10
-			}
-		}
-	}
+	img {}
 }
 
 image_writer {
 	filename: "atarist400.st"
-	img {
-		tracks: 80
-		sides: 1
-		trackdata {
-			sector_size: 512
-			sector_range {
-				start_sector: 1
-				sector_count: 10
-			}
+	img {}
+}
+
+layout {
+	tracks: 80
+	sides: 1
+	trackdata {
+		sector_size: 512
+		sector_range {
+			start_sector: 1
+			sector_count: 10
 		}
 	}
 }

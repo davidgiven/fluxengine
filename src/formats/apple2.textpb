@@ -2,15 +2,17 @@ comment: 'Apple II 140kB DOS 3.3 5.25" 40 track SSSD'
 
 image_reader {
 	filename: "apple2.img"
-	img {
-		tracks: 40
-		sides: 1
-		trackdata {
-			sector_size: 256
-			sector_range {
-				start_sector: 0
-				sector_count: 16
-			}
+	img {}
+}
+
+layout {
+	tracks: 40
+	sides: 1
+	trackdata {
+		sector_size: 256
+		sector_range {
+			start_sector: 0
+			sector_count: 16
 		}
 	}
 }

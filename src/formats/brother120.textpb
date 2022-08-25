@@ -2,30 +2,22 @@ comment: 'Brother 120kB 3.5" 39-track SS GCR'
 
 image_reader {
 	filename: "brother120.img"
-	img {
-		tracks: 39
-		sides: 1
-		trackdata {
-			sector_size: 256
-			sector_range {
-				start_sector: 0
-				sector_count: 12
-			}
-		}
-	}
+	img {}
 }
 
 image_writer {
 	filename: "brother120.img"
-	img {
-		tracks: 39
-		sides: 1
-		trackdata {
-			sector_size: 256
-			sector_range {
-				start_sector: 0
-				sector_count: 12
-			}
+	img {}
+}
+
+layout {
+	tracks: 39
+	sides: 1
+	trackdata {
+		sector_size: 256
+		sector_range {
+			start_sector: 0
+			sector_count: 12
 		}
 	}
 }

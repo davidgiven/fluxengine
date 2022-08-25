@@ -2,22 +2,24 @@ comment: 'PC 720kB 5.25"/3.5" 80-track 9-sector DSDD'
 
 image_reader {
 	filename: "ibm720.img"
-	img {
-		tracks: 80
-		sides: 2
-		trackdata {
-			sector_size: 512
-			sector_range {
-				start_sector: 1
-				sector_count: 9
-			}
-		}
-	}
+	img {}
 }
 
 image_writer {
 	filename: "ibm720.img"
 	img {}
+}
+
+layout {
+	tracks: 80
+	sides: 2
+	trackdata {
+		sector_size: 512
+		sector_range {
+			start_sector: 1
+			sector_count: 9
+		}
+	}
 }
 
 encoder {
