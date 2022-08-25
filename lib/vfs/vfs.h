@@ -24,8 +24,9 @@ enum FileType
 
 struct Dirent
 {
+	std::map<std::string, std::string> attributes;
     std::string filename;
-    FileType fileType;
+    FileType file_type;
     uint64_t length;
 };
 
@@ -38,28 +39,49 @@ enum FilesystemStatus
     FS_BAD
 };
 
-extern std::vector<std::string> parsePath(const std::string& path);
-
 class FilesystemException {};
 class BadPathException : public FilesystemException {};
 class FileNotFoundException : public FilesystemException {};
 class BadFilesystemException : public FilesystemException {};
+class ReadOnlyFilesystemException : public FilesystemException {};
+class UnimplementedFilesystemException : public FilesystemException {};
+
+class Path : public std::vector<std::string>
+{
+public:
+	Path() {}
+	Path(const std::string& text);
+};
 
 class Filesystem
 {
 public:
-	virtual void create() = 0;
-    virtual FilesystemStatus check() = 0;
-    virtual std::vector<std::unique_ptr<Dirent>> list(std::vector<std::string> path) = 0;
+	virtual void create()
+	{ throw UnimplementedFilesystemException(); }
+	
+    virtual FilesystemStatus check()
+	{ throw UnimplementedFilesystemException(); }
 
-    virtual std::unique_ptr<File> read(std::vector<std::string> path) = 0;
+    virtual std::vector<std::unique_ptr<Dirent>> list(const Path& path)
+	{ throw UnimplementedFilesystemException(); }
+
+    virtual std::unique_ptr<File> read(const Path& path)
+	{ throw UnimplementedFilesystemException(); }
+
     virtual std::vector<std::shared_ptr<const Sector>> write(
-        std::vector<std::string> path, const Bytes& data) = 0;
+        const Path& path, const Bytes& data)
+	{ throw UnimplementedFilesystemException(); }
+
+	virtual std::unique_ptr<Dirent> getMetadata(const Path& path)
+	{ throw UnimplementedFilesystemException(); }
+
+	virtual void setMetadata(const Path& path, const std::map<std::string, std::string>& metadata)
+	{ throw UnimplementedFilesystemException(); }
 
 public:
     static std::unique_ptr<Filesystem> createBrother120Filesystem(
         const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
-    static std::unique_ptr<Filesystem> createDfsFilesystem(
+    static std::unique_ptr<Filesystem> createAcornDfsFilesystem(
         const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
 
 	static std::unique_ptr<Filesystem> createFilesystem(

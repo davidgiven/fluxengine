@@ -6,11 +6,11 @@ using namespace snowhouse;
  
 static void testPathParsing()
 {
-	AssertThat(parsePath(""), Equals(std::vector<std::string>{}));
-	AssertThat(parsePath("/"), Equals(std::vector<std::string>{}));
-	AssertThat(parsePath("one"), Equals(std::vector<std::string>{ "one" }));
-	AssertThat(parsePath("one/two"), Equals(std::vector<std::string>{ "one", "two" }));
-	AssertThat(parsePath("/one/two"), Equals(std::vector<std::string>{ "one", "two" }));
+	AssertThat(Path(""), Equals(std::vector<std::string>{}));
+	AssertThat(Path("/"), Equals(std::vector<std::string>{}));
+	AssertThat(Path("one"), Equals(std::vector<std::string>{ "one" }));
+	AssertThat(Path("one/two"), Equals(std::vector<std::string>{ "one", "two" }));
+	AssertThat(Path("/one/two"), Equals(std::vector<std::string>{ "one", "two" }));
 }
 
 int main(void)

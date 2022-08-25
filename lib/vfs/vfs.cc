@@ -2,15 +2,14 @@
 #include "vfs.h"
 #include "lib/config.pb.h"
 
-std::vector<std::string> parsePath(const std::string& path)
+Path::Path(const std::string& path)
 {
 	if (path == "")
-		return {};
+		return;
 	auto p = path;
 	if (p[0] == '/')
 		p = p.substr(1);
 
-    std::vector<std::string> result;
     std::stringstream ss(p);
     std::string item;
 
@@ -18,12 +17,9 @@ std::vector<std::string> parsePath(const std::string& path)
 	{
 		if (item.empty())
 			throw BadPathException();
-		result.push_back(item);
+		push_back(item);
 	}
-
-    return result;
 }
-
 
 std::unique_ptr<Filesystem> Filesystem::createFilesystem(
 		const FilesystemProto& config, std::shared_ptr<SectorInterface> image)
@@ -33,11 +29,11 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystem(
 		case FilesystemProto::kBrother120:
 			return Filesystem::createBrother120Filesystem(config, image);
 
-		case FilesystemProto::kDfs:
-			return Filesystem::createDfsFilesystem(config, image);
+		case FilesystemProto::kAcorndfs:
+			return Filesystem::createAcornDfsFilesystem(config, image);
 
 		default:
-			Error() << "bad filesystem config";
+			Error() << "no filesystem configured";
 			return std::unique_ptr<Filesystem>();
 	}
 }

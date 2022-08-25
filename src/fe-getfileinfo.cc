@@ -4,8 +4,8 @@
 #include "sector.h"
 #include "proto.h"
 #include "readerwriter.h"
-#include "fluxsource/fluxsource.h"
 #include "imagereader/imagereader.h"
+#include "imagewriter/imagewriter.h"
 #include "fmt/format.h"
 #include "fluxengine.h"
 #include "lib/sectorinterface.h"
@@ -22,15 +22,6 @@ static StringFlag image({"-i", "--image"},
     {
         ImageReader::updateConfigForFilename(
             config.mutable_image_reader(), value);
-    });
-
-static StringFlag flux({"-f", "--flux"},
-    "flux source to work on",
-    "",
-    [](const auto& value)
-    {
-		FluxSource::updateConfigForFilename(
-            config.mutable_flux_source(), value);
     });
 
 static StringFlag directory({"-p", "--path"}, "path to list", "");
@@ -50,7 +41,7 @@ static char fileTypeChar(FileType file_type)
     }
 }
 
-int mainLs(int argc, const char* argv[])
+int mainGetFileInfo(int argc, const char* argv[])
 {
     if (argc == 1)
         showProfiles("ls", formats);
@@ -64,24 +55,11 @@ int mainLs(int argc, const char* argv[])
     auto filesystem =
         Filesystem::createFilesystem(config.filesystem(), sectorInterface);
 
-	Path path(directory);
-    auto files = filesystem->list(path);
+    Path path(directory);
+	auto dirent = filesystem->getMetadata(path);
 
-    int maxlen = 0;
-    for (const auto& dirent : files)
-        maxlen = std::max(maxlen, (int)dirent->filename.size());
-
-	uint32_t total = 0;
-    for (const auto& dirent : files)
-    {
-        fmt::print("{} {:{}}  {:6}\n",
-            fileTypeChar(dirent->file_type),
-            dirent->filename,
-            maxlen,
-            dirent->length);
-		total += dirent->length;
-    }
-    fmt::print("({} files, {} bytes)\n", files.size(), total);
+	for (const auto& e : dirent->attributes)
+		fmt::print("{} = {}\n", e.first, e.second);
 
     return 0;
 }

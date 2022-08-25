@@ -65,7 +65,7 @@ LIBFLUXENGINE_SRCS = \
 	lib/usb/usbfinder.cc \
 	lib/utils.cc \
 	lib/vfs/brother120fs.cc \
-	lib/vfs/dfs.cc \
+	lib/vfs/acorndfs.cc \
 	lib/vfs/vfs.cc \
 
 LIBFLUXENGINE_OBJS = $(patsubst %.cc, $(OBJDIR)/%.o, $(LIBFLUXENGINE_SRCS))

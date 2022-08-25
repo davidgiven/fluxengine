@@ -49,6 +49,6 @@ heads {
 }
 
 filesystem {
-	dfs {}
+	acorndfs {}
 }
 
