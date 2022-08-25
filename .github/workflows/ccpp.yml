@@ -17,10 +17,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: brew
-      run: brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils
-    - name: link 
-      run: |
-        ln -s /usr/local/opt/coreutils/libexec/gnubin/gtruncate /usr/local/bin/truncate
+      run: brew install sqlite pkg-config libusb protobuf wxwidgets fmt make
     - name: make
       run: gmake
 
