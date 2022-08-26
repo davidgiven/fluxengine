@@ -1,0 +1,34 @@
+comment: 'Common Micropolis definitions'
+
+drive {
+	hard_sector_count: 16
+}
+
+image_reader {
+	filename: "micropolis.img"
+	img {}
+}
+
+image_writer {
+	filename: "micropolis.img"
+	img {}
+}
+
+layout {
+	trackdata {
+		sector_size: 256
+		sector_range {
+			start_sector: 0
+			sector_count: 16
+		}
+	}
+}
+
+encoder {
+	micropolis {}
+}
+
+decoder {
+	micropolis {}
+}
+

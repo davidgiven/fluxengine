@@ -12,10 +12,11 @@ import "lib/mapper.proto";
 import "lib/common.proto";
 import "lib/layout.proto";
 
-// NEXT_TAG: 18
+// NEXT_TAG: 19
 message ConfigProto {
 	optional string comment = 8;
 	optional bool is_extension = 13;
+	repeated string include = 19;
 
 	optional LayoutProto layout = 17;
 
