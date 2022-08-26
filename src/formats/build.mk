@@ -1,4 +1,5 @@
 FORMATS = \
+	_micropolis \
 	40track_drive \
 	acornadfs \
 	acorndfs \
