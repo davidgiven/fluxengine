@@ -17,6 +17,7 @@ import "lib/layout.proto";
 message ConfigProto {
 	optional string comment = 8;
 	optional bool is_extension = 13;
+	repeated string include = 19;
 
 	optional LayoutProto layout = 18;
 

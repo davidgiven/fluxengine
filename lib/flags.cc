@@ -188,17 +188,17 @@ void FlagGroup::parseFlagsWithConfigFiles(int argc, const char* argv[],
 	);
 }
 
-void FlagGroup::parseConfigFile(
+ConfigProto FlagGroup::parseSingleConfigFile(
 		const std::string& filename,
 		const std::map<std::string, std::string>& configFiles)
 {
 	const auto& it = configFiles.find(filename);
 	if (it != configFiles.end())
 	{
-		ConfigProto newConfig;
-		if (!newConfig.ParseFromString(it->second))
+		ConfigProto config;
+		if (!config.ParseFromString(it->second))
 			Error() << "couldn't load built-in config proto";
-		config.MergeFrom(newConfig);
+		return config;
 	}
 	else
 	{
@@ -209,9 +209,31 @@ void FlagGroup::parseConfigFile(
 		std::ostringstream ss;
 		ss << f.rdbuf();
 
+		ConfigProto config;
 		if (!google::protobuf::TextFormat::MergeFromString(ss.str(), &config))
 			Error() << "couldn't load external config proto";
+		return config;
 	}
+}
+
+void FlagGroup::parseConfigFile(
+		const std::string& filename,
+		const std::map<std::string, std::string>& configFiles)
+{
+	auto newConfig = parseSingleConfigFile(filename, configFiles);
+
+	/* The includes need to be merged _first_. */
+
+	for (const auto& include : newConfig.include())
+	{
+		auto included = parseSingleConfigFile(include, configFiles);
+		if (included.include_size() != 0)
+			Error() << "only one level of config file includes are supported (so far, if you need this, complain)";
+
+		config.MergeFrom(included);
+	}
+
+	config.MergeFrom(newConfig);
 }
 
 void FlagGroup::checkInitialised() const
