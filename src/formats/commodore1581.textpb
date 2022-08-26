@@ -2,30 +2,22 @@ comment: 'Commodore 1581 800kB 3.5" DSDD'
 
 image_reader {
 	filename: "commodore1581.d81"
-	img {
-		tracks: 80
-		sides: 2
-		trackdata {
-			sector_size: 512
-			sector_range {
-				start_sector: 0
-				sector_count: 10
-			}
-		}
-	}
+	img {}
 }
 
 image_writer {
 	filename: "commodore1581.d81"
-	img {
-		tracks: 80
-		sides: 2
-		trackdata {
-			sector_size: 512
-			sector_range {
-				start_sector: 0
-				sector_count: 10
-			}
+	img {}
+}
+
+layout {
+	tracks: 80
+	sides: 2
+	trackdata {
+		sector_size: 512
+		sector_range {
+			start_sector: 0
+			sector_count: 10
 		}
 	}
 }

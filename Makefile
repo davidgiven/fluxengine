@@ -92,6 +92,7 @@ all: binaries tests
 
 PROTOS = \
 	arch/aeslanier/aeslanier.proto \
+	arch/agat/agat.proto \
 	arch/amiga/amiga.proto \
 	arch/apple2/apple2.proto \
 	arch/brother/brother.proto \
@@ -100,25 +101,25 @@ PROTOS = \
 	arch/fb100/fb100.proto \
 	arch/ibm/ibm.proto \
 	arch/macintosh/macintosh.proto \
+	arch/micropolis/micropolis.proto \
 	arch/mx/mx.proto \
+	arch/northstar/northstar.proto \
+	arch/tids990/tids990.proto \
 	arch/victor9k/victor9k.proto \
 	arch/zilogmcz/zilogmcz.proto \
-	arch/tids990/tids990.proto \
-	arch/micropolis/micropolis.proto \
-	arch/northstar/northstar.proto \
-	arch/agat/agat.proto \
+	lib/common.proto \
+	lib/config.proto \
 	lib/decoders/decoders.proto \
+	lib/drive.proto \
 	lib/encoders/encoders.proto \
+	lib/fl2.proto \
 	lib/fluxsink/fluxsink.proto \
 	lib/fluxsource/fluxsource.proto \
 	lib/imagereader/imagereader.proto \
 	lib/imagewriter/imagewriter.proto \
-	lib/usb/usb.proto \
-	lib/common.proto \
-	lib/fl2.proto \
-	lib/config.proto \
+	lib/layout.proto \
 	lib/mapper.proto \
-	lib/drive.proto \
+	lib/usb/usb.proto \
 	tests/testproto.proto \
 
 PROTO_HDRS = $(patsubst %.proto, $(OBJDIR)/%.pb.h, $(PROTOS))

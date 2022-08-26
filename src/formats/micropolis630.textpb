@@ -6,29 +6,21 @@ drive {
 
 image_reader {
 	filename: "micropolis.img"
-	img {
-		tracks: 77
-		sides: 2
-		trackdata {
-			sector_size: 256
-			sector_range {
-				start_sector: 0
-				sector_count: 16
-			}
-		}
-	}
+	img {}
 }
 
 image_writer {
 	filename: "micropolis.img"
-	img {
-		tracks: 77
-		trackdata {
-			sector_size: 256
-			sector_range {
-				start_sector: 0
-				sector_count: 16
-			}
+	img {}
+}
+
+layout {
+	tracks: 77
+	trackdata {
+		sector_size: 256
+		sector_range {
+			start_sector: 0
+			sector_count: 16
 		}
 	}
 }

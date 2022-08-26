@@ -2,284 +2,149 @@ comment: 'Victor 9000 / Sirius One 1224kB DSHD GCR variable sector)'
 
 image_reader {
 	filename: "victor9k_ds.img"
-	img {
-		tracks: 80
-		sides: 2
-		trackdata {
-			sector_size: 512
-			sector_range {
-				start_sector: 0
-			}
-		}
-		trackdata {
-		    side: 0
-			track: 0
-			up_to_track: 3
-			sector_range {
-				sector_count: 19
-			}
-		}
-		trackdata {
-		    side: 0
-			track: 4
-			up_to_track: 15
-			sector_range {
-				sector_count: 18
-			}
-		}
-		trackdata {
-		    side: 0
-			track: 16
-			up_to_track: 26
-			sector_range {
-				sector_count: 17
-			}
-		}
-		trackdata {
-		    side: 0
-			track: 27
-			up_to_track: 37
-			sector_range {
-				sector_count: 16
-			}
-		}
-		trackdata {
-		    side: 0
-			track: 38
-			up_to_track: 47
-			sector_range {
-				sector_count: 15
-			}
-		}
-		trackdata {
-		    side: 0
-			track: 48
-			up_to_track: 59
-			sector_range {
-				sector_count: 14
-			}
-		}
-		trackdata {
-		    side: 0
-			track: 60
-			up_to_track: 70
-			sector_range {
-				sector_count: 13
-			}
-		}
-		trackdata {
-		    side: 0
-			track: 71
-			up_to_track: 79
-			sector_range {
-				sector_count: 12
-			}
-		}
-		trackdata {
-			side: 1
-			track: 0
-			up_to_track: 7
-			sector_range {
-				sector_count: 18
-			}
-		}
-		trackdata {
-			side: 1
-			track: 8
-			up_to_track: 18
-			sector_range {
-				sector_count: 17
-			}
-		}
-		trackdata {
-			side: 1
-			track: 19
-			up_to_track: 29
-			sector_range {
-				sector_count: 16
-			}
-		}
-		trackdata {
-			side: 1
-			track: 30
-			up_to_track: 39
-			sector_range {
-				sector_count: 15
-			}
-		}
-		trackdata {
-			side: 1
-			track: 40
-			up_to_track: 51
-			sector_range {
-				sector_count: 14
-			}
-		}
-		trackdata {
-			side: 1
-			track: 52
-			up_to_track: 62
-			sector_range {
-				sector_count: 13
-			}
-		}
-		trackdata {
-			side: 1
-			track: 63
-			up_to_track: 74
-			sector_range {
-				sector_count: 12
-			}
-		}
-		trackdata {
-			side: 1
-			track: 75
-			up_to_track: 79
-			sector_range {
-				sector_count: 11
-			}
-		}
-	}
+	img {}
 }
 
 image_writer {
 	filename: "victor9k_ds.img"
-	img {
-		tracks: 80
-		sides: 2
-		trackdata {
-			sector_size: 512
-			sector_range {
-				start_sector: 0
-			}
+	img {}
+}
+
+layout {
+	tracks: 80
+	sides: 2
+	trackdata {
+		sector_size: 512
+		sector_range {
+			start_sector: 0
 		}
-		trackdata {
-			side: 0
-			track: 0
-			up_to_track: 3
-			sector_range {
-				sector_count: 19
-			}
+	}
+	trackdata {
+		side: 0
+		track: 0
+		up_to_track: 3
+		sector_range {
+			sector_count: 19
 		}
-		trackdata {
-			side: 0
-			track: 4
-			up_to_track: 15
-			sector_range {
-				sector_count: 18
-			}
+	}
+	trackdata {
+		side: 0
+		track: 4
+		up_to_track: 15
+		sector_range {
+			sector_count: 18
 		}
-		trackdata {
-			side: 0
-			track: 16
-			up_to_track: 26
-			sector_range {
-				sector_count: 17
-			}
+	}
+	trackdata {
+		side: 0
+		track: 16
+		up_to_track: 26
+		sector_range {
+			sector_count: 17
 		}
-		trackdata {
-			side: 0
-			track: 27
-			up_to_track: 37
-			sector_range {
-				sector_count: 16
-			}
+	}
+	trackdata {
+		side: 0
+		track: 27
+		up_to_track: 37
+		sector_range {
+			sector_count: 16
 		}
-		trackdata {
-			side: 0
-			track: 38
-			up_to_track: 47
-			sector_range {
-				sector_count: 15
-			}
+	}
+	trackdata {
+		side: 0
+		track: 38
+		up_to_track: 47
+		sector_range {
+			sector_count: 15
 		}
-		trackdata {
-			side: 0
-			track: 48
-			up_to_track: 59
-			sector_range {
-				sector_count: 14
-			}
+	}
+	trackdata {
+		side: 0
+		track: 48
+		up_to_track: 59
+		sector_range {
+			sector_count: 14
 		}
-		trackdata {
-			side: 0
-			track: 60
-			up_to_track: 70
-			sector_range {
-				sector_count: 13
-			}
+	}
+	trackdata {
+		side: 0
+		track: 60
+		up_to_track: 70
+		sector_range {
+			sector_count: 13
 		}
-		trackdata {
-			side: 0
-			track: 71
-			up_to_track: 79
-			sector_range {
-				sector_count: 12
-			}
+	}
+	trackdata {
+		side: 0
+		track: 71
+		up_to_track: 79
+		sector_range {
+			sector_count: 12
 		}
-		trackdata {
-			side: 1
-			track: 0
-			up_to_track: 7
-			sector_range {
-				sector_count: 18
-			}
+	}
+	trackdata {
+		side: 1
+		track: 0
+		up_to_track: 7
+		sector_range {
+			sector_count: 18
 		}
-		trackdata {
-			side: 1
-			track: 8
-			up_to_track: 18
-			sector_range {
-				sector_count: 17
-			}
+	}
+	trackdata {
+		side: 1
+		track: 8
+		up_to_track: 18
+		sector_range {
+			sector_count: 17
 		}
-		trackdata {
-			side: 1
-			track: 19
-			up_to_track: 29
-			sector_range {
-				sector_count: 16
-			}
+	}
+	trackdata {
+		side: 1
+		track: 19
+		up_to_track: 29
+		sector_range {
+			sector_count: 16
 		}
-		trackdata {
-			side: 1
-			track: 30
-			up_to_track: 39
-			sector_range {
-				sector_count: 15
-			}
+	}
+	trackdata {
+		side: 1
+		track: 30
+		up_to_track: 39
+		sector_range {
+			sector_count: 15
 		}
-		trackdata {
-			side: 1
-			track: 40
-			up_to_track: 51
-			sector_range {
-				sector_count: 14
-			}
+	}
+	trackdata {
+		side: 1
+		track: 40
+		up_to_track: 51
+		sector_range {
+			sector_count: 14
 		}
-		trackdata {
-			side: 1
-			track: 52
-			up_to_track: 62
-			sector_range {
-				sector_count: 13
-			}
+	}
+	trackdata {
+		side: 1
+		track: 52
+		up_to_track: 62
+		sector_range {
+			sector_count: 13
 		}
-		trackdata {
-			side: 1
-			track: 63
-			up_to_track: 74
-			sector_range {
-				sector_count: 12
-			}
+	}
+	trackdata {
+		side: 1
+		track: 63
+		up_to_track: 74
+		sector_range {
+			sector_count: 12
 		}
-		trackdata {
-			side: 1
-			track: 75
-			up_to_track: 79
-			sector_range {
-				sector_count: 11
-			}
+	}
+	trackdata {
+		side: 1
+		track: 75
+		up_to_track: 79
+		sector_range {
+			sector_count: 11
 		}
 	}
 }

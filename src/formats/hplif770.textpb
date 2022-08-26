@@ -7,15 +7,17 @@ drive {
 
 image_reader {
 	filename: "hplif770.img"
-	img {
-		tracks: 77
-		sides: 2
-		trackdata {
-			sector_size: 1024
-			sector_range {
-				start_sector: 1
-				sector_count: 5
-			}
+	img {}
+}
+
+layout {
+	tracks: 77
+	sides: 2
+	trackdata {
+		sector_size: 1024
+		sector_range {
+			start_sector: 1
+			sector_count: 5
 		}
 	}
 }

@@ -2,22 +2,24 @@ comment: 'PC 1440kB 3.5" 80-track 18-sector DSHD'
 
 image_reader {
 	filename: "ibm1440.img"
-	img {
-		tracks: 80
-		sides: 2
-		trackdata {
-			sector_size: 512
-			sector_range {
-				start_sector: 1
-				sector_count: 18
-			}
-		}
-	}
+	img {}
 }
 
 image_writer {
 	filename: "ibm1440.img"
 	img {}
+}
+
+layout {
+	tracks: 80
+	sides: 2
+	trackdata {
+		sector_size: 512
+		sector_range {
+			start_sector: 1
+			sector_count: 18
+		}
+	}
 }
 
 encoder {
