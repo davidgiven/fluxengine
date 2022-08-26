@@ -1,4 +1,5 @@
 comment: 'Common Micropolis definitions'
+is_extension: true
 
 drive {
 	hard_sector_count: 16
