@@ -21,6 +21,7 @@ struct Dirent
     std::string filename;
     FileType file_type;
     uint64_t length;
+	std::string mode;
 };
 
 enum FilesystemStatus

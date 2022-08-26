@@ -32,6 +32,7 @@ public:
 		start_sector = br.read_be16(); 
 		length = br.read_8() * SECTOR_SIZE;
 		file_type = TYPE_FILE;
+		mode = "";
 	}
 
 public:
@@ -75,6 +76,7 @@ public:
 		attributes["filename"] = dirent->filename;
 		attributes["length"] = fmt::format("{}", dirent->length);
 		attributes["type"] = "file";
+		attributes["mode"] = dirent->mode;
 		attributes["brother120.inode"] = fmt::format("{}", dirent->inode);
 		attributes["brother120.start_sector"] = fmt::format("{}", dirent->start_sector);
 		attributes["brother120.type"] = fmt::format("{}", dirent->brother_type);

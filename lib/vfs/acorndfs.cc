@@ -21,6 +21,7 @@ public:
 		locked = bytes0[7] & 0x80;
 		length = ((bytes1[6] & 0x30) << 12) | (bytes1[5] << 8) | bytes1[4];
 		file_type = TYPE_FILE;
+		mode = locked ? "L" : "";
 	}
 
 public:
@@ -66,6 +67,7 @@ public:
 		attributes["filename"] = dirent->filename;
 		attributes["length"] = fmt::format("{}", dirent->length);
 		attributes["type"] = "file";
+		attributes["mode"] = dirent->mode;
 		attributes["acorndfs.inode"] = fmt::format("{}", dirent->inode);
 		attributes["acorndfs.start_sector"] = fmt::format("{}", dirent->start_sector);
 		attributes["acorndfs.load_address"] = fmt::format("0x{:x}", dirent->load_address);
