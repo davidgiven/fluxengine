@@ -59,6 +59,23 @@ public:
         return result;
     }
 
+	Bytes getFile(const Path& path)
+	{
+		auto dirent = findFile(path);
+		int sectors = (dirent->length + 255) / 256;
+
+		Bytes data;
+		ByteWriter bw(data);
+		for (int i = 0; i < sectors; i++)
+		{
+			auto sector = getLogicalSector(dirent->start_sector + i);
+			bw.append(sector);
+		}
+
+		data.resize(dirent->length);
+		return data;
+	}
+
 	std::map<std::string, std::string> getMetadata(const Path& path)
 	{
 		std::map<std::string, std::string> attributes;

@@ -68,13 +68,19 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystem(
 	}
 }
 
-Bytes Filesystem::getLogicalSector(uint32_t number)
+Bytes Filesystem::getLogicalSector(uint32_t number, uint32_t count)
 {
-	if (number >= _locations.size())
+	if ((number+count) > _locations.size())
 		throw BadFilesystemException();
 
-	auto& i = _locations[number];
-	return _sectors->get(std::get<0>(i), std::get<1>(i), std::get<2>(i))->data;
+	Bytes data;
+	ByteWriter bw(data);
+	for (int i = 0; i < count; i++)
+	{
+		auto& it = _locations[number + i];
+		bw += _sectors->get(std::get<0>(it), std::get<1>(it), std::get<2>(it))->data;
+	}
+	return data;
 }
 
 void Filesystem::putLogicalSector(uint32_t number, const Bytes& data)

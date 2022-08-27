@@ -6,7 +6,10 @@
 /* Number of sectors on a 120kB disk. */
 static constexpr int SECTOR_COUNT = 468;
 
-/* Start sector for data (after the directory */
+/* Start sector for the FAT (after the directory) */
+static constexpr int FAT_START_SECTOR = 8;
+
+/* Start sector for data (after the FAT) */
 static constexpr int DATA_START_SECTOR = 14;
 
 /* Size of a sector */
@@ -14,6 +17,9 @@ static constexpr int SECTOR_SIZE = 256;
 
 /* Number of dirents in a directory. */
 static constexpr int DIRECTORY_SIZE = 128;
+
+/* Number of sectors in the FAT. */
+static constexpr int FAT_SECTORS = 4;
 
 /* Number of sectors in a directory. */
 static constexpr int DIRECTORY_SECTORS = 8;
@@ -68,6 +74,23 @@ public:
         return result;
     }
 
+	Bytes getFile(const Path& path)
+	{
+		auto fat = readFat();
+		auto dirent = findFile(path);
+		int sector = dirent->start_sector;
+
+		Bytes data;
+		ByteWriter bw(data);
+		while ((sector != 0) && (sector != 0xffff))
+		{
+			bw += getLogicalSector(sector - 1);
+			sector = fat.at(sector);
+		}
+
+		return data;
+	}
+
 	std::map<std::string, std::string> getMetadata(const Path& path)
 	{
 		std::map<std::string, std::string> attributes;
@@ -85,6 +108,19 @@ public:
 	}
 
 private:
+	std::vector<uint32_t> readFat()
+	{
+		Bytes bytes = getLogicalSector(FAT_START_SECTOR, FAT_SECTORS);
+		ByteReader br(bytes);
+		std::vector<uint32_t> table;
+
+		table.push_back(0xffff);
+		for (int sector = 1; sector != SECTOR_COUNT; sector++)
+			table.push_back(br.read_be16());
+
+		return table;
+	}
+
     std::vector<std::unique_ptr<Brother120Dirent>> findAllFiles()
     {
 		std::vector<std::unique_ptr<Brother120Dirent>> result;

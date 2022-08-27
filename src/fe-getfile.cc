@@ -19,18 +19,26 @@
 static FlagGroup flags({ &fileFlags });
 
 static StringFlag directory({"-p", "--path"}, "path to work on", "");
+static StringFlag output({"-o", "--output"}, "local filename to write to", "");
 
-int mainGetFileInfo(int argc, const char* argv[])
+int mainGetFile(int argc, const char* argv[])
 {
     if (argc == 1)
-        showProfiles("getfileinfo", formats);
+        showProfiles("getfile", formats);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
-	auto filesystem = createFilesystemFromConfig();
-	auto attributes = filesystem->getMetadata(Path(directory));
+	Path inputFilename(directory);
+	if (inputFilename.size() == 0)
+		Error() << "you must supply a filename to read";
 
-	for (const auto& e : attributes)
-		fmt::print("{} = {}\n", e.first, e.second);
+	std::string outputFilename = output;
+	if (outputFilename.empty())
+		outputFilename = inputFilename.back();
+	fmt::print("{}\n", outputFilename);
+		
+	auto filesystem = createFilesystemFromConfig();
+	auto data = filesystem->getFile(inputFilename);
+	data.writeToFile(outputFilename);
 
     return 0;
 }
