@@ -36,6 +36,12 @@ FlagGroup::FlagGroup()
     currentFlagGroup = this;
 }
 
+FlagGroup::FlagGroup(std::initializer_list<FlagGroup*> groups):
+	_groups(groups)
+{
+    currentFlagGroup = this;
+}
+
 void FlagGroup::addFlag(Flag* flag)
 {
     _flags.push_back(flag);

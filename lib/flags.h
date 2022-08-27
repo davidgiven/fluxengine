@@ -7,10 +7,9 @@ class ConfigProto;
 
 class FlagGroup
 {
-private:
-    FlagGroup(const FlagGroup& group);
 public:
     FlagGroup();
+    FlagGroup(std::initializer_list<FlagGroup*> groups);
 
 public:
     void parseFlags(int argc, const char* argv[],

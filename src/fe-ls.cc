@@ -11,28 +11,11 @@
 #include "fluxengine.h"
 #include "lib/vfs/sectorinterface.h"
 #include "lib/vfs/vfs.h"
+#include "src/fileutils.h"
 #include <google/protobuf/text_format.h>
 #include <fstream>
 
-static FlagGroup flags;
-
-static StringFlag image({"-i", "--image"},
-    "image to work on",
-    "",
-    [](const auto& value)
-    {
-        ImageReader::updateConfigForFilename(
-            config.mutable_image_reader(), value);
-    });
-
-static StringFlag flux({"-f", "--flux"},
-    "flux source to work on",
-    "",
-    [](const auto& value)
-    {
-		FluxSource::updateConfigForFilename(
-            config.mutable_flux_source(), value);
-    });
+static FlagGroup flags({ &fileFlags });
 
 static StringFlag directory({"-p", "--path"}, "path to list", "");
 
@@ -57,25 +40,8 @@ int mainLs(int argc, const char* argv[])
         showProfiles("ls", formats);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
-    std::shared_ptr<SectorInterface> sectorInterface;
-	if (config.has_flux_source())
-	{
-		std::shared_ptr<FluxSource> fluxSource(FluxSource::create(config.flux_source()));
-		std::shared_ptr<AbstractDecoder> decoder(AbstractDecoder::create(config.decoder()));
-		sectorInterface = SectorInterface::createFluxSectorInterface(fluxSource, decoder);
-	}
-	else
-	{
-		auto reader = ImageReader::create(config.image_reader());
-		std::shared_ptr<Image> image(std::move(reader->readImage()));
-		sectorInterface = SectorInterface::createImageSectorInterface(image);
-	}
-
-    auto filesystem =
-        Filesystem::createFilesystem(config.filesystem(), sectorInterface);
-
-	Path path(directory);
-    auto files = filesystem->list(path);
+	auto filesystem = createFilesystemFromConfig();
+    auto files = filesystem->list(Path(directory));
 
     int maxlen = 0;
     for (const auto& dirent : files)

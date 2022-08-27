@@ -14,6 +14,7 @@ FLUXENGINE_SRCS = \
 	src/fe-testbandwidth.cc \
 	src/fe-testvoltages.cc \
 	src/fe-write.cc \
+	src/fileutils.cc \
 	src/fluxengine.cc \
  
 FLUXENGINE_OBJS = $(patsubst %.cc, $(OBJDIR)/%.o, $(FLUXENGINE_SRCS))
