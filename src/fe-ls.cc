@@ -15,7 +15,7 @@
 #include <google/protobuf/text_format.h>
 #include <fstream>
 
-static FlagGroup flags({ &fileFlags });
+static FlagGroup flags({&fileFlags});
 
 static StringFlag directory({"-p", "--path"}, "path to list", "");
 
@@ -40,24 +40,31 @@ int mainLs(int argc, const char* argv[])
         showProfiles("ls", formats);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
-	auto filesystem = createFilesystemFromConfig();
-    auto files = filesystem->list(Path(directory));
-
-    int maxlen = 0;
-    for (const auto& dirent : files)
-        maxlen = std::max(maxlen, (int)dirent->filename.size());
-
-	uint32_t total = 0;
-    for (const auto& dirent : files)
+    try
     {
-        fmt::print("{} {:{}}  {:6}\n",
-            fileTypeChar(dirent->file_type),
-            dirent->filename,
-            maxlen,
-            dirent->length);
-		total += dirent->length;
+        auto filesystem = createFilesystemFromConfig();
+        auto files = filesystem->list(Path(directory));
+
+        int maxlen = 0;
+        for (const auto& dirent : files)
+            maxlen = std::max(maxlen, (int)dirent->filename.size());
+
+        uint32_t total = 0;
+        for (const auto& dirent : files)
+        {
+            fmt::print("{} {:{}}  {:6}\n",
+                fileTypeChar(dirent->file_type),
+                dirent->filename,
+                maxlen,
+                dirent->length);
+            total += dirent->length;
+        }
+        fmt::print("({} files, {} bytes)\n", files.size(), total);
     }
-    fmt::print("({} files, {} bytes)\n", files.size(), total);
+    catch (const FilesystemException& e)
+    {
+        Error() << e.message;
+    }
 
     return 0;
 }

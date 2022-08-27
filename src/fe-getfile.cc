@@ -16,7 +16,7 @@
 #include <google/protobuf/text_format.h>
 #include <fstream>
 
-static FlagGroup flags({ &fileFlags });
+static FlagGroup flags({&fileFlags});
 
 static StringFlag directory({"-p", "--path"}, "path to work on", "");
 static StringFlag output({"-o", "--output"}, "local filename to write to", "");
@@ -27,18 +27,25 @@ int mainGetFile(int argc, const char* argv[])
         showProfiles("getfile", formats);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
-	Path inputFilename(directory);
-	if (inputFilename.size() == 0)
-		Error() << "you must supply a filename to read";
+    try
+    {
+        Path inputFilename(directory);
+        if (inputFilename.size() == 0)
+            Error() << "you must supply a filename to read";
 
-	std::string outputFilename = output;
-	if (outputFilename.empty())
-		outputFilename = inputFilename.back();
-	fmt::print("{}\n", outputFilename);
-		
-	auto filesystem = createFilesystemFromConfig();
-	auto data = filesystem->getFile(inputFilename);
-	data.writeToFile(outputFilename);
+        std::string outputFilename = output;
+        if (outputFilename.empty())
+            outputFilename = inputFilename.back();
+        fmt::print("{}\n", outputFilename);
+
+        auto filesystem = createFilesystemFromConfig();
+        auto data = filesystem->getFile(inputFilename);
+        data.writeToFile(outputFilename);
+    }
+    catch (const FilesystemException& e)
+    {
+        Error() << e.message;
+    }
 
     return 0;
 }

@@ -73,3 +73,8 @@ heads {
 	end: 1
 }
 
+filesystem {
+	fatfs {}
+}
+
+

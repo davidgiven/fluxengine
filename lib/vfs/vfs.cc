@@ -30,7 +30,7 @@ Path::Path(const std::string& path)
 
 std::string Path::to_str() const
 {
-	return join(*this, "/");
+    return join(*this, "/");
 }
 
 Filesystem::Filesystem(std::shared_ptr<SectorInterface> sectors):

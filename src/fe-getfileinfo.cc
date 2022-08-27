@@ -16,7 +16,7 @@
 #include <google/protobuf/text_format.h>
 #include <fstream>
 
-static FlagGroup flags({ &fileFlags });
+static FlagGroup flags({&fileFlags});
 
 static StringFlag directory({"-p", "--path"}, "path to work on", "");
 
@@ -26,11 +26,18 @@ int mainGetFileInfo(int argc, const char* argv[])
         showProfiles("getfileinfo", formats);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
-	auto filesystem = createFilesystemFromConfig();
-	auto attributes = filesystem->getMetadata(Path(directory));
+    try
+    {
+        auto filesystem = createFilesystemFromConfig();
+        auto attributes = filesystem->getMetadata(Path(directory));
 
-	for (const auto& e : attributes)
-		fmt::print("{} = {}\n", e.first, e.second);
+        for (const auto& e : attributes)
+            fmt::print("{} = {}\n", e.first, e.second);
+    }
+    catch (const FilesystemException& e)
+    {
+        Error() << e.message;
+    }
 
     return 0;
 }

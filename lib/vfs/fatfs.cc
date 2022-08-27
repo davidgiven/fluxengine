@@ -103,12 +103,12 @@ public:
 
         while (!f_eof(&fil))
         {
-			uint8_t buffer[4096];
-			UINT done;
-			res = f_read(&fil, buffer, sizeof(buffer), &done);
-			throwError(res);
+            uint8_t buffer[4096];
+            UINT done;
+            res = f_read(&fil, buffer, sizeof(buffer), &done);
+            throwError(res);
 
-			bw += Bytes(buffer, done);
+            bw += Bytes(buffer, done);
         }
 
         f_close(&fil);
@@ -167,7 +167,8 @@ private:
                 throw BadFilesystemException();
 
             default:
-                throw FilesystemException();
+                throw FilesystemException(
+                    fmt::format("unknown fatfs error {}", res));
         }
     }
 
