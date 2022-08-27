@@ -14,6 +14,7 @@ OBJS += $(OBJDIR)/tests/$1.o
 $(call use-library, $(OBJDIR)/tests/$1.exe, $(OBJDIR)/tests/$1.o, LIBFLUXENGINE)
 $(call use-library, $(OBJDIR)/tests/$1.exe, $(OBJDIR)/tests/$1.o, LIBARCH)
 $(call use-library, $(OBJDIR)/tests/$1.exe, $(OBJDIR)/tests/$1.o, PROTO)
+$(call use-library, $(OBJDIR)/tests/$1.exe, $(OBJDIR)/tests/$1.o, FATFS)
 
 endef
 
@@ -32,6 +33,7 @@ $(call declare-test,kryoflux)
 $(call declare-test,ldbs)
 $(call declare-test,proto)
 $(call declare-test,utils)
+$(call declare-test,vfs)
 
 $(call use-library, $(OBJDIR)/tests/agg.exe, $(OBJDIR)/tests/agg.o, AGG)
 $(call use-library, $(OBJDIR)/tests/agg.exe, $(OBJDIR)/tests/agg.o, STB)

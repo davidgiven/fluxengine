@@ -120,6 +120,7 @@ PROTOS = \
 	lib/layout.proto \
 	lib/mapper.proto \
 	lib/usb/usb.proto \
+	lib/vfs/vfs.proto \
 	tests/testproto.proto \
 
 PROTO_HDRS = $(patsubst %.proto, $(OBJDIR)/%.pb.h, $(PROTOS))
@@ -137,6 +138,7 @@ include dep/agg/build.mk
 include dep/libusbp/build.mk
 include dep/stb/build.mk
 include dep/emu/build.mk
+include dep/fatfs/build.mk
 include scripts/build.mk
 
 include lib/build.mk

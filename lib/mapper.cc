@@ -148,6 +148,30 @@ std::set<Location> Mapper::computeLocations()
     return locations;
 }
 
+Location Mapper::computeLocationFor(unsigned desiredTrack, unsigned desiredHead)
+{
+    unsigned track_step = getTrackStep();
+    for (unsigned logicalTrack : iterate(config.tracks()))
+    {
+        for (unsigned head : iterate(config.heads()))
+        {
+            if ((logicalTrack == desiredTrack) && (head == desiredHead))
+            {
+                unsigned physicalTrack =
+                    config.drive().head_bias() + logicalTrack * track_step;
+
+                return {.physicalTrack = physicalTrack,
+                    .logicalTrack = logicalTrack,
+                    .head = head,
+                    .groupSize = track_step};
+            }
+        }
+    }
+
+    Error() << fmt::format(
+        "track {}.{} is not part of the image", desiredTrack, desiredHead);
+}
+
 nanoseconds_t Mapper::calculatePhysicalClockPeriod(
     nanoseconds_t targetClockPeriod, nanoseconds_t targetRotationalPeriod)
 {
@@ -157,5 +181,6 @@ nanoseconds_t Mapper::calculatePhysicalClockPeriod(
         Error() << "you must set --drive.rotational_period_ms as it can't be "
                    "autodetected";
 
-    return targetClockPeriod * (currentRotationalPeriod / targetRotationalPeriod);
+    return targetClockPeriod *
+           (currentRotationalPeriod / targetRotationalPeriod);
 }

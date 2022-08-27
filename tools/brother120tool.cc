@@ -366,7 +366,7 @@ void insertFile(const std::string& filename)
 	uint16_t checksum = 0;
     while (!inputFile.eof())
     {
-        uint8_t buffer[SECTOR_SIZE];
+        uint8_t buffer[SECTOR_SIZE] = {};
         inputFile.read((char*) buffer, sizeof(buffer));
 		for (int i=0; i<inputFile.gcount(); i++)
 			checksum += buffer[i];

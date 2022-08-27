@@ -1,0 +1,27 @@
+syntax = "proto2";
+
+import "lib/common.proto";
+
+message AcornDfsProto {
+	enum Flavour {
+		UNDEFINED = 0;
+		ACORN_DFS = 1;
+	}
+
+	optional Flavour flavour = 1 [default = ACORN_DFS, (help) = "which flavour of DFS to implement"];
+}
+
+message Brother120FsProto {
+}
+
+message FatFsProto {
+}
+
+message FilesystemProto {
+	oneof filesystem {
+		AcornDfsProto acorndfs = 1;
+		Brother120FsProto brother120 = 2;
+		FatFsProto fatfs = 3;
+	}
+}
+

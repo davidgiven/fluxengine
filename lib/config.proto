@@ -7,6 +7,7 @@ import "lib/imagewriter/imagewriter.proto";
 import "lib/fluxsource/fluxsource.proto";
 import "lib/fluxsink/fluxsink.proto";
 import "lib/usb/usb.proto";
+import "lib/vfs/vfs.proto";
 import "lib/drive.proto";
 import "lib/mapper.proto";
 import "lib/common.proto";
@@ -18,7 +19,7 @@ message ConfigProto {
 	optional bool is_extension = 13;
 	repeated string include = 19;
 
-	optional LayoutProto layout = 17;
+	optional LayoutProto layout = 18;
 
 	optional ImageReaderProto image_reader = 12;
 	optional ImageWriterProto image_writer = 9;
@@ -36,5 +37,6 @@ message ConfigProto {
 	optional int32 tpi = 16 [ (help) = "TPI of image; if 0, use TPI of drive" ];
 
 	optional SectorMappingProto sector_mapping = 14;
+	optional FilesystemProto filesystem = 17;
 }
 

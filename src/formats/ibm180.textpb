@@ -68,3 +68,9 @@ heads {
 }
 
 tpi: 48
+
+filesystem {
+	fatfs {}
+}
+
+
