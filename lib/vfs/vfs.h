@@ -126,6 +126,16 @@ public:
         throw UnimplementedFilesystemException();
     }
 
+    virtual void createDirectory(const Path& path)
+    {
+        throw UnimplementedFilesystemException();
+    }
+
+    virtual void deleteFile(const Path& path)
+    {
+        throw UnimplementedFilesystemException();
+    }
+
 protected:
     Filesystem(std::shared_ptr<SectorInterface> sectors);
 
