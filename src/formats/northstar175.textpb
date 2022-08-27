@@ -1,36 +1,12 @@
 comment: 'Northstar 175kB 5.25" 35-track SSDD hard-sectored'
 
-image_reader {
-	filename: "northstar.nsi"
-	nsi {}
-}
+include: '_northstar'
 
-image_writer {
-	filename: "northstar.nsi"
-	nsi {}
+layout {
+	tracks: 40
+	sides: 1
+	trackdata {
+		sector_size: 512
+	}
 }
-
-drive {
-	hard_sector_count: 10
-	sync_with_index: true
-}
-
-encoder {
-	northstar {}
-}
-
-decoder {
-	northstar {}
-}
-
-tracks {
-	start: 0
-	end: 39
-}
-
-heads {
-	start: 0
-	end: 0
-}
-
 

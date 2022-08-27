@@ -9,6 +9,18 @@ decoder {
 	fb100 {}
 }
 
+layout {
+	tracks: 40
+	sides: 1
+	trackdata {
+		sector_size: 1292  # 1280 + 12
+		physical {
+			sector: 0
+			count: 2
+		}
+	}
+}
+
 tracks {
 	start: 0
 	end: 79

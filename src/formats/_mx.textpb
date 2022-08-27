@@ -1,0 +1,21 @@
+comment: 'DVK MX common settings'
+
+image_writer {
+	filename: "mx.img"
+	img {}
+}
+
+layout {
+	trackdata {
+		sector_size: 256
+		physical {
+			sector: 0
+			count: 11
+		}
+	}
+}
+
+decoder {
+	mx {}
+}
+

@@ -19,11 +19,12 @@ Reading discs
 Just do:
 
 ```
-fluxengine read ampro
+fluxengine read ampro400
 ```
 
-You should end up with an `ampro.img` which is 409600 or 819200 bytes long.
-This is an alias for `fluxengine read ibm` with preconfigured parameters.  You
+You should end up with an `ampro.img` which is 409600. If you have a
+double-sided disk, use `ampro800`, which will give you a file819200 bytes long.
+These is an alias for `fluxengine read ibm` with preconfigured parameters.  You
 can pass this straight into [cpmtools](http://www.moria.de/~michael/cpmtools/):
 
 ```

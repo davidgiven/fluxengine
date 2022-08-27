@@ -6,9 +6,13 @@ image_writer {
 }
 
 layout {
+	tracks: 80
+	sides: 2
 	trackdata {
-		sector_range {
-			start_sector: 0
+		sector_size: 256
+		physical {
+			sector: 0
+			count: 21
 		}
 	}
 }

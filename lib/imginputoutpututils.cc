@@ -39,9 +39,8 @@ std::vector<std::pair<int, int>> getTrackOrdering(
     return ordering;
 }
 
-LayoutProto::TrackdataProto getTrackFormat(const LayoutProto& config,
-    unsigned track,
-    unsigned side)
+LayoutProto::TrackdataProto getTrackFormat(
+    const LayoutProto& config, unsigned track, unsigned side)
 {
     LayoutProto::TrackdataProto trackdata;
 
@@ -58,35 +57,40 @@ LayoutProto::TrackdataProto getTrackFormat(const LayoutProto& config,
         trackdata.MergeFrom(f);
     }
 
-	return trackdata;
+    return trackdata;
 }
 
 std::vector<unsigned> getTrackSectors(
     const LayoutProto::TrackdataProto& trackdata, unsigned numSectors)
 {
+    auto& physical = trackdata.physical();
+
     std::vector<unsigned> sectors;
-    switch (trackdata.sectors_oneof_case())
+    if (physical.has_count())
     {
-        case LayoutProto::TrackdataProto::SectorsOneofCase::kSectors:
-        {
-            for (int sectorId : trackdata.sectors().sector())
-                sectors.push_back(sectorId);
-            break;
-        }
+        if (physical.sector_size() != 1)
+            Error() << "if you use a sector count, you must specify exactly "
+                       "one start sector";
 
-        case LayoutProto::TrackdataProto::SectorsOneofCase::
-            kSectorRange:
-        {
-            int sectorId = trackdata.sector_range().start_sector();
-			if (trackdata.sector_range().has_sector_count())
-				numSectors = trackdata.sector_range().sector_count();
-            for (int i = 0; i < numSectors; i++)
-                sectors.push_back(sectorId + i);
-            break;
-        }
-
-        default:
-            break;
+        int startSector = physical.sector(0);
+        for (int i = 0; i < physical.count(); i++)
+            sectors.push_back(startSector + i);
     }
+    else if (physical.guess_count())
+    {
+        if (physical.sector_size() != 1)
+            Error() << "if you are guessing the number of sectors, you must "
+                       "specify exactly one start sector";
+
+        int startSector = physical.sector(0);
+        for (int i = 0; i < numSectors; i++)
+            sectors.push_back(startSector + i);
+    }
+    else if (trackdata.sector_size() > 0)
+    {
+        for (int sectorId : physical.sector())
+            sectors.push_back(sectorId);
+    }
+
     return sectors;
 }

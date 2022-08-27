@@ -15,64 +15,64 @@ layout {
 	sides: 1
 	trackdata {
 		sector_size: 512
-		sector_range {
-			start_sector: 0
+		physical {
+			sector: 0
 		}
 	}
 	trackdata {
 		track: 0
 		up_to_track: 3
-		sector_range {
-			sector_count: 19
+		physical {
+			count: 19
 		}
 	}
 	trackdata {
 		track: 4
 		up_to_track: 15
-		sector_range {
-			sector_count: 18
+		physical {
+			count: 18
 		}
 	}
 	trackdata {
 		track: 16
 		up_to_track: 26
-		sector_range {
-			sector_count: 17
+		physical {
+			count: 17
 		}
 	}
 	trackdata {
 		track: 27
 		up_to_track: 37
-		sector_range {
-			sector_count: 16
+		physical {
+			count: 16
 		}
 	}
 	trackdata {
 		track: 38
 		up_to_track: 47
-		sector_range {
-			sector_count: 15
+		physical {
+			count: 15
 		}
 	}
 	trackdata {
 		track: 48
 		up_to_track: 59
-		sector_range {
-			sector_count: 14
+		physical {
+			count: 14
 		}
 	}
 	trackdata {
 		track: 60
 		up_to_track: 70
-		sector_range {
-			sector_count: 13
+		physical {
+			count: 13
 		}
 	}
 	trackdata {
 		track: 71
 		up_to_track: 79
-		sector_range {
-			sector_count: 12
+		physical {
+			count: 12
 		}
 	}
 }

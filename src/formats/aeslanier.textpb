@@ -9,6 +9,18 @@ decoder {
 	aeslanier {}
 }
 
+layout {
+	tracks: 77
+	sides: 1
+	trackdata {
+		sector_size: 256
+		physical {
+			sector: 0
+			count: 32
+		}
+	}
+}
+
 tracks {
 	start: 0
 	end: 76

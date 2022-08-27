@@ -10,9 +10,23 @@ layout {
 	sides: 1
 	trackdata {
 		sector_size: 256
-		sector_range {
-			start_sector: 0
-			sector_count: 16
+		physical {
+			sector: 0
+			sector: 4
+			sector: 8
+			sector: 12
+			sector: 1
+			sector: 5
+			sector: 9
+			sector: 13
+			sector: 2
+			sector: 6
+			sector: 10
+			sector: 14
+			sector: 3
+			sector: 7
+			sector: 11
+			sector: 15
 		}
 	}
 }
