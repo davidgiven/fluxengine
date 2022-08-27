@@ -4,8 +4,9 @@
 #include "sector.h"
 #include "proto.h"
 #include "readerwriter.h"
-#include "fluxsource/fluxsource.h"
-#include "imagereader/imagereader.h"
+#include "lib/decoders/decoders.h"
+#include "lib/fluxsource/fluxsource.h"
+#include "lib/imagereader/imagereader.h"
 #include "fmt/format.h"
 #include "fluxengine.h"
 #include "lib/vfs/sectorinterface.h"
@@ -57,10 +58,19 @@ int mainLs(int argc, const char* argv[])
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
     std::shared_ptr<SectorInterface> sectorInterface;
+	if (config.has_flux_source())
+	{
+		std::shared_ptr<FluxSource> fluxSource(FluxSource::create(config.flux_source()));
+		std::shared_ptr<AbstractDecoder> decoder(AbstractDecoder::create(config.decoder()));
+		sectorInterface = SectorInterface::createFluxSectorInterface(fluxSource, decoder);
+	}
+	else
+	{
+		auto reader = ImageReader::create(config.image_reader());
+		std::shared_ptr<Image> image(std::move(reader->readImage()));
+		sectorInterface = SectorInterface::createImageSectorInterface(image);
+	}
 
-    auto reader = ImageReader::create(config.image_reader());
-    std::shared_ptr<Image> image(std::move(reader->readImage()));
-    sectorInterface = SectorInterface::createImageSectorInterface(image);
     auto filesystem =
         Filesystem::createFilesystem(config.filesystem(), sectorInterface);
 
