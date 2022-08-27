@@ -56,6 +56,7 @@ public:
             Logger() << "NFD: overriding configured format";
 
         auto ibm = config.mutable_encoder()->mutable_ibm();
+		auto layout = config.mutable_layout();
         config.mutable_tracks()->set_end(0);
         Logger() << "NFD: HD 1.2MB mode";
         if (!config.drive().has_drive())
@@ -67,7 +68,9 @@ public:
             auto trackdata = ibm->add_trackdata();
             trackdata->set_target_clock_period_us(2);
             trackdata->set_target_rotational_period_ms(167);
-            auto sectors = trackdata->mutable_sectors();
+
+			auto layoutdata = layout->add_layoutdata();
+            auto physical = layoutdata->mutable_physical();
             int currentTrackTrack = -1;
             int currentTrackHead = -1;
             int trackSectorSize = -1;
@@ -112,7 +115,9 @@ public:
                     // per-track data
                     trackdata->set_track(track);
                     trackdata->set_head(head);
-                    trackdata->set_sector_size(sectorSize);
+					layoutdata->set_track(track);
+					layoutdata->set_side(head);
+                    layoutdata->set_sector_size(sectorSize);
                     trackdata->set_use_fm(!mfm);
                     if (!mfm)
                     {
@@ -148,7 +153,7 @@ public:
                 sector->logicalSector = sectorId;
                 sector->data = data;
 
-                sectors->add_sector(sectorId);
+                physical->add_sector(sectorId);
                 if (config.tracks().end() < track)
                     config.mutable_tracks()->set_end(track);
             }

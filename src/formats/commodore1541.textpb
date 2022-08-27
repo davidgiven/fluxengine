@@ -10,6 +10,45 @@ image_writer {
 	d64 {}
 }
 
+layout {
+	tracks: 40
+	sides: 1
+	layoutdata {
+		sector_size: 256
+		physical {
+			sector: 0
+		}
+	}
+	layoutdata {
+		track: 0
+		up_to_track: 16
+		physical {
+			count: 21
+		}
+	}
+	layoutdata {
+		track: 17
+		up_to_track: 23
+		physical {
+			count: 19
+		}
+	}
+	layoutdata {
+		track: 24
+		up_to_track: 29
+		physical {
+			count: 18
+		}
+	}
+	layoutdata {
+		track: 30
+		up_to_track: 39
+		physical {
+			count: 17
+		}
+	}
+}
+
 encoder {
 	c64 {}
 }

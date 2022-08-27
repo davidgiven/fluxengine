@@ -82,6 +82,7 @@ public:
                 config.set_tpi(48);
         }
 
+		auto layout = config.mutable_layout();
         std::unique_ptr<Image> image(new Image);
         for (int track = 0; track < trackTableSize / 4; track++)
         {
@@ -99,7 +100,9 @@ public:
             auto trackdata = ibm->add_trackdata();
             trackdata->set_target_clock_period_us(1e3 / clockRate);
             trackdata->set_target_rotational_period_ms(167);
-            auto sectors = trackdata->mutable_sectors();
+
+			auto layoutdata = layout->add_layoutdata();
+            auto physical = layoutdata->mutable_physical();
 
             for (int sectorInTrack = 0; sectorInTrack < currentSectorsInTrack;
                  sectorInTrack++)
@@ -149,9 +152,13 @@ public:
                     trackSectorSize = sectorSize;
                     // this is the first sector we've read, use it settings for
                     // per-track data
+
+                    layoutdata->set_track(track);
+                    layoutdata->set_side(head);
+                    layoutdata->set_sector_size(sectorSize);
+
                     trackdata->set_track(track);
                     trackdata->set_head(head);
-                    trackdata->set_sector_size(sectorSize);
                     trackdata->set_use_fm(fm);
                     if (fm)
                     {
@@ -196,7 +203,7 @@ public:
                 sector->logicalSector = sectorId;
                 sector->data = data;
 
-                sectors->add_sector(sectorId);
+                physical->add_sector(sectorId);
             }
 
             if (mediaFlag != 0x20)
@@ -212,6 +219,9 @@ public:
         Logger() << fmt::format("D88: read {} tracks, {} sides",
             geometry.numTracks,
             geometry.numSides);
+
+		layout->set_tracks(geometry.numTracks);
+		layout->set_sides(geometry.numSides);
 
         if (!config.has_heads())
         {

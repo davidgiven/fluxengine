@@ -8,7 +8,7 @@
 #include "lib/config.pb.h"
 #include "lib/layout.pb.h"
 #include "lib/proto.h"
-#include "imginputoutpututils.h"
+#include "lib/layout.h"
 #include "fmt/format.h"
 #include <algorithm>
 #include <iostream>
@@ -32,7 +32,7 @@ public:
                        "tracks, sides and trackdata fields in the layout?";
 
         std::unique_ptr<Image> image(new Image);
-        for (const auto& p : getTrackOrdering(layout))
+        for (const auto& p : Layout::getTrackOrdering())
         {
             int track = p.first;
             int side = p.second;
@@ -40,11 +40,10 @@ public:
             if (inputFile.eof())
                 break;
 
-            auto trackdata = getTrackFormat(layout, track, side);
-
-            for (int sectorId : getTrackSectors(trackdata))
+            auto layoutdata = Layout::getLayoutOfTrack(track, side);
+            for (int sectorId : Layout::getSectorsInTrack(layoutdata))
             {
-                Bytes data(trackdata.sector_size());
+                Bytes data(layoutdata.sector_size());
                 inputFile.read((char*)data.begin(), data.size());
 
                 const auto& sector = image->put(track, side, sectorId);

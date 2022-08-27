@@ -50,7 +50,7 @@ LIBFLUXENGINE_SRCS = \
 	lib/imagewriter/ldbsimagewriter.cc \
 	lib/imagewriter/nsiimagewriter.cc \
 	lib/imagewriter/rawimagewriter.cc \
-	lib/imginputoutpututils.cc \
+	lib/layout.cc \
 	lib/ldbs.cc \
 	lib/logger.cc \
 	lib/mapper.cc \

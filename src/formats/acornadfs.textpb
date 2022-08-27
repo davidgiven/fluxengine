@@ -6,9 +6,10 @@ image_writer {
 }
 
 layout {
-	trackdata {
-		sector_range {
-			start_sector: 0
+	layoutdata {
+		physical {
+			sector: 0
+			guess_count: true
 		}
 	}
 }

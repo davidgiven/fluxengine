@@ -13,45 +13,45 @@ image_writer {
 layout {
 	tracks: 80
 	sides: 1
-	trackdata {
+	layoutdata {
 		sector_size: 512
-		sector_range {
-			start_sector: 0
+		physical {
+			sector: 0
 		}
 	}
-	trackdata {
+	layoutdata {
 		track: 0
 		up_to_track: 15
-		sector_range {
-			sector_count: 12
+		physical {
+			count: 12
 		}
 	}
-	trackdata {
+	layoutdata {
 		track: 16
 		up_to_track: 31
-		sector_range {
-			sector_count: 11
+		physical {
+			count: 11
 		}
 	}
-	trackdata {
+	layoutdata {
 		track: 32
 		up_to_track: 47
-		sector_range {
-			sector_count: 10
+		physical {
+			count: 10
 		}
 	}
-	trackdata {
+	layoutdata {
 		track: 48
 		up_to_track: 63
-		sector_range {
-			sector_count: 9
+		physical {
+			count: 9
 		}
 	}
-	trackdata {
+	layoutdata {
 		track: 64
 		up_to_track: 79
-		sector_range {
-			sector_count: 8
+		physical {
+			count: 8
 		}
 	}
 }

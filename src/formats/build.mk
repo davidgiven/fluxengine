@@ -1,12 +1,15 @@
 FORMATS = \
 	_micropolis \
+	_northstar \
+	_mx \
 	40track_drive \
 	acornadfs \
 	acorndfs \
 	aeslanier \
 	agat840 \
 	amiga \
-	ampro \
+	ampro400 \
+	ampro800 \
 	apple2_drive \
 	apple2 \
 	appledos \
@@ -41,7 +44,10 @@ FORMATS = \
 	micropolis287 \
 	micropolis315 \
 	micropolis630 \
-	mx \
+	mx110 \
+	mx220_ds \
+	mx220_ss \
+	mx440 \
 	n88basic \
 	northstar175 \
 	northstar350 \

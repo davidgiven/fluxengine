@@ -1,0 +1,21 @@
+comment: 'DVK MX 110kB 5.25" (ro)'
+
+include: '_mx'
+
+layout {
+	tracks: 40
+	sides: 1
+}
+
+tracks {
+	start: 0
+	end: 39
+}
+
+heads {
+	start: 0
+	end: 0
+}
+
+tpi: 48
+

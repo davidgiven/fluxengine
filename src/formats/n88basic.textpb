@@ -17,28 +17,23 @@ image_writer {
 layout {
 	tracks: 77
 	sides: 2
-	trackdata {
+	layoutdata {
 		sector_size: 256
-		sector_range {
-			start_sector: 1
-			sector_count: 26
+		physical {
+			sector: 1
+			count: 26
 		}
 	}
-	trackdata {
+	layoutdata {
 		track: 0
 		side: 0
 		sector_size: 128
-		sector_range {
-			start_sector: 1
-			sector_count: 26
-		}
 	}
 }
 
 encoder {
 	ibm {
         trackdata {
-            sector_size: 256
 			target_rotational_period_ms: 167
 			target_clock_period_us: 2
             gap0: 0x36
@@ -48,39 +43,11 @@ encoder {
             idam_byte: 0x5554
             dam_byte: 0x5545
             gap_fill_byte: 0x9254
-			sectors {
-				sector: 1
-				sector: 2
-				sector: 3
-				sector: 4
-				sector: 5
-				sector: 6
-				sector: 7
-				sector: 8
-                sector: 9
-                sector: 10
-                sector: 11
-                sector: 12
-                sector: 13
-                sector: 14
-                sector: 15
-                sector: 16
-                sector: 17
-                sector: 18
-                sector: 19
-                sector: 20
-                sector: 21
-                sector: 22
-                sector: 23
-                sector: 24
-                sector: 25
-                sector: 26
-			}
 		}
         trackdata {
-            sector_size: 128
-			target_rotational_period_ms: 167
-			target_clock_period_us: 2
+            track: 0
+            head: 0
+
             use_fm: true
             gap0: 0x10
             gap2: 0x09
@@ -88,21 +55,12 @@ encoder {
             idam_byte: 0xf57e
             dam_byte: 0xf56f
             gap_fill_byte: 0xffff
-            track: 0
-            head: 0
 		}
 	}
 }
 
 decoder {
-	ibm {
-		trackdata {
-			sector_range {
-				min_sector: 1
-				max_sector: 26
-			}
-		}
-	}
+	ibm {}
 }
 
 tracks {

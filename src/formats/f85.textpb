@@ -9,9 +9,21 @@ decoder {
 	f85 {}
 }
 
+layout {
+	tracks: 77
+	sides: 1
+	layoutdata {
+		sector_size: 512
+		physical {
+			sector: 0
+			count: 12
+		}
+	}
+}
+
 tracks {
 	start: 0
-	end: 79
+	end: 76
 }
 
 heads {

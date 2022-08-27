@@ -11,27 +11,24 @@ message LayoutProto {
 
 	message SectorsProto {
 		repeated int32 sector = 1 [(help) = "sector ID"];
+		oneof count_oneof {
+			int32 count = 2 [(help) = "if present, add this many consecutive sectors"];
+			bool guess_count = 3 [(help) = "if present, guess the number of sectors"];
+		}
 	}
 
-	message SectorRangeProto {
-		optional int32 start_sector = 1 [default=0, (help) = "first sector ID"];
-		optional int32 sector_count = 2 [default=1, (help) = "total number of sectors"];
-	}
-
-	message TrackdataProto {
+	message LayoutdataProto {
 		optional int32 track = 1       [(help) = "if present, this format only applies to this track"];
 		optional int32 up_to_track = 5 [(help) = "if present, forms a range with track"];
 		optional int32 side = 2        [(help) = "if present, this format only applies to this side"];
 
 		optional int32 sector_size = 3 [default=512, (help) = "number of bytes per sector"];
 
-		oneof sectors_oneof {
-			SectorsProto sectors = 4 [(help) = "use a list of sector IDs"];
-			SectorRangeProto sector_range = 6 [(help) = "use a range of contiguous IDs"];
-		}
+		optional SectorsProto physical = 4 [(help) = "physical order of sectors on disk"];
+		optional SectorsProto logical = 6 [(help) = "logical order of sectors in filesystem"];
 	}
 
-	repeated TrackdataProto trackdata = 1 [(help) = "per-track format information (repeatable)"];
+	repeated LayoutdataProto layoutdata = 1 [(help) = "per-track layout information (repeatable)"];
 	optional int32 tracks = 2 [default=0, (help) = "number of tracks in image"];
 	optional int32 sides = 3 [default=0, (help) = "number of sides in image"];
 	optional Order order = 4 [default=CHS, (help) = "the order of sectors in the filesystem"];

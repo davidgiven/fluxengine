@@ -13,138 +13,138 @@ image_writer {
 layout {
 	tracks: 80
 	sides: 2
-	trackdata {
+	layoutdata {
 		sector_size: 512
-		sector_range {
-			start_sector: 0
+		physical {
+			sector: 0
 		}
 	}
-	trackdata {
+	layoutdata {
 		side: 0
 		track: 0
 		up_to_track: 3
-		sector_range {
-			sector_count: 19
+		physical {
+			count: 19
 		}
 	}
-	trackdata {
+	layoutdata {
 		side: 0
 		track: 4
 		up_to_track: 15
-		sector_range {
-			sector_count: 18
+		physical {
+			count: 18
 		}
 	}
-	trackdata {
+	layoutdata {
 		side: 0
 		track: 16
 		up_to_track: 26
-		sector_range {
-			sector_count: 17
+		physical {
+			count: 17
 		}
 	}
-	trackdata {
+	layoutdata {
 		side: 0
 		track: 27
 		up_to_track: 37
-		sector_range {
-			sector_count: 16
+		physical {
+			count: 16
 		}
 	}
-	trackdata {
+	layoutdata {
 		side: 0
 		track: 38
 		up_to_track: 47
-		sector_range {
-			sector_count: 15
+		physical {
+			count: 15
 		}
 	}
-	trackdata {
+	layoutdata {
 		side: 0
 		track: 48
 		up_to_track: 59
-		sector_range {
-			sector_count: 14
+		physical {
+			count: 14
 		}
 	}
-	trackdata {
+	layoutdata {
 		side: 0
 		track: 60
 		up_to_track: 70
-		sector_range {
-			sector_count: 13
+		physical {
+			count: 13
 		}
 	}
-	trackdata {
+	layoutdata {
 		side: 0
 		track: 71
 		up_to_track: 79
-		sector_range {
-			sector_count: 12
+		physical {
+			count: 12
 		}
 	}
-	trackdata {
+	layoutdata {
 		side: 1
 		track: 0
 		up_to_track: 7
-		sector_range {
-			sector_count: 18
+		physical {
+			count: 18
 		}
 	}
-	trackdata {
+	layoutdata {
 		side: 1
 		track: 8
 		up_to_track: 18
-		sector_range {
-			sector_count: 17
+		physical {
+			count: 17
 		}
 	}
-	trackdata {
+	layoutdata {
 		side: 1
 		track: 19
 		up_to_track: 29
-		sector_range {
-			sector_count: 16
+		physical {
+			count: 16
 		}
 	}
-	trackdata {
+	layoutdata {
 		side: 1
 		track: 30
 		up_to_track: 39
-		sector_range {
-			sector_count: 15
+		physical {
+			count: 15
 		}
 	}
-	trackdata {
+	layoutdata {
 		side: 1
 		track: 40
 		up_to_track: 51
-		sector_range {
-			sector_count: 14
+		physical {
+			count: 14
 		}
 	}
-	trackdata {
+	layoutdata {
 		side: 1
 		track: 52
 		up_to_track: 62
-		sector_range {
-			sector_count: 13
+		physical {
+			count: 13
 		}
 	}
-	trackdata {
+	layoutdata {
 		side: 1
 		track: 63
 		up_to_track: 74
-		sector_range {
-			sector_count: 12
+		physical {
+			count: 12
 		}
 	}
-	trackdata {
+	layoutdata {
 		side: 1
 		track: 75
 		up_to_track: 79
-		sector_range {
-			sector_count: 11
+		physical {
+			count: 11
 		}
 	}
 }

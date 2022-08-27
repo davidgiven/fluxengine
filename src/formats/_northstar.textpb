@@ -1,0 +1,35 @@
+comment: 'Northstar generic settings'
+is_extension: true
+
+image_reader {
+	filename: "northstar.nsi"
+	nsi {}
+}
+
+image_writer {
+	filename: "northstar.nsi"
+	nsi {}
+}
+
+layout {
+	layoutdata {
+		physical {
+			sector: 0
+			count: 10
+		}
+	}
+}
+
+drive {
+	hard_sector_count: 10
+	sync_with_index: true
+}
+
+encoder {
+	northstar {}
+}
+
+decoder {
+	northstar {}
+}
+
