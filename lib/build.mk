@@ -67,6 +67,7 @@ LIBFLUXENGINE_SRCS = \
 	lib/vfs/brother120fs.cc \
 	lib/vfs/acorndfs.cc \
 	lib/vfs/vfs.cc \
+	lib/vfs/fatfs.cc \
 	lib/vfs/fluxsectorinterface.cc \
 	lib/vfs/imagesectorinterface.cc \
 
@@ -82,5 +83,6 @@ $(LIBFLUXENGINE_LIB): $(LIBFLUXENGINE_OBJS)
 $(LIBFLUXENGINE_OBJS): CFLAGS += $(LIBARCH_CFLAGS)
 $(LIBFLUXENGINE_OBJS): CFLAGS += $(LIBUSBP_CFLAGS)
 $(LIBFLUXENGINE_OBJS): CFLAGS += $(PROTO_CFLAGS)
+$(LIBFLUXENGINE_OBJS): CFLAGS += $(FATFS_CFLAGS)
 
 $(call use-pkgconfig, $(LIBFLUXENGINE_LIB), $(LIBFLUXENGINE_OBJS), fmt)

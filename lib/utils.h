@@ -3,6 +3,7 @@
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0]))
 
+extern std::string join(const std::vector<std::string>& values, const std::string& separator);
 extern bool beginsWith(const std::string& value, const std::string& beginning);
 extern bool endsWith(const std::string& value, const std::string& ending);
 extern std::string leftTrimWhitespace(std::string value);

@@ -45,6 +45,9 @@ class Path : public std::vector<std::string>
 public:
 	Path() {}
 	Path(const std::string& text);
+
+public:
+	std::string to_str() const;
 };
 
 class Filesystem
@@ -77,6 +80,9 @@ protected:
 	Bytes getLogicalSector(uint32_t number, uint32_t count = 1);
 	void putLogicalSector(uint32_t number, const Bytes& data);
 
+	unsigned getLogicalSectorCount();
+	unsigned getLogicalSectorSize();
+
 private:
 	typedef std::tuple<unsigned, unsigned, unsigned> location_t;
 	std::vector<location_t> _locations;
@@ -86,6 +92,8 @@ public:
     static std::unique_ptr<Filesystem> createBrother120Filesystem(
         const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
     static std::unique_ptr<Filesystem> createAcornDfsFilesystem(
+        const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
+    static std::unique_ptr<Filesystem> createFatFsFilesystem(
         const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
 
 	static std::unique_ptr<Filesystem> createFilesystem(

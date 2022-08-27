@@ -14,10 +14,14 @@ message AcornDfsProto {
 message Brother120FsProto {
 }
 
+message FatFsProto {
+}
+
 message FilesystemProto {
 	oneof filesystem {
 		AcornDfsProto acorndfs = 1;
 		Brother120FsProto brother120 = 2;
+		FatFsProto fatfs = 3;
 	}
 }
 

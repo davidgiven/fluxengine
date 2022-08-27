@@ -11,6 +11,26 @@ void ErrorException::print() const
     std::cerr << message << '\n';
 }
 
+std::string join(
+    const std::vector<std::string>& values, const std::string& separator)
+{
+    switch (values.size())
+    {
+        case 0:
+            return "";
+
+        case 1:
+            return values[0];
+
+        default:
+            std::stringstream ss;
+            ss << values[0];
+            for (int i = 1; i < values.size(); i++)
+                ss << separator << values[i];
+            return ss.str();
+    }
+}
+
 bool beginsWith(const std::string& value, const std::string& ending)
 {
     if (ending.size() > value.size())

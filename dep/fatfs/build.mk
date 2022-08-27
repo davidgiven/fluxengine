@@ -7,6 +7,6 @@ FATFS_OBJS = $(patsubst %.c, $(OBJDIR)/%.o, $(FATFS_SRCS))
 $(FATFS_OBJS): CFLAGS += -Idep/fatfs/source
 FATFS_LIB = $(OBJDIR)/libfatfs.a
 $(FATFS_LIB): $(FATFS_OBJS)
-FATFS_CFLAGS =
+FATFS_CFLAGS = -Idep/fatfs/source
 FATFS_LDFLAGS = $(FATFS_LIB)
 

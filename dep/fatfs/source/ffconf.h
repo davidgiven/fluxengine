@@ -162,6 +162,10 @@
 */
 
 
+#define FF_ALLOW_MIXED_CASE 1
+/* This option doesn't uppercase filenames before processing, in case the disk has
+ * low case filenames in it. */
+
 /*---------------------------------------------------------------------------/
 / Drive/Volume Configurations
 /---------------------------------------------------------------------------*/

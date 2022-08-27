@@ -44,3 +44,7 @@ heads {
 	end: 0
 }
 
+filesystem {
+	fatfs {}
+}
+

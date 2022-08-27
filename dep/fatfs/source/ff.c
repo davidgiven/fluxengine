@@ -2979,7 +2979,9 @@ static FRESULT create_name (	/* FR_OK: successful, FR_INVALID_NAME: could not cr
 			sfn[i++] = d;
 		} else {						/* SBC */
 			if (strchr("*+,:;<=>[]|\"\?\x7F", (int)c)) return FR_INVALID_NAME;	/* Reject illegal chrs for SFN */
+#if FF_ALLOW_MIXED_CASE == 0
 			if (IsLower(c)) c -= 0x20;	/* To upper */
+#endif
 			sfn[i++] = c;
 		}
 	}
