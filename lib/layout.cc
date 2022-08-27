@@ -5,7 +5,7 @@
 std::vector<std::pair<int, int>> Layout::getTrackOrdering(
     unsigned guessedTracks, unsigned guessedSides)
 {
-	auto layout = config.layout();
+    auto layout = config.layout();
     int tracks = layout.has_tracks() ? layout.tracks() : guessedTracks;
     int sides = layout.has_sides() ? layout.sides() : guessedSides;
 
@@ -69,8 +69,8 @@ std::vector<unsigned> Layout::getSectorsInTrack(
     if (physical.has_count())
     {
         if (physical.sector_size() != 1)
-            Error() << "if you use a sector count, you must specify exactly "
-                       "one start sector";
+            Error() << "LAYOUT: if you use a sector count, you must specify "
+                       "exactly one start sector";
 
         int startSector = physical.sector(0);
         for (int i = 0; i < physical.count(); i++)
@@ -79,8 +79,8 @@ std::vector<unsigned> Layout::getSectorsInTrack(
     else if (physical.guess_count())
     {
         if (physical.sector_size() != 1)
-            Error() << "if you are guessing the number of sectors, you must "
-                       "specify exactly one start sector";
+            Error() << "LAYOUT: if you are guessing the number of sectors, you "
+                       "must specify exactly one start sector";
 
         int startSector = physical.sector(0);
         for (int i = 0; i < guessedSectors; i++)
@@ -95,3 +95,45 @@ std::vector<unsigned> Layout::getSectorsInTrack(
     return sectors;
 }
 
+std::vector<unsigned> Layout::getLogicalSectorsInTrack(
+    const LayoutProto::LayoutdataProto& trackdata)
+{
+    auto& logical = trackdata.logical();
+
+    if (logical.sector_size() == 0)
+        return getSectorsInTrack(trackdata);
+
+    std::vector<unsigned> sectors;
+    if (logical.has_count())
+    {
+        if (logical.sector_size() != 1)
+            Error() << "LAYOUT: if you use a sector count, you must specify "
+                       "exactly one start sector";
+
+        int startSector = logical.sector(0);
+        for (int i = 0; i < logical.count(); i++)
+            sectors.push_back(startSector + i);
+    }
+    else
+    {
+        for (int sectorId : logical.sector())
+            sectors.push_back(sectorId);
+    }
+
+    return sectors;
+}
+
+std::map<unsigned, unsigned> Layout::getLogicalToPhysicalMap(
+    const LayoutProto::LayoutdataProto& trackdata)
+{
+    auto physical = getSectorsInTrack(trackdata);
+    auto logical = getSectorsInTrack(trackdata);
+    if (physical.size() != logical.size())
+        Error() << "LAYOUT: physical sector list and logical sector list have "
+                   "different sizes";
+	
+	std::map<unsigned, unsigned> map;
+	for (int i = 0; i < physical.size(); i++)
+		map[logical[i]] = physical[i];
+	return map;
+}
