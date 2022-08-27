@@ -13,7 +13,7 @@ image_writer {
 layout {
 	tracks: 80
 	sides: 2
-	trackdata {
+	layoutdata {
 		sector_size: 512
 		physical {
 			sector: 0
@@ -31,18 +31,6 @@ encoder {
 			gap0: 80
 			gap2: 22
 			gap3: 34
-			sectors {
-				sector: 0
-				sector: 1
-				sector: 2
-				sector: 3
-				sector: 4
-				sector: 5
-				sector: 6
-				sector: 7
-				sector: 8
-				sector: 9
-			}
 			swap_sides: true
 		}
 	}
@@ -52,10 +40,6 @@ decoder {
 	ibm {
 		trackdata {
 			swap_sides: false
-			sector_range: {
-				min_sector: 0
-				max_sector: 9
-			}
 		}
 	}
 }

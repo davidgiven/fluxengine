@@ -17,7 +17,7 @@ message LayoutProto {
 		}
 	}
 
-	message TrackdataProto {
+	message LayoutdataProto {
 		optional int32 track = 1       [(help) = "if present, this format only applies to this track"];
 		optional int32 up_to_track = 5 [(help) = "if present, forms a range with track"];
 		optional int32 side = 2        [(help) = "if present, this format only applies to this side"];
@@ -28,7 +28,7 @@ message LayoutProto {
 		optional SectorsProto logical = 6 [(help) = "logical order of sectors in filesystem"];
 	}
 
-	repeated TrackdataProto trackdata = 1 [(help) = "per-track format information (repeatable)"];
+	repeated LayoutdataProto layoutdata = 1 [(help) = "per-track layout information (repeatable)"];
 	optional int32 tracks = 2 [default=0, (help) = "number of tracks in image"];
 	optional int32 sides = 3 [default=0, (help) = "number of sides in image"];
 	optional Order order = 4 [default=CHS, (help) = "the order of sectors in the filesystem"];

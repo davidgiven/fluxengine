@@ -142,6 +142,8 @@ public:
         TrackHeader header = {0, 0, 0, 0, 0};
         TrackHeader previousheader = {0, 0, 0, 0, 0};
 
+        auto layout = config.mutable_layout();
+
         unsigned n = 0;
         unsigned headerPtr = 0;
         unsigned Modulation_Speed = 0;
@@ -229,8 +231,10 @@ public:
             }
 
 		    auto ibm = config.mutable_encoder()->mutable_ibm();
-           
             auto trackdata = ibm->add_trackdata();
+
+            auto layoutdata = layout->add_layoutdata();
+
             trackdata->set_target_clock_period_us(1e3 / Modulation_Speed);
             trackdata->set_target_rotational_period_ms(200);
 			if (trackSectorSize < 0)
@@ -240,15 +244,17 @@ public:
 				// per-track data
 				trackdata->set_track(header.track);
 				trackdata->set_head(header.Head);
-				trackdata->set_sector_size(sectorSize);
 				trackdata->set_use_fm(fm);
+
+				layoutdata->set_track(header.track);
+				layoutdata->set_side(header.Head);
+				layoutdata->set_sector_size(sectorSize);
 			}
 			else if (trackSectorSize != sectorSize)
 			{
 				Error() << "IMD: multiple sector sizes per track are "
 							"currently unsupported";
 			}
-            auto sectors = trackdata->mutable_sectors();
             
             //read the sectors
             for (int s = 0; s < header.numSectors; s++)
@@ -407,6 +413,9 @@ public:
 				header.track + 1, header.Head + 1,
 				fm ? "FM" : "MFM",
 				Modulation_Speed, header.numSectors, sectorSize, (header.track+1) * trackSize / 1024);
+
+        layout->set_tracks(geometry.numTracks);
+        layout->set_sides(geometry.numSides);
 
         if (!config.has_heads())
         {

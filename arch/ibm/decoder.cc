@@ -7,6 +7,7 @@
 #include "sector.h"
 #include "arch/ibm/ibm.pb.h"
 #include "proto.h"
+#include "lib/layout.h"
 #include <string.h>
 
 static_assert(std::is_trivially_copyable<IbmIdam>::value,
@@ -205,25 +206,9 @@ public:
 
 	std::set<unsigned> requiredSectors(const Location& location) const override
 	{
-		IbmDecoderProto::TrackdataProto trackdata;
-		getTrackFormat(trackdata, location.logicalTrack, location.head);
-
-		std::set<unsigned> s;
-		if (trackdata.has_sectors())
-		{
-			for (int sectorId : trackdata.sectors().sector())
-				s.insert(sectorId);
-		}
-		else if (trackdata.has_sector_range())
-		{
-			int sectorId = trackdata.sector_range().min_sector();
-			while (sectorId <= trackdata.sector_range().max_sector())
-			{
-				s.insert(sectorId);
-				sectorId++;
-			}
-		}
-		return s;
+		auto layoutdata = Layout::getLayoutOfTrack(location.logicalTrack, location.head);
+		auto sectors = Layout::getSectorsInTrack(layoutdata);
+		return std::set<unsigned>(sectors.begin(), sectors.end());
 	}
 
 private:

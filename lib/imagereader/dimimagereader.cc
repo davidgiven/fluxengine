@@ -97,13 +97,16 @@ public:
             trackCount++;
         }
 
+		auto layout = config.mutable_layout();
         if (config.encoder().format_case() ==
             EncoderProto::FormatCase::FORMAT_NOT_SET)
         {
             auto ibm = config.mutable_encoder()->mutable_ibm();
             auto trackdata = ibm->add_trackdata();
             trackdata->set_target_clock_period_us(2);
-            auto sectors = trackdata->mutable_sectors();
+
+			auto layoutdata = layout->add_layoutdata();
+            auto physical = layoutdata->mutable_physical();
             switch (mediaByte)
             {
                 case 0x00:
@@ -111,24 +114,24 @@ public:
                                 "(1024 byte sectors)";
                     config.mutable_tracks()->set_end(76);
                     trackdata->set_target_rotational_period_ms(167);
-                    trackdata->set_sector_size(1024);
+                    layoutdata->set_sector_size(1024);
                     for (int i = 0; i < 9; i++)
-                        sectors->add_sector(i);
+                        physical->add_sector(i);
                     break;
                 case 0x02:
                     Logger() << "DIM: automatically setting format to 1.2MB "
                                 "(512 byte sectors)";
                     trackdata->set_target_rotational_period_ms(167);
-                    trackdata->set_sector_size(512);
+                    layoutdata->set_sector_size(512);
                     for (int i = 0; i < 15; i++)
-                        sectors->add_sector(i);
+                        physical->add_sector(i);
                     break;
                 case 0x03:
                     Logger() << "DIM: automatically setting format to 1.44MB";
                     trackdata->set_target_rotational_period_ms(200);
-                    trackdata->set_sector_size(512);
+                    layoutdata->set_sector_size(512);
                     for (int i = 0; i < 18; i++)
-                        sectors->add_sector(i);
+                        physical->add_sector(i);
                     break;
                 default:
                     Error() << fmt::format(
@@ -147,6 +150,9 @@ public:
             geometry.numTracks,
             geometry.numSides,
             ((int)inputFile.tellg() - 256) / 1024);
+
+		layout->set_tracks(geometry.numTracks);
+		layout->set_sides(geometry.numSides);
 
         if (!config.has_heads())
         {

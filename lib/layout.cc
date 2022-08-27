@@ -1,16 +1,16 @@
-#include "globals.h"
-#include "lib/imagereader/imagereader.pb.h"
-#include "lib/layout.pb.h"
-#include "imginputoutpututils.h"
+#include "lib/globals.h"
+#include "lib/layout.h"
+#include "lib/proto.h"
 
-std::vector<std::pair<int, int>> getTrackOrdering(
-    const LayoutProto& config, unsigned numTracks, unsigned numSides)
+std::vector<std::pair<int, int>> Layout::getTrackOrdering(
+    unsigned guessedTracks, unsigned guessedSides)
 {
-    int tracks = config.has_tracks() ? config.tracks() : numTracks;
-    int sides = config.has_sides() ? config.sides() : numSides;
+	auto layout = config.layout();
+    int tracks = layout.has_tracks() ? layout.tracks() : guessedTracks;
+    int sides = layout.has_sides() ? layout.sides() : guessedSides;
 
     std::vector<std::pair<int, int>> ordering;
-    switch (config.order())
+    switch (layout.order())
     {
         case LayoutProto::CHS:
         {
@@ -33,18 +33,18 @@ std::vector<std::pair<int, int>> getTrackOrdering(
         }
 
         default:
-            Error() << "IMG: invalid track ordering";
+            Error() << "LAYOUT: invalid track ordering";
     }
 
     return ordering;
 }
 
-LayoutProto::TrackdataProto getTrackFormat(
-    const LayoutProto& config, unsigned track, unsigned side)
+LayoutProto::LayoutdataProto Layout::getLayoutOfTrack(
+    unsigned track, unsigned side)
 {
-    LayoutProto::TrackdataProto trackdata;
+    LayoutProto::LayoutdataProto layoutdata;
 
-    for (const auto& f : config.trackdata())
+    for (const auto& f : config.layout().layoutdata())
     {
         if (f.has_track() && f.has_up_to_track() &&
             ((track < f.track()) || (track > f.up_to_track())))
@@ -54,14 +54,14 @@ LayoutProto::TrackdataProto getTrackFormat(
         if (f.has_side() && (f.side() != side))
             continue;
 
-        trackdata.MergeFrom(f);
+        layoutdata.MergeFrom(f);
     }
 
-    return trackdata;
+    return layoutdata;
 }
 
-std::vector<unsigned> getTrackSectors(
-    const LayoutProto::TrackdataProto& trackdata, unsigned numSectors)
+std::vector<unsigned> Layout::getSectorsInTrack(
+    const LayoutProto::LayoutdataProto& trackdata, unsigned guessedSectors)
 {
     auto& physical = trackdata.physical();
 
@@ -83,7 +83,7 @@ std::vector<unsigned> getTrackSectors(
                        "specify exactly one start sector";
 
         int startSector = physical.sector(0);
-        for (int i = 0; i < numSectors; i++)
+        for (int i = 0; i < guessedSectors; i++)
             sectors.push_back(startSector + i);
     }
     else if (trackdata.sector_size() > 0)
@@ -94,3 +94,4 @@ std::vector<unsigned> getTrackSectors(
 
     return sectors;
 }
+

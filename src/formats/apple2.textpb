@@ -8,7 +8,7 @@ image_reader {
 layout {
 	tracks: 40
 	sides: 1
-	trackdata {
+	layoutdata {
 		sector_size: 256
 		physical {
 			sector: 0

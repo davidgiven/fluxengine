@@ -13,7 +13,7 @@ image_writer {
 layout {
 	tracks: 39
 	sides: 1
-	trackdata {
+	layoutdata {
 		sector_size: 256
 		physical {
 			sector: 0

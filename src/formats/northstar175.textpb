@@ -5,7 +5,7 @@ include: '_northstar'
 layout {
 	tracks: 40
 	sides: 1
-	trackdata {
+	layoutdata {
 		sector_size: 512
 	}
 }

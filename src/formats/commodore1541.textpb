@@ -13,34 +13,34 @@ image_writer {
 layout {
 	tracks: 40
 	sides: 1
-	trackdata {
+	layoutdata {
 		sector_size: 256
 		physical {
 			sector: 0
 		}
 	}
-	trackdata {
+	layoutdata {
 		track: 0
 		up_to_track: 16
 		physical {
 			count: 21
 		}
 	}
-	trackdata {
+	layoutdata {
 		track: 17
 		up_to_track: 23
 		physical {
 			count: 19
 		}
 	}
-	trackdata {
+	layoutdata {
 		track: 24
 		up_to_track: 29
 		physical {
 			count: 18
 		}
 	}
-	trackdata {
+	layoutdata {
 		track: 30
 		up_to_track: 39
 		physical {

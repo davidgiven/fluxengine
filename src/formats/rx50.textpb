@@ -17,7 +17,7 @@ image_writer {
 layout {
 	tracks: 80
 	sides: 1
-	trackdata {
+	layoutdata {
 		sector_size: 512
 		physical {
 			sector: 1
@@ -32,31 +32,12 @@ encoder {
 			target_rotational_period_ms: 167
 			target_clock_period_us: 3.333
 			gap3: 30
-			sectors {
-				sector: 1
-				sector: 2
-				sector: 3
-				sector: 4
-				sector: 5
-				sector: 6
-				sector: 7
-				sector: 8
-				sector: 9
-				sector: 10
-			}
 		}
 	}
 }
 
 decoder {
-	ibm {
-		trackdata {
-			sector_range {
-				min_sector: 1
-				max_sector: 10
-			}
-		}
-	}
+	ibm {}
 }
 
 tracks {

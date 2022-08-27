@@ -6,7 +6,7 @@ image_writer {
 }
 
 layout {
-	trackdata {
+	layoutdata {
 		physical {
 			sector: 0
 			guess_count: true

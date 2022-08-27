@@ -6,7 +6,7 @@ image_writer {
 }
 
 layout {
-	trackdata {
+	layoutdata {
 		sector_size: 256
 		physical {
 			sector: 0

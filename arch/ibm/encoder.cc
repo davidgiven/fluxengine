@@ -9,6 +9,8 @@
 #include "arch/ibm/ibm.pb.h"
 #include "lib/encoders/encoders.pb.h"
 #include "fmt/format.h"
+#include "lib/proto.h"
+#include "lib/layout.h"
 #include <ctype.h>
 
 /* IAM record separator:
@@ -89,7 +91,7 @@ private:
         }
     }
 
-    void getTrackFormat(IbmEncoderProto::TrackdataProto& trackdata,
+    void getEncoderTrackData(IbmEncoderProto::TrackdataProto& trackdata,
         unsigned track,
         unsigned head)
     {
@@ -105,38 +107,19 @@ private:
         }
     }
 
-private:
-    static std::set<unsigned> getSectorIds(
-        const IbmEncoderProto::TrackdataProto& trackdata)
-    {
-        std::set<unsigned> s;
-        if (trackdata.has_sectors())
-        {
-            for (int sectorId : trackdata.sectors().sector())
-                s.insert(sectorId);
-        }
-        else if (trackdata.has_sector_range())
-        {
-            int sectorId = trackdata.sector_range().min_sector();
-            while (sectorId <= trackdata.sector_range().max_sector())
-            {
-                s.insert(sectorId);
-                sectorId++;
-            }
-        }
-        return s;
-    }
-
 public:
     std::vector<std::shared_ptr<const Sector>> collectSectors(
         const Location& location, const Image& image) override
     {
         std::vector<std::shared_ptr<const Sector>> sectors;
         IbmEncoderProto::TrackdataProto trackdata;
-        getTrackFormat(trackdata, location.logicalTrack, location.head);
+        getEncoderTrackData(trackdata, location.logicalTrack, location.head);
+
+        auto layoutdata =
+            Layout::getLayoutOfTrack(location.logicalTrack, location.head);
 
         int logicalSide = location.head ^ trackdata.swap_sides();
-        for (int sectorId : getSectorIds(trackdata))
+        for (int sectorId : Layout::getSectorsInTrack(layoutdata))
         {
             const auto& sector =
                 image.get(location.logicalTrack, logicalSide, sectorId);
@@ -152,7 +135,10 @@ public:
         const Image& image) override
     {
         IbmEncoderProto::TrackdataProto trackdata;
-        getTrackFormat(trackdata, location.logicalTrack, location.head);
+        getEncoderTrackData(trackdata, location.logicalTrack, location.head);
+
+        auto layoutdata =
+            Layout::getLayoutOfTrack(location.logicalTrack, location.head);
 
         auto writeBytes = [&](const Bytes& bytes)
         {
@@ -188,7 +174,7 @@ public:
 
         uint8_t sectorSize = 0;
         {
-            int s = trackdata.sector_size() >> 7;
+            int s = layoutdata.sector_size() >> 7;
             while (s > 1)
             {
                 s >>= 1;
@@ -273,7 +259,7 @@ public:
                 bw.write_8(damUnencoded);
 
                 Bytes truncatedData =
-                    sectorData->data.slice(0, trackdata.sector_size());
+                    sectorData->data.slice(0, layoutdata.sector_size());
                 bw += truncatedData;
                 uint16_t crc = crc16(CCITT_POLY, data);
                 bw.write_be16(crc);

@@ -4,7 +4,7 @@
 #include "imagewriter/imagewriter.h"
 #include "image.h"
 #include "lib/config.pb.h"
-#include "imginputoutpututils.h"
+#include "lib/layout.h"
 #include "fmt/format.h"
 #include "logger.h"
 #include <algorithm>

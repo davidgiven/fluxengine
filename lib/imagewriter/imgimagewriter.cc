@@ -5,7 +5,7 @@
 #include "image.h"
 #include "lib/proto.h"
 #include "lib/config.pb.h"
-#include "imginputoutpututils.h"
+#include "lib/layout.h"
 #include "lib/layout.pb.h"
 #include "fmt/format.h"
 #include "logger.h"
@@ -31,13 +31,13 @@ public:
         if (!outputFile.is_open())
             Error() << "cannot open output file";
 
-        for (const auto& p : getTrackOrdering(layout, tracks, sides))
+        for (const auto& p : Layout::getTrackOrdering(tracks, sides))
         {
             int track = p.first;
             int side = p.second;
 
-            auto trackdata = getTrackFormat(layout, track, side);
-            auto sectors = getTrackSectors(trackdata, geometry.numSectors);
+            auto layoutdata = Layout::getLayoutOfTrack(track, side);
+            auto sectors = Layout::getSectorsInTrack(layoutdata, geometry.numSectors);
             if (sectors.empty())
             {
                 int maxSector = geometry.firstSector + geometry.numSectors - 1;
@@ -45,8 +45,8 @@ public:
                     sectors.push_back(i);
             }
 
-            int sectorSize = trackdata.has_sector_size()
-                                 ? trackdata.sector_size()
+            int sectorSize = layoutdata.has_sector_size()
+                                 ? layoutdata.sector_size()
                                  : geometry.sectorSize;
 
             for (int sectorId : sectors)

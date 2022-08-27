@@ -2,7 +2,7 @@
 #include "vfs.h"
 #include "lib/proto.h"
 #include "lib/layout.pb.h"
-#include "lib/imginputoutpututils.h"
+#include "lib/layout.h"
 #include "lib/image.h"
 #include "lib/sector.h"
 #include "lib/vfs/sectorinterface.h"
@@ -37,22 +37,21 @@ Filesystem::Filesystem(std::shared_ptr<SectorInterface> sectors):
     _sectors(sectors)
 {
     auto& layout = config.layout();
-
     if (!layout.has_tracks() || !layout.has_sides())
-        Error() << "filesystem support cannot be used without concrete layout "
+        Error() << "FS: filesystem support cannot be used without concrete layout "
                    "information";
 
     unsigned block = 0;
     for (const auto& p :
-        getTrackOrdering(layout, layout.tracks(), layout.sides()))
+        Layout::getTrackOrdering(layout.tracks(), layout.sides()))
     {
         int track = p.first;
         int side = p.second;
 
-        auto trackdata = getTrackFormat(layout, track, side);
-        auto sectors = getTrackSectors(trackdata);
+        auto layoutdata = Layout::getLayoutOfTrack(track, side);
+        auto sectors = Layout::getSectorsInTrack(layoutdata);
         if (sectors.empty())
-            Error() << "filesystem support cannot be used without concrete "
+            Error() << "FS: filesystem support cannot be used without concrete "
                        "layout information";
 
         for (int sectorId : sectors)
@@ -112,6 +111,6 @@ unsigned Filesystem::getLogicalSectorCount()
 
 unsigned Filesystem::getLogicalSectorSize()
 {
-    auto trackdata = getTrackFormat(config.layout(), 0, 0);
+    auto trackdata = Layout::getLayoutOfTrack(0, 0);
     return trackdata.sector_size();
 }
