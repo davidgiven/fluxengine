@@ -3,7 +3,7 @@
 #include "snowhouse/snowhouse.h"
 
 using namespace snowhouse;
- 
+
 static void testPathParsing()
 {
 	AssertThat(Path(""), Equals(std::vector<std::string>{}));

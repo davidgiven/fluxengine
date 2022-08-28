@@ -66,6 +66,7 @@ LIBFLUXENGINE_SRCS = \
 	lib/utils.cc \
 	lib/vfs/brother120fs.cc \
 	lib/vfs/acorndfs.cc \
+	lib/vfs/amigaffs.cc \
 	lib/vfs/cpmfs.cc \
 	lib/vfs/vfs.cc \
 	lib/vfs/fatfs.cc \
@@ -85,5 +86,6 @@ $(LIBFLUXENGINE_OBJS): CFLAGS += $(LIBARCH_CFLAGS)
 $(LIBFLUXENGINE_OBJS): CFLAGS += $(LIBUSBP_CFLAGS)
 $(LIBFLUXENGINE_OBJS): CFLAGS += $(PROTO_CFLAGS)
 $(LIBFLUXENGINE_OBJS): CFLAGS += $(FATFS_CFLAGS)
+$(LIBFLUXENGINE_OBJS): CFLAGS += $(ADFLIB_CFLAGS)
 
 $(call use-pkgconfig, $(LIBFLUXENGINE_LIB), $(LIBFLUXENGINE_OBJS), fmt)

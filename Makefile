@@ -41,7 +41,7 @@ AR ?= $(CCPREFIX)ar
 PKG_CONFIG ?= pkg-config
 WX_CONFIG ?= wx-config
 PROTOC ?= protoc
-CFLAGS ?= -g -O0
+CFLAGS ?= -g -O3
 CXXFLAGS += -std=c++17
 LDFLAGS ?=
 PLATFORM ?= UNIX
@@ -139,6 +139,7 @@ include dep/libusbp/build.mk
 include dep/stb/build.mk
 include dep/emu/build.mk
 include dep/fatfs/build.mk
+include dep/adflib/build.mk
 include scripts/build.mk
 
 include lib/build.mk

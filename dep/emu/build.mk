@@ -9,6 +9,7 @@ EMU_LIB = $(OBJDIR)/libemu.a
 $(EMU_LIB): $(EMU_OBJS)
 EMU_CFLAGS = -Idep/emu
 EMU_LDFLAGS = $(EMU_LIB)
+OBJS += $(EMU_OBJS)
 
 else
 
