@@ -32,6 +32,7 @@ AGG_LIB = $(OBJDIR)/libagg.a
 $(AGG_LIB): $(AGG_OBJS)
 AGG_LDFLAGS = $(AGG_LIB)
 AGG_CFLAGS = -Idep/agg/include
+OBJS += $(AGG_OBJS)
 
 $(AGG_OBJS): CFLAGS += $(AGG_CFLAGS)
 

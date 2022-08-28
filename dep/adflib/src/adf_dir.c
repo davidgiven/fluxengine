@@ -43,6 +43,29 @@
 
 extern struct Env adfEnv;
 
+struct Entry* adfFindEntry(struct Volume *vol, char* name)
+{
+    SECTNUM nSect;
+    struct bEntryBlock entryBlk;
+    struct bEntryBlock parent;
+    struct Entry* entry;
+
+    adfReadEntryBlock(vol, vol->curDirPtr, &parent);
+
+    nSect = adfNameToEntryBlk(vol, parent.hashTable, name, &entryBlk, NULL);
+    if (nSect==-1) {
+        (*adfEnv.wFct)("adfRenameEntry : existing entry not found");
+        return NULL;
+    }
+
+    entry = malloc(sizeof(*entry));
+    if (adfEntBlock2Entry(&entryBlk, entry) != RC_OK) {
+    	free(entry);
+    	return NULL;
+    }
+
+    return entry;
+}
 
 /*
  * adfRenameEntry

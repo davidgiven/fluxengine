@@ -17,6 +17,7 @@ STB_LIB = $(OBJDIR)/libstb.a
 $(STB_LIB): $(STB_OBJS)
 STB_CFLAGS =
 STB_LDFLAGS = $(STB_LIB)
+OBJS += $(STB_OBJS)
 
 endif
 

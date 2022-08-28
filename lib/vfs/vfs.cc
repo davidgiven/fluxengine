@@ -76,6 +76,9 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystem(
         case FilesystemProto::kCpmfs:
             return Filesystem::createCpmFsFilesystem(config, image);
 
+        case FilesystemProto::kAmigaffs:
+            return Filesystem::createAmigaFfsFilesystem(config, image);
+
         default:
             Error() << "no filesystem configured";
             return std::unique_ptr<Filesystem>();
@@ -97,11 +100,15 @@ Bytes Filesystem::getLogicalSector(uint32_t number, uint32_t count)
 
     Bytes data;
     ByteWriter bw(data);
+	assert(count==1);
     for (int i = 0; i < count; i++)
     {
         auto& it = _locations[number + i];
-        bw += _sectors->get(std::get<0>(it), std::get<1>(it), std::get<2>(it))
-                  ->data;
+		int track = std::get<0>(it);
+		int side = std::get<1>(it);
+		int sector = std::get<2>(it);
+		auto layoutdata = Layout::getLayoutOfTrack(track, side);
+        bw += _sectors->get(track, side, sector)->data.slice(0, layoutdata.sector_size());
     }
     return data;
 }

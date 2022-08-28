@@ -49,6 +49,7 @@ PREFIX struct List* newCell(struct List* list, void* content);
 PREFIX void freeList(struct List* list);
 
 /* dir */
+PREFIX struct Entry* adfFindEntry(struct Volume *vol, char* name);
 PREFIX RETCODE adfToRootDir(struct Volume *vol);
 PREFIX RETCODE adfCreateDir(struct Volume* vol, SECTNUM parent, char* name);
 PREFIX RETCODE adfChangeDir(struct Volume* vol, char *name);

@@ -52,11 +52,12 @@ int mainLs(int argc, const char* argv[])
         uint32_t total = 0;
         for (const auto& dirent : files)
         {
-            fmt::print("{} {:{}}  {:6}\n",
+            fmt::print("{} {:{}}  {:6} {}\n",
                 fileTypeChar(dirent->file_type),
                 dirent->filename,
                 maxlen,
-                dirent->length);
+                dirent->length,
+				dirent->mode);
             total += dirent->length;
         }
         fmt::print("({} files, {} bytes)\n", files.size(), total);

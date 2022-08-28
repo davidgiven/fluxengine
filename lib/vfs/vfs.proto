@@ -35,12 +35,16 @@ message CpmFsProto {
 	optional Padding padding = 4 [(help) = "wasted sectors not considered part of the filesystem"];
 }
 
+message AmigaFfsProto {
+}
+
 message FilesystemProto {
 	oneof filesystem {
 		AcornDfsProto acorndfs = 1;
 		Brother120FsProto brother120 = 2;
 		FatFsProto fatfs = 3;
 		CpmFsProto cpmfs = 4;
+		AmigaFfsProto amigaffs = 5;
 	}
 }
 
