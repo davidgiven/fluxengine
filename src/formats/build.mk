@@ -27,6 +27,7 @@ FORMATS = \
 	commodore1541 \
 	commodore1581 \
 	eco1 \
+	epsonpf10 \
 	f85 \
 	fb100 \
 	hp9121 \
@@ -69,7 +70,7 @@ $(OBJDIR)/src/formats/format_%.cc: $(OBJDIR)/protoencode_ConfigProto.exe src/for
 
 OBJS += $(patsubst %, $(OBJDIR)/src/formats/format_%.o, $(FORMATS))
 
-$(OBJDIR)/src/formats/table.cc: scripts/mktable.sh
+$(OBJDIR)/src/formats/table.cc: scripts/mktable.sh Makefile
 	@mkdir -p $(dir $@)
 	@echo MKTABLE $@
 	@scripts/mktable.sh formats $(FORMATS) > $@

@@ -24,9 +24,15 @@ message CpmFsProto {
 		optional uint32 sector = 3 [(help) = "sector ID"];
 	}
 
+	message Padding {
+		optional uint32 amount = 1 [(help) = "number of sectors of padding to insert"];
+		optional uint32 every = 2 [(help) = "insert padding after this many sectors"];
+	}
+
 	optional Location filesystem_start = 1 [(help) = "position of the start of the filesystem"];
 	optional int32 block_size = 2 [(help) = "allocation block size"];
 	optional int32 dir_entries = 3 [(help) = "number of entries in the directory"];
+	optional Padding padding = 4 [(help) = "wasted sectors not considered part of the filesystem"];
 }
 
 message FilesystemProto {
