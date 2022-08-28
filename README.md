@@ -204,8 +204,9 @@ There may or may not be anything interesting there.
 License
 -------
 
-Everything here _except the contents of the `dep` directory_ is © 2019 David
-Given and is licensed under the MIT open source license. Please see
+Everything here _except the contents of the `dep` directory_ is © 2022 The
+FluxEngine Authors (mostly me, David Given; see the VCS history for the other
+people) and is licensed under the MIT open source license. Please see
 [COPYING](COPYING) for the full text. The tl;dr is: you can do what you like
 with it provided you don't claim you wrote it.
 
@@ -237,3 +238,14 @@ of the directory for the full text.
 As an exception, `dep/fatfs` contains the fatfs library, taken from
 http://elm-chan.org/fsw/ff/00index_e.html. It is single-clause BSD licensed.
 Please see the contents of the directory for the full text.
+
+As an exception, `dep/adflib` contains the adflib library, written by Laurent
+Clevy et al, taken from https://github.com/lclevy/ADFlib. It is GPL 2.0
+licensed. Please see the contents of the directory for the full text.
+
+__Important:__ Because of all these exceptions, if you distribute the
+FluxEngine package as a whole, you must comply with the terms of _all_ of the
+licensing terms. This means that __effectively the FluxEngine package is
+distributable under the terms of the GPL 2.0__.
+
+
