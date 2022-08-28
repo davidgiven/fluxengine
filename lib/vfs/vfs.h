@@ -20,7 +20,7 @@ struct Dirent
 {
     std::string filename;
     FileType file_type;
-    uint64_t length;
+    uint32_t length;
     std::string mode;
 };
 
@@ -71,6 +71,11 @@ public:
 class UnimplementedFilesystemException : public FilesystemException
 {
 public:
+    UnimplementedFilesystemException(const std::string& msg):
+        FilesystemException(msg)
+    {
+    }
+
     UnimplementedFilesystemException():
         FilesystemException("Unimplemented operation")
     {
@@ -139,11 +144,14 @@ public:
 protected:
     Filesystem(std::shared_ptr<SectorInterface> sectors);
 
+    Bytes getSector(unsigned track, unsigned side, unsigned sector);
+
     Bytes getLogicalSector(uint32_t number, uint32_t count = 1);
     void putLogicalSector(uint32_t number, const Bytes& data);
 
+	unsigned getOffsetOfSector(unsigned track, unsigned side, unsigned sector);
     unsigned getLogicalSectorCount();
-    unsigned getLogicalSectorSize();
+    unsigned getLogicalSectorSize(unsigned track = 0, unsigned side = 0);
 
 private:
     typedef std::tuple<unsigned, unsigned, unsigned> location_t;
@@ -156,6 +164,8 @@ public:
     static std::unique_ptr<Filesystem> createAcornDfsFilesystem(
         const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
     static std::unique_ptr<Filesystem> createFatFsFilesystem(
+        const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
+    static std::unique_ptr<Filesystem> createCpmFsFilesystem(
         const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
 
     static std::unique_ptr<Filesystem> createFilesystem(

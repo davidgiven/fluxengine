@@ -17,11 +17,24 @@ message Brother120FsProto {
 message FatFsProto {
 }
 
+message CpmFsProto {
+	message Location {
+		optional uint32 track = 1 [(help) = "track number"];
+		optional uint32 side = 2 [(help) = "side number"];
+		optional uint32 sector = 3 [(help) = "sector ID"];
+	}
+
+	optional Location filesystem_start = 1 [(help) = "position of the start of the filesystem"];
+	optional int32 block_size = 2 [(help) = "allocation block size"];
+	optional int32 dir_entries = 3 [(help) = "number of entries in the directory"];
+}
+
 message FilesystemProto {
 	oneof filesystem {
 		AcornDfsProto acorndfs = 1;
 		Brother120FsProto brother120 = 2;
 		FatFsProto fatfs = 3;
+		CpmFsProto cpmfs = 4;
 	}
 }
 

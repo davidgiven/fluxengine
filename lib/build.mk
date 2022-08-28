@@ -66,6 +66,7 @@ LIBFLUXENGINE_SRCS = \
 	lib/utils.cc \
 	lib/vfs/brother120fs.cc \
 	lib/vfs/acorndfs.cc \
+	lib/vfs/cpmfs.cc \
 	lib/vfs/vfs.cc \
 	lib/vfs/fatfs.cc \
 	lib/vfs/fluxsectorinterface.cc \

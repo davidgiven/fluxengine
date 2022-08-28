@@ -9,13 +9,6 @@ layout {
 	tracks: 77
 	sides: 2
 	layoutdata {
-		sector_size: 512
-		physical {
-			sector: 1
-			count: 16
-		}
-	}
-	layoutdata {
 		track: 0
 		side: 0
 		sector_size: 128
@@ -31,6 +24,15 @@ layout {
 		physical {
 			sector: 1
 			count: 26
+		}
+	}
+	layoutdata {
+		track: 1
+		up_to_track: 76
+		sector_size: 512
+		physical {
+			sector: 1
+			count: 16
 		}
 	}
 }
@@ -49,4 +51,13 @@ heads {
 	end: 1
 }
 
+filesystem {
+	cpmfs {
+		filesystem_start {
+			track: 2
+		}
+		block_size: 2048
+		dir_entries: 64
+	}
+}
 
