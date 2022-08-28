@@ -73,10 +73,21 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystem(
         case FilesystemProto::kFatfs:
             return Filesystem::createFatFsFilesystem(config, image);
 
+        case FilesystemProto::kCpmfs:
+            return Filesystem::createCpmFsFilesystem(config, image);
+
         default:
             Error() << "no filesystem configured";
             return std::unique_ptr<Filesystem>();
     }
+}
+
+Bytes Filesystem::getSector(unsigned track, unsigned side, unsigned sector)
+{
+	auto s = _sectors->get(track, side, sector);
+	if (!s)
+		throw BadFilesystemException();
+	return s->data;
 }
 
 Bytes Filesystem::getLogicalSector(uint32_t number, uint32_t count)
@@ -104,13 +115,26 @@ void Filesystem::putLogicalSector(uint32_t number, const Bytes& data)
     _sectors->put(std::get<0>(i), std::get<1>(i), std::get<2>(i))->data = data;
 }
 
+unsigned Filesystem::getOffsetOfSector(unsigned track, unsigned side, unsigned sector)
+{
+	location_t key = { track, side, sector };
+
+	for (int i = 0; i < _locations.size(); i++)
+	{
+		if (_locations[i] >= key)
+			return i;
+	}
+
+	throw BadFilesystemException();
+}
+
 unsigned Filesystem::getLogicalSectorCount()
 {
     return _locations.size();
 }
 
-unsigned Filesystem::getLogicalSectorSize()
+unsigned Filesystem::getLogicalSectorSize(unsigned track, unsigned side)
 {
-    auto trackdata = Layout::getLayoutOfTrack(0, 0);
+    auto trackdata = Layout::getLayoutOfTrack(track, side);
     return trackdata.sector_size();
 }
