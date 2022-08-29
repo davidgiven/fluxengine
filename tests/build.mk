@@ -22,6 +22,7 @@ endef
 
 $(call declare-test,agg)
 $(call declare-test,amiga)
+$(call declare-test,applesingle)
 $(call declare-test,bitaccumulator)
 $(call declare-test,bytes)
 $(call declare-test,compression)
