@@ -10,6 +10,7 @@ extern std::string leftTrimWhitespace(std::string value);
 extern std::string rightTrimWhitespace(std::string value);
 extern std::string trimWhitespace(const std::string& value);
 extern std::string getLeafname(const std::string& value);
+extern std::string toIso8601(time_t t);
 
 /* If set, any running job will terminate as soon as possible (with an error).
  */
