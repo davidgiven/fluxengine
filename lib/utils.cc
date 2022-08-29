@@ -1,8 +1,6 @@
 #include "globals.h"
 #include "utils.h"
-#include <chrono>
-#include <fmt/format.h>
-#include <fmt/chrono.h>
+#include <iomanip>
 
 bool emergencyStop = false;
 
@@ -98,6 +96,9 @@ void testForEmergencyStop()
 
 std::string toIso8601(time_t t)
 {
-	auto sc = std::chrono::system_clock::from_time_t(t);
-	return fmt::format("{:%FT%TZ}", sc);
+	auto* tm = std::gmtime(&t);
+
+	std::stringstream ss;
+	ss << std::put_time(tm, "%FT%T%z");
+	return ss.str();
 }
