@@ -41,6 +41,12 @@ message AmigaFfsProto {
 message MacHfsProto {
 }
 
+message CbmfsProto {
+	optional uint32 directory_track = 1
+		[default = 17,
+	 	 (help) = "which track the directory is on (zero-based numbering)"];
+}
+
 message FilesystemProto {
 	oneof filesystem {
 		AcornDfsProto acorndfs = 1;
@@ -49,6 +55,7 @@ message FilesystemProto {
 		CpmFsProto cpmfs = 4;
 		AmigaFfsProto amigaffs = 5;
 		MacHfsProto machfs = 6;
+		CbmfsProto cbmfs = 7;
 	}
 }
 

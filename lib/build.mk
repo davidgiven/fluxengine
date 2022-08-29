@@ -68,6 +68,7 @@ LIBFLUXENGINE_SRCS = \
 	lib/vfs/amigaffs.cc \
 	lib/vfs/applesingle.cc \
 	lib/vfs/brother120fs.cc \
+	lib/vfs/cbmfs.cc \
 	lib/vfs/cpmfs.cc \
 	lib/vfs/fatfs.cc \
 	lib/vfs/machfs.cc \

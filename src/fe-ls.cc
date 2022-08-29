@@ -54,7 +54,7 @@ int mainLs(int argc, const char* argv[])
         {
             fmt::print("{} {:{}}  {:6} {}\n",
                 fileTypeChar(dirent->file_type),
-                dirent->filename,
+                "'" + dirent->filename + "'",
                 maxlen,
                 dirent->length,
 				dirent->mode);

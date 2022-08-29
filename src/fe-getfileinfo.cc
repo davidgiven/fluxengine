@@ -32,7 +32,7 @@ int mainGetFileInfo(int argc, const char* argv[])
         auto attributes = filesystem->getMetadata(Path(directory));
 
         for (const auto& e : attributes)
-            fmt::print("{} = {}\n", e.first, e.second);
+            fmt::print("{}={}\n", e.first, e.second);
     }
     catch (const FilesystemException& e)
     {

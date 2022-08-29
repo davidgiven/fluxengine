@@ -1,0 +1,18 @@
+comment: 'Commodore 1541 170kB 5.25" 35-track SS GCR'
+
+include: '_commodore1541'
+
+layout {
+	tracks: 40
+}
+
+tracks {
+	start: 0
+	end: 39
+}
+
+heads {
+	start: 0
+	end: 0
+}
+
