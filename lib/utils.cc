@@ -1,5 +1,6 @@
 #include "globals.h"
 #include "utils.h"
+#include <iomanip>
 
 bool emergencyStop = false;
 
@@ -91,4 +92,13 @@ void testForEmergencyStop()
 {
     if (emergencyStop)
         throw EmergencyStopException();
+}
+
+std::string toIso8601(time_t t)
+{
+	auto* tm = std::gmtime(&t);
+
+	std::stringstream ss;
+	ss << std::put_time(tm, "%FT%T%z");
+	return ss.str();
 }

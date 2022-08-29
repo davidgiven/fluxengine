@@ -34,6 +34,7 @@ $(call use-library, $(FLUXENGINE_BIN), $(FLUXENGINE_OBJS), PROTO)
 $(call use-library, $(FLUXENGINE_BIN), $(FLUXENGINE_OBJS), STB)
 $(call use-library, $(FLUXENGINE_BIN), $(FLUXENGINE_OBJS), FATFS)
 $(call use-library, $(FLUXENGINE_BIN), $(FLUXENGINE_OBJS), ADFLIB)
+$(call use-library, $(FLUXENGINE_BIN), $(FLUXENGINE_OBJS), HFSUTILS)
 
 binaries: fluxengine$(EXT)
 

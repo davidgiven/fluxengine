@@ -89,7 +89,7 @@ public:
     Path(const std::string& text);
 
 public:
-    std::string to_str() const;
+    std::string to_str(const std::string sep = "/") const;
 };
 
 class Filesystem
@@ -168,6 +168,8 @@ public:
     static std::unique_ptr<Filesystem> createCpmFsFilesystem(
         const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
     static std::unique_ptr<Filesystem> createAmigaFfsFilesystem(
+        const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
+    static std::unique_ptr<Filesystem> createMacHfsFilesystem(
         const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
 
     static std::unique_ptr<Filesystem> createFilesystem(

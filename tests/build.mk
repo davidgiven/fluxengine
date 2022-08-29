@@ -16,11 +16,13 @@ $(call use-library, $(OBJDIR)/tests/$1.exe, $(OBJDIR)/tests/$1.o, LIBARCH)
 $(call use-library, $(OBJDIR)/tests/$1.exe, $(OBJDIR)/tests/$1.o, PROTO)
 $(call use-library, $(OBJDIR)/tests/$1.exe, $(OBJDIR)/tests/$1.o, FATFS)
 $(call use-library, $(OBJDIR)/tests/$1.exe, $(OBJDIR)/tests/$1.o, ADFLIB)
+$(call use-library, $(OBJDIR)/tests/$1.exe, $(OBJDIR)/tests/$1.o, HFSUTILS)
 
 endef
 
 $(call declare-test,agg)
 $(call declare-test,amiga)
+$(call declare-test,applesingle)
 $(call declare-test,bitaccumulator)
 $(call declare-test,bytes)
 $(call declare-test,compression)
