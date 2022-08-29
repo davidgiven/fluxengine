@@ -28,9 +28,9 @@ Path::Path(const std::string& path)
     }
 }
 
-std::string Path::to_str() const
+std::string Path::to_str(const std::string sep) const
 {
-    return join(*this, "/");
+    return join(*this, sep);
 }
 
 Filesystem::Filesystem(std::shared_ptr<SectorInterface> sectors):
@@ -76,8 +76,11 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystem(
         case FilesystemProto::kCpmfs:
             return Filesystem::createCpmFsFilesystem(config, image);
 
-        case FilesystemProto::kAmigaffs:
+         case FilesystemProto::kAmigaffs:
             return Filesystem::createAmigaFfsFilesystem(config, image);
+
+       case FilesystemProto::kMachfs:
+            return Filesystem::createMacHfsFilesystem(config, image);
 
         default:
             Error() << "no filesystem configured";
@@ -100,7 +103,6 @@ Bytes Filesystem::getLogicalSector(uint32_t number, uint32_t count)
 
     Bytes data;
     ByteWriter bw(data);
-	assert(count==1);
     for (int i = 0; i < count; i++)
     {
         auto& it = _locations[number + i];
