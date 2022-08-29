@@ -38,6 +38,9 @@ message CpmFsProto {
 message AmigaFfsProto {
 }
 
+message MacHfsProto {
+}
+
 message FilesystemProto {
 	oneof filesystem {
 		AcornDfsProto acorndfs = 1;
@@ -45,6 +48,7 @@ message FilesystemProto {
 		FatFsProto fatfs = 3;
 		CpmFsProto cpmfs = 4;
 		AmigaFfsProto amigaffs = 5;
+		MacHfsProto machfs = 6;
 	}
 }
 
