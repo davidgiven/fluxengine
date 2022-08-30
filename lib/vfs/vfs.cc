@@ -38,8 +38,9 @@ Filesystem::Filesystem(std::shared_ptr<SectorInterface> sectors):
 {
     auto& layout = config.layout();
     if (!layout.has_tracks() || !layout.has_sides())
-        Error() << "FS: filesystem support cannot be used without concrete layout "
-                   "information";
+        Error()
+            << "FS: filesystem support cannot be used without concrete layout "
+               "information";
 
     unsigned block = 0;
     for (const auto& p :
@@ -76,11 +77,14 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystem(
         case FilesystemProto::kCpmfs:
             return Filesystem::createCpmFsFilesystem(config, image);
 
-         case FilesystemProto::kAmigaffs:
+        case FilesystemProto::kAmigaffs:
             return Filesystem::createAmigaFfsFilesystem(config, image);
 
-       case FilesystemProto::kMachfs:
+        case FilesystemProto::kMachfs:
             return Filesystem::createMacHfsFilesystem(config, image);
+
+        case FilesystemProto::kCbmfs:
+            return Filesystem::createCbmfsFilesystem(config, image);
 
         default:
             Error() << "no filesystem configured";
@@ -90,10 +94,10 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystem(
 
 Bytes Filesystem::getSector(unsigned track, unsigned side, unsigned sector)
 {
-	auto s = _sectors->get(track, side, sector);
-	if (!s)
-		throw BadFilesystemException();
-	return s->data;
+    auto s = _sectors->get(track, side, sector);
+    if (!s)
+        throw BadFilesystemException();
+    return s->data;
 }
 
 Bytes Filesystem::getLogicalSector(uint32_t number, uint32_t count)
@@ -106,11 +110,12 @@ Bytes Filesystem::getLogicalSector(uint32_t number, uint32_t count)
     for (int i = 0; i < count; i++)
     {
         auto& it = _locations[number + i];
-		int track = std::get<0>(it);
-		int side = std::get<1>(it);
-		int sector = std::get<2>(it);
-		auto layoutdata = Layout::getLayoutOfTrack(track, side);
-        bw += _sectors->get(track, side, sector)->data.slice(0, layoutdata.sector_size());
+        int track = std::get<0>(it);
+        int side = std::get<1>(it);
+        int sector = std::get<2>(it);
+        auto layoutdata = Layout::getLayoutOfTrack(track, side);
+        bw += _sectors->get(track, side, sector)
+                  ->data.slice(0, layoutdata.sector_size());
     }
     return data;
 }
@@ -124,17 +129,18 @@ void Filesystem::putLogicalSector(uint32_t number, const Bytes& data)
     _sectors->put(std::get<0>(i), std::get<1>(i), std::get<2>(i))->data = data;
 }
 
-unsigned Filesystem::getOffsetOfSector(unsigned track, unsigned side, unsigned sector)
+unsigned Filesystem::getOffsetOfSector(
+    unsigned track, unsigned side, unsigned sector)
 {
-	location_t key = { track, side, sector };
+    location_t key = {track, side, sector};
 
-	for (int i = 0; i < _locations.size(); i++)
-	{
-		if (_locations[i] >= key)
-			return i;
-	}
+    for (int i = 0; i < _locations.size(); i++)
+    {
+        if (_locations[i] >= key)
+            return i;
+    }
 
-	throw BadFilesystemException();
+    throw BadFilesystemException();
 }
 
 unsigned Filesystem::getLogicalSectorCount()

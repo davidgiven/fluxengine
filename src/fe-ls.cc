@@ -11,6 +11,7 @@
 #include "fluxengine.h"
 #include "lib/vfs/sectorinterface.h"
 #include "lib/vfs/vfs.h"
+#include "lib/utils.h"
 #include "src/fileutils.h"
 #include <google/protobuf/text_format.h>
 #include <fstream>
@@ -47,15 +48,15 @@ int mainLs(int argc, const char* argv[])
 
         int maxlen = 0;
         for (const auto& dirent : files)
-            maxlen = std::max(maxlen, (int)dirent->filename.size());
+            maxlen = std::max(maxlen, (int)quote(dirent->filename).size());
 
         uint32_t total = 0;
         for (const auto& dirent : files)
         {
             fmt::print("{} {:{}}  {:6} {}\n",
                 fileTypeChar(dirent->file_type),
-                dirent->filename,
-                maxlen,
+                quote(dirent->filename),
+                maxlen + 2,
                 dirent->length,
 				dirent->mode);
             total += dirent->length;

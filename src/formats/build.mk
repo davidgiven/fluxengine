@@ -2,6 +2,7 @@ FORMATS = \
 	_micropolis \
 	_northstar \
 	_mx \
+	_commodore1541 \
 	40track_drive \
 	acornadfs \
 	acorndfs \
@@ -24,7 +25,8 @@ FORMATS = \
 	bk800 \
 	brother120 \
 	brother240 \
-	commodore1541 \
+	commodore1541t35 \
+	commodore1541t40 \
 	commodore1581 \
 	eco1 \
 	epsonpf10 \
