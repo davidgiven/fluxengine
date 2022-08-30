@@ -297,7 +297,7 @@ void writeTracksAndVerify(FluxSink& fluxSink,
 					Logger() << "spurious sector on verify";
 					return false;
 				}
-				if (s->data != sector->data)
+				if (s->data != sector->data.slice(0, s->data.size()))
 				{
 					Logger() << "data mismatch on verify";
 					return false;
