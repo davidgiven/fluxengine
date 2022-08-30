@@ -21,7 +21,8 @@ computer](https://ilesj.wordpress.com/2014/05/14/1541-why-so-complicated/) of
 300 bytes per second (!). (The drive itself could transfer data reasonably
 quickly.)
 
-A standard 1541 disk has 35 tracks of 17 to 21 sectors, each 256 bytes long.
+A standard 1541 disk has 35 tracks of 17 to 21 sectors, each 256 bytes long
+(sometimes 40 tracks).
 
 A standard 1581 disk has 80 tracks and two sides, each with 10 sectors, 512
 bytes long.
@@ -32,12 +33,14 @@ Reading 1541 disks
 Just do:
 
 ```
-fluxengine read commodore1541 -o commodore1541.d64
+fluxengine read commodore1541t35 -o commodore1541.d64
 ```
 
 You should end up with an `commodore1541.d64` file which is 174848 bytes long.
 You can load this straight into a Commodore 64 emulator such as
 [VICE](http://vice-emu.sourceforge.net/).
+
+If you have a 40-track disk, use `commodore1541t40` instead.
 
 **Big warning!** Commodore 64 disk images are complicated due to the way the
 tracks are different sizes and the odd sector size, so you need the special D64
@@ -49,8 +52,10 @@ Writing 1541 disks
 
 Just do:
 ```
-fluxengine write commodore1541 -i file.d64
+fluxengine write commodore1541t35 -i file.d64
 ```
+
+If you have a 40-track disk, use `commodore1541t40` instead.
 
 Note that only standard Commodore 64 BAM file systems can be written this way,
 as the disk ID in the BAM has to be copied to every sector on the disk.
