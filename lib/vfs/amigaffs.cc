@@ -294,9 +294,9 @@ public:
     RETCODE adfNativeWriteSector(
         struct Device* dev, int32_t sector, int size, uint8_t* buffer)
     {
-		Bytes bytes(buffer, size);
-		putLogicalSector(sector, bytes);
-		return RC_OK;
+        Bytes bytes(buffer, size);
+        putLogicalSector(sector, bytes);
+        return RC_OK;
     }
 
 private:

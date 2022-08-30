@@ -141,6 +141,38 @@ public:
         return a.render();
     }
 
+    void putFile(const Path& path, const Bytes& bytes)
+    {
+        HfsMount m(this);
+        if (path.size() == 0)
+            throw BadPathException();
+
+        AppleSingle a;
+        try
+        {
+            a.parse(bytes);
+        }
+        catch (const InvalidFileException& e)
+        {
+            throw UnimplementedFilesystemException(
+                "you can only write valid AppleSingle encoded files");
+        }
+
+        auto pathstr = ":" + path.to_str(":");
+        hfs_delete(_vol, pathstr.c_str());
+        HfsFile file(hfs_create(_vol,
+            pathstr.c_str(),
+            (const char*)a.type.cbegin(),
+            (const char*)a.creator.cbegin()));
+        if (!file)
+            throw CannotWriteException();
+
+        hfs_setfork(file, 0);
+        writeBytes(file, a.data);
+        hfs_setfork(file, 1);
+        writeBytes(file, a.rsrc);
+    }
+
 private:
     Bytes readBytes(hfsfile* file)
     {
@@ -159,6 +191,17 @@ private:
         }
 
         return bytes;
+    }
+
+    void writeBytes(hfsfile* file, const Bytes& bytes)
+    {
+        unsigned pos = 0;
+        while (pos != bytes.size())
+        {
+            unsigned long done =
+                hfs_write(file, bytes.cbegin() + pos, bytes.size() - pos);
+            pos += done;
+        }
     }
 
 private:
@@ -186,7 +229,8 @@ private:
         HfsFile(hfsfile* file): _file(file) {}
         ~HfsFile()
         {
-            hfs_close(_file);
+            if (_file)
+                hfs_close(_file);
         }
 
         operator hfsfile*() const
@@ -204,7 +248,8 @@ private:
         HfsDir(hfsdir* dir): _dir(dir) {}
         ~HfsDir()
         {
-            hfs_closedir(_dir);
+            if (_dir)
+                hfs_closedir(_dir);
         }
 
         operator hfsdir*() const
@@ -241,7 +286,10 @@ private:
         void** priv, const void* buffer, unsigned long len);
     unsigned long hfsWrite(const void* buffer, unsigned long len)
     {
-        return -1;
+        Bytes bytes((const uint8_t*)buffer, len * 512);
+        putLogicalSector(_seek, bytes);
+        _seek += len;
+        return len;
     }
 
 private:
