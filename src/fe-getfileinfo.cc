@@ -12,6 +12,7 @@
 #include "fluxengine.h"
 #include "lib/vfs/sectorinterface.h"
 #include "lib/vfs/vfs.h"
+#include "lib/utils.h"
 #include "src/fileutils.h"
 #include <google/protobuf/text_format.h>
 #include <fstream>
@@ -32,7 +33,7 @@ int mainGetFileInfo(int argc, const char* argv[])
         auto attributes = filesystem->getMetadata(Path(directory));
 
         for (const auto& e : attributes)
-            fmt::print("{}={}\n", e.first, e.second);
+            fmt::print("{}={}\n", e.first, quote(e.second));
     }
     catch (const FilesystemException& e)
     {

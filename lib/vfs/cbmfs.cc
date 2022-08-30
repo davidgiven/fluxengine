@@ -1,7 +1,17 @@
 #include "lib/globals.h"
 #include "lib/vfs/vfs.h"
 #include "lib/config.pb.h"
+#include "lib/utils.h"
 #include <fmt/format.h>
+
+enum
+{
+	DEL,
+	SEQ,
+	PRG,
+	USR,
+	REL
+};
 
 static std::string fromPetscii(const Bytes& bytes)
 {
@@ -32,11 +42,11 @@ static std::string toFileType(uint8_t cbm_type)
 {
 	switch (cbm_type & 0x0f)
 	{
-		case 0: return "del";
-		case 1: return "seq";
-		case 2: return "prg";
-		case 3: return "usr";
-		case 4: return "rel";
+		case DEL: return "DEL";
+		case SEQ: return "SEQ";
+		case PRG: return "PRG";
+		case USR: return "USR";
+		case REL: return "REL";
 		default: return fmt::format("[bad type {:x}]", cbm_type & 0x0f);
 	}
 }
@@ -123,13 +133,13 @@ public:
     {
 		if (path.size() != 1)
 			throw BadPathException();
-		auto de = findFile(path[0]);
+		auto de = findFile(unhex(path[0]));
 		if (!de)
 			throw FileNotFoundException();
 
         std::map<std::string, std::string> attributes;
 		attributes["filename"] = de->filename;
-		attributes["length"] = de->length;
+		attributes["length"] = fmt::format("{}", de->length);
 		attributes["mode"] = de->mode;
 		attributes["type"] = "file";
 		attributes["cbmfs.type"] = toFileType(de->cbm_type);
@@ -140,6 +150,40 @@ public:
     	attributes["cbmfs.recordlen"] = fmt::format("{}", de->recordlen);
     	attributes["cbmfs.sectors"] = fmt::format("{}", de->sectors);
 		return attributes;
+	}
+
+	Bytes getFile(const Path& path)
+	{
+        if (path.size() != 1)
+            throw BadPathException();
+		auto de = findFile(unhex(path[0]));
+		if (!de)
+			throw FileNotFoundException();
+		if (de->cbm_type == REL)
+			throw UnimplementedFilesystemException("cannot read .REL files");
+
+		Bytes bytes;
+		ByteWriter bw(bytes);
+
+        uint8_t t = de->start_track - 1;
+        uint8_t s = de->start_sector;
+		for (;;)
+        {
+            auto b = getSector(t, 0, s);
+
+			if (b[0])
+				bw += b.slice(2);
+			else
+			{
+				bw += b.slice(2, b[1]);
+				break;
+			}
+
+            t = b[0] - 1;
+            s = b[1];
+        }
+
+		return bytes;
 	}
 
 private:

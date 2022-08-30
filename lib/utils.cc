@@ -102,3 +102,54 @@ std::string toIso8601(time_t t)
 	ss << std::put_time(tm, "%FT%T%z");
 	return ss.str();
 }
+
+std::string quote(const std::string& s)
+{
+	bool spaces = s.find(' ') != std::string::npos;
+	if (!spaces
+		&& (s.find('\\') == std::string::npos)
+		&& (s.find('\'') == std::string::npos)
+		&& (s.find('"') == std::string::npos))
+		return s;
+
+	std::stringstream ss;
+	if (spaces)
+		ss << '"';
+
+	for (char c : s)
+	{
+		if ((c == '\\') || (c == '\"') || (c == '!'))
+			ss << '\\';
+		ss << (char)c;
+	}
+
+	if (spaces)
+		ss << '"';
+	return ss.str();
+}
+
+std::string unhex(const std::string& s)
+{
+	std::stringstream sin(s);
+	std::stringstream sout;
+
+	for (;;)
+	{
+		int c = sin.get();
+		if (c == -1)
+			break;
+		if (c == '%')
+		{
+			char buf[3];
+			buf[0] = sin.get();
+			buf[1] = sin.get();
+			buf[2] = 0;
+
+			c = std::stoul(buf, nullptr, 16);
+		}
+		sout << (char)c;
+	}
+
+	return sout.str();
+}
+

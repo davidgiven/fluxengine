@@ -43,6 +43,13 @@ static void testLeafname()
     AssertThat(getLeafname("/path/path/filename"), Equals("filename"));
 }
 
+static void testUnhex()
+{
+	AssertThat(unhex(""), Equals(""));
+	AssertThat(unhex("foo"), Equals("foo"));
+	AssertThat(unhex("f%20o"), Equals("f o"));
+}
+
 int main(void)
 {
     testJoin();
@@ -50,5 +57,6 @@ int main(void)
     testRightTrim();
     testTrim();
     testLeafname();
+	testUnhex();
     return 0;
 }
