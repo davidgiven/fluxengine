@@ -1,6 +1,8 @@
 #include "lib/globals.h"
 #include "lib/vfs/vfs.h"
 #include "lib/config.pb.h"
+#include "lib/proto.h"
+#include "lib/layout.h"
 #include <fmt/format.h>
 
 #include "adflib.h"
@@ -54,6 +56,25 @@ public:
     {
     }
 
+    void create()
+    {
+        eraseEverythingOnDisk();
+        AdfMount m(this);
+
+        struct Device dev = {};
+        dev.readOnly = false;
+        dev.isNativeDev = true;
+        dev.devType = DEVTYPE_FLOPDD;
+        dev.cylinders = config.layout().tracks();
+        dev.heads = config.layout().sides();
+        dev.sectors = Layout::getSectorsInTrack( Layout::getLayoutOfTrack(0, 0)).size();
+        adfInitDevice(&dev, nullptr, false);
+        int res = adfCreateFlop(&dev,
+            (char*)"FluxEngine FFS", 0);
+        if (res != RC_OK)
+            throw CannotWriteException();
+    }
+
     FilesystemStatus check()
     {
         return FS_OK;
@@ -65,7 +86,7 @@ public:
 
         std::vector<std::unique_ptr<Dirent>> results;
 
-        auto* vol = m.getVolume();
+        auto* vol = m.mount();
         changeDir(vol, path);
 
         auto list = AdfList(adfGetDirEnt(vol, vol->curDirPtr));
@@ -93,7 +114,7 @@ public:
         if (path.size() == 0)
             throw BadPathException();
 
-        auto* vol = m.getVolume();
+        auto* vol = m.mount();
         changeDirButOne(vol, path);
 
         auto entry = AdfEntry(adfFindEntry(vol, (char*)path.back().c_str()));
@@ -126,7 +147,7 @@ public:
         if (path.size() == 0)
             throw BadPathException();
 
-        auto* vol = m.getVolume();
+        auto* vol = m.mount();
         changeDirButOne(vol, path);
 
         auto* file = adfOpenFile(vol, (char*)path.back().c_str(), (char*)"r");
@@ -153,7 +174,7 @@ public:
         if (path.size() == 0)
             throw BadPathException();
 
-        auto* vol = m.getVolume();
+        auto* vol = m.mount();
         changeDirButOne(vol, path);
 
         auto* file = adfOpenFile(vol, (char*)path.back().c_str(), (char*)"w");
@@ -229,19 +250,21 @@ private:
         AdfMount(AmigaFfsFilesystem* self): self(self)
         {
             currentAmigaFfs = self;
+			self->_ffs = nullptr;
 
             adfEnvInitDefault();
-            self->_ffs = adfMountDev(nullptr, false);
         }
 
         ~AdfMount()
         {
-            adfUnMountDev(self->_ffs);
+            if (self->_ffs)
+                adfUnMountDev(self->_ffs);
             adfEnvCleanUp();
         }
 
-        struct Volume* getVolume()
+        struct Volume* mount()
         {
+            self->_ffs = adfMountDev(nullptr, false);
             return adfMount(self->_ffs, 0, false);
         }
 
