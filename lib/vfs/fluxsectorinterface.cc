@@ -75,30 +75,30 @@ public:
                     &*_fluxSource);
             }
             else
-			{
-				/* Only a few sectors have changed. Do we need to populate the track? */
+            {
+                /* Only a few sectors have changed. Do we need to populate the
+                 * track? */
 
-				if (_loadedtracks.find(trackid) == _loadedtracks.end())
-					populateSectors(track, side);
+                if (_loadedtracks.find(trackid) == _loadedtracks.end())
+                    populateSectors(track, side);
 
-				/* Now merge the loaded track with the changed one, and write the result back. */
+                /* Now merge the loaded track with the changed one, and write
+                 * the result back. */
 
-				Image image;
-				for (const unsigned sector : sectors)
-				{
-					auto s = image.put(track, side, sector);
-					if (_changedSectors.contains(track, side, sector))
-						s->data = _changedSectors.get(track, side, sector)->data;
-					else
-						s->data = _readSectors.get(track, side, sector)->data;
-				}
+                Image image;
+                for (const unsigned sector : sectors)
+                {
+                    auto s = image.put(track, side, sector);
+                    if (_changedSectors.contains(track, side, sector))
+                        s->data =
+                            _changedSectors.get(track, side, sector)->data;
+                    else
+                        s->data = _readSectors.get(track, side, sector)->data;
+                }
 
-                writeDiskCommand(image,
-                    *_encoder,
-                    *_fluxSink,
-                    &*_decoder,
-                    &*_fluxSource);
-			}
+                writeDiskCommand(
+                    image, *_encoder, *_fluxSink, &*_decoder, &*_fluxSource);
+            }
         }
     }
 

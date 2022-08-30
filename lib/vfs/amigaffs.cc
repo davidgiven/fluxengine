@@ -147,6 +147,30 @@ public:
         return bytes;
     }
 
+    void putFile(const Path& path, const Bytes& data)
+    {
+        AdfMount m(this);
+        if (path.size() == 0)
+            throw BadPathException();
+
+        auto* vol = m.getVolume();
+        changeDirButOne(vol, path);
+
+        auto* file = adfOpenFile(vol, (char*)path.back().c_str(), (char*)"w");
+        if (!file)
+            throw CannotWriteException();
+
+        unsigned pos = 0;
+        while (pos != data.size())
+        {
+            long done = adfWriteFile(
+                file, data.size() - pos, (uint8_t*)data.cbegin() + pos);
+            pos += done;
+        }
+
+        adfCloseFile(file);
+    }
+
 private:
     class AdfEntry
     {
@@ -270,7 +294,9 @@ public:
     RETCODE adfNativeWriteSector(
         struct Device* dev, int32_t sector, int size, uint8_t* buffer)
     {
-        return RC_OK;
+		Bytes bytes(buffer, size);
+		putLogicalSector(sector, bytes);
+		return RC_OK;
     }
 
 private:
