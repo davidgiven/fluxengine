@@ -18,10 +18,9 @@
 
 static FlagGroup flags({&fileFlags});
 
-static StringFlag volumeName({"-n", "--name"}, "volume name", "FEDISK");
-static BoolFlag quick({"-q", "--quick"},
-    "perform quick format (requires the disk to be previously formatted)",
-    false);
+static StringFlag volumeName({"-n", "--name"}, "volume name", "FluxEngine");
+static SettableFlag quick({"-q", "--quick"},
+    "perform quick format (requires the disk to be previously formatted)");
 
 int mainFormat(int argc, const char* argv[])
 {
