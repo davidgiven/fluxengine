@@ -5,7 +5,9 @@
 #include "proto.h"
 #include "readerwriter.h"
 #include "lib/decoders/decoders.h"
+#include "lib/encoders/encoders.h"
 #include "lib/fluxsource/fluxsource.h"
+#include "lib/fluxsink/fluxsink.h"
 #include "lib/imagereader/imagereader.h"
 #include "fmt/format.h"
 #include "fluxengine.h"
@@ -32,6 +34,8 @@ static StringFlag flux({"-f", "--flux"},
     {
 		FluxSource::updateConfigForFilename(
             config.mutable_flux_source(), value);
+		FluxSink::updateConfigForFilename(
+            config.mutable_flux_sink(), value);
     });
 
 std::unique_ptr<Filesystem> createFilesystemFromConfig()
@@ -40,8 +44,10 @@ std::unique_ptr<Filesystem> createFilesystemFromConfig()
 	if (config.has_flux_source())
 	{
 		std::shared_ptr<FluxSource> fluxSource(FluxSource::create(config.flux_source()));
+		std::shared_ptr<FluxSink> fluxSink(FluxSink::create(config.flux_sink()));
+		std::shared_ptr<AbstractEncoder> encoder(AbstractEncoder::create(config.encoder()));
 		std::shared_ptr<AbstractDecoder> decoder(AbstractDecoder::create(config.decoder()));
-		sectorInterface = SectorInterface::createFluxSectorInterface(fluxSource, decoder);
+		sectorInterface = SectorInterface::createFluxSectorInterface(fluxSource, fluxSink, encoder, decoder);
 	}
 	else
 	{

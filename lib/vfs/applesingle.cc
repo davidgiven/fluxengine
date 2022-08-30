@@ -33,9 +33,9 @@ void AppleSingle::parse(const Bytes& bytes)
 
             case 9:
             {
-            	Bytes finderinfo = bytes.slice(offset, length);
-            	type = finderinfo.slice(0, 4);
-            	creator = finderinfo.slice(4, 4);
+                Bytes finderinfo = bytes.slice(offset, length);
+                type = finderinfo.slice(0, 4);
+                creator = finderinfo.slice(4, 4);
                 break;
             }
 

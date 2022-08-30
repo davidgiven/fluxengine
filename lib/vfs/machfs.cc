@@ -130,8 +130,8 @@ public:
 
         hfsdirent de;
         hfs_fstat(file, &de);
-		a.creator = Bytes(de.u.file.creator);
-		a.type = Bytes(de.u.file.type);
+        a.creator = Bytes(de.u.file.creator);
+        a.type = Bytes(de.u.file.type);
 
         hfs_setfork(file, 0);
         a.data = readBytes(file);
@@ -139,6 +139,38 @@ public:
         a.rsrc = readBytes(file);
 
         return a.render();
+    }
+
+    void putFile(const Path& path, const Bytes& bytes)
+    {
+        HfsMount m(this);
+        if (path.size() == 0)
+            throw BadPathException();
+
+        AppleSingle a;
+        try
+        {
+            a.parse(bytes);
+        }
+        catch (const InvalidFileException& e)
+        {
+            throw UnimplementedFilesystemException(
+                "you can only write valid AppleSingle encoded files");
+        }
+
+        auto pathstr = ":" + path.to_str(":");
+        hfs_delete(_vol, pathstr.c_str());
+        HfsFile file(hfs_create(_vol,
+            pathstr.c_str(),
+            (const char*)a.type.cbegin(),
+            (const char*)a.creator.cbegin()));
+        if (!file)
+            throw CannotWriteException();
+
+        hfs_setfork(file, 0);
+        writeBytes(file, a.data);
+        hfs_setfork(file, 1);
+        writeBytes(file, a.rsrc);
     }
 
 private:
@@ -159,6 +191,17 @@ private:
         }
 
         return bytes;
+    }
+
+    void writeBytes(hfsfile* file, const Bytes& bytes)
+    {
+        unsigned pos = 0;
+        while (pos != bytes.size())
+        {
+            unsigned long done =
+                hfs_write(file, bytes.cbegin() + pos, bytes.size() - pos);
+            pos += done;
+        }
     }
 
 private:
@@ -183,23 +226,39 @@ private:
     class HfsFile
     {
     public:
-    	HfsFile(hfsfile* file): _file(file) {}
-    	~HfsFile() { hfs_close(_file); }
+        HfsFile(hfsfile* file): _file(file) {}
+        ~HfsFile()
+        {
+            if (_file)
+                hfs_close(_file);
+        }
 
-    	operator hfsfile* () const { return _file; }
+        operator hfsfile*() const
+        {
+            return _file;
+        }
+
     private:
-    	hfsfile* _file;
+        hfsfile* _file;
     };
 
     class HfsDir
     {
     public:
-    	HfsDir(hfsdir* dir): _dir(dir) {}
-    	~HfsDir() { hfs_closedir(_dir); }
+        HfsDir(hfsdir* dir): _dir(dir) {}
+        ~HfsDir()
+        {
+            if (_dir)
+                hfs_closedir(_dir);
+        }
 
-    	operator hfsdir* () const { return _dir; }
+        operator hfsdir*() const
+        {
+            return _dir;
+        }
+
     private:
-    	hfsdir* _dir;
+        hfsdir* _dir;
     };
 
 private:
@@ -227,7 +286,10 @@ private:
         void** priv, const void* buffer, unsigned long len);
     unsigned long hfsWrite(const void* buffer, unsigned long len)
     {
-        return -1;
+        Bytes bytes((const uint8_t*)buffer, len * 512);
+        putLogicalSector(_seek, bytes);
+        _seek += len;
+        return len;
     }
 
 private:

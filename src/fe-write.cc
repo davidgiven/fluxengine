@@ -86,7 +86,7 @@ int mainWrite(int argc, const char* argv[])
 	if (verify && config.has_flux_source() && config.flux_source().has_drive())
 		fluxSource = FluxSource::create(config.flux_source());
 
-	writeDiskCommand(image, *encoder, *fluxSink, decoder.get(), fluxSource.get());
+	writeDiskCommand(*image, *encoder, *fluxSink, decoder.get(), fluxSource.get());
 
     return 0;
 }

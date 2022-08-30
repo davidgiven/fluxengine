@@ -23,7 +23,7 @@ extern void fillBitmapTo(std::vector<bool>& bitmap,
     unsigned terminateAt,
     const std::vector<bool>& pattern);
 
-extern void writeDiskCommand(std::shared_ptr<const Image> image,
+extern void writeDiskCommand(const Image& image,
     AbstractEncoder& encoder,
     FluxSink& fluxSink,
     AbstractDecoder* decoder = nullptr,

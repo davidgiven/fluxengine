@@ -33,6 +33,57 @@ std::string Path::to_str(const std::string sep) const
     return join(*this, sep);
 }
 
+void Filesystem::create()
+{
+    throw UnimplementedFilesystemException();
+}
+
+FilesystemStatus Filesystem::check()
+{
+    throw UnimplementedFilesystemException();
+}
+
+std::vector<std::unique_ptr<Dirent>> Filesystem::list(const Path& path)
+{
+    throw UnimplementedFilesystemException();
+}
+
+Bytes Filesystem::getFile(const Path& path)
+{
+    throw UnimplementedFilesystemException();
+}
+
+void Filesystem::putFile(const Path& path, const Bytes& data)
+{
+    throw UnimplementedFilesystemException();
+}
+
+std::map<std::string, std::string> Filesystem::getMetadata(const Path& path)
+{
+    throw UnimplementedFilesystemException();
+}
+
+void Filesystem::putMetadata(
+    const Path& path, const std::map<std::string, std::string>& metadata)
+{
+    throw UnimplementedFilesystemException();
+}
+
+void Filesystem::createDirectory(const Path& path)
+{
+    throw UnimplementedFilesystemException();
+}
+
+void Filesystem::deleteFile(const Path& path)
+{
+    throw UnimplementedFilesystemException();
+}
+
+void Filesystem::flush()
+{
+    _sectors->flush();
+}
+
 Filesystem::Filesystem(std::shared_ptr<SectorInterface> sectors):
     _sectors(sectors)
 {
@@ -125,8 +176,19 @@ void Filesystem::putLogicalSector(uint32_t number, const Bytes& data)
     if (number >= _locations.size())
         throw BadFilesystemException();
 
-    auto& i = _locations[number];
-    _sectors->put(std::get<0>(i), std::get<1>(i), std::get<2>(i))->data = data;
+    unsigned pos = 0;
+    while (pos < data.size())
+    {
+        auto& it = _locations[number];
+        int track = std::get<0>(it);
+        int side = std::get<1>(it);
+        int sector = std::get<2>(it);
+        int sectorSize = Layout::getLayoutOfTrack(track, side).sector_size();
+
+        _sectors->put(track, side, sector)->data = data.slice(pos, sectorSize);
+        pos += sectorSize;
+        number++;
+    }
 }
 
 unsigned Filesystem::getOffsetOfSector(

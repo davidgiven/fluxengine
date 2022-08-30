@@ -128,6 +128,19 @@ uint8_t& Bytes::operator [] (unsigned pos)
     return (*_data)[pos];
 }
 
+Bytes Bytes::readFromFile(const std::string& filename)
+{
+	Bytes bytes;
+	ByteWriter bw(bytes);
+
+	std::ifstream f(filename);
+	if (!f)
+		Error() << fmt::format("cannot open '{}': {}", filename, strerror(errno));
+	bw += f;
+
+	return bytes;
+}
+
 Bytes Bytes::slice(unsigned start, unsigned len) const
 {
     start += _low;

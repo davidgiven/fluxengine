@@ -18,28 +18,29 @@
 
 static FlagGroup flags({&fileFlags});
 
-static StringFlag directory({"-p", "--path"}, "disk path to work on", "");
-static StringFlag output({"-l", "--local"}, "local filename to write to", "");
+static StringFlag path({"-p", "--path"}, "path to work on", "");
+static StringFlag input({"-l", "--local"}, "local filename to read from", "");
 
-int mainGetFile(int argc, const char* argv[])
+int mainPutFile(int argc, const char* argv[])
 {
     if (argc == 1)
-        showProfiles("getfile", formats);
+        showProfiles("putfile", formats);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
     try
     {
-        Path inputFilename(directory);
-        if (inputFilename.size() == 0)
-            Error() << "you must supply a filename to read";
+        std::string inputFilename = input;
+		if (inputFilename.empty())
+			Error() << "you must supply a local file to read from";
 
-        std::string outputFilename = output;
-        if (outputFilename.empty())
-            outputFilename = inputFilename.back();
+        Path outputFilename(path);
+        if (outputFilename.size() == 0)
+            Error() << "you must supply a destination path to write to";
 
+		auto data = Bytes::readFromFile(inputFilename);
         auto filesystem = createFilesystemFromConfig();
-        auto data = filesystem->getFile(inputFilename);
-        data.writeToFile(outputFilename);
+        filesystem->putFile(outputFilename, data);
+		filesystem->flush();
     }
     catch (const FilesystemException& e)
     {
