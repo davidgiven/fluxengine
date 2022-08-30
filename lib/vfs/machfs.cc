@@ -130,8 +130,8 @@ public:
 
         hfsdirent de;
         hfs_fstat(file, &de);
-		a.creator = Bytes(de.u.file.creator);
-		a.type = Bytes(de.u.file.type);
+        a.creator = Bytes(de.u.file.creator);
+        a.type = Bytes(de.u.file.type);
 
         hfs_setfork(file, 0);
         a.data = readBytes(file);
@@ -183,23 +183,37 @@ private:
     class HfsFile
     {
     public:
-    	HfsFile(hfsfile* file): _file(file) {}
-    	~HfsFile() { hfs_close(_file); }
+        HfsFile(hfsfile* file): _file(file) {}
+        ~HfsFile()
+        {
+            hfs_close(_file);
+        }
 
-    	operator hfsfile* () const { return _file; }
+        operator hfsfile*() const
+        {
+            return _file;
+        }
+
     private:
-    	hfsfile* _file;
+        hfsfile* _file;
     };
 
     class HfsDir
     {
     public:
-    	HfsDir(hfsdir* dir): _dir(dir) {}
-    	~HfsDir() { hfs_closedir(_dir); }
+        HfsDir(hfsdir* dir): _dir(dir) {}
+        ~HfsDir()
+        {
+            hfs_closedir(_dir);
+        }
 
-    	operator hfsdir* () const { return _dir; }
+        operator hfsdir*() const
+        {
+            return _dir;
+        }
+
     private:
-    	hfsdir* _dir;
+        hfsdir* _dir;
     };
 
 private:

@@ -39,8 +39,11 @@ public:
 public:
 	void calculateSize();
 
+	bool empty() const;
+	bool contains(unsigned track, unsigned side, unsigned sectorId) const;
 	std::shared_ptr<const Sector> get(unsigned track, unsigned side, unsigned sectorId) const;
 	std::shared_ptr<Sector> put(unsigned track, unsigned side, unsigned sectorId);
+	void erase(unsigned track, unsigned side, unsigned sectorId);
 
 	const_iterator begin() const { return const_iterator(_sectors.cbegin()); }
 	const_iterator end() const { return const_iterator(_sectors.cend()); }

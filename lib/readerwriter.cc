@@ -187,8 +187,6 @@ void writeTracks(FluxSink& fluxSink,
         producer,
     std::function<bool(const Location& location)> verifier)
 {
-    Logger() << fmt::format("Writing to: {}", (std::string)fluxSink);
-
     for (const auto& location : Mapper::computeLocations())
     {
         testForEmergencyStop();
@@ -287,44 +285,53 @@ void writeTracksAndVerify(FluxSink& fluxSink,
                 return false;
             }
 
-            auto wantedSectors = encoder.collectSectors(location, image);
-            std::sort(wantedSectors.begin(),
-                wantedSectors.end(),
-                sectorPointerSortPredicate);
+			Image wanted;
+			for (const auto& sector : encoder.collectSectors(location, image))
+				wanted.put(sector->logicalTrack, sector->logicalSide, sector->logicalSector)->data = sector->data;
 
-            std::vector<std::shared_ptr<const Sector>> gotSectors(
-                trackFlux->sectors.begin(), trackFlux->sectors.end());
-            std::sort(gotSectors.begin(),
-                gotSectors.end(),
-                sectorPointerSortPredicate);
-
-            if (!std::equal(gotSectors.begin(),
-                    gotSectors.end(),
-                    wantedSectors.begin(),
-                    wantedSectors.end(),
-                    sectorPointerEqualsPredicate))
-            {
-                Logger() << "good read but the data doesn't match";
-                return false;
-            }
+			for (const auto& sector : trackFlux->sectors)
+			{
+				const auto s = wanted.get(sector->logicalTrack, sector->logicalSide, sector->logicalSector);
+				if (!s)
+				{
+					Logger() << "spurious sector on verify";
+					return false;
+				}
+				if (s->data != sector->data)
+				{
+					Logger() << "data mismatch on verify";
+					return false;
+				}
+				wanted.erase(sector->logicalTrack, sector->logicalSide, sector->logicalSector);
+			}
+			if (!wanted.empty())
+			{
+				Logger() << "missing sector on verify";
+				return false;
+			}
             return true;
         });
 }
 
-void writeDiskCommand(std::shared_ptr<const Image> image,
+void writeDiskCommand(const Image& image,
     AbstractEncoder& encoder,
     FluxSink& fluxSink,
     AbstractDecoder* decoder,
     FluxSource* fluxSource)
 {
+	const Image* imagep = &image;
+	std::unique_ptr<const Image> remapped;
     if (config.has_sector_mapping())
-        image = std::move(Mapper::remapSectorsLogicalToPhysical(
-            *image, config.sector_mapping()));
+	{
+        remapped = Mapper::remapSectorsLogicalToPhysical(
+            image, config.sector_mapping());
+		imagep = &*remapped;
+	}
 
     if (fluxSource && decoder)
-        writeTracksAndVerify(fluxSink, encoder, *fluxSource, *decoder, *image);
+        writeTracksAndVerify(fluxSink, encoder, *fluxSource, *decoder, *imagep);
     else
-        writeTracks(fluxSink, encoder, *image);
+        writeTracks(fluxSink, encoder, *imagep);
 }
 
 void writeRawDiskCommand(FluxSource& fluxSource, FluxSink& fluxSink)

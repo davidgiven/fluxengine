@@ -116,6 +116,30 @@ public:
         return bytes;
     }
 
+    void putFile(const Path& path, const Bytes& bytes)
+    {
+        mount();
+        auto pathstr = path.to_str();
+        FIL fil;
+        FRESULT res =
+            f_open(&fil, pathstr.c_str(), FA_WRITE | FA_CREATE_ALWAYS);
+        throwError(res);
+
+        unsigned remaining = bytes.size();
+        char* ptr = (char*)bytes.cbegin();
+        while (remaining != 0)
+        {
+            UINT done;
+            res = f_write(&fil, ptr, remaining, &done);
+            throwError(res);
+
+            remaining -= done;
+            ptr += done;
+        }
+
+        f_close(&fil);
+    }
+
 public:
     DRESULT diskRead(BYTE* buffer, LBA_t sector, UINT count)
     {
@@ -126,7 +150,9 @@ public:
 
     DRESULT diskWrite(const BYTE* buffer, LBA_t sector, UINT count)
     {
-        return RES_WRPRT;
+        Bytes bytes(buffer, count * getLogicalSectorSize());
+        putLogicalSector(sector, bytes);
+        return RES_OK;
     }
 
     DRESULT diskIoctl(BYTE cmd, void* buffer)
@@ -162,6 +188,16 @@ private:
             case FR_NO_FILE:
             case FR_NO_PATH:
                 throw FileNotFoundException();
+
+            case FR_INVALID_NAME:
+                throw BadPathException();
+
+            case FR_DENIED:
+            case FR_EXIST:
+            case FR_WRITE_PROTECTED:
+            case FR_MKFS_ABORTED:
+            case FR_LOCKED:
+                throw CannotWriteException();
 
             case FR_NO_FILESYSTEM:
                 throw BadFilesystemException();

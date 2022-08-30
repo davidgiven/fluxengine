@@ -20,6 +20,9 @@ public:
     Bytes* operator = (const Bytes& other);
 
 public:
+	static Bytes readFromFile(const std::string& filename);
+
+public:
     /* General purpose methods */
 
     unsigned size() const        { return _high - _low; }

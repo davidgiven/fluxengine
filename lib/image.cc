@@ -15,6 +15,17 @@ Image::Image(std::set<std::shared_ptr<const Sector>>& sectors)
 	calculateSize();
 }
 
+bool Image::empty() const
+{
+	return _sectors.empty();
+}
+
+bool Image::contains(unsigned track, unsigned side, unsigned sectorid) const
+{
+	key_t key = std::make_tuple(track, side, sectorid);
+	return _sectors.find(key) != _sectors.end();
+}
+
 std::shared_ptr<const Sector> Image::get(unsigned track, unsigned side, unsigned sectorid) const
 {
 	static std::shared_ptr<const Sector> NONE;
@@ -35,6 +46,12 @@ std::shared_ptr<Sector> Image::put(unsigned track, unsigned side, unsigned secto
 	sector->logicalSector = sectorid;
 	_sectors[key] = sector;
 	return sector;
+}
+
+void Image::erase(unsigned track, unsigned side, unsigned sectorid)
+{
+	key_t key = std::make_tuple(track, side, sectorid);
+	_sectors.erase(key);
 }
 
 void Image::calculateSize()

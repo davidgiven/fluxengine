@@ -60,6 +60,12 @@ public:
     BadFilesystemException(): FilesystemException("Invalid filesystem") {}
 };
 
+class CannotWriteException : public FilesystemException
+{
+public:
+    CannotWriteException(): FilesystemException("Cannot write file") {}
+};
+
 class ReadOnlyFilesystemException : public FilesystemException
 {
 public:
@@ -95,51 +101,17 @@ public:
 class Filesystem
 {
 public:
-    virtual void create()
-    {
-        throw UnimplementedFilesystemException();
-    }
-
-    virtual FilesystemStatus check()
-    {
-        throw UnimplementedFilesystemException();
-    }
-
-    virtual std::vector<std::unique_ptr<Dirent>> list(const Path& path)
-    {
-        throw UnimplementedFilesystemException();
-    }
-
-    virtual Bytes getFile(const Path& path)
-    {
-        throw UnimplementedFilesystemException();
-    }
-
-    virtual void putFile(const Path& path, const Bytes& data)
-    {
-        throw UnimplementedFilesystemException();
-    }
-
-    virtual std::map<std::string, std::string> getMetadata(const Path& path)
-    {
-        throw UnimplementedFilesystemException();
-    }
-
+    virtual void create();
+    virtual FilesystemStatus check();
+    virtual std::vector<std::unique_ptr<Dirent>> list(const Path& path);
+    virtual Bytes getFile(const Path& path);
+    virtual void putFile(const Path& path, const Bytes& data);
+    virtual std::map<std::string, std::string> getMetadata(const Path& path);
     virtual void putMetadata(
-        const Path& path, const std::map<std::string, std::string>& metadata)
-    {
-        throw UnimplementedFilesystemException();
-    }
-
-    virtual void createDirectory(const Path& path)
-    {
-        throw UnimplementedFilesystemException();
-    }
-
-    virtual void deleteFile(const Path& path)
-    {
-        throw UnimplementedFilesystemException();
-    }
+        const Path& path, const std::map<std::string, std::string>& metadata);
+    virtual void createDirectory(const Path& path);
+    virtual void deleteFile(const Path& path);
+    void flush();
 
 protected:
     Filesystem(std::shared_ptr<SectorInterface> sectors);
@@ -149,7 +121,7 @@ protected:
     Bytes getLogicalSector(uint32_t number, uint32_t count = 1);
     void putLogicalSector(uint32_t number, const Bytes& data);
 
-	unsigned getOffsetOfSector(unsigned track, unsigned side, unsigned sector);
+    unsigned getOffsetOfSector(unsigned track, unsigned side, unsigned sector);
     unsigned getLogicalSectorCount();
     unsigned getLogicalSectorSize(unsigned track = 0, unsigned side = 0);
 
