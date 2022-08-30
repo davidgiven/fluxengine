@@ -101,7 +101,7 @@ public:
 class Filesystem
 {
 public:
-    virtual void create();
+    virtual void create(bool quick, const std::string& name);
     virtual FilesystemStatus check();
     virtual std::vector<std::unique_ptr<Dirent>> list(const Path& path);
     virtual Bytes getFile(const Path& path);

@@ -18,6 +18,11 @@
 
 static FlagGroup flags({&fileFlags});
 
+static StringFlag volumeName({"-n", "--name"}, "volume name", "FEDISK");
+static BoolFlag quick({"-q", "--quick"},
+    "perform quick format (requires the disk to be previously formatted)",
+    false);
+
 int mainFormat(int argc, const char* argv[])
 {
     if (argc == 1)
@@ -27,8 +32,8 @@ int mainFormat(int argc, const char* argv[])
     try
     {
         auto filesystem = createFilesystemFromConfig();
-        filesystem->create();
-		filesystem->flush();
+        filesystem->create(quick, volumeName);
+        filesystem->flush();
     }
     catch (const FilesystemException& e)
     {

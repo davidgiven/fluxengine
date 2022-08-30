@@ -56,9 +56,10 @@ public:
     {
     }
 
-    void create()
+    void create(bool quick, const std::string& volumeName)
     {
-        eraseEverythingOnDisk();
+        if (!quick)
+            eraseEverythingOnDisk();
         AdfMount m(this);
 
         struct Device dev = {};
@@ -67,10 +68,10 @@ public:
         dev.devType = DEVTYPE_FLOPDD;
         dev.cylinders = config.layout().tracks();
         dev.heads = config.layout().sides();
-        dev.sectors = Layout::getSectorsInTrack( Layout::getLayoutOfTrack(0, 0)).size();
+        dev.sectors =
+            Layout::getSectorsInTrack(Layout::getLayoutOfTrack(0, 0)).size();
         adfInitDevice(&dev, nullptr, false);
-        int res = adfCreateFlop(&dev,
-            (char*)"FluxEngine FFS", 0);
+        int res = adfCreateFlop(&dev, (char*)volumeName.c_str(), 0);
         if (res != RC_OK)
             throw CannotWriteException();
     }
@@ -250,7 +251,7 @@ private:
         AdfMount(AmigaFfsFilesystem* self): self(self)
         {
             currentAmigaFfs = self;
-			self->_ffs = nullptr;
+            self->_ffs = nullptr;
 
             adfEnvInitDefault();
         }
