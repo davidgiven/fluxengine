@@ -29,6 +29,13 @@ public:
         return FS_OK;
     }
 
+    void create()
+    {
+        eraseEverythingOnDisk();
+        hfs_format(
+            (const char*)this, 0, HFS_MODE_ANY, "FluxEngine HFS", 0, nullptr);
+    }
+
     std::vector<std::unique_ptr<Dirent>> list(const Path& path)
     {
         HfsMount m(this);

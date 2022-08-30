@@ -3,6 +3,7 @@ include src/formats/build.mk
 FLUXENGINE_SRCS = \
 	src/fe-analysedriveresponse.cc \
 	src/fe-analyselayout.cc \
+	src/fe-format.cc \
 	src/fe-getfile.cc \
 	src/fe-getfileinfo.cc \
 	src/fe-inspect.cc \

@@ -125,6 +125,8 @@ protected:
     unsigned getLogicalSectorCount();
     unsigned getLogicalSectorSize(unsigned track = 0, unsigned side = 0);
 
+    void eraseEverythingOnDisk();
+
 private:
     typedef std::tuple<unsigned, unsigned, unsigned> location_t;
     std::vector<location_t> _locations;

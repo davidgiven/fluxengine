@@ -215,3 +215,9 @@ unsigned Filesystem::getLogicalSectorSize(unsigned track, unsigned side)
     auto trackdata = Layout::getLayoutOfTrack(track, side);
     return trackdata.sector_size();
 }
+
+void Filesystem::eraseEverythingOnDisk()
+{
+    for (int i = 0; i < getLogicalSectorCount(); i++)
+        putLogicalSector(i, Bytes(1));
+}
