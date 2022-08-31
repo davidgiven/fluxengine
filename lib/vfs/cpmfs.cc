@@ -152,10 +152,10 @@ public:
             throw FileNotFoundException();
 
         std::map<std::string, std::string> attributes;
-        attributes["filename"] = dirent->filename;
-        attributes["length"] = fmt::format("{}", dirent->length);
-        attributes["type"] = "file";
-        attributes["mode"] = dirent->mode;
+        attributes[FILENAME] = dirent->filename;
+        attributes[LENGTH] = fmt::format("{}", dirent->length);
+        attributes[FILE_TYPE] = "file";
+        attributes[MODE] = dirent->mode;
         return attributes;
     }
 

@@ -144,10 +144,10 @@ public:
             throw FileNotFoundException();
 
         std::map<std::string, std::string> attributes;
-        attributes["filename"] = de->filename;
-        attributes["length"] = fmt::format("{}", de->length);
-        attributes["mode"] = de->mode;
-        attributes["type"] = "file";
+        attributes[FILENAME] = de->filename;
+        attributes[LENGTH] = fmt::format("{}", de->length);
+        attributes[FILE_TYPE] = "file";
+        attributes[MODE] = de->mode;
         attributes["cbmfs.type"] = toFileType(de->cbm_type);
         attributes["cbmfs.start_track"] = fmt::format("{}", de->start_track);
         attributes["cbmfs.start_sector"] = fmt::format("{}", de->start_sector);

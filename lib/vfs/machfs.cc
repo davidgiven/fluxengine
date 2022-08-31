@@ -87,10 +87,10 @@ public:
             throw FileNotFoundException();
 
         std::map<std::string, std::string> attributes;
-        attributes["filename"] = de.name;
-        attributes["length"] = "0";
-        attributes["type"] = (de.flags & HFS_ISDIR) ? "dir" : "file";
-        attributes["mode"] = (de.flags & HFS_ISLOCKED) ? "L" : "";
+        attributes[FILENAME] = de.name;
+        attributes[LENGTH] = "0";
+        attributes[FILE_TYPE] = (de.flags & HFS_ISDIR) ? "dir" : "file";
+        attributes[MODE] = (de.flags & HFS_ISLOCKED) ? "L" : "";
         attributes["machfs.ctime"] = toIso8601(de.crdate);
         attributes["machfs.mtime"] = toIso8601(de.mddate);
         attributes["machfs.last_backup"] = toIso8601(de.bkdate);

@@ -96,10 +96,10 @@ public:
         std::map<std::string, std::string> attributes;
 
         auto dirent = findFile(path);
-        attributes["filename"] = dirent->filename;
-        attributes["length"] = fmt::format("{}", dirent->length);
-        attributes["type"] = "file";
-        attributes["mode"] = dirent->mode;
+        attributes[FILENAME] = dirent->filename;
+        attributes[LENGTH] = fmt::format("{}", dirent->length);
+        attributes[FILE_TYPE] = "file";
+        attributes[MODE] = dirent->mode;
         attributes["brother120.inode"] = fmt::format("{}", dirent->inode);
         attributes["brother120.start_sector"] =
             fmt::format("{}", dirent->start_sector);

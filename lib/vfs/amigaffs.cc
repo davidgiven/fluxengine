@@ -123,10 +123,10 @@ public:
             throw BadPathException();
 
         std::map<std::string, std::string> attributes;
-        attributes["filename"] = entry->name;
-        attributes["length"] = fmt::format("{}", entry->size);
-        attributes["type"] = (entry->type == ST_FILE) ? "file" : "dir";
-        attributes["mode"] = modeToString(entry->access);
+        attributes[FILENAME] = entry->name;
+        attributes[LENGTH] = fmt::format("{}", entry->size);
+        attributes[FILE_TYPE] = (entry->type == ST_FILE) ? "file" : "dir";
+        attributes[MODE] = modeToString(entry->access);
         attributes["amigaffs.comment"] = entry->comment;
         attributes["amigaffs.sector"] = entry->sector;
 

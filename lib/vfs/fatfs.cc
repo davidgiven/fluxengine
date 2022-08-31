@@ -44,10 +44,10 @@ public:
         char buffer[FF_MAX_SS * 2];
         currentFatFs = this;
         FRESULT res = f_mkfs("", nullptr, buffer, sizeof(buffer));
-		throwError(res);
+        throwError(res);
 
-		mount();
-		f_setlabel(volumeName.c_str());
+        mount();
+        f_setlabel(volumeName.c_str());
     }
 
     FilesystemStatus check()
@@ -96,10 +96,10 @@ public:
         FRESULT res = f_stat(pathstr.c_str(), &filinfo);
         throwError(res);
 
-        attributes["filename"] = filinfo.fname;
-        attributes["length"] = fmt::format("{}", filinfo.fsize);
-        attributes["type"] = (filinfo.fattrib & AM_DIR) ? "dir" : "file";
-        attributes["mode"] = modeToString(filinfo.fattrib);
+        attributes[FILENAME] = filinfo.fname;
+        attributes[LENGTH] = fmt::format("{}", filinfo.fsize);
+        attributes[FILE_TYPE] = (filinfo.fattrib & AM_DIR) ? "dir" : "file";
+        attributes[MODE] = modeToString(filinfo.fattrib);
 
         return attributes;
     }
@@ -180,9 +180,9 @@ public:
             case GET_SECTOR_COUNT:
                 *(DWORD*)buffer = getLogicalSectorCount();
                 break;
-				
-			case CTRL_SYNC:
-				break;
+
+            case CTRL_SYNC:
+                break;
 
             default:
                 return RES_PARERR;
