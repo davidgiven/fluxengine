@@ -24,6 +24,24 @@ public:
     {
     }
 
+    std::map<std::string, std::string> getMetadata()
+    {
+        HfsMount m(this);
+
+        hfsvolent ve;
+        if (hfs_vstat(_vol, &ve))
+            throw BadFilesystemException();
+
+        std::map<std::string, std::string> attributes;
+        attributes[VOLUME_NAME] = ve.name;
+        attributes[TOTAL_BLOCKS] =
+            fmt::format("{}", ve.totbytes / ve.alblocksz);
+        attributes[USED_BLOCKS] =
+            fmt::format("{}", (ve.totbytes - ve.freebytes) / ve.alblocksz);
+        attributes[BLOCK_SIZE] = fmt::format("{}", ve.alblocksz);
+        return attributes;
+    }
+
     FilesystemStatus check()
     {
         return FS_OK;
@@ -38,11 +56,11 @@ public:
             (const char*)this, 0, HFS_MODE_ANY, volumeName.c_str(), 0, nullptr);
     }
 
-    std::vector<std::unique_ptr<Dirent>> list(const Path& path)
+    std::vector<std::shared_ptr<Dirent>> list(const Path& path)
     {
         HfsMount m(this);
 
-        std::vector<std::unique_ptr<Dirent>> results;
+        std::vector<std::shared_ptr<Dirent>> results;
         auto pathstr = ":" + path.to_str(":");
         HfsDir dir(hfs_opendir(_vol, pathstr.c_str()));
         if (!dir)
@@ -55,7 +73,7 @@ public:
             if (r != 0)
                 break;
 
-            auto dirent = std::make_unique<Dirent>();
+            auto dirent = std::make_shared<Dirent>();
             dirent->filename = de.name;
             if (de.flags & HFS_ISDIR)
             {
@@ -69,7 +87,7 @@ public:
                     de.u.file.dsize + de.u.file.rsize + AppleSingle::OVERHEAD;
             }
             dirent->mode = (de.flags & HFS_ISLOCKED) ? "L" : "";
-            results.push_back(std::move(dirent));
+            results.push_back(dirent);
         }
         return results;
     }
@@ -80,17 +98,17 @@ public:
         if (path.size() == 0)
             throw BadPathException();
 
-        std::vector<std::unique_ptr<Dirent>> results;
+        std::vector<std::shared_ptr<Dirent>> results;
         auto pathstr = ":" + path.to_str(":");
         hfsdirent de;
         if (hfs_stat(_vol, pathstr.c_str(), &de))
             throw FileNotFoundException();
 
         std::map<std::string, std::string> attributes;
-        attributes["filename"] = de.name;
-        attributes["length"] = "0";
-        attributes["type"] = (de.flags & HFS_ISDIR) ? "dir" : "file";
-        attributes["mode"] = (de.flags & HFS_ISLOCKED) ? "L" : "";
+        attributes[FILENAME] = de.name;
+        attributes[LENGTH] = "0";
+        attributes[FILE_TYPE] = (de.flags & HFS_ISDIR) ? "dir" : "file";
+        attributes[MODE] = (de.flags & HFS_ISLOCKED) ? "L" : "";
         attributes["machfs.ctime"] = toIso8601(de.crdate);
         attributes["machfs.mtime"] = toIso8601(de.mddate);
         attributes["machfs.last_backup"] = toIso8601(de.bkdate);
@@ -129,7 +147,7 @@ public:
         if (path.size() == 0)
             throw BadPathException();
 
-        std::vector<std::unique_ptr<Dirent>> results;
+        std::vector<std::shared_ptr<Dirent>> results;
         auto pathstr = ":" + path.to_str(":");
         HfsFile file(hfs_open(_vol, pathstr.c_str()));
         if (!file)

@@ -101,19 +101,57 @@ public:
 class Filesystem
 {
 public:
-    virtual void create(bool quick, const std::string& name);
+    static constexpr const char* FILENAME = "filename";
+    static constexpr const char* LENGTH = "length";
+    static constexpr const char* MODE = "mode";
+    static constexpr const char* FILE_TYPE = "file_type";
+
+    static constexpr const char* VOLUME_NAME = "volume_name";
+    static constexpr const char* TOTAL_BLOCKS = "total_blocks";
+    static constexpr const char* USED_BLOCKS = "used_blocks";
+    static constexpr const char* BLOCK_SIZE = "block_size";
+
+public:
+    /* Create a filesystem on the disk. */
+    virtual void create(bool quick, const std::string& volmeName);
+
+    /* Are all sectors on the filesystem present and good? (Does not check
+     * filesystem consistency.) */
     virtual FilesystemStatus check();
-    virtual std::vector<std::unique_ptr<Dirent>> list(const Path& path);
+
+    /* Get volume metadata. */
+    virtual std::map<std::string, std::string> getMetadata();
+
+    /* Update volume metadata. */
+    virtual void putMetadata(
+        const std::map<std::string, std::string>& metadata);
+
+    /* List files in a given directory. */
+    virtual std::vector<std::shared_ptr<Dirent>> list(const Path& path);
+
+    /* Read a file. */
     virtual Bytes getFile(const Path& path);
+
+    /* Write a file. */
     virtual void putFile(const Path& path, const Bytes& data);
+
+    /* Get file metadata. */
     virtual std::map<std::string, std::string> getMetadata(const Path& path);
+
+    /* Update file metadata. */
     virtual void putMetadata(
         const Path& path, const std::map<std::string, std::string>& metadata);
+
+    /* Creates a directory. */
     virtual void createDirectory(const Path& path);
+
+    /* Deletes a file or non-empty directory. */
     virtual void deleteFile(const Path& path);
+
+    /* Flushes any changes back to the disk. */
     void flush();
 
-protected:
+public:
     Filesystem(std::shared_ptr<SectorInterface> sectors);
 
     Bytes getSector(unsigned track, unsigned side, unsigned sector);

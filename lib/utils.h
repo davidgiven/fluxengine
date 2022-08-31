@@ -13,6 +13,7 @@ extern std::string getLeafname(const std::string& value);
 extern std::string toIso8601(time_t t);
 extern std::string quote(const std::string& s);
 extern std::string unhex(const std::string& s);
+extern std::string tohex(const std::string& s);
 
 /* If set, any running job will terminate as soon as possible (with an error).
  */

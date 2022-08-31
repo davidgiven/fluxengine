@@ -36,6 +36,34 @@ public:
     {
     }
 
+    std::map<std::string, std::string> getMetadata()
+    {
+        mount();
+
+        std::map<std::string, std::string> attributes;
+
+        {
+            char buffer[34];
+            FRESULT res = f_getlabel("", buffer, nullptr);
+            throwError(res);
+            attributes[VOLUME_NAME] = buffer;
+        }
+
+        {
+            FATFS* fs;
+            DWORD free_clusters;
+            FRESULT res = f_getfree("", &free_clusters, &fs);
+            throwError(res);
+            int total = (fs->n_fatent - 2) + (fs->database / fs->csize);
+            attributes[TOTAL_BLOCKS] = fmt::format("{}", total);
+            attributes[USED_BLOCKS] = fmt::format("{}", total - free_clusters);
+            attributes[BLOCK_SIZE] =
+                fmt::format("{}", fs->csize * getLogicalSectorSize(0));
+        }
+
+        return attributes;
+    }
+
     void create(bool quick, const std::string& volumeName)
     {
         if (!quick)
@@ -44,10 +72,10 @@ public:
         char buffer[FF_MAX_SS * 2];
         currentFatFs = this;
         FRESULT res = f_mkfs("", nullptr, buffer, sizeof(buffer));
-		throwError(res);
+        throwError(res);
 
-		mount();
-		f_setlabel(volumeName.c_str());
+        mount();
+        f_setlabel(volumeName.c_str());
     }
 
     FilesystemStatus check()
@@ -55,14 +83,14 @@ public:
         return FS_OK;
     }
 
-    std::vector<std::unique_ptr<Dirent>> list(const Path& path)
+    std::vector<std::shared_ptr<Dirent>> list(const Path& path)
     {
         mount();
 
         DIR dir;
         auto pathstr = path.to_str();
         FRESULT res = f_opendir(&dir, pathstr.c_str());
-        std::vector<std::unique_ptr<Dirent>> results;
+        std::vector<std::shared_ptr<Dirent>> results;
 
         for (;;)
         {
@@ -73,13 +101,13 @@ public:
             if (filinfo.fname[0] == 0)
                 break;
 
-            auto dirent = std::make_unique<Dirent>();
+            auto dirent = std::make_shared<Dirent>();
             dirent->filename = filinfo.fname;
             dirent->length = filinfo.fsize;
             dirent->file_type =
                 (filinfo.fattrib & AM_DIR) ? TYPE_DIRECTORY : TYPE_FILE;
             dirent->mode = modeToString(filinfo.fattrib);
-            results.push_back(std::move(dirent));
+            results.push_back(dirent);
         }
 
         f_closedir(&dir);
@@ -96,10 +124,10 @@ public:
         FRESULT res = f_stat(pathstr.c_str(), &filinfo);
         throwError(res);
 
-        attributes["filename"] = filinfo.fname;
-        attributes["length"] = fmt::format("{}", filinfo.fsize);
-        attributes["type"] = (filinfo.fattrib & AM_DIR) ? "dir" : "file";
-        attributes["mode"] = modeToString(filinfo.fattrib);
+        attributes[FILENAME] = filinfo.fname;
+        attributes[LENGTH] = fmt::format("{}", filinfo.fsize);
+        attributes[FILE_TYPE] = (filinfo.fattrib & AM_DIR) ? "dir" : "file";
+        attributes[MODE] = modeToString(filinfo.fattrib);
 
         return attributes;
     }
@@ -180,9 +208,9 @@ public:
             case GET_SECTOR_COUNT:
                 *(DWORD*)buffer = getLogicalSectorCount();
                 break;
-				
-			case CTRL_SYNC:
-				break;
+
+            case CTRL_SYNC:
+                break;
 
             default:
                 return RES_PARERR;

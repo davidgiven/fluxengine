@@ -56,6 +56,22 @@ public:
     {
     }
 
+    std::map<std::string, std::string> getMetadata()
+    {
+        AdfMount m(this);
+        auto* vol = m.mount();
+
+        std::map<std::string, std::string> attributes;
+        attributes[VOLUME_NAME] = vol->volName;
+
+        int total = vol->lastBlock - vol->firstBlock + 1;
+        attributes[TOTAL_BLOCKS] = fmt::format("{}", total);
+        attributes[USED_BLOCKS] =
+            fmt::format("{}", total - adfCountFreeBlocks(vol));
+        attributes[BLOCK_SIZE] = "512";
+        return attributes;
+    }
+
     void create(bool quick, const std::string& volumeName)
     {
         if (!quick)
@@ -81,11 +97,11 @@ public:
         return FS_OK;
     }
 
-    std::vector<std::unique_ptr<Dirent>> list(const Path& path)
+    std::vector<std::shared_ptr<Dirent>> list(const Path& path)
     {
         AdfMount m(this);
 
-        std::vector<std::unique_ptr<Dirent>> results;
+        std::vector<std::shared_ptr<Dirent>> results;
 
         auto* vol = m.mount();
         changeDir(vol, path);
@@ -97,13 +113,13 @@ public:
             auto* entry = (struct Entry*)cell->content;
             cell = cell->next;
 
-            auto dirent = std::make_unique<Dirent>();
+            auto dirent = std::make_shared<Dirent>();
             dirent->filename = entry->name;
             dirent->length = entry->size;
             dirent->file_type =
                 (entry->type == ST_FILE) ? TYPE_FILE : TYPE_DIRECTORY;
             dirent->mode = modeToString(entry->access);
-            results.push_back(std::move(dirent));
+            results.push_back(dirent);
         }
 
         return results;
@@ -123,10 +139,10 @@ public:
             throw BadPathException();
 
         std::map<std::string, std::string> attributes;
-        attributes["filename"] = entry->name;
-        attributes["length"] = fmt::format("{}", entry->size);
-        attributes["type"] = (entry->type == ST_FILE) ? "file" : "dir";
-        attributes["mode"] = modeToString(entry->access);
+        attributes[FILENAME] = entry->name;
+        attributes[LENGTH] = fmt::format("{}", entry->size);
+        attributes[FILE_TYPE] = (entry->type == ST_FILE) ? "file" : "dir";
+        attributes[MODE] = modeToString(entry->access);
         attributes["amigaffs.comment"] = entry->comment;
         attributes["amigaffs.sector"] = entry->sector;
 

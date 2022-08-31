@@ -82,18 +82,44 @@ public:
     {
     }
 
+    std::map<std::string, std::string> getMetadata()
+    {
+        mount();
+
+        unsigned usedBlocks = _dirBlocks;
+        for (int d = 0; d < _config.dir_entries(); d++)
+        {
+            auto entry = getEntry(d);
+            if (!entry)
+                continue;
+
+            for (unsigned block : entry->allocation_map)
+            {
+                if (block)
+                    usedBlocks++;
+            }
+        }
+
+        std::map<std::string, std::string> attributes;
+        attributes[VOLUME_NAME] = "";
+        attributes[TOTAL_BLOCKS] = fmt::format("{}", _filesystemBlocks);
+        attributes[USED_BLOCKS] = fmt::format("{}", usedBlocks);
+        attributes[BLOCK_SIZE] = fmt::format("{}", _config.block_size());
+        return attributes;
+    }
+
     FilesystemStatus check()
     {
         return FS_OK;
     }
 
-    std::vector<std::unique_ptr<Dirent>> list(const Path& path)
+    std::vector<std::shared_ptr<Dirent>> list(const Path& path)
     {
         mount();
         if (!path.empty())
             throw FileNotFoundException();
 
-        std::map<std::string, std::unique_ptr<Dirent>> map;
+        std::map<std::string, std::shared_ptr<Dirent>> map;
         for (int d = 0; d < _config.dir_entries(); d++)
         {
             auto entry = getEntry(d);
@@ -114,7 +140,7 @@ public:
                 dirent->length, entry->extent * 16384 + entry->records * 128);
         }
 
-        std::vector<std::unique_ptr<Dirent>> result;
+        std::vector<std::shared_ptr<Dirent>> result;
         for (auto& e : map)
             result.push_back(std::move(e.second));
         return result;
@@ -126,7 +152,7 @@ public:
         if (path.size() != 1)
             throw BadPathException();
 
-        std::unique_ptr<Dirent> dirent;
+        std::shared_ptr<Dirent> dirent;
         for (int d = 0; d < _config.dir_entries(); d++)
         {
             auto entry = getEntry(d);
@@ -137,7 +163,7 @@ public:
 
             if (!dirent)
             {
-                dirent = std::make_unique<Dirent>();
+                dirent = std::make_shared<Dirent>();
                 dirent->filename = entry->filename;
                 dirent->mode = entry->mode;
                 dirent->length = 0;
@@ -152,10 +178,10 @@ public:
             throw FileNotFoundException();
 
         std::map<std::string, std::string> attributes;
-        attributes["filename"] = dirent->filename;
-        attributes["length"] = fmt::format("{}", dirent->length);
-        attributes["type"] = "file";
-        attributes["mode"] = dirent->mode;
+        attributes[FILENAME] = dirent->filename;
+        attributes[LENGTH] = fmt::format("{}", dirent->length);
+        attributes[FILE_TYPE] = "file";
+        attributes[MODE] = dirent->mode;
         return attributes;
     }
 

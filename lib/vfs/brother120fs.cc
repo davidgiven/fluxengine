@@ -36,7 +36,8 @@ public:
         this->inode = inode;
         brother_type = br.read_8();
         start_sector = br.read_be16();
-        length = br.read_8() * SECTOR_SIZE;
+        sector_length = br.read_8();
+        length = sector_length * SECTOR_SIZE;
         file_type = TYPE_FILE;
         mode = "";
     }
@@ -45,6 +46,60 @@ public:
     int inode;
     int brother_type;
     uint32_t start_sector;
+    uint32_t sector_length;
+};
+
+class BrotherDirectory
+{
+public:
+    BrotherDirectory(Filesystem* fs)
+    {
+        /* Read directory. */
+
+        int inode = 0;
+        for (int block = 0; block < DIRECTORY_SECTORS; block++)
+        {
+            auto bytes = fs->getLogicalSector(block);
+            for (int d = 0; d < SECTOR_SIZE / 16; d++, inode++)
+            {
+                Bytes buffer = bytes.slice(d * 16, 16);
+                if (buffer[0] == 0xf0)
+                    continue;
+
+                auto de = std::make_unique<Brother120Dirent>(inode, buffer);
+                usedSectors += de->sector_length;
+                // dirents.push_back(std::move(de));
+            }
+        }
+
+        /* Read FAT. */
+
+        Bytes bytes = fs->getLogicalSector(FAT_START_SECTOR, FAT_SECTORS);
+        ByteReader br(bytes);
+
+        fat.push_back(0xffff);
+        for (int sector = 1; sector != SECTOR_COUNT; sector++)
+            fat.push_back(br.read_be16());
+    }
+
+    std::unique_ptr<Brother120Dirent> findFile(const Path& path)
+    {
+        if (path.size() != 1)
+            throw BadPathException();
+
+        for (auto& dirent : dirents)
+        {
+            if (dirent->filename == path[0])
+                return std::move(dirent);
+        }
+
+        throw FileNotFoundException();
+    }
+
+public:
+    std::vector<uint16_t> fat;
+    std::vector<std::unique_ptr<Brother120Dirent>> dirents;
+    uint32_t usedSectors = 0;
 };
 
 class Brother120Filesystem : public Filesystem
@@ -57,18 +112,32 @@ public:
     {
     }
 
+    std::map<std::string, std::string> getMetadata()
+    {
+        BrotherDirectory dir(this);
+
+        std::map<std::string, std::string> attributes;
+        attributes[VOLUME_NAME] = "";
+        attributes[TOTAL_BLOCKS] = fmt::format("{}", getLogicalSectorCount());
+        attributes[USED_BLOCKS] = fmt::format("{}", dir.usedSectors);
+        attributes[BLOCK_SIZE] = fmt::format("{}", SECTOR_SIZE);
+        return attributes;
+    }
+
     FilesystemStatus check()
     {
         return FS_OK;
     }
 
-    std::vector<std::unique_ptr<Dirent>> list(const Path& path)
+    std::vector<std::shared_ptr<Dirent>> list(const Path& path)
     {
         if (!path.empty())
             throw FileNotFoundException();
 
-        std::vector<std::unique_ptr<Dirent>> result;
-        for (auto& dirent : findAllFiles())
+        BrotherDirectory dir(this);
+
+        std::vector<std::shared_ptr<Dirent>> result;
+        for (auto& dirent : dir.dirents)
             result.push_back(std::move(dirent));
 
         return result;
@@ -76,8 +145,8 @@ public:
 
     Bytes getFile(const Path& path)
     {
-        auto fat = readFat();
-        auto dirent = findFile(path);
+        BrotherDirectory dir(this);
+        auto dirent = dir.findFile(path);
         int sector = dirent->start_sector;
 
         Bytes data;
@@ -85,7 +154,7 @@ public:
         while ((sector != 0) && (sector != 0xffff))
         {
             bw += getLogicalSector(sector - 1);
-            sector = fat.at(sector);
+            sector = dir.fat.at(sector);
         }
 
         return data;
@@ -95,66 +164,18 @@ public:
     {
         std::map<std::string, std::string> attributes;
 
-        auto dirent = findFile(path);
-        attributes["filename"] = dirent->filename;
-        attributes["length"] = fmt::format("{}", dirent->length);
-        attributes["type"] = "file";
-        attributes["mode"] = dirent->mode;
+        BrotherDirectory dir(this);
+        auto dirent = dir.findFile(path);
+        attributes[FILENAME] = dirent->filename;
+        attributes[LENGTH] = fmt::format("{}", dirent->length);
+        attributes[FILE_TYPE] = "file";
+        attributes[MODE] = dirent->mode;
         attributes["brother120.inode"] = fmt::format("{}", dirent->inode);
         attributes["brother120.start_sector"] =
             fmt::format("{}", dirent->start_sector);
         attributes["brother120.type"] = fmt::format("{}", dirent->brother_type);
 
         return attributes;
-    }
-
-private:
-    std::vector<uint32_t> readFat()
-    {
-        Bytes bytes = getLogicalSector(FAT_START_SECTOR, FAT_SECTORS);
-        ByteReader br(bytes);
-        std::vector<uint32_t> table;
-
-        table.push_back(0xffff);
-        for (int sector = 1; sector != SECTOR_COUNT; sector++)
-            table.push_back(br.read_be16());
-
-        return table;
-    }
-
-    std::vector<std::unique_ptr<Brother120Dirent>> findAllFiles()
-    {
-        std::vector<std::unique_ptr<Brother120Dirent>> result;
-        int inode = 0;
-        for (int block = 0; block < DIRECTORY_SECTORS; block++)
-        {
-            auto bytes = getLogicalSector(block);
-            for (int d = 0; d < SECTOR_SIZE / 16; d++, inode++)
-            {
-                Bytes buffer = bytes.slice(d * 16, 16);
-                if (buffer[0] == 0xf0)
-                    continue;
-
-                result.push_back(
-                    std::make_unique<Brother120Dirent>(inode, buffer));
-            }
-        }
-
-        return result;
-    }
-
-    std::unique_ptr<Brother120Dirent> findFile(const Path& path)
-    {
-        if (path.size() != 1)
-            throw BadPathException();
-
-        for (auto& dirent : findAllFiles())
-        {
-            if (dirent->filename == path[0])
-                return std::move(dirent);
-        }
-
-        throw FileNotFoundException();
     }
 
 private:
