@@ -92,7 +92,7 @@ public:
         Directory dir(this);
 
         std::map<std::string, std::string> attributes;
-        attributes[VOLUME_NAME] = "";
+        attributes[VOLUME_NAME] = dir.volumeName;
         attributes[TOTAL_BLOCKS] = fmt::format("{}", getLogicalSectorCount());
         attributes[USED_BLOCKS] = fmt::format("{}", dir.usedSectors);
         attributes[BLOCK_SIZE] = "256";

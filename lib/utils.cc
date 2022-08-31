@@ -164,7 +164,7 @@ std::string tohex(const std::string& s)
         if ((b >= 32) && (b <= 126))
             ss << (char)b;
         else
-            ss << fmt::format("%{:2x}", b);
+            ss << fmt::format("%{:02x}", b);
     }
 
     return ss.str();
