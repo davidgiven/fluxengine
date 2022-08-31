@@ -86,7 +86,7 @@ public:
     {
         mount();
 
-		unsigned usedBlocks = _dirBlocks;
+        unsigned usedBlocks = _dirBlocks;
         for (int d = 0; d < _config.dir_entries(); d++)
         {
             auto entry = getEntry(d);
@@ -96,15 +96,15 @@ public:
             for (unsigned block : entry->allocation_map)
             {
                 if (block)
-					usedBlocks++;
+                    usedBlocks++;
             }
         }
 
         std::map<std::string, std::string> attributes;
-		attributes[VOLUME_NAME] = "";
-		attributes[TOTAL_BLOCKS] = fmt::format("{}", _filesystemBlocks);
-		attributes[USED_BLOCKS] = fmt::format("{}", usedBlocks);
-		attributes[BLOCK_SIZE] = fmt::format("{}", _config.block_size());
+        attributes[VOLUME_NAME] = "";
+        attributes[TOTAL_BLOCKS] = fmt::format("{}", _filesystemBlocks);
+        attributes[USED_BLOCKS] = fmt::format("{}", usedBlocks);
+        attributes[BLOCK_SIZE] = fmt::format("{}", _config.block_size());
         return attributes;
     }
 
