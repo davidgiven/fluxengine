@@ -15,9 +15,9 @@ FLUXENGINE_GUI_OBJS = \
 	)
 OBJS += $(FLUXENGINE_GUI_OBJS)
 $(FLUXENGINE_GUI_SRCS): | $(PROTO_HDRS)
-$(FLUXENGINE_GUI_OBJS): CFLAGS += $(shell $(WX_CONFIG) --cxxflags core base)
+$(FLUXENGINE_GUI_OBJS): CFLAGS += $(shell $(WX_CONFIG) --cxxflags core base adv)
 FLUXENGINE_GUI_BIN = $(OBJDIR)/fluxengine-gui.exe
-$(FLUXENGINE_GUI_BIN): LDFLAGS += $(shell $(WX_CONFIG) --libs core base)
+$(FLUXENGINE_GUI_BIN): LDFLAGS += $(shell $(WX_CONFIG) --libs core base adv)
 $(FLUXENGINE_GUI_BIN): $(FLUXENGINE_GUI_OBJS)
 
 $(call use-pkgconfig, $(FLUXENGINE_GUI_BIN), $(FLUXENGINE_GUI_OBJS), fmt)
