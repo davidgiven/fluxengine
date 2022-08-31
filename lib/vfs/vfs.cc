@@ -33,7 +33,7 @@ std::string Path::to_str(const std::string sep) const
     return join(*this, sep);
 }
 
-void Filesystem::create()
+void Filesystem::create(bool quick, const std::string& volumeName)
 {
     throw UnimplementedFilesystemException();
 }
@@ -214,4 +214,10 @@ unsigned Filesystem::getLogicalSectorSize(unsigned track, unsigned side)
 {
     auto trackdata = Layout::getLayoutOfTrack(track, side);
     return trackdata.sector_size();
+}
+
+void Filesystem::eraseEverythingOnDisk()
+{
+    for (int i = 0; i < getLogicalSectorCount(); i++)
+        putLogicalSector(i, Bytes(1));
 }

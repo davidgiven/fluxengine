@@ -36,6 +36,20 @@ public:
     {
     }
 
+    void create(bool quick, const std::string& volumeName)
+    {
+        if (!quick)
+            eraseEverythingOnDisk();
+
+        char buffer[FF_MAX_SS * 2];
+        currentFatFs = this;
+        FRESULT res = f_mkfs("", nullptr, buffer, sizeof(buffer));
+		throwError(res);
+
+		mount();
+		f_setlabel(volumeName.c_str());
+    }
+
     FilesystemStatus check()
     {
         return FS_OK;
@@ -162,9 +176,14 @@ public:
             case GET_SECTOR_SIZE:
                 *(DWORD*)buffer = getLogicalSectorSize();
                 break;
+
             case GET_SECTOR_COUNT:
                 *(DWORD*)buffer = getLogicalSectorCount();
                 break;
+				
+			case CTRL_SYNC:
+				break;
+
             default:
                 return RES_PARERR;
         }

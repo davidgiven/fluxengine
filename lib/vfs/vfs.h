@@ -101,7 +101,7 @@ public:
 class Filesystem
 {
 public:
-    virtual void create();
+    virtual void create(bool quick, const std::string& name);
     virtual FilesystemStatus check();
     virtual std::vector<std::unique_ptr<Dirent>> list(const Path& path);
     virtual Bytes getFile(const Path& path);
@@ -124,6 +124,8 @@ protected:
     unsigned getOffsetOfSector(unsigned track, unsigned side, unsigned sector);
     unsigned getLogicalSectorCount();
     unsigned getLogicalSectorSize(unsigned track = 0, unsigned side = 0);
+
+    void eraseEverythingOnDisk();
 
 private:
     typedef std::tuple<unsigned, unsigned, unsigned> location_t;

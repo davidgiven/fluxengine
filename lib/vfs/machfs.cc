@@ -29,6 +29,15 @@ public:
         return FS_OK;
     }
 
+    void create(bool quick, const std::string& volumeName)
+    {
+        if (!quick)
+            eraseEverythingOnDisk();
+
+        hfs_format(
+            (const char*)this, 0, HFS_MODE_ANY, volumeName.c_str(), 0, nullptr);
+    }
+
     std::vector<std::unique_ptr<Dirent>> list(const Path& path)
     {
         HfsMount m(this);
