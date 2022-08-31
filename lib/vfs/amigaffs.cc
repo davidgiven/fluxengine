@@ -56,6 +56,22 @@ public:
     {
     }
 
+    std::map<std::string, std::string> getMetadata()
+    {
+        AdfMount m(this);
+        auto* vol = m.mount();
+
+        std::map<std::string, std::string> attributes;
+        attributes[VOLUME_NAME] = vol->volName;
+
+        int total = vol->lastBlock - vol->firstBlock + 1;
+        attributes[TOTAL_BLOCKS] = fmt::format("{}", total);
+        attributes[USED_BLOCKS] =
+            fmt::format("{}", total - adfCountFreeBlocks(vol));
+        attributes[BLOCK_SIZE] = "512";
+        return attributes;
+    }
+
     void create(bool quick, const std::string& volumeName)
     {
         if (!quick)
