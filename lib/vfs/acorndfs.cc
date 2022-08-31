@@ -133,7 +133,7 @@ public:
 
     Bytes getFile(const Path& path)
     {
-		AcornDfsDirectory dir(this);
+        AcornDfsDirectory dir(this);
         auto dirent = dir.findFile(path);
         int sectors = (dirent->length + 255) / 256;
 
@@ -153,7 +153,7 @@ public:
     {
         std::map<std::string, std::string> attributes;
 
-		AcornDfsDirectory dir(this);
+        AcornDfsDirectory dir(this);
         auto dirent = dir.findFile(path);
         attributes[FILENAME] = dirent->filename;
         attributes[LENGTH] = fmt::format("{}", dirent->length);
@@ -172,7 +172,6 @@ public:
     }
 
 private:
-
 private:
     const AcornDfsProto& _config;
 };

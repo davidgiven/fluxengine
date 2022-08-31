@@ -54,7 +54,7 @@ class BrotherDirectory
 public:
     BrotherDirectory(Filesystem* fs)
     {
-		/* Read directory. */
+        /* Read directory. */
 
         int inode = 0;
         for (int block = 0; block < DIRECTORY_SECTORS; block++)
@@ -68,11 +68,11 @@ public:
 
                 auto de = std::make_unique<Brother120Dirent>(inode, buffer);
                 usedSectors += de->sector_length;
-                //dirents.push_back(std::move(de));
+                // dirents.push_back(std::move(de));
             }
         }
 
-		/* Read FAT. */
+        /* Read FAT. */
 
         Bytes bytes = fs->getLogicalSector(FAT_START_SECTOR, FAT_SECTORS);
         ByteReader br(bytes);
@@ -97,7 +97,7 @@ public:
     }
 
 public:
-	std::vector<uint16_t> fat;
+    std::vector<uint16_t> fat;
     std::vector<std::unique_ptr<Brother120Dirent>> dirents;
     uint32_t usedSectors = 0;
 };
@@ -134,7 +134,7 @@ public:
         if (!path.empty())
             throw FileNotFoundException();
 
-		BrotherDirectory dir(this);
+        BrotherDirectory dir(this);
 
         std::vector<std::shared_ptr<Dirent>> result;
         for (auto& dirent : dir.dirents)
@@ -145,7 +145,7 @@ public:
 
     Bytes getFile(const Path& path)
     {
-		BrotherDirectory dir(this);
+        BrotherDirectory dir(this);
         auto dirent = dir.findFile(path);
         int sector = dirent->start_sector;
 
@@ -164,7 +164,7 @@ public:
     {
         std::map<std::string, std::string> attributes;
 
-		BrotherDirectory dir(this);
+        BrotherDirectory dir(this);
         auto dirent = dir.findFile(path);
         attributes[FILENAME] = dirent->filename;
         attributes[LENGTH] = fmt::format("{}", dirent->length);
