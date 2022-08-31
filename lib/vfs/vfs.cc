@@ -53,7 +53,7 @@ void Filesystem::putMetadata(const std::map<std::string, std::string>& metadata)
     throw UnimplementedFilesystemException();
 }
 
-std::vector<std::unique_ptr<Dirent>> Filesystem::list(const Path& path)
+std::vector<std::shared_ptr<Dirent>> Filesystem::list(const Path& path)
 {
     throw UnimplementedFilesystemException();
 }

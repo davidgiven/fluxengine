@@ -129,14 +129,14 @@ public:
         return FS_OK;
     }
 
-    std::vector<std::unique_ptr<Dirent>> list(const Path& path)
+    std::vector<std::shared_ptr<Dirent>> list(const Path& path)
     {
         if (!path.empty())
             throw FileNotFoundException();
 
 		BrotherDirectory dir(this);
 
-        std::vector<std::unique_ptr<Dirent>> result;
+        std::vector<std::shared_ptr<Dirent>> result;
         for (auto& dirent : dir.dirents)
             result.push_back(std::move(dirent));
 

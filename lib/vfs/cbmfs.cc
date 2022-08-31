@@ -107,12 +107,12 @@ public:
         return FS_OK;
     }
 
-    std::vector<std::unique_ptr<Dirent>> list(const Path& path)
+    std::vector<std::shared_ptr<Dirent>> list(const Path& path)
     {
         if (path.size() != 0)
             throw BadPathException();
 
-        std::vector<std::unique_ptr<Dirent>> results;
+        std::vector<std::shared_ptr<Dirent>> results;
         uint8_t t = _config.directory_track();
         uint8_t s = 1;
         while (t != 0xff)
@@ -125,7 +125,7 @@ public:
                 if (dbuf[2] == 0)
                     continue;
 
-                results.push_back(std::make_unique<CbmfsDirent>(dbuf));
+                results.push_back(std::make_shared<CbmfsDirent>(dbuf));
             }
 
             t = b[0] - 1;
@@ -193,7 +193,7 @@ public:
     }
 
 private:
-    std::unique_ptr<CbmfsDirent> findFile(const std::string& filename)
+    std::shared_ptr<CbmfsDirent> findFile(const std::string& filename)
     {
         uint8_t t = _config.directory_track();
         uint8_t s = 1;
@@ -207,7 +207,7 @@ private:
                 if (dbuf[2] == 0)
                     continue;
 
-                auto de = std::make_unique<CbmfsDirent>(dbuf);
+                auto de = std::make_shared<CbmfsDirent>(dbuf);
                 if (de->filename == filename)
                     return de;
             }

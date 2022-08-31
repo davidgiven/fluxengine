@@ -127,7 +127,7 @@ public:
         const std::map<std::string, std::string>& metadata);
 
     /* List files in a given directory. */
-    virtual std::vector<std::unique_ptr<Dirent>> list(const Path& path);
+    virtual std::vector<std::shared_ptr<Dirent>> list(const Path& path);
 
     /* Read a file. */
     virtual Bytes getFile(const Path& path);

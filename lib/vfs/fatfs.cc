@@ -83,14 +83,14 @@ public:
         return FS_OK;
     }
 
-    std::vector<std::unique_ptr<Dirent>> list(const Path& path)
+    std::vector<std::shared_ptr<Dirent>> list(const Path& path)
     {
         mount();
 
         DIR dir;
         auto pathstr = path.to_str();
         FRESULT res = f_opendir(&dir, pathstr.c_str());
-        std::vector<std::unique_ptr<Dirent>> results;
+        std::vector<std::shared_ptr<Dirent>> results;
 
         for (;;)
         {
@@ -101,13 +101,13 @@ public:
             if (filinfo.fname[0] == 0)
                 break;
 
-            auto dirent = std::make_unique<Dirent>();
+            auto dirent = std::make_shared<Dirent>();
             dirent->filename = filinfo.fname;
             dirent->length = filinfo.fsize;
             dirent->file_type =
                 (filinfo.fattrib & AM_DIR) ? TYPE_DIRECTORY : TYPE_FILE;
             dirent->mode = modeToString(filinfo.fattrib);
-            results.push_back(std::move(dirent));
+            results.push_back(dirent);
         }
 
         f_closedir(&dir);

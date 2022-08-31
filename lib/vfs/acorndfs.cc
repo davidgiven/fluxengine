@@ -56,9 +56,9 @@ public:
             auto bytes0 = sector0.slice(i * 8 + 8, 8);
             auto bytes1 = sector1.slice(i * 8 + 8, 8);
 
-            auto de = std::make_unique<AcornDfsDirent>(i, bytes0, bytes1);
+            auto de = std::make_shared<AcornDfsDirent>(i, bytes0, bytes1);
             usedSectors += de->sector_count;
-            dirents.push_back(std::move(de));
+            dirents.push_back(de);
         }
 
         {
@@ -71,10 +71,24 @@ public:
         }
     }
 
+    std::shared_ptr<AcornDfsDirent> findFile(const Path& path)
+    {
+        if (path.size() != 1)
+            throw BadPathException();
+
+        for (auto& dirent : dirents)
+        {
+            if (dirent->filename == path[0])
+                return dirent;
+        }
+
+        throw FileNotFoundException();
+    }
+
 public:
     std::string volumeName;
     unsigned usedSectors = 0;
-    std::vector<std::unique_ptr<AcornDfsDirent>> dirents;
+    std::vector<std::shared_ptr<AcornDfsDirent>> dirents;
 };
 
 class AcornDfsFilesystem : public Filesystem
@@ -104,22 +118,23 @@ public:
         return FS_OK;
     }
 
-    std::vector<std::unique_ptr<Dirent>> list(const Path& path)
+    std::vector<std::shared_ptr<Dirent>> list(const Path& path)
     {
         if (!path.empty())
             throw FileNotFoundException();
         AcornDfsDirectory dir(this);
 
-        std::vector<std::unique_ptr<Dirent>> result;
+        std::vector<std::shared_ptr<Dirent>> result;
         for (auto& dirent : dir.dirents)
-            result.push_back(std::move(dirent));
+            result.push_back(dirent);
 
         return result;
     }
 
     Bytes getFile(const Path& path)
     {
-        auto dirent = findFile(path);
+		AcornDfsDirectory dir(this);
+        auto dirent = dir.findFile(path);
         int sectors = (dirent->length + 255) / 256;
 
         Bytes data;
@@ -138,7 +153,8 @@ public:
     {
         std::map<std::string, std::string> attributes;
 
-        auto dirent = findFile(path);
+		AcornDfsDirectory dir(this);
+        auto dirent = dir.findFile(path);
         attributes[FILENAME] = dirent->filename;
         attributes[LENGTH] = fmt::format("{}", dirent->length);
         attributes[FILE_TYPE] = "file";
@@ -156,20 +172,6 @@ public:
     }
 
 private:
-    std::unique_ptr<AcornDfsDirent> findFile(const Path& path)
-    {
-        if (path.size() != 1)
-            throw BadPathException();
-
-        AcornDfsDirectory dir(this);
-        for (auto& dirent : dir.dirents)
-        {
-            if (dirent->filename == path[0])
-                return std::move(dirent);
-        }
-
-        throw FileNotFoundException();
-    }
 
 private:
     const AcornDfsProto& _config;

@@ -97,11 +97,11 @@ public:
         return FS_OK;
     }
 
-    std::vector<std::unique_ptr<Dirent>> list(const Path& path)
+    std::vector<std::shared_ptr<Dirent>> list(const Path& path)
     {
         AdfMount m(this);
 
-        std::vector<std::unique_ptr<Dirent>> results;
+        std::vector<std::shared_ptr<Dirent>> results;
 
         auto* vol = m.mount();
         changeDir(vol, path);
@@ -113,13 +113,13 @@ public:
             auto* entry = (struct Entry*)cell->content;
             cell = cell->next;
 
-            auto dirent = std::make_unique<Dirent>();
+            auto dirent = std::make_shared<Dirent>();
             dirent->filename = entry->name;
             dirent->length = entry->size;
             dirent->file_type =
                 (entry->type == ST_FILE) ? TYPE_FILE : TYPE_DIRECTORY;
             dirent->mode = modeToString(entry->access);
-            results.push_back(std::move(dirent));
+            results.push_back(dirent);
         }
 
         return results;

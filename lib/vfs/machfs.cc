@@ -56,11 +56,11 @@ public:
             (const char*)this, 0, HFS_MODE_ANY, volumeName.c_str(), 0, nullptr);
     }
 
-    std::vector<std::unique_ptr<Dirent>> list(const Path& path)
+    std::vector<std::shared_ptr<Dirent>> list(const Path& path)
     {
         HfsMount m(this);
 
-        std::vector<std::unique_ptr<Dirent>> results;
+        std::vector<std::shared_ptr<Dirent>> results;
         auto pathstr = ":" + path.to_str(":");
         HfsDir dir(hfs_opendir(_vol, pathstr.c_str()));
         if (!dir)
@@ -73,7 +73,7 @@ public:
             if (r != 0)
                 break;
 
-            auto dirent = std::make_unique<Dirent>();
+            auto dirent = std::make_shared<Dirent>();
             dirent->filename = de.name;
             if (de.flags & HFS_ISDIR)
             {
@@ -87,7 +87,7 @@ public:
                     de.u.file.dsize + de.u.file.rsize + AppleSingle::OVERHEAD;
             }
             dirent->mode = (de.flags & HFS_ISLOCKED) ? "L" : "";
-            results.push_back(std::move(dirent));
+            results.push_back(dirent);
         }
         return results;
     }
@@ -98,7 +98,7 @@ public:
         if (path.size() == 0)
             throw BadPathException();
 
-        std::vector<std::unique_ptr<Dirent>> results;
+        std::vector<std::shared_ptr<Dirent>> results;
         auto pathstr = ":" + path.to_str(":");
         hfsdirent de;
         if (hfs_stat(_vol, pathstr.c_str(), &de))
@@ -147,7 +147,7 @@ public:
         if (path.size() == 0)
             throw BadPathException();
 
-        std::vector<std::unique_ptr<Dirent>> results;
+        std::vector<std::shared_ptr<Dirent>> results;
         auto pathstr = ":" + path.to_str(":");
         HfsFile file(hfs_open(_vol, pathstr.c_str()));
         if (!file)
