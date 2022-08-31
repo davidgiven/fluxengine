@@ -39,10 +39,10 @@ public:
     bool locked;
 };
 
-class Directory
+class AcornDfsDirectory
 {
 public:
-    Directory(Filesystem* fs)
+    AcornDfsDirectory(Filesystem* fs)
     {
         auto sector0 = fs->getLogicalSector(0);
         auto sector1 = fs->getLogicalSector(1);
@@ -89,7 +89,7 @@ public:
 
     std::map<std::string, std::string> getMetadata()
     {
-        Directory dir(this);
+        AcornDfsDirectory dir(this);
 
         std::map<std::string, std::string> attributes;
         attributes[VOLUME_NAME] = dir.volumeName;
@@ -108,7 +108,7 @@ public:
     {
         if (!path.empty())
             throw FileNotFoundException();
-        Directory dir(this);
+        AcornDfsDirectory dir(this);
 
         std::vector<std::unique_ptr<Dirent>> result;
         for (auto& dirent : dir.dirents)
@@ -161,7 +161,7 @@ private:
         if (path.size() != 1)
             throw BadPathException();
 
-        Directory dir(this);
+        AcornDfsDirectory dir(this);
         for (auto& dirent : dir.dirents)
         {
             if (dirent->filename == path[0])
