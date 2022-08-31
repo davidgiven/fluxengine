@@ -24,6 +24,24 @@ public:
     {
     }
 
+    std::map<std::string, std::string> getMetadata()
+    {
+        HfsMount m(this);
+
+        hfsvolent ve;
+        if (hfs_vstat(_vol, &ve))
+            throw BadFilesystemException();
+
+        std::map<std::string, std::string> attributes;
+        attributes[VOLUME_NAME] = ve.name;
+        attributes[TOTAL_BLOCKS] =
+            fmt::format("{}", ve.totbytes / ve.alblocksz);
+        attributes[USED_BLOCKS] =
+            fmt::format("{}", (ve.totbytes - ve.freebytes) / ve.alblocksz);
+        attributes[BLOCK_SIZE] = fmt::format("{}", ve.alblocksz);
+        return attributes;
+    }
+
     FilesystemStatus check()
     {
         return FS_OK;
