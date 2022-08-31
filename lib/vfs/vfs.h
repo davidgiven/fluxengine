@@ -151,7 +151,7 @@ public:
     /* Flushes any changes back to the disk. */
     void flush();
 
-protected:
+public:
     Filesystem(std::shared_ptr<SectorInterface> sectors);
 
     Bytes getSector(unsigned track, unsigned side, unsigned sector);

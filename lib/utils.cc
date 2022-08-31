@@ -1,5 +1,7 @@
 #include "globals.h"
 #include "utils.h"
+#include "lib/bytes.h"
+#include <fmt/format.h>
 #include <iomanip>
 
 bool emergencyStop = false;
@@ -151,5 +153,20 @@ std::string unhex(const std::string& s)
 	}
 
 	return sout.str();
+}
+
+std::string tohex(const std::string& s)
+{
+    std::stringstream ss;
+
+    for (uint8_t b : s)
+    {
+        if ((b >= 32) && (b <= 126))
+            ss << (char)b;
+        else
+            ss << fmt::format("%{:2x}", b);
+    }
+
+    return ss.str();
 }
 
