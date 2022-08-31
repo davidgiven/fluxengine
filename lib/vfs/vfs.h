@@ -101,15 +101,15 @@ public:
 class Filesystem
 {
 public:
-	static constexpr const char* FILENAME = "filename";
-	static constexpr const char* LENGTH = "length";
-	static constexpr const char* MODE = "mode";
-	static constexpr const char* FILE_TYPE = "file_type";
+    static constexpr const char* FILENAME = "filename";
+    static constexpr const char* LENGTH = "length";
+    static constexpr const char* MODE = "mode";
+    static constexpr const char* FILE_TYPE = "file_type";
 
-	static constexpr const char* VOLUME_NAME = "volume_name";
-	static constexpr const char* TOTAL_BLOCKS = "total_blocks";
-	static constexpr const char* USED_BLOCKS = "used_blocks";
-	static constexpr const char* BLOCK_SIZE = "block_size";
+    static constexpr const char* VOLUME_NAME = "volume_name";
+    static constexpr const char* TOTAL_BLOCKS = "total_blocks";
+    static constexpr const char* USED_BLOCKS = "used_blocks";
+    static constexpr const char* BLOCK_SIZE = "block_size";
 
 public:
     /* Create a filesystem on the disk. */

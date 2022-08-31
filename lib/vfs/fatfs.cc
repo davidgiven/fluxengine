@@ -36,6 +36,34 @@ public:
     {
     }
 
+    std::map<std::string, std::string> getMetadata()
+    {
+        mount();
+
+        std::map<std::string, std::string> attributes;
+
+        {
+            char buffer[34];
+            FRESULT res = f_getlabel("", buffer, nullptr);
+            throwError(res);
+            attributes[VOLUME_NAME] = buffer;
+        }
+
+        {
+            FATFS* fs;
+            DWORD free_clusters;
+            FRESULT res = f_getfree("", &free_clusters, &fs);
+            throwError(res);
+            int total = (fs->n_fatent - 2) + (fs->database / fs->csize);
+            attributes[TOTAL_BLOCKS] = fmt::format("{}", total);
+            attributes[USED_BLOCKS] = fmt::format("{}", total - free_clusters);
+            attributes[BLOCK_SIZE] =
+                fmt::format("{}", fs->csize * getLogicalSectorSize(0));
+        }
+
+        return attributes;
+    }
+
     void create(bool quick, const std::string& volumeName)
     {
         if (!quick)
