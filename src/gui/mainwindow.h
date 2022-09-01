@@ -17,6 +17,7 @@ public:
 private:
     void OnExit(wxCommandEvent& event);
 	void OnStopButton(wxCommandEvent&);
+	void OnConfigRadioButtonClicked(wxCommandEvent&);
 	void OnReadFluxButton(wxCommandEvent&);
 	void OnReadImageButton(wxCommandEvent&);
 	void OnWriteFluxButton(wxCommandEvent&);

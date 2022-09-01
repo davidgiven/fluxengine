@@ -19,8 +19,11 @@
 
 extern const std::map<std::string, std::string> formats;
 
+#define CONFIG_SOURCESINK "SourceSink"
 #define CONFIG_FORMAT "Format"
-#define CONFIG_FLUX "FluxSourceSink"
+#define CONFIG_EXTRACONFIG "ExtraConfig"
+#define CONFIG_FLUXIMAGE "FluxImage"
+#define CONFIG_DISKIMAGE "DiskImage"
 
 MainWindow::MainWindow():
 	MainWindowGen(nullptr),
@@ -63,17 +66,24 @@ MainWindow::MainWindow():
     if (MainWindow::formatChoice->GetCount() > 0)
         formatChoice->SetSelection(defaultFormat);
 
-	wxString defaultFluxSourceSink = fluxSourceSinkCombo->GetString(0);
-	_config.Read(CONFIG_FLUX, &defaultFluxSourceSink);
-    fluxSourceSinkCombo->SetValue(defaultFluxSourceSink);
+	//wxString defaultFluxSourceSink = sourceCombo->GetString(0);
+	//_config.Read(CONFIG_FLUX, &defaultFluxSourceSink);
+    //sourceCombo->SetValue(defaultFluxSourceSink);
+
+	realDiskRadioButton->Bind(wxEVT_RADIOBUTTON, &MainWindow::OnConfigRadioButtonClicked, this);
+	fluxImageRadioButton->Bind(wxEVT_RADIOBUTTON, &MainWindow::OnConfigRadioButtonClicked, this);
+	diskImageRadioButton->Bind(wxEVT_RADIOBUTTON, &MainWindow::OnConfigRadioButtonClicked, this);
+	realDiskRadioButton->SetValue(true);
+	wxCommandEvent dummyEvent;
+	OnConfigRadioButtonClicked(dummyEvent);
 
 	formatChoice->Bind(wxEVT_COMMAND_CHOICE_SELECTED, &MainWindow::OnControlsChanged, this);
-	fluxSourceSinkCombo->Bind(wxEVT_TEXT, &MainWindow::OnControlsChanged, this);
-    readFluxButton->Bind(wxEVT_BUTTON, &MainWindow::OnReadFluxButton, this);
-    readImageButton->Bind(wxEVT_BUTTON, &MainWindow::OnReadImageButton, this);
-	writeFluxButton->Bind(wxEVT_BUTTON, &MainWindow::OnWriteFluxButton, this);
-    writeImageButton->Bind(wxEVT_BUTTON, &MainWindow::OnWriteImageButton, this);
-    stopButton->Bind(wxEVT_BUTTON, &MainWindow::OnStopButton, this);
+	//sourceCombo->Bind(wxEVT_TEXT, &MainWindow::OnControlsChanged, this);
+    //readFluxButton->Bind(wxEVT_BUTTON, &MainWindow::OnReadFluxButton, this);
+    //readImageButton->Bind(wxEVT_BUTTON, &MainWindow::OnReadImageButton, this);
+	//writeFluxButton->Bind(wxEVT_BUTTON, &MainWindow::OnWriteFluxButton, this);
+    //writeImageButton->Bind(wxEVT_BUTTON, &MainWindow::OnWriteImageButton, this);
+    //stopTool->Bind(wxEVT_BUTTON, &MainWindow::OnStopButton, this);
 	visualiser->Bind(TRACK_SELECTION_EVENT, &MainWindow::OnTrackSelection, this);
 
     UpdateState();
@@ -84,12 +94,29 @@ void MainWindow::OnExit(wxCommandEvent& event)
     Close(true);
 }
 
+void MainWindow::OnConfigRadioButtonClicked(wxCommandEvent&)
+{
+	auto configRadioButton = [&](wxRadioButton* button) {
+		auto* following = button->GetNextSibling();
+		if (button->GetValue())
+			following->Show();
+		else
+			following->Hide();
+	};
+	configRadioButton(realDiskRadioButton);
+	configRadioButton(fluxImageRadioButton);
+	configRadioButton(diskImageRadioButton);
+	idlePanel->Layout();
+}
+
 void MainWindow::OnControlsChanged(wxCommandEvent& event)
 {
 	_config.Write(CONFIG_FORMAT,
 		formatChoice->GetString(formatChoice->GetSelection()));
-	_config.Write(CONFIG_FLUX,
-		fluxSourceSinkCombo->GetValue());
+	//_config.Write(CONFIG_FLUX,
+	//	sourceCombo->GetValue());
+	
+	UpdateState();
 }
 
 void MainWindow::OnStopButton(wxCommandEvent&)
@@ -103,8 +130,8 @@ void MainWindow::OnReadFluxButton(wxCommandEvent&)
     {
         PrepareConfig();
 
-        FluxSource::updateConfigForFilename(config.mutable_flux_source(),
-            fluxSourceSinkCombo->GetValue().ToStdString());
+        //FluxSource::updateConfigForFilename(config.mutable_flux_source(),
+        //    sourceCombo->GetValue().ToStdString());
 		visualiser->Clear();
 		_currentDisk = nullptr;
 
@@ -136,10 +163,10 @@ void MainWindow::OnWriteFluxButton(wxCommandEvent&)
     {
         PrepareConfig();
 
-        FluxSink::updateConfigForFilename(config.mutable_flux_sink(),
-            fluxSourceSinkCombo->GetValue().ToStdString());
-        FluxSource::updateConfigForFilename(config.mutable_flux_source(),
-            fluxSourceSinkCombo->GetValue().ToStdString());
+        //FluxSink::updateConfigForFilename(config.mutable_flux_sink(),
+        //    sourceCombo->GetValue().ToStdString());
+        //FluxSource::updateConfigForFilename(config.mutable_flux_source(),
+        //    sourceCombo->GetValue().ToStdString());
 
 		SetHighDensity();
 		ShowConfig();
@@ -286,29 +313,29 @@ void MainWindow::ShowConfig()
 
 void MainWindow::ApplyCustomSettings()
 {
-    for (int i = 0; i < additionalSettingsEntry->GetNumberOfLines(); i++)
-    {
-        auto setting = additionalSettingsEntry->GetLineText(i).ToStdString();
-		setting = trimWhitespace(setting);
-        if (setting.size() == 0)
-            continue;
+    //for (int i = 0; i < additionalSettingsEntry->GetNumberOfLines(); i++)
+    //{
+    //    auto setting = additionalSettingsEntry->GetLineText(i).ToStdString();
+	//	setting = trimWhitespace(setting);
+    //    if (setting.size() == 0)
+    //        continue;
 
-        auto equals = setting.find('=');
-        if (equals != std::string::npos)
-        {
-            auto key = setting.substr(0, equals);
-            auto value = setting.substr(equals + 1);
-            setProtoByString(&config, key, value);
-        }
-        else
-            FlagGroup::parseConfigFile(setting, formats);
-    }
+    //    auto equals = setting.find('=');
+    //    if (equals != std::string::npos)
+    //    {
+    //        auto key = setting.substr(0, equals);
+    //        auto value = setting.substr(equals + 1);
+    //        setProtoByString(&config, key, value);
+    //    }
+    //    else
+    //        FlagGroup::parseConfigFile(setting, formats);
+    //}
 }
 
 void MainWindow::OnLogMessage(std::shared_ptr<const AnyLogMessage> message)
 {
     logEntry->AppendText(Logger::toString(*message));
-    notebook->SetSelection(1);
+    //notebook->SetSelection(1);
 
     std::visit(
         overloaded{
@@ -362,11 +389,11 @@ void MainWindow::UpdateState()
 {
 	bool running = wxGetApp().IsWorkerThreadRunning();
 
-    writeImageButton->Enable(!running && !!_currentDisk);
-    writeFluxButton->Enable(!running && !!_currentDisk);
-    stopButton->Enable(running);
-    readFluxButton->Enable(!running);
-    readImageButton->Enable(!running);
+    //writeImageButton->Enable(!running && !!_currentDisk);
+    //writeFluxButton->Enable(!running && !!_currentDisk);
+    //stopTool->Enable(running);
+    //readFluxButton->Enable(!running);
+    //readImageButton->Enable(!running);
 }
 
 void MainWindow::UpdateDevices()

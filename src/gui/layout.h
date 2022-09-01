@@ -9,81 +9,37 @@
 
 #include <wx/artprov.h>
 #include <wx/xrc/xmlres.h>
-#include "visualisationcontrol.h"
+#include <wx/string.h>
+#include <wx/bitmap.h>
+#include <wx/image.h>
+#include <wx/icon.h>
+#include <wx/menu.h>
 #include <wx/gdicmn.h>
 #include <wx/font.h>
 #include <wx/colour.h>
 #include <wx/settings.h>
-#include <wx/string.h>
-#include <wx/button.h>
-#include <wx/bitmap.h>
-#include <wx/image.h>
-#include <wx/icon.h>
+#include "fluxviewercontrol.h"
+#include <wx/scrolbar.h>
 #include <wx/sizer.h>
+#include <wx/frame.h>
+#include <wx/textctrl.h>
 #include <wx/stattext.h>
+#include <wx/radiobut.h>
 #include <wx/combobox.h>
 #include <wx/choice.h>
 #include <wx/checkbox.h>
-#include <wx/textctrl.h>
 #include <wx/panel.h>
-#include <wx/notebook.h>
-#include <wx/menu.h>
-#include <wx/frame.h>
-#include "fluxviewercontrol.h"
-#include <wx/scrolbar.h>
-#include <wx/toolbar.h>
+#include <wx/filepicker.h>
+#include <wx/button.h>
+#include <wx/scrolwin.h>
+#include "visualisationcontrol.h"
 #include <wx/splitter.h>
 #include <wx/dataview.h>
-#include <wx/scrolwin.h>
 #include <wx/simplebook.h>
+#include <wx/notebook.h>
 #include <wx/statusbr.h>
 
 ///////////////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////////////////////////
-/// Class MainWindowGen
-///////////////////////////////////////////////////////////////////////////////
-class MainWindowGen : public wxFrame
-{
-	private:
-		wxFlexGridSizer* r;
-
-	protected:
-		VisualisationControl* visualiser;
-		wxButton* stopButton;
-		wxStaticText* m_staticText4;
-		wxComboBox* deviceCombo;
-		wxStaticText* m_staticText5;
-		wxComboBox* fluxSourceSinkCombo;
-		wxStaticText* m_staticText51;
-		wxChoice* formatChoice;
-		wxCheckBox* highDensityToggle;
-		wxNotebook* notebook;
-		wxPanel* m_panel1;
-		wxTextCtrl* additionalSettingsEntry;
-		wxPanel* m_panel2;
-		wxTextCtrl* logEntry;
-		wxPanel* m_panel3;
-		wxTextCtrl* protoConfigEntry;
-		wxButton* readFluxButton;
-		wxButton* readImageButton;
-		wxButton* writeFluxButton;
-		wxButton* writeImageButton;
-		wxMenuBar* m_menubar1;
-		wxMenu* m_menu1;
-
-		// Virtual event handlers, override them in your derived class
-		virtual void OnAbout( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnExit( wxCommandEvent& event ) { event.Skip(); }
-
-
-	public:
-
-		MainWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("FluxEngine"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 587,595 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
-
-		~MainWindowGen();
-
-};
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class FluxViewerWindowGen
@@ -135,29 +91,37 @@ class HexViewerWindowGen : public wxFrame
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Class MyFrame4
+/// Class MainWindowGen
 ///////////////////////////////////////////////////////////////////////////////
-class MyFrame4 : public wxFrame
+class MainWindowGen : public wxFrame
 {
 	private:
 
 	protected:
-		wxStaticText* m_staticText7;
-		wxStaticText* m_staticText8;
-		wxStaticText* m_staticText6;
-		wxChoice* deviceChoice;
-		wxComboBox* sourceChoice;
-		wxChoice* formatChoice;
-		wxToolBar* m_toolBar1;
-		wxToolBarToolBase* readDiskTool;
-		wxToolBarToolBase* writeDiskTool;
-		wxToolBarToolBase* browseTool;
-		wxToolBarToolBase* stopTool;
-		wxNotebook* m_notebook2;
+		wxNotebook* outerNotebook;
 		wxPanel* dataPanel;
-		wxSimplebook* m_simplebook4;
-		wxPanel* idlePanel;
-		wxStaticText* m_staticText10;
+		wxSimplebook* innerNotebook;
+		wxScrolledWindow* idlePanel;
+		wxStaticText* m_staticText61;
+		wxRadioButton* realDiskRadioButton;
+		wxPanel* m_panel8;
+		wxComboBox* deviceCombo;
+		wxChoice* driveChoice;
+		wxCheckBox* highDensityToggle;
+		wxRadioButton* fluxImageRadioButton;
+		wxPanel* m_panel91;
+		wxFilePickerCtrl* fluxImagePicker;
+		wxRadioButton* diskImageRadioButton;
+		wxPanel* m_panel101;
+		wxFilePickerCtrl* diskImagePicker;
+		wxStaticText* m_staticText23;
+		wxPanel* m_panel11;
+		wxChoice* formatChoice;
+		wxButton* extraConfigurationButton;
+		wxStaticText* m_staticText19;
+		wxButton* m_button5;
+		wxButton* m_button6;
+		wxButton* m_button7;
 		wxPanel* imagePanel;
 		wxSplitterWindow* m_splitter3;
 		wxPanel* m_panel10;
@@ -176,8 +140,6 @@ class MyFrame4 : public wxFrame
 		wxButton* browserCommitButton;
 		wxPanel* loggingPanel;
 		wxTextCtrl* logEntry;
-		wxPanel* configPanel;
-		wxTextCtrl* additionalSettingsEntry;
 		wxPanel* debugPanel;
 		wxTextCtrl* protoConfigEntry;
 		wxMenuBar* m_menubar4;
@@ -191,14 +153,14 @@ class MyFrame4 : public wxFrame
 
 	public:
 
-		MyFrame4( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 745,620 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+		MainWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("FluxEngine"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 828,620 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 
-		~MyFrame4();
+		~MainWindowGen();
 
 		void m_splitter3OnIdle( wxIdleEvent& )
 		{
 			m_splitter3->SetSashPosition( 0 );
-			m_splitter3->Disconnect( wxEVT_IDLE, wxIdleEventHandler( MyFrame4::m_splitter3OnIdle ), NULL, this );
+			m_splitter3->Disconnect( wxEVT_IDLE, wxIdleEventHandler( MainWindowGen::m_splitter3OnIdle ), NULL, this );
 		}
 
 };

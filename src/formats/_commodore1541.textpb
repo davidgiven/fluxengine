@@ -1,4 +1,5 @@
 comment: 'Commodore 1541 common settings'
+is_extension: true
 
 image_reader {
 	filename: "commodore1541.d64"
