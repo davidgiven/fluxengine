@@ -206,7 +206,7 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	fgSizer6->Fit( m_panel11 );
 	fgSizer8->Add( m_panel11, 1, wxEXPAND | wxALL, 5 );
 
-	m_staticText19 = new wxStaticText( idlePanel, wxID_ANY, wxT("and press one of"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText19 = new wxStaticText( idlePanel, wxID_ANY, wxT("and press one of:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText19->Wrap( -1 );
 	fgSizer8->Add( m_staticText19, 0, wxALIGN_CENTER|wxALL, 5 );
 

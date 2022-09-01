@@ -13,9 +13,9 @@
 #include "fmt/format.h"
 #include "mapper.h"
 #include "utils.h"
-#include "mainwindow.h"
 #include "fluxviewerwindow.h"
 #include <google/protobuf/text_format.h>
+#include <wx/config.h>
 
 extern const std::map<std::string, std::string> formats;
 
@@ -25,392 +25,426 @@ extern const std::map<std::string, std::string> formats;
 #define CONFIG_FLUXIMAGE "FluxImage"
 #define CONFIG_DISKIMAGE "DiskImage"
 
-MainWindow::MainWindow():
-	MainWindowGen(nullptr),
-	_config("FluxEngine")
+class MainWindow : public MainWindowGen
 {
-    Logger::setLogger(
-        [&](std::shared_ptr<const AnyLogMessage> message)
+public:
+    MainWindow(): MainWindowGen(nullptr), _config("FluxEngine")
+    {
+        Logger::setLogger(
+            [&](std::shared_ptr<const AnyLogMessage> message)
+            {
+                runOnUiThread(
+                    [message, this]()
+                    {
+                        OnLogMessage(message);
+                    });
+            });
+
+        wxString defaultFormatName = "ibm";
+        _config.Read(CONFIG_FORMAT, &defaultFormatName);
+
+        int defaultFormat = 0;
+        int i = 0;
+        for (const auto& it : formats)
         {
-            runOnUiThread(
-                [message, this]()
+            auto config = std::make_unique<ConfigProto>();
+            if (!config->ParseFromString(it.second))
+                continue;
+            if (config->is_extension())
+                continue;
+
+            formatChoice->Append(it.first);
+            if (it.first == defaultFormatName)
+                defaultFormat = i;
+            _formats.push_back(std::move(config));
+            i++;
+        }
+
+        UpdateDevices();
+        if (deviceCombo->GetCount() > 0)
+            deviceCombo->SetValue(deviceCombo->GetString(0));
+
+        if (MainWindow::formatChoice->GetCount() > 0)
+            formatChoice->SetSelection(defaultFormat);
+
+        // wxString defaultFluxSourceSink = sourceCombo->GetString(0);
+        //_config.Read(CONFIG_FLUX, &defaultFluxSourceSink);
+        // sourceCombo->SetValue(defaultFluxSourceSink);
+
+		Bind(UPDATE_STATE_EVENT, &MainWindow::OnUpdateStateEvent, this);
+
+        realDiskRadioButton->Bind(
+            wxEVT_RADIOBUTTON, &MainWindow::OnConfigRadioButtonClicked, this);
+        fluxImageRadioButton->Bind(
+            wxEVT_RADIOBUTTON, &MainWindow::OnConfigRadioButtonClicked, this);
+        diskImageRadioButton->Bind(
+            wxEVT_RADIOBUTTON, &MainWindow::OnConfigRadioButtonClicked, this);
+        realDiskRadioButton->SetValue(true);
+        wxCommandEvent dummyEvent;
+        OnConfigRadioButtonClicked(dummyEvent);
+
+        formatChoice->Bind(wxEVT_COMMAND_CHOICE_SELECTED,
+            &MainWindow::OnControlsChanged,
+            this);
+        // sourceCombo->Bind(wxEVT_TEXT, &MainWindow::OnControlsChanged, this);
+        // readFluxButton->Bind(wxEVT_BUTTON, &MainWindow::OnReadFluxButton,
+        // this); readImageButton->Bind(wxEVT_BUTTON,
+        // &MainWindow::OnReadImageButton, this);
+        // writeFluxButton->Bind(wxEVT_BUTTON, &MainWindow::OnWriteFluxButton,
+        // this);
+        // writeImageButton->Bind(wxEVT_BUTTON, &MainWindow::OnWriteImageButton,
+        // this); stopTool->Bind(wxEVT_BUTTON, &MainWindow::OnStopButton, this);
+        visualiser->Bind(
+            TRACK_SELECTION_EVENT, &MainWindow::OnTrackSelection, this);
+
+        UpdateState();
+    }
+
+    void OnExit(wxCommandEvent& event)
+    {
+        Close(true);
+    }
+
+    void OnConfigRadioButtonClicked(wxCommandEvent&)
+    {
+        auto configRadioButton = [&](wxRadioButton* button)
+        {
+            auto* following = button->GetNextSibling();
+            if (button->GetValue())
+                following->Show();
+            else
+                following->Hide();
+        };
+        configRadioButton(realDiskRadioButton);
+        configRadioButton(fluxImageRadioButton);
+        configRadioButton(diskImageRadioButton);
+        idlePanel->Layout();
+    }
+
+    void OnControlsChanged(wxCommandEvent& event)
+    {
+        _config.Write(CONFIG_FORMAT,
+            formatChoice->GetString(formatChoice->GetSelection()));
+        //_config.Write(CONFIG_FLUX,
+        //	sourceCombo->GetValue());
+
+        UpdateState();
+    }
+
+    void OnStopButton(wxCommandEvent&)
+    {
+        emergencyStop = true;
+    }
+
+    void OnReadFluxButton(wxCommandEvent&)
+    {
+        try
+        {
+            PrepareConfig();
+
+            // FluxSource::updateConfigForFilename(config.mutable_flux_source(),
+            //     sourceCombo->GetValue().ToStdString());
+            visualiser->Clear();
+            _currentDisk = nullptr;
+
+            SetHighDensity();
+            ShowConfig();
+            runOnWorkerThread(
+                [this]()
                 {
-                    OnLogMessage(message);
+                    auto fluxSource = FluxSource::create(config.flux_source());
+                    auto decoder = AbstractDecoder::create(config.decoder());
+                    auto diskflux = readDiskCommand(*fluxSource, *decoder);
+
+                    runOnUiThread(
+                        [&]()
+                        {
+                            visualiser->SetDiskData(diskflux);
+                        });
                 });
-        });
-
-	wxString defaultFormatName = "ibm";
-	_config.Read(CONFIG_FORMAT, &defaultFormatName);
-
-    int defaultFormat = 0;
-    int i = 0;
-    for (const auto& it : formats)
-    {
-        auto config = std::make_unique<ConfigProto>();
-        if (!config->ParseFromString(it.second))
-            continue;
-        if (config->is_extension())
-            continue;
-
-        formatChoice->Append(it.first);
-        if (it.first == defaultFormatName)
-			defaultFormat = i;
-        _formats.push_back(std::move(config));
-        i++;
+        }
+        catch (const ErrorException& e)
+        {
+            wxMessageBox(e.message, "Error", wxOK | wxICON_ERROR);
+        }
     }
 
-    UpdateDevices();
-    if (deviceCombo->GetCount() > 0)
-        deviceCombo->SetValue(deviceCombo->GetString(0));
-
-    if (MainWindow::formatChoice->GetCount() > 0)
-        formatChoice->SetSelection(defaultFormat);
-
-	//wxString defaultFluxSourceSink = sourceCombo->GetString(0);
-	//_config.Read(CONFIG_FLUX, &defaultFluxSourceSink);
-    //sourceCombo->SetValue(defaultFluxSourceSink);
-
-	realDiskRadioButton->Bind(wxEVT_RADIOBUTTON, &MainWindow::OnConfigRadioButtonClicked, this);
-	fluxImageRadioButton->Bind(wxEVT_RADIOBUTTON, &MainWindow::OnConfigRadioButtonClicked, this);
-	diskImageRadioButton->Bind(wxEVT_RADIOBUTTON, &MainWindow::OnConfigRadioButtonClicked, this);
-	realDiskRadioButton->SetValue(true);
-	wxCommandEvent dummyEvent;
-	OnConfigRadioButtonClicked(dummyEvent);
-
-	formatChoice->Bind(wxEVT_COMMAND_CHOICE_SELECTED, &MainWindow::OnControlsChanged, this);
-	//sourceCombo->Bind(wxEVT_TEXT, &MainWindow::OnControlsChanged, this);
-    //readFluxButton->Bind(wxEVT_BUTTON, &MainWindow::OnReadFluxButton, this);
-    //readImageButton->Bind(wxEVT_BUTTON, &MainWindow::OnReadImageButton, this);
-	//writeFluxButton->Bind(wxEVT_BUTTON, &MainWindow::OnWriteFluxButton, this);
-    //writeImageButton->Bind(wxEVT_BUTTON, &MainWindow::OnWriteImageButton, this);
-    //stopTool->Bind(wxEVT_BUTTON, &MainWindow::OnStopButton, this);
-	visualiser->Bind(TRACK_SELECTION_EVENT, &MainWindow::OnTrackSelection, this);
-
-    UpdateState();
-}
-
-void MainWindow::OnExit(wxCommandEvent& event)
-{
-    Close(true);
-}
-
-void MainWindow::OnConfigRadioButtonClicked(wxCommandEvent&)
-{
-	auto configRadioButton = [&](wxRadioButton* button) {
-		auto* following = button->GetNextSibling();
-		if (button->GetValue())
-			following->Show();
-		else
-			following->Hide();
-	};
-	configRadioButton(realDiskRadioButton);
-	configRadioButton(fluxImageRadioButton);
-	configRadioButton(diskImageRadioButton);
-	idlePanel->Layout();
-}
-
-void MainWindow::OnControlsChanged(wxCommandEvent& event)
-{
-	_config.Write(CONFIG_FORMAT,
-		formatChoice->GetString(formatChoice->GetSelection()));
-	//_config.Write(CONFIG_FLUX,
-	//	sourceCombo->GetValue());
-	
-	UpdateState();
-}
-
-void MainWindow::OnStopButton(wxCommandEvent&)
-{
-    emergencyStop = true;
-}
-
-void MainWindow::OnReadFluxButton(wxCommandEvent&)
-{
-    try
+    void OnWriteFluxButton(wxCommandEvent&)
     {
-        PrepareConfig();
+        try
+        {
+            PrepareConfig();
 
-        //FluxSource::updateConfigForFilename(config.mutable_flux_source(),
-        //    sourceCombo->GetValue().ToStdString());
-		visualiser->Clear();
-		_currentDisk = nullptr;
+            // FluxSink::updateConfigForFilename(config.mutable_flux_sink(),
+            //     sourceCombo->GetValue().ToStdString());
+            // FluxSource::updateConfigForFilename(config.mutable_flux_source(),
+            //     sourceCombo->GetValue().ToStdString());
 
-		SetHighDensity();
-		ShowConfig();
-        runOnWorkerThread(
-            [this]()
-            {
-                auto fluxSource = FluxSource::create(config.flux_source());
-                auto decoder = AbstractDecoder::create(config.decoder());
-                auto diskflux = readDiskCommand(*fluxSource, *decoder);
+            SetHighDensity();
+            ShowConfig();
+            auto image = _currentDisk->image;
+            runOnWorkerThread(
+                [image, this]()
+                {
+                    auto encoder = AbstractEncoder::create(config.encoder());
+                    auto fluxSink = FluxSink::create(config.flux_sink());
 
-                runOnUiThread(
-                    [&]()
+                    std::unique_ptr<AbstractDecoder> decoder;
+                    std::unique_ptr<FluxSource> fluxSource;
+                    if (config.has_decoder())
                     {
-                        visualiser->SetDiskData(diskflux);
-                    });
-            });
+                        decoder = AbstractDecoder::create(config.decoder());
+                        fluxSource = FluxSource::create(config.flux_source());
+                    }
+                    writeDiskCommand(*image,
+                        *encoder,
+                        *fluxSink,
+                        decoder.get(),
+                        fluxSource.get());
+                });
+        }
+        catch (const ErrorException& e)
+        {
+            wxMessageBox(e.message, "Error", wxOK | wxICON_ERROR);
+        }
     }
-    catch (const ErrorException& e)
+
+    void OnReadImageButton(wxCommandEvent&)
     {
-        wxMessageBox(e.message, "Error", wxOK | wxICON_ERROR);
-    }
-}
+        try
+        {
+            PrepareConfig();
+            if (!config.has_image_reader())
+                Error() << "This format is read-only.";
 
-void MainWindow::OnWriteFluxButton(wxCommandEvent&)
-{
-    try
+            auto filename = wxFileSelector("Choose a image file to read",
+                /* default_path= */ wxEmptyString,
+                /* default_filename= */ config.image_reader().filename(),
+                /* default_extension= */ wxEmptyString,
+                /* wildcard= */ wxEmptyString,
+                /* flags= */ wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+            if (filename.empty())
+                return;
+
+            ImageReader::updateConfigForFilename(
+                config.mutable_image_reader(), filename.ToStdString());
+            visualiser->Clear();
+            _currentDisk = nullptr;
+
+            ShowConfig();
+            runOnWorkerThread(
+                [this]()
+                {
+                    auto imageReader =
+                        ImageReader::create(config.image_reader());
+                    std::unique_ptr<const Image> image =
+                        imageReader->readImage();
+                    runOnUiThread(
+                        [&]()
+                        {
+                            auto disk = std::make_shared<DiskFlux>();
+                            disk = std::make_shared<DiskFlux>();
+                            disk->image = std::move(image);
+                            _currentDisk = disk;
+                            visualiser->SetDiskData(_currentDisk);
+                        });
+                });
+        }
+        catch (const ErrorException& e)
+        {
+            wxMessageBox(e.message, "Error", wxOK | wxICON_ERROR);
+        }
+    }
+
+    void OnWriteImageButton(wxCommandEvent&)
     {
-        PrepareConfig();
+        try
+        {
+            PrepareConfig();
+            if (!config.has_image_writer())
+                Error() << "This format is write-only.";
 
-        //FluxSink::updateConfigForFilename(config.mutable_flux_sink(),
-        //    sourceCombo->GetValue().ToStdString());
-        //FluxSource::updateConfigForFilename(config.mutable_flux_source(),
-        //    sourceCombo->GetValue().ToStdString());
+            auto filename = wxFileSelector("Choose a image file to write",
+                /* default_path= */ wxEmptyString,
+                /* default_filename= */ config.image_writer().filename(),
+                /* default_extension= */ wxEmptyString,
+                /* wildcard= */ wxEmptyString,
+                /* flags= */ wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+            if (filename.empty())
+                return;
 
-		SetHighDensity();
-		ShowConfig();
-		auto image = _currentDisk->image;
-        runOnWorkerThread(
-            [image, this]()
-            {
-				auto encoder = AbstractEncoder::create(config.encoder());
-				auto fluxSink = FluxSink::create(config.flux_sink());
+            ImageWriter::updateConfigForFilename(
+                config.mutable_image_writer(), filename.ToStdString());
 
-				std::unique_ptr<AbstractDecoder> decoder;
-				std::unique_ptr<FluxSource> fluxSource;
-				if (config.has_decoder())
-				{
-					decoder = AbstractDecoder::create(config.decoder());
-					fluxSource = FluxSource::create(config.flux_source());
-				}
-				writeDiskCommand(*image, *encoder, *fluxSink, decoder.get(), fluxSource.get());
-            });
+            ShowConfig();
+            auto image = _currentDisk->image;
+            runOnWorkerThread(
+                [image, this]()
+                {
+                    auto imageWriter =
+                        ImageWriter::create(config.image_writer());
+                    imageWriter->writeImage(*image);
+                });
+        }
+        catch (const ErrorException& e)
+        {
+            wxMessageBox(e.message, "Error", wxOK | wxICON_ERROR);
+        }
     }
-    catch (const ErrorException& e)
+
+    /* This sets the *global* config object. That's safe provided the worker
+     * thread isn't running, otherwise you'll get a race. */
+    void PrepareConfig()
     {
-        wxMessageBox(e.message, "Error", wxOK | wxICON_ERROR);
-    }
-}
+        assert(!wxGetApp().IsWorkerThreadRunning());
 
-void MainWindow::OnReadImageButton(wxCommandEvent&)
-{
-    try
+        auto formatSelection = formatChoice->GetSelection();
+        if (formatSelection == wxNOT_FOUND)
+            Error() << "no format selected";
+
+        config = *_formats[formatChoice->GetSelection()];
+
+        auto serial = deviceCombo->GetValue().ToStdString();
+        if (!serial.empty() && (serial[0] == '/'))
+            setProtoByString(&config, "usb.greaseweazle.port", serial);
+        else
+            setProtoByString(&config, "usb.serial", serial);
+
+        ApplyCustomSettings();
+        logEntry->Clear();
+    }
+
+    void SetHighDensity()
     {
-        PrepareConfig();
-        if (!config.has_image_reader())
-            Error() << "This format is read-only.";
-
-        auto filename = wxFileSelector(
-			"Choose a image file to read",
-			/* default_path= */ wxEmptyString,
-			/* default_filename= */ config.image_reader().filename(),
-			/* default_extension= */ wxEmptyString,
-			/* wildcard= */ wxEmptyString,
-			/* flags= */ wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-        if (filename.empty())
-            return;
-
-        ImageReader::updateConfigForFilename(
-            config.mutable_image_reader(), filename.ToStdString());
-		visualiser->Clear();
-		_currentDisk = nullptr;
-
-		ShowConfig();
-        runOnWorkerThread(
-            [this]()
-            {
-                auto imageReader = ImageReader::create(config.image_reader());
-                std::unique_ptr<const Image> image = imageReader->readImage();
-                runOnUiThread(
-                    [&]()
-                    {
-                        auto disk = std::make_shared<DiskFlux>();
-                        disk = std::make_shared<DiskFlux>();
-                        disk->image = std::move(image);
-                        _currentDisk = disk;
-                        visualiser->SetDiskData(_currentDisk);
-                    });
-            });
+        bool hd = highDensityToggle->GetValue();
+        config.mutable_drive()->set_high_density(hd);
     }
-    catch (const ErrorException& e)
+
+    void ShowConfig()
     {
-        wxMessageBox(e.message, "Error", wxOK | wxICON_ERROR);
+        std::string s;
+        google::protobuf::TextFormat::PrintToString(config, &s);
+        protoConfigEntry->Clear();
+        protoConfigEntry->AppendText(s);
     }
-}
 
-void MainWindow::OnWriteImageButton(wxCommandEvent&)
-{
-    try
+    void ApplyCustomSettings()
     {
-        PrepareConfig();
-        if (!config.has_image_writer())
-            Error() << "This format is write-only.";
+        // for (int i = 0; i < additionalSettingsEntry->GetNumberOfLines(); i++)
+        //{
+        //     auto setting =
+        //     additionalSettingsEntry->GetLineText(i).ToStdString();
+        //	setting = trimWhitespace(setting);
+        //    if (setting.size() == 0)
+        //        continue;
 
-        auto filename = wxFileSelector(
-			"Choose a image file to write",
-			/* default_path= */ wxEmptyString,
-			/* default_filename= */ config.image_writer().filename(),
-			/* default_extension= */ wxEmptyString,
-			/* wildcard= */ wxEmptyString,
-			/* flags= */ wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-        if (filename.empty())
-            return;
-
-        ImageWriter::updateConfigForFilename(
-            config.mutable_image_writer(), filename.ToStdString());
-
-		ShowConfig();
-		auto image = _currentDisk->image;
-        runOnWorkerThread(
-            [image, this]()
-            {
-				auto imageWriter = ImageWriter::create(config.image_writer());
-				imageWriter->writeImage(*image);
-            });
+        //    auto equals = setting.find('=');
+        //    if (equals != std::string::npos)
+        //    {
+        //        auto key = setting.substr(0, equals);
+        //        auto value = setting.substr(equals + 1);
+        //        setProtoByString(&config, key, value);
+        //    }
+        //    else
+        //        FlagGroup::parseConfigFile(setting, formats);
+        //}
     }
-    catch (const ErrorException& e)
+
+    void OnLogMessage(std::shared_ptr<const AnyLogMessage> message)
     {
-        wxMessageBox(e.message, "Error", wxOK | wxICON_ERROR);
+        logEntry->AppendText(Logger::toString(*message));
+        // notebook->SetSelection(1);
+
+        std::visit(
+            overloaded{
+                /* Fallback --- do nothing */
+                [&](const auto& m)
+                {
+                },
+
+                /* A fatal error. */
+                [&](const ErrorLogMessage& m)
+                {
+                    wxMessageBox(m.message, "Error", wxOK | wxICON_ERROR);
+                },
+
+                /* Indicates that we're starting a write operation. */
+                [&](const BeginWriteOperationLogMessage& m)
+                {
+                    visualiser->SetMode(m.track, m.head, VISMODE_WRITING);
+                },
+
+                [&](const EndWriteOperationLogMessage& m)
+                {
+                    visualiser->SetMode(0, 0, VISMODE_NOTHING);
+                },
+
+                /* Indicates that we're starting a read operation. */
+                [&](const BeginReadOperationLogMessage& m)
+                {
+                    visualiser->SetMode(m.track, m.head, VISMODE_READING);
+                },
+
+                [&](const EndReadOperationLogMessage& m)
+                {
+                    visualiser->SetMode(0, 0, VISMODE_NOTHING);
+                },
+
+                [&](const TrackReadLogMessage& m)
+                {
+                    visualiser->SetTrackData(m.track);
+                },
+
+                [&](const DiskReadLogMessage& m)
+                {
+                    _currentDisk = m.disk;
+                },
+            },
+            *message);
     }
-}
 
-/* This sets the *global* config object. That's safe provided the worker thread
- * isn't running, otherwise you'll get a race. */
-void MainWindow::PrepareConfig()
-{
-	assert(!wxGetApp().IsWorkerThreadRunning());
+	void OnUpdateStateEvent(wxCommandEvent&)
+	{
+		UpdateState();
+	}
 
-    auto formatSelection = formatChoice->GetSelection();
-    if (formatSelection == wxNOT_FOUND)
-        Error() << "no format selected";
-
-	config = *_formats[formatChoice->GetSelection()];
-
-    auto serial = deviceCombo->GetValue().ToStdString();
-    if (!serial.empty() && (serial[0] == '/'))
-        setProtoByString(&config, "usb.greaseweazle.port", serial);
-    else
-        setProtoByString(&config, "usb.serial", serial);
-
-    ApplyCustomSettings();
-    logEntry->Clear();
-}
-
-void MainWindow::SetHighDensity()
-{
-	bool hd = highDensityToggle->GetValue();
-	config.mutable_drive()->set_high_density(hd);
-}
-
-void MainWindow::ShowConfig()
-{
-	std::string s;
-	google::protobuf::TextFormat::PrintToString(config, &s);
-	protoConfigEntry->Clear();
-	protoConfigEntry->AppendText(s);
-}
-
-void MainWindow::ApplyCustomSettings()
-{
-    //for (int i = 0; i < additionalSettingsEntry->GetNumberOfLines(); i++)
-    //{
-    //    auto setting = additionalSettingsEntry->GetLineText(i).ToStdString();
-	//	setting = trimWhitespace(setting);
-    //    if (setting.size() == 0)
-    //        continue;
-
-    //    auto equals = setting.find('=');
-    //    if (equals != std::string::npos)
-    //    {
-    //        auto key = setting.substr(0, equals);
-    //        auto value = setting.substr(equals + 1);
-    //        setProtoByString(&config, key, value);
-    //    }
-    //    else
-    //        FlagGroup::parseConfigFile(setting, formats);
-    //}
-}
-
-void MainWindow::OnLogMessage(std::shared_ptr<const AnyLogMessage> message)
-{
-    logEntry->AppendText(Logger::toString(*message));
-    //notebook->SetSelection(1);
-
-    std::visit(
-        overloaded{
-            /* Fallback --- do nothing */
-            [&](const auto& m)
-            {
-            },
-
-            /* A fatal error. */
-            [&](const ErrorLogMessage& m)
-            {
-                wxMessageBox(m.message, "Error", wxOK | wxICON_ERROR);
-            },
-
-            /* Indicates that we're starting a write operation. */
-            [&](const BeginWriteOperationLogMessage& m)
-            {
-                visualiser->SetMode(m.track, m.head, VISMODE_WRITING);
-            },
-
-            [&](const EndWriteOperationLogMessage& m)
-            {
-                visualiser->SetMode(0, 0, VISMODE_NOTHING);
-            },
-
-            /* Indicates that we're starting a read operation. */
-            [&](const BeginReadOperationLogMessage& m)
-            {
-                visualiser->SetMode(m.track, m.head, VISMODE_READING);
-            },
-
-            [&](const EndReadOperationLogMessage& m)
-            {
-                visualiser->SetMode(0, 0, VISMODE_NOTHING);
-            },
-
-            [&](const TrackReadLogMessage& m)
-            {
-                visualiser->SetTrackData(m.track);
-            },
-
-            [&](const DiskReadLogMessage& m)
-            {
-                _currentDisk = m.disk;
-            },
-        },
-        *message);
-}
-
-void MainWindow::UpdateState()
-{
-	bool running = wxGetApp().IsWorkerThreadRunning();
-
-    //writeImageButton->Enable(!running && !!_currentDisk);
-    //writeFluxButton->Enable(!running && !!_currentDisk);
-    //stopTool->Enable(running);
-    //readFluxButton->Enable(!running);
-    //readImageButton->Enable(!running);
-}
-
-void MainWindow::UpdateDevices()
-{
-    auto candidates = findUsbDevices();
-
-    deviceCombo->Clear();
-    _devices.clear();
-    for (auto& candidate : candidates)
+    void UpdateState()
     {
-        deviceCombo->Append(candidate->serial);
-        _devices.push_back(std::move(candidate));
+        bool running = wxGetApp().IsWorkerThreadRunning();
+
+        // writeImageButton->Enable(!running && !!_currentDisk);
+        // writeFluxButton->Enable(!running && !!_currentDisk);
+        // stopTool->Enable(running);
+        // readFluxButton->Enable(!running);
+        // readImageButton->Enable(!running);
     }
-}
 
-void MainWindow::OnTrackSelection(TrackSelectionEvent& event)
+    void UpdateDevices()
+    {
+        auto candidates = findUsbDevices();
+
+        deviceCombo->Clear();
+        _devices.clear();
+        for (auto& candidate : candidates)
+        {
+            deviceCombo->Append(candidate->serial);
+            _devices.push_back(std::move(candidate));
+        }
+    }
+
+    void OnTrackSelection(TrackSelectionEvent& event)
+    {
+        (new FluxViewerWindow(this, event.trackFlux))->Show(true);
+    }
+
+private:
+    wxConfig _config;
+    std::vector<std::unique_ptr<const ConfigProto>> _formats;
+    std::vector<std::unique_ptr<const CandidateDevice>> _devices;
+    std::shared_ptr<const DiskFlux> _currentDisk;
+};
+
+wxWindow* FluxEngineApp::CreateMainWindow()
 {
-    (new FluxViewerWindow(this, event.trackFlux))->Show(true);
+    return new MainWindow();
 }
-

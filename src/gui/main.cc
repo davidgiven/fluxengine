@@ -1,12 +1,14 @@
-#include "globals.h"
+#include "lib/globals.h"
+#include "lib/logger.h"
 #include "gui.h"
-#include "mainwindow.h"
 #include "utils.h"
 
 class FluxEngineApp;
 class ExecEvent;
 
 static wxSemaphore execSemaphore(0);
+
+wxDEFINE_EVENT(UPDATE_STATE_EVENT, wxCommandEvent);
 
 wxDEFINE_EVENT(EXEC_EVENT_TYPE, ExecEvent);
 class ExecEvent : public wxThreadEvent
@@ -45,7 +47,7 @@ private:
 bool FluxEngineApp::OnInit()
 {
 	Bind(EXEC_EVENT_TYPE, &FluxEngineApp::OnExec, this);
-    _mainWindow = new MainWindow();
+    _mainWindow = CreateMainWindow();
     _mainWindow->Show(true);
     return true;
 }
@@ -69,7 +71,7 @@ wxThread::ExitCode FluxEngineApp::Entry()
 	runOnUiThread(
 		[&] {
 			_callback = nullptr;
-			_mainWindow->UpdateState();
+			SendUpdateEvent();
 		}
 	);
 	return 0;
@@ -87,7 +89,15 @@ void FluxEngineApp::RunOnWorkerThread(std::function<void()> callback)
 	emergencyStop = false;
 	CreateThread(wxTHREAD_JOINABLE);
 	GetThread()->Run();
-	_mainWindow->UpdateState();
+
+	SendUpdateEvent();
+}
+
+void FluxEngineApp::SendUpdateEvent()
+{
+	auto* event = new wxCommandEvent(UPDATE_STATE_EVENT, 0);
+	event->SetEventObject(_mainWindow);
+	QueueEvent(event);
 }
 
 void runOnWorkerThread(std::function<void()> callback)
