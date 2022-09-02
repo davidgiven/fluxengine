@@ -621,7 +621,8 @@ public:
         {
             dataNotebook->SetSelection(0);
 
-            writeButton->Enable(_selectedSource != SELECTEDSOURCE_IMAGE);
+            readButton->Enable(_selectedSource != SELECTEDSOURCE_IMAGE);
+            writeButton->Enable(_selectedSource == SELECTEDSOURCE_REAL);
         }
         else if (_state < STATE_READING__LAST)
         {

@@ -235,7 +235,7 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	gSizer9 = new wxGridSizer( 1, 0, 0, 0 );
 
 	readButton = new wxButton( idlePanel, wxID_ANY, wxT("Read disk"), wxDefaultPosition, wxDefaultSize, 0 );
-
+	readButton->SetLabelMarkup( wxT("Read disk") );
 	readButton->SetBitmap( wxArtProvider::GetBitmap( wxART_FILE_OPEN, wxART_TOOLBAR ) );
 	readButton->SetToolTip( wxT("Read and decode, producing a disk image from a real disk or flux file.") );
 
