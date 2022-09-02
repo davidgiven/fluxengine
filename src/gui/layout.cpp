@@ -429,7 +429,7 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 
 	this->SetSizer( fgSizer9 );
 	this->Layout();
-	m_menubar4 = new wxMenuBar( 0 );
+	menuBar = new wxMenuBar( 0 );
 	m_menu1 = new wxMenu();
 	wxMenuItem* m_menuItem2;
 	m_menuItem2 = new wxMenuItem( m_menu1, wxID_ABOUT, wxString( wxT("About") ) , wxEmptyString, wxITEM_NORMAL );
@@ -439,9 +439,9 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	m_menuItem1 = new wxMenuItem( m_menu1, wxID_EXIT, wxString( wxT("E&xit") ) , wxEmptyString, wxITEM_NORMAL );
 	m_menu1->Append( m_menuItem1 );
 
-	m_menubar4->Append( m_menu1, wxT("&File") );
+	menuBar->Append( m_menu1, wxT("&File") );
 
-	this->SetMenuBar( m_menubar4 );
+	this->SetMenuBar( menuBar );
 
 	statusBar = this->CreateStatusBar( 1, wxSTB_SIZEGRIP, wxID_ANY );
 

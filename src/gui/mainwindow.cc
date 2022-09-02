@@ -16,6 +16,7 @@
 #include "fluxviewerwindow.h"
 #include <google/protobuf/text_format.h>
 #include <wx/config.h>
+#include <wx/aboutdlg.h>
 
 extern const std::map<std::string, std::string> formats;
 
@@ -71,6 +72,9 @@ public:
                 UpdateState();
             });
 
+        menuBar->Bind(
+            wxEVT_MENU, &MainWindow::OnAboutMenuItem, this, wxID_ABOUT);
+
         realDiskRadioButton->Bind(
             wxEVT_RADIOBUTTON, &MainWindow::OnConfigRadioButtonClicked, this);
         fluxImageRadioButton->Bind(
@@ -123,6 +127,17 @@ public:
         Close(true);
     }
 
+    void OnAboutMenuItem(wxCommandEvent& event)
+    {
+        wxAboutDialogInfo aboutInfo;
+        aboutInfo.SetName("FluxEngine");
+        aboutInfo.SetDescription("Flux-level floppy disk management");
+        aboutInfo.SetWebSite("http://cowlark.com/fluxengine");
+        aboutInfo.SetCopyright("Mostly (C) 2018-2022 David Given");
+
+        wxAboutBox(aboutInfo);
+    }
+
     void OnConfigRadioButtonClicked(wxCommandEvent& event)
     {
         auto configRadioButton = [&](wxRadioButton* button)
@@ -172,7 +187,7 @@ public:
             UpdateState();
             ShowConfig();
 
-			_errorState = STATE_READING_FAILED;
+            _errorState = STATE_READING_FAILED;
             runOnWorkerThread(
                 [this]()
                 {
@@ -226,7 +241,7 @@ public:
             UpdateState();
             ShowConfig();
 
-			_errorState = STATE_WRITING_FAILED;
+            _errorState = STATE_WRITING_FAILED;
             runOnWorkerThread(
                 [this]()
                 {
@@ -291,7 +306,7 @@ public:
             ShowConfig();
             auto image = _currentDisk->image;
 
-			_errorState = _state;
+            _errorState = _state;
             runOnWorkerThread(
                 [image, this]()
                 {
@@ -326,7 +341,7 @@ public:
 
             ShowConfig();
 
-			_errorState = _state;
+            _errorState = _state;
             runOnWorkerThread(
                 [this]()
                 {
@@ -464,8 +479,8 @@ public:
                 [&](const ErrorLogMessage& m)
                 {
                     wxMessageBox(m.message, "Error", wxOK | wxICON_ERROR);
-					_state = _errorState;
-					UpdateState();
+                    _state = _errorState;
+                    UpdateState();
                 },
 
                 /* Indicates that we're starting a write operation. */
@@ -703,7 +718,7 @@ private:
         _formats;
     std::vector<std::unique_ptr<const CandidateDevice>> _devices;
     int _state;
-	int _errorState;
+    int _errorState;
     int _selectedSource;
     bool _dontSaveConfig = false;
     std::shared_ptr<const DiskFlux> _currentDisk;

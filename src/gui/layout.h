@@ -145,7 +145,7 @@ class MainWindowGen : public wxFrame
 		wxTextCtrl* logEntry;
 		wxPanel* debugPanel;
 		wxTextCtrl* protoConfigEntry;
-		wxMenuBar* m_menubar4;
+		wxMenuBar* menuBar;
 		wxMenu* m_menu1;
 		wxStatusBar* statusBar;
 
