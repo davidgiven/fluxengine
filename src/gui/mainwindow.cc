@@ -19,7 +19,10 @@
 
 extern const std::map<std::string, std::string> formats;
 
-#define CONFIG_SOURCESINK "SourceSink"
+#define CONFIG_SELECTEDSOURCE "SelectedSource"
+#define CONFIG_DEVICE "Device"
+#define CONFIG_DRIVE "Drive"
+#define CONFIG_HIGHDENSITY "HighDensity"
 #define CONFIG_FORMAT "Format"
 #define CONFIG_EXTRACONFIG "ExtraConfig"
 #define CONFIG_FLUXIMAGE "FluxImage"
@@ -71,7 +74,11 @@ public:
         //_config.Read(CONFIG_FLUX, &defaultFluxSourceSink);
         // sourceCombo->SetValue(defaultFluxSourceSink);
 
-		Bind(UPDATE_STATE_EVENT, &MainWindow::OnUpdateStateEvent, this);
+        Bind(UPDATE_STATE_EVENT,
+            [this](wxCommandEvent&)
+            {
+                UpdateState();
+            });
 
         realDiskRadioButton->Bind(
             wxEVT_RADIOBUTTON, &MainWindow::OnConfigRadioButtonClicked, this);
@@ -79,9 +86,24 @@ public:
             wxEVT_RADIOBUTTON, &MainWindow::OnConfigRadioButtonClicked, this);
         diskImageRadioButton->Bind(
             wxEVT_RADIOBUTTON, &MainWindow::OnConfigRadioButtonClicked, this);
-        realDiskRadioButton->SetValue(true);
-        wxCommandEvent dummyEvent;
-        OnConfigRadioButtonClicked(dummyEvent);
+
+        driveChoice->Bind(wxEVT_COMMAND_CHOICE_SELECTED,
+            &MainWindow::OnControlsChanged,
+            this);
+        deviceCombo->Bind(wxEVT_COMMAND_CHOICE_SELECTED,
+            &MainWindow::OnControlsChanged,
+            this);
+        highDensityToggle->Bind(wxEVT_COMMAND_CHOICE_SELECTED,
+            &MainWindow::OnControlsChanged,
+            this);
+
+        fluxImagePicker->Bind(wxEVT_COMMAND_CHOICE_SELECTED,
+            &MainWindow::OnControlsChanged,
+            this);
+
+        diskImagePicker->Bind(wxEVT_COMMAND_CHOICE_SELECTED,
+            &MainWindow::OnControlsChanged,
+            this);
 
         formatChoice->Bind(wxEVT_COMMAND_CHOICE_SELECTED,
             &MainWindow::OnControlsChanged,
@@ -97,6 +119,7 @@ public:
         visualiser->Bind(
             TRACK_SELECTION_EVENT, &MainWindow::OnTrackSelection, this);
 
+        LoadConfig();
         UpdateState();
     }
 
@@ -105,7 +128,7 @@ public:
         Close(true);
     }
 
-    void OnConfigRadioButtonClicked(wxCommandEvent&)
+    void OnConfigRadioButtonClicked(wxCommandEvent& event)
     {
         auto configRadioButton = [&](wxRadioButton* button)
         {
@@ -119,15 +142,20 @@ public:
         configRadioButton(fluxImageRadioButton);
         configRadioButton(diskImageRadioButton);
         idlePanel->Layout();
+
+        if (realDiskRadioButton->GetValue())
+            _selectedSource = SELECTEDSOURCE_REAL;
+        if (fluxImageRadioButton->GetValue())
+            _selectedSource = SELECTEDSOURCE_FLUX;
+        if (diskImageRadioButton->GetValue())
+            _selectedSource = SELECTEDSOURCE_IMAGE;
+
+        OnControlsChanged(event);
     }
 
     void OnControlsChanged(wxCommandEvent& event)
     {
-        _config.Write(CONFIG_FORMAT,
-            formatChoice->GetString(formatChoice->GetSelection()));
-        //_config.Write(CONFIG_FLUX,
-        //	sourceCombo->GetValue());
-
+        SaveConfig();
         UpdateState();
     }
 
@@ -215,7 +243,7 @@ public:
         {
             PrepareConfig();
             if (!config.has_image_reader())
-                Error() << "This format is read-only.";
+                Error() << "This format cannot be read from images.";
 
             auto filename = wxFileSelector("Choose a image file to read",
                 /* default_path= */ wxEmptyString,
@@ -262,7 +290,7 @@ public:
         {
             PrepareConfig();
             if (!config.has_image_writer())
-                Error() << "This format is write-only.";
+                Error() << "This format cannot be written to disks.";
 
             auto filename = wxFileSelector("Choose a image file to write",
                 /* default_path= */ wxEmptyString,
@@ -403,10 +431,107 @@ public:
             *message);
     }
 
-	void OnUpdateStateEvent(wxCommandEvent&)
-	{
-		UpdateState();
-	}
+    void LoadConfig()
+    {
+        /* Radio button config. */
+
+        wxString s = std::to_string(SELECTEDSOURCE_REAL);
+        _config.Read(CONFIG_SELECTEDSOURCE, &s);
+        _selectedSource = std::atoi(s.c_str());
+
+        switch (_selectedSource)
+        {
+            case SELECTEDSOURCE_REAL:
+                realDiskRadioButton->SetValue(1);
+                break;
+
+            case SELECTEDSOURCE_FLUX:
+                fluxImageRadioButton->SetValue(1);
+                break;
+
+            case SELECTEDSOURCE_IMAGE:
+                diskImageRadioButton->SetValue(1);
+                break;
+        }
+
+        wxCommandEvent dummyEvent;
+
+        /* Real disk block. */
+
+        s = "";
+        _config.Read(CONFIG_DEVICE, &s);
+        deviceCombo->SetValue(s);
+        if (s.empty() && (deviceCombo->GetCount() > 0))
+            deviceCombo->SetValue(deviceCombo->GetString(0));
+
+        s = "0";
+        _config.Read(CONFIG_DRIVE, &s);
+        driveChoice->SetSelection(wxAtoi(s));
+
+        s = "0";
+        _config.Read(CONFIG_HIGHDENSITY, &s);
+        highDensityToggle->SetValue(wxAtoi(s));
+
+		/* Flux image block. */
+
+		s = "";
+		_config.Read(CONFIG_FLUXIMAGE, &s);
+		fluxImagePicker->SetPath(s);
+
+		/* Disk image block. */
+
+		s = "";
+		_config.Read(CONFIG_DISKIMAGE, &s);
+		diskImagePicker->SetPath(s);
+
+		/* Format block. */
+
+        s = "ibm";
+        _config.Read(CONFIG_FORMAT, &s);
+
+        int defaultFormat = 0;
+        int i = 0;
+        for (const auto& it : formats)
+        {
+			if (it.first == s)
+			{
+				formatChoice->SetSelection(i);
+				break;
+			}
+			i++;
+		}
+
+        /* Triggers SaveConfig */
+
+        OnConfigRadioButtonClicked(dummyEvent);
+    }
+
+    void SaveConfig()
+    {
+        _config.Write(
+            CONFIG_SELECTEDSOURCE, wxString(std::to_string(_selectedSource)));
+
+        /* Real disk block. */
+
+        _config.Write(CONFIG_DEVICE, deviceCombo->GetValue());
+        _config.Write(CONFIG_DRIVE,
+            wxString(std::to_string(driveChoice->GetSelection())));
+        _config.Write(CONFIG_HIGHDENSITY,
+            wxString(std::to_string(highDensityToggle->GetValue())));
+
+		/* Flux image block. */
+
+		_config.Write(CONFIG_FLUXIMAGE, fluxImagePicker->GetPath());
+
+		/* Disk image block. */
+
+		_config.Write(CONFIG_DISKIMAGE, diskImagePicker->GetPath());
+
+		/* Format block. */
+
+        _config.Write(CONFIG_FORMAT,
+            formatChoice->GetString(formatChoice->GetSelection()));
+    }
 
     void UpdateState()
     {
@@ -438,9 +563,17 @@ public:
     }
 
 private:
+    enum
+    {
+        SELECTEDSOURCE_REAL,
+        SELECTEDSOURCE_FLUX,
+        SELECTEDSOURCE_IMAGE
+    };
+
     wxConfig _config;
     std::vector<std::unique_ptr<const ConfigProto>> _formats;
     std::vector<std::unique_ptr<const CandidateDevice>> _devices;
+    int _selectedSource;
     std::shared_ptr<const DiskFlux> _currentDisk;
 };
 

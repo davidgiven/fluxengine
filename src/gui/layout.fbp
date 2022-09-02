@@ -789,7 +789,7 @@
                                                                         <property name="style">wxRB_GROUP</property>
                                                                         <property name="subclass">; ; forward_declare</property>
                                                                         <property name="toolbar_pane">0</property>
-                                                                        <property name="tooltip"></property>
+                                                                        <property name="tooltip">You want to use a real floppy drive attached to real hardware.</property>
                                                                         <property name="validator_data_type"></property>
                                                                         <property name="validator_style">wxFILTER_NONE</property>
                                                                         <property name="validator_type">wxDefaultValidator</property>
@@ -914,7 +914,7 @@
                                                                                     <property name="style"></property>
                                                                                     <property name="subclass">; ; forward_declare</property>
                                                                                     <property name="toolbar_pane">0</property>
-                                                                                    <property name="tooltip"></property>
+                                                                                    <property name="tooltip">Device ID to use (either the path of a serial port or a USB serial number).</property>
                                                                                     <property name="validator_data_type"></property>
                                                                                     <property name="validator_style">wxFILTER_NONE</property>
                                                                                     <property name="validator_type">wxDefaultValidator</property>
@@ -979,7 +979,7 @@
                                                                                     <property name="style"></property>
                                                                                     <property name="subclass">; ; forward_declare</property>
                                                                                     <property name="toolbar_pane">0</property>
-                                                                                    <property name="tooltip"></property>
+                                                                                    <property name="tooltip">Which drive on the device to use.</property>
                                                                                     <property name="validator_data_type"></property>
                                                                                     <property name="validator_style">wxFILTER_NONE</property>
                                                                                     <property name="validator_type">wxDefaultValidator</property>
@@ -1043,7 +1043,7 @@
                                                                                     <property name="style"></property>
                                                                                     <property name="subclass">; ; forward_declare</property>
                                                                                     <property name="toolbar_pane">0</property>
-                                                                                    <property name="tooltip"></property>
+                                                                                    <property name="tooltip">If you are using a high density disk, select this.&#x0A;This can be detected automatically for 3.5&quot;&#x0A;disks but needs to be set manually for everything&#x0A;else.</property>
                                                                                     <property name="validator_data_type"></property>
                                                                                     <property name="validator_style">wxFILTER_NONE</property>
                                                                                     <property name="validator_type">wxDefaultValidator</property>
@@ -1109,7 +1109,7 @@
                                                                         <property name="style"></property>
                                                                         <property name="subclass">; ; forward_declare</property>
                                                                         <property name="toolbar_pane">0</property>
-                                                                        <property name="tooltip"></property>
+                                                                        <property name="tooltip">You want to use an unencoded flux file.</property>
                                                                         <property name="validator_data_type"></property>
                                                                         <property name="validator_style">wxFILTER_NONE</property>
                                                                         <property name="validator_type">wxDefaultValidator</property>
@@ -1236,7 +1236,7 @@
                                                                                     <property name="style">wxFLP_DEFAULT_STYLE|wxFLP_USE_TEXTCTRL</property>
                                                                                     <property name="subclass">; ; forward_declare</property>
                                                                                     <property name="toolbar_pane">0</property>
-                                                                                    <property name="tooltip"></property>
+                                                                                    <property name="tooltip">Path to a .flux, .scp or other flux file.</property>
                                                                                     <property name="validator_data_type"></property>
                                                                                     <property name="validator_style">wxFILTER_NONE</property>
                                                                                     <property name="validator_type">wxDefaultValidator</property>
@@ -1304,7 +1304,7 @@
                                                                         <property name="style"></property>
                                                                         <property name="subclass">; ; forward_declare</property>
                                                                         <property name="toolbar_pane">0</property>
-                                                                        <property name="tooltip"></property>
+                                                                        <property name="tooltip">You want to use a decode file system disk image.</property>
                                                                         <property name="validator_data_type"></property>
                                                                         <property name="validator_style">wxFILTER_NONE</property>
                                                                         <property name="validator_type">wxDefaultValidator</property>
@@ -1431,7 +1431,7 @@
                                                                                     <property name="style">wxFLP_DEFAULT_STYLE|wxFLP_USE_TEXTCTRL</property>
                                                                                     <property name="subclass">; ; forward_declare</property>
                                                                                     <property name="toolbar_pane">0</property>
-                                                                                    <property name="tooltip"></property>
+                                                                                    <property name="tooltip">The path to the disk image.</property>
                                                                                     <property name="validator_data_type"></property>
                                                                                     <property name="validator_style">wxFILTER_NONE</property>
                                                                                     <property name="validator_type">wxDefaultValidator</property>
@@ -1628,7 +1628,7 @@
                                                                                     <property name="style"></property>
                                                                                     <property name="subclass">; ; forward_declare</property>
                                                                                     <property name="toolbar_pane">0</property>
-                                                                                    <property name="tooltip"></property>
+                                                                                    <property name="tooltip">The format of the disk.</property>
                                                                                     <property name="validator_data_type"></property>
                                                                                     <property name="validator_style">wxFILTER_NONE</property>
                                                                                     <property name="validator_type">wxDefaultValidator</property>
@@ -1668,7 +1668,7 @@
                                                                                     <property name="dock">Dock</property>
                                                                                     <property name="dock_fixed">0</property>
                                                                                     <property name="docking">Left</property>
-                                                                                    <property name="enabled">1</property>
+                                                                                    <property name="enabled">0</property>
                                                                                     <property name="fg"></property>
                                                                                     <property name="floatable">1</property>
                                                                                     <property name="focus"></property>
@@ -1701,7 +1701,7 @@
                                                                                     <property name="style"></property>
                                                                                     <property name="subclass">; ; forward_declare</property>
                                                                                     <property name="toolbar_pane">0</property>
-                                                                                    <property name="tooltip"></property>
+                                                                                    <property name="tooltip">Allows you to enter arbitrary configuration parameters.</property>
                                                                                     <property name="validator_data_type"></property>
                                                                                     <property name="validator_style">wxFILTER_NONE</property>
                                                                                     <property name="validator_type">wxDefaultValidator</property>
@@ -1862,7 +1862,7 @@
                                                                                         <property name="style"></property>
                                                                                         <property name="subclass">; ; forward_declare</property>
                                                                                         <property name="toolbar_pane">0</property>
-                                                                                        <property name="tooltip"></property>
+                                                                                        <property name="tooltip">Read and decode, producing a disk image from a real disk or flux file.</property>
                                                                                         <property name="validator_data_type"></property>
                                                                                         <property name="validator_style">wxFILTER_NONE</property>
                                                                                         <property name="validator_type">wxDefaultValidator</property>
@@ -1935,7 +1935,7 @@
                                                                                         <property name="style"></property>
                                                                                         <property name="subclass">; ; forward_declare</property>
                                                                                         <property name="toolbar_pane">0</property>
-                                                                                        <property name="tooltip"></property>
+                                                                                        <property name="tooltip">Encode and write to either a real disk or a flux file.</property>
                                                                                         <property name="validator_data_type"></property>
                                                                                         <property name="validator_style">wxFILTER_NONE</property>
                                                                                         <property name="validator_type">wxDefaultValidator</property>
@@ -2008,7 +2008,7 @@
                                                                                         <property name="style"></property>
                                                                                         <property name="subclass">; ; forward_declare</property>
                                                                                         <property name="toolbar_pane">0</property>
-                                                                                        <property name="tooltip"></property>
+                                                                                        <property name="tooltip">Access the files on the disk directly without needing to image it.</property>
                                                                                         <property name="validator_data_type"></property>
                                                                                         <property name="validator_style">wxFILTER_NONE</property>
                                                                                         <property name="validator_type">wxDefaultValidator</property>
