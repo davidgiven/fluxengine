@@ -107,8 +107,8 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	wxGridSizer* gSizer10;
 	gSizer10 = new wxGridSizer( 1, 1, 0, 0 );
 
-	innerNotebook = new wxSimplebook( dataPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	idlePanel = new wxScrolledWindow( innerNotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxHSCROLL|wxVSCROLL );
+	dataNotebook = new wxSimplebook( dataPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	idlePanel = new wxScrolledWindow( dataNotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxHSCROLL|wxVSCROLL );
 	idlePanel->SetScrollRate( 5, 5 );
 	wxGridSizer* gSizer11;
 	gSizer11 = new wxGridSizer( 1, 1, 0, 0 );
@@ -232,35 +232,29 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	fgSizer8->Add( m_staticText19, 0, wxALIGN_CENTER|wxALL, 5 );
 
 	wxGridSizer* gSizer9;
-	gSizer9 = new wxGridSizer( 1, 1, 0, 0 );
+	gSizer9 = new wxGridSizer( 1, 0, 0, 0 );
 
-	wxGridSizer* gSizer101;
-	gSizer101 = new wxGridSizer( 1, 3, 0, 0 );
+	readButton = new wxButton( idlePanel, wxID_ANY, wxT("Read disk to file"), wxDefaultPosition, wxDefaultSize, 0 );
 
-	m_button5 = new wxButton( idlePanel, wxID_ANY, wxT("Read"), wxDefaultPosition, wxDefaultSize, 0 );
+	readButton->SetBitmap( wxArtProvider::GetBitmap( wxART_FILE_OPEN, wxART_TOOLBAR ) );
+	readButton->SetToolTip( wxT("Read and decode, producing a disk image from a real disk or flux file.") );
 
-	m_button5->SetBitmap( wxArtProvider::GetBitmap( wxART_FILE_OPEN, wxART_TOOLBAR ) );
-	m_button5->SetToolTip( wxT("Read and decode, producing a disk image from a real disk or flux file.") );
+	gSizer9->Add( readButton, 0, wxALIGN_CENTER|wxALL|wxEXPAND, 5 );
 
-	gSizer101->Add( m_button5, 0, wxALIGN_CENTER|wxALL, 5 );
+	writeButton = new wxButton( idlePanel, wxID_ANY, wxT("Write file to disk"), wxDefaultPosition, wxDefaultSize, 0 );
 
-	m_button6 = new wxButton( idlePanel, wxID_ANY, wxT("Write"), wxDefaultPosition, wxDefaultSize, 0 );
+	writeButton->SetBitmap( wxArtProvider::GetBitmap( wxART_FILE_SAVE, wxART_TOOLBAR ) );
+	writeButton->SetBitmapDisabled( wxArtProvider::GetBitmap( wxART_FILE_SAVE, wxART_BUTTON ) );
+	writeButton->SetToolTip( wxT("Encode and write to either a real disk or a flux file.") );
 
-	m_button6->SetBitmap( wxArtProvider::GetBitmap( wxART_FILE_SAVE, wxART_TOOLBAR ) );
-	m_button6->SetBitmapDisabled( wxArtProvider::GetBitmap( wxART_FILE_SAVE, wxART_BUTTON ) );
-	m_button6->SetToolTip( wxT("Encode and write to either a real disk or a flux file.") );
+	gSizer9->Add( writeButton, 0, wxALIGN_CENTER|wxALL|wxEXPAND, 5 );
 
-	gSizer101->Add( m_button6, 0, wxALIGN_CENTER|wxALL, 5 );
+	browseButton = new wxButton( idlePanel, wxID_ANY, wxT("Browse disk"), wxDefaultPosition, wxDefaultSize, 0 );
 
-	m_button7 = new wxButton( idlePanel, wxID_ANY, wxT("Browse"), wxDefaultPosition, wxDefaultSize, 0 );
+	browseButton->SetBitmap( wxArtProvider::GetBitmap( wxART_FOLDER_OPEN, wxART_TOOLBAR ) );
+	browseButton->SetToolTip( wxT("Access the files on the disk directly without needing to image it.") );
 
-	m_button7->SetBitmap( wxArtProvider::GetBitmap( wxART_FOLDER_OPEN, wxART_TOOLBAR ) );
-	m_button7->SetToolTip( wxT("Access the files on the disk directly without needing to image it.") );
-
-	gSizer101->Add( m_button7, 0, wxALIGN_CENTER|wxALL, 5 );
-
-
-	gSizer9->Add( gSizer101, 1, wxEXPAND, 5 );
+	gSizer9->Add( browseButton, 0, wxALIGN_CENTER|wxALL|wxEXPAND, 5 );
 
 
 	fgSizer8->Add( gSizer9, 1, wxEXPAND, 5 );
@@ -272,64 +266,83 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	idlePanel->SetSizer( gSizer11 );
 	idlePanel->Layout();
 	gSizer11->Fit( idlePanel );
-	innerNotebook->AddPage( idlePanel, wxT("a page"), false );
-	imagePanel = new wxPanel( innerNotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	dataNotebook->AddPage( idlePanel, wxT("a page"), false );
+	imagePanel = new wxPanel( dataNotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizer4;
 	bSizer4 = new wxBoxSizer( wxVERTICAL );
 
-	m_splitter3 = new wxSplitterWindow( imagePanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_3D|wxSP_LIVE_UPDATE );
-	m_splitter3->Connect( wxEVT_IDLE, wxIdleEventHandler( MainWindowGen::m_splitter3OnIdle ), NULL, this );
+	imagerToolbar = new wxToolBar( imagePanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL|wxTB_TEXT );
+	imagerBackTool = imagerToolbar->AddTool( wxID_ANY, wxT("Back"), wxArtProvider::GetBitmap( wxART_GO_BACK, wxART_TOOLBAR ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
 
-	m_panel10 = new wxPanel( m_splitter3, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	imagerToolbar->Realize();
+
+	bSizer4->Add( imagerToolbar, 0, wxEXPAND, 5 );
+
+	wxGridSizer* gSizer122;
+	gSizer122 = new wxGridSizer( 0, 2, 0, 0 );
+
 	wxGridSizer* gSizer5;
 	gSizer5 = new wxGridSizer( 0, 1, 0, 0 );
 
-	visualiser = new VisualisationControl( m_panel10, wxID_ANY, wxDefaultPosition, wxSize( -1,-1 ), wxBORDER_THEME );
+	visualiser = new VisualisationControl( imagePanel, wxID_ANY, wxDefaultPosition, wxSize( -1,-1 ), wxBORDER_THEME );
 	gSizer5->Add( visualiser, 0, wxALL|wxEXPAND, 5 );
 
 
-	m_panel10->SetSizer( gSizer5 );
-	m_panel10->Layout();
-	gSizer5->Fit( m_panel10 );
-	m_panel9 = new wxPanel( m_splitter3, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	gSizer122->Add( gSizer5, 1, wxEXPAND, 5 );
+
 	wxGridSizer* gSizer7;
 	gSizer7 = new wxGridSizer( 1, 1, 0, 0 );
 
 	wxGridSizer* gSizer8;
-	gSizer8 = new wxGridSizer( 2, 1, 0, 0 );
+	gSizer8 = new wxGridSizer( 0, 1, 0, 0 );
 
-	m_button9 = new wxButton( m_panel9, wxID_ANY, wxT("Save decoded image"), wxDefaultPosition, wxDefaultSize, 0 );
+	imagerSaveImageButton = new wxButton( imagePanel, wxID_ANY, wxT("Save decoded image"), wxDefaultPosition, wxDefaultSize, 0 );
 
-	m_button9->SetBitmap( wxArtProvider::GetBitmap( wxART_FILE_SAVE, wxART_BUTTON ) );
-	gSizer8->Add( m_button9, 0, wxALL|wxEXPAND, 5 );
+	imagerSaveImageButton->SetBitmap( wxArtProvider::GetBitmap( wxART_FILE_SAVE, wxART_BUTTON ) );
+	gSizer8->Add( imagerSaveImageButton, 0, wxALL|wxEXPAND, 5 );
 
-	m_button10 = new wxButton( m_panel9, wxID_ANY, wxT("Save raw flux"), wxDefaultPosition, wxDefaultSize, 0 );
+	imagerSaveFluxButton = new wxButton( imagePanel, wxID_ANY, wxT("Save raw flux"), wxDefaultPosition, wxDefaultSize, 0 );
 
-	m_button10->SetBitmap( wxArtProvider::GetBitmap( wxART_FILE_SAVE_AS, wxART_BUTTON ) );
-	gSizer8->Add( m_button10, 0, wxALL|wxEXPAND, 5 );
+	imagerSaveFluxButton->SetBitmap( wxArtProvider::GetBitmap( wxART_FILE_SAVE_AS, wxART_BUTTON ) );
+	gSizer8->Add( imagerSaveFluxButton, 0, wxALL|wxEXPAND, 5 );
+
+	m_staticText4 = new wxStaticText( imagePanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText4->Wrap( -1 );
+	gSizer8->Add( m_staticText4, 0, wxALL, 5 );
+
+	imagerGoAgainButton = new wxButton( imagePanel, wxID_ANY, wxT("Go again"), wxDefaultPosition, wxDefaultSize, 0 );
+
+	imagerGoAgainButton->SetBitmap( wxArtProvider::GetBitmap( wxART_REDO, wxART_BUTTON ) );
+	gSizer8->Add( imagerGoAgainButton, 0, wxALL|wxEXPAND, 5 );
 
 
 	gSizer7->Add( gSizer8, 1, wxALIGN_CENTER, 5 );
 
 
-	m_panel9->SetSizer( gSizer7 );
-	m_panel9->Layout();
-	gSizer7->Fit( m_panel9 );
-	m_splitter3->SplitVertically( m_panel10, m_panel9, 0 );
-	bSizer4->Add( m_splitter3, 1, wxEXPAND, 5 );
+	gSizer122->Add( gSizer7, 1, wxEXPAND, 5 );
+
+
+	bSizer4->Add( gSizer122, 1, wxEXPAND, 5 );
 
 
 	imagePanel->SetSizer( bSizer4 );
 	imagePanel->Layout();
 	bSizer4->Fit( imagePanel );
-	innerNotebook->AddPage( imagePanel, wxT("a page"), false );
-	browsePanel = new wxPanel( innerNotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	dataNotebook->AddPage( imagePanel, wxT("a page"), false );
+	browsePanel = new wxPanel( dataNotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxFlexGridSizer* fgSizer23;
-	fgSizer23 = new wxFlexGridSizer( 2, 1, 0, 0 );
+	fgSizer23 = new wxFlexGridSizer( 0, 1, 0, 0 );
 	fgSizer23->AddGrowableCol( 0 );
-	fgSizer23->AddGrowableRow( 0 );
+	fgSizer23->AddGrowableRow( 1 );
 	fgSizer23->SetFlexibleDirection( wxBOTH );
 	fgSizer23->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	browserToolbar = new wxToolBar( browsePanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL|wxTB_TEXT );
+	browserBackTool = browserToolbar->AddTool( wxID_ANY, wxT("Back"), wxArtProvider::GetBitmap( wxART_GO_BACK, wxART_TOOLBAR ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+
+	browserToolbar->Realize();
+
+	fgSizer23->Add( browserToolbar, 0, wxEXPAND, 5 );
 
 	m_scrolledWindow1 = new wxScrolledWindow( browsePanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxHSCROLL|wxVSCROLL );
 	m_scrolledWindow1->SetScrollRate( 5, 5 );
@@ -353,9 +366,13 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	gSizer12 = new wxGridSizer( 0, 2, 0, 0 );
 
 	browserDiscardButton = new wxButton( browsePanel, wxID_ANY, wxT("Discard pending changes"), wxDefaultPosition, wxDefaultSize, 0 );
+
+	browserDiscardButton->SetBitmap( wxArtProvider::GetBitmap( wxART_WARNING, wxART_BUTTON ) );
 	gSizer12->Add( browserDiscardButton, 0, wxALIGN_CENTER|wxALL, 5 );
 
 	browserCommitButton = new wxButton( browsePanel, wxID_ANY, wxT("Commit pending changes to disk"), wxDefaultPosition, wxDefaultSize, 0 );
+
+	browserCommitButton->SetBitmap( wxArtProvider::GetBitmap( wxART_FILE_SAVE, wxART_BUTTON ) );
 	gSizer12->Add( browserCommitButton, 0, wxALIGN_CENTER|wxALL, 5 );
 
 
@@ -365,9 +382,9 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	browsePanel->SetSizer( fgSizer23 );
 	browsePanel->Layout();
 	fgSizer23->Fit( browsePanel );
-	innerNotebook->AddPage( browsePanel, wxT("a page"), false );
+	dataNotebook->AddPage( browsePanel, wxT("a page"), false );
 
-	gSizer10->Add( innerNotebook, 1, wxEXPAND | wxALL, 5 );
+	gSizer10->Add( dataNotebook, 1, wxEXPAND | wxALL, 5 );
 
 
 	dataPanel->SetSizer( gSizer10 );
@@ -379,6 +396,8 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	gSizer6 = new wxGridSizer( 1, 1, 0, 0 );
 
 	logEntry = new wxTextCtrl( loggingPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY|wxTE_RICH );
+	logEntry->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
+
 	gSizer6->Add( logEntry, 0, wxALL|wxEXPAND, 5 );
 
 
@@ -395,6 +414,8 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	fgSizer91->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 
 	protoConfigEntry = new wxTextCtrl( debugPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY );
+	protoConfigEntry->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
+
 	fgSizer91->Add( protoConfigEntry, 0, wxALL|wxEXPAND, 5 );
 
 

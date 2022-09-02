@@ -11,8 +11,6 @@
 #define TICK 3
 #define TRACKS 82
 
-#define SECTORSIZE 5
-
 wxDEFINE_EVENT(TRACK_SELECTION_EVENT, TrackSelectionEvent);
 
 DECLARE_COLOUR(AXIS, 128, 128, 128);
@@ -46,13 +44,16 @@ void VisualisationControl::OnPaint(wxPaintEvent&)
     int w = size.GetWidth();
     int w2 = w / 2;
     int h = size.GetHeight();
+	int h2 = h / 2;
 
     int centrey = h * 1.5;
-    int outerradius = centrey - BORDER;
-    int innerradius = centrey - h + BORDER;
-    int scalesize = TRACKS * SECTORSIZE;
-    int scaletop = h / 2 - scalesize / 2;
+    int scalesize = h - BORDER * 4;
+	int sectorsize = scalesize / TRACKS;
+	scalesize = sectorsize * TRACKS;
+    int scaletop = h2 - scalesize / 2;
     int scalebottom = scaletop + scalesize - 1;
+    int outerradius = centrey - scaletop + BORDER;
+    int innerradius = centrey - scalebottom - BORDER;
 
     wxPaintDC dc(this);
 	dc.SetBackground(*wxWHITE_BRUSH);
@@ -82,18 +83,18 @@ void VisualisationControl::OnPaint(wxPaintEvent&)
 
         int factor = (_head == 0) ? -1 : 1;
 
-        int y = scaletop + _track * SECTORSIZE;
+        int y = scaletop + _track * sectorsize;
 		wxPoint points[] = {
 			{ w2 + factor*TICK, y-1 },
-			{ w2 + factor*TICK, y+SECTORSIZE-1 },
-			{ w2 + factor*TICK*2, y+SECTORSIZE/2 }
+			{ w2 + factor*TICK, y+sectorsize-1 },
+			{ w2 + factor*TICK*2, y+sectorsize/2 }
 		};
 		dc.DrawPolygon(3, points);
     }
 
     for (int track = 0; track <= TRACKS; track++)
     {
-        int y = scaletop + track * SECTORSIZE;
+        int y = scaletop + track * sectorsize;
         dc.SetBrush(AXIS_BRUSH);
         dc.SetPen(AXIS_PEN);
         dc.DrawLine({w2 - TICK, y-1}, {w2 + TICK, y-1});
@@ -130,11 +131,11 @@ void VisualisationControl::OnPaint(wxPaintEvent&)
 
                 if (head == 0)
                     dc.DrawRectangle(
-                        {w2 - x * SECTORSIZE - (SECTORSIZE - 1), y},
-                        {SECTORSIZE - 1, SECTORSIZE - 1});
+                        {w2 - x * sectorsize - (sectorsize - 1), y},
+                        {sectorsize - 1, sectorsize - 1});
                 else
-                    dc.DrawRectangle({w2 + x * SECTORSIZE + 1, y},
-                        {SECTORSIZE - 1, SECTORSIZE - 1});
+                    dc.DrawRectangle({w2 + x * sectorsize + 1, y},
+                        {sectorsize - 1, sectorsize - 1});
                 x++;
             }
         };
@@ -145,10 +146,10 @@ void VisualisationControl::OnPaint(wxPaintEvent&)
 
 	if (_selectedTrack != -1)
 	{
-		int x = (_selectedHead ? (w2-1) : 0) + SECTORSIZE;
-        int y = scaletop + _selectedTrack * SECTORSIZE - 1;
-		int bw = w/2 - SECTORSIZE*2 + 2;
-		int bh = SECTORSIZE + 3;
+		int x = (_selectedHead ? (w2-1) : 0) + sectorsize;
+        int y = scaletop + _selectedTrack * sectorsize - 1;
+		int bw = w/2 - sectorsize*2 + 2;
+		int bh = sectorsize + 3;
 		dc.SetPen(SELECTION_BOX_PEN);
 		dc.SetBrush(*wxTRANSPARENT_BRUSH);
 		dc.DrawRectangle({x, y-1, bw, bh});
@@ -166,7 +167,7 @@ void VisualisationControl::OnPaint(wxPaintEvent&)
 
 		centreText(
 			fmt::format("physical: {}.{}", _selectedTrack, _selectedHead),
-			scalebottom + 5);
+			h - 25);
 
 		key_t key = {_selectedTrack, _selectedHead};
         auto it = _tracks.find(key);
@@ -177,7 +178,7 @@ void VisualisationControl::OnPaint(wxPaintEvent&)
 					it->second->location.logicalTrack,
 					it->second->location.head);
 
-		centreText(logicalText, scalebottom + 15);
+		centreText(logicalText, h - 35);
 	}
 }
 
@@ -189,13 +190,15 @@ void VisualisationControl::OnMotion(wxMouseEvent& event)
     int h = size.GetHeight();
 
     int centrey = h * 1.5;
-    int scalesize = TRACKS * SECTORSIZE;
+    int scalesize = h - BORDER * 4;
+	int sectorsize = scalesize / TRACKS;
+	scalesize = sectorsize * TRACKS;
     int scaletop = h / 2 - scalesize / 2;
     int scalebottom = scaletop + scalesize - 1;
 
 	int headno = event.GetX() > w2;
 
-	int trackno = (event.GetY() - scaletop) / SECTORSIZE;
+	int trackno = (event.GetY() - scaletop) / sectorsize;
 	if ((trackno < 0) || (trackno >= TRACKS))
 		trackno = -1;
 	if ((_selectedHead != headno) || (_selectedTrack != trackno))

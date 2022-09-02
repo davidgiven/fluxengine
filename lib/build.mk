@@ -24,6 +24,7 @@ LIBFLUXENGINE_SRCS = \
 	lib/fluxsource/hardwarefluxsource.cc \
 	lib/fluxsource/kryoflux.cc \
 	lib/fluxsource/kryofluxfluxsource.cc \
+	lib/fluxsource/memoryfluxsource.cc \
 	lib/fluxsource/scpfluxsource.cc \
 	lib/fluxsource/testpatternfluxsource.cc \
 	lib/globals.cc \

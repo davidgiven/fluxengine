@@ -32,8 +32,8 @@
 #include <wx/filepicker.h>
 #include <wx/button.h>
 #include <wx/scrolwin.h>
+#include <wx/toolbar.h>
 #include "visualisationcontrol.h"
-#include <wx/splitter.h>
 #include <wx/dataview.h>
 #include <wx/simplebook.h>
 #include <wx/notebook.h>
@@ -100,7 +100,7 @@ class MainWindowGen : public wxFrame
 	protected:
 		wxNotebook* outerNotebook;
 		wxPanel* dataPanel;
-		wxSimplebook* innerNotebook;
+		wxSimplebook* dataNotebook;
 		wxScrolledWindow* idlePanel;
 		wxStaticText* m_staticText61;
 		wxRadioButton* realDiskRadioButton;
@@ -119,17 +119,20 @@ class MainWindowGen : public wxFrame
 		wxChoice* formatChoice;
 		wxButton* extraConfigurationButton;
 		wxStaticText* m_staticText19;
-		wxButton* m_button5;
-		wxButton* m_button6;
-		wxButton* m_button7;
+		wxButton* readButton;
+		wxButton* writeButton;
+		wxButton* browseButton;
 		wxPanel* imagePanel;
-		wxSplitterWindow* m_splitter3;
-		wxPanel* m_panel10;
+		wxToolBar* imagerToolbar;
+		wxToolBarToolBase* imagerBackTool;
 		VisualisationControl* visualiser;
-		wxPanel* m_panel9;
-		wxButton* m_button9;
-		wxButton* m_button10;
+		wxButton* imagerSaveImageButton;
+		wxButton* imagerSaveFluxButton;
+		wxStaticText* m_staticText4;
+		wxButton* imagerGoAgainButton;
 		wxPanel* browsePanel;
+		wxToolBar* browserToolbar;
+		wxToolBarToolBase* browserBackTool;
 		wxScrolledWindow* m_scrolledWindow1;
 		wxDataViewCtrl* browserView;
 		wxDataViewColumn* browserFilenameColumn;
@@ -156,12 +159,6 @@ class MainWindowGen : public wxFrame
 		MainWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("FluxEngine"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 828,620 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 
 		~MainWindowGen();
-
-		void m_splitter3OnIdle( wxIdleEvent& )
-		{
-			m_splitter3->SetSashPosition( 0 );
-			m_splitter3->Disconnect( wxEVT_IDLE, wxIdleEventHandler( MainWindowGen::m_splitter3OnIdle ), NULL, this );
-		}
 
 };
 

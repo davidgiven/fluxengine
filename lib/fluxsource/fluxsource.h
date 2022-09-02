@@ -4,6 +4,7 @@
 #include "flags.h"
 
 class CwfFluxSourceProto;
+class DiskFlux;
 class EraseFluxSourceProto;
 class Fl2FluxSourceProto;
 class FluxSourceProto;
@@ -38,6 +39,8 @@ private:
     static std::unique_ptr<FluxSource> createTestPatternFluxSource(const TestPatternFluxSourceProto& config);
 
 public:
+    static std::unique_ptr<FluxSource> createMemoryFluxSource(const DiskFlux& flux);
+
     static std::unique_ptr<FluxSource> create(const FluxSourceProto& spec);
 	static void updateConfigForFilename(FluxSourceProto* proto, const std::string& filename);
 
