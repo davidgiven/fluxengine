@@ -234,14 +234,14 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	wxGridSizer* gSizer9;
 	gSizer9 = new wxGridSizer( 1, 0, 0, 0 );
 
-	readButton = new wxButton( idlePanel, wxID_ANY, wxT("Read disk to file"), wxDefaultPosition, wxDefaultSize, 0 );
+	readButton = new wxButton( idlePanel, wxID_ANY, wxT("Read disk"), wxDefaultPosition, wxDefaultSize, 0 );
 
 	readButton->SetBitmap( wxArtProvider::GetBitmap( wxART_FILE_OPEN, wxART_TOOLBAR ) );
 	readButton->SetToolTip( wxT("Read and decode, producing a disk image from a real disk or flux file.") );
 
 	gSizer9->Add( readButton, 0, wxALIGN_CENTER|wxALL|wxEXPAND, 5 );
 
-	writeButton = new wxButton( idlePanel, wxID_ANY, wxT("Write file to disk"), wxDefaultPosition, wxDefaultSize, 0 );
+	writeButton = new wxButton( idlePanel, wxID_ANY, wxT("Write disk"), wxDefaultPosition, wxDefaultSize, 0 );
 
 	writeButton->SetBitmap( wxArtProvider::GetBitmap( wxART_FILE_SAVE, wxART_TOOLBAR ) );
 	writeButton->SetBitmapDisabled( wxArtProvider::GetBitmap( wxART_FILE_SAVE, wxART_BUTTON ) );

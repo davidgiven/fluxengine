@@ -64,11 +64,6 @@ public:
         }
 
         UpdateDevices();
-        if (deviceCombo->GetCount() > 0)
-            deviceCombo->SetValue(deviceCombo->GetString(0));
-
-        if (MainWindow::formatChoice->GetCount() > 0)
-            formatChoice->SetSelection(defaultFormat);
 
         Bind(UPDATE_STATE_EVENT,
             [this](wxCommandEvent&)
@@ -83,27 +78,18 @@ public:
         diskImageRadioButton->Bind(
             wxEVT_RADIOBUTTON, &MainWindow::OnConfigRadioButtonClicked, this);
 
-        driveChoice->Bind(wxEVT_COMMAND_CHOICE_SELECTED,
-            &MainWindow::OnControlsChanged,
-            this);
-        deviceCombo->Bind(wxEVT_COMMAND_CHOICE_SELECTED,
-            &MainWindow::OnControlsChanged,
-            this);
-        highDensityToggle->Bind(wxEVT_COMMAND_CHOICE_SELECTED,
-            &MainWindow::OnControlsChanged,
-            this);
+        driveChoice->Bind(wxEVT_CHOICE, &MainWindow::OnControlsChanged, this);
+        deviceCombo->Bind(wxEVT_TEXT, &MainWindow::OnControlsChanged, this);
+        highDensityToggle->Bind(
+            wxEVT_RADIOBUTTON, &MainWindow::OnControlsChanged, this);
 
-        fluxImagePicker->Bind(wxEVT_COMMAND_CHOICE_SELECTED,
-            &MainWindow::OnControlsChanged,
-            this);
+        fluxImagePicker->Bind(
+            wxEVT_FILEPICKER_CHANGED, &MainWindow::OnControlsChanged, this);
 
-        diskImagePicker->Bind(wxEVT_COMMAND_CHOICE_SELECTED,
-            &MainWindow::OnControlsChanged,
-            this);
+        diskImagePicker->Bind(
+            wxEVT_FILEPICKER_CHANGED, &MainWindow::OnControlsChanged, this);
 
-        formatChoice->Bind(wxEVT_COMMAND_CHOICE_SELECTED,
-            &MainWindow::OnControlsChanged,
-            this);
+        formatChoice->Bind(wxEVT_CHOICE, &MainWindow::OnControlsChanged, this);
 
         readButton->Bind(wxEVT_BUTTON, &MainWindow::OnReadButton, this);
         writeButton->Bind(wxEVT_BUTTON, &MainWindow::OnWriteButton, this);
@@ -186,6 +172,7 @@ public:
             UpdateState();
             ShowConfig();
 
+			_errorState = STATE_READING_FAILED;
             runOnWorkerThread(
                 [this]()
                 {
@@ -238,6 +225,8 @@ public:
             _state = STATE_WRITING_WORKING;
             UpdateState();
             ShowConfig();
+
+			_errorState = STATE_WRITING_FAILED;
             runOnWorkerThread(
                 [this]()
                 {
@@ -301,6 +290,8 @@ public:
 
             ShowConfig();
             auto image = _currentDisk->image;
+
+			_errorState = _state;
             runOnWorkerThread(
                 [image, this]()
                 {
@@ -334,6 +325,8 @@ public:
                 config.mutable_flux_sink(), filename.ToStdString());
 
             ShowConfig();
+
+			_errorState = _state;
             runOnWorkerThread(
                 [this]()
                 {
@@ -471,6 +464,8 @@ public:
                 [&](const ErrorLogMessage& m)
                 {
                     wxMessageBox(m.message, "Error", wxOK | wxICON_ERROR);
+					_state = _errorState;
+					UpdateState();
                 },
 
                 /* Indicates that we're starting a write operation. */
@@ -510,6 +505,11 @@ public:
 
     void LoadConfig()
     {
+        /* Prevent saving the config half-way through reloading it when the
+         * widget states all change. */
+
+        _dontSaveConfig = true;
+
         /* Radio button config. */
 
         wxString s = std::to_string(SELECTEDSOURCE_REAL);
@@ -530,8 +530,6 @@ public:
                 diskImageRadioButton->SetValue(1);
                 break;
         }
-
-        wxCommandEvent dummyEvent;
 
         /* Real disk block. */
 
@@ -580,11 +578,16 @@ public:
 
         /* Triggers SaveConfig */
 
+        _dontSaveConfig = false;
+        wxCommandEvent dummyEvent;
         OnConfigRadioButtonClicked(dummyEvent);
     }
 
     void SaveConfig()
     {
+        if (_dontSaveConfig)
+            return;
+
         _config.Write(
             CONFIG_SELECTEDSOURCE, wxString(std::to_string(_selectedSource)));
 
@@ -699,7 +702,9 @@ private:
         _formats;
     std::vector<std::unique_ptr<const CandidateDevice>> _devices;
     int _state;
+	int _errorState;
     int _selectedSource;
+    bool _dontSaveConfig = false;
     std::shared_ptr<const DiskFlux> _currentDisk;
 };
 
