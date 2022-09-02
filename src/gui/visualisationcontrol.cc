@@ -28,15 +28,17 @@ VisualisationControl::VisualisationControl(wxWindow* parent,
     long style):
     wxWindow(parent, id, pos, size, style, "VisualisationControl")
 {
-	SetDoubleBuffered(true);
+    SetDoubleBuffered(true);
 }
 
+// clang-format off
 wxBEGIN_EVENT_TABLE(VisualisationControl, wxPanel)
     EVT_PAINT(VisualisationControl::OnPaint)
 	EVT_MOTION(VisualisationControl::OnMotion)
 	EVT_LEFT_DOWN(VisualisationControl::OnLeftDown)
 	EVT_LEAVE_WINDOW(VisualisationControl::OnLeaveWindow)
-wxEND_EVENT_TABLE()
+wxEND_EVENT_TABLE();
+// clang-format on
 
 void VisualisationControl::OnPaint(wxPaintEvent&)
 {
@@ -44,20 +46,20 @@ void VisualisationControl::OnPaint(wxPaintEvent&)
     int w = size.GetWidth();
     int w2 = w / 2;
     int h = size.GetHeight();
-	int h2 = h / 2;
+    int h2 = h / 2;
 
     int centrey = h * 1.5;
     int scalesize = h - BORDER * 4;
-	int sectorsize = scalesize / TRACKS;
-	scalesize = sectorsize * TRACKS;
+    int sectorsize = scalesize / TRACKS;
+    scalesize = sectorsize * TRACKS;
     int scaletop = h2 - scalesize / 2;
     int scalebottom = scaletop + scalesize - 1;
     int outerradius = centrey - scaletop + BORDER;
     int innerradius = centrey - scalebottom - BORDER;
 
     wxPaintDC dc(this);
-	dc.SetBackground(*wxWHITE_BRUSH);
-	dc.Clear();
+    dc.SetBackground(*wxWHITE_BRUSH);
+    dc.Clear();
 
     dc.SetPen(*wxBLACK_PEN);
     dc.SetBrush(*wxLIGHT_GREY_BRUSH);
@@ -71,25 +73,25 @@ void VisualisationControl::OnPaint(wxPaintEvent&)
     if (_mode != VISMODE_NOTHING)
     {
         if (_mode == VISMODE_READING)
-		{
-			dc.SetPen(READ_ARROW_PEN);
-			dc.SetBrush(READ_ARROW_BRUSH);
-		}
+        {
+            dc.SetPen(READ_ARROW_PEN);
+            dc.SetBrush(READ_ARROW_BRUSH);
+        }
         else if (_mode == VISMODE_WRITING)
-		{
-			dc.SetPen(WRITE_ARROW_PEN);
-			dc.SetBrush(WRITE_ARROW_BRUSH);
-		}
+        {
+            dc.SetPen(WRITE_ARROW_PEN);
+            dc.SetBrush(WRITE_ARROW_BRUSH);
+        }
 
         int factor = (_head == 0) ? -1 : 1;
 
         int y = scaletop + _track * sectorsize;
-		wxPoint points[] = {
-			{ w2 + factor*TICK, y-1 },
-			{ w2 + factor*TICK, y+sectorsize-1 },
-			{ w2 + factor*TICK*2, y+sectorsize/2 }
-		};
-		dc.DrawPolygon(3, points);
+        wxPoint points[] = {
+            {w2 + factor * TICK,     y - 1             },
+            {w2 + factor * TICK,     y + sectorsize - 1},
+            {w2 + factor * TICK * 2, y + sectorsize / 2}
+        };
+        dc.DrawPolygon(3, points);
     }
 
     for (int track = 0; track <= TRACKS; track++)
@@ -97,7 +99,7 @@ void VisualisationControl::OnPaint(wxPaintEvent&)
         int y = scaletop + track * sectorsize;
         dc.SetBrush(AXIS_BRUSH);
         dc.SetPen(AXIS_PEN);
-        dc.DrawLine({w2 - TICK, y-1}, {w2 + TICK, y-1});
+        dc.DrawLine({w2 - TICK, y - 1}, {w2 + TICK, y - 1});
 
         auto drawSectors = [&](int head)
         {
@@ -144,42 +146,59 @@ void VisualisationControl::OnPaint(wxPaintEvent&)
         drawSectors(1);
     }
 
-	if (_selectedTrack != -1)
-	{
-		int x = (_selectedHead ? (w2-1) : 0) + sectorsize;
-        int y = scaletop + _selectedTrack * sectorsize - 1;
-		int bw = w/2 - sectorsize*2 + 2;
-		int bh = sectorsize + 3;
-		dc.SetPen(SELECTION_BOX_PEN);
-		dc.SetBrush(*wxTRANSPARENT_BRUSH);
-		dc.DrawRectangle({x, y-1, bw, bh});
+    if (_selectedTrack != -1)
+    {
+        key_t key = {_selectedTrack, _selectedHead};
+        int sectorCount = 0;
+        for (auto it = _sectors.lower_bound(key);
+             it != _sectors.upper_bound(key);
+             it++)
+            sectorCount++;
 
-		static wxFont font(8, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
-		dc.SetFont(font);
-		dc.SetBackgroundMode(wxTRANSPARENT);
-		dc.SetTextForeground(*wxBLACK);
+        if (sectorCount != 0)
+        {
+            dc.SetPen(SELECTION_BOX_PEN);
+            dc.SetBrush(*wxTRANSPARENT_BRUSH);
+            int bw = sectorCount * sectorsize + 3;
+            int bh = sectorsize + 3;
+            int y = scaletop + _selectedTrack * sectorsize - 1;
+            if (_selectedHead == 0)
+            {
+                int x = w2 - bw - sectorsize + 2;
+                dc.DrawRectangle({x, y - 1, bw, bh});
+            }
+            else
+            {
+                int x = w2 - 1 + sectorsize;
+                dc.DrawRectangle({x, y - 1, bw, bh});
+            }
+        }
 
-		auto centreText = [&](const std::string& text, int y)
-		{
-			auto size = dc.GetTextExtent(text);
-			dc.DrawText(text, { w2 - size.x/2 , y });
-		};
+        static wxFont font(
+            8, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+        dc.SetFont(font);
+        dc.SetBackgroundMode(wxTRANSPARENT);
+        dc.SetTextForeground(*wxBLACK);
 
-		centreText(
-			fmt::format("physical: {}.{}", _selectedTrack, _selectedHead),
-			h - 25);
+        auto centreText = [&](const std::string& text, int y)
+        {
+            auto size = dc.GetTextExtent(text);
+            dc.DrawText(text, {w2 - size.x / 2, y});
+        };
 
-		key_t key = {_selectedTrack, _selectedHead};
+        centreText(
+            fmt::format("physical: {}.{}", _selectedTrack, _selectedHead),
+            h - 25);
+
         auto it = _tracks.find(key);
-		std::string logicalText = "logical: (none)";
-		if (it != _tracks.end())
-			logicalText = fmt::format(
-					"logical: {}.{}",
-					it->second->location.logicalTrack,
-					it->second->location.head);
+        std::string logicalText = "logical: (none)";
+        if (it != _tracks.end())
+            logicalText = fmt::format("logical: {}.{}",
+                it->second->location.logicalTrack,
+                it->second->location.head);
 
-		centreText(logicalText, h - 35);
-	}
+        centreText(logicalText, h - 35);
+    }
 }
 
 void VisualisationControl::OnMotion(wxMouseEvent& event)
@@ -191,48 +210,48 @@ void VisualisationControl::OnMotion(wxMouseEvent& event)
 
     int centrey = h * 1.5;
     int scalesize = h - BORDER * 4;
-	int sectorsize = scalesize / TRACKS;
-	scalesize = sectorsize * TRACKS;
+    int sectorsize = scalesize / TRACKS;
+    scalesize = sectorsize * TRACKS;
     int scaletop = h / 2 - scalesize / 2;
     int scalebottom = scaletop + scalesize - 1;
 
-	int headno = event.GetX() > w2;
+    int headno = event.GetX() > w2;
 
-	int trackno = (event.GetY() - scaletop) / sectorsize;
-	if ((trackno < 0) || (trackno >= TRACKS))
-		trackno = -1;
-	if ((_selectedHead != headno) || (_selectedTrack != trackno))
-	{
-		_selectedTrack = trackno;
-		_selectedHead = headno;
-		Refresh();
-	}
+    int trackno = (event.GetY() - scaletop) / sectorsize;
+    if ((trackno < 0) || (trackno >= TRACKS))
+        trackno = -1;
+    if ((_selectedHead != headno) || (_selectedTrack != trackno))
+    {
+        _selectedTrack = trackno;
+        _selectedHead = headno;
+        Refresh();
+    }
 }
 
 void VisualisationControl::OnLeftDown(wxMouseEvent& event)
 {
-	OnMotion(event);
+    OnMotion(event);
 
-	if ((_selectedHead != -1) && (_selectedTrack != -1))
-	{
-		key_t key = {_selectedTrack, _selectedHead};
+    if ((_selectedHead != -1) && (_selectedTrack != -1))
+    {
+        key_t key = {_selectedTrack, _selectedHead};
         auto it = _tracks.find(key);
-		if (it != _tracks.end())
-		{
-			TrackSelectionEvent event(TRACK_SELECTION_EVENT, GetId());
-			event.SetEventObject(this);
-			event.trackFlux = it->second;
-			ProcessWindowEvent(event);
-		}
-	}
+        if (it != _tracks.end())
+        {
+            TrackSelectionEvent event(TRACK_SELECTION_EVENT, GetId());
+            event.SetEventObject(this);
+            event.trackFlux = it->second;
+            ProcessWindowEvent(event);
+        }
+    }
     else
         event.Skip();
 }
 
 void VisualisationControl::OnLeaveWindow(wxMouseEvent&)
 {
-	_selectedTrack = _selectedHead = -1;
-	Refresh();
+    _selectedTrack = _selectedHead = -1;
+    Refresh();
 }
 
 void VisualisationControl::SetMode(int track, int head, int mode)
@@ -246,14 +265,14 @@ void VisualisationControl::SetMode(int track, int head, int mode)
 void VisualisationControl::Clear()
 {
     _sectors.clear();
-	_tracks.clear();
+    _tracks.clear();
     Refresh();
 }
 
 void VisualisationControl::SetTrackData(std::shared_ptr<const TrackFlux> track)
 {
     key_t key = {track->location.physicalTrack, track->location.head};
-	_tracks[key] = track;
+    _tracks[key] = track;
     _sectors.erase(key);
     for (auto& sector : track->sectors)
         _sectors.insert({key, sector});
@@ -263,18 +282,18 @@ void VisualisationControl::SetTrackData(std::shared_ptr<const TrackFlux> track)
 
 void VisualisationControl::SetDiskData(std::shared_ptr<const DiskFlux> disk)
 {
-	_sectors.clear();
-	for (const auto& track : disk->tracks)
-	{
-		key_t key = {track->location.physicalTrack, track->location.head};
-		_tracks[key] = track;
-	}
+    _sectors.clear();
+    for (const auto& track : disk->tracks)
+    {
+        key_t key = {track->location.physicalTrack, track->location.head};
+        _tracks[key] = track;
+    }
 
-	for (const auto& sector : *(disk->image))
-	{
-		key_t key = {sector->physicalTrack, sector->physicalHead};
-		_sectors.insert({key, sector});
-	}
+    for (const auto& sector : *(disk->image))
+    {
+        key_t key = {sector->physicalTrack, sector->physicalHead};
+        _sectors.insert({key, sector});
+    }
 
     Refresh();
 }
