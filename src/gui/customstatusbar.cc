@@ -10,6 +10,8 @@ BEGIN_EVENT_TABLE(CustomStatusBar, wxStatusBar)
 END_EVENT_TABLE()
 // clang-format on
 
+wxDEFINE_EVENT(PROGRESSBAR_STOP_EVENT, wxCommandEvent);
+
 CustomStatusBar::CustomStatusBar(wxWindow* parent, wxWindowID id):
     wxStatusBar(parent, id)
 {
@@ -36,7 +38,7 @@ CustomStatusBar::CustomStatusBar(wxWindow* parent, wxWindowID id):
     _stopButton->Bind(wxEVT_BUTTON,
         [this](auto&)
         {
-            auto* event = new wxCommandEvent(UPDATE_STATE_EVENT, 0);
+            auto* event = new wxCommandEvent(PROGRESSBAR_STOP_EVENT, 0);
             event->SetEventObject(this);
             QueueEvent(event);
         });

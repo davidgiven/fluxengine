@@ -123,6 +123,12 @@ public:
         UpdateState();
 
         CreateStatusBar();
+
+        _statusBar->Bind(PROGRESSBAR_STOP_EVENT,
+            [this](auto&)
+            {
+                emergencyStop = true;
+            });
     }
 
     void OnExit(wxCommandEvent& event)
@@ -170,11 +176,6 @@ public:
     {
         SaveConfig();
         UpdateState();
-    }
-
-    void OnStopButton(wxCommandEvent&)
-    {
-        emergencyStop = true;
     }
 
     void OnReadButton(wxCommandEvent&)
@@ -478,11 +479,23 @@ public:
                 {
                 },
 
+                /* We terminated due to the stop button. */
+                [&](const EmergencyStopMessage& m)
+                {
+                    _statusBar->SetLeftLabel("Emergency stop!");
+					_statusBar->HideProgressBar();
+					_statusBar->SetRightLabel("");
+                    _state = _errorState;
+                    UpdateState();
+                },
+
                 /* A fatal error. */
                 [&](const ErrorLogMessage& m)
                 {
                     _statusBar->SetLeftLabel(m.message);
                     wxMessageBox(m.message, "Error", wxOK | wxICON_ERROR);
+					_statusBar->HideProgressBar();
+					_statusBar->SetRightLabel("");
                     _state = _errorState;
                     UpdateState();
                 },
