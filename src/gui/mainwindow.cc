@@ -14,6 +14,7 @@
 #include "mapper.h"
 #include "utils.h"
 #include "fluxviewerwindow.h"
+#include "customstatusbar.h"
 #include <google/protobuf/text_format.h>
 #include <wx/config.h>
 #include <wx/aboutdlg.h>
@@ -120,6 +121,8 @@ public:
 
         LoadConfig();
         UpdateState();
+
+        CreateStatusBar();
     }
 
     void OnExit(wxCommandEvent& event)
@@ -486,22 +489,28 @@ public:
                 /* Indicates that we're starting a write operation. */
                 [&](const BeginWriteOperationLogMessage& m)
                 {
+                    _statusBar->SetRightLabel(
+                        fmt::format("W {}.{}", m.track, m.head));
                     visualiser->SetMode(m.track, m.head, VISMODE_WRITING);
                 },
 
                 [&](const EndWriteOperationLogMessage& m)
                 {
+                    _statusBar->SetRightLabel("");
                     visualiser->SetMode(0, 0, VISMODE_NOTHING);
                 },
 
                 /* Indicates that we're starting a read operation. */
                 [&](const BeginReadOperationLogMessage& m)
                 {
+                    _statusBar->SetRightLabel(
+                        fmt::format("R {}.{}", m.track, m.head));
                     visualiser->SetMode(m.track, m.head, VISMODE_READING);
                 },
 
                 [&](const EndReadOperationLogMessage& m)
                 {
+                    _statusBar->SetRightLabel("");
                     visualiser->SetMode(0, 0, VISMODE_NOTHING);
                 },
 
@@ -685,6 +694,13 @@ public:
         (new FluxViewerWindow(this, event.trackFlux))->Show(true);
     }
 
+    wxStatusBar* OnCreateStatusBar(
+        int number, long style, wxWindowID id, const wxString& name) override
+    {
+        _statusBar = new CustomStatusBar(this, id);
+        return _statusBar;
+    }
+
 private:
     enum
     {
@@ -722,6 +738,7 @@ private:
     int _selectedSource;
     bool _dontSaveConfig = false;
     std::shared_ptr<const DiskFlux> _currentDisk;
+    CustomStatusBar* _statusBar;
 };
 
 wxWindow* FluxEngineApp::CreateMainWindow()

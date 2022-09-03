@@ -37,7 +37,6 @@
 #include <wx/dataview.h>
 #include <wx/simplebook.h>
 #include <wx/notebook.h>
-#include <wx/statusbr.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -98,6 +97,8 @@ class MainWindowGen : public wxFrame
 	private:
 
 	protected:
+		wxMenuBar* menuBar;
+		wxMenu* m_menu1;
 		wxNotebook* outerNotebook;
 		wxPanel* dataPanel;
 		wxSimplebook* dataNotebook;
@@ -145,9 +146,6 @@ class MainWindowGen : public wxFrame
 		wxTextCtrl* logEntry;
 		wxPanel* debugPanel;
 		wxTextCtrl* protoConfigEntry;
-		wxMenuBar* menuBar;
-		wxMenu* m_menu1;
-		wxStatusBar* statusBar;
 
 		// Virtual event handlers, override them in your derived class
 		virtual void OnAbout( wxCommandEvent& event ) { event.Skip(); }
@@ -156,7 +154,7 @@ class MainWindowGen : public wxFrame
 
 	public:
 
-		MainWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("FluxEngine"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 828,620 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+		MainWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("FluxEngine"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 819,607 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 
 		~MainWindowGen();
 

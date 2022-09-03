@@ -95,12 +95,22 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
 	this->SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_INACTIVECAPTION ) );
 
-	wxFlexGridSizer* fgSizer9;
-	fgSizer9 = new wxFlexGridSizer( 1, 1, 0, 0 );
-	fgSizer9->AddGrowableCol( 0 );
-	fgSizer9->AddGrowableRow( 0 );
-	fgSizer9->SetFlexibleDirection( wxBOTH );
-	fgSizer9->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_ALL );
+	menuBar = new wxMenuBar( 0 );
+	m_menu1 = new wxMenu();
+	wxMenuItem* m_menuItem2;
+	m_menuItem2 = new wxMenuItem( m_menu1, wxID_ABOUT, wxString( wxT("About") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu1->Append( m_menuItem2 );
+
+	wxMenuItem* m_menuItem1;
+	m_menuItem1 = new wxMenuItem( m_menu1, wxID_EXIT, wxString( wxT("E&xit") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu1->Append( m_menuItem1 );
+
+	menuBar->Append( m_menu1, wxT("&File") );
+
+	this->SetMenuBar( menuBar );
+
+	wxBoxSizer* bSizer4;
+	bSizer4 = new wxBoxSizer( wxVERTICAL );
 
 	outerNotebook = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 	dataPanel = new wxPanel( outerNotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
@@ -268,15 +278,15 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	gSizer11->Fit( idlePanel );
 	dataNotebook->AddPage( idlePanel, wxT("a page"), false );
 	imagePanel = new wxPanel( dataNotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	wxBoxSizer* bSizer4;
-	bSizer4 = new wxBoxSizer( wxVERTICAL );
+	wxBoxSizer* bSizer41;
+	bSizer41 = new wxBoxSizer( wxVERTICAL );
 
 	imagerToolbar = new wxToolBar( imagePanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL|wxTB_TEXT );
 	imagerBackTool = imagerToolbar->AddTool( wxID_ANY, wxT("Back"), wxArtProvider::GetBitmap( wxART_GO_BACK, wxART_TOOLBAR ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
 
 	imagerToolbar->Realize();
 
-	bSizer4->Add( imagerToolbar, 0, wxEXPAND, 5 );
+	bSizer41->Add( imagerToolbar, 0, wxEXPAND, 5 );
 
 	wxGridSizer* gSizer122;
 	gSizer122 = new wxGridSizer( 0, 2, 0, 0 );
@@ -322,12 +332,12 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	gSizer122->Add( gSizer7, 1, wxEXPAND, 5 );
 
 
-	bSizer4->Add( gSizer122, 1, wxEXPAND, 5 );
+	bSizer41->Add( gSizer122, 1, wxEXPAND, 5 );
 
 
-	imagePanel->SetSizer( bSizer4 );
+	imagePanel->SetSizer( bSizer41 );
 	imagePanel->Layout();
-	bSizer4->Fit( imagePanel );
+	bSizer41->Fit( imagePanel );
 	dataNotebook->AddPage( imagePanel, wxT("a page"), false );
 	browsePanel = new wxPanel( dataNotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxFlexGridSizer* fgSizer23;
@@ -384,7 +394,7 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	fgSizer23->Fit( browsePanel );
 	dataNotebook->AddPage( browsePanel, wxT("a page"), false );
 
-	gSizer10->Add( dataNotebook, 1, wxEXPAND | wxALL, 5 );
+	gSizer10->Add( dataNotebook, 1, wxEXPAND, 5 );
 
 
 	dataPanel->SetSizer( gSizer10 );
@@ -424,26 +434,11 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	fgSizer91->Fit( debugPanel );
 	outerNotebook->AddPage( debugPanel, wxT("Current configuration"), false );
 
-	fgSizer9->Add( outerNotebook, 1, wxEXPAND, 5 );
+	bSizer4->Add( outerNotebook, 1, wxEXPAND, 5 );
 
 
-	this->SetSizer( fgSizer9 );
+	this->SetSizer( bSizer4 );
 	this->Layout();
-	menuBar = new wxMenuBar( 0 );
-	m_menu1 = new wxMenu();
-	wxMenuItem* m_menuItem2;
-	m_menuItem2 = new wxMenuItem( m_menu1, wxID_ABOUT, wxString( wxT("About") ) , wxEmptyString, wxITEM_NORMAL );
-	m_menu1->Append( m_menuItem2 );
-
-	wxMenuItem* m_menuItem1;
-	m_menuItem1 = new wxMenuItem( m_menu1, wxID_EXIT, wxString( wxT("E&xit") ) , wxEmptyString, wxITEM_NORMAL );
-	m_menu1->Append( m_menuItem1 );
-
-	menuBar->Append( m_menu1, wxT("&File") );
-
-	this->SetMenuBar( menuBar );
-
-	statusBar = this->CreateStatusBar( 1, wxSTB_SIZEGRIP, wxID_ANY );
 
 	this->Centre( wxBOTH );
 
