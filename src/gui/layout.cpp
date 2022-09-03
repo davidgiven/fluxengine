@@ -12,7 +12,7 @@
 MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
-	this->SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_INACTIVECAPTION ) );
+	this->SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOW ) );
 
 	menuBar = new wxMenuBar( 0 );
 	m_menu1 = new wxMenu();
@@ -173,7 +173,7 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	readButton->SetBitmap( wxArtProvider::GetBitmap( wxART_FILE_OPEN, wxART_TOOLBAR ) );
 	readButton->SetToolTip( wxT("Read and decode, producing a disk image from a real disk or flux file.") );
 
-	gSizer9->Add( readButton, 0, wxALIGN_CENTER|wxALL|wxEXPAND, 5 );
+	gSizer9->Add( readButton, 0, wxALL|wxEXPAND, 5 );
 
 	writeButton = new wxButton( idlePanel, wxID_ANY, wxT("Write disk"), wxDefaultPosition, wxDefaultSize, 0 );
 
@@ -181,7 +181,7 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	writeButton->SetBitmapDisabled( wxNullBitmap );
 	writeButton->SetToolTip( wxT("Encode and write to either a real disk or a flux file.") );
 
-	gSizer9->Add( writeButton, 0, wxALIGN_CENTER|wxALL|wxEXPAND, 5 );
+	gSizer9->Add( writeButton, 0, wxALL|wxEXPAND, 5 );
 
 	browseButton = new wxButton( idlePanel, wxID_ANY, wxT("Browse disk"), wxDefaultPosition, wxDefaultSize, 0 );
 
@@ -189,7 +189,7 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	browseButton->Enable( false );
 	browseButton->SetToolTip( wxT("Access the files on the disk directly without needing to image it.") );
 
-	gSizer9->Add( browseButton, 0, wxALIGN_CENTER|wxALL|wxEXPAND, 5 );
+	gSizer9->Add( browseButton, 0, wxALL|wxEXPAND, 5 );
 
 
 	fgSizer8->Add( gSizer9, 1, wxEXPAND, 5 );

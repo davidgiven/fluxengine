@@ -32,7 +32,7 @@
         <object class="Frame" expanded="1">
             <property name="aui_managed">0</property>
             <property name="aui_manager_style">wxAUI_MGR_DEFAULT</property>
-            <property name="bg">wxSYS_COLOUR_INACTIVECAPTION</property>
+            <property name="bg">wxSYS_COLOUR_WINDOW</property>
             <property name="center">wxBOTH</property>
             <property name="context_help"></property>
             <property name="context_menu">1</property>
@@ -1410,7 +1410,7 @@
                                                     <property name="vgap">0</property>
                                                     <object class="sizeritem" expanded="0">
                                                         <property name="border">5</property>
-                                                        <property name="flag">wxALIGN_CENTER|wxALL|wxEXPAND</property>
+                                                        <property name="flag">wxALL|wxEXPAND</property>
                                                         <property name="proportion">0</property>
                                                         <object class="wxButton" expanded="0">
                                                             <property name="BottomDockable">1</property>
@@ -1484,7 +1484,7 @@
                                                     </object>
                                                     <object class="sizeritem" expanded="0">
                                                         <property name="border">5</property>
-                                                        <property name="flag">wxALIGN_CENTER|wxALL|wxEXPAND</property>
+                                                        <property name="flag">wxALL|wxEXPAND</property>
                                                         <property name="proportion">0</property>
                                                         <object class="wxButton" expanded="0">
                                                             <property name="BottomDockable">1</property>
@@ -1558,7 +1558,7 @@
                                                     </object>
                                                     <object class="sizeritem" expanded="0">
                                                         <property name="border">5</property>
-                                                        <property name="flag">wxALIGN_CENTER|wxALL|wxEXPAND</property>
+                                                        <property name="flag">wxALL|wxEXPAND</property>
                                                         <property name="proportion">0</property>
                                                         <object class="wxButton" expanded="0">
                                                             <property name="BottomDockable">1</property>
