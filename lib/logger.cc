@@ -83,8 +83,10 @@ std::string Logger::toString(const AnyLogMessage& message)
                 std::set<std::shared_ptr<const Record>> rawRecords;
                 for (const auto& trackDataFlux : track.trackDatas)
                 {
-                    rawSectors.insert(trackDataFlux->sectors.begin(), trackDataFlux->sectors.end());
-                    rawRecords.insert(trackDataFlux->records.begin(), trackDataFlux->records.end());
+                    rawSectors.insert(trackDataFlux->sectors.begin(),
+                        trackDataFlux->sectors.end());
+                    rawRecords.insert(trackDataFlux->records.begin(),
+                        trackDataFlux->records.end());
                 }
 
                 nanoseconds_t clock = 0;
@@ -134,6 +136,21 @@ std::string Logger::toString(const AnyLogMessage& message)
 
                 indent();
                 stream << fmt::format("{} bytes decoded\n", size);
+            },
+
+            /* Large-scale operation start. */
+            [&](const BeginOperationLogMessage& m)
+            {
+            },
+
+            /* Large-scale operation end. */
+            [&](const EndOperationLogMessage& m)
+            {
+            },
+
+            /* Large-scale operation progress. */
+            [&](const OperationProgressLogMessage& m)
+            {
             },
 
             /* Generic text message */

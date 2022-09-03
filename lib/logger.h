@@ -10,7 +10,11 @@ class Sector;
 
 struct ErrorLogMessage
 {
-	std::string message;
+    std::string message;
+};
+
+struct EmergencyStopMessage
+{
 };
 
 struct BeginSpeedOperationLogMessage
@@ -29,7 +33,7 @@ struct TrackReadLogMessage
 
 struct DiskReadLogMessage
 {
-	std::shared_ptr<const DiskFlux> disk;
+    std::shared_ptr<const DiskFlux> disk;
 };
 
 struct BeginReadOperationLogMessage
@@ -40,8 +44,8 @@ struct BeginReadOperationLogMessage
 
 struct EndReadOperationLogMessage
 {
-	std::shared_ptr<const TrackDataFlux> trackDataFlux;
-	std::set<std::shared_ptr<const Sector>> sectors;
+    std::shared_ptr<const TrackDataFlux> trackDataFlux;
+    std::set<std::shared_ptr<const Sector>> sectors;
 };
 
 struct BeginWriteOperationLogMessage
@@ -54,19 +58,37 @@ struct EndWriteOperationLogMessage
 {
 };
 
+struct BeginOperationLogMessage
+{
+    std::string message;
+};
+
+struct EndOperationLogMessage
+{
+    std::string message;
+};
+
+struct OperationProgressLogMessage
+{
+    unsigned progress;
+};
+
 class TrackFlux;
 
-typedef std::variant<
-	std::string,
-	ErrorLogMessage,
+typedef std::variant<std::string,
+    ErrorLogMessage,
+    EmergencyStopMessage,
     TrackReadLogMessage,
-	DiskReadLogMessage,
+    DiskReadLogMessage,
     BeginSpeedOperationLogMessage,
     EndSpeedOperationLogMessage,
     BeginReadOperationLogMessage,
     EndReadOperationLogMessage,
     BeginWriteOperationLogMessage,
-    EndWriteOperationLogMessage>
+    EndWriteOperationLogMessage,
+    BeginOperationLogMessage,
+    EndOperationLogMessage,
+    OperationProgressLogMessage>
     AnyLogMessage;
 
 class Logger

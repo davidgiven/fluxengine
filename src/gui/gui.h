@@ -9,6 +9,8 @@ class MainWindow;
 extern void runOnUiThread(std::function<void()> callback);
 extern void runOnWorkerThread(std::function<void()> callback);
 
+wxDECLARE_EVENT(UPDATE_STATE_EVENT, wxCommandEvent);
+
 template <typename R>
 static inline R runOnUiThread(std::function<R()> callback)
 {
@@ -37,8 +39,12 @@ protected:
 	virtual wxThread::ExitCode Entry();
 
 private:
+	static wxWindow* CreateMainWindow();
+	void SendUpdateEvent();
+
+private:
 	std::function<void()> _callback;
-	MainWindow* _mainWindow;
+	wxWindow* _mainWindow;
 };
 wxDECLARE_APP(FluxEngineApp);
 

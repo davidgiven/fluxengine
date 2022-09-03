@@ -1,4 +1,5 @@
 comment: 'DVK MX common settings'
+is_extension: true
 
 image_writer {
 	filename: "mx.img"
