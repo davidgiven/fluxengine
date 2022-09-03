@@ -18,16 +18,12 @@
 #include <wx/font.h>
 #include <wx/colour.h>
 #include <wx/settings.h>
-#include "fluxviewercontrol.h"
-#include <wx/scrolbar.h>
-#include <wx/sizer.h>
-#include <wx/frame.h>
-#include <wx/textctrl.h>
 #include <wx/stattext.h>
 #include <wx/radiobut.h>
 #include <wx/combobox.h>
 #include <wx/choice.h>
 #include <wx/checkbox.h>
+#include <wx/sizer.h>
 #include <wx/panel.h>
 #include <wx/filepicker.h>
 #include <wx/button.h>
@@ -36,58 +32,13 @@
 #include "visualisationcontrol.h"
 #include <wx/dataview.h>
 #include <wx/simplebook.h>
+#include <wx/frame.h>
+#include <wx/textctrl.h>
+#include <wx/dialog.h>
+#include "fluxviewercontrol.h"
+#include <wx/scrolbar.h>
 
 ///////////////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////////////////////////
-/// Class FluxViewerWindowGen
-///////////////////////////////////////////////////////////////////////////////
-class FluxViewerWindowGen : public wxFrame
-{
-	private:
-
-	protected:
-		wxMenuBar* m_menubar2;
-		wxMenu* m_menu1;
-		FluxViewerControl* fluxviewer;
-		wxScrollBar* scrollbar;
-
-		// Virtual event handlers, override them in your derived class
-		virtual void OnExit( wxCommandEvent& event ) { event.Skip(); }
-
-
-	public:
-
-		FluxViewerWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Flux Viewer"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
-
-		~FluxViewerWindowGen();
-
-};
-
-///////////////////////////////////////////////////////////////////////////////
-/// Class TextViewerWindowGen
-///////////////////////////////////////////////////////////////////////////////
-class TextViewerWindowGen : public wxFrame
-{
-	private:
-
-	protected:
-		wxMenuBar* m_menubar2;
-		wxMenu* m_menu1;
-		wxTextCtrl* textControl;
-
-		// Virtual event handlers, override them in your derived class
-		virtual void OnClose( wxCloseEvent& event ) { event.Skip(); }
-		virtual void OnExit( wxCommandEvent& event ) { event.Skip(); }
-
-
-	public:
-
-		TextViewerWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Text Viewer"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
-
-		~TextViewerWindowGen();
-
-};
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowGen
@@ -164,6 +115,57 @@ class MainWindowGen : public wxFrame
 		MainWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("FluxEngine"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 819,607 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 
 		~MainWindowGen();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class TextViewerWindowGen
+///////////////////////////////////////////////////////////////////////////////
+class TextViewerWindowGen : public wxDialog
+{
+	private:
+
+	protected:
+		wxTextCtrl* textControl;
+		wxStdDialogButtonSizer* m_sdbSizer2;
+		wxButton* m_sdbSizer2OK;
+
+		// Virtual event handlers, override them in your derived class
+		virtual void OnClose( wxCloseEvent& event ) { event.Skip(); }
+		virtual void OnClose( wxCommandEvent& event ) { event.Skip(); }
+
+
+	public:
+
+		TextViewerWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 208,143 ), long style = wxDEFAULT_DIALOG_STYLE );
+
+		~TextViewerWindowGen();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class FluxViewerWindowGen
+///////////////////////////////////////////////////////////////////////////////
+class FluxViewerWindowGen : public wxDialog
+{
+	private:
+
+	protected:
+		FluxViewerControl* fluxviewer;
+		wxScrollBar* scrollbar;
+		wxStdDialogButtonSizer* m_sdbSizer2;
+		wxButton* m_sdbSizer2OK;
+
+		// Virtual event handlers, override them in your derived class
+		virtual void OnClose( wxCloseEvent& event ) { event.Skip(); }
+		virtual void OnClose( wxCommandEvent& event ) { event.Skip(); }
+
+
+	public:
+
+		FluxViewerWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 400,200 ), long style = wxDEFAULT_DIALOG_STYLE );
+
+		~FluxViewerWindowGen();
 
 };
 
