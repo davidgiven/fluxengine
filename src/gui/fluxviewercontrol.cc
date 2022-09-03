@@ -389,20 +389,21 @@ void FluxViewerControl::ShowSectorMenu(std::shared_ptr<const Sector> sector)
 {
 	wxMenu menu;
 
-	menu.Bind(wxEVT_COMMAND_MENU_SELECTED,
+	menu.Bind(wxEVT_MENU,
 		[&] (wxCommandEvent&) {
 			DisplayDecodedData(sector);
 		},
 		menu.Append(wxID_ANY, "Show decoded data")->GetId()
 	);
 
-	menu.Bind(wxEVT_COMMAND_MENU_SELECTED,
+	menu.Bind(wxEVT_MENU,
 		[&] (wxCommandEvent&) {
 			DisplayRawData(sector);
 		},
 		menu.Append(wxID_ANY, "Show raw data")->GetId()
 	);
 
+	_rightClicked = false;
 	PopupMenu(&menu, _mouseX, _mouseY);
 }
 
@@ -417,6 +418,7 @@ void FluxViewerControl::ShowRecordMenu(const Location& location, std::shared_ptr
 		menu.Append(wxID_ANY, "Show record data")->GetId()
 	);
 
+	_rightClicked = false;
 	PopupMenu(&menu, _mouseX, _mouseY);
 }
 
