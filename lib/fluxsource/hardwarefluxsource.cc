@@ -58,6 +58,7 @@ public:
         _hardSectorThreshold = 0;
 		if (_oneRevolution == 0)
 		{
+			Logger() << BeginOperationLogMessage{"Measuring drive rotational speed"};
 			do
 			{
 				_oneRevolution =
@@ -71,6 +72,7 @@ public:
 				retries--;
 			} while ((_oneRevolution == 0) && (retries > 0));
 			config.mutable_drive()->set_rotational_period_ms(_oneRevolution / 1e6);
+			Logger() << EndOperationLogMessage{};
 		}
 
         if (_oneRevolution == 0)

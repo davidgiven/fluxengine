@@ -502,7 +502,7 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
 
     /* diskflux can't be modified below this point. */
     Logger() << DiskReadLogMessage{diskflux};
-    Logger() << BeginOperationLogMessage{"Read complete"};
+    Logger() << EndOperationLogMessage{"Read complete"};
     return diskflux;
 }
 
