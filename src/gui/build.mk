@@ -4,10 +4,10 @@ FLUXENGINE_GUI_SRCS = \
 	src/gui/customstatusbar.cc \
 	src/gui/fluxviewercontrol.cc \
 	src/gui/fluxviewerwindow.cc \
-	src/gui/hexviewerwindow.cc \
 	src/gui/layout.cpp \
 	src/gui/main.cc \
 	src/gui/mainwindow.cc \
+	src/gui/textviewerwindow.cc \
 	src/gui/visualisationcontrol.cc \
  
 FLUXENGINE_GUI_OBJS = \

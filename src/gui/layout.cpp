@@ -48,7 +48,7 @@ FluxViewerWindowGen::~FluxViewerWindowGen()
 
 }
 
-HexViewerWindowGen::HexViewerWindowGen( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
+TextViewerWindowGen::TextViewerWindowGen( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
 
@@ -69,10 +69,10 @@ HexViewerWindowGen::HexViewerWindowGen( wxWindow* parent, wxWindowID id, const w
 	fgSizer8->SetFlexibleDirection( wxHORIZONTAL );
 	fgSizer8->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_ALL );
 
-	hexEntry = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY|wxTE_RICH );
-	hexEntry->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
+	textControl = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY|wxTE_RICH );
+	textControl->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
 
-	fgSizer8->Add( hexEntry, 0, wxALL|wxEXPAND, 5 );
+	fgSizer8->Add( textControl, 0, wxALL|wxEXPAND, 5 );
 
 
 	this->SetSizer( fgSizer8 );
@@ -81,10 +81,10 @@ HexViewerWindowGen::HexViewerWindowGen( wxWindow* parent, wxWindowID id, const w
 	this->Centre( wxBOTH );
 
 	// Connect Events
-	m_menu1->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( HexViewerWindowGen::OnExit ), this, m_menuItem1->GetId());
+	m_menu1->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( TextViewerWindowGen::OnExit ), this, m_menuItem1->GetId());
 }
 
-HexViewerWindowGen::~HexViewerWindowGen()
+TextViewerWindowGen::~TextViewerWindowGen()
 {
 	// Disconnect Events
 
@@ -98,7 +98,7 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	menuBar = new wxMenuBar( 0 );
 	m_menu1 = new wxMenu();
 	wxMenuItem* m_menuItem2;
-	m_menuItem2 = new wxMenuItem( m_menu1, wxID_ABOUT, wxString( wxT("About") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuItem2 = new wxMenuItem( m_menu1, wxID_ABOUT, wxString( wxT("&About") ) , wxEmptyString, wxITEM_NORMAL );
 	m_menu1->Append( m_menuItem2 );
 
 	wxMenuItem* m_menuItem1;
@@ -107,17 +107,23 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 
 	menuBar->Append( m_menu1, wxT("&File") );
 
+	m_menu2 = new wxMenu();
+	wxMenuItem* m_menuItem3;
+	m_menuItem3 = new wxMenuItem( m_menu2, wxID_ANY, wxString( wxT("Show &logs...") ) + wxT('\t') + wxT("CTRL+L"), wxEmptyString, wxITEM_NORMAL );
+	m_menu2->Append( m_menuItem3 );
+
+	wxMenuItem* m_menuItem4;
+	m_menuItem4 = new wxMenuItem( m_menu2, wxID_ANY, wxString( wxT("Show current &configuration...") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu2->Append( m_menuItem4 );
+
+	menuBar->Append( m_menu2, wxT("&View") );
+
 	this->SetMenuBar( menuBar );
 
 	wxBoxSizer* bSizer4;
 	bSizer4 = new wxBoxSizer( wxVERTICAL );
 
-	outerNotebook = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	dataPanel = new wxPanel( outerNotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	wxGridSizer* gSizer10;
-	gSizer10 = new wxGridSizer( 1, 1, 0, 0 );
-
-	dataNotebook = new wxSimplebook( dataPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	dataNotebook = new wxSimplebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 	idlePanel = new wxScrolledWindow( dataNotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxHSCROLL|wxVSCROLL );
 	idlePanel->SetScrollRate( 5, 5 );
 	wxGridSizer* gSizer11;
@@ -394,47 +400,7 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	fgSizer23->Fit( browsePanel );
 	dataNotebook->AddPage( browsePanel, wxT("a page"), false );
 
-	gSizer10->Add( dataNotebook, 1, wxEXPAND, 5 );
-
-
-	dataPanel->SetSizer( gSizer10 );
-	dataPanel->Layout();
-	gSizer10->Fit( dataPanel );
-	outerNotebook->AddPage( dataPanel, wxT("Data"), true );
-	loggingPanel = new wxPanel( outerNotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	wxGridSizer* gSizer6;
-	gSizer6 = new wxGridSizer( 1, 1, 0, 0 );
-
-	logEntry = new wxTextCtrl( loggingPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY|wxTE_RICH );
-	logEntry->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
-
-	gSizer6->Add( logEntry, 0, wxALL|wxEXPAND, 5 );
-
-
-	loggingPanel->SetSizer( gSizer6 );
-	loggingPanel->Layout();
-	gSizer6->Fit( loggingPanel );
-	outerNotebook->AddPage( loggingPanel, wxT("Logging"), false );
-	debugPanel = new wxPanel( outerNotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	wxFlexGridSizer* fgSizer91;
-	fgSizer91 = new wxFlexGridSizer( 0, 2, 0, 0 );
-	fgSizer91->AddGrowableCol( 0 );
-	fgSizer91->AddGrowableRow( 0 );
-	fgSizer91->SetFlexibleDirection( wxBOTH );
-	fgSizer91->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
-
-	protoConfigEntry = new wxTextCtrl( debugPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY );
-	protoConfigEntry->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
-
-	fgSizer91->Add( protoConfigEntry, 0, wxALL|wxEXPAND, 5 );
-
-
-	debugPanel->SetSizer( fgSizer91 );
-	debugPanel->Layout();
-	fgSizer91->Fit( debugPanel );
-	outerNotebook->AddPage( debugPanel, wxT("Current configuration"), false );
-
-	bSizer4->Add( outerNotebook, 1, wxEXPAND, 5 );
+	bSizer4->Add( dataNotebook, 1, wxEXPAND, 5 );
 
 
 	this->SetSizer( bSizer4 );
@@ -443,12 +409,48 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	this->Centre( wxBOTH );
 
 	// Connect Events
-	m_menu1->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowGen::OnAbout ), this, m_menuItem2->GetId());
+	this->Connect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( MainWindowGen::OnClose ) );
+	m_menu1->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowGen::OnAboutMenuItem ), this, m_menuItem2->GetId());
 	m_menu1->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowGen::OnExit ), this, m_menuItem1->GetId());
+	m_menu2->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowGen::OnShowLogWindow ), this, m_menuItem3->GetId());
+	m_menu2->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowGen::OnShowConfigWindow ), this, m_menuItem4->GetId());
+	realDiskRadioButton->Connect( wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( MainWindowGen::OnConfigRadioButtonClicked ), NULL, this );
+	deviceCombo->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( MainWindowGen::OnControlsChanged ), NULL, this );
+	driveChoice->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( MainWindowGen::OnControlsChanged ), NULL, this );
+	highDensityToggle->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( MainWindowGen::OnControlsChanged ), NULL, this );
+	fluxImageRadioButton->Connect( wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( MainWindowGen::OnConfigRadioButtonClicked ), NULL, this );
+	fluxImagePicker->Connect( wxEVT_COMMAND_FILEPICKER_CHANGED, wxFileDirPickerEventHandler( MainWindowGen::OnControlsChanged ), NULL, this );
+	diskImageRadioButton->Connect( wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( MainWindowGen::OnConfigRadioButtonClicked ), NULL, this );
+	diskImagePicker->Connect( wxEVT_COMMAND_FILEPICKER_CHANGED, wxFileDirPickerEventHandler( MainWindowGen::OnControlsChanged ), NULL, this );
+	formatChoice->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( MainWindowGen::OnControlsChanged ), NULL, this );
+	readButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnReadButton ), NULL, this );
+	writeButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnWriteButton ), NULL, this );
+	this->Connect( imagerBackTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBackButton ) );
+	imagerSaveImageButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnSaveImageButton ), NULL, this );
+	imagerSaveFluxButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnSaveFluxButton ), NULL, this );
+	imagerGoAgainButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnImagerGoAgainButton ), NULL, this );
+	this->Connect( browserBackTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBackButton ) );
 }
 
 MainWindowGen::~MainWindowGen()
 {
 	// Disconnect Events
+	this->Disconnect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( MainWindowGen::OnClose ) );
+	realDiskRadioButton->Disconnect( wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( MainWindowGen::OnConfigRadioButtonClicked ), NULL, this );
+	deviceCombo->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( MainWindowGen::OnControlsChanged ), NULL, this );
+	driveChoice->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( MainWindowGen::OnControlsChanged ), NULL, this );
+	highDensityToggle->Disconnect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( MainWindowGen::OnControlsChanged ), NULL, this );
+	fluxImageRadioButton->Disconnect( wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( MainWindowGen::OnConfigRadioButtonClicked ), NULL, this );
+	fluxImagePicker->Disconnect( wxEVT_COMMAND_FILEPICKER_CHANGED, wxFileDirPickerEventHandler( MainWindowGen::OnControlsChanged ), NULL, this );
+	diskImageRadioButton->Disconnect( wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( MainWindowGen::OnConfigRadioButtonClicked ), NULL, this );
+	diskImagePicker->Disconnect( wxEVT_COMMAND_FILEPICKER_CHANGED, wxFileDirPickerEventHandler( MainWindowGen::OnControlsChanged ), NULL, this );
+	formatChoice->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( MainWindowGen::OnControlsChanged ), NULL, this );
+	readButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnReadButton ), NULL, this );
+	writeButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnWriteButton ), NULL, this );
+	this->Disconnect( imagerBackTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBackButton ) );
+	imagerSaveImageButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnSaveImageButton ), NULL, this );
+	imagerSaveFluxButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnSaveFluxButton ), NULL, this );
+	imagerGoAgainButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnImagerGoAgainButton ), NULL, this );
+	this->Disconnect( browserBackTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBackButton ) );
 
 }

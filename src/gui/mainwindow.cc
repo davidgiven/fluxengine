@@ -14,6 +14,7 @@
 #include "mapper.h"
 #include "utils.h"
 #include "fluxviewerwindow.h"
+#include "textviewerwindow.h"
 #include "customstatusbar.h"
 #include <google/protobuf/text_format.h>
 #include <wx/config.h>
@@ -45,8 +46,10 @@ public:
                     });
             });
 
-        wxString defaultFormatName = "ibm";
-        _config.Read(CONFIG_FORMAT, &defaultFormatName);
+        _logWindow.reset(
+            TextViewerWindow::Create(this, "Log viewer", "", false));
+        _configWindow.reset(
+            TextViewerWindow::Create(this, "Configuration viewer", "", false));
 
         int defaultFormat = 0;
         int i = 0;
@@ -59,8 +62,6 @@ public:
                 continue;
 
             formatChoice->Append(it.first);
-            if (it.first == defaultFormatName)
-                defaultFormat = i;
             _formats.push_back(std::make_pair(it.first, std::move(config)));
             i++;
         }
@@ -72,56 +73,12 @@ public:
             {
                 UpdateState();
             });
-        Bind(wxEVT_CLOSE_WINDOW, &MainWindow::OnClose, this);
         _exitTimer.Bind(wxEVT_TIMER,
             [this](auto&)
             {
                 wxCommandEvent e;
                 OnExit(e);
             });
-
-        menuBar->Bind(
-            wxEVT_MENU, &MainWindow::OnAboutMenuItem, this, wxID_ABOUT);
-
-        realDiskRadioButton->Bind(
-            wxEVT_RADIOBUTTON, &MainWindow::OnConfigRadioButtonClicked, this);
-        fluxImageRadioButton->Bind(
-            wxEVT_RADIOBUTTON, &MainWindow::OnConfigRadioButtonClicked, this);
-        diskImageRadioButton->Bind(
-            wxEVT_RADIOBUTTON, &MainWindow::OnConfigRadioButtonClicked, this);
-
-        driveChoice->Bind(wxEVT_CHOICE, &MainWindow::OnControlsChanged, this);
-        deviceCombo->Bind(wxEVT_TEXT, &MainWindow::OnControlsChanged, this);
-        highDensityToggle->Bind(
-            wxEVT_RADIOBUTTON, &MainWindow::OnControlsChanged, this);
-
-        fluxImagePicker->Bind(
-            wxEVT_FILEPICKER_CHANGED, &MainWindow::OnControlsChanged, this);
-
-        diskImagePicker->Bind(
-            wxEVT_FILEPICKER_CHANGED, &MainWindow::OnControlsChanged, this);
-
-        formatChoice->Bind(wxEVT_CHOICE, &MainWindow::OnControlsChanged, this);
-
-        readButton->Bind(wxEVT_BUTTON, &MainWindow::OnReadButton, this);
-        writeButton->Bind(wxEVT_BUTTON, &MainWindow::OnWriteButton, this);
-        //		browseButton->Bind(wxEVT_BUTTON,
-        //&MainWindow::OnBrowseButtonPressed, this);
-
-        imagerSaveImageButton->Bind(
-            wxEVT_BUTTON, &MainWindow::OnSaveImageButton, this);
-        imagerSaveFluxButton->Bind(
-            wxEVT_BUTTON, &MainWindow::OnSaveFluxButton, this);
-        imagerGoAgainButton->Bind(
-            wxEVT_BUTTON, &MainWindow::OnImagerGoAgainButton, this);
-        imagerToolbar->Bind(wxEVT_TOOL,
-            &MainWindow::OnBackButton,
-            this,
-            imagerBackTool->GetId());
-        browserToolbar->Bind(wxEVT_TOOL,
-            &MainWindow::OnBackButton,
-            this,
-            imagerBackTool->GetId());
 
         visualiser->Bind(
             TRACK_SELECTION_EVENT, &MainWindow::OnTrackSelection, this);
@@ -137,6 +94,16 @@ public:
                 emergencyStop = true;
             });
     }
+
+	void OnShowLogWindow(wxCommandEvent& event) override
+	{
+		_logWindow->Show();
+	}
+
+	void OnShowConfigWindow(wxCommandEvent& event) override
+	{
+		_configWindow->Show();
+	}
 
     void OnExit(wxCommandEvent& event)
     {
@@ -419,7 +386,7 @@ public:
             setProtoByString(&config, "usb.serial", serial);
 
         ApplyCustomSettings();
-        logEntry->Clear();
+        _logWindow->GetTextControl()->Clear();
 
         switch (_selectedSource)
         {
@@ -466,8 +433,8 @@ public:
     {
         std::string s;
         google::protobuf::TextFormat::PrintToString(config, &s);
-        protoConfigEntry->Clear();
-        protoConfigEntry->AppendText(s);
+        _configWindow->GetTextControl()->Clear();
+        _configWindow->GetTextControl()->AppendText(s);
     }
 
     void ApplyCustomSettings()
@@ -494,8 +461,7 @@ public:
 
     void OnLogMessage(std::shared_ptr<const AnyLogMessage> message)
     {
-        logEntry->AppendText(Logger::toString(*message));
-        // notebook->SetSelection(1);
+        _logWindow->GetTextControl()->AppendText(Logger::toString(*message));
 
         std::visit(
             overloaded{
@@ -800,6 +766,8 @@ private:
     std::shared_ptr<const DiskFlux> _currentDisk;
     CustomStatusBar* _statusBar;
     wxTimer _exitTimer;
+    std::unique_ptr<TextViewerWindow> _logWindow;
+    std::unique_ptr<TextViewerWindow> _configWindow;
 };
 
 wxWindow* FluxEngineApp::CreateMainWindow()

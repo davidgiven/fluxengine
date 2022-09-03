@@ -36,7 +36,6 @@
 #include "visualisationcontrol.h"
 #include <wx/dataview.h>
 #include <wx/simplebook.h>
-#include <wx/notebook.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -66,16 +65,16 @@ class FluxViewerWindowGen : public wxFrame
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Class HexViewerWindowGen
+/// Class TextViewerWindowGen
 ///////////////////////////////////////////////////////////////////////////////
-class HexViewerWindowGen : public wxFrame
+class TextViewerWindowGen : public wxFrame
 {
 	private:
 
 	protected:
 		wxMenuBar* m_menubar2;
 		wxMenu* m_menu1;
-		wxTextCtrl* hexEntry;
+		wxTextCtrl* textControl;
 
 		// Virtual event handlers, override them in your derived class
 		virtual void OnExit( wxCommandEvent& event ) { event.Skip(); }
@@ -83,9 +82,9 @@ class HexViewerWindowGen : public wxFrame
 
 	public:
 
-		HexViewerWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Hex Viewer"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+		TextViewerWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Text Viewer"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 
-		~HexViewerWindowGen();
+		~TextViewerWindowGen();
 
 };
 
@@ -99,8 +98,7 @@ class MainWindowGen : public wxFrame
 	protected:
 		wxMenuBar* menuBar;
 		wxMenu* m_menu1;
-		wxNotebook* outerNotebook;
-		wxPanel* dataPanel;
+		wxMenu* m_menu2;
 		wxSimplebook* dataNotebook;
 		wxScrolledWindow* idlePanel;
 		wxStaticText* m_staticText61;
@@ -142,14 +140,22 @@ class MainWindowGen : public wxFrame
 		wxDataViewColumn* browserExtraColumn;
 		wxButton* browserDiscardButton;
 		wxButton* browserCommitButton;
-		wxPanel* loggingPanel;
-		wxTextCtrl* logEntry;
-		wxPanel* debugPanel;
-		wxTextCtrl* protoConfigEntry;
 
 		// Virtual event handlers, override them in your derived class
-		virtual void OnAbout( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnClose( wxCloseEvent& event ) { event.Skip(); }
+		virtual void OnAboutMenuItem( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnExit( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnShowLogWindow( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnShowConfigWindow( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnConfigRadioButtonClicked( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnControlsChanged( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnControlsChanged( wxFileDirPickerEvent& event ) { event.Skip(); }
+		virtual void OnReadButton( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnWriteButton( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBackButton( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSaveImageButton( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSaveFluxButton( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnImagerGoAgainButton( wxCommandEvent& event ) { event.Skip(); }
 
 
 	public:

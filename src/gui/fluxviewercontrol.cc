@@ -1,7 +1,7 @@
 #include "globals.h"
 #include "gui.h"
 #include "fluxviewercontrol.h"
-#include "hexviewerwindow.h"
+#include "textviewerwindow.h"
 #include "lib/flux.h"
 #include "lib/fluxmap.h"
 #include "lib/sector.h"
@@ -443,7 +443,7 @@ void FluxViewerControl::DisplayDecodedData(std::shared_ptr<const Sector> sector)
 
 	hexdump(s, sector->data);
 
-	HexViewerWindow::Create(this, title, s.str());
+	TextViewerWindow::Create(this, title, s.str())->Show();
 }
 
 void FluxViewerControl::DisplayRawData(std::shared_ptr<const Sector> sector)
@@ -462,7 +462,7 @@ void FluxViewerControl::DisplayRawData(std::shared_ptr<const Sector> sector)
 		hexdump(s, record->rawData);
 	}
 
-	HexViewerWindow::Create(this, title, s.str());
+	TextViewerWindow::Create(this, title, s.str())->Show();
 }
 
 void FluxViewerControl::DisplayRawData(const Location& location, std::shared_ptr<const Record> record)
@@ -474,5 +474,5 @@ void FluxViewerControl::DisplayRawData(const Location& location, std::shared_ptr
 	s << title << "\n\n";
 	hexdump(s, record->rawData);
 
-	HexViewerWindow::Create(this, title, s.str());
+	TextViewerWindow::Create(this, title, s.str())->Show();
 }
