@@ -186,6 +186,7 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	browseButton = new wxButton( idlePanel, wxID_ANY, wxT("Browse disk"), wxDefaultPosition, wxDefaultSize, 0 );
 
 	browseButton->SetBitmap( wxArtProvider::GetBitmap( wxART_FOLDER_OPEN, wxART_TOOLBAR ) );
+	browseButton->Enable( false );
 	browseButton->SetToolTip( wxT("Access the files on the disk directly without needing to image it.") );
 
 	gSizer9->Add( browseButton, 0, wxALIGN_CENTER|wxALL|wxEXPAND, 5 );
