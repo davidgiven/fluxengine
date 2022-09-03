@@ -25,7 +25,6 @@ private:
 
 private:
     bool _autodestroy;
-    wxDECLARE_EVENT_TABLE();
 };
 
 #endif

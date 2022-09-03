@@ -81,12 +81,14 @@ TextViewerWindowGen::TextViewerWindowGen( wxWindow* parent, wxWindowID id, const
 	this->Centre( wxBOTH );
 
 	// Connect Events
+	this->Connect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( TextViewerWindowGen::OnClose ) );
 	m_menu1->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( TextViewerWindowGen::OnExit ), this, m_menuItem1->GetId());
 }
 
 TextViewerWindowGen::~TextViewerWindowGen()
 {
 	// Disconnect Events
+	this->Disconnect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( TextViewerWindowGen::OnClose ) );
 
 }
 
@@ -124,7 +126,7 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	bSizer4 = new wxBoxSizer( wxVERTICAL );
 
 	dataNotebook = new wxSimplebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	idlePanel = new wxScrolledWindow( dataNotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxHSCROLL|wxVSCROLL );
+	idlePanel = new wxScrolledWindow( dataNotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxHSCROLL|wxTAB_TRAVERSAL|wxVSCROLL );
 	idlePanel->SetScrollRate( 5, 5 );
 	wxGridSizer* gSizer11;
 	gSizer11 = new wxGridSizer( 1, 1, 0, 0 );

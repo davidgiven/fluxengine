@@ -77,6 +77,7 @@ class TextViewerWindowGen : public wxFrame
 		wxTextCtrl* textControl;
 
 		// Virtual event handlers, override them in your derived class
+		virtual void OnClose( wxCloseEvent& event ) { event.Skip(); }
 		virtual void OnExit( wxCommandEvent& event ) { event.Skip(); }
 
 

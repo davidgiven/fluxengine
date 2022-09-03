@@ -261,6 +261,7 @@
             <property name="window_name"></property>
             <property name="window_style">wxTAB_TRAVERSAL</property>
             <property name="xrc_skip_sizer">1</property>
+            <event name="OnClose">OnClose</event>
             <object class="wxMenuBar" expanded="1">
                 <property name="bg"></property>
                 <property name="context_help"></property>
@@ -612,7 +613,7 @@
                                 <property name="tooltip"></property>
                                 <property name="window_extra_style"></property>
                                 <property name="window_name"></property>
-                                <property name="window_style">wxHSCROLL|wxVSCROLL</property>
+                                <property name="window_style">wxHSCROLL|wxTAB_TRAVERSAL|wxVSCROLL</property>
                                 <object class="wxGridSizer" expanded="1">
                                     <property name="cols">1</property>
                                     <property name="hgap">0</property>
