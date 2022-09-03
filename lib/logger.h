@@ -14,7 +14,8 @@ struct ErrorLogMessage
 };
 
 struct EmergencyStopMessage
-{};
+{
+};
 
 struct BeginSpeedOperationLogMessage
 {
@@ -76,7 +77,7 @@ class TrackFlux;
 
 typedef std::variant<std::string,
     ErrorLogMessage,
-	EmergencyStopMessage,
+    EmergencyStopMessage,
     TrackReadLogMessage,
     DiskReadLogMessage,
     BeginSpeedOperationLogMessage,

@@ -72,6 +72,13 @@ public:
             {
                 UpdateState();
             });
+        Bind(wxEVT_CLOSE_WINDOW, &MainWindow::OnClose, this);
+        _exitTimer.Bind(wxEVT_TIMER,
+            [this](auto&)
+            {
+                wxCommandEvent e;
+                OnExit(e);
+            });
 
         menuBar->Bind(
             wxEVT_MENU, &MainWindow::OnAboutMenuItem, this, wxID_ABOUT);
@@ -133,7 +140,25 @@ public:
 
     void OnExit(wxCommandEvent& event)
     {
-        Close(true);
+        if (wxGetApp().IsWorkerThreadRunning())
+        {
+            emergencyStop = true;
+
+            /* We need to wait for the worker thread to exit before we can
+             * continue to shut down. */
+
+            _exitTimer.StartOnce(100);
+        }
+        else
+            Destroy();
+    }
+
+    void OnClose(wxCloseEvent& event)
+    {
+        event.Veto();
+
+        wxCommandEvent e;
+        OnExit(e);
     }
 
     void OnAboutMenuItem(wxCommandEvent& event)
@@ -483,8 +508,8 @@ public:
                 [&](const EmergencyStopMessage& m)
                 {
                     _statusBar->SetLeftLabel("Emergency stop!");
-					_statusBar->HideProgressBar();
-					_statusBar->SetRightLabel("");
+                    _statusBar->HideProgressBar();
+                    _statusBar->SetRightLabel("");
                     _state = _errorState;
                     UpdateState();
                 },
@@ -494,8 +519,8 @@ public:
                 {
                     _statusBar->SetLeftLabel(m.message);
                     wxMessageBox(m.message, "Error", wxOK | wxICON_ERROR);
-					_statusBar->HideProgressBar();
-					_statusBar->SetRightLabel("");
+                    _statusBar->HideProgressBar();
+                    _statusBar->SetRightLabel("");
                     _state = _errorState;
                     UpdateState();
                 },
@@ -774,6 +799,7 @@ private:
     bool _dontSaveConfig = false;
     std::shared_ptr<const DiskFlux> _currentDisk;
     CustomStatusBar* _statusBar;
+    wxTimer _exitTimer;
 };
 
 wxWindow* FluxEngineApp::CreateMainWindow()
