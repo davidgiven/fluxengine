@@ -740,7 +740,7 @@
                                                 <property name="border">5</property>
                                                 <property name="flag">wxEXPAND | wxALL</property>
                                                 <property name="proportion">1</property>
-                                                <object class="wxPanel" expanded="0">
+                                                <object class="wxPanel" expanded="1">
                                                     <property name="BottomDockable">1</property>
                                                     <property name="LeftDockable">1</property>
                                                     <property name="RightDockable">1</property>
@@ -791,7 +791,7 @@
                                                     <property name="window_extra_style"></property>
                                                     <property name="window_name"></property>
                                                     <property name="window_style">wxTAB_TRAVERSAL</property>
-                                                    <object class="wxGridSizer" expanded="0">
+                                                    <object class="wxGridSizer" expanded="1">
                                                         <property name="cols">1</property>
                                                         <property name="hgap">0</property>
                                                         <property name="minimum_size"></property>
@@ -937,7 +937,7 @@
                                                 <property name="border">5</property>
                                                 <property name="flag">wxEXPAND | wxALL</property>
                                                 <property name="proportion">1</property>
-                                                <object class="wxPanel" expanded="0">
+                                                <object class="wxPanel" expanded="1">
                                                     <property name="BottomDockable">1</property>
                                                     <property name="LeftDockable">1</property>
                                                     <property name="RightDockable">1</property>
@@ -988,7 +988,7 @@
                                                     <property name="window_extra_style"></property>
                                                     <property name="window_name"></property>
                                                     <property name="window_style">wxTAB_TRAVERSAL</property>
-                                                    <object class="wxGridSizer" expanded="0">
+                                                    <object class="wxGridSizer" expanded="1">
                                                         <property name="cols">1</property>
                                                         <property name="hgap">0</property>
                                                         <property name="minimum_size"></property>

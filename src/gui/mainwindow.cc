@@ -34,9 +34,9 @@ extern const std::map<std::string, std::string> formats;
 
 const std::string DEFAULT_EXTRA_CONFIGURATION =
     "# Place any extra configuration here.\n"
-	"# Each line can contain a key=value pair to set a property,\n"
-	"# or the name of a built-in configuration, or the filename\n"
-	"# of a text proto file. Or a comment, of course.\n\n";
+    "# Each line can contain a key=value pair to set a property,\n"
+    "# or the name of a built-in configuration, or the filename\n"
+    "# of a text proto file. Or a comment, of course.\n\n";
 
 class MainWindow : public MainWindowGen
 {
@@ -95,7 +95,7 @@ public:
             {
                 emergencyStop = true;
             });
-    
+
         /* I have no idea why this is necessary, but on Windows things aren't
          * laid out correctly without it. */
 
@@ -168,7 +168,7 @@ public:
     {
         auto configRadioButton = [&](wxRadioButton* button, wxPanel* panel)
         {
-                panel->Show(button->GetValue());
+            panel->Show(button->GetValue());
         };
         configRadioButton(realDiskRadioButton, realDiskRadioButtonPanel);
         configRadioButton(fluxImageRadioButton, fluxImageRadioButtonPanel);
@@ -186,6 +186,12 @@ public:
     }
 
     void OnControlsChanged(wxCommandEvent& event)
+    {
+        SaveConfig();
+        UpdateState();
+    }
+
+    void OnControlsChanged(wxFileDirPickerEvent& event)
     {
         SaveConfig();
         UpdateState();
