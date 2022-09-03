@@ -481,6 +481,7 @@ public:
                 /* A fatal error. */
                 [&](const ErrorLogMessage& m)
                 {
+                    _statusBar->SetLeftLabel(m.message);
                     wxMessageBox(m.message, "Error", wxOK | wxICON_ERROR);
                     _state = _errorState;
                     UpdateState();
@@ -523,6 +524,27 @@ public:
                 {
                     _currentDisk = m.disk;
                 },
+
+                /* Large-scale operation start. */
+                [&](const BeginOperationLogMessage& m)
+                {
+                    _statusBar->SetLeftLabel(m.message);
+                    _statusBar->ShowProgressBar();
+                },
+
+                /* Large-scale operation end. */
+                [&](const EndOperationLogMessage& m)
+                {
+                    _statusBar->SetLeftLabel(m.message);
+                    _statusBar->HideProgressBar();
+                },
+
+                /* Large-scale operation progress. */
+                [&](const OperationProgressLogMessage& m)
+                {
+                    _statusBar->SetProgress(m.progress);
+                },
+
             },
             *message);
     }

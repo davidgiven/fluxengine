@@ -15,6 +15,7 @@ public:
     void ShowProgressBar();
     void HideProgressBar();
     void SetProgress(int amount);
+	void SetLeftLabel(const std::string& text);
     void SetRightLabel(const std::string& text);
 
 private:

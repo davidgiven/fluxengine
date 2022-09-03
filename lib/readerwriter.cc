@@ -187,8 +187,17 @@ void writeTracks(FluxSink& fluxSink,
         producer,
     std::function<bool(const Location& location)> verifier)
 {
-    for (const auto& location : Mapper::computeLocations())
+    Logger() << BeginOperationLogMessage{"Encoding and writing to disk"};
+
+    auto locations = Mapper::computeLocations();
+
+    int index = 0;
+    for (const auto& location : locations)
     {
+        Logger() << OperationProgressLogMessage{
+            index * 100 / (unsigned)locations.size()};
+        index++;
+
         testForEmergencyStop();
 
         int retriesRemaining = config.decoder().retries();
@@ -237,6 +246,8 @@ void writeTracks(FluxSink& fluxSink,
             retriesRemaining--;
         }
     }
+
+    Logger() << EndOperationLogMessage{"Write complete"};
 }
 
 static bool dontVerify(const Location&)
@@ -285,30 +296,38 @@ void writeTracksAndVerify(FluxSink& fluxSink,
                 return false;
             }
 
-			Image wanted;
-			for (const auto& sector : encoder.collectSectors(location, image))
-				wanted.put(sector->logicalTrack, sector->logicalSide, sector->logicalSector)->data = sector->data;
+            Image wanted;
+            for (const auto& sector : encoder.collectSectors(location, image))
+                wanted
+                    .put(sector->logicalTrack,
+                        sector->logicalSide,
+                        sector->logicalSector)
+                    ->data = sector->data;
 
-			for (const auto& sector : trackFlux->sectors)
-			{
-				const auto s = wanted.get(sector->logicalTrack, sector->logicalSide, sector->logicalSector);
-				if (!s)
-				{
-					Logger() << "spurious sector on verify";
-					return false;
-				}
-				if (s->data != sector->data.slice(0, s->data.size()))
-				{
-					Logger() << "data mismatch on verify";
-					return false;
-				}
-				wanted.erase(sector->logicalTrack, sector->logicalSide, sector->logicalSector);
-			}
-			if (!wanted.empty())
-			{
-				Logger() << "missing sector on verify";
-				return false;
-			}
+            for (const auto& sector : trackFlux->sectors)
+            {
+                const auto s = wanted.get(sector->logicalTrack,
+                    sector->logicalSide,
+                    sector->logicalSector);
+                if (!s)
+                {
+                    Logger() << "spurious sector on verify";
+                    return false;
+                }
+                if (s->data != sector->data.slice(0, s->data.size()))
+                {
+                    Logger() << "data mismatch on verify";
+                    return false;
+                }
+                wanted.erase(sector->logicalTrack,
+                    sector->logicalSide,
+                    sector->logicalSector);
+            }
+            if (!wanted.empty())
+            {
+                Logger() << "missing sector on verify";
+                return false;
+            }
             return true;
         });
 }
@@ -319,14 +338,14 @@ void writeDiskCommand(const Image& image,
     AbstractDecoder* decoder,
     FluxSource* fluxSource)
 {
-	const Image* imagep = &image;
-	std::unique_ptr<const Image> remapped;
+    const Image* imagep = &image;
+    std::unique_ptr<const Image> remapped;
     if (config.has_sector_mapping())
-	{
+    {
         remapped = Mapper::remapSectorsLogicalToPhysical(
             image, config.sector_mapping());
-		imagep = &*remapped;
-	}
+        imagep = &*remapped;
+    }
 
     if (fluxSource && decoder)
         writeTracksAndVerify(fluxSink, encoder, *fluxSource, *decoder, *imagep);
@@ -346,9 +365,8 @@ void writeRawDiskCommand(FluxSource& fluxSource, FluxSink& fluxSink)
         dontVerify);
 }
 
-std::shared_ptr<TrackFlux> readAndDecodeTrack(FluxSource& fluxSource,
-    AbstractDecoder& decoder,
-    const Location& location)
+std::shared_ptr<TrackFlux> readAndDecodeTrack(
+    FluxSource& fluxSource, AbstractDecoder& decoder, const Location& location)
 {
     auto trackFlux = std::make_shared<TrackFlux>();
     trackFlux->location = location;
@@ -378,7 +396,7 @@ std::shared_ptr<TrackFlux> readAndDecodeTrack(FluxSource& fluxSource,
         retriesRemaining--;
     }
 
-	return trackFlux;
+    return trackFlux;
 }
 
 std::shared_ptr<const DiskFlux> readDiskCommand(
@@ -390,12 +408,18 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
 
     auto diskflux = std::make_shared<DiskFlux>();
 
-    for (const auto& location : Mapper::computeLocations())
+    Logger() << BeginOperationLogMessage{"Reading and decoding disk"};
+    auto locations = Mapper::computeLocations();
+    unsigned index = 0;
+    for (const auto& location : locations)
     {
+        Logger() << OperationProgressLogMessage{
+            index * 100 / (unsigned)locations.size()};
+        index++;
+
         testForEmergencyStop();
 
-        auto trackFlux = readAndDecodeTrack(
-            fluxSource, decoder, location);
+        auto trackFlux = readAndDecodeTrack(fluxSource, decoder, location);
         diskflux->tracks.push_back(trackFlux);
 
         if (outputFluxSink)
@@ -478,6 +502,7 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
 
     /* diskflux can't be modified below this point. */
     Logger() << DiskReadLogMessage{diskflux};
+    Logger() << BeginOperationLogMessage{"Read complete"};
     return diskflux;
 }
 
@@ -494,10 +519,20 @@ void readDiskCommand(
 
 void rawReadDiskCommand(FluxSource& fluxsource, FluxSink& fluxsink)
 {
-    for (unsigned track : iterate(config.tracks()))
+    Logger() << BeginOperationLogMessage{"Performing raw read of disk"};
+
+    auto tracks = iterate(config.tracks());
+    auto heads = iterate(config.heads());
+    unsigned locations = tracks.size() * heads.size();
+
+    unsigned index = 0;
+    for (unsigned track : tracks)
     {
-        for (unsigned head : iterate(config.heads()))
+        for (unsigned head : heads)
         {
+            Logger() << OperationProgressLogMessage{index * 100 / locations};
+            index++;
+
             testForEmergencyStop();
             auto fluxSourceIterator = fluxsource.readFlux(track, head);
 
@@ -511,6 +546,8 @@ void rawReadDiskCommand(FluxSource& fluxsource, FluxSink& fluxsink)
             fluxsink.writeFlux(track, head, *fluxmap);
         }
     }
+
+    Logger() << EndOperationLogMessage{"Raw read complete"};
 }
 
 void fillBitmapTo(std::vector<bool>& bitmap,

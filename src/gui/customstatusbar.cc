@@ -92,6 +92,11 @@ void CustomStatusBar::SetProgress(int amount)
     _progressBar->SetValue(amount);
 }
 
+void CustomStatusBar::SetLeftLabel(const std::string& text)
+{
+	SetStatusText(text, 0);
+}
+
 void CustomStatusBar::SetRightLabel(const std::string& text)
 {
     _rightLabel->SetLabel(text);
