@@ -37,8 +37,3 @@ void TextViewerWindow::OnClose(wxCloseEvent& event)
     else
         Hide();
 }
-
-void TextViewerWindow::OnExit(wxCommandEvent& event)
-{
-    Close(true);
-}

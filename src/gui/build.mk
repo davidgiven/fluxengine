@@ -7,6 +7,7 @@ FLUXENGINE_GUI_SRCS = \
 	src/gui/layout.cpp \
 	src/gui/main.cc \
 	src/gui/mainwindow.cc \
+	src/gui/texteditorwindow.cc \
 	src/gui/textviewerwindow.cc \
 	src/gui/visualisationcontrol.cc \
  

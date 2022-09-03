@@ -1,5 +1,5 @@
-#ifndef HEXVIEWERWINDOW_H
-#define HEXVIEWERWINDOW_H
+#ifndef TEXTVIEWERWINDOW_H
+#define TEXTVIEWERWINDOW_H
 
 #include "layout.h"
 
@@ -20,7 +20,6 @@ public:
     wxTextCtrl* GetTextControl() const;
 
 private:
-    void OnExit(wxCommandEvent& event);
     void OnClose(wxCloseEvent& event);
 
 private:

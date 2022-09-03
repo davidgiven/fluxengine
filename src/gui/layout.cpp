@@ -150,11 +150,10 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 
 	fgSizer6->Add( formatChoice, 0, wxALL|wxEXPAND, 5 );
 
-	extraConfigurationButton = new wxButton( m_panel11, wxID_ANY, wxT("Add more"), wxDefaultPosition, wxDefaultSize, 0 );
-	extraConfigurationButton->Enable( false );
-	extraConfigurationButton->SetToolTip( wxT("Allows you to enter arbitrary configuration parameters.") );
+	customConfigurationButton = new wxButton( m_panel11, wxID_ANY, wxT("Customise..."), wxDefaultPosition, wxDefaultSize, 0 );
+	customConfigurationButton->SetToolTip( wxT("Allows you to enter arbitrary configuration parameters.") );
 
-	fgSizer6->Add( extraConfigurationButton, 0, wxALL, 5 );
+	fgSizer6->Add( customConfigurationButton, 0, wxALL, 5 );
 
 
 	m_panel11->SetSizer( fgSizer6 );
@@ -342,6 +341,7 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	diskImageRadioButton->Connect( wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( MainWindowGen::OnConfigRadioButtonClicked ), NULL, this );
 	diskImagePicker->Connect( wxEVT_COMMAND_FILEPICKER_CHANGED, wxFileDirPickerEventHandler( MainWindowGen::OnControlsChanged ), NULL, this );
 	formatChoice->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( MainWindowGen::OnControlsChanged ), NULL, this );
+	customConfigurationButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnCustomConfigurationButton ), NULL, this );
 	readButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnReadButton ), NULL, this );
 	writeButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnWriteButton ), NULL, this );
 	this->Connect( imagerBackTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBackButton ) );
@@ -364,6 +364,7 @@ MainWindowGen::~MainWindowGen()
 	diskImageRadioButton->Disconnect( wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( MainWindowGen::OnConfigRadioButtonClicked ), NULL, this );
 	diskImagePicker->Disconnect( wxEVT_COMMAND_FILEPICKER_CHANGED, wxFileDirPickerEventHandler( MainWindowGen::OnControlsChanged ), NULL, this );
 	formatChoice->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( MainWindowGen::OnControlsChanged ), NULL, this );
+	customConfigurationButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnCustomConfigurationButton ), NULL, this );
 	readButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnReadButton ), NULL, this );
 	writeButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnWriteButton ), NULL, this );
 	this->Disconnect( imagerBackTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBackButton ) );
@@ -456,5 +457,52 @@ FluxViewerWindowGen::~FluxViewerWindowGen()
 	// Disconnect Events
 	this->Disconnect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( FluxViewerWindowGen::OnClose ) );
 	m_sdbSizer2OK->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( FluxViewerWindowGen::OnClose ), NULL, this );
+
+}
+
+TextEditorWindowGen::TextEditorWindowGen( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+
+	wxFlexGridSizer* fgSizer8;
+	fgSizer8 = new wxFlexGridSizer( 0, 1, 0, 0 );
+	fgSizer8->AddGrowableCol( 0 );
+	fgSizer8->AddGrowableRow( 0 );
+	fgSizer8->SetFlexibleDirection( wxBOTH );
+	fgSizer8->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_ALL );
+
+	textControl = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_PROCESS_TAB );
+	textControl->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
+
+	fgSizer8->Add( textControl, 0, wxALL|wxEXPAND, 5 );
+
+	m_sdbSizer2 = new wxStdDialogButtonSizer();
+	m_sdbSizer2Save = new wxButton( this, wxID_SAVE );
+	m_sdbSizer2->AddButton( m_sdbSizer2Save );
+	m_sdbSizer2Cancel = new wxButton( this, wxID_CANCEL );
+	m_sdbSizer2->AddButton( m_sdbSizer2Cancel );
+	m_sdbSizer2->Realize();
+
+	fgSizer8->Add( m_sdbSizer2, 1, wxALL|wxEXPAND, 5 );
+
+
+	this->SetSizer( fgSizer8 );
+	this->Layout();
+	fgSizer8->Fit( this );
+
+	this->Centre( wxBOTH );
+
+	// Connect Events
+	this->Connect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( TextEditorWindowGen::OnClose ) );
+	m_sdbSizer2Cancel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TextEditorWindowGen::OnCancel ), NULL, this );
+	m_sdbSizer2Save->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TextEditorWindowGen::OnSave ), NULL, this );
+}
+
+TextEditorWindowGen::~TextEditorWindowGen()
+{
+	// Disconnect Events
+	this->Disconnect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( TextEditorWindowGen::OnClose ) );
+	m_sdbSizer2Cancel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TextEditorWindowGen::OnCancel ), NULL, this );
+	m_sdbSizer2Save->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TextEditorWindowGen::OnSave ), NULL, this );
 
 }

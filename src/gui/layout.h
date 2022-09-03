@@ -68,7 +68,7 @@ class MainWindowGen : public wxFrame
 		wxStaticText* m_staticText23;
 		wxPanel* m_panel11;
 		wxChoice* formatChoice;
-		wxButton* extraConfigurationButton;
+		wxButton* customConfigurationButton;
 		wxStaticText* m_staticText19;
 		wxButton* readButton;
 		wxButton* writeButton;
@@ -102,6 +102,7 @@ class MainWindowGen : public wxFrame
 		virtual void OnConfigRadioButtonClicked( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnControlsChanged( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnControlsChanged( wxFileDirPickerEvent& event ) { event.Skip(); }
+		virtual void OnCustomConfigurationButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnReadButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnWriteButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBackButton( wxCommandEvent& event ) { event.Skip(); }
@@ -137,7 +138,7 @@ class TextViewerWindowGen : public wxDialog
 
 	public:
 
-		TextViewerWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 208,143 ), long style = wxDEFAULT_DIALOG_STYLE );
+		TextViewerWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 208,143 ), long style = wxCLOSE_BOX|wxDEFAULT_DIALOG_STYLE );
 
 		~TextViewerWindowGen();
 
@@ -163,9 +164,36 @@ class FluxViewerWindowGen : public wxDialog
 
 	public:
 
-		FluxViewerWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 400,200 ), long style = wxDEFAULT_DIALOG_STYLE );
+		FluxViewerWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 400,200 ), long style = wxCLOSE_BOX|wxDEFAULT_DIALOG_STYLE );
 
 		~FluxViewerWindowGen();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class TextEditorWindowGen
+///////////////////////////////////////////////////////////////////////////////
+class TextEditorWindowGen : public wxDialog
+{
+	private:
+
+	protected:
+		wxTextCtrl* textControl;
+		wxStdDialogButtonSizer* m_sdbSizer2;
+		wxButton* m_sdbSizer2Save;
+		wxButton* m_sdbSizer2Cancel;
+
+		// Virtual event handlers, override them in your derived class
+		virtual void OnClose( wxCloseEvent& event ) { event.Skip(); }
+		virtual void OnCancel( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSave( wxCommandEvent& event ) { event.Skip(); }
+
+
+	public:
+
+		TextEditorWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxCLOSE_BOX|wxDEFAULT_DIALOG_STYLE );
+
+		~TextEditorWindowGen();
 
 };
 

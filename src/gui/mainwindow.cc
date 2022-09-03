@@ -15,6 +15,7 @@
 #include "utils.h"
 #include "fluxviewerwindow.h"
 #include "textviewerwindow.h"
+#include "texteditorwindow.h"
 #include "customstatusbar.h"
 #include <google/protobuf/text_format.h>
 #include <wx/config.h>
@@ -30,6 +31,12 @@ extern const std::map<std::string, std::string> formats;
 #define CONFIG_EXTRACONFIG "ExtraConfig"
 #define CONFIG_FLUXIMAGE "FluxImage"
 #define CONFIG_DISKIMAGE "DiskImage"
+
+const std::string DEFAULT_EXTRA_CONFIGURATION =
+    "# Place any extra configuration here.\n"
+	"# Each line can contain a key=value pair to set a property,\n"
+	"# or the name of a built-in configuration, or the filename\n"
+	"# of a text proto file. Or a comment, of course.\n\n";
 
 class MainWindow : public MainWindowGen
 {
@@ -95,15 +102,28 @@ public:
             });
     }
 
-	void OnShowLogWindow(wxCommandEvent& event) override
-	{
-		_logWindow->Show();
-	}
+    void OnShowLogWindow(wxCommandEvent& event) override
+    {
+        _logWindow->Show();
+    }
 
-	void OnShowConfigWindow(wxCommandEvent& event) override
-	{
-		_configWindow->Show();
-	}
+    void OnShowConfigWindow(wxCommandEvent& event) override
+    {
+        _configWindow->Show();
+    }
+
+    void OnCustomConfigurationButton(wxCommandEvent& event) override
+    {
+        auto* editor = TextEditorWindow::Create(
+            this, "Configuration editor", _extraConfiguration);
+        editor->Bind(EDITOR_SAVE_EVENT,
+            [this](auto& event)
+            {
+                _extraConfiguration = event.text;
+                SaveConfig();
+            });
+        editor->Show();
+    }
 
     void OnExit(wxCommandEvent& event)
     {
@@ -376,8 +396,26 @@ public:
         auto formatSelection = formatChoice->GetSelection();
         if (formatSelection == wxNOT_FOUND)
             Error() << "no format selected";
-
         config = *_formats[formatChoice->GetSelection()].second;
+
+        for (auto setting : split(_extraConfiguration, '\n'))
+        {
+            setting = trimWhitespace(setting);
+            if (setting.size() == 0)
+                continue;
+            if (setting[0] == '#')
+                continue;
+
+            auto equals = setting.find('=');
+            if (equals != std::string::npos)
+            {
+                auto key = setting.substr(0, equals);
+                auto value = setting.substr(equals + 1);
+                setProtoByString(&config, key, value);
+            }
+            else
+                FlagGroup::parseConfigFile(setting, formats);
+        }
 
         auto serial = deviceCombo->GetValue().ToStdString();
         if (!serial.empty() && (serial[0] == '/'))
@@ -385,7 +423,6 @@ public:
         else
             setProtoByString(&config, "usb.serial", serial);
 
-        ApplyCustomSettings();
         _logWindow->GetTextControl()->Clear();
 
         switch (_selectedSource)
@@ -435,28 +472,6 @@ public:
         google::protobuf::TextFormat::PrintToString(config, &s);
         _configWindow->GetTextControl()->Clear();
         _configWindow->GetTextControl()->AppendText(s);
-    }
-
-    void ApplyCustomSettings()
-    {
-        // for (int i = 0; i < additionalSettingsEntry->GetNumberOfLines(); i++)
-        //{
-        //     auto setting =
-        //     additionalSettingsEntry->GetLineText(i).ToStdString();
-        //	setting = trimWhitespace(setting);
-        //    if (setting.size() == 0)
-        //        continue;
-
-        //    auto equals = setting.find('=');
-        //    if (equals != std::string::npos)
-        //    {
-        //        auto key = setting.substr(0, equals);
-        //        auto value = setting.substr(equals + 1);
-        //        setProtoByString(&config, key, value);
-        //    }
-        //    else
-        //        FlagGroup::parseConfigFile(setting, formats);
-        //}
     }
 
     void OnLogMessage(std::shared_ptr<const AnyLogMessage> message)
@@ -626,6 +641,10 @@ public:
             i++;
         }
 
+        s = DEFAULT_EXTRA_CONFIGURATION;
+        _config.Read(CONFIG_EXTRACONFIG, &s);
+        _extraConfiguration = s;
+
         /* Triggers SaveConfig */
 
         _dontSaveConfig = false;
@@ -661,6 +680,7 @@ public:
 
         _config.Write(CONFIG_FORMAT,
             formatChoice->GetString(formatChoice->GetSelection()));
+        _config.Write(CONFIG_EXTRACONFIG, wxString(_extraConfiguration));
     }
 
     void UpdateState()
@@ -768,6 +788,7 @@ private:
     wxTimer _exitTimer;
     std::unique_ptr<TextViewerWindow> _logWindow;
     std::unique_ptr<TextViewerWindow> _configWindow;
+    std::string _extraConfiguration;
 };
 
 wxWindow* FluxEngineApp::CreateMainWindow()
