@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version 3.10.1-0-g8feb16b)
+// C++ code generated with wxFormBuilder (version 3.10.1-0-g8feb16b3)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO *NOT* EDIT THIS FILE!
@@ -55,15 +55,15 @@ class MainWindowGen : public wxFrame
 		wxScrolledWindow* idlePanel;
 		wxStaticText* m_staticText61;
 		wxRadioButton* realDiskRadioButton;
-		wxPanel* m_panel8;
+		wxPanel* realDiskRadioButtonPanel;
 		wxComboBox* deviceCombo;
 		wxChoice* driveChoice;
 		wxCheckBox* highDensityToggle;
 		wxRadioButton* fluxImageRadioButton;
-		wxPanel* m_panel91;
+		wxPanel* fluxImageRadioButtonPanel;
 		wxFilePickerCtrl* fluxImagePicker;
 		wxRadioButton* diskImageRadioButton;
-		wxPanel* m_panel101;
+		wxPanel* diskImageRadioButtonPanel;
 		wxFilePickerCtrl* diskImagePicker;
 		wxStaticText* m_staticText23;
 		wxPanel* m_panel11;
@@ -113,7 +113,7 @@ class MainWindowGen : public wxFrame
 
 	public:
 
-		MainWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("FluxEngine"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 819,607 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+		MainWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("FluxEngine"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 819,607 ), long style = wxDEFAULT_FRAME_STYLE|wxRESIZE_BORDER|wxFULL_REPAINT_ON_RESIZE|wxTAB_TRAVERSAL );
 
 		~MainWindowGen();
 
@@ -138,7 +138,7 @@ class TextViewerWindowGen : public wxDialog
 
 	public:
 
-		TextViewerWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 208,143 ), long style = wxCLOSE_BOX|wxDEFAULT_DIALOG_STYLE );
+		TextViewerWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 208,143 ), long style = wxCLOSE_BOX|wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER );
 
 		~TextViewerWindowGen();
 
@@ -164,7 +164,7 @@ class FluxViewerWindowGen : public wxDialog
 
 	public:
 
-		FluxViewerWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 400,200 ), long style = wxCLOSE_BOX|wxDEFAULT_DIALOG_STYLE );
+		FluxViewerWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 400,200 ), long style = wxCLOSE_BOX|wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER );
 
 		~FluxViewerWindowGen();
 
@@ -191,7 +191,7 @@ class TextEditorWindowGen : public wxDialog
 
 	public:
 
-		TextEditorWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxCLOSE_BOX|wxDEFAULT_DIALOG_STYLE );
+		TextEditorWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxCLOSE_BOX|wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER );
 
 		~TextEditorWindowGen();
 

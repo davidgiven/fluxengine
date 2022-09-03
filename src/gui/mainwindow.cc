@@ -73,8 +73,6 @@ public:
             i++;
         }
 
-        UpdateDevices();
-
         Bind(UPDATE_STATE_EVENT,
             [this](wxCommandEvent&)
             {
@@ -90,9 +88,6 @@ public:
         visualiser->Bind(
             TRACK_SELECTION_EVENT, &MainWindow::OnTrackSelection, this);
 
-        LoadConfig();
-        UpdateState();
-
         CreateStatusBar();
 
         _statusBar->Bind(PROGRESSBAR_STOP_EVENT,
@@ -100,6 +95,16 @@ public:
             {
                 emergencyStop = true;
             });
+    
+        /* I have no idea why this is necessary, but on Windows things aren't
+         * laid out correctly without it. */
+
+        realDiskRadioButtonPanel->Hide();
+        fluxImageRadioButtonPanel->Hide();
+        diskImageRadioButtonPanel->Hide();
+
+        LoadConfig();
+        UpdateDevices();
     }
 
     void OnShowLogWindow(wxCommandEvent& event) override
@@ -161,17 +166,13 @@ public:
 
     void OnConfigRadioButtonClicked(wxCommandEvent& event)
     {
-        auto configRadioButton = [&](wxRadioButton* button)
+        auto configRadioButton = [&](wxRadioButton* button, wxPanel* panel)
         {
-            auto* following = button->GetNextSibling();
-            if (button->GetValue())
-                following->Show();
-            else
-                following->Hide();
+                panel->Show(button->GetValue());
         };
-        configRadioButton(realDiskRadioButton);
-        configRadioButton(fluxImageRadioButton);
-        configRadioButton(diskImageRadioButton);
+        configRadioButton(realDiskRadioButton, realDiskRadioButtonPanel);
+        configRadioButton(fluxImageRadioButton, fluxImageRadioButtonPanel);
+        configRadioButton(diskImageRadioButton, diskImageRadioButtonPanel);
         idlePanel->Layout();
 
         if (realDiskRadioButton->GetValue())
@@ -720,13 +721,18 @@ public:
         {
             dataNotebook->SetSelection(2);
         }
+
+        Refresh();
     }
 
     void UpdateDevices()
     {
         auto candidates = findUsbDevices();
 
+        auto device = deviceCombo->GetValue();
         deviceCombo->Clear();
+        deviceCombo->SetValue(device);
+
         _devices.clear();
         for (auto& candidate : candidates)
         {

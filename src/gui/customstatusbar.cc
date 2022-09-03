@@ -20,6 +20,9 @@ CustomStatusBar::CustomStatusBar(wxWindow* parent, wxWindowID id):
     static const int widths[] = {-1, 200, 100, 20};
     SetStatusWidths(4, widths);
 
+    static const int styles[] = { wxSB_FLAT, wxSB_FLAT, wxSB_FLAT, wxSB_FLAT };
+    SetStatusStyles(4, styles);
+
     _progressBar.reset(new wxGauge(this,
         wxID_ANY,
         100,

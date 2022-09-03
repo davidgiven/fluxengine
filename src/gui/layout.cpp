@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version 3.10.1-0-g8feb16b)
+// C++ code generated with wxFormBuilder (version 3.10.1-0-g8feb16b3)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO *NOT* EDIT THIS FILE!
@@ -64,73 +64,73 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 
 	fgSizer8->Add( realDiskRadioButton, 0, wxALL|wxEXPAND, 5 );
 
-	m_panel8 = new wxPanel( idlePanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	realDiskRadioButtonPanel = new wxPanel( idlePanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizer3;
 	bSizer3 = new wxBoxSizer( wxVERTICAL );
 
-	deviceCombo = new wxComboBox( m_panel8, wxID_ANY, wxT("Combo!"), wxDefaultPosition, wxDefaultSize, 0, NULL, 0 );
+	deviceCombo = new wxComboBox( realDiskRadioButtonPanel, wxID_ANY, wxT("Combo!"), wxDefaultPosition, wxDefaultSize, 0, NULL, 0 );
 	deviceCombo->SetToolTip( wxT("Device ID to use (either the path of a serial port or a USB serial number).") );
 
 	bSizer3->Add( deviceCombo, 0, wxALL|wxEXPAND, 5 );
 
 	wxString driveChoiceChoices[] = { wxT("drive:0"), wxT("drive:1") };
 	int driveChoiceNChoices = sizeof( driveChoiceChoices ) / sizeof( wxString );
-	driveChoice = new wxChoice( m_panel8, wxID_ANY, wxDefaultPosition, wxDefaultSize, driveChoiceNChoices, driveChoiceChoices, 0 );
+	driveChoice = new wxChoice( realDiskRadioButtonPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, driveChoiceNChoices, driveChoiceChoices, 0 );
 	driveChoice->SetSelection( 0 );
 	driveChoice->SetToolTip( wxT("Which drive on the device to use.") );
 
 	bSizer3->Add( driveChoice, 0, wxALL|wxEXPAND, 5 );
 
-	highDensityToggle = new wxCheckBox( m_panel8, wxID_ANY, wxT("This is a high density disk"), wxDefaultPosition, wxDefaultSize, 0 );
+	highDensityToggle = new wxCheckBox( realDiskRadioButtonPanel, wxID_ANY, wxT("This is a high density disk"), wxDefaultPosition, wxDefaultSize, 0 );
 	highDensityToggle->SetToolTip( wxT("If you are using a high density disk, select this.\nThis can be detected automatically for 3.5\"\ndisks but needs to be set manually for everything\nelse.") );
 
 	bSizer3->Add( highDensityToggle, 0, wxALL|wxEXPAND, 5 );
 
 
-	m_panel8->SetSizer( bSizer3 );
-	m_panel8->Layout();
-	bSizer3->Fit( m_panel8 );
-	fgSizer8->Add( m_panel8, 1, wxEXPAND | wxALL, 5 );
+	realDiskRadioButtonPanel->SetSizer( bSizer3 );
+	realDiskRadioButtonPanel->Layout();
+	bSizer3->Fit( realDiskRadioButtonPanel );
+	fgSizer8->Add( realDiskRadioButtonPanel, 1, wxEXPAND | wxALL, 5 );
 
 	fluxImageRadioButton = new wxRadioButton( idlePanel, wxID_ANY, wxT("Flux image"), wxDefaultPosition, wxDefaultSize, 0 );
 	fluxImageRadioButton->SetToolTip( wxT("You want to use an unencoded flux file.") );
 
 	fgSizer8->Add( fluxImageRadioButton, 0, wxALL|wxEXPAND, 5 );
 
-	m_panel91 = new wxPanel( idlePanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	fluxImageRadioButtonPanel = new wxPanel( idlePanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxGridSizer* gSizer121;
 	gSizer121 = new wxGridSizer( 1, 1, 0, 0 );
 
-	fluxImagePicker = new wxFilePickerCtrl( m_panel91, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE|wxFLP_USE_TEXTCTRL );
+	fluxImagePicker = new wxFilePickerCtrl( fluxImageRadioButtonPanel, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE|wxFLP_USE_TEXTCTRL );
 	fluxImagePicker->SetToolTip( wxT("Path to a .flux, .scp or other flux file.") );
 
 	gSizer121->Add( fluxImagePicker, 0, wxALL|wxEXPAND, 5 );
 
 
-	m_panel91->SetSizer( gSizer121 );
-	m_panel91->Layout();
-	gSizer121->Fit( m_panel91 );
-	fgSizer8->Add( m_panel91, 1, wxEXPAND | wxALL, 5 );
+	fluxImageRadioButtonPanel->SetSizer( gSizer121 );
+	fluxImageRadioButtonPanel->Layout();
+	gSizer121->Fit( fluxImageRadioButtonPanel );
+	fgSizer8->Add( fluxImageRadioButtonPanel, 1, wxEXPAND | wxALL, 5 );
 
 	diskImageRadioButton = new wxRadioButton( idlePanel, wxID_ANY, wxT("Disk image"), wxDefaultPosition, wxDefaultSize, 0 );
 	diskImageRadioButton->SetToolTip( wxT("You want to use a decode file system disk image.") );
 
 	fgSizer8->Add( diskImageRadioButton, 0, wxALL|wxEXPAND, 5 );
 
-	m_panel101 = new wxPanel( idlePanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	diskImageRadioButtonPanel = new wxPanel( idlePanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxGridSizer* gSizer1211;
 	gSizer1211 = new wxGridSizer( 1, 1, 0, 0 );
 
-	diskImagePicker = new wxFilePickerCtrl( m_panel101, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE|wxFLP_USE_TEXTCTRL );
+	diskImagePicker = new wxFilePickerCtrl( diskImageRadioButtonPanel, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE|wxFLP_USE_TEXTCTRL );
 	diskImagePicker->SetToolTip( wxT("The path to the disk image.") );
 
 	gSizer1211->Add( diskImagePicker, 0, wxALL|wxEXPAND, 5 );
 
 
-	m_panel101->SetSizer( gSizer1211 );
-	m_panel101->Layout();
-	gSizer1211->Fit( m_panel101 );
-	fgSizer8->Add( m_panel101, 1, wxEXPAND | wxALL, 5 );
+	diskImageRadioButtonPanel->SetSizer( gSizer1211 );
+	diskImageRadioButtonPanel->Layout();
+	gSizer1211->Fit( diskImageRadioButtonPanel );
+	fgSizer8->Add( diskImageRadioButtonPanel, 1, wxEXPAND | wxALL, 5 );
 
 	m_staticText23 = new wxStaticText( idlePanel, wxID_ANY, wxT("then select a format:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText23->Wrap( -1 );
@@ -178,7 +178,7 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	writeButton = new wxButton( idlePanel, wxID_ANY, wxT("Write disk"), wxDefaultPosition, wxDefaultSize, 0 );
 
 	writeButton->SetBitmap( wxArtProvider::GetBitmap( wxART_FILE_SAVE, wxART_TOOLBAR ) );
-	writeButton->SetBitmapDisabled( wxArtProvider::GetBitmap( wxART_FILE_SAVE, wxART_BUTTON ) );
+	writeButton->SetBitmapDisabled( wxNullBitmap );
 	writeButton->SetToolTip( wxT("Encode and write to either a real disk or a flux file.") );
 
 	gSizer9->Add( writeButton, 0, wxALIGN_CENTER|wxALL|wxEXPAND, 5 );
@@ -206,7 +206,7 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	wxBoxSizer* bSizer41;
 	bSizer41 = new wxBoxSizer( wxVERTICAL );
 
-	imagerToolbar = new wxToolBar( imagePanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL|wxTB_TEXT );
+	imagerToolbar = new wxToolBar( imagePanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_FLAT|wxTB_HORIZONTAL|wxTB_TEXT );
 	imagerBackTool = imagerToolbar->AddTool( wxID_ANY, wxT("Back"), wxArtProvider::GetBitmap( wxART_GO_BACK, wxART_TOOLBAR ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
 
 	imagerToolbar->Realize();
@@ -272,7 +272,7 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	fgSizer23->SetFlexibleDirection( wxBOTH );
 	fgSizer23->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 
-	browserToolbar = new wxToolBar( browsePanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL|wxTB_TEXT );
+	browserToolbar = new wxToolBar( browsePanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_FLAT|wxTB_HORIZONTAL|wxTB_TEXT );
 	browserBackTool = browserToolbar->AddTool( wxID_ANY, wxT("Back"), wxArtProvider::GetBitmap( wxART_GO_BACK, wxART_TOOLBAR ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
 
 	browserToolbar->Realize();
