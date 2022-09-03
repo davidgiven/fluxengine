@@ -471,8 +471,6 @@ public:
         }
     }
 
-    void SetHighDensity() {}
-
     void ShowConfig()
     {
         std::string s;
