@@ -115,6 +115,11 @@ void Filesystem::deleteFile(const Path& path)
     throw UnimplementedFilesystemException();
 }
 
+void Filesystem::moveFile(const Path& oldName, const Path& newName)
+{
+    throw UnimplementedFilesystemException();
+}
+
 bool Filesystem::needsFlushing()
 {
     return _sectors->needsFlushing();

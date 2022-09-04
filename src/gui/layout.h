@@ -90,6 +90,7 @@ class MainWindowGen : public wxFrame
 		wxToolBarToolBase* browserSaveTool;
 		wxToolBarToolBase* browserNewTool;
 		wxToolBarToolBase* browserNewDirectoryTool;
+		wxToolBarToolBase* browserRenameTool;
 		wxToolBarToolBase* browserDeleteTool;
 		wxToolBarToolBase* browserFormatTool;
 		wxDataViewCtrl* browserTree;
@@ -129,7 +130,7 @@ class MainWindowGen : public wxFrame
 
 	public:
 
-		MainWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("FluxEngine"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 592,607 ), long style = wxDEFAULT_FRAME_STYLE|wxRESIZE_BORDER|wxFULL_REPAINT_ON_RESIZE|wxTAB_TRAVERSAL );
+		MainWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("FluxEngine"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 616,607 ), long style = wxDEFAULT_FRAME_STYLE|wxRESIZE_BORDER|wxFULL_REPAINT_ON_RESIZE|wxTAB_TRAVERSAL );
 
 		~MainWindowGen();
 

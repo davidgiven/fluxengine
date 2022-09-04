@@ -928,6 +928,9 @@ public:
             browserToolbar->EnableTool(browserNewDirectoryTool->GetId(),
                 (capabilities & Filesystem::OP_CREATEDIR) &&
                     (selection.size() <= 1));
+            browserToolbar->EnableTool(browserRenameTool->GetId(),
+                (capabilities & Filesystem::OP_MOVE) &&
+                    (selection.size() == 1));
             browserToolbar->EnableTool(browserDeleteTool->GetId(),
                 (capabilities & Filesystem::OP_DELETE) &&
                     (selection.size() >= 1));

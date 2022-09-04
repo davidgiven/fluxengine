@@ -286,6 +286,8 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 
 	browserNewDirectoryTool = browserToolbar->AddTool( wxID_ANY, wxT("New directory"), wxArtProvider::GetBitmap( wxART_NEW_DIR, wxART_TOOLBAR ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
 
+	browserRenameTool = browserToolbar->AddTool( wxID_ANY, wxT("Rename"), wxArtProvider::GetBitmap( wxART_COPY, wxART_TOOLBAR ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+
 	browserDeleteTool = browserToolbar->AddTool( wxID_ANY, wxT("Delete"), wxArtProvider::GetBitmap( wxART_DELETE, wxART_TOOLBAR ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
 
 	browserToolbar->AddSeparator();

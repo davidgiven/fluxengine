@@ -47,7 +47,7 @@
             <property name="minimum_size"></property>
             <property name="name">MainWindowGen</property>
             <property name="pos"></property>
-            <property name="size">592,607</property>
+            <property name="size">616,607</property>
             <property name="style">wxDEFAULT_FRAME_STYLE|wxRESIZE_BORDER</property>
             <property name="subclass">; ; forward_declare</property>
             <property name="title">FluxEngine</property>
@@ -2374,6 +2374,17 @@
                                                 <property name="statusbar"></property>
                                                 <property name="tooltip"></property>
                                                 <event name="OnToolClicked">OnBrowserNewDirectoryButton</event>
+                                            </object>
+                                            <object class="tool" expanded="1">
+                                                <property name="bitmap">Load From Art Provider; wxART_COPY; wxART_TOOLBAR</property>
+                                                <property name="context_menu">0</property>
+                                                <property name="id">wxID_ANY</property>
+                                                <property name="kind">wxITEM_NORMAL</property>
+                                                <property name="label">Rename</property>
+                                                <property name="name">browserRenameTool</property>
+                                                <property name="permission">protected</property>
+                                                <property name="statusbar"></property>
+                                                <property name="tooltip"></property>
                                             </object>
                                             <object class="tool" expanded="1">
                                                 <property name="bitmap">Load From Art Provider; wxART_DELETE; wxART_TOOLBAR</property>
