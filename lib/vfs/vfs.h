@@ -125,7 +125,7 @@ public:
         OP_GETFSDATA = 0b0000000100000000,
         OP_PUTFSDATA = 0b0000001000000000,
         OP_PUTATTRS = 0b0000010000000000,
-		OP_MOVE = 0b0000100000000000,
+        OP_MOVE = 0b0000100000000000,
     };
 
 public:
@@ -168,7 +168,7 @@ public:
     /* Deletes a file or non-empty directory. */
     virtual void deleteFile(const Path& path);
 
-	/* Moves a file (including renaming it). */
+    /* Moves a file (including renaming it). */
     virtual void moveFile(const Path& oldName, const Path& newName);
 
     /* Does this filesystem need flushing? */

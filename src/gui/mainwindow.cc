@@ -916,22 +916,22 @@ public:
             browserToolbar->EnableTool(browserInfoTool->GetId(),
                 (capabilities & Filesystem::OP_GETDIRENT) &&
                     (selection.size() == 1));
-            browserToolbar->EnableTool(browserOpenTool->GetId(),
+            browserToolbar->EnableTool(browserViewTool->GetId(),
                 (capabilities & Filesystem::OP_GETFILE) &&
                     (selection.size() == 1));
             browserToolbar->EnableTool(browserSaveTool->GetId(),
                 (capabilities & Filesystem::OP_GETFILE) &&
                     (selection.size() == 1));
-            browserToolbar->EnableTool(browserNewTool->GetId(),
+            browserToolbar->EnableTool(browserAddTool->GetId(),
                 (capabilities & Filesystem::OP_PUTFILE) &&
                     (selection.size() <= 1));
-            browserToolbar->EnableTool(browserNewDirectoryTool->GetId(),
+            browserAddMenu->Enable(browserNewDirectoryMenuItem->GetId(),
                 (capabilities & Filesystem::OP_CREATEDIR) &&
                     (selection.size() <= 1));
-            browserToolbar->EnableTool(browserRenameTool->GetId(),
+            browserAddMenu->Enable(browserRenameMenuItem->GetId(),
                 (capabilities & Filesystem::OP_MOVE) &&
                     (selection.size() == 1));
-            browserToolbar->EnableTool(browserDeleteTool->GetId(),
+            browserAddMenu->Enable(browserDeleteMenuItem->GetId(),
                 (capabilities & Filesystem::OP_DELETE) &&
                     (selection.size() >= 1));
             browserToolbar->EnableTool(browserFormatTool->GetId(),

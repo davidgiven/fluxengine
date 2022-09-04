@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version 3.10.1-0-g8feb16b)
+// C++ code generated with wxFormBuilder (version 3.10.1-234-gd93c9fc0-dirty)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO *NOT* EDIT THIS FILE!
@@ -28,7 +28,8 @@
 #include <wx/filepicker.h>
 #include <wx/button.h>
 #include <wx/scrolwin.h>
-#include <wx/toolbar.h>
+#include <wx/aui/aui.h>
+#include <wx/aui/auibar.h>
 #include "visualisationcontrol.h"
 #include <wx/dataview.h>
 #include <wx/simplebook.h>
@@ -75,24 +76,25 @@ class MainWindowGen : public wxFrame
 		wxButton* writeButton;
 		wxButton* browseButton;
 		wxPanel* imagePanel;
-		wxToolBar* imagerToolbar;
-		wxToolBarToolBase* imagerBackTool;
+		wxAuiToolBar* imagerToolbar;
+		wxAuiToolBarItem* imagerBackTool;
 		VisualisationControl* visualiser;
 		wxButton* imagerSaveImageButton;
 		wxButton* imagerSaveFluxButton;
 		wxStaticText* m_staticText4;
 		wxButton* imagerGoAgainButton;
 		wxPanel* browsePanel;
-		wxToolBar* browserToolbar;
-		wxToolBarToolBase* browserBackTool;
-		wxToolBarToolBase* browserInfoTool;
-		wxToolBarToolBase* browserOpenTool;
-		wxToolBarToolBase* browserSaveTool;
-		wxToolBarToolBase* browserNewTool;
-		wxToolBarToolBase* browserNewDirectoryTool;
-		wxToolBarToolBase* browserRenameTool;
-		wxToolBarToolBase* browserDeleteTool;
-		wxToolBarToolBase* browserFormatTool;
+		wxAuiToolBar* browserToolbar;
+		wxAuiToolBarItem* browserBackTool;
+		wxAuiToolBarItem* browserInfoTool;
+		wxAuiToolBarItem* browserViewTool;
+		wxAuiToolBarItem* browserSaveTool;
+		wxAuiToolBarItem* browserAddTool;
+		wxMenu* browserAddMenu;
+		wxMenuItem* browserNewDirectoryMenuItem;
+		wxMenuItem* browserRenameMenuItem;
+		wxMenuItem* browserDeleteMenuItem;
+		wxAuiToolBarItem* browserFormatTool;
 		wxDataViewCtrl* browserTree;
 		wxDataViewColumn* m_dataViewColumn1;
 		wxDataViewColumn* m_dataViewColumn2;
@@ -120,8 +122,9 @@ class MainWindowGen : public wxFrame
 		virtual void OnBrowserInfoButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBrowserOpenButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBrowserSaveButton( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBrowserNewButton( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBrowserAddButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBrowserNewDirectoryButton( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBrowserRenameButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBrowserDeleteButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBrowserFormatButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBrowserDirectoryExpanding( wxDataViewEvent& event ) { event.Skip(); }
@@ -133,6 +136,19 @@ class MainWindowGen : public wxFrame
 		MainWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("FluxEngine"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 616,607 ), long style = wxDEFAULT_FRAME_STYLE|wxRESIZE_BORDER|wxFULL_REPAINT_ON_RESIZE|wxTAB_TRAVERSAL );
 
 		~MainWindowGen();
+
+		void browserAddToolOnDropDownMenu( wxAuiToolBarEvent &event )
+		{
+			if ( event.IsDropDownClicked() )
+			{
+				browserToolbar->SetToolSticky( event.GetId(), true );
+				wxRect rect = browserToolbar->GetToolRect( event.GetId() );
+				wxPoint pt = browserToolbar->ClientToScreen( rect.GetBottomLeft() );
+				pt = ScreenToClient( pt );
+				browserToolbar->PopupMenu( browserAddMenu, pt );
+				browserToolbar->SetToolSticky( event.GetId(), false );
+			}
+		}
 
 };
 
