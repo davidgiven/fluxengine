@@ -10,6 +10,7 @@ FLUXENGINE_GUI_SRCS = \
 	src/gui/mainwindow.cc \
 	src/gui/texteditorwindow.cc \
 	src/gui/textviewerwindow.cc \
+	src/gui/fileviewerwindow.cc \
 	src/gui/visualisationcontrol.cc \
  
 FLUXENGINE_GUI_OBJS = \

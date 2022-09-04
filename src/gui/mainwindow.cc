@@ -15,6 +15,7 @@
 #include "utils.h"
 #include "fluxviewerwindow.h"
 #include "textviewerwindow.h"
+#include "fileviewerwindow.h"
 #include "texteditorwindow.h"
 #include "filesystemmodel.h"
 #include "customstatusbar.h"
@@ -453,14 +454,14 @@ public:
             FSOP_GETFILEINFO, dc->dirent->path));
     }
 
-	void OnBrowserOpenButton(wxCommandEvent&)
-	{
+    void OnBrowserOpenButton(wxCommandEvent&)
+    {
         auto item = browserTree->GetSelection();
         auto dc = (DirentContainer*)_filesystemModel->GetItemData(item);
 
-        QueueBrowserOperation(std::make_unique<FilesystemOperation>(
-            FSOP_OPEN, dc->dirent->path));
-	}
+        QueueBrowserOperation(
+            std::make_unique<FilesystemOperation>(FSOP_OPEN, dc->dirent->path));
+    }
 
     void QueueBrowserOperation(std::unique_ptr<FilesystemOperation> op)
     {
@@ -538,24 +539,19 @@ public:
                                 break;
                             }
 
-							case FSOP_OPEN:
-							{
-								auto bytes = _filesystem->getFile(op->path);
+                            case FSOP_OPEN:
+                            {
+                                auto bytes = _filesystem->getFile(op->path);
 
                                 runOnUiThread(
                                     [&]()
                                     {
-										std::stringstream ss;
-										hexdump(ss, bytes);
-
-                                        TextViewerWindow::Create(this,
-                                            op->path.to_str(),
-                                            ss.str(),
-                                            true)
+                                        (new FileViewerWindow(
+                                             this, op->path.to_str(), bytes))
                                             ->Show();
                                     });
                                 break;
-							}
+                            }
                         }
                     }
 
@@ -925,7 +921,7 @@ public:
                     (selection.size() == 1));
             browserToolbar->EnableTool(browserSaveTool->GetId(),
                 (capabilities & Filesystem::OP_GETFILE) &&
-                    (selection.size() >= 1));
+                    (selection.size() == 1));
             browserToolbar->EnableTool(browserNewTool->GetId(),
                 (capabilities & Filesystem::OP_PUTFILE) &&
                     (selection.size() <= 1));
@@ -1003,7 +999,7 @@ private:
         FSOP_MOUNT,
         FSOP_LIST,
         FSOP_GETFILEINFO,
-		FSOP_OPEN,
+        FSOP_OPEN,
     };
 
     class FilesystemOperation

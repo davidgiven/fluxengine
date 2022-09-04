@@ -37,6 +37,7 @@
 #include <wx/dialog.h>
 #include "fluxviewercontrol.h"
 #include <wx/scrolbar.h>
+#include <wx/notebook.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -209,6 +210,34 @@ class TextEditorWindowGen : public wxDialog
 		TextEditorWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxCLOSE_BOX|wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER );
 
 		~TextEditorWindowGen();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class FileViewerWindowGen
+///////////////////////////////////////////////////////////////////////////////
+class FileViewerWindowGen : public wxDialog
+{
+	private:
+
+	protected:
+		wxNotebook* m_notebook1;
+		wxPanel* m_panel7;
+		wxTextCtrl* hexControl;
+		wxPanel* m_panel8;
+		wxTextCtrl* textControl;
+		wxStdDialogButtonSizer* m_sdbSizer2;
+		wxButton* m_sdbSizer2OK;
+
+		// Virtual event handlers, override them in your derived class
+		virtual void OnClose( wxCommandEvent& event ) { event.Skip(); }
+
+
+	public:
+
+		FileViewerWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 408,269 ), long style = wxDEFAULT_DIALOG_STYLE );
+
+		~FileViewerWindowGen();
 
 };
 
