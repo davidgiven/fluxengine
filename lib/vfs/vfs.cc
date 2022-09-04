@@ -38,6 +38,17 @@ Path::Path(const std::string& path)
     }
 }
 
+Path Path::parent() const
+{
+    Path p;
+    if (!empty())
+    {
+        for (int i = 0; i < (size() - 1); i++)
+            p.push_back((*this)[i]);
+    }
+    return p;
+}
+
 std::string Path::to_str(const std::string sep) const
 {
     return join(*this, sep);
@@ -78,7 +89,7 @@ void Filesystem::putFile(const Path& path, const Bytes& data)
     throw UnimplementedFilesystemException();
 }
 
-std::map<std::string, std::string> Filesystem::getMetadata(const Path& path)
+std::shared_ptr<Dirent> Filesystem::getDirent(const Path& path)
 {
     throw UnimplementedFilesystemException();
 }

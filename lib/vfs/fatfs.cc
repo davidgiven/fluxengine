@@ -36,7 +36,7 @@ public:
     {
     }
 
-    std::map<std::string, std::string> getMetadata()
+    std::map<std::string, std::string> getMetadata() override
     {
         mount();
 
@@ -64,7 +64,7 @@ public:
         return attributes;
     }
 
-    void create(bool quick, const std::string& volumeName)
+    void create(bool quick, const std::string& volumeName) override
     {
         if (!quick)
             eraseEverythingOnDisk();
@@ -78,12 +78,12 @@ public:
         f_setlabel(volumeName.c_str());
     }
 
-    FilesystemStatus check()
+    FilesystemStatus check() override
     {
         return FS_OK;
     }
 
-    std::vector<std::shared_ptr<Dirent>> list(const Path& path)
+    std::vector<std::shared_ptr<Dirent>> list(const Path& path) override
     {
         mount();
 
@@ -101,22 +101,14 @@ public:
             if (filinfo.fname[0] == 0)
                 break;
 
-            auto dirent = std::make_shared<Dirent>();
-			dirent->path = path;
-			dirent->path.push_back(filinfo.fname);
-            dirent->filename = filinfo.fname;
-            dirent->length = filinfo.fsize;
-            dirent->file_type =
-                (filinfo.fattrib & AM_DIR) ? TYPE_DIRECTORY : TYPE_FILE;
-            dirent->mode = modeToString(filinfo.fattrib);
-            results.push_back(dirent);
+            results.push_back(toDirent(filinfo, path));
         }
 
         f_closedir(&dir);
         return results;
     }
 
-    std::map<std::string, std::string> getMetadata(const Path& path)
+    std::shared_ptr<Dirent> getDirent(const Path& path) override
     {
         std::map<std::string, std::string> attributes;
 
@@ -126,15 +118,10 @@ public:
         FRESULT res = f_stat(pathstr.c_str(), &filinfo);
         throwError(res);
 
-        attributes[FILENAME] = filinfo.fname;
-        attributes[LENGTH] = fmt::format("{}", filinfo.fsize);
-        attributes[FILE_TYPE] = (filinfo.fattrib & AM_DIR) ? "dir" : "file";
-        attributes[MODE] = modeToString(filinfo.fattrib);
-
-        return attributes;
+        return toDirent(filinfo, path.parent());
     }
 
-    Bytes getFile(const Path& path)
+    Bytes getFile(const Path& path) override
     {
         mount();
         auto pathstr = path.to_str();
@@ -160,7 +147,7 @@ public:
         return bytes;
     }
 
-    void putFile(const Path& path, const Bytes& bytes)
+    void putFile(const Path& path, const Bytes& bytes) override
     {
         mount();
         auto pathstr = path.to_str();
@@ -182,6 +169,27 @@ public:
         }
 
         f_close(&fil);
+    }
+
+private:
+    std::shared_ptr<Dirent> toDirent(FILINFO& filinfo, const Path& parent)
+    {
+        auto dirent = std::make_shared<Dirent>();
+        dirent->path = parent;
+        dirent->path.push_back(filinfo.fname);
+        dirent->filename = filinfo.fname;
+        dirent->length = filinfo.fsize;
+        dirent->file_type =
+            (filinfo.fattrib & AM_DIR) ? TYPE_DIRECTORY : TYPE_FILE;
+        dirent->mode = modeToString(filinfo.fattrib);
+
+        dirent->attributes[Filesystem::FILENAME] = filinfo.fname;
+        dirent->attributes[Filesystem::LENGTH] =
+            fmt::format("{}", filinfo.fsize);
+        dirent->attributes[Filesystem::FILE_TYPE] =
+            (filinfo.fattrib & AM_DIR) ? "dir" : "file";
+        dirent->attributes[Filesystem::MODE] = modeToString(filinfo.fattrib);
+        return dirent;
     }
 
 public:

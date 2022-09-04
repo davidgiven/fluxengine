@@ -30,9 +30,9 @@ int mainGetFileInfo(int argc, const char* argv[])
     try
     {
         auto filesystem = Filesystem::createFilesystemFromConfig();
-        auto attributes = filesystem->getMetadata(Path(directory));
+        auto dirent = filesystem->getDirent(Path(directory));
 
-        for (const auto& e : attributes)
+        for (const auto& e : dirent->attributes)
             fmt::print("{}={}\n", e.first, quote(e.second));
     }
     catch (const FilesystemException& e)

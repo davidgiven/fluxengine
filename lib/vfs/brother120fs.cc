@@ -32,7 +32,7 @@ public:
         ByteReader br(bytes);
         filename = br.read(8);
         filename = filename.substr(0, filename.find(' '));
-		path = { filename };
+        path = {filename};
 
         this->inode = inode;
         brother_type = br.read_8();
@@ -41,6 +41,14 @@ public:
         length = sector_length * SECTOR_SIZE;
         file_type = TYPE_FILE;
         mode = "";
+
+        attributes[Filesystem::FILENAME] = filename;
+        attributes[Filesystem::LENGTH] = fmt::format("{}", length);
+        attributes[Filesystem::FILE_TYPE] = "file";
+        attributes[Filesystem::MODE] = mode;
+        attributes["brother120.inode"] = fmt::format("{}", inode);
+        attributes["brother120.start_sector"] = fmt::format("{}", start_sector);
+        attributes["brother120.type"] = fmt::format("{}", brother_type);
     }
 
 public:
@@ -69,7 +77,7 @@ public:
 
                 auto de = std::make_unique<Brother120Dirent>(inode, buffer);
                 usedSectors += de->sector_length;
-                // dirents.push_back(std::move(de));
+                dirents.push_back(std::move(de));
             }
         }
 
@@ -113,7 +121,7 @@ public:
     {
     }
 
-    std::map<std::string, std::string> getMetadata()
+    std::map<std::string, std::string> getMetadata() override
     {
         BrotherDirectory dir(this);
 
@@ -125,12 +133,12 @@ public:
         return attributes;
     }
 
-    FilesystemStatus check()
+    FilesystemStatus check() override
     {
         return FS_OK;
     }
 
-    std::vector<std::shared_ptr<Dirent>> list(const Path& path)
+    std::vector<std::shared_ptr<Dirent>> list(const Path& path) override
     {
         if (!path.empty())
             throw FileNotFoundException();
@@ -144,7 +152,7 @@ public:
         return result;
     }
 
-    Bytes getFile(const Path& path)
+    Bytes getFile(const Path& path) override
     {
         BrotherDirectory dir(this);
         auto dirent = dir.findFile(path);
@@ -161,22 +169,10 @@ public:
         return data;
     }
 
-    std::map<std::string, std::string> getMetadata(const Path& path)
+    std::shared_ptr<Dirent> getDirent(const Path& path) override
     {
-        std::map<std::string, std::string> attributes;
-
         BrotherDirectory dir(this);
-        auto dirent = dir.findFile(path);
-        attributes[FILENAME] = dirent->filename;
-        attributes[LENGTH] = fmt::format("{}", dirent->length);
-        attributes[FILE_TYPE] = "file";
-        attributes[MODE] = dirent->mode;
-        attributes["brother120.inode"] = fmt::format("{}", dirent->inode);
-        attributes["brother120.start_sector"] =
-            fmt::format("{}", dirent->start_sector);
-        attributes["brother120.type"] = fmt::format("{}", dirent->brother_type);
-
-        return attributes;
+        return dir.findFile(path);
     }
 
 private:

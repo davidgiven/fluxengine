@@ -18,7 +18,7 @@ public:
         filename = filename.substr(0, filename.find(' '));
 
         this->inode = inode;
-		path = { filename };
+        path = {filename};
         start_sector = ((bytes1[6] & 0x03) << 8) | bytes1[7];
         load_address =
             ((bytes1[6] & 0x0c) << 14) | (bytes1[1] << 8) | bytes1[0];
@@ -29,6 +29,18 @@ public:
         sector_count = (length + 255) / 256;
         file_type = TYPE_FILE;
         mode = locked ? "L" : "";
+
+        attributes[Filesystem::FILENAME] = filename;
+        attributes[Filesystem::LENGTH] = fmt::format("{}", length);
+        attributes[Filesystem::FILE_TYPE] = "file";
+        attributes[Filesystem::MODE] = mode;
+        attributes["acorndfs.inode"] = fmt::format("{}", inode);
+        attributes["acorndfs.start_sector"] = fmt::format("{}", start_sector);
+        attributes["acorndfs.load_address"] =
+            fmt::format("0x{:x}", load_address);
+        attributes["acorndfs.exec_address"] =
+            fmt::format("0x{:x}", exec_address);
+        attributes["acorndfs.locked"] = fmt::format("{}", locked);
     }
 
 public:
@@ -150,26 +162,10 @@ public:
         return data;
     }
 
-    std::map<std::string, std::string> getMetadata(const Path& path)
+    std::shared_ptr<Dirent> getDirent(const Path& path)
     {
-        std::map<std::string, std::string> attributes;
-
         AcornDfsDirectory dir(this);
-        auto dirent = dir.findFile(path);
-        attributes[FILENAME] = dirent->filename;
-        attributes[LENGTH] = fmt::format("{}", dirent->length);
-        attributes[FILE_TYPE] = "file";
-        attributes[MODE] = dirent->mode;
-        attributes["acorndfs.inode"] = fmt::format("{}", dirent->inode);
-        attributes["acorndfs.start_sector"] =
-            fmt::format("{}", dirent->start_sector);
-        attributes["acorndfs.load_address"] =
-            fmt::format("0x{:x}", dirent->load_address);
-        attributes["acorndfs.exec_address"] =
-            fmt::format("0x{:x}", dirent->exec_address);
-        attributes["acorndfs.locked"] = fmt::format("{}", dirent->locked);
-
-        return attributes;
+        return dir.findFile(path);
     }
 
 private:

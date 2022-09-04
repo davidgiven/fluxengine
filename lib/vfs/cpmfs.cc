@@ -82,7 +82,7 @@ public:
     {
     }
 
-    std::map<std::string, std::string> getMetadata()
+    std::map<std::string, std::string> getMetadata() override
     {
         mount();
 
@@ -108,12 +108,12 @@ public:
         return attributes;
     }
 
-    FilesystemStatus check()
+    FilesystemStatus check() override
     {
         return FS_OK;
     }
 
-    std::vector<std::shared_ptr<Dirent>> list(const Path& path)
+    std::vector<std::shared_ptr<Dirent>> list(const Path& path) override
     {
         mount();
         if (!path.empty())
@@ -130,7 +130,7 @@ public:
             if (!dirent)
             {
                 dirent = std::make_unique<Dirent>();
-				dirent->path = { entry->filename };
+                dirent->path = {entry->filename};
                 dirent->filename = entry->filename;
                 dirent->mode = entry->mode;
                 dirent->length = 0;
@@ -143,50 +143,33 @@ public:
 
         std::vector<std::shared_ptr<Dirent>> result;
         for (auto& e : map)
-            result.push_back(std::move(e.second));
+        {
+            auto& de = e.second;
+            de->attributes[FILENAME] = de->filename;
+            de->attributes[LENGTH] = fmt::format("{}", de->length);
+            de->attributes[FILE_TYPE] = "file";
+            de->attributes[MODE] = de->mode;
+            result.push_back(std::move(de));
+        }
         return result;
     }
 
-    std::map<std::string, std::string> getMetadata(const Path& path)
+    std::shared_ptr<Dirent> getDirent(const Path& path) override
     {
         mount();
         if (path.size() != 1)
             throw BadPathException();
 
-        std::shared_ptr<Dirent> dirent;
-        for (int d = 0; d < _config.dir_entries(); d++)
+        for (const auto& dirent : list(Path()))
         {
-            auto entry = getEntry(d);
-            if (!entry)
-                continue;
-            if (path[0] != entry->filename)
-                continue;
-
-            if (!dirent)
-            {
-                dirent = std::make_shared<Dirent>();
-                dirent->filename = entry->filename;
-                dirent->mode = entry->mode;
-                dirent->length = 0;
-                dirent->file_type = TYPE_FILE;
-            }
-
-            dirent->length = std::max(
-                dirent->length, entry->extent * 16384 + entry->records * 128);
+            if (dirent->filename == path.front())
+                return dirent;
         }
 
-        if (!dirent)
-            throw FileNotFoundException();
-
-        std::map<std::string, std::string> attributes;
-        attributes[FILENAME] = dirent->filename;
-        attributes[LENGTH] = fmt::format("{}", dirent->length);
-        attributes[FILE_TYPE] = "file";
-        attributes[MODE] = dirent->mode;
-        return attributes;
+        throw FileNotFoundException();
     }
 
-    Bytes getFile(const Path& path)
+    Bytes getFile(const Path& path) override
     {
         mount();
         if (path.size() != 1)

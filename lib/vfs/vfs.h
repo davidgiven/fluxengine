@@ -14,10 +14,11 @@ class Path : public std::vector<std::string>
 {
 public:
     Path() {}
-	Path(const std::vector<std::string> other);
+    Path(const std::vector<std::string> other);
     Path(const std::string& text);
 
 public:
+    Path parent() const;
     std::string to_str(const std::string sep = "/") const;
 };
 
@@ -29,11 +30,12 @@ enum FileType
 
 struct Dirent
 {
-	Path path;
+    Path path;
     std::string filename;
     FileType file_type;
     uint32_t length;
     std::string mode;
+    std::map<std::string, std::string> attributes;
 };
 
 enum FilesystemStatus
@@ -137,8 +139,8 @@ public:
     /* Write a file. */
     virtual void putFile(const Path& path, const Bytes& data);
 
-    /* Get file metadata. */
-    virtual std::map<std::string, std::string> getMetadata(const Path& path);
+    /* Get a single file dirent. */
+    virtual std::shared_ptr<Dirent> getDirent(const Path& path);
 
     /* Update file metadata. */
     virtual void putMetadata(
@@ -190,7 +192,7 @@ public:
 
     static std::unique_ptr<Filesystem> createFilesystem(
         const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
-	static std::unique_ptr<Filesystem> createFilesystemFromConfig();
+    static std::unique_ptr<Filesystem> createFilesystemFromConfig();
 };
 
 #endif

@@ -24,7 +24,7 @@ public:
     {
     }
 
-    std::map<std::string, std::string> getMetadata()
+    std::map<std::string, std::string> getMetadata() override
     {
         HfsMount m(this);
 
@@ -42,12 +42,12 @@ public:
         return attributes;
     }
 
-    FilesystemStatus check()
+    FilesystemStatus check() override
     {
         return FS_OK;
     }
 
-    void create(bool quick, const std::string& volumeName)
+    void create(bool quick, const std::string& volumeName) override
     {
         if (!quick)
             eraseEverythingOnDisk();
@@ -56,7 +56,7 @@ public:
             (const char*)this, 0, HFS_MODE_ANY, volumeName.c_str(), 0, nullptr);
     }
 
-    std::vector<std::shared_ptr<Dirent>> list(const Path& path)
+    std::vector<std::shared_ptr<Dirent>> list(const Path& path) override
     {
         HfsMount m(this);
 
@@ -73,28 +73,12 @@ public:
             if (r != 0)
                 break;
 
-            auto dirent = std::make_shared<Dirent>();
-            dirent->filename = de.name;
-			dirent->path = path;
-			dirent->path.push_back(de.name);
-            if (de.flags & HFS_ISDIR)
-            {
-
-                dirent->file_type = TYPE_DIRECTORY;
-            }
-            else
-            {
-                dirent->file_type = TYPE_FILE;
-                dirent->length =
-                    de.u.file.dsize + de.u.file.rsize + AppleSingle::OVERHEAD;
-            }
-            dirent->mode = (de.flags & HFS_ISLOCKED) ? "L" : "";
-            results.push_back(dirent);
+            results.push_back(toDirent(de, path));
         }
         return results;
     }
 
-    std::map<std::string, std::string> getMetadata(const Path& path)
+    std::shared_ptr<Dirent> getDirent(const Path& path) override
     {
         HfsMount m(this);
         if (path.size() == 0)
@@ -106,44 +90,10 @@ public:
         if (hfs_stat(_vol, pathstr.c_str(), &de))
             throw FileNotFoundException();
 
-        std::map<std::string, std::string> attributes;
-        attributes[FILENAME] = de.name;
-        attributes[LENGTH] = "0";
-        attributes[FILE_TYPE] = (de.flags & HFS_ISDIR) ? "dir" : "file";
-        attributes[MODE] = (de.flags & HFS_ISLOCKED) ? "L" : "";
-        attributes["machfs.ctime"] = toIso8601(de.crdate);
-        attributes["machfs.mtime"] = toIso8601(de.mddate);
-        attributes["machfs.last_backup"] = toIso8601(de.bkdate);
-        attributes["machfs.finder.x"] = fmt::format("{}", de.fdlocation.h);
-        attributes["machfs.finder.y"] = fmt::format("{}", de.fdlocation.v);
-        attributes["machfs.finder.flags"] = fmt::format("0x{:x}", de.fdflags);
-        if (de.flags & HFS_ISDIR)
-        {
-            attributes["machfs.dir.valence"] =
-                fmt::format("{}", de.u.dir.valence);
-            attributes["machfs.dir.x1"] = fmt::format("{}", de.u.dir.rect.left);
-            attributes["machfs.dir.y1"] = fmt::format("{}", de.u.dir.rect.top);
-            attributes["machfs.dir.x2"] =
-                fmt::format("{}", de.u.dir.rect.right);
-            attributes["machfs.dir.y2"] =
-                fmt::format("{}", de.u.dir.rect.bottom);
-        }
-        else
-        {
-            attributes["length"] = fmt::format("{}",
-                de.u.file.dsize + de.u.file.rsize + AppleSingle::OVERHEAD);
-            attributes["machfs.file.dsize"] =
-                fmt::format("{}", de.u.file.dsize);
-            attributes["machfs.file.rsize"] =
-                fmt::format("{}", de.u.file.rsize);
-            attributes["machfs.file.type"] = de.u.file.type;
-            attributes["machfs.file.creator"] = de.u.file.creator;
-        }
-
-        return attributes;
+        return toDirent(de, path.parent());
     }
 
-    Bytes getFile(const Path& path)
+    Bytes getFile(const Path& path) override
     {
         HfsMount m(this);
         if (path.size() == 0)
@@ -170,7 +120,7 @@ public:
         return a.render();
     }
 
-    void putFile(const Path& path, const Bytes& bytes)
+    void putFile(const Path& path, const Bytes& bytes) override
     {
         HfsMount m(this);
         if (path.size() == 0)
@@ -200,6 +150,64 @@ public:
         writeBytes(file, a.data);
         hfs_setfork(file, 1);
         writeBytes(file, a.rsrc);
+    }
+
+private:
+    std::shared_ptr<Dirent> toDirent(hfsdirent& de, const Path& parent)
+    {
+        auto dirent = std::make_shared<Dirent>();
+        dirent->filename = de.name;
+        dirent->path = parent;
+        dirent->path.push_back(de.name);
+        if (de.flags & HFS_ISDIR)
+            dirent->file_type = TYPE_DIRECTORY;
+        else
+        {
+            dirent->file_type = TYPE_FILE;
+            dirent->length =
+                de.u.file.dsize + de.u.file.rsize + AppleSingle::OVERHEAD;
+        }
+        dirent->mode = (de.flags & HFS_ISLOCKED) ? "L" : "";
+
+        dirent->attributes[FILENAME] = de.name;
+        dirent->attributes[LENGTH] = "0";
+        dirent->attributes[FILE_TYPE] = (de.flags & HFS_ISDIR) ? "dir" : "file";
+        dirent->attributes[MODE] = (de.flags & HFS_ISLOCKED) ? "L" : "";
+        dirent->attributes["machfs.ctime"] = toIso8601(de.crdate);
+        dirent->attributes["machfs.mtime"] = toIso8601(de.mddate);
+        dirent->attributes["machfs.last_backup"] = toIso8601(de.bkdate);
+        dirent->attributes["machfs.finder.x"] =
+            fmt::format("{}", de.fdlocation.h);
+        dirent->attributes["machfs.finder.y"] =
+            fmt::format("{}", de.fdlocation.v);
+        dirent->attributes["machfs.finder.flags"] =
+            fmt::format("0x{:x}", de.fdflags);
+        if (de.flags & HFS_ISDIR)
+        {
+            dirent->attributes["machfs.dir.valence"] =
+                fmt::format("{}", de.u.dir.valence);
+            dirent->attributes["machfs.dir.x1"] =
+                fmt::format("{}", de.u.dir.rect.left);
+            dirent->attributes["machfs.dir.y1"] =
+                fmt::format("{}", de.u.dir.rect.top);
+            dirent->attributes["machfs.dir.x2"] =
+                fmt::format("{}", de.u.dir.rect.right);
+            dirent->attributes["machfs.dir.y2"] =
+                fmt::format("{}", de.u.dir.rect.bottom);
+        }
+        else
+        {
+            dirent->attributes["length"] = fmt::format("{}",
+                de.u.file.dsize + de.u.file.rsize + AppleSingle::OVERHEAD);
+            dirent->attributes["machfs.file.dsize"] =
+                fmt::format("{}", de.u.file.dsize);
+            dirent->attributes["machfs.file.rsize"] =
+                fmt::format("{}", de.u.file.rsize);
+            dirent->attributes["machfs.file.type"] = de.u.file.type;
+            dirent->attributes["machfs.file.creator"] = de.u.file.creator;
+        }
+
+        return dirent;
     }
 
 private:

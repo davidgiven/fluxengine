@@ -113,21 +113,13 @@ public:
             auto* entry = (struct Entry*)cell->content;
             cell = cell->next;
 
-            auto dirent = std::make_shared<Dirent>();
-			dirent->path = path;
-			dirent->path.push_back(entry->name);
-            dirent->filename = entry->name;
-            dirent->length = entry->size;
-            dirent->file_type =
-                (entry->type == ST_FILE) ? TYPE_FILE : TYPE_DIRECTORY;
-            dirent->mode = modeToString(entry->access);
-            results.push_back(dirent);
+            results.push_back(toDirent(entry, path));
         }
 
         return results;
     }
 
-    std::map<std::string, std::string> getMetadata(const Path& path)
+    std::shared_ptr<Dirent> getMetadata(const Path& path)
     {
         AdfMount m(this);
         if (path.size() == 0)
@@ -140,24 +132,7 @@ public:
         if (!entry)
             throw BadPathException();
 
-        std::map<std::string, std::string> attributes;
-        attributes[FILENAME] = entry->name;
-        attributes[LENGTH] = fmt::format("{}", entry->size);
-        attributes[FILE_TYPE] = (entry->type == ST_FILE) ? "file" : "dir";
-        attributes[MODE] = modeToString(entry->access);
-        attributes["amigaffs.comment"] = entry->comment;
-        attributes["amigaffs.sector"] = entry->sector;
-
-        std::tm tm = {.tm_sec = entry->secs,
-            .tm_min = entry->mins,
-            .tm_hour = entry->hour,
-            .tm_mday = entry->days,
-            .tm_mon = entry->month,
-            .tm_year = entry->year - 1900};
-        std::stringstream ss;
-        ss << std::put_time(&tm, "%FT%T%z");
-        attributes["amigaffs.mtime"] = ss.str();
-        return attributes;
+        return toDirent(entry, path.parent());
     }
 
     Bytes getFile(const Path& path)
@@ -212,6 +187,39 @@ public:
     }
 
 private:
+    std::shared_ptr<Dirent> toDirent(struct Entry* entry, const Path& container)
+    {
+        auto dirent = std::make_shared<Dirent>();
+
+        dirent->path = container;
+        dirent->path.push_back(entry->name);
+        dirent->filename = entry->name;
+        dirent->length = entry->size;
+        dirent->file_type =
+            (entry->type == ST_FILE) ? TYPE_FILE : TYPE_DIRECTORY;
+        dirent->mode = modeToString(entry->access);
+
+        dirent->attributes[FILENAME] = entry->name;
+        dirent->attributes[LENGTH] = fmt::format("{}", entry->size);
+        dirent->attributes[FILE_TYPE] =
+            (entry->type == ST_FILE) ? "file" : "dir";
+        dirent->attributes[MODE] = modeToString(entry->access);
+        dirent->attributes["amigaffs.comment"] = entry->comment;
+        dirent->attributes["amigaffs.sector"] = entry->sector;
+
+        std::tm tm = {.tm_sec = entry->secs,
+            .tm_min = entry->mins,
+            .tm_hour = entry->hour,
+            .tm_mday = entry->days,
+            .tm_mon = entry->month,
+            .tm_year = entry->year - 1900};
+        std::stringstream ss;
+        ss << std::put_time(&tm, "%FT%T%z");
+        dirent->attributes["amigaffs.mtime"] = ss.str();
+
+        return dirent;
+    }
+
     class AdfEntry
     {
     public:
