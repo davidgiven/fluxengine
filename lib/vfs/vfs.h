@@ -47,13 +47,10 @@ enum FilesystemStatus
     FS_BAD
 };
 
-class FilesystemException
+class FilesystemException : public ErrorException
 {
 public:
-    FilesystemException(const std::string& message): message(message) {}
-
-public:
-    std::string message;
+    FilesystemException(const std::string& message): ErrorException(message) {}
 };
 
 class BadPathException : public FilesystemException

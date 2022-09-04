@@ -56,7 +56,7 @@ public:
     {
     }
 
-    std::map<std::string, std::string> getMetadata()
+    std::map<std::string, std::string> getMetadata() override
     {
         AdfMount m(this);
         auto* vol = m.mount();
@@ -72,7 +72,7 @@ public:
         return attributes;
     }
 
-    void create(bool quick, const std::string& volumeName)
+    void create(bool quick, const std::string& volumeName) override
     {
         if (!quick)
             eraseEverythingOnDisk();
@@ -92,12 +92,12 @@ public:
             throw CannotWriteException();
     }
 
-    FilesystemStatus check()
+    FilesystemStatus check() override
     {
         return FS_OK;
     }
 
-    std::vector<std::shared_ptr<Dirent>> list(const Path& path)
+    std::vector<std::shared_ptr<Dirent>> list(const Path& path) override
     {
         AdfMount m(this);
 
@@ -119,7 +119,7 @@ public:
         return results;
     }
 
-    std::shared_ptr<Dirent> getMetadata(const Path& path)
+    std::shared_ptr<Dirent> getDirent(const Path& path) override
     {
         AdfMount m(this);
         if (path.size() == 0)
@@ -135,7 +135,7 @@ public:
         return toDirent(entry, path.parent());
     }
 
-    Bytes getFile(const Path& path)
+    Bytes getFile(const Path& path) override
     {
         AdfMount m(this);
         if (path.size() == 0)
@@ -162,7 +162,7 @@ public:
         return bytes;
     }
 
-    void putFile(const Path& path, const Bytes& data)
+    void putFile(const Path& path, const Bytes& data) override
     {
         AdfMount m(this);
         if (path.size() == 0)
@@ -205,7 +205,7 @@ private:
             (entry->type == ST_FILE) ? "file" : "dir";
         dirent->attributes[MODE] = modeToString(entry->access);
         dirent->attributes["amigaffs.comment"] = entry->comment;
-        dirent->attributes["amigaffs.sector"] = entry->sector;
+        dirent->attributes["amigaffs.sector"] = std::to_string(entry->sector);
 
         std::tm tm = {.tm_sec = entry->secs,
             .tm_min = entry->mins,
