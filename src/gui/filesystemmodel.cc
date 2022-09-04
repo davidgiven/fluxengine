@@ -95,6 +95,25 @@ public:
 #endif
 
 public:
+    void Clear()
+    {
+        Clear(wxDataViewItem());
+        // DeleteAllItems();
+    }
+
+    void Clear(const wxDataViewItem& parent)
+    {
+        for (int i = GetChildCount(parent) - 1; i >= 0; i--)
+        {
+            auto child = GetNthChild(parent, i);
+
+            if (IsContainer(child))
+                Clear(child);
+            ItemDeleted(parent, child);
+            DeleteItem(child);
+        }
+    }
+
     wxDataViewItem GetRootItem() const
     {
         return wxDataViewItem();
@@ -143,6 +162,7 @@ private:
 FilesystemModel* FilesystemModel::Associate(wxDataViewCtrl* control)
 {
     auto model = new FilesystemModelImpl();
+    control->AssociateModel(nullptr);
     control->AssociateModel(model);
     return model;
 }

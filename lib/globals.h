@@ -34,6 +34,8 @@ extern void hexdumpForSrp16(std::ostream& stream, const Bytes& bytes);
 
 struct ErrorException
 {
+	ErrorException(const std::string& message): message(message){}
+
 	const std::string message;
 
 	void print() const;

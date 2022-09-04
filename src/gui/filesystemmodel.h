@@ -17,6 +17,7 @@ public:
 class FilesystemModel : public wxDataViewTreeStore
 {
 public:
+    virtual void Clear() = 0;
     virtual wxDataViewItem GetRootItem() const = 0;
     virtual void SetFiles(const wxDataViewItem& item,
         std::vector<std::shared_ptr<Dirent>>& files) = 0;

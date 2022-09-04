@@ -417,8 +417,7 @@ public:
             UpdateState();
             ShowConfig();
 
-            _filesystemModel->DeleteAllItems();
-            _filesystemModel->Cleared();
+            _filesystemModel->Clear();
 
             QueueBrowserOperation(
                 std::make_unique<FilesystemOperation>(FSOP_MOUNT));
@@ -445,6 +444,15 @@ public:
         }
     }
 
+    void OnBrowserInfoButton(wxCommandEvent&)
+    {
+        auto item = browserTree->GetSelection();
+        auto dc = (DirentContainer*)_filesystemModel->GetItemData(item);
+
+        QueueBrowserOperation(std::make_unique<FilesystemOperation>(
+            FSOP_GETFILEINFO, dc->dirent->path));
+    }
+
     void QueueBrowserOperation(std::unique_ptr<FilesystemOperation> op)
     {
         _filesystemQueue.push_back(std::move(op));
@@ -457,6 +465,7 @@ public:
         if (!running)
         {
             _state = STATE_BROWSING_WORKING;
+            _errorState = STATE_BROWSING_IDLE;
             UpdateState();
             runOnWorkerThread(
                 [this]()
@@ -493,6 +502,29 @@ public:
                                         _filesystemModel->SetFiles(
                                             op->item, files);
                                         browserTree->Expand(op->item);
+                                    });
+                                break;
+                            }
+
+                            case FSOP_GETFILEINFO:
+                            {
+                                auto dirent = _filesystem->getDirent(op->path);
+
+                                runOnUiThread(
+                                    [&]()
+                                    {
+                                        std::stringstream ss;
+                                        ss << "File attributes for "
+                                           << op->path.to_str() << ":\n\n";
+                                        for (const auto& e : dirent->attributes)
+                                            ss << e.first << "="
+                                               << quote(e.second) << "\n";
+
+                                        TextViewerWindow::Create(this,
+                                            op->path.to_str(),
+                                            ss.str(),
+                                            true)
+                                            ->Show();
                                     });
                                 break;
                             }
@@ -630,6 +662,7 @@ public:
                     _statusBar->HideProgressBar();
                     _statusBar->SetRightLabel("");
                     _state = _errorState;
+                    _filesystemQueue.clear();
                     UpdateState();
                 },
 
@@ -930,7 +963,8 @@ private:
     enum
     {
         FSOP_MOUNT,
-        FSOP_LIST
+        FSOP_LIST,
+        FSOP_GETFILEINFO,
     };
 
     class FilesystemOperation
@@ -941,6 +975,12 @@ private:
             operation(operation),
             path(path),
             item(item)
+        {
+        }
+
+        FilesystemOperation(int operation, const Path& path):
+            operation(operation),
+            path(path)
         {
         }
 
