@@ -453,6 +453,15 @@ public:
             FSOP_GETFILEINFO, dc->dirent->path));
     }
 
+	void OnBrowserOpenButton(wxCommandEvent&)
+	{
+        auto item = browserTree->GetSelection();
+        auto dc = (DirentContainer*)_filesystemModel->GetItemData(item);
+
+        QueueBrowserOperation(std::make_unique<FilesystemOperation>(
+            FSOP_OPEN, dc->dirent->path));
+	}
+
     void QueueBrowserOperation(std::unique_ptr<FilesystemOperation> op)
     {
         _filesystemQueue.push_back(std::move(op));
@@ -528,6 +537,25 @@ public:
                                     });
                                 break;
                             }
+
+							case FSOP_OPEN:
+							{
+								auto bytes = _filesystem->getFile(op->path);
+
+                                runOnUiThread(
+                                    [&]()
+                                    {
+										std::stringstream ss;
+										hexdump(ss, bytes);
+
+                                        TextViewerWindow::Create(this,
+                                            op->path.to_str(),
+                                            ss.str(),
+                                            true)
+                                            ->Show();
+                                    });
+                                break;
+							}
                         }
                     }
 
@@ -975,6 +1003,7 @@ private:
         FSOP_MOUNT,
         FSOP_LIST,
         FSOP_GETFILEINFO,
+		FSOP_OPEN,
     };
 
     class FilesystemOperation
