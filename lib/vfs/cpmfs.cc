@@ -82,6 +82,11 @@ public:
     {
     }
 
+    uint32_t capabilities() const
+    {
+        return OP_GETFSDATA | OP_LIST | OP_GETFILE | OP_GETDIRENT;
+    }
+
     std::map<std::string, std::string> getMetadata() override
     {
         mount();

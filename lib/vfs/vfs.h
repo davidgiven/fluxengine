@@ -112,7 +112,25 @@ public:
     static constexpr const char* USED_BLOCKS = "used_blocks";
     static constexpr const char* BLOCK_SIZE = "block_size";
 
+    enum
+    {
+        OP_CREATE = 0b0000000000000001,
+        OP_CHECK = 0b0000000000000010,
+        OP_LIST = 0b0000000000000100,
+        OP_GETFILE = 0b0000000000001000,
+        OP_PUTFILE = 0b0000000000010000,
+        OP_GETDIRENT = 0b0000000000100000,
+        OP_CREATEDIR = 0b0000000001000000,
+        OP_DELETE = 0b0000000010000000,
+        OP_GETFSDATA = 0b0000000100000000,
+        OP_PUTFSDATA = 0b0000001000000000,
+        OP_PUTATTRS = 0b0000010000000000,
+    };
+
 public:
+    /* Retrieve capability information. */
+    virtual uint32_t capabilities() const;
+
     /* Create a filesystem on the disk. */
     virtual void create(bool quick, const std::string& volmeName);
 

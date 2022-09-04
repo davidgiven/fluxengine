@@ -54,6 +54,11 @@ std::string Path::to_str(const std::string sep) const
     return join(*this, sep);
 }
 
+uint32_t Filesystem::capabilities() const
+{
+    return 0;
+}
+
 void Filesystem::create(bool quick, const std::string& volumeName)
 {
     throw UnimplementedFilesystemException();

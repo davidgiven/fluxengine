@@ -886,19 +886,29 @@ public:
             browserToolbar->EnableTool(
                 browserBackTool->GetId(), _state == STATE_BROWSING_IDLE);
 
-            browserToolbar->EnableTool(
-                browserInfoTool->GetId(), selection.size() == 1);
-            browserToolbar->EnableTool(
-                browserOpenTool->GetId(), selection.size() == 1);
-            browserToolbar->EnableTool(
-                browserSaveTool->GetId(), selection.size() >= 1);
-            browserToolbar->EnableTool(
-                browserNewTool->GetId(), selection.size() <= 1);
-            browserToolbar->EnableTool(
-                browserNewDirectoryTool->GetId(), selection.size() <= 1);
-            browserToolbar->EnableTool(
-                browserDeleteTool->GetId(), selection.size() >= 1);
-            browserToolbar->EnableTool(browserFormatTool->GetId(), false);
+            uint32_t capabilities =
+                _filesystem ? _filesystem->capabilities() : 0;
+
+            browserToolbar->EnableTool(browserInfoTool->GetId(),
+                (capabilities & Filesystem::OP_GETDIRENT) &&
+                    (selection.size() == 1));
+            browserToolbar->EnableTool(browserOpenTool->GetId(),
+                (capabilities & Filesystem::OP_GETFILE) &&
+                    (selection.size() == 1));
+            browserToolbar->EnableTool(browserSaveTool->GetId(),
+                (capabilities & Filesystem::OP_GETFILE) &&
+                    (selection.size() >= 1));
+            browserToolbar->EnableTool(browserNewTool->GetId(),
+                (capabilities & Filesystem::OP_PUTFILE) &&
+                    (selection.size() <= 1));
+            browserToolbar->EnableTool(browserNewDirectoryTool->GetId(),
+                (capabilities & Filesystem::OP_CREATEDIR) &&
+                    (selection.size() <= 1));
+            browserToolbar->EnableTool(browserDeleteTool->GetId(),
+                (capabilities & Filesystem::OP_DELETE) &&
+                    (selection.size() >= 1));
+            browserToolbar->EnableTool(browserFormatTool->GetId(),
+                capabilities & Filesystem::OP_CREATE);
         }
 
         Refresh();
