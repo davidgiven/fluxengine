@@ -167,6 +167,9 @@ public:
     /* Deletes a file or non-empty directory. */
     virtual void deleteFile(const Path& path);
 
+    /* Does this filesystem need flushing? */
+    bool needsFlushing();
+
     /* Flushes any changes back to the disk. */
     void flush();
 

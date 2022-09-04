@@ -24,7 +24,7 @@ public:
 
 public:
     std::shared_ptr<const Sector> get(
-        unsigned track, unsigned side, unsigned sectorId)
+        unsigned track, unsigned side, unsigned sectorId) override
     {
         auto it = _changedSectors.get(track, side, sectorId);
         if (it)
@@ -38,14 +38,19 @@ public:
     }
 
     std::shared_ptr<Sector> put(
-        unsigned track, unsigned side, unsigned sectorId)
+        unsigned track, unsigned side, unsigned sectorId) override
     {
         trackid_t trackid(track, side);
         _changedtracks.insert(trackid);
         return _changedSectors.put(track, side, sectorId);
     }
 
-    void flush()
+    bool needsFlushing() override
+    {
+        return !_changedtracks.empty();
+    }
+
+    void flush() override
     {
         for (const auto& trackid : _changedtracks)
         {

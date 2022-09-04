@@ -933,6 +933,11 @@ public:
                     (selection.size() >= 1));
             browserToolbar->EnableTool(browserFormatTool->GetId(),
                 capabilities & Filesystem::OP_CREATE);
+
+            bool needsFlushing =
+                _filesystem ? _filesystem->needsFlushing() : false;
+            browserDiscardButton->Enable(needsFlushing);
+            browserCommitButton->Enable(needsFlushing);
         }
 
         Refresh();

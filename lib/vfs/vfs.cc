@@ -115,6 +115,11 @@ void Filesystem::deleteFile(const Path& path)
     throw UnimplementedFilesystemException();
 }
 
+bool Filesystem::needsFlushing()
+{
+    return _sectors->needsFlushing();
+}
+
 void Filesystem::flush()
 {
     _sectors->flush();
