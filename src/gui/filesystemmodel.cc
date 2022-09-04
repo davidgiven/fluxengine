@@ -57,7 +57,7 @@ public:
         }
     }
 
-    #if 0
+#if 0
     int Compare(const wxDataViewItem& item1,
         const wxDataViewItem& item2,
         unsigned int column,
@@ -92,7 +92,7 @@ public:
 
         return 0;
     }
-    #endif
+#endif
 
 public:
     wxDataViewItem GetRootItem() const
@@ -105,7 +105,7 @@ public:
     {
         for (int i = 0; i < GetChildCount(parent); i++)
             ItemDeleted(parent, GetNthChild(parent, i));
-         DeleteChildren(parent);
+        DeleteChildren(parent);
 
         for (auto& dirent : files)
         {

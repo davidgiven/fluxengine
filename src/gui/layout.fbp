@@ -47,7 +47,7 @@
             <property name="minimum_size"></property>
             <property name="name">MainWindowGen</property>
             <property name="pos"></property>
-            <property name="size">570,607</property>
+            <property name="size">592,607</property>
             <property name="style">wxDEFAULT_FRAME_STYLE|wxRESIZE_BORDER</property>
             <property name="subclass">; ; forward_declare</property>
             <property name="title">FluxEngine</property>
@@ -2321,10 +2321,11 @@
                                                 <property name="id">wxID_ANY</property>
                                                 <property name="kind">wxITEM_NORMAL</property>
                                                 <property name="label">Info</property>
-                                                <property name="name">m_tool3</property>
+                                                <property name="name">browserInfoTool</property>
                                                 <property name="permission">protected</property>
                                                 <property name="statusbar"></property>
                                                 <property name="tooltip"></property>
+                                                <event name="OnToolClicked">OnBrowserInfoButton</event>
                                             </object>
                                             <object class="tool" expanded="1">
                                                 <property name="bitmap">Load From Art Provider; wxART_FILE_OPEN; wxART_TOOLBAR</property>
@@ -2332,21 +2333,23 @@
                                                 <property name="id">wxID_ANY</property>
                                                 <property name="kind">wxITEM_NORMAL</property>
                                                 <property name="label">Open</property>
-                                                <property name="name">m_tool4</property>
+                                                <property name="name">browserOpenTool</property>
                                                 <property name="permission">protected</property>
                                                 <property name="statusbar"></property>
                                                 <property name="tooltip"></property>
+                                                <event name="OnToolClicked">OnBrowserOpenButton</event>
                                             </object>
                                             <object class="tool" expanded="1">
-                                                <property name="bitmap">Load From Art Provider; wxART_FILE_SAVE_AS; wxART_TOOLBAR</property>
+                                                <property name="bitmap">Load From Art Provider; wxART_FILE_SAVE; wxART_TOOLBAR</property>
                                                 <property name="context_menu">0</property>
                                                 <property name="id">wxID_ANY</property>
                                                 <property name="kind">wxITEM_NORMAL</property>
                                                 <property name="label">Save</property>
-                                                <property name="name">m_tool5</property>
+                                                <property name="name">browserSaveTool</property>
                                                 <property name="permission">protected</property>
                                                 <property name="statusbar"></property>
                                                 <property name="tooltip"></property>
+                                                <event name="OnToolClicked">OnBrowserSaveButton</event>
                                             </object>
                                             <object class="tool" expanded="1">
                                                 <property name="bitmap">Load From Art Provider; wxART_NEW; wxART_TOOLBAR</property>
@@ -2354,10 +2357,23 @@
                                                 <property name="id">wxID_ANY</property>
                                                 <property name="kind">wxITEM_NORMAL</property>
                                                 <property name="label">New</property>
-                                                <property name="name">m_tool6</property>
+                                                <property name="name">browserNewTool</property>
                                                 <property name="permission">protected</property>
                                                 <property name="statusbar"></property>
                                                 <property name="tooltip"></property>
+                                                <event name="OnToolClicked">OnBrowserNewButton</event>
+                                            </object>
+                                            <object class="tool" expanded="1">
+                                                <property name="bitmap">Load From Art Provider; wxART_NEW_DIR; wxART_TOOLBAR</property>
+                                                <property name="context_menu">0</property>
+                                                <property name="id">wxID_ANY</property>
+                                                <property name="kind">wxITEM_NORMAL</property>
+                                                <property name="label">New directory</property>
+                                                <property name="name">browserNewDirectoryTool</property>
+                                                <property name="permission">protected</property>
+                                                <property name="statusbar"></property>
+                                                <property name="tooltip"></property>
+                                                <event name="OnToolClicked">OnBrowserNewDirectoryButton</event>
                                             </object>
                                             <object class="tool" expanded="1">
                                                 <property name="bitmap">Load From Art Provider; wxART_DELETE; wxART_TOOLBAR</property>
@@ -2365,10 +2381,26 @@
                                                 <property name="id">wxID_ANY</property>
                                                 <property name="kind">wxITEM_NORMAL</property>
                                                 <property name="label">Delete</property>
-                                                <property name="name">m_tool7</property>
+                                                <property name="name">browserDeleteTool</property>
                                                 <property name="permission">protected</property>
                                                 <property name="statusbar"></property>
                                                 <property name="tooltip"></property>
+                                                <event name="OnToolClicked">OnBrowserDeleteButton</event>
+                                            </object>
+                                            <object class="toolSeparator" expanded="1">
+                                                <property name="permission">protected</property>
+                                            </object>
+                                            <object class="tool" expanded="1">
+                                                <property name="bitmap">Load From Art Provider; wxART_WARNING; wxART_TOOLBAR</property>
+                                                <property name="context_menu">0</property>
+                                                <property name="id">wxID_ANY</property>
+                                                <property name="kind">wxITEM_NORMAL</property>
+                                                <property name="label">Format</property>
+                                                <property name="name">browserFormatTool</property>
+                                                <property name="permission">protected</property>
+                                                <property name="statusbar"></property>
+                                                <property name="tooltip"></property>
+                                                <event name="OnToolClicked">OnBrowserFormatButton</event>
                                             </object>
                                         </object>
                                     </object>
@@ -2398,6 +2430,7 @@
                                             <property name="window_name"></property>
                                             <property name="window_style"></property>
                                             <event name="OnDataViewCtrlItemExpanding">OnBrowserDirectoryExpanding</event>
+                                            <event name="OnDataViewCtrlSelectionChanged">OnBrowserSelectionChanged</event>
                                             <object class="dataViewColumn" expanded="1">
                                                 <property name="align">wxALIGN_LEFT</property>
                                                 <property name="ellipsize"></property>

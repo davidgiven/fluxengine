@@ -84,11 +84,13 @@ class MainWindowGen : public wxFrame
 		wxPanel* browsePanel;
 		wxToolBar* browserToolbar;
 		wxToolBarToolBase* browserBackTool;
-		wxToolBarToolBase* m_tool3;
-		wxToolBarToolBase* m_tool4;
-		wxToolBarToolBase* m_tool5;
-		wxToolBarToolBase* m_tool6;
-		wxToolBarToolBase* m_tool7;
+		wxToolBarToolBase* browserInfoTool;
+		wxToolBarToolBase* browserOpenTool;
+		wxToolBarToolBase* browserSaveTool;
+		wxToolBarToolBase* browserNewTool;
+		wxToolBarToolBase* browserNewDirectoryTool;
+		wxToolBarToolBase* browserDeleteTool;
+		wxToolBarToolBase* browserFormatTool;
 		wxDataViewCtrl* browserTree;
 		wxDataViewColumn* m_dataViewColumn1;
 		wxDataViewColumn* m_dataViewColumn2;
@@ -113,12 +115,20 @@ class MainWindowGen : public wxFrame
 		virtual void OnSaveImageButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSaveFluxButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnImagerGoAgainButton( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBrowserInfoButton( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBrowserOpenButton( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBrowserSaveButton( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBrowserNewButton( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBrowserNewDirectoryButton( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBrowserDeleteButton( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBrowserFormatButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBrowserDirectoryExpanding( wxDataViewEvent& event ) { event.Skip(); }
+		virtual void OnBrowserSelectionChanged( wxDataViewEvent& event ) { event.Skip(); }
 
 
 	public:
 
-		MainWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("FluxEngine"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 570,607 ), long style = wxDEFAULT_FRAME_STYLE|wxRESIZE_BORDER|wxFULL_REPAINT_ON_RESIZE|wxTAB_TRAVERSAL );
+		MainWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("FluxEngine"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 592,607 ), long style = wxDEFAULT_FRAME_STYLE|wxRESIZE_BORDER|wxFULL_REPAINT_ON_RESIZE|wxTAB_TRAVERSAL );
 
 		~MainWindowGen();
 

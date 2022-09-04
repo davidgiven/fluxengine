@@ -22,6 +22,7 @@
 #include <google/protobuf/text_format.h>
 #include <wx/config.h>
 #include <wx/aboutdlg.h>
+#include <deque>
 
 extern const std::map<std::string, std::string> formats;
 
@@ -42,6 +43,9 @@ const std::string DEFAULT_EXTRA_CONFIGURATION =
 
 class MainWindow : public MainWindowGen
 {
+private:
+    class FilesystemOperation;
+
 public:
     MainWindow(): MainWindowGen(nullptr), _config("FluxEngine")
     {
@@ -97,6 +101,8 @@ public:
             {
                 emergencyStop = true;
             });
+
+        _filesystemModel = FilesystemModel::Associate(browserTree);
 
         /* I have no idea why this is necessary, but on Windows things aren't
          * laid out correctly without it. */
@@ -411,25 +417,13 @@ public:
             UpdateState();
             ShowConfig();
 
-			_filesystemModel = FilesystemModel::Associate(browserTree);
+            _filesystemModel->DeleteAllItems();
+            _filesystemModel->Cleared();
 
-            _errorState = STATE_BROWSING_IDLE;
-            runOnWorkerThread(
-                [this]()
-                {
-                    _filesystem = Filesystem::createFilesystemFromConfig();
-                    auto files = _filesystem->list(Path());
-
-                    runOnUiThread(
-                        [&]()
-                        {
-                            _filesystemModel->SetFiles(
-                                _filesystemModel->GetRootItem(), files);
-
-                            _state = STATE_BROWSING_IDLE;
-                            UpdateState();
-                        });
-                });
+            QueueBrowserOperation(
+                std::make_unique<FilesystemOperation>(FSOP_MOUNT));
+            QueueBrowserOperation(std::make_unique<FilesystemOperation>(
+                FSOP_LIST, Path(), wxDataViewItem{}));
         }
         catch (const ErrorException& e)
         {
@@ -438,7 +432,7 @@ public:
         }
     }
 
-    void OnBrowserDirectoryExpanding(wxDataViewEvent& event)
+    void OnBrowserDirectoryExpanding(wxDataViewEvent& event) override
     {
         auto item = event.GetItem();
         auto dc = (DirentContainer*)_filesystemModel->GetItemData(item);
@@ -446,29 +440,78 @@ public:
         if (!dc->populated && !dc->populating)
         {
             dc->populating = true;
-            bool running = wxGetApp().IsWorkerThreadRunning();
-            auto path = dc->dirent->path;
-            if (!running)
-            {
-                _state = STATE_BROWSING_WORKING;
-                UpdateState();
-                runOnWorkerThread(
-                    [this, path, item]()
-                    {
-                        auto files = _filesystem->list(path);
+            QueueBrowserOperation(std::make_unique<FilesystemOperation>(
+                FSOP_LIST, dc->dirent->path, item));
+        }
+    }
 
+    void QueueBrowserOperation(std::unique_ptr<FilesystemOperation> op)
+    {
+        _filesystemQueue.push_back(std::move(op));
+        KickBrowserQueue();
+    }
+
+    void KickBrowserQueue()
+    {
+        bool running = wxGetApp().IsWorkerThreadRunning();
+        if (!running)
+        {
+            _state = STATE_BROWSING_WORKING;
+            UpdateState();
+            runOnWorkerThread(
+                [this]()
+                {
+                    for (;;)
+                    {
+                        std::unique_ptr<FilesystemOperation> op;
                         runOnUiThread(
                             [&]()
                             {
-                                _filesystemModel->SetFiles(item, files);
-                                browserTree->Expand(item);
-
-                                _state = STATE_BROWSING_IDLE;
-                                UpdateState();
+                                if (!_filesystemQueue.empty())
+                                {
+                                    op = std::move(_filesystemQueue.front());
+                                    _filesystemQueue.pop_front();
+                                }
                             });
-                    });
-            }
+                        if (!op)
+                            break;
+
+                        switch (op->operation)
+                        {
+                            case FSOP_MOUNT:
+                                _filesystem =
+                                    Filesystem::createFilesystemFromConfig();
+                                break;
+
+                            case FSOP_LIST:
+                            {
+                                auto files = _filesystem->list(op->path);
+
+                                runOnUiThread(
+                                    [&]()
+                                    {
+                                        _filesystemModel->SetFiles(
+                                            op->item, files);
+                                        browserTree->Expand(op->item);
+                                    });
+                                break;
+                            }
+                        }
+                    }
+
+                    runOnUiThread(
+                        [&]()
+                        {
+                            _state = STATE_BROWSING_IDLE;
+                            UpdateState();
+                        });
+                });
         }
+    }
+
+    void OnBrowserSelectionChanged(wxDataViewEvent& event) override
+    {
+        UpdateState();
     }
 
     /* --- Config management ------------------------------------------------ */
@@ -803,6 +846,26 @@ public:
         else if (_state < STATE_BROWSING__LAST)
         {
             dataNotebook->SetSelection(2);
+
+            wxDataViewItemArray selection;
+            browserTree->GetSelections(selection);
+
+            browserToolbar->EnableTool(
+                browserBackTool->GetId(), _state == STATE_BROWSING_IDLE);
+
+            browserToolbar->EnableTool(
+                browserInfoTool->GetId(), selection.size() == 1);
+            browserToolbar->EnableTool(
+                browserOpenTool->GetId(), selection.size() == 1);
+            browserToolbar->EnableTool(
+                browserSaveTool->GetId(), selection.size() >= 1);
+            browserToolbar->EnableTool(
+                browserNewTool->GetId(), selection.size() <= 1);
+            browserToolbar->EnableTool(
+                browserNewDirectoryTool->GetId(), selection.size() <= 1);
+            browserToolbar->EnableTool(
+                browserDeleteTool->GetId(), selection.size() >= 1);
+            browserToolbar->EnableTool(browserFormatTool->GetId(), false);
         }
 
         Refresh();
@@ -864,6 +927,30 @@ private:
         STATE_BROWSING__LAST
     };
 
+    enum
+    {
+        FSOP_MOUNT,
+        FSOP_LIST
+    };
+
+    class FilesystemOperation
+    {
+    public:
+        FilesystemOperation(
+            int operation, const Path& path, const wxDataViewItem& item):
+            operation(operation),
+            path(path),
+            item(item)
+        {
+        }
+
+        FilesystemOperation(int operation): operation(operation) {}
+
+        int operation;
+        Path path;
+        wxDataViewItem item;
+    };
+
     wxConfig _config;
     std::vector<std::pair<std::string, std::unique_ptr<const ConfigProto>>>
         _formats;
@@ -880,6 +967,7 @@ private:
     std::string _extraConfiguration;
     std::unique_ptr<Filesystem> _filesystem;
     FilesystemModel* _filesystemModel;
+    std::deque<std::unique_ptr<FilesystemOperation>> _filesystemQueue;
 };
 
 wxWindow* FluxEngineApp::CreateMainWindow()

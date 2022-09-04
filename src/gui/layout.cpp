@@ -276,15 +276,21 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 
 	browserToolbar->AddSeparator();
 
-	m_tool3 = browserToolbar->AddTool( wxID_ANY, wxT("Info"), wxArtProvider::GetBitmap( wxART_INFORMATION, wxART_TOOLBAR ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+	browserInfoTool = browserToolbar->AddTool( wxID_ANY, wxT("Info"), wxArtProvider::GetBitmap( wxART_INFORMATION, wxART_TOOLBAR ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
 
-	m_tool4 = browserToolbar->AddTool( wxID_ANY, wxT("Open"), wxArtProvider::GetBitmap( wxART_FILE_OPEN, wxART_TOOLBAR ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+	browserOpenTool = browserToolbar->AddTool( wxID_ANY, wxT("Open"), wxArtProvider::GetBitmap( wxART_FILE_OPEN, wxART_TOOLBAR ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
 
-	m_tool5 = browserToolbar->AddTool( wxID_ANY, wxT("Save"), wxArtProvider::GetBitmap( wxART_FILE_SAVE_AS, wxART_TOOLBAR ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+	browserSaveTool = browserToolbar->AddTool( wxID_ANY, wxT("Save"), wxArtProvider::GetBitmap( wxART_FILE_SAVE, wxART_TOOLBAR ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
 
-	m_tool6 = browserToolbar->AddTool( wxID_ANY, wxT("New"), wxArtProvider::GetBitmap( wxART_NEW, wxART_TOOLBAR ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+	browserNewTool = browserToolbar->AddTool( wxID_ANY, wxT("New"), wxArtProvider::GetBitmap( wxART_NEW, wxART_TOOLBAR ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
 
-	m_tool7 = browserToolbar->AddTool( wxID_ANY, wxT("Delete"), wxArtProvider::GetBitmap( wxART_DELETE, wxART_TOOLBAR ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+	browserNewDirectoryTool = browserToolbar->AddTool( wxID_ANY, wxT("New directory"), wxArtProvider::GetBitmap( wxART_NEW_DIR, wxART_TOOLBAR ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+
+	browserDeleteTool = browserToolbar->AddTool( wxID_ANY, wxT("Delete"), wxArtProvider::GetBitmap( wxART_DELETE, wxART_TOOLBAR ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+
+	browserToolbar->AddSeparator();
+
+	browserFormatTool = browserToolbar->AddTool( wxID_ANY, wxT("Format"), wxArtProvider::GetBitmap( wxART_WARNING, wxART_TOOLBAR ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
 
 	browserToolbar->Realize();
 
@@ -350,7 +356,15 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	imagerSaveFluxButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnSaveFluxButton ), NULL, this );
 	imagerGoAgainButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnImagerGoAgainButton ), NULL, this );
 	this->Connect( browserBackTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBackButton ) );
+	this->Connect( browserInfoTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserInfoButton ) );
+	this->Connect( browserOpenTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserOpenButton ) );
+	this->Connect( browserSaveTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserSaveButton ) );
+	this->Connect( browserNewTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserNewButton ) );
+	this->Connect( browserNewDirectoryTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserNewDirectoryButton ) );
+	this->Connect( browserDeleteTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserDeleteButton ) );
+	this->Connect( browserFormatTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserFormatButton ) );
 	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_ITEM_EXPANDING, wxDataViewEventHandler( MainWindowGen::OnBrowserDirectoryExpanding ), NULL, this );
+	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler( MainWindowGen::OnBrowserSelectionChanged ), NULL, this );
 }
 
 MainWindowGen::~MainWindowGen()
@@ -375,7 +389,15 @@ MainWindowGen::~MainWindowGen()
 	imagerSaveFluxButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnSaveFluxButton ), NULL, this );
 	imagerGoAgainButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnImagerGoAgainButton ), NULL, this );
 	this->Disconnect( browserBackTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBackButton ) );
+	this->Disconnect( browserInfoTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserInfoButton ) );
+	this->Disconnect( browserOpenTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserOpenButton ) );
+	this->Disconnect( browserSaveTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserSaveButton ) );
+	this->Disconnect( browserNewTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserNewButton ) );
+	this->Disconnect( browserNewDirectoryTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserNewDirectoryButton ) );
+	this->Disconnect( browserDeleteTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserDeleteButton ) );
+	this->Disconnect( browserFormatTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserFormatButton ) );
 	browserTree->Disconnect( wxEVT_COMMAND_DATAVIEW_ITEM_EXPANDING, wxDataViewEventHandler( MainWindowGen::OnBrowserDirectoryExpanding ), NULL, this );
+	browserTree->Disconnect( wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler( MainWindowGen::OnBrowserSelectionChanged ), NULL, this );
 
 }
 
