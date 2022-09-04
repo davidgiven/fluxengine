@@ -2,6 +2,7 @@ ifneq ($(shell $(WX_CONFIG) --version),)
 
 FLUXENGINE_GUI_SRCS = \
 	src/gui/customstatusbar.cc \
+	src/gui/filesystemmodel.cc \
 	src/gui/fluxviewercontrol.cc \
 	src/gui/fluxviewerwindow.cc \
 	src/gui/layout.cpp \
@@ -28,6 +29,9 @@ $(call use-library, $(FLUXENGINE_GUI_BIN), $(FLUXENGINE_GUI_OBJS), LIBFLUXENGINE
 $(call use-library, $(FLUXENGINE_GUI_BIN), $(FLUXENGINE_GUI_OBJS), LIBFORMATS)
 $(call use-library, $(FLUXENGINE_GUI_BIN), $(FLUXENGINE_GUI_OBJS), LIBUSBP)
 $(call use-library, $(FLUXENGINE_GUI_BIN), $(FLUXENGINE_GUI_OBJS), PROTO)
+$(call use-library, $(FLUXENGINE_GUI_BIN), $(FLUXENGINE_GUI_OBJS), FATFS)
+$(call use-library, $(FLUXENGINE_GUI_BIN), $(FLUXENGINE_GUI_OBJS), ADFLIB)
+$(call use-library, $(FLUXENGINE_GUI_BIN), $(FLUXENGINE_GUI_OBJS), HFSUTILS)
 
 binaries: fluxengine-gui$(EXT)
 

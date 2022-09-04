@@ -130,6 +130,7 @@ public:
             if (!dirent)
             {
                 dirent = std::make_unique<Dirent>();
+				dirent->path = { entry->filename };
                 dirent->filename = entry->filename;
                 dirent->mode = entry->mode;
                 dirent->length = 0;

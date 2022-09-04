@@ -16,7 +16,9 @@
 #include "fluxviewerwindow.h"
 #include "textviewerwindow.h"
 #include "texteditorwindow.h"
+#include "filesystemmodel.h"
 #include "customstatusbar.h"
+#include "lib/vfs/vfs.h"
 #include <google/protobuf/text_format.h>
 #include <wx/config.h>
 #include <wx/aboutdlg.h>
@@ -393,6 +395,83 @@ public:
         _state = STATE_IDLE;
         UpdateState();
     }
+
+    /* --- Browser ---------------------------------------------------------- */
+
+    void OnBrowseButton(wxCommandEvent& event) override
+    {
+        try
+        {
+            PrepareConfig();
+
+            visualiser->Clear();
+            _currentDisk = nullptr;
+
+            _state = STATE_BROWSING_WORKING;
+            UpdateState();
+            ShowConfig();
+
+			_filesystemModel = FilesystemModel::Associate(browserTree);
+
+            _errorState = STATE_BROWSING_IDLE;
+            runOnWorkerThread(
+                [this]()
+                {
+                    _filesystem = Filesystem::createFilesystemFromConfig();
+                    auto files = _filesystem->list(Path());
+
+                    runOnUiThread(
+                        [&]()
+                        {
+                            _filesystemModel->SetFiles(
+                                _filesystemModel->GetRootItem(), files);
+
+                            _state = STATE_BROWSING_IDLE;
+                            UpdateState();
+                        });
+                });
+        }
+        catch (const ErrorException& e)
+        {
+            wxMessageBox(e.message, "Error", wxOK | wxICON_ERROR);
+            _state = STATE_IDLE;
+        }
+    }
+
+    void OnBrowserDirectoryExpanding(wxDataViewEvent& event)
+    {
+        auto item = event.GetItem();
+        auto dc = (DirentContainer*)_filesystemModel->GetItemData(item);
+
+        if (!dc->populated && !dc->populating)
+        {
+            dc->populating = true;
+            bool running = wxGetApp().IsWorkerThreadRunning();
+            auto path = dc->dirent->path;
+            if (!running)
+            {
+                _state = STATE_BROWSING_WORKING;
+                UpdateState();
+                runOnWorkerThread(
+                    [this, path, item]()
+                    {
+                        auto files = _filesystem->list(path);
+
+                        runOnUiThread(
+                            [&]()
+                            {
+                                _filesystemModel->SetFiles(item, files);
+                                browserTree->Expand(item);
+
+                                _state = STATE_BROWSING_IDLE;
+                                UpdateState();
+                            });
+                    });
+            }
+        }
+    }
+
+    /* --- Config management ------------------------------------------------ */
 
     /* This sets the *global* config object. That's safe provided the worker
      * thread isn't running, otherwise you'll get a race. */
@@ -789,7 +868,7 @@ private:
     std::vector<std::pair<std::string, std::unique_ptr<const ConfigProto>>>
         _formats;
     std::vector<std::unique_ptr<const CandidateDevice>> _devices;
-    int _state;
+    int _state = STATE_IDLE;
     int _errorState;
     int _selectedSource;
     bool _dontSaveConfig = false;
@@ -799,6 +878,8 @@ private:
     std::unique_ptr<TextViewerWindow> _logWindow;
     std::unique_ptr<TextViewerWindow> _configWindow;
     std::string _extraConfiguration;
+    std::unique_ptr<Filesystem> _filesystem;
+    FilesystemModel* _filesystemModel;
 };
 
 wxWindow* FluxEngineApp::CreateMainWindow()

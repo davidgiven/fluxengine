@@ -102,6 +102,8 @@ public:
                 break;
 
             auto dirent = std::make_shared<Dirent>();
+			dirent->path = path;
+			dirent->path.push_back(filinfo.fname);
             dirent->filename = filinfo.fname;
             dirent->length = filinfo.fsize;
             dirent->file_type =

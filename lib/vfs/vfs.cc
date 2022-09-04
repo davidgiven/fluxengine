@@ -6,8 +6,18 @@
 #include "lib/image.h"
 #include "lib/sector.h"
 #include "lib/vfs/sectorinterface.h"
+#include "lib/imagereader/imagereader.h"
+#include "lib/fluxsource/fluxsource.h"
+#include "lib/fluxsink/fluxsink.h"
+#include "lib/decoders/decoders.h"
+#include "lib/encoders/encoders.h"
 #include "lib/config.pb.h"
 #include "lib/utils.h"
+
+Path::Path(const std::vector<std::string> other):
+    std::vector<std::string>(other)
+{
+}
 
 Path::Path(const std::string& path)
 {
@@ -151,6 +161,38 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystem(
             Error() << "no filesystem configured";
             return std::unique_ptr<Filesystem>();
     }
+}
+
+std::unique_ptr<Filesystem> Filesystem::createFilesystemFromConfig()
+{
+    std::shared_ptr<SectorInterface> sectorInterface;
+    if (config.has_flux_source())
+    {
+        std::shared_ptr<FluxSource> fluxSource(
+            FluxSource::create(config.flux_source()));
+        std::shared_ptr<AbstractDecoder> decoder(
+            AbstractDecoder::create(config.decoder()));
+        if (config.flux_sink().has_drive())
+        {
+            std::shared_ptr<FluxSink> fluxSink(
+                FluxSink::create(config.flux_sink()));
+            std::shared_ptr<AbstractEncoder> encoder(
+                AbstractEncoder::create(config.encoder()));
+            sectorInterface = SectorInterface::createFluxSectorInterface(
+                fluxSource, fluxSink, encoder, decoder);
+        }
+        else
+            sectorInterface = SectorInterface::createFluxSectorInterface(
+                fluxSource, nullptr, nullptr, decoder);
+    }
+    else
+    {
+        auto reader = ImageReader::create(config.image_reader());
+        std::shared_ptr<Image> image(std::move(reader->readImage()));
+        sectorInterface = SectorInterface::createImageSectorInterface(image);
+    }
+
+    return createFilesystem(config.filesystem(), sectorInterface);
 }
 
 Bytes Filesystem::getSector(unsigned track, unsigned side, unsigned sector)

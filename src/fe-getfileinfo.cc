@@ -29,7 +29,7 @@ int mainGetFileInfo(int argc, const char* argv[])
 
     try
     {
-        auto filesystem = createFilesystemFromConfig();
+        auto filesystem = Filesystem::createFilesystemFromConfig();
         auto attributes = filesystem->getMetadata(Path(directory));
 
         for (const auto& e : attributes)

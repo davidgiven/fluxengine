@@ -10,6 +10,17 @@ class DfsProto;
 class FilesystemProto;
 class SectorInterface;
 
+class Path : public std::vector<std::string>
+{
+public:
+    Path() {}
+	Path(const std::vector<std::string> other);
+    Path(const std::string& text);
+
+public:
+    std::string to_str(const std::string sep = "/") const;
+};
+
 enum FileType
 {
     TYPE_FILE,
@@ -18,6 +29,7 @@ enum FileType
 
 struct Dirent
 {
+	Path path;
     std::string filename;
     FileType file_type;
     uint32_t length;
@@ -86,16 +98,6 @@ public:
         FilesystemException("Unimplemented operation")
     {
     }
-};
-
-class Path : public std::vector<std::string>
-{
-public:
-    Path() {}
-    Path(const std::string& text);
-
-public:
-    std::string to_str(const std::string sep = "/") const;
 };
 
 class Filesystem
@@ -188,6 +190,7 @@ public:
 
     static std::unique_ptr<Filesystem> createFilesystem(
         const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
+	static std::unique_ptr<Filesystem> createFilesystemFromConfig();
 };
 
 #endif

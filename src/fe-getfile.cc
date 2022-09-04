@@ -37,7 +37,7 @@ int mainGetFile(int argc, const char* argv[])
         if (outputFilename.empty())
             outputFilename = inputFilename.back();
 
-        auto filesystem = createFilesystemFromConfig();
+        auto filesystem = Filesystem::createFilesystemFromConfig();
         auto data = filesystem->getFile(inputFilename);
         data.writeToFile(outputFilename);
     }

@@ -43,7 +43,7 @@ int mainLs(int argc, const char* argv[])
 
     try
     {
-        auto filesystem = createFilesystemFromConfig();
+        auto filesystem = Filesystem::createFilesystemFromConfig();
         auto files = filesystem->list(Path(directory));
 
         int maxlen = 0;

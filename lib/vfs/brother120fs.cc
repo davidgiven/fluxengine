@@ -32,6 +32,7 @@ public:
         ByteReader br(bytes);
         filename = br.read(8);
         filename = filename.substr(0, filename.find(' '));
+		path = { filename };
 
         this->inode = inode;
         brother_type = br.read_8();

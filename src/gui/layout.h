@@ -84,12 +84,15 @@ class MainWindowGen : public wxFrame
 		wxPanel* browsePanel;
 		wxToolBar* browserToolbar;
 		wxToolBarToolBase* browserBackTool;
-		wxScrolledWindow* m_scrolledWindow1;
-		wxDataViewCtrl* browserView;
-		wxDataViewColumn* browserFilenameColumn;
-		wxDataViewColumn* browserModeColumn;
-		wxDataViewColumn* browserLengthColumn;
-		wxDataViewColumn* browserExtraColumn;
+		wxToolBarToolBase* m_tool3;
+		wxToolBarToolBase* m_tool4;
+		wxToolBarToolBase* m_tool5;
+		wxToolBarToolBase* m_tool6;
+		wxToolBarToolBase* m_tool7;
+		wxDataViewCtrl* browserTree;
+		wxDataViewColumn* m_dataViewColumn1;
+		wxDataViewColumn* m_dataViewColumn2;
+		wxDataViewColumn* m_dataViewColumn3;
 		wxButton* browserDiscardButton;
 		wxButton* browserCommitButton;
 
@@ -105,15 +108,17 @@ class MainWindowGen : public wxFrame
 		virtual void OnCustomConfigurationButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnReadButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnWriteButton( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBrowseButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBackButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSaveImageButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSaveFluxButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnImagerGoAgainButton( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBrowserDirectoryExpanding( wxDataViewEvent& event ) { event.Skip(); }
 
 
 	public:
 
-		MainWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("FluxEngine"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 819,607 ), long style = wxDEFAULT_FRAME_STYLE|wxRESIZE_BORDER|wxFULL_REPAINT_ON_RESIZE|wxTAB_TRAVERSAL );
+		MainWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("FluxEngine"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 570,607 ), long style = wxDEFAULT_FRAME_STYLE|wxRESIZE_BORDER|wxFULL_REPAINT_ON_RESIZE|wxTAB_TRAVERSAL );
 
 		~MainWindowGen();
 

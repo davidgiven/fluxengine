@@ -74,6 +74,7 @@ class CbmfsFilesystem : public Filesystem
 
             auto filenameBytes = br.read(16).split(0xa0)[0];
             filename = fromPetscii(filenameBytes);
+			path = { filename };
             side_track = br.read_8();
             side_sector = br.read_8();
             recordlen = br.read_8();

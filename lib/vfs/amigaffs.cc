@@ -114,6 +114,8 @@ public:
             cell = cell->next;
 
             auto dirent = std::make_shared<Dirent>();
+			dirent->path = path;
+			dirent->path.push_back(entry->name);
             dirent->filename = entry->name;
             dirent->length = entry->size;
             dirent->file_type =

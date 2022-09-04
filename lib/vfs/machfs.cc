@@ -75,6 +75,8 @@ public:
 
             auto dirent = std::make_shared<Dirent>();
             dirent->filename = de.name;
+			dirent->path = path;
+			dirent->path.push_back(de.name);
             if (de.flags & HFS_ISDIR)
             {
 

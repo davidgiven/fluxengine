@@ -18,6 +18,7 @@ public:
         filename = filename.substr(0, filename.find(' '));
 
         this->inode = inode;
+		path = { filename };
         start_sector = ((bytes1[6] & 0x03) << 8) | bytes1[7];
         load_address =
             ((bytes1[6] & 0x0c) << 14) | (bytes1[1] << 8) | bytes1[0];
