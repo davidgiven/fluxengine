@@ -346,6 +346,10 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 
 	fgSizer23->Add( gSizer12, 1, wxEXPAND, 5 );
 
+	m_staticText12 = new wxStaticText( browsePanel, wxID_ANY, wxT("No changes will be written until the 'commit' button is pressed."), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL );
+	m_staticText12->Wrap( -1 );
+	fgSizer23->Add( m_staticText12, 0, wxALL|wxEXPAND, 5 );
+
 
 	browsePanel->SetSizer( fgSizer23 );
 	browsePanel->Layout();
@@ -743,7 +747,7 @@ FormatDialog::FormatDialog( wxWindow* parent, wxWindowID id, const wxString& tit
 	volumeNameText = new wxTextCtrl( this, wxID_ANY, wxT("FluxEngineDisk"), wxDefaultPosition, wxDefaultSize, 0 );
 	gbSizer1->Add( volumeNameText, wxGBPosition( 1, 1 ), wxGBSpan( 1, 1 ), wxALL|wxEXPAND, 5 );
 
-	quickFormatCheckBox = new wxCheckBox( this, wxID_ANY, wxT("Quick format"), wxDefaultPosition, wxDefaultSize, 0 );
+	quickFormatCheckBox = new wxCheckBox( this, wxID_ANY, wxT("Quick format: if the disk is not already correctly formatted,\nvery bad things will happen!"), wxDefaultPosition, wxDefaultSize, 0 );
 	gbSizer1->Add( quickFormatCheckBox, wxGBPosition( 2, 1 ), wxGBSpan( 1, 1 ), wxALL|wxEXPAND, 5 );
 
 	m_sdbSizer6 = new wxStdDialogButtonSizer();

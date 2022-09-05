@@ -77,7 +77,10 @@ public:
 
         char buffer[FF_MAX_SS * 2];
         currentFatFs = this;
-        FRESULT res = f_mkfs("", nullptr, buffer, sizeof(buffer));
+		MKFS_PARM parm = {
+			.fmt = FM_SFD | FM_ANY,
+		};
+        FRESULT res = f_mkfs("", &parm, buffer, sizeof(buffer));
         throwError(res);
 
         mount();

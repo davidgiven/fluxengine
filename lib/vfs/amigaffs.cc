@@ -305,6 +305,8 @@ private:
 
         ~AdfMount()
         {
+			if (vol)
+				adfUnMount(vol);
             if (self->_ffs)
                 adfUnMountDev(self->_ffs);
             adfEnvCleanUp();
@@ -313,11 +315,17 @@ private:
         struct Volume* mount()
         {
             self->_ffs = adfMountDev(nullptr, false);
-            return adfMount(self->_ffs, 0, false);
+			if (!self->_ffs)
+				throw BadFilesystemException();
+            vol = adfMount(self->_ffs, 0, false);
+			if (!vol)
+				throw BadFilesystemException();
+			return vol;
         }
 
     private:
         AmigaFfsFilesystem* self;
+		struct Volume* vol = nullptr;
     };
 
     void changeDir(struct Volume* vol, const Path& path)

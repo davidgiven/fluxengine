@@ -103,6 +103,7 @@ class MainWindowGen : public wxFrame
 		wxDataViewColumn* m_dataViewColumn3;
 		wxButton* browserDiscardButton;
 		wxButton* browserCommitButton;
+		wxStaticText* m_staticText12;
 
 		// Virtual event handlers, override them in your derived class
 		virtual void OnClose( wxCloseEvent& event ) { event.Skip(); }
