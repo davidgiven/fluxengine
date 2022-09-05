@@ -137,7 +137,7 @@ public:
 
         auto entry = AdfEntry(adfFindEntry(vol, (char*)path.back().c_str()));
         if (!entry)
-            throw BadPathException();
+            throw FileNotFoundException();
 
         return toDirent(entry, path.parent());
     }
@@ -363,12 +363,12 @@ private:
 
 static void onAdfWarning(char* message)
 {
-	Logger() << message;
+    Logger() << message;
 }
 
 static void onAdfError(char* message)
 {
-	throw FilesystemException(message);
+    throw FilesystemException(message);
 }
 
 void adfInitNativeFct()
@@ -380,8 +380,8 @@ void adfInitNativeFct()
     cbs->adfIsDevNative = ::adfIsDevNative;
     cbs->adfReleaseDevice = ::adfReleaseDevice;
 
-	adfChgEnvProp(PR_WFCT, (void*)onAdfWarning);
-	adfChgEnvProp(PR_EFCT, (void*)onAdfError);
+    adfChgEnvProp(PR_WFCT, (void*)onAdfWarning);
+    adfChgEnvProp(PR_EFCT, (void*)onAdfError);
 }
 
 static RETCODE adfInitDevice(struct Device* dev, char* name, BOOL ro)
