@@ -2391,18 +2391,18 @@
                                                 <event name="OnToolClicked">OnBrowserSaveButton</event>
                                             </object>
                                             <object class="tool" expanded="1">
-                                                <property name="bitmap">Load From Art Provider; wxART_NEW; wxART_TOOLBAR</property>
+                                                <property name="bitmap">Load From Art Provider; wxART_PLUS; wxART_TOOLBAR</property>
                                                 <property name="context_menu">1</property>
                                                 <property name="id">wxID_ANY</property>
                                                 <property name="kind">wxITEM_NORMAL</property>
-                                                <property name="label">Change</property>
-                                                <property name="name">browserFileMenuButton</property>
+                                                <property name="label">More</property>
+                                                <property name="name">browserMoreMenuButton</property>
                                                 <property name="permission">protected</property>
                                                 <property name="statusbar"></property>
                                                 <property name="tooltip"></property>
                                                 <object class="wxMenu" expanded="1">
                                                     <property name="label">MyMenu</property>
-                                                    <property name="name">browserFileMenu</property>
+                                                    <property name="name">browserMoreMenu</property>
                                                     <property name="permission">protected</property>
                                                     <object class="wxMenuItem" expanded="1">
                                                         <property name="bitmap"></property>

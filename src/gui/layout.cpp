@@ -282,38 +282,38 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 
 	browserSaveTool = browserToolbar->AddTool( wxID_ANY, wxT("Save"), wxArtProvider::GetBitmap( wxART_FILE_SAVE, wxART_TOOLBAR ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
 
-	browserFileMenuButton = browserToolbar->AddTool( wxID_ANY, wxT("Change"), wxArtProvider::GetBitmap( wxART_NEW, wxART_TOOLBAR ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
-	browserToolbar->SetToolDropDown( browserFileMenuButton->GetId(), true );
+	browserMoreMenuButton = browserToolbar->AddTool( wxID_ANY, wxT("More"), wxArtProvider::GetBitmap( wxART_PLUS, wxART_TOOLBAR ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+	browserToolbar->SetToolDropDown( browserMoreMenuButton->GetId(), true );
 
-	browserFileMenu = new wxMenu();
-	browserAddMenuItem = new wxMenuItem( browserFileMenu, wxID_ANY, wxString( wxT("Add file") ) , wxEmptyString, wxITEM_NORMAL );
-	browserFileMenu->Append( browserAddMenuItem );
+	browserMoreMenu = new wxMenu();
+	browserAddMenuItem = new wxMenuItem( browserMoreMenu, wxID_ANY, wxString( wxT("Add file") ) , wxEmptyString, wxITEM_NORMAL );
+	browserMoreMenu->Append( browserAddMenuItem );
 
-	browserNewDirectoryMenuItem = new wxMenuItem( browserFileMenu, wxID_ANY, wxString( wxT("New directory") ) , wxEmptyString, wxITEM_NORMAL );
+	browserNewDirectoryMenuItem = new wxMenuItem( browserMoreMenu, wxID_ANY, wxString( wxT("New directory") ) , wxEmptyString, wxITEM_NORMAL );
 	#ifdef __WXMSW__
 	browserNewDirectoryMenuItem->SetBitmaps( wxNullBitmap );
 	#elif (defined( __WXGTK__ ) || defined( __WXOSX__ ))
 	browserNewDirectoryMenuItem->SetBitmap( wxNullBitmap );
 	#endif
-	browserFileMenu->Append( browserNewDirectoryMenuItem );
+	browserMoreMenu->Append( browserNewDirectoryMenuItem );
 
-	browserRenameMenuItem = new wxMenuItem( browserFileMenu, wxID_ANY, wxString( wxT("Rename file") ) , wxEmptyString, wxITEM_NORMAL );
+	browserRenameMenuItem = new wxMenuItem( browserMoreMenu, wxID_ANY, wxString( wxT("Rename file") ) , wxEmptyString, wxITEM_NORMAL );
 	#ifdef __WXMSW__
 	browserRenameMenuItem->SetBitmaps( wxNullBitmap );
 	#elif (defined( __WXGTK__ ) || defined( __WXOSX__ ))
 	browserRenameMenuItem->SetBitmap( wxNullBitmap );
 	#endif
-	browserFileMenu->Append( browserRenameMenuItem );
+	browserMoreMenu->Append( browserRenameMenuItem );
 
-	browserDeleteMenuItem = new wxMenuItem( browserFileMenu, wxID_ANY, wxString( wxT("Delete file") ) , wxEmptyString, wxITEM_NORMAL );
+	browserDeleteMenuItem = new wxMenuItem( browserMoreMenu, wxID_ANY, wxString( wxT("Delete file") ) , wxEmptyString, wxITEM_NORMAL );
 	#ifdef __WXMSW__
 	browserDeleteMenuItem->SetBitmaps( wxNullBitmap );
 	#elif (defined( __WXGTK__ ) || defined( __WXOSX__ ))
 	browserDeleteMenuItem->SetBitmap( wxNullBitmap );
 	#endif
-	browserFileMenu->Append( browserDeleteMenuItem );
+	browserMoreMenu->Append( browserDeleteMenuItem );
 
-	browserToolbar->Connect( browserFileMenuButton->GetId(), wxEVT_COMMAND_AUITOOLBAR_TOOL_DROPDOWN, wxAuiToolBarEventHandler( MainWindowGen::browserFileMenuButtonOnDropDownMenu ), NULL, this );
+	browserToolbar->Connect( browserMoreMenuButton->GetId(), wxEVT_COMMAND_AUITOOLBAR_TOOL_DROPDOWN, wxAuiToolBarEventHandler( MainWindowGen::browserMoreMenuButtonOnDropDownMenu ), NULL, this );
 
 
 	browserToolbar->AddSeparator();
@@ -395,10 +395,10 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	this->Connect( browserInfoTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserInfoButton ) );
 	this->Connect( browserViewTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserViewButton ) );
 	this->Connect( browserSaveTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserSaveButton ) );
-	browserFileMenu->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowGen::OnBrowserAddMenuItem ), this, browserAddMenuItem->GetId());
-	browserFileMenu->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowGen::OnBrowserNewDirectoryMenuItem ), this, browserNewDirectoryMenuItem->GetId());
-	browserFileMenu->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowGen::OnBrowserRenameMenuItem ), this, browserRenameMenuItem->GetId());
-	browserFileMenu->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowGen::OnBrowserDeleteMenuItem ), this, browserDeleteMenuItem->GetId());
+	browserMoreMenu->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowGen::OnBrowserAddMenuItem ), this, browserAddMenuItem->GetId());
+	browserMoreMenu->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowGen::OnBrowserNewDirectoryMenuItem ), this, browserNewDirectoryMenuItem->GetId());
+	browserMoreMenu->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowGen::OnBrowserRenameMenuItem ), this, browserRenameMenuItem->GetId());
+	browserMoreMenu->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowGen::OnBrowserDeleteMenuItem ), this, browserDeleteMenuItem->GetId());
 	this->Connect( browserFormatTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserFormatButton ) );
 	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_ITEM_EXPANDING, wxDataViewEventHandler( MainWindowGen::OnBrowserDirectoryExpanding ), NULL, this );
 	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler( MainWindowGen::OnBrowserSelectionChanged ), NULL, this );
@@ -437,7 +437,7 @@ MainWindowGen::~MainWindowGen()
 	browserDiscardButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserDiscardButton ), NULL, this );
 	browserCommitButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserCommitButton ), NULL, this );
 
-	delete browserFileMenu;
+	delete browserMoreMenu;
 }
 
 TextViewerWindowGen::TextViewerWindowGen( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )

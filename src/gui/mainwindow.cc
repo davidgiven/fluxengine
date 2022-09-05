@@ -105,6 +105,17 @@ public:
 
         _filesystemModel = FilesystemModel::Associate(browserTree);
 
+        /* This is a bug workaround for an issue in wxformbuilder's generated
+         * code; see https://github.com/wxFormBuilder/wxFormBuilder/pull/758.
+         * The default handler for the submenu doesn't allow events to fire on
+         * the button itself, so we have to override it with our own version. */
+
+        browserToolbar->Connect(browserMoreMenuButton->GetId(),
+            wxEVT_COMMAND_AUITOOLBAR_TOOL_DROPDOWN,
+            wxAuiToolBarEventHandler(MainWindow::OnBrowserMoreMenuButton),
+            NULL,
+            this);
+
         /* I have no idea why this is necessary, but on Windows things aren't
          * laid out correctly without it. */
 
@@ -438,6 +449,16 @@ public:
         }
     }
 
+    void OnBrowserMoreMenuButton(wxAuiToolBarEvent& event)
+    {
+        browserToolbar->SetToolSticky(event.GetId(), true);
+        wxRect rect = browserToolbar->GetToolRect(event.GetId());
+        wxPoint pt = browserToolbar->ClientToScreen(rect.GetBottomLeft());
+        pt = ScreenToClient(pt);
+        browserToolbar->PopupMenu(browserMoreMenu, pt);
+        browserToolbar->SetToolSticky(event.GetId(), false);
+    }
+
     void RepopulateBrowser(wxDataViewItem item = wxDataViewItem())
     {
         Path path;
@@ -477,10 +498,10 @@ public:
                         {
                             uint32_t blockSize =
                                 std::stoul(metadata.at(Filesystem::BLOCK_SIZE));
-                            uint32_t totalBlocks =
-                                std::stoul(metadata.at(Filesystem::TOTAL_BLOCKS));
-                            uint32_t usedBlocks =
-                                std::stoul(metadata.at(Filesystem::USED_BLOCKS));
+                            uint32_t totalBlocks = std::stoul(
+                                metadata.at(Filesystem::TOTAL_BLOCKS));
+                            uint32_t usedBlocks = std::stoul(
+                                metadata.at(Filesystem::USED_BLOCKS));
 
                             diskSpaceGauge->Enable();
                             diskSpaceGauge->SetRange(totalBlocks * blockSize);
@@ -1101,13 +1122,13 @@ public:
                 (capabilities & Filesystem::OP_GETFILE) && selection);
             browserToolbar->EnableTool(browserSaveTool->GetId(),
                 (capabilities & Filesystem::OP_GETFILE) && selection);
-            browserFileMenu->Enable(browserAddMenuItem->GetId(),
+            browserMoreMenu->Enable(browserAddMenuItem->GetId(),
                 capabilities & Filesystem::OP_PUTFILE);
-            browserFileMenu->Enable(browserNewDirectoryMenuItem->GetId(),
+            browserMoreMenu->Enable(browserNewDirectoryMenuItem->GetId(),
                 capabilities & Filesystem::OP_CREATEDIR);
-            browserFileMenu->Enable(browserRenameMenuItem->GetId(),
+            browserMoreMenu->Enable(browserRenameMenuItem->GetId(),
                 (capabilities & Filesystem::OP_MOVE) && selection);
-            browserFileMenu->Enable(browserDeleteMenuItem->GetId(),
+            browserMoreMenu->Enable(browserDeleteMenuItem->GetId(),
                 (capabilities & Filesystem::OP_DELETE) && selection);
             browserToolbar->EnableTool(browserFormatTool->GetId(),
                 capabilities & Filesystem::OP_CREATE);

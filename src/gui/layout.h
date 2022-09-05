@@ -91,8 +91,8 @@ class MainWindowGen : public wxFrame
 		wxAuiToolBarItem* browserInfoTool;
 		wxAuiToolBarItem* browserViewTool;
 		wxAuiToolBarItem* browserSaveTool;
-		wxAuiToolBarItem* browserFileMenuButton;
-		wxMenu* browserFileMenu;
+		wxAuiToolBarItem* browserMoreMenuButton;
+		wxMenu* browserMoreMenu;
 		wxMenuItem* browserAddMenuItem;
 		wxMenuItem* browserNewDirectoryMenuItem;
 		wxMenuItem* browserRenameMenuItem;
@@ -144,7 +144,7 @@ class MainWindowGen : public wxFrame
 
 		~MainWindowGen();
 
-		void browserFileMenuButtonOnDropDownMenu( wxAuiToolBarEvent &event )
+		void browserMoreMenuButtonOnDropDownMenu( wxAuiToolBarEvent &event )
 		{
 			if ( event.IsDropDownClicked() )
 			{
@@ -152,7 +152,7 @@ class MainWindowGen : public wxFrame
 				wxRect rect = browserToolbar->GetToolRect( event.GetId() );
 				wxPoint pt = browserToolbar->ClientToScreen( rect.GetBottomLeft() );
 				pt = ScreenToClient( pt );
-				browserToolbar->PopupMenu( browserFileMenu, pt );
+				browserToolbar->PopupMenu( browserMoreMenu, pt );
 				browserToolbar->SetToolSticky( event.GetId(), false );
 			}
 		}
