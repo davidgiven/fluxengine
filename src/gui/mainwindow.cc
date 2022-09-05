@@ -458,6 +458,38 @@ public:
                     {
                         _filesystemModel->SetFiles(item, files);
                         browserTree->Expand(item);
+                        UpdateDiskSpaceGauge();
+                    });
+            });
+    }
+
+    void UpdateDiskSpaceGauge()
+    {
+        QueueBrowserOperation(
+            [this]()
+            {
+                auto metadata = _filesystem->getMetadata();
+
+                runOnUiThread(
+                    [&]()
+                    {
+                        try
+                        {
+                            uint32_t blockSize =
+                                std::stoul(metadata.at(Filesystem::BLOCK_SIZE));
+                            uint32_t totalBlocks =
+                                std::stoul(metadata.at(Filesystem::TOTAL_BLOCKS));
+                            uint32_t usedBlocks =
+                                std::stoul(metadata.at(Filesystem::USED_BLOCKS));
+
+                            diskSpaceGauge->Enable();
+                            diskSpaceGauge->SetRange(totalBlocks * blockSize);
+                            diskSpaceGauge->SetValue(usedBlocks * blockSize);
+                        }
+                        catch (const std::out_of_range& e)
+                        {
+                            diskSpaceGauge->Disable();
+                        }
                     });
             });
     }

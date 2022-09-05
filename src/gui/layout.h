@@ -32,6 +32,7 @@
 #include <wx/aui/auibar.h>
 #include "visualisationcontrol.h"
 #include <wx/dataview.h>
+#include <wx/gauge.h>
 #include <wx/simplebook.h>
 #include <wx/frame.h>
 #include <wx/textctrl.h>
@@ -101,6 +102,7 @@ class MainWindowGen : public wxFrame
 		wxDataViewColumn* m_dataViewColumn1;
 		wxDataViewColumn* m_dataViewColumn2;
 		wxDataViewColumn* m_dataViewColumn3;
+		wxGauge* diskSpaceGauge;
 		wxButton* browserDiscardButton;
 		wxButton* browserCommitButton;
 		wxStaticText* m_staticText12;

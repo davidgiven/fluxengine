@@ -330,6 +330,10 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	m_dataViewColumn3 = browserTree->AppendTextColumn( wxT("Mode"), 2, wxDATAVIEW_CELL_INERT, -1, static_cast<wxAlignment>(wxALIGN_LEFT), wxDATAVIEW_COL_RESIZABLE );
 	fgSizer23->Add( browserTree, 0, wxALL|wxEXPAND, 5 );
 
+	diskSpaceGauge = new wxGauge( browsePanel, wxID_ANY, 100, wxDefaultPosition, wxDefaultSize, wxGA_HORIZONTAL );
+	diskSpaceGauge->SetValue( 0 );
+	fgSizer23->Add( diskSpaceGauge, 0, wxALL|wxEXPAND, 5 );
+
 	wxGridSizer* gSizer12;
 	gSizer12 = new wxGridSizer( 0, 2, 0, 0 );
 
