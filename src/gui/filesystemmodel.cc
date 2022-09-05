@@ -149,8 +149,6 @@ public:
                 ItemAdded(item, child);
             }
         }
-
-        ItemChanged(parent);
     }
 
 private:
