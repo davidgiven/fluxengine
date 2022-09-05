@@ -2376,7 +2376,7 @@
                                                 <property name="permission">protected</property>
                                                 <property name="statusbar"></property>
                                                 <property name="tooltip"></property>
-                                                <event name="OnToolClicked">OnBrowserOpenButton</event>
+                                                <event name="OnToolClicked">OnBrowserViewButton</event>
                                             </object>
                                             <object class="tool" expanded="1">
                                                 <property name="bitmap">Load From Art Provider; wxART_FILE_SAVE; wxART_TOOLBAR</property>

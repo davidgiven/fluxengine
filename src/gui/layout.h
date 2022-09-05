@@ -120,7 +120,7 @@ class MainWindowGen : public wxFrame
 		virtual void OnSaveFluxButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnImagerGoAgainButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBrowserInfoButton( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBrowserOpenButton( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBrowserViewButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBrowserSaveButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBrowserAddButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBrowserNewDirectoryButton( wxCommandEvent& event ) { event.Skip(); }

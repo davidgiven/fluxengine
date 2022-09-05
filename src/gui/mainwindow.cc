@@ -445,7 +445,7 @@ public:
         }
     }
 
-    void OnBrowserInfoButton(wxCommandEvent&)
+    void OnBrowserInfoButton(wxCommandEvent&) override
     {
         auto item = browserTree->GetSelection();
         auto dc = (DirentContainer*)_filesystemModel->GetItemData(item);
@@ -454,13 +454,32 @@ public:
             FSOP_GETFILEINFO, dc->dirent->path));
     }
 
-    void OnBrowserOpenButton(wxCommandEvent&)
+    void OnBrowserViewButton(wxCommandEvent&) override
     {
         auto item = browserTree->GetSelection();
         auto dc = (DirentContainer*)_filesystemModel->GetItemData(item);
 
         QueueBrowserOperation(
             std::make_unique<FilesystemOperation>(FSOP_OPEN, dc->dirent->path));
+    }
+
+    void OnBrowserSaveButton(wxCommandEvent&) override
+    {
+        auto item = browserTree->GetSelection();
+        auto dc = (DirentContainer*)_filesystemModel->GetItemData(item);
+
+        auto localFilename =
+            wxFileSelector("Choose the name of the file to save",
+                /* default_path= */ wxEmptyString,
+                /* default_filename= */ dc->dirent->filename,
+                /* default_extension= */ wxEmptyString,
+                /* wildcard= */ wxEmptyString,
+                /* flags= */ wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+        if (localFilename.empty())
+            return;
+
+        QueueBrowserOperation(std::make_unique<FilesystemOperation>(
+            FSOP_GETFILE, dc->dirent->path, localFilename));
     }
 
     void QueueBrowserOperation(std::unique_ptr<FilesystemOperation> op)
@@ -550,6 +569,13 @@ public:
                                              this, op->path.to_str(), bytes))
                                             ->Show();
                                     });
+                                break;
+                            }
+
+                            case FSOP_GETFILE:
+                            {
+                                auto bytes = _filesystem->getFile(op->path);
+                                bytes.writeToFile(op->local);
                                 break;
                             }
                         }
@@ -1008,6 +1034,7 @@ private:
         FSOP_LIST,
         FSOP_GETFILEINFO,
         FSOP_OPEN,
+        FSOP_GETFILE,
     };
 
     class FilesystemOperation
@@ -1027,11 +1054,27 @@ private:
         {
         }
 
+        FilesystemOperation(
+            int operation, const Path& path, const std::string& local):
+            operation(operation),
+            path(path),
+            local(local)
+        {
+        }
+
+        FilesystemOperation(int operation, const Path& path, wxString& local):
+            operation(operation),
+            path(path),
+            local(local)
+        {
+        }
+
         FilesystemOperation(int operation): operation(operation) {}
 
         int operation;
         Path path;
         wxDataViewItem item;
+        std::string local;
     };
 
     wxConfig _config;
