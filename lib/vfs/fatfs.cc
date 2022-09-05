@@ -177,6 +177,14 @@ public:
         f_close(&fil);
     }
 
+    void deleteFile(const Path& path) override
+    {
+		mount();
+		auto pathstr = path.to_str();
+		FRESULT res = f_unlink(pathstr.c_str());
+		throwError(res);
+    }
+
 private:
     std::shared_ptr<Dirent> toDirent(FILINFO& filinfo, const Path& parent)
     {

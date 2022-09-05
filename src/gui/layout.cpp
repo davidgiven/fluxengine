@@ -324,7 +324,7 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 
 	fgSizer23->Add( browserToolbar, 0, wxEXPAND, 5 );
 
-	browserTree = new wxDataViewCtrl( browsePanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxDV_MULTIPLE );
+	browserTree = new wxDataViewCtrl( browsePanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxDV_SINGLE );
 	m_dataViewColumn1 = browserTree->AppendIconTextColumn( wxT("Filename"), 0, wxDATAVIEW_CELL_INERT, 250, static_cast<wxAlignment>(wxALIGN_LEFT), wxDATAVIEW_COL_RESIZABLE );
 	m_dataViewColumn2 = browserTree->AppendTextColumn( wxT("Size"), 1, wxDATAVIEW_CELL_INERT, -1, static_cast<wxAlignment>(wxALIGN_RIGHT), wxDATAVIEW_COL_RESIZABLE );
 	m_dataViewColumn3 = browserTree->AppendTextColumn( wxT("Mode"), 2, wxDATAVIEW_CELL_INERT, -1, static_cast<wxAlignment>(wxALIGN_LEFT), wxDATAVIEW_COL_RESIZABLE );

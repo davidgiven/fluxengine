@@ -603,6 +603,26 @@ public:
             });
     }
 
+    void OnBrowserDeleteMenuItem(wxCommandEvent&) override
+    {
+        auto item = browserTree->GetSelection();
+        auto dc = (DirentContainer*)_filesystemModel->GetItemData(item);
+        auto diskPath = dc->dirent->path;
+        auto parentItem = _filesystemModel->GetParent(item);
+
+        QueueBrowserOperation(
+            [this, diskPath, parentItem]()
+            {
+                _filesystem->deleteFile(diskPath);
+
+                runOnUiThread(
+                    [&]()
+                    {
+                        RepopulateBrowser(parentItem);
+                    });
+            });
+    }
+
     void OnBrowserFormatButton(wxCommandEvent&) override
     {
         FormatDialog d(this, wxID_ANY);
@@ -700,7 +720,8 @@ public:
         UpdateState();
     }
 
-    /* --- Config management ------------------------------------------------ */
+    /* --- Config management
+     * ------------------------------------------------ */
 
     /* This sets the *global* config object. That's safe provided the worker
      * thread isn't running, otherwise you'll get a race. */
@@ -1034,8 +1055,7 @@ public:
         {
             dataNotebook->SetSelection(2);
 
-            wxDataViewItemArray selection;
-            browserTree->GetSelections(selection);
+            bool selection = browserTree->GetSelection().IsOk();
 
             browserToolbar->EnableTool(
                 browserBackTool->GetId(), _state == STATE_BROWSING_IDLE);
@@ -1044,26 +1064,19 @@ public:
                 _filesystem ? _filesystem->capabilities() : 0;
 
             browserToolbar->EnableTool(browserInfoTool->GetId(),
-                (capabilities & Filesystem::OP_GETDIRENT) &&
-                    (selection.size() == 1));
+                (capabilities & Filesystem::OP_GETDIRENT) && selection);
             browserToolbar->EnableTool(browserViewTool->GetId(),
-                (capabilities & Filesystem::OP_GETFILE) &&
-                    (selection.size() == 1));
+                (capabilities & Filesystem::OP_GETFILE) && selection);
             browserToolbar->EnableTool(browserSaveTool->GetId(),
-                (capabilities & Filesystem::OP_GETFILE) &&
-                    (selection.size() == 1));
+                (capabilities & Filesystem::OP_GETFILE) && selection);
             browserFileMenu->Enable(browserAddMenuItem->GetId(),
-                (capabilities & Filesystem::OP_PUTFILE) &&
-                    (selection.size() <= 1));
+                capabilities & Filesystem::OP_PUTFILE);
             browserFileMenu->Enable(browserNewDirectoryMenuItem->GetId(),
-                (capabilities & Filesystem::OP_CREATEDIR) &&
-                    (selection.size() <= 1));
+                capabilities & Filesystem::OP_CREATEDIR);
             browserFileMenu->Enable(browserRenameMenuItem->GetId(),
-                (capabilities & Filesystem::OP_MOVE) &&
-                    (selection.size() == 1));
+                (capabilities & Filesystem::OP_MOVE) && selection);
             browserFileMenu->Enable(browserDeleteMenuItem->GetId(),
-                (capabilities & Filesystem::OP_DELETE) &&
-                    (selection.size() >= 1));
+                (capabilities & Filesystem::OP_DELETE) && selection);
             browserToolbar->EnableTool(browserFormatTool->GetId(),
                 capabilities & Filesystem::OP_CREATE);
 

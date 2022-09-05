@@ -158,6 +158,17 @@ public:
         writeBytes(file, a.rsrc);
     }
 
+    void deleteFile(const Path& path) override
+    {
+        HfsMount m(this);
+        if (path.size() == 0)
+            throw BadPathException();
+
+		auto pathstr = ":" + path.to_str(":");
+		if (!hfs_delete(_vol, pathstr.c_str()))
+			throw CannotWriteException();
+    }
+
 private:
     std::shared_ptr<Dirent> toDirent(hfsdirent& de, const Path& parent)
     {
