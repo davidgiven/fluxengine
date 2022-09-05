@@ -412,6 +412,7 @@ public:
             PrepareConfig();
 
             visualiser->Clear();
+            _filesystemModel->Clear();
             _currentDisk = nullptr;
 
             _state = STATE_BROWSING_WORKING;
@@ -419,13 +420,46 @@ public:
             ShowConfig();
 
             QueueBrowserOperation(
-                std::make_unique<FilesystemOperation>(FSOP_MOUNT));
+                [this]()
+                {
+                    _filesystem = Filesystem::createFilesystemFromConfig();
+
+                    runOnUiThread(
+                        [&]()
+                        {
+                            RepopulateBrowser();
+                        });
+                });
         }
         catch (const ErrorException& e)
         {
             wxMessageBox(e.message, "Error", wxOK | wxICON_ERROR);
             _state = STATE_IDLE;
         }
+    }
+
+    void RepopulateBrowser(wxDataViewItem item = wxDataViewItem())
+    {
+        Path path;
+        if (item.IsOk())
+        {
+            auto dc = (DirentContainer*)_filesystemModel->GetItemData(item);
+            path = dc->dirent->path;
+        }
+
+        _filesystemModel->Clear();
+        QueueBrowserOperation(
+            [this, path, item]()
+            {
+                auto files = _filesystem->list(path);
+
+                runOnUiThread(
+                    [&]()
+                    {
+                        _filesystemModel->SetFiles(item, files);
+                        browserTree->Expand(item);
+                    });
+            });
     }
 
     void OnBrowserDirectoryExpanding(wxDataViewEvent& event) override
@@ -436,8 +470,7 @@ public:
         if (!dc->populated && !dc->populating)
         {
             dc->populating = true;
-            QueueBrowserOperation(std::make_unique<FilesystemOperation>(
-                FSOP_LIST, dc->dirent->path, item));
+            RepopulateBrowser(item);
         }
     }
 
@@ -446,8 +479,14 @@ public:
         auto item = browserTree->GetSelection();
         auto dc = (DirentContainer*)_filesystemModel->GetItemData(item);
 
-        QueueBrowserOperation(std::make_unique<FilesystemOperation>(
-            FSOP_GETFILEINFO, dc->dirent->path));
+        std::stringstream ss;
+        ss << "File attributes for " << dc->dirent->path.to_str() << ":\n\n";
+        for (const auto& e : dc->dirent->attributes)
+            ss << e.first << "=" << quote(e.second) << "\n";
+
+        TextViewerWindow::Create(
+            this, dc->dirent->path.to_str(), ss.str(), true)
+            ->Show();
     }
 
     void OnBrowserViewButton(wxCommandEvent&) override
@@ -455,8 +494,20 @@ public:
         auto item = browserTree->GetSelection();
         auto dc = (DirentContainer*)_filesystemModel->GetItemData(item);
 
+        auto dirent = dc->dirent;
         QueueBrowserOperation(
-            std::make_unique<FilesystemOperation>(FSOP_OPEN, dc->dirent->path));
+            [this, dirent]()
+            {
+                auto bytes = _filesystem->getFile(dirent->path);
+
+                runOnUiThread(
+                    [&]()
+                    {
+                        (new FileViewerWindow(
+                             this, dirent->path.to_str(), bytes))
+                            ->Show();
+                    });
+            });
     }
 
     void OnBrowserSaveButton(wxCommandEvent&) override
@@ -470,37 +521,86 @@ public:
         if (dialog.ShowModal() != wxID_OK)
             return;
 
+        auto dirent = dc->dirent;
+        auto localPath = dialog.targetFilePicker->GetPath().ToStdString();
         QueueBrowserOperation(
-            std::make_unique<FilesystemOperation>(FSOP_GETFILE,
-                dc->dirent->path,
-                dialog.targetFilePicker->GetPath()));
+            [this, dirent, localPath]()
+            {
+                auto bytes = _filesystem->getFile(dirent->path);
+                bytes.writeToFile(localPath);
+            });
     }
 
     void OnBrowserAddMenuItem(wxCommandEvent&) override
     {
-        Path path;
+        Path diskPath;
         auto item = browserTree->GetSelection();
         if (item.IsOk())
         {
             auto dc = (DirentContainer*)_filesystemModel->GetItemData(item);
-            path = dc->dirent->path;
+            diskPath = dc->dirent->path;
             if (dc->dirent->file_type != TYPE_DIRECTORY)
-                path = path.parent();
+            {
+                diskPath = diskPath.parent();
+                item = _filesystemModel->GetParent(item);
+            }
         }
 
-        auto localFilename =
-            wxFileSelector("Choose the name of the file to add",
-                /* default_path= */ wxEmptyString,
-                /* default_filename= */ wxEmptyString,
-                /* default_extension= */ wxEmptyString,
-                /* wildcard= */ wxEmptyString,
-                /* flags= */ wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-        if (localFilename.empty())
+        auto localPath = wxFileSelector("Choose the name of the file to add",
+            /* default_path= */ wxEmptyString,
+            /* default_filename= */ wxEmptyString,
+            /* default_extension= */ wxEmptyString,
+            /* wildcard= */ wxEmptyString,
+            /* flags= */ wxFD_OPEN | wxFD_FILE_MUST_EXIST)
+                             .ToStdString();
+        if (localPath.empty())
             return;
-        path.push_back(wxFileName(localFilename).GetFullName().ToStdString());
+        diskPath.push_back(wxFileName(localPath).GetFullName().ToStdString());
 
-        QueueBrowserOperation(std::make_unique<FilesystemOperation>(
-            FSOP_PUTFILE, path, item, localFilename));
+        QueueBrowserOperation(
+            [this, diskPath, localPath, item]() mutable
+            {
+                /* Check that the file exists. */
+
+                for (;;)
+                {
+                    try
+                    {
+                        _filesystem->getDirent(diskPath);
+                    }
+                    catch (const FileNotFoundException& e)
+                    {
+                        break;
+                    }
+
+                    runOnUiThread(
+                        [&]()
+                        {
+                            FileConflictDialog d(this, wxID_ANY);
+                            d.oldNameText->SetValue(diskPath.to_str());
+                            d.newNameText->SetValue(diskPath.to_str());
+                            if (d.ShowModal() == wxID_OK)
+                                diskPath = Path(
+                                    d.newNameText->GetValue().ToStdString());
+                            else
+                                diskPath = Path("");
+                        });
+
+                    if (diskPath.empty())
+                        return;
+                }
+
+                /* Now actually write the data. */
+
+                auto bytes = Bytes::readFromFile(localPath);
+                _filesystem->putFile(diskPath, bytes);
+
+                runOnUiThread(
+                    [&]()
+                    {
+                        RepopulateBrowser(item);
+                    });
+            });
     }
 
     void OnBrowserFormatButton(wxCommandEvent&) override
@@ -509,27 +609,49 @@ public:
         if (d.ShowModal() != wxID_OK)
             return;
 
-        auto op = std::make_unique<FilesystemOperation>(FSOP_FORMAT);
-        op->volumeName = d.volumeNameText->GetValue();
-        op->quickFormat = d.quickFormatCheckBox->GetValue();
-        QueueBrowserOperation(std::move(op));
+        auto volumeName = d.volumeNameText->GetValue().ToStdString();
+        auto quickFormat = d.quickFormatCheckBox->GetValue();
+        QueueBrowserOperation(
+            [this, volumeName, quickFormat]()
+            {
+                _filesystem->discardChanges();
+                _filesystem->create(quickFormat, volumeName);
+
+                runOnUiThread(
+                    [&]()
+                    {
+                        RepopulateBrowser();
+                    });
+            });
     }
 
     void OnBrowserCommitButton(wxCommandEvent&) override
     {
         QueueBrowserOperation(
-            std::make_unique<FilesystemOperation>(FSOP_COMMIT));
+            [this]()
+            {
+                _filesystem->flushChanges();
+            });
     }
 
     void OnBrowserDiscardButton(wxCommandEvent&) override
     {
         QueueBrowserOperation(
-            std::make_unique<FilesystemOperation>(FSOP_DISCARD));
+            [this]()
+            {
+                _filesystem->discardChanges();
+
+                runOnUiThread(
+                    [&]()
+                    {
+                        RepopulateBrowser();
+                    });
+            });
     }
 
-    void QueueBrowserOperation(std::unique_ptr<FilesystemOperation> op)
+    void QueueBrowserOperation(std::function<void()> f)
     {
-        _filesystemQueue.push_back(std::move(op));
+        _filesystemQueue.push_back(f);
         KickBrowserQueue();
     }
 
@@ -546,192 +668,21 @@ public:
                 {
                     for (;;)
                     {
-                        std::unique_ptr<FilesystemOperation> op;
+                        std::function<void()> f;
                         runOnUiThread(
                             [&]()
                             {
                                 UpdateState();
                                 if (!_filesystemQueue.empty())
                                 {
-                                    op = std::move(_filesystemQueue.front());
+                                    f = _filesystemQueue.front();
                                     _filesystemQueue.pop_front();
                                 }
                             });
-                        if (!op)
+                        if (!f)
                             break;
 
-                        switch (op->operation)
-                        {
-                            case FSOP_MOUNT:
-                                runOnUiThread(
-                                    [&]()
-                                    {
-                                        _filesystemModel->Clear();
-                                    });
-
-                                _filesystem =
-                                    Filesystem::createFilesystemFromConfig();
-
-                                runOnUiThread(
-                                    [&]()
-                                    {
-                                        QueueBrowserOperation(std::make_unique<
-                                            FilesystemOperation>(FSOP_LIST,
-                                            Path(),
-                                            wxDataViewItem{}));
-                                    });
-                                break;
-
-                            case FSOP_LIST:
-                            {
-                                auto files = _filesystem->list(op->path);
-
-                                runOnUiThread(
-                                    [&]()
-                                    {
-                                        _filesystemModel->SetFiles(
-                                            op->item, files);
-                                        browserTree->Expand(op->item);
-                                    });
-                                break;
-                            }
-
-                            case FSOP_GETFILEINFO:
-                            {
-                                auto dirent = _filesystem->getDirent(op->path);
-
-                                runOnUiThread(
-                                    [&]()
-                                    {
-                                        std::stringstream ss;
-                                        ss << "File attributes for "
-                                           << op->path.to_str() << ":\n\n";
-                                        for (const auto& e : dirent->attributes)
-                                            ss << e.first << "="
-                                               << quote(e.second) << "\n";
-
-                                        TextViewerWindow::Create(this,
-                                            op->path.to_str(),
-                                            ss.str(),
-                                            true)
-                                            ->Show();
-                                    });
-                                break;
-                            }
-
-                            case FSOP_OPEN:
-                            {
-                                auto bytes = _filesystem->getFile(op->path);
-
-                                runOnUiThread(
-                                    [&]()
-                                    {
-                                        (new FileViewerWindow(
-                                             this, op->path.to_str(), bytes))
-                                            ->Show();
-                                    });
-                                break;
-                            }
-
-                            case FSOP_GETFILE:
-                            {
-                                auto bytes = _filesystem->getFile(op->path);
-                                bytes.writeToFile(op->local);
-                                break;
-                            }
-
-                            case FSOP_PUTFILE:
-                            {
-                                /* Check that the file exists. */
-
-                                Path path = op->path;
-                                for (;;)
-                                {
-                                    try
-                                    {
-                                        _filesystem->getDirent(path);
-                                    }
-                                    catch (const FileNotFoundException& e)
-                                    {
-                                        break;
-                                    }
-
-                                    runOnUiThread(
-                                        [&]()
-                                        {
-                                            FileConflictDialog d(
-                                                this, wxID_ANY);
-                                            d.oldNameText->SetValue(
-                                                path.to_str());
-                                            d.newNameText->SetValue(
-                                                path.to_str());
-                                            if (d.ShowModal() == wxID_OK)
-                                                path = Path(
-                                                    d.newNameText->GetValue()
-                                                        .ToStdString());
-                                            else
-                                                path = Path("");
-                                        });
-
-                                    if (path.empty())
-                                        goto endOperation;
-                                }
-
-                                auto bytes = Bytes::readFromFile(op->local);
-                                _filesystem->putFile(path, bytes);
-
-                                runOnUiThread(
-                                    [&]()
-                                    {
-                                        QueueBrowserOperation(std::make_unique<
-                                            FilesystemOperation>(FSOP_LIST,
-                                            path.parent(),
-                                            op->item));
-                                    });
-                                break;
-                            }
-
-                            case FSOP_FORMAT:
-                            {
-                                _filesystem->discardChanges();
-                                _filesystem->create(
-                                    op->quickFormat, op->volumeName);
-
-                                runOnUiThread(
-                                    [&]()
-                                    {
-                                        _filesystemModel->Clear();
-                                        QueueBrowserOperation(std::make_unique<
-                                            FilesystemOperation>(FSOP_LIST,
-                                            Path(),
-                                            wxDataViewItem{}));
-                                    });
-                                break;
-                            }
-
-                            case FSOP_COMMIT:
-                            {
-                                _filesystem->flushChanges();
-                                break;
-                            }
-
-                            case FSOP_DISCARD:
-                            {
-                                _filesystem->discardChanges();
-
-                                runOnUiThread(
-                                    [&]()
-                                    {
-                                        _filesystemModel->Clear();
-                                        QueueBrowserOperation(std::make_unique<
-                                            FilesystemOperation>(FSOP_LIST,
-                                            Path(),
-                                            wxDataViewItem{}));
-                                    });
-                                break;
-                            }
-                        }
-                    endOperation:;
+                        f();
                     }
 
                     runOnUiThread(
@@ -1181,19 +1132,6 @@ private:
         STATE_BROWSING__LAST
     };
 
-    enum
-    {
-        FSOP_MOUNT,
-        FSOP_LIST,
-        FSOP_GETFILEINFO,
-        FSOP_OPEN,
-        FSOP_GETFILE,
-        FSOP_PUTFILE,
-        FSOP_FORMAT,
-        FSOP_COMMIT,
-        FSOP_DISCARD,
-    };
-
     class FilesystemOperation
     {
     public:
@@ -1264,7 +1202,7 @@ private:
     std::string _extraConfiguration;
     std::unique_ptr<Filesystem> _filesystem;
     FilesystemModel* _filesystemModel;
-    std::deque<std::unique_ptr<FilesystemOperation>> _filesystemQueue;
+    std::deque<std::function<void()>> _filesystemQueue;
 };
 
 wxWindow* FluxEngineApp::CreateMainWindow()
