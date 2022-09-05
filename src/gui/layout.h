@@ -124,13 +124,15 @@ class MainWindowGen : public wxFrame
 		virtual void OnBrowserInfoButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBrowserViewButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBrowserSaveButton( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBrowserAddButton( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBrowserNewDirectoryButton( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBrowserRenameButton( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBrowserDeleteButton( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBrowserAddMenuItem( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBrowserNewDirectoryMenuItem( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBrowserRenameMenuItem( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBrowserDeleteMenuItem( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBrowserFormatButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBrowserDirectoryExpanding( wxDataViewEvent& event ) { event.Skip(); }
 		virtual void OnBrowserSelectionChanged( wxDataViewEvent& event ) { event.Skip(); }
+		virtual void OnBrowserDiscardButton( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBrowserCommitButton( wxCommandEvent& event ) { event.Skip(); }
 
 
 	public:
@@ -306,6 +308,30 @@ class FileConflictDialog : public wxDialog
 		FileConflictDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Filename conflict"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
 
 		~FileConflictDialog();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class FormatDialog
+///////////////////////////////////////////////////////////////////////////////
+class FormatDialog : public wxDialog
+{
+	private:
+
+	protected:
+		wxStaticText* m_staticText91;
+		wxStaticText* m_staticText7;
+		wxStdDialogButtonSizer* m_sdbSizer6;
+		wxButton* m_sdbSizer6OK;
+		wxButton* m_sdbSizer6Cancel;
+
+	public:
+		wxTextCtrl* volumeNameText;
+		wxCheckBox* quickFormatCheckBox;
+
+		FormatDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Format disk"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
+
+		~FormatDialog();
 
 };
 

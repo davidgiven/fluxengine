@@ -20,7 +20,10 @@ public:
     {
         return false;
     }
-    virtual void flush() {}
+
+    virtual void flushChanges() {}
+
+    virtual void discardChanges() {}
 
 public:
     static std::unique_ptr<SectorInterface> createImageSectorInterface(

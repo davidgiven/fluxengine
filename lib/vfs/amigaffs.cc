@@ -212,7 +212,6 @@ private:
             (entry->type == ST_FILE) ? "file" : "dir";
         dirent->attributes[MODE] = modeToString(entry->access);
         dirent->attributes["amigaffs.comment"] = entry->comment;
-        dirent->attributes["amigaffs.sector"] = std::to_string(entry->sector);
 
         std::tm tm = {.tm_sec = entry->secs,
             .tm_min = entry->mins,

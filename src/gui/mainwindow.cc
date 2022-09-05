@@ -418,12 +418,8 @@ public:
             UpdateState();
             ShowConfig();
 
-            _filesystemModel->Clear();
-
             QueueBrowserOperation(
                 std::make_unique<FilesystemOperation>(FSOP_MOUNT));
-            QueueBrowserOperation(std::make_unique<FilesystemOperation>(
-                FSOP_LIST, Path(), wxDataViewItem{}));
         }
         catch (const ErrorException& e)
         {
@@ -480,7 +476,7 @@ public:
                 dialog.targetFilePicker->GetPath()));
     }
 
-    void OnBrowserAddButton(wxCommandEvent&) override
+    void OnBrowserAddMenuItem(wxCommandEvent&) override
     {
         Path path;
         auto item = browserTree->GetSelection();
@@ -505,6 +501,30 @@ public:
 
         QueueBrowserOperation(std::make_unique<FilesystemOperation>(
             FSOP_PUTFILE, path, item, localFilename));
+    }
+
+    void OnBrowserFormatButton(wxCommandEvent&) override
+    {
+        FormatDialog d(this, wxID_ANY);
+        if (d.ShowModal() != wxID_OK)
+            return;
+
+        auto op = std::make_unique<FilesystemOperation>(FSOP_FORMAT);
+        op->volumeName = d.volumeNameText->GetValue();
+        op->quickFormat = d.quickFormatCheckBox->GetValue();
+        QueueBrowserOperation(std::move(op));
+    }
+
+    void OnBrowserCommitButton(wxCommandEvent&) override
+    {
+        QueueBrowserOperation(
+            std::make_unique<FilesystemOperation>(FSOP_COMMIT));
+    }
+
+    void OnBrowserDiscardButton(wxCommandEvent&) override
+    {
+        QueueBrowserOperation(
+            std::make_unique<FilesystemOperation>(FSOP_DISCARD));
     }
 
     void QueueBrowserOperation(std::unique_ptr<FilesystemOperation> op)
@@ -543,8 +563,23 @@ public:
                         switch (op->operation)
                         {
                             case FSOP_MOUNT:
+                                runOnUiThread(
+                                    [&]()
+                                    {
+                                        _filesystemModel->Clear();
+                                    });
+
                                 _filesystem =
                                     Filesystem::createFilesystemFromConfig();
+
+                                runOnUiThread(
+                                    [&]()
+                                    {
+                                        QueueBrowserOperation(std::make_unique<
+                                            FilesystemOperation>(FSOP_LIST,
+                                            Path(),
+                                            wxDataViewItem{}));
+                                    });
                                 break;
 
                             case FSOP_LIST:
@@ -652,6 +687,46 @@ public:
                                             FilesystemOperation>(FSOP_LIST,
                                             path.parent(),
                                             op->item));
+                                    });
+                                break;
+                            }
+
+                            case FSOP_FORMAT:
+                            {
+                                _filesystem->discardChanges();
+                                _filesystem->create(
+                                    op->quickFormat, op->volumeName);
+
+                                runOnUiThread(
+                                    [&]()
+                                    {
+                                        _filesystemModel->Clear();
+                                        QueueBrowserOperation(std::make_unique<
+                                            FilesystemOperation>(FSOP_LIST,
+                                            Path(),
+                                            wxDataViewItem{}));
+                                    });
+                                break;
+                            }
+
+                            case FSOP_COMMIT:
+                            {
+                                _filesystem->flushChanges();
+                                break;
+                            }
+
+                            case FSOP_DISCARD:
+                            {
+                                _filesystem->discardChanges();
+
+                                runOnUiThread(
+                                    [&]()
+                                    {
+                                        _filesystemModel->Clear();
+                                        QueueBrowserOperation(std::make_unique<
+                                            FilesystemOperation>(FSOP_LIST,
+                                            Path(),
+                                            wxDataViewItem{}));
                                     });
                                 break;
                             }
@@ -1114,6 +1189,9 @@ private:
         FSOP_OPEN,
         FSOP_GETFILE,
         FSOP_PUTFILE,
+        FSOP_FORMAT,
+        FSOP_COMMIT,
+        FSOP_DISCARD,
     };
 
     class FilesystemOperation
@@ -1165,6 +1243,9 @@ private:
         Path path;
         wxDataViewItem item;
         std::string local;
+
+        std::string volumeName;
+        bool quickFormat;
     };
 
     wxConfig _config;

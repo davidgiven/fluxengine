@@ -31,7 +31,7 @@ public:
             return it;
 
         trackid_t trackid(track, side);
-        if (_loadedtracks.find(trackid) == _loadedtracks.end())
+        if (_loadedTracks.find(trackid) == _loadedTracks.end())
             populateSectors(track, side);
 
         return _readSectors.get(track, side, sectorId);
@@ -41,18 +41,18 @@ public:
         unsigned track, unsigned side, unsigned sectorId) override
     {
         trackid_t trackid(track, side);
-        _changedtracks.insert(trackid);
+        _changedTracks.insert(trackid);
         return _changedSectors.put(track, side, sectorId);
     }
 
     bool needsFlushing() override
     {
-        return !_changedtracks.empty();
+        return !_changedTracks.empty();
     }
 
-    void flush() override
+    void flushChanges() override
     {
-        for (const auto& trackid : _changedtracks)
+        for (const auto& trackid : _changedTracks)
         {
             unsigned track = trackid.first;
             unsigned side = trackid.second;
@@ -84,7 +84,7 @@ public:
                 /* Only a few sectors have changed. Do we need to populate the
                  * track? */
 
-                if (_loadedtracks.find(trackid) == _loadedtracks.end())
+                if (_loadedTracks.find(trackid) == _loadedTracks.end())
                     populateSectors(track, side);
 
                 /* Now merge the loaded track with the changed one, and write
@@ -105,6 +105,14 @@ public:
                     image, *_encoder, *_fluxSink, &*_decoder, &*_fluxSource);
             }
         }
+
+        discardChanges();
+    }
+
+    void discardChanges() override
+    {
+        _changedTracks.clear();
+        _changedSectors.clear();
     }
 
 private:
@@ -128,7 +136,7 @@ private:
 
         for (const auto& sector : trackdata->sectors)
             *_readSectors.put(track, side, sector->logicalSector) = *sector;
-        _loadedtracks.insert(trackid_t(track, side));
+        _loadedTracks.insert(trackid_t(track, side));
     }
 
     std::shared_ptr<FluxSource> _fluxSource;
@@ -139,8 +147,8 @@ private:
     typedef std::pair<unsigned, unsigned> trackid_t;
     Image _readSectors;
     Image _changedSectors;
-    std::set<trackid_t> _loadedtracks;
-    std::set<trackid_t> _changedtracks;
+    std::set<trackid_t> _loadedTracks;
+    std::set<trackid_t> _changedTracks;
 };
 
 std::unique_ptr<SectorInterface> SectorInterface::createFluxSectorInterface(

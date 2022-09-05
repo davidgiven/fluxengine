@@ -125,9 +125,14 @@ bool Filesystem::needsFlushing()
     return _sectors->needsFlushing();
 }
 
-void Filesystem::flush()
+void Filesystem::flushChanges()
 {
-    _sectors->flush();
+    _sectors->flushChanges();
+}
+
+void Filesystem::discardChanges()
+{
+    _sectors->discardChanges();
 }
 
 Filesystem::Filesystem(std::shared_ptr<SectorInterface> sectors):

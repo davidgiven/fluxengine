@@ -40,7 +40,7 @@ int mainPutFile(int argc, const char* argv[])
 		auto data = Bytes::readFromFile(inputFilename);
         auto filesystem = Filesystem::createFilesystemFromConfig();
         filesystem->putFile(outputFilename, data);
-		filesystem->flush();
+		filesystem->flushChanges();
     }
     catch (const FilesystemException& e)
     {

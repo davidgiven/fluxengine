@@ -133,7 +133,7 @@ public:
     virtual uint32_t capabilities() const;
 
     /* Create a filesystem on the disk. */
-    virtual void create(bool quick, const std::string& volmeName);
+    virtual void create(bool quick, const std::string& volumeName);
 
     /* Are all sectors on the filesystem present and good? (Does not check
      * filesystem consistency.) */
@@ -175,7 +175,10 @@ public:
     bool needsFlushing();
 
     /* Flushes any changes back to the disk. */
-    void flush();
+    void flushChanges();
+
+    /* Discards any pending changes. */
+    void discardChanges();
 
 public:
     Filesystem(std::shared_ptr<SectorInterface> sectors);
