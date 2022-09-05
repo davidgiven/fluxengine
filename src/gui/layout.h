@@ -39,6 +39,7 @@
 #include "fluxviewercontrol.h"
 #include <wx/scrolbar.h>
 #include <wx/notebook.h>
+#include <wx/gbsizer.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -89,8 +90,9 @@ class MainWindowGen : public wxFrame
 		wxAuiToolBarItem* browserInfoTool;
 		wxAuiToolBarItem* browserViewTool;
 		wxAuiToolBarItem* browserSaveTool;
-		wxAuiToolBarItem* browserAddTool;
-		wxMenu* browserAddMenu;
+		wxAuiToolBarItem* browserFileMenuButton;
+		wxMenu* browserFileMenu;
+		wxMenuItem* browserAddMenuItem;
 		wxMenuItem* browserNewDirectoryMenuItem;
 		wxMenuItem* browserRenameMenuItem;
 		wxMenuItem* browserDeleteMenuItem;
@@ -137,7 +139,7 @@ class MainWindowGen : public wxFrame
 
 		~MainWindowGen();
 
-		void browserAddToolOnDropDownMenu( wxAuiToolBarEvent &event )
+		void browserFileMenuButtonOnDropDownMenu( wxAuiToolBarEvent &event )
 		{
 			if ( event.IsDropDownClicked() )
 			{
@@ -145,7 +147,7 @@ class MainWindowGen : public wxFrame
 				wxRect rect = browserToolbar->GetToolRect( event.GetId() );
 				wxPoint pt = browserToolbar->ClientToScreen( rect.GetBottomLeft() );
 				pt = ScreenToClient( pt );
-				browserToolbar->PopupMenu( browserAddMenu, pt );
+				browserToolbar->PopupMenu( browserFileMenu, pt );
 				browserToolbar->SetToolSticky( event.GetId(), false );
 			}
 		}
@@ -255,6 +257,55 @@ class FileViewerWindowGen : public wxDialog
 		FileViewerWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 408,269 ), long style = wxDEFAULT_DIALOG_STYLE );
 
 		~FileViewerWindowGen();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class GetfileDialog
+///////////////////////////////////////////////////////////////////////////////
+class GetfileDialog : public wxDialog
+{
+	private:
+
+	protected:
+		wxStaticText* m_staticText7;
+		wxStaticText* m_staticText9;
+		wxStdDialogButtonSizer* m_sdbSizer6;
+		wxButton* m_sdbSizer6OK;
+		wxButton* m_sdbSizer6Cancel;
+
+	public:
+		wxTextCtrl* filenameText;
+		wxFilePickerCtrl* targetFilePicker;
+
+		GetfileDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Copy file off disk"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
+
+		~GetfileDialog();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class FileConflictDialog
+///////////////////////////////////////////////////////////////////////////////
+class FileConflictDialog : public wxDialog
+{
+	private:
+
+	protected:
+		wxStaticText* m_staticText91;
+		wxStaticText* m_staticText7;
+		wxStaticText* m_staticText9;
+		wxStdDialogButtonSizer* m_sdbSizer6;
+		wxButton* m_sdbSizer6OK;
+		wxButton* m_sdbSizer6Cancel;
+
+	public:
+		wxTextCtrl* newNameText;
+		wxTextCtrl* oldNameText;
+
+		FileConflictDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Filename conflict"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
+
+		~FileConflictDialog();
 
 };
 

@@ -468,18 +468,43 @@ public:
         auto item = browserTree->GetSelection();
         auto dc = (DirentContainer*)_filesystemModel->GetItemData(item);
 
-        auto localFilename =
-            wxFileSelector("Choose the name of the file to save",
-                /* default_path= */ wxEmptyString,
-                /* default_filename= */ dc->dirent->filename,
-                /* default_extension= */ wxEmptyString,
-                /* wildcard= */ wxEmptyString,
-                /* flags= */ wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-        if (localFilename.empty())
+        GetfileDialog dialog(this, wxID_ANY);
+        dialog.filenameText->SetValue(dc->dirent->path.to_str());
+        dialog.targetFilePicker->SetFileName(wxFileName(dc->dirent->filename));
+        if (dialog.ShowModal() != wxID_OK)
             return;
 
+        QueueBrowserOperation(
+            std::make_unique<FilesystemOperation>(FSOP_GETFILE,
+                dc->dirent->path,
+                dialog.targetFilePicker->GetPath()));
+    }
+
+    void OnBrowserAddButton(wxCommandEvent&) override
+    {
+        Path path;
+        auto item = browserTree->GetSelection();
+        if (item.IsOk())
+        {
+            auto dc = (DirentContainer*)_filesystemModel->GetItemData(item);
+            path = dc->dirent->path;
+            if (dc->dirent->file_type != TYPE_DIRECTORY)
+                path = path.parent();
+        }
+
+        auto localFilename =
+            wxFileSelector("Choose the name of the file to add",
+                /* default_path= */ wxEmptyString,
+                /* default_filename= */ wxEmptyString,
+                /* default_extension= */ wxEmptyString,
+                /* wildcard= */ wxEmptyString,
+                /* flags= */ wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+        if (localFilename.empty())
+            return;
+        path.push_back(wxFileName(localFilename).GetFullName().ToStdString());
+
         QueueBrowserOperation(std::make_unique<FilesystemOperation>(
-            FSOP_GETFILE, dc->dirent->path, localFilename));
+            FSOP_PUTFILE, path, item, localFilename));
     }
 
     void QueueBrowserOperation(std::unique_ptr<FilesystemOperation> op)
@@ -505,6 +530,7 @@ public:
                         runOnUiThread(
                             [&]()
                             {
+                                UpdateState();
                                 if (!_filesystemQueue.empty())
                                 {
                                     op = std::move(_filesystemQueue.front());
@@ -578,7 +604,59 @@ public:
                                 bytes.writeToFile(op->local);
                                 break;
                             }
+
+                            case FSOP_PUTFILE:
+                            {
+                                /* Check that the file exists. */
+
+                                Path path = op->path;
+                                for (;;)
+                                {
+                                    try
+                                    {
+                                        _filesystem->getDirent(path);
+                                    }
+                                    catch (const FileNotFoundException& e)
+                                    {
+                                        break;
+                                    }
+
+                                    runOnUiThread(
+                                        [&]()
+                                        {
+                                            FileConflictDialog d(
+                                                this, wxID_ANY);
+                                            d.oldNameText->SetValue(
+                                                path.to_str());
+                                            d.newNameText->SetValue(
+                                                path.to_str());
+                                            if (d.ShowModal() == wxID_OK)
+                                                path = Path(
+                                                    d.newNameText->GetValue()
+                                                        .ToStdString());
+                                            else
+                                                path = Path("");
+                                        });
+
+                                    if (path.empty())
+                                        goto endOperation;
+                                }
+
+                                auto bytes = Bytes::readFromFile(op->local);
+                                _filesystem->putFile(path, bytes);
+
+                                runOnUiThread(
+                                    [&]()
+                                    {
+                                        QueueBrowserOperation(std::make_unique<
+                                            FilesystemOperation>(FSOP_LIST,
+                                            path.parent(),
+                                            op->item));
+                                    });
+                                break;
+                            }
                         }
+                    endOperation:;
                     }
 
                     runOnUiThread(
@@ -948,16 +1026,16 @@ public:
             browserToolbar->EnableTool(browserSaveTool->GetId(),
                 (capabilities & Filesystem::OP_GETFILE) &&
                     (selection.size() == 1));
-            browserToolbar->EnableTool(browserAddTool->GetId(),
+            browserFileMenu->Enable(browserAddMenuItem->GetId(),
                 (capabilities & Filesystem::OP_PUTFILE) &&
                     (selection.size() <= 1));
-            browserAddMenu->Enable(browserNewDirectoryMenuItem->GetId(),
+            browserFileMenu->Enable(browserNewDirectoryMenuItem->GetId(),
                 (capabilities & Filesystem::OP_CREATEDIR) &&
                     (selection.size() <= 1));
-            browserAddMenu->Enable(browserRenameMenuItem->GetId(),
+            browserFileMenu->Enable(browserRenameMenuItem->GetId(),
                 (capabilities & Filesystem::OP_MOVE) &&
                     (selection.size() == 1));
-            browserAddMenu->Enable(browserDeleteMenuItem->GetId(),
+            browserFileMenu->Enable(browserDeleteMenuItem->GetId(),
                 (capabilities & Filesystem::OP_DELETE) &&
                     (selection.size() >= 1));
             browserToolbar->EnableTool(browserFormatTool->GetId(),
@@ -1035,6 +1113,7 @@ private:
         FSOP_GETFILEINFO,
         FSOP_OPEN,
         FSOP_GETFILE,
+        FSOP_PUTFILE,
     };
 
     class FilesystemOperation
@@ -1062,7 +1141,18 @@ private:
         {
         }
 
-        FilesystemOperation(int operation, const Path& path, wxString& local):
+        FilesystemOperation(int operation,
+            const Path& path,
+            const wxDataViewItem& item,
+            wxString& local):
+            operation(operation),
+            path(path),
+            item(item),
+            local(local)
+        {
+        }
+
+        FilesystemOperation(int operation, const Path& path, wxString local):
             operation(operation),
             path(path),
             local(local)
