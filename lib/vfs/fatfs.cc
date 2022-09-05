@@ -77,9 +77,9 @@ public:
 
         char buffer[FF_MAX_SS * 2];
         currentFatFs = this;
-		MKFS_PARM parm = {
-			.fmt = FM_SFD | FM_ANY,
-		};
+        MKFS_PARM parm = {
+            .fmt = FM_SFD | FM_ANY,
+        };
         FRESULT res = f_mkfs("", &parm, buffer, sizeof(buffer));
         throwError(res);
 
@@ -182,10 +182,10 @@ public:
 
     void deleteFile(const Path& path) override
     {
-		mount();
-		auto pathstr = path.to_str();
-		FRESULT res = f_unlink(pathstr.c_str());
-		throwError(res);
+        mount();
+        auto pathstr = path.to_str();
+        FRESULT res = f_unlink(pathstr.c_str());
+        throwError(res);
     }
 
 private:

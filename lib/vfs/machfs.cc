@@ -164,9 +164,9 @@ public:
         if (path.size() == 0)
             throw BadPathException();
 
-		auto pathstr = ":" + path.to_str(":");
-		if (!hfs_delete(_vol, pathstr.c_str()))
-			throw CannotWriteException();
+        auto pathstr = ":" + path.to_str(":");
+        if (!hfs_delete(_vol, pathstr.c_str()))
+            throw CannotWriteException();
     }
 
 private:
