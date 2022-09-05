@@ -3,6 +3,7 @@
 #include "lib/config.pb.h"
 #include "lib/proto.h"
 #include "lib/layout.h"
+#include "lib/logger.h"
 #include <fmt/format.h>
 
 #include "adflib.h"
@@ -360,6 +361,16 @@ private:
     struct Device* _ffs;
 };
 
+static void onAdfWarning(char* message)
+{
+	Logger() << message;
+}
+
+static void onAdfError(char* message)
+{
+	throw FilesystemException(message);
+}
+
 void adfInitNativeFct()
 {
     auto cbs = (struct nativeFunctions*)adfEnv.nativeFct;
@@ -368,6 +379,9 @@ void adfInitNativeFct()
     cbs->adfNativeWriteSector = ::adfNativeWriteSector;
     cbs->adfIsDevNative = ::adfIsDevNative;
     cbs->adfReleaseDevice = ::adfReleaseDevice;
+
+	adfChgEnvProp(PR_WFCT, (void*)onAdfWarning);
+	adfChgEnvProp(PR_EFCT, (void*)onAdfError);
 }
 
 static RETCODE adfInitDevice(struct Device* dev, char* name, BOOL ro)
