@@ -646,6 +646,8 @@ public:
             [this, path, localPath, item]() mutable
             {
                 path = ResolveFileConflicts_WT(path);
+				if (path.empty())
+					return;
 
                 auto bytes = Bytes::readFromFile(localPath);
                 _filesystem->putFile(path, bytes);
@@ -715,18 +717,21 @@ public:
         QueueBrowserOperation(
             [this, node]() mutable
             {
-                auto oldpath = node->dirent->path;
-                auto newpath = oldpath.parent();
-                newpath.push_back(node->newname);
+                auto oldPath = node->dirent->path;
+                auto newPath = oldPath.parent();
+                newPath.push_back(node->newname);
 
-                newpath = ResolveFileConflicts_WT(newpath);
-                _filesystem->moveFile(oldpath, newpath);
+                newPath = ResolveFileConflicts_WT(newPath);
+				if (newPath.empty())
+					return;
 
-                auto dirent = _filesystem->getDirent(newpath);
+                _filesystem->moveFile(oldPath, newPath);
+
+                auto dirent = _filesystem->getDirent(newPath);
                 runOnUiThread(
                     [&]()
                     {
-                        _filesystemModel->Delete(oldpath);
+                        _filesystemModel->Delete(oldPath);
                         _filesystemModel->Add(dirent);
                     });
             });
@@ -749,6 +754,9 @@ public:
             [this, oldPath, newPath]() mutable
             {
                 newPath = ResolveFileConflicts_WT(newPath);
+				if (newPath.empty())
+					return;
+
                 _filesystem->moveFile(oldPath, newPath);
 
                 auto dirent = _filesystem->getDirent(newPath);
