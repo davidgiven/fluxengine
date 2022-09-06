@@ -316,6 +316,31 @@ class FileConflictDialog : public wxDialog
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+/// Class FileRenameDialog
+///////////////////////////////////////////////////////////////////////////////
+class FileRenameDialog : public wxDialog
+{
+	private:
+
+	protected:
+		wxStaticText* m_staticText91;
+		wxStaticText* m_staticText7;
+		wxStaticText* m_staticText9;
+		wxStdDialogButtonSizer* m_sdbSizer6;
+		wxButton* m_sdbSizer6OK;
+		wxButton* m_sdbSizer6Cancel;
+
+	public:
+		wxTextCtrl* newNameText;
+		wxTextCtrl* oldNameText;
+
+		FileRenameDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Rename or move file"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
+
+		~FileRenameDialog();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
 /// Class FormatDialog
 ///////////////////////////////////////////////////////////////////////////////
 class FormatDialog : public wxDialog

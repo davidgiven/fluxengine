@@ -732,6 +732,35 @@ public:
             });
     }
 
+    void OnBrowserRenameMenuItem(wxCommandEvent& event)
+    {
+        auto item = browserTree->GetSelection();
+        auto node = _filesystemModel->Find(item);
+
+        FileRenameDialog d(this, wxID_ANY);
+        d.oldNameText->SetValue(node->dirent->path.to_str());
+        d.newNameText->SetValue(node->dirent->path.to_str());
+        if (d.ShowModal() != wxID_OK)
+            return;
+
+        auto oldPath = node->dirent->path;
+        auto newPath = Path(d.newNameText->GetValue().ToStdString());
+        QueueBrowserOperation(
+            [this, oldPath, newPath]() mutable
+            {
+                newPath = ResolveFileConflicts_WT(newPath);
+                _filesystem->moveFile(oldPath, newPath);
+
+                auto dirent = _filesystem->getDirent(newPath);
+                runOnUiThread(
+                    [&]()
+                    {
+                        _filesystemModel->Delete(oldPath);
+                        _filesystemModel->Add(dirent);
+                    });
+            });
+    }
+
     void OnBrowserCommitButton(wxCommandEvent&) override
     {
         QueueBrowserOperation(

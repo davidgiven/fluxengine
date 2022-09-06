@@ -190,11 +190,11 @@ public:
 
     void moveFile(const Path& oldPath, const Path& newPath) override
     {
-		mount();
-		auto oldPathStr = oldPath.to_str();
-		auto newPathStr = newPath.to_str();
-		FRESULT res = f_rename(oldPathStr.c_str(), newPathStr.c_str());
-		throwError(res);
+        mount();
+        auto oldPathStr = oldPath.to_str();
+        auto newPathStr = newPath.to_str();
+        FRESULT res = f_rename(oldPathStr.c_str(), newPathStr.c_str());
+        throwError(res);
     }
 
 private:

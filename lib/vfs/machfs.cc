@@ -171,13 +171,13 @@ public:
 
     void moveFile(const Path& oldPath, const Path& newPath) override
     {
-		HfsMount m(this);
-		if (oldPath.empty() || newPath.empty())
-			throw BadPathException();
+        HfsMount m(this);
+        if (oldPath.empty() || newPath.empty())
+            throw BadPathException();
 
-		auto oldPathStr = ":" + oldPath.to_str(":");
-		auto newPathStr = ":" + newPath.to_str(":");
-		if (!hfs_rename(_vol, oldPathStr.c_str(), newPathStr.c_str()))
+        auto oldPathStr = ":" + oldPath.to_str(":");
+        auto newPathStr = ":" + newPath.to_str(":");
+        if (!hfs_rename(_vol, oldPathStr.c_str(), newPathStr.c_str()))
             throw CannotWriteException();
     }
 
