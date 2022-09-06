@@ -132,6 +132,7 @@ class MainWindowGen : public wxFrame
 		virtual void OnBrowserRenameMenuItem( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBrowserDeleteMenuItem( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBrowserFormatButton( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBrowserFilenameChanged( wxDataViewEvent& event ) { event.Skip(); }
 		virtual void OnBrowserDirectoryExpanding( wxDataViewEvent& event ) { event.Skip(); }
 		virtual void OnBrowserSelectionChanged( wxDataViewEvent& event ) { event.Skip(); }
 		virtual void OnBrowserDiscardButton( wxCommandEvent& event ) { event.Skip(); }

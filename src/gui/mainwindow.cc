@@ -578,6 +578,35 @@ public:
             });
     }
 
+    /* Called from worker thread only! */
+    Path ResolveFileConflicts_WT(Path path)
+    {
+        do
+        {
+            try
+            {
+                _filesystem->getDirent(path);
+            }
+            catch (const FileNotFoundException& e)
+            {
+                break;
+            }
+
+            runOnUiThread(
+                [&]()
+                {
+                    FileConflictDialog d(this, wxID_ANY);
+                    d.oldNameText->SetValue(path.to_str());
+                    d.newNameText->SetValue(path.to_str());
+                    if (d.ShowModal() == wxID_OK)
+                        path = Path(d.newNameText->GetValue().ToStdString());
+                    else
+                        path = Path("");
+                });
+        } while (!path.empty());
+        return path;
+    }
+
     void OnBrowserAddMenuItem(wxCommandEvent&) override
     {
         Path dirPath;
@@ -616,37 +645,7 @@ public:
         QueueBrowserOperation(
             [this, path, localPath, item]() mutable
             {
-                /* Check that the file exists. */
-
-                for (;;)
-                {
-                    try
-                    {
-                        _filesystem->getDirent(path);
-                    }
-                    catch (const FileNotFoundException& e)
-                    {
-                        break;
-                    }
-
-                    runOnUiThread(
-                        [&]()
-                        {
-                            FileConflictDialog d(this, wxID_ANY);
-                            d.oldNameText->SetValue(path.to_str());
-                            d.newNameText->SetValue(path.to_str());
-                            if (d.ShowModal() == wxID_OK)
-                                path = Path(
-                                    d.newNameText->GetValue().ToStdString());
-                            else
-                                path = Path("");
-                        });
-
-                    if (path.empty())
-                        return;
-                }
-
-                /* Now actually write the data. */
+                path = ResolveFileConflicts_WT(path);
 
                 auto bytes = Bytes::readFromFile(localPath);
                 _filesystem->putFile(path, bytes);
@@ -697,6 +696,38 @@ public:
                     [&]()
                     {
                         RepopulateBrowser();
+                    });
+            });
+    }
+
+    void OnBrowserFilenameChanged(wxDataViewEvent& event)
+    {
+        if (!(_filesystem->capabilities() & Filesystem::OP_MOVE))
+            return;
+
+        auto node = _filesystemModel->Find(event.GetItem());
+        if (!node)
+            return;
+
+        if (node->newname.empty())
+            return;
+
+        QueueBrowserOperation(
+            [this, node]() mutable
+            {
+                auto oldpath = node->dirent->path;
+                auto newpath = oldpath.parent();
+                newpath.push_back(node->newname);
+
+                newpath = ResolveFileConflicts_WT(newpath);
+                _filesystem->moveFile(oldpath, newpath);
+
+                auto dirent = _filesystem->getDirent(newpath);
+                runOnUiThread(
+                    [&]()
+                    {
+                        _filesystemModel->Delete(oldpath);
+                        _filesystemModel->Add(dirent);
                     });
             });
     }

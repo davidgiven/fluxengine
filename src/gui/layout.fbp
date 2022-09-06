@@ -2505,6 +2505,7 @@
                                             <property name="window_extra_style"></property>
                                             <property name="window_name"></property>
                                             <property name="window_style"></property>
+                                            <event name="OnDataViewCtrlItemEditingDone">OnBrowserFilenameChanged</event>
                                             <event name="OnDataViewCtrlItemExpanding">OnBrowserDirectoryExpanding</event>
                                             <event name="OnDataViewCtrlSelectionChanged">OnBrowserSelectionChanged</event>
                                             <object class="dataViewColumn" expanded="1">
@@ -2512,7 +2513,7 @@
                                                 <property name="ellipsize"></property>
                                                 <property name="flags">wxDATAVIEW_COL_RESIZABLE|wxDATAVIEW_COL_SORTABLE</property>
                                                 <property name="label">Filename</property>
-                                                <property name="mode">wxDATAVIEW_CELL_INERT</property>
+                                                <property name="mode">wxDATAVIEW_CELL_EDITABLE</property>
                                                 <property name="model_column">0</property>
                                                 <property name="name">m_dataViewColumn1</property>
                                                 <property name="permission">protected</property>

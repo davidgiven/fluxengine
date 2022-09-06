@@ -16,6 +16,8 @@ public:
     bool stub = false;
     std::shared_ptr<Dirent> dirent;
     std::map<std::string, std::shared_ptr<FilesystemNode>> children;
+
+    std::string newname; /* used for inline renames */
 };
 
 class FilesystemModel : public wxDataViewModel

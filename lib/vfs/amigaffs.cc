@@ -60,7 +60,7 @@ public:
     uint32_t capabilities() const
     {
         return OP_GETFSDATA | OP_CREATE | OP_LIST | OP_GETFILE | OP_PUTFILE |
-               OP_GETDIRENT | OP_DELETE;
+               OP_GETDIRENT | OP_DELETE | OP_MOVE;
     }
 
     std::map<std::string, std::string> getMetadata() override
@@ -204,6 +204,29 @@ public:
 
         int res =
             adfRemoveEntry(vol, vol->curDirPtr, (char*)path.back().c_str());
+        if (res != RC_OK)
+            throw CannotWriteException();
+    }
+
+    void moveFile(const Path& oldPath, const Path& newPath) override
+    {
+        AdfMount m(this);
+        if ((oldPath.size() == 0) || (newPath.size() == 0))
+            throw BadPathException();
+
+        auto* vol = m.mount();
+
+        changeDirButOne(vol, oldPath);
+        auto oldDir = vol->curDirPtr;
+
+        changeDirButOne(vol, newPath);
+        auto newDir = vol->curDirPtr;
+
+        int res = adfRenameEntry(vol,
+            oldDir,
+            (char*)oldPath.back().c_str(),
+            newDir,
+            (char*)newPath.back().c_str());
         if (res != RC_OK)
             throw CannotWriteException();
     }

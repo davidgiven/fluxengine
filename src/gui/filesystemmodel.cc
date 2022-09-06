@@ -129,7 +129,19 @@ public:
         const wxDataViewItem& item,
         unsigned column) override
     {
-        fmt::print("{}\n", __LINE__);
+        auto node = Find(item);
+        if (!node || node->stub)
+            return false;
+
+        if ((column == 0) && (value.GetType() == "wxDataViewIconText"))
+        {
+            wxDataViewIconText dvit;
+            dvit << value;
+            node->newname = dvit.GetText();
+            return true;
+        }
+
+        return false;
     }
 
     unsigned GetChildren(const wxDataViewItem& item,
