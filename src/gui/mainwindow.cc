@@ -423,7 +423,7 @@ public:
             PrepareConfig();
 
             visualiser->Clear();
-            _filesystemModel->Clear();
+            _filesystemModel->Clear(Path());
             _currentDisk = nullptr;
 
             _state = STATE_BROWSING_WORKING;
@@ -459,26 +459,23 @@ public:
         browserToolbar->SetToolSticky(event.GetId(), false);
     }
 
-    void RepopulateBrowser(wxDataViewItem item = wxDataViewItem())
+    void RepopulateBrowser(Path path = Path())
     {
-        Path path;
-        if (item.IsOk())
-        {
-            auto dc = (DirentContainer*)_filesystemModel->GetItemData(item);
-            path = dc->dirent->path;
-        }
-
-        _filesystemModel->Clear();
         QueueBrowserOperation(
-            [this, path, item]()
+            [this, path]()
             {
                 auto files = _filesystem->list(path);
 
                 runOnUiThread(
                     [&]()
                     {
-                        _filesystemModel->SetFiles(item, files);
-                        browserTree->Expand(item);
+                        _filesystemModel->Clear(path);
+                        for (auto& f : files)
+                            _filesystemModel->Add(f);
+
+                        auto node = _filesystemModel->Find(path);
+                        if (node)
+                            browserTree->Expand(node->item);
                         UpdateDiskSpaceGauge();
                     });
             });
@@ -517,47 +514,44 @@ public:
 
     void OnBrowserDirectoryExpanding(wxDataViewEvent& event) override
     {
-        auto item = event.GetItem();
-        auto dc = (DirentContainer*)_filesystemModel->GetItemData(item);
-
-        if (!dc->populated && !dc->populating)
+        auto node = _filesystemModel->Find(event.GetItem());
+        if (node && !node->populated && !node->populating)
         {
-            dc->populating = true;
-            RepopulateBrowser(item);
+            node->populating = true;
+            RepopulateBrowser(node->dirent->path);
         }
     }
 
     void OnBrowserInfoButton(wxCommandEvent&) override
     {
         auto item = browserTree->GetSelection();
-        auto dc = (DirentContainer*)_filesystemModel->GetItemData(item);
+        auto node = _filesystemModel->Find(item);
 
         std::stringstream ss;
-        ss << "File attributes for " << dc->dirent->path.to_str() << ":\n\n";
-        for (const auto& e : dc->dirent->attributes)
+        ss << "File attributes for " << node->dirent->path.to_str() << ":\n\n";
+        for (const auto& e : node->dirent->attributes)
             ss << e.first << "=" << quote(e.second) << "\n";
 
         TextViewerWindow::Create(
-            this, dc->dirent->path.to_str(), ss.str(), true)
+            this, node->dirent->path.to_str(), ss.str(), true)
             ->Show();
     }
 
     void OnBrowserViewButton(wxCommandEvent&) override
     {
         auto item = browserTree->GetSelection();
-        auto dc = (DirentContainer*)_filesystemModel->GetItemData(item);
+        auto node = _filesystemModel->Find(item);
 
-        auto dirent = dc->dirent;
         QueueBrowserOperation(
-            [this, dirent]()
+            [this, node]()
             {
-                auto bytes = _filesystem->getFile(dirent->path);
+                auto bytes = _filesystem->getFile(node->dirent->path);
 
                 runOnUiThread(
                     [&]()
                     {
                         (new FileViewerWindow(
-                             this, dirent->path.to_str(), bytes))
+                             this, node->dirent->path.to_str(), bytes))
                             ->Show();
                     });
             });
@@ -566,37 +560,45 @@ public:
     void OnBrowserSaveButton(wxCommandEvent&) override
     {
         auto item = browserTree->GetSelection();
-        auto dc = (DirentContainer*)_filesystemModel->GetItemData(item);
+        auto node = _filesystemModel->Find(item);
 
         GetfileDialog dialog(this, wxID_ANY);
-        dialog.filenameText->SetValue(dc->dirent->path.to_str());
-        dialog.targetFilePicker->SetFileName(wxFileName(dc->dirent->filename));
+        dialog.filenameText->SetValue(node->dirent->path.to_str());
+        dialog.targetFilePicker->SetFileName(
+            wxFileName(node->dirent->filename));
         if (dialog.ShowModal() != wxID_OK)
             return;
 
-        auto dirent = dc->dirent;
         auto localPath = dialog.targetFilePicker->GetPath().ToStdString();
         QueueBrowserOperation(
-            [this, dirent, localPath]()
+            [this, node, localPath]()
             {
-                auto bytes = _filesystem->getFile(dirent->path);
+                auto bytes = _filesystem->getFile(node->dirent->path);
                 bytes.writeToFile(localPath);
             });
     }
 
     void OnBrowserAddMenuItem(wxCommandEvent&) override
     {
-        Path diskPath;
+        Path dirPath;
         auto item = browserTree->GetSelection();
         if (item.IsOk())
         {
-            auto dc = (DirentContainer*)_filesystemModel->GetItemData(item);
-            diskPath = dc->dirent->path;
-            if (dc->dirent->file_type != TYPE_DIRECTORY)
-            {
-                diskPath = diskPath.parent();
-                item = _filesystemModel->GetParent(item);
-            }
+            auto dirNode = _filesystemModel->Find(item);
+            if (!dirNode)
+                return;
+            dirPath = dirNode->dirent->path;
+        }
+
+        auto dirNode = _filesystemModel->Find(dirPath);
+        if (!dirNode)
+            return;
+        if (dirNode->dirent->file_type != TYPE_DIRECTORY)
+        {
+            dirPath = dirPath.parent();
+            dirNode = _filesystemModel->Find(dirPath);
+            if (!dirNode)
+                return;
         }
 
         auto localPath = wxFileSelector("Choose the name of the file to add",
@@ -608,10 +610,11 @@ public:
                              .ToStdString();
         if (localPath.empty())
             return;
-        diskPath.push_back(wxFileName(localPath).GetFullName().ToStdString());
+        Path path = dirPath;
+        path.push_back(wxFileName(localPath).GetFullName().ToStdString());
 
         QueueBrowserOperation(
-            [this, diskPath, localPath, item]() mutable
+            [this, path, localPath, item]() mutable
             {
                 /* Check that the file exists. */
 
@@ -619,7 +622,7 @@ public:
                 {
                     try
                     {
-                        _filesystem->getDirent(diskPath);
+                        _filesystem->getDirent(path);
                     }
                     catch (const FileNotFoundException& e)
                     {
@@ -630,28 +633,30 @@ public:
                         [&]()
                         {
                             FileConflictDialog d(this, wxID_ANY);
-                            d.oldNameText->SetValue(diskPath.to_str());
-                            d.newNameText->SetValue(diskPath.to_str());
+                            d.oldNameText->SetValue(path.to_str());
+                            d.newNameText->SetValue(path.to_str());
                             if (d.ShowModal() == wxID_OK)
-                                diskPath = Path(
+                                path = Path(
                                     d.newNameText->GetValue().ToStdString());
                             else
-                                diskPath = Path("");
+                                path = Path("");
                         });
 
-                    if (diskPath.empty())
+                    if (path.empty())
                         return;
                 }
 
                 /* Now actually write the data. */
 
                 auto bytes = Bytes::readFromFile(localPath);
-                _filesystem->putFile(diskPath, bytes);
+                _filesystem->putFile(path, bytes);
+
+                auto dirent = _filesystem->getDirent(path);
 
                 runOnUiThread(
                     [&]()
                     {
-                        RepopulateBrowser(item);
+                        _filesystemModel->Add(dirent);
                     });
             });
     }
@@ -659,19 +664,17 @@ public:
     void OnBrowserDeleteMenuItem(wxCommandEvent&) override
     {
         auto item = browserTree->GetSelection();
-        auto dc = (DirentContainer*)_filesystemModel->GetItemData(item);
-        auto diskPath = dc->dirent->path;
-        auto parentItem = _filesystemModel->GetParent(item);
+        auto node = _filesystemModel->Find(item);
 
         QueueBrowserOperation(
-            [this, diskPath, parentItem]()
+            [this, node]()
             {
-                _filesystem->deleteFile(diskPath);
+                _filesystem->deleteFile(node->dirent->path);
 
                 runOnUiThread(
                     [&]()
                     {
-                        RepopulateBrowser(parentItem);
+                        _filesystemModel->Delete(node->dirent->path);
                     });
             });
     }

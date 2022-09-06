@@ -3,24 +3,31 @@
 
 #include <wx/dataview.h>
 class Dirent;
+class Path;
 
-class DirentContainer : public wxClientData
+class FilesystemNode
 {
 public:
-    DirentContainer(std::shared_ptr<Dirent> dirent): dirent(dirent) {}
+    FilesystemNode(std::shared_ptr<Dirent> dirent);
 
+    wxDataViewItem item;
     bool populated = false;
     bool populating = false;
+    bool stub = false;
     std::shared_ptr<Dirent> dirent;
+    std::map<std::string, std::shared_ptr<FilesystemNode>> children;
 };
 
-class FilesystemModel : public wxDataViewTreeStore
+class FilesystemModel : public wxDataViewModel
 {
 public:
-    virtual void Clear() = 0;
-    virtual wxDataViewItem GetRootItem() const = 0;
-    virtual void SetFiles(const wxDataViewItem& item,
-        std::vector<std::shared_ptr<Dirent>>& files) = 0;
+    virtual void Clear(const Path& path) = 0;
+    virtual std::shared_ptr<FilesystemNode> Find(const Path& path) const = 0;
+    virtual std::shared_ptr<FilesystemNode> Find(
+        const wxDataViewItem& item) const = 0;
+    virtual void Delete(const Path& path) = 0;
+    virtual void RemoveStub(const Path& path) = 0;
+    virtual void Add(std::shared_ptr<Dirent> dirent) = 0;
 
 public:
     static FilesystemModel* Associate(wxDataViewCtrl* control);

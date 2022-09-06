@@ -5,6 +5,13 @@
 #include <wx/artprov.h>
 #include <fmt/format.h>
 
+static uintptr_t nodeCount = 0;
+FilesystemNode::FilesystemNode(std::shared_ptr<Dirent> dirent):
+    dirent(dirent),
+    item((void*)nodeCount++)
+{
+}
+
 class FilesystemModelImpl : public FilesystemModel
 {
 public:
@@ -14,9 +21,16 @@ public:
             wxArtProvider::GetIcon(wxART_FOLDER_OPEN, wxART_BUTTON)),
         _folderClosedIcon(wxArtProvider::GetIcon(wxART_FOLDER, wxART_BUTTON))
     {
+        _root = std::make_shared<FilesystemNode>(std::make_shared<Dirent>());
+        _root->dirent->file_type = TYPE_DIRECTORY;
+
+        _byItem[_root->item] = _root;
+
+        ItemAdded(wxDataViewItem(), _root->item);
     }
 
-public:
+    /* --- DataViewModel API --------------------------------------------- */
+
     unsigned int GetColumnCount() const override
     {
         return 3;
@@ -26,134 +40,237 @@ public:
     {
         switch (column)
         {
+            case 0:
+                return "wxDataViewIconText";
+
             case 1:
             case 2:
                 return "string";
 
             default:
-                return FilesystemModel::GetColumnType(column);
+                wxFAIL;
+                return "<bad>";
         }
+    }
+
+    bool IsContainer(const wxDataViewItem& item) const override
+    {
+        auto node = Find(item);
+        if (!node)
+            return false;
+
+        return node->dirent->file_type == TYPE_DIRECTORY;
+    }
+
+    wxDataViewItem GetParent(const wxDataViewItem& item) const override
+    {
+        auto node = Find(item);
+        if (!node || (node == _root))
+            return wxDataViewItem();
+
+        return Find(node->dirent->path.parent())->item;
     }
 
     void GetValue(wxVariant& value,
         const wxDataViewItem& item,
-        unsigned int column) const override
+        unsigned column) const override
     {
-        auto* data = (DirentContainer*)GetItemData(item);
-        switch (column)
+        auto node = Find(item);
+        if (!node)
+            return;
+
+        if (node->stub)
         {
-            case 1:
-                value = (data && data->dirent)
-                            ? std::to_string(data->dirent->length)
-                            : "";
-                break;
+            switch (column)
+            {
+                case 0:
+                    value << wxDataViewIconText("...loading...");
+                    break;
 
-            case 2:
-                value = (data && data->dirent) ? data->dirent->mode : "";
-                break;
+                case 1:
+                    value = "";
+                    break;
 
-            default:
-                FilesystemModel::GetValue(value, item, column);
+                case 2:
+                    value = "";
+                    break;
+
+                default:
+                    wxFAIL;
+            }
         }
-    }
-
-#if 0
-    int Compare(const wxDataViewItem& item1,
-        const wxDataViewItem& item2,
-        unsigned int column,
-        bool ascending) const override
-    {
-        auto* data1 = (DirentContainer*)GetItemData(item1);
-        auto* data2 = (DirentContainer*)GetItemData(item2);
-        if (data1 && data1->dirent && data2 && data2->dirent)
+        else
         {
-            int r;
 
             switch (column)
             {
                 case 0:
-                    r = data1->dirent->filename.compare(
-                        data2->dirent->filename);
+                    value << wxDataViewIconText(node->dirent->filename,
+                        (node->dirent->file_type == TYPE_DIRECTORY)
+                            ? _folderClosedIcon
+                            : _fileIcon);
                     break;
 
                 case 1:
-                    r = data2->dirent->length - data1->dirent->length;
+                    value = std::to_string(node->dirent->length);
                     break;
 
                 case 2:
-                    r = data1->dirent->mode.compare(data2->dirent->mode);
+                    value = node->dirent->mode;
                     break;
+
+                default:
+                    wxFAIL;
             }
-
-            if (ascending)
-                r = -r;
-            return r;
         }
-
-        return 0;
-    }
-#endif
-
-public:
-    void Clear()
-    {
-        Clear(wxDataViewItem());
-        // DeleteAllItems();
     }
 
-    void Clear(const wxDataViewItem& parent)
+    bool SetValue(const wxVariant& value,
+        const wxDataViewItem& item,
+        unsigned column) override
     {
-        for (int i = GetChildCount(parent) - 1; i >= 0; i--)
+        fmt::print("{}\n", __LINE__);
+    }
+
+    unsigned GetChildren(const wxDataViewItem& item,
+        wxDataViewItemArray& children) const override
+    {
+        auto node = Find(item);
+        if (!node)
+            return 0;
+
+        for (auto& e : node->children)
+            children.Add(e.second->item);
+        return node->children.size();
+    }
+
+    /* --- Mutation API -------------------------------------------------- */
+
+    void Clear(const Path& path) override
+    {
+        auto top = Find(path);
+        if (!top)
+            return;
+
+        for (;;)
         {
-            auto child = GetNthChild(parent, i);
+            auto it = top->children.begin();
+            if (it == top->children.end())
+                break;
 
-            if (IsContainer(child))
-                Clear(child);
-            ItemDeleted(parent, child);
-            DeleteItem(child);
+            auto child = it->second;
+            if (!child->stub)
+            {
+                Clear(child->dirent->path);
+                _byItem.erase(child->item);
+            }
+            top->children.erase(it);
+            ItemDeleted(top->item, child->item);
         }
     }
 
-    wxDataViewItem GetRootItem() const
+    std::shared_ptr<FilesystemNode> Find(const Path& path) const override
     {
-        return wxDataViewItem();
-    }
+        if (path.empty())
+            return _root;
 
-    void SetFiles(const wxDataViewItem& parent,
-        std::vector<std::shared_ptr<Dirent>>& files)
-    {
-        for (int i = 0; i < GetChildCount(parent); i++)
-            ItemDeleted(parent, GetNthChild(parent, i));
-        DeleteChildren(parent);
-
-        for (auto& dirent : files)
+        auto node = _root;
+        for (const auto& element : path)
         {
-            if (dirent->file_type == TYPE_FILE)
+            try
             {
-                auto item = AppendItem(parent,
-                    dirent->filename,
-                    _fileIcon,
-                    new DirentContainer(dirent));
-                ItemAdded(parent, item);
+                node = node->children.at(element);
             }
-            else
+            catch (std::out_of_range& e)
             {
-                auto item = AppendContainer(parent,
-                    dirent->filename,
-                    _folderOpenIcon,
-                    _folderClosedIcon,
-                    new DirentContainer(dirent));
-
-                auto child = AppendItem(item, "...loading...");
-                ItemAdded(parent, item);
-                ItemAdded(item, child);
+                return nullptr;
             }
         }
 
-        ItemChanged(parent);
+        return node;
+    }
+
+    std::shared_ptr<FilesystemNode> Find(
+        const wxDataViewItem& item) const override
+    {
+        if (!item.IsOk())
+            return _root;
+
+        auto it = _byItem.find(item);
+        if (it == _byItem.end())
+            return nullptr;
+
+        auto node = it->second.lock();
+        if (node)
+            return node;
+
+        /* This node is stale; clean it out of the weak reference map. */
+
+        _byItem.erase(item);
+        return nullptr;
+    }
+
+    void Delete(const Path& path) override
+    {
+        auto parent = Find(path.parent());
+        if (!parent)
+            return;
+
+        auto child = Find(path);
+        if (!child)
+            return;
+
+        Clear(path);
+        _byItem.erase(child->item);
+        parent->children.erase(child->dirent->filename);
+        ItemDeleted(parent->item, child->item);
+    }
+
+    void RemoveStub(const Path& path) override
+    {
+        auto node = Find(path);
+        if (!node)
+            return;
+
+        /* If the only item in the directory is a stub, remove it. */
+
+        if ((node->children.size() == 1) &&
+            node->children.begin()->second->stub)
+        {
+        }
+    }
+
+    void Add(std::shared_ptr<Dirent> dirent) override
+    {
+        auto parent = Find(dirent->path.parent());
+        if (!parent)
+            return;
+
+        /* Add the actual item (the easy bit). */
+
+        auto node = std::make_shared<FilesystemNode>(dirent);
+        _byItem[node->item] = node;
+        parent->children[dirent->filename] = node;
+        ItemAdded(parent->item, node->item);
+
+        /* If this is a new directory, add the stub item to it. */
+
+        if (dirent->file_type == TYPE_DIRECTORY)
+        {
+            auto stub =
+                std::make_shared<FilesystemNode>(std::make_shared<Dirent>());
+            _byItem[stub->item] = stub;
+            node->children[""] = stub;
+            stub->stub = true;
+            stub->dirent->path = dirent->path;
+            stub->dirent->path.push_back("");
+            ItemAdded(node->item, stub->item);
+        }
     }
 
 private:
+    std::shared_ptr<FilesystemNode> _root;
+    mutable std::map<wxDataViewItem, std::weak_ptr<FilesystemNode>> _byItem;
     wxIcon _fileIcon;
     wxIcon _folderOpenIcon;
     wxIcon _folderClosedIcon;

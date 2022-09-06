@@ -24,6 +24,7 @@ public:
 
 enum FileType
 {
+    TYPE__INVALID,
     TYPE_FILE,
     TYPE_DIRECTORY
 };

@@ -2510,7 +2510,7 @@
                                             <object class="dataViewColumn" expanded="1">
                                                 <property name="align">wxALIGN_LEFT</property>
                                                 <property name="ellipsize"></property>
-                                                <property name="flags">wxDATAVIEW_COL_RESIZABLE</property>
+                                                <property name="flags">wxDATAVIEW_COL_RESIZABLE|wxDATAVIEW_COL_SORTABLE</property>
                                                 <property name="label">Filename</property>
                                                 <property name="mode">wxDATAVIEW_CELL_INERT</property>
                                                 <property name="model_column">0</property>
@@ -2529,7 +2529,7 @@
                                                 <property name="name">m_dataViewColumn2</property>
                                                 <property name="permission">protected</property>
                                                 <property name="type">Text</property>
-                                                <property name="width">-1</property>
+                                                <property name="width">100</property>
                                             </object>
                                             <object class="dataViewColumn" expanded="1">
                                                 <property name="align">wxALIGN_LEFT</property>
