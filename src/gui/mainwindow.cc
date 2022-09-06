@@ -761,6 +761,51 @@ public:
             });
     }
 
+    void OnBrowserNewDirectoryMenuItem(wxCommandEvent& event)
+    {
+        Path path;
+        auto item = browserTree->GetSelection();
+        if (item.IsOk())
+        {
+            auto node = _filesystemModel->Find(item);
+            if (!node)
+                return;
+            path = node->dirent->path;
+        }
+
+        auto node = _filesystemModel->Find(path);
+        if (!node)
+            return;
+        if (node->dirent->file_type != TYPE_DIRECTORY)
+        {
+            path = path.parent();
+            node = _filesystemModel->Find(path);
+            if (!node)
+                return;
+        }
+
+        CreateDirectoryDialog d(this, wxID_ANY);
+        d.newNameText->SetValue(path.to_str() + "/");
+        if (d.ShowModal() != wxID_OK)
+            return;
+
+        auto newPath = Path(d.newNameText->GetValue().ToStdString());
+        QueueBrowserOperation(
+            [this, newPath]() mutable
+            {
+                newPath = ResolveFileConflicts_WT(newPath);
+                _filesystem->createDirectory(newPath);
+
+                auto dirent = _filesystem->getDirent(newPath);
+                runOnUiThread(
+                    [&]()
+                    {
+                        _filesystemModel->Add(dirent);
+                        UpdateDiskSpaceGauge();
+                    });
+            });
+    }
+
     void OnBrowserCommitButton(wxCommandEvent&) override
     {
         QueueBrowserOperation(

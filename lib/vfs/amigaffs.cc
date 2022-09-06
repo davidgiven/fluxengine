@@ -60,7 +60,7 @@ public:
     uint32_t capabilities() const
     {
         return OP_GETFSDATA | OP_CREATE | OP_LIST | OP_GETFILE | OP_PUTFILE |
-               OP_GETDIRENT | OP_DELETE | OP_MOVE;
+               OP_GETDIRENT | OP_DELETE | OP_MOVE | OP_CREATEDIR;
     }
 
     std::map<std::string, std::string> getMetadata() override
@@ -227,6 +227,19 @@ public:
             (char*)oldPath.back().c_str(),
             newDir,
             (char*)newPath.back().c_str());
+        if (res != RC_OK)
+            throw CannotWriteException();
+    }
+
+    void createDirectory(const Path& path)
+    {
+        AdfMount m(this);
+        if (path.empty())
+            throw BadPathException();
+
+        auto* vol = m.mount();
+        changeDirButOne(vol, path);
+        int res = adfCreateDir(vol, vol->curDirPtr, (char*)path.back().c_str());
         if (res != RC_OK)
             throw CannotWriteException();
     }

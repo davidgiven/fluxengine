@@ -39,7 +39,7 @@ public:
     uint32_t capabilities() const
     {
         return OP_GETFSDATA | OP_CREATE | OP_LIST | OP_GETFILE | OP_PUTFILE |
-               OP_GETDIRENT | OP_MOVE;
+               OP_GETDIRENT | OP_MOVE | OP_CREATEDIR;
     }
 
     std::map<std::string, std::string> getMetadata() override
@@ -194,6 +194,14 @@ public:
         auto oldPathStr = oldPath.to_str();
         auto newPathStr = newPath.to_str();
         FRESULT res = f_rename(oldPathStr.c_str(), newPathStr.c_str());
+        throwError(res);
+    }
+
+    void createDirectory(const Path& path)
+    {
+        mount();
+        auto pathStr = path.to_str();
+        FRESULT res = f_mkdir(pathStr.c_str());
         throwError(res);
     }
 

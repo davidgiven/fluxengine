@@ -27,7 +27,7 @@ public:
     uint32_t capabilities() const
     {
         return OP_GETFSDATA | OP_CREATE | OP_LIST | OP_GETFILE | OP_PUTFILE |
-               OP_GETDIRENT | OP_MOVE;
+               OP_GETDIRENT | OP_MOVE | OP_CREATEDIR;
     }
 
     std::map<std::string, std::string> getMetadata() override
@@ -178,6 +178,15 @@ public:
         auto oldPathStr = ":" + oldPath.to_str(":");
         auto newPathStr = ":" + newPath.to_str(":");
         if (!hfs_rename(_vol, oldPathStr.c_str(), newPathStr.c_str()))
+            throw CannotWriteException();
+    }
+
+    void createDirectory(const Path& path) override
+    {
+        HfsMount m(this);
+
+        auto pathStr = ":" + path.to_str(":");
+        if (!hfs_mkdir(_vol, pathStr.c_str()))
             throw CannotWriteException();
     }
 

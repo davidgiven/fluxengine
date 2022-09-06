@@ -341,6 +341,29 @@ class FileRenameDialog : public wxDialog
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+/// Class CreateDirectoryDialog
+///////////////////////////////////////////////////////////////////////////////
+class CreateDirectoryDialog : public wxDialog
+{
+	private:
+
+	protected:
+		wxStaticText* m_staticText91;
+		wxStaticText* m_staticText9;
+		wxStdDialogButtonSizer* m_sdbSizer6;
+		wxButton* m_sdbSizer6OK;
+		wxButton* m_sdbSizer6Cancel;
+
+	public:
+		wxTextCtrl* newNameText;
+
+		CreateDirectoryDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Create new directory"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
+
+		~CreateDirectoryDialog();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
 /// Class FormatDialog
 ///////////////////////////////////////////////////////////////////////////////
 class FormatDialog : public wxDialog
