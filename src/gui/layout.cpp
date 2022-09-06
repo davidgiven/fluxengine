@@ -297,7 +297,7 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	#endif
 	browserMoreMenu->Append( browserNewDirectoryMenuItem );
 
-	browserRenameMenuItem = new wxMenuItem( browserMoreMenu, wxID_ANY, wxString( wxT("Rename file") ) , wxEmptyString, wxITEM_NORMAL );
+	browserRenameMenuItem = new wxMenuItem( browserMoreMenu, wxID_ANY, wxString( wxT("Move file") ) , wxEmptyString, wxITEM_NORMAL );
 	#ifdef __WXMSW__
 	browserRenameMenuItem->SetBitmaps( wxNullBitmap );
 	#elif (defined( __WXGTK__ ) || defined( __WXOSX__ ))
@@ -655,6 +655,8 @@ GetfileDialog::GetfileDialog( wxWindow* parent, wxWindowID id, const wxString& t
 	gbSizer1->Add( m_staticText7, wxGBPosition( 0, 0 ), wxGBSpan( 1, 1 ), wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
 	filenameText = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 300,-1 ), wxTE_READONLY );
+	filenameText->Enable( false );
+
 	gbSizer1->Add( filenameText, wxGBPosition( 0, 1 ), wxGBSpan( 1, 1 ), wxALL|wxEXPAND, 5 );
 
 	m_staticText9 = new wxStaticText( this, wxID_ANY, wxT("File to save as:"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -710,6 +712,8 @@ FileConflictDialog::FileConflictDialog( wxWindow* parent, wxWindowID id, const w
 	gbSizer1->Add( m_staticText9, wxGBPosition( 2, 0 ), wxGBSpan( 1, 1 ), wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
 	oldNameText = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY );
+	oldNameText->Enable( false );
+
 	gbSizer1->Add( oldNameText, wxGBPosition( 1, 1 ), wxGBSpan( 1, 1 ), wxALL|wxEXPAND, 5 );
 
 	m_sdbSizer6 = new wxStdDialogButtonSizer();
@@ -758,6 +762,8 @@ FileRenameDialog::FileRenameDialog( wxWindow* parent, wxWindowID id, const wxStr
 	gbSizer1->Add( m_staticText9, wxGBPosition( 2, 0 ), wxGBSpan( 1, 1 ), wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
 	oldNameText = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY );
+	oldNameText->Enable( false );
+
 	gbSizer1->Add( oldNameText, wxGBPosition( 1, 1 ), wxGBSpan( 1, 1 ), wxALL|wxEXPAND, 5 );
 
 	m_sdbSizer6 = new wxStdDialogButtonSizer();
