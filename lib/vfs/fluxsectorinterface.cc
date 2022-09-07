@@ -45,6 +45,11 @@ public:
         return _changedSectors.put(track, side, sectorId);
     }
 
+    virtual bool isReadOnly()
+    {
+        return (_fluxSink != nullptr);
+    }
+
     bool needsFlushing() override
     {
         return !_changedTracks.empty();

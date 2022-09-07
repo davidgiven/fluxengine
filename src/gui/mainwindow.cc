@@ -434,6 +434,8 @@ public:
                 [this]()
                 {
                     _filesystem = Filesystem::createFilesystemFromConfig();
+                    _filesystemCapabilities = _filesystem->capabilities();
+                    _filesystemIsReadOnly = _filesystem->isReadOnly();
 
                     runOnUiThread(
                         [&]()
@@ -476,17 +478,18 @@ public:
                         auto node = _filesystemModel->Find(path);
                         if (node)
                             browserTree->Expand(node->item);
-                        UpdateDiskSpaceGauge();
+                        UpdateFilesystemData();
                     });
             });
     }
 
-    void UpdateDiskSpaceGauge()
+    void UpdateFilesystemData()
     {
         QueueBrowserOperation(
             [this]()
             {
                 auto metadata = _filesystem->getMetadata();
+                _filesystemNeedsFlushing = _filesystem->needsFlushing();
 
                 runOnUiThread(
                     [&]()
@@ -646,8 +649,8 @@ public:
             [this, path, localPath, item]() mutable
             {
                 path = ResolveFileConflicts_WT(path);
-				if (path.empty())
-					return;
+                if (path.empty())
+                    return;
 
                 auto bytes = Bytes::readFromFile(localPath);
                 _filesystem->putFile(path, bytes);
@@ -658,6 +661,7 @@ public:
                     [&]()
                     {
                         _filesystemModel->Add(dirent);
+                        UpdateFilesystemData();
                     });
             });
     }
@@ -676,6 +680,7 @@ public:
                     [&]()
                     {
                         _filesystemModel->Delete(node->dirent->path);
+                        UpdateFilesystemData();
                     });
             });
     }
@@ -722,8 +727,8 @@ public:
                 newPath.push_back(node->newname);
 
                 newPath = ResolveFileConflicts_WT(newPath);
-				if (newPath.empty())
-					return;
+                if (newPath.empty())
+                    return;
 
                 _filesystem->moveFile(oldPath, newPath);
 
@@ -733,6 +738,7 @@ public:
                     {
                         _filesystemModel->Delete(oldPath);
                         _filesystemModel->Add(dirent);
+                        UpdateFilesystemData();
                     });
             });
     }
@@ -754,8 +760,8 @@ public:
             [this, oldPath, newPath]() mutable
             {
                 newPath = ResolveFileConflicts_WT(newPath);
-				if (newPath.empty())
-					return;
+                if (newPath.empty())
+                    return;
 
                 _filesystem->moveFile(oldPath, newPath);
 
@@ -765,6 +771,7 @@ public:
                     {
                         _filesystemModel->Delete(oldPath);
                         _filesystemModel->Add(dirent);
+                        UpdateFilesystemData();
                     });
             });
     }
@@ -809,7 +816,7 @@ public:
                     [&]()
                     {
                         _filesystemModel->Add(dirent);
-                        UpdateDiskSpaceGauge();
+                        UpdateFilesystemData();
                     });
             });
     }
@@ -820,6 +827,7 @@ public:
             [this]()
             {
                 _filesystem->flushChanges();
+                UpdateFilesystemData();
             });
     }
 
@@ -1229,28 +1237,27 @@ public:
             browserToolbar->EnableTool(
                 browserBackTool->GetId(), _state == STATE_BROWSING_IDLE);
 
-            uint32_t capabilities =
-                _filesystem ? _filesystem->capabilities() : 0;
+            uint32_t c = _filesystemCapabilities;
+            bool ro = _filesystemIsReadOnly;
+            bool needsFlushing = _filesystemNeedsFlushing;
 
             browserToolbar->EnableTool(browserInfoTool->GetId(),
-                (capabilities & Filesystem::OP_GETDIRENT) && selection);
+                (c & Filesystem::OP_GETDIRENT) && selection);
             browserToolbar->EnableTool(browserViewTool->GetId(),
-                (capabilities & Filesystem::OP_GETFILE) && selection);
+                (c & Filesystem::OP_GETFILE) && selection);
             browserToolbar->EnableTool(browserSaveTool->GetId(),
-                (capabilities & Filesystem::OP_GETFILE) && selection);
+                (c & Filesystem::OP_GETFILE) && selection);
             browserMoreMenu->Enable(browserAddMenuItem->GetId(),
-                capabilities & Filesystem::OP_PUTFILE);
+                !ro && (c & Filesystem::OP_PUTFILE));
             browserMoreMenu->Enable(browserNewDirectoryMenuItem->GetId(),
-                capabilities & Filesystem::OP_CREATEDIR);
+                !ro && (c & Filesystem::OP_CREATEDIR));
             browserMoreMenu->Enable(browserRenameMenuItem->GetId(),
-                (capabilities & Filesystem::OP_MOVE) && selection);
+                !ro && (c & Filesystem::OP_MOVE) && selection);
             browserMoreMenu->Enable(browserDeleteMenuItem->GetId(),
-                (capabilities & Filesystem::OP_DELETE) && selection);
-            browserToolbar->EnableTool(browserFormatTool->GetId(),
-                capabilities & Filesystem::OP_CREATE);
+                !ro && (c & Filesystem::OP_DELETE) && selection);
+            browserToolbar->EnableTool(
+                browserFormatTool->GetId(), !ro && (c & Filesystem::OP_CREATE));
 
-            bool needsFlushing =
-                _filesystem ? _filesystem->needsFlushing() : false;
             browserDiscardButton->Enable(needsFlushing);
             browserCommitButton->Enable(needsFlushing);
         }
@@ -1383,6 +1390,9 @@ private:
     std::unique_ptr<TextViewerWindow> _configWindow;
     std::string _extraConfiguration;
     std::unique_ptr<Filesystem> _filesystem;
+    uint32_t _filesystemCapabilities;
+    bool _filesystemIsReadOnly;
+    bool _filesystemNeedsFlushing;
     FilesystemModel* _filesystemModel;
     std::deque<std::function<void()>> _filesystemQueue;
 };

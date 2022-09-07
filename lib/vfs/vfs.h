@@ -172,6 +172,9 @@ public:
     /* Moves a file (including renaming it). */
     virtual void moveFile(const Path& oldName, const Path& newName);
 
+    /* Is this filesystem's backing store read-only? */
+    bool isReadOnly();
+
     /* Does this filesystem need flushing? */
     bool needsFlushing();
 

@@ -120,6 +120,11 @@ void Filesystem::moveFile(const Path& oldName, const Path& newName)
     throw UnimplementedFilesystemException();
 }
 
+bool Filesystem::isReadOnly()
+{
+    return _sectors->isReadOnly();
+}
+
 bool Filesystem::needsFlushing()
 {
     return _sectors->needsFlushing();

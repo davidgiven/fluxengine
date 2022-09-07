@@ -16,6 +16,11 @@ public:
     virtual std::shared_ptr<Sector> put(
         unsigned track, unsigned side, unsigned sectorId) = 0;
 
+    virtual bool isReadOnly()
+    {
+        return true;
+    }
+
     virtual bool needsFlushing()
     {
         return false;
