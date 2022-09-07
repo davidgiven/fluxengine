@@ -42,13 +42,25 @@ const std::string DEFAULT_EXTRA_CONFIGURATION =
     "# or the name of a built-in configuration, or the filename\n"
     "# of a text proto file. Or a comment, of course.\n\n";
 
+const std::string DND_TYPE = "fluxengine.files";
+
+class CancelException
+{
+};
+
 class MainWindow : public MainWindowGen
 {
 private:
     class FilesystemOperation;
 
 public:
-    MainWindow(): MainWindowGen(nullptr), _config("FluxEngine")
+    MainWindow():
+        MainWindowGen(nullptr),
+        /* This is wrong. Apparently the wxDataViewCtrl doesn't work properly
+         * with DnD unless the format is wxDF_UNICODETEXT. It should be a custom
+         * value. */
+        _dndFormat(wxDF_UNICODETEXT),
+        _config("FluxEngine")
     {
         Logger::setLogger(
             [&](std::shared_ptr<const AnyLogMessage> message)
@@ -115,6 +127,13 @@ public:
             wxAuiToolBarEventHandler(MainWindow::OnBrowserMoreMenuButton),
             NULL,
             this);
+
+        /* This is a bug workaround for an issue where the calculation of the
+         * item being dropped on is wrong due to the header not being taken into
+         * account. See https://forums.wxwidgets.org/viewtopic.php?t=44752. */
+
+        browserTree->EnableDragSource(_dndFormat);
+        browserTree->EnableDropTarget(_dndFormat);
 
         /* I have no idea why this is necessary, but on Windows things aren't
          * laid out correctly without it. */
@@ -612,28 +631,31 @@ public:
         return path;
     }
 
-    void OnBrowserAddMenuItem(wxCommandEvent&) override
+    std::shared_ptr<FilesystemNode> GetTargetDirectoryNode(wxDataViewItem& item)
     {
-        Path dirPath;
-        auto item = browserTree->GetSelection();
+        Path path;
         if (item.IsOk())
         {
-            auto dirNode = _filesystemModel->Find(item);
-            if (!dirNode)
-                return;
-            dirPath = dirNode->dirent->path;
+            auto node = _filesystemModel->Find(item);
+            if (!node)
+                return nullptr;
+            path = node->dirent->path;
         }
 
-        auto dirNode = _filesystemModel->Find(dirPath);
+        auto node = _filesystemModel->Find(path);
+        if (!node)
+            return nullptr;
+        if (node->dirent->file_type != TYPE_DIRECTORY)
+            return _filesystemModel->Find(path.parent());
+        return node;
+    }
+
+    void OnBrowserAddMenuItem(wxCommandEvent&) override
+    {
+        auto item = browserTree->GetSelection();
+        auto dirNode = GetTargetDirectoryNode(item);
         if (!dirNode)
             return;
-        if (dirNode->dirent->file_type != TYPE_DIRECTORY)
-        {
-            dirPath = dirPath.parent();
-            dirNode = _filesystemModel->Find(dirPath);
-            if (!dirNode)
-                return;
-        }
 
         auto localPath = wxFileSelector("Choose the name of the file to add",
             /* default_path= */ wxEmptyString,
@@ -644,11 +666,11 @@ public:
                              .ToStdString();
         if (localPath.empty())
             return;
-        Path path = dirPath;
-        path.push_back(wxFileName(localPath).GetFullName().ToStdString());
+        auto path = dirNode->dirent->path.concat(
+            wxFileName(localPath).GetFullName().ToStdString());
 
         QueueBrowserOperation(
-            [this, path, localPath, item]() mutable
+            [this, path, localPath]() mutable
             {
                 path = ResolveFileConflicts_WT(path);
                 if (path.empty())
@@ -672,6 +694,8 @@ public:
     {
         auto item = browserTree->GetSelection();
         auto node = _filesystemModel->Find(item);
+        if (!node)
+            return;
 
         QueueBrowserOperation(
             [this, node]()
@@ -720,13 +744,14 @@ public:
 
         if (node->newname.empty())
             return;
+        if (node->newname == node->dirent->filename)
+            return;
 
         QueueBrowserOperation(
             [this, node]() mutable
             {
                 auto oldPath = node->dirent->path;
-                auto newPath = oldPath.parent();
-                newPath.push_back(node->newname);
+                auto newPath = oldPath.parent().concat(node->newname);
 
                 newPath = ResolveFileConflicts_WT(newPath);
                 if (newPath.empty())
@@ -756,8 +781,12 @@ public:
         if (d.ShowModal() != wxID_OK)
             return;
 
-        auto oldPath = node->dirent->path;
-        auto newPath = Path(d.newNameText->GetValue().ToStdString());
+        ActuallyMoveFile(
+            node->dirent->path, Path(d.newNameText->GetValue().ToStdString()));
+    }
+
+    void ActuallyMoveFile(const Path& oldPath, Path newPath)
+    {
         QueueBrowserOperation(
             [this, oldPath, newPath]() mutable
             {
@@ -780,26 +809,11 @@ public:
 
     void OnBrowserNewDirectoryMenuItem(wxCommandEvent& event)
     {
-        Path path;
         auto item = browserTree->GetSelection();
-        if (item.IsOk())
-        {
-            auto node = _filesystemModel->Find(item);
-            if (!node)
-                return;
-            path = node->dirent->path;
-        }
-
-        auto node = _filesystemModel->Find(path);
+        auto node = GetTargetDirectoryNode(item);
         if (!node)
             return;
-        if (node->dirent->file_type != TYPE_DIRECTORY)
-        {
-            path = path.parent();
-            node = _filesystemModel->Find(path);
-            if (!node)
-                return;
-        }
+        auto path = node->dirent->path;
 
         CreateDirectoryDialog d(this, wxID_ANY);
         d.newNameText->SetValue(path.to_str() + "/");
@@ -821,6 +835,79 @@ public:
                         UpdateFilesystemData();
                     });
             });
+    }
+
+    void OnBrowserBeginDrag(wxDataViewEvent& event) override
+    {
+        auto item = browserTree->GetSelection();
+        if (!item.IsOk())
+        {
+            event.Veto();
+            return;
+        }
+
+        auto node = _filesystemModel->Find(item);
+        if (!node)
+        {
+            event.Veto();
+            return;
+        }
+
+        wxTextDataObject* obj = new wxTextDataObject();
+        obj->SetText(node->dirent->path.to_str());
+        event.SetDataObject(obj);
+        event.SetDataFormat(_dndFormat);
+    }
+
+    void OnBrowserDropPossible(wxDataViewEvent& event) override
+    {
+        if (event.GetDataFormat() != _dndFormat)
+        {
+            event.Veto();
+            return;
+        }
+    }
+
+    void OnBrowserDrop(wxDataViewEvent& event) override
+    {
+        try
+        {
+            if (event.GetDataFormat() != _dndFormat)
+                throw CancelException();
+
+            /* wxWidgets 3.0 data view DnD is borked. See
+             * https://forums.wxwidgets.org/viewtopic.php?t=44752. The hit
+             * detection is done against the wrong object, resulting in the
+             * header size not being taken into account, so we have to manually
+             * do hit detection correctly. */
+
+            auto* window = browserTree->GetMainWindow();
+            auto screenPos = wxGetMousePosition();
+            auto relPos = screenPos - window->GetScreenPosition();
+
+            wxDataViewItem item;
+            wxDataViewColumn* column;
+            browserTree->HitTest(relPos, item, column);
+            if (!item.IsOk())
+                throw CancelException();
+
+            auto destDirNode = GetTargetDirectoryNode(item);
+            if (!destDirNode)
+                throw CancelException();
+            auto destDirPath = destDirNode->dirent->path;
+
+            wxTextDataObject obj;
+            obj.SetData(_dndFormat, event.GetDataSize(), event.GetDataBuffer());
+            auto srcPath = Path(obj.GetText().ToStdString());
+            if (srcPath.empty())
+                throw CancelException();
+
+            ActuallyMoveFile(srcPath, destDirPath.concat(srcPath.back()));
+        }
+        catch (const CancelException& e)
+        {
+            event.Veto();
+        }
     }
 
     void OnBrowserCommitButton(wxCommandEvent&) override
@@ -1378,6 +1465,7 @@ private:
     };
 
     wxConfig _config;
+    wxDataFormat _dndFormat;
     std::vector<std::pair<std::string, std::unique_ptr<const ConfigProto>>>
         _formats;
     std::vector<std::unique_ptr<const CandidateDevice>> _devices;

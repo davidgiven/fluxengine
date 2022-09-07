@@ -50,6 +50,13 @@ Path Path::parent() const
     return p;
 }
 
+Path Path::concat(const std::string& s) const
+{
+    Path p(*this);
+    p.push_back(s);
+    return p;
+}
+
 std::string Path::to_str(const std::string sep) const
 {
     return join(*this, sep);

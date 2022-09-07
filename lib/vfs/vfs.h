@@ -19,6 +19,7 @@ public:
 
 public:
     Path parent() const;
+    Path concat(const std::string& s) const;
     std::string to_str(const std::string sep = "/") const;
 };
 
