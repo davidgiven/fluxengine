@@ -47,7 +47,7 @@ public:
 
     virtual bool isReadOnly()
     {
-        return (_fluxSink != nullptr);
+        return (_fluxSink == nullptr);
     }
 
     bool needsFlushing() override

@@ -277,6 +277,8 @@ public:
 
             ImageReader::updateConfigForFilename(
                 config.mutable_image_reader(), filename.ToStdString());
+            ImageWriter::updateConfigForFilename(
+                config.mutable_image_writer(), filename.ToStdString());
             visualiser->Clear();
             _currentDisk = nullptr;
 

@@ -7,6 +7,7 @@
 #include "lib/sector.h"
 #include "lib/vfs/sectorinterface.h"
 #include "lib/imagereader/imagereader.h"
+#include "lib/imagewriter/imagewriter.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/decoders/decoders.h"
@@ -223,9 +224,15 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystemFromConfig()
     }
     else
     {
-        auto reader = ImageReader::create(config.image_reader());
-        std::shared_ptr<Image> image(std::move(reader->readImage()));
-        sectorInterface = SectorInterface::createImageSectorInterface(image);
+        std::shared_ptr<ImageReader> reader(
+            ImageReader::create(config.image_reader()));
+        std::shared_ptr<ImageWriter> writer;
+        if (config.image_writer().format_case() !=
+            ImageWriterProto::FORMAT_NOT_SET)
+            writer = ImageWriter::create(config.image_writer());
+
+        sectorInterface =
+            SectorInterface::createImageSectorInterface(reader, writer);
     }
 
     return createFilesystem(config.filesystem(), sectorInterface);

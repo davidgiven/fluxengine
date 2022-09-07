@@ -7,6 +7,7 @@
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/imagereader/imagereader.h"
+#include "lib/imagewriter/imagewriter.h"
 #include "fmt/format.h"
 #include "fluxengine.h"
 #include "lib/vfs/sectorinterface.h"
@@ -23,6 +24,8 @@ static StringFlag image({"-i", "--image"},
     {
         ImageReader::updateConfigForFilename(
             config.mutable_image_reader(), value);
+        ImageWriter::updateConfigForFilename(
+            config.mutable_image_writer(), value);
     });
 
 static StringFlag flux({"-f", "--flux"},

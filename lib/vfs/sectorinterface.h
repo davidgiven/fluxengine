@@ -1,7 +1,8 @@
 #ifndef SECTORINTERFACE_H
 #define SECTORINTERFACE_H
 
-class Image;
+class ImageReader;
+class ImageWriter;
 class Sector;
 class FluxSource;
 class FluxSink;
@@ -32,7 +33,8 @@ public:
 
 public:
     static std::unique_ptr<SectorInterface> createImageSectorInterface(
-        std::shared_ptr<Image> image);
+        std::shared_ptr<ImageReader> reader,
+        std::shared_ptr<ImageWriter> writer);
     static std::unique_ptr<SectorInterface> createFluxSectorInterface(
         std::shared_ptr<FluxSource> fluxSource,
         std::shared_ptr<FluxSink> fluxSink,
