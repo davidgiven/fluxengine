@@ -74,6 +74,11 @@ public:
 		return sectors;
 	}
 
+	bool recordsSeekable() const override
+	{
+		return false;
+	}
+
 private:
 	const AmigaDecoderProto& _config;
 	nanoseconds_t _clock;
