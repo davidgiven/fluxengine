@@ -3,16 +3,19 @@
 #include "lib/imagereader/imagereader.h"
 #include "lib/imagewriter/imagewriter.h"
 #include "lib/image.h"
+#include "lib/layout.h"
+#include "lib/sector.h"
+#include "lib/bytes.h"
 
 class ImageSectorInterface : public SectorInterface
 {
 public:
     ImageSectorInterface(std::shared_ptr<ImageReader> reader,
         std::shared_ptr<ImageWriter> writer):
-        _image(reader->readImage()),
         _reader(reader),
         _writer(writer)
     {
+        discardChanges();
     }
 
 public:
@@ -47,7 +50,13 @@ public:
 
     void discardChanges() override
     {
-        _image = _reader->readImage();
+        if (_reader)
+            _image = _reader->readImage();
+        else
+        {
+            _image = std::make_shared<Image>();
+            _image->createBlankImage();
+        }
         _changed = false;
     }
 

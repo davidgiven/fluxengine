@@ -232,8 +232,8 @@ public:
 
     void OnControlsChanged(wxFileDirPickerEvent& event)
     {
-        SaveConfig();
-        UpdateState();
+        wxCommandEvent e;
+        OnControlsChanged(e);
     }
 
     void OnReadButton(wxCommandEvent&)
@@ -462,6 +462,42 @@ public:
                         [&]()
                         {
                             RepopulateBrowser();
+                        });
+                });
+        }
+        catch (const ErrorException& e)
+        {
+            wxMessageBox(e.message, "Error", wxOK | wxICON_ERROR);
+            _state = STATE_IDLE;
+        }
+    }
+
+    void OnFormatButton(wxCommandEvent& event) override
+    {
+        try
+        {
+            PrepareConfig();
+
+            visualiser->Clear();
+            _filesystemModel->Clear(Path());
+            _currentDisk = nullptr;
+
+            _state = STATE_BROWSING_WORKING;
+            UpdateState();
+            ShowConfig();
+
+            QueueBrowserOperation(
+                [this]()
+                {
+                    _filesystem = Filesystem::createFilesystemFromConfig();
+                    _filesystemCapabilities = _filesystem->capabilities();
+                    _filesystemIsReadOnly = _filesystem->isReadOnly();
+
+                    runOnUiThread(
+                        [&]()
+                        {
+                            wxCommandEvent e;
+                            OnBrowserFormatButton(e);
                         });
                 });
         }
@@ -1295,8 +1331,6 @@ public:
 
     void UpdateState()
     {
-        bool running = wxGetApp().IsWorkerThreadRunning();
-
         if (_state < STATE_IDLE__LAST)
         {
             dataNotebook->SetSelection(0);
@@ -1330,6 +1364,7 @@ public:
         {
             dataNotebook->SetSelection(2);
 
+            bool running = !_filesystemQueue.empty();
             bool selection = browserTree->GetSelection().IsOk();
 
             browserToolbar->EnableTool(
@@ -1340,24 +1375,24 @@ public:
             bool needsFlushing = _filesystemNeedsFlushing;
 
             browserToolbar->EnableTool(browserInfoTool->GetId(),
-                (c & Filesystem::OP_GETDIRENT) && selection);
+                !running && (c & Filesystem::OP_GETDIRENT) && selection);
             browserToolbar->EnableTool(browserViewTool->GetId(),
-                (c & Filesystem::OP_GETFILE) && selection);
+                !running && (c & Filesystem::OP_GETFILE) && selection);
             browserToolbar->EnableTool(browserSaveTool->GetId(),
-                (c & Filesystem::OP_GETFILE) && selection);
+                !running && (c & Filesystem::OP_GETFILE) && selection);
             browserMoreMenu->Enable(browserAddMenuItem->GetId(),
-                !ro && (c & Filesystem::OP_PUTFILE));
+                !running && !ro && (c & Filesystem::OP_PUTFILE));
             browserMoreMenu->Enable(browserNewDirectoryMenuItem->GetId(),
-                !ro && (c & Filesystem::OP_CREATEDIR));
+                !running && !ro && (c & Filesystem::OP_CREATEDIR));
             browserMoreMenu->Enable(browserRenameMenuItem->GetId(),
-                !ro && (c & Filesystem::OP_MOVE) && selection);
+                !running && !ro && (c & Filesystem::OP_MOVE) && selection);
             browserMoreMenu->Enable(browserDeleteMenuItem->GetId(),
-                !ro && (c & Filesystem::OP_DELETE) && selection);
-            browserToolbar->EnableTool(
-                browserFormatTool->GetId(), !ro && (c & Filesystem::OP_CREATE));
+                !running && !ro && (c & Filesystem::OP_DELETE) && selection);
+            browserToolbar->EnableTool(browserFormatTool->GetId(),
+                !running && !ro && (c & Filesystem::OP_CREATE));
 
-            browserDiscardButton->Enable(needsFlushing);
-            browserCommitButton->Enable(needsFlushing);
+            browserDiscardButton->Enable(!running && needsFlushing);
+            browserCommitButton->Enable(!running && needsFlushing);
         }
 
         Refresh();

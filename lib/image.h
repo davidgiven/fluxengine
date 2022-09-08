@@ -56,6 +56,7 @@ public:
     void calculateSize();
 
     void clear();
+    void createBlankImage();
     bool empty() const;
     bool contains(unsigned track, unsigned side, unsigned sectorId) const;
     std::shared_ptr<const Sector> get(
@@ -63,6 +64,8 @@ public:
     std::shared_ptr<Sector> put(
         unsigned track, unsigned side, unsigned sectorId);
     void erase(unsigned track, unsigned side, unsigned sectorId);
+
+    std::set<std::pair<unsigned, unsigned>> tracks() const;
 
     const_iterator begin() const
     {

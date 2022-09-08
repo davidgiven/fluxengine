@@ -6,6 +6,7 @@
 #include "usb/usb.h"
 #include "fluxsource/fluxsource.h"
 #include "lib/fluxsource/fluxsource.pb.h"
+#include "lib/readerwriter.h"
 #include "fmt/format.h"
 
 class HardwareFluxSource : public FluxSource
@@ -50,35 +51,7 @@ private:
 public:
     HardwareFluxSource(const HardwareFluxSourceProto& conf): _config(conf)
     {
-        int retries = 5;
-        usbSetDrive(config.drive().drive(), config.drive().high_density(), config.drive().index_mode());
-        Logger() << BeginSpeedOperationLogMessage();
-
-		_oneRevolution = config.drive().rotational_period_ms() * 1e6;
-        _hardSectorThreshold = 0;
-		if (_oneRevolution == 0)
-		{
-			Logger() << BeginOperationLogMessage{"Measuring drive rotational speed"};
-			do
-			{
-				_oneRevolution =
-					usbGetRotationalPeriod(config.drive().hard_sector_count());
-				if (config.drive().hard_sector_count() != 0)
-					_hardSectorThreshold =
-						_oneRevolution * 3 / (4 * config.drive().hard_sector_count());
-				else
-					_hardSectorThreshold = 0;
-
-				retries--;
-			} while ((_oneRevolution == 0) && (retries > 0));
-			config.mutable_drive()->set_rotational_period_ms(_oneRevolution / 1e6);
-			Logger() << EndOperationLogMessage{};
-		}
-
-        if (_oneRevolution == 0)
-            Error() << "Failed\nIs a disk in the drive?";
-
-        Logger() << EndSpeedOperationLogMessage{_oneRevolution};
+    	measureDiskRotation(_oneRevolution, _hardSectorThreshold);
     }
 
     ~HardwareFluxSource() {}

@@ -1,6 +1,7 @@
 #include "globals.h"
 #include "sector.h"
 #include "image.h"
+#include "layout.h"
 
 Image::Image() {}
 
@@ -19,6 +20,20 @@ void Image::clear()
 {
     _sectors.clear();
     _geometry = {0, 0, 0};
+}
+
+void Image::createBlankImage()
+{
+    clear();
+    for (const auto& trackAndHead : Layout::getTrackOrdering())
+    {
+        unsigned track = trackAndHead.first;
+        unsigned side = trackAndHead.second;
+        auto layout = Layout::getLayoutOfTrack(track, side);
+        Bytes blank(layout.sector_size());
+        for (unsigned sectorId : Layout::getSectorsInTrack(layout))
+            put(track, side, sectorId)->data = blank;
+    }
 }
 
 bool Image::empty() const
@@ -60,6 +75,15 @@ void Image::erase(unsigned track, unsigned side, unsigned sectorid)
 {
     key_t key = std::make_tuple(track, side, sectorid);
     _sectors.erase(key);
+}
+
+std::set<std::pair<unsigned, unsigned>> Image::tracks() const
+{
+    std::set<std::pair<unsigned, unsigned>> result;
+    for (const auto& e : _sectors)
+        result.insert(
+            std::make_pair(std::get<0>(e.first), std::get<1>(e.first)));
+    return result;
 }
 
 void Image::calculateSize()

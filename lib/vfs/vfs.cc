@@ -210,30 +210,33 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystem(
 std::unique_ptr<Filesystem> Filesystem::createFilesystemFromConfig()
 {
     std::shared_ptr<SectorInterface> sectorInterface;
-    if (config.has_flux_source())
+    if (config.has_flux_source() || config.has_flux_sink())
     {
-        std::shared_ptr<FluxSource> fluxSource(
-            FluxSource::create(config.flux_source()));
-        std::shared_ptr<AbstractDecoder> decoder(
-            AbstractDecoder::create(config.decoder()));
+        std::shared_ptr<FluxSource> fluxSource;
+        std::shared_ptr<AbstractDecoder> decoder;
+        std::shared_ptr<FluxSink> fluxSink;
+        std::shared_ptr<AbstractEncoder> encoder;
+        if (config.flux_source().source_case() !=
+            FluxSourceProto::SOURCE_NOT_SET)
+        {
+            fluxSource = FluxSource::create(config.flux_source());
+            decoder = AbstractDecoder::create(config.decoder());
+        }
         if (config.flux_sink().has_drive())
         {
-            std::shared_ptr<FluxSink> fluxSink(
-                FluxSink::create(config.flux_sink()));
-            std::shared_ptr<AbstractEncoder> encoder(
-                AbstractEncoder::create(config.encoder()));
-            sectorInterface = SectorInterface::createFluxSectorInterface(
-                fluxSource, fluxSink, encoder, decoder);
+            fluxSink = FluxSink::create(config.flux_sink());
+            encoder = AbstractEncoder::create(config.encoder());
         }
-        else
-            sectorInterface = SectorInterface::createFluxSectorInterface(
-                fluxSource, nullptr, nullptr, decoder);
+        sectorInterface = SectorInterface::createFluxSectorInterface(
+            fluxSource, fluxSink, encoder, decoder);
     }
     else
     {
-        std::shared_ptr<ImageReader> reader(
-            ImageReader::create(config.image_reader()));
+        std::shared_ptr<ImageReader> reader;
         std::shared_ptr<ImageWriter> writer;
+        if (config.image_reader().format_case() !=
+            ImageReaderProto::FORMAT_NOT_SET)
+            reader = ImageReader::create(config.image_reader());
         if (config.image_writer().format_case() !=
             ImageWriterProto::FORMAT_NOT_SET)
             writer = ImageWriter::create(config.image_writer());

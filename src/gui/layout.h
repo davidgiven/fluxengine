@@ -77,6 +77,7 @@ class MainWindowGen : public wxFrame
 		wxButton* readButton;
 		wxButton* writeButton;
 		wxButton* browseButton;
+		wxButton* formatButton;
 		wxPanel* imagePanel;
 		wxAuiToolBar* imagerToolbar;
 		wxAuiToolBarItem* imagerBackTool;
@@ -120,6 +121,7 @@ class MainWindowGen : public wxFrame
 		virtual void OnReadButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnWriteButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBrowseButton( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnFormatButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBackButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSaveImageButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSaveFluxButton( wxCommandEvent& event ) { event.Skip(); }

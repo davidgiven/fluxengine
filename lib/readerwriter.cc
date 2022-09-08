@@ -56,6 +56,46 @@ private:
         _cache;
 };
 
+void measureDiskRotation(
+    nanoseconds_t& oneRevolution, nanoseconds_t& hardSectorThreshold)
+{
+    Logger() << BeginSpeedOperationLogMessage();
+
+    int retries = 5;
+    usbSetDrive(config.drive().drive(),
+        config.drive().high_density(),
+        config.drive().index_mode());
+    oneRevolution = config.drive().rotational_period_ms() * 1e6;
+    if (config.drive().hard_sector_count() != 0)
+        hardSectorThreshold =
+            oneRevolution * 3 / (4 * config.drive().hard_sector_count());
+    else
+        hardSectorThreshold = 0;
+
+    if (oneRevolution == 0)
+    {
+        Logger() << BeginOperationLogMessage{
+            "Measuring drive rotational speed"};
+        do
+        {
+            oneRevolution =
+                usbGetRotationalPeriod(config.drive().hard_sector_count());
+            if (config.drive().hard_sector_count() != 0)
+                hardSectorThreshold = oneRevolution * 3 /
+                                      (4 * config.drive().hard_sector_count());
+
+            retries--;
+        } while ((oneRevolution == 0) && (retries > 0));
+        config.mutable_drive()->set_rotational_period_ms(oneRevolution / 1e6);
+        Logger() << EndOperationLogMessage{};
+    }
+
+    if (oneRevolution == 0)
+        Error() << "Failed\nIs a disk in the drive?";
+
+    Logger() << EndSpeedOperationLogMessage{oneRevolution};
+}
+
 /* Given a set of sectors, deduplicates them sensibly (e.g. if there is a good
  * and bad version of the same sector, the bad version is dropped). */
 
