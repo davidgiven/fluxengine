@@ -588,8 +588,7 @@ public:
 
         GetfileDialog d(this, wxID_ANY);
         d.filenameText->SetValue(node->dirent->path.to_str());
-        d.targetFilePicker->SetFileName(
-            wxFileName(node->dirent->filename));
+        d.targetFilePicker->SetFileName(wxFileName(node->dirent->filename));
         d.targetFilePicker->SetFocus();
         d.buttons_OK->SetDefault();
         if (d.ShowModal() != wxID_OK)
@@ -625,7 +624,7 @@ public:
                     d.oldNameText->SetValue(path.to_str());
                     d.newNameText->SetValue(path.to_str());
                     d.newNameText->SetFocus();
-        d.buttons_OK->SetDefault();
+                    d.buttons_OK->SetDefault();
                     if (d.ShowModal() == wxID_OK)
                         path = Path(d.newNameText->GetValue().ToStdString());
                     else
