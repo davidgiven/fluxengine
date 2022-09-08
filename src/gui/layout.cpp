@@ -592,20 +592,6 @@ FileViewerWindowGen::FileViewerWindowGen( wxWindow* parent, wxWindowID id, const
 	fgSizer8->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_ALL );
 
 	m_notebook1 = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	m_panel7 = new wxPanel( m_notebook1, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	wxGridSizer* gSizer10;
-	gSizer10 = new wxGridSizer( 1, 1, 0, 0 );
-
-	hexControl = new wxTextCtrl( m_panel7, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY );
-	hexControl->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
-
-	gSizer10->Add( hexControl, 0, wxALL|wxEXPAND, 5 );
-
-
-	m_panel7->SetSizer( gSizer10 );
-	m_panel7->Layout();
-	gSizer10->Fit( m_panel7 );
-	m_notebook1->AddPage( m_panel7, wxT("Hex"), false );
 	m_panel8 = new wxPanel( m_notebook1, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxGridSizer* gSizer101;
 	gSizer101 = new wxGridSizer( 1, 1, 0, 0 );
@@ -620,6 +606,20 @@ FileViewerWindowGen::FileViewerWindowGen( wxWindow* parent, wxWindowID id, const
 	m_panel8->Layout();
 	gSizer101->Fit( m_panel8 );
 	m_notebook1->AddPage( m_panel8, wxT("Text"), false );
+	m_panel7 = new wxPanel( m_notebook1, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxGridSizer* gSizer10;
+	gSizer10 = new wxGridSizer( 1, 1, 0, 0 );
+
+	hexControl = new wxTextCtrl( m_panel7, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY );
+	hexControl->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
+
+	gSizer10->Add( hexControl, 0, wxALL|wxEXPAND, 5 );
+
+
+	m_panel7->SetSizer( gSizer10 );
+	m_panel7->Layout();
+	gSizer10->Fit( m_panel7 );
+	m_notebook1->AddPage( m_panel7, wxT("Hex"), false );
 
 	fgSizer8->Add( m_notebook1, 1, wxEXPAND | wxALL, 5 );
 
@@ -672,14 +672,14 @@ GetfileDialog::GetfileDialog( wxWindow* parent, wxWindowID id, const wxString& t
 	targetFilePicker = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_OVERWRITE_PROMPT|wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	gbSizer1->Add( targetFilePicker, wxGBPosition( 1, 1 ), wxGBSpan( 1, 1 ), wxALL|wxEXPAND, 5 );
 
-	m_sdbSizer6 = new wxStdDialogButtonSizer();
-	m_sdbSizer6OK = new wxButton( this, wxID_OK );
-	m_sdbSizer6->AddButton( m_sdbSizer6OK );
-	m_sdbSizer6Cancel = new wxButton( this, wxID_CANCEL );
-	m_sdbSizer6->AddButton( m_sdbSizer6Cancel );
-	m_sdbSizer6->Realize();
+	buttons_ = new wxStdDialogButtonSizer();
+	buttons_OK = new wxButton( this, wxID_OK );
+	buttons_->AddButton( buttons_OK );
+	buttons_Cancel = new wxButton( this, wxID_CANCEL );
+	buttons_->AddButton( buttons_Cancel );
+	buttons_->Realize();
 
-	gbSizer1->Add( m_sdbSizer6, wxGBPosition( 2, 0 ), wxGBSpan( 1, 2 ), wxALL|wxEXPAND, 5 );
+	gbSizer1->Add( buttons_, wxGBPosition( 2, 0 ), wxGBSpan( 1, 2 ), wxALL|wxEXPAND, 5 );
 
 
 	this->SetSizer( gbSizer1 );
@@ -722,14 +722,14 @@ FileConflictDialog::FileConflictDialog( wxWindow* parent, wxWindowID id, const w
 
 	gbSizer1->Add( oldNameText, wxGBPosition( 1, 1 ), wxGBSpan( 1, 1 ), wxALL|wxEXPAND, 5 );
 
-	m_sdbSizer6 = new wxStdDialogButtonSizer();
-	m_sdbSizer6OK = new wxButton( this, wxID_OK );
-	m_sdbSizer6->AddButton( m_sdbSizer6OK );
-	m_sdbSizer6Cancel = new wxButton( this, wxID_CANCEL );
-	m_sdbSizer6->AddButton( m_sdbSizer6Cancel );
-	m_sdbSizer6->Realize();
+	buttons_ = new wxStdDialogButtonSizer();
+	buttons_OK = new wxButton( this, wxID_OK );
+	buttons_->AddButton( buttons_OK );
+	buttons_Cancel = new wxButton( this, wxID_CANCEL );
+	buttons_->AddButton( buttons_Cancel );
+	buttons_->Realize();
 
-	gbSizer1->Add( m_sdbSizer6, wxGBPosition( 3, 0 ), wxGBSpan( 1, 2 ), wxALL|wxEXPAND, 5 );
+	gbSizer1->Add( buttons_, wxGBPosition( 3, 0 ), wxGBSpan( 1, 2 ), wxALL|wxEXPAND, 5 );
 
 
 	this->SetSizer( gbSizer1 );
@@ -772,14 +772,14 @@ FileRenameDialog::FileRenameDialog( wxWindow* parent, wxWindowID id, const wxStr
 
 	gbSizer1->Add( oldNameText, wxGBPosition( 1, 1 ), wxGBSpan( 1, 1 ), wxALL|wxEXPAND, 5 );
 
-	m_sdbSizer6 = new wxStdDialogButtonSizer();
-	m_sdbSizer6OK = new wxButton( this, wxID_OK );
-	m_sdbSizer6->AddButton( m_sdbSizer6OK );
-	m_sdbSizer6Cancel = new wxButton( this, wxID_CANCEL );
-	m_sdbSizer6->AddButton( m_sdbSizer6Cancel );
-	m_sdbSizer6->Realize();
+	buttons_ = new wxStdDialogButtonSizer();
+	buttons_OK = new wxButton( this, wxID_OK );
+	buttons_->AddButton( buttons_OK );
+	buttons_Cancel = new wxButton( this, wxID_CANCEL );
+	buttons_->AddButton( buttons_Cancel );
+	buttons_->Realize();
 
-	gbSizer1->Add( m_sdbSizer6, wxGBPosition( 3, 0 ), wxGBSpan( 1, 2 ), wxALL|wxEXPAND, 5 );
+	gbSizer1->Add( buttons_, wxGBPosition( 3, 0 ), wxGBSpan( 1, 2 ), wxALL|wxEXPAND, 5 );
 
 
 	this->SetSizer( gbSizer1 );
@@ -813,14 +813,14 @@ CreateDirectoryDialog::CreateDirectoryDialog( wxWindow* parent, wxWindowID id, c
 	m_staticText9->Wrap( -1 );
 	gbSizer1->Add( m_staticText9, wxGBPosition( 1, 0 ), wxGBSpan( 1, 1 ), wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_sdbSizer6 = new wxStdDialogButtonSizer();
-	m_sdbSizer6OK = new wxButton( this, wxID_OK );
-	m_sdbSizer6->AddButton( m_sdbSizer6OK );
-	m_sdbSizer6Cancel = new wxButton( this, wxID_CANCEL );
-	m_sdbSizer6->AddButton( m_sdbSizer6Cancel );
-	m_sdbSizer6->Realize();
+	buttons_ = new wxStdDialogButtonSizer();
+	buttons_OK = new wxButton( this, wxID_OK );
+	buttons_->AddButton( buttons_OK );
+	buttons_Cancel = new wxButton( this, wxID_CANCEL );
+	buttons_->AddButton( buttons_Cancel );
+	buttons_->Realize();
 
-	gbSizer1->Add( m_sdbSizer6, wxGBPosition( 2, 0 ), wxGBSpan( 1, 2 ), wxALL|wxEXPAND, 5 );
+	gbSizer1->Add( buttons_, wxGBPosition( 2, 0 ), wxGBSpan( 1, 2 ), wxALL|wxEXPAND, 5 );
 
 
 	this->SetSizer( gbSizer1 );
@@ -857,14 +857,14 @@ FormatDialog::FormatDialog( wxWindow* parent, wxWindowID id, const wxString& tit
 	quickFormatCheckBox = new wxCheckBox( this, wxID_ANY, wxT("Quick format: if the disk is not already correctly formatted,\nvery bad things will happen!"), wxDefaultPosition, wxDefaultSize, 0 );
 	gbSizer1->Add( quickFormatCheckBox, wxGBPosition( 2, 1 ), wxGBSpan( 1, 1 ), wxALL|wxEXPAND, 5 );
 
-	m_sdbSizer6 = new wxStdDialogButtonSizer();
-	m_sdbSizer6OK = new wxButton( this, wxID_OK );
-	m_sdbSizer6->AddButton( m_sdbSizer6OK );
-	m_sdbSizer6Cancel = new wxButton( this, wxID_CANCEL );
-	m_sdbSizer6->AddButton( m_sdbSizer6Cancel );
-	m_sdbSizer6->Realize();
+	buttons_ = new wxStdDialogButtonSizer();
+	buttons_OK = new wxButton( this, wxID_OK );
+	buttons_->AddButton( buttons_OK );
+	buttons_Cancel = new wxButton( this, wxID_CANCEL );
+	buttons_->AddButton( buttons_Cancel );
+	buttons_->Realize();
 
-	gbSizer1->Add( m_sdbSizer6, wxGBPosition( 3, 0 ), wxGBSpan( 1, 2 ), wxALL|wxEXPAND, 5 );
+	gbSizer1->Add( buttons_, wxGBPosition( 3, 0 ), wxGBSpan( 1, 2 ), wxALL|wxEXPAND, 5 );
 
 
 	this->SetSizer( gbSizer1 );

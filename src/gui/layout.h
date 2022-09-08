@@ -250,10 +250,10 @@ class FileViewerWindowGen : public wxDialog
 
 	protected:
 		wxNotebook* m_notebook1;
-		wxPanel* m_panel7;
-		wxTextCtrl* hexControl;
 		wxPanel* m_panel8;
 		wxTextCtrl* textControl;
+		wxPanel* m_panel7;
+		wxTextCtrl* hexControl;
 		wxStdDialogButtonSizer* m_sdbSizer2;
 		wxButton* m_sdbSizer2OK;
 
@@ -279,13 +279,13 @@ class GetfileDialog : public wxDialog
 	protected:
 		wxStaticText* m_staticText7;
 		wxStaticText* m_staticText9;
-		wxStdDialogButtonSizer* m_sdbSizer6;
-		wxButton* m_sdbSizer6OK;
-		wxButton* m_sdbSizer6Cancel;
 
 	public:
 		wxTextCtrl* filenameText;
 		wxFilePickerCtrl* targetFilePicker;
+		wxStdDialogButtonSizer* buttons_;
+		wxButton* buttons_OK;
+		wxButton* buttons_Cancel;
 
 		GetfileDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Copy file off disk"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
 
@@ -304,13 +304,13 @@ class FileConflictDialog : public wxDialog
 		wxStaticText* m_staticText91;
 		wxStaticText* m_staticText7;
 		wxStaticText* m_staticText9;
-		wxStdDialogButtonSizer* m_sdbSizer6;
-		wxButton* m_sdbSizer6OK;
-		wxButton* m_sdbSizer6Cancel;
 
 	public:
 		wxTextCtrl* newNameText;
 		wxTextCtrl* oldNameText;
+		wxStdDialogButtonSizer* buttons_;
+		wxButton* buttons_OK;
+		wxButton* buttons_Cancel;
 
 		FileConflictDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Filename conflict"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
 
@@ -329,13 +329,13 @@ class FileRenameDialog : public wxDialog
 		wxStaticText* m_staticText91;
 		wxStaticText* m_staticText7;
 		wxStaticText* m_staticText9;
-		wxStdDialogButtonSizer* m_sdbSizer6;
-		wxButton* m_sdbSizer6OK;
-		wxButton* m_sdbSizer6Cancel;
 
 	public:
 		wxTextCtrl* newNameText;
 		wxTextCtrl* oldNameText;
+		wxStdDialogButtonSizer* buttons_;
+		wxButton* buttons_OK;
+		wxButton* buttons_Cancel;
 
 		FileRenameDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Rename or move file"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
 
@@ -353,12 +353,12 @@ class CreateDirectoryDialog : public wxDialog
 	protected:
 		wxStaticText* m_staticText91;
 		wxStaticText* m_staticText9;
-		wxStdDialogButtonSizer* m_sdbSizer6;
-		wxButton* m_sdbSizer6OK;
-		wxButton* m_sdbSizer6Cancel;
 
 	public:
 		wxTextCtrl* newNameText;
+		wxStdDialogButtonSizer* buttons_;
+		wxButton* buttons_OK;
+		wxButton* buttons_Cancel;
 
 		CreateDirectoryDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Create new directory"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
 
@@ -376,13 +376,13 @@ class FormatDialog : public wxDialog
 	protected:
 		wxStaticText* m_staticText91;
 		wxStaticText* m_staticText7;
-		wxStdDialogButtonSizer* m_sdbSizer6;
-		wxButton* m_sdbSizer6OK;
-		wxButton* m_sdbSizer6Cancel;
 
 	public:
 		wxTextCtrl* volumeNameText;
 		wxCheckBox* quickFormatCheckBox;
+		wxStdDialogButtonSizer* buttons_;
+		wxButton* buttons_OK;
+		wxButton* buttons_Cancel;
 
 		FormatDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Format disk"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
 

@@ -586,14 +586,16 @@ public:
         auto item = browserTree->GetSelection();
         auto node = _filesystemModel->Find(item);
 
-        GetfileDialog dialog(this, wxID_ANY);
-        dialog.filenameText->SetValue(node->dirent->path.to_str());
-        dialog.targetFilePicker->SetFileName(
+        GetfileDialog d(this, wxID_ANY);
+        d.filenameText->SetValue(node->dirent->path.to_str());
+        d.targetFilePicker->SetFileName(
             wxFileName(node->dirent->filename));
-        if (dialog.ShowModal() != wxID_OK)
+        d.targetFilePicker->SetFocus();
+        d.buttons_OK->SetDefault();
+        if (d.ShowModal() != wxID_OK)
             return;
 
-        auto localPath = dialog.targetFilePicker->GetPath().ToStdString();
+        auto localPath = d.targetFilePicker->GetPath().ToStdString();
         QueueBrowserOperation(
             [this, node, localPath]()
             {
@@ -622,6 +624,8 @@ public:
                     FileConflictDialog d(this, wxID_ANY);
                     d.oldNameText->SetValue(path.to_str());
                     d.newNameText->SetValue(path.to_str());
+                    d.newNameText->SetFocus();
+        d.buttons_OK->SetDefault();
                     if (d.ShowModal() == wxID_OK)
                         path = Path(d.newNameText->GetValue().ToStdString());
                     else
@@ -714,6 +718,8 @@ public:
     void OnBrowserFormatButton(wxCommandEvent&) override
     {
         FormatDialog d(this, wxID_ANY);
+        d.volumeNameText->SetFocus();
+        d.buttons_OK->SetDefault();
         if (d.ShowModal() != wxID_OK)
             return;
 
@@ -778,6 +784,8 @@ public:
         FileRenameDialog d(this, wxID_ANY);
         d.oldNameText->SetValue(node->dirent->path.to_str());
         d.newNameText->SetValue(node->dirent->path.to_str());
+        d.newNameText->SetFocus();
+        d.buttons_OK->SetDefault();
         if (d.ShowModal() != wxID_OK)
             return;
 
@@ -817,6 +825,8 @@ public:
 
         CreateDirectoryDialog d(this, wxID_ANY);
         d.newNameText->SetValue(path.to_str() + "/");
+        d.newNameText->SetFocus();
+        d.buttons_OK->SetDefault();
         if (d.ShowModal() != wxID_OK)
             return;
 
