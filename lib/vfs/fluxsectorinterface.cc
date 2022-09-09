@@ -116,8 +116,8 @@ public:
 
     void discardChanges() override
     {
-    	_loadedTracks.clear();
-    	_readSectors.clear();
+        _loadedTracks.clear();
+        _readSectors.clear();
         _changedTracks.clear();
         _changedSectors.clear();
     }
