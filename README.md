@@ -4,10 +4,9 @@ FluxEngine
 (If you're reading this on GitHub, the formatting's a bit messed up. [Try the
 version on cowlark.com instead.](http://cowlark.com/fluxengine/))
 
-**Breaking news!** As of 2021-05-21, the command line environment has changed
-_substantially_ (to make it more consistent and flexible, and allow some new
-backend features like multi-format IBM scheme disks, which are popular with
-CP/M). If things don't work the way you expect, please check the documentation.
+**Breaking news!** As of 2022-09-09, there's new filesystem support. Read (and
+sometimes write) files directly from (and to) your disks! It works in the GUI,
+too. See the details below.
 
 What?
 -----
@@ -67,6 +66,10 @@ following friendly articles:
   - [Configuring for your drive](doc/drives.md) ∾ but I don't have a 80 track
     drive! ∾ reading and writing 40 track disks ∾ Shugart and Apple II
 
+  - [Direct filesystem access](doc/filesystem.md) ∾ imaging files is a pain
+    ∾ accessing files directly ∾ features and limitation ∾ it works on disk
+    images too, you say?
+    
   - [Troubleshooting dubious disks](doc/problems.md) ∾ it's not an exact
     science ∾ the sector map ∾ clock detection and the histogram
 
