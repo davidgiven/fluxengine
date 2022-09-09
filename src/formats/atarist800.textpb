@@ -1,5 +1,7 @@
 comment: 'Atari ST 800kB 3.5" 80-track 10-sector DSDD'
 
+include: '_atari'
+
 image_reader {
 	filename: "atarist800.st"
 	img {}
@@ -51,10 +53,6 @@ tracks {
 heads {
 	start: 0
 	end: 1
-}
-
-filesystem {
-	fatfs {}
 }
 
 
