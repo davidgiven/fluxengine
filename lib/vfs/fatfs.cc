@@ -40,7 +40,7 @@ public:
     uint32_t capabilities() const
     {
         return OP_GETFSDATA | OP_CREATE | OP_LIST | OP_GETFILE | OP_PUTFILE |
-               OP_GETDIRENT | OP_MOVE | OP_CREATEDIR;
+               OP_GETDIRENT | OP_MOVE | OP_CREATEDIR | OP_DELETE;
     }
 
     std::map<std::string, std::string> getMetadata() override
