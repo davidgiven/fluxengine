@@ -9,6 +9,7 @@ extern std::vector<std::string> split(
     const std::string& string, char separator);
 extern bool beginsWith(const std::string& value, const std::string& beginning);
 extern bool endsWith(const std::string& value, const std::string& ending);
+extern std::string toUpper(const std::string& value);
 extern std::string leftTrimWhitespace(std::string value);
 extern std::string rightTrimWhitespace(std::string value);
 extern std::string trimWhitespace(const std::string& value);

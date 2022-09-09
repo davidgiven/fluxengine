@@ -1,6 +1,7 @@
 #include "lib/globals.h"
 #include "lib/vfs/vfs.h"
 #include "lib/config.pb.h"
+#include "lib/utils.h"
 #include <fmt/format.h>
 
 extern "C"
@@ -97,7 +98,7 @@ public:
         mount();
 
         DIR dir;
-        auto pathstr = path.to_str();
+        auto pathstr = toUpper(path.to_str());
         FRESULT res = f_opendir(&dir, pathstr.c_str());
         std::vector<std::shared_ptr<Dirent>> results;
 
@@ -122,7 +123,7 @@ public:
         std::map<std::string, std::string> attributes;
 
         mount();
-        auto pathstr = path.to_str();
+        auto pathstr = toUpper(path.to_str());
         FILINFO filinfo;
         FRESULT res = f_stat(pathstr.c_str(), &filinfo);
         throwError(res);
@@ -133,7 +134,7 @@ public:
     Bytes getFile(const Path& path) override
     {
         mount();
-        auto pathstr = path.to_str();
+        auto pathstr = toUpper(path.to_str());
         FIL fil;
         FRESULT res = f_open(&fil, pathstr.c_str(), FA_READ);
         throwError(res);
@@ -159,7 +160,7 @@ public:
     void putFile(const Path& path, const Bytes& bytes) override
     {
         mount();
-        auto pathstr = path.to_str();
+        auto pathstr = toUpper(path.to_str());
         FIL fil;
         FRESULT res =
             f_open(&fil, pathstr.c_str(), FA_WRITE | FA_CREATE_ALWAYS);
@@ -183,7 +184,7 @@ public:
     void deleteFile(const Path& path) override
     {
         mount();
-        auto pathstr = path.to_str();
+        auto pathstr = toUpper(path.to_str());
         FRESULT res = f_unlink(pathstr.c_str());
         throwError(res);
     }
@@ -191,8 +192,8 @@ public:
     void moveFile(const Path& oldPath, const Path& newPath) override
     {
         mount();
-        auto oldPathStr = oldPath.to_str();
-        auto newPathStr = newPath.to_str();
+        auto oldPathStr = toUpper(oldPath.to_str());
+        auto newPathStr = toUpper(newPath.to_str());
         FRESULT res = f_rename(oldPathStr.c_str(), newPathStr.c_str());
         throwError(res);
     }
@@ -209,9 +210,9 @@ private:
     std::shared_ptr<Dirent> toDirent(FILINFO& filinfo, const Path& parent)
     {
         auto dirent = std::make_shared<Dirent>();
+        dirent->filename = toUpper(filinfo.fname);
         dirent->path = parent;
-        dirent->path.push_back(filinfo.fname);
-        dirent->filename = filinfo.fname;
+        dirent->path.push_back(dirent->filename);
         dirent->length = filinfo.fsize;
         dirent->file_type =
             (filinfo.fattrib & AM_DIR) ? TYPE_DIRECTORY : TYPE_FILE;

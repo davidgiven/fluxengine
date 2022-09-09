@@ -2350,6 +2350,28 @@ static FRESULT dir_read (
 /* Directory handling - Find an object in the directory                  */
 /*-----------------------------------------------------------------------*/
 
+static int compare_filenames(const char* s1, const char* s2, size_t n)
+{
+#if FF_CASE_INSENSITIVE_COMPARISONS
+	while (n--)
+	{
+		char c1 = *s1++;
+		char c2 = *s2++;
+		int d;
+
+		if (IsLower(c1)) c1 -= 0x20;		/* To upper ASCII char */
+		if (IsLower(c2)) c2 -= 0x20;		/* To upper ASCII char */
+
+		d = c1 - c2;
+		if (d)
+			return d;
+	}
+	return 0;
+#else
+	return memcmp(s1, s2, n);
+#endif
+}
+
 static FRESULT dir_find (	/* FR_OK(0):succeeded, !=0:error */
 	DIR* dp					/* Pointer to the directory object with the file name */
 )
@@ -2409,13 +2431,13 @@ static FRESULT dir_find (	/* FR_OK(0):succeeded, !=0:error */
 				}
 			} else {					/* An SFN entry is found */
 				if (ord == 0 && sum == sum_sfn(dp->dir)) break;	/* LFN matched? */
-				if (!(dp->fn[NSFLAG] & NS_LOSS) && !memcmp(dp->dir, dp->fn, 11)) break;	/* SFN matched? */
+				if (!(dp->fn[NSFLAG] & NS_LOSS) && !compare_filenames(dp->dir, dp->fn, 11)) break;	/* SFN matched? */
 				ord = 0xFF; dp->blk_ofs = 0xFFFFFFFF;	/* Reset LFN sequence */
 			}
 		}
 #else		/* Non LFN configuration */
 		dp->obj.attr = dp->dir[DIR_Attr] & AM_MASK;
-		if (!(dp->dir[DIR_Attr] & AM_VOL) && !memcmp(dp->dir, dp->fn, 11)) break;	/* Is it a valid entry? */
+		if (!(dp->dir[DIR_Attr] & AM_VOL) && !compare_filenames(dp->dir, dp->fn, 11)) break;	/* Is it a valid entry? */
 #endif
 		res = dir_next(dp, 0);	/* Next entry */
 	} while (res == FR_OK);
@@ -2979,9 +3001,7 @@ static FRESULT create_name (	/* FR_OK: successful, FR_INVALID_NAME: could not cr
 			sfn[i++] = d;
 		} else {						/* SBC */
 			if (strchr("*+,:;<=>[]|\"\?\x7F", (int)c)) return FR_INVALID_NAME;	/* Reject illegal chrs for SFN */
-#if FF_ALLOW_MIXED_CASE == 0
 			if (IsLower(c)) c -= 0x20;	/* To upper */
-#endif
 			sfn[i++] = c;
 		}
 	}
