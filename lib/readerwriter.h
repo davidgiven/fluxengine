@@ -19,12 +19,27 @@ extern void measureDiskRotation(
 
 extern void writeTracks(FluxSink& fluxSink,
     const std::function<std::unique_ptr<const Fluxmap>(
-        const Location& location)> producer);
+        const Location& location)> producer,
+    const std::set<Location>& locations);
+
+extern void writeTracksAndVerify(FluxSink& fluxSink,
+    AbstractEncoder& encoder,
+    FluxSource& fluxSource,
+    AbstractDecoder& decoder,
+    const Image& image,
+    const std::set<Location>& locations);
 
 extern void fillBitmapTo(std::vector<bool>& bitmap,
     unsigned& cursor,
     unsigned terminateAt,
     const std::vector<bool>& pattern);
+
+extern void writeDiskCommand(const Image& image,
+    AbstractEncoder& encoder,
+    FluxSink& fluxSink,
+    AbstractDecoder* decoder,
+    FluxSource* fluxSource,
+    const std::set<Location>& locations);
 
 extern void writeDiskCommand(const Image& image,
     AbstractEncoder& encoder,

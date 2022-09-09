@@ -133,7 +133,7 @@ std::set<Location> Mapper::computeLocations()
     for (unsigned logicalTrack : iterate(config.tracks()))
     {
         for (unsigned head : iterate(config.heads()))
-        	locations.insert(computeLocationFor(logicalTrack, head));
+            locations.insert(computeLocationFor(logicalTrack, head));
     }
 
     return locations;
