@@ -66,6 +66,9 @@ The supported commands are:
   - **format**: create a new filesystem and format a disk
   - **getfileinfo**: retrieves metadata about a file.
   - **getdiskinfo**: retrieves metadata about the file system.
+  - **rm**: deletes a file or empty directory
+  - **mv**: renames a file (use `--path` and `--path2` for the old and new paths)
+  - **mkdir**: creates a directory
   
 There are commands missing here; this is all a work in progress.
 
