@@ -133,7 +133,7 @@ void showProfiles(const std::string& command, const std::map<std::string, std::s
 		ConfigProto config;
 		if (!config.ParseFromString(it.second))
 			Error() << "couldn't load config proto";
-		if (config.is_extension())
+		if (config.is_extension() && (it.first[0] != '_'))
 			std::cout << fmt::format("  {}: {}\n", it.first, config.comment());
 	}
 
