@@ -76,10 +76,10 @@ bool endsWith(const std::string& value, const std::string& ending)
 
 std::string toUpper(const std::string& value)
 {
-	std::string s = value;
-	for (char& c : s)
-		c = toupper(c);
-	return s;
+    std::string s = value;
+    for (char& c : s)
+        c = toupper(c);
+    return s;
 }
 
 std::string leftTrimWhitespace(std::string value)

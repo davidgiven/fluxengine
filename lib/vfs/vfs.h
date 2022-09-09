@@ -59,30 +59,51 @@ class BadPathException : public FilesystemException
 {
 public:
     BadPathException(): FilesystemException("Bad path") {}
+
+    BadPathException(const std::string& msg): FilesystemException(msg) {}
 };
 
 class FileNotFoundException : public FilesystemException
 {
 public:
     FileNotFoundException(): FilesystemException("File not found") {}
+
+    FileNotFoundException(const std::string& msg): FilesystemException(msg) {}
 };
 
 class BadFilesystemException : public FilesystemException
 {
 public:
     BadFilesystemException(): FilesystemException("Invalid filesystem") {}
+
+    BadFilesystemException(const std::string& msg): FilesystemException(msg) {}
 };
 
 class CannotWriteException : public FilesystemException
 {
 public:
     CannotWriteException(): FilesystemException("Cannot write file") {}
+
+    CannotWriteException(const std::string& msg): FilesystemException(msg) {}
+};
+
+class DiskFullException : public CannotWriteException
+{
+public:
+    DiskFullException(): CannotWriteException("Disk is full") {}
+
+    DiskFullException(const std::string& msg): CannotWriteException(msg) {}
 };
 
 class ReadOnlyFilesystemException : public FilesystemException
 {
 public:
     ReadOnlyFilesystemException(): FilesystemException("Read only filesystem")
+    {
+    }
+
+    ReadOnlyFilesystemException(const std::string& msg):
+        FilesystemException(msg)
     {
     }
 };

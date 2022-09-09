@@ -27,7 +27,7 @@ public:
     uint32_t capabilities() const
     {
         return OP_GETFSDATA | OP_CREATE | OP_LIST | OP_GETFILE | OP_PUTFILE |
-               OP_GETDIRENT | OP_MOVE | OP_CREATEDIR;
+               OP_GETDIRENT | OP_MOVE | OP_CREATEDIR | OP_DELETE;
     }
 
     std::map<std::string, std::string> getMetadata() override
@@ -58,8 +58,13 @@ public:
         if (!quick)
             eraseEverythingOnDisk();
 
-        hfs_format(
-            (const char*)this, 0, HFS_MODE_ANY, volumeName.c_str(), 0, nullptr);
+        if (hfs_format((const char*)this,
+                0,
+                HFS_MODE_ANY,
+                volumeName.c_str(),
+                0,
+                nullptr))
+            throwError();
     }
 
     std::vector<std::shared_ptr<Dirent>> list(const Path& path) override
@@ -70,7 +75,7 @@ public:
         auto pathstr = ":" + path.to_str(":");
         HfsDir dir(hfs_opendir(_vol, pathstr.c_str()));
         if (!dir)
-            throw FileNotFoundException();
+            throwError();
 
         for (;;)
         {
@@ -94,7 +99,7 @@ public:
         auto pathstr = ":" + path.to_str(":");
         hfsdirent de;
         if (hfs_stat(_vol, pathstr.c_str(), &de))
-            throw FileNotFoundException();
+            throwError();
 
         return toDirent(de, path.parent());
     }
@@ -109,7 +114,7 @@ public:
         auto pathstr = ":" + path.to_str(":");
         HfsFile file(hfs_open(_vol, pathstr.c_str()));
         if (!file)
-            throw FileNotFoundException();
+            throwError();
 
         AppleSingle a;
 
@@ -150,7 +155,7 @@ public:
             (const char*)a.type.cbegin(),
             (const char*)a.creator.cbegin()));
         if (!file)
-            throw CannotWriteException();
+            throwError();
 
         hfs_setfork(file, 0);
         writeBytes(file, a.data);
@@ -165,8 +170,8 @@ public:
             throw BadPathException();
 
         auto pathstr = ":" + path.to_str(":");
-        if (!hfs_delete(_vol, pathstr.c_str()))
-            throw CannotWriteException();
+        if (hfs_delete(_vol, pathstr.c_str()))
+            throwError();
     }
 
     void moveFile(const Path& oldPath, const Path& newPath) override
@@ -177,8 +182,8 @@ public:
 
         auto oldPathStr = ":" + oldPath.to_str(":");
         auto newPathStr = ":" + newPath.to_str(":");
-        if (!hfs_rename(_vol, oldPathStr.c_str(), newPathStr.c_str()))
-            throw CannotWriteException();
+        if (hfs_rename(_vol, oldPathStr.c_str(), newPathStr.c_str()))
+            throwError();
     }
 
     void createDirectory(const Path& path) override
@@ -186,8 +191,8 @@ public:
         HfsMount m(this);
 
         auto pathStr = ":" + path.to_str(":");
-        if (!hfs_mkdir(_vol, pathStr.c_str()))
-            throw CannotWriteException();
+        if (hfs_mkdir(_vol, pathStr.c_str()))
+            throwError();
     }
 
 private:
@@ -246,6 +251,56 @@ private:
         }
 
         return dirent;
+    }
+
+    void throwError()
+    {
+        auto message =
+            fmt::format("HFS error: {}", hfs_error ? hfs_error : "unknown");
+        switch (errno)
+        {
+            case ENOTDIR:
+            case ENAMETOOLONG:
+                if (hfs_error)
+                    throw BadPathException(message);
+                else
+                    throw BadPathException();
+
+            case ENOENT:
+                if (hfs_error)
+                    throw FileNotFoundException(message);
+                else
+                    throw FileNotFoundException();
+
+            case EEXIST:
+                throw BadPathException("That already exists");
+
+            case ENOTEMPTY:
+                throw BadPathException("Directory is not empty");
+
+            case EISDIR:
+                throw BadPathException("That's a directory");
+
+            case EIO:
+            case EINVAL:
+                if (hfs_error)
+                    throw BadFilesystemException(message);
+                else
+                    throw BadFilesystemException();
+
+            case ENOSPC:
+            case ENOMEM:
+                if (hfs_error)
+                    throw DiskFullException(message);
+                else
+                    throw DiskFullException();
+
+            case EROFS:
+                if (hfs_error)
+                    throw ReadOnlyFilesystemException(message);
+                else
+                    throw ReadOnlyFilesystemException();
+        }
     }
 
 private:

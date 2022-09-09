@@ -94,8 +94,12 @@ public:
 
         /* We now have complete tracks which can be written. */
 
-        writeDiskCommand(
-            _changedSectors, *_encoder, *_fluxSink, &*_decoder, &*_fluxSource, locations);
+        writeDiskCommand(_changedSectors,
+            *_encoder,
+            *_fluxSink,
+            &*_decoder,
+            &*_fluxSource,
+            locations);
 
         discardChanges();
     }
