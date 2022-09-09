@@ -1,4 +1,5 @@
 FORMATS = \
+	_atari \
 	_micropolis \
 	_northstar \
 	_mx \
@@ -72,7 +73,7 @@ $(OBJDIR)/src/formats/format_%.cc: $(OBJDIR)/protoencode_ConfigProto.exe src/for
 
 OBJS += $(patsubst %, $(OBJDIR)/src/formats/format_%.o, $(FORMATS))
 
-$(OBJDIR)/src/formats/table.cc: scripts/mktable.sh Makefile
+$(OBJDIR)/src/formats/table.cc: scripts/mktable.sh src/formats/build.mk
 	@mkdir -p $(dir $@)
 	@echo MKTABLE $@
 	@scripts/mktable.sh formats $(FORMATS) > $@

@@ -6,6 +6,7 @@
 #include "usb/usb.h"
 #include "fluxsink/fluxsink.h"
 #include "lib/fluxsink/fluxsink.pb.h"
+#include "lib/readerwriter.cc"
 #include "fmt/format.h"
 
 class HardwareFluxSink : public FluxSink
@@ -14,32 +15,8 @@ public:
     HardwareFluxSink(const HardwareFluxSinkProto& conf):
         _config(conf)
     {
-		if (config.drive().has_hard_sector_count())
-		{
-			int retries = 5;
-			usbSetDrive(config.drive().drive(), config.drive().high_density(), config.drive().index_mode());
-
-			nanoseconds_t oneRevolution = config.drive().rotational_period_ms() * 1e6;
-			if (oneRevolution == 0)
-			{
-				Logger() << BeginSpeedOperationLogMessage();
-
-				do {
-					oneRevolution = usbGetRotationalPeriod(config.drive().hard_sector_count());
-					_hardSectorThreshold = oneRevolution * 3 / (4 * config.drive().hard_sector_count());
-					retries--;
-				} while ((oneRevolution == 0) && (retries > 0));
-				config.mutable_drive()->set_rotational_period_ms(oneRevolution / 1e6);
-
-				Logger() << EndSpeedOperationLogMessage { oneRevolution };
-			}
-
-			if (oneRevolution == 0) {
-				Error() << "Failed\nIs a disk in the drive?";
-			}
-		}
-		else
-			_hardSectorThreshold = 0;
+    	nanoseconds_t oneRevolution;
+    	measureDiskRotation(oneRevolution, _hardSectorThreshold);
     }
 
     ~HardwareFluxSink()

@@ -3,7 +3,5 @@
 
 extern FlagGroup fileFlags;
 
-extern std::unique_ptr<Filesystem> createFilesystemFromConfig();
-
 #endif
 

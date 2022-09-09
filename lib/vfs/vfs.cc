@@ -6,8 +6,19 @@
 #include "lib/image.h"
 #include "lib/sector.h"
 #include "lib/vfs/sectorinterface.h"
+#include "lib/imagereader/imagereader.h"
+#include "lib/imagewriter/imagewriter.h"
+#include "lib/fluxsource/fluxsource.h"
+#include "lib/fluxsink/fluxsink.h"
+#include "lib/decoders/decoders.h"
+#include "lib/encoders/encoders.h"
 #include "lib/config.pb.h"
 #include "lib/utils.h"
+
+Path::Path(const std::vector<std::string> other):
+    std::vector<std::string>(other)
+{
+}
 
 Path::Path(const std::string& path)
 {
@@ -28,9 +39,32 @@ Path::Path(const std::string& path)
     }
 }
 
+Path Path::parent() const
+{
+    Path p;
+    if (!empty())
+    {
+        for (int i = 0; i < (size() - 1); i++)
+            p.push_back((*this)[i]);
+    }
+    return p;
+}
+
+Path Path::concat(const std::string& s) const
+{
+    Path p(*this);
+    p.push_back(s);
+    return p;
+}
+
 std::string Path::to_str(const std::string sep) const
 {
     return join(*this, sep);
+}
+
+uint32_t Filesystem::capabilities() const
+{
+    return 0;
 }
 
 void Filesystem::create(bool quick, const std::string& volumeName)
@@ -68,7 +102,7 @@ void Filesystem::putFile(const Path& path, const Bytes& data)
     throw UnimplementedFilesystemException();
 }
 
-std::map<std::string, std::string> Filesystem::getMetadata(const Path& path)
+std::shared_ptr<Dirent> Filesystem::getDirent(const Path& path)
 {
     throw UnimplementedFilesystemException();
 }
@@ -89,9 +123,29 @@ void Filesystem::deleteFile(const Path& path)
     throw UnimplementedFilesystemException();
 }
 
-void Filesystem::flush()
+void Filesystem::moveFile(const Path& oldName, const Path& newName)
 {
-    _sectors->flush();
+    throw UnimplementedFilesystemException();
+}
+
+bool Filesystem::isReadOnly()
+{
+    return _sectors->isReadOnly();
+}
+
+bool Filesystem::needsFlushing()
+{
+    return _sectors->needsFlushing();
+}
+
+void Filesystem::flushChanges()
+{
+    _sectors->flushChanges();
+}
+
+void Filesystem::discardChanges()
+{
+    _sectors->discardChanges();
 }
 
 Filesystem::Filesystem(std::shared_ptr<SectorInterface> sectors):
@@ -151,6 +205,47 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystem(
             Error() << "no filesystem configured";
             return std::unique_ptr<Filesystem>();
     }
+}
+
+std::unique_ptr<Filesystem> Filesystem::createFilesystemFromConfig()
+{
+    std::shared_ptr<SectorInterface> sectorInterface;
+    if (config.has_flux_source() || config.has_flux_sink())
+    {
+        std::shared_ptr<FluxSource> fluxSource;
+        std::shared_ptr<AbstractDecoder> decoder;
+        std::shared_ptr<FluxSink> fluxSink;
+        std::shared_ptr<AbstractEncoder> encoder;
+        if (config.flux_source().source_case() !=
+            FluxSourceProto::SOURCE_NOT_SET)
+        {
+            fluxSource = FluxSource::create(config.flux_source());
+            decoder = AbstractDecoder::create(config.decoder());
+        }
+        if (config.flux_sink().has_drive())
+        {
+            fluxSink = FluxSink::create(config.flux_sink());
+            encoder = AbstractEncoder::create(config.encoder());
+        }
+        sectorInterface = SectorInterface::createFluxSectorInterface(
+            fluxSource, fluxSink, encoder, decoder);
+    }
+    else
+    {
+        std::shared_ptr<ImageReader> reader;
+        std::shared_ptr<ImageWriter> writer;
+        if (config.image_reader().format_case() !=
+            ImageReaderProto::FORMAT_NOT_SET)
+            reader = ImageReader::create(config.image_reader());
+        if (config.image_writer().format_case() !=
+            ImageWriterProto::FORMAT_NOT_SET)
+            writer = ImageWriter::create(config.image_writer());
+
+        sectorInterface =
+            SectorInterface::createImageSectorInterface(reader, writer);
+    }
+
+    return createFilesystem(config.filesystem(), sectorInterface);
 }
 
 Bytes Filesystem::getSector(unsigned track, unsigned side, unsigned sector)

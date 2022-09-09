@@ -74,6 +74,7 @@ class CbmfsFilesystem : public Filesystem
 
             auto filenameBytes = br.read(16).split(0xa0)[0];
             filename = fromPetscii(filenameBytes);
+            path = {filename};
             side_track = br.read_8();
             side_sector = br.read_8();
             recordlen = br.read_8();
@@ -83,6 +84,18 @@ class CbmfsFilesystem : public Filesystem
             file_type = TYPE_FILE;
             length = sectors * 254;
             mode = "";
+
+            attributes[Filesystem::FILENAME] = filename;
+            attributes[Filesystem::LENGTH] = fmt::format("{}", length);
+            attributes[Filesystem::FILE_TYPE] = "file";
+            attributes[Filesystem::MODE] = mode;
+            attributes["cbmfs.type"] = toFileType(cbm_type);
+            attributes["cbmfs.start_track"] = fmt::format("{}", start_track);
+            attributes["cbmfs.start_sector"] = fmt::format("{}", start_sector);
+            attributes["cbmfs.side_track"] = fmt::format("{}", side_track);
+            attributes["cbmfs.side_sector"] = fmt::format("{}", side_sector);
+            attributes["cbmfs.recordlen"] = fmt::format("{}", recordlen);
+            attributes["cbmfs.sectors"] = fmt::format("{}", sectors);
         }
 
     public:
@@ -182,7 +195,12 @@ public:
     {
     }
 
-    std::map<std::string, std::string> getMetadata()
+    uint32_t capabilities() const
+    {
+        return OP_GETFSDATA | OP_LIST | OP_GETFILE | OP_GETDIRENT;
+    }
+
+    std::map<std::string, std::string> getMetadata() override
     {
         Directory dir(this);
 
@@ -196,12 +214,12 @@ public:
         return attributes;
     }
 
-    FilesystemStatus check()
+    FilesystemStatus check() override
     {
         return FS_OK;
     }
 
-    std::vector<std::shared_ptr<Dirent>> list(const Path& path)
+    std::vector<std::shared_ptr<Dirent>> list(const Path& path) override
     {
         if (path.size() != 0)
             throw BadPathException();
@@ -214,29 +232,16 @@ public:
         return results;
     }
 
-    std::map<std::string, std::string> getMetadata(const Path& path)
+    std::shared_ptr<Dirent> getDirent(const Path& path) override
     {
         if (path.size() != 1)
             throw BadPathException();
-        Directory dir(this);
-        auto de = dir.findFile(unhex(path[0]));
 
-        std::map<std::string, std::string> attributes;
-        attributes[FILENAME] = de->filename;
-        attributes[LENGTH] = fmt::format("{}", de->length);
-        attributes[FILE_TYPE] = "file";
-        attributes[MODE] = de->mode;
-        attributes["cbmfs.type"] = toFileType(de->cbm_type);
-        attributes["cbmfs.start_track"] = fmt::format("{}", de->start_track);
-        attributes["cbmfs.start_sector"] = fmt::format("{}", de->start_sector);
-        attributes["cbmfs.side_track"] = fmt::format("{}", de->side_track);
-        attributes["cbmfs.side_sector"] = fmt::format("{}", de->side_sector);
-        attributes["cbmfs.recordlen"] = fmt::format("{}", de->recordlen);
-        attributes["cbmfs.sectors"] = fmt::format("{}", de->sectors);
-        return attributes;
+        Directory dir(this);
+        return dir.findFile(unhex(path[0]));
     }
 
-    Bytes getFile(const Path& path)
+    Bytes getFile(const Path& path) override
     {
         if (path.size() != 1)
             throw BadPathException();

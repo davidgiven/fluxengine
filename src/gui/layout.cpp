@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version 3.10.1-0-g8feb16b)
+// C++ code generated with wxFormBuilder (version 3.10.1-234-gd93c9fc0-dirty)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO *NOT* EDIT THIS FILE!
@@ -186,10 +186,14 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	browseButton = new wxButton( idlePanel, wxID_ANY, wxT("Browse disk"), wxDefaultPosition, wxDefaultSize, 0 );
 
 	browseButton->SetBitmap( wxArtProvider::GetBitmap( wxART_FOLDER_OPEN, wxART_TOOLBAR ) );
-	browseButton->Enable( false );
 	browseButton->SetToolTip( wxT("Access the files on the disk directly without needing to image it.") );
 
 	gSizer9->Add( browseButton, 0, wxALL|wxEXPAND, 5 );
+
+	formatButton = new wxButton( idlePanel, wxID_ANY, wxT("Format disk"), wxDefaultPosition, wxDefaultSize, 0 );
+
+	formatButton->SetBitmap( wxArtProvider::GetBitmap( wxART_DELETE, wxART_BUTTON ) );
+	gSizer9->Add( formatButton, 0, wxALL|wxEXPAND, 5 );
 
 
 	fgSizer8->Add( gSizer9, 1, wxEXPAND, 5 );
@@ -206,7 +210,7 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	wxBoxSizer* bSizer41;
 	bSizer41 = new wxBoxSizer( wxVERTICAL );
 
-	imagerToolbar = new wxToolBar( imagePanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_FLAT|wxTB_HORIZONTAL|wxTB_TEXT );
+	imagerToolbar = new wxAuiToolBar( imagePanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_HORZ_LAYOUT|wxAUI_TB_TEXT );
 	imagerBackTool = imagerToolbar->AddTool( wxID_ANY, wxT("Back"), wxArtProvider::GetBitmap( wxART_GO_BACK, wxART_TOOLBAR ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
 
 	imagerToolbar->Realize();
@@ -272,30 +276,68 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	fgSizer23->SetFlexibleDirection( wxBOTH );
 	fgSizer23->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 
-	browserToolbar = new wxToolBar( browsePanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_FLAT|wxTB_HORIZONTAL|wxTB_TEXT );
+	browserToolbar = new wxAuiToolBar( browsePanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_HORZ_LAYOUT|wxAUI_TB_TEXT );
 	browserBackTool = browserToolbar->AddTool( wxID_ANY, wxT("Back"), wxArtProvider::GetBitmap( wxART_GO_BACK, wxART_TOOLBAR ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+
+	browserToolbar->AddSeparator();
+
+	browserInfoTool = browserToolbar->AddTool( wxID_ANY, wxT("Info"), wxArtProvider::GetBitmap( wxART_INFORMATION, wxART_TOOLBAR ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+
+	browserViewTool = browserToolbar->AddTool( wxID_ANY, wxT("View"), wxArtProvider::GetBitmap( wxART_FILE_OPEN, wxART_TOOLBAR ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+
+	browserSaveTool = browserToolbar->AddTool( wxID_ANY, wxT("Save"), wxArtProvider::GetBitmap( wxART_FILE_SAVE, wxART_TOOLBAR ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+
+	browserMoreMenuButton = browserToolbar->AddTool( wxID_ANY, wxT("More"), wxArtProvider::GetBitmap( wxART_PLUS, wxART_TOOLBAR ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+	browserToolbar->SetToolDropDown( browserMoreMenuButton->GetId(), true );
+
+	browserMoreMenu = new wxMenu();
+	browserAddMenuItem = new wxMenuItem( browserMoreMenu, wxID_ANY, wxString( wxT("Add file") ) , wxEmptyString, wxITEM_NORMAL );
+	browserMoreMenu->Append( browserAddMenuItem );
+
+	browserNewDirectoryMenuItem = new wxMenuItem( browserMoreMenu, wxID_ANY, wxString( wxT("New directory") ) , wxEmptyString, wxITEM_NORMAL );
+	#ifdef __WXMSW__
+	browserNewDirectoryMenuItem->SetBitmaps( wxNullBitmap );
+	#elif (defined( __WXGTK__ ) || defined( __WXOSX__ ))
+	browserNewDirectoryMenuItem->SetBitmap( wxNullBitmap );
+	#endif
+	browserMoreMenu->Append( browserNewDirectoryMenuItem );
+
+	browserRenameMenuItem = new wxMenuItem( browserMoreMenu, wxID_ANY, wxString( wxT("Move file") ) , wxEmptyString, wxITEM_NORMAL );
+	#ifdef __WXMSW__
+	browserRenameMenuItem->SetBitmaps( wxNullBitmap );
+	#elif (defined( __WXGTK__ ) || defined( __WXOSX__ ))
+	browserRenameMenuItem->SetBitmap( wxNullBitmap );
+	#endif
+	browserMoreMenu->Append( browserRenameMenuItem );
+
+	browserDeleteMenuItem = new wxMenuItem( browserMoreMenu, wxID_ANY, wxString( wxT("Delete file") ) , wxEmptyString, wxITEM_NORMAL );
+	#ifdef __WXMSW__
+	browserDeleteMenuItem->SetBitmaps( wxNullBitmap );
+	#elif (defined( __WXGTK__ ) || defined( __WXOSX__ ))
+	browserDeleteMenuItem->SetBitmap( wxNullBitmap );
+	#endif
+	browserMoreMenu->Append( browserDeleteMenuItem );
+
+	browserToolbar->Connect( browserMoreMenuButton->GetId(), wxEVT_COMMAND_AUITOOLBAR_TOOL_DROPDOWN, wxAuiToolBarEventHandler( MainWindowGen::browserMoreMenuButtonOnDropDownMenu ), NULL, this );
+
+
+	browserToolbar->AddSeparator();
+
+	browserFormatTool = browserToolbar->AddTool( wxID_ANY, wxT("Format"), wxArtProvider::GetBitmap( wxART_DELETE, wxART_TOOLBAR ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
 
 	browserToolbar->Realize();
 
 	fgSizer23->Add( browserToolbar, 0, wxEXPAND, 5 );
 
-	m_scrolledWindow1 = new wxScrolledWindow( browsePanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxHSCROLL|wxVSCROLL );
-	m_scrolledWindow1->SetScrollRate( 5, 5 );
-	wxGridSizer* gSizer13;
-	gSizer13 = new wxGridSizer( 1, 1, 0, 0 );
+	browserTree = new wxDataViewCtrl( browsePanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxDV_SINGLE );
+	m_dataViewColumn1 = browserTree->AppendIconTextColumn( wxT("Filename"), 0, wxDATAVIEW_CELL_EDITABLE, 250, static_cast<wxAlignment>(wxALIGN_LEFT), wxDATAVIEW_COL_RESIZABLE|wxDATAVIEW_COL_SORTABLE );
+	m_dataViewColumn2 = browserTree->AppendTextColumn( wxT("Size"), 1, wxDATAVIEW_CELL_INERT, 100, static_cast<wxAlignment>(wxALIGN_RIGHT), wxDATAVIEW_COL_RESIZABLE );
+	m_dataViewColumn3 = browserTree->AppendTextColumn( wxT("Mode"), 2, wxDATAVIEW_CELL_INERT, -1, static_cast<wxAlignment>(wxALIGN_LEFT), wxDATAVIEW_COL_RESIZABLE );
+	fgSizer23->Add( browserTree, 0, wxALL|wxEXPAND, 5 );
 
-	browserView = new wxDataViewCtrl( m_scrolledWindow1, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	browserFilenameColumn = browserView->AppendTextColumn( wxT("Filename"), 0, wxDATAVIEW_CELL_INERT, -1, static_cast<wxAlignment>(wxALIGN_LEFT), wxDATAVIEW_COL_RESIZABLE );
-	browserModeColumn = browserView->AppendTextColumn( wxT("Mode"), 1, wxDATAVIEW_CELL_INERT, -1, static_cast<wxAlignment>(wxALIGN_LEFT), wxDATAVIEW_COL_RESIZABLE );
-	browserLengthColumn = browserView->AppendTextColumn( wxT("Length"), 2, wxDATAVIEW_CELL_INERT, -1, static_cast<wxAlignment>(wxALIGN_LEFT), wxDATAVIEW_COL_RESIZABLE );
-	browserExtraColumn = browserView->AppendTextColumn( wxT("Additional properties"), 0, wxDATAVIEW_CELL_INERT, -1, static_cast<wxAlignment>(wxALIGN_LEFT), wxDATAVIEW_COL_RESIZABLE );
-	gSizer13->Add( browserView, 0, wxEXPAND, 5 );
-
-
-	m_scrolledWindow1->SetSizer( gSizer13 );
-	m_scrolledWindow1->Layout();
-	gSizer13->Fit( m_scrolledWindow1 );
-	fgSizer23->Add( m_scrolledWindow1, 1, wxEXPAND | wxALL, 5 );
+	diskSpaceGauge = new wxGauge( browsePanel, wxID_ANY, 100, wxDefaultPosition, wxDefaultSize, wxGA_HORIZONTAL|wxGA_SMOOTH );
+	diskSpaceGauge->SetValue( 0 );
+	fgSizer23->Add( diskSpaceGauge, 0, wxALL|wxEXPAND, 5 );
 
 	wxGridSizer* gSizer12;
 	gSizer12 = new wxGridSizer( 0, 2, 0, 0 );
@@ -312,6 +354,10 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 
 
 	fgSizer23->Add( gSizer12, 1, wxEXPAND, 5 );
+
+	m_staticText12 = new wxStaticText( browsePanel, wxID_ANY, wxT("No changes will be written until the 'commit' button is pressed."), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL );
+	m_staticText12->Wrap( -1 );
+	fgSizer23->Add( m_staticText12, 0, wxALL|wxEXPAND, 5 );
 
 
 	browsePanel->SetSizer( fgSizer23 );
@@ -345,11 +391,29 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	customConfigurationButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnCustomConfigurationButton ), NULL, this );
 	readButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnReadButton ), NULL, this );
 	writeButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnWriteButton ), NULL, this );
+	browseButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowseButton ), NULL, this );
+	formatButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnFormatButton ), NULL, this );
 	this->Connect( imagerBackTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBackButton ) );
 	imagerSaveImageButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnSaveImageButton ), NULL, this );
 	imagerSaveFluxButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnSaveFluxButton ), NULL, this );
 	imagerGoAgainButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnImagerGoAgainButton ), NULL, this );
 	this->Connect( browserBackTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBackButton ) );
+	this->Connect( browserInfoTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserInfoButton ) );
+	this->Connect( browserViewTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserViewButton ) );
+	this->Connect( browserSaveTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserSaveButton ) );
+	browserMoreMenu->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowGen::OnBrowserAddMenuItem ), this, browserAddMenuItem->GetId());
+	browserMoreMenu->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowGen::OnBrowserNewDirectoryMenuItem ), this, browserNewDirectoryMenuItem->GetId());
+	browserMoreMenu->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowGen::OnBrowserRenameMenuItem ), this, browserRenameMenuItem->GetId());
+	browserMoreMenu->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowGen::OnBrowserDeleteMenuItem ), this, browserDeleteMenuItem->GetId());
+	this->Connect( browserFormatTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserFormatButton ) );
+	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_ITEM_BEGIN_DRAG, wxDataViewEventHandler( MainWindowGen::OnBrowserBeginDrag ), NULL, this );
+	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_ITEM_DROP, wxDataViewEventHandler( MainWindowGen::OnBrowserDrop ), NULL, this );
+	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_ITEM_DROP_POSSIBLE, wxDataViewEventHandler( MainWindowGen::OnBrowserDropPossible ), NULL, this );
+	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_ITEM_EDITING_DONE, wxDataViewEventHandler( MainWindowGen::OnBrowserFilenameChanged ), NULL, this );
+	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_ITEM_EXPANDING, wxDataViewEventHandler( MainWindowGen::OnBrowserDirectoryExpanding ), NULL, this );
+	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler( MainWindowGen::OnBrowserSelectionChanged ), NULL, this );
+	browserDiscardButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserDiscardButton ), NULL, this );
+	browserCommitButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserCommitButton ), NULL, this );
 }
 
 MainWindowGen::~MainWindowGen()
@@ -368,12 +432,27 @@ MainWindowGen::~MainWindowGen()
 	customConfigurationButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnCustomConfigurationButton ), NULL, this );
 	readButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnReadButton ), NULL, this );
 	writeButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnWriteButton ), NULL, this );
+	browseButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowseButton ), NULL, this );
+	formatButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnFormatButton ), NULL, this );
 	this->Disconnect( imagerBackTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBackButton ) );
 	imagerSaveImageButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnSaveImageButton ), NULL, this );
 	imagerSaveFluxButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnSaveFluxButton ), NULL, this );
 	imagerGoAgainButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnImagerGoAgainButton ), NULL, this );
 	this->Disconnect( browserBackTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBackButton ) );
+	this->Disconnect( browserInfoTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserInfoButton ) );
+	this->Disconnect( browserViewTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserViewButton ) );
+	this->Disconnect( browserSaveTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserSaveButton ) );
+	this->Disconnect( browserFormatTool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserFormatButton ) );
+	browserTree->Disconnect( wxEVT_COMMAND_DATAVIEW_ITEM_BEGIN_DRAG, wxDataViewEventHandler( MainWindowGen::OnBrowserBeginDrag ), NULL, this );
+	browserTree->Disconnect( wxEVT_COMMAND_DATAVIEW_ITEM_DROP, wxDataViewEventHandler( MainWindowGen::OnBrowserDrop ), NULL, this );
+	browserTree->Disconnect( wxEVT_COMMAND_DATAVIEW_ITEM_DROP_POSSIBLE, wxDataViewEventHandler( MainWindowGen::OnBrowserDropPossible ), NULL, this );
+	browserTree->Disconnect( wxEVT_COMMAND_DATAVIEW_ITEM_EDITING_DONE, wxDataViewEventHandler( MainWindowGen::OnBrowserFilenameChanged ), NULL, this );
+	browserTree->Disconnect( wxEVT_COMMAND_DATAVIEW_ITEM_EXPANDING, wxDataViewEventHandler( MainWindowGen::OnBrowserDirectoryExpanding ), NULL, this );
+	browserTree->Disconnect( wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler( MainWindowGen::OnBrowserSelectionChanged ), NULL, this );
+	browserDiscardButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserDiscardButton ), NULL, this );
+	browserCommitButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainWindowGen::OnBrowserCommitButton ), NULL, this );
 
+	delete browserMoreMenu;
 }
 
 TextViewerWindowGen::TextViewerWindowGen( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
@@ -506,4 +585,302 @@ TextEditorWindowGen::~TextEditorWindowGen()
 	m_sdbSizer2Cancel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TextEditorWindowGen::OnCancel ), NULL, this );
 	m_sdbSizer2Save->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TextEditorWindowGen::OnSave ), NULL, this );
 
+}
+
+FileViewerWindowGen::FileViewerWindowGen( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+
+	wxFlexGridSizer* fgSizer8;
+	fgSizer8 = new wxFlexGridSizer( 0, 1, 0, 0 );
+	fgSizer8->AddGrowableCol( 0 );
+	fgSizer8->AddGrowableRow( 0 );
+	fgSizer8->SetFlexibleDirection( wxBOTH );
+	fgSizer8->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_ALL );
+
+	m_notebook1 = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	m_panel8 = new wxPanel( m_notebook1, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxGridSizer* gSizer101;
+	gSizer101 = new wxGridSizer( 1, 1, 0, 0 );
+
+	textControl = new wxTextCtrl( m_panel8, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY );
+	textControl->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
+
+	gSizer101->Add( textControl, 0, wxALL|wxEXPAND, 5 );
+
+
+	m_panel8->SetSizer( gSizer101 );
+	m_panel8->Layout();
+	gSizer101->Fit( m_panel8 );
+	m_notebook1->AddPage( m_panel8, wxT("Text"), false );
+	m_panel7 = new wxPanel( m_notebook1, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxGridSizer* gSizer10;
+	gSizer10 = new wxGridSizer( 1, 1, 0, 0 );
+
+	hexControl = new wxTextCtrl( m_panel7, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY );
+	hexControl->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
+
+	gSizer10->Add( hexControl, 0, wxALL|wxEXPAND, 5 );
+
+
+	m_panel7->SetSizer( gSizer10 );
+	m_panel7->Layout();
+	gSizer10->Fit( m_panel7 );
+	m_notebook1->AddPage( m_panel7, wxT("Hex"), false );
+
+	fgSizer8->Add( m_notebook1, 1, wxEXPAND | wxALL, 5 );
+
+	m_sdbSizer2 = new wxStdDialogButtonSizer();
+	m_sdbSizer2OK = new wxButton( this, wxID_OK );
+	m_sdbSizer2->AddButton( m_sdbSizer2OK );
+	m_sdbSizer2->Realize();
+
+	fgSizer8->Add( m_sdbSizer2, 1, wxALL|wxEXPAND, 5 );
+
+
+	this->SetSizer( fgSizer8 );
+	this->Layout();
+
+	this->Centre( wxBOTH );
+
+	// Connect Events
+	m_sdbSizer2OK->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( FileViewerWindowGen::OnClose ), NULL, this );
+}
+
+FileViewerWindowGen::~FileViewerWindowGen()
+{
+	// Disconnect Events
+	m_sdbSizer2OK->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( FileViewerWindowGen::OnClose ), NULL, this );
+
+}
+
+GetfileDialog::GetfileDialog( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+
+	wxGridBagSizer* gbSizer1;
+	gbSizer1 = new wxGridBagSizer( 0, 0 );
+	gbSizer1->SetFlexibleDirection( wxBOTH );
+	gbSizer1->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	m_staticText7 = new wxStaticText( this, wxID_ANY, wxT("File on disk:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText7->Wrap( -1 );
+	gbSizer1->Add( m_staticText7, wxGBPosition( 0, 0 ), wxGBSpan( 1, 1 ), wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	filenameText = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 300,-1 ), wxTE_READONLY );
+	filenameText->Enable( false );
+
+	gbSizer1->Add( filenameText, wxGBPosition( 0, 1 ), wxGBSpan( 1, 1 ), wxALL|wxEXPAND, 5 );
+
+	m_staticText9 = new wxStaticText( this, wxID_ANY, wxT("File to save as:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText9->Wrap( -1 );
+	gbSizer1->Add( m_staticText9, wxGBPosition( 1, 0 ), wxGBSpan( 1, 1 ), wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	targetFilePicker = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_OVERWRITE_PROMPT|wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	gbSizer1->Add( targetFilePicker, wxGBPosition( 1, 1 ), wxGBSpan( 1, 1 ), wxALL|wxEXPAND, 5 );
+
+	buttons_ = new wxStdDialogButtonSizer();
+	buttons_OK = new wxButton( this, wxID_OK );
+	buttons_->AddButton( buttons_OK );
+	buttons_Cancel = new wxButton( this, wxID_CANCEL );
+	buttons_->AddButton( buttons_Cancel );
+	buttons_->Realize();
+
+	gbSizer1->Add( buttons_, wxGBPosition( 2, 0 ), wxGBSpan( 1, 2 ), wxALL|wxEXPAND, 5 );
+
+
+	this->SetSizer( gbSizer1 );
+	this->Layout();
+	gbSizer1->Fit( this );
+
+	this->Centre( wxBOTH );
+}
+
+GetfileDialog::~GetfileDialog()
+{
+}
+
+FileConflictDialog::FileConflictDialog( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+
+	wxGridBagSizer* gbSizer1;
+	gbSizer1 = new wxGridBagSizer( 0, 0 );
+	gbSizer1->SetFlexibleDirection( wxBOTH );
+	gbSizer1->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	m_staticText91 = new wxStaticText( this, wxID_ANY, wxT("That name is already in use.\nPlease specify another:"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL );
+	m_staticText91->Wrap( -1 );
+	gbSizer1->Add( m_staticText91, wxGBPosition( 0, 0 ), wxGBSpan( 1, 2 ), wxALIGN_CENTER_HORIZONTAL|wxALL, 5 );
+
+	m_staticText7 = new wxStaticText( this, wxID_ANY, wxT("Old name:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText7->Wrap( -1 );
+	gbSizer1->Add( m_staticText7, wxGBPosition( 1, 0 ), wxGBSpan( 1, 1 ), wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	newNameText = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 300,-1 ), 0 );
+	gbSizer1->Add( newNameText, wxGBPosition( 2, 1 ), wxGBSpan( 1, 1 ), wxALL|wxEXPAND, 5 );
+
+	m_staticText9 = new wxStaticText( this, wxID_ANY, wxT("New name:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText9->Wrap( -1 );
+	gbSizer1->Add( m_staticText9, wxGBPosition( 2, 0 ), wxGBSpan( 1, 1 ), wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	oldNameText = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY );
+	oldNameText->Enable( false );
+
+	gbSizer1->Add( oldNameText, wxGBPosition( 1, 1 ), wxGBSpan( 1, 1 ), wxALL|wxEXPAND, 5 );
+
+	buttons_ = new wxStdDialogButtonSizer();
+	buttons_OK = new wxButton( this, wxID_OK );
+	buttons_->AddButton( buttons_OK );
+	buttons_Cancel = new wxButton( this, wxID_CANCEL );
+	buttons_->AddButton( buttons_Cancel );
+	buttons_->Realize();
+
+	gbSizer1->Add( buttons_, wxGBPosition( 3, 0 ), wxGBSpan( 1, 2 ), wxALL|wxEXPAND, 5 );
+
+
+	this->SetSizer( gbSizer1 );
+	this->Layout();
+	gbSizer1->Fit( this );
+
+	this->Centre( wxBOTH );
+}
+
+FileConflictDialog::~FileConflictDialog()
+{
+}
+
+FileRenameDialog::FileRenameDialog( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+
+	wxGridBagSizer* gbSizer1;
+	gbSizer1 = new wxGridBagSizer( 0, 0 );
+	gbSizer1->SetFlexibleDirection( wxBOTH );
+	gbSizer1->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	m_staticText91 = new wxStaticText( this, wxID_ANY, wxT("Please specify the new name\n(and path) of the file."), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL );
+	m_staticText91->Wrap( -1 );
+	gbSizer1->Add( m_staticText91, wxGBPosition( 0, 0 ), wxGBSpan( 1, 2 ), wxALIGN_CENTER_HORIZONTAL|wxALL, 5 );
+
+	m_staticText7 = new wxStaticText( this, wxID_ANY, wxT("Old name:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText7->Wrap( -1 );
+	gbSizer1->Add( m_staticText7, wxGBPosition( 1, 0 ), wxGBSpan( 1, 1 ), wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	newNameText = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 300,-1 ), 0 );
+	gbSizer1->Add( newNameText, wxGBPosition( 2, 1 ), wxGBSpan( 1, 1 ), wxALL|wxEXPAND, 5 );
+
+	m_staticText9 = new wxStaticText( this, wxID_ANY, wxT("New name:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText9->Wrap( -1 );
+	gbSizer1->Add( m_staticText9, wxGBPosition( 2, 0 ), wxGBSpan( 1, 1 ), wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	oldNameText = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY );
+	oldNameText->Enable( false );
+
+	gbSizer1->Add( oldNameText, wxGBPosition( 1, 1 ), wxGBSpan( 1, 1 ), wxALL|wxEXPAND, 5 );
+
+	buttons_ = new wxStdDialogButtonSizer();
+	buttons_OK = new wxButton( this, wxID_OK );
+	buttons_->AddButton( buttons_OK );
+	buttons_Cancel = new wxButton( this, wxID_CANCEL );
+	buttons_->AddButton( buttons_Cancel );
+	buttons_->Realize();
+
+	gbSizer1->Add( buttons_, wxGBPosition( 3, 0 ), wxGBSpan( 1, 2 ), wxALL|wxEXPAND, 5 );
+
+
+	this->SetSizer( gbSizer1 );
+	this->Layout();
+	gbSizer1->Fit( this );
+
+	this->Centre( wxBOTH );
+}
+
+FileRenameDialog::~FileRenameDialog()
+{
+}
+
+CreateDirectoryDialog::CreateDirectoryDialog( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+
+	wxGridBagSizer* gbSizer1;
+	gbSizer1 = new wxGridBagSizer( 0, 0 );
+	gbSizer1->SetFlexibleDirection( wxBOTH );
+	gbSizer1->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	m_staticText91 = new wxStaticText( this, wxID_ANY, wxT("Please specify the name (and path)\nof the new directory."), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL );
+	m_staticText91->Wrap( -1 );
+	gbSizer1->Add( m_staticText91, wxGBPosition( 0, 0 ), wxGBSpan( 1, 2 ), wxALIGN_CENTER_HORIZONTAL|wxALL, 5 );
+
+	newNameText = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 300,-1 ), 0 );
+	gbSizer1->Add( newNameText, wxGBPosition( 1, 1 ), wxGBSpan( 1, 1 ), wxALL|wxEXPAND, 5 );
+
+	m_staticText9 = new wxStaticText( this, wxID_ANY, wxT("Name:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText9->Wrap( -1 );
+	gbSizer1->Add( m_staticText9, wxGBPosition( 1, 0 ), wxGBSpan( 1, 1 ), wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	buttons_ = new wxStdDialogButtonSizer();
+	buttons_OK = new wxButton( this, wxID_OK );
+	buttons_->AddButton( buttons_OK );
+	buttons_Cancel = new wxButton( this, wxID_CANCEL );
+	buttons_->AddButton( buttons_Cancel );
+	buttons_->Realize();
+
+	gbSizer1->Add( buttons_, wxGBPosition( 2, 0 ), wxGBSpan( 1, 2 ), wxALL|wxEXPAND, 5 );
+
+
+	this->SetSizer( gbSizer1 );
+	this->Layout();
+	gbSizer1->Fit( this );
+
+	this->Centre( wxBOTH );
+}
+
+CreateDirectoryDialog::~CreateDirectoryDialog()
+{
+}
+
+FormatDialog::FormatDialog( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+
+	wxGridBagSizer* gbSizer1;
+	gbSizer1 = new wxGridBagSizer( 0, 0 );
+	gbSizer1->SetFlexibleDirection( wxBOTH );
+	gbSizer1->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	m_staticText91 = new wxStaticText( this, wxID_ANY, wxT("This will erase the entire disk. (But remember that\nyou can always undo changes until you press the 'commit changes' button.)"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL );
+	m_staticText91->Wrap( -1 );
+	gbSizer1->Add( m_staticText91, wxGBPosition( 0, 0 ), wxGBSpan( 1, 2 ), wxALIGN_CENTER_HORIZONTAL|wxALL, 5 );
+
+	m_staticText7 = new wxStaticText( this, wxID_ANY, wxT("Volume name:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText7->Wrap( -1 );
+	gbSizer1->Add( m_staticText7, wxGBPosition( 1, 0 ), wxGBSpan( 1, 1 ), wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	volumeNameText = new wxTextCtrl( this, wxID_ANY, wxT("FluxEngineDisk"), wxDefaultPosition, wxDefaultSize, 0 );
+	gbSizer1->Add( volumeNameText, wxGBPosition( 1, 1 ), wxGBSpan( 1, 1 ), wxALL|wxEXPAND, 5 );
+
+	quickFormatCheckBox = new wxCheckBox( this, wxID_ANY, wxT("Quick format: if the disk is not already correctly formatted,\nvery bad things will happen!"), wxDefaultPosition, wxDefaultSize, 0 );
+	gbSizer1->Add( quickFormatCheckBox, wxGBPosition( 2, 1 ), wxGBSpan( 1, 1 ), wxALL|wxEXPAND, 5 );
+
+	buttons_ = new wxStdDialogButtonSizer();
+	buttons_OK = new wxButton( this, wxID_OK );
+	buttons_->AddButton( buttons_OK );
+	buttons_Cancel = new wxButton( this, wxID_CANCEL );
+	buttons_->AddButton( buttons_Cancel );
+	buttons_->Realize();
+
+	gbSizer1->Add( buttons_, wxGBPosition( 3, 0 ), wxGBSpan( 1, 2 ), wxALL|wxEXPAND, 5 );
+
+
+	this->SetSizer( gbSizer1 );
+	this->Layout();
+	gbSizer1->Fit( this );
+
+	this->Centre( wxBOTH );
+}
+
+FormatDialog::~FormatDialog()
+{
 }

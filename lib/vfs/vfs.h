@@ -10,18 +10,34 @@ class DfsProto;
 class FilesystemProto;
 class SectorInterface;
 
+class Path : public std::vector<std::string>
+{
+public:
+    Path() {}
+    Path(const std::vector<std::string> other);
+    Path(const std::string& text);
+
+public:
+    Path parent() const;
+    Path concat(const std::string& s) const;
+    std::string to_str(const std::string sep = "/") const;
+};
+
 enum FileType
 {
+    TYPE__INVALID,
     TYPE_FILE,
     TYPE_DIRECTORY
 };
 
 struct Dirent
 {
+    Path path;
     std::string filename;
     FileType file_type;
     uint32_t length;
     std::string mode;
+    std::map<std::string, std::string> attributes;
 };
 
 enum FilesystemStatus
@@ -33,43 +49,61 @@ enum FilesystemStatus
     FS_BAD
 };
 
-class FilesystemException
+class FilesystemException : public ErrorException
 {
 public:
-    FilesystemException(const std::string& message): message(message) {}
-
-public:
-    std::string message;
+    FilesystemException(const std::string& message): ErrorException(message) {}
 };
 
 class BadPathException : public FilesystemException
 {
 public:
     BadPathException(): FilesystemException("Bad path") {}
+
+    BadPathException(const std::string& msg): FilesystemException(msg) {}
 };
 
 class FileNotFoundException : public FilesystemException
 {
 public:
     FileNotFoundException(): FilesystemException("File not found") {}
+
+    FileNotFoundException(const std::string& msg): FilesystemException(msg) {}
 };
 
 class BadFilesystemException : public FilesystemException
 {
 public:
     BadFilesystemException(): FilesystemException("Invalid filesystem") {}
+
+    BadFilesystemException(const std::string& msg): FilesystemException(msg) {}
 };
 
 class CannotWriteException : public FilesystemException
 {
 public:
     CannotWriteException(): FilesystemException("Cannot write file") {}
+
+    CannotWriteException(const std::string& msg): FilesystemException(msg) {}
+};
+
+class DiskFullException : public CannotWriteException
+{
+public:
+    DiskFullException(): CannotWriteException("Disk is full") {}
+
+    DiskFullException(const std::string& msg): CannotWriteException(msg) {}
 };
 
 class ReadOnlyFilesystemException : public FilesystemException
 {
 public:
     ReadOnlyFilesystemException(): FilesystemException("Read only filesystem")
+    {
+    }
+
+    ReadOnlyFilesystemException(const std::string& msg):
+        FilesystemException(msg)
     {
     }
 };
@@ -88,16 +122,6 @@ public:
     }
 };
 
-class Path : public std::vector<std::string>
-{
-public:
-    Path() {}
-    Path(const std::string& text);
-
-public:
-    std::string to_str(const std::string sep = "/") const;
-};
-
 class Filesystem
 {
 public:
@@ -111,9 +135,28 @@ public:
     static constexpr const char* USED_BLOCKS = "used_blocks";
     static constexpr const char* BLOCK_SIZE = "block_size";
 
+    enum
+    {
+        OP_CREATE = 0b0000000000000001,
+        OP_CHECK = 0b0000000000000010,
+        OP_LIST = 0b0000000000000100,
+        OP_GETFILE = 0b0000000000001000,
+        OP_PUTFILE = 0b0000000000010000,
+        OP_GETDIRENT = 0b0000000000100000,
+        OP_CREATEDIR = 0b0000000001000000,
+        OP_DELETE = 0b0000000010000000,
+        OP_GETFSDATA = 0b0000000100000000,
+        OP_PUTFSDATA = 0b0000001000000000,
+        OP_PUTATTRS = 0b0000010000000000,
+        OP_MOVE = 0b0000100000000000,
+    };
+
 public:
+    /* Retrieve capability information. */
+    virtual uint32_t capabilities() const;
+
     /* Create a filesystem on the disk. */
-    virtual void create(bool quick, const std::string& volmeName);
+    virtual void create(bool quick, const std::string& volumeName);
 
     /* Are all sectors on the filesystem present and good? (Does not check
      * filesystem consistency.) */
@@ -135,8 +178,8 @@ public:
     /* Write a file. */
     virtual void putFile(const Path& path, const Bytes& data);
 
-    /* Get file metadata. */
-    virtual std::map<std::string, std::string> getMetadata(const Path& path);
+    /* Get a single file dirent. */
+    virtual std::shared_ptr<Dirent> getDirent(const Path& path);
 
     /* Update file metadata. */
     virtual void putMetadata(
@@ -148,8 +191,20 @@ public:
     /* Deletes a file or non-empty directory. */
     virtual void deleteFile(const Path& path);
 
+    /* Moves a file (including renaming it). */
+    virtual void moveFile(const Path& oldName, const Path& newName);
+
+    /* Is this filesystem's backing store read-only? */
+    bool isReadOnly();
+
+    /* Does this filesystem need flushing? */
+    bool needsFlushing();
+
     /* Flushes any changes back to the disk. */
-    void flush();
+    void flushChanges();
+
+    /* Discards any pending changes. */
+    void discardChanges();
 
 public:
     Filesystem(std::shared_ptr<SectorInterface> sectors);
@@ -188,6 +243,7 @@ public:
 
     static std::unique_ptr<Filesystem> createFilesystem(
         const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
+    static std::unique_ptr<Filesystem> createFilesystemFromConfig();
 };
 
 #endif

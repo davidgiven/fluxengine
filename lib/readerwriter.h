@@ -14,9 +14,20 @@ class ImageWriter;
 class Location;
 class TrackFlux;
 
+extern void measureDiskRotation(
+    nanoseconds_t& oneRevolution, nanoseconds_t& hardSectorThreshold);
+
 extern void writeTracks(FluxSink& fluxSink,
     const std::function<std::unique_ptr<const Fluxmap>(
-        const Location& location)> producer);
+        const Location& location)> producer,
+    const std::set<Location>& locations);
+
+extern void writeTracksAndVerify(FluxSink& fluxSink,
+    AbstractEncoder& encoder,
+    FluxSource& fluxSource,
+    AbstractDecoder& decoder,
+    const Image& image,
+    const std::set<Location>& locations);
 
 extern void fillBitmapTo(std::vector<bool>& bitmap,
     unsigned& cursor,
@@ -26,14 +37,20 @@ extern void fillBitmapTo(std::vector<bool>& bitmap,
 extern void writeDiskCommand(const Image& image,
     AbstractEncoder& encoder,
     FluxSink& fluxSink,
+    AbstractDecoder* decoder,
+    FluxSource* fluxSource,
+    const std::set<Location>& locations);
+
+extern void writeDiskCommand(const Image& image,
+    AbstractEncoder& encoder,
+    FluxSink& fluxSink,
     AbstractDecoder* decoder = nullptr,
     FluxSource* fluxSource = nullptr);
 
 extern void writeRawDiskCommand(FluxSource& fluxSource, FluxSink& fluxSink);
 
-extern std::shared_ptr<TrackFlux> readAndDecodeTrack(FluxSource& fluxSource,
-    AbstractDecoder& decoder,
-    const Location& location);
+extern std::shared_ptr<TrackFlux> readAndDecodeTrack(
+    FluxSource& fluxSource, AbstractDecoder& decoder, const Location& location);
 
 extern std::shared_ptr<const DiskFlux> readDiskCommand(
     FluxSource& fluxsource, AbstractDecoder& decoder);

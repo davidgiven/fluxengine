@@ -56,6 +56,46 @@ private:
         _cache;
 };
 
+void measureDiskRotation(
+    nanoseconds_t& oneRevolution, nanoseconds_t& hardSectorThreshold)
+{
+    Logger() << BeginSpeedOperationLogMessage();
+
+    int retries = 5;
+    usbSetDrive(config.drive().drive(),
+        config.drive().high_density(),
+        config.drive().index_mode());
+    oneRevolution = config.drive().rotational_period_ms() * 1e6;
+    if (config.drive().hard_sector_count() != 0)
+        hardSectorThreshold =
+            oneRevolution * 3 / (4 * config.drive().hard_sector_count());
+    else
+        hardSectorThreshold = 0;
+
+    if (oneRevolution == 0)
+    {
+        Logger() << BeginOperationLogMessage{
+            "Measuring drive rotational speed"};
+        do
+        {
+            oneRevolution =
+                usbGetRotationalPeriod(config.drive().hard_sector_count());
+            if (config.drive().hard_sector_count() != 0)
+                hardSectorThreshold = oneRevolution * 3 /
+                                      (4 * config.drive().hard_sector_count());
+
+            retries--;
+        } while ((oneRevolution == 0) && (retries > 0));
+        config.mutable_drive()->set_rotational_period_ms(oneRevolution / 1e6);
+        Logger() << EndOperationLogMessage{};
+    }
+
+    if (oneRevolution == 0)
+        Error() << "Failed\nIs a disk in the drive?";
+
+    Logger() << EndSpeedOperationLogMessage{oneRevolution};
+}
+
 /* Given a set of sectors, deduplicates them sensibly (e.g. if there is a good
  * and bad version of the same sector, the bad version is dropped). */
 
@@ -185,11 +225,10 @@ ReadResult readGroup(FluxSourceIteratorHolder& fluxSourceIteratorHolder,
 void writeTracks(FluxSink& fluxSink,
     std::function<std::unique_ptr<const Fluxmap>(const Location& location)>
         producer,
-    std::function<bool(const Location& location)> verifier)
+    std::function<bool(const Location& location)> verifier,
+    const std::set<Location>& locations)
 {
     Logger() << BeginOperationLogMessage{"Encoding and writing to disk"};
-
-    auto locations = Mapper::computeLocations();
 
     int index = 0;
     for (const auto& location : locations)
@@ -255,8 +294,10 @@ static bool dontVerify(const Location&)
     return true;
 }
 
-void writeTracks(
-    FluxSink& fluxSink, AbstractEncoder& encoder, const Image& image)
+void writeTracks(FluxSink& fluxSink,
+    AbstractEncoder& encoder,
+    const Image& image,
+    const std::set<Location>& locations)
 {
     writeTracks(
         fluxSink,
@@ -265,14 +306,16 @@ void writeTracks(
             auto sectors = encoder.collectSectors(location, image);
             return encoder.encode(location, sectors, image);
         },
-        dontVerify);
+        dontVerify,
+        locations);
 }
 
 void writeTracksAndVerify(FluxSink& fluxSink,
     AbstractEncoder& encoder,
     FluxSource& fluxSource,
     AbstractDecoder& decoder,
-    const Image& image)
+    const Image& image,
+    const std::set<Location>& locations)
 {
     writeTracks(
         fluxSink,
@@ -329,14 +372,16 @@ void writeTracksAndVerify(FluxSink& fluxSink,
                 return false;
             }
             return true;
-        });
+        },
+        locations);
 }
 
 void writeDiskCommand(const Image& image,
     AbstractEncoder& encoder,
     FluxSink& fluxSink,
     AbstractDecoder* decoder,
-    FluxSource* fluxSource)
+    FluxSource* fluxSource,
+    const std::set<Location>& locations)
 {
     const Image* imagep = &image;
     std::unique_ptr<const Image> remapped;
@@ -348,9 +393,20 @@ void writeDiskCommand(const Image& image,
     }
 
     if (fluxSource && decoder)
-        writeTracksAndVerify(fluxSink, encoder, *fluxSource, *decoder, *imagep);
+        writeTracksAndVerify(
+            fluxSink, encoder, *fluxSource, *decoder, *imagep, locations);
     else
-        writeTracks(fluxSink, encoder, *imagep);
+        writeTracks(fluxSink, encoder, *imagep, locations);
+}
+
+void writeDiskCommand(const Image& image,
+    AbstractEncoder& encoder,
+    FluxSink& fluxSink,
+    AbstractDecoder* decoder,
+    FluxSource* fluxSource)
+{
+    auto locations = Mapper::computeLocations();
+    writeDiskCommand(image, encoder, fluxSink, decoder, fluxSource, locations);
 }
 
 void writeRawDiskCommand(FluxSource& fluxSource, FluxSink& fluxSink)
@@ -362,7 +418,8 @@ void writeRawDiskCommand(FluxSource& fluxSource, FluxSink& fluxSink)
             return fluxSource.readFlux(location.physicalTrack, location.head)
                 ->next();
         },
-        dontVerify);
+        dontVerify,
+        Mapper::computeLocations());
 }
 
 std::shared_ptr<TrackFlux> readAndDecodeTrack(

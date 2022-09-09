@@ -3,6 +3,7 @@
 #include "lib/config.pb.h"
 #include "lib/proto.h"
 #include "lib/layout.h"
+#include "lib/logger.h"
 #include <fmt/format.h>
 
 #include "adflib.h"
@@ -56,7 +57,13 @@ public:
     {
     }
 
-    std::map<std::string, std::string> getMetadata()
+    uint32_t capabilities() const
+    {
+        return OP_GETFSDATA | OP_CREATE | OP_LIST | OP_GETFILE | OP_PUTFILE |
+               OP_GETDIRENT | OP_DELETE | OP_MOVE | OP_CREATEDIR;
+    }
+
+    std::map<std::string, std::string> getMetadata() override
     {
         AdfMount m(this);
         auto* vol = m.mount();
@@ -72,7 +79,7 @@ public:
         return attributes;
     }
 
-    void create(bool quick, const std::string& volumeName)
+    void create(bool quick, const std::string& volumeName) override
     {
         if (!quick)
             eraseEverythingOnDisk();
@@ -92,12 +99,12 @@ public:
             throw CannotWriteException();
     }
 
-    FilesystemStatus check()
+    FilesystemStatus check() override
     {
         return FS_OK;
     }
 
-    std::vector<std::shared_ptr<Dirent>> list(const Path& path)
+    std::vector<std::shared_ptr<Dirent>> list(const Path& path) override
     {
         AdfMount m(this);
 
@@ -113,19 +120,13 @@ public:
             auto* entry = (struct Entry*)cell->content;
             cell = cell->next;
 
-            auto dirent = std::make_shared<Dirent>();
-            dirent->filename = entry->name;
-            dirent->length = entry->size;
-            dirent->file_type =
-                (entry->type == ST_FILE) ? TYPE_FILE : TYPE_DIRECTORY;
-            dirent->mode = modeToString(entry->access);
-            results.push_back(dirent);
+            results.push_back(toDirent(entry, path));
         }
 
         return results;
     }
 
-    std::map<std::string, std::string> getMetadata(const Path& path)
+    std::shared_ptr<Dirent> getDirent(const Path& path) override
     {
         AdfMount m(this);
         if (path.size() == 0)
@@ -136,29 +137,12 @@ public:
 
         auto entry = AdfEntry(adfFindEntry(vol, (char*)path.back().c_str()));
         if (!entry)
-            throw BadPathException();
+            throw FileNotFoundException();
 
-        std::map<std::string, std::string> attributes;
-        attributes[FILENAME] = entry->name;
-        attributes[LENGTH] = fmt::format("{}", entry->size);
-        attributes[FILE_TYPE] = (entry->type == ST_FILE) ? "file" : "dir";
-        attributes[MODE] = modeToString(entry->access);
-        attributes["amigaffs.comment"] = entry->comment;
-        attributes["amigaffs.sector"] = entry->sector;
-
-        std::tm tm = {.tm_sec = entry->secs,
-            .tm_min = entry->mins,
-            .tm_hour = entry->hour,
-            .tm_mday = entry->days,
-            .tm_mon = entry->month,
-            .tm_year = entry->year - 1900};
-        std::stringstream ss;
-        ss << std::put_time(&tm, "%FT%T%z");
-        attributes["amigaffs.mtime"] = ss.str();
-        return attributes;
+        return toDirent(entry, path.parent());
     }
 
-    Bytes getFile(const Path& path)
+    Bytes getFile(const Path& path) override
     {
         AdfMount m(this);
         if (path.size() == 0)
@@ -185,7 +169,7 @@ public:
         return bytes;
     }
 
-    void putFile(const Path& path, const Bytes& data)
+    void putFile(const Path& path, const Bytes& data) override
     {
         AdfMount m(this);
         if (path.size() == 0)
@@ -209,7 +193,90 @@ public:
         adfCloseFile(file);
     }
 
+    void deleteFile(const Path& path) override
+    {
+        AdfMount m(this);
+        if (path.size() == 0)
+            throw BadPathException();
+
+        auto* vol = m.mount();
+        changeDirButOne(vol, path);
+
+        int res =
+            adfRemoveEntry(vol, vol->curDirPtr, (char*)path.back().c_str());
+        if (res != RC_OK)
+            throw CannotWriteException();
+    }
+
+    void moveFile(const Path& oldPath, const Path& newPath) override
+    {
+        AdfMount m(this);
+        if ((oldPath.size() == 0) || (newPath.size() == 0))
+            throw BadPathException();
+
+        auto* vol = m.mount();
+
+        changeDirButOne(vol, oldPath);
+        auto oldDir = vol->curDirPtr;
+
+        changeDirButOne(vol, newPath);
+        auto newDir = vol->curDirPtr;
+
+        int res = adfRenameEntry(vol,
+            oldDir,
+            (char*)oldPath.back().c_str(),
+            newDir,
+            (char*)newPath.back().c_str());
+        if (res != RC_OK)
+            throw CannotWriteException();
+    }
+
+    void createDirectory(const Path& path)
+    {
+        AdfMount m(this);
+        if (path.empty())
+            throw BadPathException();
+
+        auto* vol = m.mount();
+        changeDirButOne(vol, path);
+        int res = adfCreateDir(vol, vol->curDirPtr, (char*)path.back().c_str());
+        if (res != RC_OK)
+            throw CannotWriteException();
+    }
+
 private:
+    std::shared_ptr<Dirent> toDirent(struct Entry* entry, const Path& container)
+    {
+        auto dirent = std::make_shared<Dirent>();
+
+        dirent->path = container;
+        dirent->path.push_back(entry->name);
+        dirent->filename = entry->name;
+        dirent->length = entry->size;
+        dirent->file_type =
+            (entry->type == ST_FILE) ? TYPE_FILE : TYPE_DIRECTORY;
+        dirent->mode = modeToString(entry->access);
+
+        dirent->attributes[FILENAME] = entry->name;
+        dirent->attributes[LENGTH] = fmt::format("{}", entry->size);
+        dirent->attributes[FILE_TYPE] =
+            (entry->type == ST_FILE) ? "file" : "dir";
+        dirent->attributes[MODE] = modeToString(entry->access);
+        dirent->attributes["amigaffs.comment"] = entry->comment;
+
+        std::tm tm = {.tm_sec = entry->secs,
+            .tm_min = entry->mins,
+            .tm_hour = entry->hour,
+            .tm_mday = entry->days,
+            .tm_mon = entry->month,
+            .tm_year = entry->year - 1900};
+        std::stringstream ss;
+        ss << std::put_time(&tm, "%FT%T%z");
+        dirent->attributes["amigaffs.mtime"] = ss.str();
+
+        return dirent;
+    }
+
     class AdfEntry
     {
     public:
@@ -274,6 +341,8 @@ private:
 
         ~AdfMount()
         {
+            if (vol)
+                adfUnMount(vol);
             if (self->_ffs)
                 adfUnMountDev(self->_ffs);
             adfEnvCleanUp();
@@ -282,11 +351,17 @@ private:
         struct Volume* mount()
         {
             self->_ffs = adfMountDev(nullptr, false);
-            return adfMount(self->_ffs, 0, false);
+            if (!self->_ffs)
+                throw BadFilesystemException();
+            vol = adfMount(self->_ffs, 0, false);
+            if (!vol)
+                throw BadFilesystemException();
+            return vol;
         }
 
     private:
         AmigaFfsFilesystem* self;
+        struct Volume* vol = nullptr;
     };
 
     void changeDir(struct Volume* vol, const Path& path)
@@ -344,6 +419,16 @@ private:
     struct Device* _ffs;
 };
 
+static void onAdfWarning(char* message)
+{
+    Logger() << message;
+}
+
+static void onAdfError(char* message)
+{
+    throw FilesystemException(message);
+}
+
 void adfInitNativeFct()
 {
     auto cbs = (struct nativeFunctions*)adfEnv.nativeFct;
@@ -352,6 +437,9 @@ void adfInitNativeFct()
     cbs->adfNativeWriteSector = ::adfNativeWriteSector;
     cbs->adfIsDevNative = ::adfIsDevNative;
     cbs->adfReleaseDevice = ::adfReleaseDevice;
+
+    adfChgEnvProp(PR_WFCT, (void*)onAdfWarning);
+    adfChgEnvProp(PR_EFCT, (void*)onAdfError);
 }
 
 static RETCODE adfInitDevice(struct Device* dev, char* name, BOOL ro)

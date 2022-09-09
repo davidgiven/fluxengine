@@ -9,6 +9,9 @@ FLUXENGINE_SRCS = \
 	src/fe-getfileinfo.cc \
 	src/fe-inspect.cc \
 	src/fe-ls.cc \
+	src/fe-mkdir.cc \
+	src/fe-mv.cc \
+	src/fe-rm.cc \
 	src/fe-putfile.cc \
 	src/fe-rawread.cc \
 	src/fe-rawwrite.cc \

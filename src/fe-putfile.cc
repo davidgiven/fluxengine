@@ -38,9 +38,9 @@ int mainPutFile(int argc, const char* argv[])
             Error() << "you must supply a destination path to write to";
 
 		auto data = Bytes::readFromFile(inputFilename);
-        auto filesystem = createFilesystemFromConfig();
+        auto filesystem = Filesystem::createFilesystemFromConfig();
         filesystem->putFile(outputFilename, data);
-		filesystem->flush();
+		filesystem->flushChanges();
     }
     catch (const FilesystemException& e)
     {

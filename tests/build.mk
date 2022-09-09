@@ -17,6 +17,7 @@ $(call use-library, $(OBJDIR)/tests/$1.exe, $(OBJDIR)/tests/$1.o, PROTO)
 $(call use-library, $(OBJDIR)/tests/$1.exe, $(OBJDIR)/tests/$1.o, FATFS)
 $(call use-library, $(OBJDIR)/tests/$1.exe, $(OBJDIR)/tests/$1.o, ADFLIB)
 $(call use-library, $(OBJDIR)/tests/$1.exe, $(OBJDIR)/tests/$1.o, HFSUTILS)
+$(call use-library, $(OBJDIR)/tests/$1.exe, $(OBJDIR)/tests/$1.o, LIBUSBP)
 
 endef
 

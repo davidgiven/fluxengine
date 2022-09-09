@@ -162,9 +162,9 @@
 */
 
 
-#define FF_ALLOW_MIXED_CASE 1
-/* This option doesn't uppercase filenames before processing, in case the disk has
- * low case filenames in it. */
+#define FF_CASE_INSENSITIVE_COMPARISONS 1
+/* This option ensures that SFNs on disk are compared using case-insensitive routines,
+ * some FAT variants store lower case filenames. dtrg */
 
 /*---------------------------------------------------------------------------/
 / Drive/Volume Configurations

@@ -30,9 +30,9 @@ int mainFormat(int argc, const char* argv[])
 
     try
     {
-        auto filesystem = createFilesystemFromConfig();
+        auto filesystem = Filesystem::createFilesystemFromConfig();
         filesystem->create(quick, volumeName);
-        filesystem->flush();
+        filesystem->flushChanges();
     }
     catch (const FilesystemException& e)
     {

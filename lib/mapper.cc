@@ -130,46 +130,32 @@ std::set<Location> Mapper::computeLocations()
 {
     std::set<Location> locations;
 
-    unsigned track_step = getTrackStep();
     for (unsigned logicalTrack : iterate(config.tracks()))
     {
         for (unsigned head : iterate(config.heads()))
-        {
-            unsigned physicalTrack =
-                config.drive().head_bias() + logicalTrack * track_step;
-
-            locations.insert({.physicalTrack = physicalTrack,
-                .logicalTrack = logicalTrack,
-                .head = head,
-                .groupSize = track_step});
-        }
+            locations.insert(computeLocationFor(logicalTrack, head));
     }
 
     return locations;
 }
 
-Location Mapper::computeLocationFor(unsigned desiredTrack, unsigned desiredHead)
+Location Mapper::computeLocationFor(unsigned logicalTrack, unsigned logicalHead)
 {
-    unsigned track_step = getTrackStep();
-    for (unsigned logicalTrack : iterate(config.tracks()))
+    if ((logicalTrack < config.layout().tracks()) &&
+        (logicalHead < config.layout().sides()))
     {
-        for (unsigned head : iterate(config.heads()))
-        {
-            if ((logicalTrack == desiredTrack) && (head == desiredHead))
-            {
-                unsigned physicalTrack =
-                    config.drive().head_bias() + logicalTrack * track_step;
+        unsigned track_step = getTrackStep();
+        unsigned physicalTrack =
+            config.drive().head_bias() + logicalTrack * track_step;
 
-                return {.physicalTrack = physicalTrack,
-                    .logicalTrack = logicalTrack,
-                    .head = head,
-                    .groupSize = track_step};
-            }
-        }
+        return {.physicalTrack = physicalTrack,
+            .logicalTrack = logicalTrack,
+            .head = logicalHead,
+            .groupSize = track_step};
     }
 
     Error() << fmt::format(
-        "track {}.{} is not part of the image", desiredTrack, desiredHead);
+        "track {}.{} is not part of the image", logicalTrack, logicalHead);
 }
 
 nanoseconds_t Mapper::calculatePhysicalClockPeriod(

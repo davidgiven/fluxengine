@@ -74,6 +74,14 @@ bool endsWith(const std::string& value, const std::string& ending)
            std::equal(ending.rbegin(), ending.rend(), lowercase.begin());
 }
 
+std::string toUpper(const std::string& value)
+{
+    std::string s = value;
+    for (char& c : s)
+        c = toupper(c);
+    return s;
+}
+
 std::string leftTrimWhitespace(std::string value)
 {
     value.erase(0, value.find_first_not_of(WHITESPACE));

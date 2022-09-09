@@ -81,7 +81,7 @@ RETCODE adfRenameEntry(struct Volume *vol, SECTNUM pSect, char *oldName,
 	BOOL intl;
     RETCODE rc;
 
-    if (strcmp(oldName,newName)==0)
+    if ((pSect == nPSect) && (strcmp(oldName,newName)==0))
         return RC_OK;
     
     intl = isINTL(vol->dosType) || isDIRCACHE(vol->dosType);
