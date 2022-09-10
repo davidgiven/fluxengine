@@ -1,0 +1,25 @@
+comment: 'Acorn ADFS generic settings (8-bit formats)'
+is_extension: true
+
+image_writer {
+	filename: "acornadfs.img"
+	img {}
+}
+
+layout {
+	layoutdata {
+		sector_size: 256
+		physical {
+			start_sector: 0
+			count: 16
+		}
+	}
+}
+
+decoder {
+	ibm {
+		trackdata {
+			ignore_side_byte: true
+		}
+	}
+}
