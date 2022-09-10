@@ -1,9 +1,11 @@
 #include "lib/globals.h"
 #include "lib/layout.h"
 #include "lib/proto.h"
+#include "lib/environment.h"
 #include <fmt/format.h>
 
-static std::map<std::pair<int, int>, std::unique_ptr<Layout>> layoutCache;
+static Local<std::map<std::pair<int, int>, std::unique_ptr<Layout>>>
+    layoutCache;
 
 std::vector<std::pair<int, int>> Layout::getTrackOrdering(
     unsigned guessedTracks, unsigned guessedSides)
@@ -66,7 +68,7 @@ static void expandSectors(const LayoutProto::SectorsProto& sectorsProto,
 
 const Layout& Layout::getLayoutOfTrack(unsigned track, unsigned side)
 {
-    auto& layout = layoutCache[std::make_pair(track, side)];
+    auto& layout = (*layoutCache)[std::make_pair(track, side)];
     if (!layout)
     {
         layout.reset(new Layout());
