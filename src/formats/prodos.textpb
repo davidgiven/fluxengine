@@ -24,25 +24,3 @@ layout {
 		}
 	}
 }
-
-sector_mapping {
-	trackdata {
-		mapping { physical:  0 logical:  0 }
-		mapping { physical:  1 logical:  8 }
-		mapping { physical:  2 logical:  1 }
-		mapping { physical:  3 logical:  9 }
-		mapping { physical:  4 logical:  2 }
-		mapping { physical:  5 logical: 10 }
-		mapping { physical:  6 logical:  3 }
-		mapping { physical:  7 logical: 11 }
-		mapping { physical:  8 logical:  4 }
-		mapping { physical:  9 logical: 12 }
-		mapping { physical: 10 logical:  5 }
-		mapping { physical: 11 logical: 13 }
-		mapping { physical: 12 logical:  6 }
-		mapping { physical: 13 logical: 14 }
-		mapping { physical: 14 logical:  7 }
-		mapping { physical: 15 logical: 15 }
-	}
-}
-

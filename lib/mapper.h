@@ -8,11 +8,6 @@ class Location;
 class Mapper
 {
 public:
-    static std::unique_ptr<const Image> remapSectorsPhysicalToLogical(
-        const Image& source, const SectorMappingProto& mapping);
-    static std::unique_ptr<const Image> remapSectorsLogicalToPhysical(
-        const Image& source, const SectorMappingProto& mapping);
-
     static unsigned remapTrackPhysicalToLogical(unsigned track);
     static unsigned remapTrackLogicalToPhysical(unsigned track);
 

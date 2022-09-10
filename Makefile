@@ -118,7 +118,6 @@ PROTOS = \
 	lib/imagereader/imagereader.proto \
 	lib/imagewriter/imagewriter.proto \
 	lib/layout.proto \
-	lib/mapper.proto \
 	lib/usb/usb.proto \
 	lib/vfs/vfs.proto \
 	tests/testproto.proto \

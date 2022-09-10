@@ -383,20 +383,11 @@ void writeDiskCommand(const Image& image,
     FluxSource* fluxSource,
     const std::set<Location>& locations)
 {
-    const Image* imagep = &image;
-    std::unique_ptr<const Image> remapped;
-    if (config.has_sector_mapping())
-    {
-        remapped = Mapper::remapSectorsLogicalToPhysical(
-            image, config.sector_mapping());
-        imagep = &*remapped;
-    }
-
     if (fluxSource && decoder)
         writeTracksAndVerify(
-            fluxSink, encoder, *fluxSource, *decoder, *imagep, locations);
+            fluxSink, encoder, *fluxSource, *decoder, image, locations);
     else
-        writeTracks(fluxSink, encoder, *imagep, locations);
+        writeTracks(fluxSink, encoder, image, locations);
 }
 
 void writeDiskCommand(const Image& image,
@@ -552,10 +543,6 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
             all_sectors.insert(sector);
     all_sectors = collectSectors(all_sectors);
     diskflux->image = std::make_shared<Image>(all_sectors);
-
-    if (config.has_sector_mapping())
-        diskflux->image = std::move(Mapper::remapSectorsPhysicalToLogical(
-            *diskflux->image, config.sector_mapping()));
 
     /* diskflux can't be modified below this point. */
     Logger() << DiskReadLogMessage{diskflux};
