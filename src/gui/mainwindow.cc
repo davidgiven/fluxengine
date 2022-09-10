@@ -62,6 +62,10 @@ public:
         _dndFormat(wxDF_UNICODETEXT),
         _config("FluxEngine")
     {
+		wxIcon icon;
+		icon.CopyFromBitmap(applicationBitmap->GetBitmap());
+		SetIcon(icon);
+
         Logger::setLogger(
             [&](std::shared_ptr<const AnyLogMessage> message)
             {

@@ -7,6 +7,8 @@
 
 #include "layout.h"
 
+#include "icon.png.h"
+
 ///////////////////////////////////////////////////////////////////////////
 
 MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
@@ -55,6 +57,9 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	fgSizer8->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_ALL );
 
 	fgSizer8->SetMinSize( wxSize( 400,-1 ) );
+	applicationBitmap = new wxStaticBitmap( idlePanel, wxID_ANY, icon_png_to_wx_bitmap(), wxDefaultPosition, wxDefaultSize, 0 );
+	fgSizer8->Add( applicationBitmap, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5 );
+
 	m_staticText61 = new wxStaticText( idlePanel, wxID_ANY, wxT("Pick one of:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText61->Wrap( -1 );
 	fgSizer8->Add( m_staticText61, 0, wxALIGN_CENTER|wxALL, 5 );
