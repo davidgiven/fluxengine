@@ -6,12 +6,12 @@ image_reader {
 }
 
 layout {
-	tracks: 40
+	tracks: 35
 	sides: 1
 	layoutdata {
 		sector_size: 256
 		physical {
-			sector: 0
+			start_sector: 0
 			count: 16
 		}
 	}
@@ -32,7 +32,7 @@ encoder {
 
 tracks {
 	start: 0
-	end: 39
+	end: 34
 }
 
 heads {
