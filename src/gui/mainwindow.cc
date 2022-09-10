@@ -1088,7 +1088,7 @@ public:
                 config.mutable_drive()->set_high_density(hd);
 
                 if (fortyTrackDriveToggle->GetValue())
-                	config.add_include("40track_drive");
+                	FlagGroup::parseConfigFile("40track_drive", formats);
 
                 std::string filename =
                     driveChoice->GetSelection() ? "drive:1" : "drive:0";
