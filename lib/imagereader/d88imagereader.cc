@@ -5,7 +5,6 @@
 #include "image.h"
 #include "proto.h"
 #include "logger.h"
-#include "mapper.h"
 #include "lib/config.pb.h"
 #include "fmt/format.h"
 #include <algorithm>

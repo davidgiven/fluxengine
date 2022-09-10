@@ -7,7 +7,6 @@
 #include "image.h"
 #include "fmt/format.h"
 #include "logger.h"
-#include "mapper.h"
 #include "lib/imagereader/imagereader.pb.h"
 #include <algorithm>
 #include <iostream>

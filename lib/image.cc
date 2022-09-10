@@ -2,7 +2,6 @@
 #include "lib/sector.h"
 #include "lib/image.h"
 #include "lib/layout.h"
-#include "lib/mapper.h"
 
 Image::Image() {}
 
@@ -69,7 +68,7 @@ std::shared_ptr<Sector> Image::put(
     sector->logicalTrack = track;
     sector->logicalSide = side;
     sector->logicalSector = sectorid;
-    sector->physicalTrack = Mapper::remapTrackLogicalToPhysical(track);
+    sector->physicalTrack = Layout::remapTrackLogicalToPhysical(track);
     sector->physicalHead = side;
     sector->physicalSector = trackLayout.logicalSectorToPhysical(sectorid);
     _sectors[key] = sector;

@@ -5,7 +5,6 @@
 #include "crc.h"
 #include "readerwriter.h"
 #include "image.h"
-#include "mapper.h"
 #include "arch/amiga/amiga.pb.h"
 #include "lib/encoders/encoders.pb.h"
 
@@ -156,7 +155,7 @@ public:
 
         auto fluxmap = std::make_unique<Fluxmap>();
         fluxmap->appendBits(bits,
-            Mapper::calculatePhysicalClockPeriod(
+            calculatePhysicalClockPeriod(
                 _config.clock_rate_us() * 1e3, 200e6));
         return fluxmap;
     }

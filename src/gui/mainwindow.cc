@@ -11,7 +11,6 @@
 #include "decoders/decoders.h"
 #include "lib/usb/usbfinder.h"
 #include "fmt/format.h"
-#include "mapper.h"
 #include "utils.h"
 #include "fluxviewerwindow.h"
 #include "textviewerwindow.h"

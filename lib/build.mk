@@ -55,7 +55,6 @@ LIBFLUXENGINE_SRCS = \
 	lib/layout.cc \
 	lib/ldbs.cc \
 	lib/logger.cc \
-	lib/mapper.cc \
 	lib/proto.cc \
 	lib/readerwriter.cc \
 	lib/sector.cc \

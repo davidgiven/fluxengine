@@ -5,7 +5,6 @@
 #include "decoders/decoders.h"
 #include "encoders/encoders.h"
 #include "image.h"
-#include "mapper.h"
 #include "lib/encoders/encoders.pb.h"
 
 #define GAP_FILL_SIZE_SD 30
@@ -172,7 +171,7 @@ public:
 
         std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
         fluxmap->appendBits(bits,
-            Mapper::calculatePhysicalClockPeriod(
+            calculatePhysicalClockPeriod(
                 clockRateUs * 1e3, _config.rotational_period_ms() * 1e6));
         return fluxmap;
     }

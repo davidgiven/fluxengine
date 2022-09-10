@@ -3,7 +3,6 @@
 #include "sector.h"
 #include "imagereader/imagereader.h"
 #include "image.h"
-#include "mapper.h"
 #include "logger.h"
 #include "fmt/format.h"
 #include "lib/config.pb.h"

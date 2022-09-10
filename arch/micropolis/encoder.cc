@@ -4,7 +4,6 @@
 #include "decoders/decoders.h"
 #include "encoders/encoders.h"
 #include "image.h"
-#include "mapper.h"
 #include "lib/encoders/encoders.pb.h"
 
 static void write_sector(std::vector<bool>& bits,
@@ -115,7 +114,7 @@ public:
 
         std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
         fluxmap->appendBits(bits,
-            Mapper::calculatePhysicalClockPeriod(
+            calculatePhysicalClockPeriod(
                 _config.clock_period_us() * 1e3,
                 _config.rotational_period_ms() * 1e6));
         return fluxmap;

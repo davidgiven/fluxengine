@@ -6,7 +6,6 @@
 #include "sector.h"
 #include "readerwriter.h"
 #include "image.h"
-#include "mapper.h"
 #include "fmt/format.h"
 #include "arch/victor9k/victor9k.pb.h"
 #include "lib/encoders/encoders.pb.h"
@@ -194,7 +193,7 @@ public:
         unsigned bitsPerRevolution = (trackdata.rotational_period_ms() * 1e3) /
                                      trackdata.clock_period_us();
         std::vector<bool> bits(bitsPerRevolution);
-        nanoseconds_t clockPeriod = Mapper::calculatePhysicalClockPeriod(
+        nanoseconds_t clockPeriod = calculatePhysicalClockPeriod(
             trackdata.clock_period_us() * 1e3,
             trackdata.rotational_period_ms() * 1e6);
         unsigned cursor = 0;

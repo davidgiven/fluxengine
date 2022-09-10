@@ -5,7 +5,6 @@
 #include "crc.h"
 #include "readerwriter.h"
 #include "image.h"
-#include "mapper.h"
 #include "arch/ibm/ibm.pb.h"
 #include "lib/encoders/encoders.pb.h"
 #include "fmt/format.h"
@@ -286,7 +285,7 @@ public:
 
         std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
         fluxmap->appendBits(_bits,
-            Mapper::calculatePhysicalClockPeriod(clockRateUs * 1e3,
+            calculatePhysicalClockPeriod(clockRateUs * 1e3,
                 trackdata.target_rotational_period_ms() * 1e6));
         return fluxmap;
     }

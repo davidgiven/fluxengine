@@ -14,7 +14,7 @@
 #include "sector.h"
 #include "image.h"
 #include "logger.h"
-#include "mapper.h"
+#include "layout.h"
 #include "utils.h"
 #include "lib/config.pb.h"
 #include "proto.h"
@@ -398,7 +398,7 @@ void writeDiskCommand(const Image& image,
     AbstractDecoder* decoder,
     FluxSource* fluxSource)
 {
-    auto locations = Mapper::computeLocations();
+    auto locations = Layout::computeLocations();
     writeDiskCommand(image, encoder, fluxSink, decoder, fluxSource, locations);
 }
 
@@ -412,7 +412,7 @@ void writeRawDiskCommand(FluxSource& fluxSource, FluxSink& fluxSink)
                 ->next();
         },
         dontVerify,
-        Mapper::computeLocations());
+        Layout::computeLocations());
 }
 
 std::shared_ptr<TrackFlux> readAndDecodeTrack(
@@ -461,7 +461,7 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
     auto diskflux = std::make_shared<DiskFlux>();
 
     Logger() << BeginOperationLogMessage{"Reading and decoding disk"};
-    auto locations = Mapper::computeLocations();
+    auto locations = Layout::computeLocations();
     unsigned index = 0;
     for (const auto& location : locations)
     {

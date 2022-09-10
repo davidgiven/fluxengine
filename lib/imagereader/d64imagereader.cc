@@ -5,7 +5,6 @@
 #include "fmt/format.h"
 #include "image.h"
 #include "logger.h"
-#include "mapper.h"
 #include "proto.h"
 #include <algorithm>
 #include <iostream>
@@ -56,7 +55,6 @@ public:
         for (int track = 0; track < 40; track++)
         {
             int numSectors = sectorsPerTrack(track);
-            int physicalTrack = Mapper::remapTrackLogicalToPhysical(track);
             for (int head = 0; head < numHeads; head++)
             {
                 for (int sectorId = 0; sectorId < numSectors; sectorId++)
@@ -69,14 +67,12 @@ public:
                         offset += 256;
 
                         sector->status = Sector::OK;
-                        sector->physicalTrack = physicalTrack;
                         sector->data.writer().append(payload);
                     }
                     else
                     { // no more data in input file. Write sectors with status:
                       // DATA_MISSING
                         sector->status = Sector::DATA_MISSING;
-                        sector->physicalTrack = physicalTrack;
                     }
                 }
             }

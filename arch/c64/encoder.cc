@@ -6,7 +6,6 @@
 #include "sector.h"
 #include "readerwriter.h"
 #include "image.h"
-#include "mapper.h"
 #include "fmt/format.h"
 #include "arch/c64/c64.pb.h"
 #include "lib/encoders/encoders.pb.h"
@@ -229,7 +228,7 @@ public:
 
         std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
         fluxmap->appendBits(bits,
-            Mapper::calculatePhysicalClockPeriod(clockRateUs*1e3, 200e6));
+            calculatePhysicalClockPeriod(clockRateUs*1e3, 200e6));
         return fluxmap;
     }
 

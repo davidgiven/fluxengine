@@ -5,7 +5,6 @@
 #include "crc.h"
 #include "readerwriter.h"
 #include "image.h"
-#include "mapper.h"
 #include "arch/tids990/tids990.pb.h"
 #include "lib/encoders/encoders.pb.h"
 #include <fmt/format.h>
@@ -151,7 +150,7 @@ public:
 
         auto fluxmap = std::make_unique<Fluxmap>();
         fluxmap->appendBits(_bits,
-            Mapper::calculatePhysicalClockPeriod(clockRateUs * 1e3,
+            calculatePhysicalClockPeriod(clockRateUs * 1e3,
                 _config.rotational_period_ms() * 1e6));
         return fluxmap;
     }

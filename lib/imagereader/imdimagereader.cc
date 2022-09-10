@@ -5,7 +5,7 @@
 #include "image.h"
 #include "proto.h"
 #include "logger.h"
-#include "mapper.h"
+#include "layout.h"
 #include "lib/config.pb.h"
 #include "fmt/format.h"
 #include <algorithm>
@@ -372,14 +372,14 @@ public:
 				if (blnOptionalCylinderMap) //there was een optional cylinder map. write it to the sector
 				//The Sector Cylinder Map has one entry for each sector, and contains the logical Cylinder ID for the corresponding sector in the Sector Numbering Map.
 				{
-					sector->physicalTrack = Mapper::remapTrackLogicalToPhysical(header.track);
+					sector->physicalTrack = Layout::remapTrackLogicalToPhysical(header.track);
 					sector->logicalTrack = optionalsector_map[s];
 					blnOptionalCylinderMap = false;
 				}
 				else 
 				{
 					sector->logicalTrack = header.track;
-                    sector->physicalTrack = Mapper::remapTrackLogicalToPhysical(header.track);
+                    sector->physicalTrack = Layout::remapTrackLogicalToPhysical(header.track);
 				}
 				if (blnOptionalHeadMap) //there was een optional head map. write it to the sector
 				//The Sector Head Map has one entry for each sector, and contains the logical Head ID for the corresponding sector in the Sector Numbering Map.

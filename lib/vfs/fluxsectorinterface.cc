@@ -6,7 +6,6 @@
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/layout.h"
 #include "lib/proto.h"
-#include "lib/mapper.h"
 
 class FluxSectorInterface : public SectorInterface
 {
@@ -64,7 +63,7 @@ public:
             unsigned track = trackid.first;
             unsigned side = trackid.second;
             auto& trackLayout = Layout::getLayoutOfTrack(track, side);
-            locations.insert(Mapper::computeLocationFor(track, side));
+            locations.insert(Layout::computeLocationFor(track, side));
 
             /* If we don't have all the sectors of this track, we may need to
              * populate any non-changed sectors as we can only write a track at
@@ -127,7 +126,7 @@ private:
 
     void populateSectors(unsigned track, unsigned side)
     {
-        auto location = Mapper::computeLocationFor(track, side);
+        auto location = Layout::computeLocationFor(track, side);
         auto trackdata = readAndDecodeTrack(*_fluxSource, *_decoder, location);
 
         for (const auto& sector : trackdata->sectors)

@@ -4,7 +4,6 @@
 #include "imagereader/imagereader.h"
 #include "image.h"
 #include "logger.h"
-#include "mapper.h"
 #include "lib/config.pb.h"
 #include "lib/layout.pb.h"
 #include "lib/proto.h"
