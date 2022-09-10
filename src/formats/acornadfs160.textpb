@@ -1,0 +1,19 @@
+comment: 'Acorn ADFS S-format 160kB 3.5" or 5.25" 40-track SS'
+include: '_acornadfs8'
+
+layout {
+	tracks: 40
+	sides: 1
+}
+
+tracks {
+	start: 0
+	end: 39
+}
+
+heads {
+	start: 0
+	end: 0
+}
+
+tpi: 48

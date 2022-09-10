@@ -1,0 +1,17 @@
+comment: 'Acorn ADFS L-format 640kB 3.5" or 5.25" 80-track DS'
+include: '_acornadfs8'
+
+layout {
+	tracks: 80
+	sides: 2
+}
+
+tracks {
+	start: 0
+	end: 79
+}
+
+heads {
+	start: 0
+	end: 1
+}

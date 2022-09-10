@@ -13,14 +13,14 @@ message LayoutProto
 
     message SectorsProto
     {
+        /* either */
         repeated int32 sector = 1 [ (help) = "sector ID" ];
-        oneof count_oneof
-        {
-            int32 count = 2
-                [ (help) = "if present, add this many consecutive sectors" ];
-            bool guess_count = 3
-                [ (help) = "if present, guess the number of sectors" ];
-        }
+
+        /* or */
+        optional int32 start_sector = 2
+            [ (help) = "first sector of a continuous run" ];
+        optional int32 count = 3
+            [ (help) = "number of sectors in a continuous run" ];
     }
 
     message LayoutdataProto

@@ -11,7 +11,7 @@ void Environment::reset()
 
 void Environment::addVariable(LocalBase* local)
 {
-	if (!variables)
-		variables = std::make_unique<std::set<LocalBase*>>();
+    if (!variables)
+        variables = std::make_unique<std::set<LocalBase*>>();
     variables->insert(local);
 }

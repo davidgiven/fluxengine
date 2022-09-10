@@ -16,7 +16,7 @@ layout {
 	layoutdata {
 		sector_size: 1024
 		physical {
-			sector: 1
+			start_sector: 1
 			count: 8
 		}
 	}

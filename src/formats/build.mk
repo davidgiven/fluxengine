@@ -1,11 +1,14 @@
 FORMATS = \
+	_acornadfs8 \
 	_atari \
 	_micropolis \
 	_northstar \
 	_mx \
 	_commodore1541 \
 	40track_drive \
-	acornadfs \
+	acornadfs160 \
+	acornadfs320 \
+	acornadfs640 \
 	acorndfs \
 	aeslanier \
 	agat840 \

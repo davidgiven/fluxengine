@@ -49,11 +49,11 @@ static void expandSectors(const LayoutProto::SectorsProto& sectorsProto,
 {
     if (sectorsProto.has_count())
     {
-        if (sectorsProto.sector_size() != 1)
-            Error() << "LAYOUT: if you use a sector count, you must specify "
-                       "exactly one start sector";
+        if (sectorsProto.sector_size() != 0)
+            Error() << "LAYOUT: if you use a sector count, you can't use an "
+                       "explicit sector list";
 
-        int startSector = sectorsProto.sector(0);
+        int startSector = sectorsProto.start_sector();
         for (int i = 0; i < sectorsProto.count(); i++)
             sectors.push_back(startSector + i);
     }
