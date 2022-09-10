@@ -43,8 +43,16 @@ public:
 public:
     unsigned numTracks;
     unsigned numSides;
+    unsigned numSectors;
     unsigned sectorSize;
+
+    /* Physical sector IDs in disk order. */
     std::vector<unsigned> physicalSectors;
+
+    /* Logical sector IDs in disk order. */
+    std::vector<unsigned> logicalSectorsOnDisk;
+
+    /* Logical sector IDs in filesystem order. */
     std::vector<unsigned> logicalSectors;
 
     unsigned physicalSectorToLogical(unsigned sectorId) const;

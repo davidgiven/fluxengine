@@ -157,14 +157,26 @@ const Layout& Layout::getLayoutOfTrack(unsigned track, unsigned side)
         layout->sectorSize = layoutdata.sector_size();
         expandSectors(layoutdata.physical(), layout->physicalSectors);
         if (layoutdata.has_logical())
-            expandSectors(layoutdata.logical(), layout->logicalSectors);
+            expandSectors(layoutdata.logical(), layout->logicalSectorsOnDisk);
         else
-            layout->logicalSectors = layout->physicalSectors;
+            layout->logicalSectorsOnDisk = layout->physicalSectors;
 
-        if (layout->logicalSectors.size() != layout->physicalSectors.size())
+        if (layout->logicalSectorsOnDisk.size() !=
+            layout->physicalSectors.size())
             Error() << fmt::format(
                 "LAYOUT: physical and logical sectors lists are different "
                 "sizes in {}.{}",
+                track,
+                side);
+
+        layout->logicalSectors = layout->logicalSectorsOnDisk;
+        std::sort(layout->logicalSectors.begin(), layout->logicalSectors.end());
+        layout->numSectors = layout->logicalSectors.size();
+
+        if ((layout->numSectors != layout->logicalSectorsOnDisk.size()) ||
+            (layout->numSectors != layout->physicalSectors.size()))
+            Error() << fmt::format(
+                "LAYOUT: duplicate sector ID in specification for {}.{}",
                 track,
                 side);
     }
@@ -176,7 +188,7 @@ unsigned Layout::physicalSectorToLogical(unsigned physicalSectorId) const
 {
     for (int i = 0; i < physicalSectors.size(); i++)
         if (physicalSectors[i] == physicalSectorId)
-            return logicalSectors[i];
+            return logicalSectorsOnDisk[i];
     Error() << fmt::format(
         "LAYOUT: physical sector {} not recognised", physicalSectorId);
     throw nullptr;
@@ -184,8 +196,8 @@ unsigned Layout::physicalSectorToLogical(unsigned physicalSectorId) const
 
 unsigned Layout::logicalSectorToPhysical(unsigned logicalSectorId) const
 {
-    for (int i = 0; i < logicalSectors.size(); i++)
-        if (logicalSectors[i] == logicalSectorId)
+    for (int i = 0; i < logicalSectorsOnDisk.size(); i++)
+        if (logicalSectorsOnDisk[i] == logicalSectorId)
             return physicalSectors[i];
     Error() << fmt::format(
         "LAYOUT: logical sector {} not recognised", logicalSectorId);
