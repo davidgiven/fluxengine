@@ -29,6 +29,7 @@ extern const std::map<std::string, std::string> formats;
 #define CONFIG_SELECTEDSOURCE "SelectedSource"
 #define CONFIG_DEVICE "Device"
 #define CONFIG_DRIVE "Drive"
+#define CONFIG_FORTYTRACK "FortyTrack"
 #define CONFIG_HIGHDENSITY "HighDensity"
 #define CONFIG_FORMAT "Format"
 #define CONFIG_EXTRACONFIG "ExtraConfig"
@@ -1086,6 +1087,9 @@ public:
                 bool hd = highDensityToggle->GetValue();
                 config.mutable_drive()->set_high_density(hd);
 
+                if (fortyTrackDriveToggle->GetValue())
+                	config.add_include("40track_drive");
+
                 std::string filename =
                     driveChoice->GetSelection() ? "drive:1" : "drive:0";
                 FluxSink::updateConfigForFilename(
@@ -1265,6 +1269,10 @@ public:
         _config.Read(CONFIG_HIGHDENSITY, &s);
         highDensityToggle->SetValue(wxAtoi(s));
 
+        s = "0";
+        _config.Read(CONFIG_FORTYTRACK, &s);
+        fortyTrackDriveToggle->SetValue(wxAtoi(s));
+
         /* Flux image block. */
 
         s = "";
@@ -1320,6 +1328,8 @@ public:
             wxString(std::to_string(driveChoice->GetSelection())));
         _config.Write(CONFIG_HIGHDENSITY,
             wxString(std::to_string(highDensityToggle->GetValue())));
+        _config.Write(CONFIG_FORTYTRACK,
+            wxString(std::to_string(fortyTrackDriveToggle->GetValue())));
 
         /* Flux image block. */
 

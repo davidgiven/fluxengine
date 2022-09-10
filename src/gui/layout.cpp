@@ -91,6 +91,9 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 
 	bSizer3->Add( highDensityToggle, 0, wxALL|wxEXPAND, 5 );
 
+	fortyTrackDriveToggle = new wxCheckBox( realDiskRadioButtonPanel, wxID_ANY, wxT("I'm using a 40-track drive"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer3->Add( fortyTrackDriveToggle, 0, wxALL, 5 );
+
 
 	realDiskRadioButtonPanel->SetSizer( bSizer3 );
 	realDiskRadioButtonPanel->Layout();
