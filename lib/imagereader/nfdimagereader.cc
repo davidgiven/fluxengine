@@ -57,7 +57,6 @@ public:
 
         auto ibm = config.mutable_encoder()->mutable_ibm();
 		auto layout = config.mutable_layout();
-        config.mutable_tracks()->set_end(0);
         Logger() << "NFD: HD 1.2MB mode";
         if (!config.drive().has_drive())
             config.mutable_drive()->set_high_density(true);
@@ -150,8 +149,6 @@ public:
                 sector->data = data;
 
                 physical->add_sector(sectorId);
-                if (config.tracks().end() < track)
-                    config.mutable_tracks()->set_end(track);
             }
         }
 

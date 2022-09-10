@@ -29,14 +29,3 @@ encoder {
 decoder {
 	tids990 {}
 }
-
-tracks {
-	start: 0
-	end: 76
-}
-
-heads {
-	start: 0
-	end: 1
-}
-

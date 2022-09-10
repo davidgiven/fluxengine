@@ -47,14 +47,3 @@ encoder {
 decoder {
 	ibm {}
 }
-
-tracks {
-	start: 0
-	end: 65
-}
-
-heads {
-	start: 0
-	end: 0
-}
-

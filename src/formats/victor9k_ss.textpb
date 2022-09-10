@@ -166,14 +166,3 @@ encoder {
 decoder {
 	victor9k {}
 }
-
-tracks {
-	start: 0
-	end: 79
-}
-
-heads {
-	start: 0
-	end: 0
-}
-

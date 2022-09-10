@@ -38,13 +38,13 @@ FORMATS = \
 	fb100 \
 	hp9121 \
 	hplif770 \
+	ibm \
 	ibm1200 \
 	ibm1232 \
 	ibm1440 \
 	ibm180 \
 	ibm360 \
 	ibm720 \
-	ibm \
 	mac400 \
 	mac800 \
 	micropolis143 \

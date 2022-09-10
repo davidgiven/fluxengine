@@ -41,16 +41,6 @@ drive {
 	high_density: false
 }
 
-tracks {
-	start: 0
-	end: 79
-}
-
-heads {
-	start: 0
-	end: 1
-}
-
 filesystem {
 	fatfs {}
 }

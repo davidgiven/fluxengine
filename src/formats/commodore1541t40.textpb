@@ -5,14 +5,3 @@ include: '_commodore1541'
 layout {
 	tracks: 40
 }
-
-tracks {
-	start: 0
-	end: 39
-}
-
-heads {
-	start: 0
-	end: 0
-}
-

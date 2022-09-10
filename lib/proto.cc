@@ -201,6 +201,14 @@ std::set<unsigned> iterate(const RangeProto& range)
 	return set;
 }
 
+std::set<unsigned> iterate(unsigned start, unsigned count)
+{
+	std::set<unsigned> set;
+	for (unsigned i=0; i<count; i++)
+		set.insert(start + i);
+	return set;
+}
+
 std::map<std::string, const google::protobuf::FieldDescriptor*> findAllProtoFields(google::protobuf::Message* message)
 {
 	std::map<std::string, const google::protobuf::FieldDescriptor*> fields;

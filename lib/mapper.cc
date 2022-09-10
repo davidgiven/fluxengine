@@ -32,9 +32,21 @@ std::set<Location> Mapper::computeLocations()
 {
     std::set<Location> locations;
 
-    for (unsigned logicalTrack : iterate(config.tracks()))
+    std::set<unsigned> tracks;
+    if (config.has_tracks())
+    	tracks = iterate(config.tracks());
+    else
+    	tracks = iterate(0, config.layout().tracks());
+
+    std::set<unsigned> heads;
+    if (config.has_heads())
+    	heads = iterate(config.heads());
+    else
+    	heads = iterate(0, config.layout().sides());
+
+    for (unsigned logicalTrack : tracks)
     {
-        for (unsigned head : iterate(config.heads()))
+        for (unsigned head : heads)
             locations.insert(computeLocationFor(logicalTrack, head));
     }
 

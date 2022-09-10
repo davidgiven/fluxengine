@@ -30,15 +30,5 @@ encoder {
 	apple2 {}
 }
 
-tracks {
-	start: 0
-	end: 34
-}
-
-heads {
-	start: 0
-	end: 0
-}
-
 tpi: 48
 

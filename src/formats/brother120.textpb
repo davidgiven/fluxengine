@@ -37,16 +37,6 @@ drive {
 	group_offset: 1
 }
 
-tracks {
-	start: 0
-	end: 38
-}
-
-heads {
-	start: 0
-	end: 0
-}
-
 tpi: 48
 
 filesystem {

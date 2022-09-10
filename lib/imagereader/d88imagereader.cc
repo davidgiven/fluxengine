@@ -219,20 +219,6 @@ public:
 		layout->set_tracks(geometry.numTracks);
 		layout->set_sides(geometry.numSides);
 
-        if (!config.has_heads())
-        {
-            auto* heads = config.mutable_heads();
-            heads->set_start(0);
-            heads->set_end(geometry.numSides - 1);
-        }
-
-        if (!config.has_tracks())
-        {
-            auto* tracks = config.mutable_tracks();
-            tracks->set_start(0);
-            tracks->set_end(geometry.numTracks - 1);
-        }
-
         return image;
     }
 };

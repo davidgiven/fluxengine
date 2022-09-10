@@ -34,16 +34,6 @@ drive {
 	head_bias: 1
 }
 
-tracks {
-	start: 0
-	end: 77
-}
-
-heads {
-	start: 0
-	end: 0
-}
-
 filesystem {
 	fatfs {}
 }
