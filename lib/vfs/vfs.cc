@@ -164,7 +164,7 @@ Filesystem::Filesystem(std::shared_ptr<SectorInterface> sectors):
         int track = p.first;
         int side = p.second;
 
-        auto trackLayout = Layout::getLayoutOfTrack(track, side);
+        auto& trackLayout = Layout::getLayoutOfTrack(track, side);
         if (trackLayout.logicalSectors.empty())
             Error() << "FS: filesystem support cannot be used without concrete "
                        "layout information";
@@ -268,7 +268,7 @@ Bytes Filesystem::getLogicalSector(uint32_t number, uint32_t count)
         int track = std::get<0>(it);
         int side = std::get<1>(it);
         int sector = std::get<2>(it);
-        auto trackLayout = Layout::getLayoutOfTrack(track, side);
+        auto& trackLayout = Layout::getLayoutOfTrack(track, side);
         bw += _sectors->get(track, side, sector)
                   ->data.slice(0, trackLayout.sectorSize);
     }

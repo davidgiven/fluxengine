@@ -147,10 +147,6 @@ public:
                 inputFile.read((char*)data.begin(), data.size());
                 const auto& sector = image->put(track, head, sectorId);
                 sector->status = Sector::OK;
-                sector->logicalTrack = track;
-                sector->physicalTrack = Mapper::remapTrackLogicalToPhysical(track);
-                sector->logicalSide = sector->physicalHead = head;
-                sector->physicalSector = sectorId;
                 sector->data = data;
 
                 physical->add_sector(sectorId);

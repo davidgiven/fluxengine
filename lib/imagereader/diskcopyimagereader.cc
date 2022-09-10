@@ -110,10 +110,6 @@ public:
 
                     const auto& sector = image->put(track, head, sectorId);
                     sector->status = Sector::OK;
-                    sector->logicalTrack = track;
-                    sector->physicalTrack = Mapper::remapTrackLogicalToPhysical(track);
-                    sector->logicalSide = sector->physicalHead = head;
-                    sector->physicalSector = sectorId;
                     sector->data.writer().append(payload).append(tag);
                 }
             }

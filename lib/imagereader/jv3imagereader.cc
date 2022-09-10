@@ -124,10 +124,6 @@ public:
                     const auto& sector =
                         image->put(header.track, head, header.sector);
                     sector->status = Sector::OK;
-                    sector->logicalTrack = header.track;
-                    sector->physicalTrack = Mapper::remapTrackLogicalToPhysical(header.track);
-                    sector->logicalSide = sector->physicalHead = head;
-                    sector->physicalSector = header.sector;
                     sector->data = data;
                 }
 

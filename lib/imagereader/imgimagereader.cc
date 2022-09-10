@@ -40,7 +40,7 @@ public:
             if (inputFile.eof())
                 break;
 
-            auto trackLayout = Layout::getLayoutOfTrack(track, side);
+            auto& trackLayout = Layout::getLayoutOfTrack(track, side);
             for (int sectorId : trackLayout.logicalSectors)
             {
                 Bytes data(trackLayout.sectorSize);
@@ -48,11 +48,6 @@ public:
 
                 const auto& sector = image->put(track, side, sectorId);
                 sector->status = Sector::OK;
-                sector->logicalTrack = track;
-                sector->physicalTrack =
-                    Mapper::remapTrackLogicalToPhysical(track);
-                sector->logicalSide = sector->physicalHead = side;
-                sector->physicalSector = sectorId;
                 sector->data = data;
             }
         }

@@ -63,7 +63,7 @@ public:
         {
             unsigned track = trackid.first;
             unsigned side = trackid.second;
-            auto trackLayout = Layout::getLayoutOfTrack(track, side);
+            auto& trackLayout = Layout::getLayoutOfTrack(track, side);
             locations.insert(Mapper::computeLocationFor(track, side));
 
             /* If we don't have all the sectors of this track, we may need to
@@ -131,7 +131,7 @@ private:
         auto trackdata = readAndDecodeTrack(*_fluxSource, *_decoder, location);
 
         for (const auto& sector : trackdata->sectors)
-            *_loadedSectors.put(track, side, sector->physicalSector) = *sector;
+            *_loadedSectors.put(track, side, sector->logicalSector) = *sector;
         _loadedTracks.insert(trackid_t(track, side));
     }
 

@@ -115,7 +115,7 @@ public:
         IbmEncoderProto::TrackdataProto trackdata;
         getEncoderTrackData(trackdata, location.logicalTrack, location.head);
 
-        auto trackLayout =
+        auto& trackLayout =
             Layout::getLayoutOfTrack(location.logicalTrack, location.head);
 
         int logicalSide = location.head ^ trackdata.swap_sides();
@@ -138,7 +138,7 @@ public:
         IbmEncoderProto::TrackdataProto trackdata;
         getEncoderTrackData(trackdata, location.logicalTrack, location.head);
 
-        auto trackLayout =
+        auto& trackLayout =
             Layout::getLayoutOfTrack(location.logicalTrack, location.head);
 
         auto writeBytes = [&](const Bytes& bytes)

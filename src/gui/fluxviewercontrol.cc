@@ -237,7 +237,7 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
 				wxDCClipper clipper(dc, rect);
 
 				auto text = fmt::format("c{}.h{}.s{} {}",
-					sector->logicalTrack, sector->logicalSide, sector->physicalSector,
+					sector->logicalTrack, sector->logicalSide, sector->logicalSector,
 					Sector::statusToString(sector->status));
 				auto size = dc.GetTextExtent(text);
 				dc.DrawText(text, { x+sp+BORDER, t1y - size.GetHeight()/2 });
@@ -438,7 +438,7 @@ void FluxViewerControl::DisplayDecodedData(std::shared_ptr<const Sector> sector)
 	std::stringstream s;
 
 	auto title = fmt::format("User data for c{}.h{}.s{}",
-			sector->logicalTrack, sector->logicalSide, sector->physicalSector);
+			sector->logicalTrack, sector->logicalSide, sector->logicalSector);
 	s << title << '\n';
 	dumpSectorMetadata(s, sector);
 	s << '\n';
@@ -453,7 +453,7 @@ void FluxViewerControl::DisplayRawData(std::shared_ptr<const Sector> sector)
 	std::stringstream s;
 
 	auto title = fmt::format("Raw data for c{}.h{}.s{}",
-			sector->logicalTrack, sector->logicalSide, sector->physicalSector);
+			sector->logicalTrack, sector->logicalSide, sector->logicalSector);
 	s << title << '\n';
 	dumpSectorMetadata(s, sector);
 	s << fmt::format("Number of records: {}\n", sector->records.size());

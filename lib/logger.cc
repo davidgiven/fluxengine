@@ -120,7 +120,7 @@ std::string Logger::toString(const AnyLogMessage& message)
                     stream << fmt::format(" {}.{}.{}{}",
                         sector->logicalTrack,
                         sector->logicalSide,
-                        sector->physicalSector,
+                        sector->logicalSector,
                         Sector::statusToChar(sector->status));
 
                 stream << '\n';

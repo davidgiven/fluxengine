@@ -69,7 +69,7 @@ const Layout& Layout::getLayoutOfTrack(unsigned track, unsigned side)
     auto& layout = layoutCache[std::make_pair(track, side)];
     if (!layout)
     {
-        layout.reset(new Layout);
+        layout.reset(new Layout());
 
         LayoutProto::LayoutdataProto layoutdata;
         for (const auto& f : config.layout().layoutdata())
@@ -105,20 +105,22 @@ const Layout& Layout::getLayoutOfTrack(unsigned track, unsigned side)
     return *layout;
 }
 
-unsigned Layout::physicalSectorToLogical(unsigned physicalSectorId)
+unsigned Layout::physicalSectorToLogical(unsigned physicalSectorId) const
 {
-	for (int i=0; i<physicalSectors.size(); i++)
-		if (physicalSectors[i] == physicalSectorId)
-			return logicalSectors[i];
-	Error() << fmt::format("LAYOUT: physical sector {} not recognised", physicalSectorId);
+    for (int i = 0; i < physicalSectors.size(); i++)
+        if (physicalSectors[i] == physicalSectorId)
+            return logicalSectors[i];
+    Error() << fmt::format(
+        "LAYOUT: physical sector {} not recognised", physicalSectorId);
+    throw nullptr;
 }
 
-unsigned Layout::logicalSectorToPhysical(unsigned logicalSectorId)
+unsigned Layout::logicalSectorToPhysical(unsigned logicalSectorId) const
 {
-	for (int i=0; i<logicalSectors.size(); i++)
-		if (logicalSectors[i] == logicalSectorId)
-			return physicalSectors[i];
-	Error() << fmt::format("LAYOUT: logical sector {} not recognised", logicalSectorId);
+    for (int i = 0; i < logicalSectors.size(); i++)
+        if (logicalSectors[i] == logicalSectorId)
+            return physicalSectors[i];
+    Error() << fmt::format(
+        "LAYOUT: logical sector {} not recognised", logicalSectorId);
+    throw nullptr;
 }
-
-

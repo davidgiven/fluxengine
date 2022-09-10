@@ -109,7 +109,7 @@ static std::set<std::shared_ptr<const Sector>> collectSectors(
     for (const auto& sector : track_sectors)
     {
         key_t sectorid = {
-            sector->logicalTrack, sector->logicalSide, sector->physicalSector};
+            sector->logicalTrack, sector->logicalSide, sector->logicalSector};
         sectors.insert({sectorid, sector});
     }
 
@@ -166,7 +166,7 @@ BadSectorsState combineRecordAndSectors(
     for (unsigned logical_sector : decoder.requiredSectors(trackFlux.location))
     {
         auto sector = std::make_shared<Sector>(location);
-        sector->physicalSector = logical_sector;
+        sector->logicalSector = logical_sector;
         sector->status = Sector::MISSING;
         track_sectors.insert(sector);
     }
@@ -344,14 +344,14 @@ void writeTracksAndVerify(FluxSink& fluxSink,
                 wanted
                     .put(sector->logicalTrack,
                         sector->logicalSide,
-                        sector->physicalSector)
+                        sector->logicalSector)
                     ->data = sector->data;
 
             for (const auto& sector : trackFlux->sectors)
             {
                 const auto s = wanted.get(sector->logicalTrack,
                     sector->logicalSide,
-                    sector->physicalSector);
+                    sector->logicalSector);
                 if (!s)
                 {
                     Logger() << "spurious sector on verify";
@@ -364,7 +364,7 @@ void writeTracksAndVerify(FluxSink& fluxSink,
                 }
                 wanted.erase(sector->logicalTrack,
                     sector->logicalSide,
-                    sector->physicalSector);
+                    sector->logicalSector);
             }
             if (!wanted.empty())
             {
@@ -524,7 +524,7 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
                     "status {}\n",
                     sector->logicalTrack,
                     sector->logicalSide,
-                    sector->physicalSector,
+                    sector->logicalSector,
                     sector->headerStartTime / 1000.0,
                     sector->clock / 1000.0,
                     Sector::statusToString(sector->status));

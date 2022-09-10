@@ -69,20 +69,14 @@ public:
                         offset += 256;
 
                         sector->status = Sector::OK;
-                        sector->logicalTrack = track;
                         sector->physicalTrack = physicalTrack;
-                        sector->logicalSide = sector->physicalHead = head;
-                        sector->physicalSector = sectorId;
                         sector->data.writer().append(payload);
                     }
                     else
                     { // no more data in input file. Write sectors with status:
                       // DATA_MISSING
                         sector->status = Sector::DATA_MISSING;
-                        sector->logicalTrack = track;
                         sector->physicalTrack = physicalTrack;
-                        sector->logicalSide = sector->physicalHead = head;
-                        sector->physicalSector = sectorId;
                     }
                 }
             }

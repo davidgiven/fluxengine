@@ -1,7 +1,8 @@
-#include "globals.h"
-#include "sector.h"
-#include "image.h"
-#include "layout.h"
+#include "lib/globals.h"
+#include "lib/sector.h"
+#include "lib/image.h"
+#include "lib/layout.h"
+#include "lib/mapper.h"
 
 Image::Image() {}
 
@@ -10,7 +11,7 @@ Image::Image(std::set<std::shared_ptr<const Sector>>& sectors)
     for (auto& sector : sectors)
     {
         key_t key = std::make_tuple(
-            sector->logicalTrack, sector->logicalSide, sector->physicalSector);
+            sector->logicalTrack, sector->logicalSide, sector->logicalSector);
         _sectors[key] = sector;
     }
     calculateSize();
@@ -29,7 +30,7 @@ void Image::createBlankImage()
     {
         unsigned track = trackAndHead.first;
         unsigned side = trackAndHead.second;
-        auto trackLayout = Layout::getLayoutOfTrack(track, side);
+        auto& trackLayout = Layout::getLayoutOfTrack(track, side);
         Bytes blank(trackLayout.sectorSize);
         for (unsigned sectorId : trackLayout.logicalSectors)
             put(track, side, sectorId)->data = blank;
@@ -62,11 +63,15 @@ std::shared_ptr<const Sector> Image::get(
 std::shared_ptr<Sector> Image::put(
     unsigned track, unsigned side, unsigned sectorid)
 {
+    auto& trackLayout = Layout::getLayoutOfTrack(track, side);
     key_t key = std::make_tuple(track, side, sectorid);
     std::shared_ptr<Sector> sector = std::make_shared<Sector>();
     sector->logicalTrack = track;
     sector->logicalSide = side;
-    sector->physicalSector = sectorid;
+    sector->logicalSector = sectorid;
+    sector->physicalTrack = Mapper::remapTrackLogicalToPhysical(track);
+    sector->physicalHead = side;
+    sector->physicalSector = trackLayout.logicalSectorToPhysical(sectorid);
     _sectors[key] = sector;
     return sector;
 }
@@ -100,8 +105,8 @@ void Image::calculateSize()
             _geometry.numSides =
                 std::max(_geometry.numSides, (unsigned)sector->logicalSide + 1);
             _geometry.firstSector = std::min(
-                _geometry.firstSector, (unsigned)sector->physicalSector);
-            maxSector = std::max(maxSector, (unsigned)sector->physicalSector);
+                _geometry.firstSector, (unsigned)sector->logicalSector);
+            maxSector = std::max(maxSector, (unsigned)sector->logicalSector);
             _geometry.sectorSize =
                 std::max(_geometry.sectorSize, (unsigned)sector->data.size());
         }

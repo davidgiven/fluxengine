@@ -36,7 +36,7 @@ public:
             int track = p.first;
             int side = p.second;
 
-            auto trackLayout = Layout::getLayoutOfTrack(track, side);
+            auto& trackLayout = Layout::getLayoutOfTrack(track, side);
             for (int sectorId : trackLayout.logicalSectors)
             {
                 const auto& sector = image.get(track, side, sectorId);

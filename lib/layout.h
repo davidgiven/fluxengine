@@ -6,6 +6,14 @@
 class Layout
 {
 public:
+    Layout() {}
+
+private:
+    /* Can't copy. */
+    Layout(const Layout&);
+    Layout& operator=(const Layout&);
+
+public:
     static std::vector<std::pair<int, int>> getTrackOrdering(
         unsigned guessedTracks = 0, unsigned guessedSides = 0);
 
@@ -19,8 +27,8 @@ public:
     std::vector<unsigned> physicalSectors;
     std::vector<unsigned> logicalSectors;
 
-    unsigned physicalSectorToLogical(unsigned sectorId);
-    unsigned logicalSectorToPhysical(unsigned sectorId);
+    unsigned physicalSectorToLogical(unsigned sectorId) const;
+    unsigned logicalSectorToPhysical(unsigned sectorId) const;
 };
 
 #endif
