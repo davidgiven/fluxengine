@@ -1,0 +1,10 @@
+comment: 'Acorn ADFS F-format 1600kB 3.5" 80-track DS'
+include: '_acornadfs32'
+
+layout {
+	layoutdata {
+		logical {
+			count: 10
+		}
+	}
+}

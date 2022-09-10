@@ -1,5 +1,6 @@
 FORMATS = \
 	_acornadfs8 \
+	_acornadfs32 \
 	_atari \
 	_micropolis \
 	_northstar \
@@ -9,6 +10,8 @@ FORMATS = \
 	acornadfs160 \
 	acornadfs320 \
 	acornadfs640 \
+	acornadfs800 \
+	acornadfs1600 \
 	acorndfs \
 	aeslanier \
 	agat840 \
