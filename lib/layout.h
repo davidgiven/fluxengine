@@ -15,12 +15,6 @@ public:
     static std::vector<unsigned> getSectorsInTrack(
         const LayoutProto::LayoutdataProto& trackdata,
         unsigned guessedSectors = 0);
-
-	static std::vector<unsigned> getLogicalSectorsInTrack(
-		const LayoutProto::LayoutdataProto& trackdata);
-
-	static std::map<unsigned, unsigned> getLogicalToPhysicalMap(
-		const LayoutProto::LayoutdataProto& trackdata);
 };
 
 #endif
