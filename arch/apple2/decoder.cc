@@ -88,12 +88,12 @@ public:
 
 		uint8_t volume = combine(br.read_be16());
 		_sector->logicalTrack = combine(br.read_be16());
-		_sector->logicalSector = combine(br.read_be16());
+		_sector->physicalSector = combine(br.read_be16());
 		uint8_t checksum = combine(br.read_be16());
 
 		// If the checksum is correct, upgrade the sector from MISSING
 		// to DATA_MISSING in anticipation of its data record
-		if (checksum == (volume ^ _sector->logicalTrack ^ _sector->logicalSector))
+		if (checksum == (volume ^ _sector->logicalTrack ^ _sector->physicalSector))
 			_sector->status = Sector::DATA_MISSING; /* unintuitive but correct */
 	}
 

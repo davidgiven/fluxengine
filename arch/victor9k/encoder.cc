@@ -113,7 +113,7 @@ static void write_sector(std::vector<bool>& bits,
     write_bits(bits, cursor, VICTOR9K_SECTOR_RECORD, 10);
 
     uint8_t encodedTrack = sector.logicalTrack | (sector.logicalSide << 7);
-    uint8_t encodedSector = sector.logicalSector;
+    uint8_t encodedSector = sector.physicalSector;
     write_bytes(bits,
         cursor,
         Bytes{

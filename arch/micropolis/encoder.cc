@@ -32,7 +32,7 @@ static void write_sector(std::vector<bool>& bits,
             micropolisChecksum(sector->data.slice(1, 2 + 266));
         if (wantChecksum != gotChecksum)
             std::cerr << "Warning: checksum incorrect. Sector: "
-                      << sector->logicalSector << std::endl;
+                      << sector->physicalSector << std::endl;
         sectorData = sector->data;
     }
     else
@@ -40,7 +40,7 @@ static void write_sector(std::vector<bool>& bits,
         ByteWriter writer(sectorData);
         writer.write_8(0xff); /* Sync */
         writer.write_8(sector->logicalTrack);
-        writer.write_8(sector->logicalSector);
+        writer.write_8(sector->physicalSector);
         for (int i = 0; i < 10; i++)
             writer.write_8(0); /* Padding */
         writer += sector->data;

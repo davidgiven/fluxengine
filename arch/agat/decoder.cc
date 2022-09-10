@@ -66,7 +66,7 @@ public:
 			return;
 
 		_sector->logicalTrack = bytes[1] >> 1;
-		_sector->logicalSector = bytes[2];
+		_sector->physicalSector = bytes[2];
 		_sector->logicalSide = bytes[1] & 1;
 		_sector->status = Sector::DATA_MISSING; /* unintuitive but correct */
 	}

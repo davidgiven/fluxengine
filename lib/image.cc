@@ -10,7 +10,7 @@ Image::Image(std::set<std::shared_ptr<const Sector>>& sectors)
     for (auto& sector : sectors)
     {
         key_t key = std::make_tuple(
-            sector->logicalTrack, sector->logicalSide, sector->logicalSector);
+            sector->logicalTrack, sector->logicalSide, sector->physicalSector);
         _sectors[key] = sector;
     }
     calculateSize();
@@ -66,7 +66,7 @@ std::shared_ptr<Sector> Image::put(
     std::shared_ptr<Sector> sector = std::make_shared<Sector>();
     sector->logicalTrack = track;
     sector->logicalSide = side;
-    sector->logicalSector = sectorid;
+    sector->physicalSector = sectorid;
     _sectors[key] = sector;
     return sector;
 }
@@ -100,8 +100,8 @@ void Image::calculateSize()
             _geometry.numSides =
                 std::max(_geometry.numSides, (unsigned)sector->logicalSide + 1);
             _geometry.firstSector = std::min(
-                _geometry.firstSector, (unsigned)sector->logicalSector);
-            maxSector = std::max(maxSector, (unsigned)sector->logicalSector);
+                _geometry.firstSector, (unsigned)sector->physicalSector);
+            maxSector = std::max(maxSector, (unsigned)sector->physicalSector);
             _geometry.sectorSize =
                 std::max(_geometry.sectorSize, (unsigned)sector->data.size());
         }

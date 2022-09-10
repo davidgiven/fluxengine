@@ -72,7 +72,7 @@ public:
                         sector->logicalTrack = track;
                         sector->physicalTrack = physicalTrack;
                         sector->logicalSide = sector->physicalHead = head;
-                        sector->logicalSector = sectorId;
+                        sector->physicalSector = sectorId;
                         sector->data.writer().append(payload);
                     }
                     else
@@ -82,7 +82,7 @@ public:
                         sector->logicalTrack = track;
                         sector->physicalTrack = physicalTrack;
                         sector->logicalSide = sector->physicalHead = head;
-                        sector->logicalSector = sectorId;
+                        sector->physicalSector = sectorId;
                     }
                 }
             }

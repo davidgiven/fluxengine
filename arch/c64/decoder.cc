@@ -72,7 +72,7 @@ public:
         const auto& bytes = decode(bits).slice(0, 5);
 
         uint8_t checksum = bytes[0];
-        _sector->logicalSector = bytes[1];
+        _sector->physicalSector = bytes[1];
         _sector->logicalSide = 0;
         _sector->logicalTrack = bytes[2] - 1;
         if (checksum == xorBytes(bytes.slice(1, 4)))

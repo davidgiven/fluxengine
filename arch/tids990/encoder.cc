@@ -117,7 +117,7 @@ public:
                 bw.write_8(sectorData->logicalSide << 3);
                 bw.write_8(sectorData->logicalTrack);
                 bw.write_8(_config.sector_count());
-                bw.write_8(sectorData->logicalSector);
+                bw.write_8(sectorData->physicalSector);
                 bw.write_be16(sectorData->data.size());
                 uint16_t crc = crc16(CCITT_POLY, header);
                 bw.write_be16(crc);

@@ -129,7 +129,7 @@ public:
 		uint8_t abssector = id[2];
 		_sector->logicalTrack = abssector >> 1;
 		_sector->logicalSide = 0;
-		_sector->logicalSector = abssector & 1;
+		_sector->physicalSector = abssector & 1;
 		_sector->data.writer().append(id.slice(5, 12)).append(payload);
 
 		_sector->status = (wantPayloadCrc == gotPayloadCrc) ? Sector::OK : Sector::BAD_CHECKSUM;

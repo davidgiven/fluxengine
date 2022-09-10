@@ -264,7 +264,7 @@ public:
 				int SectorID;
 				SectorID = sector_skew[s];
                 const auto& sector = image->put(header.track, header.Head, SectorID);
-				sector->logicalSector = SectorID;
+				sector->physicalSector = SectorID;
                 //read the status of the sector
                 unsigned int Status_Sector = br.read_8();
                 headerPtr++;

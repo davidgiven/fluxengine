@@ -74,11 +74,11 @@ public:
 
 		ByteReader br(bytes);
 		_sector->logicalTrack = decode_header_gcr(br.read_be16());
-		_sector->logicalSector = decode_header_gcr(br.read_be16());
+		_sector->physicalSector = decode_header_gcr(br.read_be16());
 
 		/* Sanity check the values read; there's no header checksum and
 			* occasionally we get garbage due to bit errors. */
-		if (_sector->logicalSector > 11)
+		if (_sector->physicalSector > 11)
 			return;
 		if (_sector->logicalTrack > 79)
 			return;

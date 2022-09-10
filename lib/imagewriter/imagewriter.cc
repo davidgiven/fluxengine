@@ -109,7 +109,7 @@ void ImageWriter::writeCsv(const Image& image, const std::string& filename)
 			sector->physicalHead,
 			sector->logicalTrack,
 			sector->logicalSide,
-			sector->logicalSector,
+			sector->physicalSector,
 			sector->clock,
 			sector->headerStartTime,
 			sector->headerEndTime,

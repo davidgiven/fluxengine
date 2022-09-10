@@ -97,7 +97,7 @@ void visualiseSectorsToFile(const Image& image, const std::string& filename)
 				for (const auto& sector : image)
 				{
 					if ((sector->physicalHead == side) && (sector->physicalTrack == physicalTrack)
-							&& (sector->logicalSector == alignWithSector))
+							&& (sector->physicalSector == alignWithSector))
 					{
 						offset = sector->headerStartTime;
 						if (!offset)
@@ -196,7 +196,7 @@ static void readRow(const std::vector<std::string>& row, Image& image)
 		sector->physicalHead = std::stoi(row[1]);
 		sector->logicalTrack = logicalTrack;
 		sector->logicalSide = logicalSide;
-		sector->logicalSector = logicalSector;
+		sector->physicalSector = logicalSector;
 		sector->clock = std::stod(row[5]);
 		sector->headerStartTime = std::stod(row[6]);
 		sector->headerEndTime = std::stod(row[7]);

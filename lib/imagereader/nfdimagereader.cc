@@ -150,7 +150,7 @@ public:
                 sector->logicalTrack = track;
                 sector->physicalTrack = Mapper::remapTrackLogicalToPhysical(track);
                 sector->logicalSide = sector->physicalHead = head;
-                sector->logicalSector = sectorId;
+                sector->physicalSector = sectorId;
                 sector->data = data;
 
                 physical->add_sector(sectorId);

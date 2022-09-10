@@ -74,7 +74,7 @@ public:
 
 		const auto& bytes = decode(readRawBits(6*10));
 
-		_sector->logicalSector = bytes[2];
+		_sector->physicalSector = bytes[2];
 		_sector->logicalSide = 0;
 		_sector->logicalTrack = bytes[0];
 

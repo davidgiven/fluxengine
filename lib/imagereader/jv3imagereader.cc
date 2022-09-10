@@ -127,7 +127,7 @@ public:
                     sector->logicalTrack = header.track;
                     sector->physicalTrack = Mapper::remapTrackLogicalToPhysical(header.track);
                     sector->logicalSide = sector->physicalHead = head;
-                    sector->logicalSector = header.sector;
+                    sector->physicalSector = header.sector;
                     sector->data = data;
                 }
 

@@ -128,8 +128,8 @@ public:
 
 		_sector->logicalTrack = br.read_8();
 		_sector->logicalSide = _sector->physicalHead;
-		_sector->logicalSector = br.read_8();
-		if (_sector->logicalSector > 15)
+		_sector->physicalSector = br.read_8();
+		if (_sector->physicalSector > 15)
 			return;
 		if (_sector->logicalTrack > 76)
 			return;

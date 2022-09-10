@@ -132,7 +132,7 @@ private:
         auto trackdata = readAndDecodeTrack(*_fluxSource, *_decoder, location);
 
         for (const auto& sector : trackdata->sectors)
-            *_loadedSectors.put(track, side, sector->logicalSector) = *sector;
+            *_loadedSectors.put(track, side, sector->physicalSector) = *sector;
         _loadedTracks.insert(trackid_t(track, side));
     }
 

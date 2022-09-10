@@ -65,15 +65,15 @@ static std::unique_ptr<Image> remapImpl(const Image& source,
             destSectors.insert(sector);
         else
         {
-            auto it = trackdata.find(sector->logicalSector);
+            auto it = trackdata.find(sector->physicalSector);
             if (it == trackdata.end())
                 Error() << fmt::format(
                     "mapping requested but mapping table has no entry for "
                     "sector {}",
-                    sector->logicalSector);
+                    sector->physicalSector);
 
             auto newSector = std::make_shared<Sector>(*sector);
-            newSector->logicalSector = it->second;
+            newSector->physicalSector = it->second;
             destSectors.insert(newSector);
         }
     }

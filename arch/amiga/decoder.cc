@@ -52,7 +52,7 @@ public:
 
 		_sector->logicalTrack = header[1] >> 1;
 		_sector->logicalSide = header[1] & 1;
-		_sector->logicalSector = header[2];
+		_sector->physicalSector = header[2];
 
 		uint32_t wantedheaderchecksum = amigaDeinterleave(ptr, 4).reader().read_be32();
 		uint32_t gotheaderchecksum = amigaChecksum(rawbytes.slice(0, 40));

@@ -144,7 +144,7 @@ public:
 
 		_sector->logicalTrack = br.read_8();
 		_sector->logicalSide = br.read_8();
-		_sector->logicalSector = br.read_8();
+		_sector->physicalSector = br.read_8();
 		_currentSectorSize = 1 << (br.read_8() + 7);
 		uint16_t gotCrc = crc16(CCITT_POLY, bytes.slice(0, br.pos));
 		uint16_t wantCrc = br.read_be16();
@@ -159,7 +159,7 @@ public:
 			_sector->logicalTrack = _sector->physicalTrack;
 
 		for (int sector : trackdata.ignore_sector())
-			if (_sector->logicalSector == sector)
+			if (_sector->physicalSector == sector)
 			{
 				_sector->status = Sector::MISSING;
 				break;
