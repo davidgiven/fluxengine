@@ -63,8 +63,7 @@ public:
         {
             unsigned track = trackid.first;
             unsigned side = trackid.second;
-            auto layoutdata = Layout::getLayoutOfTrack(track, side);
-            auto sectors = Layout::getSectorsInTrack(layoutdata);
+            auto trackLayout = Layout::getLayoutOfTrack(track, side);
             locations.insert(Mapper::computeLocationFor(track, side));
 
             /* If we don't have all the sectors of this track, we may need to
@@ -72,7 +71,7 @@ public:
              * a time. */
 
             if (!imageContainsAllSectorsOf(
-                    _changedSectors, track, side, sectors))
+                    _changedSectors, track, side, trackLayout.logicalSectors))
             {
                 /* If we don't have any loaded sectors for this track, pre-read
                  * it. */
@@ -83,11 +82,11 @@ public:
                 /* Now merge the loaded track with the changed one, and write
                  * the result back. */
 
-                for (const unsigned sector : sectors)
+                for (unsigned sectorId : trackLayout.logicalSectors)
                 {
-                    if (!_changedSectors.contains(track, side, sector))
-                        _changedSectors.put(track, side, sector)->data =
-                            _loadedSectors.get(track, side, sector)->data;
+                    if (!_changedSectors.contains(track, side, sectorId))
+                        _changedSectors.put(track, side, sectorId)->data =
+                            _loadedSectors.get(track, side, sectorId)->data;
                 }
             }
         }

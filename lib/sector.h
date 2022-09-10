@@ -38,9 +38,10 @@ public:
     nanoseconds_t dataEndTime = 0;
     unsigned physicalTrack = 0;
     unsigned physicalHead = 0;
+    unsigned physicalSector = 0;
     unsigned logicalTrack = 0;
     unsigned logicalSide = 0;
-    unsigned physicalSector = 0;
+    unsigned logicalSector = 0;
     Bytes data;
     std::vector<std::shared_ptr<Record>> records;
 
@@ -51,7 +52,7 @@ public:
     std::tuple<int, int, int, Status> key() const
     {
         return std::make_tuple(
-            logicalTrack, logicalSide, physicalSector, status);
+            logicalTrack, logicalSide, logicalSector, status);
     }
 
     bool operator==(const Sector& rhs) const

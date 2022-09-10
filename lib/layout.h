@@ -9,12 +9,18 @@ public:
     static std::vector<std::pair<int, int>> getTrackOrdering(
         unsigned guessedTracks = 0, unsigned guessedSides = 0);
 
-    static LayoutProto::LayoutdataProto getLayoutOfTrack(
+    static const Layout& getLayoutOfTrack(
         unsigned logicalTrack, unsigned logicalHead);
 
-    static std::vector<unsigned> getSectorsInTrack(
-        const LayoutProto::LayoutdataProto& trackdata,
-        unsigned guessedSectors = 0);
+public:
+    unsigned numTracks;
+    unsigned numSides;
+    unsigned sectorSize;
+    std::vector<unsigned> physicalSectors;
+    std::vector<unsigned> logicalSectors;
+
+    unsigned physicalSectorToLogical(unsigned sectorId);
+    unsigned logicalSectorToPhysical(unsigned sectorId);
 };
 
 #endif

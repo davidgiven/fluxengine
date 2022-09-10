@@ -115,14 +115,15 @@ public:
         IbmEncoderProto::TrackdataProto trackdata;
         getEncoderTrackData(trackdata, location.logicalTrack, location.head);
 
-        auto layoutdata =
+        auto trackLayout =
             Layout::getLayoutOfTrack(location.logicalTrack, location.head);
 
         int logicalSide = location.head ^ trackdata.swap_sides();
-        for (int sectorId : Layout::getSectorsInTrack(layoutdata))
+        for (unsigned physicalSectorId : trackLayout.physicalSectors)
         {
+        	unsigned logicalSectorId = trackLayout.physicalSectorToLogical(physicalSectorId);
             const auto& sector =
-                image.get(location.logicalTrack, logicalSide, sectorId);
+                image.get(location.logicalTrack, logicalSide, logicalSectorId);
             if (sector)
                 sectors.push_back(sector);
         }
@@ -137,7 +138,7 @@ public:
         IbmEncoderProto::TrackdataProto trackdata;
         getEncoderTrackData(trackdata, location.logicalTrack, location.head);
 
-        auto layoutdata =
+        auto trackLayout =
             Layout::getLayoutOfTrack(location.logicalTrack, location.head);
 
         auto writeBytes = [&](const Bytes& bytes)
@@ -174,7 +175,7 @@ public:
 
         uint8_t sectorSize = 0;
         {
-            int s = layoutdata.sector_size() >> 7;
+            int s = trackLayout.sectorSize >> 7;
             while (s > 1)
             {
                 s >>= 1;
@@ -259,7 +260,7 @@ public:
                 bw.write_8(damUnencoded);
 
                 Bytes truncatedData =
-                    sectorData->data.slice(0, layoutdata.sector_size());
+                    sectorData->data.slice(0, trackLayout.sectorSize);
                 bw += truncatedData;
                 uint16_t crc = crc16(CCITT_POLY, data);
                 bw.write_be16(crc);

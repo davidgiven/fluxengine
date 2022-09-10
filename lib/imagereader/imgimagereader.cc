@@ -40,10 +40,10 @@ public:
             if (inputFile.eof())
                 break;
 
-            auto layoutdata = Layout::getLayoutOfTrack(track, side);
-            for (int sectorId : Layout::getSectorsInTrack(layoutdata))
+            auto trackLayout = Layout::getLayoutOfTrack(track, side);
+            for (int sectorId : trackLayout.logicalSectors)
             {
-                Bytes data(layoutdata.sector_size());
+                Bytes data(trackLayout.sectorSize);
                 inputFile.read((char*)data.begin(), data.size());
 
                 const auto& sector = image->put(track, side, sectorId);

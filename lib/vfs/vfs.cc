@@ -164,13 +164,12 @@ Filesystem::Filesystem(std::shared_ptr<SectorInterface> sectors):
         int track = p.first;
         int side = p.second;
 
-        auto layoutdata = Layout::getLayoutOfTrack(track, side);
-        auto sectors = Layout::getSectorsInTrack(layoutdata);
-        if (sectors.empty())
+        auto trackLayout = Layout::getLayoutOfTrack(track, side);
+        if (trackLayout.logicalSectors.empty())
             Error() << "FS: filesystem support cannot be used without concrete "
                        "layout information";
 
-        for (int sectorId : sectors)
+        for (int sectorId : trackLayout.logicalSectors)
             _locations.push_back(std::make_tuple(track, side, sectorId));
     }
 }
@@ -269,9 +268,9 @@ Bytes Filesystem::getLogicalSector(uint32_t number, uint32_t count)
         int track = std::get<0>(it);
         int side = std::get<1>(it);
         int sector = std::get<2>(it);
-        auto layoutdata = Layout::getLayoutOfTrack(track, side);
+        auto trackLayout = Layout::getLayoutOfTrack(track, side);
         bw += _sectors->get(track, side, sector)
-                  ->data.slice(0, layoutdata.sector_size());
+                  ->data.slice(0, trackLayout.sectorSize);
     }
     return data;
 }
@@ -288,7 +287,7 @@ void Filesystem::putLogicalSector(uint32_t number, const Bytes& data)
         int track = std::get<0>(it);
         int side = std::get<1>(it);
         int sector = std::get<2>(it);
-        int sectorSize = Layout::getLayoutOfTrack(track, side).sector_size();
+        int sectorSize = Layout::getLayoutOfTrack(track, side).sectorSize;
 
         _sectors->put(track, side, sector)->data = data.slice(pos, sectorSize);
         pos += sectorSize;
@@ -317,8 +316,7 @@ unsigned Filesystem::getLogicalSectorCount()
 
 unsigned Filesystem::getLogicalSectorSize(unsigned track, unsigned side)
 {
-    auto trackdata = Layout::getLayoutOfTrack(track, side);
-    return trackdata.sector_size();
+    return Layout::getLayoutOfTrack(track, side).sectorSize;
 }
 
 void Filesystem::eraseEverythingOnDisk()

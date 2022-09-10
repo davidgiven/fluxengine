@@ -1,6 +1,9 @@
 #include "lib/globals.h"
 #include "lib/layout.h"
 #include "lib/proto.h"
+#include <fmt/format.h>
+
+static std::map<std::pair<int, int>, std::unique_ptr<Layout>> layoutCache;
 
 std::vector<std::pair<int, int>> Layout::getTrackOrdering(
     unsigned guessedTracks, unsigned guessedSides)
@@ -39,58 +42,83 @@ std::vector<std::pair<int, int>> Layout::getTrackOrdering(
     return ordering;
 }
 
-LayoutProto::LayoutdataProto Layout::getLayoutOfTrack(
-    unsigned track, unsigned side)
+static void expandSectors(const LayoutProto::SectorsProto& sectorsProto,
+    std::vector<unsigned>& sectors)
 {
-    LayoutProto::LayoutdataProto layoutdata;
-
-    for (const auto& f : config.layout().layoutdata())
+    if (sectorsProto.has_count())
     {
-        if (f.has_track() && f.has_up_to_track() &&
-            ((track < f.track()) || (track > f.up_to_track())))
-            continue;
-        if (f.has_track() && !f.has_up_to_track() && (track != f.track()))
-            continue;
-        if (f.has_side() && (f.side() != side))
-            continue;
-
-        layoutdata.MergeFrom(f);
-    }
-
-    return layoutdata;
-}
-
-std::vector<unsigned> Layout::getSectorsInTrack(
-    const LayoutProto::LayoutdataProto& trackdata, unsigned guessedSectors)
-{
-    auto& physical = trackdata.physical();
-
-    std::vector<unsigned> sectors;
-    if (physical.has_count())
-    {
-        if (physical.sector_size() != 1)
+        if (sectorsProto.sector_size() != 1)
             Error() << "LAYOUT: if you use a sector count, you must specify "
                        "exactly one start sector";
 
-        int startSector = physical.sector(0);
-        for (int i = 0; i < physical.count(); i++)
+        int startSector = sectorsProto.sector(0);
+        for (int i = 0; i < sectorsProto.count(); i++)
             sectors.push_back(startSector + i);
     }
-    else if (physical.guess_count())
+    else if (sectorsProto.sector_size() > 0)
     {
-        if (physical.sector_size() != 1)
-            Error() << "LAYOUT: if you are guessing the number of sectors, you "
-                       "must specify exactly one start sector";
-
-        int startSector = physical.sector(0);
-        for (int i = 0; i < guessedSectors; i++)
-            sectors.push_back(startSector + i);
-    }
-    else if (trackdata.sector_size() > 0)
-    {
-        for (int sectorId : physical.sector())
+        for (int sectorId : sectorsProto.sector())
             sectors.push_back(sectorId);
     }
-
-    return sectors;
+    else
+        Error() << "LAYOUT: no sectors in track!";
 }
+
+const Layout& Layout::getLayoutOfTrack(unsigned track, unsigned side)
+{
+    auto& layout = layoutCache[std::make_pair(track, side)];
+    if (!layout)
+    {
+        layout.reset(new Layout);
+
+        LayoutProto::LayoutdataProto layoutdata;
+        for (const auto& f : config.layout().layoutdata())
+        {
+            if (f.has_track() && f.has_up_to_track() &&
+                ((track < f.track()) || (track > f.up_to_track())))
+                continue;
+            if (f.has_track() && !f.has_up_to_track() && (track != f.track()))
+                continue;
+            if (f.has_side() && (f.side() != side))
+                continue;
+
+            layoutdata.MergeFrom(f);
+        }
+
+        layout->numTracks = config.layout().tracks();
+        layout->numSides = config.layout().sides();
+        layout->sectorSize = layoutdata.sector_size();
+        expandSectors(layoutdata.physical(), layout->physicalSectors);
+        if (layoutdata.has_logical())
+            expandSectors(layoutdata.logical(), layout->logicalSectors);
+        else
+            layout->logicalSectors = layout->physicalSectors;
+
+        if (layout->logicalSectors.size() != layout->physicalSectors.size())
+            Error() << fmt::format(
+                "LAYOUT: physical and logical sectors lists are different "
+                "sizes in {}.{}",
+                track,
+                side);
+    }
+
+    return *layout;
+}
+
+unsigned Layout::physicalSectorToLogical(unsigned physicalSectorId)
+{
+	for (int i=0; i<physicalSectors.size(); i++)
+		if (physicalSectors[i] == physicalSectorId)
+			return logicalSectors[i];
+	Error() << fmt::format("LAYOUT: physical sector {} not recognised", physicalSectorId);
+}
+
+unsigned Layout::logicalSectorToPhysical(unsigned logicalSectorId)
+{
+	for (int i=0; i<logicalSectors.size(); i++)
+		if (logicalSectors[i] == logicalSectorId)
+			return physicalSectors[i];
+	Error() << fmt::format("LAYOUT: logical sector {} not recognised", logicalSectorId);
+}
+
+

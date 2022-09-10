@@ -29,9 +29,9 @@ void Image::createBlankImage()
     {
         unsigned track = trackAndHead.first;
         unsigned side = trackAndHead.second;
-        auto layout = Layout::getLayoutOfTrack(track, side);
-        Bytes blank(layout.sector_size());
-        for (unsigned sectorId : Layout::getSectorsInTrack(layout))
+        auto trackLayout = Layout::getLayoutOfTrack(track, side);
+        Bytes blank(trackLayout.sectorSize);
+        for (unsigned sectorId : trackLayout.logicalSectors)
             put(track, side, sectorId)->data = blank;
     }
 }
