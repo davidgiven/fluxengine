@@ -46,6 +46,7 @@ private:
 
 bool FluxEngineApp::OnInit()
 {
+	wxImage::AddHandler(new wxPNGHandler());
 	Bind(EXEC_EVENT_TYPE, &FluxEngineApp::OnExec, this);
     _mainWindow = CreateMainWindow();
     _mainWindow->Show(true);

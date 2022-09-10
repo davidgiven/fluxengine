@@ -62,6 +62,10 @@ public:
         _dndFormat(wxDF_UNICODETEXT),
         _config("FluxEngine")
     {
+		wxIcon icon;
+		icon.CopyFromBitmap(applicationBitmap->GetBitmap());
+		SetIcon(icon);
+
         Logger::setLogger(
             [&](std::shared_ptr<const AnyLogMessage> message)
             {
@@ -920,21 +924,25 @@ public:
             if (event.GetDataFormat() != _dndFormat)
                 throw CancelException();
 
-            /* wxWidgets 3.0 data view DnD is borked. See
-             * https://forums.wxwidgets.org/viewtopic.php?t=44752. The hit
-             * detection is done against the wrong object, resulting in the
-             * header size not being taken into account, so we have to manually
-             * do hit detection correctly. */
+            #if defined __WXGTK__
+                /* wxWidgets 3.0 data view DnD on GTK is borked. See
+                 * https://forums.wxwidgets.org/viewtopic.php?t=44752. The hit
+                 * detection is done against the wrong object, resulting in the
+                 * header size not being taken into account, so we have to manually
+                 * do hit detection correctly. */
 
-            auto* window = browserTree->GetMainWindow();
-            auto screenPos = wxGetMousePosition();
-            auto relPos = screenPos - window->GetScreenPosition();
+                auto* window = browserTree->GetMainWindow();
+                auto screenPos = wxGetMousePosition();
+                auto relPos = screenPos - window->GetScreenPosition();
 
-            wxDataViewItem item;
-            wxDataViewColumn* column;
-            browserTree->HitTest(relPos, item, column);
-            if (!item.IsOk())
-                throw CancelException();
+                wxDataViewItem item;
+                wxDataViewColumn* column;
+                browserTree->HitTest(relPos, item, column);
+                if (!item.IsOk())
+                    throw CancelException();
+            #else
+                auto item = event.GetItem();
+            #endif
 
             auto destDirNode = GetTargetDirectoryNode(item);
             if (!destDirNode)

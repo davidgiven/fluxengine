@@ -18,6 +18,7 @@
 #include <wx/font.h>
 #include <wx/colour.h>
 #include <wx/settings.h>
+#include <wx/statbmp.h>
 #include <wx/stattext.h>
 #include <wx/radiobut.h>
 #include <wx/combobox.h>
@@ -57,6 +58,7 @@ class MainWindowGen : public wxFrame
 		wxMenu* m_menu2;
 		wxSimplebook* dataNotebook;
 		wxScrolledWindow* idlePanel;
+		wxStaticBitmap* applicationBitmap;
 		wxStaticText* m_staticText61;
 		wxRadioButton* realDiskRadioButton;
 		wxPanel* realDiskRadioButtonPanel;
