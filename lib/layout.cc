@@ -109,9 +109,10 @@ std::vector<std::pair<int, int>> Layout::getTrackOrdering(
     return ordering;
 }
 
-std::vector<unsigned> Layout::expandSectorList(const SectorListProto& sectorsProto)
+std::vector<unsigned> Layout::expandSectorList(
+    const SectorListProto& sectorsProto)
 {
-	std::vector<unsigned> sectors;
+    std::vector<unsigned> sectors;
 
     if (sectorsProto.has_count())
     {
@@ -160,31 +161,33 @@ const Layout& Layout::getLayoutOfTrack(unsigned track, unsigned side)
         layout->sectorSize = layoutdata.sector_size();
         layout->diskSectorOrder = expandSectorList(layoutdata.physical());
         layout->logicalSectorOrder = layout->diskSectorOrder;
-        std::sort(layout->diskSectorOrder.begin(), layout->diskSectorOrder.end());
+        std::sort(
+            layout->diskSectorOrder.begin(), layout->diskSectorOrder.end());
         layout->numSectors = layout->logicalSectorOrder.size();
+
+        if (layoutdata.has_filesystem())
+        {
+            layout->filesystemSectorOrder =
+                expandSectorList(layoutdata.filesystem());
+            if (layout->filesystemSectorOrder.size() != layout->numSectors)
+                Error()
+                    << "filesystem sector order list doesn't contain the right "
+                       "number of sectors";
+        }
+        else
+        {
+            for (unsigned sectorId : layout->logicalSectorOrder)
+                layout->filesystemSectorOrder.push_back(sectorId);
+        }
+
+        for (int i = 0; i < layout->numSectors; i++)
+        {
+            unsigned l = layout->logicalSectorOrder[i];
+            unsigned f = layout->filesystemSectorOrder[i];
+            layout->filesystemToLogicalSectorMap[f] = l;
+            layout->logicalToFilesystemSectorMap[l] = f;
+        }
     }
 
     return *layout;
 }
-
-#if 0
-unsigned Layout::physicalSectorToLogical(unsigned physicalSectorId) const
-{
-    for (int i = 0; i < diskSectorOrder.size(); i++)
-        if (diskSectorOrder[i] == physicalSectorId)
-            return logicalSectorsOnDisk[i];
-    Error() << fmt::format(
-        "LAYOUT: physical sector {} not recognised", physicalSectorId);
-    throw nullptr;
-}
-
-unsigned Layout::logicalSectorToPhysical(unsigned logicalSectorId) const
-{
-    for (int i = 0; i < logicalSectorsOnDisk.size(); i++)
-        if (logicalSectorsOnDisk[i] == logicalSectorId)
-            return diskSectorOrder[i];
-    Error() << fmt::format(
-        "LAYOUT: logical sector {} not recognised", logicalSectorId);
-    throw nullptr;
-}
-#endif

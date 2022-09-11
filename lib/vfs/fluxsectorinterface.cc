@@ -69,8 +69,10 @@ public:
              * populate any non-changed sectors as we can only write a track at
              * a time. */
 
-            if (!imageContainsAllSectorsOf(
-                    _changedSectors, track, side, trackLayout.logicalSectorOrder))
+            if (!imageContainsAllSectorsOf(_changedSectors,
+                    track,
+                    side,
+                    trackLayout.logicalSectorOrder))
             {
                 /* If we don't have any loaded sectors for this track, pre-read
                  * it. */

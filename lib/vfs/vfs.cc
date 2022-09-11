@@ -169,7 +169,7 @@ Filesystem::Filesystem(std::shared_ptr<SectorInterface> sectors):
             Error() << "FS: filesystem support cannot be used without concrete "
                        "layout information";
 
-        for (int sectorId : trackLayout.logicalSectorOrder)
+        for (int sectorId : trackLayout.filesystemSectorOrder)
             _locations.push_back(std::make_tuple(track, side, sectorId));
     }
 }

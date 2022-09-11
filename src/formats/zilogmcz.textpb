@@ -14,7 +14,7 @@ layout {
 	sides: 1
 	layoutdata {
 		sector_size: 132
-		logical {
+		physical {
 			start_sector: 0
 			count: 32
 		}

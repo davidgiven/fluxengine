@@ -3,7 +3,7 @@ include: '_acornadfs32'
 
 layout {
 	layoutdata {
-		logical {
+		physical {
 			count: 5
 		}
 	}

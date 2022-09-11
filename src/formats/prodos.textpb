@@ -4,24 +4,28 @@ is_extension: true
 
 filesystem {
 	prodos {}
-	
-	sector_order {
-		sector:  0 
-		sector:  8 
-		sector:  1 
-		sector:  9 
-		sector:  2
-		sector: 10 
-		sector:  3 
-		sector: 11 
-		sector:  4 
-		sector: 12 
-		sector:  5 
-		sector: 13 
-		sector:  6 
-		sector: 14 
-		sector:  7 
-		sector: 15 
+}
+
+layout {
+	layoutdata {
+		filesystem {
+			sector:  0
+			sector:  2
+			sector:  4
+			sector:  6
+			sector:  8
+			sector: 10
+			sector: 12
+			sector: 14
+			sector:  1
+			sector:  3
+			sector:  5
+			sector:  7
+			sector:  9
+			sector: 11
+			sector: 13
+			sector: 15
+		}
 	}
 }
 

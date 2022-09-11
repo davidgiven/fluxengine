@@ -43,7 +43,8 @@ public:
         unsigned logicalTrack, unsigned logicalHead);
 
     /* Expand a SectorList into the actual sector IDs. */
-	static std::vector<unsigned> expandSectorList(const SectorListProto& sectorsProto);
+    static std::vector<unsigned> expandSectorList(
+        const SectorListProto& sectorsProto);
 
 public:
     unsigned numTracks;
@@ -51,11 +52,20 @@ public:
     unsigned numSectors;
     unsigned sectorSize;
 
-    /* Physical sector IDs in disk order. */
+    /* Sector IDs in disk order. */
     std::vector<unsigned> diskSectorOrder;
 
-    /* Physical sector IDs in dlogical order. */
+    /* Sector IDs in logical order. */
     std::vector<unsigned> logicalSectorOrder;
+
+    /* Sector IDs in filesystem order. */
+    std::vector<unsigned> filesystemSectorOrder;
+
+    /* Mapping of filesystem order to logical order. */
+    std::map<unsigned, unsigned> filesystemToLogicalSectorMap;
+
+    /* Mapping of logical order to filesystem order. */
+    std::map<unsigned, unsigned> logicalToFilesystemSectorMap;
 };
 
 #endif

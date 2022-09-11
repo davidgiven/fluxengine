@@ -4,14 +4,14 @@ import "lib/common.proto";
 
 message SectorListProto
 {
-	/* either */
-	repeated int32 sector = 1 [ (help) = "sector ID" ];
+    /* either */
+    repeated int32 sector = 1 [ (help) = "sector ID" ];
 
-	/* or */
-	optional int32 start_sector = 2
-		[ (help) = "first sector of a continuous run" ];
-	optional int32 count = 3
-		[ (help) = "number of sectors in a continuous run" ];
+    /* or */
+    optional int32 start_sector = 2
+        [ (help) = "first sector of a continuous run" ];
+    optional int32 count = 3
+        [ (help) = "number of sectors in a continuous run" ];
 }
 
 message LayoutProto
@@ -37,7 +37,7 @@ message LayoutProto
 
         optional SectorListProto physical = 4
             [ (help) = "physical order of sectors on disk" ];
-        optional SectorListProto logical = 6
+        optional SectorListProto filesystem = 6
             [ (help) = "logical order of sectors in filesystem" ];
     }
 
