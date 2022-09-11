@@ -1051,6 +1051,8 @@ public:
         auto formatSelection = formatChoice->GetSelection();
         if (formatSelection == wxNOT_FOUND)
             Error() << "no format selected";
+
+        config.Clear();
         FlagGroup::parseConfigFile(_formatNames[formatChoice->GetSelection()], formats);
 
         for (auto setting : split(_extraConfiguration, '\n'))
