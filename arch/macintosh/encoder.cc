@@ -181,7 +181,7 @@ static void write_sector(std::vector<bool>& bits,
     write_bits(bits, cursor, MAC_SECTOR_RECORD, 3 * 8);
 
     uint8_t encodedTrack = sector->logicalTrack & 0x3f;
-    uint8_t encodedSector = sector->physicalSector;
+    uint8_t encodedSector = sector->logicalSector;
     uint8_t encodedSide =
         encode_side(sector->logicalTrack, sector->logicalSide);
     uint8_t formatByte = MAC_FORMAT_BYTE;
@@ -197,7 +197,7 @@ static void write_sector(std::vector<bool>& bits,
     write_bits(bits, cursor, 0xdeaaff, 3 * 8);
     write_bits(bits, cursor, 0xff3fcff3fcffLL, 6 * 8); /* sync */
     write_bits(bits, cursor, MAC_DATA_RECORD, 3 * 8);
-    write_bits(bits, cursor, encode_data_gcr(sector->physicalSector), 1 * 8);
+    write_bits(bits, cursor, encode_data_gcr(sector->logicalSector), 1 * 8);
 
     Bytes wireData;
     wireData.writer()

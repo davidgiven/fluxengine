@@ -76,13 +76,13 @@ public:
 		auto bytes = decode(readRawBits(3*10)).slice(0, 3);
 
 		uint8_t rawTrack = bytes[0];
-		_sector->physicalSector = bytes[1];
+		_sector->logicalSector = bytes[1];
 		uint8_t gotChecksum = bytes[2];
 
 		_sector->logicalTrack = rawTrack & 0x7f;
 		_sector->logicalSide = rawTrack >> 7;
 		uint8_t wantChecksum = bytes[0] + bytes[1];
-		if ((_sector->physicalSector > 20) || (_sector->logicalTrack > 85) || (_sector->logicalSide > 1))
+		if ((_sector->logicalSector > 20) || (_sector->logicalTrack > 85) || (_sector->logicalSide > 1))
 			return;
 					
 		if (wantChecksum == gotChecksum)

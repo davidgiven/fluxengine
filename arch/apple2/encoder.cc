@@ -148,15 +148,15 @@ private:
             //
             // In standard formatting, the first logical sector apparently gets
             // extra padding.
-            write_ff40(sector.physicalSector == 0 ? 32 : 8);
+            write_ff40(sector.logicalSector == 0 ? 32 : 8);
 
             // Write address field: APPLE2_SECTOR_RECORD + sector identifier +
             // DE AA EB
             write_bits(APPLE2_SECTOR_RECORD, 24);
             write_gcr44(volume_id);
             write_gcr44(sector.logicalTrack);
-            write_gcr44(sector.physicalSector);
-            write_gcr44(volume_id ^ sector.logicalTrack ^ sector.physicalSector);
+            write_gcr44(sector.logicalSector);
+            write_gcr44(volume_id ^ sector.logicalTrack ^ sector.logicalSector);
             write_bits(0xDEAAEB, 24);
 
             // Write data syncing leader: FF40 + APPLE2_DATA_RECORD + sector

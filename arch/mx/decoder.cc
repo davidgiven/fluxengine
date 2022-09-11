@@ -67,7 +67,7 @@ public:
 
 		_sector->logicalTrack = _sector->physicalTrack;
 		_sector->logicalSide = _sector->physicalHead;
-		_sector->physicalSector = _currentSector;
+		_sector->logicalSector = _currentSector;
 		_sector->data = bytes.slice(0, SECTOR_SIZE).swab();
 		_sector->status = (gotChecksum == wantChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
 		_currentSector++;

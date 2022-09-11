@@ -157,7 +157,7 @@ public:
 
 		_sector->logicalTrack = _sector->physicalTrack;
 		_sector->logicalSide = decode_side(encodedSide);
-		_sector->physicalSector = encodedSector;
+		_sector->logicalSector = encodedSector;
 		uint8_t gotsum = (encodedTrack ^ encodedSector ^ encodedSide ^ formatByte) & 0x3f;
 		if (wantedsum == gotsum)
 			_sector->status = Sector::DATA_MISSING; /* unintuitive but correct */

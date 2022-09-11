@@ -47,7 +47,7 @@ public:
 
 		_sector->logicalTrack = reversed[1];
 		_sector->logicalSide = 0;
-		_sector->physicalSector = reversed[2];
+		_sector->logicalSector = reversed[2];
 
 		/* Check header 'checksum' (which seems far too simple to mean much). */
 

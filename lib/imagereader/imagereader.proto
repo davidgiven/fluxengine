@@ -16,8 +16,13 @@ message FdiInputProto {}
 message D88InputProto {}
 message NFDInputProto {}
 
+// NEXT_TAG: 14
 message ImageReaderProto {
 	optional string filename = 1 [(help) = "filename of input sector image"];
+	optional bool filesystem_sector_order = 13 [
+		(help) = "read/write sector image in filesystem order",
+		default = false ];
+
 	oneof format {
 		ImgInputOutputProto img = 2;
 		DiskCopyInputProto diskcopy = 3;

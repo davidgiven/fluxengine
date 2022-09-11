@@ -137,7 +137,6 @@ std::shared_ptr<const TrackDataFlux> AbstractDecoder::decodeToSectors(
         if (_sector->status != Sector::MISSING)
         {
         	auto& trackLayout = Layout::getLayoutOfTrack(_sector->logicalTrack, _sector->logicalSide);
-        	_sector->logicalSector = trackLayout.physicalSectorToLogical(_sector->physicalSector);
 			_trackdata->sectors.push_back(_sector);
         }
     }

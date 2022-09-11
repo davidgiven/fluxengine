@@ -1,25 +1,23 @@
 comment: 'Applies standard AppleDOS soft sector skew to the Apple II format'
 is_extension: true
 
-layout {
-	layoutdata {
-		logical {
-			sector: 0  
-			sector: 7  
-			sector: 14 
-			sector: 6  
-			sector: 13 
-			sector: 5  
-			sector: 12 
-			sector: 4  
-			sector: 11 
-			sector: 3  
-			sector: 10 
-			sector: 2  
-			sector: 9  
-			sector: 1  
-			sector: 8  
-			sector: 15 
-		}
+filesystem {
+	sector_order {
+		sector: 0  
+		sector: 7  
+		sector: 14 
+		sector: 6  
+		sector: 13 
+		sector: 5  
+		sector: 12 
+		sector: 4  
+		sector: 11 
+		sector: 3  
+		sector: 10 
+		sector: 2  
+		sector: 9  
+		sector: 1  
+		sector: 8  
+		sector: 15 
 	}
 }

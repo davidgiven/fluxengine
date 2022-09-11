@@ -31,7 +31,7 @@ void Image::createBlankImage()
         unsigned side = trackAndHead.second;
         auto& trackLayout = Layout::getLayoutOfTrack(track, side);
         Bytes blank(trackLayout.sectorSize);
-        for (unsigned sectorId : trackLayout.logicalSectors)
+        for (unsigned sectorId : trackLayout.logicalSectorOrder)
             put(track, side, sectorId)->data = blank;
     }
 }
@@ -70,7 +70,6 @@ std::shared_ptr<Sector> Image::put(
     sector->logicalSector = sectorid;
     sector->physicalTrack = Layout::remapTrackLogicalToPhysical(track);
     sector->physicalHead = side;
-    sector->physicalSector = trackLayout.logicalSectorToPhysical(sectorid);
     _sectors[key] = sector;
     return sector;
 }

@@ -109,9 +109,10 @@ std::vector<std::pair<int, int>> Layout::getTrackOrdering(
     return ordering;
 }
 
-static void expandSectors(const LayoutProto::SectorsProto& sectorsProto,
-    std::vector<unsigned>& sectors)
+std::vector<unsigned> Layout::expandSectorList(const SectorListProto& sectorsProto)
 {
+	std::vector<unsigned> sectors;
+
     if (sectorsProto.has_count())
     {
         if (sectorsProto.sector_size() != 0)
@@ -129,6 +130,8 @@ static void expandSectors(const LayoutProto::SectorsProto& sectorsProto,
     }
     else
         Error() << "LAYOUT: no sectors in track!";
+
+    return sectors;
 }
 
 const Layout& Layout::getLayoutOfTrack(unsigned track, unsigned side)
@@ -155,39 +158,20 @@ const Layout& Layout::getLayoutOfTrack(unsigned track, unsigned side)
         layout->numTracks = config.layout().tracks();
         layout->numSides = config.layout().sides();
         layout->sectorSize = layoutdata.sector_size();
-        expandSectors(layoutdata.physical(), layout->physicalSectors);
-        if (layoutdata.has_logical())
-            expandSectors(layoutdata.logical(), layout->logicalSectorsOnDisk);
-        else
-            layout->logicalSectorsOnDisk = layout->physicalSectors;
-
-        if (layout->logicalSectorsOnDisk.size() !=
-            layout->physicalSectors.size())
-            Error() << fmt::format(
-                "LAYOUT: physical and logical sectors lists are different "
-                "sizes in {}.{}",
-                track,
-                side);
-
-        layout->logicalSectors = layout->logicalSectorsOnDisk;
-        std::sort(layout->logicalSectors.begin(), layout->logicalSectors.end());
-        layout->numSectors = layout->logicalSectors.size();
-
-        if ((layout->numSectors != layout->logicalSectorsOnDisk.size()) ||
-            (layout->numSectors != layout->physicalSectors.size()))
-            Error() << fmt::format(
-                "LAYOUT: duplicate sector ID in specification for {}.{}",
-                track,
-                side);
+        layout->diskSectorOrder = expandSectorList(layoutdata.physical());
+        layout->logicalSectorOrder = layout->diskSectorOrder;
+        std::sort(layout->diskSectorOrder.begin(), layout->diskSectorOrder.end());
+        layout->numSectors = layout->logicalSectorOrder.size();
     }
 
     return *layout;
 }
 
+#if 0
 unsigned Layout::physicalSectorToLogical(unsigned physicalSectorId) const
 {
-    for (int i = 0; i < physicalSectors.size(); i++)
-        if (physicalSectors[i] == physicalSectorId)
+    for (int i = 0; i < diskSectorOrder.size(); i++)
+        if (diskSectorOrder[i] == physicalSectorId)
             return logicalSectorsOnDisk[i];
     Error() << fmt::format(
         "LAYOUT: physical sector {} not recognised", physicalSectorId);
@@ -198,8 +182,9 @@ unsigned Layout::logicalSectorToPhysical(unsigned logicalSectorId) const
 {
     for (int i = 0; i < logicalSectorsOnDisk.size(); i++)
         if (logicalSectorsOnDisk[i] == logicalSectorId)
-            return physicalSectors[i];
+            return diskSectorOrder[i];
     Error() << fmt::format(
         "LAYOUT: logical sector {} not recognised", logicalSectorId);
     throw nullptr;
 }
+#endif

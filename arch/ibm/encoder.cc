@@ -118,11 +118,10 @@ public:
             Layout::getLayoutOfTrack(location.logicalTrack, location.head);
 
         int logicalSide = location.head ^ trackdata.swap_sides();
-        for (unsigned physicalSectorId : trackLayout.physicalSectors)
+        for (unsigned sectorId : trackLayout.diskSectorOrder)
         {
-        	unsigned logicalSectorId = trackLayout.physicalSectorToLogical(physicalSectorId);
             const auto& sector =
-                image.get(location.logicalTrack, logicalSide, logicalSectorId);
+                image.get(location.logicalTrack, logicalSide, sectorId);
             if (sector)
                 sectors.push_back(sector);
         }
@@ -226,7 +225,7 @@ public:
                 bw.write_8(idamUnencoded);
                 bw.write_8(sectorData->logicalTrack);
                 bw.write_8(sectorData->logicalSide);
-                bw.write_8(sectorData->physicalSector);
+                bw.write_8(sectorData->logicalSector);
                 bw.write_8(sectorSize);
                 uint16_t crc = crc16(CCITT_POLY, header);
                 bw.write_be16(crc);

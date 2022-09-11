@@ -89,10 +89,9 @@ void ImageWriter::writeCsv(const Image& image, const std::string& filename)
 
 	f << "\"Physical track\","
 		"\"Physical side\","
-		"\"Physical sector\","
+		"\"Logical sector\","
 		"\"Logical track\","
 		"\"Logical side\","
-		"\"Logical sector\","
 		"\"Clock (ns)\","
 		"\"Header start (ns)\","
 		"\"Header end (ns)\","
@@ -105,13 +104,12 @@ void ImageWriter::writeCsv(const Image& image, const std::string& filename)
 
 	for (const auto& sector : image)
 	{
-		f << fmt::format("{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n",
+		f << fmt::format("{},{},{},{},{},{},{},{},{},{},{},{},{}\n",
 			sector->physicalTrack,
 			sector->physicalHead,
-			sector->physicalSector,
+			sector->logicalSector,
 			sector->logicalTrack,
 			sector->logicalSide,
-			sector->logicalSector,
 			sector->clock,
 			sector->headerStartTime,
 			sector->headerEndTime,

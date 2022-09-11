@@ -3,6 +3,8 @@
 
 #include "lib/flux.h"
 
+class SectorListProto;
+
 class Layout
 {
 public:
@@ -40,6 +42,9 @@ public:
     static const Layout& getLayoutOfTrack(
         unsigned logicalTrack, unsigned logicalHead);
 
+    /* Expand a SectorList into the actual sector IDs. */
+	static std::vector<unsigned> expandSectorList(const SectorListProto& sectorsProto);
+
 public:
     unsigned numTracks;
     unsigned numSides;
@@ -47,16 +52,10 @@ public:
     unsigned sectorSize;
 
     /* Physical sector IDs in disk order. */
-    std::vector<unsigned> physicalSectors;
+    std::vector<unsigned> diskSectorOrder;
 
-    /* Logical sector IDs in disk order. */
-    std::vector<unsigned> logicalSectorsOnDisk;
-
-    /* Logical sector IDs in filesystem order. */
-    std::vector<unsigned> logicalSectors;
-
-    unsigned physicalSectorToLogical(unsigned sectorId) const;
-    unsigned logicalSectorToPhysical(unsigned sectorId) const;
+    /* Physical sector IDs in dlogical order. */
+    std::vector<unsigned> logicalSectorOrder;
 };
 
 #endif

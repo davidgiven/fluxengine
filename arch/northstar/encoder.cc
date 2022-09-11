@@ -89,7 +89,7 @@ static void write_sector(std::vector<bool>& bits,
     for (uint8_t b : sectorData)
         fullSector->push_back(b);
 
-    if (sector->physicalSector != 9)
+    if (sector->logicalSector != 9)
     {
         /* sector postamble */
         for (int i = 0; i < gapFillSize; i++)

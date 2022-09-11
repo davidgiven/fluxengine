@@ -38,7 +38,6 @@ public:
     nanoseconds_t dataEndTime = 0;
     unsigned physicalTrack = 0;
     unsigned physicalHead = 0;
-    unsigned physicalSector = 0;
     unsigned logicalTrack = 0;
     unsigned logicalSide = 0;
     unsigned logicalSector = 0;

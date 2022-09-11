@@ -66,7 +66,7 @@ public:
 		_sector->logicalSide = br.read_8() >> 3;
 		_sector->logicalTrack = br.read_8();
 		br.read_8(); /* number of sectors per track */
-		_sector->physicalSector = br.read_8();
+		_sector->logicalSector = br.read_8();
 		br.read_be16(); /* sector size */
 		uint16_t wantChecksum = br.read_be16();
 

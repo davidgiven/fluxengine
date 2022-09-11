@@ -151,7 +151,7 @@ public:
 		ByteReader br(bytes);
 
 		_sector->logicalSide = _sector->physicalHead;
-		_sector->physicalSector = _hardSectorId;
+		_sector->logicalSector = _hardSectorId;
 		_sector->logicalTrack = _sector->physicalTrack;
 
 		if (headerSize == NORTHSTAR_HEADER_SIZE_DD) {

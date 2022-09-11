@@ -91,7 +91,7 @@ public:
         dev.devType = DEVTYPE_FLOPDD;
         dev.cylinders = config.layout().tracks();
         dev.heads = config.layout().sides();
-        dev.sectors = Layout::getLayoutOfTrack(0, 0).logicalSectors.size();
+        dev.sectors = Layout::getLayoutOfTrack(0, 0).numSectors;
         adfInitDevice(&dev, nullptr, false);
         int res = adfCreateFlop(&dev, (char*)volumeName.c_str(), 0);
         if (res != RC_OK)

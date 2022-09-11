@@ -165,11 +165,11 @@ Filesystem::Filesystem(std::shared_ptr<SectorInterface> sectors):
         int side = p.second;
 
         auto& trackLayout = Layout::getLayoutOfTrack(track, side);
-        if (trackLayout.logicalSectors.empty())
+        if (trackLayout.numSectors == 0)
             Error() << "FS: filesystem support cannot be used without concrete "
                        "layout information";
 
-        for (int sectorId : trackLayout.logicalSectors)
+        for (int sectorId : trackLayout.logicalSectorOrder)
             _locations.push_back(std::make_tuple(track, side, sectorId));
     }
 }

@@ -269,7 +269,7 @@ private:
              *   06-07 - $0F ("off" bytes)
              */
             uint8_t encodedTrack = ((sector->logicalTrack) + 1); // C64 track numbering starts with 1. Fluxengine with 0.
-            uint8_t encodedSector = sector->physicalSector;
+            uint8_t encodedSector = sector->logicalSector;
             // uint8_t formatByte1 = C64_FORMAT_ID_BYTE1;
             // uint8_t formatByte2 = C64_FORMAT_ID_BYTE2;
             uint8_t headerChecksum = (encodedTrack ^ encodedSector ^ _formatByte1 ^ _formatByte2);

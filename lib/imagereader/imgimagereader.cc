@@ -40,7 +40,7 @@ public:
                 break;
 
             auto& trackLayout = Layout::getLayoutOfTrack(track, side);
-            for (int sectorId : trackLayout.logicalSectors)
+            for (int sectorId : trackLayout.logicalSectorOrder)
             {
                 Bytes data(trackLayout.sectorSize);
                 inputFile.read((char*)data.begin(), data.size());

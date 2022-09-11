@@ -1,6 +1,7 @@
 syntax = "proto2";
 
 import "lib/common.proto";
+import "lib/layout.proto";
 
 message AcornDfsProto
 {
@@ -58,6 +59,7 @@ message CbmfsProto
 
 message ProdosProto {}
 
+// NEXT_TAG: 10
 message FilesystemProto
 {
     oneof filesystem
@@ -71,4 +73,6 @@ message FilesystemProto
         CbmfsProto cbmfs = 7;
         ProdosProto prodos = 8;
     }
+    
+    optional SectorListProto sector_order = 9 [(help) = "specify the filesystem order of sectors"];
 }

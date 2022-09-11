@@ -2,6 +2,18 @@ syntax = "proto2";
 
 import "lib/common.proto";
 
+message SectorListProto
+{
+	/* either */
+	repeated int32 sector = 1 [ (help) = "sector ID" ];
+
+	/* or */
+	optional int32 start_sector = 2
+		[ (help) = "first sector of a continuous run" ];
+	optional int32 count = 3
+		[ (help) = "number of sectors in a continuous run" ];
+}
+
 message LayoutProto
 {
     enum Order
@@ -9,18 +21,6 @@ message LayoutProto
         UNDEFINED = 0;
         CHS = 1;
         HCS = 2;
-    }
-
-    message SectorsProto
-    {
-        /* either */
-        repeated int32 sector = 1 [ (help) = "sector ID" ];
-
-        /* or */
-        optional int32 start_sector = 2
-            [ (help) = "first sector of a continuous run" ];
-        optional int32 count = 3
-            [ (help) = "number of sectors in a continuous run" ];
     }
 
     message LayoutdataProto
@@ -35,9 +35,9 @@ message LayoutProto
         optional int32 sector_size = 3
             [ default = 512, (help) = "number of bytes per sector" ];
 
-        optional SectorsProto physical = 4
+        optional SectorListProto physical = 4
             [ (help) = "physical order of sectors on disk" ];
-        optional SectorsProto logical = 6
+        optional SectorListProto logical = 6
             [ (help) = "logical order of sectors in filesystem" ];
     }
 
