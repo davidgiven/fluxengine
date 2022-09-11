@@ -73,6 +73,7 @@ LIBFLUXENGINE_SRCS = \
 	lib/vfs/cpmfs.cc \
 	lib/vfs/fatfs.cc \
 	lib/vfs/machfs.cc \
+	lib/vfs/prodos.cc \
 	lib/vfs/vfs.cc \
 	lib/vfs/fluxsectorinterface.cc \
 	lib/vfs/imagesectorinterface.cc \

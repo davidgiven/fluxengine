@@ -258,9 +258,10 @@ public:
             runOnWorkerThread(
                 [this]()
                 {
-            		/* You need to call this if the config changes to invalidate any caches. */
+                    /* You need to call this if the config changes to invalidate
+                     * any caches. */
 
-            		Environment::reset();
+                    Environment::reset();
 
                     auto fluxSource = FluxSource::create(config.flux_source());
                     auto decoder = AbstractDecoder::create(config.decoder());

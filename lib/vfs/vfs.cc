@@ -200,6 +200,9 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystem(
         case FilesystemProto::kCbmfs:
             return Filesystem::createCbmfsFilesystem(config, image);
 
+        case FilesystemProto::kProdos:
+            return Filesystem::createProdosFilesystem(config, image);
+
         default:
             Error() << "no filesystem configured";
             return std::unique_ptr<Filesystem>();
@@ -258,7 +261,9 @@ Bytes Filesystem::getSector(unsigned track, unsigned side, unsigned sector)
 Bytes Filesystem::getLogicalSector(uint32_t number, uint32_t count)
 {
     if ((number + count) > _locations.size())
-        throw BadFilesystemException();
+        throw BadFilesystemException(
+            fmt::format("invalid filesystem: sector {} is out of bounds",
+                number + count - 1));
 
     Bytes data;
     ByteWriter bw(data);
@@ -278,7 +283,8 @@ Bytes Filesystem::getLogicalSector(uint32_t number, uint32_t count)
 void Filesystem::putLogicalSector(uint32_t number, const Bytes& data)
 {
     if (number >= _locations.size())
-        throw BadFilesystemException();
+        throw BadFilesystemException(fmt::format(
+            "invalid filesystem: sector {} is out of bounds", number));
 
     unsigned pos = 0;
     while (pos < data.size())

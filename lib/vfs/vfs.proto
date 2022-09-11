@@ -56,6 +56,8 @@ message CbmfsProto
     ];
 }
 
+message ProdosProto {}
+
 message FilesystemProto
 {
     oneof filesystem
@@ -67,5 +69,6 @@ message FilesystemProto
         AmigaFfsProto amigaffs = 5;
         MacHfsProto machfs = 6;
         CbmfsProto cbmfs = 7;
+        ProdosProto prodos = 8;
     }
 }
