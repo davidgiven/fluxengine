@@ -107,9 +107,9 @@ public:
 
         std::map<std::string, std::string> attributes;
         attributes[VOLUME_NAME] = "";
-        attributes[TOTAL_BLOCKS] = fmt::format("{}", _filesystemBlocks);
-        attributes[USED_BLOCKS] = fmt::format("{}", usedBlocks);
-        attributes[BLOCK_SIZE] = fmt::format("{}", _config.block_size());
+        attributes[TOTAL_BLOCKS] = std::to_string(_filesystemBlocks);
+        attributes[USED_BLOCKS] = std::to_string(usedBlocks);
+        attributes[BLOCK_SIZE] = std::to_string(_config.block_size());
         return attributes;
     }
 
@@ -151,7 +151,7 @@ public:
         {
             auto& de = e.second;
             de->attributes[FILENAME] = de->filename;
-            de->attributes[LENGTH] = fmt::format("{}", de->length);
+            de->attributes[LENGTH] = std::to_string(de->length);
             de->attributes[FILE_TYPE] = "file";
             de->attributes[MODE] = de->mode;
             result.push_back(std::move(de));

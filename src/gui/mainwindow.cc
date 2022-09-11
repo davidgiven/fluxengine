@@ -1059,7 +1059,8 @@ public:
             Error() << "no format selected";
 
         config.Clear();
-        FlagGroup::parseConfigFile(_formatNames[formatChoice->GetSelection()], formats);
+        FlagGroup::parseConfigFile(
+            _formatNames[formatChoice->GetSelection()], formats);
 
         for (auto setting : split(_extraConfiguration, '\n'))
         {

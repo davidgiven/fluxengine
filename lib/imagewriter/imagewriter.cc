@@ -138,7 +138,7 @@ void ImageWriter::printMap(const Image& image)
     std::cout << std::endl;
     std::cout << "H.SS ";
     for (unsigned i = 0; i < geometry.numTracks; i++)
-        std::cout << fmt::format("{}", i % 10);
+        std::cout << std::to_string(i % 10);
     std::cout << std::endl;
 
     for (int side = 0; side < geometry.numSides; side++)
