@@ -92,7 +92,7 @@ public:
                 continue;
 
             formatChoice->Append(it.first);
-            _formats.push_back(std::make_pair(it.first, std::move(config)));
+            _formatNames.push_back(it.first);
             i++;
         }
 
@@ -1051,7 +1051,7 @@ public:
         auto formatSelection = formatChoice->GetSelection();
         if (formatSelection == wxNOT_FOUND)
             Error() << "no format selected";
-        config = *_formats[formatChoice->GetSelection()].second;
+        FlagGroup::parseConfigFile(_formatNames[formatChoice->GetSelection()], formats);
 
         for (auto setting : split(_extraConfiguration, '\n'))
         {
@@ -1285,9 +1285,9 @@ public:
 
         int defaultFormat = 0;
         int i = 0;
-        for (const auto& it : _formats)
+        for (const auto& it : _formatNames)
         {
-            if (it.first == s)
+            if (it == s)
             {
                 formatChoice->SetSelection(i);
                 break;
@@ -1518,8 +1518,7 @@ private:
 
     wxConfig _config;
     wxDataFormat _dndFormat;
-    std::vector<std::pair<std::string, std::unique_ptr<const ConfigProto>>>
-        _formats;
+    std::vector<std::string> _formatNames;
     std::vector<std::unique_ptr<const CandidateDevice>> _devices;
     int _state = STATE_IDLE;
     int _errorState;
