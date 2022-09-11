@@ -94,9 +94,9 @@ public:
                 if (buffer[0] == 0xf0)
                     continue;
 
-                auto de = std::make_unique<Brother120Dirent>(buffer);
+                auto de = std::make_shared<Brother120Dirent>(buffer);
                 usedSectors += de->sectorLength;
-                dirents.push_back(std::move(de));
+                dirents.push_back(de);
             }
         }
 
@@ -122,7 +122,7 @@ public:
         int i = 0;
         for (const auto& de : dirents)
         {
-            bw.append(Bytes(de->filename).slice(0, 8));
+            bw.append(Bytes(de->filename + "        ").slice(0, 8));
             bw.write_8(de->brotherType);
             bw.write_be16(de->startSector);
             bw.write_8(de->sectorLength);
@@ -144,7 +144,7 @@ public:
         fs->putLogicalSector(0, bytes);
     }
 
-    std::unique_ptr<Brother120Dirent> findFile(const Path& path)
+    std::shared_ptr<Brother120Dirent> findFile(const Path& path)
     {
         if (path.size() != 1)
             throw BadPathException();
@@ -152,7 +152,34 @@ public:
         for (auto& dirent : dirents)
         {
             if (dirent->filename == path[0])
-                return std::move(dirent);
+                return dirent;
+        }
+
+        throw FileNotFoundException();
+    }
+
+    void deleteFile(const Path& path)
+    {
+        if (path.size() != 1)
+            throw BadPathException();
+
+        for (auto it = dirents.begin(); it != dirents.end(); it++)
+        {
+            auto& dirent = *it;
+            if (dirent->filename == path[0])
+            {
+                int sector = dirent->startSector;
+
+                while ((sector != 0) && (sector != 0xffff))
+                {
+                    int nextSector = fat.at(sector);
+                    freeSector(sector);
+                    sector = nextSector;
+                }
+
+                dirents.erase(it);
+                return;
+            }
         }
 
         throw FileNotFoundException();
@@ -163,16 +190,25 @@ public:
         for (int i = 0; i < fat.size(); i++)
             if (fat[i] == 0)
             {
-            	fat[i] = 0xffff;
-            	usedSectors++;
+                fat[i] = 0xffff;
+                usedSectors++;
                 return i;
             }
         throw DiskFullException();
     }
 
+    void freeSector(uint16_t i)
+    {
+        if (fat[i])
+        {
+            fat[i] = 0;
+            usedSectors--;
+        }
+    }
+
 public:
     std::vector<uint16_t> fat;
-    std::vector<std::unique_ptr<Brother120Dirent>> dirents;
+    std::vector<std::shared_ptr<Brother120Dirent>> dirents;
     uint32_t usedSectors = 0;
 };
 
@@ -188,7 +224,8 @@ public:
 
     uint32_t capabilities() const
     {
-        return OP_GETFSDATA | OP_LIST | OP_GETFILE | OP_PUTFILE | OP_GETDIRENT;
+        return OP_GETFSDATA | OP_LIST | OP_GETFILE | OP_PUTFILE | OP_GETDIRENT |
+               OP_DELETE;
     }
 
     std::map<std::string, std::string> getMetadata() override
@@ -217,7 +254,7 @@ public:
 
         std::vector<std::shared_ptr<Dirent>> result;
         for (auto& dirent : dir.dirents)
-            result.push_back(std::move(dirent));
+            result.push_back(dirent);
 
         return result;
     }
@@ -252,9 +289,13 @@ public:
         {
         }
 
+        auto& filename = path.back();
+        if (filename.size() > 8)
+        	throw CannotWriteException("filename too long (eight characters maximum)");
+
         int sectorLength = (data.size() + SECTOR_SIZE - 1) / SECTOR_SIZE;
         if (sectorLength > 0xff)
-        	throw CannotWriteException("file is too big (64kB is the maximum)");
+            throw CannotWriteException("file is too big (64kB is the maximum)");
 
         ByteReader br(data);
 
@@ -272,11 +313,16 @@ public:
             previousSector = currentSector;
         }
 
-        auto dirent = std::make_unique<Brother120Dirent>(path.back(),
-            0,
-            firstSector,
-            sectorLength);
-        dir.dirents.push_back(std::move(dirent));
+        auto dirent = std::make_shared<Brother120Dirent>(
+            filename, 0, firstSector, sectorLength);
+        dir.dirents.push_back(dirent);
+        dir.write(this);
+    }
+
+    void deleteFile(const Path& path) override
+    {
+        BrotherDirectory dir(this);
+        dir.deleteFile(path);
         dir.write(this);
     }
 
