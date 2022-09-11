@@ -19,6 +19,7 @@
 #include "filesystemmodel.h"
 #include "customstatusbar.h"
 #include "lib/vfs/vfs.h"
+#include "lib/environment.h"
 #include <google/protobuf/text_format.h>
 #include <wx/config.h>
 #include <wx/aboutdlg.h>
@@ -257,6 +258,10 @@ public:
             runOnWorkerThread(
                 [this]()
                 {
+            		/* You need to call this if the config changes to invalidate any caches. */
+
+            		Environment::reset();
+
                     auto fluxSource = FluxSource::create(config.flux_source());
                     auto decoder = AbstractDecoder::create(config.decoder());
                     auto diskflux = readDiskCommand(*fluxSource, *decoder);
@@ -1088,7 +1093,7 @@ public:
                 config.mutable_drive()->set_high_density(hd);
 
                 if (fortyTrackDriveToggle->GetValue())
-                	FlagGroup::parseConfigFile("40track_drive", formats);
+                    FlagGroup::parseConfigFile("40track_drive", formats);
 
                 std::string filename =
                     driveChoice->GetSelection() ? "drive:1" : "drive:0";

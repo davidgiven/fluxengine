@@ -24,3 +24,8 @@ layout {
 		}
 	}
 }
+
+filesystem {
+	prodos {}
+}
+

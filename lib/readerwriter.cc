@@ -18,7 +18,6 @@
 #include "utils.h"
 #include "lib/config.pb.h"
 #include "proto.h"
-#include "environment.h"
 #include <optional>
 
 enum ReadResult
@@ -229,7 +228,6 @@ void writeTracks(FluxSink& fluxSink,
     std::function<bool(const Location& location)> verifier,
     const std::set<Location>& locations)
 {
-    Environment::reset();
     Logger() << BeginOperationLogMessage{"Encoding and writing to disk"};
 
     int index = 0;
@@ -418,7 +416,6 @@ void writeRawDiskCommand(FluxSource& fluxSource, FluxSink& fluxSink)
 std::shared_ptr<TrackFlux> readAndDecodeTrack(
     FluxSource& fluxSource, AbstractDecoder& decoder, const Location& location)
 {
-    Environment::reset();
     auto trackFlux = std::make_shared<TrackFlux>();
     trackFlux->location = location;
 
@@ -453,7 +450,6 @@ std::shared_ptr<TrackFlux> readAndDecodeTrack(
 std::shared_ptr<const DiskFlux> readDiskCommand(
     FluxSource& fluxSource, AbstractDecoder& decoder)
 {
-    Environment::reset();
     std::unique_ptr<FluxSink> outputFluxSink;
     if (config.decoder().has_copy_flux_to())
         outputFluxSink = FluxSink::create(config.decoder().copy_flux_to());
@@ -569,7 +565,6 @@ void rawReadDiskCommand(FluxSource& fluxsource, FluxSink& fluxsink)
 {
     Logger() << BeginOperationLogMessage{"Performing raw read of disk"};
 
-    Environment::reset();
     auto tracks = iterate(config.tracks());
     auto heads = iterate(config.heads());
     unsigned locations = tracks.size() * heads.size();
