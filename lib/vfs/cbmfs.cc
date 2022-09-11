@@ -86,16 +86,16 @@ class CbmfsFilesystem : public Filesystem
             mode = "";
 
             attributes[Filesystem::FILENAME] = filename;
-            attributes[Filesystem::LENGTH] = fmt::format("{}", length);
+            attributes[Filesystem::LENGTH] = std::to_string(length);
             attributes[Filesystem::FILE_TYPE] = "file";
             attributes[Filesystem::MODE] = mode;
             attributes["cbmfs.type"] = toFileType(cbm_type);
-            attributes["cbmfs.start_track"] = fmt::format("{}", start_track);
-            attributes["cbmfs.start_sector"] = fmt::format("{}", start_sector);
-            attributes["cbmfs.side_track"] = fmt::format("{}", side_track);
-            attributes["cbmfs.side_sector"] = fmt::format("{}", side_sector);
-            attributes["cbmfs.recordlen"] = fmt::format("{}", recordlen);
-            attributes["cbmfs.sectors"] = fmt::format("{}", sectors);
+            attributes["cbmfs.start_track"] = std::to_string(start_track);
+            attributes["cbmfs.start_sector"] = std::to_string(start_sector);
+            attributes["cbmfs.side_track"] = std::to_string(side_track);
+            attributes["cbmfs.side_sector"] = std::to_string(side_sector);
+            attributes["cbmfs.recordlen"] = std::to_string(recordlen);
+            attributes["cbmfs.sectors"] = std::to_string(sectors);
         }
 
     public:
@@ -206,11 +206,11 @@ public:
 
         std::map<std::string, std::string> attributes;
         attributes[VOLUME_NAME] = dir.volumeName;
-        attributes[USED_BLOCKS] = fmt::format("{}", dir.usedBlocks);
-        attributes[TOTAL_BLOCKS] = fmt::format("{}", getLogicalSectorCount());
-        attributes[BLOCK_SIZE] = fmt::format("{}", getLogicalSectorSize());
-        attributes["cbmfs.dos_type"] = fmt::format("{}", (char)dir.dosVersion);
-        attributes["cbmfs.bam_size"] = fmt::format("{}", dir.bam.size());
+        attributes[USED_BLOCKS] = std::to_string(dir.usedBlocks);
+        attributes[TOTAL_BLOCKS] = std::to_string(getLogicalSectorCount());
+        attributes[BLOCK_SIZE] = std::to_string(getLogicalSectorSize());
+        attributes["cbmfs.dos_type"] = std::to_string((char)dir.dosVersion);
+        attributes["cbmfs.bam_size"] = std::to_string(dir.bam.size());
         return attributes;
     }
 

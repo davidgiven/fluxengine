@@ -62,10 +62,10 @@ public:
             FRESULT res = f_getfree("", &free_clusters, &fs);
             throwError(res);
             int total = (fs->n_fatent - 2) + (fs->database / fs->csize);
-            attributes[TOTAL_BLOCKS] = fmt::format("{}", total);
-            attributes[USED_BLOCKS] = fmt::format("{}", total - free_clusters);
+            attributes[TOTAL_BLOCKS] = std::to_string(total);
+            attributes[USED_BLOCKS] = std::to_string(total - free_clusters);
             attributes[BLOCK_SIZE] =
-                fmt::format("{}", fs->csize * getLogicalSectorSize(0));
+                std::to_string(fs->csize * getLogicalSectorSize(0));
         }
 
         return attributes;
@@ -219,8 +219,7 @@ private:
         dirent->mode = modeToString(filinfo.fattrib);
 
         dirent->attributes[Filesystem::FILENAME] = filinfo.fname;
-        dirent->attributes[Filesystem::LENGTH] =
-            fmt::format("{}", filinfo.fsize);
+        dirent->attributes[Filesystem::LENGTH] = std::to_string(filinfo.fsize);
         dirent->attributes[Filesystem::FILE_TYPE] =
             (filinfo.fattrib & AM_DIR) ? "dir" : "file";
         dirent->attributes[Filesystem::MODE] = modeToString(filinfo.fattrib);

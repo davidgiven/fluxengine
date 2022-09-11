@@ -40,11 +40,10 @@ public:
 
         std::map<std::string, std::string> attributes;
         attributes[VOLUME_NAME] = ve.name;
-        attributes[TOTAL_BLOCKS] =
-            fmt::format("{}", ve.totbytes / ve.alblocksz);
+        attributes[TOTAL_BLOCKS] = std::to_string(ve.totbytes / ve.alblocksz);
         attributes[USED_BLOCKS] =
-            fmt::format("{}", (ve.totbytes - ve.freebytes) / ve.alblocksz);
-        attributes[BLOCK_SIZE] = fmt::format("{}", ve.alblocksz);
+            std::to_string((ve.totbytes - ve.freebytes) / ve.alblocksz);
+        attributes[BLOCK_SIZE] = std::to_string(ve.alblocksz);
         return attributes;
     }
 
@@ -219,33 +218,31 @@ private:
         dirent->attributes["machfs.ctime"] = toIso8601(de.crdate);
         dirent->attributes["machfs.mtime"] = toIso8601(de.mddate);
         dirent->attributes["machfs.last_backup"] = toIso8601(de.bkdate);
-        dirent->attributes["machfs.finder.x"] =
-            fmt::format("{}", de.fdlocation.h);
-        dirent->attributes["machfs.finder.y"] =
-            fmt::format("{}", de.fdlocation.v);
+        dirent->attributes["machfs.finder.x"] = std::to_string(de.fdlocation.h);
+        dirent->attributes["machfs.finder.y"] = std::to_string(de.fdlocation.v);
         dirent->attributes["machfs.finder.flags"] =
             fmt::format("0x{:x}", de.fdflags);
         if (de.flags & HFS_ISDIR)
         {
             dirent->attributes["machfs.dir.valence"] =
-                fmt::format("{}", de.u.dir.valence);
+                std::to_string(de.u.dir.valence);
             dirent->attributes["machfs.dir.x1"] =
-                fmt::format("{}", de.u.dir.rect.left);
+                std::to_string(de.u.dir.rect.left);
             dirent->attributes["machfs.dir.y1"] =
-                fmt::format("{}", de.u.dir.rect.top);
+                std::to_string(de.u.dir.rect.top);
             dirent->attributes["machfs.dir.x2"] =
-                fmt::format("{}", de.u.dir.rect.right);
+                std::to_string(de.u.dir.rect.right);
             dirent->attributes["machfs.dir.y2"] =
-                fmt::format("{}", de.u.dir.rect.bottom);
+                std::to_string(de.u.dir.rect.bottom);
         }
         else
         {
             dirent->attributes["length"] = fmt::format("{}",
                 de.u.file.dsize + de.u.file.rsize + AppleSingle::OVERHEAD);
             dirent->attributes["machfs.file.dsize"] =
-                fmt::format("{}", de.u.file.dsize);
+                std::to_string(de.u.file.dsize);
             dirent->attributes["machfs.file.rsize"] =
-                fmt::format("{}", de.u.file.rsize);
+                std::to_string(de.u.file.rsize);
             dirent->attributes["machfs.file.type"] = de.u.file.type;
             dirent->attributes["machfs.file.creator"] = de.u.file.creator;
         }
