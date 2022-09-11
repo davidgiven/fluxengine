@@ -319,8 +319,8 @@ public:
             runOnWorkerThread(
                 [this]()
                 {
-                    auto image =
-                        ImageReader::create(config.image_reader())->readImage();
+                    auto image = ImageReader::create(config.image_reader())
+                                     ->readMappedImage();
                     auto encoder = AbstractEncoder::create(config.encoder());
                     auto fluxSink = FluxSink::create(config.flux_sink());
 
@@ -386,7 +386,7 @@ public:
                 {
                     auto imageWriter =
                         ImageWriter::create(config.image_writer());
-                    imageWriter->writeImage(*image);
+                    imageWriter->writeMappedImage(*image);
                 });
         }
         catch (const ErrorException& e)

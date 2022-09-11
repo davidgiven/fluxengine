@@ -182,8 +182,8 @@ const Layout& Layout::getLayoutOfTrack(unsigned track, unsigned side)
 
         for (int i = 0; i < layout->numSectors; i++)
         {
-            unsigned l = layout->logicalSectorOrder[i];
-            unsigned f = layout->filesystemSectorOrder[i];
+            unsigned f = layout->logicalSectorOrder[i];
+            unsigned l = layout->filesystemSectorOrder[i];
             layout->filesystemToLogicalSectorMap[f] = l;
             layout->logicalToFilesystemSectorMap[l] = f;
         }

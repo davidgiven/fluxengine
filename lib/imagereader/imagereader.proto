@@ -2,8 +2,7 @@ syntax = "proto2";
 
 import "lib/common.proto";
 
-message ImgInputOutputProto {
-}
+message ImgInputOutputProto {}
 
 message DiskCopyInputProto {}
 message ImdInputProto {}
@@ -17,24 +16,26 @@ message D88InputProto {}
 message NFDInputProto {}
 
 // NEXT_TAG: 14
-message ImageReaderProto {
-	optional string filename = 1 [(help) = "filename of input sector image"];
-	optional bool filesystem_sector_order = 13 [
-		(help) = "read/write sector image in filesystem order",
-		default = false ];
+message ImageReaderProto
+{
+    optional string filename = 1 [ (help) = "filename of input sector image" ];
+    optional bool filesystem_sector_order = 13 [
+        (help) = "read/write sector image in filesystem order",
+        default = false
+    ];
 
-	oneof format {
-		ImgInputOutputProto img = 2;
-		DiskCopyInputProto diskcopy = 3;
-		ImdInputProto imd = 4;
-		Jv3InputProto jv3 = 5;
-		D64InputProto d64 = 6;
-		NsiInputProto nsi = 7;
-		Td0InputProto td0 = 8;
-		DimInputProto dim = 9;
-		FdiInputProto fdi = 10;
-		D88InputProto d88 = 11;
+    oneof format
+    {
+        ImgInputOutputProto img = 2;
+        DiskCopyInputProto diskcopy = 3;
+        ImdInputProto imd = 4;
+        Jv3InputProto jv3 = 5;
+        D64InputProto d64 = 6;
+        NsiInputProto nsi = 7;
+        Td0InputProto td0 = 8;
+        DimInputProto dim = 9;
+        FdiInputProto fdi = 10;
+        D88InputProto d88 = 11;
         NFDInputProto nfd = 12;
-	}
+    }
 }
-

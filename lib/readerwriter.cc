@@ -558,7 +558,7 @@ void readDiskCommand(
     writer.printMap(*diskflux->image);
     if (config.decoder().has_write_csv_to())
         writer.writeCsv(*diskflux->image, config.decoder().write_csv_to());
-    writer.writeImage(*diskflux->image);
+    writer.writeMappedImage(*diskflux->image);
 }
 
 void rawReadDiskCommand(FluxSource& fluxsource, FluxSink& fluxsink)
