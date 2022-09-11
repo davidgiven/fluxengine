@@ -22,6 +22,7 @@ The following file systems are supported so far.
 | CP/M                                     |   Y   |        | For selected formats |
 | FatFS (a.k.a. MS-DOS)                    |   Y   |   Y    | FAT12, FAT16, FAT32, but only SFN; not Atari |
 | Macintosh HFS                            |   Y   |   Y    | Only AppleDouble files may be written |
+| Apple ProDOS                             |   Y   |        |       |
 
 Please not that Atari disks do _not_ use standard FatFS, and the library I'm
 using for the heavy lifting (ChaN's

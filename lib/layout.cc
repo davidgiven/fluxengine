@@ -1,6 +1,76 @@
 #include "lib/globals.h"
 #include "lib/layout.h"
 #include "lib/proto.h"
+#include "lib/environment.h"
+#include <fmt/format.h>
+
+static Local<std::map<std::pair<int, int>, std::unique_ptr<Layout>>>
+    layoutCache;
+
+unsigned Layout::remapTrackPhysicalToLogical(unsigned ptrack)
+{
+    return (ptrack - config.drive().head_bias()) / config.drive().head_width();
+}
+
+static unsigned getTrackStep()
+{
+    unsigned track_step =
+        (config.tpi() == 0) ? 1 : (config.drive().tpi() / config.tpi());
+
+    if (track_step == 0)
+        Error()
+            << "this drive can't write this image, because the head is too big";
+    return track_step;
+}
+
+unsigned Layout::remapTrackLogicalToPhysical(unsigned ltrack)
+{
+    return config.drive().head_bias() + ltrack * getTrackStep();
+}
+
+std::set<Location> Layout::computeLocations()
+{
+    std::set<Location> locations;
+
+    std::set<unsigned> tracks;
+    if (config.has_tracks())
+        tracks = iterate(config.tracks());
+    else
+        tracks = iterate(0, config.layout().tracks());
+
+    std::set<unsigned> heads;
+    if (config.has_heads())
+        heads = iterate(config.heads());
+    else
+        heads = iterate(0, config.layout().sides());
+
+    for (unsigned logicalTrack : tracks)
+    {
+        for (unsigned head : heads)
+            locations.insert(computeLocationFor(logicalTrack, head));
+    }
+
+    return locations;
+}
+
+Location Layout::computeLocationFor(unsigned logicalTrack, unsigned logicalHead)
+{
+    if ((logicalTrack < config.layout().tracks()) &&
+        (logicalHead < config.layout().sides()))
+    {
+        unsigned track_step = getTrackStep();
+        unsigned physicalTrack =
+            config.drive().head_bias() + logicalTrack * track_step;
+
+        return {.physicalTrack = physicalTrack,
+            .logicalTrack = logicalTrack,
+            .head = logicalHead,
+            .groupSize = track_step};
+    }
+
+    Error() << fmt::format(
+        "track {}.{} is not part of the image", logicalTrack, logicalHead);
+}
 
 std::vector<std::pair<int, int>> Layout::getTrackOrdering(
     unsigned guessedTracks, unsigned guessedSides)
@@ -39,101 +109,85 @@ std::vector<std::pair<int, int>> Layout::getTrackOrdering(
     return ordering;
 }
 
-LayoutProto::LayoutdataProto Layout::getLayoutOfTrack(
-    unsigned track, unsigned side)
+std::vector<unsigned> Layout::expandSectorList(
+    const SectorListProto& sectorsProto)
 {
-    LayoutProto::LayoutdataProto layoutdata;
-
-    for (const auto& f : config.layout().layoutdata())
-    {
-        if (f.has_track() && f.has_up_to_track() &&
-            ((track < f.track()) || (track > f.up_to_track())))
-            continue;
-        if (f.has_track() && !f.has_up_to_track() && (track != f.track()))
-            continue;
-        if (f.has_side() && (f.side() != side))
-            continue;
-
-        layoutdata.MergeFrom(f);
-    }
-
-    return layoutdata;
-}
-
-std::vector<unsigned> Layout::getSectorsInTrack(
-    const LayoutProto::LayoutdataProto& trackdata, unsigned guessedSectors)
-{
-    auto& physical = trackdata.physical();
-
     std::vector<unsigned> sectors;
-    if (physical.has_count())
-    {
-        if (physical.sector_size() != 1)
-            Error() << "LAYOUT: if you use a sector count, you must specify "
-                       "exactly one start sector";
 
-        int startSector = physical.sector(0);
-        for (int i = 0; i < physical.count(); i++)
+    if (sectorsProto.has_count())
+    {
+        if (sectorsProto.sector_size() != 0)
+            Error() << "LAYOUT: if you use a sector count, you can't use an "
+                       "explicit sector list";
+
+        int startSector = sectorsProto.start_sector();
+        for (int i = 0; i < sectorsProto.count(); i++)
             sectors.push_back(startSector + i);
     }
-    else if (physical.guess_count())
+    else if (sectorsProto.sector_size() > 0)
     {
-        if (physical.sector_size() != 1)
-            Error() << "LAYOUT: if you are guessing the number of sectors, you "
-                       "must specify exactly one start sector";
-
-        int startSector = physical.sector(0);
-        for (int i = 0; i < guessedSectors; i++)
-            sectors.push_back(startSector + i);
-    }
-    else if (trackdata.sector_size() > 0)
-    {
-        for (int sectorId : physical.sector())
+        for (int sectorId : sectorsProto.sector())
             sectors.push_back(sectorId);
-    }
-
-    return sectors;
-}
-
-std::vector<unsigned> Layout::getLogicalSectorsInTrack(
-    const LayoutProto::LayoutdataProto& trackdata)
-{
-    auto& logical = trackdata.logical();
-
-    if (logical.sector_size() == 0)
-        return getSectorsInTrack(trackdata);
-
-    std::vector<unsigned> sectors;
-    if (logical.has_count())
-    {
-        if (logical.sector_size() != 1)
-            Error() << "LAYOUT: if you use a sector count, you must specify "
-                       "exactly one start sector";
-
-        int startSector = logical.sector(0);
-        for (int i = 0; i < logical.count(); i++)
-            sectors.push_back(startSector + i);
     }
     else
-    {
-        for (int sectorId : logical.sector())
-            sectors.push_back(sectorId);
-    }
+        Error() << "LAYOUT: no sectors in track!";
 
     return sectors;
 }
 
-std::map<unsigned, unsigned> Layout::getLogicalToPhysicalMap(
-    const LayoutProto::LayoutdataProto& trackdata)
+const Layout& Layout::getLayoutOfTrack(unsigned track, unsigned side)
 {
-    auto physical = getSectorsInTrack(trackdata);
-    auto logical = getSectorsInTrack(trackdata);
-    if (physical.size() != logical.size())
-        Error() << "LAYOUT: physical sector list and logical sector list have "
-                   "different sizes";
-	
-	std::map<unsigned, unsigned> map;
-	for (int i = 0; i < physical.size(); i++)
-		map[logical[i]] = physical[i];
-	return map;
+    auto& layout = (*layoutCache)[std::make_pair(track, side)];
+    if (!layout)
+    {
+        layout.reset(new Layout());
+
+        LayoutProto::LayoutdataProto layoutdata;
+        for (const auto& f : config.layout().layoutdata())
+        {
+            if (f.has_track() && f.has_up_to_track() &&
+                ((track < f.track()) || (track > f.up_to_track())))
+                continue;
+            if (f.has_track() && !f.has_up_to_track() && (track != f.track()))
+                continue;
+            if (f.has_side() && (f.side() != side))
+                continue;
+
+            layoutdata.MergeFrom(f);
+        }
+
+        layout->numTracks = config.layout().tracks();
+        layout->numSides = config.layout().sides();
+        layout->sectorSize = layoutdata.sector_size();
+        layout->diskSectorOrder = expandSectorList(layoutdata.physical());
+        layout->logicalSectorOrder = layout->diskSectorOrder;
+        std::sort(
+            layout->diskSectorOrder.begin(), layout->diskSectorOrder.end());
+        layout->numSectors = layout->logicalSectorOrder.size();
+
+        if (layoutdata.has_filesystem())
+        {
+            layout->filesystemSectorOrder =
+                expandSectorList(layoutdata.filesystem());
+            if (layout->filesystemSectorOrder.size() != layout->numSectors)
+                Error()
+                    << "filesystem sector order list doesn't contain the right "
+                       "number of sectors";
+        }
+        else
+        {
+            for (unsigned sectorId : layout->logicalSectorOrder)
+                layout->filesystemSectorOrder.push_back(sectorId);
+        }
+
+        for (int i = 0; i < layout->numSectors; i++)
+        {
+            unsigned f = layout->logicalSectorOrder[i];
+            unsigned l = layout->filesystemSectorOrder[i];
+            layout->filesystemToLogicalSectorMap[f] = l;
+            layout->logicalToFilesystemSectorMap[l] = f;
+        }
+    }
+
+    return *layout;
 }

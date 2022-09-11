@@ -14,7 +14,7 @@ image_writer {
 layout {
 	layoutdata {
 		physical {
-			sector: 0
+			start_sector: 0
 			count: 10
 		}
 	}

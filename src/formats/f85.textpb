@@ -15,19 +15,8 @@ layout {
 	layoutdata {
 		sector_size: 512
 		physical {
-			sector: 0
+			start_sector: 0
 			count: 12
 		}
 	}
 }
-
-tracks {
-	start: 0
-	end: 76
-}
-
-heads {
-	start: 0
-	end: 0
-}
-

@@ -16,7 +16,7 @@ layout {
 	layoutdata {
 		sector_size: 512
 		physical {
-			sector: 0
+			start_sector: 0
 		}
 	}
 	layoutdata {
@@ -63,14 +63,3 @@ encoder {
 decoder {
 	macintosh {}
 }
-
-tracks {
-	start: 0
-	end: 79
-}
-
-heads {
-	start: 0
-	end: 0
-}
-

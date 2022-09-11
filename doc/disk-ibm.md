@@ -40,9 +40,9 @@ Just do:
 
     fluxengine read `<format>`
 
-...and you'll end up with an `ibm.img` file. This should work on most PC disks
-(including FM 360kB disks, 3.5" 1440kB disks, 5.25" 1200kB disks, etc.) The size
-of the disk image will vary depending on the format.
+...and you'll end up with a `<format>.img` file. This should work on most PC
+disks (including FM 360kB disks, 3.5" 1440kB disks, 5.25" 1200kB disks, etc.)
+The size of the disk image will vary depending on the format.
 
 The common PC formats are `ibm720` and `ibm1440`, but there are _many_ others,
 and there's too many configuration options to usefully list. Use `fluxengine

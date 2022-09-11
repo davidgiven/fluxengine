@@ -4,7 +4,6 @@
 #include "imagereader/imagereader.h"
 #include "image.h"
 #include "logger.h"
-#include "mapper.h"
 #include "proto.h"
 #include "lib/config.pb.h"
 #include "fmt/format.h"
@@ -86,10 +85,6 @@ public:
 
                     const auto& sector = image->put(track, side, sectorId);
                     sector->status = Sector::OK;
-                    sector->logicalTrack = track;
-                    sector->physicalTrack = Mapper::remapTrackLogicalToPhysical(track);
-                    sector->logicalSide = sector->physicalHead = side;
-                    sector->logicalSector = sectorId;
                     sector->data = data;
                 }
             }
@@ -112,7 +107,6 @@ public:
                 case 0x00:
                     Logger() << "DIM: automatically setting format to 1.2MB "
                                 "(1024 byte sectors)";
-                    config.mutable_tracks()->set_end(76);
                     trackdata->set_target_rotational_period_ms(167);
                     layoutdata->set_sector_size(1024);
                     for (int i = 0; i < 9; i++)
@@ -153,20 +147,6 @@ public:
 
 		layout->set_tracks(geometry.numTracks);
 		layout->set_sides(geometry.numSides);
-
-        if (!config.has_heads())
-        {
-            auto* heads = config.mutable_heads();
-            heads->set_start(0);
-            heads->set_end(geometry.numSides - 1);
-        }
-
-        if (!config.has_tracks())
-        {
-            auto* tracks = config.mutable_tracks();
-            tracks->set_start(0);
-            tracks->set_end(geometry.numTracks - 1);
-        }
 
         return image;
     }

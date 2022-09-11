@@ -8,6 +8,7 @@ LIBFLUXENGINE_SRCS = \
 	lib/decoders/fluxmapreader.cc \
 	lib/decoders/fmmfm.cc \
 	lib/encoders/encoders.cc \
+	lib/environment.cc \
 	lib/flags.cc \
 	lib/fluxmap.cc \
 	lib/fluxsink/a2rfluxsink.cc \
@@ -54,7 +55,6 @@ LIBFLUXENGINE_SRCS = \
 	lib/layout.cc \
 	lib/ldbs.cc \
 	lib/logger.cc \
-	lib/mapper.cc \
 	lib/proto.cc \
 	lib/readerwriter.cc \
 	lib/sector.cc \
@@ -73,6 +73,7 @@ LIBFLUXENGINE_SRCS = \
 	lib/vfs/cpmfs.cc \
 	lib/vfs/fatfs.cc \
 	lib/vfs/machfs.cc \
+	lib/vfs/prodos.cc \
 	lib/vfs/vfs.cc \
 	lib/vfs/fluxsectorinterface.cc \
 	lib/vfs/imagesectorinterface.cc \

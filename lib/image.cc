@@ -1,7 +1,7 @@
-#include "globals.h"
-#include "sector.h"
-#include "image.h"
-#include "layout.h"
+#include "lib/globals.h"
+#include "lib/sector.h"
+#include "lib/image.h"
+#include "lib/layout.h"
 
 Image::Image() {}
 
@@ -29,9 +29,9 @@ void Image::createBlankImage()
     {
         unsigned track = trackAndHead.first;
         unsigned side = trackAndHead.second;
-        auto layout = Layout::getLayoutOfTrack(track, side);
-        Bytes blank(layout.sector_size());
-        for (unsigned sectorId : Layout::getSectorsInTrack(layout))
+        auto& trackLayout = Layout::getLayoutOfTrack(track, side);
+        Bytes blank(trackLayout.sectorSize);
+        for (unsigned sectorId : trackLayout.logicalSectorOrder)
             put(track, side, sectorId)->data = blank;
     }
 }
@@ -62,11 +62,14 @@ std::shared_ptr<const Sector> Image::get(
 std::shared_ptr<Sector> Image::put(
     unsigned track, unsigned side, unsigned sectorid)
 {
+    auto& trackLayout = Layout::getLayoutOfTrack(track, side);
     key_t key = std::make_tuple(track, side, sectorid);
     std::shared_ptr<Sector> sector = std::make_shared<Sector>();
     sector->logicalTrack = track;
     sector->logicalSide = side;
     sector->logicalSector = sectorid;
+    sector->physicalTrack = Layout::remapTrackLogicalToPhysical(track);
+    sector->physicalHead = side;
     _sectors[key] = sector;
     return sector;
 }

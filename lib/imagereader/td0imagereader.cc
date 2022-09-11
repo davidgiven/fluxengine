@@ -5,7 +5,6 @@
 #include "image.h"
 #include "crc.h"
 #include "logger.h"
-#include "mapper.h"
 #include "fmt/format.h"
 #include "lib/config.pb.h"
 #include "fmt/format.h"

@@ -5,7 +5,6 @@
 #include "image.h"
 #include "proto.h"
 #include "logger.h"
-#include "mapper.h"
 #include "lib/config.pb.h"
 #include "fmt/format.h"
 #include <algorithm>
@@ -57,7 +56,6 @@ public:
 
         auto ibm = config.mutable_encoder()->mutable_ibm();
 		auto layout = config.mutable_layout();
-        config.mutable_tracks()->set_end(0);
         Logger() << "NFD: HD 1.2MB mode";
         if (!config.drive().has_drive())
             config.mutable_drive()->set_high_density(true);
@@ -147,15 +145,9 @@ public:
                 inputFile.read((char*)data.begin(), data.size());
                 const auto& sector = image->put(track, head, sectorId);
                 sector->status = Sector::OK;
-                sector->logicalTrack = track;
-                sector->physicalTrack = Mapper::remapTrackLogicalToPhysical(track);
-                sector->logicalSide = sector->physicalHead = head;
-                sector->logicalSector = sectorId;
                 sector->data = data;
 
                 physical->add_sector(sectorId);
-                if (config.tracks().end() < track)
-                    config.mutable_tracks()->set_end(track);
             }
         }
 

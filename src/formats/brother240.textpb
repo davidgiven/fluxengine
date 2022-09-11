@@ -16,7 +16,7 @@ layout {
 	layoutdata {
 		sector_size: 256
 		physical {
-			sector: 0
+			start_sector: 0
 			count: 12
 		}
 	}
@@ -32,16 +32,6 @@ decoder {
 
 drive {
 	head_bias: 1
-}
-
-tracks {
-	start: 0
-	end: 77
-}
-
-heads {
-	start: 0
-	end: 0
 }
 
 filesystem {

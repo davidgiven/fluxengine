@@ -13,6 +13,7 @@
 #include "arch/tids990/tids990.h"
 #include "arch/victor9k/victor9k.h"
 #include "lib/encoders/encoders.pb.h"
+#include "lib/proto.h"
 #include "protocol.h"
 
 std::unique_ptr<AbstractEncoder> AbstractEncoder::create(
@@ -38,6 +39,19 @@ std::unique_ptr<AbstractEncoder> AbstractEncoder::create(
         Error() << "no encoder specified";
 
     return (encoder->second)(config);
+}
+
+nanoseconds_t AbstractEncoder::calculatePhysicalClockPeriod(
+    nanoseconds_t targetClockPeriod, nanoseconds_t targetRotationalPeriod)
+{
+    nanoseconds_t currentRotationalPeriod =
+        config.drive().rotational_period_ms() * 1e6;
+    if (currentRotationalPeriod == 0)
+        Error() << "you must set --drive.rotational_period_ms as it can't be "
+                   "autodetected";
+
+    return targetClockPeriod *
+           (currentRotationalPeriod / targetRotationalPeriod);
 }
 
 Fluxmap& Fluxmap::appendBits(const std::vector<bool>& bits, nanoseconds_t clock)

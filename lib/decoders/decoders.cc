@@ -26,6 +26,7 @@
 #include "sector.h"
 #include "image.h"
 #include "lib/decoders/decoders.pb.h"
+#include "lib/layout.h"
 #include "fmt/format.h"
 #include <numeric>
 
@@ -72,6 +73,8 @@ std::shared_ptr<const TrackDataFlux> AbstractDecoder::decodeToSectors(
 	auto newSector = [&] {
 		_sector = std::make_shared<Sector>();
 		_sector->status = Sector::MISSING;
+		_sector->logicalTrack = location.logicalTrack;
+		_sector->logicalSide = location.head;
 		_sector->physicalTrack = location.physicalTrack;
 		_sector->physicalHead = location.head;
 	};
@@ -132,7 +135,10 @@ std::shared_ptr<const TrackDataFlux> AbstractDecoder::decodeToSectors(
         }
 
         if (_sector->status != Sector::MISSING)
+        {
+        	auto& trackLayout = Layout::getLayoutOfTrack(_sector->logicalTrack, _sector->logicalSide);
 			_trackdata->sectors.push_back(_sector);
+        }
     }
 }
 

@@ -20,7 +20,7 @@ layout {
 	layoutdata {
 		sector_size: 256
 		physical {
-			sector: 1
+			start_sector: 1
 			count: 26
 		}
 	}
@@ -61,14 +61,4 @@ encoder {
 
 decoder {
 	ibm {}
-}
-
-tracks {
-	start: 0
-	end: 76
-}
-
-heads {
-	start: 0
-	end: 1
 }

@@ -1,0 +1,7 @@
+comment: 'Acorn ADFS M-format 320kB 3.5" or 5.25" 80-track SS'
+include: '_acornadfs8'
+
+layout {
+	tracks: 80
+	sides: 1
+}

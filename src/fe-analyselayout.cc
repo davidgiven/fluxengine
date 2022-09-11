@@ -187,9 +187,9 @@ static void readRow(const std::vector<std::string>& row, Image& image)
 		if (status == Sector::Status::MISSING)
 			return;
 
-		int logicalTrack = std::stoi(row[2]);
-		int logicalSide = std::stoi(row[3]);
-		int logicalSector = std::stoi(row[4]);
+		int logicalTrack = std::stoi(row[3]);
+		int logicalSide = std::stoi(row[4]);
+		int logicalSector = std::stoi(row[2]);
 
 		const auto& sector = image.put(logicalTrack, logicalSide, logicalSector);
 		sector->physicalTrack = std::stoi(row[0]);

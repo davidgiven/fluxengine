@@ -164,13 +164,12 @@ Filesystem::Filesystem(std::shared_ptr<SectorInterface> sectors):
         int track = p.first;
         int side = p.second;
 
-        auto layoutdata = Layout::getLayoutOfTrack(track, side);
-        auto sectors = Layout::getSectorsInTrack(layoutdata);
-        if (sectors.empty())
+        auto& trackLayout = Layout::getLayoutOfTrack(track, side);
+        if (trackLayout.numSectors == 0)
             Error() << "FS: filesystem support cannot be used without concrete "
                        "layout information";
 
-        for (int sectorId : sectors)
+        for (int sectorId : trackLayout.filesystemSectorOrder)
             _locations.push_back(std::make_tuple(track, side, sectorId));
     }
 }
@@ -200,6 +199,9 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystem(
 
         case FilesystemProto::kCbmfs:
             return Filesystem::createCbmfsFilesystem(config, image);
+
+        case FilesystemProto::kProdos:
+            return Filesystem::createProdosFilesystem(config, image);
 
         default:
             Error() << "no filesystem configured";
@@ -259,7 +261,9 @@ Bytes Filesystem::getSector(unsigned track, unsigned side, unsigned sector)
 Bytes Filesystem::getLogicalSector(uint32_t number, uint32_t count)
 {
     if ((number + count) > _locations.size())
-        throw BadFilesystemException();
+        throw BadFilesystemException(
+            fmt::format("invalid filesystem: sector {} is out of bounds",
+                number + count - 1));
 
     Bytes data;
     ByteWriter bw(data);
@@ -269,9 +273,9 @@ Bytes Filesystem::getLogicalSector(uint32_t number, uint32_t count)
         int track = std::get<0>(it);
         int side = std::get<1>(it);
         int sector = std::get<2>(it);
-        auto layoutdata = Layout::getLayoutOfTrack(track, side);
+        auto& trackLayout = Layout::getLayoutOfTrack(track, side);
         bw += _sectors->get(track, side, sector)
-                  ->data.slice(0, layoutdata.sector_size());
+                  ->data.slice(0, trackLayout.sectorSize);
     }
     return data;
 }
@@ -279,7 +283,8 @@ Bytes Filesystem::getLogicalSector(uint32_t number, uint32_t count)
 void Filesystem::putLogicalSector(uint32_t number, const Bytes& data)
 {
     if (number >= _locations.size())
-        throw BadFilesystemException();
+        throw BadFilesystemException(fmt::format(
+            "invalid filesystem: sector {} is out of bounds", number));
 
     unsigned pos = 0;
     while (pos < data.size())
@@ -288,7 +293,7 @@ void Filesystem::putLogicalSector(uint32_t number, const Bytes& data)
         int track = std::get<0>(it);
         int side = std::get<1>(it);
         int sector = std::get<2>(it);
-        int sectorSize = Layout::getLayoutOfTrack(track, side).sector_size();
+        int sectorSize = Layout::getLayoutOfTrack(track, side).sectorSize;
 
         _sectors->put(track, side, sector)->data = data.slice(pos, sectorSize);
         pos += sectorSize;
@@ -317,8 +322,7 @@ unsigned Filesystem::getLogicalSectorCount()
 
 unsigned Filesystem::getLogicalSectorSize(unsigned track, unsigned side)
 {
-    auto trackdata = Layout::getLayoutOfTrack(track, side);
-    return trackdata.sector_size();
+    return Layout::getLayoutOfTrack(track, side).sectorSize;
 }
 
 void Filesystem::eraseEverythingOnDisk()

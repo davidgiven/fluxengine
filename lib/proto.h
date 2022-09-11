@@ -13,6 +13,7 @@ extern void setProtoFieldFromString(ProtoField& protoField, const std::string& v
 extern void setProtoByString(google::protobuf::Message* message, const std::string& path, const std::string& value);
 
 extern std::set<unsigned> iterate(const RangeProto& range);
+extern std::set<unsigned> iterate(unsigned start, unsigned count);
 
 extern std::map<std::string, const google::protobuf::FieldDescriptor*>
 		findAllProtoFields(google::protobuf::Message* message);

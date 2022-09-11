@@ -65,6 +65,7 @@ class MainWindowGen : public wxFrame
 		wxComboBox* deviceCombo;
 		wxChoice* driveChoice;
 		wxCheckBox* highDensityToggle;
+		wxCheckBox* fortyTrackDriveToggle;
 		wxRadioButton* fluxImageRadioButton;
 		wxPanel* fluxImageRadioButtonPanel;
 		wxFilePickerCtrl* fluxImagePicker;

@@ -1,11 +1,17 @@
 FORMATS = \
+	_acornadfs8 \
+	_acornadfs32 \
 	_atari \
 	_micropolis \
 	_northstar \
 	_mx \
 	_commodore1541 \
 	40track_drive \
-	acornadfs \
+	acornadfs160 \
+	acornadfs320 \
+	acornadfs640 \
+	acornadfs800 \
+	acornadfs1600 \
 	acorndfs \
 	aeslanier \
 	agat840 \
@@ -35,13 +41,13 @@ FORMATS = \
 	fb100 \
 	hp9121 \
 	hplif770 \
+	ibm \
 	ibm1200 \
 	ibm1232 \
 	ibm1440 \
 	ibm180 \
 	ibm360 \
 	ibm720 \
-	ibm \
 	mac400 \
 	mac800 \
 	micropolis143 \

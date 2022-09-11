@@ -16,7 +16,7 @@ layout {
 	layoutdata {
 		sector_size: 256
 		physical {
-			sector: 0
+			start_sector: 0
 			count: 12
 		}
 	}
@@ -35,16 +35,6 @@ decoder {
 drive {
 	head_bias: 0
 	group_offset: 1
-}
-
-tracks {
-	start: 0
-	end: 38
-}
-
-heads {
-	start: 0
-	end: 0
 }
 
 tpi: 48

@@ -16,7 +16,7 @@ layout {
 	layoutdata {
 		sector_size: 512
 		physical {
-			sector: 0
+			start_sector: 0
 			count: 10
 		}
 	}
@@ -42,15 +42,5 @@ decoder {
 			swap_sides: false
 		}
 	}
-}
-
-tracks {
-	start: 0
-	end: 79
-}
-
-heads {
-	start: 0
-	end: 1
 }
 

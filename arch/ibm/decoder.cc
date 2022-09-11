@@ -206,9 +206,8 @@ public:
 
 	std::set<unsigned> requiredSectors(const Location& location) const override
 	{
-		auto layoutdata = Layout::getLayoutOfTrack(location.logicalTrack, location.head);
-		auto sectors = Layout::getSectorsInTrack(layoutdata);
-		return std::set<unsigned>(sectors.begin(), sectors.end());
+		auto& trackLayout = Layout::getLayoutOfTrack(location.logicalTrack, location.head);
+		return std::set<unsigned>(trackLayout.logicalSectorOrder.begin(), trackLayout.logicalSectorOrder.end());
 	}
 
 private:

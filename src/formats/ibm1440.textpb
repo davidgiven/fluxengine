@@ -16,7 +16,7 @@ layout {
 	layoutdata {
 		sector_size: 512
 		physical {
-			sector: 1
+			start_sector: 1
 			count: 18
 		}
 	}
@@ -33,16 +33,6 @@ encoder {
 
 decoder {
 	ibm {}
-}
-
-tracks {
-	start: 0
-	end: 79
-}
-
-heads {
-	start: 0
-	end: 1
 }
 
 filesystem {

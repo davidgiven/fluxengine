@@ -16,7 +16,7 @@ layout {
 	layoutdata {
 		sector_size: 512
 		physical {
-			sector: 0
+			start_sector: 0
 			count: 11
 		}
 	}
@@ -28,16 +28,6 @@ encoder {
 
 decoder {
 	amiga {}
-}
-
-tracks {
-	start: 0
-	end: 79
-}
-
-heads {
-	start: 0
-	end: 1
 }
 
 filesystem {
