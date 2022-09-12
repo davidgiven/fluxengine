@@ -4,9 +4,15 @@ FluxEngine
 (If you're reading this on GitHub, the formatting's a bit messed up. [Try the
 version on cowlark.com instead.](http://cowlark.com/fluxengine/))
 
-**Breaking news!** As of 2022-09-09, there's new filesystem support. Read (and
-sometimes write) files directly from (and to) your disks! It works in the GUI,
-too. See the details below.
+**Breaking news!** As of 2022-09-09, there's new [filesystem
+support](doc/filesystem.md). Read (and sometimes write) files directly from
+(and to) your disks, with eight different file systems! It works in the GUI,
+too, which is available for Linux (and other Unix clones), Windows and OSX. See
+the details below.
+
+<div style="text-align: center">
+<a href="screenshot.jpg"><img src="screenshot.jpg" style="width:80%" alt="screenshot of the GUI in action"></a>
+</div>
 
 What?
 -----

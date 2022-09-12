@@ -19,10 +19,11 @@ The following file systems are supported so far.
 | Amiga FFS                                |   Y   |   Y    | Both OFS and FFS |
 | Brother 120kB                            |   Y   |   Y    |       |
 | Commodore CbmFS                          |   Y   |        | Only 1541 disks so far |
-| CP/M                                     |   Y   |        | For selected formats |
-| FatFS (a.k.a. MS-DOS)                    |   Y   |   Y    | FAT12, FAT16, FAT32, but only SFN; not Atari |
+| CP/M                                     |   Y   |        | Requires configuration for each machine |
+| FatFS (a.k.a. MS-DOS)                    |   Y   |   Y    | FAT12, FAT16, FAT32; not Atari (AFAIK!) |
 | Macintosh HFS                            |   Y   |   Y    | Only AppleDouble files may be written |
 | Apple ProDOS                             |   Y   |        |       |
+{: .datatable }
 
 Please not that Atari disks do _not_ use standard FatFS, and the library I'm
 using for the heavy lifting (ChaN's
