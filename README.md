@@ -11,7 +11,7 @@ too, which is available for Linux (and other Unix clones), Windows and OSX. See
 the details below.
 
 <div style="text-align: center">
-<a href="screenshot.jpg"><img src="screenshot.jpg" style="width:80%" alt="screenshot of the GUI in action"></a>
+<a href="doc/screenshot.jpg"><img src="doc/screenshot.jpg" style="width:80%" alt="screenshot of the GUI in action"></a>
 </div>
 
 What?
