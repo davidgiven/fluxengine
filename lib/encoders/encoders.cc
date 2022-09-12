@@ -56,21 +56,28 @@ nanoseconds_t AbstractEncoder::calculatePhysicalClockPeriod(
            (currentRotationalPeriod / targetRotationalPeriod);
 }
 
+std::shared_ptr<const Sector> AbstractEncoder::getSector(
+    const Location& location, const Image& image, unsigned sectorId)
+{
+    return image.get(location.logicalTrack, location.head, sectorId);
+}
+
 std::vector<std::shared_ptr<const Sector>> AbstractEncoder::collectSectors(
     const Location& location, const Image& image)
 {
     std::vector<std::shared_ptr<const Sector>> sectors;
 
-    auto& trackLayout =
+    const auto& trackLayout =
         Layout::getLayoutOfTrack(location.logicalTrack, location.head);
-
-    int logicalSide = location.head ^ config.layout().swap_sides();
     for (unsigned sectorId : trackLayout.diskSectorOrder)
     {
-        const auto& sector =
-            image.get(location.logicalTrack, logicalSide, sectorId);
-        if (sector)
-            sectors.push_back(sector);
+        const auto& sector = getSector(location, image, sectorId);
+        if (!sector)
+            Error() << fmt::format("sector {}.{}.{} is missing from the image",
+                location.logicalTrack,
+                location.head,
+                sectorId);
+        sectors.push_back(sector);
     }
 
     return sectors;

@@ -16,6 +16,9 @@ public:
     static std::unique_ptr<AbstractEncoder> create(const EncoderProto& config);
 
 public:
+    virtual std::shared_ptr<const Sector> getSector(
+        const Location& location, const Image& image, unsigned sectorId);
+
     virtual std::vector<std::shared_ptr<const Sector>> collectSectors(
         const Location& location, const Image& image);
 
