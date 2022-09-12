@@ -17,7 +17,7 @@ The following file systems are supported so far.
 |:-----------------------------------------|:-----:|:------:|-------|
 | Acorn DFS                                |   Y   |        |       |
 | Amiga FFS                                |   Y   |   Y    | Both OFS and FFS |
-| Brother 120kB                            |   Y   |        |       |
+| Brother 120kB                            |   Y   |   Y    |       |
 | Commodore CbmFS                          |   Y   |        | Only 1541 disks so far |
 | CP/M                                     |   Y   |        | For selected formats |
 | FatFS (a.k.a. MS-DOS)                    |   Y   |   Y    | FAT12, FAT16, FAT32, but only SFN; not Atari |
