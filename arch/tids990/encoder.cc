@@ -24,11 +24,11 @@ static uint8_t decodeUint16(uint16_t raw)
     return decodeFmMfm(b.toBits())[0];
 }
 
-class Tids990Encoder : public AbstractEncoder
+class Tids990Encoder : public Encoder
 {
 public:
     Tids990Encoder(const EncoderProto& config):
-        AbstractEncoder(config),
+        Encoder(config),
         _config(config.tids990())
     {
     }
@@ -162,8 +162,8 @@ private:
     bool _lastBit;
 };
 
-std::unique_ptr<AbstractEncoder> createTids990Encoder(
+std::unique_ptr<Encoder> createTids990Encoder(
     const EncoderProto& config)
 {
-    return std::unique_ptr<AbstractEncoder>(new Tids990Encoder(config));
+    return std::unique_ptr<Encoder>(new Tids990Encoder(config));
 }

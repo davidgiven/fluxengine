@@ -75,12 +75,12 @@ int mainWrite(int argc, const char* argv[])
 	std::unique_ptr<ImageReader> reader(ImageReader::create(config.image_reader()));
 	std::shared_ptr<Image> image = reader->readMappedImage();
 
-	std::unique_ptr<AbstractEncoder> encoder(AbstractEncoder::create(config.encoder()));
+	std::unique_ptr<Encoder> encoder(Encoder::create(config.encoder()));
 	std::unique_ptr<FluxSink> fluxSink(FluxSink::create(config.flux_sink()));
 
-	std::unique_ptr<AbstractDecoder> decoder;
+	std::unique_ptr<Decoder> decoder;
 	if (config.has_decoder() && verify)
-		decoder = AbstractDecoder::create(config.decoder());
+		decoder = Decoder::create(config.decoder());
 
 	std::unique_ptr<FluxSource> fluxSource;
 	if (verify && config.has_flux_source() && config.flux_source().has_drive())

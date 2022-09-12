@@ -89,11 +89,11 @@ const FluxMatchers ANY_RECORD_PATTERN({
     &FM_TRS80DAM2_PATTERN,
 });
 
-class IbmDecoder : public AbstractDecoder
+class IbmDecoder : public Decoder
 {
 public:
     IbmDecoder(const DecoderProto& config):
-        AbstractDecoder(config),
+        Decoder(config),
         _config(config.ibm())
     {
     }
@@ -238,7 +238,7 @@ private:
     unsigned _currentHeaderLength;
 };
 
-std::unique_ptr<AbstractDecoder> createIbmDecoder(const DecoderProto& config)
+std::unique_ptr<Decoder> createIbmDecoder(const DecoderProto& config)
 {
-    return std::unique_ptr<AbstractDecoder>(new IbmDecoder(config));
+    return std::unique_ptr<Decoder>(new IbmDecoder(config));
 }

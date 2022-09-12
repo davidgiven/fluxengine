@@ -155,7 +155,7 @@ static std::set<std::shared_ptr<const Sector>> collectSectors(
 }
 
 BadSectorsState combineRecordAndSectors(
-    TrackFlux& trackFlux, AbstractDecoder& decoder, const Location& location)
+    TrackFlux& trackFlux, Decoder& decoder, const Location& location)
 {
     std::set<std::shared_ptr<const Sector>> track_sectors;
 
@@ -184,7 +184,7 @@ BadSectorsState combineRecordAndSectors(
 ReadResult readGroup(FluxSourceIteratorHolder& fluxSourceIteratorHolder,
     const Location& location,
     TrackFlux& trackFlux,
-    AbstractDecoder& decoder)
+    Decoder& decoder)
 {
     ReadResult result = BAD_AND_CAN_NOT_RETRY;
 
@@ -290,7 +290,7 @@ void writeTracks(FluxSink& fluxSink,
 }
 
 void writeTracks(FluxSink& fluxSink,
-    AbstractEncoder& encoder,
+    Encoder& encoder,
     const Image& image,
     const std::set<Location>& locations)
 {
@@ -306,9 +306,9 @@ void writeTracks(FluxSink& fluxSink,
 }
 
 void writeTracksAndVerify(FluxSink& fluxSink,
-    AbstractEncoder& encoder,
+    Encoder& encoder,
     FluxSource& fluxSource,
-    AbstractDecoder& decoder,
+    Decoder& decoder,
     const Image& image,
     const std::set<Location>& locations)
 {
@@ -372,9 +372,9 @@ void writeTracksAndVerify(FluxSink& fluxSink,
 }
 
 void writeDiskCommand(const Image& image,
-    AbstractEncoder& encoder,
+    Encoder& encoder,
     FluxSink& fluxSink,
-    AbstractDecoder* decoder,
+    Decoder* decoder,
     FluxSource* fluxSource,
     const std::set<Location>& locations)
 {
@@ -386,9 +386,9 @@ void writeDiskCommand(const Image& image,
 }
 
 void writeDiskCommand(const Image& image,
-    AbstractEncoder& encoder,
+    Encoder& encoder,
     FluxSink& fluxSink,
-    AbstractDecoder* decoder,
+    Decoder* decoder,
     FluxSource* fluxSource)
 {
     auto locations = Layout::computeLocations();
@@ -409,7 +409,7 @@ void writeRawDiskCommand(FluxSource& fluxSource, FluxSink& fluxSink)
 }
 
 std::shared_ptr<TrackFlux> readAndDecodeTrack(
-    FluxSource& fluxSource, AbstractDecoder& decoder, const Location& location)
+    FluxSource& fluxSource, Decoder& decoder, const Location& location)
 {
     auto trackFlux = std::make_shared<TrackFlux>();
     trackFlux->location = location;
@@ -443,7 +443,7 @@ std::shared_ptr<TrackFlux> readAndDecodeTrack(
 }
 
 std::shared_ptr<const DiskFlux> readDiskCommand(
-    FluxSource& fluxSource, AbstractDecoder& decoder)
+    FluxSource& fluxSource, Decoder& decoder)
 {
     std::unique_ptr<FluxSink> outputFluxSink;
     if (config.decoder().has_copy_flux_to())
@@ -546,7 +546,7 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
 }
 
 void readDiskCommand(
-    FluxSource& fluxsource, AbstractDecoder& decoder, ImageWriter& writer)
+    FluxSource& fluxsource, Decoder& decoder, ImageWriter& writer)
 {
     auto diskflux = readDiskCommand(fluxsource, decoder);
 

@@ -18,11 +18,11 @@
 #include "lib/image.h"
 #include "protocol.h"
 
-std::unique_ptr<AbstractEncoder> AbstractEncoder::create(
+std::unique_ptr<Encoder> Encoder::create(
     const EncoderProto& config)
 {
     static const std::map<int,
-        std::function<std::unique_ptr<AbstractEncoder>(const EncoderProto&)>>
+        std::function<std::unique_ptr<Encoder>(const EncoderProto&)>>
         encoders = {
             {EncoderProto::kAmiga,      createAmigaEncoder      },
             {EncoderProto::kApple2,     createApple2Encoder     },
@@ -43,7 +43,7 @@ std::unique_ptr<AbstractEncoder> AbstractEncoder::create(
     return (encoder->second)(config);
 }
 
-nanoseconds_t AbstractEncoder::calculatePhysicalClockPeriod(
+nanoseconds_t Encoder::calculatePhysicalClockPeriod(
     nanoseconds_t targetClockPeriod, nanoseconds_t targetRotationalPeriod)
 {
     nanoseconds_t currentRotationalPeriod =
@@ -56,13 +56,13 @@ nanoseconds_t AbstractEncoder::calculatePhysicalClockPeriod(
            (currentRotationalPeriod / targetRotationalPeriod);
 }
 
-std::shared_ptr<const Sector> AbstractEncoder::getSector(
+std::shared_ptr<const Sector> Encoder::getSector(
     const Location& location, const Image& image, unsigned sectorId)
 {
     return image.get(location.logicalTrack, location.head, sectorId);
 }
 
-std::vector<std::shared_ptr<const Sector>> AbstractEncoder::collectSectors(
+std::vector<std::shared_ptr<const Sector>> Encoder::collectSectors(
     const Location& location, const Image& image)
 {
     std::vector<std::shared_ptr<const Sector>> sectors;

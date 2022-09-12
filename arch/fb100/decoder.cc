@@ -97,11 +97,11 @@ static uint16_t checksum(const Bytes& bytes)
     return (crchi << 8) | crclo;
 }
 
-class Fb100Decoder : public AbstractDecoder
+class Fb100Decoder : public Decoder
 {
 public:
 	Fb100Decoder(const DecoderProto& config):
-		AbstractDecoder(config)
+		Decoder(config)
 	{}
 
     nanoseconds_t advanceToNextRecord() override
@@ -136,9 +136,9 @@ public:
 	}
 };
 
-std::unique_ptr<AbstractDecoder> createFb100Decoder(const DecoderProto& config)
+std::unique_ptr<Decoder> createFb100Decoder(const DecoderProto& config)
 {
-	return std::unique_ptr<AbstractDecoder>(new Fb100Decoder(config));
+	return std::unique_ptr<Decoder>(new Fb100Decoder(config));
 }
 
 

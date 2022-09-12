@@ -67,11 +67,11 @@ uint8_t northstarChecksum(const Bytes& bytes) {
 	return checksum;
 }
 
-class NorthstarDecoder : public AbstractDecoder
+class NorthstarDecoder : public Decoder
 {
 public:
 	NorthstarDecoder(const DecoderProto& config):
-		AbstractDecoder(config),
+		Decoder(config),
 		_config(config.northstar())
 	{}
 
@@ -175,8 +175,8 @@ private:
 	uint8_t _hardSectorId;
 };
 
-std::unique_ptr<AbstractDecoder> createNorthstarDecoder(const DecoderProto& config)
+std::unique_ptr<Decoder> createNorthstarDecoder(const DecoderProto& config)
 {
-	return std::unique_ptr<AbstractDecoder>(new NorthstarDecoder(config));
+	return std::unique_ptr<Decoder>(new NorthstarDecoder(config));
 }
 

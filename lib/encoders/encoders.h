@@ -7,13 +7,13 @@ class Image;
 class Location;
 class Sector;
 
-class AbstractEncoder
+class Encoder
 {
 public:
-    AbstractEncoder(const EncoderProto& config) {}
-    virtual ~AbstractEncoder() {}
+    Encoder(const EncoderProto& config) {}
+    virtual ~Encoder() {}
 
-    static std::unique_ptr<AbstractEncoder> create(const EncoderProto& config);
+    static std::unique_ptr<Encoder> create(const EncoderProto& config);
 
 public:
     virtual std::shared_ptr<const Sector> getSector(

@@ -54,11 +54,11 @@ uint8_t mzosChecksum(const Bytes& bytes) {
 	return checksum;
 }
 
-class MicropolisDecoder : public AbstractDecoder
+class MicropolisDecoder : public Decoder
 {
 public:
 	MicropolisDecoder(const DecoderProto& config):
-		AbstractDecoder(config),
+		Decoder(config),
 		_config(config.micropolis())
 	{
 		_checksumType = _config.checksum_type();
@@ -184,8 +184,8 @@ private:
 	MicropolisDecoderProto_ChecksumType _checksumType;	/* -1 = auto, 1 = Micropolis, 2=MZOS */
 };
 
-std::unique_ptr<AbstractDecoder> createMicropolisDecoder(const DecoderProto& config)
+std::unique_ptr<Decoder> createMicropolisDecoder(const DecoderProto& config)
 {
-	return std::unique_ptr<AbstractDecoder>(new MicropolisDecoder(config));
+	return std::unique_ptr<Decoder>(new MicropolisDecoder(config));
 }
 

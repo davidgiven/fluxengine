@@ -209,11 +209,11 @@ static void write_sector(std::vector<bool>& bits,
     write_bits(bits, cursor, 0xdeaaff, 3 * 8);
 }
 
-class MacintoshEncoder : public AbstractEncoder
+class MacintoshEncoder : public Encoder
 {
 public:
     MacintoshEncoder(const EncoderProto& config):
-        AbstractEncoder(config),
+        Encoder(config),
         _config(config.macintosh())
     {
     }
@@ -273,8 +273,8 @@ private:
     const MacintoshEncoderProto& _config;
 };
 
-std::unique_ptr<AbstractEncoder> createMacintoshEncoder(
+std::unique_ptr<Encoder> createMacintoshEncoder(
     const EncoderProto& config)
 {
-    return std::unique_ptr<AbstractEncoder>(new MacintoshEncoder(config));
+    return std::unique_ptr<Encoder>(new MacintoshEncoder(config));
 }

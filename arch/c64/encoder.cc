@@ -162,11 +162,11 @@ static std::vector<bool> encode_data(uint8_t input)
     return output;
 }
 
-class Commodore64Encoder : public AbstractEncoder
+class Commodore64Encoder : public Encoder
 {
 public:
 	Commodore64Encoder(const EncoderProto& config):
-        AbstractEncoder(config),
+        Encoder(config),
 		_config(config.c64())
 	{}
 
@@ -327,9 +327,9 @@ private:
 	uint8_t _formatByte2;
 };
 
-std::unique_ptr<AbstractEncoder> createCommodore64Encoder(const EncoderProto& config)
+std::unique_ptr<Encoder> createCommodore64Encoder(const EncoderProto& config)
 {
-	return std::unique_ptr<AbstractEncoder>(new Commodore64Encoder(config));
+	return std::unique_ptr<Encoder>(new Commodore64Encoder(config));
 }
 
 // vim: sw=4 ts=4 et

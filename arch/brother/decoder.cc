@@ -52,11 +52,11 @@ static int decode_header_gcr(uint16_t word)
 	return -1;             
 }
 
-class BrotherDecoder : public AbstractDecoder
+class BrotherDecoder : public Decoder
 {
 public:
     BrotherDecoder(const DecoderProto& config):
-		AbstractDecoder(config)
+		Decoder(config)
 	{}
 
     nanoseconds_t advanceToNextRecord() override
@@ -111,9 +111,9 @@ public:
 	}
 };
 
-std::unique_ptr<AbstractDecoder> createBrotherDecoder(const DecoderProto& config)
+std::unique_ptr<Decoder> createBrotherDecoder(const DecoderProto& config)
 {
-	return std::unique_ptr<AbstractDecoder>(new BrotherDecoder(config));
+	return std::unique_ptr<Decoder>(new BrotherDecoder(config));
 }
 
 

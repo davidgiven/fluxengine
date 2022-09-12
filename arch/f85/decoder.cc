@@ -51,11 +51,11 @@ static Bytes decode(const std::vector<bool>& bits)
     return output;
 }
 
-class DurangoF85Decoder : public AbstractDecoder
+class DurangoF85Decoder : public Decoder
 {
 public:
 	DurangoF85Decoder(const DecoderProto& config):
-		AbstractDecoder(config)
+		Decoder(config)
 	{}
 
     nanoseconds_t advanceToNextRecord() override
@@ -102,8 +102,8 @@ public:
 	}
 };
 
-std::unique_ptr<AbstractDecoder> createDurangoF85Decoder(const DecoderProto& config)
+std::unique_ptr<Decoder> createDurangoF85Decoder(const DecoderProto& config)
 {
-	return std::unique_ptr<AbstractDecoder>(new DurangoF85Decoder(config));
+	return std::unique_ptr<Decoder>(new DurangoF85Decoder(config));
 }
 

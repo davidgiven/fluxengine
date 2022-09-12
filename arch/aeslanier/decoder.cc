@@ -23,11 +23,11 @@ static Bytes reverse_bits(const Bytes& input)
     return output;
 }
 
-class AesLanierDecoder : public AbstractDecoder
+class AesLanierDecoder : public Decoder
 {
 public:
 	AesLanierDecoder(const DecoderProto& config):
-		AbstractDecoder(config)
+		Decoder(config)
 	{}
 
     nanoseconds_t advanceToNextRecord() override
@@ -68,9 +68,9 @@ public:
 	}
 };
 
-std::unique_ptr<AbstractDecoder> createAesLanierDecoder(const DecoderProto& config)
+std::unique_ptr<Decoder> createAesLanierDecoder(const DecoderProto& config)
 {
-	return std::unique_ptr<AbstractDecoder>(new AesLanierDecoder(config));
+	return std::unique_ptr<Decoder>(new AesLanierDecoder(config));
 }
 
 

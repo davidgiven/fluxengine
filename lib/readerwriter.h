@@ -1,8 +1,8 @@
 #ifndef WRITER_H
 #define WRITER_H
 
-class AbstractDecoder;
-class AbstractEncoder;
+class Decoder;
+class Encoder;
 class DiskFlux;
 class FluxSink;
 class FluxSource;
@@ -23,9 +23,9 @@ extern void writeTracks(FluxSink& fluxSink,
     const std::set<Location>& locations);
 
 extern void writeTracksAndVerify(FluxSink& fluxSink,
-    AbstractEncoder& encoder,
+    Encoder& encoder,
     FluxSource& fluxSource,
-    AbstractDecoder& decoder,
+    Decoder& decoder,
     const Image& image,
     const std::set<Location>& locations);
 
@@ -35,27 +35,27 @@ extern void fillBitmapTo(std::vector<bool>& bitmap,
     const std::vector<bool>& pattern);
 
 extern void writeDiskCommand(const Image& image,
-    AbstractEncoder& encoder,
+    Encoder& encoder,
     FluxSink& fluxSink,
-    AbstractDecoder* decoder,
+    Decoder* decoder,
     FluxSource* fluxSource,
     const std::set<Location>& locations);
 
 extern void writeDiskCommand(const Image& image,
-    AbstractEncoder& encoder,
+    Encoder& encoder,
     FluxSink& fluxSink,
-    AbstractDecoder* decoder = nullptr,
+    Decoder* decoder = nullptr,
     FluxSource* fluxSource = nullptr);
 
 extern void writeRawDiskCommand(FluxSource& fluxSource, FluxSink& fluxSink);
 
 extern std::shared_ptr<TrackFlux> readAndDecodeTrack(
-    FluxSource& fluxSource, AbstractDecoder& decoder, const Location& location);
+    FluxSource& fluxSource, Decoder& decoder, const Location& location);
 
 extern std::shared_ptr<const DiskFlux> readDiskCommand(
-    FluxSource& fluxsource, AbstractDecoder& decoder);
+    FluxSource& fluxsource, Decoder& decoder);
 extern void readDiskCommand(
-    FluxSource& source, AbstractDecoder& decoder, ImageWriter& writer);
+    FluxSource& source, Decoder& decoder, ImageWriter& writer);
 extern void rawReadDiskCommand(FluxSource& source, FluxSink& sink);
 
 #endif

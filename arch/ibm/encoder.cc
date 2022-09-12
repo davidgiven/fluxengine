@@ -67,11 +67,11 @@ static uint8_t decodeUint16(uint16_t raw)
     return decodeFmMfm(b.toBits())[0];
 }
 
-class IbmEncoder : public AbstractEncoder
+class IbmEncoder : public Encoder
 {
 public:
     IbmEncoder(const EncoderProto& config):
-        AbstractEncoder(config),
+        Encoder(config),
         _config(config.ibm())
     {
     }
@@ -118,7 +118,7 @@ public:
             Location newLocation = location;
             newLocation.head ^= 1;
             auto sector = std::make_shared<Sector>(
-                *AbstractEncoder::getSector(newLocation, image, sectorId));
+                *Encoder::getSector(newLocation, image, sectorId));
             sector->logicalSide ^= 1;
             return sector;
         }
@@ -293,7 +293,7 @@ private:
     bool _lastBit;
 };
 
-std::unique_ptr<AbstractEncoder> createIbmEncoder(const EncoderProto& config)
+std::unique_ptr<Encoder> createIbmEncoder(const EncoderProto& config)
 {
-    return std::unique_ptr<AbstractEncoder>(new IbmEncoder(config));
+    return std::unique_ptr<Encoder>(new IbmEncoder(config));
 }

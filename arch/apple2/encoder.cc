@@ -23,11 +23,11 @@ static int encode_data_gcr(uint8_t data)
     return -1;
 }
 
-class Apple2Encoder : public AbstractEncoder
+class Apple2Encoder : public Encoder
 {
 public:
     Apple2Encoder(const EncoderProto& config):
-        AbstractEncoder(config),
+        Encoder(config),
         _config(config.apple2())
     {
     }
@@ -203,7 +203,7 @@ private:
     }
 };
 
-std::unique_ptr<AbstractEncoder> createApple2Encoder(const EncoderProto& config)
+std::unique_ptr<Encoder> createApple2Encoder(const EncoderProto& config)
 {
-    return std::unique_ptr<AbstractEncoder>(new Apple2Encoder(config));
+    return std::unique_ptr<Encoder>(new Apple2Encoder(config));
 }

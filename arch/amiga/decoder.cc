@@ -21,11 +21,11 @@
          
 static const FluxPattern SECTOR_PATTERN(48, AMIGA_SECTOR_RECORD);
 
-class AmigaDecoder : public AbstractDecoder
+class AmigaDecoder : public Decoder
 {
 public:
 	AmigaDecoder(const DecoderProto& config):
-		AbstractDecoder(config),
+		Decoder(config),
 		_config(config.amiga())
 	{}
 
@@ -79,8 +79,8 @@ private:
 	nanoseconds_t _clock;
 };
 
-std::unique_ptr<AbstractDecoder> createAmigaDecoder(const DecoderProto& config)
+std::unique_ptr<Decoder> createAmigaDecoder(const DecoderProto& config)
 {
-	return std::unique_ptr<AbstractDecoder>(new AmigaDecoder(config));
+	return std::unique_ptr<Decoder>(new AmigaDecoder(config));
 }
 

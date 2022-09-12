@@ -30,10 +30,10 @@
 #include "fmt/format.h"
 #include <numeric>
 
-std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& config)
+std::unique_ptr<Decoder> Decoder::create(const DecoderProto& config)
 {
 	static const std::map<int,
-		std::function<std::unique_ptr<AbstractDecoder>(const DecoderProto&)>> decoders =
+		std::function<std::unique_ptr<Decoder>(const DecoderProto&)>> decoders =
 	{
 		{ DecoderProto::kAgat,       createAgatDecoder },
 		{ DecoderProto::kAeslanier,  createAesLanierDecoder },
@@ -60,7 +60,7 @@ std::unique_ptr<AbstractDecoder> AbstractDecoder::create(const DecoderProto& con
 	return (decoder->second)(config);
 }
 
-std::shared_ptr<const TrackDataFlux> AbstractDecoder::decodeToSectors(
+std::shared_ptr<const TrackDataFlux> Decoder::decodeToSectors(
 		std::shared_ptr<const Fluxmap> fluxmap, const Location& location)
 {
 	_trackdata = std::make_shared<TrackDataFlux>();
@@ -142,7 +142,7 @@ std::shared_ptr<const TrackDataFlux> AbstractDecoder::decodeToSectors(
     }
 }
 
-void AbstractDecoder::pushRecord(const Fluxmap::Position& start, const Fluxmap::Position& end)
+void Decoder::pushRecord(const Fluxmap::Position& start, const Fluxmap::Position& end)
 {
     Fluxmap::Position here = _fmr->tell();
 
@@ -158,42 +158,42 @@ void AbstractDecoder::pushRecord(const Fluxmap::Position& start, const Fluxmap::
 	_recordBits.clear();
 }
 
-void AbstractDecoder::resetFluxDecoder()
+void Decoder::resetFluxDecoder()
 {
 	_decoder.reset(new FluxDecoder(_fmr, _sector->clock, _config));
 }
 
-nanoseconds_t AbstractDecoder::seekToPattern(const FluxMatcher& pattern)
+nanoseconds_t Decoder::seekToPattern(const FluxMatcher& pattern)
 {
 	nanoseconds_t clock = _fmr->seekToPattern(pattern);
 	_decoder.reset(new FluxDecoder(_fmr, clock, _config));
 	return clock;
 }
 
-void AbstractDecoder::seekToIndexMark()
+void Decoder::seekToIndexMark()
 {
 	_fmr->skipToEvent(F_BIT_PULSE);
 	_fmr->seekToIndexMark();
 }
 
-std::vector<bool> AbstractDecoder::readRawBits(unsigned count)
+std::vector<bool> Decoder::readRawBits(unsigned count)
 {
 	auto bits = _decoder->readBits(count);
 	_recordBits.insert(_recordBits.end(), bits.begin(), bits.end());
 	return bits;
 }
 
-uint8_t AbstractDecoder::readRaw8()
+uint8_t Decoder::readRaw8()
 {
 	return toBytes(readRawBits(8)).reader().read_8();
 }
 
-uint16_t AbstractDecoder::readRaw16()
+uint16_t Decoder::readRaw16()
 {
 	return toBytes(readRawBits(16)).reader().read_be16();
 }
 
-uint32_t AbstractDecoder::readRaw20()
+uint32_t Decoder::readRaw20()
 {
 	std::vector<bool> bits(4);
 	for (bool b : readRawBits(20))
@@ -202,28 +202,28 @@ uint32_t AbstractDecoder::readRaw20()
 	return toBytes(bits).reader().read_be24();
 }
 
-uint32_t AbstractDecoder::readRaw24()
+uint32_t Decoder::readRaw24()
 {
 	return toBytes(readRawBits(24)).reader().read_be24();
 }
 
-uint32_t AbstractDecoder::readRaw32()
+uint32_t Decoder::readRaw32()
 {
 	return toBytes(readRawBits(32)).reader().read_be32();
 }
 
-uint64_t AbstractDecoder::readRaw48()
+uint64_t Decoder::readRaw48()
 {
 	return toBytes(readRawBits(48)).reader().read_be48();
 }
 
-uint64_t AbstractDecoder::readRaw64()
+uint64_t Decoder::readRaw64()
 {
 	return toBytes(readRawBits(64)).reader().read_be64();
 }
 
 
-std::set<unsigned> AbstractDecoder::requiredSectors(const Location& location) const
+std::set<unsigned> Decoder::requiredSectors(const Location& location) const
 {
 	static std::set<unsigned> set;
 	return set;

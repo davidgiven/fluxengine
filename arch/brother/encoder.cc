@@ -104,11 +104,11 @@ static int charToInt(char c)
     return 10 + tolower(c) - 'a';
 }
 
-class BrotherEncoder : public AbstractEncoder
+class BrotherEncoder : public Encoder
 {
 public:
     BrotherEncoder(const EncoderProto& config):
-        AbstractEncoder(config),
+        Encoder(config),
         _config(config.brother())
     {
     }
@@ -189,8 +189,8 @@ private:
     const BrotherEncoderProto& _config;
 };
 
-std::unique_ptr<AbstractEncoder> createBrotherEncoder(
+std::unique_ptr<Encoder> createBrotherEncoder(
     const EncoderProto& config)
 {
-    return std::unique_ptr<AbstractEncoder>(new BrotherEncoder(config));
+    return std::unique_ptr<Encoder>(new BrotherEncoder(config));
 }

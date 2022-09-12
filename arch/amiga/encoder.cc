@@ -100,11 +100,11 @@ static void write_sector(std::vector<bool>& bits,
     write_interleaved_bytes(data);
 }
 
-class AmigaEncoder : public AbstractEncoder
+class AmigaEncoder : public Encoder
 {
 public:
     AmigaEncoder(const EncoderProto& config):
-        AbstractEncoder(config),
+        Encoder(config),
         _config(config.amiga())
     {
     }
@@ -164,7 +164,7 @@ private:
     const AmigaEncoderProto& _config;
 };
 
-std::unique_ptr<AbstractEncoder> createAmigaEncoder(const EncoderProto& config)
+std::unique_ptr<Encoder> createAmigaEncoder(const EncoderProto& config)
 {
-    return std::unique_ptr<AbstractEncoder>(new AmigaEncoder(config));
+    return std::unique_ptr<Encoder>(new AmigaEncoder(config));
 }

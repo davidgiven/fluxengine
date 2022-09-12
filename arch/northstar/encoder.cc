@@ -119,11 +119,11 @@ static void write_sector(std::vector<bool>& bits,
     }
 }
 
-class NorthstarEncoder : public AbstractEncoder
+class NorthstarEncoder : public Encoder
 {
 public:
     NorthstarEncoder(const EncoderProto& config):
-        AbstractEncoder(config),
+        Encoder(config),
         _config(config.northstar())
     {
     }
@@ -180,8 +180,8 @@ private:
     const NorthstarEncoderProto& _config;
 };
 
-std::unique_ptr<AbstractEncoder> createNorthstarEncoder(
+std::unique_ptr<Encoder> createNorthstarEncoder(
     const EncoderProto& config)
 {
-    return std::unique_ptr<AbstractEncoder>(new NorthstarEncoder(config));
+    return std::unique_ptr<Encoder>(new NorthstarEncoder(config));
 }

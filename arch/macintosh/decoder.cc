@@ -122,11 +122,11 @@ uint8_t decode_side(uint8_t side)
     return !!(side & 0x20);
 }
 
-class MacintoshDecoder : public AbstractDecoder
+class MacintoshDecoder : public Decoder
 {
 public:
 	MacintoshDecoder(const DecoderProto& config):
-		AbstractDecoder(config)
+		Decoder(config)
 	{}
 
     nanoseconds_t advanceToNextRecord() override
@@ -206,8 +206,8 @@ public:
 	}
 };
 
-std::unique_ptr<AbstractDecoder> createMacintoshDecoder(const DecoderProto& config)
+std::unique_ptr<Decoder> createMacintoshDecoder(const DecoderProto& config)
 {
-	return std::unique_ptr<AbstractDecoder>(new MacintoshDecoder(config));
+	return std::unique_ptr<Decoder>(new MacintoshDecoder(config));
 }
 

@@ -68,11 +68,11 @@ static void write_sector(std::vector<bool>& bits,
     }
 }
 
-class MicropolisEncoder : public AbstractEncoder
+class MicropolisEncoder : public Encoder
 {
 public:
     MicropolisEncoder(const EncoderProto& config):
-        AbstractEncoder(config),
+        Encoder(config),
         _config(config.micropolis())
     {
     }
@@ -124,8 +124,8 @@ private:
     const MicropolisEncoderProto& _config;
 };
 
-std::unique_ptr<AbstractEncoder> createMicropolisEncoder(
+std::unique_ptr<Encoder> createMicropolisEncoder(
     const EncoderProto& config)
 {
-    return std::unique_ptr<AbstractEncoder>(new MicropolisEncoder(config));
+    return std::unique_ptr<Encoder>(new MicropolisEncoder(config));
 }

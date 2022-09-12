@@ -6,8 +6,8 @@ class ImageWriter;
 class Sector;
 class FluxSource;
 class FluxSink;
-class AbstractDecoder;
-class AbstractEncoder;
+class Decoder;
+class Encoder;
 
 class SectorInterface
 {
@@ -38,8 +38,8 @@ public:
     static std::unique_ptr<SectorInterface> createFluxSectorInterface(
         std::shared_ptr<FluxSource> fluxSource,
         std::shared_ptr<FluxSink> fluxSink,
-        std::shared_ptr<AbstractEncoder> encoder,
-        std::shared_ptr<AbstractDecoder> decoder);
+        std::shared_ptr<Encoder> encoder,
+        std::shared_ptr<Decoder> decoder);
 };
 
 #endif
