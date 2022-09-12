@@ -120,9 +120,10 @@ std::vector<unsigned> Layout::expandSectorList(
             Error() << "LAYOUT: if you use a sector count, you can't use an "
                        "explicit sector list";
 
-        int startSector = sectorsProto.start_sector();
         for (int i = 0; i < sectorsProto.count(); i++)
-            sectors.push_back(startSector + i);
+            sectors.push_back(
+                sectorsProto.start_sector() +
+                ((i * sectorsProto.skew()) % sectorsProto.count()));
     }
     else if (sectorsProto.sector_size() > 0)
     {

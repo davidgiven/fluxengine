@@ -32,12 +32,22 @@ layout {
 		physical {
 			count: 18
 		}
+		filesystem {
+			start_sector: 0
+			count: 18
+			skew: 4
+		}
 	}
 	layoutdata {
 		track: 16
 		up_to_track: 26
 		physical {
 			count: 17
+		}
+		filesystem {
+			start_sector: 0
+			count: 17
+			skew: 4
 		}
 	}
 	layoutdata {
@@ -46,12 +56,22 @@ layout {
 		physical {
 			count: 16
 		}
+		filesystem {
+			start_sector: 0
+			count: 16
+			skew: 4
+		}
 	}
 	layoutdata {
 		track: 38
 		up_to_track: 47
 		physical {
 			count: 15
+		}
+		filesystem {
+			start_sector: 0
+			count: 15
+			skew: 4
 		}
 	}
 	layoutdata {
@@ -60,6 +80,11 @@ layout {
 		physical {
 			count: 14
 		}
+		filesystem {
+			start_sector: 0
+			count: 14
+			skew: 4
+		}
 	}
 	layoutdata {
 		track: 60
@@ -67,12 +92,22 @@ layout {
 		physical {
 			count: 13
 		}
+		filesystem {
+			start_sector: 0
+			count: 13
+			skew: 4
+		}
 	}
 	layoutdata {
 		track: 71
 		up_to_track: 79
 		physical {
 			count: 12
+		}
+		filesystem {
+			start_sector: 0
+			count: 12
+			skew: 4
 		}
 	}
 }
@@ -165,4 +200,14 @@ encoder {
 
 decoder {
 	victor9k {}
+}
+
+filesystem {
+    cpmfs {
+        filesystem_start {
+            track: 5
+        }
+        block_size: 2048
+        dir_entries: 128
+    }
 }
