@@ -207,14 +207,6 @@ public:
             (wantCrc == gotCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
     }
 
-    std::set<unsigned> requiredSectors(const Location& location) const override
-    {
-        auto& trackLayout =
-            Layout::getLayoutOfTrack(location.logicalTrack, location.head);
-        return std::set<unsigned>(trackLayout.logicalSectorOrder.begin(),
-            trackLayout.logicalSectorOrder.end());
-    }
-
 private:
     void getTrackFormat(IbmDecoderProto::TrackdataProto& trackdata,
         unsigned track,

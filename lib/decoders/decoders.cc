@@ -225,7 +225,7 @@ uint64_t Decoder::readRaw64()
 
 std::set<unsigned> Decoder::requiredSectors(const Location& location) const
 {
-	static std::set<unsigned> set;
-	return set;
+	const auto& trackLayout = Layout::getLayoutOfTrack(location.logicalTrack, location.head);
+	return std::set(trackLayout.logicalSectorOrder.begin(), trackLayout.logicalSectorOrder.end());
 }
 

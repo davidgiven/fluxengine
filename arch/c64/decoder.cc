@@ -94,15 +94,6 @@ public:
         _sector->status =
             (wantChecksum == gotChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
     }
-
-    std::set<unsigned> requiredSectors(const Location& location) const override
-    {
-        unsigned count = sectorsForC64Track(location.logicalTrack);
-        std::set<unsigned> sectors;
-        for (int sectorId = 0; sectorId < count; sectorId++)
-            sectors.insert(sectorId);
-        return sectors;
-    }
 };
 
 std::unique_ptr<Decoder> createCommodore64Decoder(

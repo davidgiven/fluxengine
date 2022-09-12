@@ -164,12 +164,6 @@ public:
 		_sector->status = (wantChecksum == gotChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
 	}
 
-	std::set<unsigned> requiredSectors(const Location&) const override
-	{
-		static std::set<unsigned> sectors = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-		return sectors;
-	}
-
 private:
 	const NorthstarDecoderProto& _config;
 	uint8_t _hardSectorId;
