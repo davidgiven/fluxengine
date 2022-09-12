@@ -171,24 +171,6 @@ public:
 	{}
 
 public:
-	std::vector<std::shared_ptr<const Sector>> collectSectors(const Location& location, const Image& image) override
-	{
-		std::vector<std::shared_ptr<const Sector>> sectors;
-
-        if (location.head == 0)
-        {
-            unsigned numSectors = sectorsForC64Track(location.logicalTrack);
-            for (int sectorId=0; sectorId<numSectors; sectorId++)
-            {
-                const auto& sector = image.get(location.logicalTrack, 0, sectorId);
-                if (sector)
-                    sectors.push_back(sector);
-            }
-        }
-
-		return sectors;
-	}
-
     std::unique_ptr<Fluxmap> encode(const Location& location,
             const std::vector<std::shared_ptr<const Sector>>& sectors, const Image& image) override
     {

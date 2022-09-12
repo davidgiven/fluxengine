@@ -110,27 +110,6 @@ public:
     }
 
 public:
-    std::vector<std::shared_ptr<const Sector>> collectSectors(
-        const Location& location, const Image& image) override
-    {
-        std::vector<std::shared_ptr<const Sector>> sectors;
-
-        if ((location.logicalTrack >= 0) &&
-            (location.logicalTrack < AMIGA_TRACKS_PER_DISK))
-        {
-            for (int sectorId = 0; sectorId < AMIGA_SECTORS_PER_TRACK;
-                 sectorId++)
-            {
-                const auto& sector =
-                    image.get(location.logicalTrack, location.head, sectorId);
-                if (sector)
-                    sectors.push_back(sector);
-            }
-        }
-
-        return sectors;
-    }
-
     std::unique_ptr<Fluxmap> encode(const Location& location,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
