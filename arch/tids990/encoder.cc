@@ -60,23 +60,6 @@ private:
     }
 
 public:
-    std::vector<std::shared_ptr<const Sector>> collectSectors(
-        const Location& location, const Image& image) override
-    {
-        std::vector<std::shared_ptr<const Sector>> sectors;
-
-        for (char sectorChar : _config.sector_skew())
-        {
-            int sectorId = charToInt(sectorChar);
-            const auto& sector =
-                image.get(location.logicalTrack, location.head, sectorId);
-            if (sector)
-                sectors.push_back(sector);
-        }
-
-        return sectors;
-    }
-
     std::unique_ptr<Fluxmap> encode(const Location& location,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
