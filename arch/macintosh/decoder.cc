@@ -122,11 +122,11 @@ uint8_t decode_side(uint8_t side)
     return !!(side & 0x20);
 }
 
-class MacintoshDecoder : public AbstractDecoder
+class MacintoshDecoder : public Decoder
 {
 public:
 	MacintoshDecoder(const DecoderProto& config):
-		AbstractDecoder(config)
+		Decoder(config)
 	{}
 
     nanoseconds_t advanceToNextRecord() override
@@ -182,32 +182,10 @@ public:
 		_sector->data.clear();
 		_sector->data.writer().append(userData.slice(12, 512)).append(userData.slice(0, 12));
 	}
-
-	std::set<unsigned> requiredSectors(const Location& location) const override
-	{
-		unsigned track = location.logicalTrack;
-
-		int count;
-		if (track < 16)
-			count = 12;
-		else if (track < 32)
-			count = 11;
-		else if (track < 48)
-			count = 10;
-		else if (track < 64)
-			count = 9;
-		else
-			count = 8;
-
-		std::set<unsigned> sectors;
-		while (count--)
-			sectors.insert(count);
-		return sectors;
-	}
 };
 
-std::unique_ptr<AbstractDecoder> createMacintoshDecoder(const DecoderProto& config)
+std::unique_ptr<Decoder> createMacintoshDecoder(const DecoderProto& config)
 {
-	return std::unique_ptr<AbstractDecoder>(new MacintoshDecoder(config));
+	return std::unique_ptr<Decoder>(new MacintoshDecoder(config));
 }
 

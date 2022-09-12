@@ -44,11 +44,11 @@ static const FluxMatchers ALL_PATTERNS = {
 	&DATA_PATTERN
 };
 
-class AgatDecoder : public AbstractDecoder
+class AgatDecoder : public Decoder
 {
 public:
 	AgatDecoder(const DecoderProto& config):
-		AbstractDecoder(config)
+		Decoder(config)
 	{}
 
     nanoseconds_t advanceToNextRecord() override
@@ -88,9 +88,9 @@ public:
 	}
 };
 
-std::unique_ptr<AbstractDecoder> createAgatDecoder(const DecoderProto& config)
+std::unique_ptr<Decoder> createAgatDecoder(const DecoderProto& config)
 {
-	return std::unique_ptr<AbstractDecoder>(new AgatDecoder(config));
+	return std::unique_ptr<Decoder>(new AgatDecoder(config));
 }
 
 

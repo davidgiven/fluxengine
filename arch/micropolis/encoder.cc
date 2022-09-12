@@ -68,32 +68,13 @@ static void write_sector(std::vector<bool>& bits,
     }
 }
 
-class MicropolisEncoder : public AbstractEncoder
+class MicropolisEncoder : public Encoder
 {
 public:
     MicropolisEncoder(const EncoderProto& config):
-        AbstractEncoder(config),
+        Encoder(config),
         _config(config.micropolis())
     {
-    }
-
-    std::vector<std::shared_ptr<const Sector>> collectSectors(
-        const Location& location, const Image& image) override
-    {
-        std::vector<std::shared_ptr<const Sector>> sectors;
-
-        if ((location.logicalTrack >= 0) && (location.logicalTrack < 77))
-        {
-            for (int sectorId = 0; sectorId < 16; sectorId++)
-            {
-                const auto& sector =
-                    image.get(location.logicalTrack, location.head, sectorId);
-                if (sector)
-                    sectors.push_back(sector);
-            }
-        }
-
-        return sectors;
     }
 
     std::unique_ptr<Fluxmap> encode(const Location& location,
@@ -124,8 +105,8 @@ private:
     const MicropolisEncoderProto& _config;
 };
 
-std::unique_ptr<AbstractEncoder> createMicropolisEncoder(
+std::unique_ptr<Encoder> createMicropolisEncoder(
     const EncoderProto& config)
 {
-    return std::unique_ptr<AbstractEncoder>(new MicropolisEncoder(config));
+    return std::unique_ptr<Encoder>(new MicropolisEncoder(config));
 }

@@ -12,8 +12,8 @@ class FluxSectorInterface : public SectorInterface
 public:
     FluxSectorInterface(std::shared_ptr<FluxSource> fluxSource,
         std::shared_ptr<FluxSink> fluxSink,
-        std::shared_ptr<AbstractEncoder> encoder,
-        std::shared_ptr<AbstractDecoder> decoder):
+        std::shared_ptr<Encoder> encoder,
+        std::shared_ptr<Decoder> decoder):
         _fluxSource(fluxSource),
         _fluxSink(fluxSink),
         _encoder(encoder),
@@ -138,8 +138,8 @@ private:
 
     std::shared_ptr<FluxSource> _fluxSource;
     std::shared_ptr<FluxSink> _fluxSink;
-    std::shared_ptr<AbstractEncoder> _encoder;
-    std::shared_ptr<AbstractDecoder> _decoder;
+    std::shared_ptr<Encoder> _encoder;
+    std::shared_ptr<Decoder> _decoder;
 
     typedef std::pair<unsigned, unsigned> trackid_t;
     Image _loadedSectors;
@@ -151,8 +151,8 @@ private:
 std::unique_ptr<SectorInterface> SectorInterface::createFluxSectorInterface(
     std::shared_ptr<FluxSource> fluxSource,
     std::shared_ptr<FluxSink> fluxSink,
-    std::shared_ptr<AbstractEncoder> encoder,
-    std::shared_ptr<AbstractDecoder> decoder)
+    std::shared_ptr<Encoder> encoder,
+    std::shared_ptr<Decoder> decoder)
 {
     return std::make_unique<FluxSectorInterface>(
         fluxSource, fluxSink, encoder, decoder);

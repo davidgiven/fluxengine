@@ -89,11 +89,11 @@ const FluxMatchers ANY_RECORD_PATTERN({
     &FM_TRS80DAM2_PATTERN,
 });
 
-class IbmDecoder : public AbstractDecoder
+class IbmDecoder : public Decoder
 {
 public:
     IbmDecoder(const DecoderProto& config):
-        AbstractDecoder(config),
+        Decoder(config),
         _config(config.ibm())
     {
     }
@@ -207,14 +207,6 @@ public:
             (wantCrc == gotCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
     }
 
-    std::set<unsigned> requiredSectors(const Location& location) const override
-    {
-        auto& trackLayout =
-            Layout::getLayoutOfTrack(location.logicalTrack, location.head);
-        return std::set<unsigned>(trackLayout.logicalSectorOrder.begin(),
-            trackLayout.logicalSectorOrder.end());
-    }
-
 private:
     void getTrackFormat(IbmDecoderProto::TrackdataProto& trackdata,
         unsigned track,
@@ -238,7 +230,7 @@ private:
     unsigned _currentHeaderLength;
 };
 
-std::unique_ptr<AbstractDecoder> createIbmDecoder(const DecoderProto& config)
+std::unique_ptr<Decoder> createIbmDecoder(const DecoderProto& config)
 {
-    return std::unique_ptr<AbstractDecoder>(new IbmDecoder(config));
+    return std::unique_ptr<Decoder>(new IbmDecoder(config));
 }

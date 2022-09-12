@@ -1,8 +1,8 @@
 #ifndef VICTOR9K_H
 #define VICTOR9K_H
 
-class AbstractEncoder;
-class AbstractDecoder;
+class Encoder;
+class Decoder;
 class EncoderProto;
 class DecoderProto;
 
@@ -18,7 +18,7 @@ class DecoderProto;
 
 #define VICTOR9K_SECTOR_LENGTH 512
 
-extern std::unique_ptr<AbstractDecoder> createVictor9kDecoder(const DecoderProto& config);
-extern std::unique_ptr<AbstractEncoder> createVictor9kEncoder(const EncoderProto& config);
+extern std::unique_ptr<Decoder> createVictor9kDecoder(const DecoderProto& config);
+extern std::unique_ptr<Encoder> createVictor9kEncoder(const EncoderProto& config);
 
 #endif

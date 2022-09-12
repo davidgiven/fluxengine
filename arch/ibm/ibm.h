@@ -26,14 +26,14 @@ struct IbmIdam
     uint8_t crc[2];
 };
 
-class AbstractEncoder;
-class AbstractDecoder;
+class Encoder;
+class Decoder;
 class DecoderProto;
 class EncoderProto;
 
-extern std::unique_ptr<AbstractDecoder> createIbmDecoder(
+extern std::unique_ptr<Decoder> createIbmDecoder(
     const DecoderProto& config);
-extern std::unique_ptr<AbstractEncoder> createIbmEncoder(
+extern std::unique_ptr<Encoder> createIbmEncoder(
     const EncoderProto& config);
 
 #endif

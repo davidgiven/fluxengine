@@ -23,11 +23,11 @@ const int SECTOR_SIZE = 256;
  */
 const FluxPattern ID_PATTERN(32, 0xaaaaffaf);
 
-class MxDecoder : public AbstractDecoder
+class MxDecoder : public Decoder
 {
 public:
 	MxDecoder(const DecoderProto& config):
-		AbstractDecoder(config)
+		Decoder(config)
 	{}
 
     void beginTrack() override
@@ -78,9 +78,9 @@ private:
     int _currentSector;
 };
 
-std::unique_ptr<AbstractDecoder> createMxDecoder(const DecoderProto& config)
+std::unique_ptr<Decoder> createMxDecoder(const DecoderProto& config)
 {
-	return std::unique_ptr<AbstractDecoder>(new MxDecoder(config));
+	return std::unique_ptr<Decoder>(new MxDecoder(config));
 }
 
 

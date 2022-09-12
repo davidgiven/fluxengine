@@ -12,6 +12,8 @@ message SectorListProto
         [ (help) = "first sector of a continuous run" ];
     optional int32 count = 3
         [ (help) = "number of sectors in a continuous run" ];
+    optional int32 skew = 4
+    	[ default = 1, (help) = "apply this skew between sectors" ];
 }
 
 message LayoutProto

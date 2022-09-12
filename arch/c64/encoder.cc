@@ -162,33 +162,15 @@ static std::vector<bool> encode_data(uint8_t input)
     return output;
 }
 
-class Commodore64Encoder : public AbstractEncoder
+class Commodore64Encoder : public Encoder
 {
 public:
 	Commodore64Encoder(const EncoderProto& config):
-        AbstractEncoder(config),
+        Encoder(config),
 		_config(config.c64())
 	{}
 
 public:
-	std::vector<std::shared_ptr<const Sector>> collectSectors(const Location& location, const Image& image) override
-	{
-		std::vector<std::shared_ptr<const Sector>> sectors;
-
-        if (location.head == 0)
-        {
-            unsigned numSectors = sectorsForC64Track(location.logicalTrack);
-            for (int sectorId=0; sectorId<numSectors; sectorId++)
-            {
-                const auto& sector = image.get(location.logicalTrack, 0, sectorId);
-                if (sector)
-                    sectors.push_back(sector);
-            }
-        }
-
-		return sectors;
-	}
-
     std::unique_ptr<Fluxmap> encode(const Location& location,
             const std::vector<std::shared_ptr<const Sector>>& sectors, const Image& image) override
     {
@@ -327,9 +309,9 @@ private:
 	uint8_t _formatByte2;
 };
 
-std::unique_ptr<AbstractEncoder> createCommodore64Encoder(const EncoderProto& config)
+std::unique_ptr<Encoder> createCommodore64Encoder(const EncoderProto& config)
 {
-	return std::unique_ptr<AbstractEncoder>(new Commodore64Encoder(config));
+	return std::unique_ptr<Encoder>(new Commodore64Encoder(config));
 }
 
 // vim: sw=4 ts=4 et

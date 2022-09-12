@@ -215,19 +215,19 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystemFromConfig()
     if (config.has_flux_source() || config.has_flux_sink())
     {
         std::shared_ptr<FluxSource> fluxSource;
-        std::shared_ptr<AbstractDecoder> decoder;
+        std::shared_ptr<Decoder> decoder;
         std::shared_ptr<FluxSink> fluxSink;
-        std::shared_ptr<AbstractEncoder> encoder;
+        std::shared_ptr<Encoder> encoder;
         if (config.flux_source().source_case() !=
             FluxSourceProto::SOURCE_NOT_SET)
         {
             fluxSource = FluxSource::create(config.flux_source());
-            decoder = AbstractDecoder::create(config.decoder());
+            decoder = Decoder::create(config.decoder());
         }
         if (config.flux_sink().has_drive())
         {
             fluxSink = FluxSink::create(config.flux_sink());
-            encoder = AbstractEncoder::create(config.encoder());
+            encoder = Encoder::create(config.encoder());
         }
         sectorInterface = SectorInterface::createFluxSectorInterface(
             fluxSource, fluxSink, encoder, decoder);

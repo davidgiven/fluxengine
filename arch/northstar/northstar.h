@@ -22,14 +22,14 @@
 #define NORTHSTAR_ENCODED_SECTOR_SIZE_SD	(NORTHSTAR_HEADER_SIZE_SD + NORTHSTAR_PAYLOAD_SIZE_SD + NORTHSTAR_CHECKSUM_SIZE)
 #define NORTHSTAR_ENCODED_SECTOR_SIZE_DD	(NORTHSTAR_HEADER_SIZE_DD + NORTHSTAR_PAYLOAD_SIZE_DD + NORTHSTAR_CHECKSUM_SIZE)
 
-class AbstractDecoder;
-class AbstractEncoder;
+class Decoder;
+class Encoder;
 class EncoderProto;
 class DecoderProto;
 
 extern uint8_t northstarChecksum(const Bytes& bytes);
 
-extern std::unique_ptr<AbstractDecoder> createNorthstarDecoder(const DecoderProto& config);
-extern std::unique_ptr<AbstractEncoder> createNorthstarEncoder(const EncoderProto& config);
+extern std::unique_ptr<Decoder> createNorthstarDecoder(const DecoderProto& config);
+extern std::unique_ptr<Encoder> createNorthstarEncoder(const EncoderProto& config);
 
 #endif /* NORTHSTAR */

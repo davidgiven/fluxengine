@@ -3,7 +3,7 @@
 
 #define AGAT_SECTOR_SIZE 256
 
-extern std::unique_ptr<AbstractDecoder> createAgatDecoder(const DecoderProto& config);
+extern std::unique_ptr<Decoder> createAgatDecoder(const DecoderProto& config);
 
 extern uint8_t agatChecksum(const Bytes& bytes);
 

@@ -32,12 +32,22 @@ layout {
 		physical {
 			count: 18
 		}
+		filesystem {
+			start_sector: 0
+			count: 18
+			skew: 4
+		}
 	}
 	layoutdata {
 		track: 16
 		up_to_track: 26
 		physical {
 			count: 17
+		}
+		filesystem {
+			start_sector: 0
+			count: 17
+			skew: 4
 		}
 	}
 	layoutdata {
@@ -46,12 +56,22 @@ layout {
 		physical {
 			count: 16
 		}
+		filesystem {
+			start_sector: 0
+			count: 16
+			skew: 4
+		}
 	}
 	layoutdata {
 		track: 38
 		up_to_track: 47
 		physical {
 			count: 15
+		}
+		filesystem {
+			start_sector: 0
+			count: 15
+			skew: 4
 		}
 	}
 	layoutdata {
@@ -60,6 +80,11 @@ layout {
 		physical {
 			count: 14
 		}
+		filesystem {
+			start_sector: 0
+			count: 14
+			skew: 4
+		}
 	}
 	layoutdata {
 		track: 60
@@ -67,12 +92,22 @@ layout {
 		physical {
 			count: 13
 		}
+		filesystem {
+			start_sector: 0
+			count: 13
+			skew: 4
+		}
 	}
 	layoutdata {
 		track: 71
 		up_to_track: 79
 		physical {
 			count: 12
+		}
+		filesystem {
+			start_sector: 0
+			count: 12
+			skew: 4
 		}
 	}
 }
@@ -92,77 +127,62 @@ encoder {
 			min_track: 0
 			max_track: 3
 			rotational_period_ms: 237.9
-			sector_range {
-				start_sector: 0
-				sector_count: 19
-			}
 		}
 		trackdata {
 			head: 0
 			min_track: 4
 			max_track: 15
 			rotational_period_ms: 224.5
-			sector_range {
-				sector_count: 18
-			}
 		}
 		trackdata {
 			head: 0
 			min_track: 16
 			max_track: 26
 			rotational_period_ms: 212.2
-			sector_range {
-				sector_count: 17
-			}
 		}
 		trackdata {
 			head: 0
 			min_track: 27
 			max_track: 37
 			rotational_period_ms: 199.9
-			sector_range {
-				sector_count: 16
-			}
 		}
 		trackdata {
 			head: 0
 			min_track: 38
 			max_track: 47
 			rotational_period_ms: 187.6
-			sector_range {
-				sector_count: 15
-			}
 		}
 		trackdata {
 			head: 0
 			min_track: 48
 			max_track: 59
 			rotational_period_ms: 175.3
-			sector_range {
-				sector_count: 14
-			}
 		}
 		trackdata {
 			head: 0
 			min_track: 60
 			max_track: 70
 			rotational_period_ms: 163.0
-			sector_range {
-				sector_count: 13
-			}
 		}
 		trackdata {
 			head: 0
 			min_track: 71
 			max_track: 79
 			rotational_period_ms: 149.6
-			sector_range {
-				sector_count: 12
-			}
 		}
 	}
 }
 
 decoder {
 	victor9k {}
+}
+
+filesystem {
+    cpmfs {
+        filesystem_start {
+            track: 5
+        }
+        block_size: 2048
+        dir_entries: 128
+    }
 }

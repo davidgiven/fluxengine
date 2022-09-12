@@ -64,11 +64,11 @@ static uint8_t combine(uint16_t word)
     return word & (word >> 7);
 }
 
-class Apple2Decoder : public AbstractDecoder
+class Apple2Decoder : public Decoder
 {
 public:
 	Apple2Decoder(const DecoderProto& config):
-		AbstractDecoder(config)
+		Decoder(config)
 	{}
 
     nanoseconds_t advanceToNextRecord() override
@@ -144,19 +144,11 @@ public:
 		_sector->status = Sector::BAD_CHECKSUM;
 		_sector->data = decode_crazy_data(&bytes[0], _sector->status);
 	}
-
-	std::set<unsigned> requiredSectors(const Location& location) const override
-	{
-		std::set<unsigned> sectors;
-		for (int sectorId = 0; sectorId < APPLE2_SECTORS; sectorId++)
-			sectors.insert(sectorId);
-		return sectors;
-	}
 };
 
-std::unique_ptr<AbstractDecoder> createApple2Decoder(const DecoderProto& config)
+std::unique_ptr<Decoder> createApple2Decoder(const DecoderProto& config)
 {
-	return std::unique_ptr<AbstractDecoder>(new Apple2Decoder(config));
+	return std::unique_ptr<Decoder>(new Apple2Decoder(config));
 }
 
 

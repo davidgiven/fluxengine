@@ -264,7 +264,7 @@ public:
                     Environment::reset();
 
                     auto fluxSource = FluxSource::create(config.flux_source());
-                    auto decoder = AbstractDecoder::create(config.decoder());
+                    auto decoder = Decoder::create(config.decoder());
                     auto diskflux = readDiskCommand(*fluxSource, *decoder);
 
                     runOnUiThread(
@@ -321,14 +321,14 @@ public:
                 {
                     auto image = ImageReader::create(config.image_reader())
                                      ->readMappedImage();
-                    auto encoder = AbstractEncoder::create(config.encoder());
+                    auto encoder = Encoder::create(config.encoder());
                     auto fluxSink = FluxSink::create(config.flux_sink());
 
-                    std::unique_ptr<AbstractDecoder> decoder;
+                    std::unique_ptr<Decoder> decoder;
                     std::unique_ptr<FluxSource> fluxSource;
                     if (config.has_decoder())
                     {
-                        decoder = AbstractDecoder::create(config.decoder());
+                        decoder = Decoder::create(config.decoder());
                         fluxSource = FluxSource::create(config.flux_source());
                     }
 

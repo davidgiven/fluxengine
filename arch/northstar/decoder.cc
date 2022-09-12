@@ -67,11 +67,11 @@ uint8_t northstarChecksum(const Bytes& bytes) {
 	return checksum;
 }
 
-class NorthstarDecoder : public AbstractDecoder
+class NorthstarDecoder : public Decoder
 {
 public:
 	NorthstarDecoder(const DecoderProto& config):
-		AbstractDecoder(config),
+		Decoder(config),
 		_config(config.northstar())
 	{}
 
@@ -164,19 +164,13 @@ public:
 		_sector->status = (wantChecksum == gotChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
 	}
 
-	std::set<unsigned> requiredSectors(const Location&) const override
-	{
-		static std::set<unsigned> sectors = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-		return sectors;
-	}
-
 private:
 	const NorthstarDecoderProto& _config;
 	uint8_t _hardSectorId;
 };
 
-std::unique_ptr<AbstractDecoder> createNorthstarDecoder(const DecoderProto& config)
+std::unique_ptr<Decoder> createNorthstarDecoder(const DecoderProto& config)
 {
-	return std::unique_ptr<AbstractDecoder>(new NorthstarDecoder(config));
+	return std::unique_ptr<Decoder>(new NorthstarDecoder(config));
 }
 

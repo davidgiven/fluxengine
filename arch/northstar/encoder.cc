@@ -119,32 +119,13 @@ static void write_sector(std::vector<bool>& bits,
     }
 }
 
-class NorthstarEncoder : public AbstractEncoder
+class NorthstarEncoder : public Encoder
 {
 public:
     NorthstarEncoder(const EncoderProto& config):
-        AbstractEncoder(config),
+        Encoder(config),
         _config(config.northstar())
     {
-    }
-
-    std::vector<std::shared_ptr<const Sector>> collectSectors(
-        const Location& location, const Image& image) override
-    {
-        std::vector<std::shared_ptr<const Sector>> sectors;
-
-        if ((location.logicalTrack >= 0) && (location.logicalTrack < 35))
-        {
-            for (int sectorId = 0; sectorId < 10; sectorId++)
-            {
-                const auto& sector =
-                    image.get(location.logicalTrack, location.head, sectorId);
-                if (sector)
-                    sectors.push_back(sector);
-            }
-        }
-
-        return sectors;
     }
 
     std::unique_ptr<Fluxmap> encode(const Location& location,
@@ -180,8 +161,8 @@ private:
     const NorthstarEncoderProto& _config;
 };
 
-std::unique_ptr<AbstractEncoder> createNorthstarEncoder(
+std::unique_ptr<Encoder> createNorthstarEncoder(
     const EncoderProto& config)
 {
-    return std::unique_ptr<AbstractEncoder>(new NorthstarEncoder(config));
+    return std::unique_ptr<Encoder>(new NorthstarEncoder(config));
 }
