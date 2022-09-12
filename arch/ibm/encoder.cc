@@ -221,7 +221,8 @@ public:
                 }
                 bw.write_8(idamUnencoded);
                 bw.write_8(sectorData->logicalTrack);
-                bw.write_8(sectorData->logicalSide ^ trackdata.invert_side_byte());
+                bw.write_8(
+                    sectorData->logicalSide ^ trackdata.invert_side_byte());
                 bw.write_8(sectorData->logicalSector);
                 bw.write_8(sectorSize);
                 uint16_t crc = crc16(CCITT_POLY, header);
