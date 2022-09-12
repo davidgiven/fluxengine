@@ -18,6 +18,7 @@ layout {
 		physical {
 			start_sector: 0
 			count: 12
+			skew: 5
 		}
 	}
 }
