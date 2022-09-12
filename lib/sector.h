@@ -22,7 +22,7 @@ public:
         MISSING,
         DATA_MISSING,
         CONFLICT,
-        INTERNAL_ERROR
+        INTERNAL_ERROR,
     };
 
     static std::string statusToString(Status status);

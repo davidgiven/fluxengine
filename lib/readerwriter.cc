@@ -289,11 +289,6 @@ void writeTracks(FluxSink& fluxSink,
     Logger() << EndOperationLogMessage{"Write complete"};
 }
 
-static bool dontVerify(const Location&)
-{
-    return true;
-}
-
 void writeTracks(FluxSink& fluxSink,
     AbstractEncoder& encoder,
     const Image& image,
@@ -306,7 +301,7 @@ void writeTracks(FluxSink& fluxSink,
             auto sectors = encoder.collectSectors(location, image);
             return encoder.encode(location, sectors, image);
         },
-        dontVerify,
+        [](const auto&) { return true; },
         locations);
 }
 
@@ -409,7 +404,7 @@ void writeRawDiskCommand(FluxSource& fluxSource, FluxSink& fluxSink)
             return fluxSource.readFlux(location.physicalTrack, location.head)
                 ->next();
         },
-        dontVerify,
+        [](const auto&){return true;},
         Layout::computeLocations());
 }
 
