@@ -53,7 +53,7 @@ jobs:
         strip fluxengine.exe -o fluxengine-stripped.exe
         strip fluxengine-gui.exe -o fluxengine-gui-stripped.exe
         makensis -v2 -nocd -dOUTFILE=fluxengine-installer.exe extras/windows-installer.nsi
-	  
+
     - name: zip
       run: |
         zip -9 fluxengine.zip fluxengine.exe fluxengine-gui.exe upgrade-flux-file.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex fluxengine-installer.exe
