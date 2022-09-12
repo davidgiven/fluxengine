@@ -48,8 +48,11 @@ jobs:
     - name: build
       run: make
 
-	- name: nsis
-	  run: makensis -v2 -nocs -dOUTFILE=fluxengine-installer.exe extras/windows-installer.nsi
+    - name: nsis
+      run: |
+        strip fluxengine.exe -o fluxengine-stripped.exe
+        strip fluxengine-gui.exe -o fluxengine-gui-stripped.exe
+        makensis -v2 -nocd -dOUTFILE=fluxengine-installer.exe extras/windows-installer.nsi
 	  
     - name: zip
       run: |

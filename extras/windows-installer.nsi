@@ -22,7 +22,7 @@ SetCompressor /solid lzma
 !define MUI_WELCOMEPAGE_TEXT "FluxEngine is a flux-level floppy disk interface \
  	capable of reading and writing almost any floppy disk format. This package \
  	contains the client software, which will work on either FluxEngine or \
- 	GreaseWeazle hardware. It also allows manipulation of flux files and disk
+ 	GreaseWeazle hardware. It also allows manipulation of flux files and disk \
  	images, so it's useful without any hardware.$\r$\n\ 
 	$\r$\n\
 	This wizard will install WordGrinder on your computer.$\r$\n\
@@ -83,16 +83,24 @@ FunctionEnd
 Section "FluxEngine (required)"
 	SectionIn RO
 	SetOutPath $INSTDIR
-	File /oname=fluxengine.exe "fluxengine.exe"
-	File /oname=fluxengine-gui.exe "fluxengine-gui.exe"
-	File "README.md"
-	File "dep\adflib\COPYING"
-	File "dep\hfsutils\COPYING"
-	File "dep\stb\LICENSE"
-	File "dep\fatfs\LICENSE.txt"
-	File "dep\libusbp\LICENSE.txt"
-	File "dep\snowhouse\LICENSE_1_0.txt"
-	File "dep\agg\README"
+	File /oname=fluxengine.exe fluxengine-stripped.exe
+	File /oname=fluxengine-gui.exe fluxengine-gui-stripped.exe
+	File README.md
+	CreateDirectory $INSTDIR\dep
+	CreateDirectory $INSTDIR\dep\adflib
+	File /oname=dep\adflib\COPYING dep\adflib\COPYING
+	CreateDirectory $INSTDIR\dep\hfsutils
+	File /oname=dep\hfsutils\COPYING dep\hfsutils\COPYING
+	CreateDirectory $INSTDIR\dep\stb
+	File /oname=dep\stb\LICENSE dep\stb\LICENSE
+	CreateDirectory $INSTDIR\dep\fatfs
+	File /oname=dep\fatfs\LICENSE.txt dep\fatfs\LICENSE.txt
+	CreateDirectory $INSTDIR\dep\libusbp
+	File /oname=dep\libusbp\LICENSE.txt dep\libusbp\LICENSE.txt
+	CreateDirectory $INSTDIR\dep\snowhouse
+	File /oname=dep\snowhouse\LICENSE_1_0.txt dep\snowhouse\LICENSE_1_0.txt
+	CreateDirectory $INSTDIR\dep\agg
+	File /oname=dep\agg\README dep\agg\README
 
 	; Write the installation path into the registry
 	WriteRegStr HKLM SOFTWARE\NSIS_FluxEngine "Install_Dir" "$INSTDIR"
@@ -106,6 +114,11 @@ Section "FluxEngine (required)"
 
 	; Update the shell.
 	Call RefreshShellIcons
+SectionEnd
+
+Section "FluxEngine hardware firmware"
+	SetOutPath $INSTDIR
+	FILE /oname=fluxengine-firmware.hex "FluxEngine.cydsn\CortexM3\ARM_GCC_541\Release\FluxEngine.hex"
 SectionEnd
 
 Section "Start Menu Shortcuts"
@@ -131,18 +144,13 @@ Section "Uninstall"
 	Call un.RefreshShellIcons
 
 	; Remove files and uninstaller
-	Delete $INSTDIR\wordgrinder.exe
+	Delete $INSTDIR\fluxengine.exe
+	Delete $INSTDIR\fluxengine-gui.exe
 	Delete $INSTDIR\uninstall.exe
-	Delete $INSTDIR\README.wg
-
 	Delete $INSTDIR\README.md
-	Delete $INSTDIR\dep\adflib\COPYING
-	Delete $INSTDIR\dep\hfsutils\COPYING
-	Delete $INSTDIR\dep\stb\LICENSE
-	Delete $INSTDIR\dep\fatfs\LICENSE.txt
-	Delete $INSTDIR\dep\libusbp\LICENSE.txt
-	Delete $INSTDIR\dep\snowhouse\LICENSE_1_0.txt
-	Delete $INSTDIR\dep\agg\README
+	Delete $INSTDIR\fluxengine-firmware.hex
+
+	RmDir /r $INSTDIR\dep
 
 	; Remove shortcuts, if any
 	Delete "$SMPROGRAMS\FluxEngine\*.*"
