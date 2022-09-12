@@ -14,6 +14,8 @@
 #include "arch/victor9k/victor9k.h"
 #include "lib/encoders/encoders.pb.h"
 #include "lib/proto.h"
+#include "lib/layout.h"
+#include "lib/image.h"
 #include "protocol.h"
 
 std::unique_ptr<AbstractEncoder> AbstractEncoder::create(
@@ -52,6 +54,26 @@ nanoseconds_t AbstractEncoder::calculatePhysicalClockPeriod(
 
     return targetClockPeriod *
            (currentRotationalPeriod / targetRotationalPeriod);
+}
+
+std::vector<std::shared_ptr<const Sector>> AbstractEncoder::collectSectors(
+    const Location& location, const Image& image)
+{
+    std::vector<std::shared_ptr<const Sector>> sectors;
+
+    auto& trackLayout =
+        Layout::getLayoutOfTrack(location.logicalTrack, location.head);
+
+    int logicalSide = location.head ^ config.layout().swap_sides();
+    for (unsigned sectorId : trackLayout.diskSectorOrder)
+    {
+        const auto& sector =
+            image.get(location.logicalTrack, logicalSide, sectorId);
+        if (sector)
+            sectors.push_back(sector);
+    }
+
+    return sectors;
 }
 
 Fluxmap& Fluxmap::appendBits(const std::vector<bool>& bits, nanoseconds_t clock)

@@ -107,28 +107,6 @@ private:
     }
 
 public:
-    std::vector<std::shared_ptr<const Sector>> collectSectors(
-        const Location& location, const Image& image) override
-    {
-        std::vector<std::shared_ptr<const Sector>> sectors;
-        IbmEncoderProto::TrackdataProto trackdata;
-        getEncoderTrackData(trackdata, location.logicalTrack, location.head);
-
-        auto& trackLayout =
-            Layout::getLayoutOfTrack(location.logicalTrack, location.head);
-
-        int logicalSide = location.head ^ trackdata.swap_sides();
-        for (unsigned sectorId : trackLayout.diskSectorOrder)
-        {
-            const auto& sector =
-                image.get(location.logicalTrack, logicalSide, sectorId);
-            if (sector)
-                sectors.push_back(sector);
-        }
-
-        return sectors;
-    }
-
     std::unique_ptr<Fluxmap> encode(const Location& location,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
@@ -224,7 +202,7 @@ public:
                 }
                 bw.write_8(idamUnencoded);
                 bw.write_8(sectorData->logicalTrack);
-                bw.write_8(sectorData->logicalSide);
+                bw.write_8(sectorData->logicalSide ^ trackdata.invert_side_byte());
                 bw.write_8(sectorData->logicalSector);
                 bw.write_8(sectorSize);
                 uint16_t crc = crc16(CCITT_POLY, header);

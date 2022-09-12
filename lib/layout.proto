@@ -49,4 +49,6 @@ message LayoutProto
         [ default = 0, (help) = "number of sides in image" ];
     optional Order order = 4
         [ default = CHS, (help) = "the order of sectors in the filesystem" ];
+    optional bool swap_sides = 5
+    	[ (help) = "swap the sides on the disk" ];
 }

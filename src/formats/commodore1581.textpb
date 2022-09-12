@@ -31,11 +31,16 @@ encoder {
 			gap0: 80
 			gap2: 22
 			gap3: 34
+			invert_side_byte: true
 		}
 	}
 }
 
 decoder {
-	ibm {}
+	ibm {
+		trackdata {
+			invert_side_byte: true
+		}
+	}
 }
 

@@ -151,8 +151,7 @@ public:
 		if (wantCrc == gotCrc)
 			_sector->status = Sector::DATA_MISSING; /* correct but unintuitive */
 
-		if (trackdata.swap_sides())
-			_sector->logicalSide ^= 1;
+		_sector->logicalSide ^= trackdata.invert_side_byte();
 		if (trackdata.ignore_side_byte())
 			_sector->logicalSide = _sector->physicalHead;
 		if (trackdata.ignore_track_byte())
