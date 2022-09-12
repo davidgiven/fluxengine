@@ -163,26 +163,6 @@ private:
     }
 
 public:
-    std::vector<std::shared_ptr<const Sector>> collectSectors(
-        const Location& location, const Image& image) override
-    {
-        std::vector<std::shared_ptr<const Sector>> sectors;
-
-        Victor9kEncoderProto::TrackdataProto trackdata;
-        getTrackFormat(trackdata, location.logicalTrack, location.head);
-
-        for (int i = 0; i < trackdata.sector_range().sector_count(); i++)
-        {
-            int sectorId = trackdata.sector_range().start_sector() + i;
-            const auto& sector =
-                image.get(location.logicalTrack, location.head, sectorId);
-            if (sector)
-                sectors.push_back(sector);
-        }
-
-        return sectors;
-    }
-
     std::unique_ptr<Fluxmap> encode(const Location& location,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override

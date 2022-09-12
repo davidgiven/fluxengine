@@ -127,73 +127,48 @@ encoder {
 			min_track: 0
 			max_track: 3
 			rotational_period_ms: 237.9
-			sector_range {
-				start_sector: 0
-				sector_count: 19
-			}
 		}
 		trackdata {
 			head: 0
 			min_track: 4
 			max_track: 15
 			rotational_period_ms: 224.5
-			sector_range {
-				sector_count: 18
-			}
 		}
 		trackdata {
 			head: 0
 			min_track: 16
 			max_track: 26
 			rotational_period_ms: 212.2
-			sector_range {
-				sector_count: 17
-			}
 		}
 		trackdata {
 			head: 0
 			min_track: 27
 			max_track: 37
 			rotational_period_ms: 199.9
-			sector_range {
-				sector_count: 16
-			}
 		}
 		trackdata {
 			head: 0
 			min_track: 38
 			max_track: 47
 			rotational_period_ms: 187.6
-			sector_range {
-				sector_count: 15
-			}
 		}
 		trackdata {
 			head: 0
 			min_track: 48
 			max_track: 59
 			rotational_period_ms: 175.3
-			sector_range {
-				sector_count: 14
-			}
 		}
 		trackdata {
 			head: 0
 			min_track: 60
 			max_track: 70
 			rotational_period_ms: 163.0
-			sector_range {
-				sector_count: 13
-			}
 		}
 		trackdata {
 			head: 0
 			min_track: 71
 			max_track: 79
 			rotational_period_ms: 149.6
-			sector_range {
-				sector_count: 12
-			}
 		}
 	}
 }
