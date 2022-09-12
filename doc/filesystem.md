@@ -8,7 +8,7 @@ modifications, including formatting blank disks, if the filesystem supports it.
 The GUI even has a reasonably competent file manager.
 
 <div style="text-align: center">
-<a href="filebrowser.jpg"><img src="filebrowser.jpg" style="width:80%" alt="screenshot of the GUI in action"></a>
+<a href="filebrowser.jpg"><img src="filebrowser.jpg" style="width:60%" alt="screenshot of the GUI in action"></a>
 </div>
 
 The following file systems are supported so far.
