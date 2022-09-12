@@ -14,9 +14,10 @@ public:
     virtual ~AbstractEncoder() {}
 
     static std::unique_ptr<AbstractEncoder> create(const EncoderProto& config);
+
 public:
     virtual std::vector<std::shared_ptr<const Sector>> collectSectors(
-        const Location& location, const Image& image) = 0;
+        const Location& location, const Image& image);
 
     virtual std::unique_ptr<Fluxmap> encode(const Location& location,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
