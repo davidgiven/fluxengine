@@ -64,6 +64,11 @@ static bool setFallbackFlag(
                             "option '{}' has an option inside it, which isn't "
                             "allowed",
                             path);
+                    if (configs.config().include_size() > 0)
+                        Error() << fmt::format(
+                            "option '{}' is trying to include something, which "
+                            "isn't allowed",
+                            path);
 
                     Logger() << fmt::format("OPTION: {}", configs.message());
                     config.MergeFrom(configs.config());
