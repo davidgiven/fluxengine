@@ -66,7 +66,6 @@ FORMATS = \
 	rx50 \
 	shugart_drive \
 	tids990 \
-	vgi \
 	victor9k_ds \
 	victor9k_ss \
 	zilogmcz \
