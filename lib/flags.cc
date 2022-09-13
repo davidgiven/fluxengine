@@ -65,7 +65,7 @@ static bool setFallbackFlag(
                             "allowed",
                             path);
 
-                    Logger() << fmt::format("Option {}: {}", path, configs.message());
+                    Logger() << fmt::format("OPTION: {}", configs.message());
                     config.MergeFrom(configs.config());
                     return false;
                 }

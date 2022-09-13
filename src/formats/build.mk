@@ -20,7 +20,6 @@ FORMATS = \
 	ampro800 \
 	apple2_drive \
 	apple2 \
-	appledos \
 	atarist360 \
 	atarist370 \
 	atarist400 \
@@ -62,7 +61,6 @@ FORMATS = \
 	northstar175 \
 	northstar350 \
 	northstar87 \
-	prodos \
 	rx50 \
 	shugart_drive \
 	tids990 \

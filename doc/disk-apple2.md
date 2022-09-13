@@ -40,14 +40,16 @@ Just do:
 fluxengine read apple2
 ```
 
-You should end up with an `apple2.img` which is 143360 bytes long.
-It will be in physical sector ordering. You can specify a sector ordering,
-`appledos` or `prodos` to get an image intended for use in an emulator,
-due to the logical sector mapping issue described above:
+You should end up with an `apple2.img` which is 143360 bytes long. It will be in
+physical sector ordering. You can specify a sector ordering, `--appledos` or
+`--prodos` to get an image intended for use in an emulator, due to the logical
+sector mapping issue described above:
 
 ```
-fluxengine read apple2 prodos
+fluxengine read apple2 --prodos
 ```
+
+You will also need this for filesystem access.
 
 Writing discs
 -------------
@@ -58,10 +60,10 @@ fluxengine write apple2 -i apple2.img
 ```
 
 If your image is in logical sector ordering (images intended for emulators
-usually are), specify a modifier of `appledos` or `prodos`:
+usually are), specify a modifier of `--appledos` or `--prodos`:
 
 ```
-fluxengine write apple2 prodos -i apple2.img
+fluxengine write apple2 --prodos -i apple2.img
 ```
 
 
