@@ -25,6 +25,7 @@ layout {
 encoder {
 	ibm {
 		trackdata {
+			swap_sides: true
 			invert_side_byte: true
 			target_rotational_period_ms: 200
 			target_clock_period_us: 4
@@ -40,7 +41,7 @@ decoder {
 	ibm {
 		trackdata {
 			ignore_side_byte: true
-			invert_side_byte: false
+			invert_side_byte: true
 		}
 	}
 }
