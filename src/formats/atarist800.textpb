@@ -24,23 +24,3 @@ layout {
 	}
 }
 
-encoder {
-	ibm {
-		trackdata {
-			target_rotational_period_ms: 200
-			target_clock_period_us: 4
-			emit_iam: false
-			gap0: 80
-			gap2: 22
-			gap3: 34
-		}
-	}
-}
-
-decoder {
-	ibm {
-		trackdata {
-			ignore_sector: 66
-		}
-	}
-}
