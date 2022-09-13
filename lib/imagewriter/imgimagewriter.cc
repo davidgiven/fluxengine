@@ -47,10 +47,11 @@ public:
             }
         }
 
-        Logger() << fmt::format("IMG: wrote {} tracks, {} sides, {} kB total",
+        Logger() << fmt::format("IMG: wrote {} tracks, {} sides, {} kB total to {}",
             tracks,
             sides,
-            outputFile.tellp() / 1024);
+            outputFile.tellp() / 1024,
+			_config.filename());
     }
 };
 

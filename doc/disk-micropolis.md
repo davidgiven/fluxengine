@@ -42,13 +42,13 @@ logically followed the first side (e.g., tracks 77-153). Micropolis disks
 tended to be the latter.
 
 It's also possible to output to VGI, which retains OS-specific "user data" and
-machine-specific ECC. Add "vgi" to the command line after the chosen Micropolis
-profile:
+machine-specific ECC. Add `--vgi` to the command line after the chosen
+Micropolis profile:
 ```
-fluxengine read micropolis143 vgi # single-sided Mod I
-fluxengine read micropolis287 vgi # double-sided Mod I
-fluxengine read micropolis315 vgi # single-sided Mod II
-fluxengine read micropolis630 vgi # double-sided Mod II
+fluxengine read micropolis143 --vgi # single-sided Mod I
+fluxengine read micropolis287 --vgi # double-sided Mod I
+fluxengine read micropolis315 --vgi # single-sided Mod II
+fluxengine read micropolis630 --vgi # double-sided Mod II
 ```
 
 You should end up with a `micropolis.vgi` instead. The format is well-defined
@@ -77,10 +77,10 @@ fluxengine write micropolis287 # double-sided Mod I
 fluxengine write micropolis315 # single-sided Mod II
 fluxengine write micropolis630 # double-sided Mod II
 
-fluxengine write micropolis143 vgi # single-sided Mod I
-fluxengine write micropolis287 vgi # double-sided Mod I
-fluxengine write micropolis315 vgi # single-sided Mod II
-fluxengine write micropolis630 vgi # double-sided Mod II
+fluxengine write micropolis143 --vgi # single-sided Mod I
+fluxengine write micropolis287 --vgi # double-sided Mod I
+fluxengine write micropolis315 --vgi # single-sided Mod II
+fluxengine write micropolis630 --vgi # double-sided Mod II
 ```
 
 Useful references

@@ -33,3 +33,32 @@ decoder {
 	micropolis {}
 }
 
+option {
+	name: "vgi"
+	comment: "Read/write VGI format images"
+	message: "using VGI format"
+
+	config {
+		image_reader {
+			filename: "micropolis.vgi"
+			img {}
+		}
+
+		image_writer {
+			filename: "micropolis.vgi"
+			img {}
+		}
+
+		layout {
+			layoutdata {
+				sector_size: 275
+			}
+		}
+
+		decoder {
+			micropolis {
+				sector_output_size: 275
+			}
+		}
+	}
+}
