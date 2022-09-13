@@ -30,6 +30,13 @@ ifeq ($(shell uname),Darwin)
 		-framework Foundation
 endif
 
+# Check the Make version.
+
+
+ifeq ($(findstring 4.,$(MAKE_VERSION)),)
+$(error You need GNU Make 4.x for this (if you're on OSX, use gmake).)
+endif
+
 # Normal settings.
 
 OBJDIR ?= .obj
