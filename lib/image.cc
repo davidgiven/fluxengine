@@ -69,7 +69,7 @@ std::shared_ptr<Sector> Image::put(
     sector->logicalSide = side;
     sector->logicalSector = sectorid;
     sector->physicalTrack = Layout::remapTrackLogicalToPhysical(track);
-    sector->physicalHead = side;
+    sector->physicalSide = side;
     _sectors[key] = sector;
     return sector;
 }

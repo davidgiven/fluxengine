@@ -7,14 +7,36 @@
 class Record;
 class Location;
 
-/*
- * Note that sectors here used zero-based numbering throughout (to make the
- * maths easier); traditionally floppy disk use 0-based track numbering and
- * 1-based sector numbering, which makes no sense.
- */
-class Sector
+struct LogicalLocation
 {
-public:
+	unsigned logicalTrack;
+	unsigned logicalSide;
+	unsigned logicalSector;
+
+    std::tuple<int, int, int> key() const
+    {
+        return std::make_tuple(
+            logicalTrack, logicalSide, logicalSector);
+    }
+
+    bool operator==(const LogicalLocation& rhs) const
+    {
+        return key() == rhs.key();
+    }
+
+    bool operator!=(const LogicalLocation& rhs) const
+    {
+        return key() != rhs.key();
+    }
+
+    bool operator<(const LogicalLocation& rhs) const
+    {
+        return key() < rhs.key();
+    }
+};
+
+struct Sector : public LogicalLocation
+{
     enum Status
     {
         OK,
@@ -30,21 +52,20 @@ public:
     static Status stringToStatus(const std::string& value);
 
     Status status = Status::INTERNAL_ERROR;
-    uint32_t position;
+    uint32_t position = 0;
     nanoseconds_t clock = 0;
     nanoseconds_t headerStartTime = 0;
     nanoseconds_t headerEndTime = 0;
     nanoseconds_t dataStartTime = 0;
     nanoseconds_t dataEndTime = 0;
     unsigned physicalTrack = 0;
-    unsigned physicalHead = 0;
-    unsigned logicalTrack = 0;
-    unsigned logicalSide = 0;
-    unsigned logicalSector = 0;
+    unsigned physicalSide = 0;
     Bytes data;
     std::vector<std::shared_ptr<Record>> records;
 
     Sector() {}
+
+    Sector(const LogicalLocation& location);
 
     Sector(const Location& location);
 

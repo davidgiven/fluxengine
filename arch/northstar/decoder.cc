@@ -150,7 +150,7 @@ public:
 		auto bytes = decodeFmMfm(rawbits).slice(0, recordSize);
 		ByteReader br(bytes);
 
-		_sector->logicalSide = _sector->physicalHead;
+		_sector->logicalSide = _sector->physicalSide;
 		_sector->logicalSector = _hardSectorId;
 		_sector->logicalTrack = _sector->physicalTrack;
 

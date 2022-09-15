@@ -168,7 +168,7 @@ public:
         const Image& image) override
     {
         Victor9kEncoderProto::TrackdataProto trackdata;
-        getTrackFormat(trackdata, location.logicalTrack, location.head);
+        getTrackFormat(trackdata, location.logicalTrack, location.logicalSide);
 
         unsigned bitsPerRevolution = (trackdata.rotational_period_ms() * 1e3) /
                                      trackdata.clock_period_us();

@@ -33,7 +33,6 @@ message IbmEncoderProto {
 		optional int32 gap1 = 10            [default=50, (help) = "size of gap 2 (the post-ID gap)"];
 		optional int32 gap2 = 11            [default=22, (help) = "size of gap 3 (the pre-data gap)"];
 		optional int32 gap3 = 12            [default=80, (help) = "size of gap 4 (the post-data or format gap)"];
-		optional bool swap_sides = 14       [default=false, (help) = "swap the sides of the disk"];
 		optional bool invert_side_byte = 19 [default=false, (help) = "invert the side byte before writing"];
 		optional int32 gap_fill_byte = 18   [default=0x9254, (help) = "16-bit raw bit pattern of gap fill byte"];
 		optional double target_rotational_period_ms = 1 [default=200, (help) = "rotational period of target disk"];

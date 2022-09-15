@@ -1,13 +1,19 @@
 #include "globals.h"
 #include "flux.h"
 #include "sector.h"
+#include "layout.h"
 #include "fmt/format.h"
 
+Sector::Sector(const LogicalLocation& location):
+	LogicalLocation(location),
+	physicalTrack(Layout::remapTrackLogicalToPhysical(location.logicalTrack)),
+	physicalSide(Layout::remapSideLogicalToPhysical(location.logicalSide))
+{}
+
 Sector::Sector(const Location& location):
+	LogicalLocation({ location.logicalTrack, location.logicalSide, 0 }),
     physicalTrack(location.physicalTrack),
-    physicalHead(location.head),
-    logicalTrack(location.logicalTrack),
-    logicalSide(location.head)
+    physicalSide(location.physicalSide)
 {}
 
 std::string Sector::statusToString(Status status)

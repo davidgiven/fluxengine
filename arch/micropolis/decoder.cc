@@ -127,7 +127,7 @@ public:
 			return;
 
 		_sector->logicalTrack = br.read_8();
-		_sector->logicalSide = _sector->physicalHead;
+		_sector->logicalSide = _sector->physicalSide;
 		_sector->logicalSector = br.read_8();
 		if (_sector->logicalSector > 15)
 			return;

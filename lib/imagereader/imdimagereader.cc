@@ -384,14 +384,14 @@ public:
 				if (blnOptionalHeadMap) //there was een optional head map. write it to the sector
 				//The Sector Head Map has one entry for each sector, and contains the logical Head ID for the corresponding sector in the Sector Numbering Map.
 				{
-					sector->physicalHead = header.Head;
+					sector->physicalSide = header.Head;
 					sector->logicalSide = optionalhead_map[s];
 					blnOptionalHeadMap = false;
 				}
 				else 
 				{
 					sector->logicalSide = header.Head;
-                    sector->physicalHead = header.Head;
+                    sector->physicalSide = header.Head;
 				}
             }
 

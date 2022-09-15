@@ -51,11 +51,11 @@ public:
     }
 
 public:
-    std::unique_ptr<FluxSourceIterator> readFlux(int track, int head) override
+    std::unique_ptr<FluxSourceIterator> readFlux(int physicalTrack, int physicalSide) override
     {
         for (const auto& trackFlux : _flux.tracks)
         {
-			if ((trackFlux->location.physicalTrack == track) && (trackFlux->location.head == head))
+			if ((trackFlux->location.physicalTrack == physicalTrack) && (trackFlux->location.physicalSide == physicalSide))
 				return std::make_unique<MemoryFluxSourceIterator>(*trackFlux);
         }
 

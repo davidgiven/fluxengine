@@ -163,10 +163,9 @@ BadSectorsState combineRecordAndSectors(
         track_sectors.insert(
             trackdataflux->sectors.begin(), trackdataflux->sectors.end());
 
-    for (unsigned logical_sector : decoder.requiredSectors(trackFlux.location))
+    for (auto& logicalLocation : decoder.requiredSectors(trackFlux.location))
     {
-        auto sector = std::make_shared<Sector>(location);
-        sector->logicalSector = logical_sector;
+        auto sector = std::make_shared<Sector>(logicalLocation);
         sector->status = Sector::MISSING;
         track_sectors.insert(sector);
     }
@@ -192,12 +191,12 @@ ReadResult readGroup(FluxSourceIteratorHolder& fluxSourceIteratorHolder,
          offset += config.drive().head_width())
     {
         auto& fluxSourceIterator = fluxSourceIteratorHolder.getIterator(
-            location.physicalTrack + offset, location.head);
+            location.physicalTrack + offset, location.physicalSide);
         if (!fluxSourceIterator.hasNext())
             continue;
 
         Logger() << BeginReadOperationLogMessage{
-            location.physicalTrack + offset, location.head};
+            location.physicalTrack + offset, location.physicalSide};
         std::shared_ptr<const Fluxmap> fluxmap = fluxSourceIterator.next();
         // ->rescale(
         //     1.0 / config.flux_source().rescale());
@@ -248,7 +247,7 @@ void writeTracks(FluxSink& fluxSink,
                 unsigned physicalTrack = location.physicalTrack + offset;
 
                 Logger() << BeginWriteOperationLogMessage{
-                    physicalTrack, location.head};
+                    physicalTrack, location.physicalSide};
 
                 if (offset == config.drive().group_offset())
                 {
@@ -256,7 +255,8 @@ void writeTracks(FluxSink& fluxSink,
                     if (!fluxmap)
                         goto erase;
 
-                    fluxSink.writeFlux(physicalTrack, location.head, *fluxmap);
+                    fluxSink.writeFlux(
+                        physicalTrack, location.physicalSide, *fluxmap);
                     Logger() << fmt::format("writing {0} ms in {1} bytes",
                         int(fluxmap->duration() / 1e6),
                         fluxmap->bytes());
@@ -267,7 +267,8 @@ void writeTracks(FluxSink& fluxSink,
                     /* Erase this track rather than writing. */
 
                     Fluxmap blank;
-                    fluxSink.writeFlux(physicalTrack, location.head, blank);
+                    fluxSink.writeFlux(
+                        physicalTrack, location.physicalSide, blank);
                     Logger() << "erased";
                 }
 
@@ -301,7 +302,10 @@ void writeTracks(FluxSink& fluxSink,
             auto sectors = encoder.collectSectors(location, image);
             return encoder.encode(location, sectors, image);
         },
-        [](const auto&) { return true; },
+        [](const auto&)
+        {
+            return true;
+        },
         locations);
 }
 
@@ -401,10 +405,14 @@ void writeRawDiskCommand(FluxSource& fluxSource, FluxSink& fluxSink)
         fluxSink,
         [&](const Location& location)
         {
-            return fluxSource.readFlux(location.physicalTrack, location.head)
+            return fluxSource
+                .readFlux(location.physicalTrack, location.physicalSide)
                 ->next();
         },
-        [](const auto&){return true;},
+        [](const auto&)
+        {
+            return true;
+        },
         Layout::computeLocations());
 }
 
@@ -468,8 +476,9 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
         if (outputFluxSink)
         {
             for (const auto& data : trackFlux->trackDatas)
-                outputFluxSink->writeFlux(
-                    location.physicalTrack, location.head, *data->fluxmap);
+                outputFluxSink->writeFlux(location.physicalTrack,
+                    location.physicalSide,
+                    *data->fluxmap);
         }
 
         if (config.decoder().dump_records())

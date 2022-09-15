@@ -15,14 +15,12 @@ layout {
 	sides: 1
 	layoutdata {
 		sector_size: 256
-		physical {
-			start_sector: 0
-		}
 	}
 	layoutdata {
 		track: 0
 		up_to_track: 16
 		physical {
+			start_sector: 0
 			count: 21
 		}
 	}
@@ -30,6 +28,7 @@ layout {
 		track: 17
 		up_to_track: 23
 		physical {
+			start_sector: 0
 			count: 19
 		}
 	}
@@ -37,6 +36,7 @@ layout {
 		track: 24
 		up_to_track: 29
 		physical {
+			start_sector: 0
 			count: 18
 		}
 	}
@@ -44,6 +44,7 @@ layout {
 		track: 30
 		up_to_track: 39
 		physical {
+			start_sector: 0
 			count: 17
 		}
 	}

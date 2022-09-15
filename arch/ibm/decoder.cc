@@ -141,7 +141,7 @@ public:
 
         IbmDecoderProto::TrackdataProto trackdata;
         getTrackFormat(
-            trackdata, _sector->physicalTrack, _sector->physicalHead);
+            trackdata, _sector->physicalTrack, _sector->physicalSide);
 
         _sector->logicalTrack = br.read_8();
         _sector->logicalSide = br.read_8();
@@ -154,7 +154,8 @@ public:
                 Sector::DATA_MISSING; /* correct but unintuitive */
 
         if (trackdata.ignore_side_byte())
-            _sector->logicalSide = _sector->physicalHead;
+            _sector->logicalSide =
+                Layout::remapSidePhysicalToLogical(_sector->physicalSide);
         _sector->logicalSide ^= trackdata.invert_side_byte();
         if (trackdata.ignore_track_byte())
             _sector->logicalTrack = _sector->physicalTrack;
