@@ -133,7 +133,7 @@ std::shared_ptr<const TrackDataFlux> Decoder::decodeToSectors(
 
         if (_sector->status != Sector::MISSING)
         {
-            auto& trackLayout = Layout::getLayoutOfTrack(
+            auto trackLayout = Layout::getLayoutOfTrack(
                 _sector->logicalTrack, _sector->logicalSide);
             _trackdata->sectors.push_back(_sector);
         }
@@ -224,12 +224,12 @@ uint64_t Decoder::readRaw64()
 std::set<LogicalLocation> Decoder::requiredSectors(
     const Location& location) const
 {
-    const auto& trackLayout =
+    const auto trackLayout =
         Layout::getLayoutOfTrackPhysical(location.physicalTrack, location.physicalSide);
 
     std::set<LogicalLocation> results;
-    for (unsigned sectorId : trackLayout.logicalSectorOrder)
+    for (unsigned sectorId : trackLayout->logicalSectorOrder)
         results.insert(LogicalLocation{
-            trackLayout.logicalTrack, trackLayout.logicalSide, sectorId});
+            trackLayout->logicalTrack, trackLayout->logicalSide, sectorId});
     return results;
 }

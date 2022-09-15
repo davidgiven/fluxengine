@@ -4,7 +4,7 @@
 #include "lib/environment.h"
 #include <fmt/format.h>
 
-static Local<std::map<std::pair<int, int>, std::unique_ptr<Layout>>>
+static Local<std::map<std::pair<int, int>, std::shared_ptr<Layout>>>
     layoutCache;
 
 static unsigned getTrackStep()
@@ -141,13 +141,13 @@ std::vector<unsigned> Layout::expandSectorList(
     return sectors;
 }
 
-const Layout& Layout::getLayoutOfTrack(
+std::shared_ptr<const Layout> Layout::getLayoutOfTrack(
     unsigned logicalTrack, unsigned logicalSide)
 {
     auto& layout = (*layoutCache)[std::make_pair(logicalTrack, logicalSide)];
     if (!layout)
     {
-        layout.reset(new Layout());
+    	layout = std::make_shared<Layout>();
 
         LayoutProto::LayoutdataProto layoutdata;
         for (const auto& f : config.layout().layoutdata())
@@ -203,10 +203,10 @@ const Layout& Layout::getLayoutOfTrack(
         }
     }
 
-    return *layout;
+    return layout;
 }
 
-const Layout& Layout::getLayoutOfTrackPhysical(
+std::shared_ptr<const Layout> Layout::getLayoutOfTrackPhysical(
     unsigned physicalTrack, unsigned physicalSide)
 {
     return getLayoutOfTrack(remapTrackPhysicalToLogical(physicalTrack),

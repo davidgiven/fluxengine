@@ -62,7 +62,7 @@ public:
         {
             unsigned track = trackid.first;
             unsigned side = trackid.second;
-            auto& trackLayout = Layout::getLayoutOfTrack(track, side);
+            auto trackLayout = Layout::getLayoutOfTrack(track, side);
             locations.insert(Layout::computeLocationFor(track, side));
 
             /* If we don't have all the sectors of this track, we may need to
@@ -72,7 +72,7 @@ public:
             if (!imageContainsAllSectorsOf(_changedSectors,
                     track,
                     side,
-                    trackLayout.logicalSectorOrder))
+                    trackLayout->logicalSectorOrder))
             {
                 /* If we don't have any loaded sectors for this track, pre-read
                  * it. */
@@ -83,7 +83,7 @@ public:
                 /* Now merge the loaded track with the changed one, and write
                  * the result back. */
 
-                for (unsigned sectorId : trackLayout.logicalSectorOrder)
+                for (unsigned sectorId : trackLayout->logicalSectorOrder)
                 {
                     if (!_changedSectors.contains(track, side, sectorId))
                         _changedSectors.put(track, side, sectorId)->data =

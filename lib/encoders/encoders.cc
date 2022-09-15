@@ -67,9 +67,9 @@ std::vector<std::shared_ptr<const Sector>> Encoder::collectSectors(
 {
     std::vector<std::shared_ptr<const Sector>> sectors;
 
-    const auto& trackLayout =
+    const auto trackLayout =
         Layout::getLayoutOfTrack(location.logicalTrack, location.logicalSide);
-    for (unsigned sectorId : trackLayout.diskSectorOrder)
+    for (unsigned sectorId : trackLayout->diskSectorOrder)
     {
         const auto& sector = getSector(location, image, sectorId);
         if (!sector)

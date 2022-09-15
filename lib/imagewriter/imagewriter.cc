@@ -213,12 +213,12 @@ void ImageWriter::writeMappedImage(const Image& image)
         std::set<std::shared_ptr<const Sector>> sectors;
         for (const auto& e : image)
         {
-            auto& trackLayout =
+            auto trackLayout =
                 Layout::getLayoutOfTrack(e->logicalTrack, e->logicalSide);
             auto newSector = std::make_shared<Sector>();
             *newSector = *e;
             newSector->logicalSector =
-                trackLayout.logicalToFilesystemSectorMap.at(e->logicalSector);
+                trackLayout->logicalToFilesystemSectorMap.at(e->logicalSector);
             sectors.insert(newSector);
         }
 

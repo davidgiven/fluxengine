@@ -45,11 +45,11 @@ public:
         unsigned guessedTracks = 0, unsigned guessedSides = 0);
 
     /* Returns the layout of a given track. */
-    static const Layout& getLayoutOfTrack(
+    static std::shared_ptr<const Layout> getLayoutOfTrack(
         unsigned logicalTrack, unsigned logicalHead);
 
     /* Returns the layout of a given track via physical location. */
-    static const Layout& getLayoutOfTrackPhysical(
+    static std::shared_ptr<const Layout> getLayoutOfTrackPhysical(
         unsigned physicalTrack, unsigned physicalSide);
 
     /* Expand a SectorList into the actual sector IDs. */

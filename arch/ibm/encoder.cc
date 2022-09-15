@@ -114,7 +114,7 @@ public:
         IbmEncoderProto::TrackdataProto trackdata;
         getEncoderTrackData(trackdata, location.logicalTrack, location.logicalSide);
 
-        auto& trackLayout =
+        auto trackLayout =
             Layout::getLayoutOfTrack(location.logicalTrack, location.logicalSide);
 
         auto writeBytes = [&](const Bytes& bytes)
@@ -151,7 +151,7 @@ public:
 
         uint8_t sectorSize = 0;
         {
-            int s = trackLayout.sectorSize >> 7;
+            int s = trackLayout->sectorSize >> 7;
             while (s > 1)
             {
                 s >>= 1;
@@ -237,7 +237,7 @@ public:
                 bw.write_8(damUnencoded);
 
                 Bytes truncatedData =
-                    sectorData->data.slice(0, trackLayout.sectorSize);
+                    sectorData->data.slice(0, trackLayout->sectorSize);
                 bw += truncatedData;
                 uint16_t crc = crc16(CCITT_POLY, data);
                 bw.write_be16(crc);
