@@ -8,7 +8,7 @@ class wxScrollBar;
 class wxScrollEvent;
 class Sector;
 class Record;
-class Track;
+class TrackInfo;
 
 class FluxViewerControl : public wxWindow
 {
@@ -27,11 +27,11 @@ public:
 private:
     void UpdateScale();
     void ShowSectorMenu(std::shared_ptr<const Sector> sector);
-    void ShowRecordMenu(std::shared_ptr<const Track>& layout,
+    void ShowRecordMenu(std::shared_ptr<const TrackInfo>& layout,
         std::shared_ptr<const Record> record);
     void DisplayDecodedData(std::shared_ptr<const Sector> sector);
     void DisplayRawData(std::shared_ptr<const Sector> sector);
-    void DisplayRawData(std::shared_ptr<const Track>& layout,
+    void DisplayRawData(std::shared_ptr<const TrackInfo>& layout,
         std::shared_ptr<const Record> record);
 
 private:

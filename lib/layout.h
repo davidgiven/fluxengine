@@ -4,7 +4,7 @@
 #include "lib/flux.h"
 
 class SectorListProto;
-class Track;
+class TrackInfo;
 
 class Layout
 {
@@ -25,7 +25,7 @@ public:
     /* Uses the layout and current track and heads settings to determine
      * which Locations are going to be read from or written to. 8/
      */
-    static std::vector<std::shared_ptr<const Track>> computeLocations();
+    static std::vector<std::shared_ptr<const TrackInfo>> computeLocations();
 
     /* Returns a series of <track, side> pairs representing the filesystem
      * ordering of the disk, in logical numbers. */
@@ -33,11 +33,11 @@ public:
         unsigned guessedTracks = 0, unsigned guessedSides = 0);
 
     /* Returns the layout of a given track. */
-    static std::shared_ptr<const Track> getLayoutOfTrack(
+    static std::shared_ptr<const TrackInfo> getLayoutOfTrack(
         unsigned logicalTrack, unsigned logicalHead);
 
     /* Returns the layout of a given track via physical location. */
-    static std::shared_ptr<const Track> getLayoutOfTrackPhysical(
+    static std::shared_ptr<const TrackInfo> getLayoutOfTrackPhysical(
         unsigned physicalTrack, unsigned physicalSide);
 
     /* Expand a SectorList into the actual sector IDs. */
@@ -45,14 +45,14 @@ public:
         const SectorListProto& sectorsProto);
 };
 
-class Track {
+class TrackInfo {
 public:
-	Track() {}
+	TrackInfo() {}
 
 private:
     /* Can't copy. */
-    Track(const Track&);
-    Track& operator=(const Track&);
+    TrackInfo(const TrackInfo&);
+    TrackInfo& operator=(const TrackInfo&);
 
 public:
     unsigned numTracks = 0;

@@ -10,7 +10,7 @@ Sector::Sector(const LogicalLocation& location):
 	physicalSide(Layout::remapSideLogicalToPhysical(location.logicalSide))
 {}
 
-Sector::Sector(std::shared_ptr<const Track>& layout, unsigned sectorId):
+Sector::Sector(std::shared_ptr<const TrackInfo>& layout, unsigned sectorId):
 	LogicalLocation({ layout->logicalTrack, layout->logicalSide, sectorId }),
     physicalTrack(layout->physicalTrack),
     physicalSide(layout->physicalSide)

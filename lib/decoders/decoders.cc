@@ -61,7 +61,7 @@ std::unique_ptr<Decoder> Decoder::create(const DecoderProto& config)
 }
 
 std::shared_ptr<TrackDataFlux> Decoder::decodeToSectors(
-    std::shared_ptr<const Fluxmap> fluxmap, std::shared_ptr<const Track>& layout)
+    std::shared_ptr<const Fluxmap> fluxmap, std::shared_ptr<const TrackInfo>& layout)
 {
     _trackdata = std::make_shared<TrackDataFlux>();
     _trackdata->fluxmap = fluxmap;
@@ -222,7 +222,7 @@ uint64_t Decoder::readRaw64()
 }
 
 std::set<LogicalLocation> Decoder::requiredSectors(
-    std::shared_ptr<const Track>& layout) const
+    std::shared_ptr<const TrackInfo>& layout) const
 {
     const auto trackLayout =
         Layout::getLayoutOfTrackPhysical(layout->physicalTrack, layout->physicalSide);

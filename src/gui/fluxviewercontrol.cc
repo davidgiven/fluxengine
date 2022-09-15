@@ -434,7 +434,7 @@ void FluxViewerControl::ShowSectorMenu(std::shared_ptr<const Sector> sector)
     PopupMenu(&menu, _mouseX, _mouseY);
 }
 
-void FluxViewerControl::ShowRecordMenu(std::shared_ptr<const Track>& layout,
+void FluxViewerControl::ShowRecordMenu(std::shared_ptr<const TrackInfo>& layout,
     std::shared_ptr<const Record> record)
 {
     wxMenu menu;
@@ -502,7 +502,7 @@ void FluxViewerControl::DisplayRawData(std::shared_ptr<const Sector> sector)
     TextViewerWindow::Create(this, title, s.str())->Show();
 }
 
-void FluxViewerControl::DisplayRawData(std::shared_ptr<const Track>& layout,
+void FluxViewerControl::DisplayRawData(std::shared_ptr<const TrackInfo>& layout,
     std::shared_ptr<const Record> record)
 {
     std::stringstream s;
