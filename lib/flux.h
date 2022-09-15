@@ -6,6 +6,7 @@
 class Fluxmap;
 class Sector;
 class Image;
+class Layout;
 
 struct Record
 {
@@ -15,34 +16,9 @@ struct Record
 	Bytes rawData;
 };
 
-struct Location
-{
-    unsigned physicalTrack;
-    unsigned physicalSide;
-    unsigned logicalTrack;
-	unsigned logicalSide;
-	unsigned groupSize;
-
-	bool operator==(const Location& other) const
-	{
-		return key() == other.key();
-	}
-
-    bool operator<(const Location& other) const
-    {
-		return key() < other.key();
-    }
-
-private:
-    std::tuple<unsigned, unsigned> key() const
-    {
-    	return std::make_tuple(physicalTrack, physicalSide);
-    }
-};
-
 struct TrackDataFlux
 {
-	Location location;
+	std::shared_ptr<const Layout> layout;
 	std::shared_ptr<const Fluxmap> fluxmap;
 	std::vector<std::shared_ptr<const Record>> records;
 	std::vector<std::shared_ptr<const Sector>> sectors;
@@ -50,14 +26,14 @@ struct TrackDataFlux
 
 struct TrackFlux
 {
-	Location location;
-	std::vector<std::shared_ptr<const TrackDataFlux>> trackDatas;
+	std::shared_ptr<const Layout> layout;
+	std::vector<std::shared_ptr<TrackDataFlux>> trackDatas;
 	std::set<std::shared_ptr<const Sector>> sectors;
 };
 
 struct DiskFlux
 {
-	std::vector<std::shared_ptr<const TrackFlux>> tracks;
+	std::vector<std::shared_ptr<TrackFlux>> tracks;
 	std::shared_ptr<const Image> image;
 };
 

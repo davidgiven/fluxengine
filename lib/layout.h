@@ -29,15 +29,10 @@ public:
     static unsigned remapSidePhysicalToLogical(unsigned physicalSide);
     static unsigned remapSideLogicalToPhysical(unsigned logicalSide);
 
-    /* Computes a Location for a given logical track and side, which
-     * contains the physical drive location and group size. */
-    static Location computeLocationFor(
-        unsigned logicalTrack, unsigned logicalSide);
-
     /* Uses the layout and current track and heads settings to determine
      * which Locations are going to be read from or written to. 8/
      */
-    static std::set<Location> computeLocations();
+    static std::vector<std::shared_ptr<const Layout>> computeLocations();
 
     /* Returns a series of <track, side> pairs representing the filesystem
      * ordering of the disk, in logical numbers. */
@@ -57,30 +52,30 @@ public:
         const SectorListProto& sectorsProto);
 
 public:
-    unsigned numTracks;
-    unsigned numSides;
+    unsigned numTracks = 0;
+    unsigned numSides = 0;
 
     /* The number of sectors in this track. */
-    unsigned numSectors;
+    unsigned numSectors = 0;
 
     /* Physical location of this track. */
-    unsigned physicalTrack;
+    unsigned physicalTrack = 0;
 
     /* Physical side of this track. */
-    unsigned physicalSide;
+    unsigned physicalSide = 0;
 
     /* Logical location of this track. */
-    unsigned logicalTrack;
+    unsigned logicalTrack = 0;
 
     /* Logical side of this track. */
-    unsigned logicalSide;
+    unsigned logicalSide = 0;
 
     /* The number of physical tracks which need to be written for one logical
      * track. */
-    unsigned groupSize;
+    unsigned groupSize = 0;
 
     /* Number of bytes in a sector. */
-    unsigned sectorSize;
+    unsigned sectorSize = 0;
 
     /* Sector IDs in disk order. */
     std::vector<unsigned> diskSectorOrder;

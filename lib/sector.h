@@ -5,7 +5,7 @@
 #include "fluxmap.h"
 
 class Record;
-class Location;
+class Layout;
 
 struct LogicalLocation
 {
@@ -65,9 +65,9 @@ struct Sector : public LogicalLocation
 
     Sector() {}
 
-    Sector(const LogicalLocation& location);
+    Sector(std::shared_ptr<const Layout>& layout, unsigned sectorId=0);
 
-    Sector(const Location& location);
+    Sector(const LogicalLocation& location);
 
     std::tuple<int, int, int, Status> key() const
     {

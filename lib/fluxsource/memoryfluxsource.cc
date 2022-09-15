@@ -3,6 +3,7 @@
 #include "lib/flux.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/fluxmap.h"
+#include "lib/layout.h"
 #include <fmt/format.h>
 #include <fstream>
 
@@ -40,6 +41,7 @@ class EmptyFluxSourceIterator : public FluxSourceIterator
 	std::unique_ptr<const Fluxmap> next() override
 	{
 		Error() << "no flux to read";
+		throw nullptr;
 	}
 };
 
@@ -55,7 +57,7 @@ public:
     {
         for (const auto& trackFlux : _flux.tracks)
         {
-			if ((trackFlux->location.physicalTrack == physicalTrack) && (trackFlux->location.physicalSide == physicalSide))
+			if ((trackFlux->layout->physicalTrack == physicalTrack) && (trackFlux->layout->physicalSide == physicalSide))
 				return std::make_unique<MemoryFluxSourceIterator>(*trackFlux);
         }
 

@@ -10,10 +10,10 @@ Sector::Sector(const LogicalLocation& location):
 	physicalSide(Layout::remapSideLogicalToPhysical(location.logicalSide))
 {}
 
-Sector::Sector(const Location& location):
-	LogicalLocation({ location.logicalTrack, location.logicalSide, 0 }),
-    physicalTrack(location.physicalTrack),
-    physicalSide(location.physicalSide)
+Sector::Sector(std::shared_ptr<const Layout>& layout, unsigned sectorId):
+	LogicalLocation({ layout->logicalTrack, layout->logicalSide, sectorId }),
+    physicalTrack(layout->physicalTrack),
+    physicalSide(layout->physicalSide)
 {}
 
 std::string Sector::statusToString(Status status)

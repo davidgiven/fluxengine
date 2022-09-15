@@ -9,6 +9,7 @@
 #include "fmt/format.h"
 #include "arch/victor9k/victor9k.pb.h"
 #include "lib/encoders/encoders.pb.h"
+#include "lib/layout.h"
 #include <ctype.h>
 #include "bytes.h"
 
@@ -163,12 +164,12 @@ private:
     }
 
 public:
-    std::unique_ptr<Fluxmap> encode(const Location& location,
+    std::unique_ptr<Fluxmap> encode(std::shared_ptr<const Layout>& layout,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
         Victor9kEncoderProto::TrackdataProto trackdata;
-        getTrackFormat(trackdata, location.logicalTrack, location.logicalSide);
+        getTrackFormat(trackdata, layout->logicalTrack, layout->logicalSide);
 
         unsigned bitsPerRevolution = (trackdata.rotational_period_ms() * 1e3) /
                                      trackdata.clock_period_us();

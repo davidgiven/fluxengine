@@ -56,14 +56,14 @@ public:
 
     void flushChanges() override
     {
-        std::set<Location> locations;
+        std::vector<std::shared_ptr<const Layout>> locations;
 
         for (const auto& trackid : _changedTracks)
         {
             unsigned track = trackid.first;
             unsigned side = trackid.second;
             auto trackLayout = Layout::getLayoutOfTrack(track, side);
-            locations.insert(Layout::computeLocationFor(track, side));
+            locations.push_back(trackLayout);
 
             /* If we don't have all the sectors of this track, we may need to
              * populate any non-changed sectors as we can only write a track at
@@ -128,8 +128,8 @@ private:
 
     void populateSectors(unsigned track, unsigned side)
     {
-        auto location = Layout::computeLocationFor(track, side);
-        auto trackdata = readAndDecodeTrack(*_fluxSource, *_decoder, location);
+        auto layout = Layout::getLayoutOfTrack(track, side);
+        auto trackdata = readAndDecodeTrack(*_fluxSource, *_decoder, layout);
 
         for (const auto& sector : trackdata->sectors)
             *_loadedSectors.put(track, side, sector->logicalSector) = *sector;

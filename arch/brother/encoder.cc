@@ -108,7 +108,7 @@ public:
 
 public:
     std::unique_ptr<Fluxmap> encode(
-		const Location& location,
+		std::shared_ptr<const Layout>& layout,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
