@@ -156,20 +156,28 @@ static std::set<std::shared_ptr<const Sector>> collectSectors(
 
 BadSectorsState combineRecordAndSectors(TrackFlux& trackFlux,
     Decoder& decoder,
-    std::shared_ptr<const TrackInfo>& layout)
+    std::shared_ptr<const TrackInfo>& trackLayout)
 {
     std::set<std::shared_ptr<const Sector>> track_sectors;
+
+    /* Add the sectors which were there. */
 
     for (auto& trackdataflux : trackFlux.trackDatas)
         track_sectors.insert(
             trackdataflux->sectors.begin(), trackdataflux->sectors.end());
 
-    for (auto& logicalLocation : decoder.requiredSectors(trackFlux.trackInfo))
+    /* Add the sectors which should be there. */
+
+    for (unsigned sectorId : trackLayout->logicalSectorOrder)
     {
-        auto sector = std::make_shared<Sector>(logicalLocation);
+        auto sector = std::make_shared<Sector>(LogicalLocation{
+            trackLayout->logicalTrack, trackLayout->logicalSide, sectorId});
+
         sector->status = Sector::MISSING;
         track_sectors.insert(sector);
     }
+
+    /* Deduplicate. */
 
     trackFlux.sectors = collectSectors(track_sectors);
     if (trackFlux.sectors.empty())
@@ -402,7 +410,7 @@ void writeDiskCommand(const Image& image,
 
 void writeRawDiskCommand(FluxSource& fluxSource, FluxSink& fluxSink)
 {
-	auto locations = Layout::computeLocations();
+    auto locations = Layout::computeLocations();
     writeTracks(
         fluxSink,
         [&](std::shared_ptr<const TrackInfo>& layout)

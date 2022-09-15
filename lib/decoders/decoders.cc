@@ -61,7 +61,8 @@ std::unique_ptr<Decoder> Decoder::create(const DecoderProto& config)
 }
 
 std::shared_ptr<TrackDataFlux> Decoder::decodeToSectors(
-    std::shared_ptr<const Fluxmap> fluxmap, std::shared_ptr<const TrackInfo>& trackInfo)
+    std::shared_ptr<const Fluxmap> fluxmap,
+    std::shared_ptr<const TrackInfo>& trackInfo)
 {
     _trackdata = std::make_shared<TrackDataFlux>();
     _trackdata->fluxmap = fluxmap;
@@ -219,17 +220,4 @@ uint64_t Decoder::readRaw48()
 uint64_t Decoder::readRaw64()
 {
     return toBytes(readRawBits(64)).reader().read_be64();
-}
-
-std::set<LogicalLocation> Decoder::requiredSectors(
-    std::shared_ptr<const TrackInfo>& trackInfo) const
-{
-    const auto trackLayout =
-        Layout::getLayoutOfTrackPhysical(trackInfo->physicalTrack, trackInfo->physicalSide);
-
-    std::set<LogicalLocation> results;
-    for (unsigned sectorId : trackLayout->logicalSectorOrder)
-        results.insert(LogicalLocation{
-            trackLayout->logicalTrack, trackLayout->logicalSide, sectorId});
-    return results;
 }

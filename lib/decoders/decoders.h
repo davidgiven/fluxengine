@@ -89,9 +89,6 @@ public:
         return _fmr->getDuration();
     }
 
-    virtual std::set<LogicalLocation> requiredSectors(
-        std::shared_ptr<const TrackInfo>& trackInfo) const;
-
 protected:
     virtual void beginTrack(){};
     virtual nanoseconds_t advanceToNextRecord() = 0;
