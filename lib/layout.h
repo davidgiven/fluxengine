@@ -4,17 +4,10 @@
 #include "lib/flux.h"
 
 class SectorListProto;
+class Track;
 
 class Layout
 {
-public:
-    Layout() {}
-
-private:
-    /* Can't copy. */
-    Layout(const Layout&);
-    Layout& operator=(const Layout&);
-
 public:
     /* Translates logical track numbering (the numbers actually written in the
      * sector headers) to the track numbering on the actual drive, taking into
@@ -32,7 +25,7 @@ public:
     /* Uses the layout and current track and heads settings to determine
      * which Locations are going to be read from or written to. 8/
      */
-    static std::vector<std::shared_ptr<const Layout>> computeLocations();
+    static std::vector<std::shared_ptr<const Track>> computeLocations();
 
     /* Returns a series of <track, side> pairs representing the filesystem
      * ordering of the disk, in logical numbers. */
@@ -40,16 +33,26 @@ public:
         unsigned guessedTracks = 0, unsigned guessedSides = 0);
 
     /* Returns the layout of a given track. */
-    static std::shared_ptr<const Layout> getLayoutOfTrack(
+    static std::shared_ptr<const Track> getLayoutOfTrack(
         unsigned logicalTrack, unsigned logicalHead);
 
     /* Returns the layout of a given track via physical location. */
-    static std::shared_ptr<const Layout> getLayoutOfTrackPhysical(
+    static std::shared_ptr<const Track> getLayoutOfTrackPhysical(
         unsigned physicalTrack, unsigned physicalSide);
 
     /* Expand a SectorList into the actual sector IDs. */
     static std::vector<unsigned> expandSectorList(
         const SectorListProto& sectorsProto);
+};
+
+class Track {
+public:
+	Track() {}
+
+private:
+    /* Can't copy. */
+    Track(const Track&);
+    Track& operator=(const Track&);
 
 public:
     unsigned numTracks = 0;

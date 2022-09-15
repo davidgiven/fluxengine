@@ -5,7 +5,7 @@
 #include "fluxmap.h"
 
 class Record;
-class Layout;
+class Track;
 
 struct LogicalLocation
 {
@@ -65,7 +65,7 @@ struct Sector : public LogicalLocation
 
     Sector() {}
 
-    Sector(std::shared_ptr<const Layout>& layout, unsigned sectorId=0);
+    Sector(std::shared_ptr<const Track>& layout, unsigned sectorId=0);
 
     Sector(const LogicalLocation& location);
 

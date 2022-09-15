@@ -156,7 +156,7 @@ static std::set<std::shared_ptr<const Sector>> collectSectors(
 
 BadSectorsState combineRecordAndSectors(TrackFlux& trackFlux,
     Decoder& decoder,
-    std::shared_ptr<const Layout>& layout)
+    std::shared_ptr<const Track>& layout)
 {
     std::set<std::shared_ptr<const Sector>> track_sectors;
 
@@ -182,7 +182,7 @@ BadSectorsState combineRecordAndSectors(TrackFlux& trackFlux,
 }
 
 ReadResult readGroup(FluxSourceIteratorHolder& fluxSourceIteratorHolder,
-    std::shared_ptr<const Layout>& layout,
+    std::shared_ptr<const Track>& layout,
     TrackFlux& trackFlux,
     Decoder& decoder)
 {
@@ -224,9 +224,9 @@ ReadResult readGroup(FluxSourceIteratorHolder& fluxSourceIteratorHolder,
 
 void writeTracks(FluxSink& fluxSink,
     std::function<std::unique_ptr<const Fluxmap>(
-        std::shared_ptr<const Layout>& layout)> producer,
-    std::function<bool(std::shared_ptr<const Layout>& layout)> verifier,
-    std::vector<std::shared_ptr<const Layout>>& layouts)
+        std::shared_ptr<const Track>& layout)> producer,
+    std::function<bool(std::shared_ptr<const Track>& layout)> verifier,
+    std::vector<std::shared_ptr<const Track>>& layouts)
 {
     Logger() << BeginOperationLogMessage{"Encoding and writing to disk"};
 
@@ -294,11 +294,11 @@ void writeTracks(FluxSink& fluxSink,
 void writeTracks(FluxSink& fluxSink,
     Encoder& encoder,
     const Image& image,
-    std::vector<std::shared_ptr<const Layout>>& layouts)
+    std::vector<std::shared_ptr<const Track>>& layouts)
 {
     writeTracks(
         fluxSink,
-        [&](std::shared_ptr<const Layout>& layout)
+        [&](std::shared_ptr<const Track>& layout)
         {
             auto sectors = encoder.collectSectors(layout, image);
             return encoder.encode(layout, sectors, image);
@@ -315,16 +315,16 @@ void writeTracksAndVerify(FluxSink& fluxSink,
     FluxSource& fluxSource,
     Decoder& decoder,
     const Image& image,
-    std::vector<std::shared_ptr<const Layout>>& locations)
+    std::vector<std::shared_ptr<const Track>>& locations)
 {
     writeTracks(
         fluxSink,
-        [&](std::shared_ptr<const Layout>& layout)
+        [&](std::shared_ptr<const Track>& layout)
         {
             auto sectors = encoder.collectSectors(layout, image);
             return encoder.encode(layout, sectors, image);
         },
-        [&](std::shared_ptr<const Layout>& layout)
+        [&](std::shared_ptr<const Track>& layout)
         {
             auto trackFlux = std::make_shared<TrackFlux>();
             trackFlux->layout = layout;
@@ -381,7 +381,7 @@ void writeDiskCommand(const Image& image,
     FluxSink& fluxSink,
     Decoder* decoder,
     FluxSource* fluxSource,
-    std::vector<std::shared_ptr<const Layout>>& locations)
+    std::vector<std::shared_ptr<const Track>>& locations)
 {
     if (fluxSource && decoder)
         writeTracksAndVerify(
@@ -405,7 +405,7 @@ void writeRawDiskCommand(FluxSource& fluxSource, FluxSink& fluxSink)
 	auto locations = Layout::computeLocations();
     writeTracks(
         fluxSink,
-        [&](std::shared_ptr<const Layout>& layout)
+        [&](std::shared_ptr<const Track>& layout)
         {
             return fluxSource
                 .readFlux(layout->physicalTrack, layout->physicalSide)
@@ -420,7 +420,7 @@ void writeRawDiskCommand(FluxSource& fluxSource, FluxSink& fluxSink)
 
 std::shared_ptr<TrackFlux> readAndDecodeTrack(FluxSource& fluxSource,
     Decoder& decoder,
-    std::shared_ptr<const Layout>& layout)
+    std::shared_ptr<const Track>& layout)
 {
     auto trackFlux = std::make_shared<TrackFlux>();
     trackFlux->layout = layout;

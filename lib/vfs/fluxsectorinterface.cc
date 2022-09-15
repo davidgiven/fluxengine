@@ -56,7 +56,7 @@ public:
 
     void flushChanges() override
     {
-        std::vector<std::shared_ptr<const Layout>> locations;
+        std::vector<std::shared_ptr<const Track>> locations;
 
         for (const auto& trackid : _changedTracks)
         {

@@ -4,7 +4,7 @@
 #include "lib/environment.h"
 #include <fmt/format.h>
 
-static Local<std::map<std::pair<int, int>, std::shared_ptr<Layout>>>
+static Local<std::map<std::pair<int, int>, std::shared_ptr<Track>>>
     layoutCache;
 
 static unsigned getTrackStep()
@@ -38,7 +38,7 @@ unsigned Layout::remapSideLogicalToPhysical(unsigned lside)
     return lside ^ config.layout().swap_sides();
 }
 
-std::vector<std::shared_ptr<const Layout>> Layout::computeLocations()
+std::vector<std::shared_ptr<const Track>> Layout::computeLocations()
 {
     std::set<unsigned> tracks;
     if (config.has_tracks())
@@ -52,7 +52,7 @@ std::vector<std::shared_ptr<const Layout>> Layout::computeLocations()
     else
         heads = iterate(0, config.layout().sides());
 
-    std::vector<std::shared_ptr<const Layout>> locations;
+    std::vector<std::shared_ptr<const Track>> locations;
     for (unsigned logicalTrack : tracks)
     {
         for (unsigned logicalHead : heads)
@@ -125,13 +125,13 @@ std::vector<unsigned> Layout::expandSectorList(
     return sectors;
 }
 
-std::shared_ptr<const Layout> Layout::getLayoutOfTrack(
+std::shared_ptr<const Track> Layout::getLayoutOfTrack(
     unsigned logicalTrack, unsigned logicalSide)
 {
     auto& layout = (*layoutCache)[std::make_pair(logicalTrack, logicalSide)];
     if (!layout)
     {
-    	layout = std::make_shared<Layout>();
+    	layout = std::make_shared<Track>();
 
         LayoutProto::LayoutdataProto layoutdata;
         for (const auto& f : config.layout().layoutdata())
@@ -190,7 +190,7 @@ std::shared_ptr<const Layout> Layout::getLayoutOfTrack(
     return layout;
 }
 
-std::shared_ptr<const Layout> Layout::getLayoutOfTrackPhysical(
+std::shared_ptr<const Track> Layout::getLayoutOfTrackPhysical(
     unsigned physicalTrack, unsigned physicalSide)
 {
     return getLayoutOfTrack(remapTrackPhysicalToLogical(physicalTrack),
