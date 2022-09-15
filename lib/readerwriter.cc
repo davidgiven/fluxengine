@@ -164,7 +164,7 @@ BadSectorsState combineRecordAndSectors(TrackFlux& trackFlux,
         track_sectors.insert(
             trackdataflux->sectors.begin(), trackdataflux->sectors.end());
 
-    for (auto& logicalLocation : decoder.requiredSectors(trackFlux.layout))
+    for (auto& logicalLocation : decoder.requiredSectors(trackFlux.trackInfo))
     {
         auto sector = std::make_shared<Sector>(logicalLocation);
         sector->status = Sector::MISSING;
@@ -324,13 +324,13 @@ void writeTracksAndVerify(FluxSink& fluxSink,
             auto sectors = encoder.collectSectors(layout, image);
             return encoder.encode(layout, sectors, image);
         },
-        [&](std::shared_ptr<const TrackInfo>& layout)
+        [&](std::shared_ptr<const TrackInfo>& trackInfo)
         {
             auto trackFlux = std::make_shared<TrackFlux>();
-            trackFlux->layout = layout;
+            trackFlux->trackInfo = trackInfo;
             FluxSourceIteratorHolder fluxSourceIteratorHolder(fluxSource);
             auto result = readGroup(
-                fluxSourceIteratorHolder, layout, *trackFlux, decoder);
+                fluxSourceIteratorHolder, trackInfo, *trackFlux, decoder);
             Logger() << TrackReadLogMessage{trackFlux};
 
             if (result != GOOD_READ)
@@ -340,7 +340,7 @@ void writeTracksAndVerify(FluxSink& fluxSink,
             }
 
             Image wanted;
-            for (const auto& sector : encoder.collectSectors(layout, image))
+            for (const auto& sector : encoder.collectSectors(trackInfo, image))
                 wanted
                     .put(sector->logicalTrack,
                         sector->logicalSide,
@@ -423,7 +423,7 @@ std::shared_ptr<TrackFlux> readAndDecodeTrack(FluxSource& fluxSource,
     std::shared_ptr<const TrackInfo>& layout)
 {
     auto trackFlux = std::make_shared<TrackFlux>();
-    trackFlux->layout = layout;
+    trackFlux->trackInfo = layout;
 
     FluxSourceIteratorHolder fluxSourceIteratorHolder(fluxSource);
     int retriesRemaining = config.decoder().retries();

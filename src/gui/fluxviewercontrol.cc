@@ -286,7 +286,7 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
                     text, {x + rp + BORDER, t2y - size.GetHeight() / 2});
 
                 if (_rightClicked && hovered)
-                    ShowRecordMenu(trackdata->layout, record);
+                    ShowRecordMenu(trackdata->trackInfo, record);
             }
 
             /* Flux chart. */

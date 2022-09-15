@@ -175,7 +175,7 @@ public:
     }
 
 public:
-    std::unique_ptr<Fluxmap> encode(std::shared_ptr<const TrackInfo>& layout,
+    std::unique_ptr<Fluxmap> encode(std::shared_ptr<const TrackInfo>& trackInfo,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
@@ -198,7 +198,7 @@ public:
         else
             _formatByte1 = _formatByte2 = 0;
 
-        double clockRateUs = clockPeriodForC64Track(layout->logicalTrack);
+        double clockRateUs = clockPeriodForC64Track(trackInfo->logicalTrack);
         int bitsPerRevolution = 200000.0 / clockRateUs;
 
         std::vector<bool> bits(bitsPerRevolution);

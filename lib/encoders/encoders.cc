@@ -57,9 +57,9 @@ nanoseconds_t Encoder::calculatePhysicalClockPeriod(
 }
 
 std::shared_ptr<const Sector> Encoder::getSector(
-    std::shared_ptr<const TrackInfo>& layout, const Image& image, unsigned sectorId)
+    std::shared_ptr<const TrackInfo>& trackInfo, const Image& image, unsigned sectorId)
 {
-    return image.get(layout->logicalTrack, layout->logicalSide, sectorId);
+    return image.get(trackInfo->logicalTrack, trackInfo->logicalSide, sectorId);
 }
 
 std::vector<std::shared_ptr<const Sector>> Encoder::collectSectors(

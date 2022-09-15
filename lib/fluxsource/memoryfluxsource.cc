@@ -57,7 +57,7 @@ public:
     {
         for (const auto& trackFlux : _flux.tracks)
         {
-			if ((trackFlux->layout->physicalTrack == physicalTrack) && (trackFlux->layout->physicalSide == physicalSide))
+			if ((trackFlux->trackInfo->physicalTrack == physicalTrack) && (trackFlux->trackInfo->physicalSide == physicalSide))
 				return std::make_unique<MemoryFluxSourceIterator>(*trackFlux);
         }
 

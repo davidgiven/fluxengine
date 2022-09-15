@@ -128,8 +128,8 @@ private:
 
     void populateSectors(unsigned track, unsigned side)
     {
-        auto layout = Layout::getLayoutOfTrack(track, side);
-        auto trackdata = readAndDecodeTrack(*_fluxSource, *_decoder, layout);
+        auto trackInfo = Layout::getLayoutOfTrack(track, side);
+        auto trackdata = readAndDecodeTrack(*_fluxSource, *_decoder, trackInfo);
 
         for (const auto& sector : trackdata->sectors)
             *_loadedSectors.put(track, side, sector->logicalSector) = *sector;

@@ -107,15 +107,15 @@ private:
     }
 
 public:
-    std::unique_ptr<Fluxmap> encode(std::shared_ptr<const TrackInfo>& layout,
+    std::unique_ptr<Fluxmap> encode(std::shared_ptr<const TrackInfo>& trackInfo,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
         IbmEncoderProto::TrackdataProto trackdata;
-        getEncoderTrackData(trackdata, layout->logicalTrack, layout->logicalSide);
+        getEncoderTrackData(trackdata, trackInfo->logicalTrack, trackInfo->logicalSide);
 
         auto trackLayout =
-            Layout::getLayoutOfTrack(layout->logicalTrack, layout->logicalSide);
+            Layout::getLayoutOfTrack(trackInfo->logicalTrack, trackInfo->logicalSide);
 
         auto writeBytes = [&](const Bytes& bytes)
         {
