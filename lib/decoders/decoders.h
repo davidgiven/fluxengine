@@ -89,7 +89,7 @@ public:
         return _fmr->getDuration();
     }
 
-    virtual std::set<unsigned> requiredSectors(const Location& location) const;
+    virtual std::set<LogicalLocation> requiredSectors(const Location& location) const;
 
 protected:
     virtual void beginTrack(){};

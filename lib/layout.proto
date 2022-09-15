@@ -28,11 +28,11 @@ message LayoutProto
     message LayoutdataProto
     {
         optional int32 track = 1
-            [ (help) = "if present, this format only applies to this track" ];
+            [ (help) = "if present, this format only applies to this logical track" ];
         optional int32 up_to_track = 5
             [ (help) = "if present, forms a range with track" ];
         optional int32 side = 2
-            [ (help) = "if present, this format only applies to this side" ];
+            [ (help) = "if present, this format only applies to this logical side" ];
 
         optional int32 sector_size = 3
             [ default = 512, (help) = "number of bytes per sector" ];
@@ -51,4 +51,6 @@ message LayoutProto
         [ default = 0, (help) = "number of sides in image" ];
     optional Order order = 4
         [ default = CHS, (help) = "the order of sectors in the filesystem" ];
+    optional bool swap_sides = 5
+    	[ default = false, (help) = "the sides are inverted on this disk" ];
 }

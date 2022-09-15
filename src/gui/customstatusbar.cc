@@ -20,7 +20,7 @@ CustomStatusBar::CustomStatusBar(wxWindow* parent, wxWindowID id):
     static const int widths[] = {-1, 200, 100, 20};
     SetStatusWidths(4, widths);
 
-    static const int styles[] = { wxSB_FLAT, wxSB_FLAT, wxSB_FLAT, wxSB_FLAT };
+    static const int styles[] = {wxSB_FLAT, wxSB_FLAT, wxSB_FLAT, wxSB_FLAT};
     SetStatusStyles(4, styles);
 
     _progressBar.reset(new wxGauge(this,
@@ -99,7 +99,7 @@ void CustomStatusBar::SetProgress(int amount)
 
 void CustomStatusBar::SetLeftLabel(const std::string& text)
 {
-	SetStatusText(text, 0);
+    SetStatusText(text, 0);
 }
 
 void CustomStatusBar::SetRightLabel(const std::string& text)

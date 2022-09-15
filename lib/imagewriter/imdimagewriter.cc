@@ -266,7 +266,7 @@ public:
 						{
 							blnOptionalCylinderMap = true;
 						}
-						if 	(sector->logicalSide != sector->physicalHead)	//different physicalside fromn logicalside
+						if 	(sector->logicalSide != sector->physicalSide)	//different physicalside fromn logicalside
 						{
 							blnOptionalHeadMap = true;
 						}

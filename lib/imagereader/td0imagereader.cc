@@ -112,7 +112,7 @@ public:
                 break;
 
             uint8_t physicalTrack = br.read_8();
-            uint8_t physicalHead = br.read_8() & 1;
+            uint8_t physicalSide = br.read_8() & 1;
             br.skip(1); /* crc */
 
             for (int i = 0; i < sectorCount; i++)
@@ -186,7 +186,7 @@ public:
                     image->put(logicalTrack, logicalSide, sectorId);
                 sector->status = Sector::OK;
                 sector->physicalTrack = physicalTrack;
-                sector->physicalHead = physicalHead;
+                sector->physicalSide = physicalSide;
                 sector->data = data.slice(0, sectorSize);
                 totalSize += sectorSize;
             }

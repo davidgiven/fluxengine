@@ -13,6 +13,7 @@ image_writer {
 layout {
 	tracks: 80
 	sides: 2
+	swap_sides: true
 	layoutdata {
 		sector_size: 512
 		physical {
@@ -25,8 +26,6 @@ layout {
 encoder {
 	ibm {
 		trackdata {
-			swap_sides: true
-			invert_side_byte: true
 			target_rotational_period_ms: 200
 			target_clock_period_us: 4
 			emit_iam: false
@@ -41,7 +40,6 @@ decoder {
 	ibm {
 		trackdata {
 			ignore_side_byte: true
-			invert_side_byte: true
 		}
 	}
 }

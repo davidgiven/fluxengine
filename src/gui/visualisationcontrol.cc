@@ -195,7 +195,7 @@ void VisualisationControl::OnPaint(wxPaintEvent&)
         if (it != _tracks.end())
             logicalText = fmt::format("logical: {}.{}",
                 it->second->location.logicalTrack,
-                it->second->location.head);
+                it->second->location.logicalSide);
 
         centreText(logicalText, h - 35);
     }
@@ -271,7 +271,7 @@ void VisualisationControl::Clear()
 
 void VisualisationControl::SetTrackData(std::shared_ptr<const TrackFlux> track)
 {
-    key_t key = {track->location.physicalTrack, track->location.head};
+    key_t key = {track->location.physicalTrack, track->location.physicalSide};
     _tracks[key] = track;
     _sectors.erase(key);
     for (auto& sector : track->sectors)
@@ -285,13 +285,14 @@ void VisualisationControl::SetDiskData(std::shared_ptr<const DiskFlux> disk)
     _sectors.clear();
     for (const auto& track : disk->tracks)
     {
-        key_t key = {track->location.physicalTrack, track->location.head};
+        key_t key = {
+            track->location.physicalTrack, track->location.physicalSide};
         _tracks[key] = track;
     }
 
     for (const auto& sector : *(disk->image))
     {
-        key_t key = {sector->physicalTrack, sector->physicalHead};
+        key_t key = {sector->physicalTrack, sector->physicalSide};
         _sectors.insert({key, sector});
     }
 

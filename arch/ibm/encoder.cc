@@ -107,34 +107,15 @@ private:
     }
 
 public:
-    std::shared_ptr<const Sector> getSector(
-        const Location& location, const Image& image, unsigned sectorId)
-    {
-        IbmEncoderProto::TrackdataProto trackdata;
-        getEncoderTrackData(trackdata, location.logicalTrack, location.head);
-
-        if (trackdata.swap_sides())
-        {
-            Location newLocation = location;
-            newLocation.head ^= 1;
-            auto sector = std::make_shared<Sector>(
-                *Encoder::getSector(newLocation, image, sectorId));
-            sector->logicalSide ^= 1;
-            return sector;
-        }
-        else
-            return image.get(location.logicalTrack, location.head, sectorId);
-    }
-
     std::unique_ptr<Fluxmap> encode(const Location& location,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
         IbmEncoderProto::TrackdataProto trackdata;
-        getEncoderTrackData(trackdata, location.logicalTrack, location.head);
+        getEncoderTrackData(trackdata, location.logicalTrack, location.logicalSide);
 
         auto& trackLayout =
-            Layout::getLayoutOfTrack(location.logicalTrack, location.head);
+            Layout::getLayoutOfTrack(location.logicalTrack, location.logicalSide);
 
         auto writeBytes = [&](const Bytes& bytes)
         {

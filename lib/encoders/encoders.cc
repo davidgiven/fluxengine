@@ -59,7 +59,7 @@ nanoseconds_t Encoder::calculatePhysicalClockPeriod(
 std::shared_ptr<const Sector> Encoder::getSector(
     const Location& location, const Image& image, unsigned sectorId)
 {
-    return image.get(location.logicalTrack, location.head, sectorId);
+    return image.get(location.logicalTrack, location.logicalSide, sectorId);
 }
 
 std::vector<std::shared_ptr<const Sector>> Encoder::collectSectors(
@@ -68,14 +68,14 @@ std::vector<std::shared_ptr<const Sector>> Encoder::collectSectors(
     std::vector<std::shared_ptr<const Sector>> sectors;
 
     const auto& trackLayout =
-        Layout::getLayoutOfTrack(location.logicalTrack, location.head);
+        Layout::getLayoutOfTrack(location.logicalTrack, location.logicalSide);
     for (unsigned sectorId : trackLayout.diskSectorOrder)
     {
         const auto& sector = getSector(location, image, sectorId);
         if (!sector)
             Error() << fmt::format("sector {}.{}.{} is missing from the image",
                 location.logicalTrack,
-                location.head,
+                location.logicalSide,
                 sectorId);
         sectors.push_back(sector);
     }

@@ -7,11 +7,6 @@
 static Local<std::map<std::pair<int, int>, std::unique_ptr<Layout>>>
     layoutCache;
 
-unsigned Layout::remapTrackPhysicalToLogical(unsigned ptrack)
-{
-    return (ptrack - config.drive().head_bias()) / config.drive().head_width();
-}
-
 static unsigned getTrackStep()
 {
     unsigned track_step =
@@ -23,15 +18,28 @@ static unsigned getTrackStep()
     return track_step;
 }
 
+unsigned Layout::remapTrackPhysicalToLogical(unsigned ptrack)
+{
+    return (ptrack - config.drive().head_bias()) / getTrackStep();
+}
+
 unsigned Layout::remapTrackLogicalToPhysical(unsigned ltrack)
 {
     return config.drive().head_bias() + ltrack * getTrackStep();
 }
 
+unsigned Layout::remapSidePhysicalToLogical(unsigned pside)
+{
+    return pside ^ config.layout().swap_sides();
+}
+
+unsigned Layout::remapSideLogicalToPhysical(unsigned lside)
+{
+    return lside ^ config.layout().swap_sides();
+}
+
 std::set<Location> Layout::computeLocations()
 {
-    std::set<Location> locations;
-
     std::set<unsigned> tracks;
     if (config.has_tracks())
         tracks = iterate(config.tracks());
@@ -44,32 +52,29 @@ std::set<Location> Layout::computeLocations()
     else
         heads = iterate(0, config.layout().sides());
 
+    std::set<Location> locations;
     for (unsigned logicalTrack : tracks)
     {
-        for (unsigned head : heads)
-            locations.insert(computeLocationFor(logicalTrack, head));
+        for (unsigned logicalHead : heads)
+            locations.insert(computeLocationFor(logicalTrack, logicalHead));
     }
-
     return locations;
 }
 
-Location Layout::computeLocationFor(unsigned logicalTrack, unsigned logicalHead)
+Location Layout::computeLocationFor(unsigned logicalTrack, unsigned logicalSide)
 {
     if ((logicalTrack < config.layout().tracks()) &&
-        (logicalHead < config.layout().sides()))
+        (logicalSide < config.layout().sides()))
     {
-        unsigned track_step = getTrackStep();
-        unsigned physicalTrack =
-            config.drive().head_bias() + logicalTrack * track_step;
-
-        return {.physicalTrack = physicalTrack,
+        return Location {.physicalTrack = remapTrackLogicalToPhysical(logicalTrack),
+        	.physicalSide = remapSideLogicalToPhysical(logicalSide),
             .logicalTrack = logicalTrack,
-            .head = logicalHead,
-            .groupSize = track_step};
+            .logicalSide = logicalSide,
+            .groupSize = getTrackStep()};
     }
 
     Error() << fmt::format(
-        "track {}.{} is not part of the image", logicalTrack, logicalHead);
+        "track {}.{} is not part of the image", logicalTrack, logicalSide);
 }
 
 std::vector<std::pair<int, int>> Layout::getTrackOrdering(
@@ -131,14 +136,15 @@ std::vector<unsigned> Layout::expandSectorList(
             sectors.push_back(sectorId);
     }
     else
-        Error() << "LAYOUT: no sectors in track!";
+        Error() << "LAYOUT: no sectors in sector definition!";
 
     return sectors;
 }
 
-const Layout& Layout::getLayoutOfTrack(unsigned track, unsigned side)
+const Layout& Layout::getLayoutOfTrack(
+    unsigned logicalTrack, unsigned logicalSide)
 {
-    auto& layout = (*layoutCache)[std::make_pair(track, side)];
+    auto& layout = (*layoutCache)[std::make_pair(logicalTrack, logicalSide)];
     if (!layout)
     {
         layout.reset(new Layout());
@@ -147,11 +153,13 @@ const Layout& Layout::getLayoutOfTrack(unsigned track, unsigned side)
         for (const auto& f : config.layout().layoutdata())
         {
             if (f.has_track() && f.has_up_to_track() &&
-                ((track < f.track()) || (track > f.up_to_track())))
+                ((logicalTrack < f.track()) ||
+                    (logicalTrack > f.up_to_track())))
                 continue;
-            if (f.has_track() && !f.has_up_to_track() && (track != f.track()))
+            if (f.has_track() && !f.has_up_to_track() &&
+                (logicalTrack != f.track()))
                 continue;
-            if (f.has_side() && (f.side() != side))
+            if (f.has_side() && (f.side() != logicalSide))
                 continue;
 
             layoutdata.MergeFrom(f);
@@ -160,6 +168,11 @@ const Layout& Layout::getLayoutOfTrack(unsigned track, unsigned side)
         layout->numTracks = config.layout().tracks();
         layout->numSides = config.layout().sides();
         layout->sectorSize = layoutdata.sector_size();
+        layout->logicalTrack = logicalTrack;
+        layout->logicalSide = logicalSide;
+        layout->physicalTrack = remapTrackLogicalToPhysical(logicalTrack);
+        layout->physicalSide = logicalSide ^ config.layout().swap_sides();
+        layout->groupSize = getTrackStep();
         layout->diskSectorOrder = expandSectorList(layoutdata.physical());
         layout->logicalSectorOrder = layout->diskSectorOrder;
         std::sort(
@@ -191,4 +204,11 @@ const Layout& Layout::getLayoutOfTrack(unsigned track, unsigned side)
     }
 
     return *layout;
+}
+
+const Layout& Layout::getLayoutOfTrackPhysical(
+    unsigned physicalTrack, unsigned physicalSide)
+{
+    return getLayoutOfTrack(remapTrackPhysicalToLogical(physicalTrack),
+        remapSidePhysicalToLogical(physicalSide));
 }

@@ -18,24 +18,25 @@ struct Record
 struct Location
 {
     unsigned physicalTrack;
+    unsigned physicalSide;
     unsigned logicalTrack;
-	unsigned head;
+	unsigned logicalSide;
 	unsigned groupSize;
 
 	bool operator==(const Location& other) const
 	{
-		if (physicalTrack == other.physicalTrack)
-			return true;
-		return head == other.head;
+		return key() == other.key();
 	}
 
     bool operator<(const Location& other) const
     {
-		if (physicalTrack < other.physicalTrack)
-			return true;
-		if (physicalTrack == other.physicalTrack)
-			return head < other.head;
-		return false;
+		return key() < other.key();
+    }
+
+private:
+    std::tuple<unsigned, unsigned> key() const
+    {
+    	return std::make_tuple(physicalTrack, physicalSide);
     }
 };
 
