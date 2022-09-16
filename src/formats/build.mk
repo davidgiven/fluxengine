@@ -32,6 +32,7 @@ FORMATS = \
 	brother240 \
 	commodore1541 \
 	commodore1581 \
+	cmd_fd2000 \
 	eco1 \
 	epsonpf10 \
 	f85 \
