@@ -4,7 +4,7 @@
 #include "lib/environment.h"
 #include <fmt/format.h>
 
-static Local<std::map<std::pair<int, int>, std::unique_ptr<Layout>>>
+static Local<std::map<std::pair<int, int>, std::shared_ptr<TrackInfo>>>
     layoutCache;
 
 static unsigned getTrackStep()
@@ -38,7 +38,7 @@ unsigned Layout::remapSideLogicalToPhysical(unsigned lside)
     return lside ^ config.layout().swap_sides();
 }
 
-std::set<Location> Layout::computeLocations()
+std::vector<std::shared_ptr<const TrackInfo>> Layout::computeLocations()
 {
     std::set<unsigned> tracks;
     if (config.has_tracks())
@@ -52,29 +52,13 @@ std::set<Location> Layout::computeLocations()
     else
         heads = iterate(0, config.layout().sides());
 
-    std::set<Location> locations;
+    std::vector<std::shared_ptr<const TrackInfo>> locations;
     for (unsigned logicalTrack : tracks)
     {
         for (unsigned logicalHead : heads)
-            locations.insert(computeLocationFor(logicalTrack, logicalHead));
+            locations.push_back(getLayoutOfTrack(logicalTrack, logicalHead));
     }
     return locations;
-}
-
-Location Layout::computeLocationFor(unsigned logicalTrack, unsigned logicalSide)
-{
-    if ((logicalTrack < config.layout().tracks()) &&
-        (logicalSide < config.layout().sides()))
-    {
-        return Location {.physicalTrack = remapTrackLogicalToPhysical(logicalTrack),
-        	.physicalSide = remapSideLogicalToPhysical(logicalSide),
-            .logicalTrack = logicalTrack,
-            .logicalSide = logicalSide,
-            .groupSize = getTrackStep()};
-    }
-
-    Error() << fmt::format(
-        "track {}.{} is not part of the image", logicalTrack, logicalSide);
 }
 
 std::vector<std::pair<int, int>> Layout::getTrackOrdering(
@@ -141,13 +125,13 @@ std::vector<unsigned> Layout::expandSectorList(
     return sectors;
 }
 
-const Layout& Layout::getLayoutOfTrack(
+std::shared_ptr<const TrackInfo> Layout::getLayoutOfTrack(
     unsigned logicalTrack, unsigned logicalSide)
 {
     auto& layout = (*layoutCache)[std::make_pair(logicalTrack, logicalSide)];
     if (!layout)
     {
-        layout.reset(new Layout());
+    	layout = std::make_shared<TrackInfo>();
 
         LayoutProto::LayoutdataProto layoutdata;
         for (const auto& f : config.layout().layoutdata())
@@ -203,10 +187,10 @@ const Layout& Layout::getLayoutOfTrack(
         }
     }
 
-    return *layout;
+    return layout;
 }
 
-const Layout& Layout::getLayoutOfTrackPhysical(
+std::shared_ptr<const TrackInfo> Layout::getLayoutOfTrackPhysical(
     unsigned physicalTrack, unsigned physicalSide)
 {
     return getLayoutOfTrack(remapTrackPhysicalToLogical(physicalTrack),

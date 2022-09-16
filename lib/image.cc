@@ -29,9 +29,9 @@ void Image::createBlankImage()
     {
         unsigned track = trackAndHead.first;
         unsigned side = trackAndHead.second;
-        auto& trackLayout = Layout::getLayoutOfTrack(track, side);
-        Bytes blank(trackLayout.sectorSize);
-        for (unsigned sectorId : trackLayout.logicalSectorOrder)
+        auto trackLayout = Layout::getLayoutOfTrack(track, side);
+        Bytes blank(trackLayout->sectorSize);
+        for (unsigned sectorId : trackLayout->logicalSectorOrder)
             put(track, side, sectorId)->data = blank;
     }
 }
@@ -62,7 +62,7 @@ std::shared_ptr<const Sector> Image::get(
 std::shared_ptr<Sector> Image::put(
     unsigned track, unsigned side, unsigned sectorid)
 {
-    auto& trackLayout = Layout::getLayoutOfTrack(track, side);
+    auto trackLayout = Layout::getLayoutOfTrack(track, side);
     key_t key = std::make_tuple(track, side, sectorid);
     std::shared_ptr<Sector> sector = std::make_shared<Sector>();
     sector->logicalTrack = track;

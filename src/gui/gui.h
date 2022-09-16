@@ -14,37 +14,37 @@ wxDECLARE_EVENT(UPDATE_STATE_EVENT, wxCommandEvent);
 template <typename R>
 static inline R runOnUiThread(std::function<R()> callback)
 {
-	R retvar;
-	runOnUiThread(
-		[&]() {
-			retvar = callback();
-		}
-	);
-	return retvar;
+    R retvar;
+    runOnUiThread(
+        [&]()
+        {
+            retvar = callback();
+        });
+    return retvar;
 }
 
 class FluxEngineApp : public wxApp, public wxThreadHelper
 {
 public:
     virtual bool OnInit();
-	void RunOnWorkerThread(std::function<void()> callback);
+    void RunOnWorkerThread(std::function<void()> callback);
 
 private:
-	void OnExec(const ExecEvent& event);
+    void OnExec(const ExecEvent& event);
 
 public:
-	bool IsWorkerThreadRunning() const;
+    bool IsWorkerThreadRunning() const;
 
 protected:
-	virtual wxThread::ExitCode Entry();
+    virtual wxThread::ExitCode Entry();
 
 private:
-	static wxWindow* CreateMainWindow();
-	void SendUpdateEvent();
+    static wxWindow* CreateMainWindow();
+    void SendUpdateEvent();
 
 private:
-	std::function<void()> _callback;
-	wxWindow* _mainWindow;
+    std::function<void()> _callback;
+    wxWindow* _mainWindow;
 };
 wxDECLARE_APP(FluxEngineApp);
 
@@ -54,4 +54,3 @@ wxDECLARE_APP(FluxEngineApp);
     static const wxPen name##_PEN(name##_COLOUR)
 
 #endif
-

@@ -56,14 +56,14 @@ public:
 
     void flushChanges() override
     {
-        std::set<Location> locations;
+        std::vector<std::shared_ptr<const TrackInfo>> locations;
 
         for (const auto& trackid : _changedTracks)
         {
             unsigned track = trackid.first;
             unsigned side = trackid.second;
-            auto& trackLayout = Layout::getLayoutOfTrack(track, side);
-            locations.insert(Layout::computeLocationFor(track, side));
+            auto trackLayout = Layout::getLayoutOfTrack(track, side);
+            locations.push_back(trackLayout);
 
             /* If we don't have all the sectors of this track, we may need to
              * populate any non-changed sectors as we can only write a track at
@@ -72,7 +72,7 @@ public:
             if (!imageContainsAllSectorsOf(_changedSectors,
                     track,
                     side,
-                    trackLayout.logicalSectorOrder))
+                    trackLayout->logicalSectorOrder))
             {
                 /* If we don't have any loaded sectors for this track, pre-read
                  * it. */
@@ -83,7 +83,7 @@ public:
                 /* Now merge the loaded track with the changed one, and write
                  * the result back. */
 
-                for (unsigned sectorId : trackLayout.logicalSectorOrder)
+                for (unsigned sectorId : trackLayout->logicalSectorOrder)
                 {
                     if (!_changedSectors.contains(track, side, sectorId))
                         _changedSectors.put(track, side, sectorId)->data =
@@ -128,8 +128,8 @@ private:
 
     void populateSectors(unsigned track, unsigned side)
     {
-        auto location = Layout::computeLocationFor(track, side);
-        auto trackdata = readAndDecodeTrack(*_fluxSource, *_decoder, location);
+        auto trackInfo = Layout::getLayoutOfTrack(track, side);
+        auto trackdata = readAndDecodeTrack(*_fluxSource, *_decoder, trackInfo);
 
         for (const auto& sector : trackdata->sectors)
             *_loadedSectors.put(track, side, sector->logicalSector) = *sector;

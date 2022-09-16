@@ -4,6 +4,7 @@
 #include "fluxviewerwindow.h"
 #include "fluxviewercontrol.h"
 #include "lib/flux.h"
+#include "lib/layout.h"
 #include "fmt/format.h"
 
 FluxViewerWindow::FluxViewerWindow(
@@ -14,8 +15,8 @@ FluxViewerWindow::FluxViewerWindow(
     fluxviewer->SetScrollbar(scrollbar);
     fluxviewer->SetFlux(flux);
     SetTitle(fmt::format("Flux for c{} h{}",
-        flux->location.physicalTrack,
-        flux->location.physicalSide));
+        flux->trackInfo->physicalTrack,
+        flux->trackInfo->physicalSide));
 }
 
 void FluxViewerWindow::OnExit(wxCommandEvent& event)

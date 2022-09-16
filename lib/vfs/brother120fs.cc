@@ -291,7 +291,8 @@ public:
 
         auto& filename = path.back();
         if (filename.size() > 8)
-        	throw CannotWriteException("filename too long (eight characters maximum)");
+            throw CannotWriteException(
+                "filename too long (eight characters maximum)");
 
         int sectorLength = (data.size() + SECTOR_SIZE - 1) / SECTOR_SIZE;
         if (sectorLength > 0xff)

@@ -60,7 +60,7 @@ private:
     }
 
 public:
-    std::unique_ptr<Fluxmap> encode(const Location& location,
+    std::unique_ptr<Fluxmap> encode(std::shared_ptr<const TrackInfo>& trackInfo,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {

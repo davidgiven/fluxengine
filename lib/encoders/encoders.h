@@ -4,7 +4,7 @@
 class EncoderProto;
 class Fluxmap;
 class Image;
-class Location;
+class Layout;
 class Sector;
 
 class Encoder
@@ -17,12 +17,12 @@ public:
 
 public:
     virtual std::shared_ptr<const Sector> getSector(
-        const Location& location, const Image& image, unsigned sectorId);
+        std::shared_ptr<const TrackInfo>&, const Image& image, unsigned sectorId);
 
     virtual std::vector<std::shared_ptr<const Sector>> collectSectors(
-        const Location& location, const Image& image);
+        std::shared_ptr<const TrackInfo>&, const Image& image);
 
-    virtual std::unique_ptr<Fluxmap> encode(const Location& location,
+    virtual std::unique_ptr<Fluxmap> encode(std::shared_ptr<const TrackInfo>& trackInfo,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) = 0;
 

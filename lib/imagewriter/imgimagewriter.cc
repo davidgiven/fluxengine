@@ -36,14 +36,14 @@ public:
             int track = p.first;
             int side = p.second;
 
-            auto& trackLayout = Layout::getLayoutOfTrack(track, side);
-            for (int sectorId : trackLayout.logicalSectorOrder)
+            auto trackLayout = Layout::getLayoutOfTrack(track, side);
+            for (int sectorId : trackLayout->logicalSectorOrder)
             {
                 const auto& sector = image.get(track, side, sectorId);
                 if (sector)
-                    sector->data.slice(0, trackLayout.sectorSize).writeTo(outputFile);
+                    sector->data.slice(0, trackLayout->sectorSize).writeTo(outputFile);
                 else
-                    outputFile.seekp(trackLayout.sectorSize, std::ios::cur);
+                    outputFile.seekp(trackLayout->sectorSize, std::ios::cur);
             }
         }
 

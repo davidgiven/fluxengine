@@ -49,9 +49,9 @@ public:
     };
 
 public:
-    std::shared_ptr<const TrackDataFlux> decodeToSectors(
+    std::shared_ptr<TrackDataFlux> decodeToSectors(
         std::shared_ptr<const Fluxmap> fluxmap,
-		const Location& location);
+        std::shared_ptr<const TrackInfo>& trackInfo);
 
     void pushRecord(
         const Fluxmap::Position& start, const Fluxmap::Position& end);
@@ -88,8 +88,6 @@ public:
     {
         return _fmr->getDuration();
     }
-
-    virtual std::set<LogicalLocation> requiredSectors(const Location& location) const;
 
 protected:
     virtual void beginTrack(){};

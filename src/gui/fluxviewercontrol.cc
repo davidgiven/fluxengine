@@ -5,6 +5,7 @@
 #include "lib/flux.h"
 #include "lib/fluxmap.h"
 #include "lib/sector.h"
+#include "lib/layout.h"
 #include "lib/decoders/fluxmapreader.h"
 
 DECLARE_COLOUR(BACKGROUND, 192, 192, 192);
@@ -35,14 +36,18 @@ FluxViewerControl::FluxViewerControl(wxWindow* parent,
     SetDoubleBuffered(true);
 }
 
-wxBEGIN_EVENT_TABLE(FluxViewerControl, wxPanel) EVT_PAINT(
-    FluxViewerControl::OnPaint) EVT_MOUSEWHEEL(FluxViewerControl::OnMouseWheel)
+// clang-format off
+wxBEGIN_EVENT_TABLE(FluxViewerControl, wxPanel)
+	EVT_PAINT(FluxViewerControl::OnPaint)
+	EVT_MOUSEWHEEL(FluxViewerControl::OnMouseWheel)
     EVT_LEFT_DOWN(FluxViewerControl::OnMouseMotion)
-        EVT_LEFT_UP(FluxViewerControl::OnMouseMotion)
-            EVT_MOTION(FluxViewerControl::OnMouseMotion) EVT_CONTEXT_MENU(
-                FluxViewerControl::OnContextMenu) wxEND_EVENT_TABLE()
+    EVT_LEFT_UP(FluxViewerControl::OnMouseMotion)
+    EVT_MOTION(FluxViewerControl::OnMouseMotion)
+	EVT_CONTEXT_MENU(FluxViewerControl::OnContextMenu)
+wxEND_EVENT_TABLE();
+// clang-format on
 
-                void FluxViewerControl::SetScrollbar(wxScrollBar* scrollbar)
+void FluxViewerControl::SetScrollbar(wxScrollBar* scrollbar)
 {
     _scrollbar = scrollbar;
     _scrollbar->Bind(
@@ -130,7 +135,7 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
 
     int x = -_scrollPosition / _nanosecondsPerPixel;
     nanoseconds_t fluxStartTime = 0;
-    for (const auto& trackdata : _flux->trackDatas)
+    for (auto& trackdata : _flux->trackDatas)
     {
         nanoseconds_t duration = trackdata->fluxmap->duration();
         int fw = duration / _nanosecondsPerPixel;
@@ -224,7 +229,7 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
 
             dc.SetBackgroundMode(wxTRANSPARENT);
             dc.SetTextForeground(*wxBLACK);
-            for (const auto& sector : trackdata->sectors)
+            for (auto& sector : trackdata->sectors)
             {
                 nanoseconds_t sr = sector->dataEndTime;
                 if (!sr)
@@ -261,7 +266,7 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
 
             dc.SetPen(FOREGROUND_PEN);
             dc.SetBrush(RECORD_BRUSH);
-            for (const auto& record : trackdata->records)
+            for (auto& record : trackdata->records)
             {
                 int rp = record->startTime / _nanosecondsPerPixel;
                 int rw = (record->endTime - record->startTime) /
@@ -281,7 +286,7 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
                     text, {x + rp + BORDER, t2y - size.GetHeight() / 2});
 
                 if (_rightClicked && hovered)
-                    ShowRecordMenu(trackdata->location, record);
+                    ShowRecordMenu(trackdata->trackInfo, record);
             }
 
             /* Flux chart. */
@@ -429,8 +434,8 @@ void FluxViewerControl::ShowSectorMenu(std::shared_ptr<const Sector> sector)
     PopupMenu(&menu, _mouseX, _mouseY);
 }
 
-void FluxViewerControl::ShowRecordMenu(
-    const Location& location, std::shared_ptr<const Record> record)
+void FluxViewerControl::ShowRecordMenu(std::shared_ptr<const TrackInfo>& layout,
+    std::shared_ptr<const Record> record)
 {
     wxMenu menu;
 
@@ -438,7 +443,7 @@ void FluxViewerControl::ShowRecordMenu(
         wxEVT_COMMAND_MENU_SELECTED,
         [&](wxCommandEvent&)
         {
-            DisplayRawData(location, record);
+            DisplayRawData(layout, record);
         },
         menu.Append(wxID_ANY, "Show record data")->GetId());
 
@@ -497,14 +502,14 @@ void FluxViewerControl::DisplayRawData(std::shared_ptr<const Sector> sector)
     TextViewerWindow::Create(this, title, s.str())->Show();
 }
 
-void FluxViewerControl::DisplayRawData(
-    const Location& location, std::shared_ptr<const Record> record)
+void FluxViewerControl::DisplayRawData(std::shared_ptr<const TrackInfo>& layout,
+    std::shared_ptr<const Record> record)
 {
     std::stringstream s;
 
     auto title = fmt::format("Raw data for record c{}.h{} + {:.3f}ms",
-        location.physicalTrack,
-        location.physicalSide,
+        layout->physicalTrack,
+        layout->physicalSide,
         record->startTime / 1e6);
     s << title << "\n\n";
     hexdump(s, record->rawData);

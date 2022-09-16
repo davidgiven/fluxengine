@@ -7,6 +7,7 @@
 #include "image.h"
 #include "fmt/format.h"
 #include "lib/encoders/encoders.pb.h"
+#include "lib/layout.h"
 #include "arch/macintosh/macintosh.pb.h"
 #include <ctype.h>
 
@@ -219,11 +220,11 @@ public:
     }
 
 public:
-    std::unique_ptr<Fluxmap> encode(const Location& location,
+    std::unique_ptr<Fluxmap> encode(std::shared_ptr<const TrackInfo>& trackInfo,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
-        double clockRateUs = clockRateUsForTrack(location.logicalTrack);
+        double clockRateUs = clockRateUsForTrack(trackInfo->logicalTrack);
         int bitsPerRevolution = 200000.0 / clockRateUs;
         std::vector<bool> bits(bitsPerRevolution);
         unsigned cursor = 0;
