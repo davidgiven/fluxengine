@@ -1,7 +1,0 @@
-comment: 'Commodore 1541 171kB 5.25" 35-track SS GCR'
-
-include: '_commodore1541'
-
-layout {
-	tracks: 35
-}
