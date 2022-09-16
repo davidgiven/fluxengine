@@ -33,14 +33,14 @@ Reading 1541 disks
 Just do:
 
 ```
-fluxengine read commodore1541t35 -o commodore1541.d64
+fluxengine read commodore1541 -o commodore1541.d64
 ```
 
 You should end up with an `commodore1541.d64` file which is 174848 bytes long.
 You can load this straight into a Commodore 64 emulator such as
 [VICE](http://vice-emu.sourceforge.net/).
 
-If you have a 40-track disk, use `commodore1541t40` instead.
+If you have a 40-track disk, add `--40`.
 
 **Big warning!** Commodore 64 disk images are complicated due to the way the
 tracks are different sizes and the odd sector size, so you need the special D64
@@ -52,16 +52,16 @@ Writing 1541 disks
 
 Just do:
 ```
-fluxengine write commodore1541t35 -i file.d64
+fluxengine write commodore1541 -i file.d64
 ```
 
-If you have a 40-track disk, use `commodore1541t40` instead.
+If you have a 40-track disk, add `--40`.
 
 Note that only standard Commodore 64 BAM file systems can be written this way,
 as the disk ID in the BAM has to be copied to every sector on the disk.
 
-Reading 1581 disks
-------------------
+Reading and writing 1581 disks
+------------------------------
 
 1581 disks are just another version of the standard IBM scheme.
 
@@ -71,14 +71,29 @@ Just do:
 fluxengine read commodore1581 -o commodore1581.d81
 ```
 
-Writing 1581 disks
-------------------
-
-Just do:
+or:
 
 ```
 fluxengine write commodore1581 -i commodore1581.img
 ```
+
+Reading and writing CMD FD2000 disks
+------------------------------------
+
+Yet again, these are another IBM scheme variant.
+
+Just do:
+
+```
+fluxengine read cmd_fd2000 -o cmd_fd2000.d81
+```
+
+or:
+
+```
+fluxengine write cmd_fd2000 -i cmd_fd2000.img
+```
+
 
 Useful references
 -----------------

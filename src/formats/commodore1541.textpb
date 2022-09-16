@@ -1,5 +1,4 @@
-comment: 'Commodore 1541 common settings'
-is_extension: true
+comment: 'Commodore 1541 171kB/192kB 5.25" 35/40-track SS GCR'
 
 image_reader {
 	filename: "commodore1541.d64"
@@ -13,6 +12,7 @@ image_writer {
 
 layout {
 	sides: 1
+	tracks: 35
 	layoutdata {
 		sector_size: 256
 	}
@@ -63,3 +63,28 @@ tpi: 48
 filesystem {
 	cbmfs {}
 }
+
+option {
+	name: "35"
+	comment: "35-track variant (default)"
+	message: "using 35-track variant"
+	
+	config {
+		layout {
+			tracks: 35
+		}
+	}
+}
+	
+option {
+	name: "40"
+	comment: "40-track variant"
+	message: "using 40-track variant"
+	
+	config {
+		layout {
+			tracks: 40
+		}
+	}
+}
+	
