@@ -190,11 +190,10 @@ public:
                 }
                 Bytes data(sectorSize);
                 inputFile.read((char*)data.begin(), data.size());
+                physical->add_sector(sectorId);
                 const auto& sector = image->put(track, head, sectorId);
                 sector->status = Sector::OK;
                 sector->data = data;
-
-                physical->add_sector(sectorId);
             }
 
             if (mediaFlag != 0x20)
