@@ -4,9 +4,6 @@
 #include "lib/environment.h"
 #include <fmt/format.h>
 
-static Local<std::map<std::pair<int, int>, std::shared_ptr<TrackInfo>>>
-    layoutCache;
-
 static unsigned getTrackStep()
 {
     unsigned track_step =
@@ -128,66 +125,62 @@ std::vector<unsigned> Layout::expandSectorList(
 std::shared_ptr<const TrackInfo> Layout::getLayoutOfTrack(
     unsigned logicalTrack, unsigned logicalSide)
 {
-    auto& layout = (*layoutCache)[std::make_pair(logicalTrack, logicalSide)];
-    if (!layout)
+    auto trackInfo = std::make_shared<TrackInfo>();
+
+    LayoutProto::LayoutdataProto layoutdata;
+    for (const auto& f : config.layout().layoutdata())
     {
-    	layout = std::make_shared<TrackInfo>();
+        if (f.has_track() && f.has_up_to_track() &&
+            ((logicalTrack < f.track()) ||
+             (logicalTrack > f.up_to_track())))
+            continue;
+        if (f.has_track() && !f.has_up_to_track() &&
+            (logicalTrack != f.track()))
+            continue;
+        if (f.has_side() && (f.side() != logicalSide))
+            continue;
 
-        LayoutProto::LayoutdataProto layoutdata;
-        for (const auto& f : config.layout().layoutdata())
-        {
-            if (f.has_track() && f.has_up_to_track() &&
-                ((logicalTrack < f.track()) ||
-                    (logicalTrack > f.up_to_track())))
-                continue;
-            if (f.has_track() && !f.has_up_to_track() &&
-                (logicalTrack != f.track()))
-                continue;
-            if (f.has_side() && (f.side() != logicalSide))
-                continue;
-
-            layoutdata.MergeFrom(f);
-        }
-
-        layout->numTracks = config.layout().tracks();
-        layout->numSides = config.layout().sides();
-        layout->sectorSize = layoutdata.sector_size();
-        layout->logicalTrack = logicalTrack;
-        layout->logicalSide = logicalSide;
-        layout->physicalTrack = remapTrackLogicalToPhysical(logicalTrack);
-        layout->physicalSide = logicalSide ^ config.layout().swap_sides();
-        layout->groupSize = getTrackStep();
-        layout->diskSectorOrder = expandSectorList(layoutdata.physical());
-        layout->logicalSectorOrder = layout->diskSectorOrder;
-        std::sort(
-            layout->diskSectorOrder.begin(), layout->diskSectorOrder.end());
-        layout->numSectors = layout->logicalSectorOrder.size();
-
-        if (layoutdata.has_filesystem())
-        {
-            layout->filesystemSectorOrder =
-                expandSectorList(layoutdata.filesystem());
-            if (layout->filesystemSectorOrder.size() != layout->numSectors)
-                Error()
-                    << "filesystem sector order list doesn't contain the right "
-                       "number of sectors";
-        }
-        else
-        {
-            for (unsigned sectorId : layout->logicalSectorOrder)
-                layout->filesystemSectorOrder.push_back(sectorId);
-        }
-
-        for (int i = 0; i < layout->numSectors; i++)
-        {
-            unsigned f = layout->logicalSectorOrder[i];
-            unsigned l = layout->filesystemSectorOrder[i];
-            layout->filesystemToLogicalSectorMap[f] = l;
-            layout->logicalToFilesystemSectorMap[l] = f;
-        }
+        layoutdata.MergeFrom(f);
     }
 
-    return layout;
+    trackInfo->numTracks = config.layout().tracks();
+    trackInfo->numSides = config.layout().sides();
+    trackInfo->sectorSize = layoutdata.sector_size();
+    trackInfo->logicalTrack = logicalTrack;
+    trackInfo->logicalSide = logicalSide;
+    trackInfo->physicalTrack = remapTrackLogicalToPhysical(logicalTrack);
+    trackInfo->physicalSide = logicalSide ^ config.layout().swap_sides();
+    trackInfo->groupSize = getTrackStep();
+    trackInfo->diskSectorOrder = expandSectorList(layoutdata.physical());
+    trackInfo->logicalSectorOrder = trackInfo->diskSectorOrder;
+    std::sort(
+        trackInfo->diskSectorOrder.begin(), trackInfo->diskSectorOrder.end());
+    trackInfo->numSectors = trackInfo->logicalSectorOrder.size();
+
+    if (layoutdata.has_filesystem())
+    {
+        trackInfo->filesystemSectorOrder =
+            expandSectorList(layoutdata.filesystem());
+        if (trackInfo->filesystemSectorOrder.size() != trackInfo->numSectors)
+            Error()
+                << "filesystem sector order list doesn't contain the right "
+                "number of sectors";
+    }
+    else
+    {
+        for (unsigned sectorId : trackInfo->logicalSectorOrder)
+            trackInfo->filesystemSectorOrder.push_back(sectorId);
+    }
+
+    for (int i = 0; i < trackInfo->numSectors; i++)
+    {
+        unsigned f = trackInfo->logicalSectorOrder[i];
+        unsigned l = trackInfo->filesystemSectorOrder[i];
+        trackInfo->filesystemToLogicalSectorMap[f] = l;
+        trackInfo->logicalToFilesystemSectorMap[l] = f;
+    }
+
+    return trackInfo;
 }
 
 std::shared_ptr<const TrackInfo> Layout::getLayoutOfTrackPhysical(
