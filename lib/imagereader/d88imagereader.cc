@@ -65,19 +65,15 @@ public:
         int clockRate = 500;
         if (mediaFlag == 0x20)
         {
-            Logger() << "D88: high density mode";
-			if (!config.drive().has_drive())
+            Logger() << "D88: forcing high density mode";
 				config.mutable_drive()->set_high_density(true);
-            if (!config.has_tpi())
                 config.set_tpi(96);
         }
         else
         {
-            Logger() << "D88: single/double density mode";
+            Logger() << "D88: forcing single/double density mode";
             clockRate = 300;
-			if (!config.drive().has_drive())
 				config.mutable_drive()->set_high_density(false);
-            if (!config.has_tpi())
                 config.set_tpi(48);
         }
 
