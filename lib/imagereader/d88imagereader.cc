@@ -115,6 +115,10 @@ public:
                 int ddam = sectorHeaderReader.seek(7).read_8();
                 int fddStatusCode = sectorHeaderReader.seek(8).read_8();
                 int rpm = sectorHeaderReader.seek(13).read_8();
+                int dataLength = sectorHeaderReader.seek(14).read_le16();
+                if (dataLength < sectorSize) {
+                    dataLength = sectorSize;
+                }
                 // D88 provides much more sector information that is currently
                 // ignored
                 if (ddam != 0)
@@ -190,6 +194,7 @@ public:
                 }
                 Bytes data(sectorSize);
                 inputFile.read((char*)data.begin(), data.size());
+                inputFile.seekg(dataLength-sectorSize, std::ios_base::cur);
                 physical->add_sector(sectorId);
                 const auto& sector = image->put(track, head, sectorId);
                 sector->status = Sector::OK;
