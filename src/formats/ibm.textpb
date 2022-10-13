@@ -9,11 +9,6 @@ decoder {
 	ibm {}
 }
 
-tracks {
-	start: 0
-	end: 81
-}
-
 heads {
 	start: 0
 	end: 1
