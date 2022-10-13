@@ -15,7 +15,9 @@ trap "rm -f $srcfile $fluxfile $destfile" EXIT
 
 dd if=/dev/urandom of=$srcfile bs=1048576 count=2 2>&1
 
+echo $fluxengine write $format -i $srcfile -d $fluxfile --drive.rotational_period_ms=200 "$@"
 $fluxengine write $format -i $srcfile -d $fluxfile --drive.rotational_period_ms=200 "$@"
+echo $fluxengine read $format -s $fluxfile -o $destfile --drive.rotational_period_ms=200 "$@"
 $fluxengine read $format -s $fluxfile -o $destfile --drive.rotational_period_ms=200 "$@"
 if [ ! -s $destfile ]; then
 	echo "Zero length output file!" >&2
