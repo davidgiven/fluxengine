@@ -6,6 +6,7 @@
 #include "fluxsource/fluxsource.h"
 #include "scp.h"
 #include "proto.h"
+#include "lib/logger.h"
 #include "fmt/format.h"
 #include <fstream>
 
@@ -49,9 +50,9 @@ public:
 		if ((_header.cell_width != 0) && (_header.cell_width != 16))
 			Error() << "currently only 16-bit cells in SCP files are supported";
 
-		std::cout << fmt::format("SCP tracks {}-{}, heads {}-{}\n",
+		Logger() << fmt::format("SCP: tracks {}-{}, heads {}-{}",
 			trackno(_header.start_track), trackno(_header.end_track), startSide, endSide);
-		std::cout << fmt::format("SCP sample resolution: {} ns\n", _resolution);
+		Logger() << fmt::format("SCP sample resolution: {} ns\n", _resolution);
 	}
 
 public:
