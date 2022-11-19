@@ -46,6 +46,7 @@ FORMATS = \
 	ibm180 \
 	ibm360 \
 	ibm720 \
+	icl30 \
 	mac400 \
 	mac800 \
 	micropolis143 \
