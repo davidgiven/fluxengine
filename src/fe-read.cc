@@ -67,7 +67,7 @@ int mainRead(int argc, const char* argv[])
 {
 	if (argc == 1)
 		showProfiles("read", formats);
-	config.mutable_flux_source()->mutable_drive();
+	config.mutable_flux_source()->set_type(FluxSourceProto::DRIVE);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
 	if (config.decoder().copy_flux_to().has_drive())

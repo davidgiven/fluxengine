@@ -61,10 +61,10 @@ int mainRawRead(int argc, const char* argv[])
 
 	if (argc == 1)
 		showProfiles("rawread", formats);
-	config.mutable_flux_source()->mutable_drive();
+	config.mutable_flux_source()->set_type(FluxSourceProto::DRIVE);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
-	if (config.flux_sink().has_drive())
+	if (config.flux_sink().type() == FluxSinkProto::DRIVE)
 		Error() << "you can't use rawread to write to hardware";
 
 	std::unique_ptr<FluxSource> fluxSource(FluxSource::create(config.flux_source()));
