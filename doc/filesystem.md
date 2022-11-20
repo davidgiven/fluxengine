@@ -82,7 +82,7 @@ default; for example, Macintosh HFS filesystems are common on 3.5" floppies. You
 can do this as follows:
 
 ```
-fluxengine format ibm1440 -f drive:1 --filesystem.machfs=
+fluxengine format ibm1440 -f drive:1 --filesystem.type=MACHFS
 ```
 
 Some filesystems won't work on some disks --- don't try this with Amiga FFS, for
