@@ -65,7 +65,7 @@ decoder {
 }
 
 filesystem {
-	machfs {}
+	type: MACHFS
 }
 
 

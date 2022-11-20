@@ -41,6 +41,6 @@ drive {
 tpi: 48
 
 filesystem {
-	brother120 {}
+	type: BROTHER120
 }
 

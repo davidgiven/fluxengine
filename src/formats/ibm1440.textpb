@@ -36,6 +36,6 @@ decoder {
 }
 
 filesystem {
-	fatfs {}
+	type: FATFS
 }
 

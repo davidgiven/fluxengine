@@ -61,7 +61,7 @@ decoder {
 tpi: 48
 
 filesystem {
-	cbmfs {}
+	type: CBMFS
 }
 
 option {

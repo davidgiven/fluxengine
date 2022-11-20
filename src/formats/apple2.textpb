@@ -86,7 +86,7 @@ option {
 		}
 	
 		filesystem {
-			prodos {}
+			type: PRODOS
 		}
 
 		layout {

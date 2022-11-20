@@ -50,6 +50,7 @@ decoder {
 }
 
 filesystem {
+	type: CPMFS
 	cpmfs {
 		filesystem_start {
 			track: 1

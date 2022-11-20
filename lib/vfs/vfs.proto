@@ -59,20 +59,31 @@ message CbmfsProto
 
 message ProdosProto {}
 
-// NEXT_TAG: 10
+// NEXT_TAG: 11
 message FilesystemProto
 {
-    oneof filesystem
-    {
-        AcornDfsProto acorndfs = 1;
-        Brother120FsProto brother120 = 2;
-        FatFsProto fatfs = 3;
-        CpmFsProto cpmfs = 4;
-        AmigaFfsProto amigaffs = 5;
-        MacHfsProto machfs = 6;
-        CbmfsProto cbmfs = 7;
-        ProdosProto prodos = 8;
+    enum FilesystemType {
+        NOT_SET = 0;
+        ACORNDFS = 1;
+        BROTHER120 = 2;
+        FATFS = 3;
+        CPMFS = 4;
+        AMIGAFFS = 5;
+        MACHFS = 6;
+        CBMFS = 7;
+        PRODOS = 8;
     }
+
+    optional FilesystemType type = 10 [default = NOT_SET, (help) = "filesystem type"];
+
+    optional AcornDfsProto acorndfs = 1;
+    optional Brother120FsProto brother120 = 2;
+    optional FatFsProto fatfs = 3;
+    optional CpmFsProto cpmfs = 4;
+    optional AmigaFfsProto amigaffs = 5;
+    optional MacHfsProto machfs = 6;
+    optional CbmfsProto cbmfs = 7;
+    optional ProdosProto prodos = 8;
     
     optional SectorListProto sector_order = 9 [(help) = "specify the filesystem order of sectors"];
 }

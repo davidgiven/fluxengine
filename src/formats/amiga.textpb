@@ -31,6 +31,6 @@ decoder {
 }
 
 filesystem {
-	amigaffs {}
+	type: AMIGAFFS
 }
 

@@ -24,6 +24,7 @@ decoder {
 tpi: 48
 
 filesystem {
+	type: CPMFS
 	cpmfs {
 		filesystem_start {
 			track: 4

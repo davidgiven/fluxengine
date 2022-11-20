@@ -36,6 +36,6 @@ drive {
 }
 
 filesystem {
-	fatfs {}
+	type: FATFS
 }
 

@@ -42,7 +42,7 @@ drive {
 tpi: 48
 
 filesystem {
-	fatfs {}
+	type: FATFS
 }
 
 

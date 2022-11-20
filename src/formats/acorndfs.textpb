@@ -44,6 +44,6 @@ decoder {
 }
 
 filesystem {
-	acorndfs {}
+	type: ACORNDFS
 }
 

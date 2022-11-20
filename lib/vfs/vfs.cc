@@ -177,30 +177,30 @@ Filesystem::Filesystem(std::shared_ptr<SectorInterface> sectors):
 std::unique_ptr<Filesystem> Filesystem::createFilesystem(
     const FilesystemProto& config, std::shared_ptr<SectorInterface> image)
 {
-    switch (config.filesystem_case())
+    switch (config.type())
     {
-        case FilesystemProto::kBrother120:
+        case FilesystemProto::BROTHER120:
             return Filesystem::createBrother120Filesystem(config, image);
 
-        case FilesystemProto::kAcorndfs:
+        case FilesystemProto::ACORNDFS:
             return Filesystem::createAcornDfsFilesystem(config, image);
 
-        case FilesystemProto::kFatfs:
+        case FilesystemProto::FATFS:
             return Filesystem::createFatFsFilesystem(config, image);
 
-        case FilesystemProto::kCpmfs:
+        case FilesystemProto::CPMFS:
             return Filesystem::createCpmFsFilesystem(config, image);
 
-        case FilesystemProto::kAmigaffs:
+        case FilesystemProto::AMIGAFFS:
             return Filesystem::createAmigaFfsFilesystem(config, image);
 
-        case FilesystemProto::kMachfs:
+        case FilesystemProto::MACHFS:
             return Filesystem::createMacHfsFilesystem(config, image);
 
-        case FilesystemProto::kCbmfs:
+        case FilesystemProto::CBMFS:
             return Filesystem::createCbmfsFilesystem(config, image);
 
-        case FilesystemProto::kProdos:
+        case FilesystemProto::PRODOS:
             return Filesystem::createProdosFilesystem(config, image);
 
         default:
