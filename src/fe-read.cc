@@ -70,7 +70,7 @@ int mainRead(int argc, const char* argv[])
 	config.mutable_flux_source()->set_type(FluxSourceProto::DRIVE);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
-	if (config.decoder().copy_flux_to().has_drive())
+	if (config.decoder().copy_flux_to().type() == FluxSinkProto::DRIVE)
 		Error() << "you cannot copy flux to a hardware device";
 
 	std::unique_ptr<FluxSource> fluxSource(FluxSource::create(config.flux_source()));
