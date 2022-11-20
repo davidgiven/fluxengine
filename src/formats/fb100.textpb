@@ -2,7 +2,7 @@ comment: 'Brother FB-100 100kB 3.5" 40-track SS (ro)'
 
 image_writer {
 	filename: "fb100.img"
-	img {}
+	type: IMG
 }
 
 decoder {

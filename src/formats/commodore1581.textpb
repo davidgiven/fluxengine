@@ -2,12 +2,12 @@ comment: 'Commodore 1581 800kB 3.5" DSDD'
 
 image_reader {
 	filename: "commodore1581.d81"
-	img {}
+	type: IMG
 }
 
 image_writer {
 	filename: "commodore1581.d81"
-	img {}
+	type: IMG
 }
 
 layout {

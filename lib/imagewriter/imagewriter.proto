@@ -63,24 +63,35 @@ message ImdOutputProto
     optional string comment = 3 [ (help) = "comment to set in IMD file" ];
 }
 
-// NEXT_TAG: 11
+// NEXT_TAG: 12
 message ImageWriterProto
 {
+    enum ImageWriterType {
+        NOT_SET = 0;
+        IMG = 1;
+        D64 = 2;
+        LDBS = 3;
+        DISKCOPY = 4;
+        NSI = 5;
+        RAW = 6;
+        D88 = 7;
+        IMD = 8;
+    }
+
     optional string filename = 1 [ (help) = "filename of output sector image" ];
     optional bool filesystem_sector_order = 10 [
         (help) = "read/write sector image in filesystem order",
         default = false
     ];
 
-    oneof format
-    {
-        ImgInputOutputProto img = 2;
-        D64OutputProto d64 = 3;
-        LDBSOutputProto ldbs = 4;
-        DiskCopyOutputProto diskcopy = 5;
-        NsiOutputProto nsi = 6;
-        RawOutputProto raw = 7;
-        D88OutputProto d88 = 8;
-        ImdOutputProto imd = 9;
-    }
+    optional ImageWriterType type = 11 [ default = NOT_SET, (help) = "image writer type" ];
+
+    optional ImgInputOutputProto img = 2;
+    optional D64OutputProto d64 = 3;
+    optional LDBSOutputProto ldbs = 4;
+    optional DiskCopyOutputProto diskcopy = 5;
+    optional NsiOutputProto nsi = 6;
+    optional RawOutputProto raw = 7;
+    optional D88OutputProto d88 = 8;
+    optional ImdOutputProto imd = 9;
 }

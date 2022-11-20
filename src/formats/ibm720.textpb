@@ -2,12 +2,12 @@ comment: 'PC 720kB 5.25"/3.5" 80-track 9-sector DSDD'
 
 image_reader {
 	filename: "ibm720.img"
-	img {}
+	type: IMG
 }
 
 image_writer {
 	filename: "ibm720.img"
-	img {}
+	type: IMG
 }
 
 layout {

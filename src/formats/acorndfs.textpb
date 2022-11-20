@@ -2,12 +2,12 @@ comment: 'Acorn DFS 100kB/200kB 3.5" or 5.25" 40- or 80-track SS (ro)'
 
 image_reader {
 	filename: "acorndfs.img"
-	img {}
+	type: IMG
 }
 
 image_writer {
 	filename: "acorndfs.img"
-	img {}
+	type: IMG
 }
 
 layout {

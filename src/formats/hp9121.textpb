@@ -2,7 +2,7 @@ comment: 'Hewlett-Packard 9121 264kB 3.5" SSDD'
 
 image_reader {
 	filename: "hp9121.img"
-	img {}
+	type: IMG
 }
 
 layout {

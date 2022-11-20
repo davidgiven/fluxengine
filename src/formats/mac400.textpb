@@ -2,12 +2,12 @@ comment: 'Macintosh 400kB 3.5" SSDD GCR'
 
 image_reader {
 	filename: "mac400.dsk"
-	img {}
+	type: IMG
 }
 
 image_writer {
 	filename: "mac400.dsk"
-	img {}
+	type: IMG
 }
 
 layout {

@@ -13,9 +13,9 @@ message Td0InputProto {}
 message DimInputProto {}
 message FdiInputProto {}
 message D88InputProto {}
-message NFDInputProto {}
+message NfdInputProto {}
 
-// NEXT_TAG: 14
+// NEXT_TAG: 15
 message ImageReaderProto
 {
     optional string filename = 1 [ (help) = "filename of input sector image" ];
@@ -24,18 +24,32 @@ message ImageReaderProto
         default = false
     ];
 
-    oneof format
-    {
-        ImgInputOutputProto img = 2;
-        DiskCopyInputProto diskcopy = 3;
-        ImdInputProto imd = 4;
-        Jv3InputProto jv3 = 5;
-        D64InputProto d64 = 6;
-        NsiInputProto nsi = 7;
-        Td0InputProto td0 = 8;
-        DimInputProto dim = 9;
-        FdiInputProto fdi = 10;
-        D88InputProto d88 = 11;
-        NFDInputProto nfd = 12;
-    }
+	enum ImageReaderType {
+		NOT_SET = 0;
+		IMG = 1;
+		DISKCOPY = 2;
+		IMD = 3;
+		JV3 = 4;
+		D64 = 5;
+		NSI = 6;
+		TD0 = 7;
+		DIM = 8;
+		FDI = 9;
+		D88 = 10;
+		NFD = 11;
+	}
+
+	optional ImageReaderType type = 14 [default = NOT_SET, (help) = "input image type"];
+
+	optional ImgInputOutputProto img = 2;
+	optional DiskCopyInputProto diskcopy = 3;
+	optional ImdInputProto imd = 4;
+	optional Jv3InputProto jv3 = 5;
+	optional D64InputProto d64 = 6;
+	optional NsiInputProto nsi = 7;
+	optional Td0InputProto td0 = 8;
+	optional DimInputProto dim = 9;
+	optional FdiInputProto fdi = 10;
+	optional D88InputProto d88 = 11;
+	optional NfdInputProto nfd = 12;
 }

@@ -2,12 +2,12 @@ comment: 'Commodore 1541 171kB/192kB 5.25" 35/40-track SS GCR'
 
 image_reader {
 	filename: "commodore1541.d64"
-	d64 {}
+	type: D64
 }
 
 image_writer {
 	filename: "commodore1541.d64"
-	d64 {}
+	type: D64
 }
 
 layout {

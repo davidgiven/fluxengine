@@ -218,8 +218,7 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystemFromConfig()
         std::shared_ptr<Decoder> decoder;
         std::shared_ptr<FluxSink> fluxSink;
         std::shared_ptr<Encoder> encoder;
-        if (config.flux_source().type() !=
-            FluxSourceProto::NOT_SET)
+        if (config.flux_source().type() != FluxSourceProto::NOT_SET)
         {
             fluxSource = FluxSource::create(config.flux_source());
             decoder = Decoder::create(config.decoder());
@@ -236,11 +235,9 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystemFromConfig()
     {
         std::shared_ptr<ImageReader> reader;
         std::shared_ptr<ImageWriter> writer;
-        if (config.image_reader().format_case() !=
-            ImageReaderProto::FORMAT_NOT_SET)
+        if (config.image_reader().type() != ImageReaderProto::NOT_SET)
             reader = ImageReader::create(config.image_reader());
-        if (config.image_writer().format_case() !=
-            ImageWriterProto::FORMAT_NOT_SET)
+        if (config.image_writer().type() != ImageWriterProto::NOT_SET)
             writer = ImageWriter::create(config.image_writer());
 
         sectorInterface =

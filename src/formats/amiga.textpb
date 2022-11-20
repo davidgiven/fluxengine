@@ -2,12 +2,12 @@ comment: 'Amiga 880kB 3.5" DSDD'
 
 image_reader {
 	filename: "amiga.adf"
-	img {}
+	type: IMG
 }
 
 image_writer {
 	filename: "amiga.adf"
-	img {}
+	type: IMG
 }
 
 layout {

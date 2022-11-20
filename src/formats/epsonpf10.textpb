@@ -2,7 +2,7 @@ comment: 'Epson PF-10 40-track DS DD (ro)'
 
 image_writer {
 	filename: "epsonpf10.img"
-	img {}
+	type: IMG
 }
 
 layout {

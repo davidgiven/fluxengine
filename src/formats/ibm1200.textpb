@@ -2,12 +2,12 @@ comment: 'PC 1200kB 5.25" 80-track 15-sector DSHD'
 
 image_reader {
 	filename: "ibm1200.img"
-	img {}
+	type: IMG
 }
 
 image_writer {
 	filename: "ibm1200.img"
-	img {}
+	type: IMG
 }
 
 layout {

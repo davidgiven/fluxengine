@@ -2,12 +2,12 @@ comment: 'BK 800kB 5.25"/3.5" 80-track 10-sector DSDD'
 
 image_reader {
 	filename: "bk800.img"
-	img {}
+	type: IMG
 }
 
 image_writer {
 	filename: "bk800.img"
-	img {}
+	type: IMG
 }
 
 layout {

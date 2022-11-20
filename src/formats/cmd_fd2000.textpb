@@ -2,12 +2,12 @@ comment: 'CMD FD2000 1620kB 3.5" DSHD'
 
 image_reader {
 	filename: "cmd_fd2000.img"
-	img {}
+	type: IMG
 }
 
 image_writer {
 	filename: "cmd_fd2000.img"
-	img {}
+	type: IMG
 }
 
 layout {

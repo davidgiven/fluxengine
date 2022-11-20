@@ -14,30 +14,30 @@
 
 std::unique_ptr<ImageWriter> ImageWriter::create(const ImageWriterProto& config)
 {
-    switch (config.format_case())
+    switch (config.type())
     {
-        case ImageWriterProto::kImg:
+        case ImageWriterProto::IMG:
             return ImageWriter::createImgImageWriter(config);
 
-        case ImageWriterProto::kD64:
+        case ImageWriterProto::D64:
             return ImageWriter::createD64ImageWriter(config);
 
-        case ImageWriterProto::kLdbs:
+        case ImageWriterProto::LDBS:
             return ImageWriter::createLDBSImageWriter(config);
 
-        case ImageWriterProto::kDiskcopy:
+        case ImageWriterProto::DISKCOPY:
             return ImageWriter::createDiskCopyImageWriter(config);
 
-        case ImageWriterProto::kNsi:
+        case ImageWriterProto::NSI:
             return ImageWriter::createNsiImageWriter(config);
 
-        case ImageWriterProto::kRaw:
+        case ImageWriterProto::RAW:
             return ImageWriter::createRawImageWriter(config);
 
-        case ImageWriterProto::kD88:
+        case ImageWriterProto::D88:
             return ImageWriter::createD88ImageWriter(config);
 
-        case ImageWriterProto::kImd:
+        case ImageWriterProto::IMD:
             return ImageWriter::createImdImageWriter(config);
 
         default:
@@ -52,20 +52,20 @@ void ImageWriter::updateConfigForFilename(
     static const std::map<std::string, std::function<void(ImageWriterProto*)>>
         formats = {
   // clang-format off
-		{".adf",      [](auto* proto) { proto->mutable_img(); }},
-		{".d64",      [](auto* proto) { proto->mutable_d64(); }},
-		{".d81",      [](auto* proto) { proto->mutable_img(); }},
-		{".d88",      [](auto* proto) { proto->mutable_d88(); }},
-		{".diskcopy", [](auto* proto) { proto->mutable_diskcopy(); }},
-		{".dsk",      [](auto* proto) { proto->mutable_img(); }},
-		{".img",      [](auto* proto) { proto->mutable_img(); }},
-		{".imd",      [](auto* proto) { proto->mutable_imd(); }},
-		{".ldbs",     [](auto* proto) { proto->mutable_ldbs(); }},
-		{".nsi",      [](auto* proto) { proto->mutable_nsi(); }},
-		{".raw",      [](auto* proto) { proto->mutable_raw(); }},
-		{".st",       [](auto* proto) { proto->mutable_img(); }},
-		{".vgi",      [](auto* proto) { proto->mutable_img(); }},
-		{".xdf",      [](auto* proto) { proto->mutable_img(); }},
+		{".adf",      [](auto* proto) { proto->set_type(ImageWriterProto::IMG); }},
+		{".d64",      [](auto* proto) { proto->set_type(ImageWriterProto::D64); }},
+		{".d81",      [](auto* proto) { proto->set_type(ImageWriterProto::IMG); }},
+		{".d88",      [](auto* proto) { proto->set_type(ImageWriterProto::D88); }},
+		{".diskcopy", [](auto* proto) { proto->set_type(ImageWriterProto::DISKCOPY); }},
+		{".dsk",      [](auto* proto) { proto->set_type(ImageWriterProto::IMG); }},
+		{".img",      [](auto* proto) { proto->set_type(ImageWriterProto::IMG); }},
+		{".imd",      [](auto* proto) { proto->set_type(ImageWriterProto::IMD); }},
+		{".ldbs",     [](auto* proto) { proto->set_type(ImageWriterProto::LDBS); }},
+		{".nsi",      [](auto* proto) { proto->set_type(ImageWriterProto::NSI); }},
+		{".raw",      [](auto* proto) { proto->set_type(ImageWriterProto::RAW); }},
+		{".st",       [](auto* proto) { proto->set_type(ImageWriterProto::IMG); }},
+		{".vgi",      [](auto* proto) { proto->set_type(ImageWriterProto::IMG); }},
+		{".xdf",      [](auto* proto) { proto->set_type(ImageWriterProto::IMG); }},
   // clang-format on
     };
 

@@ -2,12 +2,12 @@ comment: 'Victor 9000 / Sirius One 1224kB DSHD GCR variable sector)'
 
 image_reader {
 	filename: "victor9k_ds.img"
-	img {}
+	type: IMG
 }
 
 image_writer {
 	filename: "victor9k_ds.img"
-	img {}
+	type: IMG
 }
 
 layout {

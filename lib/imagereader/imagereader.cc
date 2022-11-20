@@ -14,39 +14,39 @@
 
 std::unique_ptr<ImageReader> ImageReader::create(const ImageReaderProto& config)
 {
-    switch (config.format_case())
+    switch (config.type())
     {
-        case ImageReaderProto::kDim:
+        case ImageReaderProto::DIM:
             return ImageReader::createDimImageReader(config);
 
-        case ImageReaderProto::kD88:
+        case ImageReaderProto::D88:
             return ImageReader::createD88ImageReader(config);
 
-        case ImageReaderProto::kFdi:
+        case ImageReaderProto::FDI:
             return ImageReader::createFdiImageReader(config);
 
-        case ImageReaderProto::kImd:
+        case ImageReaderProto::IMD:
             return ImageReader::createIMDImageReader(config);
 
-        case ImageReaderProto::kImg:
+        case ImageReaderProto::IMG:
             return ImageReader::createImgImageReader(config);
 
-        case ImageReaderProto::kDiskcopy:
+        case ImageReaderProto::DISKCOPY:
             return ImageReader::createDiskCopyImageReader(config);
 
-        case ImageReaderProto::kJv3:
+        case ImageReaderProto::JV3:
             return ImageReader::createJv3ImageReader(config);
 
-        case ImageReaderProto::kD64:
+        case ImageReaderProto::D64:
             return ImageReader::createD64ImageReader(config);
 
-        case ImageReaderProto::kNfd:
+        case ImageReaderProto::NFD:
             return ImageReader::createNFDImageReader(config);
 
-        case ImageReaderProto::kNsi:
+        case ImageReaderProto::NSI:
             return ImageReader::createNsiImageReader(config);
 
-        case ImageReaderProto::kTd0:
+        case ImageReaderProto::TD0:
             return ImageReader::createTd0ImageReader(config);
 
         default:
@@ -61,23 +61,23 @@ void ImageReader::updateConfigForFilename(
     static const std::map<std::string, std::function<void(ImageReaderProto*)>>
         formats = {
   // clang-format off
-		{".adf",      [](auto* proto) { proto->mutable_img(); }},
-		{".d64",      [](auto* proto) { proto->mutable_d64(); }},
-		{".d81",      [](auto* proto) { proto->mutable_img(); }},
-		{".d88",      [](auto* proto) { proto->mutable_d88(); }},
-		{".dim",      [](auto* proto) { proto->mutable_dim(); }},
-		{".diskcopy", [](auto* proto) { proto->mutable_diskcopy(); }},
-		{".dsk",      [](auto* proto) { proto->mutable_img(); }},
-		{".fdi",      [](auto* proto) { proto->mutable_fdi(); }},
-		{".imd",      [](auto* proto) { proto->mutable_imd(); }},
-		{".img",      [](auto* proto) { proto->mutable_img(); }},
-		{".jv3",      [](auto* proto) { proto->mutable_jv3(); }},
-		{".nfd",      [](auto* proto) { proto->mutable_nfd(); }},
-		{".nsi",      [](auto* proto) { proto->mutable_nsi(); }},
-		{".st",       [](auto* proto) { proto->mutable_img(); }},
-		{".td0",      [](auto* proto) { proto->mutable_td0(); }},
-		{".vgi",      [](auto* proto) { proto->mutable_img(); }},
-		{".xdf",      [](auto* proto) { proto->mutable_img(); }},
+		{".adf",      [](auto* proto) { proto->set_type(ImageReaderProto::IMG); }},
+		{".d64",      [](auto* proto) { proto->set_type(ImageReaderProto::D64); }},
+		{".d81",      [](auto* proto) { proto->set_type(ImageReaderProto::IMG); }},
+		{".d88",      [](auto* proto) { proto->set_type(ImageReaderProto::D88); }},
+		{".dim",      [](auto* proto) { proto->set_type(ImageReaderProto::DIM); }},
+		{".diskcopy", [](auto* proto) { proto->set_type(ImageReaderProto::DISKCOPY); }},
+		{".dsk",      [](auto* proto) { proto->set_type(ImageReaderProto::IMG); }},
+		{".fdi",      [](auto* proto) { proto->set_type(ImageReaderProto::FDI); }},
+		{".imd",      [](auto* proto) { proto->set_type(ImageReaderProto::IMD); }},
+		{".img",      [](auto* proto) { proto->set_type(ImageReaderProto::IMG); }},
+		{".jv3",      [](auto* proto) { proto->set_type(ImageReaderProto::JV3); }},
+		{".nfd",      [](auto* proto) { proto->set_type(ImageReaderProto::NFD); }},
+		{".nsi",      [](auto* proto) { proto->set_type(ImageReaderProto::NSI); }},
+		{".st",       [](auto* proto) { proto->set_type(ImageReaderProto::IMG); }},
+		{".td0",      [](auto* proto) { proto->set_type(ImageReaderProto::TD0); }},
+		{".vgi",      [](auto* proto) { proto->set_type(ImageReaderProto::IMG); }},
+		{".xdf",      [](auto* proto) { proto->set_type(ImageReaderProto::IMG); }},
   // clang-format on
     };
 
