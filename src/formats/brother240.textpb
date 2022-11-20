@@ -2,12 +2,12 @@ comment: 'Brother 240kB 3.5" 78-track SS GCR'
 
 image_reader {
 	filename: "brother240.img"
-	img {}
+	type: IMG
 }
 
 image_writer {
 	filename: "brother240.img"
-	img {}
+	type: IMG
 }
 
 layout {
@@ -36,6 +36,6 @@ drive {
 }
 
 filesystem {
-	fatfs {}
+	type: FATFS
 }
 

@@ -2,12 +2,12 @@ comment: 'PC 1440kB 3.5" 80-track 18-sector DSHD'
 
 image_reader {
 	filename: "ibm1440.img"
-	img {}
+	type: IMG
 }
 
 image_writer {
 	filename: "ibm1440.img"
-	img {}
+	type: IMG
 }
 
 layout {
@@ -36,6 +36,6 @@ decoder {
 }
 
 filesystem {
-	fatfs {}
+	type: FATFS
 }
 

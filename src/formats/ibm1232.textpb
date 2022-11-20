@@ -2,12 +2,12 @@ comment: 'Japanese PC 1232kB 5.25"/3.5" 77-track 8-sector DSHD'
 
 image_reader {
 	filename: "ibm1232.img"
-	img {}
+	type: IMG
 }
 
 image_writer {
 	filename: "ibm1232.img"
-	img {}
+	type: IMG
 }
 
 layout {
@@ -40,7 +40,7 @@ drive {
 }
 
 filesystem {
-	fatfs {}
+	type: FATFS
 }
 
 

@@ -30,15 +30,27 @@ message Fl2FluxSourceProto {
 		(help) = ".fl2 file to read flux from"];
 }
 
+// NEXT: 10
 message FluxSourceProto {
-	oneof source {
-		HardwareFluxSourceProto drive = 2;
-		TestPatternFluxSourceProto test_pattern = 3;
-		EraseFluxSourceProto erase = 4;
-		KryofluxFluxSourceProto kryoflux = 5;
-		ScpFluxSourceProto scp = 6;
-		CwfFluxSourceProto cwf = 7;
-		Fl2FluxSourceProto fl2 = 8;
+	enum FluxSourceType {
+		NOT_SET = 0;
+		DRIVE = 1;
+		TEST_PATTERN = 2;
+		ERASE = 3;
+		KRYOFLUX = 4;
+		SCP = 5;
+		CWF = 6;
+		FLUX = 7;
 	}
+
+	optional FluxSourceType type = 9 [default = NOT_SET, (help) = "flux source type"];
+
+	optional HardwareFluxSourceProto drive = 2;
+	optional TestPatternFluxSourceProto test_pattern = 3;
+	optional EraseFluxSourceProto erase = 4;
+	optional KryofluxFluxSourceProto kryoflux = 5;
+	optional ScpFluxSourceProto scp = 6;
+	optional CwfFluxSourceProto cwf = 7;
+	optional Fl2FluxSourceProto fl2 = 8;
 }
 

@@ -6,12 +6,12 @@ drive {
 
 image_reader {
 	filename: "n88basic.img"
-	img {}
+	type: IMG
 }
 
 image_writer {
 	filename: "n88basic.img"
-	img {}
+	type: IMG
 }
 
 layout {

@@ -6,12 +6,12 @@ drive {
 
 image_reader {
 	filename: "rx50.img"
-	img {}
+	type: IMG
 }
 
 image_writer {
 	filename: "rx50.img"
-	img {}
+	type: IMG
 }
 
 layout {

@@ -2,7 +2,7 @@ comment: 'Durango F85 461kB 5.25" 77-track SS (ro)'
 
 image_writer {
 	filename: "f85.img"
-	img {}
+	type: IMG
 }
 
 decoder {

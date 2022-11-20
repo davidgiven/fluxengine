@@ -3,12 +3,12 @@ is_extension: true
 
 image_reader {
 	filename: "northstar.nsi"
-	nsi {}
+	type: NSI
 }
 
 image_writer {
 	filename: "northstar.nsi"
-	nsi {}
+	type: NSI
 }
 
 layout {

@@ -27,7 +27,7 @@ int mainSeek(int argc, const char* argv[])
 {
     flags.parseFlagsWithConfigFiles(argc, argv, {});
 
-	if (!config.flux_source().has_drive())
+	if (config.flux_source().type() != FluxSourceProto::DRIVE)
 		Error() << "this only makes sense with a real disk drive";
 
     usbSetDrive(config.drive().drive(), false, config.drive().index_mode());

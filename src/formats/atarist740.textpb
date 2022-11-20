@@ -4,12 +4,12 @@ include: '_atari'
 
 image_reader {
 	filename: "atarist740.st"
-	img {}
+	type: IMG
 }
 
 image_writer {
 	filename: "atarist740.st"
-	img {}
+	type: IMG
 }
 
 layout {

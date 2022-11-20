@@ -2,7 +2,7 @@ comment: 'Agat 840kB 5.25" 80-track DS (ro)'
 
 image_writer {
 	filename: "agat.img"
-	img {}
+	type: IMG
 }
 
 layout {

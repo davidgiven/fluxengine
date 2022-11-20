@@ -3,7 +3,7 @@ is_extension: true
 
 image_writer {
 	filename: "mx.img"
-	img {}
+	type: IMG
 }
 
 layout {

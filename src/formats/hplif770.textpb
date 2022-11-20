@@ -7,12 +7,12 @@ drive {
 
 image_reader {
 	filename: "hplif770.img"
-	img {}
+	type: IMG
 }
 
 image_writer {
 	filename: "hplif770.img"
-	img {}
+	type: IMG
 }
 
 layout {

@@ -7,12 +7,12 @@ drive {
 
 image_reader {
 	filename: "micropolis.img"
-	img {}
+	type: IMG
 }
 
 image_writer {
 	filename: "micropolis.img"
-	img {}
+	type: IMG
 }
 
 layout {
@@ -41,12 +41,12 @@ option {
 	config {
 		image_reader {
 			filename: "micropolis.vgi"
-			img {}
+			type: IMG
 		}
 
 		image_writer {
 			filename: "micropolis.vgi"
-			img {}
+			type: IMG
 		}
 
 		layout {

@@ -2,12 +2,12 @@ comment: 'Texas Instruments DS990 1126kB 8" DSSD'
 
 image_reader {
 	filename: "tids990.img"
-	img {}
+	type: IMG
 }
 
 image_writer {
 	filename: "tids990.img"
-	img {}
+	type: IMG
 }
 
 layout {

@@ -2,7 +2,7 @@ comment: 'Epson PF-10 40-track DS DD (ro)'
 
 image_writer {
 	filename: "epsonpf10.img"
-	img {}
+	type: IMG
 }
 
 layout {
@@ -24,6 +24,7 @@ decoder {
 tpi: 48
 
 filesystem {
+	type: CPMFS
 	cpmfs {
 		filesystem_start {
 			track: 4

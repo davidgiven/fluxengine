@@ -2,7 +2,7 @@ comment: 'ICL Model 30 263kB 34-track DSSD (ro)'
 
 image_writer {
 	filename: "icl30.img"
-	img {}
+	type: IMG
 }
 
 layout {
@@ -50,6 +50,7 @@ decoder {
 }
 
 filesystem {
+	type: CPMFS
 	cpmfs {
 		filesystem_start {
 			track: 1

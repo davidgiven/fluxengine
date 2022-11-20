@@ -2,12 +2,12 @@ comment: 'PC 180kB 5.25" 40-track 9-sector SSDD'
 
 image_reader {
 	filename: "ibm180.img"
-	img {}
+	type: IMG
 }
 
 image_writer {
 	filename: "ibm180.img"
-	img {}
+	type: IMG
 }
 
 layout {
@@ -42,7 +42,7 @@ drive {
 tpi: 48
 
 filesystem {
-	fatfs {}
+	type: FATFS
 }
 
 

@@ -177,30 +177,30 @@ Filesystem::Filesystem(std::shared_ptr<SectorInterface> sectors):
 std::unique_ptr<Filesystem> Filesystem::createFilesystem(
     const FilesystemProto& config, std::shared_ptr<SectorInterface> image)
 {
-    switch (config.filesystem_case())
+    switch (config.type())
     {
-        case FilesystemProto::kBrother120:
+        case FilesystemProto::BROTHER120:
             return Filesystem::createBrother120Filesystem(config, image);
 
-        case FilesystemProto::kAcorndfs:
+        case FilesystemProto::ACORNDFS:
             return Filesystem::createAcornDfsFilesystem(config, image);
 
-        case FilesystemProto::kFatfs:
+        case FilesystemProto::FATFS:
             return Filesystem::createFatFsFilesystem(config, image);
 
-        case FilesystemProto::kCpmfs:
+        case FilesystemProto::CPMFS:
             return Filesystem::createCpmFsFilesystem(config, image);
 
-        case FilesystemProto::kAmigaffs:
+        case FilesystemProto::AMIGAFFS:
             return Filesystem::createAmigaFfsFilesystem(config, image);
 
-        case FilesystemProto::kMachfs:
+        case FilesystemProto::MACHFS:
             return Filesystem::createMacHfsFilesystem(config, image);
 
-        case FilesystemProto::kCbmfs:
+        case FilesystemProto::CBMFS:
             return Filesystem::createCbmfsFilesystem(config, image);
 
-        case FilesystemProto::kProdos:
+        case FilesystemProto::PRODOS:
             return Filesystem::createProdosFilesystem(config, image);
 
         default:
@@ -218,13 +218,12 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystemFromConfig()
         std::shared_ptr<Decoder> decoder;
         std::shared_ptr<FluxSink> fluxSink;
         std::shared_ptr<Encoder> encoder;
-        if (config.flux_source().source_case() !=
-            FluxSourceProto::SOURCE_NOT_SET)
+        if (config.flux_source().type() != FluxSourceProto::NOT_SET)
         {
             fluxSource = FluxSource::create(config.flux_source());
             decoder = Decoder::create(config.decoder());
         }
-        if (config.flux_sink().has_drive())
+        if (config.flux_sink().type() == FluxSinkProto::DRIVE)
         {
             fluxSink = FluxSink::create(config.flux_sink());
             encoder = Encoder::create(config.encoder());
@@ -236,11 +235,9 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystemFromConfig()
     {
         std::shared_ptr<ImageReader> reader;
         std::shared_ptr<ImageWriter> writer;
-        if (config.image_reader().format_case() !=
-            ImageReaderProto::FORMAT_NOT_SET)
+        if (config.image_reader().type() != ImageReaderProto::NOT_SET)
             reader = ImageReader::create(config.image_reader());
-        if (config.image_writer().format_case() !=
-            ImageWriterProto::FORMAT_NOT_SET)
+        if (config.image_writer().type() != ImageWriterProto::NOT_SET)
             writer = ImageWriter::create(config.image_writer());
 
         sectorInterface =
