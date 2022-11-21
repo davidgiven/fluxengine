@@ -3,77 +3,77 @@
 #include "lib/config.pb.h"
 #include <fmt/format.h>
 
-class Entry
-{
-public:
-    Entry(const Bytes& bytes, int map_entry_size)
-    {
-        user = bytes[0] & 0x0f;
-
-        {
-            std::stringstream ss;
-            ss << (char)(user + '0') << ':';
-
-            for (int i = 1; i <= 8; i++)
-            {
-                uint8_t c = bytes[i] & 0x7f;
-                if (c == ' ')
-                    break;
-                ss << (char)c;
-            }
-            for (int i = 9; i <= 11; i++)
-            {
-                uint8_t c = bytes[i] & 0x7f;
-                if (c == ' ')
-                    break;
-                if (i == 9)
-                    ss << '.';
-                ss << (char)c;
-            }
-            filename = ss.str();
-        }
-
-        {
-            std::stringstream ss;
-            if (bytes[9] & 0x80)
-                ss << 'R';
-            if (bytes[10] & 0x80)
-                ss << 'S';
-            if (bytes[11] & 0x80)
-                ss << 'A';
-            mode = ss.str();
-        }
-
-        extent = bytes[12] | (bytes[14] << 5);
-        records = bytes[15];
-
-        ByteReader br(bytes);
-        br.seek(16);
-        switch (map_entry_size)
-        {
-            case 1:
-                for (int i = 0; i < 16; i++)
-                    allocation_map.push_back(br.read_8());
-                break;
-
-            case 2:
-                for (int i = 0; i < 8; i++)
-                    allocation_map.push_back(br.read_le16());
-                break;
-        }
-    }
-
-public:
-    std::string filename;
-    std::string mode;
-    unsigned user;
-    unsigned extent;
-    unsigned records;
-    std::vector<unsigned> allocation_map;
-};
-
 class CpmFsFilesystem : public Filesystem
 {
+    class Entry
+    {
+    public:
+        Entry(const Bytes& bytes, int map_entry_size)
+        {
+            user = bytes[0] & 0x0f;
+
+            {
+                std::stringstream ss;
+                ss << (char)(user + '0') << ':';
+
+                for (int i = 1; i <= 8; i++)
+                {
+                    uint8_t c = bytes[i] & 0x7f;
+                    if (c == ' ')
+                        break;
+                    ss << (char)c;
+                }
+                for (int i = 9; i <= 11; i++)
+                {
+                    uint8_t c = bytes[i] & 0x7f;
+                    if (c == ' ')
+                        break;
+                    if (i == 9)
+                        ss << '.';
+                    ss << (char)c;
+                }
+                filename = ss.str();
+            }
+
+            {
+                std::stringstream ss;
+                if (bytes[9] & 0x80)
+                    ss << 'R';
+                if (bytes[10] & 0x80)
+                    ss << 'S';
+                if (bytes[11] & 0x80)
+                    ss << 'A';
+                mode = ss.str();
+            }
+
+            extent = bytes[12] | (bytes[14] << 5);
+            records = bytes[15];
+
+            ByteReader br(bytes);
+            br.seek(16);
+            switch (map_entry_size)
+            {
+                case 1:
+                    for (int i = 0; i < 16; i++)
+                        allocation_map.push_back(br.read_8());
+                    break;
+
+                case 2:
+                    for (int i = 0; i < 8; i++)
+                        allocation_map.push_back(br.read_le16());
+                    break;
+            }
+        }
+
+    public:
+        std::string filename;
+        std::string mode;
+        unsigned user;
+        unsigned extent;
+        unsigned records;
+        std::vector<unsigned> allocation_map;
+    };
+
 public:
     CpmFsFilesystem(
         const CpmFsProto& config, std::shared_ptr<SectorInterface> sectors):
