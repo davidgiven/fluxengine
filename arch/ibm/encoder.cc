@@ -5,7 +5,6 @@
 #include "crc.h"
 #include "readerwriter.h"
 #include "image.h"
-#include "mapper.h"
 #include "arch/ibm/ibm.pb.h"
 #include "lib/encoders/encoders.pb.h"
 #include "fmt/format.h"
@@ -68,11 +67,11 @@ static uint8_t decodeUint16(uint16_t raw)
     return decodeFmMfm(b.toBits())[0];
 }
 
-class IbmEncoder : public AbstractEncoder
+class IbmEncoder : public Encoder
 {
 public:
     IbmEncoder(const EncoderProto& config):
-        AbstractEncoder(config),
+        Encoder(config),
         _config(config.ibm())
     {
     }
@@ -108,37 +107,15 @@ private:
     }
 
 public:
-    std::vector<std::shared_ptr<const Sector>> collectSectors(
-        const Location& location, const Image& image) override
-    {
-        std::vector<std::shared_ptr<const Sector>> sectors;
-        IbmEncoderProto::TrackdataProto trackdata;
-        getEncoderTrackData(trackdata, location.logicalTrack, location.head);
-
-        auto layoutdata =
-            Layout::getLayoutOfTrack(location.logicalTrack, location.head);
-
-        int logicalSide = location.head ^ trackdata.swap_sides();
-        for (int sectorId : Layout::getSectorsInTrack(layoutdata))
-        {
-            const auto& sector =
-                image.get(location.logicalTrack, logicalSide, sectorId);
-            if (sector)
-                sectors.push_back(sector);
-        }
-
-        return sectors;
-    }
-
-    std::unique_ptr<Fluxmap> encode(const Location& location,
+    std::unique_ptr<Fluxmap> encode(std::shared_ptr<const TrackInfo>& trackInfo,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
         IbmEncoderProto::TrackdataProto trackdata;
-        getEncoderTrackData(trackdata, location.logicalTrack, location.head);
+        getEncoderTrackData(trackdata, trackInfo->logicalTrack, trackInfo->logicalSide);
 
-        auto layoutdata =
-            Layout::getLayoutOfTrack(location.logicalTrack, location.head);
+        auto trackLayout =
+            Layout::getLayoutOfTrack(trackInfo->logicalTrack, trackInfo->logicalSide);
 
         auto writeBytes = [&](const Bytes& bytes)
         {
@@ -174,7 +151,7 @@ public:
 
         uint8_t sectorSize = 0;
         {
-            int s = layoutdata.sector_size() >> 7;
+            int s = trackLayout->sectorSize >> 7;
             while (s > 1)
             {
                 s >>= 1;
@@ -225,7 +202,8 @@ public:
                 }
                 bw.write_8(idamUnencoded);
                 bw.write_8(sectorData->logicalTrack);
-                bw.write_8(sectorData->logicalSide);
+                bw.write_8(
+                    sectorData->logicalSide ^ trackdata.invert_side_byte());
                 bw.write_8(sectorData->logicalSector);
                 bw.write_8(sectorSize);
                 uint16_t crc = crc16(CCITT_POLY, header);
@@ -259,7 +237,7 @@ public:
                 bw.write_8(damUnencoded);
 
                 Bytes truncatedData =
-                    sectorData->data.slice(0, layoutdata.sector_size());
+                    sectorData->data.slice(0, trackLayout->sectorSize);
                 bw += truncatedData;
                 uint16_t crc = crc16(CCITT_POLY, data);
                 bw.write_be16(crc);
@@ -285,7 +263,7 @@ public:
 
         std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
         fluxmap->appendBits(_bits,
-            Mapper::calculatePhysicalClockPeriod(clockRateUs * 1e3,
+            calculatePhysicalClockPeriod(clockRateUs * 1e3,
                 trackdata.target_rotational_period_ms() * 1e6));
         return fluxmap;
     }
@@ -297,7 +275,7 @@ private:
     bool _lastBit;
 };
 
-std::unique_ptr<AbstractEncoder> createIbmEncoder(const EncoderProto& config)
+std::unique_ptr<Encoder> createIbmEncoder(const EncoderProto& config)
 {
-    return std::unique_ptr<AbstractEncoder>(new IbmEncoder(config));
+    return std::unique_ptr<Encoder>(new IbmEncoder(config));
 }

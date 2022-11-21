@@ -5,7 +5,7 @@
 #include "image.h"
 #include "proto.h"
 #include "logger.h"
-#include "mapper.h"
+#include "layout.h"
 #include "lib/config.pb.h"
 #include "fmt/format.h"
 #include <algorithm>
@@ -264,7 +264,6 @@ public:
 				int SectorID;
 				SectorID = sector_skew[s];
                 const auto& sector = image->put(header.track, header.Head, SectorID);
-				sector->logicalSector = SectorID;
                 //read the status of the sector
                 unsigned int Status_Sector = br.read_8();
                 headerPtr++;
@@ -373,26 +372,26 @@ public:
 				if (blnOptionalCylinderMap) //there was een optional cylinder map. write it to the sector
 				//The Sector Cylinder Map has one entry for each sector, and contains the logical Cylinder ID for the corresponding sector in the Sector Numbering Map.
 				{
-					sector->physicalTrack = Mapper::remapTrackLogicalToPhysical(header.track);
+					sector->physicalTrack = Layout::remapTrackLogicalToPhysical(header.track);
 					sector->logicalTrack = optionalsector_map[s];
 					blnOptionalCylinderMap = false;
 				}
 				else 
 				{
 					sector->logicalTrack = header.track;
-                    sector->physicalTrack = Mapper::remapTrackLogicalToPhysical(header.track);
+                    sector->physicalTrack = Layout::remapTrackLogicalToPhysical(header.track);
 				}
 				if (blnOptionalHeadMap) //there was een optional head map. write it to the sector
 				//The Sector Head Map has one entry for each sector, and contains the logical Head ID for the corresponding sector in the Sector Numbering Map.
 				{
-					sector->physicalHead = header.Head;
+					sector->physicalSide = header.Head;
 					sector->logicalSide = optionalhead_map[s];
 					blnOptionalHeadMap = false;
 				}
 				else 
 				{
 					sector->logicalSide = header.Head;
-                    sector->physicalHead = header.Head;
+                    sector->physicalSide = header.Head;
 				}
             }
 
@@ -416,20 +415,6 @@ public:
 
         layout->set_tracks(geometry.numTracks);
         layout->set_sides(geometry.numSides);
-
-        if (!config.has_heads())
-        {
-            auto* heads = config.mutable_heads();
-            heads->set_start(0);
-            heads->set_end(geometry.numSides - 1);
-        }
-
-        if (!config.has_tracks())
-        {
-            auto* tracks = config.mutable_tracks();
-            tracks->set_start(0);
-            tracks->set_end(geometry.numTracks - 1);
-        }
 
         return image;
 

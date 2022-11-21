@@ -14,7 +14,7 @@ message A2RFluxSinkProto {
 }
 
 message VcdFluxSinkProto {
-	optional string directory = 1 [default = "vcdfiles", (help) = "directory to write .vcd files to"];
+	optional string directory = 1 	   [default = "vcdfiles", (help) = "directory to write .vcd files to"];
 }
 
 message ScpFluxSinkProto {
@@ -27,15 +27,25 @@ message Fl2FluxSinkProto {
 	optional string filename = 1       [default = "flux.fl2", (help) = ".fl2 file to write to"];
 }
 
-// Next: 9
+// Next: 10
 message FluxSinkProto {
-	oneof dest {
-		HardwareFluxSinkProto drive = 2;
-		A2RFluxSinkProto a2r = 8;
-		AuFluxSinkProto au = 3;
-		VcdFluxSinkProto vcd = 4;
-		ScpFluxSinkProto scp = 5;
-		Fl2FluxSinkProto fl2 = 6;
+	enum FluxSinkType {
+		NOT_SET = 0;
+		DRIVE = 1;
+		A2R = 2;
+		AU = 3;
+		VCD = 4;
+		SCP = 5;
+		FLUX = 6;
 	}
+
+	optional FluxSinkType type = 9 [default = NOT_SET, (help) = "flux sink type"];
+
+	optional HardwareFluxSinkProto drive = 2;
+	optional A2RFluxSinkProto a2r = 8;
+	optional AuFluxSinkProto au = 3;
+	optional VcdFluxSinkProto vcd = 4;
+	optional ScpFluxSinkProto scp = 5;
+	optional Fl2FluxSinkProto fl2 = 6;
 }
 

@@ -4,7 +4,6 @@
 #include "imagereader/imagereader.h"
 #include "image.h"
 #include "logger.h"
-#include "mapper.h"
 #include "lib/config.pb.h"
 #include "lib/layout.pb.h"
 #include "lib/proto.h"
@@ -40,29 +39,25 @@ public:
             if (inputFile.eof())
                 break;
 
-            auto layoutdata = Layout::getLayoutOfTrack(track, side);
-            for (int sectorId : Layout::getSectorsInTrack(layoutdata))
+            auto trackLayout = Layout::getLayoutOfTrack(track, side);
+            for (int sectorId : trackLayout->logicalSectorOrder)
             {
-                Bytes data(layoutdata.sector_size());
+                Bytes data(trackLayout->sectorSize);
                 inputFile.read((char*)data.begin(), data.size());
 
                 const auto& sector = image->put(track, side, sectorId);
                 sector->status = Sector::OK;
-                sector->logicalTrack = track;
-                sector->physicalTrack =
-                    Mapper::remapTrackLogicalToPhysical(track);
-                sector->logicalSide = sector->physicalHead = side;
-                sector->logicalSector = sectorId;
                 sector->data = data;
             }
         }
 
         image->calculateSize();
         const Geometry& geometry = image->getGeometry();
-        Logger() << fmt::format("IMG: read {} tracks, {} sides, {} kB total",
+        Logger() << fmt::format("IMG: read {} tracks, {} sides, {} kB total from {}",
             geometry.numTracks,
             geometry.numSides,
-            inputFile.tellg() / 1024);
+            inputFile.tellg() / 1024,
+			_config.filename());
         return image;
     }
 };

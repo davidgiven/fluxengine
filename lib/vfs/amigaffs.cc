@@ -72,9 +72,9 @@ public:
         attributes[VOLUME_NAME] = vol->volName;
 
         int total = vol->lastBlock - vol->firstBlock + 1;
-        attributes[TOTAL_BLOCKS] = fmt::format("{}", total);
+        attributes[TOTAL_BLOCKS] = std::to_string(total);
         attributes[USED_BLOCKS] =
-            fmt::format("{}", total - adfCountFreeBlocks(vol));
+            std::to_string(total - adfCountFreeBlocks(vol));
         attributes[BLOCK_SIZE] = "512";
         return attributes;
     }
@@ -91,8 +91,7 @@ public:
         dev.devType = DEVTYPE_FLOPDD;
         dev.cylinders = config.layout().tracks();
         dev.heads = config.layout().sides();
-        dev.sectors =
-            Layout::getSectorsInTrack(Layout::getLayoutOfTrack(0, 0)).size();
+        dev.sectors = Layout::getLayoutOfTrack(0, 0)->numSectors;
         adfInitDevice(&dev, nullptr, false);
         int res = adfCreateFlop(&dev, (char*)volumeName.c_str(), 0);
         if (res != RC_OK)
@@ -258,7 +257,7 @@ private:
         dirent->mode = modeToString(entry->access);
 
         dirent->attributes[FILENAME] = entry->name;
-        dirent->attributes[LENGTH] = fmt::format("{}", entry->size);
+        dirent->attributes[LENGTH] = std::to_string(entry->size);
         dirent->attributes[FILE_TYPE] =
             (entry->type == ST_FILE) ? "file" : "dir";
         dirent->attributes[MODE] = modeToString(entry->access);

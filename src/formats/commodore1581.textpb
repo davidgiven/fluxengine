@@ -2,21 +2,22 @@ comment: 'Commodore 1581 800kB 3.5" DSDD'
 
 image_reader {
 	filename: "commodore1581.d81"
-	img {}
+	type: IMG
 }
 
 image_writer {
 	filename: "commodore1581.d81"
-	img {}
+	type: IMG
 }
 
 layout {
 	tracks: 80
 	sides: 2
+	swap_sides: true
 	layoutdata {
 		sector_size: 512
 		physical {
-			sector: 0
+			start_sector: 1
 			count: 10
 		}
 	}
@@ -31,7 +32,6 @@ encoder {
 			gap0: 80
 			gap2: 22
 			gap3: 34
-			swap_sides: true
 		}
 	}
 }
@@ -39,18 +39,8 @@ encoder {
 decoder {
 	ibm {
 		trackdata {
-			swap_sides: false
+			ignore_side_byte: true
 		}
 	}
-}
-
-tracks {
-	start: 0
-	end: 79
-}
-
-heads {
-	start: 0
-	end: 1
 }
 

@@ -1,11 +1,16 @@
 FORMATS = \
+	_acornadfs8 \
+	_acornadfs32 \
 	_atari \
 	_micropolis \
 	_northstar \
 	_mx \
-	_commodore1541 \
 	40track_drive \
-	acornadfs \
+	acornadfs160 \
+	acornadfs320 \
+	acornadfs640 \
+	acornadfs800 \
+	acornadfs1600 \
 	acorndfs \
 	aeslanier \
 	agat840 \
@@ -14,7 +19,6 @@ FORMATS = \
 	ampro800 \
 	apple2_drive \
 	apple2 \
-	appledos \
 	atarist360 \
 	atarist370 \
 	atarist400 \
@@ -26,22 +30,23 @@ FORMATS = \
 	bk800 \
 	brother120 \
 	brother240 \
-	commodore1541t35 \
-	commodore1541t40 \
+	commodore1541 \
 	commodore1581 \
+	cmd_fd2000 \
 	eco1 \
 	epsonpf10 \
 	f85 \
 	fb100 \
 	hp9121 \
 	hplif770 \
+	ibm \
 	ibm1200 \
 	ibm1232 \
 	ibm1440 \
 	ibm180 \
 	ibm360 \
 	ibm720 \
-	ibm \
+	icl30 \
 	mac400 \
 	mac800 \
 	micropolis143 \
@@ -56,11 +61,9 @@ FORMATS = \
 	northstar175 \
 	northstar350 \
 	northstar87 \
-	prodos \
 	rx50 \
 	shugart_drive \
 	tids990 \
-	vgi \
 	victor9k_ds \
 	victor9k_ss \
 	zilogmcz \

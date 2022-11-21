@@ -21,7 +21,5 @@ message Tids990EncoderProto {
 		(help) = "size of gap 2 (the post-ID gap)" ];
 	optional int32 gap3_bytes = 8 [ default = 51,
 		(help) = "size of gap 3 (the post-data or format gap)" ];
-	optional string sector_skew = 9 [ default = "1mhc72nid83oje94pkfa50lgb6",
-		(help) = "order to emit sectors" ];
 }
 

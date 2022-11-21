@@ -67,14 +67,14 @@ int mainRead(int argc, const char* argv[])
 {
 	if (argc == 1)
 		showProfiles("read", formats);
-	config.mutable_flux_source()->mutable_drive();
+	config.mutable_flux_source()->set_type(FluxSourceProto::DRIVE);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
-	if (config.decoder().copy_flux_to().has_drive())
+	if (config.decoder().copy_flux_to().type() == FluxSinkProto::DRIVE)
 		Error() << "you cannot copy flux to a hardware device";
 
 	std::unique_ptr<FluxSource> fluxSource(FluxSource::create(config.flux_source()));
-	std::unique_ptr<AbstractDecoder> decoder(AbstractDecoder::create(config.decoder()));
+	std::unique_ptr<Decoder> decoder(Decoder::create(config.decoder()));
 	std::unique_ptr<ImageWriter> writer(ImageWriter::create(config.image_writer()));
 
 	readDiskCommand(*fluxSource, *decoder, *writer);

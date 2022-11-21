@@ -6,15 +6,14 @@
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/layout.h"
 #include "lib/proto.h"
-#include "lib/mapper.h"
 
 class FluxSectorInterface : public SectorInterface
 {
 public:
     FluxSectorInterface(std::shared_ptr<FluxSource> fluxSource,
         std::shared_ptr<FluxSink> fluxSink,
-        std::shared_ptr<AbstractEncoder> encoder,
-        std::shared_ptr<AbstractDecoder> decoder):
+        std::shared_ptr<Encoder> encoder,
+        std::shared_ptr<Decoder> decoder):
         _fluxSource(fluxSource),
         _fluxSink(fluxSink),
         _encoder(encoder),
@@ -57,22 +56,23 @@ public:
 
     void flushChanges() override
     {
-        std::set<Location> locations;
+        std::vector<std::shared_ptr<const TrackInfo>> locations;
 
         for (const auto& trackid : _changedTracks)
         {
             unsigned track = trackid.first;
             unsigned side = trackid.second;
-            auto layoutdata = Layout::getLayoutOfTrack(track, side);
-            auto sectors = Layout::getSectorsInTrack(layoutdata);
-            locations.insert(Mapper::computeLocationFor(track, side));
+            auto trackLayout = Layout::getLayoutOfTrack(track, side);
+            locations.push_back(trackLayout);
 
             /* If we don't have all the sectors of this track, we may need to
              * populate any non-changed sectors as we can only write a track at
              * a time. */
 
-            if (!imageContainsAllSectorsOf(
-                    _changedSectors, track, side, sectors))
+            if (!imageContainsAllSectorsOf(_changedSectors,
+                    track,
+                    side,
+                    trackLayout->logicalSectorOrder))
             {
                 /* If we don't have any loaded sectors for this track, pre-read
                  * it. */
@@ -83,11 +83,11 @@ public:
                 /* Now merge the loaded track with the changed one, and write
                  * the result back. */
 
-                for (const unsigned sector : sectors)
+                for (unsigned sectorId : trackLayout->logicalSectorOrder)
                 {
-                    if (!_changedSectors.contains(track, side, sector))
-                        _changedSectors.put(track, side, sector)->data =
-                            _loadedSectors.get(track, side, sector)->data;
+                    if (!_changedSectors.contains(track, side, sectorId))
+                        _changedSectors.put(track, side, sectorId)->data =
+                            _loadedSectors.get(track, side, sectorId)->data;
                 }
             }
         }
@@ -128,8 +128,8 @@ private:
 
     void populateSectors(unsigned track, unsigned side)
     {
-        auto location = Mapper::computeLocationFor(track, side);
-        auto trackdata = readAndDecodeTrack(*_fluxSource, *_decoder, location);
+        auto trackInfo = Layout::getLayoutOfTrack(track, side);
+        auto trackdata = readAndDecodeTrack(*_fluxSource, *_decoder, trackInfo);
 
         for (const auto& sector : trackdata->sectors)
             *_loadedSectors.put(track, side, sector->logicalSector) = *sector;
@@ -138,8 +138,8 @@ private:
 
     std::shared_ptr<FluxSource> _fluxSource;
     std::shared_ptr<FluxSink> _fluxSink;
-    std::shared_ptr<AbstractEncoder> _encoder;
-    std::shared_ptr<AbstractDecoder> _decoder;
+    std::shared_ptr<Encoder> _encoder;
+    std::shared_ptr<Decoder> _decoder;
 
     typedef std::pair<unsigned, unsigned> trackid_t;
     Image _loadedSectors;
@@ -151,8 +151,8 @@ private:
 std::unique_ptr<SectorInterface> SectorInterface::createFluxSectorInterface(
     std::shared_ptr<FluxSource> fluxSource,
     std::shared_ptr<FluxSink> fluxSink,
-    std::shared_ptr<AbstractEncoder> encoder,
-    std::shared_ptr<AbstractDecoder> decoder)
+    std::shared_ptr<Encoder> encoder,
+    std::shared_ptr<Decoder> decoder)
 {
     return std::make_unique<FluxSectorInterface>(
         fluxSource, fluxSink, encoder, decoder);

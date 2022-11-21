@@ -40,7 +40,7 @@ static uint8_t getModulationandSpeed(int flags, ImdOutputProto::RecordingMode mo
 		{
 			return 3;
 		}
-	} else if ((flags>570) and (flags<630))//dont know exactly what the clock is for 300kbps assuming twice just as 500kbps en 250kbps
+	} else if ((flags>1475) and (flags<1575))//SD disk
 		/* 300 kbps*/
 	{
 		if (mode == ImdOutputProto::RECMODE_FM)
@@ -51,7 +51,7 @@ static uint8_t getModulationandSpeed(int flags, ImdOutputProto::RecordingMode mo
 		{
 			return 4;
 		}
-	} else if ((flags>475) and (flags<525)) //DD disk
+	} else if ((flags>1900) and (flags<2100)) //DD disk
 		 /* 250 kbps */
 		{
 		if (mode == ImdOutputProto::RECMODE_FM)
@@ -179,8 +179,6 @@ public:
 			comment = LABEL ;
 			comment.append(" date: ");
 			comment.append(std::ctime(&time));
-//			comment.append(" time: ");
-//			comment.append(__TIME__);
 		} else
 		{
 			comment.insert(0,"IMD ");
@@ -266,7 +264,7 @@ public:
 						{
 							blnOptionalCylinderMap = true;
 						}
-						if 	(sector->logicalSide != sector->physicalHead)	//different physicalside fromn logicalside
+						if 	(sector->logicalSide != sector->physicalSide)	//different physicalside fromn logicalside
 						{
 							blnOptionalHeadMap = true;
 						}

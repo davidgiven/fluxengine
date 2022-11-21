@@ -52,11 +52,11 @@ static Bytes decode(const std::vector<bool>& bits)
     return output;
 }
 
-class Victor9kDecoder : public AbstractDecoder
+class Victor9kDecoder : public Decoder
 {
 public:
 	Victor9kDecoder(const DecoderProto& config):
-		AbstractDecoder(config)
+		Decoder(config)
 	{}
 
     nanoseconds_t advanceToNextRecord() override
@@ -109,9 +109,9 @@ public:
 	}
 };
 
-std::unique_ptr<AbstractDecoder> createVictor9kDecoder(const DecoderProto& config)
+std::unique_ptr<Decoder> createVictor9kDecoder(const DecoderProto& config)
 {
-	return std::unique_ptr<AbstractDecoder>(new Victor9kDecoder(config));
+	return std::unique_ptr<Decoder>(new Victor9kDecoder(config));
 }
 
 

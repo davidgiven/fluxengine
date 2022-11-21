@@ -2,12 +2,12 @@ comment: 'PC 1200kB 5.25" 80-track 15-sector DSHD'
 
 image_reader {
 	filename: "ibm1200.img"
-	img {}
+	type: IMG
 }
 
 image_writer {
 	filename: "ibm1200.img"
-	img {}
+	type: IMG
 }
 
 layout {
@@ -16,7 +16,7 @@ layout {
 	layoutdata {
 		sector_size: 512
 		physical {
-			sector: 1
+			start_sector: 1
 			count: 15
 		}
 	}
@@ -39,18 +39,8 @@ drive {
 	high_density: true
 }
 
-tracks {
-	start: 0
-	end: 79
-}
-
-heads {
-	start: 0
-	end: 1
-}
-
 filesystem {
-	fatfs {}
+	type: FATFS
 }
 
 

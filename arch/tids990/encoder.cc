@@ -5,7 +5,6 @@
 #include "crc.h"
 #include "readerwriter.h"
 #include "image.h"
-#include "mapper.h"
 #include "arch/tids990/tids990.pb.h"
 #include "lib/encoders/encoders.pb.h"
 #include <fmt/format.h>
@@ -25,11 +24,11 @@ static uint8_t decodeUint16(uint16_t raw)
     return decodeFmMfm(b.toBits())[0];
 }
 
-class Tids990Encoder : public AbstractEncoder
+class Tids990Encoder : public Encoder
 {
 public:
     Tids990Encoder(const EncoderProto& config):
-        AbstractEncoder(config),
+        Encoder(config),
         _config(config.tids990())
     {
     }
@@ -61,24 +60,7 @@ private:
     }
 
 public:
-    std::vector<std::shared_ptr<const Sector>> collectSectors(
-        const Location& location, const Image& image) override
-    {
-        std::vector<std::shared_ptr<const Sector>> sectors;
-
-        for (char sectorChar : _config.sector_skew())
-        {
-            int sectorId = charToInt(sectorChar);
-            const auto& sector =
-                image.get(location.logicalTrack, location.head, sectorId);
-            if (sector)
-                sectors.push_back(sector);
-        }
-
-        return sectors;
-    }
-
-    std::unique_ptr<Fluxmap> encode(const Location& location,
+    std::unique_ptr<Fluxmap> encode(std::shared_ptr<const TrackInfo>& trackInfo,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
@@ -151,7 +133,7 @@ public:
 
         auto fluxmap = std::make_unique<Fluxmap>();
         fluxmap->appendBits(_bits,
-            Mapper::calculatePhysicalClockPeriod(clockRateUs * 1e3,
+            calculatePhysicalClockPeriod(clockRateUs * 1e3,
                 _config.rotational_period_ms() * 1e6));
         return fluxmap;
     }
@@ -163,8 +145,8 @@ private:
     bool _lastBit;
 };
 
-std::unique_ptr<AbstractEncoder> createTids990Encoder(
+std::unique_ptr<Encoder> createTids990Encoder(
     const EncoderProto& config)
 {
-    return std::unique_ptr<AbstractEncoder>(new Tids990Encoder(config));
+    return std::unique_ptr<Encoder>(new Tids990Encoder(config));
 }

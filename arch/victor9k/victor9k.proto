@@ -9,14 +9,6 @@ message Victor9kEncoderProto
 {
     message TrackdataProto
     {
-        message SectorRangeProto
-        {
-            optional int32 start_sector = 1
-                [ (help) = "first sector ID on track" ];
-            optional int32 sector_count = 2
-                [ (help) = "number of sectors on track" ];
-        }
-
         optional int32 min_track = 1
             [ (help) = "minimum track this format applies to" ];
         optional int32 max_track = 2
@@ -38,9 +30,6 @@ message Victor9kEncoderProto
             [ (help) = "size of gap between data and the next header" ];
         optional int32 post_header_gap_bits = 11
             [ (help) = "size of gap between header and the data" ];
-
-        optional SectorRangeProto sector_range = 7
-            [ (help) = "write these sectors on each track" ];
     }
 
     repeated TrackdataProto trackdata = 1;

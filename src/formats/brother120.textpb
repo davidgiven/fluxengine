@@ -2,12 +2,12 @@ comment: 'Brother 120kB 3.5" 39-track SS GCR'
 
 image_reader {
 	filename: "brother120.img"
-	img {}
+	type: IMG
 }
 
 image_writer {
 	filename: "brother120.img"
-	img {}
+	type: IMG
 }
 
 layout {
@@ -16,8 +16,9 @@ layout {
 	layoutdata {
 		sector_size: 256
 		physical {
-			sector: 0
+			start_sector: 0
 			count: 12
+			skew: 5
 		}
 	}
 }
@@ -37,19 +38,9 @@ drive {
 	group_offset: 1
 }
 
-tracks {
-	start: 0
-	end: 38
-}
-
-heads {
-	start: 0
-	end: 0
-}
-
 tpi: 48
 
 filesystem {
-	brother120 {}
+	type: BROTHER120
 }
 

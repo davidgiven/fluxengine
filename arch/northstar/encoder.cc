@@ -5,7 +5,6 @@
 #include "decoders/decoders.h"
 #include "encoders/encoders.h"
 #include "image.h"
-#include "mapper.h"
 #include "lib/encoders/encoders.pb.h"
 
 #define GAP_FILL_SIZE_SD 30
@@ -120,35 +119,16 @@ static void write_sector(std::vector<bool>& bits,
     }
 }
 
-class NorthstarEncoder : public AbstractEncoder
+class NorthstarEncoder : public Encoder
 {
 public:
     NorthstarEncoder(const EncoderProto& config):
-        AbstractEncoder(config),
+        Encoder(config),
         _config(config.northstar())
     {
     }
 
-    std::vector<std::shared_ptr<const Sector>> collectSectors(
-        const Location& location, const Image& image) override
-    {
-        std::vector<std::shared_ptr<const Sector>> sectors;
-
-        if ((location.logicalTrack >= 0) && (location.logicalTrack < 35))
-        {
-            for (int sectorId = 0; sectorId < 10; sectorId++)
-            {
-                const auto& sector =
-                    image.get(location.logicalTrack, location.head, sectorId);
-                if (sector)
-                    sectors.push_back(sector);
-            }
-        }
-
-        return sectors;
-    }
-
-    std::unique_ptr<Fluxmap> encode(const Location& location,
+    std::unique_ptr<Fluxmap> encode(std::shared_ptr<const TrackInfo>& trackInfo,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
@@ -172,7 +152,7 @@ public:
 
         std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
         fluxmap->appendBits(bits,
-            Mapper::calculatePhysicalClockPeriod(
+            calculatePhysicalClockPeriod(
                 clockRateUs * 1e3, _config.rotational_period_ms() * 1e6));
         return fluxmap;
     }
@@ -181,8 +161,8 @@ private:
     const NorthstarEncoderProto& _config;
 };
 
-std::unique_ptr<AbstractEncoder> createNorthstarEncoder(
+std::unique_ptr<Encoder> createNorthstarEncoder(
     const EncoderProto& config)
 {
-    return std::unique_ptr<AbstractEncoder>(new NorthstarEncoder(config));
+    return std::unique_ptr<Encoder>(new NorthstarEncoder(config));
 }

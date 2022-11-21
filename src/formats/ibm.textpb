@@ -2,16 +2,11 @@ comment: 'PC 3.5"/5.25" autodetect double sided format'
 
 image_writer {
 	filename: "ibm.img"
-	img {}
+	type: IMG
 }
 
 decoder {
 	ibm {}
-}
-
-tracks {
-	start: 0
-	end: 81
 }
 
 heads {

@@ -67,23 +67,23 @@ int mainWrite(int argc, const char* argv[])
 {
 	if (argc == 1)
 		showProfiles("write", formats);
-	config.mutable_flux_sink()->mutable_drive();
+	config.mutable_flux_sink()->set_type(FluxSinkProto::DRIVE);
 	if (verify)
-		config.mutable_flux_source()->mutable_drive();
+		config.mutable_flux_source()->set_type(FluxSourceProto::DRIVE);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
 	std::unique_ptr<ImageReader> reader(ImageReader::create(config.image_reader()));
-	std::shared_ptr<Image> image = reader->readImage();
+	std::shared_ptr<Image> image = reader->readMappedImage();
 
-	std::unique_ptr<AbstractEncoder> encoder(AbstractEncoder::create(config.encoder()));
+	std::unique_ptr<Encoder> encoder(Encoder::create(config.encoder()));
 	std::unique_ptr<FluxSink> fluxSink(FluxSink::create(config.flux_sink()));
 
-	std::unique_ptr<AbstractDecoder> decoder;
+	std::unique_ptr<Decoder> decoder;
 	if (config.has_decoder() && verify)
-		decoder = AbstractDecoder::create(config.decoder());
+		decoder = Decoder::create(config.decoder());
 
 	std::unique_ptr<FluxSource> fluxSource;
-	if (verify && config.has_flux_source() && config.flux_source().has_drive())
+	if (verify && (config.flux_source().type() == FluxSourceProto::DRIVE))
 		fluxSource = FluxSource::create(config.flux_source());
 
 	writeDiskCommand(*image, *encoder, *fluxSink, decoder.get(), fluxSource.get());

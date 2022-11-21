@@ -2,16 +2,16 @@ comment: 'Apple II 140kB DOS 3.3 5.25" 40 track SSSD'
 
 image_reader {
 	filename: "apple2.img"
-	img {}
+	type: IMG
 }
 
 layout {
-	tracks: 40
+	tracks: 35
 	sides: 1
 	layoutdata {
 		sector_size: 256
 		physical {
-			sector: 0
+			start_sector: 0
 			count: 16
 		}
 	}
@@ -19,7 +19,7 @@ layout {
 
 image_writer {
 	filename: "apple2.img"
-	img {}
+	type: IMG
 }
 
 decoder {
@@ -30,15 +30,86 @@ encoder {
 	apple2 {}
 }
 
-tracks {
-	start: 0
-	end: 39
-}
-
-heads {
-	start: 0
-	end: 0
-}
-
 tpi: 48
 
+option {
+	name: "appledos"
+	comment: "specifies AppleDOS soft sector skew for filesystem access and images"
+	message: "compensating for AppleDOS soft sector skew"
+		
+	config {
+		image_reader {
+			filesystem_sector_order: true
+		}
+		
+		image_writer {
+			filesystem_sector_order: true
+		}
+	
+		layout {
+			layoutdata {
+				filesystem {
+					sector: 0
+					sector: 14
+					sector: 13
+					sector: 12
+					sector: 11
+					sector: 10
+					sector:  9
+					sector:  8
+					sector:  7
+					sector:  6
+					sector:  5
+					sector:  4
+					sector:  3
+					sector:  2
+					sector:  1
+					sector: 15
+				}
+			}
+		}
+	}
+}
+
+option {
+	name: "prodos"
+	comment: "specifies ProDOS soft sector skew for filesystem access and images"
+	message: "compensating for ProDOS soft sector skew"
+		
+	config {
+		image_reader {
+			filesystem_sector_order: true
+		}
+		
+		image_writer {
+			filesystem_sector_order: true
+		}
+	
+		filesystem {
+			type: PRODOS
+		}
+
+		layout {
+			layoutdata {
+				filesystem {
+					sector:  0
+					sector:  2
+					sector:  4
+					sector:  6
+					sector:  8
+					sector: 10
+					sector: 12
+					sector: 14
+					sector:  1
+					sector:  3
+					sector:  5
+					sector:  7
+					sector:  9
+					sector: 11
+					sector: 13
+					sector: 15
+				}
+			}
+		}
+	}
+}

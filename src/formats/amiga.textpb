@@ -2,12 +2,12 @@ comment: 'Amiga 880kB 3.5" DSDD'
 
 image_reader {
 	filename: "amiga.adf"
-	img {}
+	type: IMG
 }
 
 image_writer {
 	filename: "amiga.adf"
-	img {}
+	type: IMG
 }
 
 layout {
@@ -16,7 +16,7 @@ layout {
 	layoutdata {
 		sector_size: 512
 		physical {
-			sector: 0
+			start_sector: 0
 			count: 11
 		}
 	}
@@ -30,17 +30,7 @@ decoder {
 	amiga {}
 }
 
-tracks {
-	start: 0
-	end: 79
-}
-
-heads {
-	start: 0
-	end: 1
-}
-
 filesystem {
-	amigaffs {}
+	type: AMIGAFFS
 }
 

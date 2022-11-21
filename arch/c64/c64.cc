@@ -13,16 +13,6 @@
     * 
     * The clock rate is normalised for a 200ms drive.
     */
-unsigned sectorsForC64Track(unsigned track)
-{
-    if (track < 17)
-        return 21;
-    if (track < 24)
-        return 19;
-    if (track < 30)
-        return 18;
-    return 17;
-}
 
 nanoseconds_t clockPeriodForC64Track(unsigned track)
 {

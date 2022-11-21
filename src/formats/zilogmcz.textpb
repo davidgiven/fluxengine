@@ -2,20 +2,21 @@ comment: 'Zilog MCZ 320kB 8" 77-track SS hard-sectored (ro)'
 
 image_writer {
 	filename: "zilogmcz.img"
-	img {}
+	type: IMG
 }
 
 decoder {
 	zilogmcz {}
 }
 
-tracks {
-	start: 0
-	end: 76
+layout {
+	tracks: 77
+	sides: 1
+	layoutdata {
+		sector_size: 132
+		physical {
+			start_sector: 0
+			count: 32
+		}
+	}
 }
-
-heads {
-	start: 0
-	end: 0
-}
-

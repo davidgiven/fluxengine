@@ -210,7 +210,7 @@ static nanoseconds_t guessClock(const Fluxmap& fluxmap)
 
 int mainInspect(int argc, const char* argv[])
 {
-	config.mutable_flux_source()->mutable_drive();
+	config.mutable_flux_source()->set_type(FluxSourceProto::DRIVE);
     flags.parseFlagsWithConfigFiles(argc, argv, {});
 
 	std::unique_ptr<FluxSource> fluxSource(FluxSource::create(config.flux_source()));

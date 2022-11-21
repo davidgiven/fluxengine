@@ -30,6 +30,13 @@ ifeq ($(shell uname),Darwin)
 		-framework Foundation
 endif
 
+# Check the Make version.
+
+
+ifeq ($(findstring 4.,$(MAKE_VERSION)),)
+$(error You need GNU Make 4.x for this (if you're on OSX, use gmake).)
+endif
+
 # Normal settings.
 
 OBJDIR ?= .obj
@@ -118,7 +125,6 @@ PROTOS = \
 	lib/imagereader/imagereader.proto \
 	lib/imagewriter/imagewriter.proto \
 	lib/layout.proto \
-	lib/mapper.proto \
 	lib/usb/usb.proto \
 	lib/vfs/vfs.proto \
 	tests/testproto.proto \
@@ -153,11 +159,11 @@ include tests/build.mk
 do-encodedecodetest = $(eval $(do-encodedecodetest-impl))
 define do-encodedecodetest-impl
 
-tests: $(OBJDIR)/$1.encodedecode
-$(OBJDIR)/$1.encodedecode: scripts/encodedecodetest.sh $(FLUXENGINE_BIN) $2
+tests: $(OBJDIR)/$1$3.encodedecode
+$(OBJDIR)/$1$3.encodedecode: scripts/encodedecodetest.sh $(FLUXENGINE_BIN) $2
 	@mkdir -p $(dir $$@)
-	@echo ENCODEDECODETEST $1
-	@scripts/encodedecodetest.sh $1 flux $(FLUXENGINE_BIN) $2 > $$@
+	@echo ENCODEDECODETEST $1 $3
+	@scripts/encodedecodetest.sh $1 flux $(FLUXENGINE_BIN) $2 $3 > $$@
 
 endef
 
@@ -174,8 +180,10 @@ $(call do-encodedecodetest,atarist820)
 $(call do-encodedecodetest,bk800)
 $(call do-encodedecodetest,brother120)
 $(call do-encodedecodetest,brother240)
-$(call do-encodedecodetest,commodore1541t35,scripts/commodore1541_test.textpb)
+$(call do-encodedecodetest,commodore1541,scripts/commodore1541_test.textpb,--35)
+$(call do-encodedecodetest,commodore1541,scripts/commodore1541_test.textpb,--40)
 $(call do-encodedecodetest,commodore1581)
+$(call do-encodedecodetest,cmd_fd2000)
 $(call do-encodedecodetest,hp9121)
 $(call do-encodedecodetest,ibm1200)
 $(call do-encodedecodetest,ibm1232)

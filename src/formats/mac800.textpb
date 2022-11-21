@@ -2,12 +2,12 @@ comment: 'Macintosh 800kB 3.5" DSDD GCR'
 
 image_reader {
 	filename: "mac800.dsk"
-	img {}
+	type: IMG
 }
 
 image_writer {
 	filename: "mac800.dsk"
-	img {}
+	type: IMG
 }
 
 layout {
@@ -16,7 +16,7 @@ layout {
 	layoutdata {
 		sector_size: 512
 		physical {
-			sector: 0
+			start_sector: 0
 		}
 	}
 	layoutdata {
@@ -64,18 +64,8 @@ decoder {
 	macintosh {}
 }
 
-tracks {
-	start: 0
-	end: 79
-}
-
-heads {
-	start: 0
-	end: 1
-}
-
 filesystem {
-	machfs {}
+	type: MACHFS
 }
 
 

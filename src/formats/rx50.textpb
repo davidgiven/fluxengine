@@ -6,12 +6,12 @@ drive {
 
 image_reader {
 	filename: "rx50.img"
-	img {}
+	type: IMG
 }
 
 image_writer {
 	filename: "rx50.img"
-	img {}
+	type: IMG
 }
 
 layout {
@@ -20,7 +20,7 @@ layout {
 	layoutdata {
 		sector_size: 512
 		physical {
-			sector: 1
+			start_sector: 1
 			count: 10
 		}
 	}
@@ -39,14 +39,3 @@ encoder {
 decoder {
 	ibm {}
 }
-
-tracks {
-	start: 0
-	end: 79
-}
-
-heads {
-	start: 0
-	end: 0
-}
-

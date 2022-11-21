@@ -6,10 +6,10 @@
 #include "sector.h"
 #include "readerwriter.h"
 #include "image.h"
-#include "mapper.h"
 #include "fmt/format.h"
 #include "arch/victor9k/victor9k.pb.h"
 #include "lib/encoders/encoders.pb.h"
+#include "lib/layout.h"
 #include <ctype.h>
 #include "bytes.h"
 
@@ -135,11 +135,11 @@ static void write_sector(std::vector<bool>& bits,
     write_gap(bits, cursor, trackdata.post_data_gap_bits());
 }
 
-class Victor9kEncoder : public AbstractEncoder
+class Victor9kEncoder : public Encoder
 {
 public:
     Victor9kEncoder(const EncoderProto& config):
-        AbstractEncoder(config),
+        Encoder(config),
         _config(config.victor9k())
     {
     }
@@ -164,37 +164,17 @@ private:
     }
 
 public:
-    std::vector<std::shared_ptr<const Sector>> collectSectors(
-        const Location& location, const Image& image) override
-    {
-        std::vector<std::shared_ptr<const Sector>> sectors;
-
-        Victor9kEncoderProto::TrackdataProto trackdata;
-        getTrackFormat(trackdata, location.logicalTrack, location.head);
-
-        for (int i = 0; i < trackdata.sector_range().sector_count(); i++)
-        {
-            int sectorId = trackdata.sector_range().start_sector() + i;
-            const auto& sector =
-                image.get(location.logicalTrack, location.head, sectorId);
-            if (sector)
-                sectors.push_back(sector);
-        }
-
-        return sectors;
-    }
-
-    std::unique_ptr<Fluxmap> encode(const Location& location,
+    std::unique_ptr<Fluxmap> encode(std::shared_ptr<const TrackInfo>& trackInfo,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
         Victor9kEncoderProto::TrackdataProto trackdata;
-        getTrackFormat(trackdata, location.logicalTrack, location.head);
+        getTrackFormat(trackdata, trackInfo->logicalTrack, trackInfo->logicalSide);
 
         unsigned bitsPerRevolution = (trackdata.rotational_period_ms() * 1e3) /
                                      trackdata.clock_period_us();
         std::vector<bool> bits(bitsPerRevolution);
-        nanoseconds_t clockPeriod = Mapper::calculatePhysicalClockPeriod(
+        nanoseconds_t clockPeriod = calculatePhysicalClockPeriod(
             trackdata.clock_period_us() * 1e3,
             trackdata.rotational_period_ms() * 1e6);
         unsigned cursor = 0;
@@ -222,10 +202,10 @@ private:
     const Victor9kEncoderProto& _config;
 };
 
-std::unique_ptr<AbstractEncoder> createVictor9kEncoder(
+std::unique_ptr<Encoder> createVictor9kEncoder(
     const EncoderProto& config)
 {
-    return std::unique_ptr<AbstractEncoder>(new Victor9kEncoder(config));
+    return std::unique_ptr<Encoder>(new Victor9kEncoder(config));
 }
 
 // vim: sw=4 ts=4 et

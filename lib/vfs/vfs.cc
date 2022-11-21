@@ -164,13 +164,12 @@ Filesystem::Filesystem(std::shared_ptr<SectorInterface> sectors):
         int track = p.first;
         int side = p.second;
 
-        auto layoutdata = Layout::getLayoutOfTrack(track, side);
-        auto sectors = Layout::getSectorsInTrack(layoutdata);
-        if (sectors.empty())
+        auto trackLayout = Layout::getLayoutOfTrack(track, side);
+        if (trackLayout->numSectors == 0)
             Error() << "FS: filesystem support cannot be used without concrete "
                        "layout information";
 
-        for (int sectorId : sectors)
+        for (int sectorId : trackLayout->filesystemSectorOrder)
             _locations.push_back(std::make_tuple(track, side, sectorId));
     }
 }
@@ -178,28 +177,31 @@ Filesystem::Filesystem(std::shared_ptr<SectorInterface> sectors):
 std::unique_ptr<Filesystem> Filesystem::createFilesystem(
     const FilesystemProto& config, std::shared_ptr<SectorInterface> image)
 {
-    switch (config.filesystem_case())
+    switch (config.type())
     {
-        case FilesystemProto::kBrother120:
+        case FilesystemProto::BROTHER120:
             return Filesystem::createBrother120Filesystem(config, image);
 
-        case FilesystemProto::kAcorndfs:
+        case FilesystemProto::ACORNDFS:
             return Filesystem::createAcornDfsFilesystem(config, image);
 
-        case FilesystemProto::kFatfs:
+        case FilesystemProto::FATFS:
             return Filesystem::createFatFsFilesystem(config, image);
 
-        case FilesystemProto::kCpmfs:
+        case FilesystemProto::CPMFS:
             return Filesystem::createCpmFsFilesystem(config, image);
 
-        case FilesystemProto::kAmigaffs:
+        case FilesystemProto::AMIGAFFS:
             return Filesystem::createAmigaFfsFilesystem(config, image);
 
-        case FilesystemProto::kMachfs:
+        case FilesystemProto::MACHFS:
             return Filesystem::createMacHfsFilesystem(config, image);
 
-        case FilesystemProto::kCbmfs:
+        case FilesystemProto::CBMFS:
             return Filesystem::createCbmfsFilesystem(config, image);
+
+        case FilesystemProto::PRODOS:
+            return Filesystem::createProdosFilesystem(config, image);
 
         default:
             Error() << "no filesystem configured";
@@ -213,19 +215,18 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystemFromConfig()
     if (config.has_flux_source() || config.has_flux_sink())
     {
         std::shared_ptr<FluxSource> fluxSource;
-        std::shared_ptr<AbstractDecoder> decoder;
+        std::shared_ptr<Decoder> decoder;
         std::shared_ptr<FluxSink> fluxSink;
-        std::shared_ptr<AbstractEncoder> encoder;
-        if (config.flux_source().source_case() !=
-            FluxSourceProto::SOURCE_NOT_SET)
+        std::shared_ptr<Encoder> encoder;
+        if (config.flux_source().type() != FluxSourceProto::NOT_SET)
         {
             fluxSource = FluxSource::create(config.flux_source());
-            decoder = AbstractDecoder::create(config.decoder());
+            decoder = Decoder::create(config.decoder());
         }
-        if (config.flux_sink().has_drive())
+        if (config.flux_sink().type() == FluxSinkProto::DRIVE)
         {
             fluxSink = FluxSink::create(config.flux_sink());
-            encoder = AbstractEncoder::create(config.encoder());
+            encoder = Encoder::create(config.encoder());
         }
         sectorInterface = SectorInterface::createFluxSectorInterface(
             fluxSource, fluxSink, encoder, decoder);
@@ -234,11 +235,9 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystemFromConfig()
     {
         std::shared_ptr<ImageReader> reader;
         std::shared_ptr<ImageWriter> writer;
-        if (config.image_reader().format_case() !=
-            ImageReaderProto::FORMAT_NOT_SET)
+        if (config.image_reader().type() != ImageReaderProto::NOT_SET)
             reader = ImageReader::create(config.image_reader());
-        if (config.image_writer().format_case() !=
-            ImageWriterProto::FORMAT_NOT_SET)
+        if (config.image_writer().type() != ImageWriterProto::NOT_SET)
             writer = ImageWriter::create(config.image_writer());
 
         sectorInterface =
@@ -259,7 +258,9 @@ Bytes Filesystem::getSector(unsigned track, unsigned side, unsigned sector)
 Bytes Filesystem::getLogicalSector(uint32_t number, uint32_t count)
 {
     if ((number + count) > _locations.size())
-        throw BadFilesystemException();
+        throw BadFilesystemException(
+            fmt::format("invalid filesystem: sector {} is out of bounds",
+                number + count - 1));
 
     Bytes data;
     ByteWriter bw(data);
@@ -269,9 +270,9 @@ Bytes Filesystem::getLogicalSector(uint32_t number, uint32_t count)
         int track = std::get<0>(it);
         int side = std::get<1>(it);
         int sector = std::get<2>(it);
-        auto layoutdata = Layout::getLayoutOfTrack(track, side);
+        auto trackLayout = Layout::getLayoutOfTrack(track, side);
         bw += _sectors->get(track, side, sector)
-                  ->data.slice(0, layoutdata.sector_size());
+                  ->data.slice(0, trackLayout->sectorSize);
     }
     return data;
 }
@@ -279,7 +280,8 @@ Bytes Filesystem::getLogicalSector(uint32_t number, uint32_t count)
 void Filesystem::putLogicalSector(uint32_t number, const Bytes& data)
 {
     if (number >= _locations.size())
-        throw BadFilesystemException();
+        throw BadFilesystemException(fmt::format(
+            "invalid filesystem: sector {} is out of bounds", number));
 
     unsigned pos = 0;
     while (pos < data.size())
@@ -288,7 +290,7 @@ void Filesystem::putLogicalSector(uint32_t number, const Bytes& data)
         int track = std::get<0>(it);
         int side = std::get<1>(it);
         int sector = std::get<2>(it);
-        int sectorSize = Layout::getLayoutOfTrack(track, side).sector_size();
+        int sectorSize = Layout::getLayoutOfTrack(track, side)->sectorSize;
 
         _sectors->put(track, side, sector)->data = data.slice(pos, sectorSize);
         pos += sectorSize;
@@ -317,8 +319,7 @@ unsigned Filesystem::getLogicalSectorCount()
 
 unsigned Filesystem::getLogicalSectorSize(unsigned track, unsigned side)
 {
-    auto trackdata = Layout::getLayoutOfTrack(track, side);
-    return trackdata.sector_size();
+    return Layout::getLayoutOfTrack(track, side)->sectorSize;
 }
 
 void Filesystem::eraseEverythingOnDisk()

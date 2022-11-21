@@ -9,11 +9,10 @@ import "lib/fluxsink/fluxsink.proto";
 import "lib/usb/usb.proto";
 import "lib/vfs/vfs.proto";
 import "lib/drive.proto";
-import "lib/mapper.proto";
 import "lib/common.proto";
 import "lib/layout.proto";
 
-// NEXT_TAG: 19
+// NEXT_TAG: 21
 message ConfigProto {
 	optional string comment = 8;
 	optional bool is_extension = 13;
@@ -36,7 +35,15 @@ message ConfigProto {
 	optional RangeProto heads = 7;
 	optional int32 tpi = 16 [ (help) = "TPI of image; if 0, use TPI of drive" ];
 
-	optional SectorMappingProto sector_mapping = 14;
 	optional FilesystemProto filesystem = 17;
+	
+	repeated OptionProto option = 20;
+}
+
+message OptionProto {
+	optional string name = 1 [(help) = "Option name" ];
+	optional string comment = 2 [(help) = "Help text for option" ];
+	optional string message = 3 [(help) = "Message to display when option is in use" ];
+	optional ConfigProto config = 4 [(help) = "Option data" ];
 }
 

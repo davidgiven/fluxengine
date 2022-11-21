@@ -13,13 +13,16 @@
 #include "arch/tids990/tids990.h"
 #include "arch/victor9k/victor9k.h"
 #include "lib/encoders/encoders.pb.h"
+#include "lib/proto.h"
+#include "lib/layout.h"
+#include "lib/image.h"
 #include "protocol.h"
 
-std::unique_ptr<AbstractEncoder> AbstractEncoder::create(
+std::unique_ptr<Encoder> Encoder::create(
     const EncoderProto& config)
 {
     static const std::map<int,
-        std::function<std::unique_ptr<AbstractEncoder>(const EncoderProto&)>>
+        std::function<std::unique_ptr<Encoder>(const EncoderProto&)>>
         encoders = {
             {EncoderProto::kAmiga,      createAmigaEncoder      },
             {EncoderProto::kApple2,     createApple2Encoder     },
@@ -38,6 +41,44 @@ std::unique_ptr<AbstractEncoder> AbstractEncoder::create(
         Error() << "no encoder specified";
 
     return (encoder->second)(config);
+}
+
+nanoseconds_t Encoder::calculatePhysicalClockPeriod(
+    nanoseconds_t targetClockPeriod, nanoseconds_t targetRotationalPeriod)
+{
+    nanoseconds_t currentRotationalPeriod =
+        config.drive().rotational_period_ms() * 1e6;
+    if (currentRotationalPeriod == 0)
+        Error() << "you must set --drive.rotational_period_ms as it can't be "
+                   "autodetected";
+
+    return targetClockPeriod *
+           (currentRotationalPeriod / targetRotationalPeriod);
+}
+
+std::shared_ptr<const Sector> Encoder::getSector(
+    std::shared_ptr<const TrackInfo>& trackInfo, const Image& image, unsigned sectorId)
+{
+    return image.get(trackInfo->logicalTrack, trackInfo->logicalSide, sectorId);
+}
+
+std::vector<std::shared_ptr<const Sector>> Encoder::collectSectors(
+    std::shared_ptr<const TrackInfo>& trackLayout, const Image& image)
+{
+    std::vector<std::shared_ptr<const Sector>> sectors;
+
+    for (unsigned sectorId : trackLayout->diskSectorOrder)
+    {
+        const auto& sector = getSector(trackLayout, image, sectorId);
+        if (!sector)
+            Error() << fmt::format("sector {}.{}.{} is missing from the image",
+                trackLayout->logicalTrack,
+                trackLayout->logicalSide,
+                sectorId);
+        sectors.push_back(sector);
+    }
+
+    return sectors;
 }
 
 Fluxmap& Fluxmap::appendBits(const std::vector<bool>& bits, nanoseconds_t clock)

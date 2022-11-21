@@ -27,10 +27,9 @@
 #define C64_TRACKS_PER_DISK         40
 #define C64_BAM_TRACK               17
 
-extern std::unique_ptr<AbstractDecoder> createCommodore64Decoder(const DecoderProto& config);
-extern std::unique_ptr<AbstractEncoder> createCommodore64Encoder(const EncoderProto& config);
+extern std::unique_ptr<Decoder> createCommodore64Decoder(const DecoderProto& config);
+extern std::unique_ptr<Encoder> createCommodore64Encoder(const EncoderProto& config);
 
-extern unsigned sectorsForC64Track(unsigned track);
 extern nanoseconds_t clockPeriodForC64Track(unsigned track);
 
 #endif

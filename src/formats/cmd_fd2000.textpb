@@ -1,0 +1,43 @@
+comment: 'CMD FD2000 1620kB 3.5" DSHD'
+
+image_reader {
+	filename: "cmd_fd2000.img"
+	type: IMG
+}
+
+image_writer {
+	filename: "cmd_fd2000.img"
+	type: IMG
+}
+
+layout {
+	tracks: 81
+	sides: 2
+	swap_sides: true
+	layoutdata {
+		sector_size: 1024
+		physical {
+			start_sector: 1
+			count: 10
+		}
+	}
+}
+
+encoder {
+	ibm {
+		trackdata {
+			target_rotational_period_ms: 200
+			target_clock_period_us: 2
+			emit_iam: false
+		}
+	}
+}
+
+decoder {
+	ibm {
+		trackdata {
+			ignore_side_byte: true
+		}
+	}
+}
+

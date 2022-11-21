@@ -5,7 +5,6 @@
 #include "image.h"
 #include "proto.h"
 #include "logger.h"
-#include "mapper.h"
 #include "lib/config.pb.h"
 #include "fmt/format.h"
 #include <algorithm>
@@ -66,19 +65,15 @@ public:
         int clockRate = 500;
         if (mediaFlag == 0x20)
         {
-            Logger() << "D88: high density mode";
-			if (!config.drive().has_drive())
+            Logger() << "D88: forcing high density mode";
 				config.mutable_drive()->set_high_density(true);
-            if (!config.has_tpi())
                 config.set_tpi(96);
         }
         else
         {
-            Logger() << "D88: single/double density mode";
+            Logger() << "D88: forcing single/double density mode";
             clockRate = 300;
-			if (!config.drive().has_drive())
 				config.mutable_drive()->set_high_density(false);
-            if (!config.has_tpi())
                 config.set_tpi(48);
         }
 
@@ -120,6 +115,10 @@ public:
                 int ddam = sectorHeaderReader.seek(7).read_8();
                 int fddStatusCode = sectorHeaderReader.seek(8).read_8();
                 int rpm = sectorHeaderReader.seek(13).read_8();
+                int dataLength = sectorHeaderReader.seek(14).read_le16();
+                if (dataLength < sectorSize) {
+                    dataLength = sectorSize;
+                }
                 // D88 provides much more sector information that is currently
                 // ignored
                 if (ddam != 0)
@@ -195,15 +194,11 @@ public:
                 }
                 Bytes data(sectorSize);
                 inputFile.read((char*)data.begin(), data.size());
+                inputFile.seekg(dataLength-sectorSize, std::ios_base::cur);
+                physical->add_sector(sectorId);
                 const auto& sector = image->put(track, head, sectorId);
                 sector->status = Sector::OK;
-                sector->logicalTrack = track;
-                sector->physicalTrack = Mapper::remapTrackLogicalToPhysical(track);
-                sector->logicalSide = sector->physicalHead = head;
-                sector->logicalSector = sectorId;
                 sector->data = data;
-
-                physical->add_sector(sectorId);
             }
 
             if (mediaFlag != 0x20)
@@ -222,20 +217,6 @@ public:
 
 		layout->set_tracks(geometry.numTracks);
 		layout->set_sides(geometry.numSides);
-
-        if (!config.has_heads())
-        {
-            auto* heads = config.mutable_heads();
-            heads->set_start(0);
-            heads->set_end(geometry.numSides - 1);
-        }
-
-        if (!config.has_tracks())
-        {
-            auto* tracks = config.mutable_tracks();
-            tracks->set_start(0);
-            tracks->set_end(geometry.numTracks - 1);
-        }
 
         return image;
     }

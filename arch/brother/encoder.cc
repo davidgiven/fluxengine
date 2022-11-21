@@ -97,60 +97,18 @@ static void write_sector_data(
         write_byte(0);
 }
 
-static int charToInt(char c)
-{
-    if (isdigit(c))
-        return c - '0';
-    return 10 + tolower(c) - 'a';
-}
-
-class BrotherEncoder : public AbstractEncoder
+class BrotherEncoder : public Encoder
 {
 public:
     BrotherEncoder(const EncoderProto& config):
-        AbstractEncoder(config),
+        Encoder(config),
         _config(config.brother())
     {
     }
 
 public:
-    std::vector<std::shared_ptr<const Sector>> collectSectors(
-		const Location& location,
-        const Image& image) override
-    {
-        std::vector<std::shared_ptr<const Sector>> sectors;
-
-        if (location.head != 0)
-            return sectors;
-
-        switch (_config.format())
-        {
-            case BROTHER120:
-                if (location.logicalTrack >= BROTHER_TRACKS_PER_120KB_DISK)
-                    return sectors;
-                break;
-
-            case BROTHER240:
-                if (location.logicalTrack >= BROTHER_TRACKS_PER_240KB_DISK)
-                    return sectors;
-                break;
-        }
-
-        const std::string& skew = _config.sector_skew();
-        for (int sectorCount = 0; sectorCount < BROTHER_SECTORS_PER_TRACK;
-             sectorCount++)
-        {
-            int sectorId = charToInt(skew.at(sectorCount));
-            const auto& sector = image.get(location.logicalTrack, 0, sectorId);
-            if (sector)
-                sectors.push_back(sector);
-        }
-
-        return sectors;
-    }
-
     std::unique_ptr<Fluxmap> encode(
-		const Location& location,
+		std::shared_ptr<const TrackInfo>& trackInfo,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
@@ -189,8 +147,8 @@ private:
     const BrotherEncoderProto& _config;
 };
 
-std::unique_ptr<AbstractEncoder> createBrotherEncoder(
+std::unique_ptr<Encoder> createBrotherEncoder(
     const EncoderProto& config)
 {
-    return std::unique_ptr<AbstractEncoder>(new BrotherEncoder(config));
+    return std::unique_ptr<Encoder>(new BrotherEncoder(config));
 }

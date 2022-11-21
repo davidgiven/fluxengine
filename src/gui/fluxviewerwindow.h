@@ -14,8 +14,7 @@ private:
     void OnExit(wxCommandEvent& event);
 
 private:
-	std::shared_ptr<const TrackFlux> _flux;
+    std::shared_ptr<const TrackFlux> _flux;
 };
 
 #endif
-

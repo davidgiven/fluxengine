@@ -13,11 +13,11 @@
 
 static const FluxPattern SECTOR_START_PATTERN(16, 0xaaab);
 
-class ZilogMczDecoder : public AbstractDecoder
+class ZilogMczDecoder : public Decoder
 {
 public:
 	ZilogMczDecoder(const DecoderProto& config):
-		AbstractDecoder(config)
+		Decoder(config)
 	{}
 
     nanoseconds_t advanceToNextRecord() override
@@ -50,8 +50,8 @@ public:
 	}
 };
 
-std::unique_ptr<AbstractDecoder> createZilogMczDecoder(const DecoderProto& config)
+std::unique_ptr<Decoder> createZilogMczDecoder(const DecoderProto& config)
 {
-	return std::unique_ptr<AbstractDecoder>(new ZilogMczDecoder(config));
+	return std::unique_ptr<Decoder>(new ZilogMczDecoder(config));
 }
 

@@ -54,7 +54,7 @@ static ActionFlag eraseFlag(
 	"erases the destination",
 	[]()
 	{
-		config.mutable_flux_source()->mutable_erase();
+		config.mutable_flux_source()->set_type(FluxSourceProto::ERASE);
 	});
 
 int mainRawWrite(int argc, const char* argv[])
@@ -64,10 +64,10 @@ int mainRawWrite(int argc, const char* argv[])
 
 	if (argc == 1)
 		showProfiles("rawwrite", formats);
-	config.mutable_flux_sink()->mutable_drive();
+	config.mutable_flux_sink()->set_type(FluxSinkProto::DRIVE);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
-	if (config.flux_source().has_drive())
+	if (config.flux_source().type() == FluxSourceProto::DRIVE)
 		Error() << "you can't use rawwrite to read from hardware";
 
 	std::unique_ptr<FluxSource> fluxSource(FluxSource::create(config.flux_source()));

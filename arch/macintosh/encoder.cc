@@ -5,9 +5,9 @@
 #include "crc.h"
 #include "readerwriter.h"
 #include "image.h"
-#include "mapper.h"
 #include "fmt/format.h"
 #include "lib/encoders/encoders.pb.h"
+#include "lib/layout.h"
 #include "arch/macintosh/macintosh.pb.h"
 #include <ctype.h>
 
@@ -210,42 +210,21 @@ static void write_sector(std::vector<bool>& bits,
     write_bits(bits, cursor, 0xdeaaff, 3 * 8);
 }
 
-class MacintoshEncoder : public AbstractEncoder
+class MacintoshEncoder : public Encoder
 {
 public:
     MacintoshEncoder(const EncoderProto& config):
-        AbstractEncoder(config),
+        Encoder(config),
         _config(config.macintosh())
     {
     }
 
 public:
-    std::vector<std::shared_ptr<const Sector>> collectSectors(
-        const Location& location, const Image& image) override
-    {
-        std::vector<std::shared_ptr<const Sector>> sectors;
-
-        if ((location.logicalTrack >= 0) &&
-            (location.logicalTrack < MAC_TRACKS_PER_DISK))
-        {
-            unsigned numSectors = sectorsForTrack(location.logicalTrack);
-            for (int sectorId = 0; sectorId < numSectors; sectorId++)
-            {
-                const auto& sector =
-                    image.get(location.logicalTrack, location.head, sectorId);
-                if (sector)
-                    sectors.push_back(sector);
-            }
-        }
-
-        return sectors;
-    }
-
-    std::unique_ptr<Fluxmap> encode(const Location& location,
+    std::unique_ptr<Fluxmap> encode(std::shared_ptr<const TrackInfo>& trackInfo,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
-        double clockRateUs = clockRateUsForTrack(location.logicalTrack);
+        double clockRateUs = clockRateUsForTrack(trackInfo->logicalTrack);
         int bitsPerRevolution = 200000.0 / clockRateUs;
         std::vector<bool> bits(bitsPerRevolution);
         unsigned cursor = 0;
@@ -266,7 +245,7 @@ public:
 
         std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
         fluxmap->appendBits(bits,
-            Mapper::calculatePhysicalClockPeriod(clockRateUs * 1e3, 200e6));
+            calculatePhysicalClockPeriod(clockRateUs * 1e3, 200e6));
         return fluxmap;
     }
 
@@ -274,8 +253,8 @@ private:
     const MacintoshEncoderProto& _config;
 };
 
-std::unique_ptr<AbstractEncoder> createMacintoshEncoder(
+std::unique_ptr<Encoder> createMacintoshEncoder(
     const EncoderProto& config)
 {
-    return std::unique_ptr<AbstractEncoder>(new MacintoshEncoder(config));
+    return std::unique_ptr<Encoder>(new MacintoshEncoder(config));
 }

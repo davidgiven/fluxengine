@@ -4,12 +4,12 @@ include: '_atari'
 
 image_reader {
 	filename: "atarist410.st"
-	img {}
+	type: IMG
 }
 
 image_writer {
 	filename: "atarist410.st"
-	img {}
+	type: IMG
 }
 
 layout {
@@ -18,41 +18,8 @@ layout {
 	layoutdata {
 		sector_size: 512
 		physical {
-			sector: 1
+			start_sector: 1
 			count: 10
 		}
 	}
 }
-
-encoder {
-	ibm {
-		trackdata {
-			target_rotational_period_ms: 200
-			target_clock_period_us: 4
-			emit_iam: false
-			gap0: 80
-			gap2: 22
-			gap3: 34
-		}
-	}
-}
-
-decoder {
-	ibm {
-		trackdata {
-			ignore_sector: 66
-		}
-	}
-}
-
-tracks {
-	start: 0
-	end: 81
-}
-
-heads {
-	start: 0
-	end: 0
-}
-
-

@@ -2,12 +2,12 @@ comment: 'BK 800kB 5.25"/3.5" 80-track 10-sector DSDD'
 
 image_reader {
 	filename: "bk800.img"
-	img {}
+	type: IMG
 }
 
 image_writer {
 	filename: "bk800.img"
-	img {}
+	type: IMG
 }
 
 layout {
@@ -16,7 +16,7 @@ layout {
 	layoutdata {
 		sector_size: 512
 		physical {
-			sector: 1
+			start_sector: 1
 			count: 10
 		}
 	}
@@ -37,15 +37,5 @@ encoder {
 
 decoder {
 	ibm {}
-}
-
-tracks {
-	start: 0
-	end: 79
-}
-
-heads {
-	start: 0
-	end: 1
 }
 

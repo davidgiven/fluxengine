@@ -6,6 +6,7 @@
 class Fluxmap;
 class Sector;
 class Image;
+class TrackInfo;
 
 struct Record
 {
@@ -15,33 +16,9 @@ struct Record
 	Bytes rawData;
 };
 
-struct Location
-{
-    unsigned physicalTrack;
-    unsigned logicalTrack;
-	unsigned head;
-	unsigned groupSize;
-
-	bool operator==(const Location& other) const
-	{
-		if (physicalTrack == other.physicalTrack)
-			return true;
-		return head == other.head;
-	}
-
-    bool operator<(const Location& other) const
-    {
-		if (physicalTrack < other.physicalTrack)
-			return true;
-		if (physicalTrack == other.physicalTrack)
-			return head < other.head;
-		return false;
-    }
-};
-
 struct TrackDataFlux
 {
-	Location location;
+	std::shared_ptr<const TrackInfo> trackInfo;
 	std::shared_ptr<const Fluxmap> fluxmap;
 	std::vector<std::shared_ptr<const Record>> records;
 	std::vector<std::shared_ptr<const Sector>> sectors;
@@ -49,14 +26,14 @@ struct TrackDataFlux
 
 struct TrackFlux
 {
-	Location location;
-	std::vector<std::shared_ptr<const TrackDataFlux>> trackDatas;
+	std::shared_ptr<const TrackInfo> trackInfo;
+	std::vector<std::shared_ptr<TrackDataFlux>> trackDatas;
 	std::set<std::shared_ptr<const Sector>> sectors;
 };
 
 struct DiskFlux
 {
-	std::vector<std::shared_ptr<const TrackFlux>> tracks;
+	std::vector<std::shared_ptr<TrackFlux>> tracks;
 	std::shared_ptr<const Image> image;
 };
 

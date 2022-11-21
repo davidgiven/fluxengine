@@ -11,7 +11,6 @@
 #include "decoders/decoders.h"
 #include "lib/usb/usbfinder.h"
 #include "fmt/format.h"
-#include "mapper.h"
 #include "utils.h"
 #include "fluxviewerwindow.h"
 #include "textviewerwindow.h"
@@ -20,6 +19,8 @@
 #include "filesystemmodel.h"
 #include "customstatusbar.h"
 #include "lib/vfs/vfs.h"
+#include "lib/environment.h"
+#include "lib/layout.h"
 #include <google/protobuf/text_format.h>
 #include <wx/config.h>
 #include <wx/aboutdlg.h>
@@ -30,6 +31,7 @@ extern const std::map<std::string, std::string> formats;
 #define CONFIG_SELECTEDSOURCE "SelectedSource"
 #define CONFIG_DEVICE "Device"
 #define CONFIG_DRIVE "Drive"
+#define CONFIG_FORTYTRACK "FortyTrack"
 #define CONFIG_HIGHDENSITY "HighDensity"
 #define CONFIG_FORMAT "Format"
 #define CONFIG_EXTRACONFIG "ExtraConfig"
@@ -62,9 +64,9 @@ public:
         _dndFormat(wxDF_UNICODETEXT),
         _config("FluxEngine")
     {
-		wxIcon icon;
-		icon.CopyFromBitmap(applicationBitmap->GetBitmap());
-		SetIcon(icon);
+        wxIcon icon;
+        icon.CopyFromBitmap(applicationBitmap->GetBitmap());
+        SetIcon(icon);
 
         Logger::setLogger(
             [&](std::shared_ptr<const AnyLogMessage> message)
@@ -92,7 +94,7 @@ public:
                 continue;
 
             formatChoice->Append(it.first);
-            _formats.push_back(std::make_pair(it.first, std::move(config)));
+            _formatNames.push_back(it.first);
             i++;
         }
 
@@ -257,8 +259,13 @@ public:
             runOnWorkerThread(
                 [this]()
                 {
+                    /* You need to call this if the config changes to invalidate
+                     * any caches. */
+
+                    Environment::reset();
+
                     auto fluxSource = FluxSource::create(config.flux_source());
-                    auto decoder = AbstractDecoder::create(config.decoder());
+                    auto decoder = Decoder::create(config.decoder());
                     auto diskflux = readDiskCommand(*fluxSource, *decoder);
 
                     runOnUiThread(
@@ -313,16 +320,16 @@ public:
             runOnWorkerThread(
                 [this]()
                 {
-                    auto image =
-                        ImageReader::create(config.image_reader())->readImage();
-                    auto encoder = AbstractEncoder::create(config.encoder());
+                    auto image = ImageReader::create(config.image_reader())
+                                     ->readMappedImage();
+                    auto encoder = Encoder::create(config.encoder());
                     auto fluxSink = FluxSink::create(config.flux_sink());
 
-                    std::unique_ptr<AbstractDecoder> decoder;
+                    std::unique_ptr<Decoder> decoder;
                     std::unique_ptr<FluxSource> fluxSource;
                     if (config.has_decoder())
                     {
-                        decoder = AbstractDecoder::create(config.decoder());
+                        decoder = Decoder::create(config.decoder());
                         fluxSource = FluxSource::create(config.flux_source());
                     }
 
@@ -380,7 +387,7 @@ public:
                 {
                     auto imageWriter =
                         ImageWriter::create(config.image_writer());
-                    imageWriter->writeImage(*image);
+                    imageWriter->writeMappedImage(*image);
                 });
         }
         catch (const ErrorException& e)
@@ -924,25 +931,25 @@ public:
             if (event.GetDataFormat() != _dndFormat)
                 throw CancelException();
 
-            #if defined __WXGTK__
-                /* wxWidgets 3.0 data view DnD on GTK is borked. See
-                 * https://forums.wxwidgets.org/viewtopic.php?t=44752. The hit
-                 * detection is done against the wrong object, resulting in the
-                 * header size not being taken into account, so we have to manually
-                 * do hit detection correctly. */
+#if defined __WXGTK__
+            /* wxWidgets 3.0 data view DnD on GTK is borked. See
+             * https://forums.wxwidgets.org/viewtopic.php?t=44752. The hit
+             * detection is done against the wrong object, resulting in the
+             * header size not being taken into account, so we have to manually
+             * do hit detection correctly. */
 
-                auto* window = browserTree->GetMainWindow();
-                auto screenPos = wxGetMousePosition();
-                auto relPos = screenPos - window->GetScreenPosition();
+            auto* window = browserTree->GetMainWindow();
+            auto screenPos = wxGetMousePosition();
+            auto relPos = screenPos - window->GetScreenPosition();
 
-                wxDataViewItem item;
-                wxDataViewColumn* column;
-                browserTree->HitTest(relPos, item, column);
-                if (!item.IsOk())
-                    throw CancelException();
-            #else
-                auto item = event.GetItem();
-            #endif
+            wxDataViewItem item;
+            wxDataViewColumn* column;
+            browserTree->HitTest(relPos, item, column);
+            if (!item.IsOk())
+                throw CancelException();
+#else
+            auto item = event.GetItem();
+#endif
 
             auto destDirNode = GetTargetDirectoryNode(item);
             if (!destDirNode)
@@ -1051,7 +1058,10 @@ public:
         auto formatSelection = formatChoice->GetSelection();
         if (formatSelection == wxNOT_FOUND)
             Error() << "no format selected";
-        config = *_formats[formatChoice->GetSelection()].second;
+
+        config.Clear();
+        FlagGroup::parseConfigFile(
+            _formatNames[formatChoice->GetSelection()], formats);
 
         for (auto setting : split(_extraConfiguration, '\n'))
         {
@@ -1086,6 +1096,9 @@ public:
             {
                 bool hd = highDensityToggle->GetValue();
                 config.mutable_drive()->set_high_density(hd);
+
+                if (fortyTrackDriveToggle->GetValue())
+                    FlagGroup::parseConfigFile("40track_drive", formats);
 
                 std::string filename =
                     driveChoice->GetSelection() ? "drive:1" : "drive:0";
@@ -1266,6 +1279,10 @@ public:
         _config.Read(CONFIG_HIGHDENSITY, &s);
         highDensityToggle->SetValue(wxAtoi(s));
 
+        s = "0";
+        _config.Read(CONFIG_FORTYTRACK, &s);
+        fortyTrackDriveToggle->SetValue(wxAtoi(s));
+
         /* Flux image block. */
 
         s = "";
@@ -1285,9 +1302,9 @@ public:
 
         int defaultFormat = 0;
         int i = 0;
-        for (const auto& it : _formats)
+        for (const auto& it : _formatNames)
         {
-            if (it.first == s)
+            if (it == s)
             {
                 formatChoice->SetSelection(i);
                 break;
@@ -1321,6 +1338,8 @@ public:
             wxString(std::to_string(driveChoice->GetSelection())));
         _config.Write(CONFIG_HIGHDENSITY,
             wxString(std::to_string(highDensityToggle->GetValue())));
+        _config.Write(CONFIG_FORTYTRACK,
+            wxString(std::to_string(fortyTrackDriveToggle->GetValue())));
 
         /* Flux image block. */
 
@@ -1518,8 +1537,7 @@ private:
 
     wxConfig _config;
     wxDataFormat _dndFormat;
-    std::vector<std::pair<std::string, std::unique_ptr<const ConfigProto>>>
-        _formats;
+    std::vector<std::string> _formatNames;
     std::vector<std::unique_ptr<const CandidateDevice>> _devices;
     int _state = STATE_IDLE;
     int _errorState;

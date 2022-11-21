@@ -5,7 +5,6 @@
 #include "sector.h"
 #include "readerwriter.h"
 #include "image.h"
-#include "mapper.h"
 #include "fmt/format.h"
 #include "lib/encoders/encoders.pb.h"
 #include <ctype.h>
@@ -24,11 +23,11 @@ static int encode_data_gcr(uint8_t data)
     return -1;
 }
 
-class Apple2Encoder : public AbstractEncoder
+class Apple2Encoder : public Encoder
 {
 public:
     Apple2Encoder(const EncoderProto& config):
-        AbstractEncoder(config),
+        Encoder(config),
         _config(config.apple2())
     {
     }
@@ -37,25 +36,7 @@ private:
     const Apple2EncoderProto& _config;
 
 public:
-    std::vector<std::shared_ptr<const Sector>> collectSectors(
-        const Location& location, const Image& image) override
-    {
-        std::vector<std::shared_ptr<const Sector>> sectors;
-        if (location.head == 0)
-        {
-            for (int sectorId = 0; sectorId < APPLE2_SECTORS; sectorId++)
-            {
-                const auto& sector =
-                    image.get(location.logicalTrack, 0, sectorId);
-                if (sector)
-                    sectors.push_back(sector);
-            }
-        }
-
-        return sectors;
-    }
-
-    std::unique_ptr<Fluxmap> encode(const Location& location,
+    std::unique_ptr<Fluxmap> encode(std::shared_ptr<const TrackInfo>& trackInfo,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
@@ -75,7 +56,7 @@ public:
 
         std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
         fluxmap->appendBits(bits,
-            Mapper::calculatePhysicalClockPeriod(
+            calculatePhysicalClockPeriod(
                 _config.clock_period_us() * 1e3,
                 _config.rotational_period_ms() * 1e6));
         return fluxmap;
@@ -204,7 +185,7 @@ private:
     }
 };
 
-std::unique_ptr<AbstractEncoder> createApple2Encoder(const EncoderProto& config)
+std::unique_ptr<Encoder> createApple2Encoder(const EncoderProto& config)
 {
-    return std::unique_ptr<AbstractEncoder>(new Apple2Encoder(config));
+    return std::unique_ptr<Encoder>(new Apple2Encoder(config));
 }

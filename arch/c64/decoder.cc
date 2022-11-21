@@ -53,10 +53,10 @@ static Bytes decode(const std::vector<bool>& bits)
     return output;
 }
 
-class Commodore64Decoder : public AbstractDecoder
+class Commodore64Decoder : public Decoder
 {
 public:
-    Commodore64Decoder(const DecoderProto& config): AbstractDecoder(config) {}
+    Commodore64Decoder(const DecoderProto& config): Decoder(config) {}
 
     nanoseconds_t advanceToNextRecord() override
     {
@@ -94,19 +94,10 @@ public:
         _sector->status =
             (wantChecksum == gotChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
     }
-
-    std::set<unsigned> requiredSectors(const Location& location) const override
-    {
-        unsigned count = sectorsForC64Track(location.logicalTrack);
-        std::set<unsigned> sectors;
-        for (int sectorId = 0; sectorId < count; sectorId++)
-            sectors.insert(sectorId);
-        return sectors;
-    }
 };
 
-std::unique_ptr<AbstractDecoder> createCommodore64Decoder(
+std::unique_ptr<Decoder> createCommodore64Decoder(
     const DecoderProto& config)
 {
-    return std::unique_ptr<AbstractDecoder>(new Commodore64Decoder(config));
+    return std::unique_ptr<Decoder>(new Commodore64Decoder(config));
 }

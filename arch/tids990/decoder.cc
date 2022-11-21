@@ -40,11 +40,11 @@ const FluxPattern DATA_RECORD_PATTERN(32, 0x11112245);
 
 const FluxMatchers ANY_RECORD_PATTERN({ &SECTOR_RECORD_PATTERN, &DATA_RECORD_PATTERN });
 
-class Tids990Decoder : public AbstractDecoder
+class Tids990Decoder : public Decoder
 {
 public:
 	Tids990Decoder(const DecoderProto& config):
-		AbstractDecoder(config)
+		Decoder(config)
 	{}
 
     nanoseconds_t advanceToNextRecord() override
@@ -91,8 +91,8 @@ public:
 	}
 };
 
-std::unique_ptr<AbstractDecoder> createTids990Decoder(const DecoderProto& config)
+std::unique_ptr<Decoder> createTids990Decoder(const DecoderProto& config)
 {
-	return std::unique_ptr<AbstractDecoder>(new Tids990Decoder(config));
+	return std::unique_ptr<Decoder>(new Tids990Decoder(config));
 }
 

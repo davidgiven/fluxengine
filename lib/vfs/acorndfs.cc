@@ -31,16 +31,16 @@ public:
         mode = locked ? "L" : "";
 
         attributes[Filesystem::FILENAME] = filename;
-        attributes[Filesystem::LENGTH] = fmt::format("{}", length);
+        attributes[Filesystem::LENGTH] = std::to_string(length);
         attributes[Filesystem::FILE_TYPE] = "file";
         attributes[Filesystem::MODE] = mode;
-        attributes["acorndfs.inode"] = fmt::format("{}", inode);
-        attributes["acorndfs.start_sector"] = fmt::format("{}", start_sector);
+        attributes["acorndfs.inode"] = std::to_string(inode);
+        attributes["acorndfs.start_sector"] = std::to_string(start_sector);
         attributes["acorndfs.load_address"] =
             fmt::format("0x{:x}", load_address);
         attributes["acorndfs.exec_address"] =
             fmt::format("0x{:x}", exec_address);
-        attributes["acorndfs.locked"] = fmt::format("{}", locked);
+        attributes["acorndfs.locked"] = std::to_string(locked);
     }
 
 public:
@@ -125,8 +125,8 @@ public:
 
         std::map<std::string, std::string> attributes;
         attributes[VOLUME_NAME] = dir.volumeName;
-        attributes[TOTAL_BLOCKS] = fmt::format("{}", getLogicalSectorCount());
-        attributes[USED_BLOCKS] = fmt::format("{}", dir.usedSectors);
+        attributes[TOTAL_BLOCKS] = std::to_string(getLogicalSectorCount());
+        attributes[USED_BLOCKS] = std::to_string(dir.usedSectors);
         attributes[BLOCK_SIZE] = "256";
         return attributes;
     }

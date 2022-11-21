@@ -4,7 +4,6 @@
 #include "imagereader/imagereader.h"
 #include "image.h"
 #include "logger.h"
-#include "mapper.h"
 #include "lib/config.pb.h"
 #include "fmt/format.h"
 #include <algorithm>
@@ -110,10 +109,6 @@ public:
 
                     const auto& sector = image->put(track, head, sectorId);
                     sector->status = Sector::OK;
-                    sector->logicalTrack = track;
-                    sector->physicalTrack = Mapper::remapTrackLogicalToPhysical(track);
-                    sector->logicalSide = sector->physicalHead = head;
-                    sector->logicalSector = sectorId;
                     sector->data.writer().append(payload).append(tag);
                 }
             }

@@ -36,33 +36,22 @@ public:
             int track = p.first;
             int side = p.second;
 
-            auto layoutdata = Layout::getLayoutOfTrack(track, side);
-            auto sectors = Layout::getSectorsInTrack(layoutdata, geometry.numSectors);
-            if (sectors.empty())
-            {
-                int maxSector = geometry.firstSector + geometry.numSectors - 1;
-                for (int i = geometry.firstSector; i <= maxSector; i++)
-                    sectors.push_back(i);
-            }
-
-            int sectorSize = layoutdata.has_sector_size()
-                                 ? layoutdata.sector_size()
-                                 : geometry.sectorSize;
-
-            for (int sectorId : sectors)
+            auto trackLayout = Layout::getLayoutOfTrack(track, side);
+            for (int sectorId : trackLayout->logicalSectorOrder)
             {
                 const auto& sector = image.get(track, side, sectorId);
                 if (sector)
-                    sector->data.slice(0, sectorSize).writeTo(outputFile);
+                    sector->data.slice(0, trackLayout->sectorSize).writeTo(outputFile);
                 else
-                    outputFile.seekp(sectorSize, std::ios::cur);
+                    outputFile.seekp(trackLayout->sectorSize, std::ios::cur);
             }
         }
 
-        Logger() << fmt::format("IMG: wrote {} tracks, {} sides, {} kB total",
+        Logger() << fmt::format("IMG: wrote {} tracks, {} sides, {} kB total to {}",
             tracks,
             sides,
-            outputFile.tellp() / 1024);
+            outputFile.tellp() / 1024,
+			_config.filename());
     }
 };
 

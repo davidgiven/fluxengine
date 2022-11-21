@@ -2,7 +2,7 @@ comment: 'Brother FB-100 100kB 3.5" 40-track SS (ro)'
 
 image_writer {
 	filename: "fb100.img"
-	img {}
+	type: IMG
 }
 
 decoder {
@@ -15,21 +15,10 @@ layout {
 	layoutdata {
 		sector_size: 1292  # 1280 + 12
 		physical {
-			sector: 0
+			start_sector: 0
 			count: 2
 		}
 	}
 }
 
-tracks {
-	start: 0
-	end: 79
-	step: 2
-}
-
-heads {
-	start: 0
-	end: 0
-}
-
-
+tpi: 48

@@ -8,7 +8,7 @@ modifications, including formatting blank disks, if the filesystem supports it.
 The GUI even has a reasonably competent file manager.
 
 <div style="text-align: center">
-<a href="filebrowser.jpg"><img src="filebrowser.jpg" style="width:80%" alt="screenshot of the GUI in action"></a>
+<a href="filebrowser.jpg"><img src="filebrowser.jpg" style="width:60%" alt="screenshot of the GUI in action"></a>
 </div>
 
 The following file systems are supported so far.
@@ -17,11 +17,13 @@ The following file systems are supported so far.
 |:-----------------------------------------|:-----:|:------:|-------|
 | Acorn DFS                                |   Y   |        |       |
 | Amiga FFS                                |   Y   |   Y    | Both OFS and FFS |
-| Brother 120kB                            |   Y   |        |       |
+| Brother 120kB                            |   Y   |   Y    |       |
 | Commodore CbmFS                          |   Y   |        | Only 1541 disks so far |
-| CP/M                                     |   Y   |        | For selected formats |
-| FatFS (a.k.a. MS-DOS)                    |   Y   |   Y    | FAT12, FAT16, FAT32, but only SFN; not Atari |
+| CP/M                                     |   Y   |        | Requires configuration for each machine |
+| FatFS (a.k.a. MS-DOS)                    |   Y   |   Y    | FAT12, FAT16, FAT32; not Atari (AFAIK!) |
 | Macintosh HFS                            |   Y   |   Y    | Only AppleDouble files may be written |
+| Apple ProDOS                             |   Y   |        |       |
+{: .datatable }
 
 Please not that Atari disks do _not_ use standard FatFS, and the library I'm
 using for the heavy lifting (ChaN's
@@ -80,7 +82,7 @@ default; for example, Macintosh HFS filesystems are common on 3.5" floppies. You
 can do this as follows:
 
 ```
-fluxengine format ibm1440 -f drive:1 --filesystem.machfs=
+fluxengine format ibm1440 -f drive:1 --filesystem.type=MACHFS
 ```
 
 Some filesystems won't work on some disks --- don't try this with Amiga FFS, for

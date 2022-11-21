@@ -31,14 +31,14 @@ static inline Bytes decodeFmMfm(const std::vector<bool> bits)
     return decodeFmMfm(bits.begin(), bits.end());
 }
 
-class AbstractDecoder
+class Decoder
 {
 public:
-    AbstractDecoder(const DecoderProto& config): _config(config) {}
+    Decoder(const DecoderProto& config): _config(config) {}
 
-    virtual ~AbstractDecoder() {}
+    virtual ~Decoder() {}
 
-    static std::unique_ptr<AbstractDecoder> create(const DecoderProto& config);
+    static std::unique_ptr<Decoder> create(const DecoderProto& config);
 
 public:
     enum RecordType
@@ -49,9 +49,9 @@ public:
     };
 
 public:
-    std::shared_ptr<const TrackDataFlux> decodeToSectors(
+    std::shared_ptr<TrackDataFlux> decodeToSectors(
         std::shared_ptr<const Fluxmap> fluxmap,
-		const Location& location);
+        std::shared_ptr<const TrackInfo>& trackInfo);
 
     void pushRecord(
         const Fluxmap::Position& start, const Fluxmap::Position& end);
@@ -88,8 +88,6 @@ public:
     {
         return _fmr->getDuration();
     }
-
-    virtual std::set<unsigned> requiredSectors(const Location& location) const;
 
 protected:
     virtual void beginTrack(){};
