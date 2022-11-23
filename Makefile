@@ -111,6 +111,7 @@ PROTOS = \
 	arch/micropolis/micropolis.proto \
 	arch/mx/mx.proto \
 	arch/northstar/northstar.proto \
+	arch/smaky/smaky.proto \
 	arch/tids990/tids990.proto \
 	arch/victor9k/victor9k.proto \
 	arch/zilogmcz/zilogmcz.proto \

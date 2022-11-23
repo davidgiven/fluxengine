@@ -1,5 +1,7 @@
 LIBARCH_SRCS = \
 	arch/aeslanier/decoder.cc \
+	arch/agat/agat.cc \
+	arch/agat/decoder.cc \
 	arch/amiga/amiga.cc \
 	arch/amiga/decoder.cc \
 	arch/amiga/encoder.cc \
@@ -16,18 +18,17 @@ LIBARCH_SRCS = \
 	arch/ibm/encoder.cc \
 	arch/macintosh/decoder.cc \
 	arch/macintosh/encoder.cc \
+	arch/micropolis/decoder.cc \
+	arch/micropolis/encoder.cc \
 	arch/mx/decoder.cc \
+	arch/northstar/decoder.cc \
+	arch/northstar/encoder.cc \
+	arch/smaky/decoder.cc \
+	arch/tids990/decoder.cc \
+	arch/tids990/encoder.cc \
 	arch/victor9k/decoder.cc \
 	arch/victor9k/encoder.cc \
 	arch/zilogmcz/decoder.cc \
-	arch/tids990/decoder.cc \
-	arch/tids990/encoder.cc \
-	arch/micropolis/decoder.cc \
-	arch/micropolis/encoder.cc \
-	arch/northstar/decoder.cc \
-	arch/northstar/encoder.cc \
-	arch/agat/agat.cc \
-	arch/agat/decoder.cc \
 
 LIBARCH_OBJS = $(patsubst %.cc, $(OBJDIR)/%.o, $(LIBARCH_SRCS))
 OBJS += $(LIBARCH_OBJS)

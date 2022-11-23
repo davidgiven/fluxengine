@@ -1,0 +1,33 @@
+comment: 'BK 800kB 5.25"/3.5" 80-track 10-sector DSDD'
+
+image_reader {
+	filename: "smaky.img"
+	type: IMG
+}
+
+image_writer {
+	filename: "smaky.img"
+	type: IMG
+}
+
+layout {
+	tracks: 77
+	sides: 1
+	layoutdata {
+		sector_size: 256
+		physical {
+			start_sector: 0
+			count: 16
+		}
+	}
+}
+
+drive {
+	hard_sector_count: 16
+	sync_with_index: true
+}
+
+decoder {
+	smaky {}
+}
+
