@@ -24,29 +24,31 @@ public:
     }
 
 private:
-    void adjustForIndex(
-        const Fluxmap::Position& previous, const Fluxmap::Position& now)
+    /* Returns the sector ID of the _current_ sector. */
+    int advanceToNextSector()
     {
-        if ((now.ns() - previous.ns()) < 8e6)
+        auto previous = tell();
+        seekToIndexMark();
+        auto now = tell();
+        if ((now.ns() - previous.ns()) < 9e6)
         {
             seekToIndexMark();
             auto next = tell();
-            if ((next.ns() - now.ns()) < 8e6)
+            if ((next.ns() - now.ns()) < 9e6)
             {
-                /* We have seen two short gaps in a row, so sector 0
-                 * starts here. */
+                /* We just found sector 0. */
+
+                _sectorId = 0;
             }
             else
             {
-                /* We have seen one short gap and one long gap. This
-                 * means the index mark must be at the beginning of
-                 * the long gap. */
+                /* Spurious... */
 
                 seek(now);
             }
-
-            _sectorId = 0;
         }
+
+        return _sectorId++;
     }
 
 public:
@@ -56,21 +58,23 @@ public:
          * of about 6ms. */
 
         seekToIndexMark();
-        _sectorId = -1;
-        while (_sectorId == -1)
+        _sectorId = 99;
+        for (;;)
         {
-            auto previous = tell();
-            seekToIndexMark();
-            auto now = tell();
+            auto pos = tell();
+            advanceToNextSector();
+            if (_sectorId < 99)
+            {
+                seek(pos);
+                break;
+            }
+
             if (eof())
                 return;
-
-            adjustForIndex(previous, now);
         }
 
         /* Now we know where to start counting, start finding sectors. */
 
-        _sectorId = 0;
         _sectorStarts.clear();
         for (;;)
         {
@@ -78,14 +82,9 @@ public:
             if (eof())
                 break;
 
-            if (_sectorId < 16)
-                _sectorStarts.push_back(std::make_pair(_sectorId, now));
-            _sectorId++;
-
-            seekToIndexMark();
-            auto next = tell();
-
-            adjustForIndex(now, next);
+            int id = advanceToNextSector();
+            if (id < 16)
+                _sectorStarts.push_back(std::make_pair(id, now));
         }
 
         _sectorIndex = 0;

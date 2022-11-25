@@ -24,7 +24,8 @@ layout {
 
 drive {
 	hard_sector_count: 16
-	sync_with_index: true
+	sync_with_index: false
+	revolutions: 2.2
 }
 
 decoder {
