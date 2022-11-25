@@ -22,13 +22,40 @@ public:
 		_config(config.smaky())
 	{}
 
+private:
+	void adjustForIndex(const Fluxmap::Position& previous, const Fluxmap::Position& now)
+	{
+		if ((now.ns() - previous.ns()) < 8e6)
+		{
+			seekToIndexMark();
+			auto next = tell();
+			if ((next.ns() - now.ns()) < 8e6)
+			{
+				/* We have seen two short gaps in a row, so sector 0
+				 * starts here. */
+			}
+			else
+			{
+				/* We have seen one short gap and one long gap. This
+				 * means the index mark must be at the beginning of
+				 * the long gap. */
+
+				seek(now);
+			}
+
+			_sectorId = 0;
+		}
+	}
+
+public:
 	void beginTrack() override
 	{
 		/* Find the start-of-track index marks, which will be an interval
 		 * of about 6ms. */
 
 		seekToIndexMark();
-		for (;;)
+		_sectorId = -1;
+		while (_sectorId == -1)
 		{
 			auto previous = tell();
 			seekToIndexMark();
@@ -36,61 +63,30 @@ public:
 			if (eof())
 				return;
 
-			if ((now.ns() - previous.ns()) < 8e6)
-			{
-				seekToIndexMark();
-				auto next = tell();
-				if ((next.ns() - now.ns()) < 8e6)
-				{
-					/* We have seen two short gaps in a row, so the index
-					 * mark must be now. */
-
-					seek(previous);
-					break;
-				}
-				else
-				{
-					/* We have seen one short gap and one long gap. This
-					 * means the index mark must be off the beginning of
-					 * the data. Seek to the start to simulate this. */
-
-					rewind();
-					break;
-				}
-			}
+			adjustForIndex(previous, now);
 		}
 
 		/* Now we know where to start counting, start finding sectors. */
 
-		int sectorId = 0;
+		_sectorId = 0;
 		_sectorStarts.clear();
 		for (;;)
 		{
-			auto previous = tell();
-			seekToIndexMark();
 			auto now = tell();
 			if (eof())
-			{
-				if (_sectorStarts.empty())
-					return;
+				break;
 
-				_sectorIndex = 0;
-				return;
-			}
+			if (_sectorId < 16)
+				_sectorStarts.push_back(std::make_pair(_sectorId, now));
+			_sectorId++;
 
-			if ((now.ns() - previous.ns()) < 8e6)
-			{
-				/* This is an index mark! */
-				/* Advance to the start of the first sector and record
-				 * the time. */
+			seekToIndexMark();
+			auto next = tell();
 
-				seekToIndexMark();
-				sectorId = 0;
-			}
-
-			_sectorStarts.push_back(std::make_pair(sectorId, now));
-			sectorId++;
+			adjustForIndex(now, next);
 		}
+
+		_sectorIndex = 0;
 	}
 
     nanoseconds_t advanceToNextRecord() override
