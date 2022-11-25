@@ -152,6 +152,7 @@ void Decoder::pushRecord(
     _trackdata->records.push_back(record);
     _sector->records.push_back(record);
 
+    record->position = start.bytes;
     record->startTime = start.ns();
     record->endTime = end.ns();
     record->clock = _sector->clock;
