@@ -13,7 +13,7 @@ import "arch/macintosh/macintosh.proto";
 import "arch/micropolis/micropolis.proto";
 import "arch/mx/mx.proto";
 import "arch/northstar/northstar.proto";
-import "arch/smaky/smaky.proto";
+import "arch/smaky6/smaky6.proto";
 import "arch/tids990/tids990.proto";
 import "arch/victor9k/victor9k.proto";
 import "arch/zilogmcz/zilogmcz.proto";
@@ -47,7 +47,7 @@ message DecoderProto {
 		MicropolisDecoderProto micropolis = 14;
 		MxDecoderProto mx = 15;
 		NorthstarDecoderProto northstar = 24;
-		SmakyDecoderProto smaky = 30;
+		Smaky6DecoderProto smaky6 = 30;
 		Tids990DecoderProto tids990 = 16;
 		Victor9kDecoderProto victor9k = 17;
 		ZilogMczDecoderProto zilogmcz = 18;

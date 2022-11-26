@@ -4,7 +4,7 @@
 #include "protocol.h"
 #include "decoders/decoders.h"
 #include "sector.h"
-#include "smaky.h"
+#include "smaky6.h"
 #include "bytes.h"
 #include "crc.h"
 #include "fmt/format.h"
@@ -14,12 +14,12 @@
 
 static const FluxPattern SECTOR_PATTERN(28, 0x4892aaa);
 
-class SmakyDecoder : public Decoder
+class Smaky6Decoder : public Decoder
 {
 public:
-    SmakyDecoder(const DecoderProto& config):
+    Smaky6Decoder(const DecoderProto& config):
         Decoder(config),
-        _config(config.smaky())
+        _config(config.smaky6())
     {
     }
 
@@ -111,20 +111,20 @@ public:
     void decodeSectorRecord() override
     {
         readRawBits(29);
-        const auto& rawbits = readRawBits(SMAKY_RECORD_SIZE * 16);
-        if (rawbits.size() < SMAKY_SECTOR_SIZE)
+        const auto& rawbits = readRawBits(SMAKY6_RECORD_SIZE * 16);
+        if (rawbits.size() < SMAKY6_SECTOR_SIZE)
             return;
         const auto& rawbytes =
-            toBytes(rawbits).slice(0, SMAKY_RECORD_SIZE * 16);
+            toBytes(rawbits).slice(0, SMAKY6_RECORD_SIZE * 16);
 
         /* The Smaky bytes are stored backwards! Backwards! */
 
         const auto& bytes =
-            decodeFmMfm(rawbits).slice(0, SMAKY_RECORD_SIZE).reverseBits();
+            decodeFmMfm(rawbits).slice(0, SMAKY6_RECORD_SIZE).reverseBits();
         ByteReader br(bytes);
 
         uint8_t track = br.read_8();
-        Bytes data = br.read(SMAKY_SECTOR_SIZE);
+        Bytes data = br.read(SMAKY6_SECTOR_SIZE);
         uint8_t wantedChecksum = br.read_8();
         uint8_t gotChecksum = sumBytes(data) & 0xff;
 
@@ -141,14 +141,14 @@ public:
     }
 
 private:
-    const SmakyDecoderProto& _config;
+    const Smaky6DecoderProto& _config;
     nanoseconds_t _startOfTrack;
     std::vector<std::pair<int, Fluxmap::Position>> _sectorStarts;
     int _sectorId;
     int _sectorIndex;
 };
 
-std::unique_ptr<Decoder> createSmakyDecoder(const DecoderProto& config)
+std::unique_ptr<Decoder> createSmaky6Decoder(const DecoderProto& config)
 {
-    return std::unique_ptr<Decoder>(new SmakyDecoder(config));
+    return std::unique_ptr<Decoder>(new Smaky6Decoder(config));
 }
