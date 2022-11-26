@@ -6,6 +6,7 @@
 class ExecEvent;
 class MainWindow;
 
+extern void postToUiThread(std::function<void()> callback);
 extern void runOnUiThread(std::function<void()> callback);
 extern void runOnWorkerThread(std::function<void()> callback);
 

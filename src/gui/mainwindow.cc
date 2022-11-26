@@ -55,6 +55,30 @@ class MainWindow : public MainWindowGen
 private:
     class FilesystemOperation;
 
+    enum State
+    {
+        STATE_IDLE,
+        STATE_IDLE__LAST,
+
+        STATE_READING_WORKING,
+        STATE_READING_FAILED,
+        STATE_READING_SUCCEEDED,
+        STATE_READING__LAST,
+
+        STATE_WRITING_WORKING,
+        STATE_WRITING_FAILED,
+        STATE_WRITING_SUCCEEDED,
+        STATE_WRITING__LAST,
+
+        STATE_BROWSING_WORKING,
+        STATE_BROWSING_IDLE,
+        STATE_BROWSING__LAST,
+
+        STATE_EXPLORING_WORKING,
+        STATE_EXPLORING_IDLE,
+        STATE_EXPLORING__LAST,
+    };
+
 public:
     MainWindow():
         MainWindowGen(nullptr),
@@ -997,20 +1021,20 @@ public:
 
     void QueueBrowserOperation(std::function<void()> f)
     {
-        _filesystemQueue.push_back(f);
-        KickBrowserQueue();
+        _jobQueue.push_back(f);
+        KickQueue(STATE_BROWSING_WORKING, STATE_BROWSING_IDLE);
     }
 
-    void KickBrowserQueue()
+    void KickQueue(State workingState, State idleState)
     {
         bool running = wxGetApp().IsWorkerThreadRunning();
         if (!running)
         {
-            _state = STATE_BROWSING_WORKING;
-            _errorState = STATE_BROWSING_IDLE;
+            _state = workingState;
+            _errorState = idleState;
             UpdateState();
             runOnWorkerThread(
-                [this]()
+                [this, idleState]()
                 {
                     for (;;)
                     {
@@ -1019,10 +1043,10 @@ public:
                             [&]()
                             {
                                 UpdateState();
-                                if (!_filesystemQueue.empty())
+                                if (!_jobQueue.empty())
                                 {
-                                    f = _filesystemQueue.front();
-                                    _filesystemQueue.pop_front();
+                                    f = _jobQueue.front();
+                                    _jobQueue.pop_front();
                                 }
                             });
                         if (!f)
@@ -1034,7 +1058,7 @@ public:
                     runOnUiThread(
                         [&]()
                         {
-                            _state = STATE_BROWSING_IDLE;
+                            _state = idleState;
                             UpdateState();
                         });
                 });
@@ -1046,11 +1070,144 @@ public:
         UpdateState();
     }
 
-    /* --- Config management
-     * ------------------------------------------------ */
+    /* --- Explorer -------------------------------------------------------- */
+
+    void OnExploreButton(wxCommandEvent& event) override
+    {
+        try
+        {
+            PrepareConfig();
+
+            visualiser->Clear();
+            _filesystemModel->Clear(Path());
+            _currentDisk = nullptr;
+
+            _state = STATE_EXPLORING_IDLE;
+            UpdateState();
+            ShowConfig();
+
+            _explorerFluxmap = nullptr;
+            _explorerTrack = -1;
+            _explorerSide = -1;
+            _explorerUpdatePending = false;
+
+            UpdateExplorerData();
+        }
+        catch (const ErrorException& e)
+        {
+            wxMessageBox(e.message, "Error", wxOK | wxICON_ERROR);
+            _state = STATE_IDLE;
+        }
+    }
+
+    void OnExplorerSettingChange(wxSpinEvent& event) override
+    {
+        UpdateExplorerData();
+    }
+
+    void OnExplorerSettingChange(wxSpinDoubleEvent& event) override
+    {
+        UpdateExplorerData();
+    }
+
+    void OnExplorerSettingChange(wxCommandEvent& event) override
+    {
+        UpdateExplorerData();
+    }
+
+    void OnExplorerRefreshButton(wxCommandEvent& event) override
+    {
+        _explorerFluxmap = nullptr;
+        _explorerTrack = -1;
+        _explorerSide = -1;
+        _explorerUpdatePending = false;
+
+        UpdateExplorerData();
+    }
+
+private:
+    void UpdateExplorerData()
+    {
+        if (!_jobQueue.empty())
+        {
+            _explorerUpdatePending = true;
+            return;
+        }
+
+        _explorerUpdatePending = false;
+        QueueExplorerOperation(
+            [this]()
+            {
+                /* You need to call this if the config changes to invalidate
+                 * any caches. */
+
+                Environment::reset();
+
+                int desiredTrack = explorerTrackSpinCtrl->GetValue();
+                int desiredSide = explorerSideSpinCtrl->GetValue();
+                if (!_explorerFluxmap || (desiredTrack != _explorerTrack) ||
+                    (desiredSide != _explorerSide))
+                {
+                    auto fluxSource = FluxSource::create(config.flux_source());
+                    _explorerFluxmap =
+                        fluxSource->readFlux(desiredTrack, desiredSide)->next();
+                    _explorerTrack = desiredTrack;
+                    _explorerSide = desiredSide;
+                }
+
+                runOnUiThread(
+                    [&]()
+                    {
+                        _state = STATE_EXPLORING_IDLE;
+                        UpdateState();
+
+                        FluxmapReader fmr(*_explorerFluxmap);
+                        fmr.seek(explorerStartTimeSpinCtrl->GetValue() * 1e6);
+
+                        FluxDecoder fluxDecoder(&fmr,
+                            explorerClockSpinCtrl->GetValue() * 1e3,
+                            DecoderProto());
+                        fluxDecoder.readBits(
+                            explorerBitOffsetSpinCtrl->GetValue());
+                        auto bits = fluxDecoder.readBits();
+
+                        Bytes bytes;
+                        switch (explorerDecodeChoice->GetSelection())
+                        {
+                            case 0:
+                                bytes = toBytes(bits);
+                                break;
+
+                            case 1:
+                                bytes = decodeFmMfm(bits.begin(), bits.end());
+                                break;
+                        }
+
+                        if (explorerReverseCheckBox->GetValue())
+                            bytes = bytes.reverseBits();
+
+                        std::stringstream s;
+                        hexdump(s, bytes);
+
+                        explorerText->SetValue(s.str());
+
+                        if (_explorerUpdatePending)
+                            UpdateExplorerData();
+                    });
+            });
+    }
+
+    void QueueExplorerOperation(std::function<void()> f)
+    {
+        _jobQueue.push_back(f);
+        KickQueue(STATE_EXPLORING_WORKING, STATE_EXPLORING_IDLE);
+    }
+
+    /* --- Config management ----------------------------------------------- */
 
     /* This sets the *global* config object. That's safe provided the worker
      * thread isn't running, otherwise you'll get a race. */
+public:
     void PrepareConfig()
     {
         assert(!wxGetApp().IsWorkerThreadRunning());
@@ -1169,7 +1326,7 @@ public:
                     _statusBar->HideProgressBar();
                     _statusBar->SetRightLabel("");
                     _state = _errorState;
-                    _filesystemQueue.clear();
+                    _jobQueue.clear();
                     UpdateState();
                 },
 
@@ -1362,8 +1519,15 @@ public:
         {
             dataNotebook->SetSelection(0);
 
-            readButton->Enable(_selectedSource != SELECTEDSOURCE_IMAGE);
-            writeButton->Enable(_selectedSource == SELECTEDSOURCE_REAL);
+            bool hasFormat = formatChoice->GetSelection() != wxNOT_FOUND;
+
+            readButton->Enable(
+                (_selectedSource != SELECTEDSOURCE_IMAGE) && hasFormat);
+            writeButton->Enable(
+                (_selectedSource == SELECTEDSOURCE_REAL) && hasFormat);
+            browseButton->Enable(hasFormat);
+            formatButton->Enable(hasFormat);
+            exploreButton->Enable(_selectedSource != SELECTEDSOURCE_IMAGE);
         }
         else if (_state < STATE_READING__LAST)
         {
@@ -1391,7 +1555,7 @@ public:
         {
             dataNotebook->SetSelection(2);
 
-            bool running = !_filesystemQueue.empty();
+            bool running = !_jobQueue.empty();
             bool selection = browserTree->GetSelection().IsOk();
 
             browserToolbar->EnableTool(
@@ -1420,6 +1584,13 @@ public:
 
             browserDiscardButton->Enable(!running && needsFlushing);
             browserCommitButton->Enable(!running && needsFlushing);
+        }
+        else if (_state < STATE_EXPLORING__LAST)
+        {
+            dataNotebook->SetSelection(3);
+
+            explorerToolbar->EnableTool(
+                explorerBackTool->GetId(), _state == STATE_EXPLORING_IDLE);
         }
 
         Refresh();
@@ -1459,26 +1630,6 @@ private:
         SELECTEDSOURCE_REAL,
         SELECTEDSOURCE_FLUX,
         SELECTEDSOURCE_IMAGE
-    };
-
-    enum
-    {
-        STATE_IDLE,
-        STATE_IDLE__LAST,
-
-        STATE_READING_WORKING,
-        STATE_READING_FAILED,
-        STATE_READING_SUCCEEDED,
-        STATE_READING__LAST,
-
-        STATE_WRITING_WORKING,
-        STATE_WRITING_FAILED,
-        STATE_WRITING_SUCCEEDED,
-        STATE_WRITING__LAST,
-
-        STATE_BROWSING_WORKING,
-        STATE_BROWSING_IDLE,
-        STATE_BROWSING__LAST
     };
 
     class FilesystemOperation
@@ -1539,8 +1690,8 @@ private:
     wxDataFormat _dndFormat;
     std::vector<std::string> _formatNames;
     std::vector<std::unique_ptr<const CandidateDevice>> _devices;
-    int _state = STATE_IDLE;
-    int _errorState;
+    State _state = STATE_IDLE;
+    State _errorState;
     int _selectedSource;
     bool _dontSaveConfig = false;
     std::shared_ptr<const DiskFlux> _currentDisk;
@@ -1554,7 +1705,11 @@ private:
     bool _filesystemIsReadOnly;
     bool _filesystemNeedsFlushing;
     FilesystemModel* _filesystemModel;
-    std::deque<std::function<void()>> _filesystemQueue;
+    std::deque<std::function<void()>> _jobQueue;
+    int _explorerTrack;
+    int _explorerSide;
+    bool _explorerUpdatePending;
+    std::unique_ptr<const Fluxmap> _explorerFluxmap;
 };
 
 wxWindow* FluxEngineApp::CreateMainWindow()
