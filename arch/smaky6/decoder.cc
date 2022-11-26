@@ -12,7 +12,7 @@
 #include <string.h>
 #include <algorithm>
 
-static const FluxPattern SECTOR_PATTERN(28, 0x4892aaa);
+static const FluxPattern SECTOR_PATTERN(32, 0x54892aaa);
 
 class Smaky6Decoder : public Decoder
 {
@@ -110,7 +110,7 @@ public:
 
     void decodeSectorRecord() override
     {
-        readRawBits(29);
+        readRawBits(33);
         const auto& rawbits = readRawBits(SMAKY6_RECORD_SIZE * 16);
         if (rawbits.size() < SMAKY6_SECTOR_SIZE)
             return;
