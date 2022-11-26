@@ -1,12 +1,7 @@
-comment: 'BK 800kB 5.25"/3.5" 80-track 10-sector DSDD'
-
-image_reader {
-	filename: "smaky.img"
-	type: IMG
-}
+comment: 'Smaky 6 308kB 5.25" 77-track 16-sector SSDD, hard sectored'
 
 image_writer {
-	filename: "smaky.img"
+	filename: "smaky6.img"
 	type: IMG
 }
 
