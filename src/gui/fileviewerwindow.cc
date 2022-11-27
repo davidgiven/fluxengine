@@ -31,7 +31,7 @@ FileViewerWindow::FileViewerWindow(
                 continue;
             }
 
-            if ((c == '\n') || ((c >= 32) && (c <= 126)))
+            if ((c == '\n') || (c == '\t') || ((c >= 32) && (c <= 126)))
                 ss << (char)c;
             else if (c == '\r')
                 ss << '\n';
