@@ -18,6 +18,7 @@ extern std::string toIso8601(time_t t);
 extern std::string quote(const std::string& s);
 extern std::string unhex(const std::string& s);
 extern std::string tohex(const std::string& s);
+extern bool doesFileExist(const std::string& filename);
 
 /* If set, any running job will terminate as soon as possible (with an error).
  */
