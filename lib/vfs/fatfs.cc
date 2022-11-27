@@ -246,11 +246,11 @@ public:
         switch (cmd)
         {
             case GET_SECTOR_SIZE:
-                *(DWORD*)buffer = getLogicalSectorSize();
+                *(WORD*)buffer = getLogicalSectorSize();
                 break;
 
             case GET_SECTOR_COUNT:
-                *(DWORD*)buffer = getLogicalSectorCount();
+                *(LBA_t*)buffer = getLogicalSectorCount();
                 break;
 
             case CTRL_SYNC:
