@@ -44,6 +44,6 @@ message OptionProto {
 	optional string name = 1 [(help) = "Option name" ];
 	optional string comment = 2 [(help) = "Help text for option" ];
 	optional string message = 3 [(help) = "Message to display when option is in use" ];
-	optional ConfigProto config = 4 [(help) = "Option data" ];
+	optional ConfigProto config = 4 [(help) = "Option data", (recurse) = false ];
 }
 
