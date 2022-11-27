@@ -116,6 +116,7 @@ people who've had it work).
 | [Macintosh 400kB/800kB](doc/disk-macintosh.md)  |  🦄   |   🦄   |                                     |
 | [NEC PC-98](doc/disk-ibm.md)              |  🦄   |   🦄   | trimode drive not required          |
 | [Sharp X68000](doc/disk-ibm.md)           |  🦄   |   🦄   |                                     |
+| [Smaky 6](doc/disk-smaky6.md)             |  🦖   |       | 5.25" hard sectored |
 | [TRS-80](doc/disk-trs80.md)               |  🦖   |   🦖*  | a minor variation of the IBM scheme |
 {: .datatable }
 

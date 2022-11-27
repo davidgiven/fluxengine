@@ -272,7 +272,8 @@ void VisualisationControl::Clear()
 
 void VisualisationControl::SetTrackData(std::shared_ptr<const TrackFlux> track)
 {
-    key_t key = {track->trackInfo->physicalTrack, track->trackInfo->physicalSide};
+    key_t key = {
+        track->trackInfo->physicalTrack, track->trackInfo->physicalSide};
     _tracks[key] = track;
     _sectors.erase(key);
     for (auto& sector : track->sectors)
@@ -286,7 +287,8 @@ void VisualisationControl::SetDiskData(std::shared_ptr<const DiskFlux> disk)
     _sectors.clear();
     for (const auto& track : disk->tracks)
     {
-        key_t key = {track->trackInfo->physicalTrack, track->trackInfo->physicalSide};
+        key_t key = {
+            track->trackInfo->physicalTrack, track->trackInfo->physicalSide};
         _tracks[key] = track;
     }
 

@@ -30,6 +30,7 @@ private:
     void ShowRecordMenu(std::shared_ptr<const TrackInfo>& layout,
         std::shared_ptr<const Record> record);
     void DisplayDecodedData(std::shared_ptr<const Sector> sector);
+    void DisplaySectorSummary(std::shared_ptr<const Sector> sector);
     void DisplayRawData(std::shared_ptr<const Sector> sector);
     void DisplayRawData(std::shared_ptr<const TrackInfo>& layout,
         std::shared_ptr<const Record> record);

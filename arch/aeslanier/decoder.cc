@@ -13,16 +13,6 @@ static const FluxPattern SECTOR_PATTERN(32, AESLANIER_RECORD_SEPARATOR);
 
 /* This is actually M2FM, rather than MFM, but it our MFM/FM decoder copes fine with it. */
 
-static Bytes reverse_bits(const Bytes& input)
-{
-    Bytes output;
-    ByteWriter bw(output);
-
-    for (uint8_t b : input)
-        bw.write_8(reverse_bits(b));
-    return output;
-}
-
 class AesLanierDecoder : public Decoder
 {
 public:
@@ -43,7 +33,7 @@ public:
 
 		const auto& rawbits = readRawBits(AESLANIER_RECORD_SIZE*16);
 		const auto& bytes = decodeFmMfm(rawbits).slice(0, AESLANIER_RECORD_SIZE);
-		const auto& reversed = reverse_bits(bytes);
+		const auto& reversed = bytes.reverseBits();
 
 		_sector->logicalTrack = reversed[1];
 		_sector->logicalSide = 0;

@@ -7,6 +7,7 @@
 #include "lib/sector.h"
 #include "lib/layout.h"
 #include "lib/decoders/fluxmapreader.h"
+#include "lib/crc.h"
 
 DECLARE_COLOUR(BACKGROUND, 192, 192, 192);
 DECLARE_COLOUR(READ_SEPARATOR, 255, 0, 0);
@@ -418,6 +419,14 @@ void FluxViewerControl::ShowSectorMenu(std::shared_ptr<const Sector> sector)
         wxEVT_MENU,
         [&](wxCommandEvent&)
         {
+            DisplaySectorSummary(sector);
+        },
+        menu.Append(wxID_ANY, "Show sector summary")->GetId());
+
+    menu.Bind(
+        wxEVT_MENU,
+        [&](wxCommandEvent&)
+        {
             DisplayDecodedData(sector);
         },
         menu.Append(wxID_ANY, "Show decoded data")->GetId());
@@ -461,7 +470,22 @@ static void dumpSectorMetadata(
              sector->physicalSide)
       << fmt::format("Clock:             {:.2f}us / {:.0f}kHz\n",
              sector->clock / 1000.0,
-             1000000.0 / sector->clock);
+             1000000.0 / sector->clock)
+      << fmt::format("Bytecode position: {}\n", sector->position)
+      << fmt::format(
+             "Data CRC16:        {:4x}\n", crc16(CCITT_POLY, sector->data));
+}
+
+static void dumpRecordMetadata(
+    std::ostream& s, std::shared_ptr<const Record> record)
+{
+    s << fmt::format("Bytecode position: {}\n", record->position)
+      << fmt::format(
+             "Start:             {:.2f}ms\n", record->startTime / 1000000.0)
+      << fmt::format(
+             "End:               {:.2f}ms\n", record->endTime / 1000000.0)
+      << fmt::format(
+             "Data CRC16:        {:4x}\n", crc16(CCITT_POLY, record->rawData));
 }
 
 void FluxViewerControl::DisplayDecodedData(std::shared_ptr<const Sector> sector)
@@ -481,6 +505,44 @@ void FluxViewerControl::DisplayDecodedData(std::shared_ptr<const Sector> sector)
     TextViewerWindow::Create(this, title, s.str())->Show();
 }
 
+void FluxViewerControl::DisplaySectorSummary(
+    std::shared_ptr<const Sector> sector)
+{
+    std::stringstream s;
+
+    auto title = fmt::format("Sector summary c{}.h{}.s{}",
+        sector->logicalTrack,
+        sector->logicalSide,
+        sector->logicalSector);
+    s << title << '\n';
+
+    std::vector<std::shared_ptr<const Sector>> sectors;
+    for (auto& trackdata : _flux->trackDatas)
+    {
+        if ((trackdata->trackInfo->logicalTrack == sector->logicalTrack) &&
+            (trackdata->trackInfo->logicalSide == sector->logicalSide))
+        {
+            for (auto& sec : trackdata->sectors)
+            {
+                if (*sec == *sector)
+                    sectors.push_back(sec);
+            }
+        }
+    }
+
+    s << fmt::format("Number of times seen: {}\n", sectors.size());
+
+    for (int i = 0; i < sectors.size(); i++)
+    {
+        auto& sec = sectors[i];
+        s << fmt::format("\nInstance {}:\n\n", i);
+        dumpSectorMetadata(s, sec);
+        s << '\n';
+    }
+
+    TextViewerWindow::Create(this, title, s.str())->Show();
+}
+
 void FluxViewerControl::DisplayRawData(std::shared_ptr<const Sector> sector)
 {
     std::stringstream s;
@@ -493,8 +555,11 @@ void FluxViewerControl::DisplayRawData(std::shared_ptr<const Sector> sector)
     dumpSectorMetadata(s, sector);
     s << fmt::format("Number of records: {}\n", sector->records.size());
 
-    for (auto& record : sector->records)
+    for (int i = 0; i < sector->records.size(); i++)
     {
+        auto& record = sector->records[i];
+        s << fmt::format("\nRecord {}:\n\n", i);
+        dumpRecordMetadata(s, record);
         s << '\n';
         hexdump(s, record->rawData);
     }
@@ -511,7 +576,9 @@ void FluxViewerControl::DisplayRawData(std::shared_ptr<const TrackInfo>& layout,
         layout->physicalTrack,
         layout->physicalSide,
         record->startTime / 1e6);
-    s << title << "\n\n";
+    s << title << "\n";
+    dumpRecordMetadata(s, record);
+    s << '\n';
     hexdump(s, record->rawData);
 
     TextViewerWindow::Create(this, title, s.str())->Show();

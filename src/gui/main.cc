@@ -14,8 +14,9 @@ wxDEFINE_EVENT(EXEC_EVENT_TYPE, ExecEvent);
 class ExecEvent : public wxThreadEvent
 {
 public:
-    ExecEvent(wxEventType commandType = EXEC_EVENT_TYPE, int id = 0):
-        wxThreadEvent(commandType, id)
+    ExecEvent(bool synchronous = true):
+        wxThreadEvent(EXEC_EVENT_TYPE, 0),
+        _synchronous(synchronous)
     {
     }
 
@@ -35,6 +36,11 @@ public:
         _callback = callback;
     }
 
+    bool IsSynchronous() const
+    {
+        return _synchronous;
+    }
+
     void RunCallback() const
     {
         _callback();
@@ -42,6 +48,7 @@ public:
 
 private:
     std::function<void()> _callback;
+    bool _synchronous;
 };
 
 bool FluxEngineApp::OnInit()
@@ -69,9 +76,11 @@ wxThread::ExitCode FluxEngineApp::Entry()
         Logger() << EmergencyStopMessage();
     }
 
-    runOnUiThread(
+    postToUiThread(
         [&]
         {
+            GetThread()->Wait();
+
             _callback = nullptr;
             SendUpdateEvent();
         });
@@ -114,7 +123,8 @@ bool FluxEngineApp::IsWorkerThreadRunning() const
 void FluxEngineApp::OnExec(const ExecEvent& event)
 {
     event.RunCallback();
-    execSemaphore.Post();
+    if (event.IsSynchronous())
+        execSemaphore.Post();
 }
 
 void runOnUiThread(std::function<void()> callback)
@@ -123,6 +133,13 @@ void runOnUiThread(std::function<void()> callback)
     event->SetCallback(callback);
     wxGetApp().QueueEvent(event);
     execSemaphore.Wait();
+}
+
+void postToUiThread(std::function<void()> callback)
+{
+    ExecEvent* event = new ExecEvent(false);
+    event->SetCallback(callback);
+    wxGetApp().QueueEvent(event);
 }
 
 wxIMPLEMENT_APP(FluxEngineApp);

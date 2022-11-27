@@ -63,6 +63,7 @@ FORMATS = \
 	northstar87 \
 	rx50 \
 	shugart_drive \
+	smaky6 \
 	tids990 \
 	victor9k_ds \
 	victor9k_ss \

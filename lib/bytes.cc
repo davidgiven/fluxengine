@@ -205,6 +205,16 @@ std::vector<bool> Bytes::toBits() const
 	return bits;
 }
 
+Bytes Bytes::reverseBits() const
+{
+    Bytes output;
+    ByteWriter bw(output);
+
+    for (uint8_t b : *this)
+        bw.write_8(reverse_bits(b));
+    return output;
+}
+
 uint8_t toByte(
     std::vector<bool>::const_iterator start,
     std::vector<bool>::const_iterator end)

@@ -1,0 +1,29 @@
+comment: 'Smaky 6 308kB 5.25" 77-track 16-sector SSDD, hard sectored'
+
+image_writer {
+	filename: "smaky6.img"
+	type: IMG
+}
+
+layout {
+	tracks: 77
+	sides: 1
+	layoutdata {
+		sector_size: 256
+		physical {
+			start_sector: 0
+			count: 16
+		}
+	}
+}
+
+drive {
+	hard_sector_count: 16
+	sync_with_index: false
+	revolutions: 2.2
+}
+
+decoder {
+	smaky6 {}
+}
+

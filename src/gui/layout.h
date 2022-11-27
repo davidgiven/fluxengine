@@ -34,9 +34,10 @@
 #include "visualisationcontrol.h"
 #include <wx/dataview.h>
 #include <wx/gauge.h>
+#include <wx/spinctrl.h>
+#include <wx/textctrl.h>
 #include <wx/simplebook.h>
 #include <wx/frame.h>
-#include <wx/textctrl.h>
 #include <wx/dialog.h>
 #include "fluxviewercontrol.h"
 #include <wx/scrolbar.h>
@@ -80,6 +81,7 @@ protected:
     wxButton* writeButton;
     wxButton* browseButton;
     wxButton* formatButton;
+    wxButton* exploreButton;
     wxPanel* imagePanel;
     wxAuiToolBar* imagerToolbar;
     wxAuiToolBarItem* imagerBackTool;
@@ -109,6 +111,25 @@ protected:
     wxButton* browserDiscardButton;
     wxButton* browserCommitButton;
     wxStaticText* m_staticText12;
+    wxPanel* explorePanel;
+    wxAuiToolBar* explorerToolbar;
+    wxAuiToolBarItem* explorerBackTool;
+    wxAuiToolBarItem* explorerRefreshTool;
+    wxStaticText* m_staticText22;
+    wxSpinCtrl* explorerTrackSpinCtrl;
+    wxStaticText* m_staticText26;
+    wxSpinCtrl* explorerSideSpinCtrl;
+    wxStaticText* m_staticText231;
+    wxSpinCtrlDouble* explorerStartTimeSpinCtrl;
+    wxStaticText* m_staticText24;
+    wxSpinCtrlDouble* explorerClockSpinCtrl;
+    wxStaticText* m_staticText25;
+    wxSpinCtrl* explorerBitOffsetSpinCtrl;
+    wxStaticText* m_staticText27;
+    wxChoice* explorerDecodeChoice;
+    wxStaticText* m_staticText241;
+    wxCheckBox* explorerReverseCheckBox;
+    wxTextCtrl* explorerText;
 
     // Virtual event handlers, override them in your derived class
     virtual void OnClose(wxCloseEvent& event)
@@ -160,6 +181,10 @@ protected:
         event.Skip();
     }
     virtual void OnFormatButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnExploreButton(wxCommandEvent& event)
     {
         event.Skip();
     }
@@ -240,6 +265,22 @@ protected:
         event.Skip();
     }
     virtual void OnBrowserCommitButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnExplorerRefreshButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnExplorerSettingChange(wxSpinEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnExplorerSettingChange(wxSpinDoubleEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnExplorerSettingChange(wxCommandEvent& event)
     {
         event.Skip();
     }

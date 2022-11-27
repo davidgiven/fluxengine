@@ -62,6 +62,7 @@ public:
     Bytes compress() const;
     Bytes decompress() const;
 	std::vector<bool> toBits() const;
+	Bytes reverseBits() const;
 
     ByteReader reader() const;
     ByteWriter writer();
