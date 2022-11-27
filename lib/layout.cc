@@ -58,6 +58,21 @@ std::vector<std::shared_ptr<const TrackInfo>> Layout::computeLocations()
     return locations;
 }
 
+void Layout::getBounds(const std::vector<std::shared_ptr<const TrackInfo>>& locations,
+		int& minTrack, int& maxTrack, int& minSide, int& maxSide)
+{
+	minTrack = minSide = INT_MAX;
+	maxTrack = maxSide = INT_MIN;
+
+	for (auto& ti : locations)
+	{
+		minTrack = std::min<int>(minTrack, ti->physicalTrack);
+		maxTrack = std::max<int>(maxTrack, ti->physicalTrack);
+		minSide = std::min<int>(minSide, ti->physicalSide);
+		maxSide = std::max<int>(maxSide, ti->physicalSide);
+	}
+}
+
 std::vector<std::pair<int, int>> Layout::getTrackOrdering(
     unsigned guessedTracks, unsigned guessedSides)
 {
