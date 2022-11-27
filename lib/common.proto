@@ -10,6 +10,7 @@ message RangeProto {
 
 extend google.protobuf.FieldOptions {
   optional string help = 50000;
+  optional bool recurse = 50001 [default = true];
 }
 
 enum IndexMode {
