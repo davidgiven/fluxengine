@@ -23,9 +23,14 @@ public:
     static unsigned remapSideLogicalToPhysical(unsigned logicalSide);
 
     /* Uses the layout and current track and heads settings to determine
-     * which Locations are going to be read from or written to. 8/
+     * which Locations are going to be read from or written to.
      */
     static std::vector<std::shared_ptr<const TrackInfo>> computeLocations();
+
+	/* Given a list of locations, determines the minimum and maximum track
+	 * and side settings. */
+	static void getBounds(const std::vector<std::shared_ptr<const TrackInfo>>& locations,
+		int& minTrack, int& maxTrack, int& minSide, int& maxSide);
 
     /* Returns a series of <track, side> pairs representing the filesystem
      * ordering of the disk, in logical numbers. */

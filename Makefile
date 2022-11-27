@@ -160,11 +160,17 @@ include tests/build.mk
 do-encodedecodetest = $(eval $(do-encodedecodetest-impl))
 define do-encodedecodetest-impl
 
-tests: $(OBJDIR)/$1$3.encodedecode
-$(OBJDIR)/$1$3.encodedecode: scripts/encodedecodetest.sh $(FLUXENGINE_BIN) $2
+tests: $(OBJDIR)/$1$3.flux.encodedecode
+$(OBJDIR)/$1$3.flux.encodedecode: scripts/encodedecodetest.sh $(FLUXENGINE_BIN) $2
 	@mkdir -p $(dir $$@)
-	@echo ENCODEDECODETEST $1 $3
+	@echo ENCODEDECODETEST .flux $1 $3
 	@scripts/encodedecodetest.sh $1 flux $(FLUXENGINE_BIN) $2 $3 > $$@
+
+tests: $(OBJDIR)/$1$3.scp.encodedecode
+$(OBJDIR)/$1$3.scp.encodedecode: scripts/encodedecodetest.sh $(FLUXENGINE_BIN) $2
+	@mkdir -p $(dir $$@)
+	@echo ENCODEDECODETEST .scp $1 $3
+	@scripts/encodedecodetest.sh $1 scp $(FLUXENGINE_BIN) $2 $3 > $$@
 
 endef
 

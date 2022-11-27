@@ -580,30 +580,27 @@ void rawReadDiskCommand(FluxSource& fluxsource, FluxSink& fluxsink)
 {
     Logger() << BeginOperationLogMessage{"Performing raw read of disk"};
 
-    auto tracks = iterate(config.tracks());
-    auto heads = iterate(config.heads());
-    unsigned locations = tracks.size() * heads.size();
-
+    auto locations = Layout::computeLocations();
     unsigned index = 0;
-    for (unsigned track : tracks)
+    for (auto& trackInfo : locations)
     {
-        for (unsigned head : heads)
-        {
-            Logger() << OperationProgressLogMessage{index * 100 / locations};
-            index++;
+        Logger() << OperationProgressLogMessage{index * 100 / (int)locations.size()};
+        index++;
 
-            testForEmergencyStop();
-            auto fluxSourceIterator = fluxsource.readFlux(track, head);
+        testForEmergencyStop();
+        auto fluxSourceIterator = fluxsource.readFlux(
+            trackInfo->physicalTrack, trackInfo->physicalSide);
 
-            Logger() << BeginReadOperationLogMessage{track, head};
-            auto fluxmap = fluxSourceIterator->next();
-            Logger() << EndReadOperationLogMessage()
-                     << fmt::format("{0} ms in {1} bytes",
-                            (int)(fluxmap->duration() / 1e6),
-                            fluxmap->bytes());
+        Logger() << BeginReadOperationLogMessage{
+            trackInfo->physicalTrack, trackInfo->physicalSide};
+        auto fluxmap = fluxSourceIterator->next();
+        Logger() << EndReadOperationLogMessage()
+                 << fmt::format("{0} ms in {1} bytes",
+                        (int)(fluxmap->duration() / 1e6),
+                        fluxmap->bytes());
 
-            fluxsink.writeFlux(track, head, *fluxmap);
-        }
+        fluxsink.writeFlux(
+            trackInfo->physicalTrack, trackInfo->physicalSide, *fluxmap);
     }
 
     Logger() << EndOperationLogMessage{"Raw read complete"};
