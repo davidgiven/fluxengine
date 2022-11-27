@@ -3,6 +3,7 @@
 #include "lib/bytes.h"
 #include <fmt/format.h>
 #include <iomanip>
+#include <fstream>
 
 bool emergencyStop = false;
 
@@ -190,3 +191,10 @@ std::string tohex(const std::string& s)
 
     return ss.str();
 }
+
+bool doesFileExist(const std::string& filename)
+{
+	std::ifstream f(filename);
+	return f.good();
+}
+

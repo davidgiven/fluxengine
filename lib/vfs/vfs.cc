@@ -235,7 +235,8 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystemFromConfig()
     {
         std::shared_ptr<ImageReader> reader;
         std::shared_ptr<ImageWriter> writer;
-        if (config.image_reader().type() != ImageReaderProto::NOT_SET)
+        if ((config.image_reader().type() != ImageReaderProto::NOT_SET) &&
+            doesFileExist(config.image_reader().filename()))
             reader = ImageReader::create(config.image_reader());
         if (config.image_writer().type() != ImageWriterProto::NOT_SET)
             writer = ImageWriter::create(config.image_writer());
