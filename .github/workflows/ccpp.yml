@@ -21,6 +21,12 @@ jobs:
     - name: make
       run: gmake
 
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.event.repository.name }}.${{ github.sha }}
+        path: FluxEngine.pkg
+
   build-windows:
     runs-on: windows-latest
     defaults:
@@ -62,4 +68,4 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: ${{ github.event.repository.name }}.${{ github.sha }}
-        path: fluxengine.zip
+        path: fluxengine-windows.zip
