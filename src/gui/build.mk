@@ -40,6 +40,35 @@ fluxengine-gui$(EXT): $(FLUXENGINE_GUI_BIN)
 	@echo CP $@
 	@cp $< $@
 
+ifeq ($(PLATFORM),OSX)
+
+binaries: FluxEngine.pkg
+
+FluxEngine.pkg: FluxEngine.app
+	@echo PKGBUILD $@
+	@pkgbuild --quiet --install-location /Applications --component $< $@
+
+FluxEngine.app: fluxengine-gui$(EXT) $(OBJDIR)/fluxengine.icns
+	@echo MAKEAPP $@
+	@rm -rf $@
+	@cp -a extras/FluxEngine.app.template $@
+	@cp fluxengine-gui$(EXT) $@/Contents/MacOS/fluxengine-gui
+	@mkdir -p $@/Contents/Resources
+	@cp $(OBJDIR)/fluxengine.icns $@/Contents/Resources/FluxEngine.icns
+	@for name in `otool -L fluxengine-gui$(EXT) | tr -d '\t' | grep -v '^/System/' | grep -v '^/usr/lib/' | grep -v ':$$' | awk '{print $$1}'`; do cp "$$name" $@/Contents/Resources; done
+
+$(OBJDIR)/fluxengine.icns: $(OBJDIR)/fluxengine.iconset
+	@echo ICONUTIL $@
+	@iconutil -c icns -o $@ $<
+
+$(OBJDIR)/fluxengine.iconset: extras/icon.png 
+	@echo ICONSET $@
+	@rm -rf $@
+	@mkdir -p $@
+	@sips -z 64 64 $< --out $@/icon_32x32@2x.png > /dev/null
+
+endif
+
 else
 
 $(warning wx-config missing, not building GUI)
