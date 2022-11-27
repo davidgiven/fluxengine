@@ -25,6 +25,16 @@ fluxengine read smaky6
 
 You should end up with a `smaky6.img` file.
 
+
+Filesystem access
+-----------------
+
+There is experimental read-only support for the Smaky 6 filesystem, allowing
+the directory to be listed and files read from disks. It's not known whether
+this is completely correct, so don't trust it! See the [Filesystem
+Access](filesystem.md) page for more information.
+
+
 Useful references
 -----------------
 

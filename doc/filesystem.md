@@ -23,6 +23,7 @@ The following file systems are supported so far.
 | FatFS (a.k.a. MS-DOS)                    |   Y   |   Y    | FAT12, FAT16, FAT32; not Atari (AFAIK!) |
 | Macintosh HFS                            |   Y   |   Y    | Only AppleDouble files may be written |
 | Apple ProDOS                             |   Y   |        |       |
+| Smaky 6                                  |   Y   |        |       |
 {: .datatable }
 
 Please not that Atari disks do _not_ use standard FatFS, and the library I'm
