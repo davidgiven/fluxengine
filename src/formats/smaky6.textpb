@@ -27,3 +27,7 @@ decoder {
 	smaky6 {}
 }
 
+filesystem {
+	type: SMAKY6
+}
+
