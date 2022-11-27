@@ -56,6 +56,9 @@ FluxEngine.app: fluxengine-gui$(EXT) $(OBJDIR)/fluxengine.icns
 	@mkdir -p $@/Contents/Resources
 	@cp $(OBJDIR)/fluxengine.icns $@/Contents/Resources/FluxEngine.icns
 	@for name in `otool -L fluxengine-gui$(EXT) | tr -d '\t' | grep -v '^/System/' | grep -v '^/usr/lib/' | grep -v ':$$' | awk '{print $$1}'`; do cp "$$name" $@/Contents/Resources; done
+	@cp /usr/local/opt/wxwidgets/README.md $@/Contents/Resources/wxWidgets.md
+	@cp /usr/local/opt/protobuf/LICENSE $@/Contents/Resources/protobuf.txt
+	@cp /usr/local/opt/fmt/LICENSE.rst $@/Contents/Resources/fmt.rst
 
 $(OBJDIR)/fluxengine.icns: $(OBJDIR)/fluxengine.iconset
 	@echo ICONUTIL $@
