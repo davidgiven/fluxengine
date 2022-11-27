@@ -2,6 +2,7 @@
 #define VFS_H
 
 #include "lib/bytes.h"
+#include <fmt/format.h>
 
 class Sector;
 class Image;
@@ -58,6 +59,11 @@ public:
 class BadPathException : public FilesystemException
 {
 public:
+    BadPathException(const Path& path):
+        FilesystemException(fmt::format("Bad path: '{}'", path.to_str()))
+    {
+    }
+
     BadPathException(): FilesystemException("Bad path") {}
 
     BadPathException(const std::string& msg): FilesystemException(msg) {}
@@ -241,6 +247,8 @@ public:
     static std::unique_ptr<Filesystem> createCbmfsFilesystem(
         const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
     static std::unique_ptr<Filesystem> createProdosFilesystem(
+        const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
+    static std::unique_ptr<Filesystem> createSmaky6Filesystem(
         const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
 
     static std::unique_ptr<Filesystem> createFilesystem(
