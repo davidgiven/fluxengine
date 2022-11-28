@@ -202,6 +202,23 @@ void FluxmapReader::seek(nanoseconds_t ns)
     _pos.zeroes = 0;
 }
 
+void FluxmapReader::seekToByte(unsigned b)
+{
+	if (b < _pos.bytes)
+    {
+        _pos.ticks = 0;
+        _pos.bytes = 0;
+    }
+
+    while (!eof() && (_pos.bytes < b))
+    {
+		int e;
+        unsigned t;
+        getNextEvent(e, t);
+    }
+    _pos.zeroes = 0;
+}
+
 nanoseconds_t FluxmapReader::seekToPattern(const FluxMatcher& pattern)
 {
     const FluxMatcher* unused;

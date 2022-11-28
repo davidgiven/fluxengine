@@ -100,6 +100,7 @@ public:
 
     /* Important! You can only reliably seek to 1 bits. */
     void seek(nanoseconds_t ns);
+	void seekToByte(unsigned byte);
 
     void seekToIndexMark();
     nanoseconds_t seekToPattern(const FluxMatcher& pattern);
