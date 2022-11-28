@@ -287,13 +287,47 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
                     dc.DrawRectangle(rect);
                     wxDCClipper clipper(dc, rect);
 
-                    if (_nanosecondsPerPixel > RENDER_LIMIT)
+                    if (_nanosecondsPerPixel > (RENDER_LIMIT / 4))
                     {
                         auto text =
                             fmt::format("+{:.3f}ms", record->startTime / 1e6);
                         auto size = dc.GetTextExtent(text);
                         dc.DrawText(
                             text, {rl + BORDER, t2y - size.GetHeight() / 2});
+                    }
+                    else
+                    {
+                        dc.SetPen(FOREGROUND_PEN);
+
+                        /* This is a bit dubious. We lie to the FluxMapReader
+                         * about the ticks and ns part of the seek position.
+                         * This makes the maths easier later, and also avoids
+                         * having to count all the way through the fluxmap
+                         * to read the start of the record. */
+
+                        FluxmapReader fmr(*trackdata->fluxmap);
+                        fmr.seek({record->position, 0, 0});
+
+                        FluxDecoder fd(&fmr, record->clock, DecoderProto());
+                        while ((int)fmr.tell().ns() <=
+                               (int)(record->endTime - record->startTime))
+                        {
+                            uint8_t b = toBytes(fd.readBits(8)).slice(0, 1)[0];
+
+                            int xx = fmr.tell().ns() / _nanosecondsPerPixel;
+                            if ((rl + xx) > (w + 50))
+                                break;
+                            if (((rl + xx) > 0) && (fmr.tell().ns() != 0))
+                            {
+                                auto text = fmt::format("{:02x}", b);
+                                auto size = dc.GetTextExtent(text);
+                                dc.DrawLine(
+                                    {rl + xx, t2y - ch2}, {rl + xx, t2y + ch2});
+                                dc.DrawText(text,
+                                    {rl + xx - size.GetWidth() - BORDER,
+                                        t2y - size.GetHeight() / 2});
+                            }
+                        }
                     }
 
                     if (_rightClicked && hovered)
@@ -342,7 +376,7 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
                             int xx = fmr.tell().ns() / _nanosecondsPerPixel;
                             if ((rl + xx) > (w + 50))
                                 break;
-                            if (((rl + xx) > 0) && (fmr.tell().ns() != 0))
+                            if ((rl + xx) > 0)
                             {
                                 auto size = dc.GetTextExtent(text);
                                 dc.DrawText(text,
