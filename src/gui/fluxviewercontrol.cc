@@ -4,6 +4,8 @@
 #include "textviewerwindow.h"
 #include "lib/flux.h"
 #include "lib/fluxmap.h"
+#include "lib/decoders/decoders.h"
+#include "lib/decoders/decoders.pb.h"
 #include "lib/sector.h"
 #include "lib/layout.h"
 #include "lib/decoders/fluxmapreader.h"
@@ -126,7 +128,8 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
     auto size = GetSize();
     int w = size.GetWidth();
     int h = size.GetHeight();
-    int th = h / 4;
+    constexpr int rows = 4;
+    int th = h / rows;
     int ch = th * 2 / 3;
     int ch2 = ch / 2;
     int t1y = th / 2;
@@ -265,29 +268,91 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
 
             /* Record blocks. */
 
-            dc.SetPen(FOREGROUND_PEN);
-            dc.SetBrush(RECORD_BRUSH);
             for (auto& record : trackdata->records)
             {
                 int rp = record->startTime / _nanosecondsPerPixel;
                 int rw = (record->endTime - record->startTime) /
                          _nanosecondsPerPixel;
+                int rl = x + rp;
+                int rr = rl + rw;
 
-                wxRect rect = {x + rp, t2y - ch2, rw, ch};
-                bool hovered = rect.Contains(_mouseX, _mouseY);
-                wxPen pen(FOREGROUND_COLOUR, hovered ? 2 : 1);
-                dc.SetPen(pen);
+                if ((rr >= 0) && (rl < w))
+                {
+                    wxRect rect = {rl, t2y - ch2, rw, ch};
+                    bool hovered = rect.Contains(_mouseX, _mouseY);
+                    wxPen pen(FOREGROUND_COLOUR, hovered ? 2 : 1);
+                    dc.SetPen(pen);
+                    dc.SetBrush(RECORD_BRUSH);
 
-                dc.DrawRectangle(rect);
-                wxDCClipper clipper(dc, rect);
+                    dc.DrawRectangle(rect);
+                    wxDCClipper clipper(dc, rect);
 
-                auto text = fmt::format("+{:.3f}ms", record->startTime / 1e6);
-                auto size = dc.GetTextExtent(text);
-                dc.DrawText(
-                    text, {x + rp + BORDER, t2y - size.GetHeight() / 2});
+                    if (_nanosecondsPerPixel > RENDER_LIMIT)
+                    {
+                        auto text =
+                            fmt::format("+{:.3f}ms", record->startTime / 1e6);
+                        auto size = dc.GetTextExtent(text);
+                        dc.DrawText(
+                            text, {rl + BORDER, t2y - size.GetHeight() / 2});
+                    }
 
-                if (_rightClicked && hovered)
-                    ShowRecordMenu(trackdata->trackInfo, record);
+                    if (_rightClicked && hovered)
+                        ShowRecordMenu(trackdata->trackInfo, record);
+                }
+            }
+
+            /* Raw flux bits. */
+
+            if (_nanosecondsPerPixel < (RENDER_LIMIT / 8))
+            {
+                for (auto& record : trackdata->records)
+                {
+                    int rp = record->startTime / _nanosecondsPerPixel;
+                    int rw = (record->endTime - record->startTime) /
+                             _nanosecondsPerPixel;
+                    int rl = x + rp;
+                    int rr = rl + rw;
+
+                    if ((rr >= 0) && (rl < w))
+                    {
+                        dc.SetPen(FOREGROUND_PEN);
+
+                        /* This is a bit dubious. We lie to the FluxMapReader
+                         * about the ticks and ns part of the seek position.
+                         * This makes the maths easier later, and also avoids
+                         * having to count all the way through the fluxmap
+                         * to read the start of the record. */
+
+                        FluxmapReader fmr(*trackdata->fluxmap);
+                        fmr.seek({record->position, 0, 0});
+
+                        FluxDecoder fd(&fmr, record->clock, DecoderProto());
+                        std::string text;
+                        while ((int)fmr.tell().ns() <=
+                               (int)(record->endTime - record->startTime))
+                        {
+                            bool b = fd.readBit();
+                            if (!b)
+                            {
+                                text += "0";
+                                continue;
+                            }
+                            text += "1";
+
+                            int xx = fmr.tell().ns() / _nanosecondsPerPixel;
+                            if ((rl + xx) > (w + 50))
+                                break;
+                            if (((rl + xx) > 0) && (fmr.tell().ns() != 0))
+                            {
+                                auto size = dc.GetTextExtent(text);
+                                dc.DrawText(text,
+                                    {rl + xx - size.GetWidth() - BORDER, t4y});
+                            }
+
+                            text = "";
+                        }
+                    }
+                }
             }
 
             /* Flux chart. */
