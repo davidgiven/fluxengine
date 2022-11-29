@@ -40,6 +40,9 @@ std::unique_ptr<FluxSource> FluxSource::create(const FluxSourceProto& config)
         case FluxSourceProto::FLUX:
             return createFl2FluxSource(config.fl2());
 
+        case FluxSourceProto::FLX:
+            return createFlxFluxSource(config.flx());
+
         default:
             Error() << "bad input disk configuration";
             return std::unique_ptr<FluxSource>();
@@ -92,6 +95,12 @@ void FluxSource::updateConfigForFilename(
                 {
                     proto->set_type(FluxSourceProto::DRIVE);
                     config.mutable_drive()->set_drive(std::stoi(s));
+                }},
+            {std::regex("^flx:(.*)$"),
+             [](auto& s, auto* proto)
+                {
+                    proto->set_type(FluxSourceProto::FLX);
+                    proto->mutable_flx()->set_directory(s);
                 }},
     };
 

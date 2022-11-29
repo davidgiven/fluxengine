@@ -14,6 +14,7 @@ class HardwareFluxSourceProto;
 class KryofluxFluxSourceProto;
 class ScpFluxSourceProto;
 class TestPatternFluxSourceProto;
+class FlxFluxSourceProto;
 
 class FluxSourceIterator
 {
@@ -33,6 +34,7 @@ private:
     static std::unique_ptr<FluxSource> createCwfFluxSource(const CwfFluxSourceProto& config);
     static std::unique_ptr<FluxSource> createEraseFluxSource(const EraseFluxSourceProto& config);
     static std::unique_ptr<FluxSource> createFl2FluxSource(const Fl2FluxSourceProto& config);
+    static std::unique_ptr<FluxSource> createFlxFluxSource(const FlxFluxSourceProto& config);
     static std::unique_ptr<FluxSource> createHardwareFluxSource(const HardwareFluxSourceProto& config);
     static std::unique_ptr<FluxSource> createKryofluxFluxSource(const KryofluxFluxSourceProto& config);
     static std::unique_ptr<FluxSource> createScpFluxSource(const ScpFluxSourceProto& config);
