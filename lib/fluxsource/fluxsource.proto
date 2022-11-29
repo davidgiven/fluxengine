@@ -30,7 +30,11 @@ message Fl2FluxSourceProto {
 		(help) = ".fl2 file to read flux from"];
 }
 
-// NEXT: 10
+message FlxFluxSourceProto {
+	optional string directory = 1 [(help) = "path to FLX stream directory"];
+}
+
+// NEXT: 11
 message FluxSourceProto {
 	enum FluxSourceType {
 		NOT_SET = 0;
@@ -41,6 +45,7 @@ message FluxSourceProto {
 		SCP = 5;
 		CWF = 6;
 		FLUX = 7;
+		FLX = 8;
 	}
 
 	optional FluxSourceType type = 9 [default = NOT_SET, (help) = "flux source type"];
@@ -52,5 +57,6 @@ message FluxSourceProto {
 	optional ScpFluxSourceProto scp = 6;
 	optional CwfFluxSourceProto cwf = 7;
 	optional Fl2FluxSourceProto fl2 = 8;
+	optional FlxFluxSourceProto flx = 10;
 }
 

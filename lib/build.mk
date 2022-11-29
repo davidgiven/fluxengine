@@ -22,6 +22,7 @@ LIBFLUXENGINE_SRCS = \
 	lib/fluxsource/erasefluxsource.cc \
 	lib/fluxsource/fl2fluxsource.cc \
 	lib/fluxsource/fluxsource.cc \
+	lib/fluxsource/flxfluxsource.cc \
 	lib/fluxsource/hardwarefluxsource.cc \
 	lib/fluxsource/kryoflux.cc \
 	lib/fluxsource/kryofluxfluxsource.cc \
