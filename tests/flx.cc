@@ -31,13 +31,13 @@ static void test_stream_reader()
     /* Simple one-byte intervals */
     test_convert(
         Bytes{ 0, 0x64, FLX_STOP },
-        Bytes{ 0xbc }
+        Bytes{ 0xb0 }
     );
 
     /* Index pulse */
     test_convert(
         Bytes{ 0, 0x64, FLX_INDEX, 0x64, FLX_STOP },
-        Bytes{ 0xfc, 0xbc }
+        Bytes{ 0xf0, 0xb0 }
     );
 
 }

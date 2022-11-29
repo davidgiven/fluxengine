@@ -1,7 +1,7 @@
 #ifndef FLX_H
 #define FLX_H
 
-#define FLX_TICK_NS 50 /* ns per tick */
+#define FLX_TICK_NS 40 /* ns per tick */
 
 /* Special FLX opcodes */
 
