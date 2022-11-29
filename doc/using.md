@@ -213,6 +213,11 @@ FluxEngine supports a number of ways to get or put flux. When using the `-s` or
 	Read from a Kryoflux stream, where `<path>` is the directory containing the
 	stream files. **Read only.**
   
+  - `flx:<directory>`
+
+    Read from a FLUXCOPY stream, where `<path>` is the directory containing the
+    stream files. **Read only.**
+
   - `erase:`
 
 	Read nothing --- writing this to a disk will magnetically erase a track.
