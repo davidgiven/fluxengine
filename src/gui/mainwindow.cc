@@ -1086,7 +1086,7 @@ public:
             UpdateState();
             ShowConfig();
 
-            _explorerFluxmap = nullptr;
+            _explorerFluxSource = nullptr;
             _explorerTrack = -1;
             _explorerSide = -1;
             _explorerUpdatePending = false;
@@ -1117,7 +1117,7 @@ public:
 
     void OnExplorerRefreshButton(wxCommandEvent& event) override
     {
-        _explorerFluxmap = nullptr;
+        _explorerFluxSource = nullptr;
         _explorerTrack = -1;
         _explorerSide = -1;
         _explorerUpdatePending = false;
@@ -1145,12 +1145,11 @@ private:
 
                 int desiredTrack = explorerTrackSpinCtrl->GetValue();
                 int desiredSide = explorerSideSpinCtrl->GetValue();
-                if (!_explorerFluxmap || (desiredTrack != _explorerTrack) ||
+                if (!_explorerFluxSource || (desiredTrack != _explorerTrack) ||
                     (desiredSide != _explorerSide))
                 {
-                    auto fluxSource = FluxSource::create(config.flux_source());
-                    _explorerFluxmap =
-                        fluxSource->readFlux(desiredTrack, desiredSide)->next();
+                    _explorerFluxSource =
+                        FluxSource::create(config.flux_source());
                     _explorerTrack = desiredTrack;
                     _explorerSide = desiredSide;
                 }
@@ -1161,33 +1160,46 @@ private:
                         _state = STATE_EXPLORING_IDLE;
                         UpdateState();
 
-                        FluxmapReader fmr(*_explorerFluxmap);
-                        fmr.seek(explorerStartTimeSpinCtrl->GetValue() * 1e6);
+                        std::stringstream s;
 
-                        FluxDecoder fluxDecoder(&fmr,
-                            explorerClockSpinCtrl->GetValue() * 1e3,
-                            DecoderProto());
-                        fluxDecoder.readBits(
-                            explorerBitOffsetSpinCtrl->GetValue());
-                        auto bits = fluxDecoder.readBits();
-
-                        Bytes bytes;
-                        switch (explorerDecodeChoice->GetSelection())
+                        auto iterator = _explorerFluxSource->readFlux(
+                            desiredTrack, desiredSide);
+                        while (iterator->hasNext())
                         {
-                            case 0:
-                                bytes = toBytes(bits);
-                                break;
+                            auto fluxmap = iterator->next();
+                            FluxmapReader fmr(*fluxmap);
+                            fmr.seek(
+                                explorerStartTimeSpinCtrl->GetValue() * 1e6);
 
-                            case 1:
-                                bytes = decodeFmMfm(bits.begin(), bits.end());
+                            FluxDecoder fluxDecoder(&fmr,
+                                explorerClockSpinCtrl->GetValue() * 1e3,
+                                DecoderProto());
+                            fluxDecoder.readBits(
+                                explorerBitOffsetSpinCtrl->GetValue());
+                            auto bits = fluxDecoder.readBits();
+
+                            Bytes bytes;
+                            switch (explorerDecodeChoice->GetSelection())
+                            {
+                                case 0:
+                                    bytes = toBytes(bits);
+                                    break;
+
+                                case 1:
+                                    bytes =
+                                        decodeFmMfm(bits.begin(), bits.end());
+                                    break;
+                            }
+
+                            if (explorerReverseCheckBox->GetValue())
+                                bytes = bytes.reverseBits();
+
+                            hexdump(s, bytes);
+                            s << '\n';
+
+                            if (_explorerFluxSource->isHardware())
                                 break;
                         }
-
-                        if (explorerReverseCheckBox->GetValue())
-                            bytes = bytes.reverseBits();
-
-                        std::stringstream s;
-                        hexdump(s, bytes);
 
                         explorerText->SetValue(s.str());
 
@@ -1709,7 +1721,7 @@ private:
     int _explorerTrack;
     int _explorerSide;
     bool _explorerUpdatePending;
-    std::unique_ptr<const Fluxmap> _explorerFluxmap;
+    std::unique_ptr<FluxSource> _explorerFluxSource;
 };
 
 wxWindow* FluxEngineApp::CreateMainWindow()
