@@ -52,13 +52,16 @@ FluxEngine.app: fluxengine-gui$(EXT) $(OBJDIR)/fluxengine.icns
 	@echo MAKEAPP $@
 	@rm -rf $@
 	@cp -a extras/FluxEngine.app.template $@
+	@touch $@
 	@cp fluxengine-gui$(EXT) $@/Contents/MacOS/fluxengine-gui
 	@mkdir -p $@/Contents/Resources
 	@cp $(OBJDIR)/fluxengine.icns $@/Contents/Resources/FluxEngine.icns
-	@for name in `otool -L fluxengine-gui$(EXT) | tr -d '\t' | grep -v '^/System/' | grep -v '^/usr/lib/' | grep -v ':$$' | awk '{print $$1}'`; do cp "$$name" $@/Contents/Resources; done
-	@cp /usr/local/opt/wxwidgets/README.md $@/Contents/Resources/wxWidgets.md
-	@cp /usr/local/opt/protobuf/LICENSE $@/Contents/Resources/protobuf.txt
-	@cp /usr/local/opt/fmt/LICENSE.rst $@/Contents/Resources/fmt.rst
+	@dylibbundler -of -x $@/Contents/MacOS/fluxengine-gui -b -d $@/Contents/libs -cd > /dev/null
+	@cp /usr/local/opt/wxwidgets/README.md $@/Contents/libs/wxWidgets.md
+	@cp /usr/local/opt/protobuf/LICENSE $@/Contents/libs/protobuf.txt
+	@cp /usr/local/opt/fmt/LICENSE.rst $@/Contents/libs/fmt.rst
+	@cp /usr/local/opt/libpng/LICENSE $@/Contents/libs/libpng.txt
+	@cp /usr/local/opt/libjpeg/README $@/Contents/libs/libjpeg.txt
 
 $(OBJDIR)/fluxengine.icns: $(OBJDIR)/fluxengine.iconset
 	@echo ICONUTIL $@
