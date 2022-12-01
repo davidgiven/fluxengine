@@ -55,7 +55,7 @@ FluxEngine.app: fluxengine-gui$(EXT) $(OBJDIR)/fluxengine.icns
 	@cp fluxengine-gui$(EXT) $@/Contents/MacOS/fluxengine-gui
 	@mkdir -p $@/Contents/Resources
 	@cp $(OBJDIR)/fluxengine.icns $@/Contents/Resources/FluxEngine.icns
-	@for name in `otool -L fluxengine-gui$(EXT) | tr -d '\t' | grep -v '^/System/' | grep -v '^/usr/lib/' | grep -v ':$$' | awk '{print $$1}'`; do cp "$$name" $@/Contents/Resources; done
+	@dylibbundler -of -x $@/Contents/MacOS/fluxengine-gui -b -d $@/Contents/libs -cd > /dev/null
 	@cp /usr/local/opt/wxwidgets/README.md $@/Contents/Resources/wxWidgets.md
 	@cp /usr/local/opt/protobuf/LICENSE $@/Contents/Resources/protobuf.txt
 	@cp /usr/local/opt/fmt/LICENSE.rst $@/Contents/Resources/fmt.rst
