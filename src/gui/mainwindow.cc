@@ -199,7 +199,7 @@ public:
         editor->Show();
     }
 
-    void OnExit(wxCommandEvent& event)
+    void OnExit(wxCommandEvent& event) override
     {
         if (wxGetApp().IsWorkerThreadRunning())
         {
@@ -214,7 +214,7 @@ public:
             Destroy();
     }
 
-    void OnClose(wxCloseEvent& event)
+    void OnClose(wxCloseEvent& event) override
     {
         event.Veto();
 
@@ -222,7 +222,7 @@ public:
         OnExit(e);
     }
 
-    void OnAboutMenuItem(wxCommandEvent& event)
+    void OnAboutMenuItem(wxCommandEvent& event) override
     {
         wxAboutDialogInfo aboutInfo;
         aboutInfo.SetName("FluxEngine");
@@ -233,7 +233,7 @@ public:
         wxAboutBox(aboutInfo);
     }
 
-    void OnConfigRadioButtonClicked(wxCommandEvent& event)
+    void OnConfigRadioButtonClicked(wxCommandEvent& event) override
     {
         auto configRadioButton = [&](wxRadioButton* button, wxPanel* panel)
         {
@@ -254,19 +254,19 @@ public:
         OnControlsChanged(event);
     }
 
-    void OnControlsChanged(wxCommandEvent& event)
+    void OnControlsChanged(wxCommandEvent& event) override
     {
         SaveConfig();
         UpdateState();
     }
 
-    void OnControlsChanged(wxFileDirPickerEvent& event)
+    void OnControlsChanged(wxFileDirPickerEvent& event) override
     {
         wxCommandEvent e;
         OnControlsChanged(e);
     }
 
-    void OnReadButton(wxCommandEvent&)
+    void OnReadButton(wxCommandEvent&) override
     {
         try
         {
@@ -312,7 +312,7 @@ public:
         }
     }
 
-    void OnWriteButton(wxCommandEvent&)
+    void OnWriteButton(wxCommandEvent&) override
     {
         try
         {
@@ -382,7 +382,7 @@ public:
         }
     }
 
-    void OnSaveImageButton(wxCommandEvent&)
+    void OnSaveImageButton(wxCommandEvent&) override
     {
         try
         {
@@ -420,7 +420,7 @@ public:
         }
     }
 
-    void OnSaveFluxButton(wxCommandEvent&)
+    void OnSaveFluxButton(wxCommandEvent&) override
     {
         try
         {
@@ -456,7 +456,7 @@ public:
         }
     }
 
-    void OnImagerGoAgainButton(wxCommandEvent& event)
+    void OnImagerGoAgainButton(wxCommandEvent& event) override
     {
         if (_state < STATE_READING__LAST)
             OnReadButton(event);
@@ -464,7 +464,7 @@ public:
             OnWriteButton(event);
     }
 
-    void OnBackButton(wxCommandEvent&)
+    void OnBackButton(wxCommandEvent&) override
     {
         _state = STATE_IDLE;
         UpdateState();
@@ -809,7 +809,7 @@ public:
             });
     }
 
-    void OnBrowserFilenameChanged(wxDataViewEvent& event)
+    void OnBrowserFilenameChanged(wxDataViewEvent& event) override
     {
         if (!(_filesystem->capabilities() & Filesystem::OP_MOVE))
             return;
@@ -846,7 +846,7 @@ public:
             });
     }
 
-    void OnBrowserRenameMenuItem(wxCommandEvent& event)
+    void OnBrowserRenameMenuItem(wxCommandEvent& event) override
     {
         auto item = browserTree->GetSelection();
         auto node = _filesystemModel->Find(item);
@@ -885,7 +885,7 @@ public:
             });
     }
 
-    void OnBrowserNewDirectoryMenuItem(wxCommandEvent& event)
+    void OnBrowserNewDirectoryMenuItem(wxCommandEvent& event) override
     {
         auto item = browserTree->GetSelection();
         auto node = GetTargetDirectoryNode(item);
