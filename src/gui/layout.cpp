@@ -408,14 +408,14 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	fgSizer10->Add( m_staticText22, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
 	explorerTrackSpinCtrl = new wxSpinCtrl( explorePanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 82, 0 );
-	fgSizer10->Add( explorerTrackSpinCtrl, 0, wxALL, 5 );
+	fgSizer10->Add( explorerTrackSpinCtrl, 0, wxALL|wxEXPAND, 5 );
 
 	m_staticText26 = new wxStaticText( explorePanel, wxID_ANY, wxT("Side"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText26->Wrap( -1 );
 	fgSizer10->Add( m_staticText26, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
 	explorerSideSpinCtrl = new wxSpinCtrl( explorePanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 1, 0 );
-	fgSizer10->Add( explorerSideSpinCtrl, 0, wxALL, 5 );
+	fgSizer10->Add( explorerSideSpinCtrl, 0, wxALL|wxEXPAND, 5 );
 
 	m_staticText231 = new wxStaticText( explorePanel, wxID_ANY, wxT("Start time (ms)"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText231->Wrap( -1 );
@@ -423,7 +423,7 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 
 	explorerStartTimeSpinCtrl = new wxSpinCtrlDouble( explorePanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 99999, 0.000000, 1 );
 	explorerStartTimeSpinCtrl->SetDigits( 3 );
-	fgSizer10->Add( explorerStartTimeSpinCtrl, 0, wxALL, 5 );
+	fgSizer10->Add( explorerStartTimeSpinCtrl, 0, wxALL|wxEXPAND, 5 );
 
 	m_staticText24 = new wxStaticText( explorePanel, wxID_ANY, wxT("Clock (us)"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText24->Wrap( -1 );
@@ -431,14 +431,14 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 
 	explorerClockSpinCtrl = new wxSpinCtrlDouble( explorePanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 100, 4, 1 );
 	explorerClockSpinCtrl->SetDigits( 1 );
-	fgSizer10->Add( explorerClockSpinCtrl, 0, wxALL, 5 );
+	fgSizer10->Add( explorerClockSpinCtrl, 0, wxALL|wxEXPAND, 5 );
 
 	m_staticText25 = new wxStaticText( explorePanel, wxID_ANY, wxT("Raw bit offset"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText25->Wrap( -1 );
 	fgSizer10->Add( m_staticText25, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
 	explorerBitOffsetSpinCtrl = new wxSpinCtrl( explorePanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 99999999, 0 );
-	fgSizer10->Add( explorerBitOffsetSpinCtrl, 0, wxALL, 5 );
+	fgSizer10->Add( explorerBitOffsetSpinCtrl, 0, wxALL|wxEXPAND, 5 );
 
 	m_staticText27 = new wxStaticText( explorePanel, wxID_ANY, wxT("Decode as"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText27->Wrap( -1 );
@@ -460,7 +460,7 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 
 	fgSizer12->Add( fgSizer10, 1, wxEXPAND, 5 );
 
-	explorerText = new wxTextCtrl( explorePanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_PROCESS_TAB|wxTE_READONLY );
+	explorerText = new wxTextCtrl( explorePanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxHSCROLL|wxTE_DONTWRAP|wxTE_MULTILINE|wxTE_READONLY );
 	explorerText->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
 
 	fgSizer12->Add( explorerText, 0, wxALL|wxEXPAND, 5 );
