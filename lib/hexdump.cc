@@ -23,7 +23,10 @@ void hexdump(std::ostream& stream, const Bytes& buffer)
 				break;
 
 			uint8_t c = buffer[pos+i];
-			stream << (isprint(c) ? (char)c : '.');
+			if ((c >= 32) && (c <= 126))
+				stream << (char)c;
+			else
+				stream << '.';
 		}
 		stream << std::endl;
 
