@@ -18,7 +18,7 @@ layout {
 		physical {
 			start_sector: 0
 			count: 12
-			skew: 5
+			#skew: 5
 		}
 	}
 }
@@ -32,7 +32,7 @@ decoder {
 }
 
 drive {
-	head_bias: 1
+	head_bias: 3
 }
 
 filesystem {
