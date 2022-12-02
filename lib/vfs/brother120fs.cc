@@ -31,7 +31,18 @@ public:
     {
         ByteReader br(bytes);
         filename = br.read(8);
-        filename = filename.substr(0, filename.find(' '));
+
+        for (int i = 0; filename.size(); i++)
+        {
+            if (filename[i] == ' ')
+            {
+                filename = filename.substr(0, i);
+                break;
+            }
+            if ((filename[i] < 32) || (filename[i] > 126))
+                throw BadFilesystemException();
+        }
+
         path = {filename};
 
         brotherType = br.read_8();
@@ -91,7 +102,7 @@ public:
             for (int d = 0; d < SECTOR_SIZE / 16; d++)
             {
                 Bytes buffer = bytes.slice(d * 16, 16);
-                if (buffer[0] == 0xf0)
+                if (buffer[0] & 0x80)
                     continue;
 
                 auto de = std::make_shared<Brother120Dirent>(buffer);
