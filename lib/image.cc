@@ -31,7 +31,7 @@ void Image::createBlankImage()
         unsigned side = trackAndHead.second;
         auto trackLayout = Layout::getLayoutOfTrack(track, side);
         Bytes blank(trackLayout->sectorSize);
-        for (unsigned sectorId : trackLayout->logicalSectorOrder)
+        for (unsigned sectorId : trackLayout->naturalSectorOrder)
             put(track, side, sectorId)->data = blank;
     }
 }

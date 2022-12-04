@@ -37,7 +37,7 @@ public:
             int side = p.second;
 
             auto trackLayout = Layout::getLayoutOfTrack(track, side);
-            for (int sectorId : trackLayout->logicalSectorOrder)
+            for (int sectorId : trackLayout->naturalSectorOrder)
             {
                 const auto& sector = image.get(track, side, sectorId);
                 if (sector)
