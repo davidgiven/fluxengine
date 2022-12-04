@@ -27,10 +27,14 @@ public:
      */
     static std::vector<std::shared_ptr<const TrackInfo>> computeLocations();
 
-	/* Given a list of locations, determines the minimum and maximum track
-	 * and side settings. */
-	static void getBounds(const std::vector<std::shared_ptr<const TrackInfo>>& locations,
-		int& minTrack, int& maxTrack, int& minSide, int& maxSide);
+    /* Given a list of locations, determines the minimum and maximum track
+     * and side settings. */
+    static void getBounds(
+        const std::vector<std::shared_ptr<const TrackInfo>>& locations,
+        int& minTrack,
+        int& maxTrack,
+        int& minSide,
+        int& maxSide);
 
     /* Returns a series of <track, side> pairs representing the filesystem
      * ordering of the disk, in logical numbers. */
@@ -50,9 +54,10 @@ public:
         const SectorListProto& sectorsProto);
 };
 
-class TrackInfo {
+class TrackInfo
+{
 public:
-	TrackInfo() {}
+    TrackInfo() {}
 
 private:
     /* Can't copy. */
@@ -85,20 +90,23 @@ public:
     /* Number of bytes in a sector. */
     unsigned sectorSize = 0;
 
-    /* Sector IDs in disk order. */
+    /* Sector IDs in sector ID order. This is the order in which the appear in
+     * disk images. */
+    std::vector<unsigned> naturalSectorOrder;
+
+    /* Sector IDs in disk order. This is the order they are written to the disk.
+     */
     std::vector<unsigned> diskSectorOrder;
 
-    /* Sector IDs in logical order. */
-    std::vector<unsigned> logicalSectorOrder;
-
-    /* Sector IDs in filesystem order. */
+    /* Sector IDs in filesystem order. This is the order in which the filesystem
+     * uses them. */
     std::vector<unsigned> filesystemSectorOrder;
 
-    /* Mapping of filesystem order to logical order. */
-    std::map<unsigned, unsigned> filesystemToLogicalSectorMap;
+    /* Mapping of filesystem order to natural order. */
+    std::map<unsigned, unsigned> filesystemToNaturalSectorMap;
 
-    /* Mapping of logical order to filesystem order. */
-    std::map<unsigned, unsigned> logicalToFilesystemSectorMap;
+    /* Mapping of natural order to filesystem order. */
+    std::map<unsigned, unsigned> naturalToFilesystemSectorMap;
 };
 
 #endif

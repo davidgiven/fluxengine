@@ -167,10 +167,10 @@ std::shared_ptr<const TrackInfo> Layout::getLayoutOfTrack(
     trackInfo->physicalSide = logicalSide ^ config.layout().swap_sides();
     trackInfo->groupSize = getTrackStep();
     trackInfo->diskSectorOrder = expandSectorList(layoutdata.physical());
-    trackInfo->logicalSectorOrder = trackInfo->diskSectorOrder;
+    trackInfo->naturalSectorOrder = trackInfo->diskSectorOrder;
     std::sort(
-        trackInfo->diskSectorOrder.begin(), trackInfo->diskSectorOrder.end());
-    trackInfo->numSectors = trackInfo->logicalSectorOrder.size();
+        trackInfo->naturalSectorOrder.begin(), trackInfo->naturalSectorOrder.end());
+    trackInfo->numSectors = trackInfo->naturalSectorOrder.size();
 
     if (layoutdata.has_filesystem())
     {
@@ -182,17 +182,14 @@ std::shared_ptr<const TrackInfo> Layout::getLayoutOfTrack(
                 "number of sectors";
     }
     else
-    {
-        for (unsigned sectorId : trackInfo->logicalSectorOrder)
-            trackInfo->filesystemSectorOrder.push_back(sectorId);
-    }
+		trackInfo->filesystemSectorOrder = trackInfo->naturalSectorOrder;
 
     for (int i = 0; i < trackInfo->numSectors; i++)
     {
-        unsigned f = trackInfo->logicalSectorOrder[i];
-        unsigned l = trackInfo->filesystemSectorOrder[i];
-        trackInfo->filesystemToLogicalSectorMap[f] = l;
-        trackInfo->logicalToFilesystemSectorMap[l] = f;
+        unsigned fid = trackInfo->naturalSectorOrder[i];
+        unsigned lid = trackInfo->filesystemSectorOrder[i];
+        trackInfo->filesystemToNaturalSectorMap[fid] = lid;
+        trackInfo->naturalToFilesystemSectorMap[lid] = fid;
     }
 
     return trackInfo;

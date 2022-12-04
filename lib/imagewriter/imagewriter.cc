@@ -218,7 +218,7 @@ void ImageWriter::writeMappedImage(const Image& image)
             auto newSector = std::make_shared<Sector>();
             *newSector = *e;
             newSector->logicalSector =
-                trackLayout->logicalToFilesystemSectorMap.at(e->logicalSector);
+                trackLayout->naturalToFilesystemSectorMap.at(e->logicalSector);
             sectors.insert(newSector);
         }
 

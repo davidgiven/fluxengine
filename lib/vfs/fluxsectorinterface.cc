@@ -72,7 +72,7 @@ public:
             if (!imageContainsAllSectorsOf(_changedSectors,
                     track,
                     side,
-                    trackLayout->logicalSectorOrder))
+                    trackLayout->naturalSectorOrder))
             {
                 /* If we don't have any loaded sectors for this track, pre-read
                  * it. */
@@ -83,7 +83,7 @@ public:
                 /* Now merge the loaded track with the changed one, and write
                  * the result back. */
 
-                for (unsigned sectorId : trackLayout->logicalSectorOrder)
+                for (unsigned sectorId : trackLayout->naturalSectorOrder)
                 {
                     if (!_changedSectors.contains(track, side, sectorId))
                         _changedSectors.put(track, side, sectorId)->data =

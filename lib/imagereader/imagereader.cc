@@ -112,7 +112,7 @@ std::unique_ptr<Image> ImageReader::readMappedImage()
         auto newSector = std::make_shared<Sector>();
         *newSector = *e;
         newSector->logicalSector =
-            trackLayout->filesystemToLogicalSectorMap.at(e->logicalSector);
+            trackLayout->filesystemToNaturalSectorMap.at(e->logicalSector);
         sectors.insert(newSector);
     }
 

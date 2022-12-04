@@ -168,7 +168,7 @@ BadSectorsState combineRecordAndSectors(TrackFlux& trackFlux,
 
     /* Add the sectors which should be there. */
 
-    for (unsigned sectorId : trackLayout->logicalSectorOrder)
+    for (unsigned sectorId : trackLayout->naturalSectorOrder)
     {
         auto sector = std::make_shared<Sector>(LogicalLocation{
             trackLayout->logicalTrack, trackLayout->logicalSide, sectorId});
