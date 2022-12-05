@@ -117,9 +117,34 @@ static void test_both_sectors()
         Equals(std::vector<unsigned>{0, 2, 1, 3}));
 }
 
+static void test_skew()
+{
+    load_config(R"M(
+		layout {
+			tracks: 78
+			sides: 2
+			layoutdata {
+				sector_size: 256
+				physical {
+					start_sector: 0
+					count: 12
+					skew: 6
+				}
+			}
+		}
+	)M");
+
+    auto layout = Layout::getLayoutOfTrack(0, 0);
+    AssertThat(layout->naturalSectorOrder,
+        Equals(std::vector<unsigned>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}));
+    AssertThat(layout->diskSectorOrder,
+        Equals(std::vector<unsigned>{0, 6, 1, 7, 2, 8, 3, 9, 4, 10, 5, 11}));
+}
+
 int main(int argc, const char* argv[])
 {
     test_physical_sectors();
     test_logical_sectors();
     test_both_sectors();
+    test_skew();
 }

@@ -17,6 +17,7 @@ layout {
 		sector_size: 512
 		physical {
 			start_sector: 0
+			skew: 6
 		}
 	}
 	layoutdata {
