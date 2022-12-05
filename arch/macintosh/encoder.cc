@@ -16,14 +16,14 @@ static bool lastBit;
 static double clockRateUsForTrack(unsigned track)
 {
     if (track < 16)
-        return 2.623;
+        return 2.63;
     if (track < 32)
-        return 2.861;
+        return 2.89;
     if (track < 48)
-        return 3.148;
+        return 3.20;
     if (track < 64)
-        return 3.497;
-    return 3.934;
+        return 3.57;
+    return 3.98;
 }
 
 static unsigned sectorsForTrack(unsigned track)

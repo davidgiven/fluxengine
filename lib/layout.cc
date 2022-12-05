@@ -58,19 +58,23 @@ std::vector<std::shared_ptr<const TrackInfo>> Layout::computeLocations()
     return locations;
 }
 
-void Layout::getBounds(const std::vector<std::shared_ptr<const TrackInfo>>& locations,
-		int& minTrack, int& maxTrack, int& minSide, int& maxSide)
+void Layout::getBounds(
+    const std::vector<std::shared_ptr<const TrackInfo>>& locations,
+    int& minTrack,
+    int& maxTrack,
+    int& minSide,
+    int& maxSide)
 {
-	minTrack = minSide = INT_MAX;
-	maxTrack = maxSide = INT_MIN;
+    minTrack = minSide = INT_MAX;
+    maxTrack = maxSide = INT_MIN;
 
-	for (auto& ti : locations)
-	{
-		minTrack = std::min<int>(minTrack, ti->physicalTrack);
-		maxTrack = std::max<int>(maxTrack, ti->physicalTrack);
-		minSide = std::min<int>(minSide, ti->physicalSide);
-		maxSide = std::max<int>(maxSide, ti->physicalSide);
-	}
+    for (auto& ti : locations)
+    {
+        minTrack = std::min<int>(minTrack, ti->physicalTrack);
+        maxTrack = std::max<int>(maxTrack, ti->physicalTrack);
+        minSide = std::min<int>(minSide, ti->physicalSide);
+        maxSide = std::max<int>(maxSide, ti->physicalSide);
+    }
 }
 
 std::vector<std::pair<int, int>> Layout::getTrackOrdering(
@@ -121,10 +125,24 @@ std::vector<unsigned> Layout::expandSectorList(
             Error() << "LAYOUT: if you use a sector count, you can't use an "
                        "explicit sector list";
 
+        std::set<unsigned> sectorset;
+        int id = sectorsProto.start_sector();
         for (int i = 0; i < sectorsProto.count(); i++)
-            sectors.push_back(
-                sectorsProto.start_sector() +
-                ((i * sectorsProto.skew()) % sectorsProto.count()));
+        {
+            while (sectorset.find(id) != sectorset.end())
+            {
+                id++;
+                if (id >= (sectorsProto.start_sector() + sectorsProto.count()))
+                    id -= sectorsProto.count();
+            }
+
+            sectorset.insert(id);
+            sectors.push_back(id);
+
+            id += sectorsProto.skew();
+            if (id >= (sectorsProto.start_sector() + sectorsProto.count()))
+                id -= sectorsProto.count();
+        }
     }
     else if (sectorsProto.sector_size() > 0)
     {
@@ -146,8 +164,7 @@ std::shared_ptr<const TrackInfo> Layout::getLayoutOfTrack(
     for (const auto& f : config.layout().layoutdata())
     {
         if (f.has_track() && f.has_up_to_track() &&
-            ((logicalTrack < f.track()) ||
-             (logicalTrack > f.up_to_track())))
+            ((logicalTrack < f.track()) || (logicalTrack > f.up_to_track())))
             continue;
         if (f.has_track() && !f.has_up_to_track() &&
             (logicalTrack != f.track()))
@@ -168,8 +185,8 @@ std::shared_ptr<const TrackInfo> Layout::getLayoutOfTrack(
     trackInfo->groupSize = getTrackStep();
     trackInfo->diskSectorOrder = expandSectorList(layoutdata.physical());
     trackInfo->naturalSectorOrder = trackInfo->diskSectorOrder;
-    std::sort(
-        trackInfo->naturalSectorOrder.begin(), trackInfo->naturalSectorOrder.end());
+    std::sort(trackInfo->naturalSectorOrder.begin(),
+        trackInfo->naturalSectorOrder.end());
     trackInfo->numSectors = trackInfo->naturalSectorOrder.size();
 
     if (layoutdata.has_filesystem())
@@ -177,12 +194,11 @@ std::shared_ptr<const TrackInfo> Layout::getLayoutOfTrack(
         trackInfo->filesystemSectorOrder =
             expandSectorList(layoutdata.filesystem());
         if (trackInfo->filesystemSectorOrder.size() != trackInfo->numSectors)
-            Error()
-                << "filesystem sector order list doesn't contain the right "
-                "number of sectors";
+            Error() << "filesystem sector order list doesn't contain the right "
+                       "number of sectors";
     }
     else
-		trackInfo->filesystemSectorOrder = trackInfo->naturalSectorOrder;
+        trackInfo->filesystemSectorOrder = trackInfo->naturalSectorOrder;
 
     for (int i = 0; i < trackInfo->numSectors; i++)
     {
