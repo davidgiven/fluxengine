@@ -65,6 +65,8 @@ FORMATS = \
 	shugart_drive \
 	smaky6 \
 	tids990 \
+	trs80_88 \
+	trs80_175 \
 	victor9k_ds \
 	victor9k_ss \
 	zilogmcz \

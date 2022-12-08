@@ -1,0 +1,71 @@
+comment: 'TRS-80 175kB 5.25" 35-track 10-sector SSDD'
+
+image_reader {
+	filename: "trs80-175.img"
+	img {}
+}
+
+image_writer {
+	filename: "trs80-175.img"
+	img {}
+}
+
+layout {
+	tracks: 35
+	sides: 1
+	layoutdata {
+		sector_size: 512
+		physical {
+			start_sector: 0
+			count: 10
+		}
+	}
+}
+
+encoder {
+	ibm {
+		trackdata {
+			target_rotational_period_ms: 167
+			target_clock_period_us: 3.333
+			emit_iam: false
+			gap0: 80
+			gap2: 22
+			gap3: 34
+		}
+		trackdata {
+			track: 17
+			dam_byte: 0xf56e
+		}
+	}
+}
+
+decoder {
+	ibm {}
+}
+
+tpi: 48
+
+option {
+	name: "35"
+	comment: "35-track variant (default)"
+	message: "using 35-track variant"
+	
+	config {
+		layout {
+			tracks: 35
+		}
+	}
+}
+	
+option {
+	name: "40"
+	comment: "40-track variant"
+	message: "using 40-track variant"
+	
+	config {
+		layout {
+			tracks: 40
+		}
+	}
+}
+
