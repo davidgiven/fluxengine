@@ -21,6 +21,18 @@ decoder {
 	ibm {}
 }
 
+filesystem {
+	type: CPMFS
+	cpmfs {
+		filesystem_start {
+			side: 0
+			track: 1
+		}
+		block_size: 2048
+		dir_entries: 128
+	}
+}
+
 tpi: 96
 
 
