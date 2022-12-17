@@ -1,0 +1,27 @@
+comment: 'Tiki 100 90kB 40-track 18-sector SSSD (ro)'
+
+image_writer {
+	filename: "tiki90.img"
+	type: IMG
+}
+
+layout {
+	tracks: 40
+	sides: 1
+	layoutdata {
+		side: 0
+		sector_size: 128
+		physical {
+			start_sector: 1
+			count: 18
+		}
+	}
+}
+
+decoder {
+	ibm {}
+}
+
+tpi: 48
+
+

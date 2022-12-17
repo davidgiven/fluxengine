@@ -1,0 +1,26 @@
+comment: 'Tiki 100 800kB 80-track 10-sector DSSD (ro)'
+
+image_writer {
+	filename: "tiki900.img"
+	type: IMG
+}
+
+layout {
+	tracks: 80
+	sides: 2
+	layoutdata {
+		sector_size: 512
+		physical {
+			start_sector: 1
+			count: 10
+		}
+	}
+}
+
+decoder {
+	ibm {}
+}
+
+tpi: 96
+
+
