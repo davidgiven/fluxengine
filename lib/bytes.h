@@ -64,6 +64,9 @@ public:
 	std::vector<bool> toBits() const;
 	Bytes reverseBits() const;
 
+	Bytes operator + (const Bytes& other);
+	Bytes operator * (size_t count);
+
     ByteReader reader() const;
     ByteWriter writer();
 

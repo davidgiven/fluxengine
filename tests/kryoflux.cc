@@ -5,24 +5,6 @@
 #include "fluxmap.h"
 #include "fluxsource/kryoflux.h"
 
-static Bytes operator + (const Bytes& left, const Bytes& right)
-{
-    Bytes output;
-    ByteWriter bw(output);
-    bw += left;
-    bw += right;
-    return output;
-}
-
-static Bytes operator * (const Bytes& left, size_t count)
-{
-    Bytes output;
-    ByteWriter bw(output);
-    while (count--)
-        bw += left;
-    return output;
-}
-
 static void test_convert(const Bytes& kryofluxbytes, const Bytes& fluxmapbytes)
 {
     std::unique_ptr<Fluxmap> fluxmap = readStream(kryofluxbytes);

@@ -5,24 +5,6 @@
 #include "fluxmap.h"
 #include "lib/usb/greaseweazle.h"
 
-static Bytes operator + (const Bytes& left, const Bytes& right)
-{
-    Bytes output;
-    ByteWriter bw(output);
-    bw += left;
-    bw += right;
-    return output;
-}
-
-static Bytes operator * (const Bytes& left, size_t count)
-{
-    Bytes output;
-    ByteWriter bw(output);
-    while (count--)
-        bw += left;
-    return output;
-}
-
 #define E28(val) \
 	(1 | ((val)<<1) & 0xff), \
 	(1 | ((val)>>6) & 0xff), \
