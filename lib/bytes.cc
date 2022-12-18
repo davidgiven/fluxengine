@@ -215,6 +215,24 @@ Bytes Bytes::reverseBits() const
     return output;
 }
 
+Bytes Bytes::operator + (const Bytes& other)
+{
+    Bytes output;
+    ByteWriter bw(output);
+    bw += *this;
+    bw += other;
+    return output;
+}
+
+Bytes Bytes::operator * (size_t count)
+{
+    Bytes output;
+    ByteWriter bw(output);
+    while (count--)
+        bw += *this;
+    return output;
+}
+
 uint8_t toByte(
     std::vector<bool>::const_iterator start,
     std::vector<bool>::const_iterator end)

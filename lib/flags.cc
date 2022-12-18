@@ -244,7 +244,6 @@ ConfigProto FlagGroup::parseSingleConfigFile(const std::string& filename,
         ss << f.rdbuf();
 
         ConfigProto config;
-        std::cout << ss.str() << '\n';
         if (!google::protobuf::TextFormat::MergeFromString(ss.str(), &config))
             Error() << "couldn't load external config proto";
         return config;

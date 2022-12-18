@@ -188,7 +188,6 @@ public:
             /* Find a directory entry for this logical extent. */
 
             std::unique_ptr<Entry> entry;
-            bool moreExtents = false;
             for (int d = 0; d < _config.dir_entries(); d++)
             {
                 entry = getEntry(d);
@@ -196,9 +195,10 @@ public:
                     continue;
                 if (path[0] != entry->filename)
                     continue;
-                if (entry->extent > logicalExtent)
-                    moreExtents = true;
-                if (entry->extent == logicalExtent)
+                if (entry->extent < logicalExtent)
+                    continue;
+                if ((entry->extent & ~_logicalExtentMask) ==
+                    (logicalExtent & ~_logicalExtentMask))
                     break;
             }
 
@@ -212,10 +212,10 @@ public:
             /* Copy the data out. */
 
             int i =
-                (entry->extent & ~_logicalExtentMask) * _blocksPerLogicalExtent;
+                (logicalExtent & _logicalExtentMask) * _blocksPerLogicalExtent;
             unsigned records =
                 (entry->extent == logicalExtent) ? entry->records : 128;
-            while ((records != 0) && (i != entry->allocation_map.size()))
+            while (records != 0)
             {
                 Bytes block;
                 unsigned blockid = entry->allocation_map[i];
@@ -265,7 +265,7 @@ private:
             physicalExtentSize = _config.block_size() * 8;
         }
         _logicalExtentsPerEntry = physicalExtentSize / 16384;
-        _logicalExtentMask = (1 << _logicalExtentsPerEntry) - 1;
+        _logicalExtentMask = _logicalExtentsPerEntry - 1;
         _blocksPerLogicalExtent = 16384 / _config.block_size();
 
         _directory = getCpmBlock(0, _dirBlocks);
