@@ -2,6 +2,7 @@
 #include "fluxmap.h"
 #include "decoders/decoders.h"
 #include "encoders/encoders.h"
+#include "arch/agat/agat.h"
 #include "arch/amiga/amiga.h"
 #include "arch/apple2/apple2.h"
 #include "arch/brother/brother.h"
@@ -25,6 +26,7 @@ std::unique_ptr<Encoder> Encoder::create(
         std::function<std::unique_ptr<Encoder>(const EncoderProto&)>>
         encoders = {
             {EncoderProto::kAmiga,      createAmigaEncoder      },
+            {EncoderProto::kAgat,       createAgatEncoder      },
             {EncoderProto::kApple2,     createApple2Encoder     },
             {EncoderProto::kBrother,    createBrotherEncoder    },
             {EncoderProto::kC64,        createCommodore64Encoder},

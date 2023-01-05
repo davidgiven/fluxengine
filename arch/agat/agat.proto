@@ -2,4 +2,5 @@ syntax = "proto2";
 
 message AgatDecoderProto {}
 
+message AgatEncoderProto {}
 
