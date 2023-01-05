@@ -3,6 +3,9 @@
 
 #define AGAT_SECTOR_SIZE 256
 
+static constexpr uint64_t SECTOR_ID = 0x8924555549111444;
+static constexpr uint64_t DATA_ID = 0x8924555514444911;
+
 class Encoder;
 class EncoderProto;
 class Decoder;
