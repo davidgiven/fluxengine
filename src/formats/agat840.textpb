@@ -20,3 +20,8 @@ layout {
 decoder {
 	agat {}
 }
+
+encoder {
+	agat {}
+}
+

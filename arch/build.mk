@@ -2,6 +2,7 @@ LIBARCH_SRCS = \
 	arch/aeslanier/decoder.cc \
 	arch/agat/agat.cc \
 	arch/agat/decoder.cc \
+	arch/agat/encoder.cc \
 	arch/amiga/amiga.cc \
 	arch/amiga/decoder.cc \
 	arch/amiga/encoder.cc \
