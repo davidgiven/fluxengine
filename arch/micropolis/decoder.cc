@@ -59,6 +59,70 @@ uint8_t mzosChecksum(const Bytes& bytes)
     return checksum;
 }
 
+static uint8_t b(uint32_t field, uint8_t pos)
+{
+    return (field >> pos) & 1;
+}
+
+static uint8_t eccNextBit(uint32_t ecc, uint8_t data_bit)
+{
+    // This is 0x81932080 which is 0x0104C981 with reversed bits
+    return b(ecc, 7) ^ b(ecc, 13) ^ b(ecc, 16) ^ b(ecc, 17) ^ b(ecc, 20)
+            ^ b(ecc, 23) ^ b(ecc, 24) ^ b(ecc, 31) ^ data_bit;
+}
+
+uint32_t vectorGraphicEcc(const Bytes& bytes)
+{
+    uint32_t e = 0;
+    Bytes payloadBytes = bytes.slice(0, bytes.size()-4);
+    ByteReader payload(payloadBytes);
+    while (!payload.eof()) {
+        uint8_t byte = payload.read_8();
+        for (int i = 0; i < 8; i++) {
+            e = (e << 1) | eccNextBit(e, byte >> 7);
+            byte <<= 1;
+        }
+    }
+    Bytes trailerBytes = bytes.slice(bytes.size()-4);
+    ByteReader trailer(trailerBytes);
+    uint32_t res = e;
+    while (!trailer.eof()) {
+        uint8_t byte = trailer.read_8();
+        for (int i = 0; i < 8; i++) {
+            res = (res << 1) | eccNextBit(e, byte >> 7);
+            e <<= 1;
+            byte <<= 1;
+        }
+    }
+    return res;
+}
+
+/* Fixes bytes when possible, returning true if changed. */
+static bool vectorGraphicEccFix(Bytes& bytes, uint32_t syndrome)
+{
+    uint32_t ecc = syndrome;
+    int pos = (MICROPOLIS_ENCODED_SECTOR_SIZE-5)*8+7;
+    bool aligned = false;
+    while ((ecc & 0xff000000) == 0) {
+        pos += 8;
+        ecc <<= 8;
+    }
+    for (; pos >= 0; pos--) {
+        bool bit = ecc & 1;
+        ecc >>= 1;
+        if (bit)
+            ecc ^= 0x808264c0;
+        if ((ecc & 0xff07ffff) == 0)
+            aligned = true;
+        if (aligned && pos % 8 == 0)
+            break;
+    }
+    if (pos < 0)
+        return false;
+    bytes[pos/8] ^= ecc >> 16;
+    return true;
+}
+
 class MicropolisDecoder : public Decoder
 {
 public:
@@ -132,6 +196,17 @@ public:
         auto rawbits = readRawBits(MICROPOLIS_ENCODED_SECTOR_SIZE * 16);
         auto bytes =
             decodeFmMfm(rawbits).slice(0, MICROPOLIS_ENCODED_SECTOR_SIZE);
+
+        bool eccPresent = bytes[274] == 0xaa;
+        uint32_t ecc = 0;
+        if (_config.ecc_type() == MicropolisDecoderProto::VECTOR && eccPresent) {
+            ecc = vectorGraphicEcc(bytes.slice(0, 274));
+            if (ecc != 0) {
+                vectorGraphicEccFix(bytes, ecc);
+                ecc = vectorGraphicEcc(bytes.slice(0, 274));
+            }
+        }
+
         ByteReader br(bytes);
 
         int syncByte = br.read_8(); /* sync */
@@ -193,8 +268,10 @@ public:
             _sector->data = bytes;
         else
             error("Sector output size may only be 256 or 275");
-        _sector->status =
-            (wantChecksum == gotChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
+        if (wantChecksum == gotChecksum && (!eccPresent || ecc == 0))
+            _sector->status = Sector::OK;
+        else
+            _sector->status = Sector::BAD_CHECKSUM;
     }
 
 private:
