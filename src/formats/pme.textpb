@@ -18,6 +18,7 @@ image_writer {
 layout {
 	tracks: 80
 	sides: 2
+	order: HCS
 	swap_sides: true
 	layoutdata {
 		sector_size: 1024
@@ -46,3 +47,8 @@ encoder {
 decoder {
 	ibm {}
 }
+
+filesystem {
+	type: PHILE
+}
+	
