@@ -122,9 +122,16 @@ bool FluxEngineApp::IsWorkerThreadRunning() const
 
 void FluxEngineApp::OnExec(const ExecEvent& event)
 {
-    event.RunCallback();
-    if (event.IsSynchronous())
-        execSemaphore.Post();
+    try
+    {
+        event.RunCallback();
+        if (event.IsSynchronous())
+            execSemaphore.Post();
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << "Unhandled exception: " << e.what() << "\n";
+    }
 }
 
 void runOnUiThread(std::function<void()> callback)
