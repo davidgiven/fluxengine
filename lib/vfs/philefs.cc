@@ -89,6 +89,11 @@
 00000CD0   00 0F 47 52  45 59 2E 43  4C 54 00 00  00 00 00 00  ..GREY.CLT......
  */
 
+static void trimZeros(std::string s)
+{
+    s.erase(std::remove(s.begin(), s.end(), 0), s.end());
+}
+
 class PhileFilesystem : public Filesystem
 {
     struct Span
@@ -110,13 +115,21 @@ class PhileFilesystem : public Filesystem
             br.seek(0x0e);
             length = br.read_be32();
 
+            {
+                std::stringstream ss;
+                ss << 'R';
+                if (filedes[0] & 0x40)
+                    ss << 'S';
+                mode = ss.str();
+            }
+
             this->filename = filename;
             path = {filename};
 
             attributes[Filesystem::FILENAME] = filename;
             attributes[Filesystem::LENGTH] = std::to_string(length);
             attributes[Filesystem::FILE_TYPE] = "file";
-            attributes[Filesystem::MODE] = "";
+            attributes[Filesystem::MODE] = mode;
 
             int spans = br.read_be16();
             for (int i = 0; i < spans; i++)
@@ -127,7 +140,7 @@ class PhileFilesystem : public Filesystem
                 _spans.push_back(span);
             }
 
-            attributes["smaky6.spans"] = std::to_string(spans);
+            attributes["phile.spans"] = std::to_string(spans);
         }
 
         const std::vector<Span>& spans() const
@@ -139,92 +152,6 @@ class PhileFilesystem : public Filesystem
         int _fileno;
         std::vector<Span> _spans;
     };
-
-#if 0
-    class Entry
-    {
-    public:
-        Entry(const Bytes& bytes)
-        {
-            ByteReader br(bytes);
-            br.seek(10);
-            startSector = br.read_le16();
-            endSector = br.read_le16();
-        }
-
-    public:
-        std::string filename;
-        std::string mode;
-        uint16_t startSector;
-        uint16_t endSector;
-    };
-
-    class PhileDirent : public Dirent
-    {
-    public:
-        PhileDirent(const Bytes& dbuf, const Bytes& fbuf)
-        {
-            {
-                std::stringstream ss;
-
-                for (int i = 0; i <= 7; i++)
-                {
-                    uint8_t c = dbuf[i] & 0x7f;
-                    if (c == ' ')
-                        break;
-                    ss << (char)c;
-                }
-                for (int i = 8; i <= 9; i++)
-                {
-                    uint8_t c = dbuf[i] & 0x7f;
-                    if (c == ' ')
-                        break;
-                    if (i == 8)
-                        ss << '.';
-                    ss << (char)c;
-                }
-                filename = ss.str();
-            }
-
-            std::string metadataBytes;
-            {
-                std::stringstream ss;
-
-                for (int i = 10; i < 0x18; i++)
-                    ss << fmt::format("{:02x} ", (uint8_t)dbuf[i]);
-
-                metadataBytes = ss.str();
-            }
-
-            ByteReader br(dbuf);
-
-            br.skip(10); /* filename */
-            startSector = br.read_le16();
-            endSector = br.read_le16();
-            br.skip(2); /* unknown */
-            lastSectorLength = br.read_le16();
-
-            file_type = TYPE_FILE;
-            length = (endSector - startSector - 1) * 256 + lastSectorLength;
-
-            path = {filename};
-            attributes[Filesystem::FILENAME] = filename;
-            attributes[Filesystem::LENGTH] = std::to_string(length);
-            attributes[Filesystem::FILE_TYPE] = "file";
-            attributes[Filesystem::MODE] = "";
-            attributes["smaky6.start_sector"] = std::to_string(startSector);
-            attributes["smaky6.end_sector"] = std::to_string(endSector);
-            attributes["smaky6.sectors"] =
-                std::to_string(endSector - startSector);
-            attributes["smaky6.metadata_bytes"] = metadataBytes;
-        }
-
-    public:
-        unsigned startSector;
-        unsigned endSector;
-        unsigned lastSectorLength;
-    };
-#endif
 
 public:
     PhileFilesystem(
@@ -248,10 +175,13 @@ public:
     {
         mount();
 
+        std::string volumename = _rootBlock.reader().read(0x0c);
+        trimZeros(volumename);
+
         std::map<std::string, std::string> attributes;
-        attributes[VOLUME_NAME] = "";
-        attributes[TOTAL_BLOCKS] = "";
-        attributes[USED_BLOCKS] = "";
+        attributes[VOLUME_NAME] = volumename;
+        attributes[TOTAL_BLOCKS] = std::to_string(_totalBlocks);
+        attributes[USED_BLOCKS] = attributes[TOTAL_BLOCKS];
         attributes[BLOCK_SIZE] = std::to_string(_config.block_size());
         return attributes;
     }
@@ -305,6 +235,7 @@ private:
         _filedesBlockNumber = _rootBlock.reader().seek(0x1e).read_be16();
         _filedesLength =
             _rootBlock.reader().seek(0x16).read_be16() - _filedesBlockNumber;
+        _totalBlocks = _rootBlock.reader().seek(0x18).read_be16();
 
         Bytes directoryBlock = getPsosBlock(3, 1);
         Bytes filedesBlock = getPsosBlock(_filedesBlockNumber, _filedesLength);
@@ -316,8 +247,7 @@ private:
         {
             uint16_t fileno = br.read_be16();
             std::string filename = br.read(14);
-            filename.erase(std::remove(filename.begin(), filename.end(), 0),
-                filename.end());
+            trimZeros(filename);
 
             if (fileno)
             {
@@ -351,6 +281,7 @@ private:
     const PhileProto& _config;
     int _sectorSize;
     int _blockSectors;
+    int _totalBlocks;
     int _bitmapBlockNumber;
     int _filedesBlockNumber;
     int _filedesLength;
