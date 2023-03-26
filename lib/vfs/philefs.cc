@@ -17,8 +17,8 @@
  * 13		19 ^
  * 14		2f
  * 15		00
- * 16		00 0x0018, first file block?
- * 17		18 ^
+ * 16		00
+ * 17		18
  * 18		03 0x320, number of blocks on the disk
  * 19		20 ^
  * 1a		00 0x0010, first data block?
@@ -234,7 +234,7 @@ private:
         _bitmapBlockNumber = _rootBlock.reader().seek(0x1c).read_be16();
         _filedesBlockNumber = _rootBlock.reader().seek(0x1e).read_be16();
         _filedesLength =
-            _rootBlock.reader().seek(0x16).read_be16() - _filedesBlockNumber;
+            _rootBlock.reader().seek(0x20).read_be16() - _filedesBlockNumber + 1;
         _totalBlocks = _rootBlock.reader().seek(0x18).read_be16();
 
         Bytes directoryBlock = getPsosBlock(3, 1);
