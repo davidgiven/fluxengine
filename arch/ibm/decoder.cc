@@ -167,18 +167,6 @@ public:
                 _sector->status = Sector::MISSING;
                 break;
             }
-
-        auto layout = Layout::getLayoutOfTrack(
-            _sector->logicalTrack, _sector->logicalSide);
-        if (_currentSectorSize != layout->sectorSize)
-            std::cerr << fmt::format(
-                "Warning: configured sector size for t{}.h{}.s{} is {} bytes "
-                "but that seen on disk is {} bytes\n",
-                _sector->logicalTrack,
-                _sector->logicalSide,
-                _sector->logicalSector,
-                layout->sectorSize,
-                _currentSectorSize);
     }
 
     void decodeDataRecord() override
@@ -219,6 +207,18 @@ public:
         uint16_t wantCrc = br.read_be16();
         _sector->status =
             (wantCrc == gotCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
+
+        auto layout = Layout::getLayoutOfTrack(
+            _sector->logicalTrack, _sector->logicalSide);
+        if (_currentSectorSize != layout->sectorSize)
+            std::cerr << fmt::format(
+                "Warning: configured sector size for t{}.h{}.s{} is {} bytes "
+                "but that seen on disk is {} bytes\n",
+                _sector->logicalTrack,
+                _sector->logicalSide,
+                _sector->logicalSector,
+                layout->sectorSize,
+                _currentSectorSize);
     }
 
 private:
