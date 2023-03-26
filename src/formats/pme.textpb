@@ -45,7 +45,11 @@ encoder {
 }
 
 decoder {
-	ibm {}
+	ibm {
+		trackdata {
+			ignore_side_byte: true
+		}
+	}
 }
 
 filesystem {
