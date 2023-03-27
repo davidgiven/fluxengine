@@ -474,10 +474,13 @@ std::shared_ptr<TrackFlux> readAndDecodeTrack(FluxSource& fluxSource,
             break;
         }
 
-        adjustTrackOnError(fluxSource, trackInfo->physicalTrack);
-        Logger() << fmt::format(
-            "retrying; {} retries remaining", retriesRemaining);
-        retriesRemaining--;
+        if (fluxSource.isHardware())
+        {
+            adjustTrackOnError(fluxSource, trackInfo->physicalTrack);
+            Logger() << fmt::format(
+                "retrying; {} retries remaining", retriesRemaining);
+            retriesRemaining--;
+        }
     }
 
     return trackFlux;
