@@ -1,6 +1,7 @@
 FORMATS = \
 	_acornadfs8 \
 	_acornadfs32 \
+	_apple2 \
 	_atari \
 	_micropolis \
 	_northstar \
@@ -27,6 +28,7 @@ FORMATS = \
 	atarist740 \
 	atarist800 \
 	atarist820 \
+	basis640 \
 	bk800 \
 	brother120 \
 	brother240 \
