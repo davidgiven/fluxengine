@@ -155,6 +155,14 @@ more common tools.
 	encoding. You can specify a profile if you want to write a subset of the
 	disk.
 
+  - `fluxengine merge -s <fluxfile> -s <fluxfile...> -d <fluxfile`
+
+    Merges data from multiple flux files together. This is useful if you have
+    several reads from an unreliable disk where each read has a different set
+    of good sectors. By merging the flux files, you get to combine all the
+    data. Don't use this on reads of different disks, for obvious results! Note
+    that this works on flux files, not on flux sources.
+
   - `fluxengine inspect -s <flux source> -c <cylinder> -h <head> -B`
 
 	Reads flux (possibly from a disk) and does various analyses of it to try

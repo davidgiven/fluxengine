@@ -9,6 +9,7 @@ LIBFLUXENGINE_SRCS = \
 	lib/decoders/fmmfm.cc \
 	lib/encoders/encoders.cc \
 	lib/environment.cc \
+	lib/fl2.cc \
 	lib/flags.cc \
 	lib/fluxmap.cc \
 	lib/fluxsink/a2rfluxsink.cc \
