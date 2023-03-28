@@ -1,6 +1,10 @@
 comment: 'Apple II generic settings'
 is_extension: true
 
+drive {
+	high_density: false
+}
+	
 decoder {
 	apple2 {}
 }
