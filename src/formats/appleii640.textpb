@@ -1,0 +1,40 @@
+comment: 'Apple II 640kB 5.25" 80 track DSDD'
+include: '_apple2'
+
+image_reader {
+	filename: "appleii640.img"
+	type: IMG
+}
+
+image_writer {
+	filename: "appleii640.img"
+	type: IMG
+}
+
+layout {
+	tracks: 80
+	sides: 2
+	order: HCS
+	layoutdata {
+		sector_size: 256
+		physical {
+			start_sector: 0
+			count: 16
+		}
+	}
+}
+
+decoder {
+	apple2 {
+		side_one_track_offset: 80
+	}
+}
+
+encoder {
+	apple2 {
+		side_one_track_offset: 80
+	}
+}
+
+tpi: 96
+

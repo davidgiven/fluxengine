@@ -1,8 +1,13 @@
-comment: 'Apple II 140kB DOS 3.3 5.25" 40 track SSSD'
+comment: 'Apple II 140kB 5.25" 35 track SSDD'
 include: '_apple2'
 
 image_reader {
-	filename: "apple2.img"
+	filename: "appleii140.img"
+	type: IMG
+}
+
+image_writer {
+	filename: "appleii140.img"
 	type: IMG
 }
 
@@ -16,11 +21,6 @@ layout {
 			count: 16
 		}
 	}
-}
-
-image_writer {
-	filename: "apple2.img"
-	type: IMG
 }
 
 tpi: 48

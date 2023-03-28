@@ -30,6 +30,9 @@ FluxEngine can remap the sectors from physical to logical using modifiers.  If
 you don't specify a remapping modifier, you get the sectors in the order they
 appear on the disk.
 
+(There are also some third-party 80-track double-sided drives, storing 640kB
+rather than Apple's 140kB. These are the same format, just with more tracks.)
+
 
 Reading discs
 -------------
@@ -37,16 +40,18 @@ Reading discs
 Just do:
 
 ```
-fluxengine read apple2
+fluxengine read appleii140
 ```
 
-You should end up with an `apple2.img` which is 143360 bytes long. It will be in
+(or `appleii640`)
+
+You should end up with an `appleii140.img` which is 143360 bytes long. It will be in
 physical sector ordering. You can specify a sector ordering, `--appledos` or
 `--prodos` to get an image intended for use in an emulator, due to the logical
 sector mapping issue described above:
 
 ```
-fluxengine read apple2 --prodos
+fluxengine read appleii140 --prodos
 ```
 
 You will also need this for filesystem access.
@@ -56,14 +61,14 @@ Writing discs
 
 Just do:
 ```
-fluxengine write apple2 -i apple2.img
+fluxengine write appleii140 -i appleii140.img
 ```
 
 If your image is in logical sector ordering (images intended for emulators
 usually are), specify a modifier of `--appledos` or `--prodos`:
 
 ```
-fluxengine write apple2 --prodos -i apple2.img
+fluxengine write appleii140 --prodos -i appleii140.img
 ```
 
 

@@ -19,7 +19,8 @@ FORMATS = \
 	ampro400 \
 	ampro800 \
 	apple2_drive \
-	apple2 \
+	appleii140 \
+	appleii640 \
 	atarist360 \
 	atarist370 \
 	atarist400 \
@@ -28,7 +29,6 @@ FORMATS = \
 	atarist740 \
 	atarist800 \
 	atarist820 \
-	basis640 \
 	bk800 \
 	brother120 \
 	brother240 \
