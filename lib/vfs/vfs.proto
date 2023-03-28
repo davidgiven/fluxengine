@@ -59,9 +59,11 @@ message CbmfsProto
 
 message ProdosProto {}
 
+message AppledosProto {}
+
 message Smaky6FsProto {}
 
-// NEXT_TAG: 12
+// NEXT_TAG: 13
 message FilesystemProto
 {
     enum FilesystemType {
@@ -75,6 +77,7 @@ message FilesystemProto
         CBMFS = 7;
         PRODOS = 8;
 		SMAKY6 = 9;
+		APPLEDOS = 10;
     }
 
     optional FilesystemType type = 10 [default = NOT_SET, (help) = "filesystem type"];
@@ -87,6 +90,7 @@ message FilesystemProto
     optional MacHfsProto machfs = 6;
     optional CbmfsProto cbmfs = 7;
     optional ProdosProto prodos = 8;
+	optional AppledosProto appledos = 12;
 	optional Smaky6FsProto smaky6 = 11;
     
     optional SectorListProto sector_order = 9 [(help) = "specify the filesystem order of sectors"];

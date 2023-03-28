@@ -248,6 +248,8 @@ public:
         const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
     static std::unique_ptr<Filesystem> createProdosFilesystem(
         const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
+    static std::unique_ptr<Filesystem> createAppledosFilesystem(
+        const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
     static std::unique_ptr<Filesystem> createSmaky6Filesystem(
         const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
 

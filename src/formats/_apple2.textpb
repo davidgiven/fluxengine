@@ -23,6 +23,10 @@ option {
 			filesystem_sector_order: true
 		}
 	
+		filesystem {
+			type: APPLEDOS
+		}
+
 		layout {
 			layoutdata {
 				filesystem {

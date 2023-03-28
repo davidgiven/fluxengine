@@ -203,6 +203,9 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystem(
         case FilesystemProto::PRODOS:
             return Filesystem::createProdosFilesystem(config, image);
 
+        case FilesystemProto::APPLEDOS:
+            return Filesystem::createAppledosFilesystem(config, image);
+
         case FilesystemProto::SMAKY6:
             return Filesystem::createSmaky6Filesystem(config, image);
 
