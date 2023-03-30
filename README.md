@@ -116,7 +116,7 @@ people who've had it work).
 | [Macintosh 400kB/800kB](doc/disk-macintosh.md)  |  🦄   |   🦄   |                                     |
 | [NEC PC-98](doc/disk-ibm.md)              |  🦄   |   🦄   | trimode drive not required          |
 | [PME-68-12 SBC](doc/disk-ibm.md)          |  🦄   |   🦖*  | yet another IBM scheme              |
-| [Sharp X68000](doc/disk-ibm.md)           |  🦄   |   🦄   |                                     |
+| [Sharp X68000](doc/disk-ibm.md)           |  🦄   |   🦄   | pSOS PHILE file system             |
 | [Smaky 6](doc/disk-smaky6.md)             |  🦖   |       | 5.25" hard sectored |
 | [TRS-80](doc/disk-trs80.md)               |  🦖   |   🦖*  | a minor variation of the IBM scheme |
 {: .datatable }
