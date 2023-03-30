@@ -93,7 +93,7 @@ void FluxEngineApp::RunOnWorkerThread(std::function<void()> callback)
         std::cerr << "Cannot start new worker task as one is already running\n";
     _callback = callback;
 
-    if (GetThread())
+    if (GetThread() && GetThread()->IsRunning())
         GetThread()->Wait();
 
     emergencyStop = false;
