@@ -14,26 +14,6 @@ encoder {
 }
 
 option {
-	name: "plain-appledos"
-	comment: "specifies AppleDOS format, but without sector skew"
-	message: "using AppleDOS filesystem but with no sector skew"
-		
-	config {
-		image_reader {
-			filesystem_sector_order: true
-		}
-		
-		image_writer {
-			filesystem_sector_order: true
-		}
-	
-		filesystem {
-			type: APPLEDOS
-		}
-	}
-}
-
-option {
 	name: "appledos"
 	comment: "specifies AppleDOS soft sector skew for filesystem access and images"
 	message: "compensating for AppleDOS soft sector skew"
@@ -54,21 +34,21 @@ option {
 		layout {
 			layoutdata {
 				filesystem {
-					sector: 0
-					sector: 14
+					sector:  0
 					sector: 13
-					sector: 12
 					sector: 11
-					sector: 10
 					sector:  9
-					sector:  8
 					sector:  7
-					sector:  6
 					sector:  5
-					sector:  4
 					sector:  3
-					sector:  2
 					sector:  1
+					sector: 14
+					sector: 12
+					sector: 10
+					sector:  8
+					sector:  6
+					sector:  4
+					sector:  2
 					sector: 15
 				}
 			}
