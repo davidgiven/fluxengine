@@ -56,8 +56,7 @@ public:
 
         std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
         fluxmap->appendBits(bits,
-            calculatePhysicalClockPeriod(
-                _config.clock_period_us() * 1e3,
+            calculatePhysicalClockPeriod(_config.clock_period_us() * 1e3,
                 _config.rotational_period_ms() * 1e6));
         return fluxmap;
     }
@@ -132,13 +131,17 @@ private:
             // extra padding.
             write_ff40(sector.logicalSector == 0 ? 32 : 8);
 
+            int track = sector.logicalTrack;
+            if (sector.logicalSide == 1)
+                track += _config.side_one_track_offset();
+
             // Write address field: APPLE2_SECTOR_RECORD + sector identifier +
             // DE AA EB
             write_bits(APPLE2_SECTOR_RECORD, 24);
             write_gcr44(volume_id);
-            write_gcr44(sector.logicalTrack);
+            write_gcr44(track);
             write_gcr44(sector.logicalSector);
-            write_gcr44(volume_id ^ sector.logicalTrack ^ sector.logicalSector);
+            write_gcr44(volume_id ^ track ^ sector.logicalSector);
             write_bits(0xDEAAEB, 24);
 
             // Write data syncing leader: FF40 + APPLE2_DATA_RECORD + sector

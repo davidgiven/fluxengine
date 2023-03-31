@@ -1,6 +1,7 @@
 FORMATS = \
 	_acornadfs8 \
 	_acornadfs32 \
+	_apple2 \
 	_atari \
 	_micropolis \
 	_northstar \
@@ -18,7 +19,8 @@ FORMATS = \
 	ampro400 \
 	ampro800 \
 	apple2_drive \
-	apple2 \
+	appleii140 \
+	appleii640 \
 	atarist360 \
 	atarist370 \
 	atarist400 \
@@ -61,7 +63,7 @@ FORMATS = \
 	northstar175 \
 	northstar350 \
 	northstar87 \
-	pme68_800 \
+	psos800 \
 	rx50 \
 	shugart_drive \
 	smaky6 \

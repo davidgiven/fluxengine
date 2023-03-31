@@ -106,7 +106,7 @@ people who've had it work).
 | [Acorn DFS](doc/disk-acorndfs.md)         |  🦄   |   🦖*  |                                     |
 | [Ampro Little Board](doc/disk-ampro.md)   |  🦖   |   🦖*  |                                     |
 | [Agat](doc/disk-agat.md)                  |  🦖   |        | Soviet Union Apple-II-like computer |
-| [Apple II](doc/disk-apple2.md)            |  🦄   |   🦄   |                                     |
+| [Apple II](doc/disk-apple2.md)            |  🦄   |   🦄   | both 140kB and 640kB formats        |
 | [Amiga](doc/disk-amiga.md)                |  🦄   |   🦄   |                                     |
 | [Commodore 64 1541/1581](doc/disk-c64.md) |  🦄   |   🦄   | and probably the other formats      |
 | [Brother 120kB](doc/disk-brother.md)      |  🦄   |   🦄   |                                     |
@@ -115,7 +115,7 @@ people who've had it work).
 | [Elektronika BK](doc/disk-bd.md)          |  🦄   |   🦄   | Soviet Union PDP-11 clone           |
 | [Macintosh 400kB/800kB](doc/disk-macintosh.md)  |  🦄   |   🦄   |                                     |
 | [NEC PC-98](doc/disk-ibm.md)              |  🦄   |   🦄   | trimode drive not required          |
-| [PME-68-12 SBC](doc/disk-ibm.md)          |  🦄   |   🦖*  | yet another IBM scheme              |
+| [pSOS](doc/disk-ibm.md)                   |  🦄   |   🦖*  | yet another IBM scheme              |
 | [Sharp X68000](doc/disk-ibm.md)           |  🦄   |   🦄   | pSOS PHILE file system             |
 | [Smaky 6](doc/disk-smaky6.md)             |  🦖   |       | 5.25" hard sectored |
 | [TRS-80](doc/disk-trs80.md)               |  🦖   |   🦖*  | a minor variation of the IBM scheme |

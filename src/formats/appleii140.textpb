@@ -1,0 +1,27 @@
+comment: 'Apple II 140kB 5.25" 35 track SSDD'
+include: '_apple2'
+
+image_reader {
+	filename: "appleii140.img"
+	type: IMG
+}
+
+image_writer {
+	filename: "appleii140.img"
+	type: IMG
+}
+
+layout {
+	tracks: 35
+	sides: 1
+	layoutdata {
+		sector_size: 256
+		physical {
+			start_sector: 0
+			count: 16
+		}
+	}
+}
+
+tpi: 48
+
