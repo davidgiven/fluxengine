@@ -13,37 +13,44 @@ import "lib/common.proto";
 import "lib/layout.proto";
 
 // NEXT_TAG: 21
-message ConfigProto {
-	optional string comment = 8;
-	optional bool is_extension = 13;
-	repeated string include = 19;
+message ConfigProto
+{
+    optional string comment = 8;
+    optional bool is_extension = 13;
+    repeated string include = 19;
 
-	optional LayoutProto layout = 18;
+    optional LayoutProto layout = 18;
 
-	optional ImageReaderProto image_reader = 12;
-	optional ImageWriterProto image_writer = 9;
-	
-	optional FluxSourceProto flux_source = 10;
-	optional FluxSinkProto flux_sink = 11;
-	optional DriveProto drive = 15;
+    optional ImageReaderProto image_reader = 12;
+    optional ImageWriterProto image_writer = 9;
 
-	optional EncoderProto encoder = 3;
-	optional DecoderProto decoder = 4;
-	optional UsbProto usb = 5;
+    optional FluxSourceProto flux_source = 10;
+    optional FluxSinkProto flux_sink = 11;
+    optional DriveProto drive = 15;
 
-	optional RangeProto tracks = 6;
-	optional RangeProto heads = 7;
-	optional int32 tpi = 16 [ (help) = "TPI of image; if 0, use TPI of drive" ];
+    optional EncoderProto encoder = 3;
+    optional DecoderProto decoder = 4;
+    optional UsbProto usb = 5;
 
-	optional FilesystemProto filesystem = 17;
-	
-	repeated OptionProto option = 20;
+    optional RangeProto tracks = 6;
+    optional RangeProto heads = 7;
+    optional int32 tpi = 16 [ (help) = "TPI of image; if 0, use TPI of drive" ];
+
+    optional FilesystemProto filesystem = 17;
+
+    repeated OptionProto option = 20;
 }
 
-message OptionProto {
-	optional string name = 1 [(help) = "Option name" ];
-	optional string comment = 2 [(help) = "Help text for option" ];
-	optional string message = 3 [(help) = "Message to display when option is in use" ];
-	optional ConfigProto config = 4 [(help) = "Option data", (recurse) = false ];
+message OptionProto
+{
+    optional string name = 1 [ (help) = "option name" ];
+    optional string comment = 2 [ (help) = "help text for option" ];
+    optional string message = 3
+        [ (help) = "message to display when option is in use" ];
+    optional string exclusivity_group = 5 [
+        (help) =
+            "options with the same group cannot be selected at the same time"
+    ];
+    optional ConfigProto config = 4
+        [ (help) = "option data", (recurse) = false ];
 }
-

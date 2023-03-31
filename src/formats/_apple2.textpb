@@ -17,6 +17,7 @@ option {
 	name: "appledos"
 	comment: "use AppleDOS soft sector skew for filesystem access and images"
 	message: "compensating for AppleDOS soft sector skew"
+	exclusivity_group: "format"
 		
 	config {
 		image_reader {
@@ -60,6 +61,7 @@ option {
 	name: "prodos"
 	comment: "use ProDOS soft sector skew for filesystem access and images"
 	message: "compensating for ProDOS soft sector skew"
+	exclusivity_group: "format"
 		
 	config {
 		image_reader {
@@ -103,6 +105,7 @@ option {
 	name: "cpm"
 	comment: "use CP/M soft sector skew for filesystem access and images"
 	message: "compensating for CP/M soft sector skew"
+	exclusivity_group: "format"
 		
 	config {
 		image_reader {

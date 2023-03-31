@@ -1686,13 +1686,69 @@ public:
                     _formatNames[formatChoice->GetSelection()];
                 FlagGroup::parseConfigFile(formatName, formats);
 
+                std::set<std::string> exclusivityGroups;
+                for (auto& option : config.option())
+                {
+                    if (option.has_exclusivity_group())
+                        exclusivityGroups.insert(option.exclusivity_group());
+                }
+
                 if (config.option().empty())
                     sizer->Add(new wxStaticText(formatOptionsContainer,
                         wxID_ANY,
                         "(no options for this format)"));
                 else
+                {
+                    /* Add grouped radiobuttons for anything in an exclusivity
+                     * group. */
+
+                    for (auto& group : exclusivityGroups)
+                    {
+                        bool first = true;
+                        for (auto& option : config.option())
+                        {
+                            if (option.exclusivity_group() != group)
+                                continue;
+
+                            auto* rb = new wxRadioButton(formatOptionsContainer,
+                                wxID_ANY,
+                                option.comment());
+                            auto key =
+                                std::make_pair(formatName, option.name());
+                            sizer->Add(rb);
+
+                            rb->Bind(wxEVT_RADIOBUTTON,
+                                [=](wxCommandEvent& e)
+                                {
+                                    for (auto& option : config.option())
+                                    {
+                                        if (option.exclusivity_group() == group)
+                                            _formatOptions.erase(std::make_pair(
+                                                formatName, option.name()));
+                                    }
+
+                                    _formatOptions.insert(key);
+
+                                    OnControlsChanged(e);
+                                });
+
+                            if (_formatOptions.find(key) !=
+                                _formatOptions.end())
+                                rb->SetValue(true);
+
+                            if (first)
+                                rb->SetExtraStyle(wxRB_GROUP);
+                            first = false;
+                        }
+                    }
+
+                    /* Anything that's _not_ in a group gets a checkbox. */
+
                     for (auto& option : config.option())
                     {
+                        if (option.has_exclusivity_group())
+                            continue;
+
                         auto* choice = new wxCheckBox(
                             formatOptionsContainer, wxID_ANY, option.comment());
                         auto key = std::make_pair(formatName, option.name());
@@ -1702,7 +1758,7 @@ public:
                             choice->SetValue(true);
 
                         choice->Bind(wxEVT_CHECKBOX,
-                            [this, choice, key](wxCommandEvent& e)
+                            [=](wxCommandEvent& e)
                             {
                                 if (choice->GetValue())
                                     _formatOptions.insert(key);
@@ -1712,6 +1768,7 @@ public:
                                 OnControlsChanged(e);
                             });
                     }
+                }
             }
 
             formatOptionsContainer->SetSizerAndFit(sizer);
