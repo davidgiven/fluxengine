@@ -34,7 +34,7 @@ If you don't want an image in physical sector order, specify one of these option
 
   - `--appledos` Selects AppleDOS sector translation
   - `--prodos` Selects ProDOS sector translation
-  - `--cpm` Selects CP/M SoftCard sector translation[^1]
+  - `--cpm` Selects CP/M SoftCard sector translation[^1][^2]
 
 These options also select the appropriate file system; FluxEngine has read-only
 support for all of these. For example:
@@ -50,7 +50,10 @@ to 50 tracks, so it needs tweaking to support larger disks. FluxEngine doesn't
 understand these tweaks yet but they only become important when writing to
 disks, which isn't supported yet.
 
-[^1]: 80-track CP/M disks are interesting because all the tracks on the second
+[^1]: CP/M disks use the ProDOS translation for the first three tracks and a
+    different translation for all the tracks thereafter.
+
+[^2]: 80-track CP/M disks are interesting because all the tracks on the second
     side have on-disk track numbering from 80..159; the Apple II on-disk format
     doesn't have a side byte, so presumably this is to allow tracks on the two
     sides to be distinguished from each other. AppleDOS and ProDOS disks don't
