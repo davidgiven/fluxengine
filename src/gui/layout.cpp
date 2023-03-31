@@ -169,6 +169,13 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	fgSizer6->Fit( m_panel11 );
 	fgSizer8->Add( m_panel11, 1, wxEXPAND | wxALL, 5 );
 
+	m_staticText232 = new wxStaticText( idlePanel, wxID_ANY, wxT("then select some options (if there are any):"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL );
+	m_staticText232->Wrap( -1 );
+	fgSizer8->Add( m_staticText232, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5 );
+
+	formatOptionsContainer = new wxPanel( idlePanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	fgSizer8->Add( formatOptionsContainer, 1, wxALL|wxEXPAND, 5 );
+
 	m_staticText19 = new wxStaticText( idlePanel, wxID_ANY, wxT("and press one of:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText19->Wrap( -1 );
 	fgSizer8->Add( m_staticText19, 0, wxALIGN_CENTER|wxALL, 5 );

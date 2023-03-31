@@ -34,6 +34,7 @@ extern const std::map<std::string, std::string> formats;
 #define CONFIG_FORTYTRACK "FortyTrack"
 #define CONFIG_HIGHDENSITY "HighDensity"
 #define CONFIG_FORMAT "Format"
+#define CONFIG_FORMATOPTIONS "FormatOptions"
 #define CONFIG_EXTRACONFIG "ExtraConfig"
 #define CONFIG_FLUXIMAGE "FluxImage"
 #define CONFIG_DISKIMAGE "DiskImage"
@@ -95,11 +96,16 @@ public:
         Logger::setLogger(
             [&](std::shared_ptr<const AnyLogMessage> message)
             {
-                runOnUiThread(
-                    [message, this]()
-                    {
-                        OnLogMessage(message);
-                    });
+                if (isWorkerThread())
+                {
+                    runOnUiThread(
+                        [message, this]()
+                        {
+                            OnLogMessage(message);
+                        });
+                }
+                else
+                    OnLogMessage(message);
             });
 
         _logWindow.reset(
@@ -174,6 +180,7 @@ public:
 
         LoadConfig();
         UpdateDevices();
+        UpdateFormatOptions();
     }
 
     void OnShowLogWindow(wxCommandEvent& event) override
@@ -258,6 +265,7 @@ public:
     {
         SaveConfig();
         UpdateState();
+        UpdateFormatOptions();
     }
 
     void OnControlsChanged(wxFileDirPickerEvent& event) override
@@ -1220,8 +1228,18 @@ public:
             Error() << "no format selected";
 
         config.Clear();
-        FlagGroup::parseConfigFile(
-            _formatNames[formatChoice->GetSelection()], formats);
+        auto formatName = _formatNames[formatChoice->GetSelection()];
+        FlagGroup::parseConfigFile(formatName, formats);
+
+        /* Apply any format options. */
+
+        for (const auto& e : _formatOptions)
+        {
+            if (e.first == formatName)
+                FlagGroup::applyOption(e.second);
+        }
+
+        /* Merge in any custom config. */
 
         for (auto setting : split(_extraConfiguration, '\n'))
         {
@@ -1242,6 +1260,8 @@ public:
                 FlagGroup::parseConfigFile(setting, formats);
         }
 
+        /* Locate the device, if any. */
+
         auto serial = deviceCombo->GetValue().ToStdString();
         if (!serial.empty() && (serial[0] == '/'))
             setProtoByString(&config, "usb.greaseweazle.port", serial);
@@ -1249,6 +1269,8 @@ public:
             setProtoByString(&config, "usb.serial", serial);
 
         _logWindow->GetTextControl()->Clear();
+
+        /* Apply the source/destination. */
 
         switch (_selectedSource)
         {
@@ -1476,6 +1498,24 @@ public:
         _config.Read(CONFIG_EXTRACONFIG, &s);
         _extraConfiguration = s;
 
+        /* Format options. */
+
+        _formatOptions.clear();
+        s = "";
+        _config.Read(CONFIG_FORMATOPTIONS, &s);
+        for (auto combined : split(std::string(s), ','))
+        {
+            auto pair = split(combined, ':');
+            try
+            {
+                auto key = std::make_pair(pair.at(0), pair.at(1));
+                _formatOptions.insert(key);
+            }
+            catch (std::exception&)
+            {
+            }
+        }
+
         /* Triggers SaveConfig */
 
         _dontSaveConfig = false;
@@ -1514,6 +1554,16 @@ public:
         _config.Write(CONFIG_FORMAT,
             formatChoice->GetString(formatChoice->GetSelection()));
         _config.Write(CONFIG_EXTRACONFIG, wxString(_extraConfiguration));
+
+        /* Format options. */
+
+        {
+            std::vector<std::string> options;
+            for (auto& e : _formatOptions)
+                options.push_back(fmt::format("{}:{}", e.first, e.second));
+
+            _config.Write(CONFIG_FORMATOPTIONS, wxString(join(options, ",")));
+        }
     }
 
     void UpdateState()
@@ -1615,6 +1665,55 @@ public:
         }
     }
 
+    void UpdateFormatOptions()
+    {
+        assert(!wxGetApp().IsWorkerThreadRunning());
+
+        formatOptionsContainer->DestroyChildren();
+        auto* sizer = new wxBoxSizer(wxVERTICAL);
+
+        auto formatSelection = formatChoice->GetSelection();
+        if (formatSelection == wxNOT_FOUND)
+            sizer->Add(new wxStaticText(
+                formatOptionsContainer, wxID_ANY, "(no format selected)"));
+        else
+        {
+            config.Clear();
+            std::string formatName = _formatNames[formatChoice->GetSelection()];
+            FlagGroup::parseConfigFile(formatName, formats);
+
+            if (config.option().empty())
+                sizer->Add(new wxStaticText(formatOptionsContainer,
+                    wxID_ANY,
+                    "(no options for this format)"));
+            else
+                for (auto& option : config.option())
+                {
+                    auto* choice = new wxCheckBox(
+                        formatOptionsContainer, wxID_ANY, option.comment());
+                    auto key = std::make_pair(formatName, option.name());
+                    sizer->Add(choice);
+
+                    if (_formatOptions.find(key) != _formatOptions.end())
+                        choice->SetValue(true);
+
+                    choice->Bind(wxEVT_CHECKBOX,
+                        [this, choice, key](wxCommandEvent& e)
+                        {
+                            if (choice->GetValue())
+                                _formatOptions.insert(key);
+                            else
+                                _formatOptions.erase(key);
+
+                            OnControlsChanged(e);
+                        });
+                }
+        }
+
+        formatOptionsContainer->SetSizerAndFit(sizer);
+        idlePanel->Layout();
+    }
+
     void OnTrackSelection(TrackSelectionEvent& event)
     {
         (new FluxViewerWindow(this, event.trackFlux))->Show(true);
@@ -1713,6 +1812,7 @@ private:
     int _explorerSide;
     bool _explorerUpdatePending;
     std::unique_ptr<const Fluxmap> _explorerFluxmap;
+    std::set<std::pair<std::string, std::string>> _formatOptions;
 };
 
 wxWindow* FluxEngineApp::CreateMainWindow()
