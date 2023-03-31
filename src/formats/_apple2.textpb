@@ -98,3 +98,67 @@ option {
 		}
 	}
 }
+
+option {
+	name: "cpm"
+	comment: "specifies CP/M soft sector skew for filesystem access and images"
+	message: "compensating for CP/M soft sector skew"
+		
+	config {
+		image_reader {
+			filesystem_sector_order: true
+		}
+		
+		image_writer {
+			filesystem_sector_order: true
+		}
+	
+		filesystem {
+			type: CPMFS
+			cpmfs {
+				filesystem_start {
+					track: 3
+				}
+				block_size: 4096
+				dir_entries: 128
+			}
+		}
+
+		decoder {
+			apple2 {
+				side_one_track_offset: 80
+			}
+		}
+
+		encoder {
+			apple2 {
+				side_one_track_offset: 80
+			}
+		}
+
+		layout {
+			layoutdata {
+				filesystem {
+					sector:  0
+					sector:  3
+					sector:  6
+					sector:  9
+					sector: 12
+					sector: 15
+					sector:  2
+					sector:  5
+					sector:  8
+					sector: 11
+					sector: 14
+					sector:  1
+					sector:  4
+					sector:  7
+					sector: 10
+					sector: 13
+				}
+			}
+		}
+	}
+}
+
+

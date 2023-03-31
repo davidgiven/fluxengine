@@ -30,9 +30,31 @@ FluxEngine can remap the sectors from physical to logical using modifiers.  If
 you don't specify a remapping modifier, you get the sectors in the order they
 appear on the disk.
 
-(There are also some third-party 80-track double-sided drives, storing 640kB
-rather than Apple's 140kB. These are the same format, just with more tracks.)
+If you don't want an image in physical sector order, specify one of these options:
 
+  - `--appledos` Selects AppleDOS sector translation
+  - `--prodos` Selects ProDOS sector translation
+  - `--cpm` Selects CP/M SoftCard sector translation[^1]
+
+These options also select the appropriate file system; FluxEngine has read-only
+support for all of these. For example:
+
+```
+fluxengine ls appleii140 --appledos -f image.flux
+```
+
+In addition, some third-party systems use 80-track double sides drives, with
+the same underlying disk format. These are supported with the `appleii640`
+profile. The complication here is that the AppleDOS filesystem only supports up
+to 50 tracks, so it needs tweaking to support larger disks. FluxEngine doesn't
+understand these tweaks yet but they only become important when writing to
+disks, which isn't supported yet.
+
+[^1]: 80-track CP/M disks are interesting because all the tracks on the second
+    side have on-disk track numbering from 80..159; the Apple II on-disk format
+    doesn't have a side byte, so presumably this is to allow tracks on the two
+    sides to be distinguished from each other. AppleDOS and ProDOS disks don't
+    do this.
 
 Reading discs
 -------------
@@ -45,16 +67,9 @@ fluxengine read appleii140
 
 (or `appleii640`)
 
-You should end up with an `appleii140.img` which is 143360 bytes long. It will be in
-physical sector ordering. You can specify a sector ordering, `--appledos` or
-`--prodos` to get an image intended for use in an emulator, due to the logical
-sector mapping issue described above:
-
-```
-fluxengine read appleii140 --prodos
-```
-
-You will also need this for filesystem access.
+You should end up with an `appleii140.img` which is 143360 bytes long. It will
+be in physical sector ordering if you don't specify a file system format as
+described above.
 
 Writing discs
 -------------
@@ -64,13 +79,8 @@ Just do:
 fluxengine write appleii140 -i appleii140.img
 ```
 
-If your image is in logical sector ordering (images intended for emulators
-usually are), specify a modifier of `--appledos` or `--prodos`:
-
-```
-fluxengine write appleii140 --prodos -i appleii140.img
-```
-
+The image will be expected to be in physical sector ordering if you don't
+specify a file system format as described above.
 
 Useful references
 -----------------
