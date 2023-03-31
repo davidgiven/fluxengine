@@ -59,7 +59,12 @@ message CbmfsProto
 
 message ProdosProto {}
 
-message AppledosProto {}
+message AppledosProto {
+	optional uint32 filesystem_offset_sectors = 1 [
+		default = 0,
+		(help) = "offset the entire offset up the disk this many sectors"
+	];
+}
 
 message Smaky6FsProto {}
 

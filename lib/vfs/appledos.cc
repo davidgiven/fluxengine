@@ -103,7 +103,7 @@ public:
         ByteWriter bw(bytes);
         while (tstrack)
         {
-            Bytes ts = getLogicalSector(tstrack * 16 + tssector);
+            Bytes ts = getAppleSector(tstrack * 16 + tssector);
             ByteReader br(ts);
             br.seek(0x0c);
 
@@ -114,7 +114,7 @@ public:
                 if (!track)
                     goto done;
 
-                bw += getLogicalSector(track * 16 + sector);
+                bw += getAppleSector(track * 16 + sector);
             }
 
             tstrack = ts[1];
@@ -128,7 +128,7 @@ public:
 private:
     void mount()
     {
-        _vtoc = getLogicalSector(VTOC_BLOCK);
+        _vtoc = getAppleSector(VTOC_BLOCK);
         if ((_vtoc[0x27] != 122) || (_vtoc[0x36] != 0) || (_vtoc[0x37] != 1))
             throw BadFilesystemException();
 
@@ -137,7 +137,7 @@ private:
         int sector = _vtoc[2];
         while (track)
         {
-            Bytes dir = getLogicalSector(track * 16 + sector);
+            Bytes dir = getAppleSector(track * 16 + sector);
             ByteReader br(dir);
             br.seek(0x0b);
 
@@ -160,6 +160,12 @@ private:
                 return de;
 
         throw FileNotFoundException();
+    }
+
+    Bytes getAppleSector(uint32_t number, uint32_t count = 1)
+    {
+        return getLogicalSector(
+            number + _config.filesystem_offset_sectors(), count);
     }
 
 private:

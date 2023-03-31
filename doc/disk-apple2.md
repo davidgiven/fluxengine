@@ -46,9 +46,9 @@ fluxengine ls appleii140 --appledos -f image.flux
 In addition, some third-party systems use 80-track double sides drives, with
 the same underlying disk format. These are supported with the `appleii640`
 profile. The complication here is that the AppleDOS filesystem only supports up
-to 50 tracks, so it needs tweaking to support larger disks. FluxEngine doesn't
-understand these tweaks yet but they only become important when writing to
-disks, which isn't supported yet.
+to 50 tracks, so it needs tweaking to support larger disks. It treats the
+second side of the disk as a completely different volume. To access these
+files, use `--appledos --side1`.
 
 [^1]: CP/M disks use the ProDOS translation for the first three tracks and a
     different translation for all the tracks thereafter.

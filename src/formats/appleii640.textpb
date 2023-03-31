@@ -24,17 +24,19 @@ layout {
 	}
 }
 
-decoder {
-	apple2 {
-		side_one_track_offset: 80
-	}
-}
-
-encoder {
-	apple2 {
-		side_one_track_offset: 80
-	}
-}
-
 tpi: 96
+
+option {
+	name: "side1"
+	comment: "reads the volume on side 1 of a disk"
+	message: "accessing volume on side 1"
+
+	config {
+		filesystem {
+			appledos {
+				filesystem_offset_sectors: 0x500
+			}
+		}
+	}
+}
 
