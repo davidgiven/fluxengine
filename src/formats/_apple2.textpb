@@ -15,7 +15,7 @@ encoder {
 
 option {
 	name: "appledos"
-	comment: "specifies AppleDOS soft sector skew for filesystem access and images"
+	comment: "use AppleDOS soft sector skew for filesystem access and images"
 	message: "compensating for AppleDOS soft sector skew"
 		
 	config {
@@ -58,7 +58,7 @@ option {
 
 option {
 	name: "prodos"
-	comment: "specifies ProDOS soft sector skew for filesystem access and images"
+	comment: "use ProDOS soft sector skew for filesystem access and images"
 	message: "compensating for ProDOS soft sector skew"
 		
 	config {
@@ -101,7 +101,7 @@ option {
 
 option {
 	name: "cpm"
-	comment: "specifies CP/M soft sector skew for filesystem access and images"
+	comment: "use CP/M soft sector skew for filesystem access and images"
 	message: "compensating for CP/M soft sector skew"
 		
 	config {
