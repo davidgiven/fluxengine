@@ -189,6 +189,26 @@ BadSectorsState combineRecordAndSectors(TrackFlux& trackFlux,
     return HAS_NO_BAD_SECTORS;
 }
 
+static void adjustTrackOnError(FluxSource& fluxSource, int baseTrack)
+{
+    switch (config.drive().error_behaviour())
+    {
+        case DriveProto::NOTHING:
+            break;
+
+        case DriveProto::RECALIBRATE:
+            fluxSource.recalibrate();
+            break;
+
+        case DriveProto::JIGGLE:
+            if (baseTrack > 0)
+                fluxSource.seek(baseTrack - 1);
+            else
+                fluxSource.seek(baseTrack + 1);
+            break;
+    }
+}
+
 ReadResult readGroup(FluxSourceIteratorHolder& fluxSourceIteratorHolder,
     std::shared_ptr<const TrackInfo>& trackInfo,
     TrackFlux& trackFlux,
@@ -343,6 +363,7 @@ void writeTracksAndVerify(FluxSink& fluxSink,
 
             if (result != GOOD_READ)
             {
+                adjustTrackOnError(fluxSource, trackInfo->physicalTrack);
                 Logger() << "bad read";
                 return false;
             }
@@ -453,9 +474,13 @@ std::shared_ptr<TrackFlux> readAndDecodeTrack(FluxSource& fluxSource,
             break;
         }
 
-        Logger() << fmt::format(
-            "retrying; {} retries remaining", retriesRemaining);
-        retriesRemaining--;
+        if (fluxSource.isHardware())
+        {
+            adjustTrackOnError(fluxSource, trackInfo->physicalTrack);
+            Logger() << fmt::format(
+                "retrying; {} retries remaining", retriesRemaining);
+            retriesRemaining--;
+        }
     }
 
     return trackFlux;
@@ -584,7 +609,8 @@ void rawReadDiskCommand(FluxSource& fluxsource, FluxSink& fluxsink)
     unsigned index = 0;
     for (auto& trackInfo : locations)
     {
-        Logger() << OperationProgressLogMessage{index * 100 / (int)locations.size()};
+        Logger() << OperationProgressLogMessage{
+            index * 100 / (int)locations.size()};
         index++;
 
         testForEmergencyStop();
