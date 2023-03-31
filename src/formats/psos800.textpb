@@ -1,4 +1,4 @@
-comment: 'PME 68-12 68k Single Board Computer'
+comment: 'pSOS generic 800kB DSDD with PHILE'
 
 drive {
 	high_density: false
