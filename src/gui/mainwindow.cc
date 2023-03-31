@@ -1669,49 +1669,54 @@ public:
     {
         assert(!wxGetApp().IsWorkerThreadRunning());
 
-        formatOptionsContainer->DestroyChildren();
-        auto* sizer = new wxBoxSizer(wxVERTICAL);
-
-        auto formatSelection = formatChoice->GetSelection();
-        if (formatSelection == wxNOT_FOUND)
-            sizer->Add(new wxStaticText(
-                formatOptionsContainer, wxID_ANY, "(no format selected)"));
-        else
+        int formatSelection = formatChoice->GetSelection();
+        if (formatSelection != _currentlyDisplayedFormat)
         {
-            config.Clear();
-            std::string formatName = _formatNames[formatChoice->GetSelection()];
-            FlagGroup::parseConfigFile(formatName, formats);
+            _currentlyDisplayedFormat = formatSelection;
+            formatOptionsContainer->DestroyChildren();
+            auto* sizer = new wxBoxSizer(wxVERTICAL);
 
-            if (config.option().empty())
-                sizer->Add(new wxStaticText(formatOptionsContainer,
-                    wxID_ANY,
-                    "(no options for this format)"));
+            if (formatSelection == wxNOT_FOUND)
+                sizer->Add(new wxStaticText(
+                    formatOptionsContainer, wxID_ANY, "(no format selected)"));
             else
-                for (auto& option : config.option())
-                {
-                    auto* choice = new wxCheckBox(
-                        formatOptionsContainer, wxID_ANY, option.comment());
-                    auto key = std::make_pair(formatName, option.name());
-                    sizer->Add(choice);
+            {
+                config.Clear();
+                std::string formatName =
+                    _formatNames[formatChoice->GetSelection()];
+                FlagGroup::parseConfigFile(formatName, formats);
 
-                    if (_formatOptions.find(key) != _formatOptions.end())
-                        choice->SetValue(true);
+                if (config.option().empty())
+                    sizer->Add(new wxStaticText(formatOptionsContainer,
+                        wxID_ANY,
+                        "(no options for this format)"));
+                else
+                    for (auto& option : config.option())
+                    {
+                        auto* choice = new wxCheckBox(
+                            formatOptionsContainer, wxID_ANY, option.comment());
+                        auto key = std::make_pair(formatName, option.name());
+                        sizer->Add(choice);
 
-                    choice->Bind(wxEVT_CHECKBOX,
-                        [this, choice, key](wxCommandEvent& e)
-                        {
-                            if (choice->GetValue())
-                                _formatOptions.insert(key);
-                            else
-                                _formatOptions.erase(key);
+                        if (_formatOptions.find(key) != _formatOptions.end())
+                            choice->SetValue(true);
 
-                            OnControlsChanged(e);
-                        });
-                }
+                        choice->Bind(wxEVT_CHECKBOX,
+                            [this, choice, key](wxCommandEvent& e)
+                            {
+                                if (choice->GetValue())
+                                    _formatOptions.insert(key);
+                                else
+                                    _formatOptions.erase(key);
+
+                                OnControlsChanged(e);
+                            });
+                    }
+            }
+
+            formatOptionsContainer->SetSizerAndFit(sizer);
+            idlePanel->Layout();
         }
-
-        formatOptionsContainer->SetSizerAndFit(sizer);
-        idlePanel->Layout();
     }
 
     void OnTrackSelection(TrackSelectionEvent& event)
@@ -1813,6 +1818,7 @@ private:
     bool _explorerUpdatePending;
     std::unique_ptr<const Fluxmap> _explorerFluxmap;
     std::set<std::pair<std::string, std::string>> _formatOptions;
+    int _currentlyDisplayedFormat = wxNOT_FOUND - 1;
 };
 
 wxWindow* FluxEngineApp::CreateMainWindow()
