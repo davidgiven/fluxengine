@@ -28,6 +28,7 @@ class AppledosFilesystem : public Filesystem
             for (char& c : filename)
                 c &= 0x7f;
             filename = rightTrimWhitespace(filename);
+            path = {filename};
 
             file_type = TYPE_FILE;
 
