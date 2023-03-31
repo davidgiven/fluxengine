@@ -481,6 +481,9 @@ public:
             visualiser->Clear();
             _filesystemModel->Clear(Path());
             _currentDisk = nullptr;
+            _filesystemCapabilities = 0;
+            _filesystemIsReadOnly = true;
+            _filesystemNeedsFlushing = false;
 
             _state = STATE_BROWSING_WORKING;
             UpdateState();

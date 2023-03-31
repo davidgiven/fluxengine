@@ -30,7 +30,9 @@ private:
 
         std::unique_ptr<const Fluxmap> next()
         {
-            usbSetDrive(config.drive().drive(), config.drive().high_density(), config.drive().index_mode());
+            usbSetDrive(config.drive().drive(),
+                config.drive().high_density(),
+                config.drive().index_mode());
             usbSeek(_track);
 
             Bytes data = usbRead(_head,
@@ -51,7 +53,7 @@ private:
 public:
     HardwareFluxSource(const HardwareFluxSourceProto& conf): _config(conf)
     {
-    	measureDiskRotation(_oneRevolution, _hardSectorThreshold);
+        measureDiskRotation(_oneRevolution, _hardSectorThreshold);
     }
 
     ~HardwareFluxSource() {}
@@ -59,13 +61,17 @@ public:
 public:
     std::unique_ptr<FluxSourceIterator> readFlux(int track, int head) override
     {
-        return std::make_unique<HardwareFluxSourceIterator>(
-            *this, track, head);
+        return std::make_unique<HardwareFluxSourceIterator>(*this, track, head);
     }
 
     void recalibrate() override
     {
         usbRecalibrate();
+    }
+
+    void seek(int track) override
+    {
+        usbSeek(track);
     }
 
     bool isHardware() override

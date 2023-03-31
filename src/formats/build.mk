@@ -61,6 +61,7 @@ FORMATS = \
 	northstar175 \
 	northstar350 \
 	northstar87 \
+	pme68_800 \
 	rx50 \
 	shugart_drive \
 	smaky6 \

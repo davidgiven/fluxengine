@@ -61,7 +61,14 @@ message ProdosProto {}
 
 message Smaky6FsProto {}
 
-// NEXT_TAG: 12
+message PhileProto {
+	optional uint32 block_size = 1 [
+		default = 1024,
+		(help) = "Phile filesystem block size"
+	];
+}
+
+// NEXT_TAG: 13
 message FilesystemProto
 {
     enum FilesystemType {
@@ -75,6 +82,7 @@ message FilesystemProto
         CBMFS = 7;
         PRODOS = 8;
 		SMAKY6 = 9;
+		PHILE = 10;
     }
 
     optional FilesystemType type = 10 [default = NOT_SET, (help) = "filesystem type"];
@@ -88,6 +96,7 @@ message FilesystemProto
     optional CbmfsProto cbmfs = 7;
     optional ProdosProto prodos = 8;
 	optional Smaky6FsProto smaky6 = 11;
+	optional PhileProto phile = 12;
     
     optional SectorListProto sector_order = 9 [(help) = "specify the filesystem order of sectors"];
 }

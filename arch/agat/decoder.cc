@@ -33,10 +33,7 @@
  *
  */
 
-static const uint64_t SECTOR_ID = 0x8924555549111444;
 static const FluxPattern SECTOR_PATTERN(64, SECTOR_ID);
-
-static const uint64_t DATA_ID = 0x8924555514444911;
 static const FluxPattern DATA_PATTERN(64, DATA_ID);
 
 static const FluxMatchers ALL_PATTERNS = {

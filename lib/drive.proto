@@ -35,6 +35,15 @@ message DriveProto
     optional int32 tpi = 11 [ default = 96, (help) = "TPI of drive" ];
     optional double rotational_period_ms = 12
         [ default = 0, (help) = "Rotational period of the drive in milliseconds (0 to autodetect)"];
+
+    enum ErrorBehaviour {
+        NOTHING = 0;
+        JIGGLE = 1;
+        RECALIBRATE = 2;
+    }
+
+    optional ErrorBehaviour error_behaviour = 15
+        [ default = JIGGLE, (help) = "what to do when an error occurs during reads" ];
 }
 
 // vim: ts=4 sw=4 et

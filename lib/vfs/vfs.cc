@@ -206,6 +206,9 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystem(
         case FilesystemProto::SMAKY6:
             return Filesystem::createSmaky6Filesystem(config, image);
 
+        case FilesystemProto::PHILE:
+            return Filesystem::createPhileFilesystem(config, image);
+
         default:
             Error() << "no filesystem configured";
             return std::unique_ptr<Filesystem>();
