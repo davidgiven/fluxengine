@@ -28,7 +28,7 @@ tpi: 96
 
 option {
 	name: "side1"
-	comment: "reads the volume on side 1 of a disk"
+	comment: "read the volume on side 1 of a disk (AppleDOS only)"
 	message: "accessing volume on side 1"
 
 	config {

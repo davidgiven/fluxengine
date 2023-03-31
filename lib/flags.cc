@@ -55,29 +55,37 @@ static bool setFallbackFlag(
         }
         else
         {
-            for (const auto& configs : config.option())
-            {
-                if (path == configs.name())
-                {
-                    if (configs.config().option_size() > 0)
-                        Error() << fmt::format(
-                            "option '{}' has an option inside it, which isn't "
-                            "allowed",
-                            path);
-                    if (configs.config().include_size() > 0)
-                        Error() << fmt::format(
-                            "option '{}' is trying to include something, which "
-                            "isn't allowed",
-                            path);
-
-                    Logger() << fmt::format("OPTION: {}", configs.message());
-                    config.MergeFrom(configs.config());
-                    return false;
-                }
-            }
+            if (FlagGroup::applyOption(path))
+                return false;
         }
     }
     Error() << "unrecognised flag; try --help";
+}
+
+bool FlagGroup::applyOption(const std::string& option)
+{
+    for (const auto& configs : config.option())
+    {
+        if (option == configs.name())
+        {
+            if (configs.config().option_size() > 0)
+                Error() << fmt::format(
+                    "option '{}' has an option inside it, which isn't "
+                    "allowed",
+                    option);
+            if (configs.config().include_size() > 0)
+                Error() << fmt::format(
+                    "option '{}' is trying to include something, which "
+                    "isn't allowed",
+                    option);
+
+            Logger() << fmt::format("OPTION: {}", configs.message());
+            config.MergeFrom(configs.config());
+            return true;
+        }
+    }
+
+    return false;
 }
 
 std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc,

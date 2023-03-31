@@ -115,7 +115,17 @@ void runOnWorkerThread(std::function<void()> callback)
     wxGetApp().RunOnWorkerThread(callback);
 }
 
-bool FluxEngineApp::IsWorkerThreadRunning() const
+bool isWorkerThread()
+{
+    return wxGetApp().IsWorkerThread();
+}
+
+bool FluxEngineApp::IsWorkerThread()
+{
+    return wxThread::GetCurrentId() != wxThread::GetMainId();
+}
+
+bool FluxEngineApp::IsWorkerThreadRunning()
 {
     return !!_callback;
 }

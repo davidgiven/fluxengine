@@ -9,6 +9,7 @@ class MainWindow;
 extern void postToUiThread(std::function<void()> callback);
 extern void runOnUiThread(std::function<void()> callback);
 extern void runOnWorkerThread(std::function<void()> callback);
+extern bool isWorkerThread();
 
 wxDECLARE_EVENT(UPDATE_STATE_EVENT, wxCommandEvent);
 
@@ -34,7 +35,8 @@ private:
     void OnExec(const ExecEvent& event);
 
 public:
-    bool IsWorkerThreadRunning() const;
+	bool IsWorkerThread();
+    bool IsWorkerThreadRunning();
 
 protected:
     virtual wxThread::ExitCode Entry();

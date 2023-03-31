@@ -77,6 +77,8 @@ class MainWindowGen : public wxFrame
 		wxPanel* m_panel11;
 		wxChoice* formatChoice;
 		wxButton* customConfigurationButton;
+		wxStaticText* m_staticText232;
+		wxPanel* formatOptionsContainer;
 		wxStaticText* m_staticText19;
 		wxButton* readButton;
 		wxButton* writeButton;
