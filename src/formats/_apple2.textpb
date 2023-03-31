@@ -1,0 +1,193 @@
+comment: 'Apple II generic settings'
+is_extension: true
+
+drive {
+	high_density: false
+}
+	
+decoder {
+	apple2 {}
+}
+
+encoder {
+	apple2 {}
+}
+
+option {
+	name: "appledos"
+	comment: "specifies AppleDOS soft sector skew for filesystem access and images"
+	message: "compensating for AppleDOS soft sector skew"
+		
+	config {
+		image_reader {
+			filesystem_sector_order: true
+		}
+		
+		image_writer {
+			filesystem_sector_order: true
+		}
+	
+		filesystem {
+			type: APPLEDOS
+		}
+
+		layout {
+			layoutdata {
+				filesystem {
+					sector:  0
+					sector: 13
+					sector: 11
+					sector:  9
+					sector:  7
+					sector:  5
+					sector:  3
+					sector:  1
+					sector: 14
+					sector: 12
+					sector: 10
+					sector:  8
+					sector:  6
+					sector:  4
+					sector:  2
+					sector: 15
+				}
+			}
+		}
+	}
+}
+
+option {
+	name: "prodos"
+	comment: "specifies ProDOS soft sector skew for filesystem access and images"
+	message: "compensating for ProDOS soft sector skew"
+		
+	config {
+		image_reader {
+			filesystem_sector_order: true
+		}
+		
+		image_writer {
+			filesystem_sector_order: true
+		}
+	
+		filesystem {
+			type: PRODOS
+		}
+
+		layout {
+			layoutdata {
+				filesystem {
+					sector:  0
+					sector:  2
+					sector:  4
+					sector:  6
+					sector:  8
+					sector: 10
+					sector: 12
+					sector: 14
+					sector:  1
+					sector:  3
+					sector:  5
+					sector:  7
+					sector:  9
+					sector: 11
+					sector: 13
+					sector: 15
+				}
+			}
+		}
+	}
+}
+
+option {
+	name: "cpm"
+	comment: "specifies CP/M soft sector skew for filesystem access and images"
+	message: "compensating for CP/M soft sector skew"
+		
+	config {
+		image_reader {
+			filesystem_sector_order: true
+		}
+		
+		image_writer {
+			filesystem_sector_order: true
+		}
+	
+		filesystem {
+			type: CPMFS
+			cpmfs {
+				filesystem_start {
+					track: 3
+				}
+				block_size: 4096
+				dir_entries: 128
+			}
+		}
+
+		decoder {
+			apple2 {
+				side_one_track_offset: 80
+			}
+		}
+
+		encoder {
+			apple2 {
+				side_one_track_offset: 80
+			}
+		}
+
+		layout {
+			layoutdata {
+				# The boot tracks use ProDOS translation.
+
+				track: 0
+				up_to_track: 2
+				filesystem {
+					sector:  0
+					sector:  2
+					sector:  4
+					sector:  6
+					sector:  8
+					sector: 10
+					sector: 12
+					sector: 14
+					sector:  1
+					sector:  3
+					sector:  5
+					sector:  7
+					sector:  9
+					sector: 11
+					sector: 13
+					sector: 15
+				}
+			}
+
+			layoutdata {
+				# The data tracks use their own, special translation.
+
+				track: 3
+				up_to_track: 79
+				filesystem {
+					sector:  0
+					sector:  3
+					sector:  6
+					sector:  9
+					sector: 12
+					sector: 15
+					sector:  2
+					sector:  5
+					sector:  8
+					sector: 11
+					sector: 14
+					sector:  1
+					sector:  4
+					sector:  7
+					sector: 10
+					sector: 13
+				}
+			}
+		}
+	}
+}
+
+
