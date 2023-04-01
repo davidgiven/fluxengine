@@ -464,6 +464,20 @@ MainWindowGen::MainWindowGen( wxWindow* parent, wxWindowID id, const wxString& t
 	explorerReverseCheckBox = new wxCheckBox( explorePanel, wxID_ANY, wxT("Reverse bytes"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer10->Add( explorerReverseCheckBox, 0, wxALL, 5 );
 
+	m_staticText261 = new wxStaticText( explorePanel, wxID_ANY, wxT("Search string"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText261->Wrap( -1 );
+	fgSizer10->Add( m_staticText261, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	explorerSearchText = new wxTextCtrl( explorePanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	fgSizer10->Add( explorerSearchText, 0, wxALL|wxEXPAND, 5 );
+
+	m_staticText29 = new wxStaticText( explorePanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText29->Wrap( -1 );
+	fgSizer10->Add( m_staticText29, 0, wxALL, 5 );
+
+	explorerSearchButton = new wxButton( explorePanel, wxID_ANY, wxT("Start search"), wxDefaultPosition, wxDefaultSize, 0 );
+	fgSizer10->Add( explorerSearchButton, 0, wxALL|wxRIGHT, 5 );
+
 
 	fgSizer12->Add( fgSizer10, 1, wxEXPAND, 5 );
 
