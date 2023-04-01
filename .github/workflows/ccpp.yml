@@ -27,6 +27,21 @@ jobs:
         name: ${{ github.event.repository.name }}.${{ github.sha }}
         path: FluxEngine.pkg
 
+  build-macos:
+    runs-on: macos-10.15
+    steps:
+    - uses: actions/checkout@v2
+    - name: brew
+      run: brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg
+    - name: make
+      run: gmake
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.event.repository.name }}.${{ github.sha }}
+        path: FluxEngine.pkg
+
   build-windows:
     runs-on: windows-latest
     defaults:
