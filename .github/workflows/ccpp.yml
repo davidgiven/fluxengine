@@ -9,7 +9,7 @@ jobs:
     - uses: actions/checkout@v1
     - name: apt
       run: sudo apt update && sudo apt install libudev-dev libsqlite3-dev protobuf-compiler libwxgtk3.0-gtk3-dev libfmt-dev
-    - name: make
+    - name: make -j2
       run: CXXFLAGS="-Wp,-D_GLIBCXX_ASSERTIONS" make
 
   build-macos-current:
@@ -19,7 +19,7 @@ jobs:
     - name: brew
       run: brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg
     - name: make
-      run: gmake
+      run: gmake -j2
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v2
@@ -34,7 +34,7 @@ jobs:
     - name: brew
       run: brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg
     - name: make
-      run: gmake
+      run: gmake -j2
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v2
@@ -67,7 +67,7 @@ jobs:
           zip
     - uses: actions/checkout@v1
     - name: build
-      run: make
+      run: make -j2
 
     - name: nsis
       run: |
