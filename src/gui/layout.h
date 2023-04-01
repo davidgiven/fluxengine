@@ -132,6 +132,10 @@ class MainWindowGen : public wxFrame
 		wxChoice* explorerDecodeChoice;
 		wxStaticText* m_staticText241;
 		wxCheckBox* explorerReverseCheckBox;
+		wxStaticText* m_staticText261;
+		wxTextCtrl* explorerSearchText;
+		wxStaticText* m_staticText29;
+		wxButton* explorerSearchButton;
 		wxTextCtrl* explorerText;
 
 		// Virtual event handlers, override them in your derived class
