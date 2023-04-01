@@ -34,13 +34,15 @@ jobs:
     - name: brew
       run: brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg
     - name: make
-      run: gmake -j2
+      run: |
+        gmake -j2
+        mv FluxEngine.pkg FluxEngine-10.15.pkg
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v2
       with:
         name: ${{ github.event.repository.name }}.${{ github.sha }}
-        path: FluxEngine.pkg
+        path: FluxEngine-10.15.pkg
 
   build-windows:
     runs-on: windows-latest
