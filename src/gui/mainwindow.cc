@@ -72,6 +72,48 @@ public:
             {
                 emergencyStop = true;
             });
+
+        _panelComponents[0] = _idlePanel =
+            IdlePanel::Create(this, dataNotebook);
+        _panelComponents[1] = _imagerPanel =
+            ImagerPanel::Create(this, dataNotebook);
+        _panelComponents[2] = _browserPanel =
+            BrowserPanel::Create(this, dataNotebook);
+        _panelComponents[3] = _explorerPanel =
+            ExplorerPanel::Create(this, dataNotebook);
+
+        Layout();
+        StartIdle();
+    }
+
+    void StartIdle()
+    {
+        _idlePanel->Start();
+    }
+
+    void StartReading()
+    {
+        _imagerPanel->StartReading();
+    }
+
+    void StartWriting()
+    {
+        _imagerPanel->StartWriting();
+    }
+
+    void StartBrowsing()
+    {
+        _browserPanel->StartBrowsing();
+    }
+
+    void StartFormatting()
+    {
+        _browserPanel->StartFormatting();
+    }
+
+    void StartExploring()
+    {
+        _explorerPanel->Start();
     }
 
     void OnShowLogWindow(wxCommandEvent& event) override
@@ -307,9 +349,11 @@ private:
         bool quickFormat;
     };
 
-    std::vector<PanelComponent*> _panelComponents;
+    PanelComponent* _panelComponents[4];
     IdlePanel* _idlePanel;
     ImagerPanel* _imagerPanel;
+    BrowserPanel* _browserPanel;
+    ExplorerPanel* _explorerPanel;
     int _page = PAGE_IDLE;
     int _state = 0;
     CustomStatusBar* _statusBar;

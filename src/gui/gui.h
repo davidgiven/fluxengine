@@ -6,6 +6,7 @@
 class ExecEvent;
 class DiskFlux;
 class TrackFlux;
+class wxSimplebook;
 
 extern void postToUiThread(std::function<void()> callback);
 extern void runOnUiThread(std::function<void()> callback);
@@ -72,10 +73,13 @@ public:
         PAGE_EXPLORER,
     };
 
-    void GoIdle()
-    {
-        SetPage(PAGE_IDLE);
-    }
+    virtual void StartIdle() = 0;
+    virtual void StartReading() = 0;
+    virtual void StartWriting() = 0;
+    virtual void StartBrowsing() = 0;
+    virtual void StartFormatting() = 0;
+    virtual void StartExploring() = 0;
+
     virtual void SetPage(int page) = 0;
     virtual void PrepareConfig() = 0;
     virtual void ClearLog() = 0;
@@ -84,12 +88,59 @@ public:
 class PanelComponent
 {
 public:
+    PanelComponent(MainWindow* mainWindow): _mainWindow(mainWindow) {}
+
     virtual void SwitchTo(){};
     virtual void SwitchFrom(){};
+
+    void PrepareConfig()
+    {
+        _mainWindow->PrepareConfig();
+    }
+    void SetPage(int page)
+    {
+        _mainWindow->SetPage(page);
+    }
+    void ClearLog()
+    {
+        _mainWindow->ClearLog();
+    }
+
+    void StartIdle()
+    {
+        _mainWindow->StartIdle();
+    }
+    void StartReading()
+    {
+        _mainWindow->StartReading();
+    }
+    void StartWriting()
+    {
+        _mainWindow->StartWriting();
+    }
+    void StartBrowsing()
+    {
+        _mainWindow->StartBrowsing();
+    }
+    void StartFormatting()
+    {
+        _mainWindow->StartFormatting();
+    }
+    void StartExploring()
+    {
+        _mainWindow->StartExploring();
+    }
+
+private:
+    MainWindow* _mainWindow;
 };
 
 class IdlePanel : public PanelComponent
 {
+public:
+    static IdlePanel* Create(MainWindow* mainWindow, wxSimplebook* parent);
+    IdlePanel(MainWindow* mainWindow): PanelComponent(mainWindow) {}
+
 public:
     virtual void Start() = 0;
 
@@ -98,6 +149,10 @@ public:
 
 class ImagerPanel : public PanelComponent
 {
+public:
+    static ImagerPanel* Create(MainWindow* mainWindow, wxSimplebook* parent);
+    ImagerPanel(MainWindow* mainWindow): PanelComponent(mainWindow) {}
+
 public:
     enum
     {
@@ -120,12 +175,20 @@ public:
 class BrowserPanel : public PanelComponent
 {
 public:
+    static BrowserPanel* Create(MainWindow* mainWindow, wxSimplebook* parent);
+    BrowserPanel(MainWindow* mainWindow): PanelComponent(mainWindow) {}
+
+public:
     virtual void StartBrowsing() = 0;
     virtual void StartFormatting() = 0;
 };
 
 class ExplorerPanel : public PanelComponent
 {
+public:
+    static ExplorerPanel* Create(MainWindow* mainWindow, wxSimplebook* parent);
+    ExplorerPanel(MainWindow* mainWindow): PanelComponent(mainWindow) {}
+
 public:
     virtual void Start() = 0;
 };

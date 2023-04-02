@@ -42,9 +42,9 @@ class IdlePanelImpl : public IdlePanelGen, public IdlePanel
     };
 
 public:
-    IdlePanelImpl(MainWindow* mainWindow, wxWindow* parent):
+    IdlePanelImpl(MainWindow* mainWindow, wxSimplebook* parent):
         IdlePanelGen(parent),
-        _mainWindow(mainWindow),
+        IdlePanel(mainWindow),
         _config("FluxEngine")
     {
         int defaultFormat = 0;
@@ -72,9 +72,16 @@ public:
         LoadConfig();
         UpdateDevices();
         UpdateFormatOptions();
+
+        parent->AddPage(this, "idle");
     }
 
 public:
+    void Start() override
+    {
+        SetPage(MainWindow::PAGE_IDLE);
+    }
+
     void UpdateState()
     {
         bool hasFormat = formatChoice->GetSelection() != wxNOT_FOUND;
@@ -91,6 +98,31 @@ public:
     }
 
 public:
+    void OnReadButton(wxCommandEvent&) override
+    {
+        StartReading();
+    }
+
+    void OnWriteButton(wxCommandEvent&) override
+    {
+        StartWriting();
+    }
+
+    void OnBrowseButton(wxCommandEvent&) override
+    {
+        StartBrowsing();
+    }
+
+    void OnFormatButton(wxCommandEvent&) override
+    {
+        StartFormatting();
+    }
+
+    void OnExploreButton(wxCommandEvent&) override
+    {
+        StartExploring();
+    }
+
     void OnConfigRadioButtonClicked(wxCommandEvent& event) override
     {
         auto configRadioButton = [&](wxRadioButton* button, wxPanel* panel)
@@ -187,7 +219,7 @@ public:
         else
             setProtoByString(&config, "usb.serial", serial);
 
-        _mainWindow->ClearLog();
+        ClearLog();
 
         /* Apply the source/destination. */
 
@@ -511,7 +543,6 @@ private:
     }
 
 private:
-    MainWindow* _mainWindow;
     wxConfig _config;
     std::vector<std::string> _formatNames;
     std::vector<std::unique_ptr<const CandidateDevice>> _devices;
@@ -521,3 +552,8 @@ private:
     std::set<std::pair<std::string, std::string>> _formatOptions;
     int _currentlyDisplayedFormat = wxNOT_FOUND - 1;
 };
+
+IdlePanel* IdlePanel::Create(MainWindow* mainWindow, wxSimplebook* parent)
+{
+    return new IdlePanelImpl(mainWindow, parent);
+}
