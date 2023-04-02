@@ -15,8 +15,9 @@ class BrowserPanelImpl : public BrowserPanelGen, public BrowserPanel, JobQueue
 {
     enum
     {
-        STATE_BROWSING_WORKING,
-        STATE_BROWSING_IDLE,
+        STATE_DEAD,
+        STATE_WORKING,
+        STATE_IDLE,
     };
 
 public:
@@ -70,6 +71,11 @@ private:
         }
     }
 
+    void SwitchFrom() override
+    {
+        SetState(STATE_DEAD);
+    }
+
 public:
     void StartBrowsing() override
     {
@@ -83,7 +89,7 @@ public:
             _filesystemIsReadOnly = true;
             _filesystemNeedsFlushing = false;
 
-            SetState(STATE_BROWSING_WORKING);
+            SetState(STATE_WORKING);
 
             QueueJob(
                 [this]()
@@ -118,7 +124,7 @@ public:
             _filesystemIsReadOnly = true;
             _filesystemNeedsFlushing = false;
 
-            SetState(STATE_BROWSING_WORKING);
+            SetState(STATE_WORKING);
 
             QueueJob(
                 [this]()
@@ -144,12 +150,12 @@ public:
 
     void OnQueueEmpty() override
     {
-        SetState(STATE_BROWSING_IDLE);
+        SetState(STATE_IDLE);
     }
 
     void QueueJob(std::function<void(void)> f)
     {
-        SetState(STATE_BROWSING_WORKING);
+        SetState(STATE_WORKING);
         JobQueue::QueueJob(f);
     }
 
@@ -160,7 +166,7 @@ private:
         bool selection = browserTree->GetSelection().IsOk();
 
         browserToolbar->EnableTool(
-            browserBackTool->GetId(), _state == STATE_BROWSING_IDLE);
+            browserBackTool->GetId(), _state == STATE_IDLE);
 
         uint32_t c = _filesystemCapabilities;
         bool ro = _filesystemIsReadOnly;
@@ -185,6 +191,8 @@ private:
 
         browserDiscardButton->Enable(!running && needsFlushing);
         browserCommitButton->Enable(!running && needsFlushing);
+
+        browserToolbar->Refresh();
     }
 
     void OnBrowserMoreMenuButton(wxAuiToolBarEvent& event)
@@ -669,7 +677,7 @@ private:
     }
 
 private:
-    int _state;
+    int _state = STATE_DEAD;
     std::unique_ptr<Filesystem> _filesystem;
     uint32_t _filesystemCapabilities;
     bool _filesystemIsReadOnly;
