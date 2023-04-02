@@ -265,6 +265,11 @@ public:
         }
     }
 
+	const wxBitmap GetBitmap() override
+	{
+		return applicationBitmap->GetBitmap();
+	}
+
 private:
     void LoadConfig()
     {
