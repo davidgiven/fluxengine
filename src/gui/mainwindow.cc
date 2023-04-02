@@ -82,7 +82,7 @@ public:
 
         StartIdle();
         Layout();
-		Fit();
+        Fit();
     }
 
     void StartIdle()
