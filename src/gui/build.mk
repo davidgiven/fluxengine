@@ -1,16 +1,21 @@
 ifneq ($(shell $(WX_CONFIG) --version),)
 
 FLUXENGINE_GUI_SRCS = \
+	src/gui/browserpanel.cc \
 	src/gui/customstatusbar.cc \
+	src/gui/explorerpanel.cc \
 	src/gui/filesystemmodel.cc \
+	src/gui/fileviewerwindow.cc \
 	src/gui/fluxviewercontrol.cc \
 	src/gui/fluxviewerwindow.cc \
+	src/gui/idlepanel.cc \
+	src/gui/imagerpanel.cc \
+	src/gui/jobqueue.cc \
 	src/gui/layout.cpp \
 	src/gui/main.cc \
 	src/gui/mainwindow.cc \
 	src/gui/texteditorwindow.cc \
 	src/gui/textviewerwindow.cc \
-	src/gui/fileviewerwindow.cc \
 	src/gui/visualisationcontrol.cc \
  
 FLUXENGINE_GUI_OBJS = \
