@@ -85,6 +85,9 @@ public:
 			m_listbook2->AddPage(panel, fmt::format("page {}", i),
 				false);
 			m_listbook2->SetPageImage(i, 0);
+
+			new wxButton(panel, wxID_ANY, "button");
+
 		}
     }
 
