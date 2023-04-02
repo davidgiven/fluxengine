@@ -36,10 +36,7 @@
 #include <wx/listbook.h>
 #include <wx/listctrl.h>
 #include <wx/imaglist.h>
-#include <wx/radiobut.h>
-#include <wx/combobox.h>
 #include <wx/choice.h>
-#include <wx/scrolwin.h>
 #include <wx/aui/aui.h>
 #include <wx/aui/auibar.h>
 #include "visualisationcontrol.h"
@@ -313,22 +310,9 @@ class IdlePanelGen : public wxPanel
 	private:
 
 	protected:
-		wxScrolledWindow* m_scrolledWindow1;
 		wxStaticBitmap* applicationBitmap;
 		wxStaticText* m_staticText61;
 		wxListbook* sourceListBook;
-		wxRadioButton* realDiskRadioButton;
-		wxPanel* realDiskRadioButtonPanel;
-		wxComboBox* deviceCombo;
-		wxChoice* driveChoice;
-		wxCheckBox* highDensityToggle;
-		wxCheckBox* fortyTrackDriveToggle;
-		wxRadioButton* fluxImageRadioButton;
-		wxPanel* fluxImageRadioButtonPanel;
-		wxFilePickerCtrl* fluxImagePicker;
-		wxRadioButton* diskImageRadioButton;
-		wxPanel* diskImageRadioButtonPanel;
-		wxFilePickerCtrl* diskImagePicker;
 		wxStaticText* m_staticText23;
 		wxPanel* m_panel11;
 		wxChoice* formatChoice;
@@ -343,9 +327,8 @@ class IdlePanelGen : public wxPanel
 		wxButton* exploreButton;
 
 		// Virtual event handlers, override them in your derived class
-		virtual void OnConfigRadioButtonClicked( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSourceListPageChanged( wxListbookEvent& event ) { event.Skip(); }
 		virtual void OnControlsChanged( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnControlsChanged( wxFileDirPickerEvent& event ) { event.Skip(); }
 		virtual void OnCustomConfigurationButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnReadButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnWriteButton( wxCommandEvent& event ) { event.Skip(); }
@@ -356,7 +339,7 @@ class IdlePanelGen : public wxPanel
 
 	public:
 
-		IdlePanelGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 628,447 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
+		IdlePanelGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 684,495 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
 
 		~IdlePanelGen();
 
@@ -503,6 +486,62 @@ class ExplorerPanelGen : public wxPanel
 		ExplorerPanelGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 620,426 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
 
 		~ExplorerPanelGen();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class HardwareSourcePanelGen
+///////////////////////////////////////////////////////////////////////////////
+class HardwareSourcePanelGen : public wxPanel
+{
+	private:
+
+	protected:
+
+	public:
+		wxCheckBox* highDensityToggle;
+		wxCheckBox* fortyTrackDriveToggle;
+
+		HardwareSourcePanelGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
+
+		~HardwareSourcePanelGen();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class FluxfileSourcePanelGen
+///////////////////////////////////////////////////////////////////////////////
+class FluxfileSourcePanelGen : public wxPanel
+{
+	private:
+
+	protected:
+
+	public:
+		wxFilePickerCtrl* fluxImagePicker;
+
+		FluxfileSourcePanelGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
+
+		~FluxfileSourcePanelGen();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class ImagefileSourcePanelGen
+///////////////////////////////////////////////////////////////////////////////
+class ImagefileSourcePanelGen : public wxPanel
+{
+	private:
+
+	protected:
+		wxStaticText* m_staticText27;
+
+	public:
+		wxFilePickerCtrl* diskImagePicker;
+
+		ImagefileSourcePanelGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
+
+		~ImagefileSourcePanelGen();
 
 };
 

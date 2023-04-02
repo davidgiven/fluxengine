@@ -38,11 +38,13 @@ const std::string DEFAULT_EXTRA_CONFIGURATION =
     "# or the name of a built-in configuration, or the filename\n"
     "# of a text proto file. Or a comment, of course.\n\n";
 
+wxDEFINE_EVENT(PAGE_SELECTED_EVENT, wxCommandEvent);
+
 static wxBitmap createBitmap(const uint8_t* data, size_t length)
 {
-	wxMemoryInputStream stream(data, length);
-	wxImage image(stream, wxBITMAP_TYPE_PNG);
-	return wxBitmap(image);
+    wxMemoryInputStream stream(data, length);
+    wxImage image(stream, wxBITMAP_TYPE_PNG);
+    return wxBitmap(image);
 }
 
 class IdlePanelImpl : public IdlePanelGen, public IdlePanel
@@ -54,11 +56,18 @@ class IdlePanelImpl : public IdlePanelGen, public IdlePanel
         SELECTEDSOURCE_IMAGE
     };
 
+    enum
+    {
+        ICON_HARDWARE,
+        ICON_FLUXFILE,
+        ICON_IMAGEFILE
+    };
+
 public:
     IdlePanelImpl(MainWindow* mainWindow, wxSimplebook* parent):
         IdlePanelGen(parent),
         IdlePanel(mainWindow),
-		_imageList(48, 48, true, 0),
+        _imageList(48, 48, true, 0),
         _config("FluxEngine")
     {
         int defaultFormat = 0;
@@ -76,36 +85,25 @@ public:
             i++;
         }
 
-        /* I have no idea why this is necessary, but on Windows things aren't
-         * laid out correctly without it. */
-
-        realDiskRadioButtonPanel->Hide();
-        fluxImageRadioButtonPanel->Hide();
-        diskImageRadioButtonPanel->Hide();
-
         LoadConfig();
         UpdateDevices();
         UpdateFormatOptions();
 
         parent->AddPage(this, "idle");
-		
-		auto* sourceList = sourceListBook->GetListView();
-		sourceList->SetFont(sourceList->GetFont().MakeSmaller().MakeSmaller().MakeSmaller());
 
-		_imageList.Add(createBitmap(extras_hardware_png, sizeof(extras_hardware_png)));
-		_imageList.Add(createBitmap(extras_fluxfile_png, sizeof(extras_fluxfile_png)));
-		_imageList.Add(createBitmap(extras_imagefile_png, sizeof(extras_imagefile_png)));
-		sourceListBook->SetImageList(&_imageList);
+        auto* sourceList = sourceListBook->GetListView();
+        sourceList->SetFont(
+            sourceList->GetFont().MakeSmaller().MakeSmaller().MakeSmaller());
 
-		for (int i=0; i<3; i++)
-		{
-			auto* panel = new wxPanel(sourceListBook);
-			sourceListBook->AddPage(panel, fmt::format("page {}\nmultiline", i),
-				false, i);
+        _imageList.Add(
+            createBitmap(extras_hardware_png, sizeof(extras_hardware_png)));
+        _imageList.Add(
+            createBitmap(extras_fluxfile_png, sizeof(extras_fluxfile_png)));
+        _imageList.Add(
+            createBitmap(extras_imagefile_png, sizeof(extras_imagefile_png)));
+        sourceListBook->SetImageList(&_imageList);
 
-			new wxButton(panel, wxID_ANY, "button");
-
-		}
+        UpdateSources();
     }
 
 public:
@@ -155,27 +153,6 @@ public:
         StartExploring();
     }
 
-    void OnConfigRadioButtonClicked(wxCommandEvent& event) override
-    {
-        auto configRadioButton = [&](wxRadioButton* button, wxPanel* panel)
-        {
-            panel->Show(button->GetValue());
-        };
-        configRadioButton(realDiskRadioButton, realDiskRadioButtonPanel);
-        configRadioButton(fluxImageRadioButton, fluxImageRadioButtonPanel);
-        configRadioButton(diskImageRadioButton, diskImageRadioButtonPanel);
-        Layout();
-
-        if (realDiskRadioButton->GetValue())
-            _selectedSource = SELECTEDSOURCE_REAL;
-        if (fluxImageRadioButton->GetValue())
-            _selectedSource = SELECTEDSOURCE_FLUX;
-        if (diskImageRadioButton->GetValue())
-            _selectedSource = SELECTEDSOURCE_IMAGE;
-
-        OnControlsChanged(event);
-    }
-
     void OnControlsChanged(wxCommandEvent& event) override
     {
         SaveConfig();
@@ -183,7 +160,7 @@ public:
         UpdateFormatOptions();
     }
 
-    void OnControlsChanged(wxFileDirPickerEvent& event) override
+    void OnControlsChanged(wxFileDirPickerEvent& event)
     {
         wxCommandEvent e;
         OnControlsChanged(e);
@@ -245,7 +222,7 @@ public:
 
         /* Locate the device, if any. */
 
-        auto serial = deviceCombo->GetValue().ToStdString();
+        auto serial = _selectedDevice;
         if (!serial.empty() && (serial[0] == '/'))
             setProtoByString(&config, "usb.greaseweazle.port", serial);
         else
@@ -259,14 +236,12 @@ public:
         {
             case SELECTEDSOURCE_REAL:
             {
-                bool hd = highDensityToggle->GetValue();
-                config.mutable_drive()->set_high_density(hd);
+                config.mutable_drive()->set_high_density(_selectedHighDensity);
 
-                if (fortyTrackDriveToggle->GetValue())
+                if (_selectedFortyTrack)
                     FlagGroup::parseConfigFile("40track_drive", formats);
 
-                std::string filename =
-                    driveChoice->GetSelection() ? "drive:1" : "drive:0";
+                std::string filename = _selectedDrive ? "drive:1" : "drive:0";
                 FluxSink::updateConfigForFilename(
                     config.mutable_flux_sink(), filename);
                 FluxSource::updateConfigForFilename(
@@ -277,30 +252,28 @@ public:
 
             case SELECTEDSOURCE_FLUX:
             {
-                auto filename = fluxImagePicker->GetPath().ToStdString();
                 FluxSink::updateConfigForFilename(
-                    config.mutable_flux_sink(), filename);
+                    config.mutable_flux_sink(), _selectedFluxfilename);
                 FluxSource::updateConfigForFilename(
-                    config.mutable_flux_source(), filename);
+                    config.mutable_flux_source(), _selectedFluxfilename);
                 break;
             }
 
             case SELECTEDSOURCE_IMAGE:
             {
-                auto filename = diskImagePicker->GetPath().ToStdString();
                 ImageReader::updateConfigForFilename(
-                    config.mutable_image_reader(), filename);
+                    config.mutable_image_reader(), _selectedImagefilename);
                 ImageWriter::updateConfigForFilename(
-                    config.mutable_image_writer(), filename);
+                    config.mutable_image_writer(), _selectedImagefilename);
                 break;
             }
         }
     }
 
-	const wxBitmap GetBitmap() override
-	{
-		return applicationBitmap->GetBitmap();
-	}
+    const wxBitmap GetBitmap() override
+    {
+        return applicationBitmap->GetBitmap();
+    }
 
 private:
     void LoadConfig()
@@ -312,56 +285,39 @@ private:
 
         /* Radio button config. */
 
-        wxString s = std::to_string(SELECTEDSOURCE_REAL);
+        wxString s = std::to_string(SELECTEDSOURCE_IMAGE);
         _config.Read(CONFIG_SELECTEDSOURCE, &s);
         _selectedSource = std::atoi(s.c_str());
-
-        switch (_selectedSource)
-        {
-            case SELECTEDSOURCE_REAL:
-                realDiskRadioButton->SetValue(1);
-                break;
-
-            case SELECTEDSOURCE_FLUX:
-                fluxImageRadioButton->SetValue(1);
-                break;
-
-            case SELECTEDSOURCE_IMAGE:
-                diskImageRadioButton->SetValue(1);
-                break;
-        }
 
         /* Real disk block. */
 
         s = "";
         _config.Read(CONFIG_DEVICE, &s);
-        deviceCombo->SetValue(s);
-        if (s.empty() && (deviceCombo->GetCount() > 0))
-            deviceCombo->SetValue(deviceCombo->GetString(0));
+        _selectedDevice = s;
 
         s = "0";
         _config.Read(CONFIG_DRIVE, &s);
-        driveChoice->SetSelection(wxAtoi(s));
+        _selectedDrive = wxAtoi(s);
 
         s = "0";
         _config.Read(CONFIG_HIGHDENSITY, &s);
-        highDensityToggle->SetValue(wxAtoi(s));
+        _selectedHighDensity = wxAtoi(s);
 
         s = "0";
         _config.Read(CONFIG_FORTYTRACK, &s);
-        fortyTrackDriveToggle->SetValue(wxAtoi(s));
+        _selectedFortyTrack = wxAtoi(s);
 
         /* Flux image block. */
 
         s = "";
         _config.Read(CONFIG_FLUXIMAGE, &s);
-        fluxImagePicker->SetPath(s);
+        _selectedFluxfilename = s;
 
         /* Disk image block. */
 
         s = "";
         _config.Read(CONFIG_DISKIMAGE, &s);
-        diskImagePicker->SetPath(s);
+        _selectedImagefilename = s;
 
         /* Format block. */
 
@@ -406,7 +362,6 @@ private:
 
         _dontSaveConfig = false;
         wxCommandEvent dummyEvent;
-        OnConfigRadioButtonClicked(dummyEvent);
     }
 
     void SaveConfig()
@@ -419,21 +374,20 @@ private:
 
         /* Real disk block. */
 
-        _config.Write(CONFIG_DEVICE, deviceCombo->GetValue());
-        _config.Write(CONFIG_DRIVE,
-            wxString(std::to_string(driveChoice->GetSelection())));
-        _config.Write(CONFIG_HIGHDENSITY,
-            wxString(std::to_string(highDensityToggle->GetValue())));
-        _config.Write(CONFIG_FORTYTRACK,
-            wxString(std::to_string(fortyTrackDriveToggle->GetValue())));
+        _config.Write(CONFIG_DEVICE, wxString(_selectedDevice));
+        _config.Write(CONFIG_DRIVE, wxString(std::to_string(_selectedDrive)));
+        _config.Write(
+            CONFIG_HIGHDENSITY, wxString(std::to_string(_selectedHighDensity)));
+        _config.Write(
+            CONFIG_FORTYTRACK, wxString(std::to_string(_selectedFortyTrack)));
 
         /* Flux image block. */
 
-        _config.Write(CONFIG_FLUXIMAGE, fluxImagePicker->GetPath());
+        _config.Write(CONFIG_FLUXIMAGE, wxString(_selectedFluxfilename));
 
         /* Disk image block. */
 
-        _config.Write(CONFIG_DISKIMAGE, diskImagePicker->GetPath());
+        _config.Write(CONFIG_DISKIMAGE, wxString(_selectedImagefilename));
 
         /* Format block. */
 
@@ -450,6 +404,101 @@ private:
 
             _config.Write(CONFIG_FORMATOPTIONS, wxString(join(options, ",")));
         }
+    }
+
+    void UpdateSources()
+    {
+        sourceListBook->DeleteAllPages();
+
+        for (auto& device : _devices)
+        {
+            for (int drive = 0; drive <= 1; drive++)
+            {
+                auto* panel = new HardwareSourcePanelGen(sourceListBook);
+                sourceListBook->AddPage(panel,
+                    fmt::format("{}\ndrive:{}", device->serial, drive),
+                    false,
+                    ICON_HARDWARE);
+
+                panel->Bind(PAGE_SELECTED_EVENT,
+                    [=](wxCommandEvent& e)
+                    {
+                        _selectedSource = SELECTEDSOURCE_REAL;
+                        _selectedDevice = device->serial;
+                        _selectedDrive = drive;
+                        OnControlsChanged(e);
+                    });
+
+                panel->highDensityToggle->SetValue(_selectedHighDensity);
+                panel->highDensityToggle->Bind(wxEVT_COMMAND_CHECKBOX_CLICKED,
+                    [=](wxCommandEvent& e)
+                    {
+                        _selectedHighDensity =
+                            panel->highDensityToggle->GetValue();
+                        OnControlsChanged(e);
+                    });
+
+                panel->fortyTrackDriveToggle->SetValue(_selectedFortyTrack);
+                panel->fortyTrackDriveToggle->Bind(
+                    wxEVT_COMMAND_CHECKBOX_CLICKED,
+                    [=](wxCommandEvent& e)
+                    {
+                        _selectedFortyTrack =
+                            panel->fortyTrackDriveToggle->GetValue();
+                        OnControlsChanged(e);
+                    });
+            }
+        }
+
+        {
+            auto* panel = new FluxfileSourcePanelGen(sourceListBook);
+            sourceListBook->AddPage(panel, "Flux file", false, ICON_FLUXFILE);
+
+            panel->Bind(PAGE_SELECTED_EVENT,
+                [=](wxCommandEvent& e)
+                {
+                    _selectedSource = SELECTEDSOURCE_FLUX;
+                    OnControlsChanged(e);
+                });
+
+            panel->fluxImagePicker->SetPath(_selectedFluxfilename);
+            panel->fluxImagePicker->Bind(wxEVT_COMMAND_FILEPICKER_CHANGED,
+                [=](wxFileDirPickerEvent& e)
+                {
+                    _selectedFluxfilename = e.GetPath();
+                    OnControlsChanged(e);
+                });
+        }
+
+        {
+            auto* panel = new ImagefileSourcePanelGen(sourceListBook);
+            sourceListBook->AddPage(panel, "Disk image", false, ICON_IMAGEFILE);
+
+            panel->Bind(PAGE_SELECTED_EVENT,
+                [=](wxCommandEvent& e)
+                {
+                    _selectedSource = SELECTEDSOURCE_IMAGE;
+                    OnControlsChanged(e);
+                });
+
+            panel->diskImagePicker->SetPath(_selectedImagefilename);
+            panel->diskImagePicker->Bind(wxEVT_COMMAND_FILEPICKER_CHANGED,
+                [=](wxFileDirPickerEvent& e)
+                {
+                    _selectedImagefilename = e.GetPath();
+                    OnControlsChanged(e);
+                });
+        }
+
+        sourceListBook->Fit();
+        sourceListBook->Layout();
+    }
+
+    void OnSourceListPageChanged(wxBookCtrlEvent& e)
+    {
+        auto* page = sourceListBook->GetPage(e.GetSelection());
+        auto* event = new wxCommandEvent(PAGE_SELECTED_EVENT, 0);
+        wxQueueEvent(page, event);
     }
 
     void UpdateFormatOptions()
@@ -566,25 +615,23 @@ private:
     void UpdateDevices()
     {
         auto candidates = findUsbDevices();
-
-        auto device = deviceCombo->GetValue();
-        deviceCombo->Clear();
-        deviceCombo->SetValue(device);
-
-        _devices.clear();
         for (auto& candidate : candidates)
-        {
-            deviceCombo->Append(candidate->serial);
-            _devices.push_back(std::move(candidate));
-        }
+            _devices.push_back(candidate);
     }
 
 private:
     wxConfig _config;
-	wxImageList _imageList;
+    wxImageList _imageList;
+    ConfigProto _configProto;
     std::vector<std::string> _formatNames;
-    std::vector<std::unique_ptr<const CandidateDevice>> _devices;
+    std::vector<std::shared_ptr<const CandidateDevice>> _devices;
     int _selectedSource;
+    std::string _selectedDevice;
+    int _selectedDrive;
+    bool _selectedFortyTrack;
+    bool _selectedHighDensity;
+    std::string _selectedFluxfilename;
+    std::string _selectedImagefilename;
     bool _dontSaveConfig = false;
     std::string _extraConfiguration;
     std::set<std::pair<std::string, std::string>> _formatOptions;
