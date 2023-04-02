@@ -1,4 +1,5 @@
 #include "lib/globals.h"
+#include "gui.h"
 #include "lib/fluxmap.h"
 #include "lib/usb/usbfinder.h"
 #include "lib/proto.h"
@@ -8,7 +9,6 @@
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/imagereader/imagereader.h"
 #include "lib/imagewriter/imagewriter.h"
-#include "gui.h"
 #include "layout.h"
 #include "texteditorwindow.h"
 #include <wx/config.h>
