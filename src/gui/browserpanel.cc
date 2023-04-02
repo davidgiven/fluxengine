@@ -20,9 +20,9 @@ class BrowserPanelImpl : public BrowserPanelGen, public BrowserPanel, JobQueue
     };
 
 public:
-    BrowserPanelImpl(MainWindow* mainWindow, wxWindow* parent):
+    BrowserPanelImpl(MainWindow* mainWindow, wxSimplebook* parent):
         BrowserPanelGen(parent),
-        _mainWindow(mainWindow),
+        BrowserPanel(mainWindow),
         /* This is wrong. Apparently the wxDataViewCtrl doesn't work properly
          * with DnD unless the format is wxDF_UNICODETEXT. It should be a custom
          * value. */
@@ -47,11 +47,13 @@ public:
 
         browserTree->EnableDragSource(_dndFormat);
         browserTree->EnableDropTarget(_dndFormat);
+
+        parent->AddPage(this, "browser");
     }
 
     void OnBackButton(wxCommandEvent&) override
     {
-        _mainWindow->GoIdle();
+        StartIdle();
     }
 
 private:
@@ -73,8 +75,8 @@ public:
     {
         try
         {
-            _mainWindow->SetPage(MainWindow::PAGE_BROWSER);
-            _mainWindow->PrepareConfig();
+            SetPage(MainWindow::PAGE_BROWSER);
+            PrepareConfig();
 
             _filesystemModel->Clear(Path());
             _filesystemCapabilities = 0;
@@ -100,7 +102,7 @@ public:
         catch (const ErrorException& e)
         {
             wxMessageBox(e.message, "Error", wxOK | wxICON_ERROR);
-            _mainWindow->GoIdle();
+            StartIdle();
         }
     }
 
@@ -108,8 +110,8 @@ public:
     {
         try
         {
-            _mainWindow->SetPage(MainWindow::PAGE_BROWSER);
-            _mainWindow->PrepareConfig();
+            SetPage(MainWindow::PAGE_BROWSER);
+            PrepareConfig();
 
             _filesystemModel->Clear(Path());
             _filesystemCapabilities = 0;
@@ -136,7 +138,7 @@ public:
         catch (const ErrorException& e)
         {
             wxMessageBox(e.message, "Error", wxOK | wxICON_ERROR);
-            _mainWindow->GoIdle();
+            StartIdle();
         }
     }
 
@@ -667,7 +669,6 @@ private:
     }
 
 private:
-    MainWindow* _mainWindow;
     int _state;
     std::unique_ptr<Filesystem> _filesystem;
     uint32_t _filesystemCapabilities;
@@ -676,3 +677,8 @@ private:
     FilesystemModel* _filesystemModel;
     wxDataFormat _dndFormat;
 };
+
+BrowserPanel* BrowserPanel::Create(MainWindow* mainWindow, wxSimplebook* parent)
+{
+    return new BrowserPanelImpl(mainWindow, parent);
+}

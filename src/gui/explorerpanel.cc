@@ -20,19 +20,20 @@ class ExplorerPanelImpl :
     };
 
 public:
-    ExplorerPanelImpl(MainWindow* mainWindow, wxWindow* parent):
+    ExplorerPanelImpl(MainWindow* mainWindow, wxSimplebook* parent):
         ExplorerPanelGen(parent),
-        _mainWindow(mainWindow)
+        ExplorerPanel(mainWindow)
     {
+        parent->AddPage(this, "explorer");
     }
 
 public:
-    void SwitchTo() override
+    void Start() override
     {
         try
         {
-            _mainWindow->SetPage(MainWindow::PAGE_EXPLORER);
-            _mainWindow->PrepareConfig();
+            SetPage(MainWindow::PAGE_EXPLORER);
+            PrepareConfig();
 
             SetState(STATE_EXPLORING_IDLE);
 
@@ -46,11 +47,9 @@ public:
         catch (const ErrorException& e)
         {
             wxMessageBox(e.message, "Error", wxOK | wxICON_ERROR);
-            _mainWindow->GoIdle();
+            StartIdle();
         }
     }
-
-    void SwitchFrom() override {}
 
     void UpdateState()
     {
@@ -60,7 +59,7 @@ public:
 
     void OnBackButton(wxCommandEvent&) override
     {
-        _mainWindow->GoIdle();
+        StartIdle();
     }
 
 private:
@@ -187,10 +186,15 @@ private:
     }
 
 private:
-    MainWindow* _mainWindow;
     int _state;
     int _explorerTrack;
     int _explorerSide;
     bool _explorerUpdatePending;
     std::unique_ptr<const Fluxmap> _explorerFluxmap;
 };
+
+ExplorerPanel* ExplorerPanel::Create(
+    MainWindow* mainWindow, wxSimplebook* parent)
+{
+    return new ExplorerPanelImpl(mainWindow, parent);
+}

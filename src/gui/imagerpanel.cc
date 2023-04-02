@@ -28,17 +28,19 @@ private:
     };
 
 public:
-    ImagerPanelImpl(MainWindow* mainWindow, wxWindow* parent):
+    ImagerPanelImpl(MainWindow* mainWindow, wxSimplebook* parent):
         ImagerPanelGen(parent),
-        _mainWindow(mainWindow)
+        ImagerPanel(mainWindow)
     {
         visualiser->Bind(
             TRACK_SELECTION_EVENT, &ImagerPanelImpl::OnTrackSelection, this);
+
+        parent->AddPage(this, "imager");
     }
 
     void OnBackButton(wxCommandEvent&) override
     {
-        _mainWindow->GoIdle();
+        StartIdle();
     }
 
 private:
@@ -57,6 +59,7 @@ private:
 
     void OnQueueEmpty() override
     {
+        fmt::print("queue empty\n");
         if (_state == STATE_READING_WORKING)
             _state = STATE_READING_SUCCEEDED;
         else if (_state == STATE_WRITING_WORKING)
@@ -66,6 +69,7 @@ private:
 
     void OnQueueFailed() override
     {
+        fmt::print("queue failed\n");
         if (_state == STATE_READING_WORKING)
             _state = STATE_READING_FAILED;
         else if (_state == STATE_WRITING_WORKING)
@@ -78,8 +82,8 @@ public:
     {
         try
         {
-            _mainWindow->SetPage(MainWindow::PAGE_IMAGER);
-            _mainWindow->PrepareConfig();
+            SetPage(MainWindow::PAGE_IMAGER);
+            PrepareConfig();
 
             visualiser->Clear();
             _currentDisk = nullptr;
@@ -116,8 +120,8 @@ public:
     {
         try
         {
-            _mainWindow->SetPage(MainWindow::PAGE_IMAGER);
-            _mainWindow->PrepareConfig();
+            SetPage(MainWindow::PAGE_IMAGER);
+            PrepareConfig();
             if (!config.has_image_reader())
                 Error() << "This format cannot be read from images.";
 
@@ -199,6 +203,22 @@ public:
     }
 
 public:
+    void SetVisualiserMode(int head, int track, int mode) override
+    {
+        visualiser->SetMode(head, track, mode);
+    }
+
+    void SetVisualiserTrackData(
+        std::shared_ptr<const TrackFlux> trackdata) override
+    {
+        visualiser->SetTrackData(trackdata);
+    }
+
+    void SetDisk(std::shared_ptr<const DiskFlux> diskdata) override
+    {
+        _currentDisk = diskdata;
+    }
+
     void OnImagerGoAgainButton(wxCommandEvent& event) override
     {
         switch (_state)
@@ -289,7 +309,11 @@ public:
     }
 
 private:
-    MainWindow* _mainWindow;
     int _state;
     std::shared_ptr<const DiskFlux> _currentDisk;
 };
+
+ImagerPanel* ImagerPanel::Create(MainWindow* mainWindow, wxSimplebook* parent)
+{
+    return new ImagerPanelImpl(mainWindow, parent);
+}

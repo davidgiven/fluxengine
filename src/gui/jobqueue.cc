@@ -1,6 +1,8 @@
 #include "lib/globals.h"
+#include "lib/utils.h"
 #include "gui.h"
 #include "jobqueue.h"
+#include <fmt/format.h>
 
 void JobQueue::QueueJob(std::function<void(void)> f)
 {
@@ -10,6 +12,16 @@ void JobQueue::QueueJob(std::function<void(void)> f)
         runOnWorkerThread(
             [this]()
             {
+                auto fail = [&]()
+                {
+                    runOnUiThread(
+                        [&]()
+                        {
+                            _jobQueue.clear();
+                            OnQueueFailed();
+                        });
+                };
+
                 for (;;)
                 {
                     std::function<void()> f;
@@ -29,14 +41,14 @@ void JobQueue::QueueJob(std::function<void(void)> f)
                     {
                         f();
                     }
+                    catch (const EmergencyStopException& e)
+                    {
+                        fail();
+                        throw e;
+                    }
                     catch (const ErrorException& e)
                     {
-                        runOnUiThread(
-                            [&]()
-                            {
-                                _jobQueue.clear();
-                                OnQueueFailed();
-                            });
+                        fail();
                         throw e;
                     }
 
