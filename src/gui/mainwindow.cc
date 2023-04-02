@@ -80,8 +80,9 @@ public:
         icon.CopyFromBitmap(_idlePanel->GetBitmap());
         SetIcon(icon);
 
-        Layout();
         StartIdle();
+        Layout();
+		Fit();
     }
 
     void StartIdle()

@@ -504,6 +504,8 @@ IdlePanelGen::IdlePanelGen( wxWindow* parent, wxWindowID id, const wxPoint& pos,
 	wxGridSizer* gSizer11;
 	gSizer11 = new wxGridSizer( 1, 1, 0, 0 );
 
+	m_scrolledWindow1 = new wxScrolledWindow( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxHSCROLL|wxVSCROLL );
+	m_scrolledWindow1->SetScrollRate( 5, 5 );
 	wxFlexGridSizer* fgSizer8;
 	fgSizer8 = new wxFlexGridSizer( 0, 1, 0, 0 );
 	fgSizer8->AddGrowableCol( 0 );
@@ -511,19 +513,19 @@ IdlePanelGen::IdlePanelGen( wxWindow* parent, wxWindowID id, const wxPoint& pos,
 	fgSizer8->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_ALL );
 
 	fgSizer8->SetMinSize( wxSize( 400,-1 ) );
-	applicationBitmap = new wxStaticBitmap( this, wxID_ANY, icon_png_to_wx_bitmap(), wxDefaultPosition, wxDefaultSize, 0 );
+	applicationBitmap = new wxStaticBitmap( m_scrolledWindow1, wxID_ANY, icon_png_to_wx_bitmap(), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer8->Add( applicationBitmap, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5 );
 
-	m_staticText61 = new wxStaticText( this, wxID_ANY, wxT("Pick one of:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText61 = new wxStaticText( m_scrolledWindow1, wxID_ANY, wxT("Pick one of:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText61->Wrap( -1 );
 	fgSizer8->Add( m_staticText61, 0, wxALIGN_CENTER|wxALL, 5 );
 
-	realDiskRadioButton = new wxRadioButton( this, wxID_ANY, wxT("Real disk"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP );
+	realDiskRadioButton = new wxRadioButton( m_scrolledWindow1, wxID_ANY, wxT("Real disk"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP );
 	realDiskRadioButton->SetToolTip( wxT("You want to use a real floppy drive attached to real hardware.") );
 
 	fgSizer8->Add( realDiskRadioButton, 0, wxALL|wxEXPAND, 5 );
 
-	realDiskRadioButtonPanel = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	realDiskRadioButtonPanel = new wxPanel( m_scrolledWindow1, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizer3;
 	bSizer3 = new wxBoxSizer( wxVERTICAL );
 
@@ -554,12 +556,12 @@ IdlePanelGen::IdlePanelGen( wxWindow* parent, wxWindowID id, const wxPoint& pos,
 	bSizer3->Fit( realDiskRadioButtonPanel );
 	fgSizer8->Add( realDiskRadioButtonPanel, 1, wxEXPAND | wxALL, 5 );
 
-	fluxImageRadioButton = new wxRadioButton( this, wxID_ANY, wxT("Flux image"), wxDefaultPosition, wxDefaultSize, 0 );
+	fluxImageRadioButton = new wxRadioButton( m_scrolledWindow1, wxID_ANY, wxT("Flux image"), wxDefaultPosition, wxDefaultSize, 0 );
 	fluxImageRadioButton->SetToolTip( wxT("You want to use an unencoded flux file.") );
 
 	fgSizer8->Add( fluxImageRadioButton, 0, wxALL|wxEXPAND, 5 );
 
-	fluxImageRadioButtonPanel = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	fluxImageRadioButtonPanel = new wxPanel( m_scrolledWindow1, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxGridSizer* gSizer121;
 	gSizer121 = new wxGridSizer( 1, 1, 0, 0 );
 
@@ -574,12 +576,12 @@ IdlePanelGen::IdlePanelGen( wxWindow* parent, wxWindowID id, const wxPoint& pos,
 	gSizer121->Fit( fluxImageRadioButtonPanel );
 	fgSizer8->Add( fluxImageRadioButtonPanel, 1, wxEXPAND | wxALL, 5 );
 
-	diskImageRadioButton = new wxRadioButton( this, wxID_ANY, wxT("Disk image"), wxDefaultPosition, wxDefaultSize, 0 );
+	diskImageRadioButton = new wxRadioButton( m_scrolledWindow1, wxID_ANY, wxT("Disk image"), wxDefaultPosition, wxDefaultSize, 0 );
 	diskImageRadioButton->SetToolTip( wxT("You want to use a decode file system disk image.") );
 
 	fgSizer8->Add( diskImageRadioButton, 0, wxALL|wxEXPAND, 5 );
 
-	diskImageRadioButtonPanel = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	diskImageRadioButtonPanel = new wxPanel( m_scrolledWindow1, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxGridSizer* gSizer1211;
 	gSizer1211 = new wxGridSizer( 1, 1, 0, 0 );
 
@@ -594,11 +596,11 @@ IdlePanelGen::IdlePanelGen( wxWindow* parent, wxWindowID id, const wxPoint& pos,
 	gSizer1211->Fit( diskImageRadioButtonPanel );
 	fgSizer8->Add( diskImageRadioButtonPanel, 1, wxEXPAND | wxALL, 5 );
 
-	m_staticText23 = new wxStaticText( this, wxID_ANY, wxT("then select a format:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText23 = new wxStaticText( m_scrolledWindow1, wxID_ANY, wxT("then select a format:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText23->Wrap( -1 );
 	fgSizer8->Add( m_staticText23, 0, wxALIGN_CENTER|wxALL, 5 );
 
-	m_panel11 = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	m_panel11 = new wxPanel( m_scrolledWindow1, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxFlexGridSizer* fgSizer6;
 	fgSizer6 = new wxFlexGridSizer( 1, 2, 0, 0 );
 	fgSizer6->AddGrowableCol( 0 );
@@ -623,28 +625,28 @@ IdlePanelGen::IdlePanelGen( wxWindow* parent, wxWindowID id, const wxPoint& pos,
 	fgSizer6->Fit( m_panel11 );
 	fgSizer8->Add( m_panel11, 1, wxEXPAND | wxALL, 5 );
 
-	m_staticText232 = new wxStaticText( this, wxID_ANY, wxT("then select some options (if there are any):"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL );
+	m_staticText232 = new wxStaticText( m_scrolledWindow1, wxID_ANY, wxT("then select some options (if there are any):"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL );
 	m_staticText232->Wrap( -1 );
 	fgSizer8->Add( m_staticText232, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5 );
 
-	formatOptionsContainer = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	formatOptionsContainer = new wxPanel( m_scrolledWindow1, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	fgSizer8->Add( formatOptionsContainer, 1, wxALL|wxEXPAND, 5 );
 
-	m_staticText19 = new wxStaticText( this, wxID_ANY, wxT("and press one of:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText19 = new wxStaticText( m_scrolledWindow1, wxID_ANY, wxT("and press one of:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText19->Wrap( -1 );
 	fgSizer8->Add( m_staticText19, 0, wxALIGN_CENTER|wxALL, 5 );
 
 	wxGridSizer* gSizer9;
-	gSizer9 = new wxGridSizer( 2, 3, 0, 0 );
+	gSizer9 = new wxGridSizer( 1, 5, 0, 0 );
 
-	readButton = new wxButton( this, wxID_ANY, wxT("Read disk"), wxDefaultPosition, wxDefaultSize, 0 );
+	readButton = new wxButton( m_scrolledWindow1, wxID_ANY, wxT("Read disk"), wxDefaultPosition, wxDefaultSize, 0 );
 	readButton->SetLabelMarkup( wxT("Read disk") );
 	readButton->SetBitmap( wxArtProvider::GetBitmap( wxART_FILE_OPEN, wxART_TOOLBAR ) );
 	readButton->SetToolTip( wxT("Read and decode, producing a disk image from a real disk or flux file.") );
 
 	gSizer9->Add( readButton, 0, wxALL|wxEXPAND, 5 );
 
-	writeButton = new wxButton( this, wxID_ANY, wxT("Write disk"), wxDefaultPosition, wxDefaultSize, 0 );
+	writeButton = new wxButton( m_scrolledWindow1, wxID_ANY, wxT("Write disk"), wxDefaultPosition, wxDefaultSize, 0 );
 
 	writeButton->SetBitmap( wxArtProvider::GetBitmap( wxART_FILE_SAVE, wxART_TOOLBAR ) );
 	writeButton->SetBitmapDisabled( wxNullBitmap );
@@ -652,19 +654,19 @@ IdlePanelGen::IdlePanelGen( wxWindow* parent, wxWindowID id, const wxPoint& pos,
 
 	gSizer9->Add( writeButton, 0, wxALL|wxEXPAND, 5 );
 
-	browseButton = new wxButton( this, wxID_ANY, wxT("Browse files"), wxDefaultPosition, wxDefaultSize, 0 );
+	browseButton = new wxButton( m_scrolledWindow1, wxID_ANY, wxT("Browse files"), wxDefaultPosition, wxDefaultSize, 0 );
 
 	browseButton->SetBitmap( wxArtProvider::GetBitmap( wxART_FOLDER_OPEN, wxART_TOOLBAR ) );
 	browseButton->SetToolTip( wxT("Access the files on the disk directly without needing to image it.") );
 
 	gSizer9->Add( browseButton, 0, wxALL|wxEXPAND, 5 );
 
-	formatButton = new wxButton( this, wxID_ANY, wxT("Format disk"), wxDefaultPosition, wxDefaultSize, 0 );
+	formatButton = new wxButton( m_scrolledWindow1, wxID_ANY, wxT("Format disk"), wxDefaultPosition, wxDefaultSize, 0 );
 
 	formatButton->SetBitmap( wxArtProvider::GetBitmap( wxART_DELETE, wxART_BUTTON ) );
 	gSizer9->Add( formatButton, 0, wxALL|wxEXPAND, 5 );
 
-	exploreButton = new wxButton( this, wxID_ANY, wxT("Explore disk"), wxDefaultPosition, wxDefaultSize, 0 );
+	exploreButton = new wxButton( m_scrolledWindow1, wxID_ANY, wxT("Explore disk"), wxDefaultPosition, wxDefaultSize, 0 );
 
 	exploreButton->SetBitmap( wxArtProvider::GetBitmap( wxART_INFORMATION, wxART_TOOLBAR ) );
 	gSizer9->Add( exploreButton, 0, wxALL|wxEXPAND, 5 );
@@ -673,7 +675,10 @@ IdlePanelGen::IdlePanelGen( wxWindow* parent, wxWindowID id, const wxPoint& pos,
 	fgSizer8->Add( gSizer9, 1, wxEXPAND, 5 );
 
 
-	gSizer11->Add( fgSizer8, 1, wxALIGN_CENTER|wxALL, 5 );
+	m_scrolledWindow1->SetSizer( fgSizer8 );
+	m_scrolledWindow1->Layout();
+	fgSizer8->Fit( m_scrolledWindow1 );
+	gSizer11->Add( m_scrolledWindow1, 1, wxEXPAND | wxALL, 5 );
 
 
 	this->SetSizer( gSizer11 );
