@@ -67,6 +67,7 @@ jobs:
           mingw-w64-i686-zlib
           mingw-w64-i686-nsis
           zip
+          vim
     - uses: actions/checkout@v1
     - name: build
       run: make -j2
