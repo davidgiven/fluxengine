@@ -12,6 +12,12 @@
 #include "layout.h"
 #include "texteditorwindow.h"
 #include <wx/config.h>
+#include <wx/mstream.h>
+#include <wx/image.h>
+#include <wx/bitmap.h>
+#include ".obj/extras/hardware.h"
+#include ".obj/extras/fluxfile.h"
+#include ".obj/extras/imagefile.h"
 
 extern const std::map<std::string, std::string> formats;
 
@@ -32,6 +38,13 @@ const std::string DEFAULT_EXTRA_CONFIGURATION =
     "# or the name of a built-in configuration, or the filename\n"
     "# of a text proto file. Or a comment, of course.\n\n";
 
+static wxBitmap createBitmap(const uint8_t* data, size_t length)
+{
+	wxMemoryInputStream stream(data, length);
+	wxImage image(stream, wxBITMAP_TYPE_PNG);
+	return wxBitmap(image);
+}
+
 class IdlePanelImpl : public IdlePanelGen, public IdlePanel
 {
     enum
@@ -45,6 +58,7 @@ public:
     IdlePanelImpl(MainWindow* mainWindow, wxSimplebook* parent):
         IdlePanelGen(parent),
         IdlePanel(mainWindow),
+		_imageList(48, 48, true, 0),
         _config("FluxEngine")
     {
         int defaultFormat = 0;
@@ -75,16 +89,19 @@ public:
 
         parent->AddPage(this, "idle");
 		
-		wxImageList* imageList = new wxImageList();
-		imageList->Add(GetBitmap());
-		m_listbook2->AssignImageList(imageList);
+		auto* sourceList = sourceListBook->GetListView();
+		sourceList->SetFont(sourceList->GetFont().MakeSmaller().MakeSmaller().MakeSmaller());
 
-		for (int i=0; i<4; i++)
+		_imageList.Add(createBitmap(extras_hardware_png, sizeof(extras_hardware_png)));
+		_imageList.Add(createBitmap(extras_fluxfile_png, sizeof(extras_fluxfile_png)));
+		_imageList.Add(createBitmap(extras_imagefile_png, sizeof(extras_imagefile_png)));
+		sourceListBook->SetImageList(&_imageList);
+
+		for (int i=0; i<3; i++)
 		{
-			auto* panel = new wxPanel(m_listbook2);
-			m_listbook2->AddPage(panel, fmt::format("page {}", i),
-				false);
-			m_listbook2->SetPageImage(i, 0);
+			auto* panel = new wxPanel(sourceListBook);
+			sourceListBook->AddPage(panel, fmt::format("page {}\nmultiline", i),
+				false, i);
 
 			new wxButton(panel, wxID_ANY, "button");
 
@@ -564,6 +581,7 @@ private:
 
 private:
     wxConfig _config;
+	wxImageList _imageList;
     std::vector<std::string> _formatNames;
     std::vector<std::unique_ptr<const CandidateDevice>> _devices;
     int _selectedSource;

@@ -520,15 +520,15 @@ IdlePanelGen::IdlePanelGen( wxWindow* parent, wxWindowID id, const wxPoint& pos,
 	m_staticText61->Wrap( -1 );
 	fgSizer8->Add( m_staticText61, 0, wxALIGN_CENTER|wxALL, 5 );
 
-	m_listbook2 = new wxListbook( m_scrolledWindow1, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLB_DEFAULT|wxLB_TOP );
-	wxSize m_listbook2ImageSize = wxSize( 48,48 );
-	int m_listbook2Index = 0;
-	wxImageList* m_listbook2Images = new wxImageList( m_listbook2ImageSize.GetWidth(), m_listbook2ImageSize.GetHeight() );
-	m_listbook2->AssignImageList( m_listbook2Images );
-	wxBitmap m_listbook2Bitmap;
-	wxImage m_listbook2Image;
+	sourceListBook = new wxListbook( m_scrolledWindow1, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLB_DEFAULT|wxLB_TOP|wxBORDER_THEME );
+	wxSize sourceListBookImageSize = wxSize( 48,48 );
+	int sourceListBookIndex = 0;
+	wxImageList* sourceListBookImages = new wxImageList( sourceListBookImageSize.GetWidth(), sourceListBookImageSize.GetHeight() );
+	sourceListBook->AssignImageList( sourceListBookImages );
+	wxBitmap sourceListBookBitmap;
+	wxImage sourceListBookImage;
 
-	fgSizer8->Add( m_listbook2, 1, wxEXPAND | wxALL, 5 );
+	fgSizer8->Add( sourceListBook, 1, wxEXPAND | wxALL, 5 );
 
 	realDiskRadioButton = new wxRadioButton( m_scrolledWindow1, wxID_ANY, wxT("Real disk"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP );
 	realDiskRadioButton->SetToolTip( wxT("You want to use a real floppy drive attached to real hardware.") );

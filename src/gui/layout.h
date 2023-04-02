@@ -316,7 +316,7 @@ class IdlePanelGen : public wxPanel
 		wxScrolledWindow* m_scrolledWindow1;
 		wxStaticBitmap* applicationBitmap;
 		wxStaticText* m_staticText61;
-		wxListbook* m_listbook2;
+		wxListbook* sourceListBook;
 		wxRadioButton* realDiskRadioButton;
 		wxPanel* realDiskRadioButtonPanel;
 		wxComboBox* deviceCombo;
