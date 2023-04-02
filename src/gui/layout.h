@@ -33,6 +33,9 @@
 #include <wx/gbsizer.h>
 #include <wx/checkbox.h>
 #include <wx/statbmp.h>
+#include <wx/listbook.h>
+#include <wx/listctrl.h>
+#include <wx/imaglist.h>
 #include <wx/radiobut.h>
 #include <wx/combobox.h>
 #include <wx/choice.h>
@@ -313,6 +316,13 @@ class IdlePanelGen : public wxPanel
 		wxScrolledWindow* m_scrolledWindow1;
 		wxStaticBitmap* applicationBitmap;
 		wxStaticText* m_staticText61;
+		wxListbook* m_listbook2;
+		wxPanel* m_panel8;
+		wxButton* m_button13;
+		wxPanel* m_panel9;
+		wxStaticText* m_staticText26;
+		wxPanel* m_panel10;
+		wxStaticBitmap* m_bitmap2;
 		wxRadioButton* realDiskRadioButton;
 		wxPanel* realDiskRadioButtonPanel;
 		wxComboBox* deviceCombo;
