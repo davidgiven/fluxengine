@@ -18,6 +18,11 @@ FLUXENGINE_GUI_SRCS = \
 	src/gui/textviewerwindow.cc \
 	src/gui/visualisationcontrol.cc \
  
+src/gui/idlepanel.cc: \
+	$(OBJDIR)/extras/hardware.h \
+	$(OBJDIR)/extras/fluxfile.h \
+	$(OBJDIR)/extras/imagefile.h
+
 FLUXENGINE_GUI_OBJS = \
 	$(patsubst %.cpp, $(OBJDIR)/%.o, \
 	$(patsubst %.cc, $(OBJDIR)/%.o, $(FLUXENGINE_GUI_SRCS)) \
@@ -44,6 +49,11 @@ binaries: fluxengine-gui$(EXT)
 fluxengine-gui$(EXT): $(FLUXENGINE_GUI_BIN)
 	@echo CP $@
 	@cp $< $@
+
+$(OBJDIR)/%.h: %.png
+	@echo ENCODE $@
+	@mkdir -p $(dir $@)
+	@xxd -i $^ > $@
 
 ifeq ($(PLATFORM),OSX)
 
