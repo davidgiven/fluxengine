@@ -19,6 +19,7 @@ class ImagerPanelImpl : public ImagerPanelGen, public ImagerPanel, JobQueue
 private:
     enum
     {
+        STATE_DEAD,
         STATE_READING_WORKING,
         STATE_READING_SUCCEEDED,
         STATE_READING_FAILED,
@@ -55,6 +56,11 @@ private:
                     UpdateState();
                 });
         }
+    }
+
+    void SwitchFrom() override
+    {
+        SetState(STATE_DEAD);
     }
 
     void OnQueueEmpty() override
@@ -200,6 +206,7 @@ public:
                     imagerBackTool->GetId(), _state != STATE_WRITING_WORKING);
                 break;
         }
+        imagerToolbar->Refresh();
     }
 
 public:
@@ -309,7 +316,7 @@ public:
     }
 
 private:
-    int _state;
+    int _state = STATE_DEAD;
     std::shared_ptr<const DiskFlux> _currentDisk;
 };
 

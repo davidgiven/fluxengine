@@ -15,8 +15,9 @@ class ExplorerPanelImpl :
 {
     enum
     {
-        STATE_EXPLORING_WORKING,
-        STATE_EXPLORING_IDLE,
+        STATE_DEAD,
+        STATE_WORKING,
+        STATE_IDLE,
     };
 
 public:
@@ -35,7 +36,7 @@ public:
             SetPage(MainWindow::PAGE_EXPLORER);
             PrepareConfig();
 
-            SetState(STATE_EXPLORING_IDLE);
+            SetState(STATE_IDLE);
 
             _explorerFluxmap = nullptr;
             _explorerTrack = -1;
@@ -54,7 +55,8 @@ public:
     void UpdateState()
     {
         explorerToolbar->EnableTool(
-            explorerBackTool->GetId(), _state == STATE_EXPLORING_IDLE);
+            explorerBackTool->GetId(), _state == STATE_IDLE);
+        explorerToolbar->Refresh();
     }
 
     void OnBackButton(wxCommandEvent&) override
@@ -74,6 +76,11 @@ private:
                     UpdateState();
                 });
         }
+    }
+
+    void SwitchFrom() override
+    {
+        SetState(STATE_DEAD);
     }
 
 private:
@@ -105,12 +112,12 @@ private:
 private:
     void OnQueueEmpty() override
     {
-        SetState(STATE_EXPLORING_IDLE);
+        SetState(STATE_IDLE);
     }
 
     void QueueJob(std::function<void(void)> f)
     {
-        SetState(STATE_EXPLORING_WORKING);
+        SetState(STATE_WORKING);
         JobQueue::QueueJob(f);
     }
 
@@ -146,7 +153,7 @@ private:
                 runOnUiThread(
                     [&]()
                     {
-                        _state = STATE_EXPLORING_IDLE;
+                        _state = STATE_IDLE;
                         UpdateState();
 
                         FluxmapReader fmr(*_explorerFluxmap);
@@ -186,7 +193,7 @@ private:
     }
 
 private:
-    int _state;
+    int _state = STATE_DEAD;
     int _explorerTrack;
     int _explorerSide;
     bool _explorerUpdatePending;
