@@ -36,6 +36,7 @@
 #include <wx/radiobut.h>
 #include <wx/combobox.h>
 #include <wx/choice.h>
+#include <wx/scrolwin.h>
 #include <wx/aui/aui.h>
 #include <wx/aui/auibar.h>
 #include "visualisationcontrol.h"
@@ -309,6 +310,7 @@ class IdlePanelGen : public wxPanel
 	private:
 
 	protected:
+		wxScrolledWindow* m_scrolledWindow1;
 		wxStaticBitmap* applicationBitmap;
 		wxStaticText* m_staticText61;
 		wxRadioButton* realDiskRadioButton;
@@ -350,7 +352,7 @@ class IdlePanelGen : public wxPanel
 
 	public:
 
-		IdlePanelGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
+		IdlePanelGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 628,447 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
 
 		~IdlePanelGen();
 
