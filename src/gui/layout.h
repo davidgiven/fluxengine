@@ -317,12 +317,6 @@ class IdlePanelGen : public wxPanel
 		wxStaticBitmap* applicationBitmap;
 		wxStaticText* m_staticText61;
 		wxListbook* m_listbook2;
-		wxPanel* m_panel8;
-		wxButton* m_button13;
-		wxPanel* m_panel9;
-		wxStaticText* m_staticText26;
-		wxPanel* m_panel10;
-		wxStaticBitmap* m_bitmap2;
 		wxRadioButton* realDiskRadioButton;
 		wxPanel* realDiskRadioButtonPanel;
 		wxComboBox* deviceCombo;

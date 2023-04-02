@@ -527,43 +527,6 @@ IdlePanelGen::IdlePanelGen( wxWindow* parent, wxWindowID id, const wxPoint& pos,
 	m_listbook2->AssignImageList( m_listbook2Images );
 	wxBitmap m_listbook2Bitmap;
 	wxImage m_listbook2Image;
-	m_panel8 = new wxPanel( m_listbook2, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	wxBoxSizer* bSizer5;
-	bSizer5 = new wxBoxSizer( wxVERTICAL );
-
-	m_button13 = new wxButton( m_panel8, wxID_ANY, wxT("MyButton"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer5->Add( m_button13, 0, wxALL, 5 );
-
-
-	m_panel8->SetSizer( bSizer5 );
-	m_panel8->Layout();
-	bSizer5->Fit( m_panel8 );
-	m_listbook2->AddPage( m_panel8, wxT("a page"), true );
-	m_panel9 = new wxPanel( m_listbook2, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	wxBoxSizer* bSizer6;
-	bSizer6 = new wxBoxSizer( wxVERTICAL );
-
-	m_staticText26 = new wxStaticText( m_panel9, wxID_ANY, wxT("MyLabel"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText26->Wrap( -1 );
-	bSizer6->Add( m_staticText26, 0, wxALL, 5 );
-
-
-	m_panel9->SetSizer( bSizer6 );
-	m_panel9->Layout();
-	bSizer6->Fit( m_panel9 );
-	m_listbook2->AddPage( m_panel9, wxT("a page"), false );
-	m_panel10 = new wxPanel( m_listbook2, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	wxBoxSizer* bSizer7;
-	bSizer7 = new wxBoxSizer( wxVERTICAL );
-
-	m_bitmap2 = new wxStaticBitmap( m_panel10, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer7->Add( m_bitmap2, 0, wxALL, 5 );
-
-
-	m_panel10->SetSizer( bSizer7 );
-	m_panel10->Layout();
-	bSizer7->Fit( m_panel10 );
-	m_listbook2->AddPage( m_panel10, wxT("a page"), false );
 
 	fgSizer8->Add( m_listbook2, 1, wxEXPAND | wxALL, 5 );
 
