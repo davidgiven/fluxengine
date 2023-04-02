@@ -145,6 +145,7 @@ public:
     virtual void Start() = 0;
 
     virtual void PrepareConfig() = 0;
+	virtual const wxBitmap GetBitmap() = 0;
 };
 
 class ImagerPanel : public PanelComponent

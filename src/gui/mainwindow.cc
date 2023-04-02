@@ -32,12 +32,6 @@ private:
 public:
     MainWindowImpl(): MainWindowGen(nullptr)
     {
-#if 0
-        wxIcon icon;
-        icon.CopyFromBitmap(applicationBitmap->GetBitmap());
-        SetIcon(icon);
-#endif
-
         Logger::setLogger(
             [&](std::shared_ptr<const AnyLogMessage> message)
             {
@@ -81,6 +75,10 @@ public:
             BrowserPanel::Create(this, dataNotebook);
         _panelComponents[3] = _explorerPanel =
             ExplorerPanel::Create(this, dataNotebook);
+
+        wxIcon icon;
+        icon.CopyFromBitmap(_idlePanel->GetBitmap());
+        SetIcon(icon);
 
         Layout();
         StartIdle();
