@@ -97,10 +97,12 @@ public:
     {
         _mainWindow->PrepareConfig();
     }
+
     void SetPage(int page)
     {
         _mainWindow->SetPage(page);
     }
+
     void ClearLog()
     {
         _mainWindow->ClearLog();
@@ -110,22 +112,27 @@ public:
     {
         _mainWindow->StartIdle();
     }
-    void StartReading()
+
+	void StartReading()
     {
         _mainWindow->StartReading();
     }
+
     void StartWriting()
     {
         _mainWindow->StartWriting();
     }
+
     void StartBrowsing()
     {
         _mainWindow->StartBrowsing();
     }
+
     void StartFormatting()
     {
         _mainWindow->StartFormatting();
     }
+
     void StartExploring()
     {
         _mainWindow->StartExploring();

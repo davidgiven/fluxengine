@@ -74,6 +74,18 @@ public:
         UpdateFormatOptions();
 
         parent->AddPage(this, "idle");
+		
+		wxImageList* imageList = new wxImageList();
+		imageList->Add(GetBitmap());
+		m_listbook2->AssignImageList(imageList);
+
+		for (int i=0; i<4; i++)
+		{
+			auto* panel = new wxPanel(m_listbook2);
+			m_listbook2->AddPage(panel, fmt::format("page {}", i),
+				false);
+			m_listbook2->SetPageImage(i, 0);
+		}
     }
 
 public:
