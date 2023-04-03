@@ -80,6 +80,7 @@ public:
     virtual void StartFormatting() = 0;
     virtual void StartExploring() = 0;
 
+	virtual void SafeFit() = 0;
     virtual void SetPage(int page) = 0;
     virtual void PrepareConfig() = 0;
     virtual void ClearLog() = 0;
@@ -107,6 +108,11 @@ public:
     {
         _mainWindow->ClearLog();
     }
+
+	void SafeFit()
+	{
+		_mainWindow->SafeFit();
+	}
 
     void StartIdle()
     {
