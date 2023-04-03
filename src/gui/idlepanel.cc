@@ -609,6 +609,7 @@ private:
 
             formatOptionsContainer->SetSizerAndFit(sizer);
             Layout();
+			SafeFit();
         }
     }
 

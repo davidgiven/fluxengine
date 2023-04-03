@@ -85,6 +85,17 @@ public:
         Fit();
     }
 
+    void SafeFit()
+    {
+        auto minSize = GetMinClientSize();
+
+        auto clientSize = GetClientSize();
+        SetMinClientSize(clientSize);
+        Fit();
+
+        SetMinClientSize(minSize);
+    }
+
     void StartIdle()
     {
         _idlePanel->Start();
