@@ -504,7 +504,7 @@ IdlePanelGen::IdlePanelGen( wxWindow* parent, wxWindowID id, const wxPoint& pos,
 	wxFlexGridSizer* fgSizer8;
 	fgSizer8 = new wxFlexGridSizer( 0, 1, 0, 0 );
 	fgSizer8->AddGrowableCol( 0 );
-	fgSizer8->AddGrowableRow( 2 );
+	fgSizer8->AddGrowableRow( 1 );
 	fgSizer8->SetFlexibleDirection( wxBOTH );
 	fgSizer8->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_ALL );
 
@@ -512,11 +512,10 @@ IdlePanelGen::IdlePanelGen( wxWindow* parent, wxWindowID id, const wxPoint& pos,
 	applicationBitmap = new wxStaticBitmap( this, wxID_ANY, icon_png_to_wx_bitmap(), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer8->Add( applicationBitmap, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5 );
 
-	m_staticText61 = new wxStaticText( this, wxID_ANY, wxT("Pick one of:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText61->Wrap( -1 );
-	fgSizer8->Add( m_staticText61, 0, wxALIGN_CENTER|wxALL, 5 );
+	wxStaticBoxSizer* sbSizer1;
+	sbSizer1 = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, wxT("Source / destination") ), wxVERTICAL );
 
-	sourceListBook = new wxListbook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLB_DEFAULT|wxLB_TOP|wxBORDER_THEME );
+	sourceListBook = new wxListbook( sbSizer1->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLB_DEFAULT|wxLB_TOP|wxBORDER_THEME );
 	wxSize sourceListBookImageSize = wxSize( 48,48 );
 	int sourceListBookIndex = 0;
 	wxImageList* sourceListBookImages = new wxImageList( sourceListBookImageSize.GetWidth(), sourceListBookImageSize.GetHeight() );
@@ -524,47 +523,57 @@ IdlePanelGen::IdlePanelGen( wxWindow* parent, wxWindowID id, const wxPoint& pos,
 	wxBitmap sourceListBookBitmap;
 	wxImage sourceListBookImage;
 
-	fgSizer8->Add( sourceListBook, 1, wxALL|wxEXPAND, 5 );
+	sbSizer1->Add( sourceListBook, 1, wxALL|wxEXPAND, 5 );
 
-	m_staticText23 = new wxStaticText( this, wxID_ANY, wxT("then select a format:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText23->Wrap( -1 );
-	fgSizer8->Add( m_staticText23, 0, wxALIGN_CENTER|wxALL, 5 );
 
-	m_panel11 = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	fgSizer8->Add( sbSizer1, 1, wxALL|wxEXPAND, 5 );
+
+	wxStaticBoxSizer* sbSizer2;
+	sbSizer2 = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, wxT("Format and format options") ), wxVERTICAL );
+
+	wxFlexGridSizer* fgSizer11;
+	fgSizer11 = new wxFlexGridSizer( 2, 1, 0, 0 );
+	fgSizer11->AddGrowableCol( 0 );
+	fgSizer11->AddGrowableRow( 1 );
+	fgSizer11->SetFlexibleDirection( wxVERTICAL );
+	fgSizer11->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_ALL );
+
 	wxFlexGridSizer* fgSizer6;
 	fgSizer6 = new wxFlexGridSizer( 1, 2, 0, 0 );
 	fgSizer6->AddGrowableCol( 0 );
-	fgSizer6->SetFlexibleDirection( wxBOTH );
+	fgSizer6->SetFlexibleDirection( wxHORIZONTAL );
 	fgSizer6->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 
 	wxArrayString formatChoiceChoices;
-	formatChoice = new wxChoice( m_panel11, wxID_ANY, wxDefaultPosition, wxDefaultSize, formatChoiceChoices, 0 );
+	formatChoice = new wxChoice( sbSizer2->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, formatChoiceChoices, 0 );
 	formatChoice->SetSelection( 0 );
 	formatChoice->SetToolTip( wxT("The format of the disk.") );
 
 	fgSizer6->Add( formatChoice, 0, wxALL|wxEXPAND, 5 );
 
-	customConfigurationButton = new wxButton( m_panel11, wxID_ANY, wxT("Customise..."), wxDefaultPosition, wxDefaultSize, 0 );
+	customConfigurationButton = new wxButton( sbSizer2->GetStaticBox(), wxID_ANY, wxT("Customise..."), wxDefaultPosition, wxDefaultSize, 0 );
 	customConfigurationButton->SetToolTip( wxT("Allows you to enter arbitrary configuration parameters.") );
 
-	fgSizer6->Add( customConfigurationButton, 0, wxALL, 5 );
+	fgSizer6->Add( customConfigurationButton, 0, wxALL|wxEXPAND, 5 );
 
 
-	m_panel11->SetSizer( fgSizer6 );
-	m_panel11->Layout();
-	fgSizer6->Fit( m_panel11 );
-	fgSizer8->Add( m_panel11, 1, wxEXPAND | wxALL, 5 );
+	fgSizer11->Add( fgSizer6, 1, wxEXPAND, 5 );
 
-	m_staticText232 = new wxStaticText( this, wxID_ANY, wxT("then select some options (if there are any):"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL );
-	m_staticText232->Wrap( -1 );
-	fgSizer8->Add( m_staticText232, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5 );
+	formatOptionsContainer = new wxPanel( sbSizer2->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxBoxSizer* bSizer7;
+	bSizer7 = new wxBoxSizer( wxVERTICAL );
 
-	formatOptionsContainer = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	fgSizer8->Add( formatOptionsContainer, 1, wxALL|wxEXPAND, 5 );
 
-	m_staticText19 = new wxStaticText( this, wxID_ANY, wxT("and press one of:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText19->Wrap( -1 );
-	fgSizer8->Add( m_staticText19, 0, wxALIGN_CENTER|wxALL, 5 );
+	formatOptionsContainer->SetSizer( bSizer7 );
+	formatOptionsContainer->Layout();
+	bSizer7->Fit( formatOptionsContainer );
+	fgSizer11->Add( formatOptionsContainer, 1, wxALL|wxEXPAND, 5 );
+
+
+	sbSizer2->Add( fgSizer11, 1, wxEXPAND, 5 );
+
+
+	fgSizer8->Add( sbSizer2, 1, wxALL|wxEXPAND, 5 );
 
 	wxGridSizer* gSizer9;
 	gSizer9 = new wxGridSizer( 1, 5, 0, 0 );
@@ -607,9 +616,11 @@ IdlePanelGen::IdlePanelGen( wxWindow* parent, wxWindowID id, const wxPoint& pos,
 
 	this->SetSizer( fgSizer8 );
 	this->Layout();
+	fgSizer8->Fit( this );
 
 	// Connect Events
 	sourceListBook->Connect( wxEVT_COMMAND_LISTBOOK_PAGE_CHANGED, wxListbookEventHandler( IdlePanelGen::OnSourceListPageChanged ), NULL, this );
+	sourceListBook->Connect( wxEVT_COMMAND_LISTBOOK_PAGE_CHANGING, wxListbookEventHandler( IdlePanelGen::OnSourceListPageChanging ), NULL, this );
 	formatChoice->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( IdlePanelGen::OnControlsChanged ), NULL, this );
 	customConfigurationButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( IdlePanelGen::OnCustomConfigurationButton ), NULL, this );
 	readButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( IdlePanelGen::OnReadButton ), NULL, this );
@@ -623,6 +634,7 @@ IdlePanelGen::~IdlePanelGen()
 {
 	// Disconnect Events
 	sourceListBook->Disconnect( wxEVT_COMMAND_LISTBOOK_PAGE_CHANGED, wxListbookEventHandler( IdlePanelGen::OnSourceListPageChanged ), NULL, this );
+	sourceListBook->Disconnect( wxEVT_COMMAND_LISTBOOK_PAGE_CHANGING, wxListbookEventHandler( IdlePanelGen::OnSourceListPageChanging ), NULL, this );
 	formatChoice->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( IdlePanelGen::OnControlsChanged ), NULL, this );
 	customConfigurationButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( IdlePanelGen::OnCustomConfigurationButton ), NULL, this );
 	readButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( IdlePanelGen::OnReadButton ), NULL, this );
@@ -1018,10 +1030,6 @@ ImagefileSourcePanelGen::ImagefileSourcePanelGen( wxWindow* parent, wxWindowID i
 {
 	wxBoxSizer* bSizer9;
 	bSizer9 = new wxBoxSizer( wxVERTICAL );
-
-	m_staticText27 = new wxStaticText( this, wxID_ANY, wxT("This will read processed data out of a disk image. There will obviously be no flux encoding/decoding, but this allows you to access files in a floppy disk filesystem.\n\nIf you want to write images to disk, select one of the hardware sources and use the 'Write' button."), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText27->Wrap( -1 );
-	bSizer9->Add( m_staticText27, 0, wxALL, 5 );
 
 	diskImagePicker = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL );
 	diskImagePicker->SetToolTip( wxT("The path to the disk image.") );

@@ -36,6 +36,7 @@
 #include <wx/listbook.h>
 #include <wx/listctrl.h>
 #include <wx/imaglist.h>
+#include <wx/statbox.h>
 #include <wx/choice.h>
 #include <wx/aui/aui.h>
 #include <wx/aui/auibar.h>
@@ -311,15 +312,10 @@ class IdlePanelGen : public wxPanel
 
 	protected:
 		wxStaticBitmap* applicationBitmap;
-		wxStaticText* m_staticText61;
 		wxListbook* sourceListBook;
-		wxStaticText* m_staticText23;
-		wxPanel* m_panel11;
 		wxChoice* formatChoice;
 		wxButton* customConfigurationButton;
-		wxStaticText* m_staticText232;
 		wxPanel* formatOptionsContainer;
-		wxStaticText* m_staticText19;
 		wxButton* readButton;
 		wxButton* writeButton;
 		wxButton* browseButton;
@@ -328,6 +324,7 @@ class IdlePanelGen : public wxPanel
 
 		// Virtual event handlers, override them in your derived class
 		virtual void OnSourceListPageChanged( wxListbookEvent& event ) { event.Skip(); }
+		virtual void OnSourceListPageChanging( wxListbookEvent& event ) { event.Skip(); }
 		virtual void OnControlsChanged( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnCustomConfigurationButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnReadButton( wxCommandEvent& event ) { event.Skip(); }
@@ -339,7 +336,7 @@ class IdlePanelGen : public wxPanel
 
 	public:
 
-		IdlePanelGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 684,495 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
+		IdlePanelGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
 
 		~IdlePanelGen();
 
@@ -534,7 +531,6 @@ class ImagefileSourcePanelGen : public wxPanel
 	private:
 
 	protected:
-		wxStaticText* m_staticText27;
 
 	public:
 		wxFilePickerCtrl* diskImagePicker;
