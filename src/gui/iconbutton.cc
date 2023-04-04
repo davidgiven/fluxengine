@@ -36,7 +36,7 @@ void IconButton::SetSelected(bool selected)
 {
     _selected = selected;
     wxColor bg = wxSystemSettings::GetColour(
-        _selected ? wxSYS_COLOUR_HIGHLIGHT : wxSYS_COLOUR_WINDOW);
+        _selected ? wxSYS_COLOUR_HIGHLIGHT : wxSYS_COLOUR_FRAMEBK);
     SetBackgroundColour(bg);
 	Refresh();
 }
