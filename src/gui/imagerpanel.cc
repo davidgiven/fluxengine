@@ -65,7 +65,6 @@ private:
 
     void OnQueueEmpty() override
     {
-        fmt::print("queue empty\n");
         if (_state == STATE_READING_WORKING)
             _state = STATE_READING_SUCCEEDED;
         else if (_state == STATE_WRITING_WORKING)

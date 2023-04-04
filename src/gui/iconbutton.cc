@@ -43,8 +43,8 @@ void IconButton::SetSelected(bool selected)
 
 void IconButton::OnMouseClick(wxMouseEvent&)
 {
-	auto* event = new wxCommandEvent(wxEVT_BUTTON, 0);
-	wxQueueEvent(this, event);
+    auto* event = new wxCommandEvent(wxEVT_BUTTON, 0);
+    wxQueueEvent(this, event);
 }
 
 void IconButton::SetBitmapAndLabel(

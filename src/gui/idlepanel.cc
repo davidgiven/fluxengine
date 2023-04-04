@@ -407,16 +407,18 @@ private:
         sourceIconPanel->DestroyChildren();
 
         int page = 0;
+        bool switched = false;
         for (auto& device : _devices)
         {
             for (int drive = 0; drive <= 1; drive++)
             {
                 auto* panel = new HardwareSourcePanelGen(sourceBook);
                 sourceBook->AddPage(panel, "");
-                panel->label->SetLabel(fmt::format("{}; id {}; drive:{}",
-                    getDeviceName(device->type),
-                    device->serial,
-                    drive));
+                panel->label->SetLabel(
+                    fmt::format("{}; serial number {}; drive:{}",
+                        getDeviceName(device->type),
+                        device->serial,
+                        drive));
 
                 auto* button = AddIcon(ICON_HARDWARE,
                     fmt::format(
@@ -451,6 +453,14 @@ private:
                         OnControlsChanged(e);
                     });
 
+                if ((_selectedSource == SELECTEDSOURCE_REAL) &&
+                    (_selectedDevice == device->serial) &&
+                    (_selectedDrive == drive))
+                {
+                    SwitchToPage(page);
+                    switched = true;
+                }
+
                 page++;
             }
         }
@@ -477,6 +487,12 @@ private:
                     OnControlsChanged(e);
                 });
 
+            if (_selectedSource == SELECTEDSOURCE_FLUX)
+            {
+                SwitchToPage(page);
+                switched = true;
+            }
+
             page++;
         }
 
@@ -502,12 +518,19 @@ private:
                     OnControlsChanged(e);
                 });
 
+            if (_selectedSource == SELECTEDSOURCE_IMAGE)
+            {
+                SwitchToPage(page);
+                switched = true;
+            }
+
             page++;
         }
 
         Fit();
         Layout();
-        SwitchToPage(0);
+        if (!switched)
+            SwitchToPage(0);
     }
 
     IconButton* AddIcon(int bitmapIndex, const std::string text)
