@@ -29,11 +29,12 @@ jobs:
           mingw-w64-i686-zlib
           mingw-w64-i686-nsis
           zip
+          vim
     - uses: actions/checkout@v3
 
     - name: build
       run: |
-        make
+        make -j2
 
     - name: nsis
       run: |
