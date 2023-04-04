@@ -10,22 +10,39 @@ jobs:
     - name: apt
       run: sudo apt update && sudo apt install libudev-dev libsqlite3-dev protobuf-compiler libwxgtk3.0-gtk3-dev libfmt-dev
     - name: make
-      run: CXXFLAGS="-Wp,-D_GLIBCXX_ASSERTIONS" make
+      run: CXXFLAGS="-Wp,-D_GLIBCXX_ASSERTIONS" make -j2
 
-  build-macos:
+  build-macos-current:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
     - name: brew
       run: brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg
     - name: make
-      run: gmake
+      run: gmake -j2
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v2
       with:
         name: ${{ github.event.repository.name }}.${{ github.sha }}
         path: FluxEngine.pkg
+
+  build-macos-10-15:
+    runs-on: macos-10.15
+    steps:
+    - uses: actions/checkout@v2
+    - name: brew
+      run: brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg
+    - name: make
+      run: |
+        gmake -j2
+        mv FluxEngine.pkg FluxEngine-10.15.pkg
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.event.repository.name }}.${{ github.sha }}
+        path: FluxEngine-10.15.pkg
 
   build-windows:
     runs-on: windows-latest
@@ -50,9 +67,10 @@ jobs:
           mingw-w64-i686-zlib
           mingw-w64-i686-nsis
           zip
+          vim
     - uses: actions/checkout@v1
     - name: build
-      run: make
+      run: make -j2
 
     - name: nsis
       run: |

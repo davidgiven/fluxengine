@@ -1,6 +1,8 @@
 #ifndef IMAGE_H
 #define IMAGE_H
 
+class Sector;
+
 struct Geometry
 {
     unsigned numTracks = 0;
