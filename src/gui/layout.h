@@ -492,9 +492,9 @@ class HardwareSourcePanelGen : public wxPanel
 
 	protected:
 		wxStaticText* m_staticText30;
-		wxStaticText* label;
 
 	public:
+		wxStaticText* label;
 		wxCheckBox* highDensityToggle;
 		wxCheckBox* fortyTrackDriveToggle;
 
@@ -513,6 +513,7 @@ class FluxfileSourcePanelGen : public wxPanel
 
 	protected:
 		wxStaticText* m_staticText28;
+		wxStaticText* m_staticText27;
 
 	public:
 		wxFilePickerCtrl* fluxImagePicker;
@@ -532,6 +533,7 @@ class ImagefileSourcePanelGen : public wxPanel
 
 	protected:
 		wxStaticText* m_staticText29;
+		wxStaticText* m_staticText28;
 
 	public:
 		wxFilePickerCtrl* diskImagePicker;
