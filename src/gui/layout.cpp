@@ -515,15 +515,29 @@ IdlePanelGen::IdlePanelGen( wxWindow* parent, wxWindowID id, const wxPoint& pos,
 	wxStaticBoxSizer* sbSizer1;
 	sbSizer1 = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, wxT("Source / destination") ), wxVERTICAL );
 
-	sourceListBook = new wxListbook( sbSizer1->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLB_DEFAULT|wxLB_TOP|wxBORDER_THEME );
-	wxSize sourceListBookImageSize = wxSize( 48,48 );
-	int sourceListBookIndex = 0;
-	wxImageList* sourceListBookImages = new wxImageList( sourceListBookImageSize.GetWidth(), sourceListBookImageSize.GetHeight() );
-	sourceListBook->AssignImageList( sourceListBookImages );
-	wxBitmap sourceListBookBitmap;
-	wxImage sourceListBookImage;
+	wxFlexGridSizer* fgSizer12;
+	fgSizer12 = new wxFlexGridSizer( 0, 1, 0, 0 );
+	fgSizer12->AddGrowableCol( 0 );
+	fgSizer12->AddGrowableRow( 1 );
+	fgSizer12->SetFlexibleDirection( wxBOTH );
+	fgSizer12->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 
-	sbSizer1->Add( sourceListBook, 1, wxALL|wxEXPAND, 5 );
+	sourceIconPanel = new wxPanel( sbSizer1->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxWrapSizer* wSizer3;
+	wSizer3 = new wxWrapSizer( wxHORIZONTAL, 0 );
+
+
+	sourceIconPanel->SetSizer( wSizer3 );
+	sourceIconPanel->Layout();
+	wSizer3->Fit( sourceIconPanel );
+	fgSizer12->Add( sourceIconPanel, 1, wxEXPAND | wxALL, 5 );
+
+	sourceBook = new wxSimplebook( sbSizer1->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+
+	fgSizer12->Add( sourceBook, 1, wxEXPAND | wxALL, 5 );
+
+
+	sbSizer1->Add( fgSizer12, 1, wxEXPAND, 5 );
 
 
 	fgSizer8->Add( sbSizer1, 1, wxALL|wxEXPAND, 5 );
@@ -619,8 +633,6 @@ IdlePanelGen::IdlePanelGen( wxWindow* parent, wxWindowID id, const wxPoint& pos,
 	fgSizer8->Fit( this );
 
 	// Connect Events
-	sourceListBook->Connect( wxEVT_COMMAND_LISTBOOK_PAGE_CHANGED, wxListbookEventHandler( IdlePanelGen::OnSourceListPageChanged ), NULL, this );
-	sourceListBook->Connect( wxEVT_COMMAND_LISTBOOK_PAGE_CHANGING, wxListbookEventHandler( IdlePanelGen::OnSourceListPageChanging ), NULL, this );
 	formatChoice->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( IdlePanelGen::OnControlsChanged ), NULL, this );
 	customConfigurationButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( IdlePanelGen::OnCustomConfigurationButton ), NULL, this );
 	readButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( IdlePanelGen::OnReadButton ), NULL, this );
@@ -633,8 +645,6 @@ IdlePanelGen::IdlePanelGen( wxWindow* parent, wxWindowID id, const wxPoint& pos,
 IdlePanelGen::~IdlePanelGen()
 {
 	// Disconnect Events
-	sourceListBook->Disconnect( wxEVT_COMMAND_LISTBOOK_PAGE_CHANGED, wxListbookEventHandler( IdlePanelGen::OnSourceListPageChanged ), NULL, this );
-	sourceListBook->Disconnect( wxEVT_COMMAND_LISTBOOK_PAGE_CHANGING, wxListbookEventHandler( IdlePanelGen::OnSourceListPageChanging ), NULL, this );
 	formatChoice->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( IdlePanelGen::OnControlsChanged ), NULL, this );
 	customConfigurationButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( IdlePanelGen::OnCustomConfigurationButton ), NULL, this );
 	readButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( IdlePanelGen::OnReadButton ), NULL, this );
@@ -988,6 +998,14 @@ HardwareSourcePanelGen::HardwareSourcePanelGen( wxWindow* parent, wxWindowID id,
 	wxBoxSizer* bSizer3;
 	bSizer3 = new wxBoxSizer( wxVERTICAL );
 
+	m_staticText30 = new wxStaticText( this, wxID_ANY, wxT("Read from or write to real floppy disk:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText30->Wrap( -1 );
+	bSizer3->Add( m_staticText30, 0, wxALIGN_LEFT|wxALL|wxEXPAND, 5 );
+
+	label = new wxStaticText( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	label->Wrap( -1 );
+	bSizer3->Add( label, 0, wxALIGN_LEFT|wxALL|wxEXPAND, 5 );
+
 	highDensityToggle = new wxCheckBox( this, wxID_ANY, wxT("This is a high density disk"), wxDefaultPosition, wxDefaultSize, 0 );
 	highDensityToggle->SetToolTip( wxT("If you are using a high density disk, select this.\nThis can be detected automatically for 3.5\"\ndisks but needs to be set manually for everything\nelse.") );
 
@@ -1011,6 +1029,10 @@ FluxfileSourcePanelGen::FluxfileSourcePanelGen( wxWindow* parent, wxWindowID id,
 	wxBoxSizer* bSizer8;
 	bSizer8 = new wxBoxSizer( wxVERTICAL );
 
+	m_staticText28 = new wxStaticText( this, wxID_ANY, wxT("Read flux-level data from file:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText28->Wrap( -1 );
+	bSizer8->Add( m_staticText28, 0, wxALIGN_LEFT|wxALL|wxEXPAND, 5 );
+
 	fluxImagePicker = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL );
 	fluxImagePicker->SetToolTip( wxT("Path to a .flux, .scp or other flux file.") );
 
@@ -1030,6 +1052,10 @@ ImagefileSourcePanelGen::ImagefileSourcePanelGen( wxWindow* parent, wxWindowID i
 {
 	wxBoxSizer* bSizer9;
 	bSizer9 = new wxBoxSizer( wxVERTICAL );
+
+	m_staticText29 = new wxStaticText( this, wxID_ANY, wxT("Read sector-level data from file:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText29->Wrap( -1 );
+	bSizer9->Add( m_staticText29, 0, wxALIGN_LEFT|wxALL|wxEXPAND, 5 );
 
 	diskImagePicker = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL );
 	diskImagePicker->SetToolTip( wxT("The path to the disk image.") );

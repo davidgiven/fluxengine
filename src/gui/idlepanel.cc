@@ -11,6 +11,7 @@
 #include "lib/imagewriter/imagewriter.h"
 #include "layout.h"
 #include "texteditorwindow.h"
+#include "iconbutton.h"
 #include <wx/config.h>
 #include <wx/mstream.h>
 #include <wx/image.h>
@@ -91,17 +92,12 @@ public:
 
         parent->AddPage(this, "idle");
 
-        auto* sourceList = sourceListBook->GetListView();
-        sourceList->SetFont(
-            sourceList->GetFont().MakeSmaller().MakeSmaller().MakeSmaller());
-
         _imageList.Add(
             createBitmap(extras_hardware_png, sizeof(extras_hardware_png)));
         _imageList.Add(
             createBitmap(extras_fluxfile_png, sizeof(extras_fluxfile_png)));
         _imageList.Add(
             createBitmap(extras_imagefile_png, sizeof(extras_imagefile_png)));
-        sourceListBook->SetImageList(&_imageList);
 
         UpdateSources();
     }
@@ -361,7 +357,6 @@ private:
         /* Triggers SaveConfig */
 
         _dontSaveConfig = false;
-        wxCommandEvent dummyEvent;
     }
 
     void SaveConfig()
@@ -408,21 +403,25 @@ private:
 
     void UpdateSources()
     {
-        sourceListBook->DeleteAllPages();
+        sourceBook->DeleteAllPages();
+        sourceIconPanel->DestroyChildren();
 
+        int page = 0;
         for (auto& device : _devices)
         {
             for (int drive = 0; drive <= 1; drive++)
             {
-                auto* panel = new HardwareSourcePanelGen(sourceListBook);
-                sourceListBook->AddPage(panel,
-                    fmt::format("{}\ndrive:{}", device->serial, drive),
-                    false,
-                    ICON_HARDWARE);
+                auto* panel = new HardwareSourcePanelGen(sourceBook);
+                sourceBook->AddPage(panel, "");
 
-                panel->Bind(PAGE_SELECTED_EVENT,
-                    [=](wxCommandEvent& e)
+                auto* button = AddIcon(ICON_HARDWARE,
+                    fmt::format(
+                        "{}\ndrive:{}", device->serial.substr(0, 10), drive));
+                button->Bind(wxEVT_BUTTON,
+                    [=](auto& e)
                     {
+                        SwitchToPage(page);
+
                         _selectedSource = SELECTEDSOURCE_REAL;
                         _selectedDevice = device->serial;
                         _selectedDrive = drive;
@@ -447,16 +446,21 @@ private:
                             panel->fortyTrackDriveToggle->GetValue();
                         OnControlsChanged(e);
                     });
+
+                page++;
             }
         }
 
         {
-            auto* panel = new FluxfileSourcePanelGen(sourceListBook);
-            sourceListBook->AddPage(panel, "Flux file", false, ICON_FLUXFILE);
+            auto* panel = new FluxfileSourcePanelGen(sourceBook);
+            sourceBook->AddPage(panel, "");
 
-            panel->Bind(PAGE_SELECTED_EVENT,
-                [=](wxCommandEvent& e)
+            auto* button = AddIcon(ICON_FLUXFILE, "Flux file");
+            button->Bind(wxEVT_BUTTON,
+                [=](auto& e)
                 {
+                    SwitchToPage(page);
+
                     _selectedSource = SELECTEDSOURCE_FLUX;
                     OnControlsChanged(e);
                 });
@@ -468,15 +472,20 @@ private:
                     _selectedFluxfilename = e.GetPath();
                     OnControlsChanged(e);
                 });
+
+            page++;
         }
 
         {
-            auto* panel = new ImagefileSourcePanelGen(sourceListBook);
-            sourceListBook->AddPage(panel, "Disk image", false, ICON_IMAGEFILE);
+            auto* panel = new ImagefileSourcePanelGen(sourceBook);
+            sourceBook->AddPage(panel, "");
 
-            panel->Bind(PAGE_SELECTED_EVENT,
-                [=](wxCommandEvent& e)
+            auto* button = AddIcon(ICON_IMAGEFILE, "Disk image");
+            button->Bind(wxEVT_BUTTON,
+                [=](auto& e)
                 {
+                    SwitchToPage(page);
+
                     _selectedSource = SELECTEDSOURCE_IMAGE;
                     OnControlsChanged(e);
                 });
@@ -488,18 +497,33 @@ private:
                     _selectedImagefilename = e.GetPath();
                     OnControlsChanged(e);
                 });
+
+            page++;
         }
 
-        sourceListBook->Fit();
-        sourceListBook->Layout();
+        Fit();
+        Layout();
     }
 
-    void OnSourceListPageChanged(wxBookCtrlEvent& e)
+    IconButton* AddIcon(int bitmapIndex, const std::string text)
     {
-        auto* page = sourceListBook->GetPage(e.GetSelection());
-        auto* event = new wxCommandEvent(PAGE_SELECTED_EVENT, 0);
-        wxQueueEvent(page, event);
+        auto* button = new IconButton(sourceIconPanel, wxID_ANY);
+        button->SetBitmapAndLabel(_imageList.GetBitmap(bitmapIndex), text);
+        sourceIconPanel->GetSizer()->Add(button, 0, wxALL|wxEXPAND, 5, nullptr);
+        return button;
     }
+
+    void SwitchToPage(int page) {
+		int i = 0;
+		for (auto* window : sourceIconPanel->GetChildren()) {
+			IconButton* button = dynamic_cast<IconButton*>(window);
+			if (button)
+				button->SetSelected(i == page);
+			i++;
+		}
+
+		sourceBook->ChangeSelection(page);
+	}
 
     void UpdateFormatOptions()
     {
@@ -609,7 +633,7 @@ private:
 
             formatOptionsContainer->SetSizerAndFit(sizer);
             Layout();
-			SafeFit();
+            SafeFit();
         }
     }
 
