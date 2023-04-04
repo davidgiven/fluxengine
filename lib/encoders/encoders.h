@@ -6,6 +6,7 @@ class Fluxmap;
 class Image;
 class Layout;
 class Sector;
+class TrackInfo;
 
 class Encoder
 {

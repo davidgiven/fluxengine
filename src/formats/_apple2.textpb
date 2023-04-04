@@ -14,8 +14,14 @@ encoder {
 }
 
 option {
+	name: "nofs"
+	comment: "use physical CHS sector order and no file system"
+	exclusivity_group: "format"
+}
+
+option {
 	name: "appledos"
-	comment: "use AppleDOS soft sector skew for filesystem access and images"
+	comment: "use AppleDOS soft sector skew and file system"
 	message: "compensating for AppleDOS soft sector skew"
 	exclusivity_group: "format"
 		
@@ -59,7 +65,7 @@ option {
 
 option {
 	name: "prodos"
-	comment: "use ProDOS soft sector skew for filesystem access and images"
+	comment: "use ProDOS soft sector skew and filesystem"
 	message: "compensating for ProDOS soft sector skew"
 	exclusivity_group: "format"
 		
@@ -103,7 +109,7 @@ option {
 
 option {
 	name: "cpm"
-	comment: "use CP/M soft sector skew for filesystem access and images"
+	comment: "use CP/M soft sector skew and filesystem"
 	message: "compensating for CP/M soft sector skew"
 	exclusivity_group: "format"
 		

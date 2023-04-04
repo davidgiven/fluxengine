@@ -16,7 +16,7 @@ static USB* usb = NULL;
 
 USB::~USB() {}
 
-static std::unique_ptr<CandidateDevice> selectDevice()
+static std::shared_ptr<CandidateDevice> selectDevice()
 {
     auto candidates = findUsbDevices();
     if (candidates.size() == 0)
@@ -29,14 +29,14 @@ static std::unique_ptr<CandidateDevice> selectDevice()
         for (auto& c : candidates)
         {
             if (c->serial == wantedSerial)
-                return std::move(c);
+                return c;
         }
         Error() << "serial number not found (try without one to list or "
                    "autodetect devices)";
     }
 
     if (candidates.size() == 1)
-        return std::move(candidates[0]);
+        return candidates[0];
 
     std::cerr << "More than one device detected; use --usb.serial=<serial> to "
                  "select one:\n";

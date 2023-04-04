@@ -24,9 +24,9 @@ static const std::string get_serial_number(const libusbp::device& device)
     }
 }
 
-std::vector<std::unique_ptr<CandidateDevice>> findUsbDevices()
+std::vector<std::shared_ptr<CandidateDevice>> findUsbDevices()
 {
-    std::vector<std::unique_ptr<CandidateDevice>> candidates;
+    std::vector<std::shared_ptr<CandidateDevice>> candidates;
     for (const auto& it : libusbp::list_connected_devices())
     {
         auto candidate = std::make_unique<CandidateDevice>();
@@ -42,7 +42,10 @@ std::vector<std::unique_ptr<CandidateDevice>> findUsbDevices()
             {
                 libusbp::serial_port port(candidate->device);
                 candidate->serialPort = port.get_name();
+				candidate->type = DEVICE_GREASEWEAZLE;
             }
+			else if (id == FLUXENGINE_ID)
+				candidate->type = DEVICE_FLUXENGINE;
 
             candidates.push_back(std::move(candidate));
         }
@@ -50,3 +53,19 @@ std::vector<std::unique_ptr<CandidateDevice>> findUsbDevices()
 
     return candidates;
 }
+
+std::string getDeviceName(DeviceType type)
+{
+	switch (type)
+	{
+		case DEVICE_GREASEWEAZLE:
+			return "Greaseweazle";
+
+		case DEVICE_FLUXENGINE:
+			return "FluxEngine";
+
+		default:
+			return "unknown";
+	}
+}
+
