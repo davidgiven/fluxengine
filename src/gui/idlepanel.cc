@@ -413,6 +413,10 @@ private:
             {
                 auto* panel = new HardwareSourcePanelGen(sourceBook);
                 sourceBook->AddPage(panel, "");
+                panel->label->SetLabel(fmt::format("{}; id {}; drive:{}",
+                    getDeviceName(device->type),
+                    device->serial,
+                    drive));
 
                 auto* button = AddIcon(ICON_HARDWARE,
                     fmt::format(
@@ -503,27 +507,31 @@ private:
 
         Fit();
         Layout();
+        SwitchToPage(0);
     }
 
     IconButton* AddIcon(int bitmapIndex, const std::string text)
     {
         auto* button = new IconButton(sourceIconPanel, wxID_ANY);
         button->SetBitmapAndLabel(_imageList.GetBitmap(bitmapIndex), text);
-        sourceIconPanel->GetSizer()->Add(button, 0, wxALL|wxEXPAND, 5, nullptr);
+        sourceIconPanel->GetSizer()->Add(
+            button, 0, wxALL | wxEXPAND, 5, nullptr);
         return button;
     }
 
-    void SwitchToPage(int page) {
-		int i = 0;
-		for (auto* window : sourceIconPanel->GetChildren()) {
-			IconButton* button = dynamic_cast<IconButton*>(window);
-			if (button)
-				button->SetSelected(i == page);
-			i++;
-		}
+    void SwitchToPage(int page)
+    {
+        int i = 0;
+        for (auto* window : sourceIconPanel->GetChildren())
+        {
+            IconButton* button = dynamic_cast<IconButton*>(window);
+            if (button)
+                button->SetSelected(i == page);
+            i++;
+        }
 
-		sourceBook->ChangeSelection(page);
-	}
+        sourceBook->ChangeSelection(page);
+    }
 
     void UpdateFormatOptions()
     {

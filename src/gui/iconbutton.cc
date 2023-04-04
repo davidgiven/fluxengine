@@ -38,6 +38,7 @@ void IconButton::SetSelected(bool selected)
     wxColor bg = wxSystemSettings::GetColour(
         _selected ? wxSYS_COLOUR_HIGHLIGHT : wxSYS_COLOUR_WINDOW);
     SetBackgroundColour(bg);
+	Refresh();
 }
 
 void IconButton::OnMouseClick(wxMouseEvent&)

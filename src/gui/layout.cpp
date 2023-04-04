@@ -510,7 +510,7 @@ IdlePanelGen::IdlePanelGen( wxWindow* parent, wxWindowID id, const wxPoint& pos,
 
 	fgSizer8->SetMinSize( wxSize( 400,-1 ) );
 	applicationBitmap = new wxStaticBitmap( this, wxID_ANY, icon_png_to_wx_bitmap(), wxDefaultPosition, wxDefaultSize, 0 );
-	fgSizer8->Add( applicationBitmap, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5 );
+	fgSizer8->Add( applicationBitmap, 1, wxALIGN_CENTER|wxALL, 5 );
 
 	wxStaticBoxSizer* sbSizer1;
 	sbSizer1 = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, wxT("Source / destination") ), wxVERTICAL );
@@ -1004,6 +1004,8 @@ HardwareSourcePanelGen::HardwareSourcePanelGen( wxWindow* parent, wxWindowID id,
 
 	label = new wxStaticText( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
 	label->Wrap( -1 );
+	label->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, false, wxEmptyString ) );
+
 	bSizer3->Add( label, 0, wxALIGN_LEFT|wxALL|wxEXPAND, 5 );
 
 	highDensityToggle = new wxCheckBox( this, wxID_ANY, wxT("This is a high density disk"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -1029,9 +1031,13 @@ FluxfileSourcePanelGen::FluxfileSourcePanelGen( wxWindow* parent, wxWindowID id,
 	wxBoxSizer* bSizer8;
 	bSizer8 = new wxBoxSizer( wxVERTICAL );
 
-	m_staticText28 = new wxStaticText( this, wxID_ANY, wxT("Read flux-level data from file:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText28 = new wxStaticText( this, wxID_ANY, wxT("Read or modify flux-level data from file."), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText28->Wrap( -1 );
 	bSizer8->Add( m_staticText28, 0, wxALIGN_LEFT|wxALL|wxEXPAND, 5 );
+
+	m_staticText27 = new wxStaticText( this, wxID_ANY, wxT("Filename:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText27->Wrap( -1 );
+	bSizer8->Add( m_staticText27, 0, wxALL, 5 );
 
 	fluxImagePicker = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL );
 	fluxImagePicker->SetToolTip( wxT("Path to a .flux, .scp or other flux file.") );
@@ -1053,9 +1059,13 @@ ImagefileSourcePanelGen::ImagefileSourcePanelGen( wxWindow* parent, wxWindowID i
 	wxBoxSizer* bSizer9;
 	bSizer9 = new wxBoxSizer( wxVERTICAL );
 
-	m_staticText29 = new wxStaticText( this, wxID_ANY, wxT("Read sector-level data from file:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText29 = new wxStaticText( this, wxID_ANY, wxT("Read or modify sector-level data from file."), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText29->Wrap( -1 );
 	bSizer9->Add( m_staticText29, 0, wxALIGN_LEFT|wxALL|wxEXPAND, 5 );
+
+	m_staticText28 = new wxStaticText( this, wxID_ANY, wxT("Filename:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText28->Wrap( -1 );
+	bSizer9->Add( m_staticText28, 0, wxALL, 5 );
 
 	diskImagePicker = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL );
 	diskImagePicker->SetToolTip( wxT("The path to the disk image.") );
