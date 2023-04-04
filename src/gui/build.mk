@@ -8,6 +8,7 @@ FLUXENGINE_GUI_SRCS = \
 	src/gui/fileviewerwindow.cc \
 	src/gui/fluxviewercontrol.cc \
 	src/gui/fluxviewerwindow.cc \
+	src/gui/iconbutton.cc \
 	src/gui/idlepanel.cc \
 	src/gui/imagerpanel.cc \
 	src/gui/jobqueue.cc \

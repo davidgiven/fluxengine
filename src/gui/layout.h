@@ -33,9 +33,7 @@
 #include <wx/gbsizer.h>
 #include <wx/checkbox.h>
 #include <wx/statbmp.h>
-#include <wx/listbook.h>
-#include <wx/listctrl.h>
-#include <wx/imaglist.h>
+#include <wx/wrapsizer.h>
 #include <wx/statbox.h>
 #include <wx/choice.h>
 #include <wx/aui/aui.h>
@@ -312,7 +310,8 @@ class IdlePanelGen : public wxPanel
 
 	protected:
 		wxStaticBitmap* applicationBitmap;
-		wxListbook* sourceListBook;
+		wxPanel* sourceIconPanel;
+		wxSimplebook* sourceBook;
 		wxChoice* formatChoice;
 		wxButton* customConfigurationButton;
 		wxPanel* formatOptionsContainer;
@@ -323,8 +322,6 @@ class IdlePanelGen : public wxPanel
 		wxButton* exploreButton;
 
 		// Virtual event handlers, override them in your derived class
-		virtual void OnSourceListPageChanged( wxListbookEvent& event ) { event.Skip(); }
-		virtual void OnSourceListPageChanging( wxListbookEvent& event ) { event.Skip(); }
 		virtual void OnControlsChanged( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnCustomConfigurationButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnReadButton( wxCommandEvent& event ) { event.Skip(); }
@@ -494,6 +491,8 @@ class HardwareSourcePanelGen : public wxPanel
 	private:
 
 	protected:
+		wxStaticText* m_staticText30;
+		wxStaticText* label;
 
 	public:
 		wxCheckBox* highDensityToggle;
@@ -513,6 +512,7 @@ class FluxfileSourcePanelGen : public wxPanel
 	private:
 
 	protected:
+		wxStaticText* m_staticText28;
 
 	public:
 		wxFilePickerCtrl* fluxImagePicker;
@@ -531,6 +531,7 @@ class ImagefileSourcePanelGen : public wxPanel
 	private:
 
 	protected:
+		wxStaticText* m_staticText29;
 
 	public:
 		wxFilePickerCtrl* diskImagePicker;
