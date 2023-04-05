@@ -124,8 +124,8 @@ class PhileFilesystem : public Filesystem
             attributes[Filesystem::CTIME] =
                 fmt::format("{:04}-{:02}-{:02}T{:02}:{:02}:{:02}",
                     filedes.reader().seek(4).read_be16(),
-                    filedes[6] + 1,
-                    filedes[7],
+                    filedes[6],
+                    filedes[7] + 1,
                     filedes[10] & 0x1f,
                     filedes[11],
                     filedes[8]);
