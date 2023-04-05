@@ -109,7 +109,13 @@ private:
         UpdateExplorerData();
     }
 
-private:
+    void OnGuessClockButton(wxCommandEvent& event) override
+    {
+        nanoseconds_t clock = histogram->GetMedian();
+        explorerClockSpinCtrl->SetValue(clock / 1e3);
+		UpdateExplorerData();
+    }
+
     void OnQueueEmpty() override
     {
         SetState(STATE_IDLE);
@@ -159,9 +165,9 @@ private:
                         FluxmapReader fmr(*_explorerFluxmap);
                         fmr.seek(explorerStartTimeSpinCtrl->GetValue() * 1e6);
 
-                        FluxDecoder fluxDecoder(&fmr,
-                            explorerClockSpinCtrl->GetValue() * 1e3,
-                            DecoderProto());
+                        nanoseconds_t clock =
+                            explorerClockSpinCtrl->GetValue() * 1e3;
+                        FluxDecoder fluxDecoder(&fmr, clock, DecoderProto());
                         fluxDecoder.readBits(
                             explorerBitOffsetSpinCtrl->GetValue());
                         auto bits = fluxDecoder.readBits();
@@ -183,8 +189,9 @@ private:
 
                         std::stringstream s;
                         hexdump(s, bytes);
-
                         explorerText->SetValue(s.str());
+
+                        histogram->Redraw(*_explorerFluxmap, clock);
 
                         if (_explorerUpdatePending)
                             UpdateExplorerData();
