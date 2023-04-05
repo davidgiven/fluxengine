@@ -891,6 +891,13 @@ ExplorerPanelGen::ExplorerPanelGen( wxWindow* parent, wxWindowID id, const wxPoi
 	fgSizer12->SetFlexibleDirection( wxBOTH );
 	fgSizer12->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 
+	wxFlexGridSizer* fgSizer13;
+	fgSizer13 = new wxFlexGridSizer( 0, 1, 0, 0 );
+	fgSizer13->AddGrowableCol( 0 );
+	fgSizer13->AddGrowableRow( 1 );
+	fgSizer13->SetFlexibleDirection( wxBOTH );
+	fgSizer13->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
 	wxFlexGridSizer* fgSizer10;
 	fgSizer10 = new wxFlexGridSizer( 0, 2, 0, 0 );
 	fgSizer10->AddGrowableCol( 1 );
@@ -919,9 +926,22 @@ ExplorerPanelGen::ExplorerPanelGen( wxWindow* parent, wxWindowID id, const wxPoi
 	explorerStartTimeSpinCtrl->SetDigits( 3 );
 	fgSizer10->Add( explorerStartTimeSpinCtrl, 0, wxALL|wxEXPAND, 5 );
 
+	wxFlexGridSizer* fgSizer121;
+	fgSizer121 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer121->AddGrowableCol( 0 );
+	fgSizer121->AddGrowableRow( 0 );
+	fgSizer121->SetFlexibleDirection( wxBOTH );
+	fgSizer121->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
 	m_staticText24 = new wxStaticText( this, wxID_ANY, wxT("Clock (us)"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText24->Wrap( -1 );
-	fgSizer10->Add( m_staticText24, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	fgSizer121->Add( m_staticText24, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	guessButton = new wxButton( this, wxID_ANY, wxT("Guess"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT );
+	fgSizer121->Add( guessButton, 0, wxALIGN_BOTTOM|wxALIGN_CENTER_VERTICAL|wxALIGN_LEFT|wxALIGN_TOP, 5 );
+
+
+	fgSizer10->Add( fgSizer121, 1, wxEXPAND, 5 );
 
 	explorerClockSpinCtrl = new wxSpinCtrlDouble( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 100, 4, 1 );
 	explorerClockSpinCtrl->SetDigits( 1 );
@@ -952,7 +972,13 @@ ExplorerPanelGen::ExplorerPanelGen( wxWindow* parent, wxWindowID id, const wxPoi
 	fgSizer10->Add( explorerReverseCheckBox, 0, wxALL, 5 );
 
 
-	fgSizer12->Add( fgSizer10, 1, wxEXPAND, 5 );
+	fgSizer13->Add( fgSizer10, 1, wxEXPAND, 5 );
+
+	histogram = new HistogramViewer( this, wxID_ANY, wxDefaultPosition, wxSize( 256,100 ), 0 );
+	fgSizer13->Add( histogram, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_TOP|wxALL, 5 );
+
+
+	fgSizer12->Add( fgSizer13, 1, wxEXPAND, 5 );
 
 	explorerText = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxHSCROLL|wxTE_DONTWRAP|wxTE_MULTILINE|wxTE_READONLY );
 	explorerText->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
@@ -972,6 +998,7 @@ ExplorerPanelGen::ExplorerPanelGen( wxWindow* parent, wxWindowID id, const wxPoi
 	explorerTrackSpinCtrl->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ExplorerPanelGen::OnExplorerSettingChange ), NULL, this );
 	explorerSideSpinCtrl->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ExplorerPanelGen::OnExplorerSettingChange ), NULL, this );
 	explorerStartTimeSpinCtrl->Connect( wxEVT_COMMAND_SPINCTRLDOUBLE_UPDATED, wxSpinDoubleEventHandler( ExplorerPanelGen::OnExplorerSettingChange ), NULL, this );
+	guessButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ExplorerPanelGen::OnGuessClockButton ), NULL, this );
 	explorerClockSpinCtrl->Connect( wxEVT_COMMAND_SPINCTRLDOUBLE_UPDATED, wxSpinDoubleEventHandler( ExplorerPanelGen::OnExplorerSettingChange ), NULL, this );
 	explorerBitOffsetSpinCtrl->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ExplorerPanelGen::OnExplorerSettingChange ), NULL, this );
 	explorerDecodeChoice->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( ExplorerPanelGen::OnExplorerSettingChange ), NULL, this );
@@ -986,6 +1013,7 @@ ExplorerPanelGen::~ExplorerPanelGen()
 	explorerTrackSpinCtrl->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ExplorerPanelGen::OnExplorerSettingChange ), NULL, this );
 	explorerSideSpinCtrl->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ExplorerPanelGen::OnExplorerSettingChange ), NULL, this );
 	explorerStartTimeSpinCtrl->Disconnect( wxEVT_COMMAND_SPINCTRLDOUBLE_UPDATED, wxSpinDoubleEventHandler( ExplorerPanelGen::OnExplorerSettingChange ), NULL, this );
+	guessButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ExplorerPanelGen::OnGuessClockButton ), NULL, this );
 	explorerClockSpinCtrl->Disconnect( wxEVT_COMMAND_SPINCTRLDOUBLE_UPDATED, wxSpinDoubleEventHandler( ExplorerPanelGen::OnExplorerSettingChange ), NULL, this );
 	explorerBitOffsetSpinCtrl->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ExplorerPanelGen::OnExplorerSettingChange ), NULL, this );
 	explorerDecodeChoice->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( ExplorerPanelGen::OnExplorerSettingChange ), NULL, this );
