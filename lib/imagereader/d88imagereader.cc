@@ -77,6 +77,7 @@ public:
                 config.set_tpi(48);
         }
 
+		config.clear_layout();
 		auto layout = config.mutable_layout();
         std::unique_ptr<Image> image(new Image);
         for (int track = 0; track < trackTableSize / 4; track++)
