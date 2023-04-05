@@ -42,6 +42,7 @@
 #include <wx/dataview.h>
 #include <wx/gauge.h>
 #include <wx/spinctrl.h>
+#include "histogramviewer.h"
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -458,6 +459,7 @@ class ExplorerPanelGen : public wxPanel
 		wxStaticText* m_staticText231;
 		wxSpinCtrlDouble* explorerStartTimeSpinCtrl;
 		wxStaticText* m_staticText24;
+		wxButton* guessButton;
 		wxSpinCtrlDouble* explorerClockSpinCtrl;
 		wxStaticText* m_staticText25;
 		wxSpinCtrl* explorerBitOffsetSpinCtrl;
@@ -465,6 +467,7 @@ class ExplorerPanelGen : public wxPanel
 		wxChoice* explorerDecodeChoice;
 		wxStaticText* m_staticText241;
 		wxCheckBox* explorerReverseCheckBox;
+		HistogramViewer* histogram;
 		wxTextCtrl* explorerText;
 
 		// Virtual event handlers, override them in your derived class
@@ -472,6 +475,7 @@ class ExplorerPanelGen : public wxPanel
 		virtual void OnExplorerRefreshButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnExplorerSettingChange( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnExplorerSettingChange( wxSpinDoubleEvent& event ) { event.Skip(); }
+		virtual void OnGuessClockButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnExplorerSettingChange( wxCommandEvent& event ) { event.Skip(); }
 
 

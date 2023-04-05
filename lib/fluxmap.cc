@@ -76,3 +76,89 @@ std::vector<std::unique_ptr<const Fluxmap>> Fluxmap::split() const
 
     return maps;
 }
+
+/*
+ * Tries to guess the clock by finding the smallest common interval.
+ * Returns nanoseconds.
+ */
+Fluxmap::ClockData Fluxmap::guessClock(
+    double noiseFloorFactor, double signalLevelFactor) const
+{
+    ClockData data = {};
+
+    FluxmapReader fr(*this);
+
+    while (!fr.eof())
+    {
+        unsigned interval;
+        fr.findEvent(F_BIT_PULSE, interval);
+        if (interval > 0xff)
+            continue;
+        data.buckets[interval]++;
+    }
+
+    uint32_t max =
+        *std::max_element(std::begin(data.buckets), std::end(data.buckets));
+    uint32_t min =
+        *std::min_element(std::begin(data.buckets), std::end(data.buckets));
+    data.noiseFloor = min + (max - min) * noiseFloorFactor;
+    data.signalLevel = min + (max - min) * signalLevelFactor;
+
+    /* Find a point solidly within the first pulse. */
+
+    int pulseindex = 0;
+    while (pulseindex < 256)
+    {
+        if (data.buckets[pulseindex] > data.signalLevel)
+            break;
+        pulseindex++;
+    }
+    if (pulseindex == -1)
+        return data;
+
+    /* Find the upper and lower bounds of the pulse. */
+
+    int peaklo = pulseindex;
+    while (peaklo > 0)
+    {
+        if (data.buckets[peaklo] < data.noiseFloor)
+            break;
+        peaklo--;
+    }
+
+    int peakhi = pulseindex;
+    while (peakhi < 255)
+    {
+        if (data.buckets[peakhi] < data.noiseFloor)
+            break;
+        peakhi++;
+    }
+
+    /* Find the total accumulated size of the pulse. */
+
+    uint32_t total_size = 0;
+    for (int i = peaklo; i < peakhi; i++)
+        total_size += data.buckets[i];
+
+    /* Now find the median. */
+
+    uint32_t count = 0;
+    int median = peaklo;
+    while (median < peakhi)
+    {
+        count += data.buckets[median];
+        if (count > (total_size / 2))
+            break;
+        median++;
+    }
+
+    /*
+     * Okay, the median should now be a good candidate for the (or a) clock.
+     * How this maps onto the actual clock rate depends on the encoding.
+     */
+
+    data.peakStart = peaklo * NS_PER_TICK;
+    data.peakEnd = peakhi * NS_PER_TICK;
+    data.median = median * NS_PER_TICK;
+    return data;
+}
