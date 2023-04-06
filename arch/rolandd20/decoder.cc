@@ -12,13 +12,19 @@
  *
  * BF FF FF FF FF FF FE AB
  *
- *       f       f       f       f       f       e       a       b
- * 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 0 1 0 1 0 1 1
- * 1111111111111111111111111111111111111111111111011101110111011111
- *    f   f   f   f   f   f   f   f   f   f   f   d   d   d   d   f
+ * This encodes to:
+ *
+ *    e    d    5    5    5    5    5    5
+ * 1110 1101 0101 0101 0101 0101 0101 0101
+ *    5    5    5    5    5    5    5    5
+ * 0101 0101 0101 0101 0101 0101 0101 0101
+ *    5    5    5    5    5    5    5    5
+ * 0101 0101 0101 0101 0101 0101 0101 0101
+ *    5    5    5    4    4    4    4    5
+ * 0101 0101 0101 0100 0100 0100 0100 0101
  */
 
-static const FluxPattern SECTOR_PATTERN(64, 0xfffffffffffddddfLL);
+static const FluxPattern SECTOR_PATTERN(64, 0xed55555555555555LL);
 
 class RolandD20Decoder : public Decoder
 {
@@ -34,8 +40,9 @@ public:
 
     void decodeSectorRecord() override
 	{
-		auto rawbits = readRawBits(128);
+		auto rawbits = readRawBits(256);
 		const auto& bytes = decodeFmMfm(rawbits);
+		fmt::print("{} ", _sector->clock);
 		hexdump(std::cout, bytes);
 	}
 };
