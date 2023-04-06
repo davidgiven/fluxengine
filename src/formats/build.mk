@@ -64,6 +64,7 @@ FORMATS = \
 	northstar350 \
 	northstar87 \
 	psos800 \
+	rolandd20 \
 	rx50 \
 	shugart_drive \
 	smaky6 \
