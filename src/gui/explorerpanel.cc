@@ -113,7 +113,7 @@ private:
     {
         nanoseconds_t clock = histogram->GetMedian();
         explorerClockSpinCtrl->SetValue(clock / 1e3);
-		UpdateExplorerData();
+        UpdateExplorerData();
     }
 
     void OnQueueEmpty() override

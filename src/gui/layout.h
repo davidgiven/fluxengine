@@ -39,10 +39,10 @@
 #include <wx/aui/aui.h>
 #include <wx/aui/auibar.h>
 #include "visualisationcontrol.h"
+#include "histogramviewer.h"
 #include <wx/dataview.h>
 #include <wx/gauge.h>
 #include <wx/spinctrl.h>
-#include "histogramviewer.h"
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -353,7 +353,7 @@ class ImagerPanelGen : public wxPanel
 		VisualisationControl* visualiser;
 		wxButton* imagerSaveImageButton;
 		wxButton* imagerSaveFluxButton;
-		wxStaticText* m_staticText4;
+		HistogramViewer* histogram;
 		wxButton* imagerGoAgainButton;
 
 		// Virtual event handlers, override them in your derived class
