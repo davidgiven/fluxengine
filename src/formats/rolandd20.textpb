@@ -6,19 +6,23 @@ image_writer {
 }
 
 layout {
-	tracks: 80
-	sides: 2
+	tracks: 78
+	sides: 1
 	layoutdata {
-		sector_size: 512
+		sector_size: 256
 		physical {
-			start_sector: 1
-			count: 10
+			start_sector: 0
+			count: 12
+			skew: 5
 		}
 	}
 }
 
 decoder {
-	rolandd20 {}
+	brother {}
 }
 
+drive {
+	head_bias: 1
+}
 
