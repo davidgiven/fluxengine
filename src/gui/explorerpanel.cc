@@ -8,6 +8,23 @@
 #include "layout.h"
 #include "jobqueue.h"
 
+static Bytes fakeBits(const std::vector<bool>& bits)
+{
+	Bytes result;
+	ByteWriter bw(result);
+
+	auto it = bits.begin();
+	while (it != bits.end())
+	{
+		uint8_t b = (*it++) << 4;
+		if (it != bits.end())
+			b |= *it++;
+		bw.write_8(b);
+	}
+
+	return result;
+}
+
 class ExplorerPanelImpl :
     public ExplorerPanelGen,
     public ExplorerPanel,
@@ -175,11 +192,15 @@ private:
                         Bytes bytes;
                         switch (explorerDecodeChoice->GetSelection())
                         {
-                            case 0:
+							case 0:
+								bytes = fakeBits(bits);
+								break;
+
+                            case 1:
                                 bytes = toBytes(bits);
                                 break;
 
-                            case 1:
+                            case 2:
                                 bytes = decodeFmMfm(bits.begin(), bits.end());
                                 break;
                         }
