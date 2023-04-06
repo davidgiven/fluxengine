@@ -75,6 +75,11 @@ wxThread::ExitCode FluxEngineApp::Entry()
     {
         Logger() << EmergencyStopMessage();
     }
+	catch (const std::exception& e)
+	{
+		Logger() << ErrorLogMessage{
+		fmt::format("unhandled exception: {}\n", e.what())};
+	}
 
     postToUiThread(
         [&]

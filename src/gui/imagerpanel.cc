@@ -74,7 +74,6 @@ private:
 
     void OnQueueFailed() override
     {
-        fmt::print("queue failed\n");
         if (_state == STATE_READING_WORKING)
             _state = STATE_READING_FAILED;
         else if (_state == STATE_WRITING_WORKING)
