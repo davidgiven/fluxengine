@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version 3.10.1-234-gd93c9fc0-dirty)
+// C++ code generated with wxFormBuilder (version 3.10.1-1fa5400)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO *NOT* EDIT THIS FILE!
@@ -938,7 +938,7 @@ ExplorerPanelGen::ExplorerPanelGen( wxWindow* parent, wxWindowID id, const wxPoi
 	fgSizer121->Add( m_staticText24, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
 	guessButton = new wxButton( this, wxID_ANY, wxT("Guess"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT );
-	fgSizer121->Add( guessButton, 0, wxALIGN_BOTTOM|wxALIGN_CENTER_VERTICAL|wxALIGN_LEFT|wxALIGN_TOP, 5 );
+	fgSizer121->Add( guessButton, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_LEFT, 5 );
 
 
 	fgSizer10->Add( fgSizer121, 1, wxEXPAND, 5 );
@@ -958,7 +958,7 @@ ExplorerPanelGen::ExplorerPanelGen( wxWindow* parent, wxWindowID id, const wxPoi
 	m_staticText27->Wrap( -1 );
 	fgSizer10->Add( m_staticText27, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	wxString explorerDecodeChoiceChoices[] = { wxT("Don't decode"), wxT("MFM / M²FM / FM") };
+	wxString explorerDecodeChoiceChoices[] = { wxT("Unencoded bits"), wxT("Unencoded bytes"), wxT("MFM / M²FM / FM") };
 	int explorerDecodeChoiceNChoices = sizeof( explorerDecodeChoiceChoices ) / sizeof( wxString );
 	explorerDecodeChoice = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, explorerDecodeChoiceNChoices, explorerDecodeChoiceChoices, 0 );
 	explorerDecodeChoice->SetSelection( 0 );
