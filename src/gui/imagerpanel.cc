@@ -218,6 +218,8 @@ public:
         std::shared_ptr<const TrackFlux> trackdata) override
     {
         visualiser->SetTrackData(trackdata);
+		if (!trackdata->trackDatas.empty())
+			histogram->Redraw(*(*trackdata->trackDatas.begin())->fluxmap, 0);
     }
 
     void SetDisk(std::shared_ptr<const DiskFlux> diskdata) override

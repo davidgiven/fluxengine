@@ -682,33 +682,32 @@ ImagerPanelGen::ImagerPanelGen( wxWindow* parent, wxWindowID id, const wxPoint& 
 	wxGridSizer* gSizer7;
 	gSizer7 = new wxGridSizer( 1, 1, 0, 0 );
 
-	wxGridSizer* gSizer8;
-	gSizer8 = new wxGridSizer( 0, 1, 0, 0 );
+	wxBoxSizer* bSizer8;
+	bSizer8 = new wxBoxSizer( wxVERTICAL );
 
 	imagerSaveImageButton = new wxButton( this, wxID_ANY, wxT("Save decoded image"), wxDefaultPosition, wxDefaultSize, 0 );
 
 	imagerSaveImageButton->SetBitmap( wxArtProvider::GetBitmap( wxART_FILE_SAVE, wxART_BUTTON ) );
-	gSizer8->Add( imagerSaveImageButton, 0, wxALL|wxEXPAND, 5 );
+	bSizer8->Add( imagerSaveImageButton, 0, wxALL|wxEXPAND, 5 );
 
 	imagerSaveFluxButton = new wxButton( this, wxID_ANY, wxT("Save raw flux"), wxDefaultPosition, wxDefaultSize, 0 );
 
 	imagerSaveFluxButton->SetBitmap( wxArtProvider::GetBitmap( wxART_FILE_SAVE_AS, wxART_BUTTON ) );
-	gSizer8->Add( imagerSaveFluxButton, 0, wxALL|wxEXPAND, 5 );
+	bSizer8->Add( imagerSaveFluxButton, 0, wxALL|wxEXPAND, 5 );
 
-	m_staticText4 = new wxStaticText( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText4->Wrap( -1 );
-	gSizer8->Add( m_staticText4, 0, wxALL, 5 );
+	histogram = new HistogramViewer( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer8->Add( histogram, 0, wxALIGN_CENTER_VERTICAL|wxALL|wxEXPAND, 5 );
 
 	imagerGoAgainButton = new wxButton( this, wxID_ANY, wxT("Go again"), wxDefaultPosition, wxDefaultSize, 0 );
 
 	imagerGoAgainButton->SetBitmap( wxArtProvider::GetBitmap( wxART_REDO, wxART_BUTTON ) );
-	gSizer8->Add( imagerGoAgainButton, 0, wxALL|wxEXPAND, 5 );
+	bSizer8->Add( imagerGoAgainButton, 0, wxALL|wxEXPAND, 5 );
 
 
-	gSizer7->Add( gSizer8, 1, wxALIGN_CENTER, 5 );
+	gSizer7->Add( bSizer8, 1, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5 );
 
 
-	gSizer122->Add( gSizer7, 1, wxEXPAND, 5 );
+	gSizer122->Add( gSizer7, 1, wxALIGN_CENTER_VERTICAL|wxEXPAND, 5 );
 
 
 	bSizer41->Add( gSizer122, 1, wxEXPAND, 5 );
