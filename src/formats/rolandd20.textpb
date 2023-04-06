@@ -1,0 +1,28 @@
+comment: 'Roland D20'
+
+image_writer {
+	filename: "rolandd20.img"
+	type: IMG
+}
+
+layout {
+	tracks: 78
+	sides: 1
+	layoutdata {
+		sector_size: 256
+		physical {
+			start_sector: 0
+			count: 12
+			skew: 5
+		}
+	}
+}
+
+decoder {
+	brother {}
+}
+
+drive {
+	head_bias: 1
+}
+

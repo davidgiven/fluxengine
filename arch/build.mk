@@ -24,6 +24,7 @@ LIBARCH_SRCS = \
 	arch/mx/decoder.cc \
 	arch/northstar/decoder.cc \
 	arch/northstar/encoder.cc \
+	arch/rolandd20/decoder.cc \
 	arch/smaky6/decoder.cc \
 	arch/tids990/decoder.cc \
 	arch/tids990/encoder.cc \
