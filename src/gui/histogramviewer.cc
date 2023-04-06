@@ -31,6 +31,7 @@ void HistogramViewer::Redraw(const Fluxmap& fluxmap, nanoseconds_t clock)
 {
     _data = fluxmap.guessClock();
     _clock = clock;
+	_blank = false;
     Refresh();
 }
 
@@ -39,6 +40,9 @@ void HistogramViewer::OnPaint(wxPaintEvent&)
     wxPaintDC dc(this);
     dc.SetBackground(wxSystemSettings::GetColour(wxSYS_COLOUR_FRAMEBK));
     dc.Clear();
+
+	if (_blank)
+		return;
 
     uint32_t max =
         *std::max_element(std::begin(_data.buckets), std::end(_data.buckets));
@@ -61,6 +65,7 @@ void HistogramViewer::OnPaint(wxPaintEvent&)
             {2 * BORDER + WIDTH, BORDER + HEIGHT - y});
     }
 
+	if (_clock != 0.0)
     {
         int x = _clock / NS_PER_TICK;
         dc.DrawLine({BORDER + x, 2 * BORDER + HEIGHT}, {BORDER + x, 0});
