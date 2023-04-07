@@ -15,10 +15,10 @@
  * 11		c1 ^
  * 12		0c month
  * 13		19 day
- * 14		2f time? seconds
+ * 14		2f time? minutes
  * 15		00
  * 16		00 hours
- * 17		18 minutes
+ * 17		18 seconds
  * 18		03 0x320, number of blocks on the disk
  * 19		20 ^
  * 1a		00 0x0010, first data block?
@@ -127,8 +127,8 @@ class PhileFilesystem : public Filesystem
                     filedes[6],
                     filedes[7] + 1,
                     filedes[10] & 0x1f,
-                    filedes[11],
-                    filedes[8]);
+                    filedes[8],
+                    filedes[11]);
 
             attributes[Filesystem::FILENAME] = filename;
             attributes[Filesystem::LENGTH] = std::to_string(length);
