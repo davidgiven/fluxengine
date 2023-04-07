@@ -34,6 +34,9 @@ std::unique_ptr<FluxSource> FluxSource::create(const FluxSourceProto& config)
         case FluxSourceProto::SCP:
             return createScpFluxSource(config.scp());
 
+        case FluxSourceProto::A2R:
+            return createA2rFluxSource(config.a2r());
+
         case FluxSourceProto::CWF:
             return createCwfFluxSource(config.cwf());
 
@@ -67,6 +70,12 @@ void FluxSource::updateConfigForFilename(
                 {
                     proto->set_type(FluxSourceProto::SCP);
                     proto->mutable_scp()->set_filename(s);
+                }},
+            {std::regex("^(.*\\.a2r)$"),
+             [](auto& s, auto* proto)
+                {
+                    proto->set_type(FluxSourceProto::A2R);
+                    proto->mutable_a2r()->set_filename(s);
                 }},
             {std::regex("^(.*\\.cwf)$"),
              [](auto& s, auto* proto)

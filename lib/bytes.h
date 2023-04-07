@@ -12,6 +12,7 @@ public:
     Bytes();
     Bytes(unsigned size);
     Bytes(const uint8_t* ptr, size_t len);
+    Bytes(const char* data);
     Bytes(const std::string& data);
     Bytes(std::initializer_list<uint8_t> data);
     Bytes(std::shared_ptr<std::vector<uint8_t>> data);

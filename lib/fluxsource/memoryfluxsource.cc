@@ -31,20 +31,6 @@ private:
 	int _count = 0;
 };
 
-class EmptyFluxSourceIterator : public FluxSourceIterator
-{
-	bool hasNext() const override
-	{
-		return false;
-	}
-
-	std::unique_ptr<const Fluxmap> next() override
-	{
-		Error() << "no flux to read";
-		throw nullptr;
-	}
-};
-
 class MemoryFluxSource : public FluxSource
 {
 public:

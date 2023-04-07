@@ -19,6 +19,7 @@ LIBFLUXENGINE_SRCS = \
 	lib/fluxsink/hardwarefluxsink.cc \
 	lib/fluxsink/scpfluxsink.cc \
 	lib/fluxsink/vcdfluxsink.cc \
+	lib/fluxsource/a2rfluxsource.cc \
 	lib/fluxsource/cwffluxsource.cc \
 	lib/fluxsource/erasefluxsource.cc \
 	lib/fluxsource/fl2fluxsource.cc \
