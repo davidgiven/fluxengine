@@ -47,6 +47,12 @@ Bytes::Bytes(const std::string& s):
 	_high(s.size())
 {}
 
+Bytes::Bytes(const char* s):
+	_data(createVector((const uint8_t*)s, strlen(s))),
+	_low(0),
+	_high(strlen(s))
+{}
+
 Bytes::Bytes(std::initializer_list<uint8_t> data):
     _data(createVector(data)),
     _low(0),

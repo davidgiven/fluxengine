@@ -3,6 +3,7 @@
 
 #include "flags.h"
 
+class A2rFluxSourceProto;
 class CwfFluxSourceProto;
 class DiskFlux;
 class EraseFluxSourceProto;
@@ -31,6 +32,8 @@ public:
     virtual ~FluxSource() {}
 
 private:
+    static std::unique_ptr<FluxSource> createA2rFluxSource(
+        const A2rFluxSourceProto& config);
     static std::unique_ptr<FluxSource> createCwfFluxSource(
         const CwfFluxSourceProto& config);
     static std::unique_ptr<FluxSource> createEraseFluxSource(
@@ -64,6 +67,19 @@ public:
     virtual bool isHardware()
     {
         return false;
+    }
+};
+
+class EmptyFluxSourceIterator : public FluxSourceIterator
+{
+    bool hasNext() const override
+    {
+        return false;
+    }
+
+    std::unique_ptr<const Fluxmap> next() override
+    {
+        Error() << "no flux to read";
     }
 };
 
