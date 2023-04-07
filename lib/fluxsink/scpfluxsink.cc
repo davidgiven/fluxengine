@@ -55,7 +55,7 @@ public:
         _fileheader.start_track = strackno(minTrack, minSide);
         _fileheader.end_track = strackno(maxTrack, maxSide);
         _fileheader.flags = SCP_FLAG_INDEXED;
-        if (config.tpi() == 96)
+        if (config.tpi() != 48)
             _fileheader.flags |= SCP_FLAG_96TPI;
         _fileheader.cell_width = 0;
 		if ((minSide == 0) && (maxSide == 0))
