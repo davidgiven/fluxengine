@@ -44,7 +44,6 @@ public:
 
 		int tpi = (_header.flags & SCP_FLAG_96TPI) ? 96 : 48;
         ::config.set_tpi(tpi);
-		::config.mutable_drive()->set_tpi(tpi);
 
         _resolution = 25 * (_header.resolution + 1);
         int startSide = (_header.heads == 2) ? 1 : 0;
