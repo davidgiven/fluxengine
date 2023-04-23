@@ -19,6 +19,6 @@ message MicropolisEncoderProto {
     optional double clock_period_us = 1
         [ default = 2.0, (help) = "clock rate on the real device" ];
     optional double rotational_period_ms = 2
-        [ default = 166.0, (help) = "rotational period on the real device" ];
+        [ default = 200.0, (help) = "rotational period on the real device" ];
 }
 
