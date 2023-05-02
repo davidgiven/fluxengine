@@ -1,0 +1,48 @@
+comment: 'PC 160kB 5.25" 40-track 8-sector SSDD'
+
+image_reader {
+	filename: "ibm160.img"
+	type: IMG
+}
+
+image_writer {
+	filename: "ibm160.img"
+	type: IMG
+}
+
+layout {
+	tracks: 40
+	sides: 1
+	layoutdata {
+		sector_size: 512
+		physical {
+			start_sector: 1
+			count: 8
+		}
+	}
+}
+
+encoder {
+	ibm {
+		trackdata {
+			target_rotational_period_ms: 167
+			target_clock_period_us: 3.333
+		}
+	}
+}
+
+decoder {
+	ibm {}
+}
+
+drive {
+	high_density: false
+}
+
+tpi: 48
+
+filesystem {
+	type: FATFS
+}
+
+

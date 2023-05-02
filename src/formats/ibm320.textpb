@@ -1,0 +1,44 @@
+comment: 'PC 320kB 5.25" 40-track 8-sector DSDD'
+
+image_reader {
+	filename: "ibm320.img"
+	type: IMG
+}
+
+image_writer {
+	filename: "ibm320.img"
+	type: IMG
+}
+
+layout {
+	tracks: 40
+	sides: 2
+	layoutdata {
+		sector_size: 512
+		physical {
+			start_sector: 1
+			count: 8
+		}
+	}
+}
+
+encoder {
+	ibm {
+		trackdata {
+			target_rotational_period_ms: 167
+			target_clock_period_us: 3.333
+		}
+	}
+}
+
+decoder {
+	ibm {}
+}
+
+tpi: 48
+
+filesystem {
+	type: FATFS
+}
+
+

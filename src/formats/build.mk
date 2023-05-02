@@ -46,7 +46,9 @@ FORMATS = \
 	ibm1232 \
 	ibm1440 \
 	ibm180 \
+	ibm160 \
 	ibm360 \
+	ibm320 \
 	ibm720 \
 	icl30 \
 	mac400 \
