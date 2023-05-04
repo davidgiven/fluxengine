@@ -40,6 +40,7 @@ FORMATS = \
 	f85 \
 	fb100 \
 	hp9121 \
+	hplif616 \
 	hplif770 \
 	ibm \
 	ibm1200 \

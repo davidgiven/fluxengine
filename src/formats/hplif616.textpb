@@ -1,4 +1,4 @@
-comment: 'Hewlett-Packard LIF 770kB 3.5" DSDD'
+comment: 'Hewlett-Packard LIF 616kB 3.5" DSDD'
 
 drive {
 	high_density: false
@@ -6,12 +6,12 @@ drive {
 }
 
 image_reader {
-	filename: "hplif770.img"
+	filename: "hplif616.img"
 	type: IMG
 }
 
 image_writer {
-	filename: "hplif770.img"
+	filename: "hplif616.img"
 	type: IMG
 }
 
@@ -19,13 +19,10 @@ layout {
 	tracks: 77
 	sides: 2
 	layoutdata {
-		sector_size: 1024
+		sector_size: 256
 		physical {
-			sector: 1
-			sector: 2
-			sector: 3
-			sector: 4
-			sector: 5
+			start_sector: 1
+			count: 16
 		}
 	}
 }
@@ -35,9 +32,10 @@ encoder {
 		trackdata {
 			target_rotational_period_ms: 200
 			target_clock_period_us: 4
+			emit_iam: false
 			gap0: 80
 			gap2: 22
-			gap3: 80
+			gap3: 40
 		}
 	}
 }
@@ -50,5 +48,4 @@ decoder {
 filesystem {
 	type: LIF
 }
-
 
