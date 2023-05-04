@@ -77,6 +77,7 @@ LIBFLUXENGINE_SRCS = \
 	lib/vfs/cbmfs.cc \
 	lib/vfs/cpmfs.cc \
 	lib/vfs/fatfs.cc \
+	lib/vfs/lif.cc \
 	lib/vfs/machfs.cc \
 	lib/vfs/prodos.cc \
 	lib/vfs/smaky6fs.cc \

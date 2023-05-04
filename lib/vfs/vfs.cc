@@ -212,6 +212,9 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystem(
         case FilesystemProto::PHILE:
             return Filesystem::createPhileFilesystem(config, image);
 
+        case FilesystemProto::LIF:
+            return Filesystem::createLifFilesystem(config, image);
+
         default:
             Error() << "no filesystem configured";
             return std::unique_ptr<Filesystem>();
