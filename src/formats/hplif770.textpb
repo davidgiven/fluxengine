@@ -46,3 +46,9 @@ decoder {
 	ibm {
 	}
 }
+
+filesystem {
+	type: LIF
+}
+
+
