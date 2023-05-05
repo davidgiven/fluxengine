@@ -233,8 +233,8 @@ private:
         _rootBlock = getPsosBlock(2, 1);
         _bitmapBlockNumber = _rootBlock.reader().seek(0x1c).read_be16();
         _filedesBlockNumber = _rootBlock.reader().seek(0x1e).read_be16();
-        _filedesLength =
-            _rootBlock.reader().seek(0x20).read_be16() - _filedesBlockNumber + 1;
+        _filedesLength = _rootBlock.reader().seek(0x20).read_be16() -
+                         _filedesBlockNumber + 1;
         _totalBlocks = _rootBlock.reader().seek(0x18).read_be16();
 
         Bytes directoryBlock = getPsosBlock(3, 1);

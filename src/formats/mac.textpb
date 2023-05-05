@@ -1,12 +1,12 @@
-comment: 'Macintosh 800kB 3.5" DSDD GCR'
+comment: 'Macintosh GCR family'
 
 image_reader {
-	filename: "mac800.dsk"
+	filename: "mac.dsk"
 	type: IMG
 }
 
 image_writer {
-	filename: "mac800.dsk"
+	filename: "mac.dsk"
 	type: IMG
 }
 
@@ -64,8 +64,47 @@ decoder {
 	macintosh {}
 }
 
-filesystem {
-	type: MACHFS
+option_group {
+	comment: "Format variant"
+
+	option {
+		name: "400"
+		comment: "400kB 80-track SSDD"
+
+		config {
+			layout {
+				sides: 1
+			}
+		}
+	}
+
+	option {
+		name: "800"
+		comment: "800kB 80-track DSDD"
+		set_by_default: true
+
+		config {
+			layout {
+				sides: 2
+			}
+
+			filesystem {
+				type: MACHFS
+			}
+		}
+	}
 }
 
+option {
+	name: "metadata"
+	comment: "read/write 524 byte sectors"
+
+	config {
+		layout {
+			layoutdata {
+				sector_size: 524
+			}
+		}
+	}
+}
 

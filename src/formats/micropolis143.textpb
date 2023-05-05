@@ -1,8 +1,0 @@
-comment: 'Micropolis MetaFloppy Mod I 143kB 5.25" SSDD hard-sectored'
-
-include: '_micropolis'
-
-layout {
-	tracks: 35
-	sides: 1
-}

@@ -64,27 +64,30 @@ filesystem {
 	type: CBMFS
 }
 
-option {
-	name: "35"
-	comment: "35-track variant (default)"
-	message: "using 35-track variant"
-	
-	config {
-		layout {
-			tracks: 35
+option_group {
+	comment: "Format family"
+
+	option {
+		name: "171"
+		comment: "35-track variant"
+		set_by_default: true
+		
+		config {
+			layout {
+				tracks: 35
+			}
+		}
+	}
+		
+	option {
+		name: "192"
+		comment: "40-track variant"
+		
+		config {
+			layout {
+				tracks: 40
+			}
 		}
 	}
 }
-	
-option {
-	name: "40"
-	comment: "40-track variant"
-	message: "using 40-track variant"
-	
-	config {
-		layout {
-			tracks: 40
-		}
-	}
-}
-	
+		

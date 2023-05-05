@@ -38,10 +38,10 @@ Reading disks
 Just do:
 
 ```
-fluxengine read `<format>`
+fluxengine read brother `<format>`
 ```
 
-... where `<format>` can be `brother120` or `brother240`. You should end up
+... where `<format>` can be `--120` or `--240`. You should end up
 with a `brother.img` which is either 119808 or 239616 bytes long.
 
 Writing disks
@@ -53,7 +53,7 @@ Just do:
 fluxengine write `<format>` -i brother.img
 ```
 
-...where `<format>` can be `brother120` or `brother240`.
+...where `<format>` can be `--120` or `--240`.
 
 Dealing with misaligned disks
 -----------------------------
@@ -102,7 +102,8 @@ record.) The sector order is 05a3816b4927, which gives a sector skew of 5.
 High level format
 -----------------
 
-Once decoded, you end up with a file system image.
+Once decoded, you end up with a file system image. FluxEngine supports direct
+filesystem access for both kinds of disks.
 
 ### 120kB disks
 

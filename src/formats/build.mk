@@ -1,37 +1,16 @@
 FORMATS = \
-	_acornadfs8 \
-	_acornadfs32 \
-	_apple2 \
-	_atari \
-	_micropolis \
-	_northstar \
-	_mx \
 	40track_drive \
-	acornadfs160 \
-	acornadfs320 \
-	acornadfs640 \
-	acornadfs800 \
-	acornadfs1600 \
+	acornadfs \
 	acorndfs \
 	aeslanier \
 	agat840 \
 	amiga \
-	ampro400 \
-	ampro800 \
+	ampro \
 	apple2_drive \
-	appleii140 \
-	appleii640 \
-	atarist360 \
-	atarist370 \
-	atarist400 \
-	atarist410 \
-	atarist720 \
-	atarist740 \
-	atarist800 \
-	atarist820 \
+	apple2 \
+	atarist \
 	bk800 \
-	brother120 \
-	brother240 \
+	brother \
 	commodore1541 \
 	commodore1581 \
 	cmd_fd2000 \
@@ -39,44 +18,22 @@ FORMATS = \
 	epsonpf10 \
 	f85 \
 	fb100 \
-	hp9121 \
-	hplif770 \
+	hplif \
 	ibm \
-	ibm1200 \
-	ibm1232 \
-	ibm1440 \
-	ibm180 \
-	ibm160 \
-	ibm360 \
-	ibm320 \
-	ibm720 \
 	icl30 \
-	mac400 \
-	mac800 \
-	micropolis143 \
-	micropolis287 \
-	micropolis315 \
-	micropolis630 \
-	mx110 \
-	mx220_ds \
-	mx220_ss \
-	mx440 \
+	mac \
+	micropolis \
+	mx \
 	n88basic \
-	northstar175 \
-	northstar350 \
-	northstar87 \
+	northstar \
 	psos800 \
 	rolandd20 \
 	rx50 \
 	shugart_drive \
 	smaky6 \
 	tids990 \
-	tiki90 \
-	tiki200 \
-	tiki400 \
-	tiki800 \
-	victor9k_ds \
-	victor9k_ss \
+	tiki \
+	victor9k \
 	zilogmcz \
 
 $(OBJDIR)/src/formats/format_%.o: $(OBJDIR)/src/formats/format_%.cc

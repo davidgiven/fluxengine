@@ -1,0 +1,85 @@
+comment: 'Northstar family'
+
+image_reader {
+	filename: "northstar.nsi"
+	type: NSI
+}
+
+image_writer {
+	filename: "northstar.nsi"
+	type: NSI
+}
+
+layout {
+	layoutdata {
+		physical {
+			start_sector: 0
+			count: 10
+		}
+	}
+}
+
+drive {
+	hard_sector_count: 10
+	sync_with_index: true
+}
+
+encoder {
+	northstar {}
+}
+
+decoder {
+	northstar {}
+}
+
+tpi: 48
+
+option_group {
+	comment: "Format variant"
+
+	option {
+		name: "87"
+		comment: '87.5kB 5.25" 35-track SSSD hard-sectored'
+
+		config {
+			layout {
+				tracks: 40
+				sides: 1
+				layoutdata {
+					sector_size: 256
+				}
+			}
+		}
+	}
+
+	option {
+		name: "175"
+		comment: '175kB 5.25" 40-track SSDD hard-sectored'
+
+		config {
+			layout {
+				tracks: 40
+				sides: 1
+				layoutdata {
+					sector_size: 512
+				}
+			}
+		}
+	}
+
+	option {
+		name: "350"
+		comment: '350kB 5.25" 40-track DSDD hard-sectored'
+		set_by_default: true
+
+		config {
+			layout {
+				tracks: 40
+				sides: 2
+				layoutdata {
+					sector_size: 512
+				}
+			}
+		}
+	}
+}

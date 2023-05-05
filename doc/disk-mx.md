@@ -9,7 +9,7 @@ clone of the PDP-11. The MX board was an early floppy drive controller board
 for it.
 
 <div style="text-align: center">
-<a href="http://www.leningrad.su/museum/show_big.php?n=1006"><img src="dvk3m.jpg" style="max-width: 60%" alt="A Durango F85, held precariously"></a>
+<a href="http://www.leningrad.su/museum/show_big.php?n=1006"><img src="dvk3m.jpg" style="max-width: 60%" alt="A DVK computer"></a>
 </div>
 
 The MX format is interesting in that it has to be read a track at a time. The
@@ -42,15 +42,17 @@ Reading discs
 -------------
 
 ```
-fluxengine read mx440
+fluxengine read mx
 ```
 
-You should end up with an `mx.img` which will vary in length depending on the format. The default is double-sided 80-track. For the other formats, use:
+You should end up with an `mx.img` which will vary in length depending on the
+format. The default is double-sided 80-track. For the other formats, add one of
+the following options:
 
-  * single-sided 40-track: `mx110`
-  * double-sided 40-track: `mx220_ds`
-  * single-sided 80-track: `mx220_ss`
-  * double-sided 80-track: `mx440`
+  * single-sided 40-track: `--110`
+  * double-sided 40-track: `--220ds`
+  * single-sided 80-track: `--220ss`
+  * double-sided 80-track: `--440`
 
 
 Useful references

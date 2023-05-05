@@ -33,29 +33,28 @@ Reading 1541 disks
 Just do:
 
 ```
-fluxengine read commodore1541 -o commodore1541.d64
+fluxengine read commodore -o commodore.d64
 ```
 
-You should end up with an `commodore1541.d64` file which is 174848 bytes long.
+You should end up with an `commodore.d64` file which is 174848 bytes long.
 You can load this straight into a Commodore 64 emulator such as
 [VICE](http://vice-emu.sourceforge.net/).
 
-If you have a 40-track disk, add `--40`.
+If you have a 40-track disk, add `--196`.
 
 **Big warning!** Commodore 64 disk images are complicated due to the way the
 tracks are different sizes and the odd sector size, so you need the special D64
-or LDBS output formats to represent them sensibly. Don't use IMG unless you
-know what you're doing.
+or LDBS output formats to represent them sensibly.
 
 Writing 1541 disks
 ------------------
 
 Just do:
 ```
-fluxengine write commodore1541 -i file.d64
+fluxengine write commodore -i file.d64
 ```
 
-If you have a 40-track disk, add `--40`.
+If you have a 40-track disk, add `--196`.
 
 Note that only standard Commodore 64 BAM file systems can be written this way,
 as the disk ID in the BAM has to be copied to every sector on the disk.
