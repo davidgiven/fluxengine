@@ -1,0 +1,121 @@
+comment: 'Acorn ADFS family (ro)'
+
+image_writer {
+	filename: "acornadfs.img"
+	type: IMG
+}
+
+decoder {
+	ibm {
+		trackdata {
+			ignore_side_byte: true
+		}
+	}
+}
+
+option_group {
+	comment: "Format variant"
+
+	option {
+		name: "160"
+		comment: '160kB 3.5" or 5.25" 40-track SSDD; S format'
+
+		config {
+			tpi: 48
+			layout {
+				tracks: 40
+				sides: 1
+				layoutdata {
+					sector_size: 256
+					physical {
+						start_sector: 0
+						count: 16
+					}
+				}
+			}
+		}
+	}
+
+	option {
+		name: "320"
+		comment: '320kB 3.5" or 5.25" 80-track SSDD; M format'
+
+		config {
+			tpi: 96
+			layout {
+				tracks: 80
+				sides: 1
+				layoutdata {
+					sector_size: 256
+					physical {
+						start_sector: 0
+						count: 16
+					}
+				}
+			}
+		}
+	}
+
+	option {
+		name: "640"
+		comment: '640kB 3.5" or 5.25" 80-track DSDD; L format'
+
+		config {
+			tpi: 96
+			layout {
+				tracks: 80
+				sides: 2
+				layoutdata {
+					sector_size: 256
+					physical {
+						start_sector: 0
+						count: 16
+					}
+				}
+			}
+		}
+	}
+
+	option {
+		name: "800"
+		comment: '800kB 3.5" 80-track DSDD; D and E formats'
+
+		config {
+			tpi: 96
+			layout {
+				tracks: 80
+				sides: 2
+				layoutdata {
+					sector_size: 1024
+					physical {
+						start_sector: 0
+						count: 5
+					}
+				}
+			}
+		}
+	}
+
+	option {
+		name: "1600"
+		comment: '1600kB 3.5" 80-track DSHD; F formats'
+		set_by_default: true
+
+		config {
+			tpi: 96
+			layout {
+				tracks: 80
+				sides: 2
+				layoutdata {
+					sector_size: 1024
+					physical {
+						start_sector: 0
+						count: 10
+					}
+				}
+			}
+		}
+	}
+}
+
+			
