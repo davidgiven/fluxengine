@@ -577,17 +577,23 @@ private:
                     _formatNames[formatChoice->GetSelection()];
                 FlagGroup::parseConfigFile(formatName, formats);
 
-                /* Add grouped radiobuttons for anything in an open group. */
-
                 for (auto& group : config.option_group())
                 {
+                    sizer->Add(new wxStaticText(formatOptionsContainer,
+                        wxID_ANY,
+                        group.comment() + ":"));
+
                     bool first = true;
                     bool valueSet = false;
                     wxRadioButton* defaultButton = nullptr;
                     for (auto& option : group.option())
                     {
-                        auto* rb = new wxRadioButton(
-                            formatOptionsContainer, wxID_ANY, option.comment());
+                        auto* rb = new wxRadioButton(formatOptionsContainer,
+                            wxID_ANY,
+                            option.comment(),
+                            wxDefaultPosition,
+                            wxDefaultSize,
+                            first ? wxRB_GROUP : 0);
                         auto key = std::make_pair(formatName, option.name());
                         sizer->Add(rb);
 
@@ -614,8 +620,6 @@ private:
                         if (option.set_by_default() || !defaultButton)
                             defaultButton = rb;
 
-                        if (first)
-                            rb->SetExtraStyle(wxRB_GROUP);
                         first = false;
                     }
 
