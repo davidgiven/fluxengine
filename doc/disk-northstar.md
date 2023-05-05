@@ -21,12 +21,10 @@ equivalent to .img images.
 Reading disks
 -------------
 
-You must use a 48-TPI (40-track) 300RPM 5.25" floppy drive.
-
 To read a double-sided North Star floppy, run:
 
 ```
-fluxengine read <format>
+fluxengine read northstar <format>
 ```
 
 ...where `<format>` is one of the formats listed below.
@@ -37,13 +35,10 @@ disk type.
 Writing disks
 -------------
 
-You must use a 48-TPI (40-track) 300RPM 5.25" floppy drive and make
-sure that the drive's spindle speed is adjusted to exactly 300RPM.
-
 To write a double-sided North Star floppy, run:
 
 ```
-fluxengine write <format> -i image_to_write.nsi
+fluxengine write northstar <format> -i image_to_write.nsi
 ```
 
 ...where `<format>` is one of the formats listed below.
@@ -55,9 +50,9 @@ The following formats are supported:
 
 | Format name    | Disk Type                           | File Size (bytes) |
 | -------------- | ----------------------------------- | ----------------- |
-| `northstar87`  | Single-Sided, Single-Density (SSSD) | 89,600            |
-| `northstar175` | Single-Sided, Double-Density (SSDD) | 179,200           |
-| `northstar350` | Double-Sided, Double-Density (DSDD) | 358,400           |
+| `--87`         | Single-Sided, Single-Density (SSSD) | 89,600            |
+| `--175`        | Single-Sided, Double-Density (SSDD) | 179,200           |
+| `--350`        | Double-Sided, Double-Density (DSDD) | 358,400           |
 
 Useful references
 -----------------

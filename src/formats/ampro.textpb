@@ -1,0 +1,58 @@
+comment: 'Ampro 5.25" family'
+
+image_writer {
+	filename: "ampro.img"
+	type: IMG
+}
+
+layout {
+	sides: 2
+	layoutdata {
+		sector_size: 1024
+		physical {	
+			start_sector: 17
+			count: 5
+		}
+	}
+}
+
+decoder {
+	ibm {}
+}
+
+filesystem {
+	type: CPMFS
+	cpmfs {
+		filesystem_start {
+			track: 1
+		}
+		block_size: 2048
+		dir_entries: 128
+	}
+}
+
+option_group {
+	comment: "Format variant"
+
+	option {
+		name: "400"
+		comment: "400kB 40-track DSDD"
+
+		config {
+			layout {
+				tracks: 40
+			}
+		}
+	}
+
+	option {
+		name: "800"
+		comment: "800kB 80-track DSDD"
+
+		config {
+			layout {
+				tracks: 80
+			}
+		}
+	}
+}

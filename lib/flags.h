@@ -4,6 +4,7 @@
 class DataSpec;
 class Flag;
 class ConfigProto;
+class OptionProto;
 
 class FlagGroup
 {
@@ -46,6 +47,7 @@ public:
 
     /* Modify the current config to engage the named option. */
 
+    static void applyOption(const OptionProto& option);
     static bool applyOption(const std::string& option);
 
     void addFlag(Flag* flag);

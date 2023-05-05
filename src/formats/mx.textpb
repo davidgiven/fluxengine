@@ -1,0 +1,76 @@
+comment: 'DVK MX family'
+
+image_writer {
+	filename: "mx.img"
+	type: IMG
+}
+
+layout {
+	layoutdata {
+		sector_size: 256
+		physical {
+			start_sector: 0
+			count: 11
+		}
+	}
+}
+
+decoder {
+	mx {}
+}
+
+tpi: 48
+
+option_group {
+	comment: "Format family"
+
+	option {
+		name: "110"
+		comment: '110kB 5.25" 40-track SSSD'
+
+		config {
+			layout {
+				tracks: 40
+				sides: 1
+			}
+		}
+	}
+
+	option {
+		name: "220ds"
+		comment: '220kB 5.25" 40-track DSSD'
+
+		config {
+			layout {
+				tracks: 40
+				sides: 2
+			}
+		}
+	}
+
+	option {
+		name: "220ss"
+		comment: '220kB 5.25" 80-track SSSD'
+
+		config {
+			layout {
+				tracks: 80
+				sides: 1
+			}
+		}
+	}
+
+	option {
+		name: "440"
+		comment: '440kB 5.25" 80-track DSSD'
+		set_by_default: true
+
+		config {
+			layout {
+				tracks: 80
+				sides: 2
+			}
+		}
+	}
+}
+

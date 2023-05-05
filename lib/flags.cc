@@ -41,48 +41,52 @@ void FlagGroup::addFlag(Flag* flag)
     _flags.push_back(flag);
 }
 
-static bool setFallbackFlag(
-    const std::string& key, const std::string& value, bool uses_that)
+void FlagGroup::applyOption(const OptionProto& option)
 {
-    if (beginsWith(key, "--"))
-    {
-        std::string path = key.substr(2);
-        if (key.find('.') != std::string::npos)
-        {
-            ProtoField protoField = resolveProtoPath(&config, path);
-            setProtoFieldFromString(protoField, value);
-            return uses_that;
-        }
-        else
-        {
-            if (FlagGroup::applyOption(path))
-                return false;
-        }
-    }
-    Error() << "unrecognised flag; try --help";
+    if (option.config().option_size() > 0)
+        Error() << fmt::format(
+            "option '{}' has an option inside it, which isn't "
+            "allowed",
+            option.name());
+    if (option.config().option_group_size() > 0)
+        Error() << fmt::format(
+            "option '{}' has an option group inside it, which isn't "
+            "allowed",
+            option.name());
+    if (option.config().include_size() > 0)
+        Error() << fmt::format(
+            "option '{}' is trying to include something, which "
+            "isn't allowed",
+            option.name());
+
+    Logger() << fmt::format("OPTION: {}",
+        option.has_message() ? option.message() : option.comment());
+
+    config.MergeFrom(option.config());
 }
 
-bool FlagGroup::applyOption(const std::string& option)
+bool FlagGroup::applyOption(const std::string& optionName)
 {
-    for (const auto& configs : config.option())
+    auto searchOptionList = [&](auto& optionList)
     {
-        if (option == configs.name())
+        for (const auto& option : optionList)
         {
-            if (configs.config().option_size() > 0)
-                Error() << fmt::format(
-                    "option '{}' has an option inside it, which isn't "
-                    "allowed",
-                    option);
-            if (configs.config().include_size() > 0)
-                Error() << fmt::format(
-                    "option '{}' is trying to include something, which "
-                    "isn't allowed",
-                    option);
-
-            Logger() << fmt::format("OPTION: {}", configs.message());
-            config.MergeFrom(configs.config());
-            return true;
+            if (optionName == option.name())
+            {
+                applyOption(option);
+                return true;
+            }
         }
+        return false;
+    };
+
+    if (searchOptionList(config.option()))
+        return true;
+
+    for (const auto& optionGroup : config.option_group())
+    {
+        if (searchOptionList(optionGroup.option()))
+            return true;
     }
 
     return false;
@@ -127,6 +131,8 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc,
 
     /* Now actually parse them. */
 
+    std::set<std::string> options;
+    std::vector<std::pair<std::string, std::string>> overrides;
     std::vector<std::string> filenames;
     int index = 1;
     while (index < argc)
@@ -190,8 +196,19 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc,
             auto flag = flags_by_name.find(key);
             if (flag == flags_by_name.end())
             {
-                if (setFallbackFlag(key, value, usesthat))
-                    index++;
+                if (beginsWith(key, "--"))
+                {
+                    std::string path = key.substr(2);
+                    if (key.find('.') != std::string::npos)
+                    {
+                        overrides.push_back(std::make_pair(path, value));
+                        index += usesthat;
+                    }
+                    else
+                        options.insert(path);
+                }
+                else
+                    Error() << "unrecognised flag; try --help";
             }
             else
             {
@@ -202,6 +219,49 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc,
         }
 
         index++;
+    }
+
+    /* Apply any default options in groups. */
+
+    for (auto& group : config.option_group())
+    {
+        const OptionProto* defaultOption = &*group.option().begin();
+        bool isSet = false;
+
+        for (auto& option : group.option())
+        {
+            if (options.find(option.name()) != options.end())
+            {
+                defaultOption = &option;
+                options.erase(option.name());
+            }
+        }
+
+        FlagGroup::applyOption(*defaultOption);
+    }
+
+	/* Next, any standalone options. */
+
+	for (auto& option : config.option())
+	{
+		if (options.find(option.name()) != options.end())
+		{
+			FlagGroup::applyOption(option);
+			options.erase(option.name());
+		}
+	}
+		
+    if (!options.empty())
+        Error() << fmt::format(
+            "--{} is not a known flag or format option; try --help",
+            *options.begin());
+
+    /* Now apply any value overrides (in order). */
+
+    for (auto [k, v] : overrides)
+    {
+        ProtoField protoField = resolveProtoPath(&config, k);
+        setProtoFieldFromString(protoField, v);
     }
 
     return filenames;

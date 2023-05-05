@@ -1,0 +1,143 @@
+comment: 'Hewlett-Packard LIF family'
+
+drive {
+	high_density: false
+}
+
+image_reader {
+	filename: "hplif.img"
+	type: IMG
+}
+
+image_writer {
+	filename: "hplif.img"
+	type: IMG
+}
+
+decoder {
+	ibm {
+	}
+}
+
+filesystem {
+	type: LIF
+}
+
+tpi: 96
+
+option_group {
+	comment: "Format family"
+
+	option {
+		name: "264"
+		comment: '264kB 3.5" 66-track SSDD; HP9121 format'
+
+		config {
+			layout {
+				tracks: 66
+				sides: 1
+				layoutdata {
+					sector_size: 256
+					physical {
+						sector: 0
+						sector: 4
+						sector: 8
+						sector: 12
+						sector: 1
+						sector: 5
+						sector: 9
+						sector: 13
+						sector: 2
+						sector: 6
+						sector: 10
+						sector: 14
+						sector: 3
+						sector: 7
+						sector: 11
+						sector: 15
+					}
+				}
+			}
+
+			encoder {
+				ibm {
+					trackdata {
+						emit_iam: false
+						target_rotational_period_ms: 200
+						target_clock_period_us: 4
+						gap0: 80
+						gap2: 22
+						gap3: 44
+					}
+				}
+			}
+		}
+	}
+
+	option {
+		name: "616"
+		comment: '616kB 3.5" 77-track DSDD'
+
+		config {
+			layout {
+				tracks: 77
+				sides: 2
+				layoutdata {
+					sector_size: 256
+					physical {
+						start_sector: 1
+						count: 16
+					}
+				}
+			}
+
+			encoder {
+				ibm {
+					trackdata {
+						target_rotational_period_ms: 200
+						target_clock_period_us: 4
+						emit_iam: false
+						gap0: 80
+						gap2: 22
+						gap3: 40
+					}
+				}
+			}
+		}
+	}
+
+	option {
+		name: "770"
+		comment: '770kB 3.5" 77-track DSDD'
+
+		config {
+			layout {
+				tracks: 77
+				sides: 2
+				layoutdata {
+					sector_size: 1024
+					physical {
+						sector: 1
+						sector: 2
+						sector: 3
+						sector: 4
+						sector: 5
+					}
+				}
+			}
+
+			encoder {
+				ibm {
+					trackdata {
+						target_rotational_period_ms: 200
+						target_clock_period_us: 4
+						gap0: 80
+						gap2: 22
+						gap3: 80
+					}
+				}
+			}
+		}
+	}
+}
+
