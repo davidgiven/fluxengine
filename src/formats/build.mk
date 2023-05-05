@@ -22,14 +22,6 @@ FORMATS = \
 	fb100 \
 	hplif \
 	ibm \
-	ibm1200 \
-	ibm1232 \
-	ibm1440 \
-	ibm180 \
-	ibm160 \
-	ibm360 \
-	ibm320 \
-	ibm720 \
 	icl30 \
 	mac400 \
 	mac800 \

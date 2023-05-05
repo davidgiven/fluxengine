@@ -1,4 +1,9 @@
-comment: 'PC 3.5"/5.25" autodetect double sided format'
+comment: 'Generic PC 3.5"/5.25" family'
+
+image_reader {
+	filename: "ibm.img"
+	type: IMG
+}
 
 image_writer {
 	filename: "ibm.img"
@@ -9,9 +14,255 @@ decoder {
 	ibm {}
 }
 
-heads {
-	start: 0
-	end: 1
+filesystem {
+	type: FATFS
 }
 
+tpi: 96
+
+option_group {
+	comment: "Format variant"
+
+	option {
+		name: "auto"
+		comment: 'try to autodetect the format (unreliable)'
+		set_by_default: true
+
+		config {}
+	}
+
+	option {
+		name: "160"
+		comment: '160kB 5.25" 40-track 8-sector SSDD'
+
+		config {
+			layout {
+				tracks: 40
+				sides: 1
+				layoutdata {
+					sector_size: 512
+					physical {
+						start_sector: 1
+						count: 8
+					}
+				}
+			}
+
+			encoder {
+				ibm {
+					trackdata {
+						target_rotational_period_ms: 167
+						target_clock_period_us: 3.333
+					}
+				}
+			}
+
+			tpi: 48
+		}
+	}
+
+	option {
+		name: "180"
+		comment: '180kB 5.25" 40-track 9-sector SSDD'
+
+		config {
+			layout {
+				tracks: 40
+				sides: 1
+				layoutdata {
+					sector_size: 512
+					physical {
+						start_sector: 1
+						count: 9
+					}
+				}
+			}
+
+			encoder {
+				ibm {
+					trackdata {
+						target_rotational_period_ms: 167
+						target_clock_period_us: 3.333
+					}
+				}
+			}
+
+			tpi: 48
+		}
+	}
+
+	option {
+		name: "320"
+		comment: '320kB 5.25" 40-track 8-sector DSDD'
+
+		config {
+			layout {
+				tracks: 40
+				sides: 2
+				layoutdata {
+					sector_size: 512
+					physical {
+						start_sector: 1
+						count: 8
+					}
+				}
+			}
+
+			encoder {
+				ibm {
+					trackdata {
+						target_rotational_period_ms: 167
+						target_clock_period_us: 3.333
+					}
+				}
+			}
+
+			tpi: 48
+		}
+	}
+
+	option {
+		name: "360"
+		comment: '360kB 5.25" 40-track 9-sector DSDD'
+
+		config {
+			layout {
+				tracks: 40
+				sides: 2
+				layoutdata {
+					sector_size: 512
+					physical {
+						start_sector: 1
+						count: 9
+					}
+				}
+			}
+
+			encoder {
+				ibm {
+					trackdata {
+						target_rotational_period_ms: 167
+						target_clock_period_us: 3.333
+					}
+				}
+			}
+
+			tpi: 48
+		}
+	}
+
+	option {
+		name: "720"
+		comment: '720kB 5.25"/3.5" 80-track 9-sector DSDD'
+
+		config {
+			layout {
+				tracks: 80
+				sides: 2
+				layoutdata {
+					sector_size: 512
+					physical {
+						start_sector: 1
+						count: 9
+					}
+				}
+			}
+
+			encoder {
+				ibm {
+					trackdata {
+						# This also works on 166ms drives (producing a physical clock of
+						# 3.33us).
+						target_rotational_period_ms: 200
+						target_clock_period_us: 4
+					}
+				}
+			}
+		}
+	}
+
+	option {
+		name: "1200"
+		comment: '1200kB 5.25" 80-track 15-sector DSHD'
+
+		config {
+			layout {
+				tracks: 80
+				sides: 2
+				layoutdata {
+					sector_size: 512
+					physical {
+						start_sector: 1
+						count: 15
+					}
+				}
+			}
+
+			encoder {
+				ibm {
+					trackdata {
+						target_rotational_period_ms: 167
+						target_clock_period_us: 2
+					}
+				}
+			}
+		}
+	}
+
+	option {
+		name: "1232"
+		comment: '1232kB 5.25"/3.5" 77-track 8-sector DSHD'
+
+		config {
+			layout {
+				tracks: 77
+				sides: 2
+				layoutdata {
+					sector_size: 1024
+					physical {
+						start_sector: 1
+						count: 8
+					}
+				}
+			}
+
+			encoder {
+				ibm {
+					trackdata {
+						target_rotational_period_ms: 167
+						target_clock_period_us: 2
+					}
+				}
+			}
+		}
+	}
+
+	option {
+		name: "1440"
+		comment: '1440kB 3.5" 80-track 18-sector DSHD'
+
+		config {
+			layout {
+				tracks: 80
+				sides: 2
+				layoutdata {
+					sector_size: 512
+					physical {
+						start_sector: 1
+						count: 18
+					}
+				}
+			}
+
+			encoder {
+				ibm {
+					trackdata {
+						target_rotational_period_ms: 200
+						target_clock_period_us: 2
+					}
+				}
+			}
+		}
+	}
+}
 

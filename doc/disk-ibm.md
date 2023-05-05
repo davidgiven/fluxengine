@@ -38,15 +38,16 @@ Reading disks
 
 Just do:
 
-    fluxengine read `<format>`
+    fluxengine read ibm `<format>`
 
-...and you'll end up with a `<format>.img` file. This should work on most PC
-disks (including FM 360kB disks, 3.5" 1440kB disks, 5.25" 1200kB disks, etc.)
-The size of the disk image will vary depending on the format.
+...and you'll end up with an `ibm.img` file. You'll need to specify which
+format to use; this can be one of `--160`, `--180`, `--320`, `--360`, `--720`,
+`--1200`, `--1232` or `--1400` depending. The size of the disk image will vary
+depending on the format.
 
-The common PC formats are `ibm720` and `ibm1440`, but there are _many_ others,
+The common PC formats are `--720` and `--1440`, but there are _many_ others,
 and there's too many configuration options to usefully list. Use `fluxengine
-write` to list all formats, and try `fluxengine write ibm1440 --config` to see
+write` to list all formats, and try `fluxengine write ibm --1440 --config` to see
 a sample configuration.
 
 Configuration options you'll want include:
@@ -84,16 +85,13 @@ makes things slightly awkward. Preconfigured profiles are available.
 
 The syntax is:
 
-    fluxengine write <format> -i input.img <options>
+    fluxengine write ibm <format> -i input.img <options>
 
-The common PC formats are `ibm720` and `ibm1440`, but there are _many_ others,
-and there's too many configuration options to usefully list. Use `fluxengine
-write` to list all formats, and try `fluxengine write ibm1440 --config` to see
-a sample configuration.
+See above for the formats.
 
 Some image formats, such as DIM, specify the image format, For these you can
-specify the `ibm` format and FluxEngine will automatically determine the
-correct format to use.
+specify the `--auto` format (which is the default) and FluxEngine will
+automatically determine the correct format to use.
 
 Mixed-format disks
 ------------------
@@ -131,11 +129,7 @@ drives, feature "tri-mode" support which in addition to normal 300rpm modes,
 can change their speed to read and write 360rpm DD and HD disks.
 
 Neither the FluxEngine or Greaseweazle hardware can currently command a
-tri-mode drive to spin at 360rpm, however an older 360rpm-only drive will work
-to read these formats.
+tri-mode drive to spin at 360rpm. However on both devices the FluxEngine
+software is capable of both reading and writing 300rpm disks at 360rpm and vice
+versa, so it shouldn't matter.
 
-Alternately, the FluxEngine software can rescale the flux pulses to enable
-reading and writing these formats with a plain 300rpm drive. To do this,
-specify the following two additional options:
-
-    --flux_source.rescale=1.2 --flux_sink.rescale=1.2
