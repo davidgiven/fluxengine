@@ -1,4 +1,4 @@
-comment: 'Acorn DFS 100kB/200kB 3.5" or 5.25" 40- or 80-track SS (ro)'
+comment: 'Acorn DFS fmaily'
 
 image_reader {
 	filename: "acorndfs.img"
@@ -51,7 +51,7 @@ option_group {
 
 	option {
 		name: "100"
-		comment: "40-track 100kB"
+		comment: '100kB 40-track SSSD'
 
 		config {
 			layout {
@@ -62,7 +62,7 @@ option_group {
 
 	option {
 		name: "200"
-		comment: "80-track 200kB"
+		comment: '200kB 80-track SSSD'
 		set_by_default: true
 
 		config {
