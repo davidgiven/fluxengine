@@ -11,7 +11,6 @@ image_writer {
 }
 
 layout {
-	tracks: 80
 	sides: 1
 	layoutdata {
 		sector_size: 256
@@ -45,5 +44,32 @@ decoder {
 
 filesystem {
 	type: ACORNDFS
+}
+
+option_group {
+	comment: "Format variant"
+
+	option {
+		name: "100"
+		comment: "40-track 100kB"
+
+		config {
+			layout {
+				tracks: 40
+			}
+		}
+	}
+
+	option {
+		name: "200"
+		comment: "80-track 200kB"
+		set_by_default: true
+
+		config {
+			layout {
+				tracks: 80
+			}
+		}
+	}
 }
 

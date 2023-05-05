@@ -62,27 +62,52 @@ static bool setFallbackFlag(
     Error() << "unrecognised flag; try --help";
 }
 
-bool FlagGroup::applyOption(const std::string& option)
+void FlagGroup::applyOption(const OptionProto& option)
 {
-    for (const auto& configs : config.option())
-    {
-        if (option == configs.name())
-        {
-            if (configs.config().option_size() > 0)
-                Error() << fmt::format(
-                    "option '{}' has an option inside it, which isn't "
-                    "allowed",
-                    option);
-            if (configs.config().include_size() > 0)
-                Error() << fmt::format(
-                    "option '{}' is trying to include something, which "
-                    "isn't allowed",
-                    option);
+    if (option.config().option_size() > 0)
+        Error() << fmt::format(
+            "option '{}' has an option inside it, which isn't "
+            "allowed",
+            option.name());
+    if (option.config().option_group_size() > 0)
+        Error() << fmt::format(
+            "option '{}' has an option group inside it, which isn't "
+            "allowed",
+            option.name());
+    if (option.config().include_size() > 0)
+        Error() << fmt::format(
+            "option '{}' is trying to include something, which "
+            "isn't allowed",
+            option.name());
 
-            Logger() << fmt::format("OPTION: {}", configs.message());
-            config.MergeFrom(configs.config());
-            return true;
+    Logger() << fmt::format("OPTION: {}",
+        option.has_message() ? option.message() : option.comment());
+
+    config.MergeFrom(option.config());
+}
+
+bool FlagGroup::applyOption(const std::string& optionName)
+{
+    auto searchOptionList = [&](auto& optionList)
+    {
+        for (const auto& option : optionList)
+        {
+            if (optionName == option.name())
+            {
+                applyOption(option);
+                return true;
+            }
         }
+        return false;
+    };
+
+    if (searchOptionList(config.option()))
+        return true;
+
+    for (const auto& optionGroup : config.option_group())
+    {
+        if (searchOptionList(optionGroup.option()))
+            return true;
     }
 
     return false;
