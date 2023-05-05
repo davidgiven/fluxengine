@@ -1,17 +1,11 @@
 FORMATS = \
-	_acornadfs8 \
-	_acornadfs32 \
 	_apple2 \
 	_atari \
 	_micropolis \
 	_northstar \
 	_mx \
 	40track_drive \
-	acornadfs160 \
-	acornadfs320 \
-	acornadfs640 \
-	acornadfs800 \
-	acornadfs1600 \
+	acornadfs \
 	acorndfs \
 	aeslanier \
 	agat840 \
