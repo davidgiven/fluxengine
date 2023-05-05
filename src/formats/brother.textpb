@@ -1,0 +1,91 @@
+comment: 'Brother GCR family'
+
+image_reader {
+	filename: "brother.img"
+	type: IMG
+}
+
+image_writer {
+	filename: "brother.img"
+	type: IMG
+}
+
+encoder {
+	brother {}
+}
+
+decoder {
+	brother {}
+}
+
+option_group {
+	comment: "Format variant"
+
+	option {
+		name: "120"
+		comment: '120kB 3.5" 39-track SS GCR'
+
+		config {
+			layout {
+				tracks: 39
+				sides: 1
+				layoutdata {
+					sector_size: 256
+					physical {
+						start_sector: 0
+						count: 12
+						skew: 5
+					}
+				}
+			}
+
+			encoder {
+				brother {
+					format: BROTHER120
+				}
+			}
+
+			drive {
+				head_bias: 0
+				group_offset: 1
+			}
+
+			filesystem {
+				type: BROTHER120
+			}
+
+			tpi: 48
+		}
+	}
+
+	option {
+		name: "240"
+		comment: '240kB 3.5" 78-track SS GCR'
+
+		config {
+			layout {
+				tracks: 78
+				sides: 1
+				layoutdata {
+					sector_size: 256
+					physical {
+						start_sector: 0
+						count: 12
+						skew: 5
+					}
+				}
+			}
+
+			drive {
+				head_bias: 3
+			}
+
+			filesystem {
+				type: FATFS
+			}
+
+			tpi: 96
+		}
+	}
+}
+

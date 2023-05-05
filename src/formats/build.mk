@@ -11,8 +11,7 @@ FORMATS = \
 	apple2 \
 	atarist \
 	bk800 \
-	brother120 \
-	brother240 \
+	brother \
 	commodore1541 \
 	commodore1581 \
 	cmd_fd2000 \
