@@ -15,14 +15,7 @@ FORMATS = \
 	apple2_drive \
 	appleii140 \
 	appleii640 \
-	atarist360 \
-	atarist370 \
-	atarist400 \
-	atarist410 \
-	atarist720 \
-	atarist740 \
-	atarist800 \
-	atarist820 \
+	atarist \
 	bk800 \
 	brother120 \
 	brother240 \

@@ -1,0 +1,179 @@
+comment: 'Atari ST family'
+
+encoder {
+    ibm {
+        trackdata {
+            target_rotational_period_ms: 200
+            target_clock_period_us: 4
+            emit_iam: false
+            gap0: 80
+            gap2: 22
+            gap3: 34
+        }
+    }
+}
+
+decoder {
+	ibm {
+		trackdata {
+			ignore_sector: 66
+		}
+	}
+}
+
+option_group {
+    comment: "Format variant"
+
+    option {
+        name: "360"
+        comment: '360kB 3.5" 80-track 9-sector SSDD'
+
+        config {
+            layout {
+                tracks: 80
+                sides: 1
+                layoutdata {
+                    sector_size: 512
+                    physical {
+						start_sector: 1
+						count: 9
+					}
+                }
+            }
+        }
+    }
+
+    option {
+        name: "370"
+        comment: '370kB 3.5" 82-track 9-sector SSDD'
+
+        config {
+            layout {
+                tracks: 82
+                sides: 1
+                layoutdata {
+                    sector_size: 512
+                    physical {
+						start_sector: 1
+						count: 9
+					}
+                }
+            }
+        }
+    }
+
+    option {
+        name: "400"
+        comment: '400kB 3.5" 80-track 10-sector SSDD'
+
+        config {
+            layout {
+                tracks: 80
+                sides: 1
+                layoutdata {
+                    sector_size: 512
+                    physical {
+						start_sector: 1
+						count: 10
+					}
+                }
+            }
+        }
+    }
+
+    option {
+        name: "410"
+        comment: '410kB 3.5" 82-track 10-sector SSDD'
+
+        config {
+            layout {
+                tracks: 82
+                sides: 1
+                layoutdata {
+                    sector_size: 512
+                    physical {
+						start_sector: 1
+						count: 10
+					}
+                }
+            }
+        }
+    }
+
+    option {
+        name: "720"
+        comment: '720kB 3.5" 80-track 9-sector DSDD'
+
+        config {
+            layout {
+                tracks: 80
+                sides: 2
+                layoutdata {
+                    sector_size: 512
+                    physical {
+						start_sector: 1
+						count: 9
+					}
+                }
+            }
+        }
+    }
+
+    option {
+        name: "740"
+        comment: '740kB 3.5" 82-track 9-sector DSDD'
+
+        config {
+            layout {
+                tracks: 82
+                sides: 2
+                layoutdata {
+                    sector_size: 512
+                    physical {
+						start_sector: 1
+						count: 9
+					}
+                }
+            }
+        }
+    }
+
+    option {
+        name: "800"
+        comment: '800kB 3.5" 80-track 10-sector DSDD'
+
+        config {
+            layout {
+                tracks: 80
+                sides: 2
+                layoutdata {
+                    sector_size: 512
+                    physical {
+						start_sector: 1
+						count: 10
+					}
+                }
+            }
+        }
+    }
+
+    option {
+        name: "820"
+        comment: '820kB 3.5" 82-track 10-sector DSDD'
+
+        config {
+            layout {
+                tracks: 82
+                sides: 2
+                layoutdata {
+                    sector_size: 512
+                    physical {
+						start_sector: 1
+						count: 10
+					}
+                }
+            }
+        }
+    }
+}
+
