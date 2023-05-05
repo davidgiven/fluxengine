@@ -42,15 +42,17 @@ Reading discs
 -------------
 
 ```
-fluxengine read mx440
+fluxengine read mx
 ```
 
-You should end up with an `mx.img` which will vary in length depending on the format. The default is double-sided 80-track. For the other formats, use:
+You should end up with an `mx.img` which will vary in length depending on the
+format. The default is double-sided 80-track. For the other formats, add one of
+the following options:
 
-  * single-sided 40-track: `mx110`
-  * double-sided 40-track: `mx220_ds`
-  * single-sided 80-track: `mx220_ss`
-  * double-sided 80-track: `mx440`
+  * single-sided 40-track: `--110`
+  * double-sided 40-track: `--220ds`
+  * single-sided 80-track: `--220ss`
+  * double-sided 80-track: `--440`
 
 
 Useful references

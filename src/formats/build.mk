@@ -1,6 +1,4 @@
 FORMATS = \
-	_atari \
-	_mx \
 	40track_drive \
 	acornadfs \
 	acorndfs \
@@ -36,10 +34,7 @@ FORMATS = \
 	mac400 \
 	mac800 \
 	micropolis \
-	mx110 \
-	mx220_ds \
-	mx220_ss \
-	mx440 \
+	mx \
 	n88basic \
 	northstar \
 	psos800 \

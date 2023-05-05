@@ -1,8 +1,0 @@
-comment: 'DVK MX 220kB SS 80-track 5.25" (ro)'
-
-include: '_mx'
-
-layout {
-	tracks: 80
-	sides: 1
-}
