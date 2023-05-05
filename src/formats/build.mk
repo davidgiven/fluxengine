@@ -24,9 +24,7 @@ FORMATS = \
 	epsonpf10 \
 	f85 \
 	fb100 \
-	hp9121 \
-	hplif616 \
-	hplif770 \
+	hplif \
 	ibm \
 	ibm1200 \
 	ibm1232 \
