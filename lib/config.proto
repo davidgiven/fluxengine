@@ -12,7 +12,7 @@ import "lib/drive.proto";
 import "lib/common.proto";
 import "lib/layout.proto";
 
-// NEXT_TAG: 21
+// NEXT_TAG: 23
 message ConfigProto
 {
     optional string comment = 8;
@@ -39,18 +39,27 @@ message ConfigProto
     optional FilesystemProto filesystem = 17;
 
     repeated OptionProto option = 20;
+	repeated OptionGroupProto option_group = 22;
 }
 
+// NEXT_TAG: 7
 message OptionProto
 {
     optional string name = 1 [ (help) = "option name" ];
     optional string comment = 2 [ (help) = "help text for option" ];
     optional string message = 3
         [ (help) = "message to display when option is in use" ];
-    optional string exclusivity_group = 5 [
-        (help) =
-            "options with the same group cannot be selected at the same time"
-    ];
+	optional bool set_by_default = 6 [
+		(help) = "this option is applied by default",
+		default = false
+	];
     optional ConfigProto config = 4
         [ (help) = "option data", (recurse) = false ];
 }
+
+message OptionGroupProto
+{
+	optional string comment = 1 [ (help) = "help text for option group" ];
+	repeated OptionProto option = 2;
+}
+
