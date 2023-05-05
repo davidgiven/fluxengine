@@ -9,7 +9,7 @@ clone of the PDP-11. The MX board was an early floppy drive controller board
 for it.
 
 <div style="text-align: center">
-<a href="http://www.leningrad.su/museum/show_big.php?n=1006"><img src="dvk3m.jpg" style="max-width: 60%" alt="A Durango F85, held precariously"></a>
+<a href="http://www.leningrad.su/museum/show_big.php?n=1006"><img src="dvk3m.jpg" style="max-width: 60%" alt="A DVK computer"></a>
 </div>
 
 The MX format is interesting in that it has to be read a track at a time. The
