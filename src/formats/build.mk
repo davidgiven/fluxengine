@@ -21,8 +21,7 @@ FORMATS = \
 	hplif \
 	ibm \
 	icl30 \
-	mac400 \
-	mac800 \
+	mac \
 	micropolis \
 	mx \
 	n88basic \
