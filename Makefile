@@ -177,7 +177,7 @@ endef
 
 $(call do-encodedecodetest,agat840)
 $(call do-encodedecodetest,amiga)
-$(call do-encodedecodetest,appleii140)
+$(call do-encodedecodetest,apple2,,--140)
 $(call do-encodedecodetest,atarist,,--360)
 $(call do-encodedecodetest,atarist,,--370)
 $(call do-encodedecodetest,atarist,,--400)
