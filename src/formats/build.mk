@@ -1,7 +1,6 @@
 FORMATS = \
 	_apple2 \
 	_atari \
-	_micropolis \
 	_northstar \
 	_mx \
 	40track_drive \
@@ -41,10 +40,7 @@ FORMATS = \
 	icl30 \
 	mac400 \
 	mac800 \
-	micropolis143 \
-	micropolis287 \
-	micropolis315 \
-	micropolis630 \
+	micropolis \
 	mx110 \
 	mx220_ds \
 	mx220_ss \

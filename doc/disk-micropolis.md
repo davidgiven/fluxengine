@@ -23,10 +23,10 @@ Reading disks
 Based on your floppy drive, just do one of:
 
 ```
-fluxengine read micropolis143 # single-sided Mod I
-fluxengine read micropolis287 # double-sided Mod I
-fluxengine read micropolis315 # single-sided Mod II
-fluxengine read micropolis630 # double-sided Mod II
+fluxengine read micropolis --143 # single-sided Mod I
+fluxengine read micropolis --287 # double-sided Mod I
+fluxengine read micropolis --315 # single-sided Mod II
+fluxengine read micropolis --630 # double-sided Mod II
 ```
 
 You should end up with a `micropolis.img` of the corresponding size. The image
@@ -45,10 +45,10 @@ It's also possible to output to VGI, which retains OS-specific "user data" and
 machine-specific ECC. Add `--vgi` to the command line after the chosen
 Micropolis profile:
 ```
-fluxengine read micropolis143 --vgi # single-sided Mod I
-fluxengine read micropolis287 --vgi # double-sided Mod I
-fluxengine read micropolis315 --vgi # single-sided Mod II
-fluxengine read micropolis630 --vgi # double-sided Mod II
+fluxengine read micropolis --143 --vgi # single-sided Mod I
+fluxengine read micropolis --287 --vgi # double-sided Mod I
+fluxengine read micropolis --315 --vgi # single-sided Mod II
+fluxengine read micropolis --630 --vgi # double-sided Mod II
 ```
 
 You should end up with a `micropolis.vgi` instead. The format is well-defined
@@ -72,15 +72,15 @@ Writing disks
 Just do one of:
 
 ```
-fluxengine write micropolis143 # single-sided Mod I
-fluxengine write micropolis287 # double-sided Mod I
-fluxengine write micropolis315 # single-sided Mod II
-fluxengine write micropolis630 # double-sided Mod II
+fluxengine write micropolis --143 # single-sided Mod I
+fluxengine write micropolis --287 # double-sided Mod I
+fluxengine write micropolis --315 # single-sided Mod II
+fluxengine write micropolis --630 # double-sided Mod II
 
-fluxengine write micropolis143 --vgi # single-sided Mod I
-fluxengine write micropolis287 --vgi # double-sided Mod I
-fluxengine write micropolis315 --vgi # single-sided Mod II
-fluxengine write micropolis630 --vgi # double-sided Mod II
+fluxengine write micropolis --143 --vgi # single-sided Mod I
+fluxengine write micropolis --287 --vgi # double-sided Mod I
+fluxengine write micropolis --315 --vgi # single-sided Mod II
+fluxengine write micropolis --630 --vgi # double-sided Mod II
 ```
 
 Useful references
