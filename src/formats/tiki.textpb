@@ -1,0 +1,144 @@
+comment: 'Tiki 100 family'
+
+image_writer {
+	filename: "tiki.img"
+	type: IMG
+}
+
+decoder {
+	ibm {}
+}
+
+tpi: 48
+
+option_group {
+	comment: "Format variant"
+
+	option {
+		name: "90"
+		comment: '90kB 40-track 18-sector SSSD'
+
+		config {
+			layout {
+				tracks: 40
+				sides: 1
+				layoutdata {
+					side: 0
+					sector_size: 128
+					physical {
+						start_sector: 1
+						count: 18
+					}
+				}
+			}
+
+			filesystem {
+				type: CPMFS
+				cpmfs {
+					filesystem_start {
+						track: 3
+					}
+					block_size: 1024
+					dir_entries: 32
+				}
+			}
+		}
+	}
+
+	option {
+		name: "200"
+		comment: '200kB 40-track 10-sector SSSD'
+
+		config {
+			layout {
+				tracks: 40
+				sides: 1
+				layoutdata {
+					side: 0
+					sector_size: 512
+					physical {
+						start_sector: 1
+						count: 10
+					}
+				}
+			}
+
+			filesystem {
+				type: CPMFS
+				cpmfs {
+					filesystem_start {
+						track: 2
+					}
+					block_size: 1024
+					dir_entries: 64
+				}
+			}
+		}
+	}
+
+	option {
+		name: "400"
+		comment: '400kB 40-track 10-sector DSSD'
+
+		config {
+			layout {
+				tracks: 40
+				sides: 2
+				layoutdata {
+					sector_size: 512
+					physical {
+						start_sector: 1
+						count: 10
+					}
+				}
+			}
+
+			filesystem {
+				type: CPMFS
+				cpmfs {
+					filesystem_start {
+						side: 0
+						track: 1
+					}
+					block_size: 2048
+					dir_entries: 128
+				}
+			}
+
+		}
+	}
+
+	option {
+		name: "800"
+		comment: '800kB 80-track 10-sector DSSD'
+
+		config {
+			layout {
+				tracks: 80
+				sides: 2
+				layoutdata {
+					sector_size: 512
+					physical {
+						start_sector: 1
+						count: 10
+					}
+				}
+			}
+
+			filesystem {
+				type: CPMFS
+				cpmfs {
+					filesystem_start {
+						side: 0
+						track: 1
+					}
+					block_size: 2048
+					dir_entries: 128
+				}
+			}
+
+			tpi: 96
+		}
+	}
+}
+

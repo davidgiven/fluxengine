@@ -52,10 +52,7 @@ FORMATS = \
 	shugart_drive \
 	smaky6 \
 	tids990 \
-	tiki90 \
-	tiki200 \
-	tiki400 \
-	tiki800 \
+	tiki \
 	victor9k_ds \
 	victor9k_ss \
 	zilogmcz \
