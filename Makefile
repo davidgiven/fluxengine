@@ -209,8 +209,8 @@ $(call do-encodedecodetest,mac,scripts/mac800_test.textpb,--800)
 $(call do-encodedecodetest,n88basic)
 $(call do-encodedecodetest,rx50)
 $(call do-encodedecodetest,tids990)
-$(call do-encodedecodetest,victor9k_ss)
-$(call do-encodedecodetest,victor9k_ds)
+$(call do-encodedecodetest,victor9k,,--612)
+$(call do-encodedecodetest,victor9k,,--1224)
 
 $(OBJDIR)/%.a:
 	@mkdir -p $(dir $@)

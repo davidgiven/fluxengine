@@ -33,8 +33,7 @@ FORMATS = \
 	smaky6 \
 	tids990 \
 	tiki \
-	victor9k_ds \
-	victor9k_ss \
+	victor9k \
 	zilogmcz \
 
 $(OBJDIR)/src/formats/format_%.o: $(OBJDIR)/src/formats/format_%.cc
