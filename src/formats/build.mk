@@ -5,8 +5,7 @@ FORMATS = \
 	aeslanier \
 	agat840 \
 	amiga \
-	ampro400 \
-	ampro800 \
+	ampro \
 	apple2_drive \
 	apple2 \
 	atarist \
