@@ -8,7 +8,7 @@ sector GCR disks, with a variable-speed drive and a varying number of sectors
 per track --- from 19 to 12. Disks can be double-sided, meaning that they can
 store 1224kB per disk, which was almost unheard of back then. Because the way
 that the tracks on head 1 are offset from head 0 (this happens with all disks),
-the speed zone allocation on head 1 differ from head 0...
+the speed zone allocation on head 1 differs from head 0...
 
 | Zone | Head 0 tracks | Head 1 tracks | Sectors | Original period (ms) |
 |:----:|:-------------:|:-------------:|:-------:|:--------------------:|
@@ -40,18 +40,12 @@ Reading discs
 Just do:
 
 ```
-fluxengine read <format>
+fluxengine read victor9k <format>
 
 ```
 
-...where `<format>` can be `victor9k_ss` or `victor9k_ds`. 
-
-For `victor9k_ss` you should end up with an `victor9k.img` which is 627200 bytes long. 
-For `victor9k_ds` you should end up with an `victor9k.img` which is 1224192 bytes long.
-
-**Big warning!** The image is triangular, where each track occupies a different
-amount of space. Victor disk images are complicated due to the way the tracks
-are different sizes and the odd sector size.
+...where `<format>` can be `--612` for a single-sided disk or `--1224` for a
+double-sided disk. 
 
 Writing discs
 -------------
@@ -59,11 +53,10 @@ Writing discs
 Just do:
 
 ```
-fluxengine read victor9k_ss -i victor9k.img
+fluxengine write victor9k <format> -i victor9k.img
 ```
 
-**Big warning!** This uses the same triangular disk image that reading uses.
-
+`<format>` is as above.
 
 Useful references
 -----------------

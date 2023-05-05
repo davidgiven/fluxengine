@@ -1,4 +1,4 @@
-comment: 'Victor 9000 / Sirius One 612kB SSHD GCR variable sector)'
+comment: 'Victor 9000 / Sirius One family'
 
 image_reader {
 	filename: "victor9k.img"
@@ -12,7 +12,7 @@ image_writer {
 
 layout {
 	tracks: 80
-	sides: 1
+	sides: 2
 	layoutdata {
 		sector_size: 512
 		physical {
@@ -20,6 +20,7 @@ layout {
 		}
 	}
 	layoutdata {
+		side: 0
 		track: 0
 		up_to_track: 3
 		physical {
@@ -27,87 +28,123 @@ layout {
 		}
 	}
 	layoutdata {
+		side: 0
 		track: 4
 		up_to_track: 15
 		physical {
 			count: 18
 		}
-		filesystem {
-			start_sector: 0
-			count: 18
-			skew: 4
-		}
 	}
 	layoutdata {
+		side: 0
 		track: 16
 		up_to_track: 26
 		physical {
 			count: 17
 		}
-		filesystem {
-			start_sector: 0
-			count: 17
-			skew: 4
-		}
 	}
 	layoutdata {
+		side: 0
 		track: 27
 		up_to_track: 37
 		physical {
 			count: 16
 		}
-		filesystem {
-			start_sector: 0
-			count: 16
-			skew: 4
-		}
 	}
 	layoutdata {
+		side: 0
 		track: 38
 		up_to_track: 47
 		physical {
 			count: 15
 		}
-		filesystem {
-			start_sector: 0
-			count: 15
-			skew: 4
-		}
 	}
 	layoutdata {
+		side: 0
 		track: 48
 		up_to_track: 59
 		physical {
 			count: 14
 		}
-		filesystem {
-			start_sector: 0
-			count: 14
-			skew: 4
-		}
 	}
 	layoutdata {
+		side: 0
 		track: 60
 		up_to_track: 70
 		physical {
 			count: 13
 		}
-		filesystem {
-			start_sector: 0
-			count: 13
-			skew: 4
-		}
 	}
 	layoutdata {
+		side: 0
 		track: 71
 		up_to_track: 79
 		physical {
 			count: 12
 		}
-		filesystem {
-			start_sector: 0
+	}
+	layoutdata {
+		side: 1
+		track: 0
+		up_to_track: 7
+		physical {
+			count: 18
+		}
+	}
+	layoutdata {
+		side: 1
+		track: 8
+		up_to_track: 18
+		physical {
+			count: 17
+		}
+	}
+	layoutdata {
+		side: 1
+		track: 19
+		up_to_track: 29
+		physical {
+			count: 16
+		}
+	}
+	layoutdata {
+		side: 1
+		track: 30
+		up_to_track: 39
+		physical {
+			count: 15
+		}
+	}
+	layoutdata {
+		side: 1
+		track: 40
+		up_to_track: 51
+		physical {
+			count: 14
+		}
+	}
+	layoutdata {
+		side: 1
+		track: 52
+		up_to_track: 62
+		physical {
+			count: 13
+		}
+	}
+	layoutdata {
+		side: 1
+		track: 63
+		up_to_track: 74
+		physical {
 			count: 12
-			skew: 4
+		}
+	}
+	layoutdata {
+		side: 1
+		track: 75
+		up_to_track: 79
+		physical {
+			count: 11
 		}
 	}
 }
@@ -170,6 +207,54 @@ encoder {
 			max_track: 79
 			rotational_period_ms: 149.6
 		}
+		trackdata {
+			head: 1
+			min_track: 0
+			max_track: 7
+			rotational_period_ms: 224.5
+		}
+		trackdata {
+			head: 1
+			min_track: 8
+			max_track: 18
+			rotational_period_ms: 212.2
+		}
+		trackdata {
+			head: 1
+			min_track: 19
+			max_track: 29
+			rotational_period_ms: 199.9
+		}
+		trackdata {
+			head: 1
+			min_track: 30
+			max_track: 39
+			rotational_period_ms: 187.6
+		}
+		trackdata {
+			head: 1
+			min_track: 40
+			max_track: 51
+			rotational_period_ms: 175.3
+		}
+		trackdata {
+			head: 1
+			min_track: 52
+			max_track: 62
+			rotational_period_ms: 163.0
+		}
+		trackdata {
+			head: 1
+			min_track: 63
+			max_track: 74
+			rotational_period_ms: 149.6
+		}
+		trackdata {
+			head: 1
+			min_track: 75
+			max_track: 79
+			rotational_period_ms: 144.0
+		}
 	}
 }
 
@@ -177,12 +262,29 @@ decoder {
 	victor9k {}
 }
 
-filesystem {
-    cpmfs {
-        filesystem_start {
-            track: 5
-        }
-        block_size: 2048
-        dir_entries: 128
-    }
+option_group {
+	comment: "Format family"
+
+	option {
+		name: "612"
+		comment: '612kB 80-track DSHD GCR'
+
+		config {
+			layout {
+				sides: 1
+			}
+		}
+	}
+
+	option {
+		name: "1224"
+		comment: '1224kB 80-track DSHD GCR'
+
+		config {
+			layout {
+				sides: 2
+			}
+		}
+	}
 }
+
