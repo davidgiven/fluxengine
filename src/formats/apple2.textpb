@@ -1,16 +1,71 @@
-comment: 'Apple II generic settings'
-is_extension: true
+comment: 'Apple II family'
 
-drive {
-	high_density: false
-}
-	
 decoder {
 	apple2 {}
 }
 
 encoder {
 	apple2 {}
+}
+
+
+option_group {
+	comment: "Format variant"
+
+	option {
+		name: "140"
+		comment: '140kB 5.25" 35-track SS'
+		set_by_default: true
+
+		config {
+			layout {
+				tracks: 35
+				sides: 1
+				layoutdata {
+					sector_size: 256
+					physical {
+						start_sector: 0
+						count: 16
+					}
+				}
+			}
+			tpi: 48
+		}
+	}
+
+	option {
+		name: "640"
+		comment: '640kB 5.25" 80-track DS'
+
+		config {
+			layout {
+				tracks: 80
+				sides: 2
+				order: HCS
+				layoutdata {
+					sector_size: 256
+					physical {
+						start_sector: 0
+						count: 16
+					}
+				}
+			}
+			tpi: 96
+		}
+	}
+}
+
+option {
+	name: "side1"
+	comment: "for AppleDOS file system access, read the volume on side 1 of a disk"
+
+	config {
+		filesystem {
+			appledos {
+				filesystem_offset_sectors: 0x500
+			}
+		}
+	}
 }
 
 option_group {

@@ -1,5 +1,4 @@
 FORMATS = \
-	_apple2 \
 	_atari \
 	_mx \
 	40track_drive \
@@ -11,8 +10,7 @@ FORMATS = \
 	ampro400 \
 	ampro800 \
 	apple2_drive \
-	appleii140 \
-	appleii640 \
+	apple2 \
 	atarist \
 	bk800 \
 	brother120 \

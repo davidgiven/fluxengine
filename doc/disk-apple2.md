@@ -30,7 +30,8 @@ FluxEngine can remap the sectors from physical to logical using modifiers.  If
 you don't specify a remapping modifier, you get the sectors in the order they
 appear on the disk.
 
-If you don't want an image in physical sector order, specify one of these options:
+If you don't want an image in physical sector order, specify one of these
+options:
 
   - `--appledos` Selects AppleDOS sector translation
   - `--prodos` Selects ProDOS sector translation
@@ -40,15 +41,21 @@ These options also select the appropriate file system; FluxEngine has read-only
 support for all of these. For example:
 
 ```
-fluxengine ls appleii140 --appledos -f image.flux
+fluxengine ls apple2 --appledos -f image.flux
 ```
 
 In addition, some third-party systems use 80-track double sides drives, with
-the same underlying disk format. These are supported with the `appleii640`
-profile. The complication here is that the AppleDOS filesystem only supports up
+the same underlying disk format. The full list of formats supported is:
+
+  - `--140` 35-track single-sided (the normal Apple II format)
+  - `--640` 80-track double-sided
+
+`--140` is the default.
+
+The complication here is that the AppleDOS filesystem only supports up
 to 50 tracks, so it needs tweaking to support larger disks. It treats the
 second side of the disk as a completely different volume. To access these
-files, use `--appledos --side1`.
+files, use `--640 --appledos --side1`.
 
 [^1]: CP/M disks use the ProDOS translation for the first three tracks and a
     different translation for all the tracks thereafter.
@@ -65,12 +72,12 @@ Reading discs
 Just do:
 
 ```
-fluxengine read appleii140
+fluxengine read apple2
 ```
 
-(or `appleii640`)
+(or `apple2 --640`)
 
-You should end up with an `appleii140.img` which is 143360 bytes long. It will
+You should end up with an `apple2.img` which is 143360 bytes long. It will
 be in physical sector ordering if you don't specify a file system format as
 described above.
 
@@ -79,7 +86,7 @@ Writing discs
 
 Just do:
 ```
-fluxengine write appleii140 -i appleii140.img
+fluxengine write apple2 -i apple2.img
 ```
 
 The image will be expected to be in physical sector ordering if you don't
