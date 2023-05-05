@@ -1,7 +1,6 @@
 FORMATS = \
 	_apple2 \
 	_atari \
-	_northstar \
 	_mx \
 	40track_drive \
 	acornadfs \
@@ -46,9 +45,7 @@ FORMATS = \
 	mx220_ss \
 	mx440 \
 	n88basic \
-	northstar175 \
-	northstar350 \
-	northstar87 \
+	northstar \
 	psos800 \
 	rolandd20 \
 	rx50 \
