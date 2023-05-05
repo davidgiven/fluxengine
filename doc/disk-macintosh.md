@@ -37,20 +37,19 @@ Reading discs
 Just do:
 
 ```
-fluxengine read <format> -o mac.dsk
+fluxengine read mac <format> -o mac.dsk
 ```
 
-...where `<format>` can be `mac400` or `mac800`.
+...where `<format>` can be `--400` or `--800`.
 
 You should end up with a `mac.dsk` file containing a raw sector image
 (equivalent to `.img`).
 
-**Big warning!** Mac disk images are complicated due to the way the tracks are
-different sizes and the odd sector size. What you get above is a triangular
-disk image, which contains all the 512-byte user data areas concatenated
-together in filesystem order. It does not contain the twelve bytes of metadata.
-If you want these as well, specify that you want 524 byte sectors with
-`--output.image.img.trackdata.sector_size=512`. The metadata will follow the
+The Mac disk format contains an extra twelve bytes of data per sector which can
+be used for filesystem metadata. In practice, this was never used by anyone,
+and so the default is to omit these. If you want them, specify that you want
+524 byte sectors with `--layout.layoutdata.sector_size=524`. The metadata will
+follow the
 512 bytes of user data.
 
 FluxEngine also supports DiskCopy 4.2 disk images, which may be a better option
@@ -64,15 +63,12 @@ Writing discs
 Just do:
 
 ```
-fluxengine write <format> -i mac.dsk
+fluxengine write mac <format> -i mac.dsk
 ```
 
-...where `<format>` can be `mac400` or `mac800`.
+...where `<format>` can be `400` or `800`.
 
 It'll read the image file and write it out.
-
-The same warning as above applies --- you can use normal `.dsk` files but it's
-problematic. Consider using DiskCopy 4.2 files instead.
 
 Useful references
 -----------------
