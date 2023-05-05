@@ -33,29 +33,29 @@ FluxEngine can also write Atari ST scheme disks.
 
 The syntax is:
 
-    fluxengine write <format> -i input.st
+    fluxengine write atarist -i input.st <format>
 
 Available formats
 -----------------
 
 `<format>` can be one of these:
 
-  - `atarist360`: a 360kB 3.5" disk, with 80 cylinders, 1 side, and 9 sectors
-	per track.
-  - `atarist370`: a 370kB 3.5" disk, with 82 cylinders, 1 side, and 9 sectors
-	per track.
-  - `atarist400`: a 400kB 3.5" disk, with 80 cylinders, 1 side, and 10 sectors
-	per track.
-  - `atarist410`: a 410kB 3.5" disk, with 82 cylinders, 1 side, and 10 sectors
-	per track.
-  - `atarist720`: a 720kB 3.5" disk, with 80 cylinders, 2 sides, and 9 sectors
-	per track.
-  - `atarist740`: a 740kB 3.5" disk, with 82 cylinders, 2 sides, and 9 sectors
-	per track.
-  - `atarist800`: a 800kB 3.5" disk, with 80 cylinders, 2 sides, and 10 sectors
-	per track.
-  - `atarist820`: a 820kB 3.5" disk, with 82 cylinders, 2 sides, and 10 sectors
-	per track.
+  - `--360`: a 360kB 3.5" disk, with 80 cylinders, 1 side, and 9 sectors per
+    track.
+  - `--370`: a 370kB 3.5" disk, with 82 cylinders, 1 side, and 9 sectors per
+    track.
+  - `--400`: a 400kB 3.5" disk, with 80 cylinders, 1 side, and 10 sectors per
+    track.
+  - `--410`: a 410kB 3.5" disk, with 82 cylinders, 1 side, and 10 sectors per
+    track.
+  - `--720`: a 720kB 3.5" disk, with 80 cylinders, 2 sides, and 9 sectors per
+    track.
+  - `--740`: a 740kB 3.5" disk, with 82 cylinders, 2 sides, and 9 sectors per
+    track.
+  - `--800`: a 800kB 3.5" disk, with 80 cylinders, 2 sides, and 10 sectors per
+    track.
+  - `--820`: a 820kB 3.5" disk, with 82 cylinders, 2 sides, and 10 sectors per
+    track.
 
 See [the IBM format documentation](disk-ibm.md) for more information. Note that
 only some PC 3.5" floppy disk drives are capable of seeking to the 82nd track.
