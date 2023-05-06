@@ -194,18 +194,17 @@ std::string tohex(const std::string& s)
 
 bool doesFileExist(const std::string& filename)
 {
-	std::ifstream f(filename);
-	return f.good();
+    std::ifstream f(filename);
+    return f.good();
 }
 
 int countSetBits(uint32_t word)
 {
-	int b = 0;
-	while (word)
-	{
-		b += word & 1;
-		word >>= 1;
-	}
-	return b;
+    int b = 0;
+    while (word)
+    {
+        b += word & 1;
+        word >>= 1;
+    }
+    return b;
 }
-

@@ -101,7 +101,7 @@ message FilesystemProto
         APPLEDOS = 10;
         PHILE = 11;
         LIF = 12;
-		MICRODOS = 13;
+        MICRODOS = 13;
     }
 
     optional FilesystemType type = 10
@@ -119,7 +119,7 @@ message FilesystemProto
     optional Smaky6FsProto smaky6 = 11;
     optional PhileProto phile = 13;
     optional LifProto lif = 14;
-	optional MicrodosProto microdos = 15;
+    optional MicrodosProto microdos = 15;
 
     optional SectorListProto sector_order = 9
         [ (help) = "specify the filesystem order of sectors" ];

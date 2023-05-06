@@ -240,17 +240,17 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc,
         FlagGroup::applyOption(*defaultOption);
     }
 
-	/* Next, any standalone options. */
+    /* Next, any standalone options. */
 
-	for (auto& option : config.option())
-	{
-		if (options.find(option.name()) != options.end())
-		{
-			FlagGroup::applyOption(option);
-			options.erase(option.name());
-		}
-	}
-		
+    for (auto& option : config.option())
+    {
+        if (options.find(option.name()) != options.end())
+        {
+            FlagGroup::applyOption(option);
+            options.erase(option.name());
+        }
+    }
+
     if (!options.empty())
         Error() << fmt::format(
             "--{} is not a known flag or format option; try --help",
