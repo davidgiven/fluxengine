@@ -84,15 +84,12 @@ public:
 private:
     void SetState(int state)
     {
-        if (state != _state)
-        {
-            _state = state;
-            CallAfter(
-                [&]()
-                {
-                    UpdateState();
-                });
-        }
+		_state = state;
+		CallAfter(
+			[&]()
+			{
+				UpdateState();
+			});
     }
 
     void SwitchFrom() override
