@@ -86,25 +86,27 @@ class LifFilesystem : public Filesystem
             location = br.read_be32();
             length = br.read_be32() * config.block_size();
             int year = unbcd(br.read_8());
-            int month = unbcd(br.read_8());
+            int month = unbcd(br.read_8()) + 1;
             int day = unbcd(br.read_8());
             int hour = unbcd(br.read_8());
             int minute = unbcd(br.read_8());
             int second = unbcd(br.read_8());
+            uint16_t volume = br.read_be16();
+            uint16_t protection = br.read_be16();
+            uint16_t recordSize = br.read_be16();
+
             if (year >= 70)
                 year += 1900;
             else
                 year += 2000;
 
-            std::tm tm = {
-				.tm_sec = second,
+            std::tm tm = {.tm_sec = second,
                 .tm_min = minute,
                 .tm_hour = hour,
                 .tm_mday = day,
                 .tm_mon = month,
                 .tm_year = year - 1900,
-				.tm_isdst = -1
-			};
+                .tm_isdst = -1};
             std::stringstream ss;
             ss << std::put_time(&tm, "%FT%T%z");
             ctime = ss.str();
@@ -122,6 +124,9 @@ class LifFilesystem : public Filesystem
             attributes[Filesystem::FILE_TYPE] = "file";
             attributes[Filesystem::MODE] = mode;
             attributes["lif.ctime"] = ctime;
+            attributes["lif.volume"] = std::to_string(volume & 0x7fff);
+            attributes["lif.protection"] = fmt::format("0x{:x}", protection);
+            attributes["lif.record_size"] = std::to_string(recordSize);
         }
 
     public:
