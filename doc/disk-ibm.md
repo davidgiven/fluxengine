@@ -42,8 +42,8 @@ Just do:
 
 ...and you'll end up with an `ibm.img` file. You'll need to specify which
 format to use; this can be one of `--160`, `--180`, `--320`, `--360`, `--720`,
-`--1200`, `--1232` or `--1400` depending. The size of the disk image will vary
-depending on the format.
+`--1200`, `--1232`, `--1400` or `--1680` depending. The size of the disk image
+will vary depending on the format.
 
 The common PC formats are `--720` and `--1440`, but there are _many_ others,
 and there's too many configuration options to usefully list. Use `fluxengine

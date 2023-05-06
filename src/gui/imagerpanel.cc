@@ -47,15 +47,12 @@ public:
 private:
     void SetState(int state)
     {
-        if (state != _state)
-        {
-            _state = state;
-            CallAfter(
-                [&]()
-                {
-                    UpdateState();
-                });
-        }
+		_state = state;
+		CallAfter(
+			[&]()
+			{
+				UpdateState();
+			});
     }
 
     void SwitchFrom() override
@@ -74,7 +71,6 @@ private:
 
     void OnQueueFailed() override
     {
-        fmt::print("queue failed\n");
         if (_state == STATE_READING_WORKING)
             _state = STATE_READING_FAILED;
         else if (_state == STATE_WRITING_WORKING)
@@ -218,8 +214,8 @@ public:
         std::shared_ptr<const TrackFlux> trackdata) override
     {
         visualiser->SetTrackData(trackdata);
-		if (!trackdata->trackDatas.empty())
-			histogram->Redraw(*(*trackdata->trackDatas.begin())->fluxmap, 0);
+        if (!trackdata->trackDatas.empty())
+            histogram->Redraw(*(*trackdata->trackDatas.begin())->fluxmap, 0);
     }
 
     void SetDisk(std::shared_ptr<const DiskFlux> diskdata) override

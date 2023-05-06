@@ -10,19 +10,19 @@
 
 static Bytes fakeBits(const std::vector<bool>& bits)
 {
-	Bytes result;
-	ByteWriter bw(result);
+    Bytes result;
+    ByteWriter bw(result);
 
-	auto it = bits.begin();
-	while (it != bits.end())
-	{
-		uint8_t b = (*it++) << 4;
-		if (it != bits.end())
-			b |= *it++;
-		bw.write_8(b);
-	}
+    auto it = bits.begin();
+    while (it != bits.end())
+    {
+        uint8_t b = (*it++) << 4;
+        if (it != bits.end())
+            b |= *it++;
+        bw.write_8(b);
+    }
 
-	return result;
+    return result;
 }
 
 class ExplorerPanelImpl :
@@ -84,15 +84,12 @@ public:
 private:
     void SetState(int state)
     {
-        if (state != _state)
-        {
-            _state = state;
-            CallAfter(
-                [&]()
-                {
-                    UpdateState();
-                });
-        }
+		_state = state;
+		CallAfter(
+			[&]()
+			{
+				UpdateState();
+			});
     }
 
     void SwitchFrom() override
@@ -192,9 +189,9 @@ private:
                         Bytes bytes;
                         switch (explorerDecodeChoice->GetSelection())
                         {
-							case 0:
-								bytes = fakeBits(bits);
-								break;
+                            case 0:
+                                bytes = fakeBits(bits);
+                                break;
 
                             case 1:
                                 bytes = toBytes(bits);

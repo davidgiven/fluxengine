@@ -264,5 +264,42 @@ option_group {
 			}
 		}
 	}
+
+	option {
+		name: "1680"
+		comment: '1680kB 3.5" 80-track 21-sector DSHD; DMF'
+
+		config {
+			layout {
+				tracks: 80
+				sides: 2
+				layoutdata {
+					sector_size: 512
+					physical {
+						start_sector: 1
+						count: 21
+					}
+				}
+			}
+
+			encoder {
+				ibm {
+					trackdata {
+						target_rotational_period_ms: 200
+						target_clock_period_us: 2
+						gap0: 20
+						gap3: 12
+					}
+				}
+			}
+
+			filesystem {
+				fatfs {
+					root_directory_entries: 16
+					cluster_size: 2048
+				}
+			}
+		}
+	}
 }
 
