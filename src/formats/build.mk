@@ -23,6 +23,7 @@ FORMATS = \
 	icl30 \
 	mac \
 	micropolis \
+	ms2000 \
 	mx \
 	n88basic \
 	northstar \

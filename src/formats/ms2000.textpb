@@ -1,0 +1,24 @@
+comment: 'MS2000 Microdisk Development System'
+
+image_writer {
+	filename: "ms2000.img"
+	type: IMG
+}
+
+layout {
+	tracks: 70
+	sides: 1
+	layoutdata {
+		sector_size: 512
+		physical {
+			start_sector: 1
+			count: 9
+		}
+	}
+}
+
+filesystem {
+	type: MICRODOS
+}
+
+

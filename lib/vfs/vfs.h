@@ -256,6 +256,8 @@ public:
         const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
     static std::unique_ptr<Filesystem> createLifFilesystem(
         const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
+    static std::unique_ptr<Filesystem> createMicrodosFilesystem(
+        const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
 
     static std::unique_ptr<Filesystem> createFilesystem(
         const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
