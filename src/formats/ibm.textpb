@@ -287,7 +287,8 @@ option_group {
 					trackdata {
 						target_rotational_period_ms: 200
 						target_clock_period_us: 2
-						gap3: 14
+						gap0: 20
+						gap3: 12
 					}
 				}
 			}
