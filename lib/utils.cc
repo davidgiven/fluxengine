@@ -198,4 +198,15 @@ bool doesFileExist(const std::string& filename)
     return f.good();
 }
 
+uint32_t unbcd(uint32_t bcd)
+{
+    uint32_t dec = 0;
 
+    for (int i = 0; i < 8; i++)
+    {
+        dec = dec * 10 + (bcd >> 28);
+        bcd <<= 4;
+    }
+
+    return dec;
+}

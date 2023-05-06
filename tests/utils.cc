@@ -50,6 +50,12 @@ static void testUnhex()
 	AssertThat(unhex("f%20o"), Equals("f o"));
 }
 
+static void testUnbcd()
+{
+	AssertThat(unbcd(0x1234), Equals(1234));
+	AssertThat(unbcd(0x87654321), Equals(87654321));
+}
+
 int main(void)
 {
     testJoin();
@@ -58,5 +64,6 @@ int main(void)
     testTrim();
     testLeafname();
 	testUnhex();
+	testUnbcd();
     return 0;
 }

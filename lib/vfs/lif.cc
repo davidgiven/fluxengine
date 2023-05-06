@@ -3,6 +3,7 @@
 #include "lib/config.pb.h"
 #include "lib/utils.h"
 #include <fmt/format.h>
+#include <iomanip>
 
 /* See https://www.hp9845.net/9845/projects/hpdir/#lif_filesystem for
  * a description. */
@@ -84,12 +85,35 @@ class LifFilesystem : public Filesystem
             uint16_t type = br.read_be16();
             location = br.read_be32();
             length = br.read_be32() * config.block_size();
+            int year = unbcd(br.read_8());
+            int month = unbcd(br.read_8());
+            int day = unbcd(br.read_8());
+            int hour = unbcd(br.read_8());
+            int minute = unbcd(br.read_8());
+            int second = unbcd(br.read_8());
+            if (year >= 70)
+                year += 1900;
+            else
+                year += 2000;
 
-			auto it = numberToFileType.find(type);
-			if (it != numberToFileType.end())
-				mode = it->second;
-			else
-				mode = fmt::format("{:04x}", type);
+            std::tm tm = {
+				.tm_sec = second,
+                .tm_min = minute,
+                .tm_hour = hour,
+                .tm_mday = day,
+                .tm_mon = month,
+                .tm_year = year - 1900,
+				.tm_isdst = -1
+			};
+            std::stringstream ss;
+            ss << std::put_time(&tm, "%FT%T%z");
+            ctime = ss.str();
+
+            auto it = numberToFileType.find(type);
+            if (it != numberToFileType.end())
+                mode = it->second;
+            else
+                mode = fmt::format("0x{:04x}", type);
 
             path = {filename};
 
@@ -97,10 +121,12 @@ class LifFilesystem : public Filesystem
             attributes[Filesystem::LENGTH] = std::to_string(length);
             attributes[Filesystem::FILE_TYPE] = "file";
             attributes[Filesystem::MODE] = mode;
+            attributes["lif.ctime"] = ctime;
         }
 
     public:
         uint32_t location;
+        std::string ctime;
     };
 
 public:
