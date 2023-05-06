@@ -1,5 +1,3 @@
-use_cxx11()
-
 add_executable(port_name port_name.cpp)
 
 include_directories (

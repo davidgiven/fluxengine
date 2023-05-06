@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.10.0)
 
 # Fix behavior of CMAKE_CXX_STANDARD when targeting macOS.
 if (POLICY CMP0025)
@@ -18,7 +18,7 @@ endif ()
 project (libusbp)
 
 set (LIBUSBP_VERSION_MAJOR 1)
-set (LIBUSBP_VERSION_MINOR 2)
+set (LIBUSBP_VERSION_MINOR 3)
 set (LIBUSBP_VERSION_PATCH 0)
 
 # Make 'Release' be the default build type, since the debug builds
@@ -49,28 +49,8 @@ set(VBOX_LINUX_ON_WINDOWS FALSE CACHE BOOL
 set(ENABLE_GCOV FALSE CACHE BOOL
   "Compile with special options needed for gcov.")
 
-# Our C code uses features from the C99 standard.
-macro(use_c99)
-  if (CMAKE_VERSION VERSION_LESS "3.1")
-    if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-      set (CMAKE_C_FLAGS "--std=gnu99 ${CMAKE_C_FLAGS}")
-    endif ()
-  else ()
-    set (CMAKE_C_STANDARD 99)
-  endif ()
-endmacro(use_c99)
-
-# Our C++ code uses features from the C++11 standard.
-macro(use_cxx11)
-  if (CMAKE_VERSION VERSION_LESS "3.1")
-    if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-      # Use --std=gnu++0x instead of --std=gnu++11 in order to support GCC 4.6.
-      set (CMAKE_CXX_FLAGS "--std=gnu++0x ${CMAKE_C_FLAGS}")
-    endif ()
-  else ()
-    set (CMAKE_CXX_STANDARD 11)
-  endif ()
-endmacro(use_cxx11)
+set (CMAKE_C_STANDARD 99)
+set (CMAKE_CXX_STANDARD 11)
 
 set (LIBUSBP_VERSION ${LIBUSBP_VERSION_MAJOR}.${LIBUSBP_VERSION_MINOR}.${LIBUSBP_VERSION_PATCH})
 

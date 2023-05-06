@@ -113,42 +113,79 @@ static libusbp_error * get_interface_composite(
         return error;
     }
 
-    // Get a list of all the USB-related devices.
-    HDEVINFO new_list = SetupDiGetClassDevs(NULL, "USB", NULL,
-        DIGCF_ALLCLASSES | DIGCF_PRESENT);
-    if (new_list == INVALID_HANDLE_VALUE)
-    {
-        return error_create_winapi(
-            "Failed to get list of all USB devices while finding an interface.");
-    }
+    unsigned int list_index = 0;
+    HDEVINFO new_list = INVALID_HANDLE_VALUE;
+    DWORD i = 0;
 
-    // Iterate through the list until we find a device whose
+    // Iterate through various device lists until we find a device whose
     // parent device is ours and which controls the interface
     // specified by the caller.
-    for (DWORD i = 0; ; i++)
+
+    while (true)
     {
+        if (new_list == INVALID_HANDLE_VALUE)
+        {
+            if (list_index == 0)
+            {
+                // Get a list of all the USB-related devices.
+                // It includes native USB interfaces and usbser.sys ports but
+                // not FTDI ports.
+                new_list = SetupDiGetClassDevs(NULL,
+                  "USB", NULL, DIGCF_ALLCLASSES | DIGCF_PRESENT);
+            }
+            else if (list_index == 1)
+            {
+                // Get a list of all the COM port devices.
+                // This includes FTDI and usbser.sys ports.
+                new_list = SetupDiGetClassDevs(&GUID_DEVINTERFACE_COMPORT,
+                  NULL, NULL, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
+            }
+            else if (list_index == 2)
+            {
+                // Get a list of all modem devices.
+                // Rationale: https://github.com/pyserial/pyserial/commit/7bb1dcc5aea16ca1c957690cb5276df33af1c286
+                new_list = SetupDiGetClassDevs(&GUID_DEVINTERFACE_MODEM,
+                  NULL, NULL, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
+            }
+            else
+            {
+                // Could not find the child interface in any list.
+                // This could be a temporary condition.
+                libusbp_error * error = error_create("Could not find interface %d.",
+                    interface_number);
+                error = error_add_code(error, LIBUSBP_ERROR_NOT_READY);
+                return error;
+            }
+
+            if (new_list == INVALID_HANDLE_VALUE)
+            {
+                return error_create_winapi(
+                    "Failed to list devices to find an interface (%u).",
+                    list_index);
+            }
+            i = 0;
+        }
+
         SP_DEVINFO_DATA device_info_data;
         device_info_data.cbSize = sizeof(SP_DEVINFO_DATA);
         bool success = SetupDiEnumDeviceInfo(new_list, i, &device_info_data);
         if (!success)
         {
-            libusbp_error * error;
-
             if (GetLastError() == ERROR_NO_MORE_ITEMS)
             {
-                // Could not find the child interface.  This could be
-                // a temporary condition.
-                error = error_create("Could not find interface %d.",
-                    interface_number);
-                error = error_add_code(error, LIBUSBP_ERROR_NOT_READY);
+                // This list is done.  Try the next list.
+                SetupDiDestroyDeviceInfoList(new_list);
+                new_list = INVALID_HANDLE_VALUE;
+                list_index++;
+                continue;
             }
             else
             {
-                error = error_create_winapi(
-                    "Failed to get device info while finding an interface.");
+                libusbp_error * error = error_create_winapi(
+                    "Failed to get device info to find an interface.");
+                SetupDiDestroyDeviceInfoList(new_list);
+                return error;
             }
-            SetupDiDestroyDeviceInfoList(new_list);
-            return error;
         }
 
         DEVINST parent_dev_inst;
@@ -162,6 +199,7 @@ static libusbp_error * get_interface_composite(
         if (parent_dev_inst != dev_inst)
         {
             // This device is not a child of our device.
+            i++;
             continue;
         }
 
@@ -179,9 +217,21 @@ static libusbp_error * get_interface_composite(
         unsigned int actual_interface_number;
         int result = sscanf(device_id, "USB\\VID_%*4x&PID_%*4x&MI_%2x\\",
             &actual_interface_number);
-        if (result != 1 || actual_interface_number != interface_number)
+        if (result != 1)
+        {
+          result = sscanf(device_id, "FTDIBUS\\%*[^\\]\\%x",
+            &actual_interface_number);
+          if (result != 1)
+          {
+            // Could not figure out the interface number.
+            i++;
+            continue;
+          }
+        }
+        if (actual_interface_number != interface_number)
         {
             // This is not the right interface.
+            i++;
             continue;
         }
 

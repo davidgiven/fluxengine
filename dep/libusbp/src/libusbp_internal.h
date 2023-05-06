@@ -37,6 +37,7 @@
 #include <usbioctl.h>
 #include <stringapiset.h>
 #include <winusb.h>
+#include <ntddmodm.h>
 #endif
 
 #ifdef __linux__

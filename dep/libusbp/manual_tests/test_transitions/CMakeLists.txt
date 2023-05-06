@@ -1,5 +1,3 @@
-use_cxx11()
-
 add_executable(test_transitions test_transitions.cpp)
 
 include_directories (
