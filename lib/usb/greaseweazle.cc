@@ -107,8 +107,8 @@ Bytes greaseWeazleToFluxEngine(const Bytes& gwdata, nanoseconds_t clock)
 
 		if (event)
 		{
-			uint32_t index_fl = (index_gw * clock) / NS_PER_TICK;
-			uint32_t ticks_fl = (ticks_gw * clock) / NS_PER_TICK;
+			uint32_t index_fl = round((index_gw * clock) / NS_PER_TICK);
+			uint32_t ticks_fl = round((ticks_gw * clock) / NS_PER_TICK);
 			if (index_gw != ~0)
 			{
 				if (index_fl < ticks_fl)
