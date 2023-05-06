@@ -25,9 +25,14 @@ libusbp_error * create_device(io_service_t service, libusbp_device ** device)
     assert(service != MACH_PORT_NULL);
     assert(device != NULL);
 
+    libusbp_error * error = NULL;
+
     // Allocate the device.
     libusbp_device * new_device = NULL;
-    libusbp_error * error = device_allocate(&new_device);
+    if (error == NULL)
+    {
+        error = device_allocate(&new_device);
+    }
 
     // Get the numeric IDs.
     if (error == NULL)
@@ -84,7 +89,10 @@ libusbp_error * libusbp_device_copy(const libusbp_device * source, libusbp_devic
 
     // Allocate the device.
     libusbp_device * new_device = NULL;
-    error = device_allocate(&new_device);
+    if (error == NULL)
+    {
+        error = device_allocate(&new_device);
+    }
 
     // Copy the simple fields, while leaving the pointers owned by the
     // device NULL so that libusbp_device_free is still OK to call.

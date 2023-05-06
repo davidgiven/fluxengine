@@ -2,7 +2,7 @@
 $(OBJDIR)/tests/%.log: $(OBJDIR)/tests/%.exe
 	@mkdir -p $(dir $@)
 	@echo TEST $*
-	@$< > $@
+	@$<
 
 declare-test = $(eval $(declare-test-impl))
 define declare-test-impl
