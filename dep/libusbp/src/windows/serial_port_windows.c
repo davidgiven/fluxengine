@@ -124,6 +124,26 @@ libusbp_error * libusbp_serial_port_create(
     libusbp_string_free(usb_device_id);
     libusbp_serial_port_free(new_sp);
 
+    // FTDI devices like the FT232RL aren't actually composite but they look
+    // like it on Windows because the serial port device is a child of the USB
+    // device.  On Linux and macOS, those devices can be detected with
+    // composite=false (or composite=true and interface_number=0).
+    // This workaround allows that to work on Windows too, and it might make
+    // this API easier to use for some non-FTDI devices too.
+    if (error && !composite)
+    {
+        libusbp_error * error2 = libusbp_serial_port_create(device, 0, true, port);
+        if (error2)
+        {
+            libusbp_error_free(error2);
+        }
+        else
+        {
+            libusbp_error_free(error);
+            return NULL;
+        }
+    }
+
     return error;
 }
 
