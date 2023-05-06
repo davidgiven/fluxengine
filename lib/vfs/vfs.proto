@@ -17,7 +17,14 @@ message AcornDfsProto
 
 message Brother120FsProto {}
 
-message FatFsProto {}
+message FatFsProto {
+	optional uint32 cluster_size = 1
+		[ (help) = "cluster size (for new filesystems); 0 to select automatically",
+	      default = 0 ];
+	optional uint32 root_directory_entries = 2
+		[ (help) = "number of entries in the root directory (for new filesystems); 0 to select automatically",
+		  default = 0 ];
+}
 
 message CpmFsProto
 {

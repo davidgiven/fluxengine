@@ -80,6 +80,8 @@ public:
         currentFatFs = this;
         MKFS_PARM parm = {
             .fmt = FM_SFD | FM_ANY,
+			.n_root = _config.root_directory_entries(),
+			.au_size = _config.cluster_size(),
         };
         FRESULT res = f_mkfs("", &parm, buffer, sizeof(buffer));
         throwError(res);

@@ -291,6 +291,13 @@ option_group {
 					}
 				}
 			}
+
+			filesystem {
+				fatfs {
+					root_directory_entries: 16
+					cluster_size: 2048
+				}
+			}
 		}
 	}
 }
