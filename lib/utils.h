@@ -20,6 +20,15 @@ extern std::string unhex(const std::string& s);
 extern std::string tohex(const std::string& s);
 extern bool doesFileExist(const std::string& filename);
 
+template <class K, class V>
+std::map<V, K> reverseMap(const std::map<K, V>& map)
+{
+	std::map<V, K> reverse;
+	for (const auto& [k, v] : map)
+		reverse[v] = k;
+	return reverse;
+}
+
 /* If set, any running job will terminate as soon as possible (with an error).
  */
 
