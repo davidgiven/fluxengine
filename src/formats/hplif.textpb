@@ -1,5 +1,16 @@
 comment: 'Hewlett-Packard LIF family'
 
+documentation:
+<<<
+LIF, a.k.a. Logical Interchange Format, is a series of formats used by
+Hewlett-Packard across their entire range of computers, from calculators to
+modern servers. It also defines a simple non-hierarchical filesystem which is
+bizarrely _still_ supported by HP-UX systems.
+
+Floppy-disk wise, they're yet more variations of the standard IBM floppy
+encoding scheme.
+>>>
+
 drive {
 	high_density: false
 }

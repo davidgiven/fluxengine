@@ -1,4 +1,11 @@
-comment: 'Digital RX50 400kB 5.25" 80-track 10-sector SSQD'
+comment: 'Digital RX50 400kB 5.25" 80-track 10-sector SSDD'
+
+documentation:
+<<<
+The Digital RX50 is one of the external floppy drive units used by Digital's
+range of computers, especially the DEC Rainbow microcomputer. It is a fairly
+vanilla single-sided IBM scheme variation.
+>>>
 
 drive {
 	high_density: true
@@ -39,3 +46,5 @@ encoder {
 decoder {
 	ibm {}
 }
+
+tpi: 96

@@ -1,5 +1,32 @@
 comment: 'Amiga 880kB 3.5" DSDD'
 
+documentation:
+<<<
+Amiga disks use MFM, but don't use IBM scheme. Instead, the entire track is
+read and written as a unit, with each sector butting up against the previous
+one. This saves a lot of space which allows the Amiga to not just store 880kB
+on a DD disk, but _also_ allows an extra 16 bytes of metadata per sector.
+
+This metadata is mostly unused, so the default for FluxEngine is to ignore it
+and just use the 512 bytes of main sector data. If you want it, specify a
+528-byte sector size. The metadata will come after the user data.
+
+Bizarrely, the data in each sector is stored with all the odd bits first, and
+then all the even bits. This is tied into the checksum algorithm, which is
+distinctly subpar and not particularly good at detecting errors.
+>>>
+
+documentation:
+<<<
+References
+----------
+
+  - [The Amiga Floppy Boot Process and Physical
+    Layout](https://wiki.amigaos.net/wiki/Amiga_Floppy_Boot_Process_and_Physical_Layout)
+
+  - [The Amiga Disk File FAQ](http://lclevy.free.fr/adflib/adf_info.html)
+>>>
+
 image_reader {
 	filename: "amiga.adf"
 	type: IMG
@@ -32,5 +59,39 @@ decoder {
 
 filesystem {
 	type: AMIGAFFS
+}
+
+tpi: 96
+
+option_group {
+	comment: "Sector size"
+
+	option {
+		name: "without_metadata"
+		comment: "512-byte sectors"
+		set_by_default: true
+
+		config {
+			layout {
+				layoutdata {
+					sector_size: 512
+				}
+			}
+		}
+	}
+
+	option {
+		name: "with_metadata"
+		comment: "528-byte sectors"
+		set_by_default: true
+
+		config {
+			layout {
+				layoutdata {
+					sector_size: 528
+				}
+			}
+		}
+	}
 }
 

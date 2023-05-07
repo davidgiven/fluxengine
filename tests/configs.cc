@@ -29,16 +29,12 @@ struct fmt::formatter<std::vector<std::string>>
         FormatContext& ctx) const -> decltype(ctx.out())
     {
 		auto it = ctx.out();
-		bool first = true;
 		for (const auto& s : vector)
 		{
 			if (s.empty())
 				continue;
 
-			if (!first)
-				it = fmt::format_to(it, "+");
-			it = fmt::format_to(it, "{}", s);
-			first = false;
+			it = fmt::format_to(it, "+{}", s);
 		}
 
         return it;
@@ -89,7 +85,7 @@ static void validateConfigWithOptions(std::string baseConfigName,
     /* All configs must have a tpi. */
 
     if (!config.has_tpi())
-        error("{}+{}: no tpi set", baseConfigName, options);
+        error("{}{}: no tpi set", baseConfigName, options);
 }
 
 static void validateToplevelConfig(std::string name)
@@ -149,17 +145,20 @@ static void validateToplevelConfig(std::string name)
     /* For each permutation of options, verify the complete config. */
 
     auto combinations = generateCombinations(optionGroups);
-    for (const auto& group : combinations)
-    {
-        ConfigProto configWithOption = config;
-        for (const auto& optionName : group)
-        {
-            if (!optionName.empty())
-                configWithOption.MergeFrom(
-                    optionProtos.at(optionName)->config());
-        }
-        validateConfigWithOptions(name, group, configWithOption);
-    }
+	if (combinations.empty())
+		validateConfigWithOptions(name, {}, config);
+	else
+		for (const auto& group : combinations)
+		{
+			ConfigProto configWithOption = config;
+			for (const auto& optionName : group)
+			{
+				if (!optionName.empty())
+					configWithOption.MergeFrom(
+						optionProtos.at(optionName)->config());
+			}
+			validateConfigWithOptions(name, group, configWithOption);
+		}
 }
 
 int main(int argc, const char* argv[])

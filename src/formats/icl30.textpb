@@ -1,4 +1,11 @@
-comment: 'ICL Model 30 263kB 34-track DSSD (ro)'
+comment: 'ICL Model 30 263kB 35-track DSSD'
+
+documentation:
+<<<
+The ICL Model 30 is a reasonably standard CP/M machine using 35-track single
+density disks and the traditional CP/M 128-byte secotrs --- 30 of them per
+track! Other than that it's another IBM scheme variation.
+>>>
 
 image_writer {
 	filename: "icl30.img"

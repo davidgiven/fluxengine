@@ -1,0 +1,258 @@
+comment: 'Commodore 1541 171kB/192kB 5.25" 35/40-track SS GCR'
+
+documentation:
+<<<
+Commodore 64 disks come in two varieties: GCR, which are the overwhelming
+majority; and MFM, only used on the 1571 and 1581. The latter were (as far as I
+can tell) standard IBM PC format disks with a slightly odd sector count.
+
+The GCR disks are much more interesting. They could store 170kB on a
+single-sided disk (although later drives were double-sided), using a proprietary
+encoding and record scheme; like [Apple Macintosh disks](macintosh.md) they
+stored varying numbers of sectors per track to make the most of the physical
+disk area, although unlike them they did it by changing the bitrate rather than
+adjusting the motor speed.
+
+The drives were also intelligent and ran DOS on a CPU inside them. The
+computer itself knew nothing about file systems. You could even upload
+programs onto the drive and run them there, allowing all sorts of custom disk
+formats, although this was mostly used to compensate for the [cripplingly
+slow connection to the
+computer](https://ilesj.wordpress.com/2014/05/14/1541-why-so-complicated/) of
+300 bytes per second (!). (The drive itself could transfer data reasonably
+quickly.)
+
+A standard 1541 disk has 35 tracks of 17 to 21 sectors, each 256 bytes long
+(sometimes 40 tracks).
+
+A standard 1581 disk has 80 tracks and two sides, each with 10 sectors, 512
+bytes long.
+
+A CMD FD2000 disk (a popular third-party Commodore disk drive) 
+>>>
+
+documentation:
+<<<
+References
+----------
+
+  - [Ruud's Commodore Site: 1541](http://www.baltissen.org/newhtm/1541c.htm):
+    documentation on the 1541 disk format.
+>>>
+
+image_reader {
+	filename: "commodore.d64"
+	type: D64
+}
+
+image_writer {
+	filename: "commodore.d64"
+	type: D64
+}
+
+filesystem {
+	type: CBMFS
+}
+
+option_group {
+	comment: "Format family"
+
+	option {
+		name: "171"
+		comment: "171kB 1541, 35-track variant"
+		set_by_default: true
+		
+		config {
+			layout {
+				sides: 1
+				tracks: 35
+				layoutdata {
+					sector_size: 256
+				}
+				layoutdata {
+					track: 0
+					up_to_track: 16
+					physical {
+						start_sector: 0
+						count: 21
+					}
+				}
+				layoutdata {
+					track: 17
+					up_to_track: 23
+					physical {
+						start_sector: 0
+						count: 19
+					}
+				}
+				layoutdata {
+					track: 24
+					up_to_track: 29
+					physical {
+						start_sector: 0
+						count: 18
+					}
+				}
+				layoutdata {
+					track: 30
+					up_to_track: 39
+					physical {
+						start_sector: 0
+						count: 17
+					}
+				}
+			}
+
+			encoder {
+				c64 {}
+			}
+
+			decoder {
+				c64 {}
+			}
+
+			tpi: 48
+		}
+	}
+		
+	option {
+		name: "192"
+		comment: "192kB 1541, 40-track variant"
+		
+		config {
+			layout {
+				sides: 1
+				tracks: 40
+				layoutdata {
+					sector_size: 256
+				}
+				layoutdata {
+					track: 0
+					up_to_track: 16
+					physical {
+						start_sector: 0
+						count: 21
+					}
+				}
+				layoutdata {
+					track: 17
+					up_to_track: 23
+					physical {
+						start_sector: 0
+						count: 19
+					}
+				}
+				layoutdata {
+					track: 24
+					up_to_track: 29
+					physical {
+						start_sector: 0
+						count: 18
+					}
+				}
+				layoutdata {
+					track: 30
+					up_to_track: 39
+					physical {
+						start_sector: 0
+						count: 17
+					}
+				}
+			}
+
+			encoder {
+				c64 {}
+			}
+
+			decoder {
+				c64 {}
+			}
+
+			tpi: 48
+		}
+	}
+
+	option {
+		name: "800"
+		comment: "800kB 1581"
+
+		config {
+			layout {
+				tracks: 80
+				sides: 2
+				swap_sides: true
+				layoutdata {
+					sector_size: 512
+					physical {
+						start_sector: 1
+						count: 10
+					}
+				}
+			}
+
+			encoder {
+				ibm {
+					trackdata {
+						target_rotational_period_ms: 200
+						target_clock_period_us: 4
+						emit_iam: false
+						gap0: 80
+						gap2: 22
+						gap3: 34
+					}
+				}
+			}
+
+			decoder {
+				ibm {
+					trackdata {
+						ignore_side_byte: true
+					}
+				}
+			}
+
+			tpi: 96
+		}
+	}
+
+	option {
+		name: "1620"
+		comment: "1620kB, CMD FD2000"
+
+		config {
+			layout {
+				tracks: 81
+				sides: 2
+				swap_sides: true
+				layoutdata {
+					sector_size: 1024
+					physical {
+						start_sector: 1
+						count: 10
+					}
+				}
+			}
+
+			encoder {
+				ibm {
+					trackdata {
+						target_rotational_period_ms: 200
+						target_clock_period_us: 2
+						emit_iam: false
+					}
+				}
+			}
+
+			decoder {
+				ibm {
+					trackdata {
+						ignore_side_byte: true
+					}
+				}
+			}
+
+			tpi: 96
+		}
+	}
+}
+		

@@ -3,17 +3,15 @@ FORMATS = \
 	acornadfs \
 	acorndfs \
 	aeslanier \
-	agat840 \
+	agat \
 	amiga \
 	ampro \
 	apple2_drive \
 	apple2 \
 	atarist \
-	bk800 \
+	bk \
 	brother \
-	commodore1541 \
-	commodore1581 \
-	cmd_fd2000 \
+	commodore \
 	eco1 \
 	epsonpf10 \
 	f85 \
@@ -26,7 +24,7 @@ FORMATS = \
 	mx \
 	n88basic \
 	northstar \
-	psos800 \
+	psos \
 	rolandd20 \
 	rx50 \
 	shugart_drive \
