@@ -1,5 +1,6 @@
 shortname: 'VDS Eco1'
 comment: 'CP/M; 1210kB 77-track mixed format DSHD'
+read_support_status: DINOSAUR
 
 documentation:
 <<<

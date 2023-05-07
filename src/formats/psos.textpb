@@ -1,5 +1,7 @@
 shortname: 'pSOS'
 comment: '800kB DSDD with PHILE'
+read_support_status: UNICORN
+write_support_status: UNICORN
 
 documentation:
 <<<

@@ -1,5 +1,7 @@
 shortname: 'Amiga'
 comment: '880kB 3.5" DSDD'
+read_support_status: UNICORN
+write_support_status: UNICORN
 
 documentation:
 <<<

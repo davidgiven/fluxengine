@@ -1,5 +1,6 @@
 shortname: "Durango F85"
 comment: '461kB 5.25" 77-track SS'
+read_support_status: DINOSAUR
 
 documentation:
 <<<

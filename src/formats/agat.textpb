@@ -1,5 +1,7 @@
 shortname: 'Agat'
 comment: '840kB 5.25" 80-track DS'
+read_support_status: DINOSAUR
+write_support_status: DINOSAUR
 
 documentation:
 <<<

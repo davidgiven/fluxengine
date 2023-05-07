@@ -1,5 +1,6 @@
 shortname: 'Ampro Little Board'
 comment: 'CP/M'
+read_support_status: DINOSAUR
 
 documentation:
 <<<

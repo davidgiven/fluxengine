@@ -5,6 +5,20 @@
 
 extern const std::map<std::string, const ConfigProto*> formats;
 
+static std::string supportStatus(SupportStatus status)
+{
+	switch (status)
+	{
+		case SupportStatus::DINOSAUR:
+			return "🦖";
+
+		case SupportStatus::UNICORN:
+            return "🦄";
+	}
+
+	return "";
+}
+
 int main(int argc, const char* argv[])
 {
     fmt::print("<!-- FORMATSSTART -->\n");
@@ -47,8 +61,8 @@ int main(int argc, const char* argv[])
         fmt::print("| `{}` | {} | {} | {} | {} |\n",
             name,
             config->shortname() + ": " + config->comment(),
-            config->has_decoder() ? "YES" : "",
-            config->has_encoder() ? "YES" : "",
+            supportStatus(config->read_support_status()),
+            supportStatus(config->write_support_status()),
             ss.str());
     }
 

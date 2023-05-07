@@ -1,5 +1,7 @@
 shortname: "Hewlett-Packard LIF"
 comment: 'a variety of disk formats used by HP'
+read_support_status: UNICORN
+write_support_status: UNICORN
 
 documentation:
 <<<

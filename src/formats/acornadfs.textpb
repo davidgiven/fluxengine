@@ -1,5 +1,6 @@
 shortname: "Acorn ADFS"
 comment: 'BBC Micro, Archimedes'
+read_support_status: DINOSAUR
 
 documentation:
 <<<

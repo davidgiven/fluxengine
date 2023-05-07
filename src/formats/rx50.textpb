@@ -1,5 +1,7 @@
 shortname: 'Digital RX50'
 comment: '400kB 5.25" 80-track 10-sector SSDD'
+read_support_status: DINOSAUR
+write_support_status: DINOSAUR
 
 documentation:
 <<<

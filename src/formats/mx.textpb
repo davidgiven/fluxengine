@@ -1,5 +1,6 @@
 shortname: 'DVK MX'
 comment: 'Soviet-era PDP-11 clone'
+read_support_status: DINOSAUR
 
 documentation:
 <<<

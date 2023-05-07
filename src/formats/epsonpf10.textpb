@@ -1,5 +1,6 @@
 shortname: 'Epson PF-10'
 comment: 'CP/M; 3.5" 40-track DSDD'
+read_support_status: DINOSAUR
 
 documentation:
 <<<

@@ -1,5 +1,6 @@
 shortname: 'Smaky 6'
 comment: '308kB 5.25" 77-track 16-sector SSDD, hard sectored'
+read_support_status: DINOSAUR
 
 documentation:
 <<<

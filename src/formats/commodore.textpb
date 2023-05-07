@@ -1,5 +1,7 @@
 shortname: 'Commodore'
 comment: '1541, 1581, and variations'
+read_support_status: UNICORN
+write_support_status: UNICORN
 
 documentation:
 <<<

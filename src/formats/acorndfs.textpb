@@ -1,5 +1,6 @@
 shortname: 'Acorn DFS'
 comment: 'Acorn Atom, BBC Micro series'
+read_support_status: UNICORN
 
 documentation:
 <<<

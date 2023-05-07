@@ -1,5 +1,7 @@
 shortname: 'Texas Instruments DS990'
 comment: '1126kB 8" DSSD'
+read_support_status: DINOSAUR
+write_support_status: DINOSAUR
 
 documentation:
 <<<

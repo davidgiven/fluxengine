@@ -1,5 +1,6 @@
 shortname: 'Zilog MCZ'
 comment: '320kB 8" 77-track SSSD hard-sectored'
+read_support_status: DINOSAUR
 
 documentation:
 <<<

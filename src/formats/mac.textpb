@@ -1,5 +1,7 @@
 shortname: 'Macintosh'
 comment: '400kB/800kB 3.5" GCR'
+read_support_status: UNICORN
+write_support_status: UNICORN
 
 documentation:
 <<<

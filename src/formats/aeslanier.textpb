@@ -1,5 +1,6 @@
 shortname: 'AES Lanier "No Problem"'
 comment: '616kB 5.25" 77-track SSDD hard sectored'
+read_support_status: DINOSAUR
 
 documentation:
 <<<

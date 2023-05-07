@@ -1,5 +1,7 @@
 shortname: 'BK'
 comment: '800kB 5.25"/3.5" 80-track 10-sector DSDD'
+read_support_status: DINOSAUR
+write_support_status: DINOSAUR
 
 documentation:
 <<<

@@ -1,5 +1,6 @@
 shortname: 'ICL Model 30'
 comment: 'CP/M; 263kB 35-track DSSD'
+read_support_status: DINOSAUR
 
 documentation:
 <<<

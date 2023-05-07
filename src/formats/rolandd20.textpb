@@ -1,5 +1,6 @@
 shortname: 'Roland D20'
 comment: '3.5" electronic synthesiser disks'
+read_support_status: DINOSAUR
 
 documentation:
 <<<

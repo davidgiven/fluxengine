@@ -1,5 +1,7 @@
 shortname: 'Micropolis'
 comment: '100tpi MetaFloppy disks'
+read_support_status: UNICORN
+write_support_status: UNICORN
 
 documentation:
 <<<

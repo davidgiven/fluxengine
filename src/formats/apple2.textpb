@@ -1,5 +1,7 @@
 shortname: 'Apple II'
 comment: 'Prodos, Appledos, and CP/M'
+read_support_status: UNICORN
+write_support_status: UNICORN
 
 documentation:
 <<<
