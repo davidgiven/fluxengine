@@ -11,8 +11,8 @@ bool failed = false;
 template <typename... Args>
 void error(fmt::string_view format_str, const Args&... args)
 {
-    fmt::print(
-        stderr, "{}\n", vformat(format_str, fmt::make_format_args(args...)));
+    fmt::print(stderr, format_str, args...);
+	fputc('\n', stderr);
     failed = true;
 }
 
