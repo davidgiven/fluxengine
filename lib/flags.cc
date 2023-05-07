@@ -53,11 +53,6 @@ void FlagGroup::applyOption(const OptionProto& option)
             "option '{}' has an option group inside it, which isn't "
             "allowed",
             option.name());
-    if (option.config().include_size() > 0)
-        Error() << fmt::format(
-            "option '{}' is trying to include something, which "
-            "isn't allowed",
-            option.name());
 
     Logger() << fmt::format("OPTION: {}",
         option.has_message() ? option.message() : option.comment());
@@ -316,21 +311,7 @@ ConfigProto FlagGroup::parseSingleConfigFile(const std::string& filename,
 void FlagGroup::parseConfigFile(const std::string& filename,
     const std::map<std::string, const ConfigProto*>& configFiles)
 {
-    auto newConfig = parseSingleConfigFile(filename, configFiles);
-
-    /* The includes need to be merged _first_. */
-
-    for (const auto& include : newConfig.include())
-    {
-        auto included = parseSingleConfigFile(include, configFiles);
-        if (included.include_size() != 0)
-            Error() << "only one level of config file includes are supported "
-                       "(so far, if you need this, complain)";
-
-        config.MergeFrom(included);
-    }
-
-    config.MergeFrom(newConfig);
+    config.MergeFrom(parseSingleConfigFile(filename, configFiles));
 }
 
 void FlagGroup::checkInitialised() const

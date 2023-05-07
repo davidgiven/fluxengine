@@ -89,24 +89,12 @@ static void validateConfigWithOptions(std::string baseConfigName,
 
 static void validateToplevelConfig(std::string name)
 {
-    ConfigProto toplevel = findConfig(name);
+    ConfigProto config = findConfig(name);
 
     /* Don't test extension configs. */
 
-    if (toplevel.is_extension())
+    if (config.is_extension())
         return;
-
-    /* Apply any includes. */
-
-    ConfigProto config;
-    for (const auto& include : toplevel.include())
-    {
-        ConfigProto included = findConfig(include);
-        if (included.include_size() != 0)
-            error("{}: extension config contains _includes", include);
-        config.MergeFrom(included);
-    }
-    config.MergeFrom(toplevel);
 
     /* Collate options. */
 
