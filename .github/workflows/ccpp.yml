@@ -7,13 +7,15 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v1
+      with:
+        path: 'fluxengine'
     - uses: actions/checkout@v1
       with:
         repository: 'davidgiven/fluxengine-testdata'
-        path: '../fluxengine-testdata'
+        path: 'fluxengine-testdata'
     - name: apt
       run: sudo apt update && sudo apt install libudev-dev libsqlite3-dev protobuf-compiler libwxgtk3.0-gtk3-dev libfmt-dev
-    - name: make
+    - name: make -j2 -C fluxengine
       run: CXXFLAGS="-Wp,-D_GLIBCXX_ASSERTIONS" make -j2
 
   build-macos-current:
