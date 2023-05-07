@@ -71,6 +71,8 @@ option_group {
 				tracks: 35
 				sides: 1
 			}
+
+			tpi: 50
 		}
 	}
 
@@ -83,6 +85,8 @@ option_group {
 				tracks: 35
 				sides: 2
 			}
+
+			tpi: 50
 		}
 	}
 
@@ -95,6 +99,8 @@ option_group {
 				tracks: 77
 				sides: 1
 			}
+
+			tpi: 100
 		}
 	}
 
@@ -107,6 +113,8 @@ option_group {
 				tracks: 77
 				sides: 2
 			}
+
+			tpi: 100
 		}
 	}
 }

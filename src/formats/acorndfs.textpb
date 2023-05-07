@@ -57,6 +57,7 @@ option_group {
 			layout {
 				tracks: 40
 			}
+			tpi: 48
 		}
 	}
 
@@ -69,6 +70,7 @@ option_group {
 			layout {
 				tracks: 80
 			}
+			tpi: 96
 		}
 	}
 }

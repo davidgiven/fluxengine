@@ -262,6 +262,8 @@ decoder {
 	victor9k {}
 }
 
+tpi: 96
+
 option_group {
 	comment: "Format family"
 
