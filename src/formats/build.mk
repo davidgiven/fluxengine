@@ -78,4 +78,25 @@ doc/disk-%.md: src/formats/%.textpb $(OBJDIR)/mkdoc.exe
 	@$(OBJDIR)/mkdoc.exe $* > $@
 
 
+$(OBJDIR)/mkdocindex.exe: $(OBJDIR)/scripts/mkdocindex.o
+
+$(OBJDIR)/scripts/mkdocindex.o: scripts/mkdocindex.cc
+
+$(call use-library, $(OBJDIR)/mkdocindex.exe, $(OBJDIR)/scripts/mkdocindex.o, PROTO)
+$(call use-library, $(OBJDIR)/mkdocindex.exe, $(OBJDIR)/scripts/mkdocindex.o, LIBFORMATS)
+$(call use-library, $(OBJDIR)/mkdocindex.exe, $(OBJDIR)/scripts/mkdocindex.o, LIBFLUXENGINE)
+
+
+docs: $(patsubst %, doc/disk-%.md, $(FORMATS))
+
+doc/disk-%.md: src/formats/%.textpb $(OBJDIR)/mkdoc.exe
+	@echo MKDOC $@
+	@mkdir -p $(dir $@)
+	@$(OBJDIR)/mkdoc.exe $* > $@
+
+docs: README.md
+README.md: $(OBJDIR)/mkdocindex.exe
+	@echo MKDOCINDEX $@
+	@csplit -q -f$(OBJDIR)/README. --suppress-matched README.md '/<!-- FORMATSSTART -->/' '%<!-- FORMATSEND -->%'
+	@(cat $(OBJDIR)/README.00 && $(OBJDIR)/mkdocindex.exe && cat $(OBJDIR)/README.01) > README.md
 
