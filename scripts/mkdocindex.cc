@@ -58,7 +58,7 @@ int main(int argc, const char* argv[])
         for (auto& fs : filesystems)
             ss << fs << " ";
 
-        fmt::print("| `{}` | {} | {} | {} | {} |\n",
+        fmt::print("| `[{0}](doc/disk-{0}.md)` | {1} | {2} | {3} | {4} |\n",
             name,
             config->shortname() + ": " + config->comment(),
             supportStatus(config->read_support_status()),

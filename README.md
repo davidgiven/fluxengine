@@ -107,37 +107,37 @@ choices because they can store multiple types of file system.
 <!-- This section is automatically generated. Do not edit. -->
 | Profile | Format | Read? | Write? | Filesystem? |
 |:--------|:-------|:-----:|:------:|:------------|
-| `acornadfs` | Acorn ADFS: BBC Micro, Archimedes | 🦖 |  |  |
-| `acorndfs` | Acorn DFS: Acorn Atom, BBC Micro series | 🦄 |  | ACORNDFS  |
-| `aeslanier` | AES Lanier "No Problem": 616kB 5.25" 77-track SSDD hard sectored | 🦖 |  |  |
-| `agat` | Agat: 840kB 5.25" 80-track DS | 🦖 | 🦖 |  |
-| `amiga` | Amiga: 880kB 3.5" DSDD | 🦄 | 🦄 | AMIGAFFS  |
-| `ampro` | Ampro Little Board: CP/M | 🦖 |  | CPMFS  |
-| `apple2` | Apple II: Prodos, Appledos, and CP/M | 🦄 | 🦄 | APPLEDOS CPMFS PRODOS  |
-| `atarist` | Atari ST: Almost PC compatible | 🦄 | 🦄 |  |
-| `bk` | BK: 800kB 5.25"/3.5" 80-track 10-sector DSDD | 🦖 | 🦖 |  |
-| `brother` | Brother word processors: GCR family | 🦄 | 🦄 | BROTHER120 FATFS  |
-| `commodore` | Commodore: 1541, 1581, and variations | 🦄 | 🦄 | CBMFS  |
-| `eco1` | VDS Eco1: CP/M; 1210kB 77-track mixed format DSHD | 🦖 |  | CPMFS  |
-| `epsonpf10` | Epson PF-10: CP/M; 3.5" 40-track DSDD | 🦖 |  | CPMFS  |
-| `f85` | Durango F85: 461kB 5.25" 77-track SS | 🦖 |  |  |
-| `fb100` | Brother FB-100: 100kB 3.5" 40-track SSSD | 🦖 |  |  |
-| `hplif` | Hewlett-Packard LIF: a variety of disk formats used by HP | 🦄 | 🦄 | LIF  |
-| `ibm` | IBM PC: Generic PC 3.5"/5.25" disks | 🦄 | 🦄 | FATFS  |
-| `icl30` | ICL Model 30: CP/M; 263kB 35-track DSSD | 🦖 |  | CPMFS  |
-| `mac` | Macintosh: 400kB/800kB 3.5" GCR | 🦄 | 🦄 | MACHFS  |
-| `micropolis` | Micropolis: 100tpi MetaFloppy disks | 🦄 | 🦄 |  |
-| `mx` | DVK MX: Soviet-era PDP-11 clone | 🦖 |  |  |
-| `n88basic` | N88-BASIC: PC8800/PC98 5.25"/3.5" 77-track 26-sector DSHD | 🦄 | 🦄 |  |
-| `northstar` | Northstar: 5.25" hard sectored | 🦄 | 🦄 |  |
-| `psos` | pSOS: 800kB DSDD with PHILE | 🦄 | 🦄 | PHILE  |
-| `rolandd20` | Roland D20: 3.5" electronic synthesiser disks | 🦖 |  |  |
-| `rx50` | Digital RX50: 400kB 5.25" 80-track 10-sector SSDD | 🦖 | 🦖 |  |
-| `smaky6` | Smaky 6: 308kB 5.25" 77-track 16-sector SSDD, hard sectored | 🦖 |  | SMAKY6  |
-| `tids990` | Texas Instruments DS990: 1126kB 8" DSSD | 🦖 | 🦖 |  |
-| `tiki` | Tiki 100: CP/M |  |  | CPMFS  |
-| `victor9k` | Victor 9000 / Sirius One: 1224kB 5.25" DSDD GCR | 🦖 | 🦖 |  |
-| `zilogmcz` | Zilog MCZ: 320kB 8" 77-track SSSD hard-sectored | 🦖 |  |  |
+| `[acornadfs](doc/disk-acornadfs.md)` | Acorn ADFS: BBC Micro, Archimedes | 🦖 |  |  |
+| `[acorndfs](doc/disk-acorndfs.md)` | Acorn DFS: Acorn Atom, BBC Micro series | 🦄 |  | ACORNDFS  |
+| `[aeslanier](doc/disk-aeslanier.md)` | AES Lanier "No Problem": 616kB 5.25" 77-track SSDD hard sectored | 🦖 |  |  |
+| `[agat](doc/disk-agat.md)` | Agat: 840kB 5.25" 80-track DS | 🦖 | 🦖 |  |
+| `[amiga](doc/disk-amiga.md)` | Amiga: 880kB 3.5" DSDD | 🦄 | 🦄 | AMIGAFFS  |
+| `[ampro](doc/disk-ampro.md)` | Ampro Little Board: CP/M | 🦖 |  | CPMFS  |
+| `[apple2](doc/disk-apple2.md)` | Apple II: Prodos, Appledos, and CP/M | 🦄 | 🦄 | APPLEDOS CPMFS PRODOS  |
+| `[atarist](doc/disk-atarist.md)` | Atari ST: Almost PC compatible | 🦄 | 🦄 |  |
+| `[bk](doc/disk-bk.md)` | BK: 800kB 5.25"/3.5" 80-track 10-sector DSDD | 🦖 | 🦖 |  |
+| `[brother](doc/disk-brother.md)` | Brother word processors: GCR family | 🦄 | 🦄 | BROTHER120 FATFS  |
+| `[commodore](doc/disk-commodore.md)` | Commodore: 1541, 1581, and variations | 🦄 | 🦄 | CBMFS  |
+| `[eco1](doc/disk-eco1.md)` | VDS Eco1: CP/M; 1210kB 77-track mixed format DSHD | 🦖 |  | CPMFS  |
+| `[epsonpf10](doc/disk-epsonpf10.md)` | Epson PF-10: CP/M; 3.5" 40-track DSDD | 🦖 |  | CPMFS  |
+| `[f85](doc/disk-f85.md)` | Durango F85: 461kB 5.25" 77-track SS | 🦖 |  |  |
+| `[fb100](doc/disk-fb100.md)` | Brother FB-100: 100kB 3.5" 40-track SSSD | 🦖 |  |  |
+| `[hplif](doc/disk-hplif.md)` | Hewlett-Packard LIF: a variety of disk formats used by HP | 🦄 | 🦄 | LIF  |
+| `[ibm](doc/disk-ibm.md)` | IBM PC: Generic PC 3.5"/5.25" disks | 🦄 | 🦄 | FATFS  |
+| `[icl30](doc/disk-icl30.md)` | ICL Model 30: CP/M; 263kB 35-track DSSD | 🦖 |  | CPMFS  |
+| `[mac](doc/disk-mac.md)` | Macintosh: 400kB/800kB 3.5" GCR | 🦄 | 🦄 | MACHFS  |
+| `[micropolis](doc/disk-micropolis.md)` | Micropolis: 100tpi MetaFloppy disks | 🦄 | 🦄 |  |
+| `[mx](doc/disk-mx.md)` | DVK MX: Soviet-era PDP-11 clone | 🦖 |  |  |
+| `[n88basic](doc/disk-n88basic.md)` | N88-BASIC: PC8800/PC98 5.25"/3.5" 77-track 26-sector DSHD | 🦄 | 🦄 |  |
+| `[northstar](doc/disk-northstar.md)` | Northstar: 5.25" hard sectored | 🦄 | 🦄 |  |
+| `[psos](doc/disk-psos.md)` | pSOS: 800kB DSDD with PHILE | 🦄 | 🦄 | PHILE  |
+| `[rolandd20](doc/disk-rolandd20.md)` | Roland D20: 3.5" electronic synthesiser disks | 🦖 |  |  |
+| `[rx50](doc/disk-rx50.md)` | Digital RX50: 400kB 5.25" 80-track 10-sector SSDD | 🦖 | 🦖 |  |
+| `[smaky6](doc/disk-smaky6.md)` | Smaky 6: 308kB 5.25" 77-track 16-sector SSDD, hard sectored | 🦖 |  | SMAKY6  |
+| `[tids990](doc/disk-tids990.md)` | Texas Instruments DS990: 1126kB 8" DSSD | 🦖 | 🦖 |  |
+| `[tiki](doc/disk-tiki.md)` | Tiki 100: CP/M |  |  | CPMFS  |
+| `[victor9k](doc/disk-victor9k.md)` | Victor 9000 / Sirius One: 1224kB 5.25" DSDD GCR | 🦖 | 🦖 |  |
+| `[zilogmcz](doc/disk-zilogmcz.md)` | Zilog MCZ: 320kB 8" 77-track SSSD hard-sectored | 🦖 |  |  |
 {: .datatable }
 <!-- FORMATSEND -->
 
