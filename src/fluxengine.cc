@@ -36,6 +36,7 @@ struct Command
 static command_cb mainAnalyse;
 static command_cb mainTest;
 
+// clang-format off
 static std::vector<Command> commands =
 {
     { "inspect",           mainInspect,           "Low-level analysis and inspection of a disk." },
@@ -70,10 +71,13 @@ static std::vector<Command> testables =
     { "bandwidth",     mainTestBandwidth, "Measures your USB bandwidth.", },
     { "voltages",      mainTestVoltages,  "Measures the FDD bus voltages.", },
 };
+// clang-format on
 
-static void extendedHelp(std::vector<Command>& subcommands, const std::string& command)
+static void extendedHelp(
+    std::vector<Command>& subcommands, const std::string& command)
 {
-    std::cout << "fluxengine: syntax: fluxengine " << command << " <format> [<flags>...]\n"
+    std::cout << "fluxengine: syntax: fluxengine " << command
+              << " <format> [<flags>...]\n"
                  "These subcommands are supported:\n";
 
     for (Command& c : subcommands)
@@ -82,8 +86,10 @@ static void extendedHelp(std::vector<Command>& subcommands, const std::string& c
     exit(0);
 }
 
-static int mainExtended(std::vector<Command>& subcommands, const std::string& command,
-         int argc, const char* argv[])
+static int mainExtended(std::vector<Command>& subcommands,
+    const std::string& command,
+    int argc,
+    const char* argv[])
 {
     if (argc == 1)
         extendedHelp(subcommands, command);
@@ -95,7 +101,7 @@ static int mainExtended(std::vector<Command>& subcommands, const std::string& co
     for (Command& c : subcommands)
     {
         if (format == c.name)
-            return c.main(argc-1, argv+1);
+            return c.main(argc - 1, argv + 1);
     }
 
     std::cerr << "fluxengine: unrecognised format (try --help)\n";
@@ -103,10 +109,14 @@ static int mainExtended(std::vector<Command>& subcommands, const std::string& co
 }
 
 static int mainAnalyse(int argc, const char* argv[])
-{ return mainExtended(analysables, "analyse", argc, argv); }
+{
+    return mainExtended(analysables, "analyse", argc, argv);
+}
 
 static int mainTest(int argc, const char* argv[])
-{ return mainExtended(testables, "test", argc, argv); }
+{
+    return mainExtended(testables, "test", argc, argv);
+}
 
 static void globalHelp()
 {
@@ -119,34 +129,32 @@ static void globalHelp()
     exit(0);
 }
 
-void showProfiles(const std::string& command, const std::map<std::string, std::string>& profiles)
+void showProfiles(const std::string& command,
+    const std::map<std::string, const ConfigProto*>& profiles)
 {
-	std::cout << "syntax: fluxengine " << command << " <profile> [<extensions...>] [<options>...]\n"
-				 "Use --help for option help.\n"
-	             "Available profiles include:\n";
+    std::cout << "syntax: fluxengine " << command
+              << " <profile> [<extensions...>] [<options>...]\n"
+                 "Use --help for option help.\n"
+                 "Available profiles include:\n";
 
-	for (const auto& it : profiles)
-	{
-		ConfigProto config;
-		if (!config.ParseFromString(it.second))
-			Error() << "couldn't load config proto";
-		if (!config.is_extension())
-			std::cout << fmt::format("  {}: {}\n", it.first, config.comment());
-	}
+    for (const auto& it : profiles)
+    {
+        const auto& config = *it.second;
+        if (!config.is_extension())
+            std::cout << fmt::format("  {}: {}\n", it.first, config.comment());
+    }
 
-	std::cout << "Available profile options include:\n";
+    std::cout << "Available profile options include:\n";
 
-	for (const auto& it : profiles)
-	{
-		ConfigProto config;
-		if (!config.ParseFromString(it.second))
-			Error() << "couldn't load config proto";
-		if (config.is_extension() && (it.first[0] != '_'))
-			std::cout << fmt::format("  {}: {}\n", it.first, config.comment());
-	}
+    for (const auto& it : profiles)
+    {
+        const auto& config = *it.second;
+        if (config.is_extension() && (it.first[0] != '_'))
+            std::cout << fmt::format("  {}: {}\n", it.first, config.comment());
+    }
 
-	std::cout << "Profiles and extensions may also be textpb files .\n";
-	exit(1);
+    std::cout << "Profiles and extensions may also be textpb files .\n";
+    exit(1);
 }
 
 int main(int argc, const char* argv[])
@@ -161,17 +169,17 @@ int main(int argc, const char* argv[])
     for (Command& c : commands)
     {
         if (command == c.name)
-		{
-			try
-			{
-				return c.main(argc-1, argv+1);
-			}
-			catch (const ErrorException& e)
-			{
-				e.print();
-				exit(1);
-			}
-		}
+        {
+            try
+            {
+                return c.main(argc - 1, argv + 1);
+            }
+            catch (const ErrorException& e)
+            {
+                e.print();
+                exit(1);
+            }
+        }
     }
 
     std::cerr << "fluxengine: unrecognised command (try --help)\n";

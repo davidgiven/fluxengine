@@ -279,7 +279,7 @@ void FlagGroup::parseFlags(int argc,
 
 void FlagGroup::parseFlagsWithConfigFiles(int argc,
     const char* argv[],
-    const std::map<std::string, std::string>& configFiles)
+    const std::map<std::string, const ConfigProto*>& configFiles)
 {
     parseFlags(argc,
         argv,
@@ -291,16 +291,11 @@ void FlagGroup::parseFlagsWithConfigFiles(int argc,
 }
 
 ConfigProto FlagGroup::parseSingleConfigFile(const std::string& filename,
-    const std::map<std::string, std::string>& configFiles)
+    const std::map<std::string, const ConfigProto*>& configFiles)
 {
     const auto& it = configFiles.find(filename);
     if (it != configFiles.end())
-    {
-        ConfigProto config;
-        if (!config.ParseFromString(it->second))
-            Error() << "couldn't load built-in config proto";
-        return config;
-    }
+		return *it->second;
     else
     {
         std::ifstream f(filename, std::ios::out);
@@ -319,7 +314,7 @@ ConfigProto FlagGroup::parseSingleConfigFile(const std::string& filename,
 }
 
 void FlagGroup::parseConfigFile(const std::string& filename,
-    const std::map<std::string, std::string>& configFiles)
+    const std::map<std::string, const ConfigProto*>& configFiles)
 {
     auto newConfig = parseSingleConfigFile(filename, configFiles);
 

@@ -18,6 +18,8 @@ extern std::set<unsigned> iterate(unsigned start, unsigned count);
 extern std::map<std::string, const google::protobuf::FieldDescriptor*>
 		findAllProtoFields(google::protobuf::Message* message);
 
+extern ConfigProto parseConfigBytes(const std::string_view& bytes);
+
 extern ConfigProto config;
 
 #endif

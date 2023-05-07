@@ -67,6 +67,7 @@ $(OBJDIR)/scripts/mkdoc.o: scripts/mkdoc.cc
 
 $(call use-library, $(OBJDIR)/mkdoc.exe, $(OBJDIR)/scripts/mkdoc.o, PROTO)
 $(call use-library, $(OBJDIR)/mkdoc.exe, $(OBJDIR)/scripts/mkdoc.o, LIBFORMATS)
+$(call use-library, $(OBJDIR)/mkdoc.exe, $(OBJDIR)/scripts/mkdoc.o, LIBFLUXENGINE)
 
 
 docs: $(patsubst %, doc/disk-%.md, $(FORMATS))

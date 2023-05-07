@@ -3,15 +3,11 @@
 #include "lib/flags.h"
 #include <fmt/format.h>
 
-extern const std::map<std::string, std::string> formats;
+extern const std::map<std::string, const ConfigProto*> formats;
 
-static ConfigProto findConfig(std::string name)
+static const ConfigProto& findConfig(std::string name)
 {
-    const auto data = formats.at(name);
-    ConfigProto config;
-    if (!config.ParseFromString(data))
-        Error() << "bad config name: " + name;
-    return config;
+    return *formats.at(name);
 }
 
 int main(int argc, const char* argv[])

@@ -81,10 +81,10 @@ static void test_config(void)
 
 static void test_load(void)
 {
-	extern std::string testproto_pb();
+	extern std::string_view testproto_pb_data;
 
 	TestProto proto;
-	bool r = proto.ParseFromString(testproto_pb());
+	bool r = proto.ParseFromArray(testproto_pb_data.begin(), testproto_pb_data.size());
 
 	std::string s;
 	google::protobuf::TextFormat::PrintToString(proto, &s);

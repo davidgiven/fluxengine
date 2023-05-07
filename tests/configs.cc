@@ -4,7 +4,7 @@
 #include "lib/bytes.h"
 #include <fmt/format.h>
 
-extern const std::map<std::string, std::string> formats;
+extern const std::map<std::string, const ConfigProto*> formats;
 
 bool failed = false;
 
@@ -41,13 +41,12 @@ struct fmt::formatter<std::vector<std::string>>
     }
 };
 
-static ConfigProto findConfig(std::string name)
+static const ConfigProto& findConfig(std::string name)
 {
-    const auto data = formats.at(name);
-    ConfigProto config;
-    if (!config.ParseFromString(data))
+    const auto it = formats.find(name);
+    if (it == formats.end())
         error("{}: couldn't load", name);
-    return config;
+    return *it->second;
 }
 
 static std::vector<std::vector<std::string>> generateCombinations(

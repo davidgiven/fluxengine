@@ -20,7 +20,7 @@
 #include ".obj/extras/fluxfile.h"
 #include ".obj/extras/imagefile.h"
 
-extern const std::map<std::string, std::string> formats;
+extern const std::map<std::string, const ConfigProto*> formats;
 
 #define CONFIG_SELECTEDSOURCE "SelectedSource"
 #define CONFIG_DEVICE "Device"
@@ -76,8 +76,7 @@ public:
         for (const auto& it : formats)
         {
             auto config = std::make_unique<ConfigProto>();
-            if (!config->ParseFromString(it.second))
-                continue;
+			*config = *it.second;
             if (config->is_extension())
                 continue;
 

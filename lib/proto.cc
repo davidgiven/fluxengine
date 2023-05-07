@@ -246,3 +246,12 @@ findAllProtoFields(google::protobuf::Message* message)
     recurse(descriptor, "");
     return fields;
 }
+
+ConfigProto parseConfigBytes(const std::string_view& data)
+{
+	ConfigProto proto;
+	if (!proto.ParseFromArray(data.begin(), data.size()))
+		Error() << "invalid internal config data";
+	return proto;
+}
+

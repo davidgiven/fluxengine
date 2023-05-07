@@ -48,7 +48,7 @@ AR ?= $(CCPREFIX)ar
 PKG_CONFIG ?= pkg-config
 WX_CONFIG ?= wx-config
 PROTOC ?= protoc
-CFLAGS ?= -g -Os
+CFLAGS ?= -g -O3
 CXXFLAGS += -std=c++17
 LDFLAGS ?=
 PLATFORM ?= UNIX
