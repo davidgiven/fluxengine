@@ -67,6 +67,5 @@ int main(int argc, const char* argv[])
     }
 
     std::cout << "{: .datatable }\n";
-    fmt::print("<!-- FORMATSEND -->\n");
     return 0;
 }

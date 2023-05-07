@@ -97,6 +97,6 @@ doc/disk-%.md: src/formats/%.textpb $(OBJDIR)/mkdoc.exe
 docs: README.md
 README.md: $(OBJDIR)/mkdocindex.exe
 	@echo MKDOCINDEX $@
-	@csplit -q -f$(OBJDIR)/README. --suppress-matched README.md '/<!-- FORMATSSTART -->/' '%<!-- FORMATSEND -->%'
+	@csplit -s -f$(OBJDIR)/README. README.md '/<!-- FORMATSSTART -->/' '%<!-- FORMATSEND -->%'
 	@(cat $(OBJDIR)/README.00 && $(OBJDIR)/mkdocindex.exe && cat $(OBJDIR)/README.01) > README.md
 
