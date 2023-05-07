@@ -30,8 +30,7 @@ touch](https://github.com/davidgiven/fluxengine/issues/new).
 
 (no options)
 
-References
------------------
+## References
 
 There's amazingly little information about these things.
 

@@ -22,8 +22,7 @@ equivalent to .img images.
 
 documentation:
 <<<
-References
-----------
+## References
 
   - [MICRO-DISK SYSTEM MDS-A-D DOUBLE DENSITY Manual][northstar_mds].
     Page 33 documents sector format for single- and double-density.

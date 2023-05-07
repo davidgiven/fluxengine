@@ -45,8 +45,7 @@ need to apply extra options to change the format if desired.
       - `630`: 630kB 5.25" DSDD hard-sectored; Micropolis MetaFloppy Mod II
   - `vgi`: Read/write VGI format images with 275 bytes per sector
 
-References
-----------
+## References
 
   - [Micropolis 1040/1050 S-100 Floppy Disk Subsystems User's Manual][micropolis1040/1050].
     Section 6, pages 261-266. Documents pre-ECC sector format. Note that the

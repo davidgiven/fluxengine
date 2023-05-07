@@ -20,8 +20,7 @@ FluxEngine will read and write these (but only the DSDD MFM variant).
 
 (no options)
 
-References
-----------
+## References
 
   - [The FD1000 Depot Maintenance
         Manual](http://www.bitsavers.org/pdf/ti/990/disk/2261885-9701_FD1000depotVo1_Jan81.pdf)

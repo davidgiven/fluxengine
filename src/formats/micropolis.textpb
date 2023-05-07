@@ -40,8 +40,7 @@ need to apply extra options to change the format if desired.
 
 documentation:
 <<<
-References
-----------
+## References
 
   - [Micropolis 1040/1050 S-100 Floppy Disk Subsystems User's Manual][micropolis1040/1050].
     Section 6, pages 261-266. Documents pre-ECC sector format. Note that the

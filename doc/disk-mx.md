@@ -42,8 +42,7 @@ Words are all stored little-endian.
 
 (no options)
 
-References
-----------
+## References
 
   - [The Soviet Digital Electronics
     Museum](http://www.leningrad.su/museum/main.php) (source of the image

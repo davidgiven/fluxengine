@@ -35,8 +35,7 @@ kayinfo.lbr
 
 (no options)
 
-References
-----------
+## References
 
   - [The Ampro Little Board](http://oldcomputers.net/ampro-little-board.html)
 

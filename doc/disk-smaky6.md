@@ -20,8 +20,7 @@ this is completely correct, so don't trust it!
 
 (no options)
 
-References
-----------
+## References
 
   - [Smaky Info, 1978-2002 (in French)](https://www.smaky.ch/theme.php?id=sminfo)
 

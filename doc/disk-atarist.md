@@ -15,8 +15,7 @@ Be aware that many PC drives (including mine) won't do the 82 track formats.
 
 (no options)
 
-References
-----------
+## References
 
   - [Atari ST Floppy Drive Hardware
         Information](https://info-coach.fr/atari/hardware/FD-Hard.php) by Jean

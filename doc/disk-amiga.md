@@ -18,8 +18,7 @@ distinctly subpar and not particularly good at detecting errors.
 
 (no options)
 
-References
-----------
+## References
 
   - [The Amiga Floppy Boot Process and Physical
     Layout](https://wiki.amigaos.net/wiki/Amiga_Floppy_Boot_Process_and_Physical_Layout)

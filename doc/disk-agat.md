@@ -14,8 +14,7 @@ profile.
 
 (no options)
 
-References
-----------
+## References
 
   - [Magazine article on the
         Agat](https://sudonull.com/post/54185-Is-AGAT-a-bad-copy-of-Apple)

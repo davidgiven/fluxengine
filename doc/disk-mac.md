@@ -41,8 +41,7 @@ standard for disk images is to omit it. If you want them, specify that you want
       - `800`: 800kB 80-track DSDD
   - `metadata`: read/write 524 byte sectors
 
-References
-----------
+## References
 
   - [MAME's ap_dsk35.cpp file](https://github.com/mamedev/mame/blob/4263a71e64377db11392c458b580c5ae83556bc7/src/lib/formats/ap_dsk35.cpp),
     without which I'd never have managed to do this

@@ -28,8 +28,7 @@ touch](https://github.com/davidgiven/fluxengine/issues/new)...
 
 (no options)
 
-References
-----------
+## References
 
   * [About the Zilog MCZ](http://www.retrotechnology.com/restore/zilog.html),
     containing lots of useful links

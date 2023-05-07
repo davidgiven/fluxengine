@@ -52,8 +52,7 @@ volume.
       - `cpm`: use CP/M soft sector skew and filesystem
   - `side1`: for AppleDOS file system access, read the volume on side 1 of a disk
 
-References
-----------
+## References
 
   - [Beneath Apple DOS](https://fabiensanglard.net/fd_proxy/prince_of_persia/Beneath%20Apple%20DOS.pdf)
 
