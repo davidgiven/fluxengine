@@ -47,7 +47,6 @@ $(call use-library, $(OBJDIR)/tests/agg.exe, $(OBJDIR)/tests/agg.o, AGG)
 $(call use-library, $(OBJDIR)/tests/agg.exe, $(OBJDIR)/tests/agg.o, STB)
 $(call use-library, $(OBJDIR)/tests/configs.exe, $(OBJDIR)/tests/configs.o, LIBFORMATS)
 
-
 $(OBJDIR)/tests/proto.exe: $(OBJDIR)/tests/testproto.o
 $(OBJDIR)/tests/testproto.cc: $(OBJDIR)/protoencode_TestProto.exe tests/testproto.textpb
 	@mkdir -p $(dir $@)

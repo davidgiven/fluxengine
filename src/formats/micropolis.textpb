@@ -2,6 +2,7 @@ comment: ' Micropolis format family'
 
 drive {
 	hard_sector_count: 16
+	tpi: 100
 }
 
 image_reader {
