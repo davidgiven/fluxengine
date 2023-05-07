@@ -2,7 +2,7 @@
 $(OBJDIR)/tests/%.log: $(OBJDIR)/tests/%.exe
 	@mkdir -p $(dir $@)
 	@echo TEST $*
-	@$<
+	@$< && touch $@
 
 declare-test = $(eval $(declare-test-impl))
 define declare-test-impl
@@ -27,6 +27,7 @@ $(call declare-test,applesingle)
 $(call declare-test,bitaccumulator)
 $(call declare-test,bytes)
 $(call declare-test,compression)
+$(call declare-test,configs)
 $(call declare-test,cpmfs)
 $(call declare-test,csvreader)
 $(call declare-test,flags)
@@ -44,6 +45,7 @@ $(call declare-test,vfs)
 
 $(call use-library, $(OBJDIR)/tests/agg.exe, $(OBJDIR)/tests/agg.o, AGG)
 $(call use-library, $(OBJDIR)/tests/agg.exe, $(OBJDIR)/tests/agg.o, STB)
+$(call use-library, $(OBJDIR)/tests/configs.exe, $(OBJDIR)/tests/configs.o, LIBFORMATS)
 
 $(OBJDIR)/tests/proto.exe: $(OBJDIR)/tests/testproto.o
 $(OBJDIR)/tests/testproto.cc: $(OBJDIR)/protoencode_TestProto.exe tests/testproto.textpb

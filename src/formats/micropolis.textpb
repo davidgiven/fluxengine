@@ -2,6 +2,7 @@ comment: ' Micropolis format family'
 
 drive {
 	hard_sector_count: 16
+	tpi: 100
 }
 
 image_reader {
@@ -71,6 +72,8 @@ option_group {
 				tracks: 35
 				sides: 1
 			}
+
+			tpi: 50
 		}
 	}
 
@@ -83,6 +86,8 @@ option_group {
 				tracks: 35
 				sides: 2
 			}
+
+			tpi: 50
 		}
 	}
 
@@ -95,6 +100,8 @@ option_group {
 				tracks: 77
 				sides: 1
 			}
+
+			tpi: 100
 		}
 	}
 
@@ -107,6 +114,8 @@ option_group {
 				tracks: 77
 				sides: 2
 			}
+
+			tpi: 100
 		}
 	}
 }

@@ -48,7 +48,7 @@ AR ?= $(CCPREFIX)ar
 PKG_CONFIG ?= pkg-config
 WX_CONFIG ?= wx-config
 PROTOC ?= protoc
-CFLAGS ?= -g -O3
+CFLAGS ?= -g -Os
 CXXFLAGS += -std=c++17
 LDFLAGS ?=
 PLATFORM ?= UNIX
@@ -76,6 +76,9 @@ LDFLAGS += \
 define nl
 
 endef
+
+empty :=
+space := $(empty) $(empty)
 
 use-library = $(eval $(use-library-impl))
 define use-library-impl
@@ -212,6 +215,38 @@ $(call do-encodedecodetest,rx50)
 $(call do-encodedecodetest,tids990)
 $(call do-encodedecodetest,victor9k,,--612)
 $(call do-encodedecodetest,victor9k,,--1224)
+
+do-corpustest = $(eval $(do-corpustest-impl))
+define do-corpustest-impl
+
+tests: $(OBJDIR)/corpustest/$2
+$(OBJDIR)/corpustest/$2: $(FLUXENGINE_BIN) \
+		../fluxengine-testdata/data/$1 ../fluxengine-testdata/data/$2
+	@mkdir -p $(OBJDIR)/corpustest
+	@echo CORPUSTEST $1 $2 $3
+	@$(FLUXENGINE_BIN) read $3 -s ../fluxengine-testdata/data/$1 -o $$@ > $$@.log
+	@cmp $$@ ../fluxengine-testdata/data/$2
+
+endef
+
+ifneq ($(wildcard ../fluxengine-testdata/data),)
+
+$(call do-corpustest,amiga.flux,amiga.adf,amiga)
+$(call do-corpustest,atarist360.flux,atarist360.st,atarist --360)
+$(call do-corpustest,atarist720.flux,atarist720.st,atarist --720)
+$(call do-corpustest,brother120.flux,brother120.img,brother --120)
+$(call do-corpustest,cmd-fd2000.flux,cmd-fd2000.img,cmd_fd2000)
+$(call do-corpustest,ibm1232.flux,ibm1232.img,ibm --1232)
+$(call do-corpustest,ibm1440.flux,ibm1440.img,ibm --1440)
+$(call do-corpustest,mac800.flux,mac800.dsk,mac --800)
+$(call do-corpustest,micropolis315.flux,micropolis315.img,micropolis --315)
+$(call do-corpustest,northstar87-synthetic.flux,northstar87-synthetic.nsi,northstar --87 --drive.tpi=48)
+$(call do-corpustest,northstar175-synthetic.flux,northstar175-synthetic.nsi,northstar --175 --drive.tpi=48)
+$(call do-corpustest,northstar350-synthetic.flux,northstar350-synthetic.nsi,northstar --350 --drive.tpi=48)
+$(call do-corpustest,victor9k_ss.flux,victor9k_ss.img,victor9k --612)
+$(call do-corpustest,victor9k_ds.flux,victor9k_ds.img,victor9k --1224)
+
+endif
 
 $(OBJDIR)/%.a:
 	@mkdir -p $(dir $@)

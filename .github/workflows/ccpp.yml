@@ -6,26 +6,40 @@ jobs:
   build-linux:
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
+      with:
+        repository: 'davidgiven/fluxengine'
+        path: 'fluxengine'
+    - uses: actions/checkout@v2
+      with:
+        repository: 'davidgiven/fluxengine-testdata'
+        path: 'fluxengine-testdata'
     - name: apt
       run: sudo apt update && sudo apt install libudev-dev libsqlite3-dev protobuf-compiler libwxgtk3.0-gtk3-dev libfmt-dev
     - name: make
-      run: CXXFLAGS="-Wp,-D_GLIBCXX_ASSERTIONS" make -j2
+      run: CXXFLAGS="-Wp,-D_GLIBCXX_ASSERTIONS" make -j2 -C fluxengine
 
   build-macos-current:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        repository: 'davidgiven/fluxengine'
+        path: 'fluxengine'
+    - uses: actions/checkout@v2
+      with:
+        repository: 'davidgiven/fluxengine-testdata'
+        path: 'fluxengine-testdata'
     - name: brew
       run: brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg
     - name: make
-      run: gmake -j2
+      run: gmake -j2 -C fluxengine
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v2
       with:
         name: ${{ github.event.repository.name }}.${{ github.sha }}
-        path: FluxEngine.pkg
+        path: fluxengine.FluxEngine.pkg
 
   build-windows:
     runs-on: windows-latest
@@ -51,22 +65,31 @@ jobs:
           mingw-w64-i686-nsis
           zip
           vim
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
+      with:
+        repository: 'davidgiven/fluxengine'
+        path: 'fluxengine'
+    - uses: actions/checkout@v2
+      with:
+        repository: 'davidgiven/fluxengine-testdata'
+        path: 'fluxengine-testdata'
     - name: build
-      run: make -j2
+      run: make -j2 -C fluxengine
 
     - name: nsis
       run: |
+        cd fluxengine
         strip fluxengine.exe -o fluxengine-stripped.exe
         strip fluxengine-gui.exe -o fluxengine-gui-stripped.exe
         makensis -v2 -nocd -dOUTFILE=fluxengine-installer.exe extras/windows-installer.nsi
 
     - name: zip
       run: |
+        cd fluxengine
         zip -9 fluxengine-windows.zip fluxengine.exe fluxengine-gui.exe upgrade-flux-file.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex fluxengine-installer.exe
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v2
       with:
         name: ${{ github.event.repository.name }}.${{ github.sha }}
-        path: fluxengine-windows.zip
+        path: fluxengine/fluxengine-windows.zip

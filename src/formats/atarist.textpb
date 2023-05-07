@@ -21,6 +21,8 @@ decoder {
 	}
 }
 
+tpi: 96
+
 option_group {
     comment: "Format variant"
 
