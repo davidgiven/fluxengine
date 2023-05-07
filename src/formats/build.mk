@@ -57,3 +57,24 @@ LIBFORMATS_LIB = $(OBJDIR)/libformats.a
 LIBFORMATS_LDFLAGS = $(LIBFORMATS_LIB)
 $(LIBFORMATS_LIB): $(LIBFORMATS_OBJS)
 
+
+$(OBJDIR)/mkdoc.exe: $(OBJDIR)/scripts/mkdoc.o
+
+$(OBJDIR)/scripts/mkdoc.o: scripts/mkdoc.cc
+	@mkdir -p $(dir $@)
+	@echo CXX $< $*
+	@$(CXX) $(CFLAGS) -DPROTO=$* $(CXXFLAGS) -MMD -MP -MF $(@:.o=.d) -c -o $@ $<
+
+$(call use-library, $(OBJDIR)/mkdoc.exe, $(OBJDIR)/scripts/mkdoc.o, PROTO)
+$(call use-library, $(OBJDIR)/mkdoc.exe, $(OBJDIR)/scripts/mkdoc.o, LIBFORMATS)
+
+
+docs: $(patsubst %, doc/disk-%.md, $(FORMATS))
+
+doc/disk-%.md: src/formats/%.textpb $(OBJDIR)/mkdoc.exe
+	@echo MKDOC $@
+	@mkdir -p $(dir $@)
+	@$(OBJDIR)/mkdoc.exe $* > $@
+
+
+

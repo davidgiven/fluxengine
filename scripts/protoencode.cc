@@ -98,7 +98,7 @@ int main(int argc, const char* argv[])
 					if (!u)
 						break;
 
-					ss << fmt::format("\\u000{:02x}", u);
+					ss << fmt::format("\\u{:04x}", u);
 				}
 				ss << "\\n\"\n";
 			}

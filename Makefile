@@ -98,7 +98,7 @@ $(2): private CFLAGS += $(shell $(PKG_CONFIG) --cflags $(3))
 endef
 
 .PHONY: all binaries tests clean install install-bin
-all: binaries tests
+all: binaries tests docs
 
 PROTOS = \
 	arch/aeslanier/aeslanier.proto \
