@@ -1,4 +1,5 @@
-comment: 'Commodore 8-bit family'
+shortname: 'Commodore'
+comment: '1541, 1581, and variations'
 
 documentation:
 <<<

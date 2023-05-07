@@ -1,4 +1,5 @@
-comment: 'Apple II family'
+shortname: 'Apple II'
+comment: 'Prodos, Appledos, and CP/M'
 
 documentation:
 <<<

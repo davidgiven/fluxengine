@@ -1,4 +1,5 @@
-comment: 'Generic PC 3.5"/5.25" family'
+shortname: 'ibm'
+comment: 'Generic PC 3.5"/5.25" disks'
 
 documentation:
 <<<

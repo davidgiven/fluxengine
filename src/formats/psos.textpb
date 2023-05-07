@@ -1,4 +1,5 @@
-comment: 'pSOS generic 800kB DSDD with PHILE'
+shortname: 'pSOS'
+comment: '800kB DSDD with PHILE'
 
 documentation:
 <<<

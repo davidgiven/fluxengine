@@ -1,4 +1,5 @@
-comment: 'Atari ST family'
+shortname: 'Atari ST'
+comment: 'Almost PC compatible'
 
 documentation:
 <<<

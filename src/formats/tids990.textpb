@@ -1,4 +1,5 @@
-comment: 'Texas Instruments DS990 1126kB 8" DSSD'
+shortname: 'Texas Instruments DS990'
+comment: '1126kB 8" DSSD'
 
 documentation:
 <<<

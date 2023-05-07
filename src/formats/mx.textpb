@@ -1,4 +1,5 @@
-comment: 'DVK MX family'
+shortname: 'DVK MX'
+comment: 'Soviet-era PDP-11 clone'
 
 documentation:
 <<<

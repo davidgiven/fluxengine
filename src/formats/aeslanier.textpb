@@ -1,4 +1,5 @@
-comment: 'AES Lanier "No Problem" 616kB 5.25" 77-track SSDD hard sectored'
+shortname: 'AES Lanier "No Problem"'
+comment: '616kB 5.25" 77-track SSDD hard sectored'
 
 documentation:
 <<<

@@ -1,4 +1,5 @@
-comment: 'Epson PF-10 40-track DS DD'
+shortname: 'Epson PF-10'
+comment: 'CP/M; 3.5" 40-track DSDD'
 
 documentation:
 <<<

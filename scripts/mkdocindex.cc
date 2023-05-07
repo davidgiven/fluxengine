@@ -46,7 +46,7 @@ int main(int argc, const char* argv[])
 
         fmt::print("| `{}` | {} | {} | {} | {} |\n",
             name,
-            config->comment(),
+            config->shortname() + ": " + config->comment(),
             config->has_decoder() ? "YES" : "",
             config->has_encoder() ? "YES" : "",
             ss.str());

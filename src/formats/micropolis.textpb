@@ -1,4 +1,5 @@
-comment: ' Micropolis format family'
+shortname: 'Micropolis'
+comment: '100tpi MetaFloppy disks'
 
 documentation:
 <<<

@@ -1,4 +1,5 @@
-comment: 'Brother FB-100 100kB 3.5" 40-track SS'
+shortname: 'Brother FB-100'
+comment: '100kB 3.5" 40-track SSSD'
 
 documentation:
 <<<

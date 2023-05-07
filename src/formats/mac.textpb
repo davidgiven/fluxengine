@@ -1,4 +1,5 @@
-comment: 'Macintosh GCR family'
+shortname: 'Macintosh'
+comment: '400kB/800kB 3.5" GCR'
 
 documentation:
 <<<

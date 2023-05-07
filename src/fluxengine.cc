@@ -141,7 +141,7 @@ void showProfiles(const std::string& command,
     {
         const auto& config = *it.second;
         if (!config.is_extension())
-            std::cout << fmt::format("  {}: {}\n", it.first, config.comment());
+            std::cout << fmt::format("  {}: {}\n", it.first, config.shortname());
     }
 
     std::cout << "Available profile options include:\n";

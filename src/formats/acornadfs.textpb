@@ -1,4 +1,5 @@
-comment: 'Acorn ADFS family'
+shortname: "Acorn ADFS"
+comment: 'BBC Micro, Archimedes'
 
 documentation:
 <<<

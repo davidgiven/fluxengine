@@ -101,37 +101,37 @@ who've had it work).
 <!-- This section is automatically generated. Do not edit. -->
 | Profile | Format | Read? | Write? | Filesystem? |
 |:--------|:-------|:-----:|:------:|:------------|
-| `acornadfs` | Acorn ADFS family | YES |  |  |
-| `acorndfs` | Acorn DFS fmaily | YES | YES | ACORNDFS  |
-| `aeslanier` | AES Lanier "No Problem" 616kB 5.25" 77-track SSDD hard sectored | YES |  |  |
-| `agat` | Agat 840kB 5.25" 80-track DS | YES | YES |  |
-| `amiga` | Amiga 880kB 3.5" DSDD | YES | YES | AMIGAFFS  |
-| `ampro` | Ampro Little Board family | YES |  | CPMFS  |
-| `apple2` | Apple II family | YES | YES | APPLEDOS CPMFS PRODOS  |
-| `atarist` | Atari ST family | YES | YES |  |
-| `bk` | BK 800kB 5.25"/3.5" 80-track 10-sector DSDD | YES | YES |  |
-| `brother` | Brother GCR family | YES | YES | BROTHER120 FATFS  |
-| `commodore` | Commodore 8-bit family |  |  | CBMFS  |
-| `eco1` | VDS Eco1 1210kB 77-track mixed format DSHD | YES |  | CPMFS  |
-| `epsonpf10` | Epson PF-10 40-track DS DD | YES |  | CPMFS  |
-| `f85` | Durango F85 461kB 5.25" 77-track SS | YES |  |  |
-| `fb100` | Brother FB-100 100kB 3.5" 40-track SS | YES |  |  |
-| `hplif` | Hewlett-Packard LIF family | YES |  | LIF  |
-| `ibm` | Generic PC 3.5"/5.25" family | YES |  | FATFS  |
-| `icl30` | ICL Model 30 263kB 35-track DSSD | YES |  | CPMFS  |
-| `mac` | Macintosh GCR family | YES | YES | MACHFS  |
-| `micropolis` |  Micropolis format family | YES | YES |  |
-| `mx` | DVK MX family | YES |  |  |
-| `n88basic` | N88-BASIC 5.25"/3.5" 77-track 26-sector DSHD | YES | YES |  |
-| `northstar` | Northstar family | YES | YES |  |
-| `psos` | pSOS generic 800kB DSDD with PHILE | YES | YES | PHILE  |
-| `rolandd20` | Roland D20 | YES |  |  |
-| `rx50` | Digital RX50 400kB 5.25" 80-track 10-sector SSDD | YES | YES |  |
-| `smaky6` | Smaky 6 308kB 5.25" 77-track 16-sector SSDD, hard sectored | YES |  | SMAKY6  |
-| `tids990` | Texas Instruments DS990 1126kB 8" DSSD | YES | YES |  |
-| `tiki` | Tiki 100 family | YES |  | CPMFS  |
-| `victor9k` | Victor 9000 / Sirius One family | YES | YES |  |
-| `zilogmcz` | Zilog MCZ 320kB 8" 77-track SS hard-sectored | YES |  |  |
+| `acornadfs` | Acorn ADFS: BBC Micro, Archimedes | YES |  |  |
+| `acorndfs` | Acorn DFS: Acorn Atom, BBC Micro series | YES | YES | ACORNDFS  |
+| `aeslanier` | AES Lanier "No Problem": 616kB 5.25" 77-track SSDD hard sectored | YES |  |  |
+| `agat` | Agat: 840kB 5.25" 80-track DS | YES | YES |  |
+| `amiga` | Amiga: 880kB 3.5" DSDD | YES | YES | AMIGAFFS  |
+| `ampro` | Ampro Little Board: CP/M | YES |  | CPMFS  |
+| `apple2` | Apple II: Prodos, Appledos, and CP/M | YES | YES | APPLEDOS CPMFS PRODOS  |
+| `atarist` | Atari ST: Almost PC compatible | YES | YES |  |
+| `bk` | BK: 800kB 5.25"/3.5" 80-track 10-sector DSDD | YES | YES |  |
+| `brother` | Brother word processors: GCR family | YES | YES | BROTHER120 FATFS  |
+| `commodore` | Commodore: 1541, 1581, and variations |  |  | CBMFS  |
+| `eco1` | VDS Eco1: CP/M; 1210kB 77-track mixed format DSHD | YES |  | CPMFS  |
+| `epsonpf10` | Epson PF-10: CP/M; 3.5" 40-track DSDD | YES |  | CPMFS  |
+| `f85` | Durango F85: 461kB 5.25" 77-track SS | YES |  |  |
+| `fb100` | Brother FB-100: 100kB 3.5" 40-track SSSD | YES |  |  |
+| `hplif` | Hewlett-Packard LIF: a variety of disk formats used by HP | YES |  | LIF  |
+| `ibm` | ibm: Generic PC 3.5"/5.25" disks | YES |  | FATFS  |
+| `icl30` | ICL Model 30: CP/M; 263kB 35-track DSSD | YES |  | CPMFS  |
+| `mac` | Macintosh: 400kB/800kB 3.5" GCR | YES | YES | MACHFS  |
+| `micropolis` | Micropolis: 100tpi MetaFloppy disks | YES | YES |  |
+| `mx` | DVK MX: Soviet-era PDP-11 clone | YES |  |  |
+| `n88basic` | N88-BASIC: PC8800/PC98 5.25"/3.5" 77-track 26-sector DSHD | YES | YES |  |
+| `northstar` | Northstar: 5.25" hard sectored | YES | YES |  |
+| `psos` | pSOS: 800kB DSDD with PHILE | YES | YES | PHILE  |
+| `rolandd20` | Roland D20: 3.5" electronic synthesiser disks | YES |  |  |
+| `rx50` | Digital RX50: 400kB 5.25" 80-track 10-sector SSDD | YES | YES |  |
+| `smaky6` | Smaky 6: 308kB 5.25" 77-track 16-sector SSDD, hard sectored | YES |  | SMAKY6  |
+| `tids990` | Texas Instruments DS990: 1126kB 8" DSSD | YES | YES |  |
+| `tiki` | Tiki 100: CP/M | YES |  | CPMFS  |
+| `victor9k` | Victor 9000 / Sirius One: 1224kB 5.25" DSDD GCR | YES | YES |  |
+| `zilogmcz` | Zilog MCZ: 320kB 8" 77-track SSSD hard-sectored | YES |  |  |
 {: .datatable }
 <!-- FORMATSEND -->
 

@@ -1,4 +1,5 @@
-comment: 'BK 800kB 5.25"/3.5" 80-track 10-sector DSDD'
+shortname: 'BK'
+comment: '800kB 5.25"/3.5" 80-track 10-sector DSDD'
 
 documentation:
 <<<

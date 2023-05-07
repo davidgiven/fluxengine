@@ -12,9 +12,10 @@ import "lib/drive.proto";
 import "lib/common.proto";
 import "lib/layout.proto";
 
-// NEXT_TAG: 24
+// NEXT_TAG: 25
 message ConfigProto
 {
+	optional string shortname = 24;
     optional string comment = 8;
     optional bool is_extension = 13;
 	repeated string documentation = 23;

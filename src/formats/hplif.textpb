@@ -1,4 +1,5 @@
-comment: 'Hewlett-Packard LIF family'
+shortname: "Hewlett-Packard LIF"
+comment: 'a variety of disk formats used by HP'
 
 documentation:
 <<<

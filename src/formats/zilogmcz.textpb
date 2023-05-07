@@ -1,4 +1,5 @@
-comment: 'Zilog MCZ 320kB 8" 77-track SS hard-sectored'
+shortname: 'Zilog MCZ'
+comment: '320kB 8" 77-track SSSD hard-sectored'
 
 documentation:
 <<<

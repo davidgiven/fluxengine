@@ -1,4 +1,5 @@
-comment: 'Digital RX50 400kB 5.25" 80-track 10-sector SSDD'
+shortname: 'Digital RX50'
+comment: '400kB 5.25" 80-track 10-sector SSDD'
 
 documentation:
 <<<
