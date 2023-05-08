@@ -12,6 +12,15 @@ ConfigProto config = []()
     return config;
 }();
 
+static double toFloat(const std::string& value)
+{
+    size_t idx;
+    float f = std::stof(value, &idx);
+    if (value[idx] != '\0')
+        Error() << fmt::format("invalid number '{}'", value);
+    return f;
+}
+
 static double toDouble(const std::string& value)
 {
     size_t idx;
@@ -120,6 +129,10 @@ void setProtoFieldFromString(ProtoField& protoField, const std::string& value)
     const auto* reflection = message->GetReflection();
     switch (field->type())
     {
+        case google::protobuf::FieldDescriptor::TYPE_FLOAT:
+            reflection->SetFloat(message, field, toFloat(value));
+            break;
+
         case google::protobuf::FieldDescriptor::TYPE_DOUBLE:
             reflection->SetDouble(message, field, toDouble(value));
             break;

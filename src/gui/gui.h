@@ -3,6 +3,7 @@
 
 #include <wx/wx.h>
 
+class ConfigProto;
 class ExecEvent;
 class DiskFlux;
 class TrackFlux;
@@ -12,6 +13,8 @@ extern void postToUiThread(std::function<void()> callback);
 extern void runOnUiThread(std::function<void()> callback);
 extern void runOnWorkerThread(std::function<void()> callback);
 extern bool isWorkerThread();
+
+extern const std::map<std::string, const ConfigProto*> drivetypes;
 
 wxDECLARE_EVENT(UPDATE_STATE_EVENT, wxCommandEvent);
 

@@ -20,12 +20,10 @@
 #include ".obj/extras/fluxfile.h"
 #include ".obj/extras/imagefile.h"
 
-extern const std::map<std::string, const ConfigProto*> formats;
-
 #define CONFIG_SELECTEDSOURCE "SelectedSource"
 #define CONFIG_DEVICE "Device"
 #define CONFIG_DRIVE "Drive"
-#define CONFIG_FORTYTRACK "FortyTrack"
+#define CONFIG_DRIVETYPE "DriveType"
 #define CONFIG_HIGHDENSITY "HighDensity"
 #define CONFIG_FORMAT "Format"
 #define CONFIG_FORMATOPTIONS "FormatOptions"
@@ -76,7 +74,7 @@ public:
         for (const auto& it : formats)
         {
             auto config = std::make_unique<ConfigProto>();
-			*config = *it.second;
+            *config = *it.second;
             if (config->is_extension())
                 continue;
 
@@ -194,27 +192,6 @@ public:
                 FlagGroup::applyOption(e.second);
         }
 
-        /* Merge in any custom config. */
-
-        for (auto setting : split(_extraConfiguration, '\n'))
-        {
-            setting = trimWhitespace(setting);
-            if (setting.size() == 0)
-                continue;
-            if (setting[0] == '#')
-                continue;
-
-            auto equals = setting.find('=');
-            if (equals != std::string::npos)
-            {
-                auto key = setting.substr(0, equals);
-                auto value = setting.substr(equals + 1);
-                setProtoByString(&config, key, value);
-            }
-            else
-                FlagGroup::parseConfigFile(setting, formats);
-        }
-
         /* Locate the device, if any. */
 
         auto serial = _selectedDevice;
@@ -232,9 +209,7 @@ public:
             case SELECTEDSOURCE_REAL:
             {
                 config.mutable_drive()->set_high_density(_selectedHighDensity);
-
-                if (_selectedFortyTrack)
-                    FlagGroup::parseConfigFile("40track_drive", formats);
+                config.MergeFrom(*_selectedDriveType);
 
                 std::string filename = _selectedDrive ? "drive:1" : "drive:0";
                 FluxSink::updateConfigForFilename(
@@ -262,6 +237,27 @@ public:
                     config.mutable_image_writer(), _selectedImagefilename);
                 break;
             }
+        }
+
+        /* Merge in any custom config. */
+
+        for (auto setting : split(_extraConfiguration, '\n'))
+        {
+            setting = trimWhitespace(setting);
+            if (setting.size() == 0)
+                continue;
+            if (setting[0] == '#')
+                continue;
+
+            auto equals = setting.find('=');
+            if (equals != std::string::npos)
+            {
+                auto key = setting.substr(0, equals);
+                auto value = setting.substr(equals + 1);
+                setProtoByString(&config, key, value);
+            }
+            else
+                FlagGroup::parseConfigFile(setting, formats);
         }
     }
 
@@ -298,9 +294,13 @@ private:
         _config.Read(CONFIG_HIGHDENSITY, &s);
         _selectedHighDensity = wxAtoi(s);
 
-        s = "0";
-        _config.Read(CONFIG_FORTYTRACK, &s);
-        _selectedFortyTrack = wxAtoi(s);
+        s = "";
+        _config.Read(CONFIG_DRIVETYPE, &s);
+        auto it = drivetypes.find(s.ToStdString());
+        if (it != drivetypes.end())
+            _selectedDriveType = it->second;
+        else
+            _selectedDriveType = drivetypes.begin()->second;
 
         /* Flux image block. */
 
@@ -372,8 +372,11 @@ private:
         _config.Write(CONFIG_DRIVE, wxString(std::to_string(_selectedDrive)));
         _config.Write(
             CONFIG_HIGHDENSITY, wxString(std::to_string(_selectedHighDensity)));
-        _config.Write(
-            CONFIG_FORTYTRACK, wxString(std::to_string(_selectedFortyTrack)));
+        for (auto it : drivetypes)
+        {
+            if (_selectedDriveType == it.second)
+                _config.Write(CONFIG_DRIVETYPE, wxString(it.first));
+        }
 
         /* Flux image block. */
 
@@ -442,13 +445,24 @@ private:
                         OnControlsChanged(e);
                     });
 
-                panel->fortyTrackDriveToggle->SetValue(_selectedFortyTrack);
-                panel->fortyTrackDriveToggle->Bind(
-                    wxEVT_COMMAND_CHECKBOX_CLICKED,
+                int i = 0;
+                for (auto& driveConfig : drivetypes)
+                {
+                    panel->driveTypeChoice->Append(
+                        driveConfig.second->comment());
+                    if (driveConfig.second == _selectedDriveType)
+                        panel->driveTypeChoice->SetSelection(i);
+                    i++;
+                }
+
+                panel->driveTypeChoice->Bind(wxEVT_CHOICE,
                     [=](wxCommandEvent& e)
                     {
-                        _selectedFortyTrack =
-                            panel->fortyTrackDriveToggle->GetValue();
+                        auto it = drivetypes.begin();
+                        std::advance(
+                            it, panel->driveTypeChoice->GetSelection());
+
+                        _selectedDriveType = it->second;
                         OnControlsChanged(e);
                     });
 
@@ -679,7 +693,7 @@ private:
     int _selectedSource;
     std::string _selectedDevice;
     int _selectedDrive;
-    bool _selectedFortyTrack;
+    const ConfigProto* _selectedDriveType;
     bool _selectedHighDensity;
     std::string _selectedFluxfilename;
     std::string _selectedImagefilename;
