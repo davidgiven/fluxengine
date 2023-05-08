@@ -24,6 +24,7 @@ int main(int argc, const char* argv[])
     fmt::print("<!-- FORMATSSTART -->\n");
     fmt::print(
         "<!-- This section is automatically generated. Do not edit. -->\n");
+	fmt::print("\n");
     fmt::print("| Profile | Format | Read? | Write? | Filesystem? |\n");
     fmt::print("|:--------|:-------|:-----:|:------:|:------------|\n");
 
@@ -58,7 +59,7 @@ int main(int argc, const char* argv[])
         for (auto& fs : filesystems)
             ss << fs << " ";
 
-        fmt::print("| `[{0}](doc/disk-{0}.md)` | {1} | {2} | {3} | {4} |\n",
+        fmt::print("| [`{0}`](doc/disk-{0}.md) | {1} | {2} | {3} | {4} |\n",
             name,
             config->shortname() + ": " + config->comment(),
             supportStatus(config->read_support_status()),
@@ -66,6 +67,6 @@ int main(int argc, const char* argv[])
             ss.str());
     }
 
-    std::cout << "{: .datatable }\n";
+    std::cout << "{: .datatable }\n\n";
     return 0;
 }
