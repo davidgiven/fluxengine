@@ -3,17 +3,15 @@ FORMATS = \
 	acornadfs \
 	acorndfs \
 	aeslanier \
-	agat840 \
+	agat \
 	amiga \
 	ampro \
 	apple2_drive \
 	apple2 \
 	atarist \
-	bk800 \
+	bk \
 	brother \
-	commodore1541 \
-	commodore1581 \
-	cmd_fd2000 \
+	commodore \
 	eco1 \
 	epsonpf10 \
 	f85 \
@@ -26,7 +24,7 @@ FORMATS = \
 	mx \
 	n88basic \
 	northstar \
-	psos800 \
+	psos \
 	rolandd20 \
 	rx50 \
 	shugart_drive \
@@ -58,4 +56,47 @@ LIBFORMATS_OBJS = $(patsubst %.cc, %.o, $(LIBFORMATS_SRCS))
 LIBFORMATS_LIB = $(OBJDIR)/libformats.a
 LIBFORMATS_LDFLAGS = $(LIBFORMATS_LIB)
 $(LIBFORMATS_LIB): $(LIBFORMATS_OBJS)
+
+
+$(OBJDIR)/mkdoc.exe: $(OBJDIR)/scripts/mkdoc.o
+
+$(OBJDIR)/scripts/mkdoc.o: scripts/mkdoc.cc
+	@mkdir -p $(dir $@)
+	@echo CXX $< $*
+	@$(CXX) $(CFLAGS) -DPROTO=$* $(CXXFLAGS) -MMD -MP -MF $(@:.o=.d) -c -o $@ $<
+
+$(call use-library, $(OBJDIR)/mkdoc.exe, $(OBJDIR)/scripts/mkdoc.o, PROTO)
+$(call use-library, $(OBJDIR)/mkdoc.exe, $(OBJDIR)/scripts/mkdoc.o, LIBFORMATS)
+$(call use-library, $(OBJDIR)/mkdoc.exe, $(OBJDIR)/scripts/mkdoc.o, LIBFLUXENGINE)
+
+
+docs: $(patsubst %, doc/disk-%.md, $(FORMATS))
+
+doc/disk-%.md: src/formats/%.textpb $(OBJDIR)/mkdoc.exe
+	@echo MKDOC $@
+	@mkdir -p $(dir $@)
+	@$(OBJDIR)/mkdoc.exe $* > $@
+
+
+$(OBJDIR)/mkdocindex.exe: $(OBJDIR)/scripts/mkdocindex.o
+
+$(OBJDIR)/scripts/mkdocindex.o: scripts/mkdocindex.cc
+
+$(call use-library, $(OBJDIR)/mkdocindex.exe, $(OBJDIR)/scripts/mkdocindex.o, PROTO)
+$(call use-library, $(OBJDIR)/mkdocindex.exe, $(OBJDIR)/scripts/mkdocindex.o, LIBFORMATS)
+$(call use-library, $(OBJDIR)/mkdocindex.exe, $(OBJDIR)/scripts/mkdocindex.o, LIBFLUXENGINE)
+
+
+docs: $(patsubst %, doc/disk-%.md, $(FORMATS))
+
+doc/disk-%.md: src/formats/%.textpb $(OBJDIR)/mkdoc.exe
+	@echo MKDOC $@
+	@mkdir -p $(dir $@)
+	@$(OBJDIR)/mkdoc.exe $* > $@
+
+docs: README.md
+README.md: $(OBJDIR)/mkdocindex.exe
+	@echo MKDOCINDEX $@
+	@csplit -s -f$(OBJDIR)/README. README.md '/<!-- FORMATSSTART -->/' '%<!-- FORMATSEND -->%'
+	@(cat $(OBJDIR)/README.00 && $(OBJDIR)/mkdocindex.exe && cat $(OBJDIR)/README.01) > README.md
 

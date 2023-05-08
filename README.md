@@ -88,63 +88,58 @@ Which?
 
 The current support state is as follows.
 
-Dinosaurs (🦖) have yet to be observed in real life --- I've written the
-decoder based on Kryoflux (or other) dumps I've found. I don't (yet) have
-real, physical disks in my hand to test the capture process.
+Dinosaurs (🦖) have yet to be observed in real life --- I've written the encoder
+and/or decoder based on Kryoflux (or other) dumps I've found. I don't (yet) have
+real, physical disks in my hand to test the capture process, or hardware to
+verify that written disks work.
 
-Unicorns (🦄) are completely real --- this means that I've read actual,
-physical disks with these formats and so know they work (or had reports from
-people who've had it work).
+Unicorns (🦄) are completely real --- this means that I've read actual, physical
+disks with these formats and/or written real, physical disks and then used them
+on real hardware, and so know they work (or had reports from people who've had
+it work).
 
-### Old disk formats
+If a filesystem is listed, this means that FluxEngine natively supports that
+particular filesystem and can read (and sometimes write, support varies) files
+directly from disks, flux files or disk images. Some formats have multiple
+choices because they can store multiple types of file system.
 
-| Format                                    | Read? | Write? | Notes |
-|:------------------------------------------|:-----:|:------:|-------|
-| [IBM PC compatible](doc/disk-ibm.md)      |  🦄   |   🦄   | and compatibles (like the Atari ST) |
-| [Atari ST](doc/disk-atarist.md)           |  🦄   |   🦄   | technically the same as IBM, almost |
-| [Acorn ADFS](doc/disk-acornadfs.md)       |  🦄   |   🦖*  | single- and double- sided           |
-| [Acorn DFS](doc/disk-acorndfs.md)         |  🦄   |   🦖*  |                                     |
-| [Ampro Little Board](doc/disk-ampro.md)   |  🦖   |   🦖*  |                                     |
-| [Agat](doc/disk-agat.md)                  |  🦖   |        | Soviet Union Apple-II-like computer |
-| [Apple II](doc/disk-apple2.md)            |  🦄   |   🦄   | both 140kB and 640kB formats        |
-| [Amiga](doc/disk-amiga.md)                |  🦄   |   🦄   |                                     |
-| [Commodore 64 1541/1581](doc/disk-c64.md) |  🦄   |   🦄   | and probably the other formats      |
-| [Brother 120kB](doc/disk-brother.md)      |  🦄   |   🦄   |                                     |
-| [Brother 240kB](doc/disk-brother.md)      |  🦄   |   🦄   |                                     |
-| [Brother FB-100](doc/disk-fb100.md)       |  🦖   |        | Tandy Model 100, Husky Hunter, knitting machines |
-| [Elektronika BK](doc/disk-bd.md)          |  🦄   |   🦄   | Soviet Union PDP-11 clone           |
-| [Macintosh 400kB/800kB](doc/disk-macintosh.md)  |  🦄   |   🦄   |                                     |
-| [NEC PC-98](doc/disk-ibm.md)              |  🦄   |   🦄   | trimode drive not required          |
-| [pSOS](doc/disk-ibm.md)                   |  🦄   |   🦖*  | pSOS PHILE file system              |
-| [Sharp X68000](doc/disk-ibm.md)           |  🦄   |   🦄   | yet another IBM scheme             |
-| [Smaky 6](doc/disk-smaky6.md)             |  🦖   |       | 5.25" hard sectored |
-| [TRS-80](doc/disk-trs80.md)               |  🦖   |   🦖*  | a minor variation of the IBM scheme |
+<!-- FORMATSSTART -->
+<!-- This section is automatically generated. Do not edit. -->
+| Profile | Format | Read? | Write? | Filesystem? |
+|:--------|:-------|:-----:|:------:|:------------|
+| `[acornadfs](doc/disk-acornadfs.md)` | Acorn ADFS: BBC Micro, Archimedes | 🦖 |  |  |
+| `[acorndfs](doc/disk-acorndfs.md)` | Acorn DFS: Acorn Atom, BBC Micro series | 🦄 |  | ACORNDFS  |
+| `[aeslanier](doc/disk-aeslanier.md)` | AES Lanier "No Problem": 616kB 5.25" 77-track SSDD hard sectored | 🦖 |  |  |
+| `[agat](doc/disk-agat.md)` | Agat: 840kB 5.25" 80-track DS | 🦖 | 🦖 |  |
+| `[amiga](doc/disk-amiga.md)` | Amiga: 880kB 3.5" DSDD | 🦄 | 🦄 | AMIGAFFS  |
+| `[ampro](doc/disk-ampro.md)` | Ampro Little Board: CP/M | 🦖 |  | CPMFS  |
+| `[apple2](doc/disk-apple2.md)` | Apple II: Prodos, Appledos, and CP/M | 🦄 | 🦄 | APPLEDOS CPMFS PRODOS  |
+| `[atarist](doc/disk-atarist.md)` | Atari ST: Almost PC compatible | 🦄 | 🦄 |  |
+| `[bk](doc/disk-bk.md)` | BK: 800kB 5.25"/3.5" 80-track 10-sector DSDD | 🦖 | 🦖 |  |
+| `[brother](doc/disk-brother.md)` | Brother word processors: GCR family | 🦄 | 🦄 | BROTHER120 FATFS  |
+| `[commodore](doc/disk-commodore.md)` | Commodore: 1541, 1581, and variations | 🦄 | 🦄 | CBMFS  |
+| `[eco1](doc/disk-eco1.md)` | VDS Eco1: CP/M; 1210kB 77-track mixed format DSHD | 🦖 |  | CPMFS  |
+| `[epsonpf10](doc/disk-epsonpf10.md)` | Epson PF-10: CP/M; 3.5" 40-track DSDD | 🦖 |  | CPMFS  |
+| `[f85](doc/disk-f85.md)` | Durango F85: 461kB 5.25" 77-track SS | 🦖 |  |  |
+| `[fb100](doc/disk-fb100.md)` | Brother FB-100: 100kB 3.5" 40-track SSSD | 🦖 |  |  |
+| `[hplif](doc/disk-hplif.md)` | Hewlett-Packard LIF: a variety of disk formats used by HP | 🦄 | 🦄 | LIF  |
+| `[ibm](doc/disk-ibm.md)` | IBM PC: Generic PC 3.5"/5.25" disks | 🦄 | 🦄 | FATFS  |
+| `[icl30](doc/disk-icl30.md)` | ICL Model 30: CP/M; 263kB 35-track DSSD | 🦖 |  | CPMFS  |
+| `[mac](doc/disk-mac.md)` | Macintosh: 400kB/800kB 3.5" GCR | 🦄 | 🦄 | MACHFS  |
+| `[micropolis](doc/disk-micropolis.md)` | Micropolis: 100tpi MetaFloppy disks | 🦄 | 🦄 |  |
+| `[mx](doc/disk-mx.md)` | DVK MX: Soviet-era PDP-11 clone | 🦖 |  |  |
+| `[n88basic](doc/disk-n88basic.md)` | N88-BASIC: PC8800/PC98 5.25"/3.5" 77-track 26-sector DSHD | 🦄 | 🦄 |  |
+| `[northstar](doc/disk-northstar.md)` | Northstar: 5.25" hard sectored | 🦄 | 🦄 |  |
+| `[psos](doc/disk-psos.md)` | pSOS: 800kB DSDD with PHILE | 🦄 | 🦄 | PHILE  |
+| `[rolandd20](doc/disk-rolandd20.md)` | Roland D20: 3.5" electronic synthesiser disks | 🦖 |  |  |
+| `[rx50](doc/disk-rx50.md)` | Digital RX50: 400kB 5.25" 80-track 10-sector SSDD | 🦖 | 🦖 |  |
+| `[smaky6](doc/disk-smaky6.md)` | Smaky 6: 308kB 5.25" 77-track 16-sector SSDD, hard sectored | 🦖 |  | SMAKY6  |
+| `[tids990](doc/disk-tids990.md)` | Texas Instruments DS990: 1126kB 8" DSSD | 🦖 | 🦖 |  |
+| `[tiki](doc/disk-tiki.md)` | Tiki 100: CP/M |  |  | CPMFS  |
+| `[victor9k](doc/disk-victor9k.md)` | Victor 9000 / Sirius One: 1224kB 5.25" DSDD GCR | 🦖 | 🦖 |  |
+| `[zilogmcz](doc/disk-zilogmcz.md)` | Zilog MCZ: 320kB 8" 77-track SSSD hard-sectored | 🦖 |  |  |
 {: .datatable }
-
-`*`: these formats are variations of the generic IBM format, and since the
-IBM writer is completely generic, it should be configurable for these
-formats... theoretically. I don't have the hardware to try it.
-
-### Even older disk formats
-
-These formats are for particularly old, weird architectures, even by the
-standards of floppy disks. They've largely been implemented from single flux
-files with no access to physical hardware. Typically the reads were pretty
-bad and I've had to make a number of guesses as to how things work. They do,
-at least, check the CRC so what data's there is probably good.
-
-| Format                                   | Read? | Write? | Notes |
-|:-----------------------------------------|:-----:|:------:|-------|
-| [AES Superplus / No Problem](doc/disk-aeslanier.md) |  🦖   | | hard sectors! |
-| [Durango F85](doc/disk-durangof85.md)    |  🦖   |        | 5.25" |
-| [DVK MX](doc/disk-mx.md)                 |  🦖   |        | Soviet PDP-11 clone |
-| [VDS Eco1](doc/disk-eco1.md)             |  🦖   |        | 8" mixed format |
-| [Micropolis](doc/disk-micropolis.md)     |  🦄   |        | Micropolis 100tpi drives |
-| [Northstar](doc/disk-northstar.md)       |  🦖   |   🦖   | 5.25" hard sectors |
-| [TI DS990 FD1000](doc/disk-tids990.md)   |  🦄   |  🦄    | 8" |
-| [Victor 9000](doc/disk-victor9k.md)      |  🦖   |        | 5.25" GCR encoded |
-| [Zilog MCZ](doc/disk-zilogmcz.md)        |  🦖   |        | 8" _and_ hard sectors |
-{: .datatable }
+<!-- FORMATSEND -->
 
 ### Notes
 

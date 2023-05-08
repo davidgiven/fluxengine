@@ -1,4 +1,22 @@
-comment: 'Roland D20'
+shortname: 'Roland D20'
+comment: '3.5" electronic synthesiser disks'
+read_support_status: DINOSAUR
+
+documentation:
+<<<
+The Roland D20 is a classic electronic synthesiser with a built-in floppy
+drive, used for saving MIDI sequences and samples.
+
+Weirdly, it seems to use precisely the same format as the Brother word
+processors: a thoroughly non-IBM-compatible custom GCR system.
+
+FluxEngine pretends to support this, but it has had almost no testing, the only
+disk image I have seen for it was mostly corrupt, and very little is known
+about the format, so I have no idea whether it's correct or not.
+
+Please [get in touch](https://github.com/davidgiven/fluxengine/issues/new) if
+you know anything about it.
+>>>
 
 image_writer {
 	filename: "rolandd20.img"
@@ -26,3 +44,4 @@ drive {
 	head_bias: 1
 }
 
+tpi: 96

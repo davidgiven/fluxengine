@@ -48,7 +48,7 @@ AR ?= $(CCPREFIX)ar
 PKG_CONFIG ?= pkg-config
 WX_CONFIG ?= wx-config
 PROTOC ?= protoc
-CFLAGS ?= -g -Os
+CFLAGS ?= -g -O3
 CXXFLAGS += -std=c++17
 LDFLAGS ?=
 PLATFORM ?= UNIX
@@ -98,7 +98,7 @@ $(2): private CFLAGS += $(shell $(PKG_CONFIG) --cflags $(3))
 endef
 
 .PHONY: all binaries tests clean install install-bin
-all: binaries tests
+all: binaries tests docs
 
 PROTOS = \
 	arch/aeslanier/aeslanier.proto \
@@ -178,7 +178,7 @@ $(OBJDIR)/$1$3.scp.encodedecode: scripts/encodedecodetest.sh $(FLUXENGINE_BIN) $
 
 endef
 
-$(call do-encodedecodetest,agat840)
+$(call do-encodedecodetest,agat)
 $(call do-encodedecodetest,amiga)
 $(call do-encodedecodetest,apple2,,--140)
 $(call do-encodedecodetest,atarist,,--360)
@@ -189,13 +189,13 @@ $(call do-encodedecodetest,atarist,,--720)
 $(call do-encodedecodetest,atarist,,--740)
 $(call do-encodedecodetest,atarist,,--800)
 $(call do-encodedecodetest,atarist,,--820)
-$(call do-encodedecodetest,bk800)
+$(call do-encodedecodetest,bk)
 $(call do-encodedecodetest,brother,,--120)
 $(call do-encodedecodetest,brother,,--240)
-$(call do-encodedecodetest,commodore1541,scripts/commodore1541_test.textpb,--171)
-$(call do-encodedecodetest,commodore1541,scripts/commodore1541_test.textpb,--192)
-$(call do-encodedecodetest,commodore1581)
-$(call do-encodedecodetest,cmd_fd2000)
+$(call do-encodedecodetest,commodore,scripts/commodore1541_test.textpb,--171)
+$(call do-encodedecodetest,commodore,scripts/commodore1541_test.textpb,--192)
+$(call do-encodedecodetest,commodore,,--800)
+$(call do-encodedecodetest,commodore,,--1620)
 $(call do-encodedecodetest,hplif,,--264)
 $(call do-encodedecodetest,hplif,,--616)
 $(call do-encodedecodetest,hplif,,--770)
@@ -235,7 +235,7 @@ $(call do-corpustest,amiga.flux,amiga.adf,amiga)
 $(call do-corpustest,atarist360.flux,atarist360.st,atarist --360)
 $(call do-corpustest,atarist720.flux,atarist720.st,atarist --720)
 $(call do-corpustest,brother120.flux,brother120.img,brother --120)
-$(call do-corpustest,cmd-fd2000.flux,cmd-fd2000.img,cmd_fd2000)
+$(call do-corpustest,cmd-fd2000.flux,cmd-fd2000.img,commodore --1620)
 $(call do-corpustest,ibm1232.flux,ibm1232.img,ibm --1232)
 $(call do-corpustest,ibm1440.flux,ibm1440.img,ibm --1440)
 $(call do-corpustest,mac800.flux,mac800.dsk,mac --800)

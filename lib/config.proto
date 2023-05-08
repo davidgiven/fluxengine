@@ -12,12 +12,22 @@ import "lib/drive.proto";
 import "lib/common.proto";
 import "lib/layout.proto";
 
-// NEXT_TAG: 23
+enum SupportStatus
+{
+	UNSUPPORTED = 0;
+	DINOSAUR = 1;
+	UNICORN = 2;
+}
+
+// NEXT_TAG: 27
 message ConfigProto
 {
+	optional string shortname = 24;
     optional string comment = 8;
     optional bool is_extension = 13;
-    repeated string include = 19;
+	repeated string documentation = 23;
+	optional SupportStatus read_support_status = 25 [ default = UNSUPPORTED ];
+	optional SupportStatus write_support_status = 26 [ default = UNSUPPORTED ];
 
     optional LayoutProto layout = 18;
 

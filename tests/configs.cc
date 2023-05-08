@@ -4,7 +4,7 @@
 #include "lib/bytes.h"
 #include <fmt/format.h>
 
-extern const std::map<std::string, std::string> formats;
+extern const std::map<std::string, const ConfigProto*> formats;
 
 bool failed = false;
 
@@ -29,29 +29,24 @@ struct fmt::formatter<std::vector<std::string>>
         FormatContext& ctx) const -> decltype(ctx.out())
     {
 		auto it = ctx.out();
-		bool first = true;
 		for (const auto& s : vector)
 		{
 			if (s.empty())
 				continue;
 
-			if (!first)
-				it = fmt::format_to(it, "+");
-			it = fmt::format_to(it, "{}", s);
-			first = false;
+			it = fmt::format_to(it, "+{}", s);
 		}
 
         return it;
     }
 };
 
-static ConfigProto findConfig(std::string name)
+static const ConfigProto& findConfig(std::string name)
 {
-    const auto data = formats.at(name);
-    ConfigProto config;
-    if (!config.ParseFromString(data))
+    const auto it = formats.find(name);
+    if (it == formats.end())
         error("{}: couldn't load", name);
-    return config;
+    return *it->second;
 }
 
 static std::vector<std::vector<std::string>> generateCombinations(
@@ -89,29 +84,17 @@ static void validateConfigWithOptions(std::string baseConfigName,
     /* All configs must have a tpi. */
 
     if (!config.has_tpi())
-        error("{}+{}: no tpi set", baseConfigName, options);
+        error("{}{}: no tpi set", baseConfigName, options);
 }
 
 static void validateToplevelConfig(std::string name)
 {
-    ConfigProto toplevel = findConfig(name);
+    ConfigProto config = findConfig(name);
 
     /* Don't test extension configs. */
 
-    if (toplevel.is_extension())
+    if (config.is_extension())
         return;
-
-    /* Apply any includes. */
-
-    ConfigProto config;
-    for (const auto& include : toplevel.include())
-    {
-        ConfigProto included = findConfig(include);
-        if (included.include_size() != 0)
-            error("{}: extension config contains _includes", include);
-        config.MergeFrom(included);
-    }
-    config.MergeFrom(toplevel);
 
     /* Collate options. */
 
@@ -149,17 +132,20 @@ static void validateToplevelConfig(std::string name)
     /* For each permutation of options, verify the complete config. */
 
     auto combinations = generateCombinations(optionGroups);
-    for (const auto& group : combinations)
-    {
-        ConfigProto configWithOption = config;
-        for (const auto& optionName : group)
-        {
-            if (!optionName.empty())
-                configWithOption.MergeFrom(
-                    optionProtos.at(optionName)->config());
-        }
-        validateConfigWithOptions(name, group, configWithOption);
-    }
+	if (combinations.empty())
+		validateConfigWithOptions(name, {}, config);
+	else
+		for (const auto& group : combinations)
+		{
+			ConfigProto configWithOption = config;
+			for (const auto& optionName : group)
+			{
+				if (!optionName.empty())
+					configWithOption.MergeFrom(
+						optionProtos.at(optionName)->config());
+			}
+			validateConfigWithOptions(name, group, configWithOption);
+		}
 }
 
 int main(int argc, const char* argv[])
