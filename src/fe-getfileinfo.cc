@@ -8,7 +8,6 @@
 #include "imagewriter/imagewriter.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/decoders/decoders.h"
-#include "fmt/format.h"
 #include "fluxengine.h"
 #include "lib/vfs/sectorinterface.h"
 #include "lib/vfs/vfs.h"
@@ -37,7 +36,7 @@ int mainGetFileInfo(int argc, const char* argv[])
     }
     catch (const FilesystemException& e)
     {
-        Error() << e.message;
+        error("{}", e.message);
     }
 
     return 0;

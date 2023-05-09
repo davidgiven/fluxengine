@@ -5,7 +5,6 @@
 #include "sector.h"
 #include "imagereader/imagereader.h"
 #include "image.h"
-#include "fmt/format.h"
 #include "logger.h"
 #include "lib/imagereader/imagereader.pb.h"
 #include <algorithm>
@@ -22,7 +21,7 @@ public:
         std::ifstream inputFile(
             _config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
-            Error() << "cannot open input file";
+            error("cannot open input file");
 
         const auto begin = inputFile.tellg();
         inputFile.seekg(0, std::ios::end);
@@ -55,7 +54,7 @@ public:
                 break;
 
             default:
-                Error() << "NSI: unknown file size";
+                error("NSI: unknown file size");
         }
 
         size_t trackSize = numSectors * sectorSize;

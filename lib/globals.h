@@ -15,6 +15,7 @@
 #include <climits>
 #include <variant>
 #include <optional>
+#include <fmt/format.h>
 
 #if defined(_WIN32) || defined(__WIN32__)
 #include <direct.h>
@@ -41,29 +42,12 @@ struct ErrorException
 	void print() const;
 };
 
-class Error
+template <typename... Args>
+[[ noreturn ]]
+inline void error(fmt::string_view fstr, const Args&... args)
 {
-public:
-	Error()
-	{
-		_stream << "Error: ";
-	}
-
-    [[ noreturn ]] ~Error() noexcept(false)
-    {
-		throw ErrorException { _stream.str() };
-    }
-
-    template <typename T>
-    Error& operator<<(T&& t)
-    {
-        _stream << t;
-        return *this;
-    }
-
-private:
-    std::stringstream _stream;
-};
+	throw ErrorException { fmt::format(fstr, args...) };
+}
 
 template <class... Ts> struct overloaded : Ts...  { using Ts::operator()...; };
 template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;

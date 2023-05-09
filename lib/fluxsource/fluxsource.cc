@@ -5,7 +5,6 @@
 #include "lib/config.pb.h"
 #include "proto.h"
 #include "utils.h"
-#include "fmt/format.h"
 #include <regex>
 
 static bool ends_with(const std::string& value, const std::string& ending)
@@ -47,7 +46,7 @@ std::unique_ptr<FluxSource> FluxSource::create(const FluxSourceProto& config)
             return createFlxFluxSource(config.flx());
 
         default:
-            Error() << "bad input disk configuration";
+            error("bad input disk configuration");
             return std::unique_ptr<FluxSource>();
     }
 }
@@ -123,7 +122,7 @@ void FluxSource::updateConfigForFilename(
         }
     }
 
-    Error() << fmt::format("unrecognised flux filename '{}'", filename);
+    error("unrecognised flux filename '{}'", filename);
 }
 
 class TrivialFluxSourceIterator : public FluxSourceIterator

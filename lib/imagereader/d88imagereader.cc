@@ -6,7 +6,6 @@
 #include "proto.h"
 #include "logger.h"
 #include "lib/config.pb.h"
-#include "fmt/format.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -24,7 +23,7 @@ public:
         std::ifstream inputFile(
             _config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
-            Error() << "cannot open input file";
+            error("cannot open input file");
 
         Bytes header(0x24); // read first entry of track table as well
         inputFile.read((char*)header.begin(), header.size());
@@ -66,18 +65,18 @@ public:
         if (mediaFlag == 0x20)
         {
             Logger() << "D88: forcing high density mode";
-				config.mutable_drive()->set_high_density(true);
-                config.set_tpi(96);
+            config.mutable_drive()->set_high_density(true);
+            config.set_tpi(96);
         }
         else
         {
             Logger() << "D88: forcing single/double density mode";
             clockRate = 300;
-				config.mutable_drive()->set_high_density(false);
-                config.set_tpi(48);
+            config.mutable_drive()->set_high_density(false);
+            config.set_tpi(48);
         }
 
-		auto layout = config.mutable_layout();
+        auto layout = config.mutable_layout();
         std::unique_ptr<Image> image(new Image);
         for (int track = 0; track < trackTableSize / 4; track++)
         {
@@ -96,7 +95,7 @@ public:
             trackdata->set_target_clock_period_us(1e3 / clockRate);
             trackdata->set_target_rotational_period_ms(167);
 
-			auto layoutdata = layout->add_layoutdata();
+            auto layoutdata = layout->add_layoutdata();
             auto physical = layoutdata->mutable_physical();
 
             for (int sectorInTrack = 0; sectorInTrack < currentSectorsInTrack;
@@ -116,26 +115,27 @@ public:
                 int fddStatusCode = sectorHeaderReader.seek(8).read_8();
                 int rpm = sectorHeaderReader.seek(13).read_8();
                 int dataLength = sectorHeaderReader.seek(14).read_le16();
-                if (dataLength < sectorSize) {
+                if (dataLength < sectorSize)
+                {
                     dataLength = sectorSize;
                 }
                 // D88 provides much more sector information that is currently
                 // ignored
                 if (ddam != 0)
-                    Error() << "D88: nonzero ddam currently unsupported";
+                    error("D88: nonzero ddam currently unsupported");
                 if (rpm != 0)
-                    Error()
-                        << "D88: 1.44MB 300rpm formats currently unsupported";
+                    error("D88: 1.44MB 300rpm formats currently unsupported");
                 if (fddStatusCode != 0)
-                    Error() << "D88: nonzero fdd status codes are currently "
-                               "unsupported";
+                    error(
+                        "D88: nonzero fdd status codes are currently "
+                        "unsupported");
                 if (currentSectorsInTrack == 0xffff)
                 {
                     currentSectorsInTrack = sectorsInTrack;
                 }
                 else if (currentSectorsInTrack != sectorsInTrack)
                 {
-                    Error() << "D88: mismatched number of sectors in track";
+                    error("D88: mismatched number of sectors in track");
                 }
                 if (currentTrackTrack < 0)
                 {
@@ -143,8 +143,9 @@ public:
                 }
                 else if (currentTrackTrack != track)
                 {
-                    Error() << "D88: all sectors in a track must belong to the "
-                               "same track";
+                    error(
+                        "D88: all sectors in a track must belong to the "
+                        "same track");
                 }
                 if (trackSectorSize < 0)
                 {
@@ -166,14 +167,17 @@ public:
                         trackdata->set_dam_byte(0xf56f);
                     }
                     // create timings to approximately match N88-BASIC
-                    if (clockRate == 300) {
+                    if (clockRate == 300)
+                    {
                         if (sectorSize <= 256)
                         {
                             trackdata->set_gap0(0x1b);
                             trackdata->set_gap2(0x14);
                             trackdata->set_gap3(0x1b);
                         }
-                    } else {
+                    }
+                    else
+                    {
                         if (sectorSize <= 128)
                         {
                             trackdata->set_gap0(0x1b);
@@ -189,12 +193,13 @@ public:
                 }
                 else if (trackSectorSize != sectorSize)
                 {
-                    Error() << "D88: multiple sector sizes per track are "
-                               "currently unsupported";
+                    error(
+                        "D88: multiple sector sizes per track are "
+                        "currently unsupported");
                 }
                 Bytes data(sectorSize);
                 inputFile.read((char*)data.begin(), data.size());
-                inputFile.seekg(dataLength-sectorSize, std::ios_base::cur);
+                inputFile.seekg(dataLength - sectorSize, std::ios_base::cur);
                 physical->add_sector(sectorId);
                 const auto& sector = image->put(track, head, sectorId);
                 sector->status = Sector::OK;
@@ -215,8 +220,8 @@ public:
             geometry.numTracks,
             geometry.numSides);
 
-		layout->set_tracks(geometry.numTracks);
-		layout->set_sides(geometry.numSides);
+        layout->set_tracks(geometry.numTracks);
+        layout->set_sides(geometry.numSides);
 
         return image;
     }

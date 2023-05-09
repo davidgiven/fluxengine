@@ -8,7 +8,6 @@
 #include "lib/layout.pb.h"
 #include "lib/proto.h"
 #include "lib/layout.h"
-#include "fmt/format.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -23,12 +22,13 @@ public:
         std::ifstream inputFile(
             _config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
-            Error() << "cannot open input file";
+            error("cannot open input file");
 
         auto layout = config.layout();
         if (!layout.tracks() || !layout.sides())
-            Error() << "IMG: bad configuration; did you remember to set the "
-                       "tracks, sides and trackdata fields in the layout?";
+            error(
+                "IMG: bad configuration; did you remember to set the "
+                "tracks, sides and trackdata fields in the layout?");
 
         std::unique_ptr<Image> image(new Image);
         for (const auto& p : Layout::getTrackOrdering())
@@ -53,11 +53,12 @@ public:
 
         image->calculateSize();
         const Geometry& geometry = image->getGeometry();
-        Logger() << fmt::format("IMG: read {} tracks, {} sides, {} kB total from {}",
+        Logger() << fmt::format(
+            "IMG: read {} tracks, {} sides, {} kB total from {}",
             geometry.numTracks,
             geometry.numSides,
             inputFile.tellg() / 1024,
-			_config.filename());
+            _config.filename());
         return image;
     }
 };

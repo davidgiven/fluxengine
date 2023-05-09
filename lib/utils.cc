@@ -1,7 +1,6 @@
 #include "globals.h"
 #include "utils.h"
 #include "lib/bytes.h"
-#include <fmt/format.h>
 #include <iomanip>
 #include <fstream>
 

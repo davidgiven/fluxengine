@@ -2,10 +2,8 @@
 #include <string.h>
 #include "bytes.h"
 #include "ldbs.h"
-#include "fmt/format.h"
 
-LDBS::LDBS()
-{}
+LDBS::LDBS() {}
 
 uint32_t LDBS::put(const Bytes& data, uint32_t type)
 {
@@ -23,9 +21,9 @@ uint32_t LDBS::read(const Bytes& data)
     ByteReader br(data);
 
     br.seek(0);
-    if ((br.read_be32() != LDBS_FILE_MAGIC)
-        || (br.read_be32() != LDBS_FILE_TYPE))
-        Error() << "not a valid LDBS file";
+    if ((br.read_be32() != LDBS_FILE_MAGIC) ||
+        (br.read_be32() != LDBS_FILE_TYPE))
+        error("not a valid LDBS file");
 
     uint32_t address = br.read_le32();
     br.skip(4);
@@ -35,7 +33,7 @@ uint32_t LDBS::read(const Bytes& data)
     {
         br.seek(address);
         if (br.read_be32() != LDBS_BLOCK_MAGIC)
-            Error() << fmt::format("invalid block at address 0x{:x}", address);
+            error("invalid block at address 0x{:x}", address);
 
         Block& block = blocks[address];
         block.type = br.read_be32();
@@ -46,7 +44,7 @@ uint32_t LDBS::read(const Bytes& data)
 
         block.data.writer().append(br.read(size));
     }
-        
+
     top = data.size();
     return trackDirectory;
 }
@@ -76,6 +74,6 @@ const Bytes LDBS::write(uint32_t trackDirectory)
     bw.write_le32(previous);
     bw.write_le32(0);
     bw.write_le32(trackDirectory);
-    
+
     return data;
 }

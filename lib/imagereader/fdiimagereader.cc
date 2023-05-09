@@ -6,7 +6,6 @@
 #include "proto.h"
 #include "logger.h"
 #include "lib/config.pb.h"
-#include "fmt/format.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -24,13 +23,13 @@ public:
         std::ifstream inputFile(
             _config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
-            Error() << "cannot open input file";
+            error("cannot open input file");
 
         Bytes header(32);
         inputFile.read((char*)header.begin(), header.size());
         ByteReader headerReader(header);
         if (headerReader.seek(0).read_le32() != 0)
-            Error() << "FDI: could not find FDI header, is this a FDI file?";
+            error("FDI: could not find FDI header, is this a FDI file?");
 
         // we currently don't use fddType but it could be used to automatically
         // select profile parameters in the future
@@ -62,8 +61,7 @@ public:
                     Bytes data(sectorSize);
                     inputFile.read((char*)data.begin(), data.size());
 
-                    const auto& sector =
-                        image->put(track, side, sectorId);
+                    const auto& sector = image->put(track, side, sectorId);
                     sector->status = Sector::OK;
                     sector->data = data;
                 }
@@ -72,7 +70,7 @@ public:
             trackCount++;
         }
 
-		auto layout = config.mutable_layout();
+        auto layout = config.mutable_layout();
         if (config.encoder().format_case() ==
             EncoderProto::FormatCase::FORMAT_NOT_SET)
         {
@@ -80,7 +78,7 @@ public:
             auto trackdata = ibm->add_trackdata();
             trackdata->set_target_clock_period_us(2);
 
-			auto layoutdata = layout->add_layoutdata();
+            auto layoutdata = layout->add_layoutdata();
             auto physical = layoutdata->mutable_physical();
             switch (fddType)
             {
@@ -102,7 +100,7 @@ public:
                     break;
 
                 default:
-                    Error() << fmt::format(
+                    error(
                         "FDI: unknown fdd type 0x{:2x}, could not determine "
                         "write profile automatically",
                         fddType);
@@ -117,8 +115,8 @@ public:
             geometry.numSides,
             ((int)inputFile.tellg() - headerSize) / 1024);
 
-		layout->set_tracks(geometry.numTracks);
-		layout->set_sides(geometry.numSides);
+        layout->set_tracks(geometry.numTracks);
+        layout->set_sides(geometry.numSides);
 
         return image;
     }

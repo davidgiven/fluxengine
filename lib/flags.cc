@@ -3,7 +3,6 @@
 #include "proto.h"
 #include "utils.h"
 #include "logger.h"
-#include "fmt/format.h"
 #include <google/protobuf/text_format.h>
 #include <regex>
 #include <fstream>
@@ -44,12 +43,12 @@ void FlagGroup::addFlag(Flag* flag)
 void FlagGroup::applyOption(const OptionProto& option)
 {
     if (option.config().option_size() > 0)
-        Error() << fmt::format(
+        error(
             "option '{}' has an option inside it, which isn't "
             "allowed",
             option.name());
     if (option.config().option_group_size() > 0)
-        Error() << fmt::format(
+        error(
             "option '{}' has an option group inside it, which isn't "
             "allowed",
             option.name());
@@ -112,7 +111,7 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc,
             for (const auto& name : flag->names())
             {
                 if (flags_by_name.find(name) != flags_by_name.end())
-                    Error() << "two flags use the name '" << name << "'";
+                    error("two flags use the name '{}'", name);
                 flags_by_name[name] = flag;
             }
 
@@ -203,7 +202,7 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc,
                         options.insert(path);
                 }
                 else
-                    Error() << "unrecognised flag; try --help";
+                    error("unrecognised flag; try --help");
             }
             else
             {
@@ -235,20 +234,19 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc,
         FlagGroup::applyOption(*defaultOption);
     }
 
-	/* Next, any standalone options. */
+    /* Next, any standalone options. */
 
-	for (auto& option : config.option())
-	{
-		if (options.find(option.name()) != options.end())
-		{
-			FlagGroup::applyOption(option);
-			options.erase(option.name());
-		}
-	}
-		
+    for (auto& option : config.option())
+    {
+        if (options.find(option.name()) != options.end())
+        {
+            FlagGroup::applyOption(option);
+            options.erase(option.name());
+        }
+    }
+
     if (!options.empty())
-        Error() << fmt::format(
-            "--{} is not a known flag or format option; try --help",
+        error("--{} is not a known flag or format option; try --help",
             *options.begin());
 
     /* Now apply any value overrides (in order). */
@@ -268,8 +266,8 @@ void FlagGroup::parseFlags(int argc,
 {
     auto filenames = parseFlagsWithFilenames(argc, argv, callback);
     if (!filenames.empty())
-        Error() << "non-option parameter " << *filenames.begin()
-                << " seen (try --help)";
+        error(
+            "non-option parameter '{}' seen (try --help)", *filenames.begin());
 }
 
 void FlagGroup::parseFlagsWithConfigFiles(int argc,
@@ -290,20 +288,19 @@ ConfigProto FlagGroup::parseSingleConfigFile(const std::string& filename,
 {
     const auto& it = configFiles.find(filename);
     if (it != configFiles.end())
-		return *it->second;
+        return *it->second;
     else
     {
         std::ifstream f(filename, std::ios::out);
         if (f.fail())
-            Error() << fmt::format(
-                "Cannot open '{}': {}", filename, strerror(errno));
+            error("Cannot open '{}': {}", filename, strerror(errno));
 
         std::ostringstream ss;
         ss << f.rdbuf();
 
         ConfigProto config;
         if (!google::protobuf::TextFormat::MergeFromString(ss.str(), &config))
-            Error() << "couldn't load external config proto";
+            error("couldn't load external config proto");
         return config;
     }
 }
@@ -326,7 +323,7 @@ Flag::Flag(const std::vector<std::string>& names, const std::string helptext):
     _helptext(helptext)
 {
     if (!currentFlagGroup)
-        Error() << "no flag group defined for " << *names.begin();
+        error("no flag group defined for {}", *names.begin());
     _group.addFlag(this);
 }
 
@@ -337,7 +334,7 @@ void BoolFlag::set(const std::string& value)
     else if ((value == "false") || (value == "n"))
         _value = false;
     else
-        Error() << "can't parse '" << value << "'; try 'true' or 'false'";
+        error("can't parse '{}'; try 'true' or 'false'", value);
     _callback(_value);
     _isSet = true;
 }

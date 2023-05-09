@@ -8,7 +8,6 @@
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/imagereader/imagereader.h"
 #include "lib/imagewriter/imagewriter.h"
-#include "fmt/format.h"
 #include "fluxengine.h"
 #include "lib/vfs/sectorinterface.h"
 #include "lib/vfs/vfs.h"
@@ -33,9 +32,7 @@ static StringFlag flux({"-f", "--flux"},
     "",
     [](const auto& value)
     {
-		FluxSource::updateConfigForFilename(
+        FluxSource::updateConfigForFilename(
             config.mutable_flux_source(), value);
-		FluxSink::updateConfigForFilename(
-            config.mutable_flux_sink(), value);
+        FluxSink::updateConfigForFilename(config.mutable_flux_sink(), value);
     });
-

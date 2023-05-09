@@ -1,7 +1,6 @@
 #include "lib/globals.h"
 #include "lib/vfs/vfs.h"
 #include "lib/config.pb.h"
-#include <fmt/format.h>
 
 /* Number of sectors on a 120kB disk. */
 static constexpr int SECTOR_COUNT = 468;

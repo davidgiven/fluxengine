@@ -76,7 +76,7 @@ public:
         for (const auto& it : formats)
         {
             auto config = std::make_unique<ConfigProto>();
-			*config = *it.second;
+            *config = *it.second;
             if (config->is_extension())
                 continue;
 
@@ -180,7 +180,7 @@ public:
 
         auto formatSelection = formatChoice->GetSelection();
         if (formatSelection == wxNOT_FOUND)
-            Error() << "no format selected";
+            error("no format selected");
 
         config.Clear();
         auto formatName = _formatNames[formatChoice->GetSelection()];

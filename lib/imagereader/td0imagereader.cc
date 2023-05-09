@@ -5,9 +5,7 @@
 #include "image.h"
 #include "crc.h"
 #include "logger.h"
-#include "fmt/format.h"
 #include "lib/config.pb.h"
-#include "fmt/format.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -54,7 +52,7 @@ public:
         std::ifstream inputFile(
             _config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
-            Error() << "cannot open input file";
+            error("cannot open input file");
 
         Bytes input;
         input.writer() += inputFile;
@@ -71,10 +69,11 @@ public:
 
         uint16_t gotCrc = crc16(0xa097, 0, input.slice(0, 10));
         if (gotCrc != headerCrc)
-            Error() << "TD0: header checksum mismatch";
+            error("TD0: header checksum mismatch");
         if (signature != 0x5444)
-            Error() << "TD0: unsupported file type (only uncompressed files "
-                       "are supported for now)";
+            error(
+                "TD0: unsupported file type (only uncompressed files "
+                "are supported for now)");
 
         std::string comment = "(no comment)";
         if (stepping & 0x80)

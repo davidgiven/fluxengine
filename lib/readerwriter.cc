@@ -10,7 +10,6 @@
 #include "fluxsink/fluxsink.h"
 #include "imagereader/imagereader.h"
 #include "imagewriter/imagewriter.h"
-#include "fmt/format.h"
 #include "sector.h"
 #include "image.h"
 #include "logger.h"
@@ -91,7 +90,7 @@ void measureDiskRotation(
     }
 
     if (oneRevolution == 0)
-        Error() << "Failed\nIs a disk in the drive?";
+        error("Failed\nIs a disk in the drive?");
 
     Logger() << EndSpeedOperationLogMessage{oneRevolution};
 }
@@ -308,7 +307,7 @@ void writeTracks(FluxSink& fluxSink,
                 break;
 
             if (retriesRemaining == 0)
-                Error() << "fatal error on write";
+                error("fatal error on write");
 
             Logger() << fmt::format(
                 "retrying; {} retries remaining", retriesRemaining);

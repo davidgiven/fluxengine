@@ -4,7 +4,6 @@
 #include "gui.h"
 #include "layout.h"
 #include "fileviewerwindow.h"
-#include "fmt/format.h"
 
 FileViewerWindow::FileViewerWindow(
     wxWindow* parent, const std::string& title, const Bytes& data):

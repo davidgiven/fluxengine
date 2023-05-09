@@ -45,15 +45,15 @@ static void testLeafname()
 
 static void testUnhex()
 {
-	AssertThat(unhex(""), Equals(""));
-	AssertThat(unhex("foo"), Equals("foo"));
-	AssertThat(unhex("f%20o"), Equals("f o"));
+    AssertThat(unhex(""), Equals(""));
+    AssertThat(unhex("foo"), Equals("foo"));
+    AssertThat(unhex("f%20o"), Equals("f o"));
 }
 
 static void testUnbcd()
 {
-	AssertThat(unbcd(0x1234), Equals(1234));
-	AssertThat(unbcd(0x87654321), Equals(87654321));
+    AssertThat(unbcd(0x1234), Equals(1234));
+    AssertThat(unbcd(0x87654321), Equals(87654321));
 }
 
 int main(void)
@@ -63,7 +63,7 @@ int main(void)
     testRightTrim();
     testTrim();
     testLeafname();
-	testUnhex();
-	testUnbcd();
+    testUnhex();
+    testUnbcd();
     return 0;
 }

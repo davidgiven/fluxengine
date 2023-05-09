@@ -3,7 +3,6 @@
 #include "kryoflux.h"
 #include "protocol.h"
 #include "lib/fluxsource/flx.h"
-#include "fmt/format.h"
 
 std::unique_ptr<Fluxmap> readFlxBytes(const Bytes& bytes)
 {
@@ -14,7 +13,7 @@ std::unique_ptr<Fluxmap> readFlxBytes(const Bytes& bytes)
     for (;;)
     {
         if (br.eof())
-            Error() << fmt::format("malformed FLX stream");
+            error("malformed FLX stream");
         uint8_t b = br.read_8();
         if (b == 0)
             break;
@@ -36,7 +35,7 @@ std::unique_ptr<Fluxmap> readFlxBytes(const Bytes& bytes)
             default:
             {
                 if (b < 32)
-                    Error() << fmt::format("unknown FLX opcode 0x{:2x}", b);
+                    error("unknown FLX opcode 0x{:2x}", b);
                 nanoseconds_t interval = b * FLX_TICK_NS;
                 fluxmap->appendInterval(interval / NS_PER_TICK);
                 fluxmap->appendPulse();

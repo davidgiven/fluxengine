@@ -7,7 +7,6 @@
 #include "fluxsource/fluxsource.h"
 #include "lib/fluxsource/fluxsource.pb.h"
 #include "lib/readerwriter.h"
-#include "fmt/format.h"
 
 class HardwareFluxSource : public FluxSource
 {

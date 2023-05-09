@@ -3,7 +3,6 @@
 #include "lib/fluxsource/fluxsource.pb.h"
 #include "fluxsource/fluxsource.h"
 #include "proto.h"
-#include "fmt/format.h"
 #include <fstream>
 
 struct A2Rv2Flux
@@ -121,7 +120,7 @@ public:
             }
 
             default:
-                Error() << "unsupported A2R version";
+                error("unsupported A2R version");
         }
     }
 
@@ -141,7 +140,7 @@ public:
             }
 
             default:
-                Error() << "unsupported A2R version";
+                error("unsupported A2R version");
         }
     }
 
@@ -164,7 +163,7 @@ private:
             offset += br.read_le32() + 8;
         }
 
-        Error() << "A2R file missing chunk";
+        error("A2R file missing chunk");
     }
 
 private:

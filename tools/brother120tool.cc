@@ -75,7 +75,7 @@ void writeDirectory()
         const auto& dirent = it.second;
 
         if (count == DIRECTORY_SIZE)
-            Error() << "too many files on disk";
+            error("too many files on disk");
 
         bw.append(dirent->filename);
         for (int i = dirent->filename.size(); i < 8; i++)
@@ -102,141 +102,268 @@ void writeDirectory()
 
 void writeBootSector(const Dirent& dirent, uint16_t checksum)
 {
-	uint8_t sslo = dirent.startSector & 0xff;
-	uint8_t sshi = dirent.startSector >> 8;
-	uint8_t scnt = dirent.sectorCount;
-	uint8_t end = 0x70 + scnt;
-	uint8_t cklo = checksum & 0xff;
-	uint8_t ckhi = checksum >> 8;
+    uint8_t sslo = dirent.startSector & 0xff;
+    uint8_t sshi = dirent.startSector >> 8;
+    uint8_t scnt = dirent.sectorCount;
+    uint8_t end = 0x70 + scnt;
+    uint8_t cklo = checksum & 0xff;
+    uint8_t ckhi = checksum >> 8;
 
-	uint8_t machineCode[] =
-	{
-		/* 6000 */ 0x55,             /* magic number?         */
-		/* 6001 */ 0xf3,             /* di                    */
-		/* 6002 */ 0x31, 0x00, 0x00, /* ld sp, $0000          */
-		/* 6005 */ 0x3e, 0x00,       /* ld a, $00             */
-		/* 6007 */ 0xed, 0x39, 0x34, /* out0 ($34), a         */
-		/* 600a */ 0x3e, 0x0f,       /* ld a, $0f             */
-		/* 600c */ 0xed, 0x39, 0x0a, /* out0 ($0a), a         */
-		/* 600f */ 0x3e, 0x00,       /* ld a,$00              */
-		/* 6011 */ 0xed, 0x39, 0xd8, /* out0 ($d8),a          */
-		/* 6014 */ 0x3e, 0xe7,       /* ld a,$e7              */
-		/* 6016 */ 0xed, 0x39, 0x3a, /* out0 ($3a),a          */
-		/* 6019 */ 0x3e, 0x16,       /* ld a,$16              */
-		/* 601b */ 0xed, 0x39, 0x38, /* out0 ($38),a          */
-		/* 601e */ 0x3e, 0x20,       /* ld a,$20              */
-		/* 6020 */ 0xed, 0x39, 0x39, /* out0 ($39),a          */
-		/* 6023 */ 0x01, sslo, sshi, /* ld bc, start sector   */
-		/* 6026 */ 0x21, 0x00, 0xf8, /* ld hl,$f800           */
-		/* 6029 */ 0x1e, scnt,       /* ld e, sector count    */
-		/* 602b */ 0x16, 0x70,       /* ld d,$70              */
-		/* 602d */ 0xc5,             /* push bc               */
-		/* 602e */ 0xd5,             /* push de               */
-		/* 602f */ 0xe5,             /* push hl               */
-		/* 6030 */ 0x3e, 0x06,       /* ld a,$06              */
-		/* 6032 */ 0xef,             /* rst $28               */
-		/* 6033 */ 0xda, 0xd3, 0x60, /* jp c,$60d3            */
-		/* 6036 */ 0xe1,             /* pop hl                */
-		/* 6037 */ 0xd1,             /* pop de                */
-		/* 6038 */ 0xc1,             /* pop bc                */
-		/* 6039 */ 0x3e, 0x00,       /* ld a,$00              */
-		/* 603b */ 0xed, 0x39, 0x20, /* out0 ($20),a          */
-		/* 603e */ 0x3e, 0x58,       /* ld a,$58              */
-		/* 6040 */ 0xed, 0x39, 0x21, /* out0 ($21),a          */
-		/* 6043 */ 0x3e, 0x02,       /* ld a,$02              */
-		/* 6045 */ 0xed, 0x39, 0x22, /* out0 ($22),a          */
-		/* 6048 */ 0x3e, 0x00,       /* ld a,$00              */
-		/* 604a */ 0xed, 0x39, 0x23, /* out0 ($23),a          */
-		/* 604d */ 0x7a,             /* ld a,d                */
-		/* 604e */ 0xed, 0x39, 0x24, /* out0 ($24),a          */
-		/* 6051 */ 0x3e, 0x02,       /* ld a,$02              */
-		/* 6053 */ 0xed, 0x39, 0x25, /* out0 ($25),a          */
-		/* 6056 */ 0x3e, 0x00,       /* ld a,$00              */
-		/* 6058 */ 0xed, 0x39, 0x26, /* out0 ($26),a          */
-		/* 605b */ 0x3e, 0x01,       /* ld a,$01              */
-		/* 605d */ 0xed, 0x39, 0x27, /* out0 ($27),a          */
-		/* 6060 */ 0x3e, 0x02,       /* ld a,$02              */
-		/* 6062 */ 0xed, 0x39, 0x31, /* out0 ($31),a          */
-		/* 6065 */ 0x3e, 0x40,       /* ld a,$40              */
-		/* 6067 */ 0xed, 0x39, 0x30, /* out0 ($30),a          */
-		/* 606a */ 0x03,             /* inc bc                */
-		/* 606b */ 0x14,             /* inc d                 */
-		/* 606c */ 0x1d,             /* dec e                 */
-		/* 606d */ 0x7b,             /* ld a,e                */
-		/* 606e */ 0xfe, 0x00,       /* cp $00                */
-		/* 6070 */ 0x20, 0xbb,       /* jr nz,$602d           */
-		/* 6072 */ 0x3e, 0x02,       /* ld a,$02              */
-		/* 6074 */ 0xef,             /* rst $28               */
-		/* 6075 */ 0x3e, 0x20,       /* ld a,$20              */
-		/* 6077 */ 0xed, 0x39, 0x38, /* out0 ($38),a          */
-		/* 607a */ 0x3e, 0x0c,       /* ld a,$0c              */
-		/* 607c */ 0xed, 0x39, 0x39, /* out0 ($39),a          */
-		/* 607f */ 0x3e, 0x64,       /* ld a,$64              */
-		/* 6081 */ 0xed, 0x39, 0x3a, /* out0 ($3a),a          */
-		/* 6084 */ 0x3e, 0x0f,       /* ld a,$0f              */
-		/* 6086 */ 0xed, 0x39, 0x0a, /* out0 ($0a),a          */
+    uint8_t machineCode[] = {
+        /* 6000 */ 0x55, /* magic number?         */
+        /* 6001 */ 0xf3, /* di                    */
+        /* 6002 */ 0x31,
+        0x00,
+        0x00, /* ld sp, $0000          */
+        /* 6005 */ 0x3e,
+        0x00, /* ld a, $00             */
+        /* 6007 */ 0xed,
+        0x39,
+        0x34, /* out0 ($34), a         */
+        /* 600a */ 0x3e,
+        0x0f, /* ld a, $0f             */
+        /* 600c */ 0xed,
+        0x39,
+        0x0a, /* out0 ($0a), a         */
+        /* 600f */ 0x3e,
+        0x00, /* ld a,$00              */
+        /* 6011 */ 0xed,
+        0x39,
+        0xd8, /* out0 ($d8),a          */
+        /* 6014 */ 0x3e,
+        0xe7, /* ld a,$e7              */
+        /* 6016 */ 0xed,
+        0x39,
+        0x3a, /* out0 ($3a),a          */
+        /* 6019 */ 0x3e,
+        0x16, /* ld a,$16              */
+        /* 601b */ 0xed,
+        0x39,
+        0x38, /* out0 ($38),a          */
+        /* 601e */ 0x3e,
+        0x20, /* ld a,$20              */
+        /* 6020 */ 0xed,
+        0x39,
+        0x39, /* out0 ($39),a          */
+        /* 6023 */ 0x01,
+        sslo,
+        sshi, /* ld bc, start sector   */
+        /* 6026 */ 0x21,
+        0x00,
+        0xf8, /* ld hl,$f800           */
+        /* 6029 */ 0x1e,
+        scnt, /* ld e, sector count    */
+        /* 602b */ 0x16,
+        0x70,            /* ld d,$70              */
+        /* 602d */ 0xc5, /* push bc               */
+        /* 602e */ 0xd5, /* push de               */
+        /* 602f */ 0xe5, /* push hl               */
+        /* 6030 */ 0x3e,
+        0x06,            /* ld a,$06              */
+        /* 6032 */ 0xef, /* rst $28               */
+        /* 6033 */ 0xda,
+        0xd3,
+        0x60,            /* jp c,$60d3            */
+        /* 6036 */ 0xe1, /* pop hl                */
+        /* 6037 */ 0xd1, /* pop de                */
+        /* 6038 */ 0xc1, /* pop bc                */
+        /* 6039 */ 0x3e,
+        0x00, /* ld a,$00              */
+        /* 603b */ 0xed,
+        0x39,
+        0x20, /* out0 ($20),a          */
+        /* 603e */ 0x3e,
+        0x58, /* ld a,$58              */
+        /* 6040 */ 0xed,
+        0x39,
+        0x21, /* out0 ($21),a          */
+        /* 6043 */ 0x3e,
+        0x02, /* ld a,$02              */
+        /* 6045 */ 0xed,
+        0x39,
+        0x22, /* out0 ($22),a          */
+        /* 6048 */ 0x3e,
+        0x00, /* ld a,$00              */
+        /* 604a */ 0xed,
+        0x39,
+        0x23,            /* out0 ($23),a          */
+        /* 604d */ 0x7a, /* ld a,d                */
+        /* 604e */ 0xed,
+        0x39,
+        0x24, /* out0 ($24),a          */
+        /* 6051 */ 0x3e,
+        0x02, /* ld a,$02              */
+        /* 6053 */ 0xed,
+        0x39,
+        0x25, /* out0 ($25),a          */
+        /* 6056 */ 0x3e,
+        0x00, /* ld a,$00              */
+        /* 6058 */ 0xed,
+        0x39,
+        0x26, /* out0 ($26),a          */
+        /* 605b */ 0x3e,
+        0x01, /* ld a,$01              */
+        /* 605d */ 0xed,
+        0x39,
+        0x27, /* out0 ($27),a          */
+        /* 6060 */ 0x3e,
+        0x02, /* ld a,$02              */
+        /* 6062 */ 0xed,
+        0x39,
+        0x31, /* out0 ($31),a          */
+        /* 6065 */ 0x3e,
+        0x40, /* ld a,$40              */
+        /* 6067 */ 0xed,
+        0x39,
+        0x30,            /* out0 ($30),a          */
+        /* 606a */ 0x03, /* inc bc                */
+        /* 606b */ 0x14, /* inc d                 */
+        /* 606c */ 0x1d, /* dec e                 */
+        /* 606d */ 0x7b, /* ld a,e                */
+        /* 606e */ 0xfe,
+        0x00, /* cp $00                */
+        /* 6070 */ 0x20,
+        0xbb, /* jr nz,$602d           */
+        /* 6072 */ 0x3e,
+        0x02,            /* ld a,$02              */
+        /* 6074 */ 0xef, /* rst $28               */
+        /* 6075 */ 0x3e,
+        0x20, /* ld a,$20              */
+        /* 6077 */ 0xed,
+        0x39,
+        0x38, /* out0 ($38),a          */
+        /* 607a */ 0x3e,
+        0x0c, /* ld a,$0c              */
+        /* 607c */ 0xed,
+        0x39,
+        0x39, /* out0 ($39),a          */
+        /* 607f */ 0x3e,
+        0x64, /* ld a,$64              */
+        /* 6081 */ 0xed,
+        0x39,
+        0x3a, /* out0 ($3a),a          */
+        /* 6084 */ 0x3e,
+        0x0f, /* ld a,$0f              */
+        /* 6086 */ 0xed,
+        0x39,
+        0x0a, /* out0 ($0a),a          */
 
-		/* checksum routine */
-		/* 6089 */ 0x01, 0x00, 0x70, /* ld bc,$7000           */
-		/* 608c */ 0x11, 0x00, 0x00, /* ld de,$0000           */
-		/* 608f */ 0x21, 0x00, 0x00, /* ld hl,$0000           */
-		/* 6092 */ 0x0a,             /* ld a,(bc)             */
-		/* 6093 */ 0x5f,             /* ld e,a                */
-		/* 6094 */ 0x19,             /* add hl,de             */
-		/* 6095 */ 0x03,             /* inc bc                */
-		/* 6096 */ 0x79,             /* ld a,c                */
-		/* 6097 */ 0xfe, 0x00,       /* cp $00                */
-		/* 6099 */ 0x20, 0xf7,       /* jr nz,$6092           */
-		/* 609b */ 0x78,             /* ld a,b                */
-		/* 609c */ 0xfe, end,        /* cp end page           */
-		/* 609e */ 0x20, 0xf2,       /* jr nz,$6092           */
-		/* 60a0 */ 0x11, 0xf3, 0x60, /* ld de,$60f3           */
-		/* 60a3 */ 0x1a,             /* ld a,(de)             */
-		/* 60a4 */ 0xbd,             /* cp l                  */
-		/* 60a5 */ 0x20, 0x2f,       /* jr nz,$60d6           */
-		/* 60a7 */ 0x13,             /* inc de                */
-		/* 60a8 */ 0x1a,             /* ld a,(de)             */
-		/* 60a9 */ 0xbc,             /* cp h                  */
-		/* 60aa */ 0x20, 0x2a,       /* jr nz,$60d6           */
+        /* checksum routine */
+        /* 6089 */ 0x01,
+        0x00,
+        0x70, /* ld bc,$7000           */
+        /* 608c */ 0x11,
+        0x00,
+        0x00, /* ld de,$0000           */
+        /* 608f */ 0x21,
+        0x00,
+        0x00,            /* ld hl,$0000           */
+        /* 6092 */ 0x0a, /* ld a,(bc)             */
+        /* 6093 */ 0x5f, /* ld e,a                */
+        /* 6094 */ 0x19, /* add hl,de             */
+        /* 6095 */ 0x03, /* inc bc                */
+        /* 6096 */ 0x79, /* ld a,c                */
+        /* 6097 */ 0xfe,
+        0x00, /* cp $00                */
+        /* 6099 */ 0x20,
+        0xf7,            /* jr nz,$6092           */
+        /* 609b */ 0x78, /* ld a,b                */
+        /* 609c */ 0xfe,
+        end, /* cp end page           */
+        /* 609e */ 0x20,
+        0xf2, /* jr nz,$6092           */
+        /* 60a0 */ 0x11,
+        0xf3,
+        0x60,            /* ld de,$60f3           */
+        /* 60a3 */ 0x1a, /* ld a,(de)             */
+        /* 60a4 */ 0xbd, /* cp l                  */
+        /* 60a5 */ 0x20,
+        0x2f,            /* jr nz,$60d6           */
+        /* 60a7 */ 0x13, /* inc de                */
+        /* 60a8 */ 0x1a, /* ld a,(de)             */
+        /* 60a9 */ 0xbc, /* cp h                  */
+        /* 60aa */ 0x20,
+        0x2a, /* jr nz,$60d6           */
 
-		/* reset and execute */
-		/* 60ac */ 0x3e, 0xff,       /* ld a,$ff              */
-		/* 60ae */ 0xed, 0x39, 0x88, /* out0 ($88),a          */
-		/* 60b1 */ 0x01, 0xff, 0x0f, /* ld bc,$0fff           */
-		/* 60b4 */ 0x21, 0x00, 0x40, /* ld hl,$4000           */
-		/* 60b7 */ 0x11, 0x01, 0x40, /* ld de,$4001           */
-		/* 60ba */ 0x36, 0x00,       /* ld (hl),$00           */
-		/* 60bc */ 0xed, 0xb0,       /* ldir                  */
-		/* 60be */ 0x01, 0xff, 0x0f, /* ld bc,$0fff           */
-		/* 60c1 */ 0x21, 0x00, 0x50, /* ld hl,$5000           */
-		/* 60c4 */ 0x11, 0x01, 0x50, /* ld de,$5001           */
-		/* 60c7 */ 0x36, 0x20,       /* ld (hl),$20           */
-		/* 60c9 */ 0xed, 0xb0,       /* ldir                  */
-		/* 60cb */ 0x3e, 0xfe,       /* ld a,$fe              */
-		/* 60cd */ 0xed, 0x39, 0x88, /* out0 ($88),a          */
-		/* 60d0 */ 0xc3, 0x00, 0x70, /* jp $7000              */
+        /* reset and execute */
+        /* 60ac */ 0x3e,
+        0xff, /* ld a,$ff              */
+        /* 60ae */ 0xed,
+        0x39,
+        0x88, /* out0 ($88),a          */
+        /* 60b1 */ 0x01,
+        0xff,
+        0x0f, /* ld bc,$0fff           */
+        /* 60b4 */ 0x21,
+        0x00,
+        0x40, /* ld hl,$4000           */
+        /* 60b7 */ 0x11,
+        0x01,
+        0x40, /* ld de,$4001           */
+        /* 60ba */ 0x36,
+        0x00, /* ld (hl),$00           */
+        /* 60bc */ 0xed,
+        0xb0, /* ldir                  */
+        /* 60be */ 0x01,
+        0xff,
+        0x0f, /* ld bc,$0fff           */
+        /* 60c1 */ 0x21,
+        0x00,
+        0x50, /* ld hl,$5000           */
+        /* 60c4 */ 0x11,
+        0x01,
+        0x50, /* ld de,$5001           */
+        /* 60c7 */ 0x36,
+        0x20, /* ld (hl),$20           */
+        /* 60c9 */ 0xed,
+        0xb0, /* ldir                  */
+        /* 60cb */ 0x3e,
+        0xfe, /* ld a,$fe              */
+        /* 60cd */ 0xed,
+        0x39,
+        0x88, /* out0 ($88),a          */
+        /* 60d0 */ 0xc3,
+        0x00,
+        0x70, /* jp $7000              */
 
-		/* 60d3 */ 0xe1,             /* pop hl                */
-		/* 60d4 */ 0xd1,             /* pop de                */
-		/* 60d5 */ 0xc1,             /* pop bc                */
-		/* 60d6 */ 0x01, 0x00, 0x00, /* ld bc,$0000           */
-		/* 60d9 */ 0x0b,             /* dec bc                */
-		/* 60da */ 0x3e, 0xfe,       /* ld a,$fe              */
-		/* 60dc */ 0xed, 0x39, 0x90, /* out0 ($90),a          */
-		/* 60df */ 0x78,             /* ld a,b                */
-		/* 60e0 */ 0xb1,             /* or c                  */
-		/* 60e1 */ 0x20, 0xf6,       /* jr nz,$60d9           */
-		/* 60e3 */ 0x31, 0x00, 0x00, /* ld sp,$0000           */
-		/* 60e6 */ 0x3e, 0xff,       /* ld a,$ff              */
-		/* 60e8 */ 0xed, 0x39, 0x90, /* out0 ($90),a          */
-		/* 60eb */ 0x3e, 0x0f,       /* ld a,$0f              */
-		/* 60ed */ 0xed, 0x39, 0x0a, /* out0 ($0a),a          */
-		/* 60f0 */ 0xc3, 0x00, 0x00, /* jp $0000              */
-		/* 60f3 */ cklo, ckhi,       /* checksum              */
-	};
+        /* 60d3 */ 0xe1, /* pop hl                */
+        /* 60d4 */ 0xd1, /* pop de                */
+        /* 60d5 */ 0xc1, /* pop bc                */
+        /* 60d6 */ 0x01,
+        0x00,
+        0x00,            /* ld bc,$0000           */
+        /* 60d9 */ 0x0b, /* dec bc                */
+        /* 60da */ 0x3e,
+        0xfe, /* ld a,$fe              */
+        /* 60dc */ 0xed,
+        0x39,
+        0x90,            /* out0 ($90),a          */
+        /* 60df */ 0x78, /* ld a,b                */
+        /* 60e0 */ 0xb1, /* or c                  */
+        /* 60e1 */ 0x20,
+        0xf6, /* jr nz,$60d9           */
+        /* 60e3 */ 0x31,
+        0x00,
+        0x00, /* ld sp,$0000           */
+        /* 60e6 */ 0x3e,
+        0xff, /* ld a,$ff              */
+        /* 60e8 */ 0xed,
+        0x39,
+        0x90, /* out0 ($90),a          */
+        /* 60eb */ 0x3e,
+        0x0f, /* ld a,$0f              */
+        /* 60ed */ 0xed,
+        0x39,
+        0x0a, /* out0 ($0a),a          */
+        /* 60f0 */ 0xc3,
+        0x00,
+        0x00, /* jp $0000              */
+        /* 60f3 */ cklo,
+        ckhi, /* checksum              */
+    };
 
     file.seekp(0xc00, std::ifstream::beg);
-	file.write((char*) machineCode, sizeof(machineCode));
+    file.write((char*)machineCode, sizeof(machineCode));
 }
 
 static bool isValidFile(const Dirent& dirent)
@@ -283,7 +410,7 @@ uint16_t allocateSector()
             return sector;
         }
     }
-    Error() << "unable to allocate sector --- disk full";
+    error("unable to allocate sector --- disk full");
     return 0;
 }
 
@@ -345,16 +472,15 @@ void insertFile(const std::string& filename)
 {
     auto leafname = getLeafname(filename);
     if (leafname.size() > 8)
-        Error() << "filename too long";
+        error("filename too long");
     std::cout << fmt::format("Inserting '{}'\n", leafname);
 
     std::ifstream inputFile(filename, std::ios::in | std::ios::binary);
     if (!inputFile)
-        Error() << fmt::format(
-            "unable to open input file: {}", strerror(errno));
+        error("unable to open input file: {}", strerror(errno));
 
     if (directory.find(leafname) != directory.end())
-        Error() << fmt::format("duplicate filename: {}", leafname);
+        error("duplicate filename: {}", leafname);
 
     auto dirent = std::make_unique<Dirent>();
     dirent->filename = leafname;
@@ -363,17 +489,17 @@ void insertFile(const std::string& filename)
     dirent->sectorCount = 0;
 
     uint16_t lastSector = 0xffff;
-	uint16_t checksum = 0;
+    uint16_t checksum = 0;
     while (!inputFile.eof())
     {
         uint8_t buffer[SECTOR_SIZE] = {};
-        inputFile.read((char*) buffer, sizeof(buffer));
-		for (int i=0; i<inputFile.gcount(); i++)
-			checksum += buffer[i];
+        inputFile.read((char*)buffer, sizeof(buffer));
+        for (int i = 0; i < inputFile.gcount(); i++)
+            checksum += buffer[i];
         if (inputFile.gcount() == 0)
             break;
         if (inputFile.bad())
-            Error() << fmt::format("I/O error on read: {}", strerror(errno));
+            error("I/O error on read: {}", strerror(errno));
 
         uint16_t thisSector = allocateSector();
         if (lastSector == 0xffff)
@@ -383,19 +509,19 @@ void insertFile(const std::string& filename)
         dirent->sectorCount++;
 
         file.seekp((thisSector - 1) * 0x100, std::ifstream::beg);
-        file.write((char*) buffer, sizeof(buffer));
+        file.write((char*)buffer, sizeof(buffer));
         if (file.bad())
-            Error() << fmt::format("I/O error on write: {}", strerror(errno));
+            error("I/O error on write: {}", strerror(errno));
 
         lastSector = thisSector;
     }
 
-	if (leafname == "*boot")
-	{
-		std::cout << fmt::format(
-			"Writing boot sector with checksum 0x{:04x}\n", checksum);
-		writeBootSector(*dirent, checksum);
-	}
+    if (leafname == "*boot")
+    {
+        std::cout << fmt::format(
+            "Writing boot sector with checksum 0x{:04x}\n", checksum);
+        writeBootSector(*dirent, checksum);
+    }
 
     directory[leafname] = std::move(dirent);
 }
@@ -416,8 +542,7 @@ void extractFile(const std::string& pattern)
         std::ofstream outputFile(dirent.filename,
             std::ios::out | std::ios::binary | std::ios::trunc);
         if (!outputFile)
-            Error() << fmt::format(
-                "unable to open output file: {}", strerror(errno));
+            error("unable to open output file: {}", strerror(errno));
 
         uint16_t sector = dirent.startSector;
         while ((sector != 0) && (sector != 0xffff))
@@ -425,11 +550,9 @@ void extractFile(const std::string& pattern)
             uint8_t buffer[256];
             file.seekg((sector - 1) * 0x100, std::ifstream::beg);
             if (!file.read((char*)buffer, sizeof(buffer)))
-                Error() << fmt::format(
-                    "I/O error on read: {}", strerror(errno));
+                error("I/O error on read: {}", strerror(errno));
             if (!outputFile.write((const char*)buffer, sizeof(buffer)))
-                Error() << fmt::format(
-                    "I/O error on write: {}", strerror(errno));
+                error("I/O error on write: {}", strerror(errno));
 
             sector = allocationTable[sector];
         }
@@ -443,7 +566,7 @@ static void doCreate(int argc, const char* argv[])
 
     file.open(argv[1], std::ios::out | std::ios::binary | std::ios::trunc);
     if (!file.is_open())
-        Error() << fmt::format("cannot open output file '{}'", argv[1]);
+        error("cannot open output file '{}'", argv[1]);
 
     file.seekp(SECTOR_COUNT * SECTOR_SIZE - 1, std::ifstream::beg);
     file.put(0);
@@ -465,7 +588,7 @@ static void doExtract(int argc, const char* argv[])
 
     file.open(argv[1], std::ios::in | std::ios::binary);
     if (!file.is_open())
-        Error() << fmt::format("cannot open input file '{}'", argv[1]);
+        error("cannot open input file '{}'", argv[1]);
 
     readDirectory();
     readAllocationTable();

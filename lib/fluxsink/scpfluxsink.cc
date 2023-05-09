@@ -7,7 +7,6 @@
 #include "decoders/fluxmapreader.h"
 #include "lib/fluxsink/fluxsink.pb.h"
 #include "proto.h"
-#include "fmt/format.h"
 #include "fluxmap.h"
 #include "layout.h"
 #include "scp.h"
@@ -58,12 +57,12 @@ public:
         if (config.tpi() != 48)
             _fileheader.flags |= SCP_FLAG_96TPI;
         _fileheader.cell_width = 0;
-		if ((minSide == 0) && (maxSide == 0))
-			_fileheader.heads = 1;
-		else if ((minSide == 1) && (maxSide == 1))
-			_fileheader.heads = 2;
-		else
-			_fileheader.heads = 0;
+        if ((minSide == 0) && (maxSide == 0))
+            _fileheader.heads = 1;
+        else if ((minSide == 1) && (maxSide == 1))
+            _fileheader.heads = 2;
+        else
+            _fileheader.heads = 0;
 
         std::cout << fmt::format(
             "SCP: writing 96 tpi {} file containing {} tracks\n",
@@ -83,7 +82,7 @@ public:
         std::cout << "SCP: writing output file...\n";
         std::ofstream of(_config.filename(), std::ios::out | std::ios::binary);
         if (!of.is_open())
-            Error() << "cannot open output file";
+            error("cannot open output file");
         of.write((const char*)&_fileheader, sizeof(_fileheader));
         _trackdata.writeTo(of);
         of.close();

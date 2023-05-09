@@ -6,7 +6,6 @@
 #include "logger.h"
 #include "proto.h"
 #include "lib/config.pb.h"
-#include "fmt/format.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -24,12 +23,12 @@ public:
         std::ifstream inputFile(
             _config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
-            Error() << "cannot open input file";
+            error("cannot open input file");
 
         Bytes header(256);
         inputFile.read((char*)header.begin(), header.size());
         if (header.slice(0xAB, 13) != Bytes("DIFC HEADER  "))
-            Error() << "DIM: could not find DIM header, is this a DIM file?";
+            error("DIM: could not find DIM header, is this a DIM file?");
 
         // the DIM header technically has a bit field for sectors present,
         // however it is currently ignored by this reader
@@ -61,7 +60,7 @@ public:
                 sectorSize = 512;
                 break;
             default:
-                Error() << "DIM: unsupported media byte";
+                error("DIM: unsupported media byte");
                 break;
         }
 
@@ -92,7 +91,7 @@ public:
             trackCount++;
         }
 
-		auto layout = config.mutable_layout();
+        auto layout = config.mutable_layout();
         if (config.encoder().format_case() ==
             EncoderProto::FormatCase::FORMAT_NOT_SET)
         {
@@ -100,7 +99,7 @@ public:
             auto trackdata = ibm->add_trackdata();
             trackdata->set_target_clock_period_us(2);
 
-			auto layoutdata = layout->add_layoutdata();
+            auto layoutdata = layout->add_layoutdata();
             auto physical = layoutdata->mutable_physical();
             switch (mediaByte)
             {
@@ -128,7 +127,7 @@ public:
                         physical->add_sector(i);
                     break;
                 default:
-                    Error() << fmt::format(
+                    error(
                         "DIM: unknown media byte 0x%02x, could not determine "
                         "write profile automatically",
                         mediaByte);
@@ -145,8 +144,8 @@ public:
             geometry.numSides,
             ((int)inputFile.tellg() - 256) / 1024);
 
-		layout->set_tracks(geometry.numTracks);
-		layout->set_sides(geometry.numSides);
+        layout->set_tracks(geometry.numTracks);
+        layout->set_sides(geometry.numSides);
 
         return image;
     }

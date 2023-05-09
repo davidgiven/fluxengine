@@ -7,7 +7,6 @@
 #include "lib/decoders/decoders.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/imagereader/imagereader.h"
-#include "fmt/format.h"
 #include "fluxengine.h"
 #include "lib/vfs/sectorinterface.h"
 #include "lib/vfs/vfs.h"
@@ -58,14 +57,14 @@ int mainLs(int argc, const char* argv[])
                 quote(dirent->filename),
                 maxlen + 2,
                 dirent->length,
-				dirent->mode);
+                dirent->mode);
             total += dirent->length;
         }
         fmt::print("({} files, {} bytes)\n", files.size(), total);
     }
     catch (const FilesystemException& e)
     {
-        Error() << e.message;
+        error("{}", e.message);
     }
 
     return 0;

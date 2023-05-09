@@ -1,7 +1,6 @@
 #include "globals.h"
 #include "proto.h"
 #include "lib/common.pb.h"
-#include "fmt/format.h"
 #include <regex>
 
 ConfigProto config = []()
@@ -17,7 +16,7 @@ static double toDouble(const std::string& value)
     size_t idx;
     double d = std::stod(value, &idx);
     if (value[idx] != '\0')
-        Error() << fmt::format("invalid number '{}'", value);
+        error("invalid number '{}'", value);
     return d;
 }
 
@@ -26,7 +25,7 @@ static int64_t toInt64(const std::string& value)
     size_t idx;
     int64_t d = std::stoll(value, &idx);
     if (value[idx] != '\0')
-        Error() << fmt::format("invalid number '{}'", value);
+        error("invalid number '{}'", value);
     return d;
 }
 
@@ -35,7 +34,7 @@ static uint64_t toUint64(const std::string& value)
     size_t idx;
     uint64_t d = std::stoull(value, &idx);
     if (value[idx] != '\0')
-        Error() << fmt::format("invalid number '{}'", value);
+        error("invalid number '{}'", value);
     return d;
 }
 
@@ -46,7 +45,7 @@ void setRange(RangeProto* range, const std::string& data)
 
     std::smatch dmatch;
     if (!std::regex_match(data, dmatch, DATA_REGEX))
-        Error() << "invalid range '" << data << "'";
+        error("invalid range '{}'", data);
 
     int start = std::stoi(dmatch[1]);
     range->set_start(start);
@@ -76,11 +75,9 @@ ProtoField resolveProtoPath(
     {
         const auto* field = descriptor->FindFieldByName(item);
         if (!field)
-            Error() << fmt::format(
-                "no such config field '{}' in '{}'", item, path);
+            error("no such config field '{}' in '{}'", item, path);
         if (field->type() != google::protobuf::FieldDescriptor::TYPE_MESSAGE)
-            Error() << fmt::format(
-                "config field '{}' in '{}' is not a message", item, path);
+            error("config field '{}' in '{}' is not a message", item, path);
 
         const auto* reflection = message->GetReflection();
         switch (field->label())
@@ -98,7 +95,7 @@ ProtoField resolveProtoPath(
                 break;
 
             default:
-                Error() << "bad proto label " << field->label();
+                error("bad proto label {}", field->label());
         }
 
         descriptor = message->GetDescriptor();
@@ -106,8 +103,7 @@ ProtoField resolveProtoPath(
 
     const auto* field = descriptor->FindFieldByName(trailing);
     if (!field)
-        Error() << fmt::format(
-            "no such config field '{}' in '{}'", trailing, path);
+        error("no such config field '{}' in '{}'", trailing, path);
 
     return std::make_pair(message, field);
 }
@@ -161,7 +157,7 @@ void setProtoFieldFromString(ProtoField& protoField, const std::string& value)
 
             const auto& it = boolvalues.find(value);
             if (it == boolvalues.end())
-                Error() << "invalid boolean value";
+                error("invalid boolean value");
             reflection->SetBool(message, field, it->second);
             break;
         }
@@ -171,7 +167,7 @@ void setProtoFieldFromString(ProtoField& protoField, const std::string& value)
             const auto* enumfield = field->enum_type();
             const auto* enumvalue = enumfield->FindValueByName(value);
             if (!enumvalue)
-                Error() << fmt::format("unrecognised enum value '{}'", value);
+                error("unrecognised enum value '{}'", value);
 
             reflection->SetEnum(message, field, enumvalue);
             break;
@@ -192,7 +188,7 @@ void setProtoFieldFromString(ProtoField& protoField, const std::string& value)
             }
             /* fall through */
         default:
-            Error() << "can't set this config value type";
+            error("can't set this config value type");
     }
 }
 
@@ -249,9 +245,8 @@ findAllProtoFields(google::protobuf::Message* message)
 
 ConfigProto parseConfigBytes(const std::string_view& data)
 {
-	ConfigProto proto;
-	if (!proto.ParseFromArray(data.begin(), data.size()))
-		Error() << "invalid internal config data";
-	return proto;
+    ConfigProto proto;
+    if (!proto.ParseFromArray(data.begin(), data.size()))
+        error("invalid internal config data");
+    return proto;
 }
-

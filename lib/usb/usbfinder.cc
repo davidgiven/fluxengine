@@ -2,13 +2,13 @@
 #include "flags.h"
 #include "usb.h"
 #include "bytes.h"
-#include "fmt/format.h"
 #include "usbfinder.h"
 #include "greaseweazle.h"
 #include "protocol.h"
 #include "libusbp.hpp"
 
-static const std::set<uint32_t> VALID_DEVICES = { GREASEWEAZLE_ID, FLUXENGINE_ID };
+static const std::set<uint32_t> VALID_DEVICES = {
+    GREASEWEAZLE_ID, FLUXENGINE_ID};
 
 static const std::string get_serial_number(const libusbp::device& device)
 {
@@ -42,10 +42,10 @@ std::vector<std::shared_ptr<CandidateDevice>> findUsbDevices()
             {
                 libusbp::serial_port port(candidate->device);
                 candidate->serialPort = port.get_name();
-				candidate->type = DEVICE_GREASEWEAZLE;
+                candidate->type = DEVICE_GREASEWEAZLE;
             }
-			else if (id == FLUXENGINE_ID)
-				candidate->type = DEVICE_FLUXENGINE;
+            else if (id == FLUXENGINE_ID)
+                candidate->type = DEVICE_FLUXENGINE;
 
             candidates.push_back(std::move(candidate));
         }
@@ -56,16 +56,15 @@ std::vector<std::shared_ptr<CandidateDevice>> findUsbDevices()
 
 std::string getDeviceName(DeviceType type)
 {
-	switch (type)
-	{
-		case DEVICE_GREASEWEAZLE:
-			return "Greaseweazle";
+    switch (type)
+    {
+        case DEVICE_GREASEWEAZLE:
+            return "Greaseweazle";
 
-		case DEVICE_FLUXENGINE:
-			return "FluxEngine";
+        case DEVICE_FLUXENGINE:
+            return "FluxEngine";
 
-		default:
-			return "unknown";
-	}
+        default:
+            return "unknown";
+    }
 }
-

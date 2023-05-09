@@ -5,7 +5,6 @@
 #include "image.h"
 #include "logger.h"
 #include "lib/config.pb.h"
-#include "fmt/format.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -20,7 +19,7 @@ public:
         std::ifstream inputFile(
             _config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
-            Error() << "cannot open input file";
+            error("cannot open input file");
 
         Bytes data;
         data.writer() += inputFile;
@@ -61,8 +60,7 @@ public:
                 break;
 
             default:
-                Error() << fmt::format(
-                    "don't understand DiskCopy disks of type {}", encoding);
+                error("don't understand DiskCopy disks of type {}", encoding);
         }
 
         Logger() << fmt::format(

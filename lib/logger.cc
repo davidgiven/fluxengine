@@ -3,7 +3,6 @@
 #include "fluxmap.h"
 #include "sector.h"
 #include "flux.h"
-#include "fmt/format.h"
 #include "logger.h"
 
 static bool indented = false;

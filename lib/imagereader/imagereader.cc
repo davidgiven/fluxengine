@@ -3,7 +3,6 @@
 #include "sector.h"
 #include "imagereader/imagereader.h"
 #include "utils.h"
-#include "fmt/format.h"
 #include "proto.h"
 #include "image.h"
 #include "lib/layout.h"
@@ -50,7 +49,7 @@ std::unique_ptr<ImageReader> ImageReader::create(const ImageReaderProto& config)
             return ImageReader::createTd0ImageReader(config);
 
         default:
-            Error() << "bad input file config";
+            error("bad input file config");
             return std::unique_ptr<ImageReader>();
     }
 }
@@ -91,7 +90,7 @@ void ImageReader::updateConfigForFilename(
         }
     }
 
-    Error() << fmt::format("unrecognised image filename '{}'", filename);
+    error("unrecognised image filename '{}'", filename);
 }
 
 ImageReader::ImageReader(const ImageReaderProto& config): _config(config) {}

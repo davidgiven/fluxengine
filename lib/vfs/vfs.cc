@@ -153,9 +153,9 @@ Filesystem::Filesystem(std::shared_ptr<SectorInterface> sectors):
 {
     auto& layout = config.layout();
     if (!layout.has_tracks() || !layout.has_sides())
-        Error()
-            << "FS: filesystem support cannot be used without concrete layout "
-               "information";
+        error(
+            "FS: filesystem support cannot be used without concrete layout "
+            "information");
 
     unsigned block = 0;
     for (const auto& p :
@@ -166,8 +166,9 @@ Filesystem::Filesystem(std::shared_ptr<SectorInterface> sectors):
 
         auto trackLayout = Layout::getLayoutOfTrack(track, side);
         if (trackLayout->numSectors == 0)
-            Error() << "FS: filesystem support cannot be used without concrete "
-                       "layout information";
+            error(
+                "FS: filesystem support cannot be used without concrete "
+                "layout information");
 
         for (int sectorId : trackLayout->filesystemSectorOrder)
             _locations.push_back(std::make_tuple(track, side, sectorId));
@@ -216,7 +217,7 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystem(
             return Filesystem::createLifFilesystem(config, image);
 
         default:
-            Error() << "no filesystem configured";
+            error("no filesystem configured");
             return std::unique_ptr<Filesystem>();
     }
 }

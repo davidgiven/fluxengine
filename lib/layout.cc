@@ -2,7 +2,6 @@
 #include "lib/layout.h"
 #include "lib/proto.h"
 #include "lib/environment.h"
-#include <fmt/format.h>
 
 static unsigned getTrackStep()
 {
@@ -10,8 +9,7 @@ static unsigned getTrackStep()
         (config.tpi() == 0) ? 1 : (config.drive().tpi() / config.tpi());
 
     if (track_step == 0)
-        Error()
-            << "this drive can't write this image, because the head is too big";
+        error("this drive can't write this image, because the head is too big");
     return track_step;
 }
 
@@ -108,7 +106,7 @@ std::vector<std::pair<int, int>> Layout::getTrackOrdering(
         }
 
         default:
-            Error() << "LAYOUT: invalid track ordering";
+            error("LAYOUT: invalid track ordering");
     }
 
     return ordering;
@@ -122,8 +120,9 @@ std::vector<unsigned> Layout::expandSectorList(
     if (sectorsProto.has_count())
     {
         if (sectorsProto.sector_size() != 0)
-            Error() << "LAYOUT: if you use a sector count, you can't use an "
-                       "explicit sector list";
+            error(
+                "LAYOUT: if you use a sector count, you can't use an "
+                "explicit sector list");
 
         std::set<unsigned> sectorset;
         int id = sectorsProto.start_sector();
@@ -150,7 +149,7 @@ std::vector<unsigned> Layout::expandSectorList(
             sectors.push_back(sectorId);
     }
     else
-        Error() << "LAYOUT: no sectors in sector definition!";
+        error("LAYOUT: no sectors in sector definition!");
 
     return sectors;
 }
@@ -194,8 +193,9 @@ std::shared_ptr<const TrackInfo> Layout::getLayoutOfTrack(
         trackInfo->filesystemSectorOrder =
             expandSectorList(layoutdata.filesystem());
         if (trackInfo->filesystemSectorOrder.size() != trackInfo->numSectors)
-            Error() << "filesystem sector order list doesn't contain the right "
-                       "number of sectors";
+            error(
+                "filesystem sector order list doesn't contain the right "
+                "number of sectors");
     }
     else
         trackInfo->filesystemSectorOrder = trackInfo->naturalSectorOrder;

@@ -10,7 +10,6 @@
 #include "usbfinder.h"
 #include "logger.h"
 #include "greaseweazle.h"
-#include "fmt/format.h"
 
 static USB* usb = NULL;
 
@@ -20,8 +19,9 @@ static std::shared_ptr<CandidateDevice> selectDevice()
 {
     auto candidates = findUsbDevices();
     if (candidates.size() == 0)
-        Error() << "no devices found (is one plugged in? Do you have the "
-                   "appropriate permissions?";
+        error(
+            "no devices found (is one plugged in? Do you have the "
+            "appropriate permissions?");
 
     if (config.usb().has_serial())
     {
@@ -31,8 +31,9 @@ static std::shared_ptr<CandidateDevice> selectDevice()
             if (c->serial == wantedSerial)
                 return c;
         }
-        Error() << "serial number not found (try without one to list or "
-                   "autodetect devices)";
+        error(
+            "serial number not found (try without one to list or "
+            "autodetect devices)");
     }
 
     if (candidates.size() == 1)
@@ -77,8 +78,7 @@ USB* get_usb_impl()
     switch (candidate->id)
     {
         case FLUXENGINE_ID:
-            Logger() << fmt::format(
-                "Using FluxEngine {}", candidate->serial);
+            Logger() << fmt::format("Using FluxEngine {}", candidate->serial);
             return createFluxengineUsb(candidate->device);
 
         case GREASEWEAZLE_ID:
@@ -88,7 +88,8 @@ USB* get_usb_impl()
             return createGreaseWeazleUsb(
                 candidate->serialPort, config.usb().greaseweazle());
 
-        default: Error() << "internal";
+        default:
+            error("internal");
     }
 }
 

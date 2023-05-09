@@ -2,7 +2,6 @@
 #include "gui.h"
 #include "layout.h"
 #include "textviewerwindow.h"
-#include "fmt/format.h"
 
 TextViewerWindow::TextViewerWindow(wxWindow* parent,
     const std::string& title,
