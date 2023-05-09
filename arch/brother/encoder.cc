@@ -67,7 +67,7 @@ static void write_sector_data(
     int width = 0;
 
     if (data.size() != BROTHER_DATA_RECORD_PAYLOAD)
-        Error() << "unsupported sector size";
+        error("unsupported sector size");
 
     auto write_byte = [&](uint8_t byte)
     {
@@ -107,8 +107,7 @@ public:
     }
 
 public:
-    std::unique_ptr<Fluxmap> encode(
-		std::shared_ptr<const TrackInfo>& trackInfo,
+    std::unique_ptr<Fluxmap> encode(std::shared_ptr<const TrackInfo>& trackInfo,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
@@ -116,8 +115,8 @@ public:
         std::vector<bool> bits(bitsPerRevolution);
         unsigned cursor = 0;
 
-		int sectorCount = 0;
-		for (const auto& sectorData : sectors)
+        int sectorCount = 0;
+        for (const auto& sectorData : sectors)
         {
             double headerMs = _config.post_index_gap_ms() +
                               sectorCount * _config.sector_spacing_ms();
@@ -126,16 +125,18 @@ public:
             unsigned dataCursor = dataMs * 1e3 / _config.clock_rate_us();
 
             fillBitmapTo(bits, cursor, headerCursor, {true, false});
-            write_sector_header(
-                bits, cursor, sectorData->logicalTrack, sectorData->logicalSector);
+            write_sector_header(bits,
+                cursor,
+                sectorData->logicalTrack,
+                sectorData->logicalSector);
             fillBitmapTo(bits, cursor, dataCursor, {true, false});
             write_sector_data(bits, cursor, sectorData->data);
 
-			sectorCount++;
+            sectorCount++;
         }
 
         if (cursor >= bits.size())
-            Error() << "track data overrun";
+            error("track data overrun");
         fillBitmapTo(bits, cursor, bits.size(), {true, false});
 
         std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
@@ -147,8 +148,7 @@ private:
     const BrotherEncoderProto& _config;
 };
 
-std::unique_ptr<Encoder> createBrotherEncoder(
-    const EncoderProto& config)
+std::unique_ptr<Encoder> createBrotherEncoder(const EncoderProto& config)
 {
     return std::unique_ptr<Encoder>(new BrotherEncoder(config));
 }

@@ -29,7 +29,6 @@
 #include "image.h"
 #include "lib/decoders/decoders.pb.h"
 #include "lib/layout.h"
-#include "fmt/format.h"
 #include <numeric>
 
 std::unique_ptr<Decoder> Decoder::create(const DecoderProto& config)
@@ -59,7 +58,7 @@ std::unique_ptr<Decoder> Decoder::create(const DecoderProto& config)
 
     auto decoder = decoders.find(config.format_case());
     if (decoder == decoders.end())
-        Error() << "no decoder specified";
+        error("no decoder specified");
 
     return (decoder->second)(config);
 }

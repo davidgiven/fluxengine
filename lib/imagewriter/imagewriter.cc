@@ -8,7 +8,6 @@
 #include "proto.h"
 #include "lib/layout.h"
 #include "lib/logger.h"
-#include "fmt/format.h"
 #include <iostream>
 #include <fstream>
 
@@ -41,7 +40,7 @@ std::unique_ptr<ImageWriter> ImageWriter::create(const ImageWriterProto& config)
             return ImageWriter::createImdImageWriter(config);
 
         default:
-            Error() << "bad output image config";
+            error("bad output image config");
             return std::unique_ptr<ImageWriter>();
     }
 }
@@ -79,7 +78,7 @@ void ImageWriter::updateConfigForFilename(
         }
     }
 
-    Error() << fmt::format("unrecognised image filename '{}'", filename);
+    error("unrecognised image filename '{}'", filename);
 }
 
 ImageWriter::ImageWriter(const ImageWriterProto& config): _config(config) {}
@@ -88,7 +87,7 @@ void ImageWriter::writeCsv(const Image& image, const std::string& filename)
 {
     std::ofstream f(filename, std::ios::out);
     if (!f.is_open())
-        Error() << "cannot open CSV report file";
+        error("cannot open CSV report file");
 
     f << "\"Physical track\","
          "\"Physical side\","
@@ -207,8 +206,7 @@ void ImageWriter::writeMappedImage(const Image& image)
 {
     if (_config.filesystem_sector_order())
     {
-        Logger()
-            << "WRITER: converting from disk sector order to filesystem order";
+        log("WRITER: converting from disk sector order to filesystem order");
 
         std::set<std::shared_ptr<const Sector>> sectors;
         for (const auto& e : image)

@@ -169,14 +169,15 @@ public:
         const Image& image) override
     {
         Victor9kEncoderProto::TrackdataProto trackdata;
-        getTrackFormat(trackdata, trackInfo->logicalTrack, trackInfo->logicalSide);
+        getTrackFormat(
+            trackdata, trackInfo->logicalTrack, trackInfo->logicalSide);
 
         unsigned bitsPerRevolution = (trackdata.rotational_period_ms() * 1e3) /
                                      trackdata.clock_period_us();
         std::vector<bool> bits(bitsPerRevolution);
-        nanoseconds_t clockPeriod = calculatePhysicalClockPeriod(
-            trackdata.clock_period_us() * 1e3,
-            trackdata.rotational_period_ms() * 1e6);
+        nanoseconds_t clockPeriod =
+            calculatePhysicalClockPeriod(trackdata.clock_period_us() * 1e3,
+                trackdata.rotational_period_ms() * 1e6);
         unsigned cursor = 0;
 
         fillBitmapTo(bits,
@@ -189,8 +190,7 @@ public:
             write_sector(bits, cursor, trackdata, *sector);
 
         if (cursor >= bits.size())
-            Error() << fmt::format(
-                "track data overrun by {} bits", cursor - bits.size());
+            error("track data overrun by {} bits", cursor - bits.size());
         fillBitmapTo(bits, cursor, bits.size(), {true, false});
 
         std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
@@ -202,8 +202,7 @@ private:
     const Victor9kEncoderProto& _config;
 };
 
-std::unique_ptr<Encoder> createVictor9kEncoder(
-    const EncoderProto& config)
+std::unique_ptr<Encoder> createVictor9kEncoder(const EncoderProto& config)
 {
     return std::unique_ptr<Encoder>(new Victor9kEncoder(config));
 }

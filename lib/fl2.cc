@@ -1,7 +1,6 @@
 #include "globals.h"
 #include "proto.h"
 #include "fluxmap.h"
-#include "fmt/format.h"
 #include "lib/fl2.pb.h"
 #include <fstream>
 
@@ -27,7 +26,7 @@ static void upgradeFluxFile(FluxFileProto& proto)
         proto.set_version(FluxFileVersion::VERSION_2);
     }
     if (proto.version() > FluxFileVersion::VERSION_2)
-        Error() << fmt::format(
+        error(
             "this is a version {} flux file, but this build of the client can "
             "only handle up to version {} --- please upgrade",
             proto.version(),
@@ -38,19 +37,19 @@ FluxFileProto loadFl2File(const std::string filename)
 {
     std::ifstream ifs(filename, std::ios::in | std::ios::binary);
     if (!ifs.is_open())
-        Error() << fmt::format(
-            "cannot open input file '{}': {}", filename, strerror(errno));
+        error("cannot open input file '{}': {}", filename, strerror(errno));
 
     char buffer[16];
-	ifs.read(buffer, sizeof(buffer));
+    ifs.read(buffer, sizeof(buffer));
     if (strncmp(buffer, "SQLite format 3", 16) == 0)
-        Error() << "this flux file is too old; please use the "
-                   "upgrade-flux-file tool to upgrade it";
+        error(
+            "this flux file is too old; please use the upgrade-flux-file tool "
+            "to upgrade it");
 
     FluxFileProto proto;
-	ifs.seekg(0);
+    ifs.seekg(0);
     if (!proto.ParseFromIstream(&ifs))
-        Error() << fmt::format("unable to read input file '{}'", filename);
+        error("unable to read input file '{}'", filename);
     upgradeFluxFile(proto);
     return proto;
 }
@@ -62,8 +61,8 @@ void saveFl2File(const std::string filename, FluxFileProto& proto)
 
     std::ofstream of(filename, std::ios::out | std::ios::binary);
     if (!proto.SerializeToOstream(&of))
-        Error() << fmt::format("unable to write output file '{}'", filename);
+        error("unable to write output file '{}'", filename);
     of.close();
     if (of.fail())
-        Error() << "FL2 write I/O error: " << strerror(errno);
+        error("FL2 write I/O error: {}", strerror(errno));
 }

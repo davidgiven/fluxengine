@@ -21,7 +21,7 @@ static void load_config(const std::string s)
 {
     config.Clear();
     if (!google::protobuf::TextFormat::MergeFromString(cleanup(s), &config))
-        Error() << "couldn't load test config";
+        error("couldn't load test config");
 }
 
 static void test_physical_sectors()

@@ -7,7 +7,6 @@
 #include "decoders/fluxmapreader.h"
 #include "lib/fluxsink/fluxsink.pb.h"
 #include "proto.h"
-#include "fmt/format.h"
 #include "lib/fl2.pb.h"
 #include "fl2.h"
 #include <fstream>
@@ -27,7 +26,7 @@ public:
     {
         std::ofstream of(filename);
         if (!of.is_open())
-            Error() << "cannot open output file";
+            error("cannot open output file");
         of.close();
         std::filesystem::remove(filename);
     }

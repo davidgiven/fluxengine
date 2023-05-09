@@ -9,7 +9,6 @@
 #include "imagewriter/imagewriter.h"
 #include "encoders/encoders.h"
 #include "decoders/decoders.h"
-#include "fmt/format.h"
 #include "utils.h"
 #include "fluxviewerwindow.h"
 #include "textviewerwindow.h"

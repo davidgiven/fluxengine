@@ -10,7 +10,6 @@
 #include "decoders/rawbits.h"
 #include "sector.h"
 #include "proto.h"
-#include "fmt/format.h"
 
 static FlagGroup flags;
 

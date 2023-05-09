@@ -60,12 +60,12 @@ public:
 private:
     void SetState(int state)
     {
-		_state = state;
-		CallAfter(
-			[&]()
-			{
-				UpdateState();
-			});
+        _state = state;
+        CallAfter(
+            [&]()
+            {
+                UpdateState();
+            });
     }
 
     void SwitchFrom() override

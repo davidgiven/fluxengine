@@ -6,7 +6,7 @@
 #include "fluxsource/fluxsource.h"
 #include "scp.h"
 #include "proto.h"
-#include "fmt/format.h"
+#include "lib/logger.h"
 #include <fstream>
 
 static int trackno(int strack)
@@ -31,7 +31,7 @@ public:
     {
         _if.open(_config.filename(), std::ios::in | std::ios::binary);
         if (!_if.is_open())
-            Error() << fmt::format("cannot open input file '{}': {}",
+            error("cannot open input file '{}': {}",
                 _config.filename(),
                 strerror(errno));
 
@@ -40,9 +40,9 @@ public:
 
         if ((_header.file_id[0] != 'S') || (_header.file_id[1] != 'C') ||
             (_header.file_id[2] != 'P'))
-            Error() << "input not a SCP file";
+            error("input not a SCP file");
 
-		int tpi = (_header.flags & SCP_FLAG_96TPI) ? 96 : 48;
+        int tpi = (_header.flags & SCP_FLAG_96TPI) ? 96 : 48;
         ::config.set_tpi(tpi);
 
         _resolution = 25 * (_header.resolution + 1);
@@ -50,14 +50,14 @@ public:
         int endSide = (_header.heads == 1) ? 0 : 1;
 
         if ((_header.cell_width != 0) && (_header.cell_width != 16))
-            Error() << "currently only 16-bit cells in SCP files are supported";
+            error("currently only 16-bit cells in SCP files are supported");
 
-        std::cout << fmt::format("SCP tracks {}-{}, heads {}-{}\n",
+        log("SCP tracks {}-{}, heads {}-{}",
             trackno(_header.start_track),
             trackno(_header.end_track),
             startSide,
             endSide);
-        std::cout << fmt::format("SCP sample resolution: {} ns\n", _resolution);
+        log("SCP sample resolution: {} ns", _resolution);
     }
 
 public:
@@ -78,7 +78,7 @@ public:
         if ((trackheader.track_id[0] != 'T') ||
             (trackheader.track_id[1] != 'R') ||
             (trackheader.track_id[2] != 'K'))
-            Error() << "corrupt SCP file";
+            error("corrupt SCP file");
 
         std::vector<ScpTrackRevolution> revs(_header.revolutions);
         for (int revolution = 0; revolution < _header.revolutions; revolution++)
@@ -134,7 +134,7 @@ private:
     void check_for_error()
     {
         if (_if.fail())
-            Error() << fmt::format("SCP read I/O error: {}", strerror(errno));
+            error("SCP read I/O error: {}", strerror(errno));
     }
 
 private:

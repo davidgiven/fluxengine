@@ -91,22 +91,26 @@ typedef std::variant<std::string,
     OperationProgressLogMessage>
     AnyLogMessage;
 
-class Logger
+template <class T>
+inline void log(const T& message)
 {
-public:
-    Logger& operator<<(std::shared_ptr<const AnyLogMessage> message);
+    log(std::make_shared<const AnyLogMessage>(message));
+}
 
-    template <class T>
-    Logger& operator<<(const T& message)
-    {
-        return *this << std::make_shared<const AnyLogMessage>(message);
-    }
+extern void log(std::shared_ptr<const AnyLogMessage> message);
 
-    static void setLogger(
+template <typename... Args>
+inline void log(fmt::string_view fstr, const Args&... args)
+{
+    log(fmt::format(fstr, args...));
+}
+
+namespace Logger
+{
+    extern void setLogger(
         std::function<void(std::shared_ptr<const AnyLogMessage>)> cb);
 
-    static std::string toString(const AnyLogMessage&);
-    static void textLogger(std::shared_ptr<const AnyLogMessage>);
-};
+    extern std::string toString(const AnyLogMessage&);
+}
 
 #endif

@@ -5,7 +5,6 @@
 #include "fluxsource/fluxsource.h"
 #include "proto.h"
 #include "fl2.h"
-#include "fmt/format.h"
 #include "fluxmap.h"
 #include <fstream>
 
@@ -57,7 +56,7 @@ private:
     void check_for_error(std::ifstream& ifs)
     {
         if (ifs.fail())
-            Error() << fmt::format("FL2 read I/O error: {}", strerror(errno));
+            error("FL2 read I/O error: {}", strerror(errno));
     }
 
 private:

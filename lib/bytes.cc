@@ -1,6 +1,5 @@
 #include "globals.h"
 #include "bytes.h"
-#include "fmt/format.h"
 #include <fstream>
 #include <zlib.h>
 
@@ -9,69 +8,70 @@ static std::shared_ptr<std::vector<uint8_t>> createVector(unsigned size)
     return std::make_shared<std::vector<uint8_t>>(size);
 }
 
-static std::shared_ptr<std::vector<uint8_t>> createVector(const uint8_t* ptr, unsigned size)
+static std::shared_ptr<std::vector<uint8_t>> createVector(
+    const uint8_t* ptr, unsigned size)
 {
     auto vector = std::make_shared<std::vector<uint8_t>>(size);
-    std::uninitialized_copy(ptr, ptr+size, vector->begin());
+    std::uninitialized_copy(ptr, ptr + size, vector->begin());
     return vector;
 }
 
-static std::shared_ptr<std::vector<uint8_t>> createVector(std::initializer_list<uint8_t> data)
+static std::shared_ptr<std::vector<uint8_t>> createVector(
+    std::initializer_list<uint8_t> data)
 {
     auto vector = std::make_shared<std::vector<uint8_t>>(data.size());
     std::uninitialized_copy(data.begin(), data.end(), vector->begin());
     return vector;
 }
 
-Bytes::Bytes():
-    _data(createVector(0)),
-    _low(0),
-    _high(0)
-{}
+Bytes::Bytes(): _data(createVector(0)), _low(0), _high(0) {}
 
-Bytes::Bytes(unsigned size):
-    _data(createVector(size)),
-    _low(0),
-    _high(size)
-{}
+Bytes::Bytes(unsigned size): _data(createVector(size)), _low(0), _high(size) {}
 
 Bytes::Bytes(const uint8_t* ptr, size_t len):
     _data(createVector(ptr, len)),
     _low(0),
     _high(len)
-{}
+{
+}
 
 Bytes::Bytes(const std::string& s):
-	_data(createVector((const uint8_t*)&s[0], s.size())),
-	_low(0),
-	_high(s.size())
-{}
+    _data(createVector((const uint8_t*)&s[0], s.size())),
+    _low(0),
+    _high(s.size())
+{
+}
 
 Bytes::Bytes(const char* s):
-	_data(createVector((const uint8_t*)s, strlen(s))),
-	_low(0),
-	_high(strlen(s))
-{}
+    _data(createVector((const uint8_t*)s, strlen(s))),
+    _low(0),
+    _high(strlen(s))
+{
+}
 
 Bytes::Bytes(std::initializer_list<uint8_t> data):
     _data(createVector(data)),
     _low(0),
     _high(data.size())
-{}
+{
+}
 
 Bytes::Bytes(std::shared_ptr<std::vector<uint8_t>> data):
     _data(data),
     _low(0),
     _high(data->size())
-{}
+{
+}
 
-Bytes::Bytes(std::shared_ptr<std::vector<uint8_t>> data, unsigned start, unsigned end):
+Bytes::Bytes(
+    std::shared_ptr<std::vector<uint8_t>> data, unsigned start, unsigned end):
     _data(data),
     _low(start),
     _high(end)
-{}
+{
+}
 
-Bytes* Bytes::operator = (const Bytes& other)
+Bytes* Bytes::operator=(const Bytes& other)
 {
     _data = other._data;
     _low = other._low;
@@ -102,7 +102,7 @@ void Bytes::adjustBounds(unsigned pos)
     checkWritable();
     if (pos >= _high)
     {
-        _high = pos+1;
+        _high = pos + 1;
         _data->resize(_high);
     }
 }
@@ -119,14 +119,14 @@ Bytes& Bytes::resize(unsigned size)
     return *this;
 }
 
-const uint8_t& Bytes::operator [] (unsigned pos) const
+const uint8_t& Bytes::operator[](unsigned pos) const
 {
     pos += _low;
     boundsCheck(pos);
     return (*_data)[pos];
 }
 
-uint8_t& Bytes::operator [] (unsigned pos)
+uint8_t& Bytes::operator[](unsigned pos)
 {
     checkWritable();
     pos += _low;
@@ -136,15 +136,15 @@ uint8_t& Bytes::operator [] (unsigned pos)
 
 Bytes Bytes::readFromFile(const std::string& filename)
 {
-	Bytes bytes;
-	ByteWriter bw(bytes);
+    Bytes bytes;
+    ByteWriter bw(bytes);
 
-	std::ifstream f(filename);
-	if (!f)
-		Error() << fmt::format("cannot open '{}': {}", filename, strerror(errno));
-	bw += f;
+    std::ifstream f(filename);
+    if (!f)
+        error("cannot open '{}': {}", filename, strerror(errno));
+    bw += f;
 
-	return bytes;
+    return bytes;
 }
 
 Bytes Bytes::slice(unsigned start, unsigned len) const
@@ -160,7 +160,8 @@ Bytes Bytes::slice(unsigned start, unsigned len) const
     {
         /* Can't share the buffer, as we need to zero-pad the end. */
         Bytes b(len);
-        std::uninitialized_copy(_data->cbegin()+start, _data->cbegin()+_high, b._data->begin());
+        std::uninitialized_copy(
+            _data->cbegin() + start, _data->cbegin() + _high, b._data->begin());
         return b;
     }
     else
@@ -173,42 +174,42 @@ Bytes Bytes::slice(unsigned start, unsigned len) const
 
 Bytes Bytes::slice(unsigned start) const
 {
-	int len = 0;
-	if (start < size())
-		len = size() - start;
-	return slice(start, len);
+    int len = 0;
+    if (start < size())
+        len = size() - start;
+    return slice(start, len);
 }
 
 std::vector<Bytes> Bytes::split(uint8_t separator) const
 {
-	std::vector<Bytes> vector;
+    std::vector<Bytes> vector;
 
-	int lastEnd = 0;
-	for (int i=0; i<size(); i++)
-	{
-		if ((*this)[i] == separator)
-		{
-			vector.push_back(this->slice(lastEnd, i-lastEnd));
-			lastEnd = i + 1;
-		}
-	}
-	vector.push_back(this->slice(lastEnd));
+    int lastEnd = 0;
+    for (int i = 0; i < size(); i++)
+    {
+        if ((*this)[i] == separator)
+        {
+            vector.push_back(this->slice(lastEnd, i - lastEnd));
+            lastEnd = i + 1;
+        }
+    }
+    vector.push_back(this->slice(lastEnd));
 
-	return vector;
+    return vector;
 }
 
 std::vector<bool> Bytes::toBits() const
 {
-	std::vector<bool> bits;
-	for (uint8_t byte : *this)
-	{
-		for (int i=0; i<8; i++)
-		{
-			bits.push_back(byte & 0x80);
-			byte <<= 1;
-		}
-	}
-	return bits;
+    std::vector<bool> bits;
+    for (uint8_t byte : *this)
+    {
+        for (int i = 0; i < 8; i++)
+        {
+            bits.push_back(byte & 0x80);
+            byte <<= 1;
+        }
+    }
+    return bits;
 }
 
 Bytes Bytes::reverseBits() const
@@ -221,7 +222,7 @@ Bytes Bytes::reverseBits() const
     return output;
 }
 
-Bytes Bytes::operator + (const Bytes& other)
+Bytes Bytes::operator+(const Bytes& other)
 {
     Bytes output;
     ByteWriter bw(output);
@@ -230,7 +231,7 @@ Bytes Bytes::operator + (const Bytes& other)
     return output;
 }
 
-Bytes Bytes::operator * (size_t count)
+Bytes Bytes::operator*(size_t count)
 {
     Bytes output;
     ByteWriter bw(output);
@@ -239,15 +240,13 @@ Bytes Bytes::operator * (size_t count)
     return output;
 }
 
-uint8_t toByte(
-    std::vector<bool>::const_iterator start,
+uint8_t toByte(std::vector<bool>::const_iterator start,
     std::vector<bool>::const_iterator end)
 {
     return toBytes(start, end)[0];
 }
 
-Bytes toBytes(
-    std::vector<bool>::const_iterator start,
+Bytes toBytes(std::vector<bool>::const_iterator start,
     std::vector<bool>::const_iterator end)
 {
     Bytes bytes;
@@ -283,7 +282,7 @@ Bytes Bytes::compress() const
     uLongf destsize = compressBound(size());
     Bytes dest(destsize);
     if (::compress(dest.begin(), &destsize, cbegin(), size()) != Z_OK)
-        Error() << "error compressing data";
+        error("error compressing data");
     dest.resize(destsize);
     return dest;
 }
@@ -292,12 +291,12 @@ Bytes Bytes::decompress() const
 {
     Bytes output;
     ByteWriter bw(output);
-    Bytes outputBuffer(1024*1024);
+    Bytes outputBuffer(1024 * 1024);
 
     z_stream stream = {};
     inflateInit(&stream);
     stream.avail_in = size();
-    stream.next_in = (uint8_t*) cbegin();
+    stream.next_in = (uint8_t*)cbegin();
 
     int ret;
     do
@@ -308,12 +307,11 @@ Bytes Bytes::decompress() const
         if (ret == Z_BUF_ERROR)
             ret = Z_OK;
         if ((ret != Z_OK) && (ret != Z_STREAM_END))
-            Error() << fmt::format(
-                "failed to decompress data: {}", stream.msg ? stream.msg : "(unknown error)");
-        
+            error("failed to decompress data: {}",
+                stream.msg ? stream.msg : "(unknown error)");
+
         bw += outputBuffer.slice(0, outputBuffer.size() - stream.avail_out);
-    }
-    while (ret != Z_STREAM_END);
+    } while (ret != Z_STREAM_END);
     inflateEnd(&stream);
 
     return output;
@@ -323,15 +321,15 @@ void Bytes::writeToFile(const std::string& filename) const
 {
     std::ofstream f(filename, std::ios::out | std::ios::binary);
     if (!f.is_open())
-        Error() << fmt::format("cannot open output file '{}'", filename);
+        error("cannot open output file '{}'", filename);
 
-    f.write((const char*) cbegin(), size());
+    f.write((const char*)cbegin(), size());
     f.close();
 }
 
 void Bytes::writeTo(std::ostream& stream) const
 {
-	stream.write((const char*) cbegin(), size());
+    stream.write((const char*)cbegin(), size());
 }
 
 ByteReader Bytes::reader() const
@@ -346,19 +344,19 @@ ByteWriter Bytes::writer()
 
 uint64_t ByteReader::read_be48()
 {
-	return ((uint64_t)read_be16() << 32) | read_be32();
+    return ((uint64_t)read_be16() << 32) | read_be32();
 }
 
 uint64_t ByteReader::read_be64()
 {
-	return ((uint64_t)read_be32() << 32) | read_be32();
+    return ((uint64_t)read_be32() << 32) | read_be32();
 }
 
-ByteWriter& ByteWriter::operator +=(std::istream& stream)
+ByteWriter& ByteWriter::operator+=(std::istream& stream)
 {
     Bytes buffer(4096);
 
-    while (stream.read((char*) buffer.begin(), buffer.size()))
+    while (stream.read((char*)buffer.begin(), buffer.size()))
         this->append(buffer);
     this->append(buffer.slice(0, stream.gcount()));
     return *this;
@@ -366,18 +364,18 @@ ByteWriter& ByteWriter::operator +=(std::istream& stream)
 
 void BitWriter::push(uint32_t bits, size_t size)
 {
-    bits <<= 32-size;
+    bits <<= 32 - size;
 
     while (size-- != 0)
     {
-        _fifo = (_fifo<<1) | (bits >> 31);
+        _fifo = (_fifo << 1) | (bits >> 31);
         _bitcount++;
         bits <<= 1;
         if (_bitcount == 8)
         {
             _bw.write_8(_fifo);
             _bitcount = 0;
-			_fifo = 0;
+            _fifo = 0;
         }
     }
 }
@@ -393,18 +391,18 @@ void BitWriter::flush()
 
 bool BitReader::eof()
 {
-	return (_bitcount == 0) && _br.eof();
+    return (_bitcount == 0) && _br.eof();
 }
 
 bool BitReader::get()
 {
-	if (_bitcount == 0)
-		_fifo = _br.read_8();
+    if (_bitcount == 0)
+        _fifo = _br.read_8();
 
-	bool bit = _fifo & 0x80;
-	_fifo <<= 1;
-	_bitcount = (_bitcount+1) & 7;
-	return bit;
+    bool bit = _fifo & 0x80;
+    _fifo <<= 1;
+    _bitcount = (_bitcount + 1) & 7;
+    return bit;
 }
 
 std::vector<bool> reverseBits(const std::vector<bool>& bits)

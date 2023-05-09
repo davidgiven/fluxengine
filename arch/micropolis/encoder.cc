@@ -12,7 +12,7 @@ static void write_sector(std::vector<bool>& bits,
 {
     if ((sector->data.size() != 256) &&
         (sector->data.size() != MICROPOLIS_ENCODED_SECTOR_SIZE))
-        Error() << "unsupported sector size --- you must pick 256 or 275";
+        error("unsupported sector size --- you must pick 256 or 275");
 
     int fullSectorSize = 40 + MICROPOLIS_ENCODED_SECTOR_SIZE + 40 + 35;
     auto fullSector = std::make_shared<std::vector<uint8_t>>();
@@ -24,8 +24,9 @@ static void write_sector(std::vector<bool>& bits,
     if (sector->data.size() == MICROPOLIS_ENCODED_SECTOR_SIZE)
     {
         if (sector->data[0] != 0xFF)
-            Error() << "275 byte sector doesn't start with sync byte 0xFF. "
-                       "Corrupted sector";
+            error(
+                "275 byte sector doesn't start with sync byte 0xFF. "
+                "Corrupted sector");
         uint8_t wantChecksum = sector->data[1 + 2 + 266];
         uint8_t gotChecksum =
             micropolisChecksum(sector->data.slice(1, 2 + 266));
@@ -57,7 +58,7 @@ static void write_sector(std::vector<bool>& bits,
         fullSector->push_back(0);
 
     if (fullSector->size() != fullSectorSize)
-        Error() << "sector mismatched length";
+        error("sector mismatched length");
     bool lastBit = false;
     encodeMfm(bits, cursor, fullSector, lastBit);
     /* filler */
@@ -91,12 +92,11 @@ public:
             write_sector(bits, cursor, sectorData);
 
         if (cursor != bits.size())
-            Error() << "track data mismatched length";
+            error("track data mismatched length");
 
         std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
         fluxmap->appendBits(bits,
-            calculatePhysicalClockPeriod(
-                _config.clock_period_us() * 1e3,
+            calculatePhysicalClockPeriod(_config.clock_period_us() * 1e3,
                 _config.rotational_period_ms() * 1e6));
         return fluxmap;
     }
@@ -105,8 +105,7 @@ private:
     const MicropolisEncoderProto& _config;
 };
 
-std::unique_ptr<Encoder> createMicropolisEncoder(
-    const EncoderProto& config)
+std::unique_ptr<Encoder> createMicropolisEncoder(const EncoderProto& config)
 {
     return std::unique_ptr<Encoder>(new MicropolisEncoder(config));
 }

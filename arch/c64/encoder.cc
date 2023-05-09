@@ -214,8 +214,7 @@ public:
             writeSector(bits, cursor, sector);
 
         if (cursor >= bits.size())
-            Error() << fmt::format(
-                "track data overrun by {} bits", cursor - bits.size());
+            error("track data overrun by {} bits", cursor - bits.size());
         fillBitmapTo(bits, cursor, bits.size(), {true, false});
 
         std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
@@ -243,8 +242,7 @@ private:
         {
             // There is data to encode to disk.
             if ((sector->data.size() != C64_SECTOR_LENGTH))
-                Error() << fmt::format(
-                    "unsupported sector size {} --- you must pick 256",
+                error("unsupported sector size {} --- you must pick 256",
                     sector->data.size());
 
             // 1. Write header Sync (not GCR)

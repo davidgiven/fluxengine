@@ -6,7 +6,6 @@
 #include "sector.h"
 #include "image.h"
 #include "lib/layout.h"
-#include "fmt/format.h"
 
 #define BORDER 20
 #define TICK 3

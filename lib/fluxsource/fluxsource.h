@@ -79,7 +79,7 @@ class EmptyFluxSourceIterator : public FluxSourceIterator
 
     std::unique_ptr<const Fluxmap> next() override
     {
-        Error() << "no flux to read";
+        error("no flux to read");
     }
 };
 

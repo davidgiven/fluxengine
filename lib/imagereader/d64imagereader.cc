@@ -2,7 +2,6 @@
 #include "flags.h"
 #include "sector.h"
 #include "imagereader/imagereader.h"
-#include "fmt/format.h"
 #include "image.h"
 #include "logger.h"
 #include "proto.h"
@@ -20,7 +19,7 @@ public:
         std::ifstream inputFile(
             _config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
-            Error() << "cannot open input file";
+            error("cannot open input file");
 
         inputFile.seekg(0, inputFile.beg);
         uint32_t begin = inputFile.tellg();
@@ -36,7 +35,7 @@ public:
         unsigned numHeads = 1;
         unsigned numSectors = 0;
 
-        Logger() << fmt::format("D64: reading image with {} tracks, {} heads", numTracks, numHeads);
+        log("D64: reading image with {} tracks, {} heads", numTracks, numHeads);
 
         uint32_t offset = 0;
 
