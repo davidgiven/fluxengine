@@ -144,8 +144,8 @@ public:
                 else if (currentTrackTrack != track)
                 {
                     error(
-                        "D88: all sectors in a track must belong to the "
-                        "same track");
+                        "D88: all sectors in a track must belong to the same "
+                        "track");
                 }
                 if (trackSectorSize < 0)
                 {
@@ -194,8 +194,8 @@ public:
                 else if (trackSectorSize != sectorSize)
                 {
                     error(
-                        "D88: multiple sector sizes per track are "
-                        "currently unsupported");
+                        "D88: multiple sector sizes per track are currently "
+                        "unsupported");
                 }
                 Bytes data(sectorSize);
                 inputFile.read((char*)data.begin(), data.size());

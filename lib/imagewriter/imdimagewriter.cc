@@ -13,9 +13,8 @@
 #include <ctime>
 
 /*
- *	Where to get the type of encoding FM or MFM? Now solved with options in
- *proto config
- *
+ * Where to get the type of encoding FM or MFM? Now solved with options in
+ * proto config
  */
 static const char LABEL[] = "IMD archive by fluxengine on"; // 22 karakters
 static uint8_t getModulationandSpeed(
@@ -48,8 +47,8 @@ static uint8_t getModulationandSpeed(
         }
     }
     else if ((flags > 1475) and (flags < 1575)) // SD disk
-    /* 300 kbps*/
     {
+        /* 300 kbps*/
         if (mode == ImdOutputProto::RECMODE_FM)
         {
             return 1;
@@ -60,8 +59,8 @@ static uint8_t getModulationandSpeed(
         }
     }
     else if ((flags > 1900) and (flags < 2100)) // DD disk
-    /* 250 kbps */
     {
+        /* 250 kbps */
         if (mode == ImdOutputProto::RECMODE_FM)
         {
             return 2;
@@ -120,30 +119,37 @@ static uint8_t setSectorSize(int flags)
 #define HEAD_MASK 0x3F
 #define END_OF_FILE 0x1A
 
+// clang-format off
 /*
- *IMAGE FILE FORMAT
- *The overall layout of an ImageDisk .IMD image file is:
- *IMD v.vv: dd/mm/yyyy hh:mm:ss
- *Comment (ASCII only - unlimited size)
- *1A byte - ASCII EOF character
- *- For each track on the disk:
- *1 byte Mode value							(0-5) see
- *getModulationspeed for definition 1 byte Cylinder
- *(0-n) 1 byte Head (0-1) 1 byte number of sectors in track
- *(1-n) 1 byte sector size
- *(0-6) see getsectorsize for definition sector numbering map
- *IMD start numbering sectors with 1. sector cylinder map (optional)
- *definied in high byte of head (since head is 0 or 1) sector head map
- *(optional)					definied in high byte of head (since
- *head is 0 or 1) sector data records	For each data record: 1 byte Sector
- *status 0: Sector data unavailable - could not be read 1: Normal data: (Sector
- *Size) bytes follow 2: Compressed: All bytes in sector have same value (xx) 3:
- *Normal data with "Deleted-Data address mark" 4: Compressed with "Deleted-Data
- *address mark" 5: Normal data read with data error 6: Compressed read with data
- *error" 7: Deleted data read with data error" 8: Compressed, Deleted read with
- *data error" sector size of Sector data <End of file>
+ * IMAGE FILE FORMAT
+ * The overall layout of an ImageDisk .IMD image file is:
+ * IMD v.vv: dd/mm/yyyy hh:mm:ss
+ * Comment (ASCII only - unlimited size)
+ * 1A byte - ASCII EOF character
+ * - For each track on the disk:
+ * 1 byte Mode value							(0-5) see getModulationspeed for definition		
+ * 1 byte Cylinder							(0-n)
+ * 1 byte Head								(0-1)
+ * 1 byte number of sectors in track			(1-n)
+ * 1 byte sector size							(0-6) see getsectorsize for definition
+ * sector numbering map						IMD start numbering sectors with 1.
+ * sector cylinder map (optional)				definied in high byte of head (since head is 0 or 1)
+ * sector head map (optional)					definied in high byte of head (since head is 0 or 1)
+ * sector data records	For each data record:
+ * 	1 byte Sector status 					
+ * 		0: Sector data unavailable - could not be read
+ * 		1: Normal data: (Sector Size) bytes follow
+ * 		2: Compressed: All bytes in sector have same value (xx)
+ * 		3: Normal data with "Deleted-Data address mark"
+ * 		4: Compressed with "Deleted-Data address mark"
+ * 		5: Normal data read with data error
+ * 		6: Compressed read with data error"
+ * 		7: Deleted data read with data error"
+ * 		8: Compressed, Deleted read with data error"
+ * 	sector size of Sector data
+ * <End of file>
  */
-
+// clang-format on
 class ImdImageWriter : public ImageWriter
 {
 public:
@@ -368,24 +374,28 @@ public:
                          sectorId++)
                     {
                         //	const auto& sector = sectors.get(track, head,
-                        //sectorId);
+                        // sectorId);
                         bw.write_8(sector->logicalSide); // 1 byte logical side
                     }
                 }
                 // Now read data and write to file
                 for (int sectorId = 0; sectorId < numSectorsinTrack; sectorId++)
                 {
-                    /* 					For each data record:
-                     *					1 byte Sector status
-                     *						0: Sector data unavailable - could not be
-                     *read 1: Normal data: (Sector Size) bytes follow 2:
-                     *Compressed: All bytes in sector have same value (xx) 3:
-                     *Normal data with "Deleted-Data address mark" 4: Compressed
-                     *with "Deleted-Data address mark" 5: Normal data read with
-                     *data error 6: Compressed read with data error" 7: Deleted
-                     *data read with data error" 8: Compressed, Deleted read
-                     *with data error" sector size of Sector data
-                     */
+                    // clang-format off
+                    /*	For each data record:
+                     *	1 byte Sector status 					
+                     *		0: Sector data unavailable - could not be read
+                     *		1: Normal data: (Sector Size) bytes follow
+                     *		2: Compressed: All bytes in sector have same value (xx)
+                     *		3: Normal data with "Deleted-Data address mark"
+                     *		4: Compressed with "Deleted-Data address mark"
+                     *		5: Normal data read with data error
+                     *		6: Compressed read with data error"
+                     *		7: Deleted data read with data error"
+                     *		8: Compressed, Deleted read with data error"
+                     *	sector size of Sector data
+                     */					
+                    // clang-format on
                     // read sector
                     const auto& sector = image.get(track, head, sectorId + 1);
                     bool blnCompressable =
@@ -429,22 +439,19 @@ public:
                         }
                         switch (sector->status)
                         {
-                            /*fluxengine knows of a few sector statussen but not
-                             *all of the statussen in IMD.
-                             *  // the statussen are in sector.h. Translation to
-                             *fluxengine is as follows: Statussen fluxengine
-                             *|	Status IMD
-                             *--------------------------------------------------------------------------------------------------------------------
-                             *  	OK,												|	1, 2 (Normal
-                             *data: (Sector Size) of (compressed) bytes follow)
-                             *	BAD_CHECKSUM,									|	5, 6, 7,
-                             *8 MISSING,	  sector not found
-                             *|	0 (Sector data unavailable - could not be read)
-                             *	DATA_MISSING, sector present but no data found
-                             *|	3, 4 CONFLICT,
-                             *| INTERNAL_ERROR
-                             *|
-                             */
+                            // clang-format off
+                            /* fluxengine knows of a few sector statussen but not all of the statussen in IMD.
+							 *  // the statussen are in sector.h. Translation to fluxengine is as follows:
+							 *	Statussen fluxengine							|	Status IMD		
+							 *--------------------------------------------------------------------------------------------------------------------
+							 *  	OK,											|	1, 2 (Normal data: (Sector Size) of (compressed) bytes follow)
+							 *	BAD_CHECKSUM,									|	5, 6, 7, 8
+							 *	MISSING,	  sector not found					|	0 (Sector data unavailable - could not be read)
+							 *	DATA_MISSING, sector present but no data found	|	3, 4
+							 *	CONFLICT,										|
+							 *	INTERNAL_ERROR									|
+							 */
+                            // clang-format on
                             case Sector::MISSING: /* Sector data unavailable -
                                                      could not be read */
 

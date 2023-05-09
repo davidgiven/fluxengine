@@ -70,14 +70,12 @@ static void test_reads()
     assert(br.read_8() == 0x01);
     assert(br.read_8() == 0x02);
 
-    br.seek(0);
-    assert(br.read_be24() == 0x010203);
-    br.seek(0);
-    assert(br.read_le24() == 0x030201);
-    br.seek(0);
-    assert(br.read_be32() == 0x01020304);
-    br.seek(0);
-    assert(br.read_le32() == 0x04030201);
+    // clang-format off
+    br.seek(0); assert(br.read_be24() == 0x010203);
+    br.seek(0); assert(br.read_le24() == 0x030201);
+    br.seek(0); assert(br.read_be32() == 0x01020304);
+    br.seek(0); assert(br.read_le32() == 0x04030201);
+    // clang-format on
 }
 
 static void test_writes()
@@ -97,24 +95,14 @@ static void test_writes()
         bw.seek(0);
     };
 
-    reset();
-    bw.write_le16(0x0102);
-    assert((b == Bytes{2, 1}));
-    reset();
-    bw.write_be16(0x0102);
-    assert((b == Bytes{1, 2}));
-    reset();
-    bw.write_le24(0x010203);
-    assert((b == Bytes{3, 2, 1}));
-    reset();
-    bw.write_be24(0x010203);
-    assert((b == Bytes{1, 2, 3}));
-    reset();
-    bw.write_le32(0x01020304);
-    assert((b == Bytes{4, 3, 2, 1}));
-    reset();
-    bw.write_be32(0x01020304);
-    assert((b == Bytes{1, 2, 3, 4}));
+    // clang-format off
+    reset(); bw.write_le16(0x0102); assert((b == Bytes{2, 1}));
+    reset(); bw.write_be16(0x0102); assert((b == Bytes{1, 2}));
+    reset(); bw.write_le24(0x010203); assert((b == Bytes{3, 2, 1}));
+    reset(); bw.write_be24(0x010203); assert((b == Bytes{1, 2, 3}));
+    reset(); bw.write_le32(0x01020304); assert((b == Bytes{4, 3, 2, 1}));
+    reset(); bw.write_be32(0x01020304); assert((b == Bytes{1, 2, 3, 4}));
+    // clang-format on
 
     reset();
     bw += {1, 2, 3, 4, 5};

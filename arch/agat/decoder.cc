@@ -9,14 +9,13 @@
 #include "fmt/format.h"
 #include <string.h>
 
+// clang-format off
 /*
- * data:    X  X  X  X   X  X  X  X   X  -  -  X   -  X  -  X   -  X  X  -   X
- * -  X  -  = 0xff956a flux:   01 01 01 01  01 01 01 01  01 00 10 01  00 01 00
- * 01  00 01 01 00  01 00 01 00  = 0x555549111444
- *
- * data:    X  X  X  X   X  X  X  X   -  X  X  -   X  -  X  -   X  -  -  X   -
- * X  -  X  = 0xff6a95 flux:   01 01 01 01  01 01 01 01  00 01 01 00  01 00 01
- * 00  01 00 10 01  00 01 00 01  = 0x555514444911
+ * data:    X  X  X  X   X  X  X  X   X  -  -  X   -  X  -  X   -  X  X  -   X  -  X  -  = 0xff956a
+ * flux:   01 01 01 01  01 01 01 01  01 00 10 01  00 01 00 01  00 01 01 00  01 00 01 00  = 0x555549111444
+ * 
+ * data:    X  X  X  X   X  X  X  X   -  X  X  -   X  -  X  -   X  -  -  X   -  X  -  X  = 0xff6a95
+ * flux:   01 01 01 01  01 01 01 01  00 01 01 00  01 00 01 00  01 00 10 01  00 01 00 01  = 0x555514444911
  *
  * Each pattern is prefixed with this one:
  *
@@ -32,8 +31,8 @@
  *          0100010010010010  = MFM encoded
  *           1000100100100100 = with trailing zero
  *            - - - X - - X - = effective bitstream = 0x12
- *
  */
+// clang-format on
 
 static const FluxPattern SECTOR_PATTERN(64, SECTOR_ID);
 static const FluxPattern DATA_PATTERN(64, DATA_ID);

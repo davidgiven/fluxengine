@@ -100,14 +100,14 @@ public:
                 else if (currentTrackTrack != track)
                 {
                     error(
-                        "NFD: all sectors in a track must belong to the "
-                        "same track");
+                        "NFD: all sectors in a track must belong to the same "
+                        "track");
                 }
                 else if (currentTrackHead != head)
                 {
                     error(
-                        "NFD: all sectors in a track must belong to the "
-                        "same head");
+                        "NFD: all sectors in a track must belong to the same "
+                        "head");
                 }
                 if (trackSectorSize < 0)
                 {
@@ -142,8 +142,8 @@ public:
                 else if (trackSectorSize != sectorSize)
                 {
                     error(
-                        "NFD: multiple sector sizes per track are "
-                        "currently unsupported");
+                        "NFD: multiple sector sizes per track are currently "
+                        "unsupported");
                 }
                 Bytes data(sectorSize);
                 inputFile.read((char*)data.begin(), data.size());

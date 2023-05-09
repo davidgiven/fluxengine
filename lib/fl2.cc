@@ -43,8 +43,8 @@ FluxFileProto loadFl2File(const std::string filename)
     ifs.read(buffer, sizeof(buffer));
     if (strncmp(buffer, "SQLite format 3", 16) == 0)
         error(
-            "this flux file is too old; please use the "
-            "upgrade-flux-file tool to upgrade it");
+            "this flux file is too old; please use the upgrade-flux-file tool "
+            "to upgrade it");
 
     FluxFileProto proto;
     ifs.seekg(0);

@@ -19,8 +19,7 @@ public:
     ~AuFluxSink()
     {
         std::cerr << "Warning: do not play these files, or you will break your "
-                     "speakers"
-                     " and/or ears!\n";
+                     "speakers and/or ears!\n";
     }
 
 public:

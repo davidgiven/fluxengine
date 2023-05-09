@@ -43,14 +43,10 @@ void FlagGroup::addFlag(Flag* flag)
 void FlagGroup::applyOption(const OptionProto& option)
 {
     if (option.config().option_size() > 0)
-        error(
-            "option '{}' has an option inside it, which isn't "
-            "allowed",
+        error("option '{}' has an option inside it, which isn't allowed",
             option.name());
     if (option.config().option_group_size() > 0)
-        error(
-            "option '{}' has an option group inside it, which isn't "
-            "allowed",
+        error("option '{}' has an option group inside it, which isn't allowed",
             option.name());
 
     Logger() << fmt::format("OPTION: {}",
