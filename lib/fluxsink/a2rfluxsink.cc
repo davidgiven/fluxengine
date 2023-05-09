@@ -36,8 +36,7 @@ namespace
             _writer{_bytes.writer()}
         {
 
-            Logger() << fmt::format(
-                "A2R: writing A2R {} file containing {} tracks\n",
+            log("A2R: writing A2R {} file containing {} tracks\n",
                 singlesided() ? "single sided" : "double sided",
                 config.tracks().end() - config.tracks().start() + 1);
 
@@ -53,7 +52,7 @@ namespace
             writeStream();
             writeMeta();
 
-            Logger() << "A2R: writing output file...\n";
+            log("A2R: writing output file...\n");
             std::ofstream of(
                 _config.filename(), std::ios::out | std::ios::binary);
             if (!of.is_open())

@@ -53,8 +53,7 @@ public:
 
         image->calculateSize();
         const Geometry& geometry = image->getGeometry();
-        Logger() << fmt::format(
-            "IMG: read {} tracks, {} sides, {} kB total from {}",
+        log("IMG: read {} tracks, {} sides, {} kB total from {}",
             geometry.numTracks,
             geometry.numSides,
             inputFile.tellg() / 1024,

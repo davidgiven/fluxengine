@@ -126,7 +126,7 @@ public:
         outputFile.seekp(0);
         header.writeTo(outputFile);
 
-        Logger() << fmt::format("D88: wrote {} tracks, {} sides, {} kB total",
+        log("D88: wrote {} tracks, {} sides, {} kB total",
             tracks,
             sides,
             outputFile.tellp() / 1024);

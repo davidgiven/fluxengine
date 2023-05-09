@@ -104,23 +104,23 @@ public:
             switch (mediaByte)
             {
                 case 0x00:
-                    Logger() << "DIM: automatically setting format to 1.2MB "
-                                "(1024 byte sectors)";
+                    log("DIM: automatically setting format to 1.2MB "
+                        "(1024 byte sectors)");
                     trackdata->set_target_rotational_period_ms(167);
                     layoutdata->set_sector_size(1024);
                     for (int i = 0; i < 9; i++)
                         physical->add_sector(i);
                     break;
                 case 0x02:
-                    Logger() << "DIM: automatically setting format to 1.2MB "
-                                "(512 byte sectors)";
+                    log("DIM: automatically setting format to 1.2MB "
+                        "(512 byte sectors)");
                     trackdata->set_target_rotational_period_ms(167);
                     layoutdata->set_sector_size(512);
                     for (int i = 0; i < 15; i++)
                         physical->add_sector(i);
                     break;
                 case 0x03:
-                    Logger() << "DIM: automatically setting format to 1.44MB";
+                    log("DIM: automatically setting format to 1.44MB");
                     trackdata->set_target_rotational_period_ms(200);
                     layoutdata->set_sector_size(512);
                     for (int i = 0; i < 18; i++)
@@ -128,7 +128,7 @@ public:
                     break;
                 default:
                     error(
-                        "DIM: unknown media byte 0x%02x, could not determine "
+                        "DIM: unknown media byte 0x{:02x}, could not determine "
                         "write profile automatically",
                         mediaByte);
                     break;
@@ -139,7 +139,7 @@ public:
 
         image->calculateSize();
         const Geometry& geometry = image->getGeometry();
-        Logger() << fmt::format("DIM: read {} tracks, {} sides, {} kB total",
+        log("DIM: read {} tracks, {} sides, {} kB total",
             geometry.numTracks,
             geometry.numSides,
             ((int)inputFile.tellg() - 256) / 1024);

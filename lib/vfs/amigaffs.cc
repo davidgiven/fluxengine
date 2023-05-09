@@ -419,7 +419,7 @@ private:
 
 static void onAdfWarning(char* message)
 {
-    Logger() << message;
+    log(message);
 }
 
 static void onAdfError(char* message)

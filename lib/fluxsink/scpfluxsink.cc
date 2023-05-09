@@ -10,6 +10,7 @@
 #include "fluxmap.h"
 #include "layout.h"
 #include "scp.h"
+#include "lib/logger.h"
 #include <fstream>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -64,8 +65,7 @@ public:
         else
             _fileheader.heads = 0;
 
-        std::cout << fmt::format(
-            "SCP: writing 96 tpi {} file containing {} tracks\n",
+        log("SCP: writing 96 tpi {} file containing {} tracks",
             (minSide == maxSide) ? "single sided" : "double sided",
             _fileheader.end_track - _fileheader.start_track + 1);
     }
@@ -79,7 +79,7 @@ public:
         appendChecksum(checksum, _trackdata);
         write_le32(_fileheader.checksum, checksum);
 
-        std::cout << "SCP: writing output file...\n";
+        log("SCP: writing output file");
         std::ofstream of(_config.filename(), std::ios::out | std::ios::binary);
         if (!of.is_open())
             error("cannot open output file");
@@ -97,9 +97,8 @@ public:
 
         if (strack >= std::size(_fileheader.track))
         {
-            std::cout << fmt::format(
-                "SCP: cannot write track {} head {}, "
-                "there are not not enough Track Data Headers.\n",
+            log("SCP: cannot write track {} head {}, there are not not enough "
+                "Track Data Headers.",
                 track,
                 head);
             return;

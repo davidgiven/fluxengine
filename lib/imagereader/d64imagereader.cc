@@ -35,8 +35,7 @@ public:
         unsigned numHeads = 1;
         unsigned numSectors = 0;
 
-        Logger() << fmt::format(
-            "D64: reading image with {} tracks, {} heads", numTracks, numHeads);
+        log("D64: reading image with {} tracks, {} heads", numTracks, numHeads);
 
         uint32_t offset = 0;
 

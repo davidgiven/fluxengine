@@ -67,8 +67,7 @@ USB* get_usb_impl()
         config.usb().greaseweazle().has_port())
     {
         const auto& conf = config.usb().greaseweazle();
-        Logger() << fmt::format(
-            "Using GreaseWeazle on serial port {}", conf.port());
+        log("Using GreaseWeazle on serial port {}", conf.port());
         return createGreaseWeazleUsb(conf.port(), conf);
     }
 
@@ -78,11 +77,11 @@ USB* get_usb_impl()
     switch (candidate->id)
     {
         case FLUXENGINE_ID:
-            Logger() << fmt::format("Using FluxEngine {}", candidate->serial);
+            log("Using FluxEngine {}", candidate->serial);
             return createFluxengineUsb(candidate->device);
 
         case GREASEWEAZLE_ID:
-            Logger() << fmt::format("Using GreaseWeazle {} on {}",
+            log("Using GreaseWeazle {} on {}",
                 candidate->serial,
                 candidate->serialPort);
             return createGreaseWeazleUsb(

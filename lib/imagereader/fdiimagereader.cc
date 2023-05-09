@@ -83,8 +83,8 @@ public:
             switch (fddType)
             {
                 case 0x90:
-                    Logger() << "FDI: automatically setting format to 1.2MB "
-                                "(1024 byte sectors)";
+                    log("FDI: automatically setting format to 1.2MB (1024 byte "
+                        "sectors)");
                     trackdata->set_target_rotational_period_ms(167);
                     layoutdata->set_sector_size(1024);
                     for (int i = 0; i < 9; i++)
@@ -92,7 +92,7 @@ public:
                     break;
 
                 case 0x30:
-                    Logger() << "FDI: automatically setting format to 1.44MB";
+                    log("FDI: automatically setting format to 1.44MB");
                     trackdata->set_target_rotational_period_ms(200);
                     layoutdata->set_sector_size(512);
                     for (int i = 0; i < 18; i++)
@@ -110,7 +110,7 @@ public:
 
         image->calculateSize();
         const Geometry& geometry = image->getGeometry();
-        Logger() << fmt::format("FDI: read {} tracks, {} sides, {} kB total",
+        log("FDI: read {} tracks, {} sides, {} kB total",
             geometry.numTracks,
             geometry.numSides,
             ((int)inputFile.tellg() - headerSize) / 1024);

@@ -28,7 +28,7 @@ public:
 
     void writeImage(const Image& image)
     {
-        Logger() << "D64: writing triangular image";
+        log("D64: writing triangular image");
 
         std::ofstream outputFile(
             _config.filename(), std::ios::out | std::ios::binary);

@@ -49,7 +49,7 @@ void FlagGroup::applyOption(const OptionProto& option)
         error("option '{}' has an option group inside it, which isn't allowed",
             option.name());
 
-    Logger() << fmt::format("OPTION: {}",
+    log("OPTION: {}",
         option.has_message() ? option.message() : option.comment());
 
     config.MergeFrom(option.config());

@@ -25,13 +25,11 @@ public:
 
         if (geometry.numTracks * trackSize == 0)
         {
-            Logger()
-                << "No sectors in output; skipping .nsi image file generation.";
+            log("No sectors in output; skipping .nsi image file generation.");
             return;
         }
 
-        Logger() << fmt::format(
-            "Writing {} tracks, {} sides, {} sectors, {} ({} bytes/sector), {} "
+        log("Writing {} tracks, {} sides, {} sectors, {} ({} bytes/sector), {} "
             "kB total",
             geometry.numTracks,
             geometry.numSides,
@@ -91,8 +89,8 @@ public:
                         memset(fill, ' ', sizeof(fill));
                         if (mixedDensity == false)
                         {
-                            Logger() << "Warning: Disk contains mixed "
-                                        "single/double-density sectors.";
+                            log("Warning: Disk contains mixed "
+                                "single/double-density sectors.");
                         }
                         mixedDensity = true;
                         sector->data.slice(0, 256).writeTo(outputFile);

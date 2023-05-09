@@ -106,21 +106,38 @@ class IMDImageReader : public ImageReader
 public:
     IMDImageReader(const ImageReaderProto& config): ImageReader(config) {}
 
-    std::unique_ptr<Image> readImage()
+    // clang-format off
     /*
-    IMAGE FILE FORMAT
-    The overall layout of an ImageDisk .IMD image file is:
-    IMD v.vv: dd/mm/yyyy hh:mm:ss
-    Comment (ASCII only - unlimited size)
-    1A byte - ASCII EOF character
-    - For each track on the disk:
-    1 byte Mode value                           see getModulationspeed for
-    definition 1 byte Track 1 byte Head 1 byte number of sectors in track 1 byte
-    sector size                          see getsectorsize for definition sector
-    numbering map sector track map (optional)              definied in high byte
-    of head (since head is 0 or 1) sector head map (optional) definied in high
-    byte of head (since head is 0 or 1) sector data records <End of file>
-    */
+     * IMAGE FILE FORMAT
+     * The overall layout of an ImageDisk .IMD image file is:
+     * IMD v.vv: dd/mm/yyyy hh:mm:ss
+     * Comment (ASCII only - unlimited size)
+     * 1A byte - ASCII EOF character
+     * - For each track on the disk:
+     * 1 byte Mode value							(0-5) see getModulationspeed for definition		
+     * 1 byte Cylinder							(0-n)
+     * 1 byte Head								(0-1)
+     * 1 byte number of sectors in track			(1-n)
+     * 1 byte sector size							(0-6) see getsectorsize for definition
+     * sector numbering map						IMD start numbering sectors with 1.
+     * sector cylinder map (optional)				definied in high byte of head (since head is 0 or 1)
+     * sector head map (optional)					definied in high byte of head (since head is 0 or 1)
+     * sector data records	For each data record:
+     * 	1 byte Sector status 					
+     * 		0: Sector data unavailable - could not be read
+     * 		1: Normal data: (Sector Size) bytes follow
+     * 		2: Compressed: All bytes in sector have same value (xx)
+     * 		3: Normal data with "Deleted-Data address mark"
+     * 		4: Compressed with "Deleted-Data address mark"
+     * 		5: Normal data read with data error
+     * 		6: Compressed read with data error"
+     * 		7: Deleted data read with data error"
+     * 		8: Compressed, Deleted read with data error"
+     * 	sector size of Sector data
+     * <End of file>
+     */
+    // clang-format on
+    std::unique_ptr<Image> readImage()
     {
         // Read File
         std::ifstream inputFile(
@@ -161,7 +178,7 @@ public:
             n++;
         }
         headerPtr = n; // set pointer to after comment
-        Logger() << "Comment in IMD file:" << fmt::format("{}", comment);
+        log("Comment in IMD file: {}", comment);
 
         for (;;)
         {
@@ -284,22 +301,19 @@ public:
 
                 switch (Status_Sector)
                 {
-                        /*fluxengine knows of a few sector statussen but not all
-                         *of the statussen in IMD.
-                         *  // the statussen are in sector.h. Translation to
-                         *fluxengine is as follows: Statussen fluxengine
-                         *|	Status IMD
-                         *--------------------------------------------------------------------------------------------------------------------
-                         *  	OK,
-                         *|	1, 2 (Normal data: (Sector Size) of (compressed)
-                         *bytes follow) BAD_CHECKSUM,
-                         *|	5, 6, 7, 8 MISSING,	  sector not found
-                         *|	0 (Sector data unavailable - could not be read)
-                         *	DATA_MISSING, sector present but no data found
-                         *|	3, 4 CONFLICT,
-                         *| INTERNAL_ERROR
-                         *|
-                         */
+                    // clang-format off
+                    /* fluxengine knows of a few sector statussen but not all of the statussen in IMD.
+                     *  // the statussen are in sector.h. Translation to fluxengine is as follows:
+                     *	Statussen fluxengine							|	Status IMD		
+                     *--------------------------------------------------------------------------------------------------------------------
+                     *  	OK,											|	1, 2 (Normal data: (Sector Size) of (compressed) bytes follow)
+                     *	BAD_CHECKSUM,									|	5, 6, 7, 8
+                     *	MISSING,	  sector not found					|	0 (Sector data unavailable - could not be read)
+                     *	DATA_MISSING, sector present but no data found	|	3, 4
+                     *	CONFLICT,										|
+                     *	INTERNAL_ERROR									|
+                     */
+                    // clang-format on
                     case 0: /* Sector data unavailable - could not be read */
 
                         sector->status = Sector::MISSING;
@@ -431,24 +445,22 @@ public:
 
         if (config.encoder().format_case() !=
             EncoderProto::FormatCase::FORMAT_NOT_SET)
-            Logger() << "IMD: overriding configured format";
+            log("IMD: overriding configured format");
 
         image->calculateSize();
         const Geometry& geometry = image->getGeometry();
         size_t headSize = ((header.numSectors) * (sectorSize));
         size_t trackSize = (headSize * (header.Head + 1));
 
-        Logger() << "IMD: read "
-                 << fmt::format(
-                        "{} tracks, {} heads; {}; {} kbps; {} sectors; "
-                        "sectorsize {}; {} kB total.",
-                        header.track + 1,
-                        header.Head + 1,
-                        fm ? "FM" : "MFM",
-                        Modulation_Speed,
-                        header.numSectors,
-                        sectorSize,
-                        (header.track + 1) * trackSize / 1024);
+        log("IMD: read {} tracks, {} heads; {}; {} kbps; {} sectors; "
+            "sectorsize {}; {} kB total.",
+            header.track + 1,
+            header.Head + 1,
+            fm ? "FM" : "MFM",
+            Modulation_Speed,
+            header.numSectors,
+            sectorSize,
+            (header.track + 1) * trackSize / 1024);
 
         layout->set_tracks(geometry.numTracks);
         layout->set_sides(geometry.numSides);

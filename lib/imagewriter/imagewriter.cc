@@ -206,8 +206,7 @@ void ImageWriter::writeMappedImage(const Image& image)
 {
     if (_config.filesystem_sector_order())
     {
-        Logger()
-            << "WRITER: converting from disk sector order to filesystem order";
+        log("WRITER: converting from disk sector order to filesystem order");
 
         std::set<std::shared_ptr<const Sector>> sectors;
         for (const auto& e : image)

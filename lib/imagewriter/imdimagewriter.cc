@@ -181,7 +181,7 @@ public:
                                                   : ImdOutputProto::RATE_DD;
             if (geometry.sectorSize <= 256)
                 dataRate = ImdOutputProto::RATE_SD;
-            Logger() << fmt::format("IMD: guessing data rate as {}",
+            log("IMD: guessing data rate as {}",
                 ImdOutputProto::DataRate_Name(dataRate));
         }
 
@@ -190,7 +190,7 @@ public:
         if (recordingMode == ImdOutputProto::RECMODE_GUESS)
         {
             recordingMode = ImdOutputProto::RECMODE_MFM;
-            Logger() << fmt::format("IMD: guessing recording mode as {}",
+            log("IMD: guessing recording mode as {}",
                 ImdOutputProto::RecordingMode_Name(recordingMode));
         }
 
@@ -238,8 +238,7 @@ public:
                 { // sector 0 doesnt exist exit with error
                     // this track, head has no sectors
                     Status_Sector = 0;
-                    Logger() << fmt::format(
-                        "IMD: sector {} not found on track {}, head {}\n",
+                    log("IMD: sector {} not found on track {}, head {}\n",
                         sectorId + 1,
                         track,
                         head);
@@ -394,7 +393,7 @@ public:
                      *		7: Deleted data read with data error"
                      *		8: Compressed, Deleted read with data error"
                      *	sector size of Sector data
-                     */					
+                     */
                     // clang-format on
                     // read sector
                     const auto& sector = image.get(track, head, sectorId + 1);
@@ -516,8 +515,7 @@ public:
             }
         }
         imagenew.writeTo(outputFile);
-        Logger() << fmt::format(
-            "IMD: Written {} tracks, {} heads, {} sectors, {} bytes per "
+        log("IMD: Written {} tracks, {} heads, {} sectors, {} bytes per "
             "sector, {} kB total",
             geometry.numTracks,
             numHeads,

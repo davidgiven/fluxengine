@@ -24,12 +24,11 @@ public:
 
         if (geometry.numTracks * trackSize == 0)
         {
-            Logger()
-                << "RAW: no sectors in output; skipping image file generation.";
+            log("RAW: no sectors in output; skipping image file generation.");
             return;
         }
 
-        Logger() << fmt::format("RAW: writing {} tracks, {} sides",
+        log("RAW: writing {} tracks, {} sides",
             geometry.numTracks,
             geometry.numSides);
 

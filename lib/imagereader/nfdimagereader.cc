@@ -51,12 +51,12 @@ public:
 
         if (config.encoder().format_case() !=
             EncoderProto::FormatCase::FORMAT_NOT_SET)
-            Logger() << "NFD: overriding configured format";
+            log("NFD: overriding configured format");
 
         auto ibm = config.mutable_encoder()->mutable_ibm();
         auto layout = config.mutable_layout();
-        Logger() << "NFD: HD 1.2MB mode";
-        Logger() << "NFD: forcing hign density mode";
+        log("NFD: HD 1.2MB mode");
+        log("NFD: forcing hign density mode");
         config.mutable_drive()->set_high_density(true);
         config.set_tpi(96);
 
@@ -156,7 +156,7 @@ public:
 
         image->calculateSize();
         const Geometry& geometry = image->getGeometry();
-        Logger() << fmt::format("NFD: read {} tracks, {} sides",
+        log("NFD: read {} tracks, {} sides",
             geometry.numTracks,
             geometry.numSides);
         return image;

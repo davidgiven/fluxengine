@@ -53,15 +53,13 @@ public:
                     "format");
         }
 
-        Logger() << "DC42: writing DiskCopy 4.2 image"
-                 << fmt::format(
-                        "DC42: {} tracks, {} sides, {} sectors, {} bytes per "
-                        "sector; {}",
-                        geometry.numTracks,
-                        geometry.numSides,
-                        geometry.numSectors,
-                        geometry.sectorSize,
-                        mfm ? "MFM" : "GCR");
+        log("DC42: writing DiskCopy 4.2 image");
+        log("DC42: {} tracks, {} sides, {} sectors, {} bytes per sector; {}",
+            geometry.numTracks,
+            geometry.numSides,
+            geometry.numSectors,
+            geometry.sectorSize,
+            mfm ? "MFM" : "GCR");
 
         auto sectors_per_track = [&](int track) -> int
         {

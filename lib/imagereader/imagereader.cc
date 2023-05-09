@@ -102,7 +102,7 @@ std::unique_ptr<Image> ImageReader::readMappedImage()
     if (!_config.filesystem_sector_order())
         return rawImage;
 
-    Logger() << "READER: converting from filesystem sector order to disk order";
+    log("READER: converting from filesystem sector order to disk order");
     std::set<std::shared_ptr<const Sector>> sectors;
     for (const auto& e : *rawImage)
     {

@@ -28,8 +28,7 @@ public:
         const auto end = inputFile.tellg();
         const auto fsize = (end - begin);
 
-        Logger() << fmt::format(
-            "NSI: Autodetecting geometry based on file size: {}", fsize);
+        log("NSI: Autodetecting geometry based on file size: {}", fsize);
 
         unsigned numTracks = 35;
         unsigned numSectors = 10;
@@ -59,8 +58,7 @@ public:
 
         size_t trackSize = numSectors * sectorSize;
 
-        Logger() << fmt::format(
-            "reading {} tracks, {} heads, {} sectors, {} bytes per sector, {} "
+        log("reading {} tracks, {} heads, {} sectors, {} bytes per sector, {} "
             "kB total",
             numTracks,
             numHeads,

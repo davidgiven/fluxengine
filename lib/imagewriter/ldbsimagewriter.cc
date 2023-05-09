@@ -21,8 +21,7 @@ public:
 
         const Geometry geometry = image.getGeometry();
 
-        Logger() << fmt::format(
-            "LDBS: writing {} tracks, {} sides, {} sectors, {} bytes per "
+        log("LDBS: writing {} tracks, {} sides, {} sectors, {} bytes per "
             "sector",
             geometry.numTracks,
             geometry.numSides,
@@ -41,7 +40,7 @@ public:
                                                   : LDBSOutputProto::RATE_DD;
             if (geometry.sectorSize <= 256)
                 dataRate = LDBSOutputProto::RATE_SD;
-            Logger() << fmt::format("LDBS: guessing data rate as {}",
+            log("LDBS: guessing data rate as {}",
                 LDBSOutputProto::DataRate_Name(dataRate));
         }
 
@@ -50,7 +49,7 @@ public:
         if (recordingMode == LDBSOutputProto::RECMODE_GUESS)
         {
             recordingMode = LDBSOutputProto::RECMODE_MFM;
-            Logger() << fmt::format("LDBS: guessing recording mode as {}",
+            log("LDBS: guessing recording mode as {}",
                 LDBSOutputProto::RecordingMode_Name(recordingMode));
         }
 

@@ -47,8 +47,7 @@ public:
             }
         }
 
-        Logger() << fmt::format(
-            "IMG: wrote {} tracks, {} sides, {} kB total to {}",
+        log("IMG: wrote {} tracks, {} sides, {} kB total to {}",
             tracks,
             sides,
             outputFile.tellp() / 1024,

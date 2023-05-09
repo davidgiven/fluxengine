@@ -34,7 +34,7 @@ public:
         std::string diskName = header.slice(0, 0x16);
 
         if (diskName[0])
-            Logger() << fmt::format("D88: disk name: {}", diskName);
+            log("D88: disk name: {}", diskName);
 
         ByteReader headerReader(header);
 
@@ -46,7 +46,7 @@ public:
         int diskSize = headerReader.seek(0x1c).read_le32();
 
         if (diskSize > fileSize)
-            Logger() << "D88: found multiple disk images. Only using first";
+            log("D88: found multiple disk images. Only using first");
 
         int trackTableEnd = headerReader.seek(0x20).read_le32();
         int trackTableSize = trackTableEnd - 0x20;
@@ -58,19 +58,19 @@ public:
 
         if (config.encoder().format_case() !=
             EncoderProto::FormatCase::FORMAT_NOT_SET)
-            Logger() << "D88: overriding configured format";
+            log("D88: overriding configured format");
 
         auto ibm = config.mutable_encoder()->mutable_ibm();
         int clockRate = 500;
         if (mediaFlag == 0x20)
         {
-            Logger() << "D88: forcing high density mode";
+            log("D88: forcing high density mode");
             config.mutable_drive()->set_high_density(true);
             config.set_tpi(96);
         }
         else
         {
-            Logger() << "D88: forcing single/double density mode";
+            log("D88: forcing single/double density mode");
             clockRate = 300;
             config.mutable_drive()->set_high_density(false);
             config.set_tpi(48);
@@ -216,7 +216,7 @@ public:
 
         image->calculateSize();
         const Geometry& geometry = image->getGeometry();
-        Logger() << fmt::format("D88: read {} tracks, {} sides",
+        log("D88: read {} tracks, {} sides",
             geometry.numTracks,
             geometry.numSides);
 

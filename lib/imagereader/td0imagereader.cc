@@ -97,8 +97,7 @@ public:
             comment.erase(nl.base(), comment.end());
         }
 
-        Logger() << fmt::format(
-            "TD0: TeleDisk {}.{}: {}", version / 10, version % 10, comment);
+        log("TD0: TeleDisk {}.{}: {}", version / 10, version % 10, comment);
 
         unsigned totalSize = 0;
         std::unique_ptr<Image> image(new Image);
@@ -193,8 +192,7 @@ public:
 
         image->calculateSize();
         const Geometry& geometry = image->getGeometry();
-        Logger() << fmt::format(
-            "TD0: found {} tracks, {} sides, {} sectors, {} bytes per sector, "
+        log("TD0: found {} tracks, {} sides, {} sectors, {} bytes per sector, "
             "{} kB total",
             geometry.numTracks,
             geometry.numSides,

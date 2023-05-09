@@ -63,8 +63,7 @@ public:
                 error("don't understand DiskCopy disks of type {}", encoding);
         }
 
-        Logger() << fmt::format(
-            "DC42: reading image with {} tracks, {} heads; {}; {}",
+        log("DC42: reading image with {} tracks, {} heads; {}; {}",
             numTracks,
             numHeads,
             mfm ? "MFM" : "GCR",
