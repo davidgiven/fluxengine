@@ -2,7 +2,6 @@
 #include "lib/vfs/vfs.h"
 #include "lib/utils.h"
 #include "lib/config.pb.h"
-#include <fmt/format.h>
 
 /* This is described here:
  * http://fileformats.archiveteam.org/wiki/Apple_DOS_file_system

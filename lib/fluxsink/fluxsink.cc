@@ -4,7 +4,6 @@
 #include "lib/config.pb.h"
 #include "proto.h"
 #include "utils.h"
-#include "fmt/format.h"
 #include <regex>
 
 std::unique_ptr<FluxSink> FluxSink::create(const FluxSinkProto& config)
@@ -30,7 +29,7 @@ std::unique_ptr<FluxSink> FluxSink::create(const FluxSinkProto& config)
             return createFl2FluxSink(config.fl2());
 
         default:
-            Error() << "bad output disk config";
+            error("bad output disk config");
             return std::unique_ptr<FluxSink>();
     }
 }
@@ -89,5 +88,5 @@ void FluxSink::updateConfigForFilename(
         }
     }
 
-    Error() << fmt::format("unrecognised flux filename '{}'", filename);
+    error("unrecognised flux filename '{}'", filename);
 }

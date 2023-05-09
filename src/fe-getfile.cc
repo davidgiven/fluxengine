@@ -8,7 +8,6 @@
 #include "imagewriter/imagewriter.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/decoders/decoders.h"
-#include "fmt/format.h"
 #include "fluxengine.h"
 #include "lib/vfs/sectorinterface.h"
 #include "lib/vfs/vfs.h"
@@ -31,7 +30,7 @@ int mainGetFile(int argc, const char* argv[])
     {
         Path inputFilename(directory);
         if (inputFilename.size() == 0)
-            Error() << "you must supply a filename to read";
+            error("you must supply a filename to read");
 
         std::string outputFilename = output;
         if (outputFilename.empty())
@@ -43,7 +42,7 @@ int mainGetFile(int argc, const char* argv[])
     }
     catch (const FilesystemException& e)
     {
-        Error() << e.message;
+        error("{}", e.message);
     }
 
     return 0;

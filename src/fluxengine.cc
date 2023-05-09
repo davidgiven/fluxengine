@@ -1,6 +1,5 @@
 #include "globals.h"
 #include "proto.h"
-#include "fmt/format.h"
 
 typedef int command_cb(int agrc, const char* argv[]);
 
@@ -141,7 +140,8 @@ void showProfiles(const std::string& command,
     {
         const auto& config = *it.second;
         if (!config.is_extension())
-            std::cout << fmt::format("  {}: {}\n", it.first, config.shortname());
+            std::cout << fmt::format(
+                "  {}: {}\n", it.first, config.shortname());
     }
 
     std::cout << "Available profile options include:\n";

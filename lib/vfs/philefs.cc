@@ -2,7 +2,6 @@
 #include "lib/vfs/vfs.h"
 #include "lib/config.pb.h"
 #include "lib/utils.h"
-#include <fmt/format.h>
 
 /* Root block:
  *

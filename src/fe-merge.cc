@@ -6,7 +6,6 @@
 #include "flux.h"
 #include "fl2.h"
 #include "fl2.pb.h"
-#include "fmt/format.h"
 #include "fluxengine.h"
 #include <fstream>
 
@@ -30,9 +29,9 @@ int mainMerge(int argc, const char* argv[])
     flags.parseFlags(argc, argv);
 
     if (inputFluxFiles.empty())
-        Error() << "you must specify at least one input flux file (with -s)";
+        error("you must specify at least one input flux file (with -s)");
     if (destFlux.get() == "")
-        Error() << "you must specify an output flux file (with -d)";
+        error("you must specify an output flux file (with -d)");
 
     std::map<std::pair<int, int>, TrackFluxProto> data;
     for (const auto& s : inputFluxFiles)

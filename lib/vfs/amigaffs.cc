@@ -4,7 +4,6 @@
 #include "lib/proto.h"
 #include "lib/layout.h"
 #include "lib/logger.h"
-#include <fmt/format.h>
 
 #include "adflib.h"
 #include "adf_blk.h"
@@ -420,7 +419,7 @@ private:
 
 static void onAdfWarning(char* message)
 {
-    Logger() << message;
+    log(message);
 }
 
 static void onAdfError(char* message)

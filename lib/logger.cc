@@ -3,28 +3,25 @@
 #include "fluxmap.h"
 #include "sector.h"
 #include "flux.h"
-#include "fmt/format.h"
 #include "logger.h"
 
 static bool indented = false;
-static std::function<void(std::shared_ptr<const AnyLogMessage>)> loggerImpl =
-    Logger::textLogger;
 
-Logger& Logger::operator<<(std::shared_ptr<const AnyLogMessage> message)
+static std::function<void(std::shared_ptr<const AnyLogMessage>)> loggerImpl =
+    [](auto message)
+{
+    std::cout << Logger::toString(*message) << std::flush;
+};
+
+void log(std::shared_ptr<const AnyLogMessage> message)
 {
     loggerImpl(message);
-    return *this;
 }
 
 void Logger::setLogger(
     std::function<void(std::shared_ptr<const AnyLogMessage>)> cb)
 {
     loggerImpl = cb;
-}
-
-void Logger::textLogger(std::shared_ptr<const AnyLogMessage> message)
-{
-    std::cout << toString(*message) << std::flush;
 }
 
 std::string Logger::toString(const AnyLogMessage& message)

@@ -47,12 +47,12 @@ public:
 private:
     void SetState(int state)
     {
-		_state = state;
-		CallAfter(
-			[&]()
-			{
-				UpdateState();
-			});
+        _state = state;
+        CallAfter(
+            [&]()
+            {
+                UpdateState();
+            });
     }
 
     void SwitchFrom() override
@@ -124,7 +124,7 @@ public:
             SetPage(MainWindow::PAGE_IMAGER);
             PrepareConfig();
             if (!config.has_image_reader())
-                Error() << "This format cannot be read from images.";
+                error("This format cannot be read from images.");
 
             auto filename = wxFileSelector("Choose a image file to read",
                 /* default_path= */ wxEmptyString,
@@ -244,7 +244,7 @@ public:
         try
         {
             if (!config.has_image_writer())
-                Error() << "This format cannot be saved.";
+                error("This format cannot be saved.");
 
             auto filename =
                 wxFileSelector("Choose the name of the image file to write",

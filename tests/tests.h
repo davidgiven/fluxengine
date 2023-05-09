@@ -23,7 +23,7 @@ public:
 private:
 	void fail(const std::string& message)
 	{
-		Error() << "assertion failed: " << _filename << ":" << _lineno << ": " << message;
+		error("assertion failed: {}: {}: {}", _filename, _lineno, message);
 	}
 
 private:

@@ -59,7 +59,7 @@ static void write_sector(std::vector<bool>& bits,
     const std::shared_ptr<const Sector>& sector)
 {
     if ((sector->data.size() != 512) && (sector->data.size() != 528))
-        Error() << "unsupported sector size --- you must pick 512 or 528";
+        error("unsupported sector size --- you must pick 512 or 528");
 
     uint32_t checksum = 0;
 
@@ -114,7 +114,8 @@ public:
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
-        /* Number of bits for one nominal revolution of a real 200ms Amiga disk. */
+        /* Number of bits for one nominal revolution of a real 200ms Amiga disk.
+         */
         int bitsPerRevolution = 200e3 / _config.clock_rate_us();
         std::vector<bool> bits(bitsPerRevolution);
         unsigned cursor = 0;
@@ -129,13 +130,12 @@ public:
             write_sector(bits, cursor, sector);
 
         if (cursor >= bits.size())
-            Error() << "track data overrun";
+            error("track data overrun");
         fillBitmapTo(bits, cursor, bits.size(), {true, false});
 
         auto fluxmap = std::make_unique<Fluxmap>();
         fluxmap->appendBits(bits,
-            calculatePhysicalClockPeriod(
-                _config.clock_rate_us() * 1e3, 200e6));
+            calculatePhysicalClockPeriod(_config.clock_rate_us() * 1e3, 200e6));
         return fluxmap;
     }
 

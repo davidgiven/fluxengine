@@ -23,28 +23,17 @@ static void test_convert(const Bytes& flxbytes, const Bytes& fluxmapbytes)
 
 static void test_stream_reader()
 {
-    test_convert(
-        Bytes{0},
-        Bytes{}
-    );
+    test_convert(Bytes{0}, Bytes{});
 
     /* Simple one-byte intervals */
-    test_convert(
-        Bytes{ 0, 0x64, FLX_STOP },
-        Bytes{ 0xb0 }
-    );
+    test_convert(Bytes{0, 0x64, FLX_STOP}, Bytes{0xb0});
 
     /* Index pulse */
-    test_convert(
-        Bytes{ 0, 0x64, FLX_INDEX, 0x64, FLX_STOP },
-        Bytes{ 0xf0, 0xb0 }
-    );
-
+    test_convert(Bytes{0, 0x64, FLX_INDEX, 0x64, FLX_STOP}, Bytes{0xf0, 0xb0});
 }
 
 int main(int argc, const char* argv[])
 {
-	test_stream_reader();
+    test_stream_reader();
     return 0;
 }
-

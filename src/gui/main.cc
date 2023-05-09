@@ -69,11 +69,11 @@ wxThread::ExitCode FluxEngineApp::Entry()
     }
     catch (const ErrorException& e)
     {
-        Logger() << ErrorLogMessage{e.message + '\n'};
+        log(ErrorLogMessage{e.message + '\n'});
     }
     catch (const EmergencyStopException& e)
     {
-        Logger() << EmergencyStopMessage();
+        log(EmergencyStopMessage());
     }
 
     postToUiThread(

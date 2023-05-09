@@ -3,7 +3,6 @@
 #include "lib/config.pb.h"
 #include "lib/proto.h"
 #include "lib/utils.h"
-#include <fmt/format.h>
 
 enum
 {

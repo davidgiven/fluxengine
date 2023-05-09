@@ -7,7 +7,6 @@
 #include "lib/config.pb.h"
 #include "lib/layout.h"
 #include "lib/layout.pb.h"
-#include "fmt/format.h"
 #include "logger.h"
 #include <algorithm>
 #include <iostream>
@@ -29,7 +28,7 @@ public:
         std::ofstream outputFile(
             _config.filename(), std::ios::out | std::ios::binary);
         if (!outputFile.is_open())
-            Error() << "cannot open output file";
+            error("cannot open output file");
 
         for (const auto& p : Layout::getTrackOrdering(tracks, sides))
         {
@@ -41,17 +40,18 @@ public:
             {
                 const auto& sector = image.get(track, side, sectorId);
                 if (sector)
-                    sector->data.slice(0, trackLayout->sectorSize).writeTo(outputFile);
+                    sector->data.slice(0, trackLayout->sectorSize)
+                        .writeTo(outputFile);
                 else
                     outputFile.seekp(trackLayout->sectorSize, std::ios::cur);
             }
         }
 
-        Logger() << fmt::format("IMG: wrote {} tracks, {} sides, {} kB total to {}",
+        log("IMG: wrote {} tracks, {} sides, {} kB total to {}",
             tracks,
             sides,
             outputFile.tellp() / 1024,
-			_config.filename());
+            _config.filename());
     }
 };
 

@@ -2,7 +2,6 @@
 #include "fluxmap.h"
 #include "kryoflux.h"
 #include "protocol.h"
-#include "fmt/format.h"
 #include <fstream>
 #include <sys/types.h>
 #include <dirent.h>
@@ -17,17 +16,20 @@ static bool has_suffix(const std::string& haystack, const std::string& needle)
 {
     if (needle.length() > haystack.length())
         return false;
-    
-    return haystack.compare(haystack.length() - needle.length(), needle.length(), needle) == 0;
+
+    return haystack.compare(haystack.length() - needle.length(),
+               needle.length(),
+               needle) == 0;
 }
 
-std::unique_ptr<Fluxmap> readStream(const std::string& dir, unsigned track, unsigned side)
+std::unique_ptr<Fluxmap> readStream(
+    const std::string& dir, unsigned track, unsigned side)
 {
     std::string suffix = fmt::format("{:02}.{}.raw", track, side);
 
     DIR* dirp = opendir(dir.c_str());
     if (!dirp)
-        Error() << fmt::format("cannot access path '{}'", dir);
+        error("cannot access path '{}'", dir);
 
     std::string filename;
     for (;;)
@@ -35,18 +37,18 @@ std::unique_ptr<Fluxmap> readStream(const std::string& dir, unsigned track, unsi
         struct dirent* de = readdir(dirp);
         if (!de)
             break;
-        
+
         if (has_suffix(de->d_name, suffix))
         {
             if (!filename.empty())
-                Error() << fmt::format("data is ambiguous --- multiple files end in {}", suffix);
+                error("data is ambiguous --- multiple files end in {}", suffix);
             filename = fmt::format("{}/{}", dir, de->d_name);
         }
     }
     closedir(dirp);
 
     if (filename.empty())
-        Error() << fmt::format("failed to find track {} side {} in {}", track, side, dir);
+        error("failed to find track {} side {} in {}", track, side, dir);
 
     return readStream(filename);
 }
@@ -55,7 +57,7 @@ std::unique_ptr<Fluxmap> readStream(const std::string& filename)
 {
     std::ifstream f(filename, std::ios::in | std::ios::binary);
     if (!f.is_open())
-		Error() << fmt::format("cannot open input file '{}'", filename);
+        error("cannot open input file '{}'", filename);
 
     Bytes bytes;
     ByteWriter bw(bytes);
@@ -69,7 +71,7 @@ std::unique_ptr<Fluxmap> readStream(const Bytes& bytes)
     ByteReader br(bytes);
 
     /* Pass 1: scan the stream looking for index marks. */
-    
+
     std::set<uint32_t> indexmarks;
     br.seek(0);
     while (!br.eof())
@@ -119,7 +121,8 @@ std::unique_ptr<Fluxmap> readStream(const Bytes& bytes)
                 }
                 else if (b == 0x0b)
                 {
-                    /* Ovl16: the next block is 0x10000 sclks longer than normal. */
+                    /* Ovl16: the next block is 0x10000 sclks longer than
+                     * normal. */
                     len = 0;
                 }
                 else if (b == 0x0c)
@@ -133,8 +136,9 @@ std::unique_ptr<Fluxmap> readStream(const Bytes& bytes)
                     len = 0;
                 }
                 else
-                    Error() << fmt::format(
-                        "unknown stream block byte 0x{:02x} at 0x{:08x}", b, (uint64_t)br.pos-1);
+                    error("unknown stream block byte 0x{:02x} at 0x{:08x}",
+                        b,
+                        (uint64_t)br.pos - 1);
             }
         }
 
@@ -197,7 +201,7 @@ finished_pass_1:
                 if ((b >= 0x00) && (b <= 0x07))
                 {
                     /* Flux2: double byte value */
-                    b = (b<<8) | br.read_8();
+                    b = (b << 8) | br.read_8();
                     writeFlux(extrasclks + b);
                     extrasclks = 0;
                 }
@@ -217,7 +221,8 @@ finished_pass_1:
                 }
                 else if (b == 0x0b)
                 {
-                    /* Ovl16: the next block is 0x10000 sclks longer than normal. */
+                    /* Ovl16: the next block is 0x10000 sclks longer than
+                     * normal. */
                     extrasclks += 0x10000;
                 }
                 else if (b == 0x0c)
@@ -234,14 +239,15 @@ finished_pass_1:
                     extrasclks = 0;
                 }
                 else
-                    Error() << fmt::format(
-                        "unknown stream block byte 0x{:02x} at 0x{:08x}", b, (uint64_t)br.pos-1);
+                    error("unknown stream block byte 0x{:02x} at 0x{:08x}",
+                        b,
+                        (uint64_t)br.pos - 1);
             }
         }
     }
 
 finished_pass_2:
     if (!br.eof())
-        Error() << "I/O error reading stream";
+        error("I/O error reading stream");
     return fluxmap;
 }
