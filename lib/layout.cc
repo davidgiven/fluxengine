@@ -3,14 +3,32 @@
 #include "lib/proto.h"
 #include "lib/environment.h"
 
+bool approximatelyEqual(float a, float b, float epsilon)
+{
+    return fabs(a - b) <= ((fabs(a) < fabs(b) ? fabs(b) : fabs(a)) * epsilon);
+}
+
 static unsigned getTrackStep()
 {
-    unsigned track_step =
-        (config.tpi() == 0) ? 1 : (config.drive().tpi() / config.tpi());
+	if (!config.layout().tpi())
+		error("no layout TPI set");
+	if (!config.drive().tpi())
+		error("no drive TPI set");
 
-    if (track_step == 0)
-        error("this drive can't write this image, because the head is too big");
-    return track_step;
+	if (config.layout().tpi() == 0.0)
+		error("layout TPI is zero; this shouldn't happen?");
+
+    float trackStepFactor = config.drive().tpi() / config.layout().tpi();
+
+    if (!approximatelyEqual(trackStepFactor, round(trackStepFactor), 0.001))
+        error(
+            "this drive can't handle this image, because the drive TPI doesn't "
+            "divide neatly into the layout TPI");
+    if (trackStepFactor < 0.999)
+        error(
+            "this drive can't handle this image, because the head is too big");
+
+    return round(trackStepFactor);
 }
 
 unsigned Layout::remapTrackPhysicalToLogical(unsigned ptrack)

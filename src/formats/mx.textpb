@@ -74,8 +74,6 @@ decoder {
 	mx {}
 }
 
-tpi: 48
-
 option_group {
 	comment: "Format family"
 
@@ -85,6 +83,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 48
 				tracks: 40
 				sides: 1
 			}
@@ -97,6 +96,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 48
 				tracks: 40
 				sides: 2
 			}
@@ -109,6 +109,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 96
 				tracks: 80
 				sides: 1
 			}
@@ -122,6 +123,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 96
 				tracks: 80
 				sides: 2
 			}

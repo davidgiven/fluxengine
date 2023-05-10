@@ -24,6 +24,7 @@ image_writer {
 }
 
 layout {
+	tpi: 135
 	tracks: 78
 	sides: 1
 	layoutdata {
@@ -44,4 +45,3 @@ drive {
 	head_bias: 1
 }
 
-tpi: 96

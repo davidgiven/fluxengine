@@ -66,14 +66,14 @@ public:
         {
             log("D88: forcing high density mode");
             config.mutable_drive()->set_high_density(true);
-            config.set_tpi(96);
+            config.mutable_layout()->set_tpi(96);
         }
         else
         {
             log("D88: forcing single/double density mode");
             clockRate = 300;
             config.mutable_drive()->set_high_density(false);
-            config.set_tpi(48);
+            config.mutable_layout()->set_tpi(48);
         }
 
         auto layout = config.mutable_layout();

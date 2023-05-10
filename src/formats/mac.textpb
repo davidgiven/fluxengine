@@ -70,6 +70,7 @@ image_writer {
 }
 
 layout {
+	tpi: 135
 	tracks: 80
 	sides: 2
 	layoutdata {
@@ -122,8 +123,6 @@ encoder {
 decoder {
 	macintosh {}
 }
-
-tpi: 96
 
 option_group {
 	comment: "Format variant"

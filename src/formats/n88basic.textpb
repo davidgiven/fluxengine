@@ -1,5 +1,5 @@
 shortname: 'N88-BASIC'
-comment: 'PC8800/PC98 5.25"/3.5" 77-track 26-sector DSHD'
+comment: 'PC8800/PC98 5.25" 77-track 26-sector DSHD'
 read_support_status: UNICORN
 write_support_status: UNICORN
 
@@ -28,6 +28,7 @@ image_writer {
 }
 
 layout {
+	tpi: 96
 	tracks: 77
 	sides: 2
 	layoutdata {
@@ -76,5 +77,4 @@ decoder {
 	ibm {}
 }
 
-tpi: 96
 

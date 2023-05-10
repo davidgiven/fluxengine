@@ -100,8 +100,6 @@ filesystem {
 	type: FATFS
 }
 
-tpi: 96
-
 option_group {
 	comment: "Format variant"
 
@@ -110,7 +108,11 @@ option_group {
 		comment: 'try to autodetect the format (unreliable)'
 		set_by_default: true
 
-		config {}
+		config {
+			layout {
+				tpi: 96
+			}
+		}
 	}
 
 	option {
@@ -124,6 +126,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 48
 				tracks: 40
 				sides: 1
 				layoutdata {
@@ -143,8 +146,6 @@ option_group {
 					}
 				}
 			}
-
-			tpi: 48
 		}
 	}
 
@@ -159,6 +160,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 48
 				tracks: 40
 				sides: 1
 				layoutdata {
@@ -178,8 +180,6 @@ option_group {
 					}
 				}
 			}
-
-			tpi: 48
 		}
 	}
 
@@ -194,6 +194,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 48
 				tracks: 40
 				sides: 2
 				layoutdata {
@@ -213,8 +214,6 @@ option_group {
 					}
 				}
 			}
-
-			tpi: 48
 		}
 	}
 
@@ -229,6 +228,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 48
 				tracks: 40
 				sides: 2
 				layoutdata {
@@ -248,8 +248,6 @@ option_group {
 					}
 				}
 			}
-
-			tpi: 48
 		}
 	}
 
@@ -264,6 +262,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 96
 				tracks: 80
 				sides: 2
 				layoutdata {
@@ -297,6 +296,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 135
 				tracks: 80
 				sides: 2
 				layoutdata {
@@ -330,6 +330,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 96
 				tracks: 80
 				sides: 2
 				layoutdata {
@@ -363,6 +364,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 96
 				tracks: 77
 				sides: 2
 				layoutdata {
@@ -396,6 +398,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 135
 				tracks: 80
 				sides: 2
 				layoutdata {
@@ -429,6 +432,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 135
 				tracks: 80
 				sides: 2
 				layoutdata {

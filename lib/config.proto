@@ -14,20 +14,20 @@ import "lib/layout.proto";
 
 enum SupportStatus
 {
-	UNSUPPORTED = 0;
-	DINOSAUR = 1;
-	UNICORN = 2;
+    UNSUPPORTED = 0;
+    DINOSAUR = 1;
+    UNICORN = 2;
 }
 
 // NEXT_TAG: 27
 message ConfigProto
 {
-	optional string shortname = 24;
+    optional string shortname = 24;
     optional string comment = 8;
     optional bool is_extension = 13;
-	repeated string documentation = 23;
-	optional SupportStatus read_support_status = 25 [ default = UNSUPPORTED ];
-	optional SupportStatus write_support_status = 26 [ default = UNSUPPORTED ];
+    repeated string documentation = 23;
+    optional SupportStatus read_support_status = 25 [ default = UNSUPPORTED ];
+    optional SupportStatus write_support_status = 26 [ default = UNSUPPORTED ];
 
     optional LayoutProto layout = 18;
 
@@ -44,18 +44,17 @@ message ConfigProto
 
     optional RangeProto tracks = 6;
     optional RangeProto heads = 7;
-    optional float tpi = 16 [ (help) = "TPI of image; if 0, use TPI of drive" ];
 
     optional FilesystemProto filesystem = 17;
 
     repeated OptionProto option = 20;
-	repeated OptionGroupProto option_group = 22;
+    repeated OptionGroupProto option_group = 22;
 }
 
 message OptionRequirementProto
 {
-	optional string key = 1 [ (help) = "path to config value" ];
-	repeated string value = 2 [ (help) = "list of required values" ];
+    optional string key = 1 [ (help) = "path to config value" ];
+    repeated string value = 2 [ (help) = "list of required values" ];
 }
 
 // NEXT_TAG: 8
@@ -65,12 +64,10 @@ message OptionProto
     optional string comment = 2 [ (help) = "help text for option" ];
     optional string message = 3
         [ (help) = "message to display when option is in use" ];
-	optional bool set_by_default = 6 [
-		(help) = "this option is applied by default",
-		default = false
-	];
-	repeated OptionRequirementProto requires = 7 [
-		(help) = "prerequisites for this option" ];
+    optional bool set_by_default = 6
+        [ (help) = "this option is applied by default", default = false ];
+    repeated OptionRequirementProto requires = 7
+        [ (help) = "prerequisites for this option" ];
 
     optional ConfigProto config = 4
         [ (help) = "option data", (recurse) = false ];
@@ -78,7 +75,6 @@ message OptionProto
 
 message OptionGroupProto
 {
-	optional string comment = 1 [ (help) = "help text for option group" ];
-	repeated OptionProto option = 2;
+    optional string comment = 1 [ (help) = "help text for option group" ];
+    repeated OptionProto option = 2;
 }
-

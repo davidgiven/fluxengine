@@ -76,8 +76,9 @@ option_group {
 		
 		config {
 			layout {
-				sides: 1
+				tpi: 48
 				tracks: 35
+				sides: 1
 				layoutdata {
 					sector_size: 256
 				}
@@ -122,8 +123,6 @@ option_group {
 			decoder {
 				c64 {}
 			}
-
-			tpi: 48
 		}
 	}
 		
@@ -133,8 +132,9 @@ option_group {
 		
 		config {
 			layout {
-				sides: 1
+				tpi: 48
 				tracks: 40
+				sides: 1
 				layoutdata {
 					sector_size: 256
 				}
@@ -179,17 +179,16 @@ option_group {
 			decoder {
 				c64 {}
 			}
-
-			tpi: 48
 		}
 	}
 
 	option {
 		name: "800"
-		comment: "800kB 1581"
+		comment: '800kB 3.5" 1581'
 
 		config {
 			layout {
+				tpi: 135
 				tracks: 80
 				sides: 2
 				swap_sides: true
@@ -222,17 +221,16 @@ option_group {
 					}
 				}
 			}
-
-			tpi: 96
 		}
 	}
 
 	option {
 		name: "1042"
-		comment: "1042kB 8051"
+		comment: '1042kB 5.25" 8051'
 		
 		config {
 			layout {
+				tpi: 100
 				sides: 2
 				tracks: 77
 				layoutdata {
@@ -271,7 +269,6 @@ option_group {
 					}
 				}
 			}
-			tpi: 100
 
 			decoder {
 				c64 {}
@@ -285,6 +282,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 135
 				tracks: 81
 				sides: 2
 				swap_sides: true
@@ -314,8 +312,6 @@ option_group {
 					}
 				}
 			}
-
-			tpi: 96
 		}
 	}
 }

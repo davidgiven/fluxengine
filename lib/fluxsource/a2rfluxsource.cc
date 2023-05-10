@@ -78,7 +78,6 @@ public:
                 if (disktype == 1)
                 {
                     /* 5.25" with quarter stepping. */
-                    ::config.set_tpi(48);
                     ::config.mutable_drive()->set_tracks(160);
                     ::config.mutable_drive()->set_heads(1);
                     ::config.mutable_drive()->set_head_width(4);
@@ -86,9 +85,8 @@ public:
                 }
                 else
                 {
-                    /* 3.5". 96 is wrong but that's what we use. */
-                    ::config.set_tpi(96);
-                    ::config.mutable_drive()->set_tpi(96);
+                    /* 3.5". */
+                    ::config.mutable_drive()->set_tpi(135);
                 }
 
                 Bytes stream = findChunk("STRM");

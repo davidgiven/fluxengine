@@ -27,7 +27,12 @@ static void load_config(const std::string s)
 static void test_physical_sectors()
 {
     load_config(R"M(
+		drive {
+			tpi: 96
+		}
+
 		layout {
+			tpi: 96
 			tracks: 78
 			sides: 2
 			layoutdata {
@@ -54,7 +59,12 @@ static void test_physical_sectors()
 static void test_logical_sectors()
 {
     load_config(R"M(
+		drive {
+			tpi: 96
+		}
+
 		layout {
+			tpi: 96
 			tracks: 78
 			sides: 2
 			layoutdata {
@@ -87,7 +97,12 @@ static void test_logical_sectors()
 static void test_both_sectors()
 {
     load_config(R"M(
+		drive {
+			tpi: 96
+		}
+
 		layout {
+			tpi: 96
 			tracks: 78
 			sides: 2
 			layoutdata {
@@ -120,7 +135,12 @@ static void test_both_sectors()
 static void test_skew()
 {
     load_config(R"M(
+		drive {
+			tpi: 96
+		}
+
 		layout {
+			tpi: 96
 			tracks: 78
 			sides: 2
 			layoutdata {

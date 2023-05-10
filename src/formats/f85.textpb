@@ -50,6 +50,7 @@ decoder {
 }
 
 layout {
+	tpi: 96
 	tracks: 77
 	sides: 1
 	layoutdata {
@@ -61,5 +62,4 @@ layout {
 	}
 }
 
-tpi: 96
 

@@ -32,6 +32,7 @@ image_writer {
 }
 
 layout {
+	tpi: 96
 	tracks: 80
 	sides: 2
 	layoutdata {
@@ -51,5 +52,4 @@ encoder {
 	agat {}
 }
 
-tpi: 96
 

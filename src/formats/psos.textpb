@@ -35,6 +35,7 @@ image_writer {
 }
 
 layout {
+	tpi: 96
 	tracks: 80
 	sides: 2
 	order: HCS
@@ -75,5 +76,4 @@ filesystem {
 	type: PHILE
 }
 	
-tpi: 96
 

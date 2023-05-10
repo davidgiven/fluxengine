@@ -55,7 +55,7 @@ public:
         _fileheader.start_track = strackno(minTrack, minSide);
         _fileheader.end_track = strackno(maxTrack, maxSide);
         _fileheader.flags = SCP_FLAG_INDEXED;
-        if (config.tpi() != 48)
+        if (config.drive().tpi() != 48)
             _fileheader.flags |= SCP_FLAG_96TPI;
         _fileheader.cell_width = 0;
         if ((minSide == 0) && (maxSide == 0))
@@ -65,7 +65,8 @@ public:
         else
             _fileheader.heads = 0;
 
-        log("SCP: writing 96 tpi {} file containing {} tracks",
+        log("SCP: writing {} tpi {} file containing {} tracks",
+            (_fileheader.flags & SCP_FLAG_96TPI) ? 96 : 48,
             (minSide == maxSide) ? "single sided" : "double sided",
             _fileheader.end_track - _fileheader.start_track + 1);
     }

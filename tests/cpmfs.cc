@@ -116,7 +116,12 @@ int main(void)
     try
     {
         const std::string text = R"M(
+			drive {
+				tpi: 96
+			}
+
 			layout {
+				tpi: 96
 				tracks: 10
 				sides: 1
 				layoutdata {

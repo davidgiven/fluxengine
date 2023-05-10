@@ -11,13 +11,36 @@ ConfigProto config = []()
     return config;
 }();
 
+static double toFloat(const std::string& value)
+{
+    try
+    {
+        size_t idx;
+        float f = std::stof(value, &idx);
+        if (value[idx] != '\0')
+            throw std::invalid_argument("trailing garbage");
+        return f;
+    }
+    catch (const std::invalid_argument& e)
+    {
+        error("invalid number '{}'", value);
+    }
+}
+
 static double toDouble(const std::string& value)
 {
-    size_t idx;
-    double d = std::stod(value, &idx);
-    if (value[idx] != '\0')
+    try
+    {
+        size_t idx;
+        double d = std::stod(value, &idx);
+        if (value[idx] != '\0')
+            throw std::invalid_argument("trailing garbage");
+        return d;
+    }
+    catch (const std::invalid_argument& e)
+    {
         error("invalid number '{}'", value);
-    return d;
+    }
 }
 
 static int64_t toInt64(const std::string& value)
@@ -116,6 +139,10 @@ void setProtoFieldFromString(ProtoField& protoField, const std::string& value)
     const auto* reflection = message->GetReflection();
     switch (field->type())
     {
+        case google::protobuf::FieldDescriptor::TYPE_FLOAT:
+            reflection->SetFloat(message, field, toFloat(value));
+            break;
+
         case google::protobuf::FieldDescriptor::TYPE_DOUBLE:
             reflection->SetDouble(message, field, toDouble(value));
             break;

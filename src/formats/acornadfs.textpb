@@ -41,8 +41,8 @@ option_group {
 		comment: '160kB 3.5" or 5.25" 40-track SSDD; S format'
 
 		config {
-			tpi: 48
 			layout {
+				tpi: 48
 				tracks: 40
 				sides: 1
 				layoutdata {
@@ -61,8 +61,8 @@ option_group {
 		comment: '320kB 3.5" or 5.25" 80-track SSDD; M format'
 
 		config {
-			tpi: 96
 			layout {
+				tpi: 96
 				tracks: 80
 				sides: 1
 				layoutdata {
@@ -81,8 +81,8 @@ option_group {
 		comment: '640kB 3.5" or 5.25" 80-track DSDD; L format'
 
 		config {
-			tpi: 96
 			layout {
+				tpi: 96
 				tracks: 80
 				sides: 2
 				layoutdata {
@@ -101,8 +101,8 @@ option_group {
 		comment: '800kB 3.5" 80-track DSDD; D and E formats'
 
 		config {
-			tpi: 96
 			layout {
+				tpi: 96
 				tracks: 80
 				sides: 2
 				layoutdata {
@@ -122,8 +122,8 @@ option_group {
 		set_by_default: true
 
 		config {
-			tpi: 96
 			layout {
+				tpi: 96
 				tracks: 80
 				sides: 2
 				layoutdata {

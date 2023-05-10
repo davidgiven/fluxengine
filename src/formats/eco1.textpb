@@ -41,6 +41,7 @@ image_writer {
 }
 
 layout {
+	tpi: 96
 	tracks: 77
 	sides: 2
 	layoutdata {
@@ -87,5 +88,4 @@ filesystem {
 	}
 }
 
-tpi: 96
 

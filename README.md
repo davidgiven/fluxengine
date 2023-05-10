@@ -129,7 +129,7 @@ choices because they can store multiple types of file system.
 | [`mac`](doc/disk-mac.md) | Macintosh: 400kB/800kB 3.5" GCR | 🦄 | 🦄 | MACHFS  |
 | [`micropolis`](doc/disk-micropolis.md) | Micropolis: 100tpi MetaFloppy disks | 🦄 | 🦄 |  |
 | [`mx`](doc/disk-mx.md) | DVK MX: Soviet-era PDP-11 clone | 🦖 |  |  |
-| [`n88basic`](doc/disk-n88basic.md) | N88-BASIC: PC8800/PC98 5.25"/3.5" 77-track 26-sector DSHD | 🦄 | 🦄 |  |
+| [`n88basic`](doc/disk-n88basic.md) | N88-BASIC: PC8800/PC98 5.25" 77-track 26-sector DSHD | 🦄 | 🦄 |  |
 | [`northstar`](doc/disk-northstar.md) | Northstar: 5.25" hard sectored | 🦄 | 🦄 |  |
 | [`psos`](doc/disk-psos.md) | pSOS: 800kB DSDD with PHILE | 🦄 | 🦄 | PHILE  |
 | [`rolandd20`](doc/disk-rolandd20.md) | Roland D20: 3.5" electronic synthesiser disks | 🦖 |  |  |
@@ -260,5 +260,3 @@ __Important:__ Because of all these exceptions, if you distribute the
 FluxEngine package as a whole, you must comply with the terms of _all_ of the
 licensing terms. This means that __effectively the FluxEngine package is
 distributable under the terms of the GPL 2.0__.
-
-
