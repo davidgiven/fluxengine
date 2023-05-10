@@ -20,7 +20,7 @@ static StringFlag destFlux({"--dest", "-d"},
     [](const auto& value)
     {
         FluxSink::updateConfigForFilename(
-            globalConfig().mutable_flux_sink(), value);
+            globalConfig()->mutable_flux_sink(), value);
     });
 
 static IntFlag destTrack({"--cylinder", "-c"}, "track to write to", 0);
@@ -247,15 +247,15 @@ static void draw_x_graticules(Agg2D& painter,
 
 int mainAnalyseDriveResponse(int argc, const char* argv[])
 {
-    globalConfig().mutable_flux_source()->set_type(FluxSourceProto::DRIVE);
+    globalConfig()->mutable_flux_source()->set_type(FluxSourceProto::DRIVE);
     flags.parseFlagsWithConfigFiles(argc, argv, {});
 
-    if (globalConfig().flux_sink().type() != FluxSinkProto::DRIVE)
+    if (globalConfig()->flux_sink().type() != FluxSinkProto::DRIVE)
         error("this only makes sense with a real disk drive");
 
-    usbSetDrive(globalConfig().drive().drive(),
-        globalConfig().drive().high_density(),
-        globalConfig().drive().index_mode());
+    usbSetDrive(globalConfig()->drive().drive(),
+        globalConfig()->drive().high_density(),
+        globalConfig()->drive().index_mode());
     usbSeek(destTrack);
 
     std::cout << "Measuring rotational speed...\n";

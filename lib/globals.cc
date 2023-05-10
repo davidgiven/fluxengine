@@ -13,7 +13,6 @@ double getCurrentTime(void)
 
 void warning(const std::string msg)
 {
-	log(msg);
-	fmt::print("Warning: {}\n", msg);
+    log(msg);
+    fmt::print("Warning: {}\n", msg);
 }
-

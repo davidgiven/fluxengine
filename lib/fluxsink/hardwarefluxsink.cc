@@ -22,9 +22,9 @@ public:
 public:
     void writeFlux(int track, int side, const Fluxmap& fluxmap) override
     {
-        usbSetDrive(globalConfig().drive().drive(),
-            globalConfig().drive().high_density(),
-            globalConfig().drive().index_mode());
+        usbSetDrive(globalConfig()->drive().drive(),
+            globalConfig()->drive().high_density(),
+            globalConfig()->drive().index_mode());
 #if 0
 		if (fluxSourceSinkFortyTrack)
 		{
@@ -41,7 +41,7 @@ public:
 
     operator std::string() const
     {
-        return fmt::format("drive {}", globalConfig().drive().drive());
+        return fmt::format("drive {}", globalConfig()->drive().drive());
     }
 
 private:

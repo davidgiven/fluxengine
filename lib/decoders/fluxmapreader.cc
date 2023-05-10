@@ -12,7 +12,7 @@ FluxmapReader::FluxmapReader(const Fluxmap& fluxmap):
     _fluxmap(fluxmap),
     _bytes(fluxmap.ptr()),
     _size(fluxmap.bytes()),
-    _config(globalConfig().decoder())
+    _config(globalConfig()->decoder())
 {
     rewind();
 }
@@ -133,7 +133,7 @@ FluxPattern::FluxPattern(unsigned bits, uint64_t pattern): _bits(bits)
 bool FluxPattern::matches(const unsigned* end, FluxMatch& match) const
 {
     const double clockDecodeThreshold =
-        globalConfig().decoder().bit_error_threshold();
+        globalConfig()->decoder().bit_error_threshold();
     const unsigned* start = end - _intervals.size();
     unsigned candidatelength = std::accumulate(start, end - _lowzero, 0);
     if (!candidatelength)

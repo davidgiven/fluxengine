@@ -26,12 +26,12 @@ static void upgradeFluxFile(FluxFileProto& proto)
         proto.set_version(FluxFileVersion::VERSION_2);
     }
 
-	if (proto.version() == FluxFileVersion::VERSION_2)
-	{
-		proto.mutable_drive()->set_rotational_period_ms(
-			proto.rotational_period_ms());
+    if (proto.version() == FluxFileVersion::VERSION_2)
+    {
+        proto.mutable_drive()->set_rotational_period_ms(
+            proto.rotational_period_ms());
         proto.set_version(FluxFileVersion::VERSION_3);
-	}
+    }
 
     if (proto.version() > FluxFileVersion::VERSION_3)
         error(

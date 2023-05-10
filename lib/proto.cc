@@ -11,7 +11,7 @@ static ConfigProto config = []()
     return config;
 }();
 
-ConfigProto& globalConfig()
+ConfigProto& globalConfigProto()
 {
     return config;
 }

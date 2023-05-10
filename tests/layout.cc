@@ -19,9 +19,9 @@ static std::string cleanup(const std::string& s)
 
 static void load_config(const std::string s)
 {
-    globalConfig().Clear();
+    globalConfig()->Clear();
     if (!google::protobuf::TextFormat::MergeFromString(
-            cleanup(s), &globalConfig()))
+            cleanup(s), globalConfig()))
         error("couldn't load test config");
 }
 

@@ -10,16 +10,16 @@ bool approximatelyEqual(float a, float b, float epsilon)
 
 static unsigned getTrackStep()
 {
-    if (!globalConfig().layout().tpi())
+    if (!globalConfig()->layout().tpi())
         error("no layout TPI set");
-    if (!globalConfig().drive().tpi())
+    if (!globalConfig()->drive().tpi())
         error("no drive TPI set");
 
-    if (globalConfig().layout().tpi() == 0.0)
+    if (globalConfig()->layout().tpi() == 0.0)
         error("layout TPI is zero; this shouldn't happen?");
 
     float trackStepFactor =
-        globalConfig().drive().tpi() / globalConfig().layout().tpi();
+        globalConfig()->drive().tpi() / globalConfig()->layout().tpi();
 
     if (!approximatelyEqual(trackStepFactor, round(trackStepFactor), 0.001))
         error(
@@ -34,37 +34,37 @@ static unsigned getTrackStep()
 
 unsigned Layout::remapTrackPhysicalToLogical(unsigned ptrack)
 {
-    return (ptrack - globalConfig().drive().head_bias()) / getTrackStep();
+    return (ptrack - globalConfig()->drive().head_bias()) / getTrackStep();
 }
 
 unsigned Layout::remapTrackLogicalToPhysical(unsigned ltrack)
 {
-    return globalConfig().drive().head_bias() + ltrack * getTrackStep();
+    return globalConfig()->drive().head_bias() + ltrack * getTrackStep();
 }
 
 unsigned Layout::remapSidePhysicalToLogical(unsigned pside)
 {
-    return pside ^ globalConfig().layout().swap_sides();
+    return pside ^ globalConfig()->layout().swap_sides();
 }
 
 unsigned Layout::remapSideLogicalToPhysical(unsigned lside)
 {
-    return lside ^ globalConfig().layout().swap_sides();
+    return lside ^ globalConfig()->layout().swap_sides();
 }
 
 std::vector<std::shared_ptr<const TrackInfo>> Layout::computeLocations()
 {
     std::set<unsigned> tracks;
-    if (globalConfig().has_tracks())
-        tracks = iterate(globalConfig().tracks());
+    if (globalConfig()->has_tracks())
+        tracks = iterate(globalConfig()->tracks());
     else
-        tracks = iterate(0, globalConfig().layout().tracks());
+        tracks = iterate(0, globalConfig()->layout().tracks());
 
     std::set<unsigned> heads;
-    if (globalConfig().has_heads())
-        heads = iterate(globalConfig().heads());
+    if (globalConfig()->has_heads())
+        heads = iterate(globalConfig()->heads());
     else
-        heads = iterate(0, globalConfig().layout().sides());
+        heads = iterate(0, globalConfig()->layout().sides());
 
     std::vector<std::shared_ptr<const TrackInfo>> locations;
     for (unsigned logicalTrack : tracks)
@@ -97,7 +97,7 @@ void Layout::getBounds(
 std::vector<std::pair<int, int>> Layout::getTrackOrdering(
     unsigned guessedTracks, unsigned guessedSides)
 {
-    auto layout = globalConfig().layout();
+    auto layout = globalConfig()->layout();
     int tracks = layout.has_tracks() ? layout.tracks() : guessedTracks;
     int sides = layout.has_sides() ? layout.sides() : guessedSides;
 
@@ -179,7 +179,7 @@ std::shared_ptr<const TrackInfo> Layout::getLayoutOfTrack(
     auto trackInfo = std::make_shared<TrackInfo>();
 
     LayoutProto::LayoutdataProto layoutdata;
-    for (const auto& f : globalConfig().layout().layoutdata())
+    for (const auto& f : globalConfig()->layout().layoutdata())
     {
         if (f.has_track() && f.has_up_to_track() &&
             ((logicalTrack < f.track()) || (logicalTrack > f.up_to_track())))
@@ -193,14 +193,14 @@ std::shared_ptr<const TrackInfo> Layout::getLayoutOfTrack(
         layoutdata.MergeFrom(f);
     }
 
-    trackInfo->numTracks = globalConfig().layout().tracks();
-    trackInfo->numSides = globalConfig().layout().sides();
+    trackInfo->numTracks = globalConfig()->layout().tracks();
+    trackInfo->numSides = globalConfig()->layout().sides();
     trackInfo->sectorSize = layoutdata.sector_size();
     trackInfo->logicalTrack = logicalTrack;
     trackInfo->logicalSide = logicalSide;
     trackInfo->physicalTrack = remapTrackLogicalToPhysical(logicalTrack);
     trackInfo->physicalSide =
-        logicalSide ^ globalConfig().layout().swap_sides();
+        logicalSide ^ globalConfig()->layout().swap_sides();
     trackInfo->groupSize = getTrackStep();
     trackInfo->diskSectorOrder = expandSectorList(layoutdata.physical());
     trackInfo->naturalSectorOrder = trackInfo->diskSectorOrder;

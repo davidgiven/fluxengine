@@ -102,7 +102,7 @@ void FluxSource::updateConfigForFilename(
              [](auto& s, auto* proto)
                 {
                     proto->set_type(FluxSourceProto::DRIVE);
-                    globalConfig().mutable_drive()->set_drive(std::stoi(s));
+                    globalConfig()->mutable_drive()->set_drive(std::stoi(s));
                 }},
             {std::regex("^flx:(.*)$"),
              [](auto& s, auto* proto)

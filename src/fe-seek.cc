@@ -13,7 +13,7 @@ static StringFlag sourceFlux({"-s", "--source"},
     [](const auto& value)
     {
         FluxSource::updateConfigForFilename(
-            globalConfig().mutable_flux_source(), value);
+            globalConfig()->mutable_flux_source(), value);
     });
 
 static IntFlag track({"--cylinder", "-c"}, "track to seek to", 0);
@@ -24,12 +24,12 @@ int mainSeek(int argc, const char* argv[])
 {
     flags.parseFlagsWithConfigFiles(argc, argv, {});
 
-    if (globalConfig().flux_source().type() != FluxSourceProto::DRIVE)
+    if (globalConfig()->flux_source().type() != FluxSourceProto::DRIVE)
         error("this only makes sense with a real disk drive");
 
-    usbSetDrive(globalConfig().drive().drive(),
+    usbSetDrive(globalConfig()->drive().drive(),
         false,
-        globalConfig().drive().index_mode());
+        globalConfig()->drive().index_mode());
     usbSeek(track);
     return 0;
 }

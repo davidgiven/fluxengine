@@ -13,21 +13,21 @@ static StringFlag sourceFlux({"-s", "--source"},
     [](const auto& value)
     {
         FluxSource::updateConfigForFilename(
-            globalConfig().mutable_flux_source(), value);
+            globalConfig()->mutable_flux_source(), value);
     });
 
 int mainRpm(int argc, const char* argv[])
 {
     flags.parseFlagsWithConfigFiles(argc, argv, {});
 
-    if (globalConfig().flux_source().type() != FluxSourceProto::DRIVE)
+    if (globalConfig()->flux_source().type() != FluxSourceProto::DRIVE)
         error("this only makes sense with a real disk drive");
 
-    usbSetDrive(globalConfig().drive().drive(),
+    usbSetDrive(globalConfig()->drive().drive(),
         false,
-        globalConfig().drive().index_mode());
+        globalConfig()->drive().index_mode());
     nanoseconds_t period =
-        usbGetRotationalPeriod(globalConfig().drive().hard_sector_count());
+        usbGetRotationalPeriod(globalConfig()->drive().hard_sector_count());
     if (period != 0)
         std::cout << "Rotational period is " << period / 1000000 << " ms ("
                   << 60e9 / period << " rpm)" << std::endl;

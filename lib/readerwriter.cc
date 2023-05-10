@@ -61,13 +61,13 @@ void measureDiskRotation(
     log(BeginSpeedOperationLogMessage());
 
     int retries = 5;
-    usbSetDrive(globalConfig().drive().drive(),
-        globalConfig().drive().high_density(),
-        globalConfig().drive().index_mode());
-    oneRevolution = globalConfig().drive().rotational_period_ms() * 1e6;
-    if (globalConfig().drive().hard_sector_count() != 0)
+    usbSetDrive(globalConfig()->drive().drive(),
+        globalConfig()->drive().high_density(),
+        globalConfig()->drive().index_mode());
+    oneRevolution = globalConfig()->drive().rotational_period_ms() * 1e6;
+    if (globalConfig()->drive().hard_sector_count() != 0)
         hardSectorThreshold = oneRevolution * 3 /
-                              (4 * globalConfig().drive().hard_sector_count());
+                              (4 * globalConfig()->drive().hard_sector_count());
     else
         hardSectorThreshold = 0;
 
@@ -77,15 +77,15 @@ void measureDiskRotation(
         do
         {
             oneRevolution = usbGetRotationalPeriod(
-                globalConfig().drive().hard_sector_count());
-            if (globalConfig().drive().hard_sector_count() != 0)
+                globalConfig()->drive().hard_sector_count());
+            if (globalConfig()->drive().hard_sector_count() != 0)
                 hardSectorThreshold =
                     oneRevolution * 3 /
-                    (4 * globalConfig().drive().hard_sector_count());
+                    (4 * globalConfig()->drive().hard_sector_count());
 
             retries--;
         } while ((oneRevolution == 0) && (retries > 0));
-        globalConfig().mutable_drive()->set_rotational_period_ms(
+        globalConfig()->mutable_drive()->set_rotational_period_ms(
             oneRevolution / 1e6);
         log(EndOperationLogMessage{});
     }
@@ -191,7 +191,7 @@ BadSectorsState combineRecordAndSectors(TrackFlux& trackFlux,
 
 static void adjustTrackOnError(FluxSource& fluxSource, int baseTrack)
 {
-    switch (globalConfig().drive().error_behaviour())
+    switch (globalConfig()->drive().error_behaviour())
     {
         case DriveProto::NOTHING:
             break;
@@ -217,7 +217,7 @@ ReadResult readGroup(FluxSourceIteratorHolder& fluxSourceIteratorHolder,
     ReadResult result = BAD_AND_CAN_NOT_RETRY;
 
     for (unsigned offset = 0; offset < trackInfo->groupSize;
-         offset += globalConfig().drive().head_width())
+         offset += globalConfig()->drive().head_width())
     {
         auto& fluxSourceIterator = fluxSourceIteratorHolder.getIterator(
             trackInfo->physicalTrack + offset, trackInfo->physicalSide);
@@ -228,7 +228,7 @@ ReadResult readGroup(FluxSourceIteratorHolder& fluxSourceIteratorHolder,
             trackInfo->physicalTrack + offset, trackInfo->physicalSide});
         std::shared_ptr<const Fluxmap> fluxmap = fluxSourceIterator.next();
         // ->rescale(
-        //     1.0 / globalConfig().flux_source().rescale());
+        //     1.0 / globalConfig()->flux_source().rescale());
         log(EndReadOperationLogMessage());
         log("{0} ms in {1} bytes",
             (int)(fluxmap->duration() / 1e6),
@@ -240,7 +240,7 @@ ReadResult readGroup(FluxSourceIteratorHolder& fluxSourceIteratorHolder,
             HAS_NO_BAD_SECTORS)
         {
             result = GOOD_READ;
-            if (globalConfig().decoder().skip_unnecessary_tracks())
+            if (globalConfig()->decoder().skip_unnecessary_tracks())
                 return result;
         }
         else if (fluxSourceIterator.hasNext())
@@ -267,18 +267,18 @@ void writeTracks(FluxSink& fluxSink,
 
         testForEmergencyStop();
 
-        int retriesRemaining = globalConfig().decoder().retries();
+        int retriesRemaining = globalConfig()->decoder().retries();
         for (;;)
         {
             for (int offset = 0; offset < trackInfo->groupSize;
-                 offset += globalConfig().drive().head_width())
+                 offset += globalConfig()->drive().head_width())
             {
                 unsigned physicalTrack = trackInfo->physicalTrack + offset;
 
                 log(BeginWriteOperationLogMessage{
                     physicalTrack, trackInfo->physicalSide});
 
-                if (offset == globalConfig().drive().group_offset())
+                if (offset == globalConfig()->drive().group_offset())
                 {
                     auto fluxmap = producer(trackInfo);
                     if (!fluxmap)
@@ -454,7 +454,7 @@ std::shared_ptr<TrackFlux> readAndDecodeTrack(FluxSource& fluxSource,
     trackFlux->trackInfo = trackInfo;
 
     FluxSourceIteratorHolder fluxSourceIteratorHolder(fluxSource);
-    int retriesRemaining = globalConfig().decoder().retries();
+    int retriesRemaining = globalConfig()->decoder().retries();
     for (;;)
     {
         auto result =
@@ -488,9 +488,9 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
     FluxSource& fluxSource, Decoder& decoder)
 {
     std::unique_ptr<FluxSink> outputFluxSink;
-    if (globalConfig().decoder().has_copy_flux_to())
+    if (globalConfig()->decoder().has_copy_flux_to())
         outputFluxSink =
-            FluxSink::create(globalConfig().decoder().copy_flux_to());
+            FluxSink::create(globalConfig()->decoder().copy_flux_to());
 
     auto diskflux = std::make_shared<DiskFlux>();
 
@@ -516,7 +516,7 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
                     *data->fluxmap);
         }
 
-        if (globalConfig().decoder().dump_records())
+        if (globalConfig()->decoder().dump_records())
         {
             std::vector<std::shared_ptr<const Record>> sorted_records;
 
@@ -543,7 +543,7 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
             }
         }
 
-        if (globalConfig().decoder().dump_sectors())
+        if (globalConfig()->decoder().dump_sectors())
         {
             auto collected_sectors = collectSectors(trackFlux->sectors, false);
             std::vector<std::shared_ptr<const Sector>> sorted_sectors(
@@ -595,9 +595,9 @@ void readDiskCommand(
     auto diskflux = readDiskCommand(fluxsource, decoder);
 
     writer.printMap(*diskflux->image);
-    if (globalConfig().decoder().has_write_csv_to())
+    if (globalConfig()->decoder().has_write_csv_to())
         writer.writeCsv(
-            *diskflux->image, globalConfig().decoder().write_csv_to());
+            *diskflux->image, globalConfig()->decoder().write_csv_to());
     writer.writeMappedImage(*diskflux->image);
 }
 

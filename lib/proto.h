@@ -28,6 +28,6 @@ extern ConfigProto parseConfigBytes(const std::string_view& bytes);
 
 extern const std::map<std::string, const ConfigProto*> formats;
 
-extern ConfigProto& globalConfig();
+extern ConfigProto& globalConfigProto();
 
 #endif

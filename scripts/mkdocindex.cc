@@ -7,16 +7,16 @@ extern const std::map<std::string, const ConfigProto*> formats;
 
 static std::string supportStatus(SupportStatus status)
 {
-	switch (status)
-	{
-		case SupportStatus::DINOSAUR:
-			return "🦖";
+    switch (status)
+    {
+        case SupportStatus::DINOSAUR:
+            return "🦖";
 
-		case SupportStatus::UNICORN:
+        case SupportStatus::UNICORN:
             return "🦄";
-	}
+    }
 
-	return "";
+    return "";
 }
 
 int main(int argc, const char* argv[])
@@ -24,7 +24,7 @@ int main(int argc, const char* argv[])
     fmt::print("<!-- FORMATSSTART -->\n");
     fmt::print(
         "<!-- This section is automatically generated. Do not edit. -->\n");
-	fmt::print("\n");
+    fmt::print("\n");
     fmt::print("| Profile | Format | Read? | Write? | Filesystem? |\n");
     fmt::print("|:--------|:-------|:-----:|:------:|:------------|\n");
 

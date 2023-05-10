@@ -60,4 +60,6 @@ inline void warning(fmt::string_view fstr, const Args&... args)
 template <class... Ts> struct overloaded : Ts...  { using Ts::operator()...; };
 template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
+#include "lib/config.h"
+
 #endif

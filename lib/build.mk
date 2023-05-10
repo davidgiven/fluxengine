@@ -1,6 +1,7 @@
 LIBFLUXENGINE_SRCS = \
 	lib/bitmap.cc \
 	lib/bytes.cc \
+	lib/config.cc \
 	lib/crc.cc \
 	lib/csvreader.cc \
 	lib/decoders/decoders.cc \
