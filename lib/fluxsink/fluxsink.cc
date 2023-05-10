@@ -74,7 +74,7 @@ void FluxSink::updateConfigForFilename(
              [](auto& s, auto* proto)
                 {
                     proto->set_type(FluxSinkProto::DRIVE);
-                    config.mutable_drive()->set_drive(std::stoi(s));
+                    globalConfig().mutable_drive()->set_drive(std::stoi(s));
                 }},
     };
 

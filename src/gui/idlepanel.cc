@@ -180,7 +180,7 @@ public:
         if (formatSelection == wxNOT_FOUND)
             error("no format selected");
 
-        config.Clear();
+        globalConfig().Clear();
         auto formatName = _formatNames[formatChoice->GetSelection()];
         FlagGroup::parseConfigFile(formatName, formats);
 
@@ -196,9 +196,9 @@ public:
 
         auto serial = _selectedDevice;
         if (!serial.empty() && (serial[0] == '/'))
-            setProtoByString(&config, "usb.greaseweazle.port", serial);
+            setProtoByString(&globalConfig(), "usb.greaseweazle.port", serial);
         else
-            setProtoByString(&config, "usb.serial", serial);
+            setProtoByString(&globalConfig(), "usb.serial", serial);
 
         ClearLog();
 
@@ -208,14 +208,15 @@ public:
         {
             case SELECTEDSOURCE_REAL:
             {
-                config.mutable_drive()->set_high_density(_selectedHighDensity);
-                config.MergeFrom(*_selectedDriveType);
+                globalConfig().mutable_drive()->set_high_density(
+                    _selectedHighDensity);
+                globalConfig().MergeFrom(*_selectedDriveType);
 
                 std::string filename = _selectedDrive ? "drive:1" : "drive:0";
                 FluxSink::updateConfigForFilename(
-                    config.mutable_flux_sink(), filename);
+                    globalConfig().mutable_flux_sink(), filename);
                 FluxSource::updateConfigForFilename(
-                    config.mutable_flux_source(), filename);
+                    globalConfig().mutable_flux_source(), filename);
 
                 break;
             }
@@ -223,18 +224,21 @@ public:
             case SELECTEDSOURCE_FLUX:
             {
                 FluxSink::updateConfigForFilename(
-                    config.mutable_flux_sink(), _selectedFluxfilename);
+                    globalConfig().mutable_flux_sink(), _selectedFluxfilename);
                 FluxSource::updateConfigForFilename(
-                    config.mutable_flux_source(), _selectedFluxfilename);
+                    globalConfig().mutable_flux_source(),
+                    _selectedFluxfilename);
                 break;
             }
 
             case SELECTEDSOURCE_IMAGE:
             {
                 ImageReader::updateConfigForFilename(
-                    config.mutable_image_reader(), _selectedImagefilename);
+                    globalConfig().mutable_image_reader(),
+                    _selectedImagefilename);
                 ImageWriter::updateConfigForFilename(
-                    config.mutable_image_writer(), _selectedImagefilename);
+                    globalConfig().mutable_image_writer(),
+                    _selectedImagefilename);
                 break;
             }
         }
@@ -254,7 +258,7 @@ public:
             {
                 auto key = setting.substr(0, equals);
                 auto value = setting.substr(equals + 1);
-                setProtoByString(&config, key, value);
+                setProtoByString(&globalConfig(), key, value);
             }
             else
                 FlagGroup::parseConfigFile(setting, formats);
@@ -585,12 +589,12 @@ private:
                     formatOptionsContainer, wxID_ANY, "(no format selected)"));
             else
             {
-                config.Clear();
+                globalConfig().Clear();
                 std::string formatName =
                     _formatNames[formatChoice->GetSelection()];
                 FlagGroup::parseConfigFile(formatName, formats);
 
-                for (auto& group : config.option_group())
+                for (auto& group : globalConfig().option_group())
                 {
                     sizer->Add(new wxStaticText(formatOptionsContainer,
                         wxID_ANY,
@@ -642,7 +646,7 @@ private:
 
                 /* Anything that's _not_ in a group gets a checkbox. */
 
-                for (auto& option : config.option())
+                for (auto& option : globalConfig().option())
                 {
                     auto* choice = new wxCheckBox(
                         formatOptionsContainer, wxID_ANY, option.comment());
@@ -665,7 +669,8 @@ private:
                         });
                 }
 
-                if (config.option().empty() && config.option_group().empty())
+                if (globalConfig().option().empty() &&
+                    globalConfig().option_group().empty())
                     sizer->Add(new wxStaticText(formatOptionsContainer,
                         wxID_ANY,
                         "(no options for this format)"));

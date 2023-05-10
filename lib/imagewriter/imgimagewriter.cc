@@ -21,7 +21,7 @@ public:
     {
         const Geometry geometry = image.getGeometry();
 
-        auto& layout = config.layout();
+        auto& layout = globalConfig().layout();
         int tracks = layout.has_tracks() ? layout.tracks() : geometry.numTracks;
         int sides = layout.has_sides() ? layout.sides() : geometry.numSides;
 

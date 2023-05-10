@@ -126,7 +126,8 @@ class CbmfsFilesystem : public Filesystem
             bam.resize(fs->getLogicalSectorCount());
             usedBlocks = 0;
             unsigned block = 0;
-            for (int track = 0; track < config.layout().tracks(); track++)
+            for (int track = 0; track < globalConfig().layout().tracks();
+                 track++)
             {
                 uint8_t blocks = br.read_8();
                 uint32_t bitmap = br.read_le24();

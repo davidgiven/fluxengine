@@ -182,7 +182,7 @@ public:
     void ShowConfig()
     {
         std::string s;
-        google::protobuf::TextFormat::PrintToString(config, &s);
+        google::protobuf::TextFormat::PrintToString(globalConfig(), &s);
         _configWindow->GetTextControl()->Clear();
         _configWindow->GetTextControl()->AppendText(s);
     }

@@ -72,7 +72,8 @@ static void setBlock(
 static void testPartialExtent()
 {
     auto sectors = std::make_shared<TestSectorInterface>();
-    auto fs = Filesystem::createCpmFsFilesystem(config.filesystem(), sectors);
+    auto fs =
+        Filesystem::createCpmFsFilesystem(globalConfig().filesystem(), sectors);
 
     setBlock(sectors,
         0,
@@ -91,7 +92,8 @@ static void testPartialExtent()
 static void testLogicalExtents()
 {
     auto sectors = std::make_shared<TestSectorInterface>();
-    auto fs = Filesystem::createCpmFsFilesystem(config.filesystem(), sectors);
+    auto fs =
+        Filesystem::createCpmFsFilesystem(globalConfig().filesystem(), sectors);
 
     setBlock(sectors,
         0,
@@ -141,7 +143,7 @@ int main(void)
 				}
 			}
 		)M";
-        google::protobuf::TextFormat::MergeFromString(text, &config);
+        google::protobuf::TextFormat::MergeFromString(text, &globalConfig());
 
         testPartialExtent();
         testLogicalExtents();

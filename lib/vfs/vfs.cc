@@ -151,7 +151,7 @@ void Filesystem::discardChanges()
 Filesystem::Filesystem(std::shared_ptr<SectorInterface> sectors):
     _sectors(sectors)
 {
-    auto& layout = config.layout();
+    auto& layout = globalConfig().layout();
     if (!layout.has_tracks() || !layout.has_sides())
         error(
             "FS: filesystem support cannot be used without concrete layout "
@@ -224,6 +224,7 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystem(
 
 std::unique_ptr<Filesystem> Filesystem::createFilesystemFromConfig()
 {
+    ConfigProto& config = globalConfig();
     std::shared_ptr<SectorInterface> sectorInterface;
     if (config.has_flux_source() || config.has_flux_sink())
     {

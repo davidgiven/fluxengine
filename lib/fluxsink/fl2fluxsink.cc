@@ -43,7 +43,7 @@ public:
                 track->add_flux(fluxBytes);
         }
 
-		proto.mutable_drive()->MergeFrom(config.drive());
+        proto.mutable_drive()->MergeFrom(globalConfig().drive());
         saveFl2File(_filename, proto);
     }
 

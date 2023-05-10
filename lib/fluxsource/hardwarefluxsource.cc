@@ -29,14 +29,15 @@ private:
 
         std::unique_ptr<const Fluxmap> next()
         {
-            usbSetDrive(config.drive().drive(),
-                config.drive().high_density(),
-                config.drive().index_mode());
+            usbSetDrive(globalConfig().drive().drive(),
+                globalConfig().drive().high_density(),
+                globalConfig().drive().index_mode());
             usbSeek(_track);
 
             Bytes data = usbRead(_head,
-                config.drive().sync_with_index(),
-                config.drive().revolutions() * _fluxsource._oneRevolution,
+                globalConfig().drive().sync_with_index(),
+                globalConfig().drive().revolutions() *
+                    _fluxsource._oneRevolution,
                 _fluxsource._hardSectorThreshold);
             auto fluxmap = std::make_unique<Fluxmap>();
             fluxmap->appendBytes(data);

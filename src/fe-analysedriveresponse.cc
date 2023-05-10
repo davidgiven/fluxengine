@@ -19,7 +19,8 @@ static StringFlag destFlux({"--dest", "-d"},
     "",
     [](const auto& value)
     {
-        FluxSink::updateConfigForFilename(config.mutable_flux_sink(), value);
+        FluxSink::updateConfigForFilename(
+            globalConfig().mutable_flux_sink(), value);
     });
 
 static IntFlag destTrack({"--cylinder", "-c"}, "track to write to", 0);
@@ -50,7 +51,7 @@ static IntFlag buckets({"--buckets"}, "Number of heatmap buckets", 250);
  * https://ai.googleblog.com/2019/08/turbo-improved-rainbow-colormap-for.html
  */
 static const uint8_t turbo_srgb_bytes[256][3] = {
-	// clang-format off
+  // clang-format off
     {48,  18,  59 }, {50,  21,  67 }, {51,  24,  74 }, {52,  27,  81 },
     {53,  30,  88 }, {54,  33,  95 }, {55,  36,  102}, {56,  39,  109},
     {57,  42,  115}, {58,  45,  121}, {59,  47,  128}, {60,  50,  134},
@@ -115,7 +116,7 @@ static const uint8_t turbo_srgb_bytes[256][3] = {
     {158, 16,  1  }, {155, 15,  1  }, {152, 14,  1  }, {149, 13,  1  },
     {146, 11,  1  }, {142, 10,  1  }, {139, 9,   2  }, {136, 8,   2  },
     {133, 7,   2  }, {129, 6,   2  }, {126, 5,   2  }, {122, 4,   3  }
-	// clang-format on
+  // clang-format on
 };
 
 static void palette(double value, agg::srgba8* pixel)
@@ -246,15 +247,15 @@ static void draw_x_graticules(Agg2D& painter,
 
 int mainAnalyseDriveResponse(int argc, const char* argv[])
 {
-    config.mutable_flux_source()->set_type(FluxSourceProto::DRIVE);
+    globalConfig().mutable_flux_source()->set_type(FluxSourceProto::DRIVE);
     flags.parseFlagsWithConfigFiles(argc, argv, {});
 
-    if (config.flux_sink().type() != FluxSinkProto::DRIVE)
+    if (globalConfig().flux_sink().type() != FluxSinkProto::DRIVE)
         error("this only makes sense with a real disk drive");
 
-    usbSetDrive(config.drive().drive(),
-        config.drive().high_density(),
-        config.drive().index_mode());
+    usbSetDrive(globalConfig().drive().drive(),
+        globalConfig().drive().high_density(),
+        globalConfig().drive().index_mode());
     usbSeek(destTrack);
 
     std::cout << "Measuring rotational speed...\n";

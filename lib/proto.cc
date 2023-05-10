@@ -3,13 +3,18 @@
 #include "lib/common.pb.h"
 #include <regex>
 
-ConfigProto config = []()
+static ConfigProto config = []()
 {
     ConfigProto config;
     config.mutable_drive()->set_drive(0);
     config.mutable_drive()->set_drive(0);
     return config;
 }();
+
+ConfigProto& globalConfig()
+{
+    return config;
+}
 
 static double toFloat(const std::string& value)
 {

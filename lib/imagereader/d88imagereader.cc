@@ -56,27 +56,27 @@ public:
         inputFile.read((char*)trackTable.begin(), trackTable.size());
         ByteReader trackTableReader(trackTable);
 
-        if (config.encoder().format_case() !=
+        if (globalConfig().encoder().format_case() !=
             EncoderProto::FormatCase::FORMAT_NOT_SET)
             log("D88: overriding configured format");
 
-        auto ibm = config.mutable_encoder()->mutable_ibm();
+        auto ibm = globalConfig().mutable_encoder()->mutable_ibm();
         int clockRate = 500;
         if (mediaFlag == 0x20)
         {
             log("D88: forcing high density mode");
-            config.mutable_drive()->set_high_density(true);
-            config.mutable_layout()->set_tpi(96);
+            globalConfig().mutable_drive()->set_high_density(true);
+            globalConfig().mutable_layout()->set_tpi(96);
         }
         else
         {
             log("D88: forcing single/double density mode");
             clockRate = 300;
-            config.mutable_drive()->set_high_density(false);
-            config.mutable_layout()->set_tpi(48);
+            globalConfig().mutable_drive()->set_high_density(false);
+            globalConfig().mutable_layout()->set_tpi(48);
         }
 
-        auto layout = config.mutable_layout();
+        auto layout = globalConfig().mutable_layout();
         std::unique_ptr<Image> image(new Image);
         for (int track = 0; track < trackTableSize / 4; track++)
         {

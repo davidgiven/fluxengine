@@ -23,7 +23,7 @@ static StringFlag sourceFlux({"-s", "--source"},
     [](const auto& value)
     {
         FluxSource::updateConfigForFilename(
-            config.mutable_flux_source(), value);
+            globalConfig().mutable_flux_source(), value);
     });
 
 static StringFlag destFlux({"-d", "--dest"},
@@ -31,7 +31,8 @@ static StringFlag destFlux({"-d", "--dest"},
     "",
     [](const auto& value)
     {
-        FluxSink::updateConfigForFilename(config.mutable_flux_sink(), value);
+        FluxSink::updateConfigForFilename(
+            globalConfig().mutable_flux_sink(), value);
     });
 
 static StringFlag srcTracks({"--cylinders", "-c"},
@@ -39,7 +40,7 @@ static StringFlag srcTracks({"--cylinders", "-c"},
     "",
     [](const auto& value)
     {
-        setRange(config.mutable_tracks(), value);
+        setRange(globalConfig().mutable_tracks(), value);
     });
 
 static StringFlag srcHeads({"--heads", "-h"},
@@ -47,25 +48,26 @@ static StringFlag srcHeads({"--heads", "-h"},
     "",
     [](const auto& value)
     {
-        setRange(config.mutable_heads(), value);
+        setRange(globalConfig().mutable_heads(), value);
     });
 
 int mainRawRead(int argc, const char* argv[])
 {
-    setRange(config.mutable_tracks(), "0-79");
-    setRange(config.mutable_heads(), "0-1");
+    setRange(globalConfig().mutable_tracks(), "0-79");
+    setRange(globalConfig().mutable_heads(), "0-1");
 
     if (argc == 1)
         showProfiles("rawread", formats);
-    config.mutable_flux_source()->set_type(FluxSourceProto::DRIVE);
+    globalConfig().mutable_flux_source()->set_type(FluxSourceProto::DRIVE);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
-    if (config.flux_sink().type() == FluxSinkProto::DRIVE)
+    if (globalConfig().flux_sink().type() == FluxSinkProto::DRIVE)
         error("you can't use rawread to write to hardware");
 
     std::unique_ptr<FluxSource> fluxSource(
-        FluxSource::create(config.flux_source()));
-    std::unique_ptr<FluxSink> fluxSink(FluxSink::create(config.flux_sink()));
+        FluxSource::create(globalConfig().flux_source()));
+    std::unique_ptr<FluxSink> fluxSink(
+        FluxSink::create(globalConfig().flux_sink()));
 
     rawReadDiskCommand(*fluxSource, *fluxSink);
 

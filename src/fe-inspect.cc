@@ -19,7 +19,7 @@ static StringFlag sourceFlux({"--source", "-s"},
     [](const auto& value)
     {
         FluxSource::updateConfigForFilename(
-            config.mutable_flux_source(), value);
+            globalConfig().mutable_flux_source(), value);
     });
 
 static IntFlag trackFlag({"--cylinder", "-c"}, "Track to read.", 0);
@@ -132,11 +132,11 @@ static nanoseconds_t guessClock(const Fluxmap& fluxmap)
 
 int mainInspect(int argc, const char* argv[])
 {
-    config.mutable_flux_source()->set_type(FluxSourceProto::DRIVE);
+    globalConfig().mutable_flux_source()->set_type(FluxSourceProto::DRIVE);
     flags.parseFlagsWithConfigFiles(argc, argv, {});
 
     std::unique_ptr<FluxSource> fluxSource(
-        FluxSource::create(config.flux_source()));
+        FluxSource::create(globalConfig().flux_source()));
     const auto fluxmap = fluxSource->readFlux(trackFlag, headFlag)->next();
 
     std::cout << fmt::format("0x{:x} bytes of data in {:.3f}ms\n",
@@ -220,7 +220,7 @@ int mainInspect(int argc, const char* argv[])
             "\n\nAligned bitstream from {:.3f}ms follows:\n",
             fmr.tell().ns() / 1000000.0);
 
-        FluxDecoder decoder(&fmr, clockPeriod, config.decoder());
+        FluxDecoder decoder(&fmr, clockPeriod, globalConfig().decoder());
         while (!fmr.eof())
         {
             std::cout << fmt::format("{:06x} {: 10.3f} : ",
@@ -245,7 +245,7 @@ int mainInspect(int argc, const char* argv[])
             dumpRawFlag.get(),
             fmr.tell().ns() / 1000000.0);
 
-        FluxDecoder decoder(&fmr, clockPeriod, config.decoder());
+        FluxDecoder decoder(&fmr, clockPeriod, globalConfig().decoder());
         for (int i = 0; i < dumpRawFlag; i++)
             decoder.readBit();
 

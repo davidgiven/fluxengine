@@ -24,7 +24,7 @@ public:
         if (!inputFile.is_open())
             error("cannot open input file");
 
-        auto layout = config.layout();
+        auto layout = globalConfig().layout();
         if (!layout.tracks() || !layout.sides())
             error(
                 "IMG: bad configuration; did you remember to set the "

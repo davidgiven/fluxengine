@@ -48,7 +48,7 @@ nanoseconds_t Encoder::calculatePhysicalClockPeriod(
     nanoseconds_t targetClockPeriod, nanoseconds_t targetRotationalPeriod)
 {
     nanoseconds_t currentRotationalPeriod =
-        config.drive().rotational_period_ms() * 1e6;
+        globalConfig().drive().rotational_period_ms() * 1e6;
     if (currentRotationalPeriod == 0)
         error(
             "you must set --drive.rotational_period_ms as it can't be "

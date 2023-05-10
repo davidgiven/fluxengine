@@ -91,11 +91,11 @@ public:
             trackCount++;
         }
 
-        auto layout = config.mutable_layout();
-        if (config.encoder().format_case() ==
+        auto layout = globalConfig().mutable_layout();
+        if (globalConfig().encoder().format_case() ==
             EncoderProto::FormatCase::FORMAT_NOT_SET)
         {
-            auto ibm = config.mutable_encoder()->mutable_ibm();
+            auto ibm = globalConfig().mutable_encoder()->mutable_ibm();
             auto trackdata = ibm->add_trackdata();
             trackdata->set_target_clock_period_us(2);
 
@@ -134,7 +134,7 @@ public:
                     break;
             }
 
-            config.mutable_decoder()->mutable_ibm();
+            globalConfig().mutable_decoder()->mutable_ibm();
         }
 
         image->calculateSize();

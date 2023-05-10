@@ -52,7 +52,7 @@ void FlagGroup::applyOption(const OptionProto& option)
     log("OPTION: {}",
         option.has_message() ? option.message() : option.comment());
 
-    config.MergeFrom(option.config());
+    globalConfig().MergeFrom(option.config());
 }
 
 bool FlagGroup::applyOption(const std::string& optionName)
@@ -70,10 +70,10 @@ bool FlagGroup::applyOption(const std::string& optionName)
         return false;
     };
 
-    if (searchOptionList(config.option()))
+    if (searchOptionList(globalConfig().option()))
         return true;
 
-    for (const auto& optionGroup : config.option_group())
+    for (const auto& optionGroup : globalConfig().option_group())
     {
         if (searchOptionList(optionGroup.option()))
             return true;
@@ -213,7 +213,7 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc,
 
     /* Apply any default options in groups. */
 
-    for (auto& group : config.option_group())
+    for (auto& group : globalConfig().option_group())
     {
         const OptionProto* defaultOption = &*group.option().begin();
         bool isSet = false;
@@ -232,7 +232,7 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc,
 
     /* Next, any standalone options. */
 
-    for (auto& option : config.option())
+    for (auto& option : globalConfig().option())
     {
         if (options.find(option.name()) != options.end())
         {
@@ -249,7 +249,7 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc,
 
     for (auto [k, v] : overrides)
     {
-        ProtoField protoField = resolveProtoPath(&config, k);
+        ProtoField protoField = resolveProtoPath(&globalConfig(), k);
         setProtoFieldFromString(protoField, v);
     }
 
@@ -295,7 +295,8 @@ ConfigProto FlagGroup::parseSingleConfigFile(const std::string& filename,
         ss << f.rdbuf();
 
         ConfigProto config;
-        if (!google::protobuf::TextFormat::MergeFromString(ss.str(), &config))
+        if (!google::protobuf::TextFormat::MergeFromString(
+                ss.str(), &globalConfig()))
             error("couldn't load external config proto");
         return config;
     }
@@ -304,7 +305,7 @@ ConfigProto FlagGroup::parseSingleConfigFile(const std::string& filename,
 void FlagGroup::parseConfigFile(const std::string& filename,
     const std::map<std::string, const ConfigProto*>& configFiles)
 {
-    config.MergeFrom(parseSingleConfigFile(filename, configFiles));
+    globalConfig().MergeFrom(parseSingleConfigFile(filename, configFiles));
 }
 
 void FlagGroup::checkInitialised() const
@@ -368,7 +369,7 @@ static void doHelp()
 static void doShowConfig()
 {
     std::string s;
-    google::protobuf::TextFormat::PrintToString(config, &s);
+    google::protobuf::TextFormat::PrintToString(globalConfig(), &s);
     std::cout << s << '\n';
 
     exit(0);
@@ -376,7 +377,7 @@ static void doShowConfig()
 
 static void doDoc()
 {
-    const auto fields = findAllProtoFields(&config);
+    const auto fields = findAllProtoFields(&globalConfig());
     for (const auto field : fields)
     {
         const std::string& path = field.first;
