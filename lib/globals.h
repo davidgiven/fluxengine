@@ -49,6 +49,14 @@ inline void error(fmt::string_view fstr, const Args&... args)
 	throw ErrorException { fmt::format(fstr, args...) };
 }
 
+extern void warning(const std::string msg);
+
+template <typename... Args>
+inline void warning(fmt::string_view fstr, const Args&... args)
+{
+	warning(fmt::format(fstr, args...));
+}
+
 template <class... Ts> struct overloaded : Ts...  { using Ts::operator()...; };
 template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 

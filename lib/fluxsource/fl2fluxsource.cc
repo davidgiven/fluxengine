@@ -36,6 +36,10 @@ public:
     Fl2FluxSource(const Fl2FluxSourceProto& config): _config(config)
     {
         _proto = loadFl2File(_config.filename());
+
+		if (::config.has_drive())
+			warning("FLUX: overriding drive configuration with flux file contents");
+		::config.mutable_drive()->MergeFrom(_proto.drive());
     }
 
 public:
