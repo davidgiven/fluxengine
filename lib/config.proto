@@ -52,7 +52,13 @@ message ConfigProto
 	repeated OptionGroupProto option_group = 22;
 }
 
-// NEXT_TAG: 7
+message OptionRequirementProto
+{
+	optional string key = 1 [ (help) = "path to config value" ];
+	repeated string value = 2 [ (help) = "list of required values" ];
+}
+
+// NEXT_TAG: 8
 message OptionProto
 {
     optional string name = 1 [ (help) = "option name" ];
@@ -63,6 +69,9 @@ message OptionProto
 		(help) = "this option is applied by default",
 		default = false
 	];
+	repeated OptionRequirementProto requires = 7 [
+		(help) = "prerequisites for this option" ];
+
     optional ConfigProto config = 4
         [ (help) = "option data", (recurse) = false ];
 }

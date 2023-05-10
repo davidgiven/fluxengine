@@ -117,6 +117,11 @@ option_group {
 		name: "160"
 		comment: '160kB 5.25" 40-track 8-sector SSDD'
 
+		requires {
+			key: "drive.tpi"
+			value: ["48", "96"]
+		}
+
 		config {
 			layout {
 				tracks: 40
@@ -146,6 +151,11 @@ option_group {
 	option {
 		name: "180"
 		comment: '180kB 5.25" 40-track 9-sector SSDD'
+
+		requires {
+			key: "drive.tpi"
+			value: ["48", "96"]
+		}
 
 		config {
 			layout {
@@ -177,6 +187,11 @@ option_group {
 		name: "320"
 		comment: '320kB 5.25" 40-track 8-sector DSDD'
 
+		requires {
+			key: "drive.tpi"
+			value: ["48", "96"]
+		}
+
 		config {
 			layout {
 				tracks: 40
@@ -207,6 +222,11 @@ option_group {
 		name: "360"
 		comment: '360kB 5.25" 40-track 9-sector DSDD'
 
+		requires {
+			key: "drive.tpi"
+			value: ["48", "96"]
+		}
+
 		config {
 			layout {
 				tracks: 40
@@ -234,8 +254,13 @@ option_group {
 	}
 
 	option {
-		name: "720"
-		comment: '720kB 5.25"/3.5" 80-track 9-sector DSDD'
+		name: "720_96"
+		comment: '720kB 5.25" 80-track 9-sector DSDD'
+
+		requires {
+			key: "drive.tpi"
+			value: ["96"]
+		}
 
 		config {
 			layout {
@@ -253,8 +278,39 @@ option_group {
 			encoder {
 				ibm {
 					trackdata {
-						# This also works on 166ms drives (producing a physical clock of
-						# 3.33us).
+						target_rotational_period_ms: 166
+						target_clock_period_us: 3.33
+					}
+				}
+			}
+		}
+	}
+
+	option {
+		name: "720_135"
+		comment: '720kB 3.5" 80-track 9-sector DSDD'
+
+		requires {
+			key: "drive.tpi"
+			value: ["135"]
+		}
+
+		config {
+			layout {
+				tracks: 80
+				sides: 2
+				layoutdata {
+					sector_size: 512
+					physical {
+						start_sector: 1
+						count: 9
+					}
+				}
+			}
+
+			encoder {
+				ibm {
+					trackdata {
 						target_rotational_period_ms: 200
 						target_clock_period_us: 4
 					}
@@ -266,6 +322,11 @@ option_group {
 	option {
 		name: "1200"
 		comment: '1200kB 5.25" 80-track 15-sector DSHD'
+
+		requires {
+			key: "drive.tpi"
+			value: ["96"]
+		}
 
 		config {
 			layout {
@@ -293,7 +354,12 @@ option_group {
 
 	option {
 		name: "1232"
-		comment: '1232kB 5.25"/3.5" 77-track 8-sector DSHD'
+		comment: '1232kB 5.25" 77-track 8-sector DSHD'
+
+		requires {
+			key: "drive.tpi"
+			value: ["96"]
+		}
 
 		config {
 			layout {
@@ -323,6 +389,11 @@ option_group {
 		name: "1440"
 		comment: '1440kB 3.5" 80-track 18-sector DSHD'
 
+		requires {
+			key: "drive.tpi"
+			value: ["135"]
+		}
+
 		config {
 			layout {
 				tracks: 80
@@ -350,6 +421,11 @@ option_group {
 	option {
 		name: "1680"
 		comment: '1680kB 3.5" 80-track 21-sector DSHD; DMF'
+
+		requires {
+			key: "drive.tpi"
+			value: ["135"]
+		}
 
 		config {
 			layout {
