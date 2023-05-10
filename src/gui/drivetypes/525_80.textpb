@@ -1,0 +1,6 @@
+comment: '5.25" 80 track 96tpi'
+
+drive {
+	tpi: 96
+}
+

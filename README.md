@@ -118,7 +118,7 @@ choices because they can store multiple types of file system.
 | [`atarist`](doc/disk-atarist.md) | Atari ST: Almost PC compatible | 🦄 | 🦄 |  |
 | [`bk`](doc/disk-bk.md) | BK: 800kB 5.25"/3.5" 80-track 10-sector DSDD | 🦖 | 🦖 |  |
 | [`brother`](doc/disk-brother.md) | Brother word processors: GCR family | 🦄 | 🦄 | BROTHER120 FATFS  |
-| [`commodore`](doc/disk-commodore.md) | Commodore: 1541, 1581, and variations | 🦄 | 🦄 | CBMFS  |
+| [`commodore`](doc/disk-commodore.md) | Commodore: 1541, 1581, 8050 and variations | 🦄 | 🦄 | CBMFS  |
 | [`eco1`](doc/disk-eco1.md) | VDS Eco1: CP/M; 1210kB 77-track mixed format DSHD | 🦖 |  | CPMFS  |
 | [`epsonpf10`](doc/disk-epsonpf10.md) | Epson PF-10: CP/M; 3.5" 40-track DSDD | 🦖 |  | CPMFS  |
 | [`f85`](doc/disk-f85.md) | Durango F85: 461kB 5.25" 77-track SS | 🦖 |  |  |

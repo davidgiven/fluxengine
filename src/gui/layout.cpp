@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version 3.10.1-1fa5400)
+// C++ code generated with wxFormBuilder (version 3.10.1-234-gd93c9fc0-dirty)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO *NOT* EDIT THIS FILE!
@@ -1040,8 +1040,23 @@ HardwareSourcePanelGen::HardwareSourcePanelGen( wxWindow* parent, wxWindowID id,
 
 	bSizer3->Add( highDensityToggle, 0, wxALL|wxEXPAND, 5 );
 
-	fortyTrackDriveToggle = new wxCheckBox( this, wxID_ANY, wxT("I'm using a 40-track drive"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer3->Add( fortyTrackDriveToggle, 0, wxALL, 5 );
+	wxFlexGridSizer* fgSizer14;
+	fgSizer14 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer14->AddGrowableCol( 1 );
+	fgSizer14->SetFlexibleDirection( wxBOTH );
+	fgSizer14->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	m_staticText29 = new wxStaticText( this, wxID_ANY, wxT("Drive type:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText29->Wrap( -1 );
+	fgSizer14->Add( m_staticText29, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	wxArrayString driveTypeChoiceChoices;
+	driveTypeChoice = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, driveTypeChoiceChoices, 0 );
+	driveTypeChoice->SetSelection( 0 );
+	fgSizer14->Add( driveTypeChoice, 0, wxALL|wxEXPAND, 5 );
+
+
+	bSizer3->Add( fgSizer14, 1, wxEXPAND, 5 );
 
 
 	this->SetSizer( bSizer3 );

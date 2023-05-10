@@ -21,6 +21,7 @@ extern std::map<std::string, const google::protobuf::FieldDescriptor*>
 extern ConfigProto parseConfigBytes(const std::string_view& bytes);
 
 extern ConfigProto config;
+extern const std::map<std::string, const ConfigProto*> formats;
 
 #endif
 

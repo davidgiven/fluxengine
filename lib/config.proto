@@ -44,7 +44,7 @@ message ConfigProto
 
     optional RangeProto tracks = 6;
     optional RangeProto heads = 7;
-    optional int32 tpi = 16 [ (help) = "TPI of image; if 0, use TPI of drive" ];
+    optional float tpi = 16 [ (help) = "TPI of image; if 0, use TPI of drive" ];
 
     optional FilesystemProto filesystem = 17;
 
