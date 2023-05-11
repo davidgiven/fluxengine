@@ -33,6 +33,5 @@ static StringFlag flux({"-f", "--flux"},
     [](const auto& value)
     {
         globalConfig().setFluxSource(value);
-        FluxSink::updateConfigForFilename(
-            globalConfig()->mutable_flux_sink(), value);
+        globalConfig().setFluxSink(value);
     });

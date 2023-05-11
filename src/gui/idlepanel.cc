@@ -243,8 +243,7 @@ public:
                 globalConfig()->MergeFrom(*_selectedDriveType);
 
                 std::string filename = _selectedDrive ? "drive:1" : "drive:0";
-                FluxSink::updateConfigForFilename(
-                    globalConfig()->mutable_flux_sink(), filename);
+                globalConfig().setFluxSink(filename);
                 globalConfig().setFluxSource(filename);
 
                 break;
@@ -252,8 +251,7 @@ public:
 
             case SELECTEDSOURCE_FLUX:
             {
-                FluxSink::updateConfigForFilename(
-                    globalConfig()->mutable_flux_sink(), _selectedFluxfilename);
+                globalConfig().setFluxSink(_selectedFluxfilename);
                 globalConfig().setFluxSource(_selectedFluxfilename);
                 break;
             }

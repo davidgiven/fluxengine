@@ -295,8 +295,7 @@ public:
             if (filename.empty())
                 return;
 
-            FluxSink::updateConfigForFilename(
-                globalConfig()->mutable_flux_sink(), filename.ToStdString());
+            globalConfig().setFluxSink(filename.ToStdString());
 
             QueueJob(
                 [this]()

@@ -32,8 +32,7 @@ static StringFlag destFlux({"--dest", "-d"},
     "",
     [](const auto& value)
     {
-        FluxSink::updateConfigForFilename(
-            globalConfig()->mutable_flux_sink(), value);
+        globalConfig().setFluxSink(value);
         globalConfig().setFluxSource(value);
     });
 

@@ -216,3 +216,70 @@ void Config::setFluxSource(std::string filename)
 
     error("unrecognised flux filename '{}'", filename);
 }
+
+static void setFluxSinkImpl(std::string filename, FluxSinkProto* proto)
+{
+    static const std::vector<std::pair<std::regex,
+        std::function<void(const std::string&, FluxSinkProto*)>>>
+        formats = {
+            {std::regex("^(.*\\.a2r)$"),
+             [](auto& s, auto* proto)
+                {
+                    proto->set_type(FluxSinkProto::A2R);
+                    proto->mutable_a2r()->set_filename(s);
+                }},
+            {std::regex("^(.*\\.flux)$"),
+             [](auto& s, auto* proto)
+                {
+                    proto->set_type(FluxSinkProto::FLUX);
+                    proto->mutable_fl2()->set_filename(s);
+                }},
+            {std::regex("^(.*\\.scp)$"),
+             [](auto& s, auto* proto)
+                {
+                    proto->set_type(FluxSinkProto::SCP);
+                    proto->mutable_scp()->set_filename(s);
+                }},
+            {std::regex("^vcd:(.*)$"),
+             [](auto& s, auto* proto)
+                {
+                    proto->set_type(FluxSinkProto::VCD);
+                    proto->mutable_vcd()->set_directory(s);
+                }},
+            {std::regex("^au:(.*)$"),
+             [](auto& s, auto* proto)
+                {
+                    proto->set_type(FluxSinkProto::AU);
+                    proto->mutable_au()->set_directory(s);
+                }},
+            {std::regex("^drive:(.*)"),
+             [](auto& s, auto* proto)
+                {
+                    proto->set_type(FluxSinkProto::DRIVE);
+                    globalConfig()->mutable_drive()->set_drive(std::stoi(s));
+                }},
+    };
+
+    for (const auto& it : formats)
+    {
+        std::smatch match;
+        if (std::regex_match(filename, match, it.first))
+        {
+            it.second(match[1], proto);
+            return;
+        }
+    }
+
+    error("unrecognised flux filename '{}'", filename);
+}
+
+void Config::setFluxSink(std::string filename)
+{
+    setFluxSinkImpl(filename, (*this)->mutable_flux_sink());
+}
+
+void Config::setCopyFluxTo(std::string filename)
+{
+    setFluxSinkImpl(
+        filename, (*this)->mutable_decoder()->mutable_copy_flux_to());
+}

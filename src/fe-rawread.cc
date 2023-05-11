@@ -30,8 +30,7 @@ static StringFlag destFlux({"-d", "--dest"},
     "",
     [](const auto& value)
     {
-        FluxSink::updateConfigForFilename(
-            globalConfig()->mutable_flux_sink(), value);
+        globalConfig().setFluxSink(value);
     });
 
 static StringFlag srcTracks({"--cylinders", "-c"},

@@ -39,8 +39,7 @@ static StringFlag copyFluxTo({"--copy-flux-to"},
     "",
     [](const auto& value)
     {
-        FluxSink::updateConfigForFilename(
-            globalConfig()->mutable_decoder()->mutable_copy_flux_to(), value);
+        globalConfig().setCopyFluxTo(value);
     });
 
 static StringFlag srcTracks({"--cylinders", "-c"},
