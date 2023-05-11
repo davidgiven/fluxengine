@@ -32,6 +32,14 @@ public:
 class Config
 {
 public:
+	enum IOState
+	{
+		IO_NONE,
+		IO_FLUX,
+		IO_IMAGE
+	};
+
+public:
 	ConfigProto* operator -> () const;
 	operator ConfigProto* () const;
 	operator ConfigProto& () const;
@@ -55,6 +63,14 @@ public:
 	const OptionProto& findOption(const std::string& option);
 	bool isOptionValid(const OptionProto& option);
     void applyOption(const OptionProto& option);
+
+	/* Adjust overall inputs and outputs. */
+
+	void setFluxSource(std::string value);
+
+private:
+	IOState _readState = IO_NONE;
+	IOState _writeState = IO_NONE;
 };
 
 extern Config& globalConfig();

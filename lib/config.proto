@@ -22,33 +22,32 @@ enum SupportStatus
 // NEXT_TAG: 27
 message ConfigProto
 {
-    optional string shortname = 24;
-    optional string comment = 8;
-    optional bool is_extension = 13;
-    repeated string documentation = 23;
-    optional SupportStatus read_support_status = 25 [ default = UNSUPPORTED ];
-    optional SupportStatus write_support_status = 26 [ default = UNSUPPORTED ];
+    optional string shortname = 1;
+    optional string comment = 2;
+    optional bool is_extension = 3;
+    repeated string documentation = 4;
+    optional SupportStatus read_support_status = 5 [ default = UNSUPPORTED ];
+    optional SupportStatus write_support_status = 6 [ default = UNSUPPORTED ];
 
-    optional LayoutProto layout = 18;
+    optional LayoutProto layout = 7;
 
-    optional ImageReaderProto image_reader = 12;
+    optional ImageReaderProto image_reader = 8;
     optional ImageWriterProto image_writer = 9;
-
     optional FluxSourceProto flux_source = 10;
     optional FluxSinkProto flux_sink = 11;
-    optional DriveProto drive = 15;
+    optional DriveProto drive = 12;
 
-    optional EncoderProto encoder = 3;
-    optional DecoderProto decoder = 4;
-    optional UsbProto usb = 5;
+    optional EncoderProto encoder = 13;
+    optional DecoderProto decoder = 14;
+    optional UsbProto usb = 15;
 
-    optional RangeProto tracks = 6;
-    optional RangeProto heads = 7;
+    optional RangeProto tracks = 16;
+    optional RangeProto heads = 17;
 
-    optional FilesystemProto filesystem = 17;
+    optional FilesystemProto filesystem = 18;
 
-    repeated OptionProto option = 20;
-    repeated OptionGroupProto option_group = 22;
+    repeated OptionProto option = 19;
+    repeated OptionGroupProto option_group = 20;
 }
 
 message OptionRequirementProto

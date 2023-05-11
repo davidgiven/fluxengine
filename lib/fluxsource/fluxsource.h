@@ -56,8 +56,6 @@ public:
         const DiskFlux& flux);
 
     static std::unique_ptr<FluxSource> create(const FluxSourceProto& spec);
-    static void updateConfigForFilename(
-        FluxSourceProto* proto, const std::string& filename);
 
 public:
     virtual std::unique_ptr<FluxSourceIterator> readFlux(

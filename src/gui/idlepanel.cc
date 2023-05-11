@@ -245,8 +245,7 @@ public:
                 std::string filename = _selectedDrive ? "drive:1" : "drive:0";
                 FluxSink::updateConfigForFilename(
                     globalConfig()->mutable_flux_sink(), filename);
-                FluxSource::updateConfigForFilename(
-                    globalConfig()->mutable_flux_source(), filename);
+                globalConfig().setFluxSource(filename);
 
                 break;
             }
@@ -255,9 +254,7 @@ public:
             {
                 FluxSink::updateConfigForFilename(
                     globalConfig()->mutable_flux_sink(), _selectedFluxfilename);
-                FluxSource::updateConfigForFilename(
-                    globalConfig()->mutable_flux_source(),
-                    _selectedFluxfilename);
+                globalConfig().setFluxSource(_selectedFluxfilename);
                 break;
             }
 

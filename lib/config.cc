@@ -4,6 +4,7 @@
 #include "lib/logger.h"
 #include <fstream>
 #include <google/protobuf/text_format.h>
+#include <regex>
 
 static Config config;
 
@@ -140,4 +141,78 @@ void Config::applyOption(const OptionProto& option)
         option.has_message() ? option.message() : option.comment());
 
     (*this)->MergeFrom(option.config());
+}
+
+void Config::setFluxSource(std::string filename)
+{
+    _readState = IO_FLUX;
+
+    static const std::vector<std::pair<std::regex,
+        std::function<void(const std::string&, FluxSourceProto*)>>>
+        formats = {
+            {std::regex("^(.*\\.flux)$"),
+             [](auto& s, auto* proto)
+                {
+                    proto->set_type(FluxSourceProto::FLUX);
+                    proto->mutable_fl2()->set_filename(s);
+                }},
+            {std::regex("^(.*\\.scp)$"),
+             [](auto& s, auto* proto)
+                {
+                    proto->set_type(FluxSourceProto::SCP);
+                    proto->mutable_scp()->set_filename(s);
+                }},
+            {std::regex("^(.*\\.a2r)$"),
+             [](auto& s, auto* proto)
+                {
+                    proto->set_type(FluxSourceProto::A2R);
+                    proto->mutable_a2r()->set_filename(s);
+                }},
+            {std::regex("^(.*\\.cwf)$"),
+             [](auto& s, auto* proto)
+                {
+                    proto->set_type(FluxSourceProto::CWF);
+                    proto->mutable_cwf()->set_filename(s);
+                }},
+            {std::regex("^erase:$"),
+             [](auto& s, auto* proto)
+                {
+                    proto->set_type(FluxSourceProto::ERASE);
+                }},
+            {std::regex("^kryoflux:(.*)$"),
+             [](auto& s, auto* proto)
+                {
+                    proto->set_type(FluxSourceProto::KRYOFLUX);
+                    proto->mutable_kryoflux()->set_directory(s);
+                }},
+            {std::regex("^testpattern:(.*)"),
+             [](auto& s, auto* proto)
+                {
+                    proto->set_type(FluxSourceProto::TEST_PATTERN);
+                }},
+            {std::regex("^drive:(.*)"),
+             [](auto& s, auto* proto)
+                {
+                    proto->set_type(FluxSourceProto::DRIVE);
+                    globalConfig()->mutable_drive()->set_drive(std::stoi(s));
+                }},
+            {std::regex("^flx:(.*)$"),
+             [](auto& s, auto* proto)
+                {
+                    proto->set_type(FluxSourceProto::FLX);
+                    proto->mutable_flx()->set_directory(s);
+                }},
+    };
+
+    for (const auto& it : formats)
+    {
+        std::smatch match;
+        if (std::regex_match(filename, match, it.first))
+        {
+            it.second(match[1], (*this)->mutable_flux_source());
+            return;
+        }
+    }
+
+    error("unrecognised flux filename '{}'", filename);
 }

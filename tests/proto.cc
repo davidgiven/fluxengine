@@ -109,12 +109,12 @@ static void test_config(void)
     ConfigProto config;
 
     const std::string text = R"M(
-		flux_sink {
-			drive { }
-		}
-
 		image_reader {
 			filename: "filename"
+		}
+
+		flux_sink {
+			drive { }
 		}
 	)M";
     google::protobuf::TextFormat::MergeFromString(text, &config);

@@ -34,8 +34,7 @@ static StringFlag destFlux({"--dest", "-d"},
     {
         FluxSink::updateConfigForFilename(
             globalConfig()->mutable_flux_sink(), value);
-        FluxSource::updateConfigForFilename(
-            globalConfig()->mutable_flux_source(), value);
+        globalConfig().setFluxSource(value);
     });
 
 static StringFlag destTracks({"--cylinders", "-c"},

@@ -12,8 +12,7 @@ static StringFlag sourceFlux({"-s", "--source"},
     "",
     [](const auto& value)
     {
-        FluxSource::updateConfigForFilename(
-            globalConfig()->mutable_flux_source(), value);
+        globalConfig().setFluxSource(value);
     });
 
 static IntFlag track({"--cylinder", "-c"}, "track to seek to", 0);

@@ -18,8 +18,7 @@ static StringFlag sourceFlux({"--source", "-s"},
     "",
     [](const auto& value)
     {
-        FluxSource::updateConfigForFilename(
-            globalConfig()->mutable_flux_source(), value);
+        globalConfig().setFluxSource(value);
     });
 
 static IntFlag trackFlag({"--cylinder", "-c"}, "Track to read.", 0);
