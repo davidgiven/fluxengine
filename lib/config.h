@@ -11,6 +11,9 @@ public:
 	operator ConfigProto* () const;
 	operator ConfigProto& () const;
 
+	void clear();
+	void readConfigFile(std::string filename);
+
 	void set(std::string key, std::string value);
 	std::string get(std::string key);
 };

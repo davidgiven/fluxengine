@@ -42,7 +42,7 @@ public:
     /* Load a top-level config file (or internal config file), expanding
      * includes. */
 
-    static void parseConfigFile(const std::string& filename,
+    static void readConfigFile(const std::string& filename,
         const std::map<std::string, const ConfigProto*>& configFiles);
 
     /* Modify the current config to engage the named option. */

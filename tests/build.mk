@@ -18,6 +18,7 @@ $(call use-library, $(OBJDIR)/tests/$1.exe, $(OBJDIR)/tests/$1.o, FATFS)
 $(call use-library, $(OBJDIR)/tests/$1.exe, $(OBJDIR)/tests/$1.o, ADFLIB)
 $(call use-library, $(OBJDIR)/tests/$1.exe, $(OBJDIR)/tests/$1.o, HFSUTILS)
 $(call use-library, $(OBJDIR)/tests/$1.exe, $(OBJDIR)/tests/$1.o, LIBUSBP)
+$(call use-library, $(OBJDIR)/tests/$1.exe, $(OBJDIR)/tests/$1.o, LIBFORMATS)
 
 endef
 
@@ -45,7 +46,6 @@ $(call declare-test,vfs)
 
 $(call use-library, $(OBJDIR)/tests/agg.exe, $(OBJDIR)/tests/agg.o, AGG)
 $(call use-library, $(OBJDIR)/tests/agg.exe, $(OBJDIR)/tests/agg.o, STB)
-$(call use-library, $(OBJDIR)/tests/configs.exe, $(OBJDIR)/tests/configs.o, LIBFORMATS)
 
 $(OBJDIR)/tests/proto.exe: $(OBJDIR)/tests/testproto.o
 $(OBJDIR)/tests/testproto.cc: $(OBJDIR)/protoencode_TestProto.exe tests/testproto.textpb

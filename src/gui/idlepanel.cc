@@ -180,9 +180,9 @@ public:
         if (formatSelection == wxNOT_FOUND)
             error("no format selected");
 
-        globalConfig()->Clear();
+        globalConfig().clear();
         auto formatName = _formatNames[formatChoice->GetSelection()];
-        FlagGroup::parseConfigFile(formatName, formats);
+        globalConfig().readConfigFile(formatName);
 
         /* Apply any format options. */
 
@@ -261,7 +261,7 @@ public:
                 setProtoByString(globalConfig(), key, value);
             }
             else
-                FlagGroup::parseConfigFile(setting, formats);
+                globalConfig().readConfigFile(setting);
         }
     }
 
@@ -589,10 +589,10 @@ private:
                     formatOptionsContainer, wxID_ANY, "(no format selected)"));
             else
             {
-                globalConfig()->Clear();
+                globalConfig().clear();
                 std::string formatName =
                     _formatNames[formatChoice->GetSelection()];
-                FlagGroup::parseConfigFile(formatName, formats);
+                globalConfig().readConfigFile(formatName);
 
                 for (auto& group : globalConfig()->option_group())
                 {

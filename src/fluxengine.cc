@@ -138,19 +138,18 @@ void showProfiles(const std::string& command,
 
     for (const auto& it : profiles)
     {
-        const auto& config = *it.second;
-        if (!config.is_extension())
-            std::cout << fmt::format(
-                "  {}: {}\n", it.first, config.shortname());
+        const auto& c = *it.second;
+        if (!c.is_extension())
+            std::cout << fmt::format("  {}: {}\n", it.first, c.shortname());
     }
 
     std::cout << "Available profile options include:\n";
 
     for (const auto& it : profiles)
     {
-        const auto& config = *it.second;
-        if (config.is_extension() && (it.first[0] != '_'))
-            std::cout << fmt::format("  {}: {}\n", it.first, config.comment());
+        const auto& c = *it.second;
+        if (c.is_extension() && (it.first[0] != '_'))
+            std::cout << fmt::format("  {}: {}\n", it.first, c.comment());
     }
 
     std::cout << "Profiles and extensions may also be textpb files .\n";

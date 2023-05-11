@@ -271,38 +271,9 @@ void FlagGroup::parseFlagsWithConfigFiles(int argc,
         argv,
         [&](const auto& filename)
         {
-            parseConfigFile(filename, configFiles);
+            globalConfig().readConfigFile(filename);
             return true;
         });
-}
-
-ConfigProto FlagGroup::parseSingleConfigFile(const std::string& filename,
-    const std::map<std::string, const ConfigProto*>& configFiles)
-{
-    const auto& it = configFiles.find(filename);
-    if (it != configFiles.end())
-        return *it->second;
-    else
-    {
-        std::ifstream f(filename, std::ios::out);
-        if (f.fail())
-            error("Cannot open '{}': {}", filename, strerror(errno));
-
-        std::ostringstream ss;
-        ss << f.rdbuf();
-
-        ConfigProto config;
-        if (!google::protobuf::TextFormat::MergeFromString(
-                ss.str(), globalConfig()))
-            error("couldn't load external config proto");
-        return config;
-    }
-}
-
-void FlagGroup::parseConfigFile(const std::string& filename,
-    const std::map<std::string, const ConfigProto*>& configFiles)
-{
-    globalConfig()->MergeFrom(parseSingleConfigFile(filename, configFiles));
 }
 
 void FlagGroup::checkInitialised() const

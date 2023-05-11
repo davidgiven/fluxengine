@@ -37,9 +37,9 @@ public:
     {
         _proto = loadFl2File(_config.filename());
 
-		DriveProto d = _proto.drive();
-		d.MergeFrom(globalConfig()->drive());
-		*(globalConfig()->mutable_drive()) = d;
+        DriveProto d = _proto.drive();
+        d.MergeFrom(globalConfig()->drive());
+        *(globalConfig()->mutable_drive()) = d;
     }
 
 public:
