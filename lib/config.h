@@ -5,6 +5,30 @@
 class ConfigProto;
 class OptionProto;
 
+class OptionException : public ErrorException
+{
+public:
+    OptionException(const std::string& message): ErrorException(message) {}
+};
+
+class OptionNotFoundException : public OptionException
+{
+public:
+    OptionNotFoundException(const std::string& message): OptionException(message) {}
+};
+
+class InvalidOptionException : public OptionException
+{
+public:
+    InvalidOptionException(const std::string& message): OptionException(message) {}
+};
+
+class InapplicableOptionException : public OptionException
+{
+public:
+    InapplicableOptionException(const std::string& message): OptionException(message) {}
+};
+
 class Config
 {
 public:
@@ -25,10 +49,12 @@ public:
 
 	void readConfigFile(std::string filename);
 
-    /* Modify the current config to engage the named option. */
+    /* Option management: look up an option by name, determine whether an option
+     * is valid, and apply an option. */
 
+	const OptionProto& findOption(const std::string& option);
+	bool isOptionValid(const OptionProto& option);
     void applyOption(const OptionProto& option);
-    bool applyOption(const std::string& option);
 };
 
 extern Config& globalConfig();

@@ -29,7 +29,7 @@ Config::operator ConfigProto&() const
 
 void Config::clear()
 {
-    this->clear();
+    (*this)->Clear();
 }
 
 void Config::set(std::string key, std::string value)
@@ -69,30 +69,17 @@ void Config::readConfigFile(std::string filename)
     globalConfig()->MergeFrom(loadSingleConfigFile(filename));
 }
 
-void Config::applyOption(const OptionProto& option)
+const OptionProto& Config::findOption(const std::string& optionName)
 {
-    if (option.config().option_size() > 0)
-        error("option '{}' has an option inside it, which isn't allowed",
-            option.name());
-    if (option.config().option_group_size() > 0)
-        error("option '{}' has an option group inside it, which isn't allowed",
-            option.name());
+    const OptionProto* found = nullptr;
 
-    log("OPTION: {}",
-        option.has_message() ? option.message() : option.comment());
-
-    (*this)->MergeFrom(option.config());
-}
-
-bool Config::applyOption(const std::string& optionName)
-{
     auto searchOptionList = [&](auto& optionList)
     {
         for (const auto& option : optionList)
         {
             if (optionName == option.name())
             {
-                applyOption(option);
+                found = &option;
                 return true;
             }
         }
@@ -100,13 +87,57 @@ bool Config::applyOption(const std::string& optionName)
     };
 
     if (searchOptionList((*this)->option()))
-        return true;
+        return *found;
 
     for (const auto& optionGroup : (*this)->option_group())
     {
         if (searchOptionList(optionGroup.option()))
-            return true;
+            return *found;
     }
 
-    return false;
+    throw OptionNotFoundException("option name not found");
+}
+
+bool Config::isOptionValid(const OptionProto& option)
+{
+    for (const auto& req : option.requires())
+    {
+        bool matched = false;
+        try
+        {
+            auto value = get(req.key());
+            for (auto requiredValue : req.value())
+                matched |= (requiredValue == value);
+        }
+        catch (const ProtoPathNotFoundException e)
+        {
+            /* This field isn't available, therefore it cannot match. */
+        }
+
+        if (!matched)
+            return false;
+    }
+
+    return true;
+}
+
+void Config::applyOption(const OptionProto& option)
+{
+    if (option.config().option_size() > 0)
+        throw InvalidOptionException(fmt::format(
+            "option '{}' has an option inside it, which isn't allowed",
+            option.name()));
+    if (option.config().option_group_size() > 0)
+        throw InvalidOptionException(fmt::format(
+            "option '{}' has an option group inside it, which isn't allowed",
+            option.name()));
+    if (!isOptionValid(option))
+        throw InapplicableOptionException(
+            fmt::format("option '{}' is inapplicable to this configuration",
+                option.name()));
+
+    log("OPTION: {}",
+        option.has_message() ? option.message() : option.comment());
+
+    (*this)->MergeFrom(option.config());
 }

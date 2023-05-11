@@ -169,7 +169,31 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc,
         index++;
     }
 
-    /* Apply any default options in groups. */
+    /* First apply any value overrides (in order). We need to set the up front
+     * because the options may depend on them. */
+
+    auto applyOverrides = [&]()
+    {
+        for (auto [k, v] : overrides)
+            globalConfig().set(k, v);
+    };
+    applyOverrides();
+
+    /* First apply any standalone options. After each one, reapply the overrides
+     * in case the option changed them. */
+
+    for (auto& option : globalConfig()->option())
+    {
+        if (options.find(option.name()) != options.end())
+        {
+            globalConfig().applyOption(option);
+            applyOverrides();
+            options.erase(option.name());
+        }
+    }
+
+    /* Then apply any default options in groups, likewise applying the
+     * overrides. */
 
     for (auto& group : globalConfig()->option_group())
     {
@@ -186,27 +210,12 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc,
         }
 
         globalConfig().applyOption(*defaultOption);
-    }
-
-    /* Next, any standalone options. */
-
-    for (auto& option : globalConfig()->option())
-    {
-        if (options.find(option.name()) != options.end())
-        {
-            globalConfig().applyOption(option);
-            options.erase(option.name());
-        }
+        applyOverrides();
     }
 
     if (!options.empty())
         error("--{} is not a known flag or format option; try --help",
             *options.begin());
-
-    /* Now apply any value overrides (in order). */
-
-    for (auto [k, v] : overrides)
-        globalConfig().set(k, v);
 
     return filenames;
 }

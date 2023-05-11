@@ -184,12 +184,42 @@ public:
         auto formatName = _formatNames[formatChoice->GetSelection()];
         globalConfig().readConfigFile(formatName);
 
+        /* Merge in any custom config. */
+
+        for (auto setting : split(_extraConfiguration, '\n'))
+        {
+            setting = trimWhitespace(setting);
+            if (setting.size() == 0)
+                continue;
+            if (setting[0] == '#')
+                continue;
+
+            auto equals = setting.find('=');
+            if (equals != std::string::npos)
+            {
+                auto key = setting.substr(0, equals);
+                auto value = setting.substr(equals + 1);
+                setProtoByString(globalConfig(), key, value);
+            }
+            else
+                globalConfig().readConfigFile(setting);
+        }
+
         /* Apply any format options. */
 
         for (const auto& e : _formatOptions)
         {
             if (e.first == formatName)
-                globalConfig().applyOption(e.second);
+            {
+                try
+                {
+                    globalConfig().applyOption(
+                        globalConfig().findOption(e.second));
+                }
+                catch (const OptionNotFoundException e)
+                {
+                }
+            }
         }
 
         /* Locate the device, if any. */
@@ -241,27 +271,6 @@ public:
                     _selectedImagefilename);
                 break;
             }
-        }
-
-        /* Merge in any custom config. */
-
-        for (auto setting : split(_extraConfiguration, '\n'))
-        {
-            setting = trimWhitespace(setting);
-            if (setting.size() == 0)
-                continue;
-            if (setting[0] == '#')
-                continue;
-
-            auto equals = setting.find('=');
-            if (equals != std::string::npos)
-            {
-                auto key = setting.substr(0, equals);
-                auto value = setting.substr(equals + 1);
-                setProtoByString(globalConfig(), key, value);
-            }
-            else
-                globalConfig().readConfigFile(setting);
         }
     }
 

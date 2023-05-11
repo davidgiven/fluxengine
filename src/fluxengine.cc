@@ -1,5 +1,6 @@
 #include "globals.h"
 #include "proto.h"
+#include <fmt/format.h>
 
 typedef int command_cb(int agrc, const char* argv[]);
 
@@ -175,7 +176,7 @@ int main(int argc, const char* argv[])
             }
             catch (const ErrorException& e)
             {
-                e.print();
+                fmt::print(stderr, "Error: {}\n", e.message);
                 exit(1);
             }
         }
