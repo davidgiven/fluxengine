@@ -189,7 +189,7 @@ public:
         for (const auto& e : _formatOptions)
         {
             if (e.first == formatName)
-                FlagGroup::applyOption(e.second);
+                globalConfig().applyOption(e.second);
         }
 
         /* Locate the device, if any. */
