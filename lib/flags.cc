@@ -248,10 +248,7 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc,
     /* Now apply any value overrides (in order). */
 
     for (auto [k, v] : overrides)
-    {
-        ProtoField protoField = resolveProtoPath(globalConfig(), k);
-        setProtoFieldFromString(protoField, v);
-    }
+        globalConfig().set(k, v);
 
     return filenames;
 }

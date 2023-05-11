@@ -23,3 +23,13 @@ Config::operator ConfigProto&() const
 {
     return globalConfigProto();
 }
+
+void Config::set(std::string key, std::string value)
+{
+    setProtoByString(*this, key, value);
+}
+
+std::string Config::get(std::string key)
+{
+    return getProtoByString(*this, key);
+}

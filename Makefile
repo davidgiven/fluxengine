@@ -65,6 +65,7 @@ CFLAGS += \
 	-I$(OBJDIR)/arch \
 	-I$(OBJDIR)/lib \
 	-I$(OBJDIR) \
+	-Wno-deprecated-declarations \
 
 LDFLAGS += \
 	-lz \
