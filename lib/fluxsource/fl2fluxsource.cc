@@ -37,10 +37,9 @@ public:
     {
         _proto = loadFl2File(_config.filename());
 
-        if (::globalConfig()->has_drive())
-            warning(
-                "FLUX: overriding drive configuration with flux file contents");
-        ::globalConfig()->mutable_drive()->MergeFrom(_proto.drive());
+		DriveProto d = _proto.drive();
+		d.MergeFrom(globalConfig()->drive());
+		*(globalConfig()->mutable_drive()) = d;
     }
 
 public:
