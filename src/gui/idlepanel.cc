@@ -258,9 +258,7 @@ public:
 
             case SELECTEDSOURCE_IMAGE:
             {
-                ImageReader::updateConfigForFilename(
-                    globalConfig()->mutable_image_reader(),
-                    _selectedImagefilename);
+                globalConfig().setImageReader(_selectedImagefilename);
                 ImageWriter::updateConfigForFilename(
                     globalConfig()->mutable_image_writer(),
                     _selectedImagefilename);

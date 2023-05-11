@@ -23,8 +23,7 @@ static StringFlag sourceImage({"--input", "-i"},
     "",
     [](const auto& value)
     {
-        ImageReader::updateConfigForFilename(
-            globalConfig()->mutable_image_reader(), value);
+        globalConfig().setImageReader(value);
     });
 
 static StringFlag destFlux({"--dest", "-d"},

@@ -137,8 +137,7 @@ public:
             if (filename.empty())
                 return;
 
-            ImageReader::updateConfigForFilename(
-                globalConfig()->mutable_image_reader(), filename.ToStdString());
+            globalConfig().setImageReader(filename.ToStdString());
             ImageWriter::updateConfigForFilename(
                 globalConfig()->mutable_image_writer(), filename.ToStdString());
             visualiser->Clear();

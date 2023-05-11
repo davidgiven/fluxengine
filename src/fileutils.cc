@@ -21,8 +21,7 @@ static StringFlag image({"-i", "--image"},
     "",
     [](const auto& value)
     {
-        ImageReader::updateConfigForFilename(
-            globalConfig()->mutable_image_reader(), value);
+        globalConfig().setImageReader(value);
         ImageWriter::updateConfigForFilename(
             globalConfig()->mutable_image_writer(), value);
     });
