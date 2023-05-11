@@ -322,3 +322,38 @@ void Config::setImageReader(std::string filename)
 
     error("unrecognised image filename '{}'", filename);
 }
+
+void Config::setImageWriter(std::string filename)
+{
+    static const std::map<std::string, std::function<void(ImageWriterProto*)>>
+        formats = {
+  // clang-format off
+		{".adf",      [](auto* proto) { proto->set_type(ImageWriterProto::IMG); }},
+		{".d64",      [](auto* proto) { proto->set_type(ImageWriterProto::D64); }},
+		{".d81",      [](auto* proto) { proto->set_type(ImageWriterProto::IMG); }},
+		{".d88",      [](auto* proto) { proto->set_type(ImageWriterProto::D88); }},
+		{".diskcopy", [](auto* proto) { proto->set_type(ImageWriterProto::DISKCOPY); }},
+		{".dsk",      [](auto* proto) { proto->set_type(ImageWriterProto::IMG); }},
+		{".img",      [](auto* proto) { proto->set_type(ImageWriterProto::IMG); }},
+		{".imd",      [](auto* proto) { proto->set_type(ImageWriterProto::IMD); }},
+		{".ldbs",     [](auto* proto) { proto->set_type(ImageWriterProto::LDBS); }},
+		{".nsi",      [](auto* proto) { proto->set_type(ImageWriterProto::NSI); }},
+		{".raw",      [](auto* proto) { proto->set_type(ImageWriterProto::RAW); }},
+		{".st",       [](auto* proto) { proto->set_type(ImageWriterProto::IMG); }},
+		{".vgi",      [](auto* proto) { proto->set_type(ImageWriterProto::IMG); }},
+		{".xdf",      [](auto* proto) { proto->set_type(ImageWriterProto::IMG); }},
+  // clang-format on
+    };
+
+    for (const auto& it : formats)
+    {
+        if (endsWith(filename, it.first))
+        {
+            it.second((*this)->mutable_image_writer());
+            (*this)->mutable_image_writer()->set_filename(filename);
+            return;
+        }
+    }
+
+    error("unrecognised image filename '{}'", filename);
+}

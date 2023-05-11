@@ -70,6 +70,7 @@ public:
 	void setFluxSink(std::string value);
 	void setCopyFluxTo(std::string value);
 	void setImageReader(std::string value);
+	void setImageWriter(std::string value);
 
 private:
 	IOState _readState = IO_NONE;

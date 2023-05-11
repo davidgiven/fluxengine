@@ -138,8 +138,7 @@ public:
                 return;
 
             globalConfig().setImageReader(filename.ToStdString());
-            ImageWriter::updateConfigForFilename(
-                globalConfig()->mutable_image_writer(), filename.ToStdString());
+            globalConfig().setImageWriter(filename.ToStdString());
             visualiser->Clear();
             _currentDisk = nullptr;
 
@@ -261,8 +260,7 @@ public:
             if (filename.empty())
                 return;
 
-            ImageWriter::updateConfigForFilename(
-                globalConfig()->mutable_image_writer(), filename.ToStdString());
+            globalConfig().setImageWriter(filename.ToStdString());
 
             auto image = _currentDisk->image;
 

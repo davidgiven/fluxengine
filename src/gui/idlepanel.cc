@@ -259,9 +259,7 @@ public:
             case SELECTEDSOURCE_IMAGE:
             {
                 globalConfig().setImageReader(_selectedImagefilename);
-                ImageWriter::updateConfigForFilename(
-                    globalConfig()->mutable_image_writer(),
-                    _selectedImagefilename);
+                globalConfig().setImageWriter(_selectedImagefilename);
                 break;
             }
         }

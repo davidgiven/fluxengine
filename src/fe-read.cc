@@ -30,8 +30,7 @@ static StringFlag destImage({"-o", "--output"},
     "",
     [](const auto& value)
     {
-        ImageWriter::updateConfigForFilename(
-            globalConfig()->mutable_image_writer(), value);
+        globalConfig().setImageWriter(value);
     });
 
 static StringFlag copyFluxTo({"--copy-flux-to"},
