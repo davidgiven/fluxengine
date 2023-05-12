@@ -148,8 +148,7 @@ public:
                     auto image =
                         globalConfig().getImageReader()->readMappedImage();
                     auto encoder = Encoder::create(globalConfig()->encoder());
-                    auto fluxSink =
-                        FluxSink::create(globalConfig()->flux_sink());
+                    auto fluxSink = globalConfig().getFluxSink();
 
                     std::unique_ptr<Decoder> decoder;
                     std::shared_ptr<FluxSource> verificationFluxSource;
@@ -265,9 +264,7 @@ public:
             QueueJob(
                 [image, this]()
                 {
-                    auto imageWriter =
-                        ImageWriter::create(globalConfig()->image_writer());
-                    imageWriter->writeMappedImage(*image);
+                    globalConfig().getImageWriter()->writeMappedImage(*image);
                 });
         }
         catch (const ErrorException& e)

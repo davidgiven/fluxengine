@@ -3,7 +3,9 @@
 #include "lib/proto.h"
 #include "lib/logger.h"
 #include "lib/utils.h"
+#include "lib/imagewriter/imagewriter.h"
 #include "lib/imagereader/imagereader.h"
+#include "lib/fluxsink/fluxsink.h"
 #include "lib/fluxsource/fluxsource.h"
 #include <fstream>
 #include <google/protobuf/text_format.h>
@@ -34,6 +36,7 @@ Config::operator ConfigProto&() const
 void Config::clear()
 {
     _fluxSource.reset();
+    _verificationFluxSource.reset();
     _imageReader.reset();
     (*this)->Clear();
 }
@@ -449,4 +452,30 @@ std::shared_ptr<ImageReader>& Config::getImageReader()
             std::shared_ptr(ImageReader::create((*this)->image_reader()));
     }
     return _imageReader;
+}
+
+bool Config::hasFluxSink() const
+{
+    return (*this)->flux_sink().type() != FluxSinkProto::NOT_SET;
+}
+
+std::unique_ptr<FluxSink> Config::getFluxSink()
+{
+    if (!hasFluxSink())
+        error("no flux sink configured");
+
+    return FluxSink::create((*this)->flux_sink());
+}
+
+bool Config::hasImageWriter() const
+{
+    return (*this)->image_writer().type() != ImageWriterProto::NOT_SET;
+}
+
+std::unique_ptr<ImageWriter> Config::getImageWriter()
+{
+    if (!hasImageWriter())
+        error("no image writer configured");
+
+    return ImageWriter::create((*this)->image_writer());
 }

@@ -72,8 +72,7 @@ int mainWrite(int argc, const char* argv[])
 
     std::unique_ptr<Encoder> encoder(
         Encoder::create(globalConfig()->encoder()));
-    std::unique_ptr<FluxSink> fluxSink(
-        FluxSink::create(globalConfig()->flux_sink()));
+    auto fluxSink = globalConfig().getFluxSink();
 
     std::unique_ptr<Decoder> decoder;
     std::shared_ptr<FluxSource> verificationFluxSource;

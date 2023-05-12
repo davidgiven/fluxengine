@@ -7,7 +7,9 @@
 class ConfigProto;
 class OptionProto;
 class FluxSource;
+class FluxSink;
 class ImageReader;
+class ImageWriter;
 
 class OptionException : public ErrorException
 {
@@ -86,6 +88,13 @@ public:
     std::shared_ptr<ImageReader>& getImageReader();
     bool hasVerificationFluxSource() const;
     std::shared_ptr<FluxSource>& getVerificationFluxSource();
+
+    /* Create the sinks: these are not cached. */
+
+    bool hasFluxSink() const;
+    std::unique_ptr<FluxSink> getFluxSink();
+    bool hasImageWriter() const;
+    std::unique_ptr<ImageWriter> getImageWriter();
 
 private:
     std::shared_ptr<FluxSource> _fluxSource;

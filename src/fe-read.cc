@@ -70,8 +70,7 @@ int mainRead(int argc, const char* argv[])
     auto& fluxSource = globalConfig().getFluxSource();
     std::unique_ptr<Decoder> decoder(
         Decoder::create(globalConfig()->decoder()));
-    std::unique_ptr<ImageWriter> writer(
-        ImageWriter::create(globalConfig()->image_writer()));
+    auto writer = globalConfig().getImageWriter();
 
     readDiskCommand(*fluxSource, *decoder, *writer);
 
