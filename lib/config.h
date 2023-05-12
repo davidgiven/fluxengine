@@ -10,6 +10,8 @@ class FluxSource;
 class FluxSink;
 class ImageReader;
 class ImageWriter;
+class Encoder;
+class Decoder;
 
 class OptionException : public ErrorException
 {
@@ -46,6 +48,8 @@ public:
 class Config
 {
 public:
+    /* Direct access to the proto configuration. */
+
     ConfigProto* operator->() const;
     operator ConfigProto*() const;
     operator ConfigProto&() const;
@@ -89,6 +93,13 @@ public:
     bool hasVerificationFluxSource() const;
     std::shared_ptr<FluxSource>& getVerificationFluxSource();
 
+    /* Fetch the encoder and decoder, creating them if necessary. */
+
+    bool hasEncoder() const;
+    std::shared_ptr<Encoder>& getEncoder();
+    bool hasDecoder() const;
+    std::shared_ptr<Decoder>& getDecoder();
+
     /* Create the sinks: these are not cached. */
 
     bool hasFluxSink() const;
@@ -100,6 +111,8 @@ private:
     std::shared_ptr<FluxSource> _fluxSource;
     std::shared_ptr<ImageReader> _imageReader;
     std::shared_ptr<FluxSource> _verificationFluxSource;
+    std::shared_ptr<Encoder> _encoder;
+    std::shared_ptr<Decoder> _decoder;
     FluxSourceProto _verificationFluxSourceProto;
 };
 

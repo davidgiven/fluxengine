@@ -68,8 +68,7 @@ int mainRead(int argc, const char* argv[])
         error("you cannot copy flux to a hardware device");
 
     auto& fluxSource = globalConfig().getFluxSource();
-    std::unique_ptr<Decoder> decoder(
-        Decoder::create(globalConfig()->decoder()));
+    auto& decoder = globalConfig().getDecoder();
     auto writer = globalConfig().getImageWriter();
 
     readDiskCommand(*fluxSource, *decoder, *writer);

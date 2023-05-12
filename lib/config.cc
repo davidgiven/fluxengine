@@ -7,6 +7,8 @@
 #include "lib/imagereader/imagereader.h"
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/fluxsource/fluxsource.h"
+#include "lib/encoders/encoders.h"
+#include "lib/decoders/decoders.h"
 #include <fstream>
 #include <google/protobuf/text_format.h>
 #include <regex>
@@ -38,6 +40,8 @@ void Config::clear()
     _fluxSource.reset();
     _verificationFluxSource.reset();
     _imageReader.reset();
+    _encoder.reset();
+    _decoder.reset();
     (*this)->Clear();
 }
 
@@ -478,4 +482,38 @@ std::unique_ptr<ImageWriter> Config::getImageWriter()
         error("no image writer configured");
 
     return ImageWriter::create((*this)->image_writer());
+}
+
+bool Config::hasEncoder() const
+{
+    return (*this)->has_encoder();
+}
+
+std::shared_ptr<Encoder>& Config::getEncoder()
+{
+    if (!_encoder)
+    {
+        if (!hasEncoder())
+            error("no encoder configured");
+
+        _encoder = Encoder::create((*this)->encoder());
+    }
+    return _encoder;
+}
+
+bool Config::hasDecoder() const
+{
+    return (*this)->has_decoder();
+}
+
+std::shared_ptr<Decoder>& Config::getDecoder()
+{
+    if (!_decoder)
+    {
+        if (!hasDecoder())
+            error("no decoder configured");
+
+        _decoder = Decoder::create((*this)->decoder());
+    }
+    return _decoder;
 }

@@ -99,7 +99,7 @@ public:
                     Environment::reset();
 
                     auto& fluxSource = globalConfig().getFluxSource();
-                    auto decoder = Decoder::create(globalConfig()->decoder());
+                    auto& decoder = globalConfig().getDecoder();
                     auto diskflux = readDiskCommand(*fluxSource, *decoder);
 
                     runOnUiThread(
@@ -147,14 +147,14 @@ public:
                 {
                     auto image =
                         globalConfig().getImageReader()->readMappedImage();
-                    auto encoder = Encoder::create(globalConfig()->encoder());
+                    auto encoder = globalConfig().getEncoder();
                     auto fluxSink = globalConfig().getFluxSink();
 
-                    std::unique_ptr<Decoder> decoder;
+                    std::shared_ptr<Decoder> decoder;
                     std::shared_ptr<FluxSource> verificationFluxSource;
-                    if (globalConfig()->has_decoder() && fluxSink->isHardware())
+                    if (globalConfig().hasDecoder() && fluxSink->isHardware())
                     {
-                        decoder = Decoder::create(globalConfig()->decoder());
+                        decoder = globalConfig().getDecoder();
                         verificationFluxSource =
                             globalConfig().getVerificationFluxSource();
                     }

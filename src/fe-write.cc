@@ -70,15 +70,14 @@ int mainWrite(int argc, const char* argv[])
     auto& reader = globalConfig().getImageReader();
     std::shared_ptr<Image> image = reader->readMappedImage();
 
-    std::unique_ptr<Encoder> encoder(
-        Encoder::create(globalConfig()->encoder()));
+    auto encoder = globalConfig().getEncoder();
     auto fluxSink = globalConfig().getFluxSink();
 
-    std::unique_ptr<Decoder> decoder;
+    std::shared_ptr<Decoder> decoder;
     std::shared_ptr<FluxSource> verificationFluxSource;
-    if (globalConfig()->has_decoder() && fluxSink->isHardware() && verify)
+    if (globalConfig().hasDecoder() && fluxSink->isHardware() && verify)
     {
-        decoder = Decoder::create(globalConfig()->decoder());
+        decoder = globalConfig().getDecoder();
         verificationFluxSource = globalConfig().getVerificationFluxSource();
     }
 
