@@ -3,6 +3,7 @@
 #include "lib/proto.h"
 #include "lib/logger.h"
 #include "lib/utils.h"
+#include "lib/fluxsource/fluxsource.h"
 #include <fstream>
 #include <google/protobuf/text_format.h>
 #include <regex>
@@ -146,8 +147,6 @@ void Config::applyOption(const OptionProto& option)
 
 void Config::setFluxSource(std::string filename)
 {
-    _readState = IO_FLUX;
-
     static const std::vector<std::pair<std::regex,
         std::function<void(const std::string&, FluxSourceProto*)>>>
         formats = {
@@ -356,4 +355,22 @@ void Config::setImageWriter(std::string filename)
     }
 
     error("unrecognised image filename '{}'", filename);
+}
+
+bool Config::hasFluxSource() const
+{
+    return (*this)->flux_source().type() != FluxSourceProto::NOT_SET;
+}
+
+std::shared_ptr<FluxSource>& Config::getFluxSource()
+{
+    if (!_fluxSource)
+    {
+        if (!hasFluxSource())
+            error("no flux source set");
+
+        _fluxSource =
+            std::shared_ptr(FluxSource::create((*this)->flux_source()));
+    }
+    return _fluxSource;
 }

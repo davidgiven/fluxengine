@@ -4,6 +4,7 @@
 
 class ConfigProto;
 class OptionProto;
+class FluxSource;
 
 class OptionException : public ErrorException
 {
@@ -31,14 +32,6 @@ public:
 
 class Config
 {
-public:
-	enum IOState
-	{
-		IO_NONE,
-		IO_FLUX,
-		IO_IMAGE
-	};
-
 public:
 	ConfigProto* operator -> () const;
 	operator ConfigProto* () const;
@@ -72,9 +65,13 @@ public:
 	void setImageReader(std::string value);
 	void setImageWriter(std::string value);
 
+	/* Fetch the sources, opening them if necessary. */
+
+	bool hasFluxSource() const;
+	std::shared_ptr<FluxSource>& getFluxSource();
+
 private:
-	IOState _readState = IO_NONE;
-	IOState _writeState = IO_NONE;
+	std::shared_ptr<FluxSource> _fluxSource;
 };
 
 extern Config& globalConfig();

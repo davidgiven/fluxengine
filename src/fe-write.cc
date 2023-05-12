@@ -80,10 +80,10 @@ int mainWrite(int argc, const char* argv[])
     if (globalConfig()->has_decoder() && verify)
         decoder = Decoder::create(globalConfig()->decoder());
 
-    std::unique_ptr<FluxSource> fluxSource;
+    std::shared_ptr<FluxSource> fluxSource;
     if (verify &&
         (globalConfig()->flux_source().type() == FluxSourceProto::DRIVE))
-        fluxSource = FluxSource::create(globalConfig()->flux_source());
+        fluxSource = globalConfig().getFluxSource();
 
     writeDiskCommand(
         *image, *encoder, *fluxSink, decoder.get(), fluxSource.get());

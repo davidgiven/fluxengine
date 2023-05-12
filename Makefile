@@ -143,7 +143,7 @@ $(PROTO_SRCS): | $(PROTO_HDRS)
 $(PROTO_OBJS): CFLAGS += $(PROTO_CFLAGS)
 PROTO_LIB = $(OBJDIR)/libproto.a
 $(PROTO_LIB): $(PROTO_OBJS)
-PROTO_LDFLAGS = $(shell $(PKG_CONFIG) --libs protobuf) -pthread $(PROTO_LIB)
+PROTO_LDFLAGS = $(shell $(PKG_CONFIG) --libs protobuf) -pthread
 .PRECIOUS: $(PROTO_HDRS) $(PROTO_SRCS)
 
 include dep/agg/build.mk
@@ -258,7 +258,7 @@ $(OBJDIR)/%.a:
 %.exe:
 	@mkdir -p $(dir $@)
 	@echo LINK $@
-	@$(CXX) -o $@ $^ $(LDFLAGS) $(LDFLAGS)
+	@$(CXX) -o $@ $(filter %.o,$^) $(filter %.a,$^) $(LDFLAGS) $(filter %.a,$^) $(LDFLAGS)
 
 $(OBJDIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)

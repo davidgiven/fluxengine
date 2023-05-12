@@ -43,8 +43,7 @@ public:
             error("input not a SCP file");
 
         int tpi = (_header.flags & SCP_FLAG_96TPI) ? 96 : 48;
-        if (!::globalConfig()->drive().has_tpi())
-            ::globalConfig()->mutable_drive()->set_tpi(tpi);
+        _fluxConfig.mutable_drive()->set_tpi(tpi);
 
         _resolution = 25 * (_header.resolution + 1);
         int startSide = (_header.heads == 2) ? 1 : 0;

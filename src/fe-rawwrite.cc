@@ -64,8 +64,7 @@ int mainRawWrite(int argc, const char* argv[])
     if (globalConfig()->flux_source().type() == FluxSourceProto::DRIVE)
         error("you can't use rawwrite to read from hardware");
 
-    std::unique_ptr<FluxSource> fluxSource(
-        FluxSource::create(globalConfig()->flux_source()));
+    auto& fluxSource = globalConfig().getFluxSource();
     std::unique_ptr<FluxSink> fluxSink(
         FluxSink::create(globalConfig()->flux_sink()));
 

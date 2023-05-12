@@ -163,10 +163,10 @@ private:
                 if (!_explorerFluxmap || (desiredTrack != _explorerTrack) ||
                     (desiredSide != _explorerSide))
                 {
-                    auto fluxSource =
-                        FluxSource::create(globalConfig()->flux_source());
-                    _explorerFluxmap =
-                        fluxSource->readFlux(desiredTrack, desiredSide)->next();
+                    _explorerFluxmap = globalConfig()
+                                           .getFluxSource()
+                                           ->readFlux(desiredTrack, desiredSide)
+                                           ->next();
                     _explorerTrack = desiredTrack;
                     _explorerSide = desiredSide;
                 }

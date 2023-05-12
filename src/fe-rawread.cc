@@ -62,8 +62,7 @@ int mainRawRead(int argc, const char* argv[])
     if (globalConfig()->flux_sink().type() == FluxSinkProto::DRIVE)
         error("you can't use rawread to write to hardware");
 
-    std::unique_ptr<FluxSource> fluxSource(
-        FluxSource::create(globalConfig()->flux_source()));
+    std::shared_ptr<FluxSource> fluxSource = globalConfig().getFluxSource();
     std::unique_ptr<FluxSink> fluxSink(
         FluxSink::create(globalConfig()->flux_sink()));
 

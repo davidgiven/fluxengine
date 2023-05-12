@@ -67,8 +67,7 @@ int mainRead(int argc, const char* argv[])
     if (globalConfig()->decoder().copy_flux_to().type() == FluxSinkProto::DRIVE)
         error("you cannot copy flux to a hardware device");
 
-    std::unique_ptr<FluxSource> fluxSource(
-        FluxSource::create(globalConfig()->flux_source()));
+    auto& fluxSource = globalConfig().getFluxSource();
     std::unique_ptr<Decoder> decoder(
         Decoder::create(globalConfig()->decoder()));
     std::unique_ptr<ImageWriter> writer(

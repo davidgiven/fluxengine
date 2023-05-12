@@ -98,8 +98,7 @@ public:
 
                     Environment::reset();
 
-                    auto fluxSource =
-                        FluxSource::create(globalConfig()->flux_source());
+                    auto& fluxSource = globalConfig().getFluxSource();
                     auto decoder = Decoder::create(globalConfig()->decoder());
                     auto diskflux = readDiskCommand(*fluxSource, *decoder);
 
@@ -154,12 +153,11 @@ public:
                         FluxSink::create(globalConfig()->flux_sink());
 
                     std::unique_ptr<Decoder> decoder;
-                    std::unique_ptr<FluxSource> fluxSource;
+                    std::shared_ptr<FluxSource> fluxSource;
                     if (globalConfig()->has_decoder())
                     {
                         decoder = Decoder::create(globalConfig()->decoder());
-                        fluxSource =
-                            FluxSource::create(globalConfig()->flux_source());
+                        fluxSource = globalConfig().getFluxSource();
                     }
 
                     writeDiskCommand(*image,

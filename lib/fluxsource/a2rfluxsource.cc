@@ -78,15 +78,15 @@ public:
                 if (disktype == 1)
                 {
                     /* 5.25" with quarter stepping. */
-                    ::globalConfig()->mutable_drive()->set_tracks(160);
-                    ::globalConfig()->mutable_drive()->set_heads(1);
-                    ::globalConfig()->mutable_drive()->set_head_width(4);
-                    ::globalConfig()->mutable_drive()->set_tpi(48 * 4);
+                    _fluxConfig.mutable_drive()->set_tracks(160);
+                    _fluxConfig.mutable_drive()->set_heads(1);
+                    _fluxConfig.mutable_drive()->set_head_width(4);
+                    _fluxConfig.mutable_drive()->set_tpi(48 * 4);
                 }
                 else
                 {
                     /* 3.5". */
-                    ::globalConfig()->mutable_drive()->set_tpi(135);
+                    _fluxConfig.mutable_drive()->set_tpi(135);
                 }
 
                 Bytes stream = findChunk("STRM");

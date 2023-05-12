@@ -6,7 +6,7 @@
 #include "usb/usb.h"
 #include "fluxsink/fluxsink.h"
 #include "lib/fluxsink/fluxsink.pb.h"
-#include "lib/readerwriter.cc"
+#include "lib/readerwriter.h"
 
 class HardwareFluxSink : public FluxSink
 {
