@@ -5,6 +5,7 @@
 class ConfigProto;
 class OptionProto;
 class FluxSource;
+class ImageReader;
 
 class OptionException : public ErrorException
 {
@@ -69,9 +70,12 @@ public:
 
 	bool hasFluxSource() const;
 	std::shared_ptr<FluxSource>& getFluxSource();
+	bool hasImageReader() const;
+	std::shared_ptr<ImageReader>& getImageReader();
 
 private:
 	std::shared_ptr<FluxSource> _fluxSource;
+	std::shared_ptr<ImageReader> _imageReader;
 };
 
 extern Config& globalConfig();

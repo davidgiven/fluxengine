@@ -67,8 +67,7 @@ int mainWrite(int argc, const char* argv[])
         globalConfig()->mutable_flux_source()->set_type(FluxSourceProto::DRIVE);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
-    std::unique_ptr<ImageReader> reader(
-        ImageReader::create(globalConfig()->image_reader()));
+    auto& reader = globalConfig().getImageReader();
     std::shared_ptr<Image> image = reader->readMappedImage();
 
     std::unique_ptr<Encoder> encoder(

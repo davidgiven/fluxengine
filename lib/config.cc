@@ -3,6 +3,7 @@
 #include "lib/proto.h"
 #include "lib/logger.h"
 #include "lib/utils.h"
+#include "lib/imagereader/imagereader.h"
 #include "lib/fluxsource/fluxsource.h"
 #include <fstream>
 #include <google/protobuf/text_format.h>
@@ -32,6 +33,8 @@ Config::operator ConfigProto&() const
 
 void Config::clear()
 {
+    _fluxSource.reset();
+    _imageReader.reset();
     (*this)->Clear();
 }
 
@@ -367,10 +370,28 @@ std::shared_ptr<FluxSource>& Config::getFluxSource()
     if (!_fluxSource)
     {
         if (!hasFluxSource())
-            error("no flux source set");
+            error("no flux source configured");
 
         _fluxSource =
             std::shared_ptr(FluxSource::create((*this)->flux_source()));
     }
     return _fluxSource;
+}
+
+bool Config::hasImageReader() const
+{
+    return (*this)->image_reader().type() != ImageReaderProto::NOT_SET;
+}
+
+std::shared_ptr<ImageReader>& Config::getImageReader()
+{
+    if (!_imageReader)
+    {
+        if (!hasImageReader())
+            error("no image reader configured");
+
+        _imageReader =
+            std::shared_ptr(ImageReader::create((*this)->image_reader()));
+    }
+    return _imageReader;
 }

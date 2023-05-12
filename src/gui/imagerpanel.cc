@@ -146,8 +146,7 @@ public:
                 [this]()
                 {
                     auto image =
-                        ImageReader::create(globalConfig()->image_reader())
-                            ->readMappedImage();
+                        globalConfig().getImageReader()->readMappedImage();
                     auto encoder = Encoder::create(globalConfig()->encoder());
                     auto fluxSink =
                         FluxSink::create(globalConfig()->flux_sink());
