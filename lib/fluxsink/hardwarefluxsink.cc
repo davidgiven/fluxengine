@@ -39,7 +39,12 @@ public:
         return usbWrite(side, fluxmap.rawBytes(), _hardSectorThreshold);
     }
 
-    operator std::string() const
+    bool isHardware() const override
+    {
+        return true;
+    }
+
+    operator std::string() const override
     {
         return fmt::format("drive {}", globalConfig()->drive().drive());
     }

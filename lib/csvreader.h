@@ -6,15 +6,12 @@
 class CsvReader
 {
 public:
-	CsvReader(std::istream& istream):
-		_istream(istream)
-	{}
+    CsvReader(std::istream& istream): _istream(istream) {}
 
-	std::vector<std::string> readLine();
+    std::vector<std::string> readLine();
 
 private:
-	std::istream& _istream;
+    std::istream& _istream;
 };
 
 #endif
-

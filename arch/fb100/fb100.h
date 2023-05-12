@@ -8,4 +8,3 @@
 extern std::unique_ptr<Decoder> createFb100Decoder(const DecoderProto& config);
 
 #endif
-

@@ -32,7 +32,7 @@ static StringFlag destFlux({"--dest", "-d"},
     [](const auto& value)
     {
         globalConfig().setFluxSink(value);
-        globalConfig().setFluxSource(value);
+        globalConfig().setVerificationFluxSource(value);
     });
 
 static StringFlag destTracks({"--cylinders", "-c"},
@@ -62,9 +62,9 @@ int mainWrite(int argc, const char* argv[])
 {
     if (argc == 1)
         showProfiles("write", formats);
-    globalConfig()->mutable_flux_sink()->set_type(FluxSinkProto::DRIVE);
-    if (verify)
-        globalConfig()->mutable_flux_source()->set_type(FluxSourceProto::DRIVE);
+    globalConfig().setFluxSink("drive:0");
+    globalConfig().setVerificationFluxSource("drive:0");
+
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
     auto& reader = globalConfig().getImageReader();
@@ -76,16 +76,18 @@ int mainWrite(int argc, const char* argv[])
         FluxSink::create(globalConfig()->flux_sink()));
 
     std::unique_ptr<Decoder> decoder;
-    if (globalConfig()->has_decoder() && verify)
+    std::shared_ptr<FluxSource> verificationFluxSource;
+    if (globalConfig()->has_decoder() && fluxSink->isHardware() && verify)
+    {
         decoder = Decoder::create(globalConfig()->decoder());
+        verificationFluxSource = globalConfig().getVerificationFluxSource();
+    }
 
-    std::shared_ptr<FluxSource> fluxSource;
-    if (verify &&
-        (globalConfig()->flux_source().type() == FluxSourceProto::DRIVE))
-        fluxSource = globalConfig().getFluxSource();
-
-    writeDiskCommand(
-        *image, *encoder, *fluxSink, decoder.get(), fluxSource.get());
+    writeDiskCommand(*image,
+        *encoder,
+        *fluxSink,
+        decoder.get(),
+        verificationFluxSource.get());
 
     return 0;
 }

@@ -13,12 +13,14 @@ class DecoderProto;
 
 /* ... 1101 0100 1001
  *       ^^ ^^^^ ^^^^ ten bit IO byte */
-#define VICTOR9K_DATA_RECORD   0xfffffd49
+#define VICTOR9K_DATA_RECORD 0xfffffd49
 #define VICTOR9K_DATA_ID 0x8
 
 #define VICTOR9K_SECTOR_LENGTH 512
 
-extern std::unique_ptr<Decoder> createVictor9kDecoder(const DecoderProto& config);
-extern std::unique_ptr<Encoder> createVictor9kEncoder(const EncoderProto& config);
+extern std::unique_ptr<Decoder> createVictor9kDecoder(
+    const DecoderProto& config);
+extern std::unique_ptr<Encoder> createVictor9kEncoder(
+    const EncoderProto& config);
 
 #endif

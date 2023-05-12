@@ -24,7 +24,9 @@
 
 template <class T>
 static inline std::vector<T> vector_of(T item)
-{ return std::vector<T> { item }; }
+{
+    return std::vector<T>{item};
+}
 
 typedef double nanoseconds_t;
 class Bytes;
@@ -35,18 +37,17 @@ extern void hexdumpForSrp16(std::ostream& stream, const Bytes& bytes);
 
 struct ErrorException
 {
-	ErrorException(const std::string& message): message(message){}
+    ErrorException(const std::string& message): message(message) {}
 
-	const std::string message;
+    const std::string message;
 
-	void print() const;
+    void print() const;
 };
 
 template <typename... Args>
-[[ noreturn ]]
-inline void error(fmt::string_view fstr, const Args&... args)
+[[noreturn]] inline void error(fmt::string_view fstr, const Args&... args)
 {
-	throw ErrorException { fmt::format(fstr, args...) };
+    throw ErrorException{fmt::format(fstr, args...)};
 }
 
 extern void warning(const std::string msg);
@@ -54,11 +55,16 @@ extern void warning(const std::string msg);
 template <typename... Args>
 inline void warning(fmt::string_view fstr, const Args&... args)
 {
-	warning(fmt::format(fstr, args...));
+    warning(fmt::format(fstr, args...));
 }
 
-template <class... Ts> struct overloaded : Ts...  { using Ts::operator()...; };
-template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
+template <class... Ts>
+struct overloaded : Ts...
+{
+    using Ts::operator()...;
+};
+template <class... Ts>
+overloaded(Ts...) -> overloaded<Ts...>;
 
 #include "lib/config.h"
 

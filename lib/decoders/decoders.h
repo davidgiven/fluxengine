@@ -71,10 +71,10 @@ public:
         return _fmr->tell();
     }
 
-	void rewind()
-	{
-		_fmr->rewind();
-	}
+    void rewind()
+    {
+        _fmr->rewind();
+    }
 
     void seek(const Fluxmap::Position& pos)
     {

@@ -1,8 +1,10 @@
-#include "globals.h"
-#include "flags.h"
-#include "proto.h"
-#include "utils.h"
-#include "logger.h"
+#include "lib/globals.h"
+#include "lib/flags.h"
+#include "lib/proto.h"
+#include "lib/utils.h"
+#include "lib/logger.h"
+#include "lib/fluxsource/fluxsource.h"
+#include "lib/imagereader/imagereader.h"
 #include <google/protobuf/text_format.h>
 #include <regex>
 #include <fstream>
@@ -191,6 +193,17 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc,
             options.erase(option.name());
         }
     }
+
+    /* Add any config contributed by the flux and image readers, plus overrides.
+     */
+
+    if (globalConfig().hasFluxSource())
+        globalConfig()->MergeFrom(
+            globalConfig().getFluxSource()->getExtraConfig());
+    if (globalConfig().hasImageReader())
+        globalConfig()->MergeFrom(
+            globalConfig().getImageReader()->getExtraConfig());
+    applyOverrides();
 
     /* Then apply any default options in groups, likewise applying the
      * overrides. */

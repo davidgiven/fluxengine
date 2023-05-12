@@ -6,22 +6,21 @@
 
 enum DeviceType
 {
-	DEVICE_FLUXENGINE,
-	DEVICE_GREASEWEAZLE
+    DEVICE_FLUXENGINE,
+    DEVICE_GREASEWEAZLE
 };
 
 extern std::string getDeviceName(DeviceType type);
 
 struct CandidateDevice
 {
-	DeviceType type;
-	libusbp::device device;
-	uint32_t id;
-	std::string serial;
-	std::string serialPort;
+    DeviceType type;
+    libusbp::device device;
+    uint32_t id;
+    std::string serial;
+    std::string serialPort;
 };
 
 extern std::vector<std::shared_ptr<CandidateDevice>> findUsbDevices();
 
 #endif
-

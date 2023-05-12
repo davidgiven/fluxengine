@@ -152,18 +152,19 @@ public:
                         FluxSink::create(globalConfig()->flux_sink());
 
                     std::unique_ptr<Decoder> decoder;
-                    std::shared_ptr<FluxSource> fluxSource;
-                    if (globalConfig()->has_decoder())
+                    std::shared_ptr<FluxSource> verificationFluxSource;
+                    if (globalConfig()->has_decoder() && fluxSink->isHardware())
                     {
                         decoder = Decoder::create(globalConfig()->decoder());
-                        fluxSource = globalConfig().getFluxSource();
+                        verificationFluxSource =
+                            globalConfig().getVerificationFluxSource();
                     }
 
                     writeDiskCommand(*image,
                         *encoder,
                         *fluxSink,
                         decoder.get(),
-                        fluxSource.get());
+                        verificationFluxSource.get());
                 });
         }
         catch (const ErrorException& e)

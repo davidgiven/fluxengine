@@ -104,7 +104,7 @@ const OptionProto& Config::findOption(const std::string& optionName)
     throw OptionNotFoundException("option name not found");
 }
 
-bool Config::isOptionValid(const OptionProto& option)
+void Config::checkOptionValid(const OptionProto& option)
 {
     for (const auto& req : option.requires())
     {
@@ -121,10 +121,40 @@ bool Config::isOptionValid(const OptionProto& option)
         }
 
         if (!matched)
-            return false;
-    }
+        {
+            std::stringstream ss;
+            ss << '[';
+            bool first = true;
+            for (auto requiredValue : req.value())
+            {
+                if (!first)
+                    ss << ", ";
+                ss << quote(requiredValue);
+                first = false;
+            }
+            ss << ']';
 
-    return true;
+            throw InapplicableOptionException(
+                fmt::format("option '{}' is inapplicable to this configuration "
+                            "because {}={} could not be met",
+                    option.name(),
+                    req.key(),
+                    ss.str()));
+        }
+    }
+}
+
+bool Config::isOptionValid(const OptionProto& option)
+{
+    try
+    {
+        checkOptionValid(option);
+        return true;
+    }
+    catch (const InapplicableOptionException& e)
+    {
+        return false;
+    }
 }
 
 void Config::applyOption(const OptionProto& option)
@@ -137,10 +167,7 @@ void Config::applyOption(const OptionProto& option)
         throw InvalidOptionException(fmt::format(
             "option '{}' has an option group inside it, which isn't allowed",
             option.name()));
-    if (!isOptionValid(option))
-        throw InapplicableOptionException(
-            fmt::format("option '{}' is inapplicable to this configuration",
-                option.name()));
+    checkOptionValid(option);
 
     log("OPTION: {}",
         option.has_message() ? option.message() : option.comment());
@@ -148,7 +175,7 @@ void Config::applyOption(const OptionProto& option)
     (*this)->MergeFrom(option.config());
 }
 
-void Config::setFluxSource(std::string filename)
+static void setFluxSourceImpl(std::string filename, FluxSourceProto* proto)
 {
     static const std::vector<std::pair<std::regex,
         std::function<void(const std::string&, FluxSourceProto*)>>>
@@ -212,12 +239,17 @@ void Config::setFluxSource(std::string filename)
         std::smatch match;
         if (std::regex_match(filename, match, it.first))
         {
-            it.second(match[1], (*this)->mutable_flux_source());
+            it.second(match[1], proto);
             return;
         }
     }
 
     error("unrecognised flux filename '{}'", filename);
+}
+
+void Config::setFluxSource(std::string filename)
+{
+    setFluxSourceImpl(filename, (*this)->mutable_flux_source());
 }
 
 static void setFluxSinkImpl(std::string filename, FluxSinkProto* proto)
@@ -285,6 +317,11 @@ void Config::setCopyFluxTo(std::string filename)
 {
     setFluxSinkImpl(
         filename, (*this)->mutable_decoder()->mutable_copy_flux_to());
+}
+
+void Config::setVerificationFluxSource(std::string filename)
+{
+    setFluxSourceImpl(filename, &_verificationFluxSourceProto);
 }
 
 void Config::setImageReader(std::string filename)
@@ -376,6 +413,24 @@ std::shared_ptr<FluxSource>& Config::getFluxSource()
             std::shared_ptr(FluxSource::create((*this)->flux_source()));
     }
     return _fluxSource;
+}
+
+bool Config::hasVerificationFluxSource() const
+{
+    return _verificationFluxSourceProto.type() != FluxSourceProto::NOT_SET;
+}
+
+std::shared_ptr<FluxSource>& Config::getVerificationFluxSource()
+{
+    if (!_verificationFluxSource)
+    {
+        if (!hasVerificationFluxSource())
+            error("no verification flux source configured");
+
+        _verificationFluxSource =
+            std::shared_ptr(FluxSource::create(_verificationFluxSourceProto));
+    }
+    return _verificationFluxSource;
 }
 
 bool Config::hasImageReader() const

@@ -44,7 +44,10 @@ public:
 public:
     /* Returns any extra config the image might want to contribute. */
 
-    const ConfigProto& getContributedConfig() const;
+    const ConfigProto& getExtraConfig() const
+    {
+        return _extraConfig;
+    }
 
     /* Directly reads the image. */
 

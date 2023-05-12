@@ -245,6 +245,7 @@ public:
                 std::string filename = _selectedDrive ? "drive:1" : "drive:0";
                 globalConfig().setFluxSink(filename);
                 globalConfig().setFluxSource(filename);
+                globalConfig().setVerificationFluxSource(filename);
 
                 break;
             }
