@@ -59,26 +59,30 @@ public:
     static std::unique_ptr<FluxSource> create(const FluxSourceProto& spec);
 
 public:
-	/* Returns any configuration this flux source might be carrying (e.g. tpi
-	 * of the drive which made the capture). */
+    /* Returns any configuration this flux source might be carrying (e.g. tpi
+     * of the drive which made the capture). */
 
-	const ConfigProto& getConfig() const
-	{ return _fluxConfig; }
+    const ConfigProto& getExtraConfig() const
+    {
+        return _extraConfig;
+    }
 
-	/* Read flux from a given track and side. */
+    /* Read flux from a given track and side. */
 
     virtual std::unique_ptr<FluxSourceIterator> readFlux(
         int track, int side) = 0;
 
-	/* Recalibrates; seeks to track 0 and ensures the head is in the right place. */
+    /* Recalibrates; seeks to track 0 and ensures the head is in the right
+     * place. */
 
     virtual void recalibrate() {}
 
-	/* Seeks to a given track (without recalibrating). */
+    /* Seeks to a given track (without recalibrating). */
 
     virtual void seek(int track) {}
 
-	/* Is this real hardware? If so, then flux can be read indefinitely (among other things). */
+    /* Is this real hardware? If so, then flux can be read indefinitely (among
+     * other things). */
 
     virtual bool isHardware()
     {
@@ -86,7 +90,7 @@ public:
     }
 
 protected:
-	ConfigProto _fluxConfig;
+    ConfigProto _extraConfig;
 };
 
 class EmptyFluxSourceIterator : public FluxSourceIterator

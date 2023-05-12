@@ -37,7 +37,7 @@ public:
     {
         _proto = loadFl2File(_config.filename());
 
-        *_fluxConfig.mutable_drive() = _proto.drive();
+        *_extraConfig.mutable_drive() = _proto.drive();
     }
 
 public:
