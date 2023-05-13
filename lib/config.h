@@ -57,7 +57,7 @@ public:
     /* Set and get individual config keys. */
 
     void set(std::string key, std::string value);
-    std::string get(std::string key);
+    std::string get(std::string key) const;
 
     /* Reset the entire configuration. */
 
@@ -75,9 +75,10 @@ public:
     /* Option management: look up an option by name, determine whether an option
      * is valid, and apply an option. */
 
-    const OptionProto& findOption(const std::string& option);
-    void checkOptionValid(const OptionProto& option);
-    bool isOptionValid(const OptionProto& option);
+    const OptionProto& findOption(const std::string& option) const;
+    void checkOptionValid(const OptionProto& option) const;
+    bool isOptionValid(const OptionProto& option) const;
+    bool isOptionValid(std::string option) const;
     void applyOption(const OptionProto& option);
 
     /* Adjust overall inputs and outputs. */

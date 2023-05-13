@@ -55,39 +55,37 @@ private:
         _cache;
 };
 
-void measureDiskRotation(
-    nanoseconds_t& oneRevolution, nanoseconds_t& hardSectorThreshold)
+void measureDiskRotation()
 {
     log(BeginSpeedOperationLogMessage());
 
-    int retries = 5;
-    usbSetDrive(globalConfig()->drive().drive(),
-        globalConfig()->drive().high_density(),
-        globalConfig()->drive().index_mode());
-    oneRevolution = globalConfig()->drive().rotational_period_ms() * 1e6;
-    if (globalConfig()->drive().hard_sector_count() != 0)
-        hardSectorThreshold = oneRevolution * 3 /
-                              (4 * globalConfig()->drive().hard_sector_count());
-    else
-        hardSectorThreshold = 0;
-
+    nanoseconds_t oneRevolution =
+        globalConfig()->drive().rotational_period_ms() * 1e6;
     if (oneRevolution == 0)
     {
+        usbSetDrive(globalConfig()->drive().drive(),
+            globalConfig()->drive().high_density(),
+            globalConfig()->drive().index_mode());
+
         log(BeginOperationLogMessage{"Measuring drive rotational speed"});
+        int retries = 5;
         do
         {
             oneRevolution = usbGetRotationalPeriod(
                 globalConfig()->drive().hard_sector_count());
-            if (globalConfig()->drive().hard_sector_count() != 0)
-                hardSectorThreshold =
-                    oneRevolution * 3 /
-                    (4 * globalConfig()->drive().hard_sector_count());
 
             retries--;
         } while ((oneRevolution == 0) && (retries > 0));
         globalConfig()->mutable_drive()->set_rotational_period_ms(
             oneRevolution / 1e6);
         log(EndOperationLogMessage{});
+    }
+
+    if (!globalConfig()->drive().hard_sector_threshold_ns())
+    {
+        globalConfig()->mutable_drive()->set_hard_sector_threshold_ns(
+            oneRevolution * 3 /
+            (4 * globalConfig()->drive().hard_sector_count()));
     }
 
     if (oneRevolution == 0)
@@ -258,6 +256,8 @@ void writeTracks(FluxSink& fluxSink,
 {
     log(BeginOperationLogMessage{"Encoding and writing to disk"});
 
+    if (fluxSink.isHardware())
+        measureDiskRotation();
     int index = 0;
     for (auto& trackInfo : trackInfos)
     {
@@ -495,6 +495,8 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
     auto diskflux = std::make_shared<DiskFlux>();
 
     log(BeginOperationLogMessage{"Reading and decoding disk"});
+    if (fluxSource.isHardware())
+        measureDiskRotation();
     auto locations = Layout::computeLocations();
     unsigned index = 0;
     for (auto& trackInfo : locations)
@@ -605,6 +607,8 @@ void rawReadDiskCommand(FluxSource& fluxsource, FluxSink& fluxsink)
 {
     log(BeginOperationLogMessage{"Performing raw read of disk"});
 
+    if (fluxsource.isHardware() || fluxsink.isHardware())
+        measureDiskRotation();
     auto locations = Layout::computeLocations();
     unsigned index = 0;
     for (auto& trackInfo : locations)

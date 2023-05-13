@@ -50,7 +50,7 @@ void Config::set(std::string key, std::string value)
     setProtoByString(*this, key, value);
 }
 
-std::string Config::get(std::string key)
+std::string Config::get(std::string key) const
 {
     return getProtoByString(*this, key);
 }
@@ -82,7 +82,7 @@ void Config::readConfigFile(std::string filename)
     globalConfig()->MergeFrom(loadSingleConfigFile(filename));
 }
 
-const OptionProto& Config::findOption(const std::string& optionName)
+const OptionProto& Config::findOption(const std::string& optionName) const
 {
     const OptionProto* found = nullptr;
 
@@ -108,10 +108,11 @@ const OptionProto& Config::findOption(const std::string& optionName)
             return *found;
     }
 
-    throw OptionNotFoundException("option name not found");
+    throw OptionNotFoundException(
+        fmt::format("option {} not found", optionName));
 }
 
-void Config::checkOptionValid(const OptionProto& option)
+void Config::checkOptionValid(const OptionProto& option) const
 {
     for (const auto& req : option.requires())
     {
@@ -151,7 +152,7 @@ void Config::checkOptionValid(const OptionProto& option)
     }
 }
 
-bool Config::isOptionValid(const OptionProto& option)
+bool Config::isOptionValid(const OptionProto& option) const
 {
     try
     {
@@ -162,6 +163,11 @@ bool Config::isOptionValid(const OptionProto& option)
     {
         return false;
     }
+}
+
+bool Config::isOptionValid(std::string option) const
+{
+    return isOptionValid(findOption(option));
 }
 
 void Config::applyOption(const OptionProto& option)

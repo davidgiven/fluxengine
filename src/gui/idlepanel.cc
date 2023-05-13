@@ -206,26 +206,6 @@ public:
                 globalConfig().readConfigFile(setting);
         }
 
-        /* Apply any format options. */
-
-        std::set<std::string> options;
-        for (const auto& e : _formatOptions)
-        {
-            if (e.first == formatName)
-                options.insert(e.second);
-        }
-
-        /* Locate the device, if any. */
-
-        auto serial = _selectedDevice;
-        if (!serial.empty() && (serial[0] == '/'))
-            overrides.push_back(
-                std::make_pair("usb.greaseweazle.port", serial));
-        else
-            overrides.push_back(std::make_pair("usb.serial", serial));
-
-        ClearLog();
-
         /* Apply the source/destination. */
 
         switch (_selectedSource)
@@ -240,7 +220,6 @@ public:
                 globalConfig().setFluxSink(filename);
                 globalConfig().setFluxSource(filename);
                 globalConfig().setVerificationFluxSource(filename);
-
                 break;
             }
 
@@ -258,6 +237,35 @@ public:
                 break;
             }
         }
+
+        /* Apply any format options. */
+
+        std::set<std::string> options;
+        for (const auto& e : _formatOptions)
+        {
+            if (e.first == formatName)
+            {
+                try
+                {
+                    if (globalConfig().isOptionValid(e.second))
+                        options.insert(e.second);
+                }
+                catch (const OptionException& e)
+                {
+                }
+            }
+        }
+
+        /* Locate the device, if any. */
+
+        auto serial = _selectedDevice;
+        if (!serial.empty() && (serial[0] == '/'))
+            overrides.push_back(
+                std::make_pair("usb.greaseweazle.port", serial));
+        else
+            overrides.push_back(std::make_pair("usb.serial", serial));
+
+        ClearLog();
 
         /* Resolve the rest of the stuff. */
 
@@ -574,111 +582,107 @@ private:
 
     void UpdateFormatOptions()
     {
+        int formatSelection = formatChoice->GetSelection();
+        _currentlyDisplayedFormat = formatSelection;
+
+        PrepareConfig();
         assert(!wxGetApp().IsWorkerThreadRunning());
 
-        int formatSelection = formatChoice->GetSelection();
-        if (formatSelection != _currentlyDisplayedFormat)
+        formatOptionsContainer->DestroyChildren();
+        auto* sizer = new wxBoxSizer(wxVERTICAL);
+
+        if (formatSelection == wxNOT_FOUND)
+            sizer->Add(new wxStaticText(
+                formatOptionsContainer, wxID_ANY, "(no format selected)"));
+        else
         {
-            _currentlyDisplayedFormat = formatSelection;
-            formatOptionsContainer->DestroyChildren();
-            auto* sizer = new wxBoxSizer(wxVERTICAL);
+            std::string formatName = _formatNames[formatChoice->GetSelection()];
 
-            if (formatSelection == wxNOT_FOUND)
-                sizer->Add(new wxStaticText(
-                    formatOptionsContainer, wxID_ANY, "(no format selected)"));
-            else
+            for (auto& group : globalConfig()->option_group())
             {
-                globalConfig().clear();
-                std::string formatName =
-                    _formatNames[formatChoice->GetSelection()];
-                globalConfig().readConfigFile(formatName);
+                sizer->Add(new wxStaticText(
+                    formatOptionsContainer, wxID_ANY, group.comment() + ":"));
 
-                for (auto& group : globalConfig()->option_group())
+                bool first = true;
+                bool valueSet = false;
+                wxRadioButton* defaultButton = nullptr;
+                for (auto& option : group.option())
                 {
-                    sizer->Add(new wxStaticText(formatOptionsContainer,
+                    auto* rb = new wxRadioButton(formatOptionsContainer,
                         wxID_ANY,
-                        group.comment() + ":"));
-
-                    bool first = true;
-                    bool valueSet = false;
-                    wxRadioButton* defaultButton = nullptr;
-                    for (auto& option : group.option())
-                    {
-                        auto* rb = new wxRadioButton(formatOptionsContainer,
-                            wxID_ANY,
-                            option.comment(),
-                            wxDefaultPosition,
-                            wxDefaultSize,
-                            first ? wxRB_GROUP : 0);
-                        auto key = std::make_pair(formatName, option.name());
-                        sizer->Add(rb);
-
-                        rb->Bind(wxEVT_RADIOBUTTON,
-                            [=](wxCommandEvent& e)
-                            {
-                                for (auto& option : group.option())
-                                {
-                                    _formatOptions.erase(std::make_pair(
-                                        formatName, option.name()));
-                                }
-
-                                _formatOptions.insert(key);
-
-                                OnControlsChanged(e);
-                            });
-
-                        if (_formatOptions.find(key) != _formatOptions.end())
-                        {
-                            rb->SetValue(true);
-                            valueSet = true;
-                        }
-
-                        if (option.set_by_default() || !defaultButton)
-                            defaultButton = rb;
-
-                        first = false;
-                    }
-
-                    if (!valueSet && defaultButton)
-                        defaultButton->SetValue(true);
-                }
-
-                /* Anything that's _not_ in a group gets a checkbox. */
-
-                for (auto& option : globalConfig()->option())
-                {
-                    auto* choice = new wxCheckBox(
-                        formatOptionsContainer, wxID_ANY, option.comment());
+                        option.comment(),
+                        wxDefaultPosition,
+                        wxDefaultSize,
+                        first ? wxRB_GROUP : 0);
                     auto key = std::make_pair(formatName, option.name());
-                    sizer->Add(choice);
+                    sizer->Add(rb);
 
-                    choice->SetValue(
-                        (_formatOptions.find(key) != _formatOptions.end()) ||
-                        option.set_by_default());
-
-                    choice->Bind(wxEVT_CHECKBOX,
+                    rb->Bind(wxEVT_RADIOBUTTON,
                         [=](wxCommandEvent& e)
                         {
-                            if (choice->GetValue())
-                                _formatOptions.insert(key);
-                            else
-                                _formatOptions.erase(key);
+                            for (auto& option : group.option())
+                            {
+                                _formatOptions.erase(
+                                    std::make_pair(formatName, option.name()));
+                            }
+
+                            _formatOptions.insert(key);
 
                             OnControlsChanged(e);
                         });
+
+                    if (_formatOptions.find(key) != _formatOptions.end())
+                    {
+                        rb->SetValue(true);
+                        valueSet = true;
+                    }
+
+                    rb->Enable(globalConfig().isOptionValid(option));
+                    if (option.set_by_default() || !defaultButton)
+                        defaultButton = rb;
+
+                    first = false;
                 }
 
-                if (globalConfig()->option().empty() &&
-                    globalConfig()->option_group().empty())
-                    sizer->Add(new wxStaticText(formatOptionsContainer,
-                        wxID_ANY,
-                        "(no options for this format)"));
+                if (!valueSet && defaultButton)
+                    defaultButton->SetValue(true);
             }
 
-            formatOptionsContainer->SetSizerAndFit(sizer);
-            Layout();
-            SafeFit();
+            /* Anything that's _not_ in a group gets a checkbox. */
+
+            for (auto& option : globalConfig()->option())
+            {
+                auto* choice = new wxCheckBox(
+                    formatOptionsContainer, wxID_ANY, option.comment());
+                auto key = std::make_pair(formatName, option.name());
+                sizer->Add(choice);
+
+                choice->SetValue(
+                    (_formatOptions.find(key) != _formatOptions.end()) ||
+                    option.set_by_default());
+
+                choice->Bind(wxEVT_CHECKBOX,
+                    [=](wxCommandEvent& e)
+                    {
+                        if (choice->GetValue())
+                            _formatOptions.insert(key);
+                        else
+                            _formatOptions.erase(key);
+
+                        OnControlsChanged(e);
+                    });
+            }
+
+            if (globalConfig()->option().empty() &&
+                globalConfig()->option_group().empty())
+                sizer->Add(new wxStaticText(formatOptionsContainer,
+                    wxID_ANY,
+                    "(no options for this format)"));
         }
+
+        formatOptionsContainer->SetSizerAndFit(sizer);
+        Layout();
+        SafeFit();
     }
 
     void UpdateDevices()

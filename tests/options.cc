@@ -74,6 +74,14 @@ static void test_option_validity()
 
 int main(int argc, const char* argv[])
 {
-    test_option_validity();
-    return 0;
+    try
+    {
+        test_option_validity();
+        return 0;
+    }
+    catch (const ErrorException& e)
+    {
+        fmt::print(stderr, "Error: {}\n", e.message);
+        return 1;
+    }
 }
