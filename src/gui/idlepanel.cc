@@ -186,6 +186,7 @@ public:
 
         /* Merge in any custom config. */
 
+        std::vector<std::pair<std::string, std::string>> overrides;
         for (auto setting : split(_extraConfiguration, '\n'))
         {
             setting = trimWhitespace(setting);
@@ -199,7 +200,7 @@ public:
             {
                 auto key = setting.substr(0, equals);
                 auto value = setting.substr(equals + 1);
-                setProtoByString(globalConfig(), key, value);
+                overrides.push_back(std::make_pair(key, value));
             }
             else
                 globalConfig().readConfigFile(setting);
@@ -207,28 +208,21 @@ public:
 
         /* Apply any format options. */
 
+        std::set<std::string> options;
         for (const auto& e : _formatOptions)
         {
             if (e.first == formatName)
-            {
-                try
-                {
-                    globalConfig().applyOption(
-                        globalConfig().findOption(e.second));
-                }
-                catch (const OptionNotFoundException e)
-                {
-                }
-            }
+                options.insert(e.second);
         }
 
         /* Locate the device, if any. */
 
         auto serial = _selectedDevice;
         if (!serial.empty() && (serial[0] == '/'))
-            setProtoByString(globalConfig(), "usb.greaseweazle.port", serial);
+            overrides.push_back(
+                std::make_pair("usb.greaseweazle.port", serial));
         else
-            setProtoByString(globalConfig(), "usb.serial", serial);
+            overrides.push_back(std::make_pair("usb.serial", serial));
 
         ClearLog();
 
@@ -264,6 +258,10 @@ public:
                 break;
             }
         }
+
+        /* Resolve the rest of the stuff. */
+
+        globalConfig().initialise(options, overrides);
     }
 
     const wxBitmap GetBitmap() override

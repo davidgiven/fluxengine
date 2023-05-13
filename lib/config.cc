@@ -517,3 +517,71 @@ std::shared_ptr<Decoder>& Config::getDecoder()
     }
     return _decoder;
 }
+
+void Config::initialise(std::set<std::string> options,
+    std::vector<std::pair<std::string, std::string>> overrides)
+{
+    /* Start fresh. */
+
+    /* TODO: can't do this yet without refactoring loads of stuff. */
+    // clear();
+
+    /* First apply any value overrides (in order). We need to set the up front
+     * because the options may depend on them. */
+
+    auto applyOverrides = [&]()
+    {
+        for (auto [k, v] : overrides)
+            globalConfig().set(k, v);
+    };
+    applyOverrides();
+
+    /* First apply any standalone options. After each one, reapply the overrides
+     * in case the option changed them. */
+
+    for (auto& option : globalConfig()->option())
+    {
+        if (options.find(option.name()) != options.end())
+        {
+            globalConfig().applyOption(option);
+            applyOverrides();
+            options.erase(option.name());
+        }
+    }
+
+    /* Add any config contributed by the flux and image readers, plus overrides.
+     */
+
+    if (globalConfig().hasFluxSource())
+        globalConfig()->MergeFrom(
+            globalConfig().getFluxSource()->getExtraConfig());
+    if (globalConfig().hasImageReader())
+        globalConfig()->MergeFrom(
+            globalConfig().getImageReader()->getExtraConfig());
+    applyOverrides();
+
+    /* Then apply any default options in groups, likewise applying the
+     * overrides. */
+
+    for (auto& group : globalConfig()->option_group())
+    {
+        const OptionProto* defaultOption = &*group.option().begin();
+        bool isSet = false;
+
+        for (auto& option : group.option())
+        {
+            if (options.find(option.name()) != options.end())
+            {
+                defaultOption = &option;
+                options.erase(option.name());
+            }
+        }
+
+        globalConfig().applyOption(*defaultOption);
+        applyOverrides();
+    }
+
+    if (!options.empty())
+        error("--{} is not a known flag or format option; try --help",
+            *options.begin());
+}

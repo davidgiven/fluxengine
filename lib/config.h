@@ -63,6 +63,11 @@ public:
 
     void clear();
 
+    /* Set up the entire configuration in one go. */
+
+    void initialise(std::set<std::string> options,
+        std::vector<std::pair<std::string, std::string>> overrides);
+
     /* Merge in one config file. */
 
     void readConfigFile(std::string filename);
