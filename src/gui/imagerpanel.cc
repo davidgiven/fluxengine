@@ -1,6 +1,5 @@
 #include "lib/globals.h"
 #include "lib/fluxmap.h"
-#include "lib/environment.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/imagereader/imagereader.h"
@@ -93,11 +92,6 @@ public:
             QueueJob(
                 [this]()
                 {
-                    /* You need to call this if the config changes to invalidate
-                     * any caches. */
-
-                    Environment::reset();
-
                     auto& fluxSource = globalConfig().getFluxSource();
                     auto& decoder = globalConfig().getDecoder();
                     auto diskflux = readDiskCommand(*fluxSource, *decoder);

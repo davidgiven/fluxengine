@@ -1,7 +1,6 @@
 #include "lib/globals.h"
 #include "lib/layout.h"
 #include "lib/proto.h"
-#include "lib/environment.h"
 
 bool approximatelyEqual(float a, float b, float epsilon)
 {

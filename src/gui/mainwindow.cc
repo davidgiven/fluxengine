@@ -17,7 +17,6 @@
 #include "filesystemmodel.h"
 #include "customstatusbar.h"
 #include "lib/vfs/vfs.h"
-#include "lib/environment.h"
 #include "lib/layout.h"
 #include <google/protobuf/text_format.h>
 #include <wx/aboutdlg.h>

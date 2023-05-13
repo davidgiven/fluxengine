@@ -1,6 +1,5 @@
 #include "lib/globals.h"
 #include "lib/fluxmap.h"
-#include "lib/environment.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/decoders/decoders.h"
 #include "lib/proto.h"
@@ -153,11 +152,6 @@ private:
         QueueJob(
             [this]()
             {
-                /* You need to call this if the config changes to invalidate
-                 * any caches. */
-
-                Environment::reset();
-
                 int desiredTrack = explorerTrackSpinCtrl->GetValue();
                 int desiredSide = explorerSideSpinCtrl->GetValue();
                 if (!_explorerFluxmap || (desiredTrack != _explorerTrack) ||
