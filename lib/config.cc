@@ -35,8 +35,6 @@ ConfigProto* Config::combined()
             if (options.find(option.name()) != options.end())
             {
                 _combinedConfig.MergeFrom(option.config());
-                for (auto& r : option.requires())
-                    requirements.insert(&r);
                 options.erase(option.name());
             }
         }
@@ -57,8 +55,6 @@ ConfigProto* Config::combined()
             }
 
             _combinedConfig.MergeFrom(selectedOption->config());
-            for (auto& r : selectedOption->requires())
-                requirements.insert(&r);
         }
 
         /* Add in the user overrides. */
@@ -83,12 +79,6 @@ ConfigProto* Config::combined()
         /* Merge in the overrides once again. */
 
         _combinedConfig.MergeFrom(_overridesConfig);
-
-        /* Check for options validity. */
-
-        if (!options.empty())
-            throw InvalidOptionException(
-                fmt::format("{} is not a known option", *options.begin()));
     }
     return &_combinedConfig;
 }
@@ -110,6 +100,82 @@ void Config::clear()
     _encoder.reset();
     _decoder.reset();
     _appliedOptions.clear();
+}
+
+std::vector<std::string> Config::validate()
+{
+    std::vector<std::string> results;
+
+    std::set<std::string> optionNames = _appliedOptions;
+    std::set<const OptionProto*> appliedOptions;
+    for (const auto& option : _baseConfig.option())
+    {
+        if (optionNames.find(option.name()) != optionNames.end())
+        {
+            appliedOptions.insert(&option);
+            optionNames.erase(option.name());
+        }
+    }
+
+    /* Then apply any group options. */
+
+    for (auto& group : _baseConfig.option_group())
+    {
+        int count = 0;
+
+        for (auto& option : group.option())
+        {
+            if (optionNames.find(option.name()) != optionNames.end())
+            {
+                optionNames.erase(option.name());
+                appliedOptions.insert(&option);
+
+                count++;
+                if (count == 2)
+                    results.push_back(
+                        fmt::format("multiple mutually exclusive options set "
+                                    "for group '{}'",
+                            group.comment()));
+            }
+        }
+    }
+
+    /* Check for unknown options. */
+
+    if (!optionNames.empty())
+    {
+        for (auto& name : optionNames)
+            results.push_back(fmt::format("'{}' is not a known option", name));
+    }
+
+    /* Check option requirements. */
+
+    for (auto& option : appliedOptions)
+    {
+        try
+        {
+            checkOptionValid(*option);
+        }
+        catch (const InapplicableOptionException& e)
+        {
+            results.push_back(e.message);
+        }
+    }
+
+    return results;
+}
+
+void Config::validateAndThrow()
+{
+    auto r = validate();
+    if (!r.empty())
+    {
+        std::stringstream ss;
+        ss << "invalid configuration:\n";
+        for (auto& s : r)
+            ss << s << '\n';
+        error(ss.str());
+    }
 }
 
 void Config::set(std::string key, std::string value)

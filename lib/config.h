@@ -79,6 +79,11 @@ public:
 
     void invalidate();
 
+    /* Check option validity. Returns a list of errors. */
+
+    std::vector<std::string> validate();
+    void validateAndThrow();
+
     /* Set and get individual config keys on the override config. */
 
     void set(std::string key, std::string value);
