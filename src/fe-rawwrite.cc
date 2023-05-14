@@ -33,7 +33,7 @@ static StringFlag destTracks({"--cylinders", "-c"},
     "",
     [](const auto& value)
     {
-        setRange(globalConfig()->mutable_tracks(), value);
+        setRange(globalConfig().overrides()->mutable_tracks(), value);
     });
 
 static StringFlag destHeads({"--heads", "-h"},
@@ -41,24 +41,26 @@ static StringFlag destHeads({"--heads", "-h"},
     "",
     [](const auto& value)
     {
-        setRange(globalConfig()->mutable_heads(), value);
+        setRange(globalConfig().overrides()->mutable_heads(), value);
     });
 
 static ActionFlag eraseFlag({"--erase"},
     "erases the destination",
     []()
     {
-        globalConfig()->mutable_flux_source()->set_type(FluxSourceProto::ERASE);
+        globalConfig().overrides()->mutable_flux_source()->set_type(
+            FluxSourceProto::ERASE);
     });
 
 int mainRawWrite(int argc, const char* argv[])
 {
-    setRange(globalConfig()->mutable_tracks(), "0-79");
-    setRange(globalConfig()->mutable_heads(), "0-1");
+    setRange(globalConfig().overrides()->mutable_tracks(), "0-79");
+    setRange(globalConfig().overrides()->mutable_heads(), "0-1");
 
     if (argc == 1)
         showProfiles("rawwrite", formats);
-    globalConfig()->mutable_flux_sink()->set_type(FluxSinkProto::DRIVE);
+    globalConfig().overrides()->mutable_flux_sink()->set_type(
+        FluxSinkProto::DRIVE);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
     if (globalConfig()->flux_source().type() == FluxSourceProto::DRIVE)

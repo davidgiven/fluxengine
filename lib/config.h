@@ -2,7 +2,8 @@
 
 #ifdef __cplusplus
 
-#include "lib/fluxsource/fluxsource.pb.h"
+#include <google/protobuf/message.h>
+#include "lib/config.pb.h"
 
 class ConfigProto;
 class OptionProto;
@@ -48,38 +49,64 @@ public:
 class Config
 {
 public:
-    /* Direct access to the proto configuration. */
+    /* Direct access to the various proto layers. */
 
-    ConfigProto* operator->() const;
-    operator ConfigProto*() const;
-    operator ConfigProto&() const;
+    const ConfigProto* operator->()
+    {
+        return combined();
+    }
 
-    /* Set and get individual config keys. */
+    operator const ConfigProto&()
+    {
+        return *combined();
+    }
+
+    ConfigProto* base()
+    {
+        invalidate();
+        return &_baseConfig;
+    }
+
+    ConfigProto* overrides()
+    {
+        invalidate();
+        return &_overridesConfig;
+    }
+
+    ConfigProto* combined();
+
+    /* Force the combined config to be rebuilt. */
+
+    void invalidate();
+
+    /* Set and get individual config keys on the override config. */
 
     void set(std::string key, std::string value);
-    std::string get(std::string key) const;
+    std::string get(std::string key);
+
+    /* Set a config key on the combined config. This will disappear the next
+     * time the config is rebuilt. */
+
+    void setTransient(std::string key, std::string value);
 
     /* Reset the entire configuration. */
 
     void clear();
 
-    /* Set up the entire configuration in one go. */
+    /* Merge in one config file into the base config. */
 
-    void initialise(std::set<std::string> options,
-        std::vector<std::pair<std::string, std::string>> overrides);
-
-    /* Merge in one config file. */
-
-    void readConfigFile(std::string filename);
+    void readBaseConfigFile(std::string filename);
+    void readBaseConfig(std::string data);
 
     /* Option management: look up an option by name, determine whether an option
      * is valid, and apply an option. */
 
-    const OptionProto& findOption(const std::string& option) const;
-    void checkOptionValid(const OptionProto& option) const;
-    bool isOptionValid(const OptionProto& option) const;
-    bool isOptionValid(std::string option) const;
+    const OptionProto& findOption(const std::string& option);
+    void checkOptionValid(const OptionProto& option);
+    bool isOptionValid(const OptionProto& option);
+    bool isOptionValid(std::string option);
     void applyOption(const OptionProto& option);
+    void applyOption(std::string option);
 
     /* Adjust overall inputs and outputs. */
 
@@ -92,28 +119,34 @@ public:
 
     /* Fetch the sources, opening them if necessary. */
 
-    bool hasFluxSource() const;
+    bool hasFluxSource();
     std::shared_ptr<FluxSource>& getFluxSource();
-    bool hasImageReader() const;
+    bool hasImageReader();
     std::shared_ptr<ImageReader>& getImageReader();
     bool hasVerificationFluxSource() const;
     std::shared_ptr<FluxSource>& getVerificationFluxSource();
 
     /* Fetch the encoder and decoder, creating them if necessary. */
 
-    bool hasEncoder() const;
+    bool hasEncoder();
     std::shared_ptr<Encoder>& getEncoder();
-    bool hasDecoder() const;
+    bool hasDecoder();
     std::shared_ptr<Decoder>& getDecoder();
 
     /* Create the sinks: these are not cached. */
 
-    bool hasFluxSink() const;
+    bool hasFluxSink();
     std::unique_ptr<FluxSink> getFluxSink();
-    bool hasImageWriter() const;
+    bool hasImageWriter();
     std::unique_ptr<ImageWriter> getImageWriter();
 
 private:
+    ConfigProto _baseConfig;
+    ConfigProto _overridesConfig;
+    ConfigProto _combinedConfig;
+    std::set<std::string> _appliedOptions;
+    bool _configValid;
+
     std::shared_ptr<FluxSource> _fluxSource;
     std::shared_ptr<ImageReader> _imageReader;
     std::shared_ptr<FluxSource> _verificationFluxSource;

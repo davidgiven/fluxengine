@@ -81,8 +81,6 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc,
 
     /* Now actually parse them. */
 
-    std::set<std::string> options;
-    std::vector<std::pair<std::string, std::string>> overrides;
     std::vector<std::string> filenames;
     int index = 1;
     while (index < argc)
@@ -151,11 +149,11 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc,
                     std::string path = key.substr(2);
                     if (key.find('.') != std::string::npos)
                     {
-                        overrides.push_back(std::make_pair(path, value));
+                        globalConfig().set(path, value);
                         index += usesthat;
                     }
                     else
-                        options.insert(path);
+                        globalConfig().applyOption(path);
                 }
                 else
                     error("unrecognised flag; try --help");
@@ -171,7 +169,6 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc,
         index++;
     }
 
-    globalConfig().initialise(options, overrides);
     return filenames;
 }
 
@@ -193,7 +190,7 @@ void FlagGroup::parseFlagsWithConfigFiles(int argc,
         argv,
         [&](const auto& filename)
         {
-            globalConfig().readConfigFile(filename);
+            globalConfig().readBaseConfigFile(filename);
             return true;
         });
 }
@@ -267,7 +264,7 @@ static void doShowConfig()
 
 static void doDoc()
 {
-    const auto fields = findAllProtoFields(globalConfig());
+    const auto fields = findAllProtoFields(globalConfig().base());
     for (const auto field : fields)
     {
         const std::string& path = field.first;

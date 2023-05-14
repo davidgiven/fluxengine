@@ -143,7 +143,8 @@ int main(void)
 				}
 			}
 		)M";
-        google::protobuf::TextFormat::MergeFromString(text, globalConfig());
+        google::protobuf::TextFormat::MergeFromString(
+            text, globalConfig().overrides());
 
         testPartialExtent();
         testLogicalExtents();

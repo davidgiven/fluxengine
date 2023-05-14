@@ -246,7 +246,8 @@ static void draw_x_graticules(Agg2D& painter,
 
 int mainAnalyseDriveResponse(int argc, const char* argv[])
 {
-    globalConfig()->mutable_flux_source()->set_type(FluxSourceProto::DRIVE);
+    globalConfig().overrides()->mutable_flux_source()->set_type(
+        FluxSourceProto::DRIVE);
     flags.parseFlagsWithConfigFiles(argc, argv, {});
 
     if (globalConfig()->flux_sink().type() != FluxSinkProto::DRIVE)

@@ -182,11 +182,10 @@ public:
 
         globalConfig().clear();
         auto formatName = _formatNames[formatChoice->GetSelection()];
-        globalConfig().readConfigFile(formatName);
+        globalConfig().readBaseConfigFile(formatName);
 
         /* Merge in any custom config. */
 
-        std::vector<std::pair<std::string, std::string>> overrides;
         for (auto setting : split(_extraConfiguration, '\n'))
         {
             setting = trimWhitespace(setting);
@@ -200,10 +199,10 @@ public:
             {
                 auto key = setting.substr(0, equals);
                 auto value = setting.substr(equals + 1);
-                overrides.push_back(std::make_pair(key, value));
+                globalConfig().set(key, value);
             }
             else
-                globalConfig().readConfigFile(setting);
+                globalConfig().readBaseConfigFile(setting);
         }
 
         /* Apply the source/destination. */
@@ -212,9 +211,9 @@ public:
         {
             case SELECTEDSOURCE_REAL:
             {
-                globalConfig()->mutable_drive()->set_high_density(
+                globalConfig().overrides()->mutable_drive()->set_high_density(
                     _selectedHighDensity);
-                globalConfig()->MergeFrom(*_selectedDriveType);
+                globalConfig().overrides()->MergeFrom(*_selectedDriveType);
 
                 std::string filename = _selectedDrive ? "drive:1" : "drive:0";
                 globalConfig().setFluxSink(filename);
@@ -240,15 +239,13 @@ public:
 
         /* Apply any format options. */
 
-        std::set<std::string> options;
         for (const auto& e : _formatOptions)
         {
             if (e.first == formatName)
             {
                 try
                 {
-                    if (globalConfig().isOptionValid(e.second))
-                        options.insert(e.second);
+                    globalConfig().applyOption(e.second);
                 }
                 catch (const OptionException& e)
                 {
@@ -260,16 +257,11 @@ public:
 
         auto serial = _selectedDevice;
         if (!serial.empty() && (serial[0] == '/'))
-            overrides.push_back(
-                std::make_pair("usb.greaseweazle.port", serial));
+            globalConfig().set("usb.greaseweazle.port", serial);
         else
-            overrides.push_back(std::make_pair("usb.serial", serial));
+            globalConfig().set("usb.serial", serial);
 
         ClearLog();
-
-        /* Resolve the rest of the stuff. */
-
-        globalConfig().initialise(options, overrides);
     }
 
     const wxBitmap GetBitmap() override

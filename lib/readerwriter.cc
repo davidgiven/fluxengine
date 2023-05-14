@@ -76,16 +76,16 @@ void measureDiskRotation()
 
             retries--;
         } while ((oneRevolution == 0) && (retries > 0));
-        globalConfig()->mutable_drive()->set_rotational_period_ms(
-            oneRevolution / 1e6);
+        globalConfig().setTransient(
+            "drive.rotational_period_ms", std::to_string(oneRevolution / 1e6));
         log(EndOperationLogMessage{});
     }
 
     if (!globalConfig()->drive().hard_sector_threshold_ns())
     {
-        globalConfig()->mutable_drive()->set_hard_sector_threshold_ns(
-            oneRevolution * 3 /
-            (4 * globalConfig()->drive().hard_sector_count()));
+        globalConfig().setTransient("drive.hard_sector_threshold_ns",
+            std::to_string(oneRevolution * 3 /
+                           (4 * globalConfig()->drive().hard_sector_count())));
     }
 
     if (oneRevolution == 0)

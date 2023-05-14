@@ -20,39 +20,111 @@ Config& globalConfig()
     return config;
 }
 
-ConfigProto* Config::operator->() const
+ConfigProto* Config::combined()
 {
-    return &globalConfigProto();
+    if (!_configValid)
+    {
+        _combinedConfig = _baseConfig;
+
+        /* First apply any standalone options. */
+
+        std::set<std::string> options = _appliedOptions;
+        std::set<const OptionRequirementProto*> requirements;
+        for (const auto& option : _baseConfig.option())
+        {
+            if (options.find(option.name()) != options.end())
+            {
+                _combinedConfig.MergeFrom(option.config());
+                for (auto& r : option.requires())
+                    requirements.insert(&r);
+                options.erase(option.name());
+            }
+        }
+
+        /* Then apply any group options. */
+
+        for (auto& group : _baseConfig.option_group())
+        {
+            const OptionProto* selectedOption = &*group.option().begin();
+
+            for (auto& option : group.option())
+            {
+                if (options.find(option.name()) != options.end())
+                {
+                    selectedOption = &option;
+                    options.erase(option.name());
+                }
+            }
+
+            _combinedConfig.MergeFrom(selectedOption->config());
+            for (auto& r : selectedOption->requires())
+                requirements.insert(&r);
+        }
+
+        /* Add in the user overrides. */
+
+        _combinedConfig.MergeFrom(_overridesConfig);
+
+        /* At this point the config is mostly valid. We're about to make calls
+         * that will want to call combined() reentrantly, so to prevent infinite
+         * loop we mark the config as valid now. */
+
+        _configValid = true;
+
+        /* We should now be more or less done, but we still need to add in any
+         * config contributed by the flux source and image readers. This will
+         * open the files. */
+
+        if (hasFluxSource())
+            _combinedConfig.MergeFrom(getFluxSource()->getExtraConfig());
+        if (hasImageReader())
+            _combinedConfig.MergeFrom(getImageReader()->getExtraConfig());
+
+        /* Merge in the overrides once again. */
+
+        _combinedConfig.MergeFrom(_overridesConfig);
+
+        /* Check for options validity. */
+
+        if (!options.empty())
+            throw InvalidOptionException(
+                fmt::format("{} is not a known option", *options.begin()));
+    }
+    return &_combinedConfig;
 }
 
-Config::operator ConfigProto*() const
+void Config::invalidate()
 {
-    return &globalConfigProto();
-}
-
-Config::operator ConfigProto&() const
-{
-    return globalConfigProto();
+    _configValid = false;
 }
 
 void Config::clear()
 {
+    _configValid = false;
+    _baseConfig.Clear();
+    _overridesConfig.Clear();
+    _combinedConfig.Clear();
     _fluxSource.reset();
     _verificationFluxSource.reset();
     _imageReader.reset();
     _encoder.reset();
     _decoder.reset();
-    (*this)->Clear();
+    _appliedOptions.clear();
 }
 
 void Config::set(std::string key, std::string value)
 {
-    setProtoByString(*this, key, value);
+    setProtoByString(overrides(), key, value);
 }
 
-std::string Config::get(std::string key) const
+void Config::setTransient(std::string key, std::string value)
 {
-    return getProtoByString(*this, key);
+    setProtoByString(&_combinedConfig, key, value);
+}
+
+std::string Config::get(std::string key)
+{
+    return getProtoByString(combined(), key);
 }
 
 static ConfigProto loadSingleConfigFile(std::string filename)
@@ -70,19 +142,24 @@ static ConfigProto loadSingleConfigFile(std::string filename)
         ss << f.rdbuf();
 
         ConfigProto config;
-        if (!google::protobuf::TextFormat::MergeFromString(
-                ss.str(), globalConfig()))
+        if (!google::protobuf::TextFormat::MergeFromString(ss.str(), &config))
             error("couldn't load external config proto");
         return config;
     }
 }
 
-void Config::readConfigFile(std::string filename)
+void Config::readBaseConfigFile(std::string filename)
 {
-    globalConfig()->MergeFrom(loadSingleConfigFile(filename));
+    base()->MergeFrom(loadSingleConfigFile(filename));
 }
 
-const OptionProto& Config::findOption(const std::string& optionName) const
+void Config::readBaseConfig(std::string data)
+{
+    if (!google::protobuf::TextFormat::MergeFromString(data, base()))
+        error("couldn't load external config proto");
+}
+
+const OptionProto& Config::findOption(const std::string& optionName)
 {
     const OptionProto* found = nullptr;
 
@@ -99,10 +176,10 @@ const OptionProto& Config::findOption(const std::string& optionName) const
         return false;
     };
 
-    if (searchOptionList((*this)->option()))
+    if (searchOptionList(base()->option()))
         return *found;
 
-    for (const auto& optionGroup : (*this)->option_group())
+    for (const auto& optionGroup : base()->option_group())
     {
         if (searchOptionList(optionGroup.option()))
             return *found;
@@ -112,7 +189,7 @@ const OptionProto& Config::findOption(const std::string& optionName) const
         fmt::format("option {} not found", optionName));
 }
 
-void Config::checkOptionValid(const OptionProto& option) const
+void Config::checkOptionValid(const OptionProto& option)
 {
     for (const auto& req : option.requires())
     {
@@ -125,7 +202,8 @@ void Config::checkOptionValid(const OptionProto& option) const
         }
         catch (const ProtoPathNotFoundException e)
         {
-            /* This field isn't available, therefore it cannot match. */
+            /* This field isn't available, therefore it
+             * cannot match. */
         }
 
         if (!matched)
@@ -143,7 +221,8 @@ void Config::checkOptionValid(const OptionProto& option) const
             ss << ']';
 
             throw InapplicableOptionException(
-                fmt::format("option '{}' is inapplicable to this configuration "
+                fmt::format("option '{}' is inapplicable to this "
+                            "configuration "
                             "because {}={} could not be met",
                     option.name(),
                     req.key(),
@@ -152,7 +231,7 @@ void Config::checkOptionValid(const OptionProto& option) const
     }
 }
 
-bool Config::isOptionValid(const OptionProto& option) const
+bool Config::isOptionValid(const OptionProto& option)
 {
     try
     {
@@ -165,27 +244,22 @@ bool Config::isOptionValid(const OptionProto& option) const
     }
 }
 
-bool Config::isOptionValid(std::string option) const
+bool Config::isOptionValid(std::string option)
 {
     return isOptionValid(findOption(option));
 }
 
 void Config::applyOption(const OptionProto& option)
 {
-    if (option.config().option_size() > 0)
-        throw InvalidOptionException(fmt::format(
-            "option '{}' has an option inside it, which isn't allowed",
-            option.name()));
-    if (option.config().option_group_size() > 0)
-        throw InvalidOptionException(fmt::format(
-            "option '{}' has an option group inside it, which isn't allowed",
-            option.name()));
-    checkOptionValid(option);
-
     log("OPTION: {}",
         option.has_message() ? option.message() : option.comment());
 
-    (*this)->MergeFrom(option.config());
+    _appliedOptions.insert(option.name());
+}
+
+void Config::applyOption(std::string option)
+{
+    applyOption(findOption(option));
 }
 
 static void setFluxSourceImpl(std::string filename, FluxSourceProto* proto)
@@ -237,7 +311,8 @@ static void setFluxSourceImpl(std::string filename, FluxSourceProto* proto)
              [](auto& s, auto* proto)
                 {
                     proto->set_type(FluxSourceProto::DRIVE);
-                    globalConfig()->mutable_drive()->set_drive(std::stoi(s));
+                    globalConfig().overrides()->mutable_drive()->set_drive(
+                        std::stoi(s));
                 }},
             {std::regex("^flx:(.*)$"),
              [](auto& s, auto* proto)
@@ -262,7 +337,7 @@ static void setFluxSourceImpl(std::string filename, FluxSourceProto* proto)
 
 void Config::setFluxSource(std::string filename)
 {
-    setFluxSourceImpl(filename, (*this)->mutable_flux_source());
+    setFluxSourceImpl(filename, overrides()->mutable_flux_source());
 }
 
 static void setFluxSinkImpl(std::string filename, FluxSinkProto* proto)
@@ -304,7 +379,8 @@ static void setFluxSinkImpl(std::string filename, FluxSinkProto* proto)
              [](auto& s, auto* proto)
                 {
                     proto->set_type(FluxSinkProto::DRIVE);
-                    globalConfig()->mutable_drive()->set_drive(std::stoi(s));
+                    globalConfig().overrides()->mutable_drive()->set_drive(
+                        std::stoi(s));
                 }},
     };
 
@@ -323,13 +399,13 @@ static void setFluxSinkImpl(std::string filename, FluxSinkProto* proto)
 
 void Config::setFluxSink(std::string filename)
 {
-    setFluxSinkImpl(filename, (*this)->mutable_flux_sink());
+    setFluxSinkImpl(filename, overrides()->mutable_flux_sink());
 }
 
 void Config::setCopyFluxTo(std::string filename)
 {
     setFluxSinkImpl(
-        filename, (*this)->mutable_decoder()->mutable_copy_flux_to());
+        filename, overrides()->mutable_decoder()->mutable_copy_flux_to());
 }
 
 void Config::setVerificationFluxSource(std::string filename)
@@ -366,8 +442,8 @@ void Config::setImageReader(std::string filename)
     {
         if (endsWith(filename, it.first))
         {
-            it.second((*this)->mutable_image_reader());
-            (*this)->mutable_image_reader()->set_filename(filename);
+            it.second(overrides()->mutable_image_reader());
+            overrides()->mutable_image_reader()->set_filename(filename);
             return;
         }
     }
@@ -401,8 +477,8 @@ void Config::setImageWriter(std::string filename)
     {
         if (endsWith(filename, it.first))
         {
-            it.second((*this)->mutable_image_writer());
-            (*this)->mutable_image_writer()->set_filename(filename);
+            it.second(overrides()->mutable_image_writer());
+            overrides()->mutable_image_writer()->set_filename(filename);
             return;
         }
     }
@@ -410,7 +486,7 @@ void Config::setImageWriter(std::string filename)
     error("unrecognised image filename '{}'", filename);
 }
 
-bool Config::hasFluxSource() const
+bool Config::hasFluxSource()
 {
     return (*this)->flux_source().type() != FluxSourceProto::NOT_SET;
 }
@@ -446,7 +522,7 @@ std::shared_ptr<FluxSource>& Config::getVerificationFluxSource()
     return _verificationFluxSource;
 }
 
-bool Config::hasImageReader() const
+bool Config::hasImageReader()
 {
     return (*this)->image_reader().type() != ImageReaderProto::NOT_SET;
 }
@@ -464,7 +540,7 @@ std::shared_ptr<ImageReader>& Config::getImageReader()
     return _imageReader;
 }
 
-bool Config::hasFluxSink() const
+bool Config::hasFluxSink()
 {
     return (*this)->flux_sink().type() != FluxSinkProto::NOT_SET;
 }
@@ -477,7 +553,7 @@ std::unique_ptr<FluxSink> Config::getFluxSink()
     return FluxSink::create((*this)->flux_sink());
 }
 
-bool Config::hasImageWriter() const
+bool Config::hasImageWriter()
 {
     return (*this)->image_writer().type() != ImageWriterProto::NOT_SET;
 }
@@ -490,7 +566,7 @@ std::unique_ptr<ImageWriter> Config::getImageWriter()
     return ImageWriter::create((*this)->image_writer());
 }
 
-bool Config::hasEncoder() const
+bool Config::hasEncoder()
 {
     return (*this)->has_encoder();
 }
@@ -507,9 +583,9 @@ std::shared_ptr<Encoder>& Config::getEncoder()
     return _encoder;
 }
 
-bool Config::hasDecoder() const
+bool Config::hasDecoder()
 {
-    return (*this)->has_decoder();
+    return _combinedConfig.has_decoder();
 }
 
 std::shared_ptr<Decoder>& Config::getDecoder()
@@ -522,72 +598,4 @@ std::shared_ptr<Decoder>& Config::getDecoder()
         _decoder = Decoder::create((*this)->decoder());
     }
     return _decoder;
-}
-
-void Config::initialise(std::set<std::string> options,
-    std::vector<std::pair<std::string, std::string>> overrides)
-{
-    /* Start fresh. */
-
-    /* TODO: can't do this yet without refactoring loads of stuff. */
-    // clear();
-
-    /* First apply any value overrides (in order). We need to set the up front
-     * because the options may depend on them. */
-
-    auto applyOverrides = [&]()
-    {
-        for (auto [k, v] : overrides)
-            globalConfig().set(k, v);
-    };
-    applyOverrides();
-
-    /* First apply any standalone options. After each one, reapply the overrides
-     * in case the option changed them. */
-
-    for (auto& option : globalConfig()->option())
-    {
-        if (options.find(option.name()) != options.end())
-        {
-            globalConfig().applyOption(option);
-            applyOverrides();
-            options.erase(option.name());
-        }
-    }
-
-    /* Add any config contributed by the flux and image readers, plus overrides.
-     */
-
-    if (globalConfig().hasFluxSource())
-        globalConfig()->MergeFrom(
-            globalConfig().getFluxSource()->getExtraConfig());
-    if (globalConfig().hasImageReader())
-        globalConfig()->MergeFrom(
-            globalConfig().getImageReader()->getExtraConfig());
-    applyOverrides();
-
-    /* Then apply any default options in groups, likewise applying the
-     * overrides. */
-
-    for (auto& group : globalConfig()->option_group())
-    {
-        const OptionProto* defaultOption = &*group.option().begin();
-        bool isSet = false;
-
-        for (auto& option : group.option())
-        {
-            if (options.find(option.name()) != options.end())
-            {
-                defaultOption = &option;
-                options.erase(option.name());
-            }
-        }
-
-        globalConfig().applyOption(*defaultOption);
-        applyOverrides();
-    }
-
-    if (!options.empty())
-        error("--{} is not a known flag or format option; try --help",
-            *options.begin());
 }

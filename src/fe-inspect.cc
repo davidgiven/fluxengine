@@ -131,7 +131,8 @@ static nanoseconds_t guessClock(const Fluxmap& fluxmap)
 
 int mainInspect(int argc, const char* argv[])
 {
-    globalConfig()->mutable_flux_source()->set_type(FluxSourceProto::DRIVE);
+    globalConfig().overrides()->mutable_flux_source()->set_type(
+        FluxSourceProto::DRIVE);
     flags.parseFlagsWithConfigFiles(argc, argv, {});
 
     auto& fluxSource = globalConfig().getFluxSource();

@@ -17,17 +17,10 @@ static std::string cleanup(const std::string& s)
     return outs;
 }
 
-static void load_config(const std::string s)
-{
-    globalConfig().clear();
-    if (!google::protobuf::TextFormat::MergeFromString(
-            cleanup(s), globalConfig()))
-        error("couldn't load test config");
-}
-
 static void test_physical_sectors()
 {
-    load_config(R"M(
+    globalConfig().clear();
+    globalConfig().readBaseConfig(R"M(
 		drive {
 			tpi: 96
 		}
@@ -59,7 +52,8 @@ static void test_physical_sectors()
 
 static void test_logical_sectors()
 {
-    load_config(R"M(
+    globalConfig().clear();
+    globalConfig().readBaseConfig(R"M(
 		drive {
 			tpi: 96
 		}
@@ -97,7 +91,8 @@ static void test_logical_sectors()
 
 static void test_both_sectors()
 {
-    load_config(R"M(
+    globalConfig().clear();
+    globalConfig().readBaseConfig(R"M(
 		drive {
 			tpi: 96
 		}
@@ -135,7 +130,8 @@ static void test_both_sectors()
 
 static void test_skew()
 {
-    load_config(R"M(
+    globalConfig().clear();
+    globalConfig().readBaseConfig(R"M(
 		drive {
 			tpi: 96
 		}

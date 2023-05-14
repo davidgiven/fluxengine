@@ -46,7 +46,7 @@ static StringFlag srcTracks({"--cylinders", "-c"},
     "",
     [](const auto& value)
     {
-        setRange(globalConfig()->mutable_tracks(), value);
+        setRange(globalConfig().overrides()->mutable_tracks(), value);
     });
 
 static StringFlag srcHeads({"--heads", "-h"},
@@ -54,14 +54,14 @@ static StringFlag srcHeads({"--heads", "-h"},
     "",
     [](const auto& value)
     {
-        setRange(globalConfig()->mutable_heads(), value);
+        setRange(globalConfig().overrides()->mutable_heads(), value);
     });
 
 int mainRead(int argc, const char* argv[])
 {
     if (argc == 1)
         showProfiles("read", formats);
-    globalConfig()->mutable_flux_source()->set_type(FluxSourceProto::DRIVE);
+    globalConfig().set("flux_source.type", "DRIVE");
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
     if (globalConfig()->decoder().copy_flux_to().type() == FluxSinkProto::DRIVE)

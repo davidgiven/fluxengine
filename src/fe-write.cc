@@ -40,7 +40,7 @@ static StringFlag destTracks({"--cylinders", "-c"},
     "",
     [](const auto& value)
     {
-        setRange(globalConfig()->mutable_tracks(), value);
+        setRange(globalConfig().overrides()->mutable_tracks(), value);
     });
 
 static StringFlag destHeads({"--heads", "-h"},
@@ -48,7 +48,7 @@ static StringFlag destHeads({"--heads", "-h"},
     "",
     [](const auto& value)
     {
-        setRange(globalConfig()->mutable_heads(), value);
+        setRange(globalConfig().overrides()->mutable_heads(), value);
     });
 
 static ActionFlag noVerifyFlag({"--no-verify", "-n"},
