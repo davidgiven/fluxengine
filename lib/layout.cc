@@ -1,6 +1,7 @@
 #include "lib/globals.h"
 #include "lib/layout.h"
 #include "lib/proto.h"
+#include "lib/logger.h"
 
 bool approximatelyEqual(float a, float b, float epsilon)
 {
@@ -9,10 +10,10 @@ bool approximatelyEqual(float a, float b, float epsilon)
 
 static unsigned getTrackStep()
 {
-    if (!globalConfig()->layout().tpi())
+    if (globalConfig()->layout().tpi() == 0)
         error("no layout TPI set");
-    if (!globalConfig()->drive().tpi())
-        error("no drive TPI set");
+	if (globalConfig()->drive().tpi() == 0)
+		return 1;
 
     if (globalConfig()->layout().tpi() == 0.0)
         error("layout TPI is zero; this shouldn't happen?");
