@@ -78,9 +78,9 @@ option_group {
 
 		config {
 			layout {
+				tpi: 48
 				tracks: 40
 			}
-			tpi: 48
 		}
 	}
 
@@ -91,9 +91,9 @@ option_group {
 
 		config {
 			layout {
+				tpi: 96
 				tracks: 80
 			}
-			tpi: 96
 		}
 	}
 }

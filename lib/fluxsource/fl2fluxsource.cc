@@ -36,6 +36,11 @@ public:
     Fl2FluxSource(const Fl2FluxSourceProto& config): _config(config)
     {
         _proto = loadFl2File(_config.filename());
+
+        _extraConfig.mutable_drive()->set_rotational_period_ms(
+            _proto.rotational_period_ms());
+		if (_proto.has_tpi())
+			_extraConfig.mutable_drive()->set_tpi(_proto.tpi());
     }
 
 public:

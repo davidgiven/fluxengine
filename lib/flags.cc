@@ -1,8 +1,10 @@
-#include "globals.h"
-#include "flags.h"
-#include "proto.h"
-#include "utils.h"
-#include "logger.h"
+#include "lib/globals.h"
+#include "lib/flags.h"
+#include "lib/proto.h"
+#include "lib/utils.h"
+#include "lib/logger.h"
+#include "lib/fluxsource/fluxsource.h"
+#include "lib/imagereader/imagereader.h"
 #include <google/protobuf/text_format.h>
 #include <regex>
 #include <fstream>
@@ -38,48 +40,6 @@ FlagGroup::FlagGroup(std::initializer_list<FlagGroup*> groups): _groups(groups)
 void FlagGroup::addFlag(Flag* flag)
 {
     _flags.push_back(flag);
-}
-
-void FlagGroup::applyOption(const OptionProto& option)
-{
-    if (option.config().option_size() > 0)
-        error("option '{}' has an option inside it, which isn't allowed",
-            option.name());
-    if (option.config().option_group_size() > 0)
-        error("option '{}' has an option group inside it, which isn't allowed",
-            option.name());
-
-    log("OPTION: {}",
-        option.has_message() ? option.message() : option.comment());
-
-    config.MergeFrom(option.config());
-}
-
-bool FlagGroup::applyOption(const std::string& optionName)
-{
-    auto searchOptionList = [&](auto& optionList)
-    {
-        for (const auto& option : optionList)
-        {
-            if (optionName == option.name())
-            {
-                applyOption(option);
-                return true;
-            }
-        }
-        return false;
-    };
-
-    if (searchOptionList(config.option()))
-        return true;
-
-    for (const auto& optionGroup : config.option_group())
-    {
-        if (searchOptionList(optionGroup.option()))
-            return true;
-    }
-
-    return false;
 }
 
 std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc,
@@ -121,8 +81,6 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc,
 
     /* Now actually parse them. */
 
-    std::set<std::string> options;
-    std::vector<std::pair<std::string, std::string>> overrides;
     std::vector<std::string> filenames;
     int index = 1;
     while (index < argc)
@@ -191,11 +149,11 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc,
                     std::string path = key.substr(2);
                     if (key.find('.') != std::string::npos)
                     {
-                        overrides.push_back(std::make_pair(path, value));
+                        globalConfig().set(path, value);
                         index += usesthat;
                     }
                     else
-                        options.insert(path);
+                        globalConfig().applyOption(path);
                 }
                 else
                     error("unrecognised flag; try --help");
@@ -211,48 +169,7 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc,
         index++;
     }
 
-    /* Apply any default options in groups. */
-
-    for (auto& group : config.option_group())
-    {
-        const OptionProto* defaultOption = &*group.option().begin();
-        bool isSet = false;
-
-        for (auto& option : group.option())
-        {
-            if (options.find(option.name()) != options.end())
-            {
-                defaultOption = &option;
-                options.erase(option.name());
-            }
-        }
-
-        FlagGroup::applyOption(*defaultOption);
-    }
-
-    /* Next, any standalone options. */
-
-    for (auto& option : config.option())
-    {
-        if (options.find(option.name()) != options.end())
-        {
-            FlagGroup::applyOption(option);
-            options.erase(option.name());
-        }
-    }
-
-    if (!options.empty())
-        error("--{} is not a known flag or format option; try --help",
-            *options.begin());
-
-    /* Now apply any value overrides (in order). */
-
-    for (auto [k, v] : overrides)
-    {
-        ProtoField protoField = resolveProtoPath(&config, k);
-        setProtoFieldFromString(protoField, v);
-    }
-
+    globalConfig().validateAndThrow();
     return filenames;
 }
 
@@ -274,37 +191,9 @@ void FlagGroup::parseFlagsWithConfigFiles(int argc,
         argv,
         [&](const auto& filename)
         {
-            parseConfigFile(filename, configFiles);
+            globalConfig().readBaseConfigFile(filename);
             return true;
         });
-}
-
-ConfigProto FlagGroup::parseSingleConfigFile(const std::string& filename,
-    const std::map<std::string, const ConfigProto*>& configFiles)
-{
-    const auto& it = configFiles.find(filename);
-    if (it != configFiles.end())
-        return *it->second;
-    else
-    {
-        std::ifstream f(filename, std::ios::out);
-        if (f.fail())
-            error("Cannot open '{}': {}", filename, strerror(errno));
-
-        std::ostringstream ss;
-        ss << f.rdbuf();
-
-        ConfigProto config;
-        if (!google::protobuf::TextFormat::MergeFromString(ss.str(), &config))
-            error("couldn't load external config proto");
-        return config;
-    }
-}
-
-void FlagGroup::parseConfigFile(const std::string& filename,
-    const std::map<std::string, const ConfigProto*>& configFiles)
-{
-    config.MergeFrom(parseSingleConfigFile(filename, configFiles));
 }
 
 void FlagGroup::checkInitialised() const
@@ -368,7 +257,7 @@ static void doHelp()
 static void doShowConfig()
 {
     std::string s;
-    google::protobuf::TextFormat::PrintToString(config, &s);
+    google::protobuf::TextFormat::PrintToString(globalConfig(), &s);
     std::cout << s << '\n';
 
     exit(0);
@@ -376,7 +265,7 @@ static void doShowConfig()
 
 static void doDoc()
 {
-    const auto fields = findAllProtoFields(&config);
+    const auto fields = findAllProtoFields(globalConfig().base());
     for (const auto field : fields)
     {
         const std::string& path = field.first;

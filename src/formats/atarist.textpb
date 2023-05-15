@@ -50,7 +50,9 @@ decoder {
 	}
 }
 
-tpi: 96
+layout {
+	tpi: 135
+}
 
 option_group {
     comment: "Format variant"

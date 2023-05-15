@@ -100,8 +100,6 @@ filesystem {
 	type: FATFS
 }
 
-tpi: 96
-
 option_group {
 	comment: "Format variant"
 
@@ -110,7 +108,11 @@ option_group {
 		comment: 'try to autodetect the format (unreliable)'
 		set_by_default: true
 
-		config {}
+		config {
+			layout {
+				tpi: 96
+			}
+		}
 	}
 
 	option {
@@ -119,6 +121,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 48
 				tracks: 40
 				sides: 1
 				layoutdata {
@@ -138,8 +141,6 @@ option_group {
 					}
 				}
 			}
-
-			tpi: 48
 		}
 	}
 
@@ -149,6 +150,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 48
 				tracks: 40
 				sides: 1
 				layoutdata {
@@ -168,8 +170,6 @@ option_group {
 					}
 				}
 			}
-
-			tpi: 48
 		}
 	}
 
@@ -179,6 +179,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 48
 				tracks: 40
 				sides: 2
 				layoutdata {
@@ -198,8 +199,6 @@ option_group {
 					}
 				}
 			}
-
-			tpi: 48
 		}
 	}
 
@@ -209,6 +208,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 48
 				tracks: 40
 				sides: 2
 				layoutdata {
@@ -228,17 +228,16 @@ option_group {
 					}
 				}
 			}
-
-			tpi: 48
 		}
 	}
 
 	option {
-		name: "720"
-		comment: '720kB 5.25"/3.5" 80-track 9-sector DSDD'
+		name: "720_96"
+		comment: '720kB 5.25" 80-track 9-sector DSDD'
 
 		config {
 			layout {
+				tpi: 96
 				tracks: 80
 				sides: 2
 				layoutdata {
@@ -253,8 +252,35 @@ option_group {
 			encoder {
 				ibm {
 					trackdata {
-						# This also works on 166ms drives (producing a physical clock of
-						# 3.33us).
+						target_rotational_period_ms: 166
+						target_clock_period_us: 3.33
+					}
+				}
+			}
+		}
+	}
+
+	option {
+		name: "720_135"
+		comment: '720kB 3.5" 80-track 9-sector DSDD'
+
+		config {
+			layout {
+				tpi: 135
+				tracks: 80
+				sides: 2
+				layoutdata {
+					sector_size: 512
+					physical {
+						start_sector: 1
+						count: 9
+					}
+				}
+			}
+
+			encoder {
+				ibm {
+					trackdata {
 						target_rotational_period_ms: 200
 						target_clock_period_us: 4
 					}
@@ -269,6 +295,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 96
 				tracks: 80
 				sides: 2
 				layoutdata {
@@ -293,10 +320,11 @@ option_group {
 
 	option {
 		name: "1232"
-		comment: '1232kB 5.25"/3.5" 77-track 8-sector DSHD'
+		comment: '1232kB 5.25" 77-track 8-sector DSHD'
 
 		config {
 			layout {
+				tpi: 96
 				tracks: 77
 				sides: 2
 				layoutdata {
@@ -325,6 +353,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 135
 				tracks: 80
 				sides: 2
 				layoutdata {
@@ -353,6 +382,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 135
 				tracks: 80
 				sides: 2
 				layoutdata {

@@ -17,4 +17,3 @@ extern std::unique_ptr<Encoder> createAgatEncoder(const EncoderProto& config);
 extern uint8_t agatChecksum(const Bytes& bytes);
 
 #endif
-

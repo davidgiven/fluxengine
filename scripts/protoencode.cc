@@ -122,7 +122,8 @@ int main(int argc, const char* argv[])
 
     auto data = message.SerializeAsString();
 
-    output << "#include \"lib/proto.h\"\n"
+    output << "#include \"lib/globals.h\"\n"
+           << "#include \"lib/proto.h\"\n"
            << "#include <string_view>\n"
            << "static const uint8_t rawData[] = {";
 

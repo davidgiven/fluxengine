@@ -24,7 +24,7 @@ namespace
 
     bool singlesided(void)
     {
-        return config.heads().start() == config.heads().end();
+        return globalConfig()->heads().start() == globalConfig()->heads().end();
     }
 
     class A2RFluxSink : public FluxSink
@@ -38,7 +38,8 @@ namespace
 
             log("A2R: writing A2R {} file containing {} tracks\n",
                 singlesided() ? "single sided" : "double sided",
-                config.tracks().end() - config.tracks().start() + 1);
+                globalConfig()->tracks().end() -
+                    globalConfig()->tracks().start() + 1);
 
             time_t now{std::time(nullptr)};
             auto t = gmtime(&now);

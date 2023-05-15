@@ -2,9 +2,13 @@ name: C/C++ CI
 
 on: [push]
 
+concurrency: 
+  group: environment-${{ github.head_ref }}
+  cancel-in-progress: true
+
 jobs:
   build-linux:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v2
       with:

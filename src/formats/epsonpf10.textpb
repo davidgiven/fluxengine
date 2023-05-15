@@ -15,6 +15,7 @@ image_writer {
 }
 
 layout {
+	tpi: 67.5
 	tracks: 40
 	sides: 2
 	layoutdata {
@@ -29,8 +30,6 @@ layout {
 decoder {
 	ibm {}
 }
-
-tpi: 48
 
 filesystem {
 	type: CPMFS

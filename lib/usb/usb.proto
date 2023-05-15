@@ -17,12 +17,8 @@ message GreaseWeazleProto {
 }
 
 message UsbProto {
-	oneof device {
-		string serial = 1
-			[(help) = "serial number of FluxEngine or GreaseWeazle device to use"];
-	}
+	optional string serial = 1
+		[(help) = "serial number of FluxEngine or GreaseWeazle device to use"];
 
-	oneof config {
-		GreaseWeazleProto greaseweazle = 2 [(help) = "GreaseWeazle-specific options"];
-	}
+	optional GreaseWeazleProto greaseweazle = 2 [(help) = "GreaseWeazle-specific options"];
 }

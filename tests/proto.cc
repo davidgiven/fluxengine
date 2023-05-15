@@ -26,6 +26,7 @@ static void test_setting(void)
     setProtoByString(&config, "u64", "3");
     setProtoByString(&config, "u32", "4");
     setProtoByString(&config, "d", "5.5");
+    setProtoByString(&config, "f", "6.7");
     setProtoByString(&config, "m.s", "string");
     setProtoByString(&config, "r.s", "val1");
     setProtoByString(&config, "r.s", "val2");
@@ -56,7 +57,51 @@ static void test_setting(void)
 			step: 2
 			end: 3
 		}
+		f: 6.7
 		)M")));
+}
+
+static void test_getting(void)
+{
+    std::string s = R"M(
+		i64: -1
+		i32: -2
+		u64: 3
+		u32: 4
+		d: 5.5
+		f: 6.7
+		m {
+			s: "string"
+		}
+		r {
+			s: "val2"
+		}
+		secondoption {
+			s: "2"
+		}
+		range {
+			start: 1
+			step: 2
+			end: 3
+		}
+	)M";
+
+    TestProto tp;
+    if (!google::protobuf::TextFormat::MergeFromString(cleanup(s), &tp))
+        error("couldn't load test proto");
+
+    AssertThat(getProtoByString(&tp, "i64"), Equals("-1"));
+    AssertThat(getProtoByString(&tp, "i32"), Equals("-2"));
+    AssertThat(getProtoByString(&tp, "u64"), Equals("3"));
+    AssertThat(getProtoByString(&tp, "u32"), Equals("4"));
+    AssertThat(getProtoByString(&tp, "d"), Equals("5.5"));
+    AssertThat(getProtoByString(&tp, "f"), Equals("6.7"));
+    AssertThat(getProtoByString(&tp, "m.s"), Equals("string"));
+    AssertThat(getProtoByString(&tp, "r.s"), Equals("val2"));
+    AssertThrows(
+        ProtoPathNotFoundException, getProtoByString(&tp, "firstoption.s"));
+    AssertThat(getProtoByString(&tp, "secondoption.s"), Equals("2"));
+    AssertThat(getProtoByString(&tp, "range"), Equals("1-3x2"));
 }
 
 static void test_config(void)
@@ -64,12 +109,12 @@ static void test_config(void)
     ConfigProto config;
 
     const std::string text = R"M(
-		flux_sink {
-			drive { }
-		}
-
 		image_reader {
 			filename: "filename"
+		}
+
+		flux_sink {
+			drive { }
 		}
 	)M";
     google::protobuf::TextFormat::MergeFromString(text, &config);
@@ -162,7 +207,7 @@ static void test_fields(void)
 {
     TestProto proto;
     auto fields = findAllProtoFields(&proto);
-    AssertThat(fields.size(), Equals(17));
+    AssertThat(fields.size(), Equals(18));
 }
 
 static void test_options(void)
@@ -177,11 +222,20 @@ static void test_options(void)
 
 int main(int argc, const char* argv[])
 {
-    test_setting();
-    test_config();
-    test_load();
-    test_range();
-    test_fields();
-    test_options();
+    try
+    {
+        test_setting();
+        test_getting();
+        test_config();
+        test_load();
+        test_range();
+        test_fields();
+        test_options();
+    }
+    catch (const ErrorException& e)
+    {
+        fmt::print("uncaught error: {}\n", e.message);
+        return 1;
+    }
     return 0;
 }

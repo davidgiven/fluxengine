@@ -63,7 +63,6 @@ documentation:
 
 drive {
 	hard_sector_count: 16
-	tpi: 100
 }
 
 image_reader {
@@ -130,11 +129,11 @@ option_group {
 		
 		config {
 			layout {
+				tpi: 50
 				tracks: 35
 				sides: 1
 			}
 
-			tpi: 50
 		}
 	}
 
@@ -144,11 +143,10 @@ option_group {
 		
 		config {
 			layout {
+				tpi: 50
 				tracks: 35
 				sides: 2
 			}
-
-			tpi: 50
 		}
 	}
 
@@ -158,11 +156,10 @@ option_group {
 		
 		config {
 			layout {
+				tpi: 100
 				tracks: 77
 				sides: 1
 			}
-
-			tpi: 100
 		}
 	}
 
@@ -172,11 +169,10 @@ option_group {
 		
 		config {
 			layout {
+				tpi: 100
 				tracks: 77
 				sides: 2
 			}
-
-			tpi: 100
 		}
 	}
 }

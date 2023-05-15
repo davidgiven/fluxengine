@@ -54,45 +54,6 @@ std::unique_ptr<ImageReader> ImageReader::create(const ImageReaderProto& config)
     }
 }
 
-void ImageReader::updateConfigForFilename(
-    ImageReaderProto* proto, const std::string& filename)
-{
-    static const std::map<std::string, std::function<void(ImageReaderProto*)>>
-        formats = {
-  // clang-format off
-		{".adf",      [](auto* proto) { proto->set_type(ImageReaderProto::IMG); }},
-		{".d64",      [](auto* proto) { proto->set_type(ImageReaderProto::D64); }},
-		{".d81",      [](auto* proto) { proto->set_type(ImageReaderProto::IMG); }},
-		{".d88",      [](auto* proto) { proto->set_type(ImageReaderProto::D88); }},
-		{".dim",      [](auto* proto) { proto->set_type(ImageReaderProto::DIM); }},
-		{".diskcopy", [](auto* proto) { proto->set_type(ImageReaderProto::DISKCOPY); }},
-		{".dsk",      [](auto* proto) { proto->set_type(ImageReaderProto::IMG); }},
-		{".fdi",      [](auto* proto) { proto->set_type(ImageReaderProto::FDI); }},
-		{".imd",      [](auto* proto) { proto->set_type(ImageReaderProto::IMD); }},
-		{".img",      [](auto* proto) { proto->set_type(ImageReaderProto::IMG); }},
-		{".jv3",      [](auto* proto) { proto->set_type(ImageReaderProto::JV3); }},
-		{".nfd",      [](auto* proto) { proto->set_type(ImageReaderProto::NFD); }},
-		{".nsi",      [](auto* proto) { proto->set_type(ImageReaderProto::NSI); }},
-		{".st",       [](auto* proto) { proto->set_type(ImageReaderProto::IMG); }},
-		{".td0",      [](auto* proto) { proto->set_type(ImageReaderProto::TD0); }},
-		{".vgi",      [](auto* proto) { proto->set_type(ImageReaderProto::IMG); }},
-		{".xdf",      [](auto* proto) { proto->set_type(ImageReaderProto::IMG); }},
-  // clang-format on
-    };
-
-    for (const auto& it : formats)
-    {
-        if (endsWith(filename, it.first))
-        {
-            it.second(proto);
-            proto->set_filename(filename);
-            return;
-        }
-    }
-
-    error("unrecognised image filename '{}'", filename);
-}
-
 ImageReader::ImageReader(const ImageReaderProto& config): _config(config) {}
 
 std::unique_ptr<Image> ImageReader::readMappedImage()

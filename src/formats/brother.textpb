@@ -141,6 +141,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 67.5
 				tracks: 39
 				sides: 1
 				layoutdata {
@@ -168,7 +169,6 @@ option_group {
 				type: BROTHER120
 			}
 
-			tpi: 48
 		}
 	}
 
@@ -178,6 +178,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 135
 				tracks: 78
 				sides: 1
 				layoutdata {
@@ -198,7 +199,6 @@ option_group {
 				type: FATFS
 			}
 
-			tpi: 96
 		}
 	}
 }

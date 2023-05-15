@@ -151,7 +151,7 @@ void Filesystem::discardChanges()
 Filesystem::Filesystem(std::shared_ptr<SectorInterface> sectors):
     _sectors(sectors)
 {
-    auto& layout = config.layout();
+    auto& layout = globalConfig()->layout();
     if (!layout.has_tracks() || !layout.has_sides())
         error(
             "FS: filesystem support cannot be used without concrete layout "
@@ -225,21 +225,21 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystem(
 std::unique_ptr<Filesystem> Filesystem::createFilesystemFromConfig()
 {
     std::shared_ptr<SectorInterface> sectorInterface;
-    if (config.has_flux_source() || config.has_flux_sink())
+    if (globalConfig().hasFluxSource() || globalConfig().hasFluxSink())
     {
         std::shared_ptr<FluxSource> fluxSource;
         std::shared_ptr<Decoder> decoder;
         std::shared_ptr<FluxSink> fluxSink;
         std::shared_ptr<Encoder> encoder;
-        if (config.flux_source().type() != FluxSourceProto::NOT_SET)
+        if (globalConfig().hasFluxSource())
         {
-            fluxSource = FluxSource::create(config.flux_source());
-            decoder = Decoder::create(config.decoder());
+            fluxSource = globalConfig().getFluxSource();
+            decoder = globalConfig().getDecoder();
         }
-        if (config.flux_sink().type() == FluxSinkProto::DRIVE)
+        if (globalConfig()->flux_sink().type() == FluxSinkProto::DRIVE)
         {
-            fluxSink = FluxSink::create(config.flux_sink());
-            encoder = Encoder::create(config.encoder());
+            fluxSink = globalConfig().getFluxSink();
+            encoder = globalConfig().getEncoder();
         }
         sectorInterface = SectorInterface::createFluxSectorInterface(
             fluxSource, fluxSink, encoder, decoder);
@@ -248,17 +248,17 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystemFromConfig()
     {
         std::shared_ptr<ImageReader> reader;
         std::shared_ptr<ImageWriter> writer;
-        if ((config.image_reader().type() != ImageReaderProto::NOT_SET) &&
-            doesFileExist(config.image_reader().filename()))
-            reader = ImageReader::create(config.image_reader());
-        if (config.image_writer().type() != ImageWriterProto::NOT_SET)
-            writer = ImageWriter::create(config.image_writer());
+        if (globalConfig().hasImageReader() &&
+            doesFileExist(globalConfig()->image_reader().filename()))
+            reader = globalConfig().getImageReader();
+        if (globalConfig().hasImageWriter())
+            writer = globalConfig().getImageWriter();
 
         sectorInterface =
             SectorInterface::createImageSectorInterface(reader, writer);
     }
 
-    return createFilesystem(config.filesystem(), sectorInterface);
+    return createFilesystem(globalConfig()->filesystem(), sectorInterface);
 }
 
 Bytes Filesystem::getSector(unsigned track, unsigned side, unsigned sector)

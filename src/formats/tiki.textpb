@@ -18,8 +18,6 @@ decoder {
 	ibm {}
 }
 
-tpi: 48
-
 option_group {
 	comment: "Format variant"
 
@@ -29,6 +27,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 48
 				tracks: 40
 				sides: 1
 				layoutdata {
@@ -60,6 +59,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 48
 				tracks: 40
 				sides: 1
 				layoutdata {
@@ -91,6 +91,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 48
 				tracks: 40
 				sides: 2
 				layoutdata {
@@ -123,6 +124,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 96
 				tracks: 80
 				sides: 2
 				layoutdata {
@@ -145,8 +147,6 @@ option_group {
 					dir_entries: 128
 				}
 			}
-
-			tpi: 96
 		}
 	}
 }

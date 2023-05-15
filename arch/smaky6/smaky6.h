@@ -7,4 +7,3 @@
 extern std::unique_ptr<Decoder> createSmaky6Decoder(const DecoderProto& config);
 
 #endif
-

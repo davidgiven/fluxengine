@@ -6,47 +6,38 @@
 #include "usb/usb.h"
 #include "fluxsink/fluxsink.h"
 #include "lib/fluxsink/fluxsink.pb.h"
-#include "lib/readerwriter.cc"
+#include "lib/readerwriter.h"
 
 class HardwareFluxSink : public FluxSink
 {
 public:
-    HardwareFluxSink(const HardwareFluxSinkProto& conf): _config(conf)
-    {
-        nanoseconds_t oneRevolution;
-        measureDiskRotation(oneRevolution, _hardSectorThreshold);
-    }
+    HardwareFluxSink(const HardwareFluxSinkProto& conf): _config(conf) {}
 
     ~HardwareFluxSink() {}
 
 public:
     void writeFlux(int track, int side, const Fluxmap& fluxmap) override
     {
-        usbSetDrive(config.drive().drive(),
-            config.drive().high_density(),
-            config.drive().index_mode());
-#if 0
-		if (fluxSourceSinkFortyTrack)
-		{
-			if (track & 1)
-				error("cannot write to odd physical tracks in 40-track mode");
-			usbSeek(track / 2);
-		}
-		else
-#endif
+        auto& drive = globalConfig()->drive();
+        usbSetDrive(drive.drive(), drive.high_density(), drive.index_mode());
         usbSeek(track);
 
-        return usbWrite(side, fluxmap.rawBytes(), _hardSectorThreshold);
+        return usbWrite(
+            side, fluxmap.rawBytes(), drive.hard_sector_threshold_ns());
     }
 
-    operator std::string() const
+    bool isHardware() const override
     {
-        return fmt::format("drive {}", config.drive().drive());
+        return true;
+    }
+
+    operator std::string() const override
+    {
+        return fmt::format("drive {}", globalConfig()->drive().drive());
     }
 
 private:
     const HardwareFluxSinkProto& _config;
-    nanoseconds_t _hardSectorThreshold;
 };
 
 std::unique_ptr<FluxSink> FluxSink::createHardwareFluxSink(

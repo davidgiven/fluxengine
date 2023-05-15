@@ -17,8 +17,7 @@ static StringFlag sourceFlux({"--source", "-s"},
     "",
     [](const auto& value)
     {
-        FluxSource::updateConfigForFilename(
-            config.mutable_flux_source(), value);
+        globalConfig().setFluxSource(value);
     });
 
 static StringFlag destFlux({"--dest", "-d"},
@@ -26,7 +25,7 @@ static StringFlag destFlux({"--dest", "-d"},
     "",
     [](const auto& value)
     {
-        FluxSink::updateConfigForFilename(config.mutable_flux_sink(), value);
+        globalConfig().setFluxSink(value);
     });
 
 static StringFlag destTracks({"--cylinders", "-c"},
@@ -34,7 +33,7 @@ static StringFlag destTracks({"--cylinders", "-c"},
     "",
     [](const auto& value)
     {
-        setRange(config.mutable_tracks(), value);
+        setRange(globalConfig().overrides()->mutable_tracks(), value);
     });
 
 static StringFlag destHeads({"--heads", "-h"},
@@ -42,32 +41,34 @@ static StringFlag destHeads({"--heads", "-h"},
     "",
     [](const auto& value)
     {
-        setRange(config.mutable_heads(), value);
+        setRange(globalConfig().overrides()->mutable_heads(), value);
     });
 
 static ActionFlag eraseFlag({"--erase"},
     "erases the destination",
     []()
     {
-        config.mutable_flux_source()->set_type(FluxSourceProto::ERASE);
+        globalConfig().overrides()->mutable_flux_source()->set_type(
+            FluxSourceProto::ERASE);
     });
 
 int mainRawWrite(int argc, const char* argv[])
 {
-    setRange(config.mutable_tracks(), "0-79");
-    setRange(config.mutable_heads(), "0-1");
+    setRange(globalConfig().overrides()->mutable_tracks(), "0-79");
+    setRange(globalConfig().overrides()->mutable_heads(), "0-1");
 
     if (argc == 1)
         showProfiles("rawwrite", formats);
-    config.mutable_flux_sink()->set_type(FluxSinkProto::DRIVE);
+    globalConfig().overrides()->mutable_flux_sink()->set_type(
+        FluxSinkProto::DRIVE);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
-    if (config.flux_source().type() == FluxSourceProto::DRIVE)
+    if (globalConfig()->flux_source().type() == FluxSourceProto::DRIVE)
         error("you can't use rawwrite to read from hardware");
 
-    std::unique_ptr<FluxSource> fluxSource(
-        FluxSource::create(config.flux_source()));
-    std::unique_ptr<FluxSink> fluxSink(FluxSink::create(config.flux_sink()));
+    auto& fluxSource = globalConfig().getFluxSource();
+    std::unique_ptr<FluxSink> fluxSink(
+        FluxSink::create(globalConfig()->flux_sink()));
 
     writeRawDiskCommand(*fluxSource, *fluxSink);
     return 0;

@@ -157,7 +157,7 @@ public:
         TrackHeader header = {0, 0, 0, 0, 0};
         TrackHeader previousheader = {0, 0, 0, 0, 0};
 
-        auto layout = config.mutable_layout();
+        auto layout = _extraConfig.mutable_layout();
 
         unsigned n = 0;
         unsigned headerPtr = 0;
@@ -259,7 +259,7 @@ public:
                 headerPtr++;
             }
 
-            auto ibm = config.mutable_encoder()->mutable_ibm();
+            auto ibm = _extraConfig.mutable_encoder()->mutable_ibm();
             auto trackdata = ibm->add_trackdata();
 
             auto layoutdata = layout->add_layoutdata();
@@ -443,7 +443,7 @@ public:
             }
         }
 
-        if (config.encoder().format_case() !=
+        if (_extraConfig.encoder().format_case() !=
             EncoderProto::FormatCase::FORMAT_NOT_SET)
             log("IMD: overriding configured format");
 

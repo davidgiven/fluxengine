@@ -40,6 +40,7 @@ image_writer {
 }
 
 layout {
+	tpi: 48
 	tracks: 77
 	sides: 2
 	layoutdata {
@@ -83,4 +84,3 @@ decoder {
 	tids990 {}
 }
 
-tpi: 96

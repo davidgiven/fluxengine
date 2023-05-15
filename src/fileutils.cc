@@ -21,10 +21,8 @@ static StringFlag image({"-i", "--image"},
     "",
     [](const auto& value)
     {
-        ImageReader::updateConfigForFilename(
-            config.mutable_image_reader(), value);
-        ImageWriter::updateConfigForFilename(
-            config.mutable_image_writer(), value);
+        globalConfig().setImageReader(value);
+        globalConfig().setImageWriter(value);
     });
 
 static StringFlag flux({"-f", "--flux"},
@@ -32,7 +30,6 @@ static StringFlag flux({"-f", "--flux"},
     "",
     [](const auto& value)
     {
-        FluxSource::updateConfigForFilename(
-            config.mutable_flux_source(), value);
-        FluxSink::updateConfigForFilename(config.mutable_flux_sink(), value);
+        globalConfig().setFluxSource(value);
+        globalConfig().setFluxSink(value);
     });

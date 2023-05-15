@@ -23,8 +23,7 @@ static StringFlag sourceImage({"--input", "-i"},
     "",
     [](const auto& value)
     {
-        ImageReader::updateConfigForFilename(
-            config.mutable_image_reader(), value);
+        globalConfig().setImageReader(value);
     });
 
 static StringFlag destFlux({"--dest", "-d"},
@@ -32,9 +31,8 @@ static StringFlag destFlux({"--dest", "-d"},
     "",
     [](const auto& value)
     {
-        FluxSink::updateConfigForFilename(config.mutable_flux_sink(), value);
-        FluxSource::updateConfigForFilename(
-            config.mutable_flux_source(), value);
+        globalConfig().setFluxSink(value);
+        globalConfig().setVerificationFluxSource(value);
     });
 
 static StringFlag destTracks({"--cylinders", "-c"},
@@ -42,7 +40,7 @@ static StringFlag destTracks({"--cylinders", "-c"},
     "",
     [](const auto& value)
     {
-        setRange(config.mutable_tracks(), value);
+        setRange(globalConfig().overrides()->mutable_tracks(), value);
     });
 
 static StringFlag destHeads({"--heads", "-h"},
@@ -50,7 +48,7 @@ static StringFlag destHeads({"--heads", "-h"},
     "",
     [](const auto& value)
     {
-        setRange(config.mutable_heads(), value);
+        setRange(globalConfig().overrides()->mutable_heads(), value);
     });
 
 static ActionFlag noVerifyFlag({"--no-verify", "-n"},
@@ -64,28 +62,30 @@ int mainWrite(int argc, const char* argv[])
 {
     if (argc == 1)
         showProfiles("write", formats);
-    config.mutable_flux_sink()->set_type(FluxSinkProto::DRIVE);
-    if (verify)
-        config.mutable_flux_source()->set_type(FluxSourceProto::DRIVE);
+    globalConfig().setFluxSink("drive:0");
+    globalConfig().setVerificationFluxSource("drive:0");
+
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
-    std::unique_ptr<ImageReader> reader(
-        ImageReader::create(config.image_reader()));
+    auto& reader = globalConfig().getImageReader();
     std::shared_ptr<Image> image = reader->readMappedImage();
 
-    std::unique_ptr<Encoder> encoder(Encoder::create(config.encoder()));
-    std::unique_ptr<FluxSink> fluxSink(FluxSink::create(config.flux_sink()));
+    auto encoder = globalConfig().getEncoder();
+    auto fluxSink = globalConfig().getFluxSink();
 
-    std::unique_ptr<Decoder> decoder;
-    if (config.has_decoder() && verify)
-        decoder = Decoder::create(config.decoder());
+    std::shared_ptr<Decoder> decoder;
+    std::shared_ptr<FluxSource> verificationFluxSource;
+    if (globalConfig().hasDecoder() && fluxSink->isHardware() && verify)
+    {
+        decoder = globalConfig().getDecoder();
+        verificationFluxSource = globalConfig().getVerificationFluxSource();
+    }
 
-    std::unique_ptr<FluxSource> fluxSource;
-    if (verify && (config.flux_source().type() == FluxSourceProto::DRIVE))
-        fluxSource = FluxSource::create(config.flux_source());
-
-    writeDiskCommand(
-        *image, *encoder, *fluxSink, decoder.get(), fluxSource.get());
+    writeDiskCommand(*image,
+        *encoder,
+        *fluxSink,
+        decoder.get(),
+        verificationFluxSource.get());
 
     return 0;
 }

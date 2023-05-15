@@ -49,16 +49,16 @@ public:
             error("NFD: unsupported number of heads");
         }
 
-        if (config.encoder().format_case() !=
+        if (_extraConfig.encoder().format_case() !=
             EncoderProto::FormatCase::FORMAT_NOT_SET)
             log("NFD: overriding configured format");
 
-        auto ibm = config.mutable_encoder()->mutable_ibm();
-        auto layout = config.mutable_layout();
+        auto ibm = _extraConfig.mutable_encoder()->mutable_ibm();
+        auto layout = _extraConfig.mutable_layout();
         log("NFD: HD 1.2MB mode");
         log("NFD: forcing hign density mode");
-        config.mutable_drive()->set_high_density(true);
-        config.set_tpi(96);
+        _extraConfig.mutable_drive()->set_high_density(true);
+        _extraConfig.mutable_layout()->set_tpi(96);
 
         std::unique_ptr<Image> image(new Image);
         for (int track = 0; track < 163; track++)

@@ -1,13 +1,14 @@
 shortname: 'Commodore'
-comment: '1541, 1581, and variations'
+comment: '1541, 1581, 8050 and variations'
 read_support_status: UNICORN
 write_support_status: UNICORN
 
 documentation:
 <<<
-Commodore 64 disks come in two varieties: GCR, which are the overwhelming
-majority; and MFM, only used on the 1571 and 1581. The latter were (as far as I
-can tell) standard IBM PC format disks with a slightly odd sector count.
+Commodore 8-bit computer disks come in two varieties: GCR, which are the
+overwhelming majority; and MFM, only used on the 1571 and 1581. The latter were
+(as far as I can tell) standard IBM PC format disks with a slightly odd sector
+count.
 
 The GCR disks are much more interesting. They could store 170kB on a
 single-sided disk (although later drives were double-sided), using a proprietary
@@ -25,11 +26,20 @@ computer](https://ilesj.wordpress.com/2014/05/14/1541-why-so-complicated/) of
 300 bytes per second (!). (The drive itself could transfer data reasonably
 quickly.)
 
-A standard 1541 disk has 35 tracks of 17 to 21 sectors, each 256 bytes long
-(sometimes 40 tracks).
+  - a 1541 disk has 35 tracks of 17 to 21 sectors, each 256 bytes long
+	(sometimes 40 tracks), and uses GCR encoding.
 
-A standard 1581 disk has 80 tracks and two sides, each with 10 sectors, 512
-bytes long.
+  - a standard 1581 disk has 80 tracks and two sides, each with 10 sectors, 512
+	bytes long, and uses normal IBM encoding.
+
+  - an 8050 disk has 77 tracks and two sides, with four speed zones; the number
+	of sectors varies from 23 to 29, using GCR encoding. These will store
+	1042kB. These drives are peculiar because they are 100tpi and therefore the
+	disks cannot be read in normal 96tpi drives.
+
+  - a CMD FD2000 disk (a popular third-party Commodore disk drive) has 81
+	tracks and two sides, each with 10 1024-byte sectors, for a massive 1620kB
+	of storage. This also uses IBM encoding.
 
 A CMD FD2000 disk (a popular third-party Commodore disk drive) 
 >>>
@@ -66,8 +76,9 @@ option_group {
 		
 		config {
 			layout {
-				sides: 1
+				tpi: 48
 				tracks: 35
+				sides: 1
 				layoutdata {
 					sector_size: 256
 				}
@@ -112,8 +123,6 @@ option_group {
 			decoder {
 				c64 {}
 			}
-
-			tpi: 48
 		}
 	}
 		
@@ -123,8 +132,9 @@ option_group {
 		
 		config {
 			layout {
-				sides: 1
+				tpi: 48
 				tracks: 40
+				sides: 1
 				layoutdata {
 					sector_size: 256
 				}
@@ -169,17 +179,16 @@ option_group {
 			decoder {
 				c64 {}
 			}
-
-			tpi: 48
 		}
 	}
 
 	option {
 		name: "800"
-		comment: "800kB 1581"
+		comment: '800kB 3.5" 1581'
 
 		config {
 			layout {
+				tpi: 135
 				tracks: 80
 				sides: 2
 				swap_sides: true
@@ -212,8 +221,58 @@ option_group {
 					}
 				}
 			}
+		}
+	}
 
-			tpi: 96
+	option {
+		name: "1042"
+		comment: '1042kB 5.25" 8051'
+		
+		config {
+			layout {
+				tpi: 100
+				sides: 2
+				tracks: 77
+				layoutdata {
+					sector_size: 256
+				}
+				layoutdata {
+					track: 0
+					up_to_track: 38
+					physical {
+						start_sector: 0
+						count: 29
+					}
+				}
+				layoutdata {
+					track: 39
+					up_to_track: 52
+					physical {
+						start_sector: 0
+						count: 27
+					}
+				}
+				layoutdata {
+					track: 53
+					up_to_track: 63
+					physical {
+						start_sector: 0
+						count: 25
+					}
+				}
+				layoutdata {
+					track: 64
+					up_to_track: 76
+					physical {
+						start_sector: 0
+						count: 23
+					}
+				}
+			}
+
+			decoder {
+				c64 {}
+			}
 		}
 	}
 
@@ -223,6 +282,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 135
 				tracks: 81
 				sides: 2
 				swap_sides: true
@@ -252,8 +312,6 @@ option_group {
 					}
 				}
 			}
-
-			tpi: 96
 		}
 	}
 }

@@ -23,9 +23,9 @@ static std::shared_ptr<CandidateDevice> selectDevice()
             "no devices found (is one plugged in? Do you have the "
             "appropriate permissions?");
 
-    if (config.usb().has_serial())
+    if (globalConfig()->usb().has_serial())
     {
-        auto wantedSerial = config.usb().serial();
+        auto wantedSerial = globalConfig()->usb().serial();
         for (auto& c : candidates)
         {
             if (c->serial == wantedSerial)
@@ -63,10 +63,10 @@ USB* get_usb_impl()
 {
     /* Special case for certain configurations. */
 
-    if (config.usb().has_greaseweazle() &&
-        config.usb().greaseweazle().has_port())
+    if (globalConfig()->usb().has_greaseweazle() &&
+        globalConfig()->usb().greaseweazle().has_port())
     {
-        const auto& conf = config.usb().greaseweazle();
+        const auto& conf = globalConfig()->usb().greaseweazle();
         log("Using GreaseWeazle on serial port {}", conf.port());
         return createGreaseWeazleUsb(conf.port(), conf);
     }
@@ -85,7 +85,7 @@ USB* get_usb_impl()
                 candidate->serial,
                 candidate->serialPort);
             return createGreaseWeazleUsb(
-                candidate->serialPort, config.usb().greaseweazle());
+                candidate->serialPort, globalConfig()->usb().greaseweazle());
 
         default:
             error("internal");

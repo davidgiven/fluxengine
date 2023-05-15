@@ -73,6 +73,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 48
 				tracks: 35
 				sides: 1
 				layoutdata {
@@ -83,7 +84,6 @@ option_group {
 					}
 				}
 			}
-			tpi: 48
 		}
 	}
 
@@ -93,6 +93,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 96
 				tracks: 80
 				sides: 2
 				order: HCS
@@ -104,7 +105,6 @@ option_group {
 					}
 				}
 			}
-			tpi: 96
 		}
 	}
 }

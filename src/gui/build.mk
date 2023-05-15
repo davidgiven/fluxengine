@@ -1,5 +1,7 @@
 ifneq ($(shell $(WX_CONFIG) --version),)
 
+include src/gui/drivetypes/build.mk
+
 FLUXENGINE_GUI_SRCS = \
 	src/gui/browserpanel.cc \
 	src/gui/customstatusbar.cc \
@@ -40,6 +42,7 @@ $(call use-pkgconfig, $(FLUXENGINE_GUI_BIN), $(FLUXENGINE_GUI_OBJS), fmt)
 $(call use-library, $(FLUXENGINE_GUI_BIN), $(FLUXENGINE_GUI_OBJS), LIBARCH)
 $(call use-library, $(FLUXENGINE_GUI_BIN), $(FLUXENGINE_GUI_OBJS), LIBFLUXENGINE)
 $(call use-library, $(FLUXENGINE_GUI_BIN), $(FLUXENGINE_GUI_OBJS), LIBFORMATS)
+$(call use-library, $(FLUXENGINE_GUI_BIN), $(FLUXENGINE_GUI_OBJS), LIBDRIVETYPES)
 $(call use-library, $(FLUXENGINE_GUI_BIN), $(FLUXENGINE_GUI_OBJS), LIBUSBP)
 $(call use-library, $(FLUXENGINE_GUI_BIN), $(FLUXENGINE_GUI_OBJS), PROTO)
 $(call use-library, $(FLUXENGINE_GUI_BIN), $(FLUXENGINE_GUI_OBJS), FATFS)

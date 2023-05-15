@@ -22,8 +22,7 @@ static StringFlag sourceFlux({"-s", "--source"},
     "",
     [](const auto& value)
     {
-        FluxSource::updateConfigForFilename(
-            config.mutable_flux_source(), value);
+        globalConfig().setFluxSource(value);
     });
 
 static StringFlag destImage({"-o", "--output"},
@@ -31,8 +30,7 @@ static StringFlag destImage({"-o", "--output"},
     "",
     [](const auto& value)
     {
-        ImageWriter::updateConfigForFilename(
-            config.mutable_image_writer(), value);
+        globalConfig().setImageWriter(value);
     });
 
 static StringFlag copyFluxTo({"--copy-flux-to"},
@@ -40,8 +38,7 @@ static StringFlag copyFluxTo({"--copy-flux-to"},
     "",
     [](const auto& value)
     {
-        FluxSink::updateConfigForFilename(
-            config.mutable_decoder()->mutable_copy_flux_to(), value);
+        globalConfig().setCopyFluxTo(value);
     });
 
 static StringFlag srcTracks({"--cylinders", "-c"},
@@ -49,7 +46,7 @@ static StringFlag srcTracks({"--cylinders", "-c"},
     "",
     [](const auto& value)
     {
-        setRange(config.mutable_tracks(), value);
+        setRange(globalConfig().overrides()->mutable_tracks(), value);
     });
 
 static StringFlag srcHeads({"--heads", "-h"},
@@ -57,24 +54,22 @@ static StringFlag srcHeads({"--heads", "-h"},
     "",
     [](const auto& value)
     {
-        setRange(config.mutable_heads(), value);
+        setRange(globalConfig().overrides()->mutable_heads(), value);
     });
 
 int mainRead(int argc, const char* argv[])
 {
     if (argc == 1)
         showProfiles("read", formats);
-    config.mutable_flux_source()->set_type(FluxSourceProto::DRIVE);
+    globalConfig().set("flux_source.type", "DRIVE");
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
-    if (config.decoder().copy_flux_to().type() == FluxSinkProto::DRIVE)
+    if (globalConfig()->decoder().copy_flux_to().type() == FluxSinkProto::DRIVE)
         error("you cannot copy flux to a hardware device");
 
-    std::unique_ptr<FluxSource> fluxSource(
-        FluxSource::create(config.flux_source()));
-    std::unique_ptr<Decoder> decoder(Decoder::create(config.decoder()));
-    std::unique_ptr<ImageWriter> writer(
-        ImageWriter::create(config.image_writer()));
+    auto& fluxSource = globalConfig().getFluxSource();
+    auto& decoder = globalConfig().getDecoder();
+    auto writer = globalConfig().getImageWriter();
 
     readDiskCommand(*fluxSource, *decoder, *writer);
 

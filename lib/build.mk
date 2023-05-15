@@ -1,6 +1,7 @@
 LIBFLUXENGINE_SRCS = \
 	lib/bitmap.cc \
 	lib/bytes.cc \
+	lib/config.cc \
 	lib/crc.cc \
 	lib/csvreader.cc \
 	lib/decoders/decoders.cc \
@@ -8,7 +9,6 @@ LIBFLUXENGINE_SRCS = \
 	lib/decoders/fluxmapreader.cc \
 	lib/decoders/fmmfm.cc \
 	lib/encoders/encoders.cc \
-	lib/environment.cc \
 	lib/fl2.cc \
 	lib/flags.cc \
 	lib/fluxmap.cc \
@@ -91,7 +91,7 @@ OBJS += $(LIBFLUXENGINE_OBJS)
 $(LIBFLUXENGINE_SRCS): | $(PROTO_HDRS)
 LIBFLUXENGINE_LIB = $(OBJDIR)/libfluxengine.a
 LIBFLUXENGINE_CFLAGS = 
-LIBFLUXENGINE_LDFLAGS = $(LIBFLUXENGINE_LIB)
+LIBFLUXENGINE_LDFLAGS =
 
 $(LIBFLUXENGINE_LIB): $(LIBFLUXENGINE_OBJS)
 

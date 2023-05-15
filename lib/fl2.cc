@@ -25,6 +25,7 @@ static void upgradeFluxFile(FluxFileProto& proto)
 
         proto.set_version(FluxFileVersion::VERSION_2);
     }
+
     if (proto.version() > FluxFileVersion::VERSION_2)
         error(
             "this is a version {} flux file, but this build of the client can "

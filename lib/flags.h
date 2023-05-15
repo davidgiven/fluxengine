@@ -33,23 +33,6 @@ public:
         const char* argv[],
         const std::map<std::string, const ConfigProto*>& configFiles);
 
-    /* Load one config file (or internal config file), without expanding
-     * includes. */
-
-    static ConfigProto parseSingleConfigFile(const std::string& filename,
-        const std::map<std::string, const ConfigProto*>& configFiles);
-
-    /* Load a top-level config file (or internal config file), expanding
-     * includes. */
-
-    static void parseConfigFile(const std::string& filename,
-        const std::map<std::string, const ConfigProto*>& configFiles);
-
-    /* Modify the current config to engage the named option. */
-
-    static void applyOption(const OptionProto& option);
-    static bool applyOption(const std::string& option);
-
     void addFlag(Flag* flag);
     void checkInitialised() const;
 

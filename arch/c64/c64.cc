@@ -16,13 +16,13 @@
 
 nanoseconds_t clockPeriodForC64Track(unsigned track)
 {
-    constexpr double BYTE_SIZE = 8.0;
+    constexpr double b = 8.0;
 
     if (track < 17)
-        return 26.0 / BYTE_SIZE;
+        return 26.0 / b;
     if (track < 24)
-        return 28.0 / BYTE_SIZE;
+        return 28.0 / b;
     if (track < 30)
-        return 30.0 / BYTE_SIZE;
-    return 32.0 / BYTE_SIZE;
+        return 30.0 / b;
+    return 32.0 / b;
 }

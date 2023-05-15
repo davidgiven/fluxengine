@@ -33,6 +33,7 @@ image_writer {
 }
 
 layout {
+	tpi: 100
 	tracks: 77
 	sides: 1
 	layoutdata {
@@ -58,5 +59,4 @@ filesystem {
 	type: SMAKY6
 }
 
-tpi: 100
 

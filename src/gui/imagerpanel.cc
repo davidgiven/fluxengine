@@ -1,6 +1,5 @@
 #include "lib/globals.h"
 #include "lib/fluxmap.h"
-#include "lib/environment.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/imagereader/imagereader.h"
@@ -93,13 +92,8 @@ public:
             QueueJob(
                 [this]()
                 {
-                    /* You need to call this if the config changes to invalidate
-                     * any caches. */
-
-                    Environment::reset();
-
-                    auto fluxSource = FluxSource::create(config.flux_source());
-                    auto decoder = Decoder::create(config.decoder());
+                    auto& fluxSource = globalConfig().getFluxSource();
+                    auto& decoder = globalConfig().getDecoder();
                     auto diskflux = readDiskCommand(*fluxSource, *decoder);
 
                     runOnUiThread(
@@ -123,22 +117,21 @@ public:
         {
             SetPage(MainWindow::PAGE_IMAGER);
             PrepareConfig();
-            if (!config.has_image_reader())
+            if (!globalConfig()->has_image_reader())
                 error("This format cannot be read from images.");
 
             auto filename = wxFileSelector("Choose a image file to read",
                 /* default_path= */ wxEmptyString,
-                /* default_filename= */ config.image_reader().filename(),
+                /* default_filename= */
+                globalConfig()->image_reader().filename(),
                 /* default_extension= */ wxEmptyString,
                 /* wildcard= */ wxEmptyString,
                 /* flags= */ wxFD_OPEN | wxFD_FILE_MUST_EXIST);
             if (filename.empty())
                 return;
 
-            ImageReader::updateConfigForFilename(
-                config.mutable_image_reader(), filename.ToStdString());
-            ImageWriter::updateConfigForFilename(
-                config.mutable_image_writer(), filename.ToStdString());
+            globalConfig().setImageReader(filename.ToStdString());
+            globalConfig().setImageWriter(filename.ToStdString());
             visualiser->Clear();
             _currentDisk = nullptr;
 
@@ -146,24 +139,25 @@ public:
             QueueJob(
                 [this]()
                 {
-                    auto image = ImageReader::create(config.image_reader())
-                                     ->readMappedImage();
-                    auto encoder = Encoder::create(config.encoder());
-                    auto fluxSink = FluxSink::create(config.flux_sink());
+                    auto image =
+                        globalConfig().getImageReader()->readMappedImage();
+                    auto encoder = globalConfig().getEncoder();
+                    auto fluxSink = globalConfig().getFluxSink();
 
-                    std::unique_ptr<Decoder> decoder;
-                    std::unique_ptr<FluxSource> fluxSource;
-                    if (config.has_decoder())
+                    std::shared_ptr<Decoder> decoder;
+                    std::shared_ptr<FluxSource> verificationFluxSource;
+                    if (globalConfig().hasDecoder() && fluxSink->isHardware())
                     {
-                        decoder = Decoder::create(config.decoder());
-                        fluxSource = FluxSource::create(config.flux_source());
+                        decoder = globalConfig().getDecoder();
+                        verificationFluxSource =
+                            globalConfig().getVerificationFluxSource();
                     }
 
                     writeDiskCommand(*image,
                         *encoder,
                         *fluxSink,
                         decoder.get(),
-                        fluxSource.get());
+                        verificationFluxSource.get());
                 });
         }
         catch (const ErrorException& e)
@@ -243,30 +237,28 @@ public:
     {
         try
         {
-            if (!config.has_image_writer())
+            if (!globalConfig()->has_image_writer())
                 error("This format cannot be saved.");
 
             auto filename =
                 wxFileSelector("Choose the name of the image file to write",
                     /* default_path= */ wxEmptyString,
-                    /* default_filename= */ config.image_writer().filename(),
+                    /* default_filename= */
+                    globalConfig()->image_writer().filename(),
                     /* default_extension= */ wxEmptyString,
                     /* wildcard= */ wxEmptyString,
                     /* flags= */ wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
             if (filename.empty())
                 return;
 
-            ImageWriter::updateConfigForFilename(
-                config.mutable_image_writer(), filename.ToStdString());
+            globalConfig().setImageWriter(filename.ToStdString());
 
             auto image = _currentDisk->image;
 
             QueueJob(
                 [image, this]()
                 {
-                    auto imageWriter =
-                        ImageWriter::create(config.image_writer());
-                    imageWriter->writeMappedImage(*image);
+                    globalConfig().getImageWriter()->writeMappedImage(*image);
                 });
         }
         catch (const ErrorException& e)
@@ -289,15 +281,15 @@ public:
             if (filename.empty())
                 return;
 
-            FluxSink::updateConfigForFilename(
-                config.mutable_flux_sink(), filename.ToStdString());
+            globalConfig().setFluxSink(filename.ToStdString());
 
             QueueJob(
                 [this]()
                 {
                     auto fluxSource =
                         FluxSource::createMemoryFluxSource(*_currentDisk);
-                    auto fluxSink = FluxSink::create(config.flux_sink());
+                    auto fluxSink =
+                        FluxSink::create(globalConfig()->flux_sink());
                     writeRawDiskCommand(*fluxSource, *fluxSink);
                 });
         }

@@ -34,7 +34,9 @@ public:
     bool matches(const unsigned* intervals, FluxMatch& match) const override;
 
     unsigned intervals() const override
-    { return _intervals.size(); }
+    {
+        return _intervals.size();
+    }
 
 private:
     std::vector<unsigned> _intervals;
@@ -56,7 +58,9 @@ public:
     bool matches(const unsigned* intervals, FluxMatch& match) const override;
 
     unsigned intervals() const override
-    { return _intervals; }
+    {
+        return _intervals;
+    }
 
 private:
     unsigned _intervals;
@@ -77,10 +81,14 @@ public:
     }
 
     bool eof() const
-    { return _pos.bytes == _size; }
+    {
+        return _pos.bytes == _size;
+    }
 
     Fluxmap::Position tell() const
-    { return _pos; }
+    {
+        return _pos;
+    }
 
     /* Important! You can only reliably seek to 1 bits. */
     void seek(const Fluxmap::Position& pos)
@@ -94,24 +102,25 @@ public:
     }
 
     void getNextEvent(int& event, unsigned& ticks);
-	void skipToEvent(int event);
+    void skipToEvent(int event);
     bool findEvent(int event, unsigned& ticks);
     unsigned readInterval(nanoseconds_t clock); /* with debounce support */
 
     /* Important! You can only reliably seek to 1 bits. */
     void seek(nanoseconds_t ns);
-	void seekToByte(unsigned byte);
+    void seekToByte(unsigned byte);
 
     void seekToIndexMark();
     nanoseconds_t seekToPattern(const FluxMatcher& pattern);
-    nanoseconds_t seekToPattern(const FluxMatcher& pattern, const FluxMatcher*& matching);
+    nanoseconds_t seekToPattern(
+        const FluxMatcher& pattern, const FluxMatcher*& matching);
 
 private:
     const Fluxmap& _fluxmap;
     const uint8_t* _bytes;
     const size_t _size;
     Fluxmap::Position _pos;
-	const DecoderProto& _config;
+    const DecoderProto& _config;
 };
 
 #endif

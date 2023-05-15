@@ -9,14 +9,13 @@ class TrackInfo;
 
 struct LogicalLocation
 {
-	unsigned logicalTrack;
-	unsigned logicalSide;
-	unsigned logicalSector;
+    unsigned logicalTrack;
+    unsigned logicalSide;
+    unsigned logicalSector;
 
     std::tuple<int, int, int> key() const
     {
-        return std::make_tuple(
-            logicalTrack, logicalSide, logicalSector);
+        return std::make_tuple(logicalTrack, logicalSide, logicalSector);
     }
 
     bool operator==(const LogicalLocation& rhs) const
@@ -65,7 +64,7 @@ struct Sector : public LogicalLocation
 
     Sector() {}
 
-    Sector(std::shared_ptr<const TrackInfo>& layout, unsigned sectorId=0);
+    Sector(std::shared_ptr<const TrackInfo>& layout, unsigned sectorId = 0);
 
     Sector(const LogicalLocation& location);
 
@@ -91,8 +90,7 @@ struct Sector : public LogicalLocation
     }
 };
 
-extern bool sectorPointerSortPredicate(
-	const std::shared_ptr<const Sector>& lhs,
+extern bool sectorPointerSortPredicate(const std::shared_ptr<const Sector>& lhs,
     const std::shared_ptr<const Sector>& rhs);
 extern bool sectorPointerEqualsPredicate(
     const std::shared_ptr<const Sector>& lhs,

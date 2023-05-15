@@ -25,6 +25,7 @@ image_writer {
 }
 
 layout {
+	tpi: 96
 	tracks: 80
 	sides: 1
 	layoutdata {
@@ -50,4 +51,3 @@ decoder {
 	ibm {}
 }
 
-tpi: 96

@@ -14,8 +14,7 @@ class ImageWriter;
 class TrackInfo;
 class TrackFlux;
 
-extern void measureDiskRotation(
-    nanoseconds_t& oneRevolution, nanoseconds_t& hardSectorThreshold);
+extern void measureDiskRotation();
 
 extern void writeTracks(FluxSink& fluxSink,
     const std::function<std::unique_ptr<const Fluxmap>(
