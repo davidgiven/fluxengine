@@ -1,10 +1,12 @@
 DRIVETYPES = \
-	35_80 \
 	35_40 \
-	525_80 \
+	35_80 \
 	525_40 \
-	8_77 \
+	525_40M \
+	525_80 \
+	525_80M \
 	8_38 \
+	8_77 \
 	apple2 \
 
 $(OBJDIR)/src/gui/drivetypes/drivetype_%.o: $(OBJDIR)/src/gui/drivetypes/drivetype_%.cc
