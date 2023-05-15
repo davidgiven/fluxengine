@@ -71,11 +71,6 @@ option_group {
 		comment: '140kB 5.25" 35-track SS'
 		set_by_default: true
 
-		requires {
-			key: "drive.tpi"
-			value: ["48", "96"]
-		}
-
 		config {
 			layout {
 				tpi: 48
@@ -95,11 +90,6 @@ option_group {
 	option {
 		name: "640"
 		comment: '640kB 5.25" 80-track DS'
-
-		requires {
-			key: "drive.tpi"
-			value: ["96"]
-		}
 
 		config {
 			layout {
