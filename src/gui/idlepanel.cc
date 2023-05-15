@@ -582,11 +582,18 @@ private:
         {
             PrepareConfig();
         }
-        catch (InapplicableOptionException e)
+        catch (const InapplicableOptionException& e)
         {
             /* The current set of options is invalid for some reason. Just
              * swallow the errors. */
         }
+	catch (const ErrorException& e)
+	{
+	    /* This really isn't supposed to happen, but sometimes does and
+	     * it crashes the whole program. */
+	    return;
+	}
+
         assert(!wxGetApp().IsWorkerThreadRunning());
 
         formatOptionsContainer->DestroyChildren();
