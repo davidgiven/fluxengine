@@ -584,8 +584,8 @@ private:
         }
         catch (InapplicableOptionException e)
         {
-			/* The current set of options is invalid for some reason. Just
-			 * swallow the errors. */
+            /* The current set of options is invalid for some reason. Just
+             * swallow the errors. */
         }
         assert(!wxGetApp().IsWorkerThreadRunning());
 

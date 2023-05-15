@@ -37,7 +37,9 @@ public:
     {
         _proto = loadFl2File(_config.filename());
 
-        *_extraConfig.mutable_drive() = _proto.drive();
+        _extraConfig.mutable_drive()->set_rotational_period_ms(
+            _proto.rotational_period_ms());
+        _extraConfig.mutable_drive()->set_tpi(_proto.tpi());
     }
 
 public:

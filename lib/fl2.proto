@@ -1,7 +1,5 @@
 syntax = "proto2";
 
-import "lib/drive.proto";
-
 enum FluxMagic {
 	MAGIC = 0x466c7578;
 }
@@ -9,7 +7,6 @@ enum FluxMagic {
 enum FluxFileVersion {
 	VERSION_1 = 1;
 	VERSION_2 = 2;
-	VERSION_3 = 3;
 }
 
 message TrackFluxProto {
@@ -22,7 +19,7 @@ message FluxFileProto {
 	optional int32 magic = 1;
 	optional FluxFileVersion version = 2;
 	repeated TrackFluxProto track = 3;
-	optional double rotational_period_ms = 4 [ deprecated=true ];
-	optional DriveProto drive = 5;
+	optional double rotational_period_ms = 4;
+	optional int32 tpi = 5;
 }
 

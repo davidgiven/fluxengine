@@ -43,7 +43,9 @@ public:
                 track->add_flux(fluxBytes);
         }
 
-        proto.mutable_drive()->MergeFrom(globalConfig()->drive());
+        proto.set_rotational_period_ms(
+            globalConfig()->drive().rotational_period_ms());
+        proto.set_tpi(globalConfig()->drive().tpi());
         saveFl2File(_filename, proto);
     }
 

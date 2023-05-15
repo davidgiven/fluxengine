@@ -12,8 +12,8 @@ static unsigned getTrackStep()
 {
     if (globalConfig()->layout().tpi() == 0)
         error("no layout TPI set");
-	if (globalConfig()->drive().tpi() == 0)
-		return 1;
+    if (globalConfig()->drive().tpi() == 0)
+        return 1;
 
     if (globalConfig()->layout().tpi() == 0.0)
         error("layout TPI is zero; this shouldn't happen?");

@@ -26,14 +26,7 @@ static void upgradeFluxFile(FluxFileProto& proto)
         proto.set_version(FluxFileVersion::VERSION_2);
     }
 
-    if (proto.version() == FluxFileVersion::VERSION_2)
-    {
-        proto.mutable_drive()->set_rotational_period_ms(
-            proto.rotational_period_ms());
-        proto.set_version(FluxFileVersion::VERSION_3);
-    }
-
-    if (proto.version() > FluxFileVersion::VERSION_3)
+    if (proto.version() > FluxFileVersion::VERSION_2)
         error(
             "this is a version {} flux file, but this build of the client can "
             "only handle up to version {} --- please upgrade",
@@ -65,7 +58,7 @@ FluxFileProto loadFl2File(const std::string filename)
 void saveFl2File(const std::string filename, FluxFileProto& proto)
 {
     proto.set_magic(FluxMagic::MAGIC);
-    proto.set_version(FluxFileVersion::VERSION_3);
+    proto.set_version(FluxFileVersion::VERSION_2);
 
     std::ofstream of(filename, std::ios::out | std::ios::binary);
     if (!proto.SerializeToOstream(&of))
