@@ -112,6 +112,7 @@ public:
     bool isOptionValid(std::string option);
     void applyOption(const OptionProto& option);
     void applyOption(std::string option);
+    void clearOptions();
 
     /* Adjust overall inputs and outputs. */
 

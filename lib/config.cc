@@ -174,7 +174,7 @@ void Config::validateAndThrow()
         ss << "invalid configuration:\n";
         for (auto& s : r)
             ss << s << '\n';
-        error(ss.str());
+        throw InapplicableOptionException(ss.str());
     }
 }
 
@@ -326,6 +326,12 @@ void Config::applyOption(const OptionProto& option)
 void Config::applyOption(std::string option)
 {
     applyOption(findOption(option));
+}
+
+void Config::clearOptions()
+{
+    _appliedOptions.clear();
+    invalidate();
 }
 
 static void setFluxSourceImpl(std::string filename, FluxSourceProto* proto)

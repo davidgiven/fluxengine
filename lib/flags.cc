@@ -169,7 +169,7 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc,
         index++;
     }
 
-	globalConfig().validateAndThrow();
+    globalConfig().validateAndThrow();
     return filenames;
 }
 

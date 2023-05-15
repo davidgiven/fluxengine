@@ -261,6 +261,7 @@ public:
         else
             globalConfig().set("usb.serial", serial);
 
+        globalConfig().validateAndThrow();
         ClearLog();
     }
 
@@ -577,7 +578,15 @@ private:
         int formatSelection = formatChoice->GetSelection();
         _currentlyDisplayedFormat = formatSelection;
 
-        PrepareConfig();
+        try
+        {
+            PrepareConfig();
+        }
+        catch (InapplicableOptionException e)
+        {
+			/* The current set of options is invalid for some reason. Just
+			 * swallow the errors. */
+        }
         assert(!wxGetApp().IsWorkerThreadRunning());
 
         formatOptionsContainer->DestroyChildren();
