@@ -39,7 +39,8 @@ public:
 
         _extraConfig.mutable_drive()->set_rotational_period_ms(
             _proto.rotational_period_ms());
-        _extraConfig.mutable_drive()->set_tpi(_proto.tpi());
+		if (_proto.has_tpi())
+			_extraConfig.mutable_drive()->set_tpi(_proto.tpi());
     }
 
 public:
