@@ -39,7 +39,7 @@ If you actually have a forty track drive, you need to tell FluxEngine. This is
 done by adding the special profile `40track_drive`:
 
 ```
-fluxengine write ibm360 40track_drive -i image.img -d drive:0
+fluxengine write ibm --360 40track_drive -i image.img -d drive:0
 ```
 
 It should then Just Work. This is supported by both FluxEngine and Greaseweazle

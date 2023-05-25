@@ -41,8 +41,9 @@ Supported features with the Greaseweazle include:
 	`--usb.greaseweazle.bus_type=SHUGART` or `IBMPC`; the default is `IBMPC`)
   - Apple 5.25 floppy interfaces (via `--usb.greaseweazle.bus_type=APPLE2`)
 
-Which device types are supported depend on the hardware. Genuine Greaseweazle hardware supports SHUGART and IBMPC.
-APPLE2 is only supported with hand wiring and the Adafruit\_Floppy greaseweazle-compatible firmware.
+Which device types are supported depend on the hardware. Genuine Greaseweazle
+hardware supports SHUGART and IBMPC.  APPLE2 is only supported with hand wiring
+and the Adafruit\_Floppy greaseweazle-compatible firmware.
 
 What doesn't work
 -----------------
