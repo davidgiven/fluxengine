@@ -83,9 +83,12 @@ void measureDiskRotation()
 
     if (!globalConfig()->drive().hard_sector_threshold_ns())
     {
+        int count = globalConfig()->drive().hard_sector_count();
         globalConfig().setTransient("drive.hard_sector_threshold_ns",
-            std::to_string(oneRevolution * 3 /
-                           (4 * globalConfig()->drive().hard_sector_count())));
+            count ? std::to_string(
+                        oneRevolution * 3 /
+                        (4 * globalConfig()->drive().hard_sector_count()))
+                  : "0");
     }
 
     if (oneRevolution == 0)
