@@ -1,11 +1,12 @@
-#include "globals.h"
-#include "usb.h"
+#include "lib/globals.h"
 #include "protocol.h"
-#include "fluxmap.h"
-#include "bytes.h"
+#include "lib/fluxmap.h"
+#include "lib/bytes.h"
 #include "lib/usb/usb.pb.h"
 #include "greaseweazle.h"
 #include "serial.h"
+#include "usb.h"
+#include <unistd.h>
 
 static const char* gw_error(int e)
 {
@@ -95,6 +96,13 @@ public:
                 "supported, but you have version {}. Please file a bug.",
                 version);
         }
+
+        /* Twiddle the baud rate, which indicates to the Greaseweazle that the
+         * data stream has been reset. */
+
+        _serial->setBaudRate(10000);
+        usleep(100000);
+        _serial->setBaudRate(9600);
 
         /* Configure the hardware. */
 

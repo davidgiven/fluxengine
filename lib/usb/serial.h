@@ -10,6 +10,7 @@ public:
     virtual ~SerialPort();
     virtual ssize_t readImpl(uint8_t* buffer, size_t len) = 0;
     virtual ssize_t write(const uint8_t* buffer, size_t len) = 0;
+    virtual void setBaudRate(int baudRate) = 0;
 
     void read(uint8_t* buffer, size_t len);
     void read(Bytes& bytes);
