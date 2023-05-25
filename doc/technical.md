@@ -95,7 +95,9 @@ For reference, here are the FDC pinouts:
 ```ditaa
 :-E -s 0.75
 
-                +----+----+                   +----+----+   
+                       +-- GND                       +-- GND
+                       |   (entire column)           |   (entire column)
+                +----+-+--+                   +----+-+--+   
      DISKCHG ---+ 34 + 33 +        DISKCHG ---+ 34 + 33 +
                 +----+----+                   +----+----+
        SIDE1 ---+ 32 + 31 +          SIDE1 ---+ 32 + 31 +
