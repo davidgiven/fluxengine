@@ -80,11 +80,11 @@ as you need an adapter cable or board, but this will allow you to replicate the
 FluxEngine hardware on a $2 Blue Pill.
 
 I am _not_ planning on replacing the PSoC5 with a Blue Pill, because someone
-already has: [the GreaseWeazle](https://github.com/keirf/Greaseweazle/wiki) is
+already has: [the Greaseweazle](https://github.com/keirf/Greaseweazle/wiki) is
 a completely open source firmware package which will read and write Supercard
 Pro files via a standard Blue Pill or via a prebuilt board. It's supported by
 the FluxEngine client software, and you should, mostly, be able to use
-GreaseWeazle hardware interchangeably with FluxEngine hardware. See the
+Greaseweazle hardware interchangeably with FluxEngine hardware. See the
 [dedicated page](greaseweazle.md) for more information.
 
 

@@ -5,7 +5,7 @@
 #include "flags.h"
 
 class Fluxmap;
-class GreaseWeazleProto;
+class GreaseweazleProto;
 namespace libusbp
 {
     class device;
@@ -39,8 +39,8 @@ protected:
 extern USB& getUsb();
 
 extern USB* createFluxengineUsb(libusbp::device& device);
-extern USB* createGreaseWeazleUsb(
-    const std::string& serialPort, const GreaseWeazleProto& config);
+extern USB* createGreaseweazleUsb(
+    const std::string& serialPort, const GreaseweazleProto& config);
 
 static inline int usbGetVersion()
 {

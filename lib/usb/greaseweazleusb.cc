@@ -45,7 +45,7 @@ static uint32_t ss_rand_next(uint32_t x)
     return (x & 1) ? (x >> 1) ^ 0x80000062 : x >> 1;
 }
 
-class GreaseWeazleUsb : public USB
+class GreaseweazleUsb : public USB
 {
 private:
     uint32_t read_28()
@@ -72,11 +72,11 @@ private:
                 command[0],
                 buffer[1]);
         if (buffer[1])
-            error("GreaseWeazle error: {}", gw_error(buffer[1]));
+            error("Greaseweazle error: {}", gw_error(buffer[1]));
     }
 
 public:
-    GreaseWeazleUsb(const std::string& port, const GreaseWeazleProto& config):
+    GreaseweazleUsb(const std::string& port, const GreaseweazleProto& config):
         _serial(SerialPort::openSerialPort(port)),
         _config(config)
     {
@@ -90,7 +90,7 @@ public:
         else
         {
             error(
-                "only GreaseWeazle firmware versions 22 and 24 or above are "
+                "only Greaseweazle firmware versions 22 and 24 or above are "
                 "currently "
                 "supported, but you have version {}. Please file a bug.",
                 version);
@@ -129,9 +129,9 @@ public:
     nanoseconds_t getRotationalPeriod(int hardSectorCount)
     {
         if (hardSectorCount != 0)
-            error("hard sectors are currently unsupported on the GreaseWeazel");
+            error("hard sectors are currently unsupported on the Greaseweazle");
 
-        /* The GreaseWeazle doesn't have a command to fetch the period directly,
+        /* The Greaseweazle doesn't have a command to fetch the period directly,
          * so we have to do a flux read. */
 
         switch (_version)
@@ -181,7 +181,7 @@ public:
                         break;
 
                     default:
-                        error("bad opcode in GreaseWeazle stream");
+                        error("bad opcode in Greaseweazle stream");
                 }
             }
             else
@@ -304,7 +304,7 @@ public:
         nanoseconds_t hardSectorThreshold)
     {
         if (hardSectorThreshold != 0)
-            error("hard sectors are currently unsupported on the GreaseWeazel");
+            error("hard sectors are currently unsupported on the Greaseweazle");
 
         do_command({CMD_HEAD, 3, (uint8_t)side});
 
@@ -357,7 +357,7 @@ public:
     void write(int side, const Bytes& fldata, nanoseconds_t hardSectorThreshold)
     {
         if (hardSectorThreshold != 0)
-            error("hard sectors are currently unsupported on the GreaseWeazel");
+            error("hard sectors are currently unsupported on the Greaseweazle");
 
         do_command({CMD_HEAD, 3, (uint8_t)side});
         switch (_version)
@@ -371,7 +371,7 @@ public:
                 do_command({CMD_WRITE_FLUX, 4, 1, 1});
                 break;
         }
-        _serial->write(fluxEngineToGreaseWeazle(fldata, _clock));
+        _serial->write(fluxEngineToGreaseweazle(fldata, _clock));
         _serial->readByte(); /* synchronise */
 
         do_command({CMD_GET_FLUX_STATUS, 2});
@@ -380,7 +380,7 @@ public:
     void erase(int side, nanoseconds_t hardSectorThreshold)
     {
         if (hardSectorThreshold != 0)
-            error("hard sectors are currently unsupported on the GreaseWeazel");
+            error("hard sectors are currently unsupported on the Greaseweazle");
 
         do_command({CMD_HEAD, 3, (uint8_t)side});
 
@@ -404,7 +404,7 @@ public:
 
     void measureVoltages(struct voltages_frame* voltages)
     {
-        error("unsupported operation on the GreaseWeazle");
+        error("unsupported operation on the Greaseweazle");
     }
 
 private:
@@ -416,16 +416,16 @@ private:
     };
 
     std::unique_ptr<SerialPort> _serial;
-    const GreaseWeazleProto& _config;
+    const GreaseweazleProto& _config;
     int _version;
     nanoseconds_t _clock;
     nanoseconds_t _revolutions;
 };
 
-USB* createGreaseWeazleUsb(
-    const std::string& port, const GreaseWeazleProto& config)
+USB* createGreaseweazleUsb(
+    const std::string& port, const GreaseweazleProto& config)
 {
-    return new GreaseWeazleUsb(port, config);
+    return new GreaseweazleUsb(port, config);
 }
 
 // vim: sw=4 ts=4 et
