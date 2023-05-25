@@ -45,13 +45,16 @@ std::string Logger::toString(const AnyLogMessage& message)
             /* Start measuring the rotational speed */
             [&](const BeginSpeedOperationLogMessage& m)
             {
-                stream << "Measuring rotational speed... ";
+                indent();
+                stream << "Measuring rotational speed...\n";
             },
 
             /* Finish measuring the rotational speed */
             [&](const EndSpeedOperationLogMessage& m)
             {
-                stream << fmt::format("{:.1f}ms ({:.1f}rpm)\n",
+                indent();
+                stream << fmt::format(
+                    "Rotational period is {:.1f}ms ({:.1f}rpm)\n",
                     m.rotationalPeriod / 1e6,
                     60e9 / m.rotationalPeriod);
             },

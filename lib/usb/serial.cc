@@ -88,6 +88,17 @@ public:
         return wlen;
     }
 
+    void setBaudRate(int baudRate) override
+    {
+        DCB dcb = {.DCBlength = sizeof(DCB),
+            .BaudRate = baudRate,
+            .fBinary = true,
+            .ByteSize = 8,
+            .Parity = NOPARITY,
+            .StopBits = ONESTOPBIT};
+        SetCommState(_handle, &dcb);
+    }
+
 private:
     static std::string get_last_error_string()
     {
@@ -179,6 +190,14 @@ public:
         if (wlen == -1)
             error("serial write I/O error: {}", strerror(errno));
         return wlen;
+    }
+
+    void setBaudRate(int baudRate) override
+    {
+        struct termios t;
+        tcgetattr(_fd, &t);
+        cfsetspeed(&t, baudRate);
+        tcsetattr(_fd, TCSANOW, &t);
     }
 
 private:
