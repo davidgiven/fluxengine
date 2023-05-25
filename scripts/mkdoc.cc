@@ -60,67 +60,72 @@ int main(int argc, const char* argv[])
     {
         fmt::print("{}\n", *it++);
 
-        fmt::print("## Options\n\n");
-
-        const OptionGroupProto* formatGroup = nullptr;
-        if (!config.option().empty() || !config.option_group().empty())
+        if (!config.is_extension())
         {
-            for (const auto& option_group : config.option_group())
+            fmt::print("## Options\n\n");
+
+            const OptionGroupProto* formatGroup = nullptr;
+            if (!config.option().empty() || !config.option_group().empty())
             {
-                auto groupName = option_group.comment();
-                if (groupName == "$formats")
+                for (const auto& option_group : config.option_group())
                 {
-                    groupName = "Format variants";
-                    formatGroup = &option_group;
+                    auto groupName = option_group.comment();
+                    if (groupName == "$formats")
+                    {
+                        groupName = "Format variants";
+                        formatGroup = &option_group;
+                    }
+
+                    fmt::print("  - {}:\n", groupName);
+                    for (const auto& option : option_group.option())
+                        fmt::print("      - `{}`: {}\n",
+                            option.name(),
+                            option.comment());
                 }
 
-                fmt::print("  - {}:\n", groupName);
-                for (const auto& option : option_group.option())
+                for (const auto& option : config.option())
                     fmt::print(
-                        "      - `{}`: {}\n", option.name(), option.comment());
+                        "  - `{}`: {}\n", option.name(), option.comment());
+            }
+            else
+                fmt::print("(no options)\n");
+            fmt::print("\n");
+
+            fmt::print("## Examples\n\n");
+
+            std::vector<std::string> examples;
+            if (formatGroup)
+            {
+                for (const auto& option : formatGroup->option())
+                    addExample(examples, false, argv[1], config, &option);
+            }
+            else
+                addExample(examples, false, argv[1], config, nullptr);
+
+            if (!examples.empty())
+            {
+                fmt::print("To read:\n\n");
+                for (const std::string& e : examples)
+                    fmt::print("  - `{}`\n", e);
+                fmt::print("\n");
             }
 
-            for (const auto& option : config.option())
-                fmt::print("  - `{}`: {}\n", option.name(), option.comment());
-        }
-        else
-            fmt::print("(no options)\n");
-        fmt::print("\n");
+            examples.clear();
+            if (formatGroup)
+            {
+                for (const auto& option : formatGroup->option())
+                    addExample(examples, true, argv[1], config, &option);
+            }
+            else
+                addExample(examples, true, argv[1], config, nullptr);
 
-        fmt::print("## Examples\n\n");
-
-        std::vector<std::string> examples;
-        if (formatGroup)
-        {
-            for (const auto& option : formatGroup->option())
-                addExample(examples, false, argv[1], config, &option);
-        }
-        else
-            addExample(examples, false, argv[1], config, nullptr);
-
-        if (!examples.empty())
-        {
-            fmt::print("To read:\n\n");
-            for (const std::string& e : examples)
-                fmt::print("  - `{}`\n", e);
-            fmt::print("\n");
-        }
-
-        examples.clear();
-        if (formatGroup)
-        {
-            for (const auto& option : formatGroup->option())
-                addExample(examples, true, argv[1], config, &option);
-        }
-        else
-            addExample(examples, true, argv[1], config, nullptr);
-
-        if (!examples.empty())
-        {
-            fmt::print("To write:\n\n");
-            for (const std::string& e : examples)
-                fmt::print("  - `{}`\n", e);
-            fmt::print("\n");
+            if (!examples.empty())
+            {
+                fmt::print("To write:\n\n");
+                for (const std::string& e : examples)
+                    fmt::print("  - `{}`\n", e);
+                fmt::print("\n");
+            }
         }
 
         while (it != documentation.end())

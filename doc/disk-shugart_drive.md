@@ -7,13 +7,9 @@ This is an extension profile; adding this to the command line will configure
 FluxEngine to adjust the pinout to work with a Shugart drive. This only works
 on Greaseweazle hardware.
 
+For example:
+
 ```
 fluxengine read ibm --720 shugart_drive
 ```
-
-## Options
-
-(no options)
-
-## Examples
 

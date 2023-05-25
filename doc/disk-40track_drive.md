@@ -13,9 +13,3 @@ For example:
 fluxengine read ibm --180 40track_drive
 ```
 
-## Options
-
-(no options)
-
-## Examples
-

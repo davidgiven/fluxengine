@@ -14,9 +14,3 @@ For example:
 fluxengine read apple2 --160 apple2_drive
 ```
 
-## Options
-
-(no options)
-
-## Examples
-
