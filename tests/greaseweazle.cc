@@ -12,12 +12,12 @@
 static void test_convert(const Bytes& gwbytes, const Bytes& flbytes)
 {
     Bytes gwtoflbytes = greaseWeazleToFluxEngine(gwbytes, 2 * NS_PER_TICK);
-    Bytes fltogwbytes = fluxEngineToGreaseWeazle(flbytes, 2 * NS_PER_TICK);
+    Bytes fltogwbytes = fluxEngineToGreaseweazle(flbytes, 2 * NS_PER_TICK);
 
     if (gwtoflbytes != flbytes)
     {
-        std::cout << "GreaseWeazle to FluxEngine conversion failed.\n";
-        std::cout << "GreaseWeazle bytes:" << std::endl;
+        std::cout << "Greaseweazle to FluxEngine conversion failed.\n";
+        std::cout << "Greaseweazle bytes:" << std::endl;
         hexdump(std::cout, gwbytes);
         std::cout << std::endl << "Produced this:" << std::endl;
         hexdump(std::cout, gwtoflbytes);
@@ -28,7 +28,7 @@ static void test_convert(const Bytes& gwbytes, const Bytes& flbytes)
 
     if (fltogwbytes != gwbytes)
     {
-        std::cout << "FluxEngine to GreaseWeazle conversion failed.\n";
+        std::cout << "FluxEngine to Greaseweazle conversion failed.\n";
         std::cout << "FluxEngine bytes:" << std::endl;
         hexdump(std::cout, flbytes);
         std::cout << std::endl << "Produced this:" << std::endl;

@@ -64,7 +64,7 @@ encoder {
 
 
 option_group {
-	comment: "Format variant"
+	comment: "$formats"
 
 	option {
 		name: "140"

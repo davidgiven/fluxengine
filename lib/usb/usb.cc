@@ -52,7 +52,7 @@ static std::shared_ptr<CandidateDevice> selectDevice()
 
             case GREASEWEAZLE_ID:
                 std::cerr << fmt::format(
-                    "GreaseWeazle: {} on {}\n", c->serial, c->serialPort);
+                    "Greaseweazle: {} on {}\n", c->serial, c->serialPort);
                 break;
         }
     }
@@ -67,8 +67,8 @@ USB* get_usb_impl()
         globalConfig()->usb().greaseweazle().has_port())
     {
         const auto& conf = globalConfig()->usb().greaseweazle();
-        log("Using GreaseWeazle on serial port {}", conf.port());
-        return createGreaseWeazleUsb(conf.port(), conf);
+        log("Using Greaseweazle on serial port {}", conf.port());
+        return createGreaseweazleUsb(conf.port(), conf);
     }
 
     /* Otherwise, select a device by USB ID. */
@@ -81,10 +81,10 @@ USB* get_usb_impl()
             return createFluxengineUsb(candidate->device);
 
         case GREASEWEAZLE_ID:
-            log("Using GreaseWeazle {} on {}",
+            log("Using Greaseweazle {} on {}",
                 candidate->serial,
                 candidate->serialPort);
-            return createGreaseWeazleUsb(
+            return createGreaseweazleUsb(
                 candidate->serialPort, globalConfig()->usb().greaseweazle());
 
         default:

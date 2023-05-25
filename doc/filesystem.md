@@ -17,12 +17,14 @@ The following file systems are supported so far.
 |:-----------------------------------------|:-----:|:------:|-------|
 | Acorn DFS                                |   Y   |        |       |
 | Amiga FFS                                |   Y   |   Y    | Both OFS and FFS |
+| AppleDOS / ProDOS                        |   Y   |   Y    | With a choice of sector remapping |
 | Brother 120kB                            |   Y   |   Y    |       |
 | Commodore CbmFS                          |   Y   |        | Only 1541 disks so far |
 | CP/M                                     |   Y   |        | Requires configuration for each machine |
 | FatFS (a.k.a. MS-DOS)                    |   Y   |   Y    | FAT12, FAT16, FAT32; not Atari (AFAIK!) |
+| Hewlett-Packard LIF                      |   Y   |        |       |
 | Macintosh HFS                            |   Y   |   Y    | Only AppleDouble files may be written |
-| Apple ProDOS                             |   Y   |        |       |
+| pSOS' PHILE                              |   Y   |        | Probably unreliable due to lack of documentation |
 | Smaky 6                                  |   Y   |        |       |
 {: .datatable }
 
@@ -38,19 +40,19 @@ Using it
 To use, try syntax like this:
 
 ```
-fluxengine ls ibm180 -f drive:0
+fluxengine ls ibm --180 -f drive:0
 ```
 
-`ibm180` is the format, which selects the most common filesystem automatically.
-`-f drive:0` specifies a flux source/sink, in this case a real disk. You may
-also specify a flux file (read only). Disk images may be specified with `-i
-disk.img` (read/write).
+`ibm --180` is the format, which selects the most common filesystem
+automatically.  `-f drive:0` specifies a flux source/sink, in this case a real
+disk. You may also specify a flux file (read only). Disk images may be
+specified with `-i disk.img` (read/write).
 
 Commands which take filename paramaters typically use `-p` to indicate the path
 on the disk, and `-l` for the local filename. For example:
 
 ```
-fluxengine putfile ibm180 -f drive:0 -p ondisk.pcx -l z.pcx
+fluxengine putfile ibm --180 -f drive:0 -p ondisk.pcx -l z.pcx
 ```
 
 This will copy the file `z.pcx` onto the disk and call it `ONDISK.PCX`.
@@ -83,7 +85,7 @@ default; for example, Macintosh HFS filesystems are common on 3.5" floppies. You
 can do this as follows:
 
 ```
-fluxengine format ibm1440 -f drive:1 --filesystem.type=MACHFS
+fluxengine format ibm --1440 -f drive:1 --filesystem.type=MACHFS
 ```
 
 Some filesystems won't work on some disks --- don't try this with Amiga FFS, for

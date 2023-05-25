@@ -2,7 +2,7 @@ syntax = "proto2";
 
 import "lib/common.proto";
 
-message GreaseWeazleProto {
+message GreaseweazleProto {
 	enum BusType { /* note that these must match CMD_SET_BUS codes */
 		BUSTYPE_INVALID = 0;
 		IBMPC = 1;
@@ -11,14 +11,14 @@ message GreaseWeazleProto {
 	};
 
 	optional string port = 1
-		[(help) = "GreaseWeazle serial port to use"];
+		[(help) = "Greaseweazle serial port to use"];
 	optional BusType bus_type = 2
 		[(help) = "which FDD bus type is in use", default = IBMPC];
 }
 
 message UsbProto {
 	optional string serial = 1
-		[(help) = "serial number of FluxEngine or GreaseWeazle device to use"];
+		[(help) = "serial number of FluxEngine or Greaseweazle device to use"];
 
-	optional GreaseWeazleProto greaseweazle = 2 [(help) = "GreaseWeazle-specific options"];
+	optional GreaseweazleProto greaseweazle = 2 [(help) = "Greaseweazle-specific options"];
 }

@@ -35,11 +35,11 @@ Don't believe me? Watch the demo reel!
 </div>
 
 **New!** The FluxEngine client software now works with
-[GreaseWeazle](https://github.com/keirf/Greaseweazle/wiki) hardware. So, if you
+[Greaseweazle](https://github.com/keirf/Greaseweazle/wiki) hardware. So, if you
 can't find a PSoC5 development kit, or don't want to use the Cypress Windows
 tools for programming it, you can use one of these instead. Very nearly all
-FluxEngine features are available with the GreaseWeazle and it works out-of-the
-box. See the [dedicated GreaseWeazle documentation page](doc/greaseweazle.md)
+FluxEngine features are available with the Greaseweazle and it works out-of-the
+box. See the [dedicated Greaseweazle documentation page](doc/greaseweazle.md)
 for more information.
 
 Where?
@@ -65,7 +65,7 @@ following friendly articles:
   - [Using a FluxEngine](doc/using.md) ∾ what to do with your new hardware ∾
     flux files and image files ∾ knowing what you're doing
 
-  - [Using GreaseWeazle hardware with the FluxEngine client
+  - [Using Greaseweazle hardware with the FluxEngine client
     software](doc/greaseweazle.md) ∾ what works ∾ what doesn't work ∾ where to
     go for help
 

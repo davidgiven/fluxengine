@@ -75,7 +75,7 @@ decoder {
 }
 
 option_group {
-	comment: "Format family"
+	comment: "$formats"
 
 	option {
 		name: "110"

@@ -4,7 +4,7 @@
 #include "bytes.h"
 #include "greaseweazle.h"
 
-Bytes fluxEngineToGreaseWeazle(const Bytes& fldata, nanoseconds_t clock)
+Bytes fluxEngineToGreaseweazle(const Bytes& fldata, nanoseconds_t clock)
 {
     Bytes gwdata;
     ByteWriter bw(gwdata);
@@ -89,7 +89,7 @@ Bytes greaseWeazleToFluxEngine(const Bytes& gwdata, nanoseconds_t clock)
                     break;
 
                 default:
-                    error("bad opcode in GreaseWeazle stream");
+                    error("bad opcode in Greaseweazle stream");
             }
         }
         else
