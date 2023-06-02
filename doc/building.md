@@ -185,10 +185,14 @@ generic libusb stuff and should build and run on Windows, Linux and OSX as
 well, although on Windows it'll need MSYS2 and mingw32. You'll need to
 install some support packages.
 
-  - For Linux (this is Ubuntu, but this should apply to Debian too):
+  - For Linux with Ubuntu/Debian:
 	`libusb-1.0-0-dev`, `libsqlite3-dev`, `zlib1g-dev`,
 	`libudev-dev`, `protobuf-compiler`, `libwxgtk3.0-gtk3-dev`,
 	`libfmt-dev`.
+  - For Linux with Fedora/Red Hat:
+    `git`, `make`, `gcc`, `gcc-c++`, `xxd`, `protobuf-compiler`,
+    `protobuf-devel`, `fmt-devel`, `systemd-devel`, `wxGTK3-devel`,
+    `libsqlite3x-devel`
   - For OSX with Homebrew: `libusb`, `pkg-config`, `sqlite`,
     `protobuf`, `truncate`, `wxwidgets`, `fmt`.
   - For Windows with MSYS2: `make`, `mingw-w64-i686-libusb`,
