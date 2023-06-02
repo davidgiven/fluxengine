@@ -93,6 +93,22 @@ You're now looking at the _top_ of the board.
 row of header sockets allowing you to plug the board directly onto the floppy
 disk drive; for simplicity I'm leaving that as an exercise for the reader.)
 
+### If you want to use a PCB
+
+Alternatively, you can make an actual PCB!
+
+<div style="text-align: center">
+<a href="pcb.png"><img src="pcb.png" style="width:80%" alt="the PCB schematic"></a>
+</div>
+
+This is a passive breakout board designed to take a PSoC5 development board, a
+standard 34-way PC connector, and a 50-way 8" drive connector. It was
+contributed by a user --- thanks!
+
+<a href="FluxEngine_eagle_pcb.zip">Download this to get it</a>. This package
+contains the layout in Eagle format, a printable PDF of the PCB layout, and
+gerbers suitable for sending off for manufacture.
+
 ### Grounding
 
 You _also_ need to solder a wire between a handy GND pin on the board and
@@ -185,10 +201,14 @@ generic libusb stuff and should build and run on Windows, Linux and OSX as
 well, although on Windows it'll need MSYS2 and mingw32. You'll need to
 install some support packages.
 
-  - For Linux (this is Ubuntu, but this should apply to Debian too):
+  - For Linux with Ubuntu/Debian:
 	`libusb-1.0-0-dev`, `libsqlite3-dev`, `zlib1g-dev`,
 	`libudev-dev`, `protobuf-compiler`, `libwxgtk3.0-gtk3-dev`,
 	`libfmt-dev`.
+  - For Linux with Fedora/Red Hat:
+    `git`, `make`, `gcc`, `gcc-c++`, `xxd`, `protobuf-compiler`,
+    `protobuf-devel`, `fmt-devel`, `systemd-devel`, `wxGTK3-devel`,
+    `libsqlite3x-devel`
   - For OSX with Homebrew: `libusb`, `pkg-config`, `sqlite`,
     `protobuf`, `truncate`, `wxwidgets`, `fmt`.
   - For Windows with MSYS2: `make`, `mingw-w64-i686-libusb`,
