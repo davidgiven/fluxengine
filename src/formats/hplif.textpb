@@ -91,13 +91,45 @@ option_group {
 	}
 
 	option {
-		name: "320"
-		comment: '320kB 3.5" 80-track SSDD; HP9122 format'
+		name: "616"
+		comment: '616kB 3.5" 77-track DSDD'
+
+		config {
+			layout {
+				tracks: 77
+				sides: 2
+				layoutdata {
+					sector_size: 256
+					physical {
+						start_sector: 1
+						count: 16
+					}
+				}
+			}
+
+			encoder {
+				ibm {
+					trackdata {
+						target_rotational_period_ms: 200
+						target_clock_period_us: 4
+						emit_iam: false
+						gap0: 80
+						gap2: 22
+						gap3: 40
+					}
+				}
+			}
+		}
+	}
+
+	option {
+		name: "640"
+		comment: '640kB 3.5" 80-track DSDD; HP9122 format'
 
 		config {
 			layout {
 				tracks: 80
-				sides: 1
+				sides: 2
 				layoutdata {
 					sector_size: 256
 					physical {
@@ -130,38 +162,6 @@ option_group {
 						gap0: 80
 						gap2: 22
 						gap3: 44
-					}
-				}
-			}
-		}
-	}
-
-	option {
-		name: "616"
-		comment: '616kB 3.5" 77-track DSDD'
-
-		config {
-			layout {
-				tracks: 77
-				sides: 2
-				layoutdata {
-					sector_size: 256
-					physical {
-						start_sector: 1
-						count: 16
-					}
-				}
-			}
-
-			encoder {
-				ibm {
-					trackdata {
-						target_rotational_period_ms: 200
-						target_clock_period_us: 4
-						emit_iam: false
-						gap0: 80
-						gap2: 22
-						gap3: 40
 					}
 				}
 			}

@@ -15,8 +15,8 @@ encoding scheme.
 
   - Format variants:
       - `280`: 280kB 3.5" 70-track SSDD; HP9121 format
-      - `320`: 320kB 3.5" 80-track SSDD; HP9122 format
       - `616`: 616kB 3.5" 77-track DSDD
+      - `640`: 640kB 3.5" 80-track DSDD; HP9122 format
       - `770`: 770kB 3.5" 77-track DSDD
 
 ## Examples
@@ -24,14 +24,14 @@ encoding scheme.
 To read:
 
   - `fluxengine read hplif --280 -s drive:0 -o hplif.img`
-  - `fluxengine read hplif --320 -s drive:0 -o hplif.img`
   - `fluxengine read hplif --616 -s drive:0 -o hplif.img`
+  - `fluxengine read hplif --640 -s drive:0 -o hplif.img`
   - `fluxengine read hplif --770 -s drive:0 -o hplif.img`
 
 To write:
 
   - `fluxengine write hplif --280 -d drive:0 -i hplif.img`
-  - `fluxengine write hplif --320 -d drive:0 -i hplif.img`
   - `fluxengine write hplif --616 -d drive:0 -i hplif.img`
+  - `fluxengine write hplif --640 -d drive:0 -i hplif.img`
   - `fluxengine write hplif --770 -d drive:0 -i hplif.img`
 
