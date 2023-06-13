@@ -214,6 +214,7 @@ private:
         _directoryBlock = rbr.read_be32();
         rbr.skip(4);
         _directorySize = rbr.read_be32();
+		rbr.skip(4);
         unsigned tracks = rbr.read_be32();
         unsigned heads = rbr.read_be32();
         unsigned sectors = rbr.read_be32();
