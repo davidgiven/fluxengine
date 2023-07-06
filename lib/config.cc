@@ -29,7 +29,7 @@ ConfigProto* Config::combined()
         /* First apply any standalone options. */
 
         std::set<std::string> options = _appliedOptions;
-        std::set<const OptionRequirementProto*> requirements;
+        std::set<const OptionPrerequisiteProto*> prereqs;
         for (const auto& option : _baseConfig.option())
         {
             if (options.find(option.name()) != options.end())
@@ -257,7 +257,7 @@ const OptionProto& Config::findOption(const std::string& optionName)
 
 void Config::checkOptionValid(const OptionProto& option)
 {
-    for (const auto& req : option.requires())
+    for (const auto& req : option.prerequisite())
     {
         bool matched = false;
         try

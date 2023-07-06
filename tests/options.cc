@@ -29,7 +29,7 @@ static void test_option_validity()
         option {
             name: "option1"
 
-            requires: {
+            prerequisite: {
                 key: "drive.tpi"
                 value: "96"
             }
@@ -38,7 +38,7 @@ static void test_option_validity()
         option {
             name: "option2"
 
-            requires: {
+            prerequisite: {
                 key: "drive.tpi"
                 value: "95"
             }
@@ -47,7 +47,7 @@ static void test_option_validity()
         option {
             name: "option3"
 
-            requires: {
+            prerequisite: {
                 key: "drive.tpi"
                 value: ["0", "96"]
             }
