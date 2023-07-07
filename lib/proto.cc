@@ -119,6 +119,7 @@ static ProtoField resolveProtoPath(
         switch (field->label())
         {
             case google::protobuf::FieldDescriptor::LABEL_OPTIONAL:
+            case google::protobuf::FieldDescriptor::LABEL_REQUIRED:
                 if (!create && !reflection->HasField(*message, field))
                     throw ProtoPathNotFoundException(fmt::format(
                         "could not find config field '{}'", field->name()));
@@ -139,7 +140,7 @@ static ProtoField resolveProtoPath(
                 break;
 
             default:
-                error("bad proto label {}", field->label());
+                error("bad proto label for field '{}' in '{}'", item, path);
         }
 
         descriptor = message->GetDescriptor();

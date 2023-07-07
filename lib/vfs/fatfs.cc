@@ -296,7 +296,7 @@ private:
 
             default:
                 throw FilesystemException(
-                    fmt::format("unknown fatfs error {}", res));
+                    fmt::format("unknown fatfs error {}", (int) res));
         }
     }
 
