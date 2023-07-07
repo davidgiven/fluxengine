@@ -273,6 +273,8 @@ public:
                             case ImdOutputProto::RATE_DD:
                                 RATE = 2000;
                                 break;
+                            case ImdOutputProto::RATE_GUESS:
+                                break;
                         }
                     }
                     header.ModeValue =

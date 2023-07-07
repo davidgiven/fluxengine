@@ -36,7 +36,7 @@ public:
     {
     }
 
-    uint32_t capabilities() const
+    uint32_t capabilities() const override
     {
         return OP_GETFSDATA | OP_CREATE | OP_LIST | OP_GETFILE | OP_PUTFILE |
                OP_GETDIRENT | OP_MOVE | OP_CREATEDIR | OP_DELETE;
@@ -199,7 +199,7 @@ public:
         throwError(res);
     }
 
-    void createDirectory(const Path& path)
+    void createDirectory(const Path& path) override
     {
         mount();
         auto pathStr = path.to_str();
@@ -296,7 +296,7 @@ private:
 
             default:
                 throw FilesystemException(
-                    fmt::format("unknown fatfs error {}", res));
+                    fmt::format("unknown fatfs error {}", (int)res));
         }
     }
 

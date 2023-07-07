@@ -14,9 +14,10 @@ static std::string supportStatus(SupportStatus status)
 
         case SupportStatus::UNICORN:
             return "🦄";
-    }
 
-    return "";
+        case SupportStatus::UNSUPPORTED:
+            return "";
+    }
 }
 
 int main(int argc, const char* argv[])

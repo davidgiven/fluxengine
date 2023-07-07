@@ -30,8 +30,8 @@ static void upgradeFluxFile(FluxFileProto& proto)
         error(
             "this is a version {} flux file, but this build of the client can "
             "only handle up to version {} --- please upgrade",
-            proto.version(),
-            FluxFileVersion::VERSION_2);
+            (int)proto.version(),
+            (int)FluxFileVersion::VERSION_2);
 }
 
 FluxFileProto loadFl2File(const std::string filename)

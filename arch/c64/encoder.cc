@@ -51,26 +51,6 @@ static void write_bits(
     }
 }
 
-void bindump(std::ostream& stream, std::vector<bool>& buffer)
-{
-    size_t pos = 0;
-
-    while ((pos < buffer.size()) and (pos < 520))
-    {
-        stream << fmt::format("{:5d} : ", pos);
-        for (int i = 0; i < 40; i++)
-        {
-            if ((pos + i) < buffer.size())
-                stream << fmt::format("{:01b}", (buffer[pos + i]));
-            else
-                stream << "-- ";
-            if ((((pos + i + 1) % 8) == 0) and i != 0)
-                stream << "  ";
-        }
-        stream << std::endl;
-        pos += 40;
-    }
-}
 static std::vector<bool> encode_data(uint8_t input)
 {
     /*

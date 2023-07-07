@@ -180,7 +180,7 @@ public:
         trackdataWriter += fluxdata;
     }
 
-    operator std::string() const
+    operator std::string() const override
     {
         return fmt::format("scp({})", _config.filename());
     }

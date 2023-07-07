@@ -56,7 +56,7 @@ public:
     {
     }
 
-    uint32_t capabilities() const
+    uint32_t capabilities() const override
     {
         return OP_GETFSDATA | OP_CREATE | OP_LIST | OP_GETFILE | OP_PUTFILE |
                OP_GETDIRENT | OP_DELETE | OP_MOVE | OP_CREATEDIR;
@@ -229,7 +229,7 @@ public:
             throw CannotWriteException();
     }
 
-    void createDirectory(const Path& path)
+    void createDirectory(const Path& path) override
     {
         AdfMount m(this);
         if (path.empty())

@@ -15,7 +15,7 @@ public:
         return std::unique_ptr<const Fluxmap>();
     }
 
-    void recalibrate() {}
+    void recalibrate() override {}
 };
 
 std::unique_ptr<FluxSource> FluxSource::createEraseFluxSource(

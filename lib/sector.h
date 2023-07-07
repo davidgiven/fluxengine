@@ -90,6 +90,16 @@ struct Sector : public LogicalLocation
     }
 };
 
+template <>
+struct fmt::formatter<Sector::Status> : formatter<string_view>
+{
+    auto format(Sector::Status status, format_context& ctx) const
+    {
+        return formatter<string_view>::format(
+            Sector::statusToString(status), ctx);
+    }
+};
+
 extern bool sectorPointerSortPredicate(const std::shared_ptr<const Sector>& lhs,
     const std::shared_ptr<const Sector>& rhs);
 extern bool sectorPointerEqualsPredicate(
