@@ -78,7 +78,7 @@ private:
     }
 
 public:
-    void StartReading()
+    void StartReading() override
     {
         try
         {

@@ -19,7 +19,7 @@ public:
         return readFlxBytes(Bytes::readFromFile(path));
     }
 
-    void recalibrate() {}
+    void recalibrate() override {}
 
 private:
     const std::string _path;

@@ -128,7 +128,7 @@ public:
         return fluxmap;
     }
 
-    void recalibrate() {}
+    void recalibrate() override {}
 
 private:
     void check_for_error()

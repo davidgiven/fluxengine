@@ -64,7 +64,7 @@ public:
         of << "\n";
     }
 
-    operator std::string() const
+    operator std::string() const override
     {
         return fmt::format("vcd({})", _config.directory());
     }

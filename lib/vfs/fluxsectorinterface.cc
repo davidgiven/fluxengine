@@ -44,7 +44,7 @@ public:
         return _changedSectors.put(track, side, sectorId);
     }
 
-    virtual bool isReadOnly()
+    virtual bool isReadOnly() override
     {
         return (_fluxSink == nullptr);
     }

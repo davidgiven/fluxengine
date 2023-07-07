@@ -139,7 +139,7 @@ public:
     {
     }
 
-    uint32_t capabilities() const
+    uint32_t capabilities() const override
     {
         return OP_LIST | OP_GETFILE | OP_GETFSDATA | OP_GETDIRENT;
     }

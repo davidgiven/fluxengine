@@ -83,7 +83,7 @@ public:
         Fit();
     }
 
-    void SafeFit()
+    void SafeFit() override
     {
         auto minSize = GetMinClientSize();
 
@@ -94,32 +94,32 @@ public:
         SetMinClientSize(minSize);
     }
 
-    void StartIdle()
+    void StartIdle() override
     {
         _idlePanel->Start();
     }
 
-    void StartReading()
+    void StartReading() override
     {
         _imagerPanel->StartReading();
     }
 
-    void StartWriting()
+    void StartWriting() override
     {
         _imagerPanel->StartWriting();
     }
 
-    void StartBrowsing()
+    void StartBrowsing() override
     {
         _browserPanel->StartBrowsing();
     }
 
-    void StartFormatting()
+    void StartFormatting() override
     {
         _browserPanel->StartFormatting();
     }
 
-    void StartExploring()
+    void StartExploring() override
     {
         _explorerPanel->Start();
     }
@@ -186,7 +186,7 @@ public:
         _configWindow->GetTextControl()->AppendText(s);
     }
 
-    void PrepareConfig()
+    void PrepareConfig() override
     {
         _idlePanel->PrepareConfig();
         ShowConfig();

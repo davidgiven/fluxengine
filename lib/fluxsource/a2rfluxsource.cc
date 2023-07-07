@@ -142,7 +142,7 @@ public:
         }
     }
 
-    void recalibrate() {}
+    void recalibrate() override {}
 
 private:
     Bytes findChunk(Bytes id)
