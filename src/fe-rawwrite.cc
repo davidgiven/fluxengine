@@ -49,7 +49,7 @@ static ActionFlag eraseFlag({"--erase"},
     []()
     {
         globalConfig().overrides()->mutable_flux_source()->set_type(
-            FluxSourceProto::ERASE);
+            FluxSourceSinkType::ERASE);
     });
 
 int mainRawWrite(int argc, const char* argv[])
@@ -60,10 +60,10 @@ int mainRawWrite(int argc, const char* argv[])
     if (argc == 1)
         showProfiles("rawwrite", formats);
     globalConfig().overrides()->mutable_flux_sink()->set_type(
-        FluxSinkProto::DRIVE);
+        FluxSourceSinkType::DRIVE);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
-    if (globalConfig()->flux_source().type() == FluxSourceProto::DRIVE)
+    if (globalConfig()->flux_source().type() == FluxSourceSinkType::DRIVE)
         error("you can't use rawwrite to read from hardware");
 
     auto& fluxSource = globalConfig().getFluxSource();

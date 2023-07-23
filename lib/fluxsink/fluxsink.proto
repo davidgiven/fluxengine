@@ -29,17 +29,7 @@ message Fl2FluxSinkProto {
 
 // Next: 10
 message FluxSinkProto {
-	enum FluxSinkType {
-		NOT_SET = 0;
-		DRIVE = 1;
-		A2R = 2;
-		AU = 3;
-		VCD = 4;
-		SCP = 5;
-		FLUX = 6;
-	}
-
-	optional FluxSinkType type = 9 [default = NOT_SET, (help) = "flux sink type"];
+	optional FluxSourceSinkType type = 9 [default = NOT_SET, (help) = "flux sink type"];
 
 	optional HardwareFluxSinkProto drive = 2;
 	optional A2RFluxSinkProto a2r = 8;

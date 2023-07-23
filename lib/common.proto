@@ -19,4 +19,19 @@ enum IndexMode {
 	INDEXMODE_360 = 2;
 }
 
+enum FluxSourceSinkType {
+	NOT_SET = 0;
+	A2R = 1;
+	AU = 2;
+	CWF = 3;
+	DRIVE = 4;
+	ERASE = 5;
+	FLUX = 6;
+	FLX = 7;
+	KRYOFLUX = 8;
+	SCP = 9;
+	TEST_PATTERN = 10;
+	VCD = 11;
+}
+
 

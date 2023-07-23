@@ -64,7 +64,7 @@ int mainRead(int argc, const char* argv[])
     globalConfig().set("flux_source.type", "DRIVE");
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
-    if (globalConfig()->decoder().copy_flux_to().type() == FluxSinkProto::DRIVE)
+    if (globalConfig()->decoder().copy_flux_to().type() == FluxSourceSinkType::DRIVE)
         error("you cannot copy flux to a hardware device");
 
     auto& fluxSource = globalConfig().getFluxSource();

@@ -10,26 +10,25 @@ std::unique_ptr<FluxSink> FluxSink::create(const FluxSinkProto& config)
 {
     switch (config.type())
     {
-        case FluxSinkProto::DRIVE:
+        case FluxSourceSinkType::DRIVE:
             return createHardwareFluxSink(config.drive());
 
-        case FluxSinkProto::A2R:
+        case FluxSourceSinkType::A2R:
             return createA2RFluxSink(config.a2r());
 
-        case FluxSinkProto::AU:
+        case FluxSourceSinkType::AU:
             return createAuFluxSink(config.au());
 
-        case FluxSinkProto::VCD:
+        case FluxSourceSinkType::VCD:
             return createVcdFluxSink(config.vcd());
 
-        case FluxSinkProto::SCP:
+        case FluxSourceSinkType::SCP:
             return createScpFluxSink(config.scp());
 
-        case FluxSinkProto::FLUX:
+        case FluxSourceSinkType::FLUX:
             return createFl2FluxSink(config.fl2());
 
         default:
-            error("bad output disk config");
             return std::unique_ptr<FluxSink>();
     }
 }

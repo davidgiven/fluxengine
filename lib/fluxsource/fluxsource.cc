@@ -10,35 +10,34 @@ std::unique_ptr<FluxSource> FluxSource::create(const FluxSourceProto& config)
 {
     switch (config.type())
     {
-        case FluxSourceProto::DRIVE:
+        case FluxSourceSinkType::DRIVE:
             return createHardwareFluxSource(config.drive());
 
-        case FluxSourceProto::ERASE:
+        case FluxSourceSinkType::ERASE:
             return createEraseFluxSource(config.erase());
 
-        case FluxSourceProto::KRYOFLUX:
+        case FluxSourceSinkType::KRYOFLUX:
             return createKryofluxFluxSource(config.kryoflux());
 
-        case FluxSourceProto::TEST_PATTERN:
+        case FluxSourceSinkType::TEST_PATTERN:
             return createTestPatternFluxSource(config.test_pattern());
 
-        case FluxSourceProto::SCP:
+        case FluxSourceSinkType::SCP:
             return createScpFluxSource(config.scp());
 
-        case FluxSourceProto::A2R:
+        case FluxSourceSinkType::A2R:
             return createA2rFluxSource(config.a2r());
 
-        case FluxSourceProto::CWF:
+        case FluxSourceSinkType::CWF:
             return createCwfFluxSource(config.cwf());
 
-        case FluxSourceProto::FLUX:
+        case FluxSourceSinkType::FLUX:
             return createFl2FluxSource(config.fl2());
 
-        case FluxSourceProto::FLX:
+        case FluxSourceSinkType::FLX:
             return createFlxFluxSource(config.flx());
 
         default:
-            error("bad input disk configuration");
             return std::unique_ptr<FluxSource>();
     }
 }
