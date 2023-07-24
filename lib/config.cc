@@ -22,6 +22,20 @@ struct FluxConstructor
     std::function<void(const std::string& filename, FluxSinkProto*)> sink;
 };
 
+enum ConstructorMode
+{
+    MODE_RO,
+    MODE_WO,
+    MODE_RW
+};
+
+struct ImageConstructor
+{
+    std::string extension;
+    ImageReaderWriterType type;
+    ConstructorMode mode;
+};
+
 static const std::vector<FluxConstructor> fluxConstructors = {
     {.pattern = std::regex("^(.*\\.flux)$"),
      .source =
@@ -121,6 +135,26 @@ static const std::vector<FluxConstructor> fluxConstructors = {
             proto->set_type(FLUXTYPE_AU);
             proto->mutable_au()->set_directory(s);
         }},
+};
+
+static const std::vector<ImageConstructor> imageConstructors = {
+    {".adf",      IMAGETYPE_IMG,      MODE_RW},
+    {".d64",      IMAGETYPE_D64,      MODE_RW},
+    {".d81",      IMAGETYPE_IMG,      MODE_RW},
+    {".d88",      IMAGETYPE_D88,      MODE_RW},
+    {".dim",      IMAGETYPE_DIM,      MODE_RO},
+    {".diskcopy", IMAGETYPE_DISKCOPY, MODE_RW},
+    {".dsk",      IMAGETYPE_IMG,      MODE_RW},
+    {".fdi",      IMAGETYPE_FDI,      MODE_RO},
+    {".imd",      IMAGETYPE_IMD,      MODE_RW},
+    {".img",      IMAGETYPE_IMG,      MODE_RW},
+    {".jv3",      IMAGETYPE_JV3,      MODE_RO},
+    {".nfd",      IMAGETYPE_NFD,      MODE_RO},
+    {".nsi",      IMAGETYPE_NSI,      MODE_RW},
+    {".st",       IMAGETYPE_IMG,      MODE_RW},
+    {".td0",      IMAGETYPE_TD0,      MODE_RO},
+    {".vgi",      IMAGETYPE_IMG,      MODE_RW},
+    {".xdf",      IMAGETYPE_IMG,      MODE_RW},
 };
 
 Config& globalConfig()
@@ -442,7 +476,8 @@ void Config::clearOptions()
     invalidate();
 }
 
-static void setFluxSourceImpl(const std::string& filename, FluxSourceProto* proto)
+static void setFluxSourceImpl(
+    const std::string& filename, FluxSourceProto* proto)
 {
     for (const auto& it : fluxConstructors)
     {
@@ -499,34 +534,14 @@ void Config::setVerificationFluxSource(std::string filename)
 
 void Config::setImageReader(std::string filename)
 {
-    static const std::map<std::string, std::function<void(ImageReaderProto*)>>
-        formats = {
-  // clang-format off
-		{".adf",      [](auto* proto) { proto->set_type(IMAGETYPE_IMG); }},
-		{".d64",      [](auto* proto) { proto->set_type(IMAGETYPE_D64); }},
-		{".d81",      [](auto* proto) { proto->set_type(IMAGETYPE_IMG); }},
-		{".d88",      [](auto* proto) { proto->set_type(IMAGETYPE_D88); }},
-		{".dim",      [](auto* proto) { proto->set_type(IMAGETYPE_DIM); }},
-		{".diskcopy", [](auto* proto) { proto->set_type(IMAGETYPE_DISKCOPY); }},
-		{".dsk",      [](auto* proto) { proto->set_type(IMAGETYPE_IMG); }},
-		{".fdi",      [](auto* proto) { proto->set_type(IMAGETYPE_FDI); }},
-		{".imd",      [](auto* proto) { proto->set_type(IMAGETYPE_IMD); }},
-		{".img",      [](auto* proto) { proto->set_type(IMAGETYPE_IMG); }},
-		{".jv3",      [](auto* proto) { proto->set_type(IMAGETYPE_JV3); }},
-		{".nfd",      [](auto* proto) { proto->set_type(IMAGETYPE_NFD); }},
-		{".nsi",      [](auto* proto) { proto->set_type(IMAGETYPE_NSI); }},
-		{".st",       [](auto* proto) { proto->set_type(IMAGETYPE_IMG); }},
-		{".td0",      [](auto* proto) { proto->set_type(IMAGETYPE_TD0); }},
-		{".vgi",      [](auto* proto) { proto->set_type(IMAGETYPE_IMG); }},
-		{".xdf",      [](auto* proto) { proto->set_type(IMAGETYPE_IMG); }},
-  // clang-format on
-    };
-
-    for (const auto& it : formats)
+    for (const auto& it : imageConstructors)
     {
-        if (endsWith(filename, it.first))
+        if (endsWith(filename, it.extension))
         {
-            it.second(overrides()->mutable_image_reader());
+            if (it.mode == MODE_WO)
+                throw new InapplicableValueException();
+
+            overrides()->mutable_image_reader()->set_type(it.type);
             overrides()->mutable_image_reader()->set_filename(filename);
             return;
         }
@@ -537,31 +552,14 @@ void Config::setImageReader(std::string filename)
 
 void Config::setImageWriter(std::string filename)
 {
-    static const std::map<std::string, std::function<void(ImageWriterProto*)>>
-        formats = {
-  // clang-format off
-		{".adf",      [](auto* proto) { proto->set_type(IMAGETYPE_IMG); }},
-		{".d64",      [](auto* proto) { proto->set_type(IMAGETYPE_D64); }},
-		{".d81",      [](auto* proto) { proto->set_type(IMAGETYPE_IMG); }},
-		{".d88",      [](auto* proto) { proto->set_type(IMAGETYPE_D88); }},
-		{".diskcopy", [](auto* proto) { proto->set_type(IMAGETYPE_DISKCOPY); }},
-		{".dsk",      [](auto* proto) { proto->set_type(IMAGETYPE_IMG); }},
-		{".img",      [](auto* proto) { proto->set_type(IMAGETYPE_IMG); }},
-		{".imd",      [](auto* proto) { proto->set_type(IMAGETYPE_IMD); }},
-		{".ldbs",     [](auto* proto) { proto->set_type(IMAGETYPE_LDBS); }},
-		{".nsi",      [](auto* proto) { proto->set_type(IMAGETYPE_NSI); }},
-		{".raw",      [](auto* proto) { proto->set_type(IMAGETYPE_RAW); }},
-		{".st",       [](auto* proto) { proto->set_type(IMAGETYPE_IMG); }},
-		{".vgi",      [](auto* proto) { proto->set_type(IMAGETYPE_IMG); }},
-		{".xdf",      [](auto* proto) { proto->set_type(IMAGETYPE_IMG); }},
-  // clang-format on
-    };
-
-    for (const auto& it : formats)
+    for (const auto& it : imageConstructors)
     {
-        if (endsWith(filename, it.first))
+        if (endsWith(filename, it.extension))
         {
-            it.second(overrides()->mutable_image_writer());
+            if (it.mode == MODE_RO)
+                throw new InapplicableValueException();
+
+            overrides()->mutable_image_writer()->set_type(it.type);
             overrides()->mutable_image_writer()->set_filename(filename);
             return;
         }
