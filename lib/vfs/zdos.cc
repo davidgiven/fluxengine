@@ -161,12 +161,15 @@ class ZDosFilesystem : public Filesystem
             attributes[Filesystem::LENGTH] = std::to_string(length);
             attributes[Filesystem::FILE_TYPE] = "file";
             attributes[Filesystem::MODE] = mode;
-            attributes["zdos.descriptor_record"] = std::to_string(descriptorBlock);
+            attributes["zdos.descriptor_record"] =
+                std::to_string(descriptorBlock);
             attributes["zdos.first_record"] = std::to_string(zd.firstRecord);
             attributes["zdos.record_size"] = std::to_string(zd.recordSize);
             attributes["zdos.record_count"] = std::to_string(zd.recordCount);
-            attributes["zdos.last_record_size"] = std::to_string(zd.lastRecordSize);
-            attributes["zdos.start_address"] = fmt::format("0x{:04x}", zd.startAddress);
+            attributes["zdos.last_record_size"] =
+                std::to_string(zd.lastRecordSize);
+            attributes["zdos.start_address"] =
+                fmt::format("0x{:04x}", zd.startAddress);
             attributes["zdos.type"] = fileTypeMap.at(zd.type & 0xf0);
             attributes["zdos.ctime"] = convertTime(zd.ctime);
             attributes["zdos.mtime"] = convertTime(zd.mtime);
@@ -277,7 +280,8 @@ private:
 
                 auto dirent = std::make_unique<ZDosDirent>(
                     this, filename, descriptorBlock);
-                _usedBlocks += (dirent->zd.recordCount * dirent->zd.recordSize) / 0x80 + 1;
+                _usedBlocks +=
+                    (dirent->zd.recordCount * dirent->zd.recordSize) / 0x80 + 1;
                 _dirents.push_back(std::move(dirent));
             }
         }
