@@ -88,7 +88,11 @@ message LifProto
         [ default = 256, (help) = "LIF filesystem block size" ];
 }
 
-// NEXT_TAG: 15
+message ZDosProto
+{
+}
+
+// NEXT_TAG: 16
 message FilesystemProto
 {
     enum FilesystemType
@@ -106,6 +110,7 @@ message FilesystemProto
         APPLEDOS = 10;
         PHILE = 11;
         LIF = 12;
+        ZDOS = 13;
     }
 
     optional FilesystemType type = 10
@@ -123,6 +128,7 @@ message FilesystemProto
     optional Smaky6FsProto smaky6 = 11;
     optional PhileProto phile = 13;
     optional LifProto lif = 14;
+    optional ZDosProto zdos = 15;
 
     optional SectorListProto sector_order = 9
         [ (help) = "specify the filesystem order of sectors" ];

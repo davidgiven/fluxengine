@@ -254,12 +254,12 @@ public:
                 ignoreInapplicableValueExceptions(
                     [&]()
                     {
-                globalConfig().setImageReader(_selectedImagefilename);
+                        globalConfig().setImageReader(_selectedImagefilename);
                     });
                 ignoreInapplicableValueExceptions(
                     [&]()
                     {
-                globalConfig().setImageWriter(_selectedImagefilename);
+                        globalConfig().setImageWriter(_selectedImagefilename);
                     });
                 break;
             }
