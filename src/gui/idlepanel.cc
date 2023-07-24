@@ -46,6 +46,18 @@ static wxBitmap createBitmap(const uint8_t* data, size_t length)
     return wxBitmap(image);
 }
 
+static void ignoreInapplicableValueExceptions(std::function<void(void)> cb)
+{
+    try
+    {
+        cb();
+    }
+    catch (const InapplicableValueException* e)
+    {
+        /* swallow */
+    }
+}
+
 class IdlePanelImpl : public IdlePanelGen, public IdlePanel
 {
     enum
@@ -224,30 +236,31 @@ public:
 
             case SELECTEDSOURCE_FLUX:
             {
-                try
-                {
-                    globalConfig().setFluxSink(_selectedFluxfilename);
-                }
-                catch (const InapplicableValueException* e)
-                {
-                    /* ignore */
-                }
-
-                try
-                {
-                    globalConfig().setFluxSource(_selectedFluxfilename);
-                }
-                catch (const InapplicableValueException* e)
-                {
-                    /* ignore */
-                }
+                ignoreInapplicableValueExceptions(
+                    [&]()
+                    {
+                        globalConfig().setFluxSink(_selectedFluxfilename);
+                    });
+                ignoreInapplicableValueExceptions(
+                    [&]()
+                    {
+                        globalConfig().setFluxSource(_selectedFluxfilename);
+                    });
                 break;
             }
 
             case SELECTEDSOURCE_IMAGE:
             {
+                ignoreInapplicableValueExceptions(
+                    [&]()
+                    {
                 globalConfig().setImageReader(_selectedImagefilename);
+                    });
+                ignoreInapplicableValueExceptions(
+                    [&]()
+                    {
                 globalConfig().setImageWriter(_selectedImagefilename);
+                    });
                 break;
             }
         }
