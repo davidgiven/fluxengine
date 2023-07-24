@@ -26,6 +26,7 @@ The following file systems are supported so far.
 | Macintosh HFS                            |   Y   |   Y    | Only AppleDouble files may be written |
 | pSOS' PHILE                              |   Y   |        | Probably unreliable due to lack of documentation |
 | Smaky 6                                  |   Y   |        |       |
+| Zilog MCZ RIO's ZDOS                     |   Y   |        |       |
 {: .datatable }
 
 Please not that Atari disks do _not_ use standard FatFS, and the library I'm

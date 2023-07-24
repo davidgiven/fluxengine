@@ -77,14 +77,15 @@ LIBFLUXENGINE_SRCS = \
 	lib/vfs/cbmfs.cc \
 	lib/vfs/cpmfs.cc \
 	lib/vfs/fatfs.cc \
-	lib/vfs/lif.cc \
-	lib/vfs/machfs.cc \
-	lib/vfs/prodos.cc \
-	lib/vfs/smaky6fs.cc \
-	lib/vfs/philefs.cc \
-	lib/vfs/vfs.cc \
 	lib/vfs/fluxsectorinterface.cc \
 	lib/vfs/imagesectorinterface.cc \
+	lib/vfs/lif.cc \
+	lib/vfs/machfs.cc \
+	lib/vfs/philefs.cc \
+	lib/vfs/prodos.cc \
+	lib/vfs/smaky6fs.cc \
+	lib/vfs/vfs.cc \
+	lib/vfs/zdos.cc \
 
 LIBFLUXENGINE_OBJS = $(patsubst %.cc, $(OBJDIR)/%.o, $(LIBFLUXENGINE_SRCS))
 OBJS += $(LIBFLUXENGINE_OBJS)
