@@ -29,7 +29,8 @@ message Fl2FluxSinkProto {
 
 // Next: 10
 message FluxSinkProto {
-	optional FluxSourceSinkType type = 9 [default = NOT_SET, (help) = "flux sink type"];
+	optional FluxSourceSinkType type = 9
+		[default = FLUXTYPE_NOT_SET, (help) = "flux sink type"];
 
 	optional HardwareFluxSinkProto drive = 2;
 	optional A2RFluxSinkProto a2r = 8;

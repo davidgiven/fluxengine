@@ -247,10 +247,10 @@ static void draw_x_graticules(Agg2D& painter,
 int mainAnalyseDriveResponse(int argc, const char* argv[])
 {
     globalConfig().overrides()->mutable_flux_source()->set_type(
-        FluxSourceSinkType::DRIVE);
+        FLUXTYPE_DRIVE);
     flags.parseFlagsWithConfigFiles(argc, argv, {});
 
-    if (globalConfig()->flux_sink().type() != FluxSourceSinkType::DRIVE)
+    if (globalConfig()->flux_sink().type() != FLUXTYPE_DRIVE)
         error("this only makes sense with a real disk drive");
 
     usbSetDrive(globalConfig()->drive().drive(),

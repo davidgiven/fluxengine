@@ -66,25 +66,14 @@ message ImdOutputProto
 // NEXT_TAG: 12
 message ImageWriterProto
 {
-    enum ImageWriterType {
-        NOT_SET = 0;
-        IMG = 1;
-        D64 = 2;
-        LDBS = 3;
-        DISKCOPY = 4;
-        NSI = 5;
-        RAW = 6;
-        D88 = 7;
-        IMD = 8;
-    }
-
     optional string filename = 1 [ (help) = "filename of output sector image" ];
     optional bool filesystem_sector_order = 10 [
         (help) = "read/write sector image in filesystem order",
         default = false
     ];
 
-    optional ImageWriterType type = 11 [ default = NOT_SET, (help) = "image writer type" ];
+    optional ImageReaderWriterType type = 11
+        [ default = IMAGETYPE_NOT_SET, (help) = "image writer type" ];
 
     optional ImgInputOutputProto img = 2;
     optional D64OutputProto d64 = 3;

@@ -35,12 +35,12 @@ documentation:
 
 image_reader {
 	filename: "northstar.nsi"
-	type: NSI
+	type: IMAGETYPE_NSI
 }
 
 image_writer {
 	filename: "northstar.nsi"
-	type: NSI
+	type: IMAGETYPE_NSI
 }
 
 layout {

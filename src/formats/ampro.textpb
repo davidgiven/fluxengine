@@ -44,7 +44,7 @@ documentation:
 
 image_writer {
 	filename: "ampro.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 layout {

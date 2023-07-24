@@ -10,31 +10,31 @@ std::unique_ptr<FluxSource> FluxSource::create(const FluxSourceProto& config)
 {
     switch (config.type())
     {
-        case FluxSourceSinkType::DRIVE:
+        case FLUXTYPE_DRIVE:
             return createHardwareFluxSource(config.drive());
 
-        case FluxSourceSinkType::ERASE:
+        case FLUXTYPE_ERASE:
             return createEraseFluxSource(config.erase());
 
-        case FluxSourceSinkType::KRYOFLUX:
+        case FLUXTYPE_KRYOFLUX:
             return createKryofluxFluxSource(config.kryoflux());
 
-        case FluxSourceSinkType::TEST_PATTERN:
+        case FLUXTYPE_TEST_PATTERN:
             return createTestPatternFluxSource(config.test_pattern());
 
-        case FluxSourceSinkType::SCP:
+        case FLUXTYPE_SCP:
             return createScpFluxSource(config.scp());
 
-        case FluxSourceSinkType::A2R:
+        case FLUXTYPE_A2R:
             return createA2rFluxSource(config.a2r());
 
-        case FluxSourceSinkType::CWF:
+        case FLUXTYPE_CWF:
             return createCwfFluxSource(config.cwf());
 
-        case FluxSourceSinkType::FLUX:
+        case FLUXTYPE_FLUX:
             return createFl2FluxSource(config.fl2());
 
-        case FluxSourceSinkType::FLX:
+        case FLUXTYPE_FLX:
             return createFlxFluxSource(config.flx());
 
         default:

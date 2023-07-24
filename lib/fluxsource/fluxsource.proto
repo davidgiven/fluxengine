@@ -41,7 +41,8 @@ message FlxFluxSourceProto {
 
 // NEXT: 12
 message FluxSourceProto {
-	optional FluxSourceSinkType type = 9 [default = NOT_SET, (help) = "flux source type"];
+	optional FluxSourceSinkType type = 9
+		[default = FLUXTYPE_NOT_SET, (help) = "flux source type"];
 
 	optional A2rFluxSourceProto a2r = 11;
 	optional CwfFluxSourceProto cwf = 7;

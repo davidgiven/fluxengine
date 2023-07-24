@@ -57,10 +57,10 @@ int mainRawRead(int argc, const char* argv[])
     if (argc == 1)
         showProfiles("rawread", formats);
     globalConfig().overrides()->mutable_flux_source()->set_type(
-        FluxSourceSinkType::DRIVE);
+        FLUXTYPE_DRIVE);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
-    if (globalConfig()->flux_sink().type() == FluxSourceSinkType::DRIVE)
+    if (globalConfig()->flux_sink().type() == FLUXTYPE_DRIVE)
         error("you can't use rawread to write to hardware");
 
     std::shared_ptr<FluxSource> fluxSource = globalConfig().getFluxSource();

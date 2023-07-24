@@ -27,12 +27,12 @@ static const std::vector<FluxConstructor> fluxConstructors = {
      .source =
             [](auto& s, auto* proto)
         {
-            proto->set_type(FluxSourceSinkType::FLUX);
+            proto->set_type(FLUXTYPE_FLUX);
             proto->mutable_fl2()->set_filename(s);
         }, .sink =
             [](auto& s, auto* proto)
         {
-            proto->set_type(FluxSourceSinkType::FLUX);
+            proto->set_type(FLUXTYPE_FLUX);
             proto->mutable_fl2()->set_filename(s);
         }},
     {
@@ -40,63 +40,63 @@ static const std::vector<FluxConstructor> fluxConstructors = {
      .source =
             [](auto& s, auto* proto)
         {
-            proto->set_type(FluxSourceSinkType::SCP);
+            proto->set_type(FLUXTYPE_SCP);
             proto->mutable_scp()->set_filename(s);
         }, .sink =
             [](auto& s, auto* proto)
         {
-            proto->set_type(FluxSourceSinkType::SCP);
+            proto->set_type(FLUXTYPE_SCP);
             proto->mutable_scp()->set_filename(s);
         }, },
     {.pattern = std::regex("^(.*\\.a2r)$"),
      .source =
             [](auto& s, auto* proto)
         {
-            proto->set_type(FluxSourceSinkType::A2R);
+            proto->set_type(FLUXTYPE_A2R);
             proto->mutable_a2r()->set_filename(s);
         }, .sink =
             [](auto& s, auto* proto)
         {
-            proto->set_type(FluxSourceSinkType::A2R);
+            proto->set_type(FLUXTYPE_A2R);
             proto->mutable_a2r()->set_filename(s);
         }},
     {.pattern = std::regex("^(.*\\.cwf)$"),
      .source =
             [](auto& s, auto* proto)
         {
-            proto->set_type(FluxSourceSinkType::CWF);
+            proto->set_type(FLUXTYPE_CWF);
             proto->mutable_cwf()->set_filename(s);
         }},
     {.pattern = std::regex("^erase:$"),
      .source =
             [](auto& s, auto* proto)
         {
-            proto->set_type(FluxSourceSinkType::ERASE);
+            proto->set_type(FLUXTYPE_ERASE);
         }},
     {.pattern = std::regex("^kryoflux:(.*)$"),
      .source =
             [](auto& s, auto* proto)
         {
-            proto->set_type(FluxSourceSinkType::KRYOFLUX);
+            proto->set_type(FLUXTYPE_KRYOFLUX);
             proto->mutable_kryoflux()->set_directory(s);
         }},
     {.pattern = std::regex("^testpattern:(.*)"),
      .source =
             [](auto& s, auto* proto)
         {
-            proto->set_type(FluxSourceSinkType::TEST_PATTERN);
+            proto->set_type(FLUXTYPE_TEST_PATTERN);
         }},
     {.pattern = std::regex("^drive:(.*)"),
      .source =
             [](auto& s, auto* proto)
         {
-            proto->set_type(FluxSourceSinkType::DRIVE);
+            proto->set_type(FLUXTYPE_DRIVE);
             globalConfig().overrides()->mutable_drive()->set_drive(
                 std::stoi(s));
         }, .sink =
             [](auto& s, auto* proto)
         {
-            proto->set_type(FluxSourceSinkType::DRIVE);
+            proto->set_type(FLUXTYPE_DRIVE);
             globalConfig().overrides()->mutable_drive()->set_drive(
                 std::stoi(s));
         }},
@@ -104,21 +104,21 @@ static const std::vector<FluxConstructor> fluxConstructors = {
      .source =
             [](auto& s, auto* proto)
         {
-            proto->set_type(FluxSourceSinkType::FLX);
+            proto->set_type(FLUXTYPE_FLX);
             proto->mutable_flx()->set_directory(s);
         }},
     {.pattern = std::regex("^vcd:(.*)$"),
      .sink =
             [](auto& s, auto* proto)
         {
-            proto->set_type(FluxSourceSinkType::VCD);
+            proto->set_type(FLUXTYPE_VCD);
             proto->mutable_vcd()->set_directory(s);
         }},
     {.pattern = std::regex("^au:(.*)$"),
      .sink =
             [](auto& s, auto* proto)
         {
-            proto->set_type(FluxSourceSinkType::AU);
+            proto->set_type(FLUXTYPE_AU);
             proto->mutable_au()->set_directory(s);
         }},
 };
@@ -502,23 +502,23 @@ void Config::setImageReader(std::string filename)
     static const std::map<std::string, std::function<void(ImageReaderProto*)>>
         formats = {
   // clang-format off
-		{".adf",      [](auto* proto) { proto->set_type(ImageReaderProto::IMG); }},
-		{".d64",      [](auto* proto) { proto->set_type(ImageReaderProto::D64); }},
-		{".d81",      [](auto* proto) { proto->set_type(ImageReaderProto::IMG); }},
-		{".d88",      [](auto* proto) { proto->set_type(ImageReaderProto::D88); }},
-		{".dim",      [](auto* proto) { proto->set_type(ImageReaderProto::DIM); }},
-		{".diskcopy", [](auto* proto) { proto->set_type(ImageReaderProto::DISKCOPY); }},
-		{".dsk",      [](auto* proto) { proto->set_type(ImageReaderProto::IMG); }},
-		{".fdi",      [](auto* proto) { proto->set_type(ImageReaderProto::FDI); }},
-		{".imd",      [](auto* proto) { proto->set_type(ImageReaderProto::IMD); }},
-		{".img",      [](auto* proto) { proto->set_type(ImageReaderProto::IMG); }},
-		{".jv3",      [](auto* proto) { proto->set_type(ImageReaderProto::JV3); }},
-		{".nfd",      [](auto* proto) { proto->set_type(ImageReaderProto::NFD); }},
-		{".nsi",      [](auto* proto) { proto->set_type(ImageReaderProto::NSI); }},
-		{".st",       [](auto* proto) { proto->set_type(ImageReaderProto::IMG); }},
-		{".td0",      [](auto* proto) { proto->set_type(ImageReaderProto::TD0); }},
-		{".vgi",      [](auto* proto) { proto->set_type(ImageReaderProto::IMG); }},
-		{".xdf",      [](auto* proto) { proto->set_type(ImageReaderProto::IMG); }},
+		{".adf",      [](auto* proto) { proto->set_type(IMAGETYPE_IMG); }},
+		{".d64",      [](auto* proto) { proto->set_type(IMAGETYPE_D64); }},
+		{".d81",      [](auto* proto) { proto->set_type(IMAGETYPE_IMG); }},
+		{".d88",      [](auto* proto) { proto->set_type(IMAGETYPE_D88); }},
+		{".dim",      [](auto* proto) { proto->set_type(IMAGETYPE_DIM); }},
+		{".diskcopy", [](auto* proto) { proto->set_type(IMAGETYPE_DISKCOPY); }},
+		{".dsk",      [](auto* proto) { proto->set_type(IMAGETYPE_IMG); }},
+		{".fdi",      [](auto* proto) { proto->set_type(IMAGETYPE_FDI); }},
+		{".imd",      [](auto* proto) { proto->set_type(IMAGETYPE_IMD); }},
+		{".img",      [](auto* proto) { proto->set_type(IMAGETYPE_IMG); }},
+		{".jv3",      [](auto* proto) { proto->set_type(IMAGETYPE_JV3); }},
+		{".nfd",      [](auto* proto) { proto->set_type(IMAGETYPE_NFD); }},
+		{".nsi",      [](auto* proto) { proto->set_type(IMAGETYPE_NSI); }},
+		{".st",       [](auto* proto) { proto->set_type(IMAGETYPE_IMG); }},
+		{".td0",      [](auto* proto) { proto->set_type(IMAGETYPE_TD0); }},
+		{".vgi",      [](auto* proto) { proto->set_type(IMAGETYPE_IMG); }},
+		{".xdf",      [](auto* proto) { proto->set_type(IMAGETYPE_IMG); }},
   // clang-format on
     };
 
@@ -540,20 +540,20 @@ void Config::setImageWriter(std::string filename)
     static const std::map<std::string, std::function<void(ImageWriterProto*)>>
         formats = {
   // clang-format off
-		{".adf",      [](auto* proto) { proto->set_type(ImageWriterProto::IMG); }},
-		{".d64",      [](auto* proto) { proto->set_type(ImageWriterProto::D64); }},
-		{".d81",      [](auto* proto) { proto->set_type(ImageWriterProto::IMG); }},
-		{".d88",      [](auto* proto) { proto->set_type(ImageWriterProto::D88); }},
-		{".diskcopy", [](auto* proto) { proto->set_type(ImageWriterProto::DISKCOPY); }},
-		{".dsk",      [](auto* proto) { proto->set_type(ImageWriterProto::IMG); }},
-		{".img",      [](auto* proto) { proto->set_type(ImageWriterProto::IMG); }},
-		{".imd",      [](auto* proto) { proto->set_type(ImageWriterProto::IMD); }},
-		{".ldbs",     [](auto* proto) { proto->set_type(ImageWriterProto::LDBS); }},
-		{".nsi",      [](auto* proto) { proto->set_type(ImageWriterProto::NSI); }},
-		{".raw",      [](auto* proto) { proto->set_type(ImageWriterProto::RAW); }},
-		{".st",       [](auto* proto) { proto->set_type(ImageWriterProto::IMG); }},
-		{".vgi",      [](auto* proto) { proto->set_type(ImageWriterProto::IMG); }},
-		{".xdf",      [](auto* proto) { proto->set_type(ImageWriterProto::IMG); }},
+		{".adf",      [](auto* proto) { proto->set_type(IMAGETYPE_IMG); }},
+		{".d64",      [](auto* proto) { proto->set_type(IMAGETYPE_D64); }},
+		{".d81",      [](auto* proto) { proto->set_type(IMAGETYPE_IMG); }},
+		{".d88",      [](auto* proto) { proto->set_type(IMAGETYPE_D88); }},
+		{".diskcopy", [](auto* proto) { proto->set_type(IMAGETYPE_DISKCOPY); }},
+		{".dsk",      [](auto* proto) { proto->set_type(IMAGETYPE_IMG); }},
+		{".img",      [](auto* proto) { proto->set_type(IMAGETYPE_IMG); }},
+		{".imd",      [](auto* proto) { proto->set_type(IMAGETYPE_IMD); }},
+		{".ldbs",     [](auto* proto) { proto->set_type(IMAGETYPE_LDBS); }},
+		{".nsi",      [](auto* proto) { proto->set_type(IMAGETYPE_NSI); }},
+		{".raw",      [](auto* proto) { proto->set_type(IMAGETYPE_RAW); }},
+		{".st",       [](auto* proto) { proto->set_type(IMAGETYPE_IMG); }},
+		{".vgi",      [](auto* proto) { proto->set_type(IMAGETYPE_IMG); }},
+		{".xdf",      [](auto* proto) { proto->set_type(IMAGETYPE_IMG); }},
   // clang-format on
     };
 
@@ -572,7 +572,7 @@ void Config::setImageWriter(std::string filename)
 
 bool Config::hasFluxSource()
 {
-    return (*this)->flux_source().type() != FluxSourceSinkType::NOT_SET;
+    return (*this)->flux_source().type() != FLUXTYPE_NOT_SET;
 }
 
 std::shared_ptr<FluxSource>& Config::getFluxSource()
@@ -590,7 +590,7 @@ std::shared_ptr<FluxSource>& Config::getFluxSource()
 
 bool Config::hasVerificationFluxSource() const
 {
-    return _verificationFluxSourceProto.type() != FluxSourceSinkType::NOT_SET;
+    return _verificationFluxSourceProto.type() != FLUXTYPE_NOT_SET;
 }
 
 std::shared_ptr<FluxSource>& Config::getVerificationFluxSource()
@@ -608,7 +608,7 @@ std::shared_ptr<FluxSource>& Config::getVerificationFluxSource()
 
 bool Config::hasImageReader()
 {
-    return (*this)->image_reader().type() != ImageReaderProto::NOT_SET;
+    return (*this)->image_reader().type() != IMAGETYPE_NOT_SET;
 }
 
 std::shared_ptr<ImageReader>& Config::getImageReader()
@@ -626,7 +626,7 @@ std::shared_ptr<ImageReader>& Config::getImageReader()
 
 bool Config::hasFluxSink()
 {
-    return (*this)->flux_sink().type() != FluxSourceSinkType::NOT_SET;
+    return (*this)->flux_sink().type() != FLUXTYPE_NOT_SET;
 }
 
 std::unique_ptr<FluxSink> Config::getFluxSink()
@@ -639,7 +639,7 @@ std::unique_ptr<FluxSink> Config::getFluxSink()
 
 bool Config::hasImageWriter()
 {
-    return (*this)->image_writer().type() != ImageWriterProto::NOT_SET;
+    return (*this)->image_writer().type() != IMAGETYPE_NOT_SET;
 }
 
 std::unique_ptr<ImageWriter> Config::getImageWriter()

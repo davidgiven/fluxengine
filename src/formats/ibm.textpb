@@ -84,12 +84,12 @@ versa, so it shouldn't matter.
 
 image_reader {
 	filename: "ibm.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 image_writer {
 	filename: "ibm.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 decoder {

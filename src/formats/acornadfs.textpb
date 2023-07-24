@@ -22,7 +22,7 @@ they might require nudging as the side order can't be reliably autodetected.
 
 image_writer {
 	filename: "acornadfs.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 decoder {

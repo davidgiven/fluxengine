@@ -236,7 +236,7 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystemFromConfig()
             fluxSource = globalConfig().getFluxSource();
             decoder = globalConfig().getDecoder();
         }
-        if (globalConfig()->flux_sink().type() == FluxSourceSinkType::DRIVE)
+        if (globalConfig()->flux_sink().type() == FLUXTYPE_DRIVE)
         {
             fluxSink = globalConfig().getFluxSink();
             encoder = globalConfig().getEncoder();

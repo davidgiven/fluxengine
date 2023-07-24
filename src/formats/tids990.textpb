@@ -31,12 +31,12 @@ documentation:
 
 image_reader {
 	filename: "tids990.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 image_writer {
 	filename: "tids990.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 layout {

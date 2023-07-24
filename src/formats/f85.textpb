@@ -42,7 +42,7 @@ There's amazingly little information about these things.
 
 image_writer {
 	filename: "f85.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 decoder {

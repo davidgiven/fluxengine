@@ -20,12 +20,12 @@ drive {
 
 image_reader {
 	filename: "hplif.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 image_writer {
 	filename: "hplif.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 decoder {

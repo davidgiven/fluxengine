@@ -57,7 +57,7 @@ documentation:
 
 image_writer {
 	filename: "mx.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 layout {

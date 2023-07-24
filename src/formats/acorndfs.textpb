@@ -25,12 +25,12 @@ documentation:
 
 image_reader {
 	filename: "acorndfs.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 image_writer {
 	filename: "acorndfs.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 layout {

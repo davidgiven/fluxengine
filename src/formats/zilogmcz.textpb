@@ -40,7 +40,7 @@ documentation:
 
 image_writer {
 	filename: "zilogmcz.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 decoder {

@@ -29,7 +29,7 @@ documentation:
 
 image_writer {
 	filename: "smaky6.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 layout {

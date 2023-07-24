@@ -31,12 +31,12 @@ documentation:
 
 image_reader {
 	filename: "amiga.adf"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 image_writer {
 	filename: "amiga.adf"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 layout {

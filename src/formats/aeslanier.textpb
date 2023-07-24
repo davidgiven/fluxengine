@@ -43,7 +43,7 @@ documentation:
 
 image_writer {
 	filename: "aeslanier.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 decoder {

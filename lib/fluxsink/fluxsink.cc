@@ -10,22 +10,22 @@ std::unique_ptr<FluxSink> FluxSink::create(const FluxSinkProto& config)
 {
     switch (config.type())
     {
-        case FluxSourceSinkType::DRIVE:
+        case FLUXTYPE_DRIVE:
             return createHardwareFluxSink(config.drive());
 
-        case FluxSourceSinkType::A2R:
+        case FLUXTYPE_A2R:
             return createA2RFluxSink(config.a2r());
 
-        case FluxSourceSinkType::AU:
+        case FLUXTYPE_AU:
             return createAuFluxSink(config.au());
 
-        case FluxSourceSinkType::VCD:
+        case FLUXTYPE_VCD:
             return createVcdFluxSink(config.vcd());
 
-        case FluxSourceSinkType::SCP:
+        case FLUXTYPE_SCP:
             return createScpFluxSink(config.scp());
 
-        case FluxSourceSinkType::FLUX:
+        case FLUXTYPE_FLUX:
             return createFl2FluxSink(config.fl2());
 
         default:
