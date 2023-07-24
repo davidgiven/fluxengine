@@ -442,7 +442,7 @@ void Config::clearOptions()
     invalidate();
 }
 
-static void setFluxSourceImpl(std::string filename, FluxSourceProto* proto)
+static void setFluxSourceImpl(const std::string& filename, FluxSourceProto* proto)
 {
     for (const auto& it : fluxConstructors)
     {
@@ -464,7 +464,7 @@ void Config::setFluxSource(std::string filename)
     setFluxSourceImpl(filename, overrides()->mutable_flux_source());
 }
 
-static void setFluxSinkImpl(std::string filename, FluxSinkProto* proto)
+static void setFluxSinkImpl(const std::string& filename, FluxSinkProto* proto)
 {
     for (const auto& it : fluxConstructors)
     {

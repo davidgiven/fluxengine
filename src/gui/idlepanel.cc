@@ -224,8 +224,23 @@ public:
 
             case SELECTEDSOURCE_FLUX:
             {
-                globalConfig().setFluxSink(_selectedFluxfilename);
-                globalConfig().setFluxSource(_selectedFluxfilename);
+                try
+                {
+                    globalConfig().setFluxSink(_selectedFluxfilename);
+                }
+                catch (const InapplicableValueException* e)
+                {
+                    /* ignore */
+                }
+
+                try
+                {
+                    globalConfig().setFluxSource(_selectedFluxfilename);
+                }
+                catch (const InapplicableValueException* e)
+                {
+                    /* ignore */
+                }
                 break;
             }
 
@@ -587,12 +602,12 @@ private:
             /* The current set of options is invalid for some reason. Just
              * swallow the errors. */
         }
-	catch (const ErrorException& e)
-	{
-	    /* This really isn't supposed to happen, but sometimes does and
-	     * it crashes the whole program. */
-	    return;
-	}
+        catch (const ErrorException& e)
+        {
+            /* This really isn't supposed to happen, but sometimes does and
+             * it crashes the whole program. */
+            return;
+        }
 
         assert(!wxGetApp().IsWorkerThreadRunning());
 
