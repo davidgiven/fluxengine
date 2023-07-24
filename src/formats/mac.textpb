@@ -61,12 +61,12 @@ documentation:
 
 image_reader {
 	filename: "mac.dsk"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 image_writer {
 	filename: "mac.dsk"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 layout {

@@ -15,28 +15,28 @@ std::unique_ptr<ImageWriter> ImageWriter::create(const ImageWriterProto& config)
 {
     switch (config.type())
     {
-        case ImageWriterProto::IMG:
+        case IMAGETYPE_IMG:
             return ImageWriter::createImgImageWriter(config);
 
-        case ImageWriterProto::D64:
+        case IMAGETYPE_D64:
             return ImageWriter::createD64ImageWriter(config);
 
-        case ImageWriterProto::LDBS:
+        case IMAGETYPE_LDBS:
             return ImageWriter::createLDBSImageWriter(config);
 
-        case ImageWriterProto::DISKCOPY:
+        case IMAGETYPE_DISKCOPY:
             return ImageWriter::createDiskCopyImageWriter(config);
 
-        case ImageWriterProto::NSI:
+        case IMAGETYPE_NSI:
             return ImageWriter::createNsiImageWriter(config);
 
-        case ImageWriterProto::RAW:
+        case IMAGETYPE_RAW:
             return ImageWriter::createRawImageWriter(config);
 
-        case ImageWriterProto::D88:
+        case IMAGETYPE_D88:
             return ImageWriter::createD88ImageWriter(config);
 
-        case ImageWriterProto::IMD:
+        case IMAGETYPE_IMD:
             return ImageWriter::createImdImageWriter(config);
 
         default:

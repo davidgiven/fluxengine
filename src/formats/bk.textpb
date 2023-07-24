@@ -19,12 +19,12 @@ on what was available at the time, with the same format on both.
 
 image_reader {
 	filename: "bk800.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 image_writer {
 	filename: "bk800.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 layout {

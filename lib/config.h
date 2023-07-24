@@ -4,6 +4,7 @@
 
 #include <google/protobuf/message.h>
 #include "lib/config.pb.h"
+#include "lib/common.pb.h"
 
 class ConfigProto;
 class OptionProto;
@@ -44,6 +45,14 @@ public:
         OptionException(message)
     {
     }
+};
+
+class InapplicableValueException : public ErrorException
+{
+public:
+    InapplicableValueException():
+        ErrorException("selected format cannot be used here")
+    {}
 };
 
 class Config

@@ -61,10 +61,10 @@ int mainRead(int argc, const char* argv[])
 {
     if (argc == 1)
         showProfiles("read", formats);
-    globalConfig().set("flux_source.type", "DRIVE");
+    globalConfig().set("flux_source.type", "FLUXTYPE_DRIVE");
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
-    if (globalConfig()->decoder().copy_flux_to().type() == FluxSinkProto::DRIVE)
+    if (globalConfig()->decoder().copy_flux_to().type() == FLUXTYPE_DRIVE)
         error("you cannot copy flux to a hardware device");
 
     auto& fluxSource = globalConfig().getFluxSource();

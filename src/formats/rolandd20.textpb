@@ -20,7 +20,7 @@ you know anything about it.
 
 image_writer {
 	filename: "rolandd20.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 layout {

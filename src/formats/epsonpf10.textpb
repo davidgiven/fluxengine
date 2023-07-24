@@ -11,7 +11,7 @@ format itself is yet another IBM scheme variant.
 
 image_writer {
 	filename: "epsonpf10.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 layout {

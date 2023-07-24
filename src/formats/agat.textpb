@@ -28,7 +28,7 @@ documentation:
 
 image_writer {
 	filename: "agat.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 layout {

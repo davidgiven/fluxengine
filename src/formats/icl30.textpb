@@ -11,7 +11,7 @@ track! Other than that it's another IBM scheme variation.
 
 image_writer {
 	filename: "icl30.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 layout {

@@ -50,12 +50,12 @@ documentation:
 
 image_reader {
 	filename: "victor9k.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 image_writer {
 	filename: "victor9k.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 layout {

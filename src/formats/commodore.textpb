@@ -54,12 +54,12 @@ documentation:
 
 image_reader {
 	filename: "commodore.d64"
-	type: D64
+	type: IMAGETYPE_D64
 }
 
 image_writer {
 	filename: "commodore.d64"
-	type: D64
+	type: IMAGETYPE_D64
 }
 
 filesystem {

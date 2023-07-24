@@ -15,37 +15,37 @@ std::unique_ptr<ImageReader> ImageReader::create(const ImageReaderProto& config)
 {
     switch (config.type())
     {
-        case ImageReaderProto::DIM:
+        case IMAGETYPE_DIM:
             return ImageReader::createDimImageReader(config);
 
-        case ImageReaderProto::D88:
+        case IMAGETYPE_D88:
             return ImageReader::createD88ImageReader(config);
 
-        case ImageReaderProto::FDI:
+        case IMAGETYPE_FDI:
             return ImageReader::createFdiImageReader(config);
 
-        case ImageReaderProto::IMD:
+        case IMAGETYPE_IMD:
             return ImageReader::createIMDImageReader(config);
 
-        case ImageReaderProto::IMG:
+        case IMAGETYPE_IMG:
             return ImageReader::createImgImageReader(config);
 
-        case ImageReaderProto::DISKCOPY:
+        case IMAGETYPE_DISKCOPY:
             return ImageReader::createDiskCopyImageReader(config);
 
-        case ImageReaderProto::JV3:
+        case IMAGETYPE_JV3:
             return ImageReader::createJv3ImageReader(config);
 
-        case ImageReaderProto::D64:
+        case IMAGETYPE_D64:
             return ImageReader::createD64ImageReader(config);
 
-        case ImageReaderProto::NFD:
+        case IMAGETYPE_NFD:
             return ImageReader::createNFDImageReader(config);
 
-        case ImageReaderProto::NSI:
+        case IMAGETYPE_NSI:
             return ImageReader::createNsiImageReader(config);
 
-        case ImageReaderProto::TD0:
+        case IMAGETYPE_TD0:
             return ImageReader::createTd0ImageReader(config);
 
         default:

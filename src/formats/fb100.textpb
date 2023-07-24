@@ -43,7 +43,7 @@ documentation:
 
 image_writer {
 	filename: "fb100.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 decoder {

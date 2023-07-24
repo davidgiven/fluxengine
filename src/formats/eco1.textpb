@@ -37,7 +37,7 @@ documentation:
 
 image_writer {
 	filename: "eco1.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 layout {

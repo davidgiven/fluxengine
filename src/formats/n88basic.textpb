@@ -19,12 +19,12 @@ drive {
 
 image_reader {
 	filename: "n88basic.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 image_writer {
 	filename: "n88basic.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 layout {

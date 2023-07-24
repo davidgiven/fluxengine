@@ -18,6 +18,8 @@ static std::string supportStatus(SupportStatus status)
         case SupportStatus::UNSUPPORTED:
             return "";
     }
+
+	return "";
 }
 
 int main(int argc, const char* argv[])

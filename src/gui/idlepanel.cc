@@ -46,6 +46,18 @@ static wxBitmap createBitmap(const uint8_t* data, size_t length)
     return wxBitmap(image);
 }
 
+static void ignoreInapplicableValueExceptions(std::function<void(void)> cb)
+{
+    try
+    {
+        cb();
+    }
+    catch (const InapplicableValueException* e)
+    {
+        /* swallow */
+    }
+}
+
 class IdlePanelImpl : public IdlePanelGen, public IdlePanel
 {
     enum
@@ -224,15 +236,31 @@ public:
 
             case SELECTEDSOURCE_FLUX:
             {
-                globalConfig().setFluxSink(_selectedFluxfilename);
-                globalConfig().setFluxSource(_selectedFluxfilename);
+                ignoreInapplicableValueExceptions(
+                    [&]()
+                    {
+                        globalConfig().setFluxSink(_selectedFluxfilename);
+                    });
+                ignoreInapplicableValueExceptions(
+                    [&]()
+                    {
+                        globalConfig().setFluxSource(_selectedFluxfilename);
+                    });
                 break;
             }
 
             case SELECTEDSOURCE_IMAGE:
             {
+                ignoreInapplicableValueExceptions(
+                    [&]()
+                    {
                 globalConfig().setImageReader(_selectedImagefilename);
+                    });
+                ignoreInapplicableValueExceptions(
+                    [&]()
+                    {
                 globalConfig().setImageWriter(_selectedImagefilename);
+                    });
                 break;
             }
         }
@@ -587,12 +615,12 @@ private:
             /* The current set of options is invalid for some reason. Just
              * swallow the errors. */
         }
-	catch (const ErrorException& e)
-	{
-	    /* This really isn't supposed to happen, but sometimes does and
-	     * it crashes the whole program. */
-	    return;
-	}
+        catch (const ErrorException& e)
+        {
+            /* This really isn't supposed to happen, but sometimes does and
+             * it crashes the whole program. */
+            return;
+        }
 
         assert(!wxGetApp().IsWorkerThreadRunning());
 

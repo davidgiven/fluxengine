@@ -26,12 +26,12 @@ drive {
 
 image_reader {
 	filename: "pme.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 image_writer {
 	filename: "pme.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 layout {

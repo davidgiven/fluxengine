@@ -19,7 +19,7 @@ int mainRpm(int argc, const char* argv[])
 {
     flags.parseFlagsWithConfigFiles(argc, argv, {});
 
-    if (globalConfig()->flux_source().type() != FluxSourceProto::DRIVE)
+    if (globalConfig()->flux_source().type() != FLUXTYPE_DRIVE)
         error("this only makes sense with a real disk drive");
 
     usbSetDrive(globalConfig()->drive().drive(),

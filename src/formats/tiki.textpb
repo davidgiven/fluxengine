@@ -11,7 +11,7 @@ on the precise format.
 
 image_writer {
 	filename: "tiki.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 decoder {

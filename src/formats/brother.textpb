@@ -116,12 +116,12 @@ file system supports this.
 
 image_reader {
 	filename: "brother.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 image_writer {
 	filename: "brother.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 encoder {
