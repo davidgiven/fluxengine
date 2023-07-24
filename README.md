@@ -138,7 +138,7 @@ choices because they can store multiple types of file system.
 | [`tids990`](doc/disk-tids990.md) | Texas Instruments DS990: 1126kB 8" DSSD | 🦖 | 🦖 |  |
 | [`tiki`](doc/disk-tiki.md) | Tiki 100: CP/M |  |  | CPMFS  |
 | [`victor9k`](doc/disk-victor9k.md) | Victor 9000 / Sirius One: 1224kB 5.25" DSDD GCR | 🦖 | 🦖 |  |
-| [`zilogmcz`](doc/disk-zilogmcz.md) | Zilog MCZ: 320kB 8" 77-track SSSD hard-sectored | 🦖 |  |  |
+| [`zilogmcz`](doc/disk-zilogmcz.md) | Zilog MCZ: 320kB 8" 77-track SSSD hard-sectored | 🦖 |  | ZDOS  |
 {: .datatable }
 
 <!-- FORMATSEND -->

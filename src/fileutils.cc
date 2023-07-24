@@ -14,6 +14,18 @@
 #include <google/protobuf/text_format.h>
 #include <fstream>
 
+static void ignoreInapplicableValueExceptions(std::function<void(void)> cb)
+{
+    try
+    {
+        cb();
+    }
+    catch (const InapplicableValueException* e)
+    {
+        /* swallow */
+    }
+}
+
 FlagGroup fileFlags;
 
 static StringFlag image({"-i", "--image"},
@@ -21,8 +33,16 @@ static StringFlag image({"-i", "--image"},
     "",
     [](const auto& value)
     {
-        globalConfig().setImageReader(value);
-        globalConfig().setImageWriter(value);
+        ignoreInapplicableValueExceptions(
+            [&]()
+            {
+                globalConfig().setImageReader(value);
+            });
+        ignoreInapplicableValueExceptions(
+            [&]()
+            {
+                globalConfig().setImageWriter(value);
+            });
     });
 
 static StringFlag flux({"-f", "--flux"},
@@ -30,6 +50,14 @@ static StringFlag flux({"-f", "--flux"},
     "",
     [](const auto& value)
     {
-        globalConfig().setFluxSource(value);
-        globalConfig().setFluxSink(value);
+        ignoreInapplicableValueExceptions(
+            [&]()
+            {
+                globalConfig().setFluxSink(value);
+            });
+        ignoreInapplicableValueExceptions(
+            [&]()
+            {
+                globalConfig().setFluxSource(value);
+            });
     });

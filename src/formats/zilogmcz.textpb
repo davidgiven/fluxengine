@@ -60,4 +60,13 @@ layout {
 	}
 }
 
+filesystem {
+	type: ZDOS
+	zdos {
+		filesystem_start {
+			track: 22
+			sector: 0
+		}
+	}
+}
 

@@ -90,6 +90,14 @@ message LifProto
 
 message ZDosProto
 {
+    message Location
+    {
+        optional uint32 track = 1 [ (help) = "track number" ];
+        optional uint32 sector = 3 [ (help) = "sector ID" ];
+    }
+
+    optional Location filesystem_start = 1
+        [ (help) = "position of the filesystem superblock" ];
 }
 
 // NEXT_TAG: 16
