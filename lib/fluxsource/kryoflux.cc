@@ -5,7 +5,6 @@
 #include <fstream>
 #include <sys/types.h>
 #include <dirent.h>
-#include <filesystem>
 
 #define MCLK_HZ (((18432000.0 * 73.0) / 14.0) / 2.0)
 #define SCLK_HZ (MCLK_HZ / 2)
@@ -24,34 +23,42 @@ static bool has_suffix(const std::string& haystack, const std::string& needle)
 }
 
 std::unique_ptr<Fluxmap> readStream(
-    const std::string& dir, unsigned track, unsigned side)
+    std::string dir, unsigned track, unsigned side)
 {
     std::string suffix = fmt::format("{:02}.{}.raw", track, side);
 
-    std::filesystem::path path(dir);
-    if (std::filesystem::is_regular_file(std::filesystem::status(path)))
-        path = path.parent_path();
-    if (!std::filesystem::is_directory(std::filesystem::status(path)))
+    FILE* fp = fopen(dir.c_str(), "r");
+    if (fp)
+    {
+        fclose(fp);
+        int i = dir.find_last_of("/\\");
+        dir = dir.substr(0, i);
+    }
+
+    DIR* dirp = opendir(dir.c_str());
+    if (!dirp)
         error("cannot access path '{}'", dir);
 
-    std::filesystem::path filename;
-    for (auto const& de : std::filesystem::directory_iterator{path})
+    std::string filename;
+    for (;;)
     {
-        if (has_suffix(de.path().native(), suffix))
+        struct dirent* de = readdir(dirp);
+        if (!de)
+            break;
+
+        if (has_suffix(de->d_name, suffix))
         {
             if (!filename.empty())
                 error("data is ambiguous --- multiple files end in {}", suffix);
-            filename = de.path();
+            filename = fmt::format("{}/{}", dir, de->d_name);
         }
     }
+    closedir(dirp);
 
     if (filename.empty())
-        error("failed to find track {} side {} in {}",
-            track,
-            side,
-            path.native());
+        error("failed to find track {} side {} in {}", track, side, dir);
 
-    return readStream(filename.native());
+    return readStream(filename);
 }
 
 std::unique_ptr<Fluxmap> readStream(const std::string& filename)
