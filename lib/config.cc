@@ -11,16 +11,8 @@
 #include "lib/decoders/decoders.h"
 #include <fstream>
 #include <google/protobuf/text_format.h>
-#include <regex>
 
 static Config config;
-
-struct FluxConstructor
-{
-    std::regex pattern;
-    std::function<void(const std::string& filename, FluxSourceProto*)> source;
-    std::function<void(const std::string& filename, FluxSinkProto*)> sink;
-};
 
 enum ConstructorMode
 {
@@ -37,7 +29,9 @@ struct ImageConstructor
 };
 
 static const std::vector<FluxConstructor> fluxConstructors = {
-    {.pattern = std::regex("^(.*\\.flux)$"),
+    {/* The .flux format must be first. */
+        .name = "FluxEngine (.flux)",
+     .pattern = std::regex("^(.*\\.flux)$"),
      .source =
             [](auto& s, auto* proto)
         {
@@ -50,6 +44,7 @@ static const std::vector<FluxConstructor> fluxConstructors = {
             proto->mutable_fl2()->set_filename(s);
         }},
     {
+     .name = "Supercard Pro (.scp)",
      .pattern = std::regex("^(.*\\.scp)$"),
      .source =
             [](auto& s, auto* proto)
@@ -62,7 +57,8 @@ static const std::vector<FluxConstructor> fluxConstructors = {
             proto->set_type(FLUXTYPE_SCP);
             proto->mutable_scp()->set_filename(s);
         }, },
-    {.pattern = std::regex("^(.*\\.a2r)$"),
+    {.name = "AppleSauce (.a2r)",
+     .pattern = std::regex("^(.*\\.a2r)$"),
      .source =
             [](auto& s, auto* proto)
         {
@@ -74,7 +70,8 @@ static const std::vector<FluxConstructor> fluxConstructors = {
             proto->set_type(FLUXTYPE_A2R);
             proto->mutable_a2r()->set_filename(s);
         }},
-    {.pattern = std::regex("^(.*\\.cwf)$"),
+    {.name = "CatWeazle (.cwf)",
+     .pattern = std::regex("^(.*\\.cwf)$"),
      .source =
             [](auto& s, auto* proto)
         {
@@ -87,7 +84,8 @@ static const std::vector<FluxConstructor> fluxConstructors = {
         {
             proto->set_type(FLUXTYPE_ERASE);
         }},
-    {.pattern = std::regex("^kryoflux:(.*)$"),
+    {.name = "KryoFlux directory",
+     .pattern = std::regex("^kryoflux:(.*)$"),
      .source =
             [](auto& s, auto* proto)
         {
@@ -114,21 +112,24 @@ static const std::vector<FluxConstructor> fluxConstructors = {
             globalConfig().overrides()->mutable_drive()->set_drive(
                 std::stoi(s));
         }},
-    {.pattern = std::regex("^flx:(.*)$"),
+    {.name = "FluxCopy directory",
+     .pattern = std::regex("^flx:(.*)$"),
      .source =
             [](auto& s, auto* proto)
         {
             proto->set_type(FLUXTYPE_FLX);
             proto->mutable_flx()->set_directory(s);
         }},
-    {.pattern = std::regex("^vcd:(.*)$"),
+    {.name = "Value Change Dump directory",
+     .pattern = std::regex("^vcd:(.*)$"),
      .sink =
             [](auto& s, auto* proto)
         {
             proto->set_type(FLUXTYPE_VCD);
             proto->mutable_vcd()->set_directory(s);
         }},
-    {.pattern = std::regex("^au:(.*)$"),
+    {.name = "Audio file directory",
+     .pattern = std::regex("^au:(.*)$"),
      .sink =
             [](auto& s, auto* proto)
         {
@@ -680,4 +681,9 @@ std::shared_ptr<Decoder>& Config::getDecoder()
         _decoder = Decoder::create((*this)->decoder());
     }
     return _decoder;
+}
+
+const std::vector<FluxConstructor>& Config::getFluxFormats()
+{
+    return fluxConstructors;
 }
