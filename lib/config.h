@@ -55,6 +55,14 @@ public:
     {}
 };
 
+struct FluxConstructor
+{
+    std::string name;
+    std::regex pattern;
+    std::function<void(const std::string& filename, FluxSourceProto*)> source;
+    std::function<void(const std::string& filename, FluxSinkProto*)> sink;
+};
+
 class Config
 {
 public:
@@ -154,6 +162,10 @@ public:
     std::unique_ptr<FluxSink> getFluxSink();
     bool hasImageWriter();
     std::unique_ptr<ImageWriter> getImageWriter();
+
+public:
+    static const std::vector<FluxConstructor>& getFluxFormats();
+    static std::vector<std::string> getImageFormats();
 
 private:
     ConfigProto _baseConfig;

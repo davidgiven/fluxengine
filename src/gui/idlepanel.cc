@@ -29,6 +29,7 @@
 #define CONFIG_FORMATOPTIONS "FormatOptions"
 #define CONFIG_EXTRACONFIG "ExtraConfig"
 #define CONFIG_FLUXIMAGE "FluxImage"
+#define CONFIG_FLUXFORMAT "FluxImageFormat"
 #define CONFIG_DISKIMAGE "DiskImage"
 
 const std::string DEFAULT_EXTRA_CONFIGURATION =
@@ -236,16 +237,15 @@ public:
 
             case SELECTEDSOURCE_FLUX:
             {
-                ignoreInapplicableValueExceptions(
-                    [&]()
-                    {
-                        globalConfig().setFluxSink(_selectedFluxfilename);
-                    });
-                ignoreInapplicableValueExceptions(
-                    [&]()
-                    {
-                        globalConfig().setFluxSource(_selectedFluxfilename);
-                    });
+                if (_selectedFluxFormat)
+                {
+                if (_selectedFluxFormat->sink)
+                    _selectedFluxFormat->sink(_selectedFluxFilename,
+                        globalConfig().overrides()->mutable_flux_sink());
+                if (_selectedFluxFormat->source)
+                    _selectedFluxFormat->source(_selectedFluxFilename,
+                        globalConfig().overrides()->mutable_flux_source());
+                }
                 break;
             }
 
@@ -338,7 +338,11 @@ private:
 
         s = "";
         _config.Read(CONFIG_FLUXIMAGE, &s);
-        _selectedFluxfilename = s;
+        _selectedFluxFilename = s;
+
+        s = "";
+        _config.Read(CONFIG_FLUXFORMAT, &s);
+        _selectedFluxFormatName = s;
 
         /* Disk image block. */
 
@@ -412,7 +416,8 @@ private:
 
         /* Flux image block. */
 
-        _config.Write(CONFIG_FLUXIMAGE, wxString(_selectedFluxfilename));
+        _config.Write(CONFIG_FLUXIMAGE, wxString(_selectedFluxFilename));
+        _config.Write(CONFIG_FLUXFORMAT, wxString(_selectedFluxFormatName));
 
         /* Disk image block. */
 
@@ -524,13 +529,64 @@ private:
                     OnControlsChanged(e);
                 });
 
-            panel->fluxImagePicker->SetPath(_selectedFluxfilename);
+            panel->fluxImagePicker->SetPath(_selectedFluxFilename);
+
+            panel->fluxImageFormat->Clear();
+            _selectedFluxFormat = &Config::getFluxFormats()[0];
+            int choiceIndex = 0;
+            for (int i = 0; i < Config::getFluxFormats().size(); i++)
+            {
+                const auto& format = Config::getFluxFormats()[i];
+                if (!format.name.empty() && format.source)
+                {
+                    int index = panel->fluxImageFormat->Append(
+                        format.name, (void*)&format);
+                    if (format.name == _selectedFluxFormatName)
+                    {
+                        _selectedFluxFormat = &format;
+                        choiceIndex = index;
+                    }
+                }
+            }
+            panel->fluxImageFormat->SetSelection(choiceIndex);
+
+            auto onFormatChanged = [=](wxCommandEvent& e)
+            {
+                int i = panel->fluxImageFormat->GetSelection();
+                _selectedFluxFormat =
+                    (const FluxConstructor*)
+                        panel->fluxImageFormat->GetClientData(i);
+                _selectedFluxFormatName = _selectedFluxFormat->name;
+                OnControlsChanged(e);
+            };
+
             panel->fluxImagePicker->Bind(wxEVT_COMMAND_FILEPICKER_CHANGED,
                 [=](wxFileDirPickerEvent& e)
                 {
-                    _selectedFluxfilename = e.GetPath();
+                    _selectedFluxFilename = e.GetPath();
+
+                    for (int i = 0; i < Config::getFluxFormats().size(); i++)
+                    {
+                        const auto& format = Config::getFluxFormats()[i];
+                        if (std::regex_match(
+                                _selectedFluxFilename, format.pattern))
+                        {
+                            int i =
+                                panel->fluxImageFormat->FindString(format.name);
+                            if (i != wxNOT_FOUND)
+                            {
+                                panel->fluxImageFormat->SetSelection(i);
+
+                                wxCommandEvent e;
+                                onFormatChanged(e);
+                            }
+                        }
+                    }
+
                     OnControlsChanged(e);
                 });
+
+            panel->fluxImageFormat->Bind(wxEVT_CHOICE, onFormatChanged);
 
             if (_selectedSource == SELECTEDSOURCE_FLUX)
             {
@@ -577,6 +633,8 @@ private:
         if (!switched)
             SwitchToPage(0);
     }
+
+    void OnFluxFormatChanged(wxCommandEvent&) {}
 
     IconButton* AddIcon(int bitmapIndex, const std::string text)
     {
@@ -740,7 +798,9 @@ private:
     int _selectedDrive;
     const ConfigProto* _selectedDriveType;
     bool _selectedHighDensity;
-    std::string _selectedFluxfilename;
+    std::string _selectedFluxFilename;
+    std::string _selectedFluxFormatName;
+    const FluxConstructor* _selectedFluxFormat = nullptr;
     std::string _selectedImagefilename;
     bool _dontSaveConfig = false;
     std::string _extraConfiguration;
