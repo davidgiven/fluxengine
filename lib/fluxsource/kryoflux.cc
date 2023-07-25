@@ -37,7 +37,7 @@ std::unique_ptr<Fluxmap> readStream(
     std::filesystem::path filename;
     for (auto const& de : std::filesystem::directory_iterator{path})
     {
-        if (has_suffix(de.path(), suffix))
+        if (has_suffix(de.path().native(), suffix))
         {
             if (!filename.empty())
                 error("data is ambiguous --- multiple files end in {}", suffix);
@@ -49,9 +49,9 @@ std::unique_ptr<Fluxmap> readStream(
         error("failed to find track {} side {} in {}",
             track,
             side,
-            (std::string)path);
+            path.native());
 
-    return readStream(filename);
+    return readStream(filename.native());
 }
 
 std::unique_ptr<Fluxmap> readStream(const std::string& filename)
