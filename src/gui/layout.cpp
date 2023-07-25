@@ -696,7 +696,7 @@ ImagerPanelGen::ImagerPanelGen( wxWindow* parent, wxWindowID id, const wxPoint& 
 	bSizer8->Add( imagerSaveFluxButton, 0, wxALL|wxEXPAND, 5 );
 
 	histogram = new HistogramViewer( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer8->Add( histogram, 0, wxALIGN_CENTER_VERTICAL|wxALL|wxEXPAND, 5 );
+	bSizer8->Add( histogram, 0, wxALL|wxEXPAND, 5 );
 
 	imagerGoAgainButton = new wxButton( this, wxID_ANY, wxT("Go again"), wxDefaultPosition, wxDefaultSize, 0 );
 
@@ -1081,10 +1081,19 @@ FluxfileSourcePanelGen::FluxfileSourcePanelGen( wxWindow* parent, wxWindowID id,
 	m_staticText27->Wrap( -1 );
 	bSizer8->Add( m_staticText27, 0, wxALL, 5 );
 
-	fluxImagePicker = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL );
+	fluxImagePicker = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN );
 	fluxImagePicker->SetToolTip( wxT("Path to a .flux, .scp or other flux file.") );
 
 	bSizer8->Add( fluxImagePicker, 0, wxALL|wxEXPAND, 5 );
+
+	m_staticText281 = new wxStaticText( this, wxID_ANY, wxT("Format:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText281->Wrap( -1 );
+	bSizer8->Add( m_staticText281, 0, wxALL, 5 );
+
+	wxArrayString fluxImageFormatChoices;
+	fluxImageFormat = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, fluxImageFormatChoices, 0 );
+	fluxImageFormat->SetSelection( 0 );
+	bSizer8->Add( fluxImageFormat, 0, wxALL|wxEXPAND, 5 );
 
 
 	this->SetSizer( bSizer8 );
@@ -1109,7 +1118,7 @@ ImagefileSourcePanelGen::ImagefileSourcePanelGen( wxWindow* parent, wxWindowID i
 	m_staticText28->Wrap( -1 );
 	bSizer9->Add( m_staticText28, 0, wxALL, 5 );
 
-	diskImagePicker = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL );
+	diskImagePicker = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN );
 	diskImagePicker->SetToolTip( wxT("The path to the disk image.") );
 
 	bSizer9->Add( diskImagePicker, 0, wxALL|wxEXPAND, 5 );

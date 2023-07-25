@@ -23,9 +23,17 @@ static bool has_suffix(const std::string& haystack, const std::string& needle)
 }
 
 std::unique_ptr<Fluxmap> readStream(
-    const std::string& dir, unsigned track, unsigned side)
+    std::string dir, unsigned track, unsigned side)
 {
     std::string suffix = fmt::format("{:02}.{}.raw", track, side);
+
+    FILE* fp = fopen(dir.c_str(), "r");
+    if (fp)
+    {
+        fclose(fp);
+        int i = dir.find_last_of("/\\");
+        dir = dir.substr(0, i);
+    }
 
     DIR* dirp = opendir(dir.c_str());
     if (!dirp)
