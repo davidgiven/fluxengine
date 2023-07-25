@@ -609,6 +609,7 @@ private:
         try
         {
             PrepareConfig();
+            globalConfig().combined();
         }
         catch (const InapplicableOptionException& e)
         {

@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sys/types.h>
 #include <dirent.h>
+#include <filesystem>
 
 #define MCLK_HZ (((18432000.0 * 73.0) / 14.0) / 2.0)
 #define SCLK_HZ (MCLK_HZ / 2)
@@ -27,28 +28,28 @@ std::unique_ptr<Fluxmap> readStream(
 {
     std::string suffix = fmt::format("{:02}.{}.raw", track, side);
 
-    DIR* dirp = opendir(dir.c_str());
-    if (!dirp)
+    std::filesystem::path path(dir);
+    if (std::filesystem::is_regular_file(std::filesystem::status(path)))
+        path = path.parent_path();
+    if (!std::filesystem::is_directory(std::filesystem::status(path)))
         error("cannot access path '{}'", dir);
 
-    std::string filename;
-    for (;;)
+    std::filesystem::path filename;
+    for (auto const& de : std::filesystem::directory_iterator{path})
     {
-        struct dirent* de = readdir(dirp);
-        if (!de)
-            break;
-
-        if (has_suffix(de->d_name, suffix))
+        if (has_suffix(de.path(), suffix))
         {
             if (!filename.empty())
                 error("data is ambiguous --- multiple files end in {}", suffix);
-            filename = fmt::format("{}/{}", dir, de->d_name);
+            filename = de.path();
         }
     }
-    closedir(dirp);
 
     if (filename.empty())
-        error("failed to find track {} side {} in {}", track, side, dir);
+        error("failed to find track {} side {} in {}",
+            track,
+            side,
+            (std::string)path);
 
     return readStream(filename);
 }
