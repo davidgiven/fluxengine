@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sys/types.h>
 #include <dirent.h>
+#include <filesystem>
 
 #define MCLK_HZ (((18432000.0 * 73.0) / 14.0) / 2.0)
 #define SCLK_HZ (MCLK_HZ / 2)
