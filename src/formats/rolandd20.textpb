@@ -45,3 +45,6 @@ drive {
 	head_bias: 1
 }
 
+filesystem {
+	type: ROLAND
+}

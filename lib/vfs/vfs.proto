@@ -100,7 +100,17 @@ message ZDosProto
         [ (help) = "position of the filesystem superblock" ];
 }
 
-// NEXT_TAG: 16
+message RolandFsProto
+{
+    optional uint32 directory_track = 1
+        [ (help) = "position of the directory", default = 39 ];
+    optional uint32 block_size = 2
+        [ (help) = "filesystem block size", default = 3072 ];
+    optional uint32 directory_entries = 3
+        [ (help) = "number of directory entries", default = 79 ];
+}
+
+// NEXT_TAG: 17
 message FilesystemProto
 {
     enum FilesystemType
@@ -119,6 +129,7 @@ message FilesystemProto
         PHILE = 11;
         LIF = 12;
         ZDOS = 13;
+        ROLAND = 14;
     }
 
     optional FilesystemType type = 10
@@ -137,6 +148,7 @@ message FilesystemProto
     optional PhileProto phile = 13;
     optional LifProto lif = 14;
     optional ZDosProto zdos = 15;
+    optional RolandFsProto roland = 16;
 
     optional SectorListProto sector_order = 9
         [ (help) = "specify the filesystem order of sectors" ];

@@ -219,6 +219,9 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystem(
         case FilesystemProto::ZDOS:
             return Filesystem::createZDosFilesystem(config, image);
 
+        case FilesystemProto::ROLAND:
+            return Filesystem::createRolandFsFilesystem(config, image);
+
         default:
             error("no filesystem configured");
             return std::unique_ptr<Filesystem>();

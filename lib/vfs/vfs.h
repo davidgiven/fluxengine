@@ -258,6 +258,8 @@ public:
         const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
     static std::unique_ptr<Filesystem> createZDosFilesystem(
         const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
+    static std::unique_ptr<Filesystem> createRolandFsFilesystem(
+        const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
 
     static std::unique_ptr<Filesystem> createFilesystem(
         const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
