@@ -9,33 +9,38 @@ private:
     class RolandDirent : public Dirent
     {
     public:
-        RolandDirent(const RolandFsProto& config, Bytes& bytes)
+        RolandDirent(const std::string& filename)
         {
             file_type = TYPE_FILE;
 
-            ByteReader br(bytes);
-            br.seek(1);
-            filename = trimWhitespace(br.read(13));
-            br.seek(16);
-
-            length = 0;
-            for (int i = 0; i < 16; i++)
-            {
-                uint8_t b = br.read_8();
-                blocks[i] = b;
-                if (b)
-                    length += config.block_size();
-            }
+            this->filename = filename;
             path = {filename};
 
+            length = 0;
             attributes[Filesystem::FILENAME] = filename;
             attributes[Filesystem::LENGTH] = std::to_string(length);
             attributes[Filesystem::FILE_TYPE] = "file";
             attributes[Filesystem::MODE] = "";
         }
 
+        void addBlocks(RolandFsFilesystem* fs, Bytes& dirent)
+        {
+            int extent = dirent[15];
+            for (int i=0; i<16; i++)
+            {
+                uint8_t blocknumber = dirent[16+i];
+                if (!blocknumber)
+                    break;
+
+                blocks[i + extent*16] = blocknumber;
+                length += fs->_blockSectors * fs->_sectorSize;
+            }
+
+            attributes[Filesystem::LENGTH] = std::to_string(length);
+        }
+
     public:
-        uint8_t blocks[16];
+        std::map<int, int> blocks;
     };
 
 public:
@@ -98,8 +103,9 @@ public:
         Bytes data;
         ByteWriter bw(data);
         auto f = findFile(path.front());
-        for (uint8_t b : f->blocks)
+        for (auto& e : f->blocks)
         {
+            uint8_t b = e.second;
             if (!b)
                 break;
             bw += getRolandBlock(b);
@@ -125,14 +131,26 @@ private:
         _volumeName = br.read(14);
         br.seek(32);
 
+        _dirents.clear();
+        std::map<std::string, std::shared_ptr<RolandDirent>> files;
         for (int i = 0; i < _config.directory_entries(); i++)
         {
             Bytes direntBytes = br.read(32);
-            if (direntBytes[0] != 0xe5)
+            if (direntBytes[0] == 0)
             {
-                auto dirent =
-                    std::make_unique<RolandDirent>(_config, direntBytes);
-                _dirents.push_back(std::move(dirent));
+                std::string filename = direntBytes.slice(1, 13);
+
+                std::shared_ptr<RolandDirent> de;
+                auto it = files.find(filename);
+                if (it == files.end())
+                {
+                    files[filename] = de = std::make_shared<RolandDirent>(filename);
+                    _dirents.push_back(de);
+                }
+                else
+                    de = it->second;
+
+                de->addBlocks(this, direntBytes);
             }
         }
 
