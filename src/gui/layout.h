@@ -413,8 +413,8 @@ class BrowserPanelGen : public wxPanel
 		virtual void OnBrowserBeginDrag( wxDataViewEvent& event ) { event.Skip(); }
 		virtual void OnBrowserDrop( wxDataViewEvent& event ) { event.Skip(); }
 		virtual void OnBrowserDropPossible( wxDataViewEvent& event ) { event.Skip(); }
-		virtual void OnBrowserFilenameChanged( wxDataViewEvent& event ) { event.Skip(); }
 		virtual void OnBrowserDirectoryExpanding( wxDataViewEvent& event ) { event.Skip(); }
+		virtual void OnBrowserFilenameChanged( wxDataViewEvent& event ) { event.Skip(); }
 		virtual void OnBrowserSelectionChanged( wxDataViewEvent& event ) { event.Skip(); }
 		virtual void OnBrowserDiscardButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBrowserCommitButton( wxCommandEvent& event ) { event.Skip(); }
