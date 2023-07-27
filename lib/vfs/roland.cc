@@ -2,6 +2,45 @@
 #include "lib/vfs/vfs.h"
 #include "lib/config.pb.h"
 #include "lib/utils.h"
+#include <regex>
+
+static std::string unmangleFilename(const std::string& mangled)
+{
+    std::string extension = mangled.substr(10);
+    extension.erase(extension.find_last_not_of("_") + 1);
+
+    std::string root = mangled.substr(0, 10);
+    root.erase(root.find_last_not_of("_") + 1);
+
+    if (!extension.empty())
+        return root + "." + extension;
+    return root;
+}
+
+static std::string mangleFilename(const std::string& human)
+{
+    int dot = human.rfind('.');
+    std::string extension =
+        (dot == std::string::npos) ? "" : human.substr(dot + 1);
+    std::string root =
+        (dot == std::string::npos) ? human : human.substr(0, dot);
+
+    if (extension.empty())
+        extension = "___";
+    if (extension.size() > 3)
+        throw BadPathException("Invalid filename: extension too long");
+    if (root.size() > 10)
+        throw BadPathException("Invalid filename: root too long");
+    root = (root + std::string(10, '_')).substr(0, 10);
+    std::string mangled = root + extension;
+
+    static const std::regex checker("[A-Z0-9_$.]*");
+    if (!std::regex_match(mangled, checker))
+        throw BadPathException(
+            "Invalid filename: unsupported characters (remember to use "
+            "uppercase)");
+    return mangled;
+}
 
 class RolandFsFilesystem : public Filesystem
 {
@@ -137,7 +176,8 @@ public:
             throw BadPathException("File exists");
 
         int blocks = bytes.size() / _config.block_size();
-        auto de = std::make_shared<RolandDirent>(RolandDirent(path.front()));
+        auto de = std::make_shared<RolandDirent>(
+            RolandDirent(mangleFilename(path.front())));
 
         ByteReader br(bytes);
         while (!br.eof())
@@ -187,7 +227,7 @@ private:
                 if (bw.pos == 0xa00)
                     throw DiskFullException();
 
-                if (blockIndex == 0)
+                if ((blockIndex % 16) == 0)
                 {
                     bw.write_8(0);
                     int len = de->filename.size();
@@ -238,7 +278,8 @@ private:
             Bytes direntBytes = br.read(32);
             if (direntBytes[0] == 0)
             {
-                std::string filename = direntBytes.slice(1, 13);
+                std::string filename =
+                    unmangleFilename(direntBytes.slice(1, 13));
 
                 std::shared_ptr<RolandDirent> de;
                 auto it = files.find(filename);
