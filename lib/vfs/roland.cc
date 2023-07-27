@@ -97,7 +97,7 @@ public:
     uint32_t capabilities() const override
     {
         return OP_CREATE | OP_GETFSDATA | OP_LIST | OP_GETFILE | OP_PUTFILE |
-               OP_GETDIRENT;
+               OP_GETDIRENT | OP_DELETE;
     }
 
     std::map<std::string, std::string> getMetadata() override
@@ -190,6 +190,28 @@ public:
         }
 
         _dirents.push_back(de);
+        rewriteDirectory();
+    }
+
+    void deleteFile(const Path& path) override
+    {
+        mount();
+        if (path.size() != 1)
+            throw BadPathException();
+
+        auto de = findFile(path.front());
+        for (uint8_t b : de->blocks)
+            freeBlock(b);
+
+        for (auto it = _dirents.begin(); it != _dirents.end(); it++)
+        {
+            if (*it == de)
+            {
+                _dirents.erase(it);
+                break;
+            }
+        }
+
         rewriteDirectory();
     }
 
@@ -331,6 +353,16 @@ private:
             }
 
         throw DiskFullException();
+    }
+
+    void freeBlock(int block)
+    {
+        if (block >= _filesystemBlocks)
+            throw BadFilesystemException();
+
+        if (!_allocationBitmap[block])
+            throw BadFilesystemException();
+        _allocationBitmap[block] = false;
     }
 
     Bytes getRolandBlock(int number)
