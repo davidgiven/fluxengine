@@ -37,6 +37,10 @@ layout {
 	}
 }
 
+encoder {
+	brother {}
+}
+
 decoder {
 	brother {}
 }

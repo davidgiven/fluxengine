@@ -26,3 +26,7 @@ To read:
 
   - `fluxengine read rolandd20 -s drive:0 -o rolandd20.img`
 
+To write:
+
+  - `fluxengine write rolandd20 -d drive:0 -i rolandd20.img`
+

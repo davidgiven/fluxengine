@@ -101,6 +101,14 @@ public:
     DiskFullException(const std::string& msg): CannotWriteException(msg) {}
 };
 
+class ReadErrorException : public FilesystemException
+{
+public:
+    ReadErrorException(): FilesystemException("Fatal read error") {}
+
+    ReadErrorException(const std::string& msg): FilesystemException(msg) {}
+};
+
 class ReadOnlyFilesystemException : public FilesystemException
 {
 public:
