@@ -51,15 +51,19 @@ private:
         RolandDirent(const std::string& filename)
         {
             file_type = TYPE_FILE;
-
-            this->filename = filename;
-            path = {filename};
+            rename(filename);
 
             length = 0;
             attributes[Filesystem::FILENAME] = filename;
             attributes[Filesystem::LENGTH] = std::to_string(length);
             attributes[Filesystem::FILE_TYPE] = "file";
             attributes[Filesystem::MODE] = "";
+        }
+
+        void rename(const std::string& name)
+        {
+            filename = name;
+            path = {filename};
         }
 
         void addBlock(RolandFsFilesystem* fs, uint8_t block)
@@ -97,7 +101,7 @@ public:
     uint32_t capabilities() const override
     {
         return OP_CREATE | OP_GETFSDATA | OP_LIST | OP_GETFILE | OP_PUTFILE |
-               OP_GETDIRENT | OP_DELETE;
+               OP_GETDIRENT | OP_DELETE | OP_MOVE;
     }
 
     std::map<std::string, std::string> getMetadata() override
@@ -212,6 +216,19 @@ public:
             }
         }
 
+        rewriteDirectory();
+    }
+
+    void moveFile(const Path& oldName, const Path& newName) override
+    {
+        mount();
+        if ((oldName.size() != 1) || (newName.size() != 1))
+            throw BadPathException();
+        if (findFileOrReturnNull(newName.front()))
+            throw BadPathException("File exists");
+        
+        auto de = findFile(oldName.front());
+        de->rename(mangleFilename(newName.front()));
         rewriteDirectory();
     }
 
