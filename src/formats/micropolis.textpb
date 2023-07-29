@@ -112,6 +112,7 @@ option {
 			layoutdata {
 				sector_size: 275
 			}
+			order: HCS
 		}
 
 		decoder {
