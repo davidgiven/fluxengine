@@ -98,6 +98,9 @@ Fluxmap& Fluxmap::appendBits(const std::vector<bool>& bits, nanoseconds_t clock)
             appendPulse();
         }
     }
+    unsigned delta = (now - duration()) / NS_PER_TICK;
+    if (delta)
+        appendInterval(delta);
 
     return *this;
 }

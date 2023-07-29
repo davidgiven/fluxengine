@@ -85,9 +85,10 @@ public:
         /* Discard a possible partial sector at the end of the track.
          * This partial sector could be mistaken for a conflicted sector, if
          * whatever data read happens to match the checksum of 0, which is
-         * rare, but has been observed on some disks.
+         * rare, but has been observed on some disks. There's 570uS of slack in
+         * each sector, after accounting for preamble, data, and postamble.
          */
-        if (now > (getFluxmapDuration() - 12.5e6))
+        if (now > (getFluxmapDuration() - 12.0e6))
         {
             seekToIndexMark();
             return 0;
@@ -114,9 +115,10 @@ public:
         _sector->headerStartTime = tell().ns();
 
         /* seekToPattern() can skip past the index hole, if this happens
-         * too close to the end of the Fluxmap, discard the sector.
+         * too close to the end of the Fluxmap, discard the sector. The
+         * preamble was expected to be 640uS long.
          */
-        if (_sector->headerStartTime > (getFluxmapDuration() - 12.5e6))
+        if (_sector->headerStartTime > (getFluxmapDuration() - 11.3e6))
         {
             return 0;
         }
