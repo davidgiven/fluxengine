@@ -66,15 +66,17 @@ private:
             path = {filename};
         }
 
-        void addBlock(RolandFsFilesystem* fs, uint8_t block)
+        void putBlock(RolandFsFilesystem* fs, uint8_t offset, uint8_t block)
         {
-            blocks.push_back(block);
+            if (blocks.size() <= offset)
+                blocks.resize(offset+1);
+            blocks[offset] = block;
 
-            length += fs->_blockSectors * fs->_sectorSize;
+            length = (offset+1) * fs->_blockSectors * fs->_sectorSize;
             attributes[Filesystem::LENGTH] = std::to_string(length);
         }
 
-        void addBlocks(RolandFsFilesystem* fs, Bytes& dirent)
+        void putBlocks(RolandFsFilesystem* fs, uint8_t offset, Bytes& dirent)
         {
             for (int i = 0; i < 16; i++)
             {
@@ -82,7 +84,7 @@ private:
                 if (!blocknumber)
                     break;
 
-                addBlock(fs, blocknumber);
+                putBlock(fs, offset+i, blocknumber);
             }
         }
 
@@ -184,13 +186,15 @@ public:
             RolandDirent(mangleFilename(path.front())));
 
         ByteReader br(bytes);
+        int offset = 0;
         while (!br.eof())
         {
             Bytes data =
                 br.read(_config.block_size()).slice(0, _config.block_size());
             int block = allocateBlock();
-            de->addBlock(this, block);
+            de->putBlock(this, offset, block);
             putRolandBlock(block, data);
+            offset++;
         }
 
         _dirents.push_back(de);
@@ -226,7 +230,7 @@ public:
             throw BadPathException();
         if (findFileOrReturnNull(newName.front()))
             throw BadPathException("File exists");
-        
+
         auto de = findFile(oldName.front());
         de->rename(mangleFilename(newName.front()));
         rewriteDirectory();
@@ -235,13 +239,13 @@ public:
 private:
     void init()
     {
-        _filesystemStart = getOffsetOfSector(_config.directory_track(), 0, 0);
+        _directoryLba = getOffsetOfSector(_config.directory_track(), 0, 0);
         _sectorSize = getLogicalSectorSize(0, 0);
 
         _blockSectors = _config.block_size() / _sectorSize;
 
-        _filesystemBlocks =
-            (getLogicalSectorCount() - _filesystemStart) / _blockSectors;
+        _filesystemBlocks = getLogicalSectorCount() / _blockSectors;
+        _midBlock = (getLogicalSectorCount() - _directoryLba) / _blockSectors;
 
         _dirents.clear();
         _allocationBitmap.clear();
@@ -317,6 +321,7 @@ private:
             Bytes direntBytes = br.read(32);
             if (direntBytes[0] == 0)
             {
+                int extent = direntBytes[15];
                 std::string filename =
                     unmangleFilename(direntBytes.slice(1, 13));
 
@@ -331,7 +336,7 @@ private:
                 else
                     de = it->second;
 
-                de->addBlocks(this, direntBytes);
+                de->putBlocks(this, extent*16, direntBytes);
             }
         }
 
@@ -382,25 +387,35 @@ private:
         _allocationBitmap[block] = false;
     }
 
+    unsigned blockToLogicalSectorNumber(int block)
+    {
+        int track;
+        if (block < _midBlock)
+            track = _config.directory_track() + block;
+        else
+            track = _config.directory_track() - (1 + block - _midBlock);
+        return track * _blockSectors;
+    }
+
     Bytes getRolandBlock(int number)
     {
-        int sector = number * _blockSectors;
-        return getLogicalSector(sector + _filesystemStart, _blockSectors);
+        return getLogicalSector(
+            blockToLogicalSectorNumber(number), _blockSectors);
     }
 
     void putRolandBlock(int number, const Bytes& bytes)
     {
         assert(bytes.size() == _config.block_size());
-        int sector = number * _blockSectors;
-        putLogicalSector(sector + _filesystemStart, bytes);
+        putLogicalSector(blockToLogicalSectorNumber(number), bytes);
     }
 
 private:
     const RolandFsProto& _config;
-    uint32_t _sectorSize;
-    uint32_t _blockSectors;
-    uint32_t _filesystemStart;
-    uint32_t _filesystemBlocks;
+    unsigned _sectorSize;
+    unsigned _blockSectors;
+    unsigned _midBlock;
+    unsigned _directoryLba;
+    unsigned _filesystemBlocks;
     std::vector<std::shared_ptr<RolandDirent>> _dirents;
     std::vector<bool> _allocationBitmap;
 };
