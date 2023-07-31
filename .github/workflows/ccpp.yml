@@ -43,7 +43,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: ${{ github.event.repository.name }}.${{ github.sha }}
-        path: fluxengine.FluxEngine.pkg
+        path: fluxengine/FluxEngine.pkg
 
   build-windows:
     runs-on: windows-latest
