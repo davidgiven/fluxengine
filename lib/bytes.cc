@@ -362,6 +362,14 @@ ByteWriter& ByteWriter::operator+=(std::istream& stream)
     return *this;
 }
 
+ByteWriter& ByteWriter::pad(unsigned count, uint8_t b)
+{
+    while (count--)
+        this->write_8(b);
+
+    return *this;
+}
+
 void BitWriter::push(uint32_t bits, size_t size)
 {
     bits <<= 32 - size;

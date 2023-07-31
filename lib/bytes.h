@@ -345,6 +345,8 @@ public:
         return *this += stream;
     }
 
+    ByteWriter& pad(unsigned count, uint8_t byte = 0);
+
 private:
     Bytes& _bytes;
 };

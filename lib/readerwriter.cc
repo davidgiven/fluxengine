@@ -456,6 +456,9 @@ std::shared_ptr<TrackFlux> readAndDecodeTrack(FluxSource& fluxSource,
     auto trackFlux = std::make_shared<TrackFlux>();
     trackFlux->trackInfo = trackInfo;
 
+    if (fluxSource.isHardware())
+        measureDiskRotation();
+
     FluxSourceIteratorHolder fluxSourceIteratorHolder(fluxSource);
     int retriesRemaining = globalConfig()->decoder().retries();
     for (;;)
@@ -498,8 +501,6 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
     auto diskflux = std::make_shared<DiskFlux>();
 
     log(BeginOperationLogMessage{"Reading and decoding disk"});
-    if (fluxSource.isHardware())
-        measureDiskRotation();
     auto locations = Layout::computeLocations();
     unsigned index = 0;
     for (auto& trackInfo : locations)

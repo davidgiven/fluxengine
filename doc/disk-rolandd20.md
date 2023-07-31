@@ -9,9 +9,13 @@ drive, used for saving MIDI sequences and samples.
 Weirdly, it seems to use precisely the same format as the Brother word
 processors: a thoroughly non-IBM-compatible custom GCR system.
 
-FluxEngine pretends to support this, but it has had almost no testing, the only
-disk image I have seen for it was mostly corrupt, and very little is known
-about the format, so I have no idea whether it's correct or not.
+FluxEngine supports both reading and writing D20 disks, as well as basic support
+for the filesystem, allowing files to be read from and written to D20 disks.
+Note that the D20 was never intended to support arbitrary files on its disks and
+is very likely to crash if you put unexpected files on a disk. In addition,
+while the file format itself is currently unknown, there is a header at the top
+of the file containing what appears to be the name shown in the D20 file
+browser, so the name by which you see it is not necessarily the filename.
 
 Please [get in touch](https://github.com/davidgiven/fluxengine/issues/new) if
 you know anything about it.
@@ -25,4 +29,8 @@ you know anything about it.
 To read:
 
   - `fluxengine read rolandd20 -s drive:0 -o rolandd20.img`
+
+To write:
+
+  - `fluxengine write rolandd20 -d drive:0 -i rolandd20.img`
 

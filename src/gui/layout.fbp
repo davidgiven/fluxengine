@@ -4308,7 +4308,7 @@
                             <property name="tooltip"></property>
                             <event name="OnToolClicked">OnBrowserSaveButton</event>
                         </object>
-                        <object class="tool" expanded="0">
+                        <object class="tool" expanded="1">
                             <property name="bitmap">Load From Art Provider; wxART_PLUS; wxART_TOOLBAR</property>
                             <property name="context_menu">1</property>
                             <property name="id">wxID_ANY</property>
@@ -4318,7 +4318,7 @@
                             <property name="permission">protected</property>
                             <property name="statusbar"></property>
                             <property name="tooltip"></property>
-                            <object class="wxMenu" expanded="0">
+                            <object class="wxMenu" expanded="1">
                                 <property name="label">MyMenu</property>
                                 <property name="name">browserMoreMenu</property>
                                 <property name="permission">protected</property>
@@ -4357,7 +4357,7 @@
                                     <property name="help"></property>
                                     <property name="id">wxID_ANY</property>
                                     <property name="kind">wxITEM_NORMAL</property>
-                                    <property name="label">Move file</property>
+                                    <property name="label">Move/Rename file</property>
                                     <property name="name">browserRenameMenuItem</property>
                                     <property name="permission">protected</property>
                                     <property name="shortcut"></property>
@@ -4397,11 +4397,11 @@
                         </object>
                     </object>
                 </object>
-                <object class="sizeritem" expanded="0">
+                <object class="sizeritem" expanded="1">
                     <property name="border">5</property>
                     <property name="flag">wxALL|wxEXPAND</property>
                     <property name="proportion">0</property>
-                    <object class="wxDataViewCtrl" expanded="0">
+                    <object class="wxDataViewCtrl" expanded="1">
                         <property name="bg"></property>
                         <property name="context_help"></property>
                         <property name="context_menu">1</property>
@@ -4426,8 +4426,8 @@
                         <event name="OnDataViewCtrlItemBeginDrag">OnBrowserBeginDrag</event>
                         <event name="OnDataViewCtrlItemDrop">OnBrowserDrop</event>
                         <event name="OnDataViewCtrlItemDropPossible">OnBrowserDropPossible</event>
-                        <event name="OnDataViewCtrlItemEditingDone">OnBrowserFilenameChanged</event>
                         <event name="OnDataViewCtrlItemExpanding">OnBrowserDirectoryExpanding</event>
+                        <event name="OnDataViewCtrlItemValueChanged">OnBrowserFilenameChanged</event>
                         <event name="OnDataViewCtrlSelectionChanged">OnBrowserSelectionChanged</event>
                         <object class="dataViewColumn" expanded="0">
                             <property name="align">wxALIGN_LEFT</property>

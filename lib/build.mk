@@ -83,6 +83,7 @@ LIBFLUXENGINE_SRCS = \
 	lib/vfs/machfs.cc \
 	lib/vfs/philefs.cc \
 	lib/vfs/prodos.cc \
+	lib/vfs/roland.cc \
 	lib/vfs/smaky6fs.cc \
 	lib/vfs/vfs.cc \
 	lib/vfs/zdos.cc \

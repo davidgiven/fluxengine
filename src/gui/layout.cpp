@@ -768,7 +768,7 @@ BrowserPanelGen::BrowserPanelGen( wxWindow* parent, wxWindowID id, const wxPoint
 	#endif
 	browserMoreMenu->Append( browserNewDirectoryMenuItem );
 
-	browserRenameMenuItem = new wxMenuItem( browserMoreMenu, wxID_ANY, wxString( wxT("Move file") ) , wxEmptyString, wxITEM_NORMAL );
+	browserRenameMenuItem = new wxMenuItem( browserMoreMenu, wxID_ANY, wxString( wxT("Move/Rename file") ) , wxEmptyString, wxITEM_NORMAL );
 	#ifdef __WXMSW__
 	browserRenameMenuItem->SetBitmaps( wxNullBitmap );
 	#elif (defined( __WXGTK__ ) || defined( __WXOSX__ ))
@@ -842,8 +842,8 @@ BrowserPanelGen::BrowserPanelGen( wxWindow* parent, wxWindowID id, const wxPoint
 	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_ITEM_BEGIN_DRAG, wxDataViewEventHandler( BrowserPanelGen::OnBrowserBeginDrag ), NULL, this );
 	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_ITEM_DROP, wxDataViewEventHandler( BrowserPanelGen::OnBrowserDrop ), NULL, this );
 	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_ITEM_DROP_POSSIBLE, wxDataViewEventHandler( BrowserPanelGen::OnBrowserDropPossible ), NULL, this );
-	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_ITEM_EDITING_DONE, wxDataViewEventHandler( BrowserPanelGen::OnBrowserFilenameChanged ), NULL, this );
 	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_ITEM_EXPANDING, wxDataViewEventHandler( BrowserPanelGen::OnBrowserDirectoryExpanding ), NULL, this );
+	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_ITEM_VALUE_CHANGED, wxDataViewEventHandler( BrowserPanelGen::OnBrowserFilenameChanged ), NULL, this );
 	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler( BrowserPanelGen::OnBrowserSelectionChanged ), NULL, this );
 	browserDiscardButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( BrowserPanelGen::OnBrowserDiscardButton ), NULL, this );
 	browserCommitButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( BrowserPanelGen::OnBrowserCommitButton ), NULL, this );
@@ -860,8 +860,8 @@ BrowserPanelGen::~BrowserPanelGen()
 	browserTree->Disconnect( wxEVT_COMMAND_DATAVIEW_ITEM_BEGIN_DRAG, wxDataViewEventHandler( BrowserPanelGen::OnBrowserBeginDrag ), NULL, this );
 	browserTree->Disconnect( wxEVT_COMMAND_DATAVIEW_ITEM_DROP, wxDataViewEventHandler( BrowserPanelGen::OnBrowserDrop ), NULL, this );
 	browserTree->Disconnect( wxEVT_COMMAND_DATAVIEW_ITEM_DROP_POSSIBLE, wxDataViewEventHandler( BrowserPanelGen::OnBrowserDropPossible ), NULL, this );
-	browserTree->Disconnect( wxEVT_COMMAND_DATAVIEW_ITEM_EDITING_DONE, wxDataViewEventHandler( BrowserPanelGen::OnBrowserFilenameChanged ), NULL, this );
 	browserTree->Disconnect( wxEVT_COMMAND_DATAVIEW_ITEM_EXPANDING, wxDataViewEventHandler( BrowserPanelGen::OnBrowserDirectoryExpanding ), NULL, this );
+	browserTree->Disconnect( wxEVT_COMMAND_DATAVIEW_ITEM_VALUE_CHANGED, wxDataViewEventHandler( BrowserPanelGen::OnBrowserFilenameChanged ), NULL, this );
 	browserTree->Disconnect( wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler( BrowserPanelGen::OnBrowserSelectionChanged ), NULL, this );
 	browserDiscardButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( BrowserPanelGen::OnBrowserDiscardButton ), NULL, this );
 	browserCommitButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( BrowserPanelGen::OnBrowserCommitButton ), NULL, this );

@@ -483,6 +483,7 @@ private:
                     return;
 
                 _filesystem->moveFile(oldPath, newPath);
+                node->newname = "";
 
                 auto dirent = _filesystem->getDirent(newPath);
                 runOnUiThread(
