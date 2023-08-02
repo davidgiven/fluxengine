@@ -17,8 +17,20 @@ while the file format itself is currently unknown, there is a header at the top
 of the file containing what appears to be the name shown in the D20 file
 browser, so the name by which you see it is not necessarily the filename.
 
+A word of warning --- just like the Brother word processors, the D20 floppy
+drive isn't very well aligned. The drive itself uses quarter-stepping to
+automatically adapt to whatever alignment the disk was formatted with. This
+means that trying to read such a disk on a PC drive, which does _not_ have
+adjustable alignment, may not work very well. In these situations it is possible
+to adjust the alignment of most modern drives, but this is a somewhat risky
+process and may result in permanently wrecking the drive alignment.
+
 Please [get in touch](https://github.com/davidgiven/fluxengine/issues/new) if
 you know anything about it.
+
+Many thanks to trondl [on the VCF
+forums](https://forum.vcfed.org/index.php?threads/roland-d-20-decoding-the-mysterious-floppy-format.1243226/)
+for assistance with this! 
 
 ## Options
 
