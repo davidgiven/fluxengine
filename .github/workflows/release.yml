@@ -1,7 +1,7 @@
 name: Autorelease
 
 concurrency: 
-  group: environment-${{ github.head_ref }}
+  group: environment-release-${{ github.head_ref }}
   cancel-in-progress: true
 
 on:
