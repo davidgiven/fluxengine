@@ -33,7 +33,7 @@ LIBUSBP_SRCS += \
 	dep/libusbp/src/mac/list_mac.c \
 	dep/libusbp/src/mac/serial_port_mac.c \
 
-else
+else ifeq ($(shell uname),Linux)
 
 LIBUSBP_CFLAGS += $(shell pkg-config --cflags libudev)
 LIBUSBP_LDFLAGS += $(shell pkg-config --libs libudev)
@@ -47,6 +47,11 @@ LIBUSBP_SRCS += \
 	dep/libusbp/src/linux/serial_port_linux.c \
 	dep/libusbp/src/linux/udev_linux.c \
 	dep/libusbp/src/linux/usbfd_linux.c \
+
+else
+
+LIBUSBP_SRCS += \
+	dep/libusbp/src/dummy.c
 
 endif
 
