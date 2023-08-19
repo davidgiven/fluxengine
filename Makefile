@@ -203,6 +203,7 @@ $(call do-encodedecodetest,commodore,scripts/commodore1541_test.textpb,--192 --d
 $(call do-encodedecodetest,commodore,,--800 --drive.tpi=135)
 $(call do-encodedecodetest,commodore,,--1620 --drive.tpi=135)
 $(call do-encodedecodetest,hplif,,--264 --drive.tpi=135)
+$(call do-encodedecodetest,hplif,,--608 --drive.tpi=135)
 $(call do-encodedecodetest,hplif,,--616 --drive.tpi=135)
 $(call do-encodedecodetest,hplif,,--770 --drive.tpi=135)
 $(call do-encodedecodetest,ibm,,--1200 --drive.tpi=96)

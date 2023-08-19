@@ -15,6 +15,7 @@ encoding scheme.
 
   - Format variants:
       - `264`: 264kB 3.5" 66-track SSDD; HP9121 format
+      - `608`: 608kB 3.5" 76-track DSDD; HP9122 format
       - `616`: 616kB 3.5" 77-track DSDD
       - `770`: 770kB 3.5" 77-track DSDD
 
@@ -23,12 +24,19 @@ encoding scheme.
 To read:
 
   - `fluxengine read hplif --264 -s drive:0 -o hplif.img`
+  - `fluxengine read hplif --608 -s drive:0 -o hplif.img`
   - `fluxengine read hplif --616 -s drive:0 -o hplif.img`
   - `fluxengine read hplif --770 -s drive:0 -o hplif.img`
 
 To write:
 
   - `fluxengine write hplif --264 -d drive:0 -i hplif.img`
+  - `fluxengine write hplif --608 -d drive:0 -i hplif.img`
   - `fluxengine write hplif --616 -d drive:0 -i hplif.img`
   - `fluxengine write hplif --770 -d drive:0 -i hplif.img`
+
+## References
+
+  * [A summary of the Hewlett Packard floppy disk
+    formats](http://www.bitsavers.org/pdf/hp/disc/912x/HP_Flexible_Disk_Formats.pdf)
 
