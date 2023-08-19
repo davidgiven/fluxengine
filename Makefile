@@ -30,6 +30,11 @@ ifeq ($(shell uname),Darwin)
 		-framework Foundation
 endif
 
+ifeq ($(shell uname),FreeBSD)
+	PLATFORM = FreeBSD
+	CFLAGS += -I/usr/local/include
+endif
+
 #Check the Make version.
 
 
