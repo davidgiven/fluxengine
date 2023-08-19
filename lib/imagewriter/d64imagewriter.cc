@@ -2,7 +2,6 @@
 #include "flags.h"
 #include "sector.h"
 #include "imagewriter/imagewriter.h"
-#include "fmt/format.h"
 #include "image.h"
 #include "ldbs.h"
 #include "logger.h"
@@ -25,21 +24,20 @@ static int sectors_per_track(int track)
 class D64ImageWriter : public ImageWriter
 {
 public:
-	D64ImageWriter(const ImageWriterProto& config):
-		ImageWriter(config)
-	{}
+    D64ImageWriter(const ImageWriterProto& config): ImageWriter(config) {}
 
-	void writeImage(const Image& image)
-	{
-		Logger() << "D64: writing triangular image";
+    void writeImage(const Image& image)
+    {
+        log("D64: writing triangular image");
 
-		std::ofstream outputFile(_config.filename(), std::ios::out | std::ios::binary);
-		if (!outputFile.is_open())
-			Error() << "cannot open output file";
+        std::ofstream outputFile(
+            _config.filename(), std::ios::out | std::ios::binary);
+        if (!outputFile.is_open())
+            error("cannot open output file");
 
         uint32_t offset = 0;
-		for (int track = 0; track < 40; track++)
-		{
+        for (int track = 0; track < 40; track++)
+        {
             int sectorCount = sectors_per_track(track);
             for (int sectorId = 0; sectorId < sectorCount; sectorId++)
             {
@@ -47,17 +45,18 @@ public:
                 if (sector)
                 {
                     outputFile.seekp(offset);
-                    outputFile.write((const char*) sector->data.cbegin(), sector->data.size());
+                    outputFile.write((const char*)sector->data.cbegin(),
+                        sector->data.size());
                 }
 
                 offset += 256;
             }
-		}
+        }
     }
 };
 
-std::unique_ptr<ImageWriter> ImageWriter::createD64ImageWriter(const ImageWriterProto& config)
+std::unique_ptr<ImageWriter> ImageWriter::createD64ImageWriter(
+    const ImageWriterProto& config)
 {
     return std::unique_ptr<ImageWriter>(new D64ImageWriter(config));
 }
-

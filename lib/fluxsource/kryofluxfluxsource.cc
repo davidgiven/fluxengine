@@ -9,7 +9,8 @@ class KryofluxFluxSource : public TrivialFluxSource
 public:
     KryofluxFluxSource(const KryofluxFluxSourceProto& config):
         _path(config.directory())
-    {}
+    {
+    }
 
 public:
     std::unique_ptr<const Fluxmap> readSingleFlux(int track, int side) override
@@ -23,7 +24,8 @@ private:
     const std::string _path;
 };
 
-std::unique_ptr<FluxSource> FluxSource::createKryofluxFluxSource(const KryofluxFluxSourceProto& config)
+std::unique_ptr<FluxSource> FluxSource::createKryofluxFluxSource(
+    const KryofluxFluxSourceProto& config)
 {
     return std::make_unique<KryofluxFluxSource>(config);
 }

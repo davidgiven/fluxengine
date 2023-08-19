@@ -1,7 +1,6 @@
 #include "lib/globals.h"
 #include "gui.h"
 #include "iconbutton.h"
-#include <fmt/format.h>
 
 IconButton::IconButton(wxWindow* parent,
     wxWindowID id,

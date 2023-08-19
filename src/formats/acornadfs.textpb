@@ -1,8 +1,28 @@
-comment: 'Acorn ADFS family (ro)'
+shortname: "Acorn ADFS"
+comment: 'BBC Micro, Archimedes'
+read_support_status: DINOSAUR
+
+documentation:
+<<<
+Acorn ADFS disks are used by the 6502-based BBC Micro and ARM-based Archimedes
+series of computers. They are yet another variation on MFM encoded IBM scheme
+disks, although with different sector sizes and with the 0-based sector
+identifiers rather than 1-based sector identifiers. The index hole is ignored
+and sectors are written whereever, requiring FluxEngine to do two revolutions
+to read a disk.
+
+There are various different kinds, which should all work out of the box.
+
+Be aware that Acorn logical block numbering goes all the way up side 0 and
+then all the way up side 1. However, FluxEngine uses traditional disk images
+with alternating sides, with the blocks from track 0 side 0 then track 0 side
+1 then track 1 side 0 etc. Most Acorn emulators will use both formats, but
+they might require nudging as the side order can't be reliably autodetected.
+>>>
 
 image_writer {
 	filename: "acornadfs.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 decoder {
@@ -14,15 +34,15 @@ decoder {
 }
 
 option_group {
-	comment: "Format variant"
+	comment: "$formats"
 
 	option {
 		name: "160"
 		comment: '160kB 3.5" or 5.25" 40-track SSDD; S format'
 
 		config {
-			tpi: 48
 			layout {
+				tpi: 48
 				tracks: 40
 				sides: 1
 				layoutdata {
@@ -41,8 +61,8 @@ option_group {
 		comment: '320kB 3.5" or 5.25" 80-track SSDD; M format'
 
 		config {
-			tpi: 96
 			layout {
+				tpi: 96
 				tracks: 80
 				sides: 1
 				layoutdata {
@@ -61,8 +81,8 @@ option_group {
 		comment: '640kB 3.5" or 5.25" 80-track DSDD; L format'
 
 		config {
-			tpi: 96
 			layout {
+				tpi: 96
 				tracks: 80
 				sides: 2
 				layoutdata {
@@ -81,8 +101,8 @@ option_group {
 		comment: '800kB 3.5" 80-track DSDD; D and E formats'
 
 		config {
-			tpi: 96
 			layout {
+				tpi: 96
 				tracks: 80
 				sides: 2
 				layoutdata {
@@ -102,8 +122,8 @@ option_group {
 		set_by_default: true
 
 		config {
-			tpi: 96
 			layout {
+				tpi: 96
 				tracks: 80
 				sides: 2
 				layoutdata {
@@ -118,4 +138,4 @@ option_group {
 	}
 }
 
-			
+

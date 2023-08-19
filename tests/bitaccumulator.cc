@@ -11,8 +11,7 @@ int main(int argc, const char* argv[])
     bitw.push(0x1e, 5);
     bitw.flush();
 
-    assert(bytes == Bytes{ 0x1e });
+    assert(bytes == Bytes{0x1e});
 
     return 0;
 }
-

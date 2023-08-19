@@ -65,8 +65,17 @@ void FluxViewerControl::SetFlux(std::shared_ptr<const TrackFlux> flux)
 
     _scrollPosition = 0;
     _totalDuration = 0;
+    _events.clear();
     for (const auto& trackdata : _flux->trackDatas)
+    {
+        for (const auto& record : trackdata->records)
+        {
+            _events.insert(_totalDuration + record->startTime);
+            _events.insert(_totalDuration + record->endTime);
+        }
+
         _totalDuration += trackdata->fluxmap->duration();
+    }
 
     auto size = GetSize();
     _nanosecondsPerPixel = (double)_totalDuration / (double)size.GetWidth();
@@ -128,14 +137,16 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
     auto size = GetSize();
     int w = size.GetWidth();
     int h = size.GetHeight();
-    constexpr int rows = 4;
+    constexpr int rows = 5;
     int th = h / rows;
+    int th2 = th / 2;
     int ch = th * 2 / 3;
     int ch2 = ch / 2;
-    int t1y = th / 2;
-    int t2y = th + th / 2;
-    int t3y = th * 2 + th / 2;
-    int t4y = th * 3 + th / 2;
+    int t1y = th2;
+    int t2y = th + th2;
+    int t3y = th * 2 + th2;
+    int t4y = th * 3 + th2;
+    int t5y = th * 4 + th2;
 
     int x = -_scrollPosition / _nanosecondsPerPixel;
     nanoseconds_t fluxStartTime = 0;
@@ -155,7 +166,7 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
             dc.SetPen(FOREGROUND_PEN);
             dc.DrawLine({x, t1y}, {x + fw, t1y});
             dc.DrawLine({x, t2y}, {x + fw, t2y});
-            dc.DrawLine({x, t3y}, {x + fw, t3y});
+            dc.DrawLine({x, t4y}, {x + fw, t4y});
 
             /* Index lines. */
 
@@ -203,11 +214,11 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
                     ts = ch2 / 2;
                 if ((tick % (100 * tickStep)) == 0)
                     ts = ch2;
-                dc.DrawLine({x + xx, t3y - ts}, {x + xx, t3y + ts});
+                dc.DrawLine({x + xx, t4y - ts}, {x + xx, t4y + ts});
                 if ((tick % (10 * tickStep)) == 0)
                 {
                     dc.DrawText(fmt::format("{:.3f}ms", tick / 1e6),
-                        {x + xx, t3y - ch2});
+                        {x + xx, t4y - ch2});
                 }
 
                 tick += tickStep;
@@ -415,7 +426,7 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
                                 density));
                         wxBrush brush(colour);
                         dc.SetBrush(brush);
-                        dc.DrawRectangle({x + fx, t4y - ch2}, {1, ch});
+                        dc.DrawRectangle({x + fx, t5y - ch2}, {1, ch});
                     }
                 }
             }
@@ -432,18 +443,49 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
 
                     int fx = fmr.tell().ns() / _nanosecondsPerPixel;
                     if (((x + fx) > 0) && ((x + fx) < w))
-                        dc.DrawLine({x + fx, t4y - ch2}, {x + fx, t4y + ch2});
+                        dc.DrawLine({x + fx, t5y - ch2}, {x + fx, t5y + ch2});
                     if ((x + fx) >= w)
                         break;
                 }
             }
 
             dc.SetPen(FLUX_PEN);
-            dc.DrawLine({x, t4y}, {x + fw, t4y});
+            dc.DrawLine({x, t5y}, {x + fw, t5y});
         }
 
         x += fw;
         fluxStartTime += duration;
+    }
+
+    /* Ruler. */
+
+    {
+        nanoseconds_t cursorTime =
+            (_mouseX * _nanosecondsPerPixel) + _scrollPosition;
+        auto rightEvent = _events.lower_bound(cursorTime);
+        if (rightEvent != _events.end())
+        {
+            auto leftEvent = rightEvent;
+            leftEvent--;
+            if (leftEvent != _events.begin())
+            {
+                int lx = (*leftEvent - _scrollPosition) / _nanosecondsPerPixel;
+                int rx = (*rightEvent - _scrollPosition) / _nanosecondsPerPixel;
+                int dx = rx - lx;
+                int y = t3y - th2;
+
+                dc.SetBackgroundMode(wxTRANSPARENT);
+                dc.SetTextForeground(*wxBLACK);
+                dc.SetPen(FOREGROUND_PEN);
+                dc.DrawLine({lx, y}, {rx, y});
+
+                auto text =
+                    fmt::format("{:.3f}ms", (*rightEvent - *leftEvent) / 1e6);
+                auto size = dc.GetTextExtent(text);
+                int mx = (lx + rx) / 2;
+                dc.DrawText(text, {mx - size.GetWidth() / 2, y});
+            }
+        }
     }
 
     _rightClicked = false;

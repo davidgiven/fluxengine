@@ -17,6 +17,6 @@ $(ADFLIB_OBJS): CFLAGS += -Idep/adflib/src -Idep/adflib
 ADFLIB_LIB = $(OBJDIR)/libadflib.a
 $(ADFLIB_LIB): $(ADFLIB_OBJS)
 ADFLIB_CFLAGS = -Idep/adflib/src
-ADFLIB_LDFLAGS = $(ADFLIB_LIB)
+ADFLIB_LDFLAGS =
 OBJS += $(ADFLIB_OBJS)
 

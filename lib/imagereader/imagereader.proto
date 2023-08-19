@@ -24,22 +24,8 @@ message ImageReaderProto
         default = false
     ];
 
-	enum ImageReaderType {
-		NOT_SET = 0;
-		IMG = 1;
-		DISKCOPY = 2;
-		IMD = 3;
-		JV3 = 4;
-		D64 = 5;
-		NSI = 6;
-		TD0 = 7;
-		DIM = 8;
-		FDI = 9;
-		D88 = 10;
-		NFD = 11;
-	}
-
-	optional ImageReaderType type = 14 [default = NOT_SET, (help) = "input image type"];
+	optional ImageReaderWriterType type = 14
+		[default = IMAGETYPE_NOT_SET, (help) = "input image type"];
 
 	optional ImgInputOutputProto img = 2;
 	optional DiskCopyInputProto diskcopy = 3;

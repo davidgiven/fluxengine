@@ -2,7 +2,6 @@
 #include "lib/vfs/vfs.h"
 #include "lib/config.pb.h"
 #include "lib/utils.h"
-#include <fmt/format.h>
 
 /* Root block:
  *
@@ -161,7 +160,7 @@ public:
     {
     }
 
-    uint32_t capabilities() const
+    uint32_t capabilities() const override
     {
         return OP_GETFSDATA | OP_LIST | OP_GETFILE | OP_GETDIRENT;
     }

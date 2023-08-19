@@ -1,4 +1,4 @@
-# Special Windows settings.
+#Special Windows settings.
 
 ifeq ($(OS), Windows_NT)
 	MINGWBIN = /mingw32/bin
@@ -16,12 +16,12 @@ ifeq ($(OS), Windows_NT)
 		-Wno-deprecated-enum-float-conversion \
 		-Wno-deprecated-enum-enum-conversion
 
-	# Required to get the gcc run-time libraries on the path.
+#Required to get the gcc run - time libraries on the path.
 	export PATH := $(PATH):$(MINGWBIN)
 	EXT ?= .exe
 endif
 
-# Special OSX settings.
+#Special OSX settings.
 
 ifeq ($(shell uname),Darwin)
 	PLATFORM = OSX
@@ -30,14 +30,19 @@ ifeq ($(shell uname),Darwin)
 		-framework Foundation
 endif
 
-# Check the Make version.
+ifeq ($(shell uname),FreeBSD)
+	PLATFORM = FreeBSD
+	CFLAGS += -I/usr/local/include
+endif
+
+#Check the Make version.
 
 
 ifeq ($(findstring 4.,$(MAKE_VERSION)),)
 $(error You need GNU Make 4.x for this (if you're on OSX, use gmake).)
 endif
 
-# Normal settings.
+#Normal settings.
 
 OBJDIR ?= .obj
 CCPREFIX ?=
@@ -65,6 +70,7 @@ CFLAGS += \
 	-I$(OBJDIR)/arch \
 	-I$(OBJDIR)/lib \
 	-I$(OBJDIR) \
+	-Wno-deprecated-declarations \
 
 LDFLAGS += \
 	-lz \
@@ -76,6 +82,9 @@ LDFLAGS += \
 define nl
 
 endef
+
+empty :=
+space := $(empty) $(empty)
 
 use-library = $(eval $(use-library-impl))
 define use-library-impl
@@ -95,7 +104,7 @@ $(2): private CFLAGS += $(shell $(PKG_CONFIG) --cflags $(3))
 endef
 
 .PHONY: all binaries tests clean install install-bin
-all: binaries tests
+all: binaries tests docs
 
 PROTOS = \
 	arch/aeslanier/aeslanier.proto \
@@ -134,12 +143,12 @@ PROTOS = \
 PROTO_HDRS = $(patsubst %.proto, $(OBJDIR)/%.pb.h, $(PROTOS))
 PROTO_SRCS = $(patsubst %.proto, $(OBJDIR)/%.pb.cc, $(PROTOS))
 PROTO_OBJS = $(patsubst %.cc, %.o, $(PROTO_SRCS))
-PROTO_CFLAGS = $(shell $(PKG_CONFIG) --cflags protobuf)
+PROTO_CFLAGS := $(shell $(PKG_CONFIG) --cflags protobuf)
 $(PROTO_SRCS): | $(PROTO_HDRS)
 $(PROTO_OBJS): CFLAGS += $(PROTO_CFLAGS)
 PROTO_LIB = $(OBJDIR)/libproto.a
 $(PROTO_LIB): $(PROTO_OBJS)
-PROTO_LDFLAGS = $(shell $(PKG_CONFIG) --libs protobuf) -pthread $(PROTO_LIB)
+PROTO_LDFLAGS := $(shell $(PKG_CONFIG) --libs protobuf) -pthread
 .PRECIOUS: $(PROTO_HDRS) $(PROTO_SRCS)
 
 include dep/agg/build.mk
@@ -161,56 +170,91 @@ include tests/build.mk
 do-encodedecodetest = $(eval $(do-encodedecodetest-impl))
 define do-encodedecodetest-impl
 
-tests: $(OBJDIR)/$1$3.flux.encodedecode
-$(OBJDIR)/$1$3.flux.encodedecode: scripts/encodedecodetest.sh $(FLUXENGINE_BIN) $2
+tests: $(OBJDIR)/$1$$(subst $$(space),_,$3).flux.encodedecode
+$(OBJDIR)/$1$$(subst $$(space),_,$3).flux.encodedecode: scripts/encodedecodetest.sh $(FLUXENGINE_BIN) $2
 	@mkdir -p $(dir $$@)
 	@echo ENCODEDECODETEST $1 flux $(FLUXENGINE_BIN) $2 $3
 	@scripts/encodedecodetest.sh $1 flux $(FLUXENGINE_BIN) $2 $3 > $$@
 
-tests: $(OBJDIR)/$1$3.scp.encodedecode
-$(OBJDIR)/$1$3.scp.encodedecode: scripts/encodedecodetest.sh $(FLUXENGINE_BIN) $2
+tests: $(OBJDIR)/$1$$(subst $$(space),_,$3).scp.encodedecode
+$(OBJDIR)/$1$$(subst $$(space),_,$3).scp.encodedecode: scripts/encodedecodetest.sh $(FLUXENGINE_BIN) $2
 	@mkdir -p $(dir $$@)
 	@echo ENCODEDECODETEST $1 scp $(FLUXENGINE_BIN) $2 $3
 	@scripts/encodedecodetest.sh $1 scp $(FLUXENGINE_BIN) $2 $3 > $$@
 
 endef
 
-$(call do-encodedecodetest,agat840)
-$(call do-encodedecodetest,amiga)
-$(call do-encodedecodetest,apple2,,--140)
-$(call do-encodedecodetest,atarist,,--360)
-$(call do-encodedecodetest,atarist,,--370)
-$(call do-encodedecodetest,atarist,,--400)
-$(call do-encodedecodetest,atarist,,--410)
-$(call do-encodedecodetest,atarist,,--720)
-$(call do-encodedecodetest,atarist,,--740)
-$(call do-encodedecodetest,atarist,,--800)
-$(call do-encodedecodetest,atarist,,--820)
-$(call do-encodedecodetest,bk800)
-$(call do-encodedecodetest,brother,,--120)
-$(call do-encodedecodetest,brother,,--240)
-$(call do-encodedecodetest,commodore1541,scripts/commodore1541_test.textpb,--171)
-$(call do-encodedecodetest,commodore1541,scripts/commodore1541_test.textpb,--192)
-$(call do-encodedecodetest,commodore1581)
-$(call do-encodedecodetest,cmd_fd2000)
-$(call do-encodedecodetest,hplif,,--264)
-$(call do-encodedecodetest,hplif,,--616)
-$(call do-encodedecodetest,hplif,,--770)
-$(call do-encodedecodetest,ibm,,--1200)
-$(call do-encodedecodetest,ibm,,--1232)
-$(call do-encodedecodetest,ibm,,--1440)
-$(call do-encodedecodetest,ibm,,--180)
-$(call do-encodedecodetest,ibm,,--160)
-$(call do-encodedecodetest,ibm,,--320)
-$(call do-encodedecodetest,ibm,,--360)
-$(call do-encodedecodetest,ibm,,--720)
-$(call do-encodedecodetest,mac,scripts/mac400_test.textpb,--400)
-$(call do-encodedecodetest,mac,scripts/mac800_test.textpb,--800)
-$(call do-encodedecodetest,n88basic)
-$(call do-encodedecodetest,rx50)
-$(call do-encodedecodetest,tids990)
-$(call do-encodedecodetest,victor9k,,--612)
-$(call do-encodedecodetest,victor9k,,--1224)
+$(call do-encodedecodetest,agat,,--drive.tpi=96)
+$(call do-encodedecodetest,amiga,,--drive.tpi=135)
+$(call do-encodedecodetest,apple2,,--140 --drive.tpi=96)
+$(call do-encodedecodetest,atarist,,--360 --drive.tpi=135)
+$(call do-encodedecodetest,atarist,,--370 --drive.tpi=135)
+$(call do-encodedecodetest,atarist,,--400 --drive.tpi=135)
+$(call do-encodedecodetest,atarist,,--410 --drive.tpi=135)
+$(call do-encodedecodetest,atarist,,--720 --drive.tpi=135)
+$(call do-encodedecodetest,atarist,,--740 --drive.tpi=135)
+$(call do-encodedecodetest,atarist,,--800 --drive.tpi=135)
+$(call do-encodedecodetest,atarist,,--820 --drive.tpi=135)
+$(call do-encodedecodetest,bk)
+$(call do-encodedecodetest,brother,,--120 --drive.tpi=135)
+$(call do-encodedecodetest,brother,,--240 --drive.tpi=135)
+$(call do-encodedecodetest,commodore,scripts/commodore1541_test.textpb,--171 --drive.tpi=96)
+$(call do-encodedecodetest,commodore,scripts/commodore1541_test.textpb,--192 --drive.tpi=96)
+$(call do-encodedecodetest,commodore,,--800 --drive.tpi=135)
+$(call do-encodedecodetest,commodore,,--1620 --drive.tpi=135)
+$(call do-encodedecodetest,hplif,,--264 --drive.tpi=135)
+$(call do-encodedecodetest,hplif,,--608 --drive.tpi=135)
+$(call do-encodedecodetest,hplif,,--616 --drive.tpi=135)
+$(call do-encodedecodetest,hplif,,--770 --drive.tpi=135)
+$(call do-encodedecodetest,ibm,,--1200 --drive.tpi=96)
+$(call do-encodedecodetest,ibm,,--1232 --drive.tpi=96)
+$(call do-encodedecodetest,ibm,,--1440 --drive.tpi=135)
+$(call do-encodedecodetest,ibm,,--1680 --drive.tpi=135)
+$(call do-encodedecodetest,ibm,,--180 --drive.tpi=96)
+$(call do-encodedecodetest,ibm,,--160 --drive.tpi=96)
+$(call do-encodedecodetest,ibm,,--320 --drive.tpi=96)
+$(call do-encodedecodetest,ibm,,--360 --drive.tpi=96)
+$(call do-encodedecodetest,ibm,,--720_96 --drive.tpi=96)
+$(call do-encodedecodetest,ibm,,--720_135 --drive.tpi=135)
+$(call do-encodedecodetest,mac,scripts/mac400_test.textpb,--400 --drive.tpi=135)
+$(call do-encodedecodetest,mac,scripts/mac800_test.textpb,--800 --drive.tpi=135)
+$(call do-encodedecodetest,n88basic,,--drive.tpi=96)
+$(call do-encodedecodetest,rx50,,--drive.tpi=96)
+$(call do-encodedecodetest,tids990,,--drive.tpi=48)
+$(call do-encodedecodetest,victor9k,,--612 --drive.tpi=96)
+$(call do-encodedecodetest,victor9k,,--1224 --drive.tpi=96)
+
+do-corpustest = $(eval $(do-corpustest-impl))
+define do-corpustest-impl
+
+tests: $(OBJDIR)/corpustest/$2
+$(OBJDIR)/corpustest/$2: $(FLUXENGINE_BIN) \
+		../fluxengine-testdata/data/$1 ../fluxengine-testdata/data/$2
+	@mkdir -p $(OBJDIR)/corpustest
+	@echo CORPUSTEST $1 $2 $3
+	@$(FLUXENGINE_BIN) read $3 -s ../fluxengine-testdata/data/$1 -o $$@ > $$@.log
+	@cmp $$@ ../fluxengine-testdata/data/$2
+
+endef
+
+ifneq ($(wildcard ../fluxengine-testdata/data),)
+
+$(call do-corpustest,amiga.flux,amiga.adf,amiga --drive.tpi=135)
+$(call do-corpustest,atarist360.flux,atarist360.st,atarist --360 --drive.tpi=135)
+$(call do-corpustest,atarist720.flux,atarist720.st,atarist --720 --drive.tpi=135)
+$(call do-corpustest,brother120.flux,brother120.img,brother --120 --drive.tpi=135)
+$(call do-corpustest,cmd-fd2000.flux,cmd-fd2000.img,commodore --1620 --drive.tpi=135)
+$(call do-corpustest,ibm1232.flux,ibm1232.img,ibm --1232 --drive.tpi=96)
+$(call do-corpustest,ibm1440.flux,ibm1440.img,ibm --1440 --drive.tpi=135)
+$(call do-corpustest,mac800.flux,mac800.dsk,mac --800 --drive.tpi=135)
+$(call do-corpustest,micropolis315.flux,micropolis315.img,micropolis --315 --drive.tpi=100)
+$(call do-corpustest,northstar87-synthetic.flux,northstar87-synthetic.nsi,northstar --87 --drive.tpi=48)
+$(call do-corpustest,northstar175-synthetic.flux,northstar175-synthetic.nsi,northstar --175 --drive.tpi=48)
+$(call do-corpustest,northstar350-synthetic.flux,northstar350-synthetic.nsi,northstar --350 --drive.tpi=48)
+$(call do-corpustest,victor9k_ss.flux,victor9k_ss.img,victor9k --612 --drive.tpi=96)
+$(call do-corpustest,victor9k_ds.flux,victor9k_ds.img,victor9k --1224 --drive.tpi=96)
+
+endif
 
 $(OBJDIR)/%.a:
 	@mkdir -p $(dir $@)
@@ -220,7 +264,7 @@ $(OBJDIR)/%.a:
 %.exe:
 	@mkdir -p $(dir $@)
 	@echo LINK $@
-	@$(CXX) -o $@ $^ $(LDFLAGS) $(LDFLAGS)
+	@$(CXX) -o $@ $(filter %.o,$^) $(filter %.a,$^) $(LDFLAGS) $(filter %.a,$^) $(LDFLAGS)
 
 $(OBJDIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)

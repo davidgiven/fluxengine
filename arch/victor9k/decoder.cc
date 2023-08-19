@@ -13,16 +13,18 @@
 
 const FluxPattern SECTOR_RECORD_PATTERN(32, VICTOR9K_SECTOR_RECORD);
 const FluxPattern DATA_RECORD_PATTERN(32, VICTOR9K_DATA_RECORD);
-const FluxMatchers ANY_RECORD_PATTERN({ &SECTOR_RECORD_PATTERN, &DATA_RECORD_PATTERN });
+const FluxMatchers ANY_RECORD_PATTERN(
+    {&SECTOR_RECORD_PATTERN, &DATA_RECORD_PATTERN});
 
 static int decode_data_gcr(uint8_t gcr)
 {
     switch (gcr)
     {
-		#define GCR_ENTRY(gcr, data) \
-			case gcr: return data;
-		#include "data_gcr.h"
-		#undef GCR_ENTRY
+#define GCR_ENTRY(gcr, data) \
+    case gcr:                \
+        return data;
+#include "data_gcr.h"
+#undef GCR_ENTRY
     }
     return -1;
 }
@@ -37,11 +39,11 @@ static Bytes decode(const std::vector<bool>& bits)
     while (ii != bits.end())
     {
         uint8_t inputfifo = 0;
-        for (size_t i=0; i<5; i++)
+        for (size_t i = 0; i < 5; i++)
         {
             if (ii == bits.end())
                 break;
-            inputfifo = (inputfifo<<1) | *ii++;
+            inputfifo = (inputfifo << 1) | *ii++;
         }
 
         uint8_t decoded = decode_data_gcr(inputfifo);
@@ -55,63 +57,62 @@ static Bytes decode(const std::vector<bool>& bits)
 class Victor9kDecoder : public Decoder
 {
 public:
-	Victor9kDecoder(const DecoderProto& config):
-		Decoder(config)
-	{}
+    Victor9kDecoder(const DecoderProto& config): Decoder(config) {}
 
     nanoseconds_t advanceToNextRecord() override
-	{
-		return seekToPattern(ANY_RECORD_PATTERN);
-	}
+    {
+        return seekToPattern(ANY_RECORD_PATTERN);
+    }
 
     void decodeSectorRecord() override
-	{
-		/* Check the ID. */
+    {
+        /* Check the ID. */
 
-		if (readRaw32() != VICTOR9K_SECTOR_RECORD)
-			return;
+        if (readRaw32() != VICTOR9K_SECTOR_RECORD)
+            return;
 
-		/* Read header. */
+        /* Read header. */
 
-		auto bytes = decode(readRawBits(3*10)).slice(0, 3);
+        auto bytes = decode(readRawBits(3 * 10)).slice(0, 3);
 
-		uint8_t rawTrack = bytes[0];
-		_sector->logicalSector = bytes[1];
-		uint8_t gotChecksum = bytes[2];
+        uint8_t rawTrack = bytes[0];
+        _sector->logicalSector = bytes[1];
+        uint8_t gotChecksum = bytes[2];
 
-		_sector->logicalTrack = rawTrack & 0x7f;
-		_sector->logicalSide = rawTrack >> 7;
-		uint8_t wantChecksum = bytes[0] + bytes[1];
-		if ((_sector->logicalSector > 20) || (_sector->logicalTrack > 85) || (_sector->logicalSide > 1))
-			return;
-					
-		if (wantChecksum == gotChecksum)
-			_sector->status = Sector::DATA_MISSING; /* unintuitive but correct */
-	}
+        _sector->logicalTrack = rawTrack & 0x7f;
+        _sector->logicalSide = rawTrack >> 7;
+        uint8_t wantChecksum = bytes[0] + bytes[1];
+        if ((_sector->logicalSector > 20) || (_sector->logicalTrack > 85) ||
+            (_sector->logicalSide > 1))
+            return;
+
+        if (wantChecksum == gotChecksum)
+            _sector->status =
+                Sector::DATA_MISSING; /* unintuitive but correct */
+    }
 
     void decodeDataRecord() override
-	{
-		/* Check the ID. */
+    {
+        /* Check the ID. */
 
-		if (readRaw32() != VICTOR9K_DATA_RECORD)
-			return;
+        if (readRaw32() != VICTOR9K_DATA_RECORD)
+            return;
 
-		/* Read data. */
+        /* Read data. */
 
-		auto bytes = decode(readRawBits((VICTOR9K_SECTOR_LENGTH+4)*10))
-			.slice(0, VICTOR9K_SECTOR_LENGTH+4);
-		ByteReader br(bytes);
+        auto bytes = decode(readRawBits((VICTOR9K_SECTOR_LENGTH + 4) * 10))
+                         .slice(0, VICTOR9K_SECTOR_LENGTH + 4);
+        ByteReader br(bytes);
 
-		_sector->data = br.read(VICTOR9K_SECTOR_LENGTH);
-		uint16_t gotChecksum = sumBytes(_sector->data);
-		uint16_t wantChecksum = br.read_le16();
-		_sector->status = (gotChecksum == wantChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
-	}
+        _sector->data = br.read(VICTOR9K_SECTOR_LENGTH);
+        uint16_t gotChecksum = sumBytes(_sector->data);
+        uint16_t wantChecksum = br.read_le16();
+        _sector->status =
+            (gotChecksum == wantChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
+    }
 };
 
 std::unique_ptr<Decoder> createVictor9kDecoder(const DecoderProto& config)
 {
-	return std::unique_ptr<Decoder>(new Victor9kDecoder(config));
+    return std::unique_ptr<Decoder>(new Victor9kDecoder(config));
 }
-
-

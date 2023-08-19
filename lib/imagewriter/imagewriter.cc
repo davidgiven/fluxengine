@@ -8,7 +8,6 @@
 #include "proto.h"
 #include "lib/layout.h"
 #include "lib/logger.h"
-#include "fmt/format.h"
 #include <iostream>
 #include <fstream>
 
@@ -16,70 +15,34 @@ std::unique_ptr<ImageWriter> ImageWriter::create(const ImageWriterProto& config)
 {
     switch (config.type())
     {
-        case ImageWriterProto::IMG:
+        case IMAGETYPE_IMG:
             return ImageWriter::createImgImageWriter(config);
 
-        case ImageWriterProto::D64:
+        case IMAGETYPE_D64:
             return ImageWriter::createD64ImageWriter(config);
 
-        case ImageWriterProto::LDBS:
+        case IMAGETYPE_LDBS:
             return ImageWriter::createLDBSImageWriter(config);
 
-        case ImageWriterProto::DISKCOPY:
+        case IMAGETYPE_DISKCOPY:
             return ImageWriter::createDiskCopyImageWriter(config);
 
-        case ImageWriterProto::NSI:
+        case IMAGETYPE_NSI:
             return ImageWriter::createNsiImageWriter(config);
 
-        case ImageWriterProto::RAW:
+        case IMAGETYPE_RAW:
             return ImageWriter::createRawImageWriter(config);
 
-        case ImageWriterProto::D88:
+        case IMAGETYPE_D88:
             return ImageWriter::createD88ImageWriter(config);
 
-        case ImageWriterProto::IMD:
+        case IMAGETYPE_IMD:
             return ImageWriter::createImdImageWriter(config);
 
         default:
-            Error() << "bad output image config";
+            error("bad output image config");
             return std::unique_ptr<ImageWriter>();
     }
-}
-
-void ImageWriter::updateConfigForFilename(
-    ImageWriterProto* proto, const std::string& filename)
-{
-    static const std::map<std::string, std::function<void(ImageWriterProto*)>>
-        formats = {
-  // clang-format off
-		{".adf",      [](auto* proto) { proto->set_type(ImageWriterProto::IMG); }},
-		{".d64",      [](auto* proto) { proto->set_type(ImageWriterProto::D64); }},
-		{".d81",      [](auto* proto) { proto->set_type(ImageWriterProto::IMG); }},
-		{".d88",      [](auto* proto) { proto->set_type(ImageWriterProto::D88); }},
-		{".diskcopy", [](auto* proto) { proto->set_type(ImageWriterProto::DISKCOPY); }},
-		{".dsk",      [](auto* proto) { proto->set_type(ImageWriterProto::IMG); }},
-		{".img",      [](auto* proto) { proto->set_type(ImageWriterProto::IMG); }},
-		{".imd",      [](auto* proto) { proto->set_type(ImageWriterProto::IMD); }},
-		{".ldbs",     [](auto* proto) { proto->set_type(ImageWriterProto::LDBS); }},
-		{".nsi",      [](auto* proto) { proto->set_type(ImageWriterProto::NSI); }},
-		{".raw",      [](auto* proto) { proto->set_type(ImageWriterProto::RAW); }},
-		{".st",       [](auto* proto) { proto->set_type(ImageWriterProto::IMG); }},
-		{".vgi",      [](auto* proto) { proto->set_type(ImageWriterProto::IMG); }},
-		{".xdf",      [](auto* proto) { proto->set_type(ImageWriterProto::IMG); }},
-  // clang-format on
-    };
-
-    for (const auto& it : formats)
-    {
-        if (endsWith(filename, it.first))
-        {
-            it.second(proto);
-            proto->set_filename(filename);
-            return;
-        }
-    }
-
-    Error() << fmt::format("unrecognised image filename '{}'", filename);
 }
 
 ImageWriter::ImageWriter(const ImageWriterProto& config): _config(config) {}
@@ -88,7 +51,7 @@ void ImageWriter::writeCsv(const Image& image, const std::string& filename)
 {
     std::ofstream f(filename, std::ios::out);
     if (!f.is_open())
-        Error() << "cannot open CSV report file";
+        error("cannot open CSV report file");
 
     f << "\"Physical track\","
          "\"Physical side\","
@@ -207,8 +170,7 @@ void ImageWriter::writeMappedImage(const Image& image)
 {
     if (_config.filesystem_sector_order())
     {
-        Logger()
-            << "WRITER: converting from disk sector order to filesystem order";
+        log("WRITER: converting from disk sector order to filesystem order");
 
         std::set<std::shared_ptr<const Sector>> sectors;
         for (const auto& e : image)

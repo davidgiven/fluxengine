@@ -1,7 +1,6 @@
 #include "globals.h"
 #include "utils.h"
 #include "lib/bytes.h"
-#include <fmt/format.h>
 #include <iomanip>
 #include <fstream>
 
@@ -207,4 +206,17 @@ int countSetBits(uint32_t word)
         word >>= 1;
     }
     return b;
+}
+
+uint32_t unbcd(uint32_t bcd)
+{
+    uint32_t dec = 0;
+
+    for (int i = 0; i < 8; i++)
+    {
+        dec = dec * 10 + (bcd >> 28);
+        bcd <<= 4;
+    }
+
+    return dec;
 }

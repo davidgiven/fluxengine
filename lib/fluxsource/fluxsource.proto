@@ -41,20 +41,8 @@ message FlxFluxSourceProto {
 
 // NEXT: 12
 message FluxSourceProto {
-	enum FluxSourceType {
-		NOT_SET = 0;
-		DRIVE = 1;
-		TEST_PATTERN = 2;
-		ERASE = 3;
-		KRYOFLUX = 4;
-		SCP = 5;
-		CWF = 6;
-		FLUX = 7;
-		FLX = 8;
-		A2R = 9;
-	}
-
-	optional FluxSourceType type = 9 [default = NOT_SET, (help) = "flux source type"];
+	optional FluxSourceSinkType type = 9
+		[default = FLUXTYPE_NOT_SET, (help) = "flux source type"];
 
 	optional A2rFluxSourceProto a2r = 11;
 	optional CwfFluxSourceProto cwf = 7;

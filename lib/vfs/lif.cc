@@ -2,10 +2,68 @@
 #include "lib/vfs/vfs.h"
 #include "lib/config.pb.h"
 #include "lib/utils.h"
-#include <fmt/format.h>
+#include <iomanip>
 
 /* See https://www.hp9845.net/9845/projects/hpdir/#lif_filesystem for
  * a description. */
+
+static std::map<uint16_t, std::string> numberToFileType = {
+    {0x0001, "TEXT"    },
+    {0x00ff, "D-LEX"   },
+    {0xe008, "BIN8x"   },
+    {0xe010, "DTA8x"   },
+    {0xe020, "BAS8x"   },
+    {0xe030, "XM41"    },
+    {0xe040, "ALL41"   },
+    {0xe050, "KEY41"   },
+    {0xe052, "TXT75"   },
+    {0xe053, "APP75"   },
+    {0xe058, "DAT75"   },
+    {0xe060, "STA41"   },
+    {0xe070, "X-M41"   },
+    {0xe080, "PGM41"   },
+    {0xe088, "BAS75"   },
+    {0xe089, "LEX75"   },
+    {0xe08a, "WKS75"   },
+    {0xe08b, "ROM75"   },
+    {0xe0d0, "SDATA"   },
+    {0xe0d1, "TEXT_S"  },
+    {0xe0f0, "DAT71"   },
+    {0xe0f1, "DAT71_S" },
+    {0xe204, "BIN71"   },
+    {0xe205, "BIN71_S" },
+    {0xe206, "BIN71_P" },
+    {0xe207, "BIN71_SP"},
+    {0xe208, "LEX71"   },
+    {0xe209, "LEX71_S" },
+    {0xe20a, "LEX71_P" },
+    {0xe20b, "LEX71_SP"},
+    {0xe20c, "KEY71"   },
+    {0xe20d, "KEY71_S" },
+    {0xe214, "BAS71"   },
+    {0xe215, "BAS71_S" },
+    {0xe216, "BAS71_P" },
+    {0xe217, "BAS71_SP"},
+    {0xe218, "FTH71"   },
+    {0xe219, "FTH71_S" },
+    {0xe21a, "FTH71_P" },
+    {0xe21b, "FTH71_SP"},
+    {0xe21c, "ROM71"   },
+    {0xe222, "GRA71"   },
+    {0xe224, "ADR71"   },
+    {0xe22e, "SYM71"   },
+    {0xe942, "SYS9k"   },
+    {0xe946, "HP-UX"   },
+    {0xe950, "BAS9k"   },
+    {0xe961, "BDA9k"   },
+    {0xe971, "BIN9k"   },
+    {0xea0a, "DTA9k"   },
+    {0xea32, "COD9k"   },
+    {0xea3e, "TXT9k"   },
+};
+
+static std::map<std::string, uint16_t> fileTypeToNumber =
+    reverseMap(numberToFileType);
 
 static void trimZeros(std::string s)
 {
@@ -26,18 +84,53 @@ class LifFilesystem : public Filesystem
             uint16_t type = br.read_be16();
             location = br.read_be32();
             length = br.read_be32() * config.block_size();
+            int year = unbcd(br.read_8());
+            int month = unbcd(br.read_8()) + 1;
+            int day = unbcd(br.read_8());
+            int hour = unbcd(br.read_8());
+            int minute = unbcd(br.read_8());
+            int second = unbcd(br.read_8());
+            uint16_t volume = br.read_be16();
+            uint16_t protection = br.read_be16();
+            uint16_t recordSize = br.read_be16();
 
-            mode = fmt::format("{:04x}", type);
+            if (year >= 70)
+                year += 1900;
+            else
+                year += 2000;
+
+            std::tm tm = {.tm_sec = second,
+                .tm_min = minute,
+                .tm_hour = hour,
+                .tm_mday = day,
+                .tm_mon = month,
+                .tm_year = year - 1900,
+                .tm_isdst = -1};
+            std::stringstream ss;
+            ss << std::put_time(&tm, "%FT%T%z");
+            ctime = ss.str();
+
+            auto it = numberToFileType.find(type);
+            if (it != numberToFileType.end())
+                mode = it->second;
+            else
+                mode = fmt::format("0x{:04x}", type);
+
             path = {filename};
 
             attributes[Filesystem::FILENAME] = filename;
             attributes[Filesystem::LENGTH] = std::to_string(length);
             attributes[Filesystem::FILE_TYPE] = "file";
             attributes[Filesystem::MODE] = mode;
+            attributes["lif.ctime"] = ctime;
+            attributes["lif.volume"] = std::to_string(volume & 0x7fff);
+            attributes["lif.protection"] = fmt::format("0x{:x}", protection);
+            attributes["lif.record_size"] = std::to_string(recordSize);
         }
 
     public:
         uint32_t location;
+        std::string ctime;
     };
 
 public:
@@ -121,6 +214,7 @@ private:
         _directoryBlock = rbr.read_be32();
         rbr.skip(4);
         _directorySize = rbr.read_be32();
+		rbr.skip(4);
         unsigned tracks = rbr.read_be32();
         unsigned heads = rbr.read_be32();
         unsigned sectors = rbr.read_be32();

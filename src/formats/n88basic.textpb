@@ -1,4 +1,17 @@
-comment: 'N88-BASIC 5.25"/3.5" 77-track 26-sector DSHD'
+shortname: 'N88-BASIC'
+comment: 'PC8800/PC98 5.25" 77-track 26-sector DSHD'
+read_support_status: UNICORN
+write_support_status: UNICORN
+
+documentation:
+<<<
+The N88-BASIC disk format is the one used by the operating system of the same
+name for the Japanese PC8800 and PC98 computers. It is another IBM scheme
+variant, and is very similar to some mixed-format CP/M disk formats, where
+track 0 side 0 uses 128-byte single density sectors and the rest of the disk
+uses 512-byte double density sectors. (The reason for this is that the PC8800
+boot ROM could only read single density data.)
+>>>
 
 drive {
 	high_density: true
@@ -6,15 +19,16 @@ drive {
 
 image_reader {
 	filename: "n88basic.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 image_writer {
 	filename: "n88basic.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 layout {
+	tpi: 96
 	tracks: 77
 	sides: 2
 	layoutdata {
@@ -62,3 +76,5 @@ encoder {
 decoder {
 	ibm {}
 }
+
+

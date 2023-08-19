@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version 3.10.1-1fa5400)
+// C++ code generated with wxFormBuilder (version 3.10.1-234-gd93c9fc0-dirty)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO *NOT* EDIT THIS FILE!
@@ -413,8 +413,8 @@ class BrowserPanelGen : public wxPanel
 		virtual void OnBrowserBeginDrag( wxDataViewEvent& event ) { event.Skip(); }
 		virtual void OnBrowserDrop( wxDataViewEvent& event ) { event.Skip(); }
 		virtual void OnBrowserDropPossible( wxDataViewEvent& event ) { event.Skip(); }
-		virtual void OnBrowserFilenameChanged( wxDataViewEvent& event ) { event.Skip(); }
 		virtual void OnBrowserDirectoryExpanding( wxDataViewEvent& event ) { event.Skip(); }
+		virtual void OnBrowserFilenameChanged( wxDataViewEvent& event ) { event.Skip(); }
 		virtual void OnBrowserSelectionChanged( wxDataViewEvent& event ) { event.Skip(); }
 		virtual void OnBrowserDiscardButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBrowserCommitButton( wxCommandEvent& event ) { event.Skip(); }
@@ -496,11 +496,12 @@ class HardwareSourcePanelGen : public wxPanel
 
 	protected:
 		wxStaticText* m_staticText30;
+		wxStaticText* m_staticText29;
 
 	public:
 		wxStaticText* label;
 		wxCheckBox* highDensityToggle;
-		wxCheckBox* fortyTrackDriveToggle;
+		wxChoice* driveTypeChoice;
 
 		HardwareSourcePanelGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
 
@@ -518,9 +519,11 @@ class FluxfileSourcePanelGen : public wxPanel
 	protected:
 		wxStaticText* m_staticText28;
 		wxStaticText* m_staticText27;
+		wxStaticText* m_staticText281;
 
 	public:
 		wxFilePickerCtrl* fluxImagePicker;
+		wxChoice* fluxImageFormat;
 
 		FluxfileSourcePanelGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
 

@@ -1,13 +1,95 @@
-comment: 'Generic PC 3.5"/5.25" family'
+shortname: 'IBM PC'
+comment: 'Generic PC 3.5"/5.25" disks'
+read_support_status: UNICORN
+write_support_status: UNICORN
+
+documentation:
+<<<
+IBM scheme disks are _the_ most common disk format, ever. They're used by a
+huge variety of different systems, and they come in a huge variety of different
+forms, but they're all fundamentally the same: either FM or MFM, either single-
+or double-sided, with distinct sector header and data records and no sector
+metadata. Systems which use IBM scheme disks include but are not limited to:
+
+  - IBM PCs (naturally)
+  - Atari ST
+  - late era Apple machines
+  - Acorn machines
+  - the TRS-80
+  - late era Commodore machines (the 1571 and so on)
+  - most CP/M machines
+  - NEC PC-88 series
+  - NEC PC-98 series
+  - Sharp X68000
+  - Fujitsu FM Towns
+  - VAX & PDP-11
+  - etc
+
+FluxEngine supports reading these. However, some variants are more peculiar
+than others, and as a result there are specific decoders which set the defaults
+correctly for certain formats (for example: on PC disks the sector numbers
+start from 1, but on Acorn disks they start from 0). The IBM decoder described
+here is the generic one, and is suited for 'conventional' PC disks. While you
+can read all the variant formats with it if you use the right set of arguments,
+it's easier to use the specific decoder.
+
+There is a generic decoder which should adjust automatically to whichever disk
+format you are using, but it's unreliable and not recommended. This format
+should also be used if you are writing images such as DIM which specify the
+image format. FluxEngine will use these parameters.
+>>>
+
+documentation:
+<<<
+Mixed-format disks
+------------------
+
+Some disks, such as those belonging to early CP/M machines, or N88-Basic disks
+(for PC-88 and PC-98), have more than one format on the disk at once. Typically,
+the first few tracks will be low-density FM encoded and will be read by the
+machine's ROM; those tracks contain new floppy drive handling code capable of
+coping with MFM data, and so the rest of the disk will use that, allowing them
+to store more data.
+
+FluxEngine can read these fine, but it tends to get a bit confused when it sees
+tracks with differing numbers of sectors --- if track 0 has 32 sectors but
+track 1 has 16, it will assume that sectors 16..31 are missing on track 1 and
+size the image file accordingly. This can be worked around by specifying the
+size of each track; see the `eco1` read profile for an example.
+
+N88-Basic format floppies can be written by either specifying the `n88basic`
+format, or by using D88 or NFD format images which include explicit sector
+layout information.
+
+Writing other formats can be made to work too, by creating a custom format
+specifier, using the `n88basic` format as an example.
+Please [get in touch](https://github.com/davidgiven/fluxengine/issues/new) if
+you have specific requirements.
+
+360rpm 3.5" disks
+-----------------
+
+Japanese PCs (NEC PC-98, Sharp X68000, Fujitsu FM Towns) spin their floppy
+drives at 360rpm rather than the more typical 300rpm. This was done in order
+to be fully backwards compatible with 5.25" disks, while using the exact
+same floppy controller. Later models of the PC-9821, as well as most USB floppy
+drives, feature "tri-mode" support which in addition to normal 300rpm modes,
+can change their speed to read and write 360rpm DD and HD disks.
+
+Neither the FluxEngine or Greaseweazle hardware can currently command a
+tri-mode drive to spin at 360rpm. However on both devices the FluxEngine
+software is capable of both reading and writing 300rpm disks at 360rpm and vice
+versa, so it shouldn't matter.
+>>>
 
 image_reader {
 	filename: "ibm.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 image_writer {
 	filename: "ibm.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 decoder {
@@ -18,17 +100,19 @@ filesystem {
 	type: FATFS
 }
 
-tpi: 96
-
 option_group {
-	comment: "Format variant"
+	comment: "$formats"
 
 	option {
 		name: "auto"
 		comment: 'try to autodetect the format (unreliable)'
 		set_by_default: true
 
-		config {}
+		config {
+			layout {
+				tpi: 96
+			}
+		}
 	}
 
 	option {
@@ -37,6 +121,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 48
 				tracks: 40
 				sides: 1
 				layoutdata {
@@ -56,8 +141,6 @@ option_group {
 					}
 				}
 			}
-
-			tpi: 48
 		}
 	}
 
@@ -67,6 +150,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 48
 				tracks: 40
 				sides: 1
 				layoutdata {
@@ -86,8 +170,6 @@ option_group {
 					}
 				}
 			}
-
-			tpi: 48
 		}
 	}
 
@@ -97,6 +179,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 48
 				tracks: 40
 				sides: 2
 				layoutdata {
@@ -116,8 +199,6 @@ option_group {
 					}
 				}
 			}
-
-			tpi: 48
 		}
 	}
 
@@ -127,6 +208,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 48
 				tracks: 40
 				sides: 2
 				layoutdata {
@@ -146,17 +228,16 @@ option_group {
 					}
 				}
 			}
-
-			tpi: 48
 		}
 	}
 
 	option {
-		name: "720"
-		comment: '720kB 5.25"/3.5" 80-track 9-sector DSDD'
+		name: "720_96"
+		comment: '720kB 5.25" 80-track 9-sector DSDD'
 
 		config {
 			layout {
+				tpi: 96
 				tracks: 80
 				sides: 2
 				layoutdata {
@@ -171,8 +252,35 @@ option_group {
 			encoder {
 				ibm {
 					trackdata {
-						# This also works on 166ms drives (producing a physical clock of
-						# 3.33us).
+						target_rotational_period_ms: 166
+						target_clock_period_us: 3.33
+					}
+				}
+			}
+		}
+	}
+
+	option {
+		name: "720_135"
+		comment: '720kB 3.5" 80-track 9-sector DSDD'
+
+		config {
+			layout {
+				tpi: 135
+				tracks: 80
+				sides: 2
+				layoutdata {
+					sector_size: 512
+					physical {
+						start_sector: 1
+						count: 9
+					}
+				}
+			}
+
+			encoder {
+				ibm {
+					trackdata {
 						target_rotational_period_ms: 200
 						target_clock_period_us: 4
 					}
@@ -187,6 +295,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 96
 				tracks: 80
 				sides: 2
 				layoutdata {
@@ -211,10 +320,11 @@ option_group {
 
 	option {
 		name: "1232"
-		comment: '1232kB 5.25"/3.5" 77-track 8-sector DSHD'
+		comment: '1232kB 5.25" 77-track 8-sector DSHD'
 
 		config {
 			layout {
+				tpi: 96
 				tracks: 77
 				sides: 2
 				layoutdata {
@@ -243,6 +353,7 @@ option_group {
 
 		config {
 			layout {
+				tpi: 135
 				tracks: 80
 				sides: 2
 				layoutdata {
@@ -260,6 +371,44 @@ option_group {
 						target_rotational_period_ms: 200
 						target_clock_period_us: 2
 					}
+				}
+			}
+		}
+	}
+
+	option {
+		name: "1680"
+		comment: '1680kB 3.5" 80-track 21-sector DSHD; DMF'
+
+		config {
+			layout {
+				tpi: 135
+				tracks: 80
+				sides: 2
+				layoutdata {
+					sector_size: 512
+					physical {
+						start_sector: 1
+						count: 21
+					}
+				}
+			}
+
+			encoder {
+				ibm {
+					trackdata {
+						target_rotational_period_ms: 200
+						target_clock_period_us: 2
+						gap0: 20
+						gap3: 12
+					}
+				}
+			}
+
+			filesystem {
+				fatfs {
+					root_directory_entries: 16
+					cluster_size: 2048
 				}
 			}
 		}

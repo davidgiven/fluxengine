@@ -10,7 +10,6 @@
 #include "usbfinder.h"
 #include "logger.h"
 #include "greaseweazle.h"
-#include "fmt/format.h"
 
 static USB* usb = NULL;
 
@@ -20,19 +19,21 @@ static std::shared_ptr<CandidateDevice> selectDevice()
 {
     auto candidates = findUsbDevices();
     if (candidates.size() == 0)
-        Error() << "no devices found (is one plugged in? Do you have the "
-                   "appropriate permissions?";
+        error(
+            "no devices found (is one plugged in? Do you have the "
+            "appropriate permissions?");
 
-    if (config.usb().has_serial())
+    if (globalConfig()->usb().has_serial())
     {
-        auto wantedSerial = config.usb().serial();
+        auto wantedSerial = globalConfig()->usb().serial();
         for (auto& c : candidates)
         {
             if (c->serial == wantedSerial)
                 return c;
         }
-        Error() << "serial number not found (try without one to list or "
-                   "autodetect devices)";
+        error(
+            "serial number not found (try without one to list or "
+            "autodetect devices)");
     }
 
     if (candidates.size() == 1)
@@ -51,7 +52,7 @@ static std::shared_ptr<CandidateDevice> selectDevice()
 
             case GREASEWEAZLE_ID:
                 std::cerr << fmt::format(
-                    "GreaseWeazle: {} on {}\n", c->serial, c->serialPort);
+                    "Greaseweazle: {} on {}\n", c->serial, c->serialPort);
                 break;
         }
     }
@@ -62,13 +63,12 @@ USB* get_usb_impl()
 {
     /* Special case for certain configurations. */
 
-    if (config.usb().has_greaseweazle() &&
-        config.usb().greaseweazle().has_port())
+    if (globalConfig()->usb().has_greaseweazle() &&
+        globalConfig()->usb().greaseweazle().has_port())
     {
-        const auto& conf = config.usb().greaseweazle();
-        Logger() << fmt::format(
-            "Using GreaseWeazle on serial port {}", conf.port());
-        return createGreaseWeazleUsb(conf.port(), conf);
+        const auto& conf = globalConfig()->usb().greaseweazle();
+        log("Using Greaseweazle on serial port {}", conf.port());
+        return createGreaseweazleUsb(conf.port(), conf);
     }
 
     /* Otherwise, select a device by USB ID. */
@@ -77,18 +77,18 @@ USB* get_usb_impl()
     switch (candidate->id)
     {
         case FLUXENGINE_ID:
-            Logger() << fmt::format(
-                "Using FluxEngine {}", candidate->serial);
+            log("Using FluxEngine {}", candidate->serial);
             return createFluxengineUsb(candidate->device);
 
         case GREASEWEAZLE_ID:
-            Logger() << fmt::format("Using GreaseWeazle {} on {}",
+            log("Using Greaseweazle {} on {}",
                 candidate->serial,
                 candidate->serialPort);
-            return createGreaseWeazleUsb(
-                candidate->serialPort, config.usb().greaseweazle());
+            return createGreaseweazleUsb(
+                candidate->serialPort, globalConfig()->usb().greaseweazle());
 
-        default: Error() << "internal";
+        default:
+            error("internal");
     }
 }
 

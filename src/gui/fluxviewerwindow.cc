@@ -5,7 +5,6 @@
 #include "fluxviewercontrol.h"
 #include "lib/flux.h"
 #include "lib/layout.h"
-#include "fmt/format.h"
 
 FluxViewerWindow::FluxViewerWindow(
     wxWindow* parent, std::shared_ptr<const TrackFlux> flux):

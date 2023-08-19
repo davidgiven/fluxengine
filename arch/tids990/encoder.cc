@@ -127,14 +127,14 @@ public:
         }
 
         if (_cursor >= _bits.size())
-            Error() << "track data overrun";
+            error("track data overrun");
         while (_cursor < _bits.size())
             writeBytes(1, 0x55);
 
         auto fluxmap = std::make_unique<Fluxmap>();
         fluxmap->appendBits(_bits,
-            calculatePhysicalClockPeriod(clockRateUs * 1e3,
-                _config.rotational_period_ms() * 1e6));
+            calculatePhysicalClockPeriod(
+                clockRateUs * 1e3, _config.rotational_period_ms() * 1e6));
         return fluxmap;
     }
 
@@ -145,8 +145,7 @@ private:
     bool _lastBit;
 };
 
-std::unique_ptr<Encoder> createTids990Encoder(
-    const EncoderProto& config)
+std::unique_ptr<Encoder> createTids990Encoder(const EncoderProto& config)
 {
     return std::unique_ptr<Encoder>(new Tids990Encoder(config));
 }

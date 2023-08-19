@@ -4,7 +4,6 @@
 #include "lib/proto.h"
 #include "lib/layout.h"
 #include "lib/logger.h"
-#include <fmt/format.h>
 
 #include "adflib.h"
 #include "adf_blk.h"
@@ -57,7 +56,7 @@ public:
     {
     }
 
-    uint32_t capabilities() const
+    uint32_t capabilities() const override
     {
         return OP_GETFSDATA | OP_CREATE | OP_LIST | OP_GETFILE | OP_PUTFILE |
                OP_GETDIRENT | OP_DELETE | OP_MOVE | OP_CREATEDIR;
@@ -89,8 +88,8 @@ public:
         dev.readOnly = false;
         dev.isNativeDev = true;
         dev.devType = DEVTYPE_FLOPDD;
-        dev.cylinders = config.layout().tracks();
-        dev.heads = config.layout().sides();
+        dev.cylinders = globalConfig()->layout().tracks();
+        dev.heads = globalConfig()->layout().sides();
         dev.sectors = Layout::getLayoutOfTrack(0, 0)->numSectors;
         adfInitDevice(&dev, nullptr, false);
         int res = adfCreateFlop(&dev, (char*)volumeName.c_str(), 0);
@@ -230,7 +229,7 @@ public:
             throw CannotWriteException();
     }
 
-    void createDirectory(const Path& path)
+    void createDirectory(const Path& path) override
     {
         AdfMount m(this);
         if (path.empty())
@@ -420,7 +419,7 @@ private:
 
 static void onAdfWarning(char* message)
 {
-    Logger() << message;
+    log(message);
 }
 
 static void onAdfError(char* message)

@@ -9,7 +9,6 @@
 #include "imagewriter/imagewriter.h"
 #include "encoders/encoders.h"
 #include "decoders/decoders.h"
-#include "fmt/format.h"
 #include "utils.h"
 #include "fluxviewerwindow.h"
 #include "textviewerwindow.h"
@@ -18,7 +17,6 @@
 #include "filesystemmodel.h"
 #include "customstatusbar.h"
 #include "lib/vfs/vfs.h"
-#include "lib/environment.h"
 #include "lib/layout.h"
 #include <google/protobuf/text_format.h>
 #include <wx/aboutdlg.h>
@@ -85,7 +83,7 @@ public:
         Fit();
     }
 
-    void SafeFit()
+    void SafeFit() override
     {
         auto minSize = GetMinClientSize();
 
@@ -96,32 +94,32 @@ public:
         SetMinClientSize(minSize);
     }
 
-    void StartIdle()
+    void StartIdle() override
     {
         _idlePanel->Start();
     }
 
-    void StartReading()
+    void StartReading() override
     {
         _imagerPanel->StartReading();
     }
 
-    void StartWriting()
+    void StartWriting() override
     {
         _imagerPanel->StartWriting();
     }
 
-    void StartBrowsing()
+    void StartBrowsing() override
     {
         _browserPanel->StartBrowsing();
     }
 
-    void StartFormatting()
+    void StartFormatting() override
     {
         _browserPanel->StartFormatting();
     }
 
-    void StartExploring()
+    void StartExploring() override
     {
         _explorerPanel->Start();
     }
@@ -183,12 +181,12 @@ public:
     void ShowConfig()
     {
         std::string s;
-        google::protobuf::TextFormat::PrintToString(config, &s);
+        google::protobuf::TextFormat::PrintToString(globalConfig(), &s);
         _configWindow->GetTextControl()->Clear();
         _configWindow->GetTextControl()->AppendText(s);
     }
 
-    void PrepareConfig()
+    void PrepareConfig() override
     {
         _idlePanel->PrepareConfig();
         ShowConfig();

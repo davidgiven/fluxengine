@@ -3,7 +3,6 @@
 #include "lib/fluxsource/fluxsource.pb.h"
 #include "fluxsource/fluxsource.h"
 #include "proto.h"
-#include "fmt/format.h"
 #include <fstream>
 
 struct A2Rv2Flux
@@ -79,17 +78,15 @@ public:
                 if (disktype == 1)
                 {
                     /* 5.25" with quarter stepping. */
-                    ::config.set_tpi(48);
-                    ::config.mutable_drive()->set_tracks(160);
-                    ::config.mutable_drive()->set_heads(1);
-                    ::config.mutable_drive()->set_head_width(4);
-                    ::config.mutable_drive()->set_tpi(48 * 4);
+                    _extraConfig.mutable_drive()->set_tracks(160);
+                    _extraConfig.mutable_drive()->set_heads(1);
+                    _extraConfig.mutable_drive()->set_head_width(4);
+                    _extraConfig.mutable_drive()->set_tpi(48 * 4);
                 }
                 else
                 {
-                    /* 3.5". 96 is wrong but that's what we use. */
-                    ::config.set_tpi(96);
-                    ::config.mutable_drive()->set_tpi(96);
+                    /* 3.5". */
+                    _extraConfig.mutable_drive()->set_tpi(135);
                 }
 
                 Bytes stream = findChunk("STRM");
@@ -121,7 +118,7 @@ public:
             }
 
             default:
-                Error() << "unsupported A2R version";
+                error("unsupported A2R version");
         }
     }
 
@@ -141,11 +138,11 @@ public:
             }
 
             default:
-                Error() << "unsupported A2R version";
+                error("unsupported A2R version");
         }
     }
 
-    void recalibrate() {}
+    void recalibrate() override {}
 
 private:
     Bytes findChunk(Bytes id)
@@ -164,7 +161,7 @@ private:
             offset += br.read_le32() + 8;
         }
 
-        Error() << "A2R file missing chunk";
+        error("A2R file missing chunk");
     }
 
 private:

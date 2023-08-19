@@ -19,18 +19,18 @@ struct ScpHeader
 
 enum
 {
-    SCP_FLAG_INDEXED    = (1<<0),
-    SCP_FLAG_96TPI      = (1<<1),
-    SCP_FLAG_360RPM     = (1<<2),
-    SCP_FLAG_NORMALIZED = (1<<3),
-    SCP_FLAG_READWRITE  = (1<<4),
-    SCP_FLAG_FOOTER     = (1<<5)
+    SCP_FLAG_INDEXED = (1 << 0),
+    SCP_FLAG_96TPI = (1 << 1),
+    SCP_FLAG_360RPM = (1 << 2),
+    SCP_FLAG_NORMALIZED = (1 << 3),
+    SCP_FLAG_READWRITE = (1 << 4),
+    SCP_FLAG_FOOTER = (1 << 5)
 };
 
 struct ScpTrackHeader
 {
-    char track_id[3];      // 'TRK'
-    uint8_t strack;        // SCP track number
+    char track_id[3]; // 'TRK'
+    uint8_t strack;   // SCP track number
 };
 
 struct ScpTrackRevolution

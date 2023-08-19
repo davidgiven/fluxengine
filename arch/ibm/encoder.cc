@@ -112,10 +112,11 @@ public:
         const Image& image) override
     {
         IbmEncoderProto::TrackdataProto trackdata;
-        getEncoderTrackData(trackdata, trackInfo->logicalTrack, trackInfo->logicalSide);
+        getEncoderTrackData(
+            trackdata, trackInfo->logicalTrack, trackInfo->logicalSide);
 
-        auto trackLayout =
-            Layout::getLayoutOfTrack(trackInfo->logicalTrack, trackInfo->logicalSide);
+        auto trackLayout = Layout::getLayoutOfTrack(
+            trackInfo->logicalTrack, trackInfo->logicalSide);
 
         auto writeBytes = [&](const Bytes& bytes)
         {
@@ -257,7 +258,7 @@ public:
         }
 
         if (_cursor >= _bits.size())
-            Error() << "track data overrun";
+            error("track data overrun");
         while (_cursor < _bits.size())
             writeFillerRawBytes(1, gapFill);
 

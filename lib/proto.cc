@@ -1,10 +1,9 @@
 #include "globals.h"
 #include "proto.h"
 #include "lib/common.pb.h"
-#include "fmt/format.h"
 #include <regex>
 
-ConfigProto config = []()
+static ConfigProto config = []()
 {
     ConfigProto config;
     config.mutable_drive()->set_drive(0);
@@ -12,13 +11,41 @@ ConfigProto config = []()
     return config;
 }();
 
+ConfigProto& globalConfigProto()
+{
+    return config;
+}
+
+static double toFloat(const std::string& value)
+{
+    try
+    {
+        size_t idx;
+        float f = std::stof(value, &idx);
+        if (value[idx] != '\0')
+            throw std::invalid_argument("trailing garbage");
+        return f;
+    }
+    catch (const std::invalid_argument& e)
+    {
+        error("invalid number '{}'", value);
+    }
+}
+
 static double toDouble(const std::string& value)
 {
-    size_t idx;
-    double d = std::stod(value, &idx);
-    if (value[idx] != '\0')
-        Error() << fmt::format("invalid number '{}'", value);
-    return d;
+    try
+    {
+        size_t idx;
+        double d = std::stod(value, &idx);
+        if (value[idx] != '\0')
+            throw std::invalid_argument("trailing garbage");
+        return d;
+    }
+    catch (const std::invalid_argument& e)
+    {
+        error("invalid number '{}'", value);
+    }
 }
 
 static int64_t toInt64(const std::string& value)
@@ -26,7 +53,7 @@ static int64_t toInt64(const std::string& value)
     size_t idx;
     int64_t d = std::stoll(value, &idx);
     if (value[idx] != '\0')
-        Error() << fmt::format("invalid number '{}'", value);
+        error("invalid number '{}'", value);
     return d;
 }
 
@@ -35,7 +62,7 @@ static uint64_t toUint64(const std::string& value)
     size_t idx;
     uint64_t d = std::stoull(value, &idx);
     if (value[idx] != '\0')
-        Error() << fmt::format("invalid number '{}'", value);
+        error("invalid number '{}'", value);
     return d;
 }
 
@@ -46,7 +73,7 @@ void setRange(RangeProto* range, const std::string& data)
 
     std::smatch dmatch;
     if (!std::regex_match(data, dmatch, DATA_REGEX))
-        Error() << "invalid range '" << data << "'";
+        error("invalid range '{}'", data);
 
     int start = std::stoi(dmatch[1]);
     range->set_start(start);
@@ -60,13 +87,19 @@ void setRange(RangeProto* range, const std::string& data)
         range->set_step(std::stoi(dmatch[4]));
 }
 
-ProtoField resolveProtoPath(
-    google::protobuf::Message* message, const std::string& path)
+static ProtoField resolveProtoPath(
+    google::protobuf::Message* message, const std::string& path, bool create)
 {
     std::string::size_type dot = path.rfind('.');
     std::string leading = (dot == std::string::npos) ? "" : path.substr(0, dot);
     std::string trailing =
         (dot == std::string::npos) ? path : path.substr(dot + 1);
+
+    auto fail = [&]()
+    {
+        throw ProtoPathNotFoundException(
+            fmt::format("no such config field '{}' in '{}'", trailing, path));
+    };
 
     const auto* descriptor = message->GetDescriptor();
 
@@ -76,29 +109,38 @@ ProtoField resolveProtoPath(
     {
         const auto* field = descriptor->FindFieldByName(item);
         if (!field)
-            Error() << fmt::format(
-                "no such config field '{}' in '{}'", item, path);
+            throw ProtoPathNotFoundException(
+                fmt::format("no such config field '{}' in '{}'", item, path));
         if (field->type() != google::protobuf::FieldDescriptor::TYPE_MESSAGE)
-            Error() << fmt::format(
-                "config field '{}' in '{}' is not a message", item, path);
+            throw ProtoPathNotFoundException(fmt::format(
+                "config field '{}' in '{}' is not a message", item, path));
 
         const auto* reflection = message->GetReflection();
         switch (field->label())
         {
             case google::protobuf::FieldDescriptor::LABEL_OPTIONAL:
+            case google::protobuf::FieldDescriptor::LABEL_REQUIRED:
+                if (!create && !reflection->HasField(*message, field))
+                    throw ProtoPathNotFoundException(fmt::format(
+                        "could not find config field '{}'", field->name()));
                 message = reflection->MutableMessage(message, field);
                 break;
 
             case google::protobuf::FieldDescriptor::LABEL_REPEATED:
                 if (reflection->FieldSize(*message, field) == 0)
-                    message = reflection->AddMessage(message, field);
+                {
+                    if (create)
+                        message = reflection->AddMessage(message, field);
+                    else
+                        fail();
+                }
                 else
                     message =
                         reflection->MutableRepeatedMessage(message, field, 0);
                 break;
 
             default:
-                Error() << "bad proto label " << field->label();
+                error("bad proto label for field '{}' in '{}'", item, path);
         }
 
         descriptor = message->GetDescriptor();
@@ -106,10 +148,21 @@ ProtoField resolveProtoPath(
 
     const auto* field = descriptor->FindFieldByName(trailing);
     if (!field)
-        Error() << fmt::format(
-            "no such config field '{}' in '{}'", trailing, path);
+        fail();
 
     return std::make_pair(message, field);
+}
+
+ProtoField makeProtoPath(
+    google::protobuf::Message* message, const std::string& path)
+{
+    return resolveProtoPath(message, path, /* create= */ true);
+}
+
+ProtoField findProtoPath(
+    google::protobuf::Message* message, const std::string& path)
+{
+    return resolveProtoPath(message, path, /* create= */ false);
 }
 
 void setProtoFieldFromString(ProtoField& protoField, const std::string& value)
@@ -120,6 +173,10 @@ void setProtoFieldFromString(ProtoField& protoField, const std::string& value)
     const auto* reflection = message->GetReflection();
     switch (field->type())
     {
+        case google::protobuf::FieldDescriptor::TYPE_FLOAT:
+            reflection->SetFloat(message, field, toFloat(value));
+            break;
+
         case google::protobuf::FieldDescriptor::TYPE_DOUBLE:
             reflection->SetDouble(message, field, toDouble(value));
             break;
@@ -161,7 +218,7 @@ void setProtoFieldFromString(ProtoField& protoField, const std::string& value)
 
             const auto& it = boolvalues.find(value);
             if (it == boolvalues.end())
-                Error() << "invalid boolean value";
+                error("invalid boolean value");
             reflection->SetBool(message, field, it->second);
             break;
         }
@@ -171,7 +228,7 @@ void setProtoFieldFromString(ProtoField& protoField, const std::string& value)
             const auto* enumfield = field->enum_type();
             const auto* enumvalue = enumfield->FindValueByName(value);
             if (!enumvalue)
-                Error() << fmt::format("unrecognised enum value '{}'", value);
+                error("unrecognised enum value '{}'", value);
 
             reflection->SetEnum(message, field, enumvalue);
             break;
@@ -192,7 +249,66 @@ void setProtoFieldFromString(ProtoField& protoField, const std::string& value)
             }
             /* fall through */
         default:
-            Error() << "can't set this config value type";
+            error("can't set this config value type");
+    }
+}
+
+std::string getProtoFieldValue(ProtoField& protoField)
+{
+    google::protobuf::Message* message = protoField.first;
+    const google::protobuf::FieldDescriptor* field = protoField.second;
+
+    const auto* reflection = message->GetReflection();
+    switch (field->type())
+    {
+        case google::protobuf::FieldDescriptor::TYPE_FLOAT:
+            return fmt::format("{}", reflection->GetFloat(*message, field));
+
+        case google::protobuf::FieldDescriptor::TYPE_DOUBLE:
+            return fmt::format("{}", reflection->GetDouble(*message, field));
+
+        case google::protobuf::FieldDescriptor::TYPE_INT32:
+            return std::to_string(reflection->GetInt32(*message, field));
+
+        case google::protobuf::FieldDescriptor::TYPE_INT64:
+            return std::to_string(reflection->GetInt64(*message, field));
+
+        case google::protobuf::FieldDescriptor::TYPE_UINT32:
+            return std::to_string(reflection->GetUInt32(*message, field));
+
+        case google::protobuf::FieldDescriptor::TYPE_UINT64:
+            return std::to_string(reflection->GetUInt64(*message, field));
+
+        case google::protobuf::FieldDescriptor::TYPE_STRING:
+            return reflection->GetString(*message, field);
+
+        case google::protobuf::FieldDescriptor::TYPE_BOOL:
+            return std::to_string(reflection->GetBool(*message, field));
+
+        case google::protobuf::FieldDescriptor::TYPE_ENUM:
+        {
+            const auto* enumvalue = reflection->GetEnum(*message, field);
+            const auto* enumfield = field->enum_type();
+            return enumfield->name();
+        }
+
+        case google::protobuf::FieldDescriptor::TYPE_MESSAGE:
+            if (field->message_type() == RangeProto::descriptor())
+            {
+                const RangeProto* range = dynamic_cast<const RangeProto*>(
+                    &reflection->GetMessage(*message, field));
+                if (range->step() == 1)
+                    return fmt::format("{}-{}", range->start(), range->end());
+                else
+                    return fmt::format("{}-{}x{}",
+                        range->start(),
+                        range->end(),
+                        range->step());
+            }
+            error("cannot fetch message value");
+
+        default:
+            error("unknown field type when fetching");
     }
 }
 
@@ -200,8 +316,15 @@ void setProtoByString(google::protobuf::Message* message,
     const std::string& path,
     const std::string& value)
 {
-    ProtoField protoField = resolveProtoPath(message, path);
+    ProtoField protoField = makeProtoPath(message, path);
     setProtoFieldFromString(protoField, value);
+}
+
+std::string getProtoByString(
+    google::protobuf::Message* message, const std::string& path)
+{
+    ProtoField protoField = findProtoPath(message, path);
+    return getProtoFieldValue(protoField);
 }
 
 std::set<unsigned> iterate(const RangeProto& range)
@@ -245,4 +368,12 @@ findAllProtoFields(google::protobuf::Message* message)
 
     recurse(descriptor, "");
     return fields;
+}
+
+ConfigProto parseConfigBytes(const std::string_view& data)
+{
+    ConfigProto proto;
+    if (!proto.ParseFromArray(data.begin(), data.size()))
+        error("invalid internal config data");
+    return proto;
 }

@@ -20,19 +20,19 @@ public:
 
 public:
     std::shared_ptr<const Sector> get(
-        unsigned track, unsigned side, unsigned sectorId)
+        unsigned track, unsigned side, unsigned sectorId) override
     {
         return _image->get(track, side, sectorId);
     }
 
     std::shared_ptr<Sector> put(
-        unsigned track, unsigned side, unsigned sectorId)
+        unsigned track, unsigned side, unsigned sectorId) override
     {
         _changed = true;
         return _image->put(track, side, sectorId);
     }
 
-    virtual bool isReadOnly()
+    virtual bool isReadOnly() override
     {
         return (_writer == nullptr);
     }

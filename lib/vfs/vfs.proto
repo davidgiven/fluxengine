@@ -17,7 +17,14 @@ message AcornDfsProto
 
 message Brother120FsProto {}
 
-message FatFsProto {}
+message FatFsProto {
+	optional uint32 cluster_size = 1
+		[ (help) = "cluster size (for new filesystems); 0 to select automatically",
+	      default = 0 ];
+	optional uint32 root_directory_entries = 2
+		[ (help) = "number of entries in the root directory (for new filesystems); 0 to select automatically",
+		  default = 0 ];
+}
 
 message CpmFsProto
 {
@@ -84,6 +91,29 @@ message LifProto
 message MicrodosProto {}
 
 // NEXT_TAG: 16
+message ZDosProto
+{
+    message Location
+    {
+        optional uint32 track = 1 [ (help) = "track number" ];
+        optional uint32 sector = 3 [ (help) = "sector ID" ];
+    }
+
+    optional Location filesystem_start = 1
+        [ (help) = "position of the filesystem superblock" ];
+}
+
+message RolandFsProto
+{
+    optional uint32 directory_track = 1
+        [ (help) = "position of the directory", default = 39 ];
+    optional uint32 block_size = 2
+        [ (help) = "filesystem block size", default = 3072 ];
+    optional uint32 directory_entries = 3
+        [ (help) = "number of directory entries", default = 79 ];
+}
+
+// NEXT_TAG: 18
 message FilesystemProto
 {
     enum FilesystemType
@@ -102,6 +132,8 @@ message FilesystemProto
         PHILE = 11;
         LIF = 12;
         MICRODOS = 13;
+        ZDOS = 14;
+        ROLAND = 15;
     }
 
     optional FilesystemType type = 10
@@ -120,6 +152,8 @@ message FilesystemProto
     optional PhileProto phile = 13;
     optional LifProto lif = 14;
     optional MicrodosProto microdos = 15;
+    optional ZDosProto zdos = 16;
+    optional RolandFsProto roland = 17;
 
     optional SectorListProto sector_order = 9
         [ (help) = "specify the filesystem order of sectors" ];

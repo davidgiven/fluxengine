@@ -19,14 +19,13 @@
 #include "lib/image.h"
 #include "protocol.h"
 
-std::unique_ptr<Encoder> Encoder::create(
-    const EncoderProto& config)
+std::unique_ptr<Encoder> Encoder::create(const EncoderProto& config)
 {
     static const std::map<int,
         std::function<std::unique_ptr<Encoder>(const EncoderProto&)>>
         encoders = {
             {EncoderProto::kAmiga,      createAmigaEncoder      },
-            {EncoderProto::kAgat,       createAgatEncoder      },
+            {EncoderProto::kAgat,       createAgatEncoder       },
             {EncoderProto::kApple2,     createApple2Encoder     },
             {EncoderProto::kBrother,    createBrotherEncoder    },
             {EncoderProto::kC64,        createCommodore64Encoder},
@@ -40,7 +39,7 @@ std::unique_ptr<Encoder> Encoder::create(
 
     auto encoder = encoders.find(config.format_case());
     if (encoder == encoders.end())
-        Error() << "no encoder specified";
+        error("no encoder specified");
 
     return (encoder->second)(config);
 }
@@ -49,17 +48,20 @@ nanoseconds_t Encoder::calculatePhysicalClockPeriod(
     nanoseconds_t targetClockPeriod, nanoseconds_t targetRotationalPeriod)
 {
     nanoseconds_t currentRotationalPeriod =
-        config.drive().rotational_period_ms() * 1e6;
+        globalConfig()->drive().rotational_period_ms() * 1e6;
     if (currentRotationalPeriod == 0)
-        Error() << "you must set --drive.rotational_period_ms as it can't be "
-                   "autodetected";
+        error(
+            "you must set --drive.rotational_period_ms as it can't be "
+            "autodetected");
 
     return targetClockPeriod *
            (currentRotationalPeriod / targetRotationalPeriod);
 }
 
 std::shared_ptr<const Sector> Encoder::getSector(
-    std::shared_ptr<const TrackInfo>& trackInfo, const Image& image, unsigned sectorId)
+    std::shared_ptr<const TrackInfo>& trackInfo,
+    const Image& image,
+    unsigned sectorId)
 {
     return image.get(trackInfo->logicalTrack, trackInfo->logicalSide, sectorId);
 }
@@ -73,7 +75,7 @@ std::vector<std::shared_ptr<const Sector>> Encoder::collectSectors(
     {
         const auto& sector = getSector(trackLayout, image, sectorId);
         if (!sector)
-            Error() << fmt::format("sector {}.{}.{} is missing from the image",
+            error("sector {}.{}.{} is missing from the image",
                 trackLayout->logicalTrack,
                 trackLayout->logicalSide,
                 sectorId);
@@ -96,6 +98,9 @@ Fluxmap& Fluxmap::appendBits(const std::vector<bool>& bits, nanoseconds_t clock)
             appendPulse();
         }
     }
+    unsigned delta = (now - duration()) / NS_PER_TICK;
+    if (delta)
+        appendInterval(delta);
 
     return *this;
 }

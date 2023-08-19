@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version 3.10.1-1fa5400)
+// C++ code generated with wxFormBuilder (version 3.10.1-234-gd93c9fc0-dirty)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO *NOT* EDIT THIS FILE!
@@ -696,7 +696,7 @@ ImagerPanelGen::ImagerPanelGen( wxWindow* parent, wxWindowID id, const wxPoint& 
 	bSizer8->Add( imagerSaveFluxButton, 0, wxALL|wxEXPAND, 5 );
 
 	histogram = new HistogramViewer( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer8->Add( histogram, 0, wxALIGN_CENTER_VERTICAL|wxALL|wxEXPAND, 5 );
+	bSizer8->Add( histogram, 0, wxALL|wxEXPAND, 5 );
 
 	imagerGoAgainButton = new wxButton( this, wxID_ANY, wxT("Go again"), wxDefaultPosition, wxDefaultSize, 0 );
 
@@ -768,7 +768,7 @@ BrowserPanelGen::BrowserPanelGen( wxWindow* parent, wxWindowID id, const wxPoint
 	#endif
 	browserMoreMenu->Append( browserNewDirectoryMenuItem );
 
-	browserRenameMenuItem = new wxMenuItem( browserMoreMenu, wxID_ANY, wxString( wxT("Move file") ) , wxEmptyString, wxITEM_NORMAL );
+	browserRenameMenuItem = new wxMenuItem( browserMoreMenu, wxID_ANY, wxString( wxT("Move/Rename file") ) , wxEmptyString, wxITEM_NORMAL );
 	#ifdef __WXMSW__
 	browserRenameMenuItem->SetBitmaps( wxNullBitmap );
 	#elif (defined( __WXGTK__ ) || defined( __WXOSX__ ))
@@ -842,8 +842,8 @@ BrowserPanelGen::BrowserPanelGen( wxWindow* parent, wxWindowID id, const wxPoint
 	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_ITEM_BEGIN_DRAG, wxDataViewEventHandler( BrowserPanelGen::OnBrowserBeginDrag ), NULL, this );
 	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_ITEM_DROP, wxDataViewEventHandler( BrowserPanelGen::OnBrowserDrop ), NULL, this );
 	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_ITEM_DROP_POSSIBLE, wxDataViewEventHandler( BrowserPanelGen::OnBrowserDropPossible ), NULL, this );
-	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_ITEM_EDITING_DONE, wxDataViewEventHandler( BrowserPanelGen::OnBrowserFilenameChanged ), NULL, this );
 	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_ITEM_EXPANDING, wxDataViewEventHandler( BrowserPanelGen::OnBrowserDirectoryExpanding ), NULL, this );
+	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_ITEM_VALUE_CHANGED, wxDataViewEventHandler( BrowserPanelGen::OnBrowserFilenameChanged ), NULL, this );
 	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler( BrowserPanelGen::OnBrowserSelectionChanged ), NULL, this );
 	browserDiscardButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( BrowserPanelGen::OnBrowserDiscardButton ), NULL, this );
 	browserCommitButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( BrowserPanelGen::OnBrowserCommitButton ), NULL, this );
@@ -860,8 +860,8 @@ BrowserPanelGen::~BrowserPanelGen()
 	browserTree->Disconnect( wxEVT_COMMAND_DATAVIEW_ITEM_BEGIN_DRAG, wxDataViewEventHandler( BrowserPanelGen::OnBrowserBeginDrag ), NULL, this );
 	browserTree->Disconnect( wxEVT_COMMAND_DATAVIEW_ITEM_DROP, wxDataViewEventHandler( BrowserPanelGen::OnBrowserDrop ), NULL, this );
 	browserTree->Disconnect( wxEVT_COMMAND_DATAVIEW_ITEM_DROP_POSSIBLE, wxDataViewEventHandler( BrowserPanelGen::OnBrowserDropPossible ), NULL, this );
-	browserTree->Disconnect( wxEVT_COMMAND_DATAVIEW_ITEM_EDITING_DONE, wxDataViewEventHandler( BrowserPanelGen::OnBrowserFilenameChanged ), NULL, this );
 	browserTree->Disconnect( wxEVT_COMMAND_DATAVIEW_ITEM_EXPANDING, wxDataViewEventHandler( BrowserPanelGen::OnBrowserDirectoryExpanding ), NULL, this );
+	browserTree->Disconnect( wxEVT_COMMAND_DATAVIEW_ITEM_VALUE_CHANGED, wxDataViewEventHandler( BrowserPanelGen::OnBrowserFilenameChanged ), NULL, this );
 	browserTree->Disconnect( wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler( BrowserPanelGen::OnBrowserSelectionChanged ), NULL, this );
 	browserDiscardButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( BrowserPanelGen::OnBrowserDiscardButton ), NULL, this );
 	browserCommitButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( BrowserPanelGen::OnBrowserCommitButton ), NULL, this );
@@ -1040,8 +1040,23 @@ HardwareSourcePanelGen::HardwareSourcePanelGen( wxWindow* parent, wxWindowID id,
 
 	bSizer3->Add( highDensityToggle, 0, wxALL|wxEXPAND, 5 );
 
-	fortyTrackDriveToggle = new wxCheckBox( this, wxID_ANY, wxT("I'm using a 40-track drive"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer3->Add( fortyTrackDriveToggle, 0, wxALL, 5 );
+	wxFlexGridSizer* fgSizer14;
+	fgSizer14 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer14->AddGrowableCol( 1 );
+	fgSizer14->SetFlexibleDirection( wxBOTH );
+	fgSizer14->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	m_staticText29 = new wxStaticText( this, wxID_ANY, wxT("Drive type:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText29->Wrap( -1 );
+	fgSizer14->Add( m_staticText29, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	wxArrayString driveTypeChoiceChoices;
+	driveTypeChoice = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, driveTypeChoiceChoices, 0 );
+	driveTypeChoice->SetSelection( 0 );
+	fgSizer14->Add( driveTypeChoice, 0, wxALL|wxEXPAND, 5 );
+
+
+	bSizer3->Add( fgSizer14, 1, wxEXPAND, 5 );
 
 
 	this->SetSizer( bSizer3 );
@@ -1066,10 +1081,19 @@ FluxfileSourcePanelGen::FluxfileSourcePanelGen( wxWindow* parent, wxWindowID id,
 	m_staticText27->Wrap( -1 );
 	bSizer8->Add( m_staticText27, 0, wxALL, 5 );
 
-	fluxImagePicker = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL );
+	fluxImagePicker = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN );
 	fluxImagePicker->SetToolTip( wxT("Path to a .flux, .scp or other flux file.") );
 
 	bSizer8->Add( fluxImagePicker, 0, wxALL|wxEXPAND, 5 );
+
+	m_staticText281 = new wxStaticText( this, wxID_ANY, wxT("Format:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText281->Wrap( -1 );
+	bSizer8->Add( m_staticText281, 0, wxALL, 5 );
+
+	wxArrayString fluxImageFormatChoices;
+	fluxImageFormat = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, fluxImageFormatChoices, 0 );
+	fluxImageFormat->SetSelection( 0 );
+	bSizer8->Add( fluxImageFormat, 0, wxALL|wxEXPAND, 5 );
 
 
 	this->SetSizer( bSizer8 );
@@ -1094,7 +1118,7 @@ ImagefileSourcePanelGen::ImagefileSourcePanelGen( wxWindow* parent, wxWindowID i
 	m_staticText28->Wrap( -1 );
 	bSizer9->Add( m_staticText28, 0, wxALL, 5 );
 
-	diskImagePicker = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL );
+	diskImagePicker = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN );
 	diskImagePicker->SetToolTip( wxT("The path to the disk image.") );
 
 	bSizer9->Add( diskImagePicker, 0, wxALL|wxEXPAND, 5 );

@@ -14,10 +14,10 @@
 
 const FluxPattern SECTOR_ID_PATTERN(16, 0xabaa);
 
-/* 
+/*
  * Reverse engineered from a dump of the floppy drive's ROM. I have no idea how
  * it works.
- * 
+ *
  * LF8BA:
  *         clra
  *         staa    X00B0
@@ -100,45 +100,43 @@ static uint16_t checksum(const Bytes& bytes)
 class Fb100Decoder : public Decoder
 {
 public:
-	Fb100Decoder(const DecoderProto& config):
-		Decoder(config)
-	{}
+    Fb100Decoder(const DecoderProto& config): Decoder(config) {}
 
     nanoseconds_t advanceToNextRecord() override
-	{
-		return seekToPattern(SECTOR_ID_PATTERN);
-	}
+    {
+        return seekToPattern(SECTOR_ID_PATTERN);
+    }
 
     void decodeSectorRecord() override
-	{
-		auto rawbits = readRawBits(FB100_RECORD_SIZE*16);
+    {
+        auto rawbits = readRawBits(FB100_RECORD_SIZE * 16);
 
-		const Bytes bytes = decodeFmMfm(rawbits).slice(0, FB100_RECORD_SIZE);
-		ByteReader br(bytes);
-		br.seek(1);
-		const Bytes id = br.read(FB100_ID_SIZE);
-		uint16_t wantIdCrc = br.read_be16();
-		uint16_t gotIdCrc = checksum(id);
-		const Bytes payload = br.read(FB100_PAYLOAD_SIZE);
-		uint16_t wantPayloadCrc = br.read_be16();
-		uint16_t gotPayloadCrc = checksum(payload);
+        const Bytes bytes = decodeFmMfm(rawbits).slice(0, FB100_RECORD_SIZE);
+        ByteReader br(bytes);
+        br.seek(1);
+        const Bytes id = br.read(FB100_ID_SIZE);
+        uint16_t wantIdCrc = br.read_be16();
+        uint16_t gotIdCrc = checksum(id);
+        const Bytes payload = br.read(FB100_PAYLOAD_SIZE);
+        uint16_t wantPayloadCrc = br.read_be16();
+        uint16_t gotPayloadCrc = checksum(payload);
 
-		if (wantIdCrc != gotIdCrc)
-			return;
+        if (wantIdCrc != gotIdCrc)
+            return;
 
-		uint8_t abssector = id[2];
-		_sector->logicalTrack = abssector >> 1;
-		_sector->logicalSide = 0;
-		_sector->logicalSector = abssector & 1;
-		_sector->data.writer().append(id.slice(5, 12)).append(payload);
+        uint8_t abssector = id[2];
+        _sector->logicalTrack = abssector >> 1;
+        _sector->logicalSide = 0;
+        _sector->logicalSector = abssector & 1;
+        _sector->data.writer().append(id.slice(5, 12)).append(payload);
 
-		_sector->status = (wantPayloadCrc == gotPayloadCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
-	}
+        _sector->status = (wantPayloadCrc == gotPayloadCrc)
+                              ? Sector::OK
+                              : Sector::BAD_CHECKSUM;
+    }
 };
 
 std::unique_ptr<Decoder> createFb100Decoder(const DecoderProto& config)
 {
-	return std::unique_ptr<Decoder>(new Fb100Decoder(config));
+    return std::unique_ptr<Decoder>(new Fb100Decoder(config));
 }
-
-

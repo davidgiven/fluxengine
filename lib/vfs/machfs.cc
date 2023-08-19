@@ -3,7 +3,6 @@
 #include "lib/config.pb.h"
 #include "lib/vfs/applesingle.h"
 #include "lib/utils.h"
-#include <fmt/format.h>
 
 extern "C"
 {
@@ -24,7 +23,7 @@ public:
     {
     }
 
-    uint32_t capabilities() const
+    uint32_t capabilities() const override
     {
         return OP_GETFSDATA | OP_CREATE | OP_LIST | OP_GETFILE | OP_PUTFILE |
                OP_GETDIRENT | OP_MOVE | OP_CREATEDIR | OP_DELETE;

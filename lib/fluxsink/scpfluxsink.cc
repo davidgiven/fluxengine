@@ -7,10 +7,10 @@
 #include "decoders/fluxmapreader.h"
 #include "lib/fluxsink/fluxsink.pb.h"
 #include "proto.h"
-#include "fmt/format.h"
 #include "fluxmap.h"
 #include "layout.h"
 #include "scp.h"
+#include "lib/logger.h"
 #include <fstream>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -55,18 +55,18 @@ public:
         _fileheader.start_track = strackno(minTrack, minSide);
         _fileheader.end_track = strackno(maxTrack, maxSide);
         _fileheader.flags = SCP_FLAG_INDEXED;
-        if (config.tpi() != 48)
+        if (globalConfig()->drive().tpi() != 48)
             _fileheader.flags |= SCP_FLAG_96TPI;
         _fileheader.cell_width = 0;
-		if ((minSide == 0) && (maxSide == 0))
-			_fileheader.heads = 1;
-		else if ((minSide == 1) && (maxSide == 1))
-			_fileheader.heads = 2;
-		else
-			_fileheader.heads = 0;
+        if ((minSide == 0) && (maxSide == 0))
+            _fileheader.heads = 1;
+        else if ((minSide == 1) && (maxSide == 1))
+            _fileheader.heads = 2;
+        else
+            _fileheader.heads = 0;
 
-        std::cout << fmt::format(
-            "SCP: writing 96 tpi {} file containing {} tracks\n",
+        log("SCP: writing {} tpi {} file containing {} tracks",
+            (_fileheader.flags & SCP_FLAG_96TPI) ? 96 : 48,
             (minSide == maxSide) ? "single sided" : "double sided",
             _fileheader.end_track - _fileheader.start_track + 1);
     }
@@ -80,10 +80,10 @@ public:
         appendChecksum(checksum, _trackdata);
         write_le32(_fileheader.checksum, checksum);
 
-        std::cout << "SCP: writing output file...\n";
+        log("SCP: writing output file");
         std::ofstream of(_config.filename(), std::ios::out | std::ios::binary);
         if (!of.is_open())
-            Error() << "cannot open output file";
+            error("cannot open output file");
         of.write((const char*)&_fileheader, sizeof(_fileheader));
         _trackdata.writeTo(of);
         of.close();
@@ -98,9 +98,8 @@ public:
 
         if (strack >= std::size(_fileheader.track))
         {
-            std::cout << fmt::format(
-                "SCP: cannot write track {} head {}, "
-                "there are not not enough Track Data Headers.\n",
+            log("SCP: cannot write track {} head {}, there are not not enough "
+                "Track Data Headers.",
                 track,
                 head);
             return;
@@ -181,7 +180,7 @@ public:
         trackdataWriter += fluxdata;
     }
 
-    operator std::string() const
+    operator std::string() const override
     {
         return fmt::format("scp({})", _config.filename());
     }

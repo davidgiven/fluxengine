@@ -9,7 +9,6 @@
 #include "decoders/fluxmapreader.h"
 #include "dep/agg/include/agg2d.h"
 #include "dep/stb/stb_image_write.h"
-#include "fmt/format.h"
 #include <math.h>
 #include <fstream>
 
@@ -42,7 +41,7 @@ void visualiseSectorsToFile(const Image& image, const std::string& filename)
 {
     Bitmap bitmap(writeImg, imgWidth, imgHeight);
     if (bitmap.filename.empty())
-        Error() << "you must specify an image filename to write to";
+        error("you must specify an image filename to write to");
 
     Agg2D& painter = bitmap.painter();
     painter.clearAll(0xff, 0xff, 0xff);
@@ -154,12 +153,12 @@ void visualiseSectorsToFile(const Image& image, const std::string& filename)
 static void check_for_error()
 {
     if (inputFile.fail())
-        Error() << fmt::format("I/O error: {}", strerror(errno));
+        error("I/O error: {}", strerror(errno));
 }
 
 static void bad_csv()
 {
-    Error() << "bad CSV file format";
+    error("bad CSV file format");
 }
 
 static void readRow(const std::vector<std::string>& row, Image& image)
@@ -202,7 +201,7 @@ static void readRow(const std::vector<std::string>& row, Image& image)
 static Image readCsv(const std::string& filename)
 {
     if (filename == "")
-        Error() << "you must specify an input CSV file";
+        error("you must specify an input CSV file");
 
     inputFile.open(filename);
     check_for_error();

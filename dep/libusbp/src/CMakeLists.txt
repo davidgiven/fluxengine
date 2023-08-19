@@ -1,5 +1,3 @@
-use_c99()
-
 # Settings for GCC
 if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
   # By default, symbols are not visible outside of the library.
