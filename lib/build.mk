@@ -81,6 +81,7 @@ LIBFLUXENGINE_SRCS = \
 	lib/vfs/imagesectorinterface.cc \
 	lib/vfs/lif.cc \
 	lib/vfs/machfs.cc \
+	lib/vfs/microdos.cc \
 	lib/vfs/philefs.cc \
 	lib/vfs/prodos.cc \
 	lib/vfs/roland.cc \

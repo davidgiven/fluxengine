@@ -19,6 +19,7 @@ extern std::string quote(const std::string& s);
 extern std::string unhex(const std::string& s);
 extern std::string tohex(const std::string& s);
 extern bool doesFileExist(const std::string& filename);
+extern int countSetBits(uint32_t word);
 extern uint32_t unbcd(uint32_t bcd);
 
 template <class K, class V>

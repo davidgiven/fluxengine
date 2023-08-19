@@ -88,6 +88,9 @@ message LifProto
         [ default = 256, (help) = "LIF filesystem block size" ];
 }
 
+message MicrodosProto {}
+
+// NEXT_TAG: 16
 message ZDosProto
 {
     message Location
@@ -110,7 +113,7 @@ message RolandFsProto
         [ (help) = "number of directory entries", default = 79 ];
 }
 
-// NEXT_TAG: 17
+// NEXT_TAG: 18
 message FilesystemProto
 {
     enum FilesystemType
@@ -128,8 +131,9 @@ message FilesystemProto
         APPLEDOS = 10;
         PHILE = 11;
         LIF = 12;
-        ZDOS = 13;
-        ROLAND = 14;
+        MICRODOS = 13;
+        ZDOS = 14;
+        ROLAND = 15;
     }
 
     optional FilesystemType type = 10
@@ -147,8 +151,9 @@ message FilesystemProto
     optional Smaky6FsProto smaky6 = 11;
     optional PhileProto phile = 13;
     optional LifProto lif = 14;
-    optional ZDosProto zdos = 15;
-    optional RolandFsProto roland = 16;
+    optional MicrodosProto microdos = 15;
+    optional ZDosProto zdos = 16;
+    optional RolandFsProto roland = 17;
 
     optional SectorListProto sector_order = 9
         [ (help) = "specify the filesystem order of sectors" ];

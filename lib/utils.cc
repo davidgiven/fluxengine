@@ -197,6 +197,17 @@ bool doesFileExist(const std::string& filename)
     return f.good();
 }
 
+int countSetBits(uint32_t word)
+{
+    int b = 0;
+    while (word)
+    {
+        b += word & 1;
+        word >>= 1;
+    }
+    return b;
+}
+
 uint32_t unbcd(uint32_t bcd)
 {
     uint32_t dec = 0;

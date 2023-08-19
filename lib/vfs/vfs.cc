@@ -216,6 +216,9 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystem(
         case FilesystemProto::LIF:
             return Filesystem::createLifFilesystem(config, image);
 
+        case FilesystemProto::MICRODOS:
+            return Filesystem::createMicrodosFilesystem(config, image);
+
         case FilesystemProto::ZDOS:
             return Filesystem::createZDosFilesystem(config, image);
 
