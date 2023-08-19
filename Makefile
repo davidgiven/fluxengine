@@ -32,8 +32,6 @@ endif
 
 ifeq ($(shell uname),FreeBSD)
 	PLATFORM = FreeBSD
-	#WX_CONFIG=/usr/local/bin/wxgtk3u-3.2-config
-	#WX_CONFIG=/usr/local/bin/wxgtk3u-3.0-config
 	CFLAGS += -I/usr/local/include
 endif
 
