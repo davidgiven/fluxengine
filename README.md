@@ -128,6 +128,7 @@ choices because they can store multiple types of file system.
 | [`icl30`](doc/disk-icl30.md) | ICL Model 30: CP/M; 263kB 35-track DSSD | 🦖 |  | CPMFS  |
 | [`mac`](doc/disk-mac.md) | Macintosh: 400kB/800kB 3.5" GCR | 🦄 | 🦄 | MACHFS  |
 | [`micropolis`](doc/disk-micropolis.md) | Micropolis: 100tpi MetaFloppy disks | 🦄 | 🦄 |  |
+| [`ms2000`](doc/disk-ms2000.md) | : MS2000 Microdisk Development System |  |  | MICRODOS  |
 | [`mx`](doc/disk-mx.md) | DVK MX: Soviet-era PDP-11 clone | 🦖 |  |  |
 | [`n88basic`](doc/disk-n88basic.md) | N88-BASIC: PC8800/PC98 5.25" 77-track 26-sector DSHD | 🦄 | 🦄 |  |
 | [`northstar`](doc/disk-northstar.md) | Northstar: 5.25" hard sectored | 🦄 | 🦄 |  |
