@@ -22,13 +22,25 @@ pinout as a 96tpi PC 5.25" drive. In use they should be identical.
 While most operating systems use the standard Micropolis checksum, Vector
 Graphic MZOS uses a unique checksum.  The decoder will automatically detect
 the checksum type in use; however, a specific checksum type may be forced
-using the `--decoder.micropolis.checksum_type=n` where the type is one of:
+using the `--decoder.micropolis.checksum_type=TYPE` where TYPE is one of:
 
-| Type | Description                             |
-|------|-----------------------------------------|
-| 0    | Automatically detect                    |
-| 1    | Standard Micropolis (MDOS, CP/M, OASIS) |
-| 2    | Vector Graphic MZOS                     |
+| Checksum   | Description                             |
+|------------|-----------------------------------------|
+| AUTO       | Automatically detect                    |
+| MICROPOLIS | Standard Micropolis (MDOS, CP/M, OASIS) |
+| MZOS       | Vector Graphic MZOS                     |
+
+Later versions of the Micropolis format supported ECC, especially in
+controllers with HDD support. The ECC can detect and correct errors. However,
+it is unclear what ECC algorithm was used by each vendor. ECC is disabled by
+default, but available for checking and correcting using
+`--decoder.micropolis.ecc_type=TYPE` and for writing from IMG files using
+`--encoder.micropolis.ecc_type=TYPE`, where TYPE is one of:
+
+| ECC    | Description                              |
+|--------|------------------------------------------|
+| NONE   | No ECC processing enabled                |
+| VECTOR | Vector Graphic Dual-Mode Disk Controller |
 
 The [CP/M BIOS](https://www.seasip.info/Cpm/bios.html) defined SELDSK, SETTRK,
 and SETSEC, but no function to select the head/side. Double-sided floppies

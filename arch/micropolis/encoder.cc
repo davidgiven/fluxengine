@@ -8,7 +8,8 @@
 
 static void write_sector(std::vector<bool>& bits,
     unsigned& cursor,
-    const std::shared_ptr<const Sector>& sector)
+    const std::shared_ptr<const Sector>& sector,
+    MicropolisEncoderProto::EccType eccType)
 {
     if ((sector->data.size() != 256) &&
         (sector->data.size() != MICROPOLIS_ENCODED_SECTOR_SIZE))
@@ -45,8 +46,15 @@ static void write_sector(std::vector<bool>& bits,
             writer.write_8(0); /* Padding */
         writer += sector->data;
         writer.write_8(micropolisChecksum(sectorData.slice(1)));
-        for (int i = 0; i < 5; i++)
-            writer.write_8(0); /* 4 byte ECC and ECC not present flag */
+
+        uint8_t eccPresent = 0;
+        uint32_t ecc = 0;
+        if (eccType == MicropolisEncoderProto::VECTOR) {
+            eccPresent = 0xaa;
+            ecc = vectorGraphicEcc(sectorData + Bytes(4));
+        }
+        writer.write_be32(ecc);
+        writer.write_8(eccPresent);
     }
     for (uint8_t b : sectorData)
         fullSector->push_back(b);
@@ -93,7 +101,7 @@ public:
         for (const auto& sectorData : sectors) {
             indexes.push_back(cursor);
             prev_cursor = cursor;
-            write_sector(bits, cursor, sectorData);
+            write_sector(bits, cursor, sectorData, _config.ecc_type());
         }
         indexes.push_back(prev_cursor + (cursor - prev_cursor)/2);
         indexes.push_back(cursor);
