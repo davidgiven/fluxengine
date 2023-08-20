@@ -143,6 +143,7 @@ public:
     static constexpr const char* LENGTH = "length";
     static constexpr const char* MODE = "mode";
     static constexpr const char* FILE_TYPE = "file_type";
+    static constexpr const char* CTIME = "ctime";
 
     static constexpr const char* VOLUME_NAME = "volume_name";
     static constexpr const char* TOTAL_BLOCKS = "total_blocks";

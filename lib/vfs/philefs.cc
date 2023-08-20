@@ -10,14 +10,14 @@
  * 0d		2a
  * 0e		79
  * 0f		6d
- * 10		07 0x07c10c19, creation timestamp
+ * 10		07 0x07c10c19, creation timestamp; year
  * 11		c1 ^
- * 12		0c ^
- * 13		19 ^
- * 14		2f
+ * 12		0c month
+ * 13		19 day
+ * 14		2f time? minutes
  * 15		00
- * 16		00
- * 17		18
+ * 16		00 hours
+ * 17		18 seconds
  * 18		03 0x320, number of blocks on the disk
  * 19		20 ^
  * 1a		00 0x0010, first data block?
@@ -88,11 +88,6 @@
 00000CD0   00 0F 47 52  45 59 2E 43  4C 54 00 00  00 00 00 00  ..GREY.CLT......
  */
 
-static void trimZeros(std::string s)
-{
-    s.erase(std::remove(s.begin(), s.end(), 0), s.end());
-}
-
 class PhileFilesystem : public Filesystem
 {
     struct Span
@@ -124,6 +119,15 @@ class PhileFilesystem : public Filesystem
 
             this->filename = filename;
             path = {filename};
+
+            attributes[Filesystem::CTIME] =
+                fmt::format("{:04}-{:02}-{:02}T{:02}:{:02}:{:02}",
+                    filedes.reader().seek(4).read_be16(),
+                    filedes[6],
+                    filedes[7] + 1,
+                    filedes[10] & 0x1f,
+                    filedes[8],
+                    filedes[11]);
 
             attributes[Filesystem::FILENAME] = filename;
             attributes[Filesystem::LENGTH] = std::to_string(length);
@@ -175,7 +179,7 @@ public:
         mount();
 
         std::string volumename = _rootBlock.reader().read(0x0c);
-        trimZeros(volumename);
+        volumename = trimWhitespace(volumename);
 
         std::map<std::string, std::string> attributes;
         attributes[VOLUME_NAME] = volumename;
@@ -246,7 +250,7 @@ private:
         {
             uint16_t fileno = br.read_be16();
             std::string filename = br.read(14);
-            trimZeros(filename);
+            filename = trimWhitespace(filename);
 
             if (fileno)
             {

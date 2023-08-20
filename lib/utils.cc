@@ -6,7 +6,7 @@
 
 bool emergencyStop = false;
 
-static const char* WHITESPACE = " \t\n\r\f\v";
+static std::string WHITESPACE(" \t\n\r\f\v\0", 7);
 static const char* SEPARATORS = "/\\";
 
 void ErrorException::print() const
