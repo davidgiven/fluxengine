@@ -2,7 +2,6 @@
 #include "gui.h"
 #include "customstatusbar.h"
 #include <wx/artprov.h>
-#include <fmt/format.h>
 
 // clang-format off
 BEGIN_EVENT_TABLE(CustomStatusBar, wxStatusBar)

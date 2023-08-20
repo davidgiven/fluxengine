@@ -1,9 +1,10 @@
-#include "globals.h"
-#include "flags.h"
-#include "proto.h"
-#include "utils.h"
-#include "logger.h"
-#include "fmt/format.h"
+#include "lib/globals.h"
+#include "lib/flags.h"
+#include "lib/proto.h"
+#include "lib/utils.h"
+#include "lib/logger.h"
+#include "lib/fluxsource/fluxsource.h"
+#include "lib/imagereader/imagereader.h"
 #include <google/protobuf/text_format.h>
 #include <regex>
 #include <fstream>
@@ -41,53 +42,6 @@ void FlagGroup::addFlag(Flag* flag)
     _flags.push_back(flag);
 }
 
-static bool setFallbackFlag(
-    const std::string& key, const std::string& value, bool uses_that)
-{
-    if (beginsWith(key, "--"))
-    {
-        std::string path = key.substr(2);
-        if (key.find('.') != std::string::npos)
-        {
-            ProtoField protoField = resolveProtoPath(&config, path);
-            setProtoFieldFromString(protoField, value);
-            return uses_that;
-        }
-        else
-        {
-            if (FlagGroup::applyOption(path))
-                return false;
-        }
-    }
-    Error() << "unrecognised flag; try --help";
-}
-
-bool FlagGroup::applyOption(const std::string& option)
-{
-    for (const auto& configs : config.option())
-    {
-        if (option == configs.name())
-        {
-            if (configs.config().option_size() > 0)
-                Error() << fmt::format(
-                    "option '{}' has an option inside it, which isn't "
-                    "allowed",
-                    option);
-            if (configs.config().include_size() > 0)
-                Error() << fmt::format(
-                    "option '{}' is trying to include something, which "
-                    "isn't allowed",
-                    option);
-
-            Logger() << fmt::format("OPTION: {}", configs.message());
-            config.MergeFrom(configs.config());
-            return true;
-        }
-    }
-
-    return false;
-}
-
 std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc,
     const char* argv[],
     std::function<bool(const std::string&)> callback)
@@ -113,7 +67,7 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc,
             for (const auto& name : flag->names())
             {
                 if (flags_by_name.find(name) != flags_by_name.end())
-                    Error() << "two flags use the name '" << name << "'";
+                    error("two flags use the name '{}'", name);
                 flags_by_name[name] = flag;
             }
 
@@ -190,8 +144,19 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc,
             auto flag = flags_by_name.find(key);
             if (flag == flags_by_name.end())
             {
-                if (setFallbackFlag(key, value, usesthat))
-                    index++;
+                if (beginsWith(key, "--"))
+                {
+                    std::string path = key.substr(2);
+                    if (key.find('.') != std::string::npos)
+                    {
+                        globalConfig().set(path, value);
+                        index += usesthat;
+                    }
+                    else
+                        globalConfig().applyOption(path);
+                }
+                else
+                    error("unrecognised flag; try --help");
             }
             else
             {
@@ -204,6 +169,7 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc,
         index++;
     }
 
+    globalConfig().validateAndThrow();
     return filenames;
 }
 
@@ -213,69 +179,21 @@ void FlagGroup::parseFlags(int argc,
 {
     auto filenames = parseFlagsWithFilenames(argc, argv, callback);
     if (!filenames.empty())
-        Error() << "non-option parameter " << *filenames.begin()
-                << " seen (try --help)";
+        error(
+            "non-option parameter '{}' seen (try --help)", *filenames.begin());
 }
 
 void FlagGroup::parseFlagsWithConfigFiles(int argc,
     const char* argv[],
-    const std::map<std::string, std::string>& configFiles)
+    const std::map<std::string, const ConfigProto*>& configFiles)
 {
     parseFlags(argc,
         argv,
         [&](const auto& filename)
         {
-            parseConfigFile(filename, configFiles);
+            globalConfig().readBaseConfigFile(filename);
             return true;
         });
-}
-
-ConfigProto FlagGroup::parseSingleConfigFile(const std::string& filename,
-    const std::map<std::string, std::string>& configFiles)
-{
-    const auto& it = configFiles.find(filename);
-    if (it != configFiles.end())
-    {
-        ConfigProto config;
-        if (!config.ParseFromString(it->second))
-            Error() << "couldn't load built-in config proto";
-        return config;
-    }
-    else
-    {
-        std::ifstream f(filename, std::ios::out);
-        if (f.fail())
-            Error() << fmt::format(
-                "Cannot open '{}': {}", filename, strerror(errno));
-
-        std::ostringstream ss;
-        ss << f.rdbuf();
-
-        ConfigProto config;
-        if (!google::protobuf::TextFormat::MergeFromString(ss.str(), &config))
-            Error() << "couldn't load external config proto";
-        return config;
-    }
-}
-
-void FlagGroup::parseConfigFile(const std::string& filename,
-    const std::map<std::string, std::string>& configFiles)
-{
-    auto newConfig = parseSingleConfigFile(filename, configFiles);
-
-    /* The includes need to be merged _first_. */
-
-    for (const auto& include : newConfig.include())
-    {
-        auto included = parseSingleConfigFile(include, configFiles);
-        if (included.include_size() != 0)
-            Error() << "only one level of config file includes are supported "
-                       "(so far, if you need this, complain)";
-
-        config.MergeFrom(included);
-    }
-
-    config.MergeFrom(newConfig);
 }
 
 void FlagGroup::checkInitialised() const
@@ -290,7 +208,7 @@ Flag::Flag(const std::vector<std::string>& names, const std::string helptext):
     _helptext(helptext)
 {
     if (!currentFlagGroup)
-        Error() << "no flag group defined for " << *names.begin();
+        error("no flag group defined for {}", *names.begin());
     _group.addFlag(this);
 }
 
@@ -301,7 +219,7 @@ void BoolFlag::set(const std::string& value)
     else if ((value == "false") || (value == "n"))
         _value = false;
     else
-        Error() << "can't parse '" << value << "'; try 'true' or 'false'";
+        error("can't parse '{}'; try 'true' or 'false'", value);
     _callback(_value);
     _isSet = true;
 }
@@ -339,7 +257,7 @@ static void doHelp()
 static void doShowConfig()
 {
     std::string s;
-    google::protobuf::TextFormat::PrintToString(config, &s);
+    google::protobuf::TextFormat::PrintToString(globalConfig(), &s);
     std::cout << s << '\n';
 
     exit(0);
@@ -347,7 +265,7 @@ static void doShowConfig()
 
 static void doDoc()
 {
-    const auto fields = findAllProtoFields(&config);
+    const auto fields = findAllProtoFields(globalConfig().base());
     for (const auto field : fields)
     {
         const std::string& path = field.first;

@@ -1,7 +1,6 @@
 #include "globals.h"
 #include "utils.h"
 #include "lib/bytes.h"
-#include <fmt/format.h>
 #include <iomanip>
 #include <fstream>
 
@@ -196,4 +195,28 @@ bool doesFileExist(const std::string& filename)
 {
     std::ifstream f(filename);
     return f.good();
+}
+
+int countSetBits(uint32_t word)
+{
+    int b = 0;
+    while (word)
+    {
+        b += word & 1;
+        word >>= 1;
+    }
+    return b;
+}
+
+uint32_t unbcd(uint32_t bcd)
+{
+    uint32_t dec = 0;
+
+    for (int i = 0; i < 8; i++)
+    {
+        dec = dec * 10 + (bcd >> 28);
+        bcd <<= 4;
+    }
+
+    return dec;
 }

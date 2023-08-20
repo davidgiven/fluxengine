@@ -7,4 +7,3 @@ extern FluxFileProto loadFl2File(const std::string filename);
 extern void saveFl2File(const std::string filename, FluxFileProto& proto);
 
 #endif
-

@@ -11,4 +11,3 @@ extern RangeFlag requiredSectors;
 extern int mainReadIBM(int argc, const char* argv[]);
 
 #endif
-

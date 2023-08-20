@@ -10,7 +10,6 @@
 #include "fluxsink/fluxsink.h"
 #include "imagereader/imagereader.h"
 #include "imagewriter/imagewriter.h"
-#include "fmt/format.h"
 #include "sector.h"
 #include "image.h"
 #include "logger.h"
@@ -56,44 +55,46 @@ private:
         _cache;
 };
 
-void measureDiskRotation(
-    nanoseconds_t& oneRevolution, nanoseconds_t& hardSectorThreshold)
+void measureDiskRotation()
 {
-    Logger() << BeginSpeedOperationLogMessage();
+    log(BeginSpeedOperationLogMessage());
 
-    int retries = 5;
-    usbSetDrive(config.drive().drive(),
-        config.drive().high_density(),
-        config.drive().index_mode());
-    oneRevolution = config.drive().rotational_period_ms() * 1e6;
-    if (config.drive().hard_sector_count() != 0)
-        hardSectorThreshold =
-            oneRevolution * 3 / (4 * config.drive().hard_sector_count());
-    else
-        hardSectorThreshold = 0;
-
+    nanoseconds_t oneRevolution =
+        globalConfig()->drive().rotational_period_ms() * 1e6;
     if (oneRevolution == 0)
     {
-        Logger() << BeginOperationLogMessage{
-            "Measuring drive rotational speed"};
+        usbSetDrive(globalConfig()->drive().drive(),
+            globalConfig()->drive().high_density(),
+            globalConfig()->drive().index_mode());
+
+        log(BeginOperationLogMessage{"Measuring drive rotational speed"});
+        int retries = 5;
         do
         {
-            oneRevolution =
-                usbGetRotationalPeriod(config.drive().hard_sector_count());
-            if (config.drive().hard_sector_count() != 0)
-                hardSectorThreshold = oneRevolution * 3 /
-                                      (4 * config.drive().hard_sector_count());
+            oneRevolution = usbGetRotationalPeriod(
+                globalConfig()->drive().hard_sector_count());
 
             retries--;
         } while ((oneRevolution == 0) && (retries > 0));
-        config.mutable_drive()->set_rotational_period_ms(oneRevolution / 1e6);
-        Logger() << EndOperationLogMessage{};
+        globalConfig().setTransient(
+            "drive.rotational_period_ms", std::to_string(oneRevolution / 1e6));
+        log(EndOperationLogMessage{});
+    }
+
+    if (!globalConfig()->drive().hard_sector_threshold_ns())
+    {
+        int count = globalConfig()->drive().hard_sector_count();
+        globalConfig().setTransient("drive.hard_sector_threshold_ns",
+            count ? std::to_string(
+                        oneRevolution * 3 /
+                        (4 * globalConfig()->drive().hard_sector_count()))
+                  : "0");
     }
 
     if (oneRevolution == 0)
-        Error() << "Failed\nIs a disk in the drive?";
+        error("Failed\nIs a disk in the drive?");
 
-    Logger() << EndSpeedOperationLogMessage{oneRevolution};
+    log(EndSpeedOperationLogMessage{oneRevolution});
 }
 
 /* Given a set of sectors, deduplicates them sensibly (e.g. if there is a good
@@ -191,7 +192,7 @@ BadSectorsState combineRecordAndSectors(TrackFlux& trackFlux,
 
 static void adjustTrackOnError(FluxSource& fluxSource, int baseTrack)
 {
-    switch (config.drive().error_behaviour())
+    switch (globalConfig()->drive().error_behaviour())
     {
         case DriveProto::NOTHING:
             break;
@@ -217,22 +218,22 @@ ReadResult readGroup(FluxSourceIteratorHolder& fluxSourceIteratorHolder,
     ReadResult result = BAD_AND_CAN_NOT_RETRY;
 
     for (unsigned offset = 0; offset < trackInfo->groupSize;
-         offset += config.drive().head_width())
+         offset += globalConfig()->drive().head_width())
     {
         auto& fluxSourceIterator = fluxSourceIteratorHolder.getIterator(
             trackInfo->physicalTrack + offset, trackInfo->physicalSide);
         if (!fluxSourceIterator.hasNext())
             continue;
 
-        Logger() << BeginReadOperationLogMessage{
-            trackInfo->physicalTrack + offset, trackInfo->physicalSide};
+        log(BeginReadOperationLogMessage{
+            trackInfo->physicalTrack + offset, trackInfo->physicalSide});
         std::shared_ptr<const Fluxmap> fluxmap = fluxSourceIterator.next();
         // ->rescale(
-        //     1.0 / config.flux_source().rescale());
-        Logger() << EndReadOperationLogMessage()
-                 << fmt::format("{0} ms in {1} bytes",
-                        (int)(fluxmap->duration() / 1e6),
-                        fluxmap->bytes());
+        //     1.0 / globalConfig()->flux_source().rescale());
+        log(EndReadOperationLogMessage());
+        log("{0} ms in {1} bytes",
+            (int)(fluxmap->duration() / 1e6),
+            fluxmap->bytes());
 
         auto trackdataflux = decoder.decodeToSectors(fluxmap, trackInfo);
         trackFlux.trackDatas.push_back(trackdataflux);
@@ -240,7 +241,7 @@ ReadResult readGroup(FluxSourceIteratorHolder& fluxSourceIteratorHolder,
             HAS_NO_BAD_SECTORS)
         {
             result = GOOD_READ;
-            if (config.decoder().skip_unnecessary_tracks())
+            if (globalConfig()->decoder().skip_unnecessary_tracks())
                 return result;
         }
         else if (fluxSourceIterator.hasNext())
@@ -256,29 +257,31 @@ void writeTracks(FluxSink& fluxSink,
     std::function<bool(std::shared_ptr<const TrackInfo>& trackInfo)> verifier,
     std::vector<std::shared_ptr<const TrackInfo>>& trackInfos)
 {
-    Logger() << BeginOperationLogMessage{"Encoding and writing to disk"};
+    log(BeginOperationLogMessage{"Encoding and writing to disk"});
 
+    if (fluxSink.isHardware())
+        measureDiskRotation();
     int index = 0;
     for (auto& trackInfo : trackInfos)
     {
-        Logger() << OperationProgressLogMessage{
-            index * 100 / (unsigned)trackInfos.size()};
+        log(OperationProgressLogMessage{
+            index * 100 / (unsigned)trackInfos.size()});
         index++;
 
         testForEmergencyStop();
 
-        int retriesRemaining = config.decoder().retries();
+        int retriesRemaining = globalConfig()->decoder().retries();
         for (;;)
         {
             for (int offset = 0; offset < trackInfo->groupSize;
-                 offset += config.drive().head_width())
+                 offset += globalConfig()->drive().head_width())
             {
                 unsigned physicalTrack = trackInfo->physicalTrack + offset;
 
-                Logger() << BeginWriteOperationLogMessage{
-                    physicalTrack, trackInfo->physicalSide};
+                log(BeginWriteOperationLogMessage{
+                    physicalTrack, trackInfo->physicalSide});
 
-                if (offset == config.drive().group_offset())
+                if (offset == globalConfig()->drive().group_offset())
                 {
                     auto fluxmap = producer(trackInfo);
                     if (!fluxmap)
@@ -286,7 +289,7 @@ void writeTracks(FluxSink& fluxSink,
 
                     fluxSink.writeFlux(
                         physicalTrack, trackInfo->physicalSide, *fluxmap);
-                    Logger() << fmt::format("writing {0} ms in {1} bytes",
+                    log("writing {0} ms in {1} bytes",
                         int(fluxmap->duration() / 1e6),
                         fluxmap->bytes());
                 }
@@ -298,25 +301,24 @@ void writeTracks(FluxSink& fluxSink,
                     Fluxmap blank;
                     fluxSink.writeFlux(
                         physicalTrack, trackInfo->physicalSide, blank);
-                    Logger() << "erased";
+                    log("erased");
                 }
 
-                Logger() << EndWriteOperationLogMessage();
+                log(EndWriteOperationLogMessage());
             }
 
             if (verifier(trackInfo))
                 break;
 
             if (retriesRemaining == 0)
-                Error() << "fatal error on write";
+                error("fatal error on write");
 
-            Logger() << fmt::format(
-                "retrying; {} retries remaining", retriesRemaining);
+            log("retrying; {} retries remaining", retriesRemaining);
             retriesRemaining--;
         }
     }
 
-    Logger() << EndOperationLogMessage{"Write complete"};
+    log(EndOperationLogMessage{"Write complete"});
 }
 
 void writeTracks(FluxSink& fluxSink,
@@ -359,12 +361,12 @@ void writeTracksAndVerify(FluxSink& fluxSink,
             FluxSourceIteratorHolder fluxSourceIteratorHolder(fluxSource);
             auto result = readGroup(
                 fluxSourceIteratorHolder, trackInfo, *trackFlux, decoder);
-            Logger() << TrackReadLogMessage{trackFlux};
+            log(TrackReadLogMessage{trackFlux});
 
             if (result != GOOD_READ)
             {
                 adjustTrackOnError(fluxSource, trackInfo->physicalTrack);
-                Logger() << "bad read";
+                log("bad read");
                 return false;
             }
 
@@ -383,12 +385,12 @@ void writeTracksAndVerify(FluxSink& fluxSink,
                     sector->logicalSector);
                 if (!s)
                 {
-                    Logger() << "spurious sector on verify";
+                    log("spurious sector on verify");
                     return false;
                 }
                 if (s->data != sector->data.slice(0, s->data.size()))
                 {
-                    Logger() << "data mismatch on verify";
+                    log("data mismatch on verify");
                     return false;
                 }
                 wanted.erase(sector->logicalTrack,
@@ -397,7 +399,7 @@ void writeTracksAndVerify(FluxSink& fluxSink,
             }
             if (!wanted.empty())
             {
-                Logger() << "missing sector on verify";
+                log("missing sector on verify");
                 return false;
             }
             return true;
@@ -454,8 +456,11 @@ std::shared_ptr<TrackFlux> readAndDecodeTrack(FluxSource& fluxSource,
     auto trackFlux = std::make_shared<TrackFlux>();
     trackFlux->trackInfo = trackInfo;
 
+    if (fluxSource.isHardware())
+        measureDiskRotation();
+
     FluxSourceIteratorHolder fluxSourceIteratorHolder(fluxSource);
-    int retriesRemaining = config.decoder().retries();
+    int retriesRemaining = globalConfig()->decoder().retries();
     for (;;)
     {
         auto result =
@@ -464,21 +469,20 @@ std::shared_ptr<TrackFlux> readAndDecodeTrack(FluxSource& fluxSource,
             break;
         if (result == BAD_AND_CAN_NOT_RETRY)
         {
-            Logger() << fmt::format("no more data; giving up");
+            log("no more data; giving up");
             break;
         }
 
         if (retriesRemaining == 0)
         {
-            Logger() << fmt::format("giving up");
+            log("giving up");
             break;
         }
 
         if (fluxSource.isHardware())
         {
             adjustTrackOnError(fluxSource, trackInfo->physicalTrack);
-            Logger() << fmt::format(
-                "retrying; {} retries remaining", retriesRemaining);
+            log("retrying; {} retries remaining", retriesRemaining);
             retriesRemaining--;
         }
     }
@@ -490,18 +494,19 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
     FluxSource& fluxSource, Decoder& decoder)
 {
     std::unique_ptr<FluxSink> outputFluxSink;
-    if (config.decoder().has_copy_flux_to())
-        outputFluxSink = FluxSink::create(config.decoder().copy_flux_to());
+    if (globalConfig()->decoder().has_copy_flux_to())
+        outputFluxSink =
+            FluxSink::create(globalConfig()->decoder().copy_flux_to());
 
     auto diskflux = std::make_shared<DiskFlux>();
 
-    Logger() << BeginOperationLogMessage{"Reading and decoding disk"};
+    log(BeginOperationLogMessage{"Reading and decoding disk"});
     auto locations = Layout::computeLocations();
     unsigned index = 0;
     for (auto& trackInfo : locations)
     {
-        Logger() << OperationProgressLogMessage{
-            index * 100 / (unsigned)locations.size()};
+        log(OperationProgressLogMessage{
+            index * 100 / (unsigned)locations.size()});
         index++;
 
         testForEmergencyStop();
@@ -517,7 +522,7 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
                     *data->fluxmap);
         }
 
-        if (config.decoder().dump_records())
+        if (globalConfig()->decoder().dump_records())
         {
             std::vector<std::shared_ptr<const Record>> sorted_records;
 
@@ -544,7 +549,7 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
             }
         }
 
-        if (config.decoder().dump_sectors())
+        if (globalConfig()->decoder().dump_sectors())
         {
             auto collected_sectors = collectSectors(trackFlux->sectors, false);
             std::vector<std::shared_ptr<const Sector>> sorted_sectors(
@@ -574,7 +579,7 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
         }
 
         /* track can't be modified below this point. */
-        Logger() << TrackReadLogMessage{trackFlux};
+        log(TrackReadLogMessage{trackFlux});
     }
 
     std::set<std::shared_ptr<const Sector>> all_sectors;
@@ -585,8 +590,8 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
     diskflux->image = std::make_shared<Image>(all_sectors);
 
     /* diskflux can't be modified below this point. */
-    Logger() << DiskReadLogMessage{diskflux};
-    Logger() << EndOperationLogMessage{"Read complete"};
+    log(DiskReadLogMessage{diskflux});
+    log(EndOperationLogMessage{"Read complete"});
     return diskflux;
 }
 
@@ -596,40 +601,42 @@ void readDiskCommand(
     auto diskflux = readDiskCommand(fluxsource, decoder);
 
     writer.printMap(*diskflux->image);
-    if (config.decoder().has_write_csv_to())
-        writer.writeCsv(*diskflux->image, config.decoder().write_csv_to());
+    if (globalConfig()->decoder().has_write_csv_to())
+        writer.writeCsv(
+            *diskflux->image, globalConfig()->decoder().write_csv_to());
     writer.writeMappedImage(*diskflux->image);
 }
 
 void rawReadDiskCommand(FluxSource& fluxsource, FluxSink& fluxsink)
 {
-    Logger() << BeginOperationLogMessage{"Performing raw read of disk"};
+    log(BeginOperationLogMessage{"Performing raw read of disk"});
 
+    if (fluxsource.isHardware() || fluxsink.isHardware())
+        measureDiskRotation();
     auto locations = Layout::computeLocations();
     unsigned index = 0;
     for (auto& trackInfo : locations)
     {
-        Logger() << OperationProgressLogMessage{
-            index * 100 / (int)locations.size()};
+        log(OperationProgressLogMessage{index * 100 / (int)locations.size()});
         index++;
 
         testForEmergencyStop();
         auto fluxSourceIterator = fluxsource.readFlux(
             trackInfo->physicalTrack, trackInfo->physicalSide);
 
-        Logger() << BeginReadOperationLogMessage{
-            trackInfo->physicalTrack, trackInfo->physicalSide};
+        log(BeginReadOperationLogMessage{
+            trackInfo->physicalTrack, trackInfo->physicalSide});
         auto fluxmap = fluxSourceIterator->next();
-        Logger() << EndReadOperationLogMessage()
-                 << fmt::format("{0} ms in {1} bytes",
-                        (int)(fluxmap->duration() / 1e6),
-                        fluxmap->bytes());
+        log(EndReadOperationLogMessage());
+        log("{0} ms in {1} bytes",
+            (int)(fluxmap->duration() / 1e6),
+            fluxmap->bytes());
 
         fluxsink.writeFlux(
             trackInfo->physicalTrack, trackInfo->physicalSide, *fluxmap);
     }
 
-    Logger() << EndOperationLogMessage{"Raw read complete"};
+    log(EndOperationLogMessage{"Raw read complete"});
 }
 
 void fillBitmapTo(std::vector<bool>& bitmap,

@@ -1,79 +1,38 @@
 FORMATS = \
-	_acornadfs8 \
-	_acornadfs32 \
-	_apple2 \
-	_atari \
-	_micropolis \
-	_northstar \
-	_mx \
 	40track_drive \
-	acornadfs160 \
-	acornadfs320 \
-	acornadfs640 \
-	acornadfs800 \
-	acornadfs1600 \
+	acornadfs \
 	acorndfs \
 	aeslanier \
-	agat840 \
+	agat \
 	amiga \
-	ampro400 \
-	ampro800 \
+	ampro \
 	apple2_drive \
-	appleii140 \
-	appleii640 \
-	atarist360 \
-	atarist370 \
-	atarist400 \
-	atarist410 \
-	atarist720 \
-	atarist740 \
-	atarist800 \
-	atarist820 \
-	bk800 \
-	brother120 \
-	brother240 \
-	commodore1541 \
-	commodore1581 \
-	cmd_fd2000 \
+	apple2 \
+	atarist \
+	bk \
+	brother \
+	commodore \
 	eco1 \
 	epsonpf10 \
 	f85 \
 	fb100 \
-	hp9121 \
-	hplif770 \
+	hplif \
 	ibm \
-	ibm1200 \
-	ibm1232 \
-	ibm1440 \
-	ibm180 \
-	ibm360 \
-	ibm720 \
 	icl30 \
-	mac400 \
-	mac800 \
-	micropolis143 \
-	micropolis287 \
-	micropolis315 \
-	micropolis630 \
-	mx110 \
-	mx220_ds \
-	mx220_ss \
-	mx440 \
+	mac \
+	micropolis \
+	ms2000 \
+	mx \
 	n88basic \
-	northstar175 \
-	northstar350 \
-	northstar87 \
-	psos800 \
+	northstar \
+	psos \
+	rolandd20 \
 	rx50 \
 	shugart_drive \
 	smaky6 \
 	tids990 \
-	tiki90 \
-	tiki200 \
-	tiki400 \
-	tiki800 \
-	victor9k_ds \
-	victor9k_ss \
+	tiki \
+	victor9k \
 	zilogmcz \
 
 $(OBJDIR)/src/formats/format_%.o: $(OBJDIR)/src/formats/format_%.cc
@@ -96,6 +55,49 @@ LIBFORMATS_OBJS = $(patsubst %.cc, %.o, $(LIBFORMATS_SRCS))
 .PRECIOUS: $(LIBFORMATS_SRCS)
 
 LIBFORMATS_LIB = $(OBJDIR)/libformats.a
-LIBFORMATS_LDFLAGS = $(LIBFORMATS_LIB)
+LIBFORMATS_LDFLAGS =
 $(LIBFORMATS_LIB): $(LIBFORMATS_OBJS)
+
+
+$(OBJDIR)/mkdoc.exe: $(OBJDIR)/scripts/mkdoc.o
+
+$(OBJDIR)/scripts/mkdoc.o: scripts/mkdoc.cc
+	@mkdir -p $(dir $@)
+	@echo CXX $< $*
+	@$(CXX) $(CFLAGS) -DPROTO=$* $(CXXFLAGS) -MMD -MP -MF $(@:.o=.d) -c -o $@ $<
+
+$(call use-library, $(OBJDIR)/mkdoc.exe, $(OBJDIR)/scripts/mkdoc.o, PROTO)
+$(call use-library, $(OBJDIR)/mkdoc.exe, $(OBJDIR)/scripts/mkdoc.o, LIBFORMATS)
+$(call use-library, $(OBJDIR)/mkdoc.exe, $(OBJDIR)/scripts/mkdoc.o, LIBFLUXENGINE)
+
+
+docs: $(patsubst %, doc/disk-%.md, $(FORMATS))
+
+doc/disk-%.md: src/formats/%.textpb $(OBJDIR)/mkdoc.exe
+	@echo MKDOC $@
+	@mkdir -p $(dir $@)
+	@$(OBJDIR)/mkdoc.exe $* > $@
+
+
+$(OBJDIR)/mkdocindex.exe: $(OBJDIR)/scripts/mkdocindex.o
+
+$(OBJDIR)/scripts/mkdocindex.o: scripts/mkdocindex.cc
+
+$(call use-library, $(OBJDIR)/mkdocindex.exe, $(OBJDIR)/scripts/mkdocindex.o, PROTO)
+$(call use-library, $(OBJDIR)/mkdocindex.exe, $(OBJDIR)/scripts/mkdocindex.o, LIBFORMATS)
+$(call use-library, $(OBJDIR)/mkdocindex.exe, $(OBJDIR)/scripts/mkdocindex.o, LIBFLUXENGINE)
+
+
+docs: $(patsubst %, doc/disk-%.md, $(FORMATS))
+
+doc/disk-%.md: src/formats/%.textpb $(OBJDIR)/mkdoc.exe
+	@echo MKDOC $@
+	@mkdir -p $(dir $@)
+	@$(OBJDIR)/mkdoc.exe $* > $@
+
+docs: README.md
+README.md: $(OBJDIR)/mkdocindex.exe
+	@echo MKDOCINDEX $@
+	@csplit -s -f$(OBJDIR)/README. README.md '/<!-- FORMATSSTART -->/' '%<!-- FORMATSEND -->%'
+	@(cat $(OBJDIR)/README.00 && $(OBJDIR)/mkdocindex.exe && cat $(OBJDIR)/README.01) > README.md
 

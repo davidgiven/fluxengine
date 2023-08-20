@@ -4,7 +4,6 @@
 #include "imagereader/imagereader.h"
 #include "image.h"
 #include "logger.h"
-#include "fmt/format.h"
 #include "lib/config.pb.h"
 #include <algorithm>
 #include <iostream>
@@ -82,7 +81,7 @@ static unsigned getSectorSize(uint8_t flags)
                 return 512;
         }
     }
-    Error() << "not reachable";
+    error("not reachable");
 }
 
 class Jv3ImageReader : public ImageReader
@@ -95,7 +94,7 @@ public:
         std::ifstream inputFile(
             _config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
-            Error() << "cannot open input file";
+            error("cannot open input file");
 
         inputFile.seekg(0, std::ios::end);
         unsigned inputFileSize = inputFile.tellg();

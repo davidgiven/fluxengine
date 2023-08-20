@@ -25,7 +25,7 @@ SetCompressor /solid lzma
  	GreaseWeazle hardware. It also allows manipulation of flux files and disk \
  	images, so it's useful without any hardware.$\r$\n\ 
 	$\r$\n\
-	This wizard will install WordGrinder on your computer.$\r$\n\
+	This wizard will install FluxEngine on your computer.$\r$\n\
 	$\r$\n\
 	$_CLICK"
 
@@ -130,7 +130,7 @@ SectionEnd
 
 Section "Desktop Shortcut"
 	SetOutPath "$DOCUMENTS"
-	CreateShortCut "$DESKTOP\WordGrinder.lnk" "$INSTDIR\fluxengine-gui.exe" "" "$INSTDIR\fluxengine-gui.exe" 0
+	CreateShortCut "$DESKTOP\FluxEngine.lnk" "$INSTDIR\fluxengine-gui.exe" "" "$INSTDIR\fluxengine-gui.exe" 0
 SectionEnd
 
 ;--------------------------------

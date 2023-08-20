@@ -174,7 +174,7 @@ static void write_sector(std::vector<bool>& bits,
     const std::shared_ptr<const Sector>& sector)
 {
     if ((sector->data.size() != 512) && (sector->data.size() != 524))
-        Error() << "unsupported sector size --- you must pick 512 or 524";
+        error("unsupported sector size --- you must pick 512 or 524");
 
     write_bits(bits, cursor, 0xff, 1 * 8); /* pad byte */
     for (int i = 0; i < 7; i++)
@@ -239,13 +239,12 @@ public:
             write_sector(bits, cursor, sector);
 
         if (cursor >= bits.size())
-            Error() << fmt::format(
-                "track data overrun by {} bits", cursor - bits.size());
+            error("track data overrun by {} bits", cursor - bits.size());
         fillBitmapTo(bits, cursor, bits.size(), {true, false});
 
         std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
-        fluxmap->appendBits(bits,
-            calculatePhysicalClockPeriod(clockRateUs * 1e3, 200e6));
+        fluxmap->appendBits(
+            bits, calculatePhysicalClockPeriod(clockRateUs * 1e3, 200e6));
         return fluxmap;
     }
 
@@ -253,8 +252,7 @@ private:
     const MacintoshEncoderProto& _config;
 };
 
-std::unique_ptr<Encoder> createMacintoshEncoder(
-    const EncoderProto& config)
+std::unique_ptr<Encoder> createMacintoshEncoder(const EncoderProto& config)
 {
     return std::unique_ptr<Encoder>(new MacintoshEncoder(config));
 }

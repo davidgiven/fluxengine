@@ -3,6 +3,7 @@
 
 #include <wx/wx.h>
 
+class ConfigProto;
 class ExecEvent;
 class DiskFlux;
 class TrackFlux;
@@ -12,6 +13,8 @@ extern void postToUiThread(std::function<void()> callback);
 extern void runOnUiThread(std::function<void()> callback);
 extern void runOnWorkerThread(std::function<void()> callback);
 extern bool isWorkerThread();
+
+extern const std::map<std::string, const ConfigProto*> drivetypes;
 
 wxDECLARE_EVENT(UPDATE_STATE_EVENT, wxCommandEvent);
 
@@ -80,7 +83,7 @@ public:
     virtual void StartFormatting() = 0;
     virtual void StartExploring() = 0;
 
-	virtual void SafeFit() = 0;
+    virtual void SafeFit() = 0;
     virtual void SetPage(int page) = 0;
     virtual void PrepareConfig() = 0;
     virtual void ClearLog() = 0;
@@ -109,17 +112,17 @@ public:
         _mainWindow->ClearLog();
     }
 
-	void SafeFit()
-	{
-		_mainWindow->SafeFit();
-	}
+    void SafeFit()
+    {
+        _mainWindow->SafeFit();
+    }
 
     void StartIdle()
     {
         _mainWindow->StartIdle();
     }
 
-	void StartReading()
+    void StartReading()
     {
         _mainWindow->StartReading();
     }
@@ -158,7 +161,7 @@ public:
     virtual void Start() = 0;
 
     virtual void PrepareConfig() = 0;
-	virtual const wxBitmap GetBitmap() = 0;
+    virtual const wxBitmap GetBitmap() = 0;
 };
 
 class ImagerPanel : public PanelComponent

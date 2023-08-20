@@ -49,7 +49,7 @@ static void write_sector(std::vector<bool>& bits,
             doubleDensity = true;
             break;
         default:
-            Error() << "unsupported sector size --- you must pick 256 or 512";
+            error("unsupported sector size --- you must pick 256 or 512");
             break;
     }
 
@@ -96,9 +96,10 @@ static void write_sector(std::vector<bool>& bits,
             fullSector->push_back(GAP2_FILL_BYTE);
 
         if (fullSector->size() != fullSectorSize)
-            Error() << "sector mismatched length (" << sector->data.size()
-                    << ") expected: " << fullSector->size() << " got "
-                    << fullSectorSize;
+            error("sector mismatched length ({}); expected {}, got {}",
+                sector->data.size(),
+                fullSector->size(),
+                fullSectorSize);
     }
     else
     {
@@ -148,7 +149,7 @@ public:
             write_sector(bits, cursor, sectorData);
 
         if (cursor > bits.size())
-            Error() << "track data overrun";
+            error("track data overrun");
 
         std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
         fluxmap->appendBits(bits,
@@ -161,8 +162,7 @@ private:
     const NorthstarEncoderProto& _config;
 };
 
-std::unique_ptr<Encoder> createNorthstarEncoder(
-    const EncoderProto& config)
+std::unique_ptr<Encoder> createNorthstarEncoder(const EncoderProto& config)
 {
     return std::unique_ptr<Encoder>(new NorthstarEncoder(config));
 }

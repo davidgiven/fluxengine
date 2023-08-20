@@ -3,7 +3,6 @@
 #include "sector.h"
 #include "imagereader/imagereader.h"
 #include "utils.h"
-#include "fmt/format.h"
 #include "proto.h"
 #include "image.h"
 #include "lib/layout.h"
@@ -16,82 +15,43 @@ std::unique_ptr<ImageReader> ImageReader::create(const ImageReaderProto& config)
 {
     switch (config.type())
     {
-        case ImageReaderProto::DIM:
+        case IMAGETYPE_DIM:
             return ImageReader::createDimImageReader(config);
 
-        case ImageReaderProto::D88:
+        case IMAGETYPE_D88:
             return ImageReader::createD88ImageReader(config);
 
-        case ImageReaderProto::FDI:
+        case IMAGETYPE_FDI:
             return ImageReader::createFdiImageReader(config);
 
-        case ImageReaderProto::IMD:
+        case IMAGETYPE_IMD:
             return ImageReader::createIMDImageReader(config);
 
-        case ImageReaderProto::IMG:
+        case IMAGETYPE_IMG:
             return ImageReader::createImgImageReader(config);
 
-        case ImageReaderProto::DISKCOPY:
+        case IMAGETYPE_DISKCOPY:
             return ImageReader::createDiskCopyImageReader(config);
 
-        case ImageReaderProto::JV3:
+        case IMAGETYPE_JV3:
             return ImageReader::createJv3ImageReader(config);
 
-        case ImageReaderProto::D64:
+        case IMAGETYPE_D64:
             return ImageReader::createD64ImageReader(config);
 
-        case ImageReaderProto::NFD:
+        case IMAGETYPE_NFD:
             return ImageReader::createNFDImageReader(config);
 
-        case ImageReaderProto::NSI:
+        case IMAGETYPE_NSI:
             return ImageReader::createNsiImageReader(config);
 
-        case ImageReaderProto::TD0:
+        case IMAGETYPE_TD0:
             return ImageReader::createTd0ImageReader(config);
 
         default:
-            Error() << "bad input file config";
+            error("bad input file config");
             return std::unique_ptr<ImageReader>();
     }
-}
-
-void ImageReader::updateConfigForFilename(
-    ImageReaderProto* proto, const std::string& filename)
-{
-    static const std::map<std::string, std::function<void(ImageReaderProto*)>>
-        formats = {
-  // clang-format off
-		{".adf",      [](auto* proto) { proto->set_type(ImageReaderProto::IMG); }},
-		{".d64",      [](auto* proto) { proto->set_type(ImageReaderProto::D64); }},
-		{".d81",      [](auto* proto) { proto->set_type(ImageReaderProto::IMG); }},
-		{".d88",      [](auto* proto) { proto->set_type(ImageReaderProto::D88); }},
-		{".dim",      [](auto* proto) { proto->set_type(ImageReaderProto::DIM); }},
-		{".diskcopy", [](auto* proto) { proto->set_type(ImageReaderProto::DISKCOPY); }},
-		{".dsk",      [](auto* proto) { proto->set_type(ImageReaderProto::IMG); }},
-		{".fdi",      [](auto* proto) { proto->set_type(ImageReaderProto::FDI); }},
-		{".imd",      [](auto* proto) { proto->set_type(ImageReaderProto::IMD); }},
-		{".img",      [](auto* proto) { proto->set_type(ImageReaderProto::IMG); }},
-		{".jv3",      [](auto* proto) { proto->set_type(ImageReaderProto::JV3); }},
-		{".nfd",      [](auto* proto) { proto->set_type(ImageReaderProto::NFD); }},
-		{".nsi",      [](auto* proto) { proto->set_type(ImageReaderProto::NSI); }},
-		{".st",       [](auto* proto) { proto->set_type(ImageReaderProto::IMG); }},
-		{".td0",      [](auto* proto) { proto->set_type(ImageReaderProto::TD0); }},
-		{".vgi",      [](auto* proto) { proto->set_type(ImageReaderProto::IMG); }},
-		{".xdf",      [](auto* proto) { proto->set_type(ImageReaderProto::IMG); }},
-  // clang-format on
-    };
-
-    for (const auto& it : formats)
-    {
-        if (endsWith(filename, it.first))
-        {
-            it.second(proto);
-            proto->set_filename(filename);
-            return;
-        }
-    }
-
-    Error() << fmt::format("unrecognised image filename '{}'", filename);
 }
 
 ImageReader::ImageReader(const ImageReaderProto& config): _config(config) {}
@@ -103,7 +63,7 @@ std::unique_ptr<Image> ImageReader::readMappedImage()
     if (!_config.filesystem_sector_order())
         return rawImage;
 
-    Logger() << "READER: converting from filesystem sector order to disk order";
+    log("READER: converting from filesystem sector order to disk order");
     std::set<std::shared_ptr<const Sector>> sectors;
     for (const auto& e : *rawImage)
     {

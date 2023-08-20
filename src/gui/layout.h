@@ -39,6 +39,7 @@
 #include <wx/aui/aui.h>
 #include <wx/aui/auibar.h>
 #include "visualisationcontrol.h"
+#include "histogramviewer.h"
 #include <wx/dataview.h>
 #include <wx/gauge.h>
 #include <wx/spinctrl.h>
@@ -352,7 +353,7 @@ class ImagerPanelGen : public wxPanel
 		VisualisationControl* visualiser;
 		wxButton* imagerSaveImageButton;
 		wxButton* imagerSaveFluxButton;
-		wxStaticText* m_staticText4;
+		HistogramViewer* histogram;
 		wxButton* imagerGoAgainButton;
 
 		// Virtual event handlers, override them in your derived class
@@ -412,8 +413,8 @@ class BrowserPanelGen : public wxPanel
 		virtual void OnBrowserBeginDrag( wxDataViewEvent& event ) { event.Skip(); }
 		virtual void OnBrowserDrop( wxDataViewEvent& event ) { event.Skip(); }
 		virtual void OnBrowserDropPossible( wxDataViewEvent& event ) { event.Skip(); }
-		virtual void OnBrowserFilenameChanged( wxDataViewEvent& event ) { event.Skip(); }
 		virtual void OnBrowserDirectoryExpanding( wxDataViewEvent& event ) { event.Skip(); }
+		virtual void OnBrowserFilenameChanged( wxDataViewEvent& event ) { event.Skip(); }
 		virtual void OnBrowserSelectionChanged( wxDataViewEvent& event ) { event.Skip(); }
 		virtual void OnBrowserDiscardButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBrowserCommitButton( wxCommandEvent& event ) { event.Skip(); }
@@ -458,6 +459,7 @@ class ExplorerPanelGen : public wxPanel
 		wxStaticText* m_staticText231;
 		wxSpinCtrlDouble* explorerStartTimeSpinCtrl;
 		wxStaticText* m_staticText24;
+		wxButton* guessButton;
 		wxSpinCtrlDouble* explorerClockSpinCtrl;
 		wxStaticText* m_staticText25;
 		wxSpinCtrl* explorerBitOffsetSpinCtrl;
@@ -465,6 +467,7 @@ class ExplorerPanelGen : public wxPanel
 		wxChoice* explorerDecodeChoice;
 		wxStaticText* m_staticText241;
 		wxCheckBox* explorerReverseCheckBox;
+		HistogramViewer* histogram;
 		wxTextCtrl* explorerText;
 
 		// Virtual event handlers, override them in your derived class
@@ -472,6 +475,7 @@ class ExplorerPanelGen : public wxPanel
 		virtual void OnExplorerRefreshButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnExplorerSettingChange( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnExplorerSettingChange( wxSpinDoubleEvent& event ) { event.Skip(); }
+		virtual void OnGuessClockButton( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnExplorerSettingChange( wxCommandEvent& event ) { event.Skip(); }
 
 
@@ -492,11 +496,12 @@ class HardwareSourcePanelGen : public wxPanel
 
 	protected:
 		wxStaticText* m_staticText30;
+		wxStaticText* m_staticText29;
 
 	public:
 		wxStaticText* label;
 		wxCheckBox* highDensityToggle;
-		wxCheckBox* fortyTrackDriveToggle;
+		wxChoice* driveTypeChoice;
 
 		HardwareSourcePanelGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
 
@@ -514,9 +519,11 @@ class FluxfileSourcePanelGen : public wxPanel
 	protected:
 		wxStaticText* m_staticText28;
 		wxStaticText* m_staticText27;
+		wxStaticText* m_staticText281;
 
 	public:
 		wxFilePickerCtrl* fluxImagePicker;
+		wxChoice* fluxImageFormat;
 
 		FluxfileSourcePanelGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
 

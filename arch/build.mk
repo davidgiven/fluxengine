@@ -24,6 +24,7 @@ LIBARCH_SRCS = \
 	arch/mx/decoder.cc \
 	arch/northstar/decoder.cc \
 	arch/northstar/encoder.cc \
+	arch/rolandd20/decoder.cc \
 	arch/smaky6/decoder.cc \
 	arch/tids990/decoder.cc \
 	arch/tids990/encoder.cc \
@@ -36,8 +37,7 @@ OBJS += $(LIBARCH_OBJS)
 $(LIBARCH_SRCS): | $(PROTO_HDRS)
 $(LIBARCH_SRCS): CFLAGS += $(PROTO_CFLAGS)
 LIBARCH_LIB = $(OBJDIR)/libarch.a
+LIBARCH_LDFLAGS =
 $(LIBARCH_LIB): $(LIBARCH_OBJS)
-
-LIBARCH_LDFLAGS = $(LIBARCH_LIB)
 
 $(call use-pkgconfig, $(LIBARCH_LIB), $(LIBARCH_OBJS), fmt)

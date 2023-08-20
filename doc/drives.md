@@ -39,10 +39,10 @@ If you actually have a forty track drive, you need to tell FluxEngine. This is
 done by adding the special profile `40track_drive`:
 
 ```
-fluxengine write ibm360 40track_drive -i image.img -d drive:0
+fluxengine write ibm --360 40track_drive -i image.img -d drive:0
 ```
 
-It should then Just Work. This is supported by both FluxEngine and GreaseWeazle
+It should then Just Work. This is supported by both FluxEngine and Greaseweazle
 hardware.
 
 Obviously you can't write an eighty-track format using a forty-track drive!
@@ -63,7 +63,7 @@ The FluxEngine client supports these with the `apple2_drive` profile:
 fluxengine write apple2 apple2_drive -i image.img -d drive:0
 ```
 
-This is supported only by GreaseWeazle hardware.
+This is supported only by Greaseweazle hardware.
 
 Shugart drives
 --------------
@@ -86,5 +86,5 @@ fluxengine write atarist720 shugart_drive -i image.img -d drive:0
 (If you have a 40-track Shugart drive, use _both_ `shugart_drive` and
 `40track_drive`.)
 
-This is supported only by GreaseWeazle hardware.
+This is supported only by Greaseweazle hardware.
 

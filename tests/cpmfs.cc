@@ -22,8 +22,7 @@ namespace
         {
             auto s = _image.get(track, side, sectorId);
             if (!s)
-                Error() << fmt::format(
-                    "missing sector c{}.h{}.s{}", track, side, sectorId);
+                error("missing sector c{}.h{}.s{}", track, side, sectorId);
             return s;
         }
 
@@ -40,7 +39,7 @@ namespace
 
 static Bytes createDirent(const std::string& filename,
     int extent,
-	int records,
+    int records,
     const std::initializer_list<int> blocks)
 {
     Bytes dirent;
@@ -63,21 +62,24 @@ static Bytes createDirent(const std::string& filename,
     return dirent;
 }
 
-static void setBlock(const std::shared_ptr<SectorInterface>& sectors, int block, Bytes data)
+static void setBlock(
+    const std::shared_ptr<SectorInterface>& sectors, int block, Bytes data)
 {
-	for (int i=0; i<8; i++)
-		sectors->put(block, 0, i)->data = data.slice(i*256, 256);
+    for (int i = 0; i < 8; i++)
+        sectors->put(block, 0, i)->data = data.slice(i * 256, 256);
 }
 
 static void testPartialExtent()
 {
     auto sectors = std::make_shared<TestSectorInterface>();
-    auto fs = Filesystem::createCpmFsFilesystem(config.filesystem(), sectors);
+    auto fs = Filesystem::createCpmFsFilesystem(
+        globalConfig()->filesystem(), sectors);
 
-	setBlock(sectors, 0, 
+    setBlock(sectors,
+        0,
         createDirent("FILE", 0, 1, {1, 0, 0, 0, 0, 0, 0, 0, 0}) +
-        (blank_dirent * 63));
-	setBlock(sectors, 1, {1});
+            (blank_dirent * 63));
+    setBlock(sectors, 1, {1});
 
     auto files = fs->list(Path());
     AssertThat(files.size(), Equals(1));
@@ -90,14 +92,16 @@ static void testPartialExtent()
 static void testLogicalExtents()
 {
     auto sectors = std::make_shared<TestSectorInterface>();
-    auto fs = Filesystem::createCpmFsFilesystem(config.filesystem(), sectors);
+    auto fs = Filesystem::createCpmFsFilesystem(
+        globalConfig()->filesystem(), sectors);
 
-	setBlock(sectors, 0, 
+    setBlock(sectors,
+        0,
         createDirent("FILE", 1, 128, {1, 0, 0, 0, 0, 0, 0, 0, 2}) +
-        createDirent("FILE", 2, 128, {3}) + (blank_dirent * 62));
-	setBlock(sectors, 1, {1});
-	setBlock(sectors, 2, {2});
-	setBlock(sectors, 3, {3});
+            createDirent("FILE", 2, 128, {3}) + (blank_dirent * 62));
+    setBlock(sectors, 1, {1});
+    setBlock(sectors, 2, {2});
+    setBlock(sectors, 3, {3});
 
     auto files = fs->list(Path());
     AssertThat(files.size(), Equals(1));
@@ -114,7 +118,12 @@ int main(void)
     try
     {
         const std::string text = R"M(
+			drive {
+				tpi: 96
+			}
+
 			layout {
+				tpi: 96
 				tracks: 10
 				sides: 1
 				layoutdata {
@@ -134,9 +143,10 @@ int main(void)
 				}
 			}
 		)M";
-        google::protobuf::TextFormat::MergeFromString(text, &config);
+        google::protobuf::TextFormat::MergeFromString(
+            text, globalConfig().overrides());
 
-		testPartialExtent();
+        testPartialExtent();
         testLogicalExtents();
     }
     catch (const ErrorException& e)

@@ -2,7 +2,6 @@
 #include "lib/vfs/vfs.h"
 #include "lib/config.pb.h"
 #include "lib/utils.h"
-#include <fmt/format.h>
 
 extern "C"
 {
@@ -37,7 +36,7 @@ public:
     {
     }
 
-    uint32_t capabilities() const
+    uint32_t capabilities() const override
     {
         return OP_GETFSDATA | OP_CREATE | OP_LIST | OP_GETFILE | OP_PUTFILE |
                OP_GETDIRENT | OP_MOVE | OP_CREATEDIR | OP_DELETE;
@@ -80,6 +79,8 @@ public:
         currentFatFs = this;
         MKFS_PARM parm = {
             .fmt = FM_SFD | FM_ANY,
+            .n_root = _config.root_directory_entries(),
+            .au_size = _config.cluster_size(),
         };
         FRESULT res = f_mkfs("", &parm, buffer, sizeof(buffer));
         throwError(res);
@@ -198,7 +199,7 @@ public:
         throwError(res);
     }
 
-    void createDirectory(const Path& path)
+    void createDirectory(const Path& path) override
     {
         mount();
         auto pathStr = path.to_str();
@@ -295,7 +296,7 @@ private:
 
             default:
                 throw FilesystemException(
-                    fmt::format("unknown fatfs error {}", res));
+                    fmt::format("unknown fatfs error {}", (int)res));
         }
     }
 

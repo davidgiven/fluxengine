@@ -5,116 +5,41 @@
 #include "lib/config.pb.h"
 #include "proto.h"
 #include "utils.h"
-#include "fmt/format.h"
-#include <regex>
-
-static bool ends_with(const std::string& value, const std::string& ending)
-{
-    if (ending.size() > value.size())
-        return false;
-    return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
-}
 
 std::unique_ptr<FluxSource> FluxSource::create(const FluxSourceProto& config)
 {
     switch (config.type())
     {
-        case FluxSourceProto::DRIVE:
+        case FLUXTYPE_DRIVE:
             return createHardwareFluxSource(config.drive());
 
-        case FluxSourceProto::ERASE:
+        case FLUXTYPE_ERASE:
             return createEraseFluxSource(config.erase());
 
-        case FluxSourceProto::KRYOFLUX:
+        case FLUXTYPE_KRYOFLUX:
             return createKryofluxFluxSource(config.kryoflux());
 
-        case FluxSourceProto::TEST_PATTERN:
+        case FLUXTYPE_TEST_PATTERN:
             return createTestPatternFluxSource(config.test_pattern());
 
-        case FluxSourceProto::SCP:
+        case FLUXTYPE_SCP:
             return createScpFluxSource(config.scp());
 
-        case FluxSourceProto::CWF:
+        case FLUXTYPE_A2R:
+            return createA2rFluxSource(config.a2r());
+
+        case FLUXTYPE_CWF:
             return createCwfFluxSource(config.cwf());
 
-        case FluxSourceProto::FLUX:
+        case FLUXTYPE_FLUX:
             return createFl2FluxSource(config.fl2());
 
-        case FluxSourceProto::FLX:
+        case FLUXTYPE_FLX:
             return createFlxFluxSource(config.flx());
 
         default:
-            Error() << "bad input disk configuration";
             return std::unique_ptr<FluxSource>();
     }
-}
-
-void FluxSource::updateConfigForFilename(
-    FluxSourceProto* proto, const std::string& filename)
-{
-
-    static const std::vector<std::pair<std::regex,
-        std::function<void(const std::string&, FluxSourceProto*)>>>
-        formats = {
-            {std::regex("^(.*\\.flux)$"),
-             [](auto& s, auto* proto)
-                {
-                    proto->set_type(FluxSourceProto::FLUX);
-                    proto->mutable_fl2()->set_filename(s);
-                }},
-            {std::regex("^(.*\\.scp)$"),
-             [](auto& s, auto* proto)
-                {
-                    proto->set_type(FluxSourceProto::SCP);
-                    proto->mutable_scp()->set_filename(s);
-                }},
-            {std::regex("^(.*\\.cwf)$"),
-             [](auto& s, auto* proto)
-                {
-                    proto->set_type(FluxSourceProto::CWF);
-                    proto->mutable_cwf()->set_filename(s);
-                }},
-            {std::regex("^erase:$"),
-             [](auto& s, auto* proto)
-                {
-                    proto->set_type(FluxSourceProto::ERASE);
-                }},
-            {std::regex("^kryoflux:(.*)$"),
-             [](auto& s, auto* proto)
-                {
-                    proto->set_type(FluxSourceProto::KRYOFLUX);
-                    proto->mutable_kryoflux()->set_directory(s);
-                }},
-            {std::regex("^testpattern:(.*)"),
-             [](auto& s, auto* proto)
-                {
-                    proto->set_type(FluxSourceProto::TEST_PATTERN);
-                }},
-            {std::regex("^drive:(.*)"),
-             [](auto& s, auto* proto)
-                {
-                    proto->set_type(FluxSourceProto::DRIVE);
-                    config.mutable_drive()->set_drive(std::stoi(s));
-                }},
-            {std::regex("^flx:(.*)$"),
-             [](auto& s, auto* proto)
-                {
-                    proto->set_type(FluxSourceProto::FLX);
-                    proto->mutable_flx()->set_directory(s);
-                }},
-    };
-
-    for (const auto& it : formats)
-    {
-        std::smatch match;
-        if (std::regex_match(filename, match, it.first))
-        {
-            it.second(match[1], proto);
-            return;
-        }
-    }
-
-    Error() << fmt::format("unrecognised flux filename '{}'", filename);
 }
 
 class TrivialFluxSourceIterator : public FluxSourceIterator

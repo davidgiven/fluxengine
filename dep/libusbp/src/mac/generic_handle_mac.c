@@ -63,9 +63,8 @@ static libusbp_error * process_pipe_properties(libusbp_generic_handle * handle)
         uint8_t transfer_type;
         uint16_t max_packet_size;
         uint8_t interval;
-        kr = (*handle->ioh)->GetPipeProperties(handle->ioh, (UInt8) i,
-          &direction, &endpoint_number, &transfer_type, &max_packet_size, &interval);
-
+        kern_return_t kr = (*handle->ioh)->GetPipeProperties(handle->ioh, i,
+            &direction, &endpoint_number, &transfer_type, &max_packet_size, &interval);
         if (kr != KERN_SUCCESS)
         {
             return error_create_mach(kr, "Failed to get pipe properties for pipe %d.", i);
@@ -75,11 +74,11 @@ static libusbp_error * process_pipe_properties(libusbp_generic_handle * handle)
         {
             if (direction)
             {
-                handle->in_pipe_index[endpoint_number] = (uint8_t) i;
+                handle->in_pipe_index[endpoint_number] = i;
             }
             else
             {
-                handle->out_pipe_index[endpoint_number] = (uint8_t) i;
+                handle->out_pipe_index[endpoint_number] = i;
             }
         }
     }
@@ -96,11 +95,14 @@ static libusbp_error * set_configuration(io_service_t service)
     // Turn io_service_t into something we can actually use.
     IOUSBDeviceInterface ** dev_handle = NULL;
     IOCFPlugInInterface ** plug_in = NULL;
-    error = service_to_interface(service,
-        kIOUSBDeviceUserClientTypeID,
-        CFUUIDGetUUIDBytes(kIOUSBDeviceInterfaceID197),
-        (void **)&dev_handle,
-        &plug_in);
+    if (error == NULL)
+    {
+        error = service_to_interface(service,
+            kIOUSBDeviceUserClientTypeID,
+            CFUUIDGetUUIDBytes(kIOUSBDeviceInterfaceID197),
+            (void **)&dev_handle,
+            &plug_in);
+    }
 
     uint8_t config_num = 0;
     if (error == NULL)
@@ -170,7 +172,10 @@ static libusbp_error * set_configuration_and_get_service(
 
     // Get an io_service_t for the physical device.
     io_service_t device_service = MACH_PORT_NULL;
-    error = service_get_from_id(device_id, &device_service);
+    if (error == NULL)
+    {
+        error = service_get_from_id(device_id, &device_service);
+    }
 
     // Set the configruation to 1 if it is not set.
     if (error == NULL)
@@ -209,11 +214,13 @@ libusbp_error * libusbp_generic_handle_open(
 
     // Allocate memory for the handle.
     libusbp_generic_handle * new_handle = NULL;
-    new_handle = calloc(1, sizeof(libusbp_generic_handle));
-
-    if (new_handle == NULL)
+    if (error == NULL)
     {
-        error = &error_no_memory;
+        new_handle = calloc(1, sizeof(libusbp_generic_handle));
+        if (new_handle == NULL)
+        {
+            error = &error_no_memory;
+        }
     }
 
     // Get the io_service_t representing the IOUSBInterface.
@@ -323,11 +330,14 @@ libusbp_error * libusbp_generic_handle_set_timeout(
 
     libusbp_error * error = NULL;
 
-    error = check_pipe_id(pipe_id);
+    if (error == NULL)
+    {
+        error = check_pipe_id(pipe_id);
+    }
 
     if (error == NULL)
     {
-        uint8_t endpoint_number = pipe_id & (uint8_t) MAX_ENDPOINT_NUMBER;
+        uint8_t endpoint_number = pipe_id & MAX_ENDPOINT_NUMBER;
 
         if (pipe_id & 0x80)
         {
@@ -401,7 +411,7 @@ libusbp_error * libusbp_read_pipe(
 
     libusbp_error * error = NULL;
 
-    if (size == 0)
+    if (error == NULL && size == 0)
     {
         error = error_create("Transfer size 0 is not allowed.");
     }
@@ -423,12 +433,12 @@ libusbp_error * libusbp_read_pipe(
 
     if (error == NULL)
     {
-        uint8_t endpoint_number = pipe_id & (uint8_t) MAX_ENDPOINT_NUMBER;
+        uint8_t endpoint_number = pipe_id & MAX_ENDPOINT_NUMBER;
         uint32_t no_data_timeout = 0;
         uint32_t completion_timeout = handle->in_timeout[endpoint_number];
-        uint32_t iokit_size = (uint32_t) size;
+        uint32_t iokit_size = size;
         uint32_t pipe_index = handle->in_pipe_index[endpoint_number];
-        kern_return_t kr = (*handle->ioh)->ReadPipeTO(handle->ioh, (UInt8) pipe_index,
+        kern_return_t kr = (*handle->ioh)->ReadPipeTO(handle->ioh, pipe_index,
           buffer, &iokit_size, no_data_timeout, completion_timeout);
         if (transferred != NULL) { *transferred = iokit_size; }
         if (kr != KERN_SUCCESS)
@@ -464,7 +474,7 @@ libusbp_error * libusbp_write_pipe(
 
     libusbp_error * error = NULL;
 
-    if (size > UINT32_MAX)
+    if (error == NULL && size > UINT32_MAX)
     {
         error = error_create("Transfer size is too large.");
     }
@@ -481,12 +491,12 @@ libusbp_error * libusbp_write_pipe(
 
     if (error == NULL)
     {
-        uint8_t endpoint_number = pipe_id & (uint8_t) MAX_ENDPOINT_NUMBER;
+        uint8_t endpoint_number = pipe_id & MAX_ENDPOINT_NUMBER;
         uint32_t no_data_timeout = 0;
         uint32_t completion_timeout = handle->out_timeout[endpoint_number];
         uint32_t pipe_index = handle->out_pipe_index[endpoint_number];
-        kern_return_t kr = (*handle->ioh)->WritePipeTO(handle->ioh, (UInt8) pipe_index,
-          (void *)buffer, (UInt32) size, no_data_timeout, completion_timeout);
+        kern_return_t kr = (*handle->ioh)->WritePipeTO(handle->ioh, pipe_index,
+          (void *)buffer, size, no_data_timeout, completion_timeout);
         if (kr != KERN_SUCCESS)
         {
             error = error_create_mach(kr, "");
@@ -588,7 +598,7 @@ IOUSBInterfaceInterface182 ** generic_handle_get_ioh(const libusbp_generic_handl
 
 uint8_t generic_handle_get_pipe_index(const libusbp_generic_handle * handle, uint8_t pipe_id)
 {
-    uint8_t endpoint_number = pipe_id & (uint8_t) MAX_ENDPOINT_NUMBER;
+    uint8_t endpoint_number = pipe_id & MAX_ENDPOINT_NUMBER;
     if (pipe_id & 0x80)
     {
         return handle->in_pipe_index[endpoint_number];

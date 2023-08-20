@@ -3,28 +3,25 @@
 #include "fluxmap.h"
 #include "sector.h"
 #include "flux.h"
-#include "fmt/format.h"
 #include "logger.h"
 
 static bool indented = false;
-static std::function<void(std::shared_ptr<const AnyLogMessage>)> loggerImpl =
-    Logger::textLogger;
 
-Logger& Logger::operator<<(std::shared_ptr<const AnyLogMessage> message)
+static std::function<void(std::shared_ptr<const AnyLogMessage>)> loggerImpl =
+    [](auto message)
+{
+    std::cout << Logger::toString(*message) << std::flush;
+};
+
+void log(std::shared_ptr<const AnyLogMessage> message)
 {
     loggerImpl(message);
-    return *this;
 }
 
 void Logger::setLogger(
     std::function<void(std::shared_ptr<const AnyLogMessage>)> cb)
 {
     loggerImpl = cb;
-}
-
-void Logger::textLogger(std::shared_ptr<const AnyLogMessage> message)
-{
-    std::cout << toString(*message) << std::flush;
 }
 
 std::string Logger::toString(const AnyLogMessage& message)
@@ -48,13 +45,16 @@ std::string Logger::toString(const AnyLogMessage& message)
             /* Start measuring the rotational speed */
             [&](const BeginSpeedOperationLogMessage& m)
             {
-                stream << "Measuring rotational speed... ";
+                indent();
+                stream << "Measuring rotational speed...\n";
             },
 
             /* Finish measuring the rotational speed */
             [&](const EndSpeedOperationLogMessage& m)
             {
-                stream << fmt::format("{:.1f}ms ({:.1f}rpm)\n",
+                indent();
+                stream << fmt::format(
+                    "Rotational period is {:.1f}ms ({:.1f}rpm)\n",
                     m.rotationalPeriod / 1e6,
                     60e9 / m.rotationalPeriod);
             },

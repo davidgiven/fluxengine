@@ -12,39 +12,75 @@ public:
     Bytes();
     Bytes(unsigned size);
     Bytes(const uint8_t* ptr, size_t len);
+    Bytes(const char* data);
     Bytes(const std::string& data);
     Bytes(std::initializer_list<uint8_t> data);
     Bytes(std::shared_ptr<std::vector<uint8_t>> data);
-    Bytes(std::shared_ptr<std::vector<uint8_t>> data, unsigned start, unsigned end);
+    Bytes(std::shared_ptr<std::vector<uint8_t>> data,
+        unsigned start,
+        unsigned end);
 
-    Bytes* operator = (const Bytes& other);
+    Bytes* operator=(const Bytes& other);
 
 public:
-	static Bytes readFromFile(const std::string& filename);
+    static Bytes readFromFile(const std::string& filename);
 
 public:
     /* General purpose methods */
 
-    unsigned size() const        { return _high - _low; }
-    bool empty() const           { return _high == _low; }
+    unsigned size() const
+    {
+        return _high - _low;
+    }
+    bool empty() const
+    {
+        return _high == _low;
+    }
 
-    bool operator == (const Bytes& other) const
-    { return std::equal(cbegin(), cend(), other.cbegin(), other.cend()); }
+    bool operator==(const Bytes& other) const
+    {
+        return std::equal(cbegin(), cend(), other.cbegin(), other.cend());
+    }
 
-    bool operator != (const Bytes& other) const
-    { return !(*this == other); }
+    bool operator!=(const Bytes& other) const
+    {
+        return !(*this == other);
+    }
 
-    const uint8_t& operator [] (unsigned offset) const;
-    const uint8_t* cbegin() const { return _data->data() + _low; }
-    const uint8_t* cend() const   { return _data->data() + _high; }
-    const uint8_t* begin() const  { return _data->data() + _low; }
-    const uint8_t* end() const    { return _data->data() + _high; }
+    const uint8_t& operator[](unsigned offset) const;
+    const uint8_t* cbegin() const
+    {
+        return _data->data() + _low;
+    }
+    const uint8_t* cend() const
+    {
+        return _data->data() + _high;
+    }
+    const uint8_t* begin() const
+    {
+        return _data->data() + _low;
+    }
+    const uint8_t* end() const
+    {
+        return _data->data() + _high;
+    }
 
-    uint8_t& operator [] (unsigned offset);
-    uint8_t* begin()              { checkWritable(); return _data->data() + _low; }
-    uint8_t* end()                { checkWritable(); return _data->data() + _high; }
+    uint8_t& operator[](unsigned offset);
+    uint8_t* begin()
+    {
+        checkWritable();
+        return _data->data() + _low;
+    }
+    uint8_t* end()
+    {
+        checkWritable();
+        return _data->data() + _high;
+    }
 
-	operator std::string () const { return std::string(cbegin(), cend()); }
+    operator std::string() const
+    {
+        return std::string(cbegin(), cend());
+    }
 
     void boundsCheck(unsigned pos) const;
     void checkWritable();
@@ -52,26 +88,29 @@ public:
     Bytes& resize(unsigned size);
 
     Bytes& clear()
-    { resize(0); return *this; }
+    {
+        resize(0);
+        return *this;
+    }
 
-	std::vector<Bytes> split(uint8_t separator) const;
+    std::vector<Bytes> split(uint8_t separator) const;
 
     Bytes slice(unsigned start, unsigned len) const;
     Bytes slice(unsigned start) const;
     Bytes swab() const;
     Bytes compress() const;
     Bytes decompress() const;
-	std::vector<bool> toBits() const;
-	Bytes reverseBits() const;
+    std::vector<bool> toBits() const;
+    Bytes reverseBits() const;
 
-	Bytes operator + (const Bytes& other);
-	Bytes operator * (size_t count);
+    Bytes operator+(const Bytes& other);
+    Bytes operator*(size_t count);
 
     ByteReader reader() const;
     ByteWriter writer();
 
     void writeToFile(const std::string& filename) const;
-	void writeTo(std::ostream& stream) const;
+    void writeTo(std::ostream& stream) const;
 
 private:
     std::shared_ptr<std::vector<uint8_t>> _data;
@@ -82,15 +121,15 @@ private:
 class ByteReader
 {
 public:
-    ByteReader(const Bytes& bytes):
-        _bytes(bytes)
-    {}
+    ByteReader(const Bytes& bytes): _bytes(bytes) {}
 
     ByteReader(const Bytes&&) = delete;
 
     unsigned pos = 0;
     bool eof() const
-    { return pos >= _bytes.size(); }
+    {
+        return pos >= _bytes.size();
+    }
 
     ByteReader& seek(unsigned pos)
     {
@@ -120,7 +159,7 @@ public:
     {
         uint8_t b1 = _bytes[pos++];
         uint8_t b2 = _bytes[pos++];
-        return (b1<<8) | b2;
+        return (b1 << 8) | b2;
     }
 
     uint32_t read_be24()
@@ -128,7 +167,7 @@ public:
         uint8_t b1 = _bytes[pos++];
         uint8_t b2 = _bytes[pos++];
         uint8_t b3 = _bytes[pos++];
-        return (b1<<16) | (b2<<8) | b3;
+        return (b1 << 16) | (b2 << 8) | b3;
     }
 
     uint32_t read_be32()
@@ -137,7 +176,7 @@ public:
         uint8_t b2 = _bytes[pos++];
         uint8_t b3 = _bytes[pos++];
         uint8_t b4 = _bytes[pos++];
-        return (b1<<24) | (b2<<16) | (b3<<8) | b4;
+        return (b1 << 24) | (b2 << 16) | (b3 << 8) | b4;
     }
 
     uint64_t read_be48();
@@ -147,7 +186,7 @@ public:
     {
         uint8_t b1 = _bytes[pos++];
         uint8_t b2 = _bytes[pos++];
-        return (b2<<8) | b1;
+        return (b2 << 8) | b1;
     }
 
     uint32_t read_le24()
@@ -155,7 +194,7 @@ public:
         uint8_t b1 = _bytes[pos++];
         uint8_t b2 = _bytes[pos++];
         uint8_t b3 = _bytes[pos++];
-        return (b3<<16) | (b2<<8) | b1;
+        return (b3 << 16) | (b2 << 8) | b1;
     }
 
     uint32_t read_le32()
@@ -164,7 +203,7 @@ public:
         uint8_t b2 = _bytes[pos++];
         uint8_t b3 = _bytes[pos++];
         uint8_t b4 = _bytes[pos++];
-        return (b4<<24) | (b3<<16) | (b2<<8) | b1;
+        return (b4 << 24) | (b3 << 16) | (b2 << 8) | b1;
     }
 
 private:
@@ -174,9 +213,7 @@ private:
 class ByteWriter
 {
 public:
-    ByteWriter(Bytes& bytes):
-        _bytes(bytes)
-    {}
+    ByteWriter(Bytes& bytes): _bytes(bytes) {}
 
     ByteWriter(const Bytes&&) = delete;
 
@@ -204,7 +241,7 @@ public:
 
     ByteWriter& write_be16(uint16_t value)
     {
-        _bytes.adjustBounds(pos+1);
+        _bytes.adjustBounds(pos + 1);
         uint8_t* p = _bytes.begin();
         p[pos++] = value >> 8;
         p[pos++] = value;
@@ -213,7 +250,7 @@ public:
 
     ByteWriter& write_be24(uint32_t value)
     {
-        _bytes.adjustBounds(pos+2);
+        _bytes.adjustBounds(pos + 2);
         uint8_t* p = _bytes.begin();
         p[pos++] = value >> 16;
         p[pos++] = value >> 8;
@@ -223,7 +260,7 @@ public:
 
     ByteWriter& write_be32(uint32_t value)
     {
-        _bytes.adjustBounds(pos+3);
+        _bytes.adjustBounds(pos + 3);
         uint8_t* p = _bytes.begin();
         p[pos++] = value >> 24;
         p[pos++] = value >> 16;
@@ -234,7 +271,7 @@ public:
 
     ByteWriter& write_le16(uint16_t value)
     {
-        _bytes.adjustBounds(pos+1);
+        _bytes.adjustBounds(pos + 1);
         uint8_t* p = _bytes.begin();
         p[pos++] = value;
         p[pos++] = value >> 8;
@@ -243,7 +280,7 @@ public:
 
     ByteWriter& write_le24(uint32_t value)
     {
-        _bytes.adjustBounds(pos+2);
+        _bytes.adjustBounds(pos + 2);
         uint8_t* p = _bytes.begin();
         p[pos++] = value;
         p[pos++] = value >> 8;
@@ -253,7 +290,7 @@ public:
 
     ByteWriter& write_le32(uint32_t value)
     {
-        _bytes.adjustBounds(pos+3);
+        _bytes.adjustBounds(pos + 3);
         uint8_t* p = _bytes.begin();
         p[pos++] = value;
         p[pos++] = value >> 8;
@@ -262,7 +299,7 @@ public:
         return *this;
     }
 
-    ByteWriter& operator += (std::initializer_list<uint8_t> data)
+    ByteWriter& operator+=(std::initializer_list<uint8_t> data)
     {
         _bytes.adjustBounds(pos + data.size() - 1);
         std::copy(data.begin(), data.end(), _bytes.begin() + pos);
@@ -270,7 +307,7 @@ public:
         return *this;
     }
 
-    ByteWriter& operator += (const std::vector<uint8_t>& data)
+    ByteWriter& operator+=(const std::vector<uint8_t>& data)
     {
         _bytes.adjustBounds(pos + data.size() - 1);
         std::copy(data.begin(), data.end(), _bytes.begin() + pos);
@@ -278,7 +315,7 @@ public:
         return *this;
     }
 
-    ByteWriter& operator += (const Bytes data)
+    ByteWriter& operator+=(const Bytes data)
     {
         _bytes.adjustBounds(pos + data.size() - 1);
         std::copy(data.begin(), data.end(), _bytes.begin() + pos);
@@ -286,17 +323,17 @@ public:
         return *this;
     }
 
-    ByteWriter& operator += (std::istream& stream);
+    ByteWriter& operator+=(std::istream& stream);
 
-	ByteWriter& append(const char* data)
-	{
-		return *this += Bytes((const uint8_t*)data, strlen(data));
-	}
+    ByteWriter& append(const char* data)
+    {
+        return *this += Bytes((const uint8_t*)data, strlen(data));
+    }
 
-	ByteWriter& append(const std::string& data)
-	{
-		return *this += Bytes(data);
-	}
+    ByteWriter& append(const std::string& data)
+    {
+        return *this += Bytes(data);
+    }
 
     ByteWriter& append(const Bytes data)
     {
@@ -308,6 +345,8 @@ public:
         return *this += stream;
     }
 
+    ByteWriter& pad(unsigned count, uint8_t byte = 0);
+
 private:
     Bytes& _bytes;
 };
@@ -315,14 +354,15 @@ private:
 class BitWriter
 {
 public:
-    BitWriter(ByteWriter& bw):
-        _bw(bw)
-    {}
+    BitWriter(ByteWriter& bw): _bw(bw) {}
 
     BitWriter(ByteWriter&&) = delete;
 
     void push(uint32_t bits, size_t size);
-	void push(bool bit) { push(bit, 1); }
+    void push(bool bit)
+    {
+        push(bit, 1);
+    }
     void flush();
 
 private:
@@ -334,19 +374,17 @@ private:
 class BitReader
 {
 public:
-	BitReader(ByteReader& br):
-		_br(br)
-	{}
+    BitReader(ByteReader& br): _br(br) {}
 
-	BitReader(ByteReader&&) = delete;
+    BitReader(ByteReader&&) = delete;
 
-	bool get();
-	bool eof();
+    bool get();
+    bool eof();
 
 private:
-	uint8_t _fifo = 0;
-	size_t _bitcount = 0;
-	ByteReader& _br;
+    uint8_t _fifo = 0;
+    size_t _bitcount = 0;
+    ByteReader& _br;
 };
 
 static inline uint8_t reverse_bits(uint8_t b)
@@ -357,16 +395,16 @@ static inline uint8_t reverse_bits(uint8_t b)
     return b;
 }
 
-extern uint8_t toByte(
-    std::vector<bool>::const_iterator start,
+extern uint8_t toByte(std::vector<bool>::const_iterator start,
     std::vector<bool>::const_iterator end);
 
-extern Bytes toBytes(
-    std::vector<bool>::const_iterator start,
+extern Bytes toBytes(std::vector<bool>::const_iterator start,
     std::vector<bool>::const_iterator end);
 
 inline Bytes toBytes(const std::vector<bool>& bits)
-{ return toBytes(bits.begin(), bits.end()); }
+{
+    return toBytes(bits.begin(), bits.end());
+}
 
 extern std::vector<bool> reverseBits(const std::vector<bool>& bits);
 

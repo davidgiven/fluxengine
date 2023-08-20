@@ -1,5 +1,9 @@
 name: Autorelease
 
+concurrency: 
+  group: environment-release-${{ github.head_ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches:
@@ -31,6 +35,10 @@ jobs:
           zip
           vim
     - uses: actions/checkout@v3
+
+    - name: update-protobuf
+      run: |
+         pacman -U --noconfirm https://repo.msys2.org/mingw/mingw32/mingw-w64-i686-protobuf-21.9-1-any.pkg.tar.zst
 
     - name: build
       run: |

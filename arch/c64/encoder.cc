@@ -51,26 +51,6 @@ static void write_bits(
     }
 }
 
-void bindump(std::ostream& stream, std::vector<bool>& buffer)
-{
-    size_t pos = 0;
-
-    while ((pos < buffer.size()) and (pos < 520))
-    {
-        stream << fmt::format("{:5d} : ", pos);
-        for (int i = 0; i < 40; i++)
-        {
-            if ((pos + i) < buffer.size())
-                stream << fmt::format("{:01b}", (buffer[pos + i]));
-            else
-                stream << "-- ";
-            if ((((pos + i + 1) % 8) == 0) and i != 0)
-                stream << "  ";
-        }
-        stream << std::endl;
-        pos += 40;
-    }
-}
 static std::vector<bool> encode_data(uint8_t input)
 {
     /*
@@ -214,8 +194,7 @@ public:
             writeSector(bits, cursor, sector);
 
         if (cursor >= bits.size())
-            Error() << fmt::format(
-                "track data overrun by {} bits", cursor - bits.size());
+            error("track data overrun by {} bits", cursor - bits.size());
         fillBitmapTo(bits, cursor, bits.size(), {true, false});
 
         std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
@@ -243,8 +222,7 @@ private:
         {
             // There is data to encode to disk.
             if ((sector->data.size() != C64_SECTOR_LENGTH))
-                Error() << fmt::format(
-                    "unsupported sector size {} --- you must pick 256",
+                error("unsupported sector size {} --- you must pick 256",
                     sector->data.size());
 
             // 1. Write header Sync (not GCR)

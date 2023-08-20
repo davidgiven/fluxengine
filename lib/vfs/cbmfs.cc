@@ -3,7 +3,6 @@
 #include "lib/config.pb.h"
 #include "lib/proto.h"
 #include "lib/utils.h"
-#include <fmt/format.h>
 
 enum
 {
@@ -127,7 +126,8 @@ class CbmfsFilesystem : public Filesystem
             bam.resize(fs->getLogicalSectorCount());
             usedBlocks = 0;
             unsigned block = 0;
-            for (int track = 0; track < config.layout().tracks(); track++)
+            for (int track = 0; track < globalConfig()->layout().tracks();
+                 track++)
             {
                 uint8_t blocks = br.read_8();
                 uint32_t bitmap = br.read_le24();
@@ -195,7 +195,7 @@ public:
     {
     }
 
-    uint32_t capabilities() const
+    uint32_t capabilities() const override
     {
         return OP_GETFSDATA | OP_LIST | OP_GETFILE | OP_GETDIRENT;
     }

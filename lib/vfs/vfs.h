@@ -101,6 +101,14 @@ public:
     DiskFullException(const std::string& msg): CannotWriteException(msg) {}
 };
 
+class ReadErrorException : public FilesystemException
+{
+public:
+    ReadErrorException(): FilesystemException("Fatal read error") {}
+
+    ReadErrorException(const std::string& msg): FilesystemException(msg) {}
+};
+
 class ReadOnlyFilesystemException : public FilesystemException
 {
 public:
@@ -254,6 +262,14 @@ public:
     static std::unique_ptr<Filesystem> createSmaky6Filesystem(
         const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
     static std::unique_ptr<Filesystem> createPhileFilesystem(
+        const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
+    static std::unique_ptr<Filesystem> createLifFilesystem(
+        const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
+    static std::unique_ptr<Filesystem> createMicrodosFilesystem(
+        const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
+    static std::unique_ptr<Filesystem> createZDosFilesystem(
+        const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
+    static std::unique_ptr<Filesystem> createRolandFsFilesystem(
         const FilesystemProto& config, std::shared_ptr<SectorInterface> image);
 
     static std::unique_ptr<Filesystem> createFilesystem(

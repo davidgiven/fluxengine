@@ -20,17 +20,16 @@
 #include ".obj/extras/fluxfile.h"
 #include ".obj/extras/imagefile.h"
 
-extern const std::map<std::string, std::string> formats;
-
 #define CONFIG_SELECTEDSOURCE "SelectedSource"
 #define CONFIG_DEVICE "Device"
 #define CONFIG_DRIVE "Drive"
-#define CONFIG_FORTYTRACK "FortyTrack"
+#define CONFIG_DRIVETYPE "DriveType"
 #define CONFIG_HIGHDENSITY "HighDensity"
 #define CONFIG_FORMAT "Format"
 #define CONFIG_FORMATOPTIONS "FormatOptions"
 #define CONFIG_EXTRACONFIG "ExtraConfig"
 #define CONFIG_FLUXIMAGE "FluxImage"
+#define CONFIG_FLUXFORMAT "FluxImageFormat"
 #define CONFIG_DISKIMAGE "DiskImage"
 
 const std::string DEFAULT_EXTRA_CONFIGURATION =
@@ -46,6 +45,18 @@ static wxBitmap createBitmap(const uint8_t* data, size_t length)
     wxMemoryInputStream stream(data, length);
     wxImage image(stream, wxBITMAP_TYPE_PNG);
     return wxBitmap(image);
+}
+
+static void ignoreInapplicableValueExceptions(std::function<void(void)> cb)
+{
+    try
+    {
+        cb();
+    }
+    catch (const InapplicableValueException* e)
+    {
+        /* swallow */
+    }
 }
 
 class IdlePanelImpl : public IdlePanelGen, public IdlePanel
@@ -76,8 +87,7 @@ public:
         for (const auto& it : formats)
         {
             auto config = std::make_unique<ConfigProto>();
-            if (!config->ParseFromString(it.second))
-                continue;
+            *config = *it.second;
             if (config->is_extension())
                 continue;
 
@@ -181,19 +191,11 @@ public:
 
         auto formatSelection = formatChoice->GetSelection();
         if (formatSelection == wxNOT_FOUND)
-            Error() << "no format selected";
+            error("no format selected");
 
-        config.Clear();
+        globalConfig().clear();
         auto formatName = _formatNames[formatChoice->GetSelection()];
-        FlagGroup::parseConfigFile(formatName, formats);
-
-        /* Apply any format options. */
-
-        for (const auto& e : _formatOptions)
-        {
-            if (e.first == formatName)
-                FlagGroup::applyOption(e.second);
-        }
+        globalConfig().readBaseConfigFile(formatName);
 
         /* Merge in any custom config. */
 
@@ -210,21 +212,11 @@ public:
             {
                 auto key = setting.substr(0, equals);
                 auto value = setting.substr(equals + 1);
-                setProtoByString(&config, key, value);
+                globalConfig().set(key, value);
             }
             else
-                FlagGroup::parseConfigFile(setting, formats);
+                globalConfig().readBaseConfigFile(setting);
         }
-
-        /* Locate the device, if any. */
-
-        auto serial = _selectedDevice;
-        if (!serial.empty() && (serial[0] == '/'))
-            setProtoByString(&config, "usb.greaseweazle.port", serial);
-        else
-            setProtoByString(&config, "usb.serial", serial);
-
-        ClearLog();
 
         /* Apply the source/destination. */
 
@@ -232,38 +224,73 @@ public:
         {
             case SELECTEDSOURCE_REAL:
             {
-                config.mutable_drive()->set_high_density(_selectedHighDensity);
-
-                if (_selectedFortyTrack)
-                    FlagGroup::parseConfigFile("40track_drive", formats);
+                globalConfig().overrides()->mutable_drive()->set_high_density(
+                    _selectedHighDensity);
+                globalConfig().overrides()->MergeFrom(*_selectedDriveType);
 
                 std::string filename = _selectedDrive ? "drive:1" : "drive:0";
-                FluxSink::updateConfigForFilename(
-                    config.mutable_flux_sink(), filename);
-                FluxSource::updateConfigForFilename(
-                    config.mutable_flux_source(), filename);
-
+                globalConfig().setFluxSink(filename);
+                globalConfig().setFluxSource(filename);
+                globalConfig().setVerificationFluxSource(filename);
                 break;
             }
 
             case SELECTEDSOURCE_FLUX:
             {
-                FluxSink::updateConfigForFilename(
-                    config.mutable_flux_sink(), _selectedFluxfilename);
-                FluxSource::updateConfigForFilename(
-                    config.mutable_flux_source(), _selectedFluxfilename);
+                if (_selectedFluxFormat)
+                {
+                if (_selectedFluxFormat->sink)
+                    _selectedFluxFormat->sink(_selectedFluxFilename,
+                        globalConfig().overrides()->mutable_flux_sink());
+                if (_selectedFluxFormat->source)
+                    _selectedFluxFormat->source(_selectedFluxFilename,
+                        globalConfig().overrides()->mutable_flux_source());
+                }
                 break;
             }
 
             case SELECTEDSOURCE_IMAGE:
             {
-                ImageReader::updateConfigForFilename(
-                    config.mutable_image_reader(), _selectedImagefilename);
-                ImageWriter::updateConfigForFilename(
-                    config.mutable_image_writer(), _selectedImagefilename);
+                ignoreInapplicableValueExceptions(
+                    [&]()
+                    {
+                        globalConfig().setImageReader(_selectedImagefilename);
+                    });
+                ignoreInapplicableValueExceptions(
+                    [&]()
+                    {
+                        globalConfig().setImageWriter(_selectedImagefilename);
+                    });
                 break;
             }
         }
+
+        /* Apply any format options. */
+
+        for (const auto& e : _formatOptions)
+        {
+            if (e.first == formatName)
+            {
+                try
+                {
+                    globalConfig().applyOption(e.second);
+                }
+                catch (const OptionException& e)
+                {
+                }
+            }
+        }
+
+        /* Locate the device, if any. */
+
+        auto serial = _selectedDevice;
+        if (!serial.empty() && (serial[0] == '/'))
+            globalConfig().set("usb.greaseweazle.port", serial);
+        else
+            globalConfig().set("usb.serial", serial);
+
+        globalConfig().validateAndThrow();
+        ClearLog();
     }
 
     const wxBitmap GetBitmap() override
@@ -299,15 +326,23 @@ private:
         _config.Read(CONFIG_HIGHDENSITY, &s);
         _selectedHighDensity = wxAtoi(s);
 
-        s = "0";
-        _config.Read(CONFIG_FORTYTRACK, &s);
-        _selectedFortyTrack = wxAtoi(s);
+        s = "";
+        _config.Read(CONFIG_DRIVETYPE, &s);
+        auto it = drivetypes.find(s.ToStdString());
+        if (it != drivetypes.end())
+            _selectedDriveType = it->second;
+        else
+            _selectedDriveType = drivetypes.begin()->second;
 
         /* Flux image block. */
 
         s = "";
         _config.Read(CONFIG_FLUXIMAGE, &s);
-        _selectedFluxfilename = s;
+        _selectedFluxFilename = s;
+
+        s = "";
+        _config.Read(CONFIG_FLUXFORMAT, &s);
+        _selectedFluxFormatName = s;
 
         /* Disk image block. */
 
@@ -373,12 +408,16 @@ private:
         _config.Write(CONFIG_DRIVE, wxString(std::to_string(_selectedDrive)));
         _config.Write(
             CONFIG_HIGHDENSITY, wxString(std::to_string(_selectedHighDensity)));
-        _config.Write(
-            CONFIG_FORTYTRACK, wxString(std::to_string(_selectedFortyTrack)));
+        for (auto it : drivetypes)
+        {
+            if (_selectedDriveType == it.second)
+                _config.Write(CONFIG_DRIVETYPE, wxString(it.first));
+        }
 
         /* Flux image block. */
 
-        _config.Write(CONFIG_FLUXIMAGE, wxString(_selectedFluxfilename));
+        _config.Write(CONFIG_FLUXIMAGE, wxString(_selectedFluxFilename));
+        _config.Write(CONFIG_FLUXFORMAT, wxString(_selectedFluxFormatName));
 
         /* Disk image block. */
 
@@ -443,13 +482,24 @@ private:
                         OnControlsChanged(e);
                     });
 
-                panel->fortyTrackDriveToggle->SetValue(_selectedFortyTrack);
-                panel->fortyTrackDriveToggle->Bind(
-                    wxEVT_COMMAND_CHECKBOX_CLICKED,
+                int i = 0;
+                for (auto& driveConfig : drivetypes)
+                {
+                    panel->driveTypeChoice->Append(
+                        driveConfig.second->comment());
+                    if (driveConfig.second == _selectedDriveType)
+                        panel->driveTypeChoice->SetSelection(i);
+                    i++;
+                }
+
+                panel->driveTypeChoice->Bind(wxEVT_CHOICE,
                     [=](wxCommandEvent& e)
                     {
-                        _selectedFortyTrack =
-                            panel->fortyTrackDriveToggle->GetValue();
+                        auto it = drivetypes.begin();
+                        std::advance(
+                            it, panel->driveTypeChoice->GetSelection());
+
+                        _selectedDriveType = it->second;
                         OnControlsChanged(e);
                     });
 
@@ -479,13 +529,64 @@ private:
                     OnControlsChanged(e);
                 });
 
-            panel->fluxImagePicker->SetPath(_selectedFluxfilename);
+            panel->fluxImagePicker->SetPath(_selectedFluxFilename);
+
+            panel->fluxImageFormat->Clear();
+            _selectedFluxFormat = &Config::getFluxFormats()[0];
+            int choiceIndex = 0;
+            for (int i = 0; i < Config::getFluxFormats().size(); i++)
+            {
+                const auto& format = Config::getFluxFormats()[i];
+                if (!format.name.empty() && format.source)
+                {
+                    int index = panel->fluxImageFormat->Append(
+                        format.name, (void*)&format);
+                    if (format.name == _selectedFluxFormatName)
+                    {
+                        _selectedFluxFormat = &format;
+                        choiceIndex = index;
+                    }
+                }
+            }
+            panel->fluxImageFormat->SetSelection(choiceIndex);
+
+            auto onFormatChanged = [=](wxCommandEvent& e)
+            {
+                int i = panel->fluxImageFormat->GetSelection();
+                _selectedFluxFormat =
+                    (const FluxConstructor*)
+                        panel->fluxImageFormat->GetClientData(i);
+                _selectedFluxFormatName = _selectedFluxFormat->name;
+                OnControlsChanged(e);
+            };
+
             panel->fluxImagePicker->Bind(wxEVT_COMMAND_FILEPICKER_CHANGED,
                 [=](wxFileDirPickerEvent& e)
                 {
-                    _selectedFluxfilename = e.GetPath();
+                    _selectedFluxFilename = e.GetPath();
+
+                    for (int i = 0; i < Config::getFluxFormats().size(); i++)
+                    {
+                        const auto& format = Config::getFluxFormats()[i];
+                        if (std::regex_match(
+                                _selectedFluxFilename, format.pattern))
+                        {
+                            int i =
+                                panel->fluxImageFormat->FindString(format.name);
+                            if (i != wxNOT_FOUND)
+                            {
+                                panel->fluxImageFormat->SetSelection(i);
+
+                                wxCommandEvent e;
+                                onFormatChanged(e);
+                            }
+                        }
+                    }
+
                     OnControlsChanged(e);
                 });
+
+            panel->fluxImageFormat->Bind(wxEVT_CHOICE, onFormatChanged);
 
             if (_selectedSource == SELECTEDSOURCE_FLUX)
             {
@@ -533,6 +634,8 @@ private:
             SwitchToPage(0);
     }
 
+    void OnFluxFormatChanged(wxCommandEvent&) {}
+
     IconButton* AddIcon(int bitmapIndex, const std::string text)
     {
         auto* button = new IconButton(sourceIconPanel, wxID_ANY);
@@ -558,114 +661,123 @@ private:
 
     void UpdateFormatOptions()
     {
+        int formatSelection = formatChoice->GetSelection();
+        _currentlyDisplayedFormat = formatSelection;
+
+        try
+        {
+            PrepareConfig();
+            globalConfig().combined();
+        }
+        catch (const InapplicableOptionException& e)
+        {
+            /* The current set of options is invalid for some reason. Just
+             * swallow the errors. */
+        }
+        catch (const ErrorException& e)
+        {
+            /* This really isn't supposed to happen, but sometimes does and
+             * it crashes the whole program. */
+            return;
+        }
+
         assert(!wxGetApp().IsWorkerThreadRunning());
 
-        int formatSelection = formatChoice->GetSelection();
-        if (formatSelection != _currentlyDisplayedFormat)
+        formatOptionsContainer->DestroyChildren();
+        auto* sizer = new wxBoxSizer(wxVERTICAL);
+
+        if (formatSelection == wxNOT_FOUND)
+            sizer->Add(new wxStaticText(
+                formatOptionsContainer, wxID_ANY, "(no format selected)"));
+        else
         {
-            _currentlyDisplayedFormat = formatSelection;
-            formatOptionsContainer->DestroyChildren();
-            auto* sizer = new wxBoxSizer(wxVERTICAL);
+            std::string formatName = _formatNames[formatChoice->GetSelection()];
 
-            if (formatSelection == wxNOT_FOUND)
-                sizer->Add(new wxStaticText(
-                    formatOptionsContainer, wxID_ANY, "(no format selected)"));
-            else
+            for (auto& group : globalConfig()->option_group())
             {
-                config.Clear();
-                std::string formatName =
-                    _formatNames[formatChoice->GetSelection()];
-                FlagGroup::parseConfigFile(formatName, formats);
+                sizer->Add(new wxStaticText(
+                    formatOptionsContainer, wxID_ANY, group.comment() + ":"));
 
-                std::set<std::string> exclusivityGroups;
-                for (auto& option : config.option())
+                bool first = true;
+                bool valueSet = false;
+                wxRadioButton* defaultButton = nullptr;
+                for (auto& option : group.option())
                 {
-                    if (option.has_exclusivity_group())
-                        exclusivityGroups.insert(option.exclusivity_group());
-                }
-
-                if (config.option().empty())
-                    sizer->Add(new wxStaticText(formatOptionsContainer,
+                    auto* rb = new wxRadioButton(formatOptionsContainer,
                         wxID_ANY,
-                        "(no options for this format)"));
-                else
-                {
-                    /* Add grouped radiobuttons for anything in an exclusivity
-                     * group. */
+                        option.comment(),
+                        wxDefaultPosition,
+                        wxDefaultSize,
+                        first ? wxRB_GROUP : 0);
+                    auto key = std::make_pair(formatName, option.name());
+                    sizer->Add(rb);
 
-                    for (auto& group : exclusivityGroups)
-                    {
-                        bool first = true;
-                        for (auto& option : config.option())
+                    rb->Bind(wxEVT_RADIOBUTTON,
+                        [=](wxCommandEvent& e)
                         {
-                            if (option.exclusivity_group() != group)
-                                continue;
-
-                            auto* rb = new wxRadioButton(formatOptionsContainer,
-                                wxID_ANY,
-                                option.comment());
-                            auto key =
-                                std::make_pair(formatName, option.name());
-                            sizer->Add(rb);
-
-                            rb->Bind(wxEVT_RADIOBUTTON,
-                                [=](wxCommandEvent& e)
-                                {
-                                    for (auto& option : config.option())
-                                    {
-                                        if (option.exclusivity_group() == group)
-                                            _formatOptions.erase(std::make_pair(
-                                                formatName, option.name()));
-                                    }
-
-                                    _formatOptions.insert(key);
-
-                                    OnControlsChanged(e);
-                                });
-
-                            if (_formatOptions.find(key) !=
-                                _formatOptions.end())
-                                rb->SetValue(true);
-
-                            if (first)
-                                rb->SetExtraStyle(wxRB_GROUP);
-                            first = false;
-                        }
-                    }
-
-                    /* Anything that's _not_ in a group gets a checkbox. */
-
-                    for (auto& option : config.option())
-                    {
-                        if (option.has_exclusivity_group())
-                            continue;
-
-                        auto* choice = new wxCheckBox(
-                            formatOptionsContainer, wxID_ANY, option.comment());
-                        auto key = std::make_pair(formatName, option.name());
-                        sizer->Add(choice);
-
-                        if (_formatOptions.find(key) != _formatOptions.end())
-                            choice->SetValue(true);
-
-                        choice->Bind(wxEVT_CHECKBOX,
-                            [=](wxCommandEvent& e)
+                            for (auto& option : group.option())
                             {
-                                if (choice->GetValue())
-                                    _formatOptions.insert(key);
-                                else
-                                    _formatOptions.erase(key);
+                                _formatOptions.erase(
+                                    std::make_pair(formatName, option.name()));
+                            }
 
-                                OnControlsChanged(e);
-                            });
+                            _formatOptions.insert(key);
+
+                            OnControlsChanged(e);
+                        });
+
+                    if (_formatOptions.find(key) != _formatOptions.end())
+                    {
+                        rb->SetValue(true);
+                        valueSet = true;
                     }
+
+                    rb->Enable(globalConfig().isOptionValid(option));
+                    if (option.set_by_default() || !defaultButton)
+                        defaultButton = rb;
+
+                    first = false;
                 }
+
+                if (!valueSet && defaultButton)
+                    defaultButton->SetValue(true);
             }
 
-            formatOptionsContainer->SetSizerAndFit(sizer);
-            Layout();
-            SafeFit();
+            /* Anything that's _not_ in a group gets a checkbox. */
+
+            for (auto& option : globalConfig()->option())
+            {
+                auto* choice = new wxCheckBox(
+                    formatOptionsContainer, wxID_ANY, option.comment());
+                auto key = std::make_pair(formatName, option.name());
+                sizer->Add(choice);
+
+                choice->SetValue(
+                    (_formatOptions.find(key) != _formatOptions.end()) ||
+                    option.set_by_default());
+
+                choice->Bind(wxEVT_CHECKBOX,
+                    [=](wxCommandEvent& e)
+                    {
+                        if (choice->GetValue())
+                            _formatOptions.insert(key);
+                        else
+                            _formatOptions.erase(key);
+
+                        OnControlsChanged(e);
+                    });
+            }
+
+            if (globalConfig()->option().empty() &&
+                globalConfig()->option_group().empty())
+                sizer->Add(new wxStaticText(formatOptionsContainer,
+                    wxID_ANY,
+                    "(no options for this format)"));
         }
+
+        formatOptionsContainer->SetSizerAndFit(sizer);
+        Layout();
+        SafeFit();
     }
 
     void UpdateDevices()
@@ -684,9 +796,11 @@ private:
     int _selectedSource;
     std::string _selectedDevice;
     int _selectedDrive;
-    bool _selectedFortyTrack;
+    const ConfigProto* _selectedDriveType;
     bool _selectedHighDensity;
-    std::string _selectedFluxfilename;
+    std::string _selectedFluxFilename;
+    std::string _selectedFluxFormatName;
+    const FluxConstructor* _selectedFluxFormat = nullptr;
     std::string _selectedImagefilename;
     bool _dontSaveConfig = false;
     std::string _extraConfiguration;

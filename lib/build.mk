@@ -1,6 +1,7 @@
 LIBFLUXENGINE_SRCS = \
 	lib/bitmap.cc \
 	lib/bytes.cc \
+	lib/config.cc \
 	lib/crc.cc \
 	lib/csvreader.cc \
 	lib/decoders/decoders.cc \
@@ -8,7 +9,6 @@ LIBFLUXENGINE_SRCS = \
 	lib/decoders/fluxmapreader.cc \
 	lib/decoders/fmmfm.cc \
 	lib/encoders/encoders.cc \
-	lib/environment.cc \
 	lib/fl2.cc \
 	lib/flags.cc \
 	lib/fluxmap.cc \
@@ -19,6 +19,7 @@ LIBFLUXENGINE_SRCS = \
 	lib/fluxsink/hardwarefluxsink.cc \
 	lib/fluxsink/scpfluxsink.cc \
 	lib/fluxsink/vcdfluxsink.cc \
+	lib/fluxsource/a2rfluxsource.cc \
 	lib/fluxsource/cwffluxsource.cc \
 	lib/fluxsource/erasefluxsource.cc \
 	lib/fluxsource/fl2fluxsource.cc \
@@ -76,20 +77,24 @@ LIBFLUXENGINE_SRCS = \
 	lib/vfs/cbmfs.cc \
 	lib/vfs/cpmfs.cc \
 	lib/vfs/fatfs.cc \
-	lib/vfs/machfs.cc \
-	lib/vfs/prodos.cc \
-	lib/vfs/smaky6fs.cc \
-	lib/vfs/philefs.cc \
-	lib/vfs/vfs.cc \
 	lib/vfs/fluxsectorinterface.cc \
 	lib/vfs/imagesectorinterface.cc \
+	lib/vfs/lif.cc \
+	lib/vfs/machfs.cc \
+	lib/vfs/microdos.cc \
+	lib/vfs/philefs.cc \
+	lib/vfs/prodos.cc \
+	lib/vfs/roland.cc \
+	lib/vfs/smaky6fs.cc \
+	lib/vfs/vfs.cc \
+	lib/vfs/zdos.cc \
 
 LIBFLUXENGINE_OBJS = $(patsubst %.cc, $(OBJDIR)/%.o, $(LIBFLUXENGINE_SRCS))
 OBJS += $(LIBFLUXENGINE_OBJS)
 $(LIBFLUXENGINE_SRCS): | $(PROTO_HDRS)
 LIBFLUXENGINE_LIB = $(OBJDIR)/libfluxengine.a
 LIBFLUXENGINE_CFLAGS = 
-LIBFLUXENGINE_LDFLAGS = $(LIBFLUXENGINE_LIB)
+LIBFLUXENGINE_LDFLAGS =
 
 $(LIBFLUXENGINE_LIB): $(LIBFLUXENGINE_OBJS)
 

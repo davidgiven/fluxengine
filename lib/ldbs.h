@@ -7,8 +7,8 @@ class Bytes;
  * http://www.seasip.info/Unix/LibDsk/ldbs.html
  */
 
-#define LDBS_FILE_MAGIC 0x4C425301 /* "LBS\01" */
-#define LDBS_FILE_TYPE 0x44534B02 /* "DSK\02" */
+#define LDBS_FILE_MAGIC 0x4C425301  /* "LBS\01" */
+#define LDBS_FILE_TYPE 0x44534B02   /* "DSK\02" */
 #define LDBS_BLOCK_MAGIC 0x4C444201 /* "LDB\01" */
 #define LDBS_TRACK_BLOCK 0x44495201 /* "DIR\01" */
 
@@ -19,7 +19,9 @@ public:
 
 public:
     const Bytes& get(uint32_t address) const
-    { return blocks.at(address).data; }
+    {
+        return blocks.at(address).data;
+    }
 
     uint32_t put(const Bytes& data, uint32_t type);
 

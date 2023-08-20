@@ -1,5 +1,7 @@
 ifneq ($(shell $(WX_CONFIG) --version),)
 
+include src/gui/drivetypes/build.mk
+
 FLUXENGINE_GUI_SRCS = \
 	src/gui/browserpanel.cc \
 	src/gui/customstatusbar.cc \
@@ -8,6 +10,7 @@ FLUXENGINE_GUI_SRCS = \
 	src/gui/fileviewerwindow.cc \
 	src/gui/fluxviewercontrol.cc \
 	src/gui/fluxviewerwindow.cc \
+	src/gui/histogramviewer.cc \
 	src/gui/iconbutton.cc \
 	src/gui/idlepanel.cc \
 	src/gui/imagerpanel.cc \
@@ -39,6 +42,7 @@ $(call use-pkgconfig, $(FLUXENGINE_GUI_BIN), $(FLUXENGINE_GUI_OBJS), fmt)
 $(call use-library, $(FLUXENGINE_GUI_BIN), $(FLUXENGINE_GUI_OBJS), LIBARCH)
 $(call use-library, $(FLUXENGINE_GUI_BIN), $(FLUXENGINE_GUI_OBJS), LIBFLUXENGINE)
 $(call use-library, $(FLUXENGINE_GUI_BIN), $(FLUXENGINE_GUI_OBJS), LIBFORMATS)
+$(call use-library, $(FLUXENGINE_GUI_BIN), $(FLUXENGINE_GUI_OBJS), LIBDRIVETYPES)
 $(call use-library, $(FLUXENGINE_GUI_BIN), $(FLUXENGINE_GUI_OBJS), LIBUSBP)
 $(call use-library, $(FLUXENGINE_GUI_BIN), $(FLUXENGINE_GUI_OBJS), PROTO)
 $(call use-library, $(FLUXENGINE_GUI_BIN), $(FLUXENGINE_GUI_OBJS), FATFS)
@@ -64,20 +68,20 @@ FluxEngine.pkg: FluxEngine.app
 	@echo PKGBUILD $@
 	@pkgbuild --quiet --install-location /Applications --component $< $@
 
-FluxEngine.app: fluxengine-gui$(EXT) $(OBJDIR)/fluxengine.icns
+FluxEngine.app: fluxengine-gui$(EXT) $(OBJDIR)/fluxengine.icns src/gui/build.mk
 	@echo MAKEAPP $@
-	@rm -rf $@
-	@cp -a extras/FluxEngine.app.template $@
-	@touch $@
-	@cp fluxengine-gui$(EXT) $@/Contents/MacOS/fluxengine-gui
-	@mkdir -p $@/Contents/Resources
-	@cp $(OBJDIR)/fluxengine.icns $@/Contents/Resources/FluxEngine.icns
-	@dylibbundler -of -x $@/Contents/MacOS/fluxengine-gui -b -d $@/Contents/libs -cd > /dev/null
-	@cp /usr/local/opt/wxwidgets/README.md $@/Contents/libs/wxWidgets.md
-	@cp /usr/local/opt/protobuf/LICENSE $@/Contents/libs/protobuf.txt
-	@cp /usr/local/opt/fmt/LICENSE.rst $@/Contents/libs/fmt.rst
-	@cp /usr/local/opt/libpng/LICENSE $@/Contents/libs/libpng.txt
-	@cp /usr/local/opt/libjpeg/README $@/Contents/libs/libjpeg.txt
+	rm -rf $@
+	cp -a extras/FluxEngine.app.template $@
+	touch $@
+	cp fluxengine-gui$(EXT) $@/Contents/MacOS/fluxengine-gui
+	mkdir -p $@/Contents/Resources
+	cp $(OBJDIR)/fluxengine.icns $@/Contents/Resources/FluxEngine.icns
+	dylibbundler -of -x $@/Contents/MacOS/fluxengine-gui -b -d $@/Contents/libs -cd > /dev/null
+	cp $$(brew --prefix wxwidgets)/README.md $@/Contents/libs/wxWidgets.md
+	cp $$(brew --prefix protobuf)/LICENSE $@/Contents/libs/protobuf.txt
+	cp $$(brew --prefix fmt)/LICENSE.rst $@/Contents/libs/fmt.rst
+	cp $$(brew --prefix libpng)/LICENSE $@/Contents/libs/libpng.txt
+	cp $$(brew --prefix libjpeg)/README $@/Contents/libs/libjpeg.txt
 
 $(OBJDIR)/fluxengine.icns: $(OBJDIR)/fluxengine.iconset
 	@echo ICONUTIL $@

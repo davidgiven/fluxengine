@@ -1,0 +1,6 @@
+comment: '5.25" 80 track 100tpi (Micropolis Mod-II)'
+
+drive {
+	tpi: 100
+}
+

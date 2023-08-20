@@ -2,7 +2,6 @@
 #include "gui.h"
 #include "layout.h"
 #include "texteditorwindow.h"
-#include "fmt/format.h"
 
 wxDEFINE_EVENT(EDITOR_SAVE_EVENT, EditorSaveEvent);
 

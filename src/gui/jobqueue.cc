@@ -2,7 +2,6 @@
 #include "lib/utils.h"
 #include "gui.h"
 #include "jobqueue.h"
-#include <fmt/format.h>
 
 void JobQueue::QueueJob(std::function<void(void)> f)
 {

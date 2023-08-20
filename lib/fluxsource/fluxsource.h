@@ -2,7 +2,9 @@
 #define FLUXSOURCE_H
 
 #include "flags.h"
+#include "lib/config.pb.h"
 
+class A2rFluxSourceProto;
 class CwfFluxSourceProto;
 class DiskFlux;
 class EraseFluxSourceProto;
@@ -31,6 +33,8 @@ public:
     virtual ~FluxSource() {}
 
 private:
+    static std::unique_ptr<FluxSource> createA2rFluxSource(
+        const A2rFluxSourceProto& config);
     static std::unique_ptr<FluxSource> createCwfFluxSource(
         const CwfFluxSourceProto& config);
     static std::unique_ptr<FluxSource> createEraseFluxSource(
@@ -53,17 +57,52 @@ public:
         const DiskFlux& flux);
 
     static std::unique_ptr<FluxSource> create(const FluxSourceProto& spec);
-    static void updateConfigForFilename(
-        FluxSourceProto* proto, const std::string& filename);
 
 public:
+    /* Returns any configuration this flux source might be carrying (e.g. tpi
+     * of the drive which made the capture). */
+
+    const ConfigProto& getExtraConfig() const
+    {
+        return _extraConfig;
+    }
+
+    /* Read flux from a given track and side. */
+
     virtual std::unique_ptr<FluxSourceIterator> readFlux(
         int track, int side) = 0;
+
+    /* Recalibrates; seeks to track 0 and ensures the head is in the right
+     * place. */
+
     virtual void recalibrate() {}
+
+    /* Seeks to a given track (without recalibrating). */
+
     virtual void seek(int track) {}
+
+    /* Is this real hardware? If so, then flux can be read indefinitely (among
+     * other things). */
+
     virtual bool isHardware()
     {
         return false;
+    }
+
+protected:
+    ConfigProto _extraConfig;
+};
+
+class EmptyFluxSourceIterator : public FluxSourceIterator
+{
+    bool hasNext() const override
+    {
+        return false;
+    }
+
+    std::unique_ptr<const Fluxmap> next() override
+    {
+        error("no flux to read");
     }
 };
 

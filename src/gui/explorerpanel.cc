@@ -1,12 +1,28 @@
 #include "lib/globals.h"
 #include "lib/fluxmap.h"
-#include "lib/environment.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/decoders/decoders.h"
 #include "lib/proto.h"
 #include "gui.h"
 #include "layout.h"
 #include "jobqueue.h"
+
+static Bytes fakeBits(const std::vector<bool>& bits)
+{
+    Bytes result;
+    ByteWriter bw(result);
+
+    auto it = bits.begin();
+    while (it != bits.end())
+    {
+        uint8_t b = (*it++) << 4;
+        if (it != bits.end())
+            b |= *it++;
+        bw.write_8(b);
+    }
+
+    return result;
+}
 
 class ExplorerPanelImpl :
     public ExplorerPanelGen,
@@ -67,15 +83,12 @@ public:
 private:
     void SetState(int state)
     {
-        if (state != _state)
-        {
-            _state = state;
-            CallAfter(
-                [&]()
-                {
-                    UpdateState();
-                });
-        }
+        _state = state;
+        CallAfter(
+            [&]()
+            {
+                UpdateState();
+            });
     }
 
     void SwitchFrom() override
@@ -109,7 +122,13 @@ private:
         UpdateExplorerData();
     }
 
-private:
+    void OnGuessClockButton(wxCommandEvent& event) override
+    {
+        nanoseconds_t clock = histogram->GetMedian();
+        explorerClockSpinCtrl->SetValue(clock / 1e3);
+        UpdateExplorerData();
+    }
+
     void OnQueueEmpty() override
     {
         SetState(STATE_IDLE);
@@ -133,19 +152,15 @@ private:
         QueueJob(
             [this]()
             {
-                /* You need to call this if the config changes to invalidate
-                 * any caches. */
-
-                Environment::reset();
-
                 int desiredTrack = explorerTrackSpinCtrl->GetValue();
                 int desiredSide = explorerSideSpinCtrl->GetValue();
                 if (!_explorerFluxmap || (desiredTrack != _explorerTrack) ||
                     (desiredSide != _explorerSide))
                 {
-                    auto fluxSource = FluxSource::create(config.flux_source());
-                    _explorerFluxmap =
-                        fluxSource->readFlux(desiredTrack, desiredSide)->next();
+                    _explorerFluxmap = globalConfig()
+                                           .getFluxSource()
+                                           ->readFlux(desiredTrack, desiredSide)
+                                           ->next();
                     _explorerTrack = desiredTrack;
                     _explorerSide = desiredSide;
                 }
@@ -159,9 +174,9 @@ private:
                         FluxmapReader fmr(*_explorerFluxmap);
                         fmr.seek(explorerStartTimeSpinCtrl->GetValue() * 1e6);
 
-                        FluxDecoder fluxDecoder(&fmr,
-                            explorerClockSpinCtrl->GetValue() * 1e3,
-                            DecoderProto());
+                        nanoseconds_t clock =
+                            explorerClockSpinCtrl->GetValue() * 1e3;
+                        FluxDecoder fluxDecoder(&fmr, clock, DecoderProto());
                         fluxDecoder.readBits(
                             explorerBitOffsetSpinCtrl->GetValue());
                         auto bits = fluxDecoder.readBits();
@@ -170,10 +185,14 @@ private:
                         switch (explorerDecodeChoice->GetSelection())
                         {
                             case 0:
-                                bytes = toBytes(bits);
+                                bytes = fakeBits(bits);
                                 break;
 
                             case 1:
+                                bytes = toBytes(bits);
+                                break;
+
+                            case 2:
                                 bytes = decodeFmMfm(bits.begin(), bits.end());
                                 break;
                         }
@@ -183,8 +202,9 @@ private:
 
                         std::stringstream s;
                         hexdump(s, bytes);
-
                         explorerText->SetValue(s.str());
+
+                        histogram->Redraw(*_explorerFluxmap, clock);
 
                         if (_explorerUpdatePending)
                             UpdateExplorerData();

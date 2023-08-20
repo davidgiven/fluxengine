@@ -1,0 +1,15 @@
+comment: '5.25" 40-track Apple II drive (Greaseweazle only)'
+
+usb {
+    greaseweazle {
+        bus_type: APPLE2
+    }
+}
+
+drive {
+    tracks: 160
+    heads: 1
+    head_width: 4
+        tpi: 192
+}
+

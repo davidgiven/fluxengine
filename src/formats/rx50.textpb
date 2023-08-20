@@ -1,4 +1,14 @@
-comment: 'Digital RX50 400kB 5.25" 80-track 10-sector SSQD'
+shortname: 'Digital RX50'
+comment: '400kB 5.25" 80-track 10-sector SSDD'
+read_support_status: DINOSAUR
+write_support_status: DINOSAUR
+
+documentation:
+<<<
+The Digital RX50 is one of the external floppy drive units used by Digital's
+range of computers, especially the DEC Rainbow microcomputer. It is a fairly
+vanilla single-sided IBM scheme variation.
+>>>
 
 drive {
 	high_density: true
@@ -6,15 +16,16 @@ drive {
 
 image_reader {
 	filename: "rx50.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 image_writer {
 	filename: "rx50.img"
-	type: IMG
+	type: IMAGETYPE_IMG
 }
 
 layout {
+	tpi: 96
 	tracks: 80
 	sides: 1
 	layoutdata {
@@ -39,3 +50,4 @@ encoder {
 decoder {
 	ibm {}
 }
+

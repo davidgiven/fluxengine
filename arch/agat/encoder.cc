@@ -95,7 +95,7 @@ public:
         }
 
         if (_cursor >= _bits.size())
-            Error() << "track data overrun";
+            error("track data overrun");
         fillBitmapTo(_bits, _cursor, _bits.size(), {true, false});
 
         auto fluxmap = std::make_unique<Fluxmap>();

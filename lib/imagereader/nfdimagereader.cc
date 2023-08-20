@@ -6,7 +6,6 @@
 #include "proto.h"
 #include "logger.h"
 #include "lib/config.pb.h"
-#include "fmt/format.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -24,18 +23,18 @@ public:
         std::ifstream inputFile(
             _config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
-            Error() << "cannot open input file";
+            error("cannot open input file");
 
         Bytes fileId(14); // read first entry of track table as well
         inputFile.read((char*)fileId.begin(), fileId.size());
 
         if (fileId == Bytes("T98FDDIMAGE.R1"))
         {
-            Error() << "NFD: r1 images are not currently supported";
+            error("NFD: r1 images are not currently supported");
         }
         if (fileId != Bytes("T98FDDIMAGE.R0"))
         {
-            Error() << "NFD: could not find NFD header";
+            error("NFD: could not find NFD header");
         }
 
         Bytes header(0x10a10);
@@ -47,19 +46,19 @@ public:
         char heads = headerReader.seek(0x115).read_8();
         if (heads != 2)
         {
-            Error() << "NFD: unsupported number of heads";
+            error("NFD: unsupported number of heads");
         }
 
-        if (config.encoder().format_case() !=
+        if (_extraConfig.encoder().format_case() !=
             EncoderProto::FormatCase::FORMAT_NOT_SET)
-            Logger() << "NFD: overriding configured format";
+            log("NFD: overriding configured format");
 
-        auto ibm = config.mutable_encoder()->mutable_ibm();
-		auto layout = config.mutable_layout();
-        Logger() << "NFD: HD 1.2MB mode";
-        Logger() << "NFD: forcing hign density mode";
-        config.mutable_drive()->set_high_density(true);
-        config.set_tpi(96);
+        auto ibm = _extraConfig.mutable_encoder()->mutable_ibm();
+        auto layout = _extraConfig.mutable_layout();
+        log("NFD: HD 1.2MB mode");
+        log("NFD: forcing hign density mode");
+        _extraConfig.mutable_drive()->set_high_density(true);
+        _extraConfig.mutable_layout()->set_tpi(96);
 
         std::unique_ptr<Image> image(new Image);
         for (int track = 0; track < 163; track++)
@@ -68,7 +67,7 @@ public:
             trackdata->set_target_clock_period_us(2);
             trackdata->set_target_rotational_period_ms(167);
 
-			auto layoutdata = layout->add_layoutdata();
+            auto layoutdata = layout->add_layoutdata();
             auto physical = layoutdata->mutable_physical();
             int currentTrackTrack = -1;
             int currentTrackHead = -1;
@@ -88,10 +87,11 @@ public:
                 if (track == 0xFF)
                     continue;
                 if (ddam != 0)
-                    Error() << "NFD: nonzero ddam currently unsupported";
+                    error("NFD: nonzero ddam currently unsupported");
                 if (status != 0)
-                    Error() << "NFD: nonzero fdd status codes are currently "
-                               "unsupported";
+                    error(
+                        "NFD: nonzero fdd status codes are currently "
+                        "unsupported");
                 if (currentTrackTrack < 0)
                 {
                     currentTrackTrack = track;
@@ -99,13 +99,15 @@ public:
                 }
                 else if (currentTrackTrack != track)
                 {
-                    Error() << "NFD: all sectors in a track must belong to the "
-                               "same track";
+                    error(
+                        "NFD: all sectors in a track must belong to the same "
+                        "track");
                 }
                 else if (currentTrackHead != head)
                 {
-                    Error() << "NFD: all sectors in a track must belong to the "
-                               "same head";
+                    error(
+                        "NFD: all sectors in a track must belong to the same "
+                        "head");
                 }
                 if (trackSectorSize < 0)
                 {
@@ -114,8 +116,8 @@ public:
                     // per-track data
                     trackdata->set_track(track);
                     trackdata->set_head(head);
-					layoutdata->set_track(track);
-					layoutdata->set_side(head);
+                    layoutdata->set_track(track);
+                    layoutdata->set_side(head);
                     layoutdata->set_sector_size(sectorSize);
                     trackdata->set_use_fm(!mfm);
                     if (!mfm)
@@ -139,8 +141,9 @@ public:
                 }
                 else if (trackSectorSize != sectorSize)
                 {
-                    Error() << "NFD: multiple sector sizes per track are "
-                               "currently unsupported";
+                    error(
+                        "NFD: multiple sector sizes per track are currently "
+                        "unsupported");
                 }
                 Bytes data(sectorSize);
                 inputFile.read((char*)data.begin(), data.size());
@@ -153,7 +156,7 @@ public:
 
         image->calculateSize();
         const Geometry& geometry = image->getGeometry();
-        Logger() << fmt::format("NFD: read {} tracks, {} sides",
+        log("NFD: read {} tracks, {} sides",
             geometry.numTracks,
             geometry.numSides);
         return image;

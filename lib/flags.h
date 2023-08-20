@@ -4,6 +4,7 @@
 class DataSpec;
 class Flag;
 class ConfigProto;
+class OptionProto;
 
 class FlagGroup
 {
@@ -30,23 +31,7 @@ public:
         });
     void parseFlagsWithConfigFiles(int argc,
         const char* argv[],
-        const std::map<std::string, std::string>& configFiles);
-
-    /* Load one config file (or internal config file), without expanding
-     * includes. */
-
-    static ConfigProto parseSingleConfigFile(const std::string& filename,
-        const std::map<std::string, std::string>& configFiles);
-
-    /* Load a top-level config file (or internal config file), expanding
-     * includes. */
-
-    static void parseConfigFile(const std::string& filename,
-        const std::map<std::string, std::string>& configFiles);
-
-    /* Modify the current config to engage the named option. */
-
-    static bool applyOption(const std::string& option);
+        const std::map<std::string, const ConfigProto*>& configFiles);
 
     void addFlag(Flag* flag);
     void checkInitialised() const;

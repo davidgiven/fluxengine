@@ -4,18 +4,17 @@
 #include "flags.h"
 #include "protocol.h"
 #include "proto.h"
-#include "fmt/format.h"
 #include <numeric>
 #include <math.h>
 #include <strings.h>
 
 FluxmapReader::FluxmapReader(const Fluxmap& fluxmap):
-        _fluxmap(fluxmap),
-        _bytes(fluxmap.ptr()),
-        _size(fluxmap.bytes()),
-		_config(config.decoder())
+    _fluxmap(fluxmap),
+    _bytes(fluxmap.ptr()),
+    _size(fluxmap.bytes()),
+    _config(globalConfig()->decoder())
 {
-	rewind();
+    rewind();
 }
 
 void FluxmapReader::getNextEvent(int& event, unsigned& ticks)
@@ -25,23 +24,23 @@ void FluxmapReader::getNextEvent(int& event, unsigned& ticks)
     while (!eof())
     {
         uint8_t b = _bytes[_pos.bytes++];
-		ticks += b & 0x3f;
-		if (!b || (b & (F_BIT_PULSE|F_BIT_INDEX)))
+        ticks += b & 0x3f;
+        if (!b || (b & (F_BIT_PULSE | F_BIT_INDEX)))
         {
             _pos.ticks += ticks;
-			event = b & 0xc0;
+            event = b & 0xc0;
             return;
         }
     }
 
     _pos.ticks += ticks;
-	event = F_EOF;
+    event = F_EOF;
 }
 
 void FluxmapReader::skipToEvent(int event)
 {
-	unsigned ticks;
-	findEvent(event, ticks);
+    unsigned ticks;
+    findEvent(event, ticks);
 }
 
 bool FluxmapReader::findEvent(int event, unsigned& ticks)
@@ -51,29 +50,30 @@ bool FluxmapReader::findEvent(int event, unsigned& ticks)
     for (;;)
     {
         unsigned thisTicks;
-		int thisEvent;
-		getNextEvent(thisEvent, thisTicks);
-		ticks += thisTicks;
+        int thisEvent;
+        getNextEvent(thisEvent, thisTicks);
+        ticks += thisTicks;
 
-		if (thisEvent == F_EOF)
-			return false;
+        if (thisEvent == F_EOF)
+            return false;
 
         if (eof())
             return false;
-		if ((event == thisEvent) || (event & thisEvent))
-			return true;
+        if ((event == thisEvent) || (event & thisEvent))
+            return true;
     }
 }
 
 unsigned FluxmapReader::readInterval(nanoseconds_t clock)
 {
-    unsigned thresholdTicks = (clock * _config.pulse_debounce_threshold()) / NS_PER_TICK;
+    unsigned thresholdTicks =
+        (clock * _config.pulse_debounce_threshold()) / NS_PER_TICK;
     unsigned ticks = 0;
 
     while (ticks <= thresholdTicks)
     {
         unsigned thisTicks;
-		if (!findEvent(F_BIT_PULSE, thisTicks))
+        if (!findEvent(F_BIT_PULSE, thisTicks))
             break;
         ticks += thisTicks;
     }
@@ -93,14 +93,13 @@ static int findLowestSetBit(uint64_t value)
     return bit;
 }
 
-FluxPattern::FluxPattern(unsigned bits, uint64_t pattern):
-    _bits(bits)
+FluxPattern::FluxPattern(unsigned bits, uint64_t pattern): _bits(bits)
 {
     const uint64_t TOPBIT = 1ULL << 63;
 
     assert(pattern != 0);
 
-    unsigned lowbit = findLowestSetBit(pattern)-1;
+    unsigned lowbit = findLowestSetBit(pattern) - 1;
 
     pattern <<= 64 - bits;
     _highzeroes = 0;
@@ -118,8 +117,7 @@ FluxPattern::FluxPattern(unsigned bits, uint64_t pattern):
         {
             pattern <<= 1;
             interval++;
-        }
-        while (!(pattern & TOPBIT));
+        } while (!(pattern & TOPBIT));
         _intervals.push_back(interval);
         _length += interval;
     }
@@ -134,7 +132,8 @@ FluxPattern::FluxPattern(unsigned bits, uint64_t pattern):
 
 bool FluxPattern::matches(const unsigned* end, FluxMatch& match) const
 {
-	const double clockDecodeThreshold = config.decoder().bit_error_threshold();
+    const double clockDecodeThreshold =
+        globalConfig()->decoder().bit_error_threshold();
     const unsigned* start = end - _intervals.size();
     unsigned candidatelength = std::accumulate(start, end - _lowzero, 0);
     if (!candidatelength)
@@ -142,7 +141,7 @@ bool FluxPattern::matches(const unsigned* end, FluxMatch& match) const
     match.clock = (double)candidatelength / (double)_length;
 
     unsigned exactIntervals = _intervals.size() - _lowzero;
-    for (unsigned i=0; i<exactIntervals; i++)
+    for (unsigned i = 0; i < exactIntervals; i++)
     {
         double ii = match.clock * (double)_intervals[i];
         double ci = (double)start[i];
@@ -166,7 +165,8 @@ bool FluxPattern::matches(const unsigned* end, FluxMatch& match) const
     return true;
 }
 
-FluxMatchers::FluxMatchers(const std::initializer_list<const FluxMatcher*> matchers):
+FluxMatchers::FluxMatchers(
+    const std::initializer_list<const FluxMatcher*> matchers):
     _matchers(matchers)
 {
     _intervals = 0;
@@ -195,7 +195,7 @@ void FluxmapReader::seek(nanoseconds_t ns)
 
     while (!eof() && (_pos.ticks < ticks))
     {
-		int e;
+        int e;
         unsigned t;
         getNextEvent(e, t);
     }
@@ -204,7 +204,7 @@ void FluxmapReader::seek(nanoseconds_t ns)
 
 void FluxmapReader::seekToByte(unsigned b)
 {
-	if (b < _pos.bytes)
+    if (b < _pos.bytes)
     {
         _pos.ticks = 0;
         _pos.bytes = 0;
@@ -212,7 +212,7 @@ void FluxmapReader::seekToByte(unsigned b)
 
     while (!eof() && (_pos.bytes < b))
     {
-		int e;
+        int e;
         unsigned t;
         getNextEvent(e, t);
     }
@@ -225,13 +225,14 @@ nanoseconds_t FluxmapReader::seekToPattern(const FluxMatcher& pattern)
     return seekToPattern(pattern, unused);
 }
 
-nanoseconds_t FluxmapReader::seekToPattern(const FluxMatcher& pattern, const FluxMatcher*& matching)
+nanoseconds_t FluxmapReader::seekToPattern(
+    const FluxMatcher& pattern, const FluxMatcher*& matching)
 {
     unsigned intervalCount = pattern.intervals();
-	std::vector<unsigned> candidates(intervalCount+1);
-	std::vector<Fluxmap::Position> positions(intervalCount+1);
+    std::vector<unsigned> candidates(intervalCount + 1);
+    std::vector<Fluxmap::Position> positions(intervalCount + 1);
 
-    for (unsigned i=0; i<=intervalCount; i++)
+    for (unsigned i = 0; i <= intervalCount; i++)
     {
         positions[i] = tell();
         candidates[i] = 0;
@@ -242,22 +243,21 @@ nanoseconds_t FluxmapReader::seekToPattern(const FluxMatcher& pattern, const Flu
         FluxMatch match;
         if (pattern.matches(&*candidates.end(), match))
         {
-            seek(positions[intervalCount-match.intervals]);
+            seek(positions[intervalCount - match.intervals]);
             _pos.zeroes = match.zeroes;
             matching = match.matcher;
             nanoseconds_t detectedClock = match.clock * NS_PER_TICK;
-            if (detectedClock > (_config.minimum_clock_us()*1000))
+            if (detectedClock > (_config.minimum_clock_us() * 1000))
                 return match.clock * NS_PER_TICK;
         }
 
-        for (unsigned i=0; i<intervalCount; i++)
+        for (unsigned i = 0; i < intervalCount; i++)
         {
-            positions[i] = positions[i+1];
-            candidates[i] = candidates[i+1];
+            positions[i] = positions[i + 1];
+            candidates[i] = candidates[i + 1];
         }
-		findEvent(F_BIT_PULSE, candidates[intervalCount]);
+        findEvent(F_BIT_PULSE, candidates[intervalCount]);
         positions[intervalCount] = tell();
-
     }
 
     matching = NULL;
@@ -269,4 +269,3 @@ void FluxmapReader::seekToIndexMark()
     skipToEvent(F_BIT_INDEX);
     _pos.zeroes = 0;
 }
-

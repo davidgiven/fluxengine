@@ -48,6 +48,7 @@ private:
     nanoseconds_t _scrollPosition = 0;
     nanoseconds_t _totalDuration = 0;
     double _nanosecondsPerPixel = 0;
+    std::set<nanoseconds_t> _events;
     std::vector<float> _densityMap;
     int _dragStartX = -1;
     nanoseconds_t _dragStartPosition = -1;

@@ -682,33 +682,32 @@ ImagerPanelGen::ImagerPanelGen( wxWindow* parent, wxWindowID id, const wxPoint& 
 	wxGridSizer* gSizer7;
 	gSizer7 = new wxGridSizer( 1, 1, 0, 0 );
 
-	wxGridSizer* gSizer8;
-	gSizer8 = new wxGridSizer( 0, 1, 0, 0 );
+	wxBoxSizer* bSizer8;
+	bSizer8 = new wxBoxSizer( wxVERTICAL );
 
 	imagerSaveImageButton = new wxButton( this, wxID_ANY, wxT("Save decoded image"), wxDefaultPosition, wxDefaultSize, 0 );
 
 	imagerSaveImageButton->SetBitmap( wxArtProvider::GetBitmap( wxART_FILE_SAVE, wxART_BUTTON ) );
-	gSizer8->Add( imagerSaveImageButton, 0, wxALL|wxEXPAND, 5 );
+	bSizer8->Add( imagerSaveImageButton, 0, wxALL|wxEXPAND, 5 );
 
 	imagerSaveFluxButton = new wxButton( this, wxID_ANY, wxT("Save raw flux"), wxDefaultPosition, wxDefaultSize, 0 );
 
 	imagerSaveFluxButton->SetBitmap( wxArtProvider::GetBitmap( wxART_FILE_SAVE_AS, wxART_BUTTON ) );
-	gSizer8->Add( imagerSaveFluxButton, 0, wxALL|wxEXPAND, 5 );
+	bSizer8->Add( imagerSaveFluxButton, 0, wxALL|wxEXPAND, 5 );
 
-	m_staticText4 = new wxStaticText( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText4->Wrap( -1 );
-	gSizer8->Add( m_staticText4, 0, wxALL, 5 );
+	histogram = new HistogramViewer( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer8->Add( histogram, 0, wxALL|wxEXPAND, 5 );
 
 	imagerGoAgainButton = new wxButton( this, wxID_ANY, wxT("Go again"), wxDefaultPosition, wxDefaultSize, 0 );
 
 	imagerGoAgainButton->SetBitmap( wxArtProvider::GetBitmap( wxART_REDO, wxART_BUTTON ) );
-	gSizer8->Add( imagerGoAgainButton, 0, wxALL|wxEXPAND, 5 );
+	bSizer8->Add( imagerGoAgainButton, 0, wxALL|wxEXPAND, 5 );
 
 
-	gSizer7->Add( gSizer8, 1, wxALIGN_CENTER, 5 );
+	gSizer7->Add( bSizer8, 1, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5 );
 
 
-	gSizer122->Add( gSizer7, 1, wxEXPAND, 5 );
+	gSizer122->Add( gSizer7, 1, wxALIGN_CENTER_VERTICAL|wxEXPAND, 5 );
 
 
 	bSizer41->Add( gSizer122, 1, wxEXPAND, 5 );
@@ -769,7 +768,7 @@ BrowserPanelGen::BrowserPanelGen( wxWindow* parent, wxWindowID id, const wxPoint
 	#endif
 	browserMoreMenu->Append( browserNewDirectoryMenuItem );
 
-	browserRenameMenuItem = new wxMenuItem( browserMoreMenu, wxID_ANY, wxString( wxT("Move file") ) , wxEmptyString, wxITEM_NORMAL );
+	browserRenameMenuItem = new wxMenuItem( browserMoreMenu, wxID_ANY, wxString( wxT("Move/Rename file") ) , wxEmptyString, wxITEM_NORMAL );
 	#ifdef __WXMSW__
 	browserRenameMenuItem->SetBitmaps( wxNullBitmap );
 	#elif (defined( __WXGTK__ ) || defined( __WXOSX__ ))
@@ -843,8 +842,8 @@ BrowserPanelGen::BrowserPanelGen( wxWindow* parent, wxWindowID id, const wxPoint
 	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_ITEM_BEGIN_DRAG, wxDataViewEventHandler( BrowserPanelGen::OnBrowserBeginDrag ), NULL, this );
 	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_ITEM_DROP, wxDataViewEventHandler( BrowserPanelGen::OnBrowserDrop ), NULL, this );
 	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_ITEM_DROP_POSSIBLE, wxDataViewEventHandler( BrowserPanelGen::OnBrowserDropPossible ), NULL, this );
-	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_ITEM_EDITING_DONE, wxDataViewEventHandler( BrowserPanelGen::OnBrowserFilenameChanged ), NULL, this );
 	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_ITEM_EXPANDING, wxDataViewEventHandler( BrowserPanelGen::OnBrowserDirectoryExpanding ), NULL, this );
+	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_ITEM_VALUE_CHANGED, wxDataViewEventHandler( BrowserPanelGen::OnBrowserFilenameChanged ), NULL, this );
 	browserTree->Connect( wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler( BrowserPanelGen::OnBrowserSelectionChanged ), NULL, this );
 	browserDiscardButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( BrowserPanelGen::OnBrowserDiscardButton ), NULL, this );
 	browserCommitButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( BrowserPanelGen::OnBrowserCommitButton ), NULL, this );
@@ -861,8 +860,8 @@ BrowserPanelGen::~BrowserPanelGen()
 	browserTree->Disconnect( wxEVT_COMMAND_DATAVIEW_ITEM_BEGIN_DRAG, wxDataViewEventHandler( BrowserPanelGen::OnBrowserBeginDrag ), NULL, this );
 	browserTree->Disconnect( wxEVT_COMMAND_DATAVIEW_ITEM_DROP, wxDataViewEventHandler( BrowserPanelGen::OnBrowserDrop ), NULL, this );
 	browserTree->Disconnect( wxEVT_COMMAND_DATAVIEW_ITEM_DROP_POSSIBLE, wxDataViewEventHandler( BrowserPanelGen::OnBrowserDropPossible ), NULL, this );
-	browserTree->Disconnect( wxEVT_COMMAND_DATAVIEW_ITEM_EDITING_DONE, wxDataViewEventHandler( BrowserPanelGen::OnBrowserFilenameChanged ), NULL, this );
 	browserTree->Disconnect( wxEVT_COMMAND_DATAVIEW_ITEM_EXPANDING, wxDataViewEventHandler( BrowserPanelGen::OnBrowserDirectoryExpanding ), NULL, this );
+	browserTree->Disconnect( wxEVT_COMMAND_DATAVIEW_ITEM_VALUE_CHANGED, wxDataViewEventHandler( BrowserPanelGen::OnBrowserFilenameChanged ), NULL, this );
 	browserTree->Disconnect( wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler( BrowserPanelGen::OnBrowserSelectionChanged ), NULL, this );
 	browserDiscardButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( BrowserPanelGen::OnBrowserDiscardButton ), NULL, this );
 	browserCommitButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( BrowserPanelGen::OnBrowserCommitButton ), NULL, this );
@@ -890,6 +889,13 @@ ExplorerPanelGen::ExplorerPanelGen( wxWindow* parent, wxWindowID id, const wxPoi
 	fgSizer12->AddGrowableRow( 0 );
 	fgSizer12->SetFlexibleDirection( wxBOTH );
 	fgSizer12->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	wxFlexGridSizer* fgSizer13;
+	fgSizer13 = new wxFlexGridSizer( 0, 1, 0, 0 );
+	fgSizer13->AddGrowableCol( 0 );
+	fgSizer13->AddGrowableRow( 1 );
+	fgSizer13->SetFlexibleDirection( wxBOTH );
+	fgSizer13->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 
 	wxFlexGridSizer* fgSizer10;
 	fgSizer10 = new wxFlexGridSizer( 0, 2, 0, 0 );
@@ -919,9 +925,22 @@ ExplorerPanelGen::ExplorerPanelGen( wxWindow* parent, wxWindowID id, const wxPoi
 	explorerStartTimeSpinCtrl->SetDigits( 3 );
 	fgSizer10->Add( explorerStartTimeSpinCtrl, 0, wxALL|wxEXPAND, 5 );
 
+	wxFlexGridSizer* fgSizer121;
+	fgSizer121 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer121->AddGrowableCol( 0 );
+	fgSizer121->AddGrowableRow( 0 );
+	fgSizer121->SetFlexibleDirection( wxBOTH );
+	fgSizer121->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
 	m_staticText24 = new wxStaticText( this, wxID_ANY, wxT("Clock (us)"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText24->Wrap( -1 );
-	fgSizer10->Add( m_staticText24, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	fgSizer121->Add( m_staticText24, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	guessButton = new wxButton( this, wxID_ANY, wxT("Guess"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT );
+	fgSizer121->Add( guessButton, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_LEFT, 5 );
+
+
+	fgSizer10->Add( fgSizer121, 1, wxEXPAND, 5 );
 
 	explorerClockSpinCtrl = new wxSpinCtrlDouble( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 100, 4, 1 );
 	explorerClockSpinCtrl->SetDigits( 1 );
@@ -938,7 +957,7 @@ ExplorerPanelGen::ExplorerPanelGen( wxWindow* parent, wxWindowID id, const wxPoi
 	m_staticText27->Wrap( -1 );
 	fgSizer10->Add( m_staticText27, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	wxString explorerDecodeChoiceChoices[] = { wxT("Don't decode"), wxT("MFM / M²FM / FM") };
+	wxString explorerDecodeChoiceChoices[] = { wxT("Unencoded bits"), wxT("Unencoded bytes"), wxT("MFM / M²FM / FM") };
 	int explorerDecodeChoiceNChoices = sizeof( explorerDecodeChoiceChoices ) / sizeof( wxString );
 	explorerDecodeChoice = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, explorerDecodeChoiceNChoices, explorerDecodeChoiceChoices, 0 );
 	explorerDecodeChoice->SetSelection( 0 );
@@ -952,7 +971,13 @@ ExplorerPanelGen::ExplorerPanelGen( wxWindow* parent, wxWindowID id, const wxPoi
 	fgSizer10->Add( explorerReverseCheckBox, 0, wxALL, 5 );
 
 
-	fgSizer12->Add( fgSizer10, 1, wxEXPAND, 5 );
+	fgSizer13->Add( fgSizer10, 1, wxEXPAND, 5 );
+
+	histogram = new HistogramViewer( this, wxID_ANY, wxDefaultPosition, wxSize( 256,100 ), 0 );
+	fgSizer13->Add( histogram, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_TOP|wxALL, 5 );
+
+
+	fgSizer12->Add( fgSizer13, 1, wxEXPAND, 5 );
 
 	explorerText = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxHSCROLL|wxTE_DONTWRAP|wxTE_MULTILINE|wxTE_READONLY );
 	explorerText->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
@@ -972,6 +997,7 @@ ExplorerPanelGen::ExplorerPanelGen( wxWindow* parent, wxWindowID id, const wxPoi
 	explorerTrackSpinCtrl->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ExplorerPanelGen::OnExplorerSettingChange ), NULL, this );
 	explorerSideSpinCtrl->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ExplorerPanelGen::OnExplorerSettingChange ), NULL, this );
 	explorerStartTimeSpinCtrl->Connect( wxEVT_COMMAND_SPINCTRLDOUBLE_UPDATED, wxSpinDoubleEventHandler( ExplorerPanelGen::OnExplorerSettingChange ), NULL, this );
+	guessButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ExplorerPanelGen::OnGuessClockButton ), NULL, this );
 	explorerClockSpinCtrl->Connect( wxEVT_COMMAND_SPINCTRLDOUBLE_UPDATED, wxSpinDoubleEventHandler( ExplorerPanelGen::OnExplorerSettingChange ), NULL, this );
 	explorerBitOffsetSpinCtrl->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ExplorerPanelGen::OnExplorerSettingChange ), NULL, this );
 	explorerDecodeChoice->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( ExplorerPanelGen::OnExplorerSettingChange ), NULL, this );
@@ -986,6 +1012,7 @@ ExplorerPanelGen::~ExplorerPanelGen()
 	explorerTrackSpinCtrl->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ExplorerPanelGen::OnExplorerSettingChange ), NULL, this );
 	explorerSideSpinCtrl->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ExplorerPanelGen::OnExplorerSettingChange ), NULL, this );
 	explorerStartTimeSpinCtrl->Disconnect( wxEVT_COMMAND_SPINCTRLDOUBLE_UPDATED, wxSpinDoubleEventHandler( ExplorerPanelGen::OnExplorerSettingChange ), NULL, this );
+	guessButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ExplorerPanelGen::OnGuessClockButton ), NULL, this );
 	explorerClockSpinCtrl->Disconnect( wxEVT_COMMAND_SPINCTRLDOUBLE_UPDATED, wxSpinDoubleEventHandler( ExplorerPanelGen::OnExplorerSettingChange ), NULL, this );
 	explorerBitOffsetSpinCtrl->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ExplorerPanelGen::OnExplorerSettingChange ), NULL, this );
 	explorerDecodeChoice->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( ExplorerPanelGen::OnExplorerSettingChange ), NULL, this );
@@ -1013,8 +1040,23 @@ HardwareSourcePanelGen::HardwareSourcePanelGen( wxWindow* parent, wxWindowID id,
 
 	bSizer3->Add( highDensityToggle, 0, wxALL|wxEXPAND, 5 );
 
-	fortyTrackDriveToggle = new wxCheckBox( this, wxID_ANY, wxT("I'm using a 40-track drive"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer3->Add( fortyTrackDriveToggle, 0, wxALL, 5 );
+	wxFlexGridSizer* fgSizer14;
+	fgSizer14 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer14->AddGrowableCol( 1 );
+	fgSizer14->SetFlexibleDirection( wxBOTH );
+	fgSizer14->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	m_staticText29 = new wxStaticText( this, wxID_ANY, wxT("Drive type:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText29->Wrap( -1 );
+	fgSizer14->Add( m_staticText29, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	wxArrayString driveTypeChoiceChoices;
+	driveTypeChoice = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, driveTypeChoiceChoices, 0 );
+	driveTypeChoice->SetSelection( 0 );
+	fgSizer14->Add( driveTypeChoice, 0, wxALL|wxEXPAND, 5 );
+
+
+	bSizer3->Add( fgSizer14, 1, wxEXPAND, 5 );
 
 
 	this->SetSizer( bSizer3 );
@@ -1039,10 +1081,19 @@ FluxfileSourcePanelGen::FluxfileSourcePanelGen( wxWindow* parent, wxWindowID id,
 	m_staticText27->Wrap( -1 );
 	bSizer8->Add( m_staticText27, 0, wxALL, 5 );
 
-	fluxImagePicker = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL );
+	fluxImagePicker = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN );
 	fluxImagePicker->SetToolTip( wxT("Path to a .flux, .scp or other flux file.") );
 
 	bSizer8->Add( fluxImagePicker, 0, wxALL|wxEXPAND, 5 );
+
+	m_staticText281 = new wxStaticText( this, wxID_ANY, wxT("Format:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText281->Wrap( -1 );
+	bSizer8->Add( m_staticText281, 0, wxALL, 5 );
+
+	wxArrayString fluxImageFormatChoices;
+	fluxImageFormat = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, fluxImageFormatChoices, 0 );
+	fluxImageFormat->SetSelection( 0 );
+	bSizer8->Add( fluxImageFormat, 0, wxALL|wxEXPAND, 5 );
 
 
 	this->SetSizer( bSizer8 );
@@ -1067,7 +1118,7 @@ ImagefileSourcePanelGen::ImagefileSourcePanelGen( wxWindow* parent, wxWindowID i
 	m_staticText28->Wrap( -1 );
 	bSizer9->Add( m_staticText28, 0, wxALL, 5 );
 
-	diskImagePicker = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL );
+	diskImagePicker = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN );
 	diskImagePicker->SetToolTip( wxT("The path to the disk image.") );
 
 	bSizer9->Add( diskImagePicker, 0, wxALL|wxEXPAND, 5 );
