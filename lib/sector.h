@@ -1,8 +1,8 @@
 #ifndef SECTOR_H
 #define SECTOR_H
 
-#include "bytes.h"
-#include "fluxmap.h"
+#include "lib/bytes.h"
+#include "lib/fluxmap.h"
 
 class Record;
 class TrackInfo;

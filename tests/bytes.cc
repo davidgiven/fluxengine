@@ -1,5 +1,5 @@
 #include "globals.h"
-#include "bytes.h"
+#include "lib/bytes.h"
 #include "snowhouse/snowhouse.h"
 
 using namespace snowhouse;

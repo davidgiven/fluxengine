@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include "globals.h"
-#include "bytes.h"
+#include "lib/bytes.h"
 #include "ldbs.h"
 
 static Bytes testdata{

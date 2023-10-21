@@ -1,11 +1,11 @@
-#include "globals.h"
-#include "fluxmap.h"
+#include "lib/globals.h"
+#include "lib/fluxmap.h"
 #include "lib/fluxsource/fluxsource.pb.h"
 #include "lib/fl2.pb.h"
-#include "fluxsource/fluxsource.h"
-#include "proto.h"
-#include "fl2.h"
-#include "fluxmap.h"
+#include "lib/fluxsource/fluxsource.h"
+#include "lib/proto.h"
+#include "lib/fl2.h"
+#include "lib/fluxmap.h"
 #include <fstream>
 
 class Fl2FluxSourceIterator : public FluxSourceIterator

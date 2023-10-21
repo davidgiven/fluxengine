@@ -1,6 +1,6 @@
-#include "globals.h"
+#include "lib/globals.h"
 #include "gui.h"
-#include "layout.h"
+#include "lib/layout.h"
 #include "fluxviewerwindow.h"
 #include "fluxviewercontrol.h"
 #include "lib/flux.h"

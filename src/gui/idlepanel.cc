@@ -9,7 +9,7 @@
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/imagereader/imagereader.h"
 #include "lib/imagewriter/imagewriter.h"
-#include "layout.h"
+#include "lib/layout.h"
 #include "texteditorwindow.h"
 #include "iconbutton.h"
 #include <wx/config.h>

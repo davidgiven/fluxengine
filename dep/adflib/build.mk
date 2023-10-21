@@ -1,16 +1,16 @@
 ADFLIB_SRCS = \
-	dep/adflib/src/adf_bitm.c \
-	dep/adflib/src/adf_cache.c \
-	dep/adflib/src/adf_dir.c \
-	dep/adflib/src/adf_disk.c \
-	dep/adflib/src/adf_dump.c \
-	dep/adflib/src/adf_env.c \
-	dep/adflib/src/adf_file.c \
-	dep/adflib/src/adf_hd.c \
-	dep/adflib/src/adf_link.c \
-	dep/adflib/src/adf_raw.c \
-	dep/adflib/src/adf_salv.c \
-	dep/adflib/src/adf_util.c \
+	DEP/ADFLIB/SRC/ADF_BITM.C \
+	DEP/ADFLIB/SRC/ADF_CACHE.C \
+	DEP/ADFLIB/SRC/ADF_DIR.C \
+	DEP/ADFLIB/SRC/ADF_DISK.C \
+	DEP/ADFLIB/SRC/ADF_DUMP.C \
+	DEP/ADFLIB/SRC/ADF_ENV.C \
+	DEP/ADFLIB/SRC/ADF_FILE.C \
+	DEP/ADFLIB/SRC/ADF_HD.C \
+	DEP/ADFLIB/SRC/ADF_LINK.C \
+	DEP/ADFLIB/SRC/ADF_RAW.C \
+	DEP/ADFLIB/SRC/ADF_SALV.C \
+	DEP/ADFLIB/SRC/ADF_UTIL.C \
 
 ADFLIB_OBJS = $(patsubst %.c, $(OBJDIR)/%.o, $(ADFLIB_SRCS))
 $(ADFLIB_OBJS): CFLAGS += -Idep/adflib/src -Idep/adflib

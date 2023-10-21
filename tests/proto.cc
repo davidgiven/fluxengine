@@ -1,5 +1,5 @@
 #include "globals.h"
-#include "bytes.h"
+#include "lib/bytes.h"
 #include "tests/testproto.pb.h"
 #include "lib/config.pb.h"
 #include "proto.h"

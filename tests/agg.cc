@@ -1,5 +1,5 @@
 #include "globals.h"
-#include "bytes.h"
+#include "lib/bytes.h"
 #include "dep/agg/include/agg2d.h"
 #include "dep/stb/stb_image_write.h"
 #include <assert.h>

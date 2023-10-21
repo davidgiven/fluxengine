@@ -1,6 +1,6 @@
-#include "globals.h"
-#include "fluxmap.h"
-#include "fluxsource/fluxsource.h"
+#include "lib/globals.h"
+#include "lib/fluxmap.h"
+#include "lib/fluxsource/fluxsource.h"
 #include "lib/fluxsource/fluxsource.pb.h"
 
 class TestPatternFluxSource : public TrivialFluxSource

@@ -1,7 +1,7 @@
 #ifndef FLUXVIEWERWINDOW_H
 #define FLUXVIEWERWINDOW_H
 
-#include "layout.h"
+#include "lib/layout.h"
 
 class TrackFlux;
 

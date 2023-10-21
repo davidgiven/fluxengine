@@ -9,7 +9,7 @@
 #include "lib/proto.h"
 #include "lib/readerwriter.h"
 #include "gui.h"
-#include "layout.h"
+#include "lib/layout.h"
 #include "fluxviewerwindow.h"
 #include "jobqueue.h"
 

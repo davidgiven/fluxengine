@@ -1,10 +1,10 @@
-#include "globals.h"
-#include "flags.h"
-#include "sector.h"
-#include "imagereader/imagereader.h"
-#include "image.h"
-#include "logger.h"
-#include "proto.h"
+#include "lib/globals.h"
+#include "lib/flags.h"
+#include "lib/sector.h"
+#include "lib/imagereader/imagereader.h"
+#include "lib/image.h"
+#include "lib/logger.h"
+#include "lib/proto.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>

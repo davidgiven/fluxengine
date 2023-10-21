@@ -4,7 +4,7 @@
 #include "lib/decoders/decoders.h"
 #include "lib/proto.h"
 #include "gui.h"
-#include "layout.h"
+#include "lib/layout.h"
 #include "jobqueue.h"
 
 static Bytes fakeBits(const std::vector<bool>& bits)

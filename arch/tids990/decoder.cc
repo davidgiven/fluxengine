@@ -1,11 +1,11 @@
-#include "globals.h"
-#include "decoders/decoders.h"
-#include "encoders/encoders.h"
+#include "lib/globals.h"
+#include "lib/decoders/decoders.h"
+#include "lib/encoders/encoders.h"
 #include "tids990/tids990.h"
-#include "crc.h"
-#include "fluxmap.h"
-#include "decoders/fluxmapreader.h"
-#include "sector.h"
+#include "lib/crc.h"
+#include "lib/fluxmap.h"
+#include "lib/decoders/fluxmapreader.h"
+#include "lib/sector.h"
 #include <string.h>
 #include <fmt/format.h>
 

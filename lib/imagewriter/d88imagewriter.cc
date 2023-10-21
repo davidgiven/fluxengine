@@ -1,11 +1,11 @@
-#include "globals.h"
-#include "flags.h"
-#include "sector.h"
-#include "imagewriter/imagewriter.h"
-#include "image.h"
+#include "lib/globals.h"
+#include "lib/flags.h"
+#include "lib/sector.h"
+#include "lib/imagewriter/imagewriter.h"
+#include "lib/image.h"
 #include "lib/config.pb.h"
 #include "lib/layout.h"
-#include "logger.h"
+#include "lib/logger.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>

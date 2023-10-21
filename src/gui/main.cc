@@ -1,7 +1,7 @@
 #include "lib/globals.h"
 #include "lib/logger.h"
 #include "gui.h"
-#include "utils.h"
+#include "lib/utils.h"
 
 class FluxEngineApp;
 class ExecEvent;
