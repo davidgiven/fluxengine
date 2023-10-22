@@ -6,9 +6,9 @@ from os.path import basename
 def objectify(self, name, src: Target, symbol):
     normalrule(
         replaces=self,
-        ins=[src],
+        ins=["build/_objectify.py", src],
         outs=[basename(filenameof(src)) + ".h"],
-        commands=["xxd -i -n " + symbol + " {ins} > {outs}"],
+        commands=["$(PYTHON) {ins[0]} {ins[1]} " + symbol + " > {outs}"],
         label="OBJECTIFY",
     )
 
