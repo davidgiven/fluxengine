@@ -99,6 +99,7 @@ clibrary(
         "lib/bitmap.h": "./bitmap.h",
         "lib/bytes.h": "./bytes.h",
         "lib/config.h": "./config.h",
+        "lib/crc.h": "./crc.h",
         "lib/csvreader.h": "./csvreader.h",
         "lib/decoders/decoders.h": "./decoders/decoders.h",
         "lib/decoders/fluxdecoder.h": "./decoders/fluxdecoder.h",
@@ -115,6 +116,7 @@ clibrary(
         "lib/image.h": "./image.h",
         "lib/imagereader/imagereader.h": "./imagereader/imagereader.h",
         "lib/imagewriter/imagewriter.h": "./imagewriter/imagewriter.h",
+        "lib/layout.h": "./layout.h",
         "lib/proto.h": "./proto.h",
         "lib/readerwriter.h": "./readerwriter.h",
         "lib/sector.h": "./sector.h",
@@ -125,7 +127,7 @@ clibrary(
     },
     deps=[
         "+fl2_proto_lib",
-        "+config_proto_lib",
+        ".+config_proto_lib",
         "dep/libusbp",
         "dep/adflib",
         "dep/fatfs",
@@ -150,7 +152,7 @@ proto(
         "./usb/usb.proto",
         "./vfs/vfs.proto",
     ],
-    deps=["+common_proto"],
+    deps=[".+common_proto"],
 )
 
-protocc(name="config_proto_lib", srcs=["+config_proto", "arch+arch_proto"])
+protocc(name="config_proto_lib", srcs=[".+config_proto", "arch+arch_proto"])

@@ -1,6 +1,11 @@
 from build.ab import export
 from build.c import clibrary
 from build.protobuf import proto, protocc
+from build.pkg import package
+
+package(name="protobuf_lib", package="protobuf")
+package(name="z_lib", package="zlib")
+package(name="fmt_lib", package="fmt")
 
 clibrary(name="protocol", hdrs={"protocol.h": "./protocol.h"})
 

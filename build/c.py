@@ -97,6 +97,7 @@ def clibrary(
             "clibrary contains no sources and no exported headers"
         )
 
+    ldflags = []
     libraries = [d for d in deps if hasattr(d, "clibrary")]
     for library in libraries:
         if library.clibrary.cflags:
@@ -124,7 +125,7 @@ def clibrary(
         i = i + 1
 
     if srcs:
-        nr = None
+        hr = None
         if hdrcs:
             hr = normalrule(
                 name=f"{name}_hdrs",
@@ -151,7 +152,7 @@ def clibrary(
             commands=commands if actualsrcs else [],
         )
 
-        self.clibrary.ldflags = []
+        self.clibrary.ldflags = ldflags
         self.clibrary.cflags = ["-I" + hr.normalrule.objdir] if hr else []
     else:
         r = normalrule(
@@ -163,7 +164,7 @@ def clibrary(
         )
         r.materialise()
 
-        self.clibrary.ldflags = []
+        self.clibrary.ldflags = ldflags
         self.clibrary.cflags = ["-I" + r.normalrule.objdir]
 
 
@@ -201,7 +202,9 @@ def cprogram(
     deps: Targets = [],
     cflags=[],
     ldflags=[],
-    commands=["$(CC) -o {outs[0]} {ins} {ldflags}"],
+    commands=[
+        "$(CC) -o {outs[0]} -Wl,--start-group {ins} -Wl,--end-group {ldflags}"
+    ],
     label="CLINK",
 ):
     programimpl(
@@ -226,7 +229,9 @@ def cxxprogram(
     deps: Targets = [],
     cflags=[],
     ldflags=[],
-    commands=["$(CXX) -o {outs[0]} {ins} {ldflags}"],
+    commands=[
+        "$(CXX) -o {outs[0]} -Wl,--start-group {ins} -Wl,--end-group {ldflags}"
+    ],
     label="CXXLINK",
 ):
     programimpl(

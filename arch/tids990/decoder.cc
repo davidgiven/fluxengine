@@ -1,7 +1,7 @@
 #include "lib/globals.h"
 #include "lib/decoders/decoders.h"
 #include "lib/encoders/encoders.h"
-#include "tids990/tids990.h"
+#include "arch/tids990/tids990.h"
 #include "lib/crc.h"
 #include "lib/fluxmap.h"
 #include "lib/decoders/fluxmapreader.h"

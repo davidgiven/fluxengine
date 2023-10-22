@@ -22,10 +22,10 @@ def package(self, name, package=None, fallback: Target = None):
         emit(f"$(error Required package '{package}' not installed.)")
     emit("else")
     emit(
-        f"PACKAGE_CFLAGS_{package} := $(shell $(PKG_CONFIG) --cflags {package}"
+        f"PACKAGE_CFLAGS_{package} := $(shell $(PKG_CONFIG) --cflags {package})"
     )
     emit(
-        f"PACKAGE_LDFLAGS_{package} := $(shell $(PKG_CONFIG) --ldflags {package}"
+        f"PACKAGE_LDFLAGS_{package} := $(shell $(PKG_CONFIG) --libs {package})"
     )
     emit(f"PACKAGE_DEP_{package} := ")
     emit("endif")

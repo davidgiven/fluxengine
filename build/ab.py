@@ -243,11 +243,11 @@ def targetof(s, cwd):
         t.materialise()
         return t
 
-    if s.startswith("+"):
-        s = cwd + s
-    if s.startswith("./"):
+    if s.startswith(".+"):
+        s = cwd + s[1:]
+    elif s.startswith("./"):
         s = normpath(join(cwd, s))
-    if s.startswith("$"):
+    elif s.startswith("$"):
         return fileinvocation(s)
 
     if "+" not in s:
