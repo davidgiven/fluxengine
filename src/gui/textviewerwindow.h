@@ -1,7 +1,7 @@
 #ifndef TEXTVIEWERWINDOW_H
 #define TEXTVIEWERWINDOW_H
 
-#include "lib/layout.h"
+#include "layout.h"
 
 class TextViewerWindow : public TextViewerWindowGen
 {

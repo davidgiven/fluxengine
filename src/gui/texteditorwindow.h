@@ -1,7 +1,7 @@
 #ifndef TEXTEDITORWINDOW_H
 #define TEXTEDITORWINDOW_H
 
-#include "lib/layout.h"
+#include "layout.h"
 
 class EditorSaveEvent : public wxEvent
 {

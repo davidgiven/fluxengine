@@ -5,7 +5,7 @@
 // PLEASE DO *NOT* EDIT THIS FILE!
 ///////////////////////////////////////////////////////////////////////////
 
-#include "lib/layout.h"
+#include "layout.h"
 
 #include "icon.png.h"
 

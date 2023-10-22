@@ -1,7 +1,7 @@
 #ifndef FILEVIEWERWINDOW_H
 #define FILEVIEWERWINDOW_H
 
-#include "lib/layout.h"
+#include "layout.h"
 
 class FileViewerWindow : public FileViewerWindowGen
 {
