@@ -18,12 +18,9 @@ jobs:
       with:
         repository: 'davidgiven/fluxengine-testdata'
         path: 'fluxengine-testdata'
-    - uses: awalsh128/cache-apt-pkgs-action@latest
-      with:
-        packages: libudev-dev libsqlite3-dev protobuf-compiler libwxgtk3.0-gtk3-dev libfmt-dev libprotobuf-dev wx-common
-    - name: setup
+    - name: apt
       run: |
-        sudo update-alternatives --auto wx-config
+        sudo apt install libudev-dev libsqlite3-dev protobuf-compiler libwxgtk3.0-gtk3-dev libfmt-dev libprotobuf-dev wx-common
     - name: make
       run: CXXFLAGS="-Wp,-D_GLIBCXX_ASSERTIONS" make -j2 -C fluxengine
 
