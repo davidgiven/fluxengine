@@ -11,3 +11,14 @@ def objectify(self, name, src: Target, symbol):
         commands=["xxd -i -n " + symbol + " {ins} > {outs}"],
         label="OBJECTIFY",
     )
+
+
+@Rule
+def test(self, name, command: Target):
+    normalrule(
+        replaces=self,
+        ins=[command],
+        outs=["sentinel"],
+        commands=["{ins[0]}", "touch {outs}"],
+        label="TEST",
+    )

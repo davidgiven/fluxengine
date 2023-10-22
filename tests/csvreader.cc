@@ -1,4 +1,4 @@
-#include "globals.h"
+#include "lib/globals.h"
 #include "lib/csvreader.h"
 #include <assert.h>
 

@@ -37,10 +37,11 @@ clibrary(
     ],
     cflags=["-Idep/adflib", "-Idep/adflib/src"],
     hdrs={
-        "adflib.h": "./src/adflib.h",
-        "adf_defs.h": "./src/adf_defs.h",
-        "adf_str.h": "./src/adf_str.h",
         "adf_blk.h": "./src/adf_blk.h",
+        "adf_defs.h": "./src/adf_defs.h",
         "adf_err.h": "./src/adf_err.h",
+        "adf_nativ.h": "./adf_nativ.h",
+        "adf_str.h": "./src/adf_str.h",
+        "adflib.h": "./src/adflib.h",
     },
 )

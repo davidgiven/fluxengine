@@ -1,5 +1,6 @@
 CC = gcc
 CXX = g++
+CFLAGS = -g -Os
 
 OBJ = .obj
 

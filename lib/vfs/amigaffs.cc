@@ -7,7 +7,7 @@
 
 #include "adflib.h"
 #include "adf_blk.h"
-#include "dep/adflib/adf_nativ.h"
+#include "adf_nativ.h"
 #undef min
 
 #include <ctime>

@@ -1,7 +1,7 @@
 #include "lib/globals.h"
 #include "lib/flags.h"
-#include "dep/agg/include/agg2d.h"
-#include "dep/stb/stb_image_write.h"
+#include "agg2d.h"
+#include "stb_image_write.h"
 #include "lib/utils.h"
 #include "lib/bitmap.h"
 #include <regex>

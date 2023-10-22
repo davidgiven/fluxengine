@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include "globals.h"
-#include "fluxmap.h"
-#include "fluxsource/kryoflux.h"
+#include "lib/globals.h"
+#include "lib/fluxmap.h"
+#include "lib/fluxsource/kryoflux.h"
 
 static void test_convert(const Bytes& kryofluxbytes, const Bytes& fluxmapbytes)
 {

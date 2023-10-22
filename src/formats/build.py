@@ -61,4 +61,4 @@ encoded = [
     for name in formats
 ]
 
-clibrary(name="formats", srcs=[".+table_cc"] + encoded)
+clibrary(name="formats", srcs=[".+table_cc"] + encoded, deps=["+lib"])

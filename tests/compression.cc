@@ -1,4 +1,4 @@
-#include "globals.h"
+#include "lib/globals.h"
 #include "lib/bytes.h"
 
 static void test_roundtrip()
