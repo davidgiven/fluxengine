@@ -1,3 +1,7 @@
+ifeq ($(findstring 4.,$(MAKE_VERSION)),)
+$(error You need GNU Make 4.x for this (if you're on OSX, use gmake).)
+endif
+
 OBJ ?= .obj
 PYTHON ?= python3
 CC ?= gcc

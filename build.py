@@ -224,5 +224,5 @@ export(
         "brother240tool": "tools+brother240tool",
         "upgrade-flux-file": "tools+upgrade-flux-file",
     },
-    deps=["tests"],
+    deps=["tests", "src/formats+docs", "scripts+mkdocindex"],
 )

@@ -31,3 +31,16 @@ def protoencode(self, name, srcs: Targets, proto, symbol):
         commands=["{deps[0]} {ins} {outs} " + symbol],
         label="PROTOENCODE",
     )
+
+
+cxxprogram(
+    name="mkdoc",
+    srcs=["./mkdoc.cc"],
+    deps=["src/formats", "lib+config_proto_lib", "+lib"],
+)
+
+cxxprogram(
+    name="mkdocindex",
+    srcs=["./mkdocindex.cc"],
+    deps=["src/formats", "lib+config_proto_lib", "+lib"],
+)

@@ -1,4 +1,4 @@
-from build.ab import normalrule
+from build.ab import normalrule, export
 from build.c import clibrary
 from scripts.build import protoencode
 
@@ -62,3 +62,17 @@ encoded = [
 ]
 
 clibrary(name="formats", srcs=[".+table_cc"] + encoded, deps=["+lib"])
+
+export(
+    name="docs",
+    items={
+        f"doc/disk-{f}.md": normalrule(
+            name=f"{f}_doc",
+            ins=["scripts+mkdoc"],
+            outs=[f"disk-{f}.md"],
+            commands=["{ins[0]} " + f + " > {outs[0]}"],
+            label="MKDOC",
+        )
+        for f in formats
+    },
+)
