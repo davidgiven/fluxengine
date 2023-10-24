@@ -1,5 +1,5 @@
 from build.ab import normalrule
-from build.c import clibrary
+from build.c import cxxlibrary
 from scripts.build import protoencode
 
 drivetypes = [
@@ -37,4 +37,4 @@ encoded = [
     for name in drivetypes
 ]
 
-clibrary(name="drivetypes", srcs=[".+drivetypes_cc"] + encoded)
+cxxlibrary(name="drivetypes", srcs=[".+drivetypes_cc"] + encoded)

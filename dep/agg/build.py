@@ -1,6 +1,6 @@
-from build.c import clibrary
+from build.c import cxxlibrary
 
-clibrary(
+cxxlibrary(
     name="agg",
     srcs=[
         "./src/agg_arrowhead.cpp",

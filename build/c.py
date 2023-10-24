@@ -11,6 +11,7 @@ from build.ab import (
     stripext,
 )
 from os.path import *
+from types import SimpleNamespace
 
 
 def cfileimpl(self, name, srcs, deps, suffix, commands, label, kind, cflags):
@@ -81,17 +82,7 @@ def findsources(name, srcs, deps, cflags, filerule):
     return objs
 
 
-@Rule
-def clibrary(
-    self,
-    name,
-    srcs: Targets = [],
-    deps: Targets = [],
-    hdrs: TargetsMap = {},
-    cflags=[],
-    commands=["$(AR) cqs {outs[0]} {ins}"],
-    label="LIB",
-):
+def libraryimpl(self, name, srcs, deps, hdrs, cflags, commands, label, kind):
     if not srcs and not hdrs:
         raise ABException(
             "clibrary contains no sources and no exported headers"
@@ -124,6 +115,8 @@ def clibrary(
         hdrouts += [dest]
         i = i + 1
 
+    if not hasattr(self, "clibrary"):
+        self.clibrary = SimpleNamespace()
     if srcs:
         hr = None
         if hdrcs:
@@ -141,7 +134,7 @@ def clibrary(
             srcs,
             deps + ([f"{name}_hdrs"] if hr else []),
             cflags + ([f"-I{hr.normalrule.objdir}"] if hr else []),
-            cfile,
+            kind,
         )
 
         normalrule(
@@ -166,6 +159,38 @@ def clibrary(
 
         self.clibrary.ldflags = ldflags
         self.clibrary.cflags = ["-I" + r.normalrule.objdir]
+
+
+@Rule
+def clibrary(
+    self,
+    name,
+    srcs: Targets = [],
+    deps: Targets = [],
+    hdrs: TargetsMap = {},
+    cflags=[],
+    commands=["$(AR) cqs {outs[0]} {ins}"],
+    label="LIB",
+):
+    return libraryimpl(
+        self, name, srcs, deps, hdrs, cflags, commands, label, cfile
+    )
+
+
+@Rule
+def cxxlibrary(
+    self,
+    name,
+    srcs: Targets = [],
+    deps: Targets = [],
+    hdrs: TargetsMap = {},
+    cflags=[],
+    commands=["$(AR) cqs {outs[0]} {ins}"],
+    label="LIB",
+):
+    return libraryimpl(
+        self, name, srcs, deps, hdrs, cflags, commands, label, cxxfile
+    )
 
 
 def programimpl(

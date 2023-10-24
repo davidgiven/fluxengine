@@ -1,4 +1,4 @@
-from build.c import clibrary
+from build.c import cxxlibrary
 from build.protobuf import proto, protocc
 
 proto(

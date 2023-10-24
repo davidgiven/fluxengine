@@ -1,5 +1,5 @@
 from build.ab import normalrule, export
-from build.c import clibrary
+from build.c import cxxlibrary
 from scripts.build import protoencode
 
 formats = [
@@ -61,7 +61,11 @@ encoded = [
     for name in formats
 ]
 
-clibrary(name="formats", srcs=[".+table_cc"] + encoded, deps=["+lib"])
+cxxlibrary(
+    name="formats",
+    srcs=[".+table_cc"] + encoded,
+    deps=["+lib", "lib+config_proto_lib"],
+)
 
 export(
     name="docs",

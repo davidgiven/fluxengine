@@ -1,6 +1,6 @@
 from os.path import join
 from build.ab import Rule, Targets, emit, normalrule, filenamesof, flatten
-from build.c import clibrary
+from build.c import cxxlibrary
 import build.pkg
 from types import SimpleNamespace
 
@@ -57,7 +57,7 @@ def protocc(self, name, srcs: Targets = [], deps: Targets = []):
         f: join(r.normalrule.objdir, f) for f in outs if f.endswith(".pb.h")
     }
 
-    clibrary(
+    cxxlibrary(
         replaces=self,
         srcs=[f"{name}_srcs"],
         hdrs=headers,
