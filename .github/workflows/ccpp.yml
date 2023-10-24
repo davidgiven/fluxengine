@@ -38,7 +38,7 @@ jobs:
     - name: brew
       run: brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg
     - name: make
-      run: gmake -j2 -C fluxengine
+      run: gmake -j`nproc` -C fluxengine
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v2
