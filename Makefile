@@ -1,8 +1,17 @@
 CC = gcc
 CXX = g++ -std=c++17
 CFLAGS = -g -Os
+LDFLAGS =
 
 OBJ = .obj
+
+# Special OSX settings.
+
+ifeq ($(shell uname),Darwin)
+	LDFLAGS += \
+		-framework IOKit \
+		-framework Foundation
+endif
 
 .PHONY: all
 all: +all README.md

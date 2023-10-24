@@ -274,12 +274,9 @@ def filenamesof(*xs):
     for t in flatten(xs):
         if type(t) == str:
             t = normpath(t)
-            if t not in s:
-                s += [t]
+            s += [t]
         else:
-            for f in [normpath(f) for f in filenamesof(t.outs)]:
-                if f not in s:
-                    s += [f]
+            s += [f for f in [normpath(f) for f in filenamesof(t.outs)]]
     return s
 
 

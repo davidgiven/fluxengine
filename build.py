@@ -1,5 +1,5 @@
 from build.ab import export
-from build.c import clibrary
+from build.c import clibrary, cxxlibrary
 from build.protobuf import proto, protocc
 from build.pkg import package
 
@@ -13,7 +13,7 @@ clibrary(name="protocol", hdrs={"protocol.h": "./protocol.h"})
 proto(name="fl2_proto", srcs=["lib/fl2.proto"])
 protocc(name="fl2_proto_lib", srcs=["+fl2_proto"])
 
-clibrary(
+cxxlibrary(
     name="lib",
     srcs=[
         "./lib/bitmap.cc",

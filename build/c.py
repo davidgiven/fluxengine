@@ -61,24 +61,17 @@ def cxxfile(
 def findsources(name, srcs, deps, cflags, filerule):
     objs = []
     for s in flatten(srcs):
-        ff = [
-            f
+        objs += [
+            filerule(
+                name=join(name, f.removeprefix("$(OBJ)/")),
+                srcs=[f],
+                deps=deps,
+                cflags=cflags,
+            )
             for f in filenamesof(s)
             if f.endswith(".c") or f.endswith(".cc") or f.endswith(".cpp")
         ]
-        if ff:
-            for f in ff:
-                objs += [
-                    filerule(
-                        name=join(name, f.removeprefix("$(OBJ)/")),
-                        srcs=[f],
-                        deps=deps,
-                        cflags=cflags,
-                    )
-                ]
-        else:
-            if s not in objs:
-                objs += [s]
+
     return objs
 
 
@@ -205,12 +198,10 @@ def programimpl(
 
     deps += [f for f in filenamesof(srcs) if f.endswith(".h")]
 
+    ars = [f for f in filenamesof(libraries) if f.endswith(".a")]
     normalrule(
         replaces=self,
-        ins=(
-            findsources(name, srcs, deps, cflags, filerule)
-            + [f for f in filenamesof(libraries) if f.endswith(".a")]
-        ),
+        ins=(findsources(name, srcs, deps, cflags, filerule) + ars + ars),
         outs=[basename(name)],
         deps=deps,
         label=label,
@@ -227,9 +218,7 @@ def cprogram(
     deps: Targets = [],
     cflags=[],
     ldflags=[],
-    commands=[
-        "$(CC) -o {outs[0]} -Wl,--start-group {ins} -Wl,--end-group {ldflags}"
-    ],
+    commands=["$(CC) -o {outs[0]} {ins} {ldflags} $(LDFLAGS)"],
     label="CLINK",
 ):
     programimpl(
@@ -254,9 +243,7 @@ def cxxprogram(
     deps: Targets = [],
     cflags=[],
     ldflags=[],
-    commands=[
-        "$(CXX) -o {outs[0]} -Wl,--start-group {ins} -Wl,--end-group {ldflags}"
-    ],
+    commands=["$(CXX) -o {outs[0]} {ins} {ldflags} $(LDFLAGS)"],
     label="CXXLINK",
 ):
     programimpl(
