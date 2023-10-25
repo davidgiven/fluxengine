@@ -1,3 +1,4 @@
+from build.ab import emit
 from build.c import clibrary
 from build.pkg import package
 from config import windows, osx, unix
@@ -15,6 +16,7 @@ srcs = [
     "./include/libusbp.h",
 ]
 deps = []
+ldflags = []
 
 if windows:
     srcs += [
@@ -28,6 +30,7 @@ if windows:
         "./src/windows/list_windows.c",
         "./src/windows/serial_port_windows.c",
     ]
+    ldflags += ["-lsetupapi", "-lwinusb", "-lole32", "-luuid"]
 elif osx:
     srcs += [
         "./src/mac/async_in_transfer_mac.c",
@@ -57,7 +60,8 @@ else:
 clibrary(
     name="libusbp",
     srcs=srcs,
-    cflags=["-Idep/libusbp/include", "-Idep/libusbp/src"],
+    cflags =["-Idep/libusbp/include", "-Idep/libusbp/src"],
+    ldflags=ldflags,
     deps=deps,
     hdrs={
         "libusbp_internal.h": "./src/libusbp_internal.h",

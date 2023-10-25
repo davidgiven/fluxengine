@@ -13,6 +13,11 @@ hide = @
 PKG_CONFIG ?= pkg-config
 ECHO ?= echo
 
+ifeq ($(OS), Windows_NT)
+	EXT ?= .exe
+endif
+EXT ?=
+
 include $(OBJ)/build.mk
 
 .PHONY: update-ab

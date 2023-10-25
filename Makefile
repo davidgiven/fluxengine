@@ -5,6 +5,26 @@ LDFLAGS =
 
 OBJ = .obj
 
+# Special Windows settings.
+
+ifeq ($(OS), Windows_NT)
+	MINGWBIN = /mingw32/bin
+	CCPREFIX = $(MINGWBIN)/
+	PKG_CONFIG = $(MINGWBIN)/pkg-config
+	WX_CONFIG = /usr/bin/sh $(MINGWBIN)/wx-config --static=yes
+	PROTOC = $(MINGWBIN)/protoc
+	LDFLAGS += \
+		-static
+	CXXFLAGS += \
+		-fext-numeric-literals \
+		-Wno-deprecated-enum-float-conversion \
+		-Wno-deprecated-enum-enum-conversion
+
+	# Required to get the gcc run - time libraries on the path.
+	export PATH := $(PATH):$(MINGWBIN)
+	EXT ?= .exe
+endif
+
 # Special OSX settings.
 
 ifeq ($(shell uname),Darwin)
