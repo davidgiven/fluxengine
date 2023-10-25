@@ -24,7 +24,7 @@ update-ab:
 
 .PHONY: clean
 clean::
-	@echo [-/-] CLEAN
+	@echo CLEAN
 	$(hide) rm -rf $(OBJ) bin
 
 export PYTHONHASHSEED = 1

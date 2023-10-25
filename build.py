@@ -2,6 +2,7 @@ from build.ab import export
 from build.c import clibrary, cxxlibrary
 from build.protobuf import proto, protocc
 from build.pkg import package
+import config
 
 package(name="protobuf_lib", package="protobuf")
 package(name="z_lib", package="zlib")
@@ -223,6 +224,9 @@ export(
         "brother120tool": "tools+brother120tool",
         "brother240tool": "tools+brother240tool",
         "upgrade-flux-file": "tools+upgrade-flux-file",
-    },
+    }
+    | {"FluxEngine.pkg": "src/gui+fluxengine_pkg"}
+    if config.osx
+    else {},
     deps=["tests", "src/formats+docs", "scripts+mkdocindex"],
 )

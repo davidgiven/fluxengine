@@ -10,7 +10,8 @@ OBJ = .obj
 ifeq ($(shell uname),Darwin)
 	LDFLAGS += \
 		-framework IOKit \
-		-framework Foundation
+		-framework Foundation \
+		-Wl,-no_warn_duplicate_libraries
 endif
 
 .PHONY: all

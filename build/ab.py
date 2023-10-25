@@ -247,6 +247,8 @@ def targetof(s, cwd):
         s = cwd + s[1:]
     elif s.startswith("./"):
         s = normpath(join(cwd, s))
+    elif s.endswith("/"):
+        return fileinvocation(s)
     elif s.startswith("$"):
         return fileinvocation(s)
 
