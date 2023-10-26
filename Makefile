@@ -8,6 +8,7 @@ OBJ = .obj
 # Special Windows settings.
 
 ifeq ($(OS), Windows_NT)
+	EXT ?= .exe
 	MINGWBIN = /mingw32/bin
 	CCPREFIX = $(MINGWBIN)/
 	PKG_CONFIG = $(MINGWBIN)/pkg-config
@@ -22,7 +23,6 @@ ifeq ($(OS), Windows_NT)
 
 	# Required to get the gcc run - time libraries on the path.
 	export PATH := $(PATH):$(MINGWBIN)
-	EXT ?= .exe
 endif
 
 # Special OSX settings.
@@ -30,7 +30,7 @@ endif
 ifeq ($(shell uname),Darwin)
 	LDFLAGS += \
 		-framework IOKit \
-		-framework Foundation
+		-framework Foundation 
 endif
 
 .PHONY: all
