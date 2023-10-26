@@ -37,7 +37,7 @@ endif
 .PHONY: all
 all: +all README.md
 	
-README.md: $(OBJ)/scripts+mkdocindex/scripts+mkdocindex
+README.md: $(OBJ)/scripts+mkdocindex/scripts+mkdocindex$(EXT)
 	@echo MKDOC $@
 	@csplit -s -f$(OBJ)/README. README.md '/<!-- FORMATSSTART -->/' '%<!-- FORMATSEND -->%'
 	@(cat $(OBJ)/README.00 && $< && cat $(OBJ)/README.01) > README.md
