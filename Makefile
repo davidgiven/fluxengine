@@ -30,8 +30,7 @@ endif
 ifeq ($(shell uname),Darwin)
 	LDFLAGS += \
 		-framework IOKit \
-		-framework Foundation \
-		-Wl,-no_warn_duplicate_libraries
+		-framework Foundation
 endif
 
 .PHONY: all
