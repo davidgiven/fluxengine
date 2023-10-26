@@ -74,7 +74,7 @@ export(
             name=f"{f}_doc",
             ins=["scripts+mkdoc"],
             outs=[f"disk-{f}.md"],
-            commands=["{ins[0]} " + f + " > {outs[0]}"],
+            commands=["{ins[0]} " + f + " | tr -d '\\r' > {outs[0]}"],
             label="MKDOC",
         )
         for f in formats

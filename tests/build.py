@@ -61,6 +61,7 @@ export(
                 deps=[
                     "+fl2_proto_lib",
                     "+protocol",
+                    "+z_lib",
                     ".+test_proto_lib",
                     "dep/adflib",
                     "dep/agg",

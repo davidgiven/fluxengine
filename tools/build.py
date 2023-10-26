@@ -1,15 +1,20 @@
 from build.c import cxxprogram
+import config
+
+emu = []
+if config.windows:
+    emu = ["dep/emu"]
 
 cxxprogram(
     name="brother120tool",
     srcs=["./brother120tool.cc"],
-    deps=["+lib", "lib+config_proto_lib"],
+    deps=["+lib", "lib+config_proto_lib"] + emu,
 )
 
 cxxprogram(
     name="brother240tool",
     srcs=["./brother240tool.cc"],
-    deps=["+lib", "lib+config_proto_lib"],
+    deps=["+lib", "lib+config_proto_lib"] + emu,
 )
 
 cxxprogram(

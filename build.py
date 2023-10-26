@@ -219,14 +219,14 @@ cxxlibrary(
 export(
     name="all",
     items={
-        "fluxengine": "src+fluxengine",
-        "fluxengine-gui": "src/gui",
-        "brother120tool": "tools+brother120tool",
-        "brother240tool": "tools+brother240tool",
-        "upgrade-flux-file": "tools+upgrade-flux-file",
+        "fluxengine$(EXT)": "src+fluxengine",
+        "fluxengine-gui$(EXT)": "src/gui",
+        "brother120tool$(EXT)": "tools+brother120tool",
+        "brother240tool$(EXT)": "tools+brother240tool",
+        "upgrade-flux-file$(EXT)": "tools+upgrade-flux-file",
     }
-    | {"FluxEngine.pkg": "src/gui+fluxengine_pkg"}
+    | ({"FluxEngine.pkg": "src/gui+fluxengine_pkg"}
     if config.osx
-    else {},
+    else {}),
     deps=["tests", "src/formats+docs", "scripts+mkdocindex"],
 )
