@@ -2,7 +2,10 @@ from build.ab import export
 from build.c import clibrary, cxxlibrary
 from build.protobuf import proto, protocc
 from build.pkg import package
+from build.utils import test
+from glob import glob
 import config
+import re
 
 package(name="protobuf_lib", package="protobuf")
 package(name="z_lib", package="zlib")
@@ -216,6 +219,83 @@ cxxlibrary(
     ],
 )
 
+corpustests = []
+if not glob("../fluxengine-testdata/data"):
+    print("fluxengine-testdata not found; skipping corpus tests")
+else:
+    corpus = [
+        ("agat", "", "--drive.tpi=96"),
+        ("amiga", "", "--drive.tpi=135"),
+        ("apple2", "", "--140 --drive.tpi=96"),
+        ("atarist", "", "--360 --drive.tpi=135"),
+        ("atarist", "", "--370 --drive.tpi=135"),
+        ("atarist", "", "--400 --drive.tpi=135"),
+        ("atarist", "", "--410 --drive.tpi=135"),
+        ("atarist", "", "--720 --drive.tpi=135"),
+        ("atarist", "", "--740 --drive.tpi=135"),
+        ("atarist", "", "--800 --drive.tpi=135"),
+        ("atarist", "", "--820 --drive.tpi=135"),
+        ("bk", "", ""),
+        ("brother", "", "--120 --drive.tpi=135"),
+        ("brother", "", "--240 --drive.tpi=135"),
+        (
+            "commodore",
+            "scripts/commodore1541_test.textpb",
+            "--171 --drive.tpi=96",
+        ),
+        (
+            "commodore",
+            "scripts/commodore1541_test.textpb",
+            "--192 --drive.tpi=96",
+        ),
+        ("commodore", "", "--800 --drive.tpi=135"),
+        ("commodore", "", "--1620 --drive.tpi=135"),
+        ("hplif", "", "--264 --drive.tpi=135"),
+        ("hplif", "", "--608 --drive.tpi=135"),
+        ("hplif", "", "--616 --drive.tpi=135"),
+        ("hplif", "", "--770 --drive.tpi=135"),
+        ("ibm", "", "--1200 --drive.tpi=96"),
+        ("ibm", "", "--1232 --drive.tpi=96"),
+        ("ibm", "", "--1440 --drive.tpi=135"),
+        ("ibm", "", "--1680 --drive.tpi=135"),
+        ("ibm", "", "--180 --drive.tpi=96"),
+        ("ibm", "", "--160 --drive.tpi=96"),
+        ("ibm", "", "--320 --drive.tpi=96"),
+        ("ibm", "", "--360 --drive.tpi=96"),
+        ("ibm", "", "--720_96 --drive.tpi=96"),
+        ("ibm", "", "--720_135 --drive.tpi=135"),
+        ("mac", "scripts/mac400_test.textpb", "--400 --drive.tpi=135"),
+        ("mac", "scripts/mac800_test.textpb", "--800 --drive.tpi=135"),
+        ("n88basic", "", "--drive.tpi=96"),
+        ("rx50", "", "--drive.tpi=96"),
+        ("tids990", "", "--drive.tpi=48"),
+        ("victor9k", "", "--612 --drive.tpi=96"),
+        ("victor9k", "", "--1224 --drive.tpi=96"),
+    ]
+
+    for c in corpus:
+        name = re.sub(r"[^a-zA-Z0-9]", "_", "".join(c), 0)
+        corpustests += [
+            test(
+                name=f"corpustest_{name}_{format}",
+                ins=["src+fluxengine"],
+                deps=["scripts/encodedecodetest.sh"],
+                commands=[
+                    "{deps[0]} "
+                    + c[0]
+                    + " "
+                    + format
+                    + " {ins[0]} "
+                    + c[1]
+                    + " "
+                    + c[2]
+                    + ">/dev/null"
+                ],
+                label="CORPUSTEST",
+            )
+            for format in ["scp", "flux"]
+        ]
+
 export(
     name="all",
     items={
@@ -225,8 +305,6 @@ export(
         "brother240tool$(EXT)": "tools+brother240tool",
         "upgrade-flux-file$(EXT)": "tools+upgrade-flux-file",
     }
-    | ({"FluxEngine.pkg": "src/gui+fluxengine_pkg"}
-    if config.osx
-    else {}),
-    deps=["tests", "src/formats+docs", "scripts+mkdocindex"],
+    | ({"FluxEngine.pkg": "src/gui+fluxengine_pkg"} if config.osx else {}),
+    deps=["tests", "src/formats+docs", "scripts+mkdocindex"] + corpustests,
 )

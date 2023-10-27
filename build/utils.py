@@ -1,4 +1,4 @@
-from build.ab import Rule, normalrule, Target, filenameof
+from build.ab import Rule, normalrule, Target, filenameof, Targets
 from os.path import basename
 
 
@@ -14,11 +14,30 @@ def objectify(self, name, src: Target, symbol):
 
 
 @Rule
-def test(self, name, command: Target):
-    normalrule(
-        replaces=self,
-        ins=[command],
-        outs=["sentinel"],
-        commands=["{ins[0]}", "touch {outs}"],
-        label="TEST",
-    )
+def test(
+    self,
+    name,
+    command: Target = None,
+    commands=None,
+    ins: Targets = [],
+    deps: Targets = [],
+    label="TEST",
+):
+    if command:
+        normalrule(
+            replaces=self,
+            ins=[command],
+            outs=["sentinel"],
+            commands=["{ins[0]}", "touch {outs}"],
+            deps=deps,
+            label=label,
+        )
+    else:
+        normalrule(
+            replaces=self,
+            ins=ins,
+            outs=["sentinel"],
+            commands=commands + ["touch {outs}"],
+            deps=deps,
+            label=label,
+        )

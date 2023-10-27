@@ -75,7 +75,9 @@ def findsources(name, srcs, deps, cflags, filerule):
     return objs
 
 
-def libraryimpl(self, name, srcs, deps, hdrs, cflags, ldflags, commands, label, kind):
+def libraryimpl(
+    self, name, srcs, deps, hdrs, cflags, ldflags, commands, label, kind
+):
     if not srcs and not hdrs:
         raise ABException(
             "clibrary contains no sources and no exported headers"
@@ -203,7 +205,7 @@ def programimpl(
     normalrule(
         replaces=self,
         ins=(findsources(name, srcs, deps, cflags, filerule) + ars + ars),
-        outs=[basename(name)+"$(EXT)"],
+        outs=[basename(name) + "$(EXT)"],
         deps=deps,
         label=label,
         commands=commands,

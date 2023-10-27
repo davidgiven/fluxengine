@@ -60,7 +60,7 @@ else:
 clibrary(
     name="libusbp",
     srcs=srcs,
-    cflags =["-Idep/libusbp/include", "-Idep/libusbp/src"],
+    cflags=["-Idep/libusbp/include", "-Idep/libusbp/src"],
     ldflags=ldflags,
     deps=deps,
     hdrs={
