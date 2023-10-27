@@ -85,7 +85,7 @@ jobs:
         repository: 'davidgiven/fluxengine-testdata'
         path: 'fluxengine-testdata'
     - name: build
-      run: make -j`nproc` -C fluxengine
+      run: MAGICK_TIME_LIMIT=100 make -j`nproc` -C fluxengine
 
     - name: nsis
       run: |
