@@ -59,18 +59,19 @@ jobs:
         install: >-
           diffutils
           make
+          mingw-w64-i686-binutils
           mingw-w64-i686-fmt
           mingw-w64-i686-gcc
           mingw-w64-i686-libusb
+          mingw-w64-i686-nsis
           mingw-w64-i686-pkg-config
           mingw-w64-i686-protobuf
+          mingw-w64-i686-python
           mingw-w64-i686-sqlite3
           mingw-w64-i686-wxWidgets
           mingw-w64-i686-zlib
-          mingw-w64-i686-nsis
-          mingw-w64-i686-python
-          zip
           vim
+          zip
     - name: update-protobuf
       run: |
          pacman -U --noconfirm https://repo.msys2.org/mingw/mingw32/mingw-w64-i686-protobuf-21.9-1-any.pkg.tar.zst
