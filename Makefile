@@ -14,6 +14,7 @@ ifeq ($(OS), Windows_NT)
 	PKG_CONFIG = $(MINGWBIN)/pkg-config
 	WX_CONFIG = /usr/bin/sh $(MINGWBIN)/wx-config --static=yes
 	PROTOC = $(MINGWBIN)/protoc
+	WINDRES = windres
 	LDFLAGS += \
 		-static
 	CXXFLAGS += \

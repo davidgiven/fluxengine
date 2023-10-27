@@ -14,6 +14,19 @@ WX_LDFLAGS := $(shell $(WX_CONFIG) --libs core base adv aui richtext)
 """
 )
 
+extrasrcs = []
+if config.windows:
+    extrasrcs += [
+        normalrule(
+            name="rc",
+            ins=["./windres.rc"],
+            outs=["rc.o"],
+            deps=["./manifest.xml", "extras+fluxengine_ico"],
+            commands=["$(WINDRES) {ins[0]} {outs[0]}"],
+            label="WINDRES",
+        )
+    ]
+
 cxxprogram(
     name="gui",
     srcs=[
@@ -35,7 +48,8 @@ cxxprogram(
         "./textviewerwindow.cc",
         "./visualisationcontrol.cc",
         "./layout.cpp",
-    ],
+    ]
+    + extrasrcs,
     cflags=["$(WX_CFLAGS)"],
     ldflags=["$(WX_LDFLAGS)"],
     deps=[

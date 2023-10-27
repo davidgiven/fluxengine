@@ -32,3 +32,13 @@ normalrule(
     commands=["iconutil -c icns -o {outs[0]} {ins[0]}"],
     label="ICONUTIL",
 )
+
+normalrule(
+    name="fluxengine_ico",
+    ins=["./icon.png"],
+    outs=["fluxengine.ico"],
+    commands=[
+        "convert {ins[0]} -resize 64x46 -define icon:auto-resize=64,48,32,16 {outs[0]}"
+    ],
+    label="MAKEICON",
+)
