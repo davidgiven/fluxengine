@@ -84,7 +84,7 @@ jobs:
         repository: 'davidgiven/fluxengine-testdata'
         path: 'fluxengine-testdata'
     - name: build
-      run: make -j`nproc` -C fluxengine
+      run: make -j1 hide= -C fluxengine
 
     - name: nsis
       run: |
