@@ -23,7 +23,7 @@ if config.windows:
             outs=["rc.o"],
             deps=["./manifest.xml", "extras+fluxengine_ico"],
             commands=["$(WINDRES) {ins[0]} {outs[0]}"],
-            label="WINDRES",
+            label="WINDRES"
         )
     ]
 

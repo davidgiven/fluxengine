@@ -71,6 +71,8 @@ def findsources(name, srcs, deps, cflags, filerule):
             for f in filenamesof(s)
             if f.endswith(".c") or f.endswith(".cc") or f.endswith(".cpp")
         ]
+        if any(f.endswith(".o") for f in filenamesof(s)):
+            objs += [s]
 
     return objs
 
