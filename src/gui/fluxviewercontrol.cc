@@ -1,4 +1,4 @@
-#include "globals.h"
+#include "lib/globals.h"
 #include "gui.h"
 #include "fluxviewercontrol.h"
 #include "textviewerwindow.h"

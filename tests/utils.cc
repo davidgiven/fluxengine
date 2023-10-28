@@ -1,5 +1,5 @@
-#include "globals.h"
-#include "utils.h"
+#include "lib/globals.h"
+#include "lib/utils.h"
 #include "snowhouse/snowhouse.h"
 
 using namespace snowhouse;

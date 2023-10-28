@@ -1,4 +1,4 @@
-#include "globals.h"
+#include "lib/globals.h"
 #include "vfs.h"
 #include "lib/proto.h"
 #include "lib/layout.pb.h"

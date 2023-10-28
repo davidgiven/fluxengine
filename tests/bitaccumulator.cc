@@ -1,5 +1,5 @@
-#include "globals.h"
-#include "bytes.h"
+#include "lib/globals.h"
+#include "lib/bytes.h"
 #include <assert.h>
 
 int main(int argc, const char* argv[])

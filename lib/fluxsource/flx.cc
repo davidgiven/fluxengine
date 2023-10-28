@@ -1,5 +1,5 @@
-#include "globals.h"
-#include "fluxmap.h"
+#include "lib/globals.h"
+#include "lib/fluxmap.h"
 #include "kryoflux.h"
 #include "protocol.h"
 #include "lib/fluxsource/flx.h"

@@ -1,6 +1,6 @@
-#include "globals.h"
-#include "fluxmap.h"
-#include "decoders/fluxmapreader.h"
+#include "lib/globals.h"
+#include "lib/fluxmap.h"
+#include "lib/decoders/fluxmapreader.h"
 #include "protocol.h"
 
 Fluxmap& Fluxmap::appendBytes(const Bytes& bytes)

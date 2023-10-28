@@ -1,5 +1,5 @@
-#include "globals.h"
-#include "decoders/decoders.h"
+#include "lib/globals.h"
+#include "lib/decoders/decoders.h"
 #include <assert.h>
 
 static void testDecode(void)

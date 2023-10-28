@@ -1,8 +1,8 @@
 #ifndef USB_H
 #define USB_H
 
-#include "bytes.h"
-#include "flags.h"
+#include "lib/bytes.h"
+#include "lib/flags.h"
 
 class Fluxmap;
 class GreaseweazleProto;

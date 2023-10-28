@@ -1,8 +1,8 @@
 #ifndef C64_H
 #define C64_H
 
-#include "decoders/decoders.h"
-#include "encoders/encoders.h"
+#include "lib/decoders/decoders.h"
+#include "lib/encoders/encoders.h"
 
 #define C64_SECTOR_RECORD 0xffd49
 #define C64_DATA_RECORD 0xffd57

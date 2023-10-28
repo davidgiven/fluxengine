@@ -1,14 +1,14 @@
 #define _USE_MATH_DEFINES
-#include "globals.h"
-#include "flags.h"
-#include "bitmap.h"
-#include "fluxmap.h"
-#include "sector.h"
-#include "csvreader.h"
-#include "image.h"
-#include "decoders/fluxmapreader.h"
-#include "dep/agg/include/agg2d.h"
-#include "dep/stb/stb_image_write.h"
+#include "lib/globals.h"
+#include "lib/flags.h"
+#include "lib/bitmap.h"
+#include "lib/fluxmap.h"
+#include "lib/sector.h"
+#include "lib/csvreader.h"
+#include "lib/image.h"
+#include "lib/decoders/fluxmapreader.h"
+#include "agg2d.h"
+#include "stb_image_write.h"
 #include <math.h>
 #include <fstream>
 
