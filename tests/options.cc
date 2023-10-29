@@ -23,15 +23,15 @@ static void test_option_validity()
     globalConfig().clear();
     globalConfig().readBaseConfig(R"M(
 		drive {
-			tpi: 96
+			drive_type: DRIVETYPE_80TRACK
 		}
 
         option {
             name: "option1"
 
             prerequisite: {
-                key: "drive.tpi"
-                value: "96"
+                key: "drive.drive_type"
+                value: "DRIVETYPE_80TRACK"
             }
         }
 
@@ -39,8 +39,8 @@ static void test_option_validity()
             name: "option2"
 
             prerequisite: {
-                key: "drive.tpi"
-                value: "95"
+                key: "drive.drive_type"
+                value: "DRIVETYPE_40TRACK"
             }
         }
 
@@ -48,8 +48,8 @@ static void test_option_validity()
             name: "option3"
 
             prerequisite: {
-                key: "drive.tpi"
-                value: ["0", "96"]
+                key: "drive.drive_type"
+                value: ["DRIVETYPE_UNKNOWN", "DRIVETYPE_80TRACK"]
             }
         }
 	)M");

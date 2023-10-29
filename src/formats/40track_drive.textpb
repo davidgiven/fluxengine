@@ -16,8 +16,7 @@ fluxengine read ibm --180 40track_drive
 
 drive {
     tracks: 40
-    head_width: 1
-	tpi: 48
+    drive_type: DRIVETYPE_40TRACK
 }
 
 

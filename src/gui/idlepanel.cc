@@ -239,12 +239,12 @@ public:
             {
                 if (_selectedFluxFormat)
                 {
-                if (_selectedFluxFormat->sink)
-                    _selectedFluxFormat->sink(_selectedFluxFilename,
-                        globalConfig().overrides()->mutable_flux_sink());
-                if (_selectedFluxFormat->source)
-                    _selectedFluxFormat->source(_selectedFluxFilename,
-                        globalConfig().overrides()->mutable_flux_source());
+                    if (_selectedFluxFormat->sink)
+                        _selectedFluxFormat->sink(_selectedFluxFilename,
+                            globalConfig().overrides()->mutable_flux_sink());
+                    if (_selectedFluxFormat->source)
+                        _selectedFluxFormat->source(_selectedFluxFilename,
+                            globalConfig().overrides()->mutable_flux_source());
                 }
                 break;
             }

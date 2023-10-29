@@ -218,7 +218,7 @@ ReadResult readGroup(FluxSourceIteratorHolder& fluxSourceIteratorHolder,
     ReadResult result = BAD_AND_CAN_NOT_RETRY;
 
     for (unsigned offset = 0; offset < trackInfo->groupSize;
-         offset += globalConfig()->drive().head_width())
+         offset += Layout::getHeadWidth())
     {
         auto& fluxSourceIterator = fluxSourceIteratorHolder.getIterator(
             trackInfo->physicalTrack + offset, trackInfo->physicalSide);
@@ -274,7 +274,7 @@ void writeTracks(FluxSink& fluxSink,
         for (;;)
         {
             for (int offset = 0; offset < trackInfo->groupSize;
-                 offset += globalConfig()->drive().head_width())
+                 offset += Layout::getHeadWidth())
             {
                 unsigned physicalTrack = trackInfo->physicalTrack + offset;
 

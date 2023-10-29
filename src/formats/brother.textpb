@@ -141,7 +141,7 @@ option_group {
 
 		config {
 			layout {
-				tpi: 67.5
+				format_type: FORMATTYPE_40TRACK
 				tracks: 39
 				sides: 1
 				layoutdata {
@@ -162,7 +162,7 @@ option_group {
 
 			drive {
 				head_bias: 0
-				group_offset: 1
+				group_offset: 0
 			}
 
 			filesystem {
@@ -178,7 +178,7 @@ option_group {
 
 		config {
 			layout {
-				tpi: 135
+				format_type: FORMATTYPE_80TRACK
 				tracks: 78
 				sides: 1
 				layoutdata {

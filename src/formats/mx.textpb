@@ -83,7 +83,7 @@ option_group {
 
 		config {
 			layout {
-				tpi: 48
+				format_type: FORMATTYPE_40TRACK
 				tracks: 40
 				sides: 1
 			}
@@ -96,7 +96,7 @@ option_group {
 
 		config {
 			layout {
-				tpi: 48
+				format_type: FORMATTYPE_40TRACK
 				tracks: 40
 				sides: 2
 			}
@@ -109,7 +109,7 @@ option_group {
 
 		config {
 			layout {
-				tpi: 96
+				format_type: FORMATTYPE_80TRACK
 				tracks: 80
 				sides: 1
 			}
@@ -123,7 +123,7 @@ option_group {
 
 		config {
 			layout {
-				tpi: 96
+				format_type: FORMATTYPE_80TRACK
 				tracks: 80
 				sides: 2
 			}

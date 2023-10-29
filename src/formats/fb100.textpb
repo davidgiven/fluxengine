@@ -51,7 +51,7 @@ decoder {
 }
 
 layout {
-	tpi: 67.5
+	format_type: FORMATTYPE_40TRACK
 	tracks: 40
 	sides: 1
 	layoutdata {

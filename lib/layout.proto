@@ -1,6 +1,7 @@
 syntax = "proto2";
 
 import "lib/common.proto";
+import "lib/fl2.proto";
 
 message SectorListProto
 {
@@ -57,5 +58,6 @@ message LayoutProto
         [ default = CHS, (help) = "the order of sectors in the filesystem" ];
     optional bool swap_sides = 5
         [ default = false, (help) = "the sides are inverted on this disk" ];
-    optional float tpi = 6 [ (help) = "TPI of image; if 0, use TPI of drive" ];
+    optional FormatType format_type = 6
+        [ default = FORMATTYPE_UNKNOWN, (help) = "Format type of image" ];
 }

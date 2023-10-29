@@ -281,9 +281,10 @@ Bytes Filesystem::getSector(unsigned track, unsigned side, unsigned sector)
 Bytes Filesystem::getLogicalSector(uint32_t number, uint32_t count)
 {
     if ((number + count) > _locations.size())
-        throw BadFilesystemException(
-            fmt::format("invalid filesystem: sector {} is out of bounds ({} maximum)",
-                number + count - 1, _locations.size()));
+        throw BadFilesystemException(fmt::format(
+            "invalid filesystem: sector {} is out of bounds ({} maximum)",
+            number + count - 1,
+            _locations.size()));
 
     Bytes data;
     ByteWriter bw(data);

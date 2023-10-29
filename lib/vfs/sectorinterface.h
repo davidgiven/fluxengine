@@ -12,7 +12,7 @@ class Encoder;
 class SectorInterface
 {
 public:
-	virtual ~SectorInterface() {}
+    virtual ~SectorInterface() {}
 
 public:
     virtual std::shared_ptr<const Sector> get(

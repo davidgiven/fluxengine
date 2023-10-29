@@ -41,7 +41,7 @@ image_writer {
 layout {
 	tracks: 70
 	sides: 1
-	tpi: 135
+	format_type: FORMATTYPE_80TRACK
 	layoutdata {
 		sector_size: 512
 		physical {

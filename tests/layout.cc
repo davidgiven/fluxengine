@@ -22,11 +22,11 @@ static void test_physical_sectors()
     globalConfig().clear();
     globalConfig().readBaseConfig(R"M(
 		drive {
-			tpi: 96
+			drive_type: DRIVETYPE_80TRACK
 		}
 
 		layout {
-			tpi: 96
+			format_type: FORMATTYPE_80TRACK
 			tracks: 78
 			sides: 2
 			layoutdata {
@@ -55,11 +55,11 @@ static void test_logical_sectors()
     globalConfig().clear();
     globalConfig().readBaseConfig(R"M(
 		drive {
-			tpi: 96
+			drive_type: DRIVETYPE_80TRACK
 		}
 
 		layout {
-			tpi: 96
+			format_type: FORMATTYPE_80TRACK
 			tracks: 78
 			sides: 2
 			layoutdata {
@@ -94,11 +94,11 @@ static void test_both_sectors()
     globalConfig().clear();
     globalConfig().readBaseConfig(R"M(
 		drive {
-			tpi: 96
+			drive_type: DRIVETYPE_80TRACK
 		}
 
 		layout {
-			tpi: 96
+			format_type: FORMATTYPE_80TRACK
 			tracks: 78
 			sides: 2
 			layoutdata {
@@ -133,11 +133,11 @@ static void test_skew()
     globalConfig().clear();
     globalConfig().readBaseConfig(R"M(
 		drive {
-			tpi: 96
+			drive_type: DRIVETYPE_80TRACK
 		}
 
 		layout {
-			tpi: 96
+			format_type: FORMATTYPE_80TRACK
 			tracks: 78
 			sides: 2
 			layoutdata {

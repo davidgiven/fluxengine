@@ -57,8 +57,8 @@ int mainLs(int argc, const char* argv[])
                 quote(dirent->filename),
                 maxlen + 2,
                 dirent->length,
-        				dirent->mode,
-        				dirent->attributes[Filesystem::CTIME]);
+                dirent->mode,
+                dirent->attributes[Filesystem::CTIME]);
             total += dirent->length;
         }
         fmt::print("({} files, {} bytes)\n", files.size(), total);

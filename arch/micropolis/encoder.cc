@@ -49,7 +49,8 @@ static void write_sector(std::vector<bool>& bits,
 
         uint8_t eccPresent = 0;
         uint32_t ecc = 0;
-        if (eccType == MicropolisEncoderProto::VECTOR) {
+        if (eccType == MicropolisEncoderProto::VECTOR)
+        {
             eccPresent = 0xaa;
             ecc = vectorGraphicEcc(sectorData + Bytes(4));
         }
@@ -98,23 +99,25 @@ public:
         unsigned prev_cursor = 0;
         unsigned cursor = 0;
 
-        for (const auto& sectorData : sectors) {
+        for (const auto& sectorData : sectors)
+        {
             indexes.push_back(cursor);
             prev_cursor = cursor;
             write_sector(bits, cursor, sectorData, _config.ecc_type());
         }
-        indexes.push_back(prev_cursor + (cursor - prev_cursor)/2);
+        indexes.push_back(prev_cursor + (cursor - prev_cursor) / 2);
         indexes.push_back(cursor);
 
         if (cursor != bits.size())
             error("track data mismatched length");
 
         std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
-        nanoseconds_t clockPeriod = calculatePhysicalClockPeriod(
-            _config.clock_period_us() * 1e3,
-            _config.rotational_period_ms() * 1e6);
+        nanoseconds_t clockPeriod =
+            calculatePhysicalClockPeriod(_config.clock_period_us() * 1e3,
+                _config.rotational_period_ms() * 1e6);
         auto pos = bits.begin();
-        for (int i = 1; i < indexes.size(); i++) {
+        for (int i = 1; i < indexes.size(); i++)
+        {
             auto end = bits.begin() + indexes[i];
             fluxmap->appendBits(std::vector<bool>(pos, end), clockPeriod);
             fluxmap->appendIndex();

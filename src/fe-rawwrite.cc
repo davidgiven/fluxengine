@@ -59,8 +59,7 @@ int mainRawWrite(int argc, const char* argv[])
 
     if (argc == 1)
         showProfiles("rawwrite", formats);
-    globalConfig().overrides()->mutable_flux_sink()->set_type(
-        FLUXTYPE_DRIVE);
+    globalConfig().overrides()->mutable_flux_sink()->set_type(FLUXTYPE_DRIVE);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
     if (globalConfig()->flux_source().type() == FLUXTYPE_DRIVE)
