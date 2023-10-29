@@ -695,8 +695,11 @@ private:
 
             for (auto& group : globalConfig()->option_group())
             {
+                std::string groupName = group.comment();
+                if (groupName == "$formats")
+                    groupName = "Formats";
                 sizer->Add(new wxStaticText(
-                    formatOptionsContainer, wxID_ANY, group.comment() + ":"));
+                    formatOptionsContainer, wxID_ANY, groupName + ":"));
 
                 bool first = true;
                 bool valueSet = false;
