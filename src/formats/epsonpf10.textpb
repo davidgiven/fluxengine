@@ -15,7 +15,7 @@ image_writer {
 }
 
 layout {
-	tpi: 67.5
+	format_type: FORMATTYPE_40TRACK
 	tracks: 40
 	sides: 2
 	layoutdata {

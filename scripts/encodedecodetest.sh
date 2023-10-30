@@ -1,22 +1,21 @@
 #!/bin/sh
 set -e
 
-format=$1
-tmp=/tmp/$$-$format
-srcfile=$tmp.src.img
-fluxfile=$tmp.$2
-destfile=$tmp.dest.img
-fluxengine=$3
-shift
-shift
-shift
+format="$1"
+ext="$2"
+fluxengine="$3"
+script="$4"
+flags="$5"
+dir="$6"
 
-trap "rm -f $srcfile $fluxfile $destfile" EXIT
+srcfile=$dir.$format.src.img
+fluxfile=$dir.$format.$ext
+destfile=$dir.$format.dest.img
 
 dd if=/dev/urandom of=$srcfile bs=1048576 count=2 2>&1
 
-$fluxengine write $format -i $srcfile -d $fluxfile --drive.rotational_period_ms=200 "$@"
-$fluxengine read $format -s $fluxfile -o $destfile --drive.rotational_period_ms=200 "$@"
+$fluxengine write $format -i $srcfile -d $fluxfile --drive.rotational_period_ms=200 $flags
+$fluxengine read $format -s $fluxfile -o $destfile --drive.rotational_period_ms=200 $flags
 if [ ! -s $destfile ]; then
 	echo "Zero length output file!" >&2
 	exit 1

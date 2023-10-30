@@ -46,7 +46,7 @@ filesystem {
 }
 
 layout {
-	tpi: 135
+	format_type: FORMATTYPE_80TRACK
 }
 
 option_group {

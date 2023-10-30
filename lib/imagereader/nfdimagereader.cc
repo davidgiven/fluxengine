@@ -58,7 +58,7 @@ public:
         log("NFD: HD 1.2MB mode");
         log("NFD: forcing hign density mode");
         _extraConfig.mutable_drive()->set_high_density(true);
-        _extraConfig.mutable_layout()->set_tpi(96);
+        _extraConfig.mutable_layout()->set_format_type(FORMATTYPE_80TRACK);
 
         std::unique_ptr<Image> image(new Image);
         for (int track = 0; track < 163; track++)

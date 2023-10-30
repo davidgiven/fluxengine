@@ -67,28 +67,32 @@ static uint8_t b(uint32_t field, uint8_t pos)
 static uint8_t eccNextBit(uint32_t ecc, uint8_t data_bit)
 {
     // This is 0x81932080 which is 0x0104C981 with reversed bits
-    return b(ecc, 7) ^ b(ecc, 13) ^ b(ecc, 16) ^ b(ecc, 17) ^ b(ecc, 20)
-            ^ b(ecc, 23) ^ b(ecc, 24) ^ b(ecc, 31) ^ data_bit;
+    return b(ecc, 7) ^ b(ecc, 13) ^ b(ecc, 16) ^ b(ecc, 17) ^ b(ecc, 20) ^
+           b(ecc, 23) ^ b(ecc, 24) ^ b(ecc, 31) ^ data_bit;
 }
 
 uint32_t vectorGraphicEcc(const Bytes& bytes)
 {
     uint32_t e = 0;
-    Bytes payloadBytes = bytes.slice(0, bytes.size()-4);
+    Bytes payloadBytes = bytes.slice(0, bytes.size() - 4);
     ByteReader payload(payloadBytes);
-    while (!payload.eof()) {
+    while (!payload.eof())
+    {
         uint8_t byte = payload.read_8();
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 8; i++)
+        {
             e = (e << 1) | eccNextBit(e, byte >> 7);
             byte <<= 1;
         }
     }
-    Bytes trailerBytes = bytes.slice(bytes.size()-4);
+    Bytes trailerBytes = bytes.slice(bytes.size() - 4);
     ByteReader trailer(trailerBytes);
     uint32_t res = e;
-    while (!trailer.eof()) {
+    while (!trailer.eof())
+    {
         uint8_t byte = trailer.read_8();
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 8; i++)
+        {
             res = (res << 1) | eccNextBit(e, byte >> 7);
             e <<= 1;
             byte <<= 1;
@@ -101,13 +105,15 @@ uint32_t vectorGraphicEcc(const Bytes& bytes)
 static bool vectorGraphicEccFix(Bytes& bytes, uint32_t syndrome)
 {
     uint32_t ecc = syndrome;
-    int pos = (MICROPOLIS_ENCODED_SECTOR_SIZE-5)*8+7;
+    int pos = (MICROPOLIS_ENCODED_SECTOR_SIZE - 5) * 8 + 7;
     bool aligned = false;
-    while ((ecc & 0xff000000) == 0) {
+    while ((ecc & 0xff000000) == 0)
+    {
         pos += 8;
         ecc <<= 8;
     }
-    for (; pos >= 0; pos--) {
+    for (; pos >= 0; pos--)
+    {
         bool bit = ecc & 1;
         ecc >>= 1;
         if (bit)
@@ -119,7 +125,7 @@ static bool vectorGraphicEccFix(Bytes& bytes, uint32_t syndrome)
     }
     if (pos < 0)
         return false;
-    bytes[pos/8] ^= ecc >> 16;
+    bytes[pos / 8] ^= ecc >> 16;
     return true;
 }
 
@@ -199,9 +205,11 @@ public:
 
         bool eccPresent = bytes[274] == 0xaa;
         uint32_t ecc = 0;
-        if (_config.ecc_type() == MicropolisDecoderProto::VECTOR && eccPresent) {
+        if (_config.ecc_type() == MicropolisDecoderProto::VECTOR && eccPresent)
+        {
             ecc = vectorGraphicEcc(bytes.slice(0, 274));
-            if (ecc != 0) {
+            if (ecc != 0)
+            {
                 vectorGraphicEccFix(bytes, ecc);
                 ecc = vectorGraphicEcc(bytes.slice(0, 274));
             }

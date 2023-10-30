@@ -82,7 +82,7 @@ option_group {
 
 		config {
 			layout {
-				tpi: 48
+				format_type: FORMATTYPE_40TRACK
 				tracks: 40
 			}
 		}
@@ -94,7 +94,7 @@ option_group {
 
 		config {
 			layout {
-				tpi: 96
+				format_type: FORMATTYPE_80TRACK
 				tracks: 80
 			}
 		}

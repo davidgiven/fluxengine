@@ -53,8 +53,7 @@ int mainRawRead(int argc, const char* argv[])
 
     if (argc == 1)
         showProfiles("rawread", formats);
-    globalConfig().overrides()->mutable_flux_source()->set_type(
-        FLUXTYPE_DRIVE);
+    globalConfig().overrides()->mutable_flux_source()->set_type(FLUXTYPE_DRIVE);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
     if (globalConfig()->flux_sink().type() == FLUXTYPE_DRIVE)

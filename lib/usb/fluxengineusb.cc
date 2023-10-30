@@ -76,7 +76,7 @@ public:
                 "your FluxEngine firmware is at version {} but the client is "
                 "for version {}; please upgrade",
                 version,
-                (int) FLUXENGINE_PROTOCOL_VERSION);
+                (int)FLUXENGINE_PROTOCOL_VERSION);
     }
 
 private:

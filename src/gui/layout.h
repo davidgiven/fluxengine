@@ -51,28 +51,45 @@
 ///////////////////////////////////////////////////////////////////////////////
 class MainWindowGen : public wxFrame
 {
-	private:
+private:
+protected:
+    wxMenuBar* menuBar;
+    wxMenu* m_menu1;
+    wxMenu* m_menu2;
+    wxSimplebook* dataNotebook;
 
-	protected:
-		wxMenuBar* menuBar;
-		wxMenu* m_menu1;
-		wxMenu* m_menu2;
-		wxSimplebook* dataNotebook;
+    // Virtual event handlers, override them in your derived class
+    virtual void OnClose(wxCloseEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnAboutMenuItem(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnExit(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnShowLogWindow(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnShowConfigWindow(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
 
-		// Virtual event handlers, override them in your derived class
-		virtual void OnClose( wxCloseEvent& event ) { event.Skip(); }
-		virtual void OnAboutMenuItem( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnExit( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnShowLogWindow( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnShowConfigWindow( wxCommandEvent& event ) { event.Skip(); }
+public:
+    MainWindowGen(wxWindow* parent,
+        wxWindowID id = wxID_ANY,
+        const wxString& title = wxT("FluxEngine"),
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxSize(616, 607),
+        long style = wxDEFAULT_FRAME_STYLE | wxRESIZE_BORDER |
+                     wxFULL_REPAINT_ON_RESIZE | wxTAB_TRAVERSAL);
 
-
-	public:
-
-		MainWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("FluxEngine"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 616,607 ), long style = wxDEFAULT_FRAME_STYLE|wxRESIZE_BORDER|wxFULL_REPAINT_ON_RESIZE|wxTAB_TRAVERSAL );
-
-		~MainWindowGen();
-
+    ~MainWindowGen();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -80,24 +97,32 @@ class MainWindowGen : public wxFrame
 ///////////////////////////////////////////////////////////////////////////////
 class TextViewerWindowGen : public wxDialog
 {
-	private:
+private:
+protected:
+    wxTextCtrl* textControl;
+    wxStdDialogButtonSizer* m_sdbSizer2;
+    wxButton* m_sdbSizer2OK;
 
-	protected:
-		wxTextCtrl* textControl;
-		wxStdDialogButtonSizer* m_sdbSizer2;
-		wxButton* m_sdbSizer2OK;
+    // Virtual event handlers, override them in your derived class
+    virtual void OnClose(wxCloseEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnClose(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
 
-		// Virtual event handlers, override them in your derived class
-		virtual void OnClose( wxCloseEvent& event ) { event.Skip(); }
-		virtual void OnClose( wxCommandEvent& event ) { event.Skip(); }
+public:
+    TextViewerWindowGen(wxWindow* parent,
+        wxWindowID id = wxID_ANY,
+        const wxString& title = wxEmptyString,
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxSize(208, 143),
+        long style = wxCLOSE_BOX | wxDEFAULT_DIALOG_STYLE | wxMAXIMIZE_BOX |
+                     wxMINIMIZE_BOX | wxRESIZE_BORDER);
 
-
-	public:
-
-		TextViewerWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 208,143 ), long style = wxCLOSE_BOX|wxDEFAULT_DIALOG_STYLE|wxMAXIMIZE_BOX|wxMINIMIZE_BOX|wxRESIZE_BORDER );
-
-		~TextViewerWindowGen();
-
+    ~TextViewerWindowGen();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -105,25 +130,33 @@ class TextViewerWindowGen : public wxDialog
 ///////////////////////////////////////////////////////////////////////////////
 class FluxViewerWindowGen : public wxDialog
 {
-	private:
+private:
+protected:
+    FluxViewerControl* fluxviewer;
+    wxScrollBar* scrollbar;
+    wxStdDialogButtonSizer* m_sdbSizer2;
+    wxButton* m_sdbSizer2OK;
 
-	protected:
-		FluxViewerControl* fluxviewer;
-		wxScrollBar* scrollbar;
-		wxStdDialogButtonSizer* m_sdbSizer2;
-		wxButton* m_sdbSizer2OK;
+    // Virtual event handlers, override them in your derived class
+    virtual void OnClose(wxCloseEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnClose(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
 
-		// Virtual event handlers, override them in your derived class
-		virtual void OnClose( wxCloseEvent& event ) { event.Skip(); }
-		virtual void OnClose( wxCommandEvent& event ) { event.Skip(); }
+public:
+    FluxViewerWindowGen(wxWindow* parent,
+        wxWindowID id = wxID_ANY,
+        const wxString& title = wxEmptyString,
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxSize(400, 200),
+        long style = wxCLOSE_BOX | wxDEFAULT_DIALOG_STYLE | wxMAXIMIZE_BOX |
+                     wxMINIMIZE_BOX | wxRESIZE_BORDER);
 
-
-	public:
-
-		FluxViewerWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 400,200 ), long style = wxCLOSE_BOX|wxDEFAULT_DIALOG_STYLE|wxMAXIMIZE_BOX|wxMINIMIZE_BOX|wxRESIZE_BORDER );
-
-		~FluxViewerWindowGen();
-
+    ~FluxViewerWindowGen();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -131,26 +164,37 @@ class FluxViewerWindowGen : public wxDialog
 ///////////////////////////////////////////////////////////////////////////////
 class TextEditorWindowGen : public wxDialog
 {
-	private:
+private:
+protected:
+    wxTextCtrl* textControl;
+    wxStdDialogButtonSizer* m_sdbSizer2;
+    wxButton* m_sdbSizer2Save;
+    wxButton* m_sdbSizer2Cancel;
 
-	protected:
-		wxTextCtrl* textControl;
-		wxStdDialogButtonSizer* m_sdbSizer2;
-		wxButton* m_sdbSizer2Save;
-		wxButton* m_sdbSizer2Cancel;
+    // Virtual event handlers, override them in your derived class
+    virtual void OnClose(wxCloseEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnCancel(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnSave(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
 
-		// Virtual event handlers, override them in your derived class
-		virtual void OnClose( wxCloseEvent& event ) { event.Skip(); }
-		virtual void OnCancel( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnSave( wxCommandEvent& event ) { event.Skip(); }
+public:
+    TextEditorWindowGen(wxWindow* parent,
+        wxWindowID id = wxID_ANY,
+        const wxString& title = wxEmptyString,
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxDefaultSize,
+        long style = wxCLOSE_BOX | wxDEFAULT_DIALOG_STYLE | wxMAXIMIZE_BOX |
+                     wxMINIMIZE_BOX | wxRESIZE_BORDER);
 
-
-	public:
-
-		TextEditorWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxCLOSE_BOX|wxDEFAULT_DIALOG_STYLE|wxMAXIMIZE_BOX|wxMINIMIZE_BOX|wxRESIZE_BORDER );
-
-		~TextEditorWindowGen();
-
+    ~TextEditorWindowGen();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -158,27 +202,32 @@ class TextEditorWindowGen : public wxDialog
 ///////////////////////////////////////////////////////////////////////////////
 class FileViewerWindowGen : public wxDialog
 {
-	private:
+private:
+protected:
+    wxNotebook* m_notebook1;
+    wxPanel* m_panel8;
+    wxTextCtrl* textControl;
+    wxPanel* m_panel7;
+    wxTextCtrl* hexControl;
+    wxStdDialogButtonSizer* m_sdbSizer2;
+    wxButton* m_sdbSizer2OK;
 
-	protected:
-		wxNotebook* m_notebook1;
-		wxPanel* m_panel8;
-		wxTextCtrl* textControl;
-		wxPanel* m_panel7;
-		wxTextCtrl* hexControl;
-		wxStdDialogButtonSizer* m_sdbSizer2;
-		wxButton* m_sdbSizer2OK;
+    // Virtual event handlers, override them in your derived class
+    virtual void OnClose(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
 
-		// Virtual event handlers, override them in your derived class
-		virtual void OnClose( wxCommandEvent& event ) { event.Skip(); }
+public:
+    FileViewerWindowGen(wxWindow* parent,
+        wxWindowID id = wxID_ANY,
+        const wxString& title = wxEmptyString,
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxSize(408, 269),
+        long style = wxDEFAULT_DIALOG_STYLE | wxMAXIMIZE_BOX | wxMINIMIZE_BOX |
+                     wxRESIZE_BORDER);
 
-
-	public:
-
-		FileViewerWindowGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 408,269 ), long style = wxDEFAULT_DIALOG_STYLE|wxMAXIMIZE_BOX|wxMINIMIZE_BOX|wxRESIZE_BORDER );
-
-		~FileViewerWindowGen();
-
+    ~FileViewerWindowGen();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -186,23 +235,26 @@ class FileViewerWindowGen : public wxDialog
 ///////////////////////////////////////////////////////////////////////////////
 class GetfileDialog : public wxDialog
 {
-	private:
+private:
+protected:
+    wxStaticText* m_staticText7;
+    wxStaticText* m_staticText9;
 
-	protected:
-		wxStaticText* m_staticText7;
-		wxStaticText* m_staticText9;
+public:
+    wxTextCtrl* filenameText;
+    wxFilePickerCtrl* targetFilePicker;
+    wxStdDialogButtonSizer* buttons_;
+    wxButton* buttons_OK;
+    wxButton* buttons_Cancel;
 
-	public:
-		wxTextCtrl* filenameText;
-		wxFilePickerCtrl* targetFilePicker;
-		wxStdDialogButtonSizer* buttons_;
-		wxButton* buttons_OK;
-		wxButton* buttons_Cancel;
+    GetfileDialog(wxWindow* parent,
+        wxWindowID id = wxID_ANY,
+        const wxString& title = wxT("Copy file off disk"),
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxDefaultSize,
+        long style = wxDEFAULT_DIALOG_STYLE);
 
-		GetfileDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Copy file off disk"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
-
-		~GetfileDialog();
-
+    ~GetfileDialog();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -210,24 +262,27 @@ class GetfileDialog : public wxDialog
 ///////////////////////////////////////////////////////////////////////////////
 class FileConflictDialog : public wxDialog
 {
-	private:
+private:
+protected:
+    wxStaticText* m_staticText91;
+    wxStaticText* m_staticText7;
+    wxStaticText* m_staticText9;
 
-	protected:
-		wxStaticText* m_staticText91;
-		wxStaticText* m_staticText7;
-		wxStaticText* m_staticText9;
+public:
+    wxTextCtrl* newNameText;
+    wxTextCtrl* oldNameText;
+    wxStdDialogButtonSizer* buttons_;
+    wxButton* buttons_OK;
+    wxButton* buttons_Cancel;
 
-	public:
-		wxTextCtrl* newNameText;
-		wxTextCtrl* oldNameText;
-		wxStdDialogButtonSizer* buttons_;
-		wxButton* buttons_OK;
-		wxButton* buttons_Cancel;
+    FileConflictDialog(wxWindow* parent,
+        wxWindowID id = wxID_ANY,
+        const wxString& title = wxT("Filename conflict"),
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxDefaultSize,
+        long style = wxDEFAULT_DIALOG_STYLE);
 
-		FileConflictDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Filename conflict"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
-
-		~FileConflictDialog();
-
+    ~FileConflictDialog();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -235,24 +290,27 @@ class FileConflictDialog : public wxDialog
 ///////////////////////////////////////////////////////////////////////////////
 class FileRenameDialog : public wxDialog
 {
-	private:
+private:
+protected:
+    wxStaticText* m_staticText91;
+    wxStaticText* m_staticText7;
+    wxStaticText* m_staticText9;
 
-	protected:
-		wxStaticText* m_staticText91;
-		wxStaticText* m_staticText7;
-		wxStaticText* m_staticText9;
+public:
+    wxTextCtrl* newNameText;
+    wxTextCtrl* oldNameText;
+    wxStdDialogButtonSizer* buttons_;
+    wxButton* buttons_OK;
+    wxButton* buttons_Cancel;
 
-	public:
-		wxTextCtrl* newNameText;
-		wxTextCtrl* oldNameText;
-		wxStdDialogButtonSizer* buttons_;
-		wxButton* buttons_OK;
-		wxButton* buttons_Cancel;
+    FileRenameDialog(wxWindow* parent,
+        wxWindowID id = wxID_ANY,
+        const wxString& title = wxT("Rename or move file"),
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxDefaultSize,
+        long style = wxDEFAULT_DIALOG_STYLE);
 
-		FileRenameDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Rename or move file"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
-
-		~FileRenameDialog();
-
+    ~FileRenameDialog();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -260,22 +318,25 @@ class FileRenameDialog : public wxDialog
 ///////////////////////////////////////////////////////////////////////////////
 class CreateDirectoryDialog : public wxDialog
 {
-	private:
+private:
+protected:
+    wxStaticText* m_staticText91;
+    wxStaticText* m_staticText9;
 
-	protected:
-		wxStaticText* m_staticText91;
-		wxStaticText* m_staticText9;
+public:
+    wxTextCtrl* newNameText;
+    wxStdDialogButtonSizer* buttons_;
+    wxButton* buttons_OK;
+    wxButton* buttons_Cancel;
 
-	public:
-		wxTextCtrl* newNameText;
-		wxStdDialogButtonSizer* buttons_;
-		wxButton* buttons_OK;
-		wxButton* buttons_Cancel;
+    CreateDirectoryDialog(wxWindow* parent,
+        wxWindowID id = wxID_ANY,
+        const wxString& title = wxT("Create new directory"),
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxDefaultSize,
+        long style = wxDEFAULT_DIALOG_STYLE);
 
-		CreateDirectoryDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Create new directory"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
-
-		~CreateDirectoryDialog();
-
+    ~CreateDirectoryDialog();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -283,23 +344,26 @@ class CreateDirectoryDialog : public wxDialog
 ///////////////////////////////////////////////////////////////////////////////
 class FormatDialog : public wxDialog
 {
-	private:
+private:
+protected:
+    wxStaticText* m_staticText91;
+    wxStaticText* m_staticText7;
 
-	protected:
-		wxStaticText* m_staticText91;
-		wxStaticText* m_staticText7;
+public:
+    wxTextCtrl* volumeNameText;
+    wxCheckBox* quickFormatCheckBox;
+    wxStdDialogButtonSizer* buttons_;
+    wxButton* buttons_OK;
+    wxButton* buttons_Cancel;
 
-	public:
-		wxTextCtrl* volumeNameText;
-		wxCheckBox* quickFormatCheckBox;
-		wxStdDialogButtonSizer* buttons_;
-		wxButton* buttons_OK;
-		wxButton* buttons_Cancel;
+    FormatDialog(wxWindow* parent,
+        wxWindowID id = wxID_ANY,
+        const wxString& title = wxT("Format disk"),
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxDefaultSize,
+        long style = wxDEFAULT_DIALOG_STYLE);
 
-		FormatDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Format disk"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
-
-		~FormatDialog();
-
+    ~FormatDialog();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -307,37 +371,59 @@ class FormatDialog : public wxDialog
 ///////////////////////////////////////////////////////////////////////////////
 class IdlePanelGen : public wxPanel
 {
-	private:
+private:
+protected:
+    wxStaticBitmap* applicationBitmap;
+    wxPanel* sourceIconPanel;
+    wxSimplebook* sourceBook;
+    wxChoice* formatChoice;
+    wxButton* customConfigurationButton;
+    wxPanel* formatOptionsContainer;
+    wxButton* readButton;
+    wxButton* writeButton;
+    wxButton* browseButton;
+    wxButton* formatButton;
+    wxButton* exploreButton;
 
-	protected:
-		wxStaticBitmap* applicationBitmap;
-		wxPanel* sourceIconPanel;
-		wxSimplebook* sourceBook;
-		wxChoice* formatChoice;
-		wxButton* customConfigurationButton;
-		wxPanel* formatOptionsContainer;
-		wxButton* readButton;
-		wxButton* writeButton;
-		wxButton* browseButton;
-		wxButton* formatButton;
-		wxButton* exploreButton;
+    // Virtual event handlers, override them in your derived class
+    virtual void OnControlsChanged(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnCustomConfigurationButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnReadButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnWriteButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowseButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnFormatButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnExploreButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
 
-		// Virtual event handlers, override them in your derived class
-		virtual void OnControlsChanged( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnCustomConfigurationButton( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnReadButton( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnWriteButton( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBrowseButton( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnFormatButton( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnExploreButton( wxCommandEvent& event ) { event.Skip(); }
+public:
+    IdlePanelGen(wxWindow* parent,
+        wxWindowID id = wxID_ANY,
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxSize(-1, -1),
+        long style = wxTAB_TRAVERSAL,
+        const wxString& name = wxEmptyString);
 
-
-	public:
-
-		IdlePanelGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
-
-		~IdlePanelGen();
-
+    ~IdlePanelGen();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -345,30 +431,43 @@ class IdlePanelGen : public wxPanel
 ///////////////////////////////////////////////////////////////////////////////
 class ImagerPanelGen : public wxPanel
 {
-	private:
+private:
+protected:
+    wxAuiToolBar* imagerToolbar;
+    wxAuiToolBarItem* imagerBackTool;
+    VisualisationControl* visualiser;
+    wxButton* imagerSaveImageButton;
+    wxButton* imagerSaveFluxButton;
+    HistogramViewer* histogram;
+    wxButton* imagerGoAgainButton;
 
-	protected:
-		wxAuiToolBar* imagerToolbar;
-		wxAuiToolBarItem* imagerBackTool;
-		VisualisationControl* visualiser;
-		wxButton* imagerSaveImageButton;
-		wxButton* imagerSaveFluxButton;
-		HistogramViewer* histogram;
-		wxButton* imagerGoAgainButton;
+    // Virtual event handlers, override them in your derived class
+    virtual void OnBackButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnSaveImageButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnSaveFluxButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnImagerGoAgainButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
 
-		// Virtual event handlers, override them in your derived class
-		virtual void OnBackButton( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnSaveImageButton( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnSaveFluxButton( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnImagerGoAgainButton( wxCommandEvent& event ) { event.Skip(); }
+public:
+    ImagerPanelGen(wxWindow* parent,
+        wxWindowID id = wxID_ANY,
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxSize(500, 300),
+        long style = wxTAB_TRAVERSAL,
+        const wxString& name = wxEmptyString);
 
-
-	public:
-
-		ImagerPanelGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
-
-		~ImagerPanelGen();
-
+    ~ImagerPanelGen();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -376,69 +475,121 @@ class ImagerPanelGen : public wxPanel
 ///////////////////////////////////////////////////////////////////////////////
 class BrowserPanelGen : public wxPanel
 {
-	private:
+private:
+protected:
+    wxAuiToolBar* browserToolbar;
+    wxAuiToolBarItem* browserBackTool;
+    wxAuiToolBarItem* browserInfoTool;
+    wxAuiToolBarItem* browserViewTool;
+    wxAuiToolBarItem* browserSaveTool;
+    wxAuiToolBarItem* browserMoreMenuButton;
+    wxMenu* browserMoreMenu;
+    wxMenuItem* browserAddMenuItem;
+    wxMenuItem* browserNewDirectoryMenuItem;
+    wxMenuItem* browserRenameMenuItem;
+    wxMenuItem* browserDeleteMenuItem;
+    wxAuiToolBarItem* browserFormatTool;
+    wxDataViewCtrl* browserTree;
+    wxDataViewColumn* m_dataViewColumn1;
+    wxDataViewColumn* m_dataViewColumn2;
+    wxDataViewColumn* m_dataViewColumn3;
+    wxGauge* diskSpaceGauge;
+    wxButton* browserDiscardButton;
+    wxButton* browserCommitButton;
+    wxStaticText* m_staticText12;
 
-	protected:
-		wxAuiToolBar* browserToolbar;
-		wxAuiToolBarItem* browserBackTool;
-		wxAuiToolBarItem* browserInfoTool;
-		wxAuiToolBarItem* browserViewTool;
-		wxAuiToolBarItem* browserSaveTool;
-		wxAuiToolBarItem* browserMoreMenuButton;
-		wxMenu* browserMoreMenu;
-		wxMenuItem* browserAddMenuItem;
-		wxMenuItem* browserNewDirectoryMenuItem;
-		wxMenuItem* browserRenameMenuItem;
-		wxMenuItem* browserDeleteMenuItem;
-		wxAuiToolBarItem* browserFormatTool;
-		wxDataViewCtrl* browserTree;
-		wxDataViewColumn* m_dataViewColumn1;
-		wxDataViewColumn* m_dataViewColumn2;
-		wxDataViewColumn* m_dataViewColumn3;
-		wxGauge* diskSpaceGauge;
-		wxButton* browserDiscardButton;
-		wxButton* browserCommitButton;
-		wxStaticText* m_staticText12;
+    // Virtual event handlers, override them in your derived class
+    virtual void OnBackButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserInfoButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserViewButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserSaveButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserAddMenuItem(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserNewDirectoryMenuItem(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserRenameMenuItem(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserDeleteMenuItem(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserFormatButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserBeginDrag(wxDataViewEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserDrop(wxDataViewEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserDropPossible(wxDataViewEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserDirectoryExpanding(wxDataViewEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserFilenameChanged(wxDataViewEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserSelectionChanged(wxDataViewEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserDiscardButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserCommitButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
 
-		// Virtual event handlers, override them in your derived class
-		virtual void OnBackButton( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBrowserInfoButton( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBrowserViewButton( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBrowserSaveButton( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBrowserAddMenuItem( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBrowserNewDirectoryMenuItem( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBrowserRenameMenuItem( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBrowserDeleteMenuItem( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBrowserFormatButton( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBrowserBeginDrag( wxDataViewEvent& event ) { event.Skip(); }
-		virtual void OnBrowserDrop( wxDataViewEvent& event ) { event.Skip(); }
-		virtual void OnBrowserDropPossible( wxDataViewEvent& event ) { event.Skip(); }
-		virtual void OnBrowserDirectoryExpanding( wxDataViewEvent& event ) { event.Skip(); }
-		virtual void OnBrowserFilenameChanged( wxDataViewEvent& event ) { event.Skip(); }
-		virtual void OnBrowserSelectionChanged( wxDataViewEvent& event ) { event.Skip(); }
-		virtual void OnBrowserDiscardButton( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBrowserCommitButton( wxCommandEvent& event ) { event.Skip(); }
+public:
+    BrowserPanelGen(wxWindow* parent,
+        wxWindowID id = wxID_ANY,
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxSize(500, 300),
+        long style = wxTAB_TRAVERSAL,
+        const wxString& name = wxEmptyString);
 
+    ~BrowserPanelGen();
 
-	public:
-
-		BrowserPanelGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
-
-		~BrowserPanelGen();
-
-		void browserMoreMenuButtonOnDropDownMenu( wxAuiToolBarEvent &event )
-		{
-			if ( event.IsDropDownClicked() )
-			{
-				browserToolbar->SetToolSticky( event.GetId(), true );
-				wxRect rect = browserToolbar->GetToolRect( event.GetId() );
-				wxPoint pt = browserToolbar->ClientToScreen( rect.GetBottomLeft() );
-				pt = ScreenToClient( pt );
-				browserToolbar->PopupMenu( browserMoreMenu, pt );
-				browserToolbar->SetToolSticky( event.GetId(), false );
-			}
-		}
-
+    void browserMoreMenuButtonOnDropDownMenu(wxAuiToolBarEvent& event)
+    {
+        if (event.IsDropDownClicked())
+        {
+            browserToolbar->SetToolSticky(event.GetId(), true);
+            wxRect rect = browserToolbar->GetToolRect(event.GetId());
+            wxPoint pt = browserToolbar->ClientToScreen(rect.GetBottomLeft());
+            pt = ScreenToClient(pt);
+            browserToolbar->PopupMenu(browserMoreMenu, pt);
+            browserToolbar->SetToolSticky(event.GetId(), false);
+        }
+    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -446,45 +597,64 @@ class BrowserPanelGen : public wxPanel
 ///////////////////////////////////////////////////////////////////////////////
 class ExplorerPanelGen : public wxPanel
 {
-	private:
+private:
+protected:
+    wxAuiToolBar* explorerToolbar;
+    wxAuiToolBarItem* explorerBackTool;
+    wxAuiToolBarItem* explorerRefreshTool;
+    wxStaticText* m_staticText22;
+    wxSpinCtrl* explorerTrackSpinCtrl;
+    wxStaticText* m_staticText26;
+    wxSpinCtrl* explorerSideSpinCtrl;
+    wxStaticText* m_staticText231;
+    wxSpinCtrlDouble* explorerStartTimeSpinCtrl;
+    wxStaticText* m_staticText24;
+    wxButton* guessButton;
+    wxSpinCtrlDouble* explorerClockSpinCtrl;
+    wxStaticText* m_staticText25;
+    wxSpinCtrl* explorerBitOffsetSpinCtrl;
+    wxStaticText* m_staticText27;
+    wxChoice* explorerDecodeChoice;
+    wxStaticText* m_staticText241;
+    wxCheckBox* explorerReverseCheckBox;
+    HistogramViewer* histogram;
+    wxTextCtrl* explorerText;
 
-	protected:
-		wxAuiToolBar* explorerToolbar;
-		wxAuiToolBarItem* explorerBackTool;
-		wxAuiToolBarItem* explorerRefreshTool;
-		wxStaticText* m_staticText22;
-		wxSpinCtrl* explorerTrackSpinCtrl;
-		wxStaticText* m_staticText26;
-		wxSpinCtrl* explorerSideSpinCtrl;
-		wxStaticText* m_staticText231;
-		wxSpinCtrlDouble* explorerStartTimeSpinCtrl;
-		wxStaticText* m_staticText24;
-		wxButton* guessButton;
-		wxSpinCtrlDouble* explorerClockSpinCtrl;
-		wxStaticText* m_staticText25;
-		wxSpinCtrl* explorerBitOffsetSpinCtrl;
-		wxStaticText* m_staticText27;
-		wxChoice* explorerDecodeChoice;
-		wxStaticText* m_staticText241;
-		wxCheckBox* explorerReverseCheckBox;
-		HistogramViewer* histogram;
-		wxTextCtrl* explorerText;
+    // Virtual event handlers, override them in your derived class
+    virtual void OnBackButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnExplorerRefreshButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnExplorerSettingChange(wxSpinEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnExplorerSettingChange(wxSpinDoubleEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnGuessClockButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnExplorerSettingChange(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
 
-		// Virtual event handlers, override them in your derived class
-		virtual void OnBackButton( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnExplorerRefreshButton( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnExplorerSettingChange( wxSpinEvent& event ) { event.Skip(); }
-		virtual void OnExplorerSettingChange( wxSpinDoubleEvent& event ) { event.Skip(); }
-		virtual void OnGuessClockButton( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnExplorerSettingChange( wxCommandEvent& event ) { event.Skip(); }
+public:
+    ExplorerPanelGen(wxWindow* parent,
+        wxWindowID id = wxID_ANY,
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxSize(620, 426),
+        long style = wxTAB_TRAVERSAL,
+        const wxString& name = wxEmptyString);
 
-
-	public:
-
-		ExplorerPanelGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 620,426 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
-
-		~ExplorerPanelGen();
-
+    ~ExplorerPanelGen();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -492,21 +662,24 @@ class ExplorerPanelGen : public wxPanel
 ///////////////////////////////////////////////////////////////////////////////
 class HardwareSourcePanelGen : public wxPanel
 {
-	private:
+private:
+protected:
+    wxStaticText* m_staticText30;
+    wxStaticText* m_staticText29;
 
-	protected:
-		wxStaticText* m_staticText30;
-		wxStaticText* m_staticText29;
+public:
+    wxStaticText* label;
+    wxCheckBox* highDensityToggle;
+    wxChoice* driveTypeChoice;
 
-	public:
-		wxStaticText* label;
-		wxCheckBox* highDensityToggle;
-		wxChoice* driveTypeChoice;
+    HardwareSourcePanelGen(wxWindow* parent,
+        wxWindowID id = wxID_ANY,
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxSize(-1, -1),
+        long style = wxTAB_TRAVERSAL,
+        const wxString& name = wxEmptyString);
 
-		HardwareSourcePanelGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
-
-		~HardwareSourcePanelGen();
-
+    ~HardwareSourcePanelGen();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -514,21 +687,24 @@ class HardwareSourcePanelGen : public wxPanel
 ///////////////////////////////////////////////////////////////////////////////
 class FluxfileSourcePanelGen : public wxPanel
 {
-	private:
+private:
+protected:
+    wxStaticText* m_staticText28;
+    wxStaticText* m_staticText27;
+    wxStaticText* m_staticText281;
 
-	protected:
-		wxStaticText* m_staticText28;
-		wxStaticText* m_staticText27;
-		wxStaticText* m_staticText281;
+public:
+    wxFilePickerCtrl* fluxImagePicker;
+    wxChoice* fluxImageFormat;
 
-	public:
-		wxFilePickerCtrl* fluxImagePicker;
-		wxChoice* fluxImageFormat;
+    FluxfileSourcePanelGen(wxWindow* parent,
+        wxWindowID id = wxID_ANY,
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxSize(-1, -1),
+        long style = wxTAB_TRAVERSAL,
+        const wxString& name = wxEmptyString);
 
-		FluxfileSourcePanelGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
-
-		~FluxfileSourcePanelGen();
-
+    ~FluxfileSourcePanelGen();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -536,18 +712,20 @@ class FluxfileSourcePanelGen : public wxPanel
 ///////////////////////////////////////////////////////////////////////////////
 class ImagefileSourcePanelGen : public wxPanel
 {
-	private:
+private:
+protected:
+    wxStaticText* m_staticText29;
+    wxStaticText* m_staticText28;
 
-	protected:
-		wxStaticText* m_staticText29;
-		wxStaticText* m_staticText28;
+public:
+    wxFilePickerCtrl* diskImagePicker;
 
-	public:
-		wxFilePickerCtrl* diskImagePicker;
+    ImagefileSourcePanelGen(wxWindow* parent,
+        wxWindowID id = wxID_ANY,
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxSize(-1, -1),
+        long style = wxTAB_TRAVERSAL,
+        const wxString& name = wxEmptyString);
 
-		ImagefileSourcePanelGen( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
-
-		~ImagefileSourcePanelGen();
-
+    ~ImagefileSourcePanelGen();
 };
-

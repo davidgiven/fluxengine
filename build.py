@@ -224,53 +224,53 @@ if not glob("../fluxengine-testdata/data"):
     print("fluxengine-testdata not found; skipping corpus tests")
 else:
     corpus = [
-        ("agat", "", "--drive.tpi=96"),
-        ("amiga", "", "--drive.tpi=135"),
-        ("apple2", "", "--140 --drive.tpi=96"),
-        ("atarist", "", "--360 --drive.tpi=135"),
-        ("atarist", "", "--370 --drive.tpi=135"),
-        ("atarist", "", "--400 --drive.tpi=135"),
-        ("atarist", "", "--410 --drive.tpi=135"),
-        ("atarist", "", "--720 --drive.tpi=135"),
-        ("atarist", "", "--740 --drive.tpi=135"),
-        ("atarist", "", "--800 --drive.tpi=135"),
-        ("atarist", "", "--820 --drive.tpi=135"),
+        ("agat", "", ""),
+        ("amiga", "", ""),
+        ("apple2", "", "--140 40track_drive"),
+        ("atarist", "", "--360"),
+        ("atarist", "", "--370"),
+        ("atarist", "", "--400"),
+        ("atarist", "", "--410"),
+        ("atarist", "", "--720"),
+        ("atarist", "", "--740"),
+        ("atarist", "", "--800"),
+        ("atarist", "", "--820"),
         ("bk", "", ""),
-        ("brother", "", "--120 --drive.tpi=135"),
-        ("brother", "", "--240 --drive.tpi=135"),
+        ("brother", "", "--120 40track_drive"),
+        ("brother", "", "--240"),
         (
             "commodore",
             "scripts/commodore1541_test.textpb",
-            "--171 --drive.tpi=96",
+            "--171 40track_drive",
         ),
         (
             "commodore",
             "scripts/commodore1541_test.textpb",
-            "--192 --drive.tpi=96",
+            "--192 40track_drive",
         ),
-        ("commodore", "", "--800 --drive.tpi=135"),
-        ("commodore", "", "--1620 --drive.tpi=135"),
-        ("hplif", "", "--264 --drive.tpi=135"),
-        ("hplif", "", "--608 --drive.tpi=135"),
-        ("hplif", "", "--616 --drive.tpi=135"),
-        ("hplif", "", "--770 --drive.tpi=135"),
-        ("ibm", "", "--1200 --drive.tpi=96"),
-        ("ibm", "", "--1232 --drive.tpi=96"),
-        ("ibm", "", "--1440 --drive.tpi=135"),
-        ("ibm", "", "--1680 --drive.tpi=135"),
-        ("ibm", "", "--180 --drive.tpi=96"),
-        ("ibm", "", "--160 --drive.tpi=96"),
-        ("ibm", "", "--320 --drive.tpi=96"),
-        ("ibm", "", "--360 --drive.tpi=96"),
-        ("ibm", "", "--720_96 --drive.tpi=96"),
-        ("ibm", "", "--720_135 --drive.tpi=135"),
-        ("mac", "scripts/mac400_test.textpb", "--400 --drive.tpi=135"),
-        ("mac", "scripts/mac800_test.textpb", "--800 --drive.tpi=135"),
-        ("n88basic", "", "--drive.tpi=96"),
-        ("rx50", "", "--drive.tpi=96"),
-        ("tids990", "", "--drive.tpi=48"),
-        ("victor9k", "", "--612 --drive.tpi=96"),
-        ("victor9k", "", "--1224 --drive.tpi=96"),
+        ("commodore", "", "--800"),
+        ("commodore", "", "--1620"),
+        ("hplif", "", "--264"),
+        ("hplif", "", "--608"),
+        ("hplif", "", "--616"),
+        ("hplif", "", "--770"),
+        ("ibm", "", "--1200"),
+        ("ibm", "", "--1232"),
+        ("ibm", "", "--1440"),
+        ("ibm", "", "--1680"),
+        ("ibm", "", "--180 40track_drive"),
+        ("ibm", "", "--160 40track_drive"),
+        ("ibm", "", "--320 40track_drive"),
+        ("ibm", "", "--360 40track_drive"),
+        ("ibm", "", "--720_96"),
+        ("ibm", "", "--720_135"),
+        ("mac", "scripts/mac400_test.textpb", "--400"),
+        ("mac", "scripts/mac800_test.textpb", "--800"),
+        ("n88basic", "", ""),
+        ("rx50", "", ""),
+        ("tids990", "", ""),
+        ("victor9k", "", "--612"),
+        ("victor9k", "", "--1224"),
     ]
 
     for c in corpus:
@@ -285,11 +285,11 @@ else:
                     + c[0]
                     + " "
                     + format
-                    + " {ins[0]} "
+                    + " {ins[0]} '"
                     + c[1]
-                    + " "
+                    + "' '"
                     + c[2]
-                    + ">/dev/null"
+                    + "' $(dir {outs[0]}) > /dev/null"
                 ],
                 label="CORPUSTEST",
             )

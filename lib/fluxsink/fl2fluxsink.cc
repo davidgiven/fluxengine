@@ -45,7 +45,8 @@ public:
 
         proto.set_rotational_period_ms(
             globalConfig()->drive().rotational_period_ms());
-        proto.set_tpi(globalConfig()->drive().tpi());
+        proto.set_drive_type(globalConfig()->drive().drive_type());
+        proto.set_format_type(globalConfig()->layout().format_type());
         saveFl2File(_filename, proto);
     }
 

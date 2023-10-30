@@ -244,12 +244,12 @@ private:
                             uint32_t usedBlocks = std::stoul(
                                 metadata.at(Filesystem::USED_BLOCKS));
 
-							if (!totalBlocks)
-								throw std::out_of_range("no disk usage data");
+                            if (!totalBlocks)
+                                throw std::out_of_range("no disk usage data");
 
-							diskSpaceGauge->Enable();
-							diskSpaceGauge->SetRange(totalBlocks);
-							diskSpaceGauge->SetValue(usedBlocks);
+                            diskSpaceGauge->Enable();
+                            diskSpaceGauge->SetRange(totalBlocks);
+                            diskSpaceGauge->SetValue(usedBlocks);
                         }
                         catch (const std::out_of_range& e)
                         {

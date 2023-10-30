@@ -2,34 +2,47 @@
 #include "lib/layout.h"
 #include "lib/proto.h"
 #include "lib/logger.h"
-
-bool approximatelyEqual(float a, float b, float epsilon)
-{
-    return fabs(a - b) <= ((fabs(a) < fabs(b) ? fabs(b) : fabs(a)) * epsilon);
-}
+#include "lib/fl2.h"
 
 static unsigned getTrackStep()
 {
-    if (globalConfig()->layout().tpi() == 0)
-        error("no layout TPI set");
-    if (globalConfig()->drive().tpi() == 0)
-        return 1;
+    auto format_type = globalConfig()->layout().format_type();
+    auto drive_type = globalConfig()->drive().drive_type();
 
-    if (globalConfig()->layout().tpi() == 0.0)
-        error("layout TPI is zero; this shouldn't happen?");
+    switch (format_type)
+    {
+        case FORMATTYPE_40TRACK:
+            switch (drive_type)
+            {
+                case DRIVETYPE_40TRACK:
+                    return 1;
 
-    float trackStepFactor =
-        globalConfig()->drive().tpi() / globalConfig()->layout().tpi();
+                case DRIVETYPE_80TRACK:
+                    return 2;
 
-    if (!approximatelyEqual(trackStepFactor, round(trackStepFactor), 0.001))
-        error(
-            "this drive can't handle this image, because the drive TPI doesn't "
-            "divide neatly into the layout TPI");
-    if (trackStepFactor < 0.999)
-        error(
-            "this drive can't handle this image, because the head is too big");
+                case DRIVETYPE_APPLE2:
+                    return 4;
+            }
 
-    return round(trackStepFactor);
+        case FORMATTYPE_80TRACK:
+            switch (drive_type)
+            {
+                case DRIVETYPE_40TRACK:
+                    error(
+                        "you can't write an 80 track image to a 40 track "
+                        "drive");
+
+                case DRIVETYPE_80TRACK:
+                    return 1;
+
+                case DRIVETYPE_APPLE2:
+                    error(
+                        "you can't write an 80 track image to an Apple II "
+                        "drive");
+            }
+    }
+
+    return 1;
 }
 
 unsigned Layout::remapTrackPhysicalToLogical(unsigned ptrack)
@@ -236,4 +249,16 @@ std::shared_ptr<const TrackInfo> Layout::getLayoutOfTrackPhysical(
 {
     return getLayoutOfTrack(remapTrackPhysicalToLogical(physicalTrack),
         remapSidePhysicalToLogical(physicalSide));
+}
+
+int Layout::getHeadWidth()
+{
+    switch (globalConfig()->drive().drive_type())
+    {
+        case DRIVETYPE_APPLE2:
+            return 4;
+
+        default:
+            return 1;
+    }
 }

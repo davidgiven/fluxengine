@@ -3,14 +3,8 @@ from build.c import cxxlibrary
 from scripts.build import protoencode
 
 drivetypes = [
-    "35_40",
-    "35_80",
-    "525_40M",
-    "525_40",
-    "525_80M",
-    "525_80",
-    "8_38",
-    "8_77",
+    "40track",
+    "80track",
     "apple2",
 ]
 

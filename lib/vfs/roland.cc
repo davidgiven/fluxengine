@@ -69,10 +69,10 @@ private:
         void putBlock(RolandFsFilesystem* fs, uint8_t offset, uint8_t block)
         {
             if (blocks.size() <= offset)
-                blocks.resize(offset+1);
+                blocks.resize(offset + 1);
             blocks[offset] = block;
 
-            length = (offset+1) * fs->_blockSectors * fs->_sectorSize;
+            length = (offset + 1) * fs->_blockSectors * fs->_sectorSize;
             attributes[Filesystem::LENGTH] = std::to_string(length);
         }
 
@@ -84,7 +84,7 @@ private:
                 if (!blocknumber)
                     break;
 
-                putBlock(fs, offset+i, blocknumber);
+                putBlock(fs, offset + i, blocknumber);
             }
         }
 
@@ -336,7 +336,7 @@ private:
                 else
                     de = it->second;
 
-                de->putBlocks(this, extent*16, direntBytes);
+                de->putBlocks(this, extent * 16, direntBytes);
             }
         }
 
