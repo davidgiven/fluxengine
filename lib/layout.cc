@@ -42,8 +42,6 @@ static unsigned getTrackStep()
             }
     }
 
-    warning(
-        "don't know the drive and format types; performing 1:1 track mapping");
     return 1;
 }
 
