@@ -1,0 +1,6 @@
+comment: '8", 5.25" or 3.5" 40 track'
+
+drive {
+	drive_type: DRIVETYPE_40TRACK
+}
+
