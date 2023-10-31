@@ -1,9 +1,9 @@
-#include "globals.h"
-#include "flags.h"
-#include "readerwriter.h"
-#include "fluxmap.h"
-#include "sector.h"
-#include "proto.h"
+#include "lib/globals.h"
+#include "lib/flags.h"
+#include "lib/readerwriter.h"
+#include "lib/fluxmap.h"
+#include "lib/sector.h"
+#include "lib/proto.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/fluxsink/fluxsink.h"
 #include "fluxengine.h"
@@ -59,8 +59,7 @@ int mainRawWrite(int argc, const char* argv[])
 
     if (argc == 1)
         showProfiles("rawwrite", formats);
-    globalConfig().overrides()->mutable_flux_sink()->set_type(
-        FLUXTYPE_DRIVE);
+    globalConfig().overrides()->mutable_flux_sink()->set_type(FLUXTYPE_DRIVE);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
     if (globalConfig()->flux_source().type() == FLUXTYPE_DRIVE)

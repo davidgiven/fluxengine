@@ -1,7 +1,7 @@
 #include "lib/globals.h"
 #include "lib/logger.h"
 #include "gui.h"
-#include "utils.h"
+#include "lib/utils.h"
 
 class FluxEngineApp;
 class ExecEvent;
@@ -53,19 +53,19 @@ private:
 
 bool FluxEngineApp::OnInit()
 {
-	try
-	{
-    wxImage::AddHandler(new wxPNGHandler());
-    Bind(EXEC_EVENT_TYPE, &FluxEngineApp::OnExec, this);
-    _mainWindow = CreateMainWindow();
-    _mainWindow->Show(true);
-    return true;
-	}
-	catch (const ErrorException* e)
-	{
-		fmt::print(stderr, "Exception on startup: {}\n", e->message);
-		exit(1);
-	}
+    try
+    {
+        wxImage::AddHandler(new wxPNGHandler());
+        Bind(EXEC_EVENT_TYPE, &FluxEngineApp::OnExec, this);
+        _mainWindow = CreateMainWindow();
+        _mainWindow->Show(true);
+        return true;
+    }
+    catch (const ErrorException* e)
+    {
+        fmt::print(stderr, "Exception on startup: {}\n", e->message);
+        exit(1);
+    }
 }
 
 wxThread::ExitCode FluxEngineApp::Entry()

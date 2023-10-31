@@ -1,8 +1,8 @@
-#include "globals.h"
-#include "fluxmap.h"
+#include "lib/globals.h"
+#include "lib/fluxmap.h"
 #include "lib/fluxsource/fluxsource.pb.h"
-#include "fluxsource/fluxsource.h"
-#include "proto.h"
+#include "lib/fluxsource/fluxsource.h"
+#include "lib/proto.h"
 #include <fstream>
 
 struct CwfHeader

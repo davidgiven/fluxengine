@@ -1,10 +1,10 @@
-#include "globals.h"
-#include "flags.h"
-#include "sector.h"
-#include "imagereader/imagereader.h"
-#include "image.h"
-#include "proto.h"
-#include "logger.h"
+#include "lib/globals.h"
+#include "lib/flags.h"
+#include "lib/sector.h"
+#include "lib/imagereader/imagereader.h"
+#include "lib/image.h"
+#include "lib/proto.h"
+#include "lib/logger.h"
 #include "lib/config.pb.h"
 #include <algorithm>
 #include <iostream>
@@ -61,13 +61,13 @@ public:
         if (mediaFlag == 0x20)
         {
             _extraConfig.mutable_drive()->set_high_density(true);
-            _extraConfig.mutable_layout()->set_tpi(96);
+            _extraConfig.mutable_layout()->set_format_type(FORMATTYPE_80TRACK);
         }
         else
         {
             clockRate = 300;
             _extraConfig.mutable_drive()->set_high_density(false);
-            _extraConfig.mutable_layout()->set_tpi(48);
+            _extraConfig.mutable_layout()->set_format_type(FORMATTYPE_40TRACK);
         }
 
         auto layout = _extraConfig.mutable_layout();

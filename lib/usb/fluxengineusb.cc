@@ -1,8 +1,8 @@
-#include "globals.h"
+#include "lib/globals.h"
 #include "usb.h"
 #include "protocol.h"
-#include "fluxmap.h"
-#include "bytes.h"
+#include "lib/fluxmap.h"
+#include "lib/bytes.h"
 #include "libusbp_config.h"
 #include "libusbp.hpp"
 
@@ -76,7 +76,7 @@ public:
                 "your FluxEngine firmware is at version {} but the client is "
                 "for version {}; please upgrade",
                 version,
-                (int) FLUXENGINE_PROTOCOL_VERSION);
+                (int)FLUXENGINE_PROTOCOL_VERSION);
     }
 
 private:

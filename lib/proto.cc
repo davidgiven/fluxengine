@@ -1,5 +1,5 @@
-#include "globals.h"
-#include "proto.h"
+#include "lib/globals.h"
+#include "lib/proto.h"
 #include "lib/common.pb.h"
 #include <regex>
 
@@ -288,8 +288,7 @@ std::string getProtoFieldValue(ProtoField& protoField)
         case google::protobuf::FieldDescriptor::TYPE_ENUM:
         {
             const auto* enumvalue = reflection->GetEnum(*message, field);
-            const auto* enumfield = field->enum_type();
-            return enumfield->name();
+            return enumvalue->name();
         }
 
         case google::protobuf::FieldDescriptor::TYPE_MESSAGE:

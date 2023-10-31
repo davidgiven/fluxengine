@@ -1,6 +1,0 @@
-comment: '5.25" 40 track 48tpi'
-
-drive {
-	tpi: 48
-}
-

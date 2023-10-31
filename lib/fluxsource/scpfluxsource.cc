@@ -1,11 +1,11 @@
-#include "globals.h"
-#include "fluxmap.h"
+#include "lib/globals.h"
+#include "lib/fluxmap.h"
 #include "kryoflux.h"
 #include "lib/fluxsource/fluxsource.pb.h"
 #include "lib/utils.h"
-#include "fluxsource/fluxsource.h"
-#include "scp.h"
-#include "proto.h"
+#include "lib/fluxsource/fluxsource.h"
+#include "lib/scp.h"
+#include "lib/proto.h"
 #include "lib/logger.h"
 #include <fstream>
 
@@ -42,8 +42,9 @@ public:
             (_header.file_id[2] != 'P'))
             error("input not a SCP file");
 
-        int tpi = (_header.flags & SCP_FLAG_96TPI) ? 96 : 48;
-        _extraConfig.mutable_drive()->set_tpi(tpi);
+        _extraConfig.mutable_drive()->set_drive_type(
+            (_header.flags & SCP_FLAG_96TPI) ? DRIVETYPE_80TRACK
+                                             : DRIVETYPE_40TRACK);
 
         _resolution = 25 * (_header.resolution + 1);
         int startSide = (_header.heads == 2) ? 1 : 0;

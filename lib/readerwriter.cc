@@ -1,22 +1,22 @@
-#include "globals.h"
-#include "flags.h"
-#include "fluxmap.h"
-#include "readerwriter.h"
+#include "lib/globals.h"
+#include "lib/flags.h"
+#include "lib/fluxmap.h"
+#include "lib/readerwriter.h"
 #include "protocol.h"
-#include "usb/usb.h"
-#include "encoders/encoders.h"
-#include "decoders/decoders.h"
-#include "fluxsource/fluxsource.h"
-#include "fluxsink/fluxsink.h"
-#include "imagereader/imagereader.h"
-#include "imagewriter/imagewriter.h"
-#include "sector.h"
-#include "image.h"
-#include "logger.h"
-#include "layout.h"
-#include "utils.h"
+#include "lib/usb/usb.h"
+#include "lib/encoders/encoders.h"
+#include "lib/decoders/decoders.h"
+#include "lib/fluxsource/fluxsource.h"
+#include "lib/fluxsink/fluxsink.h"
+#include "lib/imagereader/imagereader.h"
+#include "lib/imagewriter/imagewriter.h"
+#include "lib/sector.h"
+#include "lib/image.h"
+#include "lib/logger.h"
+#include "lib/layout.h"
+#include "lib/utils.h"
 #include "lib/config.pb.h"
-#include "proto.h"
+#include "lib/proto.h"
 #include <optional>
 
 enum ReadResult
@@ -218,7 +218,7 @@ ReadResult readGroup(FluxSourceIteratorHolder& fluxSourceIteratorHolder,
     ReadResult result = BAD_AND_CAN_NOT_RETRY;
 
     for (unsigned offset = 0; offset < trackInfo->groupSize;
-         offset += globalConfig()->drive().head_width())
+         offset += Layout::getHeadWidth())
     {
         auto& fluxSourceIterator = fluxSourceIteratorHolder.getIterator(
             trackInfo->physicalTrack + offset, trackInfo->physicalSide);
@@ -274,7 +274,7 @@ void writeTracks(FluxSink& fluxSink,
         for (;;)
         {
             for (int offset = 0; offset < trackInfo->groupSize;
-                 offset += globalConfig()->drive().head_width())
+                 offset += Layout::getHeadWidth())
             {
                 unsigned physicalTrack = trackInfo->physicalTrack + offset;
 

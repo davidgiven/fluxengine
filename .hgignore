@@ -1,4 +1,5 @@
 .obj
+.git
 streams
 .*\.flux
 .*\.img

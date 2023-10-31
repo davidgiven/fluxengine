@@ -1,12 +1,12 @@
-#include "globals.h"
-#include "flags.h"
-#include "fluxmap.h"
-#include "sector.h"
-#include "proto.h"
-#include "flux.h"
-#include "fl2.h"
-#include "fl2.pb.h"
-#include "fluxengine.h"
+#include "lib/globals.h"
+#include "lib/flags.h"
+#include "lib/fluxmap.h"
+#include "lib/sector.h"
+#include "lib/proto.h"
+#include "lib/flux.h"
+#include "lib/fl2.h"
+#include "lib/fl2.pb.h"
+#include "src/fluxengine.h"
 #include <fstream>
 
 static FlagGroup flags;

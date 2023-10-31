@@ -1,4 +1,4 @@
-#include "globals.h"
+#include "lib/globals.h"
 #include "lib/vfs/vfs.h"
 #include "snowhouse/snowhouse.h"
 

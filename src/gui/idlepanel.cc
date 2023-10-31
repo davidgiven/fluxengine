@@ -9,16 +9,16 @@
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/imagereader/imagereader.h"
 #include "lib/imagewriter/imagewriter.h"
-#include "layout.h"
+#include "lib/layout.h"
 #include "texteditorwindow.h"
 #include "iconbutton.h"
 #include <wx/config.h>
 #include <wx/mstream.h>
 #include <wx/image.h>
 #include <wx/bitmap.h>
-#include ".obj/extras/hardware.h"
-#include ".obj/extras/fluxfile.h"
-#include ".obj/extras/imagefile.h"
+#include "icons/hardware.h"
+#include "icons/fluxfile.h"
+#include "icons/imagefile.h"
 
 #define CONFIG_SELECTEDSOURCE "SelectedSource"
 #define CONFIG_DEVICE "Device"
@@ -103,11 +103,11 @@ public:
         parent->AddPage(this, "idle");
 
         _imageList.Add(
-            createBitmap(extras_hardware_png, sizeof(extras_hardware_png)));
+            createBitmap(icon_hardware_png, sizeof(icon_hardware_png)));
         _imageList.Add(
-            createBitmap(extras_fluxfile_png, sizeof(extras_fluxfile_png)));
+            createBitmap(icon_fluxfile_png, sizeof(icon_fluxfile_png)));
         _imageList.Add(
-            createBitmap(extras_imagefile_png, sizeof(extras_imagefile_png)));
+            createBitmap(icon_imagefile_png, sizeof(icon_imagefile_png)));
 
         UpdateSources();
     }
@@ -239,12 +239,12 @@ public:
             {
                 if (_selectedFluxFormat)
                 {
-                if (_selectedFluxFormat->sink)
-                    _selectedFluxFormat->sink(_selectedFluxFilename,
-                        globalConfig().overrides()->mutable_flux_sink());
-                if (_selectedFluxFormat->source)
-                    _selectedFluxFormat->source(_selectedFluxFilename,
-                        globalConfig().overrides()->mutable_flux_source());
+                    if (_selectedFluxFormat->sink)
+                        _selectedFluxFormat->sink(_selectedFluxFilename,
+                            globalConfig().overrides()->mutable_flux_sink());
+                    if (_selectedFluxFormat->source)
+                        _selectedFluxFormat->source(_selectedFluxFilename,
+                            globalConfig().overrides()->mutable_flux_source());
                 }
                 break;
             }
@@ -695,8 +695,11 @@ private:
 
             for (auto& group : globalConfig()->option_group())
             {
+                std::string groupName = group.comment();
+                if (groupName == "$formats")
+                    groupName = "Formats";
                 sizer->Add(new wxStaticText(
-                    formatOptionsContainer, wxID_ANY, group.comment() + ":"));
+                    formatOptionsContainer, wxID_ANY, groupName + ":"));
 
                 bool first = true;
                 bool valueSet = false;

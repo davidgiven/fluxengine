@@ -1,11 +1,11 @@
-#include "globals.h"
-#include "fluxmap.h"
+#include "lib/globals.h"
+#include "lib/fluxmap.h"
 #include "lib/fluxsource/fluxsource.pb.h"
 #include "lib/fl2.pb.h"
-#include "fluxsource/fluxsource.h"
-#include "proto.h"
-#include "fl2.h"
-#include "fluxmap.h"
+#include "lib/fluxsource/fluxsource.h"
+#include "lib/proto.h"
+#include "lib/fl2.h"
+#include "lib/fluxmap.h"
 #include <fstream>
 
 class Fl2FluxSourceIterator : public FluxSourceIterator
@@ -39,8 +39,8 @@ public:
 
         _extraConfig.mutable_drive()->set_rotational_period_ms(
             _proto.rotational_period_ms());
-        if (_proto.has_tpi())
-            _extraConfig.mutable_drive()->set_tpi(_proto.tpi());
+        if (_proto.has_drive_type())
+            _extraConfig.mutable_drive()->set_drive_type(_proto.drive_type());
     }
 
 public:

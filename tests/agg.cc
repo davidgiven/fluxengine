@@ -1,7 +1,7 @@
-#include "globals.h"
-#include "bytes.h"
-#include "dep/agg/include/agg2d.h"
-#include "dep/stb/stb_image_write.h"
+#include "lib/globals.h"
+#include "lib/bytes.h"
+#include "agg2d.h"
+#include "stb_image_write.h"
 #include <assert.h>
 
 static void test_agg(void)

@@ -1,9 +1,9 @@
-#include "globals.h"
-#include "flags.h"
-#include "fluxmap.h"
-#include "sector.h"
-#include "proto.h"
-#include "readerwriter.h"
+#include "lib/globals.h"
+#include "lib/flags.h"
+#include "lib/fluxmap.h"
+#include "lib/sector.h"
+#include "lib/proto.h"
+#include "lib/readerwriter.h"
 #include "lib/decoders/decoders.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/imagereader/imagereader.h"
@@ -57,8 +57,8 @@ int mainLs(int argc, const char* argv[])
                 quote(dirent->filename),
                 maxlen + 2,
                 dirent->length,
-        				dirent->mode,
-        				dirent->attributes[Filesystem::CTIME]);
+                dirent->mode,
+                dirent->attributes[Filesystem::CTIME]);
             total += dirent->length;
         }
         fmt::print("({} files, {} bytes)\n", files.size(), total);

@@ -1,15 +1,15 @@
-#include "globals.h"
-#include "flags.h"
-#include "readerwriter.h"
-#include "fluxmap.h"
-#include "decoders/fluxmapreader.h"
-#include "decoders/fluxdecoder.h"
-#include "decoders/decoders.h"
-#include "fluxsource/fluxsource.h"
+#include "lib/globals.h"
+#include "lib/flags.h"
+#include "lib/readerwriter.h"
+#include "lib/fluxmap.h"
+#include "lib/decoders/fluxmapreader.h"
+#include "lib/decoders/fluxdecoder.h"
+#include "lib/decoders/decoders.h"
+#include "lib/fluxsource/fluxsource.h"
 #include "protocol.h"
-#include "decoders/rawbits.h"
-#include "sector.h"
-#include "proto.h"
+#include "lib/decoders/rawbits.h"
+#include "lib/sector.h"
+#include "lib/proto.h"
 
 static FlagGroup flags;
 
@@ -131,8 +131,7 @@ static nanoseconds_t guessClock(const Fluxmap& fluxmap)
 
 int mainInspect(int argc, const char* argv[])
 {
-    globalConfig().overrides()->mutable_flux_source()->set_type(
-        FLUXTYPE_DRIVE);
+    globalConfig().overrides()->mutable_flux_source()->set_type(FLUXTYPE_DRIVE);
     flags.parseFlagsWithConfigFiles(argc, argv, {});
 
     auto& fluxSource = globalConfig().getFluxSource();

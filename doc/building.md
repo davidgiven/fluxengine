@@ -204,7 +204,7 @@ install some support packages.
   - For Linux with Ubuntu/Debian:
 	`libusb-1.0-0-dev`, `libsqlite3-dev`, `zlib1g-dev`,
 	`libudev-dev`, `protobuf-compiler`, `libwxgtk3.0-gtk3-dev`,
-	`libfmt-dev`.
+	`libfmt-dev`, `python3`.
   - For Linux with Fedora/Red Hat:
     `git`, `make`, `gcc`, `gcc-c++`, `xxd`, `protobuf-compiler`,
     `protobuf-devel`, `fmt-devel`, `systemd-devel`, `wxGTK3-devel`,
@@ -214,7 +214,7 @@ install some support packages.
   - For Windows with MSYS2: `make`, `mingw-w64-i686-libusb`,
 	`mingw-w64-i686-protobuf`, `mingw-w64-i686-sqlite3`, `mingw-w64-i686-zlib`,
 	`mingw-w64-i686-gcc`, `vim`, `diffutils`, `mingw-w64-i686-wxWidgets`,
-	`mingw-w64-i686-fmt`, `mingw-w64-i686-pkg-config`.
+	`mingw-w64-i686-fmt`, `mingw-w64-i686-pkg-config`, `mingw-w64-i686-python`.
 
 These lists are not necessarily exhaustive --- please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new) if I've missed
@@ -222,10 +222,16 @@ anything.
 
 Windows and Linux (and other Unixes) build by just doing `make`. OSX builds by
 doing `gmake` (we're using a feature which the elderly default make in OSX
-doesn't have). You should end up with some executables in the current
-directory, one of which is called `fluxengine` or `fluxengine.exe` depending on
-your platform. It has minimal dependencies and you should be able to put it
-anywhere. The other binaries may also be of interest.
+doesn't have). Remember to add an appropriate `-j` option for a parallel build.
+You should end up with some executables in the current directory, one of which
+is called `fluxengine` or `fluxengine.exe` depending on your platform. It has
+minimal dependencies and you should be able to put it anywhere. The other
+binaries may also be of interest.
+
+Potential issues:
+
+  - Complaints about a missing `libudev` on Windows? Make sure you're using the
+  mingw Python rather than the msys Python.
 
 If it doesn't build, please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new).

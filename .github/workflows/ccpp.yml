@@ -19,9 +19,10 @@ jobs:
         repository: 'davidgiven/fluxengine-testdata'
         path: 'fluxengine-testdata'
     - name: apt
-      run: sudo apt update && sudo apt install libudev-dev libsqlite3-dev protobuf-compiler libwxgtk3.0-gtk3-dev libfmt-dev
+      run: |
+        sudo apt install libudev-dev libsqlite3-dev protobuf-compiler libwxgtk3.0-gtk3-dev libfmt-dev libprotobuf-dev wx-common
     - name: make
-      run: CXXFLAGS="-Wp,-D_GLIBCXX_ASSERTIONS" make -j2 -C fluxengine
+      run: CXXFLAGS="-Wp,-D_GLIBCXX_ASSERTIONS" make -j`nproc` -C fluxengine
 
   build-macos-current:
     runs-on: macos-latest
@@ -37,7 +38,7 @@ jobs:
     - name: brew
       run: brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg
     - name: make
-      run: gmake -j2 -C fluxengine
+      run: gmake -j`nproc` -C fluxengine
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v2
@@ -58,17 +59,20 @@ jobs:
         install: >-
           diffutils
           make
+          mingw-w64-i686-binutils
           mingw-w64-i686-fmt
           mingw-w64-i686-gcc
           mingw-w64-i686-libusb
+          mingw-w64-i686-nsis
           mingw-w64-i686-pkg-config
           mingw-w64-i686-protobuf
+          mingw-w64-i686-python
           mingw-w64-i686-sqlite3
           mingw-w64-i686-wxWidgets
           mingw-w64-i686-zlib
-          mingw-w64-i686-nsis
-          zip
+          mingw-w64-i686-imagemagick
           vim
+          zip
     - name: update-protobuf
       run: |
          pacman -U --noconfirm https://repo.msys2.org/mingw/mingw32/mingw-w64-i686-protobuf-21.9-1-any.pkg.tar.zst
@@ -81,7 +85,7 @@ jobs:
         repository: 'davidgiven/fluxengine-testdata'
         path: 'fluxengine-testdata'
     - name: build
-      run: make -j2 -C fluxengine
+      run: MAGICK_TIME_LIMIT=100 make -j`nproc` -C fluxengine
 
     - name: nsis
       run: |

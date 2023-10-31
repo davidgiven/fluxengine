@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include "globals.h"
-#include "fluxmap.h"
+#include "lib/globals.h"
+#include "lib/fluxmap.h"
 #include "lib/usb/greaseweazle.h"
 
 #define E28(val)                                          \

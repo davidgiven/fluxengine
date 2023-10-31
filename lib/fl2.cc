@@ -1,6 +1,6 @@
-#include "globals.h"
-#include "proto.h"
-#include "fluxmap.h"
+#include "lib/globals.h"
+#include "lib/proto.h"
+#include "lib/fluxmap.h"
 #include "lib/fl2.pb.h"
 #include <fstream>
 

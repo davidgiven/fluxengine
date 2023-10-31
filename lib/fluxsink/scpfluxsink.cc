@@ -1,15 +1,15 @@
-#include "globals.h"
-#include "flags.h"
-#include "fluxmap.h"
-#include "bytes.h"
+#include "lib/globals.h"
+#include "lib/flags.h"
+#include "lib/fluxmap.h"
+#include "lib/bytes.h"
 #include "protocol.h"
-#include "fluxsink/fluxsink.h"
-#include "decoders/fluxmapreader.h"
+#include "lib/fluxsink/fluxsink.h"
+#include "lib/decoders/fluxmapreader.h"
 #include "lib/fluxsink/fluxsink.pb.h"
-#include "proto.h"
-#include "fluxmap.h"
-#include "layout.h"
-#include "scp.h"
+#include "lib/proto.h"
+#include "lib/fluxmap.h"
+#include "lib/layout.h"
+#include "lib/scp.h"
 #include "lib/logger.h"
 #include <fstream>
 #include <sys/stat.h>
@@ -55,7 +55,7 @@ public:
         _fileheader.start_track = strackno(minTrack, minSide);
         _fileheader.end_track = strackno(maxTrack, maxSide);
         _fileheader.flags = SCP_FLAG_INDEXED;
-        if (globalConfig()->drive().tpi() != 48)
+        if (globalConfig()->drive().drive_type() != DRIVETYPE_40TRACK)
             _fileheader.flags |= SCP_FLAG_96TPI;
         _fileheader.cell_width = 0;
         if ((minSide == 0) && (maxSide == 0))

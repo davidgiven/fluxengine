@@ -1,4 +1,4 @@
-#include "globals.h"
+#include "lib/globals.h"
 #include "lib/vfs/vfs.h"
 #include "lib/vfs/sectorinterface.h"
 #include "lib/vfs/vfs.pb.h"
@@ -119,11 +119,11 @@ int main(void)
     {
         const std::string text = R"M(
 			drive {
-				tpi: 96
+				drive_type: DRIVETYPE_80TRACK
 			}
 
 			layout {
-				tpi: 96
+				format_type: FORMATTYPE_80TRACK
 				tracks: 10
 				sides: 1
 				layoutdata {

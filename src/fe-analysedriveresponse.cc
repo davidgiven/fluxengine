@@ -1,15 +1,15 @@
-#include "globals.h"
-#include "flags.h"
-#include "usb/usb.h"
-#include "bitmap.h"
-#include "fluxmap.h"
-#include "decoders/fluxmapreader.h"
-#include "readerwriter.h"
+#include "lib/globals.h"
+#include "lib/flags.h"
+#include "lib/usb/usb.h"
+#include "lib/bitmap.h"
+#include "lib/fluxmap.h"
+#include "lib/decoders/fluxmapreader.h"
+#include "lib/readerwriter.h"
 #include "protocol.h"
-#include "proto.h"
-#include "fluxsink/fluxsink.h"
-#include "dep/agg/include/agg2d.h"
-#include "dep/stb/stb_image_write.h"
+#include "lib/proto.h"
+#include "lib/fluxsink/fluxsink.h"
+#include "agg2d.h"
+#include "stb_image_write.h"
 #include <fstream>
 
 static FlagGroup flags;
@@ -246,8 +246,7 @@ static void draw_x_graticules(Agg2D& painter,
 
 int mainAnalyseDriveResponse(int argc, const char* argv[])
 {
-    globalConfig().overrides()->mutable_flux_source()->set_type(
-        FLUXTYPE_DRIVE);
+    globalConfig().overrides()->mutable_flux_source()->set_type(FLUXTYPE_DRIVE);
     flags.parseFlagsWithConfigFiles(argc, argv, {});
 
     if (globalConfig()->flux_sink().type() != FLUXTYPE_DRIVE)

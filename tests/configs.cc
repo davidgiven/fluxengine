@@ -83,8 +83,8 @@ static void validateConfigWithOptions(std::string baseConfigName,
 {
     /* All configs must have a tpi. */
 
-    if (!config.layout().has_tpi())
-        configError("{}{}: no layout.tpi set", baseConfigName, options);
+    if (!config.layout().has_format_type())
+        configError("{}{}: no layout.format_type set", baseConfigName, options);
 }
 
 static void validateToplevelConfig(std::string name)

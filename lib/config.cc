@@ -172,7 +172,6 @@ ConfigProto* Config::combined()
         /* First apply any standalone options. */
 
         std::set<std::string> options = _appliedOptions;
-        std::set<const OptionPrerequisiteProto*> prereqs;
         for (const auto& option : _baseConfig.option())
         {
             if (options.find(option.name()) != options.end())

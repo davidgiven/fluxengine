@@ -1081,7 +1081,7 @@ FluxfileSourcePanelGen::FluxfileSourcePanelGen( wxWindow* parent, wxWindowID id,
 	m_staticText27->Wrap( -1 );
 	bSizer8->Add( m_staticText27, 0, wxALL, 5 );
 
-	fluxImagePicker = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN );
+	fluxImagePicker = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_OPEN|wxFLP_USE_TEXTCTRL );
 	fluxImagePicker->SetToolTip( wxT("Path to a .flux, .scp or other flux file.") );
 
 	bSizer8->Add( fluxImagePicker, 0, wxALL|wxEXPAND, 5 );
@@ -1118,7 +1118,7 @@ ImagefileSourcePanelGen::ImagefileSourcePanelGen( wxWindow* parent, wxWindowID i
 	m_staticText28->Wrap( -1 );
 	bSizer9->Add( m_staticText28, 0, wxALL, 5 );
 
-	diskImagePicker = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN );
+	diskImagePicker = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_OPEN|wxFLP_USE_TEXTCTRL );
 	diskImagePicker->SetToolTip( wxT("The path to the disk image.") );
 
 	bSizer9->Add( diskImagePicker, 0, wxALL|wxEXPAND, 5 );

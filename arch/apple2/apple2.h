@@ -2,8 +2,8 @@
 #define APPLE2_H
 
 #include <memory.h>
-#include "decoders/decoders.h"
-#include "encoders/encoders.h"
+#include "lib/decoders/decoders.h"
+#include "lib/encoders/encoders.h"
 
 #define APPLE2_SECTOR_RECORD 0xd5aa96
 #define APPLE2_DATA_RECORD 0xd5aaad

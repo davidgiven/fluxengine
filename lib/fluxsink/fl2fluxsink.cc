@@ -1,14 +1,14 @@
-#include "globals.h"
-#include "flags.h"
-#include "fluxmap.h"
-#include "bytes.h"
+#include "lib/globals.h"
+#include "lib/flags.h"
+#include "lib/fluxmap.h"
+#include "lib/bytes.h"
 #include "protocol.h"
-#include "fluxsink/fluxsink.h"
-#include "decoders/fluxmapreader.h"
+#include "lib/fluxsink/fluxsink.h"
+#include "lib/decoders/fluxmapreader.h"
 #include "lib/fluxsink/fluxsink.pb.h"
-#include "proto.h"
+#include "lib/proto.h"
 #include "lib/fl2.pb.h"
-#include "fl2.h"
+#include "lib/fl2.h"
 #include <fstream>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -45,7 +45,8 @@ public:
 
         proto.set_rotational_period_ms(
             globalConfig()->drive().rotational_period_ms());
-        proto.set_tpi(globalConfig()->drive().tpi());
+        proto.set_drive_type(globalConfig()->drive().drive_type());
+        proto.set_format_type(globalConfig()->layout().format_type());
         saveFl2File(_filename, proto);
     }
 

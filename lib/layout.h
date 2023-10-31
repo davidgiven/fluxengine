@@ -52,6 +52,9 @@ public:
     /* Expand a SectorList into the actual sector IDs. */
     static std::vector<unsigned> expandSectorList(
         const SectorListProto& sectorsProto);
+
+    /* Return the head width of the current drive. */
+    static int getHeadWidth();
 };
 
 class TrackInfo

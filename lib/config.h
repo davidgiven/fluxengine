@@ -52,7 +52,8 @@ class InapplicableValueException : public ErrorException
 public:
     InapplicableValueException():
         ErrorException("selected format cannot be used here")
-    {}
+    {
+    }
 };
 
 struct FluxConstructor

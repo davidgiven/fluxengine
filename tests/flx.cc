@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include "globals.h"
+#include "lib/globals.h"
 #include "lib/fluxmap.h"
 #include "lib/fluxsource/flx.h"
 

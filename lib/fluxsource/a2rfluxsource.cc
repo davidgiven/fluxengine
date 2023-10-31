@@ -1,8 +1,8 @@
-#include "globals.h"
-#include "fluxmap.h"
+#include "lib/globals.h"
+#include "lib/fluxmap.h"
 #include "lib/fluxsource/fluxsource.pb.h"
-#include "fluxsource/fluxsource.h"
-#include "proto.h"
+#include "lib/fluxsource/fluxsource.h"
+#include "lib/proto.h"
 #include <fstream>
 
 struct A2Rv2Flux
@@ -80,13 +80,14 @@ public:
                     /* 5.25" with quarter stepping. */
                     _extraConfig.mutable_drive()->set_tracks(160);
                     _extraConfig.mutable_drive()->set_heads(1);
-                    _extraConfig.mutable_drive()->set_head_width(4);
-                    _extraConfig.mutable_drive()->set_tpi(48 * 4);
+                    _extraConfig.mutable_drive()->set_drive_type(
+                        DRIVETYPE_APPLE2);
                 }
                 else
                 {
                     /* 3.5". */
-                    _extraConfig.mutable_drive()->set_tpi(135);
+                    _extraConfig.mutable_drive()->set_drive_type(
+                        DRIVETYPE_80TRACK);
                 }
 
                 Bytes stream = findChunk("STRM");

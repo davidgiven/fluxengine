@@ -1,8 +1,8 @@
-#include "globals.h"
-#include "flags.h"
-#include "usb/usb.h"
-#include "fluxsource/fluxsource.h"
-#include "proto.h"
+#include "lib/globals.h"
+#include "lib/flags.h"
+#include "lib/usb/usb.h"
+#include "lib/fluxsource/fluxsource.h"
+#include "lib/proto.h"
 #include "protocol.h"
 
 static FlagGroup flags;
