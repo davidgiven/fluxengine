@@ -31,6 +31,9 @@ std::unique_ptr<FluxSource> FluxSource::create(const FluxSourceProto& config)
         case FLUXTYPE_CWF:
             return createCwfFluxSource(config.cwf());
 
+        case FLUXTYPE_DMK:
+            return createDmkFluxSource(config.dmk());
+
         case FLUXTYPE_FLUX:
             return createFl2FluxSource(config.fl2());
 

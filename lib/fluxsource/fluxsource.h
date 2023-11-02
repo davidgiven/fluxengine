@@ -37,6 +37,8 @@ private:
         const A2rFluxSourceProto& config);
     static std::unique_ptr<FluxSource> createCwfFluxSource(
         const CwfFluxSourceProto& config);
+    static std::unique_ptr<FluxSource> createDmkFluxSource(
+        const DmkFluxSourceProto& config);
     static std::unique_ptr<FluxSource> createEraseFluxSource(
         const EraseFluxSourceProto& config);
     static std::unique_ptr<FluxSource> createFl2FluxSource(
