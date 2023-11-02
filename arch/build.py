@@ -17,6 +17,7 @@ proto(
         "./micropolis/micropolis.proto",
         "./mx/mx.proto",
         "./northstar/northstar.proto",
+        "./q1/q1.proto",
         "./rolandd20/rolandd20.proto",
         "./smaky6/smaky6.proto",
         "./tids990/tids990.proto",

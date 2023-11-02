@@ -16,6 +16,7 @@
 #include "arch/micropolis/micropolis.h"
 #include "arch/mx/mx.h"
 #include "arch/northstar/northstar.h"
+#include "arch/q1/q1.h"
 #include "arch/rolandd20/rolandd20.h"
 #include "arch/smaky6/smaky6.h"
 #include "arch/tids990/tids990.h"
@@ -49,6 +50,7 @@ std::unique_ptr<Decoder> Decoder::create(const DecoderProto& config)
             {DecoderProto::kMicropolis, createMicropolisDecoder },
             {DecoderProto::kMx,         createMxDecoder         },
             {DecoderProto::kNorthstar,  createNorthstarDecoder  },
+            {DecoderProto::kQ1,         createQ1Decoder         },
             {DecoderProto::kRolandd20,  createRolandD20Decoder  },
             {DecoderProto::kSmaky6,     createSmaky6Decoder     },
             {DecoderProto::kTids990,    createTids990Decoder    },

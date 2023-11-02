@@ -1,0 +1,42 @@
+shortname: 'Q1'
+comment: 'Q1ish'
+read_support_status: DINOSAUR
+
+documentation:
+<<<
+Q1 text here
+>>>
+
+drive {
+	high_density: true
+}
+
+image_writer {
+	filename: "q1.img"
+	type: IMAGETYPE_IMG
+}
+
+layout {
+	format_type: FORMATTYPE_80TRACK
+	tracks: 77
+	sides: 1
+	layoutdata {
+		sector_size: 256
+		physical {
+			start_sector: 1
+			count: 26
+		}
+	}
+	layoutdata {
+		track: 0
+		side: 0
+		sector_size: 128
+	}
+}
+
+decoder {
+	q1 {}
+}
+
+
+

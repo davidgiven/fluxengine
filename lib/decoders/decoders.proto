@@ -13,6 +13,7 @@ import "arch/macintosh/macintosh.proto";
 import "arch/micropolis/micropolis.proto";
 import "arch/mx/mx.proto";
 import "arch/northstar/northstar.proto";
+import "arch/q1/q1.proto";
 import "arch/rolandd20/rolandd20.proto";
 import "arch/smaky6/smaky6.proto";
 import "arch/tids990/tids990.proto";
@@ -21,7 +22,7 @@ import "arch/zilogmcz/zilogmcz.proto";
 import "lib/fluxsink/fluxsink.proto";
 import "lib/common.proto";
 
-//NEXT: 32
+//NEXT: 33
 message DecoderProto {
 	optional double pulse_debounce_threshold = 1 [default = 0.30,
 		(help) = "ignore pulses with intervals shorter than this, in fractions of a clock"];
@@ -48,6 +49,7 @@ message DecoderProto {
 		MicropolisDecoderProto micropolis = 14;
 		MxDecoderProto mx = 15;
 		NorthstarDecoderProto northstar = 24;
+		Q1DecoderProto q1 = 32;
 		RolandD20DecoderProto rolandd20 = 31;
 		Smaky6DecoderProto smaky6 = 30;
 		Tids990DecoderProto tids990 = 16;
@@ -68,4 +70,3 @@ message DecoderProto {
 	optional bool skip_unnecessary_tracks = 29 [default = true,
 		(help) = "don't read tracks if we already have all necessary sectors"];
 }
-

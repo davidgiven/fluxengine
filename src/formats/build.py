@@ -30,6 +30,7 @@ formats = [
     "n88basic",
     "northstar",
     "psos",
+    "q1",
     "rolandd20",
     "rx50",
     "shugart_drive",
