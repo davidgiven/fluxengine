@@ -221,6 +221,10 @@ FluxEngine supports a number of ways to get or put flux. When using the `-s` or
 
     Read from a Catweasel flux file. **Read only.**
   
+  - `dmk:<directory>`
+
+    Read from a Catweasel CMK directory. **Read only.**
+  
   - `<filename.a2r>`
 
     Write to a AppleSauce flux file. **Write only.**

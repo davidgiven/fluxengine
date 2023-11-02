@@ -32,6 +32,7 @@ enum FluxSourceSinkType {
 	FLUXTYPE_SCP = 9;
 	FLUXTYPE_TEST_PATTERN = 10;
 	FLUXTYPE_VCD = 11;
+	FLUXTYPE_DMK = 12;
 }
 
 enum ImageReaderWriterType {

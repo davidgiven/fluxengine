@@ -30,6 +30,11 @@ message CwfFluxSourceProto {
 		(help) = ".cwf file to read flux from"];
 }
 
+message DmkFluxSourceProto {
+	optional string directory = 1 [
+		(help) = "path to DMK directory"];
+}
+
 message Fl2FluxSourceProto {
 	optional string filename = 1 [default = "flux.fl2",
 		(help) = ".fl2 file to read flux from"];
@@ -39,13 +44,14 @@ message FlxFluxSourceProto {
 	optional string directory = 1 [(help) = "path to FLX stream directory"];
 }
 
-// NEXT: 12
+// NEXT: 13
 message FluxSourceProto {
 	optional FluxSourceSinkType type = 9
 		[default = FLUXTYPE_NOT_SET, (help) = "flux source type"];
 
 	optional A2rFluxSourceProto a2r = 11;
 	optional CwfFluxSourceProto cwf = 7;
+	optional DmkFluxSourceProto dmk = 12;
 	optional EraseFluxSourceProto erase = 4;
 	optional Fl2FluxSourceProto fl2 = 8;
 	optional FlxFluxSourceProto flx = 10;

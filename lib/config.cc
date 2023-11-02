@@ -78,6 +78,14 @@ static const std::vector<FluxConstructor> fluxConstructors = {
             proto->set_type(FLUXTYPE_CWF);
             proto->mutable_cwf()->set_filename(s);
         }},
+    {.name = "CatWeazle DMK directory",
+     .pattern = std::regex("^dmk:(.*)$"),
+     .source =
+            [](auto& s, auto* proto)
+        {
+            proto->set_type(FLUXTYPE_DMK);
+            proto->mutable_dmk()->set_directory(s);
+        }},
     {.pattern = std::regex("^erase:$"),
      .source =
             [](auto& s, auto* proto)

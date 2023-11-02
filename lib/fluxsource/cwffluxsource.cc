@@ -2,6 +2,7 @@
 #include "lib/fluxmap.h"
 #include "lib/fluxsource/fluxsource.pb.h"
 #include "lib/fluxsource/fluxsource.h"
+#include "lib/fluxsource/catweasel.h"
 #include "lib/proto.h"
 #include <fstream>
 
@@ -50,10 +51,10 @@ public:
         switch (_header.clock_rate)
         {
             case 1:
-                _clockRate = 14161000.0;
+                _clockPeriod = 1e9 / 14161000.0;
                 break;
             case 2:
-                _clockRate = 28322000.0;
+                _clockPeriod = 1e9 / 28322000.0;
                 break;
             default:
                 error("unsupported clock rate");
@@ -65,7 +66,7 @@ public:
             _header.tracks * _header.step,
             _header.sides);
         std::cout << fmt::format(
-            "CWF sample clock rate: {} MHz\n", _clockRate / 1e6);
+            "CWF sample clock rate: {} MHz\n", 1e3 / _clockPeriod);
 
         int tracks = _header.tracks * _header.sides;
         for (int i = 0; i < tracks; i++)
@@ -94,37 +95,12 @@ public:
             return std::make_unique<const Fluxmap>();
 
         off_t pos = p->second.first;
-        ;
         size_t length = p->second.second;
         _if.seekg(pos);
-
-        std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
-        uint32_t pending = 0;
-        bool oldindex = true;
-        for (size_t cursor = 0; cursor < length; cursor++)
-        {
-            uint32_t b = _if.get();
-            bool index = !!(b & 0x80);
-            b &= 0x7f;
-            if (b == 0x7f)
-            {
-                pending += 0x7f;
-                continue;
-            }
-            b += pending;
-            pending = 0;
-
-            double interval_us = b * (1e6 / _clockRate);
-            fluxmap->appendInterval(interval_us / US_PER_TICK);
-            fluxmap->appendPulse();
-
-            if (index && !oldindex)
-                fluxmap->appendIndex();
-            oldindex = index;
-        }
+        Bytes fluxdata(_if, length);
         check_for_error();
 
-        return fluxmap;
+        return decodeCatweaselData(fluxdata, _clockPeriod);
     }
 
     void recalibrate() {}
@@ -140,7 +116,7 @@ private:
     const CwfFluxSourceProto& _config;
     std::ifstream _if;
     CwfHeader _header;
-    nanoseconds_t _clockRate;
+    nanoseconds_t _clockPeriod;
     std::map<std::pair<int, int>, std::pair<off_t, size_t>> _trackOffsets;
 };
 

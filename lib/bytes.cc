@@ -71,6 +71,15 @@ Bytes::Bytes(
 {
 }
 
+Bytes::Bytes(std::istream& istream, size_t len):
+    _data(createVector(0)),
+    _low(0),
+    _high(0)
+{
+    ByteWriter bw(*this);
+    bw.append(istream, len);
+}
+
 Bytes* Bytes::operator=(const Bytes& other)
 {
     _data = other._data;
@@ -352,13 +361,24 @@ uint64_t ByteReader::read_be64()
     return ((uint64_t)read_be32() << 32) | read_be32();
 }
 
-ByteWriter& ByteWriter::operator+=(std::istream& stream)
+ByteWriter& ByteWriter::append(std::istream& stream, size_t length)
 {
     Bytes buffer(4096);
 
-    while (stream.read((char*)buffer.begin(), buffer.size()))
-        this->append(buffer);
-    this->append(buffer.slice(0, stream.gcount()));
+    while (length != 0)
+    {
+        size_t chunk = std::min((size_t)buffer.size(), length);
+        if (!stream.read((char*)buffer.begin(), chunk))
+        {
+            this->append(buffer.slice(0, stream.gcount()));
+            break;
+        }
+        else
+            this->append(buffer);
+
+        length -= chunk;
+    }
+
     return *this;
 }
 

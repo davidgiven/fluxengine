@@ -19,6 +19,7 @@ public:
     Bytes(std::shared_ptr<std::vector<uint8_t>> data,
         unsigned start,
         unsigned end);
+    Bytes(std::istream& istream, size_t len = SIZE_MAX);
 
     Bytes* operator=(const Bytes& other);
 
@@ -323,7 +324,10 @@ public:
         return *this;
     }
 
-    ByteWriter& operator+=(std::istream& stream);
+    ByteWriter& operator+=(std::istream& stream)
+    {
+        return this->append(stream);
+    }
 
     ByteWriter& append(const char* data)
     {
@@ -340,10 +344,7 @@ public:
         return *this += data;
     }
 
-    ByteWriter& append(std::istream& stream)
-    {
-        return *this += stream;
-    }
+    ByteWriter& append(std::istream& stream, size_t length = SIZE_MAX);
 
     ByteWriter& pad(unsigned count, uint8_t byte = 0);
 
