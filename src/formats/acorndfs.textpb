@@ -47,12 +47,16 @@ layout {
 encoder {
 	ibm {
 		trackdata {
-			target_rotational_period_ms: 167
-			target_clock_period_us: 3.333
+			target_rotational_period_ms: 166
+			target_clock_period_us: 3.33
 			emit_iam: false
-			gap0: 80
-			gap2: 22
-			gap3: 34
+			use_fm: true
+            gap0: 0x10
+            gap2: 0x09
+            gap3: 0x10
+            idam_byte: 0xf57e
+            dam_byte: 0xf56f
+            gap_fill_byte: 0xffff
 		}
 	}
 }
