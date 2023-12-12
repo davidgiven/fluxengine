@@ -417,8 +417,6 @@ def export(self, name=None, items: TargetsMap = {}, deps: Targets = []):
     for dest, src in items.items():
         destf = filenameof(dest)
         dir = dirname(destf)
-        if dir:
-            cs += ["mkdir -p " + dir]
 
         srcs = filenamesof(src)
         if len(srcs) != 1:
@@ -426,13 +424,16 @@ def export(self, name=None, items: TargetsMap = {}, deps: Targets = []):
                 "a dependency of an export must have exactly one output file"
             )
 
-        cs += ["cp %s %s" % (srcs[0], destf)]
+        emitter_rule(self.name + "+" + destf, srcs, [destf])
+        emitter_label(f"CP {destf}")
+        if dir:
+            emitter_exec(["mkdir -p " + dir])
+
+        emitter_exec(["cp %s %s" % (srcs[0], destf)])
         self.outs += [destf]
 
-    emitter_rule(self.name, items.values(), self.outs, deps)
-    emitter_label(f"EXPORT {self.name}")
-
-    emitter_exec(cs)
+    emitter_rule(self.name, self.outs, [], deps)
+    emit("\t@")
 
     if self.outs:
         emit("clean::")

@@ -6,7 +6,7 @@ import subprocess
 emit(
     """
 PKG_CONFIG ?= pkg-config
-PACKAGES := $(shell $(PKG_CONFIG) --list-all | cut -d' ' -f1)
+PACKAGES := $(shell $(PKG_CONFIG) --list-all | cut -d' ' -f1 | sort)
 """
 )
 
