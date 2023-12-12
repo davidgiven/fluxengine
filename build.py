@@ -227,6 +227,7 @@ if not glob("../fluxengine-testdata/data"):
     print("fluxengine-testdata not found; skipping corpus tests")
 else:
     corpus = [
+        ("acorndfs", "", "--200"),
         ("agat", "", ""),
         ("amiga", "", ""),
         ("apple2", "", "--140 40track_drive"),

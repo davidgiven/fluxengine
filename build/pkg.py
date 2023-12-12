@@ -6,7 +6,9 @@ import subprocess
 emit(
     """
 PKG_CONFIG ?= pkg-config
-PACKAGES := $(shell $(PKG_CONFIG) --list-all | cut -d' ' -f1)
+PACKAGES := $(shell $(PKG_CONFIG) --list-all | cut -d' ' -f1 | sort)
+PCFILES := $(wildcard $(patsubst %,%/*.pc,$(subst :, ,$(shell $(PKG_CONFIG) --variable pc_path pkg-config))))
+$(OBJ)/build.mk: $(PCFILES)
 """
 )
 
