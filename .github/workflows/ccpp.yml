@@ -71,6 +71,7 @@ jobs:
           mingw-w64-i686-wxWidgets
           mingw-w64-i686-zlib
           mingw-w64-i686-imagemagick
+          mingw-w64-i686-qt5-static
           vim
           zip
     - name: update-protobuf

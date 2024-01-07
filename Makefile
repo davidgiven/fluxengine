@@ -19,6 +19,7 @@ ifeq ($(OS), Windows_NT)
 	PROTOC = $(MINGWBIN)/protoc
 	WINDRES = windres
 	LDFLAGS += \
+		-Lc:/mingw32/qt5-static/lib \
 		-static
 	CXXFLAGS += \
 		-fext-numeric-literals \
