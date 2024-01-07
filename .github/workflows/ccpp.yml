@@ -20,7 +20,7 @@ jobs:
         path: 'fluxengine-testdata'
     - name: apt
       run: |
-        sudo apt install libudev-dev libsqlite3-dev protobuf-compiler libwxgtk3.0-gtk3-dev libfmt-dev libprotobuf-dev wx-common libqtbase5-dev
+        sudo apt install libudev-dev libsqlite3-dev protobuf-compiler libwxgtk3.0-gtk3-dev libfmt-dev libprotobuf-dev wx-common
     - name: make
       run: CXXFLAGS="-Wp,-D_GLIBCXX_ASSERTIONS" make -j`nproc` -C fluxengine
 
@@ -70,7 +70,7 @@ jobs:
           mingw-w64-i686-sqlite3
           mingw-w64-i686-wxWidgets
           mingw-w64-i686-zlib
-          mingw-w64-i686-imagemagick
+          mingw-w64-i686-png2ico
           mingw-w64-i686-qt5-static
           vim
           zip
