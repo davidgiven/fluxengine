@@ -97,7 +97,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: brew
-      run: brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg
+      run: brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg qt@5
     - name: make
       run: gmake
 
