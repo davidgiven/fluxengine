@@ -34,7 +34,7 @@ jobs:
           mingw-w64-i686-sqlite3
           mingw-w64-i686-wxWidgets
           mingw-w64-i686-zlib
-          mingw-w64-i686-imagemagick
+          mingw-w64-x86_64-imagemagick
           vim
           zip
     - uses: actions/checkout@v3
