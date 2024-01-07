@@ -33,7 +33,7 @@ endif
 # Special OSX settings.
 
 ifeq ($(shell uname),Darwin)
-	export PKG_CONFIG_PATH="/usr/local/opt/qt@5/lib/pkgconfig"
+	export PKG_CONFIG_PATH = /usr/local/opt/qt@5/lib/pkgconfig
 
 	LDFLAGS += \
 		-framework IOKit \
