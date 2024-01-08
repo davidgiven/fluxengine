@@ -57,7 +57,6 @@ jobs:
         update: true
         msystem: MINGW32
         install: >-
-          https://repo.msys2.org/mingw/mingw32/mingw-w64-i686-protobuf-21.9-1-any.pkg.tar.zst
           diffutils
           make
           mingw-w64-i686-binutils
@@ -74,6 +73,9 @@ jobs:
           mingw-w64-i686-qt5-base
           vim
           zip
+    - name: update-protobuf
+      run: |
+         pacman -U --noconfirm https://repo.msys2.org/mingw/mingw32/mingw-w64-i686-protobuf-21.9-1-any.pkg.tar.zst
     - uses: actions/checkout@v2
       with:
         repository: 'davidgiven/fluxengine'
