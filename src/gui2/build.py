@@ -10,8 +10,8 @@ cxxprogram(
     srcs=[
         "./main.cc",
     ],
-    cflags=["$(WX_CFLAGS)", "-fPIC"],
-    ldflags=["$(WX_LDFLAGS)"],
+    cflags=["-fPIC"],
+    ldflags=["$(QT5_EXTRA_LIBS)"],
     deps=[
         "+fl2_proto_lib",
         "+protocol",

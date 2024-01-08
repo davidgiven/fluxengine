@@ -15,16 +15,16 @@ ifeq ($(OS), Windows_NT)
 	MINGWBIN = /mingw32/bin
 	CCPREFIX = $(MINGWBIN)/
 	PKG_CONFIG = $(MINGWBIN)/pkg-config
-	WX_CONFIG = /usr/bin/sh $(MINGWBIN)/wx-config --static=yes
+	WX_CONFIG = /usr/bin/sh $(MINGWBIN)/wx-config
 	PROTOC = $(MINGWBIN)/protoc
 	WINDRES = windres
-	LDFLAGS += \
-		-Lc:/mingw32/qt5-static/lib \
-		-static
 	CXXFLAGS += \
 		-fext-numeric-literals \
 		-Wno-deprecated-enum-float-conversion \
 		-Wno-deprecated-enum-enum-conversion
+
+	# For static qt5.
+	#export PKG_CONFIG_PATH = $(MINGWBIN)/../qt5-static/lib/pkgconfig
 
 	# Required to get the gcc run - time libraries on the path.
 	export PATH := $(PATH):$(MINGWBIN)
