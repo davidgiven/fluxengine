@@ -1,9 +1,35 @@
 from build.ab import emit, normalrule
-from build.c import cxxprogram
+from build.c import cxxprogram, cxxlibrary
 from build.pkg import package
 import config
 
 package(name="Qt5Widgets", package="Qt5Widgets")
+
+normalrule(
+    name="userinterface_h",
+    ins=["./userinterface.ui"],
+    outs=["userinterface.h"],
+    commands=[
+        "uic -g cpp -o {outs[0]} {ins[0]}"
+    ],
+    label="UIC"
+)
+
+normalrule(
+    name="resources_cc",
+    ins=["./resources.qrc"],
+    outs=["resources.cc"],
+    commands=[
+        "rcc -g cpp --name resources -o {outs[0]} {ins[0]}"
+    ],
+    label="RCC"
+)
+
+cxxlibrary(
+    name="userinterface",
+    srcs=[".+resources_cc"],
+    hdrs={"userinterface.h": ".+userinterface_h"}
+)
 
 cxxprogram(
     name="gui2",
@@ -28,6 +54,7 @@ cxxprogram(
         "+fmt_lib",
         "+protobuf_lib",
         ".+Qt5Widgets",
+        ".+userinterface",
     ],
 )
 
