@@ -1,19 +1,25 @@
-#include <QApplication>
-#include <QPushButton>
-#include "userinterface.h"
+#include "globals.h"
+#include "mainwindow.h"
 
-class UserInterface : public Ui_MainWindow {};
+std::unique_ptr<Application> app;
 
-int main(int argc, char **argv)
+class ApplicationImpl : public Application
 {
- QApplication app (argc, argv);
-  Q_INIT_RESOURCE(resources);
-  QMainWindow mainWindow;
-  UserInterface ui;
-  ui.setupUi(&mainWindow);
-  mainWindow.setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
-  mainWindow.setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
-  mainWindow.show();
+public:
+    ApplicationImpl(int& argc, char** argv):
+        Application(argc, argv),
+        _mainWindow(MainWindow::create())
+    {
+        _mainWindow->show();
+    }
 
- return app.exec();
+private:
+    std::unique_ptr<MainWindow> _mainWindow;
+};
+
+int main(int argc, char** argv)
+{
+    Q_INIT_RESOURCE(resources);
+    app = std::make_unique<ApplicationImpl>(argc, argv);
+    return app->exec();
 }

@@ -35,6 +35,9 @@ cxxprogram(
     name="gui2",
     srcs=[
         "./main.cc",
+        "./mainwindow.cc",
+        "./globals.h",
+        "./mainwindow.h",
     ],
     cflags=["-fPIC"],
     ldflags=["$(QT5_EXTRA_LIBS)"],
