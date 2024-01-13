@@ -257,6 +257,10 @@ package, written by Robert Leslie et al, taken from
 https://www.mars.org/home/rob/proj/hfs. It is GPL 2.0 licensed. Please see the
 contents of the directory for the full text.
 
+As an exception, `dep/verdigris` contains a partial copy of the verdigris
+package, taken from https://github.com/woboq/verdigris. It is dual LGPL/GPLv2
+licensed. Please see the contents of the directory for the full text.
+
 __Important:__ Because of all these exceptions, if you distribute the
 FluxEngine package as a whole, you must comply with the terms of _all_ of the
 licensing terms. This means that __effectively the FluxEngine package is
