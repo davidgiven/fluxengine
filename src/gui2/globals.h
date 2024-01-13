@@ -6,6 +6,7 @@
 #include <QtConcurrent>
 
 extern QThreadPool workerThreadPool;
+Q_DECLARE_METATYPE(const ConfigProto*);
 
 class UserInterface : public Ui_MainWindow
 {

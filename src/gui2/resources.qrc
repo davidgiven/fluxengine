@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="ui">
     <file>../../extras/icon.png</file>
+    <file>../../extras/fluxfile.png</file>
+    <file>../../extras/hardware.png</file>
   </qresource>
 </RCC>

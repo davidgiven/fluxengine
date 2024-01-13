@@ -2,6 +2,9 @@
 #include "lib/proto.h"
 #include "lib/usb/usbfinder.h"
 #include "mainwindow.h"
+#include <QStandardItemModel>
+#include <QTableView>
+#include <QHeaderView>
 
 class MainWindowImpl : public MainWindow
 {
@@ -36,13 +39,32 @@ public:
 private:
     void initialiseFormats()
     {
+        _formatsModel.clear();
+        _formatsModel.setColumnCount(2);
+        _formatsModel.setHorizontalHeaderLabels(
+            QStringList{"Name", "Description"});
         for (const auto& it : formats)
         {
             if (it.second->is_extension())
                 continue;
 
-            formatsList->addItem(QString::fromStdString(it.first));
+            QStandardItem* nameItem =
+                new QStandardItem(QString::fromStdString(it.first));
+            nameItem->setData(QVariant(it.second));
+
+            QList<QStandardItem*> row{nameItem,
+                new QStandardItem(
+                    QString::fromStdString(it.second->shortname()))};
+            _formatsModel.appendRow(row);
         }
+        formatsList->setModel(&_formatsModel);
+        formatsList->setModelColumn(0);
+
+        QTableView* view = new QTableView;
+        view->setSelectionBehavior(QAbstractItemView::SelectRows);
+        view->horizontalHeader()->setStretchLastSection(true);
+        view->verticalHeader()->hide();
+        formatsList->setView(view);
     }
 
     void initialiseDevices()
@@ -52,6 +74,9 @@ private:
         for (const auto& it : devices) {}
         fmt::print("device count = {}\n", devices.size());
     }
+
+private:
+    QStandardItemModel _formatsModel;
 };
 
 std::unique_ptr<MainWindow> MainWindow::create()
