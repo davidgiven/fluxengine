@@ -1,8 +1,12 @@
 #include "globals.h"
 #include "mainwindow.h"
+#include <QtConcurrent>
 
-std::unique_ptr<Application> app;
+Application* app;
+QThreadPool workerThreadPool;
 
+/* This has to go first due to C++ compiler limitations (has to be defined
+ * before use). */
 class ApplicationImpl : public Application
 {
 public:
@@ -13,6 +17,9 @@ public:
         _mainWindow->show();
     }
 
+public:
+    void sendToUiThread(std::function<void()> callback) override {}
+
 private:
     std::unique_ptr<MainWindow> _mainWindow;
 };
@@ -20,6 +27,8 @@ private:
 int main(int argc, char** argv)
 {
     Q_INIT_RESOURCE(resources);
-    app = std::make_unique<ApplicationImpl>(argc, argv);
+    workerThreadPool.setMaxThreadCount(1);
+    ApplicationImpl impl(argc, argv);
+    app = &impl;
     return app->exec();
 }

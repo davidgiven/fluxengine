@@ -4,6 +4,7 @@ from build.pkg import package
 import config
 
 package(name="Qt5Widgets", package="Qt5Widgets")
+package(name="Qt5Concurrent", package="Qt5Concurrent")
 
 normalrule(
     name="userinterface_h",
@@ -57,6 +58,7 @@ cxxprogram(
         "+fmt_lib",
         "+protobuf_lib",
         ".+Qt5Widgets",
+        ".+Qt5Concurrent",
         ".+userinterface",
     ],
 )

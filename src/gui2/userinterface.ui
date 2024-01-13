@@ -350,14 +350,20 @@
              </widget>
             </item>
             <item row="2" column="1" colspan="2">
-             <widget class="QSlider" name="horizontalSlider">
+             <widget class="QSlider" name="revolutionsSlider">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="tickPosition">
+               <enum>QSlider::TicksAbove</enum>
+              </property>
+              <property name="tickInterval">
+               <number>1</number>
               </property>
              </widget>
             </item>
             <item row="2" column="3">
-             <widget class="QSpinBox" name="spinBox_2"/>
+             <widget class="QSpinBox" name="revolutionsSpinBox"/>
             </item>
             <item row="0" column="0" colspan="4">
              <widget class="QFrame" name="frame">
@@ -771,7 +777,7 @@ background: white;
          <item>
           <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,0,100,0">
            <item row="0" column="2" colspan="2">
-            <widget class="QComboBox" name="comboBox">
+            <widget class="QComboBox" name="formatsList">
              <property name="sizePolicy">
               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                <horstretch>0</horstretch>
