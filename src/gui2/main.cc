@@ -12,6 +12,7 @@ class ApplicationImpl : public Application
 public:
     ApplicationImpl(int& argc, char** argv):
         Application(argc, argv),
+        _settings("Cowlark Technologies", "FluxEngine"),
         _mainWindow(MainWindow::create())
     {
         _mainWindow->show();
@@ -21,6 +22,7 @@ public:
     void sendToUiThread(std::function<void()> callback) override {}
 
 private:
+    QSettings _settings;
     std::unique_ptr<MainWindow> _mainWindow;
 };
 

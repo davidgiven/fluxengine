@@ -1,4 +1,4 @@
-from build.ab import emit, normalrule
+from build.ab import normalrule, Rule, Target
 from build.c import cxxprogram, cxxlibrary
 from build.pkg import package
 import config
@@ -6,30 +6,37 @@ import config
 package(name="Qt5Widgets", package="Qt5Widgets")
 package(name="Qt5Concurrent", package="Qt5Concurrent")
 
-normalrule(
-    name="userinterface_h",
-    ins=["./userinterface.ui"],
-    outs=["userinterface.h"],
-    commands=[
-        "uic -g cpp -o {outs[0]} {ins[0]}"
-    ],
-    label="UIC"
-)
+
+@Rule
+def uic(self, name, src: Target = None, dest=None):
+    normalrule(
+        replaces=self,
+        ins=[src],
+        outs=[dest],
+        commands=["uic -g cpp -o {outs[0]} {ins[0]}"],
+        label="UIC",
+    )
+
+
+for n in ["userinterface", "driveConfigurationForm", "fluxConfigurationForm"]:
+    uic(name=n + "_h", src="./" + n + ".ui", dest=n + ".h")
 
 normalrule(
     name="resources_cc",
     ins=["./resources.qrc"],
     outs=["resources.cc"],
-    commands=[
-        "rcc -g cpp --name resources -o {outs[0]} {ins[0]}"
-    ],
-    label="RCC"
+    commands=["rcc -g cpp --name resources -o {outs[0]} {ins[0]}"],
+    label="RCC",
 )
 
 cxxlibrary(
     name="userinterface",
     srcs=[".+resources_cc"],
-    hdrs={"userinterface.h": ".+userinterface_h"}
+    hdrs={
+        "userinterface.h": ".+userinterface_h",
+        "driveConfigurationForm.h": ".+driveConfigurationForm_h",
+        "fluxConfigurationForm.h": ".+fluxConfigurationForm_h",
+    },
 )
 
 cxxprogram(
@@ -37,8 +44,10 @@ cxxprogram(
     srcs=[
         "./main.cc",
         "./mainwindow.cc",
+        "./drivecomponent.cc",
         "./globals.h",
         "./mainwindow.h",
+        "./drivecomponent.h",
     ],
     cflags=["-fPIC"],
     ldflags=["$(QT5_EXTRA_LIBS)"],
@@ -101,4 +110,3 @@ if config.osx:
         ],
         label="MKAPP",
     )
-

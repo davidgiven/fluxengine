@@ -1,7 +1,7 @@
 #include "lib/globals.h"
 #include "lib/proto.h"
-#include "lib/usb/usbfinder.h"
 #include "mainwindow.h"
+#include "drivecomponent.h"
 #include <QStandardItemModel>
 #include <QTableView>
 #include <QHeaderView>
@@ -12,12 +12,12 @@ public:
     MainWindowImpl()
     {
         setupUi(this);
+        _driveComponent = DriveComponent::create(this);
+
         setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
         setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
 
-        setDriveConfigurationPane(noDriveConfigurationWidget);
         initialiseFormats();
-        initialiseDevices();
 
         connect(revolutionsSlider,
             &QSlider::valueChanged,
@@ -30,12 +30,6 @@ public:
     }
 
 public:
-    void setDriveConfigurationPane(QWidget* active)
-    {
-        for (auto* w : driveConfigurationContainer->findChildren<QWidget*>())
-            w->setVisible(w == active);
-    }
-
 private:
     void initialiseFormats()
     {
@@ -67,16 +61,9 @@ private:
         formatsList->setView(view);
     }
 
-    void initialiseDevices()
-    {
-        auto devices = runOnWorkerThread(findUsbDevices).result();
-
-        for (const auto& it : devices) {}
-        fmt::print("device count = {}\n", devices.size());
-    }
-
 private:
     QStandardItemModel _formatsModel;
+    std::unique_ptr<DriveComponent> _driveComponent;
 };
 
 std::unique_ptr<MainWindow> MainWindow::create()
