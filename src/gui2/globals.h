@@ -2,6 +2,9 @@
 
 #include "lib/globals.h"
 #include "userinterface.h"
+#include "wobjectdefs.h"
+#include "wobjectimpl.h"
+#include <QtWidgets>
 #include <QThreadPool>
 #include <QtConcurrent>
 

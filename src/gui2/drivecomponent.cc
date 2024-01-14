@@ -7,16 +7,31 @@
 #include "fluxConfigurationForm.h"
 #include <QStandardItemModel>
 
-class DriveComponentImpl : public DriveComponent
+class DriveComponentImpl : public DriveComponent, public QObject
 {
-private:
+    W_OBJECT(DriveComponentImpl)
+
+public:
     class ConfigurationForm : public QStandardItem
     {
     public:
-        ConfigurationForm(QIcon icon, const std::string text):
-            QStandardItem(icon, QString::fromStdString(text))
+        ConfigurationForm(
+            DriveComponentImpl* dci, QIcon icon, const std::string text):
+            QStandardItem(icon, QString::fromStdString(text)),
+            _dci(dci)
         {
+            _widget = new QWidget();
         }
+
+    public:
+        QWidget* widget() const
+        {
+            return _widget;
+        }
+
+    protected:
+        DriveComponentImpl* _dci;
+        QWidget* _widget;
     };
 
     class FluxConfigurationForm :
@@ -24,23 +39,55 @@ private:
         public Ui_fluxConfigurationForm
     {
     public:
-        FluxConfigurationForm():
-            ConfigurationForm(QIcon(":/ui/extras/fluxfile.png"), "Flux file")
+        FluxConfigurationForm(DriveComponentImpl* dci):
+            ConfigurationForm(
+                dci, QIcon(":/ui/extras/fluxfile.png"), "Flux file")
         {
+            setupUi(_widget);
         }
     };
 
-    class DetectedDriveConfigurationForm :
+    class DriveConfigurationForm :
         public ConfigurationForm,
         public Ui_driveConfigurationForm
     {
     public:
-        DetectedDriveConfigurationForm(
-            const std::string& type, const std::string& id):
-            ConfigurationForm(QIcon(":/ui/extras/hardware.png"),
-                fmt::format("{}\n{}", type, id))
+        DriveConfigurationForm(
+            DriveComponentImpl* dci, QIcon icon, const std::string& label):
+            ConfigurationForm(dci, icon, label)
+        {
+            setupUi(_widget);
+        }
+    };
+
+    class ManualDriveConfigurationForm : public DriveConfigurationForm
+    {
+    public:
+        ManualDriveConfigurationForm(DriveComponentImpl* dci):
+            DriveConfigurationForm(dci,
+                QIcon(":/ui/extras/hardware.png"),
+                "Greaseweazle\n(configured manually)")
         {
         }
+    };
+
+    class DetectedDriveConfigurationForm : public DriveConfigurationForm
+    {
+    public:
+        DetectedDriveConfigurationForm(DriveComponentImpl* dci,
+            const std::string& type,
+            const std::string& id, std::shared_ptr<CandidateDevice>& device):
+            DriveConfigurationForm(dci,
+                QIcon(":/ui/extras/hardware.png"),
+                fmt::format("{}\n{}", type, id)),
+                _device(device)
+        {
+            portLineEdit->setEnabled(false);
+            portLineEdit->setText(QString::fromStdString(_device->serialPort));
+        }
+
+    private:
+        std::shared_ptr<CandidateDevice>& _device;
     };
 
 public:
@@ -48,48 +95,54 @@ public:
     {
         _mainWindow->connect(_mainWindow->deviceSelectionComboBox,
             QOverload<int>::of(&QComboBox::activated),
-            [this](int index)
-            {
-                onDeviceIndexChanged(index);
-            });
+            this,
+            &DriveComponentImpl::onDeviceIndexChanged);
 
         _devicesModel.setColumnCount(1);
         _mainWindow->deviceSelectionComboBox->setModel(&_devicesModel);
 
-        _devicesModel.appendRow(new FluxConfigurationForm());
-        _devicesModel.appendRow(
-            new QStandardItem(QIcon(":/ui/extras/hardware.png"),
-                "Greaseweazle\n(manually configured)"));
+        addForm(new FluxConfigurationForm(this));
+        addForm(new ManualDriveConfigurationForm(this));
 
         auto devices = runOnWorkerThread(findUsbDevices).result();
-        for (const auto& it : devices)
-        {
-            _devicesModel.appendRow(new DetectedDriveConfigurationForm(
-                getDeviceName(it->type), it->serial));
-        }
-        fmt::print("device count = {}\n", devices.size());
+        for (auto& it : devices)
+            addForm(new DetectedDriveConfigurationForm(
+                this, getDeviceName(it->type), it->serial, it));
 
         onDeviceIndexChanged(0);
     }
 
 private:
-    void onDeviceIndexChanged(int index)
+    void addForm(ConfigurationForm* form)
     {
-        fmt::print("value changed {}\n", index);
+        _forms.append(form);
+        _devicesModel.appendRow(form);
+
+        container()->layout()->addWidget(form->widget());
+        form->widget()->hide();
     }
 
 public:
-    void setDriveConfigurationPane(QWidget* active) override
+    void onDeviceIndexChanged(int index)
     {
-        for (auto* w :
-            _mainWindow->driveConfigurationContainer->findChildren<QWidget*>())
-            w->setVisible(w == active);
+        for (int i = 0; i < _forms.size(); i++)
+            _forms[i]->widget()->setVisible(i == index);
+    }
+    W_SLOT(onDeviceIndexChanged)
+
+public:
+    QWidget* container() const
+    {
+        return _mainWindow->driveConfigurationContainer;
     }
 
 private:
     MainWindow* _mainWindow;
     QStandardItemModel _devicesModel;
+    QList<ConfigurationForm*> _forms;
 };
+
+W_OBJECT_IMPL(DriveComponentImpl)
 
 std::unique_ptr<DriveComponent> DriveComponent::create(MainWindow* mainWindow)
 {
