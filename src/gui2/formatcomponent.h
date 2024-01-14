@@ -5,5 +5,5 @@ class MainWindow;
 class FormatComponent
 {
 public:
-    static std::unique_ptr<FormatComponent> create(MainWindow* mainWindow);
+    static FormatComponent* create(MainWindow* mainWindow);
 };

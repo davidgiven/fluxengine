@@ -33,6 +33,8 @@ private:
 public:
     FormatComponentImpl(MainWindow* mainWindow): _mainWindow(mainWindow)
     {
+        setParent(mainWindow);
+
         /* Configure the formats drop-down list. */
 
         std::string defaultFormat =
@@ -140,7 +142,8 @@ public:
             }
             qb->setCurrentIndex(selectedItem);
 
-            layout->addRow(QString::fromStdString(groupName), qb);
+            layout->addWidget(new QLabel(QString::fromStdString(groupName)));
+            layout->addWidget(qb);
 
             _mainWindow->connect(qb,
                 QOverload<int>::of(&QComboBox::activated),
@@ -156,7 +159,7 @@ public:
                 settings.contains(QString::fromStdString(option.name()))
                     ? Qt::Checked
                     : Qt::Unchecked);
-            layout->addRow(nullptr, rb);
+            layout->addWidget(rb);
 
             _mainWindow->connect(rb,
                 &QCheckBox::stateChanged,
@@ -165,7 +168,7 @@ public:
         }
 
         if (layout->count() == 0)
-            layout->addRow(new QLabel("No options for this format!"));
+            layout->addWidget(new QLabel("No options for this format!"));
     }
     W_SLOT(changeSelectedFormat)
 
@@ -190,7 +193,10 @@ public:
             if (QComboBox* cb = dynamic_cast<QComboBox*>(w))
                 settings.append(cb->currentData().toString());
             else if (OptionCheckBox* cb = dynamic_cast<OptionCheckBox*>(w))
-                settings.append(QString::fromStdString(cb->option->name()));
+            {
+                if (cb->isChecked())
+                    settings.append(QString::fromStdString(cb->option->name()));
+            }
         }
 
         app->setValue(QString(FORMAT_OPTIONS_PREFIX) + "/" + formatId,
@@ -204,7 +210,7 @@ private:
 };
 W_OBJECT_IMPL(FormatComponentImpl)
 
-std::unique_ptr<FormatComponent> FormatComponent::create(MainWindow* mainWindow)
+FormatComponent* FormatComponent::create(MainWindow* mainWindow)
 {
-    return std::make_unique<FormatComponentImpl>(mainWindow);
+    return new FormatComponentImpl(mainWindow);
 }

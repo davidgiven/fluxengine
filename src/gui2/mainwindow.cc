@@ -34,8 +34,8 @@ public:
     }
 
 private:
-    std::unique_ptr<DriveComponent> _driveComponent;
-    std::unique_ptr<FormatComponent> _formatComponent;
+    DriveComponent* _driveComponent;
+    FormatComponent* _formatComponent;
 };
 
 std::unique_ptr<MainWindow> MainWindow::create()

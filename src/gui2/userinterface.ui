@@ -14,7 +14,7 @@
    <string>MainWindow</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="resources.qrc">
+   <iconset>
     <normaloff>:/ui/extras/icon.png</normaloff>:/ui/extras/icon.png</iconset>
   </property>
   <property name="styleSheet">
@@ -112,7 +112,7 @@
        <string/>
       </property>
       <property name="pixmap">
-       <pixmap resource="resources.qrc">:/ui/extras/icon.png</pixmap>
+       <pixmap>:/ui/extras/icon.png</pixmap>
       </property>
       <property name="scaledContents">
        <bool>false</bool>
@@ -697,7 +697,7 @@ background: white;
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_10">
             <item>
-             <layout class="QFormLayout" name="formatOptionsContainerLayout"/>
+             <layout class="QVBoxLayout" name="formatOptionsContainerLayout"/>
             </item>
            </layout>
           </widget>

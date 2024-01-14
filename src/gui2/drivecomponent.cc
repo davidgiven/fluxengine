@@ -7,13 +7,18 @@
 #include "fluxConfigurationForm.h"
 #include <QStandardItemModel>
 
+static const char* DRIVE = "drive/";
+static const char* SELECTED_DRIVE = "drive/drive";
+
 class DriveComponentImpl : public DriveComponent, public QObject
 {
     W_OBJECT(DriveComponentImpl)
 
 public:
-    class ConfigurationForm : public QStandardItem
+    class ConfigurationForm : public QStandardItem, public QObject
     {
+        W_OBJECT(ConfigurationForm)
+
     public:
         ConfigurationForm(
             DriveComponentImpl* dci, QIcon icon, const std::string text):
@@ -24,9 +29,21 @@ public:
         }
 
     public:
+        virtual std::string id() const = 0;
+
+        virtual void updateSavedState() const = 0;
+        W_SLOT(updateSavedState)
+
+    public:
         QWidget* widget() const
         {
             return _widget;
+        }
+
+    protected:
+        QString qid() const
+        {
+            return DRIVE + QString::fromStdString(id());
         }
 
     protected:
@@ -44,6 +61,22 @@ public:
                 dci, QIcon(":/ui/extras/fluxfile.png"), "Flux file")
         {
             setupUi(_widget);
+
+            connect(filenameEdit,
+                &QLineEdit::editingFinished,
+                this,
+                &ConfigurationForm::updateSavedState);
+        }
+
+    public:
+        std::string id() const override
+        {
+            return "flux";
+        }
+
+        void updateSavedState() const override
+        {
+            app->setValue(qid() + "/filename", filenameEdit->text());
         }
     };
 
@@ -57,6 +90,30 @@ public:
             ConfigurationForm(dci, icon, label)
         {
             setupUi(_widget);
+
+            connect(portLineEdit,
+                &QLineEdit::editingFinished,
+                this,
+                &ConfigurationForm::updateSavedState);
+            connect(driveComboBox,
+                QOverload<int>::of(&QComboBox::activated),
+                this,
+                &ConfigurationForm::updateSavedState);
+            connect(driveTypeComboBox,
+                QOverload<int>::of(&QComboBox::activated),
+                this,
+                &ConfigurationForm::updateSavedState);
+            connect(highDensityToggle,
+                &QCheckBox::stateChanged,
+                this,
+                &ConfigurationForm::updateSavedState);
+        }
+
+        void updateSavedState() const override
+        {
+            app->setValue(
+                qid() + "/highDensity", highDensityToggle->isChecked());
+            app->setValue(qid() + "/drive", driveComboBox->currentIndex());
         }
     };
 
@@ -68,6 +125,18 @@ public:
                 QIcon(":/ui/extras/hardware.png"),
                 "Greaseweazle\n(configured manually)")
         {
+        }
+
+    public:
+        std::string id() const override
+        {
+            return "greaseweazle/manual";
+        }
+
+        void updateSavedState() const override
+        {
+            app->setValue(qid() + "/port", portLineEdit->text());
+            DriveConfigurationForm::updateSavedState();
         }
     };
 
@@ -81,24 +150,30 @@ public:
             DriveConfigurationForm(dci,
                 QIcon(":/ui/extras/hardware.png"),
                 fmt::format("{}\n{}", type, id)),
+            _type(type),
+            _id(id),
             _device(device)
         {
             portLineEdit->setEnabled(false);
             portLineEdit->setText(QString::fromStdString(_device->serialPort));
         }
 
+    public:
+        std::string id() const override
+        {
+            return fmt::format("{}:{}", _type, _id);
+        }
+
     private:
         std::shared_ptr<CandidateDevice>& _device;
+        std::string _type;
+        std::string _id;
     };
 
 public:
     DriveComponentImpl(MainWindow* mainWindow): _mainWindow(mainWindow)
     {
-        _mainWindow->connect(_mainWindow->deviceSelectionComboBox,
-            QOverload<int>::of(&QComboBox::activated),
-            this,
-            &DriveComponentImpl::onDeviceIndexChanged);
-
+        setParent(mainWindow);
         _devicesModel.setColumnCount(1);
         _mainWindow->deviceSelectionComboBox->setModel(&_devicesModel);
 
@@ -110,7 +185,21 @@ public:
             addForm(new DetectedDriveConfigurationForm(
                 this, getDeviceName(it->type), it->serial, it));
 
-        onDeviceIndexChanged(0);
+        auto currentFormId =
+            app->value(SELECTED_DRIVE).toString().toStdString();
+        int currentFormIndex = findFormById(currentFormId, 0);
+        _mainWindow->deviceSelectionComboBox->setCurrentIndex(currentFormIndex);
+        changeSelectedDevice(currentFormIndex);
+
+        _mainWindow->connect(_mainWindow->deviceSelectionComboBox,
+            QOverload<int>::of(&QComboBox::activated),
+            this,
+            &DriveComponentImpl::changeSelectedDevice);
+        _mainWindow->connect(_mainWindow->deviceSelectionComboBox,
+            QOverload<int>::of(&QComboBox::activated),
+            this,
+            &DriveComponentImpl::updateSavedState);
+
         container()->updateGeometry();
     }
 
@@ -124,13 +213,30 @@ private:
         form->widget()->hide();
     }
 
+    int findFormById(const std::string& id, int def)
+    {
+        for (int i = 0; i < _forms.size(); i++)
+            if (_forms[i]->id() == id)
+                return i;
+        return def;
+    }
+
 public:
-    void onDeviceIndexChanged(int index)
+    void changeSelectedDevice(int index)
     {
         for (int i = 0; i < _forms.size(); i++)
             _forms[i]->widget()->setVisible(i == index);
     }
-    W_SLOT(onDeviceIndexChanged)
+    W_SLOT(changeSelectedDevice)
+
+    void updateSavedState()
+    {
+        int selectedForm = _mainWindow->deviceSelectionComboBox->currentIndex();
+        ConfigurationForm* form = _forms[selectedForm];
+
+        app->setValue(SELECTED_DRIVE, QString::fromStdString(form->id()));
+    }
+    W_SLOT(updateSavedState)
 
 public:
     QWidget* container() const
@@ -145,8 +251,9 @@ private:
 };
 
 W_OBJECT_IMPL(DriveComponentImpl)
+W_OBJECT_IMPL(DriveComponentImpl::ConfigurationForm)
 
-std::unique_ptr<DriveComponent> DriveComponent::create(MainWindow* mainWindow)
+DriveComponent* DriveComponent::create(MainWindow* mainWindow)
 {
-    return std::make_unique<DriveComponentImpl>(mainWindow);
+    return new DriveComponentImpl(mainWindow);
 }
