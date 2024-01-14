@@ -10,6 +10,12 @@
     <height>167</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
@@ -54,6 +60,9 @@
      <property name="text">
       <string>Use value in file</string>
      </property>
+     <attribute name="buttonGroup">
+      <string notr="true">overrideRpmButtonGroup</string>
+     </attribute>
     </widget>
    </item>
    <item row="2" column="1">
@@ -61,6 +70,9 @@
      <property name="text">
       <string>300 rpm / 200 ms</string>
      </property>
+     <attribute name="buttonGroup">
+      <string notr="true">overrideRpmButtonGroup</string>
+     </attribute>
     </widget>
    </item>
    <item row="3" column="1">
@@ -68,6 +80,9 @@
      <property name="text">
       <string>360 rpm / 166 ms</string>
      </property>
+     <attribute name="buttonGroup">
+      <string notr="true">overrideRpmButtonGroup</string>
+     </attribute>
     </widget>
    </item>
    <item row="4" column="1">
@@ -77,6 +92,9 @@
        <property name="text">
         <string>Custom:</string>
        </property>
+       <attribute name="buttonGroup">
+        <string notr="true">overrideRpmButtonGroup</string>
+       </attribute>
       </widget>
      </item>
      <item>
@@ -95,4 +113,7 @@
  </widget>
  <resources/>
  <connections/>
+ <buttongroups>
+  <buttongroup name="overrideRpmButtonGroup"/>
+ </buttongroups>
 </ui>

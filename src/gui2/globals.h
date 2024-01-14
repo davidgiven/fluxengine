@@ -9,21 +9,19 @@
 #include <QtConcurrent>
 
 extern QThreadPool workerThreadPool;
-Q_DECLARE_METATYPE(const ConfigProto*);
 
 class UserInterface : public Ui_MainWindow
 {
 };
 
-class Application : public QApplication
+class Application : public QApplication, public QSettings
 {
 public:
-    Application(int& argc, char** argv): QApplication(argc, argv) {}
-    virtual ~Application() {}
-
-    virtual void sendToUiThread(std::function<void()> callback) = 0;
+    Application(int& argc, char** argv);
+    virtual ~Application();
 
 public:
+    virtual void sendToUiThread(std::function<void()> callback) = 0;
 };
 
 template <typename F>

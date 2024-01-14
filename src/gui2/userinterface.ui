@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1574</width>
-    <height>837</height>
+    <width>1679</width>
+    <height>1017</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <property name="windowIcon">
-   <iconset>
+   <iconset resource="resources.qrc">
     <normaloff>:/ui/extras/icon.png</normaloff>:/ui/extras/icon.png</iconset>
   </property>
   <property name="styleSheet">
@@ -240,7 +240,7 @@
        <string/>
       </property>
       <property name="pixmap">
-       <pixmap>:/ui/extras/icon.png</pixmap>
+       <pixmap resource="resources.qrc">:/ui/extras/icon.png</pixmap>
       </property>
       <property name="scaledContents">
        <bool>false</bool>
@@ -290,7 +290,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1574</width>
+     <width>1679</width>
      <height>29</height>
     </rect>
    </property>
@@ -340,25 +340,18 @@
            <attribute name="title">
             <string>Flux view</string>
            </attribute>
-           <layout class="QGridLayout" name="gridLayout_3" columnstretch="0,0,100,0">
-            <item row="2" column="0">
-             <widget class="QLabel" name="label_10">
-              <property name="text">
-               <string>Revolution:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="2">
-             <widget class="QRadioButton" name="radioButton_8">
-              <property name="text">
-               <string>By sector number</string>
-              </property>
-             </widget>
-            </item>
+           <layout class="QGridLayout" name="gridLayout_3" columnstretch="0,0,0,0">
             <item row="1" column="1">
              <widget class="QRadioButton" name="radioButton_7">
               <property name="text">
                <string>By index pulse</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_10">
+              <property name="text">
+               <string>Revolution:</string>
               </property>
              </widget>
             </item>
@@ -368,22 +361,6 @@
                <string>Alignment:</string>
               </property>
              </widget>
-            </item>
-            <item row="2" column="1" colspan="2">
-             <widget class="QSlider" name="revolutionsSlider">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="tickPosition">
-               <enum>QSlider::TicksAbove</enum>
-              </property>
-              <property name="tickInterval">
-               <number>1</number>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="3">
-             <widget class="QSpinBox" name="revolutionsSpinBox"/>
             </item>
             <item row="0" column="0" colspan="4">
              <widget class="QFrame" name="frame">
@@ -418,6 +395,29 @@ background: white;
                 </widget>
                </item>
               </layout>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QRadioButton" name="radioButton_8">
+              <property name="text">
+               <string>By sector number</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="3">
+             <widget class="QSpinBox" name="revolutionsSpinBox"/>
+            </item>
+            <item row="2" column="1" colspan="2">
+             <widget class="QSlider" name="revolutionsSlider">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="tickPosition">
+               <enum>QSlider::TicksAbove</enum>
+              </property>
+              <property name="tickInterval">
+               <number>1</number>
+              </property>
              </widget>
             </item>
            </layout>
@@ -484,8 +484,8 @@ background: white;
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>299</width>
-          <height>516</height>
+          <width>92</width>
+          <height>665</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -593,8 +593,8 @@ background: white;
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>1558</width>
-          <height>193</height>
+          <width>1663</width>
+          <height>224</height>
          </rect>
         </property>
         <property name="sizePolicy">
@@ -613,7 +613,7 @@ background: white;
          <item>
           <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,0,100,0">
            <item row="0" column="2" colspan="2">
-            <widget class="QComboBox" name="formatsList">
+            <widget class="QComboBox" name="formatSelectionComboBox">
              <property name="sizePolicy">
               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -623,17 +623,26 @@ background: white;
             </widget>
            </item>
            <item row="0" column="1">
-            <widget class="QRadioButton" name="radioButton_5">
+            <widget class="QRadioButton" name="builtInFormatRadioButton">
              <property name="text">
               <string>Built-in</string>
              </property>
+             <attribute name="buttonGroup">
+              <string notr="true">formatButtonGroup</string>
+             </attribute>
             </widget>
            </item>
            <item row="1" column="1">
-            <widget class="QRadioButton" name="radioButton_6">
+            <widget class="QRadioButton" name="customFormatRadioButton">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="text">
               <string>From file</string>
              </property>
+             <attribute name="buttonGroup">
+              <string notr="true">formatButtonGroup</string>
+             </attribute>
             </widget>
            </item>
            <item row="0" column="0">
@@ -647,7 +656,7 @@ background: white;
             </widget>
            </item>
            <item row="1" column="2">
-            <widget class="QLineEdit" name="lineEdit_2">
+            <widget class="QLineEdit" name="customFormatFilenameEdit">
              <property name="sizePolicy">
               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -657,7 +666,7 @@ background: white;
             </widget>
            </item>
            <item row="1" column="3">
-            <widget class="QToolButton" name="toolButton_8">
+            <widget class="QToolButton" name="customFormatOpenButton">
              <property name="text">
               <string>Open</string>
              </property>
@@ -676,14 +685,15 @@ background: white;
           </layout>
          </item>
          <item>
-          <widget class="QWidget" name="formatCustomOptionsForm" native="true">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
+          <widget class="QGroupBox" name="groupBox_3">
+           <property name="title">
+            <string>Per-format options</string>
            </property>
-           <layout class="QFormLayout" name="formLayout"/>
+           <layout class="QVBoxLayout" name="verticalLayout_10">
+            <item>
+             <layout class="QFormLayout" name="formatOptionsContainerLayout"/>
+            </item>
+           </layout>
           </widget>
          </item>
          <item>
@@ -701,6 +711,9 @@ background: white;
          </item>
          <item>
           <widget class="QPushButton" name="pushButton_5">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -725,4 +738,7 @@ background: white;
   <include location="resources.qrc"/>
  </resources>
  <connections/>
+ <buttongroups>
+  <buttongroup name="formatButtonGroup"/>
+ </buttongroups>
 </ui>

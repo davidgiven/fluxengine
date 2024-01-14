@@ -5,16 +5,24 @@
 Application* app;
 QThreadPool workerThreadPool;
 
-/* This has to go first due to C++ compiler limitations (has to be defined
- * before use). */
+Application::Application(int& argc, char** argv):
+    QApplication(argc, argv),
+    QSettings("Cowlark Technologies", "FluxEngine")
+{
+}
+
+Application::~Application() {}
+
 class ApplicationImpl : public Application
 {
 public:
-    ApplicationImpl(int& argc, char** argv):
-        Application(argc, argv),
-        _settings("Cowlark Technologies", "FluxEngine"),
-        _mainWindow(MainWindow::create())
+    ApplicationImpl(int& argc, char** argv): Application(argc, argv)
     {
+        /* Must be set _before_ the main window is created. */
+
+        app = this;
+
+        _mainWindow = MainWindow::create();
         _mainWindow->show();
     }
 
@@ -22,17 +30,14 @@ public:
     void sendToUiThread(std::function<void()> callback) override {}
 
 private:
-    QSettings _settings;
     std::unique_ptr<MainWindow> _mainWindow;
 };
 
 int main(int argc, char** argv)
 {
     Q_INIT_RESOURCE(resources);
-    qRegisterMetaType<const ConfigProto*>("const ConfigProto*");
     workerThreadPool.setMaxThreadCount(1);
 
     ApplicationImpl impl(argc, argv);
-    app = &impl;
     return app->exec();
 }

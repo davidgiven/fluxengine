@@ -76,11 +76,12 @@ public:
     public:
         DetectedDriveConfigurationForm(DriveComponentImpl* dci,
             const std::string& type,
-            const std::string& id, std::shared_ptr<CandidateDevice>& device):
+            const std::string& id,
+            std::shared_ptr<CandidateDevice>& device):
             DriveConfigurationForm(dci,
                 QIcon(":/ui/extras/hardware.png"),
                 fmt::format("{}\n{}", type, id)),
-                _device(device)
+            _device(device)
         {
             portLineEdit->setEnabled(false);
             portLineEdit->setText(QString::fromStdString(_device->serialPort));
