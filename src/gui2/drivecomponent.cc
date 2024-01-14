@@ -31,6 +31,8 @@ public:
     public:
         virtual std::string id() const = 0;
 
+        virtual void loadSavedState() = 0;
+        virtual void connectAll() = 0;
         virtual void updateSavedState() const = 0;
         W_SLOT(updateSavedState)
 
@@ -61,17 +63,25 @@ public:
                 dci, QIcon(":/ui/extras/fluxfile.png"), "Flux file")
         {
             setupUi(_widget);
-
-            connect(filenameEdit,
-                &QLineEdit::editingFinished,
-                this,
-                &ConfigurationForm::updateSavedState);
         }
 
     public:
         std::string id() const override
         {
             return "flux";
+        }
+
+        void loadSavedState() override
+        {
+            filenameEdit->setText(app->value(qid() + "/filename").toString());
+        }
+
+        void connectAll() override
+        {
+            connect(filenameEdit,
+                &QLineEdit::editingFinished,
+                this,
+                &ConfigurationForm::updateSavedState);
         }
 
         void updateSavedState() const override
@@ -90,7 +100,31 @@ public:
             ConfigurationForm(dci, icon, label)
         {
             setupUi(_widget);
+        }
 
+        void loadSavedState() override
+        {
+            driveComboBox->setCurrentIndex(
+                app->value(qid() + "/drive").toInt());
+
+            QString driveType = app->value(qid() + "/driveType").toString();
+            for (auto& d : drivetypes)
+            {
+                driveTypeComboBox->addItem(
+                    QString::fromStdString(d.second->comment()),
+                    QVariant(QString::fromStdString(d.first)));
+                if (QString::fromStdString(d.first) == driveType)
+                    driveTypeComboBox->setCurrentIndex(
+                        driveTypeComboBox->count() - 1);
+            }
+
+            highDensityToggle->setCheckState(
+                app->value(qid() + "/highDensity").toBool() ? Qt::Checked
+                                                            : Qt::Unchecked);
+        }
+
+        void connectAll() override
+        {
             connect(portLineEdit,
                 &QLineEdit::editingFinished,
                 this,
@@ -111,9 +145,13 @@ public:
 
         void updateSavedState() const override
         {
+            app->setValue(qid() + "/drive", driveComboBox->currentIndex());
+
+            app->setValue(qid() + "/driveType",
+                driveTypeComboBox->currentData().toString());
+
             app->setValue(
                 qid() + "/highDensity", highDensityToggle->isChecked());
-            app->setValue(qid() + "/drive", driveComboBox->currentIndex());
         }
     };
 
@@ -130,7 +168,13 @@ public:
     public:
         std::string id() const override
         {
-            return "greaseweazle/manual";
+            return "device/manual";
+        }
+
+        void loadSavedState() override
+        {
+            DriveConfigurationForm::loadSavedState();
+            portLineEdit->setText(app->value(qid() + "/port").toString());
         }
 
         void updateSavedState() const override
@@ -155,13 +199,17 @@ public:
             _device(device)
         {
             portLineEdit->setEnabled(false);
+        }
+
+        void loadSavedState() override
+        {
             portLineEdit->setText(QString::fromStdString(_device->serialPort));
         }
 
     public:
         std::string id() const override
         {
-            return fmt::format("{}:{}", _type, _id);
+            return "device/" + _id;
         }
 
     private:
@@ -206,6 +254,9 @@ public:
 private:
     void addForm(ConfigurationForm* form)
     {
+        form->loadSavedState();
+        form->connectAll();
+
         _forms.append(form);
         _devicesModel.appendRow(form);
 

@@ -1,6 +1,6 @@
 CC = gcc
 CXX = g++ -std=c++17
-CFLAGS = -g -O3
+CFLAGS = -g -O0
 LDFLAGS =
 
 OBJ = .obj

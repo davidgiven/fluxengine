@@ -8,6 +8,8 @@
 #include <QThreadPool>
 #include <QtConcurrent>
 
+Q_DECLARE_METATYPE(const ConfigProto*)
+
 extern QThreadPool workerThreadPool;
 
 class UserInterface : public Ui_MainWindow
@@ -27,6 +29,8 @@ public:
 extern bool isGuiThread();
 extern void postToUiThread(std::function<void()> callback);
 extern void runOnUiThread(std::function<void()> callback);
+
+extern const std::map<std::string, const ConfigProto*> drivetypes;
 
 template <typename F>
 static auto runOnWorkerThread(F function)
