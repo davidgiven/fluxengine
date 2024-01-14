@@ -24,14 +24,30 @@ public:
     virtual void sendToUiThread(std::function<void()> callback) = 0;
 };
 
+extern bool isGuiThread();
+extern void postToUiThread(std::function<void()> callback);
+extern void runOnUiThread(std::function<void()> callback);
+
 template <typename F>
-auto runOnWorkerThread(F function)
+static auto runOnWorkerThread(F function)
 {
     return QtConcurrent::run(&workerThreadPool,
         [=]()
         {
             return function();
         });
+}
+
+template <typename R>
+static inline R runOnUiThread(std::function<R()> callback)
+{
+    R retvar;
+    runOnUiThread(
+        [&]()
+        {
+            retvar = callback();
+        });
+    return retvar;
 }
 
 extern Application* app;

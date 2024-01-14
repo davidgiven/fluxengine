@@ -38,6 +38,19 @@
     <string notr="true"/>
    </property>
    <layout class="QGridLayout" name="gridLayout">
+    <item row="3" column="1" colspan="3">
+     <widget class="QLabel" name="label_9">
+      <property name="text">
+       <string>http://cowlark.com/fluxengine</string>
+      </property>
+      <property name="textFormat">
+       <enum>Qt::MarkdownText</enum>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
     <item row="8" column="1" colspan="3">
      <spacer name="verticalSpacer_2">
       <property name="orientation">
@@ -51,13 +64,10 @@
       </property>
      </spacer>
     </item>
-    <item row="3" column="1" colspan="3">
-     <widget class="QLabel" name="label_9">
+    <item row="7" column="1">
+     <widget class="QLabel" name="label_14">
       <property name="text">
-       <string>http://cowlark.com/fluxengine</string>
-      </property>
-      <property name="textFormat">
-       <enum>Qt::MarkdownText</enum>
+       <string>Configure drive and format before use.</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
@@ -77,86 +87,6 @@
       </property>
      </spacer>
     </item>
-    <item row="6" column="1">
-     <widget class="QGroupBox" name="groupBox">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-        <horstretch>1</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="title">
-       <string>Disk operations</string>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout_6">
-       <item>
-        <widget class="QPushButton" name="pushButton_2">
-         <property name="text">
-          <string>Read disk into memory</string>
-         </property>
-         <property name="icon">
-          <iconset theme="media-playback-start">
-           <normaloff>.</normaloff>.</iconset>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButton_4">
-         <property name="text">
-          <string>Write memory to disk</string>
-         </property>
-         <property name="icon">
-          <iconset theme="media-record">
-           <normaloff>.</normaloff>.</iconset>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButton_3">
-         <property name="text">
-          <string>Work directly with disk</string>
-         </property>
-         <property name="icon">
-          <iconset theme="system-run">
-           <normaloff>.</normaloff>.</iconset>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item row="0" column="3">
-     <widget class="QWidget" name="widget_2" native="true">
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <property name="spacing">
-        <number>0</number>
-       </property>
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
-        <number>0</number>
-       </property>
-      </layout>
-     </widget>
-    </item>
-    <item row="6" column="2">
-     <widget class="QLabel" name="label_8">
-      <property name="styleSheet">
-       <string notr="true">font-size: 20pt;
-</string>
-      </property>
-      <property name="text">
-       <string>⬅➡</string>
-      </property>
-     </widget>
-    </item>
     <item row="6" column="4">
      <spacer name="horizontalSpacer">
       <property name="orientation">
@@ -170,10 +100,22 @@
       </property>
      </spacer>
     </item>
-    <item row="2" column="1" colspan="3">
-     <widget class="QLabel" name="label_2">
+    <item row="1" column="1" colspan="3">
+     <widget class="QLabel" name="label">
+      <property name="minimumSize">
+       <size>
+        <width>64</width>
+        <height>64</height>
+       </size>
+      </property>
       <property name="text">
-       <string>FluxEngine</string>
+       <string/>
+      </property>
+      <property name="pixmap">
+       <pixmap resource="resources.qrc">:/ui/extras/icon.png</pixmap>
+      </property>
+      <property name="scaledContents">
+       <bool>false</bool>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
@@ -228,22 +170,52 @@
       </layout>
      </widget>
     </item>
-    <item row="1" column="1" colspan="3">
-     <widget class="QLabel" name="label">
-      <property name="minimumSize">
-       <size>
-        <width>64</width>
-        <height>64</height>
-       </size>
+    <item row="6" column="2">
+     <widget class="QLabel" name="label_8">
+      <property name="styleSheet">
+       <string notr="true">font-size: 20pt;
+</string>
       </property>
       <property name="text">
-       <string/>
+       <string>⬅➡</string>
       </property>
-      <property name="pixmap">
-       <pixmap resource="resources.qrc">:/ui/extras/icon.png</pixmap>
+     </widget>
+    </item>
+    <item row="0" column="3">
+     <widget class="QWidget" name="widget_2" native="true">
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+      </layout>
+     </widget>
+    </item>
+    <item row="7" column="3">
+     <widget class="QLabel" name="label_15">
+      <property name="text">
+       <string>Configure format before use.</string>
       </property>
-      <property name="scaledContents">
-       <bool>false</bool>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1" colspan="3">
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>FluxEngine</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
@@ -263,24 +235,52 @@
       </property>
      </spacer>
     </item>
-    <item row="7" column="1">
-     <widget class="QLabel" name="label_14">
-      <property name="text">
-       <string>Configure drive and format before use.</string>
+    <item row="6" column="1">
+     <widget class="QGroupBox" name="groupBox">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>1</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
       </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
+      <property name="title">
+       <string>Disk operations</string>
       </property>
-     </widget>
-    </item>
-    <item row="7" column="3">
-     <widget class="QLabel" name="label_15">
-      <property name="text">
-       <string>Configure format before use.</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <widget class="QPushButton" name="pushButton_2">
+         <property name="text">
+          <string>Read disk into memory</string>
+         </property>
+         <property name="icon">
+          <iconset theme="media-playback-start">
+           <normaloff>.</normaloff>.</iconset>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_4">
+         <property name="text">
+          <string>Write memory to disk</string>
+         </property>
+         <property name="icon">
+          <iconset theme="media-record">
+           <normaloff>.</normaloff>.</iconset>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_3">
+         <property name="text">
+          <string>Work directly with disk</string>
+         </property>
+         <property name="icon">
+          <iconset theme="system-run">
+           <normaloff>.</normaloff>.</iconset>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </item>
    </layout>
@@ -484,9 +484,15 @@ background: white;
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>92</width>
-          <height>665</height>
+          <width>360</width>
+          <height>189</height>
          </rect>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
          <item>
@@ -558,7 +564,7 @@ background: white;
     <string>Format configuration</string>
    </property>
    <attribute name="dockWidgetArea">
-    <number>8</number>
+    <number>1</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_4">
     <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -593,8 +599,8 @@ background: white;
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>1663</width>
-          <height>224</height>
+          <width>348</width>
+          <height>461</height>
          </rect>
         </property>
         <property name="sizePolicy">
@@ -733,6 +739,46 @@ background: white;
    </widget>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QDockWidget" name="dockWidget">
+   <property name="features">
+    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
+   </property>
+   <property name="windowTitle">
+    <string>Log viewer</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <layout class="QVBoxLayout" name="verticalLayout_11">
+     <item>
+      <widget class="QPlainTextEdit" name="logViewerEdit">
+       <property name="styleSheet">
+        <string notr="true">font-family: monospace;</string>
+       </property>
+       <property name="horizontalScrollBarPolicy">
+        <enum>Qt::ScrollBarAsNeeded</enum>
+       </property>
+       <property name="documentTitle">
+        <string/>
+       </property>
+       <property name="lineWrapMode">
+        <enum>QPlainTextEdit::NoWrap</enum>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+       <property name="plainText">
+        <string/>
+       </property>
+       <property name="backgroundVisible">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
  </widget>
  <resources>
   <include location="resources.qrc"/>

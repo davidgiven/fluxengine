@@ -1,15 +1,11 @@
+#include "lib/globals.h"
+#include "lib/logger.h"
 #include "globals.h"
 #include "mainwindow.h"
 #include <QtConcurrent>
 
 Application* app;
 QThreadPool workerThreadPool;
-
-Application::Application(int& argc, char** argv):
-    QApplication(argc, argv),
-    QSettings("Cowlark Technologies", "FluxEngine")
-{
-}
 
 Application::~Application() {}
 
@@ -24,6 +20,19 @@ public:
 
         _mainWindow = MainWindow::create();
         _mainWindow->show();
+
+        Logger::setLogger(
+            [&](std::shared_ptr<const AnyLogMessage> message)
+            {
+                if (isGuiThread())
+                    _mainWindow->logMessage(message);
+                else
+                    runOnUiThread(
+                        [message, this]()
+                        {
+                            _mainWindow->logMessage(message);
+                        });
+            });
     }
 
 public:
@@ -32,6 +41,27 @@ public:
 private:
     std::unique_ptr<MainWindow> _mainWindow;
 };
+
+bool isGuiThread()
+{
+    return (QThread::currentThread() == QCoreApplication::instance()->thread());
+}
+
+void postToUiThread(std::function<void()> callback)
+{
+    QMetaObject::invokeMethod((QApplication*)app, callback);
+}
+
+void runOnUiThread(std::function<void()> callback)
+{
+    QMetaObject::invokeMethod((QApplication*)app, callback);
+}
+
+Application::Application(int& argc, char** argv):
+    QApplication(argc, argv),
+    QSettings("Cowlark Technologies", "FluxEngine")
+{
+}
 
 int main(int argc, char** argv)
 {

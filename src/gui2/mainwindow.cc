@@ -25,6 +25,14 @@ public:
             &QSlider::setValue);
     }
 
+public:
+    void logMessage(std::shared_ptr<const AnyLogMessage> message) override
+    {
+        logViewerEdit->appendPlainText(
+            QString::fromStdString(Logger::toString(*message)));
+        logViewerEdit->ensureCursorVisible();
+    }
+
 private:
     std::unique_ptr<DriveComponent> _driveComponent;
     std::unique_ptr<FormatComponent> _formatComponent;

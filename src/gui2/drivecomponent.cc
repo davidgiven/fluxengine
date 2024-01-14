@@ -111,6 +111,7 @@ public:
                 this, getDeviceName(it->type), it->serial, it));
 
         onDeviceIndexChanged(0);
+        container()->updateGeometry();
     }
 
 private:
