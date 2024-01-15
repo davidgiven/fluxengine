@@ -105,6 +105,16 @@ public:
     }
 
 public:
+    void collectConfig() override
+    {
+        std::string formatId = getCurrentFormatId();
+        globalConfig().readBaseConfigFile(formatId);
+
+        for (auto& option : collectOptions())
+            globalConfig().applyOption(option.toStdString());
+    }
+
+public:
     void changeSelectedFormat(int index)
     {
         auto item = _formatsModel.item(index);
@@ -179,30 +189,44 @@ public:
         app->setValue(CUSTOM_FORMAT_FILENAME,
             _mainWindow->customFormatFilenameEdit->text());
 
-        int index = _mainWindow->formatSelectionComboBox->currentIndex();
-        auto item = _formatsModel.item(index);
-        QString formatId = item->data().toString();
-        const ConfigProto* config = formats.at(formatId.toStdString());
-        app->setValue(FORMAT, formatId);
+        std::string formatId = getCurrentFormatId();
+        const ConfigProto* config = formats.at(formatId);
+        app->setValue(FORMAT, QString::fromStdString(formatId));
 
         auto* layout = _mainWindow->formatOptionsContainerLayout;
-        QStringList settings;
+        QStringList options = collectOptions() | ranges::to<QStringList>();
+        app->setValue(QString(FORMAT_OPTIONS_PREFIX) + "/" +
+                          QString::fromStdString(formatId),
+            QVariant(options));
+    }
+    W_SLOT(updateSavedState)
+
+private:
+    QSet<QString> collectOptions() const
+    {
+        auto* layout = _mainWindow->formatOptionsContainerLayout;
+        QSet<QString> options;
         for (int i = 0; i < layout->count(); i++)
         {
             QWidget* w = layout->itemAt(i)->widget();
             if (QComboBox* cb = dynamic_cast<QComboBox*>(w))
-                settings.append(cb->currentData().toString());
+                options.insert(cb->currentData().toString());
             else if (OptionCheckBox* cb = dynamic_cast<OptionCheckBox*>(w))
             {
                 if (cb->isChecked())
-                    settings.append(QString::fromStdString(cb->option->name()));
+                    options.insert(QString::fromStdString(cb->option->name()));
             }
         }
-
-        app->setValue(QString(FORMAT_OPTIONS_PREFIX) + "/" + formatId,
-            QVariant(settings));
+        return options;
     }
-    W_SLOT(updateSavedState)
+
+private:
+    std::string getCurrentFormatId() const
+    {
+        int index = _mainWindow->formatSelectionComboBox->currentIndex();
+        auto item = _formatsModel.item(index);
+        return item->data().toString().toStdString();
+    }
 
 private:
     MainWindow* _mainWindow;

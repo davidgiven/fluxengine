@@ -30,6 +30,7 @@ public:
 
     public:
         virtual std::string id() const = 0;
+        virtual void collectConfig() const = 0;
 
         virtual void loadSavedState() = 0;
         virtual void connectAll() = 0;
@@ -71,6 +72,19 @@ public:
             return "flux";
         }
 
+        void collectConfig() const override
+        {
+            auto fluxFile = filenameEdit->text().toStdString();
+
+            const FluxConstructor* fc = &Config::getFluxFormats()[0];
+            if (fc->sink)
+                fc->sink(
+                    fluxFile, globalConfig().overrides()->mutable_flux_sink());
+            if (fc->source)
+                fc->source(fluxFile,
+                    globalConfig().overrides()->mutable_flux_source());
+        }
+
         void loadSavedState() override
         {
             filenameEdit->setText(app->value(qid() + "/filename").toString());
@@ -100,6 +114,22 @@ public:
             ConfigurationForm(dci, icon, label)
         {
             setupUi(_widget);
+        }
+
+        void collectConfig() const override
+        {
+            globalConfig().overrides()->mutable_drive()->set_high_density(
+                highDensityToggle->isChecked());
+
+            auto driveTypeId =
+                driveTypeComboBox->currentData().toString().toStdString();
+            globalConfig().overrides()->MergeFrom(*drivetypes.at(driveTypeId));
+
+            auto filename =
+                fmt::format("drive:{}", driveComboBox->currentIndex());
+            globalConfig().setFluxSink(filename);
+            globalConfig().setFluxSource(filename);
+            globalConfig().setVerificationFluxSource(filename);
         }
 
         void loadSavedState() override
@@ -169,6 +199,16 @@ public:
         std::string id() const override
         {
             return "device/manual";
+        }
+
+        void collectConfig() const override
+        {
+            DriveConfigurationForm::collectConfig();
+            globalConfig()
+                .overrides()
+                ->mutable_usb()
+                ->mutable_greaseweazle()
+                ->set_port(portLineEdit->text().toStdString());
         }
 
         void loadSavedState() override
@@ -288,6 +328,14 @@ public:
         app->setValue(SELECTED_DRIVE, QString::fromStdString(form->id()));
     }
     W_SLOT(updateSavedState)
+
+public:
+    void collectConfig() override
+    {
+        int selectedForm = _mainWindow->deviceSelectionComboBox->currentIndex();
+        ConfigurationForm* form = _forms.at(selectedForm);
+        form->collectConfig();
+    }
 
 public:
     QWidget* container() const

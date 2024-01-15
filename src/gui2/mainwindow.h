@@ -10,4 +10,5 @@ public:
 
 public:
     virtual void logMessage(std::shared_ptr<const AnyLogMessage> message) = 0;
+    virtual void collectConfig() = 0;
 };

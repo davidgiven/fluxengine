@@ -27,7 +27,7 @@ public:
                 if (isGuiThread())
                     _mainWindow->logMessage(message);
                 else
-                    runOnUiThread(
+                    postToUiThread(
                         [message, this]()
                         {
                             _mainWindow->logMessage(message);
@@ -47,6 +47,11 @@ bool isGuiThread()
     return (QThread::currentThread() == QCoreApplication::instance()->thread());
 }
 
+bool isWorkerThreadRunning()
+{
+    return workerThreadPool.activeThreadCount() != 0;
+}
+
 void postToUiThread(std::function<void()> callback)
 {
     QMetaObject::invokeMethod((QApplication*)app, callback);
@@ -55,6 +60,31 @@ void postToUiThread(std::function<void()> callback)
 void runOnUiThread(std::function<void()> callback)
 {
     QMetaObject::invokeMethod((QApplication*)app, callback);
+}
+
+QFuture<void> safeRunOnWorkerThread(std::function<void()> callback)
+{
+    return QtConcurrent::run(&workerThreadPool,
+        [=]()
+        {
+            try
+            {
+                callback();
+            }
+            catch (const ErrorException& e)
+            {
+                log("Fatal error: {}", e.message);
+            }
+            catch (const std::exception& e)
+            {
+                log("Fatal error: {}", e.what());
+            }
+            catch (...)
+            {
+                std::exception_ptr p = std::current_exception();
+                log("Fatal error: {}", p.__cxa_exception_type()->name());
+            }
+        });
 }
 
 Application::Application(int& argc, char** argv):
