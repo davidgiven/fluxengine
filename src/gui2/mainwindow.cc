@@ -19,6 +19,17 @@ public:
         setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
         setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
 
+        _progressWidget = new QProgressBar();
+        _progressWidget->setMinimum(0);
+        _progressWidget->setMaximum(100);
+        _progressWidget->setEnabled(false);
+        _progressWidget->setAlignment(Qt::AlignRight);
+        statusbar->addPermanentWidget(_progressWidget);
+
+        auto* stopWidget = new QToolButton();
+        stopWidget->setText("Stop");
+        statusbar->addPermanentWidget(stopWidget);
+
         connect(readDiskButton,
             &QAbstractButton::clicked,
             this,
@@ -37,9 +48,45 @@ public:
 public:
     void logMessage(std::shared_ptr<const AnyLogMessage> message) override
     {
+        std::visit(overloaded{/* Fallback --- do nothing */
+                       [this](const auto& m)
+                       {
+                       },
+
+                       /* Large-scale operation start. */
+                       [this](const BeginOperationLogMessage& m)
+                       {
+                           setProgressBar(0);
+                       },
+
+                       /* Large-scale operation end. */
+                       [this](const EndOperationLogMessage& m)
+                       {
+                           finishedWithProgressBar();
+                       },
+
+                       /* Large-scale operation progress. */
+                       [this](const OperationProgressLogMessage& m)
+                       {
+                           setProgressBar(m.progress);
+                       }},
+            *message);
+
         logViewerEdit->appendPlainText(
             QString::fromStdString(Logger::toString(*message)));
         logViewerEdit->ensureCursorVisible();
+    }
+
+    void setProgressBar(int progress) override
+    {
+        _progressWidget->setEnabled(true);
+        _progressWidget->setValue(progress);
+    }
+
+    void finishedWithProgressBar() override
+    {
+        _progressWidget->setEnabled(false);
+        _progressWidget->setValue(0);
     }
 
     void collectConfig() override
@@ -82,6 +129,7 @@ private:
 private:
     DriveComponent* _driveComponent;
     FormatComponent* _formatComponent;
+    QProgressBar* _progressWidget;
 };
 W_OBJECT_IMPL(MainWindowImpl)
 
