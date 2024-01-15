@@ -583,6 +583,9 @@ bool Config::hasFluxSource()
 
 std::shared_ptr<FluxSource>& Config::getFluxSource()
 {
+    /* Ensure the config gets built (which might call us reentrantly). */
+    combined();
+
     if (!_fluxSource)
     {
         if (!hasFluxSource())
@@ -601,6 +604,9 @@ bool Config::hasVerificationFluxSource() const
 
 std::shared_ptr<FluxSource>& Config::getVerificationFluxSource()
 {
+    /* Ensure the config gets built (which might call us reentrantly). */
+    combined();
+
     if (!_verificationFluxSource)
     {
         if (!hasVerificationFluxSource())
@@ -619,6 +625,9 @@ bool Config::hasImageReader()
 
 std::shared_ptr<ImageReader>& Config::getImageReader()
 {
+    /* Ensure the config gets built (which might call us reentrantly). */
+    combined();
+
     if (!_imageReader)
     {
         if (!hasImageReader())
