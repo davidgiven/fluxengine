@@ -1,9 +1,11 @@
 #include "lib/globals.h"
 #include "lib/config.h"
 #include "lib/readerwriter.h"
+#include "globals.h"
 #include "mainwindow.h"
 #include "drivecomponent.h"
 #include "formatcomponent.h"
+#include "fluxvisualiserwidget.h"
 
 class MainWindowImpl : public MainWindow
 {
@@ -29,6 +31,10 @@ public:
         auto* stopWidget = new QToolButton();
         stopWidget->setText("Stop");
         statusbar->addPermanentWidget(stopWidget);
+
+        _fluxVisualiserWidget = FluxVisualiserWidget::create();
+        fluxViewContainer->layout()->addWidget(_fluxVisualiserWidget);
+        _fluxVisualiserWidget->refresh();
 
         connect(readDiskButton,
             &QAbstractButton::clicked,
@@ -130,6 +136,7 @@ private:
     DriveComponent* _driveComponent;
     FormatComponent* _formatComponent;
     QProgressBar* _progressWidget;
+    FluxVisualiserWidget* _fluxVisualiserWidget;
 };
 W_OBJECT_IMPL(MainWindowImpl)
 

@@ -36,6 +36,7 @@ cxxlibrary(
         "userinterface.h": ".+userinterface_h",
         "driveConfigurationForm.h": ".+driveConfigurationForm_h",
         "fluxConfigurationForm.h": ".+fluxConfigurationForm_h",
+        "fluxvisualiserwidget.h": "./fluxvisualiserwidget.h",
     },
 )
 
@@ -46,6 +47,7 @@ cxxprogram(
         "./mainwindow.cc",
         "./drivecomponent.cc",
         "./formatcomponent.cc",
+        "./fluxvisualiserwidget.cc",
         "./globals.h",
         "./mainwindow.h",
         "./drivecomponent.h",
