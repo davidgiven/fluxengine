@@ -20,7 +20,7 @@ jobs:
         path: 'fluxengine-testdata'
     - name: apt
       run: |
-        sudo apt install libudev-dev libsqlite3-dev protobuf-compiler libwxgtk3.0-gtk3-dev libfmt-dev libprotobuf-dev wx-common qtbase5-dev qttools5-dev-tools
+        sudo apt install libudev-dev libsqlite3-dev protobuf-compiler libwxgtk3.0-gtk3-dev libfmt-dev libprotobuf-dev wx-common qtbase5-dev qttools5-dev-tools librange-v3-dev
     - name: make
       run: CXXFLAGS="-Wp,-D_GLIBCXX_ASSERTIONS" make -j`nproc` -C fluxengine
 
@@ -36,7 +36,9 @@ jobs:
         repository: 'davidgiven/fluxengine-testdata'
         path: 'fluxengine-testdata'
     - name: brew
-      run: brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg qt@5
+      run: |
+        brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg qt@5 range-v3
+        brew link qt@5 --force
     - name: make
       run: gmake -j`nproc` -C fluxengine
 
@@ -71,6 +73,7 @@ jobs:
           mingw-w64-i686-zlib
           mingw-w64-i686-png2ico
           mingw-w64-i686-qt5-base
+          mingw-w64-i686-range-v3
           vim
           zip
     - name: update-protobuf
