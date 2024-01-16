@@ -21,6 +21,14 @@ static const float VINNER_RADIUS = 10.0;
 
 class FluxVisualiserWidgetImpl : public FluxVisualiserWidget
 {
+private:
+    enum
+    {
+        SIDE_0,
+        SIDE_1,
+        BOTH_SIDES
+    };
+
 public:
     FluxVisualiserWidgetImpl(): _scene(new QGraphicsScene())
     {
@@ -37,6 +45,12 @@ public:
     }
 
 public:
+    void setVisibleSide(int mode)
+    {
+        _viewMode = mode;
+        refresh();
+    }
+
     void setTrackData(std::shared_ptr<const TrackFlux> track)
     {
         key_t key = {
@@ -59,11 +73,25 @@ public:
     {
         _scene->clear();
 
-        drawSide(VOUTER_RADIUS, VOUTER_RADIUS);
-        drawSide(VOUTER_RADIUS, VOUTER_RADIUS * 3 + VBORDER);
+        switch (_viewMode)
+        {
+            case SIDE_0:
+            case SIDE_1:
+                drawSide(VOUTER_RADIUS, VOUTER_RADIUS);
+                _scene->setSceneRect(
+                    0.0, 0.0, VOUTER_RADIUS * 2, VOUTER_RADIUS * 2);
+                break;
 
-        _scene->setSceneRect(
-            0.0, 0.0, VOUTER_RADIUS * 2, VOUTER_RADIUS * 4 + VBORDER);
+            case BOTH_SIDES:
+                drawSide(VOUTER_RADIUS, VOUTER_RADIUS);
+                drawSide(VOUTER_RADIUS, VOUTER_RADIUS * 3 + VBORDER);
+
+                _scene->setSceneRect(
+                    0.0, 0.0, VOUTER_RADIUS * 2, VOUTER_RADIUS * 4 + VBORDER);
+                break;
+        }
+
+        fitInView(sceneRect(), Qt::KeepAspectRatio);
     }
 
 private:
@@ -85,6 +113,7 @@ private:
 
     QGraphicsScene* _scene;
     std::map<key_t, std::shared_ptr<const TrackFlux>> _tracks;
+    int _viewMode = BOTH_SIDES;
 };
 
 FluxVisualiserWidget* FluxVisualiserWidget::create()

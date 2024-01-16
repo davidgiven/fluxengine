@@ -4,8 +4,12 @@
 #include "fluxcomponent.h"
 #include "mainwindow.h"
 #include "fluxvisualiserwidget.h"
+#include "fluxOverlayForm.h"
 
-class FluxComponentImpl : public FluxComponent, public QObject
+class FluxComponentImpl :
+    public FluxComponent,
+    public QObject,
+    public Ui_fluxOverlayForm
 {
     W_OBJECT(FluxComponentImpl)
 
@@ -18,6 +22,11 @@ public:
         _mainWindow->fluxViewContainer->layout()->addWidget(
             _fluxVisualiserWidget);
         _fluxVisualiserWidget->refresh();
+
+        connect(_mainWindow->fluxSideComboBox,
+            QOverload<int>::of(&QComboBox::activated),
+            _fluxVisualiserWidget,
+            &FluxVisualiserWidget::setVisibleSide);
     }
 
 private:

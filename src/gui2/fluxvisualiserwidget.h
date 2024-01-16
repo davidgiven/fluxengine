@@ -10,6 +10,9 @@ public:
     virtual void refresh() = 0;
     W_SLOT(refresh)
 
+    virtual void setVisibleSide(int mode) = 0;
+    W_SLOT(setVisibleSide)
+
     virtual void setTrackData(std::shared_ptr<const TrackFlux> track) = 0;
     virtual void setDiskData(std::shared_ptr<const DiskFlux> disk) = 0;
 
