@@ -60,9 +60,10 @@ public:
         _scene->clear();
 
         drawSide(VOUTER_RADIUS, VOUTER_RADIUS);
-        drawSide(VOUTER_RADIUS, VOUTER_RADIUS*3 + VBORDER);
+        drawSide(VOUTER_RADIUS, VOUTER_RADIUS * 3 + VBORDER);
 
-        _scene->setSceneRect(0.0, 0.0, VOUTER_RADIUS*2, VOUTER_RADIUS*4 + VBORDER);
+        _scene->setSceneRect(
+            0.0, 0.0, VOUTER_RADIUS * 2, VOUTER_RADIUS * 4 + VBORDER);
     }
 
 private:
@@ -72,10 +73,10 @@ private:
         black.setWidth(0);
 
         float step = (VOUTER_RADIUS - VINNER_RADIUS) / TRACKS;
-        for (int track = 0; track<82; track++)
+        for (int track = 0; track < 82; track++)
         {
             float r = VOUTER_RADIUS - track * step;
-            _scene->addEllipse(x-r, y-r, r*2, r*2, black);
+            _scene->addEllipse(x - r, y - r, r * 2, r * 2, black);
         }
     }
 

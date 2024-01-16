@@ -47,6 +47,7 @@ cxxprogram(
         "./mainwindow.cc",
         "./drivecomponent.cc",
         "./formatcomponent.cc",
+        "./fluxcomponent.cc",
         "./fluxvisualiserwidget.cc",
         "./globals.h",
         "./mainwindow.h",

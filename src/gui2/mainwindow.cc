@@ -5,7 +5,7 @@
 #include "mainwindow.h"
 #include "drivecomponent.h"
 #include "formatcomponent.h"
-#include "fluxvisualiserwidget.h"
+#include "fluxcomponent.h"
 
 class MainWindowImpl : public MainWindow
 {
@@ -17,6 +17,7 @@ public:
         setupUi(this);
         _driveComponent = DriveComponent::create(this);
         _formatComponent = FormatComponent::create(this);
+        _fluxComponent = FluxComponent::create(this);
 
         setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
         setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
@@ -31,10 +32,6 @@ public:
         auto* stopWidget = new QToolButton();
         stopWidget->setText("Stop");
         statusbar->addPermanentWidget(stopWidget);
-
-        _fluxVisualiserWidget = FluxVisualiserWidget::create();
-        fluxViewContainer->layout()->addWidget(_fluxVisualiserWidget);
-        _fluxVisualiserWidget->refresh();
 
         connect(readDiskButton,
             &QAbstractButton::clicked,
@@ -135,8 +132,8 @@ private:
 private:
     DriveComponent* _driveComponent;
     FormatComponent* _formatComponent;
+    FluxComponent* _fluxComponent;
     QProgressBar* _progressWidget;
-    FluxVisualiserWidget* _fluxVisualiserWidget;
 };
 W_OBJECT_IMPL(MainWindowImpl)
 
