@@ -6,6 +6,7 @@
 #include "lib/decoders/fluxmapreader.h"
 #include "globals.h"
 #include "fluxvisualiserwidget.h"
+#include "scene.h"
 #include <QWheelEvent>
 #include <QFrame>
 #include <QConicalGradient>
@@ -35,7 +36,7 @@ private:
     };
 
 public:
-    FluxVisualiserWidgetImpl(): _scene(new QGraphicsScene())
+    FluxVisualiserWidgetImpl(): _scene(new Scene())
     {
         setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -134,11 +135,8 @@ private:
 
         QFont font;
         font.setPointSizeF(VINNER_RADIUS / 3.0);
-        QGraphicsSimpleTextItem* label = _scene->addSimpleText(
-            QString::fromStdString(fmt::format("Side {}", side)));
-        label->setFont(font);
-        QRectF bounds = label->boundingRect();
-        label->setPos(x - bounds.width() / 2, y - bounds.height() / 2);
+        _scene->addAlignedText(
+            x, y, QString::fromStdString(fmt::format("Side {}", side)), font);
     }
 
     void recompute()
@@ -249,7 +247,7 @@ private:
         VSlot slot[SLOTS];
     };
 
-    QGraphicsScene* _scene;
+    Scene* _scene;
     std::map<key_t, std::shared_ptr<const TrackFlux>> _tracks;
     int _viewMode = BOTH_SIDES;
     VData _viewData[SIDES][TRACKS];

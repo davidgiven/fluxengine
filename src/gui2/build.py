@@ -51,6 +51,7 @@ cxxprogram(
         "./imagecomponent.cc",
         "./fluxvisualiserwidget.cc",
         "./imagevisualiserwidget.cc",
+        "./scene.cc",
         "./globals.h",
         "./mainwindow.h",
         "./drivecomponent.h",

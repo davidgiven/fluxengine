@@ -7,6 +7,7 @@
 #include "lib/decoders/fluxmapreader.h"
 #include "globals.h"
 #include "imagevisualiserwidget.h"
+#include "scene.h"
 #include <QWheelEvent>
 #include <QFrame>
 #include <QConicalGradient>
@@ -23,7 +24,7 @@ static constexpr int HEIGHT = 500;
 class ImageVisualiserWidgetImpl : public ImageVisualiserWidget
 {
 public:
-    ImageVisualiserWidgetImpl(): _scene(new QGraphicsScene())
+    ImageVisualiserWidgetImpl(): _scene(new Scene())
     {
         setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -66,10 +67,12 @@ private:
             QPen black(QColorConstants::Black, 0);
             _scene->addLine(WIDTH / 2, 0, WIDTH / 2, HEIGHT, black);
 
-            float step = (float)HEIGHT / (float)_numTracks;
+            float step = (float)HEIGHT / (float)(_numTracks + 1);
             float border = step * 0.2;
             float size = step * 0.8;
+            float top = step;
 
+            size_t maxSectors = 0;
             for (int track = 0; track < _numTracks; track++)
             {
                 auto drawSectors = [&](int side)
@@ -83,8 +86,9 @@ private:
                     std::sort(sectors.begin(),
                         sectors.end(),
                         sectorPointerSortPredicate);
+                    maxSectors = std::max(maxSectors, sectors.size());
 
-                    float y = (float)track * step;
+                    float y = top + (float)track * step;
                     float x = WIDTH / 2;
                     if (side == 0)
                         x -= size * 2;
@@ -126,16 +130,37 @@ private:
                 drawSectors(0);
                 drawSectors(1);
             }
+
+            QFont font;
+            font.setPixelSize(step);
+            _scene->addAlignedText(WIDTH / 2 - step,
+                step,
+                "Side 0",
+                font,
+                Qt::AlignRight | Qt::AlignBottom);
+            _scene->addAlignedText(WIDTH / 2 + step,
+                step,
+                "Side 1",
+                font,
+                Qt::AlignLeft | Qt::AlignBottom);
+
+            float sideWidth = (maxSectors + 1) * step;
+            setSceneRect(
+                {WIDTH / 2 - sideWidth, 0, WIDTH / 2 + sideWidth, HEIGHT});
+        }
+        else
+        {
+            _scene->addAlignedText(WIDTH / 2, HEIGHT / 2, "No image loaded!");
+            setSceneRect({0, 0, WIDTH, HEIGHT});
         }
 
-        setSceneRect({0, 0, WIDTH, HEIGHT});
         fitInView(sceneRect(), Qt::KeepAspectRatio);
     }
 
 private:
     typedef std::pair<int, int> key_t;
 
-    QGraphicsScene* _scene;
+    Scene* _scene;
     std::multimap<key_t, std::shared_ptr<const Sector>> _sectors;
     std::map<key_t, std::shared_ptr<const TrackInfo>> _trackInfos;
     unsigned _numTracks;
