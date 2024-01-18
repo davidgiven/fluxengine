@@ -7,9 +7,6 @@ class FluxVisualiserWidget : public QGraphicsView
     W_OBJECT(FluxVisualiserWidget)
 
 public:
-    virtual void refresh() = 0;
-    W_SLOT(refresh)
-
     virtual void setVisibleSide(int mode) = 0;
     W_SLOT(setVisibleSide)
 

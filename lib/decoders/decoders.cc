@@ -70,6 +70,7 @@ std::shared_ptr<TrackDataFlux> Decoder::decodeToSectors(
     _trackdata = std::make_shared<TrackDataFlux>();
     _trackdata->fluxmap = fluxmap;
     _trackdata->trackInfo = trackInfo;
+    _trackdata->rotationalPeriod = globalConfig()->drive().rotational_period_ms() * 1e6;
 
     FluxmapReader fmr(*fluxmap);
     _fmr = &fmr;

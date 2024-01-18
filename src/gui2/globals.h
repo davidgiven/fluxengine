@@ -9,7 +9,12 @@
 #include <QThreadPool>
 #include <QtConcurrent>
 
+class TrackFlux;
+class DiskFlux;
+
 Q_DECLARE_METATYPE(const ConfigProto*)
+W_REGISTER_ARGTYPE(std::shared_ptr<const TrackFlux>)
+W_REGISTER_ARGTYPE(std::shared_ptr<const DiskFlux>)
 
 extern QThreadPool workerThreadPool;
 

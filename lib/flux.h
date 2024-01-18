@@ -23,6 +23,7 @@ struct TrackDataFlux
     std::shared_ptr<const Fluxmap> fluxmap;
     std::vector<std::shared_ptr<const Record>> records;
     std::vector<std::shared_ptr<const Sector>> sectors;
+    nanoseconds_t rotationalPeriod;
 };
 
 struct TrackFlux

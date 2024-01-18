@@ -37,15 +37,6 @@ public:
             &QAbstractButton::clicked,
             this,
             &MainWindowImpl::readDisk);
-
-        connect(revolutionsSlider,
-            &QSlider::valueChanged,
-            revolutionsSpinBox,
-            &QSpinBox::setValue);
-        connect(revolutionsSpinBox,
-            QOverload<int>::of(&QSpinBox::valueChanged),
-            revolutionsSlider,
-            &QSlider::setValue);
     }
 
 public:
@@ -54,6 +45,18 @@ public:
         std::visit(overloaded{/* Fallback --- do nothing */
                        [this](const auto& m)
                        {
+                       },
+
+                       /* A track has been read. */
+                       [&](const TrackReadLogMessage& m)
+                       {
+                           _fluxComponent->setTrackData(m.track);
+                       },
+
+                       /* A complete disk has been read. */
+                       [&](const DiskReadLogMessage& m)
+                       {
+                           _fluxComponent->setDiskData(m.disk);
                        },
 
                        /* Large-scale operation start. */

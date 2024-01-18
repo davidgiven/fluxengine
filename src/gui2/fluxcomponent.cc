@@ -21,12 +21,22 @@ public:
         _fluxVisualiserWidget = FluxVisualiserWidget::create();
         _mainWindow->fluxViewContainer->layout()->addWidget(
             _fluxVisualiserWidget);
-        _fluxVisualiserWidget->refresh();
 
         connect(_mainWindow->fluxSideComboBox,
             QOverload<int>::of(&QComboBox::activated),
             _fluxVisualiserWidget,
             &FluxVisualiserWidget::setVisibleSide);
+    }
+
+public:
+    void setTrackData(std::shared_ptr<const TrackFlux> track)
+    {
+        _fluxVisualiserWidget->setTrackData(track);
+    }
+
+    void setDiskData(std::shared_ptr<const DiskFlux> disk)
+    {
+        _fluxVisualiserWidget->setDiskData(disk);
     }
 
 private:
