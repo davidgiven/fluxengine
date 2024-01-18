@@ -428,6 +428,19 @@ background: white;
            <attribute name="title">
             <string>Image view</string>
            </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_13">
+            <item>
+             <widget class="QFrame" name="imageViewContainer">
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_14"/>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </widget>
         </item>

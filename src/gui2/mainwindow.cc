@@ -6,6 +6,7 @@
 #include "drivecomponent.h"
 #include "formatcomponent.h"
 #include "fluxcomponent.h"
+#include "imagecomponent.h"
 
 class MainWindowImpl : public MainWindow
 {
@@ -18,6 +19,7 @@ public:
         _driveComponent = DriveComponent::create(this);
         _formatComponent = FormatComponent::create(this);
         _fluxComponent = FluxComponent::create(this);
+        _imageComponent = ImageComponent::create(this);
 
         setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
         setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
@@ -51,12 +53,14 @@ public:
                        [&](const TrackReadLogMessage& m)
                        {
                            _fluxComponent->setTrackData(m.track);
+                           _imageComponent->setTrackData(m.track);
                        },
 
                        /* A complete disk has been read. */
                        [&](const DiskReadLogMessage& m)
                        {
                            _fluxComponent->setDiskData(m.disk);
+                           _imageComponent->setDiskData(m.disk);
                        },
 
                        /* Large-scale operation start. */
@@ -136,6 +140,7 @@ private:
     DriveComponent* _driveComponent;
     FormatComponent* _formatComponent;
     FluxComponent* _fluxComponent;
+    ImageComponent* _imageComponent;
     QProgressBar* _progressWidget;
 };
 W_OBJECT_IMPL(MainWindowImpl)
