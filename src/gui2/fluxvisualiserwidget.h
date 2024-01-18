@@ -10,6 +10,9 @@ public:
     virtual void setVisibleSide(int mode) = 0;
     W_SLOT(setVisibleSide)
 
+    virtual void setGamma(float gamma) = 0;
+    W_SLOT(setGamma)
+
     virtual void setTrackData(std::shared_ptr<const TrackFlux> track) = 0;
     virtual void setDiskData(std::shared_ptr<const DiskFlux> disk) = 0;
 

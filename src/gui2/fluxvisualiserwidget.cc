@@ -52,10 +52,16 @@ public:
     }
 
 public:
-    void setVisibleSide(int mode)
+    void setVisibleSide(int mode) override
     {
         _viewMode = mode;
         redraw();
+    }
+
+    void setGamma(float gamma) override
+    {
+        _gamma = gamma;
+        recompute();
     }
 
     void setTrackData(std::shared_ptr<const TrackFlux> track)
@@ -117,7 +123,7 @@ private:
         float step = (VOUTER_RADIUS - VINNER_RADIUS) / TRACKS;
         for (int track = 0; track < 82; track++)
         {
-            QConicalGradient gradient(x, y, 0);
+            QConicalGradient gradient(x, y, 90.0);
             gradient.setStops(_viewData[side][track].gradientStops);
             QBrush brush(gradient);
             QPen pen(brush, step * 1.15);
@@ -125,6 +131,14 @@ private:
             float r = VOUTER_RADIUS - track * step;
             _scene->addEllipse(x - r, y - r, r * 2, r * 2, pen);
         }
+
+        QFont font;
+        font.setPointSizeF(VINNER_RADIUS / 3.0);
+        QGraphicsSimpleTextItem* label = _scene->addSimpleText(
+            QString::fromStdString(fmt::format("Side {}", side)));
+        label->setFont(font);
+        QRectF bounds = label->boundingRect();
+        label->setPos(x - bounds.width() / 2, y - bounds.height() / 2);
     }
 
     void recompute()
@@ -195,18 +209,6 @@ private:
                     vdata.slot[slotIndex].count++;
             }
 
-            float maxDensity = 0.0;
-            for (int i = 0; i < SLOTS; i++)
-            {
-                VSlot& slot = vdata.slot[i];
-                if (slot.count != 0)
-                {
-                    float factor = (float)slot.pulses / (float)slot.count;
-                    maxDensity = std::max(maxDensity, factor);
-                }
-            }
-            maxDensity = 300;
-
             for (int i = 0; i < SLOTS; i++)
             {
                 VSlot& slot = vdata.slot[i];
@@ -215,10 +217,10 @@ private:
                         QPair((float)i / SLOTS, QColorConstants::LightGray));
                 else
                 {
-                    float factor =
-                        (float)slot.pulses / (float)slot.count / maxDensity;
-                    int c = factor * 255.0;
-                    stops.append(QPair((float)i / SLOTS, QColor(c, c, c)));
+                    float factor = (float)slot.pulses / (float)slot.count / 300;
+                    int c = powf(factor, _gamma) * 255.0;
+                    stops.append(
+                        QPair(1.0 - ((float)i / SLOTS), QColor(0, c, c)));
                 }
             }
         }
@@ -251,6 +253,7 @@ private:
     std::map<key_t, std::shared_ptr<const TrackFlux>> _tracks;
     int _viewMode = BOTH_SIDES;
     VData _viewData[SIDES][TRACKS];
+    float _gamma = 1.0;
 };
 
 FluxVisualiserWidget* FluxVisualiserWidget::create()

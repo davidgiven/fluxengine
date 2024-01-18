@@ -4,12 +4,8 @@
 #include "fluxcomponent.h"
 #include "mainwindow.h"
 #include "fluxvisualiserwidget.h"
-#include "fluxOverlayForm.h"
 
-class FluxComponentImpl :
-    public FluxComponent,
-    public QObject,
-    public Ui_fluxOverlayForm
+class FluxComponentImpl : public FluxComponent, public QObject
 {
     W_OBJECT(FluxComponentImpl)
 
@@ -26,6 +22,14 @@ public:
             QOverload<int>::of(&QComboBox::activated),
             _fluxVisualiserWidget,
             &FluxVisualiserWidget::setVisibleSide);
+        connect(_mainWindow->fluxContrastSlider,
+            &QAbstractSlider::valueChanged,
+            [this](int value)
+            {
+                _fluxVisualiserWidget->setGamma(value / 100.0);
+            });
+
+        _mainWindow->fluxContrastSlider->setValue(500);
     }
 
 public:
