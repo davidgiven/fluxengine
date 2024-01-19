@@ -60,6 +60,7 @@ struct FluxConstructor
 {
     std::string name;
     std::regex pattern;
+    std::string glob;
     std::function<void(const std::string& filename, FluxSourceProto*)> source;
     std::function<void(const std::string& filename, FluxSinkProto*)> sink;
 };

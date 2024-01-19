@@ -32,6 +32,7 @@ static const std::vector<FluxConstructor> fluxConstructors = {
     {/* The .flux format must be first. */
         .name = "FluxEngine (.flux)",
      .pattern = std::regex("^(.*\\.flux)$"),
+     .glob = "*.flux",
      .source =
             [](auto& s, auto* proto)
         {
@@ -46,6 +47,7 @@ static const std::vector<FluxConstructor> fluxConstructors = {
     {
      .name = "Supercard Pro (.scp)",
      .pattern = std::regex("^(.*\\.scp)$"),
+     .glob = "*.scp",
      .source =
             [](auto& s, auto* proto)
         {
@@ -59,6 +61,7 @@ static const std::vector<FluxConstructor> fluxConstructors = {
         }, },
     {.name = "AppleSauce (.a2r)",
      .pattern = std::regex("^(.*\\.a2r)$"),
+     .glob = "*.a2r",
      .source =
             [](auto& s, auto* proto)
         {
@@ -72,6 +75,7 @@ static const std::vector<FluxConstructor> fluxConstructors = {
         }},
     {.name = "CatWeazle (.cwf)",
      .pattern = std::regex("^(.*\\.cwf)$"),
+     .glob = "*.cwf",
      .source =
             [](auto& s, auto* proto)
         {
