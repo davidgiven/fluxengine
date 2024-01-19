@@ -23,6 +23,58 @@ static constexpr int HEIGHT = 500;
 
 class ImageVisualiserWidgetImpl : public ImageVisualiserWidget
 {
+private:
+    class SectorGraphicsItem : public QGraphicsRectItem
+    {
+    public:
+        SectorGraphicsItem(std::shared_ptr<const Sector> sector,
+            qreal x,
+            qreal y,
+            qreal width,
+            qreal height,
+            const QBrush& brush):
+            QGraphicsRectItem(x, y, width, height),
+            _sector(sector)
+        {
+            setPen(QPen(Qt::NoPen));
+            setBrush(brush);
+            setAcceptHoverEvents(true);
+        }
+
+    protected:
+        void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override
+        {
+            if (scene() && !scene()->views().isEmpty() &&
+                scene()->views().first() &&
+                scene()->views().first()->viewport())
+            {
+                QGraphicsView* view = scene()->views().first();
+                QPointF scenePos = mapToScene(boundingRect().bottomRight());
+                QPoint viewportPos = view->mapFromScene(scenePos);
+                QPoint tooltipPos = view->viewport()->mapToGlobal(viewportPos);
+
+                QToolTip::showText(tooltipPos,
+                    QString::fromStdString(
+                        fmt::format("Track: {} Head: {} Sector: {}\nStatus: {}",
+                            _sector->logicalTrack,
+                            _sector->logicalSide,
+                            _sector->logicalSector,
+                            Sector::statusToString(_sector->status))));
+            }
+
+            setPen(QPen(QColorConstants::Magenta));
+        }
+
+        void hoverLeaveEvent(QGraphicsSceneHoverEvent*) override
+        {
+            QToolTip::hideText();
+            setPen(QPen(Qt::NoPen));
+        }
+
+    private:
+        std::shared_ptr<const Sector> _sector;
+    };
+
 public:
     ImageVisualiserWidgetImpl(): _scene(new Scene())
     {
@@ -98,10 +150,11 @@ private:
                     for (int sectorId = 0; sectorId < sectors.size();
                          sectorId++)
                     {
-                        const Sector& sector = *sectors.at(sectorId);
+                        std::shared_ptr<const Sector> sector =
+                            sectors.at(sectorId);
 
                         QColor colour;
-                        switch (sector.status)
+                        switch (sector->status)
                         {
                             case Sector::OK:
                                 colour = QColorConstants::DarkGreen;
@@ -117,8 +170,9 @@ private:
                         }
 
                         QBrush brush(colour);
-                        _scene->addRect(
-                            x, y, size, size, QPen(Qt::NoPen), brush);
+                        SectorGraphicsItem* item = new SectorGraphicsItem(
+                            sector, x, y, size, size, brush);
+                        _scene->addItem(item);
 
                         if (side == 0)
                             x -= step;
