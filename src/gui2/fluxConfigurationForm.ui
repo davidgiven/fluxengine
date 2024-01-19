@@ -33,7 +33,7 @@
       <widget class="QLineEdit" name="filenameEdit"/>
      </item>
      <item>
-      <widget class="QToolButton" name="toolButton_7">
+      <widget class="QToolButton" name="openButton">
        <property name="text">
         <string>Open</string>
        </property>
@@ -111,6 +111,9 @@
      </item>
      <item>
       <widget class="QSpinBox" name="spinBox">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
          <horstretch>0</horstretch>

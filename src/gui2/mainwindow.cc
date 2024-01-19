@@ -1,6 +1,7 @@
 #include "lib/globals.h"
 #include "lib/config.h"
 #include "lib/readerwriter.h"
+#include "lib/utils.h"
 #include "globals.h"
 #include "mainwindow.h"
 #include "drivecomponent.h"
@@ -11,6 +12,14 @@
 class MainWindowImpl : public MainWindow
 {
     W_OBJECT(MainWindowImpl)
+
+private:
+    enum State
+    {
+        STATE_IDLE,
+        STATE_READING,
+        STATE_WRITING
+    };
 
 public:
     MainWindowImpl()
@@ -31,14 +40,20 @@ public:
         _progressWidget->setAlignment(Qt::AlignRight);
         statusbar->addPermanentWidget(_progressWidget);
 
-        auto* stopWidget = new QToolButton();
-        stopWidget->setText("Stop");
-        statusbar->addPermanentWidget(stopWidget);
+        _stopWidget = new QToolButton();
+        _stopWidget->setText("Stop");
+        statusbar->addPermanentWidget(_stopWidget);
 
         connect(readDiskButton,
             &QAbstractButton::clicked,
             this,
             &MainWindowImpl::readDisk);
+        connect(_stopWidget,
+            &QPushButton::clicked,
+            this,
+            &MainWindowImpl::emergencyStop);
+
+        setState(STATE_IDLE);
     }
 
 public:
@@ -61,42 +76,30 @@ public:
                        {
                            _fluxComponent->setDiskData(m.disk);
                            _imageComponent->setDiskData(m.disk);
+                           _currentDisk = m.disk;
                        },
 
                        /* Large-scale operation start. */
                        [this](const BeginOperationLogMessage& m)
                        {
-                           setProgressBar(0);
+                           _progressWidget->setValue(0);
                        },
 
                        /* Large-scale operation end. */
                        [this](const EndOperationLogMessage& m)
                        {
-                           finishedWithProgressBar();
                        },
 
                        /* Large-scale operation progress. */
                        [this](const OperationProgressLogMessage& m)
                        {
-                           setProgressBar(m.progress);
+                           _progressWidget->setValue(m.progress);
                        }},
             *message);
 
         logViewerEdit->appendPlainText(
             QString::fromStdString(Logger::toString(*message)));
         logViewerEdit->ensureCursorVisible();
-    }
-
-    void setProgressBar(int progress) override
-    {
-        _progressWidget->setEnabled(true);
-        _progressWidget->setValue(progress);
-    }
-
-    void finishedWithProgressBar() override
-    {
-        _progressWidget->setEnabled(false);
-        _progressWidget->setValue(0);
     }
 
     void collectConfig() override
@@ -113,9 +116,7 @@ public:
         }
         catch (...)
         {
-            std::exception_ptr p = std::current_exception();
-            std::clog << (p ? p.__cxa_exception_type()->name() : "null")
-                      << std::endl;
+            log("Mysterious uncaught exception!");
         }
     }
 
@@ -126,22 +127,65 @@ private:
             return;
 
         collectConfig();
-        safeRunOnWorkerThread(
+        ::emergencyStop = false;
+        setState(STATE_READING);
+
+        runThen(
             [this]()
             {
                 auto& fluxSource = globalConfig().getFluxSource();
                 auto& decoder = globalConfig().getDecoder();
                 auto diskflux = readDiskCommand(*fluxSource, *decoder);
+            },
+            [this]()
+            {
+                setState(STATE_IDLE);
             });
     }
     W_SLOT(readDisk)
+
+private:
+    void emergencyStop()
+    {
+        ::emergencyStop = true;
+    }
+    W_SLOT(emergencyStop)
+
+    void setState(int state)
+    {
+        _stopWidget->setEnabled(state != STATE_IDLE);
+        _progressWidget->setEnabled(state != STATE_IDLE);
+        diskOperationsGroup->setEnabled(state == STATE_IDLE);
+        memoryOperationsGroup->setEnabled(state == STATE_IDLE);
+        driveWindow->setEnabled(state == STATE_IDLE);
+        formatWindow->setEnabled(state == STATE_IDLE);
+
+        _state = state;
+    }
+    W_SLOT(setState)
+
+private:
+    void runThen(
+        std::function<void()> workCb, std::function<void()> completionCb)
+    {
+        QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
+        watcher->setFuture(safeRunOnWorkerThread(workCb));
+        connect(watcher, &QFutureWatcher<void>::finished, completionCb);
+        connect(watcher,
+            &QFutureWatcher<void>::finished,
+            watcher,
+            &QFutureWatcher<void>::deleteLater);
+    }
 
 private:
     DriveComponent* _driveComponent;
     FormatComponent* _formatComponent;
     FluxComponent* _fluxComponent;
     ImageComponent* _imageComponent;
+    QAbstractButton* _stopWidget;
     QProgressBar* _progressWidget;
+    std::shared_ptr<const DiskFlux> _currentDisk;
+    int _state;
 };
 W_OBJECT_IMPL(MainWindowImpl)
 

@@ -10,7 +10,5 @@ public:
 
 public:
     virtual void logMessage(std::shared_ptr<const AnyLogMessage> message) = 0;
-    virtual void setProgressBar(int progress) = 0;
-    virtual void finishedWithProgressBar() = 0;
     virtual void collectConfig() = 0;
 };

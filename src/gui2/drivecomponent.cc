@@ -6,6 +6,7 @@
 #include "driveConfigurationForm.h"
 #include "fluxConfigurationForm.h"
 #include <QStandardItemModel>
+#include <range/v3/all.hpp>
 
 static const char* DRIVE = "drive/";
 static const char* SELECTED_DRIVE = "drive/drive";
@@ -96,6 +97,33 @@ public:
                 &QLineEdit::editingFinished,
                 this,
                 &ConfigurationForm::updateSavedState);
+
+            connect(openButton,
+                &QPushButton::clicked,
+                [this]()
+                {
+                    std::string formats = Config::getFluxFormats() |
+                                          ranges::views::transform(
+                                              [](const FluxConstructor& f)
+                                              {
+                                                  return f.glob;
+                                              }) |
+                                          ranges::views::filter(
+                                              [](const std::string& s)
+                                              {
+                                                  return !s.empty();
+                                              }) |
+                                          ranges::views::intersperse(" ") |
+                                          ranges::views::join |
+                                          ranges::to<std::string>();
+                    QFileDialog dialogue(_dci->container());
+                    dialogue.setFileMode(QFileDialog::ExistingFile);
+                    dialogue.setNameFilter(QString::fromStdString("Flux files (" + formats + ")"));
+
+                    QStringList fileNames;
+                    if (dialogue.exec())
+                        filenameEdit->setText(dialogue.selectedFiles().first());
+                });
         }
 
         void updateSavedState() const override
