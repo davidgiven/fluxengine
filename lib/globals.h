@@ -20,7 +20,10 @@
 
 #if defined(_WIN32) || defined(__WIN32__)
 #include <direct.h>
-#define mkdir(A, B) _mkdir(A)
+static inline int mkdir(const char* pathname, mode_t mode)
+{
+    return _mkdir(pathname);
+}
 #endif
 
 template <class T>

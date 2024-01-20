@@ -81,8 +81,7 @@ QFuture<void> safeRunOnWorkerThread(std::function<void()> callback)
             }
             catch (...)
             {
-                std::exception_ptr p = std::current_exception();
-                log("Fatal error: {}", p.__cxa_exception_type()->name());
+                log("Uncaught exception!");
             }
         });
 }
