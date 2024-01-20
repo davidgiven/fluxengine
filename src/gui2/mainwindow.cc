@@ -74,7 +74,6 @@ public:
                        /* A complete disk has been read. */
                        [&](const DiskReadLogMessage& m)
                        {
-                           _fluxComponent->setDiskData(m.disk);
                            _imageComponent->setDiskData(m.disk);
                            _currentDisk = m.disk;
                        },

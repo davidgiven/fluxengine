@@ -38,11 +38,6 @@ public:
         _fluxVisualiserWidget->setTrackData(track);
     }
 
-    void setDiskData(std::shared_ptr<const DiskFlux> disk)
-    {
-        _fluxVisualiserWidget->setDiskData(disk);
-    }
-
 private:
     MainWindow* _mainWindow;
     FluxVisualiserWidget* _fluxVisualiserWidget;

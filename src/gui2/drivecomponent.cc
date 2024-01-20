@@ -84,6 +84,32 @@ public:
             if (fc->source)
                 fc->source(fluxFile,
                     globalConfig().overrides()->mutable_flux_source());
+
+            QString rpmOverride = rpmOverrideComboBox->currentData().toString();
+            if (rpmOverride == "300")
+                globalConfig()
+                    .overrides()
+                    ->mutable_drive()
+                    ->set_rotational_period_ms(200);
+            else if (rpmOverride == "360")
+                globalConfig()
+                    .overrides()
+                    ->mutable_drive()
+                    ->set_rotational_period_ms(166);
+            else if (rpmOverride == "override")
+            {
+                float value = rpmOverrideValue->value();
+                globalConfig()
+                    .overrides()
+                    ->mutable_drive()
+                    ->set_rotational_period_ms(60e3 / value);
+            }
+
+            QString driveTypeOverride =
+                driveTypeOverrideComboBox->currentData().toString();
+            if (driveTypeOverride != "default")
+                globalConfig().overrides()->MergeFrom(
+                    *drivetypes.at(driveTypeOverride.toStdString()));
         }
 
         void loadSavedState() override

@@ -102,7 +102,7 @@ public:
         for (auto& sector : track->sectors)
             _sectors.insert({key, sector});
         _trackInfos.insert({key, track->trackInfo});
-        _numTracks = track->trackInfo->numTracks;
+        _numTracks = track->trackInfo->numLogicalTracks;
 
         redraw();
     }

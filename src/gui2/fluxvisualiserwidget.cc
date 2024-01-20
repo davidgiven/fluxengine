@@ -18,7 +18,6 @@ class DiskFlux;
 class TrackFlux;
 
 static constexpr int SIDES = 2;
-static constexpr int TRACKS = 82;
 static constexpr int SLOTS = 300;
 
 static constexpr float VBORDER = 1.0;
@@ -67,25 +66,18 @@ public:
 
     void setTrackData(std::shared_ptr<const TrackFlux> track)
     {
-        key_t key = {
-            track->trackInfo->physicalTrack, track->trackInfo->physicalSide};
-        _tracks[key] = track;
-
-        recompute(
-            track->trackInfo->physicalSide, track->trackInfo->physicalTrack);
-    }
-
-    void setDiskData(std::shared_ptr<const DiskFlux> disk)
-    {
-        _tracks.clear();
-        for (const auto& track : disk->tracks)
+        for (int i = 0; i < track->trackInfo->groupSize; i++)
         {
-            key_t key = {track->trackInfo->physicalTrack,
+            key_t key = {track->trackInfo->physicalTrack + i,
                 track->trackInfo->physicalSide};
             _tracks[key] = track;
-        }
+            _numTracks = track->trackInfo->numPhysicalTracks;
+            _viewData0.resize(_numTracks);
+            _viewData1.resize(_numTracks);
 
-        recompute();
+            recompute(track->trackInfo->physicalSide,
+                track->trackInfo->physicalTrack + i);
+        }
     }
 
 private:
@@ -121,11 +113,18 @@ private:
 
     void drawSide(float x, float y, int side)
     {
-        float step = (VOUTER_RADIUS - VINNER_RADIUS) / TRACKS;
-        for (int track = 0; track < 82; track++)
+        if (_numTracks == 0)
+        {
+            _scene->addAlignedText(x, y, "No flux loaded!");
+            return;
+        }
+
+        auto& viewData = side ? _viewData1 : _viewData0;
+        float step = (VOUTER_RADIUS - VINNER_RADIUS) / _numTracks;
+        for (int track = 0; track < _numTracks; track++)
         {
             QConicalGradient gradient(x, y, 90.0);
-            gradient.setStops(_viewData[side][track].gradientStops);
+            gradient.setStops(viewData.at(track).gradientStops);
             QBrush brush(gradient);
             QPen pen(brush, step * 1.15);
 
@@ -142,13 +141,14 @@ private:
     void recompute()
     {
         for (int side = 0; side < SIDES; side++)
-            for (int track = 0; track < TRACKS; track++)
+            for (int track = 0; track < _numTracks; track++)
                 recompute(side, track);
     }
 
     void recompute(int side, int track)
     {
-        VData& vdata = _viewData[side][track];
+        auto& viewData = side ? _viewData1 : _viewData0;
+        VData& vdata = viewData.at(track);
         QGradientStops& stops = vdata.gradientStops;
         stops.clear();
         ranges::fill(vdata.slot, VSlot());
@@ -250,7 +250,9 @@ private:
     Scene* _scene;
     std::map<key_t, std::shared_ptr<const TrackFlux>> _tracks;
     int _viewMode = BOTH_SIDES;
-    VData _viewData[SIDES][TRACKS];
+    unsigned _numTracks = 0;
+    std::vector<VData> _viewData0;
+    std::vector<VData> _viewData1;
     float _gamma = 1.0;
 };
 
