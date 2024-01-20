@@ -78,6 +78,9 @@
       <layout class="QVBoxLayout" name="verticalLayout_9">
        <item>
         <widget class="QPushButton" name="loadImageButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Load image into memory</string>
          </property>
@@ -89,6 +92,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="saveImageFluxButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Save image/flux from memory</string>
          </property>
@@ -100,6 +106,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="newImageButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Create blank image</string>
          </property>
@@ -161,6 +170,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="writeDiskButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Write memory to disk</string>
          </property>
@@ -172,6 +184,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="mountDiskButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Work directly with disk</string>
          </property>

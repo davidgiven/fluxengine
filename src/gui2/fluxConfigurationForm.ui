@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>351</width>
-    <height>167</height>
+    <height>351</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -51,69 +51,51 @@
    <item row="1" column="0">
     <widget class="QLabel" name="label_7">
      <property name="text">
-      <string>Override RPM:</string>
+      <string>RPM:</string>
      </property>
     </widget>
    </item>
    <item row="1" column="1">
-    <widget class="QRadioButton" name="radioButton">
-     <property name="enabled">
+    <widget class="QComboBox" name="rpmOverrideComboBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="editable">
       <bool>false</bool>
      </property>
-     <property name="text">
-      <string>Use value in file</string>
-     </property>
-     <attribute name="buttonGroup">
-      <string notr="true">overrideRpmButtonGroup</string>
-     </attribute>
     </widget>
    </item>
-   <item row="2" column="1">
-    <widget class="QRadioButton" name="radioButton_2">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
+   <item row="3" column="0">
+    <widget class="QLabel" name="label">
      <property name="text">
-      <string>300 rpm / 200 ms</string>
+      <string>Drive type:</string>
      </property>
-     <attribute name="buttonGroup">
-      <string notr="true">overrideRpmButtonGroup</string>
-     </attribute>
     </widget>
    </item>
    <item row="3" column="1">
-    <widget class="QRadioButton" name="radioButton_3">
-     <property name="enabled">
-      <bool>false</bool>
+    <widget class="QComboBox" name="driveTypeOverrideComboBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
      </property>
-     <property name="text">
-      <string>360 rpm / 166 ms</string>
-     </property>
-     <attribute name="buttonGroup">
-      <string notr="true">overrideRpmButtonGroup</string>
-     </attribute>
     </widget>
    </item>
-   <item row="4" column="1">
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
+   <item row="2" column="1">
+    <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QRadioButton" name="radioButton_4">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
+      <widget class="QLabel" name="label_2">
        <property name="text">
         <string>Custom:</string>
        </property>
-       <attribute name="buttonGroup">
-        <string notr="true">overrideRpmButtonGroup</string>
-       </attribute>
       </widget>
      </item>
      <item>
-      <widget class="QSpinBox" name="spinBox">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
+      <widget class="QSpinBox" name="rpmOverrideValue">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -121,7 +103,7 @@
         </sizepolicy>
        </property>
        <property name="suffix">
-        <string>ms</string>
+        <string> rpm</string>
        </property>
       </widget>
      </item>
@@ -131,7 +113,4 @@
  </widget>
  <resources/>
  <connections/>
- <buttongroups>
-  <buttongroup name="overrideRpmButtonGroup"/>
- </buttongroups>
 </ui>

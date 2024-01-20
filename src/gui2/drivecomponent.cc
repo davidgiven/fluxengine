@@ -89,12 +89,47 @@ public:
         void loadSavedState() override
         {
             filenameEdit->setText(app->value(qid() + "/filename").toString());
+
+            rpmOverrideComboBox->addItem(
+                "Use value in file", QVariant("default"));
+            rpmOverrideComboBox->addItem("300 rpm / 200 ms", QVariant("300"));
+            rpmOverrideComboBox->addItem("360 rpm / 166 ms", QVariant("360"));
+            rpmOverrideComboBox->addItem("Custom value", QVariant("custom"));
+            QString rpmType = app->value(qid() + "/rpmType").toString();
+            setByString(rpmOverrideComboBox, rpmType);
+            rpmOverrideValue->setEnabled(rpmType == "custom");
+
+            driveTypeOverrideComboBox->addItem(
+                "Use value in file", QVariant("default"));
+            for (auto& d : drivetypes)
+            {
+                driveTypeOverrideComboBox->addItem(
+                    QString::fromStdString(d.second->comment()),
+                    QVariant(QString::fromStdString(d.first)));
+            }
+            setByString(driveTypeOverrideComboBox,
+                app->value(qid() + "/driveType").toString());
+
+            rpmOverrideValue->setValue(
+                app->value(qid() + "/customRpm").toInt());
         }
 
         void connectAll() override
         {
             connect(filenameEdit,
                 &QLineEdit::editingFinished,
+                this,
+                &ConfigurationForm::updateSavedState);
+            connect(driveTypeOverrideComboBox,
+                QOverload<int>::of(&QComboBox::activated),
+                this,
+                &ConfigurationForm::updateSavedState);
+            connect(rpmOverrideComboBox,
+                QOverload<int>::of(&QComboBox::activated),
+                this,
+                &ConfigurationForm::updateSavedState);
+            connect(rpmOverrideValue,
+                QOverload<int>::of(&QSpinBox::valueChanged),
                 this,
                 &ConfigurationForm::updateSavedState);
 
@@ -118,7 +153,8 @@ public:
                                           ranges::to<std::string>();
                     QFileDialog dialogue(_dci->container());
                     dialogue.setFileMode(QFileDialog::ExistingFile);
-                    dialogue.setNameFilter(QString::fromStdString("Flux files (" + formats + ")"));
+                    dialogue.setNameFilter(
+                        QString::fromStdString("Flux files (" + formats + ")"));
 
                     QStringList fileNames;
                     if (dialogue.exec())
@@ -129,6 +165,15 @@ public:
         void updateSavedState() const override
         {
             app->setValue(qid() + "/filename", filenameEdit->text());
+
+            QString rpmType = rpmOverrideComboBox->currentData().toString();
+            app->setValue(qid() + "/rpmType", rpmType);
+            rpmOverrideValue->setEnabled(rpmType == "custom");
+
+            app->setValue(qid() + "/customRpm", rpmOverrideValue->value());
+
+            app->setValue(qid() + "/driveType",
+                driveTypeOverrideComboBox->currentData().toString());
         }
     };
 
@@ -369,6 +414,15 @@ public:
     QWidget* container() const
     {
         return _mainWindow->driveConfigurationContainer;
+    }
+
+private:
+    static void setByString(QComboBox* combobox, QString value)
+    {
+        int i = combobox->findData(QVariant(value));
+        if (i == -1)
+            i = 0;
+        combobox->setCurrentIndex(i);
     }
 
 private:
