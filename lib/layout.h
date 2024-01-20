@@ -68,8 +68,13 @@ private:
     TrackInfo& operator=(const TrackInfo&);
 
 public:
-    unsigned numTracks = 0;
-    unsigned numSides = 0;
+    /* Size of the logical layout. */
+    unsigned numLogicalTracks = 0;
+    unsigned numLogicalSides = 0;
+
+    /* Size of the physical layout. */
+    unsigned numPhysicalTracks = 0;
+    unsigned numPhysicalSides = 0;
 
     /* The number of sectors in this track. */
     unsigned numSectors = 0;

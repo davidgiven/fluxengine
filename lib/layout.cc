@@ -206,8 +206,8 @@ std::shared_ptr<const TrackInfo> Layout::getLayoutOfTrack(
         layoutdata.MergeFrom(f);
     }
 
-    trackInfo->numTracks = globalConfig()->layout().tracks();
-    trackInfo->numSides = globalConfig()->layout().sides();
+    trackInfo->numLogicalTracks = globalConfig()->layout().tracks();
+    trackInfo->numLogicalSides = globalConfig()->layout().sides();
     trackInfo->sectorSize = layoutdata.sector_size();
     trackInfo->logicalTrack = logicalTrack;
     trackInfo->logicalSide = logicalSide;
@@ -240,6 +240,11 @@ std::shared_ptr<const TrackInfo> Layout::getLayoutOfTrack(
         trackInfo->filesystemToNaturalSectorMap[fid] = lid;
         trackInfo->naturalToFilesystemSectorMap[lid] = fid;
     }
+
+    trackInfo->numPhysicalTracks =
+        Layout::remapTrackLogicalToPhysical(trackInfo->numLogicalTracks);
+    trackInfo->numPhysicalSides =
+        Layout::remapSideLogicalToPhysical(trackInfo->numLogicalSides);
 
     return trackInfo;
 }
