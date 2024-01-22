@@ -100,7 +100,7 @@ if config.osx:
             "dylibbundler -of -x {outs[0]}/Contents/MacOS/fluxengine-gui -b -d {outs[0]}/Contents/libs -cd > /dev/null",
             "cp $$(brew --prefix wxwidgets)/README.md $@/Contents/libs/wxWidgets.md",
             "cp $$(brew --prefix protobuf)/LICENSE $@/Contents/libs/protobuf.txt",
-            "cp $$(brew --prefix fmt)/LICENSE $@/Contents/libs/fmt.rst",
+            "cp $$(brew --prefix fmt)/LICENSE* $@/Contents/libs/fmt.rst",
             "cp $$(brew --prefix libpng)/LICENSE $@/Contents/libs/libpng.txt",
             "cp $$(brew --prefix libjpeg)/README $@/Contents/libs/libjpeg.txt",
             "cp $$(brew --prefix abseil)/LICENSE $@/Contents/libs/abseil.txt",
