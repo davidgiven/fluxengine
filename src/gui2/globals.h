@@ -11,10 +11,12 @@
 
 class TrackFlux;
 class DiskFlux;
+class Image;
 
 Q_DECLARE_METATYPE(const ConfigProto*)
 W_REGISTER_ARGTYPE(std::shared_ptr<const TrackFlux>)
 W_REGISTER_ARGTYPE(std::shared_ptr<const DiskFlux>)
+W_REGISTER_ARGTYPE(std::shared_ptr<const Image>)
 
 extern QThreadPool workerThreadPool;
 
