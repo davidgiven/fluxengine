@@ -111,7 +111,7 @@ class EmptyFluxSourceIterator : public FluxSourceIterator
 class TrivialFluxSource : public FluxSource
 {
 public:
-    std::unique_ptr<FluxSourceIterator> readFlux(int track, int side);
+    std::unique_ptr<FluxSourceIterator> readFlux(int track, int side) override;
     virtual std::unique_ptr<const Fluxmap> readSingleFlux(
         int track, int side) = 0;
 };

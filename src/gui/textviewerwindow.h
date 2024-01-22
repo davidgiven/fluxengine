@@ -20,7 +20,7 @@ public:
     wxTextCtrl* GetTextControl() const;
 
 private:
-    void OnClose(wxCloseEvent& event);
+    void OnClose(wxCloseEvent& event) override;
 
 private:
     bool _autodestroy;

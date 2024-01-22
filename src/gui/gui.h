@@ -33,7 +33,7 @@ static inline R runOnUiThread(std::function<R()> callback)
 class FluxEngineApp : public wxApp, public wxThreadHelper
 {
 public:
-    virtual bool OnInit();
+    virtual bool OnInit() override;
     void RunOnWorkerThread(std::function<void()> callback);
 
 private:
@@ -44,7 +44,7 @@ public:
     bool IsWorkerThreadRunning();
 
 protected:
-    virtual wxThread::ExitCode Entry();
+    virtual wxThread::ExitCode Entry() override;
 
 private:
     static wxWindow* CreateMainWindow();

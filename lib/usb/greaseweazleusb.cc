@@ -109,7 +109,7 @@ public:
         do_command({CMD_SET_BUS_TYPE, 3, (uint8_t)config.bus_type()});
     }
 
-    int getVersion()
+    int getVersion() override
     {
         do_command({CMD_GET_INFO, 3, GETINFO_FIRMWARE});
 
@@ -124,17 +124,17 @@ public:
         return br.read_be16();
     }
 
-    void recalibrate()
+    void recalibrate() override
     {
         seek(0);
     }
 
-    void seek(int track)
+    void seek(int track) override
     {
         do_command({CMD_SEEK, 3, (uint8_t)track});
     }
 
-    nanoseconds_t getRotationalPeriod(int hardSectorCount)
+    nanoseconds_t getRotationalPeriod(int hardSectorCount) override
     {
         if (hardSectorCount != 0)
             error("hard sectors are currently unsupported on the Greaseweazle");
@@ -214,7 +214,7 @@ public:
         return _revolutions;
     }
 
-    void testBulkWrite()
+    void testBulkWrite() override
     {
         std::cout << "Writing data: " << std::flush;
         const int LEN = 10 * 1024 * 1024;
@@ -264,7 +264,7 @@ public:
             int((LEN / 1024.0) / elapsed_time));
     }
 
-    void testBulkRead()
+    void testBulkRead() override
     {
         std::cout << "Reading data: " << std::flush;
         const int LEN = 10 * 1024 * 1024;
@@ -309,7 +309,7 @@ public:
     Bytes read(int side,
         bool synced,
         nanoseconds_t readTime,
-        nanoseconds_t hardSectorThreshold)
+        nanoseconds_t hardSectorThreshold) override
     {
         if (hardSectorThreshold != 0)
             error("hard sectors are currently unsupported on the Greaseweazle");
@@ -362,7 +362,9 @@ public:
         return fldata;
     }
 
-    void write(int side, const Bytes& fldata, nanoseconds_t hardSectorThreshold)
+    void write(int side,
+        const Bytes& fldata,
+        nanoseconds_t hardSectorThreshold) override
     {
         if (hardSectorThreshold != 0)
             error("hard sectors are currently unsupported on the Greaseweazle");
@@ -385,7 +387,7 @@ public:
         do_command({CMD_GET_FLUX_STATUS, 2});
     }
 
-    void erase(int side, nanoseconds_t hardSectorThreshold)
+    void erase(int side, nanoseconds_t hardSectorThreshold) override
     {
         if (hardSectorThreshold != 0)
             error("hard sectors are currently unsupported on the Greaseweazle");
@@ -403,14 +405,14 @@ public:
         do_command({CMD_GET_FLUX_STATUS, 2});
     }
 
-    void setDrive(int drive, bool high_density, int index_mode)
+    void setDrive(int drive, bool high_density, int index_mode) override
     {
         do_command({CMD_SELECT, 3, (uint8_t)drive});
         do_command({CMD_MOTOR, 4, (uint8_t)drive, 1});
         do_command({CMD_SET_PIN, 4, 2, (uint8_t)(high_density ? 1 : 0)});
     }
 
-    void measureVoltages(struct voltages_frame* voltages)
+    void measureVoltages(struct voltages_frame* voltages) override
     {
         error("unsupported operation on the Greaseweazle");
     }

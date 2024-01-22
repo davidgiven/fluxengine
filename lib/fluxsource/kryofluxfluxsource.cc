@@ -18,7 +18,7 @@ public:
         return readStream(_path, track, side);
     }
 
-    void recalibrate() {}
+    void recalibrate() override {}
 
 private:
     const std::string _path;
