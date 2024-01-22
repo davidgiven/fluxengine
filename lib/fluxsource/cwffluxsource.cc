@@ -88,7 +88,7 @@ public:
     }
 
 public:
-    std::unique_ptr<const Fluxmap> readSingleFlux(int track, int side)
+    std::unique_ptr<const Fluxmap> readSingleFlux(int track, int side) override
     {
         const auto& p = _trackOffsets.find(std::make_pair(track, side));
         if (p == _trackOffsets.end())
@@ -103,7 +103,7 @@ public:
         return decodeCatweaselData(fluxdata, _clockPeriod);
     }
 
-    void recalibrate() {}
+    void recalibrate() override {}
 
 private:
     void check_for_error()

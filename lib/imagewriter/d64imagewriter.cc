@@ -26,7 +26,7 @@ class D64ImageWriter : public ImageWriter
 public:
     D64ImageWriter(const ImageWriterProto& config): ImageWriter(config) {}
 
-    void writeImage(const Image& image)
+    void writeImage(const Image& image) override
     {
         log("D64: writing triangular image");
 

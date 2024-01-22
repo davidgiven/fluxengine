@@ -87,15 +87,17 @@ public:
     {
     }
 
-    bool hasArgument() const
+    bool hasArgument() const override
     {
         return false;
     }
-    const std::string defaultValueAsString() const
+
+    const std::string defaultValueAsString() const override
     {
         return "";
     }
-    void set(const std::string& value)
+
+    void set(const std::string& value) override
     {
         _callback();
     }
@@ -119,15 +121,17 @@ public:
         return _value;
     }
 
-    bool hasArgument() const
+    bool hasArgument() const override
     {
         return false;
     }
-    const std::string defaultValueAsString() const
+
+    const std::string defaultValueAsString() const override
     {
         return "false";
     }
-    void set(const std::string& value)
+
+    void set(const std::string& value) override
     {
         _value = true;
     }
@@ -176,7 +180,7 @@ public:
         _value = _defaultValue = value;
     }
 
-    bool hasArgument() const
+    bool hasArgument() const override
     {
         return true;
     }
@@ -203,11 +207,12 @@ public:
     {
     }
 
-    const std::string defaultValueAsString() const
+    const std::string defaultValueAsString() const override
     {
         return _defaultValue;
     }
-    void set(const std::string& value)
+
+    void set(const std::string& value) override
     {
         _value = value;
         _callback(_value);
@@ -230,11 +235,12 @@ public:
     {
     }
 
-    const std::string defaultValueAsString() const
+    const std::string defaultValueAsString() const override
     {
         return std::to_string(_defaultValue);
     }
-    void set(const std::string& value)
+
+    void set(const std::string& value) override
     {
         _value = std::stoi(value);
         _callback(_value);
@@ -257,7 +263,7 @@ public:
     {
     }
 
-    const std::string defaultValueAsString() const;
+    const std::string defaultValueAsString() const override;
 };
 
 class DoubleFlag : public ValueFlag<double>
@@ -275,11 +281,12 @@ public:
     {
     }
 
-    const std::string defaultValueAsString() const
+    const std::string defaultValueAsString() const override
     {
         return std::to_string(_defaultValue);
     }
-    void set(const std::string& value)
+
+    void set(const std::string& value) override
     {
         _value = std::stod(value);
         _callback(_value);
@@ -302,11 +309,11 @@ public:
     {
     }
 
-    const std::string defaultValueAsString() const
+    const std::string defaultValueAsString() const override
     {
         return _defaultValue ? "true" : "false";
     }
-    void set(const std::string& value);
+    void set(const std::string& value) override;
 };
 
 #endif

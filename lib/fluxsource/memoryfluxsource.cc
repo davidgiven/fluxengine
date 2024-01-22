@@ -47,7 +47,7 @@ public:
         return std::make_unique<EmptyFluxSourceIterator>();
     }
 
-    void recalibrate() {}
+    void recalibrate() override {}
 
 private:
     const DiskFlux& _flux;

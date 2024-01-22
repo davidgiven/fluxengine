@@ -123,7 +123,7 @@ private:
     }
 
 public:
-    int getVersion()
+    int getVersion() override
     {
         struct any_frame f = {
             .f = {.type = F_FRAME_GET_VERSION_CMD, .size = sizeof(f)}
@@ -133,7 +133,7 @@ public:
         return r->version;
     }
 
-    void seek(int track)
+    void seek(int track) override
     {
         struct seek_frame f = {
             .f = {.type = F_FRAME_SEEK_CMD, .size = sizeof(f)},
@@ -143,7 +143,7 @@ public:
         await_reply<struct any_frame>(F_FRAME_SEEK_REPLY);
     }
 
-    void recalibrate()
+    void recalibrate() override
     {
         struct any_frame f = {
             .f = {.type = F_FRAME_RECALIBRATE_CMD, .size = sizeof(f)},
@@ -152,7 +152,7 @@ public:
         await_reply<struct any_frame>(F_FRAME_RECALIBRATE_REPLY);
     }
 
-    nanoseconds_t getRotationalPeriod(int hardSectorCount)
+    nanoseconds_t getRotationalPeriod(int hardSectorCount) override
     {
         struct measurespeed_frame f = {
             .f = {.type = F_FRAME_MEASURE_SPEED_CMD, .size = sizeof(f)},
@@ -164,7 +164,7 @@ public:
         return r->period_ms * 1000000;
     }
 
-    void testBulkWrite()
+    void testBulkWrite() override
     {
         struct any_frame f = {
             .f = {.type = F_FRAME_BULK_WRITE_TEST_CMD, .size = sizeof(f)}
@@ -204,7 +204,7 @@ public:
         await_reply<struct any_frame>(F_FRAME_BULK_WRITE_TEST_REPLY);
     }
 
-    void testBulkRead()
+    void testBulkRead() override
     {
         struct any_frame f = {
             .f = {.type = F_FRAME_BULK_READ_TEST_CMD, .size = sizeof(f)}
@@ -242,7 +242,7 @@ public:
     Bytes read(int side,
         bool synced,
         nanoseconds_t readTime,
-        nanoseconds_t hardSectorThreshold)
+        nanoseconds_t hardSectorThreshold) override
     {
         struct read_frame f = {
             .f = {.type = F_FRAME_READ_CMD, .size = sizeof(f)},
@@ -265,7 +265,9 @@ public:
         return buffer;
     }
 
-    void write(int side, const Bytes& bytes, nanoseconds_t hardSectorThreshold)
+    void write(int side,
+        const Bytes& bytes,
+        nanoseconds_t hardSectorThreshold) override
     {
         unsigned safelen = bytes.size() & ~(FRAME_SIZE - 1);
         Bytes safeBytes = bytes.slice(0, safelen);
@@ -287,7 +289,7 @@ public:
         await_reply<struct any_frame>(F_FRAME_WRITE_REPLY);
     }
 
-    void erase(int side, nanoseconds_t hardSectorThreshold)
+    void erase(int side, nanoseconds_t hardSectorThreshold) override
     {
         struct erase_frame f = {
             .f = {.type = F_FRAME_ERASE_CMD, .size = sizeof(f)},
@@ -300,7 +302,7 @@ public:
         await_reply<struct any_frame>(F_FRAME_ERASE_REPLY);
     }
 
-    void setDrive(int drive, bool high_density, int index_mode)
+    void setDrive(int drive, bool high_density, int index_mode) override
     {
         struct set_drive_frame f = {
             .f = {.type = F_FRAME_SET_DRIVE_CMD, .size = sizeof(f)},
@@ -312,7 +314,7 @@ public:
         await_reply<struct any_frame>(F_FRAME_SET_DRIVE_REPLY);
     }
 
-    void measureVoltages(struct voltages_frame* voltages)
+    void measureVoltages(struct voltages_frame* voltages) override
     {
         struct any_frame f = {
             {.type = F_FRAME_MEASURE_VOLTAGES_CMD, .size = sizeof(f)},

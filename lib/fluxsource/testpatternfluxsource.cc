@@ -27,7 +27,7 @@ public:
         return fluxmap;
     }
 
-    void recalibrate() {}
+    void recalibrate() override {}
 
 private:
     const TestPatternFluxSourceProto& _config;
