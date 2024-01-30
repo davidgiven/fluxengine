@@ -23,6 +23,7 @@ extern command_cb mainRm;
 extern command_cb mainRpm;
 extern command_cb mainSeek;
 extern command_cb mainTestBandwidth;
+extern command_cb mainTestDevices;
 extern command_cb mainTestVoltages;
 extern command_cb mainWrite;
 
@@ -69,6 +70,7 @@ static std::vector<Command> analysables =
 static std::vector<Command> testables =
 {
     { "bandwidth",     mainTestBandwidth, "Measures your USB bandwidth.", },
+    { "devices",       mainTestDevices, "Displays all detected devices.", },
     { "voltages",      mainTestVoltages,  "Measures the FDD bus voltages.", },
 };
 // clang-format on

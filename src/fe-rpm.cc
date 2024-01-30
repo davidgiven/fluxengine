@@ -17,6 +17,7 @@ static StringFlag sourceFlux({"-s", "--source"},
 
 int mainRpm(int argc, const char* argv[])
 {
+    globalConfig().set("flux_source.type", "FLUXTYPE_DRIVE");
     flags.parseFlagsWithConfigFiles(argc, argv, {});
 
     if (globalConfig()->flux_source().type() != FLUXTYPE_DRIVE)
