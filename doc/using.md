@@ -58,7 +58,14 @@ If _more_ than one device is plugged in, you need to specify which one to use
 with the `--usb.serial` parameter, which takes the device serial number as a
 parameter.  You can find out the serial numbers by running the command without
 the `--usb.serial` parameter, and if more than one device is attached they will
-be listed. The serial number is also shown whenever a connection is made.
+be listed. The serial number is also shown whenever a connection is made. You
+can list all the detectable devices with:
+
+```
+$ fluxengine test devices
+```
+
+This will show you their serial numbers.
 
 You _can_ work with more than one FluxEngine at the same time, using different
 invocations of the client; but be careful of USB bandwidth. If the devices are
