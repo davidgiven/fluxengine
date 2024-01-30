@@ -24,13 +24,17 @@ int mainTestDevices(int argc, const char* argv[])
             fmt::print("Detected {} devices:\n", candidates.size());
     }
 
-    fmt::print("{:15} {:30} {}\n", "Type", "Serial number", "Port (if any)");
-    for (auto& candidate : candidates)
+    if (!candidates.empty())
     {
-        fmt::print("{:15} {:30} {}\n",
-            getDeviceName(candidate->type),
-            candidate->serial,
-            candidate->serialPort);
+        fmt::print(
+            "{:15} {:30} {}\n", "Type", "Serial number", "Port (if any)");
+        for (auto& candidate : candidates)
+        {
+            fmt::print("{:15} {:30} {}\n",
+                getDeviceName(candidate->type),
+                candidate->serial,
+                candidate->serialPort);
+        }
     }
 
     return 0;
