@@ -3264,6 +3264,7 @@ static UINT check_fs (	/* 0:FAT/FAT32 VBR, 1:exFAT VBR, 2:Not FAT and valid BS, 
 {
 	WORD w, sign;
 	BYTE b;
+	BYTE bpboffset = fs->bpboffset;
 
 
 	fs->wflag = 0; fs->winsect = (LBA_t)0 - 1;		/* Invaidate window */
@@ -3273,20 +3274,23 @@ static UINT check_fs (	/* 0:FAT/FAT32 VBR, 1:exFAT VBR, 2:Not FAT and valid BS, 
 	if (sign == 0xAA55 && !memcmp(fs->win + BS_JmpBoot, "\xEB\x76\x90" "EXFAT   ", 11)) return 1;	/* It is an exFAT VBR */
 #endif
 	b = fs->win[BS_JmpBoot];
-	if (b == 0xEB || b == 0xE9 || b == 0xE8) {	/* Valid JumpBoot code? (short jump, near jump or near call) */
+	if (b == 0xEB || b == 0xE9 || b == 0xE8 || b == 0x56) {	/* Valid JumpBoot code? (short jump, near jump or near call, Apricot) */
 		if (sign == 0xAA55 && !memcmp(fs->win + BS_FilSysType32, "FAT32   ", 8)) {
 			return 0;	/* It is an FAT32 VBR */
 		}
+		if (b == 0x56)
+			bpboffset = fs->bpboffset = 0x50 - 0x0b;
+
 		/* FAT volumes formatted with early MS-DOS lack BS_55AA and BS_FilSysType, so FAT VBR needs to be identified without them. */
-		w = ld_word(fs->win + BPB_BytsPerSec);
-		b = fs->win[BPB_SecPerClus];
+		w = ld_word(fs->win + bpboffset + BPB_BytsPerSec);
+		b = fs->win[bpboffset + BPB_SecPerClus];
 		if ((w & (w - 1)) == 0 && w >= FF_MIN_SS && w <= FF_MAX_SS	/* Properness of sector size (512-4096 and 2^n) */
 			&& b != 0 && (b & (b - 1)) == 0				/* Properness of cluster size (2^n) */
-			&& ld_word(fs->win + BPB_RsvdSecCnt) != 0	/* Properness of reserved sectors (MNBZ) */
-			&& (UINT)fs->win[BPB_NumFATs] - 1 <= 1		/* Properness of FATs (1 or 2) */
-			&& ld_word(fs->win + BPB_RootEntCnt) != 0	/* Properness of root dir entries (MNBZ) */
-			&& (ld_word(fs->win + BPB_TotSec16) >= 128 || ld_dword(fs->win + BPB_TotSec32) >= 0x10000)	/* Properness of volume sectors (>=128) */
-			&& ld_word(fs->win + BPB_FATSz16) != 0) {	/* Properness of FAT size (MNBZ) */
+			&& ld_word(fs->win + bpboffset + BPB_RsvdSecCnt) != 0	/* Properness of reserved sectors (MNBZ) */
+			&& (UINT)fs->win[bpboffset + BPB_NumFATs] - 1 <= 1		/* Properness of FATs (1 or 2) */
+			&& ld_word(fs->win + bpboffset + BPB_RootEntCnt) != 0	/* Properness of root dir entries (MNBZ) */
+			&& (ld_word(fs->win + bpboffset + BPB_TotSec16) >= 128 || ld_dword(fs->win + bpboffset + BPB_TotSec32) >= 0x10000)	/* Properness of volume sectors (>=128) */
+			&& ld_word(fs->win + bpboffset + BPB_FATSz16) != 0) {	/* Properness of FAT size (MNBZ) */
 				return 0;	/* It can be presumed an FAT VBR */
 		}
 	}
@@ -3407,6 +3411,8 @@ static FRESULT mount_volume (	/* FR_OK(0): successful, !=0: an error occurred */
 	if (SS(fs) > FF_MAX_SS || SS(fs) < FF_MIN_SS || (SS(fs) & (SS(fs) - 1))) return FR_DISK_ERR;
 #endif
 
+	fs->bpboffset = 0;
+
 	/* Find an FAT volume on the drive */
 	fmt = find_volume(fs, LD2PT(vol));
 	if (fmt == 4) return FR_DISK_ERR;		/* An error occured in the disk I/O layer */
@@ -3420,36 +3426,36 @@ static FRESULT mount_volume (	/* FR_OK(0): successful, !=0: an error occurred */
 		QWORD maxlba;
 		DWORD so, cv, bcl, i;
 
-		for (i = BPB_ZeroedEx; i < BPB_ZeroedEx + 53 && fs->win[i] == 0; i++) ;	/* Check zero filler */
-		if (i < BPB_ZeroedEx + 53) return FR_NO_FILESYSTEM;
+		for (i = bpboffset + BPB_ZeroedEx; i < bpboffset + BPB_ZeroedEx + 53 && fs->win[i] == 0; i++) ;	/* Check zero filler */
+		if (i < bpboffset + BPB_ZeroedEx + 53) return FR_NO_FILESYSTEM;
 
-		if (ld_word(fs->win + BPB_FSVerEx) != 0x100) return FR_NO_FILESYSTEM;	/* Check exFAT version (must be version 1.0) */
+		if (ld_word(fs->win + bpboffset + BPB_FSVerEx) != 0x100) return FR_NO_FILESYSTEM;	/* Check exFAT version (must be version 1.0) */
 
-		if (1 << fs->win[BPB_BytsPerSecEx] != SS(fs)) {	/* (BPB_BytsPerSecEx must be equal to the physical sector size) */
+		if (1 << fs->win[bpboffset + BPB_BytsPerSecEx] != SS(fs)) {	/* (bpboffset + BPB_BytsPerSecEx must be equal to the physical sector size) */
 			return FR_NO_FILESYSTEM;
 		}
 
-		maxlba = ld_qword(fs->win + BPB_TotSecEx) + bsect;	/* Last LBA of the volume + 1 */
+		maxlba = ld_qword(fs->win + bpboffset + BPB_TotSecEx) + bsect;	/* Last LBA of the volume + 1 */
 		if (!FF_LBA64 && maxlba >= 0x100000000) return FR_NO_FILESYSTEM;	/* (It cannot be accessed in 32-bit LBA) */
 
-		fs->fsize = ld_dword(fs->win + BPB_FatSzEx);	/* Number of sectors per FAT */
+		fs->fsize = ld_dword(fs->win + bpboffset + BPB_FatSzEx);	/* Number of sectors per FAT */
 
-		fs->n_fats = fs->win[BPB_NumFATsEx];			/* Number of FATs */
+		fs->n_fats = fs->win[bpboffset + BPB_NumFATsEx];			/* Number of FATs */
 		if (fs->n_fats != 1) return FR_NO_FILESYSTEM;	/* (Supports only 1 FAT) */
 
-		fs->csize = 1 << fs->win[BPB_SecPerClusEx];		/* Cluster size */
+		fs->csize = 1 << fs->win[bpboffset + BPB_SecPerClusEx];		/* Cluster size */
 		if (fs->csize == 0)	return FR_NO_FILESYSTEM;	/* (Must be 1..32768 sectors) */
 
-		nclst = ld_dword(fs->win + BPB_NumClusEx);		/* Number of clusters */
+		nclst = ld_dword(fs->win + bpboffset + BPB_NumClusEx);		/* Number of clusters */
 		if (nclst > MAX_EXFAT) return FR_NO_FILESYSTEM;	/* (Too many clusters) */
 		fs->n_fatent = nclst + 2;
 
 		/* Boundaries and Limits */
 		fs->volbase = bsect;
-		fs->database = bsect + ld_dword(fs->win + BPB_DataOfsEx);
-		fs->fatbase = bsect + ld_dword(fs->win + BPB_FatOfsEx);
+		fs->database = bsect + ld_dword(fs->win + bpboffset + BPB_DataOfsEx);
+		fs->fatbase = bsect + ld_dword(fs->win + bpboffset + BPB_FatOfsEx);
 		if (maxlba < (QWORD)fs->database + nclst * fs->csize) return FR_NO_FILESYSTEM;	/* (Volume size must not be smaller than the size requiered) */
-		fs->dirbase = ld_dword(fs->win + BPB_RootClusEx);
+		fs->dirbase = ld_dword(fs->win + bpboffset + BPB_RootClusEx);
 
 		/* Get bitmap location and check if it is contiguous (implementation assumption) */
 		so = i = 0;
@@ -3479,26 +3485,27 @@ static FRESULT mount_volume (	/* FR_OK(0): successful, !=0: an error occurred */
 	} else
 #endif	/* FF_FS_EXFAT */
 	{
-		if (ld_word(fs->win + BPB_BytsPerSec) != SS(fs)) return FR_NO_FILESYSTEM;	/* (BPB_BytsPerSec must be equal to the physical sector size) */
+		BYTE bpboffset = fs->bpboffset;
+		if (ld_word(fs->win + bpboffset + BPB_BytsPerSec) != SS(fs)) return FR_NO_FILESYSTEM;	/* (bpboffset + BPB_BytsPerSec must be equal to the physical sector size) */
 
-		fasize = ld_word(fs->win + BPB_FATSz16);		/* Number of sectors per FAT */
-		if (fasize == 0) fasize = ld_dword(fs->win + BPB_FATSz32);
+		fasize = ld_word(fs->win + bpboffset + BPB_FATSz16);		/* Number of sectors per FAT */
+		if (fasize == 0) fasize = ld_dword(fs->win + bpboffset + BPB_FATSz32);
 		fs->fsize = fasize;
 
-		fs->n_fats = fs->win[BPB_NumFATs];				/* Number of FATs */
+		fs->n_fats = fs->win[bpboffset + BPB_NumFATs];				/* Number of FATs */
 		if (fs->n_fats != 1 && fs->n_fats != 2) return FR_NO_FILESYSTEM;	/* (Must be 1 or 2) */
 		fasize *= fs->n_fats;							/* Number of sectors for FAT area */
 
-		fs->csize = fs->win[BPB_SecPerClus];			/* Cluster size */
+		fs->csize = fs->win[bpboffset + BPB_SecPerClus];			/* Cluster size */
 		if (fs->csize == 0 || (fs->csize & (fs->csize - 1))) return FR_NO_FILESYSTEM;	/* (Must be power of 2) */
 
-		fs->n_rootdir = ld_word(fs->win + BPB_RootEntCnt);	/* Number of root directory entries */
+		fs->n_rootdir = ld_word(fs->win + bpboffset + BPB_RootEntCnt);	/* Number of root directory entries */
 		if (fs->n_rootdir % (SS(fs) / SZDIRE)) return FR_NO_FILESYSTEM;	/* (Must be sector aligned) */
 
-		tsect = ld_word(fs->win + BPB_TotSec16);		/* Number of sectors on the volume */
-		if (tsect == 0) tsect = ld_dword(fs->win + BPB_TotSec32);
+		tsect = ld_word(fs->win + bpboffset + BPB_TotSec16);		/* Number of sectors on the volume */
+		if (tsect == 0) tsect = ld_dword(fs->win + bpboffset + BPB_TotSec32);
 
-		nrsv = ld_word(fs->win + BPB_RsvdSecCnt);		/* Number of reserved sectors */
+		nrsv = ld_word(fs->win + bpboffset + BPB_RsvdSecCnt);		/* Number of reserved sectors */
 		if (nrsv == 0) return FR_NO_FILESYSTEM;			/* (Must not be 0) */
 
 		/* Determine the FAT sub type */
@@ -3518,25 +3525,25 @@ static FRESULT mount_volume (	/* FR_OK(0): successful, !=0: an error occurred */
 		fs->fatbase = bsect + nrsv; 					/* FAT start sector */
 		fs->database = bsect + sysect;					/* Data start sector */
 		if (fmt == FS_FAT32) {
-			if (ld_word(fs->win + BPB_FSVer32) != 0) return FR_NO_FILESYSTEM;	/* (Must be FAT32 revision 0.0) */
-			if (fs->n_rootdir != 0) return FR_NO_FILESYSTEM;	/* (BPB_RootEntCnt must be 0) */
-			fs->dirbase = ld_dword(fs->win + BPB_RootClus32);	/* Root directory start cluster */
+			if (ld_word(fs->win + bpboffset + BPB_FSVer32) != 0) return FR_NO_FILESYSTEM;	/* (Must be FAT32 revision 0.0) */
+			if (fs->n_rootdir != 0) return FR_NO_FILESYSTEM;	/* (bpboffset + BPB_RootEntCnt must be 0) */
+			fs->dirbase = ld_dword(fs->win + bpboffset + BPB_RootClus32);	/* Root directory start cluster */
 			szbfat = fs->n_fatent * 4;					/* (Needed FAT size) */
 		} else {
-			if (fs->n_rootdir == 0)	return FR_NO_FILESYSTEM;	/* (BPB_RootEntCnt must not be 0) */
+			if (fs->n_rootdir == 0)	return FR_NO_FILESYSTEM;	/* (bpboffset + BPB_RootEntCnt must not be 0) */
 			fs->dirbase = fs->fatbase + fasize;			/* Root directory start sector */
 			szbfat = (fmt == FS_FAT16) ?				/* (Needed FAT size) */
 				fs->n_fatent * 2 : fs->n_fatent * 3 / 2 + (fs->n_fatent & 1);
 		}
-		if (fs->fsize < (szbfat + (SS(fs) - 1)) / SS(fs)) return FR_NO_FILESYSTEM;	/* (BPB_FATSz must not be less than the size needed) */
+		if (fs->fsize < (szbfat + (SS(fs) - 1)) / SS(fs)) return FR_NO_FILESYSTEM;	/* (bpboffset + BPB_FATSz must not be less than the size needed) */
 
 #if !FF_FS_READONLY
 		/* Get FSInfo if available */
 		fs->last_clst = fs->free_clst = 0xFFFFFFFF;		/* Initialize cluster allocation information */
 		fs->fsi_flag = 0x80;
 #if (FF_FS_NOFSINFO & 3) != 3
-		if (fmt == FS_FAT32				/* Allow to update FSInfo only if BPB_FSInfo32 == 1 */
-			&& ld_word(fs->win + BPB_FSInfo32) == 1
+		if (fmt == FS_FAT32				/* Allow to update FSInfo only if bpboffset + BPB_FSInfo32 == 1 */
+			&& ld_word(fs->win + bpboffset + BPB_FSInfo32) == 1
 			&& move_window(fs, bsect + 1) == FR_OK)
 		{
 			fs->fsi_flag = 0;
@@ -5366,7 +5373,7 @@ FRESULT f_getlabel (
 		if (res == FR_OK) {
 			switch (fs->fs_type) {
 			case FS_EXFAT:
-				di = BPB_VolIDEx;
+				di = fs->bpboffset + BPB_VolIDEx;
 				break;
 
 			case FS_FAT32:
@@ -5841,6 +5848,7 @@ FRESULT f_mkfs (
 	int vol;
 	DSTATUS ds;
 	FRESULT fr;
+	BYTE bpboffset;
 
 
 	/* Check mounted drive and clear work area */
@@ -5864,6 +5872,9 @@ FRESULT f_mkfs (
 #else
 	ss = FF_MAX_SS;
 #endif
+	bpboffset = 0;
+
+
 	/* Options for FAT sub-type and FAT parameters */
 	fsopt = opt->fmt & (FM_ANY | FM_SFD);
 	n_fat = (opt->n_fat >= 1 && opt->n_fat <= 2) ? opt->n_fat : 1;
@@ -6080,23 +6091,23 @@ FRESULT f_mkfs (
 			/* Main record (+0) */
 			memset(buf, 0, ss);
 			memcpy(buf + BS_JmpBoot, "\xEB\x76\x90" "EXFAT   ", 11);	/* Boot jump code (x86), OEM name */
-			st_qword(buf + BPB_VolOfsEx, b_vol);					/* Volume offset in the physical drive [sector] */
-			st_qword(buf + BPB_TotSecEx, sz_vol);					/* Volume size [sector] */
-			st_dword(buf + BPB_FatOfsEx, (DWORD)(b_fat - b_vol));	/* FAT offset [sector] */
-			st_dword(buf + BPB_FatSzEx, sz_fat);					/* FAT size [sector] */
-			st_dword(buf + BPB_DataOfsEx, (DWORD)(b_data - b_vol));	/* Data offset [sector] */
-			st_dword(buf + BPB_NumClusEx, n_clst);					/* Number of clusters */
-			st_dword(buf + BPB_RootClusEx, 2 + clen[0] + clen[1]);	/* Root dir cluster # */
-			st_dword(buf + BPB_VolIDEx, vsn);						/* VSN */
-			st_word(buf + BPB_FSVerEx, 0x100);						/* Filesystem version (1.00) */
-			for (buf[BPB_BytsPerSecEx] = 0, i = ss; i >>= 1; buf[BPB_BytsPerSecEx]++) ;	/* Log2 of sector size [byte] */
-			for (buf[BPB_SecPerClusEx] = 0, i = sz_au; i >>= 1; buf[BPB_SecPerClusEx]++) ;	/* Log2 of cluster size [sector] */
-			buf[BPB_NumFATsEx] = 1;					/* Number of FATs */
-			buf[BPB_DrvNumEx] = 0x80;				/* Drive number (for int13) */
+			st_qword(buf + bpboffset + BPB_VolOfsEx, b_vol);					/* Volume offset in the physical drive [sector] */
+			st_qword(buf + bpboffset + BPB_TotSecEx, sz_vol);					/* Volume size [sector] */
+			st_dword(buf + bpboffset + BPB_FatOfsEx, (DWORD)(b_fat - b_vol));	/* FAT offset [sector] */
+			st_dword(buf + bpboffset + BPB_FatSzEx, sz_fat);					/* FAT size [sector] */
+			st_dword(buf + bpboffset + BPB_DataOfsEx, (DWORD)(b_data - b_vol));	/* Data offset [sector] */
+			st_dword(buf + bpboffset + BPB_NumClusEx, n_clst);					/* Number of clusters */
+			st_dword(buf + bpboffset + BPB_RootClusEx, 2 + clen[0] + clen[1]);	/* Root dir cluster # */
+			st_dword(buf + bpboffset + BPB_VolIDEx, vsn);						/* VSN */
+			st_word(buf + bpboffset + BPB_FSVerEx, 0x100);						/* Filesystem version (1.00) */
+			for (buf[bpboffset + BPB_BytsPerSecEx] = 0, i = ss; i >>= 1; buf[bpboffset + BPB_BytsPerSecEx]++) ;	/* Log2 of sector size [byte] */
+			for (buf[bpboffset + BPB_SecPerClusEx] = 0, i = sz_au; i >>= 1; buf[bpboffset + BPB_SecPerClusEx]++) ;	/* Log2 of cluster size [sector] */
+			buf[bpboffset + BPB_NumFATsEx] = 1;					/* Number of FATs */
+			buf[bpboffset + BPB_DrvNumEx] = 0x80;				/* Drive number (for int13) */
 			st_word(buf + BS_BootCodeEx, 0xFEEB);	/* Boot code (x86) */
 			st_word(buf + BS_55AA, 0xAA55);			/* Signature (placed here regardless of sector size) */
 			for (i = sum = 0; i < ss; i++) {		/* VBR checksum */
-				if (i != BPB_VolFlagEx && i != BPB_VolFlagEx + 1 && i != BPB_PercInUseEx) sum = xsum32(buf[i], sum);
+				if (i != bpboffset + BPB_VolFlagEx && i != bpboffset + BPB_VolFlagEx + 1 && i != bpboffset + BPB_PercInUseEx) sum = xsum32(buf[i], sum);
 			}
 			if (disk_write(pdrv, buf, sect++, 1) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);
 			/* Extended bootstrap record (+1..+8) */
@@ -6201,32 +6212,32 @@ FRESULT f_mkfs (
 		/* Create FAT VBR */
 		memset(buf, 0, ss);
 		memcpy(buf + BS_JmpBoot, "\xEB\xFE\x90" "MSDOS5.0", 11);	/* Boot jump code (x86), OEM name */
-		st_word(buf + BPB_BytsPerSec, ss);				/* Sector size [byte] */
-		buf[BPB_SecPerClus] = (BYTE)pau;				/* Cluster size [sector] */
-		st_word(buf + BPB_RsvdSecCnt, (WORD)sz_rsv);	/* Size of reserved area */
-		buf[BPB_NumFATs] = (BYTE)n_fat;					/* Number of FATs */
-		st_word(buf + BPB_RootEntCnt, (WORD)((fsty == FS_FAT32) ? 0 : n_root));	/* Number of root directory entries */
+		st_word(buf + bpboffset + BPB_BytsPerSec, ss);				/* Sector size [byte] */
+		buf[bpboffset + BPB_SecPerClus] = (BYTE)pau;				/* Cluster size [sector] */
+		st_word(buf + bpboffset + BPB_RsvdSecCnt, (WORD)sz_rsv);	/* Size of reserved area */
+		buf[bpboffset + BPB_NumFATs] = (BYTE)n_fat;					/* Number of FATs */
+		st_word(buf + bpboffset + BPB_RootEntCnt, (WORD)((fsty == FS_FAT32) ? 0 : n_root));	/* Number of root directory entries */
 		if (sz_vol < 0x10000) {
-			st_word(buf + BPB_TotSec16, (WORD)sz_vol);	/* Volume size in 16-bit LBA */
+			st_word(buf + bpboffset + BPB_TotSec16, (WORD)sz_vol);	/* Volume size in 16-bit LBA */
 		} else {
-			st_dword(buf + BPB_TotSec32, (DWORD)sz_vol);	/* Volume size in 32-bit LBA */
+			st_dword(buf + bpboffset + BPB_TotSec32, (DWORD)sz_vol);	/* Volume size in 32-bit LBA */
 		}
-		buf[BPB_Media] = 0xF8;							/* Media descriptor byte */
-		st_word(buf + BPB_SecPerTrk, 63);				/* Number of sectors per track (for int13) */
-		st_word(buf + BPB_NumHeads, 255);				/* Number of heads (for int13) */
-		st_dword(buf + BPB_HiddSec, (DWORD)b_vol);		/* Volume offset in the physical drive [sector] */
+		buf[bpboffset + BPB_Media] = 0xF8;							/* Media descriptor byte */
+		st_word(buf + bpboffset + BPB_SecPerTrk, 63);				/* Number of sectors per track (for int13) */
+		st_word(buf + bpboffset + BPB_NumHeads, 255);				/* Number of heads (for int13) */
+		st_dword(buf + bpboffset + BPB_HiddSec, (DWORD)b_vol);		/* Volume offset in the physical drive [sector] */
 		if (fsty == FS_FAT32) {
 			st_dword(buf + BS_VolID32, vsn);			/* VSN */
-			st_dword(buf + BPB_FATSz32, sz_fat);		/* FAT size [sector] */
-			st_dword(buf + BPB_RootClus32, 2);			/* Root directory cluster # (2) */
-			st_word(buf + BPB_FSInfo32, 1);				/* Offset of FSINFO sector (VBR + 1) */
-			st_word(buf + BPB_BkBootSec32, 6);			/* Offset of backup VBR (VBR + 6) */
+			st_dword(buf + bpboffset + BPB_FATSz32, sz_fat);		/* FAT size [sector] */
+			st_dword(buf + bpboffset + BPB_RootClus32, 2);			/* Root directory cluster # (2) */
+			st_word(buf + bpboffset + BPB_FSInfo32, 1);				/* Offset of FSINFO sector (VBR + 1) */
+			st_word(buf + bpboffset + BPB_BkBootSec32, 6);			/* Offset of backup VBR (VBR + 6) */
 			buf[BS_DrvNum32] = 0x80;					/* Drive number (for int13) */
 			buf[BS_BootSig32] = 0x29;					/* Extended boot signature */
 			memcpy(buf + BS_VolLab32, "NO NAME    " "FAT32   ", 19);	/* Volume label, FAT signature */
 		} else {
 			st_dword(buf + BS_VolID, vsn);				/* VSN */
-			st_word(buf + BPB_FATSz16, (WORD)sz_fat);	/* FAT size [sector] */
+			st_word(buf + bpboffset + BPB_FATSz16, (WORD)sz_fat);	/* FAT size [sector] */
 			buf[BS_DrvNum] = 0x80;						/* Drive number (for int13) */
 			buf[BS_BootSig] = 0x29;						/* Extended boot signature */
 			memcpy(buf + BS_VolLab, "NO NAME    " "FAT     ", 19);	/* Volume label, FAT signature */
