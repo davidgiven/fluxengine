@@ -19,4 +19,13 @@ message Apple2EncoderProto
 
 	optional uint32 side_one_track_offset = 3
 		[ default = 0, (help) = "offset to apply to track numbers on side 1" ];
+
+    optional uint32 post_index_gap_bytes = 4
+        [ default = 32, (help) = "the number of resync bytes to write after the index mark" ];
+
+    optional uint32 post_address_gap_bytes = 5
+        [ default = 6, (help) = "the number of resync bytes to write after the address gap" ];
+
+    optional uint32 post_data_gap_bytes = 6
+        [ default = 8, (help) = "the number of resync bytes to write after each sector" ];
 }

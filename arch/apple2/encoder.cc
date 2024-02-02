@@ -79,18 +79,14 @@ private:
             auto write_bit = [&](bool val)
             {
                 if (cursor <= bits.size())
-                {
                     bits[cursor] = val;
-                }
                 cursor++;
             };
 
             auto write_bits = [&](uint32_t bits, int width)
             {
                 for (int i = width; i--;)
-                {
                     write_bit(bits & (1u << i));
-                }
             };
 
             auto write_gcr44 = [&](uint8_t value)
@@ -104,15 +100,13 @@ private:
             };
 
             // The special "FF40" sequence is used to synchronize the receiving
-            // shift register. It's written as "1111 1111 00"; FF indicates the
-            // 8 consecutive 1-bits, while "40" indicates the total number of
+            // shift register. It's written as "0 1111 1111 0"; FF indicates the
+            // 8 consecutive 1-bits, while "40" indicaes the total number of
             // microseconds.
             auto write_ff40 = [&](int n = 1)
             {
                 for (; n--;)
-                {
-                    write_bits(0xff << 2, 10);
-                }
+                    write_bits(0xff << 1, 10);
             };
 
             // There is data to encode to disk.
@@ -127,7 +121,9 @@ private:
             //
             // In standard formatting, the first logical sector apparently gets
             // extra padding.
-            write_ff40(sector.logicalSector == 0 ? 32 : 8);
+            write_ff40(sector.logicalSector == 0
+                           ? _config.post_index_gap_bytes()
+                           : _config.post_data_gap_bytes());
 
             int track = sector.logicalTrack;
             if (sector.logicalSide == 1)
@@ -144,7 +140,7 @@ private:
 
             // Write data syncing leader: FF40 + APPLE2_DATA_RECORD + sector
             // data + sum + DE AA EB (+ mystery bits cut off of the scan?)
-            write_ff40(8);
+            write_ff40(_config.post_address_gap_bytes());
             write_bits(APPLE2_DATA_RECORD, 24);
 
             // Convert the sector data to GCR, append the checksum, and write it
