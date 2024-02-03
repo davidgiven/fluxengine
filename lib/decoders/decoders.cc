@@ -137,8 +137,10 @@ std::shared_ptr<TrackDataFlux> Decoder::decodeToSectors(
 
         if (_sector->status != Sector::MISSING)
         {
-            auto trackLayout = Layout::getLayoutOfTrack(
-                _sector->logicalTrack, _sector->logicalSide);
+            if ((_sector->status == Sector::OK) &&
+                ((_sector->logicalTrack != trackInfo->logicalTrack) ||
+                    (_sector->logicalSide != trackInfo->logicalSide)))
+                _sector->status == Sector::WRONG_PLACE;
             _trackdata->sectors.push_back(_sector);
         }
     }

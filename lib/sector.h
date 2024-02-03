@@ -44,6 +44,7 @@ struct Sector : public LogicalLocation
         DATA_MISSING,
         CONFLICT,
         INTERNAL_ERROR,
+        WRONG_PLACE,
     };
 
     static std::string statusToString(Status status);

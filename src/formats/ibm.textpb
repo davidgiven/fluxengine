@@ -109,6 +109,10 @@ option_group {
 		set_by_default: true
 
 		config {
+			decoder {
+				collate_sectors_from_all_tracks: true
+			}
+			
 			layout {
 				format_type: FORMATTYPE_80TRACK
 			}

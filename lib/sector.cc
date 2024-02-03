@@ -31,6 +31,8 @@ std::string Sector::statusToString(Status status)
             return "present but no data found";
         case Status::CONFLICT:
             return "conflicting data";
+        case Status::WRONG_PLACE:
+            return "incorrectly placed";
         default:
             return fmt::format("unknown error {}", status);
     }
@@ -50,6 +52,8 @@ std::string Sector::statusToChar(Status status)
             return "!";
         case Status::CONFLICT:
             return "*";
+        case Status::WRONG_PLACE:
+            return "/";
         default:
             return "?";
     }

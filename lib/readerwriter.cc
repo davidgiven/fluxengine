@@ -97,9 +97,16 @@ void measureDiskRotation()
     log(EndSpeedOperationLogMessage{oneRevolution});
 }
 
+static int getEffectiveStatus(int status)
+{
+    if ((status == Sector::WRONG_PLACE) &&
+        globalConfig()->decoder().collate_sectors_from_all_tracks())
+        return Sector::OK;
+    return status;
+}
+
 /* Given a set of sectors, deduplicates them sensibly (e.g. if there is a good
  * and bad version of the same sector, the bad version is dropped). */
-
 static std::set<std::shared_ptr<const Sector>> collectSectors(
     std::set<std::shared_ptr<const Sector>>& track_sectors,
     bool collapse_conflicts = true)
@@ -124,9 +131,11 @@ static std::set<std::shared_ptr<const Sector>> collectSectors(
             it->second,
             [&](auto left, auto& rightit) -> std::shared_ptr<const Sector>
             {
+                int leftStatus = left->status;
                 auto& right = rightit.second;
-                if ((left->status == Sector::OK) &&
-                    (right->status == Sector::OK) &&
+                int rightStatus = right->status;
+                if ((leftStatus == Sector::OK) &&
+                    (rightStatus == Sector::OK) &&
                     (left->data != right->data))
                 {
                     if (!collapse_conflicts)
@@ -139,13 +148,13 @@ static std::set<std::shared_ptr<const Sector>> collectSectors(
                     s->status = Sector::CONFLICT;
                     return s;
                 }
-                if (left->status == Sector::CONFLICT)
+                if (leftStatus == Sector::CONFLICT)
                     return left;
-                if (right->status == Sector::CONFLICT)
+                if (rightStatus == Sector::CONFLICT)
                     return right;
-                if (left->status == Sector::OK)
+                if (leftStatus == Sector::OK)
                     return left;
-                if (right->status == Sector::OK)
+                if (rightStatus == Sector::OK)
                     return right;
                 return left;
             });
