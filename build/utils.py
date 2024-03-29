@@ -19,8 +19,8 @@ def test(
     name,
     command: Target = None,
     commands=None,
-    ins: Targets = [],
-    deps: Targets = [],
+    ins: Targets = None,
+    deps: Targets = None,
     label="TEST",
 ):
     if command:

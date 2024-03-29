@@ -16,6 +16,7 @@ def protoencode(self, name, srcs: Targets, proto, symbol):
                 "tests+test_proto_lib",
                 "+protobuf_lib",
                 "+fmt_lib",
+                "+lib",
             ],
         )
         encoders[proto] = r
@@ -36,11 +37,11 @@ def protoencode(self, name, srcs: Targets, proto, symbol):
 cxxprogram(
     name="mkdoc",
     srcs=["./mkdoc.cc"],
-    deps=["src/formats", "lib+config_proto_lib", "+lib"],
+    deps=["src/formats", "lib+config_proto_lib", "+lib", "+fmt_lib", "+protobuf_lib"],
 )
 
 cxxprogram(
     name="mkdocindex",
     srcs=["./mkdocindex.cc"],
-    deps=["src/formats", "lib+config_proto_lib", "+lib"],
+    deps=["src/formats", "lib+config_proto_lib", "+lib", "+fmt_lib", "+protobuf_lib"],
 )

@@ -1,8 +1,17 @@
 from os.path import join
-from build.ab import Rule, Targets, emit, normalrule, filenamesof, flatten
+from build.ab import (
+    Rule,
+    Targets,
+    emit,
+    normalrule,
+    filenamesof,
+    filenamesmatchingof,
+    bubbledattrsof,
+    targetswithtraitsof,
+)
 from build.c import cxxlibrary
-import build.pkg
 from types import SimpleNamespace
+import build.pkg
 
 emit(
     """
@@ -15,7 +24,7 @@ endif
 
 
 @Rule
-def proto(self, name, srcs: Targets = [], deps: Targets = []):
+def proto(self, name, srcs: Targets = None, deps: Targets = None):
     normalrule(
         replaces=self,
         ins=srcs,
@@ -26,40 +35,38 @@ def proto(self, name, srcs: Targets = [], deps: Targets = []):
         ],
         label="PROTO",
     )
-    self.proto.srcs = filenamesof(srcs) + flatten(
-        [s.proto.srcs for s in flatten(deps)]
-    )
+    self.attr.protosrcs = filenamesof(srcs)
+    self.bubbleattr("protosrcs", deps)
 
 
 @Rule
-def protocc(self, name, srcs: Targets = [], deps: Targets = []):
+def protocc(self, name, srcs: Targets = None, deps: Targets = None):
     outs = []
     protos = []
-    for f in flatten([s.proto.srcs for s in flatten(srcs + deps)]):
-        if f.endswith(".proto"):
-            cc = f.replace(".proto", ".pb.cc")
-            h = f.replace(".proto", ".pb.h")
-            protos += [f]
-            srcs += [f]
-            outs += [cc, h]
 
+    for f in filenamesmatchingof(bubbledattrsof(srcs, "protosrcs"), "*.proto"):
+        cc = f.replace(".proto", ".pb.cc")
+        h = f.replace(".proto", ".pb.h")
+        protos += [f]
+        srcs += [f]
+        outs += [cc, h]
+
+    srcname = f"{name}_srcs"
+    objdir = join("$(OBJ)", srcname)
     r = normalrule(
-        name=f"{name}_srcs",
+        name=srcname,
         ins=protos,
         outs=outs,
         deps=deps,
-        commands=["$(PROTOC) --cpp_out={self.normalrule.objdir} {ins}"],
+        commands=["$(PROTOC) --cpp_out={self.attr.objdir} {ins}"],
         label="PROTOCC",
     )
 
-    r.materialise()
-    headers = {
-        f: join(r.normalrule.objdir, f) for f in outs if f.endswith(".pb.h")
-    }
+    headers = {f: join(objdir, f) for f in outs if f.endswith(".pb.h")}
 
     cxxlibrary(
         replaces=self,
-        srcs=[f"{name}_srcs"],
+        srcs=[r],
+        deps=targetswithtraitsof(deps, "cheaders"),
         hdrs=headers,
-        cflags=[f"-I{r.normalrule.objdir}"],
     )
