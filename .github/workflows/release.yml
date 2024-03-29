@@ -10,85 +10,85 @@ on:
       - "master"
 
 jobs:
-  dev-release:
-    runs-on: windows-latest
-    defaults:
-      run:
-        shell: msys2 {0}
-    steps:
-    - uses: msys2/setup-msys2@v2
-      with:
-        update: true
-        msystem: MINGW32
-        install: >-
-          diffutils
-          make
-          mingw-w64-i686-binutils
-          mingw-w64-i686-fmt
-          mingw-w64-i686-gcc
-          mingw-w64-i686-libusb
-          mingw-w64-i686-nsis
-          mingw-w64-i686-pkg-config
-          mingw-w64-i686-protobuf
-          mingw-w64-i686-python
-          mingw-w64-i686-sqlite3
-          mingw-w64-i686-wxWidgets
-          mingw-w64-i686-zlib
-          mingw-w64-i686-png2ico
-          vim
-          zip
-    - uses: actions/checkout@v3
+  #dev-release:
+  #  runs-on: windows-latest
+  #  defaults:
+  #    run:
+  #      shell: msys2 {0}
+  #  steps:
+  #  - uses: msys2/setup-msys2@v2
+  #    with:
+  #      update: true
+  #      msystem: MINGW32
+  #      install: >-
+  #        diffutils
+  #        make
+  #        mingw-w64-i686-binutils
+  #        mingw-w64-i686-fmt
+  #        mingw-w64-i686-gcc
+  #        mingw-w64-i686-libusb
+  #        mingw-w64-i686-nsis
+  #        mingw-w64-i686-pkg-config
+  #        mingw-w64-i686-protobuf
+  #        mingw-w64-i686-python
+  #        mingw-w64-i686-sqlite3
+  #        mingw-w64-i686-wxWidgets
+  #        mingw-w64-i686-zlib
+  #        mingw-w64-i686-png2ico
+  #        vim
+  #        zip
+  #  - uses: actions/checkout@v3
 
-    - name: update-protobuf
-      run: |
-         pacman -U --noconfirm https://repo.msys2.org/mingw/mingw32/mingw-w64-i686-protobuf-21.9-1-any.pkg.tar.zst
+  #  - name: update-protobuf
+  #    run: |
+  #       pacman -U --noconfirm https://repo.msys2.org/mingw/mingw32/mingw-w64-i686-protobuf-21.9-1-any.pkg.tar.zst
 
-    - name: build
-      run: |
-        MAGICK_TIME_LIMIT=100 make -j`nproc`
+  #  - name: build
+  #    run: |
+  #      MAGICK_TIME_LIMIT=100 make -j`nproc`
 
-    - name: nsis
-      run: |
-        strip fluxengine.exe -o fluxengine-stripped.exe
-        strip fluxengine-gui.exe -o fluxengine-gui-stripped.exe
-        makensis -v2 -nocd -dOUTFILE=fluxengine-installer.exe extras/windows-installer.nsi
+  #  - name: nsis
+  #    run: |
+  #      strip fluxengine.exe -o fluxengine-stripped.exe
+  #      strip fluxengine-gui.exe -o fluxengine-gui-stripped.exe
+  #      makensis -v2 -nocd -dOUTFILE=fluxengine-installer.exe extras/windows-installer.nsi
 
-    - name: zip
-      run: |
-        zip -9 fluxengine.zip fluxengine.exe fluxengine-gui.exe upgrade-flux-file.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex
+  #  - name: zip
+  #    run: |
+  #      zip -9 fluxengine.zip fluxengine.exe fluxengine-gui.exe upgrade-flux-file.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex
 
-    - name: date
-      run: |
-        echo "RELEASE_DATE=$(date --rfc-3339=date)" >> ${GITHUB_ENV}
+  #  - name: date
+  #    run: |
+  #      echo "RELEASE_DATE=$(date --rfc-3339=date)" >> ${GITHUB_ENV}
 
-    - name: tag
-      uses: EndBug/latest-tag@latest
-      with:
-        tag-name: dev
-        force-branch: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #  - name: tag
+  #    uses: EndBug/latest-tag@latest
+  #    with:
+  #      tag-name: dev
+  #      force-branch: false
+  #    env:
+  #      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: delete-old-assets
-      uses: mknejp/delete-release-assets@v1
-      with:
-        token: ${{ github.token }}
-        tag: dev
-        assets: | 
-          fluxengine.zip
-          fluxengine-installer.exe
-        fail-if-no-assets: false
+  #  - name: delete-old-assets
+  #    uses: mknejp/delete-release-assets@v1
+  #    with:
+  #      token: ${{ github.token }}
+  #      tag: dev
+  #      assets: | 
+  #        fluxengine.zip
+  #        fluxengine-installer.exe
+  #      fail-if-no-assets: false
 
-    - name: release
-      uses: softprops/action-gh-release@v1
-      with:
-        name: Development build ${{ env.RELEASE_DATE }}
-        files: |
-          fluxengine.zip
-          fluxengine-installer.exe
-        tag_name: dev
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #  - name: release
+  #    uses: softprops/action-gh-release@v1
+  #    with:
+  #      name: Development build ${{ env.RELEASE_DATE }}
+  #      files: |
+  #        fluxengine.zip
+  #        fluxengine-installer.exe
+  #      tag_name: dev
+  #    env:
+  #      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-macos:
     runs-on: macos-latest

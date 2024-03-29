@@ -22,4 +22,4 @@ proto(
     deps=[".+common_proto", "+fl2_proto"],
 )
 
-protocc(name="config_proto_lib", srcs=[".+config_proto", "arch+arch_proto"])
+protocc(name="config_proto_lib", srcs=[".+common_proto", ".+config_proto", "arch+arch_proto"])
