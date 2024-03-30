@@ -68,7 +68,7 @@ jobs:
     - name: setup WSL
       run: |
         winget install  --accept-source-agreements --accept-source-agreements whitewaterfoundry.fedora-remix-for-wsl
-        wsl --install -d fedoraremix
+        wsl --list --all
         wsl --set-default fedoraremix
         wsl sh -c 'dnf -y gcc gcc-c++ protobuf-c-compiler protobuf-devel fmt-devel systemd-devel sqlite-devel wxGTK-devel mingw32-gcc mingw32-gcc-c++ mingw32-zlib-static mingw32-protobuf-static mingw32-sqlite-static mingw32-wxWidgets3-static mingw32-libpng-static mingw32-libjpeg-static mingw32-libtiff-static mingw32-nsis'
 
