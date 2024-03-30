@@ -48,48 +48,49 @@ jobs:
 
   build-windows:
     runs-on: windows-latest
-    defaults:
-      run:
-        shell: wsl-bash {0}
 
     steps:
-    - uses: Vampire/setup-wsl@v3
-      with:
-        distribution: openSUSE-Leap-15.2
-        use-cache: true
-        additional-packages:
-          gcc
-          gcc-c++
-          protobuf-c-compiler
-          protobuf-devel
-          fmt-devel
-          systemd-devel
-          sqlite-devel
-          wxGTK-devel
-          mingw32-gcc
-          mingw32-gcc-c++
-          mingw32-zlib-static
-          mingw32-protobuf-static
-          mingw32-sqlite-static
-          mingw32-wxWidgets3-static
-          mingw32-libpng-static
-          mingw32-libjpeg-static
-          mingw32-libtiff-static
-          mingw32-nsis
-
-    - uses: actions/checkout@v3
-      with:
-        repository: 'davidgiven/fluxengine'
-        path: 'fluxengine'
-
-    - uses: actions/checkout@v3
-      with:
-        repository: 'davidgiven/fluxengine-testdata'
-        path: 'fluxengine-testdata'
-
-    - name: go
+    - name: setup WSL
       run: |
-        ls
+        wsl --install --distribution whitewaterfoundry.fedora-remix-for-wsl
+
+    #- uses: Vampire/setup-wsl@v3
+    #  with:
+    #    distribution: openSUSE-Leap-15.2
+    #    use-cache: true
+    #    additional-packages:
+    #      gcc
+    #      gcc-c++
+    #      protobuf-c-compiler
+    #      protobuf-devel
+    #      fmt-devel
+    #      systemd-devel
+    #      sqlite-devel
+    #      wxGTK-devel
+    #      mingw32-gcc
+    #      mingw32-gcc-c++
+    #      mingw32-zlib-static
+    #      mingw32-protobuf-static
+    #      mingw32-sqlite-static
+    #      mingw32-wxWidgets3-static
+    #      mingw32-libpng-static
+    #      mingw32-libjpeg-static
+    #      mingw32-libtiff-static
+    #      mingw32-nsis
+
+    #- uses: actions/checkout@v3
+    #  with:
+    #    repository: 'davidgiven/fluxengine'
+    #    path: 'fluxengine'
+
+    #- uses: actions/checkout@v3
+    #  with:
+    #    repository: 'davidgiven/fluxengine-testdata'
+    #    path: 'fluxengine-testdata'
+
+    #- name: go
+    #  run: |
+    #    ls
 
   #build-windows:
   #  runs-on: windows-latest
