@@ -1,7 +1,7 @@
 from build.ab import export
 from build.c import clibrary, cxxlibrary
 from build.protobuf import proto, protocc
-from build.pkg import package
+from build.pkg import package, hostpackage
 from build.utils import test
 from glob import glob
 import config
@@ -9,8 +9,13 @@ import re
 
 package(name="protobuf_lib", package="protobuf")
 package(name="z_lib", package="zlib")
-package(name="fmt_lib", package="fmt")
+package(name="fmt_lib", package="fmt", fallback="dep/fmt")
 package(name="sqlite3_lib", package="sqlite3")
+
+hostpackage(name="protobuf_host_lib", package="protobuf")
+hostpackage(name="z_host_lib", package="zlib")
+hostpackage(name="fmt_host_lib", package="fmt")
+hostpackage(name="sqlite3_host_lib", package="sqlite3")
 
 clibrary(name="protocol", hdrs={"protocol.h": "./protocol.h"})
 
@@ -211,14 +216,15 @@ cxxlibrary(
     },
     deps=[
         "+fl2_proto_lib",
+        "+fmt_lib",
         "+protocol",
-        "lib+config_proto_lib",
         "dep/adflib",
         "dep/agg",
         "dep/fatfs",
         "dep/hfsutils",
         "dep/libusbp",
         "dep/stb",
+        "lib+config_proto_lib",
     ],
 )
 

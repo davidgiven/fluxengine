@@ -401,6 +401,7 @@ def emitter_endrule(rule, outs):
     emit("\t$(hide) touch", rule.sentinel)
 
     for f in filenamesof(outs):
+        emit(".SECONDARY:", f)
         emit(f, ":", rule.sentinel, ";")
 
 

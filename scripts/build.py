@@ -1,5 +1,5 @@
 from build.ab import Rule, normalrule, Targets
-from build.c import cxxprogram
+from build.c import cxxprogram, HostToolchain
 
 encoders = {}
 

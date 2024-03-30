@@ -1,9 +1,37 @@
-CC = gcc
-CXX = g++ -std=c++17
-CFLAGS = -g -O3
-LDFLAGS =
+export BUILDTYPE
+BUILDTYPE ?= host
 
-OBJ = .obj
+ifeq ($(BUILDTYPE),windows)
+	MINGW = i686-w64-mingw32-
+	CC = $(MINGW)gcc
+	CXX = $(MINGW)g++ -std=c++17
+	CFLAGS += -g -O3
+	CXXFLAGS += \
+		-fext-numeric-literals \
+		-Wno-deprecated-enum-float-conversion \
+		-Wno-deprecated-enum-enum-conversion
+	LDFLAGS += -static
+	AR = $(MINGW)ar
+	PKG_CONFIG = $(MINGW)pkg-config -static
+	WINDRES = $(MINGW)windres
+	WX_CONFIG = /usr/i686-w64-mingw32/sys-root/mingw/bin/wx-config-3.0 --static=yes
+	EXT = .exe
+else
+	CC = gcc
+	CXX = g++ -std=c++17
+	CFLAGS = -g -O3
+	LDFLAGS =
+	AR = ar
+	PKG_CONFIG = pkg-config
+endif
+
+HOSTCC = gcc
+HOSTCXX = g++ -std=c++17
+HOSTCFLAGS = -g -O3
+HOSTLDFLAGS =
+
+REALOBJ = .obj
+OBJ = $(REALOBJ)/$(BUILDTYPE)
 DESTDIR ?=
 PREFIX ?= /usr/local
 BINDIR ?= $(PREFIX)/bin
@@ -53,6 +81,9 @@ README.md: $(OBJ)/scripts/+mkdocindex/+mkdocindex$(EXT)
 
 .PHONY: install install-bin
 install:: all install-bin
+
+clean::
+	$(hide) rm -rf $(REALOBJ)
 
 install-bin:
 	@echo "INSTALL"

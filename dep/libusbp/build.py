@@ -61,7 +61,7 @@ clibrary(
     name="libusbp",
     srcs=srcs,
     cflags=["-Idep/libusbp/include", "-Idep/libusbp/src"],
-    ldflags=ldflags,
+    caller_ldflags=ldflags,
     deps=deps,
     hdrs={
         "libusbp_internal.h": "./src/libusbp_internal.h",
