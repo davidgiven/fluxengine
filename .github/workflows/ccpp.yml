@@ -50,10 +50,11 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Install winget
-      uses: Cyberboss/install-winget@v1
-      with:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: setup WSL
+      run: |
+        curl https://github.com/VSWSL/Fedora-WSL/releases/download/v37.0.3.0/rootfs.tar.gz | wsl --import fedora fedora -
+        wsl --set-default fedora
+        wsl sh -c 'dnf -y gcc gcc-c++ protobuf-c-compiler protobuf-devel fmt-devel systemd-devel sqlite-devel wxGTK-devel mingw32-gcc mingw32-gcc-c++ mingw32-zlib-static mingw32-protobuf-static mingw32-sqlite-static mingw32-wxWidgets3-static mingw32-libpng-static mingw32-libjpeg-static mingw32-libtiff-static mingw32-nsis'
 
     - uses: actions/checkout@v3
       with:
@@ -64,13 +65,6 @@ jobs:
       with:
         repository: 'davidgiven/fluxengine-testdata'
         path: 'fluxengine-testdata'
-
-    - name: setup WSL
-      run: |
-        winget install  --accept-source-agreements --accept-source-agreements whitewaterfoundry.fedora-remix-for-wsl
-        wsl --list --all
-        wsl --set-default fedoraremix
-        wsl sh -c 'dnf -y gcc gcc-c++ protobuf-c-compiler protobuf-devel fmt-devel systemd-devel sqlite-devel wxGTK-devel mingw32-gcc mingw32-gcc-c++ mingw32-zlib-static mingw32-protobuf-static mingw32-sqlite-static mingw32-wxWidgets3-static mingw32-libpng-static mingw32-libjpeg-static mingw32-libtiff-static mingw32-nsis'
 
     - name: run
       run: |
