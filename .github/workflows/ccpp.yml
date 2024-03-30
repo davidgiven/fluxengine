@@ -56,6 +56,11 @@ jobs:
         wsl --set-default fedora
         wsl sh -c 'dnf -y install gcc gcc-c++ protobuf-c-compiler protobuf-devel fmt-devel systemd-devel sqlite-devel wxGTK-devel mingw32-gcc mingw32-gcc-c++ mingw32-zlib-static mingw32-protobuf-static mingw32-sqlite-static mingw32-wxWidgets3-static mingw32-libpng-static mingw32-libjpeg-static mingw32-libtiff-static mingw32-nsis'
 
+    - name: fix line endings
+      run: |
+        git config --global core.autocrlf false
+        git config --global core.eol lf
+        
     - uses: actions/checkout@v3
       with:
         repository: 'davidgiven/fluxengine'
