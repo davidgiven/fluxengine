@@ -52,7 +52,7 @@ jobs:
     steps:
     - name: setup WSL
       run: |
-        wsl --install --distribution whitewaterfoundry.fedora-remix-for-wsl
+        winget install whitewaterfoundry.fedora-remix-for-wsl
 
     #- uses: Vampire/setup-wsl@v3
     #  with:
