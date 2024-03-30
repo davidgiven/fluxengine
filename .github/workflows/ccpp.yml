@@ -57,6 +57,9 @@ jobs:
       with:
         distribution: openSUSE-Leap-15.2
         use-cache: true
+        additional-packages:
+          gcc
+          gcc-c++
 
     - name: go
       run: |
