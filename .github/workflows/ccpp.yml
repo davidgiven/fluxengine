@@ -57,7 +57,7 @@ jobs:
 
     - name: setup WSL
       run: |
-        winget install whitewaterfoundry.fedora-remix-for-wsl
+        winget install  --accept-source-agreements --accept-source-agreements whitewaterfoundry.fedora-remix-for-wsl
 
     #- uses: Vampire/setup-wsl@v3
     #  with:
