@@ -74,7 +74,7 @@ jobs:
 
     - name: run
       run: |
-        wsl sh -c 'make -C fluxengine BUILDTYPE=windows -j$(nproc)'
+        wsl sh -c 'make -C fluxengine BUILDTYPE=windows V=1'
         
     #- uses: Vampire/setup-wsl@v3
     #  with:
