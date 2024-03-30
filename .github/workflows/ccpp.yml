@@ -50,6 +50,11 @@ jobs:
     runs-on: windows-latest
 
     steps:
+    - name: Install winget
+      uses: Cyberboss/install-winget@v1
+      with:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: setup WSL
       run: |
         winget install whitewaterfoundry.fedora-remix-for-wsl
