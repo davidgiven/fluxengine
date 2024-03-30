@@ -59,6 +59,10 @@ jobs:
       run: |
         winget install  --accept-source-agreements --accept-source-agreements whitewaterfoundry.fedora-remix-for-wsl
 
+    - name: run
+      run: |
+        wsl -e sh 'pwd; ls'
+        
     #- uses: Vampire/setup-wsl@v3
     #  with:
     #    distribution: openSUSE-Leap-15.2
