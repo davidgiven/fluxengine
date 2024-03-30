@@ -75,9 +75,7 @@ jobs:
 
     - name: run
       run: |
-        wsl sh -c 'cp -av fluxengine fluxengine-testdata /tmp/'
-        wsl sh -c 'make -C /tmp/fluxengine BUILDTYPE=windows V=1'
-        wsl sh -c 'cp /tmp/*.exe .'
+        wsl sh -c 'make -C fluxengine BUILDTYPE=windows V=1 CFLAGS=-v'
         
     #- uses: Vampire/setup-wsl@v3
     #  with:
