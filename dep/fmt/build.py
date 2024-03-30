@@ -14,4 +14,5 @@ cxxlibrary(
         "fmt/format.h": "./include/fmt/format.h",
         "fmt/ostream.h": "./include/fmt/ostream.h",
         "fmt/ranges.h": "./include/fmt/ranges.h",
-        })
+    },
+)
