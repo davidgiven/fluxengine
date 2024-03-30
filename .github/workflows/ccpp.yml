@@ -52,8 +52,7 @@ jobs:
     steps:
     - name: setup WSL
       run: |
-        curl https://github.com/VSWSL/Fedora-WSL/releases/download/v37.0.3.0/rootfs.tar.gz -o fedora.tar.gz
-        wsl --import fedora fedora fedora.tar.gz
+        curl -L https://github.com/VSWSL/Fedora-WSL/releases/download/v37.0.3.0/rootfs.tar.gz | wsl --import fedora fedora -
         wsl --set-default fedora
         wsl sh -c 'dnf -y gcc gcc-c++ protobuf-c-compiler protobuf-devel fmt-devel systemd-devel sqlite-devel wxGTK-devel mingw32-gcc mingw32-gcc-c++ mingw32-zlib-static mingw32-protobuf-static mingw32-sqlite-static mingw32-wxWidgets3-static mingw32-libpng-static mingw32-libjpeg-static mingw32-libtiff-static mingw32-nsis'
 
