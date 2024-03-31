@@ -3,8 +3,8 @@ BUILDTYPE ?= host
 
 ifeq ($(BUILDTYPE),windows)
 	MINGW = i686-w64-mingw32-
-	CC = $(MINGW)gcc -fstack-protector
-	CXX = $(MINGW)g++ -std=c++17 -fstack-protector
+	CC = $(MINGW)gcc -fstack-protector-strong
+	CXX = $(MINGW)g++ -std=c++17 -fstack-protector-strong
 	CFLAGS += -g -O3 \
 		-fstack-protector
 	CXXFLAGS += \
