@@ -5,13 +5,14 @@ ifeq ($(BUILDTYPE),windows)
 	MINGW = i686-w64-mingw32-
 	CC = $(MINGW)gcc
 	CXX = $(MINGW)g++ -std=c++17
-	CFLAGS += -g -O3
+	CFLAGS += -g -O3 \
+		-fstack-protector
 	CXXFLAGS += \
 		-fext-numeric-literals \
 		-Wno-deprecated-enum-float-conversion \
 		-Wno-deprecated-enum-enum-conversion \
-		-fstack-protector-all
-	LDFLAGS += -static -fstack-protector-all
+		-fstack-protector
+	LDFLAGS += -static -fstack-protector
 	AR = $(MINGW)ar
 	PKG_CONFIG = $(MINGW)pkg-config -static
 	WINDRES = $(MINGW)windres
