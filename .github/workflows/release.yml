@@ -58,6 +58,7 @@ jobs:
       with:
         tag-name: dev
         force-branch: false
+        git-directory: 'fluxengine'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
