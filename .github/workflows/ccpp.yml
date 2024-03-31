@@ -53,6 +53,7 @@ jobs:
     - name: setup WSL
       run: |
         curl -L https://github.com/VSWSL/Fedora-WSL/releases/download/v37.0.3.0/rootfs.tar.gz | wsl --import fedora fedora -
+        wsl --update
         wsl --set-version fedora 1
         wsl --set-default fedora
         wsl sh -c 'dnf -y install https://github.com/rpmsphere/noarch/raw/master/r/rpmsphere-release-38-1.noarch.rpm'
