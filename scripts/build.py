@@ -1,5 +1,5 @@
 from build.ab import Rule, normalrule, Targets
-from build.c import cxxprogram
+from build.c import cxxprogram, HostToolchain
 
 encoders = {}
 
@@ -37,11 +37,23 @@ def protoencode(self, name, srcs: Targets, proto, symbol):
 cxxprogram(
     name="mkdoc",
     srcs=["./mkdoc.cc"],
-    deps=["src/formats", "lib+config_proto_lib", "+lib", "+fmt_lib", "+protobuf_lib"],
+    deps=[
+        "src/formats",
+        "lib+config_proto_lib",
+        "+lib",
+        "+fmt_lib",
+        "+protobuf_lib",
+    ],
 )
 
 cxxprogram(
     name="mkdocindex",
     srcs=["./mkdocindex.cc"],
-    deps=["src/formats", "lib+config_proto_lib", "+lib", "+fmt_lib", "+protobuf_lib"],
+    deps=[
+        "src/formats",
+        "lib+config_proto_lib",
+        "+lib",
+        "+fmt_lib",
+        "+protobuf_lib",
+    ],
 )

@@ -6,4 +6,4 @@
 #include "winuser.h"
 
 CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "src/gui/manifest.xml"
-101 ICON DISCARDABLE ".obj/extras+fluxengine_ico/fluxengine.ico"
+101 ICON DISCARDABLE ".obj/windows/extras/+fluxengine_ico/fluxengine.ico"

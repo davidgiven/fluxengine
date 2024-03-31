@@ -43,7 +43,7 @@ update-ab:
 .PHONY: clean
 clean::
 	@echo CLEAN
-	$(hide) rm -rf $(OBJ) bin
+	$(hide) rm -rf $(OBJ)
 
 export PYTHONHASHSEED = 1
 build-files = $(shell find . -name 'build.py') $(wildcard build/*.py) $(wildcard config.py)
