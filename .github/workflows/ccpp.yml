@@ -7,44 +7,44 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  #build-linux:
-  #  runs-on: ubuntu-22.04
-  #  steps:
-  #  - uses: actions/checkout@v2
-  #    with:
-  #      repository: 'davidgiven/fluxengine'
-  #      path: 'fluxengine'
-  #  - uses: actions/checkout@v2
-  #    with:
-  #      repository: 'davidgiven/fluxengine-testdata'
-  #      path: 'fluxengine-testdata'
-  #  - name: apt
-  #    run: |
-  #      sudo apt install libudev-dev libsqlite3-dev protobuf-compiler libwxgtk3.0-gtk3-dev libfmt-dev libprotobuf-dev wx-common
-  #  - name: make
-  #    run: CXXFLAGS="-Wp,-D_GLIBCXX_ASSERTIONS" make -j`nproc` -C fluxengine
+  build-linux:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        repository: 'davidgiven/fluxengine'
+        path: 'fluxengine'
+    - uses: actions/checkout@v2
+      with:
+        repository: 'davidgiven/fluxengine-testdata'
+        path: 'fluxengine-testdata'
+    - name: apt
+      run: |
+        sudo apt install libudev-dev libsqlite3-dev protobuf-compiler libwxgtk3.0-gtk3-dev libfmt-dev libprotobuf-dev wx-common
+    - name: make
+      run: CXXFLAGS="-Wp,-D_GLIBCXX_ASSERTIONS" make -j`nproc` -C fluxengine
 
-  #build-macos-current:
-  #  runs-on: macos-latest
-  #  steps:
-  #  - uses: actions/checkout@v2
-  #    with:
-  #      repository: 'davidgiven/fluxengine'
-  #      path: 'fluxengine'
-  #  - uses: actions/checkout@v2
-  #    with:
-  #      repository: 'davidgiven/fluxengine-testdata'
-  #      path: 'fluxengine-testdata'
-  #  - name: brew
-  #    run: brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg
-  #  - name: make
-  #    run: gmake -j`nproc` -C fluxengine
+  build-macos-current:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        repository: 'davidgiven/fluxengine'
+        path: 'fluxengine'
+    - uses: actions/checkout@v2
+      with:
+        repository: 'davidgiven/fluxengine-testdata'
+        path: 'fluxengine-testdata'
+    - name: brew
+      run: brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg
+    - name: make
+      run: gmake -j`nproc` -C fluxengine
 
-  #  - name: Upload build artifacts
-  #    uses: actions/upload-artifact@v2
-  #    with:
-  #      name: ${{ github.event.repository.name }}.${{ github.sha }}
-  #      path: fluxengine/FluxEngine.pkg
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.event.repository.name }}.${{ github.sha }}
+        path: fluxengine/FluxEngine.pkg
 
   build-windows:
     runs-on: windows-latest
