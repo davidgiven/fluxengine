@@ -26,7 +26,7 @@ def package(self, name, package=None, fallback: Target = None):
         emit(
             f"PACKAGE_LDFLAGS_{package} := ",
             bubbledattrsof(fallback, "caller_ldflags"),
-            f"$(filter %.a, $(PACKAGE_DEPS_{package})",
+            f"$(filter %.a, $(PACKAGE_DEPS_{package}))",
         )
     else:
         emit(f"$(error Required package '{package}' not installed.)")
