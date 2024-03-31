@@ -82,15 +82,13 @@ jobs:
 
     - name: nsis
       run: |
-        cd fluxengine
-        strip fluxengine.exe -o fluxengine-stripped.exe
-        strip fluxengine-gui.exe -o fluxengine-gui-stripped.exe
-        makensis -v2 -nocd -dOUTFILE=fluxengine-installer.exe extras/windows-installer.nsi
+        wsl sh -c 'cd fluxengine && strip fluxengine.exe -o fluxengine-stripped.exe'
+        wsl sh -c 'cd fluxengine && strip fluxengine-gui.exe -o fluxengine-gui-stripped.exe'
+        wsl sh -c 'cd fluxengine && makensis -v2 -nocd -dOUTFILE=fluxengine-installer.exe extras/windows-installer.nsi'
 
     - name: zip
       run: |
-        cd fluxengine
-        zip -9 fluxengine-windows.zip fluxengine.exe fluxengine-gui.exe upgrade-flux-file.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex fluxengine-installer.exe
+        wsl sh -c 'cd fluxengine && zip -9 fluxengine-windows.zip fluxengine.exe fluxengine-gui.exe upgrade-flux-file.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex fluxengine-installer.exe'
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v2
