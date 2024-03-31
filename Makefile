@@ -10,7 +10,7 @@ ifeq ($(BUILDTYPE),windows)
 		-fext-numeric-literals \
 		-Wno-deprecated-enum-float-conversion \
 		-Wno-deprecated-enum-enum-conversion
-	LDFLAGS += -static
+	LDFLAGS += -static -lssp
 	AR = $(MINGW)ar
 	PKG_CONFIG = $(MINGW)pkg-config -static
 	WINDRES = $(MINGW)windres
