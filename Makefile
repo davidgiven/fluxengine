@@ -3,16 +3,15 @@ BUILDTYPE ?= host
 
 ifeq ($(BUILDTYPE),windows)
 	MINGW = i686-w64-mingw32-
-	CC = $(MINGW)gcc
-	CXX = $(MINGW)g++ -std=c++17
+	CC = $(MINGW)gcc -fstack-protector
+	CXX = $(MINGW)g++ -std=c++17 -fstack-protector
 	CFLAGS += -g -O3 \
 		-fstack-protector
 	CXXFLAGS += \
 		-fext-numeric-literals \
 		-Wno-deprecated-enum-float-conversion \
-		-Wno-deprecated-enum-enum-conversion \
-		-fstack-protector
-	LDFLAGS += -static -fstack-protector
+		-Wno-deprecated-enum-enum-conversion
+	LDFLAGS += -static
 	AR = $(MINGW)ar
 	PKG_CONFIG = $(MINGW)pkg-config -static
 	WINDRES = $(MINGW)windres
