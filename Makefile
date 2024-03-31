@@ -9,8 +9,9 @@ ifeq ($(BUILDTYPE),windows)
 	CXXFLAGS += \
 		-fext-numeric-literals \
 		-Wno-deprecated-enum-float-conversion \
-		-Wno-deprecated-enum-enum-conversion
-	LDFLAGS += -static -lssp
+		-Wno-deprecated-enum-enum-conversion \
+		-fstack-protector-all
+	LDFLAGS += -static -fstack-protector-all
 	AR = $(MINGW)ar
 	PKG_CONFIG = $(MINGW)pkg-config -static
 	WINDRES = $(MINGW)windres
