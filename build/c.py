@@ -84,7 +84,7 @@ def cxxfile(
     label=None,
 ):
     if not label:
-        label = toolchain.label + "CC"
+        label = toolchain.label + "CXX"
     if not commands:
         commands = toolchain.cfile
     cfileimpl(
