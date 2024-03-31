@@ -56,8 +56,8 @@ jobs:
         wsl --update
         wsl --set-version fedora 1
         wsl --set-default fedora
-        wsl sh -c 'dnf -y upgrade'
-        wsl sh -c 'dnf -y install https://github.com/rpmsphere/noarch/raw/master/r/rpmsphere-release-38-1.noarch.rpm'
+        wsl sh -c 'dnf -y install --releasever=39 --setop=install_weak_deps=False dnf'
+        wsl sh -c 'dnf -y install --releasever=39 https://github.com/rpmsphere/noarch/raw/master/r/rpmsphere-release-38-1.noarch.rpm'
         wsl sh -c 'dnf -y install --releasever=39 --setop=install_weak_deps=False gcc gcc-c++ protobuf-c-compiler protobuf-devel fmt-devel systemd-devel sqlite-devel wxGTK-devel mingw32-gcc mingw32-gcc-c++ mingw32-zlib-static mingw32-protobuf-static mingw32-sqlite-static mingw32-wxWidgets3-static mingw32-libpng-static mingw32-libjpeg-static mingw32-libtiff-static mingw32-nsis png2ico'
 
     - name: fix line endings
