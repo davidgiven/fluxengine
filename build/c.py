@@ -86,7 +86,7 @@ def cxxfile(
     if not label:
         label = toolchain.label + "CXX"
     if not commands:
-        commands = toolchain.cfile
+        commands = toolchain.cxxfile
     cfileimpl(
         self, name, srcs, deps, suffix, commands, label, "cxxfile", cflags
     )
