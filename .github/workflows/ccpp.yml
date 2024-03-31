@@ -47,7 +47,7 @@ jobs:
   #      path: fluxengine/FluxEngine.pkg
 
   build-windows:
-    runs-on: windows-2019
+    runs-on: windows-latest
 
     steps:
     - name: setup WSL
@@ -64,12 +64,12 @@ jobs:
         git config --global core.autocrlf false
         git config --global core.eol lf
         
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: 'davidgiven/fluxengine'
         path: 'fluxengine'
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: 'davidgiven/fluxengine-testdata'
         path: 'fluxengine-testdata'
