@@ -47,7 +47,7 @@ jobs:
   #      path: fluxengine/FluxEngine.pkg
 
   build-windows:
-    runs-on: windows-latest
+    runs-on: windows-2019
 
     steps:
     - name: setup WSL
@@ -76,73 +76,22 @@ jobs:
 
     - name: run
       run: |
-        wsl sh -c 'make -C fluxengine BUILDTYPE=windows V=1 CFLAGS=-v'
-        
-    #- uses: Vampire/setup-wsl@v3
-    #  with:
-    #    distribution: openSUSE-Leap-15.2
-    #    use-cache: true
-    #    additional-packages:
+        wsl sh -c 'make -C fluxengine BUILDTYPE=windows -j$(nproc)'
 
-    #- name: go
-    #  run: |
-    #    ls
+    - name: nsis
+      run: |
+        cd fluxengine
+        strip fluxengine.exe -o fluxengine-stripped.exe
+        strip fluxengine-gui.exe -o fluxengine-gui-stripped.exe
+        makensis -v2 -nocd -dOUTFILE=fluxengine-installer.exe extras/windows-installer.nsi
 
-  #build-windows:
-  #  runs-on: windows-latest
-  #  defaults:
-  #    run:
-  #      shell: msys2 {0}
-  #  steps:
-  #  - uses: msys2/setup-msys2@v2
-  #    with:
-  #      update: true
-  #      msystem: MINGW32
-  #      install: >-
-  #        diffutils
-  #        make
-  #        mingw-w64-i686-binutils
-  #        mingw-w64-i686-fmt
-  #        mingw-w64-i686-gcc
-  #        mingw-w64-i686-libusb
-  #        mingw-w64-i686-nsis
-  #        mingw-w64-i686-pkg-config
-  #        mingw-w64-i686-protobuf
-  #        mingw-w64-i686-python
-  #        mingw-w64-i686-sqlite3
-  #        mingw-w64-i686-wxWidgets
-  #        mingw-w64-i686-zlib
-  #        mingw-w64-i686-png2ico
-  #        vim
-  #        zip
-  #  - name: update-protobuf
-  #    run: |
-  #       pacman -U --noconfirm https://repo.msys2.org/mingw/mingw32/mingw-w64-i686-protobuf-21.9-1-any.pkg.tar.zst
-  #  - uses: actions/checkout@v2
-  #    with:
-  #      repository: 'davidgiven/fluxengine'
-  #      path: 'fluxengine'
-  #  - uses: actions/checkout@v2
-  #    with:
-  #      repository: 'davidgiven/fluxengine-testdata'
-  #      path: 'fluxengine-testdata'
-  #  - name: build
-  #    run: MAGICK_TIME_LIMIT=100 make -j`nproc` -C fluxengine
+    - name: zip
+      run: |
+        cd fluxengine
+        zip -9 fluxengine-windows.zip fluxengine.exe fluxengine-gui.exe upgrade-flux-file.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex fluxengine-installer.exe
 
-  #  - name: nsis
-  #    run: |
-  #      cd fluxengine
-  #      strip fluxengine.exe -o fluxengine-stripped.exe
-  #      strip fluxengine-gui.exe -o fluxengine-gui-stripped.exe
-  #      makensis -v2 -nocd -dOUTFILE=fluxengine-installer.exe extras/windows-installer.nsi
-
-  #  - name: zip
-  #    run: |
-  #      cd fluxengine
-  #      zip -9 fluxengine-windows.zip fluxengine.exe fluxengine-gui.exe upgrade-flux-file.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex fluxengine-installer.exe
-
-  #  - name: Upload build artifacts
-  #    uses: actions/upload-artifact@v2
-  #    with:
-  #      name: ${{ github.event.repository.name }}.${{ github.sha }}
-  #      path: fluxengine/fluxengine-windows.zip
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.event.repository.name }}.${{ github.sha }}
+        path: fluxengine/fluxengine-windows.zip
