@@ -33,20 +33,21 @@ jobs:
     - uses: actions/checkout@v4
       with:
         repository: 'davidgiven/fluxengine'
+        path: 'fluxengine'
 
     - name: run
       run: |
-        wsl sh -c 'make BUILDTYPE=windows -j$(nproc)'
+        wsl sh -c 'cd fluxengine && make BUILDTYPE=windows -j$(nproc)'
 
     - name: nsis
       run: |
-        wsl sh -c 'strip fluxengine.exe -o fluxengine-stripped.exe'
-        wsl sh -c 'strip fluxengine-gui.exe -o fluxengine-gui-stripped.exe'
-        wsl sh -c 'makensis -v2 -nocd -dOUTFILE=fluxengine-installer.exe extras/windows-installer.nsi'
+        wsl sh -c 'cd fluxengine && strip fluxengine.exe -o fluxengine-stripped.exe'
+        wsl sh -c 'cd fluxengine && strip fluxengine-gui.exe -o fluxengine-gui-stripped.exe'
+        wsl sh -c 'cd fluxengine && makensis -v2 -nocd -dOUTFILE=fluxengine-installer.exe extras/windows-installer.nsi'
 
     - name: zip
       run: |
-        wsl sh -c 'zip -9 fluxengine-windows.zip fluxengine.exe fluxengine-gui.exe upgrade-flux-file.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex fluxengine-installer.exe'
+        wsl sh -c 'cd fluxengine && zip -9 fluxengine-windows.zip fluxengine.exe fluxengine-gui.exe upgrade-flux-file.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex fluxengine-installer.exe'
 
     - name: date
       run: |
@@ -75,8 +76,8 @@ jobs:
       with:
         name: Development build ${{ env.RELEASE_DATE }}
         files: |
-          fluxengine.zip
-          fluxengine-installer.exe
+          fluxengine/fluxengine.zip
+          fluxengine/fluxengine-installer.exe
         tag_name: dev
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
