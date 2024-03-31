@@ -18,6 +18,7 @@ HOST_PACKAGES := $(shell $(HOST_PKG_CONFIG) --list-all | cut -d' ' -f1 | sort)
 def package(self, name, package=None, fallback: Target = None):
     emit("ifeq ($(filter %s, $(PACKAGES)),)" % package)
     if fallback:
+        emit(f"PACKAGE_DEPS_{package} := ", filenamesof(fallback))
         emit(
             f"PACKAGE_CFLAGS_{package} :=",
             bubbledattrsof(fallback, "caller_cflags"),
@@ -25,8 +26,8 @@ def package(self, name, package=None, fallback: Target = None):
         emit(
             f"PACKAGE_LDFLAGS_{package} := ",
             bubbledattrsof(fallback, "caller_ldflags"),
+            f"$(filter %.a, $(PACKAGE_DEPS_{package})",
         )
-        emit(f"PACKAGE_DEPS_{package} := ", filenamesof(fallback))
     else:
         emit(f"$(error Required package '{package}' not installed.)")
     emit("else")
