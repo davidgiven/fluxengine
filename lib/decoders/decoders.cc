@@ -91,7 +91,7 @@ std::shared_ptr<TrackDataFlux> Decoder::decodeToSectors(
         Fluxmap::Position recordStart = fmr.tell();
         _sector->clock = advanceToNextRecord();
         if (fmr.eof() || !_sector->clock)
-            return _trackdata;
+            break;
 
         /* Read the sector record. */
 
@@ -110,28 +110,26 @@ std::shared_ptr<TrackDataFlux> Decoder::decodeToSectors(
         {
             /* The data is in a separate record. */
 
-            for (;;)
+            _sector->headerStartTime = before.ns();
+            _sector->headerEndTime = after.ns();
+
+            _sector->clock = advanceToNextRecord();
+            if (fmr.eof() || !_sector->clock)
+                break;
+
+            before = fmr.tell();
+            decodeDataRecord();
+            after = fmr.tell();
+
+            if (_sector->status != Sector::DATA_MISSING)
             {
-                _sector->headerStartTime = before.ns();
-                _sector->headerEndTime = after.ns();
-
-                _sector->clock = advanceToNextRecord();
-                if (fmr.eof() || !_sector->clock)
-                    break;
-
-                before = fmr.tell();
-                decodeDataRecord();
-                after = fmr.tell();
-
-                if (_sector->status != Sector::DATA_MISSING)
-                {
-                    _sector->position = before.bytes;
-                    _sector->dataStartTime = before.ns();
-                    _sector->dataEndTime = after.ns();
-                    pushRecord(before, after);
-                    break;
-                }
-
+                _sector->position = before.bytes;
+                _sector->dataStartTime = before.ns();
+                _sector->dataEndTime = after.ns();
+                pushRecord(before, after);
+            }
+            else
+            {
                 fmr.skipToEvent(F_BIT_PULSE);
                 resetFluxDecoder();
             }
@@ -144,6 +142,8 @@ std::shared_ptr<TrackDataFlux> Decoder::decodeToSectors(
             _trackdata->sectors.push_back(_sector);
         }
     }
+
+    return _trackdata;
 }
 
 void Decoder::pushRecord(

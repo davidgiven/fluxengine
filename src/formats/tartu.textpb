@@ -30,21 +30,8 @@ option_group {
 	comment: "$formats"
 
 	option {
-		name: "110"
-		comment: '110kB 5.25" 40-track SSSD'
-
-		config {
-			layout {
-				format_type: FORMATTYPE_40TRACK
-				tracks: 40
-				sides: 1
-			}
-		}
-	}
-
-	option {
-		name: "220ds"
-		comment: '220kB 5.25" 40-track DSSD'
+		name: "390"
+		comment: '390kB 5.25" 40-track DSDD'
 
 		config {
 			layout {
@@ -56,22 +43,8 @@ option_group {
 	}
 
 	option {
-		name: "220ss"
-		comment: '220kB 5.25" 80-track SSSD'
-
-		config {
-			layout {
-				format_type: FORMATTYPE_80TRACK
-				tracks: 80
-				sides: 1
-			}
-		}
-	}
-
-	option {
-		name: "440"
-		comment: '440kB 5.25" 80-track DSSD'
-		set_by_default: true
+		name: "780"
+		comment: '780kB 5.25" 80-track DSDD'
 
 		config {
 			layout {
