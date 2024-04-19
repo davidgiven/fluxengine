@@ -1,0 +1,85 @@
+shortname: 'Tartu'
+comment: 'Soviet-era PDP-11 clone'
+read_support_status: DINOSAUR
+
+documentation:
+<<<
+text
+>>>
+
+image_writer {
+	filename: "tartu.img"
+	type: IMAGETYPE_IMG
+}
+
+layout {
+	layoutdata {
+		sector_size: 128
+		physical {
+			start_sector: 0
+			count: 39
+		}
+	}
+}
+
+decoder {
+	tartu {}
+}
+
+option_group {
+	comment: "$formats"
+
+	option {
+		name: "110"
+		comment: '110kB 5.25" 40-track SSSD'
+
+		config {
+			layout {
+				format_type: FORMATTYPE_40TRACK
+				tracks: 40
+				sides: 1
+			}
+		}
+	}
+
+	option {
+		name: "220ds"
+		comment: '220kB 5.25" 40-track DSSD'
+
+		config {
+			layout {
+				format_type: FORMATTYPE_40TRACK
+				tracks: 40
+				sides: 2
+			}
+		}
+	}
+
+	option {
+		name: "220ss"
+		comment: '220kB 5.25" 80-track SSSD'
+
+		config {
+			layout {
+				format_type: FORMATTYPE_80TRACK
+				tracks: 80
+				sides: 1
+			}
+		}
+	}
+
+	option {
+		name: "440"
+		comment: '440kB 5.25" 80-track DSSD'
+		set_by_default: true
+
+		config {
+			layout {
+				format_type: FORMATTYPE_80TRACK
+				tracks: 80
+				sides: 2
+			}
+		}
+	}
+}
+
