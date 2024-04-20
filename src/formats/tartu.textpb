@@ -1,10 +1,28 @@
 shortname: 'Tartu'
-comment: 'Soviet-era PDP-11 clone'
-read_support_status: DINOSAUR
+comment: 'The Palivere and variations'
+read_support_status: UNICORN
 
 documentation:
 <<<
-text
+The Tartu Palivere is a 1988 Z80-based computer from Estonia. It is a CP/M
+machine with 64kB of RAM, running off a 2MHz КP580ВМ80А, a Soviet Union 8080
+clone.
+
+From a floppy disk perspective, it is interesting because the floppy drive
+interface is almost entirely handled in software --- necessary at the time as
+the usual floppy disk interface chip at the time, the КR1818VG93 (a Soviet clone
+of the WD1793), was hard to find. Instead, the floppy controller board was
+implemented entirely using TTL logic. Despite this, the encoding is fairly high
+density, using MFM and with up to 780kB on a double-sided 80 track disk.
+
+FluxEngine supports reading Tartu disks.
+>>>
+
+documentation:
+<<<
+## References
+
+  - [ElektronikaMuseum.ee's page on the Tartu](https://www.elektroonikamuuseum.ee)
 >>>
 
 image_writer {
