@@ -16,8 +16,14 @@ layout {
 	layoutdata {
 		sector_size: 128
 		physical {
-			start_sector: 0
+			start_sector: 1
 			count: 39
+		}
+
+		filesystem {
+			start_sector: 1
+			count: 39
+			skew: 3
 		}
 	}
 }
@@ -56,3 +62,13 @@ option_group {
 	}
 }
 
+filesystem {
+	type: CPMFS
+	cpmfs {
+		filesystem_start {
+			track: 1
+		}
+		block_size: 2048
+		dir_entries: 128
+	}
+}
