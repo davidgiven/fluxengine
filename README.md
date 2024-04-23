@@ -136,6 +136,7 @@ choices because they can store multiple types of file system.
 | [`rolandd20`](doc/disk-rolandd20.md) | Roland D20: 3.5" electronic synthesiser disks | 🦄 | 🦖 | ROLAND  |
 | [`rx50`](doc/disk-rx50.md) | Digital RX50: 400kB 5.25" 80-track 10-sector SSDD | 🦖 | 🦖 |  |
 | [`smaky6`](doc/disk-smaky6.md) | Smaky 6: 308kB 5.25" 77-track 16-sector SSDD, hard sectored | 🦖 |  | SMAKY6  |
+| [`tartu`](doc/disk-tartu.md) | Tartu: The Palivere and variations | 🦄 |  | CPMFS  |
 | [`tids990`](doc/disk-tids990.md) | Texas Instruments DS990: 1126kB 8" DSSD | 🦖 | 🦖 |  |
 | [`tiki`](doc/disk-tiki.md) | Tiki 100: CP/M |  |  | CPMFS  |
 | [`victor9k`](doc/disk-victor9k.md) | Victor 9000 / Sirius One: 1224kB 5.25" DSDD GCR | 🦖 | 🦖 |  |

@@ -19,6 +19,7 @@ proto(
         "./northstar/northstar.proto",
         "./rolandd20/rolandd20.proto",
         "./smaky6/smaky6.proto",
+        "./tartu/tartu.proto",
         "./tids990/tids990.proto",
         "./victor9k/victor9k.proto",
         "./zilogmcz/zilogmcz.proto",

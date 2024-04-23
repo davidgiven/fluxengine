@@ -18,6 +18,7 @@
 #include "arch/northstar/northstar.h"
 #include "arch/rolandd20/rolandd20.h"
 #include "arch/smaky6/smaky6.h"
+#include "arch/tartu/tartu.h"
 #include "arch/tids990/tids990.h"
 #include "arch/victor9k/victor9k.h"
 #include "arch/zilogmcz/zilogmcz.h"
@@ -51,6 +52,7 @@ std::unique_ptr<Decoder> Decoder::create(const DecoderProto& config)
             {DecoderProto::kNorthstar,  createNorthstarDecoder  },
             {DecoderProto::kRolandd20,  createRolandD20Decoder  },
             {DecoderProto::kSmaky6,     createSmaky6Decoder     },
+            {DecoderProto::kTartu,      createTartuDecoder      },
             {DecoderProto::kTids990,    createTids990Decoder    },
             {DecoderProto::kVictor9K,   createVictor9kDecoder   },
             {DecoderProto::kZilogmcz,   createZilogMczDecoder   },
@@ -89,7 +91,7 @@ std::shared_ptr<TrackDataFlux> Decoder::decodeToSectors(
         Fluxmap::Position recordStart = fmr.tell();
         _sector->clock = advanceToNextRecord();
         if (fmr.eof() || !_sector->clock)
-            return _trackdata;
+            break;
 
         /* Read the sector record. */
 
@@ -108,28 +110,26 @@ std::shared_ptr<TrackDataFlux> Decoder::decodeToSectors(
         {
             /* The data is in a separate record. */
 
-            for (;;)
+            _sector->headerStartTime = before.ns();
+            _sector->headerEndTime = after.ns();
+
+            _sector->clock = advanceToNextRecord();
+            if (fmr.eof() || !_sector->clock)
+                break;
+
+            before = fmr.tell();
+            decodeDataRecord();
+            after = fmr.tell();
+
+            if (_sector->status != Sector::DATA_MISSING)
             {
-                _sector->headerStartTime = before.ns();
-                _sector->headerEndTime = after.ns();
-
-                _sector->clock = advanceToNextRecord();
-                if (fmr.eof() || !_sector->clock)
-                    break;
-
-                before = fmr.tell();
-                decodeDataRecord();
-                after = fmr.tell();
-
-                if (_sector->status != Sector::DATA_MISSING)
-                {
-                    _sector->position = before.bytes;
-                    _sector->dataStartTime = before.ns();
-                    _sector->dataEndTime = after.ns();
-                    pushRecord(before, after);
-                    break;
-                }
-
+                _sector->position = before.bytes;
+                _sector->dataStartTime = before.ns();
+                _sector->dataEndTime = after.ns();
+                pushRecord(before, after);
+            }
+            else
+            {
                 fmr.skipToEvent(F_BIT_PULSE);
                 resetFluxDecoder();
             }
@@ -142,6 +142,8 @@ std::shared_ptr<TrackDataFlux> Decoder::decodeToSectors(
             _trackdata->sectors.push_back(_sector);
         }
     }
+
+    return _trackdata;
 }
 
 void Decoder::pushRecord(

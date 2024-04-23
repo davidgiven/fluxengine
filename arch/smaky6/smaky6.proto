@@ -1,6 +1,4 @@
 syntax = "proto2";
 
-import "lib/common.proto";
-
 message Smaky6DecoderProto {}
 
