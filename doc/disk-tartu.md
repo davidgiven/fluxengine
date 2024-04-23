@@ -39,5 +39,5 @@ To read:
 
 ## References
 
-  - [ElektronikaMuseum.ee's page on the Tartu](https://www.elektroonikamuuseum.ee)
+  - [The Estonia Museum of Electronics](https://www.elektroonikamuuseum.ee/tartu_arvuti_lugu.html)
 
