@@ -5,7 +5,11 @@ tartu
 
 The Tartu Palivere is a 1988 Z80-based computer from Estonia. It is a CP/M
 machine with 64kB of RAM, running off a 2MHz ꃣ0e30
-clone.
+clone; it operated off punched tape, cassette, external hard drive or floppy, and was notable as being the first ever computer with an Estonian keyboard.
+
+<div style="text-align: center">
+<img src="tartu.jpg" alt="The Tartu computer's developer Leo Humal working with one."/>
+</div>
 
 From a floppy disk perspective, it is interesting because the floppy drive
 interface is almost entirely handled in software --- necessary at the time as
@@ -14,7 +18,11 @@ of the WD1793), was hard to find. Instead, the floppy controller board was
 implemented entirely using TTL logic. Despite this, the encoding is fairly high
 density, using MFM and with up to 780kB on a double-sided 80 track disk.
 
-FluxEngine supports reading Tartu disks.
+<div style="text-align: center">
+<img src="tartu-fdc.jpg" alt="The Tartu FDC with Soviet TTL logic chips."/>
+</div>
+
+FluxEngine supports reading Tartu disks with CP/M filesystem access.
 
 ## Options
 
