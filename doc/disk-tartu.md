@@ -37,6 +37,11 @@ To read:
   - `fluxengine read tartu --390 -s drive:0 -o tartu.img`
   - `fluxengine read tartu --780 -s drive:0 -o tartu.img`
 
+To write:
+
+  - `fluxengine write tartu --390 -d drive:0 -i tartu.img`
+  - `fluxengine write tartu --780 -d drive:0 -i tartu.img`
+
 ## References
 
   - [The Estonia Museum of Electronics](https://www.elektroonikamuuseum.ee/tartu_arvuti_lugu.html)

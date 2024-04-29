@@ -54,6 +54,10 @@ layout {
 	}
 }
 
+encoder {
+	tartu {}
+}
+
 decoder {
 	tartu {}
 }

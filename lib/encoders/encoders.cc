@@ -11,6 +11,7 @@
 #include "arch/macintosh/macintosh.h"
 #include "arch/micropolis/micropolis.h"
 #include "arch/northstar/northstar.h"
+#include "arch/tartu/tartu.h"
 #include "arch/tids990/tids990.h"
 #include "arch/victor9k/victor9k.h"
 #include "lib/encoders/encoders.pb.h"
@@ -24,8 +25,8 @@ std::unique_ptr<Encoder> Encoder::create(const EncoderProto& config)
     static const std::map<int,
         std::function<std::unique_ptr<Encoder>(const EncoderProto&)>>
         encoders = {
-            {EncoderProto::kAmiga,      createAmigaEncoder      },
             {EncoderProto::kAgat,       createAgatEncoder       },
+            {EncoderProto::kAmiga,      createAmigaEncoder      },
             {EncoderProto::kApple2,     createApple2Encoder     },
             {EncoderProto::kBrother,    createBrotherEncoder    },
             {EncoderProto::kC64,        createCommodore64Encoder},
@@ -33,6 +34,7 @@ std::unique_ptr<Encoder> Encoder::create(const EncoderProto& config)
             {EncoderProto::kMacintosh,  createMacintoshEncoder  },
             {EncoderProto::kMicropolis, createMicropolisEncoder },
             {EncoderProto::kNorthstar,  createNorthstarEncoder  },
+            {EncoderProto::kTartu,      createTartuEncoder      },
             {EncoderProto::kTids990,    createTids990Encoder    },
             {EncoderProto::kVictor9K,   createVictor9kEncoder   },
     };

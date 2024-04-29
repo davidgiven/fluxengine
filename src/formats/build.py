@@ -65,7 +65,7 @@ encoded = [
 cxxlibrary(
     name="formats",
     srcs=[".+table_cc"] + encoded,
-    deps=["+lib", "lib+config_proto_lib"],
+    deps=["+lib_headers", "lib+config_proto_lib"],
 )
 
 export(
