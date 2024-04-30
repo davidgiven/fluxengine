@@ -28,18 +28,19 @@ public:
         _bits.resize(bitsPerRevolution);
         _cursor = 0;
 
-        writeFillerRawBytesUs(_config.gap1_us());
+        writeFillerRawBitsUs(_config.gap1_us());
         bool first = true;
         for (const auto& sectorData : sectors)
         {
             if (!first)
-                writeFillerRawBytesUs(_config.gap4_us());
+                writeFillerRawBitsUs(_config.gap4_us());
             first = false;
             writeSector(sectorData);
         }
 
         if (_cursor > _bits.size())
             error("track data overrun");
+        writeFillerRawBitsUs(_config.target_rotational_period_ms() * 1000.0);
 
         std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
         fluxmap->appendBits(_bits,
@@ -67,13 +68,11 @@ private:
         }
     }
 
-    void writeFillerRawBytesUs(double us)
+    void writeFillerRawBitsUs(double us)
     {
-        uint16_t byte = _config.gap_fill_byte();
-        unsigned count = (us / _clockRateUs) / 16;
-        fmt::print("count={}\n", count);
+        unsigned count = (us / _clockRateUs) / 2;
         for (int i = 0; i < count; i++)
-            writeRawBits(byte, 16);
+            writeRawBits(0b10, 2);
     };
 
     void writeSector(const std::shared_ptr<const Sector>& sectorData)
@@ -90,7 +89,7 @@ private:
             writeBytes(bytes);
         }
 
-        writeFillerRawBytesUs(_config.gap3_us());
+        writeFillerRawBitsUs(_config.gap3_us());
         writeRawBits(_config.data_marker(), 64);
         {
             Bytes bytes;

@@ -24,7 +24,4 @@ message TartuEncoderProto {
     optional uint64 data_marker = 7
         [ default = 0xaaaaaaaa44895545,
           (help) = "64-bit raw bit pattern of data record marker" ];
-    optional uint32 gap_fill_byte = 8
-        [ default = 0xaaaa,
-          (help) = "16-bit raw bit pattern of fill byte" ];
 }
