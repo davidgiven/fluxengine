@@ -281,7 +281,7 @@ else:
         ("mac", "scripts/mac800_test.textpb", "--800"),
         ("n88basic", "", ""),
         ("rx50", "", ""),
-        ("tartu", "", "--390"),
+        ("tartu", "", "--390 40track_drive"),
         ("tartu", "", "--780"),
         ("tids990", "", ""),
         ("victor9k", "", "--612"),
