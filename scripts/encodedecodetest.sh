@@ -21,7 +21,7 @@ if [ ! -s $destfile ]; then
 	exit 1
 fi
 
-truncate $srcfile -r $destfile
+truncate -r $destfile $srcfile
 if ! cmp $srcfile $destfile; then
 	echo "Comparison failed!" >&2
 	echo "Run this to repeat:" >&2
