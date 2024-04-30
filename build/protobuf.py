@@ -11,7 +11,7 @@ from build.ab import (
 )
 from build.c import cxxlibrary
 from types import SimpleNamespace
-import build.pkg
+from build.pkg import package
 
 emit(
     """
@@ -22,6 +22,7 @@ endif
 """
 )
 
+lib = package(name="protobuf_lib", package="protobuf")
 
 @Rule
 def proto(self, name, srcs: Targets = None, deps: Targets = None):
@@ -67,6 +68,6 @@ def protocc(self, name, srcs: Targets = None, deps: Targets = None):
     cxxlibrary(
         replaces=self,
         srcs=[r],
-        deps=targetswithtraitsof(deps, "cheaders"),
+        deps=targetswithtraitsof(deps, "cheaders") + [lib],
         hdrs=headers,
     )
