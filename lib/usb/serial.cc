@@ -97,6 +97,12 @@ public:
             .Parity = NOPARITY,
             .StopBits = ONESTOPBIT};
         SetCommState(_handle, &dcb);
+
+        if (!EscapeCommFunction(_handle, CLRDTR))
+            error("Couldn't clear DTR: {}", get_last_error_string());
+        Sleep(200);
+        if (!EscapeCommFunction(_handle, SETDTR))
+            error("Couldn't set DTR: {}", get_last_error_string());
     }
 
 private:
