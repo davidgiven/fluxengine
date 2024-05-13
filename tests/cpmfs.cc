@@ -207,7 +207,7 @@ static void testPutBigFile()
                createDirent("BIGFILE", 2, 0x20, {17, 18})));
 }
 
-static auto testDelete()
+static void testDelete()
 {
     auto sectors = std::make_shared<TestSectorInterface>();
     auto fs = Filesystem::createCpmFsFilesystem(
@@ -221,6 +221,29 @@ static auto testDelete()
     auto directory = getBlock(sectors, 0, 256).slice(0, 64);
     AssertThat(directory,
         Equals((Bytes{0xe5} * 32) + createDirent("FILE2", 0, 1, {2})));
+}
+
+static void testMove()
+{
+    auto sectors = std::make_shared<TestSectorInterface>();
+    auto fs = Filesystem::createCpmFsFilesystem(
+        globalConfig()->filesystem(), sectors);
+    fs->create(true, "volume");
+
+    fs->putFile(Path("0:FILE1"), Bytes{0x55} * 0x9000);
+    fs->putFile(Path("0:FILE2"), Bytes{5, 6, 7, 8});
+
+    fs->moveFile(Path("0:FILE1"), Path("1:FILE3"));
+
+    auto directory = getBlock(sectors, 0, 256).slice(0, 32 * 3);
+    AssertThat(directory,
+        Equals(createDirent("FILE3",
+                   0,
+                   0x80,
+                   {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16},
+                   1) +
+               createDirent("FILE3", 2, 0x20, {17, 18}, 1) +
+               createDirent("FILE2", 0, 1, {19})));
 }
 
 int main(void)
@@ -262,6 +285,7 @@ int main(void)
         testPutGet();
         testPutBigFile();
         testDelete();
+        testMove();
     }
     catch (const ErrorException& e)
     {

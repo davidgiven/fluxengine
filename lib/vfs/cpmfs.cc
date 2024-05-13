@@ -193,7 +193,7 @@ public:
     uint32_t capabilities() const override
     {
         return OP_GETFSDATA | OP_LIST | OP_GETFILE | OP_PUTFILE | OP_DELETE |
-               OP_GETDIRENT | OP_CREATE;
+               OP_GETDIRENT | OP_CREATE | OP_MOVE;
     }
 
     std::map<std::string, std::string> getMetadata() override
@@ -434,6 +434,50 @@ public:
         {
             entry->records = ((bytes.size() & 0x3fff) + 127) / 128;
             putEntry(entry);
+        }
+
+        unmount();
+    }
+
+    void moveFile(const Path& oldPath, const Path& newPath) override
+    {
+        mount();
+        if ((oldPath.size() != 1) || (newPath.size() != 1))
+            throw BadPathException();
+
+        /* Check to make sure that the file exists, and that the new filename
+         * does not. */
+
+        bool found = false;
+        for (int d = 0; d < _config.dir_entries(); d++)
+        {
+            auto entry = getEntry(d);
+            if (entry->deleted)
+                continue;
+
+            auto filename = entry->combinedFilename();
+            if (filename == oldPath[0])
+                found = true;
+            if (filename == newPath[0])
+                throw CannotWriteException();
+        }
+        if (!found)
+            throw FileNotFoundException();
+
+        /* Now do the rename. */
+
+        for (int d = 0; d < _config.dir_entries(); d++)
+        {
+            auto entry = getEntry(d);
+            if (entry->deleted)
+                continue;
+
+            auto filename = entry->combinedFilename();
+            if (filename == oldPath[0])
+            {
+                entry->changeFilename(newPath[0]);
+                putEntry(entry);
+            }
         }
 
         unmount();
