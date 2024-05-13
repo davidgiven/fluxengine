@@ -37,37 +37,40 @@ namespace
     };
 }
 
-template <>
-struct Stringizer<std::vector<bool>>
+namespace snowhouse
 {
-    static std::string ToString(const std::vector<bool>& vector)
+    template <>
+    struct Stringizer<std::vector<bool>>
     {
-        std::stringstream stream;
-        stream << '{';
-        bool first = true;
-        for (const auto& item : vector)
+        static std::string ToString(const std::vector<bool>& vector)
         {
-            if (!first)
-                stream << ", ";
-            stream << item;
-            first = false;
+            std::stringstream stream;
+            stream << '{';
+            bool first = true;
+            for (const auto& item : vector)
+            {
+                if (!first)
+                    stream << ", ";
+                stream << item;
+                first = false;
+            }
+            stream << '}';
+            return stream.str();
         }
-        stream << '}';
-        return stream.str();
-    }
-};
+    };
 
-template <>
-struct Stringizer<Bytes>
-{
-    static std::string ToString(const Bytes& bytes)
+    template <>
+    struct Stringizer<Bytes>
     {
-        std::stringstream stream;
-        stream << '\n';
-        hexdump(stream, bytes);
-        return stream.str();
-    }
-};
+        static std::string ToString(const Bytes& bytes)
+        {
+            std::stringstream stream;
+            stream << '\n';
+            hexdump(stream, bytes);
+            return stream.str();
+        }
+    };
+}
 
 static Bytes createDirent(const std::string& filename,
     int extent,
