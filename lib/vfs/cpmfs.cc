@@ -193,7 +193,7 @@ public:
     uint32_t capabilities() const override
     {
         return OP_GETFSDATA | OP_LIST | OP_GETFILE | OP_PUTFILE | OP_DELETE |
-               OP_GETDIRENT | OP_CREATE | OP_MOVE;
+               OP_GETDIRENT | OP_CREATE | OP_MOVE | OP_PUTATTRS;
     }
 
     std::map<std::string, std::string> getMetadata() override
@@ -292,6 +292,42 @@ public:
         }
 
         throw FileNotFoundException();
+    }
+
+    void putMetadata(const Path& path,
+        const std::map<std::string, std::string>& metadata) override
+    {
+        mount();
+        if (path.size() != 1)
+            throw BadPathException();
+
+        /* Only updating MODE is supported. */
+
+        if (metadata.empty())
+            return;
+        if ((metadata.size() != 1) || (metadata.begin()->first != MODE))
+            throw UnimplementedFilesystemException();
+        auto mode = metadata.begin()->second;
+
+        /* Update all dirents corresponding to this file. */
+
+        bool found = false;
+        for (int d = 0; d < _config.dir_entries(); d++)
+        {
+            std::unique_ptr<Entry> entry = getEntry(d);
+            if (entry->deleted)
+                continue;
+            if (path[0] == entry->combinedFilename())
+            {
+                entry->mode = mode;
+                putEntry(entry);
+                found = true;
+            }
+        }
+        if (!found)
+            throw FileNotFoundException();
+
+        unmount();
     }
 
     Bytes getFile(const Path& path) override

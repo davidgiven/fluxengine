@@ -246,6 +246,31 @@ static void testMove()
                createDirent("FILE2", 0, 1, {19})));
 }
 
+static void testPutMetadata()
+{
+    auto sectors = std::make_shared<TestSectorInterface>();
+    auto fs = Filesystem::createCpmFsFilesystem(
+        globalConfig()->filesystem(), sectors);
+    fs->create(true, "volume");
+
+    fs->putFile(Path("0:FILE1"), Bytes{0x55} * 0x9000);
+    fs->putFile(Path("0:FILE2"), Bytes{5, 6, 7, 8});
+
+    fs->putMetadata(Path("0:FILE1"),
+        std::map<std::string, std::string>{
+            {"mode", "SRA"}
+    });
+
+    auto directory = getBlock(sectors, 0, 256).slice(0, 32 * 3);
+    AssertThat(directory,
+        Equals(createDirent("FILE1   \xa0\xa0\xa0",
+                   0,
+                   0x80,
+                   {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}) +
+               createDirent("FILE1   \xa0\xa0\xa0", 2, 0x20, {17, 18}) +
+               createDirent("FILE2", 0, 1, {19})));
+}
+
 int main(void)
 {
     try
@@ -286,6 +311,7 @@ int main(void)
         testPutBigFile();
         testDelete();
         testMove();
+        testPutMetadata();
     }
     catch (const ErrorException& e)
     {
