@@ -41,8 +41,8 @@ public:
         if (readRaw64() != HEADER_BITS)
             return;
 
-        auto bits = readRawBits(16 * 8);
-        auto bytes = decodeFmMfm(bits).slice(0, 8);
+        auto bits = readRawBits(16 * 4);
+        auto bytes = decodeFmMfm(bits).slice(0, 4);
         
         ByteReader br(bytes);
         uint8_t track = br.read_8();
