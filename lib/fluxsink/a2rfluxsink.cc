@@ -9,6 +9,7 @@
 #include "lib/logger.h"
 #include "lib/proto.h"
 #include "lib/fluxmap.h"
+#include "lib/layout.h"
 #include "lib/a2r.h"
 #include <fstream>
 #include <sys/stat.h>
@@ -22,11 +23,6 @@ namespace
         return ticks * NS_PER_TICK / A2R_NS_PER_TICK;
     }
 
-    bool singlesided(void)
-    {
-        return globalConfig()->heads().start() == globalConfig()->heads().end();
-    }
-
     class A2RFluxSink : public FluxSink
     {
     public:
@@ -35,11 +31,7 @@ namespace
             _bytes{},
             _writer{_bytes.writer()}
         {
-
-            log("A2R: writing A2R {} file containing {} tracks\n",
-                singlesided() ? "single sided" : "double sided",
-                globalConfig()->tracks().end() -
-                    globalConfig()->tracks().start() + 1);
+            log("A2R: collecting data");
 
             time_t now{std::time(nullptr)};
             auto t = gmtime(&now);
@@ -48,12 +40,19 @@ namespace
 
         ~A2RFluxSink()
         {
+            auto locations = Layout::computeLocations();
+            Layout::getBounds(
+                locations, _minTrack, _maxTrack, _minSide, _maxSide);
+
+            log("A2R: writing A2R {} file containing {} tracks...",
+                (_minSide == _maxSide) ? "single sided" : "double sided",
+                _maxTrack - _minTrack + 1);
+
             writeHeader();
             writeInfo();
             writeStream();
             writeMeta();
 
-            log("A2R: writing output file...\n");
             std::ofstream of(
                 _config.filename(), std::ios::out | std::ios::binary);
             if (!of.is_open())
@@ -82,10 +81,10 @@ namespace
             Bytes info;
             auto writer = info.writer();
             writer.write_8(A2R_INFO_CHUNK_VERSION);
-            auto version_str_padded = fmt::format("{: <32}", "Fluxengine");
+            auto version_str_padded = fmt::format("{: <32}", "FluxEngine");
             assert(version_str_padded.size() == 32);
             writer.append(version_str_padded);
-            writer.write_8(singlesided() ? A2R_DISK_525 : A2R_DISK_35);
+            writer.write_8(A2R_DISK_35);
             writer.write_8(1); // write protected
             writer.write_8(1); // synchronized
             writeChunkAndData(A2R_CHUNK_INFO, info);
@@ -192,15 +191,15 @@ namespace
             }
             else
             {
-                // We have an index, so this is real from a floppy and should be
-                // "one revolution plus a bit"
+                // We have an index, so this is a real read from a floppy and
+                // should be "one revolution plus a bit"
                 fmr.skipToEvent(F_BIT_INDEX);
                 write_flux();
             }
 
             uint32_t chunk_size = 10 + trackBytes.size();
 
-            _strmWriter.write_8(cylinder);
+            _strmWriter.write_8((cylinder << 1) | head);
             _strmWriter.write_8(A2R_TIMING);
             _strmWriter.write_le32(trackBytes.size());
             _strmWriter.write_le32(ticks_to_a2r(loopPoint));
@@ -219,6 +218,10 @@ namespace
         Bytes _strmBytes;
         ByteWriter _strmWriter{_strmBytes.writer()};
         std::map<std::string, std::string> _metadata;
+        int _minSide;
+        int _maxSide;
+        int _minTrack;
+        int _maxTrack;
     };
 } // namespace
 
