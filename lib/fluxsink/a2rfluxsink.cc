@@ -81,7 +81,7 @@ namespace
             Bytes info;
             auto writer = info.writer();
             writer.write_8(A2R_INFO_CHUNK_VERSION);
-            auto version_str_padded = fmt::format("{: <32}", "Fluxengine");
+            auto version_str_padded = fmt::format("{: <32}", "FluxEngine");
             assert(version_str_padded.size() == 32);
             writer.append(version_str_padded);
             writer.write_8(A2R_DISK_35);
