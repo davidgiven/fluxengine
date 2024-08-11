@@ -31,4 +31,4 @@ encoded = [
     for name in drivetypes
 ]
 
-cxxlibrary(name="drivetypes", srcs=[".+drivetypes_cc"] + encoded)
+cxxlibrary(name="drivetypes", srcs=[".+drivetypes_cc"] + encoded, deps=["+lib"])

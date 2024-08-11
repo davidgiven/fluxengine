@@ -26,7 +26,7 @@ public:
     {
     }
 
-    wxEvent* Clone() const
+    wxEvent* Clone() const override
     {
         return new ExecEvent(*this);
     }

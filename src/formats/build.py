@@ -34,6 +34,7 @@ formats = [
     "rx50",
     "shugart_drive",
     "smaky6",
+    "tartu",
     "tids990",
     "tiki",
     "victor9k",

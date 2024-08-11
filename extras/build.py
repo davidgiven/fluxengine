@@ -37,8 +37,6 @@ normalrule(
     name="fluxengine_ico",
     ins=["./icon.png"],
     outs=["fluxengine.ico"],
-    commands=[
-        "png2ico {outs[0]} {ins[0]}"
-    ],
+    commands=["png2ico {outs[0]} {ins[0]}"],
     label="MAKEICON",
 )

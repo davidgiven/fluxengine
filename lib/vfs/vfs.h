@@ -277,4 +277,18 @@ public:
     static std::unique_ptr<Filesystem> createFilesystemFromConfig();
 };
 
+/* Used for tests only. */
+
+class HasBitmap
+{
+public:
+    virtual std::vector<bool> getBitmapForDebugging() = 0;
+};
+
+class HasMount
+{
+public:
+    virtual void mount() = 0;
+};
+
 #endif

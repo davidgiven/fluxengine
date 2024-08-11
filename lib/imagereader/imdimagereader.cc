@@ -137,7 +137,7 @@ public:
      * <End of file>
      */
     // clang-format on
-    std::unique_ptr<Image> readImage()
+    std::unique_ptr<Image> readImage() override
     {
         // Read File
         std::ifstream inputFile(

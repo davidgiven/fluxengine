@@ -1,7 +1,7 @@
 from build.ab import export
 from build.c import clibrary, cxxlibrary
 from build.protobuf import proto, protocc
-from build.pkg import package
+from build.pkg import package, hostpackage
 from build.utils import test
 from glob import glob
 import config
@@ -9,8 +9,13 @@ import re
 
 package(name="protobuf_lib", package="protobuf")
 package(name="z_lib", package="zlib")
-package(name="fmt_lib", package="fmt")
+package(name="fmt_lib", package="fmt", fallback="dep/fmt")
 package(name="sqlite3_lib", package="sqlite3")
+
+hostpackage(name="protobuf_host_lib", package="protobuf")
+hostpackage(name="z_host_lib", package="zlib")
+hostpackage(name="fmt_host_lib", package="fmt")
+hostpackage(name="sqlite3_host_lib", package="sqlite3")
 
 clibrary(name="protocol", hdrs={"protocol.h": "./protocol.h"})
 
@@ -138,6 +143,8 @@ cxxlibrary(
         "./arch/northstar/encoder.cc",
         "./arch/rolandd20/decoder.cc",
         "./arch/smaky6/decoder.cc",
+        "./arch/tartu/decoder.cc",
+        "./arch/tartu/encoder.cc",
         "./arch/tids990/decoder.cc",
         "./arch/tids990/encoder.cc",
         "./arch/victor9k/decoder.cc",
@@ -170,6 +177,7 @@ cxxlibrary(
         "arch/micropolis/micropolis.h": "./arch/micropolis/micropolis.h",
         "arch/c64/data_gcr.h": "./arch/c64/data_gcr.h",
         "arch/c64/c64.h": "./arch/c64/c64.h",
+        "arch/tartu/tartu.h": "./arch/tartu/tartu.h",
         "lib/a2r.h": "./lib/a2r.h",
         "lib/bitmap.h": "./lib/bitmap.h",
         "lib/bytes.h": "./lib/bytes.h",
@@ -211,14 +219,15 @@ cxxlibrary(
     },
     deps=[
         "+fl2_proto_lib",
+        "+fmt_lib",
         "+protocol",
-        "lib+config_proto_lib",
         "dep/adflib",
         "dep/agg",
         "dep/fatfs",
         "dep/hfsutils",
         "dep/libusbp",
         "dep/stb",
+        "lib+config_proto_lib",
     ],
 )
 
@@ -272,6 +281,8 @@ else:
         ("mac", "scripts/mac800_test.textpb", "--800"),
         ("n88basic", "", ""),
         ("rx50", "", ""),
+        ("tartu", "", "--390 40track_drive"),
+        ("tartu", "", "--780"),
         ("tids990", "", ""),
         ("victor9k", "", "--612"),
         ("victor9k", "", "--1224"),

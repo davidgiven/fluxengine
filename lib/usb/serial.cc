@@ -42,11 +42,9 @@ public:
         commtimeouts.ReadIntervalTimeout = 100;
         SetCommTimeouts(_handle, &commtimeouts);
 
-        if (!EscapeCommFunction(_handle, CLRDTR))
-            error("Couldn't clear DTR: {}", get_last_error_string());
-        Sleep(200);
-        if (!EscapeCommFunction(_handle, SETDTR))
-            error("Couldn't set DTR: {}", get_last_error_string());
+        /* Toggle DTR to reset the device. */
+
+        toggleDtr();
 
         PurgeComm(_handle,
             PURGE_RXABORT | PURGE_RXCLEAR | PURGE_TXABORT | PURGE_TXCLEAR);
@@ -58,6 +56,15 @@ public:
     }
 
 public:
+    void toggleDtr() override
+    {
+        if (!EscapeCommFunction(_handle, CLRDTR))
+            error("Couldn't clear DTR: {}", get_last_error_string());
+        Sleep(200);
+        if (!EscapeCommFunction(_handle, SETDTR))
+            error("Couldn't set DTR: {}", get_last_error_string());
+    }
+
     ssize_t readImpl(uint8_t* buffer, size_t len) override
     {
         DWORD rlen;
@@ -97,6 +104,8 @@ public:
             .Parity = NOPARITY,
             .StopBits = ONESTOPBIT};
         SetCommState(_handle, &dcb);
+
+        toggleDtr();
     }
 
 private:
@@ -157,12 +166,7 @@ public:
 
         /* Toggle DTR to reset the device. */
 
-        int flag = TIOCM_DTR;
-        if (ioctl(_fd, TIOCMBIC, &flag) == -1)
-            error("cannot clear DTR on serial port: {}", strerror(errno));
-        usleep(200000);
-        if (ioctl(_fd, TIOCMBIS, &flag) == -1)
-            error("cannot set DTR on serial port: {}", strerror(errno));
+        toggleDtr();
 
         /* Flush pending input from a generic greaseweazel device */
         tcsetattr(_fd, TCSAFLUSH, &t);
@@ -174,6 +178,16 @@ public:
     }
 
 public:
+    void toggleDtr() override
+    {
+        int flag = TIOCM_DTR;
+        if (ioctl(_fd, TIOCMBIC, &flag) == -1)
+            error("cannot clear DTR on serial port: {}", strerror(errno));
+        usleep(200000);
+        if (ioctl(_fd, TIOCMBIS, &flag) == -1)
+            error("cannot set DTR on serial port: {}", strerror(errno));
+    }
+
     ssize_t readImpl(uint8_t* buffer, size_t len) override
     {
         ssize_t rlen = ::read(_fd, buffer, len);
@@ -198,6 +212,8 @@ public:
         tcgetattr(_fd, &t);
         cfsetspeed(&t, baudRate);
         tcsetattr(_fd, TCSANOW, &t);
+
+        toggleDtr();
     }
 
 private:

@@ -155,7 +155,7 @@ class ImdImageWriter : public ImageWriter
 public:
     ImdImageWriter(const ImageWriterProto& config): ImageWriter(config) {}
 
-    void writeImage(const Image& image)
+    void writeImage(const Image& image) override
     {
         const Geometry& geometry = image.getGeometry();
         unsigned numHeads;

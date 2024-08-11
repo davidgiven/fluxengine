@@ -23,6 +23,7 @@ cxxprogram(
         "./fe-rpm.cc",
         "./fe-seek.cc",
         "./fe-testbandwidth.cc",
+        "./fe-testdevices.cc",
         "./fe-testvoltages.cc",
         "./fe-write.cc",
         "./fileutils.cc",

@@ -1,5 +1,11 @@
 import platform
+import os
 
-windows = platform.system() == "Windows"
-osx = platform.system() == "Darwin"
-unix = not windows
+if os.getenv("BUILDTYPE") == "windows":
+    windows = True
+    osx = False
+    unix = False
+else:
+    windows = False
+    osx = platform.system() == "Darwin"
+    unix = True

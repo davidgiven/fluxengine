@@ -50,57 +50,47 @@ jobs:
 
   build-windows:
     runs-on: windows-latest
-    defaults:
-      run:
-        shell: msys2 {0}
+
     steps:
-    - uses: msys2/setup-msys2@v2
-      with:
-        update: true
-        msystem: MINGW32
-        install: >-
-          diffutils
-          make
-          mingw-w64-i686-binutils
-          mingw-w64-i686-fmt
-          mingw-w64-i686-gcc
-          mingw-w64-i686-libusb
-          mingw-w64-i686-nsis
-          mingw-w64-i686-pkg-config
-          mingw-w64-i686-python
-          mingw-w64-i686-sqlite3
-          mingw-w64-i686-wxWidgets
-          mingw-w64-i686-zlib
-          mingw-w64-i686-png2ico
-          mingw-w64-i686-qt5-base
-          mingw-w64-i686-range-v3
-          vim
-          zip
-    - name: update-protobuf
+    - name: setup WSL
       run: |
-         pacman -U --noconfirm https://repo.msys2.org/mingw/mingw32/mingw-w64-i686-protobuf-21.9-1-any.pkg.tar.zst
-    - uses: actions/checkout@v2
+        curl -L https://github.com/WhitewaterFoundry/Fedora-Remix-for-WSL/releases/download/39.0.1/Fedora-Remix-for-WSL-SL_39.0.1.0_x64_arm64.msixbundle -o fedora.msixbundle
+        unzip fedora.msixbundle Fedora-Remix-for-WSL-SL_39.0.1.0_x64.msix
+        unzip Fedora-Remix-for-WSL-SL_39.0.1.0_x64.msix install.tar.gz
+        wsl --update
+        wsl --import fedora fedora install.tar.gz
+        wsl --set-default fedora
+        wsl sh -c 'dnf -y install https://github.com/rpmsphere/noarch/raw/master/r/rpmsphere-release-38-1.noarch.rpm'
+        wsl sh -c 'dnf -y install --setop=install_weak_deps=False gcc gcc-c++ protobuf-c-compiler protobuf-devel fmt-devel systemd-devel sqlite-devel wxGTK-devel mingw32-gcc mingw32-gcc-c++ mingw32-zlib-static mingw32-protobuf-static mingw32-sqlite-static mingw32-wxWidgets3-static mingw32-libpng-static mingw32-libjpeg-static mingw32-libtiff-static mingw32-nsis png2ico'
+
+    - name: fix line endings
+      run: |
+        git config --global core.autocrlf false
+        git config --global core.eol lf
+        
+    - uses: actions/checkout@v4
       with:
         repository: 'davidgiven/fluxengine'
         path: 'fluxengine'
-    - uses: actions/checkout@v2
+
+    - uses: actions/checkout@v4
       with:
         repository: 'davidgiven/fluxengine-testdata'
         path: 'fluxengine-testdata'
-    - name: build
-      run: MAGICK_TIME_LIMIT=100 make -j`nproc` -C fluxengine
+
+    - name: run
+      run: |
+        wsl sh -c 'make -C fluxengine BUILDTYPE=windows -j$(nproc)'
 
     - name: nsis
       run: |
-        cd fluxengine
-        strip fluxengine.exe -o fluxengine-stripped.exe
-        strip fluxengine-gui.exe -o fluxengine-gui-stripped.exe
-        makensis -v2 -nocd -dOUTFILE=fluxengine-installer.exe extras/windows-installer.nsi
+        wsl sh -c 'cd fluxengine && strip fluxengine.exe -o fluxengine-stripped.exe'
+        wsl sh -c 'cd fluxengine && strip fluxengine-gui.exe -o fluxengine-gui-stripped.exe'
+        wsl sh -c 'cd fluxengine && makensis -v2 -nocd -dOUTFILE=fluxengine-installer.exe extras/windows-installer.nsi'
 
     - name: zip
       run: |
-        cd fluxengine
-        zip -9 fluxengine-windows.zip fluxengine.exe fluxengine-gui.exe upgrade-flux-file.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex fluxengine-installer.exe
+        wsl sh -c 'cd fluxengine && zip -9 fluxengine-windows.zip fluxengine.exe fluxengine-gui.exe upgrade-flux-file.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex fluxengine-installer.exe'
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v2

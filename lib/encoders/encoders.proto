@@ -9,6 +9,7 @@ import "arch/ibm/ibm.proto";
 import "arch/macintosh/macintosh.proto";
 import "arch/micropolis/micropolis.proto";
 import "arch/northstar/northstar.proto";
+import "arch/tartu/tartu.proto";
 import "arch/tids990/tids990.proto";
 import "arch/victor9k/victor9k.proto";
 
@@ -27,5 +28,6 @@ message EncoderProto
         Victor9kEncoderProto victor9k = 11;
         Apple2EncoderProto apple2 = 12;
         AgatEncoderProto agat = 13;
+        TartuEncoderProto tartu = 14;
     }
 }

@@ -234,7 +234,7 @@ namespace libusbp
         }
 
         /*! Wrapper for libusbp_error_get_message(). */
-        virtual const char * what() const noexcept
+        virtual const char * what() const noexcept override
         {
             return libusbp_error_get_message(pointer);
         }

@@ -13,9 +13,7 @@ proto(
 )
 
 protocc(
-    name="test_proto_lib",
-    srcs=[".+test_proto"],
-    deps=["lib+config_proto", "arch+arch_proto"],
+    name="test_proto_lib", srcs=[".+test_proto"], deps=["lib+config_proto_lib"]
 )
 
 tests = [
@@ -60,6 +58,9 @@ export(
                 ],
                 deps=[
                     "+fl2_proto_lib",
+                    "+fmt_lib",
+                    "+lib",
+                    "+protobuf_lib",
                     "+protocol",
                     "+z_lib",
                     ".+test_proto_lib",
@@ -70,7 +71,6 @@ export(
                     "dep/libusbp",
                     "dep/snowhouse",
                     "dep/stb",
-                    "+lib",
                     "lib+config_proto_lib",
                     "src/formats",
                 ],
@@ -85,7 +85,11 @@ export(
                 srcs=[f"./{n}.cc"],
                 deps=[
                     "+fl2_proto_lib",
+                    "+fmt_lib",
+                    "+lib",
+                    "+protobuf_lib",
                     "+protocol",
+                    "+z_lib",
                     "dep/adflib",
                     "dep/agg",
                     "dep/fatfs",
@@ -93,10 +97,10 @@ export(
                     "dep/libusbp",
                     "dep/snowhouse",
                     "dep/stb",
-                    "+lib",
                     "lib+config_proto_lib",
                     "src/formats",
-                ],
+                ]
+                + ([".+test_proto_lib"] if n == "options" else []),
             ),
         )
         for n in tests
