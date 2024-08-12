@@ -8,27 +8,11 @@ drivetypes = [
     "apple2",
 ]
 
-normalrule(
+protoencode(
     name="drivetypes_cc",
-    ins=[f"./{name}.textpb" for name in drivetypes],
-    deps=["scripts/mktable.sh"],
-    outs=["table.cc"],
-    commands=[
-        "sh scripts/mktable.sh drivetypes "
-        + (" ".join(drivetypes))
-        + " > {outs}"
-    ],
-    label="MKTABLE",
+    srcs={name: f"./{name}.textpb" for name in drivetypes},
+    proto="ConfigProto",
+    symbol="drivetypes",
 )
 
-encoded = [
-    protoencode(
-        name=f"{name}_cc",
-        srcs=[f"./{name}.textpb"],
-        proto="ConfigProto",
-        symbol=f"drivetypes_{name}_pb",
-    )
-    for name in drivetypes
-]
-
-cxxlibrary(name="drivetypes", srcs=[".+drivetypes_cc"] + encoded, deps=["+lib"])
+cxxlibrary(name="drivetypes", srcs=[".+drivetypes_cc"], deps=["+lib"])

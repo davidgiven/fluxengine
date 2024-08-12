@@ -1,11 +1,11 @@
-from build.ab import Rule, normalrule, Targets
+from build.ab import Rule, normalrule, Targets, TargetsMap
 from build.c import cxxprogram, HostToolchain
 
 encoders = {}
 
 
 @Rule
-def protoencode(self, name, srcs: Targets, proto, symbol):
+def protoencode_single(self, name, srcs: Targets, proto, symbol):
     if proto not in encoders:
         r = cxxprogram(
             name="protoencode_" + proto,
@@ -31,6 +31,27 @@ def protoencode(self, name, srcs: Targets, proto, symbol):
         deps=[r],
         commands=["{deps[0]} {ins} {outs} " + symbol],
         label="PROTOENCODE",
+    )
+
+
+@Rule
+def protoencode(self, name, proto, srcs: TargetsMap, symbol):
+    encoded = [
+        protoencode_single(
+            name=f"{k}_cc",
+            srcs=[v],
+            proto=proto,
+            symbol=f"{symbol}_{k}_pb",
+        )
+        for k, v in srcs.items()
+    ]
+
+    normalrule(
+        replaces=self,
+        ins=encoded,
+        outs=[name + ".cc"],
+        commands=["cat {ins} > {outs}"],
+        label="CONCAT",
     )
 
 
