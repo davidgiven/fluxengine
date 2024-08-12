@@ -70,7 +70,7 @@ cxxlibrary(
 cxxprogram(
     name="imager",
     srcs=[
-        "./mainwindow.cc",
+        "./mainwindow-imager.cc",
         "./fluxvisualiserwidget.cc",
         "./imagevisualiserwidget.cc",
         "./mainwindow.h",
