@@ -2,7 +2,7 @@ from build.ab import export
 from build.c import cxxprogram
 from build.protobuf import proto, protocc
 from build.utils import test
-from scripts.build import protoencode
+from scripts.build import protoencode_single
 
 
 proto(
@@ -49,7 +49,7 @@ export(
                 name="proto_test_exe",
                 srcs=[
                     "./proto.cc",
-                    protoencode(
+                    protoencode_single(
                         name="testproto_cc",
                         srcs=["./testproto.textpb"],
                         proto="TestProto",

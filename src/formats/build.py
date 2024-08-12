@@ -52,19 +52,16 @@ normalrule(
     label="MKTABLE",
 )
 
-encoded = [
-    protoencode(
-        name=f"{name}_cc",
-        srcs=[f"./{name}.textpb"],
-        proto="ConfigProto",
-        symbol=f"formats_{name}_pb",
-    )
-    for name in formats
-]
+protoencode(
+    name="formats_cc",
+    srcs={name: f"./{name}.textpb" for name in formats},
+    proto="ConfigProto",
+    symbol="formats",
+)
 
 cxxlibrary(
     name="formats",
-    srcs=[".+table_cc"] + encoded,
+    srcs=[".+formats_cc", ".+table_cc"],
     deps=["+lib", "lib+config_proto_lib"],
 )
 

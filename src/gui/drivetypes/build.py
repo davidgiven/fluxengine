@@ -9,7 +9,7 @@ drivetypes = [
 ]
 
 normalrule(
-    name="drivetypes_cc",
+    name="drivetypes_table_cc",
     ins=[f"./{name}.textpb" for name in drivetypes],
     deps=["scripts/mktable.sh"],
     outs=["table.cc"],
@@ -21,14 +21,16 @@ normalrule(
     label="MKTABLE",
 )
 
-encoded = [
-    protoencode(
-        name=f"{name}_cc",
-        srcs=[f"./{name}.textpb"],
-        proto="ConfigProto",
-        symbol=f"drivetypes_{name}_pb",
-    )
-    for name in drivetypes
-]
 
-cxxlibrary(name="drivetypes", srcs=[".+drivetypes_cc"] + encoded, deps=["+lib"])
+protoencode(
+    name="drivetypes_cc",
+    srcs={name: f"./{name}.textpb" for name in drivetypes},
+    proto="ConfigProto",
+    symbol="drivetypes",
+)
+
+cxxlibrary(
+    name="drivetypes",
+    srcs=[".+drivetypes_cc", ".+drivetypes_table_cc"],
+    deps=["+lib"],
+)

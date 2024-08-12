@@ -22,7 +22,7 @@ density, using MFM and with up to 780kB on a double-sided 80 track disk.
 <img src="tartu-fdc.jpg" alt="The Tartu FDC with Soviet TTL logic chips."/>
 </div>
 
-FluxEngine supports reading Tartu disks with CP/M filesystem access.
+FluxEngine supports reading and writing Tartu disks with CP/M filesystem access.
 
 ## Options
 
