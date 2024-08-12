@@ -40,24 +40,40 @@ cxxlibrary(
     },
 )
 
-cxxprogram(
-    name="gui2",
+cxxlibrary(
+    name="guilib",
     srcs=[
         "./main.cc",
-        "./mainwindow.cc",
         "./drivecomponent.cc",
         "./formatcomponent.cc",
         "./fluxcomponent.cc",
         "./imagecomponent.cc",
+        "./datastore.cc",
+        "./scene.cc",
+    ],
+    hdrs={
+        "globals.h": "./globals.h",
+        "drivecomponent.h": "./drivecomponent.h",
+        "formatcomponent.h": "./formatcomponent.h",
+        "datastore.h": "./datastore.h",
+    },
+    cflags=["-fPIC"],
+    deps=[
+        "+lib",
+        ".+userinterface",
+        ".+Qt5Concurrent",
+        ".+Qt5Widgets",
+        "dep/verdigris",
+    ],
+)
+
+cxxprogram(
+    name="imager",
+    srcs=[
+        "./mainwindow.cc",
         "./fluxvisualiserwidget.cc",
         "./imagevisualiserwidget.cc",
-        "./scene.cc",
-        "./datastore.cc",
-        "./globals.h",
         "./mainwindow.h",
-        "./drivecomponent.h",
-        "./formatcomponent.h",
-        "./datastore.h",
     ],
     cflags=["-fPIC"],
     ldflags=["$(QT5_EXTRA_LIBS)"],
@@ -68,6 +84,7 @@ cxxprogram(
         "+protobuf_lib",
         "+protocol",
         "+z_lib",
+        ".+guilib",
         ".+Qt5Concurrent",
         ".+Qt5Widgets",
         ".+userinterface",
@@ -97,7 +114,7 @@ if config.osx:
     normalrule(
         name="fluxengine_app",
         ins=[
-            ".+gui",
+            ".+imager",
             "extras+fluxengine_icns",
             "extras/FluxEngine.app.template/",
         ],
