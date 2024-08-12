@@ -121,11 +121,12 @@ int main(int argc, const char* argv[])
     }
 
     auto data = message.SerializeAsString();
+    auto name = argv[3];
 
     output << "#include \"lib/globals.h\"\n"
            << "#include \"lib/proto.h\"\n"
            << "#include <string_view>\n"
-           << "static const uint8_t rawData[] = {";
+           << "static const uint8_t " << name << "_rawData[] = {";
 
     int count = 0;
     for (char c : data)
@@ -140,12 +141,12 @@ int main(int argc, const char* argv[])
     }
 
     output << "\n};\n";
-    output << "extern const std::string_view " << argv[3] << "_data;\n";
-    output << "const std::string_view " << argv[3]
-           << "_data = std::string_view((const char*)rawData, " << data.size()
+    output << "extern const std::string_view " << name << "_data;\n";
+    output << "const std::string_view " << name
+           << "_data = std::string_view((const char*)" << name << "_rawData, " << data.size()
            << ");\n";
-    output << "extern const ConfigProto " << argv[3] << ";\n";
-    output << "const ConfigProto " << argv[3] << " = parseConfigBytes("
+    output << "extern const ConfigProto " << name << ";\n";
+    output << "const ConfigProto " << name << " = parseConfigBytes("
            << argv[3] << "_data);\n";
 
     return 0;
