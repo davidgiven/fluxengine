@@ -61,7 +61,7 @@ protoencode(
 
 cxxlibrary(
     name="formats",
-    srcs=[".+formats_cc"],
+    srcs=[".+formats_cc", ".+table_cc"],
     deps=["+lib", "lib+config_proto_lib"],
 )
 
