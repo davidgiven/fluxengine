@@ -20,12 +20,15 @@ public:
 public:
     void setDiskData(std::shared_ptr<const DiskFlux> diskData) override {}
 
-    void setTrackData(std::shared_ptr<const TrackFlux> trackData) override {
-        key_t key = {trackData->trackInfo->physicalTrack, trackData->trackInfo->physicalSide};
+    void setTrackData(std::shared_ptr<const TrackFlux> trackData) override
+    {
+        key_t key = {trackData->trackInfo->physicalTrack,
+            trackData->trackInfo->physicalSide};
         _tracks[key] = trackData;
     }
 
-    void setImageData(std::shared_ptr<const Image> imageData) override {
+    void setImageData(std::shared_ptr<const Image> imageData) override
+    {
         clear();
         _loadedSectors = *imageData;
     }

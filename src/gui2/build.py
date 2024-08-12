@@ -44,6 +44,7 @@ cxxlibrary(
     name="guilib",
     srcs=[
         "./main.cc",
+        "./mainwindow.cc",
         "./drivecomponent.cc",
         "./formatcomponent.cc",
         "./fluxcomponent.cc",
@@ -56,6 +57,7 @@ cxxlibrary(
         "drivecomponent.h": "./drivecomponent.h",
         "formatcomponent.h": "./formatcomponent.h",
         "datastore.h": "./datastore.h",
+        "mainwindow.h": "./mainwindow.h",
     },
     cflags=["-fPIC"],
     deps=[
@@ -73,7 +75,6 @@ cxxprogram(
         "./mainwindow-imager.cc",
         "./fluxvisualiserwidget.cc",
         "./imagevisualiserwidget.cc",
-        "./mainwindow.h",
     ],
     cflags=["-fPIC"],
     ldflags=["$(QT5_EXTRA_LIBS)"],
