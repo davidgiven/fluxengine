@@ -13,7 +13,7 @@ def uic(self, name, src: Target = None, dest=None):
         replaces=self,
         ins=[src],
         outs=[dest],
-        commands=["uic-qt5 -g cpp -o {outs[0]} {ins[0]}"],
+        commands=["$(UIC) -g cpp -o {outs[0]} {ins[0]}"],
         label="UIC",
     )
 
@@ -25,7 +25,7 @@ normalrule(
     name="resources_cc",
     ins=["./resources.qrc"],
     outs=["resources.cc"],
-    commands=["rcc-qt5 -g cpp --name resources -o {outs[0]} {ins[0]}"],
+    commands=["$(RCC) -g cpp --name resources -o {outs[0]} {ins[0]}"],
     label="RCC",
 )
 

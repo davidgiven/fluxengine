@@ -30,6 +30,10 @@ HOSTCXX = g++ -std=c++17
 HOSTCFLAGS = -g -O3
 HOSTLDFLAGS =
 
+QTBINS = $(shell $(PKG_CONFIG) Qt5Core --variable=host_bins)
+UIC = $(QTBINS)/uic
+RCC = $(QTBINS)/rcc
+
 REALOBJ = .obj
 OBJ = $(REALOBJ)/$(BUILDTYPE)
 DESTDIR ?=
