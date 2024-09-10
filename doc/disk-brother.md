@@ -7,21 +7,21 @@ Brother word processor disks are weird, using custom tooling and chipsets.
 They are completely not PC compatible in every possible way other than the
 size.
 
-Different word processors use different disk formats --- the only ones
-supported by FluxEngine are the 120kB and 240kB 3.5" formats. The default
-options are for the 240kB format. For the 120kB format, which is 40 track, do
-`fluxengine read brother -s :t=1-79x2`.
+Different word processors use different disk formats --- the only ones supported
+by FluxEngine are the 120kB and 240kB 3.5" formats. Use the `--120` and `--240`
+options to select which one.
 
 Apparently about 20% of Brother word processors have alignment issues which
-means that the disks can't be read by FluxEngine (because the tracks on the
-disk don't line up with the position of the head in a PC drive). The word
-processors themselves solved this by microstepping until they found where the
-real track is, but normal PC drives aren't capable of doing this.  Particularly
-with the 120kB disks, you might want to fiddle with the start track (e.g.
-`:t=0-79x2`) to get a clean read. Keep an eye on the bad sector map that's
-dumped at the end of a read. My word processor likes to put logical track 0 on
-physical track 3, which means that logical track 77 is on physical track 80;
-luckily my PC drive can access track 80.
+means that the disks can't be read by FluxEngine (because the tracks on the disk
+don't line up with the position of the head in a PC drive). The word processors
+themselves solved this by microstepping until they found where the real track
+is, but normal PC drives aren't capable of doing this.  Particularly with the
+120kB disks, you might want to fiddle with the head bias (e.g.
+`--drive.head_bias=3`) to get a clean read. Keep an eye on the bad sector map
+that's dumped at the end of a read. My word processor likes to put logical track
+0 on physical track 3, which means that logical track 77 is on physical track
+80, so I need that `head_bias` value of 3; luckily my PC drive can access track
+80.
 
 Using FluxEngine to *write* disks isn't a problem, so the
 simplest solution is to use FluxEngine to create a new disk, with the tracks
