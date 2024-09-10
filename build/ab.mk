@@ -30,7 +30,7 @@ EXT ?=
 
 include $(OBJ)/build.mk
 
-MAKEFLAGS += -r -j$(nprocs)
+MAKEFLAGS += -r -j$(shell nproc)
 .DELETE_ON_ERROR:
 
 .PHONY: update-ab
