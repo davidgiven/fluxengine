@@ -10,11 +10,11 @@ jobs:
   build-linux:
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         repository: 'davidgiven/fluxengine'
         path: 'fluxengine'
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         repository: 'davidgiven/fluxengine-testdata'
         path: 'fluxengine-testdata'
@@ -27,11 +27,11 @@ jobs:
   build-macos-current:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         repository: 'davidgiven/fluxengine'
         path: 'fluxengine'
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         repository: 'davidgiven/fluxengine-testdata'
         path: 'fluxengine-testdata'
@@ -41,7 +41,7 @@ jobs:
       run: gmake -j`nproc` -C fluxengine
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.event.repository.name }}.${{ github.sha }}
         path: fluxengine/FluxEngine.pkg
@@ -91,7 +91,7 @@ jobs:
         wsl sh -c 'cd fluxengine && zip -9 fluxengine-windows.zip fluxengine.exe fluxengine-gui.exe upgrade-flux-file.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex fluxengine-installer.exe'
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.event.repository.name }}.${{ github.sha }}
         path: fluxengine/fluxengine-windows.zip
