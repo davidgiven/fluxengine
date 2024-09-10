@@ -24,7 +24,7 @@ def zip(
     for k, v in items.items():
         cs += [
             "cat %s | $(ZIP) -q %s {outs[0]} -" % (filenameof(v), flags),
-            "echo '@ -\\n@=%s\\n' | $(ZIPNOTE) -w {outs[0]}" % k,
+            "printf '@ -\\n@=%s\\n' | $(ZIPNOTE) -w {outs[0]}" % k,
         ]
         ins += [v]
 
