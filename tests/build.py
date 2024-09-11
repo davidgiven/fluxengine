@@ -7,9 +7,7 @@ from scripts.build import protoencode_single
 
 proto(
     name="test_proto",
-    srcs=[
-        "./testproto.proto",
-    ],
+    srcs=["./testproto.proto"],
 )
 
 protocc(

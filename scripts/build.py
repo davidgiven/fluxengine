@@ -1,4 +1,4 @@
-from build.ab import Rule, normalrule, Targets, TargetsMap
+from build.ab import Rule, simplerule, Targets, TargetsMap
 from build.c import cxxprogram, HostToolchain
 
 encoders = {}
@@ -24,10 +24,10 @@ def protoencode_single(self, name, srcs: Targets, proto, symbol):
         r = encoders[proto]
     r.materialise()
 
-    normalrule(
+    simplerule(
         replaces=self,
         ins=srcs,
-        outs=[f"{name}.cc"],
+        outs=[f"={name}.cc"],
         deps=[r],
         commands=["{deps[0]} {ins} {outs} " + symbol],
         label="PROTOENCODE",
@@ -46,10 +46,10 @@ def protoencode(self, name, proto, srcs: TargetsMap, symbol):
         for k, v in srcs.items()
     ]
 
-    normalrule(
+    simplerule(
         replaces=self,
         ins=encoded,
-        outs=[name + ".cc"],
+        outs=[f"={name}.cc"],
         commands=["cat {ins} > {outs}"],
         label="CONCAT",
     )
