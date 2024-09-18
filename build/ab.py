@@ -16,6 +16,7 @@ from importlib.machinery import (
 import inspect
 import string
 import sys
+import hashlib
 
 verbose = False
 quiet = False
@@ -131,6 +132,12 @@ def Rule(func):
     return wrapper
 
 
+def _isiterable(xs):
+    return isinstance(xs, Iterable) and not isinstance(
+        xs, (str, bytes, bytearray)
+    )
+
+
 class Target:
     def __init__(self, cwd, name):
         if verbose:
@@ -166,7 +173,7 @@ class Target:
                     return ""
                 if type(value) == str:
                     return value
-                if isinstance(value, (set, tuple)):
+                if _isiterable(value):
                     value = list(value)
                 if type(value) != list:
                     value = [value]
@@ -210,9 +217,23 @@ class Target:
             # Actually call the callback.
 
             cwdStack.append(self.cwd)
-            self.callback(
-                **{k: self.args[k] for k in self.binding.arguments.keys()}
-            )
+            if "kwargs" in self.binding.arguments.keys():
+                # If the caller wants kwargs, return all arguments except the standard ones.
+                cbargs = {
+                    k: v for k, v in self.args.items() if k not in {"dir"}
+                }
+            else:
+                # Otherwise, just call the callback with the ones it asks for.
+                cbargs = {}
+                for k in self.binding.arguments.keys():
+                    if k != "kwargs":
+                        try:
+                            cbargs[k] = self.args[k]
+                        except KeyError:
+                            error(
+                                f"invocation of {self} failed because {k} isn't an argument"
+                            )
+            self.callback(**cbargs)
             cwdStack.pop()
         except BaseException as e:
             print(f"Error materialising {self}: {self.callback}")
@@ -308,9 +329,7 @@ class Targets:
     def convert(value, target):
         if not value:
             return []
-        assert isinstance(
-            value, (list, tuple)
-        ), "cannot convert non-list to Targets"
+        assert _isiterable(value), "cannot convert non-list to Targets"
         return [target.targetof(x) for x in flatten(value)]
 
 
@@ -334,7 +353,7 @@ def loadbuildfile(filename):
 def flatten(items):
     def generate(xs):
         for x in xs:
-            if isinstance(x, Iterable) and not isinstance(x, (str, bytes)):
+            if _isiterable(x):
                 yield from generate(x)
             else:
                 yield x
@@ -343,15 +362,13 @@ def flatten(items):
 
 
 def targetnamesof(items):
-    if not isinstance(items, (list, tuple, set)):
-        error("argument of filenamesof is not a list/tuple/set")
+    assert _isiterable(items), "argument of filenamesof is not a collection"
 
     return [t.name for t in items]
 
 
 def filenamesof(items):
-    if not isinstance(items, (list, tuple, set)):
-        error("argument of filenamesof is not a list/tuple/set")
+    assert _isiterable(items), "argument of filenamesof is not a collection"
 
     def generate(xs):
         for x in xs:
@@ -371,9 +388,12 @@ def filenameof(x):
     return xs[0]
 
 
-def emit(*args):
-    outputFp.write(" ".join(args))
-    outputFp.write("\n")
+def emit(*args, into=None):
+    s = " ".join(args) + "\n"
+    if into is not None:
+        into += [s]
+    else:
+        outputFp.write(s)
 
 
 def emit_rule(name, ins, outs, cmds=[], label=None):
@@ -382,26 +402,35 @@ def emit_rule(name, ins, outs, cmds=[], label=None):
     nonobjs = [f for f in fouts if not f.startswith("$(OBJ)")]
 
     emit("")
-    if nonobjs:
-        emit("clean::")
-        emit("\t$(hide) rm -f", *nonobjs)
 
-    emit(".PHONY:", name)
+    lines = []
+    if nonobjs:
+        emit("clean::", into=lines)
+        emit("\t$(hide) rm -f", *nonobjs, into=lines)
+
+    emit(".PHONY:", name, into=lines)
     if outs:
-        emit(name, ":", *fouts)
-        if cmds:
-            emit(*fouts, "&:", *fins)
-        else:
-            emit(*fouts, ":", *fins)
+        emit(name, ":", *fouts, into=lines)
+        emit(*fouts, "&:", *fins, "\x01", into=lines)
 
         if label:
-            emit("\t$(hide)", "$(ECHO)", label)
+            emit("\t$(hide)", "$(ECHO) $(PROGRESSINFO) ", label, into=lines)
         for c in cmds:
-            emit("\t$(hide)", c)
+            emit("\t$(hide)", c, into=lines)
     else:
         assert len(cmds) == 0, "rules with no outputs cannot have commands"
-        emit(name, ":", *fins)
+        emit(name, ":", *fins, into=lines)
 
+    cmd = "".join(lines)
+    hash = hashlib.sha1(bytes(cmd, "utf-8")).hexdigest()
+
+    outputFp.write(cmd.replace("\x01", f"$(OBJ)/.hashes/{hash}"))
+
+    if outs:
+        emit(f"$(OBJ)/.hashes/{hash}:")
+        emit(
+            f"\t$(hide) mkdir -p $(OBJ)/.hashes && touch $(OBJ)/.hashes/{hash}"
+        )
     emit("")
 
 
