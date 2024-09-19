@@ -29,9 +29,9 @@ endif
 EXT ?=
 
 ifeq ($(PROGRESSINFO),)
-rulecount := $(shell test -f $(OBJ)/build.mk && $(MAKE) -n PROGRESSINFO=XXXPROGRESSINFOXXX | grep XXXPROGRESSINFOXXX | wc -l)
+rulecount := $(shell test -f $(OBJ)/build.mk && $(MAKE) -n $(MAKECMDGOALS) PROGRESSINFO=XXXPROGRESSINFOXXX | grep XXXPROGRESSINFOXXX | wc -l)
 ruleindex := 1
-PROGRESSINFO = $(shell $(PYTHON) build/_progress.py $(ruleindex) $(rulecount))$(eval ruleindex := $(shell expr $(ruleindex) + 1))
+PROGRESSINFO = "$(shell $(PYTHON) build/_progress.py $(ruleindex) $(rulecount))$(eval ruleindex := $(shell expr $(ruleindex) + 1))"
 endif
 
 include $(OBJ)/build.mk

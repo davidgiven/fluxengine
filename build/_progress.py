@@ -1,5 +1,5 @@
 import sys
 
 (_, current, max) = sys.argv
-chars = len(str(max))
-print(f"[{current:>{chars}}/{max:>{chars}}]")
+percent = int(100 * float(current) / float(max))
+print(f"[{percent:>3}%]")
