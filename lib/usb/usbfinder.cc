@@ -3,12 +3,13 @@
 #include "usb.h"
 #include "lib/bytes.h"
 #include "usbfinder.h"
+#include "applesauce.h"
 #include "greaseweazle.h"
 #include "protocol.h"
 #include "libusbp.hpp"
 
 static const std::set<uint32_t> VALID_DEVICES = {
-    GREASEWEAZLE_ID, FLUXENGINE_ID};
+    GREASEWEAZLE_ID, FLUXENGINE_ID, APPLESAUCE_ID};
 
 static const std::string get_serial_number(const libusbp::device& device)
 {
@@ -70,6 +71,9 @@ std::string getDeviceName(DeviceType type)
 
         case DEVICE_FLUXENGINE:
             return "FluxEngine";
+
+        case DEVICE_APPLESAUCE:
+            return "Applesauce";
 
         default:
             return "unknown";

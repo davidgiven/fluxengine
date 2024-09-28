@@ -9,6 +9,7 @@
 #include "lib/proto.h"
 #include "usbfinder.h"
 #include "lib/logger.h"
+#include "applesauce.h"
 #include "greaseweazle.h"
 
 static USB* usb = NULL;
@@ -54,6 +55,11 @@ static std::shared_ptr<CandidateDevice> selectDevice()
                 std::cerr << fmt::format(
                     "Greaseweazle: {} on {}\n", c->serial, c->serialPort);
                 break;
+
+            case APPLESAUCE_ID:
+                std::cerr << fmt::format(
+                    "Applesauce: {} on {}\n", c->serial, c->serialPort);
+                break;
         }
     }
     exit(1);
@@ -86,6 +92,9 @@ USB* get_usb_impl()
                 candidate->serialPort);
             return createGreaseweazleUsb(
                 candidate->serialPort, globalConfig()->usb().greaseweazle());
+
+        case APPLESAUCE_ID:
+            error("Applesauce not supported yet");
 
         default:
             error("internal");
