@@ -3,6 +3,7 @@
 #include "lib/fluxmap.h"
 #include "lib/bytes.h"
 #include "lib/usb/usb.pb.h"
+#include "lib/utils.h"
 #include "applesauce.h"
 #include "serial.h"
 #include "usb.h"
@@ -12,6 +13,12 @@ static uint32_t ss_rand_next(uint32_t x)
 {
     return (x & 1) ? (x >> 1) ^ 0x80000062 : x >> 1;
 }
+
+class ApplesauceException : public ErrorException
+{
+public:
+    ApplesauceException(const std::string& s): ErrorException(s) {}
+};
 
 class ApplesauceUsb : public USB
 {
@@ -36,19 +43,40 @@ public:
 private:
     std::string sendrecv(const std::string& command)
     {
+        fmt::print(fmt::format("> {}\n", command));
         _serial->writeLine(command);
-        return _serial->readLine();
+        auto r = _serial->readLine();
+        fmt::print(fmt::format("< {}\n", r));
+        return r;
+    }
+
+    bool doCommand(const std::string& command)
+    {
+        return sendrecv(command) == ".";
+    }
+
+    std::string doCommandX(const std::string& command)
+    {
+        std::string r = sendrecv(command);
+        if (r != ".")
+            throw ApplesauceException(
+                fmt::format("low-level Applesauce error: '{}'", r));
+        r = _serial->readLine();
+        fmt::print(fmt::format("<< {}\n", r));
+        return r;
     }
 
     void connect()
     {
         if (!_connected)
         {
-            std::string probe = sendrecv("connect");
-            if (probe != ".")
+            if (!doCommand("connect"))
                 error("Applesauce could not find any drives");
+            doCommand("drive:enable");
+            doCommand("motor:on");
             _connected = true;
         }
+
     }
 
 public:
@@ -70,91 +98,29 @@ public:
 
     void seek(int track) override
     {
-        // do_command({CMD_SEEK, 3, (uint8_t)track});
-        error("unsupported operation seek on the Greaseweazle");
+        if (track == 0)
+            doCommand("head:zero");
+        else
+            doCommand(fmt::format("head:track{}", track));
     }
 
     nanoseconds_t getRotationalPeriod(int hardSectorCount) override
     {
-        // if (hardSectorCount != 0)
-        //     error("hard sectors are currently unsupported on the
-        //     Greaseweazle");
+        if (hardSectorCount != 0)
+            error("hard sectors are currently unsupported on the Applesauce");
 
-        // /* The Greaseweazle doesn't have a command to fetch the period
-        // directly,
-        //  * so we have to do a flux read. */
-
-        // switch (_version)
-        // {
-        //     case V22:
-        //         do_command({CMD_READ_FLUX, 2});
-        //         break;
-
-        //     case V24:
-        //     case V29:
-        //     {
-        //         Bytes cmd(8);
-        //         cmd.writer()
-        //             .write_8(CMD_READ_FLUX)
-        //             .write_8(cmd.size())
-        //             .write_le32(0)  // ticks default value (guessed)
-        //             .write_le16(2); // revolutions
-        //         do_command(cmd);
-        //     }
-        // }
-
-        // uint32_t ticks_gw = 0;
-        // uint32_t firstindex = ~0;
-        // uint32_t secondindex = ~0;
-        // for (;;)
-        // {
-        //     uint8_t b = _serial->readByte();
-        //     if (!b)
-        //         break;
-
-        //     if (b == 255)
-        //     {
-        //         switch (_serial->readByte())
-        //         {
-        //             case FLUXOP_INDEX:
-        //             {
-        //                 uint32_t index = read_28() + ticks_gw;
-        //                 if (firstindex == ~0)
-        //                     firstindex = index;
-        //                 else if (secondindex == ~0)
-        //                     secondindex = index;
-        //                 break;
-        //             }
-
-        //             case FLUXOP_SPACE:
-        //                 ticks_gw += read_28();
-        //                 break;
-
-        //             default:
-        //                 error("bad opcode in Greaseweazle stream");
-        //         }
-        //     }
-        //     else
-        //     {
-        //         if (b < 250)
-        //             ticks_gw += b;
-        //         else
-        //         {
-        //             int delta = 250 + (b - 250) * 255 + _serial->readByte() -
-        //             1; ticks_gw += delta;
-        //         }
-        //     }
-        // }
-
-        // if (secondindex == ~0)
-        //     error(
-        //         "unable to determine disk rotational period (is a disk in the
-        //         " "drive?)");
-        // do_command({CMD_GET_FLUX_STATUS, 2});
-
-        // _revolutions = (nanoseconds_t)(secondindex - firstindex) * _clock;
-        // return _revolutions;
-        error("unsupported operation getRotationalPeriod on the Greaseweazle");
+        connect();
+        try
+        {
+            double rpm = std::stod(doCommandX("sync:?speed")) / 1000.0;
+            sendrecv("X");
+            fmt::print("< {}\n", _serial->readLine());
+            return 60e9 / rpm;
+        }
+        catch (const ApplesauceException& e)
+        {
+            return 0;
+        }
     }
 
     void testBulkWrite() override
@@ -162,7 +128,7 @@ public:
         int max = std::stoi(sendrecv("data:?max"));
         fmt::print("Writing data: ");
 
-        if (sendrecv(fmt::format("data:>{}", max)) != ".")
+        if (!doCommand(fmt::format("data:>{}", max)))
             error("Cannot write to Applesauce");
 
         Bytes junk(max);
@@ -189,7 +155,7 @@ public:
         int max = std::stoi(sendrecv("data:?max"));
         fmt::print("Reading data: ");
 
-        if (sendrecv(fmt::format("data:<{}", max)) != ".")
+        if (!doCommand(fmt::format("data:<{}", max)))
             error("Cannot read from Applesauce");
 
         double start_time = getCurrentTime();
@@ -208,56 +174,22 @@ public:
         nanoseconds_t readTime,
         nanoseconds_t hardSectorThreshold) override
     {
-        // if (hardSectorThreshold != 0)
-        // error("hard sectors are currently unsupported on the Greaseweazle");
-        //
-        // do_command({CMD_HEAD, 3, (uint8_t)side});
-        //
-        // switch (_version)
-        // {
-        // case V22:
-        // {
-        // int revolutions = (readTime + _revolutions - 1) / _revolutions;
-        // Bytes cmd(4);
-        // cmd.writer()
-        // .write_8(CMD_READ_FLUX)
-        // .write_8(cmd.size())
-        // .write_le32(revolutions + (synced ? 1 : 0));
-        // do_command(cmd);
-        // break;
-        // }
-        //
-        // case V24:
-        // case V29:
-        // {
-        // Bytes cmd(8);
-        // cmd.writer()
-        // .write_8(CMD_READ_FLUX)
-        // .write_8(cmd.size())
-        // .write_le32(
-        // (readTime + (synced ? _revolutions : 0)) / _clock)
-        // .write_le16(0);
-        // do_command(cmd);
-        // }
-        // }
-        //
-        // Bytes buffer;
-        // ByteWriter bw(buffer);
-        // for (;;)
-        // {
-        // uint8_t b = _serial->readByte();
-        // if (!b)
-        // break;
-        // bw.write_8(b);
-        // }
-        //
-        // do_command({CMD_GET_FLUX_STATUS, 2});
-        //
-        // Bytes fldata = greaseWeazleToFluxEngine(buffer, _clock);
-        // if (synced)
-        // fldata = stripPartialRotation(fldata);
-        // return fldata;
-        error("unsupported operation read on the Greaseweazle");
+        if (hardSectorThreshold != 0)
+            error("hard sectors are currently unsupported on the Applesauce");
+
+        doCommand(fmt::format("disk:side{}", side));
+        doCommand(synced ? "sync:on" : "sync:off");
+        doCommand("data:clear");
+        doCommandX("disk:read");
+        // _serial->readLine();
+
+        int bufferSize = std::stoi(sendrecv("data:?size"));
+
+        doCommand(fmt::format("data:<{}", bufferSize));
+
+        Bytes rawData = _serial->readBytes(bufferSize);
+
+        return Bytes();
     }
 
     void write(int side,
@@ -311,9 +243,7 @@ public:
             error("the Applesauce only supports drive 0");
 
         connect();
-        sendrecv("drive:enable");
-        sendrecv("motor:on");
-        sendrecv(fmt::format("dpc:density{}", high_density));
+        doCommand(fmt::format("dpc:density{}", high_density ? '+' : '-'));
     }
 
     void measureVoltages(struct voltages_frame* voltages) override
