@@ -188,8 +188,7 @@ public:
         doCommand(fmt::format("data:<{}", bufferSize));
 
         Bytes rawData = _serial->readBytes(bufferSize);
-
-        return Bytes();
+        return applesauceToFluxEngine(rawData);
     }
 
     void write(int side,
