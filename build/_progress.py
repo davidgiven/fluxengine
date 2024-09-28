@@ -1,5 +1,5 @@
 import sys
 
-(_, current, max) = sys.argv
+(_, current, max, *_) = sys.argv
 percent = int(100 * float(current) / float(max))
 print(f"[{percent:>3}%]")
