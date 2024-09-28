@@ -109,7 +109,8 @@ public:
         do_command({CMD_SET_BUS_TYPE, 3, (uint8_t)config.bus_type()});
     }
 
-    int getVersion() override
+private:
+    int getVersion()
     {
         do_command({CMD_GET_INFO, 3, GETINFO_FIRMWARE});
 
@@ -124,6 +125,7 @@ public:
         return br.read_be16();
     }
 
+public:
     void seek(int track) override
     {
         do_command({CMD_SEEK, 3, (uint8_t)track});

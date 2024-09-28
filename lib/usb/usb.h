@@ -17,7 +17,6 @@ class USB
 public:
     virtual ~USB();
 
-    virtual int getVersion() = 0;
     virtual void recalibrate()
     {
         seek(0);
@@ -48,10 +47,6 @@ extern USB* createGreaseweazleUsb(
 extern USB* createApplesauceUsb(
     const std::string& serialPort, const ApplesauceProto& config);
 
-static inline int usbGetVersion()
-{
-    return getUsb().getVersion();
-}
 static inline void usbRecalibrate()
 {
     getUsb().recalibrate();

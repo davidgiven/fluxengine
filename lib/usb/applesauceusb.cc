@@ -76,26 +76,9 @@ private:
             doCommand("motor:on");
             _connected = true;
         }
-
     }
 
 public:
-    int getVersion() override
-    {
-        // do_command({CMD_GET_INFO, 3, GETINFO_FIRMWARE});
-        //
-        // Bytes response = _serial->readBytes(32);
-        // ByteReader br(response);
-        //
-        // br.seek(4);
-        // nanoseconds_t freq = br.read_le32();
-        // _clock = 1000000000 / freq;
-        //
-        // br.seek(0);
-        // return br.read_be16();
-        error("unsupported operation getVersion on the Greaseweazle");
-    }
-
     void seek(int track) override
     {
         if (track == 0)
@@ -177,11 +160,11 @@ public:
         if (hardSectorThreshold != 0)
             error("hard sectors are currently unsupported on the Applesauce");
 
+        connect();
         doCommand(fmt::format("disk:side{}", side));
         doCommand(synced ? "sync:on" : "sync:off");
         doCommand("data:clear");
         doCommandX("disk:read");
-        // _serial->readLine();
 
         int bufferSize = std::stoi(sendrecv("data:?size"));
 
@@ -195,45 +178,19 @@ public:
         const Bytes& fldata,
         nanoseconds_t hardSectorThreshold) override
     {
-        // if (hardSectorThreshold != 0)
-        // error("hard sectors are currently unsupported on the Greaseweazle");
-        //
-        // do_command({CMD_HEAD, 3, (uint8_t)side});
-        // switch (_version)
-        // {
-        // case V22:
-        // do_command({CMD_WRITE_FLUX, 3, 1});
-        // break;
-        //
-        // case V24:
-        // case V29:
-        // do_command({CMD_WRITE_FLUX, 4, 1, 1});
-        // break;
-        // }
-        // _serial->write(fluxEngineToGreaseweazle(fldata, _clock));
-        // _serial->readByte(); /* synchronise */
-        //
-        // do_command({CMD_GET_FLUX_STATUS, 2});
+        if (hardSectorThreshold != 0)
+            error("hard sectors are currently unsupported on the Applesauce");
         error("unsupported operation write on the Greaseweazle");
     }
 
     void erase(int side, nanoseconds_t hardSectorThreshold) override
     {
-        // if (hardSectorThreshold != 0)
-        // error("hard sectors are currently unsupported on the Greaseweazle");
-        //
-        // do_command({CMD_HEAD, 3, (uint8_t)side});
-        //
-        // Bytes cmd(6);
-        // ByteWriter bw(cmd);
-        // bw.write_8(CMD_ERASE_FLUX);
-        // bw.write_8(cmd.size());
-        // bw.write_le32(200e6 / _clock);
-        // do_command(cmd);
-        // _serial->readByte(); /* synchronise */
-        //
-        // do_command({CMD_GET_FLUX_STATUS, 2});
-        error("unsupported operation erase on the Greaseweazle");
+        if (hardSectorThreshold != 0)
+            error("hard sectors are currently unsupported on the Applesauce");
+
+        connect();
+        doCommand(fmt::format("disk:side{}", side));
+        doCommand("disk:wipe");
     }
 
     void setDrive(int drive, bool high_density, int index_mode) override

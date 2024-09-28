@@ -31,4 +31,3 @@ Bytes applesauceToFluxEngine(const Bytes& asdata)
 
     return fluxmap.rawBytes();
 }
-
