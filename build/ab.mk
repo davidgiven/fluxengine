@@ -29,7 +29,7 @@ endif
 EXT ?=
 
 ifeq ($(PROGRESSINFO),)
-rulecount := $(shell test -f $(OBJ)/build.mk && $(MAKE) -n $(MAKECMDGOALS) PROGRESSINFO=XXXPROGRESSINFOXXX | grep XXXPROGRESSINFOXXX | wc -l)
+rulecount := $(shell $(MAKE) -q $(OBJ)/build.mk PROGRESSINFO=1 && $(MAKE) -n $(MAKECMDGOALS) PROGRESSINFO=XXXPROGRESSINFOXXX | grep XXXPROGRESSINFOXXX | wc -l)
 ruleindex := 1
 PROGRESSINFO = "$(shell $(PYTHON) build/_progress.py $(ruleindex) $(rulecount))$(eval ruleindex := $(shell expr $(ruleindex) + 1))"
 endif
@@ -53,8 +53,8 @@ clean::
 
 export PYTHONHASHSEED = 1
 build-files = $(shell find . -name 'build.py') $(wildcard build/*.py) $(wildcard config.py)
-$(OBJ)/build.mk: Makefile $(build-files)
+$(OBJ)/build.mk: Makefile $(build-files) build/ab.mk
 	@echo "AB"
 	@mkdir -p $(OBJ)
-	$(hide) $(PYTHON) -X pycache_prefix=$(OBJ) build/ab.py -o $@ build.py \
+	$(hide) $(PYTHON) -X pycache_prefix=$(OBJ)/__pycache__ build/ab.py -o $@ build.py \
 		|| rm -f $@

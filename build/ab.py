@@ -154,6 +154,9 @@ class Target:
     def __eq__(self, other):
         return self.name is other.name
 
+    def __lt__(self, other):
+        return self.name < other.name
+
     def __hash__(self):
         return id(self)
 
@@ -314,7 +317,12 @@ def targetof(value, cwd=None):
             # Load the new build file.
 
             path = join(path, "build.py")
-            loadbuildfile(path)
+            try:
+                loadbuildfile(path)
+            except ModuleNotFoundError:
+                error(
+                    f"no such build file '{path}' while trying to resolve '{value}'"
+                )
             assert (
                 value in targets
             ), f"build file at '{path}' doesn't contain '+{target}' when trying to resolve '{value}'"
@@ -411,7 +419,7 @@ def emit_rule(name, ins, outs, cmds=[], label=None):
     emit(".PHONY:", name, into=lines)
     if outs:
         emit(name, ":", *fouts, into=lines)
-        emit(*fouts, "&:", *fins, "\x01", into=lines)
+        emit(*fouts, "&:" if len(fouts) > 1 else ":", *fins, "\x01", into=lines)
 
         if label:
             emit("\t$(hide)", "$(ECHO) $(PROGRESSINFO) ", label, into=lines)
