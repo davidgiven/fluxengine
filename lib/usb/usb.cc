@@ -77,6 +77,14 @@ USB* get_usb_impl()
         return createGreaseweazleUsb(conf.port(), conf);
     }
 
+    if (globalConfig()->usb().has_applesauce() &&
+        globalConfig()->usb().applesauce().has_port())
+    {
+        const auto& conf = globalConfig()->usb().applesauce();
+        log("Using Applesauce on serial port {}", conf.port());
+        return createApplesauceUsb(conf.port(), conf);
+    }
+
     /* Otherwise, select a device by USB ID. */
 
     auto candidate = selectDevice();
@@ -94,7 +102,11 @@ USB* get_usb_impl()
                 candidate->serialPort, globalConfig()->usb().greaseweazle());
 
         case APPLESAUCE_ID:
-            error("Applesauce not supported yet");
+            log("Using Applesauce {} on {}",
+                candidate->serial,
+                candidate->serialPort);
+            return createApplesauceUsb(
+                candidate->serialPort, globalConfig()->usb().applesauce());
 
         default:
             error("internal");

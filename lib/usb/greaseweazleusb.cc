@@ -124,11 +124,6 @@ public:
         return br.read_be16();
     }
 
-    void recalibrate() override
-    {
-        seek(0);
-    }
-
     void seek(int track) override
     {
         do_command({CMD_SEEK, 3, (uint8_t)track});

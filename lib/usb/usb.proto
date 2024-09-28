@@ -16,9 +16,15 @@ message GreaseweazleProto {
 		[(help) = "which FDD bus type is in use", default = IBMPC];
 }
 
+message ApplesauceProto {
+	optional string port = 1
+		[(help) = "Applesauce serial port to use"];
+}
+
 message UsbProto {
 	optional string serial = 1
 		[(help) = "serial number of FluxEngine or Greaseweazle device to use"];
 
 	optional GreaseweazleProto greaseweazle = 2 [(help) = "Greaseweazle-specific options"];
+	optional ApplesauceProto applesauce = 3 [(help) = "Applesauce-specific options"];
 }

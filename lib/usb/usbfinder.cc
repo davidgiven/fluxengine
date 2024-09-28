@@ -42,13 +42,17 @@ std::vector<std::shared_ptr<CandidateDevice>> findUsbDevices()
                 candidate->serial = get_serial_number(it);
 
                 if (id == GREASEWEAZLE_ID)
+                    candidate->type = DEVICE_GREASEWEAZLE;
+                else if (id == APPLESAUCE_ID)
+                    candidate->type = DEVICE_APPLESAUCE;
+                else if (id == FLUXENGINE_ID)
+                    candidate->type = DEVICE_FLUXENGINE;
+
+                if ((id == GREASEWEAZLE_ID) || (id == APPLESAUCE_ID))
                 {
                     libusbp::serial_port port(candidate->device);
                     candidate->serialPort = port.get_name();
-                    candidate->type = DEVICE_GREASEWEAZLE;
                 }
-                else if (id == FLUXENGINE_ID)
-                    candidate->type = DEVICE_FLUXENGINE;
 
                 candidates.push_back(std::move(candidate));
             }
