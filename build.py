@@ -211,6 +211,7 @@ cxxlibrary(
         "lib/proto.h": "./lib/proto.h",
         "lib/readerwriter.h": "./lib/readerwriter.h",
         "lib/sector.h": "./lib/sector.h",
+        "lib/usb/applesauce.h": "./lib/usb/applesauce.h",
         "lib/usb/greaseweazle.h": "./lib/usb/greaseweazle.h",
         "lib/usb/usb.h": "./lib/usb/usb.h",
         "lib/usb/usbfinder.h": "./lib/usb/usbfinder.h",

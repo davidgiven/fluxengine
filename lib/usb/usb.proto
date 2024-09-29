@@ -19,6 +19,8 @@ message GreaseweazleProto {
 message ApplesauceProto {
 	optional string port = 1
 		[(help) = "Applesauce serial port to use"];
+	optional bool verbose = 2
+		[(help) = "Enable verbose protocol logging", default = false];
 }
 
 message UsbProto {

@@ -43,26 +43,33 @@ public:
 private:
     std::string sendrecv(const std::string& command)
     {
-        fmt::print(fmt::format("> {}\n", command));
+        if (_config.verbose())
+            fmt::print(fmt::format("> {}\n", command));
         _serial->writeLine(command);
         auto r = _serial->readLine();
-        fmt::print(fmt::format("< {}\n", r));
+        if (_config.verbose())
+            fmt::print(fmt::format("< {}\n", r));
         return r;
     }
 
-    bool doCommand(const std::string& command)
+    void checkCommandResult(const std::string& result)
     {
-        return sendrecv(command) == ".";
+        if (result != ".")
+            throw ApplesauceException(
+                fmt::format("low-level Applesauce error: '{}'", result));
+    }
+
+    void doCommand(const std::string& command)
+    {
+        checkCommandResult(sendrecv(command));
     }
 
     std::string doCommandX(const std::string& command)
     {
-        std::string r = sendrecv(command);
-        if (r != ".")
-            throw ApplesauceException(
-                fmt::format("low-level Applesauce error: '{}'", r));
-        r = _serial->readLine();
-        fmt::print(fmt::format("<< {}\n", r));
+        doCommand(command);
+        std::string r = _serial->readLine();
+        if (_config.verbose())
+            fmt::print(fmt::format("<< {}\n", r));
         return r;
     }
 
@@ -70,11 +77,18 @@ private:
     {
         if (!_connected)
         {
-            if (!doCommand("connect"))
-                error("Applesauce could not find any drives");
-            doCommand("drive:enable");
-            doCommand("motor:on");
-            _connected = true;
+            try
+            {
+                doCommand("connect");
+                doCommand("drive:enable");
+                doCommand("motor:on");
+                doCommand("head:zero");
+                _connected = true;
+            }
+            catch (const ApplesauceException& e)
+            {
+                error("Applesauce could not connect to a drive");
+            }
         }
     }
 
@@ -95,10 +109,12 @@ public:
         connect();
         try
         {
-            double rpm = std::stod(doCommandX("sync:?speed")) / 1000.0;
-            sendrecv("X");
-            fmt::print("< {}\n", _serial->readLine());
-            return 60e9 / rpm;
+            double period_us = std::stod(doCommandX("sync:?speed"));
+            _serial->writeByte('X');
+            std::string r = _serial->readLine();
+            if (_config.verbose())
+                fmt::print("<< {}\n", r);
+            return period_us * 1e3;
         }
         catch (const ApplesauceException& e)
         {
@@ -111,8 +127,7 @@ public:
         int max = std::stoi(sendrecv("data:?max"));
         fmt::print("Writing data: ");
 
-        if (!doCommand(fmt::format("data:>{}", max)))
-            error("Cannot write to Applesauce");
+        doCommand(fmt::format("data:>{}", max));
 
         Bytes junk(max);
         uint32_t seed = 0;
@@ -138,8 +153,7 @@ public:
         int max = std::stoi(sendrecv("data:?max"));
         fmt::print("Reading data: ");
 
-        if (!doCommand(fmt::format("data:<{}", max)))
-            error("Cannot read from Applesauce");
+        doCommand(fmt::format("data:<{}", max));
 
         double start_time = getCurrentTime();
         _serial->readBytes(max);
@@ -161,7 +175,7 @@ public:
             error("hard sectors are currently unsupported on the Applesauce");
 
         connect();
-        doCommand(fmt::format("disk:side{}", side));
+        doCommand(fmt::format("head:side{}", side));
         doCommand(synced ? "sync:on" : "sync:off");
         doCommand("data:clear");
         doCommandX("disk:read");
@@ -180,7 +194,25 @@ public:
     {
         if (hardSectorThreshold != 0)
             error("hard sectors are currently unsupported on the Applesauce");
-        error("unsupported operation write on the Greaseweazle");
+
+        if (sendrecv("disk:?write") == "-")
+            error("cannot write --- disk is write protected");
+        if (sendrecv("?safe") == "+")
+            error("cannot write --- Applesauce 'safe' switch is on");
+
+        connect();
+        doCommand(fmt::format("head:side{}", side));
+        doCommand("sync:on");
+        doCommand("data:clear");
+
+        Bytes asdata = fluxEngineToApplesauce(fldata);
+        doCommand(fmt::format("data:>{}", asdata.size()));
+        _serial->write(asdata);
+        checkCommandResult(_serial->readLine());
+
+        doCommand("disk:wclear");
+        doCommand("disk:wcmd");
+        doCommandX("disk:write");
     }
 
     void erase(int side, nanoseconds_t hardSectorThreshold) override
