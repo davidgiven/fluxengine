@@ -7,11 +7,64 @@
 #include "applesauce.h"
 #include "serial.h"
 #include "usb.h"
+#include "lib/decoders/fluxmapreader.h"
 #include <unistd.h>
 
 static uint32_t ss_rand_next(uint32_t x)
 {
     return (x & 1) ? (x >> 1) ^ 0x80000062 : x >> 1;
+}
+
+static Bytes applesauceReadDataToFluxEngine(
+    const Bytes& asdata, nanoseconds_t clock)
+{
+    ByteReader br(asdata);
+    Fluxmap fluxmap;
+
+    double a2rTicksSinceLastPulse = 0;
+    while (!br.eof())
+    {
+        uint8_t b = br.read_8();
+        a2rTicksSinceLastPulse += b;
+        if (b != 255)
+        {
+            fluxmap.appendInterval(
+                a2rTicksSinceLastPulse * clock / NS_PER_TICK);
+            fluxmap.appendPulse();
+            a2rTicksSinceLastPulse = 0;
+        }
+    }
+
+    return fluxmap.rawBytes();
+}
+
+static Bytes fluxEngineToApplesauceWriteData(
+    const Bytes& fldata, nanoseconds_t clock)
+{
+    Fluxmap fluxmap(fldata);
+    FluxmapReader fmr(fluxmap);
+    Bytes asdata;
+    ByteWriter bw(asdata);
+
+    while (!fmr.eof())
+    {
+        unsigned ticks;
+        if (!fmr.findEvent(F_BIT_PULSE, ticks))
+            break;
+
+        uint32_t applesauceTicks = ticks * NS_PER_TICK / clock;
+        while (applesauceTicks >= 0xffff)
+        {
+            bw.write_le16(0xffff);
+            applesauceTicks -= 0xffff;
+        }
+        if (applesauceTicks == 0)
+            error("bad data!");
+        bw.write_le16(applesauceTicks);
+    }
+
+    bw.write_le16(0);
+    return asdata;
 }
 
 class ApplesauceException : public ErrorException
@@ -33,6 +86,8 @@ public:
                 "Applesauce device not responding (expected 'Applesauce', got "
                 "'{}')",
                 s);
+
+        doCommand("client:v2");
     }
 
     ~ApplesauceUsb()
@@ -173,52 +228,70 @@ public:
     {
         if (hardSectorThreshold != 0)
             error("hard sectors are currently unsupported on the Applesauce");
+        bool shortRead = readTime < 400e6;
+        warning(
+            "applesauce: timed reads not supported; using read of {} "
+            "revolutions",
+            shortRead ? "1.25" : "2.25");
 
         connect();
         doCommand(fmt::format("head:side{}", side));
-        doCommand(synced ? "sync:on" : "sync:off");
+        doCommand("sync:on");
         doCommand("data:clear");
-        doCommandX("disk:read");
+        std::string r = doCommandX(shortRead ? "disk:read" : "disk:xread");
+        auto rsplit = split(r, '|');
+        if (rsplit.size() < 2)
+            error("unrecognised Applesauce response to disk:read: '{}'", r);
 
-        int bufferSize = std::stoi(sendrecv("data:?size"));
+        int bufferSize = std::stoi(rsplit[0]);
+        nanoseconds_t tickSize = std::stod(rsplit[1]) / 1e3;
 
         doCommand(fmt::format("data:<{}", bufferSize));
 
         Bytes rawData = _serial->readBytes(bufferSize);
-        return applesauceToFluxEngine(rawData);
+        Bytes b = applesauceReadDataToFluxEngine(rawData, tickSize);
+        return b;
     }
 
+private:
+    void checkWritable()
+    {
+        if (sendrecv("disk:?write") == "-")
+            error("cannot write --- disk is write protected");
+        if (sendrecv("?safe") == "+")
+            error("cannot write --- Applesauce 'safe' switch is on");
+    }
+
+public:
     void write(int side,
         const Bytes& fldata,
         nanoseconds_t hardSectorThreshold) override
     {
         if (hardSectorThreshold != 0)
             error("hard sectors are currently unsupported on the Applesauce");
-
-        if (sendrecv("disk:?write") == "-")
-            error("cannot write --- disk is write protected");
-        if (sendrecv("?safe") == "+")
-            error("cannot write --- Applesauce 'safe' switch is on");
+        checkWritable();
 
         connect();
         doCommand(fmt::format("head:side{}", side));
         doCommand("sync:on");
+        doCommand("disk:wipe");
         doCommand("data:clear");
+        doCommand("disk:wclear");
 
-        Bytes asdata = fluxEngineToApplesauce(fldata);
+        Bytes asdata =
+            fluxEngineToApplesauceWriteData(fldata, _config.write_clock());
         doCommand(fmt::format("data:>{}", asdata.size()));
         _serial->write(asdata);
         checkCommandResult(_serial->readLine());
-
-        doCommand("disk:wclear");
-        doCommand("disk:wcmd");
-        doCommandX("disk:write");
+        doCommand("disk:wcmd0,0");
+        doCommand("disk:write");
     }
 
     void erase(int side, nanoseconds_t hardSectorThreshold) override
     {
         if (hardSectorThreshold != 0)
             error("hard sectors are currently unsupported on the Applesauce");
+        checkWritable();
 
         connect();
         doCommand(fmt::format("disk:side{}", side));
