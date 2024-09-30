@@ -6,6 +6,7 @@
 #include "lib/proto.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/fluxsink/fluxsink.h"
+#include "lib/usb/usb.h"
 #include "fluxengine.h"
 #include <fstream>
 #include <ctype.h>
@@ -61,6 +62,7 @@ int mainRawWrite(int argc, const char* argv[])
         showProfiles("rawwrite", formats);
     globalConfig().overrides()->mutable_flux_sink()->set_type(FLUXTYPE_DRIVE);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
+    auto usb = USB::create();
 
     if (globalConfig()->flux_source().type() == FLUXTYPE_DRIVE)
         error("you can't use rawwrite to read from hardware");

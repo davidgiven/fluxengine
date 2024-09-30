@@ -11,6 +11,7 @@
 #include "lib/vfs/sectorinterface.h"
 #include "lib/vfs/vfs.h"
 #include "lib/utils.h"
+#include "lib/usb/usb.h"
 #include "src/fileutils.h"
 #include <google/protobuf/text_format.h>
 #include <fstream>
@@ -40,33 +41,28 @@ int mainLs(int argc, const char* argv[])
         showProfiles("ls", formats);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
-    try
-    {
-        auto filesystem = Filesystem::createFilesystemFromConfig();
-        auto files = filesystem->list(Path(directory));
+    auto usb = USB::create();
 
-        int maxlen = 0;
-        for (const auto& dirent : files)
-            maxlen = std::max(maxlen, (int)quote(dirent->filename).size());
+    auto filesystem = Filesystem::createFilesystemFromConfig();
+    auto files = filesystem->list(Path(directory));
 
-        uint32_t total = 0;
-        for (const auto& dirent : files)
-        {
-            fmt::print("{} {:{}}  {:6} {:4} {}\n",
-                fileTypeChar(dirent->file_type),
-                quote(dirent->filename),
-                maxlen + 2,
-                dirent->length,
-                dirent->mode,
-                dirent->attributes[Filesystem::CTIME]);
-            total += dirent->length;
-        }
-        fmt::print("({} files, {} bytes)\n", files.size(), total);
-    }
-    catch (const FilesystemException& e)
+    int maxlen = 0;
+    for (const auto& dirent : files)
+        maxlen = std::max(maxlen, (int)quote(dirent->filename).size());
+
+    uint32_t total = 0;
+    for (const auto& dirent : files)
     {
-        error("{}", e.message);
+        fmt::print("{} {:{}}  {:6} {:4} {}\n",
+            fileTypeChar(dirent->file_type),
+            quote(dirent->filename),
+            maxlen + 2,
+            dirent->length,
+            dirent->mode,
+            dirent->attributes[Filesystem::CTIME]);
+        total += dirent->length;
     }
+    fmt::print("({} files, {} bytes)\n", files.size(), total);
 
     return 0;
 }

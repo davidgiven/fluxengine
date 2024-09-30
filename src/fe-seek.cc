@@ -26,6 +26,7 @@ int mainSeek(int argc, const char* argv[])
     if (globalConfig()->flux_source().type() != FLUXTYPE_DRIVE)
         error("this only makes sense with a real disk drive");
 
+    auto usb = USB::create();
     usbSetDrive(globalConfig()->drive().drive(),
         false,
         globalConfig()->drive().index_mode());

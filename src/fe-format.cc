@@ -11,6 +11,7 @@
 #include "fluxengine.h"
 #include "lib/vfs/sectorinterface.h"
 #include "lib/vfs/vfs.h"
+#include "lib/usb/usb.h"
 #include "src/fileutils.h"
 #include <google/protobuf/text_format.h>
 #include <fstream>
@@ -27,16 +28,10 @@ int mainFormat(int argc, const char* argv[])
         showProfiles("format", formats);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
-    try
-    {
-        auto filesystem = Filesystem::createFilesystemFromConfig();
-        filesystem->create(quick, volumeName);
-        filesystem->flushChanges();
-    }
-    catch (const FilesystemException& e)
-    {
-        error("{}", e.message);
-    }
+    auto usb = USB::create();
+    auto filesystem = Filesystem::createFilesystemFromConfig();
+    filesystem->create(quick, volumeName);
+    filesystem->flushChanges();
 
     return 0;
 }

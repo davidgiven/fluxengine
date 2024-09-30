@@ -10,6 +10,7 @@
 #include "lib/decoders/rawbits.h"
 #include "lib/sector.h"
 #include "lib/proto.h"
+#include "lib/usb/usb.h"
 
 static FlagGroup flags;
 
@@ -133,6 +134,7 @@ int mainInspect(int argc, const char* argv[])
 {
     globalConfig().overrides()->mutable_flux_source()->set_type(FLUXTYPE_DRIVE);
     flags.parseFlagsWithConfigFiles(argc, argv, {});
+    auto usb = USB::create();
 
     auto& fluxSource = globalConfig().getFluxSource();
     const auto fluxmap = fluxSource->readFlux(trackFlag, headFlag)->next();

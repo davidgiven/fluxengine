@@ -8,6 +8,7 @@
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/imagewriter/imagewriter.h"
+#include "lib/usb/usb.h"
 #include "fluxengine.h"
 #include <google/protobuf/text_format.h>
 #include <fstream>
@@ -55,6 +56,7 @@ int mainRawRead(int argc, const char* argv[])
         showProfiles("rawread", formats);
     globalConfig().overrides()->mutable_flux_source()->set_type(FLUXTYPE_DRIVE);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
+    auto usb = USB::create();
 
     if (globalConfig()->flux_sink().type() == FLUXTYPE_DRIVE)
         error("you can't use rawread to write to hardware");

@@ -7,6 +7,7 @@
 #include "lib/csvreader.h"
 #include "lib/image.h"
 #include "lib/decoders/fluxmapreader.h"
+#include "lib/usb/usb.h"
 #include "agg2d.h"
 #include "stb_image_write.h"
 #include <math.h>
@@ -228,6 +229,7 @@ static Image readCsv(const std::string& filename)
 int mainAnalyseLayout(int argc, const char* argv[])
 {
     flags.parseFlags(argc, argv);
+    auto usb = USB::create();
 
     Image image = readCsv(source.get());
     visualiseSectorsToFile(image, "out.svg");

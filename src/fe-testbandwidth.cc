@@ -7,6 +7,7 @@ static FlagGroup flags;
 int mainTestBandwidth(int argc, const char* argv[])
 {
     flags.parseFlagsWithConfigFiles(argc, argv, {});
+    auto usb = USB::create();
     usbTestBulkWrite();
     usbTestBulkRead();
     return 0;
