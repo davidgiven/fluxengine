@@ -356,7 +356,7 @@ public:
         Bytes fldata = greaseWeazleToFluxEngine(buffer, _clock);
         if (synced)
             fldata = stripPartialRotation(fldata);
-        return fldata;
+        return fldata;reaseweazle
     }
 
     void write(int side,
