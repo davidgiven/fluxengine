@@ -52,7 +52,7 @@ static Bytes fluxEngineToApplesauceWriteData(
         if (!fmr.findEvent(F_BIT_PULSE, ticks))
             break;
 
-        uint32_t applesauceTicks = ticks * NS_PER_TICK / clock;
+        uint32_t applesauceTicks = (double)ticks * NS_PER_TICK / clock;
         while (applesauceTicks >= 0xffff)
         {
             bw.write_le16(0xffff);
@@ -279,7 +279,7 @@ public:
         doCommand("disk:wclear");
 
         Bytes asdata =
-            fluxEngineToApplesauceWriteData(fldata, _config.write_clock());
+            fluxEngineToApplesauceWriteData(fldata, _config.write_clock_ns());
         doCommand(fmt::format("data:>{}", asdata.size()));
         _serial->write(asdata);
         checkCommandResult(_serial->readLine());
