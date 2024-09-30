@@ -15,6 +15,7 @@ static std::string display_voltages(struct voltages& v)
 int mainTestVoltages(int argc, const char* argv[])
 {
     flags.parseFlagsWithConfigFiles(argc, argv, {});
+    auto usb = USB::create();
     struct voltages_frame f;
     usbMeasureVoltages(&f);
 

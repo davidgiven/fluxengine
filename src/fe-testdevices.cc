@@ -1,5 +1,6 @@
 #include "lib/globals.h"
 #include "lib/flags.h"
+#include "lib/usb/usb.h"
 #include "lib/usb/usbfinder.h"
 #include <fmt/format.h>
 
@@ -8,6 +9,7 @@ static FlagGroup flags;
 int mainTestDevices(int argc, const char* argv[])
 {
     flags.parseFlagsWithConfigFiles(argc, argv, {});
+    auto usb = USB::create();
 
     auto candidates = findUsbDevices();
     switch (candidates.size())

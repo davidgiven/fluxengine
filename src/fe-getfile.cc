@@ -11,6 +11,7 @@
 #include "fluxengine.h"
 #include "lib/vfs/sectorinterface.h"
 #include "lib/vfs/vfs.h"
+#include "lib/usb/usb.h"
 #include "src/fileutils.h"
 #include <google/protobuf/text_format.h>
 #include <fstream>
@@ -26,24 +27,19 @@ int mainGetFile(int argc, const char* argv[])
         showProfiles("getfile", formats);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
-    try
-    {
-        Path inputFilename(directory);
-        if (inputFilename.size() == 0)
-            error("you must supply a filename to read");
+    auto usb = USB::create();
 
-        std::string outputFilename = output;
-        if (outputFilename.empty())
-            outputFilename = inputFilename.back();
+    Path inputFilename(directory);
+    if (inputFilename.size() == 0)
+        error("you must supply a filename to read");
 
-        auto filesystem = Filesystem::createFilesystemFromConfig();
-        auto data = filesystem->getFile(inputFilename);
-        data.writeToFile(outputFilename);
-    }
-    catch (const FilesystemException& e)
-    {
-        error("{}", e.message);
-    }
+    std::string outputFilename = output;
+    if (outputFilename.empty())
+        outputFilename = inputFilename.back();
+
+    auto filesystem = Filesystem::createFilesystemFromConfig();
+    auto data = filesystem->getFile(inputFilename);
+    data.writeToFile(outputFilename);
 
     return 0;
 }

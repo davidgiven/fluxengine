@@ -10,6 +10,7 @@
 #include "lib/imagereader/imagereader.h"
 #include "lib/imagewriter/imagewriter.h"
 #include "lib/layout.h"
+#include "lib/usb/usb.h"
 #include "texteditorwindow.h"
 #include "iconbutton.h"
 #include <wx/config.h>
@@ -291,6 +292,11 @@ public:
 
         globalConfig().validateAndThrow();
         ClearLog();
+
+        /* Ensure the USB device is opened. */
+
+        _usb.reset();
+        _usb = USB::create();
     }
 
     const wxBitmap GetBitmap() override
@@ -809,6 +815,7 @@ private:
     std::string _extraConfiguration;
     std::set<std::pair<std::string, std::string>> _formatOptions;
     int _currentlyDisplayedFormat = wxNOT_FOUND - 1;
+    std::unique_ptr<USB> _usb;
 };
 
 IdlePanel* IdlePanel::Create(MainWindow* mainWindow, wxSimplebook* parent)

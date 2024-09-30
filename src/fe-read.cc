@@ -8,6 +8,7 @@
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/imagewriter/imagewriter.h"
+#include "lib/usb/usb.h"
 #include "fluxengine.h"
 #include <google/protobuf/text_format.h>
 #include <fstream>
@@ -60,6 +61,7 @@ int mainRead(int argc, const char* argv[])
         showProfiles("read", formats);
     globalConfig().set("flux_source.type", "FLUXTYPE_DRIVE");
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
+    auto usb = USB::create();
 
     if (globalConfig()->decoder().copy_flux_to().type() == FLUXTYPE_DRIVE)
         error("you cannot copy flux to a hardware device");

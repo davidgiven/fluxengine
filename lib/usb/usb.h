@@ -14,6 +14,9 @@ namespace libusbp
 class USB
 {
 public:
+    static std::unique_ptr<USB> create();
+
+public:
     virtual ~USB();
 
     virtual int getVersion() = 0;

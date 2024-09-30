@@ -4,6 +4,7 @@
 #include "fluxengine.h"
 #include "lib/vfs/vfs.h"
 #include "lib/utils.h"
+#include "lib/usb/usb.h"
 #include "src/fileutils.h"
 #include <google/protobuf/text_format.h>
 #include <fstream>
@@ -19,25 +20,19 @@ int mainMv(int argc, const char* argv[])
         showProfiles("mv", formats);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
-    try
-    {
-        auto filesystem = Filesystem::createFilesystemFromConfig();
+    auto usb = USB::create();
+    auto filesystem = Filesystem::createFilesystemFromConfig();
 
-        Path oldPath(oldFilename);
-        if (oldPath.size() == 0)
-            error("old filename missing");
+    Path oldPath(oldFilename);
+    if (oldPath.size() == 0)
+        error("old filename missing");
 
-        Path newPath(newFilename);
-        if (newPath.size() == 0)
-            error("new filename missing");
+    Path newPath(newFilename);
+    if (newPath.size() == 0)
+        error("new filename missing");
 
-        filesystem->moveFile(oldPath, newPath);
-        filesystem->flushChanges();
-    }
-    catch (const FilesystemException& e)
-    {
-        error("{}", e.message);
-    }
+    filesystem->moveFile(oldPath, newPath);
+    filesystem->flushChanges();
 
     return 0;
 }

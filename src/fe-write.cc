@@ -11,6 +11,7 @@
 #include "arch/brother/brother.h"
 #include "arch/ibm/ibm.h"
 #include "lib/imagereader/imagereader.h"
+#include "lib/usb/usb.h"
 #include "fluxengine.h"
 #include <google/protobuf/text_format.h>
 #include <fstream>
@@ -66,6 +67,7 @@ int mainWrite(int argc, const char* argv[])
     globalConfig().setVerificationFluxSource("drive:0");
 
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
+    auto usb = USB::create();
 
     auto& reader = globalConfig().getImageReader();
     std::shared_ptr<Image> image = reader->readMappedImage();

@@ -11,9 +11,12 @@
 #include "lib/logger.h"
 #include "greaseweazle.h"
 
-static USB* usb = NULL;
+static USB* usb = nullptr;
 
-USB::~USB() {}
+USB::~USB()
+{
+    usb = nullptr;
+}
 
 static std::shared_ptr<CandidateDevice> selectDevice()
 {
@@ -59,8 +62,12 @@ static std::shared_ptr<CandidateDevice> selectDevice()
     exit(1);
 }
 
-USB* get_usb_impl()
+std::unique_ptr<USB> USB::create()
 {
+    std::unique_ptr<USB> r;
+    if (usb)
+        error("more than one USB object created");
+
     /* Special case for certain configurations. */
 
     if (globalConfig()->usb().has_greaseweazle() &&
@@ -68,33 +75,40 @@ USB* get_usb_impl()
     {
         const auto& conf = globalConfig()->usb().greaseweazle();
         log("Using Greaseweazle on serial port {}", conf.port());
-        return createGreaseweazleUsb(conf.port(), conf);
+        r.reset(createGreaseweazleUsb(conf.port(), conf));
     }
-
-    /* Otherwise, select a device by USB ID. */
-
-    auto candidate = selectDevice();
-    switch (candidate->id)
+    else
     {
-        case FLUXENGINE_ID:
-            log("Using FluxEngine {}", candidate->serial);
-            return createFluxengineUsb(candidate->device);
+        /* Otherwise, select a device by USB ID. */
 
-        case GREASEWEAZLE_ID:
-            log("Using Greaseweazle {} on {}",
-                candidate->serial,
-                candidate->serialPort);
-            return createGreaseweazleUsb(
-                candidate->serialPort, globalConfig()->usb().greaseweazle());
+        auto candidate = selectDevice();
+        switch (candidate->id)
+        {
+            case FLUXENGINE_ID:
+                log("Using FluxEngine {}", candidate->serial);
+                r.reset(createFluxengineUsb(candidate->device));
+                break;
 
-        default:
-            error("internal");
+            case GREASEWEAZLE_ID:
+                log("Using Greaseweazle {} on {}",
+                    candidate->serial,
+                    candidate->serialPort);
+                r.reset(createGreaseweazleUsb(candidate->serialPort,
+                    globalConfig()->usb().greaseweazle()));
+                break;
+
+            default:
+                error("internal");
+        }
     }
+
+    usb = r.get();
+    return r;
 }
 
 USB& getUsb()
 {
     if (!usb)
-        usb = get_usb_impl();
+        error("USB instance not created");
     return *usb;
 }

@@ -4,6 +4,7 @@
 #include "fluxengine.h"
 #include "lib/vfs/vfs.h"
 #include "lib/utils.h"
+#include "lib/usb/usb.h"
 #include "src/fileutils.h"
 #include <google/protobuf/text_format.h>
 #include <fstream>
@@ -18,21 +19,15 @@ int mainMkDir(int argc, const char* argv[])
         showProfiles("mkdir", formats);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
-    try
-    {
-        auto filesystem = Filesystem::createFilesystemFromConfig();
+    auto usb = USB::create();
+    auto filesystem = Filesystem::createFilesystemFromConfig();
 
-        Path path(filename);
-        if (path.size() == 0)
-            error("filename missing");
+    Path path(filename);
+    if (path.size() == 0)
+        error("filename missing");
 
-        filesystem->createDirectory(path);
-        filesystem->flushChanges();
-    }
-    catch (const FilesystemException& e)
-    {
-        error("{}", e.message);
-    }
+    filesystem->createDirectory(path);
+    filesystem->flushChanges();
 
     return 0;
 }

@@ -252,6 +252,7 @@ int mainAnalyseDriveResponse(int argc, const char* argv[])
     if (globalConfig()->flux_sink().type() != FLUXTYPE_DRIVE)
         error("this only makes sense with a real disk drive");
 
+    auto usb = USB::create();
     usbSetDrive(globalConfig()->drive().drive(),
         globalConfig()->drive().high_density(),
         globalConfig()->drive().index_mode());

@@ -11,6 +11,7 @@
 #include "fluxengine.h"
 #include "lib/vfs/sectorinterface.h"
 #include "lib/vfs/vfs.h"
+#include "lib/usb/usb.h"
 #include "src/fileutils.h"
 #include <google/protobuf/text_format.h>
 #include <fstream>
@@ -26,25 +27,19 @@ int mainPutFile(int argc, const char* argv[])
         showProfiles("putfile", formats);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
-    try
-    {
-        std::string inputFilename = input;
-        if (inputFilename.empty())
-            error("you must supply a local file to read from");
+    auto usb = USB::create();
+    std::string inputFilename = input;
+    if (inputFilename.empty())
+        error("you must supply a local file to read from");
 
-        Path outputFilename(path);
-        if (outputFilename.size() == 0)
-            error("you must supply a destination path to write to");
+    Path outputFilename(path);
+    if (outputFilename.size() == 0)
+        error("you must supply a destination path to write to");
 
-        auto data = Bytes::readFromFile(inputFilename);
-        auto filesystem = Filesystem::createFilesystemFromConfig();
-        filesystem->putFile(outputFilename, data);
-        filesystem->flushChanges();
-    }
-    catch (const FilesystemException& e)
-    {
-        error("{}", e.message);
-    }
+    auto data = Bytes::readFromFile(inputFilename);
+    auto filesystem = Filesystem::createFilesystemFromConfig();
+    filesystem->putFile(outputFilename, data);
+    filesystem->flushChanges();
 
     return 0;
 }

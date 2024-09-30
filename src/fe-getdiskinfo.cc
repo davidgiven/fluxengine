@@ -12,6 +12,7 @@
 #include "lib/vfs/sectorinterface.h"
 #include "lib/vfs/vfs.h"
 #include "lib/utils.h"
+#include "lib/usb/usb.h"
 #include "src/fileutils.h"
 #include <google/protobuf/text_format.h>
 #include <fstream>
@@ -24,18 +25,12 @@ int mainGetDiskInfo(int argc, const char* argv[])
         showProfiles("getdiskinfo", formats);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
-    try
-    {
-        auto filesystem = Filesystem::createFilesystemFromConfig();
-        auto attributes = filesystem->getMetadata();
+    auto usb = USB::create();
+    auto filesystem = Filesystem::createFilesystemFromConfig();
+    auto attributes = filesystem->getMetadata();
 
-        for (const auto& e : attributes)
-            fmt::print("{}={}\n", e.first, quote(e.second));
-    }
-    catch (const FilesystemException& e)
-    {
-        error("{}", e.message);
-    }
+    for (const auto& e : attributes)
+        fmt::print("{}={}\n", e.first, quote(e.second));
 
     return 0;
 }
