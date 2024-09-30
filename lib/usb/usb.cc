@@ -11,7 +11,7 @@
 #include "lib/logger.h"
 #include "greaseweazle.h"
 
-static USB* usb;
+static USB* usb = nullptr;
 
 USB::~USB()
 {
