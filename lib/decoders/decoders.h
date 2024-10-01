@@ -8,6 +8,7 @@
 
 class Sector;
 class Fluxmap;
+class FluxMatcher;
 class FluxmapReader;
 class RawBits;
 class DecoderProto;

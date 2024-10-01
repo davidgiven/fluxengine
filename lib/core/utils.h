@@ -21,6 +21,7 @@ extern std::string tohex(const std::string& s);
 extern bool doesFileExist(const std::string& filename);
 extern int countSetBits(uint32_t word);
 extern uint32_t unbcd(uint32_t bcd);
+extern int findLowestSetBit(uint64_t value);
 
 template <class K, class V>
 std::map<V, K> reverseMap(const std::map<K, V>& map)

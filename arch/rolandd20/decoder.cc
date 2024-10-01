@@ -3,6 +3,7 @@
 #include "lib/core/crc.h"
 #include "lib/fluxmap.h"
 #include "lib/decoders/fluxmapreader.h"
+#include "lib/decoders/fluxpattern.h"
 #include "lib/sector.h"
 #include "lib/core/bytes.h"
 #include "rolandd20.h"

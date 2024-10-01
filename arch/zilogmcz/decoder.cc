@@ -1,6 +1,7 @@
 #include "lib/core/globals.h"
 #include "lib/fluxmap.h"
 #include "lib/decoders/fluxmapreader.h"
+#include "lib/decoders/fluxpattern.h"
 #include "protocol.h"
 #include "lib/decoders/decoders.h"
 #include "lib/sector.h"
