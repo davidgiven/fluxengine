@@ -100,7 +100,8 @@ export(
                     "lib+config_proto_lib",
                     "src/formats",
                 ]
-                + ([".+test_proto_lib"] if n == "options" else []),
+                + ([".+test_proto_lib"] if n == "options" else [])
+                + (["lib/vfs"] if n in {"cpmfs", "applesingle", "vfs"} else []),
             ),
         )
         for n in tests
