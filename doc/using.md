@@ -50,9 +50,9 @@ file while changing the decoder options, to save disk wear. It's also much faste
 
 ### Connecting it up
 
-To use, simply plug your FluxEngine (or [Greaseweazle](greaseweazle.md)) into
-your computer and run the client. If a single device is plugged in, it will be
-automatically detected and used.
+To use, simply plug your FluxEngine (or [Greaseweazle](greaseweazle.md) or
+[Applesauce](applesauce.md)) into your computer and run the client. If a single
+device is plugged in, it will be automatically detected and used.
 
 If _more_ than one device is plugged in, you need to specify which one to use
 with the `--usb.serial` parameter, which takes the device serial number as a

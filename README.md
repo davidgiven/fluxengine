@@ -4,11 +4,8 @@ FluxEngine
 (If you're reading this on GitHub, the formatting's a bit messed up. [Try the
 version on cowlark.com instead.](http://cowlark.com/fluxengine/))
 
-**Breaking news!** As of 2022-09-09, there's new [filesystem
-support](doc/filesystem.md). Read (and sometimes write) files directly from
-(and to) your disks, with eight different file systems! It works in the GUI,
-too, which is available for Linux (and other Unix clones), Windows and OSX. See
-the details below.
+**Breaking news!** As of 2024-10-01, the FluxEngine client software works
+(to a point) with [Applesauce](doc/applesauce.md) hardware.
 
 <div style="text-align: center">
 <a href="doc/screenshot.jpg"><img src="doc/screenshot.jpg" style="width:60%" alt="screenshot of the GUI in action"></a>
@@ -35,12 +32,14 @@ Don't believe me? Watch the demo reel!
 </div>
 
 **New!** The FluxEngine client software now works with
-[Greaseweazle](https://github.com/keirf/Greaseweazle/wiki) hardware. So, if you
-can't find a PSoC5 development kit, or don't want to use the Cypress Windows
-tools for programming it, you can use one of these instead. Very nearly all
-FluxEngine features are available with the Greaseweazle and it works out-of-the
-box. See the [dedicated Greaseweazle documentation page](doc/greaseweazle.md)
-for more information.
+[Greaseweazle](https://github.com/keirf/Greaseweazle/wiki) and
+[Applesauce](https://applesaucefdc.com/) hardware. So, if you can't find a PSoC5
+development kit, or don't want to use the Cypress Windows tools for programming
+it, you can use one of these instead. Very nearly all FluxEngine features are
+available with the Greaseweazle and it works out-of-the box; the Applesauce is a
+bit less supported but still works. See the [dedicated Greaseweazle
+documentation page](doc/greaseweazle.md) or the [Applesauce
+page](doc/applesauce.md) for more information.
 
 Where?
 ------
