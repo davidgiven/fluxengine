@@ -18,23 +18,28 @@ static uint32_t ss_rand_next(uint32_t x)
     return (x & 1) ? (x >> 1) ^ 0x80000062 : x >> 1;
 }
 
-static Bytes applesauceReadDataToFluxEngine(
-    const Bytes& asdata, nanoseconds_t clock)
+static Bytes applesauceReadDataToFluxEngine(const Bytes& asdata,
+    nanoseconds_t clock,
+    const std::vector<unsigned>& indexMarks)
 {
     ByteReader br(asdata);
     Fluxmap fluxmap;
+    auto indexIt = indexMarks.begin();
+    fluxmap.appendIndex();
 
-    double a2rTicksSinceLastPulse = 0;
+    unsigned totalTicks = 0;
     while (!br.eof())
     {
         uint8_t b = br.read_8();
-        a2rTicksSinceLastPulse += b;
+        fluxmap.appendInterval(b * clock / NS_PER_TICK);
         if (b != 255)
-        {
-            fluxmap.appendInterval(
-                a2rTicksSinceLastPulse * clock / NS_PER_TICK);
             fluxmap.appendPulse();
-            a2rTicksSinceLastPulse = 0;
+
+        totalTicks += b;
+        if ((indexIt != indexMarks.end()) && (totalTicks > *indexIt))
+        {
+            fluxmap.appendIndex();
+            indexIt++;
         }
     }
 
@@ -91,7 +96,11 @@ public:
 
         doCommand("client:v2");
 
-        atexit([](){ delete instance; });
+        atexit(
+            []()
+            {
+                delete instance;
+            });
     }
 
     ~ApplesauceUsb()
@@ -242,7 +251,7 @@ public:
         doCommand(fmt::format("head:side{}", side));
         doCommand("sync:on");
         doCommand("data:clear");
-        std::string r = doCommandX(shortRead ? "disk:read" : "disk:xread");
+        std::string r = doCommandX(shortRead ? "disk:read" : "disk:readx");
         auto rsplit = split(r, '|');
         if (rsplit.size() < 2)
             error("unrecognised Applesauce response to disk:read: '{}'", r);
@@ -250,10 +259,14 @@ public:
         int bufferSize = std::stoi(rsplit[0]);
         nanoseconds_t tickSize = std::stod(rsplit[1]) / 1e3;
 
+        std::vector<unsigned> indexMarks;
+        for (auto i = rsplit.begin() + 2; i != rsplit.end(); i++)
+            indexMarks.push_back(std::stoi(*i));
+
         doCommand(fmt::format("data:<{}", bufferSize));
 
         Bytes rawData = _serial->readBytes(bufferSize);
-        Bytes b = applesauceReadDataToFluxEngine(rawData, tickSize);
+        Bytes b = applesauceReadDataToFluxEngine(rawData, tickSize, indexMarks);
         return b;
     }
 
@@ -284,8 +297,7 @@ public:
         doCommand("data:clear");
         doCommand("disk:wclear");
 
-        Bytes asdata =
-            fluxEngineToApplesauceWriteData(fldata);
+        Bytes asdata = fluxEngineToApplesauceWriteData(fldata);
         doCommand(fmt::format("data:>{}", asdata.size()));
         _serial->write(asdata);
         checkCommandResult(_serial->readLine());
