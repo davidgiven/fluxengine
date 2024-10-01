@@ -62,6 +62,7 @@ cxxprogram(
         "dep/libusbp",
         "extras+icons",
         "+lib",
+        "lib/core",
         "lib+config_proto_lib",
         "src/formats",
         "src/gui/drivetypes",
