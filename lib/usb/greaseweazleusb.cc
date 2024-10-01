@@ -109,7 +109,8 @@ public:
         do_command({CMD_SET_BUS_TYPE, 3, (uint8_t)config.bus_type()});
     }
 
-    int getVersion() override
+private:
+    int getVersion()
     {
         do_command({CMD_GET_INFO, 3, GETINFO_FIRMWARE});
 
@@ -124,11 +125,7 @@ public:
         return br.read_be16();
     }
 
-    void recalibrate() override
-    {
-        seek(0);
-    }
-
+public:
     void seek(int track) override
     {
         do_command({CMD_SEEK, 3, (uint8_t)track});
@@ -356,7 +353,7 @@ public:
 
         do_command({CMD_GET_FLUX_STATUS, 2});
 
-        Bytes fldata = greaseWeazleToFluxEngine(buffer, _clock);
+        Bytes fldata = greaseweazleToFluxEngine(buffer, _clock);
         if (synced)
             fldata = stripPartialRotation(fldata);
         return fldata;

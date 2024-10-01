@@ -10,7 +10,7 @@
 #define EP_IN 0x83
 
 extern Bytes fluxEngineToGreaseweazle(const Bytes& fldata, nanoseconds_t clock);
-extern Bytes greaseWeazleToFluxEngine(const Bytes& gwdata, nanoseconds_t clock);
+extern Bytes greaseweazleToFluxEngine(const Bytes& gwdata, nanoseconds_t clock);
 extern Bytes stripPartialRotation(const Bytes& fldata);
 
 /* Copied from

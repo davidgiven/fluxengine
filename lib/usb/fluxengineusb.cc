@@ -122,8 +122,7 @@ private:
         }
     }
 
-public:
-    int getVersion() override
+    int getVersion()
     {
         struct any_frame f = {
             .f = {.type = F_FRAME_GET_VERSION_CMD, .size = sizeof(f)}
@@ -133,6 +132,7 @@ public:
         return r->version;
     }
 
+public:
     void seek(int track) override
     {
         struct seek_frame f = {
