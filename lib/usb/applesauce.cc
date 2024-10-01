@@ -1,7 +1,7 @@
 #include "lib/globals.h"
 #include "usb.h"
 #include "protocol.h"
-#include "lib/bytes.h"
+#include "lib/core/bytes.h"
 #include "greaseweazle.h"
 #include "lib/fluxmap.h"
 #include "lib/decoders/fluxmapreader.h"
