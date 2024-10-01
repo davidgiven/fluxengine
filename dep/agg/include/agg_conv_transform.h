@@ -2,8 +2,8 @@
 // Anti-Grain Geometry - Version 2.4
 // Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
 //
-// Permission to copy, use, modify, sell and distribute this software 
-// is granted provided this copyright notice appears in all copies. 
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
 // This software is provided "as is" without express or implied
 // warranty, and with no claim as to its suitability for any purpose.
 //
@@ -26,22 +26,29 @@ namespace agg
 {
 
     //----------------------------------------------------------conv_transform
-    template<class VertexSource, class Transformer=trans_affine> class conv_transform
+    template <class VertexSource, class Transformer = trans_affine>
+    class conv_transform
     {
     public:
-        conv_transform(VertexSource& source, Transformer& tr) :
-            m_source(&source), m_trans(&tr) {}
-        void attach(VertexSource& source) { m_source = &source; }
+        conv_transform(VertexSource& source, Transformer& tr):
+            m_source(&source),
+            m_trans(&tr)
+        {
+        }
+        void attach(VertexSource& source)
+        {
+            m_source = &source;
+        }
 
-        void rewind(unsigned path_id) 
-        { 
-            m_source->rewind(path_id); 
+        void rewind(unsigned path_id)
+        {
+            m_source->rewind(path_id);
         }
 
         unsigned vertex(double* x, double* y)
         {
             unsigned cmd = m_source->vertex(x, y);
-            if(is_vertex(cmd))
+            if (is_vertex(cmd))
             {
                 m_trans->transform(x, y);
             }
@@ -55,13 +62,12 @@ namespace agg
 
     private:
         conv_transform(const conv_transform<VertexSource>&);
-        const conv_transform<VertexSource>& 
-            operator = (const conv_transform<VertexSource>&);
+        const conv_transform<VertexSource>& operator=(
+            const conv_transform<VertexSource>&);
 
-        VertexSource*      m_source;
+        VertexSource* m_source;
         Transformer* m_trans;
     };
-
 
 }
 

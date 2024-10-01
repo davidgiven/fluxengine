@@ -1,7 +1,7 @@
 #ifndef FLUXVIEWERCONTROL_H
 #define FLUXVIEWERCONTROL_H
 
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 
 class TrackFlux;
 class wxScrollBar;

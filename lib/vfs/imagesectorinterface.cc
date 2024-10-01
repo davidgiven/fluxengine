@@ -1,11 +1,11 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/vfs/sectorinterface.h"
 #include "lib/imagereader/imagereader.h"
 #include "lib/imagewriter/imagewriter.h"
 #include "lib/image.h"
 #include "lib/layout.h"
 #include "lib/sector.h"
-#include "lib/bytes.h"
+#include "lib/core/bytes.h"
 
 class ImageSectorInterface : public SectorInterface
 {

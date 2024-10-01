@@ -1,4 +1,4 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/fluxmap.h"
 #include "lib/fluxsource/fluxsource.pb.h"
 #include "lib/fl2.pb.h"

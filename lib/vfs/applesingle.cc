@@ -1,5 +1,5 @@
-#include "lib/globals.h"
-#include "lib/bytes.h"
+#include "lib/core/globals.h"
+#include "lib/core/bytes.h"
 #include "lib/vfs/applesingle.h"
 
 static constexpr uint32_t APPLESINGLE_MAGIC = 0x00051600;

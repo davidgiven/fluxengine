@@ -33,10 +33,10 @@
  * "Apple_Scratch"		empty
  */
 
-int m_zeroddr(hfsvol *);
+int m_zeroddr(hfsvol*);
 
-int m_zeropm(hfsvol *, unsigned int);
-int m_findpmentry(hfsvol *, const char *, Partition *, unsigned long *);
-int m_mkpart(hfsvol *, const char *, const char *, unsigned long);
+int m_zeropm(hfsvol*, unsigned int);
+int m_findpmentry(hfsvol*, const char*, Partition*, unsigned long*);
+int m_mkpart(hfsvol*, const char*, const char*, unsigned long);
 
-int m_zerobb(hfsvol *);
+int m_zerobb(hfsvol*);

@@ -1,7 +1,7 @@
 #ifndef SECTOR_H
 #define SECTOR_H
 
-#include "lib/bytes.h"
+#include "lib/core/bytes.h"
 #include "lib/fluxmap.h"
 
 class Record;

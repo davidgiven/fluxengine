@@ -1,6 +1,6 @@
-#include "lib/globals.h"
-#include "lib/utils.h"
-#include "lib/bytes.h"
+#include "lib/core/globals.h"
+#include "lib/core/utils.h"
+#include "lib/core/bytes.h"
 #include <iomanip>
 #include <fstream>
 

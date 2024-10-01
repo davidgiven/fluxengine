@@ -21,96 +21,118 @@
 
 namespace snowhouse
 {
-  struct DefaultFailureHandler
-  {
-    template<typename ExpectedType, typename ActualType>
-    static void Handle(const ExpectedType& expected, const ActualType& actual, const char* file_name, int line_number)
+    struct DefaultFailureHandler
     {
-      std::ostringstream str;
-
-      str << "Expected: " << snowhouse::Stringize(expected) << std::endl;
-      str << "Actual: " << snowhouse::Stringize(actual) << std::endl;
-
-      throw AssertionException(str.str(), file_name, line_number);
-    }
-
-    static void Handle(const std::string& message)
-    {
-      throw AssertionException(message);
-    }
-  };
-
-  template<typename FailureHandler>
-  struct ConfigurableAssert
-  {
-    template<typename ActualType, typename ConstraintListType>
-    static void That(const ActualType& actual, ExpressionBuilder<ConstraintListType> expression, const char* file_name = "", int line_number = 0)
-    {
-      try
-      {
-        ResultStack result;
-        OperatorStack operators;
-        expression.Evaluate(result, operators, actual);
-
-        while (!operators.empty())
+        template <typename ExpectedType, typename ActualType>
+        static void Handle(const ExpectedType& expected,
+            const ActualType& actual,
+            const char* file_name,
+            int line_number)
         {
-          ConstraintOperator* op = operators.top();
-          op->PerformOperation(result);
-          operators.pop();
+            std::ostringstream str;
+
+            str << "Expected: " << snowhouse::Stringize(expected) << std::endl;
+            str << "Actual: " << snowhouse::Stringize(actual) << std::endl;
+
+            throw AssertionException(str.str(), file_name, line_number);
         }
 
-        if (result.empty())
+        static void Handle(const std::string& message)
         {
-          throw InvalidExpressionException("The expression did not yield any result");
+            throw AssertionException(message);
+        }
+    };
+
+    template <typename FailureHandler>
+    struct ConfigurableAssert
+    {
+        template <typename ActualType, typename ConstraintListType>
+        static void That(const ActualType& actual,
+            ExpressionBuilder<ConstraintListType> expression,
+            const char* file_name = "",
+            int line_number = 0)
+        {
+            try
+            {
+                ResultStack result;
+                OperatorStack operators;
+                expression.Evaluate(result, operators, actual);
+
+                while (!operators.empty())
+                {
+                    ConstraintOperator* op = operators.top();
+                    op->PerformOperation(result);
+                    operators.pop();
+                }
+
+                if (result.empty())
+                {
+                    throw InvalidExpressionException(
+                        "The expression did not yield any result");
+                }
+
+                if (!result.top())
+                {
+                    FailureHandler::Handle(
+                        expression, actual, file_name, line_number);
+                }
+            }
+            catch (const InvalidExpressionException& e)
+            {
+                FailureHandler::Handle("Malformed expression: \"" +
+                                       snowhouse::Stringize(expression) +
+                                       "\"\n" + e.what());
+            }
         }
 
-        if (!result.top())
+        template <typename ConstraintListType>
+        static void That(const char* actual,
+            ExpressionBuilder<ConstraintListType> expression,
+            const char* file_name = "",
+            int line_number = 0)
         {
-          FailureHandler::Handle(expression, actual, file_name, line_number);
+            return That(
+                std::string(actual), expression, file_name, line_number);
         }
-      }
-      catch (const InvalidExpressionException& e)
-      {
-        FailureHandler::Handle("Malformed expression: \"" + snowhouse::Stringize(expression) + "\"\n" + e.what());
-      }
-    }
 
-    template<typename ConstraintListType>
-    static void That(const char* actual, ExpressionBuilder<ConstraintListType> expression, const char* file_name = "", int line_number = 0)
-    {
-      return That(std::string(actual), expression, file_name, line_number);
-    }
+        template <typename ActualType, typename ExpressionType>
+        static void That(const ActualType& actual,
+            const ExpressionType& expression,
+            const char* file_name = "",
+            int line_number = 0)
+        {
+            if (!expression(actual))
+            {
+                FailureHandler::Handle(
+                    expression, actual, file_name, line_number);
+            }
+        }
 
-    template<typename ActualType, typename ExpressionType>
-    static void That(const ActualType& actual, const ExpressionType& expression, const char* file_name = "", int line_number = 0)
-    {
-      if (!expression(actual))
-      {
-        FailureHandler::Handle(expression, actual, file_name, line_number);
-      }
-    }
+        template <typename ExpressionType>
+        static void That(const char* actual,
+            const ExpressionType& expression,
+            const char* file_name = "",
+            int line_number = 0)
+        {
+            return That(
+                std::string(actual), expression, file_name, line_number);
+        }
 
-    template<typename ExpressionType>
-    static void That(const char* actual, const ExpressionType& expression, const char* file_name = "", int line_number = 0)
-    {
-      return That(std::string(actual), expression, file_name, line_number);
-    }
+        static void That(bool actual)
+        {
+            if (!actual)
+            {
+                FailureHandler::Handle("Expected: true\nActual: false");
+            }
+        }
 
-    static void That(bool actual)
-    {
-      if (!actual)
-      {
-        FailureHandler::Handle("Expected: true\nActual: false");
-      }
-    }
+        static void Failure(const std::string& message)
+        {
+            FailureHandler::Handle(message);
+        }
+    };
 
-    static void Failure(const std::string& message)
-    {
-      FailureHandler::Handle(message);
-    }
-  };
-
-  using Assert = ConfigurableAssert<DefaultFailureHandler>;
+    using Assert = ConfigurableAssert<DefaultFailureHandler>;
 }
 
 #endif

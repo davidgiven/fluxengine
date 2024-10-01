@@ -1,4 +1,5 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
+#include "lib/config.h"
 #include "lib/flags.h"
 #include "lib/readerwriter.h"
 #include "lib/fluxmap.h"

@@ -1,4 +1,4 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "micropolis.h"
 #include "lib/sector.h"
 #include "lib/decoders/decoders.h"

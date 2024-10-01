@@ -1,4 +1,5 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
+#include "lib/config.h"
 #include "vfs.h"
 #include "lib/proto.h"
 #include "lib/layout.pb.h"
@@ -13,7 +14,7 @@
 #include "lib/decoders/decoders.h"
 #include "lib/encoders/encoders.h"
 #include "lib/config.pb.h"
-#include "lib/utils.h"
+#include "lib/core/utils.h"
 
 Path::Path(const std::vector<std::string> other):
     std::vector<std::string>(other)

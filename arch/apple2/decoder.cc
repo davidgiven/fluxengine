@@ -1,4 +1,4 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/fluxmap.h"
 #include "lib/decoders/fluxmapreader.h"
 #include "protocol.h"
@@ -7,7 +7,7 @@
 #include "apple2.h"
 #include "arch/apple2/apple2.pb.h"
 #include "lib/decoders/decoders.pb.h"
-#include "lib/bytes.h"
+#include "lib/core/bytes.h"
 #include "fmt/format.h"
 #include <string.h>
 #include <algorithm>

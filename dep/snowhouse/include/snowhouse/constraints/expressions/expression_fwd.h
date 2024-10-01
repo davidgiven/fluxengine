@@ -8,8 +8,8 @@
 
 namespace snowhouse
 {
-  template<typename T>
-  struct Expression;
+    template <typename T>
+    struct Expression;
 }
 
 #endif

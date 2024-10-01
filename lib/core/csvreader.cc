@@ -1,6 +1,6 @@
 #include <string>
 #include <vector>
-#include "lib/csvreader.h"
+#include "lib/core/csvreader.h"
 
 std::vector<std::string> CsvReader::readLine()
 {

@@ -19,26 +19,26 @@
  * $Id: low.h,v 1.6 1998/04/11 08:27:13 rob Exp $
  */
 
-# define HFS_DDR_SIGWORD	0x4552
+#define HFS_DDR_SIGWORD 0x4552
 
-# define HFS_PM_SIGWORD		0x504d
-# define HFS_PM_SIGWORD_OLD	0x5453
+#define HFS_PM_SIGWORD 0x504d
+#define HFS_PM_SIGWORD_OLD 0x5453
 
-# define HFS_BB_SIGWORD		0x4c4b
+#define HFS_BB_SIGWORD 0x4c4b
 
-# define HFS_BOOTCODE1LEN	(HFS_BLOCKSZ - 148)
-# define HFS_BOOTCODE2LEN	HFS_BLOCKSZ
+#define HFS_BOOTCODE1LEN (HFS_BLOCKSZ - 148)
+#define HFS_BOOTCODE2LEN HFS_BLOCKSZ
 
-# define HFS_BOOTCODELEN	(HFS_BOOTCODE1LEN + HFS_BOOTCODE2LEN)
+#define HFS_BOOTCODELEN (HFS_BOOTCODE1LEN + HFS_BOOTCODE2LEN)
 
-int l_getddr(hfsvol *, Block0 *);
-int l_putddr(hfsvol *, const Block0 *);
+int l_getddr(hfsvol*, Block0*);
+int l_putddr(hfsvol*, const Block0*);
 
-int l_getpmentry(hfsvol *, Partition *, unsigned long);
-int l_putpmentry(hfsvol *, const Partition *, unsigned long);
+int l_getpmentry(hfsvol*, Partition*, unsigned long);
+int l_putpmentry(hfsvol*, const Partition*, unsigned long);
 
-int l_getbb(hfsvol *, BootBlkHdr *, byte *);
-int l_putbb(hfsvol *, const BootBlkHdr *, const byte *);
+int l_getbb(hfsvol*, BootBlkHdr*, byte*);
+int l_putbb(hfsvol*, const BootBlkHdr*, const byte*);
 
-int l_getmdb(hfsvol *, MDB *, int);
-int l_putmdb(hfsvol *, const MDB *, int);
+int l_getmdb(hfsvol*, MDB*, int);
+int l_putmdb(hfsvol*, const MDB*, int);

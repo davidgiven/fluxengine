@@ -1,7 +1,7 @@
 #ifndef DECODERS_H
 #define DECODERS_H
 
-#include "lib/bytes.h"
+#include "lib/core/bytes.h"
 #include "lib/sector.h"
 #include "lib/decoders/fluxmapreader.h"
 #include "lib/decoders/fluxdecoder.h"

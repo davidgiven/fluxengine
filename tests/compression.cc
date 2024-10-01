@@ -1,5 +1,5 @@
-#include "lib/globals.h"
-#include "lib/bytes.h"
+#include "lib/core/globals.h"
+#include "lib/core/bytes.h"
 
 static void test_roundtrip()
 {

@@ -1,9 +1,8 @@
-#include "lib/globals.h"
-#include "lib/flags.h"
+#include "lib/core/globals.h"
 #include "agg2d.h"
 #include "stb_image_write.h"
-#include "lib/utils.h"
-#include "lib/bitmap.h"
+#include "lib/core/utils.h"
+#include "lib/core/bitmap.h"
 #include <regex>
 #include <sstream>
 

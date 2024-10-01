@@ -1,7 +1,7 @@
 #ifndef FLUXMAP_H
 #define FLUXMAP_H
 
-#include "lib/bytes.h"
+#include "lib/core/bytes.h"
 #include "protocol.h"
 #include "fmt/format.h"
 

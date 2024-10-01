@@ -1,10 +1,10 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/flags.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/fluxmap.h"
 #include "lib/config.pb.h"
 #include "lib/proto.h"
-#include "lib/utils.h"
+#include "lib/core/utils.h"
 
 std::unique_ptr<FluxSource> FluxSource::create(const FluxSourceProto& config)
 {

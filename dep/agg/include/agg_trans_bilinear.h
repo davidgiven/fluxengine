@@ -2,8 +2,8 @@
 // Anti-Grain Geometry - Version 2.4
 // Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
 //
-// Permission to copy, use, modify, sell and distribute this software 
-// is granted provided this copyright notice appears in all copies. 
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
 // This software is provided "as is" without express or implied
 // warranty, and with no claim as to its suitability for any purpose.
 //
@@ -30,33 +30,30 @@ namespace agg
     {
     public:
         //--------------------------------------------------------------------
-        trans_bilinear() : m_valid(false) {}
+        trans_bilinear(): m_valid(false) {}
 
         //--------------------------------------------------------------------
         // Arbitrary quadrangle transformations
-        trans_bilinear(const double* src, const double* dst) 
+        trans_bilinear(const double* src, const double* dst)
         {
             quad_to_quad(src, dst);
         }
 
-
         //--------------------------------------------------------------------
-        // Direct transformations 
-        trans_bilinear(double x1, double y1, double x2, double y2, 
-                       const double* quad)
+        // Direct transformations
+        trans_bilinear(
+            double x1, double y1, double x2, double y2, const double* quad)
         {
             rect_to_quad(x1, y1, x2, y2, quad);
         }
 
-
         //--------------------------------------------------------------------
-        // Reverse transformations 
-        trans_bilinear(const double* quad, 
-                       double x1, double y1, double x2, double y2)
+        // Reverse transformations
+        trans_bilinear(
+            const double* quad, double x1, double y1, double x2, double y2)
         {
             quad_to_rect(quad, x1, y1, x2, y2);
         }
-
 
         //--------------------------------------------------------------------
         // Set the transformations using two arbitrary quadrangles.
@@ -66,7 +63,7 @@ namespace agg
             double right[4][2];
 
             unsigned i;
-            for(i = 0; i < 4; i++)
+            for (i = 0; i < 4; i++)
             {
                 unsigned ix = i * 2;
                 unsigned iy = ix + 1;
@@ -81,11 +78,10 @@ namespace agg
             m_valid = simul_eq<4, 2>::solve(left, right, m_mtx);
         }
 
-
         //--------------------------------------------------------------------
         // Set the direct transformations, i.e., rectangle -> quadrangle
-        void rect_to_quad(double x1, double y1, double x2, double y2, 
-                          const double* quad)
+        void rect_to_quad(
+            double x1, double y1, double x2, double y2, const double* quad)
         {
             double src[8];
             src[0] = src[6] = x1;
@@ -95,11 +91,10 @@ namespace agg
             quad_to_quad(src, quad);
         }
 
-
         //--------------------------------------------------------------------
         // Set the reverse transformations, i.e., quadrangle -> rectangle
-        void quad_to_rect(const double* quad, 
-                          double x1, double y1, double x2, double y2)
+        void quad_to_rect(
+            const double* quad, double x1, double y1, double x2, double y2)
         {
             double dst[8];
             dst[0] = dst[6] = x1;
@@ -111,7 +106,10 @@ namespace agg
 
         //--------------------------------------------------------------------
         // Check if the equations were solved successfully
-        bool is_valid() const { return m_valid; }
+        bool is_valid() const
+        {
+            return m_valid;
+        }
 
         //--------------------------------------------------------------------
         // Transform a point (x, y)
@@ -120,10 +118,11 @@ namespace agg
             double tx = *x;
             double ty = *y;
             double xy = tx * ty;
-            *x = m_mtx[0][0] + m_mtx[1][0] * xy + m_mtx[2][0] * tx + m_mtx[3][0] * ty;
-            *y = m_mtx[0][1] + m_mtx[1][1] * xy + m_mtx[2][1] * tx + m_mtx[3][1] * ty;
+            *x = m_mtx[0][0] + m_mtx[1][0] * xy + m_mtx[2][0] * tx +
+                 m_mtx[3][0] * ty;
+            *y = m_mtx[0][1] + m_mtx[1][1] * xy + m_mtx[2][1] * tx +
+                 m_mtx[3][1] * ty;
         }
-
 
         //--------------------------------------------------------------------
         class iterator_x
@@ -136,7 +135,7 @@ namespace agg
             double y;
 
             iterator_x() {}
-            iterator_x(double tx, double ty, double step, const double m[4][2]) :
+            iterator_x(double tx, double ty, double step, const double m[4][2]):
                 inc_x(m[1][0] * step * ty + m[2][0] * step),
                 inc_y(m[1][1] * step * ty + m[2][1] * step),
                 x(m[0][0] + m[1][0] * tx * ty + m[2][0] * tx + m[3][0] * ty),
@@ -144,7 +143,7 @@ namespace agg
             {
             }
 
-            void operator ++ ()
+            void operator++()
             {
                 x += inc_x;
                 y += inc_y;
@@ -158,7 +157,7 @@ namespace agg
 
     private:
         double m_mtx[4][2];
-        bool   m_valid;
+        bool m_valid;
     };
 
 }

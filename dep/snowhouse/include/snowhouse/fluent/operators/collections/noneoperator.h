@@ -11,24 +11,33 @@
 
 namespace snowhouse
 {
-  struct NoneOperator : public CollectionOperator
-  {
-    template<typename ConstraintListType, typename ActualType>
-    void Evaluate(ConstraintListType& list, ResultStack& result, OperatorStack& operators, const ActualType& actual)
+    struct NoneOperator : public CollectionOperator
     {
-      unsigned int passed_elements = CollectionConstraintEvaluator<ConstraintListType, ActualType>::Evaluate(*this, list, result, operators, actual);
-      result.push(passed_elements == 0);
-    }
-  };
+        template <typename ConstraintListType, typename ActualType>
+        void Evaluate(ConstraintListType& list,
+            ResultStack& result,
+            OperatorStack& operators,
+            const ActualType& actual)
+        {
+            unsigned int passed_elements =
+                CollectionConstraintEvaluator<ConstraintListType,
+                    ActualType>::Evaluate(*this,
+                    list,
+                    result,
+                    operators,
+                    actual);
+            result.push(passed_elements == 0);
+        }
+    };
 
-  template<>
-  struct Stringizer<NoneOperator>
-  {
-    static std::string ToString(const NoneOperator&)
+    template <>
+    struct Stringizer<NoneOperator>
     {
-      return "none";
-    }
-  };
+        static std::string ToString(const NoneOperator&)
+        {
+            return "none";
+        }
+    };
 }
 
 #endif

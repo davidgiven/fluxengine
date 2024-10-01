@@ -1,4 +1,5 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
+#include "lib/config.h"
 #include "lib/flags.h"
 #include "lib/fluxmap.h"
 #include "lib/readerwriter.h"
@@ -14,7 +15,7 @@
 #include "lib/image.h"
 #include "lib/logger.h"
 #include "lib/layout.h"
-#include "lib/utils.h"
+#include "lib/core/utils.h"
 #include "lib/config.pb.h"
 #include "lib/proto.h"
 #include <optional>

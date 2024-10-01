@@ -2,8 +2,8 @@
 // Anti-Grain Geometry - Version 2.4
 // Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
 //
-// Permission to copy, use, modify, sell and distribute this software 
-// is granted provided this copyright notice appears in all copies. 
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
 // This software is provided "as is" without express or implied
 // warranty, and with no claim as to its suitability for any purpose.
 //
@@ -28,41 +28,58 @@
 namespace agg
 {
     //-----------------------------------------------------renderer_primitives
-    template<class BaseRenderer> class renderer_primitives
+    template <class BaseRenderer>
+    class renderer_primitives
     {
     public:
         typedef BaseRenderer base_ren_type;
         typedef typename base_ren_type::color_type color_type;
 
         //--------------------------------------------------------------------
-        explicit renderer_primitives(base_ren_type& ren) :
+        explicit renderer_primitives(base_ren_type& ren):
             m_ren(&ren),
             m_fill_color(),
             m_line_color(),
             m_curr_x(0),
             m_curr_y(0)
-        {}
-        void attach(base_ren_type& ren) { m_ren = &ren; }
-
-        //--------------------------------------------------------------------
-        static int coord(double c) 
-        { 
-            return iround(c * line_bresenham_interpolator::subpixel_scale); 
+        {
+        }
+        void attach(base_ren_type& ren)
+        {
+            m_ren = &ren;
         }
 
         //--------------------------------------------------------------------
-        void fill_color(const color_type& c) { m_fill_color = c; }
-        void line_color(const color_type& c) { m_line_color = c; }
-        const color_type& fill_color() const { return m_fill_color; }
-        const color_type& line_color() const { return m_line_color; }
+        static int coord(double c)
+        {
+            return iround(c * line_bresenham_interpolator::subpixel_scale);
+        }
+
+        //--------------------------------------------------------------------
+        void fill_color(const color_type& c)
+        {
+            m_fill_color = c;
+        }
+        void line_color(const color_type& c)
+        {
+            m_line_color = c;
+        }
+        const color_type& fill_color() const
+        {
+            return m_fill_color;
+        }
+        const color_type& line_color() const
+        {
+            return m_line_color;
+        }
 
         //--------------------------------------------------------------------
         void rectangle(int x1, int y1, int x2, int y2)
         {
-            m_ren->blend_hline(x1,   y1,   x2-1, m_line_color, cover_full);
-            m_ren->blend_vline(x2,   y1,   y2-1, m_line_color, cover_full);
-            m_ren->blend_hline(x1+1, y2,   x2,   m_line_color, cover_full);
-            m_ren->blend_vline(x1,   y1+1, y2,   m_line_color, cover_full);
+            m_ren->blend_hline(x1, y1, x2 - 1, m_line_color, cover_full);
+            m_ren->blend_vline(x2, y1, y2 - 1, m_line_color, cover_full);
+            m_ren->blend_hline(x1 + 1, y2, x2, m_line_color, cover_full);
+            m_ren->blend_vline(x1, y1 + 1, y2, m_line_color, cover_full);
         }
 
         //--------------------------------------------------------------------
@@ -72,10 +89,11 @@ namespace agg
         }
 
         //--------------------------------------------------------------------
-        void outlined_rectangle(int x1, int y1, int x2, int y2) 
+        void outlined_rectangle(int x1, int y1, int x2, int y2)
         {
             rectangle(x1, y1, x2, y2);
-            m_ren->blend_bar(x1+1, y1+1, x2-1, y2-1, m_fill_color, cover_full);
+            m_ren->blend_bar(
+                x1 + 1, y1 + 1, x2 - 1, y2 - 1, m_fill_color, cover_full);
         }
 
         //--------------------------------------------------------------------
@@ -93,8 +111,7 @@ namespace agg
                 m_ren->blend_pixel(x - dx, y - dy, m_line_color, cover_full);
                 m_ren->blend_pixel(x - dx, y + dy, m_line_color, cover_full);
                 ++ei;
-            }
-            while(dy < 0);
+            } while (dy < 0);
         }
 
         //--------------------------------------------------------------------
@@ -111,17 +128,19 @@ namespace agg
                 dx += ei.dx();
                 dy += ei.dy();
 
-                if(dy != dy0)
+                if (dy != dy0)
                 {
-                    m_ren->blend_hline(x-dx0, y+dy0, x+dx0, m_fill_color, cover_full);
-                    m_ren->blend_hline(x-dx0, y-dy0, x+dx0, m_fill_color, cover_full);
+                    m_ren->blend_hline(
+                        x - dx0, y + dy0, x + dx0, m_fill_color, cover_full);
+                    m_ren->blend_hline(
+                        x - dx0, y - dy0, x + dx0, m_fill_color, cover_full);
                 }
                 dx0 = dx;
                 dy0 = dy;
                 ++ei;
-            }
-            while(dy < 0);
-            m_ren->blend_hline(x-dx0, y+dy0, x+dx0, m_fill_color, cover_full);
+            } while (dy < 0);
+            m_ren->blend_hline(
+                x - dx0, y + dy0, x + dx0, m_fill_color, cover_full);
         }
 
         //--------------------------------------------------------------------
@@ -141,50 +160,61 @@ namespace agg
                 m_ren->blend_pixel(x - dx, y - dy, m_line_color, cover_full);
                 m_ren->blend_pixel(x - dx, y + dy, m_line_color, cover_full);
 
-                if(ei.dy() && dx)
+                if (ei.dy() && dx)
                 {
-                   m_ren->blend_hline(x-dx+1, y+dy, x+dx-1, m_fill_color, cover_full);
-                   m_ren->blend_hline(x-dx+1, y-dy, x+dx-1, m_fill_color, cover_full);
+                    m_ren->blend_hline(x - dx + 1,
+                        y + dy,
+                        x + dx - 1,
+                        m_fill_color,
+                        cover_full);
+                    m_ren->blend_hline(x - dx + 1,
+                        y - dy,
+                        x + dx - 1,
+                        m_fill_color,
+                        cover_full);
                 }
                 ++ei;
-            }
-            while(dy < 0);
+            } while (dy < 0);
         }
 
         //--------------------------------------------------------------------
-        void line(int x1, int y1, int x2, int y2, bool last=false)
+        void line(int x1, int y1, int x2, int y2, bool last = false)
         {
             line_bresenham_interpolator li(x1, y1, x2, y2);
 
             unsigned len = li.len();
-            if(len == 0)
+            if (len == 0)
             {
-                if(last)
+                if (last)
                 {
-                    m_ren->blend_pixel(li.line_lr(x1), li.line_lr(y1), m_line_color, cover_full);
+                    m_ren->blend_pixel(li.line_lr(x1),
+                        li.line_lr(y1),
+                        m_line_color,
+                        cover_full);
                 }
                 return;
             }
 
-            if(last) ++len;
+            if (last)
+                ++len;
 
-            if(li.is_ver())
+            if (li.is_ver())
             {
                 do
                 {
-                    m_ren->blend_pixel(li.x2(), li.y1(), m_line_color, cover_full);
+                    m_ren->blend_pixel(
+                        li.x2(), li.y1(), m_line_color, cover_full);
                     li.vstep();
-                }
-                while(--len);
+                } while (--len);
             }
             else
             {
                 do
                 {
-                    m_ren->blend_pixel(li.x1(), li.y2(), m_line_color, cover_full);
+                    m_ren->blend_pixel(
+                        li.x1(), li.y2(), m_line_color, cover_full);
                     li.hstep();
-                }
-                while(--len);
+                } while (--len);
             }
         }
 
@@ -196,7 +226,7 @@ namespace agg
         }
 
         //--------------------------------------------------------------------
-        void line_to(int x, int y, bool last=false)
+        void line_to(int x, int y, bool last = false)
         {
             line(m_curr_x, m_curr_y, x, y, last);
             m_curr_x = x;
@@ -204,12 +234,24 @@ namespace agg
         }
 
         //--------------------------------------------------------------------
-        const base_ren_type& ren() const { return *m_ren; }        
-        base_ren_type& ren() { return *m_ren; }        
+        const base_ren_type& ren() const
+        {
+            return *m_ren;
+        }
+        base_ren_type& ren()
+        {
+            return *m_ren;
+        }
 
         //--------------------------------------------------------------------
-        const rendering_buffer& rbuf() const { return m_ren->rbuf(); }
-        rendering_buffer& rbuf() { return m_ren->rbuf(); }
+        const rendering_buffer& rbuf() const
+        {
+            return m_ren->rbuf();
+        }
+        rendering_buffer& rbuf()
+        {
+            return m_ren->rbuf();
+        }
 
     private:
         base_ren_type* m_ren;

@@ -10,45 +10,51 @@
 
 namespace snowhouse
 {
-  struct NotOperator : public ConstraintOperator
-  {
-    template<typename ConstraintListType, typename ActualType>
-    void Evaluate(ConstraintListType& list, ResultStack& result, OperatorStack& operators, const ActualType& actual)
+    struct NotOperator : public ConstraintOperator
     {
-      EvaluateOperatorsWithLessOrEqualPrecedence(*this, operators, result);
+        template <typename ConstraintListType, typename ActualType>
+        void Evaluate(ConstraintListType& list,
+            ResultStack& result,
+            OperatorStack& operators,
+            const ActualType& actual)
+        {
+            EvaluateOperatorsWithLessOrEqualPrecedence(
+                *this, operators, result);
 
-      operators.push(this);
+            operators.push(this);
 
-      EvaluateConstraintList(list.m_tail, result, operators, actual);
-    }
+            EvaluateConstraintList(list.m_tail, result, operators, actual);
+        }
 
-    void PerformOperation(ResultStack& result) override
+        void PerformOperation(ResultStack& result) override
+        {
+            if (result.empty())
+            {
+                throw InvalidExpressionException(
+                    "The expression contains a \"not\" operator without any "
+                    "operand");
+            }
+
+            bool right = result.top();
+            result.pop();
+
+            result.push(!right);
+        }
+
+        int Precedence() const override
+        {
+            return 2;
+        }
+    };
+
+    template <>
+    struct Stringizer<NotOperator>
     {
-      if (result.empty())
-      {
-        throw InvalidExpressionException("The expression contains a \"not\" operator without any operand");
-      }
-
-      bool right = result.top();
-      result.pop();
-
-      result.push(!right);
-    }
-
-    int Precedence() const override
-    {
-      return 2;
-    }
-  };
-
-  template<>
-  struct Stringizer<NotOperator>
-  {
-    static std::string ToString(const NotOperator&)
-    {
-      return "not";
-    }
-  };
+        static std::string ToString(const NotOperator&)
+        {
+            return "not";
+        }
+    };
 }
 
 #endif

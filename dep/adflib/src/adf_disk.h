@@ -31,21 +31,21 @@
 #include "adf_str.h"
 #include "adf_defs.h"
 
-PREFIX RETCODE adfInstallBootBlock(struct Volume *vol,uint8_t*);
+PREFIX RETCODE adfInstallBootBlock(struct Volume* vol, uint8_t*);
 
-PREFIX BOOL isSectNumValid(struct Volume *vol, SECTNUM nSect);
+PREFIX BOOL isSectNumValid(struct Volume* vol, SECTNUM nSect);
 
-PREFIX struct Volume* adfMount( struct Device *dev, int nPart, BOOL readOnly );
-PREFIX void adfUnMount(struct Volume *vol);
-PREFIX void adfVolumeInfo(struct Volume *vol);
-struct Volume* adfCreateVol( struct Device* dev, int32_t start, int32_t len, 
-    char* volName, int volType );
+PREFIX struct Volume* adfMount(struct Device* dev, int nPart, BOOL readOnly);
+PREFIX void adfUnMount(struct Volume* vol);
+PREFIX void adfVolumeInfo(struct Volume* vol);
+struct Volume* adfCreateVol(
+    struct Device* dev, int32_t start, int32_t len, char* volName, int volType);
 
 /*void adfReadBitmap(struct Volume* , int32_t nBlock, struct bRootBlock* root);
 void adfUpdateBitmap(struct Volume*);
 */
-PREFIX RETCODE adfReadBlock(struct Volume* , int32_t nSect, uint8_t* buf);
-PREFIX RETCODE adfWriteBlock(struct Volume* , int32_t nSect, uint8_t* buf);
+PREFIX RETCODE adfReadBlock(struct Volume*, int32_t nSect, uint8_t* buf);
+PREFIX RETCODE adfWriteBlock(struct Volume*, int32_t nSect, uint8_t* buf);
 
 #endif /* _ADF_DISK_H */
 

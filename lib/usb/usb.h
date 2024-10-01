@@ -1,7 +1,7 @@
 #ifndef USB_H
 #define USB_H
 
-#include "lib/bytes.h"
+#include "lib/core/bytes.h"
 #include "lib/flags.h"
 
 class Fluxmap;

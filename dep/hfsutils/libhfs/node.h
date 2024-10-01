@@ -19,16 +19,16 @@
  * $Id: node.h,v 1.7 1998/11/02 22:09:06 rob Exp $
  */
 
-void n_init(node *, btree *, int, int);
+void n_init(node*, btree*, int, int);
 
-int n_new(node *);
-int n_free(node *);
+int n_new(node*);
+int n_free(node*);
 
-int n_search(node *, const byte *);
+int n_search(node*, const byte*);
 
-void n_index(const node *, byte *, unsigned int *);
+void n_index(const node*, byte*, unsigned int*);
 
-void n_insertx(node *, const byte *, unsigned int);
-int n_insert(node *, byte *, unsigned int *);
+void n_insertx(node*, const byte*, unsigned int);
+int n_insert(node*, byte*, unsigned int*);
 
-int n_delete(node *, byte *, int *);
+int n_delete(node*, byte*, int*);
