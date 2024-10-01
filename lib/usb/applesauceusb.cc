@@ -10,6 +10,9 @@
 #include "lib/decoders/fluxmapreader.h"
 #include <unistd.h>
 
+class ApplesauceUsb;
+static ApplesauceUsb* instance;
+
 static uint32_t ss_rand_next(uint32_t x)
 {
     return (x & 1) ? (x >> 1) ^ 0x80000062 : x >> 1;
@@ -38,8 +41,7 @@ static Bytes applesauceReadDataToFluxEngine(
     return fluxmap.rawBytes();
 }
 
-static Bytes fluxEngineToApplesauceWriteData(
-    const Bytes& fldata, nanoseconds_t clock)
+static Bytes fluxEngineToApplesauceWriteData(const Bytes& fldata)
 {
     Fluxmap fluxmap(fldata);
     FluxmapReader fmr(fluxmap);
@@ -52,7 +54,7 @@ static Bytes fluxEngineToApplesauceWriteData(
         if (!fmr.findEvent(F_BIT_PULSE, ticks))
             break;
 
-        uint32_t applesauceTicks = (double)ticks * NS_PER_TICK / clock;
+        uint32_t applesauceTicks = (double)ticks * NS_PER_TICK;
         while (applesauceTicks >= 0xffff)
         {
             bw.write_le16(0xffff);
@@ -88,6 +90,8 @@ public:
                 s);
 
         doCommand("client:v2");
+
+        atexit([](){ delete instance; });
     }
 
     ~ApplesauceUsb()
@@ -260,6 +264,8 @@ private:
             error("cannot write --- disk is write protected");
         if (sendrecv("?safe") == "+")
             error("cannot write --- Applesauce 'safe' switch is on");
+        if (sendrecv("?vers") < "0300")
+            error("cannot write --- need Applesauce firmware 2.0 or above");
     }
 
 public:
@@ -279,7 +285,7 @@ public:
         doCommand("disk:wclear");
 
         Bytes asdata =
-            fluxEngineToApplesauceWriteData(fldata, _config.write_clock_ns());
+            fluxEngineToApplesauceWriteData(fldata);
         doCommand(fmt::format("data:>{}", asdata.size()));
         _serial->write(asdata);
         checkCommandResult(_serial->readLine());
@@ -320,7 +326,8 @@ private:
 
 USB* createApplesauceUsb(const std::string& port, const ApplesauceProto& config)
 {
-    return new ApplesauceUsb(port, config);
+    instance = new ApplesauceUsb(port, config);
+    return instance;
 }
 
 // vim: sw=4 ts=4 et

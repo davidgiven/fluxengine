@@ -353,10 +353,10 @@ public:
 
         do_command({CMD_GET_FLUX_STATUS, 2});
 
-        Bytes fldata = greaseWeazleToFluxEngine(buffer, _clock);
+        Bytes fldata = greaseweazleToFluxEngine(buffer, _clock);
         if (synced)
             fldata = stripPartialRotation(fldata);
-        return fldata;reaseweazle
+        return fldata;
     }
 
     void write(int side,

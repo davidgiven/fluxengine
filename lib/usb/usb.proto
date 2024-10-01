@@ -21,8 +21,6 @@ message ApplesauceProto {
 		[(help) = "Applesauce serial port to use"];
 	optional bool verbose = 2
 		[(help) = "Enable verbose protocol logging", default = false];
-	optional float write_clock_ns = 3
-		[(help) = "Write clock speed", default = 22.45];
 }
 
 message UsbProto {
