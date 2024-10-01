@@ -85,7 +85,6 @@ cxxlibrary(
         "./lib/proto.cc",
         "./lib/readerwriter.cc",
         "./lib/sector.cc",
-        "./lib/usb/applesauce.cc",
         "./lib/usb/applesauceusb.cc",
         "./lib/usb/fluxengineusb.cc",
         "./lib/usb/greaseweazle.cc",

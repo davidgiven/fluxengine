@@ -4,7 +4,6 @@
 #include "lib/core/bytes.h"
 #include "lib/usb/usb.pb.h"
 #include "lib/core/utils.h"
-#include "applesauce.h"
 #include "serial.h"
 #include "usb.h"
 #include "lib/decoders/fluxmapreader.h"

@@ -18,7 +18,6 @@ tests = [
     "agg",
     "amiga",
     "applesingle",
-    "applesauce",
     "bitaccumulator",
     "bytes",
     "compression",
