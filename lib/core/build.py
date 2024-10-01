@@ -7,6 +7,7 @@ cxxlibrary(
         "./bytes.cc",
         "./crc.cc",
         "./csvreader.cc",
+        "./hexdump.cc",
         "./utils.cc",
     ],
     hdrs={
