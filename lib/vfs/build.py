@@ -28,4 +28,8 @@ cxxlibrary(
         "lib/vfs/sectorinterface.h": "./sectorinterface.h",
         "lib/vfs/vfs.h": "./vfs.h",
     },
-    deps=["+lib"])
+    deps=[
+        "+lib",
+        "+fmt_lib",
+    ],
+)
