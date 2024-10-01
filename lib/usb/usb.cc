@@ -10,6 +10,7 @@
 #include "lib/proto.h"
 #include "usbfinder.h"
 #include "lib/logger.h"
+#include "applesauce.h"
 #include "greaseweazle.h"
 
 static USB* usb = NULL;
@@ -55,6 +56,11 @@ static std::shared_ptr<CandidateDevice> selectDevice()
                 std::cerr << fmt::format(
                     "Greaseweazle: {} on {}\n", c->serial, c->serialPort);
                 break;
+
+            case APPLESAUCE_ID:
+                std::cerr << fmt::format(
+                    "Applesauce: {} on {}\n", c->serial, c->serialPort);
+                break;
         }
     }
     exit(1);
@@ -72,6 +78,14 @@ USB* get_usb_impl()
         return createGreaseweazleUsb(conf.port(), conf);
     }
 
+    if (globalConfig()->usb().has_applesauce() &&
+        globalConfig()->usb().applesauce().has_port())
+    {
+        const auto& conf = globalConfig()->usb().applesauce();
+        log("Using Applesauce on serial port {}", conf.port());
+        return createApplesauceUsb(conf.port(), conf);
+    }
+
     /* Otherwise, select a device by USB ID. */
 
     auto candidate = selectDevice();
@@ -87,6 +101,13 @@ USB* get_usb_impl()
                 candidate->serialPort);
             return createGreaseweazleUsb(
                 candidate->serialPort, globalConfig()->usb().greaseweazle());
+
+        case APPLESAUCE_ID:
+            log("Using Applesauce {} on {}",
+                candidate->serial,
+                candidate->serialPort);
+            return createApplesauceUsb(
+                candidate->serialPort, globalConfig()->usb().applesauce());
 
         default:
             error("internal");

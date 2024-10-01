@@ -7,7 +7,8 @@
 enum DeviceType
 {
     DEVICE_FLUXENGINE,
-    DEVICE_GREASEWEAZLE
+    DEVICE_GREASEWEAZLE,
+    DEVICE_APPLESAUCE,
 };
 
 extern std::string getDeviceName(DeviceType type);

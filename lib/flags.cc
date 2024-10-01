@@ -157,7 +157,7 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc,
                         globalConfig().applyOption(path);
                 }
                 else
-                    error("unrecognised flag; try --help");
+                    error("unrecognised flag '-{}'; try --help", key);
             }
             else
             {

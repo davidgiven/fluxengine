@@ -6,7 +6,7 @@ message HardwareFluxSourceProto {}
 
 message TestPatternFluxSourceProto {
 	optional double interval_us = 1        [default = 4.0, (help) = "interval between pulses"];
-	optional double sequence_length_us = 2 [default = 200.0, (help) = "length of test sequence"];
+	optional double sequence_length_ms = 2 [default = 166.0, (help) = "length of test sequence"];
 }
 
 message EraseFluxSourceProto {}

@@ -11,7 +11,7 @@
 
 static void test_convert(const Bytes& gwbytes, const Bytes& flbytes)
 {
-    Bytes gwtoflbytes = greaseWeazleToFluxEngine(gwbytes, 2 * NS_PER_TICK);
+    Bytes gwtoflbytes = greaseweazleToFluxEngine(gwbytes, 2 * NS_PER_TICK);
     Bytes fltogwbytes = fluxEngineToGreaseweazle(flbytes, 2 * NS_PER_TICK);
 
     if (gwtoflbytes != flbytes)

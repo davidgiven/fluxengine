@@ -48,7 +48,7 @@ bool FluxmapReader::findEvent(int event, unsigned& ticks)
 {
     ticks = 0;
 
-    for (;;)
+    while (!eof())
     {
         unsigned thisTicks;
         int thisEvent;
@@ -58,11 +58,11 @@ bool FluxmapReader::findEvent(int event, unsigned& ticks)
         if (thisEvent == F_EOF)
             return false;
 
-        if (eof())
-            return false;
         if ((event == thisEvent) || (event & thisEvent))
             return true;
     }
+
+    return false;
 }
 
 unsigned FluxmapReader::readInterval(nanoseconds_t clock)

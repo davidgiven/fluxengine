@@ -254,6 +254,11 @@ uint8_t SerialPort::readByte()
     return b;
 }
 
+void SerialPort::writeByte(uint8_t b)
+{
+    this->write(&b, 1);
+}
+
 void SerialPort::write(const Bytes& bytes)
 {
     int ptr = 0;
@@ -261,6 +266,28 @@ void SerialPort::write(const Bytes& bytes)
     {
         ssize_t wlen = this->write(bytes.cbegin() + ptr, bytes.size() - ptr);
         ptr += wlen;
+    }
+}
+
+void SerialPort::writeLine(const std::string& chars)
+{
+    this->write((const uint8_t*)&chars[0], chars.size());
+    writeByte('\n');
+}
+
+std::string SerialPort::readLine()
+{
+    std::string s;
+
+    for (;;)
+    {
+        uint8_t b = readByte();
+        if (b == '\r')
+            continue;
+        if (b == '\n')
+            return s;
+
+        s += b;
     }
 }
 

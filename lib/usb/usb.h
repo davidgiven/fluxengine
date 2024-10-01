@@ -6,6 +6,7 @@
 
 class Fluxmap;
 class GreaseweazleProto;
+class ApplesauceProto;
 namespace libusbp
 {
     class device;
@@ -16,8 +17,10 @@ class USB
 public:
     virtual ~USB();
 
-    virtual int getVersion() = 0;
-    virtual void recalibrate() = 0;
+    virtual void recalibrate()
+    {
+        seek(0);
+    };
     virtual void seek(int track) = 0;
     virtual nanoseconds_t getRotationalPeriod(int hardSectorCount) = 0;
     virtual void testBulkWrite() = 0;
@@ -41,11 +44,9 @@ extern USB& getUsb();
 extern USB* createFluxengineUsb(libusbp::device& device);
 extern USB* createGreaseweazleUsb(
     const std::string& serialPort, const GreaseweazleProto& config);
+extern USB* createApplesauceUsb(
+    const std::string& serialPort, const ApplesauceProto& config);
 
-static inline int usbGetVersion()
-{
-    return getUsb().getVersion();
-}
 static inline void usbRecalibrate()
 {
     getUsb().recalibrate();

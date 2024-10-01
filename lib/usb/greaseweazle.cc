@@ -53,7 +53,7 @@ Bytes fluxEngineToGreaseweazle(const Bytes& fldata, nanoseconds_t clock)
     return gwdata;
 }
 
-Bytes greaseWeazleToFluxEngine(const Bytes& gwdata, nanoseconds_t clock)
+Bytes greaseweazleToFluxEngine(const Bytes& gwdata, nanoseconds_t clock)
 {
     Bytes fldata;
     ByteReader br(gwdata);
