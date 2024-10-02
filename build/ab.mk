@@ -11,6 +11,7 @@ CFLAGS ?= -g -Og
 LDFLAGS ?= -g
 PKG_CONFIG ?= pkg-config
 ECHO ?= echo
+CP ?= cp
 TARGETS ?= +all
 
 ifdef VERBOSE
