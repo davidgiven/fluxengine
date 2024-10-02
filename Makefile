@@ -73,7 +73,7 @@ binaries: all
 tests: all
 	
 README.md: $(OBJ)/scripts/+mkdocindex/mkdocindex$(EXT)
-	@echo MKDOC $@
+	@echo $(PROGRESSINFO) MKDOC $@
 	@csplit -s -f$(OBJ)/README. README.md '/<!-- FORMATSSTART -->/' '%<!-- FORMATSEND -->%'
 	@(cat $(OBJ)/README.00 && $< && cat $(OBJ)/README.01) > README.md
 
