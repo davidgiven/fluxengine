@@ -1,11 +1,12 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/fluxmap.h"
 #include "lib/decoders/fluxmapreader.h"
+#include "lib/decoders/fluxpattern.h"
 #include "protocol.h"
 #include "lib/decoders/decoders.h"
 #include "lib/sector.h"
 #include "macintosh.h"
-#include "lib/bytes.h"
+#include "lib/core/bytes.h"
 #include "fmt/format.h"
 #include <string.h>
 #include <algorithm>

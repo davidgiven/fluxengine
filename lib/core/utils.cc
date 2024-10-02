@@ -1,6 +1,6 @@
-#include "lib/globals.h"
-#include "lib/utils.h"
-#include "lib/bytes.h"
+#include "lib/core/globals.h"
+#include "lib/core/utils.h"
+#include "lib/core/bytes.h"
 #include <iomanip>
 #include <fstream>
 
@@ -220,3 +220,17 @@ uint32_t unbcd(uint32_t bcd)
 
     return dec;
 }
+
+int findLowestSetBit(uint64_t value)
+{
+    if (!value)
+        return 0;
+    int bit = 1;
+    while (!(value & 1))
+    {
+        value >>= 1;
+        bit++;
+    }
+    return bit;
+}
+

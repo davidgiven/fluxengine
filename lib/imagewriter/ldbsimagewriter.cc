@@ -1,4 +1,4 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/flags.h"
 #include "lib/sector.h"
 #include "lib/imagewriter/imagewriter.h"

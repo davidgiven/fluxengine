@@ -10,47 +10,53 @@
 
 namespace snowhouse
 {
-  struct OrOperator : public ConstraintOperator
-  {
-    template<typename ConstraintListType, typename ActualType>
-    void Evaluate(ConstraintListType& list, ResultStack& result, OperatorStack& operators, const ActualType& actual)
+    struct OrOperator : public ConstraintOperator
     {
-      EvaluateOperatorsWithLessOrEqualPrecedence(*this, operators, result);
+        template <typename ConstraintListType, typename ActualType>
+        void Evaluate(ConstraintListType& list,
+            ResultStack& result,
+            OperatorStack& operators,
+            const ActualType& actual)
+        {
+            EvaluateOperatorsWithLessOrEqualPrecedence(
+                *this, operators, result);
 
-      operators.push(this);
+            operators.push(this);
 
-      EvaluateConstraintList(list.m_tail, result, operators, actual);
-    }
+            EvaluateConstraintList(list.m_tail, result, operators, actual);
+        }
 
-    void PerformOperation(ResultStack& result) override
+        void PerformOperation(ResultStack& result) override
+        {
+            if (result.size() < 2)
+            {
+                throw InvalidExpressionException(
+                    "The expression contains an \"or\" operator with too few "
+                    "operands");
+            }
+
+            bool right = result.top();
+            result.pop();
+            bool left = result.top();
+            result.pop();
+
+            result.push(left || right);
+        }
+
+        int Precedence() const override
+        {
+            return 4;
+        }
+    };
+
+    template <>
+    struct Stringizer<OrOperator>
     {
-      if (result.size() < 2)
-      {
-        throw InvalidExpressionException("The expression contains an \"or\" operator with too few operands");
-      }
-
-      bool right = result.top();
-      result.pop();
-      bool left = result.top();
-      result.pop();
-
-      result.push(left || right);
-    }
-
-    int Precedence() const override
-    {
-      return 4;
-    }
-  };
-
-  template<>
-  struct Stringizer<OrOperator>
-  {
-    static std::string ToString(const OrOperator&)
-    {
-      return "or";
-    }
-  };
+        static std::string ToString(const OrOperator&)
+        {
+            return "or";
+        }
+    };
 }
 
 #endif

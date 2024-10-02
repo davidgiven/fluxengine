@@ -7,7 +7,7 @@
  *  adf_dump.h
  *
  *  $Id$
- *  
+ *
  *  This file is part of ADFLib.
  *
  *  ADFLib is free software; you can redistribute it and/or modify
@@ -26,14 +26,13 @@
  *
  */
 
-PREFIX     struct Device*
-adfCreateDumpDevice(char* filename, int32_t cyl, int32_t heads, int32_t sec);
+PREFIX struct Device* adfCreateDumpDevice(
+    char* filename, int32_t cyl, int32_t heads, int32_t sec);
 PREFIX RETCODE adfCreateHdFile(struct Device* dev, char* volName, int volType);
-BOOL adfInitDumpDevice(struct Device* dev, char* name,BOOL);
-BOOL adfReadDumpSector(struct Device *dev, int32_t n, int size, uint8_t* buf);
-BOOL adfWriteDumpSector(struct Device *dev, int32_t n, int size, uint8_t* buf);
-RETCODE adfReleaseDumpDevice(struct Device *dev);
-
+BOOL adfInitDumpDevice(struct Device* dev, char* name, BOOL);
+BOOL adfReadDumpSector(struct Device* dev, int32_t n, int size, uint8_t* buf);
+BOOL adfWriteDumpSector(struct Device* dev, int32_t n, int size, uint8_t* buf);
+RETCODE adfReleaseDumpDevice(struct Device* dev);
 
 #endif /* ADF_DUMP_H */
 /*##########################################################################*/

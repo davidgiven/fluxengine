@@ -10,17 +10,15 @@
 
 namespace snowhouse
 {
-  struct CollectionOperator : public ConstraintOperator
-  {
-    void PerformOperation(ResultStack&) override
+    struct CollectionOperator : public ConstraintOperator
     {
-    }
+        void PerformOperation(ResultStack&) override {}
 
-    int Precedence() const override
-    {
-      return 1;
-    }
-  };
+        int Precedence() const override
+        {
+            return 1;
+        }
+    };
 }
 
 #endif

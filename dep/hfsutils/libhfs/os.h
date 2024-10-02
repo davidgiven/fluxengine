@@ -19,11 +19,11 @@
  * $Id: os.h,v 1.6 1998/09/15 19:21:05 rob Exp $
  */
 
-int os_open(void **, const char *, int);
-int os_close(void **);
+int os_open(void**, const char*, int);
+int os_close(void**);
 
-int os_same(void **, const char *);
+int os_same(void**, const char*);
 
-unsigned long os_seek(void **, unsigned long);
-unsigned long os_read(void **, void *, unsigned long);
-unsigned long os_write(void **, const void *, unsigned long);
+unsigned long os_seek(void**, unsigned long);
+unsigned long os_read(void**, void*, unsigned long);
+unsigned long os_write(void**, const void*, unsigned long);

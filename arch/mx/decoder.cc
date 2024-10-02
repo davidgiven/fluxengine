@@ -1,9 +1,10 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/decoders/decoders.h"
 #include "arch/mx/mx.h"
-#include "lib/crc.h"
+#include "lib/core/crc.h"
 #include "lib/fluxmap.h"
 #include "lib/decoders/fluxmapreader.h"
+#include "lib/decoders/fluxpattern.h"
 #include "lib/sector.h"
 #include <string.h>
 

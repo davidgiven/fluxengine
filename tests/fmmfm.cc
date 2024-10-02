@@ -1,4 +1,4 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/decoders/decoders.h"
 #include <assert.h>
 

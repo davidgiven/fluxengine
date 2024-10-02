@@ -1,4 +1,4 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "gui.h"
 #include "visualisationcontrol.h"
 #include "lib/fluxmap.h"

@@ -1,9 +1,9 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/flags.h"
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/config.pb.h"
 #include "lib/proto.h"
-#include "lib/utils.h"
+#include "lib/core/utils.h"
 #include <regex>
 
 std::unique_ptr<FluxSink> FluxSink::create(const FluxSinkProto& config)

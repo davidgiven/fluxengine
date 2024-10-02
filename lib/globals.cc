@@ -1,4 +1,4 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/logger.h"
 #include <sys/time.h>
 #include <stdarg.h>

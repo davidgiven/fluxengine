@@ -18,7 +18,6 @@ tests = [
     "agg",
     "amiga",
     "applesingle",
-    "applesauce",
     "bitaccumulator",
     "bytes",
     "compression",
@@ -59,6 +58,7 @@ export(
                     "+fl2_proto_lib",
                     "+fmt_lib",
                     "+lib",
+                    "lib/core",
                     "+protobuf_lib",
                     "+protocol",
                     "+z_lib",
@@ -86,6 +86,7 @@ export(
                     "+fl2_proto_lib",
                     "+fmt_lib",
                     "+lib",
+                    "lib/core",
                     "+protobuf_lib",
                     "+protocol",
                     "+z_lib",
@@ -99,7 +100,8 @@ export(
                     "lib+config_proto_lib",
                     "src/formats",
                 ]
-                + ([".+test_proto_lib"] if n == "options" else []),
+                + ([".+test_proto_lib"] if n == "options" else [])
+                + (["lib/vfs"] if n in {"cpmfs", "applesingle", "vfs"} else []),
             ),
         )
         for n in tests

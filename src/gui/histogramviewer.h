@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/fluxmap.h"
 
 class HistogramViewer : public wxWindow

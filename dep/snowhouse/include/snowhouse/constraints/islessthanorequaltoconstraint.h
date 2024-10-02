@@ -10,45 +10,50 @@
 
 namespace snowhouse
 {
-  template<typename ExpectedType>
-  struct IsLessThanOrEqualToConstraint : Expression<IsLessThanOrEqualToConstraint<ExpectedType>>
-  {
-    IsLessThanOrEqualToConstraint(const ExpectedType& expected)
-        : m_expected(expected)
+    template <typename ExpectedType>
+    struct IsLessThanOrEqualToConstraint :
+        Expression<IsLessThanOrEqualToConstraint<ExpectedType>>
     {
+        IsLessThanOrEqualToConstraint(const ExpectedType& expected):
+            m_expected(expected)
+        {
+        }
+
+        template <typename ActualType>
+        bool operator()(const ActualType& actual) const
+        {
+            return (actual <= m_expected);
+        }
+
+        ExpectedType m_expected;
+    };
+
+    template <typename ExpectedType>
+    inline IsLessThanOrEqualToConstraint<ExpectedType> IsLessThanOrEqualTo(
+        const ExpectedType& expected)
+    {
+        return IsLessThanOrEqualToConstraint<ExpectedType>(expected);
     }
 
-    template<typename ActualType>
-    bool operator()(const ActualType& actual) const
+    inline IsLessThanOrEqualToConstraint<std::string> IsLessThanOrEqualTo(
+        const char* expected)
     {
-      return (actual <= m_expected);
+        return IsLessThanOrEqualToConstraint<std::string>(expected);
     }
 
-    ExpectedType m_expected;
-  };
-
-  template<typename ExpectedType>
-  inline IsLessThanOrEqualToConstraint<ExpectedType> IsLessThanOrEqualTo(const ExpectedType& expected)
-  {
-    return IsLessThanOrEqualToConstraint<ExpectedType>(expected);
-  }
-
-  inline IsLessThanOrEqualToConstraint<std::string> IsLessThanOrEqualTo(const char* expected)
-  {
-    return IsLessThanOrEqualToConstraint<std::string>(expected);
-  }
-
-  template<typename ExpectedType>
-  struct Stringizer<IsLessThanOrEqualToConstraint<ExpectedType>>
-  {
-    static std::string ToString(const IsLessThanOrEqualToConstraint<ExpectedType>& constraint)
+    template <typename ExpectedType>
+    struct Stringizer<IsLessThanOrEqualToConstraint<ExpectedType>>
     {
-      std::ostringstream builder;
-      builder << "less than or equal to " << snowhouse::Stringize(constraint.m_expected);
+        static std::string ToString(
+            const IsLessThanOrEqualToConstraint<ExpectedType>& constraint)
+        {
+            std::ostringstream builder;
+            builder << "less than or equal to "
+                    << snowhouse::Stringize(constraint.m_expected);
 
-      return builder.str();
-    }
-  };
+            return builder.str();
+        }
+    };
 }
 
 #endif

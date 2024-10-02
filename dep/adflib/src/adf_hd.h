@@ -28,38 +28,48 @@
  *
  */
 
-#include"prefix.h"
+#include "prefix.h"
 
 #include "adf_str.h"
 #include "hd_blk.h"
 #include "adf_err.h"
 
-int adfDevType(struct Device *dev);
-PREFIX void adfDeviceInfo(struct Device *dev);
+int adfDevType(struct Device* dev);
+PREFIX void adfDeviceInfo(struct Device* dev);
 
-RETCODE adfMountHd(struct Device *dev);
+RETCODE adfMountHd(struct Device* dev);
 RETCODE adfMountFlop(struct Device* dev);
-PREFIX struct Device* adfMountDev( char* filename,BOOL);
-PREFIX void adfUnMountDev( struct Device* dev);
+PREFIX struct Device* adfMountDev(char* filename, BOOL);
+PREFIX void adfUnMountDev(struct Device* dev);
 
-RETCODE adfCreateHdHeader(struct Device* dev, int n, struct Partition** partList );
-PREFIX RETCODE adfCreateFlop(struct Device* dev, char* volName, int volType );
-PREFIX RETCODE adfCreateHd(struct Device* dev, int n, struct Partition** partList );
+RETCODE adfCreateHdHeader(
+    struct Device* dev, int n, struct Partition** partList);
+PREFIX RETCODE adfCreateFlop(struct Device* dev, char* volName, int volType);
+PREFIX RETCODE adfCreateHd(
+    struct Device* dev, int n, struct Partition** partList);
 PREFIX RETCODE adfCreateHdFile(struct Device* dev, char* volName, int volType);
 
-struct Device* adfCreateDev(char* filename, int32_t cylinders, int32_t heads, int32_t sectors);
+struct Device* adfCreateDev(
+    char* filename, int32_t cylinders, int32_t heads, int32_t sectors);
 
-RETCODE adfReadBlockDev( struct Device* dev, int32_t nSect, int32_t size, uint8_t* buf );
-RETCODE adfWriteBlockDev(struct Device* dev, int32_t nSect, int32_t size, uint8_t* buf );
-RETCODE adfReadRDSKblock( struct Device* dev, struct bRDSKblock* blk );
-RETCODE adfWriteRDSKblock(struct Device *dev, struct bRDSKblock* rdsk);
-RETCODE adfReadPARTblock( struct Device* dev, int32_t nSect, struct bPARTblock* blk );
-RETCODE adfWritePARTblock(struct Device *dev, int32_t nSect, struct bPARTblock* part);
-RETCODE adfReadFSHDblock( struct Device* dev, int32_t nSect, struct bFSHDblock* blk);
-RETCODE adfWriteFSHDblock(struct Device *dev, int32_t nSect, struct bFSHDblock* fshd);
-RETCODE adfReadLSEGblock(struct Device* dev, int32_t nSect, struct bLSEGblock* blk);
-RETCODE adfWriteLSEGblock(struct Device *dev, int32_t nSect, struct bLSEGblock* lseg);
-
+RETCODE adfReadBlockDev(
+    struct Device* dev, int32_t nSect, int32_t size, uint8_t* buf);
+RETCODE adfWriteBlockDev(
+    struct Device* dev, int32_t nSect, int32_t size, uint8_t* buf);
+RETCODE adfReadRDSKblock(struct Device* dev, struct bRDSKblock* blk);
+RETCODE adfWriteRDSKblock(struct Device* dev, struct bRDSKblock* rdsk);
+RETCODE adfReadPARTblock(
+    struct Device* dev, int32_t nSect, struct bPARTblock* blk);
+RETCODE adfWritePARTblock(
+    struct Device* dev, int32_t nSect, struct bPARTblock* part);
+RETCODE adfReadFSHDblock(
+    struct Device* dev, int32_t nSect, struct bFSHDblock* blk);
+RETCODE adfWriteFSHDblock(
+    struct Device* dev, int32_t nSect, struct bFSHDblock* fshd);
+RETCODE adfReadLSEGblock(
+    struct Device* dev, int32_t nSect, struct bLSEGblock* blk);
+RETCODE adfWriteLSEGblock(
+    struct Device* dev, int32_t nSect, struct bLSEGblock* lseg);
 
 #endif /* _ADF_HD_H */
 

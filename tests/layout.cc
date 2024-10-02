@@ -1,5 +1,6 @@
-#include "lib/globals.h"
-#include "lib/bytes.h"
+#include "lib/core/globals.h"
+#include "lib/core/bytes.h"
+#include "lib/config.h"
 #include "lib/config.pb.h"
 #include "lib/proto.h"
 #include "lib/layout.h"

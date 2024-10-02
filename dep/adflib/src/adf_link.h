@@ -7,7 +7,7 @@
  *  adf_link.h
  *
  *  $Id$
- *  
+ *
  *  This file is part of ADFLib.
  *
  *  ADFLib is free software; you can redistribute it and/or modify
@@ -26,11 +26,13 @@
  *
  */
 
-#include"prefix.h"
+#include "prefix.h"
 #include <stdint.h>
-PREFIX RETCODE adfBlockPtr2EntryName(struct Volume *vol, SECTNUM nSect, SECTNUM lPar, 
-	char **name, int32_t *size);
-
+PREFIX RETCODE adfBlockPtr2EntryName(struct Volume* vol,
+    SECTNUM nSect,
+    SECTNUM lPar,
+    char** name,
+    int32_t* size);
 
 #endif /* ADF_LINK_H */
 /*##########################################################################*/

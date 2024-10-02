@@ -1,4 +1,4 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/flags.h"
 #include "lib/fluxmap.h"
 #include "lib/sector.h"
@@ -10,7 +10,7 @@
 #include "fluxengine.h"
 #include "lib/vfs/sectorinterface.h"
 #include "lib/vfs/vfs.h"
-#include "lib/utils.h"
+#include "lib/core/utils.h"
 #include "src/fileutils.h"
 #include <google/protobuf/text_format.h>
 #include <fstream>

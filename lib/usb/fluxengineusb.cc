@@ -1,8 +1,8 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "usb.h"
 #include "protocol.h"
 #include "lib/fluxmap.h"
-#include "lib/bytes.h"
+#include "lib/core/bytes.h"
 #include "libusbp_config.h"
 #include "libusbp.hpp"
 

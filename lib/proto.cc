@@ -1,4 +1,4 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/proto.h"
 #include "lib/common.pb.h"
 #include <regex>

@@ -1,4 +1,4 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/vfs/sectorinterface.h"
 #include "lib/image.h"
 #include "lib/readerwriter.h"

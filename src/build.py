@@ -42,6 +42,8 @@ cxxprogram(
         "dep/libusbp",
         "dep/stb",
         "+lib",
+        "lib/core",
+        "lib/vfs",
         "lib+config_proto_lib",
         "src/formats",
     ],

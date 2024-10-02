@@ -1,4 +1,4 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "arch/apple2/apple2.h"
 #include "lib/decoders/decoders.h"
 #include "lib/encoders/encoders.h"
@@ -8,7 +8,7 @@
 #include "fmt/format.h"
 #include "lib/encoders/encoders.pb.h"
 #include <ctype.h>
-#include "lib/bytes.h"
+#include "lib/core/bytes.h"
 
 static int encode_data_gcr(uint8_t data)
 {

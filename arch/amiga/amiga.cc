@@ -1,7 +1,7 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/decoders/decoders.h"
 #include "amiga.h"
-#include "lib/bytes.h"
+#include "lib/core/bytes.h"
 #include "fmt/format.h"
 
 uint32_t amigaChecksum(const Bytes& bytes)

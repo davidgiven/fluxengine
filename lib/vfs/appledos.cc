@@ -1,6 +1,6 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/vfs/vfs.h"
-#include "lib/utils.h"
+#include "lib/core/utils.h"
 #include "lib/config.pb.h"
 
 /* This is described here:

@@ -1,4 +1,4 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "gui.h"
 #include "fluxviewercontrol.h"
 #include "textviewerwindow.h"
@@ -9,7 +9,7 @@
 #include "lib/sector.h"
 #include "lib/layout.h"
 #include "lib/decoders/fluxmapreader.h"
-#include "lib/crc.h"
+#include "lib/core/crc.h"
 
 DECLARE_COLOUR(BACKGROUND, 192, 192, 192);
 DECLARE_COLOUR(READ_SEPARATOR, 255, 0, 0);

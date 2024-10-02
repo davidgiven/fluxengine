@@ -1,6 +1,6 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/fluxmap.h"
-#include "lib/bytes.h"
+#include "lib/core/bytes.h"
 #include "lib/fluxsource/catweasel.h"
 
 std::unique_ptr<Fluxmap> decodeCatweaselData(

@@ -52,6 +52,6 @@
  * End of automatically configured definitions                               *
  *****************************************************************************/
 
-# ifdef DEBUG
-#  include <stdio.h>
-# endif
+#ifdef DEBUG
+#include <stdio.h>
+#endif

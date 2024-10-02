@@ -1,7 +1,7 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "usb.h"
 #include "protocol.h"
-#include "lib/bytes.h"
+#include "lib/core/bytes.h"
 #include "greaseweazle.h"
 
 Bytes fluxEngineToGreaseweazle(const Bytes& fldata, nanoseconds_t clock)

@@ -26,25 +26,22 @@
  *
  */
 
-#include"prefix.h"
+#include "prefix.h"
 
 #include "adf_str.h"
-
 
 void swLong(uint8_t* buf, uint32_t val);
 void swShort(uint8_t* buf, uint16_t val);
 
 PREFIX struct List* newCell(struct List* list, void* content);
 PREFIX void freeList(struct List* list);
-void adfDays2Date(int32_t days, int *yy, int *mm, int *dd);
+void adfDays2Date(int32_t days, int* yy, int* mm, int* dd);
 BOOL adfIsLeap(int y);
-    void
-adfTime2AmigaTime(struct DateTime dt, int32_t *day, int32_t *min, int32_t *ticks );
-    struct DateTime
-adfGiveCurrentTime( void );
+void adfTime2AmigaTime(
+    struct DateTime dt, int32_t* day, int32_t* min, int32_t* ticks);
+struct DateTime adfGiveCurrentTime(void);
 
-void dumpBlock(uint8_t *buf);
+void dumpBlock(uint8_t* buf);
 
 /*##########################################################################*/
 #endif /* _ADF_UTIL_H */
-
