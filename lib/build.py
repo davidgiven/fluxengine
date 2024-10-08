@@ -28,10 +28,7 @@ protocc(
 
 proto(
     name="config_proto",
-    srcs=[
-        "./config.proto",
-        "./imagewriter/imagewriter.proto",
-    ],
+    srcs=["./config.proto"],
     deps=[
         ".+common_proto",
         ".+layout_proto",
@@ -44,6 +41,7 @@ proto(
         "lib/encoders+proto",
         "lib/decoders+proto",
         "lib/imagereader+proto",
+        "lib/imagewriter+proto",
     ],
 )
 
