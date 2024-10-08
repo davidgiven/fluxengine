@@ -1,5 +1,5 @@
-export BUILDTYPE
 BUILDTYPE ?= host
+export BUILDTYPE
 
 ifeq ($(BUILDTYPE),windows)
 	MINGW = i686-w64-mingw32-

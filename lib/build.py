@@ -30,7 +30,6 @@ proto(
     name="config_proto",
     srcs=[
         "./config.proto",
-        "./decoders/decoders.proto",
         "./imagereader/imagereader.proto",
         "./imagewriter/imagewriter.proto",
     ],
@@ -44,6 +43,7 @@ proto(
         "lib/vfs+proto",
         "lib/usb+proto",
         "lib/encoders+proto",
+        "lib/decoders+proto",
     ],
 )
 
@@ -56,6 +56,7 @@ protocc(
         "lib/vfs+proto_lib",
         "lib/usb+proto_lib",
         "lib/encoders+proto_lib",
+        "lib/decoders+proto_lib",
         "lib+drive_proto_lib",
     ],
 )

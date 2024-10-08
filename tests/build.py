@@ -96,6 +96,7 @@ export(
                     "dep/libusbp",
                     "dep/snowhouse",
                     "dep/stb",
+                    "arch+proto_lib",
                     "lib+config_proto_lib",
                     "src/formats",
                 ]

@@ -17,6 +17,8 @@ class Toolchain:
     cxxfile = ["$(CXX) -c -o {outs[0]} {ins[0]} $(CFLAGS) {cflags}"]
     clibrary = ["$(AR) cqs {outs[0]} {ins}"]
     cxxlibrary = ["$(AR) cqs {outs[0]} {ins}"]
+    clibraryt = ["$(AR) cqsT {outs[0]} {ins}"]
+    cxxlibraryt = ["$(AR) cqsT {outs[0]} {ins}"]
     cprogram = ["$(CC) -o {outs[0]} {ins} {ldflags} $(LDFLAGS)"]
     cxxprogram = ["$(CXX) -o {outs[0]} {ins} {ldflags} $(LDFLAGS)"]
 
@@ -27,6 +29,8 @@ class HostToolchain:
     cxxfile = ["$(HOSTCXX) -c -o {outs[0]} {ins[0]} $(HOSTCFLAGS) {cflags}"]
     clibrary = ["$(HOSTAR) cqs {outs[0]} {ins}"]
     cxxlibrary = ["$(HOSTAR) cqs {outs[0]} {ins}"]
+    clibraryt = ["$(HOSTAR) cqs {outs[0]} {ins}"]
+    cxxlibraryt = ["$(HOSTAR) cqs {outs[0]} {ins}"]
     cprogram = ["$(HOSTCC) -o {outs[0]} {ins} {ldflags} $(HOSTLDFLAGS)"]
     cxxprogram = ["$(HOSTCXX) -o {outs[0]} {ins} {ldflags} $(HOSTLDFLAGS)"]
 
@@ -44,7 +48,7 @@ def cfileimpl(self, name, srcs, deps, suffix, commands, label, kind, cflags):
     t = simplerule(
         replaces=self,
         ins=srcs,
-        deps=hdr_deps,
+        deps=sorted(hdr_deps),
         outs=[outleaf],
         label=label,
         commands=commands,
@@ -312,7 +316,7 @@ def programimpl(
     label,
     filerule,
     kind,
-    libkind,
+    libaggrule,
 ):
     cfiles = findsources(
         self.localname, srcs, deps, cflags, toolchain, filerule, self.cwd
@@ -326,11 +330,21 @@ def programimpl(
         targets=lib_deps, name="caller_ldflags", initial=ldflags
     )
 
+    if len(libs) > 1:
+        libs = [
+            simplerule(
+                name=f"{self.localname}_libs",
+                ins=libs,
+                outs=[f"={self.localname}.a"],
+                commands=libaggrule,
+                label="LIBT",
+            )
+        ]
+
     simplerule(
         replaces=self,
-        ins=cfiles + libs + libs,
+        ins=cfiles + libs,
         outs=[f"={self.localname}$(EXT)"],
-        deps=lib_deps,
         label=toolchain.label + label,
         commands=commands,
         args={
@@ -367,7 +381,7 @@ def cprogram(
         label,
         cfile,
         "cprogram",
-        "clibrary",
+        toolchain.clibraryt,
     )
 
 
@@ -397,5 +411,5 @@ def cxxprogram(
         label,
         cxxfile,
         "cxxprogram",
-        "cxxlibrary",
+        toolchain.cxxlibraryt,
     )
