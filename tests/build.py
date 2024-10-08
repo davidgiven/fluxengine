@@ -5,10 +5,7 @@ from build.utils import test
 from scripts.build import protoencode_single
 
 
-proto(
-    name="test_proto",
-    srcs=["./testproto.proto"],
-)
+proto(name="test_proto", srcs=["./testproto.proto"], deps=["lib+common_proto"])
 
 protocc(
     name="test_proto_lib", srcs=[".+test_proto"], deps=["lib+config_proto_lib"]
@@ -59,6 +56,7 @@ export(
                     "+fmt_lib",
                     "+lib",
                     "lib/core",
+                    "lib/fluxsource+proto_lib",
                     "+protobuf_lib",
                     "+protocol",
                     "+z_lib",
@@ -87,6 +85,7 @@ export(
                     "+fmt_lib",
                     "+lib",
                     "lib/core",
+                    "lib/fluxsource+proto_lib",
                     "+protobuf_lib",
                     "+protocol",
                     "+z_lib",

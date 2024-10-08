@@ -30,7 +30,7 @@ def collectattrs(*, targets, name, initial=[]):
     s = set(initial)
     for a in [t.args.get(name, []) for t in targets]:
         s.update(a)
-    return sorted(list(s))
+    return sorted(s)
 
 
 def itemsof(pattern, root=None, cwd=None):

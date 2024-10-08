@@ -7,12 +7,7 @@ from build.ab import (
     flatten,
     simplerule,
 )
-from build.utils import (
-    filenamesmatchingof,
-    stripext,
-    targetswithtraitsof,
-    collectattrs,
-)
+from build.utils import filenamesmatchingof, stripext, collectattrs
 from os.path import *
 
 
@@ -39,12 +34,17 @@ class HostToolchain:
 def cfileimpl(self, name, srcs, deps, suffix, commands, label, kind, cflags):
     outleaf = "=" + stripext(basename(filenameof(srcs[0]))) + suffix
 
-    cflags = collectattrs(targets=deps, name="caller_cflags", initial=cflags)
+    hdr_deps = set()
+    for d in deps:
+        hdr_deps.update(d.args.get("cheader_deps", {d}))
+    cflags = collectattrs(
+        targets=hdr_deps, name="caller_cflags", initial=cflags
+    )
 
     t = simplerule(
         replaces=self,
         ins=srcs,
-        deps=deps,
+        deps=hdr_deps,
         outs=[outleaf],
         label=label,
         commands=commands,
@@ -93,11 +93,9 @@ def cxxfile(
 
 
 def findsources(name, srcs, deps, cflags, toolchain, filerule, cwd):
-    headers = filenamesmatchingof(srcs, "*.h")
-    cflags = cflags + ["-I" + dirname(h) for h in headers]
-
-    for d in deps:
-        headers += d.args.get("cheaders", [d])
+    for f in filenamesof(srcs):
+        if f.endswith(".h") or f.endswith(".hh"):
+            cflags = cflags + [f"-I{dirname(f)}"]
 
     objs = []
     for s in flatten(srcs):
@@ -105,8 +103,8 @@ def findsources(name, srcs, deps, cflags, toolchain, filerule, cwd):
             filerule(
                 name=join(name, f.removeprefix("$(OBJ)/")),
                 srcs=[f],
-                deps=headers,
-                cflags=cflags,
+                deps=deps,
+                cflags=sorted(set(cflags)),
                 toolchain=toolchain,
                 cwd=cwd,
             )
@@ -127,18 +125,10 @@ def findsources(name, srcs, deps, cflags, toolchain, filerule, cwd):
 def cheaders(
     self,
     name,
-    hdrs: TargetsMap = None,
+    hdrs: TargetsMap = {},
     caller_cflags=[],
-    deps: Targets = None,
+    deps: Targets = [],
 ):
-    hdr_deps = []
-    for d in deps:
-        hdr_deps += d.args.get("cheaders", [d])
-
-    hdr_caller_cflags = collectattrs(
-        targets=hdr_deps, name="caller_cflags", initial=caller_cflags
-    )
-
     cs = []
     ins = hdrs.values()
     outs = []
@@ -153,14 +143,24 @@ def cheaders(
         outs += ["=" + dest]
         i = i + 1
 
-    r = simplerule(
+    hdr_deps = {self}
+    lib_deps = set()
+    for d in deps:
+        hdr_deps.update(d.args.get("cheader_deps", {d}))
+        lib_deps.update(d.args.get("clibrary_deps", {d}))
+
+    simplerule(
         replaces=self,
         ins=ins,
         outs=outs,
+        deps=deps,
         commands=cs,
-        deps=hdr_deps,
         label="CHEADERS",
-        args={"caller_cflags": hdr_caller_cflags + ["-I" + self.dir]},
+        args={
+            "caller_cflags": caller_cflags + [f"-I{self.dir}"],
+            "cheader_deps": hdr_deps,
+            "clibrary_deps": lib_deps,
+        },
     )
 
 
@@ -184,7 +184,6 @@ def libraryimpl(
         cheaders(
             replaces=self,
             hdrs=hdrs,
-            deps=deps,
             caller_cflags=caller_cflags,
         )
         return
@@ -192,7 +191,6 @@ def libraryimpl(
         hr = cheaders(
             name=self.localname + "_hdrs",
             hdrs=hdrs,
-            deps=deps,
             caller_cflags=caller_cflags,
         )
         hr.materialise()
@@ -208,6 +206,12 @@ def libraryimpl(
         self.cwd,
     )
 
+    hdr_deps = {hr} if hr else set()
+    lib_deps = {self}
+    for d in deps:
+        hdr_deps.update(d.args.get("cheader_deps", {d}))
+        lib_deps.update(d.args.get("clibrary_deps", {d}))
+
     simplerule(
         replaces=self,
         ins=objs,
@@ -215,18 +219,12 @@ def libraryimpl(
         label=label,
         commands=commands,
         args={
-            "caller_ldflags": collectattrs(
-                targets=deps, name="caller_ldflags", initial=caller_ldflags
-            ),
-        }
-        | (
-            {"cheaders": [hr], "caller_cflags": hr.args["caller_cflags"]}
-            if hr
-            else {}
-        ),
+            "caller_ldflags": caller_ldflags,
+            "cheader_deps": hdr_deps,
+            "clibrary_deps": lib_deps,
+        },
         traits={"cheaders"},
     )
-    self.outs = self.outs + (hr.outs if hr else [])
 
 
 @Rule
@@ -314,17 +312,25 @@ def programimpl(
     label,
     filerule,
     kind,
+    libkind,
 ):
-    ars = filenamesmatchingof(deps, "*.a")
-
     cfiles = findsources(
         self.localname, srcs, deps, cflags, toolchain, filerule, self.cwd
     )
+
+    lib_deps = set()
+    for d in deps:
+        lib_deps.update(d.args.get("clibrary_deps", {d}))
+    libs = sorted(filenamesmatchingof(lib_deps, "*.a"))
+    ldflags = collectattrs(
+        targets=lib_deps, name="caller_ldflags", initial=ldflags
+    )
+
     simplerule(
         replaces=self,
-        ins=cfiles + ars + ars,
+        ins=cfiles + libs + libs,
         outs=[f"={self.localname}$(EXT)"],
-        deps=deps,
+        deps=lib_deps,
         label=toolchain.label + label,
         commands=commands,
         args={
@@ -346,8 +352,6 @@ def cprogram(
     toolchain=Toolchain,
     commands=None,
     label="CLINK",
-    cfilerule=cfile,
-    cfilekind="cprogram",
 ):
     if not commands:
         commands = toolchain.cprogram
@@ -361,8 +365,9 @@ def cprogram(
         toolchain,
         commands,
         label,
-        cfilerule,
-        cfilekind,
+        cfile,
+        "cprogram",
+        "clibrary",
     )
 
 
@@ -392,4 +397,5 @@ def cxxprogram(
         label,
         cxxfile,
         "cxxprogram",
+        "cxxlibrary",
     )

@@ -199,6 +199,7 @@ cxxlibrary(
         "dep/stb",
         "lib+config_proto_lib",
         "lib/core",
+        "lib/fluxsource+proto_lib",
     ],
 )
 

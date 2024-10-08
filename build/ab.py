@@ -148,6 +148,7 @@ class Target:
         self.dir = join("$(OBJ)", name)
         self.ins = []
         self.outs = []
+        self.deps = []
         self.materialised = False
         self.args = {}
 
