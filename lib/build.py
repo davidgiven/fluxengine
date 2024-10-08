@@ -30,7 +30,6 @@ proto(
     name="config_proto",
     srcs=[
         "./config.proto",
-        "./imagereader/imagereader.proto",
         "./imagewriter/imagewriter.proto",
     ],
     deps=[
@@ -44,6 +43,7 @@ proto(
         "lib/usb+proto",
         "lib/encoders+proto",
         "lib/decoders+proto",
+        "lib/imagereader+proto",
     ],
 )
 
