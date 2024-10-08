@@ -55,6 +55,8 @@ protocc(
         "lib/usb+proto_lib",
         "lib/encoders+proto_lib",
         "lib/decoders+proto_lib",
+        "lib/imagereader+proto_lib",
+        "lib/imagewriter+proto_lib",
         "lib+drive_proto_lib",
     ],
 )
