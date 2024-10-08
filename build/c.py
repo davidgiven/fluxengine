@@ -17,8 +17,8 @@ class Toolchain:
     cxxfile = ["$(CXX) -c -o {outs[0]} {ins[0]} $(CFLAGS) {cflags}"]
     clibrary = ["$(AR) cqs {outs[0]} {ins}"]
     cxxlibrary = ["$(AR) cqs {outs[0]} {ins}"]
-    clibraryt = ["$(AR) cqsT {outs[0]} {ins}"]
-    cxxlibraryt = ["$(AR) cqsT {outs[0]} {ins}"]
+    clibraryt = ["$(AR) cqs --thin {outs[0]} {ins}"]
+    cxxlibraryt = ["$(AR) cqs --thin {outs[0]} {ins}"]
     cprogram = ["$(CC) -o {outs[0]} {ins} {ldflags} $(LDFLAGS)"]
     cxxprogram = ["$(CXX) -o {outs[0]} {ins} {ldflags} $(LDFLAGS)"]
 
@@ -29,8 +29,8 @@ class HostToolchain:
     cxxfile = ["$(HOSTCXX) -c -o {outs[0]} {ins[0]} $(HOSTCFLAGS) {cflags}"]
     clibrary = ["$(HOSTAR) cqs {outs[0]} {ins}"]
     cxxlibrary = ["$(HOSTAR) cqs {outs[0]} {ins}"]
-    clibraryt = ["$(HOSTAR) cqs {outs[0]} {ins}"]
-    cxxlibraryt = ["$(HOSTAR) cqs {outs[0]} {ins}"]
+    clibraryt = ["$(HOSTAR) cqs --thin {outs[0]} {ins}"]
+    cxxlibraryt = ["$(HOSTAR) cqs --thin {outs[0]} {ins}"]
     cprogram = ["$(HOSTCC) -o {outs[0]} {ins} {ldflags} $(HOSTLDFLAGS)"]
     cxxprogram = ["$(HOSTCXX) -o {outs[0]} {ins} {ldflags} $(HOSTLDFLAGS)"]
 
