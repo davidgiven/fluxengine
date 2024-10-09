@@ -7,11 +7,12 @@ import build.pkg  # to get the protobuf package check
 emit(
     """
 PROTOC ?= protoc
-ifeq ($(filter protobuf, $(PACKAGES)),)
-$(error Required package 'protobuf' not installed.)"
-endif
 """
 )
+
+assert build.pkg.TargetPkgConfig.has_package(
+    "protobuf"
+), "required package 'protobuf' not installed"
 
 
 def _getprotodeps(deps):

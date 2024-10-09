@@ -10,9 +10,12 @@ AR ?= ar
 CFLAGS ?= -g -Og
 LDFLAGS ?= -g
 PKG_CONFIG ?= pkg-config
+HOST_PKG_CONFIG ?= $(PKG_CONFIG)
 ECHO ?= echo
 CP ?= cp
-TARGETS ?= +all
+
+export PKG_CONFIG
+export HOST_PKG_CONFIG
 
 ifdef VERBOSE
 	hide =
@@ -45,14 +48,23 @@ endif
 EXT ?=
 
 ifeq ($(PROGRESSINFO),)
-rulecount := $(shell $(MAKE) --no-print-directory -q $(OBJ)/build.mk PROGRESSINFO=1 && $(MAKE) -n $(MAKECMDGOALS) PROGRESSINFO=XXXPROGRESSINFOXXX | grep XXXPROGRESSINFOXXX | wc -l)
+rulecount := $(shell $(MAKE) -q $(OBJ)/build.mk PROGRESSINFO=1 && $(MAKE) -n $(MAKECMDGOALS) PROGRESSINFO=XXXPROGRESSINFOXXX | grep XXXPROGRESSINFOXXX | wc -l)
 ruleindex := 1
 PROGRESSINFO = "$(shell $(PYTHON) build/_progress.py $(ruleindex) $(rulecount))$(eval ruleindex := $(shell expr $(ruleindex) + 1))"
 endif
 
+PKG_CONFIG_HASHES = $(OBJ)/.pkg-config-hashes/target-$(word 1, $(shell $(PKG_CONFIG) --list-all | md5sum))
+HOST_PKG_CONFIG_HASHES = $(OBJ)/.pkg-config-hashes/host-$(word 1, $(shell $(HOST_PKG_CONFIG) --list-all | md5sum))
+
+$(OBJ)/build.mk : $(PKG_CONFIG_HASHES) $(HOST_PKG_CONFIG_HASHES)
+$(PKG_CONFIG_HASHES) $(HOST_PKG_CONFIG_HASHES) &:
+	$(hide) rm -rf $(OBJ)/.pkg-config-hashes
+	$(hide) mkdir -p $(OBJ)/.pkg-config-hashes
+	$(hide) touch $(PKG_CONFIG_HASHES) $(HOST_PKG_CONFIG_HASHES)
+
 include $(OBJ)/build.mk
 
-MAKEFLAGS += -r -j$(shell nproc)
+MAKEFLAGS += -r -j$(shell nproc) --no-print-directory
 .DELETE_ON_ERROR:
 
 .PHONY: update-ab
