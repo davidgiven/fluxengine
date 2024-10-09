@@ -6,9 +6,19 @@ from build.ab import (
     filenamesof,
     flatten,
     simplerule,
+    emit,
 )
 from build.utils import filenamesmatchingof, stripext, collectattrs
 from os.path import *
+
+emit(
+    """
+ifeq ($(OSX),no)
+START-GROUP ?= -Wl,--start-group
+END-GROUP ?= -Wl,--end-group
+endif
+"""
+)
 
 
 class Toolchain:
@@ -17,10 +27,12 @@ class Toolchain:
     cxxfile = ["$(CXX) -c -o {outs[0]} {ins[0]} $(CFLAGS) {cflags}"]
     clibrary = ["$(AR) cqs {outs[0]} {ins}"]
     cxxlibrary = ["$(AR) cqs {outs[0]} {ins}"]
-    clibraryt = ["$(AR) cqs --thin {outs[0]} {ins}"]
-    cxxlibraryt = ["$(AR) cqs --thin {outs[0]} {ins}"]
-    cprogram = ["$(CC) -o {outs[0]} {ins} {ldflags} $(LDFLAGS)"]
-    cxxprogram = ["$(CXX) -o {outs[0]} {ins} {ldflags} $(LDFLAGS)"]
+    cprogram = [
+        "$(CC) -o {outs[0]} $(START-GROUP) {ins} $(END-GROUP) {ldflags} $(LDFLAGS)"
+    ]
+    cxxprogram = [
+        "$(CXX) -o {outs[0]} $(START-GROUP) {ins} $(END-GROUP) {ldflags} $(LDFLAGS)"
+    ]
 
 
 class HostToolchain:
@@ -29,8 +41,6 @@ class HostToolchain:
     cxxfile = ["$(HOSTCXX) -c -o {outs[0]} {ins[0]} $(HOSTCFLAGS) {cflags}"]
     clibrary = ["$(HOSTAR) cqs {outs[0]} {ins}"]
     cxxlibrary = ["$(HOSTAR) cqs {outs[0]} {ins}"]
-    clibraryt = ["$(HOSTAR) cqs --thin {outs[0]} {ins}"]
-    cxxlibraryt = ["$(HOSTAR) cqs --thin {outs[0]} {ins}"]
     cprogram = ["$(HOSTCC) -o {outs[0]} {ins} {ldflags} $(HOSTLDFLAGS)"]
     cxxprogram = ["$(HOSTCXX) -o {outs[0]} {ins} {ldflags} $(HOSTLDFLAGS)"]
 
@@ -316,7 +326,6 @@ def programimpl(
     label,
     filerule,
     kind,
-    libaggrule,
 ):
     cfiles = findsources(
         self.localname, srcs, deps, cflags, toolchain, filerule, self.cwd
@@ -329,17 +338,6 @@ def programimpl(
     ldflags = collectattrs(
         targets=lib_deps, name="caller_ldflags", initial=ldflags
     )
-
-    if len(libs) > 1:
-        libs = [
-            simplerule(
-                name=f"{self.localname}_libs",
-                ins=libs,
-                outs=[f"={self.localname}.a"],
-                commands=libaggrule,
-                label="LIBT",
-            )
-        ]
 
     simplerule(
         replaces=self,
@@ -381,7 +379,6 @@ def cprogram(
         label,
         cfile,
         "cprogram",
-        toolchain.clibraryt,
     )
 
 
@@ -411,5 +408,4 @@ def cxxprogram(
         label,
         cxxfile,
         "cxxprogram",
-        toolchain.cxxlibraryt,
     )

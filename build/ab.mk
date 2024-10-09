@@ -24,6 +24,21 @@ else
 	endif
 endif
 
+WINDOWS := no
+OSX := no
+LINUX := no
+ifeq ($(OS),Windows_NT)
+    WINDOWS := yes
+else
+    UNAME_S := $(shell uname -s)
+    ifeq ($(UNAME_S),Linux)
+		LINUX := yes
+    endif
+    ifeq ($(UNAME_S),Darwin)
+		OSX := yes
+    endif
+endif
+
 ifeq ($(OS), Windows_NT)
 	EXT ?= .exe
 endif
