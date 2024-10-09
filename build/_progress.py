@@ -5,4 +5,4 @@ try:
     percent = int(100 * float(current) / float(max))
     print(f"[{percent:>3}%]")
 except ValueError:
-    print(f"[{sys.argv}]")
+    pass
