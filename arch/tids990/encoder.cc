@@ -7,7 +7,7 @@
 #include "lib/image.h"
 #include "arch/tids990/tids990.pb.h"
 #include "lib/encoders/encoders.pb.h"
-#include <fmt/format.h>
+#include "fmt/format.h"
 
 static int charToInt(char c)
 {

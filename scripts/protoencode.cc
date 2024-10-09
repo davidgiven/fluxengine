@@ -2,7 +2,7 @@
 #include <google/protobuf/text_format.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <fstream>
-#include <fmt/format.h>
+#include "fmt/format.h"
 #include "tests/testproto.pb.h"
 #include "lib/config.pb.h"
 #include <sstream>

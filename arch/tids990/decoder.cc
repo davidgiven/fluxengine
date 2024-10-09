@@ -8,7 +8,7 @@
 #include "lib/decoders/fluxpattern.h"
 #include "lib/sector.h"
 #include <string.h>
-#include <fmt/format.h>
+#include "fmt/format.h"
 
 /* The Texas Instruments DS990 uses MFM with a scheme similar to a simplified
  * version of the IBM record scheme (it's actually easier to parse than IBM).

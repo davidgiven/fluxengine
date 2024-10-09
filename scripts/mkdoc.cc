@@ -1,7 +1,7 @@
 #include "lib/globals.h"
 #include "lib/proto.h"
 #include "lib/flags.h"
-#include <fmt/format.h>
+#include "fmt/format.h"
 
 extern const std::map<std::string, const ConfigProto*> formats;
 
