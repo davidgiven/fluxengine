@@ -49,10 +49,12 @@ def _package(self, name, package, fallback, pkgconfig):
         self.traits.add("cheaders")
         return
 
-    assert fallback, f"Required package '{package}' not installed"
+    assert (
+        fallback
+    ), f"Required package '{package}' not installed when materialising target '{name}'"
 
-    self.args["cheader_deps"] = {fallback}
-    self.args["clibrary_deps"] = {fallback}
+    self.args["cheader_deps"] = fallback.args.get("cheader_deps", {fallback})
+    self.args["clibrary_deps"] = fallback.args.get("clibrary_deps", {fallback})
     self.ins = []
     self.outs = []
     self.deps = [fallback]

@@ -51,12 +51,17 @@ class HostToolchain:
     ]
 
 
+def _indirect(deps, name):
+    r = set()
+    for d in deps:
+        r.update(d.args.get(name, {d}))
+    return r
+
+
 def cfileimpl(self, name, srcs, deps, suffix, commands, label, kind, cflags):
     outleaf = "=" + stripext(basename(filenameof(srcs[0]))) + suffix
 
-    hdr_deps = set()
-    for d in deps:
-        hdr_deps.update(d.args.get("cheader_deps", {d}))
+    hdr_deps = _indirect(deps, "cheader_deps")
     cflags = collectattrs(
         targets=hdr_deps, name="caller_cflags", initial=cflags
     )
@@ -141,49 +146,6 @@ def findsources(name, srcs, deps, cflags, toolchain, filerule, cwd):
     return objs
 
 
-@Rule
-def cheaders(
-    self,
-    name,
-    hdrs: TargetsMap = {},
-    caller_cflags=[],
-    deps: Targets = [],
-):
-    cs = []
-    ins = hdrs.values()
-    outs = []
-    i = 0
-    for dest, src in hdrs.items():
-        s = filenamesof([src])
-        assert (
-            len(s) == 1
-        ), "the target of a header must return exactly one file"
-
-        cs += ["$(CP) {ins[" + str(i) + "]} {outs[" + str(i) + "]}"]
-        outs += ["=" + dest]
-        i = i + 1
-
-    hdr_deps = {self}
-    lib_deps = set()
-    for d in deps:
-        hdr_deps.update(d.args.get("cheader_deps", {d}))
-        lib_deps.update(d.args.get("clibrary_deps", {d}))
-
-    simplerule(
-        replaces=self,
-        ins=ins,
-        outs=outs,
-        deps=deps,
-        commands=cs,
-        label="CHEADERS",
-        args={
-            "caller_cflags": caller_cflags + [f"-I{self.dir}"],
-            "cheader_deps": hdr_deps,
-            "clibrary_deps": lib_deps,
-        },
-    )
-
-
 def libraryimpl(
     self,
     name,
@@ -199,52 +161,64 @@ def libraryimpl(
     label,
     kind,
 ):
+    hdr_deps = _indirect(deps, "cheader_deps") | {self}
+    lib_deps = _indirect(deps, "clibrary_deps") | {self}
+
     hr = None
-    if hdrs and not srcs:
-        cheaders(
-            replaces=self,
-            hdrs=hdrs,
-            caller_cflags=caller_cflags,
-        )
-        return
+    hf = []
+    ar = None
     if hdrs:
-        hr = cheaders(
-            name=self.localname + "_hdrs",
-            hdrs=hdrs,
-            caller_cflags=caller_cflags,
+        cs = []
+        ins = hdrs.values()
+        outs = []
+        i = 0
+        for dest, src in hdrs.items():
+            s = filenamesof([src])
+            assert (
+                len(s) == 1
+            ), "the target of a header must return exactly one file"
+
+            cs += ["$(CP) {ins[" + str(i) + "]} {outs[" + str(i) + "]}"]
+            outs += ["=" + dest]
+            i = i + 1
+
+        hr = simplerule(
+            name=f"{self.localname}_hdr",
+            ins=ins,
+            outs=outs,
+            deps=deps,
+            commands=cs,
+            label="CHEADERS",
         )
         hr.materialise()
-        deps = deps + [hr]
+        hf = [f"-I{hr.dir}"]
 
-    objs = findsources(
-        self.localname,
-        srcs,
-        deps,
-        cflags,
-        toolchain,
-        kind,
-        self.cwd,
-    )
+    if srcs:
+        objs = findsources(
+            self.localname,
+            srcs,
+            deps + ([hr] if hr else []),
+            cflags + hf,
+            toolchain,
+            kind,
+            self.cwd,
+        )
 
-    hdr_deps = {hr} if hr else set()
-    lib_deps = {self}
-    for d in deps:
-        hdr_deps.update(d.args.get("cheader_deps", {d}))
-        lib_deps.update(d.args.get("clibrary_deps", {d}))
+        ar = simplerule(
+            name=f"{self.localname}_lib",
+            ins=objs,
+            outs=[f"={self.localname}.a"],
+            label=label,
+            commands=commands,
+        )
+        ar.materialise()
 
-    simplerule(
-        replaces=self,
-        ins=objs,
-        outs=[f"={self.localname}.a"],
-        label=label,
-        commands=commands,
-        args={
-            "caller_ldflags": caller_ldflags,
-            "cheader_deps": hdr_deps,
-            "clibrary_deps": lib_deps,
-        },
-        traits={"cheaders"},
-    )
+    self.outs = ([hr] if hr else []) + ([ar] if ar else [])
+    self.deps = self.outs
+    self.args["cheader_deps"] = hdr_deps
+    self.args["clibrary_deps"] = lib_deps
+    self.args["caller_cflags"] = caller_cflags + hf
+    self.args["caller_ldflags"] = caller_ldflags
 
 
 @Rule
@@ -298,11 +272,12 @@ def cxxlibrary(
     toolchain=Toolchain,
     commands=None,
     label=None,
+    cxxfilerule=cxxfile,
 ):
     if not label:
         label = toolchain.label + "LIB"
     if not commands:
-        commands = toolchain.clibrary
+        commands = toolchain.cxxlibrary
     libraryimpl(
         self,
         name,
@@ -316,7 +291,7 @@ def cxxlibrary(
         toolchain,
         commands,
         label,
-        cxxfile,
+        cxxfilerule,
     )
 
 

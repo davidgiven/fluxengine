@@ -14,7 +14,7 @@ package(name="sqlite3_lib", package="sqlite3")
 
 hostpackage(name="protobuf_host_lib", package="protobuf")
 hostpackage(name="z_host_lib", package="zlib")
-hostpackage(name="fmt_host_lib", package="fmt")
+hostpackage(name="fmt_host_lib", package="fmt", fallback="dep/fmt")
 hostpackage(name="sqlite3_host_lib", package="sqlite3")
 
 clibrary(name="protocol", hdrs={"protocol.h": "./protocol.h"})
