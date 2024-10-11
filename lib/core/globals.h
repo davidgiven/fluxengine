@@ -16,7 +16,7 @@
 #include <variant>
 #include <optional>
 #include <regex>
-#include <fmt/format.h>
+#include "fmt/format.h"
 
 #if defined(_WIN32) || defined(__WIN32__)
 #include <direct.h>

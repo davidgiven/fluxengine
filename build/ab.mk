@@ -10,8 +10,12 @@ AR ?= ar
 CFLAGS ?= -g -Og
 LDFLAGS ?= -g
 PKG_CONFIG ?= pkg-config
+HOST_PKG_CONFIG ?= $(PKG_CONFIG)
 ECHO ?= echo
-TARGETS ?= +all
+CP ?= cp
+
+export PKG_CONFIG
+export HOST_PKG_CONFIG
 
 ifdef VERBOSE
 	hide =
@@ -21,6 +25,21 @@ else
 	else
 		hide = @
 	endif
+endif
+
+WINDOWS := no
+OSX := no
+LINUX := no
+ifeq ($(OS),Windows_NT)
+    WINDOWS := yes
+else
+    UNAME_S := $(shell uname -s)
+    ifeq ($(UNAME_S),Linux)
+		LINUX := yes
+    endif
+    ifeq ($(UNAME_S),Darwin)
+		OSX := yes
+    endif
 endif
 
 ifeq ($(OS), Windows_NT)
@@ -33,6 +52,15 @@ rulecount := $(shell $(MAKE) --no-print-directory -q $(OBJ)/build.mk PROGRESSINF
 ruleindex := 1
 PROGRESSINFO = "$(shell $(PYTHON) build/_progress.py $(ruleindex) $(rulecount))$(eval ruleindex := $(shell expr $(ruleindex) + 1))"
 endif
+
+PKG_CONFIG_HASHES = $(OBJ)/.pkg-config-hashes/target-$(word 1, $(shell $(PKG_CONFIG) --list-all | md5sum))
+HOST_PKG_CONFIG_HASHES = $(OBJ)/.pkg-config-hashes/host-$(word 1, $(shell $(HOST_PKG_CONFIG) --list-all | md5sum))
+
+$(OBJ)/build.mk : $(PKG_CONFIG_HASHES) $(HOST_PKG_CONFIG_HASHES)
+$(PKG_CONFIG_HASHES) $(HOST_PKG_CONFIG_HASHES) &:
+	$(hide) rm -rf $(OBJ)/.pkg-config-hashes
+	$(hide) mkdir -p $(OBJ)/.pkg-config-hashes
+	$(hide) touch $(PKG_CONFIG_HASHES) $(HOST_PKG_CONFIG_HASHES)
 
 include $(OBJ)/build.mk
 

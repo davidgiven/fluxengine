@@ -1,7 +1,7 @@
 #include "lib/core/globals.h"
 #include "lib/vfs/vfs.h"
 #include "lib/config.pb.h"
-#include <fmt/format.h>
+#include "fmt/format.h"
 #include <regex>
 
 class CpmFsFilesystem : public Filesystem, public HasBitmap, public HasMount

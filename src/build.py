@@ -45,6 +45,7 @@ cxxprogram(
         "lib/core",
         "lib/vfs",
         "lib+config_proto_lib",
+        "lib/fluxsource+proto_lib",
         "src/formats",
     ],
 )

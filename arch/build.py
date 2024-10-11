@@ -2,7 +2,7 @@ from build.c import cxxlibrary
 from build.protobuf import proto, protocc
 
 proto(
-    name="arch_proto",
+    name="proto",
     srcs=[
         "./aeslanier/aeslanier.proto",
         "./agat/agat.proto",
@@ -24,4 +24,7 @@ proto(
         "./victor9k/victor9k.proto",
         "./zilogmcz/zilogmcz.proto",
     ],
+    deps=["lib+common_proto"],
 )
+
+protocc(name="proto_lib", srcs=[".+proto"], deps=["lib+common_proto_lib"])

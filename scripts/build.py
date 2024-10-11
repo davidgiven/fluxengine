@@ -13,6 +13,8 @@ def protoencode_single(self, name, srcs: Targets, proto, symbol):
             cflags=["-DPROTO=" + proto],
             deps=[
                 "lib+config_proto_lib",
+                "lib/fluxsource+proto_lib",
+                "lib/fluxsink+proto_lib",
                 "tests+test_proto_lib",
                 "+protobuf_lib",
                 "+fmt_lib",
@@ -61,6 +63,8 @@ cxxprogram(
     deps=[
         "src/formats",
         "lib+config_proto_lib",
+        "lib/fluxsource+proto_lib",
+        "lib/fluxsink+proto_lib",
         "+lib",
         "+fmt_lib",
         "+protobuf_lib",
@@ -73,6 +77,8 @@ cxxprogram(
     deps=[
         "src/formats",
         "lib+config_proto_lib",
+        "lib/fluxsource+proto_lib",
+        "lib/fluxsink+proto_lib",
         "+lib",
         "+fmt_lib",
         "+protobuf_lib",

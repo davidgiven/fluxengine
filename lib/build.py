@@ -1,28 +1,62 @@
-from build.c import cxxlibrary
 from build.protobuf import proto, protocc
 
 
 proto(name="common_proto", srcs=["./common.proto"])
+protocc(name="common_proto_lib", srcs=[".+common_proto"])
+
+proto(
+    name="layout_proto",
+    srcs=["./layout.proto"],
+    deps=[".+common_proto", "+fl2_proto"],
+)
+protocc(
+    name="layout_proto_lib",
+    srcs=[".+layout_proto"],
+    deps=[".+common_proto_lib", "+fl2_proto_lib"],
+)
+
+proto(
+    name="drive_proto",
+    srcs=["./drive.proto"],
+    deps=[".+common_proto", "+fl2_proto", ".+layout_proto"],
+)
+protocc(
+    name="drive_proto_lib",
+    srcs=[".+drive_proto"],
+    deps=[".+common_proto_lib", "+fl2_proto_lib", ".+layout_proto_lib"],
+)
 
 proto(
     name="config_proto",
-    srcs=[
-        "./config.proto",
-        "./layout.proto",
-        "./drive.proto",
-        "./decoders/decoders.proto",
-        "./encoders/encoders.proto",
-        "./fluxsink/fluxsink.proto",
-        "./fluxsource/fluxsource.proto",
-        "./imagereader/imagereader.proto",
-        "./imagewriter/imagewriter.proto",
-        "./usb/usb.proto",
-        "./vfs/vfs.proto",
+    srcs=["./config.proto"],
+    deps=[
+        ".+common_proto",
+        ".+layout_proto",
+        ".+drive_proto",
+        "+fl2_proto",
+        "lib/fluxsource+proto",
+        "lib/fluxsink+proto",
+        "lib/vfs+proto",
+        "lib/usb+proto",
+        "lib/encoders+proto",
+        "lib/decoders+proto",
+        "lib/imagereader+proto",
+        "lib/imagewriter+proto",
     ],
-    deps=[".+common_proto", "+fl2_proto"],
 )
 
 protocc(
     name="config_proto_lib",
-    srcs=[".+common_proto", ".+config_proto", "arch+arch_proto", "+fl2_proto"]
+    srcs=[".+common_proto", ".+config_proto", "arch+proto", "+fl2_proto"],
+    deps=[
+        "lib/fluxsource+proto_lib",
+        "lib/fluxsink+proto_lib",
+        "lib/vfs+proto_lib",
+        "lib/usb+proto_lib",
+        "lib/encoders+proto_lib",
+        "lib/decoders+proto_lib",
+        "lib/imagereader+proto_lib",
+        "lib/imagewriter+proto_lib",
+        "lib+drive_proto_lib",
+    ],
 )

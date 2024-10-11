@@ -1,4 +1,21 @@
 from build.c import cxxlibrary
+from build.protobuf import proto, protocc
+
+proto(
+    name="proto",
+    srcs=["./vfs.proto"],
+    deps=["lib+common_proto", "lib+layout_proto", "+fl2_proto"],
+)
+
+protocc(
+    name="proto_lib",
+    srcs=[".+proto"],
+    deps=[
+        "lib+common_proto_lib",
+        "lib+layout_proto_lib",
+        "+fl2_proto_lib",
+    ],
+)
 
 cxxlibrary(
     name="vfs",
@@ -31,5 +48,6 @@ cxxlibrary(
     deps=[
         "+lib",
         "+fmt_lib",
+        ".+proto_lib",
     ],
 )
