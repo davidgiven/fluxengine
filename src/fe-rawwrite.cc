@@ -66,9 +66,8 @@ int mainRawWrite(int argc, const char* argv[])
     if (globalConfig()->flux_source().type() == FLUXTYPE_DRIVE)
         error("you can't use rawwrite to read from hardware");
 
-    auto& fluxSource = globalConfig().getFluxSource();
-    std::unique_ptr<FluxSink> fluxSink(
-        FluxSink::create(globalConfig()->flux_sink()));
+    auto fluxSource = FluxSource::create(globalConfig());
+    auto fluxSink = FluxSink::create(globalConfig());
 
     writeRawDiskCommand(*fluxSource, *fluxSink);
     return 0;

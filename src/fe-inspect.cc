@@ -135,7 +135,7 @@ int mainInspect(int argc, const char* argv[])
     globalConfig().overrides()->mutable_flux_source()->set_type(FLUXTYPE_DRIVE);
     flags.parseFlagsWithConfigFiles(argc, argv, {});
 
-    auto& fluxSource = globalConfig().getFluxSource();
+    auto fluxSource = FluxSource::create(globalConfig());
     const auto fluxmap = fluxSource->readFlux(trackFlag, headFlag)->next();
 
     std::cout << fmt::format("0x{:x} bytes of data in {:.3f}ms\n",

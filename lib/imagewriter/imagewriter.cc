@@ -1,4 +1,5 @@
 #include "lib/core/globals.h"
+#include "lib/config.h"
 #include "lib/flags.h"
 #include "lib/sector.h"
 #include "lib/imagewriter/imagewriter.h"
@@ -10,6 +11,13 @@
 #include "lib/logger.h"
 #include <iostream>
 #include <fstream>
+
+std::unique_ptr<ImageWriter> ImageWriter::create(Config& config)
+{
+    if (!config.hasImageWriter())
+        error("no image writer configured");
+    return create(config->image_writer());
+}
 
 std::unique_ptr<ImageWriter> ImageWriter::create(const ImageWriterProto& config)
 {

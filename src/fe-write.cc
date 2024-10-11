@@ -68,18 +68,19 @@ int mainWrite(int argc, const char* argv[])
 
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
-    auto& reader = globalConfig().getImageReader();
+    auto reader = ImageReader::create(globalConfig());
     std::shared_ptr<Image> image = reader->readMappedImage();
 
-    auto encoder = globalConfig().getEncoder();
-    auto fluxSink = globalConfig().getFluxSink();
+    auto encoder = Encoder::create(globalConfig());
+    auto fluxSink = FluxSink::create(globalConfig());
 
     std::shared_ptr<Decoder> decoder;
     std::shared_ptr<FluxSource> verificationFluxSource;
     if (globalConfig().hasDecoder() && fluxSink->isHardware() && verify)
     {
-        decoder = globalConfig().getDecoder();
-        verificationFluxSource = globalConfig().getVerificationFluxSource();
+        decoder = Decoder::create(globalConfig());
+        verificationFluxSource =
+            FluxSource::create(globalConfig().getVerificationFluxSourceProto());
     }
 
     writeDiskCommand(*image,

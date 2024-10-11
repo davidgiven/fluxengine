@@ -65,9 +65,9 @@ int mainRead(int argc, const char* argv[])
     if (globalConfig()->decoder().copy_flux_to().type() == FLUXTYPE_DRIVE)
         error("you cannot copy flux to a hardware device");
 
-    auto& fluxSource = globalConfig().getFluxSource();
-    auto& decoder = globalConfig().getDecoder();
-    auto writer = globalConfig().getImageWriter();
+    auto fluxSource = FluxSource::create(globalConfig());
+    auto decoder = Decoder::create(globalConfig());
+    auto writer = ImageWriter::create(globalConfig());
 
     readDiskCommand(*fluxSource, *decoder, *writer);
 

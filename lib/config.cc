@@ -3,12 +3,6 @@
 #include "lib/proto.h"
 #include "lib/logger.h"
 #include "lib/core/utils.h"
-#include "lib/imagewriter/imagewriter.h"
-#include "lib/imagereader/imagereader.h"
-#include "lib/fluxsink/fluxsink.h"
-#include "lib/fluxsource/fluxsource.h"
-#include "lib/encoders/encoders.h"
-#include "lib/decoders/decoders.h"
 #include <fstream>
 #include <google/protobuf/text_format.h>
 
@@ -211,24 +205,10 @@ ConfigProto* Config::combined()
 
         _combinedConfig.MergeFrom(_overridesConfig);
 
-        /* At this point the config is mostly valid. We're about to make calls
-         * that will want to call combined() reentrantly, so to prevent infinite
-         * loop we mark the config as valid now. */
+        /* At this point the config is valid, although when fluxsources or
+         * imagereaders are loaded it may be adjusted again. */
 
         _configValid = true;
-
-        /* We should now be more or less done, but we still need to add in any
-         * config contributed by the flux source and image readers. This will
-         * open the files. */
-
-        if (hasFluxSource())
-            _combinedConfig.MergeFrom(getFluxSource()->getExtraConfig());
-        if (hasImageReader())
-            _combinedConfig.MergeFrom(getImageReader()->getExtraConfig());
-
-        /* Merge in the overrides once again. */
-
-        _combinedConfig.MergeFrom(_overridesConfig);
     }
     return &_combinedConfig;
 }
@@ -244,11 +224,6 @@ void Config::clear()
     _baseConfig.Clear();
     _overridesConfig.Clear();
     _combinedConfig.Clear();
-    _fluxSource.reset();
-    _verificationFluxSource.reset();
-    _imageReader.reset();
-    _encoder.reset();
-    _decoder.reset();
     _appliedOptions.clear();
 }
 
@@ -581,35 +556,9 @@ bool Config::hasFluxSource()
     return (*this)->flux_source().type() != FLUXTYPE_NOT_SET;
 }
 
-std::shared_ptr<FluxSource>& Config::getFluxSource()
-{
-    if (!_fluxSource)
-    {
-        if (!hasFluxSource())
-            error("no flux source configured");
-
-        _fluxSource =
-            std::shared_ptr(FluxSource::create((*this)->flux_source()));
-    }
-    return _fluxSource;
-}
-
 bool Config::hasVerificationFluxSource() const
 {
     return _verificationFluxSourceProto.type() != FLUXTYPE_NOT_SET;
-}
-
-std::shared_ptr<FluxSource>& Config::getVerificationFluxSource()
-{
-    if (!_verificationFluxSource)
-    {
-        if (!hasVerificationFluxSource())
-            error("no verification flux source configured");
-
-        _verificationFluxSource =
-            std::shared_ptr(FluxSource::create(_verificationFluxSourceProto));
-    }
-    return _verificationFluxSource;
 }
 
 bool Config::hasImageReader()
@@ -617,30 +566,9 @@ bool Config::hasImageReader()
     return (*this)->image_reader().type() != IMAGETYPE_NOT_SET;
 }
 
-std::shared_ptr<ImageReader>& Config::getImageReader()
-{
-    if (!_imageReader)
-    {
-        if (!hasImageReader())
-            error("no image reader configured");
-
-        _imageReader =
-            std::shared_ptr(ImageReader::create((*this)->image_reader()));
-    }
-    return _imageReader;
-}
-
 bool Config::hasFluxSink()
 {
     return (*this)->flux_sink().type() != FLUXTYPE_NOT_SET;
-}
-
-std::unique_ptr<FluxSink> Config::getFluxSink()
-{
-    if (!hasFluxSink())
-        error("no flux sink configured");
-
-    return FluxSink::create((*this)->flux_sink());
 }
 
 bool Config::hasImageWriter()
@@ -648,46 +576,14 @@ bool Config::hasImageWriter()
     return (*this)->image_writer().type() != IMAGETYPE_NOT_SET;
 }
 
-std::unique_ptr<ImageWriter> Config::getImageWriter()
-{
-    if (!hasImageWriter())
-        error("no image writer configured");
-
-    return ImageWriter::create((*this)->image_writer());
-}
-
 bool Config::hasEncoder()
 {
     return (*this)->has_encoder();
 }
 
-std::shared_ptr<Encoder>& Config::getEncoder()
-{
-    if (!_encoder)
-    {
-        if (!hasEncoder())
-            error("no encoder configured");
-
-        _encoder = Encoder::create((*this)->encoder());
-    }
-    return _encoder;
-}
-
 bool Config::hasDecoder()
 {
     return _combinedConfig.has_decoder();
-}
-
-std::shared_ptr<Decoder>& Config::getDecoder()
-{
-    if (!_decoder)
-    {
-        if (!hasDecoder())
-            error("no decoder configured");
-
-        _decoder = Decoder::create((*this)->decoder());
-    }
-    return _decoder;
 }
 
 const std::vector<FluxConstructor>& Config::getFluxFormats()

@@ -1,10 +1,18 @@
 #include "lib/core/globals.h"
 #include "lib/flags.h"
+#include "lib/config.h"
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/config.pb.h"
 #include "lib/proto.h"
 #include "lib/core/utils.h"
 #include <regex>
+
+std::unique_ptr<FluxSink> FluxSink::create(Config& config)
+{
+    if (!config.hasFluxSink())
+        error("no flux sink configured");
+    return create(config->flux_sink());
+}
 
 std::unique_ptr<FluxSink> FluxSink::create(const FluxSinkProto& config)
 {

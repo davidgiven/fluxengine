@@ -13,6 +13,7 @@
 #include "lib/layout.h"
 #include "texteditorwindow.h"
 #include "iconbutton.h"
+#include "context.h"
 #include <wx/config.h>
 #include <wx/mstream.h>
 #include <wx/image.h>
@@ -794,7 +795,6 @@ private:
 private:
     wxConfig _config;
     wxImageList _imageList;
-    ConfigProto _configProto;
     std::vector<std::string> _formatNames;
     std::vector<std::shared_ptr<const CandidateDevice>> _devices;
     int _selectedSource;

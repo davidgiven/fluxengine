@@ -7,6 +7,7 @@
 class ImageSpec;
 class ImageReaderProto;
 class ConfigProto;
+class Config;
 
 class ImageReader
 {
@@ -15,6 +16,7 @@ public:
     virtual ~ImageReader(){};
 
 public:
+    static std::unique_ptr<ImageReader> create(Config& config);
     static std::unique_ptr<ImageReader> create(const ImageReaderProto& config);
 
 public:

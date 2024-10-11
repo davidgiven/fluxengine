@@ -1,6 +1,7 @@
 #include "lib/core/globals.h"
 #include "lib/flags.h"
 #include "lib/fluxmap.h"
+#include "lib/config.h"
 #include "lib/decoders/decoders.h"
 #include "lib/encoders/encoders.h"
 #include "arch/agat/agat.h"
@@ -31,6 +32,13 @@
 #include "lib/decoders/decoders.pb.h"
 #include "lib/layout.h"
 #include <numeric>
+
+std::unique_ptr<Decoder> Decoder::create(Config& config)
+{
+    if (!config.hasDecoder())
+        error("no decoder configured");
+    return create(config->decoder());
+}
 
 std::unique_ptr<Decoder> Decoder::create(const DecoderProto& config)
 {

@@ -32,6 +32,8 @@ cxxprogram(
     name="gui",
     srcs=[
         "./browserpanel.cc",
+        "./context.cc",
+        "./context.h",
         "./customstatusbar.cc",
         "./explorerpanel.cc",
         "./filesystemmodel.cc",

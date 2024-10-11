@@ -186,7 +186,6 @@ def libraryimpl(
             name=f"{self.localname}_hdr",
             ins=ins,
             outs=outs,
-            deps=deps,
             commands=cs,
             label="CHEADERS",
         )

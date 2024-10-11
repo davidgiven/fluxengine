@@ -12,6 +12,7 @@ class FluxMatcher;
 class FluxmapReader;
 class RawBits;
 class DecoderProto;
+class Config;
 
 #include "lib/flux.h"
 
@@ -39,6 +40,7 @@ public:
 
     virtual ~Decoder() {}
 
+    static std::unique_ptr<Decoder> create(Config& config);
     static std::unique_ptr<Decoder> create(const DecoderProto& config);
 
 public:

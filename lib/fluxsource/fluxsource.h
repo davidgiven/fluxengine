@@ -17,6 +17,7 @@ class KryofluxFluxSourceProto;
 class ScpFluxSourceProto;
 class TestPatternFluxSourceProto;
 class FlxFluxSourceProto;
+class Config;
 
 class FluxSourceIterator
 {
@@ -58,6 +59,7 @@ public:
     static std::unique_ptr<FluxSource> createMemoryFluxSource(
         const DiskFlux& flux);
 
+    static std::unique_ptr<FluxSource> create(Config& config);
     static std::unique_ptr<FluxSource> create(const FluxSourceProto& spec);
 
 public:

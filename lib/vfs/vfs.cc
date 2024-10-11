@@ -243,13 +243,13 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystemFromConfig()
         std::shared_ptr<Encoder> encoder;
         if (globalConfig().hasFluxSource())
         {
-            fluxSource = globalConfig().getFluxSource();
-            decoder = globalConfig().getDecoder();
+            fluxSource = FluxSource::create(globalConfig());
+            decoder = Decoder::create(globalConfig());
         }
         if (globalConfig()->flux_sink().type() == FLUXTYPE_DRIVE)
         {
-            fluxSink = globalConfig().getFluxSink();
-            encoder = globalConfig().getEncoder();
+            fluxSink = FluxSink::create(globalConfig());
+            encoder = Encoder::create(globalConfig());
         }
         sectorInterface = SectorInterface::createFluxSectorInterface(
             fluxSource, fluxSink, encoder, decoder);
@@ -260,9 +260,9 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystemFromConfig()
         std::shared_ptr<ImageWriter> writer;
         if (globalConfig().hasImageReader() &&
             doesFileExist(globalConfig()->image_reader().filename()))
-            reader = globalConfig().getImageReader();
+            reader = ImageReader::create(globalConfig());
         if (globalConfig().hasImageWriter())
-            writer = globalConfig().getImageWriter();
+            writer = ImageWriter::create(globalConfig());
 
         sectorInterface =
             SectorInterface::createImageSectorInterface(reader, writer);

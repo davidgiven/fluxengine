@@ -12,6 +12,7 @@ class A2RFluxSinkProto;
 class VcdFluxSinkProto;
 class ScpFluxSinkProto;
 class Fl2FluxSinkProto;
+class Config;
 
 class FluxSink
 {
@@ -34,6 +35,7 @@ public:
     static std::unique_ptr<FluxSink> createFl2FluxSink(
         const std::string& filename);
 
+    static std::unique_ptr<FluxSink> create(Config& config);
     static std::unique_ptr<FluxSink> create(const FluxSinkProto& config);
 
 public:

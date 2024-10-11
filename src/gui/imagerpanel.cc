@@ -13,6 +13,7 @@
 #include "lib/layout.h"
 #include "fluxviewerwindow.h"
 #include "jobqueue.h"
+#include "context.h"
 
 class ImagerPanelImpl : public ImagerPanelGen, public ImagerPanel, JobQueue
 {
@@ -93,8 +94,8 @@ public:
             QueueJob(
                 [this]()
                 {
-                    auto& fluxSource = globalConfig().getFluxSource();
-                    auto& decoder = globalConfig().getDecoder();
+                    auto* fluxSource = GetContext().GetFluxSource();
+                    auto* decoder = GetContext().GetDecoder();
                     auto diskflux = readDiskCommand(*fluxSource, *decoder);
 
                     runOnUiThread(
@@ -141,24 +142,24 @@ public:
                 [this]()
                 {
                     auto image =
-                        globalConfig().getImageReader()->readMappedImage();
-                    auto encoder = globalConfig().getEncoder();
-                    auto fluxSink = globalConfig().getFluxSink();
+                        GetContext().GetImageReader()->readMappedImage();
+                    auto* encoder = GetContext().GetEncoder();
+                    auto* fluxSink = GetContext().GetFluxSink();
 
-                    std::shared_ptr<Decoder> decoder;
-                    std::shared_ptr<FluxSource> verificationFluxSource;
+                    Decoder* decoder = nullptr;
+                    FluxSource* verificationFluxSource;
                     if (globalConfig().hasDecoder() && fluxSink->isHardware())
                     {
-                        decoder = globalConfig().getDecoder();
+                        decoder = GetContext().GetDecoder();
                         verificationFluxSource =
-                            globalConfig().getVerificationFluxSource();
+                            GetContext().GetVerificationFluxSource();
                     }
 
                     writeDiskCommand(*image,
                         *encoder,
                         *fluxSink,
-                        decoder.get(),
-                        verificationFluxSource.get());
+                        decoder,
+                        verificationFluxSource);
                 });
         }
         catch (const ErrorException& e)
@@ -259,7 +260,7 @@ public:
             QueueJob(
                 [image, this]()
                 {
-                    globalConfig().getImageWriter()->writeMappedImage(*image);
+                    GetContext().GetImageWriter()->writeMappedImage(*image);
                 });
         }
         catch (const ErrorException& e)

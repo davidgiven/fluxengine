@@ -7,6 +7,7 @@
 #include "gui.h"
 #include "layout.h"
 #include "jobqueue.h"
+#include "context.h"
 
 static Bytes fakeBits(const std::vector<bool>& bits)
 {
@@ -158,8 +159,8 @@ private:
                 if (!_explorerFluxmap || (desiredTrack != _explorerTrack) ||
                     (desiredSide != _explorerSide))
                 {
-                    _explorerFluxmap = globalConfig()
-                                           .getFluxSource()
+                    _explorerFluxmap = GetContext()
+                                           .GetFluxSource()
                                            ->readFlux(desiredTrack, desiredSide)
                                            ->next();
                     _explorerTrack = desiredTrack;

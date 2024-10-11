@@ -17,6 +17,7 @@
 #include "texteditorwindow.h"
 #include "filesystemmodel.h"
 #include "customstatusbar.h"
+#include "context.h"
 #include "lib/vfs/vfs.h"
 #include "lib/layout.h"
 #include <google/protobuf/text_format.h>
@@ -179,6 +180,12 @@ public:
     /* This sets the *global* config object. That's safe provided the worker
      * thread isn't running, otherwise you'll get a race. */
 public:
+    Context& GetContext()
+    {
+        assert(_context);
+        return *_context;
+    }
+
     void ShowConfig()
     {
         std::string s;
@@ -189,6 +196,7 @@ public:
 
     void PrepareConfig() override
     {
+        _context = Context::Create();
         _idlePanel->PrepareConfig();
         ShowConfig();
     }
@@ -369,6 +377,7 @@ private:
     wxTimer _exitTimer;
     std::unique_ptr<TextViewerWindow> _logWindow;
     std::unique_ptr<TextViewerWindow> _configWindow;
+    std::unique_ptr<Context> _context;
 };
 
 wxWindow* FluxEngineApp::CreateMainWindow()

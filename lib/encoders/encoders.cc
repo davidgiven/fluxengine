@@ -21,6 +21,13 @@
 #include "lib/image.h"
 #include "protocol.h"
 
+std::unique_ptr<Encoder> Encoder::create(Config& config)
+{
+    if (!config.hasEncoder())
+        error("no encoder configured");
+    return create(config->encoder());
+}
+
 std::unique_ptr<Encoder> Encoder::create(const EncoderProto& config)
 {
     static const std::map<int,
