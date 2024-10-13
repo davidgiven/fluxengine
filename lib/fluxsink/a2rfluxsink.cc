@@ -6,7 +6,7 @@
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/decoders/fluxmapreader.h"
 #include "lib/fluxsink/fluxsink.pb.h"
-#include "lib/logger.h"
+#include "lib/core/logger.h"
 #include "lib/proto.h"
 #include "lib/fluxmap.h"
 #include "lib/layout.h"

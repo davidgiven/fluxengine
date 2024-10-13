@@ -2,7 +2,7 @@
 #include "lib/config.h"
 #include "lib/layout.h"
 #include "lib/proto.h"
-#include "lib/logger.h"
+#include "lib/core/logger.h"
 #include "lib/fl2.h"
 
 static unsigned getTrackStep()

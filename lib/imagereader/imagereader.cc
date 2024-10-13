@@ -8,7 +8,7 @@
 #include "lib/image.h"
 #include "lib/layout.h"
 #include "lib/config.pb.h"
-#include "lib/logger.h"
+#include "lib/core/logger.h"
 #include <algorithm>
 #include <ctype.h>
 

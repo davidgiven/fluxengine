@@ -3,7 +3,7 @@
 #include "lib/sector.h"
 #include "lib/imagereader/imagereader.h"
 #include "lib/image.h"
-#include "lib/logger.h"
+#include "lib/core/logger.h"
 #include "lib/config.pb.h"
 #include <algorithm>
 #include <iostream>

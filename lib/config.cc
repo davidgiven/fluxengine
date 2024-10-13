@@ -1,7 +1,7 @@
 #include "lib/core/globals.h"
 #include "lib/config.h"
 #include "lib/proto.h"
-#include "lib/logger.h"
+#include "lib/core/logger.h"
 #include "lib/core/utils.h"
 #include <fstream>
 #include <google/protobuf/text_format.h>

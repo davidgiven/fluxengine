@@ -8,7 +8,7 @@
 #include "lib/config.pb.h"
 #include "lib/proto.h"
 #include "lib/layout.h"
-#include "lib/logger.h"
+#include "lib/core/logger.h"
 #include <iostream>
 #include <fstream>
 

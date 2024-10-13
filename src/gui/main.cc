@@ -1,5 +1,5 @@
 #include "lib/core/globals.h"
-#include "lib/logger.h"
+#include "lib/core/logger.h"
 #include "gui.h"
 #include "lib/core/utils.h"
 

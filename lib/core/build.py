@@ -9,6 +9,7 @@ cxxlibrary(
         "./csvreader.cc",
         "./hexdump.cc",
         "./utils.cc",
+        "./logger.cc",
     ],
     hdrs={
         "lib/core/bitmap.h": "./bitmap.h",
@@ -17,6 +18,7 @@ cxxlibrary(
         "lib/core/csvreader.h": "./csvreader.h",
         "lib/core/globals.h": "./globals.h",
         "lib/core/utils.h": "./utils.h",
+        "lib/core/logger.h": "./logger.h",
     },
     deps=[
         "dep/agg",

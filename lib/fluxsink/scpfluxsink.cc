@@ -11,7 +11,7 @@
 #include "lib/fluxmap.h"
 #include "lib/layout.h"
 #include "lib/scp.h"
-#include "lib/logger.h"
+#include "lib/core/logger.h"
 #include <fstream>
 #include <sys/stat.h>
 #include <sys/types.h>

@@ -9,7 +9,7 @@
 #include "lib/core/bytes.h"
 #include "lib/proto.h"
 #include "usbfinder.h"
-#include "lib/logger.h"
+#include "lib/core/logger.h"
 #include "applesauce.h"
 #include "greaseweazle.h"
 

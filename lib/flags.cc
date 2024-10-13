@@ -3,7 +3,7 @@
 #include "lib/flags.h"
 #include "lib/proto.h"
 #include "lib/core/utils.h"
-#include "lib/logger.h"
+#include "lib/core/logger.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/imagereader/imagereader.h"
 #include <google/protobuf/text_format.h>

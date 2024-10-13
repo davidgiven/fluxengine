@@ -13,7 +13,7 @@
 #include "lib/imagewriter/imagewriter.h"
 #include "lib/sector.h"
 #include "lib/image.h"
-#include "lib/logger.h"
+#include "lib/core/logger.h"
 #include "lib/layout.h"
 #include "lib/core/utils.h"
 #include "lib/config.pb.h"

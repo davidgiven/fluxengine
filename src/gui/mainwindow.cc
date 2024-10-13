@@ -2,7 +2,7 @@
 #include "lib/config.h"
 #include "lib/proto.h"
 #include "gui.h"
-#include "lib/logger.h"
+#include "lib/core/logger.h"
 #include "lib/readerwriter.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/fluxsink/fluxsink.h"
