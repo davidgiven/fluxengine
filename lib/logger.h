@@ -2,11 +2,39 @@
 #define LOGGER_H
 
 #include "fmt/format.h"
+#include <type_traits>
 
 class DiskFlux;
 class TrackDataFlux;
 class TrackFlux;
 class Sector;
+
+class LogRenderer
+{
+public:
+    static std::unique_ptr<LogRenderer> create();
+
+public:
+    virtual LogRenderer& add(std::string m) = 0;
+    virtual LogRenderer& newsection() = 0;
+    virtual LogRenderer& newline() = 0;
+
+    virtual void renderTo(std::ostream& stream) = 0;
+};
+
+struct ErrorLogMessage;
+struct EmergencyStopMessage;
+struct BeginSpeedOperationLogMessage;
+struct EndSpeedOperationLogMessage;
+struct TrackReadLogMessage;
+struct DiskReadLogMessage;
+struct BeginReadOperationLogMessage;
+struct EndReadOperationLogMessage;
+struct BeginWriteOperationLogMessage;
+struct EndWriteOperationLogMessage;
+struct BeginOperationLogMessage;
+struct EndOperationLogMessage;
+struct OperationProgressLogMessage;
 
 struct ErrorLogMessage
 {
@@ -17,87 +45,57 @@ struct EmergencyStopMessage
 {
 };
 
-struct BeginSpeedOperationLogMessage
-{
-};
+extern void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const ErrorLogMessage> m);
+extern void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const EmergencyStopMessage> m);
+extern void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const TrackReadLogMessage> m);
+extern void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const DiskReadLogMessage> m);
+extern void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const BeginSpeedOperationLogMessage> m);
+extern void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const EndSpeedOperationLogMessage> m);
+extern void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const BeginReadOperationLogMessage> m);
+extern void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const EndReadOperationLogMessage> m);
+extern void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const BeginWriteOperationLogMessage> m);
+extern void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const EndWriteOperationLogMessage> m);
+extern void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const BeginOperationLogMessage> m);
+extern void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const EndOperationLogMessage> m);
+extern void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const OperationProgressLogMessage> m);
 
-struct EndSpeedOperationLogMessage
-{
-    nanoseconds_t rotationalPeriod;
-};
-
-struct TrackReadLogMessage
-{
-    std::shared_ptr<const TrackFlux> track;
-};
-
-struct DiskReadLogMessage
-{
-    std::shared_ptr<const DiskFlux> disk;
-};
-
-struct BeginReadOperationLogMessage
-{
-    unsigned track;
-    unsigned head;
-};
-
-struct EndReadOperationLogMessage
-{
-    std::shared_ptr<const TrackDataFlux> trackDataFlux;
-    std::set<std::shared_ptr<const Sector>> sectors;
-};
-
-struct BeginWriteOperationLogMessage
-{
-    unsigned track;
-    unsigned head;
-};
-
-struct EndWriteOperationLogMessage
-{
-};
-
-struct BeginOperationLogMessage
-{
-    std::string message;
-};
-
-struct EndOperationLogMessage
-{
-    std::string message;
-};
-
-struct OperationProgressLogMessage
-{
-    unsigned progress;
-};
-
-class TrackFlux;
-
-typedef std::variant<std::string,
-    ErrorLogMessage,
-    EmergencyStopMessage,
-    TrackReadLogMessage,
-    DiskReadLogMessage,
-    BeginSpeedOperationLogMessage,
-    EndSpeedOperationLogMessage,
-    BeginReadOperationLogMessage,
-    EndReadOperationLogMessage,
-    BeginWriteOperationLogMessage,
-    EndWriteOperationLogMessage,
-    BeginOperationLogMessage,
-    EndOperationLogMessage,
-    OperationProgressLogMessage>
+typedef std::variant<std::shared_ptr<const std::string>,
+    std::shared_ptr<const ErrorLogMessage>,
+    std::shared_ptr<const EmergencyStopMessage>,
+    std::shared_ptr<const TrackReadLogMessage>,
+    std::shared_ptr<const DiskReadLogMessage>,
+    std::shared_ptr<const BeginSpeedOperationLogMessage>,
+    std::shared_ptr<const EndSpeedOperationLogMessage>,
+    std::shared_ptr<const BeginReadOperationLogMessage>,
+    std::shared_ptr<const EndReadOperationLogMessage>,
+    std::shared_ptr<const BeginWriteOperationLogMessage>,
+    std::shared_ptr<const EndWriteOperationLogMessage>,
+    std::shared_ptr<const BeginOperationLogMessage>,
+    std::shared_ptr<const EndOperationLogMessage>,
+    std::shared_ptr<const OperationProgressLogMessage>>
     AnyLogMessage;
+
+extern void log(const char* ptr);
+extern void log(const AnyLogMessage& message);
 
 template <class T>
 inline void log(const T& message)
 {
-    log(std::make_shared<const AnyLogMessage>(message));
+    log(AnyLogMessage(std::make_shared<T>(message)));
 }
-
-extern void log(std::shared_ptr<const AnyLogMessage> message);
 
 template <typename... Args>
 inline void log(fmt::string_view fstr, const Args&... args)
@@ -107,8 +105,7 @@ inline void log(fmt::string_view fstr, const Args&... args)
 
 namespace Logger
 {
-    extern void setLogger(
-        std::function<void(std::shared_ptr<const AnyLogMessage>)> cb);
+    extern void setLogger(std::function<void(const AnyLogMessage&)> cb);
 
     extern std::string toString(const AnyLogMessage&);
 }

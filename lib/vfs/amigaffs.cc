@@ -420,7 +420,7 @@ private:
 
 static void onAdfWarning(char* message)
 {
-    log(message);
+    log((const char*)message);
 }
 
 static void onAdfError(char* message)

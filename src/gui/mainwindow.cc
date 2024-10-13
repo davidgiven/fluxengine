@@ -33,7 +33,7 @@ public:
     MainWindowImpl(): MainWindowGen(nullptr)
     {
         Logger::setLogger(
-            [&](std::shared_ptr<const AnyLogMessage> message)
+            [&](const AnyLogMessage& message)
             {
                 if (isWorkerThread())
                 {
@@ -201,9 +201,9 @@ public:
         ShowConfig();
     }
 
-    void OnLogMessage(std::shared_ptr<const AnyLogMessage> message)
+    void OnLogMessage(const AnyLogMessage& message)
     {
-        _logWindow->GetTextControl()->AppendText(Logger::toString(*message));
+        _logWindow->GetTextControl()->AppendText(Logger::toString(message));
 
         std::visit(
             overloaded{
@@ -213,7 +213,7 @@ public:
                 },
 
                 /* We terminated due to the stop button. */
-                [&](const EmergencyStopMessage& m)
+                [&](std::shared_ptr<const EmergencyStopMessage> m)
                 {
                     _statusBar->SetLeftLabel("Emergency stop!");
                     _statusBar->HideProgressBar();
@@ -221,76 +221,76 @@ public:
                 },
 
                 /* A fatal error. */
-                [&](const ErrorLogMessage& m)
+                [&](std::shared_ptr<const ErrorLogMessage> m)
                 {
-                    _statusBar->SetLeftLabel(m.message);
-                    wxMessageBox(m.message, "Error", wxOK | wxICON_ERROR);
+                    _statusBar->SetLeftLabel(m->message);
+                    wxMessageBox(m->message, "Error", wxOK | wxICON_ERROR);
                     _statusBar->HideProgressBar();
                     _statusBar->SetRightLabel("");
                 },
 
                 /* Indicates that we're starting a write operation. */
-                [&](const BeginWriteOperationLogMessage& m)
+                [&](std::shared_ptr<const BeginWriteOperationLogMessage> m)
                 {
                     _statusBar->SetRightLabel(
-                        fmt::format("W {}.{}", m.track, m.head));
+                        fmt::format("W {}.{}", m->track, m->head));
                     _imagerPanel->SetVisualiserMode(
-                        m.track, m.head, VISMODE_WRITING);
+                        m->track, m->head, VISMODE_WRITING);
                 },
 
-                [&](const EndWriteOperationLogMessage& m)
+                [&](std::shared_ptr<const EndWriteOperationLogMessage> m)
                 {
                     _statusBar->SetRightLabel("");
                     _imagerPanel->SetVisualiserMode(0, 0, VISMODE_NOTHING);
                 },
 
                 /* Indicates that we're starting a read operation. */
-                [&](const BeginReadOperationLogMessage& m)
+                [&](std::shared_ptr<const BeginReadOperationLogMessage> m)
                 {
                     _statusBar->SetRightLabel(
-                        fmt::format("R {}.{}", m.track, m.head));
+                        fmt::format("R {}.{}", m->track, m->head));
                     _imagerPanel->SetVisualiserMode(
-                        m.track, m.head, VISMODE_READING);
+                        m->track, m->head, VISMODE_READING);
                 },
 
-                [&](const EndReadOperationLogMessage& m)
+                [&](std::shared_ptr<const EndReadOperationLogMessage> m)
                 {
                     _statusBar->SetRightLabel("");
                     _imagerPanel->SetVisualiserMode(0, 0, VISMODE_NOTHING);
                 },
 
-                [&](const TrackReadLogMessage& m)
+                [&](std::shared_ptr<const TrackReadLogMessage> m)
                 {
-                    _imagerPanel->SetVisualiserTrackData(m.track);
+                    _imagerPanel->SetVisualiserTrackData(m->track);
                 },
 
-                [&](const DiskReadLogMessage& m)
+                [&](std::shared_ptr<const DiskReadLogMessage> m)
                 {
-                    _imagerPanel->SetDisk(m.disk);
+                    _imagerPanel->SetDisk(m->disk);
                 },
 
                 /* Large-scale operation start. */
-                [&](const BeginOperationLogMessage& m)
+                [&](std::shared_ptr<const BeginOperationLogMessage> m)
                 {
-                    _statusBar->SetLeftLabel(m.message);
+                    _statusBar->SetLeftLabel(m->message);
                     _statusBar->ShowProgressBar();
                 },
 
                 /* Large-scale operation end. */
-                [&](const EndOperationLogMessage& m)
+                [&](std::shared_ptr<const EndOperationLogMessage> m)
                 {
-                    _statusBar->SetLeftLabel(m.message);
+                    _statusBar->SetLeftLabel(m->message);
                     _statusBar->HideProgressBar();
                 },
 
                 /* Large-scale operation progress. */
-                [&](const OperationProgressLogMessage& m)
+                [&](std::shared_ptr<const OperationProgressLogMessage> m)
                 {
-                    _statusBar->SetProgress(m.progress);
+                    _statusBar->SetProgress(m->progress);
                 },
 
             },
-            *message);
+            message);
     }
 
     void SetPage(int page) override

@@ -83,6 +83,7 @@ cxxlibrary(
         "./lib/layout.cc",
         "./lib/ldbs.cc",
         "./lib/logger.cc",
+        "./lib/logrenderer.cc",
         "./lib/proto.cc",
         "./lib/readerwriter.cc",
         "./lib/sector.cc",
