@@ -7,7 +7,8 @@ static bool indented = false;
 static std::function<void(const AnyLogMessage&)> loggerImpl =
     [](const auto& message)
 {
-    std::cout << Logger::toString(message) << std::flush;
+    static auto r = LogRenderer::create(std::cout);
+    r->add(message);
 };
 
 void log(const char* m)
@@ -42,24 +43,14 @@ void renderLogMessage(LogRenderer& r, std::shared_ptr<const std::string> msg)
     r.newline().add(*msg).newline();
 }
 
-std::string Logger::toString(const AnyLogMessage& message)
+LogRenderer& LogRenderer::add(const AnyLogMessage& message)
 {
-    std::stringstream stream;
-
-    auto indent = [&]()
-    {
-        if (!indented)
-            stream << "      ";
-        indented = false;
-    };
-
-    auto r = LogRenderer::create();
     std::visit(
         [&](const auto& arg)
         {
-            renderLogMessage(*r, arg);
+            renderLogMessage(*this, arg);
         },
         message);
 
-    return stream.str();
+    return *this;
 }

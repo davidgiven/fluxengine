@@ -8,19 +8,7 @@ class DiskFlux;
 class TrackDataFlux;
 class TrackFlux;
 class Sector;
-
-class LogRenderer
-{
-public:
-    static std::unique_ptr<LogRenderer> create();
-
-public:
-    virtual LogRenderer& add(std::string m) = 0;
-    virtual LogRenderer& newsection() = 0;
-    virtual LogRenderer& newline() = 0;
-
-    virtual void renderTo(std::ostream& stream) = 0;
-};
+class LogRenderer;
 
 struct ErrorLogMessage;
 struct EmergencyStopMessage;
@@ -35,6 +23,7 @@ struct EndWriteOperationLogMessage;
 struct BeginOperationLogMessage;
 struct EndOperationLogMessage;
 struct OperationProgressLogMessage;
+struct OptionLogMessage;
 
 struct ErrorLogMessage
 {
@@ -71,6 +60,8 @@ extern void renderLogMessage(
     LogRenderer& r, std::shared_ptr<const EndOperationLogMessage> m);
 extern void renderLogMessage(
     LogRenderer& r, std::shared_ptr<const OperationProgressLogMessage> m);
+extern void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const OptionLogMessage> m);
 
 typedef std::variant<std::shared_ptr<const std::string>,
     std::shared_ptr<const ErrorLogMessage>,
@@ -85,7 +76,8 @@ typedef std::variant<std::shared_ptr<const std::string>,
     std::shared_ptr<const EndWriteOperationLogMessage>,
     std::shared_ptr<const BeginOperationLogMessage>,
     std::shared_ptr<const EndOperationLogMessage>,
-    std::shared_ptr<const OperationProgressLogMessage>>
+    std::shared_ptr<const OperationProgressLogMessage>,
+    std::shared_ptr<const OptionLogMessage>>
     AnyLogMessage;
 
 extern void log(const char* ptr);
@@ -103,11 +95,24 @@ inline void log(fmt::string_view fstr, const Args&... args)
     log(fmt::format(fstr, args...));
 }
 
+class LogRenderer
+{
+public:
+    static std::unique_ptr<LogRenderer> create(std::ostream& stream);
+
+public:
+    LogRenderer& add(const AnyLogMessage& message);
+
+public:
+    virtual LogRenderer& add(const std::string& m) = 0;
+    virtual LogRenderer& comma() = 0;
+    virtual LogRenderer& header(const std::string& h) = 0;
+    virtual LogRenderer& newline() = 0;
+};
+
 namespace Logger
 {
     extern void setLogger(std::function<void(const AnyLogMessage&)> cb);
-
-    extern std::string toString(const AnyLogMessage&);
 }
 
 #endif

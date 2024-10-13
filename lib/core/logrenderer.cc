@@ -7,55 +7,89 @@ namespace
     class LogRendererImpl : public LogRenderer
     {
     public:
-        LogRenderer& add(std::string m) override
+        LogRendererImpl(std::ostream& stream): _stream(stream) {}
+
+    private:
+        void indent()
         {
-            if (_atNewline && _indented)
+            _stream << "       ";
+            _lineLen = 7;
+            _space = true;
+        }
+
+    public:
+        LogRenderer& add(const std::string& m) override
+        {
+            if (_newline && !_header)
+                indent();
+
+            if (!_space)
             {
-                _stream << "    ";
-                _lineLen = 4;
-                _indented = true;
+                _stream << ' ';
+                _lineLen++;
             }
 
-            if ((m.size() + _lineLen) > 80)
-            {
-                _stream << "\n    ";
-                _lineLen = 4;
-                _indented = true;
-            }
+            _newline = false;
+            _header = false;
 
+            _lineLen += m.size();
+            if (_lineLen >= 80)
+            {
+                _stream << '\n';
+                indent();
+            }
             _stream << m;
+            _space = !m.empty() && isspace(m[m.size() - 1]);
             return *this;
         }
 
-        LogRenderer& newsection() override
+        LogRenderer& header(const std::string& m) override
         {
-            newline();
-            _indented = false;
+            if (!_newline)
+                _stream << '\n';
+            _stream << m;
+            _lineLen = m.size();
+            _header = true;
+            _newline = true;
+            _space = !m.empty() && isspace(m[m.size() - 1]);
+            return *this;
+        }
+
+        LogRenderer& comma() override
+        {
+            if (!_newline || _header)
+            {
+                _stream << ';';
+                _space = false;
+            }
             return *this;
         }
 
         LogRenderer& newline() override
         {
-            if (!_atNewline)
+            if (!_header)
             {
-                _stream << '\n';
-                _atNewline = true;
+                if (!_newline)
+                    _stream << '\n';
+
+                _lineLen = 0;
+                _header = false;
+                _newline = true;
+                _space = true;
             }
-            _lineLen = 0;
             return *this;
         }
 
-        void renderTo(std::ostream& stream) override {}
-
     private:
-        bool _atNewline = false;
-        bool _indented = false;
+        bool _header = false;
+        bool _newline = false;
+        bool _space = false;
         int _lineLen = 0;
-        std::stringstream _stream;
+        std::ostream& _stream;
     };
 }
 
-std::unique_ptr<LogRenderer> LogRenderer::create()
+std::unique_ptr<LogRenderer> LogRenderer::create(std::ostream& stream)
 {
-    return std::make_unique<LogRendererImpl>();
+    return std::make_unique<LogRendererImpl>(stream);
 }

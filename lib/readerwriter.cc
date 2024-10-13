@@ -57,7 +57,7 @@ void renderLogMessage(
 void renderLogMessage(
     LogRenderer& r, std::shared_ptr<const BeginWriteOperationLogMessage> m)
 {
-    r.newsection().add(fmt::format("{:2}.{}: ", m->track, m->head));
+    r.header(fmt::format("W{:2}.{}: ", m->track, m->head));
 }
 
 /* Indicates that we're finishing a write operation. */
@@ -70,7 +70,7 @@ void renderLogMessage(
 void renderLogMessage(
     LogRenderer& r, std::shared_ptr<const BeginReadOperationLogMessage> m)
 {
-    r.newsection().add(fmt::format("{:2}.{}: ", m->track, m->head));
+    r.header(fmt::format("R{:2}.{}: ", m->track, m->head));
 }
 
 /* Indicates that we're finishing a read operation. */
@@ -102,13 +102,13 @@ void renderLogMessage(
     if (!rawSectors.empty())
         clock /= rawSectors.size();
 
-    r.add(fmt::format("{} raw records, {} raw sectors",
+    r.comma().add(fmt::format("{} raw records, {} raw sectors",
         rawRecords.size(),
         rawSectors.size()));
     if (clock != 0)
     {
-        r.add(fmt::format(
-            "; {:.2f}us clock ({:.0f}kHz)", clock / 1000.0, 1000000.0 / clock));
+        r.comma().add(fmt::format(
+            "{:.2f}us clock ({:.0f}kHz)", clock / 1000.0, 1000000.0 / clock));
     }
 
     r.newline().add("sectors:");
@@ -118,7 +118,7 @@ void renderLogMessage(
     std::sort(sectors.begin(), sectors.end(), sectorPointerSortPredicate);
 
     for (const auto& sector : sectors)
-        r.add(fmt::format(" {}.{}.{}{}",
+        r.add(fmt::format("{}.{}.{}{}",
             sector->logicalTrack,
             sector->logicalSide,
             sector->logicalSector,
@@ -349,13 +349,14 @@ ReadResult readGroup(FluxSourceIteratorHolder& fluxSourceIteratorHolder,
     for (unsigned offset = 0; offset < trackInfo->groupSize;
          offset += Layout::getHeadWidth())
     {
+        log(BeginReadOperationLogMessage{
+            trackInfo->physicalTrack + offset, trackInfo->physicalSide});
+
         auto& fluxSourceIterator = fluxSourceIteratorHolder.getIterator(
             trackInfo->physicalTrack + offset, trackInfo->physicalSide);
         if (!fluxSourceIterator.hasNext())
             continue;
 
-        log(BeginReadOperationLogMessage{
-            trackInfo->physicalTrack + offset, trackInfo->physicalSide});
         std::shared_ptr<const Fluxmap> fluxmap = fluxSourceIterator.next();
         // ->rescale(
         //     1.0 / globalConfig()->flux_source().rescale());

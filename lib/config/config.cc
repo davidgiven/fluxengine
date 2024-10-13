@@ -160,6 +160,16 @@ static const std::vector<ImageConstructor> imageConstructors = {
     {".xdf",      IMAGETYPE_IMG,      MODE_RW},
 };
 
+struct OptionLogMessage
+{
+    std::string message;
+};
+
+void renderLogMessage(LogRenderer& r, std::shared_ptr<const OptionLogMessage> m)
+{
+    r.newline().add("OPTION:").add(m->message).newline();
+}
+
 Config& globalConfig()
 {
     return config;
@@ -442,8 +452,8 @@ bool Config::isOptionValid(std::string option)
 
 void Config::applyOption(const OptionProto& option)
 {
-    log("OPTION: {}",
-        option.has_message() ? option.message() : option.comment());
+    log(OptionLogMessage{
+        option.has_message() ? option.message() : option.comment()});
 
     _appliedOptions.insert(option.name());
 }

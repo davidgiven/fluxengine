@@ -29,6 +29,18 @@ wxTextCtrl* TextViewerWindow::GetTextControl() const
     return textControl;
 }
 
+std::streamsize TextViewerWindow::xsputn(const char* s, std::streamsize n)
+{
+    textControl->AppendText(std::string(s, n));
+    return n;
+}
+
+int TextViewerWindow::overflow(int c)
+{
+    char b = c;
+    return xsputn(&b, 1);
+}
+
 void TextViewerWindow::OnClose(wxCloseEvent& event)
 {
     if (_autodestroy)

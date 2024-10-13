@@ -24,13 +24,45 @@
 #include <wx/aboutdlg.h>
 #include <deque>
 
+class CallbackOstream : public std::streambuf
+{
+public:
+    CallbackOstream(std::function<void(const std::string&)> cb): _cb(cb) {}
+
+public:
+    std::streamsize xsputn(const char* p, std::streamsize n) override
+    {
+        _cb(std::string(p, n));
+        return n;
+    }
+
+    int_type overflow(int_type v) override
+    {
+        char c = v;
+        _cb(std::string(&c, 1));
+        return 1;
+    }
+
+private:
+    std::function<void(const std::string&)> _cb;
+};
+
 class MainWindowImpl : public MainWindowGen, public MainWindow
 {
 private:
     class FilesystemOperation;
 
 public:
-    MainWindowImpl(): MainWindowGen(nullptr)
+    MainWindowImpl():
+        MainWindowGen(nullptr),
+        _logStreamBuf(
+            [this](const std::string& s)
+            {
+                if (_logWindow)
+                    _logWindow->GetTextControl()->AppendText(s);
+            }),
+        _logStream(&_logStreamBuf),
+        _logRenderer(LogRenderer::create(_logStream))
     {
         Logger::setLogger(
             [&](const AnyLogMessage& message)
@@ -203,7 +235,8 @@ public:
 
     void OnLogMessage(const AnyLogMessage& message)
     {
-        _logWindow->GetTextControl()->AppendText(Logger::toString(message));
+        _logRenderer->add(message);
+        _logStream.flush();
 
         std::visit(
             overloaded{
@@ -376,8 +409,11 @@ private:
     CustomStatusBar* _statusBar;
     wxTimer _exitTimer;
     std::unique_ptr<TextViewerWindow> _logWindow;
+    CallbackOstream _logStreamBuf;
+    std::ostream _logStream;
     std::unique_ptr<TextViewerWindow> _configWindow;
     std::unique_ptr<Context> _context;
+    std::unique_ptr<LogRenderer> _logRenderer;
 };
 
 wxWindow* FluxEngineApp::CreateMainWindow()

@@ -11,6 +11,7 @@ cxxprogram(
     deps=[
         "+lib",
         "lib/core",
+        "lib/data",
         "lib/config+proto_lib",
         "lib/fluxsource+proto_lib",
         "+fmt_lib",
@@ -25,6 +26,7 @@ cxxprogram(
     deps=[
         "+lib",
         "lib/core",
+        "lib/data",
         "lib/config+proto_lib",
         "lib/fluxsource+proto_lib",
         "+fmt_lib",
@@ -49,5 +51,6 @@ cxxprogram(
         "lib/fluxsource+proto_lib",
         "src/formats",
         "lib/core",
+        "lib/data",
     ],
 )

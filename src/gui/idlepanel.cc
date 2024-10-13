@@ -195,6 +195,7 @@ public:
         if (formatSelection == wxNOT_FOUND)
             error("no format selected");
 
+        ClearLog();
         globalConfig().clear();
         auto formatName = _formatNames[formatChoice->GetSelection()];
         globalConfig().readBaseConfigFile(formatName);
@@ -292,7 +293,6 @@ public:
             globalConfig().set("usb.serial", serial);
 
         globalConfig().validateAndThrow();
-        ClearLog();
     }
 
     const wxBitmap GetBitmap() override

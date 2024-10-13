@@ -43,6 +43,7 @@ cxxprogram(
         "dep/stb",
         "+lib",
         "lib/core",
+        "lib/data",
         "lib/vfs",
         "lib/config",
         "lib/fluxsource+proto_lib",
