@@ -15,4 +15,5 @@ clibrary(
         "ffconf.h": "./source/ffconf.h",
         "diskio.h": "./source/diskio.h",
     },
+    cflags=["-Wno-pointer-sign"],
 )
