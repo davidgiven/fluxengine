@@ -19,7 +19,7 @@
 #include "customstatusbar.h"
 #include "context.h"
 #include "lib/vfs/vfs.h"
-#include "lib/layout.h"
+#include "lib/data/layout.h"
 #include <google/protobuf/text_format.h>
 #include <wx/aboutdlg.h>
 #include <deque>

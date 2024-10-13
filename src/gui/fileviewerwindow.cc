@@ -2,7 +2,7 @@
 #include "lib/core/utils.h"
 #include "lib/core/bytes.h"
 #include "gui.h"
-#include "lib/layout.h"
+#include "lib/data/layout.h"
 #include "fileviewerwindow.h"
 
 FileViewerWindow::FileViewerWindow(

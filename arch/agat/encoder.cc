@@ -4,8 +4,8 @@
 #include "agat.h"
 #include "lib/core/crc.h"
 #include "lib/readerwriter.h"
-#include "lib/image.h"
-#include "lib/layout.h"
+#include "lib/data/image.h"
+#include "lib/data/layout.h"
 #include "arch/agat/agat.pb.h"
 #include "lib/encoders/encoders.pb.h"
 

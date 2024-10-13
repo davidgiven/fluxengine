@@ -3,7 +3,7 @@
 #include "lib/config/flags.h"
 #include "lib/usb/usb.h"
 #include "lib/core/bitmap.h"
-#include "lib/fluxmap.h"
+#include "lib/data/fluxmap.h"
 #include "lib/decoders/fluxmapreader.h"
 #include "lib/readerwriter.h"
 #include "protocol.h"

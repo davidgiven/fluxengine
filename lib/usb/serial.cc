@@ -1,7 +1,7 @@
 #include "lib/core/globals.h"
 #include "usb.h"
 #include "protocol.h"
-#include "lib/fluxmap.h"
+#include "lib/data/fluxmap.h"
 #include "lib/core/bytes.h"
 #include "serial.h"
 #include <unistd.h>

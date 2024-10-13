@@ -1,7 +1,7 @@
 #include "lib/core/globals.h"
 #include "lib/vfs/vfs.h"
 #include "lib/config/config.pb.h"
-#include "lib/layout.h"
+#include "lib/data/layout.h"
 #include <iomanip>
 
 /* See

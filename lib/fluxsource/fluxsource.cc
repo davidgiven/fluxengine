@@ -2,7 +2,7 @@
 #include "lib/config/config.h"
 #include "lib/config/flags.h"
 #include "lib/fluxsource/fluxsource.h"
-#include "lib/fluxmap.h"
+#include "lib/data/fluxmap.h"
 #include "lib/config/config.pb.h"
 #include "lib/config/proto.h"
 #include "lib/core/utils.h"

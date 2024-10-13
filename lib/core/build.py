@@ -10,6 +10,7 @@ cxxlibrary(
         "./hexdump.cc",
         "./utils.cc",
         "./logger.cc",
+        "./logrenderer.cc",
     ],
     hdrs={
         "lib/core/bitmap.h": "./bitmap.h",

@@ -1,9 +1,8 @@
 #include "lib/core/globals.h"
 #include "lib/config/config.h"
-#include "lib/layout.h"
+#include "lib/data/layout.h"
 #include "lib/config/proto.h"
 #include "lib/core/logger.h"
-#include "lib/fl2.h"
 
 static unsigned getTrackStep()
 {

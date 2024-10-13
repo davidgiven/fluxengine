@@ -2,14 +2,14 @@
 #include "lib/config/config.h"
 #include "lib/config/flags.h"
 #include "lib/readerwriter.h"
-#include "lib/fluxmap.h"
+#include "lib/data/fluxmap.h"
 #include "lib/decoders/fluxmapreader.h"
 #include "lib/decoders/fluxdecoder.h"
 #include "lib/decoders/decoders.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "protocol.h"
 #include "lib/decoders/rawbits.h"
-#include "lib/sector.h"
+#include "lib/data/sector.h"
 #include "lib/config/proto.h"
 
 static FlagGroup flags;
@@ -78,8 +78,8 @@ static nanoseconds_t guessClock(const Fluxmap& fluxmap)
     if (manualClockRate != 0.0)
         return manualClockRate * 1000.0;
 
-    auto data =
-        fluxmap.guessClock(noiseFloorFactor.get(), signalLevelFactor.get());
+    auto data = FluxmapReader(fluxmap).guessClock(
+        noiseFloorFactor.get(), signalLevelFactor.get());
 
     std::cout << "\nClock detection histogram:" << std::endl;
 

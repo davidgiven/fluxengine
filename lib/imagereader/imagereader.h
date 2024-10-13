@@ -1,7 +1,7 @@
 #ifndef IMAGEREADER_H
 #define IMAGEREADER_H
 
-#include "lib/image.h"
+#include "lib/data/image.h"
 #include "lib/config/config.pb.h"
 
 class ImageSpec;

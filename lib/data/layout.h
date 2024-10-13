@@ -1,7 +1,7 @@
 #ifndef LAYOUT_H
 #define LAYOUT_H
 
-#include "lib/flux.h"
+#include "lib/data/flux.h"
 
 class SectorListProto;
 class TrackInfo;

@@ -5,12 +5,12 @@
 #include "ibm.h"
 #include "lib/core/crc.h"
 #include "lib/readerwriter.h"
-#include "lib/image.h"
+#include "lib/data/image.h"
 #include "arch/ibm/ibm.pb.h"
 #include "lib/encoders/encoders.pb.h"
 #include "fmt/format.h"
 #include "lib/config/proto.h"
-#include "lib/layout.h"
+#include "lib/data/layout.h"
 #include <ctype.h>
 
 /* IAM record separator:

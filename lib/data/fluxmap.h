@@ -83,19 +83,6 @@ public:
         int threshold_ticks, int amount_ticks);
     std::vector<std::unique_ptr<const Fluxmap>> split() const;
 
-    struct ClockData
-    {
-        nanoseconds_t median;
-        uint32_t noiseFloor;
-        uint32_t signalLevel;
-        nanoseconds_t peakStart;
-        nanoseconds_t peakEnd;
-        uint32_t buckets[256];
-    };
-
-    ClockData guessClock(
-        double noiseFloorFactor = 0.01, double signalLevelFactor = 0.05) const;
-
 private:
     uint8_t& findLastByte();
 

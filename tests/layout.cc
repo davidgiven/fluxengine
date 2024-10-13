@@ -3,7 +3,7 @@
 #include "lib/config/config.h"
 #include "lib/config/config.pb.h"
 #include "lib/config/proto.h"
-#include "lib/layout.h"
+#include "lib/data/layout.h"
 #include "snowhouse/snowhouse.h"
 #include <google/protobuf/text_format.h>
 #include <regex>

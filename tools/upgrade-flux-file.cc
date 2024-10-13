@@ -1,5 +1,5 @@
 #include "lib/globals.h"
-#include "lib/fluxmap.h"
+#include "lib/data/fluxmap.h"
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/core/bytes.h"
 #include "fmt/format.h"

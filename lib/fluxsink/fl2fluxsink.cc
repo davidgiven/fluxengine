@@ -1,7 +1,7 @@
 #include "lib/core/globals.h"
 #include "lib/config/config.h"
 #include "lib/config/flags.h"
-#include "lib/fluxmap.h"
+#include "lib/data/fluxmap.h"
 #include "lib/core/bytes.h"
 #include "protocol.h"
 #include "lib/fluxsink/fluxsink.h"

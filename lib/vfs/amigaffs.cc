@@ -3,7 +3,7 @@
 #include "lib/vfs/vfs.h"
 #include "lib/config/config.pb.h"
 #include "lib/config/proto.h"
-#include "lib/layout.h"
+#include "lib/data/layout.h"
 #include "lib/core/logger.h"
 
 #include "adflib.h"

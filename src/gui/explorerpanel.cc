@@ -1,6 +1,6 @@
 #include "lib/core/globals.h"
 #include "lib/config/config.h"
-#include "lib/fluxmap.h"
+#include "lib/data/fluxmap.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/decoders/decoders.h"
 #include "lib/config/proto.h"

@@ -2,10 +2,10 @@
 #include "lib/decoders/decoders.h"
 #include "arch/mx/mx.h"
 #include "lib/core/crc.h"
-#include "lib/fluxmap.h"
+#include "lib/data/fluxmap.h"
 #include "lib/decoders/fluxmapreader.h"
 #include "lib/decoders/fluxpattern.h"
-#include "lib/sector.h"
+#include "lib/data/sector.h"
 #include <string.h>
 
 const int SECTOR_SIZE = 256;

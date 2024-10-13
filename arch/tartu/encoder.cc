@@ -4,8 +4,8 @@
 #include "lib/encoders/encoders.h"
 #include "arch/tartu/tartu.h"
 #include "lib/core/crc.h"
-#include "lib/fluxmap.h"
-#include "lib/sector.h"
+#include "lib/data/fluxmap.h"
+#include "lib/data/sector.h"
 #include <string.h>
 
 class TartuEncoder : public Encoder

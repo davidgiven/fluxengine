@@ -1,7 +1,7 @@
 #pragma once
 
 #include "lib/core/utils.h"
-#include "lib/fluxmap.h"
+#include "lib/data/fluxmap.h"
 #include "lib/config/flags.h"
 #include "protocol.h"
 

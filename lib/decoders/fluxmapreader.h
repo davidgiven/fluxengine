@@ -1,7 +1,7 @@
 #ifndef FLUXMAPREADER_H
 #define FLUXMAPREADER_H
 
-#include "lib/fluxmap.h"
+#include "lib/data/fluxmap.h"
 #include "lib/config/flags.h"
 #include "protocol.h"
 
@@ -55,6 +55,19 @@ public:
     nanoseconds_t seekToPattern(const FluxMatcher& pattern);
     nanoseconds_t seekToPattern(
         const FluxMatcher& pattern, const FluxMatcher*& matching);
+
+    struct ClockData
+    {
+        nanoseconds_t median;
+        uint32_t noiseFloor;
+        uint32_t signalLevel;
+        nanoseconds_t peakStart;
+        nanoseconds_t peakEnd;
+        uint32_t buckets[256];
+    };
+
+    ClockData guessClock(
+        double noiseFloorFactor = 0.01, double signalLevelFactor = 0.05);
 
 private:
     const Fluxmap& _fluxmap;

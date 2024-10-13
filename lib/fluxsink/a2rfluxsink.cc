@@ -1,6 +1,6 @@
 #include "lib/core/globals.h"
 #include "lib/config/flags.h"
-#include "lib/fluxmap.h"
+#include "lib/data/fluxmap.h"
 #include "lib/core/bytes.h"
 #include "protocol.h"
 #include "lib/fluxsink/fluxsink.h"
@@ -8,8 +8,8 @@
 #include "lib/fluxsink/fluxsink.pb.h"
 #include "lib/core/logger.h"
 #include "lib/config/proto.h"
-#include "lib/fluxmap.h"
-#include "lib/layout.h"
+#include "lib/data/fluxmap.h"
+#include "lib/data/layout.h"
 #include "lib/a2r.h"
 #include <fstream>
 #include <sys/stat.h>

@@ -2,7 +2,7 @@
 #define SECTOR_H
 
 #include "lib/core/bytes.h"
-#include "lib/fluxmap.h"
+#include "lib/data/fluxmap.h"
 
 class Record;
 class TrackInfo;

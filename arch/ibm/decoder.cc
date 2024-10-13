@@ -2,13 +2,13 @@
 #include "lib/decoders/decoders.h"
 #include "ibm.h"
 #include "lib/core/crc.h"
-#include "lib/fluxmap.h"
+#include "lib/data/fluxmap.h"
 #include "lib/decoders/fluxmapreader.h"
 #include "lib/decoders/fluxpattern.h"
-#include "lib/sector.h"
+#include "lib/data/sector.h"
 #include "arch/ibm/ibm.pb.h"
 #include "lib/config/proto.h"
-#include "lib/layout.h"
+#include "lib/data/layout.h"
 #include <string.h>
 
 static_assert(std::is_trivially_copyable<IbmIdam>::value,
