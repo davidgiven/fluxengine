@@ -99,6 +99,7 @@ class LogRenderer
 {
 public:
     static std::unique_ptr<LogRenderer> create(std::ostream& stream);
+    virtual ~LogRenderer() {}
 
 public:
     LogRenderer& add(const AnyLogMessage& message);
