@@ -233,4 +233,3 @@ int findLowestSetBit(uint64_t value)
     }
     return bit;
 }
-

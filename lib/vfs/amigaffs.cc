@@ -1,10 +1,10 @@
 #include "lib/core/globals.h"
-#include "lib/config.h"
+#include "lib/config/config.h"
 #include "lib/vfs/vfs.h"
-#include "lib/config.pb.h"
-#include "lib/proto.h"
-#include "lib/layout.h"
-#include "lib/logger.h"
+#include "lib/config/config.pb.h"
+#include "lib/config/proto.h"
+#include "lib/data/layout.h"
+#include "lib/core/logger.h"
 
 #include "adflib.h"
 #include "adf_blk.h"
@@ -420,7 +420,7 @@ private:
 
 static void onAdfWarning(char* message)
 {
-    log(message);
+    log((const char*)message);
 }
 
 static void onAdfError(char* message)

@@ -4,10 +4,10 @@
 #include "macintosh.h"
 #include "lib/core/crc.h"
 #include "lib/readerwriter.h"
-#include "lib/image.h"
+#include "lib/data/image.h"
 #include "fmt/format.h"
 #include "lib/encoders/encoders.pb.h"
-#include "lib/layout.h"
+#include "lib/data/layout.h"
 #include "arch/macintosh/macintosh.pb.h"
 #include <ctype.h>
 

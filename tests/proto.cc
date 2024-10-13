@@ -1,8 +1,8 @@
 #include "lib/core/globals.h"
 #include "lib/core/bytes.h"
 #include "tests/testproto.pb.h"
-#include "lib/config.pb.h"
-#include "lib/proto.h"
+#include "lib/config/config.pb.h"
+#include "lib/config/proto.h"
 #include "snowhouse/snowhouse.h"
 #include <google/protobuf/text_format.h>
 #include <assert.h>

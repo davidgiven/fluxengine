@@ -8,6 +8,7 @@ class ExecEvent;
 class DiskFlux;
 class TrackFlux;
 class wxSimplebook;
+class Context;
 
 extern void postToUiThread(std::function<void()> callback);
 extern void runOnUiThread(std::function<void()> callback);
@@ -87,6 +88,7 @@ public:
     virtual void SetPage(int page) = 0;
     virtual void PrepareConfig() = 0;
     virtual void ClearLog() = 0;
+    virtual Context& GetContext() = 0;
 };
 
 class PanelComponent
@@ -145,6 +147,11 @@ public:
     void StartExploring()
     {
         _mainWindow->StartExploring();
+    }
+
+    Context& GetContext()
+    {
+        return _mainWindow->GetContext();
     }
 
 private:

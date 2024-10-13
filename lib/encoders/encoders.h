@@ -7,6 +7,7 @@ class Image;
 class Layout;
 class Sector;
 class TrackInfo;
+class Config;
 
 class Encoder
 {
@@ -14,6 +15,7 @@ public:
     Encoder(const EncoderProto& config) {}
     virtual ~Encoder() {}
 
+    static std::unique_ptr<Encoder> create(Config& config);
     static std::unique_ptr<Encoder> create(const EncoderProto& config);
 
 public:

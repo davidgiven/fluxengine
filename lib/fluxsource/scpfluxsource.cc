@@ -1,12 +1,12 @@
 #include "lib/core/globals.h"
-#include "lib/fluxmap.h"
+#include "lib/data/fluxmap.h"
 #include "kryoflux.h"
 #include "lib/fluxsource/fluxsource.pb.h"
 #include "lib/core/utils.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/scp.h"
-#include "lib/proto.h"
-#include "lib/logger.h"
+#include "lib/config/proto.h"
+#include "lib/core/logger.h"
 #include <fstream>
 
 static int trackno(int strack)

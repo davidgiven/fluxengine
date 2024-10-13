@@ -3,13 +3,13 @@
 #include "lib/encoders/encoders.h"
 #include "c64.h"
 #include "lib/core/crc.h"
-#include "lib/sector.h"
+#include "lib/data/sector.h"
 #include "lib/readerwriter.h"
-#include "lib/image.h"
+#include "lib/data/image.h"
 #include "fmt/format.h"
 #include "arch/c64/c64.pb.h"
 #include "lib/encoders/encoders.pb.h"
-#include "lib/layout.h"
+#include "lib/data/layout.h"
 #include <ctype.h>
 #include "lib/core/bytes.h"
 

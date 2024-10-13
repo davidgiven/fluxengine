@@ -3,6 +3,7 @@
 
 class ImageWriterProto;
 class Image;
+class Config;
 
 class ImageWriter
 {
@@ -11,6 +12,7 @@ public:
     virtual ~ImageWriter(){};
 
 public:
+    static std::unique_ptr<ImageWriter> create(Config& config);
     static std::unique_ptr<ImageWriter> create(const ImageWriterProto& config);
 
     static std::unique_ptr<ImageWriter> createD64ImageWriter(

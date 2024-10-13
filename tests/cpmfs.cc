@@ -1,11 +1,11 @@
 #include "lib/core/globals.h"
-#include "lib/config.h"
+#include "lib/config/config.h"
 #include "lib/vfs/vfs.h"
 #include "lib/vfs/sectorinterface.h"
 #include "lib/vfs/vfs.pb.h"
-#include "lib/image.h"
-#include "lib/proto.h"
-#include "lib/sector.h"
+#include "lib/data/image.h"
+#include "lib/config/proto.h"
+#include "lib/data/sector.h"
 #include "snowhouse/snowhouse.h"
 #include <google/protobuf/text_format.h>
 

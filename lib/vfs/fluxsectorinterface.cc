@@ -1,11 +1,11 @@
 #include "lib/core/globals.h"
 #include "lib/vfs/sectorinterface.h"
-#include "lib/image.h"
+#include "lib/data/image.h"
 #include "lib/readerwriter.h"
 #include "lib/decoders/decoders.h"
 #include "lib/fluxsource/fluxsource.h"
-#include "lib/layout.h"
-#include "lib/proto.h"
+#include "lib/data/layout.h"
+#include "lib/config/proto.h"
 
 class FluxSectorInterface : public SectorInterface
 {

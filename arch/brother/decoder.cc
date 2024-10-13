@@ -1,11 +1,11 @@
 #include "lib/core/globals.h"
-#include "lib/fluxmap.h"
+#include "lib/data/fluxmap.h"
 #include "lib/decoders/fluxmapreader.h"
 #include "lib/decoders/fluxpattern.h"
 #include "lib/decoders/decoders.h"
 #include "lib/encoders/encoders.h"
 #include "brother.h"
-#include "lib/sector.h"
+#include "lib/data/sector.h"
 #include "lib/core/bytes.h"
 #include "lib/core/crc.h"
 #include <ctype.h>

@@ -1,11 +1,11 @@
 #include "lib/core/globals.h"
-#include "lib/config.h"
-#include "lib/flags.h"
+#include "lib/config/config.h"
+#include "lib/config/flags.h"
 #include "lib/readerwriter.h"
-#include "lib/fluxmap.h"
+#include "lib/data/fluxmap.h"
 #include "lib/decoders/decoders.h"
-#include "lib/sector.h"
-#include "lib/proto.h"
+#include "lib/data/sector.h"
+#include "lib/config/proto.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/imagewriter/imagewriter.h"
@@ -65,9 +65,9 @@ int mainRead(int argc, const char* argv[])
     if (globalConfig()->decoder().copy_flux_to().type() == FLUXTYPE_DRIVE)
         error("you cannot copy flux to a hardware device");
 
-    auto& fluxSource = globalConfig().getFluxSource();
-    auto& decoder = globalConfig().getDecoder();
-    auto writer = globalConfig().getImageWriter();
+    auto fluxSource = FluxSource::create(globalConfig());
+    auto decoder = Decoder::create(globalConfig());
+    auto writer = ImageWriter::create(globalConfig());
 
     readDiskCommand(*fluxSource, *decoder, *writer);
 

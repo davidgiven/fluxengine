@@ -1,15 +1,23 @@
 #include "lib/core/globals.h"
-#include "lib/flags.h"
-#include "lib/sector.h"
+#include "lib/config/config.h"
+#include "lib/config/flags.h"
+#include "lib/data/sector.h"
 #include "lib/imagewriter/imagewriter.h"
-#include "lib/image.h"
+#include "lib/data/image.h"
 #include "lib/core/utils.h"
-#include "lib/config.pb.h"
-#include "lib/proto.h"
-#include "lib/layout.h"
-#include "lib/logger.h"
+#include "lib/config/config.pb.h"
+#include "lib/config/proto.h"
+#include "lib/data/layout.h"
+#include "lib/core/logger.h"
 #include <iostream>
 #include <fstream>
+
+std::unique_ptr<ImageWriter> ImageWriter::create(Config& config)
+{
+    if (!config.hasImageWriter())
+        error("no image writer configured");
+    return create(config->image_writer());
+}
 
 std::unique_ptr<ImageWriter> ImageWriter::create(const ImageWriterProto& config)
 {

@@ -4,7 +4,7 @@
 #include "brother.h"
 #include "lib/core/crc.h"
 #include "lib/readerwriter.h"
-#include "lib/image.h"
+#include "lib/data/image.h"
 #include "arch/brother/brother.pb.h"
 #include "lib/encoders/encoders.pb.h"
 

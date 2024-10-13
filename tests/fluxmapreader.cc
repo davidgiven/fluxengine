@@ -1,5 +1,5 @@
 #include "lib/core/globals.h"
-#include "lib/fluxmap.h"
+#include "lib/data/fluxmap.h"
 #include "lib/decoders/fluxmapreader.h"
 #include "protocol.h"
 #include "fmt/format.h"

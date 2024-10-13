@@ -1,7 +1,7 @@
 #include "lib/core/globals.h"
-#include "lib/sector.h"
-#include "lib/image.h"
-#include "lib/layout.h"
+#include "lib/data/sector.h"
+#include "lib/data/image.h"
+#include "lib/data/layout.h"
 
 Image::Image() {}
 

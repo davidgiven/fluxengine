@@ -1,11 +1,11 @@
 #include "lib/core/globals.h"
 #include "gui.h"
 #include "visualisationcontrol.h"
-#include "lib/fluxmap.h"
-#include "lib/flux.h"
-#include "lib/sector.h"
-#include "lib/image.h"
-#include "lib/layout.h"
+#include "lib/data/fluxmap.h"
+#include "lib/data/flux.h"
+#include "lib/data/sector.h"
+#include "lib/data/image.h"
+#include "lib/data/layout.h"
 
 #define BORDER 20
 #define TICK 3

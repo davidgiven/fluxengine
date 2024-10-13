@@ -22,4 +22,5 @@ clibrary(
         "libhfs.h": "./libhfs/libhfs.h",
         "os.h": "./libhfs/os.h",
     },
+    cflags=["-Wno-pointer-sign"],
 )

@@ -2,9 +2,9 @@
 #include "lib/vfs/sectorinterface.h"
 #include "lib/imagereader/imagereader.h"
 #include "lib/imagewriter/imagewriter.h"
-#include "lib/image.h"
-#include "lib/layout.h"
-#include "lib/sector.h"
+#include "lib/data/image.h"
+#include "lib/data/layout.h"
+#include "lib/data/sector.h"
 #include "lib/core/bytes.h"
 
 class ImageSectorInterface : public SectorInterface

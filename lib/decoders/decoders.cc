@@ -1,6 +1,7 @@
 #include "lib/core/globals.h"
-#include "lib/flags.h"
-#include "lib/fluxmap.h"
+#include "lib/config/flags.h"
+#include "lib/data/fluxmap.h"
+#include "lib/config/config.h"
 #include "lib/decoders/decoders.h"
 #include "lib/encoders/encoders.h"
 #include "arch/agat/agat.h"
@@ -23,14 +24,21 @@
 #include "arch/victor9k/victor9k.h"
 #include "arch/zilogmcz/zilogmcz.h"
 #include "lib/decoders/fluxmapreader.h"
-#include "lib/flux.h"
+#include "lib/data/flux.h"
 #include "protocol.h"
 #include "lib/decoders/rawbits.h"
-#include "lib/sector.h"
-#include "lib/image.h"
+#include "lib/data/sector.h"
+#include "lib/data/image.h"
 #include "lib/decoders/decoders.pb.h"
-#include "lib/layout.h"
+#include "lib/data/layout.h"
 #include <numeric>
+
+std::unique_ptr<Decoder> Decoder::create(Config& config)
+{
+    if (!config.hasDecoder())
+        error("no decoder configured");
+    return create(config->decoder());
+}
 
 std::unique_ptr<Decoder> Decoder::create(const DecoderProto& config)
 {

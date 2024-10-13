@@ -1,11 +1,11 @@
 #include "lib/core/globals.h"
-#include "lib/config.h"
+#include "lib/config/config.h"
 #include "vfs.h"
-#include "lib/proto.h"
+#include "lib/config/proto.h"
 #include "lib/layout.pb.h"
-#include "lib/layout.h"
-#include "lib/image.h"
-#include "lib/sector.h"
+#include "lib/data/layout.h"
+#include "lib/data/image.h"
+#include "lib/data/sector.h"
 #include "lib/vfs/sectorinterface.h"
 #include "lib/imagereader/imagereader.h"
 #include "lib/imagewriter/imagewriter.h"
@@ -13,7 +13,7 @@
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/decoders/decoders.h"
 #include "lib/encoders/encoders.h"
-#include "lib/config.pb.h"
+#include "lib/config/config.pb.h"
 #include "lib/core/utils.h"
 
 Path::Path(const std::vector<std::string> other):
@@ -243,13 +243,13 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystemFromConfig()
         std::shared_ptr<Encoder> encoder;
         if (globalConfig().hasFluxSource())
         {
-            fluxSource = globalConfig().getFluxSource();
-            decoder = globalConfig().getDecoder();
+            fluxSource = FluxSource::create(globalConfig());
+            decoder = Decoder::create(globalConfig());
         }
         if (globalConfig()->flux_sink().type() == FLUXTYPE_DRIVE)
         {
-            fluxSink = globalConfig().getFluxSink();
-            encoder = globalConfig().getEncoder();
+            fluxSink = FluxSink::create(globalConfig());
+            encoder = Encoder::create(globalConfig());
         }
         sectorInterface = SectorInterface::createFluxSectorInterface(
             fluxSource, fluxSink, encoder, decoder);
@@ -260,9 +260,9 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystemFromConfig()
         std::shared_ptr<ImageWriter> writer;
         if (globalConfig().hasImageReader() &&
             doesFileExist(globalConfig()->image_reader().filename()))
-            reader = globalConfig().getImageReader();
+            reader = ImageReader::create(globalConfig());
         if (globalConfig().hasImageWriter())
-            writer = globalConfig().getImageWriter();
+            writer = ImageWriter::create(globalConfig());
 
         sectorInterface =
             SectorInterface::createImageSectorInterface(reader, writer);

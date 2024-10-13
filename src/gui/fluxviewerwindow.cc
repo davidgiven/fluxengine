@@ -1,10 +1,10 @@
 #include "lib/core/globals.h"
 #include "gui.h"
-#include "lib/layout.h"
+#include "lib/data/layout.h"
 #include "fluxviewerwindow.h"
 #include "fluxviewercontrol.h"
-#include "lib/flux.h"
-#include "lib/layout.h"
+#include "lib/data/flux.h"
+#include "lib/data/layout.h"
 
 FluxViewerWindow::FluxViewerWindow(
     wxWindow* parent, std::shared_ptr<const TrackFlux> flux):

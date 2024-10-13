@@ -3,7 +3,7 @@
 #ifdef __cplusplus
 
 #include <google/protobuf/message.h>
-#include "lib/config.pb.h"
+#include "lib/config/config.pb.h"
 #include "lib/common.pb.h"
 
 class ConfigProto;
@@ -141,28 +141,21 @@ public:
     void setImageReader(std::string value);
     void setImageWriter(std::string value);
 
-    /* Fetch the sources, opening them if necessary. */
+    /* Query useful things about the config. */
 
     bool hasFluxSource();
-    std::shared_ptr<FluxSource>& getFluxSource();
     bool hasImageReader();
-    std::shared_ptr<ImageReader>& getImageReader();
     bool hasVerificationFluxSource() const;
-    std::shared_ptr<FluxSource>& getVerificationFluxSource();
-
-    /* Fetch the encoder and decoder, creating them if necessary. */
+    const FluxSourceProto& getVerificationFluxSourceProto() const
+    {
+        return _verificationFluxSourceProto;
+    }
 
     bool hasEncoder();
-    std::shared_ptr<Encoder>& getEncoder();
     bool hasDecoder();
-    std::shared_ptr<Decoder>& getDecoder();
-
-    /* Create the sinks: these are not cached. */
 
     bool hasFluxSink();
-    std::unique_ptr<FluxSink> getFluxSink();
     bool hasImageWriter();
-    std::unique_ptr<ImageWriter> getImageWriter();
 
 public:
     static const std::vector<FluxConstructor>& getFluxFormats();
@@ -175,11 +168,6 @@ private:
     std::set<std::string> _appliedOptions;
     bool _configValid;
 
-    std::shared_ptr<FluxSource> _fluxSource;
-    std::shared_ptr<ImageReader> _imageReader;
-    std::shared_ptr<FluxSource> _verificationFluxSource;
-    std::shared_ptr<Encoder> _encoder;
-    std::shared_ptr<Decoder> _decoder;
     FluxSourceProto _verificationFluxSourceProto;
 };
 

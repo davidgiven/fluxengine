@@ -13,6 +13,64 @@ class ImageReader;
 class ImageWriter;
 class TrackInfo;
 class TrackFlux;
+class TrackDataFlux;
+class Sector;
+
+struct BeginSpeedOperationLogMessage
+{
+};
+
+struct EndSpeedOperationLogMessage
+{
+    nanoseconds_t rotationalPeriod;
+};
+
+struct TrackReadLogMessage
+{
+    std::shared_ptr<const TrackFlux> track;
+};
+
+struct DiskReadLogMessage
+{
+    std::shared_ptr<const DiskFlux> disk;
+};
+
+struct BeginReadOperationLogMessage
+{
+    unsigned track;
+    unsigned head;
+};
+
+struct EndReadOperationLogMessage
+{
+    std::shared_ptr<const TrackDataFlux> trackDataFlux;
+    std::set<std::shared_ptr<const Sector>> sectors;
+};
+
+struct BeginWriteOperationLogMessage
+{
+    unsigned track;
+    unsigned head;
+};
+
+struct EndWriteOperationLogMessage
+{
+};
+
+struct BeginOperationLogMessage
+{
+    std::string message;
+};
+
+struct EndOperationLogMessage
+{
+    std::string message;
+};
+
+struct OperationProgressLogMessage
+{
+    unsigned progress;
+};
 
 extern void measureDiskRotation();
 

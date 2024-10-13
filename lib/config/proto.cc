@@ -1,5 +1,5 @@
 #include "lib/core/globals.h"
-#include "lib/proto.h"
+#include "lib/config/proto.h"
 #include "lib/common.pb.h"
 #include <regex>
 

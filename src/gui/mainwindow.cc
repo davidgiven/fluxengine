@@ -1,8 +1,8 @@
 #include "lib/core/globals.h"
-#include "lib/config.h"
-#include "lib/proto.h"
+#include "lib/config/config.h"
+#include "lib/config/proto.h"
 #include "gui.h"
-#include "lib/logger.h"
+#include "lib/core/logger.h"
 #include "lib/readerwriter.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/fluxsink/fluxsink.h"
@@ -17,11 +17,35 @@
 #include "texteditorwindow.h"
 #include "filesystemmodel.h"
 #include "customstatusbar.h"
+#include "context.h"
 #include "lib/vfs/vfs.h"
-#include "lib/layout.h"
+#include "lib/data/layout.h"
 #include <google/protobuf/text_format.h>
 #include <wx/aboutdlg.h>
 #include <deque>
+
+class CallbackOstream : public std::streambuf
+{
+public:
+    CallbackOstream(std::function<void(const std::string&)> cb): _cb(cb) {}
+
+public:
+    std::streamsize xsputn(const char* p, std::streamsize n) override
+    {
+        _cb(std::string(p, n));
+        return n;
+    }
+
+    int_type overflow(int_type v) override
+    {
+        char c = v;
+        _cb(std::string(&c, 1));
+        return 1;
+    }
+
+private:
+    std::function<void(const std::string&)> _cb;
+};
 
 class MainWindowImpl : public MainWindowGen, public MainWindow
 {
@@ -29,10 +53,19 @@ private:
     class FilesystemOperation;
 
 public:
-    MainWindowImpl(): MainWindowGen(nullptr)
+    MainWindowImpl():
+        MainWindowGen(nullptr),
+        _logStreamBuf(
+            [this](const std::string& s)
+            {
+                if (_logWindow)
+                    _logWindow->GetTextControl()->AppendText(s);
+            }),
+        _logStream(&_logStreamBuf),
+        _logRenderer(LogRenderer::create(_logStream))
     {
         Logger::setLogger(
-            [&](std::shared_ptr<const AnyLogMessage> message)
+            [&](const AnyLogMessage& message)
             {
                 if (isWorkerThread())
                 {
@@ -179,6 +212,12 @@ public:
     /* This sets the *global* config object. That's safe provided the worker
      * thread isn't running, otherwise you'll get a race. */
 public:
+    Context& GetContext()
+    {
+        assert(_context);
+        return *_context;
+    }
+
     void ShowConfig()
     {
         std::string s;
@@ -189,13 +228,15 @@ public:
 
     void PrepareConfig() override
     {
+        _context = Context::Create();
         _idlePanel->PrepareConfig();
         ShowConfig();
     }
 
-    void OnLogMessage(std::shared_ptr<const AnyLogMessage> message)
+    void OnLogMessage(const AnyLogMessage& message)
     {
-        _logWindow->GetTextControl()->AppendText(Logger::toString(*message));
+        _logRenderer->add(message);
+        _logStream.flush();
 
         std::visit(
             overloaded{
@@ -205,7 +246,7 @@ public:
                 },
 
                 /* We terminated due to the stop button. */
-                [&](const EmergencyStopMessage& m)
+                [&](std::shared_ptr<const EmergencyStopMessage> m)
                 {
                     _statusBar->SetLeftLabel("Emergency stop!");
                     _statusBar->HideProgressBar();
@@ -213,76 +254,76 @@ public:
                 },
 
                 /* A fatal error. */
-                [&](const ErrorLogMessage& m)
+                [&](std::shared_ptr<const ErrorLogMessage> m)
                 {
-                    _statusBar->SetLeftLabel(m.message);
-                    wxMessageBox(m.message, "Error", wxOK | wxICON_ERROR);
+                    _statusBar->SetLeftLabel(m->message);
+                    wxMessageBox(m->message, "Error", wxOK | wxICON_ERROR);
                     _statusBar->HideProgressBar();
                     _statusBar->SetRightLabel("");
                 },
 
                 /* Indicates that we're starting a write operation. */
-                [&](const BeginWriteOperationLogMessage& m)
+                [&](std::shared_ptr<const BeginWriteOperationLogMessage> m)
                 {
                     _statusBar->SetRightLabel(
-                        fmt::format("W {}.{}", m.track, m.head));
+                        fmt::format("W {}.{}", m->track, m->head));
                     _imagerPanel->SetVisualiserMode(
-                        m.track, m.head, VISMODE_WRITING);
+                        m->track, m->head, VISMODE_WRITING);
                 },
 
-                [&](const EndWriteOperationLogMessage& m)
+                [&](std::shared_ptr<const EndWriteOperationLogMessage> m)
                 {
                     _statusBar->SetRightLabel("");
                     _imagerPanel->SetVisualiserMode(0, 0, VISMODE_NOTHING);
                 },
 
                 /* Indicates that we're starting a read operation. */
-                [&](const BeginReadOperationLogMessage& m)
+                [&](std::shared_ptr<const BeginReadOperationLogMessage> m)
                 {
                     _statusBar->SetRightLabel(
-                        fmt::format("R {}.{}", m.track, m.head));
+                        fmt::format("R {}.{}", m->track, m->head));
                     _imagerPanel->SetVisualiserMode(
-                        m.track, m.head, VISMODE_READING);
+                        m->track, m->head, VISMODE_READING);
                 },
 
-                [&](const EndReadOperationLogMessage& m)
+                [&](std::shared_ptr<const EndReadOperationLogMessage> m)
                 {
                     _statusBar->SetRightLabel("");
                     _imagerPanel->SetVisualiserMode(0, 0, VISMODE_NOTHING);
                 },
 
-                [&](const TrackReadLogMessage& m)
+                [&](std::shared_ptr<const TrackReadLogMessage> m)
                 {
-                    _imagerPanel->SetVisualiserTrackData(m.track);
+                    _imagerPanel->SetVisualiserTrackData(m->track);
                 },
 
-                [&](const DiskReadLogMessage& m)
+                [&](std::shared_ptr<const DiskReadLogMessage> m)
                 {
-                    _imagerPanel->SetDisk(m.disk);
+                    _imagerPanel->SetDisk(m->disk);
                 },
 
                 /* Large-scale operation start. */
-                [&](const BeginOperationLogMessage& m)
+                [&](std::shared_ptr<const BeginOperationLogMessage> m)
                 {
-                    _statusBar->SetLeftLabel(m.message);
+                    _statusBar->SetLeftLabel(m->message);
                     _statusBar->ShowProgressBar();
                 },
 
                 /* Large-scale operation end. */
-                [&](const EndOperationLogMessage& m)
+                [&](std::shared_ptr<const EndOperationLogMessage> m)
                 {
-                    _statusBar->SetLeftLabel(m.message);
+                    _statusBar->SetLeftLabel(m->message);
                     _statusBar->HideProgressBar();
                 },
 
                 /* Large-scale operation progress. */
-                [&](const OperationProgressLogMessage& m)
+                [&](std::shared_ptr<const OperationProgressLogMessage> m)
                 {
-                    _statusBar->SetProgress(m.progress);
+                    _statusBar->SetProgress(m->progress);
                 },
 
             },
-            *message);
+            message);
     }
 
     void SetPage(int page) override
@@ -368,7 +409,11 @@ private:
     CustomStatusBar* _statusBar;
     wxTimer _exitTimer;
     std::unique_ptr<TextViewerWindow> _logWindow;
+    CallbackOstream _logStreamBuf;
+    std::ostream _logStream;
     std::unique_ptr<TextViewerWindow> _configWindow;
+    std::unique_ptr<Context> _context;
+    std::unique_ptr<LogRenderer> _logRenderer;
 };
 
 wxWindow* FluxEngineApp::CreateMainWindow()

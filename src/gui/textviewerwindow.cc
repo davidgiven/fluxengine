@@ -1,6 +1,6 @@
 #include "lib/core/globals.h"
 #include "gui.h"
-#include "lib/layout.h"
+#include "lib/data/layout.h"
 #include "textviewerwindow.h"
 
 TextViewerWindow::TextViewerWindow(wxWindow* parent,
@@ -27,6 +27,18 @@ TextViewerWindow* TextViewerWindow::Create(wxWindow* parent,
 wxTextCtrl* TextViewerWindow::GetTextControl() const
 {
     return textControl;
+}
+
+std::streamsize TextViewerWindow::xsputn(const char* s, std::streamsize n)
+{
+    textControl->AppendText(std::string(s, n));
+    return n;
+}
+
+int TextViewerWindow::overflow(int c)
+{
+    char b = c;
+    return xsputn(&b, 1);
 }
 
 void TextViewerWindow::OnClose(wxCloseEvent& event)

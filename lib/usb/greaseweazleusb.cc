@@ -1,6 +1,6 @@
 #include "lib/core/globals.h"
 #include "protocol.h"
-#include "lib/fluxmap.h"
+#include "lib/data/fluxmap.h"
 #include "lib/core/bytes.h"
 #include "lib/usb/usb.pb.h"
 #include "greaseweazle.h"

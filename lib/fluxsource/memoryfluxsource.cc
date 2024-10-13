@@ -1,9 +1,9 @@
 #include "lib/core/globals.h"
-#include "lib/fluxmap.h"
-#include "lib/flux.h"
+#include "lib/data/fluxmap.h"
+#include "lib/data/flux.h"
 #include "lib/fluxsource/fluxsource.h"
-#include "lib/fluxmap.h"
-#include "lib/layout.h"
+#include "lib/data/fluxmap.h"
+#include "lib/data/layout.h"
 #include <fstream>
 
 class MemoryFluxSourceIterator : public FluxSourceIterator

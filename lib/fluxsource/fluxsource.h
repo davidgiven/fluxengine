@@ -1,8 +1,8 @@
 #ifndef FLUXSOURCE_H
 #define FLUXSOURCE_H
 
-#include "lib/flags.h"
-#include "lib/config.pb.h"
+#include "lib/config/flags.h"
+#include "lib/config/config.pb.h"
 
 class A2rFluxSourceProto;
 class CwfFluxSourceProto;
@@ -17,6 +17,7 @@ class KryofluxFluxSourceProto;
 class ScpFluxSourceProto;
 class TestPatternFluxSourceProto;
 class FlxFluxSourceProto;
+class Config;
 
 class FluxSourceIterator
 {
@@ -58,6 +59,7 @@ public:
     static std::unique_ptr<FluxSource> createMemoryFluxSource(
         const DiskFlux& flux);
 
+    static std::unique_ptr<FluxSource> create(Config& config);
     static std::unique_ptr<FluxSource> create(const FluxSourceProto& spec);
 
 public:

@@ -1,5 +1,5 @@
 #include "lib/core/globals.h"
-#include "lib/config.h"
+#include "lib/config/config.h"
 #include "lib/vfs/vfs.h"
 #include "snowhouse/snowhouse.h"
 

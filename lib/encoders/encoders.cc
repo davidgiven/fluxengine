@@ -1,6 +1,6 @@
 #include "lib/core/globals.h"
-#include "lib/config.h"
-#include "lib/fluxmap.h"
+#include "lib/config/config.h"
+#include "lib/data/fluxmap.h"
 #include "lib/decoders/decoders.h"
 #include "lib/encoders/encoders.h"
 #include "arch/agat/agat.h"
@@ -16,10 +16,17 @@
 #include "arch/tids990/tids990.h"
 #include "arch/victor9k/victor9k.h"
 #include "lib/encoders/encoders.pb.h"
-#include "lib/proto.h"
-#include "lib/layout.h"
-#include "lib/image.h"
+#include "lib/config/proto.h"
+#include "lib/data/layout.h"
+#include "lib/data/image.h"
 #include "protocol.h"
+
+std::unique_ptr<Encoder> Encoder::create(Config& config)
+{
+    if (!config.hasEncoder())
+        error("no encoder configured");
+    return create(config->encoder());
+}
 
 std::unique_ptr<Encoder> Encoder::create(const EncoderProto& config)
 {

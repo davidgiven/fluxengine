@@ -1,16 +1,16 @@
 #include "lib/core/globals.h"
-#include "lib/config.h"
+#include "lib/config/config.h"
 #include "lib/decoders/decoders.h"
 #include "lib/encoders/encoders.h"
 #include "ibm.h"
 #include "lib/core/crc.h"
 #include "lib/readerwriter.h"
-#include "lib/image.h"
+#include "lib/data/image.h"
 #include "arch/ibm/ibm.pb.h"
 #include "lib/encoders/encoders.pb.h"
 #include "fmt/format.h"
-#include "lib/proto.h"
-#include "lib/layout.h"
+#include "lib/config/proto.h"
+#include "lib/data/layout.h"
 #include <ctype.h>
 
 /* IAM record separator:

@@ -1,7 +1,7 @@
 #include "lib/core/globals.h"
-#include "lib/flux.h"
-#include "lib/sector.h"
-#include "lib/layout.h"
+#include "lib/data/flux.h"
+#include "lib/data/sector.h"
+#include "lib/data/layout.h"
 
 Sector::Sector(const LogicalLocation& location):
     LogicalLocation(location),

@@ -1,7 +1,7 @@
 #include "lib/core/globals.h"
-#include "lib/config.h"
-#include "lib/flags.h"
-#include "lib/fluxmap.h"
+#include "lib/config/config.h"
+#include "lib/config/flags.h"
+#include "lib/data/fluxmap.h"
 #include "lib/readerwriter.h"
 #include "protocol.h"
 #include "lib/usb/usb.h"
@@ -11,13 +11,13 @@
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/imagereader/imagereader.h"
 #include "lib/imagewriter/imagewriter.h"
-#include "lib/sector.h"
-#include "lib/image.h"
-#include "lib/logger.h"
-#include "lib/layout.h"
+#include "lib/data/sector.h"
+#include "lib/data/image.h"
+#include "lib/core/logger.h"
+#include "lib/data/layout.h"
 #include "lib/core/utils.h"
-#include "lib/config.pb.h"
-#include "lib/proto.h"
+#include "lib/config/config.pb.h"
+#include "lib/config/proto.h"
 #include <optional>
 
 enum ReadResult
@@ -32,6 +32,134 @@ enum BadSectorsState
     HAS_NO_BAD_SECTORS,
     HAS_BAD_SECTORS
 };
+
+/* Log renderers. */
+
+/* Start measuring the rotational speed */
+void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const BeginSpeedOperationLogMessage> m)
+{
+    r.newline().add("Measuring rotational speed...").newline();
+}
+
+/* Finish measuring the rotational speed */
+void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const EndSpeedOperationLogMessage> m)
+{
+    r.newline()
+        .add(fmt::format("Rotational period is {:.1f}ms ({:.1f}rpm)",
+            m->rotationalPeriod / 1e6,
+            60e9 / m->rotationalPeriod))
+        .newline();
+}
+
+/* Indicates that we're starting a write operation. */
+void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const BeginWriteOperationLogMessage> m)
+{
+    r.header(fmt::format("W{:2}.{}: ", m->track, m->head));
+}
+
+/* Indicates that we're finishing a write operation. */
+void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const EndWriteOperationLogMessage> m)
+{
+}
+
+/* Indicates that we're starting a read operation. */
+void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const BeginReadOperationLogMessage> m)
+{
+    r.header(fmt::format("R{:2}.{}: ", m->track, m->head));
+}
+
+/* Indicates that we're finishing a read operation. */
+void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const EndReadOperationLogMessage> m)
+{
+}
+
+/* We've just read a track (we might reread it if there are errors)
+ */
+void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const TrackReadLogMessage> m)
+{
+    const auto& track = *m->track;
+
+    std::set<std::shared_ptr<const Sector>> rawSectors;
+    std::set<std::shared_ptr<const Record>> rawRecords;
+    for (const auto& trackDataFlux : track.trackDatas)
+    {
+        rawSectors.insert(
+            trackDataFlux->sectors.begin(), trackDataFlux->sectors.end());
+        rawRecords.insert(
+            trackDataFlux->records.begin(), trackDataFlux->records.end());
+    }
+
+    nanoseconds_t clock = 0;
+    for (const auto& sector : rawSectors)
+        clock += sector->clock;
+    if (!rawSectors.empty())
+        clock /= rawSectors.size();
+
+    r.comma().add(fmt::format("{} raw records, {} raw sectors",
+        rawRecords.size(),
+        rawSectors.size()));
+    if (clock != 0)
+    {
+        r.comma().add(fmt::format(
+            "{:.2f}us clock ({:.0f}kHz)", clock / 1000.0, 1000000.0 / clock));
+    }
+
+    r.newline().add("sectors:");
+
+    std::vector<std::shared_ptr<const Sector>> sectors(
+        track.sectors.begin(), track.sectors.end());
+    std::sort(sectors.begin(), sectors.end(), sectorPointerSortPredicate);
+
+    for (const auto& sector : sectors)
+        r.add(fmt::format("{}.{}.{}{}",
+            sector->logicalTrack,
+            sector->logicalSide,
+            sector->logicalSector,
+            Sector::statusToChar(sector->status)));
+
+    int size = 0;
+    std::set<std::pair<int, int>> track_ids;
+    for (const auto& sector : m->track->sectors)
+    {
+        track_ids.insert(
+            std::make_pair(sector->logicalTrack, sector->logicalSide));
+        size += sector->data.size();
+    }
+
+    r.newline().add(fmt::format("{} bytes decoded\n", size));
+}
+
+/* We've just read a disk.
+ */
+void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const DiskReadLogMessage> m)
+{
+}
+
+/* Large-scale operation start. */
+void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const BeginOperationLogMessage> m)
+{
+}
+
+/* Large-scale operation end. */
+void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const EndOperationLogMessage> m)
+{
+}
+
+/* Large-scale operation progress. */
+void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const OperationProgressLogMessage> m)
+{
+}
 
 /* In order to allow rereads in file-based flux sources, we need to persist the
  * FluxSourceIterator (as that's where the state for which read to return is
@@ -221,13 +349,14 @@ ReadResult readGroup(FluxSourceIteratorHolder& fluxSourceIteratorHolder,
     for (unsigned offset = 0; offset < trackInfo->groupSize;
          offset += Layout::getHeadWidth())
     {
+        log(BeginReadOperationLogMessage{
+            trackInfo->physicalTrack + offset, trackInfo->physicalSide});
+
         auto& fluxSourceIterator = fluxSourceIteratorHolder.getIterator(
             trackInfo->physicalTrack + offset, trackInfo->physicalSide);
         if (!fluxSourceIterator.hasNext())
             continue;
 
-        log(BeginReadOperationLogMessage{
-            trackInfo->physicalTrack + offset, trackInfo->physicalSide});
         std::shared_ptr<const Fluxmap> fluxmap = fluxSourceIterator.next();
         // ->rescale(
         //     1.0 / globalConfig()->flux_source().rescale());
