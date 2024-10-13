@@ -1,8 +1,8 @@
 #ifndef FLUXSOURCE_H
 #define FLUXSOURCE_H
 
-#include "lib/flags.h"
-#include "lib/config.pb.h"
+#include "lib/config/flags.h"
+#include "lib/config/config.pb.h"
 
 class A2rFluxSourceProto;
 class CwfFluxSourceProto;

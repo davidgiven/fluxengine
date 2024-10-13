@@ -1,9 +1,9 @@
 #include "lib/core/globals.h"
-#include "lib/flags.h"
+#include "lib/config/flags.h"
 #include "lib/sector.h"
 #include "lib/imagewriter/imagewriter.h"
 #include "lib/image.h"
-#include "lib/config.pb.h"
+#include "lib/config/config.pb.h"
 #include "lib/layout.h"
 #include "lib/core/logger.h"
 #include <algorithm>

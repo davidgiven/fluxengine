@@ -1,5 +1,5 @@
 #include "lib/core/globals.h"
-#include "lib/flags.h"
+#include "lib/config/flags.h"
 #include "lib/usb/usbfinder.h"
 #include "fmt/format.h"
 

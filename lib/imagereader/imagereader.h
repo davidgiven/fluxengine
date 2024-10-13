@@ -2,7 +2,7 @@
 #define IMAGEREADER_H
 
 #include "lib/image.h"
-#include "lib/config.pb.h"
+#include "lib/config/config.pb.h"
 
 class ImageSpec;
 class ImageReaderProto;

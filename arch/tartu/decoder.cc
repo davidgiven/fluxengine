@@ -1,5 +1,5 @@
 #include "lib/core/globals.h"
-#include "lib/config.h"
+#include "lib/config/config.h"
 #include "lib/decoders/decoders.h"
 #include "arch/tartu/tartu.h"
 #include "lib/core/crc.h"

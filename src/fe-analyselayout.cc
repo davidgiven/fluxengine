@@ -1,7 +1,7 @@
 #define _USE_MATH_DEFINES
 #include "lib/core/globals.h"
-#include "lib/config.h"
-#include "lib/flags.h"
+#include "lib/config/config.h"
+#include "lib/config/flags.h"
 #include "lib/core/bitmap.h"
 #include "lib/fluxmap.h"
 #include "lib/sector.h"

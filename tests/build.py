@@ -8,7 +8,7 @@ from scripts.build import protoencode_single
 proto(name="test_proto", srcs=["./testproto.proto"], deps=["lib+common_proto"])
 
 protocc(
-    name="test_proto_lib", srcs=[".+test_proto"], deps=["lib+config_proto_lib"]
+    name="test_proto_lib", srcs=[".+test_proto"], deps=["lib/config+proto_lib"]
 )
 
 tests = [
@@ -68,7 +68,7 @@ export(
                     "dep/libusbp",
                     "dep/snowhouse",
                     "dep/stb",
-                    "lib+config_proto_lib",
+                    "lib/config",
                     "src/formats",
                 ],
             ),
@@ -97,7 +97,7 @@ export(
                     "dep/snowhouse",
                     "dep/stb",
                     "arch+proto_lib",
-                    "lib+config_proto_lib",
+                    "lib/config",
                     "src/formats",
                 ]
                 + ([".+test_proto_lib"] if n == "options" else [])

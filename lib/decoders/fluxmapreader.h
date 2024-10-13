@@ -2,7 +2,7 @@
 #define FLUXMAPREADER_H
 
 #include "lib/fluxmap.h"
-#include "lib/flags.h"
+#include "lib/config/flags.h"
 #include "protocol.h"
 
 class DecoderProto;

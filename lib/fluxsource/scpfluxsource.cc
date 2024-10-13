@@ -5,7 +5,7 @@
 #include "lib/core/utils.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/scp.h"
-#include "lib/proto.h"
+#include "lib/config/proto.h"
 #include "lib/core/logger.h"
 #include <fstream>
 

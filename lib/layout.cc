@@ -1,7 +1,7 @@
 #include "lib/core/globals.h"
-#include "lib/config.h"
+#include "lib/config/config.h"
 #include "lib/layout.h"
-#include "lib/proto.h"
+#include "lib/config/proto.h"
 #include "lib/core/logger.h"
 #include "lib/fl2.h"
 

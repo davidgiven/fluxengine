@@ -1,6 +1,6 @@
 #include "lib/core/globals.h"
 #include "lib/vfs/vfs.h"
-#include "lib/config.pb.h"
+#include "lib/config/config.pb.h"
 #include "lib/core/utils.h"
 
 /* A directory entry looks like:

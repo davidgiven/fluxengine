@@ -3,7 +3,7 @@
 #ifdef __cplusplus
 
 #include <google/protobuf/message.h>
-#include "lib/config.pb.h"
+#include "lib/config/config.pb.h"
 #include "lib/common.pb.h"
 
 class ConfigProto;

@@ -5,7 +5,7 @@
 #include "lib/decoders/decoders.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/layout.h"
-#include "lib/proto.h"
+#include "lib/config/proto.h"
 
 class FluxSectorInterface : public SectorInterface
 {

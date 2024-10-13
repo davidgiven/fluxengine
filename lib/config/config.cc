@@ -1,6 +1,6 @@
 #include "lib/core/globals.h"
-#include "lib/config.h"
-#include "lib/proto.h"
+#include "lib/config/config.h"
+#include "lib/config/proto.h"
 #include "lib/core/logger.h"
 #include "lib/core/utils.h"
 #include <fstream>

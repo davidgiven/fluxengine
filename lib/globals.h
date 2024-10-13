@@ -67,6 +67,6 @@ struct overloaded : Ts...
 template <class... Ts>
 overloaded(Ts...) -> overloaded<Ts...>;
 
-#include "lib/config.h"
+#include "lib/config/config.h"
 
 #endif

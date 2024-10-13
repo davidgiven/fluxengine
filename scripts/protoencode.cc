@@ -4,7 +4,7 @@
 #include <fstream>
 #include "fmt/format.h"
 #include "tests/testproto.pb.h"
-#include "lib/config.pb.h"
+#include "lib/config/config.pb.h"
 #include <sstream>
 #include <locale>
 
@@ -124,7 +124,7 @@ int main(int argc, const char* argv[])
     auto name = argv[3];
 
     output << "#include \"lib/globals.h\"\n"
-           << "#include \"lib/proto.h\"\n"
+           << "#include \"lib/config/proto.h\"\n"
            << "#include <string_view>\n"
            << "static const uint8_t " << name << "_rawData[] = {";
 

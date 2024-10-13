@@ -1,7 +1,7 @@
 #ifndef READIBM_H
 #define READIBM_H
 
-#include "lib/flags.h"
+#include "lib/config/flags.h"
 #include "dataspec.h"
 
 extern IntFlag sectorIdBase;

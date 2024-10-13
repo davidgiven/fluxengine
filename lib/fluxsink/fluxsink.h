@@ -1,7 +1,7 @@
 #ifndef FLUXSINK_H
 #define FLUXSINK_H
 
-#include "lib/flags.h"
+#include "lib/config/flags.h"
 #include <ostream>
 
 class Fluxmap;

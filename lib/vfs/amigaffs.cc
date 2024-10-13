@@ -1,8 +1,8 @@
 #include "lib/core/globals.h"
-#include "lib/config.h"
+#include "lib/config/config.h"
 #include "lib/vfs/vfs.h"
-#include "lib/config.pb.h"
-#include "lib/proto.h"
+#include "lib/config/config.pb.h"
+#include "lib/config/proto.h"
 #include "lib/layout.h"
 #include "lib/core/logger.h"
 

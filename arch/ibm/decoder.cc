@@ -7,7 +7,7 @@
 #include "lib/decoders/fluxpattern.h"
 #include "lib/sector.h"
 #include "arch/ibm/ibm.pb.h"
-#include "lib/proto.h"
+#include "lib/config/proto.h"
 #include "lib/layout.h"
 #include <string.h>
 

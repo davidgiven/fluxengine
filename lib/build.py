@@ -25,38 +25,3 @@ protocc(
     srcs=[".+drive_proto"],
     deps=[".+common_proto_lib", "+fl2_proto_lib", ".+layout_proto_lib"],
 )
-
-proto(
-    name="config_proto",
-    srcs=["./config.proto"],
-    deps=[
-        ".+common_proto",
-        ".+layout_proto",
-        ".+drive_proto",
-        "+fl2_proto",
-        "lib/fluxsource+proto",
-        "lib/fluxsink+proto",
-        "lib/vfs+proto",
-        "lib/usb+proto",
-        "lib/encoders+proto",
-        "lib/decoders+proto",
-        "lib/imagereader+proto",
-        "lib/imagewriter+proto",
-    ],
-)
-
-protocc(
-    name="config_proto_lib",
-    srcs=[".+common_proto", ".+config_proto", "arch+proto", "+fl2_proto"],
-    deps=[
-        "lib/fluxsource+proto_lib",
-        "lib/fluxsink+proto_lib",
-        "lib/vfs+proto_lib",
-        "lib/usb+proto_lib",
-        "lib/encoders+proto_lib",
-        "lib/decoders+proto_lib",
-        "lib/imagereader+proto_lib",
-        "lib/imagewriter+proto_lib",
-        "lib+drive_proto_lib",
-    ],
-)

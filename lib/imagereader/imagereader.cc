@@ -1,13 +1,13 @@
 #include "lib/core/globals.h"
-#include "lib/config.h"
-#include "lib/flags.h"
+#include "lib/config/config.h"
+#include "lib/config/flags.h"
 #include "lib/sector.h"
 #include "lib/imagereader/imagereader.h"
 #include "lib/core/utils.h"
-#include "lib/proto.h"
+#include "lib/config/proto.h"
 #include "lib/image.h"
 #include "lib/layout.h"
-#include "lib/config.pb.h"
+#include "lib/config/config.pb.h"
 #include "lib/core/logger.h"
 #include <algorithm>
 #include <ctype.h>

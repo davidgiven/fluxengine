@@ -1,7 +1,7 @@
 #include "lib/core/globals.h"
-#include "lib/config.h"
+#include "lib/config/config.h"
 #include "vfs.h"
-#include "lib/proto.h"
+#include "lib/config/proto.h"
 #include "lib/layout.pb.h"
 #include "lib/layout.h"
 #include "lib/image.h"
@@ -13,7 +13,7 @@
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/decoders/decoders.h"
 #include "lib/encoders/encoders.h"
-#include "lib/config.pb.h"
+#include "lib/config/config.pb.h"
 #include "lib/core/utils.h"
 
 Path::Path(const std::vector<std::string> other):

@@ -3,7 +3,7 @@
 
 #include <google/protobuf/message.h>
 #include "lib/common.pb.h"
-#include "lib/config.pb.h"
+#include "lib/config/config.pb.h"
 
 class ProtoPathNotFoundException : public ErrorException
 {

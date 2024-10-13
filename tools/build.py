@@ -11,7 +11,7 @@ cxxprogram(
     deps=[
         "+lib",
         "lib/core",
-        "lib+config_proto_lib",
+        "lib/config+proto_lib",
         "lib/fluxsource+proto_lib",
         "+fmt_lib",
         "+z_lib",
@@ -25,7 +25,7 @@ cxxprogram(
     deps=[
         "+lib",
         "lib/core",
-        "lib+config_proto_lib",
+        "lib/config+proto_lib",
         "lib/fluxsource+proto_lib",
         "+fmt_lib",
         "+z_lib",
@@ -45,7 +45,7 @@ cxxprogram(
         "+sqlite3_lib",
         "+z_lib",
         "dep/libusbp",
-        "lib+config_proto_lib",
+        "lib/config+proto_lib",
         "lib/fluxsource+proto_lib",
         "src/formats",
         "lib/core",

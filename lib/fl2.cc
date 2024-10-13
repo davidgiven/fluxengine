@@ -1,5 +1,5 @@
 #include "lib/core/globals.h"
-#include "lib/proto.h"
+#include "lib/config/proto.h"
 #include "lib/fluxmap.h"
 #include "lib/fl2.pb.h"
 #include <fstream>
