@@ -1,7 +1,6 @@
 from build.ab import Rule, Targets, emit, simplerule, filenamesof
 from build.utils import filenamesmatchingof, collectattrs
-from types import SimpleNamespace
-from os.path import join, abspath, dirname
+from os.path import join, abspath, dirname, relpath
 import build.pkg  # to get the protobuf package check
 
 emit(
@@ -26,7 +25,10 @@ def _getprotodeps(deps):
 def proto(self, name, srcs: Targets = [], deps: Targets = []):
     protodeps = _getprotodeps(deps)
     descriptorlist = ":".join(
-        [abspath(f) for f in filenamesmatchingof(protodeps, "*.descriptor")]
+        [
+            relpath(f, start=self.dir)
+            for f in filenamesmatchingof(protodeps, "*.descriptor")
+        ]
     )
 
     dirs = sorted({"{dir}/" + dirname(f) for f in filenamesof(srcs)})
@@ -81,7 +83,10 @@ def protocc(self, name, srcs: Targets = [], deps: Targets = []):
 
     protodeps = _getprotodeps(deps + srcs)
     descriptorlist = ":".join(
-        [abspath(f) for f in filenamesmatchingof(protodeps, "*.descriptor")]
+        [
+            relpath(f, start=self.dir)
+            for f in filenamesmatchingof(protodeps, "*.descriptor")
+        ]
     )
 
     r = simplerule(
