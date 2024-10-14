@@ -7,7 +7,7 @@
 #include "lib/data/sector.h"
 #include "lib/core/csvreader.h"
 #include "lib/data/image.h"
-#include "lib/decoders/fluxmapreader.h"
+#include "lib/data/fluxmapreader.h"
 #include "agg2d.h"
 #include "stb_image_write.h"
 #include <math.h>

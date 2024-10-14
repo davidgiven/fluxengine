@@ -5,7 +5,7 @@
 #include "lib/core/bytes.h"
 #include "protocol.h"
 #include "lib/fluxsink/fluxsink.h"
-#include "lib/decoders/fluxmapreader.h"
+#include "lib/data/fluxmapreader.h"
 #include "lib/fluxsink/fluxsink.pb.h"
 #include "lib/config/proto.h"
 #include "lib/fl2.pb.h"

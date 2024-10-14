@@ -1,6 +1,6 @@
 #include "lib/core/globals.h"
 #include "lib/data/fluxmap.h"
-#include "lib/decoders/fluxpattern.h"
+#include "lib/data/fluxpattern.h"
 #include <sstream>
 
 typedef std::vector<unsigned> ivector;

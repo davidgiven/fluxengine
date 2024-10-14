@@ -2,7 +2,7 @@
 
 #include "lib/core/globals.h"
 #include "lib/data/fluxmap.h"
-#include "lib/decoders/fluxmapreader.h"
+#include "lib/data/fluxmapreader.h"
 
 class HistogramViewer : public wxWindow
 {

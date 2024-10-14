@@ -23,7 +23,7 @@
 #include "arch/tids990/tids990.h"
 #include "arch/victor9k/victor9k.h"
 #include "arch/zilogmcz/zilogmcz.h"
-#include "lib/decoders/fluxmapreader.h"
+#include "lib/data/fluxmapreader.h"
 #include "lib/data/flux.h"
 #include "protocol.h"
 #include "lib/decoders/rawbits.h"
