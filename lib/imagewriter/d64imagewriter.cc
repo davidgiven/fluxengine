@@ -3,7 +3,7 @@
 #include "lib/data/sector.h"
 #include "lib/imagewriter/imagewriter.h"
 #include "lib/data/image.h"
-#include "lib/ldbs.h"
+#include "lib/external/ldbs.h"
 #include "lib/core/logger.h"
 #include "lib/config/config.pb.h"
 #include <algorithm>

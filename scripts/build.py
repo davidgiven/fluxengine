@@ -18,7 +18,6 @@ def protoencode_single(self, name, srcs: Targets, proto, symbol):
                 "tests+test_proto_lib",
                 "+protobuf_lib",
                 "+fmt_lib",
-                "+lib",
             ],
         )
         encoders[proto] = r
@@ -65,7 +64,6 @@ cxxprogram(
         "lib/config+proto_lib",
         "lib/fluxsource+proto_lib",
         "lib/fluxsink+proto_lib",
-        "+lib",
         "+fmt_lib",
         "+protobuf_lib",
     ],
@@ -79,7 +77,6 @@ cxxprogram(
         "lib/config+proto_lib",
         "lib/fluxsource+proto_lib",
         "lib/fluxsink+proto_lib",
-        "+lib",
         "+fmt_lib",
         "+protobuf_lib",
     ],

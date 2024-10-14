@@ -1,7 +1,6 @@
 #include "lib/core/globals.h"
-#include "lib/config/proto.h"
 #include "lib/data/fluxmap.h"
-#include "lib/fl2.pb.h"
+#include "lib/external/fl2.pb.h"
 #include <fstream>
 
 static void upgradeFluxFile(FluxFileProto& proto)

@@ -8,7 +8,7 @@ proto(
         "lib+common_proto",
         "lib+layout_proto",
         "lib+drive_proto",
-        "+fl2_proto",
+        "lib/external+fl2_proto",
         "lib/fluxsource+proto",
         "lib/fluxsink+proto",
         "lib/vfs+proto",
@@ -22,7 +22,7 @@ proto(
 
 protocc(
     name="proto_lib",
-    srcs=[".+proto", "arch+proto", "+fl2_proto"],
+    srcs=[".+proto", "arch+proto"],
     deps=[
         "lib/fluxsource+proto_lib",
         "lib/fluxsink+proto_lib",
@@ -32,6 +32,7 @@ protocc(
         "lib/decoders+proto_lib",
         "lib/imagereader+proto_lib",
         "lib/imagewriter+proto_lib",
+        "lib/external+fl2_proto_lib",
         "lib+drive_proto_lib",
     ],
 )

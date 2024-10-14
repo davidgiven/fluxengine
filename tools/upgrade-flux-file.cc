@@ -1,4 +1,4 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/data/fluxmap.h"
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/core/bytes.h"

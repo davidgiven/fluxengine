@@ -10,7 +10,7 @@
 #include "lib/config/proto.h"
 #include "lib/data/fluxmap.h"
 #include "lib/data/layout.h"
-#include "lib/a2r.h"
+#include "lib/external/a2r.h"
 #include <fstream>
 #include <sys/stat.h>
 #include <sys/types.h>

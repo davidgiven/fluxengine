@@ -10,7 +10,7 @@
 #include "lib/config/proto.h"
 #include "lib/data/fluxmap.h"
 #include "lib/data/layout.h"
-#include "lib/scp.h"
+#include "lib/external/scp.h"
 #include "lib/core/logger.h"
 #include <fstream>
 #include <sys/stat.h>

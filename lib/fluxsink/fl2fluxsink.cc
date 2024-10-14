@@ -8,8 +8,8 @@
 #include "lib/data/fluxmapreader.h"
 #include "lib/fluxsink/fluxsink.pb.h"
 #include "lib/config/proto.h"
-#include "lib/fl2.pb.h"
-#include "lib/fl2.h"
+#include "lib/external/fl2.pb.h"
+#include "lib/external/fl2.h"
 #include <fstream>
 #include <sys/stat.h>
 #include <sys/types.h>
