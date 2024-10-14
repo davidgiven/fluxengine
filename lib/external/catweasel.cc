@@ -1,7 +1,7 @@
 #include "lib/core/globals.h"
 #include "lib/data/fluxmap.h"
 #include "lib/core/bytes.h"
-#include "lib/fluxsource/catweasel.h"
+#include "lib/external/catweasel.h"
 
 std::unique_ptr<Fluxmap> decodeCatweaselData(
     const Bytes& bytes, nanoseconds_t clock)
