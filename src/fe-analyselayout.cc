@@ -5,7 +5,7 @@
 #include "lib/core/bitmap.h"
 #include "lib/data/fluxmap.h"
 #include "lib/data/sector.h"
-#include "lib/core/csvreader.h"
+#include "lib/external/csvreader.h"
 #include "lib/data/image.h"
 #include "lib/data/fluxmapreader.h"
 #include "agg2d.h"
