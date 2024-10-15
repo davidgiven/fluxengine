@@ -53,13 +53,18 @@ def _package(self, name, package, fallback, pkgconfig):
         fallback
     ), f"Required package '{package}' not installed when materialising target '{name}'"
 
-    self.args["cheader_deps"] = fallback.args.get("cheader_deps", {fallback})
-    self.args["clibrary_deps"] = fallback.args.get("clibrary_deps", {fallback})
-    self.ins = []
-    self.outs = []
-    self.deps = [fallback]
-    self.traits.add("clibrary")
-    self.traits.add("cheaders")
+    if "cheader_deps" in fallback.args:
+        self.args["cheader_deps"] = fallback.args["cheader_deps"]
+    if "clibrary_deps" in fallback.args:
+        self.args["clibrary_deps"] = fallback.args["clibrary_deps"]
+    if "cheader_files" in fallback.args:
+        self.args["cheader_files"] = fallback.args["cheader_files"]
+    if "clibrary_files" in fallback.args:
+        self.args["clibrary_files"] = fallback.args["clibrary_files"]
+    self.ins = fallback.ins
+    self.outs = fallback.outs
+    self.deps = fallback.deps
+    self.traits = fallback.traits
 
 
 @Rule

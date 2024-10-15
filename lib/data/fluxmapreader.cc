@@ -1,8 +1,8 @@
 #include "lib/core/globals.h"
 #include "lib/config/config.h"
 #include "lib/data/fluxmap.h"
-#include "lib/decoders/fluxmapreader.h"
-#include "lib/decoders/fluxpattern.h"
+#include "lib/data/fluxmapreader.h"
+#include "lib/data/fluxpattern.h"
 #include "lib/config/proto.h"
 #include "protocol.h"
 #include <numeric>

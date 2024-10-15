@@ -8,7 +8,7 @@
 #include "lib/decoders/decoders.pb.h"
 #include "lib/data/sector.h"
 #include "lib/data/layout.h"
-#include "lib/decoders/fluxmapreader.h"
+#include "lib/data/fluxmapreader.h"
 #include "lib/core/crc.h"
 
 DECLARE_COLOUR(BACKGROUND, 192, 192, 192);

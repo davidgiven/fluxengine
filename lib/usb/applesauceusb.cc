@@ -1,4 +1,4 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "protocol.h"
 #include "lib/data/fluxmap.h"
 #include "lib/core/bytes.h"
@@ -6,7 +6,7 @@
 #include "lib/core/utils.h"
 #include "serial.h"
 #include "usb.h"
-#include "lib/decoders/fluxmapreader.h"
+#include "lib/data/fluxmapreader.h"
 #include <unistd.h>
 
 class ApplesauceUsb;

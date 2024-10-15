@@ -62,7 +62,7 @@ protoencode(
 cxxlibrary(
     name="formats",
     srcs=[".+formats_cc", ".+table_cc"],
-    deps=["+lib", "lib/config+proto_lib"],
+    deps=["lib/config", "lib/core"],
 )
 
 export(

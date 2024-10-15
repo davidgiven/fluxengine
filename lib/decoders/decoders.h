@@ -3,7 +3,7 @@
 
 #include "lib/core/bytes.h"
 #include "lib/data/sector.h"
-#include "lib/decoders/fluxmapreader.h"
+#include "lib/data/fluxmapreader.h"
 #include "lib/decoders/fluxdecoder.h"
 
 class Sector;

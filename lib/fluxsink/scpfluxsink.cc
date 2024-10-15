@@ -5,12 +5,12 @@
 #include "lib/core/bytes.h"
 #include "protocol.h"
 #include "lib/fluxsink/fluxsink.h"
-#include "lib/decoders/fluxmapreader.h"
+#include "lib/data/fluxmapreader.h"
 #include "lib/fluxsink/fluxsink.pb.h"
 #include "lib/config/proto.h"
 #include "lib/data/fluxmap.h"
 #include "lib/data/layout.h"
-#include "lib/scp.h"
+#include "lib/external/scp.h"
 #include "lib/core/logger.h"
 #include <fstream>
 #include <sys/stat.h>

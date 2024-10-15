@@ -4,7 +4,7 @@
 #include "lib/usb/usb.h"
 #include "lib/core/bitmap.h"
 #include "lib/data/fluxmap.h"
-#include "lib/decoders/fluxmapreader.h"
+#include "lib/data/fluxmapreader.h"
 #include "lib/readerwriter.h"
 #include "protocol.h"
 #include "lib/config/proto.h"

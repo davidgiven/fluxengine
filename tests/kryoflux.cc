@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include "lib/core/globals.h"
 #include "lib/data/fluxmap.h"
-#include "lib/fluxsource/kryoflux.h"
+#include "lib/external/kryoflux.h"
 
 static void test_convert(const Bytes& kryofluxbytes, const Bytes& fluxmapbytes)
 {

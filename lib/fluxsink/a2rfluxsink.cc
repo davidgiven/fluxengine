@@ -4,13 +4,13 @@
 #include "lib/core/bytes.h"
 #include "protocol.h"
 #include "lib/fluxsink/fluxsink.h"
-#include "lib/decoders/fluxmapreader.h"
+#include "lib/data/fluxmapreader.h"
 #include "lib/fluxsink/fluxsink.pb.h"
 #include "lib/core/logger.h"
 #include "lib/config/proto.h"
 #include "lib/data/fluxmap.h"
 #include "lib/data/layout.h"
-#include "lib/a2r.h"
+#include "lib/external/a2r.h"
 #include <fstream>
 #include <sys/stat.h>
 #include <sys/types.h>

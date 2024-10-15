@@ -3,7 +3,7 @@
 #include "lib/config/flags.h"
 #include "lib/readerwriter.h"
 #include "lib/data/fluxmap.h"
-#include "lib/decoders/fluxmapreader.h"
+#include "lib/data/fluxmapreader.h"
 #include "lib/decoders/fluxdecoder.h"
 #include "lib/decoders/decoders.h"
 #include "lib/fluxsource/fluxsource.h"

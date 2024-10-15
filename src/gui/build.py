@@ -56,7 +56,7 @@ cxxprogram(
     cflags=["$(WX_CFLAGS)"],
     ldflags=["$(WX_LDFLAGS)"],
     deps=[
-        "+fl2_proto_lib",
+        "lib/external+fl2_proto_lib",
         "+protocol",
         "dep/adflib",
         "dep/fatfs",

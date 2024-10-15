@@ -1,8 +1,11 @@
 #include "lib/core/globals.h"
 #include "lib/core/utils.h"
 #include "lib/core/bytes.h"
+#include "lib/core/logger.h"
 #include <iomanip>
 #include <fstream>
+#include <sys/time.h>
+#include <stdarg.h>
 
 bool emergencyStop = false;
 
@@ -233,3 +236,17 @@ int findLowestSetBit(uint64_t value)
     }
     return bit;
 }
+
+double getCurrentTime(void)
+{
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+
+    return double(tv.tv_sec) + tv.tv_usec / 1000000.0;
+}
+
+void warning(const std::string msg)
+{
+    log(msg);
+}
+

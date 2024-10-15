@@ -69,7 +69,7 @@ def cfileimpl(self, name, srcs, deps, suffix, commands, label, kind, cflags):
     t = simplerule(
         replaces=self,
         ins=srcs,
-        deps=sorted(hdr_deps),
+        deps=sorted(_indirect(hdr_deps, "cheader_files")),
         outs=[outleaf],
         label=label,
         commands=commands,
@@ -216,6 +216,8 @@ def libraryimpl(
     self.deps = self.outs
     self.args["cheader_deps"] = hdr_deps
     self.args["clibrary_deps"] = lib_deps
+    self.args["cheader_files"] = [hr] if hr else []
+    self.args["clibrary_files"] = [ar] if ar else []
     self.args["caller_cflags"] = caller_cflags + hf
     self.args["caller_ldflags"] = caller_ldflags
 
@@ -323,7 +325,7 @@ def programimpl(
         replaces=self,
         ins=cfiles + libs,
         outs=[f"={self.localname}$(EXT)"],
-        deps=deps,
+        deps=sorted(_indirect(lib_deps, "clibrary_files")),
         label=toolchain.label + label,
         commands=commands,
         args={

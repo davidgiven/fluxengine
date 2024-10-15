@@ -123,7 +123,7 @@ int main(int argc, const char* argv[])
     auto data = message.SerializeAsString();
     auto name = argv[3];
 
-    output << "#include \"lib/globals.h\"\n"
+    output << "#include \"lib/core/globals.h\"\n"
            << "#include \"lib/config/proto.h\"\n"
            << "#include <string_view>\n"
            << "static const uint8_t " << name << "_rawData[] = {";

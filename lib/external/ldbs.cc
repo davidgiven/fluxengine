@@ -1,7 +1,7 @@
 #include "lib/core/globals.h"
 #include <string.h>
 #include "lib/core/bytes.h"
-#include "lib/ldbs.h"
+#include "lib/external/ldbs.h"
 
 LDBS::LDBS() {}
 

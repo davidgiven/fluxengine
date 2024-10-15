@@ -4,8 +4,8 @@
 #include "arch/tids990/tids990.h"
 #include "lib/core/crc.h"
 #include "lib/data/fluxmap.h"
-#include "lib/decoders/fluxmapreader.h"
-#include "lib/decoders/fluxpattern.h"
+#include "lib/data/fluxmapreader.h"
+#include "lib/data/fluxpattern.h"
 #include "lib/data/sector.h"
 #include <string.h>
 #include "fmt/format.h"

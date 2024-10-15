@@ -52,7 +52,7 @@ export(
                     ),
                 ],
                 deps=[
-                    "+fl2_proto_lib",
+                    "lib/external+fl2_proto_lib",
                     "+fmt_lib",
                     "+lib",
                     "+protobuf_lib",
@@ -82,7 +82,7 @@ export(
                 name=f"{n}_test_exe",
                 srcs=[f"./{n}.cc"],
                 deps=[
-                    "+fl2_proto_lib",
+                    "lib/external+fl2_proto_lib",
                     "+fmt_lib",
                     "+lib",
                     "+protobuf_lib",

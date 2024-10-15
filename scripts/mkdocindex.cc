@@ -1,4 +1,4 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/config/proto.h"
 #include "lib/config/flags.h"
 #include "fmt/format.h"
