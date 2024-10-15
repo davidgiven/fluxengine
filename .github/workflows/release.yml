@@ -87,7 +87,7 @@ jobs:
   build-macos:
     strategy:
       matrix:
-        runs-on: [macos-13, macos-14-arm64]
+        runs-on: [macos-13, macos-15-arm64]
     runs-on: ${{ matrix.runs-on }}
     steps:
     - uses: actions/checkout@v4
