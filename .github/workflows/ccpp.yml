@@ -37,12 +37,10 @@ jobs:
         path: 'fluxengine-testdata'
     - name: brew
       run: |
-        brew upgrade
         brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg
-        which protoc
-        protoc --version
+        find /usr/local/include/google/
     - name: make
-      run: gmake -j`nproc` -C fluxengine
+      run: gmake -j1 -C fluxengine -V1
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
