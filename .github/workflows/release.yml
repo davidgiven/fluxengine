@@ -85,7 +85,10 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-macos:
-    runs-on: macos-13
+    strategy:
+      matrix:
+        runs-on: [macos-13, macos-15-arm64]
+    runs-on: ${{ matrix.runs-on }}
     steps:
     - uses: actions/checkout@v4
 
@@ -93,7 +96,9 @@ jobs:
       run: brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg
 
     - name: make
-      run: gmake -j`nproc`
+      run: |
+        gmake
+        mv FluxEngine.pkg FluxEngine-${{ matrix.runs-on }}.pkg
 
     - name: tag
       uses: EndBug/latest-tag@latest
@@ -109,7 +114,7 @@ jobs:
         token: ${{ github.token }}
         tag: dev
         assets: | 
-          FluxEngine.pkg
+          FluxEngine-${{ matrix.runs-on }}.pkg
         fail-if-no-assets: false
 
     - name: release
@@ -117,7 +122,7 @@ jobs:
       with:
         name: Development build ${{ env.RELEASE_DATE }}
         files: |
-          FluxEngine.pkg
+          FluxEngine-${{ matrix.runs-on }}.pkg
         tag_name: dev
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
