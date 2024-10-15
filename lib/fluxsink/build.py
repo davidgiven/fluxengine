@@ -16,5 +16,5 @@ cxxlibrary(
         "./vcdfluxsink.cc",
     ],
     hdrs={"lib/fluxsink/fluxsink.h": "./fluxsink.h"},
-    deps=["lib/core", "lib/config", "lib/data", "lib/external","lib/usb"],
+    deps=["lib/core", "lib/config", "lib/data", "lib/external", "lib/usb"],
 )

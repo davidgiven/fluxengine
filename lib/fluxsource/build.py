@@ -26,5 +26,5 @@ cxxlibrary(
         "./testpatternfluxsource.cc",
     ],
     hdrs={"lib/fluxsource/fluxsource.h": "./fluxsource.h"},
-    deps=["lib/core","lib/data","lib/external","lib/usb",".+proto_lib"]
+    deps=["lib/core", "lib/data", "lib/external", "lib/usb", ".+proto_lib"],
 )
