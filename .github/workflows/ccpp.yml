@@ -38,7 +38,6 @@ jobs:
     - name: brew
       run: |
         brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg
-        find /usr/local/include/google/
         brew list protobuf
     - name: make
       run: gmake -j1 -C fluxengine -V1
