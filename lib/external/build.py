@@ -12,6 +12,7 @@ cxxlibrary(
         "./kryoflux.cc",
         "./catweasel.cc",
         "./csvreader.cc",
+        "./flx.cc",
     ],
     hdrs={
         "lib/external/a2r.h": "./a2r.h",
@@ -21,6 +22,7 @@ cxxlibrary(
         "lib/external/kryoflux.h": "./kryoflux.h",
         "lib/external/ldbs.h": "./ldbs.h",
         "lib/external/scp.h": "./scp.h",
+        "lib/external/flx.h": "./flx.h",
     },
     deps=["lib/core", ".+fl2_proto_lib", "lib/data"],
 )

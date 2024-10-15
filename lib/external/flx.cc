@@ -2,7 +2,7 @@
 #include "lib/data/fluxmap.h"
 #include "lib/external/kryoflux.h"
 #include "protocol.h"
-#include "lib/fluxsource/flx.h"
+#include "lib/external/flx.h"
 
 std::unique_ptr<Fluxmap> readFlxBytes(const Bytes& bytes)
 {
