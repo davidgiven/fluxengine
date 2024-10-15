@@ -1,5 +1,4 @@
 #include "lib/core/globals.h"
-#include "usb.h"
 #include "protocol.h"
 #include "lib/core/bytes.h"
 #include "greaseweazle.h"
