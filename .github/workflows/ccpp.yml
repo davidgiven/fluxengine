@@ -25,7 +25,10 @@ jobs:
       run: CXXFLAGS="-Wp,-D_GLIBCXX_ASSERTIONS" make -j`nproc` -C fluxengine
 
   build-macos-current:
-    runs-on: macos-latest
+    strategy:
+      matrix:
+        runs-on: [macos-13, macos-14-arm64]
+    runs-on: ${{ matrix.runs-on }}
     steps:
     - uses: actions/checkout@v4
       with:
@@ -39,12 +42,11 @@ jobs:
       run: |
         brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg
     - name: make
-      run: gmake -j1 -C fluxengine V=1
-
+      run: gmake -C fluxengine
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ github.event.repository.name }}.${{ github.sha }}.fluxengine.pkg
+        name: ${{ github.event.repository.name }}.${{ github.sha }}.fluxengine.${{ matrix.runs-on }}.pkg
         path: fluxengine/FluxEngine.pkg
 
   build-windows:
