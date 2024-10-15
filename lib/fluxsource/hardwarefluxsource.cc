@@ -7,7 +7,6 @@
 #include "lib/usb/usb.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/fluxsource/fluxsource.pb.h"
-#include "lib/readerwriter.h"
 
 class HardwareFluxSource : public FluxSource
 {
