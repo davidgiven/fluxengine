@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include "lib/core/globals.h"
 #include "lib/data/fluxmap.h"
-#include "lib/usb/greaseweazle.h"
+#include "lib/external/greaseweazle.h"
 
 #define E28(val)                                          \
     (1 | ((val) << 1) & 0xff), (1 | ((val) >> 6) & 0xff), \
