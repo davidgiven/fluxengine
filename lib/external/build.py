@@ -2,7 +2,7 @@ from build.c import cxxlibrary
 from build.protobuf import proto, protocc
 
 proto(name="fl2_proto", srcs=["./fl2.proto"])
-protocc(name="fl2_proto_lib", srcs=[".+fl2_proto"])
+protocc(name="fl2_proto_lib", srcs=[".+fl2_proto"], deps=["+protobuf_lib"])
 
 cxxlibrary(
     name="external",
