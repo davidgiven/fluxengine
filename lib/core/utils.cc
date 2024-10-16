@@ -249,4 +249,3 @@ void warning(const std::string msg)
 {
     log(msg);
 }
-

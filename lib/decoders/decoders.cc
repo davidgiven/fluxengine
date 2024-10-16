@@ -3,7 +3,6 @@
 #include "lib/data/fluxmap.h"
 #include "lib/config/config.h"
 #include "lib/decoders/decoders.h"
-#include "lib/encoders/encoders.h"
 #include "lib/data/fluxmapreader.h"
 #include "lib/data/flux.h"
 #include "protocol.h"
@@ -13,7 +12,6 @@
 #include "lib/decoders/decoders.pb.h"
 #include "lib/data/layout.h"
 #include <numeric>
-
 
 std::shared_ptr<TrackDataFlux> Decoder::decodeToSectors(
     std::shared_ptr<const Fluxmap> fluxmap,

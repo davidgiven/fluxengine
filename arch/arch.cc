@@ -30,7 +30,8 @@ std::unique_ptr<Encoder> Arch::createEncoder(Config& config)
     return createEncoder(config->encoder());
 }
 
-    std::unique_ptr<Encoder> Arch::createEncoder(const EncoderProto& config){
+std::unique_ptr<Encoder> Arch::createEncoder(const EncoderProto& config)
+{
     static const std::map<int,
         std::function<std::unique_ptr<Encoder>(const EncoderProto&)>>
         encoders = {
