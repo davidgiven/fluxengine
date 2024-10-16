@@ -68,6 +68,7 @@ cxxprogram(
         "lib/data",
         "lib/vfs",
         "lib/config",
+        "arch",
         "src/formats",
         "src/gui/drivetypes",
         "+z_lib",

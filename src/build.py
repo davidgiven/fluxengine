@@ -46,6 +46,7 @@ cxxprogram(
         "lib/data",
         "lib/external",
         "lib/vfs",
+        "arch",
         "src/formats",
     ],
 )
