@@ -3,7 +3,6 @@
 #include "lib/encoders/encoders.h"
 #include "tids990.h"
 #include "lib/core/crc.h"
-#include "lib/readerwriter.h"
 #include "lib/data/image.h"
 #include "arch/tids990/tids990.pb.h"
 #include "lib/encoders/encoders.pb.h"

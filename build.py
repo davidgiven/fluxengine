@@ -22,11 +22,9 @@ clibrary(name="protocol", hdrs={"protocol.h": "./protocol.h"})
 cxxlibrary(
     name="lib",
     srcs=[
-        "./lib/encoders/encoders.cc",
         "./lib/readerwriter.cc",
     ],
     hdrs={
-        "lib/encoders/encoders.h": "./lib/encoders/encoders.h",
         "lib/readerwriter.h": "./lib/readerwriter.h",
     },
     deps=[
@@ -47,6 +45,7 @@ cxxlibrary(
         "lib/imagereader",
         "lib/imagewriter",
         "lib/decoders",
+        "lib/encoders",
     ],
 )
 

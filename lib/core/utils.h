@@ -23,6 +23,11 @@ extern int countSetBits(uint32_t word);
 extern uint32_t unbcd(uint32_t bcd);
 extern int findLowestSetBit(uint64_t value);
 
+extern void fillBitmapTo(std::vector<bool>& bitmap,
+    unsigned& cursor,
+    unsigned terminateAt,
+    const std::vector<bool>& pattern);
+
 template <class K, class V>
 std::map<V, K> reverseMap(const std::map<K, V>& map)
 {

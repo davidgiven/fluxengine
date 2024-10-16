@@ -98,5 +98,5 @@ cxxlibrary(
         "arch/tartu/tartu.h": "./tartu/tartu.h",
         "arch/arch.h": "./arch.h",
     },
-    deps=["+lib"],
+    deps=["lib/core", "lib/data", "lib/config", "lib/encoders", "lib/decoders"],
 )

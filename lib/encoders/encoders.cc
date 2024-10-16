@@ -1,7 +1,6 @@
 #include "lib/core/globals.h"
 #include "lib/config/config.h"
 #include "lib/data/fluxmap.h"
-#include "lib/decoders/decoders.h"
 #include "lib/encoders/encoders.h"
 #include "lib/encoders/encoders.pb.h"
 #include "lib/config/proto.h"
