@@ -87,7 +87,7 @@ jobs:
   build-macos:
     strategy:
       matrix:
-        runs-on: [macos-13, macos-15-arm64]
+        runs-on: [macos-13, macos-latest]
     runs-on: ${{ matrix.runs-on }}
     steps:
     - uses: actions/checkout@v4
@@ -97,8 +97,8 @@ jobs:
 
     - name: make
       run: |
-        gmake
-        mv FluxEngine.pkg FluxEngine-${{ matrix.runs-on }}.pkg
+        gmake -j $(nprocs)
+        mv FluxEngine.pkg FluxEngine-${{ runner.arch }}.pkg
 
     - name: tag
       uses: EndBug/latest-tag@latest
@@ -114,7 +114,7 @@ jobs:
         token: ${{ github.token }}
         tag: dev
         assets: | 
-          FluxEngine-${{ matrix.runs-on }}.pkg
+          FluxEngine-${{ runner.arch }}.pkg
         fail-if-no-assets: false
 
     - name: release
@@ -122,7 +122,7 @@ jobs:
       with:
         name: Development build ${{ env.RELEASE_DATE }}
         files: |
-          FluxEngine-${{ matrix.runs-on }}.pkg
+          FluxEngine-${{ runner.arch }}.pkg
         tag_name: dev
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
