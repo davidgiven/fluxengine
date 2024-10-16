@@ -9,8 +9,7 @@
 #include "lib/config/proto.h"
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/fluxsource/fluxsource.h"
-#include "arch/brother/brother.h"
-#include "arch/ibm/ibm.h"
+#include "arch/arch.h"
 #include "lib/imagereader/imagereader.h"
 #include "fluxengine.h"
 #include <google/protobuf/text_format.h>
@@ -71,14 +70,14 @@ int mainWrite(int argc, const char* argv[])
     auto reader = ImageReader::create(globalConfig());
     std::shared_ptr<Image> image = reader->readMappedImage();
 
-    auto encoder = Encoder::create(globalConfig());
+    auto encoder = Arch::createEncoder(globalConfig());
     auto fluxSink = FluxSink::create(globalConfig());
 
     std::shared_ptr<Decoder> decoder;
     std::shared_ptr<FluxSource> verificationFluxSource;
     if (globalConfig().hasDecoder() && fluxSink->isHardware() && verify)
     {
-        decoder = Decoder::create(globalConfig());
+        decoder = Arch::createDecoder(globalConfig());
         verificationFluxSource =
             FluxSource::create(globalConfig().getVerificationFluxSourceProto());
     }

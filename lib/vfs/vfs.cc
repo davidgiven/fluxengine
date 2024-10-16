@@ -15,6 +15,7 @@
 #include "lib/encoders/encoders.h"
 #include "lib/config/config.pb.h"
 #include "lib/core/utils.h"
+#include "arch/arch.h"
 
 Path::Path(const std::vector<std::string> other):
     std::vector<std::string>(other)
@@ -244,12 +245,12 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystemFromConfig()
         if (globalConfig().hasFluxSource())
         {
             fluxSource = FluxSource::create(globalConfig());
-            decoder = Decoder::create(globalConfig());
+            decoder = Arch::createDecoder(globalConfig());
         }
         if (globalConfig()->flux_sink().type() == FLUXTYPE_DRIVE)
         {
             fluxSink = FluxSink::create(globalConfig());
-            encoder = Encoder::create(globalConfig());
+            encoder = Arch::createEncoder(globalConfig());
         }
         sectorInterface = SectorInterface::createFluxSectorInterface(
             fluxSource, fluxSink, encoder, decoder);

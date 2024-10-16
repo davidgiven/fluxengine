@@ -4,25 +4,6 @@
 #include "lib/config/config.h"
 #include "lib/decoders/decoders.h"
 #include "lib/encoders/encoders.h"
-#include "arch/agat/agat.h"
-#include "arch/aeslanier/aeslanier.h"
-#include "arch/amiga/amiga.h"
-#include "arch/apple2/apple2.h"
-#include "arch/brother/brother.h"
-#include "arch/c64/c64.h"
-#include "arch/f85/f85.h"
-#include "arch/fb100/fb100.h"
-#include "arch/ibm/ibm.h"
-#include "arch/macintosh/macintosh.h"
-#include "arch/micropolis/micropolis.h"
-#include "arch/mx/mx.h"
-#include "arch/northstar/northstar.h"
-#include "arch/rolandd20/rolandd20.h"
-#include "arch/smaky6/smaky6.h"
-#include "arch/tartu/tartu.h"
-#include "arch/tids990/tids990.h"
-#include "arch/victor9k/victor9k.h"
-#include "arch/zilogmcz/zilogmcz.h"
 #include "lib/data/fluxmapreader.h"
 #include "lib/data/flux.h"
 #include "protocol.h"
@@ -33,45 +14,6 @@
 #include "lib/data/layout.h"
 #include <numeric>
 
-std::unique_ptr<Decoder> Decoder::create(Config& config)
-{
-    if (!config.hasDecoder())
-        error("no decoder configured");
-    return create(config->decoder());
-}
-
-std::unique_ptr<Decoder> Decoder::create(const DecoderProto& config)
-{
-    static const std::map<int,
-        std::function<std::unique_ptr<Decoder>(const DecoderProto&)>>
-        decoders = {
-            {DecoderProto::kAgat,       createAgatDecoder       },
-            {DecoderProto::kAeslanier,  createAesLanierDecoder  },
-            {DecoderProto::kAmiga,      createAmigaDecoder      },
-            {DecoderProto::kApple2,     createApple2Decoder     },
-            {DecoderProto::kBrother,    createBrotherDecoder    },
-            {DecoderProto::kC64,        createCommodore64Decoder},
-            {DecoderProto::kF85,        createDurangoF85Decoder },
-            {DecoderProto::kFb100,      createFb100Decoder      },
-            {DecoderProto::kIbm,        createIbmDecoder        },
-            {DecoderProto::kMacintosh,  createMacintoshDecoder  },
-            {DecoderProto::kMicropolis, createMicropolisDecoder },
-            {DecoderProto::kMx,         createMxDecoder         },
-            {DecoderProto::kNorthstar,  createNorthstarDecoder  },
-            {DecoderProto::kRolandd20,  createRolandD20Decoder  },
-            {DecoderProto::kSmaky6,     createSmaky6Decoder     },
-            {DecoderProto::kTartu,      createTartuDecoder      },
-            {DecoderProto::kTids990,    createTids990Decoder    },
-            {DecoderProto::kVictor9K,   createVictor9kDecoder   },
-            {DecoderProto::kZilogmcz,   createZilogMczDecoder   },
-    };
-
-    auto decoder = decoders.find(config.format_case());
-    if (decoder == decoders.end())
-        error("no decoder specified");
-
-    return (decoder->second)(config);
-}
 
 std::shared_ptr<TrackDataFlux> Decoder::decodeToSectors(
     std::shared_ptr<const Fluxmap> fluxmap,
