@@ -68,7 +68,7 @@ cxxprogram(
         "lib/data",
         "lib/vfs",
         "lib/config",
-        "lib/fluxsource+proto_lib",
+        "arch",
         "src/formats",
         "src/gui/drivetypes",
         "+z_lib",

@@ -2,10 +2,9 @@
 #include "lib/config/flags.h"
 #include "lib/data/sector.h"
 #include "lib/imagewriter/imagewriter.h"
-#include "lib/decoders/decoders.h"
 #include "lib/data/image.h"
+#include "lib/data/flux.h"
 #include "lib/core/logger.h"
-#include "arch/northstar/northstar.h"
 #include "lib/imagewriter/imagewriter.pb.h"
 #include <algorithm>
 #include <iostream>

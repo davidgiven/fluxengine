@@ -768,18 +768,3 @@ void rawReadDiskCommand(FluxSource& fluxsource, FluxSink& fluxsink)
 
     log(EndOperationLogMessage{"Raw read complete"});
 }
-
-void fillBitmapTo(std::vector<bool>& bitmap,
-    unsigned& cursor,
-    unsigned terminateAt,
-    const std::vector<bool>& pattern)
-{
-    while (cursor < terminateAt)
-    {
-        for (bool b : pattern)
-        {
-            if (cursor < bitmap.size())
-                bitmap[cursor++] = b;
-        }
-    }
-}

@@ -250,3 +250,17 @@ void warning(const std::string msg)
     log(msg);
 }
 
+void fillBitmapTo(std::vector<bool>& bitmap,
+    unsigned& cursor,
+    unsigned terminateAt,
+    const std::vector<bool>& pattern)
+{
+    while (cursor < terminateAt)
+    {
+        for (bool b : pattern)
+        {
+            if (cursor < bitmap.size())
+                bitmap[cursor++] = b;
+        }
+    }
+}

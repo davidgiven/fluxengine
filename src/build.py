@@ -33,7 +33,6 @@ cxxprogram(
         "+fmt_lib",
         "+lib",
         "+protobuf_lib",
-        "+protobuf_lib",
         "+protocol",
         "+z_lib",
         "dep/adflib",
@@ -46,8 +45,8 @@ cxxprogram(
         "lib/core",
         "lib/data",
         "lib/external",
-        "lib/fluxsource+proto_lib",
         "lib/vfs",
+        "arch",
         "src/formats",
     ],
 )

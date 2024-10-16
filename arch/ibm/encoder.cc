@@ -4,7 +4,6 @@
 #include "lib/encoders/encoders.h"
 #include "ibm.h"
 #include "lib/core/crc.h"
-#include "lib/readerwriter.h"
 #include "lib/data/image.h"
 #include "arch/ibm/ibm.pb.h"
 #include "lib/encoders/encoders.pb.h"

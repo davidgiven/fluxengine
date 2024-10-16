@@ -103,7 +103,8 @@ export(
                     "src/formats",
                 ]
                 + ([".+test_proto_lib"] if n == "options" else [])
-                + (["lib/vfs"] if n in {"cpmfs", "applesingle", "vfs"} else []),
+                + (["lib/vfs"] if n in {"cpmfs", "applesingle", "vfs"} else [])
+                + (["arch"] if n in {"amiga"} else []),
             ),
         )
         for n in tests

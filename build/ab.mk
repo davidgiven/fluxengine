@@ -48,7 +48,7 @@ endif
 EXT ?=
 
 ifeq ($(PROGRESSINFO),)
-rulecount := $(shell $(MAKE) --no-print-directory -q $(OBJ)/build.mk PROGRESSINFO=1 && $(MAKE) -n $(MAKECMDGOALS) PROGRESSINFO=XXXPROGRESSINFOXXX | grep XXXPROGRESSINFOXXX | wc -l)
+rulecount := $(strip $(shell $(MAKE) --no-print-directory -q $(OBJ)/build.mk PROGRESSINFO=1 && $(MAKE) --no-print-directory -n $(MAKECMDGOALS) PROGRESSINFO=XXXPROGRESSINFOXXX | grep XXXPROGRESSINFOXXX | wc -l))
 ruleindex := 1
 PROGRESSINFO = "[$(ruleindex)/$(rulecount)]$(eval ruleindex := $(shell expr $(ruleindex) + 1))"
 endif

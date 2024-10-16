@@ -86,11 +86,6 @@ extern void writeTracksAndVerify(FluxSink& fluxSink,
     const Image& image,
     std::vector<std::shared_ptr<const TrackInfo>>& locations);
 
-extern void fillBitmapTo(std::vector<bool>& bitmap,
-    unsigned& cursor,
-    unsigned terminateAt,
-    const std::vector<bool>& pattern);
-
 extern void writeDiskCommand(const Image& image,
     Encoder& encoder,
     FluxSink& fluxSink,

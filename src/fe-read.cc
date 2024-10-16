@@ -9,6 +9,7 @@
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/imagewriter/imagewriter.h"
+#include "arch/arch.h"
 #include "fluxengine.h"
 #include <google/protobuf/text_format.h>
 #include <fstream>
@@ -66,7 +67,7 @@ int mainRead(int argc, const char* argv[])
         error("you cannot copy flux to a hardware device");
 
     auto fluxSource = FluxSource::create(globalConfig());
-    auto decoder = Decoder::create(globalConfig());
+    auto decoder = Arch::createDecoder(globalConfig());
     auto writer = ImageWriter::create(globalConfig());
 
     readDiskCommand(*fluxSource, *decoder, *writer);

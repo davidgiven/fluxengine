@@ -27,8 +27,8 @@ class Toolchain:
     label = ""
     cfile = ["$(CC) -c -o {outs[0]} {ins[0]} $(CFLAGS) {cflags}"]
     cxxfile = ["$(CXX) -c -o {outs[0]} {ins[0]} $(CFLAGS) {cflags}"]
-    clibrary = ["$(AR) cqs {outs[0]} {ins}"]
-    cxxlibrary = ["$(AR) cqs {outs[0]} {ins}"]
+    clibrary = ["rm -f {outs[0]} && $(AR) cqs {outs[0]} {ins}"]
+    cxxlibrary = ["rm -f {outs[0]} && $(AR) cqs {outs[0]} {ins}"]
     cprogram = [
         "$(CC) -o {outs[0]} $(STARTGROUP) {ins} {ldflags} $(LDFLAGS) $(ENDGROUP)"
     ]
@@ -41,8 +41,8 @@ class HostToolchain:
     label = "HOST "
     cfile = ["$(HOSTCC) -c -o {outs[0]} {ins[0]} $(HOSTCFLAGS) {cflags}"]
     cxxfile = ["$(HOSTCXX) -c -o {outs[0]} {ins[0]} $(HOSTCFLAGS) {cflags}"]
-    clibrary = ["$(HOSTAR) cqs {outs[0]} {ins}"]
-    cxxlibrary = ["$(HOSTAR) cqs {outs[0]} {ins}"]
+    clibrary = ["rm -f {outs[0]} && $(HOSTAR) cqs {outs[0]} {ins}"]
+    cxxlibrary = ["rm -f {outs[0]} && $(HOSTAR) cqs {outs[0]} {ins}"]
     cprogram = [
         "$(HOSTCC) -o {outs[0]} $(HOSTSTARTGROUP) {ins} {ldflags} $(HOSTLDFLAGS) $(HOSTENDGROUP)"
     ]

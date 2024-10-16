@@ -1,11 +1,12 @@
-#include <lib/core/globals.h>
-#include <lib/fluxsource/fluxsource.h>
-#include <lib/fluxsink/fluxsink.h>
-#include <lib/imagereader/imagereader.h>
-#include <lib/imagewriter/imagewriter.h>
-#include <lib/decoders/decoders.h>
-#include <lib/encoders/encoders.h>
-#include <lib/config/config.h>
+#include "lib/core/globals.h"
+#include "lib/fluxsource/fluxsource.h"
+#include "lib/fluxsink/fluxsink.h"
+#include "lib/imagereader/imagereader.h"
+#include "lib/imagewriter/imagewriter.h"
+#include "lib/decoders/decoders.h"
+#include "lib/encoders/encoders.h"
+#include "arch/arch.h"
+#include "lib/config/config.h"
 #include "context.h"
 #include "gui.h"
 
@@ -64,7 +65,7 @@ namespace
         {
             if (!_encoder)
             {
-                _encoder = Encoder::create(globalConfig());
+                _encoder = Arch::createEncoder(globalConfig());
             }
             return _encoder.get();
         }
@@ -73,7 +74,7 @@ namespace
         {
             if (!_decoder)
             {
-                _decoder = Decoder::create(globalConfig());
+                _decoder = Arch::createDecoder(globalConfig());
             }
             return _decoder.get();
         }
