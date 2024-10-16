@@ -27,7 +27,7 @@ jobs:
   build-macos-current:
     strategy:
       matrix:
-        runs-on: [macos-13, macos-15-arm64]
+        runs-on: [macos-13, macos-latest]
     runs-on: ${{ matrix.runs-on }}
     steps:
     - uses: actions/checkout@v4
@@ -42,11 +42,11 @@ jobs:
       run: |
         brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg
     - name: make
-      run: gmake -C fluxengine
+      run: gmake -C fluxengine -j $(nprocs)
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ github.event.repository.name }}.${{ github.sha }}.fluxengine.${{ matrix.runs-on }}.pkg
+        name: ${{ github.event.repository.name }}.${{ github.sha }}.fluxengine.${{ runner.arch }}.pkg
         path: fluxengine/FluxEngine.pkg
 
   build-windows:
