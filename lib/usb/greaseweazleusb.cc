@@ -3,7 +3,7 @@
 #include "lib/data/fluxmap.h"
 #include "lib/core/bytes.h"
 #include "lib/usb/usb.pb.h"
-#include "greaseweazle.h"
+#include "lib/external/greaseweazle.h"
 #include "serial.h"
 #include "usb.h"
 #include <unistd.h>

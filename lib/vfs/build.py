@@ -48,6 +48,7 @@ cxxlibrary(
     deps=[
         "+lib",
         "+fmt_lib",
+        "arch",
         ".+proto_lib",
     ],
 )

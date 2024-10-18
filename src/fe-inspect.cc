@@ -1,7 +1,6 @@
 #include "lib/core/globals.h"
 #include "lib/config/config.h"
 #include "lib/config/flags.h"
-#include "lib/readerwriter.h"
 #include "lib/data/fluxmap.h"
 #include "lib/data/fluxmapreader.h"
 #include "lib/decoders/fluxdecoder.h"

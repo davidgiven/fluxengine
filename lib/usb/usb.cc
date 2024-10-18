@@ -10,8 +10,8 @@
 #include "lib/config/proto.h"
 #include "usbfinder.h"
 #include "lib/core/logger.h"
-#include "applesauce.h"
-#include "greaseweazle.h"
+#include "lib/external/applesauce.h"
+#include "lib/external/greaseweazle.h"
 
 static USB* usb = NULL;
 

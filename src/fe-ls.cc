@@ -3,7 +3,6 @@
 #include "lib/data/fluxmap.h"
 #include "lib/data/sector.h"
 #include "lib/config/proto.h"
-#include "lib/readerwriter.h"
 #include "lib/decoders/decoders.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/imagereader/imagereader.h"

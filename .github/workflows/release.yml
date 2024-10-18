@@ -97,7 +97,7 @@ jobs:
 
     - name: make
       run: |
-        gmake -j $(nprocs)
+        gmake -j2
         mv FluxEngine.pkg FluxEngine-${{ runner.arch }}.pkg
 
     - name: tag

@@ -3,8 +3,8 @@
 #include "usb.h"
 #include "lib/core/bytes.h"
 #include "usbfinder.h"
-#include "applesauce.h"
-#include "greaseweazle.h"
+#include "lib/external/applesauce.h"
+#include "lib/external/greaseweazle.h"
 #include "protocol.h"
 #include "libusbp.hpp"
 
