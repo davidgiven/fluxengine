@@ -144,7 +144,7 @@ def protojava(self, name, srcs: Targets = [], deps: Targets = []):
         cwd=self.cwd,
         ins=protos,
         outs=[f"={self.localname}.srcjar"],
-        deps=deps,
+        deps=srcs + deps,
         commands=[
             "mkdir -p {dir}/srcs",
             "cd {dir} && "
