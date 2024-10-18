@@ -423,7 +423,7 @@ def emit_rule(name, ins, outs, cmds=[], label=None):
         emit(*fouts, "&:" if len(fouts) > 1 else ":", *fins, "\x01", into=lines)
 
         if label:
-            emit("\t$(hide)", "$(ECHO) $(PROGRESSINFO) ", label, into=lines)
+            emit("\t$(hide)", "$(ECHO) $(PROGRESSINFO)", label, into=lines)
         for c in cmds:
             emit("\t$(hide)", c, into=lines)
     else:
