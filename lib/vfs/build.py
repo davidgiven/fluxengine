@@ -46,9 +46,12 @@ cxxlibrary(
         "lib/vfs/vfs.h": "./vfs.h",
     },
     deps=[
-        "+lib",
         "+fmt_lib",
         "arch",
+        "lib/algorithms",
         ".+proto_lib",
+        "dep/hfsutils",
+        "dep/adflib",
+        "dep/fatfs",
     ],
 )

@@ -31,7 +31,6 @@ cxxprogram(
     cflags=["-I."],
     deps=[
         "+fmt_lib",
-        "+lib",
         "+protobuf_lib",
         "+protocol",
         "+z_lib",
@@ -46,6 +45,7 @@ cxxprogram(
         "lib/data",
         "lib/external",
         "lib/vfs",
+        "lib/algorithms",
         "arch",
         "src/formats",
     ],

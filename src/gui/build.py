@@ -63,7 +63,6 @@ cxxprogram(
         "dep/hfsutils",
         "dep/libusbp",
         "extras+icons",
-        "+lib",
         "lib/core",
         "lib/data",
         "lib/vfs",

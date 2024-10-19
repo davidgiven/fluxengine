@@ -19,36 +19,6 @@ hostpackage(name="sqlite3_host_lib", package="sqlite3")
 
 clibrary(name="protocol", hdrs={"protocol.h": "./protocol.h"})
 
-cxxlibrary(
-    name="lib",
-    srcs=[
-        "./lib/readerwriter.cc",
-    ],
-    hdrs={
-        "lib/readerwriter.h": "./lib/readerwriter.h",
-    },
-    deps=[
-        "+fmt_lib",
-        "+protocol",
-        "dep/adflib",
-        "dep/fatfs",
-        "dep/hfsutils",
-        "dep/libusbp",
-        "dep/stb",
-        "src/formats",
-        "lib/core",
-        "lib/config",
-        "lib/data",
-        "lib/external",
-        "lib/fluxsink",
-        "lib/fluxsource",
-        "lib/imagereader",
-        "lib/imagewriter",
-        "lib/decoders",
-        "lib/encoders",
-    ],
-)
-
 corpustests = []
 if not glob("../fluxengine-testdata/data"):
     print("fluxengine-testdata not found; skipping corpus tests")

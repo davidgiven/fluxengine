@@ -54,7 +54,6 @@ export(
                 deps=[
                     "lib/external+fl2_proto_lib",
                     "+fmt_lib",
-                    "+lib",
                     "+protobuf_lib",
                     "+protocol",
                     "+z_lib",
@@ -84,7 +83,6 @@ export(
                 deps=[
                     "lib/external+fl2_proto_lib",
                     "+fmt_lib",
-                    "+lib",
                     "+protobuf_lib",
                     "+protocol",
                     "+z_lib",
@@ -96,6 +94,7 @@ export(
                     "dep/libusbp",
                     "dep/snowhouse",
                     "dep/stb",
+                    "lib/algorithms",
                     "lib/config",
                     "lib/core",
                     "lib/data",
