@@ -1,6 +1,6 @@
 #include "lib/core/globals.h"
 #include "lib/config/proto.h"
-#include "lib/common.pb.h"
+#include "lib/config/common.pb.h"
 #include <regex>
 
 static ConfigProto config = []()

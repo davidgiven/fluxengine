@@ -24,10 +24,10 @@ proto(
         "./victor9k/victor9k.proto",
         "./zilogmcz/zilogmcz.proto",
     ],
-    deps=["lib+common_proto"],
+    deps=["lib/config+common_proto"],
 )
 
-protocc(name="proto_lib", srcs=[".+proto"], deps=["lib+common_proto_lib"])
+protocc(name="proto_lib", srcs=[".+proto"], deps=["lib/config+common_proto_lib"])
 
 cxxlibrary(
     name="arch",

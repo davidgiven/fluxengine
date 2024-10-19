@@ -1,17 +1,22 @@
 from build.c import cxxlibrary
 from build.protobuf import proto, protocc
 
+proto(name="common_proto", srcs=["./common.proto"])
+protocc(
+    name="common_proto_lib", srcs=[".+common_proto"], deps=["+protobuf_lib"]
+)
+
 proto(
     name="drive_proto",
     srcs=["./drive.proto"],
-    deps=["lib+common_proto", "lib/external+fl2_proto", ".+layout_proto"],
+    deps=[".+common_proto", "lib/external+fl2_proto", ".+layout_proto"],
 )
 protocc(
     name="drive_proto_lib",
     srcs=[".+drive_proto"],
     deps=[
         ".+layout_proto_lib",
-        "lib+common_proto_lib",
+        ".+common_proto_lib",
         "lib/external+fl2_proto_lib",
     ],
 )
@@ -19,12 +24,12 @@ protocc(
 proto(
     name="layout_proto",
     srcs=["./layout.proto"],
-    deps=["lib+common_proto", "lib/external+fl2_proto"],
+    deps=[".+common_proto", "lib/external+fl2_proto"],
 )
 protocc(
     name="layout_proto_lib",
     srcs=[".+layout_proto"],
-    deps=["lib+common_proto_lib", "lib/external+fl2_proto_lib"],
+    deps=[".+common_proto_lib", "lib/external+fl2_proto_lib"],
 )
 
 proto(
@@ -33,7 +38,7 @@ proto(
     deps=[
         ".+drive_proto",
         ".+layout_proto",
-        "lib+common_proto",
+        ".+common_proto",
         "lib/decoders+proto",
         "lib/encoders+proto",
         "lib/external+fl2_proto",
@@ -51,6 +56,7 @@ protocc(
     srcs=[".+proto", "arch+proto"],
     deps=[
         ".+drive_proto_lib",
+        ".+common_proto_lib",
         "lib/decoders+proto_lib",
         "lib/encoders+proto_lib",
         "lib/external+fl2_proto_lib",

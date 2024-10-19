@@ -4,7 +4,7 @@
 
 #include <google/protobuf/message.h>
 #include "lib/config/config.pb.h"
-#include "lib/common.pb.h"
+#include "lib/config/common.pb.h"
 
 class ConfigProto;
 class OptionProto;
