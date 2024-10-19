@@ -27,7 +27,9 @@ proto(
     deps=["lib/config+common_proto"],
 )
 
-protocc(name="proto_lib", srcs=[".+proto"], deps=["lib/config+common_proto_lib"])
+protocc(
+    name="proto_lib", srcs=[".+proto"], deps=["lib/config+common_proto_lib"]
+)
 
 cxxlibrary(
     name="arch",

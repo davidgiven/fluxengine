@@ -5,7 +5,11 @@ from build.utils import test
 from scripts.build import protoencode_single
 
 
-proto(name="test_proto", srcs=["./testproto.proto"], deps=["lib/config+common_proto"])
+proto(
+    name="test_proto",
+    srcs=["./testproto.proto"],
+    deps=["lib/config+common_proto"],
+)
 
 protocc(
     name="test_proto_lib", srcs=[".+test_proto"], deps=["lib/config+proto_lib"]

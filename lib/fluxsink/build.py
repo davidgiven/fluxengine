@@ -2,7 +2,9 @@ from build.protobuf import proto, protocc
 from build.c import cxxlibrary
 
 proto(name="proto", srcs=["./fluxsink.proto"], deps=["lib/config+common_proto"])
-protocc(name="proto_lib", srcs=[".+proto"], deps=["lib/config+common_proto_lib"])
+protocc(
+    name="proto_lib", srcs=[".+proto"], deps=["lib/config+common_proto_lib"]
+)
 
 cxxlibrary(
     name="fluxsink",

@@ -10,7 +10,11 @@ proto(
 protocc(
     name="proto_lib",
     srcs=[".+proto"],
-    deps=["lib/config+common_proto_lib", "arch+proto_lib", "lib/fluxsink+proto_lib"],
+    deps=[
+        "lib/config+common_proto_lib",
+        "arch+proto_lib",
+        "lib/fluxsink+proto_lib",
+    ],
 )
 
 cxxlibrary(

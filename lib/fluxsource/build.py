@@ -1,7 +1,9 @@
 from build.protobuf import proto, protocc
 from build.c import cxxlibrary
 
-proto(name="proto", srcs=["./fluxsource.proto"], deps=["lib/config+common_proto"])
+proto(
+    name="proto", srcs=["./fluxsource.proto"], deps=["lib/config+common_proto"]
+)
 
 protocc(
     name="proto_lib",

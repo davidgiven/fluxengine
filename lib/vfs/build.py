@@ -4,7 +4,11 @@ from build.protobuf import proto, protocc
 proto(
     name="proto",
     srcs=["./vfs.proto"],
-    deps=["lib/config+common_proto", "lib/config+layout_proto", "lib/external+fl2_proto"],
+    deps=[
+        "lib/config+common_proto",
+        "lib/config+layout_proto",
+        "lib/external+fl2_proto",
+    ],
 )
 
 protocc(
