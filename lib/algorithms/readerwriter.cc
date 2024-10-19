@@ -2,7 +2,7 @@
 #include "lib/config/config.h"
 #include "lib/config/flags.h"
 #include "lib/data/fluxmap.h"
-#include "lib/readerwriter.h"
+#include "lib/algorithms/readerwriter.h"
 #include "protocol.h"
 #include "lib/usb/usb.h"
 #include "lib/encoders/encoders.h"

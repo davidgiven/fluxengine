@@ -6,7 +6,7 @@
 #include "lib/data/image.h"
 #include "lib/core/logger.h"
 #include "lib/config/config.pb.h"
-#include "lib/layout.pb.h"
+#include "lib/config/layout.pb.h"
 #include "lib/config/proto.h"
 #include "lib/data/layout.h"
 #include <algorithm>

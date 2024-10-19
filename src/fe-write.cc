@@ -1,7 +1,7 @@
 #include "lib/core/globals.h"
 #include "lib/config/config.h"
 #include "lib/config/flags.h"
-#include "lib/readerwriter.h"
+#include "lib/algorithms/readerwriter.h"
 #include "lib/data/fluxmap.h"
 #include "lib/decoders/decoders.h"
 #include "lib/encoders/encoders.h"

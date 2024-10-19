@@ -4,15 +4,15 @@ from build.protobuf import proto, protocc
 proto(
     name="proto",
     srcs=["./vfs.proto"],
-    deps=["lib+common_proto", "lib+layout_proto", "lib/external+fl2_proto"],
+    deps=["lib/config+common_proto", "lib/config+layout_proto", "lib/external+fl2_proto"],
 )
 
 protocc(
     name="proto_lib",
     srcs=[".+proto"],
     deps=[
-        "lib+common_proto_lib",
-        "lib+layout_proto_lib",
+        "lib/config+common_proto_lib",
+        "lib/config+layout_proto_lib",
         "lib/external+fl2_proto_lib",
     ],
 )
@@ -46,9 +46,12 @@ cxxlibrary(
         "lib/vfs/vfs.h": "./vfs.h",
     },
     deps=[
-        "+lib",
         "+fmt_lib",
         "arch",
+        "lib/algorithms",
         ".+proto_lib",
+        "dep/hfsutils",
+        "dep/adflib",
+        "dep/fatfs",
     ],
 )

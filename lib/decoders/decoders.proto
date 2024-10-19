@@ -20,7 +20,7 @@ import "arch/tids990/tids990.proto";
 import "arch/victor9k/victor9k.proto";
 import "arch/zilogmcz/zilogmcz.proto";
 import "lib/fluxsink/fluxsink.proto";
-import "lib/common.proto";
+import "lib/config/common.proto";
 
 //NEXT: 33
 message DecoderProto {

@@ -4,7 +4,7 @@
 #include "lib/data/fluxmap.h"
 #include "lib/data/sector.h"
 #include "lib/config/proto.h"
-#include "lib/readerwriter.h"
+#include "lib/algorithms/readerwriter.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/imagereader/imagereader.h"

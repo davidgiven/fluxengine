@@ -2,7 +2,7 @@
 #include "lib/config/config.h"
 #include "vfs.h"
 #include "lib/config/proto.h"
-#include "lib/layout.pb.h"
+#include "lib/config/layout.pb.h"
 #include "lib/data/layout.h"
 #include "lib/data/image.h"
 #include "lib/data/sector.h"

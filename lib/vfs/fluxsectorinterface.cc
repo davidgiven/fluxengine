@@ -1,7 +1,7 @@
 #include "lib/core/globals.h"
 #include "lib/vfs/sectorinterface.h"
 #include "lib/data/image.h"
-#include "lib/readerwriter.h"
+#include "lib/algorithms/readerwriter.h"
 #include "lib/decoders/decoders.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/data/layout.h"

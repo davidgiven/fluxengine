@@ -32,5 +32,5 @@ protoencode(
 cxxlibrary(
     name="drivetypes",
     srcs=[".+drivetypes_cc", ".+drivetypes_table_cc"],
-    deps=["+lib"],
+    deps=["lib/core", "lib/config"],
 )

@@ -4,12 +4,12 @@ from build.c import cxxlibrary
 proto(
     name="proto",
     srcs=["./imagewriter.proto"],
-    deps=["lib+common_proto", "lib/imagereader+proto"],
+    deps=["lib/config+common_proto", "lib/imagereader+proto"],
 )
 protocc(
     name="proto_lib",
     srcs=[".+proto"],
-    deps=["lib+common_proto_lib", "lib/imagereader+proto_lib"],
+    deps=["lib/config+common_proto_lib", "lib/imagereader+proto_lib"],
 )
 
 cxxlibrary(

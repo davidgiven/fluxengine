@@ -8,9 +8,9 @@ import "lib/fluxsource/fluxsource.proto";
 import "lib/fluxsink/fluxsink.proto";
 import "lib/usb/usb.proto";
 import "lib/vfs/vfs.proto";
-import "lib/drive.proto";
-import "lib/common.proto";
-import "lib/layout.proto";
+import "lib/config/drive.proto";
+import "lib/config/common.proto";
+import "lib/config/layout.proto";
 
 enum SupportStatus
 {

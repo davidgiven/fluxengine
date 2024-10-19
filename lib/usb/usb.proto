@@ -1,6 +1,6 @@
 syntax = "proto2";
 
-import "lib/common.proto";
+import "lib/config/common.proto";
 
 message GreaseweazleProto {
 	enum BusType { /* note that these must match CMD_SET_BUS codes */

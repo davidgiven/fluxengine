@@ -8,7 +8,7 @@
 #include "lib/encoders/encoders.h"
 #include "lib/decoders/decoders.h"
 #include "lib/config/proto.h"
-#include "lib/readerwriter.h"
+#include "lib/algorithms/readerwriter.h"
 #include "gui.h"
 #include "lib/data/layout.h"
 #include "fluxviewerwindow.h"

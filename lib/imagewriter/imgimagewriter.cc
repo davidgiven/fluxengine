@@ -7,7 +7,7 @@
 #include "lib/config/proto.h"
 #include "lib/config/config.pb.h"
 #include "lib/data/layout.h"
-#include "lib/layout.pb.h"
+#include "lib/config/layout.pb.h"
 #include "lib/core/logger.h"
 #include <algorithm>
 #include <iostream>
