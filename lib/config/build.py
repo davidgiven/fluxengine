@@ -2,12 +2,27 @@ from build.c import cxxlibrary
 from build.protobuf import proto, protocc
 
 proto(
+    name="drive_proto",
+    srcs=["./drive.proto"],
+    deps=["lib+common_proto", "lib/external+fl2_proto", "lib+layout_proto"],
+)
+
+protocc(
+    name="drive_proto_lib",
+    srcs=[".+drive_proto"],
+    deps=[
+        "lib+common_proto_lib",
+        "lib/external+fl2_proto_lib",
+        "lib+layout_proto_lib",
+    ],
+)
+proto(
     name="proto",
     srcs=["./config.proto"],
     deps=[
         "lib+common_proto",
         "lib+layout_proto",
-        "lib+drive_proto",
+        ".+drive_proto",
         "lib/external+fl2_proto",
         "lib/fluxsource+proto",
         "lib/fluxsink+proto",
@@ -24,16 +39,16 @@ protocc(
     name="proto_lib",
     srcs=[".+proto", "arch+proto"],
     deps=[
-        "lib/fluxsource+proto_lib",
-        "lib/fluxsink+proto_lib",
-        "lib/vfs+proto_lib",
-        "lib/usb+proto_lib",
-        "lib/encoders+proto_lib",
+        ".+drive_proto_lib",
         "lib/decoders+proto_lib",
+        "lib/encoders+proto_lib",
+        "lib/external+fl2_proto_lib",
+        "lib/fluxsink+proto_lib",
+        "lib/fluxsource+proto_lib",
         "lib/imagereader+proto_lib",
         "lib/imagewriter+proto_lib",
-        "lib/external+fl2_proto_lib",
-        "lib+drive_proto_lib",
+        "lib/usb+proto_lib",
+        "lib/vfs+proto_lib",
     ],
 )
 

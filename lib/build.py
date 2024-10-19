@@ -16,18 +16,3 @@ protocc(
     srcs=[".+layout_proto"],
     deps=[".+common_proto_lib", "lib/external+fl2_proto_lib"],
 )
-
-proto(
-    name="drive_proto",
-    srcs=["./drive.proto"],
-    deps=[".+common_proto", "lib/external+fl2_proto", ".+layout_proto"],
-)
-protocc(
-    name="drive_proto_lib",
-    srcs=[".+drive_proto"],
-    deps=[
-        ".+common_proto_lib",
-        "lib/external+fl2_proto_lib",
-        ".+layout_proto_lib",
-    ],
-)
