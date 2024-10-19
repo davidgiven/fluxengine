@@ -10,7 +10,7 @@ import "lib/usb/usb.proto";
 import "lib/vfs/vfs.proto";
 import "lib/config/drive.proto";
 import "lib/common.proto";
-import "lib/layout.proto";
+import "lib/config/layout.proto";
 
 enum SupportStatus
 {
