@@ -42,9 +42,9 @@ std::unique_ptr<ImageReader> ImageReader::create(const ImageReaderProto& config)
             return ImageReader::createDiskCopyImageReader(config);
 
         case IMAGETYPE_DSK:
-			return ImageReader::createDSKImageReader(config);
+            return ImageReader::createDSKImageReader(config);
 
-		case IMAGETYPE_JV3:
+        case IMAGETYPE_JV3:
             return ImageReader::createJv3ImageReader(config);
 
         case IMAGETYPE_D64:
