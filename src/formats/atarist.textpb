@@ -1,0 +1,213 @@
+shortname: 'Atari ST'
+comment: 'Almost PC compatible'
+read_support_status: UNICORN
+write_support_status: UNICORN
+
+documentation:
+<<<
+Atari ST disks are standard MFM encoded IBM scheme disks without an IAM header.
+Disks are typically formatted 512 bytes per sector with between 9-10 (sometimes
+11!) sectors per track and 80-82 tracks per side.
+
+For some reason, occasionally formatting software will put an extra IDAM record
+with a sector number of 66 on a disk, which can horribly confuse things. The
+Atari profiles below are configured to ignore these.
+
+Be aware that many PC drives (including mine) won't do the 82 track formats. 
+>>>
+
+documentation:
+<<<
+## References
+
+  - [Atari ST Floppy Drive Hardware
+        Information](https://info-coach.fr/atari/hardware/FD-Hard.php) by Jean
+        Louis-Guerin
+
+  - [Atari ST Floppy Drive Software
+        Information](https://info-coach.fr/atari/software/FD-Soft.php) by Jean
+        Louis-Guerin
+>>>
+
+encoder {
+    ibm {
+        trackdata {
+            target_rotational_period_ms: 200
+            target_clock_period_us: 4
+            emit_iam: false
+            gap0: 80
+            gap2: 22
+            gap3: 34
+        }
+    }
+}
+
+decoder {
+	ibm {
+		trackdata {
+			ignore_sector: 66
+		}
+	}
+}
+
+layout {
+	format_type: FORMATTYPE_80TRACK
+}
+
+option_group {
+    comment: "$formats"
+
+    option {
+        name: "360"
+        comment: '360kB 3.5" 80-track 9-sector SSDD'
+
+        config {
+            layout {
+                tracks: 80
+                sides: 1
+                layoutdata {
+                    sector_size: 512
+                    physical {
+						start_sector: 1
+						count: 9
+					}
+                }
+            }
+        }
+    }
+
+    option {
+        name: "370"
+        comment: '370kB 3.5" 82-track 9-sector SSDD'
+
+        config {
+            layout {
+                tracks: 82
+                sides: 1
+                layoutdata {
+                    sector_size: 512
+                    physical {
+						start_sector: 1
+						count: 9
+					}
+                }
+            }
+        }
+    }
+
+    option {
+        name: "400"
+        comment: '400kB 3.5" 80-track 10-sector SSDD'
+
+        config {
+            layout {
+                tracks: 80
+                sides: 1
+                layoutdata {
+                    sector_size: 512
+                    physical {
+						start_sector: 1
+						count: 10
+					}
+                }
+            }
+        }
+    }
+
+    option {
+        name: "410"
+        comment: '410kB 3.5" 82-track 10-sector SSDD'
+
+        config {
+            layout {
+                tracks: 82
+                sides: 1
+                layoutdata {
+                    sector_size: 512
+                    physical {
+						start_sector: 1
+						count: 10
+					}
+                }
+            }
+        }
+    }
+
+    option {
+        name: "720"
+        comment: '720kB 3.5" 80-track 9-sector DSDD'
+		set_by_default: true
+
+        config {
+            layout {
+                tracks: 80
+                sides: 2
+                layoutdata {
+                    sector_size: 512
+                    physical {
+						start_sector: 1
+						count: 9
+					}
+                }
+            }
+        }
+    }
+
+    option {
+        name: "740"
+        comment: '740kB 3.5" 82-track 9-sector DSDD'
+
+        config {
+            layout {
+                tracks: 82
+                sides: 2
+                layoutdata {
+                    sector_size: 512
+                    physical {
+						start_sector: 1
+						count: 9
+					}
+                }
+            }
+        }
+    }
+
+    option {
+        name: "800"
+        comment: '800kB 3.5" 80-track 10-sector DSDD'
+
+        config {
+            layout {
+                tracks: 80
+                sides: 2
+                layoutdata {
+                    sector_size: 512
+                    physical {
+						start_sector: 1
+						count: 10
+					}
+                }
+            }
+        }
+    }
+
+    option {
+        name: "820"
+        comment: '820kB 3.5" 82-track 10-sector DSDD'
+
+        config {
+            layout {
+                tracks: 82
+                sides: 2
+                layoutdata {
+                    sector_size: 512
+                    physical {
+						start_sector: 1
+						count: 10
+					}
+                }
+            }
+        }
+    }
+}
+

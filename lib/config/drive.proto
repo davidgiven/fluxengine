@@ -1,0 +1,51 @@
+syntax = "proto2";
+
+import "lib/config/common.proto";
+import "lib/external/fl2.proto";
+
+// Next: 15
+message DriveProto
+{
+    optional int32 drive = 1
+        [ default = 0, (help) = "which drive to write to (0 or 1)" ];
+    optional IndexMode index_mode = 2
+        [ default = INDEXMODE_DRIVE, (help) = "index pulse source" ];
+    optional int32 hard_sector_count = 3
+        [ default = 0, (help) = "number of hard sectors on disk" ];
+    optional double hard_sector_threshold_ns = 4
+        [ default = 0, (help) = "index pulses longer than this interval are "
+            "considered sector markers; shorter indicates an true index marker" ];
+    optional bool high_density = 5
+        [ default = true, (help) = "set if this is a high density disk" ];
+    optional bool sync_with_index = 6
+        [ default = false, (help) = "start reading at index mark" ];
+    optional double revolutions = 7
+        [ default = 1.2, (help) = "number of revolutions to read" ];
+
+    optional int32 tracks = 8
+        [ default = 81, (help) = "Number of tracks supported by drive" ];
+    optional int32 heads = 9
+        [ default = 2, (help) = "Number of heads supported by drive" ];
+    optional int32 head_bias = 10 [
+        default = 0,
+        (help) = "Bias to apply to the head position (in tracks)"
+    ];
+    optional int32 group_offset = 11 [
+        default = 0,
+        (help) = "When writing groups, erase all tracks except this one in each group"
+    ];
+    optional DriveType drive_type = 12 [ default = DRIVETYPE_UNKNOWN, (help) = "Type of drive" ];
+    optional double rotational_period_ms = 13
+        [ default = 0, (help) = "Rotational period of the drive in milliseconds (0 to autodetect)"];
+
+    enum ErrorBehaviour {
+        NOTHING = 0;
+        JIGGLE = 1;
+        RECALIBRATE = 2;
+    }
+
+    optional ErrorBehaviour error_behaviour = 14
+        [ default = JIGGLE, (help) = "what to do when an error occurs during reads" ];
+}
+
+// vim: ts=4 sw=4 et

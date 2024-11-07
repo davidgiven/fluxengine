@@ -1,0 +1,79 @@
+syntax = "proto2";
+
+import "lib/decoders/decoders.proto";
+import "lib/encoders/encoders.proto";
+import "lib/imagereader/imagereader.proto";
+import "lib/imagewriter/imagewriter.proto";
+import "lib/fluxsource/fluxsource.proto";
+import "lib/fluxsink/fluxsink.proto";
+import "lib/usb/usb.proto";
+import "lib/vfs/vfs.proto";
+import "lib/config/drive.proto";
+import "lib/config/common.proto";
+import "lib/config/layout.proto";
+
+enum SupportStatus
+{
+    UNSUPPORTED = 0;
+    DINOSAUR = 1;
+    UNICORN = 2;
+}
+
+// NEXT_TAG: 27
+message ConfigProto
+{
+    optional string shortname = 1;
+    optional string comment = 2;
+    optional bool is_extension = 3;
+    repeated string documentation = 4;
+    optional SupportStatus read_support_status = 5 [ default = UNSUPPORTED ];
+    optional SupportStatus write_support_status = 6 [ default = UNSUPPORTED ];
+
+    optional LayoutProto layout = 7;
+
+    optional ImageReaderProto image_reader = 8;
+    optional ImageWriterProto image_writer = 9;
+    optional FluxSourceProto flux_source = 10;
+    optional FluxSinkProto flux_sink = 11;
+    optional DriveProto drive = 12;
+
+    optional EncoderProto encoder = 13;
+    optional DecoderProto decoder = 14;
+    optional UsbProto usb = 15;
+
+    optional RangeProto tracks = 16;
+    optional RangeProto heads = 17;
+
+    optional FilesystemProto filesystem = 18;
+
+    repeated OptionProto option = 19;
+    repeated OptionGroupProto option_group = 20;
+}
+
+message OptionPrerequisiteProto
+{
+    optional string key = 1 [ (help) = "path to config value" ];
+    repeated string value = 2 [ (help) = "list of required values" ];
+}
+
+// NEXT_TAG: 8
+message OptionProto
+{
+    optional string name = 1 [ (help) = "option name" ];
+    optional string comment = 2 [ (help) = "help text for option" ];
+    optional string message = 3
+        [ (help) = "message to display when option is in use" ];
+    optional bool set_by_default = 6
+        [ (help) = "this option is applied by default", default = false ];
+    repeated OptionPrerequisiteProto prerequisite = 7
+        [ (help) = "prerequisites for this option" ];
+
+    optional ConfigProto config = 4
+        [ (help) = "option data", (recurse) = false ];
+}
+
+message OptionGroupProto
+{
+    optional string comment = 1 [ (help) = "help text for option group" ];
+    repeated OptionProto option = 2;
+}

@@ -1,5 +1,13 @@
 syntax = "proto2";
 
+import "lib/config/common.proto";
+
 message NorthstarDecoderProto {}
-message NorthstarEncoderProto {}
+
+message NorthstarEncoderProto {
+    optional double clock_period_us = 1
+        [ default = 4.0, (help) = "clock rate on the real device (for FM)" ];
+    optional double rotational_period_ms = 2
+        [ default = 166.0, (help) = "rotational period on the real device" ];
+}
 

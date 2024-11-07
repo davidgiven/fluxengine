@@ -1,0 +1,74 @@
+shortname: 'ICL Model 30'
+comment: 'CP/M; 263kB 35-track DSSD'
+read_support_status: DINOSAUR
+
+documentation:
+<<<
+The ICL Model 30 is a reasonably standard CP/M machine using 35-track single
+density disks and the traditional CP/M 128-byte secotrs --- 30 of them per
+track! Other than that it's another IBM scheme variation.
+>>>
+
+image_writer {
+	filename: "icl30.img"
+	type: IMAGETYPE_IMG
+}
+
+layout {
+	format_type: FORMATTYPE_40TRACK
+	tracks: 35
+	sides: 2
+	layoutdata {
+		sector_size: 128
+		physical {
+			sector: 1
+			sector: 5
+			sector: 9
+			sector: 13
+			sector: 17
+			sector: 21
+			sector: 25
+			sector: 29
+			sector: 3
+			sector: 7
+			sector: 11
+			sector: 15
+			sector: 19
+			sector: 23
+			sector: 27
+			sector: 2
+			sector: 6
+			sector: 10
+			sector: 14
+			sector: 18
+			sector: 22
+			sector: 26
+			sector: 30
+			sector: 4
+			sector: 8
+			sector: 12
+			sector: 16
+			sector: 20
+			sector: 24
+			sector: 28
+		}
+	}
+}
+
+decoder {
+	ibm {}
+}
+
+filesystem {
+	type: CPMFS
+	cpmfs {
+		filesystem_start {
+			track: 1
+			side: 1
+		}
+		block_size: 1024
+		dir_entries: 64
+	}
+}
+
+

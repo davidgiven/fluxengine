@@ -1,16 +1,66 @@
-comment: 'Acorn DFS 100kB/200kB 3.5" or 5.25" 40- or 80-track SS (ro)'
+shortname: 'Acorn DFS'
+comment: 'Acorn Atom, BBC Micro series'
+read_support_status: UNICORN
+
+documentation:
+<<<
+Acorn DFS disks are used by the Acorn Atom and BBC Micro series of computers.
+They are pretty standard FM encoded IBM scheme disks, with 256-sectors and
+0-based sector identifiers. There's nothing particularly special here.
+
+DFS disks are all single-sided, but allow the other side of the disk to be
+used as another volume.
+
+They come in two varieties, 40 track and 80 track. These should both work.
+Some rare disks are both at the same time. FluxEngine can read these but it
+requires a bit of fiddling as they have the same tracks on twice.
+>>>
+
+documentation:
+<<<
+## References
+
+  - [The Acorn DFS disc format](https://beebwiki.mdfs.net/Acorn_DFS_disc_format)
+>>>
+
+image_reader {
+	filename: "acorndfs.img"
+	type: IMAGETYPE_IMG
+}
 
 image_writer {
 	filename: "acorndfs.img"
-	img {
-		trackdata {
-			sector_range {
-				start_sector: 0
-			}
+	type: IMAGETYPE_IMG
+}
+
+layout {
+	sides: 1
+	layoutdata {
+		sector_size: 256
+		physical {
+			start_sector: 0
+			count: 10
 		}
 	}
 }
 
+encoder {
+	ibm {
+		trackdata {
+			target_rotational_period_ms: 166
+			target_clock_period_us: 3.33
+			emit_iam: false
+			use_fm: true
+            gap0: 0x10
+            gap2: 0x09
+            gap3: 0x10
+            idam_byte: 0xf57e
+            dam_byte: 0xf56f
+            gap_fill_byte: 0xffff
+		}
+	}
+}
+			
 decoder {
 	ibm {
 		trackdata {
@@ -19,14 +69,35 @@ decoder {
 	}
 }
 
-cylinders {
-	start: 0
-	end: 79
+filesystem {
+	type: ACORNDFS
 }
 
-heads {
-	start: 0
-	end: 0
+option_group {
+	comment: "$formats"
+
+	option {
+		name: "100"
+		comment: '100kB 40-track SSSD'
+
+		config {
+			layout {
+				format_type: FORMATTYPE_40TRACK
+				tracks: 40
+			}
+		}
+	}
+
+	option {
+		name: "200"
+		comment: '200kB 80-track SSSD'
+		set_by_default: true
+
+		config {
+			layout {
+				format_type: FORMATTYPE_80TRACK
+				tracks: 80
+			}
+		}
+	}
 }
-
-

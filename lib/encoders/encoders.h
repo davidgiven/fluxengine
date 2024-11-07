@@ -1,26 +1,38 @@
 #ifndef ENCODERS_H
 #define ENCODERS_H
 
-class Fluxmap;
 class EncoderProto;
+class Fluxmap;
 class Image;
+class Layout;
 class Sector;
+class TrackInfo;
+class Config;
 
-class AbstractEncoder
+class Encoder
 {
 public:
-    AbstractEncoder(const EncoderProto& config) {}
-	virtual ~AbstractEncoder() {}
+    Encoder(const EncoderProto& config) {}
+    virtual ~Encoder() {}
 
-	static std::unique_ptr<AbstractEncoder> create(const EncoderProto& config);
+    static std::unique_ptr<Encoder> create(Config& config);
 
 public:
-	virtual std::vector<std::shared_ptr<Sector>> collectSectors(
-		int physicalCylinder, int physicalHead, const Image& image) = 0;
+    virtual std::shared_ptr<const Sector> getSector(
+        std::shared_ptr<const TrackInfo>&,
+        const Image& image,
+        unsigned sectorId);
 
-	virtual std::unique_ptr<Fluxmap> encode(
-		int physicalCylinder, int physicalHead, const std::vector<std::shared_ptr<Sector>>& sectors, const Image& image) = 0;
+    virtual std::vector<std::shared_ptr<const Sector>> collectSectors(
+        std::shared_ptr<const TrackInfo>&, const Image& image);
+
+    virtual std::unique_ptr<Fluxmap> encode(
+        std::shared_ptr<const TrackInfo>& trackInfo,
+        const std::vector<std::shared_ptr<const Sector>>& sectors,
+        const Image& image) = 0;
+
+    nanoseconds_t calculatePhysicalClockPeriod(
+        nanoseconds_t targetClockPeriod, nanoseconds_t targetRotationalPeriod);
 };
 
 #endif
-

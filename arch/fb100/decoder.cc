@@ -1,23 +1,24 @@
-#include "globals.h"
-#include "fluxmap.h"
-#include "decoders/fluxmapreader.h"
+#include "lib/core/globals.h"
+#include "lib/data/fluxmap.h"
+#include "lib/data/fluxmapreader.h"
+#include "lib/data/fluxpattern.h"
 #include "protocol.h"
-#include "decoders/decoders.h"
-#include "sector.h"
+#include "lib/decoders/decoders.h"
+#include "lib/data/sector.h"
 #include "fb100.h"
-#include "crc.h"
-#include "bytes.h"
-#include "decoders/rawbits.h"
+#include "lib/core/crc.h"
+#include "lib/core/bytes.h"
+#include "lib/decoders/rawbits.h"
 #include "fmt/format.h"
 #include <string.h>
 #include <algorithm>
 
 const FluxPattern SECTOR_ID_PATTERN(16, 0xabaa);
 
-/* 
+/*
  * Reverse engineered from a dump of the floppy drive's ROM. I have no idea how
  * it works.
- * 
+ *
  * LF8BA:
  *         clra
  *         staa    X00B0
@@ -97,52 +98,46 @@ static uint16_t checksum(const Bytes& bytes)
     return (crchi << 8) | crclo;
 }
 
-class Fb100Decoder : public AbstractDecoder
+class Fb100Decoder : public Decoder
 {
 public:
-	Fb100Decoder(const DecoderProto& config):
-		AbstractDecoder(config)
-	{}
+    Fb100Decoder(const DecoderProto& config): Decoder(config) {}
 
-    RecordType advanceToNextRecord()
-	{
-		const FluxMatcher* matcher = nullptr;
-		_sector->clock = _fmr->seekToPattern(SECTOR_ID_PATTERN, matcher);
-		if (matcher == &SECTOR_ID_PATTERN)
-			return RecordType::SECTOR_RECORD;
-		return RecordType::UNKNOWN_RECORD;
-	}
+    nanoseconds_t advanceToNextRecord() override
+    {
+        return seekToPattern(SECTOR_ID_PATTERN);
+    }
 
-    void decodeSectorRecord()
-	{
-		auto rawbits = readRawBits(FB100_RECORD_SIZE*16);
+    void decodeSectorRecord() override
+    {
+        auto rawbits = readRawBits(FB100_RECORD_SIZE * 16);
 
-		const Bytes bytes = decodeFmMfm(rawbits).slice(0, FB100_RECORD_SIZE);
-		ByteReader br(bytes);
-		br.seek(1);
-		const Bytes id = br.read(FB100_ID_SIZE);
-		uint16_t wantIdCrc = br.read_be16();
-		uint16_t gotIdCrc = checksum(id);
-		const Bytes payload = br.read(FB100_PAYLOAD_SIZE);
-		uint16_t wantPayloadCrc = br.read_be16();
-		uint16_t gotPayloadCrc = checksum(payload);
+        const Bytes bytes = decodeFmMfm(rawbits).slice(0, FB100_RECORD_SIZE);
+        ByteReader br(bytes);
+        br.seek(1);
+        const Bytes id = br.read(FB100_ID_SIZE);
+        uint16_t wantIdCrc = br.read_be16();
+        uint16_t gotIdCrc = checksum(id);
+        const Bytes payload = br.read(FB100_PAYLOAD_SIZE);
+        uint16_t wantPayloadCrc = br.read_be16();
+        uint16_t gotPayloadCrc = checksum(payload);
 
-		if (wantIdCrc != gotIdCrc)
-			return;
+        if (wantIdCrc != gotIdCrc)
+            return;
 
-		uint8_t abssector = id[2];
-		_sector->logicalTrack = abssector >> 1;
-		_sector->logicalSide = 0;
-		_sector->logicalSector = abssector & 1;
-		_sector->data.writer().append(id.slice(5, 12)).append(payload);
+        uint8_t abssector = id[2];
+        _sector->logicalTrack = abssector >> 1;
+        _sector->logicalSide = 0;
+        _sector->logicalSector = abssector & 1;
+        _sector->data.writer().append(id.slice(5, 12)).append(payload);
 
-		_sector->status = (wantPayloadCrc == gotPayloadCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
-	}
+        _sector->status = (wantPayloadCrc == gotPayloadCrc)
+                              ? Sector::OK
+                              : Sector::BAD_CHECKSUM;
+    }
 };
 
-std::unique_ptr<AbstractDecoder> createFb100Decoder(const DecoderProto& config)
+std::unique_ptr<Decoder> createFb100Decoder(const DecoderProto& config)
 {
-	return std::unique_ptr<AbstractDecoder>(new Fb100Decoder(config));
+    return std::unique_ptr<Decoder>(new Fb100Decoder(config));
 }
-
-

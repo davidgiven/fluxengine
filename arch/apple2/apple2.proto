@@ -1,4 +1,22 @@
 syntax = "proto2";
 
-message Apple2DecoderProto {}
+import "lib/config/common.proto";
 
+message Apple2DecoderProto {
+	optional uint32 side_one_track_offset = 1
+		[ default = 0, (help) = "offset to apply to track numbers on side 1" ];
+}
+
+message Apple2EncoderProto
+{
+    /* 245kHz. */
+    optional double clock_period_us = 1
+        [ default = 4, (help) = "clock rate on the real device" ];
+    
+    /* Apple II disk drives spin at 300rpm. */
+    optional double rotational_period_ms = 2
+        [ default = 200.0, (help) = "rotational period on the real device" ];
+
+	optional uint32 side_one_track_offset = 3
+		[ default = 0, (help) = "offset to apply to track numbers on side 1" ];
+}

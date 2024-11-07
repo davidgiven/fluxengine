@@ -1,6 +1,6 @@
 syntax = "proto2";
 
-import "lib/common.proto";
+import "lib/config/common.proto";
 
 message TestProto {
 	message SubMessageProto {
@@ -12,6 +12,7 @@ message TestProto {
 	optional uint64 u64 = 3;
 	optional uint32 u32 = 4;
 	optional double d = 5;
+	optional double f = 11;
 	optional SubMessageProto m = 6;
 	repeated SubMessageProto r = 7;
 

@@ -2,12 +2,14 @@ FluxEngine
 ==========
 
 (If you're reading this on GitHub, the formatting's a bit messed up. [Try the
-version on cowlark.com instead.](http://cowlark.com/fluxengine/)
+version on cowlark.com instead.](http://cowlark.com/fluxengine/))
 
-**Breaking news!** As of 2021-05-21, the command line environment has changed
-_substantially_ (to make it more consistent and flexible, and allow some new
-backend features like multi-format IBM scheme disks, which are popular with
-CP/M). If things don't work the way you expect, please check the documentation.
+**Breaking news!** As of 2024-10-01, the FluxEngine client software works
+(to a point) with [Applesauce](doc/applesauce.md) hardware.
+
+<div style="text-align: center">
+<a href="doc/screenshot.jpg"><img src="doc/screenshot.jpg" style="width:60%" alt="screenshot of the GUI in action"></a>
+</div>
 
 What?
 -----
@@ -30,17 +32,14 @@ Don't believe me? Watch the demo reel!
 </div>
 
 **New!** The FluxEngine client software now works with
-[GreaseWeazle](https://github.com/keirf/Greaseweazle/wiki) hardware. So, if you
-can't find a PSoC5 development kit, or don't want to use the Cypress Windows
-tools for programming it, you can use one of these instead. Very nearly all
-FluxEngine features are available with the GreaseWeazle and it works out-of-the
-box. See the [dedicated GreaseWeazle documentation page](doc/greaseweazle.md)
-for more information.
-
-**Important note.** On 2020-04-02 I changed the bytecode format (and firmware).
-Flux files will need to be upgraded with `fluxengine upgradefluxfile`. The new
-format should be more reliable and use way, way less bandwidth. Sorry for the
-inconvenience.
+[Greaseweazle](https://github.com/keirf/Greaseweazle/wiki) and
+[Applesauce](https://applesaucefdc.com/) hardware. So, if you can't find a PSoC5
+development kit, or don't want to use the Cypress Windows tools for programming
+it, you can use one of these instead. Very nearly all FluxEngine features are
+available with the Greaseweazle and it works out-of-the box; the Applesauce is a
+bit less supported but still works. See the [dedicated Greaseweazle
+documentation page](doc/greaseweazle.md) or the [Applesauce
+page](doc/applesauce.md) for more information.
 
 Where?
 ------
@@ -65,73 +64,85 @@ following friendly articles:
   - [Using a FluxEngine](doc/using.md) ∾ what to do with your new hardware ∾
     flux files and image files ∾ knowing what you're doing
 
-  - [Using GreaseWeazle hardware with the FluxEngine client
-	software](doc/greaseweazle.md) ∾ what works ∾ what doesn't work ∾ where to
-	go for help
+  - [Using Greaseweazle hardware with the FluxEngine client
+    software](doc/greaseweazle.md) ∾ what works ∾ what doesn't work ∾ where to
+    go for help
 
+  - [Configuring for your drive](doc/drives.md) ∾ but I don't have a 80 track
+    drive! ∾ reading and writing 40 track disks ∾ Shugart and Apple II
+
+  - [Direct filesystem access](doc/filesystem.md) ∾ imaging files is a pain
+    ∾ accessing files directly ∾ features and limitation ∾ it works on disk
+    images too, you say?
+    
   - [Troubleshooting dubious disks](doc/problems.md) ∾ it's not an exact
-	science ∾ the sector map ∾ clock detection and the histogram
+    science ∾ the sector map ∾ clock detection and the histogram
 
-  - [Checking your drive](doc/driveresponse.md) ∾ you can't do that with that ∾
-	measuring your drive's ability to work with exotic formats
+  - [Disk densities](doc/driveresponse.md) ∾ what's the difference between an HD
+    and DD disk? ∾ you can't do that with that ∾ measuring your drive's ability to
+    work with exotic formats ∾ I think my drive is broken
 
 Which?
 ------
 
 The current support state is as follows.
 
-Dinosaurs (🦖) have yet to be observed in real life --- I've written the
-decoder based on Kryoflux (or other) dumps I've found. I don't (yet) have
-real, physical disks in my hand to test the capture process.
+Dinosaurs (🦖) have yet to be observed in real life --- I've written the encoder
+and/or decoder based on Kryoflux (or other) dumps I've found. I don't (yet) have
+real, physical disks in my hand to test the capture process, or hardware to
+verify that written disks work.
 
-Unicorns (🦄) are completely real --- this means that I've read actual,
-physical disks with these formats and so know they work (or had reports from
-people who've had it work).
+Unicorns (🦄) are completely real --- this means that I've read actual, physical
+disks with these formats and/or written real, physical disks and then used them
+on real hardware, and so know they work (or had reports from people who've had
+it work).
 
-### Old disk formats
+If a filesystem is listed, this means that FluxEngine natively supports that
+particular filesystem and can read (and sometimes write, support varies) files
+directly from disks, flux files or disk images. Some formats have multiple
+choices because they can store multiple types of file system.
 
-| Format                                    | Read? | Write? | Notes |
-|:------------------------------------------|:-----:|:------:|-------|
-| [IBM PC compatible](doc/disk-ibm.md)      |  🦄   |   🦄   | and compatibles (like the Atari ST) |
-| [Acorn ADFS](doc/disk-acornadfs.md)       |  🦄   |   🦖*  | single- and double- sided           |
-| [Acorn DFS](doc/disk-acorndfs.md)         |  🦄   |   🦖*  |                                     |
-| [Ampro Little Board](doc/disk-ampro.md)   |  🦖   |   🦖*  |                                     |
-| [Apple II DOS 3.3](doc/disk-apple2.md)    |  🦄   |        | doesn't do logical sector remapping |
-| [Amiga](doc/disk-amiga.md)                |  🦄   |   🦄   |                                     |
-| [Commodore 64 1541/1581](doc/disk-c64.md) |  🦄   |   🦄   | and probably the other formats      |
-| [Brother 120kB](doc/disk-brother.md)      |  🦄   |   🦖   |                                     |
-| [Brother 240kB](doc/disk-brother.md)      |  🦄   |   🦄   |                                     |
-| [Brother FB-100](doc/disk-fb100.md)       |  🦖   |        | Tandy Model 100, Husky Hunter, knitting machines |
-| [Macintosh 800kB](doc/disk-macintosh.md)  |  🦄   |   🦄   | and probably the 400kB too          |
-| [NEC PC-98](doc/disk-ibm.md)              |  🦄   |   🦄   | trimode drive not required          |
-| [Sharp X68000](doc/disk-ibm.md)           |  🦄   |   🦄   |                                     |
-| [TRS-80](doc/disk-trs80.md)               |  🦖   |   🦖*  | a minor variation of the IBM scheme |
+<!-- FORMATSSTART -->
+<!-- This section is automatically generated. Do not edit. -->
+
+| Profile | Format | Read? | Write? | Filesystem? |
+|:--------|:-------|:-----:|:------:|:------------|
+| [`acornadfs`](doc/disk-acornadfs.md) | Acorn ADFS: BBC Micro, Archimedes | 🦖 |  |  |
+| [`acorndfs`](doc/disk-acorndfs.md) | Acorn DFS: Acorn Atom, BBC Micro series | 🦄 |  | ACORNDFS  |
+| [`aeslanier`](doc/disk-aeslanier.md) | AES Lanier "No Problem": 616kB 5.25" 77-track SSDD hard sectored | 🦖 |  |  |
+| [`agat`](doc/disk-agat.md) | Agat: 840kB 5.25" 80-track DS | 🦖 | 🦖 |  |
+| [`amiga`](doc/disk-amiga.md) | Amiga: 880kB 3.5" DSDD | 🦄 | 🦄 | AMIGAFFS  |
+| [`ampro`](doc/disk-ampro.md) | Ampro Little Board: CP/M | 🦖 |  | CPMFS  |
+| [`apple2`](doc/disk-apple2.md) | Apple II: Prodos, Appledos, and CP/M | 🦄 | 🦄 | APPLEDOS CPMFS PRODOS  |
+| [`atarist`](doc/disk-atarist.md) | Atari ST: Almost PC compatible | 🦄 | 🦄 |  |
+| [`bk`](doc/disk-bk.md) | BK: 800kB 5.25"/3.5" 80-track 10-sector DSDD | 🦖 | 🦖 |  |
+| [`brother`](doc/disk-brother.md) | Brother word processors: GCR family | 🦄 | 🦄 | BROTHER120 FATFS  |
+| [`commodore`](doc/disk-commodore.md) | Commodore: 1541, 1581, 8050 and variations | 🦄 | 🦄 | CBMFS  |
+| [`eco1`](doc/disk-eco1.md) | VDS Eco1: CP/M; 1210kB 77-track mixed format DSHD | 🦖 |  | CPMFS  |
+| [`epsonpf10`](doc/disk-epsonpf10.md) | Epson PF-10: CP/M; 3.5" 40-track DSDD | 🦖 |  | CPMFS  |
+| [`f85`](doc/disk-f85.md) | Durango F85: 461kB 5.25" 77-track SS | 🦖 |  |  |
+| [`fb100`](doc/disk-fb100.md) | Brother FB-100: 100kB 3.5" 40-track SSSD | 🦖 |  |  |
+| [`hplif`](doc/disk-hplif.md) | Hewlett-Packard LIF: a variety of disk formats used by HP | 🦄 | 🦄 | LIF  |
+| [`ibm`](doc/disk-ibm.md) | IBM PC: Generic PC 3.5"/5.25" disks | 🦄 | 🦄 | FATFS  |
+| [`icl30`](doc/disk-icl30.md) | ICL Model 30: CP/M; 263kB 35-track DSSD | 🦖 |  | CPMFS  |
+| [`mac`](doc/disk-mac.md) | Macintosh: 400kB/800kB 3.5" GCR | 🦄 | 🦄 | MACHFS  |
+| [`micropolis`](doc/disk-micropolis.md) | Micropolis: 100tpi MetaFloppy disks | 🦄 | 🦄 |  |
+| [`ms2000`](doc/disk-ms2000.md) | : MS2000 Microdisk Development System |  |  | MICRODOS  |
+| [`mx`](doc/disk-mx.md) | DVK MX: Soviet-era PDP-11 clone | 🦖 |  |  |
+| [`n88basic`](doc/disk-n88basic.md) | N88-BASIC: PC8800/PC98 5.25" 77-track 26-sector DSHD | 🦄 | 🦄 |  |
+| [`northstar`](doc/disk-northstar.md) | Northstar: 5.25" hard sectored | 🦄 | 🦄 |  |
+| [`psos`](doc/disk-psos.md) | pSOS: 800kB DSDD with PHILE | 🦄 | 🦄 | PHILE  |
+| [`rolandd20`](doc/disk-rolandd20.md) | Roland D20: 3.5" electronic synthesiser disks | 🦄 | 🦖 | ROLAND  |
+| [`rx50`](doc/disk-rx50.md) | Digital RX50: 400kB 5.25" 80-track 10-sector SSDD | 🦖 | 🦖 |  |
+| [`smaky6`](doc/disk-smaky6.md) | Smaky 6: 308kB 5.25" 77-track 16-sector SSDD, hard sectored | 🦖 |  | SMAKY6  |
+| [`tartu`](doc/disk-tartu.md) | Tartu: The Palivere and variations | 🦄 | 🦖 | CPMFS  |
+| [`tids990`](doc/disk-tids990.md) | Texas Instruments DS990: 1126kB 8" DSSD | 🦖 | 🦖 |  |
+| [`tiki`](doc/disk-tiki.md) | Tiki 100: CP/M |  |  | CPMFS  |
+| [`victor9k`](doc/disk-victor9k.md) | Victor 9000 / Sirius One: 1224kB 5.25" DSDD GCR | 🦖 | 🦖 |  |
+| [`zilogmcz`](doc/disk-zilogmcz.md) | Zilog MCZ: 320kB 8" 77-track SSSD hard-sectored | 🦖 |  | ZDOS  |
 {: .datatable }
 
-`*`: these formats are variations of the generic IBM format, and since the
-IBM writer is completely generic, it should be configurable for these
-formats... theoretically. I don't have the hardware to try it.
-
-### Even older disk formats
-
-These formats are for particularly old, weird architectures, even by the
-standards of floppy disks. They've largely been implemented from single flux
-files with no access to physical hardware. Typically the reads were pretty
-bad and I've had to make a number of guesses as to how things work. They do,
-at least, check the CRC so what data's there is probably good.
-
-| Format                                   | Read? | Write? | Notes |
-|:-----------------------------------------|:-----:|:------:|-------|
-| [AES Superplus / No Problem](doc/disk-aeslanier.md) |  🦖   | | hard sectors! |
-| [Durango F85](doc/disk-durangof85.md)    |  🦖   |        | 5.25" |
-| [DVK MX](doc/disk-mx.md)                 |  🦖   |        | Soviet PDP-11 clone |
-| [VDS Eco1](doc/disk-eco1.md)             |  🦖   |        | 8" mixed format |
-| [Micropolis](doc/disk-micropolis.md)     |  🦄   |        | Micropolis 100tpi drives |
-| [Northstar](doc/disk-northstar.md)       |  🦖   |   🦖   | 5.25" hard sectors |
-| [TI DS990 FD1000](doc/disk-tids990.md)   |  🦄   |  🦄    | 8" |
-| [Victor 9000](doc/disk-victor9k.md)      |  🦖   |        | 5.25" GCR encoded |
-| [Zilog MCZ](doc/disk-zilogmcz.md)        |  🦖   |        | 8" _and_ hard sectors |
-{: .datatable }
+<!-- FORMATSEND -->
 
 ### Notes
 
@@ -148,7 +159,7 @@ at least, check the CRC so what data's there is probably good.
     There hasn't been a lot of demand for this yet; if you have a pressing
     need to write weird disks, [please
     ask](https://github.com/davidgiven/fluxengine/issues/new). I haven't
-    implement write support for PC disks because they're boring and I'm lazy,
+    implemented write support for PC disks because they're boring and I'm lazy,
     and also because they vary so much that figuring out how to specify them
     is hard.
 
@@ -202,16 +213,11 @@ There may or may not be anything interesting there.
 License
 -------
 
-Everything here _except the contents of the `dep` directory_ is © 2019 David
-Given and is licensed under the MIT open source license. Please see
+Everything here _except the contents of the `dep` directory_ is © 2022 The
+FluxEngine Authors (mostly me, David Given; see the VCS history for the other
+people) and is licensed under the MIT open source license. Please see
 [COPYING](COPYING) for the full text. The tl;dr is: you can do what you like
 with it provided you don't claim you wrote it.
-
-As an exception, `dep/fmt` contains a copy of [fmt](http://fmtlib.net),
-maintained by Victor Zverovich (`vitaut <https://github.com/vitaut>`) and
-Jonathan Müller (`foonathan <https://github.com/foonathan>`) with
-contributions from many other people. It is licensed under the terms of the
-BSD license. Please see the contents of the directory for the full text.
 
 As an exception, `dep/emu` contains parts of the OpenBSD C library
 code, maintained by Todd Miller and William A. Rowe (and probably others). It is licensed
@@ -230,8 +236,28 @@ text.
 
 As an exception, `dep/snowhouse` contains the snowhouse assertion library,
 taken from https://github.com/banditcpp/snowhouse. It is Boost Standard License
-1.0 licensed. Please see the contents of the directory for the full text.
+1.0 licensed. Please see the contents of the directory for the full text. Note
+that this is only used during the build and no code ends up in the output
+binaries.
 
 As an exception, `dep/libusbp` contains the libusbp library, taken from
 https://github.com/pololu/libusbp. It is MIT licensed. Please see the contents
 of the directory for the full text.
+
+As an exception, `dep/fatfs` contains the fatfs library, taken from
+http://elm-chan.org/fsw/ff/00index_e.html. It is single-clause BSD licensed.
+Please see the contents of the directory for the full text.
+
+As an exception, `dep/adflib` contains the adflib library, written by Laurent
+Clevy et al, taken from https://github.com/lclevy/ADFlib. It is GPL 2.0
+licensed. Please see the contents of the directory for the full text.
+
+As an exception, `dep/hfsutils` contains a partial copy of the hfsutils
+package, written by Robert Leslie et al, taken from
+https://www.mars.org/home/rob/proj/hfs. It is GPL 2.0 licensed. Please see the
+contents of the directory for the full text.
+
+__Important:__ Because of all these exceptions, if you distribute the
+FluxEngine package as a whole, you must comply with the terms of _all_ of the
+licensing terms. This means that __effectively the FluxEngine package is
+distributable under the terms of the GPL 2.0__.

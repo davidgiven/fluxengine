@@ -1,87 +1,96 @@
-PACKAGES = zlib sqlite3 protobuf
+BUILDTYPE ?= host
+export BUILDTYPE
 
-export CFLAGS = \
-	-ffunction-sections -fdata-sections
-export CXXFLAGS = $(CFLAGS) \
-	-x c++ --std=gnu++2a \
-	-Wno-deprecated-enum-enum-conversion \
-	-Wno-deprecated-enum-float-conversion
-export LDFLAGS = -pthread
+ifeq ($(BUILDTYPE),windows)
+	MINGW = i686-w64-mingw32-
+	CC = $(MINGW)gcc
+	CXX = $(MINGW)g++ -std=c++17
+	CFLAGS += -g -O3
+	CXXFLAGS += \
+		-fext-numeric-literals \
+		-Wno-deprecated-enum-float-conversion \
+		-Wno-deprecated-enum-enum-conversion
+	LDFLAGS += -static
+	AR = $(MINGW)ar
+	PKG_CONFIG = $(MINGW)pkg-config -static
+	WINDRES = $(MINGW)windres
+	WX_CONFIG = /usr/i686-w64-mingw32/sys-root/mingw/bin/wx-config-3.0 --static=yes
+	EXT = .exe
+else
+	CC = gcc
+	CXX = g++ -std=c++17
+	CFLAGS = -g -O3
+	LDFLAGS =
+	AR = ar
+	PKG_CONFIG = pkg-config
+endif
 
-export COPTFLAGS = -Os
-export LDOPTFLAGS = -Os
+HOSTCC = gcc
+HOSTCXX = g++ -std=c++17
+HOSTCFLAGS = -g -O3
+HOSTLDFLAGS =
 
-export CDBGFLAGS = -O0 -g
-export LDDBGFLAGS = -O0 -g
+REALOBJ = .obj
+OBJ = $(REALOBJ)/$(BUILDTYPE)
+DESTDIR ?=
+PREFIX ?= /usr/local
+BINDIR ?= $(PREFIX)/bin
+
+# Special Windows settings.
 
 ifeq ($(OS), Windows_NT)
-else
-ifeq ($(shell uname),Darwin)
-else
-	PACKAGES += libudev
-endif
-endif
+	EXT ?= .exe
+	MINGWBIN = /mingw32/bin
+	CCPREFIX = $(MINGWBIN)/
+	PKG_CONFIG = $(MINGWBIN)/pkg-config
+	WX_CONFIG = /usr/bin/sh $(MINGWBIN)/wx-config --static=yes
+	PROTOC = $(MINGWBIN)/protoc
+	WINDRES = windres
+	LDFLAGS += \
+		-static
+	CXXFLAGS += \
+		-fext-numeric-literals \
+		-Wno-deprecated-enum-float-conversion \
+		-Wno-deprecated-enum-enum-conversion
 
-ifeq ($(OS), Windows_NT)
-export PROTOC = /mingw32/bin/protoc
-export CC = /mingw32/bin/gcc
-export CXX = /mingw32/bin/g++
-export AR = /mingw32/bin/ar rc
-export RANLIB = /mingw32/bin/ranlib
-export STRIP = /mingw32/bin/strip
-export CFLAGS += -I/mingw32/include/libusb-1.0 -I/mingw32/include
-export LDFLAGS +=
-export LIBS += -L/mingw32/lib -static -lz -lsqlite3 \
-	-lsetupapi -lwinusb -lole32 -lprotobuf -luuid
-export EXTENSION = .exe
-else
-
-packages-exist = $(shell pkg-config --exists $(PACKAGES) && echo yes)
-ifneq ($(packages-exist),yes)
-$(warning These pkg-config packages are installed: $(shell pkg-config --list-all | sort | awk '{print $$1}'))
-$(error You must have these pkg-config packages installed: $(PACKAGES))
+	# Required to get the gcc run - time libraries on the path.
+	export PATH := $(PATH):$(MINGWBIN)
 endif
 
-export PROTOC = protoc
-export CC = gcc
-export CXX = g++
-export AR = ar rc
-export RANLIB = ranlib
-export STRIP = strip
-export CFLAGS += $(shell pkg-config --cflags $(PACKAGES))
-export LDFLAGS +=
-export LIBS += $(shell pkg-config --libs $(PACKAGES))
-export EXTENSION =
+# Special OSX settings.
 
 ifeq ($(shell uname),Darwin)
-AR = ar rcS
-RANLIB += -c -no_warning_for_no_symbols
-export CC = clang
-export CXX = clang++
-export COBJC = clang
-export LDFLAGS += -framework IOKit -framework CoreFoundation
-export CFLAGS += -Wno-deprecated-declarations
+	LDFLAGS += \
+		-framework IOKit \
+		-framework Foundation 
 endif
 
-endif
-export XXD = xxd
+.PHONY: all
+all: +all README.md
 
-CFLAGS += -Ilib -Idep/fmt -Iarch
+.PHONY: binaries tests
+binaries: all
+tests: all
+	
+README.md: $(OBJ)/scripts/+mkdocindex/mkdocindex$(EXT)
+	@echo $(PROGRESSINFO) MKDOC $@
+	@csplit -s -f$(OBJ)/README. README.md '/<!-- FORMATSSTART -->/' '%<!-- FORMATSEND -->%'
+	@(cat $(OBJ)/README.00 && $< && cat $(OBJ)/README.01) > README.md
 
-export OBJDIR = .obj
+.PHONY: tests
 
-all: .obj/build.ninja
-	@ninja -f .obj/build.ninja -k 0
-	@if command -v cscope > /dev/null; then cscope -bRq; fi
+.PHONY: install install-bin
+install:: all install-bin
 
-clean:
-	@echo CLEAN
-	@rm -rf $(OBJDIR)
+clean::
+	$(hide) rm -rf $(REALOBJ)
 
-.obj/build.ninja: mkninja.sh Makefile
-	@echo MKNINJA $@
-	@mkdir -p $(OBJDIR)
-	@sh $< > $@
+install-bin:
+	@echo "INSTALL"
+	$(hide) install -D -v "$(OBJ)/src+fluxengine/src+fluxengine" "$(DESTDIR)$(BINDIR)/fluxengine"
+	$(hide) install -D -v "$(OBJ)/src/gui+gui/gui+gui" "$(DESTDIR)$(BINDIR)/fluxengine-gui"
+	$(hide) install -D -v "$(OBJ)/tools+brother120tool/tools+brother120tool" "$(DESTDIR)$(BINDIR)/brother120tool"
+	$(hide) install -D -v "$(OBJ)/tools+brother240tool/tools+brother240tool" "$(DESTDIR)$(BINDIR)/brother240tool"
+	$(hide) install -D -v "$(OBJ)/tools+upgrade-flux-file/tools+upgrade-flux-file" "$(DESTDIR)$(BINDIR)/upgrade-flux-file"
 
-compdb:
-	@ninja -f .obj/build.ninja -t compdb > compile_commands.json
+include build/ab.mk

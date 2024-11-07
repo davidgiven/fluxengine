@@ -1,11 +1,37 @@
 syntax = "proto2";
 
-import "lib/common.proto";
+import "lib/config/common.proto";
 
 message MicropolisDecoderProto {
+	enum ChecksumType {
+		AUTO = 0;
+		MICROPOLIS = 1;
+		MZOS = 2;
+	}
+	enum EccType {
+		NONE = 0;
+		VECTOR = 1;
+	}
+
 	optional int32 sector_output_size = 1 [default = 256,
 		(help) = "How much of the raw sector should be saved. Must be 256 or 275"];
+	optional ChecksumType checksum_type = 2 [default = AUTO,
+		(help) = "Checksum type to use: AUTO, MICROPOLIS, MZOS"];
+	optional EccType ecc_type = 3 [default = NONE,
+		(help) = "ECC type to use: NONE, VECTOR"];
 }
 
-message MicropolisEncoderProto {}
+message MicropolisEncoderProto {
+    enum EccType {
+        NONE = 0;
+        VECTOR = 1;
+    }
+
+    optional double clock_period_us = 1
+        [ default = 2.0, (help) = "clock rate on the real device" ];
+    optional double rotational_period_ms = 2
+        [ default = 200.0, (help) = "rotational period on the real device" ];
+    optional EccType ecc_type = 3 [default = NONE,
+        (help) = "ECC type to use for IMG data: NONE, VECTOR"];
+}
 

@@ -1,14 +1,15 @@
 syntax = "proto2";
 
-import "lib/common.proto";
+import "lib/config/common.proto";
 
 message Tids990DecoderProto {}
+
 message Tids990EncoderProto {
-	optional double track_length_ms = 1 [ default = 166,
+	optional double rotational_period_ms = 1 [ default = 166,
 		(help) = "length of a track" ];
 	optional int32 sector_count = 2 [ default = 26,
 		(help) = "number of sectors per track" ];
-	optional double clock_rate_khz = 3 [ default = 500,
+	optional double clock_period_us = 3 [ default = 2,
 		(help) = "clock rate of data to write" ];
 	optional int32 am1_byte = 4 [ default = 0x2244,
 		(help) = "16-bit RAW bit pattern to use for the AM1 ID byte" ];
@@ -20,7 +21,5 @@ message Tids990EncoderProto {
 		(help) = "size of gap 2 (the post-ID gap)" ];
 	optional int32 gap3_bytes = 8 [ default = 51,
 		(help) = "size of gap 3 (the post-data or format gap)" ];
-	optional string sector_skew = 9 [ default = "1mhc72nid83oje94pkfa50lgb6",
-		(help) = "order to emit sectors" ];
 }
 

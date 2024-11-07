@@ -1,77 +1,85 @@
-#include "globals.h"
-#include "flags.h"
-#include "fluxmap.h"
-#include "usb/usb.h"
-#include "fluxsource/fluxsource.h"
+#include "lib/core/globals.h"
+#include "lib/config/config.h"
+#include "lib/config/flags.h"
+#include "lib/data/fluxmap.h"
+#include "lib/core/logger.h"
+#include "lib/config/proto.h"
+#include "lib/usb/usb.h"
+#include "lib/fluxsource/fluxsource.h"
 #include "lib/fluxsource/fluxsource.pb.h"
-#include "fmt/format.h"
 
 class HardwareFluxSource : public FluxSource
 {
-public:
-    HardwareFluxSource(const HardwareFluxSourceProto& config):
-        _config(config)
+private:
+    class HardwareFluxSourceIterator : public FluxSourceIterator
     {
-        int rotationalSpeedMs;
-        int retries = 5;
-        usbSetDrive(_config.drive(), _config.high_density(), _config.index_mode());
-        std::cout << "Measuring rotational speed... " << std::flush;
- 
-        do {
-            _oneRevolution = usbGetRotationalPeriod(_config.hard_sector_count());
-            if (_config.hard_sector_count() != 0)
-                _hardSectorThreshold = _oneRevolution * 3 / (4 * _config.hard_sector_count());
-            else
-                _hardSectorThreshold = 0;
-
-            rotationalSpeedMs = _oneRevolution / 1e6;
-            retries--;
-        } while ((rotationalSpeedMs == 0) && (retries > 0));
-
-        if (rotationalSpeedMs == 0) {
-			Error() << "Failed\nIs a disk in the drive?";
+    public:
+        HardwareFluxSourceIterator(int track, int head):
+            _track(track),
+            _head(head)
+        {
         }
 
-        std::cout << fmt::format("{}ms\n", rotationalSpeedMs);
-    }
+        bool hasNext() const override
+        {
+            return true;
+        }
 
-    ~HardwareFluxSource()
-    {
-    }
+        std::unique_ptr<const Fluxmap> next() override
+        {
+            const auto& drive = globalConfig()->drive();
+
+            usbSetDrive(
+                drive.drive(), drive.high_density(), drive.index_mode());
+            usbSeek(_track);
+
+            Bytes data = usbRead(_head,
+                drive.sync_with_index(),
+                drive.revolutions() * drive.rotational_period_ms() * 1e6,
+                drive.hard_sector_threshold_ns());
+            auto fluxmap = std::make_unique<Fluxmap>();
+            fluxmap->appendBytes(data);
+            return fluxmap;
+        }
+
+    private:
+        int _track;
+        int _head;
+    };
 
 public:
-    std::unique_ptr<Fluxmap> readFlux(int track, int side)
-    {
-        usbSetDrive(_config.drive(), _config.high_density(), _config.index_mode());
-        usbSeek(track);
+    HardwareFluxSource(const HardwareFluxSourceProto& conf): _config(conf) {}
 
-        Bytes data = usbRead(
-            side, _config.sync_with_index(), _config.revolutions() * _oneRevolution, _hardSectorThreshold);
-        auto fluxmap = std::make_unique<Fluxmap>();
-        fluxmap->appendBytes(data);
-        return fluxmap;
+    ~HardwareFluxSource() {}
+
+public:
+    std::unique_ptr<FluxSourceIterator> readFlux(int track, int head) override
+    {
+        return std::make_unique<HardwareFluxSourceIterator>(track, head);
     }
 
-    void recalibrate()
+    void recalibrate() override
     {
         usbRecalibrate();
     }
 
-    bool retryable()
+    void seek(int track) override
+    {
+        usbSeek(track);
+    }
+
+    bool isHardware() override
     {
         return true;
     }
 
 private:
     const HardwareFluxSourceProto& _config;
-    nanoseconds_t _oneRevolution;
-    nanoseconds_t _hardSectorThreshold;
+    bool _measured;
 };
 
-std::unique_ptr<FluxSource> FluxSource::createHardwareFluxSource(const HardwareFluxSourceProto& config)
+std::unique_ptr<FluxSource> FluxSource::createHardwareFluxSource(
+    const HardwareFluxSourceProto& config)
 {
     return std::unique_ptr<FluxSource>(new HardwareFluxSource(config));
 }
-
-
-

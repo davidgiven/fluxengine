@@ -37,7 +37,10 @@ libusbp_error * libusbp_find_device_with_vid_pid(
 
     libusbp_device ** new_list = NULL;
     size_t size = 0;
-    error = libusbp_list_connected_devices(&new_list, &size);
+    if (error == NULL)
+    {
+        error = libusbp_list_connected_devices(&new_list, &size);
+    }
 
     assert(error != NULL || new_list != NULL);
 

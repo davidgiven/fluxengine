@@ -11,34 +11,35 @@
 
 namespace snowhouse
 {
-  template<typename ExpressionType>
-  struct NotExpression : Expression<NotExpression<ExpressionType>>
-  {
-    explicit NotExpression(const ExpressionType& expression)
-        : m_expression(expression)
+    template <typename ExpressionType>
+    struct NotExpression : Expression<NotExpression<ExpressionType>>
     {
-    }
+        explicit NotExpression(const ExpressionType& expression):
+            m_expression(expression)
+        {
+        }
 
-    template<typename ActualType>
-    bool operator()(const ActualType& actual) const
+        template <typename ActualType>
+        bool operator()(const ActualType& actual) const
+        {
+            return !m_expression(actual);
+        }
+
+        ExpressionType m_expression;
+    };
+
+    template <typename ExpressionType>
+    struct Stringizer<NotExpression<ExpressionType>>
     {
-      return !m_expression(actual);
-    }
+        static std::string ToString(
+            const NotExpression<ExpressionType>& expression)
+        {
+            std::ostringstream builder;
+            builder << "not " << snowhouse::Stringize(expression.m_expression);
 
-    ExpressionType m_expression;
-  };
-
-  template<typename ExpressionType>
-  struct Stringizer<NotExpression<ExpressionType>>
-  {
-    static std::string ToString(const NotExpression<ExpressionType>& expression)
-    {
-      std::ostringstream builder;
-      builder << "not " << snowhouse::Stringize(expression.m_expression);
-
-      return builder.str();
-    }
-  };
+            return builder.str();
+        }
+    };
 }
 
 #endif

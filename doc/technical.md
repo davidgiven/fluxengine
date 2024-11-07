@@ -80,13 +80,63 @@ as you need an adapter cable or board, but this will allow you to replicate the
 FluxEngine hardware on a $2 Blue Pill.
 
 I am _not_ planning on replacing the PSoC5 with a Blue Pill, because someone
-already has: [the GreaseWeazle](https://github.com/keirf/Greaseweazle/wiki) is
+already has: [the Greaseweazle](https://github.com/keirf/Greaseweazle/wiki) is
 a completely open source firmware package which will read and write Supercard
 Pro files via a standard Blue Pill or via a prebuilt board. It's supported by
 the FluxEngine client software, and you should, mostly, be able to use
-GreaseWeazle hardware interchangeably with FluxEngine hardware. See the
+Greaseweazle hardware interchangeably with FluxEngine hardware. See the
 [dedicated page](greaseweazle.md) for more information.
 
+
+## Drive interface pinouts
+
+For reference, here are the FDC pinouts:
+
+```ditaa
+:-E -s 0.75
+
+                       +-- GND                       +-- GND
+                       |   (entire column)           |   (entire column)
+                +----+-+--+                   +----+-+--+   
+     DISKCHG ---+ 34 + 33 +        DISKCHG ---+ 34 + 33 +
+                +----+----+                   +----+----+
+       SIDE1 ---+ 32 + 31 +          SIDE1 ---+ 32 + 31 +
+                +----+----+                   +----+----+
+       RDATA ---+ 30 + 29 +          RDATA ---+ 30 + 29 +
+                +----+----+                   +----+----+
+         WPT ---+ 28 + 27 +            WPT ---+ 28 + 27 +
+                +----+----+                   +----+----+
+       TRK00 ---+ 26 + 25 +          TRK00 ---+ 26 + 25 +
+                +----+----+                   +----+----+
+       WGATE ---+ 24 + 23 +          WGATE ---+ 24 + 23 +
+                +----+----+                   +----+----+
+       WDATA ---+ 22 + 21 +          WDATA ---+ 22 + 21 +
+                +----+----+                   +----+----+
+        STEP ---+ 20 + 19 +           STEP ---+ 20 + 19 +
+                +----+----+                   +----+----+
+   DIR/SIDE1 ---+ 18 + 17 +      DIR/SIDE1 ---+ 18 + 17 +
+                +----+----+                   +----+----+
+       MOTEB ---+ 16 + 15 +          MOTEB ---+ 16 + 15 +
+                +----+----+                   +----+----+
+       DRVSA ---+ 14 + 13 +            DS3 ---+ 14 + 13 +
+                +----+----+                   +----+----+
+       DRVSB ---+ 12 + 11 +            DS2 ---+ 12 + 11 +
+                +----+----+                   +----+----+
+       MOTEA ---+ 10 + 9  +            DS1 ---+ 10 + 9  +
+                +----+----+                   +----+----+
+       INDEX ---+ 8  + 7  +          INDEX ---+ 8  + 7  +
+                +----+----+                   +----+----+
+         n/c ---+ 6  + 5  +            DS4 ---+ 6  + 5  +
+                +----+----+                   +----+----+
+         n/c ---+ 4  + 3  +            INU ---+ 4  + 3  +
+                +----+----+                   +----+----+
+       REDWC ---+ 2  + 1  +          REDWC ---+ 2  + 1  +
+                +----+----+                   +----+----+   
+                           
+              PC interface           Shugart interface
+ 
+               Odd numbered pins are always grounded
+```
 
 ### Some useful links
 

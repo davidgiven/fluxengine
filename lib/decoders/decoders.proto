@@ -1,5 +1,6 @@
 syntax = "proto2";
 
+import "arch/agat/agat.proto";
 import "arch/aeslanier/aeslanier.proto";
 import "arch/amiga/amiga.proto";
 import "arch/apple2/apple2.proto";
@@ -12,13 +13,16 @@ import "arch/macintosh/macintosh.proto";
 import "arch/micropolis/micropolis.proto";
 import "arch/mx/mx.proto";
 import "arch/northstar/northstar.proto";
+import "arch/rolandd20/rolandd20.proto";
+import "arch/smaky6/smaky6.proto";
+import "arch/tartu/tartu.proto";
 import "arch/tids990/tids990.proto";
 import "arch/victor9k/victor9k.proto";
 import "arch/zilogmcz/zilogmcz.proto";
 import "lib/fluxsink/fluxsink.proto";
-import "lib/common.proto";
+import "lib/config/common.proto";
 
-//NEXT: 27
+//NEXT: 33
 message DecoderProto {
 	optional double pulse_debounce_threshold = 1 [default = 0.30,
 		(help) = "ignore pulses with intervals shorter than this, in fractions of a clock"];
@@ -32,21 +36,25 @@ message DecoderProto {
 	optional double flux_scale = 27 [default = 1.0];
 
 	oneof format {
-		IbmDecoderProto ibm = 5;
-		BrotherDecoderProto brother = 6;
 		AesLanierDecoderProto aeslanier = 7;
+		AgatDecoderProto agat = 28;
 		AmigaDecoderProto amiga = 8;
+		Apple2DecoderProto apple2 = 13;
+		BrotherDecoderProto brother = 6;
 		Commodore64DecoderProto c64 = 9;
 		F85DecoderProto f85 = 10;
 		Fb100DecoderProto fb100 = 11;
+		IbmDecoderProto ibm = 5;
 		MacintoshDecoderProto macintosh = 12;
-		Apple2DecoderProto apple2 = 13;
 		MicropolisDecoderProto micropolis = 14;
 		MxDecoderProto mx = 15;
+		NorthstarDecoderProto northstar = 24;
+		RolandD20DecoderProto rolandd20 = 31;
+		Smaky6DecoderProto smaky6 = 30;
+		TartuDecoderProto tartu = 32;
 		Tids990DecoderProto tids990 = 16;
 		Victor9kDecoderProto victor9k = 17;
 		ZilogMczDecoderProto zilogmcz = 18;
-		NorthstarDecoderProto northstar = 24;
 	}
 
 	optional FluxSinkProto copy_flux_to = 19
@@ -59,5 +67,7 @@ message DecoderProto {
 		(help) = "how many times to retry each track in the event of a read failure"];
 	optional string write_csv_to = 23
 		[(help) = "if set, write a CSV report of the disk state"];
+	optional bool skip_unnecessary_tracks = 29 [default = true,
+		(help) = "don't read tracks if we already have all necessary sectors"];
 }
 

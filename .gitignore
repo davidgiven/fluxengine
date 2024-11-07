@@ -1,2 +1,10 @@
 .obj
 .project
+/.ninja*
+/brother120tool
+/brother120tool-*
+/brother240tool
+/brother240tool-*
+/fluxengine
+/fluxengine-*
+/upgrade-flux-file

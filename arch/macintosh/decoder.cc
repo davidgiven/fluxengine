@@ -1,33 +1,37 @@
-#include "globals.h"
-#include "fluxmap.h"
-#include "decoders/fluxmapreader.h"
+#include "lib/core/globals.h"
+#include "lib/data/fluxmap.h"
+#include "lib/data/fluxmapreader.h"
+#include "lib/data/fluxpattern.h"
 #include "protocol.h"
-#include "decoders/decoders.h"
-#include "sector.h"
+#include "lib/decoders/decoders.h"
+#include "lib/data/sector.h"
 #include "macintosh.h"
-#include "bytes.h"
+#include "lib/core/bytes.h"
 #include "fmt/format.h"
 #include <string.h>
 #include <algorithm>
 
 const FluxPattern SECTOR_RECORD_PATTERN(24, MAC_SECTOR_RECORD);
 const FluxPattern DATA_RECORD_PATTERN(24, MAC_DATA_RECORD);
-const FluxMatchers ANY_RECORD_PATTERN({ &SECTOR_RECORD_PATTERN, &DATA_RECORD_PATTERN });
+const FluxMatchers ANY_RECORD_PATTERN(
+    {&SECTOR_RECORD_PATTERN, &DATA_RECORD_PATTERN});
 
 static int decode_data_gcr(uint8_t gcr)
 {
     switch (gcr)
     {
-		#define GCR_ENTRY(gcr, data) \
-			case gcr: return data;
-		#include "data_gcr.h"
-		#undef GCR_ENTRY
+#define GCR_ENTRY(gcr, data) \
+    case gcr:                \
+        return data;
+#include "data_gcr.h"
+#undef GCR_ENTRY
     }
     return -1;
 }
 
-/* This is extremely inspired by the MESS implementation, written by Nathan Woods
- * and R. Belmont: https://github.com/mamedev/mame/blob/4263a71e64377db11392c458b580c5ae83556bc7/src/lib/formats/ap_dsk35.cpp
+/* This is extremely inspired by the MESS implementation, written by Nathan
+ * Woods and R. Belmont:
+ * https://github.com/mamedev/mame/blob/4263a71e64377db11392c458b580c5ae83556bc7/src/lib/formats/ap_dsk35.cpp
  */
 static Bytes decode_crazy_data(const Bytes& input, Sector::Status& status)
 {
@@ -41,7 +45,7 @@ static Bytes decode_crazy_data(const Bytes& input, Sector::Status& status)
     uint8_t b2[LOOKUP_LEN + 1];
     uint8_t b3[LOOKUP_LEN + 1];
 
-    for (int i=0; i<=LOOKUP_LEN; i++)
+    for (int i = 0; i <= LOOKUP_LEN; i++)
     {
         uint8_t w4 = br.read_8();
         uint8_t w1 = br.read_8();
@@ -122,97 +126,71 @@ uint8_t decode_side(uint8_t side)
     return !!(side & 0x20);
 }
 
-class MacintoshDecoder : public AbstractDecoder
+class MacintoshDecoder : public Decoder
 {
 public:
-	MacintoshDecoder(const DecoderProto& config):
-		AbstractDecoder(config)
-	{}
+    MacintoshDecoder(const DecoderProto& config): Decoder(config) {}
 
-    RecordType advanceToNextRecord()
-	{
-		const FluxMatcher* matcher = nullptr;
-		_sector->clock = _fmr->seekToPattern(ANY_RECORD_PATTERN, matcher);
-		if (matcher == &SECTOR_RECORD_PATTERN)
-			return SECTOR_RECORD;
-		if (matcher == &DATA_RECORD_PATTERN)
-			return DATA_RECORD;
-		return UNKNOWN_RECORD;
-	}
+    nanoseconds_t advanceToNextRecord() override
+    {
+        return seekToPattern(ANY_RECORD_PATTERN);
+    }
 
-    void decodeSectorRecord()
-	{
-		/* Skip ID (as we know it's a MAC_SECTOR_RECORD). */
-		readRawBits(24);
+    void decodeSectorRecord() override
+    {
+        if (readRaw24() != MAC_SECTOR_RECORD)
+            return;
 
-		/* Read header. */
+        /* Read header. */
 
-		auto header = toBytes(readRawBits(7*8)).slice(0, 7);
-					
-		uint8_t encodedTrack = decode_data_gcr(header[0]);
-		if (encodedTrack != (_sector->physicalCylinder & 0x3f))
-			return;
-					
-		uint8_t encodedSector = decode_data_gcr(header[1]);
-		uint8_t encodedSide = decode_data_gcr(header[2]);
-		uint8_t formatByte = decode_data_gcr(header[3]);
-		uint8_t wantedsum = decode_data_gcr(header[4]);
+        auto header = toBytes(readRawBits(7 * 8)).slice(0, 7);
 
-		if (encodedSector > 11)
-			return;
+        uint8_t encodedTrack = decode_data_gcr(header[0]);
+        if (encodedTrack != (_sector->physicalTrack & 0x3f))
+            return;
 
-		_sector->logicalTrack = _sector->physicalCylinder;
-		_sector->logicalSide = decode_side(encodedSide);
-		_sector->logicalSector = encodedSector;
-		uint8_t gotsum = (encodedTrack ^ encodedSector ^ encodedSide ^ formatByte) & 0x3f;
-		if (wantedsum == gotsum)
-			_sector->status = Sector::DATA_MISSING; /* unintuitive but correct */
-	}
+        uint8_t encodedSector = decode_data_gcr(header[1]);
+        uint8_t encodedSide = decode_data_gcr(header[2]);
+        uint8_t formatByte = decode_data_gcr(header[3]);
+        uint8_t wantedsum = decode_data_gcr(header[4]);
 
-    void decodeDataRecord()
-	{
-		auto id = toBytes(readRawBits(24)).reader().read_be24();
-		if (id != MAC_DATA_RECORD)
-			return;
+        if (encodedSector > 11)
+            return;
 
-		/* Read data. */
+        _sector->logicalTrack = _sector->physicalTrack;
+        _sector->logicalSide = decode_side(encodedSide);
+        _sector->logicalSector = encodedSector;
+        uint8_t gotsum =
+            (encodedTrack ^ encodedSector ^ encodedSide ^ formatByte) & 0x3f;
+        if (wantedsum == gotsum)
+            _sector->status =
+                Sector::DATA_MISSING; /* unintuitive but correct */
+    }
 
-		readRawBits(8); /* skip spare byte */
-		auto inputbuffer = toBytes(readRawBits(MAC_ENCODED_SECTOR_LENGTH*8))
-			.slice(0, MAC_ENCODED_SECTOR_LENGTH);
+    void decodeDataRecord() override
+    {
+        if (readRaw24() != MAC_DATA_RECORD)
+            return;
 
-		for (unsigned i=0; i<inputbuffer.size(); i++)
-			inputbuffer[i] = decode_data_gcr(inputbuffer[i]);
-			
-		_sector->status = Sector::BAD_CHECKSUM;
-		Bytes userData = decode_crazy_data(inputbuffer, _sector->status);
-		_sector->data.clear();
-		_sector->data.writer().append(userData.slice(12, 512)).append(userData.slice(0, 12));
-	}
+        /* Read data. */
 
-	std::set<unsigned> requiredSectors(unsigned cylinder, unsigned head) const
-	{
-		int count;
-		if (cylinder < 16)
-			count = 12;
-		else if (cylinder < 32)
-			count = 11;
-		else if (cylinder < 48)
-			count = 10;
-		else if (cylinder < 64)
-			count = 9;
-		else
-			count = 8;
+        readRawBits(8); /* skip spare byte */
+        auto inputbuffer = toBytes(readRawBits(MAC_ENCODED_SECTOR_LENGTH * 8))
+                               .slice(0, MAC_ENCODED_SECTOR_LENGTH);
 
-		std::set<unsigned> sectors;
-		while (count--)
-			sectors.insert(count);
-		return sectors;
-	}
+        for (unsigned i = 0; i < inputbuffer.size(); i++)
+            inputbuffer[i] = decode_data_gcr(inputbuffer[i]);
+
+        _sector->status = Sector::BAD_CHECKSUM;
+        Bytes userData = decode_crazy_data(inputbuffer, _sector->status);
+        _sector->data.clear();
+        _sector->data.writer()
+            .append(userData.slice(12, 512))
+            .append(userData.slice(0, 12));
+    }
 };
 
-std::unique_ptr<AbstractDecoder> createMacintoshDecoder(const DecoderProto& config)
+std::unique_ptr<Decoder> createMacintoshDecoder(const DecoderProto& config)
 {
-	return std::unique_ptr<AbstractDecoder>(new MacintoshDecoder(config));
+    return std::unique_ptr<Decoder>(new MacintoshDecoder(config));
 }
-

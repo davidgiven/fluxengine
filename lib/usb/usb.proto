@@ -1,27 +1,32 @@
 syntax = "proto2";
 
-import "lib/common.proto";
+import "lib/config/common.proto";
 
-message GreaseWeazleProto {
-	enum BusType {
+message GreaseweazleProto {
+	enum BusType { /* note that these must match CMD_SET_BUS codes */
 		BUSTYPE_INVALID = 0;
 		IBMPC = 1;
 		SHUGART = 2;
+        APPLE2 = 3;
 	};
 
 	optional string port = 1
-		[(help) = "GreaseWeazle serial port to use"];
+		[(help) = "Greaseweazle serial port to use"];
 	optional BusType bus_type = 2
 		[(help) = "which FDD bus type is in use", default = IBMPC];
 }
 
-message UsbProto {
-	oneof device {
-		string serial = 1
-			[(help) = "serial number of FluxEngine or GreaseWeazle device to use"];
-	}
+message ApplesauceProto {
+	optional string port = 1
+		[(help) = "Applesauce serial port to use"];
+	optional bool verbose = 2
+		[(help) = "Enable verbose protocol logging", default = false];
+}
 
-	oneof config {
-		GreaseWeazleProto greaseweazle = 2 [(help) = "GreaseWeazle-specific options"];
-	}
+message UsbProto {
+	optional string serial = 1
+		[(help) = "serial number of FluxEngine or Greaseweazle device to use"];
+
+	optional GreaseweazleProto greaseweazle = 2 [(help) = "Greaseweazle-specific options"];
+	optional ApplesauceProto applesauce = 3 [(help) = "Applesauce-specific options"];
 }

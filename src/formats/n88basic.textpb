@@ -1,71 +1,55 @@
-comment: 'N88-BASIC 5.25"/3.5" 77-track 26-sector DSHD'
+shortname: 'N88-BASIC'
+comment: 'PC8800/PC98 5.25" 77-track 26-sector DSHD'
+read_support_status: UNICORN
+write_support_status: UNICORN
 
-flux_sink {
-	drive {
-		high_density: true
-	}
-}
+documentation:
+<<<
+The N88-BASIC disk format is the one used by the operating system of the same
+name for the Japanese PC8800 and PC98 computers. It is another IBM scheme
+variant, and is very similar to some mixed-format CP/M disk formats, where
+track 0 side 0 uses 128-byte single density sectors and the rest of the disk
+uses 512-byte double density sectors. (The reason for this is that the PC8800
+boot ROM could only read single density data.)
+>>>
 
-flux_source {
-	drive {
-		high_density: true
-	}
+drive {
+	high_density: true
 }
 
 image_reader {
 	filename: "n88basic.img"
-	img {
-		tracks: 77
-		sides: 2
-        trackdata {
-			sector_size: 256
-			sector_range {
-				start_sector: 1
-				sector_count: 26
-			}
-		}
-        trackdata {
-            track: 0
-            side: 0
-			sector_size: 128
-			sector_range {
-				start_sector: 1
-				sector_count: 26
-			}
-		}
-	}
+	type: IMAGETYPE_IMG
 }
 
 image_writer {
 	filename: "n88basic.img"
-	img {
-		tracks: 77
-		sides: 2
-        trackdata {
-			sector_size: 256
-			sector_range {
-				start_sector: 1
-				sector_count: 26
-			}
+	type: IMAGETYPE_IMG
+}
+
+layout {
+	format_type: FORMATTYPE_80TRACK
+	tracks: 77
+	sides: 2
+	layoutdata {
+		sector_size: 256
+		physical {
+			start_sector: 1
+			count: 26
 		}
-        trackdata {
-            track: 0
-            side: 0
-			sector_size: 128
-			sector_range {
-				start_sector: 1
-				sector_count: 26
-			}
-		}
+	}
+	layoutdata {
+		track: 0
+		side: 0
+		sector_size: 128
 	}
 }
 
 encoder {
 	ibm {
         trackdata {
-            sector_size: 256
-			track_length_ms: 167
-			clock_rate_khz: 500
+			target_rotational_period_ms: 167
+			target_clock_period_us: 2
             gap0: 0x36
             gap2: 22
             gap3: 0x36
@@ -73,39 +57,11 @@ encoder {
             idam_byte: 0x5554
             dam_byte: 0x5545
             gap_fill_byte: 0x9254
-			sectors {
-				sector: 1
-				sector: 2
-				sector: 3
-				sector: 4
-				sector: 5
-				sector: 6
-				sector: 7
-				sector: 8
-                sector: 9
-                sector: 10
-                sector: 11
-                sector: 12
-                sector: 13
-                sector: 14
-                sector: 15
-                sector: 16
-                sector: 17
-                sector: 18
-                sector: 19
-                sector: 20
-                sector: 21
-                sector: 22
-                sector: 23
-                sector: 24
-                sector: 25
-                sector: 26
-			}
 		}
         trackdata {
-            sector_size: 128
-			track_length_ms: 167
-			clock_rate_khz: 500
+            track: 0
+            head: 0
+
             use_fm: true
             gap0: 0x10
             gap2: 0x09
@@ -113,29 +69,12 @@ encoder {
             idam_byte: 0xf57e
             dam_byte: 0xf56f
             gap_fill_byte: 0xffff
-            cylinder: 0
-            head: 0
 		}
 	}
 }
 
 decoder {
-	ibm {
-		trackdata {
-			sector_range {
-				min_sector: 1
-				max_sector: 26
-			}
-		}
-	}
+	ibm {}
 }
 
-cylinders {
-	start: 0
-	end: 76
-}
 
-heads {
-	start: 0
-	end: 1
-}

@@ -1,14 +1,28 @@
-comment: 'Acorn ADFS L/D/E/F 640kB/800kB/1600kB 3.5" or 5.25" 80-track DS (ro)'
+shortname: "Acorn ADFS"
+comment: 'BBC Micro, Archimedes'
+read_support_status: DINOSAUR
+
+documentation:
+<<<
+Acorn ADFS disks are used by the 6502-based BBC Micro and ARM-based Archimedes
+series of computers. They are yet another variation on MFM encoded IBM scheme
+disks, although with different sector sizes and with the 0-based sector
+identifiers rather than 1-based sector identifiers. The index hole is ignored
+and sectors are written whereever, requiring FluxEngine to do two revolutions
+to read a disk.
+
+There are various different kinds, which should all work out of the box.
+
+Be aware that Acorn logical block numbering goes all the way up side 0 and
+then all the way up side 1. However, FluxEngine uses traditional disk images
+with alternating sides, with the blocks from track 0 side 0 then track 0 side
+1 then track 1 side 0 etc. Most Acorn emulators will use both formats, but
+they might require nudging as the side order can't be reliably autodetected.
+>>>
 
 image_writer {
 	filename: "acornadfs.img"
-	img {
-		trackdata {
-			sector_range {
-				start_sector: 0
-			}
-		}
-	}
+	type: IMAGETYPE_IMG
 }
 
 decoder {
@@ -19,13 +33,109 @@ decoder {
 	}
 }
 
-cylinders {
-	start: 0
-	end: 79
+option_group {
+	comment: "$formats"
+
+	option {
+		name: "160"
+		comment: '160kB 3.5" or 5.25" 40-track SSDD; S format'
+
+		config {
+			layout {
+				format_type: FORMATTYPE_40TRACK
+				tracks: 40
+				sides: 1
+				layoutdata {
+					sector_size: 256
+					physical {
+						start_sector: 0
+						count: 16
+					}
+				}
+			}
+		}
+	}
+
+	option {
+		name: "320"
+		comment: '320kB 3.5" or 5.25" 80-track SSDD; M format'
+
+		config {
+			layout {
+				format_type: FORMATTYPE_80TRACK
+				tracks: 80
+				sides: 1
+				layoutdata {
+					sector_size: 256
+					physical {
+						start_sector: 0
+						count: 16
+					}
+				}
+			}
+		}
+	}
+
+	option {
+		name: "640"
+		comment: '640kB 3.5" or 5.25" 80-track DSDD; L format'
+
+		config {
+			layout {
+				format_type: FORMATTYPE_80TRACK
+				tracks: 80
+				sides: 2
+				layoutdata {
+					sector_size: 256
+					physical {
+						start_sector: 0
+						count: 16
+					}
+				}
+			}
+		}
+	}
+
+	option {
+		name: "800"
+		comment: '800kB 3.5" 80-track DSDD; D and E formats'
+
+		config {
+			layout {
+				format_type: FORMATTYPE_80TRACK
+				tracks: 80
+				sides: 2
+				layoutdata {
+					sector_size: 1024
+					physical {
+						start_sector: 0
+						count: 5
+					}
+				}
+			}
+		}
+	}
+
+	option {
+		name: "1600"
+		comment: '1600kB 3.5" 80-track DSHD; F formats'
+		set_by_default: true
+
+		config {
+			layout {
+				format_type: FORMATTYPE_80TRACK
+				tracks: 80
+				sides: 2
+				layoutdata {
+					sector_size: 1024
+					physical {
+						start_sector: 0
+						count: 10
+					}
+				}
+			}
+		}
+	}
 }
 
-heads {
-	start: 0
-	end: 1
-}
 

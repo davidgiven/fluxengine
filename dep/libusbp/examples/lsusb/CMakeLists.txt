@@ -1,5 +1,3 @@
-use_cxx11()
-
 add_executable(lsusb lsusb.cpp)
 
 include_directories (

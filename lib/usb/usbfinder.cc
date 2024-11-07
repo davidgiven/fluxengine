@@ -1,11 +1,15 @@
-#include "globals.h"
-#include "flags.h"
+#include "lib/core/globals.h"
+#include "lib/config/flags.h"
 #include "usb.h"
-#include "bytes.h"
-#include "fmt/format.h"
+#include "lib/core/bytes.h"
 #include "usbfinder.h"
-#include "greaseweazle.h"
+#include "lib/external/applesauce.h"
+#include "lib/external/greaseweazle.h"
+#include "protocol.h"
 #include "libusbp.hpp"
+
+static const std::set<uint32_t> VALID_DEVICES = {
+    GREASEWEAZLE_ID, FLUXENGINE_ID, APPLESAUCE_ID};
 
 static const std::string get_serial_number(const libusbp::device& device)
 {
@@ -21,30 +25,61 @@ static const std::string get_serial_number(const libusbp::device& device)
     }
 }
 
-std::vector<std::unique_ptr<CandidateDevice>> findUsbDevices(
-    const std::set<uint32_t>& ids)
+std::vector<std::shared_ptr<CandidateDevice>> findUsbDevices()
 {
-    std::vector<std::unique_ptr<CandidateDevice>> candidates;
-    for (const auto& it : libusbp::list_connected_devices())
+    try
     {
-        auto candidate = std::make_unique<CandidateDevice>();
-        candidate->device = it;
-
-        uint32_t id = (it.get_vendor_id() << 16) | it.get_product_id();
-        if (ids.find(id) != ids.end())
+        std::vector<std::shared_ptr<CandidateDevice>> candidates;
+        for (const auto& it : libusbp::list_connected_devices())
         {
-            candidate->id = id;
-            candidate->serial = get_serial_number(it);
+            auto candidate = std::make_unique<CandidateDevice>();
+            candidate->device = it;
 
-            if (id == GREASEWEAZLE_ID)
+            uint32_t id = (it.get_vendor_id() << 16) | it.get_product_id();
+            if (VALID_DEVICES.find(id) != VALID_DEVICES.end())
             {
-                libusbp::serial_port port(candidate->device);
-                candidate->serialPort = port.get_name();
+                candidate->id = id;
+                candidate->serial = get_serial_number(it);
+
+                if (id == GREASEWEAZLE_ID)
+                    candidate->type = DEVICE_GREASEWEAZLE;
+                else if (id == APPLESAUCE_ID)
+                    candidate->type = DEVICE_APPLESAUCE;
+                else if (id == FLUXENGINE_ID)
+                    candidate->type = DEVICE_FLUXENGINE;
+
+                if ((id == GREASEWEAZLE_ID) || (id == APPLESAUCE_ID))
+                {
+                    libusbp::serial_port port(candidate->device);
+                    candidate->serialPort = port.get_name();
+                }
+
+                candidates.push_back(std::move(candidate));
             }
-
-            candidates.push_back(std::move(candidate));
         }
-    }
 
-    return candidates;
+        return candidates;
+    }
+    catch (const libusbp::error& e)
+    {
+        error("USB error: {}", e.message());
+    }
+}
+
+std::string getDeviceName(DeviceType type)
+{
+    switch (type)
+    {
+        case DEVICE_GREASEWEAZLE:
+            return "Greaseweazle";
+
+        case DEVICE_FLUXENGINE:
+            return "FluxEngine";
+
+        case DEVICE_APPLESAUCE:
+            return "Applesauce";
+
+        default:
+            return "unknown";
+    }
 }

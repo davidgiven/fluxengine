@@ -1,22 +1,308 @@
-comment: 'Apple II 140kB DOS 3.3 5.25" 40 track SSSD (ro)'
+shortname: 'Apple II'
+comment: 'Prodos, Appledos, and CP/M'
+read_support_status: UNICORN
+write_support_status: UNICORN
 
-image_writer {
-	filename: "apple2.img"
-	img {}
-}
+documentation:
+<<<
+Apple II disks are nominally fairly sensible 40-track, single-sided, 256
+bytes-per-sector jobs. However, they come in two varieties: DOS 3.3/ProDOS and
+above, and pre-DOS 3.3. They use different GCR encoding systems, dubbed
+6-and-2 and 5-and-3, and are mutually incompatible (although in some rare
+cases you can mix 6-and-2 and 5-and-3 sectors on the same disk).
+
+The difference is in the drive controller; the 6-and-2 controller is capable
+of a more efficient encoding, and can fit 16 sectors on a track, storing
+140kB on a disk. The 5-and-3 controller can only fit 13, with a mere 114kB.
+
+Both formats use GCR (in different varieties) in a nice, simple grid of
+sectors, unlike the Macintosh. Like the Macintosh, there's a crazy encoding
+scheme applied to the data before it goes down on disk to speed up
+checksumming.
+
+In addition, a lot of the behaviour of the drive was handled in software.
+This means that Apple II disks can do all kinds of weird things, including
+having spiral tracks! Copy protection for the Apple II was even madder than
+on other systems.
+
+FluxEngine can only read well-behaved 6-and-2 disks. It doesn't even try to
+handle the weird stuff.
+
+Apple DOS also applies logical sector remapping on top of the physical sector
+numbering on the disk, and this _varies_ depending on what the disk is for.
+FluxEngine can remap the sectors from physical to logical using modifiers.  If
+you don't specify a remapping modifier, you get the sectors in the order they
+appear on the disk.
+
+If you don't want an image in physical sector order, specify one of the
+filesystem ordering options. These also select the appropriate file system;
+FluxEngine has read-only support for all of these.
+
+In addition, some third-party systems use 80-track double sides drives, with
+the same underlying disk format. The complication here is that the AppleDOS
+filesystem only supports up to 50 tracks, so it needs tweaking to support
+larger disks. It treats the second side of the disk as a completely different
+volume.
+>>>
+
+documentation:
+<<<
+## References
+
+  - [Beneath Apple DOS](https://fabiensanglard.net/fd_proxy/prince_of_persia/Beneath%20Apple%20DOS.pdf)
+
+  - [MAME's ap2_dsk.cpp file](https://github.com/mamedev/mame/blob/4263a71e64377db11392c458b580c5ae83556bc7/src/lib/formats/ap2_dsk.cpp)
+>>>
 
 decoder {
 	apple2 {}
 }
 
-cylinders {
-	start: 0
-	end: 79
-	step: 2
+encoder {
+	apple2 {}
 }
 
-heads {
-	start: 0
-	end: 0
+
+option_group {
+	comment: "$formats"
+
+	option {
+		name: "140"
+		comment: '140kB 5.25" 35-track SS'
+		set_by_default: true
+
+		config {
+			layout {
+				format_type: FORMATTYPE_40TRACK
+				tracks: 35
+				sides: 1
+				layoutdata {
+					sector_size: 256
+					physical {
+						start_sector: 0
+						count: 16
+					}
+				}
+			}
+		}
+	}
+
+	option {
+		name: "640"
+		comment: '640kB 5.25" 80-track DS'
+
+		config {
+			layout {
+				format_type: FORMATTYPE_80TRACK
+				tracks: 80
+				sides: 2
+				order: HCS
+				layoutdata {
+					sector_size: 256
+					physical {
+						start_sector: 0
+						count: 16
+					}
+				}
+			}
+		}
+	}
+}
+
+option {
+	name: "side1"
+	comment: "for AppleDOS file system access, read the volume on side 1 of a disk"
+
+	config {
+		filesystem {
+			appledos {
+				filesystem_offset_sectors: 0x500
+			}
+		}
+	}
+}
+
+option_group {
+	comment: "Filesystem and sector skew"
+
+	option {
+		name: "nofs"
+		comment: "use physical CHS sector order and no file system"
+	}
+
+	option {
+		name: "appledos"
+		comment: "use AppleDOS soft sector skew and file system"
+			
+		config {
+			image_reader {
+				filesystem_sector_order: true
+			}
+			
+			image_writer {
+				filesystem_sector_order: true
+			}
+		
+			filesystem {
+				type: APPLEDOS
+			}
+
+			layout {
+				layoutdata {
+					filesystem {
+						sector:  0
+						sector: 13
+						sector: 11
+						sector:  9
+						sector:  7
+						sector:  5
+						sector:  3
+						sector:  1
+						sector: 14
+						sector: 12
+						sector: 10
+						sector:  8
+						sector:  6
+						sector:  4
+						sector:  2
+						sector: 15
+					}
+				}
+			}
+		}
+	}
+
+	option {
+		name: "prodos"
+		comment: "use ProDOS soft sector skew and filesystem"
+		set_by_default: true
+			
+		config {
+			image_reader {
+				filesystem_sector_order: true
+			}
+			
+			image_writer {
+				filesystem_sector_order: true
+			}
+		
+			filesystem {
+				type: PRODOS
+			}
+
+			layout {
+				layoutdata {
+					filesystem {
+						sector:  0
+						sector:  2
+						sector:  4
+						sector:  6
+						sector:  8
+						sector: 10
+						sector: 12
+						sector: 14
+						sector:  1
+						sector:  3
+						sector:  5
+						sector:  7
+						sector:  9
+						sector: 11
+						sector: 13
+						sector: 15
+					}
+				}
+			}
+		}
+	}
+
+	option {
+		name: "cpm"
+		comment: "use CP/M soft sector skew and filesystem"
+			
+		config {
+			image_reader {
+				filesystem_sector_order: true
+			}
+			
+			image_writer {
+				filesystem_sector_order: true
+			}
+		
+			filesystem {
+				type: CPMFS
+				cpmfs {
+					filesystem_start {
+						track: 3
+					}
+					block_size: 4096
+					dir_entries: 128
+				}
+			}
+
+			decoder {
+				apple2 {
+					side_one_track_offset: 80
+				}
+			}
+
+			encoder {
+				apple2 {
+					side_one_track_offset: 80
+				}
+			}
+
+			layout {
+				layoutdata {
+					# The boot tracks use ProDOS translation.
+
+					track: 0
+					up_to_track: 2
+					filesystem {
+						sector:  0
+						sector:  2
+						sector:  4
+						sector:  6
+						sector:  8
+						sector: 10
+						sector: 12
+						sector: 14
+						sector:  1
+						sector:  3
+						sector:  5
+						sector:  7
+						sector:  9
+						sector: 11
+						sector: 13
+						sector: 15
+					}
+				}
+
+				layoutdata {
+					# The data tracks use their own, special translation.
+
+					track: 3
+					up_to_track: 79
+					filesystem {
+						sector:  0
+						sector:  3
+						sector:  6
+						sector:  9
+						sector: 12
+						sector: 15
+						sector:  2
+						sector:  5
+						sector:  8
+						sector: 11
+						sector: 14
+						sector:  1
+						sector:  4
+						sector:  7
+						sector: 10
+						sector: 13
+					}
+				}
+			}
+		}
+	}
 }
 

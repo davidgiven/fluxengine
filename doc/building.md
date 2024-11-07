@@ -93,6 +93,22 @@ You're now looking at the _top_ of the board.
 row of header sockets allowing you to plug the board directly onto the floppy
 disk drive; for simplicity I'm leaving that as an exercise for the reader.)
 
+### If you want to use a PCB
+
+Alternatively, you can make an actual PCB!
+
+<div style="text-align: center">
+<a href="pcb.png"><img src="pcb.png" style="width:80%" alt="the PCB schematic"></a>
+</div>
+
+This is a passive breakout board designed to take a PSoC5 development board, a
+standard 34-way PC connector, and a 50-way 8" drive connector. It was
+contributed by a user --- thanks!
+
+<a href="FluxEngine_eagle_pcb.zip">Download this to get it</a>. This package
+contains the layout in Eagle format, a printable PDF of the PCB layout, and
+gerbers suitable for sending off for manufacture.
+
 ### Grounding
 
 You _also_ need to solder a wire between a handy GND pin on the board and
@@ -185,22 +201,37 @@ generic libusb stuff and should build and run on Windows, Linux and OSX as
 well, although on Windows it'll need MSYS2 and mingw32. You'll need to
 install some support packages.
 
-  - For Linux (this is Ubuntu, but this should apply to Debian too):
-	`ninja-build`, `libusb-1.0-0-dev`, `libsqlite3-dev`, `zlib1g-dev`,
-	`libudev-dev`.
-  - For OSX with Homebrew: `ninja`, `libusb`, `pkg-config`, `sqlite`,
-    `protobuf`.
-  - For Windows with MSYS2: `make`, `ninja`, `mingw-w64-i686-libusb`,
+  - For Linux with Ubuntu/Debian:
+	`libusb-1.0-0-dev`, `libsqlite3-dev`, `zlib1g-dev`,
+	`libudev-dev`, `protobuf-compiler`, `libwxgtk3.0-gtk3-dev`,
+	`libfmt-dev`, `python3`.
+  - For Linux with Fedora/Red Hat:
+    `git`, `make`, `gcc`, `gcc-c++`, `xxd`, `protobuf-compiler`,
+    `protobuf-devel`, `fmt-devel`, `systemd-devel`, `wxGTK3-devel`,
+    `libsqlite3x-devel`
+  - For OSX with Homebrew: `libusb`, `pkg-config`, `sqlite`,
+    `protobuf`, `truncate`, `wxwidgets`, `fmt`.
+  - For Windows with MSYS2: `make`, `mingw-w64-i686-libusb`,
 	`mingw-w64-i686-protobuf`, `mingw-w64-i686-sqlite3`, `mingw-w64-i686-zlib`,
-	`mingw-w64-i686-gcc`.
+	`mingw-w64-i686-gcc`, `vim`, `diffutils`, `mingw-w64-i686-wxWidgets`,
+	`mingw-w64-i686-fmt`, `mingw-w64-i686-pkg-config`, `mingw-w64-i686-python`.
 
 These lists are not necessarily exhaustive --- please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new) if I've missed
 anything.
 
-All systems build by just doing `make`. You should end up with a single
-executable in the current directory, called `fluxengine`. It has minimal
-dependencies and you should be able to put it anywhere.
+Windows and Linux (and other Unixes) build by just doing `make`. OSX builds by
+doing `gmake` (we're using a feature which the elderly default make in OSX
+doesn't have). Remember to add an appropriate `-j` option for a parallel build.
+You should end up with some executables in the current directory, one of which
+is called `fluxengine` or `fluxengine.exe` depending on your platform. It has
+minimal dependencies and you should be able to put it anywhere. The other
+binaries may also be of interest.
+
+Potential issues:
+
+  - Complaints about a missing `libudev` on Windows? Make sure you're using the
+  mingw Python rather than the msys Python.
 
 If it doesn't build, please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new).
@@ -231,7 +262,7 @@ You should now have a working board, so it's time to test it.
      have a single 3.5" connector, after the twist.)
      
      If you have **two** drives, plug them into both connectors. FluxEngine,
-     sadly, non-standard disk numbering (there are reasons). Drive 0 is the
+     sadly, uses non-standard disk numbering (there are reasons). Drive 0 is the
      one nearest the motherboard; that is, before the twist. Drive 1 is the
      one at the end of the cable; that is, after the twist. Drive 0 is the
      default. You can tell the client to select drive 1 by using `-s :d=1`.

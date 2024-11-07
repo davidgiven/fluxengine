@@ -1,0 +1,160 @@
+syntax = "proto2";
+
+import "lib/config/common.proto";
+import "lib/config/layout.proto";
+
+message AcornDfsProto
+{
+    enum Flavour
+    {
+        UNDEFINED = 0;
+        ACORN_DFS = 1;
+    }
+
+    optional Flavour flavour = 1
+        [ default = ACORN_DFS, (help) = "which flavour of DFS to implement" ];
+}
+
+message Brother120FsProto {}
+
+message FatFsProto {
+	optional uint32 cluster_size = 1
+		[ (help) = "cluster size (for new filesystems); 0 to select automatically",
+	      default = 0 ];
+	optional uint32 root_directory_entries = 2
+		[ (help) = "number of entries in the root directory (for new filesystems); 0 to select automatically",
+		  default = 0 ];
+}
+
+message CpmFsProto
+{
+    message Location
+    {
+        optional uint32 track = 1 [ (help) = "track number" ];
+        optional uint32 side = 2 [ (help) = "side number" ];
+        optional uint32 sector = 3 [ (help) = "sector ID" ];
+    }
+
+    message Padding
+    {
+        optional uint32 amount = 1
+            [ (help) = "number of sectors of padding to insert" ];
+        optional uint32 every = 2
+            [ (help) = "insert padding after this many sectors" ];
+    }
+
+    optional Location filesystem_start = 1
+        [ (help) = "position of the start of the filesystem" ];
+    optional int32 block_size = 2 [ (help) = "allocation block size" ];
+    optional int32 dir_entries = 3
+        [ (help) = "number of entries in the directory" ];
+    optional Padding padding = 4
+        [ (help) = "wasted sectors not considered part of the filesystem" ];
+}
+
+message AmigaFfsProto {}
+
+message MacHfsProto {}
+
+message CbmfsProto
+{
+    optional uint32 directory_track = 1 [
+        default = 17,
+        (help) = "which track the directory is on (zero-based numbering)"
+    ];
+}
+
+message ProdosProto {}
+
+message AppledosProto
+{
+    optional uint32 filesystem_offset_sectors = 1 [
+        default = 0,
+        (help) = "offset the entire offset up the disk this many sectors"
+    ];
+}
+
+message Smaky6FsProto {}
+
+message PhileProto
+{
+    optional uint32 block_size = 1
+        [ default = 1024, (help) = "Phile filesystem block size" ];
+}
+
+message LifProto
+{
+    optional uint32 block_size = 1
+        [ default = 256, (help) = "LIF filesystem block size" ];
+}
+
+message MicrodosProto {}
+
+// NEXT_TAG: 16
+message ZDosProto
+{
+    message Location
+    {
+        optional uint32 track = 1 [ (help) = "track number" ];
+        optional uint32 sector = 3 [ (help) = "sector ID" ];
+    }
+
+    optional Location filesystem_start = 1
+        [ (help) = "position of the filesystem superblock" ];
+}
+
+message RolandFsProto
+{
+    optional uint32 directory_track = 1
+        [ (help) = "position of the directory", default = 39 ];
+    optional uint32 block_size = 2
+        [ (help) = "filesystem block size", default = 3072 ];
+    optional uint32 directory_entries = 3
+        [ (help) = "number of directory entries", default = 79 ];
+}
+
+// NEXT_TAG: 18
+message FilesystemProto
+{
+    enum FilesystemType
+    {
+        NOT_SET = 0;
+        ACORNDFS = 1;
+        BROTHER120 = 2;
+        FATFS = 3;
+        CPMFS = 4;
+        AMIGAFFS = 5;
+        MACHFS = 6;
+        CBMFS = 7;
+        PRODOS = 8;
+        SMAKY6 = 9;
+        APPLEDOS = 10;
+        PHILE = 11;
+        LIF = 12;
+        MICRODOS = 13;
+        ZDOS = 14;
+        ROLAND = 15;
+    }
+
+    optional FilesystemType type = 10
+        [ default = NOT_SET, (help) = "filesystem type" ];
+
+    optional AcornDfsProto acorndfs = 1;
+    optional Brother120FsProto brother120 = 2;
+    optional FatFsProto fatfs = 3;
+    optional CpmFsProto cpmfs = 4;
+    optional AmigaFfsProto amigaffs = 5;
+    optional MacHfsProto machfs = 6;
+    optional CbmfsProto cbmfs = 7;
+    optional ProdosProto prodos = 8;
+    optional AppledosProto appledos = 12;
+    optional Smaky6FsProto smaky6 = 11;
+    optional PhileProto phile = 13;
+    optional LifProto lif = 14;
+    optional MicrodosProto microdos = 15;
+    optional ZDosProto zdos = 16;
+    optional RolandFsProto roland = 17;
+
+    optional SectorListProto sector_order = 9
+        [ (help) = "specify the filesystem order of sectors" ];
+}

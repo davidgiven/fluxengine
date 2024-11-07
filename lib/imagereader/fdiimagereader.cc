@@ -1,11 +1,12 @@
-#include "globals.h"
-#include "flags.h"
-#include "sector.h"
-#include "imagereader/imagereader.h"
-#include "image.h"
-#include "proto.h"
-#include "lib/config.pb.h"
-#include "fmt/format.h"
+#include "lib/core/globals.h"
+#include "lib/config/config.h"
+#include "lib/config/flags.h"
+#include "lib/data/sector.h"
+#include "lib/imagereader/imagereader.h"
+#include "lib/data/image.h"
+#include "lib/config/proto.h"
+#include "lib/core/logger.h"
+#include "lib/config/config.pb.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -16,24 +17,23 @@
 class FdiImageReader : public ImageReader
 {
 public:
-	FdiImageReader(const ImageReaderProto& config):
-		ImageReader(config)
-	{}
+    FdiImageReader(const ImageReaderProto& config): ImageReader(config) {}
 
-	std::unique_ptr<Image> readImage()
-	{
-        std::ifstream inputFile(_config.filename(), std::ios::in | std::ios::binary);
+    std::unique_ptr<Image> readImage() override
+    {
+        std::ifstream inputFile(
+            _config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
-            Error() << "cannot open input file";
+            error("cannot open input file");
 
         Bytes header(32);
-        inputFile.read((char*) header.begin(), header.size());
+        inputFile.read((char*)header.begin(), header.size());
         ByteReader headerReader(header);
         if (headerReader.seek(0).read_le32() != 0)
-            Error() << "FDI: could not find FDI header, is this a FDI file?";
+            error("FDI: could not find FDI header, is this a FDI file?");
 
-        // we currently don't use fddType but it could be used to automatically select
-        // profile parameters in the future
+        // we currently don't use fddType but it could be used to automatically
+        // select profile parameters in the future
         //
         int fddType = headerReader.seek(4).read_le32();
         int headerSize = headerReader.seek(0x08).read_le32();
@@ -45,12 +45,11 @@ public:
         inputFile.seekg(headerSize);
 
         std::unique_ptr<Image> image(new Image);
-		int trackCount = 0;
+        int trackCount = 0;
         for (int track = 0; track < tracks; track++)
         {
-			if (inputFile.eof())
-				break;
-			int physicalCylinder = track;
+            if (inputFile.eof())
+                break;
 
             for (int side = 0; side < sides; side++)
             {
@@ -61,77 +60,71 @@ public:
                 for (int sectorId : sectors)
                 {
                     Bytes data(sectorSize);
-                    inputFile.read((char*) data.begin(), data.size());
+                    inputFile.read((char*)data.begin(), data.size());
 
-					const auto& sector = image->put(physicalCylinder, side, sectorId);
+                    const auto& sector = image->put(track, side, sectorId);
                     sector->status = Sector::OK;
-                    sector->logicalTrack = track;
-					sector->physicalCylinder = physicalCylinder;
-                    sector->logicalSide = sector->physicalHead = side;
-                    sector->logicalSector = sectorId;
                     sector->data = data;
                 }
             }
 
-			trackCount++;
+            trackCount++;
         }
 
-        if (config.encoder().format_case() == EncoderProto::FormatCase::FORMAT_NOT_SET)
+        auto layout = _extraConfig.mutable_layout();
+        if (globalConfig()->encoder().format_case() ==
+            EncoderProto::FormatCase::FORMAT_NOT_SET)
         {
-            auto ibm = config.mutable_encoder()->mutable_ibm();
+            auto ibm = _extraConfig.mutable_encoder()->mutable_ibm();
             auto trackdata = ibm->add_trackdata();
-            trackdata->set_clock_rate_khz(500);
-            auto sectors = trackdata->mutable_sectors();
-            switch (fddType) {
+            trackdata->set_target_clock_period_us(2);
+
+            auto layoutdata = layout->add_layoutdata();
+            auto physical = layoutdata->mutable_physical();
+            switch (fddType)
+            {
                 case 0x90:
-                    std::cout << "FDI: automatically setting format to 1.2MB (1024 byte sectors)\n";
-                    config.mutable_cylinders()->set_end(76);
-                    trackdata->set_track_length_ms(167);
-                    trackdata->set_sector_size(1024);
+                    log("FDI: automatically setting format to 1.2MB (1024 byte "
+                        "sectors)");
+                    trackdata->set_target_rotational_period_ms(167);
+                    layoutdata->set_sector_size(1024);
                     for (int i = 0; i < 9; i++)
-                        sectors->add_sector(i);
+                        physical->add_sector(i);
                     break;
+
                 case 0x30:
-                    std::cout << "FDI: automatically setting format to 1.44MB\n";
-                    trackdata->set_track_length_ms(200);
-                    trackdata->set_sector_size(512);
+                    log("FDI: automatically setting format to 1.44MB");
+                    trackdata->set_target_rotational_period_ms(200);
+                    layoutdata->set_sector_size(512);
                     for (int i = 0; i < 18; i++)
-                        sectors->add_sector(i);
+                        physical->add_sector(i);
                     break;
+
                 default:
-                    Error() << fmt::format("FDI: unknown fdd type 0x%02x, could not determine write profile automatically", fddType);
+                    error(
+                        "FDI: unknown fdd type 0x{:2x}, could not determine "
+                        "write profile automatically",
+                        fddType);
                     break;
             }
         }
 
-		image->calculateSize();
-		const Geometry& geometry = image->getGeometry();
-        std::cout << fmt::format("FDI: read {} tracks, {} sides, {} kB total\n",
-                        geometry.numTracks, geometry.numSides,
-						((int)inputFile.tellg() - headerSize) / 1024);
+        image->calculateSize();
+        const Geometry& geometry = image->getGeometry();
+        log("FDI: read {} tracks, {} sides, {} kB total",
+            geometry.numTracks,
+            geometry.numSides,
+            ((int)inputFile.tellg() - headerSize) / 1024);
 
-		if (!config.has_heads())
-		{
-			auto* heads = config.mutable_heads();
-			heads->set_start(0);
-			heads->set_end(geometry.numSides - 1);
-		}
+        layout->set_tracks(geometry.numTracks);
+        layout->set_sides(geometry.numSides);
 
-		if (!config.has_cylinders())
-		{
-			auto* cylinders = config.mutable_cylinders();
-			cylinders->set_start(0);
-			cylinders->set_end(geometry.numTracks - 1);
-		}
-		
         return image;
-	}
-
+    }
 };
 
 std::unique_ptr<ImageReader> ImageReader::createFdiImageReader(
-	const ImageReaderProto& config)
+    const ImageReaderProto& config)
 {
     return std::unique_ptr<ImageReader>(new FdiImageReader(config));
 }
-

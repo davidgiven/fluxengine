@@ -1,23 +1,79 @@
-comment: 'Texas Instruments DS990 1126kB 8" DSSD'
+shortname: 'Texas Instruments DS990'
+comment: '1126kB 8" DSSD'
+read_support_status: DINOSAUR
+write_support_status: DINOSAUR
+
+documentation:
+<<<
+The Texas Instruments DS990 was a multiuser modular computing system from 1998,
+based around the TMS-9900 processor (as used by the TI-99). It had an 8" floppy
+drive module, the FD1000, which was a 77-track, 288-byte sector FM/MFM system
+with 26 sectors per track. The encoding scheme was very similar to a simplified
+version of the IBM scheme, but of course not compatible. A double-sided disk
+would store a very satisfactory 1126kB of data; here's one at <a
+href="https://www.old-computers.com/museum/computer.asp?st=1&c=1025">old-computers.com</a>:
+
+<div style="text-align: center">
+<a href="https://www.old-computers.com/museum/computer.asp?st=1&c=1025">
+<img src="tids990.jpg" style="max-width: 60%" alt="A DS990 at old-computers.com"></a>
+</div>
+
+FluxEngine will read and write these (but only the DSDD MFM variant).
+>>>
+
+documentation:
+<<<
+## References
+
+  - [The FD1000 Depot Maintenance
+        Manual](http://www.bitsavers.org/pdf/ti/990/disk/2261885-9701_FD1000depotVo1_Jan81.pdf)
+>>>
 
 image_reader {
 	filename: "tids990.img"
-	img {
-		tracks: 77
-		sides: 2
-		trackdata {
-			sector_size: 288
-			sector_range {
-				start_sector: 0
-				sector_count: 26
-			}
-		}
-	}
+	type: IMAGETYPE_IMG
 }
 
 image_writer {
 	filename: "tids990.img"
-	img {}
+	type: IMAGETYPE_IMG
+}
+
+layout {
+	format_type: FORMATTYPE_80TRACK
+	tracks: 77
+	sides: 2
+	layoutdata {
+		sector_size: 288
+		physical {
+			sector: 1
+			sector: 22
+			sector: 17
+			sector: 12
+			sector: 7
+			sector: 2
+			sector: 23
+			sector: 18
+			sector: 13
+			sector: 8
+			sector: 3
+			sector: 24
+			sector: 19
+			sector: 14
+			sector: 9
+			sector: 4
+			sector: 25
+			sector: 20
+			sector: 15
+			sector: 10
+			sector: 5
+			sector: 0
+			sector: 21
+			sector: 16
+			sector: 11
+			sector: 6
+		}
+	}
 }
 
 encoder {
@@ -26,15 +82,5 @@ encoder {
 
 decoder {
 	tids990 {}
-}
-
-cylinders {
-	start: 0
-	end: 76
-}
-
-heads {
-	start: 0
-	end: 1
 }
 

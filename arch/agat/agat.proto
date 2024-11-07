@@ -1,0 +1,19 @@
+syntax = "proto2";
+
+import "lib/config/common.proto";
+
+message AgatDecoderProto {}
+
+message AgatEncoderProto {
+	optional double target_clock_period_us = 1
+		[default=2.00, (help)="Data clock period of target format."];
+	optional double target_rotational_period_ms = 2
+		[default=200.0, (help)="Rotational period of target format."];
+	optional int32 post_index_gap_bytes = 3
+		[default=40, (help)="Post-index gap before first sector header."];
+	optional int32 pre_sector_gap_bytes = 4
+		[default=11, (help)="Gap before each sector header."];
+	optional int32 pre_data_gap_bytes = 5
+		[default=2, (help)="Gap before each sector data record."];
+}
+

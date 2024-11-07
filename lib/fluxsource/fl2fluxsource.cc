@@ -1,46 +1,67 @@
-#include "globals.h"
-#include "fluxmap.h"
+#include "lib/core/globals.h"
+#include "lib/data/fluxmap.h"
 #include "lib/fluxsource/fluxsource.pb.h"
-#include "lib/fl2.pb.h"
-#include "fluxsource/fluxsource.h"
-#include "proto.h"
-#include "fmt/format.h"
+#include "lib/external/fl2.pb.h"
+#include "lib/fluxsource/fluxsource.h"
+#include "lib/config/proto.h"
+#include "lib/external/fl2.h"
+#include "lib/data/fluxmap.h"
 #include <fstream>
+
+class Fl2FluxSourceIterator : public FluxSourceIterator
+{
+public:
+    Fl2FluxSourceIterator(const TrackFluxProto& proto): _proto(proto) {}
+
+    bool hasNext() const override
+    {
+        return _count < _proto.flux_size();
+    }
+
+    std::unique_ptr<const Fluxmap> next() override
+    {
+        auto bytes = _proto.flux(_count);
+        _count++;
+        return std::make_unique<Fluxmap>(bytes);
+    }
+
+private:
+    const TrackFluxProto& _proto;
+    int _count = 0;
+};
 
 class Fl2FluxSource : public FluxSource
 {
 public:
     Fl2FluxSource(const Fl2FluxSourceProto& config): _config(config)
     {
-        std::ifstream ifs(_config.filename(), std::ios::in | std::ios::binary);
-        if (!ifs.is_open())
-            Error() << fmt::format("cannot open input file '{}': {}",
-                _config.filename(),
-                strerror(errno));
+        _proto = loadFl2File(_config.filename());
 
-        if (!_proto.ParseFromIstream(&ifs))
-            Error() << "unable to read input file";
+        _extraConfig.mutable_drive()->set_rotational_period_ms(
+            _proto.rotational_period_ms());
+        if (_proto.has_drive_type())
+            _extraConfig.mutable_drive()->set_drive_type(_proto.drive_type());
     }
 
 public:
-    std::unique_ptr<Fluxmap> readFlux(int cylinder, int head)
+    std::unique_ptr<FluxSourceIterator> readFlux(int track, int head) override
     {
-        for (const auto& track : _proto.track())
+        for (const auto& trackFlux : _proto.track())
         {
-            if ((track.cylinder() == cylinder) && (track.head() == head))
-                return std::make_unique<Fluxmap>(track.flux());
+            if ((trackFlux.track() == track) && (trackFlux.head() == head))
+                return std::make_unique<Fl2FluxSourceIterator>(trackFlux);
         }
 
-        return std::make_unique<Fluxmap>();
+        return std::make_unique<EmptyFluxSourceIterator>();
     }
 
-    void recalibrate() {}
+    void recalibrate() override {}
 
 private:
     void check_for_error(std::ifstream& ifs)
     {
         if (ifs.fail())
-            Error() << fmt::format("FL2 read I/O error: {}", strerror(errno));
+            error("FL2 read I/O error: {}", strerror(errno));
     }
 
 private:
@@ -51,12 +72,5 @@ private:
 std::unique_ptr<FluxSource> FluxSource::createFl2FluxSource(
     const Fl2FluxSourceProto& config)
 {
-    char buffer[16];
-    std::ifstream(config.filename(), std::ios::in | std::ios::binary)
-        .read(buffer, 16);
-    if (strncmp(buffer, "SQLite format 3", 16) == 0)
-        Error() << "this flux file is too old; please use the "
-                   "upgrade-flux-file tool to upgrade it";
-
     return std::unique_ptr<FluxSource>(new Fl2FluxSource(config));
 }

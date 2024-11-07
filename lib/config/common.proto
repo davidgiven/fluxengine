@@ -1,0 +1,55 @@
+syntax = "proto2";
+
+import "google/protobuf/descriptor.proto";
+
+message RangeProto {
+	optional int32 start = 1 [default = 0, (help) = "start value"];
+	optional int32 step = 2 [default = 1, (help) = "amount to step by (positive)"];
+	optional int32 end = 3 [(help) = "inclusive end value, defaulting to the start value"];
+}
+
+extend google.protobuf.FieldOptions {
+  optional string help = 50000;
+  optional bool recurse = 50001 [default = true];
+}
+
+enum IndexMode {
+	INDEXMODE_DRIVE = 0;
+	INDEXMODE_300 = 1;
+	INDEXMODE_360 = 2;
+}
+
+enum FluxSourceSinkType {
+	FLUXTYPE_NOT_SET = 0;
+	FLUXTYPE_A2R = 1;
+	FLUXTYPE_AU = 2;
+	FLUXTYPE_CWF = 3;
+	FLUXTYPE_DRIVE = 4;
+	FLUXTYPE_ERASE = 5;
+	FLUXTYPE_FLUX = 6;
+	FLUXTYPE_FLX = 7;
+	FLUXTYPE_KRYOFLUX = 8;
+	FLUXTYPE_SCP = 9;
+	FLUXTYPE_TEST_PATTERN = 10;
+	FLUXTYPE_VCD = 11;
+	FLUXTYPE_DMK = 12;
+}
+
+enum ImageReaderWriterType {
+	IMAGETYPE_NOT_SET = 0;
+	IMAGETYPE_D64 = 1;
+	IMAGETYPE_D88 = 2;
+	IMAGETYPE_DIM = 3;
+	IMAGETYPE_DISKCOPY = 4;
+	IMAGETYPE_FDI = 5;
+	IMAGETYPE_IMD = 6;
+	IMAGETYPE_IMG = 7;
+	IMAGETYPE_JV3 = 8;
+	IMAGETYPE_LDBS = 9;
+	IMAGETYPE_NFD = 10;
+	IMAGETYPE_NSI = 11;
+	IMAGETYPE_RAW = 12;
+	IMAGETYPE_TD0 = 13;
+}
+
+

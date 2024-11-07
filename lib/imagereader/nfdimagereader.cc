@@ -1,11 +1,11 @@
-#include "globals.h"
-#include "flags.h"
-#include "sector.h"
-#include "imagereader/imagereader.h"
-#include "image.h"
-#include "proto.h"
-#include "lib/config.pb.h"
-#include "fmt/format.h"
+#include "lib/core/globals.h"
+#include "lib/config/flags.h"
+#include "lib/data/sector.h"
+#include "lib/imagereader/imagereader.h"
+#include "lib/data/image.h"
+#include "lib/config/proto.h"
+#include "lib/core/logger.h"
+#include "lib/config/config.pb.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -16,61 +16,67 @@
 class NFDImageReader : public ImageReader
 {
 public:
-	NFDImageReader(const ImageReaderProto& config):
-		ImageReader(config)
-	{}
+    NFDImageReader(const ImageReaderProto& config): ImageReader(config) {}
 
-	std::unique_ptr<Image> readImage()
-	{
-        std::ifstream inputFile(_config.filename(), std::ios::in | std::ios::binary);
+    std::unique_ptr<Image> readImage() override
+    {
+        std::ifstream inputFile(
+            _config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
-            Error() << "cannot open input file";
+            error("cannot open input file");
 
         Bytes fileId(14); // read first entry of track table as well
-        inputFile.read((char*) fileId.begin(), fileId.size());
+        inputFile.read((char*)fileId.begin(), fileId.size());
 
-        if (fileId == Bytes("T98FDDIMAGE.R1")) {
-            Error() << "NFD: r1 images are not currently supported";
+        if (fileId == Bytes("T98FDDIMAGE.R1"))
+        {
+            error("NFD: r1 images are not currently supported");
         }
-        if (fileId != Bytes("T98FDDIMAGE.R0")) {
-            Error() << "NFD: could not find NFD header";
+        if (fileId != Bytes("T98FDDIMAGE.R0"))
+        {
+            error("NFD: could not find NFD header");
         }
 
         Bytes header(0x10a10);
-        inputFile.seekg( 0, std::ios::beg );
-        inputFile.read((char*) header.begin(), header.size());
+        inputFile.seekg(0, std::ios::beg);
+        inputFile.read((char*)header.begin(), header.size());
 
         ByteReader headerReader(header);
 
         char heads = headerReader.seek(0x115).read_8();
-        if (heads != 2) {
-            Error() << "NFD: unsupported number of heads";
+        if (heads != 2)
+        {
+            error("NFD: unsupported number of heads");
         }
 
-        if (config.encoder().format_case() != EncoderProto::FormatCase::FORMAT_NOT_SET)
-            std::cout << "NFD: overriding configured format";
+        if (_extraConfig.encoder().format_case() !=
+            EncoderProto::FormatCase::FORMAT_NOT_SET)
+            log("NFD: overriding configured format");
 
-        auto ibm = config.mutable_encoder()->mutable_ibm();
-        config.mutable_cylinders()->set_end(0);
-        std::cout << "NFD: HD 1.2MB mode\n";
-        if (config.flux_sink().dest_case() == FluxSinkProto::DestCase::kDrive) {
-            config.mutable_flux_sink()->mutable_drive()->set_high_density(true);
-        }
+        auto ibm = _extraConfig.mutable_encoder()->mutable_ibm();
+        auto layout = _extraConfig.mutable_layout();
+        log("NFD: HD 1.2MB mode");
+        log("NFD: forcing hign density mode");
+        _extraConfig.mutable_drive()->set_high_density(true);
+        _extraConfig.mutable_layout()->set_format_type(FORMATTYPE_80TRACK);
 
         std::unique_ptr<Image> image(new Image);
         for (int track = 0; track < 163; track++)
         {
             auto trackdata = ibm->add_trackdata();
-            trackdata->set_clock_rate_khz(500);
-            trackdata->set_track_length_ms(167);
-            auto sectors = trackdata->mutable_sectors();
-            int currentTrackCylinder = -1;
+            trackdata->set_target_clock_period_us(2);
+            trackdata->set_target_rotational_period_ms(167);
+
+            auto layoutdata = layout->add_layoutdata();
+            auto physical = layoutdata->mutable_physical();
+            int currentTrackTrack = -1;
             int currentTrackHead = -1;
             int trackSectorSize = -1;
 
-            for (int sectorInTrack = 0; sectorInTrack < 26; sectorInTrack++){
+            for (int sectorInTrack = 0; sectorInTrack < 26; sectorInTrack++)
+            {
                 headerReader.seek(0x120 + track * 26 * 16 + sectorInTrack * 16);
-                int cylinder = headerReader.read_8();
+                int track = headerReader.read_8();
                 int head = headerReader.read_8();
                 int sectorId = headerReader.read_8();
                 int sectorSize = 128 << headerReader.read_8();
@@ -78,72 +84,87 @@ public:
                 int ddam = headerReader.read_8();
                 int status = headerReader.read_8();
                 headerReader.skip(9); // skip ST0, ST1, ST2, PDA, reserved(5)
-                if (cylinder == 0xFF)
+                if (track == 0xFF)
                     continue;
                 if (ddam != 0)
-                    Error() << "NFD: nonzero ddam currently unsupported";
+                    error("NFD: nonzero ddam currently unsupported");
                 if (status != 0)
-                    Error() << "NFD: nonzero fdd status codes are currently unsupported";
-                if (currentTrackCylinder < 0) {
-                    currentTrackCylinder = cylinder;
+                    error(
+                        "NFD: nonzero fdd status codes are currently "
+                        "unsupported");
+                if (currentTrackTrack < 0)
+                {
+                    currentTrackTrack = track;
                     currentTrackHead = head;
-                } else if (currentTrackCylinder != cylinder) {
-                    Error() << "NFD: all sectors in a track must belong to the same cylinder";
-                } else if (currentTrackHead != head) {
-                    Error() << "NFD: all sectors in a track must belong to the same head";
                 }
-                if (trackSectorSize < 0) {
+                else if (currentTrackTrack != track)
+                {
+                    error(
+                        "NFD: all sectors in a track must belong to the same "
+                        "track");
+                }
+                else if (currentTrackHead != head)
+                {
+                    error(
+                        "NFD: all sectors in a track must belong to the same "
+                        "head");
+                }
+                if (trackSectorSize < 0)
+                {
                     trackSectorSize = sectorSize;
-                    // this is the first sector we've read, use it settings for per-track data
-                    trackdata->set_cylinder(cylinder);
+                    // this is the first sector we've read, use it settings for
+                    // per-track data
+                    trackdata->set_track(track);
                     trackdata->set_head(head);
-                    trackdata->set_sector_size(sectorSize);
+                    layoutdata->set_track(track);
+                    layoutdata->set_side(head);
+                    layoutdata->set_sector_size(sectorSize);
                     trackdata->set_use_fm(!mfm);
-                    if (!mfm) {
+                    if (!mfm)
+                    {
                         trackdata->set_gap_fill_byte(0xffff);
                         trackdata->set_idam_byte(0xf57e);
                         trackdata->set_dam_byte(0xf56f);
                     }
                     // create timings to approximately match N88-BASIC
-                    if (sectorSize <= 128) {
+                    if (sectorSize <= 128)
+                    {
                         trackdata->set_gap0(0x1b);
                         trackdata->set_gap2(0x09);
                         trackdata->set_gap3(0x1b);
-                    } else if (sectorSize <= 256) {
+                    }
+                    else if (sectorSize <= 256)
+                    {
                         trackdata->set_gap0(0x36);
                         trackdata->set_gap3(0x36);
                     }
-                } else if (trackSectorSize != sectorSize) {
-                    Error() << "NFD: multiple sector sizes per track are currently unsupported";
+                }
+                else if (trackSectorSize != sectorSize)
+                {
+                    error(
+                        "NFD: multiple sector sizes per track are currently "
+                        "unsupported");
                 }
                 Bytes data(sectorSize);
-                inputFile.read((char*) data.begin(), data.size());
-                const auto& sector = image->put(cylinder, head, sectorId);
+                inputFile.read((char*)data.begin(), data.size());
+                physical->add_sector(sectorId);
+                const auto& sector = image->put(track, head, sectorId);
                 sector->status = Sector::OK;
-                sector->logicalTrack = cylinder;
-                sector->physicalCylinder = cylinder;
-                sector->logicalSide = sector->physicalHead = head;
-                sector->logicalSector = sectorId;
                 sector->data = data;
-
-                sectors->add_sector(sectorId);
-                if (config.cylinders().end() < cylinder)
-                    config.mutable_cylinders()->set_end(cylinder);
             }
         }
 
         image->calculateSize();
         const Geometry& geometry = image->getGeometry();
-        std::cout << fmt::format("NFD: read {} tracks, {} sides\n",
-                        geometry.numTracks, geometry.numSides);
+        log("NFD: read {} tracks, {} sides",
+            geometry.numTracks,
+            geometry.numSides);
         return image;
     }
-
 };
 
 std::unique_ptr<ImageReader> ImageReader::createNFDImageReader(
-	const ImageReaderProto& config)
+    const ImageReaderProto& config)
 {
     return std::unique_ptr<ImageReader>(new NFDImageReader(config));
 }
-

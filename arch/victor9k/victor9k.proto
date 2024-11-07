@@ -1,32 +1,36 @@
 syntax = "proto2";
 
-import "lib/common.proto";
+import "lib/config/common.proto";
 
 message Victor9kDecoderProto {}
 
 // NEXT: 12
-message Victor9kEncoderProto {
-	message TrackdataProto {
-		message SectorRangeProto {
-			optional int32 start_sector = 1 [(help) = "first sector ID on track"];
-			optional int32 sector_count = 2 [(help) = "number of sectors on track"];
-		}
+message Victor9kEncoderProto
+{
+    message TrackdataProto
+    {
+        optional int32 min_track = 1
+            [ (help) = "minimum track this format applies to" ];
+        optional int32 max_track = 2
+            [ (help) = "maximum track this format applies to" ];
+        optional int32 head = 3
+            [ (help) = "which head this format applies to" ];
 
-		optional int32 min_cylinder = 1            [(help) = "minimum cylinder this format applies to"];
-		optional int32 max_cylinder = 2            [(help) = "maximum cylinder this format applies to"];
-		optional int32 head = 3                    [(help) = "which head this format applies to"];
+        optional double rotational_period_ms = 4
+            [ (help) = "original rotational period of this track" ];
+        optional double clock_period_us = 5
+            [ (help) = "original data rate of this track" ];
+        optional double post_index_gap_us = 6
+            [ (help) = "size of post-index gap" ];
+        optional int32 pre_header_sync_bits = 10
+            [ (help) = "number of sync bits before the sector header" ];
+        optional int32 pre_data_sync_bits = 8
+            [ (help) = "number of sync bits before the sector data" ];
+        optional int32 post_data_gap_bits = 9
+            [ (help) = "size of gap between data and the next header" ];
+        optional int32 post_header_gap_bits = 11
+            [ (help) = "size of gap between header and the data" ];
+    }
 
-		optional double original_period_ms = 4     [(help) = "original rotational period of this cylinder"];
-		optional double original_data_rate_khz = 5 [(help) = "original data rate of this cylinder"];
-		optional double post_index_gap_us = 6      [(help) = "size of post-index gap"];
-		optional int32 pre_header_sync_bits = 10   [(help) = "number of sync bits before the sector header"];
-		optional int32 pre_data_sync_bits = 8      [(help) = "number of sync bits before the sector data"];
-		optional int32 post_data_gap_bits = 9      [(help) = "size of gap between data and the next header"];
-		optional int32 post_header_gap_bits = 11   [(help) = "size of gap between header and the data"];
-
-		optional SectorRangeProto sector_range = 7 [(help) = "write these sectors on each track"];
-	}
-
-	repeated TrackdataProto trackdata = 1;
+    repeated TrackdataProto trackdata = 1;
 }
-

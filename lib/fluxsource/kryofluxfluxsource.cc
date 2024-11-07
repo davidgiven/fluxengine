@@ -1,29 +1,31 @@
-#include "globals.h"
-#include "fluxmap.h"
-#include "kryoflux.h"
+#include "lib/core/globals.h"
+#include "lib/data/fluxmap.h"
+#include "lib/external/kryoflux.h"
 #include "lib/fluxsource/fluxsource.pb.h"
-#include "fluxsource/fluxsource.h"
+#include "lib/fluxsource/fluxsource.h"
 
-class KryofluxFluxSource : public FluxSource
+class KryofluxFluxSource : public TrivialFluxSource
 {
 public:
     KryofluxFluxSource(const KryofluxFluxSourceProto& config):
         _path(config.directory())
-    {}
+    {
+    }
 
 public:
-    std::unique_ptr<Fluxmap> readFlux(int track, int side)
+    std::unique_ptr<const Fluxmap> readSingleFlux(int track, int side) override
     {
         return readStream(_path, track, side);
     }
 
-    void recalibrate() {}
+    void recalibrate() override {}
 
 private:
     const std::string _path;
 };
 
-std::unique_ptr<FluxSource> FluxSource::createKryofluxFluxSource(const KryofluxFluxSourceProto& config)
+std::unique_ptr<FluxSource> FluxSource::createKryofluxFluxSource(
+    const KryofluxFluxSourceProto& config)
 {
-    return std::unique_ptr<FluxSource>(new KryofluxFluxSource(config));
+    return std::make_unique<KryofluxFluxSource>(config);
 }

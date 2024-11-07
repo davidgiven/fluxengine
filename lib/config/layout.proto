@@ -1,0 +1,63 @@
+syntax = "proto2";
+
+import "lib/config/common.proto";
+import "lib/external/fl2.proto";
+
+message SectorListProto
+{
+    /* either */
+    repeated int32 sector = 1 [ (help) = "sector ID" ];
+
+    /* or */
+    optional int32 start_sector = 2
+        [ (help) = "first sector of a continuous run" ];
+    optional int32 count = 3
+        [ (help) = "number of sectors in a continuous run" ];
+    optional int32 skew = 4
+        [ default = 1, (help) = "apply this skew between sectors" ];
+}
+
+message LayoutProto
+{
+    enum Order
+    {
+        UNDEFINED = 0;
+        CHS = 1;
+        HCS = 2;
+    }
+
+    message LayoutdataProto
+    {
+        optional int32 track = 1 [
+            (help) =
+                "if present, this format only applies to this logical track"
+        ];
+        optional int32 up_to_track = 5
+            [ (help) = "if present, forms a range with track" ];
+        optional int32 side = 2 [
+            (help) =
+                "if present, this format only applies to this logical side"
+        ];
+
+        optional int32 sector_size = 3
+            [ default = 512, (help) = "number of bytes per sector" ];
+
+        optional SectorListProto physical = 4
+            [ (help) = "physical order of sectors on disk" ];
+        optional SectorListProto filesystem = 6
+            [ (help) = "logical order of sectors in filesystem" ];
+    }
+
+    repeated LayoutdataProto layoutdata = 1
+        [ (help) = "per-track layout information (repeatable)" ];
+    optional int32 tracks = 2
+        [ default = 0, (help) = "number of tracks in image" ];
+    optional int32 sides = 3
+        [ default = 0, (help) = "number of sides in image" ];
+    optional Order order = 4
+        [ default = CHS, (help) = "the order of sectors in the filesystem" ];
+    optional bool swap_sides = 5
+        [ default = false, (help) = "the sides are inverted on this disk" ];
+    optional FormatType format_type = 6
+        [ default = FORMATTYPE_UNKNOWN, (help) = "Format type of image" ];
+}

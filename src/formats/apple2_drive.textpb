@@ -1,0 +1,30 @@
+comment: 'Adjust configuration for a 40-track Apple II drive'
+is_extension: true
+
+documentation:
+<<<
+This is an extension profile; adding this to the command line will configure
+FluxEngine to adjust the pinout and track spacing to work with an Apple II
+drive.  This only works on Greaseweazle hardware and requires a custom
+connector.
+
+For example:
+
+```
+fluxengine read apple2 --160 apple2_drive
+```
+>>>
+
+usb {
+    greaseweazle {
+        bus_type: APPLE2
+    }
+}
+
+drive {
+    tracks: 160
+    heads: 1
+    drive_type: DRIVETYPE_APPLE2
+}
+
+

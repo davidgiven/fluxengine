@@ -1,55 +1,59 @@
-#include "globals.h"
-#include "flags.h"
-#include "sector.h"
-#include "imagereader/imagereader.h"
-#include "image.h"
-#include "proto.h"
-#include "lib/config.pb.h"
-#include "fmt/format.h"
+#include "lib/core/globals.h"
+#include "lib/config/flags.h"
+#include "lib/data/sector.h"
+#include "lib/imagereader/imagereader.h"
+#include "lib/data/image.h"
+#include "lib/config/proto.h"
+#include "lib/core/logger.h"
+#include "lib/data/layout.h"
+#include "lib/config/config.pb.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>
 
-static unsigned getModulationandSpeed(uint8_t flags, bool *mfm)
+static unsigned getModulationandSpeed(uint8_t flags, bool* fm)
 {
     switch (flags)
-        {
-            case 0: /* 500 kbps FM */
-                //clockRateKhz.setDefaultValue(250);
-                *mfm = false;
-                return 500;
-                break;
+    {
+        case 0: /* 500 kbps FM */
+            // clockRateKhz.setDefaultValue(250);
+            *fm = true;
+            return 500;
+            break;
 
-            case 1: /* 300 kbps FM */
-                *mfm  = false;
-                return 300;
-                
-                break;
+        case 1: /* 300 kbps FM */
+            *fm = true;
+            return 300;
 
-            case 2: /* 250 kbps FM */
-                *mfm  = false;
-                return 250;
-                break;
+            break;
 
-            case 3: /* 500 kbps MFM */
-                *mfm  = true;
-                return 500;
-                break;
+        case 2: /* 250 kbps FM */
+            *fm = true;
+            return 250;
+            break;
 
-            case 4: /* 300 kbps MFM */
-                *mfm  = true;
-                return 300;
-                break;
+        case 3: /* 500 kbps MFM */
+            *fm = false;
+            return 500;
+            break;
 
-            case 5: /* 250 kbps MFM */
-                *mfm  = true;
-                return 250;
-                break;
+        case 4: /* 300 kbps MFM */
+            *fm = false;
+            return 300;
+            break;
 
-            default:
-                Error() << fmt::format("don't understand IMD disks with this modulation and speed {}", flags);
-                throw 0;
-        }
+        case 5: /* 250 kbps MFM */
+            *fm = false;
+            return 250;
+            break;
+
+        default:
+            error(
+                "IMD: don't understand IMD disks with this modulation and "
+                "speed {}",
+                flags);
+            throw 0;
+    }
 }
 
 struct TrackHeader
@@ -65,95 +69,127 @@ static unsigned getSectorSize(uint8_t flags)
 {
     switch (flags)
     {
-        case 0: return 128;
-        case 1: return 256;
-        case 2: return 512;
-        case 3: return 1024;
-        case 4: return 2048;
-        case 5: return 4096;
-        case 6: return 8192;
+        case 0:
+            return 128;
+            break;
+        case 1:
+            return 256;
+            break;
+        case 2:
+            return 512;
+            break;
+        case 3:
+            return 1024;
+            break;
+        case 4:
+            return 2048;
+            break;
+        case 5:
+            return 4096;
+            break;
+        case 6:
+            return 8192;
+            break;
+        default:
+            error("not reachable");
+            throw 0;
     }
-    Error() << "not reachable";
 }
 
-
-#define SEC_CYL_MAP_FLAG  0x80 
+#define SEC_CYL_MAP_FLAG 0x80
 #define SEC_HEAD_MAP_FLAG 0x40
-#define HEAD_MASK         0x3F
-#define END_OF_FILE       0x1A
-
+#define HEAD_MASK 0x3F
+#define END_OF_FILE 0x1A
 
 class IMDImageReader : public ImageReader
 {
 public:
-    IMDImageReader(const ImageReaderProto& config):
-        ImageReader(config)
-    {}
+    IMDImageReader(const ImageReaderProto& config): ImageReader(config) {}
 
-    std::unique_ptr<Image> readImage()
+    // clang-format off
     /*
-    IMAGE FILE FORMAT
-    The overall layout of an ImageDisk .IMD image file is:
-    IMD v.vv: dd/mm/yyyy hh:mm:ss
-    Comment (ASCII only - unlimited size)
-    1A byte - ASCII EOF character
-    - For each track on the disk:
-    1 byte Mode value                           see getModulationspeed for definition       
-    1 byte Cylinder
-    1 byte Head
-    1 byte number of sectors in track           
-    1 byte sector size                          see getsectorsize for definition
-    sector numbering map
-    sector cylinder map (optional)              definied in high byte of head (since head is 0 or 1)
-    sector head map (optional)                  definied in high byte of head (since head is 0 or 1)
-    sector data records
-    <End of file>
-    */
+     * IMAGE FILE FORMAT
+     * The overall layout of an ImageDisk .IMD image file is:
+     * IMD v.vv: dd/mm/yyyy hh:mm:ss
+     * Comment (ASCII only - unlimited size)
+     * 1A byte - ASCII EOF character
+     * - For each track on the disk:
+     * 1 byte Mode value							(0-5) see getModulationspeed for definition		
+     * 1 byte Cylinder							(0-n)
+     * 1 byte Head								(0-1)
+     * 1 byte number of sectors in track			(1-n)
+     * 1 byte sector size							(0-6) see getsectorsize for definition
+     * sector numbering map						IMD start numbering sectors with 1.
+     * sector cylinder map (optional)				definied in high byte of head (since head is 0 or 1)
+     * sector head map (optional)					definied in high byte of head (since head is 0 or 1)
+     * sector data records	For each data record:
+     * 	1 byte Sector status 					
+     * 		0: Sector data unavailable - could not be read
+     * 		1: Normal data: (Sector Size) bytes follow
+     * 		2: Compressed: All bytes in sector have same value (xx)
+     * 		3: Normal data with "Deleted-Data address mark"
+     * 		4: Compressed with "Deleted-Data address mark"
+     * 		5: Normal data read with data error
+     * 		6: Compressed read with data error"
+     * 		7: Deleted data read with data error"
+     * 		8: Compressed, Deleted read with data error"
+     * 	sector size of Sector data
+     * <End of file>
+     */
+    // clang-format on
+    std::unique_ptr<Image> readImage() override
     {
-        //Read File
-        std::ifstream inputFile(_config.filename(), std::ios::in | std::ios::binary);
+        // Read File
+        std::ifstream inputFile(
+            _config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
-            Error() << "cannot open input file";
-        //define some variables
-        bool mfm = false;   //define coding just to show in comment for setting the right write parameters
+            error("IMD: cannot open input file");
+        // define some variables
+        bool fm = false; // define coding just to show in comment for setting
+                         // the right write parameters
         inputFile.seekg(0, inputFile.end);
-        int inputFileSize = inputFile.tellg();  // determine filesize
+        int inputFileSize = inputFile.tellg(); // determine filesize
         inputFile.seekg(0, inputFile.beg);
         Bytes data;
         data.writer() += inputFile;
         ByteReader br(data);
         std::unique_ptr<Image> image(new Image);
         TrackHeader header = {0, 0, 0, 0, 0};
+        TrackHeader previousheader = {0, 0, 0, 0, 0};
+
+        auto layout = _extraConfig.mutable_layout();
 
         unsigned n = 0;
         unsigned headerPtr = 0;
         unsigned Modulation_Speed = 0;
         unsigned sectorSize = 0;
         std::string sector_skew;
-        int b;  
-        unsigned char comment[8192]; //i choose a fixed value. dont know how to make dynamic arrays in C++. This should be enough
-        // Read comment
-        while ((b = br.read_8()) != EOF && b != 0x1A)
-        {
-            comment[n++] = (unsigned char)b;
-        }
-        headerPtr = n; //set pointer to after comment
-        comment[n] = '\0'; // null-terminate the string
-        //write comment to screen
-        std::cout   << "Comment in IMD image:\n"
-                    << fmt::format("{}\n",
-                    comment);
 
-        //first read header
+        int b;
+        std::string comment;
+        bool blnOptionalCylinderMap = false;
+        bool blnOptionalHeadMap = false;
+        int trackSectorSize = -1;
+        // Read comment
+        comment.clear();
+        while ((b = br.read_8()) != EOF && b != END_OF_FILE)
+        {
+            comment.push_back(b);
+            n++;
+        }
+        headerPtr = n; // set pointer to after comment
+        log("Comment in IMD file: {}", comment);
+
         for (;;)
         {
-            if (headerPtr >= inputFileSize-1)
+            if (headerPtr >= inputFileSize - 1)
             {
                 break;
             }
+            // first read header
             header.ModeValue = br.read_8();
             headerPtr++;
-            Modulation_Speed = getModulationandSpeed(header.ModeValue, &mfm);
+            Modulation_Speed = getModulationandSpeed(header.ModeValue, &fm);
             header.track = br.read_8();
             headerPtr++;
             header.Head = br.read_8();
@@ -164,84 +200,270 @@ public:
             headerPtr++;
             sectorSize = getSectorSize(header.SectorSize);
 
-            //Read optional cylinder map To Do
-
-            //Read optional sector head map To Do
-
-            //read sector numbering map
-            std::vector<unsigned> sector_map(header.numSectors);
+            unsigned optionalsector_map[header.numSectors];
+            // The Sector Cylinder Map has one entry for each sector, and
+            // contains the logical Cylinder ID for the corresponding sector in
+            // the Sector Numbering Map.
+            if (header.Head & SEC_CYL_MAP_FLAG)
+            {
+                // Read optional cylinder map
+                for (b = 0; b < header.numSectors; b++)
+                {
+                    optionalsector_map[b] = br.read_8();
+                    headerPtr++;
+                }
+                blnOptionalCylinderMap = true; // set bool so we know there is
+                                               // an optional cylinder map
+                header.Head =
+                    header.Head ^
+                    SEC_CYL_MAP_FLAG; // remove flag 10000001 ^ 10000000 =
+                                      // 00000001 and 10000000 ^ 10000000 =
+                                      // 00000000
+            }
+            // Read optional sector head map
+            // The Sector Head Map has one entry for each sector, and contains
+            // the logical Head ID for the corresponding sector in the Sector
+            // Numbering Map.
+            unsigned optionalhead_map[header.numSectors];
+            if (header.Head & SEC_HEAD_MAP_FLAG)
+            {
+                // Read optional sector head map
+                for (b = 0; b < header.numSectors; b++)
+                {
+                    optionalhead_map[b] = br.read_8();
+                    headerPtr++;
+                }
+                blnOptionalHeadMap =
+                    true; // set bool so we know there is an optional head map
+                header.Head =
+                    header.Head ^
+                    SEC_HEAD_MAP_FLAG; // remove flag 01000001 ^ 01000001 =
+                                       // 00000001 and 01000000 ^ 0100000 =
+                                       // 00000000 for writing sector head later
+            }
+            // read sector numbering map
             sector_skew.clear();
-            for (int b = 0;  b < header.numSectors; b++)
-            {   
-                sector_map[b] = br.read_8();
+            bool blnBase0 = false; // check what first start number of the
+                                   // sector is. Fluxengine expects 1.
+            for (b = 0; b < header.numSectors; b++)
+            {
+                uint8_t t;
+                t = br.read_8();
+                if (t == 0x00)
+                    blnBase0 = true;
+                if (blnBase0)
+                {
+                    t = t + 1;
+                }
+                sector_skew.push_back(t);
                 headerPtr++;
             }
 
-            //read the sectors
+            auto ibm = _extraConfig.mutable_encoder()->mutable_ibm();
+            auto trackdata = ibm->add_trackdata();
+
+            auto layoutdata = layout->add_layoutdata();
+
+            trackdata->set_target_clock_period_us(1e3 / Modulation_Speed);
+            trackdata->set_target_rotational_period_ms(200);
+            if (trackSectorSize < 0)
+            {
+                trackSectorSize = sectorSize;
+                // this is the first sector we've read, use it settings for
+                // per-track data
+                trackdata->set_track(header.track);
+                trackdata->set_head(header.Head);
+                trackdata->set_use_fm(fm);
+
+                layoutdata->set_track(header.track);
+                layoutdata->set_side(header.Head);
+                layoutdata->set_sector_size(sectorSize);
+            }
+            else if (trackSectorSize != sectorSize)
+            {
+                error(
+                    "IMD: multiple sector sizes per track are "
+                    "currently unsupported");
+            }
+
+            // read the sectors
             for (int s = 0; s < header.numSectors; s++)
             {
                 Bytes sectordata;
-                const auto& sector = image->put(header.track, header.Head, sector_map[s]);
-                //read the status of the sector
+                Bytes compressed(sectorSize);
+                int SectorID;
+                SectorID = sector_skew[s];
+                const auto& sector =
+                    image->put(header.track, header.Head, SectorID);
+                // read the status of the sector
                 unsigned int Status_Sector = br.read_8();
                 headerPtr++;
 
                 switch (Status_Sector)
                 {
+                    // clang-format off
+                    /* fluxengine knows of a few sector statussen but not all of the statussen in IMD.
+                     *  // the statussen are in sector.h. Translation to fluxengine is as follows:
+                     *	Statussen fluxengine							|	Status IMD		
+                     *--------------------------------------------------------------------------------------------------------------------
+                     *  	OK,											|	1, 2 (Normal data: (Sector Size) of (compressed) bytes follow)
+                     *	BAD_CHECKSUM,									|	5, 6, 7, 8
+                     *	MISSING,	  sector not found					|	0 (Sector data unavailable - could not be read)
+                     *	DATA_MISSING, sector present but no data found	|	3, 4
+                     *	CONFLICT,										|
+                     *	INTERNAL_ERROR									|
+                     */
+                    // clang-format on
                     case 0: /* Sector data unavailable - could not be read */
+
+                        sector->status = Sector::MISSING;
                         break;
 
                     case 1: /* Normal data: (Sector Size) bytes follow */
                         sectordata = br.read(sectorSize);
                         headerPtr += sectorSize;
                         sector->data.writer().append(sectordata);
+                        sector->status = Sector::OK;
                         break;
 
-                    case 2: /* Compressed: All bytes in sector have same value (xx) */
-                        sectordata = br.read(1);
+                    case 2: /* Compressed: All bytes in sector have same value
+                               (xx) */
+                        compressed[0] = br.read_8();
                         headerPtr++;
-                        sector->data.writer().append(sectordata);
-
                         for (int k = 1; k < sectorSize; k++)
                         {
-                            //fill data till sector is full
-                            sector->data.writer().append(sectordata);
+                            // fill data till sector is full
+                            br.seek(headerPtr);
+                            compressed[k] = br.read_8();
                         }
+                        sector->data.writer().append(compressed);
+                        sector->status = Sector::OK;
                         break;
 
                     case 3: /* Normal data with "Deleted-Data address mark" */
+                        sector->status = Sector::DATA_MISSING;
+                        sectordata = br.read(sectorSize);
+                        headerPtr += sectorSize;
+                        sector->data.writer().append(sectordata);
+                        break;
+
                     case 4: /* Compressed with "Deleted-Data address mark"*/
-                    case 5: /* Normal data read with data error */
-                    case 6: /* Compressed read with data error" */
-                    case 7: /* Deleted data read with data error" */
-                    case 8: /* Compressed, Deleted read with data error" */
+                        compressed[0] = br.read_8();
+                        headerPtr++;
+                        for (int k = 1; k < sectorSize; k++)
+                        {
+                            // fill data till sector is full
+                            br.seek(headerPtr);
+                            compressed[k] = br.read_8();
+                        }
+                        sector->data.writer().append(compressed);
+                        sector->status = Sector::DATA_MISSING;
+                        break;
+
+                    case 5: /* Normal data read with data error*/
+                        sectordata = br.read(sectorSize);
+                        headerPtr += sectorSize;
+                        sector->status = Sector::BAD_CHECKSUM;
+                        sector->data.writer().append(sectordata);
+                        break;
+
+                    case 6: /* Compressed read with data error*/
+                        compressed[0] = br.read_8();
+                        headerPtr++;
+                        for (int k = 1; k < sectorSize; k++)
+                        {
+                            // fill data till sector is full
+                            br.seek(headerPtr);
+                            compressed[k] = br.read_8();
+                        }
+                        sector->data.writer().append(compressed);
+                        sector->status = Sector::BAD_CHECKSUM;
+                        break;
+
+                    case 7: /* Deleted data read with data error*/
+                        sectordata = br.read(sectorSize);
+                        headerPtr += sectorSize;
+                        sector->status = Sector::BAD_CHECKSUM;
+                        sector->data.writer().append(sectordata);
+                        break;
+
+                    case 8: /* Compressed, Deleted read with data error*/
+                        compressed[0] = br.read_8();
+                        headerPtr++;
+                        for (int k = 1; k < sectorSize; k++)
+                        {
+                            // fill data till sector is full
+                            br.seek(headerPtr);
+                            compressed[k] = br.read_8();
+                        }
+                        sector->data.writer().append(compressed);
+                        sector->status = Sector::BAD_CHECKSUM;
+                        break;
+
                     default:
-                        Error() << fmt::format("don't understand IMD disks with sector status {}", Status_Sector);
-                }       
-                sector->status = Sector::OK;
-                sector->logicalTrack = sector->physicalCylinder = header.track;
-                sector->logicalSide = sector->physicalHead = header.Head;
-                sector->logicalSector = (sector_map[s]);
+                        error(
+                            "IMD: Don't understand IMD files with sector "
+                            "status {}, track {}, sector {}",
+                            Status_Sector,
+                            header.track,
+                            s);
+                }
+                if (blnOptionalCylinderMap) // there was een optional cylinder
+                                            // map. write it to the sector
+                // The Sector Cylinder Map has one entry for each sector, and
+                // contains the logical Cylinder ID for the corresponding sector
+                // in the Sector Numbering Map.
+                {
+                    sector->physicalTrack =
+                        Layout::remapTrackLogicalToPhysical(header.track);
+                    sector->logicalTrack = optionalsector_map[s];
+                    blnOptionalCylinderMap = false;
+                }
+                else
+                {
+                    sector->logicalTrack = header.track;
+                    sector->physicalTrack =
+                        Layout::remapTrackLogicalToPhysical(header.track);
+                }
+                if (blnOptionalHeadMap) // there was een optional head map.
+                                        // write it to the sector
+                // The Sector Head Map has one entry for each sector, and
+                // contains the logical Head ID for the corresponding sector in
+                // the Sector Numbering Map.
+                {
+                    sector->physicalSide = header.Head;
+                    sector->logicalSide = optionalhead_map[s];
+                    blnOptionalHeadMap = false;
+                }
+                else
+                {
+                    sector->logicalSide = header.Head;
+                    sector->physicalSide = header.Head;
+                }
             }
-
         }
-        //Write format detected in IMD image to screen to help user set the right write parameters
 
-        image->setGeometry({
-            .numTracks = header.track,
-            .numSides = header.Head + 1U,
-            .numSectors = header.numSectors,
-            .sectorSize = sectorSize
-        });
+        if (_extraConfig.encoder().format_case() !=
+            EncoderProto::FormatCase::FORMAT_NOT_SET)
+            log("IMD: overriding configured format");
 
-        size_t headSize = header.numSectors * sectorSize;
-        size_t trackSize = headSize * (header.Head + 1);
+        image->calculateSize();
+        const Geometry& geometry = image->getGeometry();
+        size_t headSize = ((header.numSectors) * (sectorSize));
+        size_t trackSize = (headSize * (header.Head + 1));
 
-        std::cout << fmt::format("IMD: {} tracks, {} heads; {}; {} kbps; {} sectors; sectorsize {};\n"
-                                 "     sectormap {}; {} kB total\n",
-                    header.track, header.Head + 1,
-                    mfm ? "MFM" : "FM",
-                    Modulation_Speed, header.numSectors, sectorSize, sector_skew, (header.track+1) * trackSize / 1024);
+        log("IMD: read {} tracks, {} heads; {}; {} kbps; {} sectors; "
+            "sectorsize {}; {} kB total.",
+            header.track + 1,
+            header.Head + 1,
+            fm ? "FM" : "MFM",
+            Modulation_Speed,
+            header.numSectors,
+            sectorSize,
+            (header.track + 1) * trackSize / 1024);
+
+        layout->set_tracks(geometry.numTracks);
+        layout->set_sides(geometry.numSides);
 
         return image;
     }

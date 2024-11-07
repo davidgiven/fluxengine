@@ -1,10 +1,10 @@
-Using the FluxEngine client software with GreaseWeazle hardware
+Using the FluxEngine client software with Greaseweazle hardware
 ===============================================================
 
 The FluxEngine isn't the only project which does this; another one is the
-[GreaseWeazle](https://github.com/keirf/Greaseweazle/wiki), a Blue Pill based
+[Greaseweazle](https://github.com/keirf/Greaseweazle/wiki), a Blue Pill based
 completely open source solution. This requires more work to set up (or you can
-buy a prebuilt GreaseWeazle board), but provides completely open source
+buy a prebuilt Greaseweazle board), but provides completely open source
 hardware which doesn't require the use of the Cypress Windows-based tools that
 the FluxEngine does. Luckily, the FluxEngine software supports it almost
 out-of-the-box --- just plug it in and nearly everything should work. The
@@ -16,10 +16,10 @@ FluxEngine makes things complicated when you're not using the FluxEngine client
 software with a FluxEngine board, but I'm afraid it's too late to change that
 now. Sorry.
 
-**If you are using GreaseWeazle-compatible hardware** such as the
+**If you are using Greaseweazle-compatible hardware** such as the
 [adafruit-floppy](https://github.com/adafruit/Adafruit_Floppy) project, then
 FluxEngine will still work; however, as the USB VID/PID won't be that of a real
-GreaseWeazle, the the FluxEngine client can't autodetect it. Instead, you'll
+Greaseweazle, the the FluxEngine client can't autodetect it. Instead, you'll
 need to specify the serial port manually with something like
 `--usb.greaseweazle.port=/dev/ttyACM0` or `--usb.greaseweazle.port=COM5`.
 
@@ -32,13 +32,18 @@ Driver box says `WinUSB` and the right one says `USB Serial (CDC)`. Then press
 What works
 ----------
 
-Supported features with the GreaseWeazle include:
+Supported features with the Greaseweazle include:
 
   - simple reading and writing of disks, seeking etc
   - erasing disks
   - determining disk rotation speed
-  - both Shugart and normal IBM buses (via
+  - Shugart and normal IBM buses (via
 	`--usb.greaseweazle.bus_type=SHUGART` or `IBMPC`; the default is `IBMPC`)
+  - Apple 5.25 floppy interfaces (via `--usb.greaseweazle.bus_type=APPLE2`)
+
+Which device types are supported depend on the hardware. Genuine Greaseweazle
+hardware supports SHUGART and IBMPC.  APPLE2 is only supported with hand wiring
+and the Adafruit\_Floppy greaseweazle-compatible firmware.
 
 What doesn't work
 -----------------
@@ -55,12 +60,12 @@ Who to contact
 --------------
 
 I want to make it clear that the FluxEngine code is _not_ supported by the
-GreaseWeazle team. If you have any problems, please [contact
+Greaseweazle team. If you have any problems, please [contact
 me](https://github.com/davidgiven/fluxengine/issues/new) and not them.
 
-In addition, the GreaseWeazle release cycle is not synchronised to the
+In addition, the Greaseweazle release cycle is not synchronised to the
 FluxEngine release cycle, so it's possible you'll have a version of the
-GreaseWeazle firmware which is not supported by FluxEngine. Hopefully, it'll
+Greaseweazle firmware which is not supported by FluxEngine. Hopefully, it'll
 detect this and complain. Again, [file an
 issue](https://github.com/davidgiven/fluxengine/issues/new) and I'll look into
 it.

@@ -1,5 +1,9 @@
 name: Autorelease
 
+concurrency: 
+  group: environment-release-${{ github.head_ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches:
@@ -8,43 +12,57 @@ on:
 jobs:
   dev-release:
     runs-on: windows-latest
-    defaults:
-      run:
-        shell: msys2 {0}
+
     steps:
-    - uses: msys2/setup-msys2@v2
-      with:
-        update: true
-        msystem: MINGW32
-        install: >-
-          make
-          ninja
-          mingw-w64-i686-libusb
-          mingw-w64-i686-sqlite3
-          mingw-w64-i686-zlib
-          mingw-w64-i686-gcc
-          zip
-          mingw-w64-i686-protobuf
-          vim
-          diffutils
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 1
-    - name: build
+    - name: setup WSL
       run: |
-        make
+        curl -L https://github.com/WhitewaterFoundry/Fedora-Remix-for-WSL/releases/download/39.0.1/Fedora-Remix-for-WSL-SL_39.0.1.0_x64_arm64.msixbundle -o fedora.msixbundle
+        unzip fedora.msixbundle Fedora-Remix-for-WSL-SL_39.0.1.0_x64.msix
+        unzip Fedora-Remix-for-WSL-SL_39.0.1.0_x64.msix install.tar.gz
+        wsl --update
+        wsl --set-default-version 2
+        wsl --import fedora fedora install.tar.gz
+        wsl --set-default fedora
+        wsl sh -c 'dnf -y install https://github.com/rpmsphere/noarch/raw/master/r/rpmsphere-release-38-1.noarch.rpm'
+        wsl sh -c 'dnf -y install --setop=install_weak_deps=False gcc gcc-c++ protobuf-c-compiler protobuf-devel fmt-devel systemd-devel sqlite-devel wxGTK-devel mingw32-gcc mingw32-gcc-c++ mingw32-zlib-static mingw32-protobuf-static mingw32-sqlite-static mingw32-wxWidgets3-static mingw32-libpng-static mingw32-libjpeg-static mingw32-libtiff-static mingw32-nsis png2ico'
+
+    - name: fix line endings
+      run: |
+        git config --global core.autocrlf false
+        git config --global core.eol lf
+        
+    - uses: actions/checkout@v4
+      with:
+        repository: 'davidgiven/fluxengine'
+        path: 'fluxengine'
+
+    - name: run
+      run: |
+        wsl sh -c 'cd fluxengine && make BUILDTYPE=windows -j$(nproc)'
+
+    - name: nsis
+      run: |
+        wsl sh -c 'cd fluxengine && strip fluxengine.exe -o fluxengine-stripped.exe'
+        wsl sh -c 'cd fluxengine && strip fluxengine-gui.exe -o fluxengine-gui-stripped.exe'
+        wsl sh -c 'cd fluxengine && makensis -v2 -nocd -dOUTFILE=fluxengine-installer.exe extras/windows-installer.nsi'
+
     - name: zip
       run: |
-        zip -9 fluxengine.zip fluxengine.exe upgrade-flux-file.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex
+        wsl sh -c 'cd fluxengine && zip -9 fluxengine-windows.zip fluxengine.exe fluxengine-gui.exe upgrade-flux-file.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex fluxengine-installer.exe'
+
     - name: date
       run: |
         echo "RELEASE_DATE=$(date --rfc-3339=date)" >> ${GITHUB_ENV}
+
     - name: tag
       uses: EndBug/latest-tag@latest
       with:
         tag-name: dev
+        force-branch: false
+        git-directory: 'fluxengine'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: delete-old-assets
       uses: mknejp/delete-release-assets@v1
       with:
@@ -52,13 +70,62 @@ jobs:
         tag: dev
         assets: | 
           fluxengine.zip
+          fluxengine-installer.exe
         fail-if-no-assets: false
+
     - name: release
       uses: softprops/action-gh-release@v1
       with:
         name: Development build ${{ env.RELEASE_DATE }}
         files: |
-          fluxengine.zip
+          fluxengine/fluxengine.zip
+          fluxengine/fluxengine-installer.exe
         tag_name: dev
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-macos:
+    strategy:
+      matrix:
+        runs-on: [macos-13, macos-latest]
+    runs-on: ${{ matrix.runs-on }}
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: brew
+      run: brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg
+
+    - name: make
+      run: |
+        gmake -j2
+        mv FluxEngine.pkg FluxEngine-${{ runner.arch }}.pkg
+
+    - name: tag
+      uses: EndBug/latest-tag@latest
+      with:
+        tag-name: dev
+        force-branch: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: delete-old-assets
+      uses: mknejp/delete-release-assets@v1
+      with:
+        token: ${{ github.token }}
+        tag: dev
+        assets: | 
+          FluxEngine-${{ runner.arch }}.pkg
+        fail-if-no-assets: false
+
+    - name: release
+      uses: softprops/action-gh-release@v1
+      with:
+        name: Development build ${{ env.RELEASE_DATE }}
+        files: |
+          FluxEngine-${{ runner.arch }}.pkg
+        tag_name: dev
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+

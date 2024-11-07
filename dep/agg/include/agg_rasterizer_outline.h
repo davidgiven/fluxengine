@@ -2,8 +2,8 @@
 // Anti-Grain Geometry - Version 2.4
 // Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
 //
-// Permission to copy, use, modify, sell and distribute this software 
-// is granted provided this copyright notice appears in all copies. 
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
 // This software is provided "as is" without express or implied
 // warranty, and with no claim as to its suitability for any purpose.
 //
@@ -20,17 +20,21 @@
 namespace agg
 {
     //======================================================rasterizer_outline
-    template<class Renderer> class rasterizer_outline
+    template <class Renderer>
+    class rasterizer_outline
     {
     public:
-        explicit rasterizer_outline(Renderer& ren) : 
-            m_ren(&ren), 
-            m_start_x(0), 
-            m_start_y(0), 
+        explicit rasterizer_outline(Renderer& ren):
+            m_ren(&ren),
+            m_start_x(0),
+            m_start_y(0),
             m_vertices(0)
-        {}
-        void attach(Renderer& ren) { m_ren = &ren; }
-
+        {
+        }
+        void attach(Renderer& ren)
+        {
+            m_ren = &ren;
+        }
 
         //--------------------------------------------------------------------
         void move_to(int x, int y)
@@ -61,7 +65,7 @@ namespace agg
         //--------------------------------------------------------------------
         void close()
         {
-            if(m_vertices > 2)
+            if (m_vertices > 2)
             {
                 line_to(m_start_x, m_start_y);
             }
@@ -71,15 +75,16 @@ namespace agg
         //--------------------------------------------------------------------
         void add_vertex(double x, double y, unsigned cmd)
         {
-            if(is_move_to(cmd)) 
+            if (is_move_to(cmd))
             {
                 move_to_d(x, y);
             }
-            else 
+            else
             {
-                if(is_end_poly(cmd))
+                if (is_end_poly(cmd))
                 {
-                    if(is_closed(cmd)) close();
+                    if (is_closed(cmd))
+                        close();
                 }
                 else
                 {
@@ -88,60 +93,54 @@ namespace agg
             }
         }
 
-
         //--------------------------------------------------------------------
-        template<class VertexSource>
-        void add_path(VertexSource& vs, unsigned path_id=0)
+        template <class VertexSource>
+        void add_path(VertexSource& vs, unsigned path_id = 0)
         {
             double x;
             double y;
 
             unsigned cmd;
             vs.rewind(path_id);
-            while(!is_stop(cmd = vs.vertex(&x, &y)))
+            while (!is_stop(cmd = vs.vertex(&x, &y)))
             {
                 add_vertex(x, y, cmd);
             }
         }
 
-
         //--------------------------------------------------------------------
-        template<class VertexSource, class ColorStorage, class PathId>
-        void render_all_paths(VertexSource& vs, 
-                              const ColorStorage& colors, 
-                              const PathId& path_id,
-                              unsigned num_paths)
+        template <class VertexSource, class ColorStorage, class PathId>
+        void render_all_paths(VertexSource& vs,
+            const ColorStorage& colors,
+            const PathId& path_id,
+            unsigned num_paths)
         {
-            for(unsigned i = 0; i < num_paths; i++)
+            for (unsigned i = 0; i < num_paths; i++)
             {
                 m_ren->line_color(colors[i]);
                 add_path(vs, path_id[i]);
             }
         }
 
-
         //--------------------------------------------------------------------
-        template<class Ctrl> void render_ctrl(Ctrl& c)
+        template <class Ctrl>
+        void render_ctrl(Ctrl& c)
         {
             unsigned i;
-            for(i = 0; i < c.num_paths(); i++)
+            for (i = 0; i < c.num_paths(); i++)
             {
                 m_ren->line_color(c.color(i));
                 add_path(c, i);
             }
         }
 
-
     private:
         Renderer* m_ren;
-        int       m_start_x;
-        int       m_start_y;
-        unsigned  m_vertices;
+        int m_start_x;
+        int m_start_y;
+        unsigned m_vertices;
     };
-
 
 }
 
-
 #endif
-

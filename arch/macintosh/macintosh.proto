@@ -1,14 +1,11 @@
 syntax = "proto2";
 
-import "lib/common.proto";
+import "lib/config/common.proto";
 
 message MacintoshDecoderProto {}
 
 message MacintoshEncoderProto {
 	optional double post_index_gap_us = 1 [default = 0.0,
 		(help) = "post-index gap before first sector header (microseconds)."];
-
-	optional double clock_compensation_factor = 2 [default = 1.0,
-		(help) = "scale the output clock by this much."];
 }
 

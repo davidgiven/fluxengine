@@ -1,47 +1,88 @@
 syntax = "proto2";
 
 import "lib/imagereader/imagereader.proto";
-import "lib/common.proto";
+import "lib/config/common.proto";
 
 message D64OutputProto {}
 
-message LDBSOutputProto {
-	enum DataRate {
-		RATE_HD = 0;
-		RATE_DD = 1;
-		RATE_SD = 2;
-		RATE_ED = 3;
-		RATE_GUESS = -1;
-	}
+message LDBSOutputProto
+{
+    enum DataRate
+    {
+        RATE_HD = 0;
+        RATE_DD = 1;
+        RATE_SD = 2;
+        RATE_ED = 3;
+        RATE_GUESS = -1;
+    }
 
-	enum RecordingMode {
-		RECMODE_MFM = 0;
-		RECMODE_FM = 1;
-		RECMODE_GCR_MAC = 0x12;
-		RECMODE_GCR_PRODOS = 0x14;
-		RECMODE_GCR_LISA = 0x22;
-		RECMODE_GUESS = -1;
-	}
+    enum RecordingMode
+    {
+        RECMODE_MFM = 0;
+        RECMODE_FM = 1;
+        RECMODE_GCR_MAC = 0x12;
+        RECMODE_GCR_PRODOS = 0x14;
+        RECMODE_GCR_LISA = 0x22;
+        RECMODE_GUESS = -1;
+    }
 
-	optional DataRate data_rate = 1 [default=RATE_GUESS, (help) = "data rate to use in LDBS file"];
-	optional RecordingMode recording_mode = 2 [default=RECMODE_GUESS, (help) = "recording mode to use in LDBS file"];
+    optional DataRate data_rate = 1
+        [ default = RATE_GUESS, (help) = "data rate to use in LDBS file" ];
+    optional RecordingMode recording_mode = 2 [
+        default = RECMODE_GUESS,
+        (help) = "recording mode to use in LDBS file"
+    ];
 }
 
 message DiskCopyOutputProto {}
 message DSKOutputProto {}
 message NsiOutputProto {}
 message RawOutputProto {}
+message D88OutputProto {}
+message ImdOutputProto
+{
+    enum DataRate
+    {
+        RATE_HD = 0;
+        RATE_DD = 1;
+        RATE_SD = 2;
+        RATE_GUESS = -1;
+    }
 
-message ImageWriterProto {
-	optional string filename = 1 [(help) = "filename of output sector image"];
-	oneof format {
-		ImgInputOutputProto img = 2;
-		D64OutputProto d64 = 3;
-		LDBSOutputProto ldbs = 4;
-		DiskCopyOutputProto diskcopy = 5;
-		NsiOutputProto nsi = 6;
-		RawOutputProto raw = 7;
-		DSKOutputProto dsk = 8;
-	}
+    enum RecordingMode
+    {
+        RECMODE_MFM = 0;
+        RECMODE_FM = 1;
+        RECMODE_GUESS = -1;
+    }
+    optional DataRate data_rate = 1
+        [ default = RATE_GUESS, (help) = "data rate to use in IMD file" ];
+    optional RecordingMode recording_mode = 2 [
+        default = RECMODE_GUESS,
+        (help) = "recording mode (FM or MFM encoding) to use in IMD file"
+    ];
+    optional string comment = 3 [ (help) = "comment to set in IMD file" ];
 }
 
+// NEXT_TAG: 12
+message ImageWriterProto
+{
+    optional string filename = 1 [ (help) = "filename of output sector image" ];
+    optional bool filesystem_sector_order = 10 [
+        (help) = "read/write sector image in filesystem order",
+        default = false
+    ];
+
+    optional ImageReaderWriterType type = 11
+        [ default = IMAGETYPE_NOT_SET, (help) = "image writer type" ];
+
+    optional ImgInputOutputProto img = 2;
+    optional D64OutputProto d64 = 3;
+    optional LDBSOutputProto ldbs = 4;
+    optional DiskCopyOutputProto diskcopy = 5;
+    optional NsiOutputProto nsi = 6;
+    optional RawOutputProto raw = 7;
+    optional D88OutputProto d88 = 8;
+    optional ImdOutputProto imd = 9;
+    optional DskOutputProto dsk = 10
+}

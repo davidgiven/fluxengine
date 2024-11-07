@@ -1,0 +1,48 @@
+shortname: 'Epson PF-10'
+comment: 'CP/M; 3.5" 40-track DSDD'
+read_support_status: DINOSAUR
+
+documentation:
+<<<
+The Epson PF10 is the disk unit for the Epson Z80 series of 'laptops', running
+CP/M. It uses a single-sided 40-track 3.5" format, which is unusual, but the
+format itself is yet another IBM scheme variant.
+>>>
+
+image_writer {
+	filename: "epsonpf10.img"
+	type: IMAGETYPE_IMG
+}
+
+layout {
+	format_type: FORMATTYPE_40TRACK
+	tracks: 40
+	sides: 2
+	layoutdata {
+		sector_size: 512
+		physical {
+			start_sector: 1
+			count: 9
+		}
+	}
+}
+
+decoder {
+	ibm {}
+}
+
+filesystem {
+	type: CPMFS
+	cpmfs {
+		filesystem_start {
+			track: 4
+		}
+		block_size: 2048
+		dir_entries: 64
+		padding {
+			amount: 1
+			every: 8
+		}
+	}
+}
+

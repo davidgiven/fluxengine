@@ -4,15 +4,24 @@
 #include "libusbp_config.h"
 #include "libusbp.hpp"
 
-struct CandidateDevice
+enum DeviceType
 {
-	libusbp::device device;
-	uint32_t id;
-	std::string serial;
-	std::string serialPort;
+    DEVICE_FLUXENGINE,
+    DEVICE_GREASEWEAZLE,
+    DEVICE_APPLESAUCE,
 };
 
-extern std::vector<std::unique_ptr<CandidateDevice>> findUsbDevices(const std::set<uint32_t>& id);
+extern std::string getDeviceName(DeviceType type);
+
+struct CandidateDevice
+{
+    DeviceType type;
+    libusbp::device device;
+    uint32_t id;
+    std::string serial;
+    std::string serialPort;
+};
+
+extern std::vector<std::shared_ptr<CandidateDevice>> findUsbDevices();
 
 #endif
-

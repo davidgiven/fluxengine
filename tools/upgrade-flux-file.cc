@@ -1,7 +1,7 @@
-#include "globals.h"
-#include "fluxmap.h"
-#include "fluxsink/fluxsink.h"
-#include "bytes.h"
+#include "lib/core/globals.h"
+#include "lib/data/fluxmap.h"
+#include "lib/fluxsink/fluxsink.h"
+#include "lib/core/bytes.h"
 #include "fmt/format.h"
 #include <string.h>
 #include <fstream>
@@ -28,7 +28,7 @@ static bool hasProperties(sqlite3* db);
 void sqlCheck(sqlite3* db, int i)
 {
     if (i != SQLITE_OK)
-        Error() << "database error: " << sqlite3_errmsg(db);
+        error("database error: {}", sqlite3_errmsg(db));
 }
 
 sqlite3* sqlOpen(const std::string filename, int flags)
@@ -36,7 +36,7 @@ sqlite3* sqlOpen(const std::string filename, int flags)
     sqlite3* db;
     int i = sqlite3_open_v2(filename.c_str(), &db, flags, NULL);
     if (i != SQLITE_OK)
-        Error() << "failed: " << sqlite3_errstr(i);
+        error("failed: {}", sqlite3_errstr(i));
 
     return db;
 }
@@ -51,7 +51,7 @@ void sqlStmt(sqlite3* db, const char* sql)
     char* errmsg;
     int i = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (i != SQLITE_OK)
-        Error() << "database error: %s" << errmsg;
+        error("database error: {}", errmsg);
 }
 
 bool hasProperties(sqlite3* db)
@@ -67,7 +67,7 @@ bool hasProperties(sqlite3* db)
 
     int i = sqlite3_step(stmt);
     if (i != SQLITE_ROW)
-        Error() << "Error accessing sqlite metadata";
+        error("Error accessing sqlite metadata");
     bool has_properties = sqlite3_column_int(stmt, 0) != 0;
     sqlCheck(db, sqlite3_finalize(stmt));
 
@@ -121,7 +121,7 @@ std::vector<std::pair<unsigned, unsigned>> sqlFindFlux(sqlite3* db)
         if (i == SQLITE_DONE)
             break;
         if (i != SQLITE_ROW)
-            Error() << "failed to read from database: " << sqlite3_errmsg(db);
+            error("failed to read from database: {}", sqlite3_errmsg(db));
 
         unsigned track = sqlite3_column_int(stmt, 0);
         unsigned side = sqlite3_column_int(stmt, 1);
@@ -151,7 +151,7 @@ long sqlReadIntProperty(sqlite3* db, const std::string& name)
     if (i != SQLITE_DONE)
     {
         if (i != SQLITE_ROW)
-            Error() << "failed to read from database: " << sqlite3_errmsg(db);
+            error("failed to read from database: {}", sqlite3_errmsg(db));
 
         result = sqlite3_column_int(stmt, 0);
     }
@@ -192,7 +192,7 @@ static Bytes sqlReadFluxBytes(sqlite3* db, int track, int side)
     if (i != SQLITE_DONE)
     {
         if (i != SQLITE_ROW)
-            Error() << "failed to read from database: " << sqlite3_errmsg(db);
+            error("failed to read from database: {}", sqlite3_errmsg(db));
 
         const uint8_t* blobptr = (const uint8_t*)sqlite3_column_blob(stmt, 0);
         size_t bloblen = sqlite3_column_bytes(stmt, 0);
@@ -209,8 +209,7 @@ static Bytes sqlReadFluxBytes(sqlite3* db, int track, int side)
                 break;
 
             default:
-                Error() << fmt::format(
-                    "unsupported compression type {}", compression);
+                error("unsupported compression type {}", compression);
         }
     }
     sqlCheck(db, sqlite3_finalize(stmt));
@@ -255,53 +254,66 @@ static void translateFluxVersion2(Fluxmap& fluxmap, const Bytes& bytes)
 
 int main(int argc, const char* argv[])
 {
-    if ((argc != 2) || (strcmp(argv[1], "--help") == 0))
-        syntax();
-
-    std::string filename = argv[1];
-    if (!isSqlite(filename))
+    try
     {
-        std::cout << "File is up to date.\n";
-        exit(0);
-    }
+        if ((argc != 2) || (strcmp(argv[1], "--help") == 0))
+            syntax();
 
-    std::string outFilename = filename + ".out.flux";
-    auto db = sqlOpen(filename, SQLITE_OPEN_READONLY);
-    int version = sqlGetVersion(db);
-
-    {
-        auto fluxsink = FluxSink::createFl2FluxSink(outFilename);
-        for (const auto& locations : sqlFindFlux(db))
+        std::string filename = argv[1];
+        if (!isSqlite(filename))
         {
-            unsigned cylinder = locations.first;
-            unsigned head = locations.second;
-            Bytes bytes = sqlReadFluxBytes(db, cylinder, head);
-            Fluxmap fluxmap;
-            switch (version)
-            {
-                case FLUX_VERSION_2:
-                    translateFluxVersion2(fluxmap, bytes);
-                    break;
-
-                case FLUX_VERSION_3:
-                    fluxmap.appendBytes(bytes);
-                    break;
-
-                default:
-                    Error() << fmt::format(
-                        "you cannot upgrade version {} files (please file a "
-                        "bug)",
-                        version);
-            }
-            fluxsink->writeFlux(cylinder, head, fluxmap);
-            std::cout << '.' << std::flush;
+            std::cout << "File is up to date.\n";
+            exit(0);
         }
 
-        std::cout << "Writing output file...\n";
-    }
+        std::string outFilename = filename + ".out.flux";
+        auto db = sqlOpen(filename, SQLITE_OPEN_READONLY);
+        int version = sqlGetVersion(db);
 
-    if (rename(outFilename.c_str(), filename.c_str()) != 0)
-        Error() << fmt::format(
-            "couldn't replace input file: {}", strerror(errno));
-    return 0;
+        {
+            auto fluxsink = FluxSink::createFl2FluxSink(outFilename);
+            for (const auto& locations : sqlFindFlux(db))
+            {
+                unsigned cylinder = locations.first;
+                unsigned head = locations.second;
+                Bytes bytes = sqlReadFluxBytes(db, cylinder, head);
+                Fluxmap fluxmap;
+                switch (version)
+                {
+                    case FLUX_VERSION_2:
+                        translateFluxVersion2(fluxmap, bytes);
+                        break;
+
+                    case FLUX_VERSION_3:
+                        fluxmap.appendBytes(bytes);
+                        break;
+
+                    default:
+                        error(
+                            "you cannot upgrade version {} files (please file "
+                            "a "
+                            "bug)",
+                            version);
+                }
+                fluxsink->writeFlux(cylinder, head, fluxmap);
+                std::cout << '.' << std::flush;
+            }
+
+            std::cout << "Writing output file...\n";
+        }
+
+        sqlite3_close(db);
+
+        if (remove(filename.c_str()) != 0)
+            error("couldn't remove input file: {}", strerror(errno));
+
+        if (rename(outFilename.c_str(), filename.c_str()) != 0)
+            error("couldn't replace input file: {}", strerror(errno));
+        return 0;
+    }
+    catch (const ErrorException& e)
+    {
+        e.print();
+        exit(1);
+    }
 }

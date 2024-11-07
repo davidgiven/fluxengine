@@ -1,26 +1,33 @@
 syntax = "proto2";
 
+import "arch/agat/agat.proto";
 import "arch/amiga/amiga.proto";
+import "arch/apple2/apple2.proto";
 import "arch/brother/brother.proto";
 import "arch/c64/c64.proto";
 import "arch/ibm/ibm.proto";
 import "arch/macintosh/macintosh.proto";
 import "arch/micropolis/micropolis.proto";
 import "arch/northstar/northstar.proto";
+import "arch/tartu/tartu.proto";
 import "arch/tids990/tids990.proto";
 import "arch/victor9k/victor9k.proto";
-//import "lib/common.proto";
 
-message EncoderProto {
-	oneof format {
-		IbmEncoderProto ibm = 3;
-		BrotherEncoderProto brother = 4;
-		AmigaEncoderProto amiga = 5;
-		MacintoshEncoderProto macintosh = 6;
-		Tids990EncoderProto tids990 = 7;
-		Commodore64EncoderProto c64 = 8;
-		NorthstarEncoderProto northstar = 9;
-		MicropolisEncoderProto micropolis = 10;
-		Victor9kEncoderProto victor9k = 11;
-	}
+message EncoderProto
+{
+    oneof format
+    {
+        IbmEncoderProto ibm = 3;
+        BrotherEncoderProto brother = 4;
+        AmigaEncoderProto amiga = 5;
+        MacintoshEncoderProto macintosh = 6;
+        Tids990EncoderProto tids990 = 7;
+        Commodore64EncoderProto c64 = 8;
+        NorthstarEncoderProto northstar = 9;
+        MicropolisEncoderProto micropolis = 10;
+        Victor9kEncoderProto victor9k = 11;
+        Apple2EncoderProto apple2 = 12;
+        AgatEncoderProto agat = 13;
+        TartuEncoderProto tartu = 14;
+    }
 }

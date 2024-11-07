@@ -1,0 +1,205 @@
+shortname: 'Brother word processors'
+comment: 'GCR family'
+read_support_status: UNICORN
+write_support_status: UNICORN
+
+documentation:
+<<<
+Brother word processor disks are weird, using custom tooling and chipsets.
+They are completely not PC compatible in every possible way other than the
+size.
+
+Different word processors use different disk formats --- the only ones supported
+by FluxEngine are the 120kB and 240kB 3.5" formats. Use the `--120` and `--240`
+options to select which one.
+
+Apparently about 20% of Brother word processors have alignment issues which
+means that the disks can't be read by FluxEngine (because the tracks on the disk
+don't line up with the position of the head in a PC drive). The word processors
+themselves solved this by microstepping until they found where the real track
+is, but normal PC drives aren't capable of doing this.  Particularly with the
+120kB disks, you might want to fiddle with the head bias (e.g.
+`--drive.head_bias=3`) to get a clean read. Keep an eye on the bad sector map
+that's dumped at the end of a read. My word processor likes to put logical track
+0 on physical track 3, which means that logical track 77 is on physical track
+80, so I need that `head_bias` value of 3; luckily my PC drive can access track
+80.
+
+Using FluxEngine to *write* disks isn't a problem, so the
+simplest solution is to use FluxEngine to create a new disk, with the tracks
+aligned properly, and then use a word processor to copy the files you want
+onto it. The new disk can then be read and you can extract the files.
+Obviously this sucks if you don't actually have a word processor, but I can't
+do anything about that.
+
+If you find one of these misaligned disks then *please* [get in
+touch](https://github.com/davidgiven/fluxengine/issues/new); I want to
+investigate.
+>>>
+
+documentation:
+<<<
+Dealing with misaligned disks
+-----------------------------
+
+While FluxEngine can't read misaligned disks directly, Brother word processors
+_can_. If you have access to a compatible word processor, there's a fairly
+simple workaround to allow you to extract the data:
+
+  1. Format a disk using FluxEngine (by simply writing a blank filesystem image
+         to a disk). This will have the correct alignment to work on a PC drive.
+
+  2. Use a word processor to copy the misaligned disk to the newly formatted
+         disk. The machine will happily adjust itself to both sets of alignments.
+
+  3. Use FluxEngine to read the data off the correctly aligned disk.
+
+I realise this is rather unsatisfactory, as the Brother hardware is becoming
+rarer and they cope rather badly with damaged disks, but this is a limitation
+of the hardware of normal PC drives. (It _is_ possible to deliberately misalign
+a drive to make it match up with a bad disk, but this is for experts only --- I
+wouldn't dare.)
+
+Low level format
+----------------
+
+The drive is a single-sided 3.5" drive spinning at not 300 rpm (I don't know
+the precise speed yet but FluxEngine doesn't care). The 240kB disks have 78
+tracks and the 120kB disks have 39.
+
+Each track has 12 256-byte sectors. The drive ignores the index hole so they're
+lined up all anyhow. As FluxEngine can only read from index to index, it
+actually reads two complete revolutions and reassembles the sectors from that.
+
+The underlying encoding is exceptionally weird; they use two different kinds of
+GCR, one kind for the sector header records and a completely different one for
+the data itself. It also has a completely bizarre CRC variant which a genius on
+StackOverflow reverse engineered for me. However, odd though it may be, it does
+seem pretty robust.
+
+See the source code for the GCR tables and CRC routine.
+
+Sectors are about 16.2ms apart on the disk (at 300 rpm). The header and
+data records are 0.694ms apart. (All measured from the beginning of the
+record.) The sector order is 05a3816b4927, which gives a sector skew of 5.
+
+High level format
+-----------------
+
+Once decoded, you end up with a file system image. FluxEngine supports direct
+filesystem access for both kinds of disks.
+
+### 120kB disks
+
+These disks use a proprietary and very simple file system. It's FAT-like
+with an obvious directory and allocation table. It's supported by FluxEngine.
+
+Any files whose names begin with an asterisk (`*`) will be marked as hidden. If
+the file is named `*boot`, then a boot sector will be created which will load
+and run the file at 0x7000 if the machine is started with CODE+Q pressed. So
+far this has only been confirmed to work on a WP-1.
+
+### 240kB disks
+
+Conversely, the 240kB disks turns out to be a completely normal Microsoft FAT
+file system with a media type of 0x58 --- did you know that FAT supports 256
+byte sectors? I didn't --- of the MSX-DOS variety. There's a faint
+possibility that the word processor is based on MSX-DOS, but I haven't
+reverse engineered it to find out.
+
+Standard Linux mtools will access the filesystem image and allow you to move
+files in and out. However, you'll need to change the media type bytes at
+offsets 0x015 and 0x100 from 0x58 to 0xf0 before mtools will touch it. The
+supplied `brother240tool` will do this. Additionally, FluxEngine's own FAT
+file system supports this.
+>>>
+
+image_reader {
+	filename: "brother.img"
+	type: IMAGETYPE_IMG
+}
+
+image_writer {
+	filename: "brother.img"
+	type: IMAGETYPE_IMG
+}
+
+encoder {
+	brother {}
+}
+
+decoder {
+	brother {}
+}
+
+option_group {
+	comment: "$formats"
+
+	option {
+		name: "120"
+		comment: '120kB 3.5" 39-track SS GCR'
+
+		config {
+			layout {
+				format_type: FORMATTYPE_40TRACK
+				tracks: 39
+				sides: 1
+				layoutdata {
+					sector_size: 256
+					physical {
+						start_sector: 0
+						count: 12
+						skew: 5
+					}
+				}
+			}
+
+			encoder {
+				brother {
+					format: BROTHER120
+				}
+			}
+
+			drive {
+				head_bias: 0
+				group_offset: 0
+			}
+
+			filesystem {
+				type: BROTHER120
+			}
+
+		}
+	}
+
+	option {
+		name: "240"
+		comment: '240kB 3.5" 78-track SS GCR'
+
+		config {
+			layout {
+				format_type: FORMATTYPE_80TRACK
+				tracks: 78
+				sides: 1
+				layoutdata {
+					sector_size: 256
+					physical {
+						start_sector: 0
+						count: 12
+						skew: 5
+					}
+				}
+			}
+
+			drive {
+				head_bias: 0
+			}
+
+			filesystem {
+				type: FATFS
+			}
+
+		}
+	}
+}
+

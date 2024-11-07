@@ -10,47 +10,49 @@
 
 namespace snowhouse
 {
-  template<typename ExpectedType>
-  struct HasLengthConstraint : Expression<HasLengthConstraint<ExpectedType>>
-  {
-    HasLengthConstraint(const ExpectedType& expected)
-        : m_expected(expected)
+    template <typename ExpectedType>
+    struct HasLengthConstraint : Expression<HasLengthConstraint<ExpectedType>>
     {
+        HasLengthConstraint(const ExpectedType& expected): m_expected(expected)
+        {
+        }
+
+        template <typename ActualType>
+        bool operator()(const ActualType& actual) const
+        {
+            using SizeType = typename ActualType::size_type;
+            SizeType expectedSize = static_cast<SizeType>(m_expected);
+            return (actual.size() == expectedSize);
+        }
+
+        ExpectedType m_expected;
+    };
+
+    template <typename ExpectedType>
+    inline HasLengthConstraint<ExpectedType> HasLength(
+        const ExpectedType& expected)
+    {
+        return HasLengthConstraint<ExpectedType>(expected);
     }
 
-    template<typename ActualType>
-    bool operator()(const ActualType& actual) const
+    inline HasLengthConstraint<std::string> HasLength(const char* expected)
     {
-      using SizeType = typename ActualType::size_type;
-      SizeType expectedSize = static_cast<SizeType>(m_expected);
-      return (actual.size() == expectedSize);
+        return HasLengthConstraint<std::string>(expected);
     }
 
-    ExpectedType m_expected;
-  };
-
-  template<typename ExpectedType>
-  inline HasLengthConstraint<ExpectedType> HasLength(const ExpectedType& expected)
-  {
-    return HasLengthConstraint<ExpectedType>(expected);
-  }
-
-  inline HasLengthConstraint<std::string> HasLength(const char* expected)
-  {
-    return HasLengthConstraint<std::string>(expected);
-  }
-
-  template<typename ExpectedType>
-  struct Stringizer<HasLengthConstraint<ExpectedType>>
-  {
-    static std::string ToString(const HasLengthConstraint<ExpectedType>& constraint)
+    template <typename ExpectedType>
+    struct Stringizer<HasLengthConstraint<ExpectedType>>
     {
-      std::ostringstream builder;
-      builder << "of length " << snowhouse::Stringize(constraint.m_expected);
+        static std::string ToString(
+            const HasLengthConstraint<ExpectedType>& constraint)
+        {
+            std::ostringstream builder;
+            builder << "of length "
+                    << snowhouse::Stringize(constraint.m_expected);
 
-      return builder.str();
-    }
-  };
+            return builder.str();
+        }
+    };
 }
 
 #endif

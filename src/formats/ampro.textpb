@@ -1,12 +1,59 @@
-comment: 'Ampro 400kB/800kB 5.25" 40/80 track SSDD/DSDD (ro)'
+shortname: 'Ampro Little Board'
+comment: 'CP/M'
+read_support_status: DINOSAUR
+
+documentation:
+<<<
+The Ampro Little Board was a very simple and cheap Z80-based computer from
+1984, which ran CP/M. It was, in fact, a single PCB which you could mount
+on the bottom of a 5.25" drive.
+
+[All about the Ampro Little Board](http://oldcomputers.net/ampro-little-board.html)
+
+It stored either 400kB on a double-sided 40-track drive or 800kB on a
+double-sided 80 track drive. The disk format it used was a slightly quirky
+variation of the standard MFM IBM scheme --- sector numbering starts at 17
+rather than 1 (or Acorn's 0). FluxEngine supports this.
+
+FluxEngine has direct filesystem support for these disks, or you can pass the
+disk images into [cpmtools](http://www.moria.de/~michael/cpmtools/):
+
+```
+$ cpmls -f ampdsdd ampro.img
+0:
+-a60014.e
+amprodsk.com
+bitchk.doc
+bitchk.mac
+cpmmac.mac
+dir.com
+himem.doc
+himem.mac
+kaydiag.lbr
+kayinfo.lbr
+...etc...
+```
+>>>
+
+documentation:
+<<<
+## References
+
+  - [The Ampro Little Board](http://oldcomputers.net/ampro-little-board.html)
+>>>
 
 image_writer {
 	filename: "ampro.img"
-	img {
-		trackdata {
-			sector_range {	
-				start_sector: 17
-			}
+	type: IMAGETYPE_IMG
+}
+
+layout {
+	sides: 2
+	layoutdata {
+		sector_size: 1024
+		physical {	
+			start_sector: 17
+			count: 5
 		}
 	}
 }
@@ -15,14 +62,41 @@ decoder {
 	ibm {}
 }
 
-cylinders {
-	start: 0
-	end: 79
+filesystem {
+	type: CPMFS
+	cpmfs {
+		filesystem_start {
+			track: 1
+		}
+		block_size: 2048
+		dir_entries: 128
+	}
 }
 
-heads {
-	start: 0
-	end: 0
+option_group {
+	comment: "$formats"
+
+	option {
+		name: "400"
+		comment: "400kB 40-track DSDD"
+
+		config {
+			layout {
+				format_type: FORMATTYPE_40TRACK
+				tracks: 40
+			}
+		}
+	}
+
+	option {
+		name: "800"
+		comment: "800kB 80-track DSDD"
+
+		config {
+			layout {
+				format_type: FORMATTYPE_80TRACK
+				tracks: 80
+			}
+		}
+	}
 }
-
-

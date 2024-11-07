@@ -1,76 +1,89 @@
-#include "globals.h"
-#include "flags.h"
-#include "fluxsource/fluxsource.h"
-#include "lib/config.pb.h"
-#include "proto.h"
-#include "utils.h"
-#include "fmt/format.h"
-#include <regex>
+#include "lib/core/globals.h"
+#include "lib/config/config.h"
+#include "lib/config/flags.h"
+#include "lib/fluxsource/fluxsource.h"
+#include "lib/data/fluxmap.h"
+#include "lib/config/config.pb.h"
+#include "lib/config/proto.h"
+#include "lib/core/utils.h"
 
-static bool ends_with(const std::string& value, const std::string& ending)
+std::unique_ptr<FluxSource> FluxSource::create(Config& config)
 {
-    if (ending.size() > value.size())
-        return false;
-    return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
+    if (!config.hasFluxSource())
+        error("no flux source configured");
+    return create(config->flux_source());
 }
 
 std::unique_ptr<FluxSource> FluxSource::create(const FluxSourceProto& config)
 {
-	switch (config.source_case())
-	{
-		case FluxSourceProto::kDrive:
-			return createHardwareFluxSource(config.drive());
+    switch (config.type())
+    {
+        case FLUXTYPE_DRIVE:
+            return createHardwareFluxSource(config.drive());
 
-		case FluxSourceProto::kErase:
-			return createEraseFluxSource(config.erase());
+        case FLUXTYPE_ERASE:
+            return createEraseFluxSource(config.erase());
 
-		case FluxSourceProto::kKryoflux:
-			return createKryofluxFluxSource(config.kryoflux());
+        case FLUXTYPE_KRYOFLUX:
+            return createKryofluxFluxSource(config.kryoflux());
 
-		case FluxSourceProto::kTestPattern:
-			return createTestPatternFluxSource(config.test_pattern());
+        case FLUXTYPE_TEST_PATTERN:
+            return createTestPatternFluxSource(config.test_pattern());
 
-		case FluxSourceProto::kScp:
-			return createScpFluxSource(config.scp());
+        case FLUXTYPE_SCP:
+            return createScpFluxSource(config.scp());
 
-		case FluxSourceProto::kCwf:
-			return createCwfFluxSource(config.cwf());
+        case FLUXTYPE_A2R:
+            return createA2rFluxSource(config.a2r());
 
-		case FluxSourceProto::kFl2:
-			return createFl2FluxSource(config.fl2());
+        case FLUXTYPE_CWF:
+            return createCwfFluxSource(config.cwf());
 
-		default:
-			Error() << "bad input disk configuration";
-			return std::unique_ptr<FluxSource>();
-	}
+        case FLUXTYPE_DMK:
+            return createDmkFluxSource(config.dmk());
+
+        case FLUXTYPE_FLUX:
+            return createFl2FluxSource(config.fl2());
+
+        case FLUXTYPE_FLX:
+            return createFlxFluxSource(config.flx());
+
+        default:
+            return std::unique_ptr<FluxSource>();
+    }
 }
 
-void FluxSource::updateConfigForFilename(FluxSourceProto* proto, const std::string& filename)
+class TrivialFluxSourceIterator : public FluxSourceIterator
 {
+public:
+    TrivialFluxSourceIterator(
+        TrivialFluxSource* fluxSource, int track, int head):
+        _fluxSource(fluxSource),
+        _track(track),
+        _head(head)
+    {
+    }
 
-	static const std::vector<std::pair<std::regex, std::function<void(const std::string&)>>> formats =
-	{
-		{ std::regex("^(.*\\.flux)$"),     [&](const auto& s) { proto->mutable_fl2()->set_filename(s); }},
-		{ std::regex("^(.*\\.scp)$"),      [&](const auto& s) { proto->mutable_scp()->set_filename(s); }},
-		{ std::regex("^(.*\\.cwf)$"),      [&](const auto& s) { proto->mutable_cwf()->set_filename(s); }},
-		{ std::regex("^erase:$"),          [&](const auto& s) { proto->mutable_erase(); }},
-		{ std::regex("^kryoflux:(.*)$"),   [&](const auto& s) { proto->mutable_kryoflux()->set_directory(s); }},
-		{ std::regex("^testpattern:(.*)"), [&](const auto& s) { proto->mutable_test_pattern(); }},
-		{ std::regex("^drive:(.*)"),       [&](const auto& s) { proto->mutable_drive()->set_drive(std::stoi(s)); }},
-	};
+    bool hasNext() const override
+    {
+        return !!_fluxSource;
+    }
 
-	for (const auto& it : formats)
-	{
-		std::smatch match;
-		if (std::regex_match(filename, match, it.first))
-		{
-			it.second(match[1]);
-			return;
-		}
-	}
+    std::unique_ptr<const Fluxmap> next() override
+    {
+        auto fluxmap = _fluxSource->readSingleFlux(_track, _head);
+        _fluxSource = nullptr;
+        return fluxmap;
+    }
 
-	Error() << fmt::format("unrecognised flux filename '{}'", filename);
+private:
+    TrivialFluxSource* _fluxSource;
+    int _track;
+    int _head;
+};
+
+std::unique_ptr<FluxSourceIterator> TrivialFluxSource::readFlux(
+    int track, int head)
+{
+    return std::make_unique<TrivialFluxSourceIterator>(this, track, head);
 }
-
-
-

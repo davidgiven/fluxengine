@@ -1,0 +1,42 @@
+syntax = "proto2";
+
+enum FluxMagic {
+	MAGIC = 0x466c7578;
+}
+
+enum FluxFileVersion {
+	VERSION_1 = 1;
+	VERSION_2 = 2;
+}
+
+message TrackFluxProto {
+	optional int32 track = 1;
+	optional int32 head = 2;
+	repeated bytes flux = 3;
+}
+
+enum DriveType {
+	DRIVETYPE_UNKNOWN = 0;
+	DRIVETYPE_40TRACK = 1;
+	DRIVETYPE_80TRACK = 2;
+	DRIVETYPE_APPLE2 = 3;
+}
+
+enum FormatType {
+	FORMATTYPE_UNKNOWN = 0;
+	FORMATTYPE_40TRACK = 1;
+	FORMATTYPE_80TRACK = 2;
+}
+
+// NEXT: 8
+message FluxFileProto {
+	optional int32 magic = 1;
+	optional FluxFileVersion version = 2;
+	repeated TrackFluxProto track = 3;
+	optional double rotational_period_ms = 4;
+	optional DriveType drive_type = 6 [default = DRIVETYPE_UNKNOWN];
+	optional FormatType format_type = 7 [default = FORMATTYPE_UNKNOWN];
+
+	reserved 5;
+}
+

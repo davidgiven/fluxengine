@@ -1,41 +1,45 @@
-#include "globals.h"
-#include "flags.h"
+#include "lib/core/globals.h"
+#include "lib/config/config.h"
+#include "lib/config/flags.h"
 #include "usb.h"
 #include "libusbp_config.h"
 #include "libusbp.hpp"
 #include "protocol.h"
-#include "fluxmap.h"
-#include "bytes.h"
-#include "proto.h"
+#include "lib/data/fluxmap.h"
+#include "lib/core/bytes.h"
+#include "lib/config/proto.h"
 #include "usbfinder.h"
-#include "greaseweazle.h"
-#include "fmt/format.h"
+#include "lib/core/logger.h"
+#include "lib/external/applesauce.h"
+#include "lib/external/greaseweazle.h"
 
 static USB* usb = NULL;
 
 USB::~USB() {}
 
-static std::unique_ptr<CandidateDevice> selectDevice()
+static std::shared_ptr<CandidateDevice> selectDevice()
 {
-    auto candidates = findUsbDevices({FLUXENGINE_ID, GREASEWEAZLE_ID});
+    auto candidates = findUsbDevices();
     if (candidates.size() == 0)
-        Error() << "no devices found (is one plugged in? Do you have the "
-                   "appropriate permissions?";
+        error(
+            "no devices found (is one plugged in? Do you have the "
+            "appropriate permissions?");
 
-    if (config.usb().has_serial())
+    if (globalConfig()->usb().has_serial())
     {
-        auto wantedSerial = config.usb().serial();
+        auto wantedSerial = globalConfig()->usb().serial();
         for (auto& c : candidates)
         {
             if (c->serial == wantedSerial)
-                return std::move(c);
+                return c;
         }
-        Error() << "serial number not found (try without one to list or "
-                   "autodetect devices)";
+        error(
+            "serial number not found (try without one to list or "
+            "autodetect devices)");
     }
 
     if (candidates.size() == 1)
-        return std::move(candidates[0]);
+        return candidates[0];
 
     std::cerr << "More than one device detected; use --usb.serial=<serial> to "
                  "select one:\n";
@@ -50,7 +54,12 @@ static std::unique_ptr<CandidateDevice> selectDevice()
 
             case GREASEWEAZLE_ID:
                 std::cerr << fmt::format(
-                    "GreaseWeazle: {} on {}\n", c->serial, c->serialPort);
+                    "Greaseweazle: {} on {}\n", c->serial, c->serialPort);
+                break;
+
+            case APPLESAUCE_ID:
+                std::cerr << fmt::format(
+                    "Applesauce: {} on {}\n", c->serial, c->serialPort);
                 break;
         }
     }
@@ -61,13 +70,20 @@ USB* get_usb_impl()
 {
     /* Special case for certain configurations. */
 
-    if (config.usb().has_greaseweazle() &&
-        config.usb().greaseweazle().has_port())
+    if (globalConfig()->usb().has_greaseweazle() &&
+        globalConfig()->usb().greaseweazle().has_port())
     {
-        const auto& conf = config.usb().greaseweazle();
-        std::cerr << fmt::format(
-            "Using GreaseWeazle on serial port {}\n", conf.port());
-        return createGreaseWeazleUsb(conf.port(), conf);
+        const auto& conf = globalConfig()->usb().greaseweazle();
+        log("Using Greaseweazle on serial port {}", conf.port());
+        return createGreaseweazleUsb(conf.port(), conf);
+    }
+
+    if (globalConfig()->usb().has_applesauce() &&
+        globalConfig()->usb().applesauce().has_port())
+    {
+        const auto& conf = globalConfig()->usb().applesauce();
+        log("Using Applesauce on serial port {}", conf.port());
+        return createApplesauceUsb(conf.port(), conf);
     }
 
     /* Otherwise, select a device by USB ID. */
@@ -76,18 +92,25 @@ USB* get_usb_impl()
     switch (candidate->id)
     {
         case FLUXENGINE_ID:
-            std::cerr << fmt::format(
-                "Using FluxEngine {}\n", candidate->serial);
+            log("Using FluxEngine {}", candidate->serial);
             return createFluxengineUsb(candidate->device);
 
         case GREASEWEAZLE_ID:
-            std::cerr << fmt::format("Using GreaseWeazle {} on {}\n",
+            log("Using Greaseweazle {} on {}",
                 candidate->serial,
                 candidate->serialPort);
-            return createGreaseWeazleUsb(
-                candidate->serialPort, config.usb().greaseweazle());
+            return createGreaseweazleUsb(
+                candidate->serialPort, globalConfig()->usb().greaseweazle());
 
-        default: Error() << "internal";
+        case APPLESAUCE_ID:
+            log("Using Applesauce {} on {}",
+                candidate->serial,
+                candidate->serialPort);
+            return createApplesauceUsb(
+                candidate->serialPort, globalConfig()->usb().applesauce());
+
+        default:
+            error("internal");
     }
 }
 

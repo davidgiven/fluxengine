@@ -1,29 +1,18 @@
 syntax = "proto2";
 
-import "lib/common.proto";
+import "lib/config/common.proto";
 
 message IbmDecoderProto {
-	// Next: 10
+	// Next: 11
 	message TrackdataProto {
-		message SectorsProto {
-			repeated int32 sector = 1            [(help) = "require these sectors to exist for a good read"];
-		}
-		message SectorRangeProto {
-			optional int32 min_sector = 1        [(help) = "require these sectors to exist for a good read"];
-			optional int32 max_sector = 2        [(help) = "require these sectors to exist for a good read"];
-		}
-
-		optional int32 cylinder = 7              [(help) = "if set, the format applies only to this track"];
+		optional int32 track = 7              [(help) = "if set, the format applies only to this track"];
 		optional int32 head = 8                  [(help) = "if set, the format applies only to this head"];
 
 		optional bool ignore_side_byte = 2       [default = false, (help) = "ignore side byte in sector header"];
 		optional bool ignore_track_byte = 6      [default = false, (help) = "ignore track byte in sector header"];
-		optional bool swap_sides = 4             [default = false, (help) = "put logical side 1 on physical side 0"];
+		optional bool invert_side_byte = 4       [default = false, (help) = "invert the side byte in the sector header"];
 
-		oneof required_sectors {
-			SectorsProto sectors = 5             [(help) = "require these sectors to exist for a good read"];
-			SectorRangeProto sector_range = 9    [(help) = "require these sectors to exist for a good read"];
-		}
+		repeated int32 ignore_sector = 10        [(help) = "sectors with these IDs will not be read"];
 	}
 
 	repeated TrackdataProto trackdata = 1;
@@ -32,21 +21,11 @@ message IbmDecoderProto {
 message IbmEncoderProto {
 	// Next: 20
 	message TrackdataProto {
-		message SectorsProto {
-			repeated int32 sector = 1		[(help) = "write these sectors (in order) on each track"];
-		}
-		message SectorRangeProto {
-			optional int32 min_sector = 1   [(help) = "write these sectors (in order) on each track"];
-			optional int32 max_sector = 2   [(help) = "write these sectors (in order) on each track"];
-		}
-
-		optional int32 cylinder = 15        [(help) = "if set, the format applies only to this track"];
+		optional int32 track = 15        [(help) = "if set, the format applies only to this track"];
 		optional int32 head = 16            [(help) = "if set, the format applies only to this head"];
 
-		optional double track_length_ms = 1 [(help) = "length of track"];
-		optional int32 sector_size = 2      [default=512, (help) = "number of bytes per sector"];
 		optional bool emit_iam = 3          [default=true, (help) = "whether to emit an IAM record"];
-		optional double clock_rate_khz = 5  [(help) = "data clock rate"];
+		optional double target_clock_period_us = 5  [default=4, (help) = "data clock rate on target disk"];
 		optional bool use_fm = 6            [default=false, (help) = "whether to use FM encoding rather than MFM"];
 		optional int32 idam_byte = 7        [default=0x5554, (help) = "16-bit raw bit pattern of IDAM byte"];
 		optional int32 dam_byte = 8         [default=0x5545, (help) = "16-bit raw bit pattern of DAM byte"];
@@ -54,13 +33,9 @@ message IbmEncoderProto {
 		optional int32 gap1 = 10            [default=50, (help) = "size of gap 2 (the post-ID gap)"];
 		optional int32 gap2 = 11            [default=22, (help) = "size of gap 3 (the pre-data gap)"];
 		optional int32 gap3 = 12            [default=80, (help) = "size of gap 4 (the post-data or format gap)"];
-		optional bool swap_sides = 14       [default=false, (help) = "swap side bytes when writing"];
+		optional bool invert_side_byte = 19 [default=false, (help) = "invert the side byte before writing"];
 		optional int32 gap_fill_byte = 18   [default=0x9254, (help) = "16-bit raw bit pattern of gap fill byte"];
-
-		oneof required_sectors {
-			SectorsProto sectors = 17            [(help) = "require these sectors to exist for a good read"];
-			SectorRangeProto sector_range = 19   [(help) = "require these sectors to exist for a good read"];
-		}
+		optional double target_rotational_period_ms = 1 [default=200, (help) = "rotational period of target disk"];
 	}
 
 	repeated TrackdataProto trackdata = 1;

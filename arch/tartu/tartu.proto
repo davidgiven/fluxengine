@@ -1,0 +1,27 @@
+syntax = "proto2";
+
+import "lib/config/common.proto";
+
+message TartuDecoderProto {}
+
+message TartuEncoderProto {
+    optional double clock_period_us = 1
+        [ default = 2.0, (help) = "clock rate on the real device (for MFM)" ];
+    optional double target_rotational_period_ms = 2
+        [ default=200, (help) = "rotational period of target disk" ];
+    optional double gap1_us = 3
+        [ default = 1200,
+          (help) = "size of gap 1 (the post-index gap)" ];
+    optional double gap3_us = 4
+        [ default = 150,
+          (help) = "size of gap 3 (the pre-data gap)" ];
+    optional double gap4_us = 5
+        [ default = 180,
+          (help) = "size of gap 4 (the post-data or format gap)" ];
+    optional uint64 header_marker = 6
+        [ default = 0xaaaaaaaa44895554,
+          (help) = "64-bit raw bit pattern of header record marker" ];
+    optional uint64 data_marker = 7
+        [ default = 0xaaaaaaaa44895545,
+          (help) = "64-bit raw bit pattern of data record marker" ];
+}

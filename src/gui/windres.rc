@@ -1,0 +1,9 @@
+/* © 2023 David Given.
+ * FluxEngine is licensed under the MIT open source license. See the COPYING
+ * file in this distribution for the full text.
+ */
+
+#include "winuser.h"
+
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "src/gui/manifest.xml"
+101 ICON DISCARDABLE ".obj/windows/extras/+fluxengine_ico/fluxengine.ico"

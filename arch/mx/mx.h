@@ -1,8 +1,8 @@
 #ifndef MX_H
 #define MX_H
 
-#include "decoders/decoders.h"
+#include "lib/decoders/decoders.h"
 
-extern std::unique_ptr<AbstractDecoder> createMxDecoder(const DecoderProto& config);
+extern std::unique_ptr<Decoder> createMxDecoder(const DecoderProto& config);
 
 #endif

@@ -1,34 +1,74 @@
-comment: 'VDS Eco1 1210kB 77-track mixed format DSHD (ro)'
+shortname: 'VDS Eco1'
+comment: 'CP/M; 1210kB 77-track mixed format DSHD'
+read_support_status: DINOSAUR
+
+documentation:
+<<<
+The Eco1 is a Italian CP/M machine produced in 1982. It had 64kB of RAM, in
+later models expandable up to 384kB, and _two_ Z80 processors. One of these was
+used solely for managing the twin 8" drives, each storing 1.2MB, which was
+quite impressive for a CP/M machine in those days. Visually it is best
+described as 'very brown'.
+
+<div style="text-align: center">
+<a href="vds-eco1.jpg"> <img src="vds-eco1.jpg" style="width:80%" alt="A contemporary advert for the Eco1"/></a>
+</div>
+
+Its format is standard IBM scheme, but with an interesting wrinkle: there are
+_three_ different formatting zones on the disk:
+
+  - Track 0 side 0: 26 sectors, 128 bytes per sector (3296 bytes)
+  - Track 0 side 1: 26 sectors, 256 bytes per sector (6656 bytes)
+  - All others: 16 sectors, 512 bytes per sector (8192 bytes)
+
+The standard `read ibm` command will autodetect and read these disks, but due
+to the format confusing the size autodetection the images need postprocessing
+to be useful, so there's a custom profile for the Eco1 which produces sensible
+images.
+>>>
+
+documentation:
+<<<
+## References
+
+  - [Apulio Retrocomputing's page on the
+	Eco1](https://www.apuliaretrocomputing.it/wordpress/?p=8976)
+>>>
 
 image_writer {
 	filename: "eco1.img"
-	img {
-		tracks: 77
-		sides: 2
-		trackdata {
-			sector_size: 512
-			sector_range {
-				start_sector: 1
-				sector_count: 16
-			}
+	type: IMAGETYPE_IMG
+}
+
+layout {
+	format_type: FORMATTYPE_80TRACK
+	tracks: 77
+	sides: 2
+	layoutdata {
+		track: 0
+		side: 0
+		sector_size: 128
+		physical {
+			start_sector: 1
+			count: 26
 		}
-		trackdata {
-			track: 0
-			side: 0
-			sector_size: 128
-			sector_range {
-				start_sector: 1
-				sector_count: 26
-			}
+	}
+	layoutdata {
+		track: 0
+		side: 1
+		sector_size: 256
+		physical {
+			start_sector: 1
+			count: 26
 		}
-		trackdata {
-			track: 0
-			side: 1
-			sector_size: 256
-			sector_range {
-				start_sector: 1
-				sector_count: 26
-			}
+	}
+	layoutdata {
+		track: 1
+		up_to_track: 76
+		sector_size: 512
+		physical {
+			start_sector: 1
+			count: 16
 		}
 	}
 }
@@ -37,14 +77,15 @@ decoder {
 	ibm {}
 }
 
-cylinders {
-	start: 0
-	end: 76
-}
-
-heads {
-	start: 0
-	end: 1
+filesystem {
+	type: CPMFS
+	cpmfs {
+		filesystem_start {
+			track: 2
+		}
+		block_size: 2048
+		dir_entries: 64
+	}
 }
 
 

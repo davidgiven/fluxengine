@@ -10,45 +10,50 @@
 
 namespace snowhouse
 {
-  template<typename ExpectedType>
-  struct IsGreaterThanOrEqualToConstraint : Expression<IsGreaterThanOrEqualToConstraint<ExpectedType>>
-  {
-    IsGreaterThanOrEqualToConstraint(const ExpectedType& expected)
-        : m_expected(expected)
+    template <typename ExpectedType>
+    struct IsGreaterThanOrEqualToConstraint :
+        Expression<IsGreaterThanOrEqualToConstraint<ExpectedType>>
     {
+        IsGreaterThanOrEqualToConstraint(const ExpectedType& expected):
+            m_expected(expected)
+        {
+        }
+
+        template <typename ActualType>
+        bool operator()(const ActualType& actual) const
+        {
+            return (actual >= m_expected);
+        }
+
+        ExpectedType m_expected;
+    };
+
+    template <typename ExpectedType>
+    inline IsGreaterThanOrEqualToConstraint<ExpectedType>
+    IsGreaterThanOrEqualTo(const ExpectedType& expected)
+    {
+        return IsGreaterThanOrEqualToConstraint<ExpectedType>(expected);
     }
 
-    template<typename ActualType>
-    bool operator()(const ActualType& actual) const
+    inline IsGreaterThanOrEqualToConstraint<std::string> IsGreaterThanOrEqualTo(
+        const char* expected)
     {
-      return (actual >= m_expected);
+        return IsGreaterThanOrEqualToConstraint<std::string>(expected);
     }
 
-    ExpectedType m_expected;
-  };
-
-  template<typename ExpectedType>
-  inline IsGreaterThanOrEqualToConstraint<ExpectedType> IsGreaterThanOrEqualTo(const ExpectedType& expected)
-  {
-    return IsGreaterThanOrEqualToConstraint<ExpectedType>(expected);
-  }
-
-  inline IsGreaterThanOrEqualToConstraint<std::string> IsGreaterThanOrEqualTo(const char* expected)
-  {
-    return IsGreaterThanOrEqualToConstraint<std::string>(expected);
-  }
-
-  template<typename ExpectedType>
-  struct Stringizer<IsGreaterThanOrEqualToConstraint<ExpectedType>>
-  {
-    static std::string ToString(const IsGreaterThanOrEqualToConstraint<ExpectedType>& constraint)
+    template <typename ExpectedType>
+    struct Stringizer<IsGreaterThanOrEqualToConstraint<ExpectedType>>
     {
-      std::ostringstream builder;
-      builder << "greater than or equal to " << snowhouse::Stringize(constraint.m_expected);
+        static std::string ToString(
+            const IsGreaterThanOrEqualToConstraint<ExpectedType>& constraint)
+        {
+            std::ostringstream builder;
+            builder << "greater than or equal to "
+                    << snowhouse::Stringize(constraint.m_expected);
 
-      return builder.str();
-    }
-  };
+            return builder.str();
+        }
+    };
 }
 
 #endif

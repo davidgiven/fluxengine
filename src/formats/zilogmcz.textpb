@@ -1,21 +1,69 @@
-comment: 'Zilog MCZ 320kB 8" 77-track SS hard-sectored (ro)'
+shortname: 'Zilog MCZ'
+comment: '320kB 8" 77-track SSSD hard-sectored'
+read_support_status: DINOSAUR
+
+documentation:
+<<<
+The Zilog MCZ is an extremely early Z80 development system, produced by
+Zilog, which came out in 1976. It used twin 8-inch hard sectored floppy
+drives; here's one at the <a
+href="http://www.computinghistory.org.uk/det/12157/Zilog-Z-80-Microcomputer-System/">Centre
+for Computing History</a>:
+
+<div style="text-align: center">
+<a href="http://www.computinghistory.org.uk/det/12157/Zilog-Z-80-Microcomputer-System/">
+<img src="zilogmcz.jpg" style="max-width: 60%" alt="A Zilog MCZ at the Centre For Computing History"></a>
+</div>
+
+The MCZ ran Zilog's own operating system, Z80-RIO, and used 77 track
+single-sided disks, with 32 sectors (each marked by an index hole), with 132
+bytes per sector --- 128 bytes of user payload plus two two-byte metadata
+words used to construct linked lists of sectors for storing files. These
+stored 320kB each.
+
+FluxEngine has read support for these, including support for RIO's ZDOS file
+system.
+>>>
+
+documentation:
+<<<
+## References
+
+  * [About the Zilog MCZ](http://www.retrotechnology.com/restore/zilog.html),
+    containing lots of useful links
+
+  * [The hardware user's manual](https://amaus.org/static/S100/zilog/ZDS/Zilog%20ZDS%201-25%20Hardware%20Users%20Manual.pdf)
+>>>
 
 image_writer {
 	filename: "zilogmcz.img"
-	img {}
+	type: IMAGETYPE_IMG
 }
 
 decoder {
 	zilogmcz {}
 }
 
-cylinders {
-	start: 0
-	end: 76
+layout {
+	format_type: FORMATTYPE_40TRACK
+	tracks: 77
+	sides: 1
+	layoutdata {
+		sector_size: 132
+		physical {
+			start_sector: 0
+			count: 32
+		}
+	}
 }
 
-heads {
-	start: 0
-	end: 0
+filesystem {
+	type: ZDOS
+	zdos {
+		filesystem_start {
+			track: 22
+			sector: 0
+		}
+	}
 }
 

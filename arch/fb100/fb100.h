@@ -5,7 +5,6 @@
 #define FB100_ID_SIZE 17
 #define FB100_PAYLOAD_SIZE 0x500
 
-extern std::unique_ptr<AbstractDecoder> createFb100Decoder(const DecoderProto& config);
+extern std::unique_ptr<Decoder> createFb100Decoder(const DecoderProto& config);
 
 #endif
-

@@ -1,43 +1,8 @@
 syntax = "proto2";
 
-import "lib/common.proto";
+import "lib/config/common.proto";
 
-message ImgInputOutputProto {
-	enum Order {
-		UNDEFINED = 0;
-		CHS = 1;
-		HCS = 2;
-	}
-
-	message SectorsProto {
-		repeated int32 sector = 1 [(help) = "sector ID"];
-	}
-
-	message SectorRangeProto {
-		optional int32 start_sector = 1 [default=0, (help) = "first sector ID"];
-		optional int32 sector_count = 2 [default=1, (help) = "total number of sectors"];
-	}
-
-	message TrackdataProto {
-		optional int32 track = 1       [(help) = "if present, this format only applies to this track"];
-		optional int32 up_to_track = 5 [(help) = "if present, forms a range with track"];
-		optional int32 side = 2        [(help) = "if present, this format only applies to this side"];
-
-		optional int32 sector_size = 3 [default=512, (help) = "number of bytes per sector"];
-
-		oneof sectors_oneof {
-			SectorsProto sectors = 4 [(help) = "use a list of sector IDs"];
-			SectorRangeProto sector_range = 6 [(help) = "use a range of contiguous IDs"];
-		}
-	}
-
-	repeated TrackdataProto trackdata = 4 [(help) = "per-track format information (repeatable)"];
-	optional int32 tracks = 5 [default=0, (help) = "number of tracks in image"];
-	optional int32 sides = 6 [default=0, (help) = "number of sides in image"];
-	optional int32 physical_offset = 7 [default=0, (help) = "logical:physical track offset"];
-	optional int32 physical_step = 8 [default=1, (help) = "logical:physical track step"];
-	optional Order order = 9 [default=CHS, (help) = "the order in which to emit tracks in the image"];
-}
+message ImgInputOutputProto {}
 
 message DiskCopyInputProto {}
 message ImdInputProto {}
@@ -48,24 +13,31 @@ message Td0InputProto {}
 message DimInputProto {}
 message FdiInputProto {}
 message D88InputProto {}
-message NFDInputProto {}
-message DSKInputProto {}
+message NfdInputProto {}
+message DskKInputProto {}
 
-message ImageReaderProto {
-	optional string filename = 1 [(help) = "filename of input sector image"];
-	oneof format {
-		ImgInputOutputProto img = 2;
-		DiskCopyInputProto diskcopy = 3;
-		ImdInputProto imd = 4;
-		Jv3InputProto jv3 = 5;
-		D64InputProto d64 = 6;
-		NsiInputProto nsi = 7;
-		Td0InputProto td0 = 8;
-		DimInputProto dim = 9;
-		FdiInputProto fdi = 10;
-		D88InputProto d88 = 11;
-        NFDInputProto nfd = 12;
-		DSKInputProto dsk = 13;
-	}
+// NEXT_TAG: 15
+message ImageReaderProto
+{
+    optional string filename = 1 [ (help) = "filename of input sector image" ];
+    optional bool filesystem_sector_order = 13 [
+        (help) = "read/write sector image in filesystem order",
+        default = false
+    ];
+
+	optional ImageReaderWriterType type = 14
+		[default = IMAGETYPE_NOT_SET, (help) = "input image type"];
+
+	optional ImgInputOutputProto img = 2;
+	optional DiskCopyInputProto diskcopy = 3;
+	optional ImdInputProto imd = 4;
+	optional Jv3InputProto jv3 = 5;
+	optional D64InputProto d64 = 6;
+	optional NsiInputProto nsi = 7;
+	optional Td0InputProto td0 = 8;
+	optional DimInputProto dim = 9;
+	optional FdiInputProto fdi = 10;
+	optional D88InputProto d88 = 11;
+	optional NfdInputProto nfd = 12;
+	optional DskInputProto dsk = 13;
 }
-

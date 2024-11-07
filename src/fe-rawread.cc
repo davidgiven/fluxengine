@@ -1,76 +1,69 @@
-#include "globals.h"
-#include "flags.h"
-#include "reader.h"
-#include "fluxmap.h"
-#include "decoders/decoders.h"
-#include "macintosh/macintosh.h"
-#include "sector.h"
-#include "proto.h"
-#include "fluxsink/fluxsink.h"
-#include "fluxsource/fluxsource.h"
-#include "arch/brother/brother.h"
-#include "arch/ibm/ibm.h"
-#include "imagewriter/imagewriter.h"
-#include "fmt/format.h"
+#include "lib/core/globals.h"
+#include "lib/config/config.h"
+#include "lib/config/flags.h"
+#include "lib/algorithms/readerwriter.h"
+#include "lib/data/fluxmap.h"
+#include "lib/decoders/decoders.h"
+#include "lib/data/sector.h"
+#include "lib/config/proto.h"
+#include "lib/fluxsink/fluxsink.h"
+#include "lib/fluxsource/fluxsource.h"
+#include "lib/imagewriter/imagewriter.h"
 #include "fluxengine.h"
 #include <google/protobuf/text_format.h>
 #include <fstream>
 
 static FlagGroup flags;
 
-static StringFlag sourceFlux(
-	{ "-s", "--source" },
-	"flux file to read from",
-	"",
-	[](const auto& value)
-	{
-		FluxSource::updateConfigForFilename(config.mutable_flux_source(), value);
-	});
+static StringFlag sourceFlux({"-s", "--source"},
+    "flux file to read from",
+    "",
+    [](const auto& value)
+    {
+        globalConfig().setFluxSource(value);
+    });
 
-static StringFlag destFlux(
-	{ "-d", "--dest" },
-	"destination flux file to write to",
-	"",
-	[](const auto& value)
-	{
-		FluxSink::updateConfigForFilename(config.mutable_flux_sink(), value);
-	});
+static StringFlag destFlux({"-d", "--dest"},
+    "destination flux file to write to",
+    "",
+    [](const auto& value)
+    {
+        globalConfig().setFluxSink(value);
+    });
 
-static StringFlag srcCylinders(
-	{ "--cylinders", "-c" },
-	"cylinders to read from",
-	"",
-	[](const auto& value)
-	{
-		setRange(config.mutable_cylinders(), value);
-	});
+static StringFlag srcTracks({"--cylinders", "-c"},
+    "tracks to read from",
+    "",
+    [](const auto& value)
+    {
+        setRange(globalConfig().overrides()->mutable_tracks(), value);
+    });
 
-static StringFlag srcHeads(
-	{ "--heads", "-h" },
-	"heads to read from",
-	"",
-	[](const auto& value)
-	{
-		setRange(config.mutable_heads(), value);
-	});
+static StringFlag srcHeads({"--heads", "-h"},
+    "heads to read from",
+    "",
+    [](const auto& value)
+    {
+        setRange(globalConfig().overrides()->mutable_heads(), value);
+    });
 
 int mainRawRead(int argc, const char* argv[])
 {
-	setRange(config.mutable_cylinders(), "0-79");
-	setRange(config.mutable_heads(), "0-1");
+    setRange(globalConfig().overrides()->mutable_tracks(), "0-79");
+    setRange(globalConfig().overrides()->mutable_heads(), "0-1");
 
-	if (argc == 1)
-		showProfiles("rawread", formats);
+    if (argc == 1)
+        showProfiles("rawread", formats);
+    globalConfig().overrides()->mutable_flux_source()->set_type(FLUXTYPE_DRIVE);
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
-	if (config.flux_sink().has_drive())
-		Error() << "you can't use rawread to write to hardware";
+    if (globalConfig()->flux_sink().type() == FLUXTYPE_DRIVE)
+        error("you can't use rawread to write to hardware");
 
-	std::unique_ptr<FluxSource> fluxSource(FluxSource::create(config.flux_source()));
-	std::unique_ptr<FluxSink> fluxSink(FluxSink::create(config.flux_sink()));
+    auto fluxSource = FluxSource::create(globalConfig());
+    auto fluxSink = FluxSink::create(globalConfig());
 
-	rawReadDiskCommand(*fluxSource, *fluxSink);
+    rawReadDiskCommand(*fluxSource, *fluxSink);
 
     return 0;
 }
-

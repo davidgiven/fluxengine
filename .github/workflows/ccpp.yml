@@ -2,63 +2,100 @@ name: C/C++ CI
 
 on: [push]
 
+concurrency: 
+  group: environment-${{ github.head_ref }}
+  cancel-in-progress: true
+
 jobs:
   build-linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
       with:
-        fetch-depth: 1
+        repository: 'davidgiven/fluxengine'
+        path: 'fluxengine'
+    - uses: actions/checkout@v4
+      with:
+        repository: 'davidgiven/fluxengine-testdata'
+        path: 'fluxengine-testdata'
     - name: apt
-      run: sudo apt update && sudo apt install libudev-dev libsqlite3-dev ninja-build protobuf-compiler
+      run: |
+        sudo apt install libudev-dev libsqlite3-dev protobuf-compiler libwxgtk3.0-gtk3-dev libfmt-dev libprotobuf-dev wx-common
     - name: make
-      run: make
+      run: CXXFLAGS="-Wp,-D_GLIBCXX_ASSERTIONS" make -j`nproc` -C fluxengine
 
-  build-macos:
-    runs-on: macos-latest
+  build-macos-current:
+    strategy:
+      matrix:
+        runs-on: [macos-13, macos-latest]
+    runs-on: ${{ matrix.runs-on }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
-        fetch-depth: 1
+        repository: 'davidgiven/fluxengine'
+        path: 'fluxengine'
+    - uses: actions/checkout@v4
+      with:
+        repository: 'davidgiven/fluxengine-testdata'
+        path: 'fluxengine-testdata'
     - name: brew
-      run: brew install sqlite pkg-config libusb ninja protobuf truncate
+      run: |
+        brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg
     - name: make
-      run: make
+      run: gmake -C fluxengine -j2
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ github.event.repository.name }}.${{ github.sha }}.fluxengine.${{ runner.arch }}.pkg
+        path: fluxengine/FluxEngine.pkg
 
   build-windows:
     runs-on: windows-latest
-    defaults:
-      run:
-        shell: msys2 {0}
+
     steps:
-    - uses: msys2/setup-msys2@v2
-      with:
-        update: true
-        msystem: MINGW32
-        install: >-
-          make
-          ninja
-          mingw-w64-i686-libusb
-          mingw-w64-i686-sqlite3
-          mingw-w64-i686-zlib
-          mingw-w64-i686-gcc
-          zip
-          mingw-w64-i686-protobuf
-          vim
-          diffutils
-    - uses: actions/checkout@v1
-      with:
-        fetch-depth: 1
-    - name: build
+    - name: setup WSL
       run: |
-        make
+        curl -L https://github.com/WhitewaterFoundry/Fedora-Remix-for-WSL/releases/download/40.1.0/Fedora-Remix-for-WSL-SL_40.1.0.0_x64_arm64.msixbundle -o fedora.msixbundle
+        unzip fedora.msixbundle Fedora-Remix-for-WSL-SL_40.1.0.0_x64.msix
+        unzip Fedora-Remix-for-WSL-SL_40.1.0.0_x64.msix install.tar.gz
+        wsl --update
+        wsl --set-default-version 2
+        wsl --import fedora fedora install.tar.gz
+        wsl --set-default fedora
+        wsl sh -c 'dnf -y install https://github.com/rpmsphere/noarch/raw/master/r/rpmsphere-release-38-1.noarch.rpm'
+        wsl sh -c 'dnf -y install --setop=install_weak_deps=False gcc gcc-c++ protobuf-c-compiler protobuf-devel fmt-devel systemd-devel sqlite-devel wxGTK-devel mingw32-gcc mingw32-gcc-c++ mingw32-zlib-static mingw32-protobuf-static mingw32-sqlite-static mingw32-wxWidgets3-static mingw32-libpng-static mingw32-libjpeg-static mingw32-libtiff-static mingw32-nsis png2ico'
+
+    - name: fix line endings
+      run: |
+        git config --global core.autocrlf false
+        git config --global core.eol lf
+        
+    - uses: actions/checkout@v4
+      with:
+        repository: 'davidgiven/fluxengine'
+        path: 'fluxengine'
+
+    - uses: actions/checkout@v4
+      with:
+        repository: 'davidgiven/fluxengine-testdata'
+        path: 'fluxengine-testdata'
+
+    - name: run
+      run: |
+        wsl sh -c 'make -C fluxengine BUILDTYPE=windows -j$(nproc)'
+
+    - name: nsis
+      run: |
+        wsl sh -c 'cd fluxengine && strip fluxengine.exe -o fluxengine-stripped.exe'
+        wsl sh -c 'cd fluxengine && strip fluxengine-gui.exe -o fluxengine-gui-stripped.exe'
+        wsl sh -c 'cd fluxengine && makensis -v2 -nocd -dOUTFILE=fluxengine-installer.exe extras/windows-installer.nsi'
 
     - name: zip
       run: |
-        zip -9 fluxengine.zip fluxengine.exe upgrade-flux-file.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex
+        wsl sh -c 'cd fluxengine && zip -9 fluxengine-windows.zip fluxengine.exe fluxengine-gui.exe upgrade-flux-file.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex fluxengine-installer.exe'
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
-        name: ${{ github.event.repository.name }}.${{ github.sha }}
-        path: fluxengine.zip
+        name: ${{ github.event.repository.name }}.${{ github.sha }}.windows.zip
+        path: fluxengine/fluxengine-windows.zip

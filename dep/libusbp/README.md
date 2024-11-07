@@ -1,7 +1,5 @@
 # libusbp: Pololu USB Library
 
-Version: 1.2.0<br/>
-Release date: 2020-11-16<br/>
 [www.pololu.com](https://www.pololu.com/)
 
 The **Pololu USB Library** (also known as **libusbp**) is a cross-platform C library for accessing USB devices.
@@ -17,7 +15,7 @@ The **Pololu USB Library** (also known as **libusbp**) is a cross-platform C lib
 - Provides detailed error information to the caller.
   - Each error includes one or more English sentences describing the error, including error codes from underlying APIs.
   - Some errors have libusbp-defined error codes that can be used to programmatically decide how to handle the error.
-- Provides an object-oriented C++ wrapper (using features of C++11).
+- Provides an object-oriented C++ wrapper.
 - Provides access to underlying identifiers, handles, and file descriptors.
 
 
@@ -139,9 +137,9 @@ If you are using GCC and a shell that supports Bash-like syntax, here is an exam
 
     gcc program.c `pkg-config --cflags --libs libusbp-1`
 
-Here is an equivalent command for C++.  Note that we use the `--std=gnu++11` option because the libusbp C++ API requires features from C++11:
+Here is an equivalent command for C++:
 
-    g++ --std=gnu++11 program.cpp `pkg-config --cflags --libs libusbp-1`
+    g++ program.cpp `pkg-config --cflags --libs libusbp-1`
 
 The order of the arguments above matters: the user program must come before libusbp because it relies on symbols that are defined by libusbp.
 
@@ -167,6 +165,9 @@ For detailed documentation of this library, see the header files `libusb.h` and 
 
 ## Version history
 
+* 1.3.0 (2023-01-02):
+  * Windows: Added support for detecting FTDI serial ports.  (FTDI devices with more than one port have not been tested and the interface for detecting them might change in the future.)
+  * macOS: Fixed the detection of serial ports for devices that are not CDC ACM.
 * 1.2.0 (2020-11-16):
   * Linux: Made the library work with devices attached to the cp210x driver.
   * Windows: Made the library work with devices that have lowercase letters in their hardware IDs.

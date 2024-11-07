@@ -124,7 +124,7 @@ libusbp_error * error_add_v(libusbp_error * error, const char * format, va_list 
         int result = vsnprintf(x, 0, format, ap2);
         if (result > 0)
         {
-            outer_message_length = (size_t) result;
+            outer_message_length = result;
         }
         va_end(ap2);
     }
