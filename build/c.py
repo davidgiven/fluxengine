@@ -14,51 +14,27 @@ from os.path import *
 emit(
     """
 ifeq ($(OSX),no)
-HOSTSTARTGROUP ?= -Wl,--start-group
-HOSTENDGROUP ?= -Wl,--end-group
+STARTGROUP ?= -Wl,--start-group
+ENDGROUP ?= -Wl,--end-group
 endif
-STARTGROUP ?= $(HOSTSTARTGROUP)
-ENDGROUP ?= $(HOSTENDGROUP)
 """
 )
 
-
-class Toolchain:
-    label = ""
-    cfile = ["$(CC) -c -o {outs[0]} {ins[0]} $(CFLAGS) {cflags}"]
-    cxxfile = ["$(CXX) -c -o {outs[0]} {ins[0]} $(CFLAGS) {cflags}"]
-    clibrary = ["rm -f {outs[0]} && $(AR) cqs {outs[0]} {ins}"]
-    cxxlibrary = ["rm -f {outs[0]} && $(AR) cqs {outs[0]} {ins}"]
-    cprogram = [
-        "$(CC) -o {outs[0]} $(STARTGROUP) {ins} {ldflags} $(LDFLAGS) $(ENDGROUP)"
-    ]
-    cxxprogram = [
-        "$(CXX) -o {outs[0]} $(STARTGROUP) {ins} {ldflags} $(LDFLAGS) $(ENDGROUP)"
-    ]
-
-
-class HostToolchain:
-    label = "HOST "
-    cfile = ["$(HOSTCC) -c -o {outs[0]} {ins[0]} $(HOSTCFLAGS) {cflags}"]
-    cxxfile = ["$(HOSTCXX) -c -o {outs[0]} {ins[0]} $(HOSTCFLAGS) {cflags}"]
-    clibrary = ["rm -f {outs[0]} && $(HOSTAR) cqs {outs[0]} {ins}"]
-    cxxlibrary = ["rm -f {outs[0]} && $(HOSTAR) cqs {outs[0]} {ins}"]
-    cprogram = [
-        "$(HOSTCC) -o {outs[0]} $(HOSTSTARTGROUP) {ins} {ldflags} $(HOSTLDFLAGS) $(HOSTENDGROUP)"
-    ]
-    cxxprogram = [
-        "$(HOSTCXX) -o {outs[0]} $(HOSTSTARTGROUP) {ins} {ldflags} $(HOSTLDFLAGS) $(HOSTENDGROUP)"
-    ]
-
+def _combine(list1, list2):
+    r = list(list1)
+    for i in list2:
+        if i not in r:
+            r.append(i)
+    return r
 
 def _indirect(deps, name):
-    r = set()
+    r = []
     for d in deps:
-        r.update(d.args.get(name, {d}))
+        r = _combine(r, d.args.get(name, [d]))
     return r
 
 
-def cfileimpl(self, name, srcs, deps, suffix, commands, label, kind, cflags):
+def cfileimpl(self, name, srcs, deps, suffix, commands, label, cflags):
     outleaf = "=" + stripext(basename(filenameof(srcs[0]))) + suffix
 
     hdr_deps = _indirect(deps, "cheader_deps")
@@ -85,15 +61,10 @@ def cfile(
     deps: Targets = None,
     cflags=[],
     suffix=".o",
-    toolchain=Toolchain,
-    commands=None,
-    label=None,
+    commands=["$(CC) -c -o {outs[0]} {ins[0]} $(CFLAGS) {cflags}"],
+    label="CC",
 ):
-    if not label:
-        label = toolchain.label + "CC"
-    if not commands:
-        commands = toolchain.cfile
-    cfileimpl(self, name, srcs, deps, suffix, commands, label, "cfile", cflags)
+    cfileimpl(self, name, srcs, deps, suffix, commands, label, cflags)
 
 
 @Rule
@@ -104,20 +75,13 @@ def cxxfile(
     deps: Targets = None,
     cflags=[],
     suffix=".o",
-    toolchain=Toolchain,
-    commands=None,
-    label=None,
+    commands=["$(CXX) -c -o {outs[0]} {ins[0]} $(CFLAGS) {cflags}"],
+    label="CXX",
 ):
-    if not label:
-        label = toolchain.label + "CXX"
-    if not commands:
-        commands = toolchain.cxxfile
-    cfileimpl(
-        self, name, srcs, deps, suffix, commands, label, "cxxfile", cflags
-    )
+    cfileimpl(self, name, srcs, deps, suffix, commands, label, cflags)
 
 
-def findsources(name, srcs, deps, cflags, toolchain, filerule, cwd):
+def findsources(name, srcs, deps, cflags, filerule, cwd):
     for f in filenamesof(srcs):
         if f.endswith(".h") or f.endswith(".hh"):
             cflags = cflags + [f"-I{dirname(f)}"]
@@ -130,7 +94,6 @@ def findsources(name, srcs, deps, cflags, toolchain, filerule, cwd):
                 srcs=[f],
                 deps=deps,
                 cflags=sorted(set(cflags)),
-                toolchain=toolchain,
                 cwd=cwd,
             )
             for f in filenamesof([s])
@@ -156,13 +119,12 @@ def libraryimpl(
     caller_ldflags,
     cflags,
     ldflags,
-    toolchain,
     commands,
     label,
-    kind,
+    filerule,
 ):
-    hdr_deps = _indirect(deps, "cheader_deps") | {self}
-    lib_deps = _indirect(deps, "clibrary_deps") | {self}
+    hdr_deps = _combine(_indirect(deps, "cheader_deps"), [self])
+    lib_deps = _combine(_indirect(deps, "clibrary_deps"), [self])
 
     hr = None
     hf = []
@@ -198,8 +160,7 @@ def libraryimpl(
             srcs,
             deps + ([hr] if hr else []),
             cflags + hf,
-            toolchain,
-            kind,
+            filerule,
             self.cwd,
         )
 
@@ -233,15 +194,10 @@ def clibrary(
     caller_ldflags=[],
     cflags=[],
     ldflags=[],
-    toolchain=Toolchain,
-    commands=None,
-    label=None,
+    commands=["rm -f {outs[0]} && $(AR) cqs {outs[0]} {ins}"],
+    label="LIB",
     cfilerule=cfile,
 ):
-    if not label:
-        label = toolchain.label + "LIB"
-    if not commands:
-        commands = toolchain.clibrary
     libraryimpl(
         self,
         name,
@@ -252,7 +208,6 @@ def clibrary(
         caller_ldflags,
         cflags,
         ldflags,
-        toolchain,
         commands,
         label,
         cfilerule,
@@ -270,15 +225,10 @@ def cxxlibrary(
     caller_ldflags=[],
     cflags=[],
     ldflags=[],
-    toolchain=Toolchain,
-    commands=None,
-    label=None,
+    commands=["rm -f {outs[0]} && $(AR) cqs {outs[0]} {ins}"],
+    label="CXXLIB",
     cxxfilerule=cxxfile,
 ):
-    if not label:
-        label = toolchain.label + "LIB"
-    if not commands:
-        commands = toolchain.cxxlibrary
     libraryimpl(
         self,
         name,
@@ -289,7 +239,6 @@ def cxxlibrary(
         caller_ldflags,
         cflags,
         ldflags,
-        toolchain,
         commands,
         label,
         cxxfilerule,
@@ -303,20 +252,16 @@ def programimpl(
     deps,
     cflags,
     ldflags,
-    toolchain,
     commands,
     label,
     filerule,
-    kind,
 ):
-    cfiles = findsources(
-        self.localname, srcs, deps, cflags, toolchain, filerule, self.cwd
-    )
+    cfiles = findsources(self.localname, srcs, deps, cflags, filerule, self.cwd)
 
-    lib_deps = set()
+    lib_deps = []
     for d in deps:
-        lib_deps.update(d.args.get("clibrary_deps", {d}))
-    libs = sorted(filenamesmatchingof(lib_deps, "*.a"))
+        lib_deps = _combine(lib_deps, d.args.get("clibrary_deps", {d}))
+    libs = filenamesmatchingof(lib_deps, "*.a")
     ldflags = collectattrs(
         targets=lib_deps, name="caller_ldflags", initial=ldflags
     )
@@ -325,8 +270,8 @@ def programimpl(
         replaces=self,
         ins=cfiles + libs,
         outs=[f"={self.localname}$(EXT)"],
-        deps=sorted(_indirect(lib_deps, "clibrary_files")),
-        label=toolchain.label + label,
+        deps=_indirect(lib_deps, "clibrary_files"),
+        label=label,
         commands=commands,
         args={
             "ldflags": collectattrs(
@@ -344,12 +289,12 @@ def cprogram(
     deps: Targets = None,
     cflags=[],
     ldflags=[],
-    toolchain=Toolchain,
-    commands=None,
+    commands=[
+        "$(CC) -o {outs[0]} $(STARTGROUP) {ins} {ldflags} $(LDFLAGS) $(ENDGROUP)"
+    ],
     label="CLINK",
+    cfilerule=cfile,
 ):
-    if not commands:
-        commands = toolchain.cprogram
     programimpl(
         self,
         name,
@@ -357,11 +302,9 @@ def cprogram(
         deps,
         cflags,
         ldflags,
-        toolchain,
         commands,
         label,
-        cfile,
-        "cprogram",
+        cfilerule,
     )
 
 
@@ -373,12 +316,12 @@ def cxxprogram(
     deps: Targets = None,
     cflags=[],
     ldflags=[],
-    toolchain=Toolchain,
-    commands=None,
+    commands=[
+        "$(CXX) -o {outs[0]} $(STARTGROUP) {ins} {ldflags} $(LDFLAGS) $(ENDGROUP)"
+    ],
     label="CXXLINK",
+    cxxfilerule=cxxfile,
 ):
-    if not commands:
-        commands = toolchain.cxxprogram
     programimpl(
         self,
         name,
@@ -386,9 +329,7 @@ def cxxprogram(
         deps,
         cflags,
         ldflags,
-        toolchain,
         commands,
         label,
-        cxxfile,
-        "cxxprogram",
+        cxxfilerule,
     )

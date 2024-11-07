@@ -1,5 +1,5 @@
 from build.ab import Rule, simplerule, Targets, TargetsMap
-from build.c import cxxprogram, HostToolchain
+from build.c import cxxprogram
 
 encoders = {}
 
