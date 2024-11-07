@@ -36,7 +36,7 @@ std::unique_ptr<ImageWriter> ImageWriter::create(const ImageWriterProto& config)
             return ImageWriter::createDiskCopyImageWriter(config);
 
         case IMAGETYPE_DSK:
-			return ImageWriter::createDSKImageWriter(config);
+            return ImageWriter::createDSKImageWriter(config);
 
         case IMAGETYPE_NSI:
             return ImageWriter::createNsiImageWriter(config);
