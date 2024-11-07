@@ -50,6 +50,7 @@ enum ImageReaderWriterType {
 	IMAGETYPE_NSI = 11;
 	IMAGETYPE_RAW = 12;
 	IMAGETYPE_TD0 = 13;
+	IMAGETYPE_DSK = 14
 }
 
 
