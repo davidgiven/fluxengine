@@ -1,4 +1,11 @@
-BUILDTYPE ?= host
+ifeq ($(BUILDTYPE),)
+    buildtype_Darwin = osx
+    buildtype_Haiku = haiku
+    BUILDTYPE := $(buildtype_$(shell uname -s ))
+        ifeq ($(BUILDTYPE),)
+                BUILDTYPE := unix
+        endif
+endif
 export BUILDTYPE
 
 ifeq ($(BUILDTYPE),windows)
@@ -20,9 +27,14 @@ else
 	CC = gcc
 	CXX = g++ -std=c++17
 	CFLAGS = -g -O3
-	LDFLAGS = -pthread -Wl,--no-as-needed
+	LDFLAGS =
 	AR = ar
 	PKG_CONFIG = pkg-config
+	ifeq ($(BUILDTYPE),osx)
+	else
+		LDFLAGS += -pthread -Wl,--no-as-needed
+	endif
+
 endif
 
 HOSTCC = gcc
