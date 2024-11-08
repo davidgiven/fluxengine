@@ -20,7 +20,7 @@ else
 	CC = gcc
 	CXX = g++ -std=c++17
 	CFLAGS = -g -O3
-	LDFLAGS =
+	LDFLAGS = -pthread -Wl,--no-as-needed
 	AR = ar
 	PKG_CONFIG = pkg-config
 endif
@@ -94,3 +94,24 @@ install-bin:
 	$(hide) install -D -v "$(OBJ)/tools+upgrade-flux-file/tools+upgrade-flux-file" "$(DESTDIR)$(BINDIR)/upgrade-flux-file"
 
 include build/ab.mk
+
+DOCKERFILES = \
+	debian11 \
+    debian12
+
+define run-docker
+    docker build -t $1 -f tests/docker/Dockerfile.$(strip $1) .
+    docker run \
+        --device=/dev/kvm \
+        --rm \
+        --attach STDOUT \
+                --attach STDERR \
+        $1 \
+        make
+
+endef
+
+.PHONY: dockertests
+dockertests:
+	$(hide) echo DOCKERTESTS
+	$(foreach f,$(DOCKERFILES), $(call run-docker, $f))
