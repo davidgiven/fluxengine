@@ -24,6 +24,27 @@ jobs:
     - name: make
       run: CXXFLAGS="-Wp,-D_GLIBCXX_ASSERTIONS" make -j`nproc` -C fluxengine
 
+  build-linux-debian-11:
+    runs-on: ubuntu-22.04
+    container: debian:11
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        repository: 'davidgiven/fluxengine'
+        path: 'fluxengine'
+    - uses: actions/checkout@v4
+      with:
+        repository: 'davidgiven/fluxengine-testdata'
+        path: 'fluxengine-testdata'
+    - name: apt
+      run: >
+        sudo apt install -y python3 make xz-utils python3 python3-hamcrest
+        protobuf-compiler libprotobuf-dev libsqlite3-dev
+        libfmt-dev libprotobuf-dev wx-common pkg-config
+        libudev-dev g++ libwxgtk3.0-gtk3-dev
+    - name: make
+      run: make -C fluxengine
+      
   build-macos-current:
     strategy:
       matrix:
