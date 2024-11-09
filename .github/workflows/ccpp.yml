@@ -78,7 +78,7 @@ jobs:
     steps:
     - name: setup WSL
       run: |
-        curl -L https://github.com/WhitewaterFoundry/Fedora-Remix-for-WSL/releases/download/40.1.0/Fedora-Remix-for-WSL-SL_41.0.0.0_x64_arm64.msixbundle -o fedora.msixbundle
+        curl -L https://github.com/WhitewaterFoundry/Fedora-Remix-for-WSL/releases/download/41.0.0/Fedora-Remix-for-WSL-SL_41.0.0.0_x64_arm64.msixbundle -o fedora.msixbundle
         unzip fedora.msixbundle Fedora-Remix-for-WSL-SL_41.0.0.0_x64.msix
         unzip Fedora-Remix-for-WSL-SL_41.0.0.0_x64.msix install.tar.gz
         wsl --update
