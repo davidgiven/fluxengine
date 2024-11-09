@@ -95,8 +95,7 @@ struct fmt::formatter<Sector::Status> : formatter<string_view>
 {
     auto format(Sector::Status status, format_context& ctx) const
     {
-        return formatter<string_view>::format(
-            Sector::statusToString(status), ctx);
+        return format_to(ctx.out(), "{}", Sector::statusToString(status));
     }
 };
 

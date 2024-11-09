@@ -1,0 +1,31 @@
+FROM debian:11
+
+RUN apt-get update
+RUN apt install -y python3 make xz-utils python3 python3-hamcrest \
+    protobuf-compiler libprotobuf-dev libsqlite3-dev \
+    libfmt-dev libprotobuf-dev wx-common pkg-config \
+    libudev-dev g++ libwxgtk3.0-gtk3-dev
+
+RUN useradd app
+RUN mkdir -p /home/app
+RUN chown app /home/app
+USER app
+WORKDIR /home/app
+
+COPY --chown=app:app arch arch
+COPY --chown=app:app build build
+COPY --chown=app:app dep dep
+COPY --chown=app:app doc doc
+COPY --chown=app:app extras extras
+COPY --chown=app:app lib lib
+COPY --chown=app:app scripts scripts
+COPY --chown=app:app src src
+COPY --chown=app:app tests tests
+COPY --chown=app:app tools tools
+COPY --chown=app:app Makefile .
+COPY --chown=app:app build.py .
+COPY --chown=app:app config.py .
+COPY --chown=app:app protocol.h .
+COPY --chown=app:app README.md .
+
+
