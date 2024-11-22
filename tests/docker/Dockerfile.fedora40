@@ -1,10 +1,11 @@
-FROM debian:12
+FROM fedora:40
 
-RUN apt-get update
-RUN apt install -y python3 make xz-utils python3 python3-hamcrest \
-    protobuf-compiler libprotobuf-dev libsqlite3-dev \
-    libfmt-dev libprotobuf-dev wx-common pkg-config \
-    libudev-dev g++ libwxgtk3.2-dev
+RUN dnf update -y
+RUN dnf -y install https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-40.noarch.rpm
+RUN dnf -y install https://github.com/rpmsphere/noarch/raw/master/r/rpmsphere-release-40-1.noarch.rpm
+RUN dnf -y install \
+    protobuf-compiler protobuf-devel sqlite-devel libudev-devel \
+    wxGTK-devel gcc gcc-c++ fmt-devel png2ico
 
 RUN useradd app
 RUN mkdir -p /home/app

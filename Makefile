@@ -109,21 +109,12 @@ include build/ab.mk
 
 DOCKERFILES = \
 	debian11 \
-    debian12
+    debian12 \
+    fedora40 \
+    fedora41
 
-define run-docker
-    docker build -t $1 -f tests/docker/Dockerfile.$(strip $1) .
-    docker run \
-        --device=/dev/kvm \
-        --rm \
-        --attach STDOUT \
-                --attach STDERR \
-        $1 \
-        make
-
-endef
+docker-%: tests/docker/Dockerfile.%
+	docker build -t $* -f $< .
 
 .PHONY: dockertests
-dockertests:
-	$(hide) echo DOCKERTESTS
-	$(foreach f,$(DOCKERFILES), $(call run-docker, $f))
+dockertests: $(foreach f,$(DOCKERFILES), docker-$(strip $f) .WAIT)
