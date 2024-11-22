@@ -110,6 +110,7 @@ include build/ab.mk
 DOCKERFILES = \
 	debian11 \
     debian12 \
+    fedora40 \
     fedora41
 
 docker-%: tests/docker/Dockerfile.%
