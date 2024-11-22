@@ -28,4 +28,4 @@ COPY --chown=app:app config.py .
 COPY --chown=app:app protocol.h .
 COPY --chown=app:app README.md .
 
-
+RUN make
