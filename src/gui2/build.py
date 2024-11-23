@@ -108,24 +108,24 @@ cxxprogram(
 )
 
 if config.osx:
-    normalrule(
+    simplerule(
         name="fluxengine_pkg",
         ins=[".+fluxengine_app"],
-        outs=["FluxEngine.pkg"],
+        outs=["=FluxEngine.pkg"],
         commands=[
             "pkgbuild --quiet --install-location /Applications --component {ins[0]} {outs[0]}"
         ],
         label="PKGBUILD",
     )
 
-    normalrule(
+    simplerule(
         name="fluxengine_app",
         ins=[
             ".+imager",
             "extras+fluxengine_icns",
             "extras/FluxEngine.app.template/",
         ],
-        outs=["FluxEngine.app"],
+        outs=["=FluxEngine.app"],
         commands=[
             "rm -rf {outs[0]}",
             "cp -a {ins[2]} {outs[0]}",
