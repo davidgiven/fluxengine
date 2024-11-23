@@ -1,7 +1,7 @@
-#include "lib/globals.h"
-#include "lib/config.h"
-#include "lib/readerwriter.h"
-#include "lib/utils.h"
+#include "lib/core/globals.h"
+#include "lib/config/config.h"
+#include "lib/algorithms/readerwriter.h"
+#include "lib/core/utils.h"
 #include "globals.h"
 #include "mainwindow.h"
 

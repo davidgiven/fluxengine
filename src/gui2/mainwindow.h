@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lib/logger.h"
+#include "lib/core/logger.h"
 #include "globals.h"
 
 class MainWindow : public QMainWindow, public Ui_MainWindow
@@ -14,7 +14,7 @@ public:
     MainWindow();
 
 public:
-    virtual void logMessage(std::shared_ptr<const AnyLogMessage> message) = 0;
+    virtual void logMessage(const AnyLogMessage& message) = 0;
     virtual void collectConfig() = 0;
 
 protected:

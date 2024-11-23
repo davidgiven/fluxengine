@@ -1,7 +1,7 @@
-#include "lib/globals.h"
-#include "lib/image.h"
-#include "lib/flux.h"
-#include "lib/layout.h"
+#include "lib/core/globals.h"
+#include "lib/data/image.h"
+#include "lib/data/flux.h"
+#include "lib/data/layout.h"
 #include "globals.h"
 #include "datastore.h"
 

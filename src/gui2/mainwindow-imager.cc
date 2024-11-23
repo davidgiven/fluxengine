@@ -1,13 +1,39 @@
-#include "lib/globals.h"
-#include "lib/config.h"
-#include "lib/readerwriter.h"
-#include "lib/utils.h"
+#include "lib/core/globals.h"
+#include "lib/config/config.h"
+#include "lib/algorithms/readerwriter.h"
+#include "lib/core/utils.h"
+#include "lib/fluxsource/fluxsource.h"
+#include "lib/decoders/decoders.h"
+#include "arch/arch.h"
 #include "globals.h"
 #include "mainwindow.h"
 #include "drivecomponent.h"
 #include "formatcomponent.h"
 #include "fluxcomponent.h"
 #include "imagecomponent.h"
+
+class CallbackOstream : public std::streambuf
+{
+public:
+    CallbackOstream(std::function<void(const std::string&)> cb): _cb(cb) {}
+
+public:
+    std::streamsize xsputn(const char* p, std::streamsize n) override
+    {
+        _cb(std::string(p, n));
+        return n;
+    }
+
+    int_type overflow(int_type v) override
+    {
+        char c = v;
+        _cb(std::string(&c, 1));
+        return 1;
+    }
+
+private:
+    std::function<void(const std::string&)> _cb;
+};
 
 class MainWindowImpl : public MainWindow
 {
@@ -22,7 +48,15 @@ private:
     };
 
 public:
-    MainWindowImpl()
+    MainWindowImpl():
+        _logStreamBuf(
+            [this](const std::string& s)
+            {
+                logViewerEdit->appendPlainText(QString::fromStdString(s));
+                logViewerEdit->ensureCursorVisible();
+            }),
+        _logStream(&_logStreamBuf),
+        _logRenderer(LogRenderer::create(_logStream))
     {
         _driveComponent = DriveComponent::create(this);
         _formatComponent = FormatComponent::create(this);
@@ -41,8 +75,9 @@ public:
     }
 
 public:
-    void logMessage(std::shared_ptr<const AnyLogMessage> message) override
+    void logMessage(const AnyLogMessage& message) override
     {
+#if 0
         std::visit(overloaded{/* Fallback --- do nothing */
                        [this](const auto& m)
                        {
@@ -79,10 +114,10 @@ public:
                            _progressWidget->setValue(m.progress);
                        }},
             *message);
+#endif
 
-        logViewerEdit->appendPlainText(
-            QString::fromStdString(Logger::toString(*message)));
-        logViewerEdit->ensureCursorVisible();
+        _logRenderer->add(message);
+        _logStream.flush();
     }
 
     void collectConfig() override
@@ -116,8 +151,8 @@ private:
         runThen(
             [this]()
             {
-                auto& fluxSource = globalConfig().getFluxSource();
-                auto& decoder = globalConfig().getDecoder();
+                auto fluxSource = FluxSource::create(globalConfig());
+                auto decoder = Arch::createDecoder(globalConfig());
                 auto diskflux = readDiskCommand(*fluxSource, *decoder);
             },
             [this]()
@@ -142,6 +177,9 @@ private:
     W_SLOT(setState)
 
 private:
+    std::ostream _logStream;
+    CallbackOstream _logStreamBuf;
+    std::unique_ptr<LogRenderer> _logRenderer;
     DriveComponent* _driveComponent;
     FormatComponent* _formatComponent;
     FluxComponent* _fluxComponent;

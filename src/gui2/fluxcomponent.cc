@@ -1,4 +1,4 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/usb/usbfinder.h"
 #include "globals.h"
 #include "fluxcomponent.h"

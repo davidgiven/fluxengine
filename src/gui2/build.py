@@ -1,4 +1,4 @@
-from build.ab import normalrule, Rule, Target
+from build.ab import simplerule, Rule, Target
 from build.c import cxxprogram, cxxlibrary
 from build.pkg import package
 import config
@@ -9,10 +9,10 @@ package(name="Qt5Concurrent", package="Qt5Concurrent")
 
 @Rule
 def uic(self, name, src: Target = None, dest=None):
-    normalrule(
+    simplerule(
         replaces=self,
         ins=[src],
-        outs=[dest],
+        outs=["=" + dest],
         commands=["$(UIC) -g cpp -o {outs[0]} {ins[0]}"],
         label="UIC",
     )
@@ -21,10 +21,10 @@ def uic(self, name, src: Target = None, dest=None):
 for n in ["userinterface", "driveConfigurationForm", "fluxConfigurationForm"]:
     uic(name=n + "_h", src="./" + n + ".ui", dest=n + ".h")
 
-normalrule(
+simplerule(
     name="resources_cc",
     ins=["./resources.qrc"],
-    outs=["resources.cc"],
+    outs=["=resources.cc"],
     commands=["$(RCC) -g cpp --name resources -o {outs[0]} {ins[0]}"],
     label="RCC",
 )
@@ -61,7 +61,12 @@ cxxlibrary(
     },
     cflags=["-fPIC"],
     deps=[
-        "+lib",
+        "lib/config",
+        "lib/core",
+        "lib/data",
+        "lib/external",
+        "lib/algorithms",
+        "lib/vfs",
         ".+userinterface",
         ".+Qt5Concurrent",
         ".+Qt5Widgets",
@@ -79,9 +84,7 @@ cxxprogram(
     cflags=["-fPIC"],
     ldflags=["$(QT5_EXTRA_LIBS)"],
     deps=[
-        "+fl2_proto_lib",
         "+fmt_lib",
-        "+lib",
         "+protobuf_lib",
         "+protocol",
         "+z_lib",
@@ -95,7 +98,10 @@ cxxprogram(
         "dep/libusbp",
         "dep/verdigris",
         "extras+icons",
-        "lib+config_proto_lib",
+        "lib/config",
+        "lib/core",
+        "lib/data",
+        "lib/external",
         "src/formats",
         "src/gui/drivetypes",
     ],

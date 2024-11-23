@@ -1,10 +1,10 @@
-#include "lib/globals.h"
-#include "lib/config.h"
-#include "lib/flux.h"
-#include "lib/layout.h"
-#include "lib/image.h"
-#include "lib/sector.h"
-#include "lib/decoders/fluxmapreader.h"
+#include "lib/core/globals.h"
+#include "lib/config/config.h"
+#include "lib/data/flux.h"
+#include "lib/data/layout.h"
+#include "lib/data/image.h"
+#include "lib/data/sector.h"
+#include "lib/data/fluxmapreader.h"
 #include "globals.h"
 #include "imagevisualiserwidget.h"
 #include "scene.h"
@@ -132,8 +132,8 @@ private:
                     key_t key = {track, side};
                     std::vector<std::shared_ptr<const Sector>> sectors;
                     for (auto it = _sectors.lower_bound(key);
-                         it != _sectors.upper_bound(key);
-                         it++)
+                        it != _sectors.upper_bound(key);
+                        it++)
                         sectors.push_back(it->second);
                     std::sort(sectors.begin(),
                         sectors.end(),
@@ -148,7 +148,7 @@ private:
                         x += size;
 
                     for (int sectorId = 0; sectorId < sectors.size();
-                         sectorId++)
+                        sectorId++)
                     {
                         std::shared_ptr<const Sector> sector =
                             sectors.at(sectorId);

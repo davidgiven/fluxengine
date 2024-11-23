@@ -1,7 +1,8 @@
 #pragma once
 
-#include "lib/globals.h"
-#include "lib/logger.h"
+#include "lib/core/globals.h"
+#include "lib/core/logger.h"
+#include "lib/config/config.h"
 #include "userinterface.h"
 #include "wobjectdefs.h"
 #include "wobjectimpl.h"

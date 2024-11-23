@@ -1,5 +1,6 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/usb/usbfinder.h"
+#include "lib/config/config.h"
 #include "globals.h"
 #include "imagecomponent.h"
 #include "mainwindow.h"

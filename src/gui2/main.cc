@@ -1,5 +1,5 @@
-#include "lib/globals.h"
-#include "lib/logger.h"
+#include "lib/core/globals.h"
+#include "lib/core/logger.h"
 #include "globals.h"
 #include "mainwindow.h"
 #include <QtConcurrent>
@@ -22,7 +22,7 @@ public:
         _mainWindow->show();
 
         Logger::setLogger(
-            [&](std::shared_ptr<const AnyLogMessage> message)
+            [&](const AnyLogMessage& message)
             {
                 if (isGuiThread())
                     _mainWindow->logMessage(message);
