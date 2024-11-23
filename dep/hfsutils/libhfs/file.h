@@ -19,27 +19,30 @@
  * $Id: file.h,v 1.6 1998/04/11 08:27:12 rob Exp $
  */
 
-enum {
-  fkData = 0x00,
-  fkRsrc = 0xff
+enum
+{
+    fkData = 0x00,
+    fkRsrc = 0xff
 };
 
-void f_init(hfsfile *, hfsvol *, long, const char *);
-void f_selectfork(hfsfile *, int);
-void f_getptrs(hfsfile *, ExtDataRec **, unsigned long **, unsigned long **);
+void f_init(hfsfile*, hfsvol*, long, const char*);
+void f_selectfork(hfsfile*, int);
+void f_getptrs(hfsfile*, ExtDataRec**, unsigned long**, unsigned long**);
 
-int f_doblock(hfsfile *, unsigned long, block *,
-	      int (*)(hfsvol *, unsigned int, unsigned int, block *));
+int f_doblock(hfsfile*,
+    unsigned long,
+    block*,
+    int (*)(hfsvol*, unsigned int, unsigned int, block*));
 
-# define f_getblock(file, num, bp)  \
-    f_doblock((file), (num), (bp), b_readab)
-# define f_putblock(file, num, bp)  \
-    f_doblock((file), (num), (bp),  \
-	      (int (*)(hfsvol *, unsigned int, unsigned int, block *))  \
-	      b_writeab)
+#define f_getblock(file, num, bp) f_doblock((file), (num), (bp), b_readab)
+#define f_putblock(file, num, bp) \
+    f_doblock((file),             \
+        (num),                    \
+        (bp),                     \
+        (int (*)(hfsvol*, unsigned int, unsigned int, block*))b_writeab)
 
-int f_addextent(hfsfile *, ExtDescriptor *);
-long f_alloc(hfsfile *);
+int f_addextent(hfsfile*, ExtDescriptor*);
+long f_alloc(hfsfile*);
 
-int f_trunc(hfsfile *);
-int f_flush(hfsfile *);
+int f_trunc(hfsfile*);
+int f_flush(hfsfile*);

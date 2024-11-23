@@ -1,7 +1,8 @@
 #pragma once
 
-#include "lib/globals.h"
-#include "lib/fluxmap.h"
+#include "lib/core/globals.h"
+#include "lib/data/fluxmap.h"
+#include "lib/data/fluxmapreader.h"
 
 class HistogramViewer : public wxWindow
 {
@@ -31,7 +32,7 @@ private:
 
 private:
     bool _blank = true;
-    Fluxmap::ClockData _data;
+    FluxmapReader::ClockData _data;
     wxFont _font;
     nanoseconds_t _clock;
     wxDECLARE_EVENT_TABLE();

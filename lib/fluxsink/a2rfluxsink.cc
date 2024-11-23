@@ -1,20 +1,20 @@
-#include "lib/globals.h"
-#include "lib/flags.h"
-#include "lib/fluxmap.h"
-#include "lib/bytes.h"
+#include "lib/core/globals.h"
+#include "lib/config/flags.h"
+#include "lib/data/fluxmap.h"
+#include "lib/core/bytes.h"
 #include "protocol.h"
 #include "lib/fluxsink/fluxsink.h"
-#include "lib/decoders/fluxmapreader.h"
+#include "lib/data/fluxmapreader.h"
 #include "lib/fluxsink/fluxsink.pb.h"
-#include "lib/logger.h"
-#include "lib/proto.h"
-#include "lib/fluxmap.h"
-#include "lib/layout.h"
-#include "lib/a2r.h"
+#include "lib/core/logger.h"
+#include "lib/config/proto.h"
+#include "lib/data/fluxmap.h"
+#include "lib/data/layout.h"
+#include "lib/external/a2r.h"
 #include <fstream>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <fmt/chrono.h>
+#include "fmt/chrono.h"
 
 namespace
 {

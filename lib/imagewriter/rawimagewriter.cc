@@ -1,11 +1,10 @@
-#include "lib/globals.h"
-#include "lib/flags.h"
-#include "lib/sector.h"
+#include "lib/core/globals.h"
+#include "lib/config/flags.h"
+#include "lib/data/sector.h"
 #include "lib/imagewriter/imagewriter.h"
-#include "lib/decoders/decoders.h"
-#include "lib/image.h"
-#include "lib/logger.h"
-#include "arch/northstar/northstar.h"
+#include "lib/data/image.h"
+#include "lib/data/flux.h"
+#include "lib/core/logger.h"
 #include "lib/imagewriter/imagewriter.pb.h"
 #include <algorithm>
 #include <iostream>

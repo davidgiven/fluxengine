@@ -1,15 +1,15 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "gui.h"
 #include "fluxviewercontrol.h"
 #include "textviewerwindow.h"
-#include "lib/flux.h"
-#include "lib/fluxmap.h"
+#include "lib/data/flux.h"
+#include "lib/data/fluxmap.h"
 #include "lib/decoders/decoders.h"
 #include "lib/decoders/decoders.pb.h"
-#include "lib/sector.h"
-#include "lib/layout.h"
-#include "lib/decoders/fluxmapreader.h"
-#include "lib/crc.h"
+#include "lib/data/sector.h"
+#include "lib/data/layout.h"
+#include "lib/data/fluxmapreader.h"
+#include "lib/core/crc.h"
 
 DECLARE_COLOUR(BACKGROUND, 192, 192, 192);
 DECLARE_COLOUR(READ_SEPARATOR, 255, 0, 0);

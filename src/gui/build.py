@@ -1,4 +1,4 @@
-from build.ab import emit, normalrule
+from build.ab import emit, simplerule
 from build.c import cxxprogram
 import config
 
@@ -18,10 +18,10 @@ endif
 extrasrcs = []
 if config.windows:
     extrasrcs += [
-        normalrule(
+        simplerule(
             name="rc",
             ins=["./windres.rc"],
-            outs=["rc.o"],
+            outs=["=rc.o"],
             deps=["./manifest.xml", "extras+fluxengine_ico"],
             commands=["$(WINDRES) {ins[0]} {outs[0]}"],
             label="WINDRES",
@@ -32,6 +32,8 @@ cxxprogram(
     name="gui",
     srcs=[
         "./browserpanel.cc",
+        "./context.cc",
+        "./context.h",
         "./customstatusbar.cc",
         "./explorerpanel.cc",
         "./filesystemmodel.cc",
@@ -54,15 +56,18 @@ cxxprogram(
     cflags=["$(WX_CFLAGS)"],
     ldflags=["$(WX_LDFLAGS)"],
     deps=[
-        "+fl2_proto_lib",
+        "lib/external+fl2_proto_lib",
         "+protocol",
         "dep/adflib",
         "dep/fatfs",
         "dep/hfsutils",
         "dep/libusbp",
         "extras+icons",
-        "+lib",
-        "lib+config_proto_lib",
+        "lib/core",
+        "lib/data",
+        "lib/vfs",
+        "lib/config",
+        "arch",
         "src/formats",
         "src/gui/drivetypes",
         "+z_lib",
@@ -72,24 +77,24 @@ cxxprogram(
 )
 
 if config.osx:
-    normalrule(
+    simplerule(
         name="fluxengine_pkg",
         ins=[".+fluxengine_app"],
-        outs=["FluxEngine.pkg"],
+        outs=["=FluxEngine.pkg"],
         commands=[
             "pkgbuild --quiet --install-location /Applications --component {ins[0]} {outs[0]}"
         ],
         label="PKGBUILD",
     )
 
-    normalrule(
+    simplerule(
         name="fluxengine_app",
         ins=[
             ".+gui",
             "extras+fluxengine_icns",
             "extras/FluxEngine.app.template/",
         ],
-        outs=["FluxEngine.app"],
+        outs=["=FluxEngine.app"],
         commands=[
             "rm -rf {outs[0]}",
             "cp -a {ins[2]} {outs[0]}",

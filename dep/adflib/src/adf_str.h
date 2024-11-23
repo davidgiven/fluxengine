@@ -28,41 +28,43 @@
  *
  */
 
-#include<stdio.h>
+#include <stdio.h>
 
-#include"adf_defs.h"
-#include"adf_blk.h"
-#include"adf_err.h"
+#include "adf_defs.h"
+#include "adf_blk.h"
+#include "adf_err.h"
 
 /* ----- VOLUME ----- */
 
-struct Volume {
+struct Volume
+{
     struct Device* dev;
 
-    SECTNUM firstBlock;     /* first block of data area (from beginning of device) */
-    SECTNUM lastBlock;      /* last block of data area  (from beginning of device) */
-    SECTNUM rootBlock;      /* root block (from firstBlock) */
+    SECTNUM
+        firstBlock;    /* first block of data area (from beginning of device) */
+    SECTNUM lastBlock; /* last block of data area  (from beginning of device) */
+    SECTNUM rootBlock; /* root block (from firstBlock) */
 
-    char dosType;           /* FFS/OFS, DIRCACHE, INTERNATIONAL */
+    char dosType; /* FFS/OFS, DIRCACHE, INTERNATIONAL */
     BOOL bootCode;
     BOOL readOnly;
-    int datablockSize;      /* 488 or 512 */
-    int blockSize;			/* 512 */
+    int datablockSize; /* 488 or 512 */
+    int blockSize;     /* 512 */
 
-    char *volName;
+    char* volName;
 
     BOOL mounted;
 
-    int32_t bitmapSize;             /* in blocks */
-    SECTNUM *bitmapBlocks;       /* bitmap blocks pointers */
-    struct bBitmapBlock **bitmapTable;
-    BOOL *bitmapBlocksChg;
+    int32_t bitmapSize;    /* in blocks */
+    SECTNUM* bitmapBlocks; /* bitmap blocks pointers */
+    struct bBitmapBlock** bitmapTable;
+    BOOL* bitmapBlocksChg;
 
     SECTNUM curDirPtr;
 };
 
-
-struct Partition {
+struct Partition
+{
     int32_t startCyl;
     int32_t lenCyl;
     char* volName;
@@ -71,35 +73,36 @@ struct Partition {
 
 /* ----- DEVICES ----- */
 
-#define DEVTYPE_FLOPDD 		1
-#define DEVTYPE_FLOPHD 		2
-#define DEVTYPE_HARDDISK 	3
-#define DEVTYPE_HARDFILE 	4
+#define DEVTYPE_FLOPDD 1
+#define DEVTYPE_FLOPHD 2
+#define DEVTYPE_HARDDISK 3
+#define DEVTYPE_HARDFILE 4
 
-struct Device {
-    int devType;               /* see below */
+struct Device
+{
+    int devType; /* see below */
     BOOL readOnly;
-    int32_t size;                 /* in bytes */
+    int32_t size; /* in bytes */
 
-    int nVol;                  /* partitions */
-    struct Volume** volList;  
-	
-    int32_t cylinders;            /* geometry */
+    int nVol; /* partitions */
+    struct Volume** volList;
+
+    int32_t cylinders; /* geometry */
     int32_t heads;
     int32_t sectors;
 
     BOOL isNativeDev;
-    void *nativeDev;
+    void* nativeDev;
 };
-
 
 /* ----- FILE ----- */
 
-struct File {
-    struct Volume *volume;
+struct File
+{
+    struct Volume* volume;
 
     struct bFileHeaderBlock* fileHdr;
-    void *currentData;
+    void* currentData;
     struct bFileExtBlock* currentExt;
 
     int32_t nDataBlock;
@@ -109,12 +112,12 @@ struct File {
     int posInDataBlk;
     int posInExtBlk;
     BOOL eof, writeMode;
-    };
-
+};
 
 /* ----- ENTRY ---- */
 
-struct Entry{
+struct Entry
+{
     int type;
     char* name;
     SECTNUM sector;
@@ -127,72 +130,72 @@ struct Entry{
     int hour, mins, secs;
 };
 
-struct CacheEntry{
+struct CacheEntry
+{
     int32_t header, size, protect;
     short days, mins, ticks;
     signed char type;
     char nLen, cLen;
-    char name[MAXNAMELEN+1], comm[MAXCMMTLEN+1];
-/*    char *name, *comm;*/
-
+    char name[MAXNAMELEN + 1], comm[MAXCMMTLEN + 1];
+    /*    char *name, *comm;*/
 };
 
-
-
-
-struct DateTime{
-    int year,mon,day,hour,min,sec;
+struct DateTime
+{
+    int year, mon, day, hour, min, sec;
 };
 
 /* ----- ENVIRONMENT ----- */
 
-#define PR_VFCT			1
-#define PR_WFCT			2
-#define PR_EFCT			3
-#define PR_NOTFCT		4
-#define PR_USEDIRC		5
-#define PR_USE_NOTFCT 	6
-#define PR_PROGBAR 		7
-#define PR_USE_PROGBAR 	8
-#define PR_RWACCESS 	9
+#define PR_VFCT 1
+#define PR_WFCT 2
+#define PR_EFCT 3
+#define PR_NOTFCT 4
+#define PR_USEDIRC 5
+#define PR_USE_NOTFCT 6
+#define PR_PROGBAR 7
+#define PR_USE_PROGBAR 8
+#define PR_RWACCESS 9
 #define PR_USE_RWACCESS 10
 
-struct Env{
-    void (*vFct)(char*);       /* verbose callback function */
-    void (*wFct)(char*);       /* warning callback function */
-    void (*eFct)(char*);       /* error callback function */
+struct Env
+{
+    void (*vFct)(char*); /* verbose callback function */
+    void (*wFct)(char*); /* warning callback function */
+    void (*eFct)(char*); /* error callback function */
 
     void (*notifyFct)(SECTNUM, int);
     BOOL useNotify;
 
-    void (*rwhAccess)(SECTNUM,SECTNUM,BOOL);
+    void (*rwhAccess)(SECTNUM, SECTNUM, BOOL);
     BOOL useRWAccess;
 
     void (*progressBar)(int);
     BOOL useProgressBar;
 
     BOOL useDirCache;
-	
-    void *nativeFct;
+
+    void* nativeFct;
 };
 
-
-
-struct List{         /* generic linked tree */
-    void *content;
+struct List
+{ /* generic linked tree */
+    void* content;
     struct List* subdir;
     struct List* next;
 };
 
-struct GenBlock{
+struct GenBlock
+{
     SECTNUM sect;
     SECTNUM parent;
     int type;
     int secType;
-    char *name;	/* if (type == 2 and (secType==2 or secType==-3)) */
+    char* name; /* if (type == 2 and (secType==2 or secType==-3)) */
 };
 
-struct FileBlocks{
+struct FileBlocks
+{
     SECTNUM header;
     int32_t nbExtens;
     SECTNUM* extens;
@@ -200,36 +203,35 @@ struct FileBlocks{
     SECTNUM* data;
 };
 
-struct bEntryBlock {
-/*000*/	int32_t	type;		/* T_HEADER == 2 */
-/*004*/	int32_t	headerKey;	/* current block number */
-        int32_t	r1[3];
-/*014*/	uint32_t	checkSum;
-/*018*/	int32_t	hashTable[HT_SIZE];
-        int32_t	r2[2];
-/*140*/	int32_t	access;	/* bit0=del, 1=modif, 2=write, 3=read */
-/*144*/	int32_t	byteSize;
-/*148*/	char	commLen;
-/*149*/	char	comment[MAXCMMTLEN+1];
-        char	r3[91-(MAXCMMTLEN+1)];
-/*1a4*/	int32_t	days;
-/*1a8*/	int32_t	mins;
-/*1ac*/	int32_t	ticks;
-/*1b0*/	char	nameLen;
-/*1b1*/	char	name[MAXNAMELEN+1];
-        int32_t	r4;
-/*1d4*/	int32_t	realEntry;
-/*1d8*/	int32_t	nextLink;
-        int32_t	r5[5];
-/*1f0*/	int32_t	nextSameHash;
-/*1f4*/	int32_t	parent;
-/*1f8*/	int32_t	extension;
-/*1fc*/	int32_t	secType;
-	};
-
+struct bEntryBlock
+{
+    /*000*/ int32_t type;      /* T_HEADER == 2 */
+    /*004*/ int32_t headerKey; /* current block number */
+    int32_t r1[3];
+    /*014*/ uint32_t checkSum;
+    /*018*/ int32_t hashTable[HT_SIZE];
+    int32_t r2[2];
+    /*140*/ int32_t access; /* bit0=del, 1=modif, 2=write, 3=read */
+    /*144*/ int32_t byteSize;
+    /*148*/ char commLen;
+    /*149*/ char comment[MAXCMMTLEN + 1];
+    char r3[91 - (MAXCMMTLEN + 1)];
+    /*1a4*/ int32_t days;
+    /*1a8*/ int32_t mins;
+    /*1ac*/ int32_t ticks;
+    /*1b0*/ char nameLen;
+    /*1b1*/ char name[MAXNAMELEN + 1];
+    int32_t r4;
+    /*1d4*/ int32_t realEntry;
+    /*1d8*/ int32_t nextLink;
+    int32_t r5[5];
+    /*1f0*/ int32_t nextSameHash;
+    /*1f4*/ int32_t parent;
+    /*1f8*/ int32_t extension;
+    /*1fc*/ int32_t secType;
+};
 
 #define ENV_DECLARATION struct Env adfEnv
-
 
 #endif /* _ADF_STR_H */
 /*##########################################################################*/

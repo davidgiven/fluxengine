@@ -19,13 +19,12 @@
 
 inline void describe(const char* title)
 {
-  std::cout << std::endl
-            << title << ":" << std::endl;
+    std::cout << std::endl << title << ":" << std::endl;
 }
 
 inline void it(const char* title)
 {
-  std::cout << " - " << title << std::endl;
+    std::cout << " - " << title << std::endl;
 }
 
 #endif

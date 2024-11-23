@@ -1,8 +1,9 @@
-#include "lib/globals.h"
-#include "lib/bytes.h"
-#include "lib/config.pb.h"
-#include "lib/proto.h"
-#include "lib/layout.h"
+#include "lib/core/globals.h"
+#include "lib/core/bytes.h"
+#include "lib/config/config.h"
+#include "lib/config/config.pb.h"
+#include "lib/config/proto.h"
+#include "lib/data/layout.h"
 #include "snowhouse/snowhouse.h"
 #include <google/protobuf/text_format.h>
 #include <regex>

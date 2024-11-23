@@ -1,15 +1,23 @@
-#include "lib/globals.h"
-#include "lib/flags.h"
-#include "lib/sector.h"
+#include "lib/core/globals.h"
+#include "lib/config/config.h"
+#include "lib/config/flags.h"
+#include "lib/data/sector.h"
 #include "lib/imagereader/imagereader.h"
-#include "lib/utils.h"
-#include "lib/proto.h"
-#include "lib/image.h"
-#include "lib/layout.h"
-#include "lib/config.pb.h"
-#include "lib/logger.h"
+#include "lib/core/utils.h"
+#include "lib/config/proto.h"
+#include "lib/data/image.h"
+#include "lib/data/layout.h"
+#include "lib/config/config.pb.h"
+#include "lib/core/logger.h"
 #include <algorithm>
 #include <ctype.h>
+
+std::unique_ptr<ImageReader> ImageReader::create(Config& config)
+{
+    if (!config.hasImageReader())
+        error("no image reader configured");
+    return create(config->image_reader());
+}
 
 std::unique_ptr<ImageReader> ImageReader::create(const ImageReaderProto& config)
 {

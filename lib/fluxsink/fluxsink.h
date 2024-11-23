@@ -1,7 +1,7 @@
 #ifndef FLUXSINK_H
 #define FLUXSINK_H
 
-#include "lib/flags.h"
+#include "lib/config/flags.h"
 #include <ostream>
 
 class Fluxmap;
@@ -12,6 +12,7 @@ class A2RFluxSinkProto;
 class VcdFluxSinkProto;
 class ScpFluxSinkProto;
 class Fl2FluxSinkProto;
+class Config;
 
 class FluxSink
 {
@@ -34,6 +35,7 @@ public:
     static std::unique_ptr<FluxSink> createFl2FluxSink(
         const std::string& filename);
 
+    static std::unique_ptr<FluxSink> create(Config& config);
     static std::unique_ptr<FluxSink> create(const FluxSinkProto& config);
 
 public:

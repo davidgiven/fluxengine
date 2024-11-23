@@ -1,8 +1,9 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
+#include "lib/config/config.h"
 #include "lib/vfs/vfs.h"
-#include "lib/config.pb.h"
-#include "lib/proto.h"
-#include "lib/utils.h"
+#include "lib/config/config.pb.h"
+#include "lib/config/proto.h"
+#include "lib/core/utils.h"
 
 enum
 {

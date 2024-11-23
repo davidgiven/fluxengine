@@ -1,13 +1,12 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/decoders/decoders.h"
 #include "lib/encoders/encoders.h"
 #include "tids990.h"
-#include "lib/crc.h"
-#include "lib/readerwriter.h"
-#include "lib/image.h"
+#include "lib/core/crc.h"
+#include "lib/data/image.h"
 #include "arch/tids990/tids990.pb.h"
 #include "lib/encoders/encoders.pb.h"
-#include <fmt/format.h>
+#include "fmt/format.h"
 
 static int charToInt(char c)
 {

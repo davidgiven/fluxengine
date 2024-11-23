@@ -1,4 +1,4 @@
-from build.ab import normalrule
+from build.ab import simplerule
 from build.c import cxxlibrary
 from scripts.build import protoencode
 
@@ -8,11 +8,11 @@ drivetypes = [
     "apple2",
 ]
 
-normalrule(
+simplerule(
     name="drivetypes_table_cc",
     ins=[f"./{name}.textpb" for name in drivetypes],
     deps=["scripts/mktable.sh"],
-    outs=["table.cc"],
+    outs=["=table.cc"],
     commands=[
         "sh scripts/mktable.sh drivetypes "
         + (" ".join(drivetypes))
@@ -32,5 +32,5 @@ protoencode(
 cxxlibrary(
     name="drivetypes",
     srcs=[".+drivetypes_cc", ".+drivetypes_table_cc"],
-    deps=["+lib"],
+    deps=["lib/core", "lib/config"],
 )

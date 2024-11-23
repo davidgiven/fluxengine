@@ -1,8 +1,8 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "usb.h"
 #include "protocol.h"
-#include "lib/fluxmap.h"
-#include "lib/bytes.h"
+#include "lib/data/fluxmap.h"
+#include "lib/core/bytes.h"
 #include "libusbp_config.h"
 #include "libusbp.hpp"
 
@@ -122,8 +122,7 @@ private:
         }
     }
 
-public:
-    int getVersion() override
+    int getVersion()
     {
         struct any_frame f = {
             .f = {.type = F_FRAME_GET_VERSION_CMD, .size = sizeof(f)}
@@ -133,6 +132,7 @@ public:
         return r->version;
     }
 
+public:
     void seek(int track) override
     {
         struct seek_frame f = {

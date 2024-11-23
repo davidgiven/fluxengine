@@ -1,15 +1,17 @@
-#include "lib/globals.h"
-#include "lib/flags.h"
+#include "lib/core/globals.h"
+#include "lib/config/config.h"
+#include "lib/config/flags.h"
 #include "usb.h"
 #include "libusbp_config.h"
 #include "libusbp.hpp"
 #include "protocol.h"
-#include "lib/fluxmap.h"
-#include "lib/bytes.h"
-#include "lib/proto.h"
+#include "lib/data/fluxmap.h"
+#include "lib/core/bytes.h"
+#include "lib/config/proto.h"
 #include "usbfinder.h"
-#include "lib/logger.h"
-#include "greaseweazle.h"
+#include "lib/core/logger.h"
+#include "lib/external/applesauce.h"
+#include "lib/external/greaseweazle.h"
 
 static USB* usb = NULL;
 
@@ -54,6 +56,11 @@ static std::shared_ptr<CandidateDevice> selectDevice()
                 std::cerr << fmt::format(
                     "Greaseweazle: {} on {}\n", c->serial, c->serialPort);
                 break;
+
+            case APPLESAUCE_ID:
+                std::cerr << fmt::format(
+                    "Applesauce: {} on {}\n", c->serial, c->serialPort);
+                break;
         }
     }
     exit(1);
@@ -71,6 +78,14 @@ USB* get_usb_impl()
         return createGreaseweazleUsb(conf.port(), conf);
     }
 
+    if (globalConfig()->usb().has_applesauce() &&
+        globalConfig()->usb().applesauce().has_port())
+    {
+        const auto& conf = globalConfig()->usb().applesauce();
+        log("Using Applesauce on serial port {}", conf.port());
+        return createApplesauceUsb(conf.port(), conf);
+    }
+
     /* Otherwise, select a device by USB ID. */
 
     auto candidate = selectDevice();
@@ -86,6 +101,13 @@ USB* get_usb_impl()
                 candidate->serialPort);
             return createGreaseweazleUsb(
                 candidate->serialPort, globalConfig()->usb().greaseweazle());
+
+        case APPLESAUCE_ID:
+            log("Using Applesauce {} on {}",
+                candidate->serial,
+                candidate->serialPort);
+            return createApplesauceUsb(
+                candidate->serialPort, globalConfig()->usb().applesauce());
 
         default:
             error("internal");

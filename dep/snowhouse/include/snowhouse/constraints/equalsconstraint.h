@@ -10,69 +10,68 @@
 
 namespace snowhouse
 {
-  template<typename ExpectedType>
-  struct EqualsConstraint : Expression<EqualsConstraint<ExpectedType>>
-  {
-    EqualsConstraint(const ExpectedType& expected)
-        : m_expected(expected)
+    template <typename ExpectedType>
+    struct EqualsConstraint : Expression<EqualsConstraint<ExpectedType>>
     {
+        EqualsConstraint(const ExpectedType& expected): m_expected(expected) {}
+
+        template <typename ActualType>
+        bool operator()(const ActualType& actual) const
+        {
+            return (m_expected == actual);
+        }
+
+        ExpectedType m_expected;
+    };
+
+    template <typename ExpectedType>
+    inline EqualsConstraint<ExpectedType> Equals(const ExpectedType& expected)
+    {
+        return EqualsConstraint<ExpectedType>(expected);
     }
 
-    template<typename ActualType>
-    bool operator()(const ActualType& actual) const
+    inline EqualsConstraint<std::string> Equals(const char* expected)
     {
-      return (m_expected == actual);
+        return EqualsConstraint<std::string>(expected);
     }
 
-    ExpectedType m_expected;
-  };
-
-  template<typename ExpectedType>
-  inline EqualsConstraint<ExpectedType> Equals(const ExpectedType& expected)
-  {
-    return EqualsConstraint<ExpectedType>(expected);
-  }
-
-  inline EqualsConstraint<std::string> Equals(const char* expected)
-  {
-    return EqualsConstraint<std::string>(expected);
-  }
-
-  inline EqualsConstraint<bool> IsFalse()
-  {
-    return EqualsConstraint<bool>(false);
-  }
-
-  inline EqualsConstraint<bool> IsTrue()
-  {
-    return EqualsConstraint<bool>(true);
-  }
-
-  inline EqualsConstraint<std::nullptr_t> IsNull()
-  {
-    return EqualsConstraint<std::nullptr_t>(nullptr);
-  }
-
-  template<>
-  struct Stringizer<EqualsConstraint<bool>>
-  {
-    static std::string ToString(const EqualsConstraint<bool>& constraint)
+    inline EqualsConstraint<bool> IsFalse()
     {
-      return constraint.m_expected ? "true" : "false";
+        return EqualsConstraint<bool>(false);
     }
-  };
 
-  template<typename ExpectedType>
-  struct Stringizer<EqualsConstraint<ExpectedType>>
-  {
-    static std::string ToString(const EqualsConstraint<ExpectedType>& constraint)
+    inline EqualsConstraint<bool> IsTrue()
     {
-      std::ostringstream builder;
-      builder << "equal to " << snowhouse::Stringize(constraint.m_expected);
-
-      return builder.str();
+        return EqualsConstraint<bool>(true);
     }
-  };
+
+    inline EqualsConstraint<std::nullptr_t> IsNull()
+    {
+        return EqualsConstraint<std::nullptr_t>(nullptr);
+    }
+
+    template <>
+    struct Stringizer<EqualsConstraint<bool>>
+    {
+        static std::string ToString(const EqualsConstraint<bool>& constraint)
+        {
+            return constraint.m_expected ? "true" : "false";
+        }
+    };
+
+    template <typename ExpectedType>
+    struct Stringizer<EqualsConstraint<ExpectedType>>
+    {
+        static std::string ToString(
+            const EqualsConstraint<ExpectedType>& constraint)
+        {
+            std::ostringstream builder;
+            builder << "equal to "
+                    << snowhouse::Stringize(constraint.m_expected);
+
+            return builder.str();
+        }
+    };
 }
 
 #endif

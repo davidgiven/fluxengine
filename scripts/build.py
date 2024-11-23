@@ -1,5 +1,5 @@
-from build.ab import Rule, normalrule, Targets, TargetsMap
-from build.c import cxxprogram, HostToolchain
+from build.ab import Rule, simplerule, Targets, TargetsMap
+from build.c import cxxprogram
 
 encoders = {}
 
@@ -12,11 +12,12 @@ def protoencode_single(self, name, srcs: Targets, proto, symbol):
             srcs=["scripts/protoencode.cc"],
             cflags=["-DPROTO=" + proto],
             deps=[
-                "lib+config_proto_lib",
+                "lib/config+proto_lib",
+                "lib/fluxsource+proto_lib",
+                "lib/fluxsink+proto_lib",
                 "tests+test_proto_lib",
                 "+protobuf_lib",
                 "+fmt_lib",
-                "+lib",
             ],
         )
         encoders[proto] = r
@@ -24,10 +25,10 @@ def protoencode_single(self, name, srcs: Targets, proto, symbol):
         r = encoders[proto]
     r.materialise()
 
-    normalrule(
+    simplerule(
         replaces=self,
         ins=srcs,
-        outs=[f"{name}.cc"],
+        outs=[f"={name}.cc"],
         deps=[r],
         commands=["{deps[0]} {ins} {outs} " + symbol],
         label="PROTOENCODE",
@@ -46,10 +47,10 @@ def protoencode(self, name, proto, srcs: TargetsMap, symbol):
         for k, v in srcs.items()
     ]
 
-    normalrule(
+    simplerule(
         replaces=self,
         ins=encoded,
-        outs=[name + ".cc"],
+        outs=[f"={name}.cc"],
         commands=["cat {ins} > {outs}"],
         label="CONCAT",
     )
@@ -60,8 +61,9 @@ cxxprogram(
     srcs=["./mkdoc.cc"],
     deps=[
         "src/formats",
-        "lib+config_proto_lib",
-        "+lib",
+        "lib/config+proto_lib",
+        "lib/fluxsource+proto_lib",
+        "lib/fluxsink+proto_lib",
         "+fmt_lib",
         "+protobuf_lib",
     ],
@@ -72,8 +74,9 @@ cxxprogram(
     srcs=["./mkdocindex.cc"],
     deps=[
         "src/formats",
-        "lib+config_proto_lib",
-        "+lib",
+        "lib/config+proto_lib",
+        "lib/fluxsource+proto_lib",
+        "lib/fluxsink+proto_lib",
         "+fmt_lib",
         "+protobuf_lib",
     ],

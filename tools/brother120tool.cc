@@ -1,7 +1,7 @@
-#include "lib/globals.h"
-#include "lib/bytes.h"
+#include "lib/core/globals.h"
+#include "lib/core/bytes.h"
 #include "fmt/format.h"
-#include "lib/utils.h"
+#include "lib/core/utils.h"
 #include <fstream>
 #include "fnmatch.h"
 

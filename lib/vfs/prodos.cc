@@ -1,6 +1,6 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/vfs/vfs.h"
-#include "lib/config.pb.h"
+#include "lib/config/config.pb.h"
 
 /* This is described here:
  * http://fileformats.archiveteam.org/wiki/ProDOS_file_system

@@ -1,5 +1,5 @@
-#include "lib/globals.h"
-#include "lib/csvreader.h"
+#include "lib/core/globals.h"
+#include "lib/external/csvreader.h"
 #include <assert.h>
 
 typedef std::vector<std::string> strings;

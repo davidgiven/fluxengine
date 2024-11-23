@@ -1,12 +1,12 @@
-#include "lib/globals.h"
-#include "lib/flags.h"
-#include "lib/fluxmap.h"
-#include "lib/logger.h"
-#include "lib/proto.h"
+#include "lib/core/globals.h"
+#include "lib/config/config.h"
+#include "lib/config/flags.h"
+#include "lib/data/fluxmap.h"
+#include "lib/core/logger.h"
+#include "lib/config/proto.h"
 #include "lib/usb/usb.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/fluxsource/fluxsource.pb.h"
-#include "lib/readerwriter.h"
 
 class HardwareFluxSource : public FluxSource
 {

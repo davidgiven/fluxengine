@@ -1,8 +1,8 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/vfs/vfs.h"
-#include "lib/config.pb.h"
-#include "lib/utils.h"
-#include <fmt/format.h>
+#include "lib/config/config.pb.h"
+#include "lib/core/utils.h"
+#include "fmt/format.h"
 
 /* See https://www.hp9845.net/9845/projects/hpdir/#lif_filesystem for
  * a description. */

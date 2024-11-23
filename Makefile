@@ -1,5 +1,12 @@
+ifeq ($(BUILDTYPE),)
+    buildtype_Darwin = osx
+    buildtype_Haiku = haiku
+    BUILDTYPE := $(buildtype_$(shell uname -s ))
+        ifeq ($(BUILDTYPE),)
+                BUILDTYPE := unix
+        endif
+endif
 export BUILDTYPE
-BUILDTYPE ?= host
 
 ifeq ($(BUILDTYPE),windows)
 	MINGW = i686-w64-mingw32-
@@ -23,6 +30,11 @@ else
 	LDFLAGS =
 	AR = ar
 	PKG_CONFIG = pkg-config
+	ifeq ($(BUILDTYPE),osx)
+	else
+		LDFLAGS += -pthread -Wl,--no-as-needed
+	endif
+
 endif
 
 HOSTCC = gcc
@@ -81,8 +93,8 @@ all: +all README.md
 binaries: all
 tests: all
 	
-README.md: $(OBJ)/scripts/+mkdocindex/+mkdocindex$(EXT)
-	@echo MKDOC $@
+README.md: $(OBJ)/scripts/+mkdocindex/mkdocindex$(EXT)
+	@echo $(PROGRESSINFO) MKDOC $@
 	@csplit -s -f$(OBJ)/README. README.md '/<!-- FORMATSSTART -->/' '%<!-- FORMATSEND -->%'
 	@(cat $(OBJ)/README.00 && $< && cat $(OBJ)/README.01) > README.md
 
@@ -103,3 +115,15 @@ install-bin:
 	$(hide) install -D -v "$(OBJ)/tools+upgrade-flux-file/tools+upgrade-flux-file" "$(DESTDIR)$(BINDIR)/upgrade-flux-file"
 
 include build/ab.mk
+
+DOCKERFILES = \
+	debian11 \
+    debian12 \
+    fedora40 \
+    fedora41
+
+docker-%: tests/docker/Dockerfile.%
+	docker build -t $* -f $< .
+
+.PHONY: dockertests
+dockertests: $(foreach f,$(DOCKERFILES), docker-$(strip $f) .WAIT)

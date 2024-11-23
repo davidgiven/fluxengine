@@ -1,6 +1,6 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "gui.h"
-#include "lib/fluxmap.h"
+#include "lib/data/fluxmap.h"
 #include "histogramviewer.h"
 
 static constexpr int BORDER = 10;
@@ -29,7 +29,7 @@ HistogramViewer::HistogramViewer(wxWindow* parent,
 
 void HistogramViewer::Redraw(const Fluxmap& fluxmap, nanoseconds_t clock)
 {
-    _data = fluxmap.guessClock();
+    _data = FluxmapReader(fluxmap).guessClock();
     _clock = clock;
     _blank = false;
     Refresh();

@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include "lib/globals.h"
-#include "lib/bytes.h"
-#include "lib/ldbs.h"
+#include "lib/core/globals.h"
+#include "lib/core/bytes.h"
+#include "lib/external/ldbs.h"
 
 static Bytes testdata{
     // clang-format off

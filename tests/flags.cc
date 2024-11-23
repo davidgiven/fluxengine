@@ -1,5 +1,5 @@
-#include "lib/globals.h"
-#include "lib/flags.h"
+#include "lib/core/globals.h"
+#include "lib/config/flags.h"
 #include <assert.h>
 
 static void testDefaultIntValue()

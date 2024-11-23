@@ -30,7 +30,6 @@ cxxprogram(
     ],
     cflags=["-I."],
     deps=[
-        "+fl2_proto_lib",
         "+fmt_lib",
         "+protobuf_lib",
         "+protocol",
@@ -41,8 +40,13 @@ cxxprogram(
         "dep/hfsutils",
         "dep/libusbp",
         "dep/stb",
-        "+lib",
-        "lib+config_proto_lib",
+        "lib/config",
+        "lib/core",
+        "lib/data",
+        "lib/external",
+        "lib/vfs",
+        "lib/algorithms",
+        "arch",
         "src/formats",
     ],
 )

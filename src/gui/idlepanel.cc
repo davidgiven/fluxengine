@@ -1,17 +1,19 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
+#include "lib/config/config.h"
 #include "gui.h"
-#include "lib/fluxmap.h"
+#include "lib/data/fluxmap.h"
 #include "lib/usb/usbfinder.h"
-#include "lib/proto.h"
-#include "lib/flags.h"
-#include "lib/utils.h"
+#include "lib/config/proto.h"
+#include "lib/config/flags.h"
+#include "lib/core/utils.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/imagereader/imagereader.h"
 #include "lib/imagewriter/imagewriter.h"
-#include "lib/layout.h"
+#include "lib/data/layout.h"
 #include "texteditorwindow.h"
 #include "iconbutton.h"
+#include "context.h"
 #include <wx/config.h>
 #include <wx/mstream.h>
 #include <wx/image.h>
@@ -193,6 +195,7 @@ public:
         if (formatSelection == wxNOT_FOUND)
             error("no format selected");
 
+        ClearLog();
         globalConfig().clear();
         auto formatName = _formatNames[formatChoice->GetSelection()];
         globalConfig().readBaseConfigFile(formatName);
@@ -290,7 +293,6 @@ public:
             globalConfig().set("usb.serial", serial);
 
         globalConfig().validateAndThrow();
-        ClearLog();
     }
 
     const wxBitmap GetBitmap() override
@@ -793,7 +795,6 @@ private:
 private:
     wxConfig _config;
     wxImageList _imageList;
-    ConfigProto _configProto;
     std::vector<std::string> _formatNames;
     std::vector<std::shared_ptr<const CandidateDevice>> _devices;
     int _selectedSource;

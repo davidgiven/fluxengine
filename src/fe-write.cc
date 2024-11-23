@@ -1,15 +1,15 @@
-#include "lib/globals.h"
-#include "lib/flags.h"
-#include "lib/readerwriter.h"
-#include "lib/fluxmap.h"
+#include "lib/core/globals.h"
+#include "lib/config/config.h"
+#include "lib/config/flags.h"
+#include "lib/algorithms/readerwriter.h"
+#include "lib/data/fluxmap.h"
 #include "lib/decoders/decoders.h"
 #include "lib/encoders/encoders.h"
-#include "lib/sector.h"
-#include "lib/proto.h"
+#include "lib/data/sector.h"
+#include "lib/config/proto.h"
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/fluxsource/fluxsource.h"
-#include "arch/brother/brother.h"
-#include "arch/ibm/ibm.h"
+#include "arch/arch.h"
 #include "lib/imagereader/imagereader.h"
 #include "fluxengine.h"
 #include <google/protobuf/text_format.h>
@@ -67,18 +67,19 @@ int mainWrite(int argc, const char* argv[])
 
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
-    auto& reader = globalConfig().getImageReader();
+    auto reader = ImageReader::create(globalConfig());
     std::shared_ptr<Image> image = reader->readMappedImage();
 
-    auto encoder = globalConfig().getEncoder();
-    auto fluxSink = globalConfig().getFluxSink();
+    auto encoder = Arch::createEncoder(globalConfig());
+    auto fluxSink = FluxSink::create(globalConfig());
 
     std::shared_ptr<Decoder> decoder;
     std::shared_ptr<FluxSource> verificationFluxSource;
     if (globalConfig().hasDecoder() && fluxSink->isHardware() && verify)
     {
-        decoder = globalConfig().getDecoder();
-        verificationFluxSource = globalConfig().getVerificationFluxSource();
+        decoder = Arch::createDecoder(globalConfig());
+        verificationFluxSource =
+            FluxSource::create(globalConfig().getVerificationFluxSourceProto());
     }
 
     writeDiskCommand(*image,

@@ -1,12 +1,13 @@
 #ifndef IMAGEREADER_H
 #define IMAGEREADER_H
 
-#include "lib/image.h"
-#include "lib/config.pb.h"
+#include "lib/data/image.h"
+#include "lib/config/config.pb.h"
 
 class ImageSpec;
 class ImageReaderProto;
 class ConfigProto;
+class Config;
 
 class ImageReader
 {
@@ -15,6 +16,7 @@ public:
     virtual ~ImageReader(){};
 
 public:
+    static std::unique_ptr<ImageReader> create(Config& config);
     static std::unique_ptr<ImageReader> create(const ImageReaderProto& config);
 
 public:

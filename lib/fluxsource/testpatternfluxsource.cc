@@ -1,5 +1,5 @@
-#include "lib/globals.h"
-#include "lib/fluxmap.h"
+#include "lib/core/globals.h"
+#include "lib/data/fluxmap.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/fluxsource/fluxsource.pb.h"
 
@@ -18,9 +18,9 @@ public:
     {
         auto fluxmap = std::make_unique<Fluxmap>();
 
-        while (fluxmap->duration() < (_config.sequence_length_us() * 1000000.0))
+        while (fluxmap->duration() < (_config.sequence_length_ms() * 1e6))
         {
-            fluxmap->appendInterval(_config.interval_us());
+            fluxmap->appendInterval(_config.interval_us() * TICKS_PER_US);
             fluxmap->appendPulse();
         }
 

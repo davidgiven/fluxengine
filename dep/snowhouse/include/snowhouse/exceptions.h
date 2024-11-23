@@ -10,68 +10,67 @@
 
 namespace snowhouse
 {
-  template<typename ExceptionType>
-  struct ExceptionStorage
-  {
-    static void last_exception(ExceptionType*** e, bool clear = false)
+    template <typename ExceptionType>
+    struct ExceptionStorage
     {
-      static ExceptionType* last = nullptr;
-      if (clear && last)
-      {
-        delete last;
-        return;
-      }
+        static void last_exception(ExceptionType*** e, bool clear = false)
+        {
+            static ExceptionType* last = nullptr;
+            if (clear && last)
+            {
+                delete last;
+                return;
+            }
 
-      *e = &last;
-      silly_warning_about_unused_arg(e);
-    }
+            *e = &last;
+            silly_warning_about_unused_arg(e);
+        }
 
-    static ExceptionType*** silly_warning_about_unused_arg(ExceptionType*** e)
+        static ExceptionType*** silly_warning_about_unused_arg(
+            ExceptionType*** e)
+        {
+            return e;
+        }
+
+        static void store(const ExceptionType& e)
+        {
+            ExceptionType** last = nullptr;
+            last_exception(&last);
+            if (*last)
+            {
+                delete *last;
+                *last = nullptr;
+            }
+
+            *last = new ExceptionType(e);
+        }
+
+        void compiler_thinks_i_am_unused() {}
+
+        ~ExceptionStorage()
+        {
+            ExceptionType** e = nullptr;
+            last_exception(&e);
+            if (*e)
+            {
+                delete *e;
+                *e = nullptr;
+            }
+        }
+    };
+
+    template <typename ExceptionType>
+    inline ExceptionType& LastException()
     {
-      return e;
+        ExceptionType** e = nullptr;
+        ExceptionStorage<ExceptionType>::last_exception(&e);
+        if (*e == nullptr)
+        {
+            Assert::Failure("No exception was stored");
+        }
+
+        return **e;
     }
-
-    static void store(const ExceptionType& e)
-    {
-      ExceptionType** last = nullptr;
-      last_exception(&last);
-      if (*last)
-      {
-        delete *last;
-        *last = nullptr;
-      }
-
-      *last = new ExceptionType(e);
-    }
-
-    void compiler_thinks_i_am_unused()
-    {
-    }
-
-    ~ExceptionStorage()
-    {
-      ExceptionType** e = nullptr;
-      last_exception(&e);
-      if (*e)
-      {
-        delete *e;
-        *e = nullptr;
-      }
-    }
-  };
-
-  template<typename ExceptionType>
-  inline ExceptionType& LastException()
-  {
-    ExceptionType** e = nullptr;
-    ExceptionStorage<ExceptionType>::last_exception(&e);
-    if (*e == nullptr)
-    {
-      Assert::Failure("No exception was stored");
-    }
-
-    return **e;
-  }
 }
 
 // clang-format off

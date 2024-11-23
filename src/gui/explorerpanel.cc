@@ -1,11 +1,13 @@
-#include "lib/globals.h"
-#include "lib/fluxmap.h"
+#include "lib/core/globals.h"
+#include "lib/config/config.h"
+#include "lib/data/fluxmap.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/decoders/decoders.h"
-#include "lib/proto.h"
+#include "lib/config/proto.h"
 #include "gui.h"
 #include "layout.h"
 #include "jobqueue.h"
+#include "context.h"
 
 static Bytes fakeBits(const std::vector<bool>& bits)
 {
@@ -157,8 +159,8 @@ private:
                 if (!_explorerFluxmap || (desiredTrack != _explorerTrack) ||
                     (desiredSide != _explorerSide))
                 {
-                    _explorerFluxmap = globalConfig()
-                                           .getFluxSource()
+                    _explorerFluxmap = GetContext()
+                                           .GetFluxSource()
                                            ->readFlux(desiredTrack, desiredSide)
                                            ->next();
                     _explorerTrack = desiredTrack;

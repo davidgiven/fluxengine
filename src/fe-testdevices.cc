@@ -1,7 +1,7 @@
-#include "lib/globals.h"
-#include "lib/flags.h"
+#include "lib/core/globals.h"
+#include "lib/config/flags.h"
 #include "lib/usb/usbfinder.h"
-#include <fmt/format.h>
+#include "fmt/format.h"
 
 static FlagGroup flags;
 

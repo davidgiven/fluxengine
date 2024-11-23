@@ -19,22 +19,22 @@
  * $Id: block.h,v 1.10 1998/11/02 22:08:53 rob Exp $
  */
 
-int b_init(hfsvol *);
-int b_flush(hfsvol *);
-int b_finish(hfsvol *);
+int b_init(hfsvol*);
+int b_flush(hfsvol*);
+int b_finish(hfsvol*);
 
-int b_readpb(hfsvol *, unsigned long, block *, unsigned int);
-int b_writepb(hfsvol *, unsigned long, const block *, unsigned int);
+int b_readpb(hfsvol*, unsigned long, block*, unsigned int);
+int b_writepb(hfsvol*, unsigned long, const block*, unsigned int);
 
-int b_readlb(hfsvol *, unsigned long, block *);
-int b_writelb(hfsvol *, unsigned long, const block *);
+int b_readlb(hfsvol*, unsigned long, block*);
+int b_writelb(hfsvol*, unsigned long, const block*);
 
-int b_readab(hfsvol *, unsigned int, unsigned int, block *);
-int b_writeab(hfsvol *, unsigned int, unsigned int, const block *);
+int b_readab(hfsvol*, unsigned int, unsigned int, block*);
+int b_writeab(hfsvol*, unsigned int, unsigned int, const block*);
 
-unsigned long b_size(hfsvol *);
+unsigned long b_size(hfsvol*);
 
-# ifdef DEBUG
-void b_showstats(const bcache *);
-void b_dumpcache(const bcache *);
-# endif
+#ifdef DEBUG
+void b_showstats(const bcache*);
+void b_dumpcache(const bcache*);
+#endif

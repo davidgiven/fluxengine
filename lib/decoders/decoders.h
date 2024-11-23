@@ -1,18 +1,20 @@
 #ifndef DECODERS_H
 #define DECODERS_H
 
-#include "lib/bytes.h"
-#include "lib/sector.h"
-#include "lib/decoders/fluxmapreader.h"
+#include "lib/core/bytes.h"
+#include "lib/data/sector.h"
+#include "lib/data/fluxmapreader.h"
 #include "lib/decoders/fluxdecoder.h"
 
 class Sector;
 class Fluxmap;
+class FluxMatcher;
 class FluxmapReader;
 class RawBits;
 class DecoderProto;
+class Config;
 
-#include "lib/flux.h"
+#include "lib/data/flux.h"
 
 extern void setDecoderManualClockRate(double clockrate_us);
 
@@ -38,6 +40,7 @@ public:
 
     virtual ~Decoder() {}
 
+    static std::unique_ptr<Decoder> create(Config& config);
     static std::unique_ptr<Decoder> create(const DecoderProto& config);
 
 public:

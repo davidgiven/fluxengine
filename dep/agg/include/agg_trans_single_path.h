@@ -2,8 +2,8 @@
 // Anti-Grain Geometry - Version 2.4
 // Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
 //
-// Permission to copy, use, modify, sell and distribute this software 
-// is granted provided this copyright notice appears in all copies. 
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
 // This software is provided "as is" without express or implied
 // warranty, and with no claim as to its suitability for any purpose.
 //
@@ -40,12 +40,24 @@ namespace agg
         trans_single_path();
 
         //--------------------------------------------------------------------
-        void   base_length(double v)  { m_base_length = v; }
-        double base_length() const { return m_base_length; }
+        void base_length(double v)
+        {
+            m_base_length = v;
+        }
+        double base_length() const
+        {
+            return m_base_length;
+        }
 
         //--------------------------------------------------------------------
-        void preserve_x_scale(bool f) { m_preserve_x_scale = f;    }
-        bool preserve_x_scale() const { return m_preserve_x_scale; }
+        void preserve_x_scale(bool f)
+        {
+            m_preserve_x_scale = f;
+        }
+        bool preserve_x_scale() const
+        {
+            return m_preserve_x_scale;
+        }
 
         //--------------------------------------------------------------------
         void reset();
@@ -54,23 +66,23 @@ namespace agg
         void finalize_path();
 
         //--------------------------------------------------------------------
-        template<class VertexSource> 
-        void add_path(VertexSource& vs, unsigned path_id=0)
+        template <class VertexSource>
+        void add_path(VertexSource& vs, unsigned path_id = 0)
         {
             double x;
             double y;
 
             unsigned cmd;
             vs.rewind(path_id);
-            while(!is_stop(cmd = vs.vertex(&x, &y)))
+            while (!is_stop(cmd = vs.vertex(&x, &y)))
             {
-                if(is_move_to(cmd)) 
+                if (is_move_to(cmd))
                 {
                     move_to(x, y);
                 }
-                else 
+                else
                 {
-                    if(is_vertex(cmd))
+                    if (is_vertex(cmd))
                     {
                         line_to(x, y);
                     }
@@ -81,16 +93,15 @@ namespace agg
 
         //--------------------------------------------------------------------
         double total_length() const;
-        void transform(double *x, double *y) const;
+        void transform(double* x, double* y) const;
 
     private:
         vertex_storage m_src_vertices;
-        double         m_base_length;
-        double         m_kindex;
-        status_e       m_status;
-        bool           m_preserve_x_scale;
+        double m_base_length;
+        double m_kindex;
+        status_e m_status;
+        bool m_preserve_x_scale;
     };
-
 
 }
 

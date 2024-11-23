@@ -1,4 +1,4 @@
-from build.ab import normalrule, export
+from build.ab import simplerule, export
 from build.c import cxxlibrary
 from scripts.build import protoencode
 
@@ -41,11 +41,11 @@ formats = [
     "zilogmcz",
 ]
 
-normalrule(
+simplerule(
     name="table_cc",
     ins=[f"./{name}.textpb" for name in formats],
     deps=["scripts/mktable.sh"],
-    outs=["table.cc"],
+    outs=["=table.cc"],
     commands=[
         "sh scripts/mktable.sh formats " + (" ".join(formats)) + " > {outs}"
     ],
@@ -62,16 +62,16 @@ protoencode(
 cxxlibrary(
     name="formats",
     srcs=[".+formats_cc", ".+table_cc"],
-    deps=["+lib", "lib+config_proto_lib"],
+    deps=["lib/config", "lib/core"],
 )
 
 export(
     name="docs",
     items={
-        f"doc/disk-{f}.md": normalrule(
+        f"doc/disk-{f}.md": simplerule(
             name=f"{f}_doc",
             ins=["scripts+mkdoc"],
-            outs=[f"disk-{f}.md"],
+            outs=[f"=disk-{f}.md"],
             commands=["{ins[0]} " + f + " | tr -d '\\r' > {outs[0]}"],
             label="MKDOC",
         )

@@ -1,6 +1,6 @@
 syntax = "proto2";
 
-import "lib/common.proto";
+import "lib/config/common.proto";
 
 message GreaseweazleProto {
 	enum BusType { /* note that these must match CMD_SET_BUS codes */
@@ -16,9 +16,17 @@ message GreaseweazleProto {
 		[(help) = "which FDD bus type is in use", default = IBMPC];
 }
 
+message ApplesauceProto {
+	optional string port = 1
+		[(help) = "Applesauce serial port to use"];
+	optional bool verbose = 2
+		[(help) = "Enable verbose protocol logging", default = false];
+}
+
 message UsbProto {
 	optional string serial = 1
 		[(help) = "serial number of FluxEngine or Greaseweazle device to use"];
 
 	optional GreaseweazleProto greaseweazle = 2 [(help) = "Greaseweazle-specific options"];
+	optional ApplesauceProto applesauce = 3 [(help) = "Applesauce-specific options"];
 }

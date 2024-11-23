@@ -1,13 +1,14 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/decoders/decoders.h"
 #include "ibm.h"
-#include "lib/crc.h"
-#include "lib/fluxmap.h"
-#include "lib/decoders/fluxmapreader.h"
-#include "lib/sector.h"
+#include "lib/core/crc.h"
+#include "lib/data/fluxmap.h"
+#include "lib/data/fluxmapreader.h"
+#include "lib/data/fluxpattern.h"
+#include "lib/data/sector.h"
 #include "arch/ibm/ibm.pb.h"
-#include "lib/proto.h"
-#include "lib/layout.h"
+#include "lib/config/proto.h"
+#include "lib/data/layout.h"
 #include <string.h>
 
 static_assert(std::is_trivially_copyable<IbmIdam>::value,

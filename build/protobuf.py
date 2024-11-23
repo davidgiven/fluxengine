@@ -1,73 +1,173 @@
-from os.path import join
-from build.ab import (
-    Rule,
-    Targets,
-    emit,
-    normalrule,
-    filenamesof,
-    filenamesmatchingof,
-    bubbledattrsof,
-    targetswithtraitsof,
-)
-from build.c import cxxlibrary
-from types import SimpleNamespace
-from build.pkg import package
+from build.ab import Rule, Targets, emit, simplerule, filenamesof
+from build.utils import filenamesmatchingof, collectattrs
+from os.path import join, abspath, dirname, relpath
+import build.pkg  # to get the protobuf package check
 
 emit(
     """
 PROTOC ?= protoc
-ifeq ($(filter protobuf, $(PACKAGES)),)
-$(error Required package 'protobuf' not installed.)"
-endif
 """
 )
 
-lib = package(name="protobuf_lib", package="protobuf")
+assert build.pkg.TargetPkgConfig.has_package(
+    "protobuf"
+), "required package 'protobuf' not installed"
+
+
+def _getprotodeps(deps):
+    r = set()
+    for d in deps:
+        r.update(d.args.get("protodeps", {d}))
+    return sorted(r)
+
 
 @Rule
-def proto(self, name, srcs: Targets = None, deps: Targets = None):
-    normalrule(
+def proto(self, name, srcs: Targets = [], deps: Targets = []):
+    protodeps = _getprotodeps(deps)
+    descriptorlist = ":".join(
+        [
+            relpath(f, start=self.dir)
+            for f in filenamesmatchingof(protodeps, "*.descriptor")
+        ]
+    )
+
+    dirs = sorted({"{dir}/" + dirname(f) for f in filenamesof(srcs)})
+    simplerule(
         replaces=self,
         ins=srcs,
-        outs=[f"{name}.descriptor"],
-        deps=deps,
-        commands=[
-            "$(PROTOC) --include_source_info --descriptor_set_out={outs[0]} {ins}"
-        ],
+        outs=[f"={self.localname}.descriptor"],
+        deps=protodeps,
+        commands=(
+            ["mkdir -p " + (" ".join(dirs))]
+            + [f"$(CP) {f} {{dir}}/{f}" for f in filenamesof(srcs)]
+            + [
+                "cd {dir} && "
+                + (
+                    " ".join(
+                        [
+                            "$(PROTOC)",
+                            "--proto_path=.",
+                            "--include_source_info",
+                            f"--descriptor_set_out={self.localname}.descriptor",
+                        ]
+                        + (
+                            [f"--descriptor_set_in={descriptorlist}"]
+                            if descriptorlist
+                            else []
+                        )
+                        + ["{ins}"]
+                    )
+                )
+            ]
+        ),
         label="PROTO",
+        args={
+            "protosrcs": filenamesof(srcs),
+            "protodeps": set(protodeps) | {self},
+        },
     )
-    self.attr.protosrcs = filenamesof(srcs)
-    self.bubbleattr("protosrcs", deps)
 
 
 @Rule
-def protocc(self, name, srcs: Targets = None, deps: Targets = None):
+def protocc(self, name, srcs: Targets = [], deps: Targets = []):
     outs = []
     protos = []
 
-    for f in filenamesmatchingof(bubbledattrsof(srcs, "protosrcs"), "*.proto"):
+    allsrcs = collectattrs(targets=srcs, name="protosrcs")
+    assert allsrcs, "no sources provided"
+    for f in filenamesmatchingof(allsrcs, "*.proto"):
         cc = f.replace(".proto", ".pb.cc")
         h = f.replace(".proto", ".pb.h")
         protos += [f]
-        srcs += [f]
-        outs += [cc, h]
+        outs += ["=" + cc, "=" + h]
 
-    srcname = f"{name}_srcs"
-    objdir = join("$(OBJ)", srcname)
-    r = normalrule(
-        name=srcname,
-        ins=protos,
+    protodeps = _getprotodeps(deps + srcs)
+    descriptorlist = ":".join(
+        [
+            relpath(f, start=self.dir)
+            for f in filenamesmatchingof(protodeps, "*.descriptor")
+        ]
+    )
+
+    r = simplerule(
+        name=f"{self.localname}_srcs",
+        cwd=self.cwd,
+        ins=srcs,
         outs=outs,
-        deps=deps,
-        commands=["$(PROTOC) --cpp_out={self.attr.objdir} {ins}"],
+        deps=protodeps,
+        commands=[
+            "cd {dir} && "
+            + (
+                " ".join(
+                    [
+                        "$(PROTOC)",
+                        "--proto_path=.",
+                        "--cpp_out=.",
+                        f"--descriptor_set_in={descriptorlist}",
+                    ]
+                    + protos
+                )
+            )
+        ],
         label="PROTOCC",
     )
 
-    headers = {f: join(objdir, f) for f in outs if f.endswith(".pb.h")}
+    headers = {f[1:]: join(r.dir, f[1:]) for f in outs if f.endswith(".pb.h")}
+
+    from build.c import cxxlibrary
 
     cxxlibrary(
         replaces=self,
         srcs=[r],
-        deps=targetswithtraitsof(deps, "cheaders") + [lib],
+        deps=deps,
         hdrs=headers,
+    )
+
+
+@Rule
+def protojava(self, name, srcs: Targets = [], deps: Targets = []):
+    outs = []
+
+    allsrcs = collectattrs(targets=srcs, name="protosrcs")
+    assert allsrcs, "no sources provided"
+    protos = []
+    for f in filenamesmatchingof(allsrcs, "*.proto"):
+        protos += [f]
+        srcs += [f]
+
+    descriptorlist = ":".join(
+        [abspath(f) for f in filenamesmatchingof(srcs + deps, "*.descriptor")]
+    )
+
+    r = simplerule(
+        name=f"{self.localname}_srcs",
+        cwd=self.cwd,
+        ins=protos,
+        outs=[f"={self.localname}.srcjar"],
+        deps=srcs + deps,
+        commands=[
+            "mkdir -p {dir}/srcs",
+            "cd {dir} && "
+            + (
+                " ".join(
+                    [
+                        "$(PROTOC)",
+                        "--proto_path=.",
+                        "--java_out=.",
+                        f"--descriptor_set_in={descriptorlist}",
+                    ]
+                    + protos
+                )
+            ),
+            "$(JAR) cf {outs[0]} -C {dir}/srcs .",
+        ],
+        traits={"srcjar"},
+        label="PROTOJAVA",
+    )
+
+    from build.java import javalibrary
+
+    javalibrary(
+        replaces=self,
+        deps=[r] + deps,
     )

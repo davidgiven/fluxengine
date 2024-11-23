@@ -1,4 +1,4 @@
-from build.ab import normalrule, simplerule
+from build.ab import simplerule, simplerule
 from build.utils import objectify
 from build.c import clibrary
 
@@ -14,10 +14,10 @@ clibrary(
     },
 )
 
-normalrule(
+simplerule(
     name="fluxengine_iconset",
     ins=["./icon.png"],
-    outs=["fluxengine.iconset"],
+    outs=["=fluxengine.iconset"],
     commands=[
         "mkdir -p {outs[0]}",
         "sips -z 64 64 {ins[0]} --out {outs[0]}/icon_32x32@2x.png > /dev/null",
@@ -25,18 +25,18 @@ normalrule(
     label="ICONSET",
 )
 
-normalrule(
+simplerule(
     name="fluxengine_icns",
     ins=[".+fluxengine_iconset"],
-    outs=["fluxengine.icns"],
+    outs=["=fluxengine.icns"],
     commands=["iconutil -c icns -o {outs[0]} {ins[0]}"],
     label="ICONUTIL",
 )
 
-normalrule(
+simplerule(
     name="fluxengine_ico",
     ins=["./icon.png"],
-    outs=["fluxengine.ico"],
+    outs=["=fluxengine.ico"],
     commands=["png2ico {outs[0]} {ins[0]}"],
     label="MAKEICON",
 )

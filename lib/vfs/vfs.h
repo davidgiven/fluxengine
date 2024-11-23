@@ -1,8 +1,8 @@
 #ifndef VFS_H
 #define VFS_H
 
-#include "lib/bytes.h"
-#include <fmt/format.h>
+#include "lib/core/bytes.h"
+#include "fmt/format.h"
 
 class Sector;
 class Image;

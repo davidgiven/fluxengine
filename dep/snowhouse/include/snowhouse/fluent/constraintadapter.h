@@ -11,32 +11,36 @@
 
 namespace snowhouse
 {
-  template<typename ConstraintType>
-  struct ConstraintAdapter
-  {
-    explicit ConstraintAdapter(const ConstraintType& constraint)
-        : m_constraint(constraint)
+    template <typename ConstraintType>
+    struct ConstraintAdapter
     {
-    }
+        explicit ConstraintAdapter(const ConstraintType& constraint):
+            m_constraint(constraint)
+        {
+        }
 
-    template<typename ConstraintListType, typename ActualType>
-    void Evaluate(ConstraintListType& list, ResultStack& result, OperatorStack& operators, const ActualType& actual)
+        template <typename ConstraintListType, typename ActualType>
+        void Evaluate(ConstraintListType& list,
+            ResultStack& result,
+            OperatorStack& operators,
+            const ActualType& actual)
+        {
+            result.push(m_constraint(actual));
+            EvaluateConstraintList(list.m_tail, result, operators, actual);
+        }
+
+        ConstraintType m_constraint;
+    };
+
+    template <typename ConstraintType>
+    struct Stringizer<ConstraintAdapter<ConstraintType>>
     {
-      result.push(m_constraint(actual));
-      EvaluateConstraintList(list.m_tail, result, operators, actual);
-    }
-
-    ConstraintType m_constraint;
-  };
-
-  template<typename ConstraintType>
-  struct Stringizer<ConstraintAdapter<ConstraintType>>
-  {
-    static std::string ToString(const ConstraintAdapter<ConstraintType>& constraintAdapter)
-    {
-      return snowhouse::Stringize(constraintAdapter.m_constraint);
-    }
-  };
+        static std::string ToString(
+            const ConstraintAdapter<ConstraintType>& constraintAdapter)
+        {
+            return snowhouse::Stringize(constraintAdapter.m_constraint);
+        }
+    };
 }
 
 #endif

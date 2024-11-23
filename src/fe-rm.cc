@@ -1,9 +1,9 @@
-#include "lib/globals.h"
-#include "lib/flags.h"
-#include "lib/proto.h"
+#include "lib/core/globals.h"
+#include "lib/config/flags.h"
+#include "lib/config/proto.h"
 #include "fluxengine.h"
 #include "lib/vfs/vfs.h"
-#include "lib/utils.h"
+#include "lib/core/utils.h"
 #include "src/fileutils.h"
 #include <google/protobuf/text_format.h>
 #include <fstream>

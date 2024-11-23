@@ -17,7 +17,11 @@ public:
     void read(Bytes& bytes);
     Bytes readBytes(size_t count);
     uint8_t readByte();
+    void writeByte(uint8_t b);
     void write(const Bytes& bytes);
+
+    void writeLine(const std::string& chars);
+    std::string readLine();
 
 private:
     uint8_t _readbuffer[4096];

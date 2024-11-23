@@ -7,13 +7,12 @@ from scripts.build import protoencode_single
 
 proto(
     name="test_proto",
-    srcs=[
-        "./testproto.proto",
-    ],
+    srcs=["./testproto.proto"],
+    deps=["lib/config+common_proto"],
 )
 
 protocc(
-    name="test_proto_lib", srcs=[".+test_proto"], deps=["lib+config_proto_lib"]
+    name="test_proto_lib", srcs=[".+test_proto"], deps=["lib/config+proto_lib"]
 )
 
 tests = [
@@ -57,9 +56,8 @@ export(
                     ),
                 ],
                 deps=[
-                    "+fl2_proto_lib",
+                    "lib/external+fl2_proto_lib",
                     "+fmt_lib",
-                    "+lib",
                     "+protobuf_lib",
                     "+protocol",
                     "+z_lib",
@@ -71,7 +69,10 @@ export(
                     "dep/libusbp",
                     "dep/snowhouse",
                     "dep/stb",
-                    "lib+config_proto_lib",
+                    "lib/config",
+                    "lib/core",
+                    "lib/data",
+                    "lib/fluxsource+proto_lib",
                     "src/formats",
                 ],
             ),
@@ -84,12 +85,12 @@ export(
                 name=f"{n}_test_exe",
                 srcs=[f"./{n}.cc"],
                 deps=[
-                    "+fl2_proto_lib",
+                    "lib/external+fl2_proto_lib",
                     "+fmt_lib",
-                    "+lib",
                     "+protobuf_lib",
                     "+protocol",
                     "+z_lib",
+                    "arch+proto_lib",
                     "dep/adflib",
                     "dep/agg",
                     "dep/fatfs",
@@ -97,10 +98,16 @@ export(
                     "dep/libusbp",
                     "dep/snowhouse",
                     "dep/stb",
-                    "lib+config_proto_lib",
+                    "lib/algorithms",
+                    "lib/config",
+                    "lib/core",
+                    "lib/data",
+                    "lib/fluxsource+proto_lib",
                     "src/formats",
                 ]
-                + ([".+test_proto_lib"] if n == "options" else []),
+                + ([".+test_proto_lib"] if n == "options" else [])
+                + (["lib/vfs"] if n in {"cpmfs", "applesingle", "vfs"} else [])
+                + (["arch"] if n in {"amiga"} else []),
             ),
         )
         for n in tests

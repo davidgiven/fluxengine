@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include "lib/globals.h"
-#include "lib/fluxmap.h"
-#include "lib/usb/greaseweazle.h"
+#include "lib/core/globals.h"
+#include "lib/data/fluxmap.h"
+#include "lib/external/greaseweazle.h"
 
 #define E28(val)                                          \
     (1 | ((val) << 1) & 0xff), (1 | ((val) >> 6) & 0xff), \
@@ -11,7 +11,7 @@
 
 static void test_convert(const Bytes& gwbytes, const Bytes& flbytes)
 {
-    Bytes gwtoflbytes = greaseWeazleToFluxEngine(gwbytes, 2 * NS_PER_TICK);
+    Bytes gwtoflbytes = greaseweazleToFluxEngine(gwbytes, 2 * NS_PER_TICK);
     Bytes fltogwbytes = fluxEngineToGreaseweazle(flbytes, 2 * NS_PER_TICK);
 
     if (gwtoflbytes != flbytes)

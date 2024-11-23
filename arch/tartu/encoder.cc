@@ -1,10 +1,11 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
+#include "lib/config/config.h"
 #include "lib/decoders/decoders.h"
 #include "lib/encoders/encoders.h"
 #include "arch/tartu/tartu.h"
-#include "lib/crc.h"
-#include "lib/fluxmap.h"
-#include "lib/sector.h"
+#include "lib/core/crc.h"
+#include "lib/data/fluxmap.h"
+#include "lib/data/sector.h"
 #include <string.h>
 
 class TartuEncoder : public Encoder

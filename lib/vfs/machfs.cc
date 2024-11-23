@@ -1,8 +1,8 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/vfs/vfs.h"
-#include "lib/config.pb.h"
+#include "lib/config/config.pb.h"
 #include "lib/vfs/applesingle.h"
-#include "lib/utils.h"
+#include "lib/core/utils.h"
 
 extern "C"
 {

@@ -1,4 +1,4 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "gui.h"
 #include "customstatusbar.h"
 #include <wx/artprov.h>

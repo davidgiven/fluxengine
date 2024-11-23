@@ -1,9 +1,10 @@
-#include "lib/globals.h"
-#include "lib/flags.h"
-#include "lib/readerwriter.h"
-#include "lib/fluxmap.h"
-#include "lib/sector.h"
-#include "lib/proto.h"
+#include "lib/core/globals.h"
+#include "lib/config/config.h"
+#include "lib/config/flags.h"
+#include "lib/algorithms/readerwriter.h"
+#include "lib/data/fluxmap.h"
+#include "lib/data/sector.h"
+#include "lib/config/proto.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/fluxsink/fluxsink.h"
 #include "fluxengine.h"
@@ -65,9 +66,8 @@ int mainRawWrite(int argc, const char* argv[])
     if (globalConfig()->flux_source().type() == FLUXTYPE_DRIVE)
         error("you can't use rawwrite to read from hardware");
 
-    auto& fluxSource = globalConfig().getFluxSource();
-    std::unique_ptr<FluxSink> fluxSink(
-        FluxSink::create(globalConfig()->flux_sink()));
+    auto fluxSource = FluxSource::create(globalConfig());
+    auto fluxSink = FluxSink::create(globalConfig());
 
     writeRawDiskCommand(*fluxSource, *fluxSink);
     return 0;

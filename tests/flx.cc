@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include "lib/globals.h"
-#include "lib/fluxmap.h"
-#include "lib/fluxsource/flx.h"
+#include "lib/core/globals.h"
+#include "lib/data/fluxmap.h"
+#include "lib/external/flx.h"
 
 static void test_convert(const Bytes& flxbytes, const Bytes& fluxmapbytes)
 {

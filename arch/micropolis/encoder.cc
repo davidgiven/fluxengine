@@ -1,9 +1,9 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "micropolis.h"
-#include "lib/sector.h"
+#include "lib/data/sector.h"
 #include "lib/decoders/decoders.h"
 #include "lib/encoders/encoders.h"
-#include "lib/image.h"
+#include "lib/data/image.h"
 #include "lib/encoders/encoders.pb.h"
 
 static void write_sector(std::vector<bool>& bits,

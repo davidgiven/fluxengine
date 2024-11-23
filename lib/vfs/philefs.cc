@@ -1,7 +1,7 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/vfs/vfs.h"
-#include "lib/config.pb.h"
-#include "lib/utils.h"
+#include "lib/config/config.pb.h"
+#include "lib/core/utils.h"
 
 /* Root block:
  *
