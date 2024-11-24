@@ -111,7 +111,8 @@ DOCKERFILES = \
 	debian11 \
     debian12 \
     fedora40 \
-    fedora41
+    fedora41 \
+	manjaro
 
 docker-%: tests/docker/Dockerfile.%
 	docker build -t $* -f $< .
