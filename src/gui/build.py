@@ -9,8 +9,8 @@ ifneq ($(strip $(shell command -v $(WX_CONFIG) >/dev/null 2>&1; echo $$?)),0)
 WX_CFLAGS = $(error Required binary 'wx-config' not found.)
 WX_LDFLAGS = $(error Required binary 'wx-config' not found.)
 else
-WX_CFLAGS := $(shell $(WX_CONFIG) --cxxflags core base adv aui richtext)
-WX_LDFLAGS := $(shell $(WX_CONFIG) --libs core base adv aui richtext)
+WX_CFLAGS := $(shell $(WX_CONFIG) --cxxflags base adv aui richtext core)
+WX_LDFLAGS := $(shell $(WX_CONFIG) --libs base adv aui richtext core)
 endif
 """
 )
