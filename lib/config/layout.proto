@@ -22,8 +22,9 @@ message LayoutProto
     enum Order
     {
         UNDEFINED = 0;
-        CHS = 1;
-        HCS = 2;
+        CHS = 1; // sort by cylinder, then head, then sector -- libdsk 'alt'
+        HCS = 2; // sort by head, then cylinder, then sector -- libdsk 'outout'
+        HCS_RH1 = 3; // as HCS, except the cylinder count for head 1 is reversed -- libdsk 'outback'
     }
 
     message LayoutdataProto

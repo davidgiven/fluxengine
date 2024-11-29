@@ -137,6 +137,20 @@ std::vector<std::pair<int, int>> Layout::getTrackOrdering(
             break;
         }
 
+        case LayoutProto::HCS_RH1:
+        {
+            for (int side = 0; side < sides; side++)
+            {
+                if (side == 0)
+                    for (int track = 0; track < tracks; track++)
+                        trackList.push_back(std::make_pair(track, side));
+                if (side == 1)
+                    for (int track = tracks; track >= 0; track--)
+                        trackList.push_back(std::make_pair(track - 1, side));
+            }
+            break;
+        }
+
         default:
             error("LAYOUT: invalid track trackList");
     }
