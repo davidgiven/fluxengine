@@ -176,7 +176,7 @@ void ImageWriter::printMap(const Image& image)
 
 void ImageWriter::writeMappedImage(const Image& image)
 {
-    if (_config.filesystem_sector_order())
+    if (_config.filesystem_track_order())
     {
         log("WRITER: converting from disk sector order to filesystem order");
 

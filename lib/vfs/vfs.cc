@@ -160,8 +160,8 @@ Filesystem::Filesystem(std::shared_ptr<SectorInterface> sectors):
             "information");
 
     unsigned block = 0;
-    for (const auto& p :
-        Layout::getTrackOrdering(layout.tracks(), layout.sides()))
+    for (const auto& p : Layout::getTrackOrdering(
+             layout.filesystem_track_order(), layout.tracks(), layout.sides()))
     {
         int track = p.first;
         int side = p.second;

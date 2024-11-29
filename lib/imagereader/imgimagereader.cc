@@ -32,7 +32,8 @@ public:
                 "tracks, sides and trackdata fields in the layout?");
 
         std::unique_ptr<Image> image(new Image);
-        for (const auto& p : Layout::getTrackOrdering())
+        for (const auto& p :
+            Layout::getTrackOrdering(layout.filesystem_track_order()))
         {
             int track = p.first;
             int side = p.second;

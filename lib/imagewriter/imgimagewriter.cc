@@ -31,7 +31,8 @@ public:
         if (!outputFile.is_open())
             error("cannot open output file");
 
-        for (const auto& p : Layout::getTrackOrdering(tracks, sides))
+        for (const auto& p : Layout::getTrackOrdering(
+                 layout.filesystem_track_order(), tracks, sides))
         {
             int track = p.first;
             int side = p.second;

@@ -54,10 +54,12 @@ message LayoutProto
         [ default = 0, (help) = "number of tracks in image" ];
     optional int32 sides = 3
         [ default = 0, (help) = "number of sides in image" ];
-    optional Order order = 4
+    optional Order filesystem_track_order = 4
         [ default = CHS, (help) = "the order of sectors in the filesystem" ];
-    optional bool swap_sides = 5
+    optional Order image_track_order = 5
+        [ default = CHS, (help) = "the order of sectors in disk images" ];
+    optional bool swap_sides = 6
         [ default = false, (help) = "the sides are inverted on this disk" ];
-    optional FormatType format_type = 6
+    optional FormatType format_type = 7
         [ default = FORMATTYPE_UNKNOWN, (help) = "Format type of image" ];
 }

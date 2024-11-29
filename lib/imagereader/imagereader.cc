@@ -68,7 +68,7 @@ std::unique_ptr<Image> ImageReader::readMappedImage()
 {
     auto rawImage = readImage();
 
-    if (!_config.filesystem_sector_order())
+    if (!_config.filesystem_track_order())
         return rawImage;
 
     log("READER: converting from filesystem sector order to disk order");

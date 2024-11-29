@@ -9,7 +9,7 @@ class ImageWriter
 {
 public:
     ImageWriter(const ImageWriterProto& config);
-    virtual ~ImageWriter(){};
+    virtual ~ImageWriter() {};
 
 public:
     static std::unique_ptr<ImageWriter> create(Config& config);

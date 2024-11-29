@@ -13,7 +13,7 @@ class ImageReader
 {
 public:
     ImageReader(const ImageReaderProto& config);
-    virtual ~ImageReader(){};
+    virtual ~ImageReader() {};
 
 public:
     static std::unique_ptr<ImageReader> create(Config& config);

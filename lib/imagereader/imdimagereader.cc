@@ -301,7 +301,7 @@ public:
 
                 switch (Status_Sector)
                 {
-                    // clang-format off
+                        // clang-format off
                     /* fluxengine knows of a few sector statussen but not all of the statussen in IMD.
                      *  // the statussen are in sector.h. Translation to fluxengine is as follows:
                      *	Statussen fluxengine							|	Status IMD		
