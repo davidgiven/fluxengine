@@ -137,11 +137,15 @@ option_group {
 			
 		config {
 			image_reader {
-				filesystem_track_order: true
+				img {
+					filesystem_sector_order: true
+				}
 			}
 			
 			image_writer {
-				filesystem_track_order: true
+				img {
+					filesystem_sector_order: true
+				}
 			}
 		
 			filesystem {
@@ -180,11 +184,15 @@ option_group {
 			
 		config {
 			image_reader {
-				filesystem_track_order: true
+				img {
+					filesystem_sector_order: true
+				}
 			}
 			
 			image_writer {
-				filesystem_track_order: true
+				img {
+					filesystem_sector_order: true
+				}
 			}
 		
 			filesystem {
@@ -222,11 +230,15 @@ option_group {
 			
 		config {
 			image_reader {
-				filesystem_track_order: true
+				img {
+					filesystem_sector_order: true
+				}
 			}
 			
 			image_writer {
-				filesystem_track_order: true
+				img {
+					filesystem_sector_order: true
+				}
 			}
 		
 			filesystem {

@@ -51,14 +51,9 @@ public:
         return _extraConfig;
     }
 
-    /* Directly reads the image. */
+    /* Reads the image. */
 
     virtual std::unique_ptr<Image> readImage() = 0;
-
-    /* Reads the image, and then applies any optional mapping to go from
-     * filesystem ordering to disk ordering. */
-
-    std::unique_ptr<Image> readMappedImage();
 
 protected:
     const ImageReaderProto& _config;

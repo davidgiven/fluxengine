@@ -37,11 +37,8 @@ public:
     void writeCsv(const Image& sectors, const std::string& filename);
 
     /* Writes a raw image. */
-    virtual void writeImage(const Image& sectors) = 0;
 
-    /* Writes an image applying any optional mapping from disk sector numbering
-     * to filesystem sector numbering. */
-    void writeMappedImage(const Image& sectors);
+    virtual void writeImage(const Image& sectors) = 0;
 
 protected:
     const ImageWriterProto& _config;

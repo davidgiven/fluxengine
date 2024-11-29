@@ -2,7 +2,12 @@ syntax = "proto2";
 
 import "lib/config/common.proto";
 
-message ImgInputOutputProto {}
+message ImgInputOutputProto {
+    optional bool filesystem_sector_order = 1 [
+        (help) = "read/write sector image in filesystem order",
+        default = false
+    ];
+}
 
 message DiskCopyInputProto {}
 message ImdInputProto {}
@@ -15,16 +20,12 @@ message FdiInputProto {}
 message D88InputProto {}
 message NfdInputProto {}
 
-// NEXT_TAG: 15
+// NEXT_TAG: 14
 message ImageReaderProto
 {
     optional string filename = 1 [ (help) = "filename of input sector image" ];
-    optional bool filesystem_track_order = 13 [
-        (help) = "read/write sector image in filesystem order",
-        default = false
-    ];
 
-	optional ImageReaderWriterType type = 14
+	optional ImageReaderWriterType type = 13
 		[default = IMAGETYPE_NOT_SET, (help) = "input image type"];
 
 	optional ImgInputOutputProto img = 2;

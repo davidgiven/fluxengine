@@ -173,27 +173,3 @@ void ImageWriter::printMap(const Image& image)
                   << std::endl;
     }
 }
-
-void ImageWriter::writeMappedImage(const Image& image)
-{
-    if (_config.filesystem_track_order())
-    {
-        log("WRITER: converting from disk sector order to filesystem order");
-
-        std::set<std::shared_ptr<const Sector>> sectors;
-        for (const auto& e : image)
-        {
-            auto trackLayout =
-                Layout::getLayoutOfTrack(e->logicalTrack, e->logicalSide);
-            auto newSector = std::make_shared<Sector>();
-            *newSector = *e;
-            newSector->logicalSector =
-                trackLayout->naturalToFilesystemSectorMap.at(e->logicalSector);
-            sectors.insert(newSector);
-        }
-
-        writeImage(Image(sectors));
-    }
-    else
-        writeImage(image);
-}

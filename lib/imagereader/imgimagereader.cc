@@ -31,9 +31,11 @@ public:
                 "IMG: bad configuration; did you remember to set the "
                 "tracks, sides and trackdata fields in the layout?");
 
+        bool in_filesystem_order = _config.img().filesystem_sector_order();
         std::unique_ptr<Image> image(new Image);
-        for (const auto& p :
-            Layout::getTrackOrdering(layout.filesystem_track_order()))
+        for (const auto& p : Layout::getTrackOrdering(
+                 in_filesystem_order ? layout.filesystem_track_order()
+                                     : layout.image_track_order()))
         {
             int track = p.first;
             int side = p.second;
@@ -47,6 +49,9 @@ public:
                 Bytes data(trackLayout->sectorSize);
                 inputFile.read((char*)data.begin(), data.size());
 
+                if (in_filesystem_order)
+                    sectorId =
+                        trackLayout->filesystemToNaturalSectorMap.at(sectorId);
                 const auto& sector = image->put(track, side, sectorId);
                 sector->status = Sector::OK;
                 sector->data = data;

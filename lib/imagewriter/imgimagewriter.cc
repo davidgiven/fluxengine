@@ -31,8 +31,12 @@ public:
         if (!outputFile.is_open())
             error("cannot open output file");
 
+        bool in_filesystem_order = _config.img().filesystem_sector_order();
         for (const auto& p : Layout::getTrackOrdering(
-                 layout.filesystem_track_order(), tracks, sides))
+                 in_filesystem_order ? layout.filesystem_track_order()
+                                     : layout.image_track_order(),
+                 tracks,
+                 sides))
         {
             int track = p.first;
             int side = p.second;
@@ -40,6 +44,10 @@ public:
             auto trackLayout = Layout::getLayoutOfTrack(track, side);
             for (int sectorId : trackLayout->naturalSectorOrder)
             {
+                if (in_filesystem_order)
+                    sectorId =
+                        trackLayout->filesystemToNaturalSectorMap.at(sectorId);
+
                 const auto& sector = image.get(track, side, sectorId);
                 if (sector)
                     sector->data.slice(0, trackLayout->sectorSize)
