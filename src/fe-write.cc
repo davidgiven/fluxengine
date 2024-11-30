@@ -68,7 +68,7 @@ int mainWrite(int argc, const char* argv[])
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
     auto reader = ImageReader::create(globalConfig());
-    std::shared_ptr<Image> image = reader->readMappedImage();
+    std::shared_ptr<Image> image = reader->readImage();
 
     auto encoder = Arch::createEncoder(globalConfig());
     auto fluxSink = FluxSink::create(globalConfig());

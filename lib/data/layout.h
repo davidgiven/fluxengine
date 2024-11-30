@@ -2,6 +2,7 @@
 #define LAYOUT_H
 
 #include "lib/data/flux.h"
+#include "lib/config/layout.pb.h"
 
 class SectorListProto;
 class TrackInfo;
@@ -39,7 +40,9 @@ public:
     /* Returns a series of <track, side> pairs representing the filesystem
      * ordering of the disk, in logical numbers. */
     static std::vector<std::pair<int, int>> getTrackOrdering(
-        unsigned guessedTracks = 0, unsigned guessedSides = 0);
+        LayoutProto::Order ordering,
+        unsigned guessedTracks = 0,
+        unsigned guessedSides = 0);
 
     /* Returns the layout of a given track. */
     static std::shared_ptr<const TrackInfo> getLayoutOfTrack(

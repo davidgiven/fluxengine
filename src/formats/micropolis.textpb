@@ -124,7 +124,8 @@ option {
 			layoutdata {
 				sector_size: 275
 			}
-			order: HCS
+			filesystem_track_order: HCS
+			image_track_order: HCS
 		}
 
 		decoder {

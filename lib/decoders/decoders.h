@@ -98,10 +98,10 @@ public:
     }
 
 protected:
-    virtual void beginTrack(){};
+    virtual void beginTrack() {};
     virtual nanoseconds_t advanceToNextRecord() = 0;
     virtual void decodeSectorRecord() = 0;
-    virtual void decodeDataRecord(){};
+    virtual void decodeDataRecord() {};
 
     const DecoderProto& _config;
     std::shared_ptr<TrackDataFlux> _trackdata;

@@ -23,6 +23,7 @@ formats = [
     "hplif",
     "ibm",
     "icl30",
+    "juku",
     "mac",
     "micropolis",
     "ms2000",
