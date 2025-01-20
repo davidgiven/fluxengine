@@ -18,7 +18,7 @@ def uic(self, name, src: Target = None, dest=None):
     )
 
 
-for n in ["userinterface", "driveConfigurationForm", "fluxConfigurationForm"]:
+for n in ["imager", "frame"]:
     uic(name=n + "_h", src="./" + n + ".ui", dest=n + ".h")
 
 simplerule(
@@ -29,35 +29,28 @@ simplerule(
     label="RCC",
 )
 
-cxxlibrary(
-    name="userinterface",
-    srcs=[".+resources_cc"],
-    hdrs={
-        "userinterface.h": ".+userinterface_h",
-        "driveConfigurationForm.h": ".+driveConfigurationForm_h",
-        "fluxConfigurationForm.h": ".+fluxConfigurationForm_h",
-        "fluxvisualiserwidget.h": "./fluxvisualiserwidget.h",
-    },
-)
+# cxxlibrary(
+#    name="userinterface",
+#    srcs=[".+resources_cc"],
+#    hdrs={
+#        "userinterface.h": ".+userinterface_h",
+#        "driveConfigurationForm.h": ".+driveConfigurationForm_h",
+#        "fluxConfigurationForm.h": ".+fluxConfigurationForm_h",
+#        "fluxvisualiserwidget.h": "./fluxvisualiserwidget.h",
+#    },
+# )
 
 cxxlibrary(
-    name="guilib",
+    name="framelib",
     srcs=[
         "./main.cc",
         "./mainwindow.cc",
-        "./drivecomponent.cc",
-        "./formatcomponent.cc",
-        "./fluxcomponent.cc",
-        "./imagecomponent.cc",
-        "./datastore.cc",
-        "./scene.cc",
+        ".+resources_cc",
     ],
     hdrs={
         "globals.h": "./globals.h",
-        "drivecomponent.h": "./drivecomponent.h",
-        "formatcomponent.h": "./formatcomponent.h",
-        "datastore.h": "./datastore.h",
         "mainwindow.h": "./mainwindow.h",
+        "frame.h": ".+frame_h",
     },
     cflags=["-fPIC"],
     deps=[
@@ -67,31 +60,96 @@ cxxlibrary(
         "lib/external",
         "lib/algorithms",
         "lib/vfs",
-        ".+userinterface",
         ".+Qt5Concurrent",
         ".+Qt5Widgets",
         "dep/verdigris",
     ],
 )
 
+# cxxlibrary(
+#    name="guilib",
+#    srcs=[
+#        "./main.cc",
+#        "./mainwindow.cc",
+#        "./drivecomponent.cc",
+#        "./formatcomponent.cc",
+#        "./fluxcomponent.cc",
+#        "./imagecomponent.cc",
+#        "./datastore.cc",
+#        "./scene.cc",
+#    ],
+#    hdrs={
+#        "globals.h": "./globals.h",
+#        "drivecomponent.h": "./drivecomponent.h",
+#        "formatcomponent.h": "./formatcomponent.h",
+#        "datastore.h": "./datastore.h",
+#        "mainwindow.h": "./mainwindow.h",
+#    },
+#    cflags=["-fPIC"],
+#    deps=[
+#        "lib/config",
+#        "lib/core",
+#        "lib/data",
+#        "lib/external",
+#        "lib/algorithms",
+#        "lib/vfs",
+#        ".+userinterface",
+#        ".+Qt5Concurrent",
+#        ".+Qt5Widgets",
+#        "dep/verdigris",
+#    ],
+# )
+#
+# cxxprogram(
+#    name="imager",
+#    srcs=[
+#        "./mainwindow-imager.cc",
+#        "./fluxvisualiserwidget.cc",
+#        "./imagevisualiserwidget.cc",
+#    ],
+#    cflags=["-fPIC"],
+#    ldflags=["$(QT5_EXTRA_LIBS)"],
+#    deps=[
+#        "+fmt_lib",
+#        "+protobuf_lib",
+#        "+protocol",
+#        "+z_lib",
+#        ".+guilib",
+#        ".+Qt5Concurrent",
+#        ".+Qt5Widgets",
+#        ".+userinterface",
+#        "dep/adflib",
+#        "dep/fatfs",
+#        "dep/hfsutils",
+#        "dep/libusbp",
+#        "dep/verdigris",
+#        "extras+icons",
+#        "lib/config",
+#        "lib/core",
+#        "lib/data",
+#        "lib/external",
+#        "src/formats",
+#        "src/gui/drivetypes",
+#    ],
+# )
+
 cxxprogram(
-    name="imager",
+    name="frametest",
     srcs=[
-        "./mainwindow-imager.cc",
-        "./fluxvisualiserwidget.cc",
-        "./imagevisualiserwidget.cc",
+        "./frametest.cc",
+        ".+imager_h",
     ],
     cflags=["-fPIC"],
     ldflags=["$(QT5_EXTRA_LIBS)"],
     deps=[
+        ".+imager_h",
         "+fmt_lib",
         "+protobuf_lib",
         "+protocol",
         "+z_lib",
-        ".+guilib",
+        ".+framelib",
         ".+Qt5Concurrent",
         ".+Qt5Widgets",
-        ".+userinterface",
         "dep/adflib",
         "dep/fatfs",
         "dep/hfsutils",

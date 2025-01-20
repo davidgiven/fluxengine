@@ -3,7 +3,7 @@
 #include "lib/core/globals.h"
 #include "lib/core/logger.h"
 #include "lib/config/config.h"
-#include "userinterface.h"
+#include "frame.h"
 #include "wobjectdefs.h"
 #include "wobjectimpl.h"
 #include <QtWidgets>

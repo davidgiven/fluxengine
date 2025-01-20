@@ -7,7 +7,15 @@
 
 W_OBJECT_IMPL(MainWindow)
 
-MainWindow::MainWindow()
+MainWindow::MainWindow():
+        _logStreamBuf(
+            [this](const std::string& s)
+            {
+                logViewerEdit->appendPlainText(QString::fromStdString(s));
+                logViewerEdit->ensureCursorVisible();
+            }),
+        _logStream(&_logStreamBuf),
+        _logRenderer(LogRenderer::create(_logStream))
 {
     setupUi(this);
 
@@ -42,3 +50,48 @@ void MainWindow::runThen(
         watcher,
         &QFutureWatcher<void>::deleteLater);
 }
+
+    void MainWindow::logMessage(const AnyLogMessage& message)
+    {
+#if 0
+        std::visit(overloaded{/* Fallback --- do nothing */
+                       [this](const auto& m)
+                       {
+                       },
+
+                       /* A track has been read. */
+                       [&](const TrackReadLogMessage& m)
+                       {
+                           _fluxComponent->setTrackData(m.track);
+                           _imageComponent->setTrackData(m.track);
+                       },
+
+                       /* A complete disk has been read. */
+                       [&](const DiskReadLogMessage& m)
+                       {
+                           _imageComponent->setDiskData(m.disk);
+                           _currentDisk = m.disk;
+                       },
+
+                       /* Large-scale operation start. */
+                       [this](const BeginOperationLogMessage& m)
+                       {
+                           _progressWidget->setValue(0);
+                       },
+
+                       /* Large-scale operation end. */
+                       [this](const EndOperationLogMessage& m)
+                       {
+                       },
+
+                       /* Large-scale operation progress. */
+                       [this](const OperationProgressLogMessage& m)
+                       {
+                           _progressWidget->setValue(m.progress);
+                       }},
+            *message);
+#endif
+
+        _logRenderer->add(message);
+        _logStream.flush();
+    }
