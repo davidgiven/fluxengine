@@ -43,9 +43,15 @@
       <property name="orientation">
        <enum>Qt::Orientation::Horizontal</enum>
       </property>
+      <property name="handleWidth">
+       <number>5</number>
+      </property>
       <widget class="QSplitter" name="splitter">
        <property name="orientation">
         <enum>Qt::Orientation::Vertical</enum>
+       </property>
+       <property name="handleWidth">
+        <number>5</number>
        </property>
        <widget class="QGroupBox" name="groupBox_4">
         <property name="sizePolicy">
@@ -95,8 +101,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>875</width>
-              <height>444</height>
+              <width>873</width>
+              <height>462</height>
              </rect>
             </property>
             <property name="sizePolicy">
@@ -127,7 +133,13 @@
               </widget>
              </item>
              <item>
-              <widget class="QStackedWidget" name="stackedWidget">
+              <widget class="QStackedWidget" name="driveStackedWidget">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="lineWidth">
                 <number>0</number>
                </property>
@@ -135,6 +147,12 @@
                 <number>1</number>
                </property>
                <widget class="QWidget" name="hardwareDevicePage">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <layout class="QFormLayout" name="formLayout">
                  <property name="leftMargin">
                   <number>0</number>
@@ -149,7 +167,14 @@
                   <number>0</number>
                  </property>
                  <item row="0" column="1">
-                  <widget class="QLineEdit" name="portLineEdit"/>
+                  <widget class="QLineEdit" name="portLineEdit">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                  </widget>
                  </item>
                  <item row="3" column="0">
                   <widget class="QLabel" name="label_61">
@@ -207,7 +232,7 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="6" column="0">
+                 <item row="7" column="0">
                   <widget class="QLabel" name="label_15">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
@@ -220,7 +245,7 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="6" column="1">
+                 <item row="7" column="1">
                   <widget class="QRadioButton" name="defaultSampleTimeCheckbox">
                    <property name="enabled">
                     <bool>false</bool>
@@ -230,7 +255,40 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="7" column="1">
+                 <item row="6" column="1">
+                  <widget class="QCheckBox" name="highDensityToggle">
+                   <property name="text">
+                    <string>High density disk inserted</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_4">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>Port:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="9" column="1">
+                  <spacer name="verticalSpacer_2">
+                   <property name="orientation">
+                    <enum>Qt::Orientation::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>20</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                 <item row="8" column="1">
                   <layout class="QHBoxLayout" name="horizontalLayout_7">
                    <item>
                     <widget class="QRadioButton" name="customSampleTimeCheckBox">
@@ -245,7 +303,7 @@
                    <item>
                     <widget class="QSpinBox" name="customSampleTimeSpinbox">
                      <property name="sizePolicy">
-                      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                        <horstretch>0</horstretch>
                        <verstretch>0</verstretch>
                       </sizepolicy>
@@ -272,29 +330,15 @@
                    </item>
                   </layout>
                  </item>
-                 <item row="5" column="1">
-                  <widget class="QCheckBox" name="highDensityToggle">
-                   <property name="text">
-                    <string>High density disk inserted</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="label_4">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="text">
-                    <string>Port:</string>
-                   </property>
-                  </widget>
-                 </item>
                 </layout>
                </widget>
                <widget class="QWidget" name="fluxDevicePage">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <layout class="QFormLayout" name="formLayout1">
                  <property name="leftMargin">
                   <number>0</number>
@@ -324,7 +368,14 @@
                  <item row="0" column="1">
                   <layout class="QHBoxLayout" name="horizontalLayout_2">
                    <item>
-                    <widget class="QLineEdit" name="filenameEdit"/>
+                    <widget class="QLineEdit" name="filenameEdit">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                    </widget>
                    </item>
                    <item>
                     <widget class="QToolButton" name="openButton">
@@ -357,7 +408,7 @@
                  <item row="1" column="1">
                   <widget class="QComboBox" name="rpmOverrideComboBox">
                    <property name="sizePolicy">
-                    <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                    <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
@@ -383,7 +434,7 @@
                  <item row="3" column="1">
                   <widget class="QComboBox" name="driveTypeOverrideComboBox">
                    <property name="sizePolicy">
-                    <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                    <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
@@ -402,7 +453,7 @@
                    <item>
                     <widget class="QSpinBox" name="rpmOverrideValue">
                      <property name="sizePolicy">
-                      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                        <horstretch>0</horstretch>
                        <verstretch>0</verstretch>
                       </sizepolicy>
@@ -414,22 +465,22 @@
                    </item>
                   </layout>
                  </item>
+                 <item row="4" column="1">
+                  <spacer name="verticalSpacer">
+                   <property name="orientation">
+                    <enum>Qt::Orientation::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>20</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
                 </layout>
                </widget>
               </widget>
-             </item>
-             <item>
-              <spacer name="verticalSpacer_4">
-               <property name="orientation">
-                <enum>Qt::Orientation::Vertical</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>0</height>
-                </size>
-               </property>
-              </spacer>
              </item>
             </layout>
            </widget>
@@ -491,8 +542,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>875</width>
-              <height>343</height>
+              <width>873</width>
+              <height>321</height>
              </rect>
             </property>
             <property name="sizePolicy">
@@ -626,6 +677,9 @@
       <widget class="QSplitter" name="splitter_2">
        <property name="orientation">
         <enum>Qt::Orientation::Vertical</enum>
+       </property>
+       <property name="handleWidth">
+        <number>5</number>
        </property>
        <widget class="QFrame" name="container">
         <property name="sizePolicy">

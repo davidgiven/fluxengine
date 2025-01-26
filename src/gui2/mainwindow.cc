@@ -4,18 +4,19 @@
 #include "lib/core/utils.h"
 #include "globals.h"
 #include "mainwindow.h"
+#include "drivecomponent.h"
 
 W_OBJECT_IMPL(MainWindow)
 
 MainWindow::MainWindow():
-        _logStreamBuf(
-            [this](const std::string& s)
-            {
-                logViewerEdit->appendPlainText(QString::fromStdString(s));
-                logViewerEdit->ensureCursorVisible();
-            }),
-        _logStream(&_logStreamBuf),
-        _logRenderer(LogRenderer::create(_logStream))
+    _logStreamBuf(
+        [this](const std::string& s)
+        {
+            logViewerEdit->appendPlainText(QString::fromStdString(s));
+            logViewerEdit->ensureCursorVisible();
+        }),
+    _logStream(&_logStreamBuf),
+    _logRenderer(LogRenderer::create(_logStream))
 {
     setupUi(this);
 
@@ -37,6 +38,8 @@ MainWindow::MainWindow():
         {
             ::emergencyStop = true;
         });
+
+    _driveComponent = DriveComponent::create(this);
 }
 
 void MainWindow::runThen(
@@ -51,8 +54,8 @@ void MainWindow::runThen(
         &QFutureWatcher<void>::deleteLater);
 }
 
-    void MainWindow::logMessage(const AnyLogMessage& message)
-    {
+void MainWindow::logMessage(const AnyLogMessage& message)
+{
 #if 0
         std::visit(overloaded{/* Fallback --- do nothing */
                        [this](const auto& m)
@@ -92,6 +95,6 @@ void MainWindow::runThen(
             *message);
 #endif
 
-        _logRenderer->add(message);
-        _logStream.flush();
-    }
+    _logRenderer->add(message);
+    _logStream.flush();
+}

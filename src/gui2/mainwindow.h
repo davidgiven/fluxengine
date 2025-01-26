@@ -3,6 +3,8 @@
 #include "lib/core/logger.h"
 #include "globals.h"
 
+class DriveComponent;
+
 class CallbackOstream : public std::streambuf
 {
 public:
@@ -50,4 +52,5 @@ protected:
     std::ostream _logStream;
     CallbackOstream _logStreamBuf;
     std::unique_ptr<LogRenderer> _logRenderer;
+    DriveComponent* _driveComponent;
 };

@@ -45,6 +45,7 @@ cxxlibrary(
     srcs=[
         "./main.cc",
         "./mainwindow.cc",
+        "./drivecomponent.cc",
         ".+resources_cc",
     ],
     hdrs={

@@ -4,8 +4,6 @@
 #include "globals.h"
 #include "drivecomponent.h"
 #include "mainwindow.h"
-#include "driveConfigurationForm.h"
-#include "fluxConfigurationForm.h"
 #include <QStandardItemModel>
 #include <range/v3/all.hpp>
 
@@ -22,12 +20,15 @@ public:
         W_OBJECT(ConfigurationForm)
 
     public:
-        ConfigurationForm(
-            DriveComponentImpl* dci, QIcon icon, const std::string text):
+        ConfigurationForm(QWidget* widget,
+            DriveComponentImpl* dci,
+            QIcon icon,
+            const std::string text):
             QStandardItem(icon, QString::fromStdString(text)),
-            _dci(dci)
+            _widget(widget),
+            _dci(dci),
+            _mw(dci->_mainWindow)
         {
-            _widget = new QWidget();
         }
 
     public:
@@ -52,20 +53,20 @@ public:
         }
 
     protected:
-        DriveComponentImpl* _dci;
         QWidget* _widget;
+        DriveComponentImpl* _dci;
+        MainWindow* _mw;
     };
 
-    class FluxConfigurationForm :
-        public ConfigurationForm,
-        public Ui_fluxConfigurationForm
+    class FluxConfigurationForm : public ConfigurationForm
     {
     public:
         FluxConfigurationForm(DriveComponentImpl* dci):
-            ConfigurationForm(
-                dci, QIcon(":/ui/extras/fluxfile.png"), "Flux file")
+            ConfigurationForm(dci->_mainWindow->fluxDevicePage,
+                dci,
+                QIcon(":/ui/extras/fluxfile.png"),
+                "Flux file")
         {
-            setupUi(_widget);
         }
 
     public:
@@ -76,7 +77,7 @@ public:
 
         void collectConfig() const override
         {
-            auto fluxFile = filenameEdit->text().toStdString();
+            auto fluxFile = _mw->filenameEdit->text().toStdString();
 
             const FluxConstructor* fc = &Config::getFluxFormats()[0];
             if (fc->sink)
@@ -86,7 +87,8 @@ public:
                 fc->source(fluxFile,
                     globalConfig().overrides()->mutable_flux_source());
 
-            QString rpmOverride = rpmOverrideComboBox->currentData().toString();
+            QString rpmOverride =
+                _mw->rpmOverrideComboBox->currentData().toString();
             if (rpmOverride == "300")
                 globalConfig()
                     .overrides()
@@ -99,7 +101,7 @@ public:
                     ->set_rotational_period_ms(166);
             else if (rpmOverride == "override")
             {
-                float value = rpmOverrideValue->value();
+                float value = _mw->rpmOverrideValue->value();
                 globalConfig()
                     .overrides()
                     ->mutable_drive()
@@ -107,7 +109,7 @@ public:
             }
 
             QString driveTypeOverride =
-                driveTypeOverrideComboBox->currentData().toString();
+                _mw->driveTypeOverrideComboBox->currentData().toString();
             if (driveTypeOverride != "default")
                 globalConfig().overrides()->MergeFrom(
                     *drivetypes.at(driveTypeOverride.toStdString()));
@@ -115,52 +117,56 @@ public:
 
         void loadSavedState() override
         {
-            filenameEdit->setText(app->value(qid() + "/filename").toString());
+            _mw->filenameEdit->setText(
+                app->value(qid() + "/filename").toString());
 
-            rpmOverrideComboBox->addItem(
+            _mw->rpmOverrideComboBox->addItem(
                 "Use value in file", QVariant("default"));
-            rpmOverrideComboBox->addItem("300 rpm / 200 ms", QVariant("300"));
-            rpmOverrideComboBox->addItem("360 rpm / 166 ms", QVariant("360"));
-            rpmOverrideComboBox->addItem("Custom value", QVariant("custom"));
+            _mw->rpmOverrideComboBox->addItem(
+                "300 rpm / 200 ms", QVariant("300"));
+            _mw->rpmOverrideComboBox->addItem(
+                "360 rpm / 166 ms", QVariant("360"));
+            _mw->rpmOverrideComboBox->addItem(
+                "Custom value", QVariant("custom"));
             QString rpmType = app->value(qid() + "/rpmType").toString();
-            setByString(rpmOverrideComboBox, rpmType);
-            rpmOverrideValue->setEnabled(rpmType == "custom");
+            setByString(_mw->rpmOverrideComboBox, rpmType);
+            _mw->rpmOverrideValue->setEnabled(rpmType == "custom");
 
-            driveTypeOverrideComboBox->addItem(
+            _mw->driveTypeOverrideComboBox->addItem(
                 "Use value in file", QVariant("default"));
             for (auto& d : drivetypes)
             {
-                driveTypeOverrideComboBox->addItem(
+                _mw->driveTypeOverrideComboBox->addItem(
                     QString::fromStdString(d.second->comment()),
                     QVariant(QString::fromStdString(d.first)));
             }
-            setByString(driveTypeOverrideComboBox,
+            setByString(_mw->driveTypeOverrideComboBox,
                 app->value(qid() + "/driveType").toString());
 
-            rpmOverrideValue->setValue(
+            _mw->rpmOverrideValue->setValue(
                 app->value(qid() + "/customRpm").toInt());
         }
 
         void connectAll() override
         {
-            connect(filenameEdit,
+            connect(_mw->filenameEdit,
                 &QLineEdit::editingFinished,
                 this,
                 &ConfigurationForm::updateSavedState);
-            connect(driveTypeOverrideComboBox,
+            connect(_mw->driveTypeOverrideComboBox,
                 QOverload<int>::of(&QComboBox::activated),
                 this,
                 &ConfigurationForm::updateSavedState);
-            connect(rpmOverrideComboBox,
+            connect(_mw->rpmOverrideComboBox,
                 QOverload<int>::of(&QComboBox::activated),
                 this,
                 &ConfigurationForm::updateSavedState);
-            connect(rpmOverrideValue,
+            connect(_mw->rpmOverrideValue,
                 QOverload<int>::of(&QSpinBox::valueChanged),
                 this,
                 &ConfigurationForm::updateSavedState);
 
-            connect(openButton,
+            connect(_mw->openButton,
                 &QPushButton::clicked,
                 [this]()
                 {
@@ -178,55 +184,55 @@ public:
                                           ranges::views::intersperse(" ") |
                                           ranges::views::join |
                                           ranges::to<std::string>();
-                    QFileDialog dialogue(_dci->container());
+                    QFileDialog dialogue(_mw);
                     dialogue.setFileMode(QFileDialog::ExistingFile);
                     dialogue.setNameFilter(
                         QString::fromStdString("Flux files (" + formats + ")"));
 
                     QStringList fileNames;
                     if (dialogue.exec())
-                        filenameEdit->setText(dialogue.selectedFiles().first());
+                        _mw->filenameEdit->setText(
+                            dialogue.selectedFiles().first());
                 });
         }
 
         void updateSavedState() const override
         {
-            app->setValue(qid() + "/filename", filenameEdit->text());
+            app->setValue(qid() + "/filename", _mw->filenameEdit->text());
 
-            QString rpmType = rpmOverrideComboBox->currentData().toString();
+            QString rpmType =
+                _mw->rpmOverrideComboBox->currentData().toString();
             app->setValue(qid() + "/rpmType", rpmType);
-            rpmOverrideValue->setEnabled(rpmType == "custom");
+            _mw->rpmOverrideValue->setEnabled(rpmType == "custom");
 
-            app->setValue(qid() + "/customRpm", rpmOverrideValue->value());
+            app->setValue(qid() + "/customRpm", _mw->rpmOverrideValue->value());
 
             app->setValue(qid() + "/driveType",
-                driveTypeOverrideComboBox->currentData().toString());
+                _mw->driveTypeOverrideComboBox->currentData().toString());
         }
     };
 
-    class DriveConfigurationForm :
-        public ConfigurationForm,
-        public Ui_driveConfigurationForm
+    class DriveConfigurationForm : public ConfigurationForm
     {
     public:
         DriveConfigurationForm(
             DriveComponentImpl* dci, QIcon icon, const std::string& label):
-            ConfigurationForm(dci, icon, label)
+            ConfigurationForm(
+                dci->_mainWindow->hardwareDevicePage, dci, icon, label)
         {
-            setupUi(_widget);
         }
 
         void collectConfig() const override
         {
             globalConfig().overrides()->mutable_drive()->set_high_density(
-                highDensityToggle->isChecked());
+                _mw->highDensityToggle->isChecked());
 
             auto driveTypeId =
-                driveTypeComboBox->currentData().toString().toStdString();
+                _mw->driveTypeComboBox->currentData().toString().toStdString();
             globalConfig().overrides()->MergeFrom(*drivetypes.at(driveTypeId));
 
             auto filename =
-                fmt::format("drive:{}", driveComboBox->currentIndex());
+                fmt::format("drive:{}", _mw->driveComboBox->currentIndex());
             globalConfig().setFluxSink(filename);
             globalConfig().setFluxSource(filename);
             globalConfig().setVerificationFluxSource(filename);
@@ -234,40 +240,40 @@ public:
 
         void loadSavedState() override
         {
-            driveComboBox->setCurrentIndex(
+            _mw->driveComboBox->setCurrentIndex(
                 app->value(qid() + "/drive").toInt());
 
             QString driveType = app->value(qid() + "/driveType").toString();
             for (auto& d : drivetypes)
             {
-                driveTypeComboBox->addItem(
+                _mw->driveTypeComboBox->addItem(
                     QString::fromStdString(d.second->comment()),
                     QVariant(QString::fromStdString(d.first)));
                 if (QString::fromStdString(d.first) == driveType)
-                    driveTypeComboBox->setCurrentIndex(
-                        driveTypeComboBox->count() - 1);
+                    _mw->driveTypeComboBox->setCurrentIndex(
+                        _mw->driveTypeComboBox->count() - 1);
             }
 
-            highDensityToggle->setCheckState(
+            _mw->highDensityToggle->setCheckState(
                 app->value(qid() + "/highDensity").toBool() ? Qt::Checked
                                                             : Qt::Unchecked);
         }
 
         void connectAll() override
         {
-            connect(portLineEdit,
+            connect(_mw->portLineEdit,
                 &QLineEdit::editingFinished,
                 this,
                 &ConfigurationForm::updateSavedState);
-            connect(driveComboBox,
+            connect(_mw->driveComboBox,
                 QOverload<int>::of(&QComboBox::activated),
                 this,
                 &ConfigurationForm::updateSavedState);
-            connect(driveTypeComboBox,
+            connect(_mw->driveTypeComboBox,
                 QOverload<int>::of(&QComboBox::activated),
                 this,
                 &ConfigurationForm::updateSavedState);
-            connect(highDensityToggle,
+            connect(_mw->highDensityToggle,
                 &QCheckBox::stateChanged,
                 this,
                 &ConfigurationForm::updateSavedState);
@@ -275,13 +281,13 @@ public:
 
         void updateSavedState() const override
         {
-            app->setValue(qid() + "/drive", driveComboBox->currentIndex());
+            app->setValue(qid() + "/drive", _mw->driveComboBox->currentIndex());
 
             app->setValue(qid() + "/driveType",
-                driveTypeComboBox->currentData().toString());
+                _mw->driveTypeComboBox->currentData().toString());
 
             app->setValue(
-                qid() + "/highDensity", highDensityToggle->isChecked());
+                qid() + "/highDensity", _mw->highDensityToggle->isChecked());
         }
     };
 
@@ -308,18 +314,18 @@ public:
                 .overrides()
                 ->mutable_usb()
                 ->mutable_greaseweazle()
-                ->set_port(portLineEdit->text().toStdString());
+                ->set_port(_mw->portLineEdit->text().toStdString());
         }
 
         void loadSavedState() override
         {
             DriveConfigurationForm::loadSavedState();
-            portLineEdit->setText(app->value(qid() + "/port").toString());
+            _mw->portLineEdit->setText(app->value(qid() + "/port").toString());
         }
 
         void updateSavedState() const override
         {
-            app->setValue(qid() + "/port", portLineEdit->text());
+            app->setValue(qid() + "/port", _mw->portLineEdit->text());
             DriveConfigurationForm::updateSavedState();
         }
     };
@@ -338,12 +344,13 @@ public:
             _id(id),
             _device(device)
         {
-            portLineEdit->setEnabled(false);
+            _mw->portLineEdit->setEnabled(false);
         }
 
         void loadSavedState() override
         {
-            portLineEdit->setText(QString::fromStdString(_device->serialPort));
+            _mw->portLineEdit->setText(
+                QString::fromStdString(_device->serialPort));
         }
 
     public:
@@ -388,7 +395,7 @@ public:
             this,
             &DriveComponentImpl::updateSavedState);
 
-        container()->updateGeometry();
+        _mainWindow->updateGeometry();
     }
 
 private:
@@ -399,9 +406,6 @@ private:
 
         _forms.append(form);
         _devicesModel.appendRow(form);
-
-        container()->layout()->addWidget(form->widget());
-        form->widget()->hide();
     }
 
     int findFormById(const std::string& id, int def)
@@ -415,8 +419,7 @@ private:
 public:
     void changeSelectedDevice(int index)
     {
-        for (int i = 0; i < _forms.size(); i++)
-            _forms[i]->widget()->setVisible(i == index);
+        _mainWindow->driveStackedWidget->setCurrentIndex(index);
     }
     W_SLOT(changeSelectedDevice)
 
@@ -435,12 +438,6 @@ public:
         int selectedForm = _mainWindow->deviceSelectionComboBox->currentIndex();
         ConfigurationForm* form = _forms.at(selectedForm);
         form->collectConfig();
-    }
-
-public:
-    QWidget* container() const
-    {
-        return _mainWindow->driveConfigurationContainer;
     }
 
 private:
