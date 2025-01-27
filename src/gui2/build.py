@@ -47,12 +47,16 @@ cxxlibrary(
         "./mainwindow.cc",
         "./drivecomponent.cc",
         "./formatcomponent.cc",
+        "./fluxvisualiserwidget.cc",
+        "./imagevisualiserwidget.cc",
         ".+resources_cc",
     ],
     hdrs={
         "globals.h": "./globals.h",
         "mainwindow.h": "./mainwindow.h",
         "frame.h": ".+frame_h",
+        "fluxvisualiserwidget.h": "./fluxvisualiserwidget.h",
+        "imagevisualiserwidget.h": "./imagevisualiserwidget.h",
     },
     cflags=["-fPIC"],
     deps=[
@@ -139,7 +143,6 @@ cxxprogram(
     name="imager",
     srcs=[
         "./mainwindow-imager.cc",
-        "./fluxvisualiserwidget.cc",
         "./scene.cc",
         ".+imager_h",
     ],

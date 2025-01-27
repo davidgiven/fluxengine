@@ -9,6 +9,7 @@
 #include "mainwindow.h"
 #include "imager.h"
 #include "fluxvisualiserwidget.h"
+#include "imagevisualiserwidget.h"
 
 class MainWindowImpl : public MainWindow, protected Ui_Imager
 {
@@ -26,10 +27,8 @@ public:
     MainWindowImpl()
     {
         Ui_Imager::setupUi(container);
-        // _driveComponent = DriveComponent::create(this);
-        // _formatComponent = FormatComponent::create(this);
-        //_fluxComponent = FluxComponent::create(this);
-        // _imageComponent = ImageComponent::create(this);
+
+        /* Flux visualiser */
 
         _fluxVisualiserWidget = FluxVisualiserWidget::create();
         fluxViewContainer->layout()->addWidget(_fluxVisualiserWidget);
@@ -46,8 +45,12 @@ public:
             });
         fluxContrastSlider->setValue(500);
 
-        // setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
-        // setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
+        /* Image visualiser */
+
+        _imageVisualiserWidget = ImageVisualiserWidget::create();
+        imageViewContainer->layout()->addWidget(_imageVisualiserWidget);
+
+        /* Controls */
 
         connect(readDiskButton,
             &QAbstractButton::clicked,
@@ -70,6 +73,7 @@ protected:
                        [&](std::shared_ptr<const TrackReadLogMessage> m)
                        {
                            _fluxVisualiserWidget->setTrackData(m->track);
+                           _imageVisualiserWidget->setTrackData(m->track);
                        },
 
                        /* A complete disk has been read. */
@@ -127,8 +131,8 @@ private:
         _stopWidget->setEnabled(state != STATE_IDLE);
         _progressWidget->setEnabled(state != STATE_IDLE);
 
-        saveImageButton->setEnabled((bool) _currentDisk);
-        writeDiskButton->setEnabled((bool) _currentDisk);
+        saveImageButton->setEnabled((bool)_currentDisk);
+        writeDiskButton->setEnabled((bool)_currentDisk);
 
         _state = state;
     }
@@ -137,6 +141,7 @@ private:
 private:
     std::shared_ptr<const DiskFlux> _currentDisk;
     FluxVisualiserWidget* _fluxVisualiserWidget;
+    ImageVisualiserWidget* _imageVisualiserWidget;
     int _state;
 };
 W_OBJECT_IMPL(MainWindowImpl)
