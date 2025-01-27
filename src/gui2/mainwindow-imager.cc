@@ -69,17 +69,14 @@ protected:
                        /* A track has been read. */
                        [&](std::shared_ptr<const TrackReadLogMessage> m)
                        {
-                           fmt::print("set track data!\n");
                            _fluxVisualiserWidget->setTrackData(m->track);
-                           //    _fluxComponent->setTrackData(m.track);
-                           //    _imageComponent->setTrackData(m.track);
                        },
 
                        /* A complete disk has been read. */
                        [&](std::shared_ptr<const DiskReadLogMessage> m)
                        {
-                           //    _imageComponent->setDiskData(m.disk);
-                           //    _currentDisk = m.disk;
+                           _currentDisk = m->disk;
+                           updateState();
                        },
 
                        /* Large-scale operation end. */
@@ -117,6 +114,11 @@ private:
     W_SLOT(readDisk)
 
 private:
+    void updateState()
+    {
+        setState(_state);
+    }
+
     void setState(int state)
     {
         settingsCanBeChanged(state == STATE_IDLE);
@@ -124,6 +126,9 @@ private:
 
         _stopWidget->setEnabled(state != STATE_IDLE);
         _progressWidget->setEnabled(state != STATE_IDLE);
+
+        saveImageButton->setEnabled((bool) _currentDisk);
+        writeDiskButton->setEnabled((bool) _currentDisk);
 
         _state = state;
     }
