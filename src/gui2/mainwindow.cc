@@ -57,28 +57,29 @@ void MainWindow::runThen(
         &QFutureWatcher<void>::deleteLater);
 }
 
+/* Runs on the UI thread. */
 void MainWindow::logMessage(const AnyLogMessage& message)
 {
     std::visit(overloaded{/* Fallback --- do nothing */
-                   [this](const auto& m)
+                   [&](const auto& m)
                    {
                    },
 
                    /* Large-scale operation start. */
-                   [this](const BeginOperationLogMessage& m)
+                   [&](std::shared_ptr<const BeginOperationLogMessage> m)
                    {
                        _progressWidget->setValue(0);
                    },
 
                    /* Large-scale operation end. */
-                   [this](const EndOperationLogMessage& m)
+                   [&](std::shared_ptr<const EndOperationLogMessage> m)
                    {
                    },
 
                    /* Large-scale operation progress. */
-                   [this](const OperationProgressLogMessage& m)
+                   [&](std::shared_ptr<const OperationProgressLogMessage> m)
                    {
-                       _progressWidget->setValue(m.progress);
+                       _progressWidget->setValue(m->progress);
                    }},
         message);
 

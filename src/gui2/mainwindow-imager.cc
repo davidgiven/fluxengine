@@ -8,6 +8,7 @@
 #include "globals.h"
 #include "mainwindow.h"
 #include "imager.h"
+#include "fluxvisualiserwidget.h"
 
 class MainWindowImpl : public MainWindow, protected Ui_Imager
 {
@@ -27,8 +28,23 @@ public:
         Ui_Imager::setupUi(container);
         // _driveComponent = DriveComponent::create(this);
         // _formatComponent = FormatComponent::create(this);
-        // _fluxComponent = FluxComponent::create(this);
+        //_fluxComponent = FluxComponent::create(this);
         // _imageComponent = ImageComponent::create(this);
+
+        _fluxVisualiserWidget = FluxVisualiserWidget::create();
+        fluxViewContainer->layout()->addWidget(_fluxVisualiserWidget);
+
+        connect(fluxSideComboBox,
+            QOverload<int>::of(&QComboBox::activated),
+            _fluxVisualiserWidget,
+            &FluxVisualiserWidget::setVisibleSide);
+        connect(fluxContrastSlider,
+            &QAbstractSlider::valueChanged,
+            [this](int value)
+            {
+                _fluxVisualiserWidget->setGamma(value / 100.0);
+            });
+        fluxContrastSlider->setValue(500);
 
         // setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
         // setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
@@ -42,6 +58,7 @@ public:
     }
 
 protected:
+    /* Runs on the UI thread. */
     void logMessage(const AnyLogMessage& message)
     {
         std::visit(overloaded{/* Fallback --- do nothing */
@@ -50,21 +67,23 @@ protected:
                        },
 
                        /* A track has been read. */
-                       [&](const TrackReadLogMessage& m)
+                       [&](std::shared_ptr<const TrackReadLogMessage> m)
                        {
+                           fmt::print("set track data!\n");
+                           _fluxVisualiserWidget->setTrackData(m->track);
                            //    _fluxComponent->setTrackData(m.track);
                            //    _imageComponent->setTrackData(m.track);
                        },
 
                        /* A complete disk has been read. */
-                       [&](const DiskReadLogMessage& m)
+                       [&](std::shared_ptr<const DiskReadLogMessage> m)
                        {
                            //    _imageComponent->setDiskData(m.disk);
                            //    _currentDisk = m.disk;
                        },
 
                        /* Large-scale operation end. */
-                       [this](const EndOperationLogMessage& m)
+                       [&](std::shared_ptr<const EndOperationLogMessage> m)
                        {
                        }},
             message);
@@ -112,6 +131,7 @@ private:
 
 private:
     std::shared_ptr<const DiskFlux> _currentDisk;
+    FluxVisualiserWidget* _fluxVisualiserWidget;
     int _state;
 };
 W_OBJECT_IMPL(MainWindowImpl)

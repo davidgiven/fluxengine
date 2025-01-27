@@ -35,9 +35,6 @@ public:
             });
     }
 
-public:
-    void sendToUiThread(std::function<void()> callback) override {}
-
 private:
     std::unique_ptr<MainWindow> _mainWindow;
 };
@@ -52,14 +49,39 @@ bool isWorkerThreadRunning()
     return workerThreadPool.activeThreadCount() != 0;
 }
 
+/* Asynchronously run the callback on the UI thread. */
 void postToUiThread(std::function<void()> callback)
 {
     QMetaObject::invokeMethod((QApplication*)app, callback);
 }
 
+/* Synchronously run the callback on the UI thread. */
 void runOnUiThread(std::function<void()> callback)
 {
-    QMetaObject::invokeMethod((QApplication*)app, callback);
+    if (isGuiThread())
+        callback();
+    else
+    {
+        QSemaphore semaphore(0);
+        QMetaObject::invokeMethod((QApplication*)app,
+            [&]()
+            {
+                try
+                {
+                    callback();
+                }
+                catch (const ErrorException& e)
+                {
+                    log("Fatal error: {}", e.message);
+                }
+                catch (...)
+                {
+                    log("Mysterious uncaught exception!");
+                }
+                semaphore.release(1);
+            });
+        semaphore.acquire(1);
+    }
 }
 
 QFuture<void> safeRunOnWorkerThread(std::function<void()> callback)

@@ -30,9 +30,6 @@ class Application : public QApplication, public QSettings
 public:
     Application(int& argc, char** argv);
     virtual ~Application();
-
-public:
-    virtual void sendToUiThread(std::function<void()> callback) = 0;
 };
 
 extern bool isGuiThread();

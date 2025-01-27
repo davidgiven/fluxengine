@@ -139,6 +139,8 @@ cxxprogram(
     name="imager",
     srcs=[
         "./mainwindow-imager.cc",
+        "./fluxvisualiserwidget.cc",
+        "./scene.cc",
         ".+imager_h",
     ],
     cflags=["-fPIC"],
