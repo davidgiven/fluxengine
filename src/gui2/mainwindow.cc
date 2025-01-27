@@ -5,6 +5,7 @@
 #include "globals.h"
 #include "mainwindow.h"
 #include "drivecomponent.h"
+#include "formatcomponent.h"
 
 W_OBJECT_IMPL(MainWindow)
 
@@ -40,6 +41,7 @@ MainWindow::MainWindow():
         });
 
     _driveComponent = DriveComponent::create(this);
+    _formatComponent = FormatComponent::create(this);
 }
 
 void MainWindow::runThen(

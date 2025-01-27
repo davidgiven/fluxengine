@@ -4,6 +4,7 @@
 #include "globals.h"
 
 class DriveComponent;
+class FormatComponent;
 
 class CallbackOstream : public std::streambuf
 {
@@ -53,4 +54,5 @@ protected:
     CallbackOstream _logStreamBuf;
     std::unique_ptr<LogRenderer> _logRenderer;
     DriveComponent* _driveComponent;
+    FormatComponent* _formatComponent;
 };
