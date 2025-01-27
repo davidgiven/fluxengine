@@ -74,6 +74,7 @@ void MainWindow::logMessage(const AnyLogMessage& message)
                    /* Large-scale operation end. */
                    [&](std::shared_ptr<const EndOperationLogMessage> m)
                    {
+                       _progressWidget->setValue(100);
                    },
 
                    /* Large-scale operation progress. */
