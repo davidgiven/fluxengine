@@ -53,7 +53,7 @@
        <property name="handleWidth">
         <number>5</number>
        </property>
-       <widget class="QGroupBox" name="groupBox_4">
+       <widget class="QGroupBox" name="driveConfigurationBox">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
           <horstretch>0</horstretch>
@@ -488,7 +488,7 @@
          </item>
         </layout>
        </widget>
-       <widget class="QGroupBox" name="groupBox_5">
+       <widget class="QGroupBox" name="formatConfigurationBox">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
           <horstretch>0</horstretch>
@@ -765,7 +765,7 @@
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionE_xit">
    <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::ApplicationExit"/>
+    <iconset theme="application-exit"/>
    </property>
    <property name="text">
     <string>E&amp;xit</string>
@@ -773,7 +773,7 @@
   </action>
   <action name="actionCu_t">
    <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::EditCut"/>
+    <iconset theme="edit-cut"/>
    </property>
    <property name="text">
     <string>Cu&amp;t</string>
@@ -781,7 +781,7 @@
   </action>
   <action name="actionCopy">
    <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::EditCopy"/>
+    <iconset theme="edit-copy"/>
    </property>
    <property name="text">
     <string>&amp;Copy</string>
@@ -789,7 +789,7 @@
   </action>
   <action name="actionPaste">
    <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::EditPaste"/>
+    <iconset theme="edit-paste"/>
    </property>
    <property name="text">
     <string>&amp;Paste</string>

@@ -372,8 +372,8 @@ public:
         _devicesModel.setColumnCount(1);
         _mainWindow->deviceSelectionComboBox->setModel(&_devicesModel);
 
-        addForm(new FluxConfigurationForm(this));
         addForm(new ManualDriveConfigurationForm(this));
+        addForm(new FluxConfigurationForm(this));
 
         auto devices = runOnWorkerThread(findUsbDevices).result();
         for (auto& it : devices)

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>333</width>
+    <width>494</width>
     <height>250</height>
    </rect>
   </property>
@@ -45,6 +45,9 @@
           <widget class="QLabel" name="label_4">
            <property name="text">
             <string>Contrast:</string>
+           </property>
+           <property name="buddy">
+            <cstring>commandButtonFrame</cstring>
            </property>
           </widget>
          </item>
@@ -137,36 +140,62 @@ background: white;
     </widget>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="0">
-      <widget class="QPushButton" name="pushButton_2">
-       <property name="text">
-        <string>Read from disk</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QPushButton" name="pushButton_3">
-       <property name="text">
-        <string>Load from file</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
-      <widget class="QPushButton" name="pushButton_4">
-       <property name="text">
-        <string>Write to file</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="3">
-      <widget class="QPushButton" name="pushButton">
-       <property name="text">
-        <string>Write to disk</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    <widget class="QFrame" name="commandButtonFrame">
+     <layout class="QGridLayout" name="gridLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item row="0" column="1">
+       <widget class="QPushButton" name="loadFluxButton">
+        <property name="text">
+         <string>Load from file</string>
+        </property>
+        <property name="icon">
+         <iconset theme="document-open"/>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QPushButton" name="readDiskButton">
+        <property name="text">
+         <string>Read from disk</string>
+        </property>
+        <property name="icon">
+         <iconset theme="media-playback-start"/>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QPushButton" name="writeDiskButton">
+        <property name="text">
+         <string>Write to disk</string>
+        </property>
+        <property name="icon">
+         <iconset theme="media-record"/>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QPushButton" name="saveFluxButton">
+        <property name="text">
+         <string>Save to file</string>
+        </property>
+        <property name="icon">
+         <iconset theme="document-save"/>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </item>
   </layout>
  </widget>

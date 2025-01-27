@@ -41,9 +41,11 @@ public:
 
 public:
     virtual void logMessage(const AnyLogMessage& message);
-    virtual void collectConfig() = 0;
+    void collectConfig();
+    void updateState();
 
 protected:
+    void settingsCanBeChanged(bool state);
     void runThen(
         std::function<void()> workCb, std::function<void()> completionCb);
 

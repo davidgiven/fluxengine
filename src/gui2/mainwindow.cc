@@ -13,7 +13,8 @@ MainWindow::MainWindow():
     _logStreamBuf(
         [this](const std::string& s)
         {
-            logViewerEdit->appendPlainText(QString::fromStdString(s));
+            logViewerEdit->moveCursor(QTextCursor::End);
+            logViewerEdit->insertPlainText(QString::fromStdString(s));
             logViewerEdit->ensureCursorVisible();
         }),
     _logStream(&_logStreamBuf),
@@ -58,45 +59,53 @@ void MainWindow::runThen(
 
 void MainWindow::logMessage(const AnyLogMessage& message)
 {
-#if 0
-        std::visit(overloaded{/* Fallback --- do nothing */
-                       [this](const auto& m)
-                       {
-                       },
+    std::visit(overloaded{/* Fallback --- do nothing */
+                   [this](const auto& m)
+                   {
+                   },
 
-                       /* A track has been read. */
-                       [&](const TrackReadLogMessage& m)
-                       {
-                           _fluxComponent->setTrackData(m.track);
-                           _imageComponent->setTrackData(m.track);
-                       },
+                   /* Large-scale operation start. */
+                   [this](const BeginOperationLogMessage& m)
+                   {
+                       _progressWidget->setValue(0);
+                   },
 
-                       /* A complete disk has been read. */
-                       [&](const DiskReadLogMessage& m)
-                       {
-                           _imageComponent->setDiskData(m.disk);
-                           _currentDisk = m.disk;
-                       },
+                   /* Large-scale operation end. */
+                   [this](const EndOperationLogMessage& m)
+                   {
+                   },
 
-                       /* Large-scale operation start. */
-                       [this](const BeginOperationLogMessage& m)
-                       {
-                           _progressWidget->setValue(0);
-                       },
-
-                       /* Large-scale operation end. */
-                       [this](const EndOperationLogMessage& m)
-                       {
-                       },
-
-                       /* Large-scale operation progress. */
-                       [this](const OperationProgressLogMessage& m)
-                       {
-                           _progressWidget->setValue(m.progress);
-                       }},
-            *message);
-#endif
+                   /* Large-scale operation progress. */
+                   [this](const OperationProgressLogMessage& m)
+                   {
+                       _progressWidget->setValue(m.progress);
+                   }},
+        message);
 
     _logRenderer->add(message);
     _logStream.flush();
+}
+
+void MainWindow::collectConfig()
+{
+    try
+    {
+        globalConfig().clear();
+        _formatComponent->collectConfig();
+        _driveComponent->collectConfig();
+    }
+    catch (const ErrorException& e)
+    {
+        log("Fatal error: {}", e.message);
+    }
+    catch (...)
+    {
+        log("Mysterious uncaught exception!");
+    }
+}
+
+void MainWindow::settingsCanBeChanged(bool state)
+{
+    driveConfigurationBox->setEnabled(state);
+    formatConfigurationBox->setEnabled(state);
 }

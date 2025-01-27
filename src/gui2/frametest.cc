@@ -9,7 +9,7 @@
 #include "mainwindow.h"
 #include "imager.h"
 
-class MainWindowImpl : public MainWindow
+class MainWindowImpl : public MainWindow, protected Ui_Imager
 {
     W_OBJECT(MainWindowImpl)
 
@@ -24,7 +24,7 @@ private:
 public:
     MainWindowImpl()
     {
-        ui.setupUi(container);
+        Ui_Imager::setupUi(container);
         // _driveComponent = DriveComponent::create(this);
         // _formatComponent = FormatComponent::create(this);
         // _fluxComponent = FluxComponent::create(this);
@@ -33,61 +33,76 @@ public:
         // setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
         // setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
 
-        // connect(readDiskButton,
-        //     &QAbstractButton::clicked,
-        //     this,
-        //     &MainWindowImpl::readDisk);
+        connect(readDiskButton,
+            &QAbstractButton::clicked,
+            this,
+            &MainWindowImpl::readDisk);
 
         setState(STATE_IDLE);
     }
 
-public:
-
-    void collectConfig() override
+protected:
+    void logMessage(const AnyLogMessage& message)
     {
-        try
-        {
-            globalConfig().clear();
-            // _formatComponent->collectConfig();
-            // _driveComponent->collectConfig();
-        }
-        catch (const ErrorException& e)
-        {
-            log("Fatal error: {}", e.message);
-        }
-        catch (...)
-        {
-            log("Mysterious uncaught exception!");
-        }
+        std::visit(overloaded{/* Fallback --- do nothing */
+                       [&](const auto& m)
+                       {
+                       },
+
+                       /* A track has been read. */
+                       [&](const TrackReadLogMessage& m)
+                       {
+                           //    _fluxComponent->setTrackData(m.track);
+                           //    _imageComponent->setTrackData(m.track);
+                       },
+
+                       /* A complete disk has been read. */
+                       [&](const DiskReadLogMessage& m)
+                       {
+                           //    _imageComponent->setDiskData(m.disk);
+                           //    _currentDisk = m.disk;
+                       },
+
+                       /* Large-scale operation end. */
+                       [this](const EndOperationLogMessage& m)
+                       {
+                       }},
+            message);
+
+        MainWindow::logMessage(message);
     }
 
+public:
 private:
-    // void readDisk()
-    // {
-    //     if (isWorkerThreadRunning())
-    //         return;
+    void readDisk()
+    {
+        if (isWorkerThreadRunning())
+            return;
 
-    //     collectConfig();
-    //     ::emergencyStop = false;
-    //     setState(STATE_READING);
+        collectConfig();
+        ::emergencyStop = false;
+        setState(STATE_READING);
 
-    //     runThen(
-    //         [this]()
-    //         {
-    //             auto fluxSource = FluxSource::create(globalConfig());
-    //             auto decoder = Arch::createDecoder(globalConfig());
-    //             auto diskflux = readDiskCommand(*fluxSource, *decoder);
-    //         },
-    //         [this]()
-    //         {
-    //             setState(STATE_IDLE);
-    //         });
-    // }
-    // W_SLOT(readDisk)
+        runThen(
+            [this]()
+            {
+                auto fluxSource = FluxSource::create(globalConfig());
+                auto decoder = Arch::createDecoder(globalConfig());
+                auto diskflux = readDiskCommand(*fluxSource, *decoder);
+            },
+            [this]()
+            {
+                setState(STATE_IDLE);
+            });
+    }
+    W_SLOT(readDisk)
 
 private:
     void setState(int state)
     {
+        settingsCanBeChanged(state == STATE_IDLE);
+        commandButtonFrame->setEnabled(state == STATE_IDLE);
+
         _stopWidget->setEnabled(state != STATE_IDLE);
         _progressWidget->setEnabled(state != STATE_IDLE);
 
@@ -96,7 +111,6 @@ private:
     W_SLOT(setState)
 
 private:
-    Ui_Imager ui;
     std::shared_ptr<const DiskFlux> _currentDisk;
     int _state;
 };
