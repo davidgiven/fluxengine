@@ -100,6 +100,7 @@ export(
         "fluxengine$(EXT)": "src+fluxengine",
         "fluxengine-gui$(EXT)": "src/gui",
         "fluxengine-imager$(EXT)": "src/gui2+imager",
+        "fluxengine-filer$(EXT)": "src/gui2+filer",
         "brother120tool$(EXT)": "tools+brother120tool",
         "brother240tool$(EXT)": "tools+brother240tool",
         "upgrade-flux-file$(EXT)": "tools+upgrade-flux-file",
