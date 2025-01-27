@@ -136,9 +136,9 @@ cxxlibrary(
 # )
 
 cxxprogram(
-    name="frametest",
+    name="imager",
     srcs=[
-        "./frametest.cc",
+        "./mainwindow-imager.cc",
         ".+imager_h",
     ],
     cflags=["-fPIC"],
