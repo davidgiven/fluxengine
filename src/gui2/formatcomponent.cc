@@ -123,12 +123,8 @@ public:
         const ConfigProto* config = formats.at(formatId.toStdString());
 
         auto* layout = _mainWindow->formatOptionsContainerLayout;
-        for (int i = 0; i < layout->count(); i++)
-        {
-            QWidget* w = layout->itemAt(i)->widget();
-            if (w)
-                w->deleteLater();
-        }
+        while (auto item = layout->takeAt(0))
+            delete item->widget();
 
         QSet<QString> settings =
             app->value(QString(FORMAT_OPTIONS_PREFIX) + "/" + formatId)
