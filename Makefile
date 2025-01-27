@@ -39,7 +39,7 @@ endif
 
 HOSTCC = gcc
 HOSTCXX = g++ -std=c++17
-HOSTCFLAGS = -g -O3
+HOSTCFLAGS = -g
 HOSTLDFLAGS =
 
 QTBINS = $(shell $(PKG_CONFIG) Qt5Core --variable=host_bins)
