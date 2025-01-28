@@ -8,9 +8,7 @@
 #include "fluxvisualiserwidget.h"
 #include "fluxview.h"
 #include "scene.h"
-#include <QWheelEvent>
-#include <QFrame>
-#include <QConicalGradient>
+#include "viewnavigator.h"
 #include <range/v3/all.hpp>
 
 W_OBJECT_IMPL(FluxVisualiserWidget)
@@ -38,7 +36,9 @@ private:
     };
 
 public:
-    FluxVisualiserWidgetImpl(): _nanosecondsPerPixel(100000)
+    FluxVisualiserWidgetImpl():
+        _nanosecondsPerPixel(100000),
+        _viewNavigator(ViewNavigator::create(this))
     {
         clearData();
     }
@@ -89,11 +89,11 @@ public:
     }
 
 protected:
-protected:
     void paintEvent(QPaintEvent* event) override
     {
         QPainter painter(this);
         painter.setRenderHint(QPainter::Antialiasing);
+        _viewNavigator->transform(painter);
 
         painter.setPen(palette().color(QPalette::Text));
         painter.setBrush(Qt::NoBrush);
@@ -137,6 +137,7 @@ private:
     nanoseconds_t _nanosecondsPerPixel;
     nanoseconds_t _totalDuration;
     std::unique_ptr<FluxView> _fluxView;
+    std::unique_ptr<ViewNavigator> _viewNavigator;
 };
 
 FluxVisualiserWidget* FluxVisualiserWidget::create()
