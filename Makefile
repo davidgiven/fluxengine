@@ -26,7 +26,7 @@ ifeq ($(BUILDTYPE),windows)
 else
 	CC = gcc
 	CXX = g++ -std=c++17
-	CFLAGS = -g -O3
+	CFLAGS = -g -O0
 	LDFLAGS =
 	AR = ar
 	PKG_CONFIG = pkg-config
@@ -39,7 +39,7 @@ endif
 
 HOSTCC = gcc
 HOSTCXX = g++ -std=c++17
-HOSTCFLAGS = -g
+HOSTCFLAGS = -g -Os
 HOSTLDFLAGS =
 
 QTBINS = $(shell $(PKG_CONFIG) Qt5Core --variable=host_bins)

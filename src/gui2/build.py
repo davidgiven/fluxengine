@@ -37,6 +37,7 @@ cxxlibrary(
         "./drivecomponent.cc",
         "./formatcomponent.cc",
         "./fluxvisualiserwidget.cc",
+        "./fluxview.cc",
         "./imagevisualiserwidget.cc",
         "./scene.cc",
         ".+resources_cc",
