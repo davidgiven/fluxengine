@@ -78,9 +78,11 @@ public:
 
         painter.setBrush(Qt::NoBrush);
 
-        for (int pixel = startPos / _nanosecondsPerPixel;
-            pixel < t.gradient.size();
-            pixel++)
+        int start = std::max(0, (int)(startPos / _nanosecondsPerPixel));
+        int end = std::min(
+            (int)t.gradient.size(), (int)(endPos / _nanosecondsPerPixel));
+
+        for (int pixel = start; pixel < end; pixel++)
         {
             int c = t.gradient[pixel] * 255;
             painter.setPen(QPen(QColor(0, c, c), 1.5));

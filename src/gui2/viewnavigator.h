@@ -6,5 +6,5 @@ public:
     static std::unique_ptr<ViewNavigator> create(QWidget* obj);
 
 public:
-    virtual void transform(QPainter& painter)  = 0;
+    virtual void transform(QPainter& painter) = 0;
 };

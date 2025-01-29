@@ -66,6 +66,7 @@ public:
         _numTracks = 0;
         _totalDuration = 0;
         _fluxView = FluxView::create();
+        _fluxView->setScale(_nanosecondsPerPixel);
         repaint();
     }
 
@@ -95,14 +96,18 @@ protected:
         painter.setRenderHint(QPainter::Antialiasing);
         _viewNavigator->transform(painter);
 
+        QRectF world =
+            painter.worldTransform().inverted().mapRect(QRectF(event->rect()));
+        nanoseconds_t left = world.left() * _nanosecondsPerPixel;
+        nanoseconds_t right = world.right() * _nanosecondsPerPixel;
         painter.setPen(palette().color(QPalette::Text));
         painter.setBrush(Qt::NoBrush);
 
         for (int i = 0; i < _numTracks; i++)
         {
             painter.save();
-            painter.translate(HBORDER, VBORDER + VSCALE_TRACK_SIZE * i);
-            _fluxView->redraw(painter, 0, 100, i);
+            painter.translate(0, VSCALE_TRACK_SIZE * i);
+            _fluxView->redraw(painter, left, right, i);
             painter.restore();
         }
     }
