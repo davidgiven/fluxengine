@@ -507,7 +507,7 @@ def export(self, name=None, items: TargetsMap = {}, deps: Targets = []):
             cwd=self.cwd,
             ins=[srcs[0]],
             outs=[destf],
-            commands=["$(CP) %s %s" % (srcs[0], destf)],
+            commands=["$(CP) -r %s %s" % (srcs[0], destf)],
             label="",
         )
         subrule.materialise()

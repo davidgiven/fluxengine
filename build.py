@@ -103,6 +103,9 @@ export(
         "brother240tool$(EXT)": "tools+brother240tool",
         "upgrade-flux-file$(EXT)": "tools+upgrade-flux-file",
     }
-    | ({"FluxEngine.pkg": "src/gui+fluxengine_pkg"} if config.osx else {}),
+    | ({
+        "FluxEngine.pkg": "src/gui+fluxengine_pkg",
+        "FluxEngine.app": "src/gui+fluxengine_app",
+       } if config.osx else {}),
     deps=["tests", "src/formats+docs", "scripts+mkdocindex"] + corpustests,
 )
