@@ -16,24 +16,12 @@ W_OBJECT_IMPL(FluxVisualiserWidget)
 class DiskFlux;
 class TrackFlux;
 
-static constexpr double HBORDER = 50;
-static constexpr double VBORDER = 50;
-
-static constexpr double HSCALE_NS_PER_PIXEL = 0.1;
 static constexpr double VSCALE_TRACK_SIZE = 10;
 
 class FluxVisualiserWidgetImpl : public FluxVisualiserWidget
 {
 private:
     struct track_t;
-
-private:
-    enum
-    {
-        SIDE_0,
-        SIDE_1,
-        BOTH_SIDES
-    };
 
 public:
     FluxVisualiserWidgetImpl():
@@ -44,29 +32,15 @@ public:
     }
 
 public:
-    void resizeEvent(QResizeEvent* event) override
-    {
-        // fitInView(sceneRect(), Qt::KeepAspectRatio);
-    }
+    void resizeEvent(QResizeEvent* event) override {}
 
 public:
-    void setVisibleSide(int mode) override
-    {
-        _viewMode = mode;
-    }
-
-    void setGamma(float gamma) override
-    {
-        _gamma = gamma;
-    }
-
     void clearData() override
     {
         _tracks.clear();
         _numTracks = 0;
         _totalDuration = 0;
         _fluxView = FluxView::create();
-        _fluxView->setScale(_nanosecondsPerPixel);
         repaint();
     }
 
@@ -74,18 +48,12 @@ public:
     {
         key_t key = {
             track->trackInfo->physicalTrack, track->trackInfo->physicalSide};
-        // const auto& it =
-        //     _tracks.insert_or_assign(key, std::move(track_t())).first;
-        // it->second.flux = track;
         _numTracks = std::max(_numTracks, track->trackInfo->numPhysicalTracks);
 
-        _fluxView->setTrackData(key.first, track->trackDatas.front()->fluxmap);
+        if (track->trackInfo->physicalSide == 0)
+            _fluxView->setTrackData(
+                key.first, track->trackDatas.front()->fluxmap);
 
-        // if (!track->trackDatas.empty())
-        // {
-        //     _totalDuration = std::max(_totalDuration,
-        //     track->trackDatas.front()->fluxmap->duration());
-        // }
         repaint();
     }
 
@@ -98,8 +66,8 @@ protected:
 
         QRectF world =
             painter.worldTransform().inverted().mapRect(QRectF(event->rect()));
-        nanoseconds_t left = world.left() * _nanosecondsPerPixel;
-        nanoseconds_t right = world.right() * _nanosecondsPerPixel;
+        nanoseconds_t left = world.left() * FLUXVIEWER_NS_PER_UNIT;
+        nanoseconds_t right = world.right() * FLUXVIEWER_NS_PER_UNIT;
         painter.setPen(palette().color(QPalette::Text));
         painter.setBrush(Qt::NoBrush);
 
@@ -121,24 +89,8 @@ private:
         std::vector<float> densityMap;
     };
 
-    // struct VSlot
-    // {
-    //     int count;
-    //     int pulses;
-    // };
-
-    // struct VData
-    // {
-    //     QGradientStops gradientStops;
-    //     VSlot slot[SLOTS];
-    // };
-
     std::map<key_t, track_t> _tracks;
-    int _viewMode = BOTH_SIDES;
     unsigned _numTracks = 0;
-    // std::vector<VData> _viewData0;
-    // std::vector<VData> _viewData1;
-    float _gamma = 1.0;
     nanoseconds_t _nanosecondsPerPixel;
     nanoseconds_t _totalDuration;
     std::unique_ptr<FluxView> _fluxView;

@@ -20,51 +20,30 @@ public:
     {
         auto& t = _trackData[track];
         t.fluxmap = fluxmap;
+        t.pulses.clear();
+        t.indices.clear();
 
         FluxmapReader fmr(*fluxmap);
-        unsigned ticks;
-        if (fmr.findEvent(F_BIT_INDEX, ticks))
-            t.firstIndexTimestamp = NS_PER_TICK * ticks;
-        else
-            t.firstIndexTimestamp = 0;
+        t.firstIndexTimestamp = 0;
+        while (!fmr.eof())
+        {
+            int type;
+            unsigned ticks;
+            fmr.getNextEvent(type, ticks);
 
-        updateGradient(t);
+            nanoseconds_t here = fmr.tell().ns();
+            if (type & F_BIT_INDEX)
+                t.indices.push_back(here);
+            if (type & F_BIT_PULSE)
+                t.pulses.push_back(here);
+            if (type & F_EOF)
+                break;
+        }
     }
 
     void clear() override
     {
         _trackData.clear();
-    }
-
-    void setScale(nanoseconds_t nanosecondsPerPixel) override
-    {
-        _nanosecondsPerPixel = nanosecondsPerPixel;
-        for (auto& t : _trackData)
-            updateGradient(t.second);
-    }
-
-    void updateGradient(track_t& t)
-    {
-        if (!t.fluxmap)
-            return;
-
-        int numPixels = t.fluxmap->duration() / _nanosecondsPerPixel;
-        t.gradient.clear();
-        t.gradient.resize(numPixels + 1, 0);
-
-        FluxmapReader fmr(*t.fluxmap);
-        while (!fmr.eof())
-        {
-            unsigned ticks;
-            if (!fmr.findEvent(F_BIT_PULSE, ticks))
-                break;
-            int pixel = fmr.tell().ns() / _nanosecondsPerPixel;
-            t.gradient[pixel]++;
-        }
-        int max = *ranges::max_element(t.gradient);
-
-        for (float& f : t.gradient)
-            f /= max;
     }
 
     void redraw(QPainter& painter,
@@ -76,17 +55,47 @@ public:
         if (!t.fluxmap)
             return;
 
+        /* Number of on-screen pixels per drawing unit. */
+        double pixelsPerUnit = painter.worldTransform().m11();
+
+        /* Width of an on-screen pixel in drawing units. */
+        double granularity = 1.0 / pixelsPerUnit;
+
+        /* Number of nanoseconds per on-screen pixel. */
+        double nsPerPixel = granularity * FLUXVIEWER_NS_PER_UNIT;
+
         painter.setBrush(Qt::NoBrush);
 
-        int start = std::max(0, (int)(startPos / _nanosecondsPerPixel));
-        int end = std::min(
-            (int)t.gradient.size(), (int)(endPos / _nanosecondsPerPixel));
+        int pixel = 0;
+        int count = 0;
+        int i = 0;
 
-        for (int pixel = start; pixel < end; pixel++)
+        for (nanoseconds_t here : t.pulses)
         {
-            int c = t.gradient[pixel] * 255;
-            painter.setPen(QPen(QColor(0, c, c), 1.5));
-            painter.drawLine(pixel, 0, pixel, 5);
+            if (here < startPos)
+                continue;
+            if (here > endPos)
+                break;
+
+            int thisPixel = here / nsPerPixel;
+            if (thisPixel != pixel)
+            {
+                if (count != 0)
+                {
+                    double x = pixel * granularity;
+                    double countPerNs = count / nsPerPixel;
+                    double density = std::clamp(
+                        countPerNs / FLUXVIEWER_GRADIENT_ADJUST, 0.0, 1.0);
+                    int c = 255 - density * 255.0;
+                    painter.setPen(QPen(
+                        QColor(0, c, c), granularity * FLUXVIEWER_LINE_WIDTH));
+                    painter.drawLine(QLineF(x, 0, x, 5));
+                    count = 0;
+                }
+                pixel = thisPixel;
+            }
+
+            count++;
         }
     }
 
@@ -95,11 +104,11 @@ private:
     {
         std::shared_ptr<const Fluxmap> fluxmap;
         nanoseconds_t firstIndexTimestamp = 0;
-        std::vector<float> gradient;
+        std::vector<nanoseconds_t> pulses;
+        std::vector<nanoseconds_t> indices;
     };
 
     std::map<int, track_t> _trackData;
-    nanoseconds_t _nanosecondsPerPixel = 1e6;
 };
 
 std::unique_ptr<FluxView> FluxView::create()

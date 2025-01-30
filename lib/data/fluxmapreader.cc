@@ -38,10 +38,10 @@ void FluxmapReader::getNextEvent(int& event, unsigned& ticks)
     event = F_EOF;
 }
 
-void FluxmapReader::skipToEvent(int event)
+bool FluxmapReader::skipToEvent(int event)
 {
     unsigned ticks;
-    findEvent(event, ticks);
+    return findEvent(event, ticks);
 }
 
 bool FluxmapReader::findEvent(int event, unsigned& ticks)

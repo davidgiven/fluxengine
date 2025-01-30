@@ -33,17 +33,17 @@ public:
         _fluxVisualiserWidget = FluxVisualiserWidget::create();
         fluxViewContainer->layout()->addWidget(_fluxVisualiserWidget);
 
-        connect(fluxSideComboBox,
-            QOverload<int>::of(&QComboBox::activated),
-            _fluxVisualiserWidget,
-            &FluxVisualiserWidget::setVisibleSide);
-        connect(fluxContrastSlider,
-            &QAbstractSlider::valueChanged,
-            [this](int value)
-            {
-                _fluxVisualiserWidget->setGamma(value / 100.0);
-            });
-        fluxContrastSlider->setValue(500);
+        // connect(fluxSideComboBox,
+        //     QOverload<int>::of(&QComboBox::activated),
+        //     _fluxVisualiserWidget,
+        //     &FluxVisualiserWidget::setVisibleSide);
+        // connect(fluxContrastSlider,
+        //     &QAbstractSlider::valueChanged,
+        //     [this](int value)
+        //     {
+        //         _fluxVisualiserWidget->setGamma(value / 100.0);
+        //     });
+        // fluxContrastSlider->setValue(500);
 
         /* Image visualiser */
 

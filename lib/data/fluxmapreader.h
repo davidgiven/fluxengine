@@ -43,7 +43,7 @@ public:
     }
 
     void getNextEvent(int& event, unsigned& ticks);
-    void skipToEvent(int event);
+    bool skipToEvent(int event);
     bool findEvent(int event, unsigned& ticks);
     unsigned readInterval(nanoseconds_t clock); /* with debounce support */
 
