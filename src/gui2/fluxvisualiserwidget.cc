@@ -21,6 +21,8 @@ static constexpr double VMARGIN_SIZE = 30;
 static constexpr double HMARGIN_SIZE = 40;
 static constexpr int MINIMUM_TICK_DISTANCE = 10;
 
+static constexpr double DEFAULT_SCALE = 0.25;
+
 static constexpr QRect CENTRED(
     -(INT_MAX / 2), -(INT_MAX / 2), INT_MAX, INT_MAX);
 
@@ -30,7 +32,7 @@ private:
     struct track_t;
 
 public:
-    FluxVisualiserWidgetImpl(): _viewNavigator(ViewNavigator::create(this))
+    FluxVisualiserWidgetImpl(): _viewNavigator(ViewNavigator::create(this, 2.0))
     {
         clearData();
     }
@@ -44,8 +46,10 @@ public:
         _tracks.clear();
         _numTracks = 0;
         _totalDuration = 0;
-        _fluxView = FluxView::create();
+        _fluxView0 = FluxView::create();
+        _fluxView1 = FluxView::create();
         repaint();
+        resetView();
     }
 
     void setTrackData(std::shared_ptr<const TrackFlux> track) override
@@ -54,15 +58,25 @@ public:
             track->trackInfo->physicalTrack, track->trackInfo->physicalSide};
         _numTracks = std::max(_numTracks, track->trackInfo->numPhysicalTracks);
 
+        std::shared_ptr<const Fluxmap> data =
+            track->trackDatas.front()->fluxmap;
         if (track->trackInfo->physicalSide == 0)
-        {
-            std::shared_ptr<const Fluxmap> data =
-                track->trackDatas.front()->fluxmap;
-            _fluxView->setTrackData(key.first, data);
-            _totalDuration = std::max(_totalDuration, data->duration());
-        }
+            _fluxView0->setTrackData(key.first, data);
+        else
+            _fluxView1->setTrackData(key.first, data);
+        _totalDuration = std::max(_totalDuration, data->duration());
 
         repaint();
+    }
+
+public:
+    void resetView() override
+    {
+        _viewNavigator->setScale(DEFAULT_SCALE);
+        _viewNavigator->setOrigin(rect().width() / 2 / DEFAULT_SCALE -
+                                      HMARGIN_SIZE * 1.2 / DEFAULT_SCALE,
+            rect().height() / 2 / DEFAULT_SCALE -
+                VMARGIN_SIZE * 1.2 / DEFAULT_SCALE);
     }
 
 protected:
@@ -90,7 +104,7 @@ protected:
             painter.save();
             painter.translate(0, VSCALE_TRACK_SIZE * i);
             painter.setPen(palette().color(QPalette::Text));
-            _fluxView->redraw(painter, left, right, i, VSCALE_TRACK_SIZE);
+            _fluxView0->redraw(painter, left, right, i, VSCALE_TRACK_SIZE);
 
             painter.setPen(palette().color(QPalette::Base));
             painter.drawLine(left / FLUXVIEWER_NS_PER_UNIT,
@@ -171,7 +185,7 @@ protected:
             double w = std::clamp(xx * 4 / 3 - ys / 2, xx / 2, xx);
 
             QFont font;
-            font.setPixelSize(std::clamp(ys * 2 / 3, 2.0, HMARGIN_SIZE/3));
+            font.setPixelSize(std::clamp(ys * 2 / 3, 2.0, HMARGIN_SIZE / 3));
             painter.setFont(font);
 
             while (t < bottom)
@@ -210,7 +224,8 @@ private:
     std::map<key_t, track_t> _tracks;
     unsigned _numTracks = 0;
     nanoseconds_t _totalDuration;
-    std::unique_ptr<FluxView> _fluxView;
+    std::unique_ptr<FluxView> _fluxView0;
+    std::unique_ptr<FluxView> _fluxView1;
     std::unique_ptr<ViewNavigator> _viewNavigator;
 };
 

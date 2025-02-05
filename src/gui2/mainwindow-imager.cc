@@ -102,6 +102,7 @@ private:
         collectConfig();
         ::emergencyStop = false;
         setState(STATE_READING);
+        _fluxVisualiserWidget->resetView();
 
         runThen(
             [this]()

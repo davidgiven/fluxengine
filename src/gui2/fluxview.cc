@@ -49,7 +49,8 @@ public:
     void redraw(QPainter& painter,
         nanoseconds_t startPos,
         nanoseconds_t endPos,
-        int track, double height)
+        int track,
+        double height)
     {
         auto& t = _trackData[track];
         if (!t.fluxmap)
