@@ -17,5 +17,5 @@ public:
     virtual void redraw(QPainter& painter,
         nanoseconds_t startPos,
         nanoseconds_t endPos,
-        int track) = 0;
+        int track, double height) = 0;
 };

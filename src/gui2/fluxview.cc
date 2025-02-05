@@ -49,7 +49,7 @@ public:
     void redraw(QPainter& painter,
         nanoseconds_t startPos,
         nanoseconds_t endPos,
-        int track)
+        int track, double height)
     {
         auto& t = _trackData[track];
         if (!t.fluxmap)
@@ -89,7 +89,7 @@ public:
                     int c = 255 - density * 255.0;
                     painter.setPen(QPen(
                         QColor(0, c, c), granularity * FLUXVIEWER_LINE_WIDTH));
-                    painter.drawLine(QLineF(x, 0, x, 5));
+                    painter.drawLine(QLineF(x, 0, x, height));
                     count = 0;
                 }
                 pixel = thisPixel;
