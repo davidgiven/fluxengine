@@ -20,6 +20,8 @@ static constexpr double VSCALE_TRACK_SIZE = 10;
 static constexpr double VMARGIN_SIZE = 30;
 static constexpr double HMARGIN_SIZE = 40;
 static constexpr int MINIMUM_TICK_DISTANCE = 10;
+static constexpr int MAXIMUM_TRACKS = 82;
+static constexpr double SIDE_SPACING = 90;
 
 static constexpr double DEFAULT_SCALE = 0.25;
 
@@ -46,8 +48,8 @@ public:
         _tracks.clear();
         _numTracks = 0;
         _totalDuration = 0;
-        _fluxView0 = FluxView::create();
-        _fluxView1 = FluxView::create();
+        _fluxView[0] = FluxView::create();
+        _fluxView[1] = FluxView::create();
         repaint();
         resetView();
     }
@@ -60,10 +62,8 @@ public:
 
         std::shared_ptr<const Fluxmap> data =
             track->trackDatas.front()->fluxmap;
-        if (track->trackInfo->physicalSide == 0)
-            _fluxView0->setTrackData(key.first, data);
-        else
-            _fluxView1->setTrackData(key.first, data);
+        _fluxView[track->trackInfo->physicalSide]->setTrackData(
+            key.first, data);
         _totalDuration = std::max(_totalDuration, data->duration());
 
         repaint();
@@ -99,19 +99,24 @@ protected:
         painter.setPen(palette().color(QPalette::Text));
         painter.setBrush(Qt::NoBrush);
 
-        for (int i = 0; i < _numTracks; i++)
+        for (int side = 0; side <= 1; side++)
         {
-            painter.save();
-            painter.translate(0, VSCALE_TRACK_SIZE * i);
-            painter.setPen(palette().color(QPalette::Text));
-            _fluxView0->redraw(painter, left, right, i, VSCALE_TRACK_SIZE);
+            for (int i = 0; i < _numTracks; i++)
+            {
+                painter.save();
+                painter.translate(
+                    0, VSCALE_TRACK_SIZE * (i + side * SIDE_SPACING));
+                painter.setPen(palette().color(QPalette::Text));
+                _fluxView[side]->redraw(
+                    painter, left, right, i, VSCALE_TRACK_SIZE);
 
-            painter.setPen(palette().color(QPalette::Base));
-            painter.drawLine(left / FLUXVIEWER_NS_PER_UNIT,
-                0,
-                right / FLUXVIEWER_NS_PER_UNIT,
-                0);
-            painter.restore();
+                painter.setPen(palette().color(QPalette::Base));
+                painter.drawLine(left / FLUXVIEWER_NS_PER_UNIT,
+                    0,
+                    right / FLUXVIEWER_NS_PER_UNIT,
+                    0);
+                painter.restore();
+            }
         }
         painter.restore();
 
@@ -173,6 +178,7 @@ protected:
 
         /* Draw the vertical scale. */
 
+        for (int side = 0; side <= 1; side++)
         {
             painter.save();
             painter.setPen(QPen(palette().color(QPalette::Text), 0));
@@ -180,17 +186,16 @@ protected:
 
             double xx = HMARGIN_SIZE * 4 / 5;
             double ys = rect().height() / (bottomTrack - topTrack);
-            int t = std::max(0.0, floor(topTrack));
-            int bottom = std::min(82.0, ceil(bottomTrack));
             double w = std::clamp(xx * 4 / 3 - ys / 2, xx / 2, xx);
+            double yy0 = (side * 90 - topTrack) * ys;
 
             QFont font;
             font.setPixelSize(std::clamp(ys * 2 / 3, 2.0, HMARGIN_SIZE / 3));
             painter.setFont(font);
 
-            while (t < bottom)
+            for (int t = 0; t < MAXIMUM_TRACKS; t++)
             {
-                double yy = (t - topTrack) * ys;
+                double yy = yy0 + t * ys;
                 double yt = yy + ys * 0.5 / VSCALE_TRACK_SIZE;
                 double yb = yy + ys * 9.5 / VSCALE_TRACK_SIZE;
                 painter.drawLine(xx, yt, w, yt);
@@ -203,10 +208,8 @@ protected:
 
                 painter.drawText(CENTRED,
                     Qt::AlignCenter,
-                    QString::fromStdString(fmt::format("{}.{}", 0, t)));
+                    QString::fromStdString(fmt::format("{}.{}", side, t)));
                 painter.restore();
-
-                t++;
             }
             painter.restore();
         }
@@ -224,8 +227,7 @@ private:
     std::map<key_t, track_t> _tracks;
     unsigned _numTracks = 0;
     nanoseconds_t _totalDuration;
-    std::unique_ptr<FluxView> _fluxView0;
-    std::unique_ptr<FluxView> _fluxView1;
+    std::unique_ptr<FluxView> _fluxView[2];
     std::unique_ptr<ViewNavigator> _viewNavigator;
 };
 
