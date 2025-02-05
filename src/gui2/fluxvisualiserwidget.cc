@@ -106,21 +106,17 @@ protected:
         while ((tickStep / nanosecondsPerPixel) < MINIMUM_TICK_DISTANCE)
             tickStep *= 10;
 
-        painter.setPen(palette().color(QPalette::Text));
+        painter.setPen(QPen(palette().color(QPalette::Text), 0));
         painter.setBrush(Qt::NoBrush);
-        // static wxFont font(
-        //     6, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
-        // dc.SetFont(font);
-        // dc.SetBackgroundMode(wxTRANSPARENT);
-        // dc.SetTextForeground(*wxBLACK);
-        // dc.SetPen(FOREGROUND_PEN);
 
         nanoseconds_t dataLeft = std::max(left, 0.0);
         nanoseconds_t dataRight = std::min(right, _totalDuration);
 
-        painter.drawLine((dataLeft-left) / nanosecondsPerPixel,
+        QFontMetrics fontMetrics(painter.font());
+
+        painter.drawLine((dataLeft - left) / nanosecondsPerPixel,
             yy,
-            (dataRight-left) / nanosecondsPerPixel,
+            (dataRight - left) / nanosecondsPerPixel,
             yy);
         uint64_t tick = std::max(floor(dataLeft / tickStep) * tickStep, 0.0);
         while (tick < dataRight)
@@ -131,14 +127,18 @@ protected:
                 ts = VMARGIN_SIZE / 4;
             if ((tick % (100 * tickStep)) == 0)
                 ts = VMARGIN_SIZE / 3;
-#if 0
-                dc.DrawLine({x + xx, t4y - ts}, {x + xx, t4y + ts});
-                if ((tick % (10 * tickStep)) == 0)
-                {
-                    dc.DrawText(fmt::format("{:.3f}ms", tick / 1e6),
-                        {x + xx, t4y - ch2});
-                }
-#endif
+
+            if ((tick % (10 * tickStep)) == 0)
+            {
+                painter.drawText(xx - 512,
+                    0,
+                    1024,
+                    VMARGIN_SIZE / 2,
+                    Qt::AlignCenter,
+                    QString::fromStdString(
+                        fmt::format("{:.3f}ms", tick / 1e6)));
+            }
+
             painter.drawLine(xx, yy, xx, yy - ts);
 
             tick += tickStep;
