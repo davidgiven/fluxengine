@@ -111,11 +111,11 @@ private:
     std::string sendrecv(const std::string& command)
     {
         if (_config.verbose())
-            fmt::print(fmt::format("> {}\n", command));
+            fmt::print("> {}\n", command);
         _serial->writeLine(command);
         auto r = _serial->readLine();
         if (_config.verbose())
-            fmt::print(fmt::format("< {}\n", r));
+            fmt::print("< {}\n", r);
         return r;
     }
 
@@ -136,7 +136,7 @@ private:
         doCommand(command);
         std::string r = _serial->readLine();
         if (_config.verbose())
-            fmt::print(fmt::format("<< {}\n", r));
+            fmt::print("<< {}\n", r);
         return r;
     }
 

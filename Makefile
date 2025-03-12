@@ -11,7 +11,7 @@ export BUILDTYPE
 ifeq ($(BUILDTYPE),windows)
 	MINGW = i686-w64-mingw32-
 	CC = $(MINGW)gcc
-	CXX = $(MINGW)g++ -std=c++17
+	CXX = $(MINGW)g++ -std=c++20
 	CFLAGS += -g -O3
 	CXXFLAGS += \
 		-fext-numeric-literals \
