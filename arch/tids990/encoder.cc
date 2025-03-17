@@ -1,7 +1,7 @@
 #include "lib/core/globals.h"
 #include "lib/decoders/decoders.h"
 #include "lib/encoders/encoders.h"
-#include "arch/tids990/tids990"
+#include "arch/tids990/tids990.h"
 #include "lib/core/crc.h"
 #include "lib/data/image.h"
 #include "arch/tids990/tids990.pb.h"
