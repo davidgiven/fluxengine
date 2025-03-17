@@ -4,7 +4,7 @@
 #include "lib/data/fluxpattern.h"
 #include "lib/decoders/decoders.h"
 #include "lib/data/sector.h"
-#include "micropolis.h"
+#include "arch/micropolis/micropolis.h"
 #include "lib/core/bytes.h"
 #include "fmt/format.h"
 #include "lib/decoders/decoders.pb.h"

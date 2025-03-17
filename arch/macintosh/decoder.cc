@@ -5,7 +5,7 @@
 #include "protocol.h"
 #include "lib/decoders/decoders.h"
 #include "lib/data/sector.h"
-#include "macintosh.h"
+#include "arch/macintosh/macintosh.h"
 #include "lib/core/bytes.h"
 #include "fmt/format.h"
 #include <string.h>

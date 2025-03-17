@@ -1,9 +1,9 @@
 #include "lib/core/globals.h"
-#include "usb.h"
+#include "lib/usb/usb.h"
 #include "protocol.h"
 #include "lib/data/fluxmap.h"
 #include "lib/core/bytes.h"
-#include "serial.h"
+#include "lib/usb/serial.h"
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>

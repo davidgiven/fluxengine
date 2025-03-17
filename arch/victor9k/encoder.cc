@@ -2,7 +2,7 @@
 #include "lib/core/utils.h"
 #include "lib/decoders/decoders.h"
 #include "lib/encoders/encoders.h"
-#include "victor9k.h"
+#include "arch/victor9k/victor9k.h"
 #include "lib/core/crc.h"
 #include "lib/data/sector.h"
 #include "lib/data/image.h"

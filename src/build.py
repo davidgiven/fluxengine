@@ -4,6 +4,7 @@ cxxprogram(
     name="fluxengine",
     srcs=[
         "./fluxengine.cc",
+        "./fluxengine.h",
         "./fe-analysedriveresponse.cc",
         "./fe-analyselayout.cc",
         "./fe-format.cc",
@@ -27,6 +28,7 @@ cxxprogram(
         "./fe-testvoltages.cc",
         "./fe-write.cc",
         "./fileutils.cc",
+        "./fileutils.h",
     ],
     cflags=["-I."],
     deps=[

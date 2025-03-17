@@ -4,8 +4,8 @@
 #include "lib/core/bytes.h"
 #include "lib/usb/usb.pb.h"
 #include "lib/external/greaseweazle.h"
-#include "serial.h"
-#include "usb.h"
+#include "lib/usb/serial.h"
+#include "lib/usb/usb.h"
 #include <unistd.h>
 
 static const char* gw_error(int e)

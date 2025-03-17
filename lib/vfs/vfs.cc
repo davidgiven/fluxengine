@@ -1,6 +1,6 @@
 #include "lib/core/globals.h"
 #include "lib/config/config.h"
-#include "vfs.h"
+#include "lib/vfs/vfs.h"
 #include "lib/config/proto.h"
 #include "lib/config/layout.pb.h"
 #include "lib/data/layout.h"

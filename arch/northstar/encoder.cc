@@ -1,5 +1,5 @@
 #include "lib/core/globals.h"
-#include "northstar.h"
+#include "arch/northstar/northstar.h"
 #include "lib/data/sector.h"
 #include "lib/core/bytes.h"
 #include "lib/decoders/decoders.h"

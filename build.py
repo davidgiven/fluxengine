@@ -79,15 +79,15 @@ else:
                 ins=["src+fluxengine"],
                 deps=["scripts/encodedecodetest.sh"],
                 commands=[
-                    "{deps[0]} "
+                    "$[deps[0]] "
                     + c[0]
                     + " "
                     + format
-                    + " {ins[0]} '"
+                    + " $[ins[0]] '"
                     + c[1]
                     + "' '"
                     + c[2]
-                    + "' $(dir {outs[0]}) > /dev/null"
+                    + "' $(dir $[outs[0]]) > /dev/null"
                 ],
                 label="CORPUSTEST",
             )

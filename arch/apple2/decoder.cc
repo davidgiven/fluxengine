@@ -5,7 +5,7 @@
 #include "protocol.h"
 #include "lib/decoders/decoders.h"
 #include "lib/data/sector.h"
-#include "apple2.h"
+#include "arch/apple2/apple2.h"
 #include "arch/apple2/apple2.pb.h"
 #include "lib/decoders/decoders.pb.h"
 #include "lib/core/bytes.h"

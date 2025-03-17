@@ -4,8 +4,8 @@
 #include "lib/core/bytes.h"
 #include "lib/usb/usb.pb.h"
 #include "lib/core/utils.h"
-#include "serial.h"
-#include "usb.h"
+#include "lib/usb/serial.h"
+#include "lib/usb/usb.h"
 #include "lib/data/fluxmapreader.h"
 #include <unistd.h>
 

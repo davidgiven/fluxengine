@@ -51,6 +51,8 @@ ifeq ($(OS), Windows_NT)
 endif
 EXT ?=
 
+CWD=$(shell pwd)
+
 ifeq ($(PROGRESSINFO),)
 # The first make invocation here has to have its output discarded or else it
 # produces spurious 'Leaving directory' messages... don't know why.

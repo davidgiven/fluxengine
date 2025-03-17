@@ -18,7 +18,7 @@
 #include "arch/rolandd20/rolandd20.h"
 #include "arch/smaky6/smaky6.h"
 #include "arch/tartu/tartu.h"
-#include "arch/tids990/tids990.h"
+#include "arch/tids990/tids990"
 #include "arch/victor9k/victor9k.h"
 #include "arch/zilogmcz/zilogmcz.h"
 #include "arch/arch.h"

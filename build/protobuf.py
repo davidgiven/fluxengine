@@ -31,7 +31,7 @@ def proto(self, name, srcs: Targets = [], deps: Targets = []):
         ]
     )
 
-    dirs = sorted({"{dir}/" + dirname(f) for f in filenamesof(srcs)})
+    dirs = sorted({"$[dir]/" + dirname(f) for f in filenamesof(srcs)})
     simplerule(
         replaces=self,
         ins=srcs,
@@ -39,9 +39,9 @@ def proto(self, name, srcs: Targets = [], deps: Targets = []):
         deps=protodeps,
         commands=(
             ["mkdir -p " + (" ".join(dirs))]
-            + [f"$(CP) {f} {{dir}}/{f}" for f in filenamesof(srcs)]
+            + [f"$(CP) {f} $[dir]/{f}" for f in filenamesof(srcs)]
             + [
-                "cd {dir} && "
+                "cd $[dir] && "
                 + (
                     " ".join(
                         [
@@ -55,7 +55,7 @@ def proto(self, name, srcs: Targets = [], deps: Targets = []):
                             if descriptorlist
                             else []
                         )
-                        + ["{ins}"]
+                        + ["$[ins]"]
                     )
                 )
             ]
@@ -96,7 +96,7 @@ def protocc(self, name, srcs: Targets = [], deps: Targets = []):
         outs=outs,
         deps=protodeps,
         commands=[
-            "cd {dir} && "
+            "cd $[dir] && "
             + (
                 " ".join(
                     [
@@ -146,8 +146,8 @@ def protojava(self, name, srcs: Targets = [], deps: Targets = []):
         outs=[f"={self.localname}.srcjar"],
         deps=srcs + deps,
         commands=[
-            "mkdir -p {dir}/srcs",
-            "cd {dir} && "
+            "mkdir -p $[dir]/srcs",
+            "cd $[dir]/srcs && "
             + (
                 " ".join(
                     [
@@ -159,7 +159,7 @@ def protojava(self, name, srcs: Targets = [], deps: Targets = []):
                     + protos
                 )
             ),
-            "$(JAR) cf {outs[0]} -C {dir}/srcs .",
+            "$(JAR) cf $[outs[0]] -C $[dir]/srcs .",
         ],
         traits={"srcjar"},
         label="PROTOJAVA",

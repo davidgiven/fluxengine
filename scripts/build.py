@@ -30,7 +30,7 @@ def protoencode_single(self, name, srcs: Targets, proto, symbol):
         ins=srcs,
         outs=[f"={name}.cc"],
         deps=[r],
-        commands=["{deps[0]} {ins} {outs} " + symbol],
+        commands=["$[deps[0]] $[ins] $[outs] " + symbol],
         label="PROTOENCODE",
     )
 
@@ -51,7 +51,7 @@ def protoencode(self, name, proto, srcs: TargetsMap, symbol):
         replaces=self,
         ins=encoded,
         outs=[f"={name}.cc"],
-        commands=["cat {ins} > {outs}"],
+        commands=["cat $[ins] > $[outs]"],
         label="CONCAT",
     )
 
