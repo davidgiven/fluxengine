@@ -16,7 +16,7 @@ endif
 """
 )
 
-extrasrcs = []
+extrasrcs = ["./layout.cpp"]
 if config.windows:
     extrasrcs += [
         simplerule(
@@ -31,9 +31,7 @@ if config.windows:
 
 cxxprogram(
     name="gui",
-    srcs=glob("*.c", root_dir="src/gui") +
-    glob("*.h", root_dir="src/gui")
-    + extrasrcs,
+    srcs=glob("src/gui/*.cc") + glob("src/gui/*.h") + extrasrcs,
     cflags=["$(WX_CFLAGS)"],
     ldflags=["$(WX_LDFLAGS)"],
     deps=[

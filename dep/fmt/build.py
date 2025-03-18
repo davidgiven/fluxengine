@@ -21,6 +21,6 @@ cxxlibrary(
         "fmt/printf.h": "./include/fmt/printf.h",
         "fmt/ranges.h": "./include/fmt/ranges.h",
         "fmt/std.h": "./include/fmt/std.h",
-        "fmt/xchar.h": "./include/fmt/xchar.h"
+        "fmt/xchar.h": "./include/fmt/xchar.h",
     },
 )
