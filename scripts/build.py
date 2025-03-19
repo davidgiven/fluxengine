@@ -60,12 +60,13 @@ cxxprogram(
     name="mkdoc",
     srcs=["./mkdoc.cc"],
     deps=[
-        "src/formats",
-        "lib/config+proto_lib",
-        "lib/fluxsource+proto_lib",
-        "lib/fluxsink+proto_lib",
         "+fmt_lib",
         "+protobuf_lib",
+        "lib/algorithms",
+        "lib/config+proto_lib",
+        "lib/fluxsink+proto_lib",
+        "lib/fluxsource+proto_lib",
+        "src/formats",
     ],
 )
 
@@ -73,11 +74,12 @@ cxxprogram(
     name="mkdocindex",
     srcs=["./mkdocindex.cc"],
     deps=[
-        "src/formats",
-        "lib/config+proto_lib",
-        "lib/fluxsource+proto_lib",
-        "lib/fluxsink+proto_lib",
         "+fmt_lib",
         "+protobuf_lib",
+        "lib/algorithms",
+        "lib/config+proto_lib",
+        "lib/fluxsink+proto_lib",
+        "lib/fluxsource+proto_lib",
+        "src/formats",
     ],
 )
