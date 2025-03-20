@@ -1,5 +1,5 @@
 from build.c import cxxlibrary
-from build.protobuf import proto, protocc
+from build.protobuf import proto, protocc, protolib
 from os.path import *
 from glob import glob
 import sys
@@ -41,9 +41,9 @@ for a in archs:
         )
     ]
 
-proto(
+protolib(
     name="proto",
-    deps=ps + ["lib/config+common_proto"],
+    srcs=ps + ["lib/config+common_proto"],
 )
 
 cxxlibrary(name="proto_lib", deps=pls)

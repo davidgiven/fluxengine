@@ -31,54 +31,53 @@ def proto(self, name, srcs: Targets = [], deps: Targets = []):
         ]
     )
 
-    if srcs:
-        dirs = sorted({"$[dir]/" + dirname(f) for f in filenamesof(srcs)})
-        simplerule(
-            replaces=self,
-            ins=srcs,
-            outs=[f"={self.localname}.descriptor"],
-            deps=protodeps,
-            commands=(
-                ["mkdir -p " + (" ".join(dirs))]
-                + [f"$(CP) {f} $[dir]/{f}" for f in filenamesof(srcs)]
-                + [
-                    "cd $[dir] && "
-                    + (
-                        " ".join(
-                            [
-                                "$(PROTOC)",
-                                "--proto_path=.",
-                                "--include_source_info",
-                                f"--descriptor_set_out={self.localname}.descriptor",
-                            ]
-                            + (
-                                [f"--descriptor_set_in={descriptorlist}"]
-                                if descriptorlist
-                                else []
-                            )
-                            + ["$[ins]"]
+    dirs = sorted({"$[dir]/" + dirname(f) for f in filenamesof(srcs)})
+    simplerule(
+        replaces=self,
+        ins=srcs,
+        outs=[f"={self.localname}.descriptor"],
+        deps=protodeps,
+        commands=(
+            ["mkdir -p " + (" ".join(dirs))]
+            + [f"$(CP) {f} $[dir]/{f}" for f in filenamesof(srcs)]
+            + [
+                "cd $[dir] && "
+                + (
+                    " ".join(
+                        [
+                            "$(PROTOC)",
+                            "--proto_path=.",
+                            "--include_source_info",
+                            f"--descriptor_set_out={self.localname}.descriptor",
+                        ]
+                        + (
+                            [f"--descriptor_set_in={descriptorlist}"]
+                            if descriptorlist
+                            else []
                         )
+                        + ["$[ins]"]
                     )
-                ]
-            ),
-            label="PROTO",
-            args={
-                "protosrcs": filenamesof(srcs),
-                "protodeps": set(protodeps) | {self},
-            },
-        )
-    else:
-        simplerule(
-            replaces=self,
-            ins=protodeps,
-            outs=["=stamp"],
-            commands=["touch $[outs]"],
-            label="PROTO",
-            args={
-                "protosrcs": [],
-                "protodeps": set(protodeps),
-            },
-        )
+                )
+            ]
+        ),
+        label="PROTO",
+        args={
+            "protosrcs": filenamesof(srcs),
+            "protodeps": set(protodeps) | {self},
+        },
+    )
+
+
+@Rule
+def protolib(self, name, srcs: Targets = []):
+    simplerule(
+        replaces=self,
+        label="PROTOLIB",
+        args={
+            "protosrcs": collectattrs(targets=srcs, name="protosrcs"),
+            "protodeps": set(_getprotodeps(srcs)),
+        },
+    )
 
 
 @Rule
