@@ -11,7 +11,6 @@ from build.ab import (
 from os.path import relpath, splitext, join, basename, isfile
 from glob import iglob
 import fnmatch
-import itertools
 
 
 def filenamesmatchingof(xs, pattern):

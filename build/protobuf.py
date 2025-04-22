@@ -1,17 +1,16 @@
 from build.ab import Rule, Targets, emit, simplerule, filenamesof
 from build.utils import filenamesmatchingof, collectattrs
 from os.path import join, abspath, dirname, relpath
-import build.pkg  # to get the protobuf package check
+from build.pkg import has_package
 
 emit(
     """
 PROTOC ?= protoc
+HOSTPROTOC ?= protoc
 """
 )
 
-assert build.pkg.TargetPkgConfig.has_package(
-    "protobuf"
-), "required package 'protobuf' not installed"
+assert has_package("protobuf"), "required package 'protobuf' not installed"
 
 
 def _getprotodeps(deps):
