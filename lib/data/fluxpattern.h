@@ -33,6 +33,11 @@ public:
 
     bool matches(const unsigned* intervals, FluxMatch& match) const override;
 
+    unsigned length() const
+    {
+        return _bits;
+    }
+
     unsigned intervals() const override
     {
         return _intervals.size();

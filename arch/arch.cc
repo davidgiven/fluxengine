@@ -4,6 +4,7 @@
 #include "lib/config/config.h"
 #include "arch/agat/agat.h"
 #include "arch/aeslanier/aeslanier.h"
+#include "arch/aeslanier5/aeslanier5.h"
 #include "arch/amiga/amiga.h"
 #include "arch/apple2/apple2.h"
 #include "arch/brother/brother.h"
@@ -70,6 +71,7 @@ std::unique_ptr<Decoder> Arch::createDecoder(const DecoderProto& config)
         decoders = {
             {DecoderProto::kAgat,       createAgatDecoder       },
             {DecoderProto::kAeslanier,  createAesLanierDecoder  },
+            {DecoderProto::kAeslanier5, createAesLanier5Decoder  },
             {DecoderProto::kAmiga,      createAmigaDecoder      },
             {DecoderProto::kApple2,     createApple2Decoder     },
             {DecoderProto::kBrother,    createBrotherDecoder    },

@@ -2,6 +2,7 @@ syntax = "proto2";
 
 import "arch/agat/agat.proto";
 import "arch/aeslanier/aeslanier.proto";
+import "arch/aeslanier5/aeslanier5.proto";
 import "arch/amiga/amiga.proto";
 import "arch/apple2/apple2.proto";
 import "arch/brother/brother.proto";
@@ -22,7 +23,7 @@ import "arch/zilogmcz/zilogmcz.proto";
 import "lib/fluxsink/fluxsink.proto";
 import "lib/config/common.proto";
 
-//NEXT: 33
+//NEXT: 34
 message DecoderProto {
 	optional double pulse_debounce_threshold = 1 [default = 0.30,
 		(help) = "ignore pulses with intervals shorter than this, in fractions of a clock"];
@@ -37,6 +38,7 @@ message DecoderProto {
 
 	oneof format {
 		AesLanierDecoderProto aeslanier = 7;
+		AesLanier5DecoderProto aeslanier5 = 33;
 		AgatDecoderProto agat = 28;
 		AmigaDecoderProto amiga = 8;
 		Apple2DecoderProto apple2 = 13;
