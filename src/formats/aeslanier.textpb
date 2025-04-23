@@ -14,6 +14,8 @@ of nearly £50,000 in 2018!).
 processing software off twin 5.25" drive units, but apparently other software
 was available.
 
+**Note:** the following is wrong and needs to be updated.
+
 The disk format is exceptionally weird. They used 77 track, 32 sector, single-sided
 _hard_ sectored disks, where there were multiple index holes,
 indicating to the hardware where the sectors start. The encoding scheme
@@ -50,7 +52,7 @@ option_group {
 	comment: "$formats"
 
 	option {
-		name: '8" format'
+		name: '8'
 		comment: 'use the format found on 8" disks'
 		set_by_default: true
 
@@ -75,8 +77,8 @@ option_group {
 	}
 
 	option {
-		name: '5.25" format'
-		comment: 'use the format found on 5.25" disks'
+		name: '83'
+		comment: '83kB 5.25" 35-track 16-sector SSSD'
 
 		config {
 			decoder {
