@@ -5,6 +5,7 @@ proto(
     name="proto",
     srcs=[
         "./aeslanier/aeslanier.proto",
+        "./aeslanier5/aeslanier5.proto",
         "./agat/agat.proto",
         "./amiga/amiga.proto",
         "./apple2/apple2.proto",
@@ -36,6 +37,7 @@ cxxlibrary(
     srcs=[
         "./arch.cc",
         "./aeslanier/decoder.cc",
+        "./aeslanier5/decoder.cc",
         "./agat/agat.cc",
         "./agat/decoder.cc",
         "./agat/encoder.cc",
@@ -83,6 +85,7 @@ cxxlibrary(
         "arch/f85/f85.h": "./f85/f85.h",
         "arch/mx/mx.h": "./mx/mx.h",
         "arch/aeslanier/aeslanier.h": "./aeslanier/aeslanier.h",
+        "arch/aeslanier5/aeslanier5.h": "./aeslanier5/aeslanier5.h",
         "arch/northstar/northstar.h": "./northstar/northstar.h",
         "arch/brother/data_gcr.h": "./brother/data_gcr.h",
         "arch/brother/brother.h": "./brother/brother.h",

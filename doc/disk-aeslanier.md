@@ -31,13 +31,16 @@ based on what looks right. If anyone knows _anything_ about these disks,
 
 ## Options
 
-(no options)
+  - Format variants:
+      - `8" format`: use the format found on 8" disks
+      - `5.25" format`: use the format found on 5.25" disks
 
 ## Examples
 
 To read:
 
-  - `fluxengine read aeslanier -s drive:0 -o aeslanier.img`
+  - `fluxengine read aeslanier --8" format -s drive:0 -o aeslanier.img`
+  - `fluxengine read aeslanier --5.25" format -s drive:0 -o aeslanier.img`
 
 ## References
 

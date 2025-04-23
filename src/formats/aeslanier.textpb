@@ -46,21 +46,56 @@ image_writer {
 	type: IMAGETYPE_IMG
 }
 
-decoder {
-	aeslanier {}
-}
+option_group {
+	comment: "$formats"
 
-layout {
-	format_type: FORMATTYPE_80TRACK
-	tracks: 77
-	sides: 1
-	layoutdata {
-		sector_size: 256
-		physical {
-			start_sector: 0
-			count: 32
+	option {
+		name: '8" format'
+		comment: 'use the format found on 8" disks'
+		set_by_default: true
+
+		config {
+			decoder {
+				aeslanier {}
+			}
+
+			layout {
+				format_type: FORMATTYPE_80TRACK
+				tracks: 77
+				sides: 1
+				layoutdata {
+					sector_size: 256
+					physical {
+						start_sector: 0
+						count: 32
+					}
+				}
+			}
+		}
+	}
+
+	option {
+		name: '5.25" format'
+		comment: 'use the format found on 5.25" disks'
+
+		config {
+			decoder {
+				aeslanier5 {}
+			}
+
+			layout {
+				format_type: FORMATTYPE_40TRACK
+				tracks: 35
+				sides: 1
+				layoutdata {
+					sector_size: 150
+					physical {
+						start_sector: 0
+						count: 16
+						skew: 3
+					}
+				}
+			}
 		}
 	}
 }
-
-
