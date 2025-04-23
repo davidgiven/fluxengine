@@ -1,6 +1,9 @@
 from build.ab import simplerule, simplerule
 from build.utils import objectify
 from build.c import clibrary
+from build.zip import zip
+from glob import glob
+from os.path import *
 
 icons = ["fluxfile", "hardware", "icon", "imagefile"]
 
@@ -15,22 +18,15 @@ clibrary(
 )
 
 simplerule(
-    name="fluxengine_iconset",
+    name="fluxengine_icns",
     ins=["./icon.png"],
-    outs=["=fluxengine.iconset"],
+    outs=["=fluxengine.icns"],
     commands=[
-        "mkdir -p $[outs[0]]",
-        "sips -z 64 64 $[ins[0]] --out $[outs[0]]/icon_32x32@2x.png > /dev/null",
+        "mkdir -p fluxengine.iconset",
+        "sips -z 64 64 $[ins[0]] --out fluxengine.iconset/icon_32x32@2x.png > /dev/null",
+        "iconutil -c icns -o $[outs[0]] fluxengine.iconset",
     ],
     label="ICONSET",
-)
-
-simplerule(
-    name="fluxengine_icns",
-    ins=[".+fluxengine_iconset"],
-    outs=["=fluxengine.icns"],
-    commands=["iconutil -c icns -o $[outs[0]] $[ins[0]]"],
-    label="ICONUTIL",
 )
 
 simplerule(
@@ -39,4 +35,19 @@ simplerule(
     outs=["=fluxengine.ico"],
     commands=["png2ico $[outs[0]] $[ins[0]]"],
     label="MAKEICON",
+)
+
+template_files = [
+    f
+    for f in glob(
+        "**", recursive=True, root_dir="extras/FluxEngine.app.template"
+    )
+    if isfile(join("extras/FluxEngine.app.template", f))
+]
+zip(
+    name="fluxengine_template",
+    items={
+        join("FluxEngine.app", k): join("extras/FluxEngine.app.template", k)
+        for k in template_files
+    },
 )
