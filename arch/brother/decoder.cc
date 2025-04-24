@@ -4,7 +4,7 @@
 #include "lib/data/fluxpattern.h"
 #include "lib/decoders/decoders.h"
 #include "lib/encoders/encoders.h"
-#include "brother.h"
+#include "arch/brother/brother.h"
 #include "lib/data/sector.h"
 #include "lib/core/bytes.h"
 #include "lib/core/crc.h"

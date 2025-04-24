@@ -5,7 +5,7 @@
 #include "protocol.h"
 #include "lib/decoders/decoders.h"
 #include "lib/data/sector.h"
-#include "zilogmcz.h"
+#include "arch/zilogmcz/zilogmcz.h"
 #include "lib/core/bytes.h"
 #include "lib/core/crc.h"
 #include "fmt/format.h"

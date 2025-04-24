@@ -2,7 +2,7 @@
 #include "lib/core/utils.h"
 #include "lib/decoders/decoders.h"
 #include "lib/encoders/encoders.h"
-#include "agat.h"
+#include "arch/agat/agat.h"
 #include "lib/core/crc.h"
 #include "lib/data/image.h"
 #include "lib/data/layout.h"

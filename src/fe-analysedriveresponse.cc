@@ -167,7 +167,7 @@ static void draw_y_axis(Agg2D& painter,
         [&](double y, double v)
         {
             painter.line(x, y, x - 5, y);
-            painter.text(x - 8, y + 5.0, fmt::format(format, v));
+            painter.text(x - 8, y + 5.0, fmt::format(fmt::runtime(format), v));
         });
 }
 
@@ -194,7 +194,7 @@ static void draw_x_axis(Agg2D& painter,
         [&](double x, double v)
         {
             painter.line(x, y, x, y + 5);
-            painter.text(x, y + 18, fmt::format(format, v));
+            painter.text(x, y + 18, fmt::format(fmt::runtime(format), v));
         });
 }
 

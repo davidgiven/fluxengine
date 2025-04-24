@@ -11,7 +11,7 @@ bool failed = false;
 template <typename... Args>
 static void configError(fmt::string_view format_str, const Args&... args)
 {
-    fmt::print(stderr, format_str, args...);
+    fmt::print(stderr, fmt::runtime(format_str), args...);
     fputc('\n', stderr);
     failed = true;
 }

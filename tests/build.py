@@ -83,7 +83,7 @@ export(
             name=f"{n}_test",
             command=cxxprogram(
                 name=f"{n}_test_exe",
-                srcs=[f"./{n}.cc"],
+                srcs=[f"./{n}.cc", "./tests.h"],
                 deps=[
                     "lib/external+fl2_proto_lib",
                     "+fmt_lib",

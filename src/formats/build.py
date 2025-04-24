@@ -47,7 +47,7 @@ simplerule(
     deps=["scripts/mktable.sh"],
     outs=["=table.cc"],
     commands=[
-        "sh scripts/mktable.sh formats " + (" ".join(formats)) + " > {outs}"
+        "sh scripts/mktable.sh formats " + (" ".join(formats)) + " > $[outs]"
     ],
     label="MKTABLE",
 )
@@ -72,7 +72,7 @@ export(
             name=f"{f}_doc",
             ins=["scripts+mkdoc"],
             outs=[f"=disk-{f}.md"],
-            commands=["{ins[0]} " + f + " | tr -d '\\r' > {outs[0]}"],
+            commands=["$[ins[0]] " + f + " | tr -d '\\r' > $[outs[0]]"],
             label="MKDOC",
         )
         for f in formats

@@ -30,7 +30,7 @@ def protoencode_single(self, name, srcs: Targets, proto, symbol):
         ins=srcs,
         outs=[f"={name}.cc"],
         deps=[r],
-        commands=["{deps[0]} {ins} {outs} " + symbol],
+        commands=["$[deps[0]] $[ins] $[outs] " + symbol],
         label="PROTOENCODE",
     )
 
@@ -51,7 +51,7 @@ def protoencode(self, name, proto, srcs: TargetsMap, symbol):
         replaces=self,
         ins=encoded,
         outs=[f"={name}.cc"],
-        commands=["cat {ins} > {outs}"],
+        commands=["cat $[ins] > $[outs]"],
         label="CONCAT",
     )
 
@@ -60,12 +60,13 @@ cxxprogram(
     name="mkdoc",
     srcs=["./mkdoc.cc"],
     deps=[
-        "src/formats",
-        "lib/config+proto_lib",
-        "lib/fluxsource+proto_lib",
-        "lib/fluxsink+proto_lib",
         "+fmt_lib",
         "+protobuf_lib",
+        "lib/algorithms",
+        "lib/config+proto_lib",
+        "lib/fluxsink+proto_lib",
+        "lib/fluxsource+proto_lib",
+        "src/formats",
     ],
 )
 
@@ -73,11 +74,12 @@ cxxprogram(
     name="mkdocindex",
     srcs=["./mkdocindex.cc"],
     deps=[
-        "src/formats",
-        "lib/config+proto_lib",
-        "lib/fluxsource+proto_lib",
-        "lib/fluxsink+proto_lib",
         "+fmt_lib",
         "+protobuf_lib",
+        "lib/algorithms",
+        "lib/config+proto_lib",
+        "lib/fluxsink+proto_lib",
+        "lib/fluxsource+proto_lib",
+        "src/formats",
     ],
 )

@@ -1,5 +1,5 @@
 #include "lib/core/globals.h"
-#include "c64.h"
+#include "arch/c64/c64.h"
 
 /*
  *   Track   Sectors/track   # Sectors   Storage in Bytes   Clock rate

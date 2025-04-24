@@ -5,7 +5,7 @@
 #include "protocol.h"
 #include "lib/decoders/decoders.h"
 #include "lib/data/sector.h"
-#include "c64.h"
+#include "arch/c64/c64.h"
 #include "lib/core/crc.h"
 #include "lib/core/bytes.h"
 #include "fmt/format.h"

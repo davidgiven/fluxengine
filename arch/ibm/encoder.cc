@@ -2,7 +2,7 @@
 #include "lib/config/config.h"
 #include "lib/decoders/decoders.h"
 #include "lib/encoders/encoders.h"
-#include "ibm.h"
+#include "arch/ibm/ibm.h"
 #include "lib/core/crc.h"
 #include "lib/data/image.h"
 #include "arch/ibm/ibm.pb.h"
