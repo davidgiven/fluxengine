@@ -105,7 +105,7 @@ jobs:
 
     - name: run
       run: |
-        wsl sh -c 'make -C fluxengine BUILDTYPE=windows -j$(nproc) V=1'
+        wsl sh -c 'make -C fluxengine BUILDTYPE=windows -j$(nproc)'
 
     - name: nsis
       run: |
