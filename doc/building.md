@@ -211,10 +211,11 @@ install some support packages.
     `libsqlite3x-devel`
   - For OSX with Homebrew: `libusb`, `pkg-config`, `sqlite`,
     `protobuf`, `truncate`, `wxwidgets`, `fmt`.
-  - For Windows with MSYS2: `make`, `mingw-w64-i686-libusb`,
-	`mingw-w64-i686-protobuf`, `mingw-w64-i686-sqlite3`, `mingw-w64-i686-zlib`,
-	`mingw-w64-i686-gcc`, `vim`, `diffutils`, `mingw-w64-i686-wxWidgets`,
-	`mingw-w64-i686-fmt`, `mingw-w64-i686-pkg-config`, `mingw-w64-i686-python`.
+  - For Windows with WSL: `protobuf-c-compiler` `protobuf-devel` `fmt-devel`
+  `systemd-devel` `sqlite-devel` `wxGTK-devel` `mingw32-gcc` `mingw32-gcc-c++`
+  `mingw32-zlib-static` `mingw32-protobuf-static` `mingw32-sqlite-static`
+  `mingw32-wxWidgets3-static` `mingw32-libpng-static` `mingw32-libjpeg-static`
+  `mingw32-libtiff-static` `mingw32-nsis png2ico`
 
 These lists are not necessarily exhaustive --- please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new) if I've missed
