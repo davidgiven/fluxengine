@@ -26,7 +26,7 @@ def main():
                 print("link", sf)
             os.makedirs(dirname(sf), exist_ok=True)
             try:
-                os.symlink(abspath(f), sf)
+                os.link(abspath(f), sf)
             except PermissionError:
                 shutil.copy(f, sf)
 
