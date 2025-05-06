@@ -62,7 +62,7 @@ public:
 
                 int actualSectors = 0;
                 for (int sectorId = 0; sectorId < geometry.numSectors;
-                     sectorId++)
+                    sectorId++)
                 {
                     const auto& sector = image.get(track, side, sectorId);
                     if (sector)
@@ -81,7 +81,7 @@ public:
                 trackHeaderWriter.write_le16(0); /* approximate track length */
 
                 for (int sectorId = 0; sectorId < geometry.numSectors;
-                     sectorId++)
+                    sectorId++)
                 {
                     const auto& sector = image.get(track, side, sectorId);
                     if (sector)

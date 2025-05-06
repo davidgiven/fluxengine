@@ -38,7 +38,8 @@ layout {
 	format_type: FORMATTYPE_80TRACK
 	tracks: 80
 	sides: 2
-	order: HCS
+	image_track_order: HCS
+	filesystem_track_order: HCS
 	swap_sides: true
 	layoutdata {
 		sector_size: 1024

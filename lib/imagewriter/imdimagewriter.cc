@@ -354,7 +354,7 @@ public:
                     // determine how the optional cylinder map looks like
                     // write the corresponding logical ID
                     for (int sectorId = 0; sectorId < numSectorsinTrack;
-                         sectorId++)
+                        sectorId++)
                     {
                         // const auto& sector = sectors.get(track, head,
                         // sectorId);
@@ -372,7 +372,7 @@ public:
                     // determine how the optional head map looks like
                     // write the corresponding logical ID
                     for (int sectorId = 0; sectorId < numSectorsinTrack;
-                         sectorId++)
+                        sectorId++)
                     {
                         //	const auto& sector = sectors.get(track, head,
                         // sectorId);
@@ -440,7 +440,7 @@ public:
                         }
                         switch (sector->status)
                         {
-                            // clang-format off
+                                // clang-format off
                             /* fluxengine knows of a few sector statussen but not all of the statussen in IMD.
 							 *  // the statussen are in sector.h. Translation to fluxengine is as follows:
 							 *	Statussen fluxengine							|	Status IMD		

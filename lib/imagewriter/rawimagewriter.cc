@@ -38,7 +38,7 @@ public:
 
         unsigned sectorFileOffset;
         for (int track = 0; track < geometry.numTracks * geometry.numSides;
-             track++)
+            track++)
         {
             int side = (track < geometry.numTracks) ? 0 : 1;
 
