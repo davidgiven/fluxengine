@@ -288,7 +288,7 @@ std::string getProtoFieldValue(ProtoField& protoField)
         case google::protobuf::FieldDescriptor::TYPE_ENUM:
         {
             const auto* enumvalue = reflection->GetEnum(*message, field);
-            return enumvalue->name();
+            return static_cast<std::string>(enumvalue->name());
         }
 
         case google::protobuf::FieldDescriptor::TYPE_MESSAGE:
@@ -355,7 +355,7 @@ findAllProtoFields(google::protobuf::Message* message)
         for (int i = 0; i < d->field_count(); i++)
         {
             const google::protobuf::FieldDescriptor* f = d->field(i);
-            std::string n = s + f->name();
+            std::string n = s + static_cast<std::string>(f->name());
 
             if (f->options().GetExtension(::recurse) &&
                 (f->type() == google::protobuf::FieldDescriptor::TYPE_MESSAGE))
