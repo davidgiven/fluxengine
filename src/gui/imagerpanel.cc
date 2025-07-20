@@ -142,7 +142,7 @@ public:
                 [this]()
                 {
                     auto image =
-                        GetContext().GetImageReader()->readMappedImage();
+                        GetContext().GetImageReader()->readImage();
                     auto* encoder = GetContext().GetEncoder();
                     auto* fluxSink = GetContext().GetFluxSink();
 
@@ -260,7 +260,7 @@ public:
             QueueJob(
                 [image, this]()
                 {
-                    GetContext().GetImageWriter()->writeMappedImage(*image);
+                    GetContext().GetImageWriter()->writeImage(*image);
                 });
         }
         catch (const ErrorException& e)

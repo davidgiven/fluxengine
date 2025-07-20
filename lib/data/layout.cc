@@ -108,21 +108,21 @@ void Layout::getBounds(
 }
 
 std::vector<std::pair<int, int>> Layout::getTrackOrdering(
-    unsigned guessedTracks, unsigned guessedSides)
+    LayoutProto::Order ordering, unsigned guessedTracks, unsigned guessedSides)
 {
     auto layout = globalConfig()->layout();
     int tracks = layout.has_tracks() ? layout.tracks() : guessedTracks;
     int sides = layout.has_sides() ? layout.sides() : guessedSides;
 
-    std::vector<std::pair<int, int>> ordering;
-    switch (layout.order())
+    std::vector<std::pair<int, int>> trackList;
+    switch (ordering)
     {
         case LayoutProto::CHS:
         {
             for (int track = 0; track < tracks; track++)
             {
                 for (int side = 0; side < sides; side++)
-                    ordering.push_back(std::make_pair(track, side));
+                    trackList.push_back(std::make_pair(track, side));
             }
             break;
         }
@@ -132,16 +132,30 @@ std::vector<std::pair<int, int>> Layout::getTrackOrdering(
             for (int side = 0; side < sides; side++)
             {
                 for (int track = 0; track < tracks; track++)
-                    ordering.push_back(std::make_pair(track, side));
+                    trackList.push_back(std::make_pair(track, side));
+            }
+            break;
+        }
+
+        case LayoutProto::HCS_RH1:
+        {
+            for (int side = 0; side < sides; side++)
+            {
+                if (side == 0)
+                    for (int track = 0; track < tracks; track++)
+                        trackList.push_back(std::make_pair(track, side));
+                if (side == 1)
+                    for (int track = tracks; track >= 0; track--)
+                        trackList.push_back(std::make_pair(track - 1, side));
             }
             break;
         }
 
         default:
-            error("LAYOUT: invalid track ordering");
+            error("LAYOUT: invalid track trackList");
     }
 
-    return ordering;
+    return trackList;
 }
 
 std::vector<unsigned> Layout::expandSectorList(
