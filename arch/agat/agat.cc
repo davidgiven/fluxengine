@@ -1,6 +1,6 @@
 #include "lib/core/globals.h"
 #include "lib/decoders/decoders.h"
-#include "agat.h"
+#include "arch/agat/agat.h"
 #include "lib/core/bytes.h"
 #include "fmt/format.h"
 

@@ -5,7 +5,7 @@
 #include "protocol.h"
 #include "lib/decoders/decoders.h"
 #include "lib/data/sector.h"
-#include "fb100.h"
+#include "arch/fb100/fb100.h"
 #include "lib/core/crc.h"
 #include "lib/core/bytes.h"
 #include "lib/decoders/rawbits.h"

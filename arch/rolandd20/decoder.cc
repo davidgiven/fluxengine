@@ -6,7 +6,7 @@
 #include "lib/data/fluxpattern.h"
 #include "lib/data/sector.h"
 #include "lib/core/bytes.h"
-#include "rolandd20.h"
+#include "arch/rolandd20/rolandd20.h"
 #include <string.h>
 
 /* Sector header record:

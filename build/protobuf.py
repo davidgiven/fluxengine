@@ -1,17 +1,16 @@
 from build.ab import Rule, Targets, emit, simplerule, filenamesof
 from build.utils import filenamesmatchingof, collectattrs
 from os.path import join, abspath, dirname, relpath
-import build.pkg  # to get the protobuf package check
+from build.pkg import has_package
 
 emit(
     """
 PROTOC ?= protoc
+HOSTPROTOC ?= protoc
 """
 )
 
-assert build.pkg.TargetPkgConfig.has_package(
-    "protobuf"
-), "required package 'protobuf' not installed"
+assert has_package("protobuf"), "required package 'protobuf' not installed"
 
 
 def _getprotodeps(deps):
@@ -31,7 +30,7 @@ def proto(self, name, srcs: Targets = [], deps: Targets = []):
         ]
     )
 
-    dirs = sorted({"{dir}/" + dirname(f) for f in filenamesof(srcs)})
+    dirs = sorted({"$[dir]/" + dirname(f) for f in filenamesof(srcs)})
     simplerule(
         replaces=self,
         ins=srcs,
@@ -39,9 +38,9 @@ def proto(self, name, srcs: Targets = [], deps: Targets = []):
         deps=protodeps,
         commands=(
             ["mkdir -p " + (" ".join(dirs))]
-            + [f"$(CP) {f} {{dir}}/{f}" for f in filenamesof(srcs)]
+            + [f"$(CP) {f} $[dir]/{f}" for f in filenamesof(srcs)]
             + [
-                "cd {dir} && "
+                "cd $[dir] && "
                 + (
                     " ".join(
                         [
@@ -55,7 +54,7 @@ def proto(self, name, srcs: Targets = [], deps: Targets = []):
                             if descriptorlist
                             else []
                         )
-                        + ["{ins}"]
+                        + ["$[ins]"]
                     )
                 )
             ]
@@ -64,6 +63,18 @@ def proto(self, name, srcs: Targets = [], deps: Targets = []):
         args={
             "protosrcs": filenamesof(srcs),
             "protodeps": set(protodeps) | {self},
+        },
+    )
+
+
+@Rule
+def protolib(self, name, srcs: Targets = []):
+    simplerule(
+        replaces=self,
+        label="PROTOLIB",
+        args={
+            "protosrcs": collectattrs(targets=srcs, name="protosrcs"),
+            "protodeps": set(_getprotodeps(srcs)),
         },
     )
 
@@ -96,7 +107,7 @@ def protocc(self, name, srcs: Targets = [], deps: Targets = []):
         outs=outs,
         deps=protodeps,
         commands=[
-            "cd {dir} && "
+            "cd $[dir] && "
             + (
                 " ".join(
                     [
@@ -146,8 +157,8 @@ def protojava(self, name, srcs: Targets = [], deps: Targets = []):
         outs=[f"={self.localname}.srcjar"],
         deps=srcs + deps,
         commands=[
-            "mkdir -p {dir}/srcs",
-            "cd {dir} && "
+            "mkdir -p $[dir]/srcs",
+            "cd $[dir]/srcs && "
             + (
                 " ".join(
                     [
@@ -159,7 +170,7 @@ def protojava(self, name, srcs: Targets = [], deps: Targets = []):
                     + protos
                 )
             ),
-            "$(JAR) cf {outs[0]} -C {dir}/srcs .",
+            "$(JAR) cf $[outs[0]] -C $[dir]/srcs .",
         ],
         traits={"srcjar"},
         label="PROTOJAVA",

@@ -16,7 +16,7 @@ simplerule(
     commands=[
         "sh scripts/mktable.sh drivetypes "
         + (" ".join(drivetypes))
-        + " > {outs}"
+        + " > $[outs]"
     ],
     label="MKTABLE",
 )

@@ -48,7 +48,7 @@ struct ErrorException
 template <typename... Args>
 [[noreturn]] inline void error(fmt::string_view fstr, const Args&... args)
 {
-    throw ErrorException{fmt::format(fstr, args...)};
+    throw ErrorException{fmt::format(fmt::runtime(fstr), args...)};
 }
 
 extern void warning(const std::string msg);
@@ -56,7 +56,7 @@ extern void warning(const std::string msg);
 template <typename... Args>
 inline void warning(fmt::string_view fstr, const Args&... args)
 {
-    warning(fmt::format(fstr, args...));
+    warning(fmt::format(fmt::runtime(fstr), args...));
 }
 
 template <class... Ts>

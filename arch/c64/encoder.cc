@@ -2,7 +2,7 @@
 #include "lib/core/utils.h"
 #include "lib/decoders/decoders.h"
 #include "lib/encoders/encoders.h"
-#include "c64.h"
+#include "arch/c64/c64.h"
 #include "lib/core/crc.h"
 #include "lib/data/sector.h"
 #include "lib/data/image.h"

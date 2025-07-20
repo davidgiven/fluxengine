@@ -17,7 +17,7 @@
 #include "lib/data/fluxpattern.h"
 #include "lib/decoders/decoders.h"
 #include "lib/data/sector.h"
-#include "northstar.h"
+#include "arch/northstar/northstar.h"
 #include "lib/core/bytes.h"
 #include "lib/decoders/decoders.pb.h"
 #include "fmt/format.h"
