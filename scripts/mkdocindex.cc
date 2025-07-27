@@ -43,7 +43,7 @@ int main(int argc, const char* argv[])
             {
                 const auto* descriptor =
                     FilesystemProto::FilesystemType_descriptor();
-                auto name = descriptor->FindValueByNumber(fs.type())->name();
+                auto name = static_cast<std::string>(descriptor->FindValueByNumber(fs.type())->name());
 
                 filesystems.insert(name);
             }
