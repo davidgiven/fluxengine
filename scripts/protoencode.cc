@@ -78,7 +78,7 @@ int main(int argc, const char* argv[])
 			if (b == '/')
 				b = '\\';
 	#endif
-    std::ifstream input(argv[1]);
+    std::ifstream input(filename);
     if (!input)
     {
         perror("couldn't open input file");
