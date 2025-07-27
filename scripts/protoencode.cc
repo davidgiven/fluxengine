@@ -72,6 +72,12 @@ int main(int argc, const char* argv[])
 {
     PROTO message;
 
+	std::string filename = argv[1];
+	#if defined _WIN32
+		for (char& b : filename)
+			if (b == '/')
+				b = '\\';
+	#endif
     std::ifstream input(argv[1]);
     if (!input)
     {
