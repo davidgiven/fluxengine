@@ -83,9 +83,7 @@ all: +all README.md
 binaries: all
 tests: all
 	
-# No $(EXT) here, even on Windows, as this program isn't exported
-# outside WSL.
-README.md: $(OBJ)/scripts/+mkdocindex/mkdocindex
+README.md: $(OBJ)/scripts/+mkdocindex/mkdocindex$(EXT)
 	@echo $(PROGRESSINFO)MKDOC $@
 	@csplit -s -f$(OBJ)/README. README.md '/<!-- FORMATSSTART -->/' '%<!-- FORMATSEND -->%'
 	@(cat $(OBJ)/README.00 && $< && cat $(OBJ)/README.01) > README.md
