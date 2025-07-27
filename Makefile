@@ -34,7 +34,6 @@ else
 	else
 		LDFLAGS += -pthread -Wl,--no-as-needed
 	endif
-
 endif
 
 HOSTCC = gcc
@@ -84,7 +83,6 @@ all: +all README.md
 binaries: all
 tests: all
 	
-$(warning $(OBJ)/scripts/+mkdocindex/mkdocindex$(EXT))
 README.md: $(OBJ)/scripts/+mkdocindex/mkdocindex$(EXT)
 	@echo $(PROGRESSINFO)MKDOC $@
 	@csplit -s -f$(OBJ)/README. README.md '/<!-- FORMATSSTART -->/' '%<!-- FORMATSEND -->%'
