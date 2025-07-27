@@ -125,6 +125,7 @@ choices because they can store multiple types of file system.
 | [`hplif`](doc/disk-hplif.md) | Hewlett-Packard LIF: a variety of disk formats used by HP | 🦄 | 🦄 | LIF  |
 | [`ibm`](doc/disk-ibm.md) | IBM PC: Generic PC 3.5"/5.25" disks | 🦄 | 🦄 | FATFS  |
 | [`icl30`](doc/disk-icl30.md) | ICL Model 30: CP/M; 263kB 35-track DSSD | 🦖 |  | CPMFS  |
+| [`juku`](doc/disk-juku.md) | Juku E5104: CP/M |  |  | CPMFS  |
 | [`mac`](doc/disk-mac.md) | Macintosh: 400kB/800kB 3.5" GCR | 🦄 | 🦄 | MACHFS  |
 | [`micropolis`](doc/disk-micropolis.md) | Micropolis: 100tpi MetaFloppy disks | 🦄 | 🦄 |  |
 | [`ms2000`](doc/disk-ms2000.md) | : MS2000 Microdisk Development System |  |  | MICRODOS  |
