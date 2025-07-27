@@ -96,7 +96,8 @@ option_group {
 				format_type: FORMATTYPE_80TRACK
 				tracks: 80
 				sides: 2
-				order: HCS
+				image_track_order: HCS
+				filesystem_track_order: HCS
 				layoutdata {
 					sector_size: 256
 					physical {
@@ -136,11 +137,15 @@ option_group {
 			
 		config {
 			image_reader {
-				filesystem_sector_order: true
+				img {
+					filesystem_sector_order: true
+				}
 			}
 			
 			image_writer {
-				filesystem_sector_order: true
+				img {
+					filesystem_sector_order: true
+				}
 			}
 		
 			filesystem {
@@ -179,11 +184,15 @@ option_group {
 			
 		config {
 			image_reader {
-				filesystem_sector_order: true
+				img {
+					filesystem_sector_order: true
+				}
 			}
 			
 			image_writer {
-				filesystem_sector_order: true
+				img {
+					filesystem_sector_order: true
+				}
 			}
 		
 			filesystem {
@@ -221,11 +230,15 @@ option_group {
 			
 		config {
 			image_reader {
-				filesystem_sector_order: true
+				img {
+					filesystem_sector_order: true
+				}
 			}
 			
 			image_writer {
-				filesystem_sector_order: true
+				img {
+					filesystem_sector_order: true
+				}
 			}
 		
 			filesystem {

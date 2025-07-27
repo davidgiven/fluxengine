@@ -63,26 +63,3 @@ std::unique_ptr<ImageReader> ImageReader::create(const ImageReaderProto& config)
 }
 
 ImageReader::ImageReader(const ImageReaderProto& config): _config(config) {}
-
-std::unique_ptr<Image> ImageReader::readMappedImage()
-{
-    auto rawImage = readImage();
-
-    if (!_config.filesystem_sector_order())
-        return rawImage;
-
-    log("READER: converting from filesystem sector order to disk order");
-    std::set<std::shared_ptr<const Sector>> sectors;
-    for (const auto& e : *rawImage)
-    {
-        auto trackLayout =
-            Layout::getLayoutOfTrack(e->logicalTrack, e->logicalSide);
-        auto newSector = std::make_shared<Sector>();
-        *newSector = *e;
-        newSector->logicalSector =
-            trackLayout->filesystemToNaturalSectorMap.at(e->logicalSector);
-        sectors.insert(newSector);
-    }
-
-    return std::make_unique<Image>(sectors);
-}

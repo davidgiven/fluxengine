@@ -67,12 +67,8 @@ message ImdOutputProto
 message ImageWriterProto
 {
     optional string filename = 1 [ (help) = "filename of output sector image" ];
-    optional bool filesystem_sector_order = 10 [
-        (help) = "read/write sector image in filesystem order",
-        default = false
-    ];
 
-    optional ImageReaderWriterType type = 11
+    optional ImageReaderWriterType type = 10
         [ default = IMAGETYPE_NOT_SET, (help) = "image writer type" ];
 
     optional ImgInputOutputProto img = 2;

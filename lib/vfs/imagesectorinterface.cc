@@ -44,14 +44,14 @@ public:
 
     void flushChanges() override
     {
-        _writer->writeMappedImage(*_image);
+        _writer->writeImage(*_image);
         _changed = false;
     }
 
     void discardChanges() override
     {
         if (_reader)
-            _image = _reader->readMappedImage();
+            _image = _reader->readImage();
         else
         {
             _image = std::make_shared<Image>();
