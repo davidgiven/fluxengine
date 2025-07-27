@@ -500,7 +500,6 @@ def emit_rule(self, ins, outs, cmds=[], label=None):
         globalId = globalId + 1
 
         emit(f"OUTS_{outsn}", "=", *fouts, into=lines)
-        emit(f"$(warning $(OUTS_{outsn}))", into=lines)
         emit(f"INS_{insn}", "=", *fins, into=lines)
         emit(name, ":", f"$(OUTS_{outsn})", into=lines)
         emit(hashfile, ":", into=lines)
