@@ -501,15 +501,17 @@ def emit_rule(self, ins, outs, cmds=[], label=None):
 
         emit(f"OUTS_{outsn}", "=", *fouts, into=lines)
         emit(f"INS_{insn}", "=", *fins, into=lines)
+        emit(name, ":", f"$(OUTS_{outsn})", into=lines)
+        emit(hashfile, ":", into=lines)
+        emit(f"\t@mkdir -p {self.dir}", into=lines)
+        emit(f"\t@touch {hashfile}", into=lines)
         emit(
-            name,
-            ":",
-            hashfile,
             f"$(OUTS_{outsn})",
+            "&:" if len(fouts) > 1 else ":",
+            f"$(INS_{insn})",
+            hashfile,
             into=lines,
         )
-        emit(f"$(OUTS_{outsn})", ":", hashfile, into=lines)
-        emit(hashfile, ":", f"$(INS_{insn})", into=lines)
 
         if label:
             emit("\t$(hide)", "$(ECHO) $(PROGRESSINFO)" + label, into=lines)
@@ -537,9 +539,6 @@ def emit_rule(self, ins, outs, cmds=[], label=None):
         emit(name, ":", *fins, into=lines)
 
     outputFp.write("".join(lines))
-
-    if outs:
-        emit(f"\t$(hide) touch {hashfile}")
     emit("")
 
 

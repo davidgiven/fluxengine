@@ -7,6 +7,11 @@ from glob import glob
 import config
 import re
 
+# Hack for building on Fedora/WSL; executables get the .exe extension,
+# build the build system detects it as Linux.
+import build.toolchain
+toolchain.Toolchain.EXE = "$(EXT)"
+
 package(name="protobuf_lib", package="protobuf")
 package(name="z_lib", package="zlib")
 package(name="fmt_lib", package="fmt", fallback="dep/fmt")
