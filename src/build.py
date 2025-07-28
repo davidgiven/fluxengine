@@ -7,6 +7,7 @@ cxxprogram(
         "./fluxengine.h",
         "./fe-analysedriveresponse.cc",
         "./fe-analyselayout.cc",
+        "./fe-fluxfilels.cc",
         "./fe-format.cc",
         "./fe-getdiskinfo.cc",
         "./fe-getfile.cc",
