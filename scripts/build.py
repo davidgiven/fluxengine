@@ -5,13 +5,14 @@ encoders = {}
 
 
 @Rule
-def protoencode_single(self, name, srcs: Targets, proto, symbol):
+def protoencode_single(self, name, srcs: Targets, proto, include, symbol):
     if proto not in encoders:
         r = cxxprogram(
             name="protoencode_" + proto,
             srcs=["scripts/protoencode.cc"],
-            cflags=["-DPROTO=" + proto],
+            cflags=["-DPROTO=" + proto, "-DINCLUDE="+include],
             deps=[
+                "lib/core",
                 "lib/config+proto_lib",
                 "lib/fluxsource+proto_lib",
                 "lib/fluxsink+proto_lib",
@@ -41,12 +42,13 @@ def protoencode_single(self, name, srcs: Targets, proto, symbol):
 
 
 @Rule
-def protoencode(self, name, proto, srcs: TargetsMap, symbol):
+def protoencode(self, name, proto, include,srcs: TargetsMap, symbol):
     encoded = [
         protoencode_single(
             name=f"{k}_cc",
             srcs=[v],
             proto=proto,
+            include=include,
             symbol=f"{symbol}_{k}_pb",
         )
         for k, v in srcs.items()

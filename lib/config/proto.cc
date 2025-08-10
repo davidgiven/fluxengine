@@ -107,6 +107,16 @@ static ProtoField resolveProtoPath(
     std::stringstream ss(leading);
     while (std::getline(ss, item, '.'))
     {
+        static const std::regex INDEX_REGEX("(\\w+)\\[([0-9]+)\\]");
+
+        int index = -1;
+        std::smatch dmatch;
+        if (std::regex_match(item, dmatch, INDEX_REGEX))
+        {
+            item = dmatch[1];
+            index = std::stoi(dmatch[2]);
+        }
+
         const auto* field = descriptor->FindFieldByName(item);
         if (!field)
             throw ProtoPathNotFoundException(
@@ -116,6 +126,14 @@ static ProtoField resolveProtoPath(
                 "config field '{}' in '{}' is not a message", item, path));
 
         const auto* reflection = message->GetReflection();
+        if ((field->label() !=
+                google::protobuf::FieldDescriptor::LABEL_REPEATED) &&
+            (index != -1))
+            throw ProtoPathNotFoundException(fmt::format(
+                "config field '{}[{}]' is indexed, but not repeated",
+                item,
+                index));
+
         switch (field->label())
         {
             case google::protobuf::FieldDescriptor::LABEL_OPTIONAL:
@@ -127,16 +145,15 @@ static ProtoField resolveProtoPath(
                 break;
 
             case google::protobuf::FieldDescriptor::LABEL_REPEATED:
-                if (reflection->FieldSize(*message, field) == 0)
-                {
-                    if (create)
-                        message = reflection->AddMessage(message, field);
-                    else
-                        fail();
-                }
-                else
-                    message =
-                        reflection->MutableRepeatedMessage(message, field, 0);
+                if (index == -1)
+                    throw ProtoPathNotFoundException(fmt::format(
+                        "config field '{}' is repeated and must be indexed",
+                        item));
+                while (reflection->FieldSize(*message, field) <= index)
+                    reflection->AddMessage(message, field);
+
+                message =
+                    reflection->MutableRepeatedMessage(message, field, index);
                 break;
 
             default:
@@ -343,11 +360,17 @@ std::set<unsigned> iterate(unsigned start, unsigned count)
     return set;
 }
 
+static bool shouldRecurse(const google::protobuf::FieldDescriptor* f)
+{
+    if (f->type() != google::protobuf::FieldDescriptor::TYPE_MESSAGE)
+		return false;
+	return f->message_type()->options().GetExtension(::recurse);
+}
+
 std::map<std::string, const google::protobuf::FieldDescriptor*>
-findAllProtoFields(google::protobuf::Message* message)
+findAllPossibleProtoFields(const google::protobuf::Descriptor* descriptor)
 {
     std::map<std::string, const google::protobuf::FieldDescriptor*> fields;
-    const auto* descriptor = message->GetDescriptor();
 
     std::function<void(const google::protobuf::Descriptor*, const std::string&)>
         recurse = [&](auto* d, const auto& s)
@@ -357,8 +380,10 @@ findAllProtoFields(google::protobuf::Message* message)
             const google::protobuf::FieldDescriptor* f = d->field(i);
             std::string n = s + f->name();
 
-            if (f->options().GetExtension(::recurse) &&
-                (f->type() == google::protobuf::FieldDescriptor::TYPE_MESSAGE))
+            if (f->label() == google::protobuf::FieldDescriptor::LABEL_REPEATED)
+                n += "[]";
+
+            if (shouldRecurse(f))
                 recurse(f->message_type(), n + ".");
 
             fields[n] = f;
@@ -369,10 +394,47 @@ findAllProtoFields(google::protobuf::Message* message)
     return fields;
 }
 
-ConfigProto parseConfigBytes(const std::string_view& data)
+std::map<std::string, const google::protobuf::FieldDescriptor*>
+findAllProtoFields(const google::protobuf::Message& message)
 {
-    ConfigProto proto;
-    if (!proto.ParseFromArray(data.begin(), data.size()))
-        error("invalid internal config data");
-    return proto;
+    std::map<std::string, const google::protobuf::FieldDescriptor*> allFields;
+
+    std::function<void(const google::protobuf::Message&, const std::string&)>
+        recurse = [&](auto& message, const auto& name)
+    {
+        const auto* reflection = message.GetReflection();
+        std::vector<const google::protobuf::FieldDescriptor*> fields;
+        reflection->ListFields(message, &fields);
+
+        for (const auto* f : fields)
+        {
+            auto basename = name;
+            if (!basename.empty())
+                basename += '.';
+            basename += f->name();
+
+            if (f->label() == google::protobuf::FieldDescriptor::LABEL_REPEATED)
+            {
+                for (int i = 0; i < reflection->FieldSize(message, f); i++)
+                {
+                    const auto n = fmt::format("{}[{}]", basename, i);
+                    if (shouldRecurse(f))
+                        recurse(
+                            reflection->GetRepeatedMessage(message, f, i), n);
+                    else
+                        allFields[n] = f;
+                }
+            }
+            else
+            {
+                if (shouldRecurse(f))
+                    recurse(reflection->GetMessage(message, f), basename);
+                else
+                    allFields[basename] = f;
+            }
+        }
+    };
+
+    recurse(message, "");
+    return allFields;
 }
