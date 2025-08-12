@@ -7,6 +7,7 @@ typedef int command_cb(int agrc, const char* argv[]);
 extern command_cb mainAnalyseDriveResponse;
 extern command_cb mainAnalyseLayout;
 extern command_cb mainFluxfileLs;
+extern command_cb mainFluxfileRm;
 extern command_cb mainFormat;
 extern command_cb mainGetDiskInfo;
 extern command_cb mainGetFile;
@@ -80,6 +81,7 @@ static std::vector<Command> testables =
 static std::vector<Command> fluxfileables =
 {
     { "ls",            mainFluxfileLs,           "Lists the contents of a flux file.", },
+    { "rm",            mainFluxfileRm,           "Removes flux from a flux file.", },
 };
 // clang-format on
 

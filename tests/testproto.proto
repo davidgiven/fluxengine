@@ -7,6 +7,7 @@ message TestProto
     message SubMessageProto
     {
         optional string s = 1;
+		repeated int32 r = 2;
     }
 
     optional int64 i64 = 1 [(help) = "i64"];

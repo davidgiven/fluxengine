@@ -16,8 +16,8 @@ public:
 
 extern void setRange(RangeProto* range, const std::string& data);
 
-typedef std::pair<google::protobuf::Message*,
-    const google::protobuf::FieldDescriptor*>
+typedef std::tuple<google::protobuf::Message*,
+    const google::protobuf::FieldDescriptor*, int>
     ProtoField;
 
 extern ProtoField makeProtoPath(

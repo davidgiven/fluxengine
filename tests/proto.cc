@@ -85,6 +85,9 @@ static void test_getting(void)
 		}
 		secondoption {
 			s: "2"
+			r: 0
+			r: 1
+			r: 2
 		}
 		range {
 			start: 1
@@ -108,6 +111,7 @@ static void test_getting(void)
     AssertThat(getProtoByString(&tp, "r[1].s"), Equals("val3"));
     AssertThrows(
         ProtoPathNotFoundException, getProtoByString(&tp, "firstoption.s"));
+    AssertThat(getProtoByString(&tp, "secondoption.r[2]"), Equals("2"));
     AssertThat(getProtoByString(&tp, "secondoption.s"), Equals("2"));
     AssertThat(getProtoByString(&tp, "range"), Equals("1-3x2"));
 }
@@ -223,15 +227,19 @@ static void test_fields(void)
         Equals(std::vector<std::string>{"d",
             "f",
             "firstoption",
+            "firstoption.r[]",
             "firstoption.s",
             "i32",
             "i64",
             "m",
+			"m.r[]",
             "m.s",
             "r[]",
+            "r[].r[]",
             "r[].s",
             "range",
             "secondoption",
+            "secondoption.r[]",
             "secondoption.s",
             "u32",
             "u64"}));

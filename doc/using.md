@@ -387,6 +387,12 @@ sources.)
 
   Shows all the components inside a flux file.
 
+  - `fluxfile rm <fluxfile>:<path>...`
+
+  Removes flux from a flux file. You may specify the path to an individual read
+  (e.g. `track.h0_t5.flux9`) or the track itself (`track.h0_t5`); the latter
+  will remove all reads from the track.
+
 ### High density disks
 
 High density disks use a different magnetic medium to low and double density

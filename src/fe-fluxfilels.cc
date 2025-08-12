@@ -6,6 +6,7 @@
 #include "lib/data/flux.h"
 #include "lib/external/fl2.h"
 #include "lib/external/fl2.pb.h"
+#include "dep/alphanum/alphanum.h"
 #include "src/fluxengine.h"
 #include <fstream>
 
@@ -18,28 +19,19 @@ int mainFluxfileLs(int argc, const char* argv[])
     if (filenames.size() != 1)
         error("you must specify exactly one filename");
 
-    const auto& filename = *filenames.begin();
-    fmt::print("Contents of {}:\n", filename);
-    FluxFileProto f = loadFl2File(filename);
-
-    fmt::print("version: {}\n", getProtoByString(&f, "version"));
-    fmt::print("rotational_period_ms: {}\n",
-        getProtoByString(&f, "rotational_period_ms"));
-    fmt::print("drive_type: {}\n", getProtoByString(&f, "drive_type"));
-    fmt::print("format_type: {}\n", getProtoByString(&f, "format_type"));
-    for (const auto& track : f.track())
+    for (const auto& filename : filenames)
     {
-        for (int i = 0; i < track.flux().size(); i++)
-        {
-            const auto& flux = track.flux().at(i);
-            Fluxmap fluxmap(flux);
+        fmt::print("Contents of {}:\n", filename);
+        FluxFileProto f = loadFl2File(filename);
 
-            fmt::print("track.t{}_h{}.flux{}: {:.3f} ms, {} bytes\n",
-                track.track(),
-                track.head(),
-                i,
-                fluxmap.duration() / 1000000,
-                fluxmap.bytes());
+        auto fields = findAllProtoFields(f);
+		std::set<std::string, doj::alphanum_less<std::string>> fieldsSorted;
+        for (const auto& e : fields)
+			fieldsSorted.insert(e.first);
+
+        for (const auto& e : fieldsSorted)
+        {
+            fmt::print("{}: {}\n", e, getProtoByString(&f, e));
         }
     }
 
