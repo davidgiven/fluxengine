@@ -178,7 +178,7 @@ static ProtoField resolveProtoPath(
     if (!field)
         fail();
 
-    return std::make_tuple(message, field, -1);
+    return std::make_tuple(message, field, index);
 }
 
 ProtoField makeProtoPath(
@@ -221,7 +221,7 @@ static int32_t parseEnum(
     const auto* enumvalue = enumfield->FindValueByName(value);
     if (!enumvalue)
         error("unrecognised enum value '{}'", value);
-    return enumvalue->index();
+    return enumvalue->number();
 }
 
 template <typename T>
@@ -280,7 +280,7 @@ void setProtoFieldFromString(ProtoField& protoField, const std::string& value)
                     reflection->GetMutableRepeatedFieldRef<uint32_t>(
                         message, field),
                     index,
-                    (uint32_t)toUInt64(value));
+                    (uint32_t)toUint64(value));
                 break;
 
             case google::protobuf::FieldDescriptor::TYPE_UINT64:
@@ -288,7 +288,7 @@ void setProtoFieldFromString(ProtoField& protoField, const std::string& value)
                     reflection->GetMutableRepeatedFieldRef<uint64_t>(
                         message, field),
                     index,
-                    toUInt64(value));
+                    toUint64(value));
                 break;
 
             case google::protobuf::FieldDescriptor::TYPE_STRING:
@@ -308,8 +308,11 @@ void setProtoFieldFromString(ProtoField& protoField, const std::string& value)
                 break;
 
             case google::protobuf::FieldDescriptor::TYPE_ENUM:
-                reflection->SetRepeatedEnum(
-                    message, field, index, parseEnum(field, value));
+                updateRepeatedField(
+                    reflection->GetMutableRepeatedFieldRef<int32_t>(
+                        message, field),
+                    index,
+                    parseEnum(field, value));
                 break;
 
             case google::protobuf::FieldDescriptor::TYPE_MESSAGE:
@@ -318,11 +321,6 @@ void setProtoFieldFromString(ProtoField& protoField, const std::string& value)
                     setRange((RangeProto*)reflection->MutableRepeatedMessage(
                                  message, field, index),
                         value);
-                    break;
-                }
-                if (field->containing_oneof() && value.empty())
-                {
-                    reflection->MutableRepeatedMessage(message, field, index);
                     break;
                 }
                 /* fall through */
@@ -369,7 +367,7 @@ void setProtoFieldFromString(ProtoField& protoField, const std::string& value)
                 break;
 
             case google::protobuf::FieldDescriptor::TYPE_ENUM:
-                reflection->SetEnum(message, field, parseEnum(field, value));
+                reflection->SetEnumValue(message, field, parseEnum(field, value));
                 break;
 
             case google::protobuf::FieldDescriptor::TYPE_MESSAGE:
