@@ -9,6 +9,7 @@
 #include <lexy/action/parse.hpp>
 #include <lexy_ext/report_error.hpp>
 #include "fmt/ranges.h"
+#include <ranges>
 
 namespace
 {
@@ -142,5 +143,20 @@ std::vector<CylinderHead> parseCylinderHeadsString(const std::string& s)
         error(fmt::format("track descriptor parse error: {}",
             fmt::join(result.errors(), "; ")));
     }
-    return result.value();
+    
+    std::vector<CylinderHead> results = result.value();
+    std::sort(results.begin(), results.end());
+    return results;
+}
+
+std::string convertCylinderHeadsToString(const std::vector<CylinderHead>& chs)
+{
+    return fmt::format("{}",
+        fmt::join(chs | std::views::transform(
+                            [](const auto& ch)
+                            {
+                                return fmt::format(
+                                    "c{}h{}", ch.cylinder, ch.head);
+                            }),
+            " "));
 }

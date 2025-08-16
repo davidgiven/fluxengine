@@ -173,8 +173,7 @@ public:
         _fileheader.revolutions = revolution;
         write_le32(
             _fileheader.track[strack], trackdataWriter.pos + sizeof(ScpHeader));
-        trackdataWriter +=
-            Bytes((uint8_t*)&trackHeader, sizeof(trackHeader));
+        trackdataWriter += Bytes((uint8_t*)&trackHeader, sizeof(trackHeader));
         trackdataWriter += fluxdata;
     }
 

@@ -15,7 +15,7 @@ fluxengine read ibm --180 40track_drive
 >>>
 
 drive {
-    tracks: 40
+    tracks: "c0-40h0-1"
     drive_type: DRIVETYPE_40TRACK
 }
 

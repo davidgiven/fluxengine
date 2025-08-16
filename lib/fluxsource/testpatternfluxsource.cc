@@ -9,6 +9,7 @@ public:
     TestPatternFluxSource(const TestPatternFluxSourceProto& config):
         _config(config)
     {
+        _extraConfig.mutable_drive()->set_tracks("c0-255h0-1");
     }
 
     ~TestPatternFluxSource() {}

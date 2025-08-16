@@ -28,44 +28,26 @@ int mainConvert(int argc, const char* argv[])
     globalConfig().setFluxSink(filenames[1]);
 
     auto fluxSource = FluxSource::create(globalConfig());
+    auto locations = globalConfig()->drive().tracks();
+    globalConfig().overrides()->set_tracks(locations);
 
-#if 0
-    std::vector<std::shared_ptr<const TrackInfo>> locations;
-    std::map<std::shared_ptr<const TrackInfo>,
-        std::vector<std::shared_ptr<const Fluxmap>>>
-        data;
-    for (int track = 0; track < 255; track++)
-        for (int side = 0; side < 2; side++)
-        {
-            auto ti = std::make_shared<TrackInfo>();
-            ti->physicalTrack = track;
-            ti->physicalSide = side;
-
-            auto fsi = fluxSource->readFlux(track, side);
-            std::vector<std::shared_ptr<const Fluxmap>> fluxes;
-
-            while (fsi->hasNext())
-                fluxes.push_back(fsi->next());
-
-            if (!fluxes.empty())
-            {
-                data[ti] = fluxes;
-                locations.push_back(ti);
-            }
-        }
-
-    auto [minTrack, maxTrack, minSide, maxSide] = Layout::getBounds(locations);
-    log("CONVERT: seen tracks {}..{}, sides {}..{}",
-        minTrack,
-        maxTrack,
-        minSide,
-        maxSide);
-
-    globalConfig().set("tracks", fmt::format("{}-{}", minTrack, maxTrack));
-    globalConfig().set("heads", fmt::format("{}-{}", minSide, maxSide));
+    auto physicalLocations = Layout::computePhysicalLocations();
+    auto [minCylinder, maxCylinder, minHead, maxHead] =
+        Layout::getBounds(physicalLocations);
+    log("CONVERT: seen cylinders {}..{}, heads {}..{}",
+        minCylinder,
+        maxCylinder,
+        minHead,
+        maxHead);
 
     auto fluxSink = FluxSink::create(globalConfig());
-#endif
+
+    for (const auto& physicalLocation : physicalLocations)
+    {
+        auto fi = fluxSource->readFlux(physicalLocation);
+        while (fi->hasNext())
+            fluxSink->writeFlux(physicalLocation, *fi->next());
+    }
 
     return 0;
 }

@@ -1,5 +1,6 @@
 #include "lib/core/globals.h"
 #include "lib/data/fluxmap.h"
+#include "lib/data/locations.h"
 #include "lib/external/kryoflux.h"
 #include "lib/fluxsource/fluxsource.pb.h"
 #include "lib/core/utils.h"
@@ -52,6 +53,15 @@ public:
 
         if ((_header.cell_width != 0) && (_header.cell_width != 16))
             error("currently only 16-bit cells in SCP files are supported");
+
+        std::vector<CylinderHead> chs;
+        for (unsigned cylinder = trackno(_header.start_track);
+            cylinder <= trackno(_header.end_track);
+            cylinder++)
+            for (unsigned head = startSide; head <= endSide; head++)
+                chs.push_back(CylinderHead{cylinder, head});
+        _extraConfig.mutable_drive()->set_tracks(
+            convertCylinderHeadsToString(chs));
 
         log("SCP tracks {}-{}, heads {}-{}",
             trackno(_header.start_track),

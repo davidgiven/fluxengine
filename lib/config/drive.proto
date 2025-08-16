@@ -3,7 +3,7 @@ syntax = "proto2";
 import "lib/config/common.proto";
 import "lib/external/fl2.proto";
 
-// Next: 15
+// Next: 14
 message DriveProto
 {
     optional int32 drive = 1
@@ -22,20 +22,18 @@ message DriveProto
     optional double revolutions = 7
         [ default = 1.2, (help) = "number of revolutions to read" ];
 
-    optional int32 tracks = 8
-        [ default = 81, (help) = "Number of tracks supported by drive" ];
-    optional int32 heads = 9
-        [ default = 2, (help) = "Number of heads supported by drive" ];
-    optional int32 head_bias = 10 [
+    optional string tracks = 8
+        [ default = "c0-80h0-1", (help) = "Tracks supported by drive" ];
+    optional int32 head_bias = 9 [
         default = 0,
         (help) = "Bias to apply to the head position (in tracks)"
     ];
-    optional int32 group_offset = 11 [
+    optional int32 group_offset = 10 [
         default = 0,
         (help) = "When writing groups, erase all tracks except this one in each group"
     ];
-    optional DriveType drive_type = 12 [ default = DRIVETYPE_UNKNOWN, (help) = "Type of drive" ];
-    optional double rotational_period_ms = 13
+    optional DriveType drive_type = 11 [ default = DRIVETYPE_UNKNOWN, (help) = "Type of drive" ];
+    optional double rotational_period_ms = 12
         [ default = 0, (help) = "Rotational period of the drive in milliseconds (0 to autodetect)"];
 
     enum ErrorBehaviour {
@@ -44,7 +42,7 @@ message DriveProto
         RECALIBRATE = 2;
     }
 
-    optional ErrorBehaviour error_behaviour = 14
+    optional ErrorBehaviour error_behaviour = 13
         [ default = JIGGLE, (help) = "what to do when an error occurs during reads" ];
 }
 

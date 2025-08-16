@@ -6,7 +6,11 @@
 class EraseFluxSource : public TrivialFluxSource
 {
 public:
-    EraseFluxSource(const EraseFluxSourceProto& config) {}
+    EraseFluxSource(const EraseFluxSourceProto& config)
+    {
+        _extraConfig.mutable_drive()->set_tracks("c0-255h0-1");
+    }
+
     ~EraseFluxSource() {}
 
 public:

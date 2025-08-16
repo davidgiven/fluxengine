@@ -7,8 +7,7 @@ usb {
 }
 
 drive {
-    tracks: 160
-    heads: 1
+    tracks: "c0-159h0"
     drive_type: DRIVETYPE_APPLE2
 }
 

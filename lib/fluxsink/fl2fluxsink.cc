@@ -10,6 +10,7 @@
 #include "lib/config/proto.h"
 #include "lib/external/fl2.pb.h"
 #include "lib/external/fl2.h"
+#include "lib/core/logger.h"
 #include <fstream>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -34,6 +35,8 @@ public:
 
     ~Fl2FluxSink()
     {
+        log("FL2: writing {}", _filename);
+
         FluxFileProto proto;
         for (const auto& e : _data)
         {

@@ -2,6 +2,7 @@
 #define FLUXSOURCE_H
 
 #include "lib/config/flags.h"
+#include "lib/data/locations.h"
 #include "lib/config/config.pb.h"
 
 class A2rFluxSourceProto;
@@ -71,19 +72,23 @@ public:
         return _extraConfig;
     }
 
-    /* Read flux from a given track and side. */
+    /* Read flux from a given cylinder and head. */
 
     virtual std::unique_ptr<FluxSourceIterator> readFlux(
-        int track, int side) = 0;
+        int cylinder, int head) = 0;
+    std::unique_ptr<FluxSourceIterator> readFlux(const CylinderHead& location)
+    {
+        return readFlux(location.cylinder, location.head);
+    }
 
-    /* Recalibrates; seeks to track 0 and ensures the head is in the right
+    /* Recalibrates; seeks to cylinder 0 and ensures the head is in the right
      * place. */
 
     virtual void recalibrate() {}
 
-    /* Seeks to a given track (without recalibrating). */
+    /* Seeks to a given cylinder (without recalibrating). */
 
-    virtual void seek(int track) {}
+    virtual void seek(int cylinder) {}
 
     /* Is this real hardware? If so, then flux can be read indefinitely (among
      * other things). */
@@ -113,9 +118,10 @@ class EmptyFluxSourceIterator : public FluxSourceIterator
 class TrivialFluxSource : public FluxSource
 {
 public:
-    std::unique_ptr<FluxSourceIterator> readFlux(int track, int side) override;
+    std::unique_ptr<FluxSourceIterator> readFlux(
+        int cylinder, int head) override;
     virtual std::unique_ptr<const Fluxmap> readSingleFlux(
-        int track, int side) = 0;
+        int cylinder, int head) = 0;
 };
 
 #endif
