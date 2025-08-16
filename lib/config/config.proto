@@ -41,8 +41,7 @@ message ConfigProto
     optional DecoderProto decoder = 14;
     optional UsbProto usb = 15;
 
-    optional RangeProto tracks = 16;
-    optional RangeProto heads = 17;
+    optional string tracks = 16;
 
     optional FilesystemProto filesystem = 18;
 

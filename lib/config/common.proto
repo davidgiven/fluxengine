@@ -2,12 +2,6 @@ syntax = "proto2";
 
 import "google/protobuf/descriptor.proto";
 
-message RangeProto {
-	optional int32 start = 1 [default = 0, (help) = "start value"];
-	optional int32 step = 2 [default = 1, (help) = "amount to step by (positive)"];
-	optional int32 end = 3 [(help) = "inclusive end value, defaulting to the start value"];
-}
-
 extend google.protobuf.FieldOptions {
   optional string help = 50000;
   optional bool recurse = 50001 [default = true];

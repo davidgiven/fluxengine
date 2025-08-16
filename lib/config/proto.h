@@ -14,8 +14,6 @@ public:
     }
 };
 
-extern void setRange(RangeProto* range, const std::string& data);
-
 typedef std::pair<google::protobuf::Message*,
     const google::protobuf::FieldDescriptor*>
     ProtoField;
@@ -33,7 +31,6 @@ extern void setProtoByString(google::protobuf::Message* message,
 extern std::string getProtoByString(
     google::protobuf::Message* message, const std::string& path);
 
-extern std::set<unsigned> iterate(const RangeProto& range);
 extern std::set<unsigned> iterate(unsigned start, unsigned count);
 
 extern std::map<std::string, const google::protobuf::FieldDescriptor*>

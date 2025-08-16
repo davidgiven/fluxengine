@@ -25,8 +25,10 @@ ifeq ($(BUILDTYPE),windows)
 	EXT = .exe
 else
 	CC = gcc
-	CXX = g++ -std=c++17
-	CFLAGS = -g -O3
+	CXX = g++ -std=c++20
+	CFLAGS = -g -O3 \
+		-Wno-deprecated-enum-float-conversion \
+		-Wno-deprecated-enum-enum-conversion
 	LDFLAGS =
 	AR = ar
 	PKG_CONFIG = pkg-config

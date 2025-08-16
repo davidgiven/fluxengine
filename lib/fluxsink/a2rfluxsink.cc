@@ -40,9 +40,13 @@ namespace
 
         ~A2RFluxSink()
         {
-            auto locations = Layout::computeLocations();
-            Layout::getBounds(
-                locations, _minTrack, _maxTrack, _minSide, _maxSide);
+            auto physicalLocations = Layout::computePhysicalLocations();
+            auto [minTrack, maxTrack, minSide, maxSide] =
+                Layout::getBounds(physicalLocations);
+            _minTrack = minTrack;
+            _maxTrack = maxTrack;
+            _minSide = minSide;
+            _maxSide = maxSide;
 
             log("A2R: writing A2R {} file containing {} tracks...",
                 (_minSide == _maxSide) ? "single sided" : "double sided",

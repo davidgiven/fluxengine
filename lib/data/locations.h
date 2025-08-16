@@ -1,12 +1,12 @@
 #pragma once
 
-class Location
+class TrackHead
 {
 public:
-    bool operator==(const Location&) const = default;
+    bool operator==(const TrackHead&) const = default;
 
-    int track;
-    int head;
+    unsigned track;
+    unsigned head;
 };
 
-extern std::vector<Location> parseLocationsString(const std::string& s);
+extern std::vector<TrackHead> parseTrackHeadsString(const std::string& s);

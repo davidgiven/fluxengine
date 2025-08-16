@@ -14,7 +14,7 @@ namespace
 {
     struct Member
     {
-        int start, end, step;
+        unsigned start, end, step;
     };
 }
 
@@ -26,13 +26,15 @@ namespace grammar
     {
         static constexpr auto rule = []()
         {
-            auto integer = dsl::integer<int>(dsl::digits<>);
+            auto integer = dsl::integer<unsigned>(dsl::digits<>);
             auto step = dsl::lit_c<'x'> >> integer;
             auto end = dsl::lit_c<'-'> >> integer;
             return integer + dsl::opt(end) + dsl::opt(step);
         }();
         static constexpr auto value = lexy::callback<Member>(
-            [](int start, std::optional<int> end, std::optional<int> step)
+            [](unsigned start,
+                std::optional<unsigned> end,
+                std::optional<unsigned> step)
             {
                 return Member{start, end.value_or(start), step.value_or(1)};
             });
@@ -42,8 +44,9 @@ namespace grammar
     {
         static constexpr auto rule =
             dsl::list(dsl::p<member>, dsl::sep(dsl::lit_c<','>));
-        static constexpr auto value = lexy::fold_inplace<std::vector<int>>({},
-            [](std::vector<int>& result, const Member& item)
+        static constexpr auto value = lexy::fold_inplace<std::vector<unsigned>>(
+            {},
+            [](std::vector<unsigned>& result, const Member& item)
             {
                 if (item.start < 0)
                     error("range start {} must be at least 0", item.start);
@@ -61,14 +64,14 @@ namespace grammar
     {
         static constexpr auto rule = dsl::lit_c<'c'> + dsl::p<members> +
                                      dsl::lit_c<'h'> + dsl::p<members>;
-        static constexpr auto value = lexy::callback<std::vector<Location>>(
-            [](const std::vector<int>& cs, const std::vector<int>& hs)
+        static constexpr auto value = lexy::callback<std::vector<TrackHead>>(
+            [](const std::vector<unsigned>& cs, const std::vector<unsigned>& hs)
             {
-                std::vector<Location> result;
+                std::vector<TrackHead> result;
 
-                for (int c : cs)
-                    for (int h : hs)
-                        result.push_back(Location{c, h});
+                for (unsigned c : cs)
+                    for (unsigned h : hs)
+                        result.push_back(TrackHead{c, h});
 
                 return result;
             });
@@ -78,12 +81,13 @@ namespace grammar
     {
         static constexpr auto rule =
             dsl::list(dsl::p<ch>, dsl::sep(dsl::ascii::space));
-        static constexpr auto value = lexy::fold_inplace<std::vector<Location>>(
-            {},
-            [](std::vector<Location>& result, const std::vector<Location>& item)
-            {
-                result.insert(result.end(), item.begin(), item.end());
-            });
+        static constexpr auto value =
+            lexy::fold_inplace<std::vector<TrackHead>>({},
+                [](std::vector<TrackHead>& result,
+                    const std::vector<TrackHead>& item)
+                {
+                    result.insert(result.end(), item.begin(), item.end());
+                });
     };
 };
 
@@ -129,14 +133,14 @@ struct _error_collector
 };
 constexpr auto error_collector = _error_collector();
 
-std::vector<Location> parseLocationsString(const std::string& s)
+std::vector<TrackHead> parseTrackHeadsString(const std::string& s)
 {
     auto input = lexy::string_input(s);
     auto result = lexy::parse<grammar::chs>(input, error_collector);
     if (result.is_error())
     {
-        error(fmt::format(
-            "range parse error: {}", fmt::join(result.errors(), "; ")));
+        error(fmt::format("track descriptor parse error: {}",
+            fmt::join(result.errors(), "; ")));
     }
     return result.value();
 }

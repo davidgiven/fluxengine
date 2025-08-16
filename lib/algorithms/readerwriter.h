@@ -1,6 +1,8 @@
 #ifndef WRITER_H
 #define WRITER_H
 
+#include "lib/data/locations.h"
+
 class Decoder;
 class Encoder;
 class DiskFlux;
@@ -91,7 +93,7 @@ extern void writeDiskCommand(const Image& image,
     FluxSink& fluxSink,
     Decoder* decoder,
     FluxSource* fluxSource,
-    std::vector<std::shared_ptr<const TrackInfo>>& locations);
+    const std::vector<TrackHead>& locations);
 
 extern void writeDiskCommand(const Image& image,
     Encoder& encoder,

@@ -6,6 +6,7 @@ typedef int command_cb(int agrc, const char* argv[]);
 
 extern command_cb mainAnalyseDriveResponse;
 extern command_cb mainAnalyseLayout;
+extern command_cb mainConvert;
 extern command_cb mainFormat;
 extern command_cb mainGetDiskInfo;
 extern command_cb mainGetFile;
@@ -47,6 +48,7 @@ static std::vector<Command> commands =
 	{ "format",            mainFormat,            "Format a disk and make a file system on it.", },
 	{ "rawread",           mainRawRead,           "Reads raw flux from a disk. Warning: you can't use this to copy disks.", },
     { "rawwrite",          mainRawWrite,          "Writes a flux file to a disk. Warning: you can't use this to copy disks.", },
+    { "convert",           mainConvert,           "Converts a flux file from one format to another.", },
 	{ "merge",             mainMerge,             "Merge together multiple flux files.", },
 	{ "getdiskinfo",       mainGetDiskInfo,       "Read volume metadata off a disk (or image).", },
 	{ "ls",                mainLs,                "Show files on disk (or image).", },

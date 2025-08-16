@@ -41,12 +41,8 @@ class ScpFluxSink : public FluxSink
 public:
     ScpFluxSink(const ScpFluxSinkProto& lconfig): _config(lconfig)
     {
-        int minTrack;
-        int maxTrack;
-        int minSide;
-        int maxSide;
-        Layout::getBounds(
-            Layout::computeLocations(), minTrack, maxTrack, minSide, maxSide);
+        auto [minTrack, maxTrack, minSide, maxSide] =
+            Layout::getBounds(Layout::computePhysicalLocations());
 
         _fileheader.file_id[0] = 'S';
         _fileheader.file_id[1] = 'C';
