@@ -56,14 +56,14 @@ public:
 
     void flushChanges() override
     {
-        std::vector<TrackHead> locations;
+        std::vector<CylinderHead> locations;
 
         for (const auto& trackid : _changedTracks)
         {
             unsigned track = trackid.first;
             unsigned side = trackid.second;
             auto trackLayout = Layout::getLayoutOfTrack(track, side);
-            locations.push_back(TrackHead{
+            locations.push_back(CylinderHead{
                 trackLayout->physicalTrack, trackLayout->physicalSide});
 
             /* If we don't have all the sectors of this track, we may need to

@@ -64,14 +64,14 @@ namespace grammar
     {
         static constexpr auto rule = dsl::lit_c<'c'> + dsl::p<members> +
                                      dsl::lit_c<'h'> + dsl::p<members>;
-        static constexpr auto value = lexy::callback<std::vector<TrackHead>>(
+        static constexpr auto value = lexy::callback<std::vector<CylinderHead>>(
             [](const std::vector<unsigned>& cs, const std::vector<unsigned>& hs)
             {
-                std::vector<TrackHead> result;
+                std::vector<CylinderHead> result;
 
                 for (unsigned c : cs)
                     for (unsigned h : hs)
-                        result.push_back(TrackHead{c, h});
+                        result.push_back(CylinderHead{c, h});
 
                 return result;
             });
@@ -82,9 +82,9 @@ namespace grammar
         static constexpr auto rule =
             dsl::list(dsl::p<ch>, dsl::sep(dsl::ascii::space));
         static constexpr auto value =
-            lexy::fold_inplace<std::vector<TrackHead>>({},
-                [](std::vector<TrackHead>& result,
-                    const std::vector<TrackHead>& item)
+            lexy::fold_inplace<std::vector<CylinderHead>>({},
+                [](std::vector<CylinderHead>& result,
+                    const std::vector<CylinderHead>& item)
                 {
                     result.insert(result.end(), item.begin(), item.end());
                 });
@@ -133,7 +133,7 @@ struct _error_collector
 };
 constexpr auto error_collector = _error_collector();
 
-std::vector<TrackHead> parseTrackHeadsString(const std::string& s)
+std::vector<CylinderHead> parseCylinderHeadsString(const std::string& s)
 {
     auto input = lexy::string_input(s);
     auto result = lexy::parse<grammar::chs>(input, error_collector);

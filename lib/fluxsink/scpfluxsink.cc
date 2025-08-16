@@ -101,11 +101,11 @@ public:
                 head);
             return;
         }
-        ScpTrack trackheader = {0};
-        trackheader.header.track_id[0] = 'T';
-        trackheader.header.track_id[1] = 'R';
-        trackheader.header.track_id[2] = 'K';
-        trackheader.header.strack = strack;
+        ScpTrack trackHeader = {0};
+        trackHeader.header.track_id[0] = 'T';
+        trackHeader.header.track_id[1] = 'R';
+        trackHeader.header.track_id[2] = 'K';
+        trackHeader.header.strack = strack;
 
         FluxmapReader fmr(fluxmap);
         Bytes fluxdata;
@@ -142,7 +142,7 @@ public:
                     revolution = 0;
                 if (revolution >= 0)
                 {
-                    auto* revheader = &trackheader.revolution[revolution];
+                    auto* revheader = &trackHeader.revolution[revolution];
                     write_le32(
                         revheader->offset, startOffset + sizeof(ScpTrack));
                     write_le32(revheader->length,
@@ -173,7 +173,8 @@ public:
         _fileheader.revolutions = revolution;
         write_le32(
             _fileheader.track[strack], trackdataWriter.pos + sizeof(ScpHeader));
-        trackdataWriter += Bytes((uint8_t*)&trackheader, sizeof(trackheader));
+        trackdataWriter +=
+            Bytes((uint8_t*)&trackHeader, sizeof(trackHeader));
         trackdataWriter += fluxdata;
     }
 

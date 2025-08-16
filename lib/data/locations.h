@@ -1,12 +1,10 @@
 #pragma once
 
-class TrackHead
+struct CylinderHead
 {
-public:
-    bool operator==(const TrackHead&) const = default;
+    bool operator==(const CylinderHead&) const = default;
 
-    unsigned track;
-    unsigned head;
+    unsigned cylinder, head;
 };
 
-extern std::vector<TrackHead> parseTrackHeadsString(const std::string& s);
+extern std::vector<CylinderHead> parseCylinderHeadsString(const std::string& s);

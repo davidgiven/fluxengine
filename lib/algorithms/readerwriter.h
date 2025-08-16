@@ -93,7 +93,7 @@ extern void writeDiskCommand(const Image& image,
     FluxSink& fluxSink,
     Decoder* decoder,
     FluxSource* fluxSource,
-    const std::vector<TrackHead>& locations);
+    const std::vector<CylinderHead>& locations);
 
 extern void writeDiskCommand(const Image& image,
     Encoder& encoder,

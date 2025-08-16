@@ -65,25 +65,26 @@ unsigned Layout::remapSideLogicalToPhysical(unsigned lside)
     return lside ^ globalConfig()->layout().swap_sides();
 }
 
-std::vector<TrackHead> Layout::computePhysicalLocations()
+std::vector<CylinderHead> Layout::computePhysicalLocations()
 {
     if (globalConfig()->has_tracks())
-        return parseTrackHeadsString(globalConfig()->tracks());
+        return parseCylinderHeadsString(globalConfig()->tracks());
 
     std::set<unsigned> tracks = iterate(0, globalConfig()->layout().tracks());
     std::set<unsigned> heads = iterate(0, globalConfig()->layout().sides());
 
-    std::vector<TrackHead> locations;
+    std::vector<CylinderHead> locations;
     for (unsigned logicalTrack : tracks)
         for (unsigned logicalHead : heads)
             locations.push_back(
-                TrackHead{remapTrackLogicalToPhysical(logicalTrack),
+                CylinderHead{remapTrackLogicalToPhysical(logicalTrack),
                     remapSideLogicalToPhysical(logicalHead)});
 
     return locations;
 }
 
-Layout::LayoutBounds Layout::getBounds(const std::vector<TrackHead>& locations)
+Layout::LayoutBounds Layout::getBounds(
+    const std::vector<CylinderHead>& locations)
 {
     LayoutBounds r{.minTrack = INT_MAX,
         .maxTrack = INT_MIN,
@@ -92,8 +93,8 @@ Layout::LayoutBounds Layout::getBounds(const std::vector<TrackHead>& locations)
 
     for (const auto& ti : locations)
     {
-        r.minTrack = std::min<int>(r.minTrack, ti.track);
-        r.maxTrack = std::max<int>(r.maxTrack, ti.track);
+        r.minTrack = std::min<int>(r.minTrack, ti.cylinder);
+        r.maxTrack = std::max<int>(r.maxTrack, ti.cylinder);
         r.minSide = std::min<int>(r.minSide, ti.head);
         r.maxSide = std::max<int>(r.maxSide, ti.head);
     }
@@ -260,14 +261,14 @@ std::shared_ptr<const TrackInfo> Layout::getLayoutOfTrackPhysical(
 }
 
 std::shared_ptr<const TrackInfo> Layout::getLayoutOfTrackPhysical(
-    const TrackHead& physicalLocation)
+    const CylinderHead& physicalLocation)
 {
     return getLayoutOfTrackPhysical(
-        physicalLocation.track, physicalLocation.head);
+        physicalLocation.cylinder, physicalLocation.head);
 }
 
 std::vector<std::shared_ptr<const TrackInfo>> Layout::getLayoutOfTracksPhysical(
-    const std::vector<TrackHead>& physicalLocations)
+    const std::vector<CylinderHead>& physicalLocations)
 {
     std::vector<std::shared_ptr<const TrackInfo>> results;
     for (const auto& physicalLocation : physicalLocations)

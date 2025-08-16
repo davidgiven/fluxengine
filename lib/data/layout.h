@@ -27,15 +27,15 @@ public:
     /* Uses the layout and current track and heads settings to determine
      * which physical tracks are going to be read from or written to.
      */
-    static std::vector<TrackHead> computePhysicalLocations();
+    static std::vector<CylinderHead> computePhysicalLocations();
 
-    /* Given a list of TrackHead locations, determines the minimum and maximum
-     * track and side settings. */
+    /* Given a list of CylinderHead locations, determines the minimum and
+     * maximum track and side settings. */
     struct LayoutBounds
     {
         int minTrack, maxTrack, minSide, maxSide;
     };
-    static LayoutBounds getBounds(const std::vector<TrackHead>& locations);
+    static LayoutBounds getBounds(const std::vector<CylinderHead>& locations);
 
     /* Returns a series of <track, side> pairs representing the filesystem
      * ordering of the disk, in logical numbers. */
@@ -54,11 +54,11 @@ public:
 
     /* Returns the layout of a given track via physical location. */
     static std::shared_ptr<const TrackInfo> getLayoutOfTrackPhysical(
-        const TrackHead& physicalLocation);
+        const CylinderHead& physicalLocation);
 
     /* Returns the layouts of a multiple tracks via physical location. */
     static std::vector<std::shared_ptr<const TrackInfo>>
-    getLayoutOfTracksPhysical(const std::vector<TrackHead>& locations);
+    getLayoutOfTracksPhysical(const std::vector<CylinderHead>& locations);
 
     /* Expand a SectorList into the actual sector IDs. */
     static std::vector<unsigned> expandSectorList(

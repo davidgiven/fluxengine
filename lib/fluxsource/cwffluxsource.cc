@@ -71,17 +71,17 @@ public:
         int tracks = _header.tracks * _header.sides;
         for (int i = 0; i < tracks; i++)
         {
-            CwfTrack trackheader;
-            _if.read((char*)&trackheader, sizeof(trackheader));
+            CwfTrack trackHeader;
+            _if.read((char*)&trackHeader, sizeof(trackHeader));
             check_for_error();
 
             uint32_t length =
-                Bytes(trackheader.length, 4).reader().read_le32() -
+                Bytes(trackHeader.length, 4).reader().read_le32() -
                 sizeof(CwfTrack);
-            unsigned track_number = trackheader.track * _header.step;
+            unsigned track_number = trackHeader.track * _header.step;
 
             off_t pos = _if.tellg();
-            _trackOffsets[std::make_pair(track_number, trackheader.side)] =
+            _trackOffsets[std::make_pair(track_number, trackHeader.side)] =
                 std::make_pair(pos, length);
             _if.seekg(pos + length);
         }

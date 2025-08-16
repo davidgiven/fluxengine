@@ -76,9 +76,10 @@ public:
                 trackHeaderWriter.write_le16(actualSectors);
                 trackHeaderWriter.write_8(dataRate);
                 trackHeaderWriter.write_8(recordingMode);
-                trackHeaderWriter.write_8(0);    /* format gap length */
-                trackHeaderWriter.write_8(0);    /* filler byte */
-                trackHeaderWriter.write_le16(0); /* approximate track length */
+                trackHeaderWriter.write_8(0); /* format gap length */
+                trackHeaderWriter.write_8(0); /* filler byte */
+                trackHeaderWriter.write_le16(
+                    0); /* approximate track length */
 
                 for (int sectorId = 0; sectorId < geometry.numSectors;
                     sectorId++)
@@ -99,7 +100,7 @@ public:
                         trackHeaderWriter.write_8(
                             (sector->status == Sector::OK)
                                 ? 0x00
-                                : 0x20);              /* 8272 status 1 */
+                                : 0x20);                 /* 8272 status 1 */
                         trackHeaderWriter.write_8(0); /* 8272 status 2 */
                         trackHeaderWriter.write_8(1); /* number of copies */
                         trackHeaderWriter.write_8(0); /* filler byte */
@@ -113,7 +114,8 @@ public:
 
                 uint32_t trackLabel = (('T') << 24) | ((track & 0xff) << 16) |
                                       ((track >> 8) << 8) | side;
-                uint32_t trackHeaderAddress = ldbs.put(trackHeader, trackLabel);
+                uint32_t trackHeaderAddress =
+                    ldbs.put(trackHeader, trackLabel);
                 trackDirectoryWriter.write_be32(trackLabel);
                 trackDirectoryWriter.write_le32(trackHeaderAddress);
                 trackDirectorySize++;

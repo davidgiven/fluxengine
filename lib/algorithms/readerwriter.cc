@@ -542,7 +542,7 @@ void writeDiskCommand(const Image& image,
     FluxSink& fluxSink,
     Decoder* decoder,
     FluxSource* fluxSource,
-    const std::vector<TrackHead>& physicalLocations)
+    const std::vector<CylinderHead>& physicalLocations)
 {
     auto trackinfos = Layout::getLayoutOfTracksPhysical(physicalLocations);
     if (fluxSource && decoder)
@@ -638,7 +638,7 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
     for (auto& physicalLocation : physicalLocations)
     {
         auto trackInfo = Layout::getLayoutOfTrackPhysical(
-            physicalLocation.track, physicalLocation.head);
+            physicalLocation.cylinder, physicalLocation.head);
 
         log(OperationProgressLogMessage{
             index * 100 / (unsigned)physicalLocations.size()});
@@ -758,7 +758,7 @@ void rawReadDiskCommand(FluxSource& fluxsource, FluxSink& fluxsink)
 
         testForEmergencyStop();
         auto trackInfo = Layout::getLayoutOfTrackPhysical(
-            physicalLocation.track, physicalLocation.head);
+            physicalLocation.cylinder, physicalLocation.head);
         auto fluxSourceIterator = fluxsource.readFlux(
             trackInfo->physicalTrack, trackInfo->physicalSide);
 
