@@ -39,7 +39,7 @@ else
 endif
 
 HOSTCC = gcc
-HOSTCXX = g++ -std=c++17
+HOSTCXX = g++ -std=c++20
 HOSTCFLAGS = -g -O3
 HOSTLDFLAGS =
 

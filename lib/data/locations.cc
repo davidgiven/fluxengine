@@ -100,6 +100,9 @@ struct _error_collector
 
         return_type _results;
 
+        constexpr _sink() {}
+        constexpr ~_sink() {}
+
         template <typename Input, typename Reader, typename Tag>
         void operator()(const lexy::error_context<Input>& context,
             const lexy::error<Reader, Tag>& error)
@@ -143,7 +146,7 @@ std::vector<CylinderHead> parseCylinderHeadsString(const std::string& s)
         error(fmt::format("track descriptor parse error: {}",
             fmt::join(result.errors(), "; ")));
     }
-    
+
     std::vector<CylinderHead> results = result.value();
     std::sort(results.begin(), results.end());
     return results;
