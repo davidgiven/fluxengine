@@ -100,9 +100,6 @@ struct _error_collector
 
         return_type _results;
 
-        constexpr _sink() {}
-        constexpr ~_sink() {}
-
         template <typename Input, typename Reader, typename Tag>
         void operator()(const lexy::error_context<Input>& context,
             const lexy::error<Reader, Tag>& error)

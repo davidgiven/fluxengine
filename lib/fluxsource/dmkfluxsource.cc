@@ -63,7 +63,7 @@ public:
             static const std::regex FILENAME_REGEX(
                 "C_S([0-9]+)T([0-9]+)\\.[0-9]+");
 
-            std::string filename = di.path().filename();
+            std::string filename = di.path().filename().string();
             std::smatch dmatch;
             if (std::regex_match(filename, dmatch, FILENAME_REGEX))
                 chs.push_back(CylinderHead{(unsigned)std::stoi(dmatch[2]),

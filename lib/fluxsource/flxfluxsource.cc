@@ -18,7 +18,7 @@ public:
             static const std::regex FILENAME_REGEX(
                 "@TR([0-9]+)S([0-9]+)@\\.FLX");
 
-            std::string filename = di.path().filename();
+            std::string filename = di.path().filename().string();
             std::smatch dmatch;
             if (std::regex_match(filename, dmatch, FILENAME_REGEX))
                 chs.push_back(CylinderHead{(unsigned)std::stoi(dmatch[1]),
