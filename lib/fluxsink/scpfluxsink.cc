@@ -52,6 +52,8 @@ public:
         _fileheader.start_track = strackno(minTrack, minSide);
         _fileheader.end_track = strackno(maxTrack, maxSide);
         _fileheader.flags = SCP_FLAG_INDEXED;
+        if (globalConfig()->drive().drive_type() == DRIVETYPE_APPLE2)
+            error("you can't write Apple II flux images to SCP files yet");
         if (globalConfig()->drive().drive_type() != DRIVETYPE_40TRACK)
             _fileheader.flags |= SCP_FLAG_96TPI;
         _fileheader.cell_width = 0;
