@@ -58,6 +58,7 @@ protoencode(
     name="formats_cc",
     srcs={name: f"./{name}.textpb" for name in formats},
     proto="ConfigProto",
+    include="lib/config/config.pb.h",
     symbol="formats",
 )
 

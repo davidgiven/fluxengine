@@ -24,6 +24,9 @@
 #define mkdir(A, B) _mkdir(A)
 #endif
 
+#define STRINGIFY(a) XSTRINGIFY(a)
+#define XSTRINGIFY(a) #a
+
 template <class T>
 static inline std::vector<T> vector_of(T item)
 {

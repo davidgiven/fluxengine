@@ -26,6 +26,7 @@ protoencode(
     name="drivetypes_cc",
     srcs={name: f"./{name}.textpb" for name in drivetypes},
     proto="ConfigProto",
+    include="lib/config/config.pb.h",
     symbol="drivetypes",
 )
 

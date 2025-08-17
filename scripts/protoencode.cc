@@ -3,12 +3,13 @@
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <fstream>
 #include "fmt/format.h"
+#include "lib/core/globals.h"
 #include "tests/testproto.pb.h"
 #include "lib/config/config.pb.h"
 #include <sstream>
 #include <locale>
 
-#define STRINGIFY(s) #s
+const std::string protoname = STRINGIFY(PROTO);
 
 static uint32_t readu8(std::string::iterator& it, std::string::iterator end)
 {
@@ -125,6 +126,7 @@ int main(int argc, const char* argv[])
 
     output << "#include \"lib/core/globals.h\"\n"
            << "#include \"lib/config/proto.h\"\n"
+           << "#include \"" STRINGIFY(INCLUDE) "\"\n"
            << "#include <string_view>\n"
            << "static const uint8_t " << name << "_rawData[] = {";
 
@@ -143,11 +145,11 @@ int main(int argc, const char* argv[])
     output << "\n};\n";
     output << "extern const std::string_view " << name << "_data;\n";
     output << "const std::string_view " << name
-           << "_data = std::string_view((const char*)" << name << "_rawData, " << data.size()
-           << ");\n";
-    output << "extern const ConfigProto " << name << ";\n";
-    output << "const ConfigProto " << name << " = parseConfigBytes("
-           << argv[3] << "_data);\n";
+           << "_data = std::string_view((const char*)" << name << "_rawData, "
+           << data.size() << ");\n";
+    output << "extern const " << protoname << " " << name << ";\n";
+    output << "const " << protoname << " " << name << " = parseProtoBytes<"
+           << protoname << ">(" << argv[3] << "_data);\n";
 
     return 0;
 }

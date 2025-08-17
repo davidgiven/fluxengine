@@ -40,44 +40,38 @@ tests = [
     "vfs",
 ]
 
+protoencode_single(
+    name="testproto_cc",
+    srcs=["./testproto.textpb"],
+    proto="TestProto",
+    include="tests/testproto.pb.h",
+    symbol="testproto_pb",
+)
+
 export(
     name="tests",
     deps=[
         test(
-            name="proto_test",
+            name=f"{n}_test",
             command=cxxprogram(
-                name="proto_test_exe",
+                name=f"{n}_test_exe",
                 srcs=[
-                    "./proto.cc",
-                    protoencode_single(
-                        name="testproto_cc",
-                        srcs=["./testproto.textpb"],
-                        proto="TestProto",
-                        symbol="testproto_pb",
-                    ),
+                    f"./{n}.cc",
+                    ".+testproto_cc",
                 ],
                 deps=[
-                    "lib/external+fl2_proto_lib",
                     "+fmt_lib",
                     "+protobuf_lib",
                     "+protocol",
-                    "+z_lib",
                     ".+test_proto_lib",
-                    "dep/adflib",
-                    "dep/agg",
-                    "dep/fatfs",
-                    "dep/hfsutils",
-                    "dep/libusbp",
                     "dep/snowhouse",
-                    "dep/stb",
                     "lib/config",
                     "lib/core",
-                    "lib/data",
                     "lib/fluxsource+proto_lib",
-                    "src/formats",
                 ],
             ),
-        ),
+        )
+        for n in ["proto"]
     ]
     + [
         test(
