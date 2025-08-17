@@ -157,12 +157,11 @@ static void test_fields(void)
             "i32",
             "i64",
             "m",
-			"m.r[]",
+            "m.r[]",
             "m.s",
             "r[]",
             "r[].r[]",
             "r[].s",
-            "range",
             "secondoption",
             "secondoption.r[]",
             "secondoption.s",
@@ -201,11 +200,6 @@ static void test_findallfields(void)
 		secondoption {
 			s: "2"
 		}
-		range {
-			start: 1
-			step: 2
-			end: 3
-		}
 	)M";
 
     TestProto proto;
@@ -225,7 +219,6 @@ static void test_findallfields(void)
             "m.s",
             "r[0].s",
             "r[1].s",
-            "range",
             "secondoption.s",
             "u32",
             "u64"}));

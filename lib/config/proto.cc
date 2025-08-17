@@ -157,7 +157,7 @@ static ProtoField resolveProtoPath(
     if (!field)
         fail();
 
-    return std::make_tuple(message, field, index);
+    return ProtoField(message, field, index);
 }
 
 ProtoField makeProtoPath(
@@ -210,207 +210,232 @@ static void updateRepeatedField(
     mrfr.Set(index, value);
 }
 
-void setProtoFieldFromString(ProtoField& protoField, const std::string& value)
+void ProtoField::set(const std::string& value)
 {
-    auto& [message, field, index] = protoField;
-
-    const auto* reflection = message->GetReflection();
-    if (field->label() == google::protobuf::FieldDescriptor::LABEL_REPEATED)
+    const auto* reflection = _message->GetReflection();
+    if (_field->label() == google::protobuf::FieldDescriptor::LABEL_REPEATED)
     {
-        if (index == -1)
+        if (_index == -1)
             error("field '{}' is repeated but no index is provided");
 
-        switch (field->type())
+        switch (_field->type())
         {
             case google::protobuf::FieldDescriptor::TYPE_FLOAT:
                 updateRepeatedField(
                     reflection->GetMutableRepeatedFieldRef<float>(
-                        message, field),
-                    index,
+                        _message, _field),
+                    _index,
                     toFloat(value));
                 break;
 
             case google::protobuf::FieldDescriptor::TYPE_DOUBLE:
                 updateRepeatedField(
                     reflection->GetMutableRepeatedFieldRef<double>(
-                        message, field),
-                    index,
+                        _message, _field),
+                    _index,
                     toDouble(value));
                 break;
 
             case google::protobuf::FieldDescriptor::TYPE_INT32:
                 updateRepeatedField(
                     reflection->GetMutableRepeatedFieldRef<int32_t>(
-                        message, field),
-                    index,
+                        _message, _field),
+                    _index,
                     (int32_t)toInt64(value));
                 break;
 
             case google::protobuf::FieldDescriptor::TYPE_INT64:
                 updateRepeatedField(
                     reflection->GetMutableRepeatedFieldRef<int64_t>(
-                        message, field),
-                    index,
+                        _message, _field),
+                    _index,
                     toInt64(value));
                 break;
 
             case google::protobuf::FieldDescriptor::TYPE_UINT32:
                 updateRepeatedField(
                     reflection->GetMutableRepeatedFieldRef<uint32_t>(
-                        message, field),
-                    index,
+                        _message, _field),
+                    _index,
                     (uint32_t)toUint64(value));
                 break;
 
             case google::protobuf::FieldDescriptor::TYPE_UINT64:
                 updateRepeatedField(
                     reflection->GetMutableRepeatedFieldRef<uint64_t>(
-                        message, field),
-                    index,
+                        _message, _field),
+                    _index,
                     toUint64(value));
                 break;
 
             case google::protobuf::FieldDescriptor::TYPE_STRING:
                 updateRepeatedField(
                     reflection->GetMutableRepeatedFieldRef<std::string>(
-                        message, field),
-                    index,
+                        _message, _field),
+                    _index,
                     value);
                 break;
 
             case google::protobuf::FieldDescriptor::TYPE_BOOL:
                 updateRepeatedField(
                     reflection->GetMutableRepeatedFieldRef<bool>(
-                        message, field),
-                    index,
+                        _message, _field),
+                    _index,
                     parseBoolean(value));
                 break;
 
             case google::protobuf::FieldDescriptor::TYPE_ENUM:
                 updateRepeatedField(
                     reflection->GetMutableRepeatedFieldRef<int32_t>(
-                        message, field),
-                    index,
-                    parseEnum(field, value));
+                        _message, _field),
+                    _index,
+                    parseEnum(_field, value));
                 break;
 
-            case google::protobuf::FieldDescriptor::TYPE_MESSAGE:
-                if (field->message_type() == RangeProto::descriptor())
-                {
-                    setRange((RangeProto*)reflection->MutableRepeatedMessage(
-                                 message, field, index),
-                        value);
-                    break;
-                }
-                /* fall through */
             default:
                 error("can't set this config value type");
         }
     }
     else
     {
-        if (index != -1)
+        if (_index != -1)
             error("field '{}' is not repeated but an index is provided");
-        switch (field->type())
+        switch (_field->type())
         {
             case google::protobuf::FieldDescriptor::TYPE_FLOAT:
-                reflection->SetFloat(message, field, toFloat(value));
+                reflection->SetFloat(_message, _field, toFloat(value));
                 break;
 
             case google::protobuf::FieldDescriptor::TYPE_DOUBLE:
-                reflection->SetDouble(message, field, toDouble(value));
+                reflection->SetDouble(_message, _field, toDouble(value));
                 break;
 
             case google::protobuf::FieldDescriptor::TYPE_INT32:
-                reflection->SetInt32(message, field, toInt64(value));
+                reflection->SetInt32(_message, _field, toInt64(value));
                 break;
 
             case google::protobuf::FieldDescriptor::TYPE_INT64:
-                reflection->SetInt64(message, field, toInt64(value));
+                reflection->SetInt64(_message, _field, toInt64(value));
                 break;
 
             case google::protobuf::FieldDescriptor::TYPE_UINT32:
-                reflection->SetUInt32(message, field, toUint64(value));
+                reflection->SetUInt32(_message, _field, toUint64(value));
                 break;
 
             case google::protobuf::FieldDescriptor::TYPE_UINT64:
-                reflection->SetUInt64(message, field, toUint64(value));
+                reflection->SetUInt64(_message, _field, toUint64(value));
                 break;
 
             case google::protobuf::FieldDescriptor::TYPE_STRING:
-                reflection->SetString(message, field, value);
+                reflection->SetString(_message, _field, value);
                 break;
 
             case google::protobuf::FieldDescriptor::TYPE_BOOL:
-                reflection->SetBool(message, field, parseBoolean(value));
+                reflection->SetBool(_message, _field, parseBoolean(value));
                 break;
 
             case google::protobuf::FieldDescriptor::TYPE_ENUM:
-                reflection->SetEnumValue(message, field, parseEnum(field, value));
+                reflection->SetEnumValue(
+                    _message, _field, parseEnum(_field, value));
                 break;
 
-            case google::protobuf::FieldDescriptor::TYPE_MESSAGE:
-                if (field->message_type() == RangeProto::descriptor())
-                {
-                    setRange(
-                        (RangeProto*)reflection->MutableMessage(message, field),
-                        value);
-                    break;
-                }
-                if (field->containing_oneof() && value.empty())
-                {
-                    reflection->MutableMessage(message, field);
-                    break;
-                }
-                /* fall through */
             default:
                 error("can't set this config value type");
         }
     }
 }
 
-std::string getProtoFieldValue(ProtoField& protoField)
+std::string ProtoField::get() const
 {
-    auto& [message, field, index] = protoField;
-
-    const auto* reflection = message->GetReflection();
-    switch (field->type())
+    const auto* reflection = _message->GetReflection();
+    if (_field->label() == google::protobuf::FieldDescriptor::LABEL_REPEATED)
     {
-        case google::protobuf::FieldDescriptor::TYPE_FLOAT:
-            return fmt::format("{}", reflection->GetFloat(*message, field));
+        if (_index == -1)
+            error("field '{}' is repeated but no index is provided",
+                _field->name());
 
-        case google::protobuf::FieldDescriptor::TYPE_DOUBLE:
-            return fmt::format("{}", reflection->GetDouble(*message, field));
-
-        case google::protobuf::FieldDescriptor::TYPE_INT32:
-            return std::to_string(reflection->GetInt32(*message, field));
-
-        case google::protobuf::FieldDescriptor::TYPE_INT64:
-            return std::to_string(reflection->GetInt64(*message, field));
-
-        case google::protobuf::FieldDescriptor::TYPE_UINT32:
-            return std::to_string(reflection->GetUInt32(*message, field));
-
-        case google::protobuf::FieldDescriptor::TYPE_UINT64:
-            return std::to_string(reflection->GetUInt64(*message, field));
-
-        case google::protobuf::FieldDescriptor::TYPE_STRING:
-            return reflection->GetString(*message, field);
-
-        case google::protobuf::FieldDescriptor::TYPE_BOOL:
-            return std::to_string(reflection->GetBool(*message, field));
-
-        case google::protobuf::FieldDescriptor::TYPE_ENUM:
+        switch (_field->type())
         {
-            const auto* enumvalue = reflection->GetEnum(*message, field);
-            return enumvalue->name();
+            case google::protobuf::FieldDescriptor::TYPE_FLOAT:
+                return fmt::format("{:g}",
+                    reflection->GetRepeatedFloat(*_message, _field, _index));
+
+            case google::protobuf::FieldDescriptor::TYPE_DOUBLE:
+                return fmt::format("{:g}",
+                    reflection->GetRepeatedDouble(*_message, _field, _index));
+
+            case google::protobuf::FieldDescriptor::TYPE_INT32:
+                return std::to_string(
+                    reflection->GetRepeatedInt32(*_message, _field, _index));
+
+            case google::protobuf::FieldDescriptor::TYPE_INT64:
+                return std::to_string(
+                    reflection->GetRepeatedInt64(*_message, _field, _index));
+
+            case google::protobuf::FieldDescriptor::TYPE_UINT32:
+                return std::to_string(
+                    reflection->GetRepeatedUInt32(*_message, _field, _index));
+
+            case google::protobuf::FieldDescriptor::TYPE_UINT64:
+                return std::to_string(
+                    reflection->GetRepeatedUInt64(*_message, _field, _index));
+
+            case google::protobuf::FieldDescriptor::TYPE_STRING:
+                return reflection->GetRepeatedString(*_message, _field, _index);
+
+            case google::protobuf::FieldDescriptor::TYPE_MESSAGE:
+                error("cannot fetch message value");
+
+            default:
+                error("unknown field type when fetching repeated field '{}'",
+                    _field->name());
         }
+    }
+    else
+    {
+        if (_index != -1)
+            error("field '{}' is not repeated but an index is provided",
+                _field->name());
+        switch (_field->type())
+        {
+            case google::protobuf::FieldDescriptor::TYPE_FLOAT:
+                return fmt::format(
+                    "{:g}", reflection->GetFloat(*_message, _field));
 
-        case google::protobuf::FieldDescriptor::TYPE_MESSAGE:
-            error("cannot fetch message value");
+            case google::protobuf::FieldDescriptor::TYPE_DOUBLE:
+                return fmt::format(
+                    "{:g}", reflection->GetDouble(*_message, _field));
 
-        default:
-            error("unknown field type when fetching");
+            case google::protobuf::FieldDescriptor::TYPE_INT32:
+                return std::to_string(reflection->GetInt32(*_message, _field));
+
+            case google::protobuf::FieldDescriptor::TYPE_INT64:
+                return std::to_string(reflection->GetInt64(*_message, _field));
+
+            case google::protobuf::FieldDescriptor::TYPE_UINT32:
+                return std::to_string(reflection->GetUInt32(*_message, _field));
+
+            case google::protobuf::FieldDescriptor::TYPE_UINT64:
+                return std::to_string(reflection->GetUInt64(*_message, _field));
+
+            case google::protobuf::FieldDescriptor::TYPE_STRING:
+                return reflection->GetString(*_message, _field);
+
+            case google::protobuf::FieldDescriptor::TYPE_BOOL:
+                return std::to_string(reflection->GetBool(*_message, _field));
+
+            case google::protobuf::FieldDescriptor::TYPE_ENUM:
+            {
+                const auto* enumvalue = reflection->GetEnum(*_message, _field);
+                return enumvalue->name();
+            }
+
+            case google::protobuf::FieldDescriptor::TYPE_MESSAGE:
+                error("cannot fetch message value");
+
+            default:
+                error("unknown field type when fetching '{}'", _field->name());
+        }
     }
 }
 
@@ -418,15 +443,13 @@ void setProtoByString(google::protobuf::Message* message,
     const std::string& path,
     const std::string& value)
 {
-    ProtoField protoField = makeProtoPath(message, path);
-    setProtoFieldFromString(protoField, value);
+    makeProtoPath(message, path).set(value);
 }
 
 std::string getProtoByString(
     google::protobuf::Message* message, const std::string& path)
 {
-    ProtoField protoField = findProtoPath(message, path);
-    return getProtoFieldValue(protoField);
+    return findProtoPath(message, path).get();
 }
 
 std::set<unsigned> iterate(unsigned start, unsigned count)

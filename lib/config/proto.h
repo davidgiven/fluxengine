@@ -14,9 +14,29 @@ public:
     }
 };
 
-typedef std::tuple<google::protobuf::Message*,
-    const google::protobuf::FieldDescriptor*, int>
-    ProtoField;
+class ProtoField
+{
+public:
+    ProtoField(google::protobuf::Message* message,
+        const google::protobuf::FieldDescriptor* field,
+        int index):
+        _message(message),
+        _field(field),
+        _index(index)
+    {
+    }
+
+    void set(const std::string& value);
+    std::string get() const;
+
+    bool operator==(const ProtoField& other) const = default;
+    std::strong_ordering operator<=>(const ProtoField& other) const = default;
+
+private:
+    google::protobuf::Message* _message;
+    const google::protobuf::FieldDescriptor* _field;
+    int _index;
+};
 
 extern ProtoField makeProtoPath(
     google::protobuf::Message* message, const std::string& path);
