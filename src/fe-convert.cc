@@ -11,21 +11,34 @@
 #include <google/protobuf/text_format.h>
 #include <fstream>
 
-static FlagGroup flags = {};
+static FlagGroup flags;
 
-static void syntax()
-{
-    error("syntax: fluxengine convert <sourcefile> <destfile>");
-}
+static StringFlag sourceFlux({"-s", "--source"},
+    "flux file to read from",
+    "",
+    [](const auto& value)
+    {
+        globalConfig().setFluxSource(value);
+    });
+
+static StringFlag destImage({"-d", "--dest"},
+    "flux file to write to",
+    "",
+    [](const auto& value)
+    {
+        globalConfig().setFluxSink(value);
+    });
 
 int mainConvert(int argc, const char* argv[])
 {
-    auto filenames = flags.parseFlagsWithFilenames(argc, argv);
-    if (filenames.size() != 2)
-        syntax();
+    flags.parseFlags(argc, argv);
 
-    globalConfig().setFluxSource(filenames[0]);
-    globalConfig().setFluxSink(filenames[1]);
+    if ((globalConfig()->flux_sink().type() == FLUXTYPE_DRIVE) ||
+        (globalConfig()->flux_source().type() == FLUXTYPE_DRIVE))
+        error("you cannot read or write flux to a hardware device");
+    if ((globalConfig()->flux_sink().type() == FLUXTYPE_NOT_SET) ||
+        (globalConfig()->flux_source().type() == FLUXTYPE_NOT_SET))
+        error("you must specify both a source and destination flux filename");
 
     auto fluxSource = FluxSource::create(globalConfig());
     auto locations = globalConfig()->drive().tracks();
