@@ -4,6 +4,7 @@
 #include "lib/config/config.pb.h"
 #include "lib/config/proto.h"
 #include "snowhouse/snowhouse.h"
+#include "dep/alphanum/alphanum.h"
 #include <google/protobuf/text_format.h>
 #include <assert.h>
 #include <regex>
@@ -206,10 +207,11 @@ static void test_findallfields(void)
     if (!google::protobuf::TextFormat::MergeFromString(cleanup(s), &proto))
         error("couldn't load test proto");
 
-    auto fields = findAllProtoFields(proto);
+    auto fields = findAllProtoFields(&proto);
     std::vector<std::string> fieldNames;
     for (const auto& e : fields)
-        fieldNames.push_back(e.first);
+        fieldNames.push_back(e.path());
+    std::ranges::sort(fieldNames, doj::alphanum_less<std::string>());
 
     AssertThat(fieldNames,
         Equals(std::vector<std::string>{"d",

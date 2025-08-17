@@ -24,14 +24,26 @@ int mainFluxfileLs(int argc, const char* argv[])
         fmt::print("Contents of {}:\n", filename);
         FluxFileProto f = loadFl2File(filename);
 
-        auto fields = findAllProtoFields(f);
-		std::set<std::string, doj::alphanum_less<std::string>> fieldsSorted;
-        for (const auto& e : fields)
-			fieldsSorted.insert(e.first);
+        auto fields = findAllProtoFields(&f);
+        std::ranges::sort(fields,
+            [](const auto& o1, const auto& o2)
+            {
+                return doj::alphanum_comp(o1.path(), o2.path()) < 0;
+            });
 
-        for (const auto& e : fieldsSorted)
+        for (const auto& pf : fields)
         {
-            fmt::print("{}: {}\n", e, getProtoByString(&f, e));
+            auto path = pf.path();
+            if (pf.descriptor()->options().GetExtension(::isflux))
+            {
+                Fluxmap fluxmap(pf.getBytes());
+                fmt::print("{}: {:0.3f} ms of flux in {} bytes\n",
+                    path,
+                    fluxmap.duration() / 1000000.0,
+                    fluxmap.bytes());
+            }
+            else
+                fmt::print("{}: {}\n", path, pf.get());
         }
     }
 

@@ -17,9 +17,11 @@ public:
 class ProtoField
 {
 public:
-    ProtoField(google::protobuf::Message* message,
+    ProtoField(const std::string& path,
+        google::protobuf::Message* message,
         const google::protobuf::FieldDescriptor* field,
-        int index):
+        int index = -1):
+        _path(path),
         _message(message),
         _field(field),
         _index(index)
@@ -28,11 +30,24 @@ public:
 
     void set(const std::string& value);
     std::string get() const;
+    google::protobuf::Message* getMessage() const;
+    std::string getBytes() const;
 
     bool operator==(const ProtoField& other) const = default;
     std::strong_ordering operator<=>(const ProtoField& other) const = default;
 
+    const std::string& path() const
+    {
+        return _path;
+    }
+
+    const google::protobuf::FieldDescriptor* descriptor() const
+    {
+        return _field;
+    }
+
 private:
+    std::string _path;
     google::protobuf::Message* _message;
     const google::protobuf::FieldDescriptor* _field;
     int _index;
@@ -56,8 +71,8 @@ extern std::set<unsigned> iterate(unsigned start, unsigned count);
 extern std::map<std::string, const google::protobuf::FieldDescriptor*>
 findAllPossibleProtoFields(const google::protobuf::Descriptor* descriptor);
 
-extern std::map<std::string, const google::protobuf::FieldDescriptor*>
-findAllProtoFields(const google::protobuf::Message& message);
+extern std::vector<ProtoField> findAllProtoFields(
+    google::protobuf::Message* message);
 
 template <class T>
 static inline const T parseProtoBytes(const std::string_view& bytes)

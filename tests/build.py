@@ -68,6 +68,7 @@ export(
                     "lib/config",
                     "lib/core",
                     "lib/fluxsource+proto_lib",
+                    "dep/alphanum",
                 ],
             ),
         )

@@ -264,7 +264,8 @@ static void doShowConfig()
 
 static void doDoc()
 {
-    const auto fields = findAllPossibleProtoFields(globalConfig().base()->GetDescriptor());
+    const auto fields =
+        findAllPossibleProtoFields(globalConfig().base()->GetDescriptor());
     for (const auto field : fields)
     {
         const std::string& path = field.first;
