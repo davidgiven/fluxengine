@@ -29,7 +29,7 @@ static unsigned getTrackStep()
             {
                 case DRIVETYPE_40TRACK:
                     error(
-                        "you can't write an 80 track image to a 40 track "
+                        "you can't read/write an 80 track image from/to a 40 track "
                         "drive");
 
                 case DRIVETYPE_80TRACK:
@@ -37,7 +37,7 @@ static unsigned getTrackStep()
 
                 case DRIVETYPE_APPLE2:
                     error(
-                        "you can't write an 80 track image to an Apple II "
+                        "you can't read/write an 80 track image from/to an Apple II "
                         "drive");
             }
     }
