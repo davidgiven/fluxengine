@@ -9,6 +9,7 @@ extern command_cb mainAnalyseLayout;
 extern command_cb mainConvert;
 extern command_cb mainFluxfileLs;
 extern command_cb mainFluxfileRm;
+extern command_cb mainFluxfileCp;
 extern command_cb mainFormat;
 extern command_cb mainGetDiskInfo;
 extern command_cb mainGetFile;
@@ -84,6 +85,7 @@ static std::vector<Command> fluxfileables =
 {
     { "ls",            mainFluxfileLs,           "Lists the contents of a flux file.", },
     { "rm",            mainFluxfileRm,           "Removes flux from a flux file.", },
+    { "cp",            mainFluxfileCp,           "Copies flux from one flux file to another." },
 };
 // clang-format on
 

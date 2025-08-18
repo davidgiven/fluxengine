@@ -13,6 +13,7 @@ cxxprogram(
         "./fe-format.cc",
         "./fe-fluxfilels.cc",
         "./fe-fluxfilerm.cc",
+        "./fe-fluxfilecp.cc",
         "./fe-getdiskinfo.cc",
         "./fe-getfile.cc",
         "./fe-getfileinfo.cc",
