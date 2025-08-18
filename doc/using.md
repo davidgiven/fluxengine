@@ -383,15 +383,20 @@ FluxEngine also supports a number of file system image formats. When using the
 individual flux files. (Note that this only works on flux files themselves, not
 sources.)
 
-  - `fluxfile ls <fluxfile>`
+  - `fluxfile ls -f <fluxfile>`
 
   Shows all the components inside a flux file.
 
-  - `fluxfile rm <fluxfile>:<path>...`
+  - `fluxfile rm -f <fluxfile> -t <tracks>`
 
-  Removes flux from a flux file. You may specify the path to an individual read
-  (e.g. `track.h0_t5.flux9`) or the track itself (`track.h0_t5`); the latter
-  will remove all reads from the track.
+  Removes flux from a flux file. All reads are removed from the specified track;
+  use the normal `c0h0` syntax, including using ranges, such as `c0-9h0-1`.
+
+  - `fluxfile cp -i <input fluxfile> -o <output fluxfile> -t <tracks>`
+
+  Copies flux from one file to another. All reads are copied from the source
+  file and _appended_ to the relevant track in the destination file. You can use
+  ranges etc.
 
 ### High density disks
 
