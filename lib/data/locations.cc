@@ -46,7 +46,7 @@ namespace grammar
         static constexpr auto rule =
             dsl::list(dsl::p<member>, dsl::sep(dsl::lit_c<','>));
         static constexpr auto value = lexy::fold_inplace<std::vector<unsigned>>(
-            {},
+            std::initializer_list<unsigned>{},
             [](std::vector<unsigned>& result, const Member& item)
             {
                 if (item.start < 0)
@@ -83,7 +83,8 @@ namespace grammar
         static constexpr auto rule =
             dsl::list(dsl::p<ch>, dsl::sep(dsl::ascii::space));
         static constexpr auto value =
-            lexy::fold_inplace<std::vector<CylinderHead>>({},
+            lexy::fold_inplace<std::vector<CylinderHead>>(
+                std::initializer_list<CylinderHead>{},
                 [](std::vector<CylinderHead>& result,
                     const std::vector<CylinderHead>& item)
                 {
@@ -92,7 +93,7 @@ namespace grammar
     };
 };
 
-struct _error_collector
+struct error_collector
 {
     struct _sink
     {
@@ -127,17 +128,16 @@ struct _error_collector
         }
     };
 
-    constexpr auto sink() const
+    auto sink() const
     {
         return _sink{};
     }
 };
-constexpr auto error_collector = _error_collector();
 
 std::vector<CylinderHead> parseCylinderHeadsString(const std::string& s)
 {
     auto input = lexy::string_input(s);
-    auto result = lexy::parse<grammar::chs>(input, error_collector);
+    auto result = lexy::parse<grammar::chs>(input, error_collector());
     if (result.is_error())
     {
         error(fmt::format("track descriptor parse error: {}",

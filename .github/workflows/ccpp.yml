@@ -8,7 +8,7 @@ concurrency:
 
 jobs:
   build-linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v4
       with:
@@ -20,7 +20,7 @@ jobs:
         path: 'fluxengine-testdata'
     - name: apt
       run: |
-        sudo apt install libudev-dev libsqlite3-dev protobuf-compiler libwxgtk3.2-dev libfmt-dev libprotobuf-dev
+        sudo apt install libudev-dev libsqlite3-dev protobuf-compiler libwxgtk3.0-gtk3-dev libfmt-dev libprotobuf-dev
     - name: make
       run: CXXFLAGS="-Wp,-D_GLIBCXX_ASSERTIONS" make -j`nproc` -C fluxengine
 
