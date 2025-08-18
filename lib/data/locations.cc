@@ -93,7 +93,7 @@ namespace grammar
     };
 };
 
-struct _error_collector
+struct error_collector
 {
     struct _sink
     {
@@ -128,17 +128,16 @@ struct _error_collector
         }
     };
 
-    constexpr auto sink() const
+    auto sink() const
     {
         return _sink{};
     }
 };
-constexpr auto error_collector = _error_collector();
 
 std::vector<CylinderHead> parseCylinderHeadsString(const std::string& s)
 {
     auto input = lexy::string_input(s);
-    auto result = lexy::parse<grammar::chs>(input, error_collector);
+    auto result = lexy::parse<grammar::chs>(input, error_collector());
     if (result.is_error())
     {
         error(fmt::format("track descriptor parse error: {}",
