@@ -46,7 +46,7 @@ namespace grammar
         static constexpr auto rule =
             dsl::list(dsl::p<member>, dsl::sep(dsl::lit_c<','>));
         static constexpr auto value = lexy::fold_inplace<std::vector<unsigned>>(
-            {},
+            std::initializer_list<unsigned>{},
             [](std::vector<unsigned>& result, const Member& item)
             {
                 if (item.start < 0)
@@ -83,7 +83,8 @@ namespace grammar
         static constexpr auto rule =
             dsl::list(dsl::p<ch>, dsl::sep(dsl::ascii::space));
         static constexpr auto value =
-            lexy::fold_inplace<std::vector<CylinderHead>>({},
+            lexy::fold_inplace<std::vector<CylinderHead>>(
+                std::initializer_list<CylinderHead>{},
                 [](std::vector<CylinderHead>& result,
                     const std::vector<CylinderHead>& item)
                 {
