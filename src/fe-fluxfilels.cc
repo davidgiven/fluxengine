@@ -6,45 +6,39 @@
 #include "lib/data/flux.h"
 #include "lib/external/fl2.h"
 #include "lib/external/fl2.pb.h"
-#include "dep/alphanum/alphanum.h"
 #include "src/fluxengine.h"
 #include <fstream>
 
 static FlagGroup flags;
-static std::string filename;
+
+static StringFlag fluxFilename({"-f", "--fluxfile"}, "flux file to show");
 
 int mainFluxfileLs(int argc, const char* argv[])
 {
-    const auto filenames = flags.parseFlagsWithFilenames(argc, argv);
-    if (filenames.size() != 1)
-        error("you must specify exactly one filename");
+    flags.parseFlags(argc, argv);
+    if (!fluxFilename.isSet())
+        error("you must specify a filename with -f");
 
-    for (const auto& filename : filenames)
+    fmt::print("{}:\n", fluxFilename.get());
+    FluxFileProto f = loadFl2File(fluxFilename.get());
+
+    for (auto* s :
+        {"version", "rotational_period_ms", "drive_type", "format_type"})
+        fmt::print("  {}: {}\n", s, getProtoByString(&f, s));
+
+    for (const auto& trackFlux : f.track())
     {
-        fmt::print("Contents of {}:\n", filename);
-        FluxFileProto f = loadFl2File(filename);
+        fmt::print("  flux for c{}h{}:", trackFlux.track(), trackFlux.head());
 
-        auto fields = findAllProtoFields(&f);
-        std::ranges::sort(fields,
-            [](const auto& o1, const auto& o2)
-            {
-                return doj::alphanum_comp(o1.path(), o2.path()) < 0;
-            });
-
-        for (const auto& pf : fields)
+        for (const auto& flux : trackFlux.flux())
         {
-            auto path = pf.path();
-            if (pf.descriptor()->options().GetExtension(::isflux))
-            {
-                Fluxmap fluxmap(pf.getBytes());
-                fmt::print("{}: {:0.3f} ms of flux in {} bytes\n",
-                    path,
-                    fluxmap.duration() / 1000000.0,
-                    fluxmap.bytes());
-            }
-            else
-                fmt::print("{}: {}\n", path, pf.get());
+            Fluxmap fluxmap(flux);
+            if (&flux != &trackFlux.flux()[0])
+                fmt::print(",");
+            fmt::print(" {:0.3f}ms", fluxmap.duration() / 1000000.0);
         }
+
+        fmt::print("\n");
     }
 
     return 0;
