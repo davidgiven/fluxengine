@@ -3,6 +3,7 @@
 #include "lib/data/fluxmap.h"
 #include "lib/data/sector.h"
 #include "lib/config/proto.h"
+#include "lib/data/locations.h"
 #include "lib/data/flux.h"
 #include "lib/external/fl2.h"
 #include "lib/external/fl2.pb.h"
@@ -10,38 +11,52 @@
 #include <fstream>
 
 static FlagGroup flags;
-static std::string filename;
+
+static StringFlag fluxFilename({"-f", "--fluxfile"}, "flux file to show");
+static StringFlag tracksFlag({"-t", "--tracks"}, "tracks to remove");
 
 int mainFluxfileRm(int argc, const char* argv[])
 {
-    const auto filenames = flags.parseFlagsWithFilenames(argc, argv);
-    if (filenames.size() != 1)
-        error("you must specify exactly one filename");
+    flags.parseFlags(argc, argv);
+    if (!fluxFilename.isSet())
+        error("you must specify a filename with -f");
 
-    const auto& filename = *filenames.begin();
-    fmt::print("Contents of {}:\n", filename);
-    FluxFileProto f = loadFl2File(filename);
+    fmt::print("{}:\n", fluxFilename.get());
+    FluxFileProto f = loadFl2File(fluxFilename.get());
 
-    fmt::print("version: {}\n", getProtoByString(&f, "version"));
-    fmt::print("rotational_period_ms: {}\n",
-        getProtoByString(&f, "rotational_period_ms"));
-    fmt::print("drive_type: {}\n", getProtoByString(&f, "drive_type"));
-    fmt::print("format_type: {}\n", getProtoByString(&f, "format_type"));
-    for (const auto& track : f.track())
+    bool changed = false;
+    for (const auto& location : parseCylinderHeadsString(tracksFlag))
     {
-        for (int i = 0; i < track.flux().size(); i++)
-        {
-            const auto& flux = track.flux().at(i);
-            Fluxmap fluxmap(flux);
+        auto* repeatedFlux = f.mutable_track();
 
-            fmt::print("track.t{}_h{}.flux{}: {:.3f} ms, {} bytes\n",
-                track.track(),
-                track.head(),
-                i,
-                fluxmap.duration() / 1000000,
-                fluxmap.bytes());
+        bool found = false;
+        for (int i = 0; i < repeatedFlux->size(); i++)
+        {
+            const auto& trackFlux = repeatedFlux->Get(i);
+            if ((trackFlux.track() == location.cylinder) &&
+                (trackFlux.head() == location.head))
+            {
+                fmt::print(
+                    "  removing c{}h{}\n", location.cylinder, location.head);
+                repeatedFlux->DeleteSubrange(i, 1);
+                found = changed = true;
+                i--;
+            }
         }
+
+        if (!found)
+            fmt::print("  location c{}h{} not found\n",
+                location.cylinder,
+                location.head);
     }
+
+    if (changed)
+    {
+        fmt::print("writing back file\n");
+        saveFl2File(fluxFilename.get(), f);
+    }
+    else
+        fmt::print("file not modified\n");
 
     return 0;
 }
