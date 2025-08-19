@@ -75,8 +75,10 @@ static int splitIndexedField(std::string& item)
     std::smatch dmatch;
     if (std::regex_match(item, dmatch, INDEX_REGEX))
     {
-        item = dmatch[1];
+        auto stem = dmatch[1];
         index = std::stoi(dmatch[2]);
+
+        item = stem;
     }
 
     return index;
