@@ -2,9 +2,14 @@ syntax = "proto2";
 
 import "google/protobuf/descriptor.proto";
 
-extend google.protobuf.FieldOptions {
-  optional string help = 50000;
-  optional bool recurse = 50001 [default = true];
+extend google.protobuf.FieldOptions
+{
+    optional string help = 50000;
+}
+
+extend google.protobuf.MessageOptions
+{
+    optional bool recurse = 50001 [default = true];
 }
 
 enum IndexMode {
@@ -29,21 +34,18 @@ enum FluxSourceSinkType {
 	FLUXTYPE_DMK = 12;
 }
 
-enum ImageReaderWriterType {
-	IMAGETYPE_NOT_SET = 0;
-	IMAGETYPE_D64 = 1;
-	IMAGETYPE_D88 = 2;
-	IMAGETYPE_DIM = 3;
-	IMAGETYPE_DISKCOPY = 4;
-	IMAGETYPE_FDI = 5;
-	IMAGETYPE_IMD = 6;
-	IMAGETYPE_IMG = 7;
-	IMAGETYPE_JV3 = 8;
-	IMAGETYPE_LDBS = 9;
-	IMAGETYPE_NFD = 10;
-	IMAGETYPE_NSI = 11;
-	IMAGETYPE_RAW = 12;
-	IMAGETYPE_TD0 = 13;
+enum ImageReaderWriterType
+{
+    IMAGETYPE_NOT_SET = 0; IMAGETYPE_D64 = 1; IMAGETYPE_D88 = 2;
+    IMAGETYPE_DIM = 3;
+    IMAGETYPE_DISKCOPY = 4;
+    IMAGETYPE_FDI = 5;
+    IMAGETYPE_IMD = 6;
+    IMAGETYPE_IMG = 7;
+    IMAGETYPE_JV3 = 8;
+    IMAGETYPE_LDBS = 9;
+    IMAGETYPE_NFD = 10;
+    IMAGETYPE_NSI = 11;
+    IMAGETYPE_RAW = 12;
+    IMAGETYPE_TD0 = 13;
 }
-
-

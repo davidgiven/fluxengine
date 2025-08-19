@@ -377,6 +377,27 @@ FluxEngine also supports a number of file system image formats. When using the
   correctness. Individual records are separated by three `\\0` bytes and tracks
   are separated by four `\\0` bytes; tracks are emitted in CHS order.
 
+### Manipulating flux files
+
+`fluxengine fluxfile` contains a set of tools for examining or manipulating
+individual flux files. (Note that this only works on flux files themselves, not
+sources.)
+
+  - `fluxfile ls -f <fluxfile>`
+
+  Shows all the components inside a flux file.
+
+  - `fluxfile rm -f <fluxfile> -t <tracks>`
+
+  Removes flux from a flux file. All reads are removed from the specified track;
+  use the normal `c0h0` syntax, including using ranges, such as `c0-9h0-1`.
+
+  - `fluxfile cp -i <input fluxfile> -o <output fluxfile> -t <tracks>`
+
+  Copies flux from one file to another. All reads are copied from the source
+  file and _appended_ to the relevant track in the destination file. You can use
+  ranges etc.
+
 ### High density disks
 
 High density disks use a different magnetic medium to low and double density

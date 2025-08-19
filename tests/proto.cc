@@ -4,6 +4,7 @@
 #include "lib/config/config.pb.h"
 #include "lib/config/proto.h"
 #include "snowhouse/snowhouse.h"
+#include "dep/alphanum/alphanum.h"
 #include <google/protobuf/text_format.h>
 #include <assert.h>
 #include <regex>
@@ -28,8 +29,9 @@ static void test_setting(void)
     setProtoByString(&config, "d", "5.5");
     setProtoByString(&config, "f", "6.7");
     setProtoByString(&config, "m.s", "string");
-    setProtoByString(&config, "r.s", "val1");
-    setProtoByString(&config, "r.s", "val2");
+    setProtoByString(&config, "r[0].s", "val1");
+    setProtoByString(&config, "r[0].s", "val2");
+    setProtoByString(&config, "r[1].s", "val3");
     setProtoByString(&config, "firstoption.s", "1");
     setProtoByString(&config, "secondoption.s", "2");
 
@@ -47,6 +49,9 @@ static void test_setting(void)
 		}
 		r {
 			s: "val2"
+		}
+		r {
+			s: "val3"
 		}
 		secondoption {
 			s: "2"
@@ -70,8 +75,14 @@ static void test_getting(void)
 		r {
 			s: "val2"
 		}
+		r {
+			s: "val3"
+		}
 		secondoption {
 			s: "2"
+			r: 0
+			r: 1
+			r: 2
 		}
 	)M";
 
@@ -86,9 +97,11 @@ static void test_getting(void)
     AssertThat(getProtoByString(&tp, "d"), Equals("5.5"));
     AssertThat(getProtoByString(&tp, "f"), Equals("6.7"));
     AssertThat(getProtoByString(&tp, "m.s"), Equals("string"));
-    AssertThat(getProtoByString(&tp, "r.s"), Equals("val2"));
+    AssertThat(getProtoByString(&tp, "r[0].s"), Equals("val2"));
+    AssertThat(getProtoByString(&tp, "r[1].s"), Equals("val3"));
     AssertThrows(
         ProtoPathNotFoundException, getProtoByString(&tp, "firstoption.s"));
+    AssertThat(getProtoByString(&tp, "secondoption.r[2]"), Equals("2"));
     AssertThat(getProtoByString(&tp, "secondoption.s"), Equals("2"));
 }
 
@@ -131,8 +144,30 @@ static void test_load(void)
 static void test_fields(void)
 {
     TestProto proto;
-    auto fields = findAllProtoFields(&proto);
-    AssertThat(fields.size(), Equals(14));
+    auto fields = findAllPossibleProtoFields(proto.GetDescriptor());
+    std::vector<std::string> fieldNames;
+    for (const auto& e : fields)
+        fieldNames.push_back(e.first);
+
+    AssertThat(fieldNames,
+        Equals(std::vector<std::string>{"d",
+            "f",
+            "firstoption",
+            "firstoption.r[]",
+            "firstoption.s",
+            "i32",
+            "i64",
+            "m",
+            "m.r[]",
+            "m.s",
+            "r[]",
+            "r[].r[]",
+            "r[].s",
+            "secondoption",
+            "secondoption.r[]",
+            "secondoption.s",
+            "u32",
+            "u64"}));
 }
 
 static void test_options(void)
@@ -145,6 +180,52 @@ static void test_options(void)
     AssertThat(s, Equals("i64"));
 }
 
+static void test_findallfields(void)
+{
+    std::string s = R"M(
+		i64: -1
+		i32: -2
+		u64: 3
+		u32: 4
+		d: 5.5
+		f: 6.7
+		m {
+			s: "string"
+		}
+		r {
+			s: "val2"
+		}
+		r {
+			s: "val3"
+		}
+		secondoption {
+			s: "2"
+		}
+	)M";
+
+    TestProto proto;
+    if (!google::protobuf::TextFormat::MergeFromString(cleanup(s), &proto))
+        error("couldn't load test proto");
+
+    auto fields = findAllProtoFields(&proto);
+    std::vector<std::string> fieldNames;
+    for (const auto& e : fields)
+        fieldNames.push_back(e.path());
+    std::ranges::sort(fieldNames, doj::alphanum_less<std::string>());
+
+    AssertThat(fieldNames,
+        Equals(std::vector<std::string>{"d",
+            "f",
+            "i32",
+            "i64",
+            "m.s",
+            "r[0].s",
+            "r[1].s",
+            "secondoption.s",
+            "u32",
+            "u64"}));
+}
+
 int main(int argc, const char* argv[])
 {
     try
@@ -155,6 +236,7 @@ int main(int argc, const char* argv[])
         test_load();
         test_fields();
         test_options();
+        test_findallfields();
     }
     catch (const ErrorException& e)
     {

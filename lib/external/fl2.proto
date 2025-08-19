@@ -1,5 +1,12 @@
 syntax = "proto2";
 
+import "google/protobuf/descriptor.proto";
+
+extend google.protobuf.FieldOptions
+{
+    optional bool isflux = 60000 [default = false];
+}
+
 enum FluxMagic {
 	MAGIC = 0x466c7578;
 }
@@ -12,7 +19,7 @@ enum FluxFileVersion {
 message TrackFluxProto {
 	optional int32 track = 1;
 	optional int32 head = 2;
-	repeated bytes flux = 3;
+	repeated bytes flux = 3 [(isflux) = true];
 }
 
 enum DriveType {
