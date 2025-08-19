@@ -70,7 +70,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: ${{ github.event.repository.name }}.${{ github.sha }}.fluxengine.${{ runner.arch }}.pkg
-        path: fluxengine/FluxEngine.pkg
+        path: |
+          fluxengine/FluxEngine.pkg
+          fluxengine/FluxEngine.app.zip
 
   build-windows:
     runs-on: windows-latest

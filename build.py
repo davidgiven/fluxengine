@@ -10,6 +10,7 @@ import re
 # Hack for building on Fedora/WSL; executables get the .exe extension,
 # build the build system detects it as Linux.
 import build.toolchain
+
 toolchain.Toolchain.EXE = "$(EXT)"
 
 package(name="protobuf_lib", package="protobuf")
@@ -108,6 +109,13 @@ export(
         "brother240tool$(EXT)": "tools+brother240tool",
         "upgrade-flux-file$(EXT)": "tools+upgrade-flux-file",
     }
-    | ({"FluxEngine.pkg": "src/gui+fluxengine_pkg"} if config.osx else {}),
+    | (
+        {
+            "FluxEngine.pkg": "src/gui+fluxengine_pkg",
+            "FluxEngine.app.zip": "src/gui+fluxengine_app_zip",
+        }
+        if config.osx
+        else {}
+    ),
     deps=["tests", "src/formats+docs", "scripts+mkdocindex"] + corpustests,
 )
