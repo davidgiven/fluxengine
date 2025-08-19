@@ -57,13 +57,13 @@ cxxprogram(
 
 if config.osx:
     simplerule(
-        name="fluxengine_pkg",
+        name="fluxengine_app_zip",
         ins=[
             ".+gui",
             "extras+fluxengine_icns",
             "extras+fluxengine_template",
         ],
-        outs=["=FluxEngine.pkg"],
+        outs=["=FluxEngine.app.zip"],
         commands=[
             "rm -rf $[outs[0]]",
             "unzip -q $[ins[2]]",  # creates FluxEngine.app
@@ -79,7 +79,20 @@ if config.osx:
             "cp $$(brew --prefix abseil)/LICENSE FluxEngine.app/Contents/libs/abseil.txt",
             "cp $$(brew --prefix libtiff)/LICENSE.md FluxEngine.app/Contents/libs/libtiff.txt",
             "cp $$(brew --prefix zstd)/LICENSE FluxEngine.app/Contents/libs/zstd.txt",
-            "pkgbuild --quiet --install-location /Applications --component FluxEngine.app $[outs[0]]",
+            "zip -rq $[outs[0]] FluxEngine.app",
         ],
         label="MKAPP",
+    )
+
+    simplerule(
+        name="fluxengine_pkg",
+        ins=[
+            ".+fluxengine_app_zip",
+        ],
+        outs=["=FluxEngine.pkg"],
+        commands=[
+            "unzip -q $[ins[0]]",
+            "pkgbuild --quiet --install-location /Applications --component FluxEngine.app $[outs[0]]",
+        ],
+        label="MKPKG",
     )

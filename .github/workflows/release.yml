@@ -99,6 +99,7 @@ jobs:
       run: |
         gmake
         mv FluxEngine.pkg FluxEngine-${{ runner.arch }}.pkg
+        mv FluxEngine.app.zip FluxEngine-${{ runner.arch }}.app.zip
 
     - name: tag
       uses: EndBug/latest-tag@latest
@@ -115,6 +116,7 @@ jobs:
         tag: dev
         assets: | 
           FluxEngine-${{ runner.arch }}.pkg
+          FluxEngine-${{ runner.arch }}.app.zip
         fail-if-no-assets: false
 
     - name: release
@@ -123,6 +125,7 @@ jobs:
         name: Development build ${{ env.RELEASE_DATE }}
         files: |
           FluxEngine-${{ runner.arch }}.pkg
+          FluxEngine-${{ runner.arch }}.app.zip
         tag_name: dev
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
