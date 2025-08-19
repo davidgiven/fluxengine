@@ -19,7 +19,7 @@ static std::string supportStatus(SupportStatus status)
             return "";
     }
 
-	return "";
+    return "";
 }
 
 int main(int argc, const char* argv[])
@@ -43,7 +43,8 @@ int main(int argc, const char* argv[])
             {
                 const auto* descriptor =
                     FilesystemProto::FilesystemType_descriptor();
-                auto name = descriptor->FindValueByNumber(fs.type())->name();
+                std::string name =
+                    descriptor->FindValueByNumber(fs.type())->name();
 
                 filesystems.insert(name);
             }
