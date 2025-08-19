@@ -35,22 +35,6 @@ static StringFlag destFlux({"--dest", "-d"},
         globalConfig().setVerificationFluxSource(value);
     });
 
-static StringFlag destTracks({"--cylinders", "-c"},
-    "tracks to write to",
-    "",
-    [](const auto& value)
-    {
-        setRange(globalConfig().overrides()->mutable_tracks(), value);
-    });
-
-static StringFlag destHeads({"--heads", "-h"},
-    "heads to write to",
-    "",
-    [](const auto& value)
-    {
-        setRange(globalConfig().overrides()->mutable_heads(), value);
-    });
-
 static ActionFlag noVerifyFlag({"--no-verify", "-n"},
     "skip verification of write",
     []

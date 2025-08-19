@@ -137,6 +137,7 @@ choices because they can store multiple types of file system.
 | [`rx50`](doc/disk-rx50.md) | Digital RX50: 400kB 5.25" 80-track 10-sector SSDD | 🦖 | 🦖 |  |
 | [`smaky6`](doc/disk-smaky6.md) | Smaky 6: 308kB 5.25" 77-track 16-sector SSDD, hard sectored | 🦖 |  | SMAKY6  |
 | [`tartu`](doc/disk-tartu.md) | Tartu: The Palivere and variations | 🦄 | 🦖 | CPMFS  |
+| [`ti99`](doc/disk-ti99.md) | TI-99: 90kB 35-track SSSD | 🦖 |  |  |
 | [`tids990`](doc/disk-tids990.md) | Texas Instruments DS990: 1126kB 8" DSSD | 🦖 | 🦖 |  |
 | [`tiki`](doc/disk-tiki.md) | Tiki 100: CP/M |  |  | CPMFS  |
 | [`victor9k`](doc/disk-victor9k.md) | Victor 9000 / Sirius One: 1224kB 5.25" DSDD GCR | 🦖 | 🦖 |  |
@@ -257,6 +258,10 @@ As an exception, `dep/hfsutils` contains a partial copy of the hfsutils
 package, written by Robert Leslie et al, taken from
 https://www.mars.org/home/rob/proj/hfs. It is GPL 2.0 licensed. Please see the
 contents of the directory for the full text.
+
+As an exception, `dep/lexy` contains a partial copy of the lexy package, written
+by foonathen@github, taken from https://github.com/foonathan/lexy. It is BSL 1.0
+licensed. Please see the contents of the directory for the full text.
 
 __Important:__ Because of all these exceptions, if you distribute the
 FluxEngine package as a whole, you must comply with the terms of _all_ of the

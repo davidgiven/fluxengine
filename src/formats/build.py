@@ -36,6 +36,7 @@ formats = [
     "shugart_drive",
     "smaky6",
     "tartu",
+    "ti99",
     "tids990",
     "tiki",
     "victor9k",

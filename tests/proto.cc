@@ -32,7 +32,6 @@ static void test_setting(void)
     setProtoByString(&config, "r.s", "val2");
     setProtoByString(&config, "firstoption.s", "1");
     setProtoByString(&config, "secondoption.s", "2");
-    setProtoByString(&config, "range", "1-3x2");
 
     std::string s;
     google::protobuf::TextFormat::PrintToString(config, &s);
@@ -51,11 +50,6 @@ static void test_setting(void)
 		}
 		secondoption {
 			s: "2"
-		}
-		range {
-			start: 1
-			step: 2
-			end: 3
 		}
 		f: 6.7
 		)M")));
@@ -79,11 +73,6 @@ static void test_getting(void)
 		secondoption {
 			s: "2"
 		}
-		range {
-			start: 1
-			step: 2
-			end: 3
-		}
 	)M";
 
     TestProto tp;
@@ -101,7 +90,6 @@ static void test_getting(void)
     AssertThrows(
         ProtoPathNotFoundException, getProtoByString(&tp, "firstoption.s"));
     AssertThat(getProtoByString(&tp, "secondoption.s"), Equals("2"));
-    AssertThat(getProtoByString(&tp, "range"), Equals("1-3x2"));
 }
 
 static void test_config(void)
@@ -140,74 +128,11 @@ static void test_load(void)
     AssertThat(proto.has_secondoption(), Equals(true));
 }
 
-static void test_range(void)
-{
-    {
-        RangeProto r;
-        r.set_start(0);
-        r.set_end(3);
-
-        AssertThat(iterate(r), Equals(std::set<unsigned>{0, 1, 2, 3}));
-    }
-
-    {
-        RangeProto r;
-        r.set_start(0);
-        r.set_end(3);
-        r.set_step(2);
-
-        AssertThat(iterate(r), Equals(std::set<unsigned>{0, 2}));
-    }
-
-    {
-        RangeProto r;
-        r.set_start(1);
-        r.set_end(1);
-
-        AssertThat(iterate(r), Equals(std::set<unsigned>{1}));
-    }
-
-    {
-        RangeProto r;
-        r.set_start(1);
-
-        AssertThat(iterate(r), Equals(std::set<unsigned>{1}));
-    }
-
-    {
-        RangeProto r;
-        setRange(&r, "1-3");
-
-        AssertThat(iterate(r), Equals(std::set<unsigned>{1, 2, 3}));
-    }
-
-    {
-        RangeProto r;
-        setRange(&r, "0-3x2");
-
-        AssertThat(iterate(r), Equals(std::set<unsigned>{0, 2}));
-    }
-
-    {
-        RangeProto r;
-        setRange(&r, "0");
-
-        AssertThat(iterate(r), Equals(std::set<unsigned>{0}));
-    }
-
-    {
-        RangeProto r;
-        setRange(&r, "7");
-
-        AssertThat(iterate(r), Equals(std::set<unsigned>{7}));
-    }
-}
-
 static void test_fields(void)
 {
     TestProto proto;
     auto fields = findAllProtoFields(&proto);
-    AssertThat(fields.size(), Equals(18));
+    AssertThat(fields.size(), Equals(14));
 }
 
 static void test_options(void)
@@ -228,7 +153,6 @@ int main(int argc, const char* argv[])
         test_getting();
         test_config();
         test_load();
-        test_range();
         test_fields();
         test_options();
     }

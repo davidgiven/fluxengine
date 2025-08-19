@@ -31,7 +31,16 @@ private:
 class MemoryFluxSource : public FluxSource
 {
 public:
-    MemoryFluxSource(const DiskFlux& flux): _flux(flux) {}
+    MemoryFluxSource(const DiskFlux& flux): _flux(flux)
+    {
+        std::vector<CylinderHead> chs;
+        for (const auto& trackFlux : flux.tracks)
+            chs.push_back(
+                CylinderHead{(unsigned)trackFlux->trackInfo->physicalTrack,
+                    (unsigned)trackFlux->trackInfo->logicalTrack});
+        _extraConfig.mutable_drive()->set_tracks(
+            convertCylinderHeadsToString(chs));
+    }
 
 public:
     std::unique_ptr<FluxSourceIterator> readFlux(

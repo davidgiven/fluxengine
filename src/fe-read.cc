@@ -40,22 +40,6 @@ static StringFlag copyFluxTo({"--copy-flux-to"},
         globalConfig().setCopyFluxTo(value);
     });
 
-static StringFlag srcTracks({"--cylinders", "-c"},
-    "tracks to read from",
-    "",
-    [](const auto& value)
-    {
-        setRange(globalConfig().overrides()->mutable_tracks(), value);
-    });
-
-static StringFlag srcHeads({"--heads", "-h"},
-    "heads to read from",
-    "",
-    [](const auto& value)
-    {
-        setRange(globalConfig().overrides()->mutable_heads(), value);
-    });
-
 int mainRead(int argc, const char* argv[])
 {
     if (argc == 1)

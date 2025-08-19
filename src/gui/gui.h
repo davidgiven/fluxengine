@@ -96,8 +96,8 @@ class PanelComponent
 public:
     PanelComponent(MainWindow* mainWindow): _mainWindow(mainWindow) {}
 
-    virtual void SwitchTo(){};
-    virtual void SwitchFrom(){};
+    virtual void SwitchTo() {};
+    virtual void SwitchFrom() {};
 
     void PrepareConfig()
     {

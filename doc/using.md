@@ -425,6 +425,14 @@ behaviour.
     useful for using very old drives with FluxEngine itself. If you use this
     option, then any index marks in the sampled flux are, of course, garbage.
 
+  - `--tracks='c0h0 c1h0 c3-5h1'
+
+    Constrains which tracks to access. These are always specified as _physical_
+    locations (i.e. which cylinders your drive will actually seek to). Inside
+    the track specifier, you can use comma-separated values which can either be
+    a raw number, a range (`3-5`), or a range with a step (`3-10x2`). So, this
+    is possible: `c0,2,3,9,15-20x2h0-1`
+
 ## Visualisation
 
 When using `fluxengined read` (either from a real disk or from a flux file) you

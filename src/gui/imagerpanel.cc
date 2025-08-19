@@ -141,8 +141,7 @@ public:
             QueueJob(
                 [this]()
                 {
-                    auto image =
-                        GetContext().GetImageReader()->readImage();
+                    auto image = GetContext().GetImageReader()->readImage();
                     auto* encoder = GetContext().GetEncoder();
                     auto* fluxSink = GetContext().GetFluxSink();
 

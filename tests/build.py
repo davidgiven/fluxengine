@@ -33,6 +33,7 @@ tests = [
     "greaseweazle",
     "kryoflux",
     "layout",
+    "locations",
     "ldbs",
     "options",
     "utils",

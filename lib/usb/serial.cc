@@ -98,7 +98,7 @@ public:
     void setBaudRate(int baudRate) override
     {
         DCB dcb = {.DCBlength = sizeof(DCB),
-            .BaudRate = (DWORD) baudRate,
+            .BaudRate = (DWORD)baudRate,
             .fBinary = true,
             .ByteSize = 8,
             .Parity = NOPARITY,

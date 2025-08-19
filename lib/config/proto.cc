@@ -66,27 +66,6 @@ static uint64_t toUint64(const std::string& value)
     return d;
 }
 
-void setRange(RangeProto* range, const std::string& data)
-{
-    static const std::regex DATA_REGEX(
-        "([0-9]+)(?:(?:-([0-9]+))|(?:\\+([0-9]+)))?(?:x([0-9]+))?");
-
-    std::smatch dmatch;
-    if (!std::regex_match(data, dmatch, DATA_REGEX))
-        error("invalid range '{}'", data);
-
-    int start = std::stoi(dmatch[1]);
-    range->set_start(start);
-    range->set_end(start);
-    range->clear_step();
-    if (!dmatch[2].str().empty())
-        range->set_end(std::stoi(dmatch[2]));
-    if (!dmatch[3].str().empty())
-        range->set_end(std::stoi(dmatch[3]) - range->start());
-    if (!dmatch[4].str().empty())
-        range->set_step(std::stoi(dmatch[4]));
-}
-
 static ProtoField resolveProtoPath(
     google::protobuf::Message* message, const std::string& path, bool create)
 {
@@ -235,13 +214,6 @@ void setProtoFieldFromString(ProtoField& protoField, const std::string& value)
         }
 
         case google::protobuf::FieldDescriptor::TYPE_MESSAGE:
-            if (field->message_type() == RangeProto::descriptor())
-            {
-                setRange(
-                    (RangeProto*)reflection->MutableMessage(message, field),
-                    value);
-                break;
-            }
             if (field->containing_oneof() && value.empty())
             {
                 reflection->MutableMessage(message, field);
@@ -292,18 +264,6 @@ std::string getProtoFieldValue(ProtoField& protoField)
         }
 
         case google::protobuf::FieldDescriptor::TYPE_MESSAGE:
-            if (field->message_type() == RangeProto::descriptor())
-            {
-                const RangeProto* range = dynamic_cast<const RangeProto*>(
-                    &reflection->GetMessage(*message, field));
-                if (range->step() == 1)
-                    return fmt::format("{}-{}", range->start(), range->end());
-                else
-                    return fmt::format("{}-{}x{}",
-                        range->start(),
-                        range->end(),
-                        range->step());
-            }
             error("cannot fetch message value");
 
         default:
@@ -324,15 +284,6 @@ std::string getProtoByString(
 {
     ProtoField protoField = findProtoPath(message, path);
     return getProtoFieldValue(protoField);
-}
-
-std::set<unsigned> iterate(const RangeProto& range)
-{
-    std::set<unsigned> set;
-    int end = range.has_end() ? range.end() : range.start();
-    for (unsigned i = range.start(); i <= end; i += range.step())
-        set.insert(i);
-    return set;
 }
 
 std::set<unsigned> iterate(unsigned start, unsigned count)

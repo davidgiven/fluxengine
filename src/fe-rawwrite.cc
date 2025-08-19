@@ -29,22 +29,6 @@ static StringFlag destFlux({"--dest", "-d"},
         globalConfig().setFluxSink(value);
     });
 
-static StringFlag destTracks({"--cylinders", "-c"},
-    "tracks to write to",
-    "",
-    [](const auto& value)
-    {
-        setRange(globalConfig().overrides()->mutable_tracks(), value);
-    });
-
-static StringFlag destHeads({"--heads", "-h"},
-    "heads to write to",
-    "",
-    [](const auto& value)
-    {
-        setRange(globalConfig().overrides()->mutable_heads(), value);
-    });
-
 static ActionFlag eraseFlag({"--erase"},
     "erases the destination",
     []()
@@ -55,8 +39,7 @@ static ActionFlag eraseFlag({"--erase"},
 
 int mainRawWrite(int argc, const char* argv[])
 {
-    setRange(globalConfig().overrides()->mutable_tracks(), "0-79");
-    setRange(globalConfig().overrides()->mutable_heads(), "0-1");
+    globalConfig().overrides()->set_tracks("c0-79h0-1");
 
     if (argc == 1)
         showProfiles("rawwrite", formats);

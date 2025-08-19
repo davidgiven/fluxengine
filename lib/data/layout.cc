@@ -29,7 +29,7 @@ static unsigned getTrackStep()
             {
                 case DRIVETYPE_40TRACK:
                     error(
-                        "you can't write an 80 track image to a 40 track "
+                        "you can't read/write an 80 track image from/to a 40 track "
                         "drive");
 
                 case DRIVETYPE_80TRACK:
@@ -37,7 +37,7 @@ static unsigned getTrackStep()
 
                 case DRIVETYPE_APPLE2:
                     error(
-                        "you can't write an 80 track image to an Apple II "
+                        "you can't read/write an 80 track image from/to an Apple II "
                         "drive");
             }
     }
@@ -65,46 +65,41 @@ unsigned Layout::remapSideLogicalToPhysical(unsigned lside)
     return lside ^ globalConfig()->layout().swap_sides();
 }
 
-std::vector<std::shared_ptr<const TrackInfo>> Layout::computeLocations()
+std::vector<CylinderHead> Layout::computePhysicalLocations()
 {
-    std::set<unsigned> tracks;
     if (globalConfig()->has_tracks())
-        tracks = iterate(globalConfig()->tracks());
-    else
-        tracks = iterate(0, globalConfig()->layout().tracks());
+        return parseCylinderHeadsString(globalConfig()->tracks());
 
-    std::set<unsigned> heads;
-    if (globalConfig()->has_heads())
-        heads = iterate(globalConfig()->heads());
-    else
-        heads = iterate(0, globalConfig()->layout().sides());
+    std::set<unsigned> tracks = iterate(0, globalConfig()->layout().tracks());
+    std::set<unsigned> heads = iterate(0, globalConfig()->layout().sides());
 
-    std::vector<std::shared_ptr<const TrackInfo>> locations;
+    std::vector<CylinderHead> locations;
     for (unsigned logicalTrack : tracks)
-    {
         for (unsigned logicalHead : heads)
-            locations.push_back(getLayoutOfTrack(logicalTrack, logicalHead));
-    }
+            locations.push_back(
+                CylinderHead{remapTrackLogicalToPhysical(logicalTrack),
+                    remapSideLogicalToPhysical(logicalHead)});
+
     return locations;
 }
 
-void Layout::getBounds(
-    const std::vector<std::shared_ptr<const TrackInfo>>& locations,
-    int& minTrack,
-    int& maxTrack,
-    int& minSide,
-    int& maxSide)
+Layout::LayoutBounds Layout::getBounds(
+    const std::vector<CylinderHead>& locations)
 {
-    minTrack = minSide = INT_MAX;
-    maxTrack = maxSide = INT_MIN;
+    LayoutBounds r{.minTrack = INT_MAX,
+        .maxTrack = INT_MIN,
+        .minSide = INT_MAX,
+        .maxSide = INT_MIN};
 
-    for (auto& ti : locations)
+    for (const auto& ti : locations)
     {
-        minTrack = std::min<int>(minTrack, ti->physicalTrack);
-        maxTrack = std::max<int>(maxTrack, ti->physicalTrack);
-        minSide = std::min<int>(minSide, ti->physicalSide);
-        maxSide = std::max<int>(maxSide, ti->physicalSide);
+        r.minTrack = std::min<int>(r.minTrack, ti.cylinder);
+        r.maxTrack = std::max<int>(r.maxTrack, ti.cylinder);
+        r.minSide = std::min<int>(r.minSide, ti.head);
+        r.maxSide = std::max<int>(r.maxSide, ti.head);
     }
+
+    return r;
 }
 
 std::vector<std::pair<int, int>> Layout::getTrackOrdering(
@@ -263,6 +258,22 @@ std::shared_ptr<const TrackInfo> Layout::getLayoutOfTrackPhysical(
 {
     return getLayoutOfTrack(remapTrackPhysicalToLogical(physicalTrack),
         remapSidePhysicalToLogical(physicalSide));
+}
+
+std::shared_ptr<const TrackInfo> Layout::getLayoutOfTrackPhysical(
+    const CylinderHead& physicalLocation)
+{
+    return getLayoutOfTrackPhysical(
+        physicalLocation.cylinder, physicalLocation.head);
+}
+
+std::vector<std::shared_ptr<const TrackInfo>> Layout::getLayoutOfTracksPhysical(
+    const std::vector<CylinderHead>& physicalLocations)
+{
+    std::vector<std::shared_ptr<const TrackInfo>> results;
+    for (const auto& physicalLocation : physicalLocations)
+        results.push_back(getLayoutOfTrackPhysical(physicalLocation));
+    return results;
 }
 
 int Layout::getHeadWidth()
