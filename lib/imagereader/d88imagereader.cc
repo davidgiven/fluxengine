@@ -93,7 +93,7 @@ public:
             auto physical = layoutdata->mutable_physical();
 
             for (int sectorInTrack = 0; sectorInTrack < currentSectorsInTrack;
-                 sectorInTrack++)
+                sectorInTrack++)
             {
                 Bytes sectorHeader(0x10);
                 inputFile.read(

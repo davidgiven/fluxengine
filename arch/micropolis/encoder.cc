@@ -1,5 +1,5 @@
 #include "lib/core/globals.h"
-#include "micropolis.h"
+#include "arch/micropolis/micropolis.h"
 #include "lib/data/sector.h"
 #include "lib/decoders/decoders.h"
 #include "lib/encoders/encoders.h"

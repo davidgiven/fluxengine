@@ -23,6 +23,7 @@ formats = [
     "hplif",
     "ibm",
     "icl30",
+    "juku",
     "mac",
     "micropolis",
     "ms2000",
@@ -35,6 +36,7 @@ formats = [
     "shugart_drive",
     "smaky6",
     "tartu",
+    "ti99",
     "tids990",
     "tiki",
     "victor9k",
@@ -47,7 +49,7 @@ simplerule(
     deps=["scripts/mktable.sh"],
     outs=["=table.cc"],
     commands=[
-        "sh scripts/mktable.sh formats " + (" ".join(formats)) + " > {outs}"
+        "sh scripts/mktable.sh formats " + (" ".join(formats)) + " > $[outs]"
     ],
     label="MKTABLE",
 )
@@ -56,6 +58,7 @@ protoencode(
     name="formats_cc",
     srcs={name: f"./{name}.textpb" for name in formats},
     proto="ConfigProto",
+    include="lib/config/config.pb.h",
     symbol="formats",
 )
 
@@ -72,7 +75,7 @@ export(
             name=f"{f}_doc",
             ins=["scripts+mkdoc"],
             outs=[f"=disk-{f}.md"],
-            commands=["{ins[0]} " + f + " | tr -d '\\r' > {outs[0]}"],
+            commands=["$[ins[0]] " + f + " | tr -d '\\r' > $[outs[0]]"],
             label="MKDOC",
         )
         for f in formats

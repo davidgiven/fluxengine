@@ -11,7 +11,7 @@ export BUILDTYPE
 ifeq ($(BUILDTYPE),windows)
 	MINGW = i686-w64-mingw32-
 	CC = $(MINGW)gcc
-	CXX = $(MINGW)g++ -std=c++17
+	CXX = $(MINGW)g++ -std=c++20
 	CFLAGS += -g -O3
 	CXXFLAGS += \
 		-fext-numeric-literals \
@@ -25,8 +25,10 @@ ifeq ($(BUILDTYPE),windows)
 	EXT = .exe
 else
 	CC = gcc
-	CXX = g++ -std=c++17
-	CFLAGS = -g -O3
+	CXX = g++ -std=c++20
+	CFLAGS = -g -O3 \
+		-Wno-deprecated-enum-float-conversion \
+		-Wno-deprecated-enum-enum-conversion
 	LDFLAGS =
 	AR = ar
 	PKG_CONFIG = pkg-config
@@ -34,11 +36,10 @@ else
 	else
 		LDFLAGS += -pthread -Wl,--no-as-needed
 	endif
-
 endif
 
 HOSTCC = gcc
-HOSTCXX = g++ -std=c++17
+HOSTCXX = g++ -std=c++20
 HOSTCFLAGS = -g -O3
 HOSTLDFLAGS =
 
@@ -85,7 +86,7 @@ binaries: all
 tests: all
 	
 README.md: $(OBJ)/scripts/+mkdocindex/mkdocindex$(EXT)
-	@echo $(PROGRESSINFO) MKDOC $@
+	@echo $(PROGRESSINFO)MKDOC $@
 	@csplit -s -f$(OBJ)/README. README.md '/<!-- FORMATSSTART -->/' '%<!-- FORMATSEND -->%'
 	@(cat $(OBJ)/README.00 && $< && cat $(OBJ)/README.01) > README.md
 

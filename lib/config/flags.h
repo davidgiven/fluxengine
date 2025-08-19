@@ -46,7 +46,7 @@ class Flag
 {
 public:
     Flag(const std::vector<std::string>& names, const std::string helptext);
-    virtual ~Flag(){};
+    virtual ~Flag() {};
 
     void checkInitialised() const
     {

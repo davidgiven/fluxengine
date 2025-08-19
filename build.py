@@ -7,6 +7,11 @@ from glob import glob
 import config
 import re
 
+# Hack for building on Fedora/WSL; executables get the .exe extension,
+# build the build system detects it as Linux.
+import build.toolchain
+toolchain.Toolchain.EXE = "$(EXT)"
+
 package(name="protobuf_lib", package="protobuf")
 package(name="z_lib", package="zlib")
 package(name="fmt_lib", package="fmt", fallback="dep/fmt")
@@ -79,15 +84,15 @@ else:
                 ins=["src+fluxengine"],
                 deps=["scripts/encodedecodetest.sh"],
                 commands=[
-                    "{deps[0]} "
+                    "$[deps[0]] "
                     + c[0]
                     + " "
                     + format
-                    + " {ins[0]} '"
+                    + " $[ins[0]] '"
                     + c[1]
                     + "' '"
                     + c[2]
-                    + "' $(dir {outs[0]}) > /dev/null"
+                    + "' $(dir $[outs[0]]) > /dev/null"
                 ],
                 label="CORPUSTEST",
             )

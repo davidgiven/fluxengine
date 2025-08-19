@@ -2,6 +2,7 @@
 #include "lib/data/sector.h"
 #include "lib/data/image.h"
 #include "lib/data/layout.h"
+#include "lib/config/config.h"
 
 Image::Image() {}
 
@@ -25,7 +26,8 @@ void Image::clear()
 void Image::createBlankImage()
 {
     clear();
-    for (const auto& trackAndHead : Layout::getTrackOrdering())
+    for (const auto& trackAndHead : Layout::getTrackOrdering(
+             globalConfig()->layout().filesystem_track_order()))
     {
         unsigned track = trackAndHead.first;
         unsigned side = trackAndHead.second;

@@ -2,6 +2,8 @@
 #define LAYOUT_H
 
 #include "lib/data/flux.h"
+#include "lib/config/layout.pb.h"
+#include "lib/data/locations.h"
 
 class SectorListProto;
 class TrackInfo;
@@ -23,23 +25,24 @@ public:
     static unsigned remapSideLogicalToPhysical(unsigned logicalSide);
 
     /* Uses the layout and current track and heads settings to determine
-     * which Locations are going to be read from or written to.
+     * which physical tracks are going to be read from or written to.
      */
-    static std::vector<std::shared_ptr<const TrackInfo>> computeLocations();
+    static std::vector<CylinderHead> computePhysicalLocations();
 
-    /* Given a list of locations, determines the minimum and maximum track
-     * and side settings. */
-    static void getBounds(
-        const std::vector<std::shared_ptr<const TrackInfo>>& locations,
-        int& minTrack,
-        int& maxTrack,
-        int& minSide,
-        int& maxSide);
+    /* Given a list of CylinderHead locations, determines the minimum and
+     * maximum track and side settings. */
+    struct LayoutBounds
+    {
+        int minTrack, maxTrack, minSide, maxSide;
+    };
+    static LayoutBounds getBounds(const std::vector<CylinderHead>& locations);
 
     /* Returns a series of <track, side> pairs representing the filesystem
      * ordering of the disk, in logical numbers. */
     static std::vector<std::pair<int, int>> getTrackOrdering(
-        unsigned guessedTracks = 0, unsigned guessedSides = 0);
+        LayoutProto::Order ordering,
+        unsigned guessedTracks = 0,
+        unsigned guessedSides = 0);
 
     /* Returns the layout of a given track. */
     static std::shared_ptr<const TrackInfo> getLayoutOfTrack(
@@ -48,6 +51,14 @@ public:
     /* Returns the layout of a given track via physical location. */
     static std::shared_ptr<const TrackInfo> getLayoutOfTrackPhysical(
         unsigned physicalTrack, unsigned physicalSide);
+
+    /* Returns the layout of a given track via physical location. */
+    static std::shared_ptr<const TrackInfo> getLayoutOfTrackPhysical(
+        const CylinderHead& physicalLocation);
+
+    /* Returns the layouts of a multiple tracks via physical location. */
+    static std::vector<std::shared_ptr<const TrackInfo>>
+    getLayoutOfTracksPhysical(const std::vector<CylinderHead>& locations);
 
     /* Expand a SectorList into the actual sector IDs. */
     static std::vector<unsigned> expandSectorList(

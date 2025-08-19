@@ -6,7 +6,6 @@ import builtins
 from copy import copy
 import functools
 import importlib
-import importlib.abc
 import importlib.util
 from importlib.machinery import (
     SourceFileLoader,
@@ -17,6 +16,11 @@ import inspect
 import string
 import sys
 import hashlib
+import re
+import ast
+from collections import namedtuple
+
+VERBOSE_MK_FILE = False
 
 verbose = False
 quiet = False
@@ -25,6 +29,24 @@ targets = {}
 unmaterialisedTargets = {}  # dict, not set, to get consistent ordering
 materialisingStack = []
 defaultGlobals = {}
+globalId = 1
+wordCache = {}
+
+RE_FORMAT_SPEC = re.compile(
+    r"(?:(?P<fill>[\s\S])?(?P<align>[<>=^]))?"
+    r"(?P<sign>[- +])?"
+    r"(?P<pos_zero>z)?"
+    r"(?P<alt>#)?"
+    r"(?P<zero_padding>0)?"
+    r"(?P<width_str>\d+)?"
+    r"(?P<grouping>[_,])?"
+    r"(?:(?P<decimal>\.)(?P<precision_str>\d+))?"
+    r"(?P<type>[bcdeEfFgGnosxX%])?"
+)
+
+CommandFormatSpec = namedtuple(
+    "CommandFormatSpec", RE_FORMAT_SPEC.groupindex.keys()
+)
 
 sys.path += ["."]
 old_import = builtins.__import__
@@ -80,6 +102,29 @@ def error(message):
     raise ABException(message)
 
 
+class BracketedFormatter(string.Formatter):
+    def parse(self, format_string):
+        while format_string:
+            left, *right = format_string.split("$[", 1)
+            if not right:
+                yield (left, None, None, None)
+                break
+            right = right[0]
+
+            offset = len(right) + 1
+            try:
+                ast.parse(right)
+            except SyntaxError as e:
+                if not str(e).startswith("unmatched ']'"):
+                    raise e
+                offset = e.offset
+
+            expr = right[0 : offset - 1]
+            format_string = right[offset:]
+
+            yield (left if left else None, expr, None, None)
+
+
 def Rule(func):
     sig = inspect.signature(func)
 
@@ -115,7 +160,8 @@ def Rule(func):
         t.callback = func
         t.traits.add(func.__name__)
         if "args" in kwargs:
-            t.args |= kwargs["args"]
+            t.explicit_args = kwargs["args"]
+            t.args.update(t.explicit_args)
             del kwargs["args"]
         if "traits" in kwargs:
             t.traits |= kwargs["traits"]
@@ -166,7 +212,7 @@ class Target:
         return f"Target('{self.name}')"
 
     def templateexpand(selfi, s):
-        class Formatter(string.Formatter):
+        class Formatter(BracketedFormatter):
             def get_field(self, name, a1, a2):
                 return (
                     eval(name, selfi.callback.__globals__, selfi.args),
@@ -355,9 +401,26 @@ class TargetsMap:
         return output
 
 
+def _removesuffix(self, suffix):
+    # suffix='' should not call self[:-0].
+    if suffix and self.endswith(suffix):
+        return self[: -len(suffix)]
+    else:
+        return self[:]
+
+
 def loadbuildfile(filename):
-    filename = filename.replace("/", ".").removesuffix(".py")
-    builtins.__import__(filename)
+    modulename = _removesuffix(filename.replace("/", "."), ".py")
+    if modulename not in sys.modules:
+        spec = importlib.util.spec_from_file_location(
+            name=modulename,
+            location=filename,
+            loader=BuildFileLoaderImpl(fullname=modulename, path=filename),
+            submodule_search_locations=[],
+        )
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[modulename] = module
+        spec.loader.exec_module(module)
 
 
 def flatten(items):
@@ -383,6 +446,7 @@ def filenamesof(items):
     def generate(xs):
         for x in xs:
             if isinstance(x, Target):
+                x.materialise()
                 yield from generate(x.outs)
             else:
                 yield x
@@ -406,49 +470,75 @@ def emit(*args, into=None):
         outputFp.write(s)
 
 
-def emit_rule(name, ins, outs, cmds=[], label=None):
-    fins = filenamesof(ins)
+def emit_rule(self, ins, outs, cmds=[], label=None):
+    name = self.name
+    fins_list = filenamesof(ins)
+    fins = set(fins_list)
     fouts = filenamesof(outs)
     nonobjs = [f for f in fouts if not f.startswith("$(OBJ)")]
 
     emit("")
+    if VERBOSE_MK_FILE:
+        for k, v in self.args.items():
+            emit(f"# {k} = {v}")
 
     lines = []
     if nonobjs:
         emit("clean::", into=lines)
         emit("\t$(hide) rm -f", *nonobjs, into=lines)
 
+    hashable = cmds + fins_list + fouts
+    hash = hashlib.sha1(bytes("\n".join(hashable), "utf-8")).hexdigest()
+    hashfile = join(self.dir, f"hash_{hash}")
+
+    global globalId
     emit(".PHONY:", name, into=lines)
     if outs:
-        emit(name, ":", *fouts, into=lines)
-        if len(fouts) == 1:
-            emit(*fouts, ":", *fins, "\x01", into=lines)
-        else:
-            emit("ifeq ($(MAKE4.3),yes)", into=lines)
-            emit(*fouts, "&:", *fins, "\x01", into=lines)
-            emit("else", into=lines)
-            emit(*(fouts[1:]), ":", fouts[0], into=lines)
-            emit(fouts[0], ":", *fins, "\x01", into=lines)
-            emit("endif", into=lines)
+        outsn = globalId
+        globalId = globalId + 1
+        insn = globalId
+        globalId = globalId + 1
+
+        emit(f"OUTS_{outsn}", "=", *fouts, into=lines)
+        emit(f"INS_{insn}", "=", *fins, into=lines)
+        emit(name, ":", f"$(OUTS_{outsn})", into=lines)
+        emit(hashfile, ":", into=lines)
+        emit(f"\t@mkdir -p {self.dir}", into=lines)
+        emit(f"\t@touch {hashfile}", into=lines)
+        emit(
+            f"$(OUTS_{outsn})",
+            "&:" if len(fouts) > 1 else ":",
+            f"$(INS_{insn})",
+            hashfile,
+            into=lines,
+        )
 
         if label:
-            emit("\t$(hide)", "$(ECHO) $(PROGRESSINFO)", label, into=lines)
+            emit("\t$(hide)", "$(ECHO) $(PROGRESSINFO)" + label, into=lines)
+
+        sandbox = join(self.dir, "sandbox")
+        emit("\t$(hide)", f"rm -rf {sandbox}", into=lines)
+        emit(
+            "\t$(hide)",
+            "$(PYTHON) build/_sandbox.py --link -s",
+            sandbox,
+            f"$(INS_{insn})",
+            into=lines,
+        )
         for c in cmds:
-            emit("\t$(hide)", c, into=lines)
+            emit(f"\t$(hide) cd {sandbox} && (", c, ")", into=lines)
+        emit(
+            "\t$(hide)",
+            "$(PYTHON) build/_sandbox.py --export -s",
+            sandbox,
+            f"$(OUTS_{outsn})",
+            into=lines,
+        )
     else:
         assert len(cmds) == 0, "rules with no outputs cannot have commands"
         emit(name, ":", *fins, into=lines)
 
-    cmd = "".join(lines)
-    hash = hashlib.sha1(bytes(cmd, "utf-8")).hexdigest()
-
-    outputFp.write(cmd.replace("\x01", f"$(OBJ)/.hashes/{hash}"))
-
-    if outs:
-        emit(f"$(OBJ)/.hashes/{hash}:")
-        emit(
-            f"\t$(hide) mkdir -p $(OBJ)/.hashes && touch $(OBJ)/.hashes/{hash}"
-        )
+    outputFp.write("".join(lines))
     emit("")
 
 
@@ -479,10 +569,10 @@ def simplerule(
         cs += [self.templateexpand(c)]
 
     emit_rule(
-        name=self.name,
+        self=self,
         ins=ins + deps,
         outs=outs,
-        label=self.templateexpand("{label} {name}") if label else None,
+        label=self.templateexpand("$[label] $[name]") if label else None,
         cmds=cs,
     )
 
@@ -507,18 +597,17 @@ def export(self, name=None, items: TargetsMap = {}, deps: Targets = []):
             cwd=self.cwd,
             ins=[srcs[0]],
             outs=[destf],
-            commands=["$(CP) -r %s %s" % (srcs[0], destf)],
+            commands=["$(CP) -Hr %s %s" % (srcs[0], destf)],
             label="",
         )
         subrule.materialise()
 
-    simplerule(
-        replaces=self,
-        ins=outs + deps,
-        outs=["=sentinel"],
-        commands=["touch {outs[0]}"],
-        label="EXPORT",
-    )
+    self.ins = []
+    self.outs = deps + outs
+
+    emit("")
+    emit(".PHONY:", name)
+    emit(name, ":", *filenamesof(outs + deps))
 
 
 def main():

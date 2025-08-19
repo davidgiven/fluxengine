@@ -31,26 +31,9 @@ static StringFlag destFlux({"-d", "--dest"},
         globalConfig().setFluxSink(value);
     });
 
-static StringFlag srcTracks({"--cylinders", "-c"},
-    "tracks to read from",
-    "",
-    [](const auto& value)
-    {
-        setRange(globalConfig().overrides()->mutable_tracks(), value);
-    });
-
-static StringFlag srcHeads({"--heads", "-h"},
-    "heads to read from",
-    "",
-    [](const auto& value)
-    {
-        setRange(globalConfig().overrides()->mutable_heads(), value);
-    });
-
 int mainRawRead(int argc, const char* argv[])
 {
-    setRange(globalConfig().overrides()->mutable_tracks(), "0-79");
-    setRange(globalConfig().overrides()->mutable_heads(), "0-1");
+    globalConfig().overrides()->set_tracks("0-79");
 
     if (argc == 1)
         showProfiles("rawread", formats);

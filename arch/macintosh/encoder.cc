@@ -2,7 +2,7 @@
 #include "lib/core/utils.h"
 #include "lib/decoders/decoders.h"
 #include "lib/encoders/encoders.h"
-#include "macintosh.h"
+#include "arch/macintosh/macintosh.h"
 #include "lib/core/crc.h"
 #include "lib/data/image.h"
 #include "fmt/format.h"

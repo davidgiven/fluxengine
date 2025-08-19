@@ -2,7 +2,7 @@
 #include "lib/core/utils.h"
 #include "lib/decoders/decoders.h"
 #include "lib/encoders/encoders.h"
-#include "amiga.h"
+#include "arch/amiga/amiga.h"
 #include "lib/core/crc.h"
 #include "lib/data/image.h"
 #include "arch/amiga/amiga.pb.h"

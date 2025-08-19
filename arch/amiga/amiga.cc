@@ -1,6 +1,6 @@
 #include "lib/core/globals.h"
 #include "lib/decoders/decoders.h"
-#include "amiga.h"
+#include "arch/amiga/amiga.h"
 #include "lib/core/bytes.h"
 #include "fmt/format.h"
 

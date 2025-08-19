@@ -1,11 +1,13 @@
 #include "lib/core/globals.h"
 #include "lib/data/fluxmap.h"
+#include "lib/data/locations.h"
 #include "lib/fluxsource/fluxsource.pb.h"
 #include "lib/external/fl2.pb.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/config/proto.h"
 #include "lib/external/fl2.h"
 #include "lib/data/fluxmap.h"
+#include "lib/core/logger.h"
 #include <fstream>
 
 class Fl2FluxSourceIterator : public FluxSourceIterator
@@ -35,12 +37,20 @@ class Fl2FluxSource : public FluxSource
 public:
     Fl2FluxSource(const Fl2FluxSourceProto& config): _config(config)
     {
+        log("FL2: reading {}", _config.filename());
         _proto = loadFl2File(_config.filename());
 
         _extraConfig.mutable_drive()->set_rotational_period_ms(
             _proto.rotational_period_ms());
         if (_proto.has_drive_type())
             _extraConfig.mutable_drive()->set_drive_type(_proto.drive_type());
+
+        std::vector<CylinderHead> chs;
+        for (const auto& trackFlux : _proto.track())
+            chs.push_back(CylinderHead{
+                (unsigned)trackFlux.track(), (unsigned)trackFlux.head()});
+        _extraConfig.mutable_drive()->set_tracks(
+            convertCylinderHeadsToString(chs));
     }
 
 public:

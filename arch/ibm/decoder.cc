@@ -1,6 +1,6 @@
 #include "lib/core/globals.h"
 #include "lib/decoders/decoders.h"
-#include "ibm.h"
+#include "arch/ibm/ibm.h"
 #include "lib/core/crc.h"
 #include "lib/data/fluxmap.h"
 #include "lib/data/fluxmapreader.h"

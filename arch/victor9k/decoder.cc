@@ -5,7 +5,7 @@
 #include "protocol.h"
 #include "lib/decoders/decoders.h"
 #include "lib/data/sector.h"
-#include "victor9k.h"
+#include "arch/victor9k/victor9k.h"
 #include "lib/core/crc.h"
 #include "lib/core/bytes.h"
 #include "fmt/format.h"

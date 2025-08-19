@@ -347,7 +347,7 @@ ReadResult readGroup(FluxSourceIteratorHolder& fluxSourceIteratorHolder,
     ReadResult result = BAD_AND_CAN_NOT_RETRY;
 
     for (unsigned offset = 0; offset < trackInfo->groupSize;
-         offset += Layout::getHeadWidth())
+        offset += Layout::getHeadWidth())
     {
         log(BeginReadOperationLogMessage{
             trackInfo->physicalTrack + offset, trackInfo->physicalSide});
@@ -404,7 +404,7 @@ void writeTracks(FluxSink& fluxSink,
         for (;;)
         {
             for (int offset = 0; offset < trackInfo->groupSize;
-                 offset += Layout::getHeadWidth())
+                offset += Layout::getHeadWidth())
             {
                 unsigned physicalTrack = trackInfo->physicalTrack + offset;
 
@@ -542,13 +542,14 @@ void writeDiskCommand(const Image& image,
     FluxSink& fluxSink,
     Decoder* decoder,
     FluxSource* fluxSource,
-    std::vector<std::shared_ptr<const TrackInfo>>& locations)
+    const std::vector<CylinderHead>& physicalLocations)
 {
+    auto trackinfos = Layout::getLayoutOfTracksPhysical(physicalLocations);
     if (fluxSource && decoder)
         writeTracksAndVerify(
-            fluxSink, encoder, *fluxSource, *decoder, image, locations);
+            fluxSink, encoder, *fluxSource, *decoder, image, trackinfos);
     else
-        writeTracks(fluxSink, encoder, image, locations);
+        writeTracks(fluxSink, encoder, image, trackinfos);
 }
 
 void writeDiskCommand(const Image& image,
@@ -557,13 +558,14 @@ void writeDiskCommand(const Image& image,
     Decoder* decoder,
     FluxSource* fluxSource)
 {
-    auto locations = Layout::computeLocations();
+    auto locations = Layout::computePhysicalLocations();
     writeDiskCommand(image, encoder, fluxSink, decoder, fluxSource, locations);
 }
 
 void writeRawDiskCommand(FluxSource& fluxSource, FluxSink& fluxSink)
 {
-    auto locations = Layout::computeLocations();
+    auto physicalLocations = Layout::computePhysicalLocations();
+    auto trackinfos = Layout::getLayoutOfTracksPhysical(physicalLocations);
     writeTracks(
         fluxSink,
         [&](std::shared_ptr<const TrackInfo>& trackInfo)
@@ -576,7 +578,7 @@ void writeRawDiskCommand(FluxSource& fluxSource, FluxSink& fluxSink)
         {
             return true;
         },
-        locations);
+        trackinfos);
 }
 
 std::shared_ptr<TrackFlux> readAndDecodeTrack(FluxSource& fluxSource,
@@ -631,12 +633,15 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
     auto diskflux = std::make_shared<DiskFlux>();
 
     log(BeginOperationLogMessage{"Reading and decoding disk"});
-    auto locations = Layout::computeLocations();
+    auto physicalLocations = Layout::computePhysicalLocations();
     unsigned index = 0;
-    for (auto& trackInfo : locations)
+    for (auto& physicalLocation : physicalLocations)
     {
+        auto trackInfo = Layout::getLayoutOfTrackPhysical(
+            physicalLocation.cylinder, physicalLocation.head);
+
         log(OperationProgressLogMessage{
-            index * 100 / (unsigned)locations.size()});
+            index * 100 / (unsigned)physicalLocations.size()});
         index++;
 
         testForEmergencyStop();
@@ -734,7 +739,7 @@ void readDiskCommand(
     if (globalConfig()->decoder().has_write_csv_to())
         writer.writeCsv(
             *diskflux->image, globalConfig()->decoder().write_csv_to());
-    writer.writeMappedImage(*diskflux->image);
+    writer.writeImage(*diskflux->image);
 }
 
 void rawReadDiskCommand(FluxSource& fluxsource, FluxSink& fluxsink)
@@ -743,14 +748,17 @@ void rawReadDiskCommand(FluxSource& fluxsource, FluxSink& fluxsink)
 
     if (fluxsource.isHardware() || fluxsink.isHardware())
         measureDiskRotation();
-    auto locations = Layout::computeLocations();
+    auto physicalLocations = Layout::computePhysicalLocations();
     unsigned index = 0;
-    for (auto& trackInfo : locations)
+    for (const auto& physicalLocation : physicalLocations)
     {
-        log(OperationProgressLogMessage{index * 100 / (int)locations.size()});
+        log(OperationProgressLogMessage{
+            index * 100 / (int)physicalLocations.size()});
         index++;
 
         testForEmergencyStop();
+        auto trackInfo = Layout::getLayoutOfTrackPhysical(
+            physicalLocation.cylinder, physicalLocation.head);
         auto fluxSourceIterator = fluxsource.readFlux(
             trackInfo->physicalTrack, trackInfo->physicalSide);
 

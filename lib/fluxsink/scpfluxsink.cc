@@ -41,12 +41,8 @@ class ScpFluxSink : public FluxSink
 public:
     ScpFluxSink(const ScpFluxSinkProto& lconfig): _config(lconfig)
     {
-        int minTrack;
-        int maxTrack;
-        int minSide;
-        int maxSide;
-        Layout::getBounds(
-            Layout::computeLocations(), minTrack, maxTrack, minSide, maxSide);
+        auto [minTrack, maxTrack, minSide, maxSide] =
+            Layout::getBounds(Layout::computePhysicalLocations());
 
         _fileheader.file_id[0] = 'S';
         _fileheader.file_id[1] = 'C';
@@ -56,6 +52,8 @@ public:
         _fileheader.start_track = strackno(minTrack, minSide);
         _fileheader.end_track = strackno(maxTrack, maxSide);
         _fileheader.flags = SCP_FLAG_INDEXED;
+        if (globalConfig()->drive().drive_type() == DRIVETYPE_APPLE2)
+            error("you can't write Apple II flux images to SCP files yet");
         if (globalConfig()->drive().drive_type() != DRIVETYPE_40TRACK)
             _fileheader.flags |= SCP_FLAG_96TPI;
         _fileheader.cell_width = 0;
@@ -105,11 +103,11 @@ public:
                 head);
             return;
         }
-        ScpTrack trackheader = {0};
-        trackheader.header.track_id[0] = 'T';
-        trackheader.header.track_id[1] = 'R';
-        trackheader.header.track_id[2] = 'K';
-        trackheader.header.strack = strack;
+        ScpTrack trackHeader = {0};
+        trackHeader.header.track_id[0] = 'T';
+        trackHeader.header.track_id[1] = 'R';
+        trackHeader.header.track_id[2] = 'K';
+        trackHeader.header.strack = strack;
 
         FluxmapReader fmr(fluxmap);
         Bytes fluxdata;
@@ -146,7 +144,7 @@ public:
                     revolution = 0;
                 if (revolution >= 0)
                 {
-                    auto* revheader = &trackheader.revolution[revolution];
+                    auto* revheader = &trackHeader.revolution[revolution];
                     write_le32(
                         revheader->offset, startOffset + sizeof(ScpTrack));
                     write_le32(revheader->length,
@@ -177,7 +175,7 @@ public:
         _fileheader.revolutions = revolution;
         write_le32(
             _fileheader.track[strack], trackdataWriter.pos + sizeof(ScpHeader));
-        trackdataWriter += Bytes((uint8_t*)&trackheader, sizeof(trackheader));
+        trackdataWriter += Bytes((uint8_t*)&trackHeader, sizeof(trackHeader));
         trackdataWriter += fluxdata;
     }
 

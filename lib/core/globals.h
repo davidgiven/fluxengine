@@ -16,12 +16,16 @@
 #include <variant>
 #include <optional>
 #include <regex>
+#include <ranges>
 #include "fmt/format.h"
 
 #if defined(_WIN32) || defined(__WIN32__)
 #include <direct.h>
 #define mkdir(A, B) _mkdir(A)
 #endif
+
+#define STRINGIFY(a) XSTRINGIFY(a)
+#define XSTRINGIFY(a) #a
 
 template <class T>
 static inline std::vector<T> vector_of(T item)
@@ -48,7 +52,7 @@ struct ErrorException
 template <typename... Args>
 [[noreturn]] inline void error(fmt::string_view fstr, const Args&... args)
 {
-    throw ErrorException{fmt::format(fstr, args...)};
+    throw ErrorException{fmt::format(fmt::runtime(fstr), args...)};
 }
 
 extern void warning(const std::string msg);
@@ -56,7 +60,7 @@ extern void warning(const std::string msg);
 template <typename... Args>
 inline void warning(fmt::string_view fstr, const Args&... args)
 {
-    warning(fmt::format(fstr, args...));
+    warning(fmt::format(fmt::runtime(fstr), args...));
 }
 
 template <class... Ts>

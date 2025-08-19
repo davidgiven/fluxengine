@@ -1,7 +1,6 @@
 syntax = "proto2";
 
 import "lib/config/common.proto";
-import "lib/config/layout.proto";
 
 message AcornDfsProto
 {
@@ -154,7 +153,4 @@ message FilesystemProto
     optional MicrodosProto microdos = 15;
     optional ZDosProto zdos = 16;
     optional RolandFsProto roland = 17;
-
-    optional SectorListProto sector_order = 9
-        [ (help) = "specify the filesystem order of sectors" ];
 }

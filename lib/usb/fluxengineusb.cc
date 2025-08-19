@@ -1,5 +1,5 @@
 #include "lib/core/globals.h"
-#include "usb.h"
+#include "lib/usb/usb.h"
 #include "protocol.h"
 #include "lib/data/fluxmap.h"
 #include "lib/core/bytes.h"

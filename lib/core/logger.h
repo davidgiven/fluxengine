@@ -92,7 +92,7 @@ inline void log(const T& message)
 template <typename... Args>
 inline void log(fmt::string_view fstr, const Args&... args)
 {
-    log(fmt::format(fstr, args...));
+    log(fmt::format(fmt::runtime(fstr), args...));
 }
 
 class LogRenderer

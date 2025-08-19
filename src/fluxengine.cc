@@ -6,6 +6,10 @@ typedef int command_cb(int agrc, const char* argv[]);
 
 extern command_cb mainAnalyseDriveResponse;
 extern command_cb mainAnalyseLayout;
+extern command_cb mainConvert;
+extern command_cb mainFluxfileLs;
+extern command_cb mainFluxfileRm;
+extern command_cb mainFluxfileCp;
 extern command_cb mainFormat;
 extern command_cb mainGetDiskInfo;
 extern command_cb mainGetFile;
@@ -35,6 +39,7 @@ struct Command
 };
 
 static command_cb mainAnalyse;
+static command_cb mainFluxfile;
 static command_cb mainTest;
 
 // clang-format off
@@ -44,9 +49,11 @@ static std::vector<Command> commands =
 	{ "analyse",           mainAnalyse,           "Disk and drive analysis tools." },
     { "read",              mainRead,              "Reads a disk, producing a sector image.", },
     { "write",             mainWrite,             "Writes a sector image to a disk.", },
+	{ "fluxfile",          mainFluxfile,          "Flux file manipulation operations.", },
 	{ "format",            mainFormat,            "Format a disk and make a file system on it.", },
 	{ "rawread",           mainRawRead,           "Reads raw flux from a disk. Warning: you can't use this to copy disks.", },
     { "rawwrite",          mainRawWrite,          "Writes a flux file to a disk. Warning: you can't use this to copy disks.", },
+    { "convert",           mainConvert,           "Converts a flux file from one format to another.", },
 	{ "merge",             mainMerge,             "Merge together multiple flux files.", },
 	{ "getdiskinfo",       mainGetDiskInfo,       "Read volume metadata off a disk (or image).", },
 	{ "ls",                mainLs,                "Show files on disk (or image).", },
@@ -69,9 +76,16 @@ static std::vector<Command> analysables =
 
 static std::vector<Command> testables =
 {
-    { "bandwidth",     mainTestBandwidth, "Measures your USB bandwidth.", },
-    { "devices",       mainTestDevices, "Displays all detected devices.", },
-    { "voltages",      mainTestVoltages,  "Measures the FDD bus voltages.", },
+    { "bandwidth",     mainTestBandwidth,        "Measures your USB bandwidth.", },
+    { "devices",       mainTestDevices,          "Displays all detected devices.", },
+    { "voltages",      mainTestVoltages,         "Measures the FDD bus voltages.", },
+};
+
+static std::vector<Command> fluxfileables =
+{
+    { "ls",            mainFluxfileLs,           "Lists the contents of a flux file.", },
+    { "rm",            mainFluxfileRm,           "Removes flux from a flux file.", },
+    { "cp",            mainFluxfileCp,           "Copies flux from one flux file to another." },
 };
 // clang-format on
 
@@ -118,6 +132,11 @@ static int mainAnalyse(int argc, const char* argv[])
 static int mainTest(int argc, const char* argv[])
 {
     return mainExtended(testables, "test", argc, argv);
+}
+
+static int mainFluxfile(int argc, const char* argv[])
+{
+    return mainExtended(fluxfileables, "fluxfile", argc, argv);
 }
 
 static void globalHelp()

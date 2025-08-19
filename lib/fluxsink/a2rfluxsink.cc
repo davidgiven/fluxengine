@@ -1,5 +1,6 @@
 #include "lib/core/globals.h"
 #include "lib/config/flags.h"
+#include "lib/config/config.h"
 #include "lib/data/fluxmap.h"
 #include "lib/core/bytes.h"
 #include "protocol.h"
@@ -31,8 +32,6 @@ namespace
             _bytes{},
             _writer{_bytes.writer()}
         {
-            log("A2R: collecting data");
-
             time_t now{std::time(nullptr)};
             auto t = gmtime(&now);
             _metadata["image_date"] = fmt::format("{:%FT%TZ}", *t);
@@ -40,9 +39,13 @@ namespace
 
         ~A2RFluxSink()
         {
-            auto locations = Layout::computeLocations();
-            Layout::getBounds(
-                locations, _minTrack, _maxTrack, _minSide, _maxSide);
+            auto physicalLocations = Layout::computePhysicalLocations();
+            auto [minTrack, maxTrack, minSide, maxSide] =
+                Layout::getBounds(physicalLocations);
+            _minTrack = minTrack;
+            _maxTrack = maxTrack;
+            _minSide = minSide;
+            _maxSide = maxSide;
 
             log("A2R: writing A2R {} file containing {} tracks...",
                 (_minSide == _maxSide) ? "single sided" : "double sided",
@@ -84,7 +87,12 @@ namespace
             auto version_str_padded = fmt::format("{: <32}", "FluxEngine");
             assert(version_str_padded.size() == 32);
             writer.append(version_str_padded);
-            writer.write_8(A2R_DISK_35);
+
+            writer.write_8(
+                (globalConfig()->drive().drive_type() == DRIVETYPE_APPLE2)
+                    ? A2R_DISK_525
+                    : A2R_DISK_35);
+
             writer.write_8(1); // write protected
             writer.write_8(1); // synchronized
             writeChunkAndData(A2R_CHUNK_INFO, info);
@@ -199,7 +207,11 @@ namespace
 
             uint32_t chunk_size = 10 + trackBytes.size();
 
-            _strmWriter.write_8((cylinder << 1) | head);
+            if (globalConfig()->drive().drive_type() == DRIVETYPE_APPLE2)
+                _strmWriter.write_8(cylinder);
+            else
+                _strmWriter.write_8((cylinder << 1) | head);
+
             _strmWriter.write_8(A2R_TIMING);
             _strmWriter.write_le32(trackBytes.size());
             _strmWriter.write_le32(ticks_to_a2r(loopPoint));

@@ -1,6 +1,6 @@
 #include "lib/core/globals.h"
 #include "lib/config/config.h"
-#include "vfs.h"
+#include "lib/vfs/vfs.h"
 #include "lib/config/proto.h"
 #include "lib/config/layout.pb.h"
 #include "lib/data/layout.h"
@@ -160,8 +160,8 @@ Filesystem::Filesystem(std::shared_ptr<SectorInterface> sectors):
             "information");
 
     unsigned block = 0;
-    for (const auto& p :
-        Layout::getTrackOrdering(layout.tracks(), layout.sides()))
+    for (const auto& p : Layout::getTrackOrdering(
+             layout.filesystem_track_order(), layout.tracks(), layout.sides()))
     {
         int track = p.first;
         int side = p.second;

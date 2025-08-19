@@ -9,6 +9,7 @@ public:
     TestPatternFluxSource(const TestPatternFluxSourceProto& config):
         _config(config)
     {
+        _extraConfig.mutable_drive()->set_tracks("c0-255h0-1");
     }
 
     ~TestPatternFluxSource() {}
@@ -20,7 +21,8 @@ public:
 
         while (fluxmap->duration() < (_config.sequence_length_ms() * 1e6))
         {
-            fluxmap->appendInterval(_config.interval_us() * TICKS_PER_US);
+            fluxmap->appendInterval(
+                _config.interval_us() * (double)TICKS_PER_US);
             fluxmap->appendPulse();
         }
 

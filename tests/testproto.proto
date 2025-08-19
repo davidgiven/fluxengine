@@ -2,25 +2,25 @@ syntax = "proto2";
 
 import "lib/config/common.proto";
 
-message TestProto {
-	message SubMessageProto {
-		optional string s = 1;
-	}
+message TestProto
+{
+    message SubMessageProto
+    {
+        optional string s = 1;
+		repeated int32 r = 2;
+    }
 
-	optional int64 i64 = 1 [(help)="i64"];
-	optional int32 i32 = 2;
-	optional uint64 u64 = 3;
-	optional uint32 u32 = 4;
-	optional double d = 5;
-	optional double f = 11;
-	optional SubMessageProto m = 6;
-	repeated SubMessageProto r = 7;
+    optional int64 i64 = 1 [(help) = "i64"];
+    optional int32 i32 = 2;
+    optional uint64 u64 = 3;
+    optional uint32 u32 = 4;
+    optional double d = 5;
+    optional double f = 11;
+    optional SubMessageProto m = 6;
+    repeated SubMessageProto r = 7;
 
 	oneof alt {
 		SubMessageProto firstoption = 8;
 		SubMessageProto secondoption = 9;
 	}
-
-	optional RangeProto range = 10;
 }
-

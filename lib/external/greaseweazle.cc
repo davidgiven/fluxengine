@@ -1,7 +1,7 @@
 #include "lib/core/globals.h"
 #include "protocol.h"
 #include "lib/core/bytes.h"
-#include "greaseweazle.h"
+#include "lib/external/greaseweazle.h"
 
 Bytes fluxEngineToGreaseweazle(const Bytes& fldata, nanoseconds_t clock)
 {

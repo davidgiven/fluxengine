@@ -106,8 +106,8 @@ void VisualisationControl::OnPaint(wxPaintEvent&)
             key_t key = {track, head};
             std::vector<std::shared_ptr<const Sector>> sectors;
             for (auto it = _sectors.lower_bound(key);
-                 it != _sectors.upper_bound(key);
-                 it++)
+                it != _sectors.upper_bound(key);
+                it++)
                 sectors.push_back(it->second);
             std::sort(
                 sectors.begin(), sectors.end(), sectorPointerSortPredicate);
@@ -151,8 +151,8 @@ void VisualisationControl::OnPaint(wxPaintEvent&)
         key_t key = {_selectedTrack, _selectedHead};
         int sectorCount = 0;
         for (auto it = _sectors.lower_bound(key);
-             it != _sectors.upper_bound(key);
-             it++)
+            it != _sectors.upper_bound(key);
+            it++)
             sectorCount++;
 
         if (sectorCount != 0)

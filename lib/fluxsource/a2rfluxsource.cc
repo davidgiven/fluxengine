@@ -1,9 +1,13 @@
 #include "lib/core/globals.h"
 #include "lib/data/fluxmap.h"
+#include "lib/data/layout.h"
 #include "lib/fluxsource/fluxsource.pb.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/config/proto.h"
+#include "lib/data/locations.h"
+#include "lib/core/logger.h"
 #include <fstream>
+#include <ranges>
 
 struct A2Rv2Flux
 {
@@ -78,8 +82,6 @@ public:
                 if (disktype == 1)
                 {
                     /* 5.25" with quarter stepping. */
-                    _extraConfig.mutable_drive()->set_tracks(160);
-                    _extraConfig.mutable_drive()->set_heads(1);
                     _extraConfig.mutable_drive()->set_drive_type(
                         DRIVETYPE_APPLE2);
                 }
@@ -94,12 +96,12 @@ public:
                 ByteReader bsr(stream);
                 for (;;)
                 {
-                    int location = bsr.read_8();
+                    unsigned location = bsr.read_8();
                     if (location == 0xff)
                         break;
-                    auto key = (disktype == 1) ? std::make_pair(location, 0)
-                                               : std::make_pair(location >> 1,
-                                                     location & 1);
+                    auto key = (disktype == 1)
+                                   ? CylinderHead{location, 0}
+                                   : CylinderHead{location >> 1, location & 1};
 
                     bsr.skip(1);
                     uint32_t len = bsr.read_le32();
@@ -115,6 +117,20 @@ public:
                     it->second->flux.push_back(bsr.read(len));
                 }
 
+                auto keys = std::views::keys(_v2data);
+                std::vector<CylinderHead> chs{keys.begin(), keys.end()};
+                auto [minCylinder, maxCylinder, minHead, maxHead] =
+                    Layout::getBounds(chs);
+                log("A2R: reading A2R {} file with {} cylinders and {} head{}",
+                    (disktype == 1)   ? "Apple II"
+                    : (disktype == 2) ? "normal"
+                                      : "unknown",
+                    maxCylinder - minCylinder + 1,
+                    maxHead - minHead + 1,
+                    (maxHead == minHead) ? "" : "s");
+
+                _extraConfig.mutable_drive()->set_tracks(
+                    convertCylinderHeadsToString(chs));
                 break;
             }
 
@@ -130,7 +146,8 @@ public:
         {
             case 2:
             {
-                auto i = _v2data.find(std::make_pair(track, head));
+                auto i =
+                    _v2data.find(CylinderHead{(unsigned)track, (unsigned)head});
                 if (i != _v2data.end())
                     return std::make_unique<A2rv2FluxSourceIterator>(
                         *i->second);
@@ -170,7 +187,7 @@ private:
     Bytes _data;
     std::ifstream _if;
     int _version;
-    std::map<std::pair<int, int>, std::unique_ptr<A2Rv2Flux>> _v2data;
+    std::map<CylinderHead, std::unique_ptr<A2Rv2Flux>> _v2data;
 };
 
 std::unique_ptr<FluxSource> FluxSource::createA2rFluxSource(

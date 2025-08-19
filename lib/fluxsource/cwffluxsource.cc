@@ -1,10 +1,12 @@
 #include "lib/core/globals.h"
 #include "lib/data/fluxmap.h"
+#include "lib/data/locations.h"
 #include "lib/fluxsource/fluxsource.pb.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/external/catweasel.h"
 #include "lib/config/proto.h"
 #include <fstream>
+#include <ranges>
 
 struct CwfHeader
 {
@@ -14,8 +16,8 @@ struct CwfHeader
     uint8_t version;      // version of this file
     uint8_t clock_rate;   // clock rate used: 0, 1, 2 (2 = 28MHz)
     uint8_t drive_type;   // type of drive
-    uint8_t tracks;       // number of tracks
-    uint8_t sides;        // number of sides
+    uint8_t cylinders;    // number of cylinders
+    uint8_t heads;        // number of heads
     uint8_t index_mark;   // nonzero if index marks are included
     uint8_t step;         // track stepping interval
     uint8_t filler[15];   // reserved for expansion
@@ -24,8 +26,8 @@ struct CwfHeader
 
 struct CwfTrack
 {
-    uint8_t track; // sequential
-    uint8_t side;
+    uint8_t cylinder; // sequential
+    uint8_t head;
     uint8_t unused[2];
     uint8_t length[4]; // little-endian
 };
@@ -60,37 +62,44 @@ public:
                 error("unsupported clock rate");
         }
 
-        std::cout << fmt::format("CWF {}x{} = {} tracks, {} sides\n",
-            _header.tracks,
-            _header.step,
-            _header.tracks * _header.step,
-            _header.sides);
+        std::cout << fmt::format("CWF {}x{} = {} cylinders, {} heads\n",
+            _header.cylinders,
+            _header.heads,
+            _header.cylinders * _header.step,
+            _header.heads);
         std::cout << fmt::format(
             "CWF sample clock rate: {} MHz\n", 1e3 / _clockPeriod);
 
-        int tracks = _header.tracks * _header.sides;
-        for (int i = 0; i < tracks; i++)
+        int cylinders = _header.cylinders * _header.heads;
+        for (int i = 0; i < cylinders; i++)
         {
-            CwfTrack trackheader;
-            _if.read((char*)&trackheader, sizeof(trackheader));
+            CwfTrack trackHeader;
+            _if.read((char*)&trackHeader, sizeof(trackHeader));
             check_for_error();
 
             uint32_t length =
-                Bytes(trackheader.length, 4).reader().read_le32() -
+                Bytes(trackHeader.length, 4).reader().read_le32() -
                 sizeof(CwfTrack);
-            unsigned track_number = trackheader.track * _header.step;
+            unsigned track_number = trackHeader.cylinder * _header.step;
 
             off_t pos = _if.tellg();
-            _trackOffsets[std::make_pair(track_number, trackheader.side)] =
+            _trackOffsets[CylinderHead{track_number, trackHeader.head}] =
                 std::make_pair(pos, length);
             _if.seekg(pos + length);
         }
+
+        std::vector<CylinderHead> chs;
+        for (auto& [key, value] : _trackOffsets)
+            chs.push_back(key);
+        _extraConfig.mutable_drive()->set_tracks(
+            convertCylinderHeadsToString(chs));
     }
 
 public:
     std::unique_ptr<const Fluxmap> readSingleFlux(int track, int side) override
     {
-        const auto& p = _trackOffsets.find(std::make_pair(track, side));
+        const auto& p =
+            _trackOffsets.find(CylinderHead{(unsigned)track, (unsigned)side});
         if (p == _trackOffsets.end())
             return std::make_unique<const Fluxmap>();
 
@@ -117,7 +126,7 @@ private:
     std::ifstream _if;
     CwfHeader _header;
     nanoseconds_t _clockPeriod;
-    std::map<std::pair<int, int>, std::pair<off_t, size_t>> _trackOffsets;
+    std::map<CylinderHead, std::pair<off_t, size_t>> _trackOffsets;
 };
 
 std::unique_ptr<FluxSource> FluxSource::createCwfFluxSource(

@@ -20,32 +20,32 @@ jobs:
         path: 'fluxengine-testdata'
     - name: apt
       run: |
-        sudo apt install libudev-dev libsqlite3-dev protobuf-compiler libwxgtk3.0-gtk3-dev libfmt-dev libprotobuf-dev wx-common
+        sudo apt install libudev-dev libsqlite3-dev protobuf-compiler libwxgtk3.0-gtk3-dev libfmt-dev libprotobuf-dev
     - name: make
       run: CXXFLAGS="-Wp,-D_GLIBCXX_ASSERTIONS" make -j`nproc` -C fluxengine
 
-  build-linux-debian-11:
-    runs-on: ubuntu-22.04
-    container: debian:11
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        repository: 'davidgiven/fluxengine'
-        path: 'fluxengine'
-    - uses: actions/checkout@v4
-      with:
-        repository: 'davidgiven/fluxengine-testdata'
-        path: 'fluxengine-testdata'
-    - name: apt update
-      run: apt update
-    - name: apt
-      run: >
-        apt install -y python3 make xz-utils python3 python3-hamcrest
-        protobuf-compiler libprotobuf-dev libsqlite3-dev
-        libfmt-dev libprotobuf-dev wx-common pkg-config
-        libudev-dev g++ libwxgtk3.0-gtk3-dev
-    - name: make
-      run: make -C fluxengine
+  #build-linux-debian-11:
+  #  runs-on: ubuntu-22.04
+  #  container: debian:11
+  #  steps:
+  #  - uses: actions/checkout@v4
+  #    with:
+  #      repository: 'davidgiven/fluxengine'
+  #      path: 'fluxengine'
+  #  - uses: actions/checkout@v4
+  #    with:
+  #      repository: 'davidgiven/fluxengine-testdata'
+  #      path: 'fluxengine-testdata'
+  #  - name: apt update
+  #    run: apt update
+  #  - name: apt
+  #    run: >
+  #      apt install -y python3 make xz-utils python3 python3-hamcrest
+  #      protobuf-compiler libprotobuf-dev libsqlite3-dev
+  #      libfmt-dev libprotobuf-dev wx-common pkg-config
+  #      libudev-dev g++ libwxgtk3.0-gtk3-dev
+  #  - name: make
+  #    run: make -C fluxengine
       
   build-macos-current:
     strategy:
@@ -65,7 +65,7 @@ jobs:
       run: |
         brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg
     - name: make
-      run: gmake -C fluxengine -j2
+      run: gmake -C fluxengine
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -78,15 +78,15 @@ jobs:
     steps:
     - name: setup WSL
       run: |
-        curl -L https://github.com/WhitewaterFoundry/Fedora-Remix-for-WSL/releases/download/40.1.0/Fedora-Remix-for-WSL-SL_40.1.0.0_x64_arm64.msixbundle -o fedora.msixbundle
-        unzip fedora.msixbundle Fedora-Remix-for-WSL-SL_40.1.0.0_x64.msix
-        unzip Fedora-Remix-for-WSL-SL_40.1.0.0_x64.msix install.tar.gz
+        curl -L https://github.com/WhitewaterFoundry/Fedora-Remix-for-WSL/releases/download/41.0.0/Fedora-Remix-for-WSL-SL_41.0.0.0_x64_arm64.msixbundle -o fedora.msixbundle
+        unzip fedora.msixbundle Fedora-Remix-for-WSL-SL_41.0.0.0_x64.msix
+        unzip Fedora-Remix-for-WSL-SL_41.0.0.0_x64.msix install.tar.gz
         wsl --update
-        wsl --set-default-version 2
+        wsl --set-default-version 1
         wsl --import fedora fedora install.tar.gz
         wsl --set-default fedora
         wsl sh -c 'dnf -y install https://github.com/rpmsphere/noarch/raw/master/r/rpmsphere-release-40-1.noarch.rpm'
-        wsl sh -c 'dnf -y install --setop=install_weak_deps=False gcc gcc-c++ protobuf-c-compiler protobuf-devel fmt-devel systemd-devel sqlite-devel wxGTK-devel mingw32-gcc mingw32-gcc-c++ mingw32-zlib-static mingw32-protobuf-static mingw32-sqlite-static mingw32-wxWidgets3-static mingw32-libpng-static mingw32-libjpeg-static mingw32-libtiff-static mingw32-nsis png2ico'
+        wsl sh -c 'dnf -y install gcc gcc-c++ protobuf-c-compiler protobuf-devel fmt-devel systemd-devel sqlite-devel wxGTK-devel mingw32-gcc mingw32-gcc-c++ mingw32-zlib-static mingw32-protobuf-static mingw32-sqlite-static mingw32-wxWidgets3-static mingw32-libpng-static mingw32-libjpeg-static mingw32-libtiff-static mingw32-nsis png2ico'
 
     - name: fix line endings
       run: |

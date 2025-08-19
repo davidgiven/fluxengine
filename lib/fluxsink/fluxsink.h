@@ -2,6 +2,7 @@
 #define FLUXSINK_H
 
 #include "lib/config/flags.h"
+#include "lib/data/locations.h"
 #include <ostream>
 
 class Fluxmap;
@@ -42,6 +43,10 @@ public:
     /* Writes a fluxmap to a track and side. */
 
     virtual void writeFlux(int track, int side, const Fluxmap& fluxmap) = 0;
+    void writeFlux(const CylinderHead& location, const Fluxmap& fluxmap)
+    {
+        writeFlux(location.cylinder, location.head, fluxmap);
+    }
 
     /* Returns whether this is writing to real hardware or not. */
 
