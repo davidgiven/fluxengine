@@ -87,7 +87,12 @@ $(PKG_CONFIG_HASHES) $(HOST_PKG_CONFIG_HASHES) &:
 
 include $(OBJ)/build.mk
 
-MAKEFLAGS += -r -j$(shell nproc)
+ifeq ($(OSX),yes)
+	MAKEFLAGS += -r -j$(shell sysctl -n hw.logicalcpu)
+else
+	MAKEFLAGS += -r -j$(shell nproc)
+endif
+
 .DELETE_ON_ERROR:
 
 .PHONY: update-ab

@@ -65,7 +65,7 @@ jobs:
       run: |
         brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg
     - name: make
-      run: gmake -C fluxengine -j2
+      run: gmake -C fluxengine
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
