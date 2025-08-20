@@ -11,6 +11,6 @@ connector.
 For example:
 
 ```
-fluxengine read -c apple2 --160 apple2_drive
+fluxengine read apple2 --160 apple2_drive
 ```
 

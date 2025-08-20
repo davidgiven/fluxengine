@@ -66,6 +66,18 @@ struct FluxConstructor
 
 class Config
 {
+private:
+    struct OptionInfo
+    {
+        bool operator==(const OptionInfo& other) const = default;
+        std::strong_ordering operator<=>(
+            const OptionInfo& other) const = default;
+
+        const OptionGroupProto* group;
+        const OptionProto* option;
+        bool usesValue;
+    };
+
 public:
     /* Direct access to the various proto layers. */
 
@@ -124,12 +136,12 @@ public:
     /* Option management: look up an option by name, determine whether an option
      * is valid, and apply an option. */
 
-    const OptionProto& findOption(const std::string& option);
+    OptionInfo findOption(
+        const std::string& name, const std::string value = "");
     void checkOptionValid(const OptionProto& option);
     bool isOptionValid(const OptionProto& option);
-    bool isOptionValid(std::string option);
-    void applyOption(const OptionProto& option);
-    void applyOption(std::string option);
+    void applyOption(const OptionInfo& optionInfo);
+    bool applyOption(const std::string& name, const std::string value = "");
     void clearOptions();
 
     /* Adjust overall inputs and outputs. */
@@ -165,7 +177,7 @@ private:
     ConfigProto _baseConfig;
     ConfigProto _overridesConfig;
     ConfigProto _combinedConfig;
-    std::set<std::string> _appliedOptions;
+    std::set<OptionInfo> _appliedOptions;
     bool _configValid;
 
     FluxSourceProto _verificationFluxSourceProto;

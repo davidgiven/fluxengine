@@ -10,6 +10,6 @@ no way to detect this automatically.
 For example:
 
 ```
-fluxengine read -c ibm --180 40track_drive
+fluxengine read ibm --180 40track_drive
 ```
 

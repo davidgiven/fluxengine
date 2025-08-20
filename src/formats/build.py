@@ -3,14 +3,13 @@ from build.c import cxxlibrary
 from scripts.build import protoencode
 
 formats = [
-    "40track_drive",
+    "_global_options",
     "acornadfs",
     "acorndfs",
     "aeslanier",
     "agat",
     "amiga",
     "ampro",
-    "apple2_drive",
     "apple2",
     "atarist",
     "bk",
@@ -33,7 +32,6 @@ formats = [
     "psos",
     "rolandd20",
     "rx50",
-    "shugart_drive",
     "smaky6",
     "tartu",
     "ti99",

@@ -158,7 +158,7 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc,
                         index += usesthat;
                     }
                     else
-                        globalConfig().applyOption(path);
+                        usesthat = globalConfig().applyOption(path, value);
                 }
                 else
                     error("unrecognised flag '-{}'; try --help", key);
@@ -197,6 +197,7 @@ void FlagGroup::parseFlagsWithConfigFiles(int argc,
     const char* argv[],
     const std::map<std::string, const ConfigProto*>& configFiles)
 {
+    globalConfig().readBaseConfigFile("_global_options");
     FlagGroup({this, &configGroup}).parseFlags(argc, argv);
 }
 

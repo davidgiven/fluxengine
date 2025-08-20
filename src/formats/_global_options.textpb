@@ -1,0 +1,77 @@
+comment: 'Options which can be applied everywhere.'
+is_extension: true
+
+option_group {
+	comment: "Drive type"
+    name: "drivetype"
+
+	option {
+		name: "80"
+		comment: '80 track drive'
+        set_by_default: true
+
+		config {
+		}
+	}
+
+	option {
+		name: "40"
+		comment: '40 track drive'
+
+		config {
+            drive {
+                tracks: "c0-40h0-1"
+                drive_type: DRIVETYPE_40TRACK
+            }
+		}
+	}
+
+	option {
+		name: "160"
+		comment: '160 track Apple II drive'
+
+		config {
+            drive {
+                tracks: "c0-159h0"
+                drive_type: DRIVETYPE_APPLE2
+            }
+		}
+	}
+}
+
+option_group {
+    comment: 'Bus interface'
+    name: "bus"
+
+	option {
+		name: "pc"
+		comment: 'PC drive interface'
+        set_by_default: true
+    }
+
+	option {
+		name: "shugart"
+		comment: 'Shugart bus interface (only on Greaseweazle)'
+
+		config {
+            usb {
+                greaseweazle {
+                    bus_type: SHUGART
+                }
+            }
+        }
+    }
+
+	option {
+		name: "appleii"
+		comment: 'Apple II bus interface (only on Greaseweazle)'
+
+		config {
+            usb {
+                greaseweazle {
+                    bus_type: APPLE2
+                }
+            }
+		}
+	}
+}
