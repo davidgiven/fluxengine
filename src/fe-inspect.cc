@@ -21,9 +21,7 @@ static StringFlag sourceFlux({"--source", "-s"},
         globalConfig().setFluxSource(value);
     });
 
-static IntFlag trackFlag({"--cylinder", "-c"}, "Track to read.", 0);
-
-static IntFlag headFlag({"--head", "-h"}, "Head to read.", 0);
+static StringFlag destTracks({"--tracks", "-t"}, "tracks to write to", "c0h0");
 
 static SettableFlag dumpFluxFlag(
     {"--dump-flux", "-F"}, "Dump raw magnetic disk flux.");
@@ -135,7 +133,10 @@ int mainInspect(int argc, const char* argv[])
     flags.parseFlagsWithConfigFiles(argc, argv, {});
 
     auto fluxSource = FluxSource::create(globalConfig());
-    const auto fluxmap = fluxSource->readFlux(trackFlag, headFlag)->next();
+    auto tracks = parseCylinderHeadsString(destTracks);
+    if (tracks.size() != 1)
+        error("you must specify exactly one track");
+    const auto fluxmap = fluxSource->readFlux(tracks[0])->next();
 
     std::cout << fmt::format("0x{:x} bytes of data in {:.3f}ms\n",
         fluxmap->bytes(),

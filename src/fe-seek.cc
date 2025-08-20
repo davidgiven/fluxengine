@@ -16,7 +16,7 @@ static StringFlag sourceFlux({"-s", "--source"},
         globalConfig().setFluxSource(value);
     });
 
-static IntFlag track({"--cylinder", "-c"}, "track to seek to", 0);
+static IntFlag track({"--cylinder", "-t"}, "track to seek to", 0);
 
 extern const std::map<std::string, std::string> readables;
 

@@ -22,9 +22,7 @@ static StringFlag destFlux({"--dest", "-d"},
         globalConfig().setFluxSink(value);
     });
 
-static IntFlag destTrack({"--cylinder", "-c"}, "track to write to", 0);
-
-static IntFlag destHead({"--head", "-h"}, "head to write to", 0);
+static StringFlag destTracks({"--tracks", "-t"}, "tracks to write to", "c0h0");
 
 static DoubleFlag minInterval(
     {"--min-interval-us"}, "Minimum pulse interval", 2.0);
@@ -251,11 +249,14 @@ int mainAnalyseDriveResponse(int argc, const char* argv[])
 
     if (globalConfig()->flux_sink().type() != FLUXTYPE_DRIVE)
         error("this only makes sense with a real disk drive");
+    auto tracks = parseCylinderHeadsString(destTracks);
+    if (tracks.size() != 1)
+        error("you must specify exactly one track");
 
     usbSetDrive(globalConfig()->drive().drive(),
         globalConfig()->drive().high_density(),
         globalConfig()->drive().index_mode());
-    usbSeek(destTrack);
+    usbSeek(tracks[0].cylinder);
 
     std::cout << "Measuring rotational speed...\n";
     nanoseconds_t period = usbGetRotationalPeriod(0);
@@ -291,12 +292,12 @@ int mainAnalyseDriveResponse(int argc, const char* argv[])
                 outFluxmap.appendPulse();
             }
 
-            usbWrite(destHead, outFluxmap.rawBytes(), 0);
+            usbWrite(tracks[0].head, outFluxmap.rawBytes(), 0);
 
             /* Read the test pattern in again. */
 
             Fluxmap inFluxmap;
-            inFluxmap.appendBytes(usbRead(destHead, true, period, 0));
+            inFluxmap.appendBytes(usbRead(tracks[0].head, true, period, 0));
 
             /* Compute histogram. */
 
