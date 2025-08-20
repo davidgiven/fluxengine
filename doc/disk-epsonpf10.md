@@ -15,5 +15,5 @@ format itself is yet another IBM scheme variant.
 
 To read:
 
-  - `fluxengine read epsonpf10 -s drive:0 -o epsonpf10.img`
+  - `fluxengine read -c epsonpf10 -s drive:0 -o epsonpf10.img`
 

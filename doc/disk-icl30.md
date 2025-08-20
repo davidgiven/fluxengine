@@ -15,5 +15,5 @@ track! Other than that it's another IBM scheme variation.
 
 To read:
 
-  - `fluxengine read icl30 -s drive:0 -o icl30.img`
+  - `fluxengine read -c icl30 -s drive:0 -o icl30.img`
 

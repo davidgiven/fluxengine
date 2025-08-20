@@ -37,7 +37,7 @@ based on what looks right. If anyone knows _anything_ about these disks,
 
 To read:
 
-  - `fluxengine read aeslanier -s drive:0 -o aeslanier.img`
+  - `fluxengine read -c aeslanier -s drive:0 -o aeslanier.img`
 
 ## References
 

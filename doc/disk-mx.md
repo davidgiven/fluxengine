@@ -52,10 +52,10 @@ Words are all stored little-endian.
 
 To read:
 
-  - `fluxengine read mx --110 -s drive:0 -o mx.img`
-  - `fluxengine read mx --220ds -s drive:0 -o mx.img`
-  - `fluxengine read mx --220ss -s drive:0 -o mx.img`
-  - `fluxengine read mx --440 -s drive:0 -o mx.img`
+  - `fluxengine read -c mx --110 -s drive:0 -o mx.img`
+  - `fluxengine read -c mx --220ds -s drive:0 -o mx.img`
+  - `fluxengine read -c mx --220ss -s drive:0 -o mx.img`
+  - `fluxengine read -c mx --440 -s drive:0 -o mx.img`
 
 ## References
 

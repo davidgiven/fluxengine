@@ -26,11 +26,11 @@ distinctly subpar and not particularly good at detecting errors.
 
 To read:
 
-  - `fluxengine read amiga -s drive:0 -o amiga.adf`
+  - `fluxengine read -c amiga -s drive:0 -o amiga.adf`
 
 To write:
 
-  - `fluxengine write amiga -d drive:0 -i amiga.adf`
+  - `fluxengine write -c amiga -d drive:0 -i amiga.adf`
 
 ## References
 

@@ -24,9 +24,9 @@ and, oddly, swapped sides.
 
 To read:
 
-  - `fluxengine read psos -s drive:0 -o pme.img`
+  - `fluxengine read -c psos -s drive:0 -o pme.img`
 
 To write:
 
-  - `fluxengine write psos -d drive:0 -i pme.img`
+  - `fluxengine write -c psos -d drive:0 -i pme.img`
 

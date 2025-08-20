@@ -40,9 +40,9 @@ for assistance with this!
 
 To read:
 
-  - `fluxengine read rolandd20 -s drive:0 -o rolandd20.img`
+  - `fluxengine read -c rolandd20 -s drive:0 -o rolandd20.img`
 
 To write:
 
-  - `fluxengine write rolandd20 -d drive:0 -i rolandd20.img`
+  - `fluxengine write -c rolandd20 -d drive:0 -i rolandd20.img`
 

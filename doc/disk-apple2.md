@@ -58,13 +58,13 @@ volume.
 
 To read:
 
-  - `fluxengine read apple2 --140 -s drive:0 -o apple2.img`
-  - `fluxengine read apple2 --640 -s drive:0 -o apple2.img`
+  - `fluxengine read -c apple2 --140 -s drive:0 -o apple2.img`
+  - `fluxengine read -c apple2 --640 -s drive:0 -o apple2.img`
 
 To write:
 
-  - `fluxengine write apple2 --140 -d drive:0 -i apple2.img`
-  - `fluxengine write apple2 --640 -d drive:0 -i apple2.img`
+  - `fluxengine write -c apple2 --140 -d drive:0 -i apple2.img`
+  - `fluxengine write -c apple2 --640 -d drive:0 -i apple2.img`
 
 ## References
 

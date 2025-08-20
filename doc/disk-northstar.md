@@ -31,15 +31,15 @@ equivalent to .img images.
 
 To read:
 
-  - `fluxengine read northstar --87 -s drive:0 -o northstar.nsi`
-  - `fluxengine read northstar --175 -s drive:0 -o northstar.nsi`
-  - `fluxengine read northstar --350 -s drive:0 -o northstar.nsi`
+  - `fluxengine read -c northstar --87 -s drive:0 -o northstar.nsi`
+  - `fluxengine read -c northstar --175 -s drive:0 -o northstar.nsi`
+  - `fluxengine read -c northstar --350 -s drive:0 -o northstar.nsi`
 
 To write:
 
-  - `fluxengine write northstar --87 -d drive:0 -i northstar.nsi`
-  - `fluxengine write northstar --175 -d drive:0 -i northstar.nsi`
-  - `fluxengine write northstar --350 -d drive:0 -i northstar.nsi`
+  - `fluxengine write -c northstar --87 -d drive:0 -i northstar.nsi`
+  - `fluxengine write -c northstar --175 -d drive:0 -i northstar.nsi`
+  - `fluxengine write -c northstar --350 -d drive:0 -i northstar.nsi`
 
 ## References
 

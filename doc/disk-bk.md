@@ -22,9 +22,9 @@ on what was available at the time, with the same format on both.
 
 To read:
 
-  - `fluxengine read bk -s drive:0 -o bk800.img`
+  - `fluxengine read -c bk -s drive:0 -o bk800.img`
 
 To write:
 
-  - `fluxengine write bk -d drive:0 -i bk800.img`
+  - `fluxengine write -c bk -d drive:0 -i bk800.img`
 

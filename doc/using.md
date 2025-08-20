@@ -82,16 +82,16 @@ Here are some sample invocations:
 ```
 # Read an PC 1440kB disk, producing a disk image with the default name
 # (ibm.img)
-$ fluxengine read ibm --1440
+$ fluxengine read -c ibm --1440
 
 # Write a PC 1440kB disk to drive 1
-$ fluxengine write ibm --1440 -i image.img -d drive:1
+$ fluxengine write -c ibm --1440 -i image.img -d drive:1
 
 # Read a Eco1 CP/M disk, making a copy of the flux into a file
-$ fluxengine read eco1 --copy-flux-to copy.flux -o eco1.ldbs
+$ fluxengine read -c eco1 --copy-flux-to copy.flux -o eco1.ldbs
 
 # Rerun the decode from the flux file, tweaking the parameters
-$ fluxengine read eco1 -s copy.flux -o eco1.ldbs --cylinders=1
+$ fluxengine read -c eco1 -s copy.flux -o eco1.ldbs --cylinders=1
 ```
 
 ### Configuration
@@ -146,14 +146,14 @@ different task. Run each one with `--help` to get a full list of
 (non-configuration-setting) options; this describes only basic usage of the
 more common tools.
 
-  - `fluxengine read <profile> <options> -s <flux source> -o <image output>`
+  - `fluxengine read -c <profile> <options> -s <flux source> -o <image output>`
 
     Reads flux (possibly from a disk) and decodes it into a file system image.
     `<profile>` is a reference to an internal input configuration file
     describing the format. `<options>` may be any combination of options
     defined by the profile.
 
-  - `fluxengine write <profile> -i <image input> -d <flux destination>`
+  - `fluxengine write -c <profile> -i <image input> -d <flux destination>`
 
     Reads a filesystem image and encodes it into flux (possibly writing to a
     disk). `<profile>` is a reference to an internal output configuration file
@@ -489,7 +489,7 @@ containing valuable historical data, and you want to read them.
 Typically I do this:
 
 ```
-$ fluxengine read brother240 -s drive:0 -o brother.img --copy-flux-to=brother.flux --decoder.write_csv_to=brother.csv
+$ fluxengine read -c brother240 -s drive:0 -o brother.img --copy-flux-to=brother.flux --decoder.write_csv_to=brother.csv
 ```
 
 This will read the disk in drive 0 and write out an information CSV file. It'll
@@ -499,7 +499,7 @@ settings, I can rerun the decode without having to physically touch the disk
 like this:
 
 ```
-$ fluxengine read brother -s brother.flux -o brother.img --decoder.write_csv_to=brother.csv
+$ fluxengine read -c brother -s brother.flux -o brother.img --decoder.write_csv_to=brother.csv
 ```
 
 Apart from being drastically faster, this avoids touching the (potentially

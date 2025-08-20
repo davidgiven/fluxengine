@@ -29,25 +29,25 @@ Be aware that many PC drives (including mine) won't do the 82 track formats.
 
 To read:
 
-  - `fluxengine read atarist --360 -s drive:0 -o atarist.img`
-  - `fluxengine read atarist --370 -s drive:0 -o atarist.img`
-  - `fluxengine read atarist --400 -s drive:0 -o atarist.img`
-  - `fluxengine read atarist --410 -s drive:0 -o atarist.img`
-  - `fluxengine read atarist --720 -s drive:0 -o atarist.img`
-  - `fluxengine read atarist --740 -s drive:0 -o atarist.img`
-  - `fluxengine read atarist --800 -s drive:0 -o atarist.img`
-  - `fluxengine read atarist --820 -s drive:0 -o atarist.img`
+  - `fluxengine read -c atarist --360 -s drive:0 -o atarist.img`
+  - `fluxengine read -c atarist --370 -s drive:0 -o atarist.img`
+  - `fluxengine read -c atarist --400 -s drive:0 -o atarist.img`
+  - `fluxengine read -c atarist --410 -s drive:0 -o atarist.img`
+  - `fluxengine read -c atarist --720 -s drive:0 -o atarist.img`
+  - `fluxengine read -c atarist --740 -s drive:0 -o atarist.img`
+  - `fluxengine read -c atarist --800 -s drive:0 -o atarist.img`
+  - `fluxengine read -c atarist --820 -s drive:0 -o atarist.img`
 
 To write:
 
-  - `fluxengine write atarist --360 -d drive:0 -i atarist.img`
-  - `fluxengine write atarist --370 -d drive:0 -i atarist.img`
-  - `fluxengine write atarist --400 -d drive:0 -i atarist.img`
-  - `fluxengine write atarist --410 -d drive:0 -i atarist.img`
-  - `fluxengine write atarist --720 -d drive:0 -i atarist.img`
-  - `fluxengine write atarist --740 -d drive:0 -i atarist.img`
-  - `fluxengine write atarist --800 -d drive:0 -i atarist.img`
-  - `fluxengine write atarist --820 -d drive:0 -i atarist.img`
+  - `fluxengine write -c atarist --360 -d drive:0 -i atarist.img`
+  - `fluxengine write -c atarist --370 -d drive:0 -i atarist.img`
+  - `fluxengine write -c atarist --400 -d drive:0 -i atarist.img`
+  - `fluxengine write -c atarist --410 -d drive:0 -i atarist.img`
+  - `fluxengine write -c atarist --720 -d drive:0 -i atarist.img`
+  - `fluxengine write -c atarist --740 -d drive:0 -i atarist.img`
+  - `fluxengine write -c atarist --800 -d drive:0 -i atarist.img`
+  - `fluxengine write -c atarist --820 -d drive:0 -i atarist.img`
 
 ## References
 

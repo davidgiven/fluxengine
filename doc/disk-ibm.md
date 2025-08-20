@@ -55,30 +55,30 @@ image format. FluxEngine will use these parameters.
 
 To read:
 
-  - `fluxengine read ibm --auto -s drive:0 -o ibm.img`
-  - `fluxengine read ibm --160 -s drive:0 -o ibm.img`
-  - `fluxengine read ibm --180 -s drive:0 -o ibm.img`
-  - `fluxengine read ibm --320 -s drive:0 -o ibm.img`
-  - `fluxengine read ibm --360 -s drive:0 -o ibm.img`
-  - `fluxengine read ibm --720_96 -s drive:0 -o ibm.img`
-  - `fluxengine read ibm --720_135 -s drive:0 -o ibm.img`
-  - `fluxengine read ibm --1200 -s drive:0 -o ibm.img`
-  - `fluxengine read ibm --1232 -s drive:0 -o ibm.img`
-  - `fluxengine read ibm --1440 -s drive:0 -o ibm.img`
-  - `fluxengine read ibm --1680 -s drive:0 -o ibm.img`
+  - `fluxengine read -c ibm --auto -s drive:0 -o ibm.img`
+  - `fluxengine read -c ibm --160 -s drive:0 -o ibm.img`
+  - `fluxengine read -c ibm --180 -s drive:0 -o ibm.img`
+  - `fluxengine read -c ibm --320 -s drive:0 -o ibm.img`
+  - `fluxengine read -c ibm --360 -s drive:0 -o ibm.img`
+  - `fluxengine read -c ibm --720_96 -s drive:0 -o ibm.img`
+  - `fluxengine read -c ibm --720_135 -s drive:0 -o ibm.img`
+  - `fluxengine read -c ibm --1200 -s drive:0 -o ibm.img`
+  - `fluxengine read -c ibm --1232 -s drive:0 -o ibm.img`
+  - `fluxengine read -c ibm --1440 -s drive:0 -o ibm.img`
+  - `fluxengine read -c ibm --1680 -s drive:0 -o ibm.img`
 
 To write:
 
-  - `fluxengine write ibm --160 -d drive:0 -i ibm.img`
-  - `fluxengine write ibm --180 -d drive:0 -i ibm.img`
-  - `fluxengine write ibm --320 -d drive:0 -i ibm.img`
-  - `fluxengine write ibm --360 -d drive:0 -i ibm.img`
-  - `fluxengine write ibm --720_96 -d drive:0 -i ibm.img`
-  - `fluxengine write ibm --720_135 -d drive:0 -i ibm.img`
-  - `fluxengine write ibm --1200 -d drive:0 -i ibm.img`
-  - `fluxengine write ibm --1232 -d drive:0 -i ibm.img`
-  - `fluxengine write ibm --1440 -d drive:0 -i ibm.img`
-  - `fluxengine write ibm --1680 -d drive:0 -i ibm.img`
+  - `fluxengine write -c ibm --160 -d drive:0 -i ibm.img`
+  - `fluxengine write -c ibm --180 -d drive:0 -i ibm.img`
+  - `fluxengine write -c ibm --320 -d drive:0 -i ibm.img`
+  - `fluxengine write -c ibm --360 -d drive:0 -i ibm.img`
+  - `fluxengine write -c ibm --720_96 -d drive:0 -i ibm.img`
+  - `fluxengine write -c ibm --720_135 -d drive:0 -i ibm.img`
+  - `fluxengine write -c ibm --1200 -d drive:0 -i ibm.img`
+  - `fluxengine write -c ibm --1232 -d drive:0 -i ibm.img`
+  - `fluxengine write -c ibm --1440 -d drive:0 -i ibm.img`
+  - `fluxengine write -c ibm --1680 -d drive:0 -i ibm.img`
 
 Mixed-format disks
 ------------------

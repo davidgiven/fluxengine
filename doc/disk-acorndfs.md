@@ -24,13 +24,13 @@ requires a bit of fiddling as they have the same tracks on twice.
 
 To read:
 
-  - `fluxengine read acorndfs --100 -s drive:0 -o acorndfs.img`
-  - `fluxengine read acorndfs --200 -s drive:0 -o acorndfs.img`
+  - `fluxengine read -c acorndfs --100 -s drive:0 -o acorndfs.img`
+  - `fluxengine read -c acorndfs --200 -s drive:0 -o acorndfs.img`
 
 To write:
 
-  - `fluxengine write acorndfs --100 -d drive:0 -i acorndfs.img`
-  - `fluxengine write acorndfs --200 -d drive:0 -i acorndfs.img`
+  - `fluxengine write -c acorndfs --100 -d drive:0 -i acorndfs.img`
+  - `fluxengine write -c acorndfs --200 -d drive:0 -i acorndfs.img`
 
 ## References
 

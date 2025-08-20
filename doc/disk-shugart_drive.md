@@ -10,6 +10,6 @@ on Greaseweazle hardware.
 For example:
 
 ```
-fluxengine read ibm --720 shugart_drive
+fluxengine read -c ibm --720 shugart_drive
 ```
 

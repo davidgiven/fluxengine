@@ -30,7 +30,7 @@ I don't have access to one of those disks.
 
 To read:
 
-  - `fluxengine read fb100 -s drive:0 -o fb100.img`
+  - `fluxengine read -c fb100 -s drive:0 -o fb100.img`
 
 ## References
 

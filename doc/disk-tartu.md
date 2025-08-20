@@ -34,13 +34,13 @@ FluxEngine supports reading and writing Tartu disks with CP/M filesystem access.
 
 To read:
 
-  - `fluxengine read tartu --390 -s drive:0 -o tartu.img`
-  - `fluxengine read tartu --780 -s drive:0 -o tartu.img`
+  - `fluxengine read -c tartu --390 -s drive:0 -o tartu.img`
+  - `fluxengine read -c tartu --780 -s drive:0 -o tartu.img`
 
 To write:
 
-  - `fluxengine write tartu --390 -d drive:0 -i tartu.img`
-  - `fluxengine write tartu --780 -d drive:0 -i tartu.img`
+  - `fluxengine write -c tartu --390 -d drive:0 -i tartu.img`
+  - `fluxengine write -c tartu --780 -d drive:0 -i tartu.img`
 
 ## References
 
