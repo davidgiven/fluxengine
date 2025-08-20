@@ -13,17 +13,23 @@ static std::vector<Flag*> all_flags;
 static std::map<const std::string, Flag*> flags_by_name;
 
 static void doHelp();
+static void doLoadConfig(const std::string& filename);
 static void doShowConfig();
 static void doDoc();
 
 static FlagGroup helpGroup;
 static ActionFlag helpFlag = ActionFlag({"--help"}, "Shows the help.", doHelp);
 
-static ActionFlag showConfigFlag = ActionFlag({"--config", "-C"},
+static FlagGroup configGroup;
+static ActionFlag loadConfigFlag({"--config", "-c"},
+    "Reads an internal or external configuration file.",
+    doLoadConfig);
+
+static ActionFlag showConfigFlag({"--show-config", "-C"},
     "Shows the currently set configuration and halts.",
     doShowConfig);
 
-static ActionFlag docFlag = ActionFlag(
+static ActionFlag docFlag(
     {"--doc"}, "Shows the available configuration options and halts.", doDoc);
 
 FlagGroup::FlagGroup()
@@ -182,17 +188,16 @@ void FlagGroup::parseFlags(int argc,
             "non-option parameter '{}' seen (try --help)", *filenames.begin());
 }
 
+static void doLoadConfig(const std::string& filename)
+{
+    globalConfig().readBaseConfigFile(filename);
+}
+
 void FlagGroup::parseFlagsWithConfigFiles(int argc,
     const char* argv[],
     const std::map<std::string, const ConfigProto*>& configFiles)
 {
-    parseFlags(argc,
-        argv,
-        [&](const auto& filename)
-        {
-            globalConfig().readBaseConfigFile(filename);
-            return true;
-        });
+    FlagGroup({this, &configGroup}).parseFlags(argc, argv);
 }
 
 void FlagGroup::checkInitialised() const
