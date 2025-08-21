@@ -741,38 +741,3 @@ void readDiskCommand(
             *diskflux->image, globalConfig()->decoder().write_csv_to());
     writer.writeImage(*diskflux->image);
 }
-
-void rawReadDiskCommand(FluxSource& fluxsource, FluxSink& fluxsink)
-{
-    log(BeginOperationLogMessage{"Performing raw read of disk"});
-
-    if (fluxsource.isHardware() || fluxsink.isHardware())
-        measureDiskRotation();
-    auto physicalLocations = Layout::computePhysicalLocations();
-    unsigned index = 0;
-    for (const auto& physicalLocation : physicalLocations)
-    {
-        log(OperationProgressLogMessage{
-            index * 100 / (int)physicalLocations.size()});
-        index++;
-
-        testForEmergencyStop();
-        auto trackInfo = Layout::getLayoutOfTrackPhysical(
-            physicalLocation.cylinder, physicalLocation.head);
-        auto fluxSourceIterator = fluxsource.readFlux(
-            trackInfo->physicalTrack, trackInfo->physicalSide);
-
-        log(BeginReadOperationLogMessage{
-            trackInfo->physicalTrack, trackInfo->physicalSide});
-        auto fluxmap = fluxSourceIterator->next();
-        log(EndReadOperationLogMessage());
-        log("{0} ms in {1} bytes",
-            (int)(fluxmap->duration() / 1e6),
-            fluxmap->bytes());
-
-        fluxsink.writeFlux(
-            trackInfo->physicalTrack, trackInfo->physicalSide, *fluxmap);
-    }
-
-    log(EndOperationLogMessage{"Raw read complete"});
-}

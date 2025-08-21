@@ -111,6 +111,5 @@ extern std::shared_ptr<const DiskFlux> readDiskCommand(
     FluxSource& fluxsource, Decoder& decoder);
 extern void readDiskCommand(
     FluxSource& source, Decoder& decoder, ImageWriter& writer);
-extern void rawReadDiskCommand(FluxSource& source, FluxSink& sink);
 
 #endif
