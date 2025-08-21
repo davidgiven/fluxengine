@@ -26,7 +26,7 @@ this is completely correct, so don't trust it!
 
 To read:
 
-  - `fluxengine read smaky6 -s drive:0 -o smaky6.img`
+  - `fluxengine read -c smaky6 -s drive:0 -o smaky6.img`
 
 ## References
 

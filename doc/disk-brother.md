@@ -44,13 +44,13 @@ investigate.
 
 To read:
 
-  - `fluxengine read brother --120 -s drive:0 -o brother.img`
-  - `fluxengine read brother --240 -s drive:0 -o brother.img`
+  - `fluxengine read -c brother --120 -s drive:0 -o brother.img`
+  - `fluxengine read -c brother --240 -s drive:0 -o brother.img`
 
 To write:
 
-  - `fluxengine write brother --120 -d drive:0 -i brother.img`
-  - `fluxengine write brother --240 -d drive:0 -i brother.img`
+  - `fluxengine write -c brother --120 -d drive:0 -i brother.img`
+  - `fluxengine write -c brother --240 -d drive:0 -i brother.img`
 
 Dealing with misaligned disks
 -----------------------------

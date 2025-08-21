@@ -28,7 +28,7 @@ static void addExample(std::vector<std::string>& examples,
     else
         return;
 
-    r += fmt::format(" {}", name);
+    r += fmt::format(" -c {}", name);
     if (format)
         r += fmt::format(" --{}", format->name());
 

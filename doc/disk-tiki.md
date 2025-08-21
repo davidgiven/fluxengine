@@ -20,8 +20,8 @@ on the precise format.
 
 To read:
 
-  - `fluxengine read tiki --90 -s drive:0 -o tiki.img`
-  - `fluxengine read tiki --200 -s drive:0 -o tiki.img`
-  - `fluxengine read tiki --400 -s drive:0 -o tiki.img`
-  - `fluxengine read tiki --800 -s drive:0 -o tiki.img`
+  - `fluxengine read -c tiki --90 -s drive:0 -o tiki.img`
+  - `fluxengine read -c tiki --200 -s drive:0 -o tiki.img`
+  - `fluxengine read -c tiki --400 -s drive:0 -o tiki.img`
+  - `fluxengine read -c tiki --800 -s drive:0 -o tiki.img`
 

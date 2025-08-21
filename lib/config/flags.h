@@ -83,13 +83,23 @@ public:
         const std::string helptext,
         std::function<void(void)> callback):
         Flag(names, helptext),
-        _callback(callback)
+        _voidCallback(callback),
+        _hasArgument(false)
+    {
+    }
+
+    ActionFlag(const std::vector<std::string>& names,
+        const std::string helptext,
+        std::function<void(const std::string&)> callback):
+        Flag(names, helptext),
+        _callback(callback),
+        _hasArgument(true)
     {
     }
 
     bool hasArgument() const override
     {
-        return false;
+        return _hasArgument;
     }
 
     const std::string defaultValueAsString() const override
@@ -99,11 +109,16 @@ public:
 
     void set(const std::string& value) override
     {
-        _callback();
+        if (_hasArgument)
+            _callback(value);
+        else
+            _voidCallback();
     }
 
 private:
-    const std::function<void(void)> _callback;
+    const std::function<void(const std::string&)> _callback;
+    const std::function<void(void)> _voidCallback;
+    bool _hasArgument;
 };
 
 class SettableFlag : public Flag

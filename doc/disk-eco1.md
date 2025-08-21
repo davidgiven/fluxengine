@@ -33,7 +33,7 @@ images.
 
 To read:
 
-  - `fluxengine read eco1 -s drive:0 -o eco1.img`
+  - `fluxengine read -c eco1 -s drive:0 -o eco1.img`
 
 ## References
 

@@ -36,7 +36,7 @@ touch](https://github.com/davidgiven/fluxengine/issues/new).
 
 To read:
 
-  - `fluxengine read f85 -s drive:0 -o f85.img`
+  - `fluxengine read -c f85 -s drive:0 -o f85.img`
 
 ## References
 

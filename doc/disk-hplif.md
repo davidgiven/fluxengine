@@ -23,17 +23,17 @@ encoding scheme.
 
 To read:
 
-  - `fluxengine read hplif --264 -s drive:0 -o hplif.img`
-  - `fluxengine read hplif --608 -s drive:0 -o hplif.img`
-  - `fluxengine read hplif --616 -s drive:0 -o hplif.img`
-  - `fluxengine read hplif --770 -s drive:0 -o hplif.img`
+  - `fluxengine read -c hplif --264 -s drive:0 -o hplif.img`
+  - `fluxengine read -c hplif --608 -s drive:0 -o hplif.img`
+  - `fluxengine read -c hplif --616 -s drive:0 -o hplif.img`
+  - `fluxengine read -c hplif --770 -s drive:0 -o hplif.img`
 
 To write:
 
-  - `fluxengine write hplif --264 -d drive:0 -i hplif.img`
-  - `fluxengine write hplif --608 -d drive:0 -i hplif.img`
-  - `fluxengine write hplif --616 -d drive:0 -i hplif.img`
-  - `fluxengine write hplif --770 -d drive:0 -i hplif.img`
+  - `fluxengine write -c hplif --264 -d drive:0 -i hplif.img`
+  - `fluxengine write -c hplif --608 -d drive:0 -i hplif.img`
+  - `fluxengine write -c hplif --616 -d drive:0 -i hplif.img`
+  - `fluxengine write -c hplif --770 -d drive:0 -i hplif.img`
 
 ## References
 

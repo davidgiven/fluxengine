@@ -31,9 +31,9 @@ they might require nudging as the side order can't be reliably autodetected.
 
 To read:
 
-  - `fluxengine read acornadfs --160 -s drive:0 -o acornadfs.img`
-  - `fluxengine read acornadfs --320 -s drive:0 -o acornadfs.img`
-  - `fluxengine read acornadfs --640 -s drive:0 -o acornadfs.img`
-  - `fluxengine read acornadfs --800 -s drive:0 -o acornadfs.img`
-  - `fluxengine read acornadfs --1600 -s drive:0 -o acornadfs.img`
+  - `fluxengine read -c acornadfs --160 -s drive:0 -o acornadfs.img`
+  - `fluxengine read -c acornadfs --320 -s drive:0 -o acornadfs.img`
+  - `fluxengine read -c acornadfs --640 -s drive:0 -o acornadfs.img`
+  - `fluxengine read -c acornadfs --800 -s drive:0 -o acornadfs.img`
+  - `fluxengine read -c acornadfs --1600 -s drive:0 -o acornadfs.img`
 

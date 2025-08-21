@@ -55,14 +55,14 @@ static void test_option_validity()
         }
 	)M");
 
-    AssertThat(
-        globalConfig().isOptionValid(globalConfig().findOption("option1")),
+    AssertThat(globalConfig().isOptionValid(
+                   *globalConfig().findOption("option1").option),
         Equals(true));
-    AssertThat(
-        globalConfig().isOptionValid(globalConfig().findOption("option2")),
+    AssertThat(globalConfig().isOptionValid(
+                   *globalConfig().findOption("option2").option),
         Equals(false));
-    AssertThat(
-        globalConfig().isOptionValid(globalConfig().findOption("option3")),
+    AssertThat(globalConfig().isOptionValid(
+                   *globalConfig().findOption("option3").option),
         Equals(true));
 }
 

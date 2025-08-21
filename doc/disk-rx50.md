@@ -15,9 +15,9 @@ vanilla single-sided IBM scheme variation.
 
 To read:
 
-  - `fluxengine read rx50 -s drive:0 -o rx50.img`
+  - `fluxengine read -c rx50 -s drive:0 -o rx50.img`
 
 To write:
 
-  - `fluxengine write rx50 -d drive:0 -i rx50.img`
+  - `fluxengine write -c rx50 -d drive:0 -i rx50.img`
 

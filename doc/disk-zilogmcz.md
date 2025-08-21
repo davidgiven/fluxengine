@@ -31,7 +31,7 @@ system.
 
 To read:
 
-  - `fluxengine read zilogmcz -s drive:0 -o zilogmcz.img`
+  - `fluxengine read -c zilogmcz -s drive:0 -o zilogmcz.img`
 
 ## References
 

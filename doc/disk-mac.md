@@ -47,13 +47,13 @@ standard for disk images is to omit it. If you want them, specify that you want
 
 To read:
 
-  - `fluxengine read mac --400 -s drive:0 -o mac.dsk`
-  - `fluxengine read mac --800 -s drive:0 -o mac.dsk`
+  - `fluxengine read -c mac --400 -s drive:0 -o mac.dsk`
+  - `fluxengine read -c mac --800 -s drive:0 -o mac.dsk`
 
 To write:
 
-  - `fluxengine write mac --400 -d drive:0 -i mac.dsk`
-  - `fluxengine write mac --800 -d drive:0 -i mac.dsk`
+  - `fluxengine write -c mac --400 -d drive:0 -i mac.dsk`
+  - `fluxengine write -c mac --800 -d drive:0 -i mac.dsk`
 
 ## References
 

@@ -18,9 +18,9 @@ boot ROM could only read single density data.)
 
 To read:
 
-  - `fluxengine read n88basic -s drive:0 -o n88basic.img`
+  - `fluxengine read -c n88basic -s drive:0 -o n88basic.img`
 
 To write:
 
-  - `fluxengine write n88basic -d drive:0 -i n88basic.img`
+  - `fluxengine write -c n88basic -d drive:0 -i n88basic.img`
 

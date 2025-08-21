@@ -26,11 +26,11 @@ FluxEngine will read and write these (but only the DSDD MFM variant).
 
 To read:
 
-  - `fluxengine read tids990 -s drive:0 -o tids990.img`
+  - `fluxengine read -c tids990 -s drive:0 -o tids990.img`
 
 To write:
 
-  - `fluxengine write tids990 -d drive:0 -i tids990.img`
+  - `fluxengine write -c tids990 -d drive:0 -i tids990.img`
 
 ## References
 

@@ -46,13 +46,13 @@ FluxEngine can read and write both the single-sided and double-sided variants.
 
 To read:
 
-  - `fluxengine read victor9k --612 -s drive:0 -o victor9k.img`
-  - `fluxengine read victor9k --1224 -s drive:0 -o victor9k.img`
+  - `fluxengine read -c victor9k --612 -s drive:0 -o victor9k.img`
+  - `fluxengine read -c victor9k --1224 -s drive:0 -o victor9k.img`
 
 To write:
 
-  - `fluxengine write victor9k --612 -d drive:0 -i victor9k.img`
-  - `fluxengine write victor9k --1224 -d drive:0 -i victor9k.img`
+  - `fluxengine write -c victor9k --612 -d drive:0 -i victor9k.img`
+  - `fluxengine write -c victor9k --1224 -d drive:0 -i victor9k.img`
 
 ## References
 

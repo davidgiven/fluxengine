@@ -54,18 +54,18 @@ A CMD FD2000 disk (a popular third-party Commodore disk drive)
 
 To read:
 
-  - `fluxengine read commodore --171 -s drive:0 -o commodore.d64`
-  - `fluxengine read commodore --192 -s drive:0 -o commodore.d64`
-  - `fluxengine read commodore --800 -s drive:0 -o commodore.d64`
-  - `fluxengine read commodore --1042 -s drive:0 -o commodore.d64`
-  - `fluxengine read commodore --1620 -s drive:0 -o commodore.d64`
+  - `fluxengine read -c commodore --171 -s drive:0 -o commodore.d64`
+  - `fluxengine read -c commodore --192 -s drive:0 -o commodore.d64`
+  - `fluxengine read -c commodore --800 -s drive:0 -o commodore.d64`
+  - `fluxengine read -c commodore --1042 -s drive:0 -o commodore.d64`
+  - `fluxengine read -c commodore --1620 -s drive:0 -o commodore.d64`
 
 To write:
 
-  - `fluxengine write commodore --171 -d drive:0 -i commodore.d64`
-  - `fluxengine write commodore --192 -d drive:0 -i commodore.d64`
-  - `fluxengine write commodore --800 -d drive:0 -i commodore.d64`
-  - `fluxengine write commodore --1620 -d drive:0 -i commodore.d64`
+  - `fluxengine write -c commodore --171 -d drive:0 -i commodore.d64`
+  - `fluxengine write -c commodore --192 -d drive:0 -i commodore.d64`
+  - `fluxengine write -c commodore --800 -d drive:0 -i commodore.d64`
+  - `fluxengine write -c commodore --1620 -d drive:0 -i commodore.d64`
 
 ## References
 

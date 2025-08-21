@@ -63,11 +63,11 @@ need to apply extra options to change the format if desired.
 
 To read:
 
-  - `fluxengine read micropolis -s drive:0 -o micropolis.img`
+  - `fluxengine read -c micropolis -s drive:0 -o micropolis.img`
 
 To write:
 
-  - `fluxengine write micropolis -d drive:0 -i micropolis.img`
+  - `fluxengine write -c micropolis -d drive:0 -i micropolis.img`
 
 ## References
 

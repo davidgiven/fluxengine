@@ -73,5 +73,6 @@ message OptionProto
 message OptionGroupProto
 {
     optional string comment = 1 [(help) = "help text for option group"];
-    repeated OptionProto option = 2;
+    optional string name = 2 [(help) = "option group name"];
+    repeated OptionProto option = 3;
 }

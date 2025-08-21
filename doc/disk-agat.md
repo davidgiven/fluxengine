@@ -20,11 +20,11 @@ profile.
 
 To read:
 
-  - `fluxengine read agat -s drive:0 -o agat.img`
+  - `fluxengine read -c agat -s drive:0 -o agat.img`
 
 To write:
 
-  - `fluxengine write agat -d drive:0 -i agat.img`
+  - `fluxengine write -c agat -d drive:0 -i agat.img`
 
 ## References
 

@@ -5,6 +5,7 @@
 #include "lib/core/utils.h"
 #include <fstream>
 #include <google/protobuf/text_format.h>
+#include <fmt/ranges.h>
 
 static Config config;
 
@@ -181,35 +182,8 @@ ConfigProto* Config::combined()
     {
         _combinedConfig = _baseConfig;
 
-        /* First apply any standalone options. */
-
-        std::set<std::string> options = _appliedOptions;
-        for (const auto& option : _baseConfig.option())
-        {
-            if (options.find(option.name()) != options.end())
-            {
-                _combinedConfig.MergeFrom(option.config());
-                options.erase(option.name());
-            }
-        }
-
-        /* Then apply any group options. */
-
-        for (auto& group : _baseConfig.option_group())
-        {
-            const OptionProto* selectedOption = &*group.option().begin();
-
-            for (auto& option : group.option())
-            {
-                if (options.find(option.name()) != options.end())
-                {
-                    selectedOption = &option;
-                    options.erase(option.name());
-                }
-            }
-
-            _combinedConfig.MergeFrom(selectedOption->config());
-        }
+        for (const auto& optionInfo : _appliedOptions)
+            _combinedConfig.MergeFrom(optionInfo.option->config());
 
         /* Add in the user overrides. */
 
@@ -241,51 +215,27 @@ std::vector<std::string> Config::validate()
 {
     std::vector<std::string> results;
 
-    std::set<std::string> optionNames = _appliedOptions;
-    std::set<const OptionProto*> appliedOptions;
-    for (const auto& option : _baseConfig.option())
-    {
-        if (optionNames.find(option.name()) != optionNames.end())
+    /* Ensure that only one item in each group is set. */
+
+    std::map<const OptionGroupProto*, const OptionProto*> optionsByGroup;
+    for (auto [group, option, hasArgument] : _appliedOptions)
+        if (group)
         {
-            appliedOptions.insert(&option);
-            optionNames.erase(option.name());
+            auto& o = optionsByGroup[group];
+            if (o)
+                results.push_back(
+                    fmt::format("multiple mutually exclusive values set for "
+                                "group '{}': valid values are: {}",
+                        group->comment(),
+                        fmt::join(std::views::transform(
+                                      group->option(), &OptionProto::name),
+                            ", ")));
+            o = option;
         }
-    }
-
-    /* Then apply any group options. */
-
-    for (auto& group : _baseConfig.option_group())
-    {
-        int count = 0;
-
-        for (auto& option : group.option())
-        {
-            if (optionNames.find(option.name()) != optionNames.end())
-            {
-                optionNames.erase(option.name());
-                appliedOptions.insert(&option);
-
-                count++;
-                if (count == 2)
-                    results.push_back(
-                        fmt::format("multiple mutually exclusive options set "
-                                    "for group '{}'",
-                            group.comment()));
-            }
-        }
-    }
-
-    /* Check for unknown options. */
-
-    if (!optionNames.empty())
-    {
-        for (auto& name : optionNames)
-            results.push_back(fmt::format("'{}' is not a known option", name));
-    }
 
     /* Check option requirements. */
 
-    for (auto& option : appliedOptions)
+    for (auto [group, option, hasArgument] : _appliedOptions)
     {
         try
         {
@@ -360,11 +310,12 @@ void Config::readBaseConfig(std::string data)
         error("couldn't load external config proto");
 }
 
-const OptionProto& Config::findOption(const std::string& optionName)
+Config::OptionInfo Config::findOption(
+    const std::string& name, const std::string value)
 {
     const OptionProto* found = nullptr;
 
-    auto searchOptionList = [&](auto& optionList)
+    auto searchOptionList = [&](auto& optionList, const std::string& optionName)
     {
         for (const auto& option : optionList)
         {
@@ -377,17 +328,39 @@ const OptionProto& Config::findOption(const std::string& optionName)
         return false;
     };
 
-    if (searchOptionList(base()->option()))
-        return *found;
+    /* First look for any group names which match. */
+
+    if (!value.empty())
+        for (const auto& optionGroup : base()->option_group())
+            if (optionGroup.name() == name)
+            {
+                /* The option must therefore be one of these. */
+
+                if (searchOptionList(optionGroup.option(), value))
+                    return {&optionGroup, found, true};
+
+                throw OptionNotFoundException(fmt::format(
+                    "value {} is not valid for option {}; valid values are: {}",
+                    value,
+                    name,
+                    fmt::join(std::views::transform(
+                                  optionGroup.option(), &OptionProto::name),
+                        ", ")));
+            }
+
+    /* Now search for individual options. */
+
+    if (searchOptionList(base()->option(), name))
+        return {nullptr, found, false};
 
     for (const auto& optionGroup : base()->option_group())
     {
-        if (searchOptionList(optionGroup.option()))
-            return *found;
+        if (optionGroup.name().empty())
+            if (searchOptionList(optionGroup.option(), name))
+                return {nullptr, found, false};
     }
 
-    throw OptionNotFoundException(
-        fmt::format("option {} not found", optionName));
+    throw OptionNotFoundException(fmt::format("option {} not found", name));
 }
 
 void Config::checkOptionValid(const OptionProto& option)
@@ -445,22 +418,20 @@ bool Config::isOptionValid(const OptionProto& option)
     }
 }
 
-bool Config::isOptionValid(std::string option)
+void Config::applyOption(const OptionInfo& optionInfo)
 {
-    return isOptionValid(findOption(option));
-}
-
-void Config::applyOption(const OptionProto& option)
-{
+    auto* option = optionInfo.option;
     log(OptionLogMessage{
-        option.has_message() ? option.message() : option.comment()});
+        option->has_message() ? option->message() : option->comment()});
 
-    _appliedOptions.insert(option.name());
+    _appliedOptions.insert(optionInfo);
 }
 
-void Config::applyOption(std::string option)
+bool Config::applyOption(const std::string& name, const std::string value)
 {
-    applyOption(findOption(option));
+    auto optionInfo = findOption(name, value);
+    applyOption(optionInfo);
+    return optionInfo.usesValue;
 }
 
 void Config::clearOptions()

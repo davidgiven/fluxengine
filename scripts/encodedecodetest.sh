@@ -14,10 +14,10 @@ destfile=$dir/dest.img
 
 dd if=/dev/urandom of=$srcfile bs=1048576 count=2 2>&1
 
-echo $fluxengine write $format -i $srcfile -d $fluxfile --drive.rotational_period_ms=200 $flags
-$fluxengine write $format -i $srcfile -d $fluxfile --drive.rotational_period_ms=200 $flags
-echo $fluxengine read $format -s $fluxfile -o $destfile --drive.rotational_period_ms=200 $flags
-$fluxengine read $format -s $fluxfile -o $destfile --drive.rotational_period_ms=200 $flags
+echo $fluxengine write -c $format -i $srcfile -d $fluxfile --drive.rotational_period_ms=200 $flags
+$fluxengine write -c $format -i $srcfile -d $fluxfile --drive.rotational_period_ms=200 $flags
+echo $fluxengine read -c $format -s $fluxfile -o $destfile --drive.rotational_period_ms=200 $flags
+$fluxengine read -c $format -s $fluxfile -o $destfile --drive.rotational_period_ms=200 $flags
 if [ ! -s $destfile ]; then
 	echo "Zero length output file!" >&2
 	exit 1

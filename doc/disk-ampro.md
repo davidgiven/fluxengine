@@ -43,8 +43,8 @@ kayinfo.lbr
 
 To read:
 
-  - `fluxengine read ampro --400 -s drive:0 -o ampro.img`
-  - `fluxengine read ampro --800 -s drive:0 -o ampro.img`
+  - `fluxengine read -c ampro --400 -s drive:0 -o ampro.img`
+  - `fluxengine read -c ampro --800 -s drive:0 -o ampro.img`
 
 ## References
 
