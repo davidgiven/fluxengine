@@ -268,6 +268,10 @@ written by Dave Koelle, taken from
 https://web.archive.org/web/20210207124255/davekoelle.com/alphanum.html. It is
 MIT licensed. Please see the source for the full text.
 
+As an exception, `dep/imgui` contains a partial copy of the Dear Imgui package,
+written by Omar Cornut, taken from https://github.com/WerWolv/ImHex. It is MIT
+licensed. Please see the contents of the directory for the full text.
+
 __Important:__ Because of all these exceptions, if you distribute the
 FluxEngine package as a whole, you must comply with the terms of _all_ of the
 licensing terms. This means that __effectively the FluxEngine package is
