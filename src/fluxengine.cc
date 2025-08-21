@@ -16,11 +16,9 @@ extern command_cb mainGetFile;
 extern command_cb mainGetFileInfo;
 extern command_cb mainInspect;
 extern command_cb mainLs;
-extern command_cb mainMerge;
 extern command_cb mainMkDir;
 extern command_cb mainMv;
 extern command_cb mainPutFile;
-extern command_cb mainRawRead;
 extern command_cb mainRawWrite;
 extern command_cb mainRead;
 extern command_cb mainRm;
@@ -51,10 +49,8 @@ static std::vector<Command> commands =
     { "write",             mainWrite,             "Writes a sector image to a disk.", },
 	{ "fluxfile",          mainFluxfile,          "Flux file manipulation operations.", },
 	{ "format",            mainFormat,            "Format a disk and make a file system on it.", },
-	{ "rawread",           mainRawRead,           "Reads raw flux from a disk. Warning: you can't use this to copy disks.", },
     { "rawwrite",          mainRawWrite,          "Writes a flux file to a disk. Warning: you can't use this to copy disks.", },
     { "convert",           mainConvert,           "Converts a flux file from one format to another.", },
-	{ "merge",             mainMerge,             "Merge together multiple flux files.", },
 	{ "getdiskinfo",       mainGetDiskInfo,       "Read volume metadata off a disk (or image).", },
 	{ "ls",                mainLs,                "Show files on disk (or image).", },
 	{ "mv",                mainMv,                "Rename a file on a disk (or image).", },
