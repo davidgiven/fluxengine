@@ -159,27 +159,13 @@ more common tools.
     disk). `<profile>` is a reference to an internal output configuration file
     describing the format.
 
-  - `fluxengine rawread -s <flux source> -d <flux destination>`
-
-    Reads flux (possibly from a disk) and writes it to a flux file without doing
-    any decoding. You can specify a profile if you want to read a subset of the
-    disk.
-
   - `fluxengine rawwrite -s <flux source> -d <flux destination>`
 
     Reads flux from a file and writes it (possibly to a disk) without doing any
     encoding. You can specify a profile if you want to write a subset of the
     disk.
 
-  - `fluxengine merge -s <fluxfile> -s <fluxfile...> -d <fluxfile`
-
-    Merges data from multiple flux files together. This is useful if you have
-    several reads from an unreliable disk where each read has a different set
-    of good sectors. By merging the flux files, you get to combine all the
-    data. Don't use this on reads of different disks, for obvious results! Note
-    that this works on flux files, not on flux sources.
-
-  - `fluxengine inspect -s <flux source> -c <cylinder> -h <head> -B`
+  - `fluxengine inspect -s <flux source> -t <track> -h <head> -B`
 
     Reads flux (possibly from a disk) and does various analyses of it to try and
     detect the clock rate, display raw flux information, examine the underlying
@@ -198,14 +184,8 @@ more common tools.
 
 There are other tools; try `fluxengine --help`.
 
-**Important note on `rawread` and `rawwrite`:** You can't use these tools to
+**Important note on `rawwrite`:** You can't use theis tool to
 copy disks, in most circumstances. See [the FAQ](faq.md) for more information.
-Also, `rawread` is not guaranteed to read correctly. Floppy disks are
-fundamentally unreliable, and random bit errors may occur at any time; these
-can only be detected by performing a decode and verifying the checksums on the
-sectors. To perform a correct read, it's recommended to do `fluxengine read`
-with the `--copy-flux-to` option, to perform a decode to a filesystem image
-while also writing to a flux file.
 
 ### Flux sources and destinations
 
