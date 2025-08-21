@@ -108,13 +108,13 @@ encoder {
     }
   }
 }
-$ fluxengine write ibm --1440 config.textpb -i image.img
+$ fluxengine write -c ibm --1440 -c config.textpb -i image.img
 ```
 
 ...or you can specify them on the command line:
 
 ```
-$ fluxengine write ibm --1440 -i image.img --encoder.ibm.trackdata.emit_iam=false
+$ fluxengine write -c ibm --1440 -i image.img --encoder.ibm.trackdata.emit_iam=false
 ```
 
 Both the above invocations are equivalent. The text files use [Google's
@@ -128,7 +128,7 @@ files as you wish; they are all merged left to right.  You can see all these
 settings by doing:
 
 ```
-$ fluxengine write ibm --1440 --config
+$ fluxengine write -c ibm --1440 --show-config
 ```
 
 The `--config` option will cause the current configuration to be dumped to the
