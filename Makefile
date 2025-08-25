@@ -26,7 +26,8 @@ ifeq ($(BUILDTYPE),windows)
 else
 	CC = gcc
 	CXX = g++ -std=c++20
-	CFLAGS = -g -O3 \
+	CFLAGS = -g -O3
+	CXXFLAGS += \
 		-Wno-deprecated-enum-float-conversion \
 		-Wno-deprecated-enum-enum-conversion
 	LDFLAGS =
