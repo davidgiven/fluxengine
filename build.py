@@ -8,7 +8,7 @@ import config
 import re
 
 # Hack for building on Fedora/WSL; executables get the .exe extension,
-# build the build system detects it as Linux.
+# but the build system detects it as Linux.
 import build.toolchain
 
 toolchain.Toolchain.EXE = "$(EXT)"
@@ -93,7 +93,7 @@ else:
                     + c[1]
                     + "' '"
                     + c[2]
-                    + "' $(dir $[outs[0]]) > /dev/null"
+                    + "' $[dirname(filenameof(outs[0]))] > /dev/null"
                 ],
                 label="CORPUSTEST",
             )
