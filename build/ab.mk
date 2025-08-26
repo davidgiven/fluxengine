@@ -115,5 +115,4 @@ $(OBJ)/build.ninja $(OBJ)/build.targets &:
 include $(OBJ)/build.targets
 .PHONY: $(ninja-targets)
 $(ninja-targets) &: $(OBJ)/build.ninja
-	@echo "NINJA"
 	+$(hide) $(NINJA) -f $(OBJ)/build.ninja $@

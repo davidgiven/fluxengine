@@ -150,7 +150,7 @@ class GlobalFormatter(string.Formatter):
             m = re.search(f"(?:[^$]|^)()\\$\\(([^)]*)\\)()", format_string)
             if not m:
                 yield (
-                    _undo_escaped_dollar(format_string, "("),
+                    format_string,
                     None,
                     None,
                     None,
@@ -161,7 +161,7 @@ class GlobalFormatter(string.Formatter):
             format_string = format_string[m.end(3) :]
 
             yield (
-                _undo_escaped_dollar(left, "(") if left else None,
+                left if left else None,
                 var,
                 None,
                 None,
@@ -187,7 +187,7 @@ def substituteGlobalVariables(value):
         oldValue = value
         value = globalFormatter.format(value)
         if value == oldValue:
-            return value
+            return _undo_escaped_dollar( value, "(")
 
 
 def Rule(func):
@@ -583,7 +583,7 @@ def emit_rule(self, ins, outs, cmds=[], label=None):
             emit(" command=sh", rulef)
         else:
             emit("build", *fouts, ":rule", *fins)
-            emit(" command=", "&&".join([s.strip() for s in rule]))
+            emit(" command=", "&&".join([s.strip() for s in rule]).replace("$", "$$"))
         if label:
             emit(" description=", label)
         emit("build", name, ":phony", *fouts)
