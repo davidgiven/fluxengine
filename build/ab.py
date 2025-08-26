@@ -110,6 +110,7 @@ def error(message):
 def _undo_escaped_dollar(s, op):
     return s.replace(f"$${op}", f"${op}")
 
+
 class BracketedFormatter(string.Formatter):
     def parse(self, format_string):
         while format_string:
@@ -187,7 +188,7 @@ def substituteGlobalVariables(value):
         oldValue = value
         value = globalFormatter.format(value)
         if value == oldValue:
-            return _undo_escaped_dollar( value, "(")
+            return _undo_escaped_dollar(value, "(")
 
 
 def Rule(func):
@@ -583,7 +584,10 @@ def emit_rule(self, ins, outs, cmds=[], label=None):
             emit(" command=sh", rulef)
         else:
             emit("build", *fouts, ":rule", *fins)
-            emit(" command=", "&&".join([s.strip() for s in rule]).replace("$", "$$"))
+            emit(
+                " command=",
+                "&&".join([s.strip() for s in rule]).replace("$", "$$"),
+            )
         if label:
             emit(" description=", label)
         emit("build", name, ":phony", *fouts)
