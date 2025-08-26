@@ -1,25 +1,19 @@
 from build.ab import simplerule, G
 from build.c import cxxprogram
-from build.utils import shell
+from build.utils import shell, does_command_exist
 from glob import glob
 import config
-import shutil
-import subprocess
 
 G.setdefault("WX_CONFIG", "wx-config")
-assert shutil.which(G.WX_CONFIG), "Required binary 'wx-config' not found"
+assert does_command_exist(G.WX_CONFIG), "Required binary 'wx-config' not found"
 
 G.setdefault(
     "WX_CFLAGS",
-    shell(
-        [G.WX_CONFIG, "--cxxflags", "base", "adv", "aui", "richtext", "core"]
-    ),
+    shell([G.WX_CONFIG, "--cxxflags", "base", "adv", "aui", "richtext", "core"]),
 )
 G.setdefault(
     "WX_LDFLAGS",
-    shell(
-        [G.WX_CONFIG, "--libs", "base", "adv", "aui", "richtext", "core"]
-    )
+    shell([G.WX_CONFIG, "--libs", "base", "adv", "aui", "richtext", "core"]),
 )
 
 extrasrcs = ["./layout.cpp"]
