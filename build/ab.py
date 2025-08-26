@@ -107,20 +107,16 @@ def error(message):
     raise ABException(message)
 
 
+def _undo_escaped_dollar(s, op):
+    return s.replace(f"$${op}", f"${op}")
+
 class BracketedFormatter(string.Formatter):
-    def __init__(self, op, cl):
-        self.op = op
-        self.cl = cl
-
-    def _undo_escaped_dollar(self, s):
-        return s.replace(f"$${self.op}", f"${self.op}")
-
     def parse(self, format_string):
         while format_string:
-            m = re.search(f"(?:[^$]|^)()\\$\\{self.op}()", format_string)
+            m = re.search(f"(?:[^$]|^)()\\$\\[()", format_string)
             if not m:
                 yield (
-                    self._undo_escaped_dollar(format_string),
+                    _undo_escaped_dollar(format_string, "["),
                     None,
                     None,
                     None,
@@ -133,7 +129,7 @@ class BracketedFormatter(string.Formatter):
             try:
                 ast.parse(right)
             except SyntaxError as e:
-                if not str(e).startswith(f"unmatched '{self.cl}'"):
+                if not str(e).startswith(f"unmatched ']'"):
                     raise e
                 offset = e.offset
 
@@ -141,16 +137,35 @@ class BracketedFormatter(string.Formatter):
             format_string = right[offset:]
 
             yield (
-                self._undo_escaped_dollar(left) if left else None,
+                _undo_escaped_dollar(left, "[") if left else None,
                 expr,
                 None,
                 None,
             )
 
 
-class GlobalFormatter(BracketedFormatter):
-    def __init__(self):
-        super().__init__("(", ")")
+class GlobalFormatter(string.Formatter):
+    def parse(self, format_string):
+        while format_string:
+            m = re.search(f"(?:[^$]|^)()\\$\\(([^)]*)\\)()", format_string)
+            if not m:
+                yield (
+                    _undo_escaped_dollar(format_string, "("),
+                    None,
+                    None,
+                    None,
+                )
+                break
+            left = format_string[: m.start(1)]
+            var = m[2]
+            format_string = format_string[m.end(3) :]
+
+            yield (
+                _undo_escaped_dollar(left, "(") if left else None,
+                var,
+                None,
+                None,
+            )
 
     def get_field(self, name, a1, a2):
         return (
@@ -261,9 +276,6 @@ class Target:
 
     def templateexpand(selfi, s):
         class Formatter(BracketedFormatter):
-            def __init__(self):
-                super().__init__("[", "]")
-
             def get_field(self, name, a1, a2):
                 return (
                     eval(name, selfi.callback.__globals__, selfi.args),
