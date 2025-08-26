@@ -1,14 +1,10 @@
-from build.ab import Rule, Targets, emit, simplerule, filenamesof
+from build.ab import Rule, Targets, emit, simplerule, filenamesof, G
 from build.utils import filenamesmatchingof, collectattrs
 from os.path import join, abspath, dirname, relpath
 from build.pkg import has_package
 
-emit(
-    """
-PROTOC ?= protoc
-HOSTPROTOC ?= protoc
-"""
-)
+G.setdefault("PROTOC", "protoc")
+G.setdefault("HOSTPROTOC", "hostprotoc")
 
 assert has_package("protobuf"), "required package 'protobuf' not installed"
 

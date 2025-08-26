@@ -11,6 +11,7 @@ from build.ab import (
 from os.path import relpath, splitext, join, basename, isfile
 from glob import iglob
 import fnmatch
+import subprocess
 
 
 def filenamesmatchingof(xs, pattern):
@@ -49,6 +50,11 @@ def itemsof(pattern, root=None, cwd=None):
         except ValueError:
             error(f"file '{f}' is not in root '{root}'")
     return result
+
+
+def shell(args):
+    r = subprocess.check_output(args)
+    return r.decode("utf-8").strip()
 
 
 @Rule
