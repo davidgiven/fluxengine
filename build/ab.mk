@@ -113,8 +113,7 @@ $(OBJ)/build.ninja $(OBJ)/build.targets &:
 		|| (rm -f $@ && false)
 
 include $(OBJ)/build.targets
-.PHONY: $(ninja-targets) invoke-ninja
-.NOTPARALLEL: invoke-ninja
-$(ninja-targets): invoke-ninja
-invoke-ninja: $(OBJ)/build.ninja
+.PHONY: $(ninja-targets)
+.NOTPARALLEL:
+$(ninja-targets): $(OBJ)/build.ninja
 	+$(hide) $(NINJA) -f $(OBJ)/build.ninja $@
