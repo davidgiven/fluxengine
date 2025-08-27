@@ -578,6 +578,7 @@ def emit_rule(self, ins, outs, cmds=[], label=None):
 
             rulef = join(self.dir, f"rule-{rulehash}.sh")
             with open(rulef, "wt") as fp:
+                fp.write("set -e\n")
                 fp.write(ruletext)
 
             emit("build", *fouts, ":rule", *fins, rulef)
