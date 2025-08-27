@@ -35,7 +35,7 @@ clibrary(
         "./config.h",
         "./src/adflib.h",
     ],
-    cflags=["-Idep/adflib", "-Idep/adflib/src"],
+    cflags=["-Wno-stringop-overflow"],
     hdrs={
         "adf_blk.h": "./src/adf_blk.h",
         "adf_defs.h": "./src/adf_defs.h",

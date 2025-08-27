@@ -12,12 +12,15 @@ ifeq ($(BUILDTYPE),windows)
 	MINGW = i686-w64-mingw32-
 	CC = $(MINGW)gcc
 	CXX = $(MINGW)g++ -std=c++20
-	CFLAGS += -g -O3
+	CFLAGS += -g -O3 \
+		-Wno-unknown-warning-option \
+		-ffunction-sections \
+		-fdata-sections
 	CXXFLAGS += \
 		-fext-numeric-literals \
 		-Wno-deprecated-enum-float-conversion \
 		-Wno-deprecated-enum-enum-conversion
-	LDFLAGS += -static
+	LDFLAGS += -static -Wl,--gc-sections
 	AR = $(MINGW)ar
 	PKG_CONFIG = $(MINGW)pkg-config -static
 	WINDRES = $(MINGW)windres
@@ -27,6 +30,8 @@ else
 	CC = gcc
 	CXX = g++ -std=c++20
 	CFLAGS = -g -O3 \
+		-Wno-unknown-warning-option
+	CXXFLAGS += \
 		-Wno-deprecated-enum-float-conversion \
 		-Wno-deprecated-enum-enum-conversion
 	LDFLAGS =

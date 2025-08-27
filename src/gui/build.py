@@ -1,19 +1,19 @@
-from build.ab import emit, simplerule
+from build.ab import simplerule, G
 from build.c import cxxprogram
+from build.utils import shell, does_command_exist
 from glob import glob
 import config
 
-emit(
-    """
-WX_CONFIG ?= wx-config
-ifneq ($(strip $(shell command -v $(WX_CONFIG) >/dev/null 2>&1; echo $$?)),0)
-WX_CFLAGS = $(error Required binary 'wx-config' not found.)
-WX_LDFLAGS = $(error Required binary 'wx-config' not found.)
-else
-WX_CFLAGS := $(shell $(WX_CONFIG) --cxxflags base adv aui richtext core)
-WX_LDFLAGS := $(shell $(WX_CONFIG) --libs base adv aui richtext core)
-endif
-"""
+G.setdefault("WX_CONFIG", "wx-config")
+assert does_command_exist(G.WX_CONFIG), "Required binary 'wx-config' not found"
+
+G.setdefault(
+    "WX_CFLAGS",
+    shell(f"{G.WX_CONFIG} --cxxflags base adv aui richtext core"),
+)
+G.setdefault(
+    "WX_LDFLAGS",
+    shell(f"{G.WX_CONFIG} --libs base adv aui richtext core"),
 )
 
 extrasrcs = ["./layout.cpp"]

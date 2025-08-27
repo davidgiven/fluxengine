@@ -4,10 +4,71 @@
 #include <fstream>
 #include "fmt/format.h"
 #include "lib/core/globals.h"
+#include "lib/core/logger.h"
 #include "tests/testproto.pb.h"
 #include "lib/config/config.pb.h"
 #include <sstream>
 #include <locale>
+
+void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const BeginSpeedOperationLogMessage> m)
+{
+}
+
+void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const EndSpeedOperationLogMessage> m)
+{
+}
+
+void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const BeginWriteOperationLogMessage> m)
+{
+}
+
+void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const EndWriteOperationLogMessage> m)
+{
+}
+
+void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const BeginReadOperationLogMessage> m)
+{
+}
+
+void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const EndReadOperationLogMessage> m)
+{
+}
+
+void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const TrackReadLogMessage> m)
+{
+}
+
+void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const DiskReadLogMessage> m)
+{
+}
+
+void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const BeginOperationLogMessage> m)
+{
+}
+
+void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const EndOperationLogMessage> m)
+{
+}
+
+void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const OperationProgressLogMessage> m)
+{
+}
+
+void renderLogMessage(
+    LogRenderer& r, std::shared_ptr<const OptionLogMessage> m)
+{
+}
 
 const std::string protoname = STRINGIFY(PROTO);
 

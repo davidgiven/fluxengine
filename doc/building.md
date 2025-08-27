@@ -204,18 +204,18 @@ install some support packages.
   - For Linux with Ubuntu/Debian:
 	`libusb-1.0-0-dev`, `libsqlite3-dev`, `zlib1g-dev`,
 	`libudev-dev`, `protobuf-compiler`, `libwxgtk3.0-gtk3-dev`,
-	`libfmt-dev`, `python3`.
+	`libfmt-dev`, `python3`. `ninja-build`
   - For Linux with Fedora/Red Hat:
     `git`, `make`, `gcc`, `gcc-c++`, `xxd`, `protobuf-compiler`,
     `protobuf-devel`, `fmt-devel`, `systemd-devel`, `wxGTK3-devel`,
-    `libsqlite3x-devel`
+    `libsqlite3x-devel`, `ninja-build`
   - For OSX with Homebrew: `libusb`, `pkg-config`, `sqlite`,
-    `protobuf`, `truncate`, `wxwidgets`, `fmt`.
+    `protobuf`, `truncate`, `wxwidgets`, `fmt`. `ninja`
   - For Windows with WSL: `protobuf-c-compiler` `protobuf-devel` `fmt-devel`
   `systemd-devel` `sqlite-devel` `wxGTK-devel` `mingw32-gcc` `mingw32-gcc-c++`
   `mingw32-zlib-static` `mingw32-protobuf-static` `mingw32-sqlite-static`
   `mingw32-wxWidgets3-static` `mingw32-libpng-static` `mingw32-libjpeg-static`
-  `mingw32-libtiff-static` `mingw32-nsis png2ico`
+  `mingw32-libtiff-static` `mingw32-nsis png2ico` `ninja-build`
 
 These lists are not necessarily exhaustive --- please [get in
 touch](https://github.com/davidgiven/fluxengine/issues/new) if I've missed
