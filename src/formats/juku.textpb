@@ -12,8 +12,10 @@ of a whole generation of Estonian IT professionals.
 
 The system uses dual 5.25 inch ИЗОТ ЕС5323 (IZOT ES5323)
 diskette drive with regular MFM encoded DSDD. The disks have
-a sector skew factor 2 and tracks start from outside of the
-diskette _for both sides_, which is a combination that somewhat
+a sector skew factor 2 and tracks are written on one side of
+the floppy until it is full and then continued on the other
+side, starting from the outside of the disk again. This differs
+from the most common alternating sides method and somewhat
 complicates reading CP/M filesystem content with common tools.
 
 Mostly 800kB (786kB) DSDD disks were used, but there are also
@@ -21,8 +23,8 @@ Mostly 800kB (786kB) DSDD disks were used, but there are also
 
 ## References (all in Estonian)
 
-  - [How to read the content of Juku disks?](https://github.com/infoaed/juku3000/blob/master/docs/kettad.md)
-  - [List of recovered Juku software](https://github.com/infoaed/juku3000/blob/master/docs/tarkvara-kataloog.md)
+  - [How to read/write Juku disk images?](https://j3k.infoaed.ee/kettad/)
+  - [List of recovered Juku software](https://j3k.infoaed.ee/tarkvara-kataloog/)
   - [System disks for E5104](https://elektroonikamuuseum.ee/juku_arvuti_tarkvara.html)
 >>>
 
