@@ -7,6 +7,7 @@ from build.ab import (
     cwdStack,
     error,
     simplerule,
+    G
 )
 from os.path import relpath, splitext, join, basename, isfile
 from glob import iglob
@@ -58,8 +59,8 @@ def does_command_exist(cmd):
     return shutil.which(basecmd)
 
 
-def shell(args):
-    r = subprocess.check_output(args)
+def shell(cmd):
+    r = subprocess.check_output([G.SHELL, "-c", cmd])
     return r.decode("utf-8").strip()
 
 

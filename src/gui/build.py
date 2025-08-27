@@ -9,11 +9,11 @@ assert does_command_exist(G.WX_CONFIG), "Required binary 'wx-config' not found"
 
 G.setdefault(
     "WX_CFLAGS",
-    shell([G.WX_CONFIG, "--cxxflags", "base", "adv", "aui", "richtext", "core"]),
+    shell(f"{G.WX_CONFIG} --cxxflags base adv aui richtext core"),
 )
 G.setdefault(
     "WX_LDFLAGS",
-    shell([G.WX_CONFIG, "--libs", "base", "adv", "aui", "richtext", "core"]),
+    shell(f"{G.WX_CONFIG} --libs base adv aui richtext core"),
 )
 
 extrasrcs = ["./layout.cpp"]
