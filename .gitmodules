@@ -4,3 +4,7 @@
 [submodule "dep/libwolv"]
 	path = dep/libwolv
 	url = git@github.com:WerWolv/libwolv.git
+[submodule "dep/imgui"]
+	path = dep/imgui
+	url = https://github.com/ocornut/imgui.git
+	branch = docking
