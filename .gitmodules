@@ -1,0 +1,3 @@
+[submodule "dep/libwolv"]
+	path = dep/libwolv
+	url = git@github.com:WerWolv/libwolv.git
