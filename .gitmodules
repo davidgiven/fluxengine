@@ -17,3 +17,6 @@
 [submodule "dep/xdgpp"]
 	path = dep/xdgpp
 	url = https://github.com/WerWolv/xdgpp.git
+[submodule "dep/romfs"]
+	path = dep/libromfs
+	url = https://github.com/WerWolv/libromfs.git
