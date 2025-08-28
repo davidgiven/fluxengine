@@ -9,5 +9,5 @@
 	url = https://github.com/ocornut/imgui.git
 	branch = docking
 [submodule "pattern-language"]
-	path = pattern-language
+	path = dep/pattern-language
 	url = https://github.com/WerWolv/PatternLanguage.git
