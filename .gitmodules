@@ -11,3 +11,6 @@
 [submodule "pattern-language"]
 	path = dep/pattern-language
 	url = https://github.com/WerWolv/PatternLanguage.git
+[submodule "dep/native-file-dialog"]
+	path = dep/native-file-dialog
+	url = https://github.com/btzy/nativefiledialog-extended.git
