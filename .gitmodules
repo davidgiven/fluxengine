@@ -20,3 +20,6 @@
 [submodule "dep/romfs"]
 	path = dep/libromfs
 	url = https://github.com/WerWolv/libromfs.git
+[submodule "dep/throwing_ptr"]
+	path = dep/throwing_ptr
+	url = https://github.com/rockdreamer/throwing_ptr.git
