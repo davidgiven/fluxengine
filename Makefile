@@ -28,7 +28,7 @@ ifeq ($(BUILDTYPE),windows)
 	EXT = .exe
 else
 	CC = gcc
-	CXX = g++ -std=c++20
+	CXX = g++ -std=c++23
 	CFLAGS = -g -O3 \
 		-Wno-unknown-warning-option
 	CXXFLAGS += \
