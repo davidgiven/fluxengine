@@ -1,0 +1,3 @@
+[submodule "src/gui2/imhex"]
+	path = dep/imhex
+	url = git@github.com:WerWolv/ImHex.git
