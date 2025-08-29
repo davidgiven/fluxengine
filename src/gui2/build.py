@@ -1,4 +1,4 @@
-from build.c import cxxprogram, cxxlibrary
+from build.c import cxxprogram, cxxlibrary, simplerule
 from build.pkg import package
 from glob import glob
 from functools import reduce
@@ -48,8 +48,7 @@ cxxlibrary(
     + sources_from("dep/imhex/lib/third_party/imgui/imnodes/source")
     + sources_from("dep/imhex/lib/third_party/imgui/implot/source")
     + sources_from("dep/imhex/lib/third_party/imgui/implot3d/source")
-    + sources_from("dep/imhex/lib/third_party/imgui/imgui/source")
-    + sources_from("dep/imhex/lib/third_party/imgui/imgui_test_engine/source"),
+    + sources_from("dep/imhex/lib/third_party/imgui/imgui/source"),
     hdrs=reduce(
         operator.ior,
         [
@@ -60,13 +59,13 @@ cxxlibrary(
                 "implot",
                 "implot3d",
                 "imnodes",
-                "imgui_test_engine",
                 "cimgui",
             ]
         ],
     )
     | {
         "imgui_freetype.h": "dep/imhex/lib/third_party/imgui/imgui/include/misc/freetype/imgui_freetype.h",
+        "imconfig.h": "./imconfig.h",
     },
     deps=[".+freetype2_lib"],
 )
@@ -76,6 +75,7 @@ cxxlibrary(name="libxdgpp", srcs=[], hdrs={"xdg.hpp": "dep/xdgpp/xdg.hpp"})
 cxxlibrary(
     name="libromfs",
     srcs=sources_from("dep/libromfs/lib/source"),
+    cflags=cflags,
     hdrs={"romfs/romfs.hpp": "dep/libromfs/lib/include/romfs/romfs.hpp"},
 )
 
@@ -86,6 +86,19 @@ cxxprogram(
         '-DLIBROMFS_PROJECT_NAME=\\"fluxengine\\"',
         '-DRESOURCE_LOCATION=\\"rsrc\\"',
     ],
+)
+
+simplerule(
+    name="romfs",
+    ins=glob("src/gui2/rsrc/*", recursive=True),
+    outs=["=romfs.cc"],
+    deps=[".+mkromfs"],
+    commands=[
+        "ln -s $$(dirname $$(realpath $[ins[0]])) rsrc",
+        "$[deps[0]]",
+        "mv libromfs_resources.cpp $[outs[0]]",
+    ],
+    label="ROMFS",
 )
 
 cxxlibrary(
@@ -125,6 +138,7 @@ cxxlibrary(
     srcs=sources_from("dep/imhex/lib/libimhex/source/ui")
     + sources_from("dep/imhex/lib/libimhex/source/api")
     + [
+        "dep/imhex/lib/libimhex/source/subcommands/subcommands.cpp",
         "dep/imhex/lib/libimhex/source/helpers/crypto.cpp",
         "dep/imhex/lib/libimhex/source/helpers/default_paths.cpp",
         "dep/imhex/lib/libimhex/source/helpers/fs.cpp",
@@ -190,15 +204,21 @@ cxxlibrary(
 cxxprogram(
     name="gui2",
     srcs=[
-        "dep/imhex/main/gui/include/window.hpp",
-        "dep/imhex/main/gui/include/messaging.hpp",
         "dep/imhex/main/gui/include/crash_handlers.hpp",
+        "dep/imhex/main/gui/include/messaging.hpp",
+        "dep/imhex/main/gui/include/window.hpp",
+        "dep/imhex/main/gui/source/crash_handlers.cpp",
+        "dep/imhex/main/gui/source/init/run/cli.cpp",
+        "dep/imhex/main/gui/source/init/run/common.cpp",
+        "dep/imhex/main/gui/source/init/run/desktop.cpp",
+        "dep/imhex/main/gui/source/init/splash_window.cpp",
+        "dep/imhex/main/gui/source/init/tasks.cpp",
         "dep/imhex/main/gui/source/main.cpp",
         "dep/imhex/main/gui/source/messaging/common.cpp",
         "dep/imhex/main/gui/source/messaging/linux.cpp",
-        "dep/imhex/main/gui/source/window/window.cpp",
         "dep/imhex/main/gui/source/window/platform/linux.cpp",
-        "dep/imhex/main/gui/source/crash_handlers.cpp",
+        "dep/imhex/main/gui/source/window/window.cpp",
+        ".+romfs",
     ],
     cflags=cflags,
     ldflags=["-ldl"],
