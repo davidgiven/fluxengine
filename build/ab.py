@@ -581,7 +581,7 @@ def emit_rule(self, ins, outs, cmds=[], label=None):
                 fp.write("set -e\n")
                 fp.write(ruletext)
 
-            emit("build", *fouts, ":rule", *fins, rulef)
+            emit("build", *fouts, ":rule", *fins)
             emit(" command=sh", rulef)
         else:
             emit("build", *fouts, ":rule", *fins)

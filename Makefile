@@ -29,9 +29,10 @@ ifeq ($(BUILDTYPE),windows)
 else
 	CC = gcc
 	CXX = g++ -std=c++23
-	CFLAGS = -g -O3 \
+	CFLAGS = -g -O0 \
 		-Wno-unknown-warning-option
-	CXXFLAGS += \
+	CXXFLAGS = \
+		-g -O0 \
 		-Wno-deprecated-enum-float-conversion \
 		-Wno-deprecated-enum-enum-conversion
 	LDFLAGS =
@@ -45,7 +46,7 @@ endif
 
 HOSTCC = gcc
 HOSTCXX = g++ -std=c++20
-HOSTCFLAGS = -g -O3
+HOSTCFLAGS = -g -O0
 HOSTLDFLAGS =
 
 REALOBJ = .obj
