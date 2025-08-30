@@ -1,0 +1,411 @@
+{
+    "base": "Light",
+    "colors": {
+        "imgui": {
+            "border": "#0000004C",
+            "border-shadow": "#00000000",
+            "button": "*#4296F966",
+            "button-active": "*#0F87F9FF",
+            "button-hovered": "*#4296F9FF",
+            "check-mark": "*#4296F9FF",
+            "child-background": "#00000000",
+            "docking-empty-background": "#EFEFEFFF",
+            "docking-preview": "*#4296F937",
+            "drag-drop-target": "#4296F9F2",
+            "frame-background": "#FFFFFFFF",
+            "frame-background-active": "*#4296F9AA",
+            "frame-background-hovered": "*#4296F966",
+            "header": "*#4296F94F",
+            "header-active": "*#4296F9FF",
+            "header-hovered": "*#4296F9CC",
+            "menu-bar-background": "#DBDBDBFF",
+            "modal-window-dim-background": "#33333330",
+            "nav-highlight": "*#4296F9CC",
+            "nav-windowing-background": "#33333333",
+            "nav-windowing-highlight": "#B2B2B2B2",
+            "plot-histogram": "#E5B200FF",
+            "plot-histogram-hovered": "#FF7200FF",
+            "plot-lines": "#636363FF",
+            "plot-lines-hovered": "#FF6D59FF",
+            "popup-background": "#FFFFFFFF",
+            "resize-grip": "*#5959592B",
+            "resize-grip-active": "*#4296F9F2",
+            "resize-grip-hovered": "*#4296F9AA",
+            "input-text-cursor": "#000000FF",
+            "scrollbar-background": "#F9F9F987",
+            "scrollbar-grab": "#AFAFAFCC",
+            "scrollbar-grab-active": "#7C7C7CFF",
+            "scrollbar-grab-hovered": "#7C7C7CCC",
+            "separator": "*#6363639E",
+            "separator-active": "*#2370CCFF",
+            "separator-hovered": "*#2370CCC6",
+            "slider-grab": "*#4296F9C6",
+            "slider-grab-active": "*#7589CC99",
+            "tab": "*#C2CBD5ED",
+            "tab-active": "*#97B9E1FF",
+            "tab-active-overline": "*#4296F9FF",
+            "tab-hovered": "*#4296F9CC",
+            "tab-unfocused": "*#EAECEEFB",
+            "tab-unfocused-active": "*#BDD1E9FF",
+            "tab-unfocused-active-overline": "*#4296FF00",
+            "table-border-light": "#ADADBCFF",
+            "table-border-strong": "#9191A3FF",
+            "table-header-background": "#C6DDF9FF",
+            "table-row-background": "#00000000",
+            "table-row-background-alt": "#4C4C4C16",
+            "text": "#000000FF",
+            "text-disabled": "#999999FF",
+            "text-link": "*#4296F9FF",
+            "text-selected-background": "*#4296F959",
+            "tree-lines": "#0000004C",
+            "title-background": "#DBDBDBFF",
+            "title-background-active": "#DBDBDBFF",
+            "title-background-collapse": "#DBDBDBFF",
+            "window-background": "#EFEFEFFF",
+            "window-shadow": "#00000055"
+        },
+        "imhex": {
+            "blur-background": "#00000000",
+            "desc-button": "#E6E6E6FF",
+            "desc-button-active": "#BEBEBEFF",
+            "desc-button-hovered": "#D2D2D2FF",
+            "highlight": "#299770FF",
+            "IEEE-tool-sign": "#BBBBFFFF",
+            "IEEE-tool-exp": "#BBFFBBFF",
+            "IEEE-tool-mantissa": "#FFBBBBFF",
+            "toolbar-blue": "#06539BFF",
+            "toolbar-brown": "#DBB377FF",
+            "toolbar-gray": "#191919FF",
+            "toolbar-green": "#388B42FF",
+            "toolbar-purple": "#672A78FF",
+            "toolbar-red": "#E74C3CFF",
+            "toolbar-yellow": "#F1C40FFF",
+            "logger-debug": "#388B42FF",
+            "logger-info": "#06539BFF",
+            "logger-warning": "#F1C40FFF",
+            "logger-error": "#E74C3CFF",
+            "logger-fatal": "#672A78FF",
+            "achievement-unlocked": "#F1C40FFF",
+            "find-highlight": "#672A78FF",
+            "diff-added": "#388B42FF",
+            "diff-removed": "#E74C3CFF",
+            "diff-changed": "#F1C40FFF",
+            "advanced-encoding-ascii": "#06539BFF",
+            "advanced-encoding-single": "#E74C3CFF",
+            "advanced-encoding-multi": "#F1C40FFF",
+            "advanced-encoding-unknown": "#E74C3CFF",
+            "patches": "#E74C3CFF",
+            "pattern-selected": "#06539BFF"
+        },
+        "imnodes": {
+            "box-selector": "*#5AAAFA1E",
+            "box-selector-outline": "*#5AAAFA96",
+            "grid-background": "#E1E1E1FF",
+            "grid-line": "#B4B4B464",
+            "grid-line-primary": "#78787864",
+            "link": "*#4296FA64",
+            "link-hovered": "*#4296FAF2",
+            "link-selected": "*#4296FAF2",
+            "mini-map-background": "#19191964",
+            "mini-map-background-hovered": "#191919C8",
+            "mini-map-canvas": "#C8C8C819",
+            "mini-map-canvas-outline": "#C8C8C8C8",
+            "mini-map-link": "*#4296FA64",
+            "mini-map-link-selected": "*#4296FAF2",
+            "mini-map-node-background": "#C8C8C864",
+            "mini-map-node-background-hovered": "#C8C8C8FF",
+            "mini-map-node-background-selected": "#C8C8F0FF",
+            "mini-map-node-outline": "#C8C8C864",
+            "mini-map-outline": "#96969664",
+            "mini-map-outline-hovered": "#969696C8",
+            "node-background": "#F0F0F0FF",
+            "node-background-hovered": "#F0F0F0FF",
+            "node-background-selected": "#F0F0F0FF",
+            "node-outline": "#646464FF",
+            "pin": "#4F8CE0FF",
+            "pin-hovered": "#13529CFF",
+            "title-bar": "#F8F8F8FF",
+            "title-bar-hovered": "#D1D1D1FF",
+            "title-bar-selected": "#D1D1D1FF"
+        },
+        "implot": {
+            "axis-bg": "auto",
+            "axis-bg-active": "auto",
+            "axis-bg-hovered": "auto",
+            "axis-grid": "#FFFFFFFF",
+            "axis-text": "auto",
+            "axis-tick": "#0000003F",
+            "crosshairs": "#0000007F",
+            "error-bar": "auto",
+            "fill": "auto",
+            "frame-bg": "#FFFFFFFF",
+            "inlay-text": "#000000FF",
+            "legend-bg": "#FFFFFFF9",
+            "legend-border": "#D1D1D1CC",
+            "legend-text": "#000000FF",
+            "line": "auto",
+            "marker-fill": "auto",
+            "marker-outline": "auto",
+            "plot-bg": "#6B91FF21",
+            "plot-border": "#00000000",
+            "selection": "#D1A307FF",
+            "title-text": "#000000FF"
+        },
+        "text-editor": {
+            "attribute": "#404040FF",
+            "background": "#FFFFFFFF",
+            "multi-line-comment": "#205040FF",
+            "breakpoint": "#FF200080",
+            "known-identifier": "#106060FF",
+            "calculated-pointer": "#404040FF",
+            "char-literal": "#704030FF",
+            "comment": "#205020FF",
+            "current-line-edge": "#00000040",
+            "current-line-fill": "#00000040",
+            "current-line-fill-inactive": "#80808040",
+            "cursor": "#000000FF",
+            "debug-text": "#8A8A8AFF",
+            "default": "#7F7F7FFF",
+            "default-text": "#7F7F7FFF",
+            "preprocessor": "#6F6F5FFF",
+            "doc-block-comment": "#205040FF",
+            "doc-comment": "#205020FF",
+            "doc-global-comment": "#205040FF",
+            "error-marker": "#FF1000A0",
+            "error-text": "#FF200080",
+            "function": "#404040FF",
+            "function-parameter": "#404040FF",
+            "function-variable": "#404040FF",
+            "global-variable": "#404040FF",
+            "keyword": "#060CFFFF",
+            "line-number": "#005050FF",
+            "local-variable": "#404040FF",
+            "namespace": "#404040FF",
+            "number": "#008000FF",
+            "punctuation": "#7F7F7FFF",
+            "pattern-variable": "#404040FF",
+            "placed-variable": "#404040FF",
+            "preprocessor-deactivated": "#4F4F4F45",
+            "preproc-identifier": "#6F6F5FFF",
+            "selection": "*#00006080",
+            "separator": "#7F7F7FFF",
+            "string": "#A02020FF",
+            "template-variable": "#404040FF",
+            "typedef": "#404040FF",
+            "unknown-identifier": "#FC2C2CFE",
+            "user-defined-type": "#404040FF",
+            "view": "#404040FF",
+            "warning-text": "#FFFF00FF"
+        }
+    },
+    "image_theme": "light",
+    "name": "Light",
+    "styles": {
+        "imgui": {
+            "alpha": 1.0,
+            "disabled-alpha": 0.6,
+            "window-padding": [
+                8.0,
+                8.0
+            ],
+            "window-rounding": 0.0,
+            "window-border-size": 1.0,
+            "window-border-hover-padding": 4.0,
+            "window-min-size": [
+                32.0,
+                32.0
+            ],
+            "window-title-align": [
+                0.0,
+                0.5
+            ],
+            "child-rounding": 0.0,
+            "child-border-size": 1.0,
+            "popup-rounding": 0.0,
+            "popup-border-size": 1.0,
+            "frame-padding": [
+                4.0,
+                3.0
+            ],
+            "frame-rounding": 0.0,
+            "frame-border-size": 0.0,
+            "item-spacing": [
+                8.0,
+                4.0
+            ],
+            "item-inner-spacing": [
+                4.0,
+                4.0
+            ],
+            "cell-padding": [
+                4.0,
+                2.0
+            ],
+            "touch-extra-padding": [
+                0.0,
+                0.0
+            ],
+            "indent-spacing": 21.0,
+            "columns-min-spacing": 6.0,
+            "scrollbar-size": 14.0,
+            "scrollbar-rounding": 9.0,
+            "grab-min-size": 12.0,
+            "grab-rounding": 0.0,
+            "log-slider-deadzone": 4.0,
+            "image-border-size": 0.0,
+            "tab-rounding": 5.0,
+            "tab-border-size": 0.0,
+            "tab-min-width-base": 1.0,
+            "tab-min-width-shrink": 80.0,
+            "tab-close-button-min-width-selected": -1.0,
+            "tab-close-button-min-width-unselected": 0.0,
+            "tab-bar-border-size": 1.0,
+            "tab-bar-overline-size": 1.0,
+            "table-angled-headers-angle": 0.610865,
+            "table-angled-headers-text-align": [
+                0.5,
+                0.0
+            ],
+            "tree-lines-size": 1.0,
+            "tree-lines-rounding": 0.0,
+            "button-text-align": [
+                0.5,
+                0.5
+            ],
+            "selectable-text-align": [
+                0.0,
+                0.0
+            ],
+            "separator-text-border-size": 3.0,
+            "separator-text-align": [
+                0.0,
+                0.5
+            ],
+            "separator-text-padding": [
+                20.0,
+                3.0
+            ],
+            "display-window-padding": [
+                19.0,
+                19.0
+            ],
+            "display-safe-area-padding": [
+                3.0,
+                3.0
+            ],
+            "docking-separator-size": 2.0,
+            "mouse-cursor-scale": 1.0,
+            "curve-tessellation-tol": 1.25,
+            "circle-tessellation-max-error": 0.3,
+            "window-shadow-size": 100.0,
+            "window-shadow-offset": 0.0,
+            "window-shadow-angle": 0.785398
+        },
+        "imnodes": {
+            "grid-spacing": 24.0,
+            "link-hover-distance": 10.0,
+            "link-line-segments-per-length": 0.1,
+            "link-thickness": 3.0,
+            "mini-map-offset": [
+                4.0,
+                4.0
+            ],
+            "mini-map-padding": [
+                8.0,
+                8.0
+            ],
+            "node-border-thickness": 1.0,
+            "node-corner-rounding": 4.0,
+            "node-padding": [
+                8.0,
+                8.0
+            ],
+            "pin-circle-radius": 4.0,
+            "pin-hover-radius": 10.0,
+            "pin-line-thickness": 1.0,
+            "pin-offset": 0.0,
+            "pin-quad-side-length": 7.0,
+            "pin-triangle-side-length": 9.5
+        },
+        "implot": {
+            "annotation-padding": [
+                2.0,
+                2.0
+            ],
+            "digital-bit-gap": 4.0,
+            "digital-bit-height": 8.0,
+            "error-bar-size": 5.0,
+            "error-bar-weight": 1.5,
+            "fill-alpha": 1.0,
+            "fit-padding": [
+                0.0,
+                0.0
+            ],
+            "label-padding": [
+                5.0,
+                5.0
+            ],
+            "legend-inner-padding": [
+                5.0,
+                5.0
+            ],
+            "legend-padding": [
+                10.0,
+                10.0
+            ],
+            "legend-spacing": [
+                5.0,
+                0.0
+            ],
+            "line-weight": 1.0,
+            "major-grid-size": [
+                1.0,
+                1.0
+            ],
+            "major-tick-len": [
+                10.0,
+                10.0
+            ],
+            "major-tick-size": [
+                1.0,
+                1.0
+            ],
+            "marker-size": 4.0,
+            "marker-weight": 1.0,
+            "minor-alpha": 0.25,
+            "minor-grid-size": [
+                1.0,
+                1.0
+            ],
+            "minor-tick-len": [
+                5.0,
+                5.0
+            ],
+            "minor-tick-size": [
+                1.0,
+                1.0
+            ],
+            "mouse-pos-padding": [
+                10.0,
+                10.0
+            ],
+            "plot-border-size": 1.0,
+            "plot-default-size": [
+                400.0,
+                300.0
+            ],
+            "plot-min-size": [
+                200.0,
+                150.0
+            ],
+            "plot-padding": [
+                10.0,
+                10.0
+            ]
+        },
+        "imhex": {
+            "window-blur": 0.0,
+            "popup-alpha": 0.65
+        }
+    }
+}

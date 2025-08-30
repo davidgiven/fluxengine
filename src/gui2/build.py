@@ -1,4 +1,4 @@
-from build.c import cxxprogram, cxxlibrary, simplerule
+from build.c import cxxprogram, cxxlibrary, simplerule, clibrary
 from build.pkg import package
 from glob import glob
 from functools import reduce
@@ -10,6 +10,9 @@ cflags = [
     "-DOS_LINUX",
     "-DLIBROMFS_PROJECT_NAME=fluxengine",
     "-DIMHEX_STATIC_LINK_PLUGINS",
+    '-DIMHEX_VERSION=\\"\\"',
+    "-DIMHEX_PLUGIN_FEATURES_CONTENT={}",
+    "-DDEBUG",
 ]
 
 package(name="dbus_lib", package="dbus-1")
@@ -17,6 +20,8 @@ package(name="freetype2_lib", package="freetype2")
 package(name="mbedcrypto_lib", package="mbedcrypto")
 package(name="libcurl_lib", package="libcurl")
 package(name="glfw3_lib", package="glfw3")
+package(name="md4c_lib", package="md4c")
+package(name="magic_lib", package="libmagic")
 
 
 def headers_from(path):
@@ -91,7 +96,14 @@ cxxprogram(
 
 simplerule(
     name="romfs",
-    ins=glob("src/gui2/rsrc/*", recursive=True),
+    ins=[
+        f
+        for f in glob(
+            "src/gui2/rsrc/**",
+            recursive=True,
+        )
+        if isfile(f)
+    ],
     outs=["=romfs.cc"],
     deps=[".+mkromfs"],
     commands=[
@@ -110,6 +122,7 @@ cxxlibrary(
         "dep/libwolv/libs/io/source/io/fs.cpp",
         "dep/libwolv/libs/io/source/io/handle.cpp",
         "dep/libwolv/libs/utils/source/utils/string.cpp",
+        "dep/libwolv/libs/math_eval/source/math_eval/math_evaluator.cpp",
     ],
     hdrs=reduce(
         operator.ior,
@@ -137,25 +150,34 @@ cxxlibrary(
 
 cxxlibrary(name="hacks", srcs=[], hdrs={"jthread.hpp": "./jthread.hpp"})
 
+clibrary(name="libmicrotar",
+           srcs=sources_from("dep/imhex/lib/third_party/microtar/source"),
+           hdrs=headers_from("dep/imhex/lib/third_party/microtar/include"))
+
 cxxlibrary(
     name="libimhex",
     srcs=(
         sources_from("dep/imhex/lib/libimhex/source/ui")
         + sources_from("dep/imhex/lib/libimhex/source/api")
+        + sources_from("dep/imhex/lib/libimhex/source/providers")
         + [
             "dep/imhex/lib/libimhex/source/subcommands/subcommands.cpp",
             "dep/imhex/lib/libimhex/source/helpers/crypto.cpp",
-            "dep/imhex/lib/libimhex/source/helpers/default_paths.cpp",
+            "dep/imhex/lib/libimhex/source/helpers/debugging.cpp",
+            ".//default_paths.cpp",
             "dep/imhex/lib/libimhex/source/helpers/fs.cpp",
             "dep/imhex/lib/libimhex/source/helpers/http_requests.cpp",
             "dep/imhex/lib/libimhex/source/helpers/http_requests_native.cpp",
+            "dep/imhex/lib/libimhex/source/helpers/encoding_file.cpp",
             "dep/imhex/lib/libimhex/source/helpers/logger.cpp",
+            "dep/imhex/lib/libimhex/source/helpers/magic.cpp",
             "dep/imhex/lib/libimhex/source/helpers/opengl.cpp",
             "dep/imhex/lib/libimhex/source/helpers/scaling.cpp",
             "dep/imhex/lib/libimhex/source/helpers/semantic_version.cpp",
             "dep/imhex/lib/libimhex/source/helpers/utils.cpp",
             "dep/imhex/lib/libimhex/source/helpers/utils_linux.cpp",
             "dep/imhex/lib/libimhex/source/helpers/keys.cpp",
+            "dep/imhex/lib/libimhex/source/helpers/tar.cpp",
         ]
     ),
     hdrs=headers_from("dep/imhex/lib/libimhex/include"),
@@ -168,9 +190,11 @@ cxxlibrary(
         ".+libnfd",
         ".+hacks",
         ".+libxdgpp",
+        ".+libmicrotar",
         ".+mbedcrypto_lib",
         ".+libcurl_lib",
         ".+glfw3_lib",
+        ".+magic_lib",
     ],
 )
 
@@ -178,6 +202,7 @@ cxxlibrary(
     name="libtrace",
     srcs=[
         "dep/imhex/lib/trace/source/stacktrace.cpp",
+        "dep/imhex/lib/trace/source/exceptions.cpp",
         "dep/imhex/lib/third_party/llvm-demangle/source/Demangle.cpp",
         "dep/imhex/lib/third_party/llvm-demangle/source/RustDemangle.cpp",
         "dep/imhex/lib/third_party/llvm-demangle/source/DLangDemangle.cpp",
@@ -223,18 +248,58 @@ cxxlibrary(
 
 cxxlibrary(
     name="ui-plugin",
-    srcs=sources_from("dep/imhex/plugins/ui/source"),
+    srcs=[
+        "dep/imhex/plugins/ui/source/ui/text_editor/editor.cpp",
+        "dep/imhex/plugins/ui/source/ui/text_editor/highlighter.cpp",
+        "dep/imhex/plugins/ui/source/ui/text_editor/navigate.cpp",
+        "dep/imhex/plugins/ui/source/ui/text_editor/render.cpp",
+        "dep/imhex/plugins/ui/source/ui/text_editor/support.cpp",
+        "dep/imhex/plugins/ui/source/ui/text_editor/utf8.cpp",
+        "dep/imhex/plugins/ui/source/ui/hex_editor.cpp",
+        "dep/imhex/plugins/ui/source/ui/markdown.cpp",
+        "dep/imhex/plugins/ui/source/ui/widgets.cpp",
+        "./menu_items.cpp",
+    ],
     hdrs=headers_from("dep/imhex/plugins/ui/include") | {},
     cflags=cflags,
-    deps=[".+libimhex", ".+libromfs", ".+fonts-plugin"],
+    deps=[".+libimhex", ".+libromfs", ".+fonts-plugin", ".+md4c_lib"],
 )
 
 cxxlibrary(
     name="builtin-plugin",
-    srcs=sources_from("dep/imhex/plugins/builtin/source"),
+    srcs=[
+        "dep/imhex/plugins/builtin/source/content/events.cpp",
+        "dep/imhex/plugins/builtin/source/content/global_actions.cpp",
+        "dep/imhex/plugins/builtin/source/content/init_tasks.cpp",
+        "dep/imhex/plugins/builtin/source/content/popups/hex_editor/popup_hex_editor_find.cpp",
+        "dep/imhex/plugins/builtin/source/content/differing_byte_searcher.cpp",
+        "dep/imhex/plugins/builtin/source/content/providers/file_provider.cpp",
+        "dep/imhex/plugins/builtin/source/content/providers/view_provider.cpp",
+        "dep/imhex/plugins/builtin/source/content/data_visualizers.cpp",
+        "dep/imhex/plugins/builtin/source/content/settings_entries.cpp",
+        "dep/imhex/plugins/builtin/source/content/themes.cpp",
+        "dep/imhex/plugins/builtin/source/content/ui_items.cpp",
+        "dep/imhex/plugins/builtin/source/content/project.cpp",
+        "dep/imhex/plugins/builtin/source/content/workspaces.cpp",
+        "dep/imhex/plugins/builtin/source/content/views/view_hex_editor.cpp",
+        "dep/imhex/plugins/builtin/source/content/views/view_logs.cpp",
+        "dep/imhex/plugins/builtin/source/content/views/view_theme_manager.cpp",
+        "dep/imhex/plugins/builtin/source/content/views/view_settings.cpp",
+        "dep/imhex/plugins/builtin/source/content/views/view_about.cpp",
+        "dep/imhex/plugins/builtin/source/content/window_decoration.cpp",
+        "dep/imhex/plugins/builtin/source/plugin_builtin.cpp",
+    ],
     hdrs=headers_from("dep/imhex/plugins/builtin/include"),
     cflags=cflags,
-    deps=[".+libimhex", ".+libromfs", ".+libpl", ".+ui-plugin", ".+fonts-plugin"],
+    deps=[
+        ".+libimhex",
+        ".+libromfs",
+        ".+libtrace",
+        ".+libpl",
+        ".+libwolv",
+        ".+ui-plugin",
+        ".+fonts-plugin",
+    ],
 )
 
 cxxprogram(
@@ -250,12 +315,14 @@ cxxprogram(
         "dep/imhex/main/gui/source/window/platform/linux.cpp",
         "dep/imhex/main/gui/source/window/window.cpp",
         "./fluxengine.cc",
+        "./main_menu_items.cc",
+        "./customview.cc",
+        "./customview.h",
         ".+romfs",
     ],
     cflags=cflags,
     ldflags=["-ldl"],
     deps=[
-        ".+libimhex",
         ".+libpl",
         ".+init",
         ".+libtrace",
