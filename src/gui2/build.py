@@ -72,7 +72,7 @@ cxxlibrary(
     )
     | {
         "imgui_freetype.h": "dep/imhex/lib/third_party/imgui/imgui/include/misc/freetype/imgui_freetype.h",
-        "imconfig.h": "./imconfig.h",
+        "imconfig.h": "./imhex/imconfig.h",
     },
     deps=[".+freetype2_lib"],
 )
@@ -126,7 +126,7 @@ cxxlibrary(
     deps=[".+libthrowingptr", ".+libwolv"],
 )
 
-cxxlibrary(name="hacks", srcs=[], hdrs={"jthread.hpp": "./jthread.hpp"})
+cxxlibrary(name="hacks", srcs=[], hdrs={"jthread.hpp": "./imhex/jthread.hpp"})
 
 clibrary(
     name="libmicrotar",
@@ -145,7 +145,7 @@ cxxlibrary(
             "dep/imhex/lib/libimhex/source/subcommands/subcommands.cpp",
             "dep/imhex/lib/libimhex/source/helpers/crypto.cpp",
             "dep/imhex/lib/libimhex/source/helpers/debugging.cpp",
-            "./default_paths.cpp",
+            "./imhex/default_paths.cpp",
             "dep/imhex/lib/libimhex/source/helpers/fs.cpp",
             "dep/imhex/lib/libimhex/source/helpers/http_requests.cpp",
             "dep/imhex/lib/libimhex/source/helpers/http_requests_native.cpp",
@@ -266,7 +266,7 @@ plugin(
             "dep/imhex/plugins/ui/source/ui/visualizer_drawer.cpp",
             "dep/imhex/plugins/ui/source/ui/widgets.cpp",
             "dep/imhex/plugins/ui/source/library_ui.cpp",
-            "./menu_items.cpp",
+            "./imhex/menu_items.cpp",
         ]
     ),
     hdrs=headers_from("dep/imhex/plugins/ui/include"),
@@ -321,7 +321,7 @@ plugin(
 cxxprogram(
     name="gui2",
     srcs=[
-        "./fluxengine.cc",
+        "./main.cc",
         # "./customview.cc",
         # "./customview.h",
         # "./configview.cc",
