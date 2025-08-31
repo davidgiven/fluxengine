@@ -321,22 +321,20 @@ plugin(
 plugin(
     name="fluxengine-plugin",
     id="fluxengine",
-    srcs=["./fluxengine.cc"],
+    srcs=[
+        "./fluxengine.cc",
+        "./customview.cc",
+        "./customview.h",
+    ],
     hdrs={},
     romfsdir="src/gui2/rsrc",
-    deps=[".+libimhex"]
+    deps=[".+libimhex", ".+fonts-plugin"],
 )
 
 cxxprogram(
     name="gui2",
     srcs=[
         "./main.cc",
-        # "./customview.cc",
-        # "./customview.h",
-        # "./configview.cc",
-        # "./configview.h",
-        # "./summaryview.cc",
-        # "./summaryview.h",
     ],
     cflags=cflags,
     ldflags=["-ldl"],

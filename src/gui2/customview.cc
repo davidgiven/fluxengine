@@ -1,4 +1,3 @@
-#include "content/views/view_logs.hpp"
 #include <hex/api/content_registry/user_interface.hpp>
 #include <hex/helpers/logger.hpp>
 #include <fonts/vscode_icons.hpp>
