@@ -108,6 +108,7 @@ export(
         "brother120tool$(EXT)": "tools+brother120tool",
         "brother240tool$(EXT)": "tools+brother240tool",
         "upgrade-flux-file$(EXT)": "tools+upgrade-flux-file",
+    "plugin.hexplug": "src/gui2/+plugin",
     }
     | (
         {
