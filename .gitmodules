@@ -1,3 +1,6 @@
 [submodule "dep/imhex"]
 	path = dep/imhex
 	url = http://github.com/WerWolv/ImHex.git
+[submodule "dep/libwolv"]
+	path = dep/libwolv
+	url = git@github.com:WerWolv/libwolv.git
