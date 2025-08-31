@@ -4,3 +4,6 @@
 [submodule "dep/libwolv"]
 	path = dep/libwolv
 	url = git@github.com:WerWolv/libwolv.git
+[submodule "dep/libromfs"]
+	path = dep/libromfs
+	url = https://github.com/WerWolv/libromfs.git
