@@ -4,11 +4,13 @@
 #include <hex/helpers/logger.hpp>
 #include <hex/helpers/debugging.hpp>
 #include <hex/helpers/utils.hpp>
+#include <hex/api/theme_manager.hpp>
 #include <hex/api/content_registry/settings.hpp>
 #include <hex/api/content_registry/user_interface.hpp>
 #include <hex/api/content_registry/views.hpp>
 #include <hex/api/content_registry/provider.hpp>
 #include <hex/api/events/events_gui.hpp>
+#include <hex/api/events/requests_gui.hpp>
 #include <hex/ui/imgui_imhex_extensions.h>
 #include <romfs/romfs.hpp>
 
@@ -21,6 +23,8 @@
 
 #include <hex/api/layout_manager.hpp>
 #include "customview.h"
+#include "configview.h"
+#include "summaryview.h"
 
 // #include "content/command_line_interface.hpp"
 // #include <banners/banner_icon.hpp>
@@ -157,7 +161,10 @@ namespace
         ContentRegistry::Views::add<ViewSettings>();
         ContentRegistry::Views::add<ViewThemeManager>();
         ContentRegistry::Views::add<ViewLogs>();
+
         ContentRegistry::Views::add<CustomView>();
+        ContentRegistry::Views::add<ConfigView>();
+        ContentRegistry::Views::add<SummaryView>();
 
         LayoutManager::registerLoadCallback(
             [](std::string_view line)
@@ -204,6 +211,17 @@ IMHEX_PLUGIN_SETUP_BUILTIN("Built-in", "david.given", "FluxEngine TC")
     ImHexApi::System::addStartupTask(
         "Configuring UI scale", false, configureUIScale);
 
+    extractBundledFiles();
+
+    hex::log::debug("Using romfs: '{}'", romfs::name());
+    LocalizationManager::addLanguages(
+        romfs::get("lang/languages.json").string(),
+        [](const std::filesystem::path& path)
+        {
+            return romfs::get(path).string();
+        });
+    LocalizationManager::setLanguage("native");
+
     addFooterItems();
     addTitleBarButtons();
     addToolbarItems();
@@ -225,13 +243,35 @@ IMHEX_PLUGIN_SETUP_BUILTIN("Built-in", "david.given", "FluxEngine TC")
     loadWorkspaces();
     addWindowDecoration();
 
-    #if 1
     auto provider =
         ImHexApi::Provider::createProvider("hex.builtin.provider.null");
     if (provider != nullptr)
         std::ignore = provider->open();
-        #endif
+        
+        ContentRegistry::Settings::onChange("hex.builtin.setting.interface", "hex.builtin.setting.interface.color", [](const ContentRegistry::Settings::SettingsValue &value) {
+            auto theme = value.get<std::string>("Dark");
+            if (theme != ThemeManager::NativeTheme) {
+                static std::string lastTheme;
+
+                if (theme != lastTheme) {
+                    RequestChangeTheme::post(theme);
+                    lastTheme = theme;
+                }
+            }
+        });
+        ContentRegistry::Settings::onChange("hex.builtin.setting.interface", "hex.builtin.setting.interface.language", [](const ContentRegistry::Settings::SettingsValue &value) {
+            auto language = value.get<std::string>("en-US");
+            if (language != LocalizationManager::getSelectedLanguageId())
+                LocalizationManager::setLanguage(language);
+        });
+        ContentRegistry::Settings::onChange("hex.builtin.setting.interface", "hex.builtin.setting.interface.fps", [](const ContentRegistry::Settings::SettingsValue &value) {
+            ImHexApi::System::setTargetFPS(static_cast<float>(value.get<int>(14)));
+        });
+
+            LayoutManager::loadFromString(std::string(romfs::get("layouts/default.hexlyt").string()));
 }
+
+extern "C" void forceLinkPlugin_Fonts();
 
 namespace
 {
@@ -240,6 +280,7 @@ namespace
         StaticLoad()
         {
             forceLinkPlugin_fluxengine();
+            forceLinkPlugin_Fonts();
         }
     };
 }

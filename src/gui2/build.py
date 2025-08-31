@@ -87,28 +87,40 @@ cxxlibrary(
 
 cxxprogram(
     name="mkromfs",
-    srcs=sources_from("dep/libromfs/generator/source"),
+    srcs=["./tools/mkromfs.cc"],
     cflags=[
         '-DLIBROMFS_PROJECT_NAME=\\"fluxengine\\"',
         '-DRESOURCE_LOCATION=\\"rsrc\\"',
     ],
+    deps=["+fmt_lib"],
 )
 
-simplerule(
-    name="romfs",
-    ins=[
+resource_dirs = [
+    "src/gui2/rsrc",
+    "dep/imhex/main/gui/romfs",
+    "dep/imhex/plugins/builtin/romfs",
+    "dep/imhex/plugins/fonts/romfs",
+    "dep/imhex/plugins/ui/romfs",
+]
+resources = [
+    [
         f
         for f in glob(
-            "src/gui2/rsrc/**",
+            f"{d}/**",
             recursive=True,
         )
         if isfile(f)
-    ],
+    ]
+    for d in resource_dirs
+]
+
+simplerule(
+    name="romfs",
+    ins=resources,
     outs=["=romfs.cc"],
     deps=[".+mkromfs"],
     commands=[
-        "ln -s $$(dirname $$(realpath $[ins[0]])) rsrc",
-        "$[deps[0]]",
+        "$[deps[0]] " + (" ".join(resource_dirs)),
         "mv libromfs_resources.cpp $[outs[0]]",
     ],
     label="ROMFS",
@@ -150,9 +162,11 @@ cxxlibrary(
 
 cxxlibrary(name="hacks", srcs=[], hdrs={"jthread.hpp": "./jthread.hpp"})
 
-clibrary(name="libmicrotar",
-           srcs=sources_from("dep/imhex/lib/third_party/microtar/source"),
-           hdrs=headers_from("dep/imhex/lib/third_party/microtar/include"))
+clibrary(
+    name="libmicrotar",
+    srcs=sources_from("dep/imhex/lib/third_party/microtar/source"),
+    hdrs=headers_from("dep/imhex/lib/third_party/microtar/include"),
+)
 
 cxxlibrary(
     name="libimhex",
@@ -242,7 +256,7 @@ cxxlibrary(
     name="fonts-plugin",
     srcs=sources_from("dep/imhex/plugins/fonts/source"),
     hdrs=headers_from("dep/imhex/plugins/fonts/include"),
-    cflags=cflags,
+    cflags=cflags+["-DIMHEX_PLUGIN_NAME=Fonts"],
     deps=[".+libimhex", ".+libromfs"],
 )
 
@@ -269,6 +283,7 @@ cxxlibrary(
     name="builtin-plugin",
     srcs=[
         "dep/imhex/plugins/builtin/source/content/events.cpp",
+        "dep/imhex/plugins/builtin/source/content/file_extraction.cpp",
         "dep/imhex/plugins/builtin/source/content/global_actions.cpp",
         "dep/imhex/plugins/builtin/source/content/init_tasks.cpp",
         "dep/imhex/plugins/builtin/source/content/popups/hex_editor/popup_hex_editor_find.cpp",
@@ -318,6 +333,10 @@ cxxprogram(
         "./main_menu_items.cc",
         "./customview.cc",
         "./customview.h",
+        "./configview.cc",
+        "./configview.h",
+        "./summaryview.cc",
+        "./summaryview.h",
         ".+romfs",
     ],
     cflags=cflags,

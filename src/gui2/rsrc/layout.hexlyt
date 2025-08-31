@@ -1,54 +1,54 @@
 [Window][ImHexDockSpace]
-Pos=0,38
-Size=2560,1513
+Pos=0,29
+Size=2803,1551
 Collapsed=0
 
 [Window][###hex.builtin.view.settings.name]
-Pos=259,200
-Size=700,400
+Pos=924,446
+Size=1050,600
 Collapsed=0
 
 [Window][###hex.builtin.view.hex_editor.name]
-Pos=0,76
-Size=1140,980
+Pos=500,58
+Size=2303,1016
 Collapsed=0
-DockId=0x00000007,0
+DockId=0x0000000D,0
 
 [Window][###hex.builtin.view.data_inspector.name]
-Pos=1142,76
-Size=553,980
+Pos=621,38
+Size=124,468
 Collapsed=0
 DockId=0x00000008,0
 
 [Window][###hex.builtin.view.pattern_data.name]
-Pos=0,1058
-Size=1695,445
+Pos=0,508
+Size=745,252
 Collapsed=0
 DockId=0x00000006,0
 
 [Window][###hex.builtin.view.pattern_editor.name]
-Pos=1697,76
-Size=863,1427
+Pos=747,38
+Size=646,722
 Collapsed=0
-DockId=0x00000004,0
+DockId=0x00000009,0
 
 [Window][###hex.hashes.view.hashes.name]
 Pos=1697,76
 Size=863,1427
 Collapsed=0
-DockId=0x00000004,4
+DockId=0x00000009,4
 
 [Window][###hex.builtin.view.find.name]
 Pos=1697,76
 Size=863,1427
 Collapsed=0
-DockId=0x00000004,3
+DockId=0x00000009,3
 
 [Window][###hex.builtin.view.bookmarks.name]
 Pos=1697,76
 Size=863,1427
 Collapsed=0
-DockId=0x00000004,2
+DockId=0x00000009,2
 
 [Window][###hex.builtin.view.information.name]
 Pos=-1889,-120
@@ -61,14 +61,16 @@ Size=560,660
 Collapsed=0
 
 [Window][###hex.builtin.view.store.name]
-Pos=562,201
+ViewportPos=564,236
+ViewportId=0xB51F9C4A
 Size=900,700
 Collapsed=0
 
 [Window][###hex.diffing.view.diff.name]
-Pos=1233,38
-Size=687,1021
+Pos=1372,38
+Size=1188,1333
 Collapsed=0
+DockId=0x00000009,1
 
 [Window][###hex.builtin.view.provider_settings.load_popup]
 Pos=585,322
@@ -81,20 +83,20 @@ Size=510,420
 Collapsed=0
 
 [Window][###hex.builtin.view.data_processor.name]
-Pos=1697,76
-Size=863,1427
+Pos=747,38
+Size=646,722
 Collapsed=0
-DockId=0x00000004,1
+DockId=0x00000009,1
 
 [Window][###hex.builtin.view.tools.name]
-ViewportPos=952,218
-ViewportId=0x9B385D8A
-Size=1306,1600
+Pos=849,268
+Size=431,430
 Collapsed=0
+DockId=0x0000000A,0
 
 [Window][###hex.builtin.view.theme_manager.name]
-Pos=391,302
-Size=469,400
+Pos=787,263
+Size=536,745
 Collapsed=0
 
 [Window][###hex.builtin.tools.invariant_multiplication]
@@ -118,8 +120,8 @@ Size=600,220
 Collapsed=0
 
 [Window][###hex.builtin.view.help.about.name]
-Pos=214,201
-Size=600,350
+Pos=377,193
+Size=677,400
 Collapsed=0
 
 [Window][###hex.builtin.view.constants.name]
@@ -132,56 +134,173 @@ Pos=1004,-204
 Size=1336,1320
 Collapsed=0
 
+[Window][Debug##Default]
+Pos=0,55
+Size=400,400
+Collapsed=0
+
+[Window][Question]
+Pos=496,338
+Size=400,105
+Collapsed=0
+
+[Window][Welcome Screen]
+Pos=0,37
+Size=1393,728
+Collapsed=0
+
+[Window][##achievement_unlocked]
+Pos=1093,0
+Size=200,55
+Collapsed=0
+
+[Window][hex.builtin.popup.blocking_task.title]
+Pos=506,305
+Size=20,40
+Collapsed=0
+
+[Window][Waiting for Tasks]
+Pos=60,60
+Size=16,35
+Collapsed=0
+
+[Window][Restore lost data]
+Pos=555,349
+Size=283,84
+Collapsed=0
+
+[Window][Error]
+Pos=440,301
+Size=400,118
+Collapsed=0
+
+[Window][###hex.builtin.view.highlight_rules.name]
+ViewportPos=724,217
+ViewportId=0x31C07F88
+Size=700,400
+Collapsed=0
+
+[Window][SideBarWindow]
+Pos=19,37
+Size=660,1345
+Collapsed=0
+
+[Window][SideBarWindow/##Content_53A061AE]
+IsChild=1
+Size=644,1329
+
+[Window][Choose file]
+Pos=382,131
+Size=516,458
+Collapsed=0
+
+[Window][###hex.builtin.view.logs.name]
+Pos=1457,337
+Size=549,600
+Collapsed=0
+
+[Window][###hex.builtin.view.achievements.name]
+Pos=60,60
+Size=800,600
+Collapsed=0
+
+[Window][hex.builtin.welcome.start.recent.auto_backups]
+Pos=580,365
+Size=233,52
+Collapsed=0
+
+[Window][Auto Backups]
+Pos=580,331
+Size=233,120
+Collapsed=0
+
+[Window][hex.builtin.popup.create_workspace.title]
+Pos=496,325
+Size=400,132
+Collapsed=0
+
+[Window][hex.builtin.popup.foreground_task.title]
+Pos=60,60
+Size=450,300
+Collapsed=0
+
+[Window][##hex.builtin.view.hex_editor.menu.edit.set_base]
+Pos=0,58
+Size=344,117
+Collapsed=0
+
+[Window][Please Wait...]
+Pos=60,60
+Size=450,300
+Collapsed=0
+
+[Window][hex.ui.common.question]
+Pos=1149,666
+Size=600,160
+Collapsed=0
+
+[Window][###fluxengine.view.config.name]
+Pos=0,58
+Size=497,1482
+Collapsed=0
+DockId=0x0000000B,0
+
+[Window][###fluxengine.view.summary.name]
+Pos=500,1077
+Size=2303,463
+Collapsed=0
+DockId=0x0000000E,0
+
+[Window][Save Layout]
+Pos=1101,688
+Size=600,201
+Collapsed=0
+
+[Table][0x6A4694E4,3]
+RefScale=13
+Column 0  Sort=0v
+
+[Table][0x7EE28D79,8]
+RefScale=13
+Column 0  Width=13
+Column 1  Weight=1.0000
+Column 2  Weight=1.0000
+Column 3  Weight=1.0000 Sort=0v
+Column 4  Weight=1.0000
+Column 5  Weight=1.0000
+Column 6  Weight=1.0000
+Column 7  Weight=1.0000
+
+[Table][0x6190819E,3]
+Column 0  Weight=1.0000
+Column 1  Weight=1.0000
+Column 2  Weight=1.0000
+
+[Table][0xBA4B7604,2]
+RefScale=20
+Column 0  Width=180
+Column 1  Weight=1.0000
+
 [Docking][Data]
-DockSpace       ID=0x81A8BB71 Window=0xF9B0A590 Pos=161,350 Size=2560,1427 Split=X
-  DockNode      ID=0x00000001 Parent=0x81A8BB71 SizeRef=847,0 Split=Y
-    DockNode    ID=0x00000005 Parent=0x00000001 SizeRef=0,44 Split=X Selected=0x5708C63F
-      DockNode  ID=0x00000007 Parent=0x00000005 SizeRef=1140,701 Selected=0x5708C63F
-      DockNode  ID=0x00000008 Parent=0x00000005 SizeRef=553,701 Selected=0xFBA7A393
-    DockNode    ID=0x00000006 Parent=0x00000001 SizeRef=0,20 Selected=0x7AD1CDDD
-  DockNode      ID=0x00000002 Parent=0x81A8BB71 SizeRef=431,0 Split=X
-    DockNode    ID=0x00000003 Parent=0x00000002 SizeRef=12,0
-    DockNode    ID=0x00000004 Parent=0x00000002 SizeRef=52,0 Selected=0xCACA884B
+DockSpace           ID=0x81A8BB71 Window=0xF9B0A590 Pos=0,58 Size=2803,1482 Split=X
+  DockNode          ID=0x0000000B Parent=0x81A8BB71 SizeRef=497,1482 Selected=0xFCDCA4E7
+  DockNode          ID=0x0000000C Parent=0x81A8BB71 SizeRef=2303,1482 Split=X
+    DockNode        ID=0x00000001 Parent=0x0000000C SizeRef=1370,0 Split=Y
+      DockNode      ID=0x00000005 Parent=0x00000001 SizeRef=0,825 Split=X Selected=0x5708C63F
+        DockNode    ID=0x00000007 Parent=0x00000005 SizeRef=1140,701 Split=Y Selected=0x5708C63F
+          DockNode  ID=0x0000000D Parent=0x00000007 SizeRef=2303,1016 Selected=0x5708C63F
+          DockNode  ID=0x0000000E Parent=0x00000007 SizeRef=2303,463 Selected=0x941F5F91
+        DockNode    ID=0x00000008 Parent=0x00000005 SizeRef=228,701 Selected=0xFBA7A393
+      DockNode      ID=0x00000006 Parent=0x00000001 SizeRef=0,444 Selected=0x7AD1CDDD
+    DockNode        ID=0x00000002 Parent=0x0000000C SizeRef=1188,0 Split=X
+      DockNode      ID=0x00000003 Parent=0x00000002 SizeRef=12,0
+      DockNode      ID=0x00000004 Parent=0x00000002 SizeRef=52,0 Split=Y Selected=0xCACA884B
+        DockNode    ID=0x00000009 Parent=0x00000004 SizeRef=420,228 Selected=0xCACA884B
+        DockNode    ID=0x0000000A Parent=0x00000004 SizeRef=420,430 Selected=0x1F041AD3
 
 [ImHex][General]
-hex.builtin.view.achievements.name=0
-hex.builtin.view.bookmarks.name=0
-hex.builtin.view.command_palette.name=0
-hex.builtin.view.constants.name=0
-hex.builtin.view.data_inspector.name=0
-hex.builtin.view.data_processor.name=0
-hex.diffing.view.diff.name=0
-hex.disassembler.view.disassembler.name=0
-hex.builtin.view.find.name=0
-hex.hashes.view.hashes.name=0
-hex.builtin.view.help.about.name=0
+fluxengine.view.config.name=1
+fluxengine.view.custom.name=0
+fluxengine.view.summary.name=1
 hex.builtin.view.hex_editor.name=1
-hex.builtin.view.highlight_rules.name=0
-hex.builtin.view.information.name=0
-hex.builtin.view.logs.name=0
-hex.builtin.view.patches.name=0
-hex.builtin.view.pattern_data.name=0
-hex.builtin.view.pattern_editor.name=0
-hex.builtin.view.provider_settings.name=0
-hex.builtin.view.settings.name=0
-hex.builtin.view.store.name=0
-hex.builtin.view.theme_manager.name=0
-hex.builtin.view.tools.name=0
-hex.yara_rules.view.yara.name=0
-hex.windows.view.tty_console.name=0
-hex.builtin.tools.demangler=0
-hex.builtin.tools.ascii_table=0
-hex.builtin.tools.regex_replacer=0
-hex.builtin.tools.color=0
-hex.builtin.tools.calc=0
-hex.builtin.tools.graphing=0
-hex.builtin.tools.base_converter=0
-hex.builtin.tools.byte_swapper=0
-hex.builtin.tools.permissions=0
-hex.builtin.tools.wiki_explain=0
-hex.builtin.tools.file_tools=0
-hex.builtin.tools.ieee754=0
-hex.builtin.tools.invariant_multiplication=0
-hex.builtin.tools.tcp_client_server=0
-hex.builtin.tools.euclidean_algorithm=0
-MainWindowSize=600,800
+
