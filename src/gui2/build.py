@@ -11,7 +11,7 @@ cflags = [
     '-DIMHEX_PROJECT_NAME=\\"fluxengine\\"',
     "-DOS_LINUX",
     "-DIMHEX_STATIC_LINK_PLUGINS",
-    '-DIMHEX_VERSION=\\"\\"',
+    '-DIMHEX_VERSION=\\"0.0.0\\"',
     "-DIMHEX_PLUGIN_FEATURES_CONTENT={}",
     "-DDEBUG",
 ]
@@ -318,6 +318,15 @@ plugin(
     ],
 )
 
+plugin(
+    name="fluxengine-plugin",
+    id="fluxengine",
+    srcs=["./fluxengine.cc"],
+    hdrs={},
+    romfsdir="src/gui2/rsrc",
+    deps=[".+libimhex"]
+)
+
 cxxprogram(
     name="gui2",
     srcs=[
@@ -339,5 +348,6 @@ cxxprogram(
         ".+fonts-plugin",
         ".+ui-plugin",
         ".+gui-plugin",
+        ".+fluxengine-plugin",
     ],
 )
