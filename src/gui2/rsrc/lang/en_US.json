@@ -1,3 +1,9 @@
 {
-    "hex.yara.information_section.advanced_data_info": "Advanced Data Information"
+    "fluxengine.view.config.name": "FluxEngine configuration",
+    "fluxengine.view.config.deviceConfiguration": "Device setup",
+    "fluxengine.view.config.selectedDevice": "Device",
+    "fluxengine.view.config.formatConfiguration": "Format setup",
+    "fluxengine.view.config.selectedFormat": "Format",
+    "fluxengine.view.config.subformats": "Available subformats",
+    "fluxengine.view.config.other": "Miscellaneous"
 }

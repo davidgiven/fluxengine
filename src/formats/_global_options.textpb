@@ -4,6 +4,7 @@ is_extension: true
 option_group {
 	comment: "Drive type"
     name: "drivetype"
+	applicability: SOURCESINK
 
 	option {
 		name: "80"
@@ -42,6 +43,7 @@ option_group {
 option_group {
     comment: 'Bus interface'
     name: "bus"
+	applicability: HARDWARE_SOURCESINK
 
 	option {
 		name: "pc"

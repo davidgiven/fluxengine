@@ -322,13 +322,30 @@ plugin(
     name="fluxengine-plugin",
     id="fluxengine",
     srcs=[
+        "./globals.h",
         "./fluxengine.cc",
         "./customview.cc",
         "./customview.h",
+        "./configview.cc",
+        "./configview.h",
+        "./summaryview.cc",
+        "./summaryview.h",
+        "./datastore.cc",
+        "./datastore.h",
+        "./diskprovider.h",
     ],
     hdrs={},
     romfsdir="src/gui2/rsrc",
-    deps=[".+libimhex", ".+fonts-plugin"],
+    deps=[
+        ".+libimhex",
+        ".+fonts-plugin",
+        "lib/core",
+        "lib/data",
+        "lib/config",
+        "lib/usb",
+        "src/gui/drivetypes",
+        "src/formats",
+    ],
 )
 
 cxxprogram(
