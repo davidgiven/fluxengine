@@ -55,7 +55,15 @@ message OptionPrerequisiteProto
     repeated string value = 2 [(help) = "list of required values"];
 }
 
-// NEXT_TAG: 8
+enum OptionApplicabilityHint
+{
+    FORMAT = 0;
+    SOURCESINK = 1;
+    HARDWARE_SOURCESINK = 2;
+	MANUAL_SOURCESINK = 3;
+}
+
+// NEXT_TAG: 9
 message OptionProto
 {
     optional string name = 1 [(help) = "option name"];
@@ -68,11 +76,14 @@ message OptionProto
         7 [(help) = "prerequisites for this option"];
 
     optional ConfigProto config = 4 [(help) = "option data"];
+    repeated OptionApplicabilityHint applicability = 8;
 }
 
+// NEXT_TAG: 5
 message OptionGroupProto
 {
     optional string comment = 1 [(help) = "help text for option group"];
     optional string name = 2 [(help) = "option group name"];
     repeated OptionProto option = 3;
+    repeated OptionApplicabilityHint applicability = 4;
 }
