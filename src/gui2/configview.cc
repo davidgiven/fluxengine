@@ -23,6 +23,9 @@ static const hex::UnlocalizedString SELECTED_DRIVE(
 static const hex::UnlocalizedString HIGH_DENSITY(
     "fluxengine.config.high_density");
 
+static const std::string DEVICE_MANUAL = "manual";
+static const std::string DEVICE_FLUXFILE = "fluxfile";
+
 namespace
 {
     template <typename T>
@@ -37,7 +40,7 @@ namespace
         {
         }
 
-        operator T()
+        operator const T&()
         {
             if (!_cachedValue)
             {
@@ -206,14 +209,13 @@ void ConfigView::drawContent()
         "fluxengine.view.config.deviceConfiguration"_lang);
     if (device_open)
     {
-        int manualDriveIndex = _usbDevices.size() + 0;
-        int fluxfileDriveIndex = _usbDevices.size() + 1;
-        int selectedDrive = std::min(hex::ContentRegistry::Settings::read<int>(
-                                         FLUXENGINE_CONFIG, SELECTED_DRIVE, 0),
-            fluxfileDriveIndex);
+        auto driveSetting = DynamicSetting<std::string>(
+            "fluxengine.settings", "device", DEVICE_FLUXFILE);
+        if (!_devices->contains(driveSetting))
+            driveSetting = DEVICE_FLUXFILE;
 
         if (ImGui::BeginCombo("fluxengine.view.config.selectedDevice"_lang,
-                "Preview",
+                _devices->at(driveSetting).label.c_str(),
                 ImGuiComboFlags_HeightLargest))
         {
             ON_SCOPE_EXIT
@@ -221,52 +223,56 @@ void ConfigView::drawContent()
                 ImGui::EndCombo();
             };
 
-            for (int i = 0; i < _usbDevices.size(); i++)
-                if (ImGui::Selectable(
-                        _usbDevices[i]->serial.c_str(), selectedDrive == i))
-                {
-                    selectedDrive = i;
-                    hex::ContentRegistry::Settings::write<int>(
-                        FLUXENGINE_CONFIG, SELECTED_DRIVE, selectedDrive);
-                }
-
-            if (ImGui::Selectable("fluxengine.view.config.manualDevice"_lang,
-                    selectedDrive == manualDriveIndex))
+            for (auto& it : *_devices)
             {
-                selectedDrive = manualDriveIndex;
-                hex::ContentRegistry::Settings::write<int>(
-                    FLUXENGINE_CONFIG, SELECTED_DRIVE, selectedDrive);
+                if (ImGui::Selectable(it.second.label.c_str(),
+                        (std::string)driveSetting == it.first))
+                    driveSetting = it.first;
             }
-            if (ImGui::Selectable("fluxengine.view.config.fluxfileDevice"_lang,
-                    selectedDrive == fluxfileDriveIndex))
-            {
-                selectedDrive = fluxfileDriveIndex;
-                hex::ContentRegistry::Settings::write<int>(
-                    FLUXENGINE_CONFIG, SELECTED_DRIVE, selectedDrive);
-            }
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("fluxengine.view.config.rescan"_lang))
+        {
+            _configState = CONFIG_UNKNOWN;
+            return;
         }
 
         std::set<int> applicableOptions{SOURCESINK};
-        if (selectedDrive == manualDriveIndex)
+        if ((std::string)driveSetting == DEVICE_MANUAL)
         {
-            ImGui::Text("manual drive config");
+            auto manualDevicePathSetting = DynamicSetting<std::fs::path>(
+                "fluxengine.settings", "manualDevicePath", "");
+            std::fs::path value = manualDevicePathSetting;
+            if (ImGuiExt::InputFilePicker(
+                    "fluxengine.view.config.hardwareDevicePath"_lang,
+                    value,
+                    {}))
+                manualDevicePathSetting = value;
+
             applicableOptions.insert(MANUAL_SOURCESINK);
         }
 
-        if (selectedDrive <= manualDriveIndex)
+        if (((std::string)driveSetting == DEVICE_MANUAL) ||
+            (((std::string)driveSetting)[0] == '#'))
         {
-            applicableOptions.insert(HARDWARE_SOURCESINK);
-            bool highDensity = hex::ContentRegistry::Settings::read<bool>(
-                FLUXENGINE_CONFIG, HIGH_DENSITY, 0);
+            auto highdensitySetting = DynamicSetting<bool>(
+                "fluxengine.settings", "highDensity", true);
+
+            bool value = highdensitySetting;
             if (ImGui::Checkbox(
-                    "fluxengine.view.config.highDensity"_lang, &highDensity))
-                hex::ContentRegistry::Settings::write<bool>(
-                    FLUXENGINE_CONFIG, HIGH_DENSITY, highDensity);
+                    "fluxengine.view.config.highDensity"_lang, &value))
+                highdensitySetting = value;
+
+            applicableOptions.insert(HARDWARE_SOURCESINK);
         }
-        else if (selectedDrive == manualDriveIndex) {}
-        else if (selectedDrive == fluxfileDriveIndex)
+        else if ((std::string)driveSetting == DEVICE_FLUXFILE)
         {
-            ImGui::Text("fluxfile drive config");
+            auto fluxfilePathSetting = DynamicSetting<std::fs::path>(
+                "fluxengine.settings", "fluxfile", "");
+            std::fs::path value = fluxfilePathSetting;
+            if (ImGuiExt::InputFilePicker(
+                    "fluxengine.view.config.fluxfile"_lang, value, {}))
+                fluxfilePathSetting = value;
         }
 
         {
@@ -311,8 +317,8 @@ void ConfigView::drawContent()
         "fluxengine.view.config.formatConfiguration"_lang);
     if (format_open)
     {
-        auto formatSetting =
-            DynamicSetting<std::string>("fluxengine.settings.format", "selected", "ibm");
+        auto formatSetting = DynamicSetting<std::string>(
+            "fluxengine.settings.format", "selected", "ibm");
         if (ImGui::BeginCombo("fluxengine.view.config.selectedFormat"_lang,
                 renderFormatName(formatSetting).c_str(),
                 ImGuiComboFlags_HeightLargest))
@@ -375,8 +381,22 @@ void ConfigView::probeConfig()
         [this]
         {
             hex::log::debug("probing USB");
-            _usbDevices = findUsbDevices();
+            auto usbDevices = findUsbDevices();
+            auto devices = std::make_shared<DeviceMap>();
 
-            _configState = CONFIG_KNOWN;
+            (*devices)[DEVICE_FLUXFILE] = {
+                nullptr, "fluxengine.view.config.fluxfile"_lang};
+            (*devices)[DEVICE_MANUAL] = {
+                nullptr, "fluxengine.view.config.manual"_lang};
+            for (auto it : usbDevices)
+                (*devices)["#" + it->serial] = {it,
+                    fmt::format("{}: {}", getDeviceName(it->type), it->serial)};
+
+            hex::TaskManager::doLater(
+                [this, devices]
+                {
+                    _devices = devices;
+                    _configState = CONFIG_KNOWN;
+                });
         });
 }

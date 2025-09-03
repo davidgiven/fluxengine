@@ -5,5 +5,9 @@
     "fluxengine.view.config.formatConfiguration": "Format setup",
     "fluxengine.view.config.selectedFormat": "Format",
     "fluxengine.view.config.subformats": "Available subformats",
-    "fluxengine.view.config.other": "Miscellaneous"
+    "fluxengine.view.config.other": "Miscellaneous",
+    "fluxengine.view.config.fluxfile": "Flux file",
+    "fluxengine.view.config.manual": "Manual device setup",
+    "fluxengine.view.config.hardwareDevicePath": "Device path",
+    "fluxengine.view.config.highDensity": "High density disk"
 }
