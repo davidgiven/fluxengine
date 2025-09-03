@@ -29,10 +29,11 @@ void SummaryView::drawContent()
 {
     auto diskFlux = Datastore::getDiskFlux();
 
-    if (!diskFlux)
-    {
-        ImGuiExt::TextOverlay("fluxengine.ui.summary.no_disk"_lang,
-            ImGui::GetWindowPos() + ImGui::GetWindowSize() / 2,
-            ImGui::GetWindowWidth() * 0.7);
-    }
+    if (ImGui::Button("fluxengine.summary.controls.read"_lang))
+        Datastore::beginRead();
+
+    ImGui::SameLine();
+    ImGui::BeginDisabled();
+    ImGui::Button("fluxengine.summary.controls.write"_lang);
+    ImGui::EndDisabled();
 }

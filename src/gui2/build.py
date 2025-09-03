@@ -339,12 +339,19 @@ plugin(
     deps=[
         ".+libimhex",
         ".+fonts-plugin",
+        "+protocol",
+        "dep/adflib",
+        "dep/fatfs",
+        "dep/hfsutils",
+        "dep/libusbp",
         "lib/core",
         "lib/data",
+        "lib/vfs",
         "lib/config",
         "lib/usb",
         "src/gui/drivetypes",
         "src/formats",
+        "+z_lib",
     ],
 )
 

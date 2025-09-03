@@ -17,7 +17,8 @@ extern const std::map<std::string, const ConfigProto*> drivetypes;
 using namespace hex;
 using OptionsMap = std::map<std::string, std::string>;
 
-static const hex::UnlocalizedString FLUXENGINE_CONFIG("fluxengine.config");
+const hex::UnlocalizedString FLUXENGINE_CONFIG("fluxengine.config");
+
 static const hex::UnlocalizedString SELECTED_DRIVE(
     "fluxengine.config.selected_drive");
 static const hex::UnlocalizedString HIGH_DENSITY(
