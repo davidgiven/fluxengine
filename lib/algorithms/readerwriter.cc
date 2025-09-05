@@ -715,17 +715,20 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
 
         /* track can't be modified below this point. */
         log(TrackReadLogMessage{trackFlux});
+
+        std::set<std::shared_ptr<const Sector>> all_sectors;
+        for (auto& track : diskflux->tracks)
+            for (auto& sector : track->sectors)
+                all_sectors.insert(sector);
+        all_sectors = collectSectors(all_sectors);
+        diskflux->image = std::make_shared<Image>(all_sectors);
+
+        /* Log a _copy_ of the diskflux structure so that the logger doesn't see
+         * the diskflux get mutated in subsequent reads. */
+        log(DiskReadLogMessage{std::make_shared<DiskFlux>(*diskflux)});
     }
 
-    std::set<std::shared_ptr<const Sector>> all_sectors;
-    for (auto& track : diskflux->tracks)
-        for (auto& sector : track->sectors)
-            all_sectors.insert(sector);
-    all_sectors = collectSectors(all_sectors);
-    diskflux->image = std::make_shared<Image>(all_sectors);
-
     /* diskflux can't be modified below this point. */
-    log(DiskReadLogMessage{diskflux});
     log(EndOperationLogMessage{"Read complete"});
     return diskflux;
 }
