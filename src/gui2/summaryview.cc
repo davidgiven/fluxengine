@@ -28,7 +28,101 @@ SummaryView::SummaryView():
 void SummaryView::drawContent()
 {
     auto diskFlux = Datastore::getDiskFlux();
+    auto [minCylinder, maxCylinder, minHead, maxHead] =
+        Datastore::getDiskBounds();
+    int numCylinders = maxCylinder - minCylinder + 1;
+    int numHeads = maxHead - minHead + 1;
 
+    {
+        ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, {1, 1});
+        ON_SCOPE_EXIT
+        {
+            ImGui::PopStyleVar();
+        };
+
+        auto backgroundColour = ImGui::GetStyle().Colors[ImGuiCol_WindowBg];
+        ImGui::PushStyleColor(ImGuiCol_TableBorderLight, backgroundColour);
+        ON_SCOPE_EXIT
+        {
+            ImGui::PopStyleColor();
+        };
+
+        ImGui::PushStyleColor(ImGuiCol_TableBorderStrong, backgroundColour);
+        ON_SCOPE_EXIT
+        {
+            ImGui::PopStyleColor();
+        };
+
+        if (ImGui::BeginTable("diskSummary",
+                numCylinders + 1,
+                ImGuiTableFlags_NoSavedSettings |
+                    ImGuiTableFlags_HighlightHoveredColumn |
+                    ImGuiTableFlags_NoClip | ImGuiTableFlags_NoPadInnerX |
+                    ImGuiTableFlags_NoPadOuterX | ImGuiTableFlags_Borders))
+        {
+            ON_SCOPE_EXIT
+            {
+                ImGui::EndTable();
+            };
+
+            ImGui::PushFont(NULL, ImGui::GetFontSize() * 0.6);
+            ON_SCOPE_EXIT
+            {
+                ImGui::PopFont();
+            };
+
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, {0, 0});
+            ON_SCOPE_EXIT
+            {
+                ImGui::PopStyleVar();
+            };
+
+            float rowHeight = ImGui::GetFontSize() * 2.0;
+            ImGui::TableSetupColumn(
+                "", ImGuiTableColumnFlags_WidthFixed, rowHeight / 2);
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            for (int cylinder = minCylinder; cylinder <= maxCylinder;
+                cylinder++)
+            {
+                ImGui::TableNextColumn();
+
+                auto text = fmt::format("{}", cylinder);
+                ImGui::SetCursorPosX(ImGui::GetCursorPosX() +
+                                     ImGui::GetColumnWidth() / 2 -
+                                     ImGui::CalcTextSize(text.c_str()).x / 2);
+                ImGui::Text("%s", text.c_str());
+            }
+
+            for (int head = minHead; head <= maxHead; head++)
+            {
+                ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
+                ImGui::TableNextColumn();
+
+                auto text = fmt::format("{}", head);
+                auto textSize = ImGui::CalcTextSize(text.c_str());
+                ImGui::SetCursorPos({ImGui::GetCursorPosX() +
+                                         ImGui::GetColumnWidth() / 2 -
+                                         textSize.x / 2,
+                    ImGui::GetCursorPosY() + rowHeight / 2 - textSize.y / 2});
+                ImGui::Text("%s", text.c_str());
+
+                for (int cylinder = minCylinder; cylinder <= maxCylinder;
+                    cylinder++)
+                {
+                    ImGui::TableNextColumn();
+                    ImGui::Selectable(
+                        fmt::format("##c{}h{}", cylinder, head).c_str(),
+                        true,
+                        ImGuiSelectableFlags_None,
+                        {0, rowHeight});
+                }
+            }
+        }
+    }
+
+    ImGui::SetCursorPosY(ImGui::GetWindowHeight() - ImGui::GetFontSize() * 2);
     if (ImGui::Button("fluxengine.summary.controls.read"_lang))
         Datastore::beginRead();
 

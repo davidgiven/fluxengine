@@ -8,6 +8,7 @@
 #include "lib/config/proto.h"
 #include "lib/usb/usbfinder.h"
 #include "globals.h"
+#include "utils.h"
 #include "configview.h"
 #include "datastore.h"
 
@@ -15,7 +16,6 @@
 extern const std::map<std::string, const ConfigProto*> drivetypes;
 
 using namespace hex;
-using OptionsMap = std::map<std::string, std::string>;
 
 const hex::UnlocalizedString FLUXENGINE_CONFIG("fluxengine.config");
 
@@ -29,45 +29,6 @@ static const std::string DEVICE_FLUXFILE = "fluxfile";
 
 namespace
 {
-    template <typename T>
-    class DynamicSetting
-    {
-    public:
-        DynamicSetting(
-            std::string_view path, std::string_view leaf, T defaultValue):
-            _key(hex::UnlocalizedString(fmt::format("{}.{}", path, leaf))),
-            _defaultValue(defaultValue),
-            _cachedValue()
-        {
-        }
-
-        operator const T&()
-        {
-            if (!_cachedValue)
-            {
-                _cachedValue =
-                    std::make_optional(hex::ContentRegistry::Settings::read<T>(
-                        FLUXENGINE_CONFIG, _key, _defaultValue));
-            }
-            return *_cachedValue;
-        }
-
-        T operator=(T value)
-        {
-            if (!_cachedValue || (*_cachedValue != value))
-            {
-                hex::ContentRegistry::Settings::write<T>(
-                    FLUXENGINE_CONFIG, _key, value);
-                *_cachedValue = value;
-            }
-            return value;
-        }
-
-    private:
-        const hex::UnlocalizedString _key;
-        const T _defaultValue;
-        std::optional<T> _cachedValue;
-    };
 }
 
 ConfigView::ConfigView():
@@ -75,49 +36,23 @@ ConfigView::ConfigView():
 {
 }
 
-static OptionsMap stringToOptions(const std::string& optionsString)
-{
-    OptionsMap result;
-    for (auto it : std::views::split(optionsString, ' '))
-    {
-        std::string left(&*it.begin(), std::ranges::distance(it));
-        std::string right;
-        auto i = left.find('=');
-        if (i != std::string::npos)
-        {
-            right = left.substr(i + 1);
-            left = left.substr(0, i);
-        }
-        result[left] = right;
-    }
-    return result;
-}
-
-static std::string optionsToString(const OptionsMap& options)
-{
-    std::stringstream ss;
-    for (auto& it : options)
-    {
-        if (ss.rdbuf()->in_avail())
-            ss << " ";
-        ss << it.first;
-        if (!it.second.empty())
-            ss << "=" << it.second;
-    }
-    return ss.str();
-}
-
 static void showOption(OptionsMap& options, const OptionProto& option)
 {
-    auto it = options.find(option.name());
-    bool value = option.set_by_default();
+    const auto& name = option.name();
+    auto it = options.find(name);
+    bool value = false;
     if (it != options.end())
-        value = (it->second == "true");
+        value = true;
 
     bool oldValue = value;
     ImGui::Checkbox(option.comment().c_str(), &value);
     if (oldValue != value)
-        options[option.name()] = value ? "true" : "false";
+    {
+        if (value)
+            options[name]="";
+        else
+            options.erase(name);
+    }
 }
 
 static void showOptionGroup(OptionsMap& options,
@@ -278,7 +213,7 @@ void ConfigView::drawContent()
 
         {
             auto globalOptions =
-                DynamicSetting<std::string>("fluxengine.config", "global", "");
+                DynamicSetting<std::string>("fluxengine.settings", "globalSettings", "");
             OptionsMap parsedOptions = stringToOptions(globalOptions);
 
             const auto& config = formats.at("_global_options");
