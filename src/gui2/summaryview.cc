@@ -129,16 +129,20 @@ void SummaryView::drawContent()
                 {
                     auto sectors = findSectors(diskFlux, cylinder, head);
                     auto colour = ImGui::GetColorU32(ImGuiCol_TextDisabled);
+                    int totalSectors = 0;
+                    int goodSectors = 0;
                     if (sectors.has_value())
                     {
-                        bool isGood = std::ranges::all_of(*sectors,
+                        totalSectors = sectors->size();
+                        goodSectors = std::ranges::count_if(*sectors,
                             [](auto& e)
                             {
                                 return e->status == Sector::OK;
                             });
                         colour = ImGuiExt::GetCustomColorU32(
-                            isGood ? ImGuiCustomCol_LoggerInfo
-                                   : ImGuiCustomCol_LoggerError);
+                            (goodSectors == totalSectors)
+                                ? ImGuiCustomCol_LoggerInfo
+                                : ImGuiCustomCol_LoggerError);
                     }
 
                     ImGui::PushStyleColor(ImGuiCol_Header, colour);
@@ -153,17 +157,44 @@ void SummaryView::drawContent()
                         true,
                         ImGuiSelectableFlags_None,
                         {0, rowHeight});
+                    ImGui::SetItemTooltip(
+                        totalSectors ? fmt::format("{} sectors read\n{} good "
+                                                   "sectors\n{} bad sectors",
+                                           totalSectors,
+                                           goodSectors,
+                                           totalSectors - goodSectors)
+                                           .c_str()
+                                     : "No data");
                 }
             }
         }
     }
 
-    ImGui::SetCursorPosY(ImGui::GetWindowHeight() - ImGui::GetFontSize() * 2);
-    if (ImGui::Button("fluxengine.summary.controls.read"_lang))
-        Datastore::beginRead();
+    {
+        ImGui::BeginDisabled(Datastore::isBusy());
+        ON_SCOPE_EXIT
+        {
+            ImGui::EndDisabled();
+        };
 
-    ImGui::SameLine();
-    ImGui::BeginDisabled();
-    ImGui::Button("fluxengine.summary.controls.write"_lang);
-    ImGui::EndDisabled();
+        ImGui::SetCursorPosY(
+            ImGui::GetWindowHeight() - ImGui::GetFontSize() * 2);
+        if (ImGui::Button("fluxengine.summary.controls.read"_lang))
+            Datastore::beginRead();
+
+        ImGui::SameLine();
+        ImGui::BeginDisabled();
+        ImGui::Button("fluxengine.summary.controls.write"_lang);
+        ImGui::EndDisabled();
+    }
+    {
+        ImGui::BeginDisabled(!Datastore::isBusy());
+        ON_SCOPE_EXIT
+        {
+            ImGui::EndDisabled();
+        };
+        ImGui::SameLine();
+        if (ImGui::Button("fluxengine.summary.controls.stop"_lang))
+            Datastore::stop();
+    }
 }

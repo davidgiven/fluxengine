@@ -9,5 +9,9 @@
     "fluxengine.view.config.fluxfile": "Flux file",
     "fluxengine.view.config.manual": "Manual device setup",
     "fluxengine.view.config.hardwareDevicePath": "Device path",
-    "fluxengine.view.config.highDensity": "High density disk"
+    "fluxengine.view.config.highDensity": "High density disk",
+
+    "fluxengine.summary.controls.read": "Read from device",
+    "fluxengine.summary.controls.write": "Write to device",
+    "fluxengine.summary.controls.stop": "Stop"
 }

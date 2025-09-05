@@ -341,6 +341,7 @@ plugin(
     deps=[
         ".+libimhex",
         ".+fonts-plugin",
+        ".+ui-plugin",
         "+protocol",
         "dep/adflib",
         "dep/fatfs",

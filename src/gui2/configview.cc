@@ -49,7 +49,7 @@ static void showOption(OptionsMap& options, const OptionProto& option)
     if (oldValue != value)
     {
         if (value)
-            options[name]="";
+            options[name] = "";
         else
             options.erase(name);
     }
@@ -138,6 +138,12 @@ void ConfigView::drawContent()
     if (_configState != CONFIG_KNOWN)
         return;
 
+    ImGui::BeginDisabled(Datastore::isBusy());
+    ON_SCOPE_EXIT
+    {
+        ImGui::EndDisabled();
+    };
+
     auto device_open =
         DynamicSetting<bool>("fluxengine.config.device", "open", true);
     ImGui::SetNextItemOpen(device_open);
@@ -212,8 +218,8 @@ void ConfigView::drawContent()
         }
 
         {
-            auto globalOptions =
-                DynamicSetting<std::string>("fluxengine.settings", "globalSettings", "");
+            auto globalOptions = DynamicSetting<std::string>(
+                "fluxengine.settings", "globalSettings", "");
             OptionsMap parsedOptions = stringToOptions(globalOptions);
 
             const auto& config = formats.at("_global_options");

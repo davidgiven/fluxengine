@@ -25,5 +25,5 @@ IMHEX_PLUGIN_SETUP("FluxEngine", "David Given", "FluxEngine integration")
     hex::ContentRegistry::Views::add<ConfigView>();
     hex::ContentRegistry::Views::add<SummaryView>();
 
-    Datastore::rebuildConfiguration();
+    Datastore::init();
 }

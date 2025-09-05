@@ -2,9 +2,15 @@
 #include <hex/helpers/auto_reset.hpp>
 #include <hex/api/content_registry/settings.hpp>
 #include <hex/api/task_manager.hpp>
+#include <toasts/toast_notification.hpp>
 #include "lib/core/globals.h"
+#include "lib/core/utils.h"
 #include "lib/config/config.h"
 #include "lib/data/flux.h"
+#include "lib/fluxsource/fluxsource.h"
+#include "lib/decoders/decoders.h"
+#include "lib/algorithms/readerwriter.h"
+#include "arch/arch.h"
 #include "globals.h"
 #include "datastore.h"
 #include "utils.h"
@@ -18,6 +24,7 @@ static hex::AutoReset<std::shared_ptr<const DiskFlux>> diskFlux;
 static std::deque<std::function<void()>> pendingTasks;
 static std::mutex pendingTasksMutex;
 static std::thread workerThread;
+static std::atomic<bool> busy;
 
 static bool configurationValid;
 static Layout::LayoutBounds diskBounds;
@@ -25,6 +32,14 @@ static Layout::LayoutBounds diskBounds;
 static void workerThread_cb()
 {
     hex::log::debug("worker thread start");
+
+    auto stopWorkerThread = []
+    {
+        workerThread.detach();
+        workerThread = std::move(std::thread());
+        hex::log::debug("worker thread shutdown");
+        emergencyStop = busy = false;
+    };
 
     for (;;)
     {
@@ -34,9 +49,7 @@ static void workerThread_cb()
             const std::lock_guard<std::mutex> lock(pendingTasksMutex);
             if (pendingTasks.empty())
             {
-                workerThread.detach();
-                workerThread = std::move(std::thread());
-                hex::log::debug("worker thread shutdown");
+                stopWorkerThread();
                 return;
             }
 
@@ -53,13 +66,42 @@ static void workerThread_cb()
         catch (const ErrorException& e)
         {
             const std::lock_guard<std::mutex> lock(pendingTasksMutex);
-            workerThread.detach();
-            workerThread = std::move(std::thread());
             hex::log::debug("worker exception: {}", e.message);
-            pendingTasks.clear();
+            stopWorkerThread();
+            return;
+        }
+        catch (const EmergencyStopException& e)
+        {
+            const std::lock_guard<std::mutex> lock(pendingTasksMutex);
+            hex::log::debug("worker emergency stop");
+            stopWorkerThread();
             return;
         }
     }
+}
+
+void Datastore::init()
+{
+    runOnWorkerThread(
+        []
+        {
+            Logger::setLogger(
+                [](const AnyLogMessage& message)
+                {
+                    hex::TaskManager::doLater(
+                        [=]
+                        {
+                            Datastore::onLogMessage(message);
+                        });
+                });
+        });
+
+    Datastore::rebuildConfiguration();
+}
+
+bool Datastore::isBusy()
+{
+    return busy;
 }
 
 bool Datastore::isConfigurationValid()
@@ -81,6 +123,7 @@ void Datastore::runOnWorkerThread(std::function<void()> callback)
 {
     const std::lock_guard<std::mutex> lock(pendingTasksMutex);
     pendingTasks.push_back(callback);
+    busy = true;
     if (workerThread.get_id() == std::thread::id())
         workerThread = std::move(std::thread(workerThread_cb));
 }
@@ -201,4 +244,104 @@ void Datastore::rebuildConfiguration()
         });
 }
 
-void Datastore::beginRead(void) {}
+void Datastore::onLogMessage(const AnyLogMessage& message)
+{
+    std::visit(
+        overloaded{
+            /* Fallback --- do nothing */
+            [&](const auto& m)
+            {
+            },
+
+            /* We terminated due to the stop button. */
+            [&](std::shared_ptr<const EmergencyStopMessage> m)
+            {
+                hex::ui::ToastError("Emergency stop!");
+            },
+
+            /* A fatal error. */
+            [&](std::shared_ptr<const ErrorLogMessage> m)
+            {
+                hex::ui::ToastError(m->message);
+            },
+
+            /* Indicates that we're starting a write operation. */
+            [&](std::shared_ptr<const BeginWriteOperationLogMessage> m)
+            {
+                // _statusBar->SetRightLabel(
+                //     fmt::format("W {}.{}", m->track, m->head));
+                // _imagerPanel->SetVisualiserMode(
+                //     m->track, m->head, VISMODE_WRITING);
+            },
+
+            [&](std::shared_ptr<const EndWriteOperationLogMessage> m)
+            {
+                // _statusBar->SetRightLabel("");
+                // _imagerPanel->SetVisualiserMode(0, 0, VISMODE_NOTHING);
+            },
+
+            /* Indicates that we're starting a read operation. */
+            [&](std::shared_ptr<const BeginReadOperationLogMessage> m)
+            {
+                // _statusBar->SetRightLabel(
+                //     fmt::format("R {}.{}", m->track, m->head));
+                // _imagerPanel->SetVisualiserMode(
+                //     m->track, m->head, VISMODE_READING);
+            },
+
+            [&](std::shared_ptr<const EndReadOperationLogMessage> m)
+            {
+                // _statusBar->SetRightLabel("");
+                // _imagerPanel->SetVisualiserMode(0, 0, VISMODE_NOTHING);
+            },
+
+            [&](std::shared_ptr<const TrackReadLogMessage> m)
+            {
+                // _imagerPanel->SetVisualiserTrackData(m->track);
+            },
+
+            [&](std::shared_ptr<const DiskReadLogMessage> m)
+            {
+                diskFlux = m->disk;
+            },
+
+            /* Large-scale operation start. */
+            [&](std::shared_ptr<const BeginOperationLogMessage> m)
+            {
+                // _statusBar->SetLeftLabel(m->message);
+                // _statusBar->ShowProgressBar();
+            },
+
+            /* Large-scale operation end. */
+            [&](std::shared_ptr<const EndOperationLogMessage> m)
+            {
+                // _statusBar->SetLeftLabel(m->message);
+                // _statusBar->HideProgressBar();
+            },
+
+            /* Large-scale operation progress. */
+            [&](std::shared_ptr<const OperationProgressLogMessage> m)
+            {
+                // _statusBar->SetProgress(m->progress);
+            },
+
+        },
+        message);
+}
+
+void Datastore::beginRead(void)
+{
+    Datastore::runOnWorkerThread(
+        []
+        {
+            auto fluxSource = FluxSource::create(globalConfig());
+            auto decoder = Arch::createDecoder(globalConfig());
+
+            auto diskflux = readDiskCommand(*fluxSource, *decoder);
+        });
+}
+
+void Datastore::stop(void)
+{
+    emergencyStop = true;
+}
