@@ -1,10 +1,12 @@
 #include <hex/api/content_registry/user_interface.hpp>
+#include <hex/api/theme_manager.hpp>
 #include <hex/helpers/logger.hpp>
 #include <fonts/vscode_icons.hpp>
 #include <fmt/format.h>
 #include "lib/core/globals.h"
 #include "lib/config/config.h"
 #include "lib/data/flux.h"
+#include "lib/data/sector.h"
 #include "globals.h"
 #include "summaryview.h"
 #include "datastore.h"
@@ -25,6 +27,20 @@ SummaryView::SummaryView():
         });
 }
 
+static std::optional<std::set<std::shared_ptr<const Sector>>> findSectors(
+    std::shared_ptr<const DiskFlux>& diskFlux, int cylinder, int head)
+{
+    if (diskFlux)
+        for (auto& it : diskFlux->tracks)
+        {
+            if ((it->trackInfo->physicalTrack == cylinder) &&
+                (it->trackInfo->physicalSide == head))
+                return std::make_optional(it->sectors);
+        }
+
+    return {};
+}
+
 void SummaryView::drawContent()
 {
     auto diskFlux = Datastore::getDiskFlux();
@@ -40,7 +56,7 @@ void SummaryView::drawContent()
             ImGui::PopStyleVar();
         };
 
-        auto backgroundColour = ImGui::GetStyle().Colors[ImGuiCol_WindowBg];
+        auto backgroundColour = ImGui::GetColorU32(ImGuiCol_WindowBg);
         ImGui::PushStyleColor(ImGuiCol_TableBorderLight, backgroundColour);
         ON_SCOPE_EXIT
         {
@@ -111,6 +127,26 @@ void SummaryView::drawContent()
                 for (int cylinder = minCylinder; cylinder <= maxCylinder;
                     cylinder++)
                 {
+                    auto sectors = findSectors(diskFlux, cylinder, head);
+                    auto colour = ImGui::GetColorU32(ImGuiCol_TextDisabled);
+                    if (sectors.has_value())
+                    {
+                        bool isGood = std::ranges::all_of(*sectors,
+                            [](auto& e)
+                            {
+                                return e->status == Sector::OK;
+                            });
+                        colour = ImGuiExt::GetCustomColorU32(
+                            isGood ? ImGuiCustomCol_LoggerInfo
+                                   : ImGuiCustomCol_LoggerError);
+                    }
+
+                    ImGui::PushStyleColor(ImGuiCol_Header, colour);
+                    ON_SCOPE_EXIT
+                    {
+                        ImGui::PopStyleColor();
+                    };
+
                     ImGui::TableNextColumn();
                     ImGui::Selectable(
                         fmt::format("##c{}h{}", cylinder, head).c_str(),
