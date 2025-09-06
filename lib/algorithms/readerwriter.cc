@@ -728,6 +728,9 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
         log(DiskReadLogMessage{std::make_shared<DiskFlux>(*diskflux)});
     }
 
+    if (!diskflux->image)
+        diskflux->image = std::make_shared<Image>();
+
     /* diskflux can't be modified below this point. */
     log(EndOperationLogMessage{"Read complete"});
     return diskflux;

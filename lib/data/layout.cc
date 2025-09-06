@@ -69,7 +69,7 @@ unsigned Layout::remapSideLogicalToPhysical(unsigned lside)
 
 std::vector<CylinderHead> Layout::computePhysicalLocations()
 {
-    if (globalConfig()->has_tracks())
+    if (!globalConfig()->tracks().empty())
         return parseCylinderHeadsString(globalConfig()->tracks());
 
     std::set<unsigned> tracks = iterate(0, globalConfig()->layout().tracks());
@@ -288,4 +288,30 @@ int Layout::getHeadWidth()
         default:
             return 1;
     }
+}
+
+std::vector<CylinderHeadSector> Layout::computeFilesystemLogicalOrdering(){
+    std::vector<CylinderHeadSector> result;
+    auto& layout = globalConfig()->layout();
+    if (layout.has_tracks() && layout.has_sides())
+    {
+        unsigned block = 0;
+        for (const auto& p :
+            Layout::getTrackOrdering(layout.filesystem_track_order(),
+                layout.tracks(),
+                layout.sides()))
+        {
+            unsigned track = p.first;
+            unsigned side = p.second;
+
+            auto trackLayout = Layout::getLayoutOfTrack(track, side);
+            if (trackLayout->numSectors == 0)
+                continue;
+
+            for (unsigned sectorId : trackLayout->filesystemSectorOrder)
+                result.push_back(
+                    CylinderHeadSector{track, side, sectorId});
+        }
+    }
+    return result;
 }

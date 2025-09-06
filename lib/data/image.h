@@ -1,6 +1,8 @@
 #ifndef IMAGE_H
 #define IMAGE_H
 
+#include "lib/data/locations.h"
+
 class Sector;
 
 struct Geometry
@@ -15,9 +17,6 @@ struct Geometry
 
 class Image
 {
-private:
-    typedef std::tuple<unsigned, unsigned, unsigned> key_t;
-
 public:
     Image();
     Image(std::set<std::shared_ptr<const Sector>>& sectors);
@@ -25,8 +24,8 @@ public:
 public:
     class const_iterator
     {
-        typedef std::map<key_t, std::shared_ptr<const Sector>>::const_iterator
-            wrapped_iterator_t;
+        typedef std::map<CylinderHeadSector,
+            std::shared_ptr<const Sector>>::const_iterator wrapped_iterator_t;
 
     public:
         const_iterator(const wrapped_iterator_t& it): _it(it) {}
@@ -68,12 +67,12 @@ public:
         unsigned track, unsigned side, unsigned sectorId);
     void erase(unsigned track, unsigned side, unsigned sectorId);
 
-    key_t findBlock(unsigned block) const;
+    CylinderHeadSector findBlock(unsigned block) const;
     std::shared_ptr<const Sector> getBlock(unsigned block) const;
     std::shared_ptr<Sector> putBlock(unsigned block);
     int getBlockCount() const;
 
-    std::set<std::pair<unsigned, unsigned>> tracks() const;
+    std::set<CylinderHead> tracks() const;
 
     const_iterator begin() const
     {
@@ -95,8 +94,8 @@ public:
 
 private:
     Geometry _geometry = {0, 0, 0};
-    std::map<key_t, std::shared_ptr<const Sector>> _sectors;
-    std::vector<key_t> _filesystemOrder;
+    std::map<CylinderHeadSector, std::shared_ptr<const Sector>> _sectors;
+    std::vector<CylinderHeadSector> _filesystemOrder;
 };
 
 #endif
