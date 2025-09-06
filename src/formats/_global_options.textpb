@@ -12,6 +12,10 @@ option_group {
         set_by_default: true
 
 		config {
+            drive {
+                tracks: "c0-80h-1"
+                drive_type: DRIVETYPE_80TRACK
+            }
 		}
 	}
 
