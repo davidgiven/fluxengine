@@ -324,8 +324,8 @@ plugin(
     srcs=[
         "./configview.cc",
         "./configview.h",
-        "./customview.cc",
-        "./customview.h",
+        "./imageview.cc",
+        "./imageview.h",
         "./datastore.cc",
         "./datastore.h",
         "./diskprovider.h",

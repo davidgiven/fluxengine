@@ -16,15 +16,6 @@ using namespace hex;
 SummaryView::SummaryView():
     View::Window("fluxengine.view.summary.name", ICON_VS_DEBUG_LINE_BY_LINE)
 {
-    ContentRegistry::UserInterface::addMenuItem(
-        {"hex.builtin.menu.extras", "fluxengine.view.custom.name"},
-        ICON_VS_BRACKET_ERROR,
-        2500,
-        Shortcut::None,
-        [&, this]
-        {
-            this->getWindowOpenState() = true;
-        });
 }
 
 static std::optional<std::set<std::shared_ptr<const Sector>>> findSectors(
@@ -158,13 +149,16 @@ void SummaryView::drawContent()
                         ImGuiSelectableFlags_None,
                         {0, rowHeight});
                     ImGui::SetItemTooltip(
-                        totalSectors ? fmt::format("{} sectors read\n{} good "
-                                                   "sectors\n{} bad sectors",
-                                           totalSectors,
-                                           goodSectors,
-                                           totalSectors - goodSectors)
-                                           .c_str()
-                                     : "No data");
+                        totalSectors
+                            ? fmt::format("c{}h{}\n{} sectors read\n{} good "
+                                          "sectors\n{} bad sectors",
+                                  cylinder,
+                                  head,
+                                  totalSectors,
+                                  goodSectors,
+                                  totalSectors - goodSectors)
+                                  .c_str()
+                            : "No data");
                 }
             }
         }

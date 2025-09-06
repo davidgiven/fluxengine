@@ -11,7 +11,10 @@
     "fluxengine.view.config.hardwareDevicePath": "Device path",
     "fluxengine.view.config.highDensity": "High density disk",
 
+    "fluxengine.view.summary.name":"FluxEngine control panel",
     "fluxengine.summary.controls.read": "Read from device",
     "fluxengine.summary.controls.write": "Write to device",
-    "fluxengine.summary.controls.stop": "Stop"
+    "fluxengine.summary.controls.stop": "Stop",
+
+    "fluxengine.view.image.name": "FluxEngine disk image"
 }

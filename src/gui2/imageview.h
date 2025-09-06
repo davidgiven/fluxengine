@@ -2,10 +2,10 @@
 
 #include <hex/ui/view.hpp>
 
-class CustomView : public hex::View::Window {
+class ImageView : public hex::View::Window {
 public:
-    CustomView();
-    ~CustomView() override = default;
+    ImageView();
+    ~ImageView() override = default;
 
     void drawContent() override;
 
