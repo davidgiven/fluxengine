@@ -12,4 +12,3 @@ namespace ImGui
         ImGui::Text(text.c_str());
     }
 }
-

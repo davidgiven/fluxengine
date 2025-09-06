@@ -16,5 +16,5 @@
     "fluxengine.summary.controls.write": "Write to device",
     "fluxengine.summary.controls.stop": "Stop",
 
-    "fluxengine.view.image.name": "FluxEngine disk image"
+    "fluxengine.view.image.name": "FluxEngine sector map"
 }

@@ -34,4 +34,3 @@ std::string optionsToString(const OptionsMap& options)
     }
     return ss.str();
 }
-

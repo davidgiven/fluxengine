@@ -36,7 +36,7 @@ void SummaryView::drawContent()
 {
     auto diskFlux = Datastore::getDiskFlux();
     auto [minCylinder, maxCylinder, minHead, maxHead] =
-        Datastore::getDiskBounds();
+        Datastore::getDiskPhysicalBounds();
     int numCylinders = maxCylinder - minCylinder + 1;
     int numHeads = maxHead - minHead + 1;
 
@@ -72,7 +72,8 @@ void SummaryView::drawContent()
                 ImGui::EndTable();
             };
 
-            ImGui::PushFont(NULL, ImGui::GetFontSize() * 0.6);
+            auto originalFontSize = ImGui::GetFontSize();
+            ImGui::PushFont(NULL, originalFontSize * 0.6);
             ON_SCOPE_EXIT
             {
                 ImGui::PopFont();
@@ -84,9 +85,9 @@ void SummaryView::drawContent()
                 ImGui::PopStyleVar();
             };
 
-            float rowHeight = ImGui::GetFontSize() * 2.0;
+            float rowHeight = originalFontSize * 0.6 * 2.0;
             ImGui::TableSetupColumn(
-                "", ImGuiTableColumnFlags_WidthFixed, rowHeight / 2);
+                "", ImGuiTableColumnFlags_WidthFixed, originalFontSize);
 
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
@@ -95,7 +96,7 @@ void SummaryView::drawContent()
             {
                 ImGui::TableNextColumn();
 
-                auto text = fmt::format("{}", cylinder);
+                auto text = fmt::format("c{}", cylinder);
                 ImGui::SetCursorPosX(ImGui::GetCursorPosX() +
                                      ImGui::GetColumnWidth() / 2 -
                                      ImGui::CalcTextSize(text.c_str()).x / 2);
@@ -107,7 +108,7 @@ void SummaryView::drawContent()
                 ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
                 ImGui::TableNextColumn();
 
-                auto text = fmt::format("{}", head);
+                auto text = fmt::format("h{}", head);
                 auto textSize = ImGui::CalcTextSize(text.c_str());
                 ImGui::SetCursorPos({ImGui::GetCursorPosX() +
                                          ImGui::GetColumnWidth() / 2 -
@@ -131,7 +132,7 @@ void SummaryView::drawContent()
                                 return e->status == Sector::OK;
                             });
                         colour = ImGuiExt::GetCustomColorU32(
-                            (goodSectors == totalSectors)
+                            ((goodSectors == totalSectors) && totalSectors)
                                 ? ImGuiCustomCol_LoggerInfo
                                 : ImGuiCustomCol_LoggerError);
                     }
@@ -148,6 +149,12 @@ void SummaryView::drawContent()
                         true,
                         ImGuiSelectableFlags_None,
                         {0, rowHeight});
+
+                    ImGui::PushFont(NULL, originalFontSize);
+                    ON_SCOPE_EXIT
+                    {
+                        ImGui::PopFont();
+                    };
                     ImGui::SetItemTooltip(
                         totalSectors
                             ? fmt::format("c{}h{}\n{} sectors read\n{} good "

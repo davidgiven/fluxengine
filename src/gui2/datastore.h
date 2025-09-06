@@ -13,7 +13,14 @@ public:
 
     static bool isBusy();
     static bool isConfigurationValid();
-    static const Layout::LayoutBounds& getDiskBounds();
+    static const std::map<CylinderHead, std::shared_ptr<const TrackInfo>>&
+    getPhysicalTrackLayouts();
+    static std::shared_ptr<const Sector> findSectorByPhysicalLocation(
+        const CylinderHeadSector& location);
+    static std::optional<unsigned> findBlockByLogicalLocation(
+        const CylinderHeadSector& location);
+    static const Layout::LayoutBounds& getDiskPhysicalBounds();
+    static const Layout::LayoutBounds& getImageLogicalBounds();
     static void rebuildConfiguration();
     static void onLogMessage(const AnyLogMessage& message);
 

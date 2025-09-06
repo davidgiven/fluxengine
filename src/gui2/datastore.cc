@@ -7,6 +7,7 @@
 #include "lib/core/utils.h"
 #include "lib/config/config.h"
 #include "lib/data/flux.h"
+#include "lib/data/image.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/decoders/decoders.h"
 #include "lib/algorithms/readerwriter.h"
@@ -27,7 +28,12 @@ static std::thread workerThread;
 static std::atomic<bool> busy;
 
 static bool configurationValid;
-static Layout::LayoutBounds diskBounds;
+static std::map<CylinderHead, std::shared_ptr<const TrackInfo>>
+    physicalTrackLayouts;
+static std::map<CylinderHeadSector, std::shared_ptr<const Sector>>
+    sectorByPhysicalLocation;
+static std::map<CylinderHeadSector, unsigned> blockByLogicalLocation;
+static Layout::LayoutBounds diskPhysicalBounds;
 
 static void workerThread_cb()
 {
@@ -109,14 +115,38 @@ bool Datastore::isConfigurationValid()
     return isConfigurationValid;
 }
 
-const Layout::LayoutBounds& Datastore::getDiskBounds()
+const std::map<CylinderHead, std::shared_ptr<const TrackInfo>>&
+Datastore::getPhysicalTrackLayouts()
 {
-    return diskBounds;
+    return physicalTrackLayouts;
+}
+
+const Layout::LayoutBounds& Datastore::getDiskPhysicalBounds()
+{
+    return diskPhysicalBounds;
 }
 
 std::shared_ptr<const DiskFlux> Datastore::getDiskFlux()
 {
     return diskFlux;
+}
+
+std::shared_ptr<const Sector> Datastore::findSectorByPhysicalLocation(
+    const CylinderHeadSector& location)
+{
+    const auto& it = sectorByPhysicalLocation.find(location);
+    if (it == sectorByPhysicalLocation.end())
+        return nullptr;
+    return it->second;
+}
+
+std::optional<unsigned> Datastore::findBlockByLogicalLocation(
+    const CylinderHeadSector& location)
+{
+    const auto& it = blockByLogicalLocation.find(location);
+    if (it == blockByLogicalLocation.end())
+        return {};
+    return it->second;
 }
 
 void Datastore::runOnWorkerThread(std::function<void()> callback)
@@ -138,6 +168,29 @@ static T readSetting(const std::string& leaf, const T defaultValue)
 static void badConfiguration()
 {
     throw ErrorException("internal error: no configuration");
+}
+
+static void rebuildDiskFluxIndices()
+{
+    sectorByPhysicalLocation.clear();
+    blockByLogicalLocation.clear();
+    if (*diskFlux)
+    {
+        for (const auto& track : (*diskFlux)->tracks)
+            for (const auto& sector : track->sectors)
+                sectorByPhysicalLocation[{sector->physicalTrack,
+                    sector->physicalSide,
+                    sector->logicalSector}] = sector;
+
+        if ((*diskFlux)->image)
+            for (unsigned block = 0;
+                block < (*diskFlux)->image->getBlockCount();
+                block++)
+            {
+                auto logicalLocation = (*diskFlux)->image->findBlock(block);
+                blockByLogicalLocation[logicalLocation] = block;
+            }
+    }
 }
 
 void Datastore::rebuildConfiguration()
@@ -233,8 +286,21 @@ void Datastore::rebuildConfiguration()
                     []
                     {
                         auto locations = Layout::computePhysicalLocations();
-                        diskBounds = Layout::getBounds(locations);
-                        configurationValid = true;
+                        auto diskPhysicalBounds = Layout::getBounds(locations);
+
+                        decltype(::physicalTrackLayouts) physicalTrackLayouts;
+                        for (auto& it : locations)
+                            physicalTrackLayouts[it] =
+                                Layout::getLayoutOfTrackPhysical(it);
+
+                        hex::TaskManager::doLater(
+                            [=]
+                            {
+                                ::diskPhysicalBounds = diskPhysicalBounds;
+                                ::physicalTrackLayouts = physicalTrackLayouts;
+                                rebuildDiskFluxIndices();
+                                configurationValid = true;
+                            });
                     });
             }
             catch (const ErrorException& e)
@@ -303,6 +369,7 @@ void Datastore::onLogMessage(const AnyLogMessage& message)
             [&](std::shared_ptr<const DiskReadLogMessage> m)
             {
                 diskFlux = m->disk;
+                rebuildDiskFluxIndices();
             },
 
             /* Large-scale operation start. */
