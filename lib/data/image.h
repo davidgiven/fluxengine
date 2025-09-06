@@ -61,11 +61,17 @@ public:
     void createBlankImage();
     bool empty() const;
     bool contains(unsigned track, unsigned side, unsigned sectorId) const;
+
     std::shared_ptr<const Sector> get(
         unsigned track, unsigned side, unsigned sectorId) const;
     std::shared_ptr<Sector> put(
         unsigned track, unsigned side, unsigned sectorId);
     void erase(unsigned track, unsigned side, unsigned sectorId);
+
+    key_t findBlock(unsigned block) const;
+    std::shared_ptr<const Sector> getBlock(unsigned block) const;
+    std::shared_ptr<Sector> putBlock(unsigned block);
+    int getBlockCount() const;
 
     std::set<std::pair<unsigned, unsigned>> tracks() const;
 
@@ -90,6 +96,7 @@ public:
 private:
     Geometry _geometry = {0, 0, 0};
     std::map<key_t, std::shared_ptr<const Sector>> _sectors;
+    std::vector<key_t> _filesystemOrder;
 };
 
 #endif

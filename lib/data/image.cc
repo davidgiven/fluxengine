@@ -15,6 +15,31 @@ Image::Image(std::set<std::shared_ptr<const Sector>>& sectors)
         _sectors[key] = sector;
     }
     calculateSize();
+
+    /* The filesystem order is constant for a given layout and so can be
+     * computed once. */
+
+    auto& layout = globalConfig()->layout();
+    if (layout.has_tracks() && layout.has_sides())
+    {
+        unsigned block = 0;
+        for (const auto& p :
+            Layout::getTrackOrdering(layout.filesystem_track_order(),
+                layout.tracks(),
+                layout.sides()))
+        {
+            int track = p.first;
+            int side = p.second;
+
+            auto trackLayout = Layout::getLayoutOfTrack(track, side);
+            if (trackLayout->numSectors == 0)
+                continue;
+
+            for (int sectorId : trackLayout->filesystemSectorOrder)
+                _filesystemOrder.push_back(
+                    std::make_tuple(track, side, sectorId));
+        }
+    }
 }
 
 void Image::clear()
@@ -52,12 +77,10 @@ bool Image::contains(unsigned track, unsigned side, unsigned sectorid) const
 std::shared_ptr<const Sector> Image::get(
     unsigned track, unsigned side, unsigned sectorid) const
 {
-    static std::shared_ptr<const Sector> NONE;
-
     key_t key = std::make_tuple(track, side, sectorid);
     auto i = _sectors.find(key);
     if (i == _sectors.end())
-        return NONE;
+        return nullptr;
     return i->second;
 }
 
@@ -74,6 +97,33 @@ std::shared_ptr<Sector> Image::put(
     sector->physicalSide = side;
     _sectors[key] = sector;
     return sector;
+}
+
+Image::key_t Image::findBlock(unsigned block) const
+{
+    if (block >= _filesystemOrder.size())
+        error("block {} is out of bounds ({} maximum)",
+            block,
+            _filesystemOrder.size());
+
+    return _filesystemOrder.at(block);
+}
+
+std::shared_ptr<const Sector> Image::getBlock(unsigned block) const
+{
+    auto [cylinder, head, sector] = findBlock(block);
+    return get(cylinder, head, sector);
+}
+
+std::shared_ptr<Sector> Image::putBlock(unsigned block)
+{
+    auto [cylinder, head, sector] = findBlock(block);
+    return put(cylinder, head, sector);
+}
+
+int Image::getBlockCount() const
+{
+    return _filesystemOrder.size();
 }
 
 void Image::erase(unsigned track, unsigned side, unsigned sectorid)
