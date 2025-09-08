@@ -1,5 +1,6 @@
 #include <hex/helpers/logger.hpp>
 #include <hex/helpers/auto_reset.hpp>
+#include <hex/api/imhex_api/hex_editor.hpp>
 #include <hex/api/content_registry/settings.hpp>
 #include <hex/api/task_manager.hpp>
 #include <toasts/toast_notification.hpp>
@@ -20,7 +21,7 @@
 #include <deque>
 #include <semaphore>
 
-static hex::AutoReset<std::shared_ptr<const DiskFlux>> diskFlux;
+static std::shared_ptr<const DiskFlux> diskFlux;
 
 static std::deque<std::function<void()>> pendingTasks;
 static std::mutex pendingTasksMutex;
@@ -109,6 +110,45 @@ void Datastore::init()
                 });
         });
 
+    Events::SeekToSectorViaPhysicalLocation::subscribe(
+        [](CylinderHeadSector physicalLocation)
+        {
+            auto it = sectorByPhysicalLocation.find(physicalLocation);
+            if (diskFlux && diskFlux->image &&
+                (it != sectorByPhysicalLocation.end()))
+            {
+                auto sector = it->second;
+                unsigned offset = diskFlux->image->findOffsetByLogicalLocation(
+                    {sector->logicalCylinder,
+                        sector->logicalHead,
+                        sector->logicalSector});
+
+                hex::ImHexApi::HexEditor::setSelection(
+                    hex::Region{offset, sector->trackLayout->sectorSize});
+            }
+        });
+
+    Events::SeekToTrackViaPhysicalLocation::subscribe(
+        [](CylinderHead physicalLocation)
+        {
+            const auto& it = physicalCylinderLayouts.find(physicalLocation);
+            if (diskFlux && diskFlux->image &&
+                (it != physicalCylinderLayouts.end()))
+            {
+                const auto& layout = it->second;
+                unsigned firstSector = layout->filesystemSectorOrder.front();
+                unsigned startOffset =
+                    diskFlux->image->findApproximateOffsetByPhysicalLocation(
+                        {layout->logicalCylinder,
+                            layout->logicalHead,
+                            firstSector});
+                unsigned trackSize =
+                    layout->sectorSize * layout->filesystemSectorOrder.size();
+
+                hex::ImHexApi::HexEditor::setSelection(
+                    hex::Region{startOffset, trackSize});
+            }
+        });
     Datastore::rebuildConfiguration();
 }
 
@@ -181,20 +221,19 @@ static void rebuildDiskFluxIndices()
 {
     sectorByPhysicalLocation.clear();
     blockByLogicalLocation.clear();
-    if (*diskFlux)
+    if (diskFlux)
     {
-        for (const auto& track : (*diskFlux)->tracks)
+        for (const auto& track : diskFlux->tracks)
             for (const auto& sector : track->sectors)
                 sectorByPhysicalLocation[{sector->physicalCylinder,
                     sector->physicalHead,
                     sector->logicalSector}] = sector;
 
-        if ((*diskFlux)->image)
-            for (unsigned block = 0;
-                block < (*diskFlux)->image->getBlockCount();
+        if (diskFlux->image)
+            for (unsigned block = 0; block < diskFlux->image->getBlockCount();
                 block++)
             {
-                auto logicalLocation = (*diskFlux)->image->findBlock(block);
+                auto logicalLocation = diskFlux->image->findBlock(block);
                 blockByLogicalLocation[logicalLocation] = block;
             }
     }
@@ -295,7 +334,8 @@ void Datastore::rebuildConfiguration()
                         auto locations = Layout::computePhysicalLocations();
                         auto diskPhysicalBounds = Layout::getBounds(locations);
 
-                        decltype(::physicalCylinderLayouts) physicalCylinderLayouts;
+                        decltype(::physicalCylinderLayouts)
+                            physicalCylinderLayouts;
                         for (auto& it : locations)
                             physicalCylinderLayouts[it] =
                                 Layout::getLayoutOfTrackPhysical(it);
@@ -304,7 +344,8 @@ void Datastore::rebuildConfiguration()
                             [=]
                             {
                                 ::diskPhysicalBounds = diskPhysicalBounds;
-                                ::physicalCylinderLayouts = physicalCylinderLayouts;
+                                ::physicalCylinderLayouts =
+                                    physicalCylinderLayouts;
                                 rebuildDiskFluxIndices();
                                 configurationValid = true;
                             });

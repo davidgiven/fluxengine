@@ -22,13 +22,6 @@ DiskProvider::DiskProvider()
 
             hex::ImHexApi::Provider::remove(this, true);
         });
-
-    Events::SeekToPhysicalLocationInImage::subscribe(
-        [](const CylinderHeadSector& physicalLocation)
-        {
-            hex::ImHexApi::HexEditor::setSelection(
-                {0, 0}, hex::ImHexApi::Provider::get());
-        });
 }
 
 DiskProvider::~DiskProvider()

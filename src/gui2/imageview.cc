@@ -167,7 +167,7 @@ void ImageView::drawContent()
                                 {0,
                                     rowHeight -
                                         ImGui::GetStyle().CellPadding.y * 2}))
-                            Events::SeekToPhysicalLocationInImage::post(
+                            Events::SeekToSectorViaPhysicalLocation::post(
                                 CylinderHeadSector{
                                     physicalCylinder, physicalHead, sectorId});
 

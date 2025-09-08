@@ -10,9 +10,9 @@ Image::Image(std::set<std::shared_ptr<const Sector>>& sectors):
     _filesystemOrder(Layout::computeFilesystemLogicalOrdering())
 {
     for (auto& sector : sectors)
-        _sectors[{
-            sector->logicalCylinder, sector->logicalHead, sector->logicalSector}] =
-            sector;
+        _sectors[{sector->logicalCylinder,
+            sector->logicalHead,
+            sector->logicalSector}] = sector;
     calculateSize();
 }
 
@@ -106,6 +106,40 @@ Image::LocationAndOffset Image::findBlockByOffset(unsigned offset) const
     }
 
     throw OutOfRangeException("location is not in the image");
+}
+
+unsigned Image::findOffsetByLogicalLocation(
+    const LogicalLocation& logicalLocation) const
+{
+    unsigned offset = 0;
+    for (const auto& it : _filesystemOrder)
+    {
+        if (it == logicalLocation)
+            return offset;
+        const auto& sector = _sectors.at(it);
+        offset += sector->trackLayout->sectorSize;
+    }
+
+    throw OutOfRangeException("location is not in the image");
+}
+
+/* TODO: this is all wrong and the whole layout stuff needs to be refactored. */
+unsigned Image::findApproximateOffsetByPhysicalLocation(
+    const CylinderHeadSector& physicalLocation) const
+{
+    unsigned offset = 0;
+    for (const auto& it : _filesystemOrder)
+    {
+        const auto& sector = _sectors.at(it);
+        CylinderHeadSector sectorPhysicalLocation = {sector->physicalCylinder,
+            sector->physicalHead,
+            sector->logicalSector};
+        if (sectorPhysicalLocation >= physicalLocation)
+            break;
+        offset += sector->trackLayout->sectorSize;
+    }
+
+    return offset;
 }
 
 void Image::erase(unsigned track, unsigned side, unsigned sectorid)

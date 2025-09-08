@@ -78,6 +78,8 @@ public:
         unsigned offset;
     };
     LocationAndOffset findBlockByOffset(unsigned offset) const;
+    unsigned findOffsetByLogicalLocation(const LogicalLocation& logicalLocation) const;
+    unsigned findApproximateOffsetByPhysicalLocation(const CylinderHeadSector& physicalLocation) const;
 
     const_iterator begin() const
     {

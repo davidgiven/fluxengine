@@ -149,8 +149,8 @@ void SummaryView::drawContent()
                             true,
                             ImGuiSelectableFlags_None,
                             {0, rowHeight}))
-                        Events::SeekToPhysicalLocationInImage::post(
-                            CylinderHeadSector{cylinder, head, 0});
+                        Events::SeekToTrackViaPhysicalLocation::post(
+                            CylinderHead{cylinder, head});
 
                     ImGui::PushFont(NULL, originalFontSize);
                     ON_SCOPE_EXIT
