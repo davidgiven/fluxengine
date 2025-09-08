@@ -178,7 +178,7 @@ public:
         else
             _formatByte1 = _formatByte2 = 0;
 
-        double clockRateUs = clockPeriodForC64Track(trackInfo->logicalTrack);
+        double clockRateUs = clockPeriodForC64Track(trackInfo->logicalCylinder);
         int bitsPerRevolution = 200000.0 / clockRateUs;
 
         std::vector<bool> bits(bitsPerRevolution);
@@ -245,7 +245,7 @@ private:
              *   06-07 - $0F ("off" bytes)
              */
             uint8_t encodedTrack =
-                ((sector->logicalTrack) +
+                ((sector->logicalCylinder) +
                     1); // C64 track numbering starts with 1. Fluxengine with 0.
             uint8_t encodedSector = sector->logicalSector;
             // uint8_t formatByte1 = C64_FORMAT_ID_BYTE1;

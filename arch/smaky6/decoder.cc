@@ -129,11 +129,11 @@ public:
         uint8_t wantedChecksum = br.read_8();
         uint8_t gotChecksum = sumBytes(data) & 0xff;
 
-        if (track != _sector->physicalTrack)
+        if (track != _sector->physicalCylinder)
             return;
 
-        _sector->logicalTrack = _sector->physicalTrack;
-        _sector->logicalSide = _sector->physicalSide;
+        _sector->logicalCylinder = _sector->physicalCylinder;
+        _sector->logicalHead = _sector->physicalHead;
         _sector->logicalSector = _sectorId;
 
         _sector->data = data;

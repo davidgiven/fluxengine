@@ -79,11 +79,11 @@ void ImageWriter::writeCsv(const Image& image, const std::string& filename)
     for (const auto& sector : image)
     {
         f << fmt::format("{},{},{},{},{},{},{},{},{},{},{},{},{}\n",
-            sector->physicalTrack,
-            sector->physicalSide,
+            sector->physicalCylinder,
+            sector->physicalHead,
             sector->logicalSector,
-            sector->logicalTrack,
-            sector->logicalSide,
+            sector->logicalCylinder,
+            sector->logicalHead,
             sector->clock,
             sector->headerStartTime,
             sector->headerEndTime,
@@ -104,15 +104,15 @@ void ImageWriter::printMap(const Image& image)
     int totalSectors = 0;
 
     std::cout << "     Tracks -> ";
-    for (unsigned i = 10; i < geometry.numTracks; i += 10)
+    for (unsigned i = 10; i < geometry.numCylinders; i += 10)
         std::cout << fmt::format("{:<10d}", i / 10);
     std::cout << std::endl;
     std::cout << "H.SS ";
-    for (unsigned i = 0; i < geometry.numTracks; i++)
+    for (unsigned i = 0; i < geometry.numCylinders; i++)
         std::cout << std::to_string(i % 10);
     std::cout << std::endl;
 
-    for (int side = 0; side < geometry.numSides; side++)
+    for (int side = 0; side < geometry.numHeads; side++)
     {
         int maxSector = geometry.firstSector + geometry.numSectors - 1;
         for (int sectorId = 0; sectorId <= maxSector; sectorId++)
@@ -121,7 +121,7 @@ void ImageWriter::printMap(const Image& image)
                 continue;
 
             std::cout << fmt::format("{}.{:2} ", side, sectorId);
-            for (int track = 0; track < geometry.numTracks; track++)
+            for (int track = 0; track < geometry.numCylinders; track++)
             {
                 const auto& sector = image.get(track, side, sectorId);
                 if (!sector)

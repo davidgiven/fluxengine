@@ -36,20 +36,20 @@ public:
         std::vector<CylinderHead> chs;
         for (const auto& trackFlux : flux.tracks)
             chs.push_back(
-                CylinderHead{(unsigned)trackFlux->trackInfo->physicalTrack,
-                    (unsigned)trackFlux->trackInfo->logicalTrack});
+                CylinderHead{(unsigned)trackFlux->trackInfo->physicalCylinder,
+                    (unsigned)trackFlux->trackInfo->logicalCylinder});
         _extraConfig.mutable_drive()->set_tracks(
             convertCylinderHeadsToString(chs));
     }
 
 public:
     std::unique_ptr<FluxSourceIterator> readFlux(
-        int physicalTrack, int physicalSide) override
+        int physicalCylinder, int physicalHead) override
     {
         for (const auto& trackFlux : _flux.tracks)
         {
-            if ((trackFlux->trackInfo->physicalTrack == physicalTrack) &&
-                (trackFlux->trackInfo->physicalSide == physicalSide))
+            if ((trackFlux->trackInfo->physicalCylinder == physicalCylinder) &&
+                (trackFlux->trackInfo->physicalHead == physicalHead))
                 return std::make_unique<MemoryFluxSourceIterator>(*trackFlux);
         }
 

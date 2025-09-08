@@ -211,11 +211,11 @@ public:
         image->calculateSize();
         const Geometry& geometry = image->getGeometry();
         log("D88: read {} tracks, {} sides",
-            geometry.numTracks,
-            geometry.numSides);
+            geometry.numCylinders,
+            geometry.numHeads);
 
-        layout->set_tracks(geometry.numTracks);
-        layout->set_sides(geometry.numSides);
+        layout->set_tracks(geometry.numCylinders);
+        layout->set_sides(geometry.numHeads);
 
         return image;
     }

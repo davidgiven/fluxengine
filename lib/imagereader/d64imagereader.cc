@@ -31,11 +31,11 @@ public:
         data.writer() += inputFile;
         ByteReader br(data);
 
-        unsigned numTracks = 39;
+        unsigned numCylinders = 39;
         unsigned numHeads = 1;
         unsigned numSectors = 0;
 
-        log("D64: reading image with {} tracks, {} heads", numTracks, numHeads);
+        log("D64: reading image with {} tracks, {} heads", numCylinders, numHeads);
 
         uint32_t offset = 0;
 

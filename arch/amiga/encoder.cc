@@ -84,7 +84,7 @@ static void write_sector(std::vector<bool>& bits,
 
     checksum = 0;
     Bytes header = {0xff, /* Amiga 1.0 format byte */
-        (uint8_t)((sector->logicalTrack << 1) | sector->logicalSide),
+        (uint8_t)((sector->logicalCylinder << 1) | sector->logicalHead),
         (uint8_t)sector->logicalSector,
         (uint8_t)(AMIGA_SECTORS_PER_TRACK - sector->logicalSector)};
     write_interleaved_bytes(header);

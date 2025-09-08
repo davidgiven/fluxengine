@@ -181,10 +181,10 @@ static void write_sector(std::vector<bool>& bits,
         write_bits(bits, cursor, 0xff3fcff3fcffLL, 6 * 8); /* sync */
     write_bits(bits, cursor, MAC_SECTOR_RECORD, 3 * 8);
 
-    uint8_t encodedTrack = sector->logicalTrack & 0x3f;
+    uint8_t encodedTrack = sector->logicalCylinder & 0x3f;
     uint8_t encodedSector = sector->logicalSector;
     uint8_t encodedSide =
-        encode_side(sector->logicalTrack, sector->logicalSide);
+        encode_side(sector->logicalCylinder, sector->logicalHead);
     uint8_t formatByte = MAC_FORMAT_BYTE;
     uint8_t headerChecksum =
         (encodedTrack ^ encodedSector ^ encodedSide ^ formatByte) & 0x3f;
@@ -224,7 +224,7 @@ public:
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
-        double clockRateUs = clockRateUsForTrack(trackInfo->logicalTrack);
+        double clockRateUs = clockRateUsForTrack(trackInfo->logicalCylinder);
         int bitsPerRevolution = 200000.0 / clockRateUs;
         std::vector<bool> bits(bitsPerRevolution);
         unsigned cursor = 0;

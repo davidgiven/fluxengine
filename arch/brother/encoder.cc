@@ -127,7 +127,7 @@ public:
             fillBitmapTo(bits, cursor, headerCursor, {true, false});
             write_sector_header(bits,
                 cursor,
-                sectorData->logicalTrack,
+                sectorData->logicalCylinder,
                 sectorData->logicalSector);
             fillBitmapTo(bits, cursor, dataCursor, {true, false});
             write_sector_data(bits, cursor, sectorData->data);

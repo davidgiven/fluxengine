@@ -14,7 +14,7 @@ public:
     static bool isBusy();
     static bool isConfigurationValid();
     static const std::map<CylinderHead, std::shared_ptr<const TrackInfo>>&
-    getPhysicalTrackLayouts();
+    getphysicalCylinderLayouts();
     static std::shared_ptr<const Sector> findSectorByPhysicalLocation(
         const CylinderHeadSector& location);
     static std::optional<unsigned> findBlockByLogicalLocation(

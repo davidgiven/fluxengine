@@ -222,14 +222,14 @@ public:
         if (syncByte != 0xFF)
             return;
 
-        _sector->logicalTrack = br.read_8();
-        _sector->logicalSide = _sector->physicalSide;
+        _sector->logicalCylinder = br.read_8();
+        _sector->logicalHead = _sector->physicalHead;
         _sector->logicalSector = br.read_8();
         if (_sector->logicalSector > 15)
             return;
-        if (_sector->logicalTrack > 76)
+        if (_sector->logicalCylinder > 76)
             return;
-        if (_sector->logicalTrack != _sector->physicalTrack)
+        if (_sector->logicalCylinder != _sector->physicalCylinder)
             return;
 
         br.read(10); /* OS data or padding */

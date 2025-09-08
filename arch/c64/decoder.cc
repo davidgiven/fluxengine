@@ -74,8 +74,8 @@ public:
 
         uint8_t checksum = bytes[0];
         _sector->logicalSector = bytes[1];
-        _sector->logicalSide = 0;
-        _sector->logicalTrack = bytes[2] - 1;
+        _sector->logicalHead = 0;
+        _sector->logicalCylinder = bytes[2] - 1;
         if (checksum == xorBytes(bytes.slice(1, 4)))
             _sector->status =
                 Sector::DATA_MISSING; /* unintuitive but correct */

@@ -40,16 +40,16 @@ namespace
         ~A2RFluxSink()
         {
             auto physicalLocations = Layout::computePhysicalLocations();
-            auto [minTrack, maxTrack, minSide, maxSide] =
+            auto [minCylinder, maxCylinder, minHead, maxHead] =
                 Layout::getBounds(physicalLocations);
-            _minTrack = minTrack;
-            _maxTrack = maxTrack;
-            _minSide = minSide;
-            _maxSide = maxSide;
+            _minCylinder = minCylinder;
+            _maxCylinder = maxCylinder;
+            _minHead = minHead;
+            _maxHead = maxHead;
 
             log("A2R: writing A2R {} file containing {} tracks...",
-                (_minSide == _maxSide) ? "single sided" : "double sided",
-                _maxTrack - _minTrack + 1);
+                (_minHead == _maxHead) ? "single sided" : "double sided",
+                _maxCylinder - _minCylinder + 1);
 
             writeHeader();
             writeInfo();
@@ -230,10 +230,10 @@ namespace
         Bytes _strmBytes;
         ByteWriter _strmWriter{_strmBytes.writer()};
         std::map<std::string, std::string> _metadata;
-        int _minSide;
-        int _maxSide;
-        int _minTrack;
-        int _maxTrack;
+        int _minHead;
+        int _maxHead;
+        int _minCylinder;
+        int _maxCylinder;
     };
 } // namespace
 

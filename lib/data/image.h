@@ -7,8 +7,8 @@ class Sector;
 
 struct Geometry
 {
-    unsigned numTracks = 0;
-    unsigned numSides = 0;
+    unsigned numCylinders = 0;
+    unsigned numHeads = 0;
     unsigned firstSector = UINT_MAX;
     unsigned numSectors = 0;
     unsigned sectorSize = 0;

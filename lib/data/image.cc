@@ -11,7 +11,7 @@ Image::Image(std::set<std::shared_ptr<const Sector>>& sectors):
 {
     for (auto& sector : sectors)
         _sectors[{
-            sector->logicalTrack, sector->logicalSide, sector->logicalSector}] =
+            sector->logicalCylinder, sector->logicalHead, sector->logicalSector}] =
             sector;
     calculateSize();
 }
@@ -62,8 +62,8 @@ std::shared_ptr<Sector> Image::put(
     auto trackLayout = Layout::getLayoutOfTrack(track, side);
     std::shared_ptr<Sector> sector = std::make_shared<Sector>(
         trackLayout, LogicalLocation{track, side, sectorid});
-    sector->physicalTrack = Layout::remapTrackLogicalToPhysical(track);
-    sector->physicalSide = side;
+    sector->physicalCylinder = Layout::remapCylinderLogicalToPhysical(track);
+    sector->physicalHead = side;
     _sectors[{track, side, sectorid}] = sector;
     return sector;
 }
@@ -122,10 +122,10 @@ void Image::calculateSize()
         const auto& sector = i.second;
         if (sector)
         {
-            _geometry.numTracks = std::max(
-                _geometry.numTracks, (unsigned)sector->logicalTrack + 1);
-            _geometry.numSides =
-                std::max(_geometry.numSides, (unsigned)sector->logicalSide + 1);
+            _geometry.numCylinders = std::max(
+                _geometry.numCylinders, (unsigned)sector->logicalCylinder + 1);
+            _geometry.numHeads =
+                std::max(_geometry.numHeads, (unsigned)sector->logicalHead + 1);
             _geometry.firstSector = std::min(
                 _geometry.firstSector, (unsigned)sector->logicalSector);
             maxSector = std::max(maxSector, (unsigned)sector->logicalSector);

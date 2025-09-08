@@ -64,8 +64,8 @@ public:
             gotChecksum += br.read_be16();
         uint16_t wantChecksum = br.read_be16();
 
-        _sector->logicalTrack = _sector->physicalTrack;
-        _sector->logicalSide = _sector->physicalSide;
+        _sector->logicalCylinder = _sector->physicalCylinder;
+        _sector->logicalHead = _sector->physicalHead;
         _sector->logicalSector = _currentSector;
         _sector->data = bytes.slice(0, SECTOR_SIZE).swab();
         _sector->status =

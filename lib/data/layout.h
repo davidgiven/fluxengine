@@ -15,14 +15,14 @@ public:
      * sector headers) to the track numbering on the actual drive, taking into
      * account tpi settings.
      */
-    static unsigned remapTrackPhysicalToLogical(unsigned physicalTrack);
-    static unsigned remapTrackLogicalToPhysical(unsigned logicalTrack);
+    static unsigned remapCylinderPhysicalToLogical(unsigned physicalCylinder);
+    static unsigned remapCylinderLogicalToPhysical(unsigned logicalCylinder);
 
     /* Translates logical side numbering (the numbers actually written in the
      * sector headers) to the sides used on the actual drive.
      */
-    static unsigned remapSidePhysicalToLogical(unsigned physicalSide);
-    static unsigned remapSideLogicalToPhysical(unsigned logicalSide);
+    static unsigned remapHeadPhysicalToLogical(unsigned physicalHead);
+    static unsigned remapHeadLogicalToPhysical(unsigned logicalHead);
 
     /* Uses the layout and current track and heads settings to determine
      * which physical tracks are going to be read from or written to.
@@ -37,7 +37,7 @@ public:
      * maximum track and side settings. */
     struct LayoutBounds
     {
-        int minTrack, maxTrack, minSide, maxSide;
+        int minCylinder, maxCylinder, minHead, maxHead;
     };
     static LayoutBounds getBounds(const std::vector<CylinderHead>& locations);
 
@@ -45,16 +45,16 @@ public:
      * ordering of the disk, in logical numbers. */
     static std::vector<std::pair<int, int>> getTrackOrdering(
         LayoutProto::Order ordering,
-        unsigned guessedTracks = 0,
-        unsigned guessedSides = 0);
+        unsigned guessedCylinders = 0,
+        unsigned guessedHeads = 0);
 
     /* Returns the layout of a given track. */
     static std::shared_ptr<const TrackInfo> getLayoutOfTrack(
-        unsigned logicalTrack, unsigned logicalHead);
+        unsigned logicalCylinder, unsigned logicalHead);
 
     /* Returns the layout of a given track via physical location. */
     static std::shared_ptr<const TrackInfo> getLayoutOfTrackPhysical(
-        unsigned physicalTrack, unsigned physicalSide);
+        unsigned physicalCylinder, unsigned physicalHead);
 
     /* Returns the layout of a given track via physical location. */
     static std::shared_ptr<const TrackInfo> getLayoutOfTrackPhysical(
@@ -83,23 +83,23 @@ private:
     TrackInfo& operator=(const TrackInfo&);
 
 public:
-    unsigned numTracks = 0;
-    unsigned numSides = 0;
+    unsigned numCylinders = 0;
+    unsigned numHeads = 0;
 
     /* The number of sectors in this track. */
     unsigned numSectors = 0;
 
     /* Physical location of this track. */
-    unsigned physicalTrack = 0;
+    unsigned physicalCylinder = 0;
 
     /* Physical side of this track. */
-    unsigned physicalSide = 0;
+    unsigned physicalHead = 0;
 
     /* Logical location of this track. */
-    unsigned logicalTrack = 0;
+    unsigned logicalCylinder = 0;
 
     /* Logical side of this track. */
-    unsigned logicalSide = 0;
+    unsigned logicalHead = 0;
 
     /* The number of physical tracks which need to be written for one logical
      * track. */

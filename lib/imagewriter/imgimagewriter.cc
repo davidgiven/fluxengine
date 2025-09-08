@@ -23,8 +23,8 @@ public:
         const Geometry geometry = image.getGeometry();
 
         auto& layout = globalConfig()->layout();
-        int tracks = layout.has_tracks() ? layout.tracks() : geometry.numTracks;
-        int sides = layout.has_sides() ? layout.sides() : geometry.numSides;
+        int tracks = layout.has_tracks() ? layout.tracks() : geometry.numCylinders;
+        int sides = layout.has_sides() ? layout.sides() : geometry.numHeads;
 
         std::ofstream outputFile(
             _config.filename(), std::ios::out | std::ios::binary);

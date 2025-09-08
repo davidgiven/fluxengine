@@ -157,8 +157,8 @@ public:
         image->calculateSize();
         const Geometry& geometry = image->getGeometry();
         log("NFD: read {} tracks, {} sides",
-            geometry.numTracks,
-            geometry.numSides);
+            geometry.numCylinders,
+            geometry.numHeads);
         return image;
     }
 };

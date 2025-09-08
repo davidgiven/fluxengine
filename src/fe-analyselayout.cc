@@ -63,9 +63,9 @@ void visualiseSectorsToFile(const Image& image, const std::string& filename)
             BORDER + ((sideToDraw == -1) ? (panel_centre + side * panel_size)
                                          : panel_centre);
 
-        for (int physicalTrack = 0; physicalTrack < TRACKS; physicalTrack++)
+        for (int physicalCylinder = 0; physicalCylinder < TRACKS; physicalCylinder++)
         {
-            double visibleDistance = (TRACKS * 0.5) + (TRACKS - physicalTrack);
+            double visibleDistance = (TRACKS * 0.5) + (TRACKS - physicalCylinder);
             double radius = (disk_radius * visibleDistance) / (TRACKS * 1.5);
             painter.noFill();
             painter.lineColor(0x88, 0x88, 0x88);
@@ -77,8 +77,8 @@ void visualiseSectorsToFile(const Image& image, const std::string& filename)
             {
                 for (const auto& sector : image)
                 {
-                    if ((sector->physicalSide == side) &&
-                        (sector->physicalTrack == physicalTrack) &&
+                    if ((sector->physicalHead == side) &&
+                        (sector->physicalCylinder == physicalCylinder) &&
                         (sector->logicalSector == alignWithSector))
                     {
                         offset = sector->headerStartTime;
@@ -111,8 +111,8 @@ void visualiseSectorsToFile(const Image& image, const std::string& filename)
             /* Sadly, Images aren't indexable by physical track. */
             for (const auto& sector : image)
             {
-                if ((sector->physicalSide == side) &&
-                    (sector->physicalTrack == physicalTrack))
+                if ((sector->physicalHead == side) &&
+                    (sector->physicalCylinder == physicalCylinder))
                 {
                     painter.lineColor(0xff, 0x00, 0x00);
                     if (sector->status == Sector::OK)
@@ -175,16 +175,16 @@ static void readRow(const std::vector<std::string>& row, Image& image)
         if (status == Sector::Status::MISSING)
             return;
 
-        int logicalTrack = std::stoi(row[3]);
-        int logicalSide = std::stoi(row[4]);
+        int logicalCylinder = std::stoi(row[3]);
+        int logicalHead = std::stoi(row[4]);
         int logicalSector = std::stoi(row[2]);
 
         const auto& sector =
-            image.put(logicalTrack, logicalSide, logicalSector);
-        sector->physicalTrack = std::stoi(row[0]);
-        sector->physicalSide = std::stoi(row[1]);
-        sector->logicalTrack = logicalTrack;
-        sector->logicalSide = logicalSide;
+            image.put(logicalCylinder, logicalHead, logicalSector);
+        sector->physicalCylinder = std::stoi(row[0]);
+        sector->physicalHead = std::stoi(row[1]);
+        sector->logicalCylinder = logicalCylinder;
+        sector->logicalHead = logicalHead;
         sector->logicalSector = logicalSector;
         sector->clock = std::stod(row[5]);
         sector->headerStartTime = std::stod(row[6]);

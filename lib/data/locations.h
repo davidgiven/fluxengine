@@ -21,8 +21,8 @@ struct LogicalLocation
     bool operator==(const LogicalLocation&) const = default;
     std::strong_ordering operator<=>(const LogicalLocation&) const = default;
 
-    unsigned logicalTrack;
-    unsigned logicalSide;
+    unsigned logicalCylinder;
+    unsigned logicalHead;
     unsigned logicalSector;
 };
 

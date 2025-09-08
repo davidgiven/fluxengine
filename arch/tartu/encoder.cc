@@ -83,7 +83,7 @@ private:
             Bytes bytes;
             ByteWriter bw(bytes);
             bw.write_8(
-                (sectorData->logicalTrack << 1) | sectorData->logicalSide);
+                (sectorData->logicalCylinder << 1) | sectorData->logicalHead);
             bw.write_8(1);
             bw.write_8(sectorData->logicalSector);
             bw.write_8(~sumBytes(bytes.slice(0, 3)));

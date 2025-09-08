@@ -119,8 +119,8 @@ void renderLogMessage(
 
     for (const auto& sector : sectors)
         r.add(fmt::format("{}.{}.{}{}",
-            sector->logicalTrack,
-            sector->logicalSide,
+            sector->logicalCylinder,
+            sector->logicalHead,
             sector->logicalSector,
             Sector::statusToChar(sector->status)));
 
@@ -129,7 +129,7 @@ void renderLogMessage(
     for (const auto& sector : m->track->sectors)
     {
         track_ids.insert(
-            std::make_pair(sector->logicalTrack, sector->logicalSide));
+            std::make_pair(sector->logicalCylinder, sector->logicalHead));
         size += sector->data.size();
     }
 
@@ -239,7 +239,7 @@ static std::set<std::shared_ptr<const Sector>> collectSectors(
     for (const auto& sector : track_sectors)
     {
         key_t sectorid = {
-            sector->logicalTrack, sector->logicalSide, sector->logicalSector};
+            sector->logicalCylinder, sector->logicalHead, sector->logicalSector};
         sectors.insert({sectorid, sector});
     }
 
@@ -301,7 +301,7 @@ BadSectorsState combineRecordAndSectors(TrackFlux& trackFlux,
     for (unsigned sectorId : trackLayout->naturalSectorOrder)
     {
         auto sector = std::make_shared<Sector>(trackLayout, LogicalLocation{
-            trackLayout->logicalTrack, trackLayout->logicalSide, sectorId});
+            trackLayout->logicalCylinder, trackLayout->logicalHead, sectorId});
 
         sector->status = Sector::MISSING;
         track_sectors.insert(sector);
@@ -350,10 +350,10 @@ ReadResult readGroup(FluxSourceIteratorHolder& fluxSourceIteratorHolder,
         offset += Layout::getHeadWidth())
     {
         log(BeginReadOperationLogMessage{
-            trackInfo->physicalTrack + offset, trackInfo->physicalSide});
+            trackInfo->physicalCylinder + offset, trackInfo->physicalHead});
 
         auto& fluxSourceIterator = fluxSourceIteratorHolder.getIterator(
-            trackInfo->physicalTrack + offset, trackInfo->physicalSide);
+            trackInfo->physicalCylinder + offset, trackInfo->physicalHead);
         if (!fluxSourceIterator.hasNext())
             continue;
 
@@ -406,10 +406,10 @@ void writeTracks(FluxSink& fluxSink,
             for (int offset = 0; offset < trackInfo->groupSize;
                 offset += Layout::getHeadWidth())
             {
-                unsigned physicalTrack = trackInfo->physicalTrack + offset;
+                unsigned physicalCylinder = trackInfo->physicalCylinder + offset;
 
                 log(BeginWriteOperationLogMessage{
-                    physicalTrack, trackInfo->physicalSide});
+                    physicalCylinder, trackInfo->physicalHead});
 
                 if (offset == globalConfig()->drive().group_offset())
                 {
@@ -418,7 +418,7 @@ void writeTracks(FluxSink& fluxSink,
                         goto erase;
 
                     fluxSink.writeFlux(
-                        physicalTrack, trackInfo->physicalSide, *fluxmap);
+                        physicalCylinder, trackInfo->physicalHead, *fluxmap);
                     log("writing {0} ms in {1} bytes",
                         int(fluxmap->duration() / 1e6),
                         fluxmap->bytes());
@@ -430,7 +430,7 @@ void writeTracks(FluxSink& fluxSink,
 
                     Fluxmap blank;
                     fluxSink.writeFlux(
-                        physicalTrack, trackInfo->physicalSide, blank);
+                        physicalCylinder, trackInfo->physicalHead, blank);
                     log("erased");
                 }
 
@@ -495,7 +495,7 @@ void writeTracksAndVerify(FluxSink& fluxSink,
 
             if (result != GOOD_READ)
             {
-                adjustTrackOnError(fluxSource, trackInfo->physicalTrack);
+                adjustTrackOnError(fluxSource, trackInfo->physicalCylinder);
                 log("bad read");
                 return false;
             }
@@ -503,15 +503,15 @@ void writeTracksAndVerify(FluxSink& fluxSink,
             Image wanted;
             for (const auto& sector : encoder.collectSectors(trackInfo, image))
                 wanted
-                    .put(sector->logicalTrack,
-                        sector->logicalSide,
+                    .put(sector->logicalCylinder,
+                        sector->logicalHead,
                         sector->logicalSector)
                     ->data = sector->data;
 
             for (const auto& sector : trackFlux->sectors)
             {
-                const auto s = wanted.get(sector->logicalTrack,
-                    sector->logicalSide,
+                const auto s = wanted.get(sector->logicalCylinder,
+                    sector->logicalHead,
                     sector->logicalSector);
                 if (!s)
                 {
@@ -523,8 +523,8 @@ void writeTracksAndVerify(FluxSink& fluxSink,
                     log("data mismatch on verify");
                     return false;
                 }
-                wanted.erase(sector->logicalTrack,
-                    sector->logicalSide,
+                wanted.erase(sector->logicalCylinder,
+                    sector->logicalHead,
                     sector->logicalSector);
             }
             if (!wanted.empty())
@@ -571,7 +571,7 @@ void writeRawDiskCommand(FluxSource& fluxSource, FluxSink& fluxSink)
         [&](std::shared_ptr<const TrackInfo>& trackInfo)
         {
             return fluxSource
-                .readFlux(trackInfo->physicalTrack, trackInfo->physicalSide)
+                .readFlux(trackInfo->physicalCylinder, trackInfo->physicalHead)
                 ->next();
         },
         [](const auto&)
@@ -613,7 +613,7 @@ std::shared_ptr<TrackFlux> readAndDecodeTrack(FluxSource& fluxSource,
 
         if (fluxSource.isHardware())
         {
-            adjustTrackOnError(fluxSource, trackInfo->physicalTrack);
+            adjustTrackOnError(fluxSource, trackInfo->physicalCylinder);
             log("retrying; {} retries remaining", retriesRemaining);
             retriesRemaining--;
         }
@@ -652,8 +652,8 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
         if (outputFluxSink)
         {
             for (const auto& data : trackFlux->trackDatas)
-                outputFluxSink->writeFlux(trackInfo->physicalTrack,
-                    trackInfo->physicalSide,
+                outputFluxSink->writeFlux(trackInfo->physicalCylinder,
+                    trackInfo->physicalHead,
                     *data->fluxmap);
         }
 
@@ -702,8 +702,8 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
                 std::cout << fmt::format(
                     "{}.{:02}.{:02}: I+{:.2f}us with {:.2f}us clock: "
                     "status {}\n",
-                    sector->logicalTrack,
-                    sector->logicalSide,
+                    sector->logicalCylinder,
+                    sector->logicalHead,
                     sector->logicalSector,
                     sector->headerStartTime / 1000.0,
                     sector->clock / 1000.0,

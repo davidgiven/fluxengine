@@ -23,8 +23,8 @@ public:
 
         log("LDBS: writing {} tracks, {} sides, {} sectors, {} bytes per "
             "sector",
-            geometry.numTracks,
-            geometry.numSides,
+            geometry.numCylinders,
+            geometry.numHeads,
             geometry.numSectors,
             geometry.sectorSize);
 
@@ -53,9 +53,9 @@ public:
                 LDBSOutputProto::RecordingMode_Name(recordingMode));
         }
 
-        for (int track = 0; track < geometry.numTracks; track++)
+        for (int track = 0; track < geometry.numCylinders; track++)
         {
-            for (int side = 0; side < geometry.numSides; side++)
+            for (int side = 0; side < geometry.numHeads; side++)
             {
                 Bytes trackHeader;
                 ByteWriter trackHeaderWriter(trackHeader);

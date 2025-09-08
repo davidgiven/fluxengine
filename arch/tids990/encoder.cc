@@ -95,8 +95,8 @@ public:
 
                 writeBytes(12, 0x55);
                 bw.write_8(am1Unencoded);
-                bw.write_8(sectorData->logicalSide << 3);
-                bw.write_8(sectorData->logicalTrack);
+                bw.write_8(sectorData->logicalHead << 3);
+                bw.write_8(sectorData->logicalCylinder);
                 bw.write_8(_config.sector_count());
                 bw.write_8(sectorData->logicalSector);
                 bw.write_be16(sectorData->data.size());

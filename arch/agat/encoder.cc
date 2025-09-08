@@ -63,7 +63,7 @@ public:
         const Image& image) override
     {
         auto trackLayout = Layout::getLayoutOfTrack(
-            trackInfo->logicalTrack, trackInfo->logicalSide);
+            trackInfo->logicalCylinder, trackInfo->logicalHead);
 
         double clockRateUs = _config.target_clock_period_us() / 2.0;
         int bitsPerRevolution =
@@ -80,7 +80,7 @@ public:
             writeFillerRawBytes(_config.pre_sector_gap_bytes(), 0xaaaa);
             writeRawBits(SECTOR_ID, 64);
             writeByte(0x5a);
-            writeByte((sector->logicalTrack << 1) | sector->logicalSide);
+            writeByte((sector->logicalCylinder << 1) | sector->logicalHead);
             writeByte(sector->logicalSector);
             writeByte(0x5a);
 

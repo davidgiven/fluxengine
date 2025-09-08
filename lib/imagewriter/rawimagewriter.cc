@@ -21,15 +21,15 @@ public:
 
         size_t trackSize = geometry.numSectors * geometry.sectorSize;
 
-        if (geometry.numTracks * trackSize == 0)
+        if (geometry.numCylinders * trackSize == 0)
         {
             log("RAW: no sectors in output; skipping image file generation.");
             return;
         }
 
         log("RAW: writing {} tracks, {} sides",
-            geometry.numTracks,
-            geometry.numSides);
+            geometry.numCylinders,
+            geometry.numHeads);
 
         std::ofstream outputFile(
             _config.filename(), std::ios::out | std::ios::binary);
@@ -37,16 +37,16 @@ public:
             error("RAW: cannot open output file");
 
         unsigned sectorFileOffset;
-        for (int track = 0; track < geometry.numTracks * geometry.numSides;
+        for (int track = 0; track < geometry.numCylinders * geometry.numHeads;
             track++)
         {
-            int side = (track < geometry.numTracks) ? 0 : 1;
+            int side = (track < geometry.numCylinders) ? 0 : 1;
 
             std::vector<std::shared_ptr<Record>> records;
             for (int sectorId = 0; sectorId < geometry.numSectors; sectorId++)
             {
                 const auto& sector =
-                    image.get(track % geometry.numTracks, side, sectorId);
+                    image.get(track % geometry.numCylinders, side, sectorId);
                 if (sector)
                     records.insert(records.end(),
                         sector->records.begin(),

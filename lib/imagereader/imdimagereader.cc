@@ -414,16 +414,16 @@ public:
                 // contains the logical Cylinder ID for the corresponding sector
                 // in the Sector Numbering Map.
                 {
-                    sector->physicalTrack =
-                        Layout::remapTrackLogicalToPhysical(header.track);
-                    sector->logicalTrack = optionalsector_map[s];
+                    sector->physicalCylinder =
+                        Layout::remapCylinderLogicalToPhysical(header.track);
+                    sector->logicalCylinder = optionalsector_map[s];
                     blnOptionalCylinderMap = false;
                 }
                 else
                 {
-                    sector->logicalTrack = header.track;
-                    sector->physicalTrack =
-                        Layout::remapTrackLogicalToPhysical(header.track);
+                    sector->logicalCylinder = header.track;
+                    sector->physicalCylinder =
+                        Layout::remapCylinderLogicalToPhysical(header.track);
                 }
                 if (blnOptionalHeadMap) // there was een optional head map.
                                         // write it to the sector
@@ -431,14 +431,14 @@ public:
                 // contains the logical Head ID for the corresponding sector in
                 // the Sector Numbering Map.
                 {
-                    sector->physicalSide = header.Head;
-                    sector->logicalSide = optionalhead_map[s];
+                    sector->physicalHead = header.Head;
+                    sector->logicalHead = optionalhead_map[s];
                     blnOptionalHeadMap = false;
                 }
                 else
                 {
-                    sector->logicalSide = header.Head;
-                    sector->physicalSide = header.Head;
+                    sector->logicalHead = header.Head;
+                    sector->physicalHead = header.Head;
                 }
             }
         }
@@ -462,8 +462,8 @@ public:
             sectorSize,
             (header.track + 1) * trackSize / 1024);
 
-        layout->set_tracks(geometry.numTracks);
-        layout->set_sides(geometry.numSides);
+        layout->set_tracks(geometry.numCylinders);
+        layout->set_sides(geometry.numHeads);
 
         return image;
     }

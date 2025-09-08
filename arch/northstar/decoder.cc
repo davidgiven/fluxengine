@@ -159,9 +159,9 @@ public:
         auto bytes = decodeFmMfm(rawbits).slice(0, recordSize);
         ByteReader br(bytes);
 
-        _sector->logicalSide = _sector->physicalSide;
+        _sector->logicalHead = _sector->physicalHead;
         _sector->logicalSector = _hardSectorId;
-        _sector->logicalTrack = _sector->physicalTrack;
+        _sector->logicalCylinder = _sector->physicalCylinder;
 
         if (headerSize == NORTHSTAR_HEADER_SIZE_DD)
         {

@@ -113,10 +113,10 @@ public:
     {
         IbmEncoderProto::TrackdataProto trackdata;
         getEncoderTrackData(
-            trackdata, trackInfo->logicalTrack, trackInfo->logicalSide);
+            trackdata, trackInfo->logicalCylinder, trackInfo->logicalHead);
 
         auto trackLayout = Layout::getLayoutOfTrack(
-            trackInfo->logicalTrack, trackInfo->logicalSide);
+            trackInfo->logicalCylinder, trackInfo->logicalHead);
 
         auto writeBytes = [&](const Bytes& bytes)
         {
@@ -202,9 +202,9 @@ public:
                         bw.write_8(MFM_RECORD_SEPARATOR_BYTE);
                 }
                 bw.write_8(idamUnencoded);
-                bw.write_8(sectorData->logicalTrack);
+                bw.write_8(sectorData->logicalCylinder);
                 bw.write_8(
-                    sectorData->logicalSide ^ trackdata.invert_side_byte());
+                    sectorData->logicalHead ^ trackdata.invert_side_byte());
                 bw.write_8(sectorData->logicalSector);
                 bw.write_8(sectorSize);
                 uint16_t crc = crc16(CCITT_POLY, header);

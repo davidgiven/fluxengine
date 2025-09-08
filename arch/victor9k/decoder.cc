@@ -80,11 +80,11 @@ public:
         _sector->logicalSector = bytes[1];
         uint8_t gotChecksum = bytes[2];
 
-        _sector->logicalTrack = rawTrack & 0x7f;
-        _sector->logicalSide = rawTrack >> 7;
+        _sector->logicalCylinder = rawTrack & 0x7f;
+        _sector->logicalHead = rawTrack >> 7;
         uint8_t wantChecksum = bytes[0] + bytes[1];
-        if ((_sector->logicalSector > 20) || (_sector->logicalTrack > 85) ||
-            (_sector->logicalSide > 1))
+        if ((_sector->logicalSector > 20) || (_sector->logicalCylinder > 85) ||
+            (_sector->logicalHead > 1))
             return;
 
         if (wantChecksum == gotChecksum)

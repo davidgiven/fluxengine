@@ -142,10 +142,10 @@ public:
 
         IbmDecoderProto::TrackdataProto trackdata;
         getTrackFormat(
-            trackdata, _sector->physicalTrack, _sector->physicalSide);
+            trackdata, _sector->physicalCylinder, _sector->physicalHead);
 
-        _sector->logicalTrack = br.read_8();
-        _sector->logicalSide = br.read_8();
+        _sector->logicalCylinder = br.read_8();
+        _sector->logicalHead = br.read_8();
         _sector->logicalSector = br.read_8();
         _currentSectorSize = 1 << (br.read_8() + 7);
 
@@ -156,11 +156,11 @@ public:
                 Sector::DATA_MISSING; /* correct but unintuitive */
 
         if (trackdata.ignore_side_byte())
-            _sector->logicalSide =
-                Layout::remapSidePhysicalToLogical(_sector->physicalSide);
-        _sector->logicalSide ^= trackdata.invert_side_byte();
+            _sector->logicalHead =
+                Layout::remapHeadPhysicalToLogical(_sector->physicalHead);
+        _sector->logicalHead ^= trackdata.invert_side_byte();
         if (trackdata.ignore_track_byte())
-            _sector->logicalTrack = _sector->physicalTrack;
+            _sector->logicalCylinder = _sector->physicalCylinder;
 
         for (int sector : trackdata.ignore_sector())
             if (_sector->logicalSector == sector)
@@ -210,13 +210,13 @@ public:
             (wantCrc == gotCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
 
         auto layout = Layout::getLayoutOfTrack(
-            _sector->logicalTrack, _sector->logicalSide);
+            _sector->logicalCylinder, _sector->logicalHead);
         if (_currentSectorSize != layout->sectorSize)
             std::cerr << fmt::format(
                 "Warning: configured sector size for t{}.h{}.s{} is {} bytes "
                 "but that seen on disk is {} bytes\n",
-                _sector->logicalTrack,
-                _sector->logicalSide,
+                _sector->logicalCylinder,
+                _sector->logicalHead,
                 _sector->logicalSector,
                 layout->sectorSize,
                 _currentSectorSize);

@@ -93,24 +93,24 @@ public:
         ByteReader br(header);
 
         uint8_t volume = combine(br.read_be16());
-        _sector->logicalTrack = combine(br.read_be16());
-        _sector->logicalSide = _sector->physicalSide;
+        _sector->logicalCylinder = combine(br.read_be16());
+        _sector->logicalHead = _sector->physicalHead;
         _sector->logicalSector = combine(br.read_be16());
         uint8_t checksum = combine(br.read_be16());
 
         // If the checksum is correct, upgrade the sector from MISSING
         // to DATA_MISSING in anticipation of its data record
         if (checksum ==
-            (volume ^ _sector->logicalTrack ^ _sector->logicalSector))
+            (volume ^ _sector->logicalCylinder ^ _sector->logicalSector))
             _sector->status =
                 Sector::DATA_MISSING; /* unintuitive but correct */
 
-        if (_sector->logicalSide == 1)
-            _sector->logicalTrack -= _config.apple2().side_one_track_offset();
+        if (_sector->logicalHead == 1)
+            _sector->logicalCylinder -= _config.apple2().side_one_track_offset();
 
         /* Sanity check. */
 
-        if (_sector->logicalTrack > 100)
+        if (_sector->logicalCylinder > 100)
         {
             _sector->status = Sector::MISSING;
             return;

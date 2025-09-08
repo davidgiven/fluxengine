@@ -24,8 +24,8 @@ static std::optional<std::set<std::shared_ptr<const Sector>>> findSectors(
     if (diskFlux)
         for (auto& it : diskFlux->tracks)
         {
-            if ((it->trackInfo->physicalTrack == cylinder) &&
-                (it->trackInfo->physicalSide == head))
+            if ((it->trackInfo->physicalCylinder == cylinder) &&
+                (it->trackInfo->physicalHead == head))
                 return std::make_optional(it->sectors);
         }
 

@@ -32,8 +32,8 @@ struct Sector : public LogicalLocation
     nanoseconds_t headerEndTime = 0;
     nanoseconds_t dataStartTime = 0;
     nanoseconds_t dataEndTime = 0;
-    unsigned physicalTrack = 0;
-    unsigned physicalSide = 0;
+    unsigned physicalCylinder = 0;
+    unsigned physicalHead = 0;
     Bytes data;
     std::vector<std::shared_ptr<Record>> records;
 
@@ -42,7 +42,7 @@ struct Sector : public LogicalLocation
     std::tuple<int, int, int, Status> key() const
     {
         return std::make_tuple(
-            logicalTrack, logicalSide, logicalSector, status);
+            logicalCylinder, logicalHead, logicalSector, status);
     }
 
     bool operator==(const Sector& rhs) const

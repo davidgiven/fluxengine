@@ -61,8 +61,8 @@ public:
         image->calculateSize();
         const Geometry& geometry = image->getGeometry();
         log("IMG: read {} tracks, {} sides, {} kB total from {}",
-            geometry.numTracks,
-            geometry.numSides,
+            geometry.numCylinders,
+            geometry.numHeads,
             inputFile.tellg() / 1024,
             _config.filename());
         return image;

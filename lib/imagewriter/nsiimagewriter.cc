@@ -21,7 +21,7 @@ public:
 
         size_t trackSize = geometry.numSectors * geometry.sectorSize;
 
-        if (geometry.numTracks * trackSize == 0)
+        if (geometry.numCylinders * trackSize == 0)
         {
             log("No sectors in output; skipping .nsi image file generation.");
             return;
@@ -29,12 +29,12 @@ public:
 
         log("Writing {} tracks, {} sides, {} sectors, {} ({} bytes/sector), {} "
             "kB total",
-            geometry.numTracks,
-            geometry.numSides,
+            geometry.numCylinders,
+            geometry.numHeads,
             geometry.numSectors,
             geometry.sectorSize == 256 ? "SD" : "DD",
             geometry.sectorSize,
-            geometry.numTracks * geometry.numSides * geometry.numSectors *
+            geometry.numCylinders * geometry.numHeads * geometry.numSectors *
                 geometry.sectorSize / 1024);
 
         std::ofstream outputFile(
@@ -43,14 +43,14 @@ public:
             error("cannot open output file");
 
         unsigned sectorFileOffset;
-        for (int track = 0; track < geometry.numTracks * geometry.numSides;
+        for (int track = 0; track < geometry.numCylinders * geometry.numHeads;
             track++)
         {
-            int side = (track < geometry.numTracks) ? 0 : 1;
+            int side = (track < geometry.numCylinders) ? 0 : 1;
             for (int sectorId = 0; sectorId < geometry.numSectors; sectorId++)
             {
                 const auto& sector =
-                    image.get(track % geometry.numTracks, side, sectorId);
+                    image.get(track % geometry.numCylinders, side, sectorId);
                 if (sector)
                 {
                     if (side == 0)
@@ -62,9 +62,9 @@ public:
                     { /* Side 1 is from track 70-35 */
                         sectorFileOffset =
                             (geometry.sectorSize * geometry.numSectors *
-                                geometry.numTracks) + /* Skip over side 0 */
-                            ((geometry.numTracks - 1) -
-                                (track % geometry.numTracks)) *
+                                geometry.numCylinders) + /* Skip over side 0 */
+                            ((geometry.numCylinders - 1) -
+                                (track % geometry.numCylinders)) *
                                 (geometry.sectorSize * geometry.numSectors) +
                             (sectorId *
                                 geometry.sectorSize); /* Sector offset from

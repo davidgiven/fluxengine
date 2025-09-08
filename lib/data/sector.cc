@@ -7,8 +7,8 @@ Sector::Sector(
     std::shared_ptr<const TrackInfo>& layout, const LogicalLocation& location):
     LogicalLocation(location),
     trackLayout(layout),
-    physicalTrack(Layout::remapTrackLogicalToPhysical(location.logicalTrack)),
-    physicalSide(Layout::remapSideLogicalToPhysical(location.logicalSide))
+    physicalCylinder(Layout::remapCylinderLogicalToPhysical(location.logicalCylinder)),
+    physicalHead(Layout::remapHeadLogicalToPhysical(location.logicalHead))
 {
 }
 

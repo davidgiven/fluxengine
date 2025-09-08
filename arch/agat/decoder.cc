@@ -59,9 +59,9 @@ public:
         if (bytes[3] != 0x5a)
             return;
 
-        _sector->logicalTrack = bytes[1] >> 1;
+        _sector->logicalCylinder = bytes[1] >> 1;
         _sector->logicalSector = bytes[2];
-        _sector->logicalSide = bytes[1] & 1;
+        _sector->logicalHead = bytes[1] & 1;
         _sector->status = Sector::DATA_MISSING; /* unintuitive but correct */
     }
 

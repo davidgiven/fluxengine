@@ -265,8 +265,8 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
                 wxDCClipper clipper(dc, rect);
 
                 auto text = fmt::format("c{}.h{}.s{} {}",
-                    sector->logicalTrack,
-                    sector->logicalSide,
+                    sector->logicalCylinder,
+                    sector->logicalHead,
                     sector->logicalSector,
                     Sector::statusToString(sector->status));
                 auto size = dc.GetTextExtent(text);
@@ -607,8 +607,8 @@ static void dumpSectorMetadata(
     s << fmt::format(
              "Sector status:     {}\n", Sector::statusToString(sector->status))
       << fmt::format("Physical location: c{}.h{}\n",
-             sector->physicalTrack,
-             sector->physicalSide)
+             sector->physicalCylinder,
+             sector->physicalHead)
       << fmt::format("Clock:             {:.2f}us / {:.0f}kHz\n",
              sector->clock / 1000.0,
              1000000.0 / sector->clock)
@@ -634,8 +634,8 @@ void FluxViewerControl::DisplayDecodedData(std::shared_ptr<const Sector> sector)
     std::stringstream s;
 
     auto title = fmt::format("User data for c{}.h{}.s{}",
-        sector->logicalTrack,
-        sector->logicalSide,
+        sector->logicalCylinder,
+        sector->logicalHead,
         sector->logicalSector);
     s << title << '\n';
     dumpSectorMetadata(s, sector);
@@ -652,16 +652,16 @@ void FluxViewerControl::DisplaySectorSummary(
     std::stringstream s;
 
     auto title = fmt::format("Sector summary c{}.h{}.s{}",
-        sector->logicalTrack,
-        sector->logicalSide,
+        sector->logicalCylinder,
+        sector->logicalHead,
         sector->logicalSector);
     s << title << '\n';
 
     std::vector<std::shared_ptr<const Sector>> sectors;
     for (auto& trackdata : _flux->trackDatas)
     {
-        if ((trackdata->trackInfo->logicalTrack == sector->logicalTrack) &&
-            (trackdata->trackInfo->logicalSide == sector->logicalSide))
+        if ((trackdata->trackInfo->logicalCylinder == sector->logicalCylinder) &&
+            (trackdata->trackInfo->logicalHead == sector->logicalHead))
         {
             for (auto& sec : trackdata->sectors)
             {
@@ -689,8 +689,8 @@ void FluxViewerControl::DisplayRawData(std::shared_ptr<const Sector> sector)
     std::stringstream s;
 
     auto title = fmt::format("Raw data for c{}.h{}.s{}",
-        sector->logicalTrack,
-        sector->logicalSide,
+        sector->logicalCylinder,
+        sector->logicalHead,
         sector->logicalSector);
     s << title << '\n';
     dumpSectorMetadata(s, sector);
@@ -714,8 +714,8 @@ void FluxViewerControl::DisplayRawData(std::shared_ptr<const TrackInfo>& layout,
     std::stringstream s;
 
     auto title = fmt::format("Raw data for record c{}.h{} + {:.3f}ms",
-        layout->physicalTrack,
-        layout->physicalSide,
+        layout->physicalCylinder,
+        layout->physicalHead,
         record->startTime / 1e6);
     s << title << "\n";
     dumpRecordMetadata(s, record);

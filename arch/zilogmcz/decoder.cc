@@ -34,11 +34,11 @@ public:
         ByteReader br(bytes);
 
         _sector->logicalSector = br.read_8() & 0x1f;
-        _sector->logicalSide = 0;
-        _sector->logicalTrack = br.read_8() & 0x7f;
+        _sector->logicalHead = 0;
+        _sector->logicalCylinder = br.read_8() & 0x7f;
         if (_sector->logicalSector > 31)
             return;
-        if (_sector->logicalTrack > 80)
+        if (_sector->logicalCylinder > 80)
             return;
 
         _sector->data = br.read(132);

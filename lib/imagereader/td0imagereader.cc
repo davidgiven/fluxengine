@@ -109,16 +109,16 @@ public:
             if (sectorCount == 0xff)
                 break;
 
-            uint8_t physicalTrack = br.read_8();
-            uint8_t physicalSide = br.read_8() & 1;
+            uint8_t physicalCylinder = br.read_8();
+            uint8_t physicalHead = br.read_8() & 1;
             br.skip(1); /* crc */
 
             for (int i = 0; i < sectorCount; i++)
             {
                 /* Read sector */
 
-                uint8_t logicalTrack = br.read_8();
-                uint8_t logicalSide = br.read_8();
+                uint8_t logicalCylinder = br.read_8();
+                uint8_t logicalHead = br.read_8();
                 uint8_t sectorId = br.read_8();
                 uint8_t sectorSizeEncoded = br.read_8();
                 unsigned sectorSize = 128 << sectorSizeEncoded;
@@ -181,10 +181,10 @@ public:
                 }
 
                 const auto& sector =
-                    image->put(logicalTrack, logicalSide, sectorId);
+                    image->put(logicalCylinder, logicalHead, sectorId);
                 sector->status = Sector::OK;
-                sector->physicalTrack = physicalTrack;
-                sector->physicalSide = physicalSide;
+                sector->physicalCylinder = physicalCylinder;
+                sector->physicalHead = physicalHead;
                 sector->data = data.slice(0, sectorSize);
                 totalSize += sectorSize;
             }
@@ -194,8 +194,8 @@ public:
         const Geometry& geometry = image->getGeometry();
         log("TD0: found {} tracks, {} sides, {} sectors, {} bytes per sector, "
             "{} kB total",
-            geometry.numTracks,
-            geometry.numSides,
+            geometry.numCylinders,
+            geometry.numHeads,
             geometry.numSectors,
             geometry.sectorSize,
             totalSize / 1024);

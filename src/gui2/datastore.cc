@@ -29,7 +29,7 @@ static std::atomic<bool> busy;
 
 static bool configurationValid;
 static std::map<CylinderHead, std::shared_ptr<const TrackInfo>>
-    physicalTrackLayouts;
+    physicalCylinderLayouts;
 static std::map<CylinderHeadSector, std::shared_ptr<const Sector>>
     sectorByPhysicalLocation;
 static std::map<LogicalLocation, unsigned> blockByLogicalLocation;
@@ -116,9 +116,9 @@ bool Datastore::isConfigurationValid()
 }
 
 const std::map<CylinderHead, std::shared_ptr<const TrackInfo>>&
-Datastore::getPhysicalTrackLayouts()
+Datastore::getphysicalCylinderLayouts()
 {
-    return physicalTrackLayouts;
+    return physicalCylinderLayouts;
 }
 
 const Layout::LayoutBounds& Datastore::getDiskPhysicalBounds()
@@ -178,8 +178,8 @@ static void rebuildDiskFluxIndices()
     {
         for (const auto& track : (*diskFlux)->tracks)
             for (const auto& sector : track->sectors)
-                sectorByPhysicalLocation[{sector->physicalTrack,
-                    sector->physicalSide,
+                sectorByPhysicalLocation[{sector->physicalCylinder,
+                    sector->physicalHead,
                     sector->logicalSector}] = sector;
 
         if ((*diskFlux)->image)
@@ -288,16 +288,16 @@ void Datastore::rebuildConfiguration()
                         auto locations = Layout::computePhysicalLocations();
                         auto diskPhysicalBounds = Layout::getBounds(locations);
 
-                        decltype(::physicalTrackLayouts) physicalTrackLayouts;
+                        decltype(::physicalCylinderLayouts) physicalCylinderLayouts;
                         for (auto& it : locations)
-                            physicalTrackLayouts[it] =
+                            physicalCylinderLayouts[it] =
                                 Layout::getLayoutOfTrackPhysical(it);
 
                         hex::TaskManager::doLater(
                             [=]
                             {
                                 ::diskPhysicalBounds = diskPhysicalBounds;
-                                ::physicalTrackLayouts = physicalTrackLayouts;
+                                ::physicalCylinderLayouts = physicalCylinderLayouts;
                                 rebuildDiskFluxIndices();
                                 configurationValid = true;
                             });

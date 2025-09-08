@@ -40,7 +40,7 @@ static void write_sector(std::vector<bool>& bits,
     {
         ByteWriter writer(sectorData);
         writer.write_8(0xff); /* Sync */
-        writer.write_8(sector->logicalTrack);
+        writer.write_8(sector->logicalCylinder);
         writer.write_8(sector->logicalSector);
         for (int i = 0; i < 10; i++)
             writer.write_8(0); /* Padding */

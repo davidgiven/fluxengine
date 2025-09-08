@@ -129,8 +129,8 @@ private:
             // extra padding.
             write_ff40(sector.logicalSector == 0 ? 32 : 8);
 
-            int track = sector.logicalTrack;
-            if (sector.logicalSide == 1)
+            int track = sector.logicalCylinder;
+            if (sector.logicalHead == 1)
                 track += _config.side_one_track_offset();
 
             // Write address field: APPLE2_SECTOR_RECORD + sector identifier +

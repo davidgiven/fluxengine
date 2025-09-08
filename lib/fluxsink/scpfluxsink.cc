@@ -41,7 +41,7 @@ class ScpFluxSink : public FluxSink
 public:
     ScpFluxSink(const ScpFluxSinkProto& lconfig): _config(lconfig)
     {
-        auto [minTrack, maxTrack, minSide, maxSide] =
+        auto [minCylinder, maxCylinder, minHead, maxHead] =
             Layout::getBounds(Layout::computePhysicalLocations());
 
         _fileheader.file_id[0] = 'S';
@@ -49,24 +49,24 @@ public:
         _fileheader.file_id[2] = 'P';
         _fileheader.version = 0x18; /* Version 1.8 of the spec */
         _fileheader.type = _config.type_byte();
-        _fileheader.start_track = strackno(minTrack, minSide);
-        _fileheader.end_track = strackno(maxTrack, maxSide);
+        _fileheader.start_track = strackno(minCylinder, minHead);
+        _fileheader.end_track = strackno(maxCylinder, maxHead);
         _fileheader.flags = SCP_FLAG_INDEXED;
         if (globalConfig()->drive().drive_type() == DRIVETYPE_APPLE2)
             error("you can't write Apple II flux images to SCP files yet");
         if (globalConfig()->drive().drive_type() != DRIVETYPE_40TRACK)
             _fileheader.flags |= SCP_FLAG_96TPI;
         _fileheader.cell_width = 0;
-        if ((minSide == 0) && (maxSide == 0))
+        if ((minHead == 0) && (maxHead == 0))
             _fileheader.heads = 1;
-        else if ((minSide == 1) && (maxSide == 1))
+        else if ((minHead == 1) && (maxHead == 1))
             _fileheader.heads = 2;
         else
             _fileheader.heads = 0;
 
         log("SCP: writing {} tpi {} file containing {} tracks",
             (_fileheader.flags & SCP_FLAG_96TPI) ? 96 : 48,
-            (minSide == maxSide) ? "single sided" : "double sided",
+            (minHead == maxHead) ? "single sided" : "double sided",
             _fileheader.end_track - _fileheader.start_track + 1);
     }
 

@@ -14,8 +14,8 @@ FluxViewerWindow::FluxViewerWindow(
     fluxviewer->SetScrollbar(scrollbar);
     fluxviewer->SetFlux(flux);
     SetTitle(fmt::format("Flux for c{} h{}",
-        flux->trackInfo->physicalTrack,
-        flux->trackInfo->physicalSide));
+        flux->trackInfo->physicalCylinder,
+        flux->trackInfo->physicalHead));
 }
 
 void FluxViewerWindow::OnExit(wxCommandEvent& event)

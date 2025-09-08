@@ -150,8 +150,8 @@ void ImageView::drawContent()
                         };
 
                         auto block = Datastore::findBlockByLogicalLocation(
-                            {sector->logicalTrack,
-                                sector->logicalSide,
+                            {sector->logicalCylinder,
+                                sector->logicalHead,
                                 sector->logicalSector});
 
                         auto id = block.has_value() ? fmt::format("#{}", *block)
@@ -184,8 +184,8 @@ void ImageView::drawContent()
                                 physicalCylinder,
                                 physicalHead,
                                 sectorId,
-                                sector->logicalTrack,
-                                sector->logicalSide,
+                                sector->logicalCylinder,
+                                sector->logicalHead,
                                 sectorId,
                                 sector->data.size(),
                                 Sector::statusToString(sector->status))

@@ -30,8 +30,8 @@ public:
     {
         const Geometry geometry = image.getGeometry();
 
-        int tracks = geometry.numTracks;
-        int sides = geometry.numSides;
+        int tracks = geometry.numCylinders;
+        int sides = geometry.numHeads;
 
         std::ofstream outputFile(
             _config.filename(), std::ios::out | std::ios::binary);
@@ -45,7 +45,7 @@ public:
             headerWriter.write_8(0x0); // image name + reserved bytes
         }
         headerWriter.write_8(0x00); // not write protected
-        if (geometry.numTracks > 42)
+        if (geometry.numCylinders > 42)
         {
             headerWriter.write_8(0x20); // 2HD
         }
@@ -64,7 +64,7 @@ public:
 
         uint32_t trackOffset = 688;
 
-        for (int track = 0; track < geometry.numTracks * geometry.numSides;
+        for (int track = 0; track < geometry.numCylinders * geometry.numHeads;
             track++)
         {
             headerWriter.seek(0x20 + 4 * track);
@@ -92,8 +92,8 @@ public:
             {
                 Bytes sectorBytes;
                 ByteWriter sectorWriter(sectorBytes);
-                sectorWriter.write_8(sector->logicalTrack);
-                sectorWriter.write_8(sector->logicalSide);
+                sectorWriter.write_8(sector->logicalCylinder);
+                sectorWriter.write_8(sector->logicalHead);
                 sectorWriter.write_8(sector->logicalSector);
                 sectorWriter.write_8(
                     24 - countl_zero(uint32_t(sector->data.size())));

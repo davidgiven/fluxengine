@@ -126,8 +126,8 @@ public:
             return;
 
         uint8_t abssector = id[2];
-        _sector->logicalTrack = abssector >> 1;
-        _sector->logicalSide = 0;
+        _sector->logicalCylinder = abssector >> 1;
+        _sector->logicalHead = 0;
         _sector->logicalSector = abssector & 1;
         _sector->data.writer().append(id.slice(5, 12)).append(payload);
 

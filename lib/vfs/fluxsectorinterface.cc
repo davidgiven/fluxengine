@@ -64,7 +64,7 @@ public:
             unsigned side = trackid.second;
             auto trackLayout = Layout::getLayoutOfTrack(track, side);
             locations.push_back(CylinderHead{
-                trackLayout->physicalTrack, trackLayout->physicalSide});
+                trackLayout->physicalCylinder, trackLayout->physicalHead});
 
             /* If we don't have all the sectors of this track, we may need to
              * populate any non-changed sectors as we can only write a track at

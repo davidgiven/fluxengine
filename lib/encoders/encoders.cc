@@ -27,7 +27,7 @@ std::shared_ptr<const Sector> Encoder::getSector(
     const Image& image,
     unsigned sectorId)
 {
-    return image.get(trackInfo->logicalTrack, trackInfo->logicalSide, sectorId);
+    return image.get(trackInfo->logicalCylinder, trackInfo->logicalHead, sectorId);
 }
 
 std::vector<std::shared_ptr<const Sector>> Encoder::collectSectors(
@@ -40,8 +40,8 @@ std::vector<std::shared_ptr<const Sector>> Encoder::collectSectors(
         const auto& sector = getSector(trackLayout, image, sectorId);
         if (!sector)
             error("sector {}.{}.{} is missing from the image",
-                trackLayout->logicalTrack,
-                trackLayout->logicalSide,
+                trackLayout->logicalCylinder,
+                trackLayout->logicalHead,
                 sectorId);
         sectors.push_back(sector);
     }
