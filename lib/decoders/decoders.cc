@@ -26,7 +26,9 @@ std::shared_ptr<TrackDataFlux> Decoder::decodeToSectors(
 
     auto newSector = [&]
     {
-        _sector = std::make_shared<Sector>(trackInfo, 0);
+        _sector = std::make_shared<Sector>(trackInfo, LogicalLocation{0, 0, 0});
+        _sector->physicalTrack = trackInfo->physicalTrack;
+        _sector->physicalSide = trackInfo->physicalSide;
         _sector->status = Sector::MISSING;
     };
 

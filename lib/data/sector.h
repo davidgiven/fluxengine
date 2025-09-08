@@ -3,36 +3,10 @@
 
 #include "lib/core/bytes.h"
 #include "lib/data/fluxmap.h"
+#include "lib/data/locations.h"
 
 class Record;
 class TrackInfo;
-
-struct LogicalLocation
-{
-    unsigned logicalTrack;
-    unsigned logicalSide;
-    unsigned logicalSector;
-
-    std::tuple<int, int, int> key() const
-    {
-        return std::make_tuple(logicalTrack, logicalSide, logicalSector);
-    }
-
-    bool operator==(const LogicalLocation& rhs) const
-    {
-        return key() == rhs.key();
-    }
-
-    bool operator!=(const LogicalLocation& rhs) const
-    {
-        return key() != rhs.key();
-    }
-
-    bool operator<(const LogicalLocation& rhs) const
-    {
-        return key() < rhs.key();
-    }
-};
 
 struct Sector : public LogicalLocation
 {
@@ -51,6 +25,7 @@ struct Sector : public LogicalLocation
     static Status stringToStatus(const std::string& value);
 
     Status status = Status::INTERNAL_ERROR;
+    std::shared_ptr<const TrackInfo> trackLayout;
     uint32_t position = 0;
     nanoseconds_t clock = 0;
     nanoseconds_t headerStartTime = 0;
@@ -62,11 +37,7 @@ struct Sector : public LogicalLocation
     Bytes data;
     std::vector<std::shared_ptr<Record>> records;
 
-    Sector() {}
-
-    Sector(std::shared_ptr<const TrackInfo>& layout, unsigned sectorId = 0);
-
-    Sector(const LogicalLocation& location);
+    Sector(std::shared_ptr<const TrackInfo>& layout, const LogicalLocation& location);
 
     std::tuple<int, int, int, Status> key() const
     {

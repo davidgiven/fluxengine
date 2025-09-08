@@ -84,7 +84,7 @@ build-file-timestamps = $(shell ls -l $(build-files) | md5sum)
 # Wipe the build file (forcing a regeneration) if the make environment is different.
 # (Conveniently, this includes the pkg-config hash calculated above.)
 
-ignored-variables = MAKE_RESTARTS .VARIABLES MAKECMDGOALS MAKEFLAGS MFLAGS
+ignored-variables = MAKE_RESTARTS .VARIABLES MAKECMDGOALS MAKEFLAGS MFLAGS PAGER _
 $(shell mkdir -p $(OBJ))
 $(file >$(OBJ)/newvars.txt,$(foreach v,$(filter-out $(ignored-variables),$(.VARIABLES)),$(v)=$($(v))$(newline)))
 $(shell touch $(OBJ)/vars.txt)

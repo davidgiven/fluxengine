@@ -3,6 +3,7 @@
 #include <hex/helpers/logger.hpp>
 #include <hex/api/content_registry/provider.hpp>
 #include <romfs/romfs.hpp>
+#include "globals.h"
 #include "imageview.h"
 #include "configview.h"
 #include "summaryview.h"

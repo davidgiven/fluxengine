@@ -3,17 +3,12 @@
 #include "lib/data/sector.h"
 #include "lib/data/layout.h"
 
-Sector::Sector(const LogicalLocation& location):
+Sector::Sector(
+    std::shared_ptr<const TrackInfo>& layout, const LogicalLocation& location):
     LogicalLocation(location),
+    trackLayout(layout),
     physicalTrack(Layout::remapTrackLogicalToPhysical(location.logicalTrack)),
     physicalSide(Layout::remapSideLogicalToPhysical(location.logicalSide))
-{
-}
-
-Sector::Sector(std::shared_ptr<const TrackInfo>& layout, unsigned sectorId):
-    LogicalLocation({layout->logicalTrack, layout->logicalSide, sectorId}),
-    physicalTrack(layout->physicalTrack),
-    physicalSide(layout->physicalSide)
 {
 }
 

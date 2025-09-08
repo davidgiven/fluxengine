@@ -13,6 +13,7 @@ struct Geometry
     unsigned numSectors = 0;
     unsigned sectorSize = 0;
     bool irregular = false;
+    unsigned totalBytes = 0;
 };
 
 class Image
@@ -24,7 +25,7 @@ public:
 public:
     class const_iterator
     {
-        typedef std::map<CylinderHeadSector,
+        typedef std::map<LogicalLocation,
             std::shared_ptr<const Sector>>::const_iterator wrapped_iterator_t;
 
     public:
@@ -67,12 +68,16 @@ public:
         unsigned track, unsigned side, unsigned sectorId);
     void erase(unsigned track, unsigned side, unsigned sectorId);
 
-    CylinderHeadSector findBlock(unsigned block) const;
+    LogicalLocation findBlock(unsigned block) const;
     std::shared_ptr<const Sector> getBlock(unsigned block) const;
     std::shared_ptr<Sector> putBlock(unsigned block);
     int getBlockCount() const;
 
-    std::set<CylinderHead> tracks() const;
+    struct LocationAndOffset {
+        unsigned block;
+        unsigned offset;
+    };
+    LocationAndOffset findBlockByOffset(unsigned offset) const;
 
     const_iterator begin() const
     {
@@ -94,8 +99,8 @@ public:
 
 private:
     Geometry _geometry = {0, 0, 0};
-    std::map<CylinderHeadSector, std::shared_ptr<const Sector>> _sectors;
-    std::vector<CylinderHeadSector> _filesystemOrder;
+    std::map<LogicalLocation, std::shared_ptr<const Sector>> _sectors;
+    std::vector<LogicalLocation> _filesystemOrder;
 };
 
 #endif

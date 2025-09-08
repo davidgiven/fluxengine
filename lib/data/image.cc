@@ -60,17 +60,15 @@ std::shared_ptr<Sector> Image::put(
     unsigned track, unsigned side, unsigned sectorid)
 {
     auto trackLayout = Layout::getLayoutOfTrack(track, side);
-    std::shared_ptr<Sector> sector = std::make_shared<Sector>();
-    sector->logicalTrack = track;
-    sector->logicalSide = side;
-    sector->logicalSector = sectorid;
+    std::shared_ptr<Sector> sector = std::make_shared<Sector>(
+        trackLayout, LogicalLocation{track, side, sectorid});
     sector->physicalTrack = Layout::remapTrackLogicalToPhysical(track);
     sector->physicalSide = side;
     _sectors[{track, side, sectorid}] = sector;
     return sector;
 }
 
-CylinderHeadSector Image::findBlock(unsigned block) const
+LogicalLocation Image::findBlock(unsigned block) const
 {
     if (block >= _filesystemOrder.size())
         error("block {} is out of bounds ({} maximum)",
@@ -97,17 +95,22 @@ int Image::getBlockCount() const
     return _filesystemOrder.size();
 }
 
+Image::LocationAndOffset Image::findBlockByOffset(unsigned offset) const
+{
+    for (unsigned block = 0; block < _filesystemOrder.size(); block++)
+    {
+        auto sector = getBlock(block);
+        if (offset < sector->trackLayout->sectorSize)
+            return {block, offset};
+        offset -= sector->trackLayout->sectorSize;
+    }
+
+    throw OutOfRangeException("location is not in the image");
+}
+
 void Image::erase(unsigned track, unsigned side, unsigned sectorid)
 {
     _sectors.erase({track, side, sectorid});
-}
-
-std::set<CylinderHead> Image::tracks() const
-{
-    std::set<CylinderHead> result;
-    for (const auto& [location, sector] : _sectors)
-        result.insert({location.cylinder, location.head});
-    return result;
 }
 
 void Image::calculateSize()
@@ -127,7 +130,8 @@ void Image::calculateSize()
                 _geometry.firstSector, (unsigned)sector->logicalSector);
             maxSector = std::max(maxSector, (unsigned)sector->logicalSector);
             _geometry.sectorSize =
-                std::max(_geometry.sectorSize, (unsigned)sector->data.size());
+                std::max(_geometry.sectorSize, sector->trackLayout->sectorSize);
+            _geometry.totalBytes += sector->trackLayout->sectorSize;
         }
     }
     _geometry.numSectors = maxSector - _geometry.firstSector + 1;

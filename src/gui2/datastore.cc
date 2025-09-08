@@ -32,7 +32,7 @@ static std::map<CylinderHead, std::shared_ptr<const TrackInfo>>
     physicalTrackLayouts;
 static std::map<CylinderHeadSector, std::shared_ptr<const Sector>>
     sectorByPhysicalLocation;
-static std::map<CylinderHeadSector, unsigned> blockByLogicalLocation;
+static std::map<LogicalLocation, unsigned> blockByLogicalLocation;
 static Layout::LayoutBounds diskPhysicalBounds;
 
 static void workerThread_cb()
@@ -141,7 +141,7 @@ std::shared_ptr<const Sector> Datastore::findSectorByPhysicalLocation(
 }
 
 std::optional<unsigned> Datastore::findBlockByLogicalLocation(
-    const CylinderHeadSector& location)
+    const LogicalLocation& location)
 {
     const auto& it = blockByLogicalLocation.find(location);
     if (it == blockByLogicalLocation.end())

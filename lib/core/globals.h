@@ -49,6 +49,11 @@ struct ErrorException
     void print() const;
 };
 
+struct OutOfRangeException : public ErrorException
+{
+    OutOfRangeException(const std::string& message): ErrorException(message) {}
+};
+
 template <typename... Args>
 [[noreturn]] inline void error(fmt::string_view fstr, const Args&... args)
 {

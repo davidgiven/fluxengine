@@ -31,7 +31,7 @@ public:
 
     /* Uses the current layout to compute the filesystem's block order, in
      * _logical_ tracks. */
-    static std::vector<CylinderHeadSector> computeFilesystemLogicalOrdering();
+    static std::vector<LogicalLocation> computeFilesystemLogicalOrdering();
 
     /* Given a list of CylinderHead locations, determines the minimum and
      * maximum track and side settings. */

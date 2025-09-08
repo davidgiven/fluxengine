@@ -4,6 +4,7 @@
 #include "lib/core/globals.h"
 #include "lib/data/image.h"
 #include "lib/data/sector.h"
+#include "globals.h"
 #include "imageview.h"
 #include "datastore.h"
 
@@ -155,17 +156,20 @@ void ImageView::drawContent()
 
                         auto id = block.has_value() ? fmt::format("#{}", *block)
                                                     : "???";
-                        ImGui::Selectable(fmt::format("{}##image_c{}h{}s{}",
-                                              id,
-                                              physicalCylinder,
-                                              physicalHead,
-                                              sectorId)
-                                              .c_str(),
-                            true,
-                            ImGuiSelectableFlags_None,
-                            {0,
-                                rowHeight -
-                                    ImGui::GetStyle().CellPadding.y * 2});
+                        if (ImGui::Selectable(fmt::format("{}##image_c{}h{}s{}",
+                                                  id,
+                                                  physicalCylinder,
+                                                  physicalHead,
+                                                  sectorId)
+                                                  .c_str(),
+                                true,
+                                ImGuiSelectableFlags_None,
+                                {0,
+                                    rowHeight -
+                                        ImGui::GetStyle().CellPadding.y * 2}))
+                            Events::SeekToPhysicalLocationInImage::post(
+                                CylinderHeadSector{
+                                    physicalCylinder, physicalHead, sectorId});
 
                         ImGui::PushFont(NULL, originalFontSize);
                         ON_SCOPE_EXIT

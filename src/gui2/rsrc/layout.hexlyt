@@ -10,9 +10,9 @@ Collapsed=0
 
 [Window][###hex.builtin.view.hex_editor.name]
 Pos=705,88
-Size=1491,1307
+Size=1107,1307
 Collapsed=0
-DockId=0x0000000F,0
+DockId=0x00000009,0
 
 [Window][###hex.builtin.view.data_inspector.name]
 Pos=621,38
@@ -30,25 +30,25 @@ DockId=0x00000006,0
 Pos=747,38
 Size=646,722
 Collapsed=0
-DockId=0x00000009,0
+DockId=0x00000004,0
 
 [Window][###hex.hashes.view.hashes.name]
 Pos=1697,76
 Size=863,1427
 Collapsed=0
-DockId=0x00000009,4
+DockId=0x00000004,4
 
 [Window][###hex.builtin.view.find.name]
 Pos=1697,76
 Size=863,1427
 Collapsed=0
-DockId=0x00000009,3
+DockId=0x00000004,3
 
 [Window][###hex.builtin.view.bookmarks.name]
-Pos=1697,76
-Size=863,1427
+Pos=1816,88
+Size=454,1307
 Collapsed=0
-DockId=0x00000009,2
+DockId=0x0000000A,0
 
 [Window][###hex.builtin.view.information.name]
 Pos=-1889,-120
@@ -70,7 +70,7 @@ Collapsed=0
 Pos=1372,38
 Size=1188,1333
 Collapsed=0
-DockId=0x00000009,1
+DockId=0x00000004,1
 
 [Window][###hex.builtin.view.provider_settings.load_popup]
 Pos=585,322
@@ -86,13 +86,13 @@ Collapsed=0
 Pos=747,38
 Size=646,722
 Collapsed=0
-DockId=0x00000009,1
+DockId=0x00000004,1
 
 [Window][###hex.builtin.view.tools.name]
 Pos=849,268
 Size=431,430
 Collapsed=0
-DockId=0x0000000A,0
+DockId=0x00000004,0
 
 [Window][###hex.builtin.view.theme_manager.name]
 Pos=787,263
@@ -145,8 +145,8 @@ Size=600,180
 Collapsed=0
 
 [Window][Welcome Screen]
-Pos=0,138
-Size=3740,1778
+Pos=0,1449
+Size=3740,467
 Collapsed=0
 
 [Window][##achievement_unlocked]
@@ -490,6 +490,22 @@ Pos=2,132
 Size=3736,64
 Collapsed=0
 
+[Window][###fluxengine.view.image.name]
+Pos=2274,88
+Size=1466,1307
+Collapsed=0
+DockId=0x00000012,0
+
+[Window][##Banner0x7f20d00f0380]
+Pos=2,132
+Size=3736,64
+Collapsed=0
+
+[Window][##Banner0x7fe8d40f0380]
+Pos=2,88
+Size=3736,64
+Collapsed=0
+
 [Table][0x6A4694E4,3]
 RefScale=13
 Column 0  Sort=0v
@@ -515,24 +531,38 @@ RefScale=24
 Column 0  Width=216
 Column 1  Weight=1.0000
 
+[Table][0x4A4A8566,9]
+RefScale=32
+Column 0  Width=32
+Column 1  Weight=1.0000
+Column 2  Weight=1.0000
+Column 3  Weight=1.0000 Sort=0v
+Column 4  Weight=1.0000
+Column 5  Weight=1.0000
+Column 6  Weight=1.0000
+Column 7  Weight=1.0000
+Column 8  Weight=-1.0000
+
 [Docking][Data]
-DockSpace           ID=0x81A8BB71 Window=0xF9B0A590 Pos=0,88 Size=3740,1818 Split=X
-  DockNode          ID=0x0000000B Parent=0x81A8BB71 SizeRef=701,1818 Selected=0xFCDCA4E7
-  DockNode          ID=0x0000000C Parent=0x81A8BB71 SizeRef=3035,1818 Split=X
-    DockNode        ID=0x0000000D Parent=0x0000000C SizeRef=603,1513 Split=X
-      DockNode      ID=0x00000001 Parent=0x0000000D SizeRef=1370,0 Split=Y
-        DockNode    ID=0x00000005 Parent=0x00000001 SizeRef=0,825 Selected=0x5708C63F
-        DockNode    ID=0x00000006 Parent=0x00000001 SizeRef=0,444 Selected=0x7AD1CDDD
-      DockNode      ID=0x00000002 Parent=0x0000000D SizeRef=1188,0 Split=X
-        DockNode    ID=0x00000003 Parent=0x00000002 SizeRef=12,0
-        DockNode    ID=0x00000004 Parent=0x00000002 SizeRef=52,0 Split=Y Selected=0xCACA884B
-          DockNode  ID=0x00000009 Parent=0x00000004 SizeRef=420,228 Selected=0xCACA884B
-          DockNode  ID=0x0000000A Parent=0x00000004 SizeRef=420,430 Selected=0x1F041AD3
-    DockNode        ID=0x0000000E Parent=0x0000000C SizeRef=3133,1513 Split=Y Selected=0x5708C63F
-      DockNode      ID=0x00000007 Parent=0x0000000E SizeRef=3010,1307 Split=X Selected=0x5708C63F
-        DockNode    ID=0x0000000F Parent=0x00000007 SizeRef=1491,1307 Selected=0x5708C63F
-        DockNode    ID=0x00000010 Parent=0x00000007 SizeRef=1540,1307 Selected=0xA4C6AD5D
-      DockNode      ID=0x00000008 Parent=0x0000000E SizeRef=3010,507 Selected=0x941F5F91
+DockSpace             ID=0x81A8BB71 Window=0xF9B0A590 Pos=0,88 Size=3740,1818 Split=X
+  DockNode            ID=0x0000000B Parent=0x81A8BB71 SizeRef=701,1818 Selected=0xFCDCA4E7
+  DockNode            ID=0x0000000C Parent=0x81A8BB71 SizeRef=3035,1818 Split=X
+    DockNode          ID=0x0000000D Parent=0x0000000C SizeRef=603,1513 Split=X
+      DockNode        ID=0x00000001 Parent=0x0000000D SizeRef=1370,0 Split=Y
+        DockNode      ID=0x00000005 Parent=0x00000001 SizeRef=0,825 Selected=0x5708C63F
+        DockNode      ID=0x00000006 Parent=0x00000001 SizeRef=0,444 Selected=0x7AD1CDDD
+      DockNode        ID=0x00000002 Parent=0x0000000D SizeRef=1188,0 Split=X
+        DockNode      ID=0x00000003 Parent=0x00000002 SizeRef=12,0
+        DockNode      ID=0x00000004 Parent=0x00000002 SizeRef=52,0 Selected=0xCACA884B
+    DockNode          ID=0x0000000E Parent=0x0000000C SizeRef=3133,1513 Split=Y Selected=0x5708C63F
+      DockNode        ID=0x00000007 Parent=0x0000000E SizeRef=3010,1307 Split=X Selected=0x5708C63F
+        DockNode      ID=0x0000000F Parent=0x00000007 SizeRef=1491,1307 Split=X Selected=0x5708C63F
+          DockNode    ID=0x00000011 Parent=0x0000000F SizeRef=1565,1375 Split=X Selected=0x5708C63F
+            DockNode  ID=0x00000009 Parent=0x00000011 SizeRef=1107,1307 Selected=0x5708C63F
+            DockNode  ID=0x0000000A Parent=0x00000011 SizeRef=454,1307 Selected=0x0CA98265
+          DockNode    ID=0x00000012 Parent=0x0000000F SizeRef=1466,1375 Selected=0xDA2066A8
+        DockNode      ID=0x00000010 Parent=0x00000007 SizeRef=1540,1307 Selected=0xA4C6AD5D
+      DockNode        ID=0x00000008 Parent=0x0000000E SizeRef=3010,507 Selected=0x941F5F91
 
 [ImHex][General]
 hex.builtin.tools.demangler=0
@@ -552,9 +582,9 @@ hex.builtin.tools.tcp_client_server=0
 hex.builtin.tools.euclidean_algorithm=0
 hex.builtin.tools.http_requests=0
 fluxengine.view.config.name=1
-fluxengine.view.custom.name=1
+fluxengine.view.image.name=1
 fluxengine.view.summary.name=1
-hex.builtin.view.bookmarks.name=0
+hex.builtin.view.bookmarks.name=1
 hex.builtin.view.command_palette.name=0
 hex.builtin.view.constants.name=0
 hex.builtin.view.data_inspector.name=0

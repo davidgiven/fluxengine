@@ -16,6 +16,16 @@ struct CylinderHeadSector
     unsigned cylinder, head, sector;
 };
 
+struct LogicalLocation
+{
+    bool operator==(const LogicalLocation&) const = default;
+    std::strong_ordering operator<=>(const LogicalLocation&) const = default;
+
+    unsigned logicalTrack;
+    unsigned logicalSide;
+    unsigned logicalSector;
+};
+
 extern std::vector<CylinderHead> parseCylinderHeadsString(const std::string& s);
 extern std::string convertCylinderHeadsToString(
     const std::vector<CylinderHead>& chs);

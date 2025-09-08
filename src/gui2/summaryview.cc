@@ -103,7 +103,7 @@ void SummaryView::drawContent()
                 ImGui::Text("%s", text.c_str());
             }
 
-            for (int head = minHead; head <= maxHead; head++)
+            for (unsigned head = minHead; head <= maxHead; head++)
             {
                 ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
                 ImGui::TableNextColumn();
@@ -116,7 +116,7 @@ void SummaryView::drawContent()
                     ImGui::GetCursorPosY() + rowHeight / 2 - textSize.y / 2});
                 ImGui::Text("%s", text.c_str());
 
-                for (int cylinder = minCylinder; cylinder <= maxCylinder;
+                for (unsigned cylinder = minCylinder; cylinder <= maxCylinder;
                     cylinder++)
                 {
                     auto sectors = findSectors(diskFlux, cylinder, head);
@@ -144,11 +144,13 @@ void SummaryView::drawContent()
                     };
 
                     ImGui::TableNextColumn();
-                    ImGui::Selectable(
-                        fmt::format("##c{}h{}", cylinder, head).c_str(),
-                        true,
-                        ImGuiSelectableFlags_None,
-                        {0, rowHeight});
+                    if (ImGui::Selectable(
+                            fmt::format("##c{}h{}", cylinder, head).c_str(),
+                            true,
+                            ImGuiSelectableFlags_None,
+                            {0, rowHeight}))
+                        Events::SeekToPhysicalLocationInImage::post(
+                            CylinderHeadSector{cylinder, head, 0});
 
                     ImGui::PushFont(NULL, originalFontSize);
                     ON_SCOPE_EXIT

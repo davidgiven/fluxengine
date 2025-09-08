@@ -290,8 +290,8 @@ int Layout::getHeadWidth()
     }
 }
 
-std::vector<CylinderHeadSector> Layout::computeFilesystemLogicalOrdering(){
-    std::vector<CylinderHeadSector> result;
+std::vector<LogicalLocation> Layout::computeFilesystemLogicalOrdering(){
+    std::vector<LogicalLocation> result;
     auto& layout = globalConfig()->layout();
     if (layout.has_tracks() && layout.has_sides())
     {
@@ -310,7 +310,7 @@ std::vector<CylinderHeadSector> Layout::computeFilesystemLogicalOrdering(){
 
             for (unsigned sectorId : trackLayout->filesystemSectorOrder)
                 result.push_back(
-                    CylinderHeadSector{track, side, sectorId});
+                    {track, side, sectorId});
         }
     }
     return result;

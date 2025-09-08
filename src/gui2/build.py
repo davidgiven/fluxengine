@@ -328,6 +328,7 @@ plugin(
         "./imageview.h",
         "./datastore.cc",
         "./datastore.h",
+        "./diskprovider.cc",
         "./diskprovider.h",
         "./fluxengine.cc",
         "./globals.h",

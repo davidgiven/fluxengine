@@ -18,7 +18,7 @@ public:
     static std::shared_ptr<const Sector> findSectorByPhysicalLocation(
         const CylinderHeadSector& location);
     static std::optional<unsigned> findBlockByLogicalLocation(
-        const CylinderHeadSector& location);
+        const LogicalLocation& location);
     static const Layout::LayoutBounds& getDiskPhysicalBounds();
     static const Layout::LayoutBounds& getImageLogicalBounds();
     static void rebuildConfiguration();

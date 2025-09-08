@@ -9,89 +9,30 @@
 class DiskProvider : public hex::prv::Provider
 {
 public:
-    DiskProvider()
-    {
-        hex::EventProviderOpened::subscribe(
-            [this](auto* newProvider)
-            {
-                if (newProvider == this)
-                    return;
+    DiskProvider();
+    ~DiskProvider() override;
 
-                hex::ImHexApi::Provider::remove(this, true);
-            });
-    }
+    [[nodiscard]] bool isAvailable() const override;
+    [[nodiscard]] bool isReadable() const override;
+    [[nodiscard]] bool isWritable() const override;
+    [[nodiscard]] bool isResizable() const override;
+    [[nodiscard]] bool isSavable() const override;
 
-    ~DiskProvider() override
-    {
-        hex::EventProviderOpened::unsubscribe(this);
-    }
+    [[nodiscard]] bool open() override;
 
-    [[nodiscard]] bool isAvailable() const override
-    {
-        return true;
-    }
-    [[nodiscard]] bool isReadable() const override
-    {
-        return true;
-    }
-    [[nodiscard]] bool isWritable() const override
-    {
-        return false;
-    }
-    [[nodiscard]] bool isResizable() const override
-    {
-        return false;
-    }
-    [[nodiscard]] bool isSavable() const override
-    {
-        return false;
-    }
+    void close() override;
 
-    [[nodiscard]] bool open() override
-    {
-        return true;
-    }
-    void close() override {}
+    void readRaw(u64 offset, void* buffer, size_t size) override;
+    void writeRaw(u64 offset, const void* buffer, size_t size) override;
 
-    void readRaw(u64 offset, void* buffer, size_t size) override
-    {
-        std::ignore = offset;
-        std::ignore = buffer;
-        std::ignore = size;
-    }
-    void writeRaw(u64 offset, const void* buffer, size_t size) override
-    {
-        std::ignore = offset;
-        std::ignore = buffer;
-        std::ignore = size;
-    }
-    [[nodiscard]] u64 getActualSize() const override
-    {
-        return 0x00;
-    }
+    [[nodiscard]] u64 getActualSize() const override;
 
-    [[nodiscard]] std::string getName() const override
-    {
-        return "ImHex";
-    }
+    [[nodiscard]] std::string getName() const override;
+    [[nodiscard]] const char* getIcon() const override;
+    [[nodiscard]] hex::UnlocalizedString getTypeName() const override;
 
-    [[nodiscard]] const char* getIcon() const override
-    {
-        return "";
-    }
+    void loadSettings(const nlohmann::json& settings) override;
 
-    void loadSettings(const nlohmann::json& settings) override
-    {
-        std::ignore = settings;
-    }
     [[nodiscard]] nlohmann::json storeSettings(
-        nlohmann::json settings) const override
-    {
-        return settings;
-    }
-
-    [[nodiscard]] hex::UnlocalizedString getTypeName() const override
-    {
-        return "fluxengine.provider.disk";
-    }
+        nlohmann::json settings) const override;
 };
