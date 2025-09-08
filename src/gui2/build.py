@@ -31,8 +31,9 @@ def headers_from(path):
     return hdrs
 
 
-def sources_from(path):
+def sources_from(path, except_for=[]):
     srcs = [join(path, f) for f in glob("**/*.c*", root_dir=path, recursive=True)]
+    srcs = [f for f in srcs if f not in except_for]
     assert srcs, f"path {path} contained no sources"
     return srcs
 
@@ -277,7 +278,14 @@ plugin(
 plugin(
     name="builtin-plugin",
     id="builtin",
-    srcs=sources_from("dep/imhex/plugins/builtin/source"),
+    srcs=sources_from(
+        "dep/imhex/plugins/builtin/source",
+        except_for=[
+            "dep/imhex/plugins/builtin/source/content/welcome_screen.cpp",
+            "dep/imhex/plugins/builtin/source/content/out_of_box_experience.cpp",
+        ],
+    )
+    + ["./welcome.cc"],
     hdrs=headers_from("dep/imhex/plugins/builtin/include"),
     romfsdir="dep/imhex/plugins/builtin/romfs",
     deps=[

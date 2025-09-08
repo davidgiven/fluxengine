@@ -83,6 +83,13 @@ static void workerThread_cb()
             stopWorkerThread();
             return;
         }
+        catch (...)
+        {
+            const std::lock_guard<std::mutex> lock(pendingTasksMutex);
+            hex::log::debug("worker thread threw an unknown exception");
+            stopWorkerThread();
+            return;
+        }
     }
 }
 

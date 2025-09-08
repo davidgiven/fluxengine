@@ -290,24 +290,27 @@ void ConfigView::drawContent()
                 "fluxengine.settings", (std::string)formatSetting, "");
             OptionsMap parsedOptions = stringToOptions(globalOptions);
 
-            auto config = formats.at(formatSetting);
-            if (!config->option().empty())
+            if (formats.contains(formatSetting))
             {
-                ImGui::SeparatorText("fluxengine.view.config.other"_lang);
-                for (auto& it : config->option())
-                    showOption(parsedOptions, it);
-            }
-
-            for (auto& it : config->option_group())
-            {
-                if (it.applicability().empty() ||
-                    std::ranges::contains(it.applicability(), FORMAT))
+                auto config = formats.at(formatSetting);
+                if (!config->option().empty())
                 {
-                    auto name = it.comment();
-                    if (name == "$formats")
-                        name = (std::
+                    ImGui::SeparatorText("fluxengine.view.config.other"_lang);
+                    for (auto& it : config->option())
+                        showOption(parsedOptions, it);
+                }
+
+                for (auto& it : config->option_group())
+                {
+                    if (it.applicability().empty() ||
+                        std::ranges::contains(it.applicability(), FORMAT))
+                    {
+                        auto name = it.comment();
+                        if (name == "$formats")
+                            name = (std::
                                 string) "fluxengine.view.config.subformats"_lang;
-                    showOptionGroup(parsedOptions, it, name.c_str());
+                        showOptionGroup(parsedOptions, it, name.c_str());
+                    }
                 }
             }
 

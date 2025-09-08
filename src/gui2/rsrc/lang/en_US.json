@@ -10,6 +10,7 @@
     "fluxengine.view.config.manual": "Manual device setup",
     "fluxengine.view.config.hardwareDevicePath": "Device path",
     "fluxengine.view.config.highDensity": "High density disk",
+    "fluxengine.view.config.rescan": "Rescan",
 
     "fluxengine.view.summary.name":"FluxEngine control panel",
     "fluxengine.summary.controls.read": "Read from device",
