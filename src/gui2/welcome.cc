@@ -321,6 +321,12 @@ namespace hex::plugin::builtin
                     });
             }
         }
+
+        TaskManager::doLaterOnce(
+            []
+            {
+                ImHexApi::Provider::createProvider("fluxengine.provider.disk");
+            });
     }
 
 }
