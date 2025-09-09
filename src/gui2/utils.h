@@ -5,7 +5,12 @@
 #include <hex/api/content_registry/settings.hpp>
 #include "datastore.h"
 
+struct ImVec2;
+
 using OptionsMap = std::map<std::string, std::string>;
+
+extern int MaybeDisabledButton(
+    const std::string& message, const ImVec2& size, bool isDisabled);
 
 extern OptionsMap stringToOptions(const std::string& optionsString);
 extern std::string optionsToString(const OptionsMap& options);

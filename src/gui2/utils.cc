@@ -1,7 +1,19 @@
+#include <imgui.h>
 #include "lib/core/globals.h"
 #include "lib/config/proto.h"
 #include "globals.h"
 #include "utils.h"
+
+int MaybeDisabledButton(
+    const std::string& message, const ImVec2& size, bool isDisabled)
+{
+    ImGui::BeginDisabled(isDisabled);
+    ON_SCOPE_EXIT
+    {
+        ImGui::EndDisabled();
+    };
+    return ImGui::Button(message.c_str(), size);
+}
 
 OptionsMap stringToOptions(const std::string& optionsString)
 {

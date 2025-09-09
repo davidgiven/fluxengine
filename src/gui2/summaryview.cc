@@ -2,6 +2,7 @@
 #include <hex/api/theme_manager.hpp>
 #include <hex/helpers/logger.hpp>
 #include <fonts/vscode_icons.hpp>
+#include <fonts/tabler_icons.hpp>
 #include <fmt/format.h>
 #include "lib/core/globals.h"
 #include "lib/config/config.h"
@@ -10,6 +11,9 @@
 #include "globals.h"
 #include "summaryview.h"
 #include "datastore.h"
+#include "utils.h"
+#include <implot.h>
+#include <implot_internal.h>
 
 using namespace hex;
 
@@ -173,31 +177,115 @@ void SummaryView::drawContent()
         }
     }
 
+    ImGui::SetCursorPosY(
+        ImGui::GetContentRegionAvail().y - ImGui::GetFontSize() * 4);
+    if (ImGui::BeginTable("controlPanel",
+            7,
+            ImGuiTableFlags_NoSavedSettings | ImGuiTableFlags_NoClip))
     {
-        ImGui::BeginDisabled(Datastore::isBusy());
         ON_SCOPE_EXIT
         {
-            ImGui::EndDisabled();
+            ImGui::EndTable();
         };
 
-        ImGui::SetCursorPosY(
-            ImGui::GetWindowHeight() - ImGui::GetFontSize() * 2);
-        if (ImGui::Button("fluxengine.summary.controls.read"_lang))
+        bool busy = Datastore::isBusy() || !Datastore::isConfigurationValid();
+        bool hasImage = diskFlux && diskFlux->image;
+
+        auto majorButtonWidth = ImGui::GetFontSize() * 10;
+        ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);
+        ImGui::TableSetupColumn(
+            "", ImGuiTableColumnFlags_WidthFixed, majorButtonWidth);
+        ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed);
+        ImGui::TableSetupColumn(
+            "", ImGuiTableColumnFlags_WidthFixed, majorButtonWidth * 1.5);
+        ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed);
+        ImGui::TableSetupColumn(
+            "", ImGuiTableColumnFlags_WidthFixed, majorButtonWidth);
+        ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);
+
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        ImGui::TableNextColumn();
+        if (MaybeDisabledButton(
+                fmt::format("{} {}", ICON_TA_DEVICE_FLOPPY, "Read disk"),
+                ImVec2(ImGui::GetContentRegionAvail().x, 0),
+                busy))
             Datastore::beginRead();
+        ImGui::TableNextColumn();
+        ImGui::TableNextColumn();
+        MaybeDisabledButton(
+            fmt::format("{} {}", ICON_VS_FOLDER_OPENED, "Load sector image"),
+            ImVec2(ImGui::GetContentRegionAvail().x, 0),
+            busy);
+        ImGui::TableNextColumn();
+        ImGui::TableNextColumn();
+        MaybeDisabledButton(
+            fmt::format("{} {}", ICON_VS_SAVE_AS, "Write disk").c_str(),
+            ImVec2(ImGui::GetContentRegionAvail().x, 0),
+            busy || !hasImage);
 
-        ImGui::SameLine();
-        ImGui::BeginDisabled();
-        ImGui::Button("fluxengine.summary.controls.write"_lang);
-        ImGui::EndDisabled();
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        ImGui::TableNextColumn();
+        MaybeDisabledButton(
+            fmt::format("{} {}", ICON_TA_REPEAT, "Reread bad tracks").c_str(),
+            ImVec2(ImGui::GetContentRegionAvail().x, 0),
+            busy);
+        ImGui::TableNextColumn();
+        ImGui::Text(ICON_VS_ARROW_RIGHT);
+        ImGui::TableNextColumn();
+        MaybeDisabledButton(
+            fmt::format("{} {}", ICON_VS_SAVE_ALL, "Save sector image").c_str(),
+            ImVec2(ImGui::GetContentRegionAvail().x, 0),
+            busy || !hasImage);
+        ImGui::TableNextColumn();
+        ImGui::Text(ICON_VS_ARROW_RIGHT);
+        ImGui::TableNextColumn();
+        MaybeDisabledButton(
+            fmt::format("{} {}", ICON_TA_DOWNLOAD, "Save flux file").c_str(),
+            ImVec2(ImGui::GetContentRegionAvail().x, 0),
+            busy || !diskFlux);
+
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        ImGui::TableNextColumn();
+        MaybeDisabledButton(
+            fmt::format("{} {}", ICON_TA_UPLOAD, "Load flux file").c_str(),
+            ImVec2(ImGui::GetContentRegionAvail().x, 0),
+            busy);
+        ImGui::TableNextColumn();
+        ImGui::TableNextColumn();
+        MaybeDisabledButton(
+            fmt::format("{} {}", ICON_VS_NEW_FILE, "Create blank image")
+                .c_str(),
+            ImVec2(ImGui::GetContentRegionAvail().x, 0),
+            busy);
     }
+
     {
-        ImGui::BeginDisabled(!Datastore::isBusy());
+        auto size = ImVec2(ImGui::GetWindowSize().x * 0.6, 0);
+        ImGui::SetCursorPos({ImGui::GetWindowSize().x / 2 - size.x / 2,
+            ImGui::GetWindowSize().y - ImGui::GetFontSize() * 1.5f});
+
+        auto red = ImGuiExt::GetCustomColorU32(ImGuiCustomCol_LoggerError);
+        auto text = ImGui::GetColorU32(ImGuiCol_Text);
+        auto redHover = ImMixU32(red, text, 32);
+        auto redPressed = ImMixU32(red, text, 64);
+
+        ImGui::PushStyleColor(ImGuiCol_Button, red);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, redHover);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, redPressed);
+
         ON_SCOPE_EXIT
         {
-            ImGui::EndDisabled();
+            ImGui::PopStyleColor(3);
         };
-        ImGui::SameLine();
-        if (ImGui::Button("fluxengine.summary.controls.stop"_lang))
+
+        if (MaybeDisabledButton(fmt::format("{} {}",
+                                    ICON_TA_CANCEL,
+                                    "fluxengine.summary.controls.stop"_lang),
+                size,
+                !Datastore::isBusy()))
             Datastore::stop();
     }
 }
