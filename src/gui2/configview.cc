@@ -32,7 +32,8 @@ namespace
 }
 
 ConfigView::ConfigView():
-    View::Window("fluxengine.view.config.name", ICON_VS_DEBUG_LINE_BY_LINE)
+    View::Window("fluxengine.view.config.name", ICON_VS_DEBUG_LINE_BY_LINE),
+    _devices(std::make_shared<DeviceMap>())
 {
 }
 
@@ -133,10 +134,8 @@ static const std::string& renderFormatName(const std::string& id)
 
 void ConfigView::drawContent()
 {
-    if (_configState == CONFIG_UNKNOWN)
+    if (_devices->empty())
         probeConfig();
-    if (_configState != CONFIG_KNOWN)
-        return;
 
     ImGui::BeginDisabled(Datastore::isBusy());
     ON_SCOPE_EXIT
@@ -157,7 +156,7 @@ void ConfigView::drawContent()
             driveSetting = DEVICE_FLUXFILE;
 
         if (ImGui::BeginCombo("fluxengine.view.config.selectedDevice"_lang,
-                _devices->at(driveSetting).label.c_str(),
+                (*_devices)[driveSetting].label.c_str(),
                 ImGuiComboFlags_HeightLargest))
         {
             ON_SCOPE_EXIT
@@ -174,10 +173,7 @@ void ConfigView::drawContent()
         }
         ImGui::SameLine();
         if (ImGui::Button("fluxengine.view.config.rescan"_lang))
-        {
-            _configState = CONFIG_UNKNOWN;
-            return;
-        }
+            probeConfig();
 
         std::set<int> applicableOptions{SOURCESINK};
         if ((std::string)driveSetting == DEVICE_MANUAL)
@@ -321,7 +317,6 @@ void ConfigView::drawContent()
 
 void ConfigView::probeConfig()
 {
-    _configState = CONFIG_PROBING;
     Datastore::runOnWorkerThread(
         [this]
         {
@@ -341,7 +336,6 @@ void ConfigView::probeConfig()
                 [this, devices]
                 {
                     _devices = devices;
-                    _configState = CONFIG_KNOWN;
                 });
         });
 }

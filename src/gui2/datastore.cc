@@ -200,7 +200,6 @@ void Datastore::runOnWorkerThread(std::function<void()> callback)
 {
     const std::lock_guard<std::mutex> lock(pendingTasksMutex);
     pendingTasks.push_back(callback);
-    busy = true;
     if (workerThread.get_id() == std::thread::id())
         workerThread = std::move(std::thread(workerThread_cb));
 }
@@ -449,6 +448,8 @@ void Datastore::beginRead(void)
     Datastore::runOnWorkerThread(
         []
         {
+            busy = true;
+
             auto fluxSource = FluxSource::create(globalConfig());
             auto decoder = Arch::createDecoder(globalConfig());
 

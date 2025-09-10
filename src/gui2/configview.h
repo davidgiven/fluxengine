@@ -6,14 +6,6 @@ class CandidateDevice;
 
 class ConfigView : public hex::View::Window
 {
-private:
-    enum ConfigState
-    {
-        CONFIG_UNKNOWN,
-        CONFIG_PROBING,
-        CONFIG_KNOWN
-    };
-
 public:
     ConfigView();
     ~ConfigView() override = default;
@@ -43,8 +35,5 @@ private:
 
     typedef std::map<std::string, Device> DeviceMap;
 
-    ConfigState _configState = CONFIG_UNKNOWN;
     std::shared_ptr<DeviceMap> _devices;
-    std::fs::path _manualDevicePath;
-    std::fs::path _fluxfilePath;
 };
