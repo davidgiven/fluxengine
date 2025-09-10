@@ -25,6 +25,7 @@ public:
     static void onLogMessage(const AnyLogMessage& message);
 
     static void beginRead();
+    static void writeImage(const std::fs::path& path);
     static void stop();
 
     static std::shared_ptr<const DiskFlux> getDiskFlux();

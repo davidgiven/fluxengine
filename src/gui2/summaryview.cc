@@ -11,6 +11,7 @@
 #include "globals.h"
 #include "summaryview.h"
 #include "datastore.h"
+#include "configview.h"
 #include "utils.h"
 #include <implot.h>
 #include <implot_internal.h>
@@ -34,6 +35,26 @@ static std::optional<std::set<std::shared_ptr<const Sector>>> findSectors(
         }
 
     return {};
+}
+
+static void loadFluxFile()
+{
+    fs::openFileBrowser(fs::DialogMode::Open,
+        {},
+        [](const auto& path)
+        {
+            hex::ContentRegistry::Settings::write<std::fs::path>(
+                FLUXENGINE_CONFIG,
+                "fluxengine.settings.device",
+                DEVICE_FLUXFILE);
+            hex::ContentRegistry::Settings::write<std::fs::path>(
+                FLUXENGINE_CONFIG, "fluxengine.settings.fluxfile", path);
+        });
+}
+
+static void saveSectorImage()
+{
+    fs::openFileBrowser(fs::DialogMode::Save, {}, Datastore::writeImage);
 }
 
 void SummaryView::drawContent()
@@ -178,7 +199,7 @@ void SummaryView::drawContent()
     }
 
     ImGui::SetCursorPosY(
-        ImGui::GetContentRegionAvail().y - ImGui::GetFontSize() * 4);
+        ImGui::GetContentRegionAvail().y - ImGui::GetFontSize() * 3);
     if (ImGui::BeginTable("controlPanel",
             7,
             ImGuiTableFlags_NoSavedSettings | ImGuiTableFlags_NoClip))
@@ -234,10 +255,12 @@ void SummaryView::drawContent()
         ImGui::TableNextColumn();
         ImGui::Text(ICON_VS_ARROW_RIGHT);
         ImGui::TableNextColumn();
-        MaybeDisabledButton(
-            fmt::format("{} {}", ICON_VS_SAVE_ALL, "Save sector image").c_str(),
-            ImVec2(ImGui::GetContentRegionAvail().x, 0),
-            busy || !hasImage);
+        if (MaybeDisabledButton(
+                fmt::format("{} {}", ICON_VS_SAVE_ALL, "Save sector image")
+                    .c_str(),
+                ImVec2(ImGui::GetContentRegionAvail().x, 0),
+                busy || !hasImage))
+            saveSectorImage();
         ImGui::TableNextColumn();
         ImGui::Text(ICON_VS_ARROW_RIGHT);
         ImGui::TableNextColumn();
@@ -249,10 +272,11 @@ void SummaryView::drawContent()
         ImGui::TableNextRow();
         ImGui::TableNextColumn();
         ImGui::TableNextColumn();
-        MaybeDisabledButton(
-            fmt::format("{} {}", ICON_TA_UPLOAD, "Load flux file").c_str(),
-            ImVec2(ImGui::GetContentRegionAvail().x, 0),
-            busy);
+        if (MaybeDisabledButton(
+                fmt::format("{} {}", ICON_TA_UPLOAD, "Load flux file").c_str(),
+                ImVec2(ImGui::GetContentRegionAvail().x, 0),
+                busy))
+            loadFluxFile();
         ImGui::TableNextColumn();
         ImGui::TableNextColumn();
         MaybeDisabledButton(

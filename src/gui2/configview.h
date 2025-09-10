@@ -37,3 +37,6 @@ private:
 
     std::shared_ptr<DeviceMap> _devices;
 };
+
+static constexpr std::string DEVICE_MANUAL = "manual";
+static constexpr std::string DEVICE_FLUXFILE = "fluxfile";

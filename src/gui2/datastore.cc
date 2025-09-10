@@ -11,6 +11,7 @@
 #include "lib/data/image.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/decoders/decoders.h"
+#include "lib/imagewriter/imagewriter.h"
 #include "lib/algorithms/readerwriter.h"
 #include "arch/arch.h"
 #include "globals.h"
@@ -74,6 +75,12 @@ static void workerThread_cb()
         {
             const std::lock_guard<std::mutex> lock(pendingTasksMutex);
             hex::log::debug("worker exception: {}", e.message);
+            hex::TaskManager::doLater(
+                [=]
+                {
+                    hex::ui::ToastError::open(
+                        fmt::format("FluxEngine error: {}", e.message));
+                });
             stopWorkerThread();
             return;
         }
@@ -81,6 +88,11 @@ static void workerThread_cb()
         {
             const std::lock_guard<std::mutex> lock(pendingTasksMutex);
             hex::log::debug("worker emergency stop");
+            hex::TaskManager::doLater(
+                [=]
+                {
+                    hex::ui::ToastError::open("FluxEngine operation cancelled");
+                });
             stopWorkerThread();
             return;
         }
@@ -88,6 +100,12 @@ static void workerThread_cb()
         {
             const std::lock_guard<std::mutex> lock(pendingTasksMutex);
             hex::log::debug("worker thread threw an unknown exception");
+            hex::TaskManager::doLater(
+                [=]
+                {
+                    hex::ui::ToastError::open(
+                        "FluxEngine worker thread died mysteriously");
+                });
             stopWorkerThread();
             return;
         }
@@ -246,114 +264,102 @@ void Datastore::rebuildConfiguration()
             hex::log::debug("FluxEngine configuration stale; rebuilding it");
             configurationValid = false;
 
-            try
-            {
-                /* Reset and apply the format configuration. */
+            /* Reset and apply the format configuration. */
 
-                auto formatName =
-                    readSetting<std::string>("format.selected", "");
-                if (formatName.empty())
-                    badConfiguration();
+            auto formatName = readSetting<std::string>("format.selected", "");
+            if (formatName.empty())
+                badConfiguration();
+            Datastore::runOnWorkerThread(
+                [=]
+                {
+                    globalConfig().clear();
+                    globalConfig().readBaseConfigFile("_global_options");
+                    globalConfig().readBaseConfigFile(formatName);
+                });
+
+            /* Device-specific settings. */
+
+            auto device = readSetting<std::string>("device", "fluxfile");
+            if (device.empty())
+                badConfiguration();
+            if (device == "fluxfile")
+            {
+                auto fluxfile =
+                    readSetting<std::fs::path>("fluxfile", "unset").string();
                 Datastore::runOnWorkerThread(
                     [=]
                     {
-                        globalConfig().clear();
-                        globalConfig().readBaseConfigFile("_global_options");
-                        globalConfig().readBaseConfigFile(formatName);
+                        globalConfig().setFluxSink(fluxfile);
+                        globalConfig().setFluxSource(fluxfile);
+                        globalConfig().setVerificationFluxSource(fluxfile);
+                    });
+            }
+            else
+            {
+                auto highDensity = readSetting<bool>("highDensity", true);
+                Datastore::runOnWorkerThread(
+                    [=]
+                    {
+                        globalConfig()
+                            .overrides()
+                            ->mutable_drive()
+                            ->set_high_density(highDensity);
                     });
 
-                /* Device-specific settings. */
-
-                auto device = readSetting<std::string>("device", "fluxfile");
-                if (device.empty())
-                    badConfiguration();
-                if (device == "fluxfile")
+                if (device[0] == '#')
                 {
-                    auto fluxfile =
-                        readSetting<std::fs::path>("fluxfile", "unset")
-                            .string();
-                    Datastore::runOnWorkerThread(
-                        [=]
-                        {
-                            globalConfig().setFluxSink(fluxfile);
-                            globalConfig().setFluxSource(fluxfile);
-                            globalConfig().setVerificationFluxSource(fluxfile);
-                        });
-                }
-                else
-                {
-                    auto highDensity = readSetting<bool>("highDensity", true);
+                    auto serial = device.substr(1);
                     Datastore::runOnWorkerThread(
                         [=]
                         {
                             globalConfig()
                                 .overrides()
-                                ->mutable_drive()
-                                ->set_high_density(highDensity);
+                                ->mutable_usb()
+                                ->set_serial(serial);
+                            globalConfig().setFluxSink("drive:0");
+                            globalConfig().setFluxSource("drive:0");
+                            globalConfig().setVerificationFluxSource("drive:0");
                         });
-
-                    if (device[0] == '#')
-                    {
-                        auto serial = device.substr(1);
-                        Datastore::runOnWorkerThread(
-                            [=]
-                            {
-                                globalConfig()
-                                    .overrides()
-                                    ->mutable_usb()
-                                    ->set_serial(serial);
-                                globalConfig().setFluxSink("drive:0");
-                                globalConfig().setFluxSource("drive:0");
-                                globalConfig().setVerificationFluxSource(
-                                    "drive:0");
-                            });
-                    }
                 }
-
-                /* Selected options. */
-
-                auto options = stringToOptions(
-                    readSetting<std::string>("globalSettings", ""));
-                options.merge(
-                    stringToOptions(readSetting<std::string>(formatName, "")));
-
-                Datastore::runOnWorkerThread(
-                    [=]
-                    {
-                        for (const auto& [key, value] : options)
-                            globalConfig().applyOption(key, value);
-                    });
-
-                /* Update the UI-thread copy of the bits of configuration we
-                 * need. */
-
-                Datastore::runOnWorkerThread(
-                    []
-                    {
-                        auto locations = Layout::computePhysicalLocations();
-                        auto diskPhysicalBounds = Layout::getBounds(locations);
-
-                        decltype(::physicalCylinderLayouts)
-                            physicalCylinderLayouts;
-                        for (auto& it : locations)
-                            physicalCylinderLayouts[it] =
-                                Layout::getLayoutOfTrackPhysical(it);
-
-                        hex::TaskManager::doLater(
-                            [=]
-                            {
-                                ::diskPhysicalBounds = diskPhysicalBounds;
-                                ::physicalCylinderLayouts =
-                                    physicalCylinderLayouts;
-                                rebuildDiskFluxIndices();
-                                configurationValid = true;
-                            });
-                    });
             }
-            catch (const ErrorException& e)
-            {
-                hex::log::error("{}", e.message);
-            }
+
+            /* Selected options. */
+
+            auto options =
+                stringToOptions(readSetting<std::string>("globalSettings", ""));
+            options.merge(
+                stringToOptions(readSetting<std::string>(formatName, "")));
+
+            Datastore::runOnWorkerThread(
+                [=]
+                {
+                    for (const auto& [key, value] : options)
+                        globalConfig().applyOption(key, value);
+                });
+
+            /* Update the UI-thread copy of the bits of configuration we
+             * need. */
+
+            Datastore::runOnWorkerThread(
+                []
+                {
+                    auto locations = Layout::computePhysicalLocations();
+                    auto diskPhysicalBounds = Layout::getBounds(locations);
+
+                    decltype(::physicalCylinderLayouts) physicalCylinderLayouts;
+                    for (auto& it : locations)
+                        physicalCylinderLayouts[it] =
+                            Layout::getLayoutOfTrackPhysical(it);
+
+                    hex::TaskManager::doLater(
+                        [=]
+                        {
+                            ::diskPhysicalBounds = diskPhysicalBounds;
+                            ::physicalCylinderLayouts = physicalCylinderLayouts;
+                            rebuildDiskFluxIndices();
+                            configurationValid = true;
+                        });
+                });
         });
 }
 
@@ -369,13 +375,12 @@ void Datastore::onLogMessage(const AnyLogMessage& message)
             /* We terminated due to the stop button. */
             [&](std::shared_ptr<const EmergencyStopMessage> m)
             {
-                hex::ui::ToastError("Emergency stop!");
             },
 
             /* A fatal error. */
             [&](std::shared_ptr<const ErrorLogMessage> m)
             {
-                hex::ui::ToastError(m->message);
+                hex::ui::ToastError::open(m->message);
             },
 
             /* Indicates that we're starting a write operation. */
@@ -460,4 +465,16 @@ void Datastore::beginRead(void)
 void Datastore::stop(void)
 {
     emergencyStop = true;
+}
+
+void Datastore::writeImage(const std::fs::path& path)
+{
+    busy = true;
+    Datastore::runOnWorkerThread(
+        [=]
+        {
+            globalConfig().setImageWriter(path);
+            ImageWriter::create(globalConfig())
+                ->writeImage(*Datastore::getDiskFlux()->image);
+        });
 }

@@ -24,13 +24,6 @@ static const hex::UnlocalizedString SELECTED_DRIVE(
 static const hex::UnlocalizedString HIGH_DENSITY(
     "fluxengine.config.high_density");
 
-static const std::string DEVICE_MANUAL = "manual";
-static const std::string DEVICE_FLUXFILE = "fluxfile";
-
-namespace
-{
-}
-
 ConfigView::ConfigView():
     View::Window("fluxengine.view.config.name", ICON_VS_DEBUG_LINE_BY_LINE),
     _devices(std::make_shared<DeviceMap>())
