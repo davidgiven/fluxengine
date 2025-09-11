@@ -1,10 +1,23 @@
 comment: 'Options which can be applied everywhere.'
 is_extension: true
 
+option {
+	comment: "High density"
+	name: "hd"
+	applicability: HARDWARE_SOURCESINK
+	set_by_default: true
+
+	config {
+		drive {
+			high_density: true
+		}
+	}
+}
+	
 option_group {
 	comment: "Drive type"
     name: "drivetype"
-	applicability: SOURCESINK
+	applicability: ANY_SOURCESINK
 
 	option {
 		name: "80"

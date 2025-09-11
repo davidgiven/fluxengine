@@ -385,9 +385,8 @@ disks, and have different magnetic properties. 3.5" drives can usually
 autodetect what kind of medium is inserted into the drive based on the hole in
 the disk casing, but 5.25" drives can't. As a result, you need to explicitly
 tell FluxEngine on the command line whether you're using a high density disk or
-not with the `--drive.high_density` configuration setting.
-**If you don't do this, your disks may not read correctly and will _certainly_
-fail to write correctly.**
+not with the `--hd` configuration setting.  **If you don't do this, your disks
+may not read correctly and will _certainly_ fail to write correctly.**
 
 You can distinguish high density 5.25" floppies from the presence of a
 traction ring around the hole in the middle of the disk; if the ring is not

@@ -58,9 +58,10 @@ message OptionPrerequisiteProto
 enum OptionApplicabilityHint
 {
     FORMAT = 0;
-    SOURCESINK = 1;
+    ANY_SOURCESINK = 1;
     HARDWARE_SOURCESINK = 2;
 	MANUAL_SOURCESINK = 3;
+	FLUXFILE_SOURCESINK = 4;
 }
 
 // NEXT_TAG: 9

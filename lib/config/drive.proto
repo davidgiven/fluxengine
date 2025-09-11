@@ -16,7 +16,7 @@ message DriveProto
         [ default = 0, (help) = "index pulses longer than this interval are "
             "considered sector markers; shorter indicates an true index marker" ];
     optional bool high_density = 5
-        [ default = true, (help) = "set if this is a high density disk" ];
+        [ default = false, (help) = "set if this is a high density disk" ];
     optional bool sync_with_index = 6
         [ default = false, (help) = "start reading at index mark" ];
     optional double revolutions = 7
