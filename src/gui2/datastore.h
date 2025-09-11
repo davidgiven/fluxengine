@@ -5,14 +5,28 @@
 #include "lib/data/layout.h"
 
 class DiskFlux;
+class CandidateDevice;
+
+static constexpr std::string DEVICE_MANUAL = "manual";
+static constexpr std::string DEVICE_FLUXFILE = "fluxfile";
 
 class Datastore
 {
+public:
+    struct Device
+    {
+        std::shared_ptr<CandidateDevice> coreDevice;
+        std::string label;
+    };
+
 public:
     static void init();
 
     static bool isBusy();
     static bool isConfigurationValid();
+    static void probeDevices();
+
+    static const std::map<std::string, Device>& getDevices();
     static const std::map<CylinderHead, std::shared_ptr<const TrackInfo>>&
     getphysicalCylinderLayouts();
     static std::shared_ptr<const Sector> findSectorByPhysicalLocation(

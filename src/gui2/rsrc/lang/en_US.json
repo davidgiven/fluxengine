@@ -16,6 +16,12 @@
     "fluxengine.summary.controls.read": "Read from device",
     "fluxengine.summary.controls.write": "Write to device",
     "fluxengine.summary.controls.stop": "Stop",
+    "fluxengine.view.summary.edit": "Edit",
+    "fluxengine.view.summary.highDensity": "High density",
+    "fluxengine.view.summary.yes": "yes",
+    "fluxengine.view.summary.no": "no",
+    "fluxengine.view.summary.format": "Format",
+    "fluxengine.view.summary.variations": "Variant",
 
     "fluxengine.view.image.name": "FluxEngine sector map"
 }

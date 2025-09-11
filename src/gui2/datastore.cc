@@ -13,6 +13,7 @@
 #include "lib/decoders/decoders.h"
 #include "lib/imagewriter/imagewriter.h"
 #include "lib/algorithms/readerwriter.h"
+#include "lib/usb/usbfinder.h"
 #include "arch/arch.h"
 #include "globals.h"
 #include "datastore.h"
@@ -22,6 +23,8 @@
 #include <deque>
 #include <semaphore>
 
+using hex::operator""_lang;
+
 static std::shared_ptr<const DiskFlux> diskFlux;
 
 static std::deque<std::function<void()>> pendingTasks;
@@ -30,6 +33,7 @@ static std::thread workerThread;
 static std::atomic<bool> busy;
 
 static bool configurationValid;
+static std::map<std::string, Datastore::Device> devices;
 static std::map<CylinderHead, std::shared_ptr<const TrackInfo>>
     physicalCylinderLayouts;
 static std::map<CylinderHeadSector, std::shared_ptr<const Sector>>
@@ -112,6 +116,14 @@ static void workerThread_cb()
     }
 }
 
+void Datastore::runOnWorkerThread(std::function<void()> callback)
+{
+    const std::lock_guard<std::mutex> lock(pendingTasksMutex);
+    pendingTasks.push_back(callback);
+    if (workerThread.get_id() == std::thread::id())
+        workerThread = std::move(std::thread(workerThread_cb));
+}
+
 void Datastore::init()
 {
     runOnWorkerThread(
@@ -127,6 +139,8 @@ void Datastore::init()
                         });
                 });
         });
+
+    probeDevices();
 
     Events::SeekToSectorViaPhysicalLocation::subscribe(
         [](CylinderHeadSector physicalLocation)
@@ -180,6 +194,11 @@ bool Datastore::isConfigurationValid()
     return isConfigurationValid;
 }
 
+const std::map<std::string, Datastore::Device>& Datastore::getDevices()
+{
+    return devices;
+}
+
 const std::map<CylinderHead, std::shared_ptr<const TrackInfo>>&
 Datastore::getphysicalCylinderLayouts()
 {
@@ -214,14 +233,6 @@ std::optional<unsigned> Datastore::findBlockByLogicalLocation(
     return it->second;
 }
 
-void Datastore::runOnWorkerThread(std::function<void()> callback)
-{
-    const std::lock_guard<std::mutex> lock(pendingTasksMutex);
-    pendingTasks.push_back(callback);
-    if (workerThread.get_id() == std::thread::id())
-        workerThread = std::move(std::thread(workerThread_cb));
-}
-
 template <typename T>
 static T readSetting(const std::string& leaf, const T defaultValue)
 {
@@ -254,6 +265,30 @@ static void rebuildDiskFluxIndices()
                 blockByLogicalLocation[logicalLocation] = block;
             }
     }
+}
+
+void Datastore::probeDevices()
+{
+    Datastore::runOnWorkerThread(
+        []
+        {
+            hex::log::debug("probing USB");
+            auto usbDevices = findUsbDevices();
+
+            hex::TaskManager::doLater(
+                [usbDevices]
+                {
+                    devices.clear();
+                    devices[DEVICE_FLUXFILE] = {
+                        nullptr, "fluxengine.view.config.fluxfile"_lang};
+                    devices[DEVICE_MANUAL] = {
+                        nullptr, "fluxengine.view.config.manual"_lang};
+                    for (auto it : usbDevices)
+                        devices["#" + it->serial] = {it,
+                            fmt::format(
+                                "{}: {}", getDeviceName(it->type), it->serial)};
+                });
+        });
 }
 
 void Datastore::rebuildConfiguration()

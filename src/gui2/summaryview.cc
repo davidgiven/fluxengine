@@ -8,6 +8,7 @@
 #include "lib/config/config.h"
 #include "lib/data/flux.h"
 #include "lib/data/sector.h"
+#include "lib/config/proto.h"
 #include "globals.h"
 #include "summaryview.h"
 #include "datastore.h"
@@ -55,6 +56,179 @@ static void loadFluxFile()
 static void saveSectorImage()
 {
     fs::openFileBrowser(fs::DialogMode::Save, {}, Datastore::writeImage);
+}
+
+static void showOptions() {}
+
+static void emitOptions(const OptionsMap& options,
+    const ConfigProto* config,
+    const std::set<int>& applicableOptions)
+{
+    for (auto& it : config->option())
+    {
+        if (!applicableOptions.empty() &&
+            std::ranges::none_of(it.applicability(),
+                [&](int item)
+                {
+                    return applicableOptions.contains(item);
+                }))
+            continue;
+
+        ImGui::Text(fmt::format("{}: {}",
+            wolv::util::capitalizeString(it.comment()),
+            options.contains(it.name()) ? "fluxengine.view.summary.yes"_lang
+                                        : "fluxengine.view.summary.no"_lang));
+    }
+
+    for (auto& it : config->option_group())
+    {
+        if (!applicableOptions.empty() &&
+            std::ranges::none_of(it.applicability(),
+                [&](int item)
+                {
+                    return applicableOptions.contains(item);
+                }))
+            continue;
+
+        std::string comment = it.comment();
+        if (comment == "$formats")
+            comment = (std::string) "fluxengine.view.summary.variations"_lang;
+
+        const OptionProto* selectedOption = nullptr;
+        if (it.name().empty())
+        {
+            for (auto& ot : it.option())
+                if (options.contains(ot.name()))
+                    selectedOption = &ot;
+        }
+        else
+        {
+            auto value = findOrDefault(options, it.name());
+            for (auto& ot : it.option())
+                if (ot.name() == value)
+                    selectedOption = &ot;
+        }
+
+        if (!selectedOption)
+            for (auto& ot : it.option())
+                if (ot.set_by_default())
+                    selectedOption = &ot;
+
+        ImGui::Text(fmt::format("{}:", comment));
+        ImGui::SameLine();
+        if (selectedOption)
+            ImGui::TextWrapped(
+                wolv::util::capitalizeString(selectedOption->comment())
+                    .c_str());
+        else
+            ImGui::TextWrapped("***bad***");
+    }
+}
+
+static void drawDeviceBox()
+{
+    if (ImGuiExt::BeginSubWindow("Device",
+            nullptr,
+            ImGui::GetContentRegionAvail(),
+            ImGuiChildFlags_None))
+    {
+        ON_SCOPE_EXIT
+        {
+            ImGuiExt::EndSubWindow();
+        };
+
+        /* Device name */
+
+        std::set<int> applicableOptions = {ANY_SOURCESINK};
+        auto deviceName = hex::ContentRegistry::Settings::read<std::string>(
+            FLUXENGINE_CONFIG, "fluxengine.settings.device", DEVICE_FLUXFILE);
+        auto device = findOrDefault(Datastore::getDevices(),
+            deviceName,
+            {.label = "No device configured"});
+        if (deviceName == DEVICE_FLUXFILE)
+        {
+            ImGui::Text(fmt::format("{}: {}",
+                device.label,
+                hex::ContentRegistry::Settings::read<std::fs::path>(
+                    FLUXENGINE_CONFIG,
+                    "fluxengine.settings.fluxfile",
+                    "no file configured")
+                    .filename()
+                    .string()));
+            applicableOptions.insert(FLUXFILE_SOURCESINK);
+        }
+        else if (deviceName == DEVICE_MANUAL)
+        {
+            ImGui::Text(fmt::format("Greaseweazle: {}",
+                hex::ContentRegistry::Settings::read<std::string>(
+                    FLUXENGINE_CONFIG,
+                    "fluxengine.settings.manualDevicePath",
+                    "no path configured")));
+            applicableOptions.insert(MANUAL_SOURCESINK);
+            applicableOptions.insert(HARDWARE_SOURCESINK);
+        }
+        else
+        {
+            ImGui::Text(device.label.c_str());
+            applicableOptions.insert(HARDWARE_SOURCESINK);
+        }
+
+        /* Other options */
+
+        auto globalOptions =
+            stringToOptions(hex::ContentRegistry::Settings::read<std::string>(
+                FLUXENGINE_CONFIG, "fluxengine.settings.globalSettings", ""));
+        emitOptions(
+            globalOptions, formats.at("_global_options"), applicableOptions);
+
+        ImGui::Button(
+            fmt::format("{}##device", "fluxengine.view.summary.edit"_lang)
+                .c_str());
+    }
+}
+
+void drawFormatBox()
+{
+    if (ImGuiExt::BeginSubWindow("Format",
+            nullptr,
+            ImGui::GetContentRegionAvail(),
+            ImGuiChildFlags_None))
+    {
+        ON_SCOPE_EXIT
+        {
+            ImGuiExt::EndSubWindow();
+        };
+
+        /* Format name */
+
+        auto formatName =
+            hex::ContentRegistry::Settings::read<std::string>(FLUXENGINE_CONFIG,
+                "fluxengine.settings.format.selected",
+                DEVICE_FLUXFILE);
+        auto format = findOrDefault(formats, formatName);
+        if (!format)
+        {
+            ImGui::Text("***bad***");
+            return;
+        }
+
+        ImGui::Text(fmt::format("{}:", "fluxengine.view.summary.format"_lang));
+        ImGui::SameLine();
+        ImGui::BeginGroup();
+        ImGui::Text(format->shortname());
+        ImGui::Text(format->comment());
+        ImGui::EndGroup();
+
+        auto formatOptions = stringToOptions(
+            hex::ContentRegistry::Settings::read<std::string>(FLUXENGINE_CONFIG,
+                fmt::format("fluxengine.settings.{}", formatName),
+                ""));
+        emitOptions(formatOptions, format, {});
+
+        ImGui::Button(
+            fmt::format("{}##format", "fluxengine.view.summary.edit"_lang)
+                .c_str());
+    }
 }
 
 void SummaryView::drawContent()
@@ -199,9 +373,9 @@ void SummaryView::drawContent()
     }
 
     ImGui::SetCursorPosY(
-        ImGui::GetContentRegionAvail().y - ImGui::GetFontSize() * 3);
-    if (ImGui::BeginTable("controlPanel",
-            7,
+        ImGui::GetContentRegionAvail().y - ImGui::GetFontSize() * 6);
+    if (ImGui::BeginTable("controlPanelOuter",
+            3,
             ImGuiTableFlags_NoSavedSettings | ImGuiTableFlags_NoClip))
     {
         ON_SCOPE_EXIT
@@ -209,107 +383,145 @@ void SummaryView::drawContent()
             ImGui::EndTable();
         };
 
-        bool busy = Datastore::isBusy() || !Datastore::isConfigurationValid();
-        bool hasImage = diskFlux && diskFlux->image;
-
-        auto majorButtonWidth = ImGui::GetFontSize() * 10;
+        auto sideWidth = ImGui::GetFontSize() * 20;
+        ImGui::TableSetupColumn(
+            "", ImGuiTableColumnFlags_WidthFixed, sideWidth);
         ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);
         ImGui::TableSetupColumn(
-            "", ImGuiTableColumnFlags_WidthFixed, majorButtonWidth);
-        ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed);
-        ImGui::TableSetupColumn(
-            "", ImGuiTableColumnFlags_WidthFixed, majorButtonWidth * 1.5);
-        ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed);
-        ImGui::TableSetupColumn(
-            "", ImGuiTableColumnFlags_WidthFixed, majorButtonWidth);
-        ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);
+            "", ImGuiTableColumnFlags_WidthFixed, sideWidth);
 
         ImGui::TableNextRow();
         ImGui::TableNextColumn();
-        ImGui::TableNextColumn();
-        if (MaybeDisabledButton(
-                fmt::format("{} {}", ICON_TA_DEVICE_FLOPPY, "Read disk"),
-                ImVec2(ImGui::GetContentRegionAvail().x, 0),
-                busy))
-            Datastore::beginRead();
-        ImGui::TableNextColumn();
-        ImGui::TableNextColumn();
-        MaybeDisabledButton(
-            fmt::format("{} {}", ICON_VS_FOLDER_OPENED, "Load sector image"),
-            ImVec2(ImGui::GetContentRegionAvail().x, 0),
-            busy);
-        ImGui::TableNextColumn();
-        ImGui::TableNextColumn();
-        MaybeDisabledButton(
-            fmt::format("{} {}", ICON_VS_SAVE_AS, "Write disk").c_str(),
-            ImVec2(ImGui::GetContentRegionAvail().x, 0),
-            busy || !hasImage);
+        drawDeviceBox();
 
-        ImGui::TableNextRow();
         ImGui::TableNextColumn();
-        ImGui::TableNextColumn();
-        MaybeDisabledButton(
-            fmt::format("{} {}", ICON_TA_REPEAT, "Reread bad tracks").c_str(),
-            ImVec2(ImGui::GetContentRegionAvail().x, 0),
-            busy);
-        ImGui::TableNextColumn();
-        ImGui::Text(ICON_VS_ARROW_RIGHT);
-        ImGui::TableNextColumn();
-        if (MaybeDisabledButton(
-                fmt::format("{} {}", ICON_VS_SAVE_ALL, "Save sector image")
-                    .c_str(),
-                ImVec2(ImGui::GetContentRegionAvail().x, 0),
-                busy || !hasImage))
-            saveSectorImage();
-        ImGui::TableNextColumn();
-        ImGui::Text(ICON_VS_ARROW_RIGHT);
-        ImGui::TableNextColumn();
-        MaybeDisabledButton(
-            fmt::format("{} {}", ICON_TA_DOWNLOAD, "Save flux file").c_str(),
-            ImVec2(ImGui::GetContentRegionAvail().x, 0),
-            busy || !diskFlux);
-
-        ImGui::TableNextRow();
-        ImGui::TableNextColumn();
-        ImGui::TableNextColumn();
-        if (MaybeDisabledButton(
-                fmt::format("{} {}", ICON_TA_UPLOAD, "Load flux file").c_str(),
-                ImVec2(ImGui::GetContentRegionAvail().x, 0),
-                busy))
-            loadFluxFile();
-        ImGui::TableNextColumn();
-        ImGui::TableNextColumn();
-        MaybeDisabledButton(
-            fmt::format("{} {}", ICON_VS_NEW_FILE, "Create blank image")
-                .c_str(),
-            ImVec2(ImGui::GetContentRegionAvail().x, 0),
-            busy);
-    }
-
-    {
-        auto size = ImVec2(ImGui::GetWindowSize().x * 0.6, 0);
-        ImGui::SetCursorPos({ImGui::GetWindowSize().x / 2 - size.x / 2,
-            ImGui::GetWindowSize().y - ImGui::GetFontSize() * 1.5f});
-
-        auto red = ImGuiExt::GetCustomColorU32(ImGuiCustomCol_LoggerError);
-        auto text = ImGui::GetColorU32(ImGuiCol_Text);
-        auto redHover = ImMixU32(red, text, 32);
-        auto redPressed = ImMixU32(red, text, 64);
-
-        ImGui::PushStyleColor(ImGuiCol_Button, red);
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, redHover);
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, redPressed);
-
-        ON_SCOPE_EXIT
+        if (ImGuiExt::BeginSubWindow("Controls",
+                nullptr,
+                ImGui::GetContentRegionAvail(),
+                ImGuiChildFlags_None))
         {
-            ImGui::PopStyleColor(3);
-        };
+            ON_SCOPE_EXIT
+            {
+                ImGuiExt::EndSubWindow();
+            };
+            if (ImGui::BeginTable("controlPanel",
+                    5,
+                    ImGuiTableFlags_NoSavedSettings | ImGuiTableFlags_NoClip))
+            {
+                ON_SCOPE_EXIT
+                {
+                    ImGui::EndTable();
+                };
 
-        if (MaybeDisabledButton(fmt::format("{} {}",
-                                    ICON_TA_CANCEL,
-                                    "fluxengine.summary.controls.stop"_lang),
-                size,
-                !Datastore::isBusy()))
-            Datastore::stop();
+                bool busy =
+                    Datastore::isBusy() || !Datastore::isConfigurationValid();
+                bool hasImage = diskFlux && diskFlux->image;
+
+                auto majorButtonWidth = ImGui::GetFontSize() * 10;
+                ImGui::TableSetupColumn(
+                    "", ImGuiTableColumnFlags_WidthFixed, majorButtonWidth);
+                ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed);
+                ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);
+                ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed);
+                ImGui::TableSetupColumn(
+                    "", ImGuiTableColumnFlags_WidthFixed, majorButtonWidth);
+
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                if (MaybeDisabledButton(
+                        fmt::format(
+                            "{} {}", ICON_TA_DEVICE_FLOPPY, "Read disk"),
+                        ImVec2(ImGui::GetContentRegionAvail().x, 0),
+                        busy))
+                    Datastore::beginRead();
+                ImGui::TableNextColumn();
+                ImGui::TableNextColumn();
+                MaybeDisabledButton(
+                    fmt::format(
+                        "{} {}", ICON_VS_FOLDER_OPENED, "Load sector image"),
+                    ImVec2(ImGui::GetContentRegionAvail().x, 0),
+                    busy);
+                ImGui::TableNextColumn();
+                ImGui::TableNextColumn();
+                MaybeDisabledButton(
+                    fmt::format("{} {}", ICON_VS_SAVE_AS, "Write disk").c_str(),
+                    ImVec2(ImGui::GetContentRegionAvail().x, 0),
+                    busy || !hasImage);
+
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                MaybeDisabledButton(
+                    fmt::format("{} {}", ICON_TA_REPEAT, "Reread bad tracks")
+                        .c_str(),
+                    ImVec2(ImGui::GetContentRegionAvail().x, 0),
+                    busy);
+                ImGui::TableNextColumn();
+                ImGui::Text(ICON_VS_ARROW_RIGHT);
+                ImGui::TableNextColumn();
+                if (MaybeDisabledButton(
+                        fmt::format(
+                            "{} {}", ICON_VS_SAVE_ALL, "Save sector image")
+                            .c_str(),
+                        ImVec2(ImGui::GetContentRegionAvail().x, 0),
+                        busy || !hasImage))
+                    saveSectorImage();
+                ImGui::TableNextColumn();
+                ImGui::Text(ICON_VS_ARROW_RIGHT);
+                ImGui::TableNextColumn();
+                MaybeDisabledButton(
+                    fmt::format("{} {}", ICON_TA_DOWNLOAD, "Save flux file")
+                        .c_str(),
+                    ImVec2(ImGui::GetContentRegionAvail().x, 0),
+                    busy || !diskFlux);
+
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                if (MaybeDisabledButton(
+                        fmt::format("{} {}", ICON_TA_UPLOAD, "Load flux file")
+                            .c_str(),
+                        ImVec2(ImGui::GetContentRegionAvail().x, 0),
+                        busy))
+                    loadFluxFile();
+                ImGui::TableNextColumn();
+                ImGui::TableNextColumn();
+                MaybeDisabledButton(
+                    fmt::format("{} {}", ICON_VS_NEW_FILE, "Create blank image")
+                        .c_str(),
+                    ImVec2(ImGui::GetContentRegionAvail().x, 0),
+                    busy);
+            }
+
+            {
+                auto size = ImVec2(ImGui::GetWindowSize().x * 0.6, 0);
+                ImGui::SetCursorPos({ImGui::GetWindowSize().x / 2 - size.x / 2,
+                    ImGui::GetWindowSize().y - ImGui::GetFontSize() * 1.5f});
+
+                auto red =
+                    ImGuiExt::GetCustomColorU32(ImGuiCustomCol_LoggerError);
+                auto text = ImGui::GetColorU32(ImGuiCol_Text);
+                auto redHover = ImMixU32(red, text, 32);
+                auto redPressed = ImMixU32(red, text, 64);
+
+                ImGui::PushStyleColor(ImGuiCol_Button, red);
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, redHover);
+                ImGui::PushStyleColor(ImGuiCol_ButtonActive, redPressed);
+
+                ON_SCOPE_EXIT
+                {
+                    ImGui::PopStyleColor(3);
+                };
+
+                if (MaybeDisabledButton(
+                        fmt::format("{} {}",
+                            ICON_TA_CANCEL,
+                            "fluxengine.summary.controls.stop"_lang),
+                        size,
+                        !Datastore::isBusy()))
+                    Datastore::stop();
+            }
+        }
+
+        ImGui::TableNextColumn();
+        drawFormatBox();
     }
 }

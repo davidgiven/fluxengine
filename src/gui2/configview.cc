@@ -168,7 +168,7 @@ void ConfigView::drawContent()
         if (ImGui::Button("fluxengine.view.config.rescan"_lang))
             probeConfig();
 
-        std::set<int> applicableOptions{SOURCESINK};
+        std::set<int> applicableOptions{ANY_SOURCESINK};
         if ((std::string)driveSetting == DEVICE_MANUAL)
         {
             auto manualDevicePathSetting = DynamicSetting<std::fs::path>(
