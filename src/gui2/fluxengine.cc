@@ -5,7 +5,6 @@
 #include <romfs/romfs.hpp>
 #include "globals.h"
 #include "imageview.h"
-#include "configview.h"
 #include "summaryview.h"
 #include "diskprovider.h"
 #include "datastore.h"
@@ -23,7 +22,6 @@ IMHEX_PLUGIN_SETUP("FluxEngine", "David Given", "FluxEngine integration")
     hex::ContentRegistry::Provider::add<DiskProvider>();
 
     hex::ContentRegistry::Views::add<ImageView>();
-    hex::ContentRegistry::Views::add<ConfigView>();
     hex::ContentRegistry::Views::add<SummaryView>();
 
     Datastore::init();

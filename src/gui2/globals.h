@@ -7,7 +7,7 @@
 class CylinderHeadSector;
 class CylinderHead;
 
-extern const hex::UnlocalizedString FLUXENGINE_CONFIG;
+static const std::string FLUXENGINE_CONFIG = "fluxengine.config";
 
 namespace ImGui
 {
@@ -25,7 +25,8 @@ namespace Events
 }
 
 template <typename K, typename V>
-inline const V& findOrDefault(const std::map<K, V>& map, const K& key, const V& defaultValue = V())
+inline const V& findOrDefault(
+    const std::map<K, V>& map, const K& key, const V& defaultValue = V())
 {
     auto it = map.find(key);
     if (it == map.end())

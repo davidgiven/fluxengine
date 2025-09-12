@@ -12,7 +12,6 @@
 #include "globals.h"
 #include "summaryview.h"
 #include "datastore.h"
-#include "configview.h"
 #include "utils.h"
 #include <implot.h>
 #include <implot_internal.h>

@@ -330,8 +330,6 @@ plugin(
     name="fluxengine-plugin",
     id="fluxengine",
     srcs=[
-        "./configview.cc",
-        "./configview.h",
         "./imageview.cc",
         "./imageview.h",
         "./datastore.cc",
