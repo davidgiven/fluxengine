@@ -30,7 +30,7 @@ public:
 
     operator const T&()
     {
-        if (!_cachedValue)
+        if (!_cachedValue.has_value())
         {
             _cachedValue =
                 std::make_optional(hex::ContentRegistry::Settings::read<T>(
@@ -41,11 +41,11 @@ public:
 
     T operator=(T value)
     {
-        if (!_cachedValue || (*_cachedValue != value))
+        if (!_cachedValue.has_value() || (*_cachedValue != value))
         {
             hex::ContentRegistry::Settings::write<T>(
                 FLUXENGINE_CONFIG, _key, value);
-            *_cachedValue = value;
+            _cachedValue = std::make_optional(value);
             Datastore::rebuildConfiguration();
         }
         return value;
