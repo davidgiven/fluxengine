@@ -19,6 +19,8 @@
 
 using namespace hex;
 
+static DynamicSettingFactory settings("fluxengine.settings");
+
 SummaryView::SummaryView():
     View::Window("fluxengine.view.summary.name", ICON_VS_DEBUG_LINE_BY_LINE)
 {
@@ -44,12 +46,8 @@ static void loadFluxFile()
         {},
         [](const auto& path)
         {
-            hex::ContentRegistry::Settings::write<std::fs::path>(
-                FLUXENGINE_CONFIG,
-                "fluxengine.settings.device",
-                DEVICE_FLUXFILE);
-            hex::ContentRegistry::Settings::write<std::fs::path>(
-                FLUXENGINE_CONFIG, "fluxengine.settings.fluxfile", path);
+            settings.get<std::string>("device") = DEVICE_FLUXFILE;
+            settings.get<std::fs::path>("fluxfile") = path;
         });
 }
 
@@ -195,8 +193,7 @@ static void drawDeviceBox()
         /* Device name */
 
         std::set<int> applicableOptions = {ANY_SOURCESINK};
-        auto deviceNameSetting =
-            DynamicSetting<std::string>("fluxengine.settings", "device");
+        auto deviceNameSetting = settings.get<std::string>("device");
         auto selectedDevice = findOrDefault(Datastore::getDevices(),
             (std::string)deviceNameSetting,
             {.label = "No device configured"});
@@ -222,7 +219,7 @@ static void drawDeviceBox()
             applicableOptions.insert(HARDWARE_SOURCESINK);
         }
         ImGui::SameLine();
-        if (ImGui::BeginCombo("##format", nullptr, ImGuiComboFlags_NoPreview))
+        if (ImGui::BeginCombo("##devices", nullptr, ImGuiComboFlags_NoPreview))
         {
             ON_SCOPE_EXIT
             {
@@ -244,8 +241,7 @@ static void drawDeviceBox()
             ImGui::AlignTextToFramePadding();
             ImGui::Text(fmt::format("{}:", label));
             ImGui::SameLine();
-            auto pathSetting =
-                DynamicSetting<std::string>("fluxengine.settings", setting);
+            auto pathSetting = settings.get<std::string>(setting);
             auto pathString = (std::string)pathSetting;
             ImGui::SetNextItemWidth(-FLT_MIN);
             if (ImGui::InputText(id.c_str(),
@@ -288,31 +284,46 @@ void drawFormatBox()
 
         /* Format name */
 
-        auto formatName =
-            hex::ContentRegistry::Settings::read<std::string>(FLUXENGINE_CONFIG,
-                "fluxengine.settings.format.selected",
-                DEVICE_FLUXFILE);
-        auto format = findOrDefault(formats, formatName);
-        if (!format)
+        auto formatSetting =
+            settings.get<std::string>("format.selected", "ibm");
+        auto selectedFormat =
+            findOrDefault(formats, (std::string)formatSetting);
+        if (!selectedFormat)
         {
-            ImGui::Text("***bad***");
-            return;
+            formatSetting = "ibm";
+            selectedFormat = formats.at(formatSetting);
         }
 
         ImGui::Text(fmt::format("{}:", "fluxengine.view.summary.format"_lang));
         ImGui::SameLine();
         ImGui::BeginGroup();
-        ImGui::Text(format->shortname());
-        ImGui::Text(format->comment());
+        ImGui::TextWrapped(selectedFormat->shortname().c_str());
+        ImGui::TextWrapped(selectedFormat->comment().c_str());
         ImGui::EndGroup();
 
-        auto formatOptionsSetting =
-            DynamicSetting<std::string>("fluxengine.settings", formatName);
-        emitOptions(formatOptionsSetting, format, {});
+        ImGui::SameLine();
+        if (ImGui::BeginCombo("##formats", nullptr, ImGuiComboFlags_NoPreview))
+        {
+            ON_SCOPE_EXIT
+            {
+                ImGui::EndCombo();
+            };
 
-        ImGui::Button(
-            fmt::format("{}##format", "fluxengine.view.summary.edit"_lang)
-                .c_str());
+            for (auto& [name, format] : formats)
+                if (!format->is_extension())
+                {
+                    auto label = format->shortname();
+                    if (label.empty())
+                        label = name;
+                    if (ImGui::Selectable(
+                            fmt::format("{}##{}", label, name).c_str(), false))
+                        formatSetting = name;
+                }
+        }
+
+        auto formatOptionsSetting = DynamicSetting<std::string>(
+            "fluxengine.settings", (std::string)formatSetting);
+        emitOptions(formatOptionsSetting, selectedFormat, {});
     }
 }
 

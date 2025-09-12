@@ -56,3 +56,18 @@ private:
     const T _defaultValue;
     std::optional<T> _cachedValue;
 };
+
+class DynamicSettingFactory
+{
+public:
+    DynamicSettingFactory(const std::string& path): _path(path) {}
+
+    template <typename T>
+    DynamicSetting<T> get(std::string_view leaf, T defaultValue = T())
+    {
+        return DynamicSetting<T>(_path, leaf, defaultValue);
+    }
+
+public:
+    std::string _path;
+};
