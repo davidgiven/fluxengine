@@ -22,6 +22,8 @@
     "fluxengine.view.summary.no": "no",
     "fluxengine.view.summary.format": "Format",
     "fluxengine.view.summary.variations": "Variant",
+    "fluxengine.view.summary.manualDevicePath": "Device path",
+    "fluxengine.view.summary.fluxFile": "Flux file",
 
     "fluxengine.view.image.name": "FluxEngine sector map"
 }

@@ -60,10 +60,12 @@ static void saveSectorImage()
 
 static void showOptions() {}
 
-static void emitOptions(const OptionsMap& options,
+static void emitOptions(DynamicSetting<std::string>& setting,
     const ConfigProto* config,
     const std::set<int>& applicableOptions)
 {
+    auto options = stringToOptions(setting);
+
     for (auto& it : config->option())
     {
         if (!applicableOptions.empty() &&
@@ -74,10 +76,35 @@ static void emitOptions(const OptionsMap& options,
                 }))
             continue;
 
+        ImGui::AlignTextToFramePadding();
+        bool selected = options.contains(it.name());
         ImGui::Text(fmt::format("{}: {}",
             wolv::util::capitalizeString(it.comment()),
-            options.contains(it.name()) ? "fluxengine.view.summary.yes"_lang
-                                        : "fluxengine.view.summary.no"_lang));
+            selected ? "fluxengine.view.summary.yes"_lang
+                     : "fluxengine.view.summary.no"_lang));
+        ImGui::SameLine();
+        if (ImGui::BeginCombo(fmt::format("##{}", it.comment()).c_str(),
+                nullptr,
+                ImGuiComboFlags_NoPreview))
+        {
+            ON_SCOPE_EXIT
+            {
+                ImGui::EndCombo();
+            };
+
+            int value = -1;
+            if (ImGui::Selectable("fluxengine.view.summary.no"_lang, !selected))
+                value = 0;
+            if (ImGui::Selectable("fluxengine.view.summary.yes"_lang, selected))
+                value = 1;
+            if (value != -1)
+            {
+                options.erase(it.name());
+                if (value)
+                    options[it.name()] = "true";
+                setting = optionsToString(options);
+            }
+        }
     }
 
     for (auto& it : config->option_group())
@@ -114,6 +141,7 @@ static void emitOptions(const OptionsMap& options,
                 if (ot.set_by_default())
                     selectedOption = &ot;
 
+        ImGui::AlignTextToFramePadding();
         ImGui::Text(fmt::format("{}:", comment));
         ImGui::SameLine();
         if (selectedOption)
@@ -122,6 +150,33 @@ static void emitOptions(const OptionsMap& options,
                     .c_str());
         else
             ImGui::TextWrapped("***bad***");
+        ImGui::SameLine();
+        if (ImGui::BeginCombo(fmt::format("##{}", it.comment()).c_str(),
+                nullptr,
+                ImGuiComboFlags_NoPreview))
+        {
+            ON_SCOPE_EXIT
+            {
+                ImGui::EndCombo();
+            };
+
+            for (auto& ot : it.option())
+                if (ImGui::Selectable(
+                        ot.comment().c_str(), &ot == selectedOption))
+                {
+                    if (it.name().empty())
+                    {
+                        options.erase(selectedOption->name());
+                        options[ot.name()] = "true";
+                    }
+                    else
+                    {
+                        options.erase(it.name());
+                        options[it.name()] = ot.name();
+                    }
+                    setting = optionsToString(options);
+                }
+        }
     }
 }
 
@@ -140,50 +195,82 @@ static void drawDeviceBox()
         /* Device name */
 
         std::set<int> applicableOptions = {ANY_SOURCESINK};
-        auto deviceName = hex::ContentRegistry::Settings::read<std::string>(
-            FLUXENGINE_CONFIG, "fluxengine.settings.device", DEVICE_FLUXFILE);
-        auto device = findOrDefault(Datastore::getDevices(),
-            deviceName,
+        auto deviceNameSetting =
+            DynamicSetting<std::string>("fluxengine.settings", "device");
+        auto selectedDevice = findOrDefault(Datastore::getDevices(),
+            (std::string)deviceNameSetting,
             {.label = "No device configured"});
-        if (deviceName == DEVICE_FLUXFILE)
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text("Device:");
+        ImGui::SameLine();
+        constexpr int maxLen = 25;
+        if ((std::string)deviceNameSetting == DEVICE_FLUXFILE)
         {
-            ImGui::Text(fmt::format("{}: {}",
-                device.label,
-                hex::ContentRegistry::Settings::read<std::fs::path>(
-                    FLUXENGINE_CONFIG,
-                    "fluxengine.settings.fluxfile",
-                    "no file configured")
-                    .filename()
-                    .string()));
+            ImGui::Text(shortenString(selectedDevice.label, maxLen));
             applicableOptions.insert(FLUXFILE_SOURCESINK);
         }
-        else if (deviceName == DEVICE_MANUAL)
+        else if ((std::string)deviceNameSetting == DEVICE_MANUAL)
         {
-            ImGui::Text(fmt::format("Greaseweazle: {}",
-                hex::ContentRegistry::Settings::read<std::string>(
-                    FLUXENGINE_CONFIG,
-                    "fluxengine.settings.manualDevicePath",
-                    "no path configured")));
+            ImGui::Text("Greaseweazle manual setup");
+
             applicableOptions.insert(MANUAL_SOURCESINK);
             applicableOptions.insert(HARDWARE_SOURCESINK);
         }
         else
         {
-            ImGui::Text(device.label.c_str());
+            ImGui::Text(shortenString(selectedDevice.label, maxLen));
             applicableOptions.insert(HARDWARE_SOURCESINK);
         }
+        ImGui::SameLine();
+        if (ImGui::BeginCombo("##format", nullptr, ImGuiComboFlags_NoPreview))
+        {
+            ON_SCOPE_EXIT
+            {
+                ImGui::EndCombo();
+            };
+
+            for (auto& [name, device] : Datastore::getDevices())
+                if (ImGui::Selectable(device.label.c_str(), false))
+                    deviceNameSetting = name;
+        }
+
+        /* The file path, if DEVICE_FLUXFILE, and device path, if DEVICE_MANUAL
+         */
+
+        auto doPathSetting = [=](const std::string& label,
+                                 const std::string& setting,
+                                 const std::string& id)
+        {
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text(fmt::format("{}:", label));
+            ImGui::SameLine();
+            auto pathSetting =
+                DynamicSetting<std::string>("fluxengine.settings", setting);
+            auto pathString = (std::string)pathSetting;
+            ImGui::SetNextItemWidth(-FLT_MIN);
+            if (ImGui::InputText(id.c_str(),
+                    pathString,
+                    ImGuiInputTextFlags_CallbackCompletion |
+                        ImGuiInputTextFlags_ElideLeft))
+                pathSetting = pathString;
+        };
+
+        if ((std::string)deviceNameSetting == DEVICE_FLUXFILE)
+            doPathSetting("fluxengine.view.summary.fluxFile"_lang,
+                "fluxfile",
+                "##fluxfilePath");
+        if ((std::string)deviceNameSetting == DEVICE_MANUAL)
+            doPathSetting("fluxengine.view.summary.manualDevicePath"_lang,
+                "manualDevicePath",
+                "##manualDevicePath");
 
         /* Other options */
 
-        auto globalOptions =
-            stringToOptions(hex::ContentRegistry::Settings::read<std::string>(
-                FLUXENGINE_CONFIG, "fluxengine.settings.globalSettings", ""));
-        emitOptions(
-            globalOptions, formats.at("_global_options"), applicableOptions);
-
-        ImGui::Button(
-            fmt::format("{}##device", "fluxengine.view.summary.edit"_lang)
-                .c_str());
+        auto globalOptionsSetting = DynamicSetting<std::string>(
+            "fluxengine.settings", "globalSettings");
+        emitOptions(globalOptionsSetting,
+            formats.at("_global_options"),
+            applicableOptions);
     }
 }
 
@@ -219,11 +306,9 @@ void drawFormatBox()
         ImGui::Text(format->comment());
         ImGui::EndGroup();
 
-        auto formatOptions = stringToOptions(
-            hex::ContentRegistry::Settings::read<std::string>(FLUXENGINE_CONFIG,
-                fmt::format("fluxengine.settings.{}", formatName),
-                ""));
-        emitOptions(formatOptions, format, {});
+        auto formatOptionsSetting =
+            DynamicSetting<std::string>("fluxengine.settings", formatName);
+        emitOptions(formatOptionsSetting, format, {});
 
         ImGui::Button(
             fmt::format("{}##format", "fluxengine.view.summary.edit"_lang)
@@ -373,7 +458,7 @@ void SummaryView::drawContent()
     }
 
     ImGui::SetCursorPosY(
-        ImGui::GetContentRegionAvail().y - ImGui::GetFontSize() * 6);
+        ImGui::GetContentRegionAvail().y - ImGui::GetFontSize() * 8);
     if (ImGui::BeginTable("controlPanelOuter",
             3,
             ImGuiTableFlags_NoSavedSettings | ImGuiTableFlags_NoClip))

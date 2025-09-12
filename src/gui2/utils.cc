@@ -15,6 +15,13 @@ int MaybeDisabledButton(
     return ImGui::Button(message.c_str(), size);
 }
 
+std::string shortenString(const std::string& s, size_t len)
+{
+    if (s.size() < len)
+        return s;
+    return s.substr(0, len) + "…";
+}
+
 OptionsMap stringToOptions(const std::string& optionsString)
 {
     OptionsMap result;

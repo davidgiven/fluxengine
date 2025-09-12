@@ -11,6 +11,7 @@ using OptionsMap = std::map<std::string, std::string>;
 
 extern int MaybeDisabledButton(
     const std::string& message, const ImVec2& size, bool isDisabled);
+extern std::string shortenString(const std::string& s, size_t len);
 
 extern OptionsMap stringToOptions(const std::string& optionsString);
 extern std::string optionsToString(const OptionsMap& options);
@@ -20,7 +21,7 @@ class DynamicSetting
 {
 public:
     DynamicSetting(
-        std::string_view path, std::string_view leaf, T defaultValue):
+        std::string_view path, std::string_view leaf, T defaultValue = T()):
         _key(hex::UnlocalizedString(fmt::format("{}.{}", path, leaf))),
         _defaultValue(defaultValue),
         _cachedValue()

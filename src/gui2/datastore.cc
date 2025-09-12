@@ -286,7 +286,7 @@ void Datastore::probeDevices()
                     for (auto it : usbDevices)
                         devices["#" + it->serial] = {it,
                             fmt::format(
-                                "{}: {}", getDeviceName(it->type), it->serial)};
+                                "{} {}", getDeviceName(it->type), it->serial)};
                 });
         });
 }
