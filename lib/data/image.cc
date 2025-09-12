@@ -13,6 +13,16 @@ Image::Image(std::set<std::shared_ptr<const Sector>>& sectors):
         _sectors[{sector->logicalCylinder,
             sector->logicalHead,
             sector->logicalSector}] = sector;
+    for (auto& location : _filesystemOrder)
+        if (!_sectors.contains(location))
+        {
+            auto trackInfo = Layout::getLayoutOfTrack(
+                location.logicalCylinder, location.logicalHead);
+            auto sector = std::make_shared<Sector>(trackInfo, location);
+            sector->status = Sector::MISSING;
+            _sectors[location] = sector;
+        }
+
     calculateSize();
 }
 
@@ -100,6 +110,8 @@ Image::LocationAndOffset Image::findBlockByOffset(unsigned offset) const
     for (unsigned block = 0; block < _filesystemOrder.size(); block++)
     {
         auto sector = getBlock(block);
+        if (!sector)
+            throw OutOfRangeException("sector missing from image");
         if (offset < sector->trackLayout->sectorSize)
             return {block, offset};
         offset -= sector->trackLayout->sectorSize;
@@ -116,7 +128,10 @@ unsigned Image::findOffsetByLogicalLocation(
     {
         if (it == logicalLocation)
             return offset;
-        const auto& sector = _sectors.at(it);
+        const auto& ot = _sectors.find(it);
+        if (ot == _sectors.end())
+            throw OutOfRangeException("sector missing from image");
+        const auto& sector = ot->second;
         offset += sector->trackLayout->sectorSize;
     }
 

@@ -24,6 +24,12 @@ struct LogicalLocation
     unsigned logicalCylinder;
     unsigned logicalHead;
     unsigned logicalSector;
+
+    operator std::string() const
+    {
+        return fmt::format(
+            "c{}h{}s{}", logicalCylinder, logicalHead, logicalSector);
+    }
 };
 
 extern std::vector<CylinderHead> parseCylinderHeadsString(const std::string& s);
