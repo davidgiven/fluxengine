@@ -31,10 +31,12 @@ public:
     getphysicalCylinderLayouts();
     static std::shared_ptr<const Sector> findSectorByPhysicalLocation(
         const CylinderHeadSector& location);
+    static std::shared_ptr<const Sector> findSectorByLogicalLocation(
+        const LogicalLocation& location);
     static std::optional<unsigned> findBlockByLogicalLocation(
         const LogicalLocation& location);
     static const Layout::LayoutBounds& getDiskPhysicalBounds();
-    static const Layout::LayoutBounds& getImageLogicalBounds();
+    static const Layout::LayoutBounds& getDiskLogicalBounds();
     static void rebuildConfiguration();
     static void onLogMessage(const AnyLogMessage& message);
 

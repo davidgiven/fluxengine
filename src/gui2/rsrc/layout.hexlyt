@@ -1,22 +1,22 @@
 [Window][ImHexDockSpace]
-Pos=0,44
-Size=3740,1920
+Pos=0,33
+Size=2880,1590
 Collapsed=0
 
 [Window][###hex.builtin.view.settings.name]
-Pos=740,410
-Size=1400,800
+Pos=706,415
+Size=1467,789
 Collapsed=0
 
 [Window][###hex.builtin.view.hex_editor.name]
-Pos=705,88
-Size=1107,1307
+Pos=0,66
+Size=941,1513
 Collapsed=0
 DockId=0x00000009,0
 
 [Window][###hex.builtin.view.data_inspector.name]
-Pos=621,38
-Size=124,468
+Pos=575,66
+Size=222,1513
 Collapsed=0
 DockId=0x00000005,0
 
@@ -39,16 +39,16 @@ Collapsed=0
 DockId=0x00000004,4
 
 [Window][###hex.builtin.view.find.name]
-Pos=1697,76
-Size=863,1427
+Pos=575,66
+Size=418,1513
 Collapsed=0
-DockId=0x00000004,3
+DockId=0x00000004,1
 
 [Window][###hex.builtin.view.bookmarks.name]
-Pos=1816,88
-Size=454,1307
+Pos=1046,66
+Size=911,1108
 Collapsed=0
-DockId=0x0000000A,0
+DockId=0x00000011,0
 
 [Window][###hex.builtin.view.information.name]
 Pos=-1889,-120
@@ -61,8 +61,7 @@ Size=560,660
 Collapsed=0
 
 [Window][###hex.builtin.view.store.name]
-ViewportPos=564,236
-ViewportId=0xB51F9C4A
+Pos=768,367
 Size=900,700
 Collapsed=0
 
@@ -78,9 +77,10 @@ Size=314,208
 Collapsed=0
 
 [Window][###hex.builtin.view.patches.name]
-Pos=-1889,-120
-Size=510,420
+Pos=575,66
+Size=222,1513
 Collapsed=0
+DockId=0x00000005,0
 
 [Window][###hex.builtin.view.data_processor.name]
 Pos=747,38
@@ -89,14 +89,14 @@ Collapsed=0
 DockId=0x00000004,1
 
 [Window][###hex.builtin.view.tools.name]
-Pos=849,268
-Size=431,430
+Pos=575,66
+Size=418,1513
 Collapsed=0
 DockId=0x00000004,0
 
 [Window][###hex.builtin.view.theme_manager.name]
 Pos=787,263
-Size=536,745
+Size=450,751
 Collapsed=0
 
 [Window][###hex.builtin.tools.invariant_multiplication]
@@ -125,9 +125,10 @@ Size=1050,675
 Collapsed=0
 
 [Window][###hex.builtin.view.constants.name]
-Pos=419,-124
-Size=652,660
+Pos=575,66
+Size=418,1513
 Collapsed=0
+DockId=0x00000004,1
 
 [Window][###hex.disassembler.view.disassembler.name]
 Pos=1004,-204
@@ -140,18 +141,18 @@ Size=400,400
 Collapsed=0
 
 [Window][Question]
-Pos=1140,720
-Size=600,180
+Pos=1470,740
+Size=800,480
 Collapsed=0
 
 [Window][Welcome Screen]
-Pos=0,1449
-Size=3740,467
+Pos=0,1194
+Size=2880,392
 Collapsed=0
 
 [Window][##achievement_unlocked]
-Pos=1093,0
-Size=200,55
+Pos=2430,0
+Size=300,82
 Collapsed=0
 
 [Window][hex.builtin.popup.blocking_task.title]
@@ -175,9 +176,8 @@ Size=400,118
 Collapsed=0
 
 [Window][###hex.builtin.view.highlight_rules.name]
-ViewportPos=724,217
-ViewportId=0x31C07F88
-Size=700,400
+Pos=677,540
+Size=1050,600
 Collapsed=0
 
 [Window][SideBarWindow]
@@ -201,7 +201,7 @@ Collapsed=0
 
 [Window][###hex.builtin.view.achievements.name]
 Pos=60,60
-Size=800,600
+Size=1200,900
 Collapsed=0
 
 [Window][hex.builtin.welcome.start.recent.auto_backups]
@@ -231,7 +231,7 @@ Collapsed=0
 
 [Window][Please Wait...]
 Pos=813,455
-Size=600,400
+Size=450,300
 Collapsed=0
 
 [Window][hex.ui.common.question]
@@ -240,20 +240,20 @@ Size=600,180
 Collapsed=0
 
 [Window][###fluxengine.view.config.name]
-Pos=0,88
-Size=701,1818
+Pos=0,66
+Size=572,1513
 Collapsed=0
 DockId=0x0000000B,0
 
 [Window][###fluxengine.view.summary.name]
-Pos=705,1399
-Size=3035,507
+Pos=944,1046
+Size=1936,533
 Collapsed=0
 DockId=0x00000008,0
 
 [Window][Save Layout]
-Pos=1470,830
-Size=800,300
+Pos=1140,697
+Size=600,225
 Collapsed=0
 
 [Window][##hex.builtin.view.hex_editor.menu.file.search]
@@ -491,10 +491,10 @@ Size=3736,64
 Collapsed=0
 
 [Window][###fluxengine.view.image.name]
-Pos=2274,88
-Size=1466,1307
+Pos=944,66
+Size=969,977
 Collapsed=0
-DockId=0x00000012,0
+DockId=0x00000013,0
 
 [Window][##Banner0x7f20d00f0380]
 Pos=2,132
@@ -506,8 +506,754 @@ Pos=2,88
 Size=3736,64
 Collapsed=0
 
+[Window][##Banner0x7fc890008e10]
+Pos=1,66
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f9ae8008e10]
+Pos=1,66
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7faae8008e80]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f0c2c008e80]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f467c008e80]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fcd60008fe0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fbc50008fe0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f4168008fe0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f53ac008fd0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f3068008fc0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f5910008fc0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fa34c008fc0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7ff9e0008fc0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fd4cc008fc0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f72d4008fc0]
+Pos=1,99
+Size=3354,48
+Collapsed=0
+
+[Window][##Banner0x7f0670008fc0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fbf3c008fc0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f7014008fc0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f0bb8008fc0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fc6ac008fc0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f44c4008fc0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f0f04008fc0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fb96c008fc0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f15c0008fc0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f5b8c008fc0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f7b3c008fc0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fb390008fc0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f261c008fc0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f8c6c008fc0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fdc14008fc0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f5860008fc0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fd8f8008fd0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f91d4008fd0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f04b8008fd0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f7988008fd0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7ff364008fd0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f2320008fd0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fb900008fd0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f14f8008fd0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fbf10009030]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fa168009030]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fffc8009030]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f8d00009030]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fc810009060]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f0490009060]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7ff81c009090]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f2e38009090]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f8cb4009090]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7efc680091c0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f86240090d0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f83bc009220]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f38a0009220]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fffc8009220]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Toast_0]
+Pos=2340,1497
+Size=525,108
+Collapsed=0
+
+[Window][##Banner0x7f63ec009220]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Toast_1]
+Pos=2340,1312
+Size=525,108
+Collapsed=0
+
+[Window][##Banner0x7f5590009220]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##hex.builtin.view.hex_editor.menu.edit.set_page_size]
+Pos=575,99
+Size=408,129
+Collapsed=0
+
+[Window][##Banner0x7fc8d8009220]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f03000090f0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f84b8009220]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f66a4009220]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7ff304009220]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7facb8009220]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fbd18009220]
+Pos=1,99
+Size=2835,48
+Collapsed=0
+
+[Window][##Banner0x7f7648009220]
+Pos=1,99
+Size=2798,48
+Collapsed=0
+
+[Window][##Banner0x7f0ccc009220]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f20e4009220]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][Create new Workspace]
+Pos=1140,697
+Size=600,225
+Collapsed=0
+
+[Window][##Banner0x7f4ff00090f0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f1ae0009220]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f8f480090f0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f95500090f0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f3f980090f0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f3b7c0090f0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fe2280090f0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f9d0c009100]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f4b840090f0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f974c0090f0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fd2340090f0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fd18c0090f0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fe5e80090f0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f05e80090f0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f56680090f0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f9b50009100]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f14400090f0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fb2440092a0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f06100092a0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f4c580092a0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f66b80092a0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f43840091e0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f867c0091e0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fed000091e0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f53400092e0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f36b00092e0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f5eb4009310]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fb1e0009300]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f7710009310]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f0348009300]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fe738009300]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f1d6c009300]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f5c80009300]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fc098009300]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f0044009300]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fd0e4009300]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f745c009300]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fd2e0009300]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f7510009300]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f53d0009300]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f7bd4009300]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fbdb8009300]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f981c009300]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f01ac009300]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f023c009300]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f18f8009320]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f4c04009310]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f2054009310]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fc370009320]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f91e8009320]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f7e44009320]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fe8bc009320]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f0d30009320]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f0b78009310]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f169c009310]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f7680009320]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7feda0009320]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f41c4009320]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f0d24009320]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f6554009320]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f27b8009320]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f0adc009320]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f892c009320]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f3338009320]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f8e1c009320]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fc6bc009320]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f43640093e0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f62d40093e0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f208c0093e0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f9e480093e0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f44700093e0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f35700093e0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f8fd80093f0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fa1300093f0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fdeec0093f0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f4dc0009420]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fffc8009420]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f36f0009420]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][###fluxengine.view.physical.name]
+Pos=1916,66
+Size=964,977
+Collapsed=0
+DockId=0x00000014,0
+
+[Window][##Banner0x7f03fc009420]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
 [Table][0x6A4694E4,3]
-RefScale=13
+RefScale=24
 Column 0  Sort=0v
 
 [Table][0x7EE28D79,8]
@@ -543,26 +1289,40 @@ Column 6  Weight=1.0000
 Column 7  Weight=1.0000
 Column 8  Weight=-1.0000
 
+[Table][0xDB02BA59,4]
+Column 0  Weight=1.0000 Sort=0v
+Column 1  Weight=1.0000
+Column 2  Weight=1.0000
+Column 3  Weight=1.0000
+
+[Table][0x86997068,3]
+RefScale=24
+Column 0  Width=21 Sort=0v
+Column 1  Width=87
+Column 2  Weight=1.0000
+
 [Docking][Data]
-DockSpace             ID=0x81A8BB71 Window=0xF9B0A590 Pos=0,88 Size=3740,1818 Split=X
-  DockNode            ID=0x0000000B Parent=0x81A8BB71 SizeRef=701,1818 Selected=0xFCDCA4E7
-  DockNode            ID=0x0000000C Parent=0x81A8BB71 SizeRef=3035,1818 Split=X
-    DockNode          ID=0x0000000D Parent=0x0000000C SizeRef=603,1513 Split=X
-      DockNode        ID=0x00000001 Parent=0x0000000D SizeRef=1370,0 Split=Y
-        DockNode      ID=0x00000005 Parent=0x00000001 SizeRef=0,825 Selected=0x5708C63F
-        DockNode      ID=0x00000006 Parent=0x00000001 SizeRef=0,444 Selected=0x7AD1CDDD
-      DockNode        ID=0x00000002 Parent=0x0000000D SizeRef=1188,0 Split=X
-        DockNode      ID=0x00000003 Parent=0x00000002 SizeRef=12,0
-        DockNode      ID=0x00000004 Parent=0x00000002 SizeRef=52,0 Selected=0xCACA884B
-    DockNode          ID=0x0000000E Parent=0x0000000C SizeRef=3133,1513 Split=Y Selected=0x5708C63F
-      DockNode        ID=0x00000007 Parent=0x0000000E SizeRef=3010,1307 Split=X Selected=0x5708C63F
-        DockNode      ID=0x0000000F Parent=0x00000007 SizeRef=1491,1307 Split=X Selected=0x5708C63F
-          DockNode    ID=0x00000011 Parent=0x0000000F SizeRef=1565,1375 Split=X Selected=0x5708C63F
-            DockNode  ID=0x00000009 Parent=0x00000011 SizeRef=1107,1307 Selected=0x5708C63F
-            DockNode  ID=0x0000000A Parent=0x00000011 SizeRef=454,1307 Selected=0x0CA98265
-          DockNode    ID=0x00000012 Parent=0x0000000F SizeRef=1466,1375 Selected=0xDA2066A8
-        DockNode      ID=0x00000010 Parent=0x00000007 SizeRef=1540,1307 Selected=0xA4C6AD5D
-      DockNode        ID=0x00000008 Parent=0x0000000E SizeRef=3010,507 Selected=0x941F5F91
+DockSpace               ID=0x81A8BB71 Window=0xF9B0A590 Pos=0,66 Size=2880,1513 Split=X
+  DockNode              ID=0x00000009 Parent=0x81A8BB71 SizeRef=941,1513 Selected=0x5708C63F
+  DockNode              ID=0x0000000A Parent=0x81A8BB71 SizeRef=1936,1513 Split=X
+    DockNode            ID=0x0000000B Parent=0x0000000A SizeRef=572,1818 Selected=0xFCDCA4E7
+    DockNode            ID=0x0000000C Parent=0x0000000A SizeRef=2305,1818 Split=X
+      DockNode          ID=0x0000000D Parent=0x0000000C SizeRef=418,1513 Split=X
+        DockNode        ID=0x00000001 Parent=0x0000000D SizeRef=1370,0 Split=Y
+          DockNode      ID=0x00000005 Parent=0x00000001 SizeRef=0,825 Selected=0x516992A4
+          DockNode      ID=0x00000006 Parent=0x00000001 SizeRef=0,444 Selected=0x7AD1CDDD
+        DockNode        ID=0x00000002 Parent=0x0000000D SizeRef=1188,0 Split=X
+          DockNode      ID=0x00000003 Parent=0x00000002 SizeRef=12,0
+          DockNode      ID=0x00000004 Parent=0x00000002 SizeRef=52,0 Selected=0x1F041AD3
+      DockNode          ID=0x0000000E Parent=0x0000000C SizeRef=1884,1513 Split=Y Selected=0x5708C63F
+        DockNode        ID=0x00000007 Parent=0x0000000E SizeRef=3010,977 Split=X Selected=0x5708C63F
+          DockNode      ID=0x0000000F Parent=0x00000007 SizeRef=1491,1307 Split=X Selected=0x5708C63F
+            DockNode    ID=0x00000011 Parent=0x0000000F SizeRef=936,1375 Selected=0x0CA98265
+            DockNode    ID=0x00000012 Parent=0x0000000F SizeRef=945,1375 Split=X Selected=0xDA2066A8
+              DockNode  ID=0x00000013 Parent=0x00000012 SizeRef=969,977 Selected=0xDA2066A8
+              DockNode  ID=0x00000014 Parent=0x00000012 SizeRef=964,977 Selected=0x6D92B9F4
+          DockNode      ID=0x00000010 Parent=0x00000007 SizeRef=1540,1307 Selected=0xA4C6AD5D
+        DockNode        ID=0x00000008 Parent=0x0000000E SizeRef=3010,533 Selected=0x941F5F91
 
 [ImHex][General]
 hex.builtin.tools.demangler=0
@@ -581,10 +1341,10 @@ hex.builtin.tools.invariant_multiplication=0
 hex.builtin.tools.tcp_client_server=0
 hex.builtin.tools.euclidean_algorithm=0
 hex.builtin.tools.http_requests=0
-fluxengine.view.config.name=1
 fluxengine.view.image.name=1
+fluxengine.view.physical.name=1
 fluxengine.view.summary.name=1
-hex.builtin.view.bookmarks.name=1
+hex.builtin.view.bookmarks.name=0
 hex.builtin.view.command_palette.name=0
 hex.builtin.view.constants.name=0
 hex.builtin.view.data_inspector.name=0

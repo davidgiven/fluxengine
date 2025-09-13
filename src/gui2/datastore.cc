@@ -38,8 +38,11 @@ static std::map<CylinderHead, std::shared_ptr<const TrackInfo>>
     physicalCylinderLayouts;
 static std::map<CylinderHeadSector, std::shared_ptr<const Sector>>
     sectorByPhysicalLocation;
+static std::map<LogicalLocation, std::shared_ptr<const Sector>>
+    sectorByLogicalLocation;
 static std::map<LogicalLocation, unsigned> blockByLogicalLocation;
 static Layout::LayoutBounds diskPhysicalBounds;
+static Layout::LayoutBounds diskLogicalBounds;
 
 static void workerThread_cb()
 {
@@ -210,6 +213,11 @@ const Layout::LayoutBounds& Datastore::getDiskPhysicalBounds()
     return diskPhysicalBounds;
 }
 
+const Layout::LayoutBounds& Datastore::getDiskLogicalBounds()
+{
+    return diskLogicalBounds;
+}
+
 std::shared_ptr<const DiskFlux> Datastore::getDiskFlux()
 {
     return diskFlux;
@@ -220,6 +228,15 @@ std::shared_ptr<const Sector> Datastore::findSectorByPhysicalLocation(
 {
     const auto& it = sectorByPhysicalLocation.find(location);
     if (it == sectorByPhysicalLocation.end())
+        return nullptr;
+    return it->second;
+}
+
+std::shared_ptr<const Sector> Datastore::findSectorByLogicalLocation(
+    const LogicalLocation& location)
+{
+    const auto& it = sectorByLogicalLocation.find(location);
+    if (it == sectorByLogicalLocation.end())
         return nullptr;
     return it->second;
 }
@@ -248,14 +265,20 @@ static void badConfiguration()
 static void rebuildDiskFluxIndices()
 {
     sectorByPhysicalLocation.clear();
+    sectorByLogicalLocation.clear();
     blockByLogicalLocation.clear();
     if (diskFlux)
     {
         for (const auto& track : diskFlux->tracks)
             for (const auto& sector : track->sectors)
+            {
                 sectorByPhysicalLocation[{sector->physicalCylinder,
                     sector->physicalHead,
                     sector->logicalSector}] = sector;
+                sectorByLogicalLocation[{sector->logicalCylinder,
+                    sector->logicalHead,
+                    sector->logicalSector}] = sector;
+            }
 
         if (diskFlux->image)
             for (unsigned block = 0; block < diskFlux->image->getBlockCount();
@@ -380,6 +403,8 @@ void Datastore::rebuildConfiguration()
                 {
                     auto locations = Layout::computePhysicalLocations();
                     auto diskPhysicalBounds = Layout::getBounds(locations);
+                    auto diskLogicalBounds =
+                        Layout::getBounds(Layout::computeLogicalLocations());
 
                     decltype(::physicalCylinderLayouts) physicalCylinderLayouts;
                     for (auto& it : locations)
@@ -390,6 +415,7 @@ void Datastore::rebuildConfiguration()
                         [=]
                         {
                             ::diskPhysicalBounds = diskPhysicalBounds;
+                            ::diskLogicalBounds = diskLogicalBounds;
                             ::physicalCylinderLayouts = physicalCylinderLayouts;
                             rebuildDiskFluxIndices();
                             configurationValid = true;

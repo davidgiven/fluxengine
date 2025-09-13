@@ -3,10 +3,11 @@
 #include <hex/ui/view.hpp>
 #include "abstractsectorview.h"
 
-class ImageView : public AbstractSectorView
+class PhysicalView : public AbstractSectorView
 {
 public:
-    ImageView();
+    PhysicalView();
+    ~PhysicalView();
 
     std::shared_ptr<const Sector> getSector(
         unsigned cylinder, unsigned head, unsigned sectorId) override;

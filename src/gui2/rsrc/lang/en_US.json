@@ -25,5 +25,7 @@
     "fluxengine.view.summary.manualDevicePath": "Device path",
     "fluxengine.view.summary.fluxFile": "Flux file",
 
-    "fluxengine.view.image.name": "FluxEngine sector map"
+    "fluxengine.view.image.name": "FluxEngine logical sector map",
+
+    "fluxengine.view.physical.name": "FluxEngine physical sector map"
 }

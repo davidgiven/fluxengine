@@ -330,8 +330,12 @@ plugin(
     name="fluxengine-plugin",
     id="fluxengine",
     srcs=[
+        "./abstractsectorview.cc",
+        "./abstractsectorview.h",
         "./imageview.cc",
         "./imageview.h",
+        "./physicalview.cc",
+        "./physicalview.h",
         "./datastore.cc",
         "./datastore.h",
         "./diskprovider.cc",

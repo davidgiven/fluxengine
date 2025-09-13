@@ -21,7 +21,7 @@ using namespace hex;
 static DynamicSettingFactory settings("fluxengine.settings");
 
 SummaryView::SummaryView():
-    View::Window("fluxengine.view.summary.name", ICON_VS_DEBUG_LINE_BY_LINE)
+    View::Window("fluxengine.view.summary.name", ICON_VS_COMPASS)
 {
 }
 
