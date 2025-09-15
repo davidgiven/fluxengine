@@ -4,7 +4,7 @@
 #include "globals.h"
 #include "utils.h"
 
-int MaybeDisabledButton(
+int maybeDisabledButton(
     const std::string& message, const ImVec2& size, bool isDisabled)
 {
     ImGui::BeginDisabled(isDisabled);

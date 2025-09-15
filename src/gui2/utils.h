@@ -9,7 +9,7 @@ struct ImVec2;
 
 using OptionsMap = std::map<std::string, std::string>;
 
-extern int MaybeDisabledButton(
+extern int maybeDisabledButton(
     const std::string& message, const ImVec2& size, bool isDisabled);
 extern std::string shortenString(const std::string& s, size_t len);
 

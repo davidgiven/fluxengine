@@ -85,6 +85,22 @@ std::vector<CylinderHead> Layout::computePhysicalLocations()
     return locations;
 }
 
+std::vector<CylinderHead> Layout::computeLogicalLocations()
+{
+    if (!globalConfig()->tracks().empty())
+        return parseCylinderHeadsString(globalConfig()->tracks());
+
+    std::set<unsigned> tracks = iterate(0, globalConfig()->layout().tracks());
+    std::set<unsigned> heads = iterate(0, globalConfig()->layout().sides());
+
+    std::vector<CylinderHead> locations;
+    for (unsigned logicalCylinder : tracks)
+        for (unsigned logicalHead : heads)
+            locations.push_back(CylinderHead{logicalCylinder, logicalHead});
+
+    return locations;
+}
+
 Layout::LayoutBounds Layout::getBounds(
     const std::vector<CylinderHead>& locations)
 {
@@ -105,7 +121,9 @@ Layout::LayoutBounds Layout::getBounds(
 }
 
 std::vector<std::pair<int, int>> Layout::getTrackOrdering(
-    LayoutProto::Order ordering, unsigned guessedCylinders, unsigned guessedHeads)
+    LayoutProto::Order ordering,
+    unsigned guessedCylinders,
+    unsigned guessedHeads)
 {
     auto layout = globalConfig()->layout();
     int tracks = layout.has_tracks() ? layout.tracks() : guessedCylinders;
@@ -206,7 +224,8 @@ std::shared_ptr<const TrackInfo> Layout::getLayoutOfTrack(
     for (const auto& f : globalConfig()->layout().layoutdata())
     {
         if (f.has_track() && f.has_up_to_track() &&
-            ((logicalCylinder < f.track()) || (logicalCylinder > f.up_to_track())))
+            ((logicalCylinder < f.track()) ||
+                (logicalCylinder > f.up_to_track())))
             continue;
         if (f.has_track() && !f.has_up_to_track() &&
             (logicalCylinder != f.track()))
@@ -222,7 +241,8 @@ std::shared_ptr<const TrackInfo> Layout::getLayoutOfTrack(
     trackInfo->sectorSize = layoutdata.sector_size();
     trackInfo->logicalCylinder = logicalCylinder;
     trackInfo->logicalHead = logicalHead;
-    trackInfo->physicalCylinder = remapCylinderLogicalToPhysical(logicalCylinder);
+    trackInfo->physicalCylinder =
+        remapCylinderLogicalToPhysical(logicalCylinder);
     trackInfo->physicalHead =
         logicalHead ^ globalConfig()->layout().swap_sides();
     trackInfo->groupSize = getTrackStep();
@@ -290,7 +310,8 @@ int Layout::getHeadWidth()
     }
 }
 
-std::vector<LogicalLocation> Layout::computeFilesystemLogicalOrdering(){
+std::vector<LogicalLocation> Layout::computeFilesystemLogicalOrdering()
+{
     std::vector<LogicalLocation> result;
     auto& layout = globalConfig()->layout();
     if (layout.has_tracks() && layout.has_sides())
@@ -309,8 +330,7 @@ std::vector<LogicalLocation> Layout::computeFilesystemLogicalOrdering(){
                 continue;
 
             for (unsigned sectorId : trackLayout->filesystemSectorOrder)
-                result.push_back(
-                    {track, side, sectorId});
+                result.push_back({track, side, sectorId});
         }
     }
     return result;

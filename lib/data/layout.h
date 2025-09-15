@@ -25,9 +25,10 @@ public:
     static unsigned remapHeadLogicalToPhysical(unsigned logicalHead);
 
     /* Uses the layout and current track and heads settings to determine
-     * which physical tracks are going to be read from or written to.
+     * which physical/logical tracks are going to be read from or written to.
      */
     static std::vector<CylinderHead> computePhysicalLocations();
+    static std::vector<CylinderHead> computeLogicalLocations();
 
     /* Uses the current layout to compute the filesystem's block order, in
      * _logical_ tracks. */

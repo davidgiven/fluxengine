@@ -1,6 +1,7 @@
 #ifndef SECTORINTERFACE_H
 #define SECTORINTERFACE_H
 
+class Image;
 class ImageReader;
 class ImageWriter;
 class Sector;
@@ -35,6 +36,8 @@ public:
     virtual void discardChanges() {}
 
 public:
+    static std::unique_ptr<SectorInterface> createMemorySectorInterface(
+        std::shared_ptr<Image> image);
     static std::unique_ptr<SectorInterface> createImageSectorInterface(
         std::shared_ptr<ImageReader> reader,
         std::shared_ptr<ImageWriter> writer);

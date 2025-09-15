@@ -37,7 +37,11 @@ struct Sector : public LogicalLocation
     Bytes data;
     std::vector<std::shared_ptr<Record>> records;
 
-    Sector(std::shared_ptr<const TrackInfo>& layout, const LogicalLocation& location);
+    Sector(const Sector& other) = default;
+    Sector& operator=(const Sector& other) = default;
+
+    Sector(std::shared_ptr<const TrackInfo>& layout,
+        const LogicalLocation& location);
 
     std::tuple<int, int, int, Status> key() const
     {
@@ -45,19 +49,9 @@ struct Sector : public LogicalLocation
             logicalCylinder, logicalHead, logicalSector, status);
     }
 
-    bool operator==(const Sector& rhs) const
+    std::strong_ordering operator<=>(const Sector& rhs) const
     {
-        return key() == rhs.key();
-    }
-
-    bool operator!=(const Sector& rhs) const
-    {
-        return key() != rhs.key();
-    }
-
-    bool operator<(const Sector& rhs) const
-    {
-        return key() < rhs.key();
+        return key() <=> rhs.key();
     }
 };
 

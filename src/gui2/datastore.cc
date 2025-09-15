@@ -10,10 +10,12 @@
 #include "lib/data/flux.h"
 #include "lib/data/image.h"
 #include "lib/fluxsource/fluxsource.h"
+#include "lib/fluxsink/fluxsink.h"
 #include "lib/decoders/decoders.h"
 #include "lib/imagewriter/imagewriter.h"
 #include "lib/algorithms/readerwriter.h"
 #include "lib/usb/usbfinder.h"
+#include "lib/vfs/vfs.h"
 #include "arch/arch.h"
 #include "globals.h"
 #include "datastore.h"
@@ -33,6 +35,7 @@ static std::thread workerThread;
 static std::atomic<bool> busy;
 
 static bool configurationValid;
+static bool formattingSupported;
 static std::map<std::string, Datastore::Device> devices;
 static std::map<CylinderHead, std::shared_ptr<const TrackInfo>>
     physicalCylinderLayouts;
@@ -197,6 +200,11 @@ bool Datastore::isConfigurationValid()
     return isConfigurationValid;
 }
 
+bool Datastore::canFormat()
+{
+    return formattingSupported;
+}
+
 const std::map<std::string, Datastore::Device>& Datastore::getDevices()
 {
     return devices;
@@ -319,7 +327,6 @@ void Datastore::rebuildConfiguration()
     hex::TaskManager::doLaterOnce(
         []
         {
-            hex::log::debug("FluxEngine configuration stale; rebuilding it");
             configurationValid = false;
 
             /* Reset and apply the format configuration. */
@@ -397,6 +404,30 @@ void Datastore::rebuildConfiguration()
 
             /* Update the UI-thread copy of the bits of configuration we
              * need. */
+
+            formattingSupported = false;
+            Datastore::runOnWorkerThread(
+                []
+                {
+                    bool formattingSupported;
+                    try
+                    {
+                        auto filesystem = Filesystem::createFilesystem(
+                            globalConfig()->filesystem(), nullptr);
+                        uint32_t flags = filesystem->capabilities();
+                        formattingSupported = flags & Filesystem::OP_CREATE;
+                    }
+                    catch (const ErrorException&)
+                    {
+                        formattingSupported = false;
+                    }
+
+                    hex::TaskManager::doLater(
+                        [=]
+                        {
+                            ::formattingSupported = formattingSupported;
+                        });
+                });
 
             Datastore::runOnWorkerThread(
                 []
@@ -537,5 +568,35 @@ void Datastore::writeImage(const std::fs::path& path)
             globalConfig().setImageWriter(path);
             ImageWriter::create(globalConfig())
                 ->writeImage(*Datastore::getDiskFlux()->image);
+        });
+}
+
+void Datastore::writeFluxFile(const std::fs::path& path)
+{
+    busy = true;
+    Datastore::runOnWorkerThread(
+        [=]
+        {
+            ON_SCOPE_EXIT
+            {
+                rebuildConfiguration();
+            };
+            globalConfig().setFluxSink(path);
+            auto fluxSource = FluxSource::createMemoryFluxSource(*diskFlux);
+            auto fluxSink = FluxSink::create(globalConfig());
+            writeRawDiskCommand(*fluxSource, *fluxSink);
+        });
+}
+
+void Datastore::createBlankImage()
+{
+    busy = true;
+    Datastore::runOnWorkerThread(
+        [=]
+        {
+            ON_SCOPE_EXIT
+            {
+                rebuildConfiguration();
+            };
         });
 }

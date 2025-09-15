@@ -24,6 +24,7 @@ public:
 
     static bool isBusy();
     static bool isConfigurationValid();
+    static bool canFormat();
     static void probeDevices();
 
     static const std::map<std::string, Device>& getDevices();
@@ -42,6 +43,8 @@ public:
 
     static void beginRead();
     static void writeImage(const std::fs::path& path);
+    static void writeFluxFile(const std::fs::path& path);
+    static void createBlankImage();
     static void stop();
 
     static std::shared_ptr<const DiskFlux> getDiskFlux();

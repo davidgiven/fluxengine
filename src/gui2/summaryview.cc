@@ -55,6 +55,11 @@ static void saveSectorImage()
     fs::openFileBrowser(fs::DialogMode::Save, {}, Datastore::writeImage);
 }
 
+static void saveFluxFile()
+{
+    fs::openFileBrowser(fs::DialogMode::Save, {}, Datastore::writeFluxFile);
+}
+
 static void showOptions() {}
 
 static void emitOptions(DynamicSetting<std::string>& setting,
@@ -146,7 +151,7 @@ static void emitOptions(DynamicSetting<std::string>& setting,
                 wolv::util::capitalizeString(selectedOption->comment())
                     .c_str());
         else
-            ImGui::TextWrapped("***bad***");
+            ImGui::TextWrapped("***missing default***");
         ImGui::SameLine();
         if (ImGui::BeginCombo(fmt::format("##{}", it.comment()).c_str(),
                 nullptr,
@@ -163,7 +168,8 @@ static void emitOptions(DynamicSetting<std::string>& setting,
                 {
                     if (it.name().empty())
                     {
-                        options.erase(selectedOption->name());
+                        if (selectedOption)
+                            options.erase(selectedOption->name());
                         options[ot.name()] = "true";
                     }
                     else
@@ -523,7 +529,7 @@ void SummaryView::drawContent()
 
                 ImGui::TableNextRow();
                 ImGui::TableNextColumn();
-                if (MaybeDisabledButton(
+                if (maybeDisabledButton(
                         fmt::format(
                             "{} {}", ICON_TA_DEVICE_FLOPPY, "Read disk"),
                         ImVec2(ImGui::GetContentRegionAvail().x, 0),
@@ -531,21 +537,21 @@ void SummaryView::drawContent()
                     Datastore::beginRead();
                 ImGui::TableNextColumn();
                 ImGui::TableNextColumn();
-                MaybeDisabledButton(
+                maybeDisabledButton(
                     fmt::format(
                         "{} {}", ICON_VS_FOLDER_OPENED, "Load sector image"),
                     ImVec2(ImGui::GetContentRegionAvail().x, 0),
                     busy);
                 ImGui::TableNextColumn();
                 ImGui::TableNextColumn();
-                MaybeDisabledButton(
+                maybeDisabledButton(
                     fmt::format("{} {}", ICON_VS_SAVE_AS, "Write disk").c_str(),
                     ImVec2(ImGui::GetContentRegionAvail().x, 0),
                     busy || !hasImage);
 
                 ImGui::TableNextRow();
                 ImGui::TableNextColumn();
-                MaybeDisabledButton(
+                maybeDisabledButton(
                     fmt::format("{} {}", ICON_TA_REPEAT, "Reread bad tracks")
                         .c_str(),
                     ImVec2(ImGui::GetContentRegionAvail().x, 0),
@@ -553,7 +559,7 @@ void SummaryView::drawContent()
                 ImGui::TableNextColumn();
                 ImGui::Text(ICON_VS_ARROW_RIGHT);
                 ImGui::TableNextColumn();
-                if (MaybeDisabledButton(
+                if (maybeDisabledButton(
                         fmt::format(
                             "{} {}", ICON_VS_SAVE_ALL, "Save sector image")
                             .c_str(),
@@ -563,27 +569,30 @@ void SummaryView::drawContent()
                 ImGui::TableNextColumn();
                 ImGui::Text(ICON_VS_ARROW_RIGHT);
                 ImGui::TableNextColumn();
-                MaybeDisabledButton(
-                    fmt::format("{} {}", ICON_TA_DOWNLOAD, "Save flux file")
-                        .c_str(),
-                    ImVec2(ImGui::GetContentRegionAvail().x, 0),
-                    busy || !diskFlux);
+                if (maybeDisabledButton(
+                        fmt::format("{} {}", ICON_TA_DOWNLOAD, "Save flux file")
+                            .c_str(),
+                        ImVec2(ImGui::GetContentRegionAvail().x, 0),
+                        busy || !diskFlux))
+                    saveFluxFile();
 
                 ImGui::TableNextRow();
                 ImGui::TableNextColumn();
-                if (MaybeDisabledButton(
-                        fmt::format("{} {}", ICON_TA_UPLOAD, "Load flux file")
+                if (maybeDisabledButton(
+                        fmt::format("{} {}", ICON_TA_UPLOAD, "Setup flux file")
                             .c_str(),
                         ImVec2(ImGui::GetContentRegionAvail().x, 0),
                         busy))
                     loadFluxFile();
                 ImGui::TableNextColumn();
                 ImGui::TableNextColumn();
-                MaybeDisabledButton(
-                    fmt::format("{} {}", ICON_VS_NEW_FILE, "Create blank image")
-                        .c_str(),
-                    ImVec2(ImGui::GetContentRegionAvail().x, 0),
-                    busy);
+                if (maybeDisabledButton(
+                        fmt::format(
+                            "{} {}", ICON_VS_NEW_FILE, "Create blank image")
+                            .c_str(),
+                        ImVec2(ImGui::GetContentRegionAvail().x, 0),
+                        busy || !Datastore::canFormat()))
+                    Datastore::createBlankImage();
             }
 
             {
@@ -606,7 +615,7 @@ void SummaryView::drawContent()
                     ImGui::PopStyleColor(3);
                 };
 
-                if (MaybeDisabledButton(
+                if (maybeDisabledButton(
                         fmt::format("{} {}",
                             ICON_TA_CANCEL,
                             "fluxengine.summary.controls.stop"_lang),
