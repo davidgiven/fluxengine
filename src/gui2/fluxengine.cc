@@ -7,6 +7,7 @@
 #include "imageview.h"
 #include "physicalview.h"
 #include "summaryview.h"
+#include "configview.h"
 #include "diskprovider.h"
 #include "datastore.h"
 
@@ -25,6 +26,7 @@ IMHEX_PLUGIN_SETUP("FluxEngine", "David Given", "FluxEngine integration")
     hex::ContentRegistry::Views::add<ImageView>();
     hex::ContentRegistry::Views::add<PhysicalView>();
     hex::ContentRegistry::Views::add<SummaryView>();
+    hex::ContentRegistry::Views::add<ConfigView>();
 
     Datastore::init();
 }

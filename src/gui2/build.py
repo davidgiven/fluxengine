@@ -332,6 +332,8 @@ plugin(
     srcs=[
         "./abstractsectorview.cc",
         "./abstractsectorview.h",
+        "./configview.cc",
+        "./configview.h",
         "./datastore.cc",
         "./datastore.h",
         "./diskprovider.cc",

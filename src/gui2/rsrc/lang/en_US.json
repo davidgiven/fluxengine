@@ -27,5 +27,15 @@
 
     "fluxengine.view.image.name": "FluxEngine logical sector map",
 
-    "fluxengine.view.physical.name": "FluxEngine physical sector map"
+    "fluxengine.view.physical.name": "FluxEngine physical sector map",
+
+    "fluxengine.view.config.yes": "yes",
+    "fluxengine.view.config.no": "no",
+    "fluxengine.view.config.format": "Format",
+    "fluxengine.view.config.variations": "Variant",
+    "fluxengine.view.config.manualDevicePath": "Device path",
+    "fluxengine.view.config.fluxFile": "Flux file",
+    "fluxengine.view.config.formatProperties": "Format properties",
+    "fluxengine.view.config.deviceProperties": "Device properties",
+    "fluxengine.view.config.customProperties": "Custom properties"
 }

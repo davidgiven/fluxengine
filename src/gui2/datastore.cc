@@ -331,9 +331,9 @@ void Datastore::rebuildConfiguration()
 
             /* Reset and apply the format configuration. */
 
-            auto formatName = readSetting<std::string>("format.selected", "");
+            auto formatName = readSetting<std::string>("format.selected", "ibm");
             if (formatName.empty())
-                badConfiguration();
+                return;
             Datastore::runOnWorkerThread(
                 [=]
                 {
@@ -346,7 +346,7 @@ void Datastore::rebuildConfiguration()
 
             auto device = readSetting<std::string>("device", "fluxfile");
             if (device.empty())
-                badConfiguration();
+                return;
             if (device == "fluxfile")
             {
                 auto fluxfile =
