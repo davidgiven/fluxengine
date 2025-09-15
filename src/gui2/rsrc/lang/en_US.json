@@ -12,7 +12,7 @@
     "fluxengine.view.config.highDensity": "High density disk",
     "fluxengine.view.config.rescan": "Rescan",
 
-    "fluxengine.view.summary.name":"FluxEngine control panel",
+    "fluxengine.view.summary.name":"FluxEngine status",
     "fluxengine.summary.controls.read": "Read from device",
     "fluxengine.summary.controls.write": "Write to device",
     "fluxengine.summary.controls.stop": "Stop",
@@ -37,5 +37,15 @@
     "fluxengine.view.config.fluxFile": "Flux file",
     "fluxengine.view.config.formatProperties": "Format properties",
     "fluxengine.view.config.deviceProperties": "Device properties",
-    "fluxengine.view.config.customProperties": "Custom properties"
+    "fluxengine.view.config.customProperties": "Custom properties",
+
+    "fluxengine.view.controlpanel.name": "FluxEngine controls",
+    "fluxengine.views.controlpanel.readDevice": "Read from device",
+    "fluxengine.views.controlpanel.writeDevice": "Write to device",
+    "fluxengine.views.controlpanel.readFlux": "Load flux file",
+    "fluxengine.views.controlpanel.writeFlux": "Save flux file",
+    "fluxengine.views.controlpanel.readImage": "Load disk image",
+    "fluxengine.views.controlpanel.writeImage": "Save disk image",
+    "fluxengine.views.controlpanel.rereadBad": "Re-read bad tracks",
+    "fluxengine.views.controlpanel.createBlank": "Create blank disk"
 }

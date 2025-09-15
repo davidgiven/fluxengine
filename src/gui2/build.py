@@ -334,6 +334,8 @@ plugin(
         "./abstractsectorview.h",
         "./configview.cc",
         "./configview.h",
+        "./controlpanelview.cc",
+        "./controlpanelview.h",
         "./datastore.cc",
         "./datastore.h",
         "./diskprovider.cc",
