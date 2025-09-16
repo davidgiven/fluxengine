@@ -122,7 +122,7 @@ void AbstractSectorView::drawContent()
                                 textSize.x / 2,
                             ImGui::GetCursorPosY() + rowHeight / 2 -
                                 textSize.y / 2});
-                    ImGui::Text("%s", text.c_str());
+                    ImGui::Text("{}", text.c_str());
                 }
 
                 for (unsigned sectorId = minSector; sectorId <= maxSector;

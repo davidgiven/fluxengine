@@ -33,6 +33,8 @@ else
 		-Wno-unknown-warning-option
 	CXXFLAGS = \
 		-g -O3 \
+		-Wformat \
+		-Wformat-security \
 		-Wno-deprecated-enum-float-conversion \
 		-Wno-deprecated-enum-enum-conversion
 	LDFLAGS =
