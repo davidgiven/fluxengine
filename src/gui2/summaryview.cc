@@ -39,34 +39,54 @@ static std::optional<std::set<std::shared_ptr<const Sector>>> findSectors(
     return {};
 }
 
-static void loadFluxFile()
+struct TrackAnalysis
 {
-    fs::openFileBrowser(fs::DialogMode::Open,
-        {},
-        [](const auto& path)
-        {
-            settings.get<std::string>("device") = DEVICE_FLUXFILE;
-            settings.get<std::fs::path>("fluxfile") = path;
-        });
-}
+    std::string tooltip;
+    uint32_t colour;
+};
 
-static void saveSectorImage()
+TrackAnalysis analyseTrack(std::shared_ptr<const DiskFlux>& diskFlux,
+    unsigned physicalCylinder,
+    unsigned physicalHead)
 {
-    fs::openFileBrowser(fs::DialogMode::Save, {}, Datastore::writeImage);
-}
+    TrackAnalysis result = {};
+    auto sectors = findSectors(diskFlux, physicalCylinder, physicalHead);
+    result.colour = ImGui::GetColorU32(ImGuiCol_TextDisabled);
+    result.tooltip = "No data";
+    if (sectors.has_value())
+    {
+        unsigned totalSectors = sectors->size();
+        unsigned goodSectors = std::ranges::count_if(*sectors,
+            [](auto& e)
+            {
+                return e->status == Sector::OK;
+            });
+        unsigned badSectors = totalSectors - goodSectors;
 
-static void saveFluxFile()
-{
-    fs::openFileBrowser(fs::DialogMode::Save, {}, Datastore::writeFluxFile);
-}
+        result.colour = ImGuiExt::GetCustomColorU32(
+            ((goodSectors == totalSectors) && goodSectors && totalSectors)
+                ? ImGuiCustomCol_LoggerInfo
+                : ImGuiCustomCol_LoggerError);
 
-static void showOptions() {}
+        result.tooltip = fmt::format(
+            "c{}h{}\n{} sectors read\n{} good "
+            "sectors\n{} bad sectors",
+            physicalCylinder,
+            physicalHead,
+            totalSectors,
+            goodSectors,
+            badSectors);
+    }
+    return result;
+}
 
 void SummaryView::drawContent()
 {
     auto diskFlux = Datastore::getDiskFlux();
     auto [minCylinder, maxCylinder, minHead, maxHead] =
         Datastore::getDiskPhysicalBounds();
+    const auto& physicalCylinderLayouts =
+        Datastore::getPhysicalCylinderLayouts();
     int numCylinders = maxCylinder - minCylinder + 1;
     int numHeads = maxHead - minHead + 1;
 
@@ -90,7 +110,10 @@ void SummaryView::drawContent()
             ImGui::PopStyleColor();
         };
 
-        if (ImGui::BeginTable("diskSummary",
+        ImGuiExt::TextFormattedCenteredHorizontal("Physical map (what the drive sees)");
+
+        auto originalFontSize = ImGui::GetFontSize();
+        if (ImGui::BeginTable("physicalMap",
                 numCylinders + 1,
                 ImGuiTableFlags_NoSavedSettings |
                     ImGuiTableFlags_HighlightHoveredColumn |
@@ -102,7 +125,6 @@ void SummaryView::drawContent()
                 ImGui::EndTable();
             };
 
-            auto originalFontSize = ImGui::GetFontSize();
             ImGui::PushFont(NULL, originalFontSize * 0.6);
             ON_SCOPE_EXIT
             {
@@ -149,24 +171,8 @@ void SummaryView::drawContent()
                 for (unsigned cylinder = minCylinder; cylinder <= maxCylinder;
                     cylinder++)
                 {
-                    auto sectors = findSectors(diskFlux, cylinder, head);
-                    auto colour = ImGui::GetColorU32(ImGuiCol_TextDisabled);
-                    int totalSectors = 0;
-                    int goodSectors = 0;
-                    if (sectors.has_value())
-                    {
-                        totalSectors = sectors->size();
-                        goodSectors = std::ranges::count_if(*sectors,
-                            [](auto& e)
-                            {
-                                return e->status == Sector::OK;
-                            });
-                        colour = ImGuiExt::GetCustomColorU32(
-                            ((goodSectors == totalSectors) && totalSectors)
-                                ? ImGuiCustomCol_LoggerInfo
-                                : ImGuiCustomCol_LoggerError);
-                    }
-
+                    auto [tooltip, colour] =
+                        analyseTrack(diskFlux, cylinder, head);
                     ImGui::PushStyleColor(ImGuiCol_Header, colour);
                     ON_SCOPE_EXIT
                     {
@@ -187,17 +193,140 @@ void SummaryView::drawContent()
                     {
                         ImGui::PopFont();
                     };
-                    ImGui::SetItemTooltip(
-                        totalSectors
-                            ? fmt::format("c{}h{}\n{} sectors read\n{} good "
-                                          "sectors\n{} bad sectors",
-                                  cylinder,
-                                  head,
-                                  totalSectors,
-                                  goodSectors,
-                                  totalSectors - goodSectors)
-                                  .c_str()
-                            : "No data");
+                    ImGui::SetItemTooltip(tooltip.c_str());
+                }
+            }
+        }
+
+        ImGuiExt::TextFormattedCenteredHorizontal("Logical map (what the disk image sees)");
+
+        if (ImGui::BeginTable("logicalMap",
+                numCylinders + 1,
+                ImGuiTableFlags_NoSavedSettings |
+                    ImGuiTableFlags_HighlightHoveredColumn |
+                    ImGuiTableFlags_NoClip | ImGuiTableFlags_NoPadInnerX |
+                    ImGuiTableFlags_NoPadOuterX | ImGuiTableFlags_Borders))
+        {
+            ON_SCOPE_EXIT
+            {
+                ImGui::EndTable();
+            };
+
+            ImGui::PushFont(NULL, originalFontSize * 0.6);
+            ON_SCOPE_EXIT
+            {
+                ImGui::PopFont();
+            };
+
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, {0, 0});
+            ON_SCOPE_EXIT
+            {
+                ImGui::PopStyleVar();
+            };
+
+            float rowHeight = originalFontSize * 0.6 * 2.0;
+            ImGui::TableSetupColumn(
+                "", ImGuiTableColumnFlags_WidthFixed, originalFontSize);
+
+            for (unsigned physicalHead = minHead; physicalHead <= maxHead;
+                physicalHead++)
+            {
+                ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
+                ImGui::TableNextColumn();
+
+                /* Grotty code to find the first track on this head, so we can
+                 * get the layout. */
+
+                std::shared_ptr<const TrackInfo> sampleTrackInfo = nullptr;
+                for (auto& [physicalLocation, trackInfo] :
+                    physicalCylinderLayouts)
+                    if (physicalLocation.head == physicalHead)
+                    {
+                        sampleTrackInfo = trackInfo;
+                        break;
+                    }
+
+                if (sampleTrackInfo)
+                {
+                    auto text =
+                        fmt::format("h{}", sampleTrackInfo->logicalHead);
+                    auto textSize = ImGui::CalcTextSize(text.c_str());
+                    ImGui::SetCursorPos(
+                        {ImGui::GetCursorPosX() + ImGui::GetColumnWidth() / 2 -
+                                textSize.x / 2,
+                            ImGui::GetCursorPosY() + rowHeight / 2 -
+                                textSize.y / 2});
+                    ImGui::Text("%s", text.c_str());
+
+                    for (unsigned physicalCylinder = minCylinder;
+                        physicalCylinder <= maxCylinder;
+                        physicalCylinder++)
+                    {
+                        ImGui::TableNextColumn();
+
+                        auto it = physicalCylinderLayouts.find(
+                            {physicalCylinder, physicalHead});
+                        if (it != physicalCylinderLayouts.end())
+                        {
+                            auto [tooltip, colour] = analyseTrack(
+                                diskFlux, physicalCylinder, physicalHead);
+
+                            ImGui::PushStyleColor(ImGuiCol_Header, colour);
+                            ON_SCOPE_EXIT
+                            {
+                                ImGui::PopStyleColor();
+                            };
+
+                            auto& trackInfo = it->second;
+                            float width = ImGui::GetContentRegionAvail().x *
+                                              trackInfo->groupSize +
+                                          ImGui::GetStyle().CellPadding.x *
+                                              (trackInfo->groupSize - 1);
+                            if (ImGui::Selectable(
+                                    fmt::format("##logical_c{}h{}",
+                                        trackInfo->logicalCylinder,
+                                        trackInfo->logicalHead)
+                                        .c_str(),
+                                    true,
+                                    ImGuiSelectableFlags_None,
+                                    {width, rowHeight}))
+                                Events::SeekToTrackViaPhysicalLocation::post(
+                                    CylinderHead{trackInfo->physicalCylinder,
+                                        trackInfo->physicalHead});
+
+                            ImGui::PushFont(NULL, originalFontSize);
+                            ON_SCOPE_EXIT
+                            {
+                                ImGui::PopFont();
+                            };
+                            ImGui::SetItemTooltip(tooltip.c_str());
+                        }
+                    }
+                }
+            }
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            for (unsigned physicalCylinder = minCylinder;
+                physicalCylinder <= maxCylinder;
+                physicalCylinder++)
+            {
+                ImGui::TableNextColumn();
+
+                for (auto& [physicalLocation, trackInfo] :
+                    physicalCylinderLayouts)
+                {
+                    if (trackInfo->physicalCylinder == physicalCylinder)
+                    {
+                        auto text =
+                            fmt::format("c{}", trackInfo->logicalCylinder);
+                        ImGui::SetCursorPosX(
+                            ImGui::GetCursorPosX() +
+                            ImGui::GetColumnWidth() / 2 -
+                            ImGui::CalcTextSize(text.c_str()).x / 2);
+                        ImGui::Text("%s", text.c_str());
+                        break;
+                    }
                 }
             }
         }
