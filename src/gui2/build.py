@@ -16,7 +16,6 @@ cflags = [
     # "-DDEBUG",
 ]
 
-package(name="mbedtls_lib", package="mbedtls")
 package(name="dbus_lib", package="dbus-1")
 package(name="freetype2_lib", package="freetype2")
 package(name="libcurl_lib", package="libcurl")
@@ -187,7 +186,6 @@ cxxlibrary(
         ".+hacks",
         ".+libxdgpp",
         ".+libmicrotar",
-        ".+mbedtls_lib",
         ".+libcurl_lib",
         ".+glfw3_lib",
         ".+magic_lib",
