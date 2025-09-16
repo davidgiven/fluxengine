@@ -29,7 +29,7 @@ public:
 
     static const std::map<std::string, Device>& getDevices();
     static const std::map<CylinderHead, std::shared_ptr<const TrackInfo>>&
-    getphysicalCylinderLayouts();
+    getPhysicalCylinderLayouts();
     static std::shared_ptr<const Sector> findSectorByPhysicalLocation(
         const CylinderHeadSector& location);
     static std::shared_ptr<const Sector> findSectorByLogicalLocation(

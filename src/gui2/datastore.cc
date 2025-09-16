@@ -177,8 +177,8 @@ void Datastore::init()
                 unsigned firstSector = layout->filesystemSectorOrder.front();
                 unsigned startOffset =
                     diskFlux->image->findApproximateOffsetByPhysicalLocation(
-                        {layout->logicalCylinder,
-                            layout->logicalHead,
+                        {layout->physicalCylinder,
+                            layout->physicalHead,
                             firstSector});
                 unsigned trackSize =
                     layout->sectorSize * layout->filesystemSectorOrder.size();
@@ -211,7 +211,7 @@ const std::map<std::string, Datastore::Device>& Datastore::getDevices()
 }
 
 const std::map<CylinderHead, std::shared_ptr<const TrackInfo>>&
-Datastore::getphysicalCylinderLayouts()
+Datastore::getPhysicalCylinderLayouts()
 {
     return physicalCylinderLayouts;
 }
