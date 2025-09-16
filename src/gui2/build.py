@@ -86,7 +86,7 @@ cxxlibrary(
     )
     | {
         "imgui_freetype.h": "dep/imhex/lib/third_party/imgui/imgui/include/misc/freetype/imgui_freetype.h",
-        "imconfig.h": "./imhex/imconfig.h",
+        "imconfig.h": "./imhex_overrides/imconfig.h",
     },
     deps=[".+freetype2_lib",".+lunasvg"],
 )
@@ -140,7 +140,7 @@ cxxlibrary(
     deps=[".+libthrowingptr", ".+libwolv"],
 )
 
-cxxlibrary(name="hacks", srcs=[], hdrs={"jthread.hpp": "./imhex/jthread.hpp"})
+cxxlibrary(name="hacks", srcs=[], hdrs={"jthread.hpp": "./imhex_overrides/jthread.hpp"})
 
 clibrary(
     name="libmicrotar",
@@ -159,7 +159,7 @@ cxxlibrary(
             "dep/imhex/lib/libimhex/source/subcommands/subcommands.cpp",
             "dep/imhex/lib/libimhex/source/helpers/crypto.cpp",
             "dep/imhex/lib/libimhex/source/helpers/debugging.cpp",
-            "./imhex/default_paths.cpp",
+            "./imhex_overrides/default_paths.cpp",
             "dep/imhex/lib/libimhex/source/helpers/fs.cpp",
             "dep/imhex/lib/libimhex/source/helpers/http_requests.cpp",
             "dep/imhex/lib/libimhex/source/helpers/http_requests_native.cpp",
@@ -279,7 +279,7 @@ plugin(
             "dep/imhex/plugins/ui/source/ui/visualizer_drawer.cpp",
             "dep/imhex/plugins/ui/source/ui/widgets.cpp",
             "dep/imhex/plugins/ui/source/library_ui.cpp",
-            "./imhex/menu_items.cpp",
+            "./imhex_overrides/menu_items.cpp",
         ]
     ),
     hdrs=headers_from("dep/imhex/plugins/ui/include"),
@@ -297,7 +297,7 @@ plugin(
             "dep/imhex/plugins/builtin/source/content/out_of_box_experience.cpp",
         ],
     )
-    + ["./welcome.cc"],
+    + ["./imhex_overrides/welcome.cc"],
     hdrs=headers_from("dep/imhex/plugins/builtin/include"),
     romfsdir="dep/imhex/plugins/builtin/romfs",
     deps=[
