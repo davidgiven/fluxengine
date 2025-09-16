@@ -32,7 +32,7 @@ def headers_from(path):
 
 
 def sources_from(path, except_for=[]):
-    srcs = [join(path, f) for f in glob("**/*.c*", root_dir=path, recursive=True)]
+    srcs = [join(path, f) for f in glob("**/*.[ch]*", root_dir=path, recursive=True)]
     srcs = [f for f in srcs if f not in except_for]
     assert srcs, f"path {path} contained no sources"
     return srcs
@@ -48,6 +48,19 @@ cxxlibrary(
         "nfd.h": "dep/native-file-dialog/src/include/nfd.h",
     },
     deps=[".+dbus_lib"],
+)
+
+clibrary(
+    name="plutovg",
+    srcs=sources_from("dep/lunasvg/plutovg/source"),
+    hdrs=headers_from("dep/lunasvg/plutovg/include")
+)
+
+cxxlibrary(
+    name="lunasvg",
+    srcs=sources_from("dep/lunasvg/source"),
+    hdrs=headers_from("dep/lunasvg/include"),
+    deps=[".+plutovg"]
 )
 
 cxxlibrary(
@@ -75,7 +88,7 @@ cxxlibrary(
         "imgui_freetype.h": "dep/imhex/lib/third_party/imgui/imgui/include/misc/freetype/imgui_freetype.h",
         "imconfig.h": "./imhex/imconfig.h",
     },
-    deps=[".+freetype2_lib"],
+    deps=[".+freetype2_lib",".+lunasvg"],
 )
 
 cxxlibrary(name="libxdgpp", srcs=[], hdrs={"xdg.hpp": "dep/xdgpp/xdg.hpp"})
@@ -165,8 +178,7 @@ cxxlibrary(
         ]
     ),
     hdrs=headers_from("dep/imhex/lib/libimhex/include"),
-    cflags=cflags + ["-I/usr/include/lunasvg"],
-    caller_ldflags=["-llunasvg"],
+    cflags=cflags,
     deps=[
         ".+libwolv",
         ".+imgui",
