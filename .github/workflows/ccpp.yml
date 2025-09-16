@@ -21,7 +21,7 @@ jobs:
         path: 'fluxengine-testdata'
     - name: apt
       run: |
-        sudo apt install libudev-dev libsqlite3-dev protobuf-compiler libwxgtk3.0-gtk3-dev libfmt-dev libprotobuf-dev libmagic-dev libmbedtls-dev libmagic-dev nlohmann-json3-dev libdbus-1-dev
+        sudo apt install libudev-dev libsqlite3-dev protobuf-compiler libwxgtk3.0-gtk3-dev libfmt-dev libprotobuf-dev libmagic-dev libmbedtls-dev libcurl4-nss-dev libmagic-dev nlohmann-json3-dev libdbus-1-dev
     - name: make
       run: CXXFLAGS="-Wp,-D_GLIBCXX_ASSERTIONS" make -j`nproc` -C fluxengine
 
