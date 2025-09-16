@@ -13,12 +13,12 @@ cflags = [
     "-DIMHEX_STATIC_LINK_PLUGINS",
     '-DIMHEX_VERSION=\\"0.0.0\\"',
     "-DIMHEX_PLUGIN_FEATURES_CONTENT={}",
-    "-DDEBUG",
+    # "-DDEBUG",
 ]
 
+package(name="mbedtls_lib", package="mbedtls")
 package(name="dbus_lib", package="dbus-1")
 package(name="freetype2_lib", package="freetype2")
-package(name="mbedcrypto_lib", package="mbedcrypto")
 package(name="libcurl_lib", package="libcurl")
 package(name="glfw3_lib", package="glfw3")
 package(name="md4c_lib", package="md4c")
@@ -187,7 +187,7 @@ cxxlibrary(
         ".+hacks",
         ".+libxdgpp",
         ".+libmicrotar",
-        ".+mbedcrypto_lib",
+        ".+mbedtls_lib",
         ".+libcurl_lib",
         ".+glfw3_lib",
         ".+magic_lib",
@@ -391,7 +391,7 @@ cxxprogram(
         "./main.cc",
     ],
     cflags=cflags,
-    ldflags=["-ldl"],
+    ldflags=["-ldl", "-lmbedcrypto"],
     deps=[
         ".+libpl",
         "+fmt_lib",
