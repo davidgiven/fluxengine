@@ -60,7 +60,7 @@ struct fmt::formatter<Sector::Status> : formatter<string_view>
 {
     auto format(Sector::Status status, format_context& ctx) const
     {
-        return format_to(ctx.out(), "{}", Sector::statusToString(status));
+        return fmt::format_to(ctx.out(), "{}", Sector::statusToString(status));
     }
 };
 
