@@ -151,13 +151,17 @@ cxxlibrary(
     name="libimhex",
     srcs=(
         sources_from("dep/imhex/lib/libimhex/source/ui")
-        + sources_from("dep/imhex/lib/libimhex/source/api")
+        + sources_from(
+            "dep/imhex/lib/libimhex/source/api",
+            except_for=["dep/imhex/lib/libimhex/source/api/achievement_manager.cpp"],
+        )
         + sources_from("dep/imhex/lib/libimhex/source/data_processor")
         + sources_from("dep/imhex/lib/libimhex/source/providers")
         + [
             "dep/imhex/lib/libimhex/source/subcommands/subcommands.cpp",
             "dep/imhex/lib/libimhex/source/helpers/crypto.cpp",
             "dep/imhex/lib/libimhex/source/helpers/debugging.cpp",
+            "./imhex_overrides/achievement_manager.cpp",
             "./imhex_overrides/default_paths.cpp",
             "dep/imhex/lib/libimhex/source/helpers/fs.cpp",
             "dep/imhex/lib/libimhex/source/helpers/http_requests.cpp",
@@ -291,11 +295,25 @@ plugin(
     srcs=sources_from(
         "dep/imhex/plugins/builtin/source",
         except_for=[
+            "dep/imhex/plugins/builtin/source/content/views/view_achievements.cpp",
+            "dep/imhex/plugins/builtin/source/content/achievements.cpp",
+            "dep/imhex/plugins/builtin/source/content/main_menu_items.cpp",
             "dep/imhex/plugins/builtin/source/content/welcome_screen.cpp",
             "dep/imhex/plugins/builtin/source/content/out_of_box_experience.cpp",
-        ],
+            "dep/imhex/plugins/builtin/source/content/views.cpp",
+            "dep/imhex/plugins/builtin/source/content/views/view_data_processor.cpp",
+            "dep/imhex/plugins/builtin/source/content/views/view_tutorials.cpp",
+            "dep/imhex/plugins/builtin/source/content/data_processor_nodes.cpp",
+        ]
+        + glob("dep/imhex/plugins/builtin/source/content/data_processor_nodes/*")
+        + glob("dep/imhex/plugins/builtin/source/content/tutorials/*"),
     )
-    + ["./imhex_overrides/welcome.cc"],
+    + [
+        "./imhex_overrides/welcome.cc",
+        "./imhex_overrides/stubs.cc",
+        "./imhex_overrides/views.cpp",
+        "./imhex_overrides/main_menu_items.cpp",
+    ],
     hdrs=headers_from("dep/imhex/plugins/builtin/include"),
     romfsdir="dep/imhex/plugins/builtin/romfs",
     deps=[
