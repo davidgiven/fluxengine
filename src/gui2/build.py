@@ -315,7 +315,7 @@ plugin(
         "dep/imhex/main/gui/source/init/run/cli.cpp",
         "dep/imhex/main/gui/source/init/run/common.cpp",
         "dep/imhex/main/gui/source/init/run/desktop.cpp",
-        "dep/imhex/main/gui/source/init/splash_window.cpp",
+        "./imhex_overrides/splash_window.cpp",
         "dep/imhex/main/gui/source/init/tasks.cpp",
         "dep/imhex/main/gui/include/crash_handlers.hpp",
         "dep/imhex/main/gui/include/messaging.hpp",
@@ -328,7 +328,7 @@ plugin(
         "dep/imhex/main/gui/source/window/window.cpp",
     ],
     hdrs=headers_from("dep/imhex/main/gui/include"),
-    romfsdir="dep/imhex/main/gui/romfs",
+    romfsdir="src/gui2/imhex_overrides/rsrc",
     deps=[
         ".+libtrace",
         ".+libimhex",
