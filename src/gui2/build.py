@@ -129,8 +129,7 @@ cxxlibrary(
 
 cxxlibrary(
     name="libpl",
-    srcs=sources_from("dep/pattern-language/lib/source")
-    + sources_from("dep/pattern-language/cli/source"),
+    srcs=sources_from("dep/pattern-language/lib/source"),
     hdrs=(
         headers_from("dep/pattern-language/lib/include")
         | headers_from("dep/pattern-language/generators/include")

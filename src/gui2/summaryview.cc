@@ -193,7 +193,7 @@ void SummaryView::drawContent()
                     {
                         ImGui::PopFont();
                     };
-                    ImGui::SetItemTooltip(tooltip.c_str());
+                    ImGui::SetItemTooltip("%s", tooltip.c_str());
                 }
             }
         }
@@ -299,7 +299,7 @@ void SummaryView::drawContent()
                             {
                                 ImGui::PopFont();
                             };
-                            ImGui::SetItemTooltip(tooltip.c_str());
+                            ImGui::SetItemTooltip("%s", tooltip.c_str());
                         }
                     }
                 }

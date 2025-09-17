@@ -122,7 +122,7 @@ void AbstractSectorView::drawContent()
                                 textSize.x / 2,
                             ImGui::GetCursorPosY() + rowHeight / 2 -
                                 textSize.y / 2});
-                    ImGui::Text("{}", text.c_str());
+                    ImGui::Text("%s", text.c_str());
                 }
 
                 for (unsigned sectorId = minSector; sectorId <= maxSector;
@@ -172,7 +172,7 @@ void AbstractSectorView::drawContent()
                         {
                             ImGui::PopFont();
                         };
-                        ImGui::SetItemTooltip(
+                        ImGui::SetItemTooltip("%s",
                             fmt::format("Physical: c{}h{}s{}\n"
                                         "Logical: c{}h{}s{}\n"
                                         "Size: {} bytes\n"
