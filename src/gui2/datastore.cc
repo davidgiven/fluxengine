@@ -197,7 +197,7 @@ bool Datastore::isBusy()
 
 bool Datastore::isConfigurationValid()
 {
-    return isConfigurationValid;
+    return configurationValid; 
 }
 
 bool Datastore::canFormat()

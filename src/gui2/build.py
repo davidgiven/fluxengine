@@ -6,15 +6,21 @@ from glob import glob
 from functools import reduce
 import operator
 from os.path import *
+import config
 
 cflags = [
     '-DIMHEX_PROJECT_NAME=\\"fluxengine\\"',
-    "-DOS_LINUX",
     "-DIMHEX_STATIC_LINK_PLUGINS",
     '-DIMHEX_VERSION=\\"0.0.0\\"',
     "-DIMHEX_PLUGIN_FEATURES_CONTENT={}",
     # "-DDEBUG",
 ]
+if config.osx:
+    cflags = cflags + ["-DOS_MACOS"]
+elif config.windows:
+    cflags = cflags + ["-DOS_WINDOWS"]
+else:
+    cflags = cflags + ["-DOS_LINUX"]
 
 package(name="dbus_lib", package="dbus-1")
 package(name="freetype2_lib", package="freetype2")
@@ -22,6 +28,7 @@ package(name="libcurl_lib", package="libcurl")
 package(name="glfw3_lib", package="glfw3")
 package(name="md4c_lib", package="md4c")
 package(name="magic_lib", package="libmagic")
+package(name="nlohmannjson_lib", package="nlohmann_json")
 
 
 def headers_from(path):
@@ -37,17 +44,34 @@ def sources_from(path, except_for=[]):
     return srcs
 
 
-cxxlibrary(
-    name="libnfd",
-    srcs=[
-        "dep/native-file-dialog/src/nfd_portal.cpp",
-    ],
-    hdrs={
-        "nfd.hpp": "dep/native-file-dialog/src/include/nfd.hpp",
-        "nfd.h": "dep/native-file-dialog/src/include/nfd.h",
-    },
-    deps=[".+dbus_lib"],
-)
+if config.osx:
+    clibrary(
+        name="libnfd",
+        srcs=["dep/native-file-dialog/src/nfd_cocoa.m"],
+        hdrs={
+            "nfd.hpp": "dep/native-file-dialog/src/include/nfd.hpp",
+            "nfd.h": "dep/native-file-dialog/src/include/nfd.h",
+        },
+    )
+elif config.windows:
+    cxxlibrary(
+        name="libnfd",
+        srcs=(["dep/native-file-dialog/src/nfd_win.cpp"]),
+        hdrs={
+            "nfd.hpp": "dep/native-file-dialog/src/include/nfd.hpp",
+            "nfd.h": "dep/native-file-dialog/src/include/nfd.h",
+        },
+    )
+else:
+    cxxlibrary(
+        name="libnfd",
+        srcs=(["dep/native-file-dialog/src/nfd_portal.cpp"]),
+        hdrs={
+            "nfd.hpp": "dep/native-file-dialog/src/include/nfd.hpp",
+            "nfd.h": "dep/native-file-dialog/src/include/nfd.h",
+        },
+        deps=[".+dbus_lib"],
+    )
 
 clibrary(
     name="plutovg",
@@ -102,6 +126,29 @@ cxxprogram(
     deps=["+fmt_lib"],
 )
 
+if config.osx:
+    clibrary(
+        name="libwolv-io-fs",
+        srcs=[
+            "dep/libwolv/libs/io/source/io/fs_macos.m",
+        ],
+        cflags=cflags,
+    )
+elif config.windows:
+    cxxlibrary(
+        name="libwolv-io-fs",
+        srcs=["dep/libwolv/libs/io/source/io/file_win.cpp"],
+        hdrs=headers_from("dep/libwolv/libs/io/include"),
+        cflags=cflags,
+    )
+else:
+    cxxlibrary(
+        name="libwolv-io-fs",
+        srcs=["dep/libwolv/libs/io/source/io/file_unix.cpp"],
+        hdrs=headers_from("dep/libwolv/libs/io/include"),
+        cflags=cflags,
+    )
+
 wolv_modules = ["types", "io", "utils", "containers", "hash", "math_eval", "net"]
 cxxlibrary(
     name="libwolv",
@@ -111,8 +158,8 @@ cxxlibrary(
             "dep/libwolv/libs/io/source/io/file_unix.cpp",
             "dep/libwolv/libs/io/source/io/fs.cpp",
             "dep/libwolv/libs/io/source/io/handle.cpp",
-            "dep/libwolv/libs/utils/source/utils/string.cpp",
             "dep/libwolv/libs/math_eval/source/math_eval/math_evaluator.cpp",
+            "dep/libwolv/libs/utils/source/utils/string.cpp",
         ]
         + sources_from("dep/libwolv/libs/net/source")
     ),
@@ -121,6 +168,8 @@ cxxlibrary(
         [headers_from(f"dep/libwolv/libs/{d}/include") for d in wolv_modules],
     )
     | {"types/uintwide_t.h": "dep/libwolv/libs/types/include/wolv/types/uintwide_t.h"},
+    deps=[".+libwolv-io-fs"],
+    cflags=cflags
 )
 
 cxxlibrary(
@@ -146,6 +195,24 @@ clibrary(
     srcs=sources_from("dep/imhex/lib/third_party/microtar/source"),
     hdrs=headers_from("dep/imhex/lib/third_party/microtar/include"),
 )
+
+if config.osx:
+    clibrary(
+        name="libimhex-utils",
+        srcs=[
+            "dep/imhex/lib/libimhex/source/helpers/utils_macos.m",
+            "dep/imhex/lib/libimhex/source/helpers/macos_menu.m",
+        ],
+        hdrs=headers_from("dep/imhex/lib/libimhex/include"),
+        cflags=cflags,
+    )
+elif config.unix:
+    cxxlibrary(
+        name="libimhex-utils",
+        srcs=["dep/imhex/lib/libimhex/source/helpers/utils_linux.cpp"],
+        hdrs=headers_from("dep/imhex/lib/libimhex/include"),
+        cflags=cflags,
+    )
 
 cxxlibrary(
     name="libimhex",
@@ -173,12 +240,11 @@ cxxlibrary(
             "dep/imhex/lib/libimhex/source/helpers/scaling.cpp",
             "dep/imhex/lib/libimhex/source/helpers/semantic_version.cpp",
             "dep/imhex/lib/libimhex/source/helpers/utils.cpp",
-            "dep/imhex/lib/libimhex/source/helpers/utils_linux.cpp",
             "dep/imhex/lib/libimhex/source/helpers/patches.cpp",
             "dep/imhex/lib/libimhex/source/helpers/keys.cpp",
             "dep/imhex/lib/libimhex/source/helpers/tar.cpp",
             "dep/imhex/lib/libimhex/source/helpers/udp_server.cpp",
-        ]
+        ],
     ),
     hdrs=headers_from("dep/imhex/lib/libimhex/include"),
     cflags=cflags,
@@ -187,12 +253,13 @@ cxxlibrary(
         ".+imgui",
         ".+libpl",
         ".+libnfd",
-        ".+hacks",
         ".+libxdgpp",
         ".+libmicrotar",
+        ".+libimhex-utils",
         ".+libcurl_lib",
         ".+glfw3_lib",
         ".+magic_lib",
+        ".+hacks",
     ],
 )
 
@@ -330,21 +397,34 @@ plugin(
     name="gui-plugin",
     id="gui",
     srcs=[
-        "dep/imhex/main/gui/source/init/run/cli.cpp",
-        "dep/imhex/main/gui/source/init/run/common.cpp",
-        "dep/imhex/main/gui/source/init/run/desktop.cpp",
         "./imhex_overrides/splash_window.cpp",
-        "dep/imhex/main/gui/source/init/tasks.cpp",
         "dep/imhex/main/gui/include/crash_handlers.hpp",
         "dep/imhex/main/gui/include/messaging.hpp",
         "dep/imhex/main/gui/include/window.hpp",
         "dep/imhex/main/gui/source/crash_handlers.cpp",
+        "dep/imhex/main/gui/source/init/run/cli.cpp",
+        "dep/imhex/main/gui/source/init/run/common.cpp",
+        "dep/imhex/main/gui/source/init/run/desktop.cpp",
+        "dep/imhex/main/gui/source/init/tasks.cpp",
         "dep/imhex/main/gui/source/main.cpp",
         "dep/imhex/main/gui/source/messaging/common.cpp",
-        "dep/imhex/main/gui/source/messaging/linux.cpp",
-        "dep/imhex/main/gui/source/window/platform/linux.cpp",
         "dep/imhex/main/gui/source/window/window.cpp",
-    ],
+    ]
+    + (
+        [
+            "dep/imhex/main/gui/source/window/platform/macos.cpp",
+            "dep/imhex/main/gui/source/messaging/macos.cpp",
+        ]
+        if config.osx
+        else (
+            ["dep/imhex/main/gui/source/window/platform/windows.cpp"]
+            if config.windows
+            else [
+                "dep/imhex/main/gui/source/window/platform/linux.cpp",
+                "dep/imhex/main/gui/source/messaging/linux.cpp",
+            ]
+        )
+    ),
     hdrs=headers_from("dep/imhex/main/gui/include"),
     romfsdir="src/gui2/imhex_overrides/rsrc",
     deps=[
@@ -411,7 +491,6 @@ cxxprogram(
     deps=[
         ".+libpl",
         "+fmt_lib",
-        ".+hacks",
         ".+builtin-plugin",
         ".+fonts-plugin",
         ".+ui-plugin",

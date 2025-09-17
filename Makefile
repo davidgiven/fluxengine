@@ -11,12 +11,13 @@ export BUILDTYPE
 ifeq ($(BUILDTYPE),windows)
 	MINGW = i686-w64-mingw32-
 	CC = $(MINGW)gcc
-	CXX = $(MINGW)g++ -std=c++20
+	CXX = $(MINGW)g++
 	CFLAGS += -g -O3 \
 		-Wno-unknown-warning-option \
 		-ffunction-sections \
 		-fdata-sections
 	CXXFLAGS += \
+		-std=c++23 \
 		-fext-numeric-literals \
 		-Wno-deprecated-enum-float-conversion \
 		-Wno-deprecated-enum-enum-conversion
@@ -28,11 +29,13 @@ ifeq ($(BUILDTYPE),windows)
 	EXT = .exe
 else
 	CC = gcc
-	CXX = g++ -std=c++23
+	CXX = g++
 	CFLAGS = -g -O3 \
 		-Wno-unknown-warning-option
 	CXXFLAGS = \
+		-std=c++23 \
 		-g -O3 \
+		-fexperimental-library \
 		-Wformat \
 		-Wformat-security \
 		-Wno-deprecated-enum-float-conversion \
@@ -83,7 +86,9 @@ endif
 ifeq ($(shell uname),Darwin)
 	LDFLAGS += \
 		-framework IOKit \
-		-framework Foundation 
+		-framework AppKit  \
+		-framework UniformTypeIdentifiers \
+		-framework UserNotifications
 endif
 
 .PHONY: all

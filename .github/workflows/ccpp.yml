@@ -64,7 +64,7 @@ jobs:
         path: 'fluxengine-testdata'
     - name: brew
       run: |
-        brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg
+        brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg libmagic nlohmann-json cli11 boost
     - name: make
       run: gmake -C fluxengine
     - name: Upload build artifacts
