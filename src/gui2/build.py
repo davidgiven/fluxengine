@@ -52,14 +52,14 @@ cxxlibrary(
 clibrary(
     name="plutovg",
     srcs=sources_from("dep/lunasvg/plutovg/source"),
-    hdrs=headers_from("dep/lunasvg/plutovg/include")
+    hdrs=headers_from("dep/lunasvg/plutovg/include"),
 )
 
 cxxlibrary(
     name="lunasvg",
     srcs=sources_from("dep/lunasvg/source"),
     hdrs=headers_from("dep/lunasvg/include"),
-    deps=[".+plutovg"]
+    deps=[".+plutovg"],
 )
 
 cxxlibrary(
@@ -87,7 +87,7 @@ cxxlibrary(
         "imgui_freetype.h": "dep/imhex/lib/third_party/imgui/imgui/include/misc/freetype/imgui_freetype.h",
         "imconfig.h": "./imhex_overrides/imconfig.h",
     },
-    deps=[".+freetype2_lib",".+lunasvg"],
+    deps=[".+freetype2_lib", ".+lunasvg"],
 )
 
 cxxlibrary(name="libxdgpp", srcs=[], hdrs={"xdg.hpp": "dep/xdgpp/xdg.hpp"})
@@ -129,7 +129,8 @@ cxxlibrary(
 
 cxxlibrary(
     name="libpl",
-    srcs=sources_from("dep/pattern-language/lib/source"),
+    srcs=sources_from("dep/pattern-language/lib/source")
+    + sources_from("dep/pattern-language/cli/source"),
     hdrs=(
         headers_from("dep/pattern-language/lib/include")
         | headers_from("dep/pattern-language/generators/include")
