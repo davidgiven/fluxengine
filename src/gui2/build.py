@@ -144,8 +144,7 @@ elif config.windows:
 else:
     cxxlibrary(
         name="libwolv-io-fs",
-        srcs=["dep/libwolv/libs/io/source/io/file_unix.cpp"],
-        hdrs=headers_from("dep/libwolv/libs/io/include"),
+        srcs=[],
         cflags=cflags,
     )
 
@@ -169,7 +168,7 @@ cxxlibrary(
     )
     | {"types/uintwide_t.h": "dep/libwolv/libs/types/include/wolv/types/uintwide_t.h"},
     deps=[".+libwolv-io-fs"],
-    cflags=cflags
+    cflags=cflags,
 )
 
 cxxlibrary(
@@ -212,6 +211,7 @@ elif config.unix:
         srcs=["dep/imhex/lib/libimhex/source/helpers/utils_linux.cpp"],
         hdrs=headers_from("dep/imhex/lib/libimhex/include"),
         cflags=cflags,
+        deps=[".+libwolv"],
     )
 
 cxxlibrary(

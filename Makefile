@@ -28,8 +28,8 @@ ifeq ($(BUILDTYPE),windows)
 	WX_CONFIG = /usr/i686-w64-mingw32/sys-root/mingw/bin/wx-config-3.0 --static=yes
 	EXT = .exe
 else
-	CC = gcc
-	CXX = g++
+	CC = clang
+	CXX = clang++
 	CFLAGS = -g -O3 \
 		-Wno-unknown-warning-option
 	CXXFLAGS = \

@@ -148,7 +148,7 @@ void ImageWriter::printMap(const Image& image)
                             break;
 
                         default:
-                            std::cout << '?';
+                            std::cout << (int)sector->status;
                             break;
                     }
                 }
