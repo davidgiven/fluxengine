@@ -22,7 +22,6 @@ elif config.windows:
 else:
     cflags = cflags + ["-DOS_LINUX"]
 
-package(name="dbus_lib", package="dbus-1")
 package(name="freetype2_lib", package="freetype2")
 package(name="libcurl_lib", package="libcurl")
 package(name="glfw3_lib", package="glfw3")
@@ -63,6 +62,7 @@ elif config.windows:
         },
     )
 else:
+    package(name="dbus_lib", package="dbus-1")
     cxxlibrary(
         name="libnfd",
         srcs=(["dep/native-file-dialog/src/nfd_portal.cpp"]),
