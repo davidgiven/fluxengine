@@ -12,7 +12,7 @@ cflags = [
     '-DIMHEX_PROJECT_NAME=\\"fluxengine\\"',
     "-DIMHEX_STATIC_LINK_PLUGINS",
     '-DIMHEX_VERSION=\\"0.0.0\\"',
-    "-DIMHEX_PLUGIN_FEATURES_CONTENT={}",
+    '-DLUNASVG_BUILD_STATIC',
     # "-DDEBUG",
 ]
 if config.osx:
@@ -320,6 +320,7 @@ def plugin(name, id, srcs, hdrs, romfsdir, deps):
         + [
             f"-DIMHEX_PLUGIN_NAME={id}",
             f"-DLIBROMFS_PROJECT_NAME={id}",
+            f"-DIMHEX_PLUGIN_FEATURES_CONTENT=",
             f"-Dromfs=romfs_{id}",
         ],
         deps=deps,
