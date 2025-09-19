@@ -1,7 +1,6 @@
 from build.c import cxxprogram, cxxlibrary, simplerule, clibrary
-from build.ab import targetof, Rule, Target
+from build.ab import simplerule
 from build.pkg import package
-from build.utils import filenamesmatchingof
 from glob import glob
 from functools import reduce
 import operator
@@ -12,7 +11,7 @@ cflags = [
     '-DIMHEX_PROJECT_NAME=\\"fluxengine\\"',
     "-DIMHEX_STATIC_LINK_PLUGINS",
     '-DIMHEX_VERSION=\\"0.0.0\\"',
-    '-DLUNASVG_BUILD_STATIC',
+    "-DLUNASVG_BUILD_STATIC",
     # "-DDEBUG",
 ]
 if config.osx:
@@ -22,12 +21,24 @@ elif config.windows:
 else:
     cflags = cflags + ["-DOS_LINUX"]
 
-package(name="freetype2_lib", package="freetype2")
-package(name="libcurl_lib", package="libcurl")
-package(name="glfw3_lib", package="glfw3")
-package(name="md4c_lib", package="md4c")
-package(name="magic_lib", package="libmagic")
-package(name="nlohmannjson_lib", package="nlohmann_json")
+r = simplerule(
+    name="glfw-windows-fallback",
+    ins=[],
+    outs=[
+        "=glfw-3.4.bin.WIN32/include/GLFW/glfw3.h",
+        "=glfw-3.4.bin.WIN32/include/GLFW/glfw3native.h",
+        "=glfw-3.4.bin.WIN32/lib-mingw-w64/libglfw3.a",
+    ],
+    commands=[
+        "curl -Ls https://github.com/glfw/glfw/releases/download/3.4/glfw-3.4.bin.WIN32.zip -o $[dir]/glfw.zip",
+        "cd $[dir] && unzip -DD -o -q glfw.zip",
+    ],
+    label="CURLLIBRARY",
+    traits={"clibrary", "cheaders"},
+)
+r.args["caller_cflags"] = [f"-I{r.dir}/glfw-3.4.bin.WIN32/include"]
+r.args["cheader_files"] = [r]
+r.args["cheader_deps"] = [r]
 
 
 def headers_from(path):
@@ -42,6 +53,32 @@ def sources_from(path, except_for=[]):
     assert srcs, f"path {path} contained no sources"
     return srcs
 
+
+package(name="freetype2_lib", package="freetype2")
+package(name="libcurl_lib", package="libcurl")
+package(name="glfw3_lib", package="glfw3", fallback=".+glfw-windows-fallback")
+
+cxxlibrary(
+    name="nlohmannjson_lib",
+    srcs=[],
+    hdrs=headers_from("dep/nlohmann_json/single_include"),
+)
+
+clibrary(
+    name="magic_lib",
+    srcs=sources_from(
+        "dep/file/src", except_for=["dep/file/src/file.c", "dep/file/src/seccomp.c"]
+    ),
+    hdrs={"magic.h": "dep/file/src/magic.h.in"},
+)
+
+clibrary(
+    name="md4c_lib",
+    srcs=sources_from("dep/md4c/src"),
+    hdrs={"md4c.h": "dep/md4c/src/md4c.h"},
+)
+
+cxxlibrary(name="cli11_lib", srcs=[], hdrs=headers_from("dep/cli11/include"))
 
 if config.osx:
     clibrary(
@@ -83,7 +120,7 @@ cxxlibrary(
     name="lunasvg",
     srcs=sources_from("dep/lunasvg/source"),
     hdrs=headers_from("dep/lunasvg/include"),
-    deps=[".+plutovg"],
+    deps=[".+plutovg", "+fmt_lib"],
 )
 
 cxxlibrary(
@@ -111,7 +148,7 @@ cxxlibrary(
         "imgui_freetype.h": "dep/imhex/lib/third_party/imgui/imgui/include/misc/freetype/imgui_freetype.h",
         "imconfig.h": "./imhex_overrides/imconfig.h",
     },
-    deps=[".+freetype2_lib", ".+lunasvg"],
+    deps=[".+freetype2_lib", ".+lunasvg", ".+glfw3_lib"],
 )
 
 cxxlibrary(name="libxdgpp", srcs=[], hdrs={"xdg.hpp": "dep/xdgpp/xdg.hpp"})
@@ -138,7 +175,11 @@ elif config.windows:
     cxxlibrary(
         name="libwolv-io-fs",
         srcs=["dep/libwolv/libs/io/source/io/file_win.cpp"],
-        hdrs=headers_from("dep/libwolv/libs/io/include"),
+        hdrs=(
+            headers_from("dep/libwolv/libs/io/include")
+            | headers_from("dep/libwolv/libs/types/include")
+            | headers_from("dep/libwolv/libs/utils/include")
+        ),
         cflags=cflags,
     )
 else:
@@ -154,13 +195,17 @@ cxxlibrary(
     srcs=(
         [
             "dep/libwolv/libs/io/source/io/file.cpp",
-            "dep/libwolv/libs/io/source/io/file_unix.cpp",
             "dep/libwolv/libs/io/source/io/fs.cpp",
             "dep/libwolv/libs/io/source/io/handle.cpp",
             "dep/libwolv/libs/math_eval/source/math_eval/math_evaluator.cpp",
             "dep/libwolv/libs/utils/source/utils/string.cpp",
         ]
         + sources_from("dep/libwolv/libs/net/source")
+        + (
+            ["dep/libwolv/libs/io/source/io/file_unix.cpp"]
+            if config.osx or config.unix
+            else []
+        )
     ),
     hdrs=reduce(
         operator.ior,
@@ -184,7 +229,13 @@ cxxlibrary(
         | headers_from("dep/pattern-language/generators/include")
         | headers_from("dep/pattern-language/cli/include")
     ),
-    deps=[".+libthrowingptr", ".+libwolv"],
+    deps=[
+        ".+libthrowingptr",
+        ".+libwolv",
+        "+fmt_lib",
+        ".+cli11_lib",
+        ".+nlohmannjson_lib",
+    ],
 )
 
 cxxlibrary(name="hacks", srcs=[], hdrs={"jthread.hpp": "./imhex_overrides/jthread.hpp"})
@@ -205,6 +256,8 @@ if config.osx:
         hdrs=headers_from("dep/imhex/lib/libimhex/include"),
         cflags=cflags,
     )
+elif config.windows:
+    cxxlibrary(name="libimhex-utils", srcs=[])
 elif config.unix:
     cxxlibrary(
         name="libimhex-utils",

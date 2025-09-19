@@ -13,14 +13,16 @@ ifeq ($(BUILDTYPE),windows)
 	CC = $(MINGW)gcc
 	CXX = $(MINGW)g++
 	CFLAGS += -g -O3 \
-		-Wno-unknown-warning-option \
 		-ffunction-sections \
-		-fdata-sections
+		-fdata-sections \
+		-Wno-attributes
 	CXXFLAGS += \
 		-std=c++23 \
 		-fext-numeric-literals \
 		-Wno-deprecated-enum-float-conversion \
-		-Wno-deprecated-enum-enum-conversion
+		-Wno-deprecated-enum-enum-conversion \
+		-U__GXX_TYPEINFO_EQUALITY_INLINE \
+		-D__GXX_TYPEINFO_EQUALITY_INLINE 
 	LDFLAGS += -static -Wl,--gc-sections
 	AR = $(MINGW)ar
 	PKG_CONFIG = $(MINGW)pkg-config -static
