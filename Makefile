@@ -15,13 +15,15 @@ ifeq ($(BUILDTYPE),windows)
 	CFLAGS += -g -O3 \
 		-ffunction-sections \
 		-fdata-sections \
-		-Wno-attributes
+		-Wno-attributes \
+		-fPIC
 	CXXFLAGS += \
 		-std=c++23 \
 		-Wno-deprecated-enum-float-conversion \
 		-Wno-deprecated-enum-enum-conversion \
 		-U__GXX_TYPEINFO_EQUALITY_INLINE \
-		-D__GXX_TYPEINFO_EQUALITY_INLINE 
+		-D__GXX_TYPEINFO_EQUALITY_INLINE \
+		-fPIC
 	#LDFLAGS += -Wl,--gc-sections
 	AR = $(MINGW)gcc-ar
 	PKG_CONFIG = $(MINGW)pkg-config --static
