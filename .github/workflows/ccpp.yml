@@ -101,7 +101,7 @@ jobs:
     - name: dependencies
       run: |
         set -x
-        pacman -S --needed --noconfirm pactoys
+        pacman -S --needed --noconfirm pactoys make
         pacboy -S --needed --noconfirm protobuf:p pkg-config:p curl-winssl:p file:p glfw:p gcc:p mbedtls:p
 
     - name: run
