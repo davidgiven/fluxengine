@@ -94,11 +94,6 @@ jobs:
         repository: 'davidgiven/fluxengine-testdata'
         path: 'fluxengine-testdata'
 
-    - uses: actions/checkout@v4
-      with:
-        repository: 'abseil/abseil-cpp'
-        path: 'abseil'
-
     - uses: msys2/setup-msys2@v2
       with:
         msystem: mingw64
@@ -109,9 +104,6 @@ jobs:
         pacman -S --needed --noconfirm pactoys make python diffutils ninja
         pacboy -S --needed --noconfirm protobuf:p pkg-config:p curl-winssl:p file:p glfw:p mbedtls:p sqlite:p freetype:p boost:p gcc:p binutils:p
 
-    - name: abseil
-      run: |
-        cd abseil && mkdir build && cd build && 
     - name: run
       run: |
         make -C fluxengine BUILDTYPE=windows
