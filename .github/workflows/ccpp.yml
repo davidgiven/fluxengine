@@ -102,7 +102,7 @@ jobs:
       run: |
         set -x
         pacman -S --needed --noconfirm pactoys make python diffutils ninja
-        pacboy -S --needed --noconfirm protobuf:p pkg-config:p curl-winssl:p file:p glfw:p gcc:p mbedtls:p
+        pacboy -S --needed --noconfirm protobuf:p pkg-config:p curl-winssl:p file:p glfw:p gcc:p mbedtls:p sqlite:p
 
     - name: run
       run: |
