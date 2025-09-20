@@ -16,14 +16,14 @@ ifeq ($(BUILDTYPE),windows)
 		-ffunction-sections \
 		-fdata-sections \
 		-Wno-attributes \
-		-fPIC
+		--mcmodel=medium
 	CXXFLAGS += \
 		-std=c++23 \
 		-Wno-deprecated-enum-float-conversion \
 		-Wno-deprecated-enum-enum-conversion \
 		-U__GXX_TYPEINFO_EQUALITY_INLINE \
 		-D__GXX_TYPEINFO_EQUALITY_INLINE \
-		-fPIC
+		--mcmodel=medium
 	#LDFLAGS += -Wl,--gc-sections
 	AR = $(MINGW)gcc-ar
 	PKG_CONFIG = $(MINGW)pkg-config --static
