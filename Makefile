@@ -10,8 +10,8 @@ export BUILDTYPE
 
 ifeq ($(BUILDTYPE),windows)
 	MINGW = x86_64-w64-mingw32-
-	CC = $(MINGW)clang
-	CXX = $(MINGW)clang++
+	CC = /mingw64/bin/clang
+	CXX = /mingw64/bin/clang++
 	CFLAGS += -g -O3 \
 		-ffunction-sections \
 		-fdata-sections \
