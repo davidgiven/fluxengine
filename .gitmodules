@@ -7,8 +7,7 @@
 [submodule "dep/imgui"]
 	path = dep/imgui
 	url = https://github.com/ocornut/imgui.git
-	branch = docking
-[submodule "pattern-language"]
+[submodule "dep/pattern-language"]
 	path = dep/pattern-language
 	url = https://github.com/WerWolv/PatternLanguage.git
 [submodule "dep/native-file-dialog"]
@@ -17,7 +16,7 @@
 [submodule "dep/xdgpp"]
 	path = dep/xdgpp
 	url = https://github.com/WerWolv/xdgpp.git
-[submodule "dep/romfs"]
+[submodule "dep/libromfs"]
 	path = dep/libromfs
 	url = https://github.com/WerWolv/libromfs.git
 [submodule "dep/throwing_ptr"]
@@ -26,9 +25,6 @@
 [submodule "dep/lunasvg"]
 	path = dep/lunasvg
 	url = https://github.com/sammycage/lunasvg.git
-[submodule "dep/file"]
-	path = dep/file
-	url = https://github.com/file/file
 [submodule "dep/md4c"]
 	path = dep/md4c
 	url = https://github.com/mity/md4c
