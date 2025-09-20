@@ -22,6 +22,9 @@ static unsigned getTrackStep()
 
                 case DRIVETYPE_APPLE2:
                     return 4;
+
+                default:
+                    error("bad drive_type {}", (int)drive_type);
             }
 
         case FORMATTYPE_80TRACK:
@@ -41,7 +44,13 @@ static unsigned getTrackStep()
                         "you can't read/write an 80 track image from/to an "
                         "Apple II "
                         "drive");
+
+                default:
+                    error("bad drive_type {}", (int)drive_type);
             }
+
+        default:
+            error("bad format_type {}", (int)drive_type);
     }
 
     return 1;

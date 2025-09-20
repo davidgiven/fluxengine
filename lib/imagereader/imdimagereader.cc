@@ -200,7 +200,7 @@ public:
             headerPtr++;
             sectorSize = getSectorSize(header.SectorSize);
 
-            unsigned optionalsector_map[header.numSectors];
+            std::vector<unsigned> optionalsector_map(header.numSectors);
             // The Sector Cylinder Map has one entry for each sector, and
             // contains the logical Cylinder ID for the corresponding sector in
             // the Sector Numbering Map.
@@ -224,7 +224,7 @@ public:
             // The Sector Head Map has one entry for each sector, and contains
             // the logical Head ID for the corresponding sector in the Sector
             // Numbering Map.
-            unsigned optionalhead_map[header.numSectors];
+            std::vector<unsigned> optionalhead_map(header.numSectors);
             if (header.Head & SEC_HEAD_MAP_FLAG)
             {
                 // Read optional sector head map
