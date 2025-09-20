@@ -18,7 +18,6 @@ ifeq ($(BUILDTYPE),windows)
 		-Wno-attributes
 	CXXFLAGS += \
 		-std=c++23 \
-		-fext-numeric-literals \
 		-Wno-deprecated-enum-float-conversion \
 		-Wno-deprecated-enum-enum-conversion \
 		-U__GXX_TYPEINFO_EQUALITY_INLINE \
