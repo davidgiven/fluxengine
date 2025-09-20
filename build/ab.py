@@ -55,6 +55,7 @@ class Environment(types.SimpleNamespace):
 
 
 G = Environment()
+G.setdefault("AB_NO_SANDBOX", "")
 
 
 class PathFinderImpl(PathFinder):
@@ -558,19 +559,23 @@ def emit_rule(self, ins, outs, cmds=[], label=None):
         os.makedirs(self.dir, exist_ok=True)
         rule = []
 
-        sandbox = join(self.dir, "sandbox")
-        emit(f"rm -rf {sandbox}", into=rule)
-        emit(
-            f"{G.PYTHON} build/_sandbox.py --link -s", sandbox, *fins, into=rule
-        )
-        for c in cmds:
-            emit(f"(cd {sandbox} &&", c, ")", into=rule)
-        emit(
-            f"{G.PYTHON} build/_sandbox.py --export -s",
-            sandbox,
-            *fouts,
-            into=rule,
-        )
+        if G.AB_NO_SANDBOX:
+            sandbox = join(self.dir, "sandbox")
+            emit(f"rm -rf {sandbox}", into=rule)
+            emit(
+                f"{G.PYTHON} build/_sandbox.py --link -s", sandbox, *fins, into=rule
+            )
+            for c in cmds:
+                emit(f"(cd {sandbox} &&", c, ")", into=rule)
+            emit(
+                f"{G.PYTHON} build/_sandbox.py --export -s",
+                sandbox,
+                *fouts,
+                into=rule,
+            )
+        else:
+            for c in cmds:
+                emit(c, into=rule)
 
         ruletext = "".join(rule)
         if len(ruletext) > 7000:
