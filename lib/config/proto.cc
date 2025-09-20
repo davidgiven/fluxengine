@@ -123,14 +123,7 @@ static ProtoField resolveProtoPath(
                 item,
                 index));
 
-        if (field->is_optional() || field->is_required())
-        {
-            if (!create && !reflection->HasField(*message, field))
-                throw ProtoPathNotFoundException(fmt::format(
-                    "could not find config field '{}'", field->name()));
-            message = reflection->MutableMessage(message, field);
-        }
-        else if (field->is_repeated())
+        if (field->is_repeated())
         {
             if (index == -1)
                 throw ProtoPathNotFoundException(fmt::format(
@@ -141,7 +134,12 @@ static ProtoField resolveProtoPath(
             message = reflection->MutableRepeatedMessage(message, field, index);
         }
         else
-            error("bad proto label for field '{}' in '{}'", item, path);
+        {
+            if (!create && !reflection->HasField(*message, field))
+                throw ProtoPathNotFoundException(fmt::format(
+                    "could not find config field '{}'", field->name()));
+            message = reflection->MutableMessage(message, field);
+        }
 
         descriptor = message->GetDescriptor();
     }
