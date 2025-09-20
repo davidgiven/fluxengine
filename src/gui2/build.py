@@ -12,6 +12,8 @@ cflags = [
     "-DIMHEX_STATIC_LINK_PLUGINS",
     '-DIMHEX_VERSION=\\"0.0.0\\"',
     "-DLUNASVG_BUILD_STATIC",
+    "-DPLUTOVG_BUILD_STATIC",
+    "-DUNICODE",
     # "-DDEBUG",
 ]
 if config.osx:
@@ -21,34 +23,19 @@ elif config.windows:
 else:
     cflags = cflags + ["-DOS_LINUX"]
 
-r = simplerule(
-    name="glfw-windows-fallback",
-    ins=[],
-    outs=[
-        "=glfw-3.4.bin.WIN32/include/GLFW/glfw3.h",
-        "=glfw-3.4.bin.WIN32/include/GLFW/glfw3native.h",
-        "=glfw-3.4.bin.WIN32/lib-mingw-w64/libglfw3.a",
-    ],
-    commands=[
-        "curl -Ls https://github.com/glfw/glfw/releases/download/3.4/glfw-3.4.bin.WIN32.zip -o $[dir]/glfw.zip",
-        "cd $[dir] && unzip -DD -o -q glfw.zip",
-    ],
-    label="CURLLIBRARY",
-    traits={"clibrary", "cheaders"},
-)
-r.args["caller_cflags"] = [f"-I{r.dir}/glfw-3.4.bin.WIN32/include"]
-r.args["cheader_files"] = [r]
-r.args["cheader_deps"] = [r]
-
 
 def headers_from(path):
-    hdrs = {k: f"{path}/{k}" for k in glob("**/*.h*", root_dir=path, recursive=True)}
+    hdrs = {
+        k: f"{path}/{k}" for k in glob("**/*.h*", root_dir=path, recursive=True)
+    }
     assert hdrs, f"path {path} contained no headers"
     return hdrs
 
 
 def sources_from(path, except_for=[]):
-    srcs = [join(path, f) for f in glob("**/*.[ch]*", root_dir=path, recursive=True)]
+    srcs = [
+        join(path, f) for f in glob("**/*.[ch]*", root_dir=path, recursive=True)
+    ]
     srcs = [f for f in srcs if f not in except_for]
     assert srcs, f"path {path} contained no sources"
     return srcs
@@ -56,20 +43,13 @@ def sources_from(path, except_for=[]):
 
 package(name="freetype2_lib", package="freetype2")
 package(name="libcurl_lib", package="libcurl")
-package(name="glfw3_lib", package="glfw3", fallback=".+glfw-windows-fallback")
+package(name="glfw3_lib", package="glfw3")
+package(name="magic_lib", package="libmagic")
 
 cxxlibrary(
     name="nlohmannjson_lib",
     srcs=[],
     hdrs=headers_from("dep/nlohmann_json/single_include"),
-)
-
-clibrary(
-    name="magic_lib",
-    srcs=sources_from(
-        "dep/file/src", except_for=["dep/file/src/file.c", "dep/file/src/seccomp.c"]
-    ),
-    hdrs={"magic.h": "dep/file/src/magic.h.in"},
 )
 
 clibrary(
@@ -114,6 +94,7 @@ clibrary(
     name="plutovg",
     srcs=sources_from("dep/lunasvg/plutovg/source"),
     hdrs=headers_from("dep/lunasvg/plutovg/include"),
+    cflags=cflags,
 )
 
 cxxlibrary(
@@ -121,6 +102,7 @@ cxxlibrary(
     srcs=sources_from("dep/lunasvg/source"),
     hdrs=headers_from("dep/lunasvg/include"),
     deps=[".+plutovg", "+fmt_lib"],
+    cflags=cflags,
 )
 
 cxxlibrary(
@@ -189,7 +171,15 @@ else:
         cflags=cflags,
     )
 
-wolv_modules = ["types", "io", "utils", "containers", "hash", "math_eval", "net"]
+wolv_modules = [
+    "types",
+    "io",
+    "utils",
+    "containers",
+    "hash",
+    "math_eval",
+    "net",
+]
 cxxlibrary(
     name="libwolv",
     srcs=(
@@ -211,13 +201,17 @@ cxxlibrary(
         operator.ior,
         [headers_from(f"dep/libwolv/libs/{d}/include") for d in wolv_modules],
     )
-    | {"types/uintwide_t.h": "dep/libwolv/libs/types/include/wolv/types/uintwide_t.h"},
+    | {
+        "types/uintwide_t.h": "dep/libwolv/libs/types/include/wolv/types/uintwide_t.h"
+    },
     deps=[".+libwolv-io-fs"],
     cflags=cflags,
 )
 
 cxxlibrary(
-    name="libthrowingptr", srcs=[], hdrs=headers_from("dep/throwing_ptr/include")
+    name="libthrowingptr",
+    srcs=[],
+    hdrs=headers_from("dep/throwing_ptr/include"),
 )
 
 cxxlibrary(
@@ -238,7 +232,9 @@ cxxlibrary(
     ],
 )
 
-cxxlibrary(name="hacks", srcs=[], hdrs={"jthread.hpp": "./imhex_overrides/jthread.hpp"})
+cxxlibrary(
+    name="hacks", srcs=[], hdrs={"jthread.hpp": "./imhex_overrides/jthread.hpp"}
+)
 
 clibrary(
     name="libmicrotar",
@@ -273,7 +269,9 @@ cxxlibrary(
         sources_from("dep/imhex/lib/libimhex/source/ui")
         + sources_from(
             "dep/imhex/lib/libimhex/source/api",
-            except_for=["dep/imhex/lib/libimhex/source/api/achievement_manager.cpp"],
+            except_for=[
+                "dep/imhex/lib/libimhex/source/api/achievement_manager.cpp"
+            ],
         )
         + sources_from("dep/imhex/lib/libimhex/source/data_processor")
         + sources_from("dep/imhex/lib/libimhex/source/providers")
@@ -426,7 +424,9 @@ plugin(
             "dep/imhex/plugins/builtin/source/content/views/view_tutorials.cpp",
             "dep/imhex/plugins/builtin/source/content/data_processor_nodes.cpp",
         ]
-        + glob("dep/imhex/plugins/builtin/source/content/data_processor_nodes/*")
+        + glob(
+            "dep/imhex/plugins/builtin/source/content/data_processor_nodes/*"
+        )
         + glob("dep/imhex/plugins/builtin/source/content/tutorials/*"),
     )
     + [
@@ -471,7 +471,10 @@ plugin(
         ]
         if config.osx
         else (
-            ["dep/imhex/main/gui/source/window/platform/windows.cpp"]
+            [
+                "dep/imhex/main/gui/source/window/platform/windows.cpp",
+                "dep/imhex/main/gui/source/messaging/windows.cpp",
+            ]
             if config.windows
             else [
                 "dep/imhex/main/gui/source/window/platform/linux.cpp",
@@ -541,7 +544,9 @@ cxxprogram(
         "./main.cc",
     ],
     cflags=cflags,
-    ldflags=["-ldl", "-lmbedcrypto"],
+    ldflags=["-lmbedcrypto"]
+    + (["-ldl"] if config.unix else [])
+    + (["-ldwmapi", "-lnetapi32"] if config.windows else []),
     deps=[
         ".+libpl",
         "+fmt_lib",

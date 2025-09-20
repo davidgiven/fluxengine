@@ -78,38 +78,35 @@ jobs:
 
   build-windows:
     runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
 
     steps:
-    - name: setup WSL
-      run: |
-        curl -L https://github.com/WhitewaterFoundry/Fedora-Remix-for-WSL/releases/download/41.0.0/Fedora-Remix-for-WSL-SL_41.0.0.0_x64_arm64.msixbundle -o fedora.msixbundle
-        unzip fedora.msixbundle Fedora-Remix-for-WSL-SL_41.0.0.0_x64.msix
-        unzip Fedora-Remix-for-WSL-SL_41.0.0.0_x64.msix install.tar.gz
-        wsl --update
-        wsl --set-default-version 1
-        wsl --import fedora fedora install.tar.gz
-        wsl --set-default fedora
-        wsl sh -c 'dnf -y install https://github.com/rpmsphere/noarch/raw/master/r/rpmsphere-release-40-1.noarch.rpm'
-        wsl sh -c 'dnf -y install gcc gcc-c++ protobuf-c-compiler protobuf-devel fmt-devel systemd-devel sqlite-devel wxGTK-devel mingw32-gcc mingw32-gcc-c++ mingw32-zlib-static mingw32-protobuf-static mingw32-sqlite-static mingw32-wxWidgets3-static mingw32-libpng-static mingw32-libjpeg-static mingw32-libtiff-static mingw32-nsis png2ico ninja-build mingw32-freetype mingw32-curl-static mingw32-boost-static'
-
-    - name: fix line endings
-      run: |
-        git config --global core.autocrlf false
-        git config --global core.eol lf
-        
     - uses: actions/checkout@v4
       with:
         repository: 'davidgiven/fluxengine'
         path: 'fluxengine'
+        submodules: 'true'
 
     - uses: actions/checkout@v4
       with:
         repository: 'davidgiven/fluxengine-testdata'
         path: 'fluxengine-testdata'
 
+    - uses: msys2/setup-msys2@v2
+      with:
+        msystem: mingw64
+
+    - name: dependencies
+      run: |
+        set -x
+        pacman -S --needed --noconfirm pactoys
+        pacboy -S --needed --noconfirm protobuf:p pkg-config:p curl-winssl:p file:p glfw:p gcc:p mbedtls:p
+
     - name: run
       run: |
-        wsl sh -c 'make -C fluxengine BUILDTYPE=windows -j$(nproc)'
+        wsl sh -c 'make -C fluxengine BUILDTYPE=windows'
 
     - name: nsis
       run: |

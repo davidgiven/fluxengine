@@ -9,7 +9,7 @@ endif
 export BUILDTYPE
 
 ifeq ($(BUILDTYPE),windows)
-	MINGW = i686-w64-mingw32-
+	MINGW = x86_64-w64-mingw32-
 	CC = $(MINGW)gcc
 	CXX = $(MINGW)g++
 	CFLAGS += -g -O3 \
@@ -23,12 +23,15 @@ ifeq ($(BUILDTYPE),windows)
 		-Wno-deprecated-enum-enum-conversion \
 		-U__GXX_TYPEINFO_EQUALITY_INLINE \
 		-D__GXX_TYPEINFO_EQUALITY_INLINE 
-	LDFLAGS += -static -Wl,--gc-sections
-	AR = $(MINGW)ar
-	PKG_CONFIG = $(MINGW)pkg-config -static
+	#LDFLAGS += -Wl,--gc-sections
+	AR = $(MINGW)gcc-ar
+	PKG_CONFIG = $(MINGW)pkg-config --static
 	WINDRES = $(MINGW)windres
 	WX_CONFIG = /usr/i686-w64-mingw32/sys-root/mingw/bin/wx-config-3.0 --static=yes
+	PROTOC_SEPARATOR = ;
 	EXT = .exe
+
+	AB_NO_SANDBOX = yes
 else
 	CC = clang
 	CXX = clang++
@@ -64,24 +67,24 @@ BINDIR ?= $(PREFIX)/bin
 
 # Special Windows settings.
 
-ifeq ($(OS), Windows_NT)
-	EXT ?= .exe
-	MINGWBIN = /mingw32/bin
-	CCPREFIX = $(MINGWBIN)/
-	PKG_CONFIG = $(MINGWBIN)/pkg-config
-	WX_CONFIG = /usr/bin/sh $(MINGWBIN)/wx-config --static=yes
-	PROTOC = $(MINGWBIN)/protoc
-	WINDRES = windres
-	LDFLAGS += \
-		-static
-	CXXFLAGS += \
-		-fext-numeric-literals \
-		-Wno-deprecated-enum-float-conversion \
-		-Wno-deprecated-enum-enum-conversion
-
-	# Required to get the gcc run - time libraries on the path.
-	export PATH := $(PATH):$(MINGWBIN)
-endif
+#ifeq ($(OS), Windows_NT)
+#	EXT ?= .exe
+#	MINGWBIN = /mingw32/bin
+#	CCPREFIX = $(MINGWBIN)/
+#	PKG_CONFIG = $(MINGWBIN)/pkg-config
+#	WX_CONFIG = /usr/bin/sh $(MINGWBIN)/wx-config --static=yes
+#	PROTOC = $(MINGWBIN)/protoc
+#	WINDRES = windres
+#	LDFLAGS += \
+#		-static
+#	CXXFLAGS += \
+#		-fext-numeric-literals \
+#		-Wno-deprecated-enum-float-conversion \
+#		-Wno-deprecated-enum-enum-conversion
+#
+#	# Required to get the gcc run - time libraries on the path.
+#	export PATH := $(PATH):$(MINGWBIN)
+#endif
 
 # Special OSX settings.
 

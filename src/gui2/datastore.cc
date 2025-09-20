@@ -565,7 +565,7 @@ void Datastore::writeImage(const std::fs::path& path)
     Datastore::runOnWorkerThread(
         [=]
         {
-            globalConfig().setImageWriter(path);
+            globalConfig().setImageWriter(path.string());
             ImageWriter::create(globalConfig())
                 ->writeImage(*Datastore::getDiskFlux()->image);
         });
@@ -581,7 +581,7 @@ void Datastore::writeFluxFile(const std::fs::path& path)
             {
                 rebuildConfiguration();
             };
-            globalConfig().setFluxSink(path);
+            globalConfig().setFluxSink(path.string());
             auto fluxSource = FluxSource::createMemoryFluxSource(*diskFlux);
             auto fluxSink = FluxSink::create(globalConfig());
             writeRawDiskCommand(*fluxSource, *fluxSink);
