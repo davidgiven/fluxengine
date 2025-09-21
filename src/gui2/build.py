@@ -25,13 +25,17 @@ else:
 
 
 def headers_from(path):
-    hdrs = {k: f"{path}/{k}" for k in glob("**/*.h*", root_dir=path, recursive=True)}
+    hdrs = {
+        k: f"{path}/{k}" for k in glob("**/*.h*", root_dir=path, recursive=True)
+    }
     assert hdrs, f"path {path} contained no headers"
     return hdrs
 
 
 def sources_from(path, except_for=[]):
-    srcs = [join(path, f) for f in glob("**/*.[ch]*", root_dir=path, recursive=True)]
+    srcs = [
+        join(path, f) for f in glob("**/*.[ch]*", root_dir=path, recursive=True)
+    ]
     srcs = [f for f in srcs if f not in except_for]
     assert srcs, f"path {path} contained no sources"
     return srcs
@@ -41,7 +45,6 @@ package(name="freetype2_lib", package="freetype2")
 package(name="libcurl_lib", package="libcurl")
 package(name="glfw3_lib", package="glfw3")
 package(name="magic_lib", package="libmagic")
-package(name="tre_lib", package="tre")
 
 cxxlibrary(
     name="nlohmannjson_lib",
@@ -198,7 +201,9 @@ cxxlibrary(
         operator.ior,
         [headers_from(f"dep/libwolv/libs/{d}/include") for d in wolv_modules],
     )
-    | {"types/uintwide_t.h": "dep/libwolv/libs/types/include/wolv/types/uintwide_t.h"},
+    | {
+        "types/uintwide_t.h": "dep/libwolv/libs/types/include/wolv/types/uintwide_t.h"
+    },
     deps=[".+libwolv-io-fs"],
     cflags=cflags,
 )
@@ -227,7 +232,9 @@ cxxlibrary(
     ],
 )
 
-cxxlibrary(name="hacks", srcs=[], hdrs={"jthread.hpp": "./imhex_overrides/jthread.hpp"})
+cxxlibrary(
+    name="hacks", srcs=[], hdrs={"jthread.hpp": "./imhex_overrides/jthread.hpp"}
+)
 
 clibrary(
     name="libmicrotar",
@@ -262,7 +269,9 @@ cxxlibrary(
         sources_from("dep/imhex/lib/libimhex/source/ui")
         + sources_from(
             "dep/imhex/lib/libimhex/source/api",
-            except_for=["dep/imhex/lib/libimhex/source/api/achievement_manager.cpp"],
+            except_for=[
+                "dep/imhex/lib/libimhex/source/api/achievement_manager.cpp"
+            ],
         )
         + sources_from("dep/imhex/lib/libimhex/source/data_processor")
         + sources_from("dep/imhex/lib/libimhex/source/providers")
@@ -415,7 +424,9 @@ plugin(
             "dep/imhex/plugins/builtin/source/content/views/view_tutorials.cpp",
             "dep/imhex/plugins/builtin/source/content/data_processor_nodes.cpp",
         ]
-        + glob("dep/imhex/plugins/builtin/source/content/data_processor_nodes/*")
+        + glob(
+            "dep/imhex/plugins/builtin/source/content/data_processor_nodes/*"
+        )
         + glob("dep/imhex/plugins/builtin/source/content/tutorials/*"),
     )
     + [
@@ -544,6 +555,7 @@ cxxprogram(
         ".+ui-plugin",
         ".+gui-plugin",
         ".+fluxengine-plugin",
-        ".+tre_lib",
-    ],
+    ]
+    # Windows needs this, for some reason.
+    + (config.windows and [package(name="tre_lib", package="tre")] or []),
 )
