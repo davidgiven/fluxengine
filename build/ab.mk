@@ -91,7 +91,7 @@ ignored-variables = MAKE_RESTARTS .VARIABLES MAKECMDGOALS MAKEFLAGS MFLAGS PAGER
 $(shell mkdir -p $(OBJ))
 $(file >$(OBJ)/newvars.txt,$(foreach v,$(filter-out $(ignored-variables),$(.VARIABLES)),$(v)=$($(v))$(newline)))
 $(shell touch $(OBJ)/vars.txt)
-$(shell diff -u $(OBJ)/vars.txt $(OBJ)/newvars.txt >&2)
+#$(shell diff -u $(OBJ)/vars.txt $(OBJ)/newvars.txt >&2)
 $(shell cmp -s $(OBJ)/newvars.txt $(OBJ)/vars.txt || (rm -f $(OBJ)/build.ninja && echo "Environment changed --- regenerating" >&2))
 $(shell mv $(OBJ)/newvars.txt $(OBJ)/vars.txt)
 
