@@ -24,7 +24,7 @@ static unsigned getTrackStep()
                     return 4;
 
                 default:
-                    error("bad drive_type {}", (int)drive_type);
+                    break;
             }
 
         case FORMATTYPE_80TRACK:
@@ -46,11 +46,11 @@ static unsigned getTrackStep()
                         "drive");
 
                 default:
-                    error("bad drive_type {}", (int)drive_type);
+                    break;
             }
 
         default:
-            error("bad format_type {}", (int)drive_type);
+            break;
     }
 
     return 1;
