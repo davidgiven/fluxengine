@@ -101,8 +101,8 @@ jobs:
     - name: dependencies
       run: |
         set -x
-        pacman -S --needed --noconfirm pactoys make python diffutils ninja makensis
-        pacboy -S --needed --noconfirm protobuf:p pkg-config:p curl-winssl:p file:p glfw:p mbedtls:p sqlite:p freetype:p boost:p gcc:p binutils:p
+        pacman -S --needed --noconfirm pactoys make python diffutils ninja
+        pacboy -S --needed --noconfirm protobuf:p pkg-config:p curl-winssl:p file:p glfw:p mbedtls:p sqlite:p freetype:p boost:p gcc:p binutils:p nsis:p
 
     - name: run
       run: |
