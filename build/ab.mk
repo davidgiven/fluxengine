@@ -87,7 +87,7 @@ build-file-timestamps = $(shell ls -l $(build-files) | md5sum)
 ignored-variables = MAKE_RESTARTS .VARIABLES MAKECMDGOALS MAKEFLAGS MFLAGS PAGER _ \
 	DESKTOP_STARTUP_ID XAUTHORITY ICEAUTHORITY SSH_AUTH_SOCK SESSION_MANAGER \
 	INVOCATION_ID SYSTEMD_EXEC_PID MANAGER_PID SSH_AGENT_PID JOURNAL_STREAM \
-	GPG_TTY WINDOWID MANAGERPID MAKE_TERMOUT MAKE_TERMERR
+	GPG_TTY WINDOWID MANAGERPID MAKE_TERMOUT MAKE_TERMERR OLDPWD
 $(shell mkdir -p $(OBJ))
 $(file >$(OBJ)/newvars.txt,$(foreach v,$(filter-out $(ignored-variables),$(.VARIABLES)),$(v)=$($(v))$(newline)))
 $(shell touch $(OBJ)/vars.txt)
