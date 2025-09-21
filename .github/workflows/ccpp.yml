@@ -101,7 +101,7 @@ jobs:
     - name: dependencies
       run: |
         set -x
-        pacman -S --needed --noconfirm pactoys make python diffutils ninja
+        pacman -S --needed --noconfirm pactoys make python diffutils ninja makensis
         pacboy -S --needed --noconfirm protobuf:p pkg-config:p curl-winssl:p file:p glfw:p mbedtls:p sqlite:p freetype:p boost:p gcc:p binutils:p
 
     - name: run
@@ -110,9 +110,10 @@ jobs:
 
     - name: nsis
       run: |
-        cd fluxengine && strip fluxengine.exe -o fluxengine-stripped.exe
-        cd fluxengine && strip fluxengine-gui.exe -o fluxengine-gui-stripped.exe
-        cd fluxengine && makensis -v2 -nocd -dOUTFILE=fluxengine-installer.exe extras/windows-installer.nsi
+        cd fluxengine
+        strip fluxengine.exe -o fluxengine-stripped.exe
+        strip fluxengine-gui.exe -o fluxengine-gui-stripped.exe
+        makensis -v2 -nocd -dOUTFILE=fluxengine-installer.exe extras/windows-installer.nsi
 
     - name: zip
       run: |
