@@ -16,21 +16,22 @@ ifeq ($(BUILDTYPE),windows)
 		-ffunction-sections \
 		-fdata-sections \
 		-Wno-attributes \
-		-Wa,-mbig-obj
+		-Wa,-mbig-obj \
+		-static
 	CXXFLAGS += \
 		-std=c++23 \
 		-Wno-deprecated-enum-float-conversion \
 		-Wno-deprecated-enum-enum-conversion \
 		-Wno-attributes \
-		-U__GXX_TYPEINFO_EQUALITY_INLINE \
-		-D__GXX_TYPEINFO_EQUALITY_INLINE \
-		-Wa,-mbig-obj
+		-Wa,-mbig-obj \
+		-static
 	LDFLAGS += -Wl,--gc-sections -static
 	AR = $(MINGW)gcc-ar
 	PKG_CONFIG = $(MINGW)pkg-config --static
 	WINDRES = $(MINGW)windres
 	WX_CONFIG = /usr/i686-w64-mingw32/sys-root/mingw/bin/wx-config-3.0 --static=yes
 	NINJA = /bin/ninja
+	PROTOC = /mingw64/bin/protoc
 	PROTOC_SEPARATOR = ;
 	EXT = .exe
 
