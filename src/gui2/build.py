@@ -41,6 +41,7 @@ package(name="freetype2_lib", package="freetype2")
 package(name="libcurl_lib", package="libcurl")
 package(name="glfw3_lib", package="glfw3")
 package(name="magic_lib", package="libmagic")
+package(name="tre_lib", package="tre")
 
 cxxlibrary(
     name="nlohmannjson_lib",
@@ -543,5 +544,6 @@ cxxprogram(
         ".+ui-plugin",
         ".+gui-plugin",
         ".+fluxengine-plugin",
+        ".+tre_lib",
     ],
 )
