@@ -353,8 +353,7 @@ def romfs(name, id, dir):
         outs=["=romfs.cc"],
         deps=[f".+{id}_mkromfs"],
         commands=[
-            f"$[deps[0]] {dir}",
-            "mv libromfs_resources.cpp $[outs[0]]",
+            f"$[deps[0]] $[outs[0]] {dir}",
         ],
         label="ROMFS",
     )

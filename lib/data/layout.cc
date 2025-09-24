@@ -4,10 +4,10 @@
 #include "lib/config/proto.h"
 #include "lib/core/logger.h"
 
-static unsigned getTrackStep()
+static unsigned getTrackStep(const ConfigProto& config = globalConfig())
 {
-    auto format_type = globalConfig()->layout().format_type();
-    auto drive_type = globalConfig()->drive().drive_type();
+    auto format_type = config.layout().format_type();
+    auto drive_type = config.drive().drive_type();
 
     switch (format_type)
     {
@@ -224,12 +224,10 @@ std::vector<unsigned> Layout::expandSectorList(
     return sectors;
 }
 
-std::shared_ptr<const TrackInfo> Layout::getLayoutOfTrack(
-    unsigned logicalCylinder, unsigned logicalHead)
+static const LayoutProto::LayoutdataProto getLayoutData(
+    unsigned logicalCylinder, unsigned logicalHead, const ConfigProto& config)
 {
-    auto trackInfo = std::make_shared<TrackInfo>();
-
-    LayoutProto::LayoutdataProto layoutdata;
+    LayoutProto::LayoutdataProto layoutData;
     for (const auto& f : globalConfig()->layout().layoutdata())
     {
         if (f.has_track() && f.has_up_to_track() &&
@@ -242,9 +240,18 @@ std::shared_ptr<const TrackInfo> Layout::getLayoutOfTrack(
         if (f.has_side() && (f.side() != logicalHead))
             continue;
 
-        layoutdata.MergeFrom(f);
+        layoutData.MergeFrom(f);
     }
+    return layoutData;
+}
 
+std::shared_ptr<const TrackInfo> Layout::getLayoutOfTrack(
+    unsigned logicalCylinder, unsigned logicalHead)
+{
+    auto trackInfo = std::make_shared<TrackInfo>();
+
+    auto layoutdata =
+        getLayoutData(logicalCylinder, logicalHead, globalConfig());
     trackInfo->numCylinders = globalConfig()->layout().tracks();
     trackInfo->numHeads = globalConfig()->layout().sides();
     trackInfo->sectorSize = layoutdata.sector_size();
@@ -343,4 +350,88 @@ std::vector<LogicalLocation> Layout::computeFilesystemLogicalOrdering()
         }
     }
     return result;
+}
+
+DiskLayout::DiskLayout(const ConfigProto& config)
+{
+    minPhysicalCylinder = minPhysicalHead = UINT_MAX;
+    maxPhysicalCylinder = maxPhysicalHead = 0;
+
+    numLogicalCylinders = config.layout().tracks();
+    numLogicalHeads = config.layout().sides();
+
+    unsigned groupSize = getTrackStep(config);
+    for (unsigned logicalCylinder = 0; logicalCylinder < numLogicalCylinders;
+        logicalCylinder++)
+        for (unsigned logicalHead = 0; logicalHead < numLogicalHeads;
+            logicalHead++)
+        {
+            auto ltl = std::make_shared<LogicalTrackLayout>();
+            layoutByLogicalLocation[{logicalCylinder, logicalHead}] = ltl;
+
+            ltl->logicalCylinder = logicalCylinder;
+            ltl->logicalHead = logicalHead;
+            ltl->groupSize = groupSize;
+            ltl->physicalCylinder =
+                config.drive().head_bias() + logicalCylinder * ltl->groupSize;
+            ltl->physicalHead = logicalHead ^ config.layout().swap_sides();
+
+            minPhysicalCylinder =
+                std::min(minPhysicalCylinder, ltl->physicalCylinder);
+            maxPhysicalCylinder = std::max(maxPhysicalCylinder,
+                ltl->physicalCylinder + ltl->groupSize - 1);
+            minPhysicalHead = std::min(minPhysicalHead, ltl->physicalHead);
+            maxPhysicalHead = std::max(maxPhysicalHead, ltl->physicalHead);
+
+            auto layoutdata =
+                getLayoutData(logicalCylinder, logicalHead, globalConfig());
+            ltl->diskSectorOrder =
+                Layout::expandSectorList(layoutdata.physical());
+            ltl->naturalSectorOrder = ltl->diskSectorOrder;
+            std::sort(
+                ltl->naturalSectorOrder.begin(), ltl->naturalSectorOrder.end());
+            ltl->numSectors = ltl->naturalSectorOrder.size();
+
+            if (layoutdata.has_filesystem())
+            {
+                ltl->filesystemSectorOrder =
+                    Layout::expandSectorList(layoutdata.filesystem());
+                if (ltl->filesystemSectorOrder.size() != ltl->numSectors)
+                    error(
+                        "filesystem sector order list doesn't contain the "
+                        "right number of sectors");
+            }
+            else
+                ltl->filesystemSectorOrder = ltl->naturalSectorOrder;
+
+            for (int i = 0; i < ltl->numSectors; i++)
+            {
+                unsigned fid = ltl->naturalSectorOrder[i];
+                unsigned lid = ltl->filesystemSectorOrder[i];
+                ltl->filesystemToNaturalSectorMap[fid] = lid;
+                ltl->naturalToFilesystemSectorMap[lid] = fid;
+            }
+        };
+
+    for (unsigned physicalCylinder = minPhysicalCylinder;
+        physicalCylinder <= maxPhysicalCylinder;
+        physicalCylinder++)
+        for (unsigned physicalHead = minPhysicalHead;
+            physicalHead <= maxPhysicalHead;
+            physicalHead++)
+        {
+            auto ptl = std::make_shared<PhysicalTrackLayout>();
+            layoutByPhysicalLocation[{physicalCylinder, physicalHead}] = ptl;
+
+            ptl->physicalCylinder = physicalCylinder;
+            ptl->physicalHead = physicalHead;
+            ptl->groupOffset =
+                (physicalCylinder - config.drive().head_bias()) % groupSize;
+
+            unsigned logicalCylinder =
+                (physicalCylinder - config.drive().head_bias()) / groupSize;
+            unsigned logicalHead = physicalHead ^ config.layout().swap_sides();
+            ptl->logicalTrackLayout = findOrDefault(
+                layoutByLogicalLocation, {logicalCylinder, logicalHead});
+        }
 }

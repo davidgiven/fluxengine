@@ -23,13 +23,3 @@ namespace Events
     EVENT_DEF(SeekToSectorViaPhysicalLocation, CylinderHeadSector);
     EVENT_DEF(SeekToTrackViaPhysicalLocation, CylinderHead);
 }
-
-template <typename K, typename V>
-inline const V& findOrDefault(
-    const std::map<K, V>& map, const K& key, const V& defaultValue = V())
-{
-    auto it = map.find(key);
-    if (it == map.end())
-        return defaultValue;
-    return it->second;
-}

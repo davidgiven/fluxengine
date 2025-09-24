@@ -49,6 +49,8 @@ static void test_physical_sectors()
         layout->diskSectorOrder, Equals(std::vector<unsigned>{0, 2, 1, 3}));
     AssertThat(layout->filesystemSectorOrder,
         Equals(std::vector<unsigned>{0, 1, 2, 3}));
+
+	auto diskLayout = createDiskLayout();
 }
 
 static void test_logical_sectors()

@@ -61,10 +61,10 @@ namespace
 
 int main(int argc, const char* const argv[])
 {
-    std::ofstream outputFile("libromfs_resources.cpp");
+    std::ofstream outputFile(argv[1]);
 
     std::vector<std::string> resourceLocations;
-    for (int i = 1; i < argc; i++)
+    for (int i = 2; i < argc; i++)
         resourceLocations.push_back(argv[i]);
 
     outputFile << "#include <romfs/romfs.hpp>\n\n";
