@@ -19,7 +19,7 @@ PhysicalView::~PhysicalView() {}
 
 Layout::LayoutBounds PhysicalView::getBounds()
 {
-    return Datastore::getDiskPhysicalBounds();
+    return Datastore::getDiskLayout()->getPhysicalBounds();
 }
 
 std::shared_ptr<const Sector> PhysicalView::getSector(

@@ -14,7 +14,7 @@ ImageView::ImageView(): AbstractSectorView("fluxengine.view.image.name") {}
 
 Layout::LayoutBounds ImageView::getBounds()
 {
-    return Datastore::getDiskLogicalBounds();
+    return Datastore::getDiskLayout()->getLogicalBounds();
 }
 
 std::shared_ptr<const Sector> ImageView::getSector(

@@ -360,7 +360,10 @@ DiskLayout::DiskLayout(const ConfigProto& config)
     numLogicalCylinders = config.layout().tracks();
     numLogicalHeads = config.layout().sides();
 
-    unsigned groupSize = getTrackStep(config);
+    groupSize = getTrackStep(config);
+    headBias = config.drive().head_bias();
+    swapSides = config.layout().swap_sides();
+
     for (unsigned logicalCylinder = 0; logicalCylinder < numLogicalCylinders;
         logicalCylinder++)
         for (unsigned logicalHead = 0; logicalHead < numLogicalHeads;
@@ -373,8 +376,8 @@ DiskLayout::DiskLayout(const ConfigProto& config)
             ltl->logicalHead = logicalHead;
             ltl->groupSize = groupSize;
             ltl->physicalCylinder =
-                config.drive().head_bias() + logicalCylinder * ltl->groupSize;
-            ltl->physicalHead = logicalHead ^ config.layout().swap_sides();
+                remapCylinderLogicalToPhysical(logicalCylinder);
+            ltl->physicalHead = remapHeadLogicalToPhysical(logicalHead);
 
             minPhysicalCylinder =
                 std::min(minPhysicalCylinder, ltl->physicalCylinder);
@@ -425,13 +428,40 @@ DiskLayout::DiskLayout(const ConfigProto& config)
 
             ptl->physicalCylinder = physicalCylinder;
             ptl->physicalHead = physicalHead;
-            ptl->groupOffset =
-                (physicalCylinder - config.drive().head_bias()) % groupSize;
+            ptl->groupOffset = (physicalCylinder - headBias) % groupSize;
 
             unsigned logicalCylinder =
-                (physicalCylinder - config.drive().head_bias()) / groupSize;
-            unsigned logicalHead = physicalHead ^ config.layout().swap_sides();
+                remapCylinderPhysicalToLogical(physicalCylinder);
+            unsigned logicalHead = remapHeadPhysicalToLogical(physicalHead);
             ptl->logicalTrackLayout = findOrDefault(
                 layoutByLogicalLocation, {logicalCylinder, logicalHead});
         }
+}
+
+static Layout::LayoutBounds getBounds(std::ranges::view auto keys)
+{
+    Layout::LayoutBounds r{.minCylinder = INT_MAX,
+        .maxCylinder = INT_MIN,
+        .minHead = INT_MAX,
+        .maxHead = INT_MIN};
+
+    for (const auto& ch : keys)
+    {
+        r.minCylinder = std::min<int>(r.minCylinder, ch.cylinder);
+        r.maxCylinder = std::max<int>(r.maxCylinder, ch.cylinder);
+        r.minHead = std::min<int>(r.minHead, ch.head);
+        r.maxHead = std::max<int>(r.maxHead, ch.head);
+    }
+
+    return r;
+}
+
+Layout::LayoutBounds DiskLayout::getPhysicalBounds() const
+{
+    return getBounds(std::views::keys(layoutByPhysicalLocation));
+}
+
+Layout::LayoutBounds DiskLayout::getLogicalBounds() const
+{
+    return getBounds(std::views::keys(layoutByLogicalLocation));
 }

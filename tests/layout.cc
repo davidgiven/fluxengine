@@ -223,10 +223,42 @@ static void test_skew()
     }
 }
 
+static void test_bounds()
+{
+    globalConfig().clear();
+    globalConfig().readBaseConfig(R"M(
+		drive {
+			drive_type: DRIVETYPE_80TRACK
+		}
+
+		layout {
+			format_type: FORMATTYPE_40TRACK
+			tracks: 2
+			sides: 2
+			layoutdata {
+				sector_size: 256
+				physical {
+					start_sector: 0
+					count: 12
+					skew: 6
+				}
+			}
+		}
+	)M");
+
+    auto diskLayout = createDiskLayout();
+    AssertThat(diskLayout->groupSize, Equals(2));
+    AssertThat(diskLayout->getLogicalBounds(),
+        Equals(Layout::LayoutBounds{0, 1, 0, 1}));
+    AssertThat(diskLayout->getPhysicalBounds(),
+        Equals(Layout::LayoutBounds{0, 3, 0, 1}));
+}
+
 int main(int argc, const char* argv[])
 {
     test_physical_sectors();
     test_logical_sectors();
     test_both_sectors();
     test_skew();
+    test_bounds();
 }

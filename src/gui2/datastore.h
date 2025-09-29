@@ -5,6 +5,7 @@
 #include "lib/data/layout.h"
 
 class DiskFlux;
+class DiskLayout;
 class CandidateDevice;
 
 static constexpr std::string DEVICE_MANUAL = "manual";
@@ -36,8 +37,7 @@ public:
         const LogicalLocation& location);
     static std::optional<unsigned> findBlockByLogicalLocation(
         const LogicalLocation& location);
-    static const Layout::LayoutBounds& getDiskPhysicalBounds();
-    static const Layout::LayoutBounds& getDiskLogicalBounds();
+    static std::shared_ptr<const DiskLayout> getDiskLayout();
     static void rebuildConfiguration();
     static void onLogMessage(const AnyLogMessage& message);
 

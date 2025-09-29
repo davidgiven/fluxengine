@@ -37,6 +37,7 @@ static std::atomic<bool> busy;
 static bool configurationValid;
 static bool formattingSupported;
 static std::map<std::string, Datastore::Device> devices;
+static std::shared_ptr<const DiskLayout> diskLayout;
 static std::map<CylinderHead, std::shared_ptr<const TrackInfo>>
     physicalCylinderLayouts;
 static std::map<CylinderHeadSector, std::shared_ptr<const Sector>>
@@ -197,7 +198,7 @@ bool Datastore::isBusy()
 
 bool Datastore::isConfigurationValid()
 {
-    return configurationValid; 
+    return configurationValid;
 }
 
 bool Datastore::canFormat()
@@ -210,20 +211,9 @@ const std::map<std::string, Datastore::Device>& Datastore::getDevices()
     return devices;
 }
 
-const std::map<CylinderHead, std::shared_ptr<const TrackInfo>>&
-Datastore::getPhysicalCylinderLayouts()
+std::shared_ptr<const DiskLayout> Datastore::getDiskLayout()
 {
-    return physicalCylinderLayouts;
-}
-
-const Layout::LayoutBounds& Datastore::getDiskPhysicalBounds()
-{
-    return diskPhysicalBounds;
-}
-
-const Layout::LayoutBounds& Datastore::getDiskLogicalBounds()
-{
-    return diskLogicalBounds;
+    return diskLayout;
 }
 
 std::shared_ptr<const DiskFlux> Datastore::getDiskFlux()
@@ -331,7 +321,8 @@ void Datastore::rebuildConfiguration()
 
             /* Reset and apply the format configuration. */
 
-            auto formatName = readSetting<std::string>("format.selected", "ibm");
+            auto formatName =
+                readSetting<std::string>("format.selected", "ibm");
             if (formatName.empty())
                 return;
             Datastore::runOnWorkerThread(
@@ -432,6 +423,7 @@ void Datastore::rebuildConfiguration()
             Datastore::runOnWorkerThread(
                 []
                 {
+                    auto diskLayout = createDiskLayout();
                     auto locations = Layout::computePhysicalLocations();
                     auto diskPhysicalBounds = Layout::getBounds(locations);
                     auto diskLogicalBounds =
@@ -445,6 +437,7 @@ void Datastore::rebuildConfiguration()
                     hex::TaskManager::doLater(
                         [=]
                         {
+                            ::diskLayout = diskLayout;
                             ::diskPhysicalBounds = diskPhysicalBounds;
                             ::diskLogicalBounds = diskLogicalBounds;
                             ::physicalCylinderLayouts = physicalCylinderLayouts;

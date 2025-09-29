@@ -40,6 +40,9 @@ public:
      * maximum track and side settings. */
     struct LayoutBounds
     {
+        std::strong_ordering operator<=>(
+            const LayoutBounds& other) const = default;
+
         int minCylinder, maxCylinder, minHead, maxHead;
     };
     static LayoutBounds getBounds(const std::vector<CylinderHead>& locations);
@@ -138,6 +141,9 @@ public:
     DiskLayout(const ConfigProto& config = globalConfig());
 
 public:
+    unsigned headBias;
+    bool swapSides;
+
     unsigned minPhysicalCylinder, maxPhysicalCylinder;
     unsigned minPhysicalHead, maxPhysicalHead;
     unsigned groupSize;
@@ -151,6 +157,30 @@ public:
         layoutByLogicalLocation;
     std::vector<CylinderHeadSector> physicalLocationsInFilesystemOrder;
     std::vector<LogicalLocation> logicalLocationsInFilesystemOrder;
+
+public:
+    unsigned remapCylinderPhysicalToLogical(unsigned physicalCylinder) const
+    {
+        return (physicalCylinder - headBias) / groupSize;
+    }
+
+    unsigned remapCylinderLogicalToPhysical(unsigned logicalCylinder) const
+    {
+        return headBias + logicalCylinder * groupSize;
+    }
+
+    unsigned remapHeadPhysicalToLogical(unsigned physicalHead) const
+    {
+        return physicalHead ^ swapSides;
+    }
+
+    unsigned remapHeadLogicalToPhysical(unsigned logicalHead) const
+    {
+        return logicalHead ^ swapSides;
+    }
+
+    Layout::LayoutBounds getPhysicalBounds() const;
+    Layout::LayoutBounds getLogicalBounds() const;
 };
 
 static std::shared_ptr<DiskLayout> createDiskLayout(

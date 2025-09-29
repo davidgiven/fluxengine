@@ -44,7 +44,8 @@ static void emitOptions(DynamicSetting<std::string>& setting,
         ImGui::TableNextRow();
         ImGui::TableNextColumn();
         ImGui::AlignTextToFramePadding();
-        ImGui::TextWrapped("%s", wolv::util::capitalizeString(it.comment()).c_str());
+        ImGui::TextWrapped(
+            "%s", wolv::util::capitalizeString(it.comment()).c_str());
 
         ImGui::TableNextColumn();
         ImGui::SetNextItemWidth(-FLT_MIN);

@@ -83,12 +83,14 @@ TrackAnalysis analyseTrack(std::shared_ptr<const DiskFlux>& diskFlux,
 void SummaryView::drawContent()
 {
     auto diskFlux = Datastore::getDiskFlux();
-    auto [minCylinder, maxCylinder, minHead, maxHead] =
-        Datastore::getDiskPhysicalBounds();
-    const auto& physicalCylinderLayouts =
-        Datastore::getPhysicalCylinderLayouts();
-    int numCylinders = maxCylinder - minCylinder + 1;
-    int numHeads = maxHead - minHead + 1;
+    auto diskLayout = Datastore::getDiskLayout();
+
+    auto [minPhysicalCylinder,
+        maxPhysicalCylinder,
+        minPhysicalHead,
+        maxPhysicalHead] = diskLayout->getPhysicalBounds();
+    int numPhysicalCylinders = maxPhysicalCylinder - minPhysicalCylinder + 1;
+    int numPhysicalHeads = maxPhysicalHead - minPhysicalHead + 1;
 
     {
         ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, {1, 1});
@@ -110,11 +112,12 @@ void SummaryView::drawContent()
             ImGui::PopStyleColor();
         };
 
-        ImGuiExt::TextFormattedCenteredHorizontal("Physical map (what the drive sees)");
+        ImGuiExt::TextFormattedCenteredHorizontal(
+            "Physical map (what the drive sees)");
 
         auto originalFontSize = ImGui::GetFontSize();
         if (ImGui::BeginTable("physicalMap",
-                numCylinders + 1,
+                numPhysicalCylinders + 1,
                 ImGuiTableFlags_NoSavedSettings |
                     ImGuiTableFlags_HighlightHoveredColumn |
                     ImGuiTableFlags_NoClip | ImGuiTableFlags_NoPadInnerX |
@@ -143,7 +146,8 @@ void SummaryView::drawContent()
 
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
-            for (int cylinder = minCylinder; cylinder <= maxCylinder;
+            for (int cylinder = minPhysicalCylinder;
+                cylinder <= maxPhysicalCylinder;
                 cylinder++)
             {
                 ImGui::TableNextColumn();
@@ -155,7 +159,8 @@ void SummaryView::drawContent()
                 ImGui::Text("%s", text.c_str());
             }
 
-            for (unsigned head = minHead; head <= maxHead; head++)
+            for (unsigned head = minPhysicalHead; head <= maxPhysicalHead;
+                head++)
             {
                 ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
                 ImGui::TableNextColumn();
@@ -168,7 +173,8 @@ void SummaryView::drawContent()
                     ImGui::GetCursorPosY() + rowHeight / 2 - textSize.y / 2});
                 ImGui::Text("%s", text.c_str());
 
-                for (unsigned cylinder = minCylinder; cylinder <= maxCylinder;
+                for (unsigned cylinder = minPhysicalCylinder;
+                    cylinder <= maxPhysicalCylinder;
                     cylinder++)
                 {
                     auto [tooltip, colour] =
@@ -198,10 +204,12 @@ void SummaryView::drawContent()
             }
         }
 
-        ImGuiExt::TextFormattedCenteredHorizontal("Logical map (what the disk image sees)");
+        ImGuiExt::TextFormattedCenteredHorizontal(
+            "Logical map (what's in the disk image)");
 
+        /* Must match the physicalMap table width above. */
         if (ImGui::BeginTable("logicalMap",
-                numCylinders + 1,
+                numPhysicalCylinders + 1,
                 ImGuiTableFlags_NoSavedSettings |
                     ImGuiTableFlags_HighlightHoveredColumn |
                     ImGuiTableFlags_NoClip | ImGuiTableFlags_NoPadInnerX |
@@ -228,98 +236,85 @@ void SummaryView::drawContent()
             ImGui::TableSetupColumn(
                 "", ImGuiTableColumnFlags_WidthFixed, originalFontSize);
 
-            for (unsigned physicalHead = minHead; physicalHead <= maxHead;
+            for (unsigned physicalHead = minPhysicalHead;
+                physicalHead <= maxPhysicalHead;
                 physicalHead++)
             {
+                unsigned logicalHead =
+                    diskLayout->remapHeadPhysicalToLogical(physicalHead);
+
                 ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
                 ImGui::TableNextColumn();
 
-                /* Grotty code to find the first track on this head, so we can
-                 * get the layout. */
+                auto text = fmt::format("h{}", logicalHead);
+                auto textSize = ImGui::CalcTextSize(text.c_str());
+                ImGui::SetCursorPos({ImGui::GetCursorPosX() +
+                                         ImGui::GetColumnWidth() / 2 -
+                                         textSize.x / 2,
+                    ImGui::GetCursorPosY() + rowHeight / 2 - textSize.y / 2});
+                ImGui::Text("%s", text.c_str());
 
-                std::shared_ptr<const TrackInfo> sampleTrackInfo = nullptr;
-                for (auto& [physicalLocation, trackInfo] :
-                    physicalCylinderLayouts)
-                    if (physicalLocation.head == physicalHead)
-                    {
-                        sampleTrackInfo = trackInfo;
-                        break;
-                    }
-
-                if (sampleTrackInfo)
+                for (unsigned physicalCylinder = minPhysicalCylinder;
+                    physicalCylinder <= maxPhysicalCylinder;
+                    physicalCylinder++)
                 {
-                    auto text =
-                        fmt::format("h{}", sampleTrackInfo->logicalHead);
-                    auto textSize = ImGui::CalcTextSize(text.c_str());
-                    ImGui::SetCursorPos(
-                        {ImGui::GetCursorPosX() + ImGui::GetColumnWidth() / 2 -
-                                textSize.x / 2,
-                            ImGui::GetCursorPosY() + rowHeight / 2 -
-                                textSize.y / 2});
-                    ImGui::Text("%s", text.c_str());
+                    ImGui::TableNextColumn();
 
-                    for (unsigned physicalCylinder = minCylinder;
-                        physicalCylinder <= maxCylinder;
-                        physicalCylinder++)
+                    auto& ptl = diskLayout->layoutByPhysicalLocation.at(
+                        {physicalCylinder, physicalHead});
+                    if (ptl->groupOffset == 0)
                     {
-                        ImGui::TableNextColumn();
+                        auto [tooltip, colour] = analyseTrack(
+                            diskFlux, physicalCylinder, physicalHead);
 
-                        auto it = physicalCylinderLayouts.find(
-                            {physicalCylinder, physicalHead});
-                        if (it != physicalCylinderLayouts.end())
+                        ImGui::PushStyleColor(ImGuiCol_Header, colour);
+                        ON_SCOPE_EXIT
                         {
-                            auto [tooltip, colour] = analyseTrack(
-                                diskFlux, physicalCylinder, physicalHead);
+                            ImGui::PopStyleColor();
+                        };
 
-                            ImGui::PushStyleColor(ImGuiCol_Header, colour);
-                            ON_SCOPE_EXIT
-                            {
-                                ImGui::PopStyleColor();
-                            };
+                        float width = ImGui::GetContentRegionAvail().x *
+                                          diskLayout->groupSize +
+                                      ImGui::GetStyle().CellPadding.x *
+                                          (diskLayout->groupSize - 1);
+                        if (ImGui::Selectable(
+                                fmt::format("##logical_c{}h{}",
+                                    ptl->logicalTrackLayout->logicalCylinder,
+                                    ptl->logicalTrackLayout->logicalHead)
+                                    .c_str(),
+                                true,
+                                ImGuiSelectableFlags_None,
+                                {width, rowHeight}))
+                            Events::SeekToTrackViaPhysicalLocation::post(
+                                CylinderHead{
+                                    ptl->logicalTrackLayout->physicalCylinder,
+                                    ptl->logicalTrackLayout->physicalHead});
 
-                            auto& trackInfo = it->second;
-                            float width = ImGui::GetContentRegionAvail().x *
-                                              trackInfo->groupSize +
-                                          ImGui::GetStyle().CellPadding.x *
-                                              (trackInfo->groupSize - 1);
-                            if (ImGui::Selectable(
-                                    fmt::format("##logical_c{}h{}",
-                                        trackInfo->logicalCylinder,
-                                        trackInfo->logicalHead)
-                                        .c_str(),
-                                    true,
-                                    ImGuiSelectableFlags_None,
-                                    {width, rowHeight}))
-                                Events::SeekToTrackViaPhysicalLocation::post(
-                                    CylinderHead{trackInfo->physicalCylinder,
-                                        trackInfo->physicalHead});
-
-                            ImGui::PushFont(NULL, originalFontSize);
-                            ON_SCOPE_EXIT
-                            {
-                                ImGui::PopFont();
-                            };
-                            ImGui::SetItemTooltip("%s", tooltip.c_str());
-                        }
+                        ImGui::PushFont(NULL, originalFontSize);
+                        ON_SCOPE_EXIT
+                        {
+                            ImGui::PopFont();
+                        };
+                        ImGui::SetItemTooltip("%s", tooltip.c_str());
                     }
                 }
             }
 
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
-            for (unsigned physicalCylinder = minCylinder;
-                physicalCylinder <= maxCylinder;
+            for (unsigned physicalCylinder = minPhysicalCylinder;
+                physicalCylinder <= maxPhysicalCylinder;
                 physicalCylinder++)
             {
                 ImGui::TableNextColumn();
 
-                for (auto& [physicalLocation, trackInfo] :
-                    physicalCylinderLayouts)
+                for (auto& [ch, ptl] : diskLayout->layoutByPhysicalLocation)
                 {
-                    if (trackInfo->physicalCylinder == physicalCylinder)
+                    if (ptl->logicalTrackLayout->physicalCylinder ==
+                        physicalCylinder)
                     {
-                        auto text =
-                            fmt::format("c{}", trackInfo->logicalCylinder);
+                        auto text = fmt::format(
+                            "c{}", ptl->logicalTrackLayout->logicalCylinder);
                         ImGui::SetCursorPosX(
                             ImGui::GetCursorPosX() +
                             ImGui::GetColumnWidth() / 2 -
