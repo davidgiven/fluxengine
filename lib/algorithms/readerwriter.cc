@@ -631,6 +631,7 @@ std::shared_ptr<const DiskFlux> readDiskCommand(
             FluxSink::create(globalConfig()->decoder().copy_flux_to());
 
     auto diskflux = std::make_shared<DiskFlux>();
+    diskflux->layout = createDiskLayout();
 
     log(BeginOperationLogMessage{"Reading and decoding disk"});
     auto physicalLocations = Layout::computePhysicalLocations();

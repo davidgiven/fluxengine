@@ -7,6 +7,7 @@ class Fluxmap;
 class Sector;
 class Image;
 class TrackInfo;
+class DiskLayout;
 
 struct Record
 {
@@ -36,6 +37,7 @@ struct DiskFlux
 {
     std::vector<std::shared_ptr<TrackFlux>> tracks;
     std::shared_ptr<const Image> image;
+    std::shared_ptr<const DiskLayout> layout;
 };
 
 #endif
