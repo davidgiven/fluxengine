@@ -32,6 +32,12 @@ struct LogicalLocation
     }
 };
 
+inline std::ostream& operator<<(std::ostream& stream, LogicalLocation location)
+{
+    stream << (std::string)location;
+    return stream;
+}
+
 extern std::vector<CylinderHead> parseCylinderHeadsString(const std::string& s);
 extern std::string convertCylinderHeadsToString(
     const std::vector<CylinderHead>& chs);

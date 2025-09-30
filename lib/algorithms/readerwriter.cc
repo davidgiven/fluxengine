@@ -238,8 +238,9 @@ static std::set<std::shared_ptr<const Sector>> collectSectors(
 
     for (const auto& sector : track_sectors)
     {
-        key_t sectorid = {
-            sector->logicalCylinder, sector->logicalHead, sector->logicalSector};
+        key_t sectorid = {sector->logicalCylinder,
+            sector->logicalHead,
+            sector->logicalSector};
         sectors.insert({sectorid, sector});
     }
 
@@ -300,8 +301,10 @@ BadSectorsState combineRecordAndSectors(TrackFlux& trackFlux,
 
     for (unsigned sectorId : trackLayout->naturalSectorOrder)
     {
-        auto sector = std::make_shared<Sector>(trackLayout, LogicalLocation{
-            trackLayout->logicalCylinder, trackLayout->logicalHead, sectorId});
+        auto sector = std::make_shared<Sector>(trackLayout,
+            LogicalLocation{trackLayout->logicalCylinder,
+                trackLayout->logicalHead,
+                sectorId});
 
         sector->status = Sector::MISSING;
         track_sectors.insert(sector);
@@ -406,7 +409,8 @@ void writeTracks(FluxSink& fluxSink,
             for (int offset = 0; offset < trackInfo->groupSize;
                 offset += Layout::getHeadWidth())
             {
-                unsigned physicalCylinder = trackInfo->physicalCylinder + offset;
+                unsigned physicalCylinder =
+                    trackInfo->physicalCylinder + offset;
 
                 log(BeginWriteOperationLogMessage{
                     physicalCylinder, trackInfo->physicalHead});

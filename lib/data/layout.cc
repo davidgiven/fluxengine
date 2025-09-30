@@ -129,23 +129,22 @@ Layout::LayoutBounds Layout::getBounds(
     return r;
 }
 
-std::vector<std::pair<int, int>> Layout::getTrackOrdering(
+std::vector<std::pair<unsigned, unsigned>> getTrackOrdering(
+    const ConfigProto& config,
     LayoutProto::Order ordering,
-    unsigned guessedCylinders,
-    unsigned guessedHeads)
+    unsigned tracks,
+    unsigned sides)
 {
-    auto layout = globalConfig()->layout();
-    int tracks = layout.has_tracks() ? layout.tracks() : guessedCylinders;
-    int sides = layout.has_sides() ? layout.sides() : guessedHeads;
+    auto layout = config.layout();
 
-    std::vector<std::pair<int, int>> trackList;
+    std::vector<std::pair<unsigned, unsigned>> trackList;
     switch (ordering)
     {
         case LayoutProto::CHS:
         {
-            for (int track = 0; track < tracks; track++)
+            for (unsigned track = 0; track < tracks; track++)
             {
-                for (int side = 0; side < sides; side++)
+                for (unsigned side = 0; side < sides; side++)
                     trackList.push_back(std::make_pair(track, side));
             }
             break;
@@ -153,9 +152,9 @@ std::vector<std::pair<int, int>> Layout::getTrackOrdering(
 
         case LayoutProto::HCS:
         {
-            for (int side = 0; side < sides; side++)
+            for (unsigned side = 0; side < sides; side++)
             {
-                for (int track = 0; track < tracks; track++)
+                for (unsigned track = 0; track < tracks; track++)
                     trackList.push_back(std::make_pair(track, side));
             }
             break;
@@ -163,13 +162,13 @@ std::vector<std::pair<int, int>> Layout::getTrackOrdering(
 
         case LayoutProto::HCS_RH1:
         {
-            for (int side = 0; side < sides; side++)
+            for (unsigned side = 0; side < sides; side++)
             {
                 if (side == 0)
-                    for (int track = 0; track < tracks; track++)
+                    for (unsigned track = 0; track < tracks; track++)
                         trackList.push_back(std::make_pair(track, side));
                 if (side == 1)
-                    for (int track = tracks; track >= 0; track--)
+                    for (unsigned track = tracks; track >= 0; track--)
                         trackList.push_back(std::make_pair(track - 1, side));
             }
             break;
@@ -180,6 +179,18 @@ std::vector<std::pair<int, int>> Layout::getTrackOrdering(
     }
 
     return trackList;
+}
+
+std::vector<std::pair<unsigned, unsigned>> Layout::getTrackOrdering(
+    LayoutProto::Order ordering,
+    unsigned guessedCylinders,
+    unsigned guessedHeads)
+{
+    auto& layout = globalConfig()->layout();
+    return ::getTrackOrdering(globalConfig(),
+        ordering,
+        layout.has_tracks() ? layout.tracks() : guessedCylinders,
+        layout.has_sides() ? layout.sides() : guessedHeads);
 }
 
 std::vector<unsigned> Layout::expandSectorList(
@@ -388,6 +399,7 @@ DiskLayout::DiskLayout(const ConfigProto& config)
 
             auto layoutdata =
                 getLayoutData(logicalCylinder, logicalHead, globalConfig());
+            ltl->sectorSize = layoutdata.sector_size();
             ltl->diskSectorOrder =
                 Layout::expandSectorList(layoutdata.physical());
             ltl->naturalSectorOrder = ltl->diskSectorOrder;
@@ -436,6 +448,24 @@ DiskLayout::DiskLayout(const ConfigProto& config)
             ptl->logicalTrackLayout = findOrDefault(
                 layoutByLogicalLocation, {logicalCylinder, logicalHead});
         }
+
+    unsigned sectorOffset = 0;
+    for (auto [logicalCylinder, logicalHead] : getTrackOrdering(config,
+             config.layout().filesystem_track_order(),
+             numLogicalCylinders,
+             numLogicalHeads))
+    {
+        const auto& ltl =
+            layoutByLogicalLocation[{logicalCylinder, logicalHead}];
+        for (unsigned lid : ltl->filesystemSectorOrder)
+        {
+            LogicalLocation logicalLocation = {
+                logicalCylinder, logicalHead, lid};
+            logicalLocationsBySectorOffset[sectorOffset] = logicalLocation;
+            sectorOffsetByLogicalLocation[logicalLocation] = sectorOffset;
+            sectorOffset += ltl->sectorSize;
+        }
+    }
 }
 
 static Layout::LayoutBounds getBounds(std::ranges::view auto keys)

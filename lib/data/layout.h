@@ -47,9 +47,9 @@ public:
     };
     static LayoutBounds getBounds(const std::vector<CylinderHead>& locations);
 
-    /* Returns a series of <track, side> pairs representing the filesystem
-     * ordering of the disk, in logical numbers. */
-    static std::vector<std::pair<int, int>> getTrackOrdering(
+    /* Returns a series of logical <track, side> pairs representing the
+     * filesystem ordering of the disk, in logical numbers. */
+    static std::vector<std::pair<unsigned, unsigned>> getTrackOrdering(
         LayoutProto::Order ordering,
         unsigned guessedCylinders = 0,
         unsigned guessedHeads = 0);
@@ -157,6 +157,8 @@ public:
         layoutByLogicalLocation;
     std::vector<CylinderHeadSector> physicalLocationsInFilesystemOrder;
     std::vector<LogicalLocation> logicalLocationsInFilesystemOrder;
+    std::map<unsigned, LogicalLocation> logicalLocationsBySectorOffset;
+    std::map<LogicalLocation, unsigned> sectorOffsetByLogicalLocation;
 
 public:
     unsigned remapCylinderPhysicalToLogical(unsigned physicalCylinder) const
