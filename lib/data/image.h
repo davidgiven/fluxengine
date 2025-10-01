@@ -62,24 +62,18 @@ public:
     bool empty() const;
     bool contains(unsigned track, unsigned side, unsigned sectorId) const;
 
+    std::shared_ptr<const Sector> get(const LogicalLocation& location) const
+    {
+        return get(location.logicalCylinder,
+            location.logicalHead,
+            location.logicalSector);
+    }
+
     std::shared_ptr<const Sector> get(
         unsigned track, unsigned side, unsigned sectorId) const;
     std::shared_ptr<Sector> put(
         unsigned track, unsigned side, unsigned sectorId);
     void erase(unsigned track, unsigned side, unsigned sectorId);
-
-    LogicalLocation findBlock(unsigned block) const;
-    std::shared_ptr<const Sector> getBlock(unsigned block) const;
-    std::shared_ptr<Sector> putBlock(unsigned block);
-    int getBlockCount() const;
-
-    struct LocationAndOffset {
-        unsigned block;
-        unsigned offset;
-    };
-    LocationAndOffset findBlockByOffset(unsigned offset) const;
-    unsigned findOffsetByLogicalLocation(const LogicalLocation& logicalLocation) const;
-    unsigned findApproximateOffsetByPhysicalLocation(const CylinderHeadSector& physicalLocation) const;
 
     const_iterator begin() const
     {

@@ -30,12 +30,12 @@ void AbstractSectorView::drawContent()
 
     unsigned minSector = UINT_MAX;
     unsigned maxSector = 0;
-    for (int i = 0; i < image->getBlockCount(); i++)
+    for (auto& [chs, ltl] : diskFlux->layout->layoutByLogicalLocation)
     {
-        auto [logicalCylinder, logicalHead, logicalSector] =
-            image->findBlock(i);
-        minSector = std::min(minSector, logicalSector);
-        maxSector = std::max(maxSector, logicalSector);
+        minSector = std::min(
+            minSector, *std::ranges::min_element(ltl->filesystemSectorOrder));
+        maxSector = std::max(
+            maxSector, *std::ranges::max_element(ltl->filesystemSectorOrder));
     }
     unsigned sectorCount = maxSector - minSector + 1;
 
@@ -144,7 +144,8 @@ void AbstractSectorView::drawContent()
                             ImGui::PopStyleColor();
                         };
 
-                        auto block = Datastore::findBlockByLogicalLocation(
+                        auto block = findOptionally(
+                            diskFlux->layout->blockIdByLogicalLocation,
                             {sector->logicalCylinder,
                                 sector->logicalHead,
                                 sector->logicalSector});

@@ -450,6 +450,7 @@ DiskLayout::DiskLayout(const ConfigProto& config)
         }
 
     unsigned sectorOffset = 0;
+    unsigned blockId = 0;
     for (auto [logicalCylinder, logicalHead] : getTrackOrdering(config,
              config.layout().filesystem_track_order(),
              numLogicalCylinders,
@@ -461,9 +462,13 @@ DiskLayout::DiskLayout(const ConfigProto& config)
         {
             LogicalLocation logicalLocation = {
                 logicalCylinder, logicalHead, lid};
-            logicalLocationsBySectorOffset[sectorOffset] = logicalLocation;
+            logicalLocationBySectorOffset[sectorOffset] = logicalLocation;
             sectorOffsetByLogicalLocation[logicalLocation] = sectorOffset;
             sectorOffset += ltl->sectorSize;
+
+            logicalLocationByBlockId[blockId] = logicalLocation;
+            blockIdByLogicalLocation[logicalLocation] = blockId;
+            blockId++;
         }
     }
 }

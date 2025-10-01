@@ -31,12 +31,6 @@ public:
     static const std::map<std::string, Device>& getDevices();
     static const std::map<CylinderHead, std::shared_ptr<const TrackInfo>>&
     getPhysicalCylinderLayouts();
-    static std::shared_ptr<const Sector> findSectorByPhysicalLocation(
-        const CylinderHeadSector& location);
-    static std::shared_ptr<const Sector> findSectorByLogicalLocation(
-        const LogicalLocation& location);
-    static std::optional<unsigned> findBlockByLogicalLocation(
-        const LogicalLocation& location);
     static std::shared_ptr<const DiskLayout> getDiskLayout();
     static void rebuildConfiguration();
     static void onLogMessage(const AnyLogMessage& message);

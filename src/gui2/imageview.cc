@@ -18,7 +18,8 @@ Layout::LayoutBounds ImageView::getBounds()
 }
 
 std::shared_ptr<const Sector> ImageView::getSector(
-    unsigned cylinder, unsigned head, unsigned sectorId)
+    unsigned logicalCylinder, unsigned logicalHead, unsigned sectorId)
 {
-    return Datastore::findSectorByLogicalLocation({cylinder, head, sectorId});
+    auto diskFlux = Datastore::getDiskFlux();
+    return diskFlux->image->get({logicalCylinder, logicalHead, sectorId});
 }

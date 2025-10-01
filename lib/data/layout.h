@@ -157,8 +157,10 @@ public:
         layoutByLogicalLocation;
     std::vector<CylinderHeadSector> physicalLocationsInFilesystemOrder;
     std::vector<LogicalLocation> logicalLocationsInFilesystemOrder;
-    std::map<unsigned, LogicalLocation> logicalLocationsBySectorOffset;
+    std::map<unsigned, LogicalLocation> logicalLocationBySectorOffset;
     std::map<LogicalLocation, unsigned> sectorOffsetByLogicalLocation;
+    std::map<unsigned, LogicalLocation> logicalLocationByBlockId;
+    std::map<LogicalLocation, unsigned> blockIdByLogicalLocation;
 
 public:
     unsigned remapCylinderPhysicalToLogical(unsigned physicalCylinder) const

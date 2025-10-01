@@ -11,6 +11,7 @@
 #include "globals.h"
 #include "diskprovider.h"
 #include "datastore.h"
+#include <algorithm>
 
 DiskProvider::DiskProvider()
 {
@@ -64,9 +65,16 @@ void DiskProvider::readRaw(u64 offset, void* buffer, size_t size)
     {
         while (size != 0)
         {
-            auto [block, blockOffset] =
-                diskFlux->image->findBlockByOffset(offset);
-            auto sector = diskFlux->image->getBlock(block);
+            auto it =
+                diskFlux->layout->logicalLocationBySectorOffset.upper_bound(
+                    offset);
+            if (it != diskFlux->layout->logicalLocationBySectorOffset.begin())
+                it--;
+
+            unsigned realOffset = it->first;
+            auto logicalLocation = it->second;
+            auto sector = diskFlux->image->get(logicalLocation);
+            unsigned blockOffset = realOffset - offset;
             unsigned bytesRemaining = std::min(
                 (unsigned)size, sector->trackLayout->sectorSize - blockOffset);
             auto bytes = sector->data.slice(blockOffset, bytesRemaining);

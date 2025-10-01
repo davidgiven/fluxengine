@@ -44,7 +44,6 @@ static std::map<CylinderHeadSector, std::shared_ptr<const Sector>>
     sectorByPhysicalLocation;
 static std::map<LogicalLocation, std::shared_ptr<const Sector>>
     sectorByLogicalLocation;
-static std::map<LogicalLocation, unsigned> blockByLogicalLocation;
 static Layout::LayoutBounds diskPhysicalBounds;
 static Layout::LayoutBounds diskLogicalBounds;
 
@@ -157,10 +156,11 @@ void Datastore::init()
                 (it != sectorByPhysicalLocation.end()))
             {
                 auto sector = it->second;
-                unsigned offset = diskFlux->image->findOffsetByLogicalLocation(
-                    {sector->logicalCylinder,
-                        sector->logicalHead,
-                        sector->logicalSector});
+                unsigned offset =
+                    diskFlux->layout->sectorOffsetByLogicalLocation.at(
+                        {sector->logicalCylinder,
+                            sector->logicalHead,
+                            sector->logicalSector});
 
                 hex::ImHexApi::HexEditor::setSelection(
                     hex::Region{offset, sector->trackLayout->sectorSize});
@@ -170,23 +170,28 @@ void Datastore::init()
     Events::SeekToTrackViaPhysicalLocation::subscribe(
         [](CylinderHead physicalLocation)
         {
-            const auto& it = physicalCylinderLayouts.find(physicalLocation);
-            if (diskFlux && diskFlux->image &&
-                (it != physicalCylinderLayouts.end()))
-            {
-                const auto& layout = it->second;
-                unsigned firstSector = layout->filesystemSectorOrder.front();
-                unsigned startOffset =
-                    diskFlux->image->findApproximateOffsetByPhysicalLocation(
-                        {layout->physicalCylinder,
-                            layout->physicalHead,
-                            firstSector});
-                unsigned trackSize =
-                    layout->sectorSize * layout->filesystemSectorOrder.size();
+            if (!diskFlux)
+                return;
+            auto ptlo =
+                findOptionally(diskFlux->layout->layoutByPhysicalLocation,
+                    {physicalLocation.cylinder, physicalLocation.head});
+            if (!ptlo.has_value())
+                return;
+            auto ptl = *ptlo;
+            auto ltl = ptl->logicalTrackLayout;
+            unsigned firstSectorId = ltl->filesystemSectorOrder.front();
+            unsigned lastSectorId = ltl->filesystemSectorOrder.back();
 
-                hex::ImHexApi::HexEditor::setSelection(
-                    hex::Region{startOffset, trackSize});
-            }
+            unsigned startOffset =
+                diskFlux->layout->sectorOffsetByLogicalLocation.at(
+                    {ltl->logicalCylinder, ltl->logicalHead, firstSectorId});
+            unsigned endOffset =
+                diskFlux->layout->sectorOffsetByLogicalLocation.at(
+                    {ltl->logicalCylinder, ltl->logicalHead, lastSectorId}) +
+                ltl->sectorSize;
+
+            hex::ImHexApi::HexEditor::setSelection(
+                hex::Region{startOffset, endOffset - startOffset});
         });
     Datastore::rebuildConfiguration();
 }
@@ -221,33 +226,6 @@ std::shared_ptr<const DiskFlux> Datastore::getDiskFlux()
     return diskFlux;
 }
 
-std::shared_ptr<const Sector> Datastore::findSectorByPhysicalLocation(
-    const CylinderHeadSector& location)
-{
-    const auto& it = sectorByPhysicalLocation.find(location);
-    if (it == sectorByPhysicalLocation.end())
-        return nullptr;
-    return it->second;
-}
-
-std::shared_ptr<const Sector> Datastore::findSectorByLogicalLocation(
-    const LogicalLocation& location)
-{
-    const auto& it = sectorByLogicalLocation.find(location);
-    if (it == sectorByLogicalLocation.end())
-        return nullptr;
-    return it->second;
-}
-
-std::optional<unsigned> Datastore::findBlockByLogicalLocation(
-    const LogicalLocation& location)
-{
-    const auto& it = blockByLogicalLocation.find(location);
-    if (it == blockByLogicalLocation.end())
-        return {};
-    return it->second;
-}
-
 template <typename T>
 static T readSetting(const std::string& leaf, const T defaultValue)
 {
@@ -264,7 +242,6 @@ static void rebuildDiskFluxIndices()
 {
     sectorByPhysicalLocation.clear();
     sectorByLogicalLocation.clear();
-    blockByLogicalLocation.clear();
     if (diskFlux)
     {
         for (const auto& track : diskFlux->tracks)
@@ -276,14 +253,6 @@ static void rebuildDiskFluxIndices()
                 sectorByLogicalLocation[{sector->logicalCylinder,
                     sector->logicalHead,
                     sector->logicalSector}] = sector;
-            }
-
-        if (diskFlux->image)
-            for (unsigned block = 0; block < diskFlux->image->getBlockCount();
-                block++)
-            {
-                auto logicalLocation = diskFlux->image->findBlock(block);
-                blockByLogicalLocation[logicalLocation] = block;
             }
     }
 }

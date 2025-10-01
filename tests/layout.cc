@@ -301,8 +301,8 @@ static void test_sectoroffsets()
 
     auto diskLayout = createDiskLayout();
     AssertThat(diskLayout->groupSize, Equals(1));
-    AssertThat(diskLayout->logicalLocationsBySectorOffset,
-        EqualsContainer(decltype(diskLayout->logicalLocationsBySectorOffset){
+    AssertThat(diskLayout->logicalLocationBySectorOffset,
+        EqualsContainer(decltype(diskLayout->logicalLocationBySectorOffset){
             {0,    {0, 0, 0}},
             {256,  {0, 0, 2}},
             {512,  {0, 0, 1}},

@@ -86,4 +86,14 @@ inline const V& findOrDefault(
     return it->second;
 }
 
+template <typename K, typename V>
+inline const std::optional<V> findOptionally(
+    const std::map<K, V>& map, const K& key, const V& defaultValue = V())
+{
+    auto it = map.find(key);
+    if (it == map.end())
+        return std::nullopt;
+    return std::make_optional(it->second);
+}
+
 #endif
