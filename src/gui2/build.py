@@ -45,6 +45,7 @@ package(name="freetype2_lib", package="freetype2")
 package(name="libcurl_lib", package="libcurl")
 package(name="glfw3_lib", package="glfw3")
 package(name="magic_lib", package="libmagic")
+package(name="mbedtls_lib", package="mbedtls")
 
 cxxlibrary(
     name="nlohmannjson_lib",
@@ -311,6 +312,7 @@ cxxlibrary(
         ".+libcurl_lib",
         ".+glfw3_lib",
         ".+magic_lib",
+        ".+mbedtls_lib",
         ".+hacks",
     ],
 )
