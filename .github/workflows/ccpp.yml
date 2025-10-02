@@ -92,7 +92,7 @@ jobs:
         install: |
           python diffutils ninja make
         pacboy: |
-          protobuf:p pkg-config:p curl-winssl:p file:p glfw:p mbedtls:p
+          protobuf:p pkgconf:p curl-winssl:p file:p glfw:p mbedtls:p
           sqlite:p freetype:p boost:p gcc:p binutils:p nsis:p abseil-cpp:p
 
     - name: debug
