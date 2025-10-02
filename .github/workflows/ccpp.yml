@@ -86,6 +86,7 @@ jobs:
     - uses: msys2/setup-msys2@v2
       with:
         msystem: mingw64
+        update: true
         pacboy: |
           python diffutils ninja
           protobuf:p pkg-config:p curl-winssl:p file:p glfw:p mbedtls:p
