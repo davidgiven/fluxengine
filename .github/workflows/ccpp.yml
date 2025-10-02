@@ -83,6 +83,14 @@ jobs:
         shell: msys2 {0}
 
     steps:
+    - uses: msys2/setup-msys2@v2
+      with:
+        msystem: mingw64
+        pacboy: |
+          python diffutils ninja
+          protobuf:p pkg-config:p curl-winssl:p file:p glfw:p mbedtls:p
+          sqlite:p freetype:p boost:p gcc:p binutils:p nsis:p abseil-cpp:p
+
     - uses: actions/checkout@v4
       with:
         repository: 'davidgiven/fluxengine'
@@ -93,16 +101,6 @@ jobs:
       with:
         repository: 'davidgiven/fluxengine-testdata'
         path: 'fluxengine-testdata'
-
-    - uses: msys2/setup-msys2@v2
-      with:
-        msystem: mingw64
-
-    - name: dependencies
-      run: |
-        set -x
-        pacman -S --needed --noconfirm pactoys make python diffutils ninja
-        pacboy -S --needed --noconfirm protobuf:p pkg-config:p curl-winssl:p file:p glfw:p mbedtls:p sqlite:p freetype:p boost:p gcc:p binutils:p nsis:p abseil-cpp:p
 
     - name: run
       run: |
