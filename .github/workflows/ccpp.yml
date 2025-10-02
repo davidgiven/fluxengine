@@ -67,6 +67,9 @@ jobs:
       run: |
         brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg libmagic nlohmann-json cli11 boost glfw3 md4c ninja python freetype2 mbedtls
         brew update
+        pkg-config --cflags --libs glfw3
+        pkg-config --cflags --libs glfw3 --static
+        false
     - name: make
       run: gmake -C fluxengine
     - name: Upload build artifacts
