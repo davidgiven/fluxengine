@@ -95,6 +95,13 @@ jobs:
           protobuf:p pkg-config:p curl-winssl:p file:p glfw:p mbedtls:p
           sqlite:p freetype:p boost:p gcc:p binutils:p nsis:p abseil-cpp:p
 
+    - name: debug
+      run: |
+        pacboy -Q --info protobuf:p
+        cat /mingw64/lib/pkgconfig/protobuf.pc
+        /mingw64/bin/pkg-config.exe protobuf --cflags
+        /mingw64/bin/pkg-config.exe protobuf --cflags --static
+
     - uses: actions/checkout@v4
       with:
         repository: 'davidgiven/fluxengine'
