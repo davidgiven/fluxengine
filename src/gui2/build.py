@@ -251,6 +251,7 @@ if config.osx:
         ],
         hdrs=headers_from("dep/imhex/lib/libimhex/include"),
         cflags=cflags,
+        deps=[".+glfw3_lib"],
     )
 elif config.windows:
     cxxlibrary(name="libimhex-utils", srcs=[])
