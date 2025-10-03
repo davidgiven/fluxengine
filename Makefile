@@ -40,11 +40,13 @@ else
 	CC = clang
 	CXX = clang++
 	CFLAGS = -g -O3 \
+		-I/opt/homebrew/include -I/usr/local/include \
 		-Wno-unknown-warning-option
 	CXXFLAGS = \
 		-std=c++23 \
 		-g -O3 \
 		-fexperimental-library \
+		-I/opt/homebrew/include -I/usr/local/include \
 		-Wformat \
 		-Wformat-security \
 		-Wno-deprecated-enum-float-conversion \
