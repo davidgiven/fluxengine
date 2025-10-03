@@ -13,14 +13,7 @@ namespace hex::plugin::builtin
                 "hex.builtin.title_bar_button.debug_build",
                 []
                 {
-                    if (ImGui::GetIO().KeyShift)
-                    {
-                        RequestOpenPopup::post("DebugMenu");
-                    }
-                    else
-                    {
-                        hex::openWebpage("https://cowlark.com/fluxengine");
-                    }
+                    RequestOpenPopup::post("DebugMenu");
                 });
         }
 
