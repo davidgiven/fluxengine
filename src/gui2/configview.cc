@@ -285,6 +285,12 @@ static void deviceProperties()
 
 void ConfigView::drawContent()
 {
+    ImGui::BeginDisabled(Datastore::isBusy());
+    ON_SCOPE_EXIT
+    {
+        ImGui::EndDisabled();
+    };
+
     ImGui::SeparatorText("fluxengine.view.config.formatProperties"_lang);
     if (ImGui::BeginTable("propertiesEditor",
             2,
