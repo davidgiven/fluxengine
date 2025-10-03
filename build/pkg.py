@@ -40,8 +40,6 @@ def _package(self, name, package, fallback, pkgconfig):
         cflags = pkgconfig.get_property(package, "--cflags")
         ldflags = pkgconfig.get_property(package, "--libs")
 
-        print(f"package {package} cflags: {cflags}")
-        print(f"package {package} ldflags: {ldflags}")
         if cflags:
             self.args["caller_cflags"] = [cflags]
         if ldflags:
