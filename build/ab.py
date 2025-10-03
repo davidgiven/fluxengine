@@ -559,7 +559,7 @@ def emit_rule(self, ins, outs, cmds=[], label=None):
         os.makedirs(self.dir, exist_ok=True)
         rule = []
 
-        if G.AB_NO_SANDBOX:
+        if not G.AB_NO_SANDBOX:
             sandbox = join(self.dir, "sandbox")
             emit(f"rm -rf {sandbox}", into=rule)
             emit(
