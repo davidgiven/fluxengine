@@ -111,8 +111,8 @@ export(
     }
     | (
         {
-            "FluxEngine.pkg": "src/gui+fluxengine_pkg",
-            "FluxEngine.app.zip": "src/gui+fluxengine_app_zip",
+            "FluxEngine.pkg": "src/gui2+fluxengine_pkg",
+            "FluxEngine.app.zip": "src/gui2+fluxengine_app_zip",
         }
         if config.osx
         else {}

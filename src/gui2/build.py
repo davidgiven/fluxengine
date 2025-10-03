@@ -561,3 +561,48 @@ cxxprogram(
     # Windows needs this, for some reason.
     + (config.windows and [package(name="tre_lib", package="tre")] or []),
 )
+
+if config.osx:
+    simplerule(
+        name="fluxengine_app_zip",
+        ins=[
+            ".+gui2",
+            "extras+fluxengine_icns",
+            "extras+fluxengine_template",
+        ],
+        outs=["=FluxEngine.app.zip"],
+        commands=[
+            "rm -rf $[dir]/FluxEngine.app",
+            "unzip -q -d $[dir] $[ins[2]]",  # creates FluxEngine.app
+            "cp $[ins[0]] $[dir]/FluxEngine.app/Contents/MacOS/fluxengine-gui",
+            "mkdir -p $[dir]/FluxEngine.app/Contents/Resources",
+            "cp $[ins[1]] $[dir]/FluxEngine.app/Contents/Resources/FluxEngine.icns",
+            "dylibbundler -of -x $[dir]/FluxEngine.app/Contents/MacOS/fluxengine-gui -b -d $[dir]/FluxEngine.app/Contents/libs -cd > /dev/null",
+            #"cp $$(brew --prefix wxwidgets)/README.md FluxEngine.app/Contents/libs/wxWidgets.md",
+            #"cp $$(brew --prefix protobuf)/LICENSE FluxEngine.app/Contents/libs/protobuf.txt",
+            #"cp $$(brew --prefix fmt)/LICENSE* FluxEngine.app/Contents/libs/fmt.rst",
+            #"cp $$(brew --prefix libpng)/LICENSE FluxEngine.app/Contents/libs/libpng.txt",
+            #"cp $$(brew --prefix libjpeg)/README FluxEngine.app/Contents/libs/libjpeg.txt",
+            #"cp $$(brew --prefix abseil)/LICENSE FluxEngine.app/Contents/libs/abseil.txt",
+            #"cp $$(brew --prefix libtiff)/LICENSE.md FluxEngine.app/Contents/libs/libtiff.txt",
+            #"cp $$(brew --prefix zstd)/LICENSE FluxEngine.app/Contents/libs/zstd.txt",
+            "(cd $[dir] && zip -rq FluxEngine.app.zip FluxEngine.app)",
+            "mv $[dir]/FluxEngine.app.zip $[outs[0]]"
+        ],
+        label="MKAPP",
+    )
+
+    simplerule(
+        name="fluxengine_pkg",
+        ins=[
+            ".+fluxengine_app_zip",
+        ],
+        outs=["=FluxEngine.pkg"],
+        commands=[
+            "rm -rf $[dir]/FluxEngine.app",
+            "unzip -q -d $[dir] $[ins[0]]",
+            "pkgbuild --quiet --install-location /Applications --component $[dir]/FluxEngine.app $[outs[0]]",
+        ],
+        label="MKPKG",
+    )
+
