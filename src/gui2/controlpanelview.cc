@@ -47,7 +47,6 @@ static void saveFluxFile()
     fs::openFileBrowser(fs::DialogMode::Save, {}, Datastore::writeFluxFile);
 }
 
-static void showOptions() {}
 void ControlPanelView::drawContent()
 {
     auto diskFlux = Datastore::getDiskFlux();

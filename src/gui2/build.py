@@ -421,6 +421,7 @@ plugin(
             "dep/imhex/plugins/builtin/source/content/main_menu_items.cpp",
             "dep/imhex/plugins/builtin/source/content/welcome_screen.cpp",
             "dep/imhex/plugins/builtin/source/content/out_of_box_experience.cpp",
+            "dep/imhex/plugins/builtin/source/content/ui_items.cpp",
             "dep/imhex/plugins/builtin/source/content/views.cpp",
             "dep/imhex/plugins/builtin/source/content/views/view_data_processor.cpp",
             "dep/imhex/plugins/builtin/source/content/views/view_tutorials.cpp",
@@ -434,6 +435,7 @@ plugin(
     + [
         "./imhex_overrides/welcome.cc",
         "./imhex_overrides/stubs.cc",
+        "./imhex_overrides/ui_items.cc",
         "./imhex_overrides/views.cpp",
         "./imhex_overrides/main_menu_items.cpp",
     ],
@@ -446,6 +448,7 @@ plugin(
         ".+libwolv",
         ".+ui-plugin",
         ".+fonts-plugin",
+        "dep/imhex/plugins/builtin/source/content/ui_items.cpp",
     ],
 )
 
@@ -578,16 +581,16 @@ if config.osx:
             "mkdir -p $[dir]/FluxEngine.app/Contents/Resources",
             "cp $[ins[1]] $[dir]/FluxEngine.app/Contents/Resources/FluxEngine.icns",
             "dylibbundler -of -x $[dir]/FluxEngine.app/Contents/MacOS/fluxengine-gui -b -d $[dir]/FluxEngine.app/Contents/libs -cd > /dev/null",
-            #"cp $$(brew --prefix wxwidgets)/README.md FluxEngine.app/Contents/libs/wxWidgets.md",
-            #"cp $$(brew --prefix protobuf)/LICENSE FluxEngine.app/Contents/libs/protobuf.txt",
-            #"cp $$(brew --prefix fmt)/LICENSE* FluxEngine.app/Contents/libs/fmt.rst",
-            #"cp $$(brew --prefix libpng)/LICENSE FluxEngine.app/Contents/libs/libpng.txt",
-            #"cp $$(brew --prefix libjpeg)/README FluxEngine.app/Contents/libs/libjpeg.txt",
-            #"cp $$(brew --prefix abseil)/LICENSE FluxEngine.app/Contents/libs/abseil.txt",
-            #"cp $$(brew --prefix libtiff)/LICENSE.md FluxEngine.app/Contents/libs/libtiff.txt",
-            #"cp $$(brew --prefix zstd)/LICENSE FluxEngine.app/Contents/libs/zstd.txt",
+            # "cp $$(brew --prefix wxwidgets)/README.md FluxEngine.app/Contents/libs/wxWidgets.md",
+            # "cp $$(brew --prefix protobuf)/LICENSE FluxEngine.app/Contents/libs/protobuf.txt",
+            # "cp $$(brew --prefix fmt)/LICENSE* FluxEngine.app/Contents/libs/fmt.rst",
+            # "cp $$(brew --prefix libpng)/LICENSE FluxEngine.app/Contents/libs/libpng.txt",
+            # "cp $$(brew --prefix libjpeg)/README FluxEngine.app/Contents/libs/libjpeg.txt",
+            # "cp $$(brew --prefix abseil)/LICENSE FluxEngine.app/Contents/libs/abseil.txt",
+            # "cp $$(brew --prefix libtiff)/LICENSE.md FluxEngine.app/Contents/libs/libtiff.txt",
+            # "cp $$(brew --prefix zstd)/LICENSE FluxEngine.app/Contents/libs/zstd.txt",
             "(cd $[dir] && zip -rq FluxEngine.app.zip FluxEngine.app)",
-            "mv $[dir]/FluxEngine.app.zip $[outs[0]]"
+            "mv $[dir]/FluxEngine.app.zip $[outs[0]]",
         ],
         label="MKAPP",
     )
@@ -605,4 +608,3 @@ if config.osx:
         ],
         label="MKPKG",
     )
-

@@ -84,6 +84,8 @@ void SummaryView::drawContent()
 {
     auto diskFlux = Datastore::getDiskFlux();
     auto diskLayout = Datastore::getDiskLayout();
+    if (!diskFlux || !diskLayout)
+        return;
 
     auto [minPhysicalCylinder,
         maxPhysicalCylinder,
