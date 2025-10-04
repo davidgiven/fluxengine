@@ -17,8 +17,6 @@ AbstractSectorView::AbstractSectorView(const std::string& name):
 
 void AbstractSectorView::drawContent()
 {
-    if (!Datastore::isConfigurationValid())
-        return;
     auto diskFlux = Datastore::getDiskFlux();
     if (!diskFlux)
         return;

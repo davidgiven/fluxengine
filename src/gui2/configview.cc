@@ -70,7 +70,6 @@ static void emitOptions(DynamicSetting<std::string>& setting,
                 if (value)
                     options[it.name()] = "true";
                 setting = optionsToString(options);
-                Datastore::rebuildConfiguration();
             }
         }
     }
@@ -147,7 +146,6 @@ static void emitOptions(DynamicSetting<std::string>& setting,
                         options[it.name()] = ot.name();
                     }
                     setting = optionsToString(options);
-                    Datastore::rebuildConfiguration();
                 }
         }
     }
@@ -185,10 +183,7 @@ static void formatProperties()
                     label = name;
                 if (ImGui::Selectable(
                         fmt::format("{}##{}", label, name).c_str(), false))
-                {
                     formatSetting = name;
-                    Datastore::rebuildConfiguration();
-                }
             }
     }
 
@@ -234,10 +229,7 @@ static void deviceProperties()
 
         for (auto& [name, device] : Datastore::getDevices())
             if (ImGui::Selectable(device.label.c_str(), false))
-            {
                 deviceNameSetting = name;
-                Datastore::rebuildConfiguration();
-            }
     }
 
     /* The file path, if DEVICE_FLUXFILE, and device path, if DEVICE_MANUAL
@@ -260,10 +252,7 @@ static void deviceProperties()
                 pathString,
                 ImGuiInputTextFlags_CallbackCompletion |
                     ImGuiInputTextFlags_ElideLeft))
-        {
             pathSetting = pathString;
-            Datastore::rebuildConfiguration();
-        }
     };
 
     if ((std::string)deviceNameSetting == DEVICE_FLUXFILE)
@@ -325,6 +314,6 @@ void ConfigView::drawContent()
     if (ImGui::InputTextMultiline("##customProperties",
             buffer,
             ImGui::GetContentRegionAvail(),
-            ImGuiInputTextFlags_CallbackCompletion))
+            ImGuiInputTextFlags_None))
         customSetting = buffer;
 }

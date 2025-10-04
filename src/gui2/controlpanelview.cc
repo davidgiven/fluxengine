@@ -34,6 +34,8 @@ static void loadFluxFile()
         {
             settings.get<std::string>("device") = DEVICE_FLUXFILE;
             settings.get<std::fs::path>("fluxfile") = path;
+
+            Datastore::beginRead();
         });
 }
 
@@ -50,7 +52,7 @@ static void saveFluxFile()
 void ControlPanelView::drawContent()
 {
     auto diskFlux = Datastore::getDiskFlux();
-    bool busy = Datastore::isBusy() || !Datastore::isConfigurationValid();
+    bool busy = Datastore::isBusy();
     bool hasImage = diskFlux && diskFlux->image;
 
     if (ImGui::BeginTable("controlPanelOuter",

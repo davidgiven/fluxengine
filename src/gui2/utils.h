@@ -46,7 +46,6 @@ public:
             hex::ContentRegistry::Settings::write<T>(
                 FLUXENGINE_CONFIG, _key, value);
             _cachedValue = std::make_optional(value);
-            Datastore::rebuildConfiguration();
         }
         return value;
     }

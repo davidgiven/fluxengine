@@ -24,7 +24,6 @@ public:
     static void init();
 
     static bool isBusy();
-    static bool isConfigurationValid();
     static bool canFormat();
     static void probeDevices();
 
@@ -32,9 +31,10 @@ public:
     static const std::map<CylinderHead, std::shared_ptr<const TrackInfo>>&
     getPhysicalCylinderLayouts();
     static std::shared_ptr<const DiskLayout> getDiskLayout();
-    static void rebuildConfiguration();
     static void onLogMessage(const AnyLogMessage& message);
 
+    /* Begins a transation. Rebuilds the configuration. */
+    static void reset();
     static void beginRead();
     static void writeImage(const std::fs::path& path);
     static void writeFluxFile(const std::fs::path& path);
