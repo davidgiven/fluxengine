@@ -55,7 +55,7 @@ class Environment(types.SimpleNamespace):
 
 
 G = Environment()
-G.setdefault("AB_NO_SANDBOX", "")
+G.setdefault("AB_SANDBOX", "yes")
 
 
 class PathFinderImpl(PathFinder):
@@ -559,7 +559,7 @@ def emit_rule(self, ins, outs, cmds=[], label=None):
         os.makedirs(self.dir, exist_ok=True)
         rule = []
 
-        if not G.AB_NO_SANDBOX:
+        if G.AB_SANDBOX == "yes":
             sandbox = join(self.dir, "sandbox")
             emit(f"rm -rf {sandbox}", into=rule)
             emit(

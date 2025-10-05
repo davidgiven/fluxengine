@@ -8,17 +8,21 @@ ifeq ($(BUILDTYPE),)
 endif
 export BUILDTYPE
 
+OPTFLAGS = -g -O3
+
 ifeq ($(BUILDTYPE),windows)
 	MINGW = x86_64-w64-mingw32-
 	CC = $(MINGW)gcc
 	CXX = $(MINGW)g++
-	CFLAGS += -g -O3 \
+	CFLAGS += \
+		$(OPTFLAGS) \
 		-ffunction-sections \
 		-fdata-sections \
 		-Wno-attributes \
 		-Wa,-mbig-obj \
 		-static
 	CXXFLAGS += \
+		$(OPTFLAGS) \
 		-std=c++23 \
 		-Wno-deprecated-enum-float-conversion \
 		-Wno-deprecated-enum-enum-conversion \
@@ -35,16 +39,17 @@ ifeq ($(BUILDTYPE),windows)
 	PROTOC_SEPARATOR = ;
 	EXT = .exe
 
-	AB_NO_SANDBOX = yes
+	AB_SANDBOX = no
 else
 	CC = clang
 	CXX = clang++
-	CFLAGS = -g -O3 \
+	CFLAGS = \
+		$(OPTFLAGS) \
 		-I/opt/homebrew/include -I/usr/local/include \
 		-Wno-unknown-warning-option
 	CXXFLAGS = \
+		$(OPTFLAGS) \
 		-std=c++23 \
-		-g -O3 \
 		-fexperimental-library \
 		-I/opt/homebrew/include -I/usr/local/include \
 		-Wformat \
