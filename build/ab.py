@@ -55,7 +55,6 @@ class Environment(types.SimpleNamespace):
 
 
 G = Environment()
-G.setdefault("AB_SANDBOX", "yes")
 
 
 class PathFinderImpl(PathFinder):
@@ -701,6 +700,7 @@ def main():
         if "=" in line:
             name, value = line.split("=", 1)
             G.setdefault(name.strip(), value.strip())
+    G.setdefault("AB_SANDBOX", "yes")
 
     global ninjaFp, shellFp, outputdir
     outputdir = args.outputdir
