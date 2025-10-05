@@ -514,6 +514,8 @@ plugin(
         "./globals.h",
         "./imageview.cc",
         "./imageview.h",
+        "./logview.cc",
+        "./logview.h",
         "./physicalview.cc",
         "./physicalview.h",
         "./summaryview.cc",

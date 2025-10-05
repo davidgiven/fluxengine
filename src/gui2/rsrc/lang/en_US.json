@@ -40,5 +40,7 @@
     "fluxengine.view.controlpanel.writeImage": "Save disk image",
     "fluxengine.view.controlpanel.rereadBad": "Re-read bad tracks",
     "fluxengine.view.controlpanel.createBlank": "Format disk",
-    "fluxengine.view.controlpanel.stop": "Stop"
+    "fluxengine.view.controlpanel.stop": "Stop",
+
+    "fluxengine.view.log.name": "FluxEngine log viewer"
 }

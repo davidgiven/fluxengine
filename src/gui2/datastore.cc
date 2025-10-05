@@ -17,6 +17,7 @@
 #include "lib/usb/usbfinder.h"
 #include "lib/vfs/vfs.h"
 #include "arch/arch.h"
+#include "logview.h"
 #include "globals.h"
 #include "datastore.h"
 #include "utils.h"
@@ -427,6 +428,7 @@ void wtRebuildConfiguration()
 
 void Datastore::onLogMessage(const AnyLogMessage& message)
 {
+    LogView::logMessage(message);
     std::visit(
         overloaded{
             /* Fallback --- do nothing */
