@@ -1,4 +1,6 @@
 {
+    "fluxengine.provider.disk": "FluxEngine disk access",
+
     "fluxengine.view.config.name": "FluxEngine configuration",
     "fluxengine.view.config.deviceConfiguration": "Device setup",
     "fluxengine.view.config.selectedDevice": "Device",
@@ -10,25 +12,7 @@
     "fluxengine.view.config.manual": "Manual device setup",
     "fluxengine.view.config.hardwareDevicePath": "Device path",
     "fluxengine.view.config.highDensity": "High density disk",
-    "fluxengine.view.config.rescan": "Rescan",
-
-    "fluxengine.view.summary.name":"FluxEngine status",
-    "fluxengine.summary.controls.read": "Read from device",
-    "fluxengine.summary.controls.write": "Write to device",
-    "fluxengine.summary.controls.stop": "Stop",
-    "fluxengine.view.summary.edit": "Edit",
-    "fluxengine.view.summary.highDensity": "High density",
-    "fluxengine.view.summary.yes": "yes",
-    "fluxengine.view.summary.no": "no",
-    "fluxengine.view.summary.format": "Format",
-    "fluxengine.view.summary.variations": "Variant",
-    "fluxengine.view.summary.manualDevicePath": "Device path",
-    "fluxengine.view.summary.fluxFile": "Flux file",
-
-    "fluxengine.view.image.name": "FluxEngine logical sector map",
-
-    "fluxengine.view.physical.name": "FluxEngine physical sector map",
-
+    "fluxengine.view.config.rescan": "Rescan USB",
     "fluxengine.view.config.yes": "yes",
     "fluxengine.view.config.no": "no",
     "fluxengine.view.config.format": "Format",
@@ -39,13 +23,22 @@
     "fluxengine.view.config.deviceProperties": "Device properties",
     "fluxengine.view.config.customProperties": "Custom properties",
 
+    "fluxengine.view.summary.name":"FluxEngine status",
+    "fluxengine.view.summary.physical":"Physical view (what your drive sees)",
+    "fluxengine.view.summary.logical":"Logical view (what's on the disk)",
+
+    "fluxengine.view.image.name": "FluxEngine logical sector map",
+
+    "fluxengine.view.physical.name": "FluxEngine physical sector map",
+
     "fluxengine.view.controlpanel.name": "FluxEngine controls",
-    "fluxengine.views.controlpanel.readDevice": "Read from device",
-    "fluxengine.views.controlpanel.writeDevice": "Write to device",
-    "fluxengine.views.controlpanel.readFlux": "Load flux file",
-    "fluxengine.views.controlpanel.writeFlux": "Save flux file",
-    "fluxengine.views.controlpanel.readImage": "Load disk image",
-    "fluxengine.views.controlpanel.writeImage": "Save disk image",
-    "fluxengine.views.controlpanel.rereadBad": "Re-read bad tracks",
-    "fluxengine.views.controlpanel.createBlank": "Create blank disk"
+    "fluxengine.view.controlpanel.readDevice": "Read",
+    "fluxengine.view.controlpanel.writeDevice": "Write",
+    "fluxengine.view.controlpanel.readFlux": "Read flux file",
+    "fluxengine.view.controlpanel.writeFlux": "Write flux file",
+    "fluxengine.view.controlpanel.readImage": "Load disk image",
+    "fluxengine.view.controlpanel.writeImage": "Save disk image",
+    "fluxengine.view.controlpanel.rereadBad": "Re-read bad tracks",
+    "fluxengine.view.controlpanel.createBlank": "Format disk",
+    "fluxengine.view.controlpanel.stop": "Stop"
 }

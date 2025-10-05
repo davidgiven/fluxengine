@@ -232,6 +232,16 @@ static void deviceProperties()
                 deviceNameSetting = name;
     }
 
+    /* The rescan button. */
+
+    ImGui::TableNextRow();
+    ImGui::TableNextColumn();
+    ImGui::TableNextColumn();
+    if (ImGui::Button("fluxengine.view.config.rescan"_lang))
+    {
+        Datastore::probeDevices();
+    }
+
     /* The file path, if DEVICE_FLUXFILE, and device path, if DEVICE_MANUAL
      */
 
@@ -256,11 +266,11 @@ static void deviceProperties()
     };
 
     if ((std::string)deviceNameSetting == DEVICE_FLUXFILE)
-        doPathSetting("fluxengine.view.summary.fluxFile"_lang,
+        doPathSetting("fluxengine.view.config.fluxFile"_lang,
             "fluxfile",
             "##fluxfilePath");
     if ((std::string)deviceNameSetting == DEVICE_MANUAL)
-        doPathSetting("fluxengine.view.summary.manualDevicePath"_lang,
+        doPathSetting("fluxengine.view.config.manualDevicePath"_lang,
             "manualDevicePath",
             "##manualDevicePath");
 

@@ -182,6 +182,7 @@ void Datastore::init()
                     hex::TaskManager::doLater(
                         [=]
                         {
+                            hex::ImHexApi::System::unlockFrameRate();
                             Datastore::onLogMessage(message);
                         });
                 });

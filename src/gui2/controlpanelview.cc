@@ -94,46 +94,45 @@ void ControlPanelView::drawContent()
 
         ImGui::TableNextRow();
         button(ICON_TA_DEVICE_FLOPPY,
-            "fluxengine.views.controlpanel.readDevice"_lang,
+            "fluxengine.view.controlpanel.readDevice"_lang,
             Datastore::beginRead,
             busy);
         ImGui::TableNextColumn();
         button(ICON_VS_SAVE_AS,
-            "fluxengine.views.controlpanel.writeDevice"_lang,
+            "fluxengine.view.controlpanel.writeDevice"_lang,
             nullptr,
             busy || !hasImage);
 
         ImGui::TableNextRow();
         button(ICON_TA_UPLOAD,
-            "fluxengine.views.controlpanel.readFlux"_lang,
+            "fluxengine.view.controlpanel.readFlux"_lang,
             loadFluxFile,
             busy);
         ImGui::TableNextColumn();
         button(ICON_TA_DOWNLOAD,
-            "fluxengine.views.controlpanel.writeFlux"_lang,
+            "fluxengine.view.controlpanel.writeFlux"_lang,
             saveFluxFile,
             busy || !diskFlux);
 
         ImGui::TableNextRow();
         button(ICON_VS_FOLDER_OPENED,
-            "fluxengine.views.controlpanel.readImage"_lang,
+            "fluxengine.view.controlpanel.readImage"_lang,
             nullptr,
             busy);
         ImGui::TableNextColumn();
         button(ICON_VS_SAVE_ALL,
-            "fluxengine.views.controlpanel.writeImage"_lang,
+            "fluxengine.view.controlpanel.writeImage"_lang,
             saveSectorImage,
             busy || !hasImage);
 
         ImGui::TableNextRow();
         button(ICON_TA_REPEAT,
-            "fluxengine.views.controlpanel.rereadBad"_lang,
+            "fluxengine.view.controlpanel.rereadBad"_lang,
             nullptr,
             busy || !diskFlux);
-
-        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
         button(ICON_VS_NEW_FILE,
-            "fluxengine.views.controlpanel.createBlank"_lang,
+            "fluxengine.view.controlpanel.createBlank"_lang,
             nullptr,
             busy || !Datastore::canFormat());
     }
@@ -157,7 +156,7 @@ void ControlPanelView::drawContent()
 
         if (maybeDisabledButton(fmt::format("{} {}",
                                     ICON_TA_CANCEL,
-                                    "fluxengine.summary.controls.stop"_lang),
+                                    "fluxengine.view.controlpanel.stop"_lang),
                 {ImGui::GetContentRegionAvail().x, 0},
                 !busy))
             Datastore::stop();

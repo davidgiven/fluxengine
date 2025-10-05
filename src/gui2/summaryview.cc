@@ -115,7 +115,7 @@ void SummaryView::drawContent()
         };
 
         ImGuiExt::TextFormattedCenteredHorizontal(
-            "Physical map (what the drive sees)");
+            "fluxengine.view.summary.physical"_lang);
 
         auto originalFontSize = ImGui::GetFontSize();
         if (ImGui::BeginTable("physicalMap",
@@ -207,7 +207,7 @@ void SummaryView::drawContent()
         }
 
         ImGuiExt::TextFormattedCenteredHorizontal(
-            "Logical map (what's in the disk image)");
+            "fluxengine.view.summary.logical"_lang);
 
         /* Must match the physicalMap table width above. */
         if (ImGui::BeginTable("logicalMap",
