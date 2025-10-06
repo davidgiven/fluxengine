@@ -6,7 +6,7 @@
 
 Image::Image() {}
 
-Image::Image(std::set<std::shared_ptr<const Sector>>& sectors):
+Image::Image(std::vector<std::shared_ptr<const Sector>>& sectors):
     _filesystemOrder(Layout::computeFilesystemLogicalOrdering())
 {
     for (auto& sector : sectors)

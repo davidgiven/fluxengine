@@ -6,7 +6,6 @@
 
 class DiskFlux;
 class TrackDataFlux;
-class TrackFlux;
 class Sector;
 class LogRenderer;
 

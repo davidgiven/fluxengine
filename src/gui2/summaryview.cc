@@ -25,18 +25,22 @@ SummaryView::SummaryView():
 {
 }
 
-static std::optional<std::set<std::shared_ptr<const Sector>>> findSectors(
-    std::shared_ptr<const DiskFlux>& diskFlux, int cylinder, int head)
+static std::set<std::shared_ptr<const Sector>> findSectors(
+    std::shared_ptr<const DiskFlux>& diskFlux,
+    unsigned physicalCylinder,
+    unsigned physicalHead)
 {
-    if (diskFlux)
-        for (auto& it : diskFlux->tracks)
-        {
-            if ((it->trackInfo->physicalCylinder == cylinder) &&
-                (it->trackInfo->physicalHead == head))
-                return std::make_optional(it->sectors);
-        }
+    std::set<std::shared_ptr<const Sector>> sectors;
 
-    return {};
+    if (diskFlux)
+    {
+        auto [startIt, endIt] = diskFlux->sectorsByTrack.equal_range(
+            {physicalCylinder, physicalHead});
+        for (auto it = startIt; it != endIt; it++)
+            sectors.insert(it->second);
+    }
+
+    return sectors;
 }
 
 struct TrackAnalysis
@@ -53,10 +57,10 @@ TrackAnalysis analyseTrack(std::shared_ptr<const DiskFlux>& diskFlux,
     auto sectors = findSectors(diskFlux, physicalCylinder, physicalHead);
     result.colour = ImGui::GetColorU32(ImGuiCol_TextDisabled);
     result.tooltip = "No data";
-    if (sectors.has_value())
+    if (!sectors.empty())
     {
-        unsigned totalSectors = sectors->size();
-        unsigned goodSectors = std::ranges::count_if(*sectors,
+        unsigned totalSectors = sectors.size();
+        unsigned goodSectors = std::ranges::count_if(sectors,
             [](auto& e)
             {
                 return e->status == Sector::OK;

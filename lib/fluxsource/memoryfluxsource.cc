@@ -8,24 +8,32 @@
 
 class MemoryFluxSourceIterator : public FluxSourceIterator
 {
+    using multimap =
+        std::multimap<CylinderHead, std::shared_ptr<const TrackDataFlux>>;
+
 public:
-    MemoryFluxSourceIterator(const TrackFlux& track): _track(track) {}
+    MemoryFluxSourceIterator(
+        multimap::const_iterator startIt, multimap::const_iterator endIt):
+        _startIt(startIt),
+        _endIt(endIt)
+    {
+    }
 
     bool hasNext() const override
     {
-        return _count < _track.trackDatas.size();
+        return _startIt != _endIt;
     }
 
     std::unique_ptr<const Fluxmap> next() override
     {
-        auto bytes = _track.trackDatas[_count]->fluxmap->rawBytes();
-        _count++;
+        auto bytes = _startIt->second->fluxmap->rawBytes();
+        _startIt++;
         return std::make_unique<Fluxmap>(bytes);
     }
 
 private:
-    const TrackFlux& _track;
-    int _count = 0;
+    multimap::const_iterator _startIt;
+    multimap::const_iterator _endIt;
 };
 
 class MemoryFluxSource : public FluxSource
@@ -33,25 +41,21 @@ class MemoryFluxSource : public FluxSource
 public:
     MemoryFluxSource(const DiskFlux& flux): _flux(flux)
     {
-        std::vector<CylinderHead> chs;
-        for (const auto& trackFlux : flux.tracks)
-            chs.push_back(
-                CylinderHead{(unsigned)trackFlux->trackInfo->physicalCylinder,
-                    (unsigned)trackFlux->trackInfo->logicalCylinder});
+        std::set<CylinderHead> chs;
+        for (auto& [ch, trackDataFlux] : flux.fluxesByTrack)
+            chs.insert(ch);
         _extraConfig.mutable_drive()->set_tracks(
-            convertCylinderHeadsToString(chs));
+            convertCylinderHeadsToString(std::vector(chs.begin(), chs.end())));
     }
 
 public:
     std::unique_ptr<FluxSourceIterator> readFlux(
         int physicalCylinder, int physicalHead) override
     {
-        for (const auto& trackFlux : _flux.tracks)
-        {
-            if ((trackFlux->trackInfo->physicalCylinder == physicalCylinder) &&
-                (trackFlux->trackInfo->physicalHead == physicalHead))
-                return std::make_unique<MemoryFluxSourceIterator>(*trackFlux);
-        }
+        auto [startIt, endIt] = _flux.fluxesByTrack.equal_range(
+            {(unsigned)physicalCylinder, (unsigned)physicalHead});
+        if (startIt != _flux.fluxesByTrack.end())
+            return std::make_unique<MemoryFluxSourceIterator>(startIt, endIt);
 
         return std::make_unique<EmptyFluxSourceIterator>();
     }

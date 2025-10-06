@@ -132,7 +132,7 @@ private:
         auto trackInfo = Layout::getLayoutOfTrack(track, side);
         auto trackdata = readAndDecodeTrack(*_fluxSource, *_decoder, trackInfo);
 
-        for (const auto& sector : trackdata->sectors)
+        for (const auto& sector : trackdata.sectors)
             *_loadedSectors.put(track, side, sector->logicalSector) = *sector;
         _loadedTracks.insert(trackid_t(track, side));
     }

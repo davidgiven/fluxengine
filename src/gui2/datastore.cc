@@ -276,16 +276,15 @@ static void rebuildDiskFluxIndices()
     sectorByLogicalLocation.clear();
     if (diskFlux)
     {
-        for (const auto& track : diskFlux->tracks)
-            for (const auto& sector : track->sectors)
-            {
-                sectorByPhysicalLocation[{sector->physicalCylinder,
-                    sector->physicalHead,
-                    sector->logicalSector}] = sector;
-                sectorByLogicalLocation[{sector->logicalCylinder,
-                    sector->logicalHead,
-                    sector->logicalSector}] = sector;
-            }
+        for (const auto& [ch, sector] : diskFlux->sectorsByTrack)
+        {
+            sectorByPhysicalLocation[{sector->physicalCylinder,
+                sector->physicalHead,
+                sector->logicalSector}] = sector;
+            sectorByLogicalLocation[{sector->logicalCylinder,
+                sector->logicalHead,
+                sector->logicalSector}] = sector;
+        }
     }
 }
 
@@ -526,7 +525,8 @@ void Datastore::beginRead(void)
             wtRebuildConfiguration();
             auto fluxSource = FluxSource::create(globalConfig());
             auto decoder = Arch::createDecoder(globalConfig());
-            auto diskflux = readDiskCommand(*fluxSource, *decoder);
+            auto diskflux = std::make_shared<DiskFlux>();
+            readDiskCommand(*fluxSource, *decoder, *diskflux);
         });
 }
 

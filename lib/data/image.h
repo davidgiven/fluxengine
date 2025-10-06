@@ -20,7 +20,7 @@ class Image
 {
 public:
     Image();
-    Image(std::set<std::shared_ptr<const Sector>>& sectors);
+    Image(std::vector<std::shared_ptr<const Sector>>& sectors);
 
 public:
     class const_iterator

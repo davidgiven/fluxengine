@@ -2,6 +2,7 @@
 #define FLUX_H
 
 #include "lib/core/bytes.h"
+#include "lib/data/locations.h"
 
 class Fluxmap;
 class Sector;
@@ -26,16 +27,13 @@ struct TrackDataFlux
     std::vector<std::shared_ptr<const Sector>> sectors;
 };
 
-struct TrackFlux
-{
-    std::shared_ptr<const TrackInfo> trackInfo;
-    std::vector<std::shared_ptr<TrackDataFlux>> trackDatas;
-    std::set<std::shared_ptr<const Sector>> sectors;
-};
-
 struct DiskFlux
 {
-    std::vector<std::shared_ptr<TrackFlux>> tracks;
+    DiskFlux& operator=(const DiskFlux& other) = default;
+
+    std::multimap<CylinderHead, std::shared_ptr<const TrackDataFlux>>
+        fluxesByTrack;
+    std::multimap<CylinderHead, std::shared_ptr<const Sector>> sectorsByTrack;
     std::shared_ptr<const Image> image;
     std::shared_ptr<const DiskLayout> layout;
 };
