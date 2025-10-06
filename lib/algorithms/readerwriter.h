@@ -28,7 +28,7 @@ struct EndSpeedOperationLogMessage
 
 struct TrackReadLogMessage
 {
-    std::vector<std::shared_ptr<const DecodedTrack>> fluxes;
+    std::vector<std::shared_ptr<const DecodedTrack>> tracks;
     std::vector<std::shared_ptr<const Sector>> sectors;
 };
 
@@ -103,13 +103,13 @@ extern void writeDiskCommand(const Image& image,
 
 extern void writeRawDiskCommand(FluxSource& fluxSource, FluxSink& fluxSink);
 
-struct FluxAndSectors
+struct TracksAndSectors
 {
-    std::vector<std::shared_ptr<const DecodedTrack>> fluxes;
+    std::vector<std::shared_ptr<const DecodedTrack>> tracks;
     std::vector<std::shared_ptr<const Sector>> sectors;
 };
 
-extern FluxAndSectors readAndDecodeTrack(FluxSource& fluxSource,
+extern TracksAndSectors readAndDecodeTrack(FluxSource& fluxSource,
     Decoder& decoder,
     std::shared_ptr<const TrackInfo>& layout);
 

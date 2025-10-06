@@ -86,12 +86,12 @@ void renderLogMessage(
 {
     std::set<std::shared_ptr<const Sector>> rawSectors;
     std::set<std::shared_ptr<const Record>> rawRecords;
-    for (const auto& trackDataFlux : m->fluxes)
+    for (const auto& track : m->tracks)
     {
         rawSectors.insert(
-            trackDataFlux->sectors.begin(), trackDataFlux->sectors.end());
+            track->sectors.begin(), track->sectors.end());
         rawRecords.insert(
-            trackDataFlux->records.begin(), trackDataFlux->records.end());
+            track->records.begin(), track->records.end());
     }
 
     nanoseconds_t clock = 0;
@@ -290,7 +290,7 @@ struct CombinationResult
 };
 
 static CombinationResult combineRecordAndSectors(
-    std::vector<std::shared_ptr<const DecodedTrack>>& fluxes,
+    std::vector<std::shared_ptr<const DecodedTrack>>& tracks,
     Decoder& decoder,
     std::shared_ptr<const TrackInfo>& trackLayout)
 {
@@ -299,8 +299,8 @@ static CombinationResult combineRecordAndSectors(
 
     /* Add the sectors which were there. */
 
-    for (auto& trackdataflux : fluxes)
-        for (auto& sector : trackdataflux->sectors)
+    for (auto& track : tracks)
+        for (auto& sector : track->sectors)
             track_sectors.push_back(sector);
 
     /* Add the sectors which should be there. */
@@ -357,7 +357,7 @@ struct ReadGroupResult
 static ReadGroupResult readGroup(
     FluxSourceIteratorHolder& fluxSourceIteratorHolder,
     std::shared_ptr<const TrackInfo>& trackInfo,
-    std::vector<std::shared_ptr<const DecodedTrack>>& fluxes,
+    std::vector<std::shared_ptr<const DecodedTrack>>& tracks,
     Decoder& decoder)
 {
     ReadGroupResult rgr = {BAD_AND_CAN_NOT_RETRY};
@@ -382,12 +382,12 @@ static ReadGroupResult readGroup(
             fluxmap->bytes());
 
         auto flux = decoder.decodeToSectors(std::move(fluxmap), trackInfo);
-        fluxes.push_back(flux);
+        tracks.push_back(flux);
 
         /* Decode what we've got so far. */
 
         auto [result, sectors] =
-            combineRecordAndSectors(fluxes, decoder, trackInfo);
+            combineRecordAndSectors(tracks, decoder, trackInfo);
         rgr.sectors = sectors;
         if (result == HAS_NO_BAD_SECTORS)
         {
@@ -514,10 +514,10 @@ void writeTracksAndVerify(FluxSink& fluxSink,
         [&](std::shared_ptr<const TrackInfo>& trackInfo)
         {
             FluxSourceIteratorHolder fluxSourceIteratorHolder(fluxSource);
-            std::vector<std::shared_ptr<const DecodedTrack>> fluxes;
+            std::vector<std::shared_ptr<const DecodedTrack>> tracks;
             auto [result, sectors] =
-                readGroup(fluxSourceIteratorHolder, trackInfo, fluxes, decoder);
-            log(TrackReadLogMessage{fluxes, sectors});
+                readGroup(fluxSourceIteratorHolder, trackInfo, tracks, decoder);
+            log(TrackReadLogMessage{tracks, sectors});
 
             if (result != GOOD_READ)
             {
@@ -607,11 +607,11 @@ void writeRawDiskCommand(FluxSource& fluxSource, FluxSink& fluxSink)
         trackinfos);
 }
 
-FluxAndSectors readAndDecodeTrack(FluxSource& fluxSource,
+TracksAndSectors readAndDecodeTrack(FluxSource& fluxSource,
     Decoder& decoder,
     std::shared_ptr<const TrackInfo>& trackInfo)
 {
-    FluxAndSectors fas;
+    TracksAndSectors fas;
 
     if (fluxSource.isHardware())
         measureDiskRotation();
@@ -621,7 +621,7 @@ FluxAndSectors readAndDecodeTrack(FluxSource& fluxSource,
     for (;;)
     {
         auto [result, sectors] =
-            readGroup(fluxSourceIteratorHolder, trackInfo, fas.fluxes, decoder);
+            readGroup(fluxSourceIteratorHolder, trackInfo, fas.tracks, decoder);
         std::copy(
             sectors.begin(), sectors.end(), std::back_inserter(fas.sectors));
         if (result == GOOD_READ)
@@ -650,15 +650,15 @@ FluxAndSectors readAndDecodeTrack(FluxSource& fluxSource,
 }
 
 void readDiskCommand(
-    FluxSource& fluxSource, Decoder& decoder, DecodedDisk& diskflux)
+    FluxSource& fluxSource, Decoder& decoder, DecodedDisk& decodedDisk)
 {
     std::unique_ptr<FluxSink> outputFluxSink;
     if (globalConfig()->decoder().has_copy_flux_to())
         outputFluxSink =
             FluxSink::create(globalConfig()->decoder().copy_flux_to());
 
-    if (!diskflux.layout)
-        diskflux.layout = createDiskLayout();
+    if (!decodedDisk.layout)
+        decodedDisk.layout = createDiskLayout();
 
     log(BeginOperationLogMessage{"Reading and decoding disk"});
     auto physicalLocations = Layout::computePhysicalLocations();
@@ -677,9 +677,10 @@ void readDiskCommand(
         auto [trackFluxes, trackSectors] =
             readAndDecodeTrack(fluxSource, decoder, trackInfo);
         for (const auto& flux : trackFluxes)
-            diskflux.decodedTracks.insert(std::pair{physicalLocation, flux});
+            decodedDisk.decodedTracks.insert(std::pair{physicalLocation, flux});
         for (const auto& sector : trackSectors)
-            diskflux.sectorsByTrack.insert(std::pair{physicalLocation, sector});
+            decodedDisk.sectorsByTrack.insert(
+                std::pair{physicalLocation, sector});
 
         if (outputFluxSink)
         {
@@ -746,18 +747,18 @@ void readDiskCommand(
         log(TrackReadLogMessage{trackFluxes, trackSectors});
 
         std::vector<std::shared_ptr<const Sector>> all_sectors;
-        for (auto& [ch, sector] : diskflux.sectorsByTrack)
+        for (auto& [ch, sector] : decodedDisk.sectorsByTrack)
             all_sectors.push_back(sector);
         all_sectors = collectSectors(all_sectors);
-        diskflux.image = std::make_shared<Image>(all_sectors);
+        decodedDisk.image = std::make_shared<Image>(all_sectors);
 
-        /* Log a _copy_ of the diskflux structure so that the logger doesn't see
-         * the diskflux get mutated in subsequent reads. */
-        log(DiskReadLogMessage{std::make_shared<DecodedDisk>(diskflux)});
+        /* Log a _copy_ of the decodedDisk structure so that the logger doesn't
+         * see the decodedDisk get mutated in subsequent reads. */
+        log(DiskReadLogMessage{std::make_shared<DecodedDisk>(decodedDisk)});
     }
 
-    if (!diskflux.image)
-        diskflux.image = std::make_shared<Image>();
+    if (!decodedDisk.image)
+        decodedDisk.image = std::make_shared<Image>();
 
     log(EndOperationLogMessage{"Read complete"});
 }
@@ -765,12 +766,12 @@ void readDiskCommand(
 void readDiskCommand(
     FluxSource& fluxsource, Decoder& decoder, ImageWriter& writer)
 {
-    DecodedDisk diskflux;
-    readDiskCommand(fluxsource, decoder, diskflux);
+    DecodedDisk decodedDisk;
+    readDiskCommand(fluxsource, decoder, decodedDisk);
 
-    writer.printMap(*diskflux.image);
+    writer.printMap(*decodedDisk.image);
     if (globalConfig()->decoder().has_write_csv_to())
         writer.writeCsv(
-            *diskflux.image, globalConfig()->decoder().write_csv_to());
-    writer.writeImage(*diskflux.image);
+            *decodedDisk.image, globalConfig()->decoder().write_csv_to());
+    writer.writeImage(*decodedDisk.image);
 }
