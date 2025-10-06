@@ -14,7 +14,7 @@ class RawBits;
 class DecoderProto;
 class Config;
 
-#include "lib/data/flux.h"
+#include "lib/data/decoded.h"
 
 extern void setDecoderManualClockRate(double clockrate_us);
 

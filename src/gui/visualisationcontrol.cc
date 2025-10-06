@@ -2,7 +2,7 @@
 #include "gui.h"
 #include "visualisationcontrol.h"
 #include "lib/data/fluxmap.h"
-#include "lib/data/flux.h"
+#include "lib/data/decoded.h"
 #include "lib/data/sector.h"
 #include "lib/data/image.h"
 #include "lib/data/layout.h"

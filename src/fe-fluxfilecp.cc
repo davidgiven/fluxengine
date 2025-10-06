@@ -4,7 +4,7 @@
 #include "lib/data/sector.h"
 #include "lib/config/proto.h"
 #include "lib/data/locations.h"
-#include "lib/data/flux.h"
+#include "lib/data/decoded.h"
 #include "lib/external/fl2.h"
 #include "lib/external/fl2.pb.h"
 #include "src/fluxengine.h"

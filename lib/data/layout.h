@@ -1,7 +1,7 @@
 #ifndef LAYOUT_H
 #define LAYOUT_H
 
-#include "lib/data/flux.h"
+#include "lib/data/decoded.h"
 #include "lib/config/layout.pb.h"
 #include "lib/config/config.h"
 #include "lib/data/locations.h"

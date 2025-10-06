@@ -7,7 +7,7 @@
 #include "lib/core/globals.h"
 #include "lib/core/utils.h"
 #include "lib/config/config.h"
-#include "lib/data/flux.h"
+#include "lib/data/decoded.h"
 #include "lib/data/image.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/fluxsink/fluxsink.h"

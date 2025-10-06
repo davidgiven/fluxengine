@@ -7,7 +7,7 @@
 #include <imgui_internal.h>
 #include "lib/core/globals.h"
 #include "lib/config/config.h"
-#include "lib/data/flux.h"
+#include "lib/data/decoded.h"
 #include "lib/data/sector.h"
 #include "lib/config/proto.h"
 #include "globals.h"

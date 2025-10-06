@@ -12,7 +12,7 @@ cxxlibrary(
         "./sector.cc",
     ],
     hdrs={
-        "lib/data/flux.h": "./flux.h",
+        "lib/data/decoded.h": "./decoded.h",
         "lib/data/fluxmap.h": "./fluxmap.h",
         "lib/data/sector.h": "./sector.h",
         "lib/data/layout.h": "./layout.h",

@@ -4,7 +4,7 @@
 #include "lib/config/config.h"
 #include "lib/decoders/decoders.h"
 #include "lib/data/fluxmapreader.h"
-#include "lib/data/flux.h"
+#include "lib/data/decoded.h"
 #include "protocol.h"
 #include "lib/decoders/rawbits.h"
 #include "lib/data/sector.h"

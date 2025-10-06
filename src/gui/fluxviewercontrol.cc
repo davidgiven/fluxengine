@@ -2,7 +2,7 @@
 #include "gui.h"
 #include "fluxviewercontrol.h"
 #include "textviewerwindow.h"
-#include "lib/data/flux.h"
+#include "lib/data/decoded.h"
 #include "lib/data/fluxmap.h"
 #include "lib/decoders/decoders.h"
 #include "lib/decoders/decoders.pb.h"
