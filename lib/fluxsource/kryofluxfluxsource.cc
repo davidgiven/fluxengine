@@ -15,7 +15,8 @@ public:
         std::vector<CylinderHead> chs;
         for (const auto& di : std::filesystem::directory_iterator(_path))
         {
-            static const std::regex FILENAME_REGEX(".*[^0-9]([0-9]+)\\.([0-9]+)\\.raw");
+            static const std::regex FILENAME_REGEX(
+                ".*[^0-9]([0-9]+)\\.([0-9]+)\\.raw");
 
             std::string filename = di.path().filename().string();
             std::smatch dmatch;

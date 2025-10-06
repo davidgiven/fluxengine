@@ -4,8 +4,8 @@
 #include "fmt/format.h"
 #include <type_traits>
 
-class DiskFlux;
-class TrackDataFlux;
+class DecodedDisk;
+class DecodedTrack;
 class Sector;
 class LogRenderer;
 

@@ -27,7 +27,8 @@ std::shared_ptr<const Sector> Encoder::getSector(
     const Image& image,
     unsigned sectorId)
 {
-    return image.get(trackInfo->logicalCylinder, trackInfo->logicalHead, sectorId);
+    return image.get(
+        trackInfo->logicalCylinder, trackInfo->logicalHead, sectorId);
 }
 
 std::vector<std::shared_ptr<const Sector>> Encoder::collectSectors(

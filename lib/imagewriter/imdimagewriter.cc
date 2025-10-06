@@ -308,8 +308,9 @@ public:
                             (sectorId + sectorIdBase) +
                             '0'); // fill sectorskew start with 1
                         if ((sector->physicalCylinder) !=
-                            (sector->logicalCylinder)) // different physicalCylinder
-                                                    // fromn logicalCylinder
+                            (sector->logicalCylinder)) // different
+                                                       // physicalCylinder fromn
+                                                       // logicalCylinder
                         {
                             blnOptionalCylinderMap = true;
                         }
@@ -359,7 +360,7 @@ public:
                         // const auto& sector = sectors.get(track, head,
                         // sectorId);
                         bw.write_8(sector->logicalCylinder); // 1 byte logical
-                                                          // track
+                                                             // track
                     }
                 }
 

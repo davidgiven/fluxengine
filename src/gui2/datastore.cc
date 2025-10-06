@@ -30,7 +30,7 @@
 
 using hex::operator""_lang;
 
-static std::shared_ptr<const DiskFlux> diskFlux;
+static std::shared_ptr<const DecodedDisk> diskFlux;
 
 static std::deque<std::function<void()>> pendingTasks;
 static std::mutex pendingTasksMutex;
@@ -260,7 +260,7 @@ std::shared_ptr<const DiskLayout> Datastore::getDiskLayout()
     return diskLayout;
 }
 
-std::shared_ptr<const DiskFlux> Datastore::getDiskFlux()
+std::shared_ptr<const DecodedDisk> Datastore::getDecodedDisk()
 {
     return diskFlux;
 }
@@ -270,7 +270,7 @@ static void badConfiguration()
     throw ErrorException("internal error: no configuration");
 }
 
-static void rebuildDiskFluxIndices()
+static void rebuildDecodedDiskIndices()
 {
     sectorByPhysicalLocation.clear();
     sectorByLogicalLocation.clear();
@@ -421,7 +421,7 @@ void wtRebuildConfiguration()
             ::diskPhysicalBounds = diskPhysicalBounds;
             ::diskLogicalBounds = diskLogicalBounds;
             ::physicalCylinderLayouts = physicalCylinderLayouts;
-            rebuildDiskFluxIndices();
+            rebuildDecodedDiskIndices();
         });
 }
 
@@ -484,7 +484,7 @@ void Datastore::onLogMessage(const AnyLogMessage& message)
             [&](std::shared_ptr<const DiskReadLogMessage> m)
             {
                 diskFlux = m->disk;
-                rebuildDiskFluxIndices();
+                rebuildDecodedDiskIndices();
             },
 
             /* Large-scale operation start. */
@@ -525,7 +525,7 @@ void Datastore::beginRead(void)
             wtRebuildConfiguration();
             auto fluxSource = FluxSource::create(globalConfig());
             auto decoder = Arch::createDecoder(globalConfig());
-            auto diskflux = std::make_shared<DiskFlux>();
+            auto diskflux = std::make_shared<DecodedDisk>();
             readDiskCommand(*fluxSource, *decoder, *diskflux);
         });
 }
@@ -549,7 +549,7 @@ void Datastore::writeImage(const std::fs::path& path)
             wtRebuildConfiguration();
             globalConfig().setImageWriter(path.string());
             ImageWriter::create(globalConfig())
-                ->writeImage(*Datastore::getDiskFlux()->image);
+                ->writeImage(*Datastore::getDecodedDisk()->image);
         });
 }
 

@@ -13,11 +13,11 @@
 #include "lib/data/layout.h"
 #include <numeric>
 
-std::shared_ptr<TrackDataFlux> Decoder::decodeToSectors(
+std::shared_ptr<DecodedTrack> Decoder::decodeToSectors(
     std::shared_ptr<const Fluxmap> fluxmap,
     std::shared_ptr<const TrackInfo>& trackInfo)
 {
-    _trackdata = std::make_shared<TrackDataFlux>();
+    _trackdata = std::make_shared<DecodedTrack>();
     _trackdata->fluxmap = fluxmap;
     _trackdata->trackInfo = trackInfo;
 

@@ -26,7 +26,7 @@ SummaryView::SummaryView():
 }
 
 static std::set<std::shared_ptr<const Sector>> findSectors(
-    std::shared_ptr<const DiskFlux>& diskFlux,
+    std::shared_ptr<const DecodedDisk>& diskFlux,
     unsigned physicalCylinder,
     unsigned physicalHead)
 {
@@ -49,7 +49,7 @@ struct TrackAnalysis
     uint32_t colour;
 };
 
-TrackAnalysis analyseTrack(std::shared_ptr<const DiskFlux>& diskFlux,
+TrackAnalysis analyseTrack(std::shared_ptr<const DecodedDisk>& diskFlux,
     unsigned physicalCylinder,
     unsigned physicalHead)
 {
@@ -86,7 +86,7 @@ TrackAnalysis analyseTrack(std::shared_ptr<const DiskFlux>& diskFlux,
 
 void SummaryView::drawContent()
 {
-    auto diskFlux = Datastore::getDiskFlux();
+    auto diskFlux = Datastore::getDecodedDisk();
     auto diskLayout = Datastore::getDiskLayout();
     if (!diskFlux || !diskLayout)
         return;

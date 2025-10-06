@@ -19,7 +19,7 @@ struct Record
     Bytes rawData;
 };
 
-struct TrackDataFlux
+struct DecodedTrack
 {
     std::shared_ptr<const TrackInfo> trackInfo;
     std::shared_ptr<const Fluxmap> fluxmap;
@@ -27,12 +27,12 @@ struct TrackDataFlux
     std::vector<std::shared_ptr<const Sector>> sectors;
 };
 
-struct DiskFlux
+struct DecodedDisk
 {
-    DiskFlux& operator=(const DiskFlux& other) = default;
+    DecodedDisk& operator=(const DecodedDisk& other) = default;
 
-    std::multimap<CylinderHead, std::shared_ptr<const TrackDataFlux>>
-        fluxesByTrack;
+    std::multimap<CylinderHead, std::shared_ptr<const DecodedTrack>>
+        decodedTracks;
     std::multimap<CylinderHead, std::shared_ptr<const Sector>> sectorsByTrack;
     std::shared_ptr<const Image> image;
     std::shared_ptr<const DiskLayout> layout;

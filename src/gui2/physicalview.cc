@@ -25,7 +25,7 @@ Layout::LayoutBounds PhysicalView::getBounds()
 std::shared_ptr<const Sector> PhysicalView::getSector(
     unsigned physicalCylinder, unsigned physicalHead, unsigned sectorId)
 {
-    auto diskFlux = Datastore::getDiskFlux();
+    auto diskFlux = Datastore::getDecodedDisk();
     auto& ptl = findOrDefault(diskFlux->layout->layoutByPhysicalLocation,
         {physicalCylinder, physicalHead});
     if (!ptl)

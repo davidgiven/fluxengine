@@ -660,7 +660,8 @@ void FluxViewerControl::DisplaySectorSummary(
     std::vector<std::shared_ptr<const Sector>> sectors;
     for (auto& trackdata : _flux->trackDatas)
     {
-        if ((trackdata->trackInfo->logicalCylinder == sector->logicalCylinder) &&
+        if ((trackdata->trackInfo->logicalCylinder ==
+                sector->logicalCylinder) &&
             (trackdata->trackInfo->logicalHead == sector->logicalHead))
         {
             for (auto& sec : trackdata->sectors)

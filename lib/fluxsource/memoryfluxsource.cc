@@ -9,7 +9,7 @@
 class MemoryFluxSourceIterator : public FluxSourceIterator
 {
     using multimap =
-        std::multimap<CylinderHead, std::shared_ptr<const TrackDataFlux>>;
+        std::multimap<CylinderHead, std::shared_ptr<const DecodedTrack>>;
 
 public:
     MemoryFluxSourceIterator(
@@ -39,10 +39,10 @@ private:
 class MemoryFluxSource : public FluxSource
 {
 public:
-    MemoryFluxSource(const DiskFlux& flux): _flux(flux)
+    MemoryFluxSource(const DecodedDisk& flux): _flux(flux)
     {
         std::set<CylinderHead> chs;
-        for (auto& [ch, trackDataFlux] : flux.fluxesByTrack)
+        for (auto& [ch, trackDataFlux] : flux.decodedTracks)
             chs.insert(ch);
         _extraConfig.mutable_drive()->set_tracks(
             convertCylinderHeadsToString(std::vector(chs.begin(), chs.end())));
@@ -52,9 +52,9 @@ public:
     std::unique_ptr<FluxSourceIterator> readFlux(
         int physicalCylinder, int physicalHead) override
     {
-        auto [startIt, endIt] = _flux.fluxesByTrack.equal_range(
+        auto [startIt, endIt] = _flux.decodedTracks.equal_range(
             {(unsigned)physicalCylinder, (unsigned)physicalHead});
-        if (startIt != _flux.fluxesByTrack.end())
+        if (startIt != _flux.decodedTracks.end())
             return std::make_unique<MemoryFluxSourceIterator>(startIt, endIt);
 
         return std::make_unique<EmptyFluxSourceIterator>();
@@ -63,11 +63,11 @@ public:
     void recalibrate() override {}
 
 private:
-    const DiskFlux& _flux;
+    const DecodedDisk& _flux;
 };
 
 std::unique_ptr<FluxSource> FluxSource::createMemoryFluxSource(
-    const DiskFlux& flux)
+    const DecodedDisk& flux)
 {
     return std::make_unique<MemoryFluxSource>(flux);
 }

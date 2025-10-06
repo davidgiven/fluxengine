@@ -63,9 +63,11 @@ void visualiseSectorsToFile(const Image& image, const std::string& filename)
             BORDER + ((sideToDraw == -1) ? (panel_centre + side * panel_size)
                                          : panel_centre);
 
-        for (int physicalCylinder = 0; physicalCylinder < TRACKS; physicalCylinder++)
+        for (int physicalCylinder = 0; physicalCylinder < TRACKS;
+            physicalCylinder++)
         {
-            double visibleDistance = (TRACKS * 0.5) + (TRACKS - physicalCylinder);
+            double visibleDistance =
+                (TRACKS * 0.5) + (TRACKS - physicalCylinder);
             double radius = (disk_radius * visibleDistance) / (TRACKS * 1.5);
             painter.noFill();
             painter.lineColor(0x88, 0x88, 0x88);

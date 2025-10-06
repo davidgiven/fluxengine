@@ -4,7 +4,7 @@
 #include "lib/core/logger.h"
 #include "lib/data/layout.h"
 
-class DiskFlux;
+class DecodedDisk;
 class DiskLayout;
 class CandidateDevice;
 
@@ -41,7 +41,7 @@ public:
     static void createBlankImage();
     static void stop();
 
-    static std::shared_ptr<const DiskFlux> getDiskFlux();
+    static std::shared_ptr<const DecodedDisk> getDecodedDisk();
 
     static void runOnWorkerThread(std::function<void()> callback);
 };

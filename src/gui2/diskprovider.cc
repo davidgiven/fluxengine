@@ -60,7 +60,7 @@ void DiskProvider::close() {}
 
 void DiskProvider::readRaw(u64 offset, void* buffer, size_t size)
 {
-    const auto& diskFlux = Datastore::getDiskFlux();
+    const auto& diskFlux = Datastore::getDecodedDisk();
     if (diskFlux && diskFlux->image)
     {
         while (size != 0)
@@ -98,7 +98,7 @@ void DiskProvider::writeRaw(u64 offset, const void* buffer, size_t size)
 
 [[nodiscard]] u64 DiskProvider::getActualSize() const
 {
-    const auto& diskFlux = Datastore::getDiskFlux();
+    const auto& diskFlux = Datastore::getDecodedDisk();
     if (diskFlux && diskFlux->image)
         return diskFlux->image->getGeometry().totalBytes;
     return 0;

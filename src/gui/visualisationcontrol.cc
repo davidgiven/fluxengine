@@ -281,7 +281,7 @@ void VisualisationControl::SetTrackData(std::shared_ptr<const TrackFlux> track)
     Refresh();
 }
 
-void VisualisationControl::SetDiskData(std::shared_ptr<const DiskFlux> disk)
+void VisualisationControl::SetDiskData(std::shared_ptr<const DecodedDisk> disk)
 {
     _sectors.clear();
     for (const auto& track : disk->tracks)

@@ -35,7 +35,9 @@ public:
         unsigned numHeads = 1;
         unsigned numSectors = 0;
 
-        log("D64: reading image with {} tracks, {} heads", numCylinders, numHeads);
+        log("D64: reading image with {} tracks, {} heads",
+            numCylinders,
+            numHeads);
 
         uint32_t offset = 0;
 

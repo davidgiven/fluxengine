@@ -101,7 +101,8 @@ int main(int argc, const char* const argv[])
             if (!entry.is_regular_file())
                 continue;
 
-            auto relativePath = entry.path().lexically_relative( resourceLocation);
+            auto relativePath =
+                entry.path().lexically_relative(resourceLocation);
 
             std::vector<std::uint8_t> inputData;
             inputData.resize(entry.file_size());

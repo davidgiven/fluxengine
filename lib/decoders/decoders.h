@@ -52,7 +52,7 @@ public:
     };
 
 public:
-    std::shared_ptr<TrackDataFlux> decodeToSectors(
+    std::shared_ptr<DecodedTrack> decodeToSectors(
         std::shared_ptr<const Fluxmap> fluxmap,
         std::shared_ptr<const TrackInfo>& trackInfo);
 
@@ -104,7 +104,7 @@ protected:
     virtual void decodeDataRecord() {};
 
     const DecoderProto& _config;
-    std::shared_ptr<TrackDataFlux> _trackdata;
+    std::shared_ptr<DecodedTrack> _trackdata;
     std::shared_ptr<Sector> _sector;
     std::unique_ptr<FluxDecoder> _decoder;
     std::vector<bool> _recordBits;

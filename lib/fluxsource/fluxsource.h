@@ -7,7 +7,7 @@
 
 class A2rFluxSourceProto;
 class CwfFluxSourceProto;
-class DiskFlux;
+class DecodedDisk;
 class EraseFluxSourceProto;
 class Fl2FluxSourceProto;
 class FluxSourceProto;
@@ -58,7 +58,7 @@ private:
 
 public:
     static std::unique_ptr<FluxSource> createMemoryFluxSource(
-        const DiskFlux& flux);
+        const DecodedDisk& flux);
 
     static std::unique_ptr<FluxSource> create(Config& config);
     static std::unique_ptr<FluxSource> create(const FluxSourceProto& spec);

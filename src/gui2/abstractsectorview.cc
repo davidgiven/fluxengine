@@ -17,7 +17,7 @@ AbstractSectorView::AbstractSectorView(const std::string& name):
 
 void AbstractSectorView::drawContent()
 {
-    auto diskFlux = Datastore::getDiskFlux();
+    auto diskFlux = Datastore::getDecodedDisk();
     if (!diskFlux)
         return;
     auto& image = diskFlux->image;

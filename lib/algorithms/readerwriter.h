@@ -5,7 +5,7 @@
 
 class Decoder;
 class Encoder;
-class DiskFlux;
+class DecodedDisk;
 class FluxSink;
 class FluxSource;
 class FluxSourceIteratorHolder;
@@ -14,7 +14,7 @@ class Image;
 class ImageReader;
 class ImageWriter;
 class TrackInfo;
-class TrackDataFlux;
+class DecodedTrack;
 class Sector;
 
 struct BeginSpeedOperationLogMessage
@@ -28,13 +28,13 @@ struct EndSpeedOperationLogMessage
 
 struct TrackReadLogMessage
 {
-    std::vector<std::shared_ptr<const TrackDataFlux>> fluxes;
+    std::vector<std::shared_ptr<const DecodedTrack>> fluxes;
     std::vector<std::shared_ptr<const Sector>> sectors;
 };
 
 struct DiskReadLogMessage
 {
-    std::shared_ptr<const DiskFlux> disk;
+    std::shared_ptr<const DecodedDisk> disk;
 };
 
 struct BeginReadOperationLogMessage
@@ -45,7 +45,7 @@ struct BeginReadOperationLogMessage
 
 struct EndReadOperationLogMessage
 {
-    std::shared_ptr<const TrackDataFlux> trackDataFlux;
+    std::shared_ptr<const DecodedTrack> trackDataFlux;
     std::set<std::shared_ptr<const Sector>> sectors;
 };
 
@@ -105,7 +105,7 @@ extern void writeRawDiskCommand(FluxSource& fluxSource, FluxSink& fluxSink);
 
 struct FluxAndSectors
 {
-    std::vector<std::shared_ptr<const TrackDataFlux>> fluxes;
+    std::vector<std::shared_ptr<const DecodedTrack>> fluxes;
     std::vector<std::shared_ptr<const Sector>> sectors;
 };
 
@@ -114,7 +114,7 @@ extern FluxAndSectors readAndDecodeTrack(FluxSource& fluxSource,
     std::shared_ptr<const TrackInfo>& layout);
 
 extern void readDiskCommand(
-    FluxSource& fluxsource, Decoder& decoder, DiskFlux& diskflux);
+    FluxSource& fluxsource, Decoder& decoder, DecodedDisk& diskflux);
 extern void readDiskCommand(
     FluxSource& source, Decoder& decoder, ImageWriter& writer);
 

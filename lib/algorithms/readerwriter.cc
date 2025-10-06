@@ -290,7 +290,7 @@ struct CombinationResult
 };
 
 static CombinationResult combineRecordAndSectors(
-    std::vector<std::shared_ptr<const TrackDataFlux>>& fluxes,
+    std::vector<std::shared_ptr<const DecodedTrack>>& fluxes,
     Decoder& decoder,
     std::shared_ptr<const TrackInfo>& trackLayout)
 {
@@ -357,7 +357,7 @@ struct ReadGroupResult
 static ReadGroupResult readGroup(
     FluxSourceIteratorHolder& fluxSourceIteratorHolder,
     std::shared_ptr<const TrackInfo>& trackInfo,
-    std::vector<std::shared_ptr<const TrackDataFlux>>& fluxes,
+    std::vector<std::shared_ptr<const DecodedTrack>>& fluxes,
     Decoder& decoder)
 {
     ReadGroupResult rgr = {BAD_AND_CAN_NOT_RETRY};
@@ -514,7 +514,7 @@ void writeTracksAndVerify(FluxSink& fluxSink,
         [&](std::shared_ptr<const TrackInfo>& trackInfo)
         {
             FluxSourceIteratorHolder fluxSourceIteratorHolder(fluxSource);
-            std::vector<std::shared_ptr<const TrackDataFlux>> fluxes;
+            std::vector<std::shared_ptr<const DecodedTrack>> fluxes;
             auto [result, sectors] =
                 readGroup(fluxSourceIteratorHolder, trackInfo, fluxes, decoder);
             log(TrackReadLogMessage{fluxes, sectors});
@@ -650,7 +650,7 @@ FluxAndSectors readAndDecodeTrack(FluxSource& fluxSource,
 }
 
 void readDiskCommand(
-    FluxSource& fluxSource, Decoder& decoder, DiskFlux& diskflux)
+    FluxSource& fluxSource, Decoder& decoder, DecodedDisk& diskflux)
 {
     std::unique_ptr<FluxSink> outputFluxSink;
     if (globalConfig()->decoder().has_copy_flux_to())
@@ -677,7 +677,7 @@ void readDiskCommand(
         auto [trackFluxes, trackSectors] =
             readAndDecodeTrack(fluxSource, decoder, trackInfo);
         for (const auto& flux : trackFluxes)
-            diskflux.fluxesByTrack.insert(std::pair{physicalLocation, flux});
+            diskflux.decodedTracks.insert(std::pair{physicalLocation, flux});
         for (const auto& sector : trackSectors)
             diskflux.sectorsByTrack.insert(std::pair{physicalLocation, sector});
 
@@ -753,7 +753,7 @@ void readDiskCommand(
 
         /* Log a _copy_ of the diskflux structure so that the logger doesn't see
          * the diskflux get mutated in subsequent reads. */
-        log(DiskReadLogMessage{std::make_shared<DiskFlux>(diskflux)});
+        log(DiskReadLogMessage{std::make_shared<DecodedDisk>(diskflux)});
     }
 
     if (!diskflux.image)
@@ -765,7 +765,7 @@ void readDiskCommand(
 void readDiskCommand(
     FluxSource& fluxsource, Decoder& decoder, ImageWriter& writer)
 {
-    DiskFlux diskflux;
+    DecodedDisk diskflux;
     readDiskCommand(fluxsource, decoder, diskflux);
 
     writer.printMap(*diskflux.image);

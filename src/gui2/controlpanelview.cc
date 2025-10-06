@@ -51,7 +51,7 @@ static void saveFluxFile()
 
 void ControlPanelView::drawContent()
 {
-    auto diskFlux = Datastore::getDiskFlux();
+    auto diskFlux = Datastore::getDecodedDisk();
     bool busy = Datastore::isBusy();
     bool hasImage = diskFlux && diskFlux->image;
 
