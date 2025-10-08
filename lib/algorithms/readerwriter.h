@@ -3,9 +3,11 @@
 
 #include "lib/data/locations.h"
 
-class Decoder;
-class Encoder;
 class DecodedDisk;
+class DecodedTrack;
+class Decoder;
+class DiskLayout;
+class Encoder;
 class FluxSink;
 class FluxSource;
 class FluxSourceIteratorHolder;
@@ -13,8 +15,8 @@ class Fluxmap;
 class Image;
 class ImageReader;
 class ImageWriter;
-class TrackInfo;
-class DecodedTrack;
+class LogicalTrackLayout;
+class PhysicalTrackLayout;
 class Sector;
 
 struct BeginSpeedOperationLogMessage
@@ -76,32 +78,37 @@ struct OperationProgressLogMessage
 
 extern void measureDiskRotation();
 
-extern void writeTracks(FluxSink& fluxSink,
+extern void writeTracks(const DiskLayout& diskLayout,
+    FluxSink& fluxSink,
     const std::function<std::unique_ptr<const Fluxmap>(
-        std::shared_ptr<const TrackInfo>& layout)> producer,
-    std::vector<std::shared_ptr<const TrackInfo>>& locations);
+        const LogicalTrackLayout& ltl)> producer,
+    const std::vector<CylinderHead>& locations);
 
-extern void writeTracksAndVerify(FluxSink& fluxSink,
+extern void writeTracksAndVerify(const DiskLayout& diskLayout,
+    FluxSink& fluxSink,
     Encoder& encoder,
     FluxSource& fluxSource,
     Decoder& decoder,
     const Image& image,
-    std::vector<std::shared_ptr<const TrackInfo>>& locations);
+    const std::vector<CylinderHead>& locations);
 
-extern void writeDiskCommand(const Image& image,
+extern void writeDiskCommand(const DiskLayout& diskLayout,
+    const Image& image,
     Encoder& encoder,
     FluxSink& fluxSink,
     Decoder* decoder,
     FluxSource* fluxSource,
     const std::vector<CylinderHead>& locations);
 
-extern void writeDiskCommand(const Image& image,
+extern void writeDiskCommand(const DiskLayout& diskLayout,
+    const Image& image,
     Encoder& encoder,
     FluxSink& fluxSink,
     Decoder* decoder = nullptr,
     FluxSource* fluxSource = nullptr);
 
-extern void writeRawDiskCommand(FluxSource& fluxSource, FluxSink& fluxSink);
+extern void writeRawDiskCommand(
+    const DiskLayout& diskLayout, FluxSource& fluxSource, FluxSink& fluxSink);
 
 struct TracksAndSectors
 {
@@ -109,9 +116,10 @@ struct TracksAndSectors
     std::vector<std::shared_ptr<const Sector>> sectors;
 };
 
-extern TracksAndSectors readAndDecodeTrack(FluxSource& fluxSource,
+extern TracksAndSectors readAndDecodeTrack(const DiskLayout& diskLayout,
+    FluxSource& fluxSource,
     Decoder& decoder,
-    std::shared_ptr<const TrackInfo>& layout);
+    const std::shared_ptr<const LogicalTrackLayout>& ltl);
 
 extern void readDiskCommand(
     FluxSource& fluxsource, Decoder& decoder, DecodedDisk& diskflux);

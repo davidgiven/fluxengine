@@ -5,6 +5,7 @@
 #include "protocol.h"
 #include "lib/decoders/decoders.h"
 #include "lib/data/sector.h"
+#include "lib/data/layout.h"
 #include "arch/apple2/apple2.h"
 #include "arch/apple2/apple2.pb.h"
 #include "lib/decoders/decoders.pb.h"
@@ -94,7 +95,7 @@ public:
 
         uint8_t volume = combine(br.read_be16());
         _sector->logicalCylinder = combine(br.read_be16());
-        _sector->logicalHead = _sector->physicalHead;
+        _sector->logicalHead = _ltl->logicalHead;
         _sector->logicalSector = combine(br.read_be16());
         uint8_t checksum = combine(br.read_be16());
 

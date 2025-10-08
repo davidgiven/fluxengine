@@ -34,7 +34,7 @@ static std::set<std::shared_ptr<const Sector>> findSectors(
 
     if (diskFlux)
     {
-        auto [startIt, endIt] = diskFlux->sectorsByTrack.equal_range(
+        auto [startIt, endIt] = diskFlux->sectorsByPhysicalLocation.equal_range(
             {physicalCylinder, physicalHead});
         for (auto it = startIt; it != endIt; it++)
             sectors.insert(it->second);

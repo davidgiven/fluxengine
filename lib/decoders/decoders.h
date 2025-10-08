@@ -6,13 +6,14 @@
 #include "lib/data/fluxmapreader.h"
 #include "lib/decoders/fluxdecoder.h"
 
-class Sector;
-class Fluxmap;
-class FluxMatcher;
-class FluxmapReader;
-class RawBits;
-class DecoderProto;
 class Config;
+class DecoderProto;
+class FluxMatcher;
+class Fluxmap;
+class FluxmapReader;
+class PhysicalTrackLayout;
+class RawBits;
+class Sector;
 
 #include "lib/data/decoded.h"
 
@@ -54,7 +55,7 @@ public:
 public:
     std::shared_ptr<DecodedTrack> decodeToSectors(
         std::shared_ptr<const Fluxmap> fluxmap,
-        std::shared_ptr<const TrackInfo>& trackInfo);
+        const std::shared_ptr<const PhysicalTrackLayout>& ptl);
 
     void pushRecord(
         const Fluxmap::Position& start, const Fluxmap::Position& end);
@@ -104,6 +105,7 @@ protected:
     virtual void decodeDataRecord() {};
 
     const DecoderProto& _config;
+    std::shared_ptr<const LogicalTrackLayout> _ltl;
     std::shared_ptr<DecodedTrack> _trackdata;
     std::shared_ptr<Sector> _sector;
     std::unique_ptr<FluxDecoder> _decoder;

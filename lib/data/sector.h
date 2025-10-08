@@ -6,7 +6,7 @@
 #include "lib/data/locations.h"
 
 class Record;
-class TrackInfo;
+class LogicalTrackLayout;
 
 struct Sector : public LogicalLocation
 {
@@ -25,23 +25,20 @@ struct Sector : public LogicalLocation
     static Status stringToStatus(const std::string& value);
 
     Status status = Status::INTERNAL_ERROR;
-    std::shared_ptr<const TrackInfo> trackLayout;
     uint32_t position = 0;
     nanoseconds_t clock = 0;
     nanoseconds_t headerStartTime = 0;
     nanoseconds_t headerEndTime = 0;
     nanoseconds_t dataStartTime = 0;
     nanoseconds_t dataEndTime = 0;
-    unsigned physicalCylinder = 0;
-    unsigned physicalHead = 0;
+    std::optional<CylinderHead> physicalLocation = {};
     Bytes data;
     std::vector<std::shared_ptr<Record>> records;
 
     Sector(const Sector& other) = default;
     Sector& operator=(const Sector& other) = default;
 
-    Sector(std::shared_ptr<const TrackInfo>& layout,
-        const LogicalLocation& location);
+    Sector(const LogicalLocation& location);
 
     std::tuple<int, int, int, Status> key() const
     {

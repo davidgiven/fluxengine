@@ -8,6 +8,7 @@ class Sector;
 class FluxSource;
 class FluxSink;
 class Decoder;
+class DiskLayout;
 class Encoder;
 
 class SectorInterface
@@ -42,6 +43,7 @@ public:
         std::shared_ptr<ImageReader> reader,
         std::shared_ptr<ImageWriter> writer);
     static std::unique_ptr<SectorInterface> createFluxSectorInterface(
+        const std::shared_ptr<const DiskLayout>& diskLayout,
         std::shared_ptr<FluxSource> fluxSource,
         std::shared_ptr<FluxSink> fluxSink,
         std::shared_ptr<Encoder> encoder,

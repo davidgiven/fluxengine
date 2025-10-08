@@ -17,6 +17,7 @@
 #include "lib/data/fluxpattern.h"
 #include "lib/decoders/decoders.h"
 #include "lib/data/sector.h"
+#include "lib/data/layout.h"
 #include "arch/northstar/northstar.h"
 #include "lib/core/bytes.h"
 #include "lib/decoders/decoders.pb.h"
@@ -159,9 +160,9 @@ public:
         auto bytes = decodeFmMfm(rawbits).slice(0, recordSize);
         ByteReader br(bytes);
 
-        _sector->logicalHead = _sector->physicalHead;
+        _sector->logicalHead = _ltl->logicalHead;
         _sector->logicalSector = _hardSectorId;
-        _sector->logicalCylinder = _sector->physicalCylinder;
+        _sector->logicalCylinder = _ltl->logicalCylinder;
 
         if (headerSize == NORTHSTAR_HEADER_SIZE_DD)
         {

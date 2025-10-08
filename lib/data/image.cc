@@ -6,22 +6,12 @@
 
 Image::Image() {}
 
-Image::Image(std::vector<std::shared_ptr<const Sector>>& sectors):
-    _filesystemOrder(Layout::computeFilesystemLogicalOrdering())
+Image::Image(const std::vector<std::shared_ptr<const Sector>>& sectors)
 {
     for (auto& sector : sectors)
         _sectors[{sector->logicalCylinder,
             sector->logicalHead,
             sector->logicalSector}] = sector;
-    for (auto& location : _filesystemOrder)
-        if (!_sectors.contains(location))
-        {
-            auto trackInfo = Layout::getLayoutOfTrack(
-                location.logicalCylinder, location.logicalHead);
-            auto sector = std::make_shared<Sector>(trackInfo, location);
-            sector->status = Sector::MISSING;
-            _sectors[location] = sector;
-        }
 
     calculateSize();
 }
@@ -52,35 +42,43 @@ bool Image::empty() const
     return _sectors.empty();
 }
 
-bool Image::contains(unsigned track, unsigned side, unsigned sectorid) const
+bool Image::contains(const LogicalLocation& location) const
 {
-    return _sectors.find({track, side, sectorid}) != _sectors.end();
+    return _sectors.find(location) != _sectors.end();
 }
 
-std::shared_ptr<const Sector> Image::get(
-    unsigned track, unsigned side, unsigned sectorid) const
+std::shared_ptr<const Sector> Image::get(const LogicalLocation& location) const
 {
-    auto i = _sectors.find({track, side, sectorid});
+    auto i = _sectors.find(location);
     if (i == _sectors.end())
         return nullptr;
     return i->second;
 }
 
-std::shared_ptr<Sector> Image::put(
-    unsigned track, unsigned side, unsigned sectorid)
+std::shared_ptr<Sector> Image::put(const LogicalLocation& location)
 {
-    auto trackLayout = Layout::getLayoutOfTrack(track, side);
-    std::shared_ptr<Sector> sector = std::make_shared<Sector>(
-        trackLayout, LogicalLocation{track, side, sectorid});
-    sector->physicalCylinder = Layout::remapCylinderLogicalToPhysical(track);
-    sector->physicalHead = side;
-    _sectors[{track, side, sectorid}] = sector;
+    auto sector = std::make_shared<Sector>(location);
+    _sectors[location] = sector;
     return sector;
 }
 
-void Image::erase(unsigned track, unsigned side, unsigned sectorid)
+void Image::erase(const LogicalLocation& location)
 {
-    _sectors.erase({track, side, sectorid});
+    _sectors.erase(location);
+}
+
+void Image::addMissingSectors(const DiskLayout& diskLayout)
+{
+    for (auto& location : diskLayout.logicalSectorLocationsInFilesystemOrder)
+        if (!_sectors.contains(location))
+        {
+            auto& ltl = diskLayout.layoutByLogicalLocation.at(
+                {location.logicalCylinder, location.logicalHead});
+            auto sector = std::make_shared<Sector>(location);
+            sector->status = Sector::MISSING;
+            _sectors[location] = sector;
+        }
+    calculateSize();
 }
 
 void Image::calculateSize()
@@ -100,8 +98,8 @@ void Image::calculateSize()
                 _geometry.firstSector, (unsigned)sector->logicalSector);
             maxSector = std::max(maxSector, (unsigned)sector->logicalSector);
             _geometry.sectorSize =
-                std::max(_geometry.sectorSize, sector->trackLayout->sectorSize);
-            _geometry.totalBytes += sector->trackLayout->sectorSize;
+                std::max(_geometry.sectorSize, sector->data.size());
+            _geometry.totalBytes += _geometry.sectorSize;
         }
     }
     _geometry.numSectors = maxSector - _geometry.firstSector + 1;

@@ -132,7 +132,7 @@ struct PhysicalTrackLayout
     unsigned groupOffset;
 
     /* The logical track that this track is part of. */
-    std::shared_ptr<LogicalTrackLayout> logicalTrackLayout;
+    std::shared_ptr<const LogicalTrackLayout> logicalTrackLayout;
 };
 
 class DiskLayout
@@ -142,6 +142,7 @@ public:
 
 public:
     unsigned headBias;
+    unsigned headWidth;
     bool swapSides;
 
     unsigned minPhysicalCylinder, maxPhysicalCylinder;
@@ -151,12 +152,13 @@ public:
     unsigned numLogicalCylinders;
     unsigned numLogicalHeads;
 
-    std::map<CylinderHead, std::shared_ptr<PhysicalTrackLayout>>
+    std::map<CylinderHead, std::shared_ptr<const PhysicalTrackLayout>>
         layoutByPhysicalLocation;
-    std::map<CylinderHead, std::shared_ptr<LogicalTrackLayout>>
+    std::map<CylinderHead, std::shared_ptr<const LogicalTrackLayout>>
         layoutByLogicalLocation;
-    std::vector<CylinderHeadSector> physicalLocationsInFilesystemOrder;
-    std::vector<LogicalLocation> logicalLocationsInFilesystemOrder;
+    std::vector<CylinderHead> logicalLocations;
+    std::vector<CylinderHeadSector> physicalSectorLocationsInFilesystemOrder;
+    std::vector<LogicalLocation> logicalSectorLocationsInFilesystemOrder;
     std::map<unsigned, LogicalLocation> logicalLocationBySectorOffset;
     std::map<LogicalLocation, unsigned> sectorOffsetByLogicalLocation;
     std::map<unsigned, LogicalLocation> logicalLocationByBlockId;

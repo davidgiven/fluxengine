@@ -161,24 +161,31 @@ void AbstractSectorView::drawContent()
                                 {0,
                                     rowHeight -
                                         ImGui::GetStyle().CellPadding.y * 2}))
-                            Events::SeekToSectorViaPhysicalLocation::post(
-                                CylinderHeadSector{sector->physicalCylinder,
-                                    sector->physicalHead,
-                                    sectorId});
+                            if (sector->physicalLocation.has_value())
+                                Events::SeekToSectorViaPhysicalLocation::post(
+                                    CylinderHeadSector{
+                                        sector->physicalLocation->cylinder,
+                                        sector->physicalLocation->head,
+                                        sectorId});
 
                         ImGui::PushFont(NULL, originalFontSize);
                         ON_SCOPE_EXIT
                         {
                             ImGui::PopFont();
                         };
+                        auto physicalLocation =
+                            sector->physicalLocation.has_value()
+                                ? fmt::format("Physical: c{}h{}s{}",
+                                      sector->physicalLocation->cylinder,
+                                      sector->physicalLocation->head,
+                                      sectorId)
+                                : "unknown";
                         ImGui::SetItemTooltip("%s",
-                            fmt::format("Physical: c{}h{}s{}\n"
+                            fmt::format("Physical: {}\n"
                                         "Logical: c{}h{}s{}\n"
                                         "Size: {} bytes\n"
                                         "Status: {}",
-                                sector->physicalCylinder,
-                                sector->physicalHead,
-                                sectorId,
+                                physicalLocation,
                                 sector->logicalCylinder,
                                 sector->logicalHead,
                                 sectorId,

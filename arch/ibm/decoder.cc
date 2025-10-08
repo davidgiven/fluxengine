@@ -141,8 +141,7 @@ public:
         bw += decodeFmMfm(bits).slice(0, IBM_IDAM_LEN);
 
         IbmDecoderProto::TrackdataProto trackdata;
-        getTrackFormat(
-            trackdata, _sector->physicalCylinder, _sector->physicalHead);
+        getTrackFormat(trackdata, _ltl->logicalCylinder, _ltl->logicalHead);
 
         _sector->logicalCylinder = br.read_8();
         _sector->logicalHead = br.read_8();
@@ -156,11 +155,10 @@ public:
                 Sector::DATA_MISSING; /* correct but unintuitive */
 
         if (trackdata.ignore_side_byte())
-            _sector->logicalHead =
-                Layout::remapHeadPhysicalToLogical(_sector->physicalHead);
+            _sector->logicalHead = _ltl->logicalHead;
         _sector->logicalHead ^= trackdata.invert_side_byte();
         if (trackdata.ignore_track_byte())
-            _sector->logicalCylinder = _sector->physicalCylinder;
+            _sector->logicalCylinder = _ltl->logicalCylinder;
 
         for (int sector : trackdata.ignore_sector())
             if (_sector->logicalSector == sector)

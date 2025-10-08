@@ -375,13 +375,26 @@ DiskLayout::DiskLayout(const ConfigProto& config)
     headBias = config.drive().head_bias();
     swapSides = config.layout().swap_sides();
 
+    switch (globalConfig()->drive().drive_type())
+    {
+        case DRIVETYPE_APPLE2:
+            headWidth = 4;
+            break;
+
+        default:
+            headWidth = 1;
+            break;
+    }
+
     for (unsigned logicalCylinder = 0; logicalCylinder < numLogicalCylinders;
         logicalCylinder++)
         for (unsigned logicalHead = 0; logicalHead < numLogicalHeads;
             logicalHead++)
         {
             auto ltl = std::make_shared<LogicalTrackLayout>();
-            layoutByLogicalLocation[{logicalCylinder, logicalHead}] = ltl;
+            CylinderHead ch(logicalCylinder, logicalHead);
+            layoutByLogicalLocation[ch] = ltl;
+            logicalLocations.push_back(ch);
 
             ltl->logicalCylinder = logicalCylinder;
             ltl->logicalHead = logicalHead;

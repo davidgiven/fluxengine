@@ -4,6 +4,7 @@
 #include "lib/data/locations.h"
 
 class Sector;
+class DiskLayout;
 
 struct Geometry
 {
@@ -20,7 +21,7 @@ class Image
 {
 public:
     Image();
-    Image(std::vector<std::shared_ptr<const Sector>>& sectors);
+    Image(const std::vector<std::shared_ptr<const Sector>>& sectors);
 
 public:
     class const_iterator
@@ -60,20 +61,51 @@ public:
     void clear();
     void createBlankImage();
     bool empty() const;
-    bool contains(unsigned track, unsigned side, unsigned sectorId) const;
 
-    std::shared_ptr<const Sector> get(const LogicalLocation& location) const
+    bool contains(const LogicalLocation& location) const;
+    std::shared_ptr<const Sector> get(const LogicalLocation& location) const;
+    std::shared_ptr<Sector> put(const LogicalLocation& location);
+    void erase(const LogicalLocation& location);
+
+    bool contains(const CylinderHead& ch, unsigned sector) const
     {
-        return get(location.logicalCylinder,
-            location.logicalHead,
-            location.logicalSector);
+        return contains({ch.cylinder, ch.head, sector});
+    }
+
+    bool contains(unsigned cylinder, unsigned head, unsigned sector) const
+    {
+        return contains({cylinder, head, sector});
     }
 
     std::shared_ptr<const Sector> get(
-        unsigned track, unsigned side, unsigned sectorId) const;
+        const CylinderHead& ch, unsigned sector) const
+    {
+        return get({ch.cylinder, ch.head, sector});
+    }
+
+    std::shared_ptr<const Sector> get(
+        unsigned cylinder, unsigned head, unsigned sector) const
+    {
+        return get({cylinder, head, sector});
+    }
+
+    std::shared_ptr<Sector> put(const CylinderHead& ch, unsigned sector)
+    {
+        return put({ch.cylinder, ch.head, sector});
+    }
+
     std::shared_ptr<Sector> put(
-        unsigned track, unsigned side, unsigned sectorId);
-    void erase(unsigned track, unsigned side, unsigned sectorId);
+        unsigned cylinder, unsigned head, unsigned sector)
+    {
+        return put({cylinder, head, sector});
+    }
+
+    void erase(unsigned cylinder, unsigned head, unsigned sector)
+    {
+        erase({cylinder, head, sector});
+    }
+
+    void addMissingSectors(const DiskLayout& layout);
 
     const_iterator begin() const
     {
@@ -96,7 +128,6 @@ public:
 private:
     Geometry _geometry = {0, 0, 0};
     std::map<LogicalLocation, std::shared_ptr<const Sector>> _sectors;
-    std::vector<LogicalLocation> _filesystemOrder;
 };
 
 #endif

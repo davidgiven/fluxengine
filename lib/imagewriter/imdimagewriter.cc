@@ -307,19 +307,12 @@ public:
                         sector_skew.push_back(
                             (sectorId + sectorIdBase) +
                             '0'); // fill sectorskew start with 1
-                        if ((sector->physicalCylinder) !=
-                            (sector->logicalCylinder)) // different
-                                                       // physicalCylinder fromn
-                                                       // logicalCylinder
-                        {
-                            blnOptionalCylinderMap = true;
-                        }
-                        if (sector->logicalHead !=
-                            sector->physicalHead) // different physicalHead
-                                                  // fromn logicalHead
-                        {
+                        if (sector->physicalLocation.has_value() &&
+                            ((sector->physicalLocation->cylinder !=
+                                 sector->logicalCylinder) ||
+                                (sector->physicalLocation->head !=
+                                    sector->logicalHead)))
                             blnOptionalHeadMap = true;
-                        }
                     }
                 }
                 bw.write_8(header.ModeValue); // 1 byte ModeValue

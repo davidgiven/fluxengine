@@ -42,7 +42,7 @@ public:
     MemoryFluxSource(const DecodedDisk& flux): _flux(flux)
     {
         std::set<CylinderHead> chs;
-        for (auto& [ch, trackDataFlux] : flux.decodedTracks)
+        for (auto& [ch, trackDataFlux] : flux.tracksByPhysicalLocation)
             chs.insert(ch);
         _extraConfig.mutable_drive()->set_tracks(
             convertCylinderHeadsToString(std::vector(chs.begin(), chs.end())));
@@ -52,9 +52,9 @@ public:
     std::unique_ptr<FluxSourceIterator> readFlux(
         int physicalCylinder, int physicalHead) override
     {
-        auto [startIt, endIt] = _flux.decodedTracks.equal_range(
+        auto [startIt, endIt] = _flux.tracksByPhysicalLocation.equal_range(
             {(unsigned)physicalCylinder, (unsigned)physicalHead});
-        if (startIt != _flux.decodedTracks.end())
+        if (startIt != _flux.tracksByPhysicalLocation.end())
             return std::make_unique<MemoryFluxSourceIterator>(startIt, endIt);
 
         return std::make_unique<EmptyFluxSourceIterator>();

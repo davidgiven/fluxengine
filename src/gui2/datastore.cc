@@ -206,7 +206,7 @@ void Datastore::init()
                             sector->logicalSector});
 
                 hex::ImHexApi::HexEditor::setSelection(
-                    hex::Region{offset, sector->trackLayout->sectorSize});
+                    hex::Region{offset, sector->data.size()});
             }
         });
 
@@ -276,10 +276,10 @@ static void rebuildDecodedDiskIndices()
     sectorByLogicalLocation.clear();
     if (diskFlux)
     {
-        for (const auto& [ch, sector] : diskFlux->sectorsByTrack)
+        for (const auto& [ch, sector] : diskFlux->sectorsByPhysicalLocation)
         {
-            sectorByPhysicalLocation[{sector->physicalCylinder,
-                sector->physicalHead,
+            sectorByPhysicalLocation[{sector->physicalLocation->cylinder,
+                sector->physicalLocation->head,
                 sector->logicalSector}] = sector;
             sectorByLogicalLocation[{sector->logicalCylinder,
                 sector->logicalHead,
@@ -568,7 +568,7 @@ void Datastore::writeFluxFile(const std::fs::path& path)
             globalConfig().setFluxSink(path.string());
             auto fluxSource = FluxSource::createMemoryFluxSource(*diskFlux);
             auto fluxSink = FluxSink::create(globalConfig());
-            writeRawDiskCommand(*fluxSource, *fluxSink);
+            writeRawDiskCommand(*diskLayout, *fluxSource, *fluxSink);
         });
 }
 

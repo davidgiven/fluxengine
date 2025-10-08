@@ -408,38 +408,32 @@ public:
                             header.track,
                             s);
                 }
-                if (blnOptionalCylinderMap) // there was een optional cylinder
-                                            // map. write it to the sector
-                // The Sector Cylinder Map has one entry for each sector, and
-                // contains the logical Cylinder ID for the corresponding sector
-                // in the Sector Numbering Map.
+
+                if (blnOptionalCylinderMap)
                 {
-                    sector->physicalCylinder =
-                        Layout::remapCylinderLogicalToPhysical(header.track);
+                    // there was een optional cylinder
+                    // map. write it to the sector
+                    // The Sector Cylinder Map has one entry for each sector,
+                    // and contains the logical Cylinder ID for the
+                    // corresponding sector in the Sector Numbering Map.
                     sector->logicalCylinder = optionalsector_map[s];
                     blnOptionalCylinderMap = false;
                 }
                 else
-                {
                     sector->logicalCylinder = header.track;
-                    sector->physicalCylinder =
-                        Layout::remapCylinderLogicalToPhysical(header.track);
-                }
-                if (blnOptionalHeadMap) // there was een optional head map.
-                                        // write it to the sector
-                // The Sector Head Map has one entry for each sector, and
-                // contains the logical Head ID for the corresponding sector in
-                // the Sector Numbering Map.
+
+                if (blnOptionalHeadMap)
                 {
-                    sector->physicalHead = header.Head;
+                    // there was een optional head map.
+                    // write it to the sector
+                    // The Sector Head Map has one entry for each sector, and
+                    // contains the logical Head ID for the corresponding sector
+                    // in the Sector Numbering Map.
                     sector->logicalHead = optionalhead_map[s];
                     blnOptionalHeadMap = false;
                 }
                 else
-                {
                     sector->logicalHead = header.Head;
-                    sector->physicalHead = header.Head;
-                }
             }
         }
 

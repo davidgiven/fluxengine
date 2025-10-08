@@ -6,6 +6,7 @@
 #include "lib/data/layout.h"
 #include "lib/data/image.h"
 #include "lib/data/sector.h"
+#include "lib/data/layout.h"
 #include "lib/vfs/sectorinterface.h"
 #include "lib/imagereader/imagereader.h"
 #include "lib/imagewriter/imagewriter.h"
@@ -252,8 +253,9 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystemFromConfig()
             fluxSink = FluxSink::create(globalConfig());
             encoder = Arch::createEncoder(globalConfig());
         }
+        auto diskLayout = createDiskLayout(globalConfig());
         sectorInterface = SectorInterface::createFluxSectorInterface(
-            fluxSource, fluxSink, encoder, decoder);
+            diskLayout, fluxSource, fluxSink, encoder, decoder);
     }
     else
     {

@@ -5,6 +5,7 @@
 #include "protocol.h"
 #include "lib/decoders/decoders.h"
 #include "lib/data/sector.h"
+#include "lib/data/layout.h"
 #include "arch/smaky6/smaky6.h"
 #include "lib/core/bytes.h"
 #include "lib/core/crc.h"
@@ -129,11 +130,11 @@ public:
         uint8_t wantedChecksum = br.read_8();
         uint8_t gotChecksum = sumBytes(data) & 0xff;
 
-        if (track != _sector->physicalCylinder)
+        if (track != _ltl->logicalCylinder)
             return;
 
-        _sector->logicalCylinder = _sector->physicalCylinder;
-        _sector->logicalHead = _sector->physicalHead;
+        _sector->logicalCylinder = _ltl->physicalCylinder;
+        _sector->logicalHead = _ltl->logicalHead;
         _sector->logicalSector = _sectorId;
 
         _sector->data = data;

@@ -183,8 +183,6 @@ public:
                 const auto& sector =
                     image->put(logicalCylinder, logicalHead, sectorId);
                 sector->status = Sector::OK;
-                sector->physicalCylinder = physicalCylinder;
-                sector->physicalHead = physicalHead;
                 sector->data = data.slice(0, sectorSize);
                 totalSize += sectorSize;
             }

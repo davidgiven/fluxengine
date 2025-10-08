@@ -107,16 +107,12 @@ private:
     }
 
 public:
-    std::unique_ptr<Fluxmap> encode(std::shared_ptr<const TrackInfo>& trackInfo,
+    std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout& ltl,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
         IbmEncoderProto::TrackdataProto trackdata;
-        getEncoderTrackData(
-            trackdata, trackInfo->logicalCylinder, trackInfo->logicalHead);
-
-        auto trackLayout = Layout::getLayoutOfTrack(
-            trackInfo->logicalCylinder, trackInfo->logicalHead);
+        getEncoderTrackData(trackdata, ltl.logicalCylinder, ltl.logicalHead);
 
         auto writeBytes = [&](const Bytes& bytes)
         {
@@ -152,7 +148,7 @@ public:
 
         uint8_t sectorSize = 0;
         {
-            int s = trackLayout->sectorSize >> 7;
+            int s = ltl.sectorSize >> 7;
             while (s > 1)
             {
                 s >>= 1;
@@ -237,8 +233,7 @@ public:
                 }
                 bw.write_8(damUnencoded);
 
-                Bytes truncatedData =
-                    sectorData->data.slice(0, trackLayout->sectorSize);
+                Bytes truncatedData = sectorData->data.slice(0, ltl.sectorSize);
                 bw += truncatedData;
                 uint16_t crc = crc16(CCITT_POLY, data);
                 bw.write_be16(crc);

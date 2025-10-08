@@ -57,6 +57,7 @@ public:
 
 protected:
     const ImageReaderProto& _config;
+    std::shared_ptr<const DiskLayout> _layout;
     ConfigProto _extraConfig;
 };
 

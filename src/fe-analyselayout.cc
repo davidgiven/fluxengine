@@ -79,8 +79,9 @@ void visualiseSectorsToFile(const Image& image, const std::string& filename)
             {
                 for (const auto& sector : image)
                 {
-                    if ((sector->physicalHead == side) &&
-                        (sector->physicalCylinder == physicalCylinder) &&
+                    if ((sector->physicalLocation->head == side) &&
+                        (sector->physicalLocation->cylinder ==
+                            physicalCylinder) &&
                         (sector->logicalSector == alignWithSector))
                     {
                         offset = sector->headerStartTime;
@@ -113,8 +114,8 @@ void visualiseSectorsToFile(const Image& image, const std::string& filename)
             /* Sadly, Images aren't indexable by physical track. */
             for (const auto& sector : image)
             {
-                if ((sector->physicalHead == side) &&
-                    (sector->physicalCylinder == physicalCylinder))
+                if ((sector->physicalLocation->head == side) &&
+                    (sector->physicalLocation->cylinder == physicalCylinder))
                 {
                     painter.lineColor(0xff, 0x00, 0x00);
                     if (sector->status == Sector::OK)
@@ -183,8 +184,8 @@ static void readRow(const std::vector<std::string>& row, Image& image)
 
         const auto& sector =
             image.put(logicalCylinder, logicalHead, logicalSector);
-        sector->physicalCylinder = std::stoi(row[0]);
-        sector->physicalHead = std::stoi(row[1]);
+        sector->physicalLocation = std::make_optional<CylinderHead>(
+            {(unsigned)std::stoi(row[0]), (unsigned)std::stoi(row[1])});
         sector->logicalCylinder = logicalCylinder;
         sector->logicalHead = logicalHead;
         sector->logicalSector = logicalSector;
