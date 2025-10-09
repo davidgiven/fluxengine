@@ -36,8 +36,8 @@ std::vector<std::shared_ptr<const Sector>> Encoder::collectSectors(
 
     for (unsigned sectorId : ltl.diskSectorOrder)
     {
-        const auto& sector = getSector(
-            {ltl.logicalCylinder, ltl.logicalHead}, image, sectorId);
+        const auto& sector =
+            getSector({ltl.logicalCylinder, ltl.logicalHead}, image, sectorId);
         if (!sector)
             error("sector {}.{}.{} is missing from the image",
                 ltl.logicalCylinder,

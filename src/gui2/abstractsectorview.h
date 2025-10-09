@@ -25,5 +25,5 @@ public:
 protected:
     virtual std::shared_ptr<const Sector> getSector(
         unsigned cylinder, unsigned head, unsigned sectorId) = 0;
-    virtual Layout::LayoutBounds getBounds() = 0;
+    virtual DiskLayout::LayoutBounds getBounds() = 0;
 };

@@ -183,9 +183,10 @@ class CpmFsFilesystem : public Filesystem, public HasBitmap, public HasMount
     };
 
 public:
-    CpmFsFilesystem(
-        const CpmFsProto& config, std::shared_ptr<SectorInterface> sectors):
-        Filesystem(sectors),
+    CpmFsFilesystem(const CpmFsProto& config,
+        const std::shared_ptr<const DiskLayout>& diskLayout,
+        std::shared_ptr<SectorInterface> sectors):
+        Filesystem(diskLayout, sectors),
         _config(config)
     {
     }
@@ -661,7 +662,10 @@ private:
 };
 
 std::unique_ptr<Filesystem> Filesystem::createCpmFsFilesystem(
-    const FilesystemProto& config, std::shared_ptr<SectorInterface> sectors)
+    const FilesystemProto& config,
+    const std::shared_ptr<const DiskLayout>& diskLayout,
+    std::shared_ptr<SectorInterface> sectors)
 {
-    return std::make_unique<CpmFsFilesystem>(config.cpmfs(), sectors);
+    return std::make_unique<CpmFsFilesystem>(
+        config.cpmfs(), diskLayout, sectors);
 }

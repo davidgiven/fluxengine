@@ -157,9 +157,10 @@ class PhileFilesystem : public Filesystem
     };
 
 public:
-    PhileFilesystem(
-        const PhileProto& config, std::shared_ptr<SectorInterface> sectors):
-        Filesystem(sectors),
+    PhileFilesystem(const PhileProto& config,
+        const std::shared_ptr<const DiskLayout>& diskLayout,
+        std::shared_ptr<SectorInterface> sectors):
+        Filesystem(diskLayout, sectors),
         _config(config)
     {
     }
@@ -293,7 +294,10 @@ private:
 };
 
 std::unique_ptr<Filesystem> Filesystem::createPhileFilesystem(
-    const FilesystemProto& config, std::shared_ptr<SectorInterface> sectors)
+    const FilesystemProto& config,
+    const std::shared_ptr<const DiskLayout>& diskLayout,
+    std::shared_ptr<SectorInterface> sectors)
 {
-    return std::make_unique<PhileFilesystem>(config.phile(), sectors);
+    return std::make_unique<PhileFilesystem>(
+        config.phile(), diskLayout, sectors);
 }

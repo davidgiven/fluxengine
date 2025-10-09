@@ -39,9 +39,11 @@ namespace
 
         ~A2RFluxSink()
         {
-            auto physicalLocations = Layout::computePhysicalLocations();
+            // FIXME: should use a passed-in DiskLayout object.
+            auto diskLayout = createDiskLayout();
             auto [minCylinder, maxCylinder, minHead, maxHead] =
-                Layout::getBounds(physicalLocations);
+                diskLayout->getPhysicalBounds();
+
             _minCylinder = minCylinder;
             _maxCylinder = maxCylinder;
             _minHead = minHead;

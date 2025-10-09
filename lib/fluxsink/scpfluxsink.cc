@@ -41,8 +41,10 @@ class ScpFluxSink : public FluxSink
 public:
     ScpFluxSink(const ScpFluxSinkProto& lconfig): _config(lconfig)
     {
+        // FIXME: should use a passed-in DiskLayout object.
+        auto diskLayout = createDiskLayout();
         auto [minCylinder, maxCylinder, minHead, maxHead] =
-            Layout::getBounds(Layout::computePhysicalLocations());
+            diskLayout->getPhysicalBounds();
 
         _fileheader.file_id[0] = 'S';
         _fileheader.file_id[1] = 'C';

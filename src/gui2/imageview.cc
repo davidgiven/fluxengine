@@ -12,7 +12,7 @@ using namespace hex;
 
 ImageView::ImageView(): AbstractSectorView("fluxengine.view.image.name") {}
 
-Layout::LayoutBounds ImageView::getBounds()
+DiskLayout::LayoutBounds ImageView::getBounds()
 {
     return Datastore::getDiskLayout()->getLogicalBounds();
 }

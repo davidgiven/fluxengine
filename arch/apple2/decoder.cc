@@ -107,7 +107,8 @@ public:
                 Sector::DATA_MISSING; /* unintuitive but correct */
 
         if (_sector->logicalHead == 1)
-            _sector->logicalCylinder -= _config.apple2().side_one_track_offset();
+            _sector->logicalCylinder -=
+                _config.apple2().side_one_track_offset();
 
         /* Sanity check. */
 

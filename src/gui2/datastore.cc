@@ -44,14 +44,12 @@ static std::atomic<bool> failed;
 static bool formattingSupported;
 static std::map<std::string, Datastore::Device> devices;
 static std::shared_ptr<const DiskLayout> diskLayout;
-static std::map<CylinderHead, std::shared_ptr<const TrackInfo>>
-    physicalCylinderLayouts;
 static std::map<CylinderHeadSector, std::shared_ptr<const Sector>>
     sectorByPhysicalLocation;
 static std::map<LogicalLocation, std::shared_ptr<const Sector>>
     sectorByLogicalLocation;
-static Layout::LayoutBounds diskPhysicalBounds;
-static Layout::LayoutBounds diskLogicalBounds;
+static DiskLayout::LayoutBounds diskPhysicalBounds;
+static DiskLayout::LayoutBounds diskLogicalBounds;
 
 static void wtRebuildConfiguration();
 
@@ -200,7 +198,7 @@ void Datastore::init()
             {
                 auto sector = it->second;
                 unsigned offset =
-                    diskFlux->layout->sectorOffsetByLogicalLocation.at(
+                    diskFlux->layout->sectorOffsetByLogicalSectorLocation.at(
                         {sector->logicalCylinder,
                             sector->logicalHead,
                             sector->logicalSector});
@@ -226,10 +224,10 @@ void Datastore::init()
             unsigned lastSectorId = ltl->filesystemSectorOrder.back();
 
             unsigned startOffset =
-                diskFlux->layout->sectorOffsetByLogicalLocation.at(
+                diskFlux->layout->sectorOffsetByLogicalSectorLocation.at(
                     {ltl->logicalCylinder, ltl->logicalHead, firstSectorId});
             unsigned endOffset =
-                diskFlux->layout->sectorOffsetByLogicalLocation.at(
+                diskFlux->layout->sectorOffsetByLogicalSectorLocation.at(
                     {ltl->logicalCylinder, ltl->logicalHead, lastSectorId}) +
                 ltl->sectorSize;
 
@@ -393,8 +391,8 @@ void wtRebuildConfiguration()
     bool formattingSupported = false;
     try
     {
-        auto filesystem =
-            Filesystem::createFilesystem(globalConfig()->filesystem(), nullptr);
+        auto filesystem = Filesystem::createFilesystem(
+            globalConfig()->filesystem(), diskLayout, nullptr);
         uint32_t flags = filesystem->capabilities();
         formattingSupported = flags & Filesystem::OP_CREATE;
     }
@@ -404,14 +402,8 @@ void wtRebuildConfiguration()
     }
 
     auto diskLayout = createDiskLayout();
-    auto locations = Layout::computePhysicalLocations();
-    auto diskPhysicalBounds = Layout::getBounds(locations);
-    auto diskLogicalBounds =
-        Layout::getBounds(Layout::computeLogicalLocations());
-
-    decltype(::physicalCylinderLayouts) physicalCylinderLayouts;
-    for (auto& it : locations)
-        physicalCylinderLayouts[it] = Layout::getLayoutOfTrackPhysical(it);
+    auto diskPhysicalBounds = diskLayout->getPhysicalBounds();
+    auto diskLogicalBounds = diskLayout->getLogicalBounds();
 
     hex::TaskManager::doLater(
         [=]
@@ -420,7 +412,6 @@ void wtRebuildConfiguration()
             ::diskLayout = diskLayout;
             ::diskPhysicalBounds = diskPhysicalBounds;
             ::diskLogicalBounds = diskLogicalBounds;
-            ::physicalCylinderLayouts = physicalCylinderLayouts;
             rebuildDecodedDiskIndices();
         });
 }

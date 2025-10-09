@@ -105,7 +105,7 @@ public:
         erase({cylinder, head, sector});
     }
 
-    void addMissingSectors(const DiskLayout& layout);
+    void addMissingSectors(const DiskLayout& layout, bool populated = false);
 
     const_iterator begin() const
     {

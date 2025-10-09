@@ -89,11 +89,7 @@ std::shared_ptr<DecodedTrack> Decoder::decodeToSectors(
         }
 
         if (_sector->status != Sector::MISSING)
-        {
-            auto trackLayout = Layout::getLayoutOfTrack(
-                _sector->logicalCylinder, _sector->logicalHead);
             _trackdata->sectors.push_back(_sector);
-        }
     }
 
     return _trackdata;

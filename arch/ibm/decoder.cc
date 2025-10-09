@@ -207,16 +207,14 @@ public:
         _sector->status =
             (wantCrc == gotCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
 
-        auto layout = Layout::getLayoutOfTrack(
-            _sector->logicalCylinder, _sector->logicalHead);
-        if (_currentSectorSize != layout->sectorSize)
+        if (_currentSectorSize != _ltl->sectorSize)
             std::cerr << fmt::format(
                 "Warning: configured sector size for t{}.h{}.s{} is {} bytes "
                 "but that seen on disk is {} bytes\n",
                 _sector->logicalCylinder,
                 _sector->logicalHead,
                 _sector->logicalSector,
-                layout->sectorSize,
+                _ltl->sectorSize,
                 _currentSectorSize);
     }
 

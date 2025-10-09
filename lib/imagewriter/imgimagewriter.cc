@@ -32,29 +32,25 @@ public:
         if (!outputFile.is_open())
             error("cannot open output file");
 
+        const auto diskLayout = createDiskLayout();
         bool in_filesystem_order = _config.img().filesystem_sector_order();
-        for (const auto& p : Layout::getTrackOrdering(
-                 in_filesystem_order ? layout.filesystem_track_order()
-                                     : layout.image_track_order(),
-                 tracks,
-                 sides))
+
+        for (auto& logicalLocation :
+            in_filesystem_order ? diskLayout->logicalLocationsInFilesystemOrder
+                                : diskLayout->logicalLocations)
         {
-            int track = p.first;
-            int side = p.second;
+            auto& ltl = diskLayout->layoutByLogicalLocation.at(logicalLocation);
 
-            auto trackLayout = Layout::getLayoutOfTrack(track, side);
-            for (int sectorId : trackLayout->naturalSectorOrder)
+            for (unsigned sectorId : in_filesystem_order
+                                         ? ltl->filesystemSectorOrder
+                                         : ltl->naturalSectorOrder)
             {
-                if (in_filesystem_order)
-                    sectorId =
-                        trackLayout->filesystemToNaturalSectorMap.at(sectorId);
-
-                const auto& sector = image.get(track, side, sectorId);
+                const auto& sector = image.get(
+                    logicalLocation.cylinder, logicalLocation.head, sectorId);
                 if (sector)
-                    sector->data.slice(0, trackLayout->sectorSize)
-                        .writeTo(outputFile);
+                    sector->data.slice(0, ltl->sectorSize).writeTo(outputFile);
                 else
-                    outputFile.seekp(trackLayout->sectorSize, std::ios::cur);
+                    outputFile.seekp(ltl->sectorSize, std::ios::cur);
             }
         }
 

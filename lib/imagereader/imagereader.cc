@@ -62,7 +62,4 @@ std::unique_ptr<ImageReader> ImageReader::create(const ImageReaderProto& config)
     }
 }
 
-ImageReader::ImageReader(const ImageReaderProto& config):
-    _config(config)
-{
-}
+ImageReader::ImageReader(const ImageReaderProto& config): _config(config) {}

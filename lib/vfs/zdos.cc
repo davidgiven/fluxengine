@@ -182,9 +182,10 @@ class ZDosFilesystem : public Filesystem
     };
 
 public:
-    ZDosFilesystem(
-        const ZDosProto& config, std::shared_ptr<SectorInterface> sectors):
-        Filesystem(sectors),
+    ZDosFilesystem(const ZDosProto& config,
+        const std::shared_ptr<const DiskLayout>& diskLayout,
+        std::shared_ptr<SectorInterface> sectors):
+        Filesystem(diskLayout, sectors),
         _config(config)
     {
     }
@@ -255,7 +256,8 @@ public:
 private:
     void mount()
     {
-        _sectorsPerTrack = Layout::getLayoutOfTrack(0, 0)->numSectors;
+        _sectorsPerTrack =
+            _diskLayout->layoutByLogicalLocation.at({0, 0})->numSectors;
 
         int rootBlock = toBlockNumber(_config.filesystem_start().sector(),
             _config.filesystem_start().track());
@@ -319,7 +321,9 @@ private:
 };
 
 std::unique_ptr<Filesystem> Filesystem::createZDosFilesystem(
-    const FilesystemProto& config, std::shared_ptr<SectorInterface> sectors)
+    const FilesystemProto& config,
+    const std::shared_ptr<const DiskLayout>& diskLayout,
+    std::shared_ptr<SectorInterface> sectors)
 {
-    return std::make_unique<ZDosFilesystem>(config.zdos(), sectors);
+    return std::make_unique<ZDosFilesystem>(config.zdos(), diskLayout, sectors);
 }

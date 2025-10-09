@@ -10,5 +10,5 @@ public:
 
     std::shared_ptr<const Sector> getSector(
         unsigned cylinder, unsigned head, unsigned sectorId) override;
-    Layout::LayoutBounds getBounds() override;
+    DiskLayout::LayoutBounds getBounds() override;
 };

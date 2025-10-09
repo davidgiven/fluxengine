@@ -66,17 +66,17 @@ void DiskProvider::readRaw(u64 offset, void* buffer, size_t size)
         while (size != 0)
         {
             auto it =
-                diskFlux->layout->logicalLocationBySectorOffset.upper_bound(
+                diskFlux->layout->logicalSectorLocationBySectorOffset.upper_bound(
                     offset);
-            if (it != diskFlux->layout->logicalLocationBySectorOffset.begin())
+            if (it != diskFlux->layout->logicalSectorLocationBySectorOffset.begin())
                 it--;
 
             unsigned realOffset = it->first;
             auto logicalLocation = it->second;
             auto sector = diskFlux->image->get(logicalLocation);
             unsigned blockOffset = realOffset - offset;
-            unsigned bytesRemaining = std::min(
-                (unsigned)size, sector->data.size() - blockOffset);
+            unsigned bytesRemaining =
+                std::min((unsigned)size, sector->data.size() - blockOffset);
             auto bytes = sector->data.slice(blockOffset, bytesRemaining);
             memcpy(buffer, bytes.cbegin(), bytes.size());
 

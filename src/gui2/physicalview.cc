@@ -17,7 +17,7 @@ PhysicalView::PhysicalView():
 
 PhysicalView::~PhysicalView() {}
 
-Layout::LayoutBounds PhysicalView::getBounds()
+DiskLayout::LayoutBounds PhysicalView::getBounds()
 {
     return Datastore::getDiskLayout()->getPhysicalBounds();
 }

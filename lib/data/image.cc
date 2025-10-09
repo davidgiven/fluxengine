@@ -22,21 +22,6 @@ void Image::clear()
     _geometry = {0, 0, 0};
 }
 
-void Image::createBlankImage()
-{
-    clear();
-    for (const auto& trackAndHead : Layout::getTrackOrdering(
-             globalConfig()->layout().filesystem_track_order()))
-    {
-        unsigned track = trackAndHead.first;
-        unsigned side = trackAndHead.second;
-        auto trackLayout = Layout::getLayoutOfTrack(track, side);
-        Bytes blank(trackLayout->sectorSize);
-        for (unsigned sectorId : trackLayout->naturalSectorOrder)
-            put(track, side, sectorId)->data = blank;
-    }
-}
-
 bool Image::empty() const
 {
     return _sectors.empty();
@@ -67,7 +52,7 @@ void Image::erase(const LogicalLocation& location)
     _sectors.erase(location);
 }
 
-void Image::addMissingSectors(const DiskLayout& diskLayout)
+void Image::addMissingSectors(const DiskLayout& diskLayout, bool populated)
 {
     for (auto& location : diskLayout.logicalSectorLocationsInFilesystemOrder)
         if (!_sectors.contains(location))
@@ -75,7 +60,12 @@ void Image::addMissingSectors(const DiskLayout& diskLayout)
             auto& ltl = diskLayout.layoutByLogicalLocation.at(
                 {location.logicalCylinder, location.logicalHead});
             auto sector = std::make_shared<Sector>(location);
-            sector->status = Sector::MISSING;
+
+            if (populated)
+                sector->data = Bytes(ltl->sectorSize);
+            else
+                sector->status = Sector::MISSING;
+
             _sectors[location] = sector;
         }
     calculateSize();

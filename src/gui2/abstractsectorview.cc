@@ -143,7 +143,7 @@ void AbstractSectorView::drawContent()
                         };
 
                         auto block = findOptionally(
-                            diskFlux->layout->blockIdByLogicalLocation,
+                            diskFlux->layout->blockIdByLogicalSectorLocation,
                             {sector->logicalCylinder,
                                 sector->logicalHead,
                                 sector->logicalSector});

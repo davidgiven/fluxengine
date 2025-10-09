@@ -132,8 +132,8 @@ private:
     {
         CylinderHead logicalLocation = {logicalCylinder, logicalSide};
         auto& ltl = _diskLayout->layoutByLogicalLocation.at(logicalLocation);
-        auto trackdata = readAndDecodeTrack(
-            *_diskLayout, *_fluxSource, *_decoder, ltl);
+        auto trackdata =
+            readAndDecodeTrack(*_diskLayout, *_fluxSource, *_decoder, ltl);
 
         for (const auto& sector : trackdata.sectors)
             *_loadedSectors.put(logicalLocation, sector->logicalSector) =

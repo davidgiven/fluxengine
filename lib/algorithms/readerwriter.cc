@@ -359,7 +359,7 @@ static ReadGroupResult readGroup(const DiskLayout& diskLayout,
     ReadGroupResult rgr = {BAD_AND_CAN_NOT_RETRY};
 
     for (unsigned offset = 0; offset < ltl->groupSize;
-        offset += Layout::getHeadWidth())
+        offset += diskLayout.headWidth)
     {
         unsigned physicalCylinder = ltl->physicalCylinder + offset;
         unsigned physicalHead = ltl->physicalHead;
@@ -578,7 +578,6 @@ void writeDiskCommand(const DiskLayout& diskLayout,
 {
     auto chs = std::ranges::views::keys(diskLayout.layoutByLogicalLocation) |
                std::ranges::to<std::vector>();
-    auto trackinfos = Layout::getLayoutOfTracksPhysical(physicalLocations);
     if (fluxSource && decoder)
         writeTracksAndVerify(
             diskLayout, fluxSink, encoder, *fluxSource, *decoder, image, chs);
