@@ -31,7 +31,7 @@ std::shared_ptr<DecodedTrack> Decoder::decodeToSectors(
     {
         _sector = std::make_shared<Sector>(LogicalLocation{0, 0, 0});
         _sector->physicalLocation = std::make_optional<CylinderHead>(
-            {ptl->physicalCylinder, ptl->physicalHead});
+            ptl->physicalCylinder, ptl->physicalHead);
         _sector->status = Sector::MISSING;
     };
 
