@@ -309,6 +309,8 @@ static CombinationResult combineRecordAndSectors(
             LogicalLocation{ltl->logicalCylinder, ltl->logicalHead, sectorId});
 
         sector->status = Sector::MISSING;
+        sector->physicalLocation = std::make_optional(
+            CylinderHead(ltl->physicalCylinder, ltl->physicalHead));
         track_sectors.push_back(sector);
     }
 
