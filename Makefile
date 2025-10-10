@@ -8,7 +8,7 @@ ifeq ($(BUILDTYPE),)
 endif
 export BUILDTYPE
 
-OPTFLAGS = -g -O3
+OPTFLAGS = -g -O0
 
 ifeq ($(BUILDTYPE),windows)
 	MINGW = x86_64-w64-mingw32-

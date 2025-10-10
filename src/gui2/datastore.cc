@@ -89,15 +89,14 @@ static void workerThread_cb()
         {
             cb();
         }
-        catch (const ErrorException& e)
+        catch (const std::exception& e)
         {
             const std::lock_guard<std::mutex> lock(pendingTasksMutex);
-            hex::log::debug("worker exception: {}", e.message);
             hex::TaskManager::doLater(
                 [=]
                 {
                     hex::ui::ToastError::open(
-                        fmt::format("FluxEngine error: {}", e.message));
+                        fmt::format("FluxEngine error: {}", e.what()));
                 });
             stopWorkerThread();
             return;
@@ -122,7 +121,8 @@ static void workerThread_cb()
                 [=]
                 {
                     hex::ui::ToastError::open(
-                        "FluxEngine worker thread died mysteriously");
+                        "FluxEngine worker thread died with an unknown "
+                        "exception");
                 });
             stopWorkerThread();
             return;

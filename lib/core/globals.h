@@ -40,12 +40,13 @@ extern double getCurrentTime();
 extern void hexdump(std::ostream& stream, const Bytes& bytes);
 extern void hexdumpForSrp16(std::ostream& stream, const Bytes& bytes);
 
-struct ErrorException
+struct ErrorException : public std::exception
 {
     ErrorException(const std::string& message): message(message) {}
 
     const std::string message;
 
+    const char* what() const throw();
     void print() const;
 };
 
