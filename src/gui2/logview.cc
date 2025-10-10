@@ -33,10 +33,10 @@ void LogView::drawContent()
         ImGui::PopStyleColor();
     };
 
-    auto buffer = logstream.view();
+    auto buffer = logstream.str();
     ImGui::InputTextMultiline("##logview",
-        (char*)buffer.data(),
-        buffer.size(),
+        (char*)buffer.c_str(),
+        buffer.size() + 1,
         ImGui::GetContentRegionAvail(),
         ImGuiInputTextFlags_ReadOnly);
 

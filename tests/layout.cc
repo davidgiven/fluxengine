@@ -249,42 +249,44 @@ static void test_sectoroffsets()
     auto diskLayout = createDiskLayout();
     AssertThat(diskLayout->groupSize, Equals(1));
     AssertThat(diskLayout->logicalSectorLocationBySectorOffset,
-        EqualsContainer(decltype(diskLayout->logicalSectorLocationBySectorOffset){
-            {0,    {0, 0, 0}},
-            {256,  {0, 0, 2}},
-            {512,  {0, 0, 1}},
-            {768,  {0, 0, 3}},
-            {1024, {0, 1, 0}},
-            {1280, {0, 1, 2}},
-            {1536, {0, 1, 1}},
-            {1792, {0, 1, 3}},
-            {2048, {1, 0, 0}},
-            {2304, {1, 0, 2}},
-            {2560, {1, 0, 1}},
-            {2816, {1, 0, 3}},
-            {3072, {1, 1, 0}},
-            {3328, {1, 1, 2}},
-            {3584, {1, 1, 1}},
-            {3840, {1, 1, 3}}
+        EqualsContainer(
+            decltype(diskLayout->logicalSectorLocationBySectorOffset){
+                {0,    {0, 0, 0}},
+                {256,  {0, 0, 2}},
+                {512,  {0, 0, 1}},
+                {768,  {0, 0, 3}},
+                {1024, {0, 1, 0}},
+                {1280, {0, 1, 2}},
+                {1536, {0, 1, 1}},
+                {1792, {0, 1, 3}},
+                {2048, {1, 0, 0}},
+                {2304, {1, 0, 2}},
+                {2560, {1, 0, 1}},
+                {2816, {1, 0, 3}},
+                {3072, {1, 1, 0}},
+                {3328, {1, 1, 2}},
+                {3584, {1, 1, 1}},
+                {3840, {1, 1, 3}}
     }));
     AssertThat(diskLayout->sectorOffsetByLogicalSectorLocation,
-        EqualsContainer(decltype(diskLayout->sectorOffsetByLogicalSectorLocation){
-            {{0, 0, 0}, 0   },
-            {{0, 0, 1}, 512 },
-            {{0, 0, 2}, 256 },
-            {{0, 0, 3}, 768 },
-            {{0, 1, 0}, 1024},
-            {{0, 1, 1}, 1536},
-            {{0, 1, 2}, 1280},
-            {{0, 1, 3}, 1792},
-            {{1, 0, 0}, 2048},
-            {{1, 0, 1}, 2560},
-            {{1, 0, 2}, 2304},
-            {{1, 0, 3}, 2816},
-            {{1, 1, 0}, 3072},
-            {{1, 1, 1}, 3584},
-            {{1, 1, 2}, 3328},
-            {{1, 1, 3}, 3840}
+        EqualsContainer(
+            decltype(diskLayout->sectorOffsetByLogicalSectorLocation){
+                {{0, 0, 0}, 0   },
+                {{0, 0, 1}, 512 },
+                {{0, 0, 2}, 256 },
+                {{0, 0, 3}, 768 },
+                {{0, 1, 0}, 1024},
+                {{0, 1, 1}, 1536},
+                {{0, 1, 2}, 1280},
+                {{0, 1, 3}, 1792},
+                {{1, 0, 0}, 2048},
+                {{1, 0, 1}, 2560},
+                {{1, 0, 2}, 2304},
+                {{1, 0, 3}, 2816},
+                {{1, 1, 0}, 3072},
+                {{1, 1, 1}, 3584},
+                {{1, 1, 2}, 3328},
+                {{1, 1, 3}, 3840}
     }));
 }
 

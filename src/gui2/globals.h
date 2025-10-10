@@ -17,9 +17,18 @@ namespace ImGui
     }
 }
 
+enum class DiskActivityType {
+    None,
+    Read,
+    Write,
+};
+
 namespace Events
 {
     using namespace hex;
     EVENT_DEF(SeekToSectorViaPhysicalLocation, CylinderHeadSector);
     EVENT_DEF(SeekToTrackViaPhysicalLocation, CylinderHead);
+    EVENT_DEF(DiskActivityNotification, DiskActivityType, unsigned, unsigned);
 }
+
+#define DEFER(_stmt) ON_SCOPE_EXIT { _stmt; }

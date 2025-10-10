@@ -318,9 +318,10 @@ void Filesystem::putLogicalSector(uint32_t number, const Bytes& data)
 unsigned Filesystem::getOffsetOfSector(
     unsigned track, unsigned side, unsigned sector)
 {
-    unsigned offset = findOrDefault(_diskLayout->sectorOffsetByLogicalSectorLocation,
-        {track, side, sector},
-        UINT_MAX);
+    unsigned offset =
+        findOrDefault(_diskLayout->sectorOffsetByLogicalSectorLocation,
+            {track, side, sector},
+            UINT_MAX);
     if (offset == UINT_MAX)
         throw BadFilesystemException();
     return offset;

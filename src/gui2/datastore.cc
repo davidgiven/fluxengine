@@ -388,6 +388,7 @@ void wtRebuildConfiguration()
     /* Update the UI-thread copy of the bits of configuration we
      * need. */
 
+    auto diskLayout = createDiskLayout();
     bool formattingSupported = false;
     try
     {
@@ -401,7 +402,6 @@ void wtRebuildConfiguration()
         formattingSupported = false;
     }
 
-    auto diskLayout = createDiskLayout();
     auto diskPhysicalBounds = diskLayout->getPhysicalBounds();
     auto diskLogicalBounds = diskLayout->getLogicalBounds();
 
@@ -440,31 +440,27 @@ void Datastore::onLogMessage(const AnyLogMessage& message)
             /* Indicates that we're starting a write operation. */
             [&](std::shared_ptr<const BeginWriteOperationLogMessage> m)
             {
-                // _statusBar->SetRightLabel(
-                //     fmt::format("W {}.{}", m->track, m->head));
-                // _imagerPanel->SetVisualiserMode(
-                //     m->track, m->head, VISMODE_WRITING);
+                Events::DiskActivityNotification::post(
+                    DiskActivityType::Write, m->track, m->head);
             },
 
             [&](std::shared_ptr<const EndWriteOperationLogMessage> m)
             {
-                // _statusBar->SetRightLabel("");
-                // _imagerPanel->SetVisualiserMode(0, 0, VISMODE_NOTHING);
+                Events::DiskActivityNotification::post(
+                    DiskActivityType::None, 0, 0);
             },
 
             /* Indicates that we're starting a read operation. */
             [&](std::shared_ptr<const BeginReadOperationLogMessage> m)
             {
-                // _statusBar->SetRightLabel(
-                //     fmt::format("R {}.{}", m->track, m->head));
-                // _imagerPanel->SetVisualiserMode(
-                //     m->track, m->head, VISMODE_READING);
+                Events::DiskActivityNotification::post(
+                    DiskActivityType::Read, m->track, m->head);
             },
 
             [&](std::shared_ptr<const EndReadOperationLogMessage> m)
             {
-                // _statusBar->SetRightLabel("");
-                // _imagerPanel->SetVisualiserMode(0, 0, VISMODE_NOTHING);
+                Events::DiskActivityNotification::post(
+                    DiskActivityType::None, 0, 0);
             },
 
             [&](std::shared_ptr<const TrackReadLogMessage> m)
@@ -508,10 +504,7 @@ void Datastore::beginRead(void)
         []
         {
             busy = true;
-            ON_SCOPE_EXIT
-            {
-                busy = false;
-            };
+            DEFER(busy = false);
 
             wtRebuildConfiguration();
             auto fluxSource = FluxSource::create(globalConfig());

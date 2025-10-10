@@ -30,6 +30,11 @@ struct LogicalLocation
         return fmt::format(
             "c{}h{}s{}", logicalCylinder, logicalHead, logicalSector);
     }
+
+    CylinderHead trackLocation() const
+    {
+        return {logicalCylinder, logicalHead};
+    }
 };
 
 inline std::ostream& operator<<(std::ostream& stream, LogicalLocation location)

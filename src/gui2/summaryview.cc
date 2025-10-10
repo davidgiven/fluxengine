@@ -20,25 +20,46 @@ using namespace hex;
 
 static DynamicSettingFactory settings("fluxengine.settings");
 
+static DiskActivityType currentDiskActivityType = DiskActivityType::None;
+static unsigned currentPhysicalCylinder;
+static unsigned currentPhysicalHead;
+
+static std::string getActivityLabel(DiskActivityType type)
+{
+    switch (type)
+    {
+        case DiskActivityType::None:
+            return "";
+        case DiskActivityType::Read:
+            return "R";
+        case DiskActivityType::Write:
+            return "W";
+    }
+}
+
 SummaryView::SummaryView():
     View::Window("fluxengine.view.summary.name", ICON_VS_COMPASS)
 {
+    Events::DiskActivityNotification::subscribe(
+        [](DiskActivityType type, unsigned cylinder, unsigned head)
+        {
+            currentDiskActivityType = type;
+            currentPhysicalCylinder = cylinder;
+            currentPhysicalHead = head;
+        });
 }
 
 static std::set<std::shared_ptr<const Sector>> findSectors(
-    std::shared_ptr<const DecodedDisk>& diskFlux,
+    const DecodedDisk& diskFlux,
     unsigned physicalCylinder,
     unsigned physicalHead)
 {
     std::set<std::shared_ptr<const Sector>> sectors;
 
-    if (diskFlux)
-    {
-        auto [startIt, endIt] = diskFlux->sectorsByPhysicalLocation.equal_range(
-            {physicalCylinder, physicalHead});
-        for (auto it = startIt; it != endIt; it++)
-            sectors.insert(it->second);
-    }
+    auto [startIt, endIt] = diskFlux.sectorsByPhysicalLocation.equal_range(
+        {physicalCylinder, physicalHead});
+    for (auto it = startIt; it != endIt; it++)
+        sectors.insert(it->second);
 
     return sectors;
 }
@@ -49,7 +70,7 @@ struct TrackAnalysis
     uint32_t colour;
 };
 
-TrackAnalysis analyseTrack(std::shared_ptr<const DecodedDisk>& diskFlux,
+static TrackAnalysis analyseTrack(const DecodedDisk& diskFlux,
     unsigned physicalCylinder,
     unsigned physicalHead)
 {
@@ -84,6 +105,212 @@ TrackAnalysis analyseTrack(std::shared_ptr<const DecodedDisk>& diskFlux,
     return result;
 }
 
+static void drawCylinderRule(unsigned min, unsigned max)
+{
+    ImGui::TableNextRow();
+    ImGui::TableNextColumn();
+    for (int cylinder = min; cylinder <= max; cylinder++)
+    {
+        ImGui::TableNextColumn();
+
+        auto text = fmt::format("c{}", cylinder);
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() +
+                             ImGui::GetColumnWidth() / 2 -
+                             ImGui::CalcTextSize(text.c_str()).x / 2);
+        ImGui::Text("%s", text.c_str());
+    }
+}
+
+static void drawPhysicalMap(unsigned minPhysicalCylinder,
+    unsigned maxPhysicalCylinder,
+    unsigned minPhysicalHead,
+    unsigned maxPhysicalHead,
+    const DecodedDisk& diskFlux)
+{
+    int numPhysicalCylinders = maxPhysicalCylinder - minPhysicalCylinder + 1;
+    int numPhysicalHeads = maxPhysicalHead - minPhysicalHead + 1;
+
+    auto originalFontSize = ImGui::GetFontSize();
+    if (ImGui::BeginTable("physicalMap",
+            numPhysicalCylinders + 1,
+            ImGuiTableFlags_NoSavedSettings |
+                ImGuiTableFlags_HighlightHoveredColumn |
+                ImGuiTableFlags_NoClip | ImGuiTableFlags_NoPadInnerX |
+                ImGuiTableFlags_NoPadOuterX | ImGuiTableFlags_Borders))
+    {
+        DEFER(ImGui::EndTable());
+
+        ImGui::PushFont(NULL, originalFontSize * 0.6);
+        DEFER(ImGui::PopFont());
+
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, {0, 0});
+        DEFER(ImGui::PopStyleVar());
+
+        float rowHeight = originalFontSize * 0.6 * 2.0;
+        ImGui::TableSetupColumn(
+            "", ImGuiTableColumnFlags_WidthFixed, originalFontSize);
+
+        drawCylinderRule(minPhysicalCylinder, maxPhysicalCylinder);
+
+        for (unsigned head = minPhysicalHead; head <= maxPhysicalHead; head++)
+        {
+            ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
+            ImGui::TableNextColumn();
+
+            auto text = fmt::format("h{}", head);
+            auto textSize = ImGui::CalcTextSize(text.c_str());
+            ImGui::SetCursorPos(
+                {ImGui::GetCursorPosX() + ImGui::GetColumnWidth() / 2 -
+                        textSize.x / 2,
+                    ImGui::GetCursorPosY() + rowHeight / 2 - textSize.y / 2});
+            ImGui::Text("%s", text.c_str());
+
+            ImGui::PushStyleVar(
+                ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
+            DEFER(ImGui::PopStyleVar());
+
+            for (unsigned cylinder = minPhysicalCylinder;
+                cylinder <= maxPhysicalCylinder;
+                cylinder++)
+            {
+                auto [tooltip, colour] = analyseTrack(diskFlux, cylinder, head);
+                ImGui::PushStyleColor(ImGuiCol_Header, colour);
+                DEFER(ImGui::PopStyleColor());
+                ImGui::PushFont(NULL, originalFontSize);
+                DEFER(ImGui::PopFont());
+
+                ImGui::TableNextColumn();
+                std::string diskActivityLabel = "";
+                if ((currentDiskActivityType != DiskActivityType::None) &&
+                    (cylinder == currentPhysicalCylinder) &&
+                    (head == currentPhysicalHead))
+                    diskActivityLabel =
+                        getActivityLabel(currentDiskActivityType);
+
+                if (ImGui::Selectable(
+                        fmt::format(
+                            "{}##c{}h{}", diskActivityLabel, cylinder, head)
+                            .c_str(),
+                        true,
+                        ImGuiSelectableFlags_None,
+                        {0, rowHeight}))
+                    Events::SeekToTrackViaPhysicalLocation::post(
+                        CylinderHead{cylinder, head});
+
+                ImGui::SetItemTooltip("%s", tooltip.c_str());
+            }
+        }
+    }
+}
+
+static void drawLogicalMap(unsigned minPhysicalCylinder,
+    unsigned maxPhysicalCylinder,
+    unsigned minPhysicalHead,
+    unsigned maxPhysicalHead,
+    const DecodedDisk& diskFlux,
+    const DiskLayout& diskLayout)
+{
+    auto originalFontSize = ImGui::GetFontSize();
+    int numPhysicalCylinders = maxPhysicalCylinder - minPhysicalCylinder + 1;
+    int numPhysicalHeads = maxPhysicalHead - minPhysicalHead + 1;
+
+    if (ImGui::BeginTable("logicalMap",
+            numPhysicalCylinders + 1,
+            ImGuiTableFlags_NoSavedSettings |
+                ImGuiTableFlags_HighlightHoveredColumn |
+                ImGuiTableFlags_NoClip | ImGuiTableFlags_NoPadInnerX |
+                ImGuiTableFlags_NoPadOuterX | ImGuiTableFlags_Borders))
+    {
+        DEFER(ImGui::EndTable());
+
+        ImGui::PushFont(NULL, originalFontSize * 0.6);
+        DEFER(ImGui::PopFont());
+
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, {0, 0});
+        DEFER(ImGui::PopStyleVar());
+
+        float rowHeight = originalFontSize * 0.6 * 2.0;
+        ImGui::TableSetupColumn(
+            "", ImGuiTableColumnFlags_WidthFixed, originalFontSize);
+
+        for (unsigned physicalHead = minPhysicalHead;
+            physicalHead <= maxPhysicalHead;
+            physicalHead++)
+        {
+            unsigned logicalHead =
+                diskLayout.remapHeadPhysicalToLogical(physicalHead);
+
+            ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
+            ImGui::TableNextColumn();
+
+            auto text = fmt::format("h{}", logicalHead);
+            auto textSize = ImGui::CalcTextSize(text.c_str());
+            ImGui::SetCursorPos(
+                {ImGui::GetCursorPosX() + ImGui::GetColumnWidth() / 2 -
+                        textSize.x / 2,
+                    ImGui::GetCursorPosY() + rowHeight / 2 - textSize.y / 2});
+            ImGui::Text("%s", text.c_str());
+
+            ImGui::PushStyleVar(
+                ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
+            DEFER(ImGui::PopStyleVar());
+
+            for (unsigned physicalCylinder = minPhysicalCylinder;
+                physicalCylinder <= maxPhysicalCylinder;
+                physicalCylinder++)
+            {
+                ImGui::TableNextColumn();
+
+                auto& ptl = diskLayout.layoutByPhysicalLocation.at(
+                    {physicalCylinder, physicalHead});
+                if (ptl->groupOffset == 0)
+                {
+                    auto [tooltip, colour] =
+                        analyseTrack(diskFlux, physicalCylinder, physicalHead);
+
+                    ImGui::PushStyleColor(ImGuiCol_Header, colour);
+                    DEFER(ImGui::PopStyleColor());
+                    ImGui::PushFont(NULL, originalFontSize);
+                    DEFER(ImGui::PopFont());
+
+                    std::string diskActivityLabel = "";
+                    if (currentDiskActivityType != DiskActivityType::None)
+                    {
+                        auto ptlactive = diskLayout.layoutByPhysicalLocation.at(
+                            {currentPhysicalCylinder, currentPhysicalHead});
+                        if (ptlactive->logicalTrackLayout ==
+                            ptl->logicalTrackLayout)
+                            diskActivityLabel =
+                                getActivityLabel(currentDiskActivityType);
+                    }
+
+                    float width = ImGui::GetContentRegionAvail().x *
+                                      diskLayout.groupSize +
+                                  ImGui::GetStyle().CellPadding.x *
+                                      (diskLayout.groupSize - 1);
+                    if (ImGui::Selectable(
+                            fmt::format("{}##logical_c{}h{}",
+                                diskActivityLabel,
+                                ptl->logicalTrackLayout->logicalCylinder,
+                                ptl->logicalTrackLayout->logicalHead)
+                                .c_str(),
+                            true,
+                            ImGuiSelectableFlags_None,
+                            {width, rowHeight}))
+                        Events::SeekToTrackViaPhysicalLocation::post(
+                            CylinderHead{
+                                ptl->logicalTrackLayout->physicalCylinder,
+                                ptl->logicalTrackLayout->physicalHead});
+
+                    ImGui::SetItemTooltip("%s", tooltip.c_str());
+                }
+            }
+        }
+
+        drawCylinderRule(minPhysicalCylinder, maxPhysicalCylinder);
+    }
+}
+
 void SummaryView::drawContent()
 {
     auto diskFlux = Datastore::getDecodedDisk();
@@ -100,236 +327,32 @@ void SummaryView::drawContent()
 
     {
         ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, {1, 1});
-        ON_SCOPE_EXIT
-        {
-            ImGui::PopStyleVar();
-        };
+        DEFER(ImGui::PopStyleVar());
 
         auto backgroundColour = ImGui::GetColorU32(ImGuiCol_WindowBg);
         ImGui::PushStyleColor(ImGuiCol_TableBorderLight, backgroundColour);
-        ON_SCOPE_EXIT
-        {
-            ImGui::PopStyleColor();
-        };
-
         ImGui::PushStyleColor(ImGuiCol_TableBorderStrong, backgroundColour);
-        ON_SCOPE_EXIT
-        {
-            ImGui::PopStyleColor();
-        };
+        DEFER(ImGui::PopStyleColor(2));
 
         ImGuiExt::TextFormattedCenteredHorizontal(
             "fluxengine.view.summary.physical"_lang);
 
-        auto originalFontSize = ImGui::GetFontSize();
-        if (ImGui::BeginTable("physicalMap",
-                numPhysicalCylinders + 1,
-                ImGuiTableFlags_NoSavedSettings |
-                    ImGuiTableFlags_HighlightHoveredColumn |
-                    ImGuiTableFlags_NoClip | ImGuiTableFlags_NoPadInnerX |
-                    ImGuiTableFlags_NoPadOuterX | ImGuiTableFlags_Borders))
-        {
-            ON_SCOPE_EXIT
-            {
-                ImGui::EndTable();
-            };
-
-            ImGui::PushFont(NULL, originalFontSize * 0.6);
-            ON_SCOPE_EXIT
-            {
-                ImGui::PopFont();
-            };
-
-            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, {0, 0});
-            ON_SCOPE_EXIT
-            {
-                ImGui::PopStyleVar();
-            };
-
-            float rowHeight = originalFontSize * 0.6 * 2.0;
-            ImGui::TableSetupColumn(
-                "", ImGuiTableColumnFlags_WidthFixed, originalFontSize);
-
-            ImGui::TableNextRow();
-            ImGui::TableNextColumn();
-            for (int cylinder = minPhysicalCylinder;
-                cylinder <= maxPhysicalCylinder;
-                cylinder++)
-            {
-                ImGui::TableNextColumn();
-
-                auto text = fmt::format("c{}", cylinder);
-                ImGui::SetCursorPosX(ImGui::GetCursorPosX() +
-                                     ImGui::GetColumnWidth() / 2 -
-                                     ImGui::CalcTextSize(text.c_str()).x / 2);
-                ImGui::Text("%s", text.c_str());
-            }
-
-            for (unsigned head = minPhysicalHead; head <= maxPhysicalHead;
-                head++)
-            {
-                ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
-                ImGui::TableNextColumn();
-
-                auto text = fmt::format("h{}", head);
-                auto textSize = ImGui::CalcTextSize(text.c_str());
-                ImGui::SetCursorPos({ImGui::GetCursorPosX() +
-                                         ImGui::GetColumnWidth() / 2 -
-                                         textSize.x / 2,
-                    ImGui::GetCursorPosY() + rowHeight / 2 - textSize.y / 2});
-                ImGui::Text("%s", text.c_str());
-
-                for (unsigned cylinder = minPhysicalCylinder;
-                    cylinder <= maxPhysicalCylinder;
-                    cylinder++)
-                {
-                    auto [tooltip, colour] =
-                        analyseTrack(diskFlux, cylinder, head);
-                    ImGui::PushStyleColor(ImGuiCol_Header, colour);
-                    ON_SCOPE_EXIT
-                    {
-                        ImGui::PopStyleColor();
-                    };
-
-                    ImGui::TableNextColumn();
-                    if (ImGui::Selectable(
-                            fmt::format("##c{}h{}", cylinder, head).c_str(),
-                            true,
-                            ImGuiSelectableFlags_None,
-                            {0, rowHeight}))
-                        Events::SeekToTrackViaPhysicalLocation::post(
-                            CylinderHead{cylinder, head});
-
-                    ImGui::PushFont(NULL, originalFontSize);
-                    ON_SCOPE_EXIT
-                    {
-                        ImGui::PopFont();
-                    };
-                    ImGui::SetItemTooltip("%s", tooltip.c_str());
-                }
-            }
-        }
+        if (diskFlux)
+            drawPhysicalMap(minPhysicalCylinder,
+                maxPhysicalCylinder,
+                minPhysicalHead,
+                maxPhysicalHead,
+                *diskFlux);
 
         ImGuiExt::TextFormattedCenteredHorizontal(
             "fluxengine.view.summary.logical"_lang);
 
-        /* Must match the physicalMap table width above. */
-        if (ImGui::BeginTable("logicalMap",
-                numPhysicalCylinders + 1,
-                ImGuiTableFlags_NoSavedSettings |
-                    ImGuiTableFlags_HighlightHoveredColumn |
-                    ImGuiTableFlags_NoClip | ImGuiTableFlags_NoPadInnerX |
-                    ImGuiTableFlags_NoPadOuterX | ImGuiTableFlags_Borders))
-        {
-            ON_SCOPE_EXIT
-            {
-                ImGui::EndTable();
-            };
-
-            ImGui::PushFont(NULL, originalFontSize * 0.6);
-            ON_SCOPE_EXIT
-            {
-                ImGui::PopFont();
-            };
-
-            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, {0, 0});
-            ON_SCOPE_EXIT
-            {
-                ImGui::PopStyleVar();
-            };
-
-            float rowHeight = originalFontSize * 0.6 * 2.0;
-            ImGui::TableSetupColumn(
-                "", ImGuiTableColumnFlags_WidthFixed, originalFontSize);
-
-            for (unsigned physicalHead = minPhysicalHead;
-                physicalHead <= maxPhysicalHead;
-                physicalHead++)
-            {
-                unsigned logicalHead =
-                    diskLayout->remapHeadPhysicalToLogical(physicalHead);
-
-                ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
-                ImGui::TableNextColumn();
-
-                auto text = fmt::format("h{}", logicalHead);
-                auto textSize = ImGui::CalcTextSize(text.c_str());
-                ImGui::SetCursorPos({ImGui::GetCursorPosX() +
-                                         ImGui::GetColumnWidth() / 2 -
-                                         textSize.x / 2,
-                    ImGui::GetCursorPosY() + rowHeight / 2 - textSize.y / 2});
-                ImGui::Text("%s", text.c_str());
-
-                for (unsigned physicalCylinder = minPhysicalCylinder;
-                    physicalCylinder <= maxPhysicalCylinder;
-                    physicalCylinder++)
-                {
-                    ImGui::TableNextColumn();
-
-                    auto& ptl = diskLayout->layoutByPhysicalLocation.at(
-                        {physicalCylinder, physicalHead});
-                    if (ptl->groupOffset == 0)
-                    {
-                        auto [tooltip, colour] = analyseTrack(
-                            diskFlux, physicalCylinder, physicalHead);
-
-                        ImGui::PushStyleColor(ImGuiCol_Header, colour);
-                        ON_SCOPE_EXIT
-                        {
-                            ImGui::PopStyleColor();
-                        };
-
-                        float width = ImGui::GetContentRegionAvail().x *
-                                          diskLayout->groupSize +
-                                      ImGui::GetStyle().CellPadding.x *
-                                          (diskLayout->groupSize - 1);
-                        if (ImGui::Selectable(
-                                fmt::format("##logical_c{}h{}",
-                                    ptl->logicalTrackLayout->logicalCylinder,
-                                    ptl->logicalTrackLayout->logicalHead)
-                                    .c_str(),
-                                true,
-                                ImGuiSelectableFlags_None,
-                                {width, rowHeight}))
-                            Events::SeekToTrackViaPhysicalLocation::post(
-                                CylinderHead{
-                                    ptl->logicalTrackLayout->physicalCylinder,
-                                    ptl->logicalTrackLayout->physicalHead});
-
-                        ImGui::PushFont(NULL, originalFontSize);
-                        ON_SCOPE_EXIT
-                        {
-                            ImGui::PopFont();
-                        };
-                        ImGui::SetItemTooltip("%s", tooltip.c_str());
-                    }
-                }
-            }
-
-            ImGui::TableNextRow();
-            ImGui::TableNextColumn();
-            for (unsigned physicalCylinder = minPhysicalCylinder;
-                physicalCylinder <= maxPhysicalCylinder;
-                physicalCylinder++)
-            {
-                ImGui::TableNextColumn();
-
-                for (auto& [ch, ptl] : diskLayout->layoutByPhysicalLocation)
-                {
-                    if (ptl->logicalTrackLayout->physicalCylinder ==
-                        physicalCylinder)
-                    {
-                        auto text = fmt::format(
-                            "c{}", ptl->logicalTrackLayout->logicalCylinder);
-                        ImGui::SetCursorPosX(
-                            ImGui::GetCursorPosX() +
-                            ImGui::GetColumnWidth() / 2 -
-                            ImGui::CalcTextSize(text.c_str()).x / 2);
-                        ImGui::Text("%s", text.c_str());
-                        break;
-                    }
-                }
-            }
-        }
+        if (diskFlux)
+            drawLogicalMap(minPhysicalCylinder,
+                maxPhysicalCylinder,
+                minPhysicalHead,
+                maxPhysicalHead,
+                *diskFlux,
+                *diskLayout);
     }
 }
