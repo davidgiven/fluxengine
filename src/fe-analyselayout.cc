@@ -185,7 +185,7 @@ static void readRow(const std::vector<std::string>& row, Image& image)
         const auto& sector =
             image.put(logicalCylinder, logicalHead, logicalSector);
         sector->physicalLocation = std::make_optional<CylinderHead>(
-            {(unsigned)std::stoi(row[0]), (unsigned)std::stoi(row[1])});
+            (unsigned)std::stoi(row[0]), (unsigned)std::stoi(row[1]));
         sector->logicalCylinder = logicalCylinder;
         sector->logicalHead = logicalHead;
         sector->logicalSector = logicalSector;
