@@ -27,18 +27,11 @@
 #define STRINGIFY(a) XSTRINGIFY(a)
 #define XSTRINGIFY(a) #a
 
-template <class T>
-static inline std::vector<T> vector_of(T item)
-{
-    return std::vector<T>{item};
-}
-
 typedef double nanoseconds_t;
 class Bytes;
 
 extern double getCurrentTime();
 extern void hexdump(std::ostream& stream, const Bytes& bytes);
-extern void hexdumpForSrp16(std::ostream& stream, const Bytes& bytes);
 
 struct ErrorException : public std::exception
 {
@@ -46,7 +39,7 @@ struct ErrorException : public std::exception
 
     const std::string message;
 
-    const char* what() const throw();
+    const char* what() const throw() override;
     void print() const;
 };
 
