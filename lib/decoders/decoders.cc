@@ -72,6 +72,7 @@ std::shared_ptr<DecodedTrack> Decoder::decodeToSectors(
 
             before = fmr.tell();
             decodeDataRecord();
+            _sector->data = _sector->data.slice(0, _ltl->sectorSize);
             after = fmr.tell();
 
             if (_sector->status != Sector::DATA_MISSING)
