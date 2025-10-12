@@ -211,6 +211,13 @@ void Config::clear()
     _appliedOptions.clear();
 }
 
+static std::string getValidValues(const OptionGroupProto& group)
+{
+    return fmt::format("{}",
+        fmt::join(
+            std::views::transform(group.option(), &OptionProto::name), ", "));
+}
+
 std::vector<std::string> Config::validate()
 {
     std::vector<std::string> results;
@@ -218,7 +225,7 @@ std::vector<std::string> Config::validate()
     /* Ensure that only one item in each group is set. */
 
     std::map<const OptionGroupProto*, const OptionProto*> optionsByGroup;
-    for (auto [group, option, hasArgument] : _appliedOptions)
+    for (auto& [group, option, hasArgument] : _appliedOptions)
         if (group)
         {
             auto& o = optionsByGroup[group];
@@ -227,11 +234,22 @@ std::vector<std::string> Config::validate()
                     fmt::format("multiple mutually exclusive values set for "
                                 "group '{}': valid values are: {}",
                         group->comment(),
-                        fmt::join(std::views::transform(
-                                      group->option(), &OptionProto::name),
-                            ", ")));
+                        getValidValues(*group)));
             o = option;
         }
+
+    /* Ensure that every group has an option set. */
+
+    for (const auto& group : base()->option_group())
+    {
+        if (!optionsByGroup.contains(&group))
+        {
+            results.push_back(
+                fmt::format("no value set for group '{}': valid values are: {}",
+                    group.comment(),
+                    getValidValues(group)));
+        }
+    }
 
     /* Check option requirements. */
 
@@ -357,7 +375,7 @@ Config::OptionInfo Config::findOption(
     {
         if (optionGroup.name().empty())
             if (searchOptionList(optionGroup.option(), name))
-                return {nullptr, found, false};
+                return {&optionGroup, found, false};
     }
 
     throw OptionNotFoundException(fmt::format("option {} not found", name));
@@ -395,8 +413,7 @@ void Config::checkOptionValid(const OptionProto& option)
             ss << ']';
 
             throw InapplicableOptionException(
-                fmt::format("option '{}' is inapplicable to this "
-                            "configuration "
+                fmt::format("option '{}' is inapplicable to this configuration "
                             "because {}={} could not be met",
                     option.name(),
                     req.key(),
@@ -432,6 +449,29 @@ bool Config::applyOption(const std::string& name, const std::string value)
     auto optionInfo = findOption(name, value);
     applyOption(optionInfo);
     return optionInfo.usesValue;
+}
+
+void Config::applyDefaultOptions()
+{
+    std::set<const OptionGroupProto*> appliedOptionGroups;
+    for (auto& [group, option, hasArgument] : _appliedOptions)
+        if (group)
+            appliedOptionGroups.insert(group);
+
+    /* For every group which doesn't have an option set, find the default and
+     * set it. */
+
+    for (const auto& group : base()->option_group())
+    {
+        if (!appliedOptionGroups.contains(&group))
+        {
+            for (const auto& option : group.option())
+            {
+                if (option.set_by_default())
+                    applyOption({&group, &option, false});
+            }
+        }
+    }
 }
 
 void Config::clearOptions()

@@ -174,6 +174,7 @@ std::vector<std::string> FlagGroup::parseFlagsWithFilenames(int argc,
         index++;
     }
 
+    globalConfig().applyDefaultOptions();
     globalConfig().validateAndThrow();
     return filenames;
 }
