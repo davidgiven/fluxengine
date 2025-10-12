@@ -104,10 +104,10 @@ void ControlPanelView::drawContent()
             busy || !hasImage);
 
         ImGui::TableNextRow();
-        button(ICON_TA_UPLOAD,
-            "fluxengine.view.controlpanel.readFlux"_lang,
-            loadFluxFile,
-            busy);
+        button(ICON_TA_REPEAT,
+            "fluxengine.view.controlpanel.rereadBad"_lang,
+            nullptr,
+            busy || !diskFlux);
         ImGui::TableNextColumn();
         button(ICON_TA_DOWNLOAD,
             "fluxengine.view.controlpanel.writeFlux"_lang,
@@ -115,9 +115,9 @@ void ControlPanelView::drawContent()
             busy || !diskFlux);
 
         ImGui::TableNextRow();
-        button(ICON_VS_FOLDER_OPENED,
-            "fluxengine.view.controlpanel.readImage"_lang,
-            nullptr,
+        button(ICON_TA_UPLOAD,
+            "fluxengine.view.controlpanel.readFlux"_lang,
+            loadFluxFile,
             busy);
         ImGui::TableNextColumn();
         button(ICON_VS_SAVE_ALL,
@@ -126,10 +126,10 @@ void ControlPanelView::drawContent()
             busy || !hasImage);
 
         ImGui::TableNextRow();
-        button(ICON_TA_REPEAT,
-            "fluxengine.view.controlpanel.rereadBad"_lang,
+        button(ICON_VS_FOLDER_OPENED,
+            "fluxengine.view.controlpanel.readImage"_lang,
             nullptr,
-            busy || !diskFlux);
+            busy);
 
         ImGui::TableNextRow();
         button(ICON_VS_NEW_FILE,
