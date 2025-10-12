@@ -58,6 +58,43 @@ option_group {
 }
 
 option_group {
+	comment: "Drive rotational speed"
+    name: "drivespeed"
+	applicability: ANY_SOURCESINK
+	
+	option {
+		name: "auto"
+		comment: 'Autodetect from hardware'
+		set_by_default: true
+
+		config {
+		}
+	}
+
+	option {
+		name: "300"
+		comment: '300rpm (200ms)'
+
+		config {
+			drive {
+				rotational_period_ms: 200
+			}
+		}
+	}
+
+	option {
+		name: "360"
+		comment: '360rpm (166ms)'
+
+		config {
+			drive {
+				rotational_period_ms: 166
+			}
+		}
+	}
+}
+
+option_group {
     comment: 'Bus interface'
     name: "bus"
 	applicability: HARDWARE_SOURCESINK
