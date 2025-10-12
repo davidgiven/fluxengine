@@ -31,6 +31,7 @@
 using hex::operator""_lang;
 
 static std::shared_ptr<const DecodedDisk> diskFlux;
+static std::shared_ptr<Image> wtImage;
 
 static std::deque<std::function<void()>> pendingTasks;
 static std::mutex pendingTasksMutex;
@@ -44,12 +45,6 @@ static std::atomic<bool> failed;
 static bool formattingSupported;
 static std::map<std::string, Datastore::Device> devices;
 static std::shared_ptr<const DiskLayout> diskLayout;
-static std::map<CylinderHeadSector, std::shared_ptr<const Sector>>
-    sectorByPhysicalLocation;
-static std::map<LogicalLocation, std::shared_ptr<const Sector>>
-    sectorByLogicalLocation;
-static DiskLayout::LayoutBounds diskPhysicalBounds;
-static DiskLayout::LayoutBounds diskLogicalBounds;
 
 static void wtRebuildConfiguration();
 
@@ -139,7 +134,7 @@ void Datastore::runOnWorkerThread(std::function<void()> callback)
 }
 
 template <typename T>
-static T wtRunSynchronouslyOnUiThread(std::function<T()> callback)
+T wtRunSynchronouslyOnUiThread(std::function<T()> callback)
 {
     T result;
     hex::TaskManager::doLaterOnce(
@@ -150,6 +145,27 @@ static T wtRunSynchronouslyOnUiThread(std::function<T()> callback)
         });
     uiThreadSemaphore.acquire();
     return result;
+}
+
+template <>
+void wtRunSynchronouslyOnUiThread(std::function<void()> callback)
+{
+    hex::TaskManager::doLaterOnce(
+        [&]()
+        {
+            callback();
+            uiThreadSemaphore.release();
+        });
+    uiThreadSemaphore.acquire();
+}
+
+static void wtWaitForUiThreadToCatchUp()
+{
+    static std::function<void()> cb = []()
+    {
+    };
+
+    wtRunSynchronouslyOnUiThread(cb);
 }
 
 template <typename T>
@@ -192,19 +208,23 @@ void Datastore::init()
     Events::SeekToSectorViaPhysicalLocation::subscribe(
         [](CylinderHeadSector physicalLocation)
         {
-            auto it = sectorByPhysicalLocation.find(physicalLocation);
-            if (diskFlux && diskFlux->image &&
-                (it != sectorByPhysicalLocation.end()))
+            if (diskLayout)
             {
-                auto sector = it->second;
-                unsigned offset =
-                    diskFlux->layout->sectorOffsetByLogicalSectorLocation.at(
-                        {sector->logicalCylinder,
-                            sector->logicalHead,
-                            sector->logicalSector});
-
-                hex::ImHexApi::HexEditor::setSelection(
-                    hex::Region{offset, sector->data.size()});
+                auto& ptlo =
+                    findOptionally(diskLayout->layoutByPhysicalLocation,
+                        {physicalLocation.cylinder, physicalLocation.head});
+                if (ptlo.has_value())
+                {
+                    auto& ptl = *ptlo;
+                    auto offseto = findOptionally(
+                        diskLayout->sectorOffsetByLogicalSectorLocation,
+                        {ptl->logicalTrackLayout->logicalCylinder,
+                            ptl->logicalTrackLayout->logicalHead,
+                            physicalLocation.sector});
+                    if (offseto.has_value())
+                        hex::ImHexApi::HexEditor::setSelection(hex::Region(
+                            *offseto, ptl->logicalTrackLayout->sectorSize));
+                }
             }
         });
 
@@ -266,24 +286,6 @@ std::shared_ptr<const DecodedDisk> Datastore::getDecodedDisk()
 static void badConfiguration()
 {
     throw ErrorException("internal error: no configuration");
-}
-
-static void rebuildDecodedDiskIndices()
-{
-    sectorByPhysicalLocation.clear();
-    sectorByLogicalLocation.clear();
-    if (diskFlux)
-    {
-        for (const auto& [ch, sector] : diskFlux->sectorsByPhysicalLocation)
-        {
-            sectorByPhysicalLocation[{sector->physicalLocation->cylinder,
-                sector->physicalLocation->head,
-                sector->logicalSector}] = sector;
-            sectorByLogicalLocation[{sector->logicalCylinder,
-                sector->logicalHead,
-                sector->logicalSector}] = sector;
-        }
-    }
 }
 
 void Datastore::probeDevices()
@@ -385,10 +387,19 @@ void wtRebuildConfiguration()
         }
     }
 
+    /* Finalise the options. */
+
+    globalConfig().applyDefaultOptions();
+    globalConfig().validateAndThrow();
+    auto diskLayout = createDiskLayout();
+
     /* Update the UI-thread copy of the bits of configuration we
      * need. */
 
-    auto diskLayout = createDiskLayout();
+    auto diskFlux = std::make_shared<DecodedDisk>();
+    wtImage = std::make_shared<Image>();
+    wtImage->addMissingSectors(*diskLayout);
+    diskFlux->image = wtImage;
     bool formattingSupported = false;
     try
     {
@@ -402,17 +413,12 @@ void wtRebuildConfiguration()
         formattingSupported = false;
     }
 
-    auto diskPhysicalBounds = diskLayout->getPhysicalBounds();
-    auto diskLogicalBounds = diskLayout->getLogicalBounds();
-
     hex::TaskManager::doLater(
         [=]
         {
-            ::formattingSupported = true;
+            ::formattingSupported = formattingSupported;
             ::diskLayout = diskLayout;
-            ::diskPhysicalBounds = diskPhysicalBounds;
-            ::diskLogicalBounds = diskLogicalBounds;
-            rebuildDecodedDiskIndices();
+            ::diskFlux = diskFlux;
         });
 }
 
@@ -470,8 +476,11 @@ void Datastore::onLogMessage(const AnyLogMessage& message)
 
             [&](std::shared_ptr<const DiskReadLogMessage> m)
             {
+                /* This is where data gets from the worker thread to the GUI.
+                 * The diskFlux here is a copy of the one being worked on, and
+                 * is guaranteed not to change. */
+
                 diskFlux = m->disk;
-                rebuildDecodedDiskIndices();
             },
 
             /* Large-scale operation start. */
@@ -507,8 +516,10 @@ void Datastore::beginRead(void)
             DEFER(busy = false);
 
             wtRebuildConfiguration();
+            wtWaitForUiThreadToCatchUp();
             auto fluxSource = FluxSource::create(globalConfig());
             auto decoder = Arch::createDecoder(globalConfig());
+
             auto diskflux = std::make_shared<DecodedDisk>();
             readDiskCommand(*fluxSource, *decoder, *diskflux);
         });

@@ -18,7 +18,8 @@ AbstractSectorView::AbstractSectorView(const std::string& name):
 void AbstractSectorView::drawContent()
 {
     auto diskFlux = Datastore::getDecodedDisk();
-    if (!diskFlux)
+    auto diskLayout = Datastore::getDiskLayout();
+    if (!diskFlux || !diskLayout)
         return;
     auto& image = diskFlux->image;
     if (!image)
@@ -28,7 +29,7 @@ void AbstractSectorView::drawContent()
 
     unsigned minSector = UINT_MAX;
     unsigned maxSector = 0;
-    for (auto& [chs, ltl] : diskFlux->layout->layoutByLogicalLocation)
+    for (auto& [chs, ltl] : diskLayout->layoutByLogicalLocation)
     {
         minSector = std::min(
             minSector, *std::ranges::min_element(ltl->filesystemSectorOrder));
@@ -143,7 +144,7 @@ void AbstractSectorView::drawContent()
                         };
 
                         auto block = findOptionally(
-                            diskFlux->layout->blockIdByLogicalSectorLocation,
+                            diskLayout->blockIdByLogicalSectorLocation,
                             {sector->logicalCylinder,
                                 sector->logicalHead,
                                 sector->logicalSector});
