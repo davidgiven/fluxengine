@@ -409,6 +409,7 @@ static ReadGroupResult readGroup(const DiskLayout& diskLayout,
 }
 
 void writeTracks(const DiskLayout& diskLayout,
+
     FluxSink& fluxSink,
     std::function<std::unique_ptr<const Fluxmap>(
         const std::shared_ptr<const LogicalTrackLayout>&)> producer,
@@ -666,31 +667,28 @@ TracksAndSectors readAndDecodeTrack(const DiskLayout& diskLayout,
     return fas;
 }
 
-void readDiskCommand(
-    FluxSource& fluxSource, Decoder& decoder, DecodedDisk& decodedDisk)
+void readDiskCommand(const DiskLayout& diskLayout,
+    FluxSource& fluxSource,
+    Decoder& decoder,
+    DecodedDisk& decodedDisk)
 {
     std::unique_ptr<FluxSink> outputFluxSink;
     if (globalConfig()->decoder().has_copy_flux_to())
         outputFluxSink =
             FluxSink::create(globalConfig()->decoder().copy_flux_to());
 
-    if (!decodedDisk.layout)
-        decodedDisk.layout = createDiskLayout();
-
     log(BeginOperationLogMessage{"Reading and decoding disk"});
     unsigned index = 0;
-    for (auto& [logicalLocation, ltl] :
-        decodedDisk.layout->layoutByLogicalLocation)
+    for (auto& [logicalLocation, ltl] : diskLayout.layoutByLogicalLocation)
     {
         log(OperationProgressLogMessage{
-            index * 100 /
-            (unsigned)decodedDisk.layout->layoutByLogicalLocation.size()});
+            index * 100 / (unsigned)diskLayout.layoutByLogicalLocation.size()});
         index++;
 
         testForEmergencyStop();
 
         auto [trackFluxes, trackSectors] =
-            readAndDecodeTrack(*decodedDisk.layout, fluxSource, decoder, ltl);
+            readAndDecodeTrack(diskLayout, fluxSource, decoder, ltl);
         for (const auto& flux : trackFluxes)
             decodedDisk.tracksByPhysicalLocation.emplace(
                 CylinderHead{
@@ -781,11 +779,13 @@ void readDiskCommand(
     log(EndOperationLogMessage{"Read complete"});
 }
 
-void readDiskCommand(
-    FluxSource& fluxsource, Decoder& decoder, ImageWriter& writer)
+void readDiskCommand(const DiskLayout& diskLayout,
+    FluxSource& fluxsource,
+    Decoder& decoder,
+    ImageWriter& writer)
 {
     DecodedDisk decodedDisk;
-    readDiskCommand(fluxsource, decoder, decodedDisk);
+    readDiskCommand(diskLayout, fluxsource, decoder, decodedDisk);
 
     writer.printMap(*decodedDisk.image);
     if (globalConfig()->decoder().has_write_csv_to())

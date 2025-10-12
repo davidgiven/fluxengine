@@ -121,9 +121,13 @@ extern TracksAndSectors readAndDecodeTrack(const DiskLayout& diskLayout,
     Decoder& decoder,
     const std::shared_ptr<const LogicalTrackLayout>& ltl);
 
-extern void readDiskCommand(
-    FluxSource& fluxsource, Decoder& decoder, DecodedDisk& diskflux);
-extern void readDiskCommand(
-    FluxSource& source, Decoder& decoder, ImageWriter& writer);
+extern void readDiskCommand(const DiskLayout& diskLayout,
+    FluxSource& fluxsource,
+    Decoder& decoder,
+    DecodedDisk& diskflux);
+extern void readDiskCommand(const DiskLayout& diskLayout,
+    FluxSource& source,
+    Decoder& decoder,
+    ImageWriter& writer);
 
 #endif

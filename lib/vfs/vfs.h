@@ -225,6 +225,7 @@ public:
 public:
     Filesystem(const std::shared_ptr<const DiskLayout>& diskLayout,
         std::shared_ptr<SectorInterface> sectors);
+    virtual ~Filesystem() {};
 
     Bytes getSector(unsigned track, unsigned side, unsigned sector);
 
@@ -238,7 +239,7 @@ public:
     void eraseEverythingOnDisk();
 
 protected:
-    const std::shared_ptr<const DiskLayout>& _diskLayout;
+    const std::shared_ptr<const DiskLayout> _diskLayout;
     unsigned _blockCount;
 
 private:

@@ -12,10 +12,12 @@
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/decoders/decoders.h"
+#include "lib/encoders/encoders.h"
 #include "lib/imagewriter/imagewriter.h"
 #include "lib/algorithms/readerwriter.h"
 #include "lib/usb/usbfinder.h"
 #include "lib/vfs/vfs.h"
+#include "lib/vfs/sectorinterface.h"
 #include "arch/arch.h"
 #include "logview.h"
 #include "globals.h"
@@ -208,34 +210,31 @@ void Datastore::init()
     Events::SeekToSectorViaPhysicalLocation::subscribe(
         [](CylinderHeadSector physicalLocation)
         {
-            if (diskLayout)
+            if (!diskLayout)
+                return;
+            auto& ptlo = findOptionally(diskLayout->layoutByPhysicalLocation,
+                {physicalLocation.cylinder, physicalLocation.head});
+            if (ptlo.has_value())
             {
-                auto& ptlo =
-                    findOptionally(diskLayout->layoutByPhysicalLocation,
-                        {physicalLocation.cylinder, physicalLocation.head});
-                if (ptlo.has_value())
-                {
-                    auto& ptl = *ptlo;
-                    auto offseto = findOptionally(
-                        diskLayout->sectorOffsetByLogicalSectorLocation,
-                        {ptl->logicalTrackLayout->logicalCylinder,
-                            ptl->logicalTrackLayout->logicalHead,
-                            physicalLocation.sector});
-                    if (offseto.has_value())
-                        hex::ImHexApi::HexEditor::setSelection(hex::Region(
-                            *offseto, ptl->logicalTrackLayout->sectorSize));
-                }
+                auto& ptl = *ptlo;
+                auto offseto = findOptionally(
+                    diskLayout->sectorOffsetByLogicalSectorLocation,
+                    {ptl->logicalTrackLayout->logicalCylinder,
+                        ptl->logicalTrackLayout->logicalHead,
+                        physicalLocation.sector});
+                if (offseto.has_value())
+                    hex::ImHexApi::HexEditor::setSelection(hex::Region(
+                        *offseto, ptl->logicalTrackLayout->sectorSize));
             }
         });
 
     Events::SeekToTrackViaPhysicalLocation::subscribe(
         [](CylinderHead physicalLocation)
         {
-            if (!diskFlux)
+            if (!diskFlux || !diskLayout)
                 return;
-            auto ptlo =
-                findOptionally(diskFlux->layout->layoutByPhysicalLocation,
-                    {physicalLocation.cylinder, physicalLocation.head});
+            auto ptlo = findOptionally(diskLayout->layoutByPhysicalLocation,
+                {physicalLocation.cylinder, physicalLocation.head});
             if (!ptlo.has_value())
                 return;
             auto ptl = *ptlo;
@@ -244,10 +243,10 @@ void Datastore::init()
             unsigned lastSectorId = ltl->filesystemSectorOrder.back();
 
             unsigned startOffset =
-                diskFlux->layout->sectorOffsetByLogicalSectorLocation.at(
+                diskLayout->sectorOffsetByLogicalSectorLocation.at(
                     {ltl->logicalCylinder, ltl->logicalHead, firstSectorId});
             unsigned endOffset =
-                diskFlux->layout->sectorOffsetByLogicalSectorLocation.at(
+                diskLayout->sectorOffsetByLogicalSectorLocation.at(
                     {ltl->logicalCylinder, ltl->logicalHead, lastSectorId}) +
                 ltl->sectorSize;
 
@@ -521,7 +520,20 @@ void Datastore::beginRead(void)
             auto decoder = Arch::createDecoder(globalConfig());
 
             auto diskflux = std::make_shared<DecodedDisk>();
-            readDiskCommand(*fluxSource, *decoder, *diskflux);
+            readDiskCommand(*diskLayout, *fluxSource, *decoder, *diskflux);
+        });
+}
+
+void Datastore::reset()
+{
+    Datastore::runOnWorkerThread(
+        []
+        {
+            busy = true;
+            DEFER(busy = false);
+
+            wtRebuildConfiguration();
+            wtWaitForUiThreadToCatchUp();
         });
 }
 
@@ -576,7 +588,28 @@ void Datastore::createBlankImage()
             ON_SCOPE_EXIT
             {
                 busy = false;
-                wtRebuildConfiguration();
             };
+
+            wtRebuildConfiguration();
+            auto diskflux = std::make_shared<DecodedDisk>();
+            auto image = std::make_shared<Image>();
+            std::shared_ptr<SectorInterface> sectorInterface =
+                SectorInterface::createMemorySectorInterface(image);
+            auto filesystem = Filesystem::createFilesystem(
+                globalConfig()->filesystem(), diskLayout, sectorInterface);
+
+            filesystem->create(false, "FLUXENGINE");
+            filesystem->flushChanges();
+
+            image->calculateSize();
+            image->populateSectorPhysicalLocationsFromLogicalLocations(
+                *diskLayout);
+            diskflux->image = image;
+            diskflux->populateTrackDataFromImage(*diskLayout);
+            hex::TaskManager::doLater(
+                [=]
+                {
+                    ::diskFlux = diskflux;
+                });
         });
 }

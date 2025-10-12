@@ -20,7 +20,7 @@ std::string Sector::statusToString(Status status)
         case Status::CONFLICT:
             return "conflicting data";
         default:
-            return fmt::format("unknown error {}", status);
+            return fmt::format("unknown error {}", (int)status);
     }
 }
 

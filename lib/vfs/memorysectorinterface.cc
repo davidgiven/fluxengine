@@ -41,7 +41,13 @@ public:
 
     void flushChanges() override
     {
-        // _writer->writeImage(*_image);
+        for (const auto& sector : *_liveImage)
+        {
+            const auto& s = _backupImage->put(sector->logicalCylinder,
+                sector->logicalHead,
+                sector->logicalSector);
+            *s = *sector;
+        }
         _changed = false;
     }
 

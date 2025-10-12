@@ -106,6 +106,8 @@ public:
     }
 
     void addMissingSectors(const DiskLayout& layout, bool populated = false);
+    void populateSectorPhysicalLocationsFromLogicalLocations(
+        const DiskLayout& diskLayout);
 
     const_iterator begin() const
     {

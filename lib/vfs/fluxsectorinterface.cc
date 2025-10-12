@@ -99,8 +99,8 @@ public:
             _changedSectors,
             *_encoder,
             *_fluxSink,
-            &*_decoder,
-            &*_fluxSource,
+            _decoder.get(),
+            _fluxSource.get(),
             locations);
 
         discardChanges();

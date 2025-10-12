@@ -25,12 +25,13 @@ DiskLayout::LayoutBounds PhysicalView::getBounds()
 std::shared_ptr<const Sector> PhysicalView::getSector(
     unsigned physicalCylinder, unsigned physicalHead, unsigned sectorId)
 {
-    auto diskFlux = Datastore::getDecodedDisk();
-    auto& ptl = findOrDefault(diskFlux->layout->layoutByPhysicalLocation,
-        {physicalCylinder, physicalHead});
+    const auto& diskFlux = Datastore::getDecodedDisk();
+    const auto& diskLayout = Datastore::getDiskLayout();
+    const auto& ptl = findOrDefault(
+        diskLayout->layoutByPhysicalLocation, {physicalCylinder, physicalHead});
     if (!ptl)
         return nullptr;
-    auto& ltl = ptl->logicalTrackLayout;
+    const auto& ltl = ptl->logicalTrackLayout;
     return diskFlux->image->get(
         {ltl->logicalCylinder, ltl->logicalHead, sectorId});
 }

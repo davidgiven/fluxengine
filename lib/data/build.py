@@ -3,6 +3,7 @@ from build.c import cxxlibrary
 cxxlibrary(
     name="data",
     srcs=[
+        "./decoded.cc",
         "./fluxmap.cc",
         "./fluxmapreader.cc",
         "./fluxpattern.cc",

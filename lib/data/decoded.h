@@ -38,7 +38,8 @@ struct DecodedDisk
     std::multimap<CylinderHead, std::shared_ptr<const Sector>>
         sectorsByPhysicalLocation;
     std::shared_ptr<const Image> image;
-    std::shared_ptr<const DiskLayout> layout;
+
+    void populateTrackDataFromImage(const DiskLayout& diskLayout);
 };
 
 #endif

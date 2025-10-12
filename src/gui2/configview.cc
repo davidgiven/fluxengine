@@ -70,6 +70,7 @@ static void emitOptions(DynamicSetting<std::string>& setting,
                 if (value)
                     options[it.name()] = "true";
                 setting = optionsToString(options);
+                Datastore::reset();
             }
         }
     }
@@ -146,6 +147,7 @@ static void emitOptions(DynamicSetting<std::string>& setting,
                         options[it.name()] = ot.name();
                     }
                     setting = optionsToString(options);
+                    Datastore::reset();
                 }
         }
     }
@@ -183,7 +185,10 @@ static void formatProperties()
                     label = name;
                 if (ImGui::Selectable(
                         fmt::format("{}##{}", label, name).c_str(), false))
+                {
                     formatSetting = name;
+                    Datastore::reset();
+                }
             }
     }
 

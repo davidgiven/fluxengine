@@ -305,11 +305,13 @@ void Filesystem::putLogicalSector(uint32_t number, const Bytes& data)
     unsigned pos = 0;
     while (pos < data.size())
     {
-        auto& [cylinder, head, sectorId] =
+        const auto& [cylinder, head, sectorId] =
             _diskLayout->logicalSectorLocationsInFilesystemOrder.at(number);
-        auto& ltl = _diskLayout->layoutByLogicalLocation.at({cylinder, head});
-        _sectors->put(cylinder, head, sectorId)->data =
-            data.slice(pos, ltl->sectorSize);
+        const auto& ltl =
+            _diskLayout->layoutByLogicalLocation.at({cylinder, head});
+        const auto& sector = _sectors->put(cylinder, head, sectorId);
+        sector->status = Sector::OK;
+        sector->data = data.slice(pos, ltl->sectorSize);
         pos += ltl->sectorSize;
         number++;
     }

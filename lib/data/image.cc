@@ -94,3 +94,25 @@ void Image::calculateSize()
     }
     _geometry.numSectors = maxSector - _geometry.firstSector + 1;
 }
+
+void Image::populateSectorPhysicalLocationsFromLogicalLocations(
+    const DiskLayout& diskLayout)
+{
+    Image tempImage;
+    for (const auto& sector : *this)
+    {
+        const auto& ltl = diskLayout.layoutByLogicalLocation.at(
+            {sector->logicalCylinder, sector->logicalHead});
+        auto newSector = tempImage.put(sector->logicalCylinder,
+            sector->logicalHead,
+            sector->logicalSector);
+        *newSector = *sector;
+        newSector->physicalLocation = std::make_optional<CylinderHead>(
+            ltl->physicalCylinder, ltl->physicalHead);
+    }
+
+    for (const auto& sector : tempImage)
+        _sectors[{sector->logicalCylinder,
+            sector->logicalHead,
+            sector->logicalSector}] = sector;
+}

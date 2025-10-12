@@ -130,10 +130,11 @@ void ControlPanelView::drawContent()
             "fluxengine.view.controlpanel.rereadBad"_lang,
             nullptr,
             busy || !diskFlux);
-        ImGui::TableNextColumn();
+
+        ImGui::TableNextRow();
         button(ICON_VS_NEW_FILE,
             "fluxengine.view.controlpanel.createBlank"_lang,
-            nullptr,
+            Datastore::createBlankImage,
             busy || !Datastore::canFormat());
     }
 
