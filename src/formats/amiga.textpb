@@ -85,7 +85,6 @@ option_group {
 	option {
 		name: "with_metadata"
 		comment: "528-byte sectors"
-		set_by_default: true
 
 		config {
 			layout {
