@@ -33,8 +33,6 @@ public:
         const ScpFluxSinkProto& config);
     static std::unique_ptr<FluxSink> createFl2FluxSink(
         const Fl2FluxSinkProto& config);
-    static std::unique_ptr<FluxSink> createMemoryFluxSink(
-        DecodedDisk& decodedDisk);
 
     static std::unique_ptr<FluxSink> createFl2FluxSink(
         const std::string& filename);

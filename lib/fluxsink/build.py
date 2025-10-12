@@ -14,7 +14,6 @@ cxxlibrary(
         "./fl2fluxsink.cc",
         "./fluxsink.cc",
         "./hardwarefluxsink.cc",
-        "./memoryfluxsink.cc",
         "./scpfluxsink.cc",
         "./vcdfluxsink.cc",
     ],
