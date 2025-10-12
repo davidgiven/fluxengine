@@ -33,8 +33,7 @@ static unsigned getTrackStep(const ConfigProto& config = globalConfig())
                 case DRIVETYPE_40TRACK:
                     error(
                         "you can't read/write an 80 track image from/to a 40 "
-                        "track "
-                        "drive");
+                        "track drive");
 
                 case DRIVETYPE_80TRACK:
                     return 1;
@@ -42,8 +41,7 @@ static unsigned getTrackStep(const ConfigProto& config = globalConfig())
                 case DRIVETYPE_APPLE2:
                     error(
                         "you can't read/write an 80 track image from/to an "
-                        "Apple II "
-                        "drive");
+                        "Apple II drive");
 
                 default:
                     break;
