@@ -247,6 +247,18 @@ static void deviceProperties()
         Datastore::probeDevices();
     }
 
+    ImGui::SameLine();
+    if (ImGui::Button("fluxengine.view.config.setupFluxFile"_lang))
+    {
+        fs::openFileBrowser(fs::DialogMode::Open,
+            {},
+            [](const auto& path)
+            {
+                settings.get<std::string>("device") = DEVICE_FLUXFILE;
+                settings.get<std::fs::path>("fluxfile") = path;
+            });
+    }
+
     /* The file path, if DEVICE_FLUXFILE, and device path, if DEVICE_MANUAL
      */
 

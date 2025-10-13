@@ -26,19 +26,6 @@ ControlPanelView::ControlPanelView():
 {
 }
 
-static void loadFluxFile()
-{
-    fs::openFileBrowser(fs::DialogMode::Open,
-        {},
-        [](const auto& path)
-        {
-            settings.get<std::string>("device") = DEVICE_FLUXFILE;
-            settings.get<std::fs::path>("fluxfile") = path;
-
-            Datastore::beginRead();
-        });
-}
-
 static void saveFluxFile()
 {
     fs::openFileBrowser(fs::DialogMode::Save, {}, Datastore::writeFluxFile);
@@ -120,21 +107,15 @@ void ControlPanelView::drawContent()
             busy || !diskFlux);
 
         ImGui::TableNextRow();
-        button(ICON_TA_UPLOAD,
-            "fluxengine.view.controlpanel.readFlux"_lang,
-            loadFluxFile,
+        button(ICON_VS_FOLDER_OPENED,
+            "fluxengine.view.controlpanel.readImage"_lang,
+            loadSectorImage,
             busy);
         ImGui::TableNextColumn();
         button(ICON_VS_SAVE_ALL,
             "fluxengine.view.controlpanel.writeImage"_lang,
             saveSectorImage,
             busy || !hasImage);
-
-        ImGui::TableNextRow();
-        button(ICON_VS_FOLDER_OPENED,
-            "fluxengine.view.controlpanel.readImage"_lang,
-            loadSectorImage,
-            busy);
 
         ImGui::TableNextRow();
         button(ICON_VS_NEW_FILE,
