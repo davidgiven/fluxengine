@@ -87,10 +87,11 @@ public:
 
     unsigned minPhysicalCylinder, maxPhysicalCylinder;
     unsigned minPhysicalHead, maxPhysicalHead;
-    unsigned groupSize; /* Number of physical cylinders per logical cylinder */
-    unsigned headBias;  /* Physical cylinder offset */
-    unsigned headWidth; /* Width of the physical head */
-    bool swapSides;     /* Whether sides need to be swapped */
+    unsigned groupSize;  /* Number of physical cylinders per logical cylinder */
+    unsigned headBias;   /* Physical cylinder offset */
+    unsigned headWidth;  /* Width of the physical head */
+    bool swapSides;      /* Whether sides need to be swapped */
+    unsigned totalBytes; /* Total number of bytes on the disk. */
 
     /* Physical and logical layouts by location. */
 

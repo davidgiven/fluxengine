@@ -89,11 +89,12 @@ static void workerThread_cb()
         catch (const std::exception& e)
         {
             const std::lock_guard<std::mutex> lock(pendingTasksMutex);
+            std::string message = e.what();
             hex::TaskManager::doLater(
                 [=]
                 {
                     hex::ui::ToastError::open(
-                        fmt::format("FluxEngine error: {}", e.what()));
+                        fmt::format("FluxEngine error: {}", message));
                 });
             stopWorkerThread();
             return;
@@ -311,6 +312,16 @@ void Datastore::probeDevices()
         });
 }
 
+static void wtClearDiskData()
+{
+    hex::TaskManager::doLater(
+        []
+        {
+            ::wtImage = nullptr;
+            ::diskFlux = nullptr;
+        });
+}
+
 void wtRebuildConfiguration()
 {
     /* Reset and apply the format configuration. */
@@ -395,10 +406,6 @@ void wtRebuildConfiguration()
     /* Update the UI-thread copy of the bits of configuration we
      * need. */
 
-    auto diskFlux = std::make_shared<DecodedDisk>();
-    wtImage = std::make_shared<Image>();
-    wtImage->addMissingSectors(*diskLayout);
-    diskFlux->image = wtImage;
     bool formattingSupported = false;
     try
     {
@@ -417,7 +424,6 @@ void wtRebuildConfiguration()
         {
             ::formattingSupported = formattingSupported;
             ::diskLayout = diskLayout;
-            ::diskFlux = diskFlux;
         });
 }
 
@@ -506,7 +512,26 @@ void Datastore::onLogMessage(const AnyLogMessage& message)
         message);
 }
 
-void Datastore::beginRead(void)
+void Datastore::beginRead()
+{
+    Datastore::runOnWorkerThread(
+        []
+        {
+            busy = true;
+            DEFER(busy = false);
+
+            wtRebuildConfiguration();
+            wtClearDiskData();
+            wtWaitForUiThreadToCatchUp();
+            auto fluxSource = FluxSource::create(globalConfig());
+            auto decoder = Arch::createDecoder(globalConfig());
+
+            auto diskflux = std::make_shared<DecodedDisk>();
+            readDiskCommand(*diskLayout, *fluxSource, *decoder, *diskflux);
+        });
+}
+
+void Datastore::beginWrite()
 {
     Datastore::runOnWorkerThread(
         []
@@ -516,11 +541,25 @@ void Datastore::beginRead(void)
 
             wtRebuildConfiguration();
             wtWaitForUiThreadToCatchUp();
-            auto fluxSource = FluxSource::create(globalConfig());
-            auto decoder = Arch::createDecoder(globalConfig());
 
-            auto diskflux = std::make_shared<DecodedDisk>();
-            readDiskCommand(*diskLayout, *fluxSource, *decoder, *diskflux);
+            auto fluxSink = FluxSink::create(globalConfig());
+            auto encoder = Arch::createEncoder(globalConfig());
+            std::shared_ptr<Decoder> decoder;
+            std::shared_ptr<FluxSource> verificationFluxSource;
+            if (globalConfig().hasDecoder() && fluxSink->isHardware())
+            {
+                decoder = Arch::createDecoder(globalConfig());
+                verificationFluxSource = FluxSource::create(
+                    globalConfig().getVerificationFluxSourceProto());
+            }
+
+            auto image = diskFlux->image;
+            writeDiskCommand(*diskLayout,
+                *image,
+                *encoder,
+                *fluxSink,
+                decoder.get(),
+                verificationFluxSource.get());
         });
 }
 
@@ -533,11 +572,12 @@ void Datastore::reset()
             DEFER(busy = false);
 
             wtRebuildConfiguration();
+            wtClearDiskData();
             wtWaitForUiThreadToCatchUp();
         });
 }
 
-void Datastore::stop(void)
+void Datastore::stop()
 {
     emergencyStop = true;
 }
@@ -554,6 +594,7 @@ void Datastore::writeImage(const std::fs::path& path)
             };
 
             wtRebuildConfiguration();
+            wtWaitForUiThreadToCatchUp();
             globalConfig().setImageWriter(path.string());
             ImageWriter::create(globalConfig())
                 ->writeImage(*Datastore::getDecodedDisk()->image);
@@ -572,6 +613,14 @@ void Datastore::writeFluxFile(const std::fs::path& path)
             };
 
             wtRebuildConfiguration();
+            wtWaitForUiThreadToCatchUp();
+
+            if (!diskFlux || !diskFlux->image)
+                error("no loaded image");
+            if (diskFlux->image->getGeometry().totalBytes !=
+                diskLayout->totalBytes)
+                error("loaded image is not the right size for this format");
+
             globalConfig().setFluxSink(path.string());
             auto fluxSource = FluxSource::createMemoryFluxSource(*diskFlux);
             auto fluxSink = FluxSink::create(globalConfig());
@@ -591,6 +640,9 @@ void Datastore::createBlankImage()
             };
 
             wtRebuildConfiguration();
+            wtClearDiskData();
+            wtWaitForUiThreadToCatchUp();
+
             auto diskflux = std::make_shared<DecodedDisk>();
             auto image = std::make_shared<Image>();
             std::shared_ptr<SectorInterface> sectorInterface =

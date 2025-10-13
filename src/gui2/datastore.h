@@ -36,6 +36,7 @@ public:
     /* Begins a transation. Rebuilds the configuration. */
     static void reset();
     static void beginRead();
+    static void beginWrite();
     static void writeImage(const std::fs::path& path);
     static void writeFluxFile(const std::fs::path& path);
     static void createBlankImage();

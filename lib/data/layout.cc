@@ -285,6 +285,8 @@ DiskLayout::DiskLayout(const ConfigProto& config)
             blockId++;
         }
     }
+
+    totalBytes = sectorOffset;
 }
 
 static ConfigProto createTestConfig(unsigned numCylinders,

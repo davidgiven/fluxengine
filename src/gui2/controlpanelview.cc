@@ -100,7 +100,7 @@ void ControlPanelView::drawContent()
         ImGui::TableNextColumn();
         button(ICON_VS_SAVE_AS,
             "fluxengine.view.controlpanel.writeDevice"_lang,
-            nullptr,
+            Datastore::beginWrite,
             busy || !hasImage);
 
         ImGui::TableNextRow();
