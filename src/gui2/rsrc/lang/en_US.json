@@ -50,6 +50,7 @@
     "fluxengine.view.status.readDevice": "Reading disk",
     "fluxengine.view.status.writeDevice": "Writing disk",
     "fluxengine.view.status.writeFlux": "Writing flux file to disk",
+    "fluxengine.view.status.readImage": "Reading image file from disk",
     "fluxengine.view.status.writeImage": "Writing image file to disk",
     "fluxengine.view.status.blankFilesystem": "Creating blank filesystem"
 }

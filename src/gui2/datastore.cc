@@ -13,6 +13,7 @@
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/decoders/decoders.h"
 #include "lib/encoders/encoders.h"
+#include "lib/imagereader/imagereader.h"
 #include "lib/imagewriter/imagewriter.h"
 #include "lib/algorithms/readerwriter.h"
 #include "lib/usb/usbfinder.h"
@@ -624,6 +625,20 @@ void Datastore::stop()
     emergencyStop = true;
 }
 
+static std::shared_ptr<DecodedDisk> wtMakeDiskDataFromImage(
+    std::shared_ptr<Image>& image)
+{
+    image->calculateSize();
+    image->populateSectorPhysicalLocationsFromLogicalLocations(*diskLayout);
+    if (image->getGeometry().totalBytes != diskLayout->totalBytes)
+        error("loaded image is not the right size for this format");
+
+    auto diskflux = std::make_shared<DecodedDisk>();
+    diskflux->image = image;
+    diskflux->populateTrackDataFromImage(*diskLayout);
+    return diskflux;
+}
+
 void Datastore::writeImage(const std::fs::path& path)
 {
     Events::OperationStart::post("fluxengine.view.status.writeImage"_lang);
@@ -641,6 +656,39 @@ void Datastore::writeImage(const std::fs::path& path)
                 globalConfig().setImageWriter(path.string());
                 ImageWriter::create(globalConfig())
                     ->writeImage(*Datastore::getDecodedDisk()->image);
+            }
+            catch (...)
+            {
+                failed = true;
+                throw;
+            }
+        });
+}
+
+void Datastore::readImage(const std::fs::path& path)
+{
+    Events::OperationStart::post("fluxengine.view.status.readImage"_lang);
+    Datastore::runOnWorkerThread(
+        [=]
+        {
+            busy = true;
+            failed = false;
+            DEFER(wtOperationStop());
+
+            try
+            {
+                wtRebuildConfiguration();
+                wtWaitForUiThreadToCatchUp();
+                globalConfig().setImageReader(path.string());
+                std::shared_ptr<Image> image =
+                    ImageReader::create(globalConfig())->readImage();
+
+                auto diskFlux = wtMakeDiskDataFromImage(image);
+                hex::TaskManager::doLater(
+                    [=]
+                    {
+                        ::diskFlux = diskFlux;
+                    });
             }
             catch (...)
             {
@@ -700,7 +748,6 @@ void Datastore::createBlankImage()
                 wtClearDiskData();
                 wtWaitForUiThreadToCatchUp();
 
-                auto diskflux = std::make_shared<DecodedDisk>();
                 auto image = std::make_shared<Image>();
                 std::shared_ptr<SectorInterface> sectorInterface =
                     SectorInterface::createMemorySectorInterface(image);
@@ -710,15 +757,11 @@ void Datastore::createBlankImage()
                 filesystem->create(false, "FLUXENGINE");
                 filesystem->flushChanges();
 
-                image->calculateSize();
-                image->populateSectorPhysicalLocationsFromLogicalLocations(
-                    *diskLayout);
-                diskflux->image = image;
-                diskflux->populateTrackDataFromImage(*diskLayout);
+                auto diskFlux = wtMakeDiskDataFromImage(image);
                 hex::TaskManager::doLater(
                     [=]
                     {
-                        ::diskFlux = diskflux;
+                        ::diskFlux = diskFlux;
                     });
             }
             catch (...)

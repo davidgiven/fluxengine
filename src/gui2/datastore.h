@@ -37,6 +37,7 @@ public:
     static void reset();
     static void beginRead();
     static void beginWrite();
+    static void readImage(const std::fs::path& path);
     static void writeImage(const std::fs::path& path);
     static void writeFluxFile(const std::fs::path& path);
     static void createBlankImage();

@@ -39,14 +39,19 @@ static void loadFluxFile()
         });
 }
 
-static void saveSectorImage()
-{
-    fs::openFileBrowser(fs::DialogMode::Save, {}, Datastore::writeImage);
-}
-
 static void saveFluxFile()
 {
     fs::openFileBrowser(fs::DialogMode::Save, {}, Datastore::writeFluxFile);
+}
+
+static void loadSectorImage()
+{
+    fs::openFileBrowser(fs::DialogMode::Open, {}, Datastore::readImage);
+}
+
+static void saveSectorImage()
+{
+    fs::openFileBrowser(fs::DialogMode::Save, {}, Datastore::writeImage);
 }
 
 void ControlPanelView::drawContent()
@@ -128,7 +133,7 @@ void ControlPanelView::drawContent()
         ImGui::TableNextRow();
         button(ICON_VS_FOLDER_OPENED,
             "fluxengine.view.controlpanel.readImage"_lang,
-            nullptr,
+            loadSectorImage,
             busy);
 
         ImGui::TableNextRow();
