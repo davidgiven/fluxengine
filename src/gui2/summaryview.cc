@@ -23,6 +23,8 @@ static DynamicSettingFactory settings("fluxengine.settings");
 static DiskActivityType currentDiskActivityType = DiskActivityType::None;
 static unsigned currentPhysicalCylinder;
 static unsigned currentPhysicalHead;
+static std::string currentStatusMessage;
+static OperationState currentOperationState = OperationState::Running;
 
 static std::string getActivityLabel(DiskActivityType type)
 {
@@ -46,6 +48,19 @@ SummaryView::SummaryView():
             currentDiskActivityType = type;
             currentPhysicalCylinder = cylinder;
             currentPhysicalHead = head;
+        });
+
+    Events::OperationStart::subscribe(
+        [](std::string message)
+        {
+            currentStatusMessage = message;
+            currentOperationState = OperationState::Running;
+        });
+
+    Events::OperationStop::subscribe(
+        [](OperationState state)
+        {
+            currentOperationState = state;
         });
 }
 
@@ -325,6 +340,7 @@ void SummaryView::drawContent()
     int numPhysicalCylinders = maxPhysicalCylinder - minPhysicalCylinder + 1;
     int numPhysicalHeads = maxPhysicalHead - minPhysicalHead + 1;
 
+    if (diskFlux)
     {
         ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, {1, 1});
         DEFER(ImGui::PopStyleVar());
@@ -337,22 +353,45 @@ void SummaryView::drawContent()
         ImGuiExt::TextFormattedCenteredHorizontal(
             "fluxengine.view.summary.physical"_lang);
 
-        if (diskFlux)
-            drawPhysicalMap(minPhysicalCylinder,
-                maxPhysicalCylinder,
-                minPhysicalHead,
-                maxPhysicalHead,
-                *diskFlux);
+        drawPhysicalMap(minPhysicalCylinder,
+            maxPhysicalCylinder,
+            minPhysicalHead,
+            maxPhysicalHead,
+            *diskFlux);
 
         ImGuiExt::TextFormattedCenteredHorizontal(
             "fluxengine.view.summary.logical"_lang);
 
-        if (diskFlux)
-            drawLogicalMap(minPhysicalCylinder,
-                maxPhysicalCylinder,
-                minPhysicalHead,
-                maxPhysicalHead,
-                *diskFlux,
-                *diskLayout);
+        drawLogicalMap(minPhysicalCylinder,
+            maxPhysicalCylinder,
+            minPhysicalHead,
+            maxPhysicalHead,
+            *diskFlux,
+            *diskLayout);
+
+        ImGui::Dummy(ImVec2(0, ImGui::GetFontSize()));
+
+        std::string message = currentStatusMessage;
+        if (!message.empty())
+        {
+            switch (currentOperationState)
+            {
+                case OperationState::Running:
+                    message += (std::
+                            string) "fluxengine.view.status.runningSuffix"_lang;
+                    break;
+
+                case OperationState::Succeeded:
+                    message += (std::
+                            string) "fluxengine.view.status.succeededSuffix"_lang;
+                    break;
+
+                case OperationState::Failed:
+                    message += (std::
+                            string) "fluxengine.view.status.failedSuffix"_lang;
+                    break;
+            }
+            ImGuiExt::TextFormattedCenteredHorizontal(message);
+        }
     }
 }

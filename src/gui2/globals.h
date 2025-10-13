@@ -17,10 +17,18 @@ namespace ImGui
     }
 }
 
-enum class DiskActivityType {
+enum class DiskActivityType
+{
     None,
     Read,
     Write,
+};
+
+enum class OperationState
+{
+    Running,
+    Succeeded,
+    Failed
 };
 
 namespace Events
@@ -29,6 +37,12 @@ namespace Events
     EVENT_DEF(SeekToSectorViaPhysicalLocation, CylinderHeadSector);
     EVENT_DEF(SeekToTrackViaPhysicalLocation, CylinderHead);
     EVENT_DEF(DiskActivityNotification, DiskActivityType, unsigned, unsigned);
+    EVENT_DEF(OperationStart, std::string);
+    EVENT_DEF(OperationStop, OperationState);
 }
 
-#define DEFER(_stmt) ON_SCOPE_EXIT { _stmt; }
+#define DEFER(_stmt) \
+    ON_SCOPE_EXIT    \
+    {                \
+        _stmt;       \
+    }

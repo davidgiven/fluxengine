@@ -171,6 +171,18 @@ static void wtWaitForUiThreadToCatchUp()
     wtRunSynchronouslyOnUiThread(cb);
 }
 
+static void wtOperationStop()
+{
+    OperationState state =
+        failed ? OperationState::Failed : OperationState::Succeeded;
+    busy = false;
+    hex::TaskManager::doLaterOnce(
+        [=]()
+        {
+            Events::OperationStop::post(state);
+        });
+}
+
 template <typename T>
 static T readSetting(const std::string& leaf, const T defaultValue)
 {
@@ -514,66 +526,96 @@ void Datastore::onLogMessage(const AnyLogMessage& message)
 
 void Datastore::beginRead()
 {
+    Events::OperationStart::post("fluxengine.view.status.readDevice"_lang);
     Datastore::runOnWorkerThread(
         []
         {
             busy = true;
-            DEFER(busy = false);
+            failed = false;
+            DEFER(wtOperationStop());
 
-            wtRebuildConfiguration();
-            wtClearDiskData();
-            wtWaitForUiThreadToCatchUp();
-            auto fluxSource = FluxSource::create(globalConfig());
-            auto decoder = Arch::createDecoder(globalConfig());
+            try
+            {
+                wtRebuildConfiguration();
+                wtClearDiskData();
+                wtWaitForUiThreadToCatchUp();
+                auto fluxSource = FluxSource::create(globalConfig());
+                auto decoder = Arch::createDecoder(globalConfig());
 
-            auto diskflux = std::make_shared<DecodedDisk>();
-            readDiskCommand(*diskLayout, *fluxSource, *decoder, *diskflux);
+                auto diskflux = std::make_shared<DecodedDisk>();
+                readDiskCommand(*diskLayout, *fluxSource, *decoder, *diskflux);
+            }
+            catch (...)
+            {
+                failed = true;
+                throw;
+            }
         });
 }
 
 void Datastore::beginWrite()
 {
+    Events::OperationStart::post("fluxengine.view.status.writeDevice"_lang);
     Datastore::runOnWorkerThread(
         []
         {
             busy = true;
-            DEFER(busy = false);
+            failed = false;
+            DEFER(wtOperationStop());
 
-            wtRebuildConfiguration();
-            wtWaitForUiThreadToCatchUp();
-
-            auto fluxSink = FluxSink::create(globalConfig());
-            auto encoder = Arch::createEncoder(globalConfig());
-            std::shared_ptr<Decoder> decoder;
-            std::shared_ptr<FluxSource> verificationFluxSource;
-            if (globalConfig().hasDecoder() && fluxSink->isHardware())
+            try
             {
-                decoder = Arch::createDecoder(globalConfig());
-                verificationFluxSource = FluxSource::create(
-                    globalConfig().getVerificationFluxSourceProto());
-            }
+                wtRebuildConfiguration();
+                wtWaitForUiThreadToCatchUp();
 
-            auto image = diskFlux->image;
-            writeDiskCommand(*diskLayout,
-                *image,
-                *encoder,
-                *fluxSink,
-                decoder.get(),
-                verificationFluxSource.get());
+                auto fluxSink = FluxSink::create(globalConfig());
+                auto encoder = Arch::createEncoder(globalConfig());
+                std::shared_ptr<Decoder> decoder;
+                std::shared_ptr<FluxSource> verificationFluxSource;
+                if (globalConfig().hasDecoder() && fluxSink->isHardware())
+                {
+                    decoder = Arch::createDecoder(globalConfig());
+                    verificationFluxSource = FluxSource::create(
+                        globalConfig().getVerificationFluxSourceProto());
+                }
+
+                auto image = diskFlux->image;
+                writeDiskCommand(*diskLayout,
+                    *image,
+                    *encoder,
+                    *fluxSink,
+                    decoder.get(),
+                    verificationFluxSource.get());
+            }
+            catch (...)
+            {
+                failed = true;
+                throw;
+            }
         });
 }
 
 void Datastore::reset()
 {
+    Events::OperationStart::post("");
     Datastore::runOnWorkerThread(
         []
         {
             busy = true;
-            DEFER(busy = false);
+            failed = false;
+            DEFER(wtOperationStop());
 
-            wtRebuildConfiguration();
-            wtClearDiskData();
-            wtWaitForUiThreadToCatchUp();
+            try
+            {
+                wtRebuildConfiguration();
+                wtClearDiskData();
+                wtWaitForUiThreadToCatchUp();
+            }
+            catch (...)
+            {
+                failed = true;
+                throw;
+            }
         });
 }
 
@@ -584,84 +626,105 @@ void Datastore::stop()
 
 void Datastore::writeImage(const std::fs::path& path)
 {
+    Events::OperationStart::post("fluxengine.view.status.writeImage"_lang);
     Datastore::runOnWorkerThread(
         [=]
         {
             busy = true;
-            ON_SCOPE_EXIT
-            {
-                busy = false;
-            };
+            failed = false;
+            DEFER(wtOperationStop());
 
-            wtRebuildConfiguration();
-            wtWaitForUiThreadToCatchUp();
-            globalConfig().setImageWriter(path.string());
-            ImageWriter::create(globalConfig())
-                ->writeImage(*Datastore::getDecodedDisk()->image);
+            try
+            {
+                wtRebuildConfiguration();
+                wtWaitForUiThreadToCatchUp();
+                globalConfig().setImageWriter(path.string());
+                ImageWriter::create(globalConfig())
+                    ->writeImage(*Datastore::getDecodedDisk()->image);
+            }
+            catch (...)
+            {
+                failed = true;
+                throw;
+            }
         });
 }
 
 void Datastore::writeFluxFile(const std::fs::path& path)
 {
+    Events::OperationStart::post("fluxengine.view.status.writeFlux"_lang);
     Datastore::runOnWorkerThread(
         [=]
         {
             busy = true;
-            ON_SCOPE_EXIT
+            failed = false;
+            DEFER(wtOperationStop());
+
+            try
             {
-                busy = false;
-            };
+                wtRebuildConfiguration();
+                wtWaitForUiThreadToCatchUp();
 
-            wtRebuildConfiguration();
-            wtWaitForUiThreadToCatchUp();
+                if (!diskFlux || !diskFlux->image)
+                    error("no loaded image");
+                if (diskFlux->image->getGeometry().totalBytes !=
+                    diskLayout->totalBytes)
+                    error("loaded image is not the right size for this format");
 
-            if (!diskFlux || !diskFlux->image)
-                error("no loaded image");
-            if (diskFlux->image->getGeometry().totalBytes !=
-                diskLayout->totalBytes)
-                error("loaded image is not the right size for this format");
-
-            globalConfig().setFluxSink(path.string());
-            auto fluxSource = FluxSource::createMemoryFluxSource(*diskFlux);
-            auto fluxSink = FluxSink::create(globalConfig());
-            writeRawDiskCommand(*diskLayout, *fluxSource, *fluxSink);
+                globalConfig().setFluxSink(path.string());
+                auto fluxSource = FluxSource::createMemoryFluxSource(*diskFlux);
+                auto fluxSink = FluxSink::create(globalConfig());
+                writeRawDiskCommand(*diskLayout, *fluxSource, *fluxSink);
+            }
+            catch (...)
+            {
+                failed = true;
+                throw;
+            }
         });
 }
 
 void Datastore::createBlankImage()
 {
+    Events::OperationStart::post("fluxengine.view.status.blankFilesystem"_lang);
     Datastore::runOnWorkerThread(
         [=]
         {
             busy = true;
-            ON_SCOPE_EXIT
+            failed = false;
+            DEFER(wtOperationStop());
+
+            try
             {
-                busy = false;
-            };
+                wtRebuildConfiguration();
+                wtClearDiskData();
+                wtWaitForUiThreadToCatchUp();
 
-            wtRebuildConfiguration();
-            wtClearDiskData();
-            wtWaitForUiThreadToCatchUp();
+                auto diskflux = std::make_shared<DecodedDisk>();
+                auto image = std::make_shared<Image>();
+                std::shared_ptr<SectorInterface> sectorInterface =
+                    SectorInterface::createMemorySectorInterface(image);
+                auto filesystem = Filesystem::createFilesystem(
+                    globalConfig()->filesystem(), diskLayout, sectorInterface);
 
-            auto diskflux = std::make_shared<DecodedDisk>();
-            auto image = std::make_shared<Image>();
-            std::shared_ptr<SectorInterface> sectorInterface =
-                SectorInterface::createMemorySectorInterface(image);
-            auto filesystem = Filesystem::createFilesystem(
-                globalConfig()->filesystem(), diskLayout, sectorInterface);
+                filesystem->create(false, "FLUXENGINE");
+                filesystem->flushChanges();
 
-            filesystem->create(false, "FLUXENGINE");
-            filesystem->flushChanges();
-
-            image->calculateSize();
-            image->populateSectorPhysicalLocationsFromLogicalLocations(
-                *diskLayout);
-            diskflux->image = image;
-            diskflux->populateTrackDataFromImage(*diskLayout);
-            hex::TaskManager::doLater(
-                [=]
-                {
-                    ::diskFlux = diskflux;
-                });
+                image->calculateSize();
+                image->populateSectorPhysicalLocationsFromLogicalLocations(
+                    *diskLayout);
+                diskflux->image = image;
+                diskflux->populateTrackDataFromImage(*diskLayout);
+                hex::TaskManager::doLater(
+                    [=]
+                    {
+                        ::diskFlux = diskflux;
+                    });
+            }
+            catch (...)
+            {
+                failed = true;
+                throw;
+            }
         });
 }
