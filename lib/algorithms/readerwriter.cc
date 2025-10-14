@@ -349,7 +349,7 @@ static void adjustTrackOnError(FluxSource& fluxSource, int baseTrack)
 struct ReadGroupResult
 {
     ReadResult result;
-    std::vector<std::shared_ptr<const Sector>> sectors;
+    std::vector<std::shared_ptr<const Sector>> combinedSectors;
 };
 
 static ReadGroupResult readGroup(const DiskLayout& diskLayout,
@@ -359,6 +359,21 @@ static ReadGroupResult readGroup(const DiskLayout& diskLayout,
     Decoder& decoder)
 {
     ReadGroupResult rgr = {BAD_AND_CAN_NOT_RETRY};
+
+    /* Before doing the read, look to see if we already have the necessary
+     * sectors. */
+
+    {
+        auto [result, sectors] = combineRecordAndSectors(tracks, decoder, ltl);
+        rgr.combinedSectors = sectors;
+        if (result == HAS_NO_BAD_SECTORS)
+        {
+            /* We have all necessary sectors, so can stop here. */
+            rgr.result = GOOD_READ;
+            if (globalConfig()->decoder().skip_unnecessary_tracks())
+                return rgr;
+        }
+    }
 
     for (unsigned offset = 0; offset < ltl->groupSize;
         offset += diskLayout.headWidth)
@@ -389,7 +404,7 @@ static ReadGroupResult readGroup(const DiskLayout& diskLayout,
         /* Decode what we've got so far. */
 
         auto [result, sectors] = combineRecordAndSectors(tracks, decoder, ltl);
-        rgr.sectors = sectors;
+        rgr.combinedSectors = sectors;
         if (result == HAS_NO_BAD_SECTORS)
         {
             /* We have all necessary sectors, so can stop here. */
@@ -399,8 +414,8 @@ static ReadGroupResult readGroup(const DiskLayout& diskLayout,
         }
         else if (fluxSourceIterator.hasNext())
         {
-            /* The flux source claims it can do more reads, so mark this group
-             * as being retryable. */
+            /* The flux source claims it can do more reads, so mark this
+             * group as being retryable. */
             rgr.result = BAD_AND_CAN_RETRY;
         }
     }
@@ -634,13 +649,13 @@ void writeRawDiskCommand(const DiskLayout& diskLayout,
         diskLayout.logicalLocations);
 }
 
-TracksAndSectors readAndDecodeTrack(const DiskLayout& diskLayout,
+void readAndDecodeTrack(const DiskLayout& diskLayout,
     FluxSource& fluxSource,
     Decoder& decoder,
-    const std::shared_ptr<const LogicalTrackLayout>& ltl)
+    const std::shared_ptr<const LogicalTrackLayout>& ltl,
+    std::vector<std::shared_ptr<const Track>>& tracks,
+    std::vector<std::shared_ptr<const Sector>>& combinedSectors)
 {
-    TracksAndSectors fas;
-
     if (fluxSource.isHardware())
         measureDiskRotation();
 
@@ -649,9 +664,8 @@ TracksAndSectors readAndDecodeTrack(const DiskLayout& diskLayout,
     for (;;)
     {
         auto [result, sectors] = readGroup(
-            diskLayout, fluxSourceIteratorHolder, ltl, fas.tracks, decoder);
-        std::copy(
-            sectors.begin(), sectors.end(), std::back_inserter(fas.sectors));
+            diskLayout, fluxSourceIteratorHolder, ltl, tracks, decoder);
+        combinedSectors = sectors;
         if (result == GOOD_READ)
             break;
         if (result == BAD_AND_CAN_NOT_RETRY)
@@ -673,8 +687,6 @@ TracksAndSectors readAndDecodeTrack(const DiskLayout& diskLayout,
             retriesRemaining--;
         }
     }
-
-    return fas;
 }
 
 void readDiskCommand(const DiskLayout& diskLayout,
@@ -686,6 +698,13 @@ void readDiskCommand(const DiskLayout& diskLayout,
     if (globalConfig()->decoder().has_copy_flux_to())
         outputFluxSinkFactory =
             FluxSinkFactory::create(globalConfig()->decoder().copy_flux_to());
+
+    std::map<CylinderHead, std::vector<std::shared_ptr<const Track>>>
+        tracksByLogicalLocation;
+    for (auto& [ch, track] : disk.tracksByPhysicalLocation)
+        tracksByLogicalLocation[CylinderHead(track->ltl->logicalCylinder,
+                                    track->ltl->logicalHead)]
+            .push_back(track);
 
     log(BeginOperationLogMessage{"Reading and decoding disk"});
     {
@@ -702,13 +721,31 @@ void readDiskCommand(const DiskLayout& diskLayout,
 
             testForEmergencyStop();
 
-            auto [trackFluxes, trackSectors] =
-                readAndDecodeTrack(diskLayout, fluxSource, decoder, ltl);
+            auto& trackFluxes = tracksByLogicalLocation[logicalLocation];
+            std::vector<std::shared_ptr<const Sector>> trackSectors;
+            readAndDecodeTrack(diskLayout,
+                fluxSource,
+                decoder,
+                ltl,
+                trackFluxes,
+                trackSectors);
+
+            /* Replace all tracks on the disk by the new combined set. */
+
+            for (const auto& flux : trackFluxes)
+                disk.tracksByPhysicalLocation.erase(CylinderHead{
+                    flux->ptl->physicalCylinder, flux->ptl->physicalHead});
             for (const auto& flux : trackFluxes)
                 disk.tracksByPhysicalLocation.emplace(
                     CylinderHead{
                         flux->ptl->physicalCylinder, flux->ptl->physicalHead},
                     flux);
+
+            /* Likewise for sectors. */
+
+            for (const auto& sector : trackSectors)
+                disk.sectorsByPhysicalLocation.erase(
+                    sector->physicalLocation.value());
             for (const auto& sector : trackSectors)
                 disk.sectorsByPhysicalLocation.emplace(
                     sector->physicalLocation.value(), sector);

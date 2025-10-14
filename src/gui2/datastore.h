@@ -35,7 +35,7 @@ public:
 
     /* Begins a transation. Rebuilds the configuration. */
     static void reset();
-    static void beginRead();
+    static void beginRead(bool rereadBadSectors);
     static void beginWrite();
     static void readImage(const std::fs::path& path);
     static void writeImage(const std::fs::path& path);

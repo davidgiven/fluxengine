@@ -85,9 +85,13 @@ void ControlPanelView::drawContent()
         };
 
         ImGui::TableNextRow();
-        button(ICON_TA_DEVICE_FLOPPY,
+        button(
+            ICON_TA_DEVICE_FLOPPY,
             "fluxengine.view.controlpanel.readDevice"_lang,
-            Datastore::beginRead,
+            []
+            {
+                Datastore::beginRead(false);
+            },
             busy);
         ImGui::TableNextColumn();
         button(ICON_VS_SAVE_AS,
@@ -96,9 +100,13 @@ void ControlPanelView::drawContent()
             busy || !hasImage);
 
         ImGui::TableNextRow();
-        button(ICON_TA_REPEAT,
+        button(
+            ICON_TA_REPEAT,
             "fluxengine.view.controlpanel.rereadBad"_lang,
-            nullptr,
+            []
+            {
+                Datastore::beginRead(true);
+            },
             busy || !disk);
         ImGui::TableNextColumn();
         button(ICON_TA_DOWNLOAD,

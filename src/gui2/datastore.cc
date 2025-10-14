@@ -526,11 +526,11 @@ void Datastore::onLogMessage(const AnyLogMessage& message)
         message);
 }
 
-void Datastore::beginRead()
+void Datastore::beginRead(bool rereadBadSectors)
 {
     Events::OperationStart::post("fluxengine.view.status.readDevice"_lang);
     Datastore::runOnWorkerThread(
-        []
+        [=]
         {
             busy = true;
             failed = false;
@@ -539,12 +539,19 @@ void Datastore::beginRead()
             try
             {
                 wtRebuildConfiguration();
-                wtClearDiskData();
-                wtWaitForUiThreadToCatchUp();
+                if (!rereadBadSectors)
+                    wtClearDiskData();
+
+                std::shared_ptr<Disk> disk;
+                wtRunSynchronouslyOnUiThread((std::function<void()>)[&] {
+                    if (::disk)
+                        disk = std::make_shared<Disk>(*::disk);
+                    else
+                        disk = std::make_shared<Disk>();
+                });
                 auto fluxSource = FluxSource::create(globalConfig());
                 auto decoder = Arch::createDecoder(globalConfig());
 
-                auto disk = std::make_shared<Disk>();
                 readDiskCommand(*diskLayout, *fluxSource, *decoder, *disk);
             }
             catch (...)

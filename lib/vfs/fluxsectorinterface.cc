@@ -132,10 +132,16 @@ private:
     {
         CylinderHead logicalLocation = {logicalCylinder, logicalSide};
         auto& ltl = _diskLayout->layoutByLogicalLocation.at(logicalLocation);
-        auto trackdata =
-            readAndDecodeTrack(*_diskLayout, *_fluxSource, *_decoder, ltl);
+        std::vector<std::shared_ptr<const Track>> trackFluxes;
+        std::vector<std::shared_ptr<const Sector>> trackSectors;
+        readAndDecodeTrack(*_diskLayout,
+            *_fluxSource,
+            *_decoder,
+            ltl,
+            trackFluxes,
+            trackSectors);
 
-        for (const auto& sector : trackdata.sectors)
+        for (const auto& sector : trackSectors)
             *_loadedSectors.put(logicalLocation, sector->logicalSector) =
                 *sector;
         _loadedTracks.insert(logicalLocation);

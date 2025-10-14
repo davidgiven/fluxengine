@@ -107,19 +107,19 @@ extern void writeDiskCommand(const DiskLayout& diskLayout,
     Decoder* decoder = nullptr,
     FluxSource* fluxSource = nullptr);
 
-extern void writeRawDiskCommand(
-    const DiskLayout& diskLayout, FluxSource& fluxSource, FluxSinkFactory& fluxSinkFactory);
+extern void writeRawDiskCommand(const DiskLayout& diskLayout,
+    FluxSource& fluxSource,
+    FluxSinkFactory& fluxSinkFactory);
 
-struct TracksAndSectors
-{
-    std::vector<std::shared_ptr<const Track>> tracks;
-    std::vector<std::shared_ptr<const Sector>> sectors;
-};
+/* Reads a single group of tracks. tracks and combinedSectors are populated.
+ * tracks may contain preexisting data which will be taken into account. */
 
-extern TracksAndSectors readAndDecodeTrack(const DiskLayout& diskLayout,
+extern void readAndDecodeTrack(const DiskLayout& diskLayout,
     FluxSource& fluxSource,
     Decoder& decoder,
-    const std::shared_ptr<const LogicalTrackLayout>& ltl);
+    const std::shared_ptr<const LogicalTrackLayout>& ltl,
+    std::vector<std::shared_ptr<const Track>>& tracks,
+    std::vector<std::shared_ptr<const Sector>>& combinedSectors);
 
 extern void readDiskCommand(const DiskLayout& diskLayout,
     FluxSource& fluxSource,
