@@ -271,7 +271,8 @@ int main(int argc, const char* argv[])
         int version = sqlGetVersion(db);
 
         {
-            auto fluxsink = FluxSink::createFl2FluxSink(outFilename);
+            auto fluxSink = FluxSink::createFl2FluxSink(outFilename)->create();
+
             for (const auto& locations : sqlFindFlux(db))
             {
                 unsigned cylinder = locations.first;
@@ -295,7 +296,7 @@ int main(int argc, const char* argv[])
                             "bug)",
                             version);
                 }
-                fluxsink->writeFlux(cylinder, head, fluxmap);
+                fluxSink->addFlux(cylinder, head, fluxmap);
                 std::cout << '.' << std::flush;
             }
 

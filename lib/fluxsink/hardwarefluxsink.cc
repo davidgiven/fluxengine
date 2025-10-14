@@ -8,15 +8,9 @@
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/fluxsink/fluxsink.pb.h"
 
-class HardwareFluxSink : public FluxSink
+class HardwareSink : public FluxSink::Sink
 {
-public:
-    HardwareFluxSink(const HardwareFluxSinkProto& conf): _config(conf) {}
-
-    ~HardwareFluxSink() {}
-
-public:
-    void writeFlux(int track, int side, const Fluxmap& fluxmap) override
+    void addFlux(int track, int side, const Fluxmap& fluxmap) override
     {
         auto& drive = globalConfig()->drive();
         usbSetDrive(drive.drive(), drive.high_density(), drive.index_mode());
@@ -24,6 +18,15 @@ public:
 
         return usbWrite(
             side, fluxmap.rawBytes(), drive.hard_sector_threshold_ns());
+    }
+};
+
+class HardwareFluxSink : public FluxSink
+{
+public:
+    std::unique_ptr<Sink> create() override
+    {
+        return std::make_unique<HardwareSink>();
     }
 
     bool isHardware() const override
@@ -33,15 +36,12 @@ public:
 
     operator std::string() const override
     {
-        return fmt::format("drive {}", globalConfig()->drive().drive());
+        return "hardware {}";
     }
-
-private:
-    const HardwareFluxSinkProto& _config;
 };
 
 std::unique_ptr<FluxSink> FluxSink::createHardwareFluxSink(
     const HardwareFluxSinkProto& config)
 {
-    return std::unique_ptr<FluxSink>(new HardwareFluxSink(config));
+    return std::unique_ptr<FluxSink>();
 }

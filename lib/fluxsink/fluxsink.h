@@ -4,6 +4,7 @@
 #include "lib/config/flags.h"
 #include "lib/data/locations.h"
 #include <ostream>
+#include <filesystem>
 
 class Fluxmap;
 class FluxSinkProto;
@@ -41,19 +42,40 @@ public:
     static std::unique_ptr<FluxSink> create(const FluxSinkProto& config);
 
 public:
-    /* Writes a fluxmap to a track and side. */
-
-    virtual void writeFlux(int track, int side, const Fluxmap& fluxmap) = 0;
-    void writeFlux(const CylinderHead& location, const Fluxmap& fluxmap)
+    class Sink
     {
-        writeFlux(location.cylinder, location.head, fluxmap);
-    }
+    public:
+        Sink() {}
+        virtual ~Sink() {}
+
+    public:
+        /* Writes a fluxmap to a track and side. */
+
+        virtual void addFlux(int track, int side, const Fluxmap& fluxmap) = 0;
+        void addFlux(const CylinderHead& location, const Fluxmap& fluxmap)
+        {
+            addFlux(location.cylinder, location.head, fluxmap);
+        }
+    };
+
+public:
+    /* Creates a writer object. */
+
+    virtual std::unique_ptr<Sink> create() = 0;
 
     /* Returns whether this is writing to real hardware or not. */
 
     virtual bool isHardware() const
     {
         return false;
+    }
+
+    /* Returns the path (filename or directory) being written to, if there is
+     * one. */
+
+    virtual std::optional<std::filesystem::path> getPath() const
+    {
+        return {};
     }
 
     virtual operator std::string() const = 0;

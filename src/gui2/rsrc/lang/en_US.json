@@ -52,5 +52,7 @@
     "fluxengine.view.status.writeFlux": "Writing flux file to disk",
     "fluxengine.view.status.readImage": "Reading image file from disk",
     "fluxengine.view.status.writeImage": "Writing image file to disk",
-    "fluxengine.view.status.blankFilesystem": "Creating blank filesystem"
+    "fluxengine.view.status.blankFilesystem": "Creating blank filesystem",
+
+    "fluxengine.messages.writingFluxToFile": "The current configuration is to write to a flux file rather than to hardware. Is this what you intended?"
 }

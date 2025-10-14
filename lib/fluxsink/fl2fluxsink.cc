@@ -16,15 +16,10 @@
 #include <sys/types.h>
 #include <filesystem>
 
-class Fl2FluxSink : public FluxSink
+class Fl2Sink : public FluxSink::Sink
 {
 public:
-    Fl2FluxSink(const Fl2FluxSinkProto& lconfig):
-        Fl2FluxSink(lconfig.filename())
-    {
-    }
-
-    Fl2FluxSink(const std::string& filename): _filename(filename)
+    Fl2Sink(const std::string& filename): _filename(filename)
     {
         std::ofstream of(filename);
         if (!of.is_open())
@@ -33,7 +28,7 @@ public:
         std::filesystem::remove(filename);
     }
 
-    ~Fl2FluxSink()
+    ~Fl2Sink()
     {
         log("FL2: writing {}", _filename);
 
@@ -54,16 +49,10 @@ public:
         saveFl2File(_filename, proto);
     }
 
-public:
-    void writeFlux(int track, int head, const Fluxmap& fluxmap) override
+    void addFlux(int track, int head, const Fluxmap& fluxmap) override
     {
         auto& vector = _data[std::make_pair(track, head)];
         vector.push_back(fluxmap.rawBytes());
-    }
-
-    operator std::string() const override
-    {
-        return fmt::format("fl2({})", _filename);
     }
 
 private:
@@ -71,10 +60,35 @@ private:
     std::map<std::pair<unsigned, unsigned>, std::vector<Bytes>> _data;
 };
 
+class Fl2FluxSink : public FluxSink
+{
+public:
+    Fl2FluxSink(const std::string& filename): _filename(filename) {}
+
+    std::unique_ptr<Sink> create() override
+    {
+        return std::make_unique<Fl2Sink>(_filename);
+    }
+
+    std::optional<std::filesystem::path> getPath() const override
+    {
+        return std::make_optional(_filename);
+    }
+
+public:
+    operator std::string() const override
+    {
+        return fmt::format("fl2({})", _filename);
+    }
+
+private:
+    const std::string _filename;
+};
+
 std::unique_ptr<FluxSink> FluxSink::createFl2FluxSink(
     const Fl2FluxSinkProto& config)
 {
-    return std::unique_ptr<FluxSink>(new Fl2FluxSink(config));
+    return std::unique_ptr<FluxSink>(new Fl2FluxSink(config.filename()));
 }
 
 std::unique_ptr<FluxSink> FluxSink::createFl2FluxSink(

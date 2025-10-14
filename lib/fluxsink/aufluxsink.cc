@@ -1,4 +1,5 @@
 #include "lib/core/globals.h"
+#include "lib/core/logger.h"
 #include "lib/config/flags.h"
 #include "lib/data/fluxmap.h"
 #include "lib/core/bytes.h"
@@ -11,27 +12,29 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-class AuFluxSink : public FluxSink
+class AuSink : public FluxSink::Sink
 {
 public:
-    AuFluxSink(const AuFluxSinkProto& config): _config(config) {}
-
-    ~AuFluxSink()
+    AuSink(const std::string& directory, bool indexMarkers):
+        _directory(directory),
+        _indexMarkers(indexMarkers)
     {
-        std::cerr << "Warning: do not play these files, or you will break your "
-                     "speakers and/or ears!\n";
     }
 
-public:
-    void writeFlux(int track, int head, const Fluxmap& fluxmap) override
+    ~AuSink()
+    {
+        log("Warning: do not play these files, or you will break your "
+            "speakers and/or ears!");
+    }
+
+    void addFlux(int track, int head, const Fluxmap& fluxmap) override
     {
         unsigned totalTicks = fluxmap.ticks() + 2;
-        unsigned channels = _config.index_markers() ? 2 : 1;
+        unsigned channels = _indexMarkers ? 2 : 1;
 
-        mkdir(_config.directory().c_str(), 0744);
+        mkdir(_directory.c_str(), 0744);
         std::ofstream of(
-            fmt::format(
-                "{}/c{:02d}.h{:01d}.au", _config.directory(), track, head),
+            fmt::format("{}/c{:02d}.h{:01d}.au", _directory, track, head),
             std::ios::out | std::ios::binary);
         if (!of.is_open())
             error("cannot open output file");
@@ -73,12 +76,33 @@ public:
 
                 if (event & F_BIT_PULSE)
                     data[timestamp * channels + 0] = 0x7f;
-                if (_config.index_markers() && (event & F_BIT_INDEX))
+                if (_indexMarkers && (event & F_BIT_INDEX))
                     data[timestamp * channels + 1] = 0x7f;
             }
 
             of.write((const char*)data.cbegin(), data.size());
         }
+    }
+
+private:
+    std::string _directory;
+    bool _indexMarkers;
+};
+
+class AuFluxSink : public FluxSink
+{
+public:
+    AuFluxSink(const AuFluxSinkProto& config): _config(config) {}
+
+    std::unique_ptr<Sink> create() override
+    {
+        return std::make_unique<AuSink>(
+            _config.directory(), _config.index_markers());
+    }
+
+    std::optional<std::filesystem::path> getPath() const override
+    {
+        return std::make_optional(_config.directory());
     }
 
     operator std::string() const override

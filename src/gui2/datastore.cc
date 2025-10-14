@@ -3,6 +3,7 @@
 #include <hex/api/imhex_api/hex_editor.hpp>
 #include <hex/api/content_registry/settings.hpp>
 #include <hex/api/task_manager.hpp>
+#include <popups/popup_question.hpp>
 #include <toasts/toast_notification.hpp>
 #include "lib/core/globals.h"
 #include "lib/core/utils.h"
@@ -580,6 +581,29 @@ void Datastore::beginWrite()
                         globalConfig().getVerificationFluxSourceProto());
                 }
 
+                auto path = fluxSink->getPath();
+                if (path.has_value() && std::filesystem::exists(*path))
+                {
+                    {
+                        bool result;
+                        wtRunSynchronouslyOnUiThread((
+                            std::function<void()>)[&] {
+                            hex::ui::PopupQuestion::open(
+                                "fluxengine.messages.writingFluxToFile"_lang,
+                                [&]
+                                {
+                                    result = true;
+                                },
+                                [&]
+                                {
+                                    result = false;
+                                });
+                        });
+                        if (!result)
+                            throw EmergencyStopException();
+                    }
+                }
+
                 auto image = diskFlux->image;
                 writeDiskCommand(*diskLayout,
                     *image,
@@ -717,7 +741,9 @@ void Datastore::writeFluxFile(const std::fs::path& path)
                     error("no loaded image");
                 if (diskFlux->image->getGeometry().totalBytes !=
                     diskLayout->totalBytes)
-                    error("loaded image is not the right size for this format");
+                    error(
+                        "loaded image is not the right size for this "
+                        "format");
 
                 globalConfig().setFluxSink(path.string());
                 auto fluxSource = FluxSource::createMemoryFluxSource(*diskFlux);
