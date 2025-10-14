@@ -60,9 +60,9 @@ void DiskProvider::close() {}
 
 void DiskProvider::readRaw(u64 offset, void* buffer, size_t size)
 {
-    const auto& diskFlux = Datastore::getDisk();
+    const auto& disk = Datastore::getDisk();
     const auto& diskLayout = Datastore::getDiskLayout();
-    if (diskFlux && diskFlux->image && diskLayout)
+    if (disk && disk->image && diskLayout)
     {
         while (size != 0)
         {
@@ -74,7 +74,7 @@ void DiskProvider::readRaw(u64 offset, void* buffer, size_t size)
 
             unsigned realOffset = it->first;
             auto logicalLocation = it->second;
-            auto sector = diskFlux->image->get(logicalLocation);
+            auto sector = disk->image->get(logicalLocation);
             auto& ltl = diskLayout->layoutByLogicalLocation.at(
                 logicalLocation.trackLocation());
             unsigned blockOffset = realOffset - offset;

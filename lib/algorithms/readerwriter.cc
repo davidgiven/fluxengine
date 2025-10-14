@@ -680,7 +680,7 @@ TracksAndSectors readAndDecodeTrack(const DiskLayout& diskLayout,
 void readDiskCommand(const DiskLayout& diskLayout,
     FluxSource& fluxSource,
     Decoder& decoder,
-    Disk& decodedDisk)
+    Disk& disk)
 {
     std::unique_ptr<FluxSinkFactory> outputFluxSinkFactory;
     if (globalConfig()->decoder().has_copy_flux_to())
@@ -705,12 +705,12 @@ void readDiskCommand(const DiskLayout& diskLayout,
             auto [trackFluxes, trackSectors] =
                 readAndDecodeTrack(diskLayout, fluxSource, decoder, ltl);
             for (const auto& flux : trackFluxes)
-                decodedDisk.tracksByPhysicalLocation.emplace(
+                disk.tracksByPhysicalLocation.emplace(
                     CylinderHead{
                         flux->ptl->physicalCylinder, flux->ptl->physicalHead},
                     flux);
             for (const auto& sector : trackSectors)
-                decodedDisk.sectorsByPhysicalLocation.emplace(
+                disk.sectorsByPhysicalLocation.emplace(
                     sector->physicalLocation.value(), sector);
 
             if (outputFluxSink)
@@ -778,34 +778,33 @@ void readDiskCommand(const DiskLayout& diskLayout,
             log(TrackReadLogMessage{trackFluxes, trackSectors});
 
             std::vector<std::shared_ptr<const Sector>> all_sectors;
-            for (auto& [ch, sector] : decodedDisk.sectorsByPhysicalLocation)
+            for (auto& [ch, sector] : disk.sectorsByPhysicalLocation)
                 all_sectors.push_back(sector);
             all_sectors = collectSectors(all_sectors);
-            decodedDisk.image = std::make_shared<Image>(all_sectors);
+            disk.image = std::make_shared<Image>(all_sectors);
 
-            /* Log a _copy_ of the decodedDisk structure so that the logger
-             * doesn't see the decodedDisk get mutated in subsequent reads. */
-            log(DiskReadLogMessage{std::make_shared<Disk>(decodedDisk)});
+            /* Log a _copy_ of the disk structure so that the logger
+             * doesn't see the disk get mutated in subsequent reads. */
+            log(DiskReadLogMessage{std::make_shared<Disk>(disk)});
         }
     }
 
-    if (!decodedDisk.image)
-        decodedDisk.image = std::make_shared<Image>();
+    if (!disk.image)
+        disk.image = std::make_shared<Image>();
 
     log(EndOperationLogMessage{"Read complete"});
 }
 
 void readDiskCommand(const DiskLayout& diskLayout,
-    FluxSource& fluxsource,
+    FluxSource& fluxSource,
     Decoder& decoder,
     ImageWriter& writer)
 {
-    Disk decodedDisk;
-    readDiskCommand(diskLayout, fluxsource, decoder, decodedDisk);
+    Disk disk;
+    readDiskCommand(diskLayout, fluxSource, decoder, disk);
 
-    writer.printMap(*decodedDisk.image);
+    writer.printMap(*disk.image);
     if (globalConfig()->decoder().has_write_csv_to())
-        writer.writeCsv(
-            *decodedDisk.image, globalConfig()->decoder().write_csv_to());
-    writer.writeImage(*decodedDisk.image);
+        writer.writeCsv(*disk.image, globalConfig()->decoder().write_csv_to());
+    writer.writeImage(*disk.image);
 }

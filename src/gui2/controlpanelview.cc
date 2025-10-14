@@ -43,9 +43,9 @@ static void saveSectorImage()
 
 void ControlPanelView::drawContent()
 {
-    auto diskFlux = Datastore::getDisk();
+    auto disk = Datastore::getDisk();
     bool busy = Datastore::isBusy();
-    bool hasImage = diskFlux && diskFlux->image;
+    bool hasImage = disk && disk->image;
 
     if (ImGui::BeginTable("controlPanelOuter",
             3,
@@ -99,12 +99,12 @@ void ControlPanelView::drawContent()
         button(ICON_TA_REPEAT,
             "fluxengine.view.controlpanel.rereadBad"_lang,
             nullptr,
-            busy || !diskFlux);
+            busy || !disk);
         ImGui::TableNextColumn();
         button(ICON_TA_DOWNLOAD,
             "fluxengine.view.controlpanel.writeFlux"_lang,
             saveFluxFile,
-            busy || !diskFlux);
+            busy || !disk);
 
         ImGui::TableNextRow();
         button(ICON_VS_FOLDER_OPENED,

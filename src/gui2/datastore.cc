@@ -34,7 +34,7 @@
 
 using hex::operator""_lang;
 
-static std::shared_ptr<const Disk> diskFlux;
+static std::shared_ptr<const Disk> disk;
 static std::shared_ptr<Image> wtImage;
 
 static std::deque<std::function<void()>> pendingTasks;
@@ -246,7 +246,7 @@ void Datastore::init()
     Events::SeekToTrackViaPhysicalLocation::subscribe(
         [](CylinderHead physicalLocation)
         {
-            if (!diskFlux || !diskLayout)
+            if (!disk || !diskLayout)
                 return;
             auto ptlo = findOptionally(diskLayout->layoutByPhysicalLocation,
                 {physicalLocation.cylinder, physicalLocation.head});
@@ -294,7 +294,7 @@ std::shared_ptr<const DiskLayout> Datastore::getDiskLayout()
 
 std::shared_ptr<const Disk> Datastore::getDisk()
 {
-    return diskFlux;
+    return disk;
 }
 
 static void badConfiguration()
@@ -332,7 +332,7 @@ static void wtClearDiskData()
         []
         {
             ::wtImage = nullptr;
-            ::diskFlux = nullptr;
+            ::disk = nullptr;
         });
 }
 
@@ -496,10 +496,10 @@ void Datastore::onLogMessage(const AnyLogMessage& message)
             [&](std::shared_ptr<const DiskReadLogMessage> m)
             {
                 /* This is where data gets from the worker thread to the GUI.
-                 * The diskFlux here is a copy of the one being worked on, and
+                 * The disk here is a copy of the one being worked on, and
                  * is guaranteed not to change. */
 
-                diskFlux = m->disk;
+                disk = m->disk;
             },
 
             /* Large-scale operation start. */
@@ -544,8 +544,8 @@ void Datastore::beginRead()
                 auto fluxSource = FluxSource::create(globalConfig());
                 auto decoder = Arch::createDecoder(globalConfig());
 
-                auto diskflux = std::make_shared<Disk>();
-                readDiskCommand(*diskLayout, *fluxSource, *decoder, *diskflux);
+                auto disk = std::make_shared<Disk>();
+                readDiskCommand(*diskLayout, *fluxSource, *decoder, *disk);
             }
             catch (...)
             {
@@ -605,7 +605,7 @@ void Datastore::beginWrite()
                     }
                 }
 
-                auto image = diskFlux->image;
+                auto image = disk->image;
                 writeDiskCommand(*diskLayout,
                     *image,
                     *encoder,
@@ -705,11 +705,11 @@ void Datastore::readImage(const std::fs::path& path)
                 std::shared_ptr<Image> image =
                     ImageReader::create(globalConfig())->readImage();
 
-                auto diskFlux = wtMakeDiskDataFromImage(image);
+                auto disk = wtMakeDiskDataFromImage(image);
                 hex::TaskManager::doLater(
                     [=]
                     {
-                        ::diskFlux = diskFlux;
+                        ::disk = disk;
                     });
             }
             catch (...)
@@ -735,16 +735,16 @@ void Datastore::writeFluxFile(const std::fs::path& path)
                 wtRebuildConfiguration();
                 wtWaitForUiThreadToCatchUp();
 
-                if (!diskFlux || !diskFlux->image)
+                if (!disk || !disk->image)
                     error("no loaded image");
-                if (diskFlux->image->getGeometry().totalBytes !=
+                if (disk->image->getGeometry().totalBytes !=
                     diskLayout->totalBytes)
                     error(
                         "loaded image is not the right size for this "
                         "format");
 
                 globalConfig().setFluxSink(path.string());
-                auto fluxSource = FluxSource::createMemoryFluxSource(*diskFlux);
+                auto fluxSource = FluxSource::createMemoryFluxSource(*disk);
                 auto fluxSinkFactory = FluxSinkFactory::create(globalConfig());
                 writeRawDiskCommand(*diskLayout, *fluxSource, *fluxSinkFactory);
             }
@@ -781,11 +781,11 @@ void Datastore::createBlankImage()
                 filesystem->create(false, "FLUXENGINE");
                 filesystem->flushChanges();
 
-                auto diskFlux = wtMakeDiskDataFromImage(image);
+                auto disk = wtMakeDiskDataFromImage(image);
                 hex::TaskManager::doLater(
                     [=]
                     {
-                        ::diskFlux = diskFlux;
+                        ::disk = disk;
                     });
             }
             catch (...)

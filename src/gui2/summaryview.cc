@@ -65,11 +65,11 @@ SummaryView::SummaryView():
 }
 
 static std::set<std::shared_ptr<const Sector>> findSectors(
-    const Disk& diskFlux, unsigned physicalCylinder, unsigned physicalHead)
+    const Disk& disk, unsigned physicalCylinder, unsigned physicalHead)
 {
     std::set<std::shared_ptr<const Sector>> sectors;
 
-    auto [startIt, endIt] = diskFlux.sectorsByPhysicalLocation.equal_range(
+    auto [startIt, endIt] = disk.sectorsByPhysicalLocation.equal_range(
         {physicalCylinder, physicalHead});
     for (auto it = startIt; it != endIt; it++)
         sectors.insert(it->second);
@@ -84,10 +84,10 @@ struct TrackAnalysis
 };
 
 static TrackAnalysis analyseTrack(
-    const Disk& diskFlux, unsigned physicalCylinder, unsigned physicalHead)
+    const Disk& disk, unsigned physicalCylinder, unsigned physicalHead)
 {
     TrackAnalysis result = {};
-    auto sectors = findSectors(diskFlux, physicalCylinder, physicalHead);
+    auto sectors = findSectors(disk, physicalCylinder, physicalHead);
     result.colour = ImGui::GetColorU32(ImGuiCol_TextDisabled);
     result.tooltip = "No data";
     if (!sectors.empty())
@@ -137,7 +137,7 @@ static void drawPhysicalMap(unsigned minPhysicalCylinder,
     unsigned maxPhysicalCylinder,
     unsigned minPhysicalHead,
     unsigned maxPhysicalHead,
-    const Disk& diskFlux)
+    const Disk& disk)
 {
     int numPhysicalCylinders = maxPhysicalCylinder - minPhysicalCylinder + 1;
     int numPhysicalHeads = maxPhysicalHead - minPhysicalHead + 1;
@@ -185,7 +185,7 @@ static void drawPhysicalMap(unsigned minPhysicalCylinder,
                 cylinder <= maxPhysicalCylinder;
                 cylinder++)
             {
-                auto [tooltip, colour] = analyseTrack(diskFlux, cylinder, head);
+                auto [tooltip, colour] = analyseTrack(disk, cylinder, head);
                 ImGui::PushStyleColor(ImGuiCol_Header, colour);
                 DEFER(ImGui::PopStyleColor());
                 ImGui::PushFont(NULL, originalFontSize);
@@ -219,7 +219,7 @@ static void drawLogicalMap(unsigned minPhysicalCylinder,
     unsigned maxPhysicalCylinder,
     unsigned minPhysicalHead,
     unsigned maxPhysicalHead,
-    const Disk& diskFlux,
+    const Disk& disk,
     const DiskLayout& diskLayout)
 {
     auto originalFontSize = ImGui::GetFontSize();
@@ -278,7 +278,7 @@ static void drawLogicalMap(unsigned minPhysicalCylinder,
                 if (ptl->groupOffset == 0)
                 {
                     auto [tooltip, colour] =
-                        analyseTrack(diskFlux, physicalCylinder, physicalHead);
+                        analyseTrack(disk, physicalCylinder, physicalHead);
 
                     ImGui::PushStyleColor(ImGuiCol_Header, colour);
                     DEFER(ImGui::PopStyleColor());
@@ -325,9 +325,9 @@ static void drawLogicalMap(unsigned minPhysicalCylinder,
 
 void SummaryView::drawContent()
 {
-    auto diskFlux = Datastore::getDisk();
+    auto disk = Datastore::getDisk();
     auto diskLayout = Datastore::getDiskLayout();
-    if (!diskFlux || !diskLayout)
+    if (!disk || !diskLayout)
         return;
 
     auto [minPhysicalCylinder,
@@ -337,7 +337,7 @@ void SummaryView::drawContent()
     int numPhysicalCylinders = maxPhysicalCylinder - minPhysicalCylinder + 1;
     int numPhysicalHeads = maxPhysicalHead - minPhysicalHead + 1;
 
-    if (diskFlux)
+    if (disk)
     {
         ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, {1, 1});
         DEFER(ImGui::PopStyleVar());
@@ -354,7 +354,7 @@ void SummaryView::drawContent()
             maxPhysicalCylinder,
             minPhysicalHead,
             maxPhysicalHead,
-            *diskFlux);
+            *disk);
 
         ImGuiExt::TextFormattedCenteredHorizontal(
             "fluxengine.view.summary.logical"_lang);
@@ -363,7 +363,7 @@ void SummaryView::drawContent()
             maxPhysicalCylinder,
             minPhysicalHead,
             maxPhysicalHead,
-            *diskFlux,
+            *disk,
             *diskLayout);
 
         ImGui::Dummy(ImVec2(0, ImGui::GetFontSize()));

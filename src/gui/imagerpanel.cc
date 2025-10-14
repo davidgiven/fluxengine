@@ -96,12 +96,12 @@ public:
                 {
                     auto* fluxSource = GetContext().GetFluxSource();
                     auto* decoder = GetContext().GetDecoder();
-                    auto diskflux = readDiskCommand(*fluxSource, *decoder);
+                    auto disk = readDiskCommand(*fluxSource, *decoder);
 
                     runOnUiThread(
                         [&]()
                         {
-                            visualiser->SetDiskData(diskflux);
+                            visualiser->SetDiskData(disk);
                         });
                 });
         }
