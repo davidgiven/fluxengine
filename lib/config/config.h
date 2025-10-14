@@ -9,7 +9,7 @@
 class ConfigProto;
 class OptionProto;
 class FluxSource;
-class FluxSink;
+class FluxSinkFactory;
 class ImageReader;
 class ImageWriter;
 class Encoder;

@@ -34,11 +34,11 @@ namespace
             return _verificationFluxSource.get();
         }
 
-        FluxSink* GetFluxSink() override
+        FluxSinkFactory* GetFluxSink() override
         {
             if (!_fluxSink)
             {
-                _fluxSink = FluxSink::create(globalConfig());
+                _fluxSink = FluxSinkFactory::create(globalConfig());
             }
             return _fluxSink.get();
         }
@@ -82,7 +82,7 @@ namespace
     private:
         std::unique_ptr<FluxSource> _fluxSource;
         std::unique_ptr<FluxSource> _verificationFluxSource;
-        std::unique_ptr<FluxSink> _fluxSink;
+        std::unique_ptr<FluxSinkFactory> _fluxSink;
         std::unique_ptr<ImageReader> _imageReader;
         std::unique_ptr<ImageWriter> _imageWriter;
         std::unique_ptr<Encoder> _encoder;

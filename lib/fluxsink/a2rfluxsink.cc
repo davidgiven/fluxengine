@@ -22,7 +22,7 @@ static uint32_t ticks_to_a2r(uint32_t ticks)
     return ticks * NS_PER_TICK / A2R_NS_PER_TICK;
 }
 
-class A2RSink : public FluxSink::Sink
+class A2RSink : public FluxSink
 {
 public:
     A2RSink(const std::string& filename):
@@ -231,12 +231,12 @@ private:
     int _maxCylinder;
 };
 
-class A2RFluxSink : public FluxSink
+class A2RFluxSinkFactory : public FluxSinkFactory
 {
 public:
-    A2RFluxSink(const A2RFluxSinkProto& lconfig): _config(lconfig) {}
+    A2RFluxSinkFactory(const A2RFluxSinkProto& lconfig): _config(lconfig) {}
 
-    std::unique_ptr<Sink> create() override
+    std::unique_ptr<FluxSink> create() override
     {
         return std::make_unique<A2RSink>(_config.filename());
     }
@@ -255,8 +255,8 @@ private:
     const A2RFluxSinkProto& _config;
 };
 
-std::unique_ptr<FluxSink> FluxSink::createA2RFluxSink(
+std::unique_ptr<FluxSinkFactory> FluxSinkFactory::createA2RFluxSinkFactory(
     const A2RFluxSinkProto& config)
 {
-    return std::unique_ptr<FluxSink>(new A2RFluxSink(config));
+    return std::unique_ptr<FluxSinkFactory>(new A2RFluxSinkFactory(config));
 }

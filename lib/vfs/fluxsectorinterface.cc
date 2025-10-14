@@ -13,12 +13,12 @@ class FluxSectorInterface : public SectorInterface
 public:
     FluxSectorInterface(const std::shared_ptr<const DiskLayout>& diskLayout,
         std::shared_ptr<FluxSource> fluxSource,
-        std::shared_ptr<FluxSink> fluxSink,
+        std::shared_ptr<FluxSinkFactory> fluxSinkFactory,
         std::shared_ptr<Encoder> encoder,
         std::shared_ptr<Decoder> decoder):
         _diskLayout(diskLayout),
         _fluxSource(fluxSource),
-        _fluxSink(fluxSink),
+        _fluxSink(fluxSinkFactory),
         _encoder(encoder),
         _decoder(decoder)
     {
@@ -143,7 +143,7 @@ private:
 
     std::shared_ptr<const DiskLayout> _diskLayout;
     std::shared_ptr<FluxSource> _fluxSource;
-    std::shared_ptr<FluxSink> _fluxSink;
+    std::shared_ptr<FluxSinkFactory> _fluxSink;
     std::shared_ptr<Encoder> _encoder;
     std::shared_ptr<Decoder> _decoder;
 
@@ -157,10 +157,10 @@ private:
 std::unique_ptr<SectorInterface> SectorInterface::createFluxSectorInterface(
     const std::shared_ptr<const DiskLayout>& diskLayout,
     std::shared_ptr<FluxSource> fluxSource,
-    std::shared_ptr<FluxSink> fluxSink,
+    std::shared_ptr<FluxSinkFactory> fluxSinkFactory,
     std::shared_ptr<Encoder> encoder,
     std::shared_ptr<Decoder> decoder)
 {
     return std::make_unique<FluxSectorInterface>(
-        diskLayout, fluxSource, fluxSink, encoder, decoder);
+        diskLayout, fluxSource, fluxSinkFactory, encoder, decoder);
 }

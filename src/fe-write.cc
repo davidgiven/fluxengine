@@ -57,11 +57,11 @@ int mainWrite(int argc, const char* argv[])
 
     auto diskLayout = createDiskLayout();
     auto encoder = Arch::createEncoder(globalConfig());
-    auto fluxSink = FluxSink::create(globalConfig());
+    auto fluxSinkFactory = FluxSinkFactory::create(globalConfig());
 
     std::shared_ptr<Decoder> decoder;
     std::shared_ptr<FluxSource> verificationFluxSource;
-    if (globalConfig().hasDecoder() && fluxSink->isHardware() && verify)
+    if (globalConfig().hasDecoder() && fluxSinkFactory->isHardware() && verify)
     {
         decoder = Arch::createDecoder(globalConfig());
         verificationFluxSource =
@@ -71,7 +71,7 @@ int mainWrite(int argc, const char* argv[])
     writeDiskCommand(*diskLayout,
         *image,
         *encoder,
-        *fluxSink,
+        *fluxSinkFactory,
         decoder.get(),
         verificationFluxSource.get());
 

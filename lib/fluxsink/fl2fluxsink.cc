@@ -16,7 +16,7 @@
 #include <sys/types.h>
 #include <filesystem>
 
-class Fl2Sink : public FluxSink::Sink
+class Fl2Sink : public FluxSink
 {
 public:
     Fl2Sink(const std::string& filename): _filename(filename)
@@ -60,12 +60,12 @@ private:
     std::map<std::pair<unsigned, unsigned>, std::vector<Bytes>> _data;
 };
 
-class Fl2FluxSink : public FluxSink
+class Fl2FluxSinkFactory : public FluxSinkFactory
 {
 public:
-    Fl2FluxSink(const std::string& filename): _filename(filename) {}
+    Fl2FluxSinkFactory(const std::string& filename): _filename(filename) {}
 
-    std::unique_ptr<Sink> create() override
+    std::unique_ptr<FluxSink> create() override
     {
         return std::make_unique<Fl2Sink>(_filename);
     }
@@ -85,14 +85,15 @@ private:
     const std::string _filename;
 };
 
-std::unique_ptr<FluxSink> FluxSink::createFl2FluxSink(
+std::unique_ptr<FluxSinkFactory> FluxSinkFactory::createFl2FluxSinkFactory(
     const Fl2FluxSinkProto& config)
 {
-    return std::unique_ptr<FluxSink>(new Fl2FluxSink(config.filename()));
+    return std::unique_ptr<FluxSinkFactory>(
+        new Fl2FluxSinkFactory(config.filename()));
 }
 
-std::unique_ptr<FluxSink> FluxSink::createFl2FluxSink(
+std::unique_ptr<FluxSinkFactory> FluxSinkFactory::createFl2FluxSinkFactory(
     const std::string& filename)
 {
-    return std::unique_ptr<FluxSink>(new Fl2FluxSink(filename));
+    return std::unique_ptr<FluxSinkFactory>(new Fl2FluxSinkFactory(filename));
 }

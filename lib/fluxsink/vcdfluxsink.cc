@@ -11,7 +11,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-class VcdSink : public FluxSink::Sink
+class VcdSink : public FluxSink
 {
 public:
     VcdSink(const std::string& directory): _directory(directory) {}
@@ -66,12 +66,12 @@ private:
     const std::string _directory;
 };
 
-class VcdFluxSink : public FluxSink
+class VcdFluxSinkFactory : public FluxSinkFactory
 {
 public:
-    VcdFluxSink(const VcdFluxSinkProto& config): _config(config) {}
+    VcdFluxSinkFactory(const VcdFluxSinkProto& config): _config(config) {}
 
-    std::unique_ptr<Sink> create() override
+    std::unique_ptr<FluxSink> create() override
     {
         return std::make_unique<VcdSink>(_config.directory());
     }
@@ -91,8 +91,8 @@ private:
     const VcdFluxSinkProto& _config;
 };
 
-std::unique_ptr<FluxSink> FluxSink::createVcdFluxSink(
+std::unique_ptr<FluxSinkFactory> FluxSinkFactory::createVcdFluxSinkFactory(
     const VcdFluxSinkProto& config)
 {
-    return std::unique_ptr<FluxSink>(new VcdFluxSink(config));
+    return std::unique_ptr<FluxSinkFactory>(new VcdFluxSinkFactory(config));
 }

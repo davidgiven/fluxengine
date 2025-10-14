@@ -51,9 +51,9 @@ int mainRawWrite(int argc, const char* argv[])
         error("you can't use rawwrite to read from hardware");
 
     auto fluxSource = FluxSource::create(globalConfig());
-    auto fluxSink = FluxSink::create(globalConfig());
+    auto fluxSinkFactory = FluxSinkFactory::create(globalConfig());
     auto diskLayout = createDiskLayout(globalConfig());
 
-    writeRawDiskCommand(*diskLayout, *fluxSource, *fluxSink);
+    writeRawDiskCommand(*diskLayout, *fluxSource, *fluxSinkFactory);
     return 0;
 }

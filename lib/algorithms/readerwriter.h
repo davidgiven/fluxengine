@@ -8,7 +8,7 @@ class DecodedTrack;
 class Decoder;
 class DiskLayout;
 class Encoder;
-class FluxSink;
+class FluxSinkFactory;
 class FluxSource;
 class FluxSourceIteratorHolder;
 class Fluxmap;
@@ -79,13 +79,13 @@ struct OperationProgressLogMessage
 extern void measureDiskRotation();
 
 extern void writeTracks(const DiskLayout& diskLayout,
-    FluxSink& fluxSink,
+    FluxSinkFactory& fluxSinkFactory,
     const std::function<std::unique_ptr<const Fluxmap>(
         const LogicalTrackLayout& ltl)> producer,
     const std::vector<CylinderHead>& locations);
 
 extern void writeTracksAndVerify(const DiskLayout& diskLayout,
-    FluxSink& fluxSink,
+    FluxSinkFactory& fluxSinkFactory,
     Encoder& encoder,
     FluxSource& fluxSource,
     Decoder& decoder,
@@ -95,7 +95,7 @@ extern void writeTracksAndVerify(const DiskLayout& diskLayout,
 extern void writeDiskCommand(const DiskLayout& diskLayout,
     const Image& image,
     Encoder& encoder,
-    FluxSink& fluxSink,
+    FluxSinkFactory& fluxSinkFactory,
     Decoder* decoder,
     FluxSource* fluxSource,
     const std::vector<CylinderHead>& locations);
@@ -103,12 +103,12 @@ extern void writeDiskCommand(const DiskLayout& diskLayout,
 extern void writeDiskCommand(const DiskLayout& diskLayout,
     const Image& image,
     Encoder& encoder,
-    FluxSink& fluxSink,
+    FluxSinkFactory& fluxSinkFactory,
     Decoder* decoder = nullptr,
     FluxSource* fluxSource = nullptr);
 
 extern void writeRawDiskCommand(
-    const DiskLayout& diskLayout, FluxSource& fluxSource, FluxSink& fluxSink);
+    const DiskLayout& diskLayout, FluxSource& fluxSource, FluxSinkFactory& fluxSinkFactory);
 
 struct TracksAndSectors
 {

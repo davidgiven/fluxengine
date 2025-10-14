@@ -410,7 +410,7 @@ static ReadGroupResult readGroup(const DiskLayout& diskLayout,
 
 void writeTracks(const DiskLayout& diskLayout,
 
-    FluxSink& fluxSinkFactory,
+    FluxSinkFactory& fluxSinkFactory,
     std::function<std::unique_ptr<const Fluxmap>(
         const std::shared_ptr<const LogicalTrackLayout>&)> producer,
     std::function<bool(const std::shared_ptr<const LogicalTrackLayout>&)>
@@ -487,14 +487,14 @@ void writeTracks(const DiskLayout& diskLayout,
 }
 
 void writeTracks(const DiskLayout& diskLayout,
-    FluxSink& fluxSink,
+    FluxSinkFactory& fluxSinkFactory,
     Encoder& encoder,
     const Image& image,
     const std::vector<CylinderHead>& chs)
 {
     writeTracks(
         diskLayout,
-        fluxSink,
+        fluxSinkFactory,
         [&](const std::shared_ptr<const LogicalTrackLayout>& ltl)
         {
             auto sectors = encoder.collectSectors(*ltl, image);
@@ -508,7 +508,7 @@ void writeTracks(const DiskLayout& diskLayout,
 }
 
 void writeTracksAndVerify(const DiskLayout& diskLayout,
-    FluxSink& fluxSink,
+    FluxSinkFactory& fluxSinkFactory,
     Encoder& encoder,
     FluxSource& fluxSource,
     Decoder& decoder,
@@ -517,7 +517,7 @@ void writeTracksAndVerify(const DiskLayout& diskLayout,
 {
     writeTracks(
         diskLayout,
-        fluxSink,
+        fluxSinkFactory,
         [&](const std::shared_ptr<const LogicalTrackLayout>& ltl)
         {
             auto sectors = encoder.collectSectors(*ltl, image);
@@ -578,7 +578,7 @@ void writeTracksAndVerify(const DiskLayout& diskLayout,
 void writeDiskCommand(const DiskLayout& diskLayout,
     const Image& image,
     Encoder& encoder,
-    FluxSink& fluxSink,
+    FluxSinkFactory& fluxSinkFactory,
     Decoder* decoder,
     FluxSource* fluxSource,
     const std::vector<CylinderHead>& physicalLocations)
@@ -586,35 +586,41 @@ void writeDiskCommand(const DiskLayout& diskLayout,
     auto chs = std::ranges::views::keys(diskLayout.layoutByLogicalLocation) |
                std::ranges::to<std::vector>();
     if (fluxSource && decoder)
-        writeTracksAndVerify(
-            diskLayout, fluxSink, encoder, *fluxSource, *decoder, image, chs);
+        writeTracksAndVerify(diskLayout,
+            fluxSinkFactory,
+            encoder,
+            *fluxSource,
+            *decoder,
+            image,
+            chs);
     else
-        writeTracks(diskLayout, fluxSink, encoder, image, chs);
+        writeTracks(diskLayout, fluxSinkFactory, encoder, image, chs);
 }
 
 void writeDiskCommand(const DiskLayout& diskLayout,
     const Image& image,
     Encoder& encoder,
-    FluxSink& fluxSink,
+    FluxSinkFactory& fluxSinkFactory,
     Decoder* decoder,
     FluxSource* fluxSource)
 {
     writeDiskCommand(diskLayout,
         image,
         encoder,
-        fluxSink,
+        fluxSinkFactory,
         decoder,
         fluxSource,
         std::ranges::views::keys(diskLayout.layoutByLogicalLocation) |
             std::ranges::to<std::vector>());
 }
 
-void writeRawDiskCommand(
-    const DiskLayout& diskLayout, FluxSource& fluxSource, FluxSink& fluxSink)
+void writeRawDiskCommand(const DiskLayout& diskLayout,
+    FluxSource& fluxSource,
+    FluxSinkFactory& fluxSinkFactory)
 {
     writeTracks(
         diskLayout,
-        fluxSink,
+        fluxSinkFactory,
         [&](const std::shared_ptr<const LogicalTrackLayout>& ltl)
         {
             return fluxSource
@@ -676,14 +682,14 @@ void readDiskCommand(const DiskLayout& diskLayout,
     Decoder& decoder,
     DecodedDisk& decodedDisk)
 {
-    std::unique_ptr<FluxSink> outputFluxSinkFactory;
+    std::unique_ptr<FluxSinkFactory> outputFluxSinkFactory;
     if (globalConfig()->decoder().has_copy_flux_to())
         outputFluxSinkFactory =
-            FluxSink::create(globalConfig()->decoder().copy_flux_to());
+            FluxSinkFactory::create(globalConfig()->decoder().copy_flux_to());
 
     log(BeginOperationLogMessage{"Reading and decoding disk"});
     {
-        std::unique_ptr<FluxSink::Sink> outputFluxSink;
+        std::unique_ptr<FluxSink> outputFluxSink;
         if (outputFluxSinkFactory)
             outputFluxSink = outputFluxSinkFactory->create();
         unsigned index = 0;

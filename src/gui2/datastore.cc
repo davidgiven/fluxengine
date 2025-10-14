@@ -570,18 +570,19 @@ void Datastore::beginWrite()
                 wtRebuildConfiguration();
                 wtWaitForUiThreadToCatchUp();
 
-                auto fluxSink = FluxSink::create(globalConfig());
+                auto fluxSinkFactory = FluxSinkFactory::create(globalConfig());
                 auto encoder = Arch::createEncoder(globalConfig());
                 std::shared_ptr<Decoder> decoder;
                 std::shared_ptr<FluxSource> verificationFluxSource;
-                if (globalConfig().hasDecoder() && fluxSink->isHardware())
+                if (globalConfig().hasDecoder() &&
+                    fluxSinkFactory->isHardware())
                 {
                     decoder = Arch::createDecoder(globalConfig());
                     verificationFluxSource = FluxSource::create(
                         globalConfig().getVerificationFluxSourceProto());
                 }
 
-                auto path = fluxSink->getPath();
+                auto path = fluxSinkFactory->getPath();
                 if (path.has_value() && std::filesystem::exists(*path))
                 {
                     {
@@ -608,7 +609,7 @@ void Datastore::beginWrite()
                 writeDiskCommand(*diskLayout,
                     *image,
                     *encoder,
-                    *fluxSink,
+                    *fluxSinkFactory,
                     decoder.get(),
                     verificationFluxSource.get());
             }
@@ -747,8 +748,8 @@ void Datastore::writeFluxFile(const std::fs::path& path)
 
                 globalConfig().setFluxSink(path.string());
                 auto fluxSource = FluxSource::createMemoryFluxSource(*diskFlux);
-                auto fluxSink = FluxSink::create(globalConfig());
-                writeRawDiskCommand(*diskLayout, *fluxSource, *fluxSink);
+                auto fluxSinkFactory = FluxSinkFactory::create(globalConfig());
+                writeRawDiskCommand(*diskLayout, *fluxSource, *fluxSinkFactory);
             }
             catch (...)
             {

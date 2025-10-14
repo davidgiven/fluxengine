@@ -143,11 +143,12 @@ public:
                 {
                     auto image = GetContext().GetImageReader()->readImage();
                     auto* encoder = GetContext().GetEncoder();
-                    auto* fluxSink = GetContext().GetFluxSink();
+                    auto* fluxSinkFactory = GetContext().GetFluxSink();
 
                     Decoder* decoder = nullptr;
                     FluxSource* verificationFluxSource;
-                    if (globalConfig().hasDecoder() && fluxSink->isHardware())
+                    if (globalConfig().hasDecoder() &&
+                        fluxSinkFactory->isHardware())
                     {
                         decoder = GetContext().GetDecoder();
                         verificationFluxSource =
@@ -156,7 +157,7 @@ public:
 
                     writeDiskCommand(*image,
                         *encoder,
-                        *fluxSink,
+                        *fluxSinkFactory,
                         decoder,
                         verificationFluxSource);
                 });
@@ -289,9 +290,9 @@ public:
                 {
                     auto fluxSource =
                         FluxSource::createMemoryFluxSource(*_currentDisk);
-                    auto fluxSink =
-                        FluxSink::create(globalConfig()->flux_sink());
-                    writeRawDiskCommand(*fluxSource, *fluxSink);
+                    auto fluxSinkFactory =
+                        FluxSinkFactory::create(globalConfig()->flux_sink());
+                    writeRawDiskCommand(*fluxSource, *fluxSinkFactory);
                 });
         }
         catch (const ErrorException& e)

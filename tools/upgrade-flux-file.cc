@@ -271,7 +271,7 @@ int main(int argc, const char* argv[])
         int version = sqlGetVersion(db);
 
         {
-            auto fluxSink = FluxSink::createFl2FluxSink(outFilename)->create();
+            auto fluxSink = FluxSinkFactory::createFl2FluxSinkFactory(outFilename)->create();
 
             for (const auto& locations : sqlFindFlux(db))
             {

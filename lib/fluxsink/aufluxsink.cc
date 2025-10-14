@@ -12,7 +12,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-class AuSink : public FluxSink::Sink
+class AuSink : public FluxSink
 {
 public:
     AuSink(const std::string& directory, bool indexMarkers):
@@ -89,12 +89,12 @@ private:
     bool _indexMarkers;
 };
 
-class AuFluxSink : public FluxSink
+class AuFluxSinkFactory : public FluxSinkFactory
 {
 public:
-    AuFluxSink(const AuFluxSinkProto& config): _config(config) {}
+    AuFluxSinkFactory(const AuFluxSinkProto& config): _config(config) {}
 
-    std::unique_ptr<Sink> create() override
+    std::unique_ptr<FluxSink> create() override
     {
         return std::make_unique<AuSink>(
             _config.directory(), _config.index_markers());
@@ -114,8 +114,8 @@ private:
     const AuFluxSinkProto& _config;
 };
 
-std::unique_ptr<FluxSink> FluxSink::createAuFluxSink(
+std::unique_ptr<FluxSinkFactory> FluxSinkFactory::createAuFluxSinkFactory(
     const AuFluxSinkProto& config)
 {
-    return std::unique_ptr<FluxSink>(new AuFluxSink(config));
+    return std::unique_ptr<FluxSinkFactory>(new AuFluxSinkFactory(config));
 }

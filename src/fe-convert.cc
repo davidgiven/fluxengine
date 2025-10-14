@@ -53,7 +53,7 @@ int mainConvert(int argc, const char* argv[])
         minHead,
         maxHead);
 
-    auto fluxSinkFactory = FluxSink::create(globalConfig());
+    auto fluxSinkFactory = FluxSinkFactory::create(globalConfig());
     auto fluxSink = fluxSinkFactory->create();
 
     for (const auto& physicalLocation : diskLayout->physicalLocations)

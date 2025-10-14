@@ -234,7 +234,7 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystemFromConfig()
     {
         std::shared_ptr<FluxSource> fluxSource;
         std::shared_ptr<Decoder> decoder;
-        std::shared_ptr<FluxSink> fluxSink;
+        std::shared_ptr<FluxSinkFactory> fluxSinkFactory;
         std::shared_ptr<Encoder> encoder;
         if (globalConfig().hasFluxSource())
         {
@@ -243,11 +243,11 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystemFromConfig()
         }
         if (globalConfig()->flux_sink().type() == FLUXTYPE_DRIVE)
         {
-            fluxSink = FluxSink::create(globalConfig());
+            fluxSinkFactory = FluxSinkFactory::create(globalConfig());
             encoder = Arch::createEncoder(globalConfig());
         }
         sectorInterface = SectorInterface::createFluxSectorInterface(
-            diskLayout, fluxSource, fluxSink, encoder, decoder);
+            diskLayout, fluxSource, fluxSinkFactory, encoder, decoder);
     }
     else
     {

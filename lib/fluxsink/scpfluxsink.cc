@@ -36,7 +36,7 @@ static void appendChecksum(uint32_t& checksum, const Bytes& bytes)
         checksum += br.read_8();
 }
 
-class ScpSink : public FluxSink::Sink
+class ScpSink : public FluxSink
 {
 public:
     ScpSink(const std::string& filename, uint8_t typeByte, bool alignWithIndex):
@@ -192,12 +192,12 @@ private:
     Bytes _trackdata;
 };
 
-class ScpFluxSink : public FluxSink
+class ScpFluxSinkFactory : public FluxSinkFactory
 {
 public:
-    ScpFluxSink(const ScpFluxSinkProto& lconfig): _config(lconfig) {}
+    ScpFluxSinkFactory(const ScpFluxSinkProto& lconfig): _config(lconfig) {}
 
-    std::unique_ptr<Sink> create() override
+    std::unique_ptr<FluxSink> create() override
     {
         return std::make_unique<ScpSink>(_config.filename(),
             _config.type_byte(),
@@ -219,8 +219,8 @@ private:
     const ScpFluxSinkProto& _config;
 };
 
-std::unique_ptr<FluxSink> FluxSink::createScpFluxSink(
+std::unique_ptr<FluxSinkFactory> FluxSinkFactory::createScpFluxSinkFactory(
     const ScpFluxSinkProto& config)
 {
-    return std::unique_ptr<FluxSink>(new ScpFluxSink(config));
+    return std::unique_ptr<FluxSinkFactory>(new ScpFluxSinkFactory(config));
 }

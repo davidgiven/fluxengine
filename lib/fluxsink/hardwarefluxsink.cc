@@ -8,7 +8,7 @@
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/fluxsink/fluxsink.pb.h"
 
-class HardwareSink : public FluxSink::Sink
+class HardwareSink : public FluxSink
 {
     void addFlux(int track, int side, const Fluxmap& fluxmap) override
     {
@@ -21,10 +21,10 @@ class HardwareSink : public FluxSink::Sink
     }
 };
 
-class HardwareFluxSink : public FluxSink
+class HardwareFluxSinkFactory : public FluxSinkFactory
 {
 public:
-    std::unique_ptr<Sink> create() override
+    std::unique_ptr<FluxSink> create() override
     {
         return std::make_unique<HardwareSink>();
     }
@@ -40,8 +40,8 @@ public:
     }
 };
 
-std::unique_ptr<FluxSink> FluxSink::createHardwareFluxSink(
+std::unique_ptr<FluxSinkFactory> FluxSinkFactory::createHardwareFluxSinkFactory(
     const HardwareFluxSinkProto& config)
 {
-    return std::unique_ptr<FluxSink>();
+    return std::unique_ptr<FluxSinkFactory>();
 }
