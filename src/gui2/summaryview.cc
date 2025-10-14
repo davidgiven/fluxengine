@@ -6,7 +6,7 @@
 #include <fmt/format.h>
 #include "lib/core/globals.h"
 #include "lib/config/config.h"
-#include "lib/data/decoded.h"
+#include "lib/data/disk.h"
 #include "lib/data/sector.h"
 #include "lib/config/proto.h"
 #include "globals.h"
@@ -65,9 +65,7 @@ SummaryView::SummaryView():
 }
 
 static std::set<std::shared_ptr<const Sector>> findSectors(
-    const DecodedDisk& diskFlux,
-    unsigned physicalCylinder,
-    unsigned physicalHead)
+    const Disk& diskFlux, unsigned physicalCylinder, unsigned physicalHead)
 {
     std::set<std::shared_ptr<const Sector>> sectors;
 
@@ -85,9 +83,8 @@ struct TrackAnalysis
     uint32_t colour;
 };
 
-static TrackAnalysis analyseTrack(const DecodedDisk& diskFlux,
-    unsigned physicalCylinder,
-    unsigned physicalHead)
+static TrackAnalysis analyseTrack(
+    const Disk& diskFlux, unsigned physicalCylinder, unsigned physicalHead)
 {
     TrackAnalysis result = {};
     auto sectors = findSectors(diskFlux, physicalCylinder, physicalHead);
@@ -140,7 +137,7 @@ static void drawPhysicalMap(unsigned minPhysicalCylinder,
     unsigned maxPhysicalCylinder,
     unsigned minPhysicalHead,
     unsigned maxPhysicalHead,
-    const DecodedDisk& diskFlux)
+    const Disk& diskFlux)
 {
     int numPhysicalCylinders = maxPhysicalCylinder - minPhysicalCylinder + 1;
     int numPhysicalHeads = maxPhysicalHead - minPhysicalHead + 1;
@@ -222,7 +219,7 @@ static void drawLogicalMap(unsigned minPhysicalCylinder,
     unsigned maxPhysicalCylinder,
     unsigned minPhysicalHead,
     unsigned maxPhysicalHead,
-    const DecodedDisk& diskFlux,
+    const Disk& diskFlux,
     const DiskLayout& diskLayout)
 {
     auto originalFontSize = ImGui::GetFontSize();
@@ -328,7 +325,7 @@ static void drawLogicalMap(unsigned minPhysicalCylinder,
 
 void SummaryView::drawContent()
 {
-    auto diskFlux = Datastore::getDecodedDisk();
+    auto diskFlux = Datastore::getDisk();
     auto diskLayout = Datastore::getDiskLayout();
     if (!diskFlux || !diskLayout)
         return;

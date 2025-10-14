@@ -1,6 +1,6 @@
 #include "lib/core/globals.h"
 #include "lib/data/fluxmap.h"
-#include "lib/data/decoded.h"
+#include "lib/data/disk.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/data/fluxmap.h"
 #include "lib/data/layout.h"
@@ -8,8 +8,7 @@
 
 class MemoryFluxSourceIterator : public FluxSourceIterator
 {
-    using multimap =
-        std::multimap<CylinderHead, std::shared_ptr<const DecodedTrack>>;
+    using multimap = std::multimap<CylinderHead, std::shared_ptr<const Track>>;
 
 public:
     MemoryFluxSourceIterator(
@@ -39,7 +38,7 @@ private:
 class MemoryFluxSource : public FluxSource
 {
 public:
-    MemoryFluxSource(const DecodedDisk& flux): _flux(flux)
+    MemoryFluxSource(const Disk& flux): _flux(flux)
     {
         std::set<CylinderHead> chs;
         for (auto& [ch, trackDataFlux] : flux.tracksByPhysicalLocation)
@@ -63,11 +62,10 @@ public:
     void recalibrate() override {}
 
 private:
-    const DecodedDisk& _flux;
+    const Disk& _flux;
 };
 
-std::unique_ptr<FluxSource> FluxSource::createMemoryFluxSource(
-    const DecodedDisk& flux)
+std::unique_ptr<FluxSource> FluxSource::createMemoryFluxSource(const Disk& flux)
 {
     return std::make_unique<MemoryFluxSource>(flux);
 }

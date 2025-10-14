@@ -288,7 +288,7 @@ struct CombinationResult
 };
 
 static CombinationResult combineRecordAndSectors(
-    std::vector<std::shared_ptr<const DecodedTrack>>& tracks,
+    std::vector<std::shared_ptr<const Track>>& tracks,
     Decoder& decoder,
     const std::shared_ptr<const LogicalTrackLayout>& ltl)
 {
@@ -355,7 +355,7 @@ struct ReadGroupResult
 static ReadGroupResult readGroup(const DiskLayout& diskLayout,
     FluxSourceIteratorHolder& fluxSourceIteratorHolder,
     const std::shared_ptr<const LogicalTrackLayout>& ltl,
-    std::vector<std::shared_ptr<const DecodedTrack>>& tracks,
+    std::vector<std::shared_ptr<const Track>>& tracks,
     Decoder& decoder)
 {
     ReadGroupResult rgr = {BAD_AND_CAN_NOT_RETRY};
@@ -526,7 +526,7 @@ void writeTracksAndVerify(const DiskLayout& diskLayout,
         [&](const std::shared_ptr<const LogicalTrackLayout>& ltl)
         {
             FluxSourceIteratorHolder fluxSourceIteratorHolder(fluxSource);
-            std::vector<std::shared_ptr<const DecodedTrack>> tracks;
+            std::vector<std::shared_ptr<const Track>> tracks;
             auto [result, sectors] = readGroup(
                 diskLayout, fluxSourceIteratorHolder, ltl, tracks, decoder);
             log(TrackReadLogMessage{tracks, sectors});
@@ -680,7 +680,7 @@ TracksAndSectors readAndDecodeTrack(const DiskLayout& diskLayout,
 void readDiskCommand(const DiskLayout& diskLayout,
     FluxSource& fluxSource,
     Decoder& decoder,
-    DecodedDisk& decodedDisk)
+    Disk& decodedDisk)
 {
     std::unique_ptr<FluxSinkFactory> outputFluxSinkFactory;
     if (globalConfig()->decoder().has_copy_flux_to())
@@ -785,7 +785,7 @@ void readDiskCommand(const DiskLayout& diskLayout,
 
             /* Log a _copy_ of the decodedDisk structure so that the logger
              * doesn't see the decodedDisk get mutated in subsequent reads. */
-            log(DiskReadLogMessage{std::make_shared<DecodedDisk>(decodedDisk)});
+            log(DiskReadLogMessage{std::make_shared<Disk>(decodedDisk)});
         }
     }
 
@@ -800,7 +800,7 @@ void readDiskCommand(const DiskLayout& diskLayout,
     Decoder& decoder,
     ImageWriter& writer)
 {
-    DecodedDisk decodedDisk;
+    Disk decodedDisk;
     readDiskCommand(diskLayout, fluxsource, decoder, decodedDisk);
 
     writer.printMap(*decodedDisk.image);

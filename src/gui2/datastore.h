@@ -4,7 +4,7 @@
 #include "lib/core/logger.h"
 #include "lib/data/layout.h"
 
-class DecodedDisk;
+class Disk;
 class DiskLayout;
 class CandidateDevice;
 
@@ -43,7 +43,7 @@ public:
     static void createBlankImage();
     static void stop();
 
-    static std::shared_ptr<const DecodedDisk> getDecodedDisk();
+    static std::shared_ptr<const Disk> getDisk();
 
     static void runOnWorkerThread(std::function<void()> callback);
 };

@@ -2,7 +2,7 @@
 #include "gui.h"
 #include "visualisationcontrol.h"
 #include "lib/data/fluxmap.h"
-#include "lib/data/decoded.h"
+#include "lib/data/disk.h"
 #include "lib/data/sector.h"
 #include "lib/data/image.h"
 #include "lib/data/layout.h"
@@ -281,7 +281,7 @@ void VisualisationControl::SetTrackData(std::shared_ptr<const TrackFlux> track)
     Refresh();
 }
 
-void VisualisationControl::SetDiskData(std::shared_ptr<const DecodedDisk> disk)
+void VisualisationControl::SetDiskData(std::shared_ptr<const Disk> disk)
 {
     _sectors.clear();
     for (const auto& track : disk->tracks)

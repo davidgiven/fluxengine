@@ -214,7 +214,7 @@ public:
             histogram->Redraw(*(*trackdata->trackDatas.begin())->fluxmap, 0);
     }
 
-    void SetDisk(std::shared_ptr<const DecodedDisk> diskdata) override
+    void SetDisk(std::shared_ptr<const Disk> diskdata) override
     {
         _currentDisk = diskdata;
     }
@@ -308,7 +308,7 @@ public:
 
 private:
     int _state = STATE_DEAD;
-    std::shared_ptr<const DecodedDisk> _currentDisk;
+    std::shared_ptr<const Disk> _currentDisk;
 };
 
 ImagerPanel* ImagerPanel::Create(MainWindow* mainWindow, wxSimplebook* parent)

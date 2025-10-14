@@ -1,5 +1,5 @@
 #include "lib/core/globals.h"
-#include "lib/data/decoded.h"
+#include "lib/data/disk.h"
 #include "lib/data/image.h"
 #include "lib/data/layout.h"
 #include "lib/data/sector.h"
@@ -19,11 +19,12 @@ namespace
     inline constexpr pair_to_range_t pair_to_range{};
 }
 
-void DecodedDisk::populateTrackDataFromImage(const DiskLayout& diskLayout)
-{
-    tracksByPhysicalLocation.clear();
-    sectorsByPhysicalLocation.clear();
+Disk::Disk() {}
 
+Disk::Disk(
+    const std::shared_ptr<const Image>& image, const DiskLayout& diskLayout):
+    image(image)
+{
     std::multimap<CylinderHead, std::shared_ptr<const Sector>>
         sectorsGroupedByTrack;
     for (const auto& sector : *image)
@@ -37,7 +38,7 @@ void DecodedDisk::populateTrackDataFromImage(const DiskLayout& diskLayout)
             diskLayout.layoutByPhysicalLocation.at(physicalLocation);
         const auto& ltl = ptl->logicalTrackLayout;
 
-        auto decodedTrack = std::make_shared<DecodedTrack>();
+        auto decodedTrack = std::make_shared<Track>();
         decodedTrack->ltl = ltl;
         decodedTrack->ptl = ptl;
         tracksByPhysicalLocation.insert(

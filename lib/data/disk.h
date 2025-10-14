@@ -20,7 +20,7 @@ struct Record
     Bytes rawData;
 };
 
-struct DecodedTrack
+struct Track
 {
     std::shared_ptr<const LogicalTrackLayout> ltl;
     std::shared_ptr<const PhysicalTrackLayout> ptl;
@@ -29,17 +29,23 @@ struct DecodedTrack
     std::vector<std::shared_ptr<const Sector>> sectors;
 };
 
-struct DecodedDisk
+struct Disk
 {
-    DecodedDisk& operator=(const DecodedDisk& other) = default;
+    Disk();
 
-    std::multimap<CylinderHead, std::shared_ptr<const DecodedTrack>>
+    /* Creates a Disk from an Image, populating the tracks and sectors maps
+     * based on the supplied disk layout. */
+
+    Disk(const std::shared_ptr<const Image>& image,
+        const DiskLayout& diskLayout);
+
+    Disk& operator=(const Disk& other) = default;
+
+    std::multimap<CylinderHead, std::shared_ptr<const Track>>
         tracksByPhysicalLocation;
     std::multimap<CylinderHead, std::shared_ptr<const Sector>>
         sectorsByPhysicalLocation;
     std::shared_ptr<const Image> image;
-
-    void populateTrackDataFromImage(const DiskLayout& diskLayout);
 };
 
 #endif

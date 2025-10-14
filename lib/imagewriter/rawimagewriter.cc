@@ -3,7 +3,7 @@
 #include "lib/data/sector.h"
 #include "lib/imagewriter/imagewriter.h"
 #include "lib/data/image.h"
-#include "lib/data/decoded.h"
+#include "lib/data/disk.h"
 #include "lib/core/logger.h"
 #include "lib/imagewriter/imagewriter.pb.h"
 #include <algorithm>

@@ -15,7 +15,7 @@ class PhysicalTrackLayout;
 class RawBits;
 class Sector;
 
-#include "lib/data/decoded.h"
+#include "lib/data/disk.h"
 
 extern void setDecoderManualClockRate(double clockrate_us);
 
@@ -53,7 +53,7 @@ public:
     };
 
 public:
-    std::shared_ptr<DecodedTrack> decodeToSectors(
+    std::shared_ptr<Track> decodeToSectors(
         std::shared_ptr<const Fluxmap> fluxmap,
         const std::shared_ptr<const PhysicalTrackLayout>& ptl);
 
@@ -106,7 +106,7 @@ protected:
 
     const DecoderProto& _config;
     std::shared_ptr<const LogicalTrackLayout> _ltl;
-    std::shared_ptr<DecodedTrack> _trackdata;
+    std::shared_ptr<Track> _trackdata;
     std::shared_ptr<Sector> _sector;
     std::unique_ptr<FluxDecoder> _decoder;
     std::vector<bool> _recordBits;

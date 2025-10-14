@@ -8,7 +8,7 @@
 #include "lib/core/globals.h"
 #include "lib/core/utils.h"
 #include "lib/config/config.h"
-#include "lib/data/decoded.h"
+#include "lib/data/disk.h"
 #include "lib/data/image.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/fluxsink/fluxsink.h"
@@ -34,7 +34,7 @@
 
 using hex::operator""_lang;
 
-static std::shared_ptr<const DecodedDisk> diskFlux;
+static std::shared_ptr<const Disk> diskFlux;
 static std::shared_ptr<Image> wtImage;
 
 static std::deque<std::function<void()>> pendingTasks;
@@ -292,7 +292,7 @@ std::shared_ptr<const DiskLayout> Datastore::getDiskLayout()
     return diskLayout;
 }
 
-std::shared_ptr<const DecodedDisk> Datastore::getDecodedDisk()
+std::shared_ptr<const Disk> Datastore::getDisk()
 {
     return diskFlux;
 }
@@ -544,7 +544,7 @@ void Datastore::beginRead()
                 auto fluxSource = FluxSource::create(globalConfig());
                 auto decoder = Arch::createDecoder(globalConfig());
 
-                auto diskflux = std::make_shared<DecodedDisk>();
+                auto diskflux = std::make_shared<Disk>();
                 readDiskCommand(*diskLayout, *fluxSource, *decoder, *diskflux);
             }
             catch (...)
@@ -650,7 +650,7 @@ void Datastore::stop()
     emergencyStop = true;
 }
 
-static std::shared_ptr<DecodedDisk> wtMakeDiskDataFromImage(
+static std::shared_ptr<Disk> wtMakeDiskDataFromImage(
     std::shared_ptr<Image>& image)
 {
     image->calculateSize();
@@ -658,10 +658,7 @@ static std::shared_ptr<DecodedDisk> wtMakeDiskDataFromImage(
     if (image->getGeometry().totalBytes != diskLayout->totalBytes)
         error("loaded image is not the right size for this format");
 
-    auto diskflux = std::make_shared<DecodedDisk>();
-    diskflux->image = image;
-    diskflux->populateTrackDataFromImage(*diskLayout);
-    return diskflux;
+    return std::make_shared<Disk>(image, *diskLayout);
 }
 
 void Datastore::writeImage(const std::fs::path& path)
@@ -680,7 +677,7 @@ void Datastore::writeImage(const std::fs::path& path)
                 wtWaitForUiThreadToCatchUp();
                 globalConfig().setImageWriter(path.string());
                 ImageWriter::create(globalConfig())
-                    ->writeImage(*Datastore::getDecodedDisk()->image);
+                    ->writeImage(*Datastore::getDisk()->image);
             }
             catch (...)
             {

@@ -60,7 +60,7 @@ void DiskProvider::close() {}
 
 void DiskProvider::readRaw(u64 offset, void* buffer, size_t size)
 {
-    const auto& diskFlux = Datastore::getDecodedDisk();
+    const auto& diskFlux = Datastore::getDisk();
     const auto& diskLayout = Datastore::getDiskLayout();
     if (diskFlux && diskFlux->image && diskLayout)
     {

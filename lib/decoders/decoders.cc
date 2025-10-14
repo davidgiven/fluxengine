@@ -4,7 +4,7 @@
 #include "lib/config/config.h"
 #include "lib/decoders/decoders.h"
 #include "lib/data/fluxmapreader.h"
-#include "lib/data/decoded.h"
+#include "lib/data/disk.h"
 #include "protocol.h"
 #include "lib/decoders/rawbits.h"
 #include "lib/data/sector.h"
@@ -13,13 +13,13 @@
 #include "lib/data/layout.h"
 #include <numeric>
 
-std::shared_ptr<DecodedTrack> Decoder::decodeToSectors(
+std::shared_ptr<Track> Decoder::decodeToSectors(
     std::shared_ptr<const Fluxmap> fluxmap,
     const std::shared_ptr<const PhysicalTrackLayout>& ptl)
 {
     _ltl = ptl->logicalTrackLayout;
 
-    _trackdata = std::make_shared<DecodedTrack>();
+    _trackdata = std::make_shared<Track>();
     _trackdata->fluxmap = fluxmap;
     _trackdata->ptl = ptl;
     _trackdata->ltl = ptl->logicalTrackLayout;

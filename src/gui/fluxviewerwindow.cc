@@ -3,7 +3,7 @@
 #include "lib/data/layout.h"
 #include "fluxviewerwindow.h"
 #include "fluxviewercontrol.h"
-#include "lib/data/decoded.h"
+#include "lib/data/disk.h"
 #include "lib/data/layout.h"
 
 FluxViewerWindow::FluxViewerWindow(

@@ -3,8 +3,8 @@
 
 #include "lib/data/locations.h"
 
-class DecodedDisk;
-class DecodedTrack;
+class Disk;
+class Track;
 class Decoder;
 class DiskLayout;
 class Encoder;
@@ -30,13 +30,13 @@ struct EndSpeedOperationLogMessage
 
 struct TrackReadLogMessage
 {
-    std::vector<std::shared_ptr<const DecodedTrack>> tracks;
+    std::vector<std::shared_ptr<const Track>> tracks;
     std::vector<std::shared_ptr<const Sector>> sectors;
 };
 
 struct DiskReadLogMessage
 {
-    std::shared_ptr<const DecodedDisk> disk;
+    std::shared_ptr<const Disk> disk;
 };
 
 struct BeginReadOperationLogMessage
@@ -47,7 +47,7 @@ struct BeginReadOperationLogMessage
 
 struct EndReadOperationLogMessage
 {
-    std::shared_ptr<const DecodedTrack> trackDataFlux;
+    std::shared_ptr<const Track> trackDataFlux;
     std::set<std::shared_ptr<const Sector>> sectors;
 };
 
@@ -112,7 +112,7 @@ extern void writeRawDiskCommand(
 
 struct TracksAndSectors
 {
-    std::vector<std::shared_ptr<const DecodedTrack>> tracks;
+    std::vector<std::shared_ptr<const Track>> tracks;
     std::vector<std::shared_ptr<const Sector>> sectors;
 };
 
@@ -124,7 +124,7 @@ extern TracksAndSectors readAndDecodeTrack(const DiskLayout& diskLayout,
 extern void readDiskCommand(const DiskLayout& diskLayout,
     FluxSource& fluxsource,
     Decoder& decoder,
-    DecodedDisk& diskflux);
+    Disk& diskflux);
 extern void readDiskCommand(const DiskLayout& diskLayout,
     FluxSource& source,
     Decoder& decoder,

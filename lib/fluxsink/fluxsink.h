@@ -15,7 +15,7 @@ class VcdFluxSinkProto;
 class ScpFluxSinkProto;
 class Fl2FluxSinkProto;
 class Config;
-class DecodedDisk;
+class Disk;
 
 class FluxSink
 {

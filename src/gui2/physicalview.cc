@@ -25,7 +25,7 @@ DiskLayout::LayoutBounds PhysicalView::getBounds()
 std::shared_ptr<const Sector> PhysicalView::getSector(
     unsigned physicalCylinder, unsigned physicalHead, unsigned sectorId)
 {
-    const auto& diskFlux = Datastore::getDecodedDisk();
+    const auto& diskFlux = Datastore::getDisk();
     const auto& diskLayout = Datastore::getDiskLayout();
     const auto& ptl = findOrDefault(
         diskLayout->layoutByPhysicalLocation, {physicalCylinder, physicalHead});

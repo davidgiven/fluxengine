@@ -1,5 +1,5 @@
 #include "lib/core/globals.h"
-#include "lib/data/decoded.h"
+#include "lib/data/disk.h"
 #include "lib/data/sector.h"
 #include "lib/data/layout.h"
 
