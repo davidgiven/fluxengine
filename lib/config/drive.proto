@@ -20,7 +20,7 @@ message DriveProto
     optional bool sync_with_index = 6
         [ default = false, (help) = "start reading at index mark" ];
     optional double revolutions = 7
-        [ default = 1.2, (help) = "number of revolutions to read" ];
+        [ default = 2.5, (help) = "number of revolutions to read" ];
 
     optional string tracks = 8
         [ default = "c0-80h0-1", (help) = "Tracks supported by drive" ];
