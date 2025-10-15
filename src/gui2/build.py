@@ -520,6 +520,8 @@ plugin(
         "./physicalview.h",
         "./summaryview.cc",
         "./summaryview.h",
+        "./visualiserview.cc",
+        "./visualiserview.h",
         "./utils.cc",
         "./utils.h",
     ],
