@@ -76,8 +76,6 @@ struct OperationProgressLogMessage
     unsigned progress;
 };
 
-extern void measureDiskRotation();
-
 extern void writeTracks(const DiskLayout& diskLayout,
     FluxSinkFactory& fluxSinkFactory,
     const std::function<std::unique_ptr<const Fluxmap>(

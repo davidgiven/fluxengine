@@ -90,7 +90,7 @@ std::shared_ptr<Track> Decoder::decodeToSectors(
         }
 
         if (_sector->status != Sector::MISSING)
-            _trackdata->sectors.push_back(_sector);
+            _trackdata->allSectors.push_back(_sector);
     }
 
     return _trackdata;

@@ -82,14 +82,18 @@ public:
     std::unique_ptr<const Fluxmap> precompensate(
         int threshold_ticks, int amount_ticks);
     std::vector<std::unique_ptr<const Fluxmap>> split() const;
+    const std::vector<nanoseconds_t>& getIndexMarks() const;
 
 private:
     uint8_t& findLastByte();
+    void flushIndexMarks();
 
 private:
     nanoseconds_t _duration = 0;
     int _ticks = 0;
     Bytes _bytes;
+    mutable std::mutex _mutationMutex;
+    mutable std::optional<std::vector<nanoseconds_t>> _indexMarks;
 };
 
 #endif

@@ -47,7 +47,8 @@ Disk::Disk(
         for (auto& [ch, sector] :
             sectorsGroupedByTrack.equal_range(physicalLocation) | pair_to_range)
         {
-            decodedTrack->sectors.push_back(sector);
+            decodedTrack->allSectors.push_back(sector);
+            decodedTrack->normalisedSectors.push_back(sector);
             sectorsByPhysicalLocation.insert(
                 std::make_pair(physicalLocation, sector));
         }

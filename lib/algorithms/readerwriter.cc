@@ -88,7 +88,7 @@ void renderLogMessage(
     std::set<std::shared_ptr<const Record>> rawRecords;
     for (const auto& track : m->tracks)
     {
-        rawSectors.insert(track->sectors.begin(), track->sectors.end());
+        rawSectors.insert(track->allSectors.begin(), track->allSectors.end());
         rawRecords.insert(track->records.begin(), track->records.end());
     }
 
@@ -113,7 +113,7 @@ void renderLogMessage(
         m->sectors.begin(), m->sectors.end());
     std::sort(sectors.begin(), sectors.end(), sectorPointerSortPredicate);
 
-    for (const auto& sector : sectors)
+    for (const auto& sector : rawSectors)
         r.add(fmt::format("{}.{}.{}{}",
             sector->logicalCylinder,
             sector->logicalHead,
@@ -180,7 +180,7 @@ private:
         _cache;
 };
 
-void measureDiskRotation()
+static nanoseconds_t measureDiskRotation()
 {
     log(BeginSpeedOperationLogMessage());
 
@@ -220,6 +220,7 @@ void measureDiskRotation()
         error("Failed\nIs a disk in the drive?");
 
     log(EndSpeedOperationLogMessage{oneRevolution});
+    return oneRevolution;
 }
 
 /* Given a set of sectors, deduplicates them sensibly (e.g. if there is a good
@@ -298,7 +299,7 @@ static CombinationResult combineRecordAndSectors(
     /* Add the sectors which were there. */
 
     for (auto& track : tracks)
-        for (auto& sector : track->sectors)
+        for (auto& sector : track->allSectors)
             track_sectors.push_back(sector);
 
     /* Add the sectors which should be there. */
@@ -399,6 +400,7 @@ static ReadGroupResult readGroup(const DiskLayout& diskLayout,
             fluxmap->bytes());
 
         auto flux = decoder.decodeToSectors(std::move(fluxmap), ptl);
+        flux->normalisedSectors = collectSectors(flux->allSectors);
         tracks.push_back(flux);
 
         /* Decode what we've got so far. */
@@ -707,6 +709,10 @@ void readDiskCommand(const DiskLayout& diskLayout,
             .push_back(track);
 
     log(BeginOperationLogMessage{"Reading and decoding disk"});
+
+    if (fluxSource.isHardware())
+        disk.rotationalPeriod = measureDiskRotation();
+
     {
         std::unique_ptr<FluxSink> outputFluxSink;
         if (outputFluxSinkFactory)
