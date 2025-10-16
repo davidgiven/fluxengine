@@ -45,6 +45,8 @@ void VisualiserView::drawContent()
     ImVec2 side0pos(centre.x, centre.y - outerRadius - padding.y);
     ImVec2 side1pos(centre.x, centre.y + outerRadius + padding.y);
 
+    bool badData = false;
+
     auto drawCentered =
         [&](const ImVec2& pos, uint32_t colour, const std::string& s)
     {
@@ -81,14 +83,20 @@ void VisualiserView::drawContent()
             const auto& indexMarks = track->fluxmap->getIndexMarks();
             nanoseconds_t rotationalPeriod;
             if (indexMarks.empty())
+            {
+                badData = true;
                 continue;
+            }
             if (indexMarks.size() >= 2)
                 rotationalPeriod = indexMarks[1] - indexMarks[0];
             else
             {
                 rotationalPeriod = disk->rotationalPeriod;
                 if (rotationalPeriod == 0)
+                {
+                    badData = true;
                     continue;
+                }
             }
             float radiansPerNano = IM_PI * 2.0 / rotationalPeriod;
 
@@ -160,4 +168,9 @@ void VisualiserView::drawContent()
 
     drawSide(0, side0pos);
     drawSide(1, side1pos);
+
+    if (badData)
+        ImGuiExt::TextOverlay("fluxengine.view.visualiser.missingData"_lang,
+            pos + ImVec2(size.x / 2, size.y - 100),
+            size.x * 0.7);
 }

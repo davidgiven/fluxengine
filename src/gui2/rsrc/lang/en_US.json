@@ -45,6 +45,7 @@
     "fluxengine.view.log.name": "FluxEngine log viewer",
 
     "fluxengine.view.visualiser.name": "FluxEngine disk visualiser",
+    "fluxengine.view.visualiser.missingData": "Missing flux data",
 
     "fluxengine.view.status.runningSuffix": "...",
     "fluxengine.view.status.succeededSuffix": "... done",
