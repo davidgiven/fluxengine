@@ -43,5 +43,5 @@ public:
 std::unique_ptr<FluxSinkFactory> FluxSinkFactory::createHardwareFluxSinkFactory(
     const HardwareFluxSinkProto& config)
 {
-    return std::unique_ptr<FluxSinkFactory>();
+    return std::make_unique<HardwareFluxSinkFactory>();
 }
