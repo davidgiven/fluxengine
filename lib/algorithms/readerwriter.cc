@@ -180,12 +180,16 @@ private:
         _cache;
 };
 
+static nanoseconds_t getRotationalPeriodFromConfig()
+{
+    return globalConfig()->drive().rotational_period_ms() * 1e6;
+}
+
 static nanoseconds_t measureDiskRotation()
 {
     log(BeginSpeedOperationLogMessage());
 
-    nanoseconds_t oneRevolution =
-        globalConfig()->drive().rotational_period_ms() * 1e6;
+    nanoseconds_t oneRevolution = getRotationalPeriodFromConfig();
     if (oneRevolution == 0)
     {
         usbSetDrive(globalConfig()->drive().drive(),
@@ -712,6 +716,8 @@ void readDiskCommand(const DiskLayout& diskLayout,
 
     if (fluxSource.isHardware())
         disk.rotationalPeriod = measureDiskRotation();
+    else
+        disk.rotationalPeriod = getRotationalPeriodFromConfig();
 
     {
         std::unique_ptr<FluxSink> outputFluxSink;
