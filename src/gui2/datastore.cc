@@ -182,6 +182,8 @@ static void wtOperationStop()
         [=]()
         {
             Events::OperationStop::post(state);
+            Events::DiskActivityNotification::post(
+                DiskActivityType::None, 0, 0);
         });
 }
 

@@ -77,7 +77,7 @@ void DiskProvider::readRaw(u64 offset, void* buffer, size_t size)
             auto sector = disk->image->get(logicalLocation);
             auto& ltl = diskLayout->layoutByLogicalLocation.at(
                 logicalLocation.trackLocation());
-            unsigned blockOffset = realOffset - offset;
+            unsigned blockOffset = offset - realOffset;
             unsigned bytesRemaining =
                 std::min((unsigned)size, ltl->sectorSize - blockOffset);
             auto bytes = sector
