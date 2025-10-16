@@ -88,12 +88,18 @@ const std::vector<nanoseconds_t>& Fluxmap::getIndexMarks() const
     {
         _indexMarks = std::make_optional<std::vector<nanoseconds_t>>();
         FluxmapReader fmr(*this);
+        nanoseconds_t oldt = -1;
         for (;;)
         {
             unsigned ticks;
             if (!fmr.findEvent(F_BIT_INDEX, ticks))
                 break;
-            _indexMarks->push_back(fmr.tell().ns());
+
+            /* Debounce. */
+            nanoseconds_t t = fmr.tell().ns();
+            if (t != oldt)
+                _indexMarks->push_back(t);
+            oldt = t;
         }
     }
     return *_indexMarks;
