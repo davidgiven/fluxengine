@@ -1,7 +1,12 @@
 #include <hex/plugin.hpp>
 #include <hex/api/content_registry/views.hpp>
+#include <hex/api/content_registry/user_interface.hpp>
 #include <hex/helpers/logger.hpp>
 #include <hex/api/content_registry/provider.hpp>
+#include <hex/api/workspace_manager.hpp>
+#include <hex/helpers/default_paths.hpp>
+#include <fonts/vscode_icons.hpp>
+#include <fonts/tabler_icons.hpp>
 #include <romfs/romfs.hpp>
 #include "globals.h"
 #include "imageview.h"
@@ -22,6 +27,42 @@ IMHEX_PLUGIN_SETUP("FluxEngine", "David Given", "FluxEngine integration")
         [](const std::filesystem::path& path)
         {
             return romfs::get(path).string();
+        });
+
+    hex::ContentRegistry::UserInterface::addMenuItem(
+        {"hex.builtin.menu.workspace", "fluxengine.menu.workspace.reset"},
+        ICON_TA_CANCEL,
+        10000,
+        hex::Shortcut::None,
+        []
+        {
+            static const std::string extractFolder = "auto_extract/workspaces";
+            for (const auto& romfsPath : romfs::list(extractFolder))
+            {
+                for (const auto& imhexPath : hex::paths::getDataPaths(false))
+                {
+                    const auto path =
+                        imhexPath / std::fs::relative(romfsPath, extractFolder);
+                    hex::log::info("Extracting {} to {}",
+                        romfsPath.string(),
+                        path.string());
+
+                    wolv::io::File file(path, wolv::io::File::Mode::Create);
+                    if (!file.isValid())
+                        continue;
+
+                    auto data = romfs::get(romfsPath).span<u8>();
+                    file.writeBuffer(data.data(), data.size());
+
+                    if (file.getSize() == data.size())
+                        break;
+                }
+            }
+
+            auto currentWorkspaceName =
+                hex::WorkspaceManager::getCurrentWorkspace()->first;
+            hex::WorkspaceManager::reload();
+            hex::WorkspaceManager::switchWorkspace(currentWorkspaceName);
         });
 
     hex::ContentRegistry::Provider::add<DiskProvider>();
