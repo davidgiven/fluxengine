@@ -416,16 +416,17 @@ plugin(
     srcs=sources_from(
         "dep/imhex/plugins/builtin/source",
         except_for=[
-            "dep/imhex/plugins/builtin/source/content/views/view_achievements.cpp",
             "dep/imhex/plugins/builtin/source/content/achievements.cpp",
+            "dep/imhex/plugins/builtin/source/content/data_processor_nodes.cpp",
             "dep/imhex/plugins/builtin/source/content/main_menu_items.cpp",
-            "dep/imhex/plugins/builtin/source/content/welcome_screen.cpp",
             "dep/imhex/plugins/builtin/source/content/out_of_box_experience.cpp",
+            "dep/imhex/plugins/builtin/source/content/providers.cpp",
             "dep/imhex/plugins/builtin/source/content/ui_items.cpp",
             "dep/imhex/plugins/builtin/source/content/views.cpp",
+            "dep/imhex/plugins/builtin/source/content/views/view_achievements.cpp",
             "dep/imhex/plugins/builtin/source/content/views/view_data_processor.cpp",
             "dep/imhex/plugins/builtin/source/content/views/view_tutorials.cpp",
-            "dep/imhex/plugins/builtin/source/content/data_processor_nodes.cpp",
+            "dep/imhex/plugins/builtin/source/content/welcome_screen.cpp",
         ]
         + glob(
             "dep/imhex/plugins/builtin/source/content/data_processor_nodes/*"
@@ -433,11 +434,12 @@ plugin(
         + glob("dep/imhex/plugins/builtin/source/content/tutorials/*"),
     )
     + [
-        "./imhex_overrides/welcome.cc",
+        "./imhex_overrides/main_menu_items.cpp",
+        "./imhex_overrides/providers.cpp",
         "./imhex_overrides/stubs.cc",
         "./imhex_overrides/ui_items.cc",
         "./imhex_overrides/views.cpp",
-        "./imhex_overrides/main_menu_items.cpp",
+        "./imhex_overrides/welcome.cc",
     ],
     hdrs=headers_from("dep/imhex/plugins/builtin/include"),
     romfsdir="dep/imhex/plugins/builtin/romfs",
