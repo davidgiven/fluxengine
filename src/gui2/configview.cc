@@ -18,9 +18,25 @@ using namespace hex;
 
 static DynamicSettingFactory settings("fluxengine.settings");
 
+static constexpr const char* DEFAULT_CUSTOM_SETTINGS = R"R(
+# These settings will override the ones above.
+# Here are some useful ones:
+# decoder.retries=0
+# drive.revolutions=1.2
+)R";
+
 ConfigView::ConfigView():
     View::Window("fluxengine.view.config.name", ICON_VS_COMPASS)
 {
+    Events::SetSystemConfig::subscribe(
+        [](std::string customConfig)
+        {
+            auto customSetting = settings.get<std::string>("systemProperties");
+            customSetting =
+                "# These settings were set by a file and\n"
+                "# may contradict the ones above (it's a bug).\n" +
+                customConfig;
+        });
 }
 
 static void emitOptions(DynamicSetting<std::string>& setting,
@@ -336,11 +352,33 @@ void ConfigView::drawContent()
 
     ImGui::SeparatorText("fluxengine.view.config.customProperties"_lang);
 
-    auto customSetting = settings.get<std::string>("custom");
-    std::string buffer = customSetting;
-    if (ImGui::InputTextMultiline("##customProperties",
-            buffer,
-            ImGui::GetContentRegionAvail(),
-            ImGuiInputTextFlags_None))
-        customSetting = buffer;
+    if (ImGui::BeginTabBar("customconfig", ImGuiTabBarFlags_None))
+    {
+        DEFER(ImGui::EndTabBar());
+        if (ImGui::BeginTabItem("User"))
+        {
+            DEFER(ImGui::EndTabItem());
+
+            auto setting =
+                settings.get<std::string>("custom", DEFAULT_CUSTOM_SETTINGS);
+            std::string buffer = setting;
+            if (ImGui::InputTextMultiline("##customProperties",
+                    buffer,
+                    ImGui::GetContentRegionAvail(),
+                    ImGuiInputTextFlags_None))
+                setting = buffer;
+        }
+        if (ImGui::BeginTabItem("System"))
+        {
+            DEFER(ImGui::EndTabItem());
+
+            auto setting = settings.get<std::string>("systemProperties");
+            std::string buffer = setting;
+            if (ImGui::InputTextMultiline("##systemProperties",
+                    buffer,
+                    ImGui::GetContentRegionAvail(),
+                    ImGuiInputTextFlags_None))
+                setting = buffer;
+        }
+    }
 }

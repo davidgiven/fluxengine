@@ -451,6 +451,29 @@ bool Config::applyOption(const std::string& name, const std::string value)
     return optionInfo.usesValue;
 }
 
+void Config::applyOptionsFile(const std::string& data)
+{
+    if (!data.empty())
+    {
+        for (auto setting : split(data, '\n'))
+        {
+            setting = trimWhitespace(setting);
+            if (setting.size() == 0)
+                continue;
+            if (setting[0] == '#')
+                continue;
+
+            auto equals = setting.find('=');
+            if (equals == std::string::npos)
+                error("Malformed setting line '{}'", setting);
+
+            auto key = setting.substr(0, equals);
+            auto value = setting.substr(equals + 1);
+            globalConfig().set(key, value);
+        }
+    }
+}
+
 void Config::applyDefaultOptions()
 {
     std::set<const OptionGroupProto*> appliedOptionGroups;

@@ -540,12 +540,13 @@ findAllPossibleProtoFields(const google::protobuf::Descriptor* descriptor)
     return fields;
 }
 
-std::vector<ProtoField> findAllProtoFields(google::protobuf::Message* message)
+std::vector<ProtoField> findAllProtoFields(
+    const google::protobuf::Message* message)
 {
     std::vector<ProtoField> allFields;
 
-    std::function<void(google::protobuf::Message*, const std::string&)>
-        recurse = [&](auto* message, const auto& name)
+    std::function<void(const google::protobuf::Message*, const std::string&)>
+        recurse = [&](const auto* message, const auto& name)
     {
         const auto* reflection = message->GetReflection();
         std::vector<const google::protobuf::FieldDescriptor*> fields;
@@ -565,22 +566,32 @@ std::vector<ProtoField> findAllProtoFields(google::protobuf::Message* message)
                     const auto n = fmt::format("{}[{}]", basename, i);
                     if (shouldRecurse(f))
                         recurse(
-                            reflection->MutableRepeatedMessage(message, f, i),
-                            n);
+                            &reflection->GetRepeatedMessage(*message, f, i), n);
                     else
-                        allFields.push_back(ProtoField(n, message, f, i));
+                        allFields.push_back(ProtoField(
+                            n, (google::protobuf::Message*)message, f, i));
                 }
             }
             else
             {
                 if (shouldRecurse(f))
-                    recurse(reflection->MutableMessage(message, f), basename);
+                    recurse(&reflection->GetMessage(*message, f), basename);
                 else
-                    allFields.push_back(ProtoField(basename, message, f));
+                    allFields.push_back(ProtoField(
+                        basename, (google::protobuf::Message*)message, f));
             }
         }
     };
 
     recurse(message, "");
     return allFields;
+}
+
+std::string renderProtoAsConfig(const google::protobuf::Message* message)
+{
+    auto allFields = findAllProtoFields(message);
+    std::stringstream ss;
+    for (const auto& field : allFields)
+        ss << field.path() << "=" << field.get() << "\n";
+    return ss.str();
 }

@@ -8,6 +8,7 @@
 #include "lib/core/globals.h"
 #include "lib/core/utils.h"
 #include "lib/config/config.h"
+#include "lib/config/proto.h"
 #include "lib/data/disk.h"
 #include "lib/data/image.h"
 #include "lib/fluxsource/fluxsource.h"
@@ -50,7 +51,7 @@ static bool formattingSupported;
 static std::map<std::string, Datastore::Device> devices;
 static std::shared_ptr<const DiskLayout> diskLayout;
 
-static void wtRebuildConfiguration();
+static void wtRebuildConfiguration(bool useCustom);
 
 static void workerThread_cb()
 {
@@ -271,7 +272,11 @@ void Datastore::init()
                 hex::Region{startOffset, endOffset - startOffset});
         });
 
-    runOnWorkerThread(wtRebuildConfiguration);
+    runOnWorkerThread(
+        []
+        {
+            wtRebuildConfiguration(true);
+        });
 }
 
 bool Datastore::isBusy()
@@ -338,7 +343,7 @@ static void wtClearDiskData()
         });
 }
 
-void wtRebuildConfiguration()
+void wtRebuildConfiguration(bool withCustom = false)
 {
     /* Reset and apply the format configuration. */
 
@@ -392,26 +397,10 @@ void wtRebuildConfiguration()
 
     /* Custom settings. */
 
-    auto customSettings = readSettingFromUiThread<std::string>("custom", "");
-    if (!customSettings.empty())
-    {
-        for (auto setting : split(customSettings, '\n'))
-        {
-            setting = trimWhitespace(setting);
-            if (setting.size() == 0)
-                continue;
-            if (setting[0] == '#')
-                continue;
-
-            auto equals = setting.find('=');
-            if (equals == std::string::npos)
-                error("Malformed setting line '{}'", setting);
-
-            auto key = setting.substr(0, equals);
-            auto value = setting.substr(equals + 1);
-            globalConfig().set(key, value);
-        }
-    }
+    globalConfig().applyOptionsFile(
+        readSettingFromUiThread<std::string>("systemProperties", ""));
+    globalConfig().applyOptionsFile(
+        readSettingFromUiThread<std::string>("custom", ""));
 
     /* Finalise the options. */
 
@@ -540,7 +529,7 @@ void Datastore::beginRead(bool rereadBadSectors)
 
             try
             {
-                wtRebuildConfiguration();
+                wtRebuildConfiguration(true);
                 if (!rereadBadSectors)
                     wtClearDiskData();
 
@@ -576,7 +565,7 @@ void Datastore::beginWrite()
 
             try
             {
-                wtRebuildConfiguration();
+                wtRebuildConfiguration(true);
                 wtWaitForUiThreadToCatchUp();
 
                 auto fluxSinkFactory = FluxSinkFactory::create(globalConfig());
@@ -642,7 +631,7 @@ void Datastore::reset()
 
             try
             {
-                wtRebuildConfiguration();
+                wtRebuildConfiguration(false);
                 wtClearDiskData();
                 wtWaitForUiThreadToCatchUp();
             }
@@ -682,7 +671,7 @@ void Datastore::writeImage(const std::fs::path& path)
 
             try
             {
-                wtRebuildConfiguration();
+                wtRebuildConfiguration(true);
                 wtWaitForUiThreadToCatchUp();
                 globalConfig().setImageWriter(path.string());
                 ImageWriter::create(globalConfig())
@@ -708,11 +697,23 @@ void Datastore::readImage(const std::fs::path& path)
 
             try
             {
-                wtRebuildConfiguration();
+                wtRebuildConfiguration(true);
                 wtWaitForUiThreadToCatchUp();
                 globalConfig().setImageReader(path.string());
-                std::shared_ptr<Image> image =
-                    ImageReader::create(globalConfig())->readImage();
+                auto imageReader = ImageReader::create(globalConfig());
+                std::shared_ptr<Image> image = imageReader->readImage();
+
+                const auto& extraConfig = imageReader->getExtraConfig();
+                auto customConfig = renderProtoAsConfig(&extraConfig);
+
+                /* Update the setting, and then rebuild the config again as it
+                 * will have changed. */
+
+                wtRunSynchronouslyOnUiThread((std::function<void()>)[=] {
+                    Events::SetSystemConfig::post(customConfig);
+                });
+                wtRebuildConfiguration(true);
+                wtWaitForUiThreadToCatchUp();
 
                 auto disk = wtMakeDiskDataFromImage(image);
                 hex::TaskManager::doLater(
@@ -741,7 +742,7 @@ void Datastore::writeFluxFile(const std::fs::path& path)
 
             try
             {
-                wtRebuildConfiguration();
+                wtRebuildConfiguration(true);
                 wtWaitForUiThreadToCatchUp();
 
                 if (!disk || !disk->image)
@@ -777,7 +778,7 @@ void Datastore::createBlankImage()
 
             try
             {
-                wtRebuildConfiguration();
+                wtRebuildConfiguration(false);
                 wtClearDiskData();
                 wtWaitForUiThreadToCatchUp();
 
@@ -794,6 +795,7 @@ void Datastore::createBlankImage()
                 hex::TaskManager::doLater(
                     [=]
                     {
+                        Events::SetSystemConfig::post("");
                         ::disk = disk;
                     });
             }

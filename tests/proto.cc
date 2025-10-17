@@ -226,6 +226,49 @@ static void test_findallfields(void)
             "u64"}));
 }
 
+static void test_rendering(void)
+{
+    std::string s = R"M(
+		i64: -1
+		i32: -2
+		u64: 3
+		u32: 4
+		d: 5.5
+		f: 6.7
+		m {
+			s: "string"
+		}
+		r {
+			s: "val2"
+		}
+		r {
+			s: "val3"
+		}
+		secondoption {
+			s: "2"
+		}
+	)M";
+
+    TestProto proto;
+    if (!google::protobuf::TextFormat::MergeFromString(cleanup(s), &proto))
+        error("couldn't load test proto");
+
+    auto config = renderProtoAsConfig(&proto);
+
+    AssertThat(cleanup(config), Equals(cleanup(R"M(
+            i64=-1
+            i32=-2
+            u64=3
+            u32=4
+            d=5.5
+            m.s=string
+            r[0].s=val2
+            r[1].s=val3
+            secondoption.s=2
+            f=6.7
+            )M")));
+}
+
 int main(int argc, const char* argv[])
 {
     try
@@ -237,6 +280,7 @@ int main(int argc, const char* argv[])
         test_fields();
         test_options();
         test_findallfields();
+        test_rendering();
     }
     catch (const ErrorException& e)
     {

@@ -111,6 +111,8 @@ public:
             }
         }
 
+        _extraConfig.mutable_layout()->add_layoutdata()->set_sector_size(524);
+
         image->setGeometry({.numCylinders = numCylinders,
             .numHeads = numHeads,
             .numSectors = 12,

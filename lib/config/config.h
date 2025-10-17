@@ -142,6 +142,7 @@ public:
     bool isOptionValid(const OptionProto& option);
     void applyOption(const OptionInfo& optionInfo);
     bool applyOption(const std::string& name, const std::string value = "");
+    void applyOptionsFile(const std::string& data);
     void applyDefaultOptions();
     void clearOptions();
 

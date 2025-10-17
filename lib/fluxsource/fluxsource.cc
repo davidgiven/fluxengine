@@ -11,9 +11,7 @@ std::unique_ptr<FluxSource> FluxSource::create(Config& config)
 {
     if (!config.hasFluxSource())
         error("no flux source configured");
-    auto fluxSource = create(config->flux_source());
-    globalConfig().base()->MergeFrom(fluxSource->getExtraConfig());
-    return fluxSource;
+    return create(config->flux_source());
 }
 
 std::unique_ptr<FluxSource> FluxSource::create(const FluxSourceProto& config)

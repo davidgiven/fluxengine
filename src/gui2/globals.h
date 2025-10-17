@@ -39,6 +39,7 @@ namespace Events
     EVENT_DEF(DiskActivityNotification, DiskActivityType, unsigned, unsigned);
     EVENT_DEF(OperationStart, std::string);
     EVENT_DEF(OperationStop, OperationState);
+    EVENT_DEF(SetSystemConfig, std::string);
 }
 
 #define DEFER(_stmt) \
