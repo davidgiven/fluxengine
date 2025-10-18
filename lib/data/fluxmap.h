@@ -4,6 +4,7 @@
 #include "lib/core/bytes.h"
 #include "protocol.h"
 #include "fmt/format.h"
+#include <mutex>
 
 class RawBits;
 
