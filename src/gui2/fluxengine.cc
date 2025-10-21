@@ -16,6 +16,7 @@
 #include "controlpanelview.h"
 #include "logview.h"
 #include "visualiserview.h"
+#include "exerciserview.h"
 #include "diskprovider.h"
 #include "datastore.h"
 
@@ -65,6 +66,18 @@ IMHEX_PLUGIN_SETUP("FluxEngine", "David Given", "FluxEngine integration")
             hex::WorkspaceManager::switchWorkspace(currentWorkspaceName);
         });
 
+    hex::ContentRegistry::UserInterface::addMenuItem(
+        {"hex.builtin.menu.extras", "fluxengine.menu.tools.exerciser"},
+        ICON_TA_TOOLS,
+        2500,
+        hex::Shortcut::None,
+        []
+        {
+            hex::ContentRegistry::Views::getViewByName(
+                "fluxengine.view.exerciser.name")
+                ->getWindowOpenState() = true;
+        });
+
     hex::ContentRegistry::Provider::add<DiskProvider>();
 
     hex::ContentRegistry::Views::add<ConfigView>();
@@ -74,6 +87,7 @@ IMHEX_PLUGIN_SETUP("FluxEngine", "David Given", "FluxEngine integration")
     hex::ContentRegistry::Views::add<PhysicalView>();
     hex::ContentRegistry::Views::add<SummaryView>();
     hex::ContentRegistry::Views::add<VisualiserView>();
+    hex::ContentRegistry::Views::add<ExerciserView>();
 
     Datastore::init();
 }

@@ -510,6 +510,8 @@ plugin(
         "./controlpanelview.h",
         "./datastore.cc",
         "./datastore.h",
+        "./exerciserview.cc",
+        "./exerciserview.h",
         "./diskprovider.cc",
         "./diskprovider.h",
         "./fluxengine.cc",
