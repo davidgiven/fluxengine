@@ -35,7 +35,7 @@
 
 using hex::operator""_lang;
 
-static std::shared_ptr<const Disk> disk;
+static std::shared_ptr<const Disk> disk = std::make_shared<Disk>();
 static std::shared_ptr<Image> wtImage;
 
 static std::deque<std::function<void()>> pendingTasks;

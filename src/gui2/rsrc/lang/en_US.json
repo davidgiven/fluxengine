@@ -33,13 +33,13 @@
     "fluxengine.view.physical.name": "FluxEngine physical sector map",
 
     "fluxengine.view.controlpanel.name": "FluxEngine controls",
-    "fluxengine.view.controlpanel.readDevice": "Read",
-    "fluxengine.view.controlpanel.writeDevice": "Write",
+    "fluxengine.view.controlpanel.readDevice": "Read from device",
+    "fluxengine.view.controlpanel.writeDevice": "Write to device",
     "fluxengine.view.controlpanel.writeFlux": "Write flux file",
     "fluxengine.view.controlpanel.readImage": "Load disk image",
     "fluxengine.view.controlpanel.writeImage": "Save disk image",
     "fluxengine.view.controlpanel.rereadBad": "Re-read bad tracks",
-    "fluxengine.view.controlpanel.createBlank": "Empty filesystem",
+    "fluxengine.view.controlpanel.createBlank": "Make empty image",
     "fluxengine.view.controlpanel.stop": "Stop",
 
     "fluxengine.view.log.name": "FluxEngine log viewer",
@@ -58,5 +58,8 @@
     "fluxengine.view.status.blankFilesystem": "Creating blank filesystem",
 
     "fluxengine.messages.writingFluxToFile": "The current configuration is to write to a flux file rather than to hardware. Is this what you intended?",
+    
+    "fluxengine.menu.name": "Disk",
+    "fluxengine.menu.disk.exerciser": "Disk exerciser",
     "fluxengine.menu.workspace.reset": "Reset workspace"
 }

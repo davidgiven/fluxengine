@@ -5,6 +5,7 @@
 #include <hex/api/content_registry/provider.hpp>
 #include <hex/api/workspace_manager.hpp>
 #include <hex/helpers/default_paths.hpp>
+#include <hex/helpers/fs.hpp>
 #include <fonts/vscode_icons.hpp>
 #include <fonts/tabler_icons.hpp>
 #include <romfs/romfs.hpp>
@@ -66,10 +67,106 @@ IMHEX_PLUGIN_SETUP("FluxEngine", "David Given", "FluxEngine integration")
             hex::WorkspaceManager::switchWorkspace(currentWorkspaceName);
         });
 
+    hex::ContentRegistry::UserInterface::registerMainMenuItem(
+        "fluxengine.menu.name", 4999);
+
+    auto isReady = []
+    {
+        return !Datastore::isBusy();
+    };
+
+    auto isReadyAndHasImage = []
+    {
+        return !Datastore::isBusy() && Datastore::getDisk()->image;
+    };
+
     hex::ContentRegistry::UserInterface::addMenuItem(
-        {"hex.builtin.menu.extras", "fluxengine.menu.tools.exerciser"},
+        {"fluxengine.menu.name", "fluxengine.view.controlpanel.readDevice"},
+        ICON_TA_DEVICE_FLOPPY,
+        1000,
+        hex::Shortcut::None,
+        []
+        {
+            Datastore::beginRead(false);
+        },
+        isReady);
+
+    hex::ContentRegistry::UserInterface::addMenuItem(
+        {"fluxengine.menu.name", "fluxengine.view.controlpanel.rereadBad"},
+        ICON_TA_REPEAT,
+        1100,
+        hex::Shortcut::None,
+        []
+        {
+            Datastore::beginRead(true);
+        },
+        isReadyAndHasImage);
+
+    hex::ContentRegistry::UserInterface::addMenuItem(
+        {"fluxengine.menu.name", "fluxengine.view.controlpanel.readImage"},
+        ICON_VS_FOLDER_OPENED,
+        1200,
+        hex::Shortcut::None,
+        []
+        {
+            hex::fs::openFileBrowser(
+                hex::fs::DialogMode::Open, {}, Datastore::readImage);
+        },
+        isReady);
+
+    hex::ContentRegistry::UserInterface::addMenuItem(
+        {"fluxengine.menu.name", "fluxengine.view.controlpanel.createBlank"},
+        ICON_VS_FOLDER_OPENED,
+        1250,
+        hex::Shortcut::None,
+        Datastore::createBlankImage,
+        []
+        {
+            return !Datastore::isBusy() && Datastore::canFormat();
+        });
+
+    hex::ContentRegistry::UserInterface::addMenuItemSeparator(
+        {"fluxengine.menu.name"}, 1300);
+
+    hex::ContentRegistry::UserInterface::addMenuItem(
+        {"fluxengine.menu.name", "fluxengine.view.controlpanel.writeDevice"},
+        ICON_TA_DEVICE_FLOPPY,
+        1400,
+        hex::Shortcut::None,
+        Datastore::beginWrite,
+        isReadyAndHasImage);
+
+    hex::ContentRegistry::UserInterface::addMenuItem(
+        {"fluxengine.menu.name", "fluxengine.view.controlpanel.writeFlux"},
+        ICON_TA_DOWNLOAD,
+        1500,
+        hex::Shortcut::None,
+        []
+        {
+            hex::fs::openFileBrowser(
+                hex::fs::DialogMode::Save, {}, Datastore::writeFluxFile);
+        },
+        isReady);
+
+    hex::ContentRegistry::UserInterface::addMenuItem(
+        {"fluxengine.menu.name", "fluxengine.view.controlpanel.writeImage"},
+        ICON_VS_SAVE_ALL,
+        1600,
+        hex::Shortcut::None,
+        []
+        {
+            hex::fs::openFileBrowser(
+                hex::fs::DialogMode::Save, {}, Datastore::writeImage);
+        },
+        isReadyAndHasImage);
+
+    hex::ContentRegistry::UserInterface::addMenuItemSeparator(
+        {"fluxengine.menu.name"}, 9999);
+
+    hex::ContentRegistry::UserInterface::addMenuItem(
+        {"fluxengine.menu.name", "fluxengine.menu.disk.exerciser"},
         ICON_TA_TOOLS,
-        2500,
+        10000,
         hex::Shortcut::None,
         []
         {
