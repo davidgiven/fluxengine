@@ -47,6 +47,13 @@
     "fluxengine.view.visualiser.name": "FluxEngine disk visualiser",
     "fluxengine.view.visualiser.missingData": "Partial visualisation",
 
+    "fluxengine.view.exerciser.name": "FluxEngine disk exerciser",
+    "fluxengine.view.exerciser.drive": "Drive",
+    "fluxengine.view.exerciser.cylinder": "Cylinder",
+    "fluxengine.view.exerciser.nudgeDown": "Nudge down",
+    "fluxengine.view.exerciser.reset": "Reset",
+    "fluxengine.view.exerciser.nudgeUp": "Nudge up",
+
     "fluxengine.view.status.runningSuffix": "...",
     "fluxengine.view.status.succeededSuffix": "... done",
     "fluxengine.view.status.failedSuffix": "... failed",
