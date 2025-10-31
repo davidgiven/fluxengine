@@ -4,11 +4,9 @@ from os.path import join, abspath, dirname, relpath
 from build.pkg import has_package
 
 G.setdefault("PROTOC", "protoc")
-G.setdefault("PROTOC_SEPARATOR", ":")
 G.setdefault("HOSTPROTOC", "hostprotoc")
 
 assert has_package("protobuf"), "required package 'protobuf' not installed"
-
 
 
 def _getprotodeps(deps):
@@ -21,7 +19,7 @@ def _getprotodeps(deps):
 @Rule
 def proto(self, name, srcs: Targets = [], deps: Targets = []):
     protodeps = _getprotodeps(deps)
-    descriptorlist = (G.PROTOC_SEPARATOR).join(
+    descriptorlist = ":".join(
         [
             relpath(f, start=self.dir)
             for f in filenamesmatchingof(protodeps, "*.descriptor")
@@ -48,7 +46,7 @@ def proto(self, name, srcs: Targets = [], deps: Targets = []):
                             f"--descriptor_set_out={self.localname}.descriptor",
                         ]
                         + (
-                            [f"--descriptor_set_in='{descriptorlist}'"]
+                            [f"--descriptor_set_in={descriptorlist}"]
                             if descriptorlist
                             else []
                         )
@@ -91,7 +89,7 @@ def protocc(self, name, srcs: Targets = [], deps: Targets = []):
         outs += ["=" + cc, "=" + h]
 
     protodeps = _getprotodeps(deps + srcs)
-    descriptorlist = G.PROTOC_SEPARATOR.join(
+    descriptorlist = ":".join(
         [
             relpath(f, start=self.dir)
             for f in filenamesmatchingof(protodeps, "*.descriptor")
@@ -112,7 +110,7 @@ def protocc(self, name, srcs: Targets = [], deps: Targets = []):
                         "$(PROTOC)",
                         "--proto_path=.",
                         "--cpp_out=.",
-                        f"--descriptor_set_in='{descriptorlist}'",
+                        f"--descriptor_set_in={descriptorlist}",
                     ]
                     + protos
                 )

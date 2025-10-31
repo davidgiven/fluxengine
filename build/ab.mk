@@ -117,6 +117,7 @@ $(OBJ)/build.ninja $(OBJ)/build.targets &:
 		-o $(OBJ) build.py \
 		-v $(OBJ)/vars.txt \
 		|| (rm -f $@ && false)
+	$(hide) cp $(OBJ)/compile_commands.json compile_commands.json
 
 include $(OBJ)/build.targets
 .PHONY: $(ninja-targets)

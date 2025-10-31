@@ -12,6 +12,7 @@ import hashlib
 import importlib
 import importlib.util
 import inspect
+import json
 import os
 import re
 import string
@@ -27,6 +28,7 @@ unmaterialisedTargets = {}  # dict, not set, to get consistent ordering
 materialisingStack = []
 defaultGlobals = {}
 outputTargets = set()
+commandsDb = []
 
 RE_FORMAT_SPEC = re.compile(
     r"(?:(?P<fill>[\s\S])?(?P<align>[<>=^]))?"
@@ -540,6 +542,15 @@ def shell(*args):
     shellFp.write(s)
 
 
+def add_commanddb_entry(commands, file):
+    global commandsDb
+    commandsDb += [{
+        "directory": os.getcwd(),
+                "command": (" && ".join(commands)),
+                "file": file
+    }
+        ]
+
 def emit_rule(self, ins, outs, cmds=[], label=None):
     name = self.name
     fins = [self.templateexpand(f) for f in set(filenamesof(ins))]
@@ -562,7 +573,10 @@ def emit_rule(self, ins, outs, cmds=[], label=None):
             sandbox = join(self.dir, "sandbox")
             emit(f"rm -rf {sandbox}", into=rule)
             emit(
-                f"{G.PYTHON} build/_sandbox.py --link -s", sandbox, *fins, into=rule
+                f"{G.PYTHON} build/_sandbox.py --link -s",
+                sandbox,
+                *fins,
+                into=rule,
             )
             for c in cmds:
                 emit(f"(cd {sandbox} &&", c, ")", into=rule)
@@ -596,7 +610,6 @@ def emit_rule(self, ins, outs, cmds=[], label=None):
         if label:
             emit(" description=", label)
         emit("build", name, ":phony", *fouts)
-
     else:
         assert len(cmds) == 0, "rules with no outputs cannot have commands"
         emit("build", name, ":phony", *fins)
@@ -612,6 +625,7 @@ def simplerule(
     outs: Targets = [],
     deps: Targets = [],
     commands=[],
+    add_to_commanddb=False,
     label="RULE",
 ):
     self.ins = ins
@@ -627,8 +641,22 @@ def simplerule(
 
         cs = [("mkdir -p %s" % dir) for dir in dirs]
 
+    coreCommands = []
     for c in commands:
-        cs += [self.templateexpand(c)]
+        coreCommands += [self.templateexpand(c)]
+    cs += coreCommands
+
+    if add_to_commanddb:
+        infiles = filenamesof(ins)
+        if len(infiles) > 0:
+            global commandsDb
+            commandsDb += [
+                {
+                    "directory": os.getcwd(),
+                    "command": (" && ".join(coreCommands)),
+                    "file": infiles[0],
+                }
+            ]
 
     emit_rule(
         self=self,
@@ -702,7 +730,7 @@ def main():
             G.setdefault(name.strip(), value.strip())
     G.setdefault("AB_SANDBOX", "yes")
 
-    global ninjaFp, shellFp, outputdir
+    global ninjaFp, shellFp, jsonFp, outputdir
     outputdir = args.outputdir
     G.setdefault("OBJ", outputdir)
     ninjaFp = open(outputdir + "/build.ninja", "wt")
@@ -725,6 +753,9 @@ def main():
     with open(outputdir + "/build.targets", "wt") as fp:
         fp.write("ninja-targets =")
         fp.write(substituteGlobalVariables(" ".join(outputTargets)))
+
+    with open(outputdir + "/compile_commands.json", "wt") as fp:
+        json.dump(commandsDb, fp)
 
 
 main()
