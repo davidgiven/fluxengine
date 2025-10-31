@@ -313,24 +313,6 @@ DiskLayout::DiskLayout(unsigned numCylinders,
 {
 }
 
-static DiskLayout::LayoutBounds getBounds(std::ranges::view auto keys)
-{
-    DiskLayout::LayoutBounds r{.minCylinder = INT_MAX,
-        .maxCylinder = INT_MIN,
-        .minHead = INT_MAX,
-        .maxHead = INT_MIN};
-
-    for (const auto& ch : keys)
-    {
-        r.minCylinder = std::min<int>(r.minCylinder, ch.cylinder);
-        r.maxCylinder = std::max<int>(r.maxCylinder, ch.cylinder);
-        r.minHead = std::min<int>(r.minHead, ch.head);
-        r.maxHead = std::max<int>(r.maxHead, ch.head);
-    }
-
-    return r;
-}
-
 DiskLayout::LayoutBounds DiskLayout::getPhysicalBounds() const
 {
     return getBounds(std::views::keys(layoutByPhysicalLocation));

@@ -19,7 +19,8 @@ namespace
     inline constexpr pair_to_range_t pair_to_range{};
 }
 
-Disk::Disk() {}
+Disk::Disk():
+image(std::make_shared<Image>()){}
 
 Disk::Disk(
     const std::shared_ptr<const Image>& image, const DiskLayout& diskLayout):
