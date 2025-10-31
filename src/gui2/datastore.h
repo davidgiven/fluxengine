@@ -33,7 +33,6 @@ public:
     static std::shared_ptr<const DiskLayout> getDiskLayout();
     static void onLogMessage(const AnyLogMessage& message);
 
-    /* Begins a transation. Rebuilds the configuration. */
     static void reset();
     static void beginRead(bool rereadBadSectors);
     static void beginWrite();

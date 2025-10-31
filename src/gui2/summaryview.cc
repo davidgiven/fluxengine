@@ -141,6 +141,8 @@ static void drawPhysicalMap(unsigned minPhysicalCylinder,
 {
     int numPhysicalCylinders = maxPhysicalCylinder - minPhysicalCylinder + 1;
     int numPhysicalHeads = maxPhysicalHead - minPhysicalHead + 1;
+    if (!numPhysicalCylinders || !numPhysicalHeads)
+        return;
 
     auto originalFontSize = ImGui::GetFontSize();
     if (ImGui::BeginTable("physicalMap",
@@ -225,6 +227,8 @@ static void drawLogicalMap(unsigned minPhysicalCylinder,
     auto originalFontSize = ImGui::GetFontSize();
     int numPhysicalCylinders = maxPhysicalCylinder - minPhysicalCylinder + 1;
     int numPhysicalHeads = maxPhysicalHead - minPhysicalHead + 1;
+    if (!numPhysicalCylinders || !numPhysicalHeads)
+        return;
 
     if (ImGui::BeginTable("logicalMap",
             numPhysicalCylinders + 1,
@@ -334,8 +338,6 @@ void SummaryView::drawContent()
         maxPhysicalCylinder,
         minPhysicalHead,
         maxPhysicalHead] = diskLayout->getPhysicalBounds();
-    int numPhysicalCylinders = maxPhysicalCylinder - minPhysicalCylinder + 1;
-    int numPhysicalHeads = maxPhysicalHead - minPhysicalHead + 1;
 
     if (disk)
     {

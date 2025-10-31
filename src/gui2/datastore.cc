@@ -339,7 +339,7 @@ static void wtClearDiskData()
         []
         {
             ::wtImage = nullptr;
-            ::disk = nullptr;
+            ::disk = std::make_shared<Disk>();
         });
 }
 

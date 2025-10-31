@@ -10,6 +10,11 @@ public:
 
     void drawContent() override;
 
+protected:
+    void onOpen() override;
+    void onClose() override;
+
+public:
     [[nodiscard]] bool shouldDraw() const override
     {
         return true;
@@ -18,5 +23,14 @@ public:
     {
         return false;
     }
-};
 
+    ImVec2 getMinSize() const override
+    {
+        return {800, 100};
+    }
+
+    int getWindowFlags() const override
+    {
+        return ImGuiWindowFlags_AlwaysAutoResize;
+    }
+};
