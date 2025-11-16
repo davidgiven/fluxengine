@@ -115,7 +115,7 @@ jobs:
 
     - name: run
       run: |
-        make -C fluxengine BUILDTYPE=windows
+        make -C fluxengine BUILDTYPE=windows AB_SANDBOX=no
 
     - name: nsis
       run: |
