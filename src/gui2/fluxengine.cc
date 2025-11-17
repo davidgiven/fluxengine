@@ -44,7 +44,7 @@ IMHEX_PLUGIN_SETUP("FluxEngine", "David Given", "FluxEngine integration")
                 for (const auto& imhexPath : hex::paths::getDataPaths(false))
                 {
                     const auto path =
-                        imhexPath / std::fs::relative(romfsPath, extractFolder);
+                        imhexPath / std::fs::relative(romfsPath, "auto_extract");
                     hex::log::info("Extracting {} to {}",
                         romfsPath.string(),
                         path.string());
