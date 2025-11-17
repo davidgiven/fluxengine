@@ -2,12 +2,14 @@ from build.ab import Rule, Targets, emit, simplerule, filenamesof, G
 from build.utils import filenamesmatchingof, collectattrs
 from os.path import join, abspath, dirname, relpath
 from build.pkg import has_package
+import platform
 
 G.setdefault("PROTOC", "protoc")
 G.setdefault("HOSTPROTOC", "hostprotoc")
 
 assert has_package("protobuf"), "required package 'protobuf' not installed"
 
+PROTO_SEPARATOR = ";" if (platform.system() == "Windows") else ":"
 
 def _getprotodeps(deps):
     r = set()
@@ -19,7 +21,7 @@ def _getprotodeps(deps):
 @Rule
 def proto(self, name, srcs: Targets = [], deps: Targets = []):
     protodeps = _getprotodeps(deps)
-    descriptorlist = ":".join(
+    descriptorlist = PROTO_SEPARATOR.join(
         [
             relpath(f, start=self.dir)
             for f in filenamesmatchingof(protodeps, "*.descriptor")
@@ -89,7 +91,7 @@ def protocc(self, name, srcs: Targets = [], deps: Targets = []):
         outs += ["=" + cc, "=" + h]
 
     protodeps = _getprotodeps(deps + srcs)
-    descriptorlist = ":".join(
+    descriptorlist = PROTO_SEPARATOR.join(
         [
             relpath(f, start=self.dir)
             for f in filenamesmatchingof(protodeps, "*.descriptor")
@@ -142,7 +144,7 @@ def protojava(self, name, srcs: Targets = [], deps: Targets = []):
         protos += [f]
         srcs += [f]
 
-    descriptorlist = ":".join(
+    descriptorlist = PROTO_SEPARATOR.join(
         [abspath(f) for f in filenamesmatchingof(srcs + deps, "*.descriptor")]
     )
 
