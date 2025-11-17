@@ -48,7 +48,7 @@ def proto(self, name, srcs: Targets = [], deps: Targets = []):
                             f"--descriptor_set_out={self.localname}.descriptor",
                         ]
                         + (
-                            [f"--descriptor_set_in={descriptorlist}"]
+                            [f"--descriptor_set_in='{descriptorlist}'"]
                             if descriptorlist
                             else []
                         )
@@ -112,7 +112,7 @@ def protocc(self, name, srcs: Targets = [], deps: Targets = []):
                         "$(PROTOC)",
                         "--proto_path=.",
                         "--cpp_out=.",
-                        f"--descriptor_set_in={descriptorlist}",
+                        f"--descriptor_set_in='{descriptorlist}'",
                     ]
                     + protos
                 )
@@ -163,7 +163,7 @@ def protojava(self, name, srcs: Targets = [], deps: Targets = []):
                         "$(PROTOC)",
                         "--proto_path=.",
                         "--java_out=.",
-                        f"--descriptor_set_in={descriptorlist}",
+                        f"--descriptor_set_in='{descriptorlist}'",
                     ]
                     + protos
                 )
