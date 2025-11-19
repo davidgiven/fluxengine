@@ -4,11 +4,11 @@ FluxEngine
 (If you're reading this on GitHub, the formatting's a bit messed up. [Try the
 version on cowlark.com instead.](http://cowlark.com/fluxengine/))
 
-**Breaking news!** As of 2024-10-01, the FluxEngine client software works
-(to a point) with [Applesauce](doc/applesauce.md) hardware.
+**Breaking news!** As of 2025-11-19, there's a new FluxEngine GUI, based on
+the excellent [ImHex](https://imhex.werwolv.net/), which is substantially better (i.e. mostly works) than the old one!
 
 <div style="text-align: center">
-<a href="doc/screenshot.jpg"><img src="doc/screenshot.jpg" style="width:60%" alt="screenshot of the GUI in action"></a>
+<a href="doc/screenshot.png"><img src="doc/screenshot.png" style="width:60%" alt="screenshot of the GUI in action"></a>
 </div>
 
 What?

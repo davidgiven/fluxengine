@@ -15,7 +15,7 @@ If possible, try using the GUI, which should provide simplified access for most
 common operations.
 
 <div style="text-align: center">
-<a href="screenshot-details.png"><img src="screenshot-details.png" style="width:60%" alt="screenshot of the GUI in action"></a>
+<a href="screenshot.png"><img src="screenshot.png" style="width:60%" alt="screenshot of the GUI in action"></a>
 </div>
 
 ### Core concepts
