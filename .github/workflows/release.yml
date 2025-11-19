@@ -105,7 +105,10 @@ jobs:
         brew upgrade
 
     - name: make
-      run: gmake
+      run: |
+        gmake
+        mv fluxengine/FluxEngine.pkg FluxEngine-${{ runner.arch }}.pkg
+        mv fluxengine/FluxEngine.app.zip FluxEngine-${{ runner.arch }}.app.zip
 
     - name: tag
       uses: EndBug/latest-tag@latest
