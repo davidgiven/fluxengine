@@ -18,6 +18,9 @@ common operations.
 <a href="screenshot.png"><img src="screenshot.png" style="width:60%" alt="screenshot of the GUI in action"></a>
 </div>
 
+Precompiled binaries for Windows and OSX can be
+found [at the downloads page](https://github.com/davidgiven/fluxengine/releases/tag/dev).
+
 ### Core concepts
 
 FluxEngine's job is to read magnetic data (called _flux_) off a disk, decode
