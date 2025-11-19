@@ -167,7 +167,7 @@ public:
             error("IMD: cannot open output file");
         unsigned numSectorsinTrack = 0;
 
-        numHeads = geometry.numSides;
+        numHeads = geometry.numHeads;
         numSectors = geometry.numSectors;
         numBytes = geometry.sectorSize;
 
@@ -221,7 +221,7 @@ public:
         bool blnOptionalHeadMap = false;
 
         /* Write the actual sector data. */
-        for (int track = 0; track < geometry.numTracks; track++)
+        for (int track = 0; track < geometry.numCylinders; track++)
         {
             for (int head = 0; head < numHeads; head++)
             {
@@ -307,18 +307,12 @@ public:
                         sector_skew.push_back(
                             (sectorId + sectorIdBase) +
                             '0'); // fill sectorskew start with 1
-                        if ((sector->physicalTrack) !=
-                            (sector->logicalTrack)) // different physicaltrack
-                                                    // fromn logicaltrack
-                        {
-                            blnOptionalCylinderMap = true;
-                        }
-                        if (sector->logicalSide !=
-                            sector->physicalSide) // different physicalside
-                                                  // fromn logicalside
-                        {
+                        if (sector->physicalLocation.has_value() &&
+                            ((sector->physicalLocation->cylinder !=
+                                 sector->logicalCylinder) ||
+                                (sector->physicalLocation->head !=
+                                    sector->logicalHead)))
                             blnOptionalHeadMap = true;
-                        }
                     }
                 }
                 bw.write_8(header.ModeValue); // 1 byte ModeValue
@@ -358,8 +352,8 @@ public:
                     {
                         // const auto& sector = sectors.get(track, head,
                         // sectorId);
-                        bw.write_8(sector->logicalTrack); // 1 byte logical
-                                                          // track
+                        bw.write_8(sector->logicalCylinder); // 1 byte logical
+                                                             // track
                     }
                 }
 
@@ -376,7 +370,7 @@ public:
                     {
                         //	const auto& sector = sectors.get(track, head,
                         // sectorId);
-                        bw.write_8(sector->logicalSide); // 1 byte logical side
+                        bw.write_8(sector->logicalHead); // 1 byte logical side
                     }
                 }
                 // Now read data and write to file
@@ -519,7 +513,7 @@ public:
         imagenew.writeTo(outputFile);
         log("IMD: Written {} tracks, {} heads, {} sectors, {} bytes per "
             "sector, {} kB total",
-            geometry.numTracks,
+            geometry.numCylinders,
             numHeads,
             numSectors,
             numBytes,

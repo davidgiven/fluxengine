@@ -10,8 +10,10 @@
 class ImageSectorInterface : public SectorInterface
 {
 public:
-    ImageSectorInterface(std::shared_ptr<ImageReader> reader,
-        std::shared_ptr<ImageWriter> writer):
+    ImageSectorInterface(const std::shared_ptr<const DiskLayout>& diskLayout,
+        const std::shared_ptr<ImageReader>& reader,
+        const std::shared_ptr<ImageWriter>& writer):
+        _diskLayout(diskLayout),
         _reader(reader),
         _writer(writer)
     {
@@ -55,20 +57,23 @@ public:
         else
         {
             _image = std::make_shared<Image>();
-            _image->createBlankImage();
+            _image->addMissingSectors(*_diskLayout);
         }
         _changed = false;
     }
 
 private:
     std::shared_ptr<Image> _image;
+    std::shared_ptr<const DiskLayout> _diskLayout;
     std::shared_ptr<ImageReader> _reader;
     std::shared_ptr<ImageWriter> _writer;
     bool _changed = false;
 };
 
 std::unique_ptr<SectorInterface> SectorInterface::createImageSectorInterface(
-    std::shared_ptr<ImageReader> reader, std::shared_ptr<ImageWriter> writer)
+    const std::shared_ptr<const DiskLayout>& diskLayout,
+    std::shared_ptr<ImageReader> reader,
+    std::shared_ptr<ImageWriter> writer)
 {
-    return std::make_unique<ImageSectorInterface>(reader, writer);
+    return std::make_unique<ImageSectorInterface>(diskLayout, reader, writer);
 }

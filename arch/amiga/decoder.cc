@@ -52,8 +52,8 @@ public:
         Bytes header = amigaDeinterleave(ptr, 4);
         Bytes recoveryinfo = amigaDeinterleave(ptr, 16);
 
-        _sector->logicalTrack = header[1] >> 1;
-        _sector->logicalSide = header[1] & 1;
+        _sector->logicalCylinder = header[1] >> 1;
+        _sector->logicalHead = header[1] & 1;
         _sector->logicalSector = header[2];
 
         uint32_t wantedheaderchecksum =

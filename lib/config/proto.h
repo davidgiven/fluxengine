@@ -72,7 +72,9 @@ extern std::map<std::string, const google::protobuf::FieldDescriptor*>
 findAllPossibleProtoFields(const google::protobuf::Descriptor* descriptor);
 
 extern std::vector<ProtoField> findAllProtoFields(
-    google::protobuf::Message* message);
+    const google::protobuf::Message* message);
+extern std::string renderProtoAsConfig(
+    const google::protobuf::Message* message);
 
 template <class T>
 static inline const T parseProtoBytes(const std::string_view& bytes)

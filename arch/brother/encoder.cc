@@ -107,7 +107,7 @@ public:
     }
 
 public:
-    std::unique_ptr<Fluxmap> encode(std::shared_ptr<const TrackInfo>& trackInfo,
+    std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout& ltl,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
@@ -127,7 +127,7 @@ public:
             fillBitmapTo(bits, cursor, headerCursor, {true, false});
             write_sector_header(bits,
                 cursor,
-                sectorData->logicalTrack,
+                sectorData->logicalCylinder,
                 sectorData->logicalSector);
             fillBitmapTo(bits, cursor, dataCursor, {true, false});
             write_sector_data(bits, cursor, sectorData->data);

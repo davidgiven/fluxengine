@@ -3,36 +3,10 @@
 
 #include "lib/core/bytes.h"
 #include "lib/data/fluxmap.h"
+#include "lib/data/locations.h"
 
 class Record;
-class TrackInfo;
-
-struct LogicalLocation
-{
-    unsigned logicalTrack;
-    unsigned logicalSide;
-    unsigned logicalSector;
-
-    std::tuple<int, int, int> key() const
-    {
-        return std::make_tuple(logicalTrack, logicalSide, logicalSector);
-    }
-
-    bool operator==(const LogicalLocation& rhs) const
-    {
-        return key() == rhs.key();
-    }
-
-    bool operator!=(const LogicalLocation& rhs) const
-    {
-        return key() != rhs.key();
-    }
-
-    bool operator<(const LogicalLocation& rhs) const
-    {
-        return key() < rhs.key();
-    }
-};
+class LogicalTrackLayout;
 
 struct Sector : public LogicalLocation
 {
@@ -57,36 +31,24 @@ struct Sector : public LogicalLocation
     nanoseconds_t headerEndTime = 0;
     nanoseconds_t dataStartTime = 0;
     nanoseconds_t dataEndTime = 0;
-    unsigned physicalTrack = 0;
-    unsigned physicalSide = 0;
+    std::optional<CylinderHead> physicalLocation = {};
     Bytes data;
     std::vector<std::shared_ptr<Record>> records;
 
-    Sector() {}
-
-    Sector(std::shared_ptr<const TrackInfo>& layout, unsigned sectorId = 0);
+    Sector(const Sector& other) = default;
+    Sector& operator=(const Sector& other) = default;
 
     Sector(const LogicalLocation& location);
 
     std::tuple<int, int, int, Status> key() const
     {
         return std::make_tuple(
-            logicalTrack, logicalSide, logicalSector, status);
+            logicalCylinder, logicalHead, logicalSector, status);
     }
 
-    bool operator==(const Sector& rhs) const
+    std::strong_ordering operator<=>(const Sector& rhs) const
     {
-        return key() == rhs.key();
-    }
-
-    bool operator!=(const Sector& rhs) const
-    {
-        return key() != rhs.key();
-    }
-
-    bool operator<(const Sector& rhs) const
-    {
-        return key() < rhs.key();
+        return key() <=> rhs.key();
     }
 };
 
@@ -95,7 +57,7 @@ struct fmt::formatter<Sector::Status> : formatter<string_view>
 {
     auto format(Sector::Status status, format_context& ctx) const
     {
-        return format_to(ctx.out(), "{}", Sector::statusToString(status));
+        return fmt::format_to(ctx.out(), "{}", Sector::statusToString(status));
     }
 };
 

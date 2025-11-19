@@ -1,0 +1,72 @@
+#pragma once
+
+#include <map>
+#include <string>
+#include <hex/api/content_registry/settings.hpp>
+#include "datastore.h"
+
+struct ImVec2;
+
+using OptionsMap = std::map<std::string, std::string>;
+
+extern int maybeDisabledButton(
+    const std::string& message, const ImVec2& size, bool isDisabled);
+extern std::string shortenString(const std::string& s, size_t len);
+
+extern OptionsMap stringToOptions(const std::string& optionsString);
+extern std::string optionsToString(const OptionsMap& options);
+
+template <typename T>
+class DynamicSetting
+{
+public:
+    DynamicSetting(
+        std::string_view path, std::string_view leaf, T defaultValue = T()):
+        _key(hex::UnlocalizedString(fmt::format("{}.{}", path, leaf))),
+        _defaultValue(defaultValue),
+        _cachedValue()
+    {
+    }
+
+    operator const T&()
+    {
+        if (!_cachedValue.has_value())
+        {
+            _cachedValue =
+                std::make_optional(hex::ContentRegistry::Settings::read<T>(
+                    FLUXENGINE_CONFIG, _key, _defaultValue));
+        }
+        return *_cachedValue;
+    }
+
+    T operator=(T value)
+    {
+        if (!_cachedValue.has_value() || (*_cachedValue != value))
+        {
+            hex::ContentRegistry::Settings::write<T>(
+                FLUXENGINE_CONFIG, _key, value);
+            _cachedValue = std::make_optional(value);
+        }
+        return value;
+    }
+
+private:
+    const hex::UnlocalizedString _key;
+    const T _defaultValue;
+    std::optional<T> _cachedValue;
+};
+
+class DynamicSettingFactory
+{
+public:
+    DynamicSettingFactory(const std::string& path): _path(path) {}
+
+    template <typename T>
+    DynamicSetting<T> get(std::string_view leaf, T defaultValue = T())
+    {
+        return DynamicSetting<T>(_path, leaf, defaultValue);
+    }
+
+public:
+    std::string _path;
+};

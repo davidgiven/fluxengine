@@ -50,9 +50,10 @@ static std::string modeToString(long access)
 class AmigaFfsFilesystem : public Filesystem
 {
 public:
-    AmigaFfsFilesystem(
-        const AmigaFfsProto& config, std::shared_ptr<SectorInterface> sectors):
-        Filesystem(sectors),
+    AmigaFfsFilesystem(const AmigaFfsProto& config,
+        const std::shared_ptr<const DiskLayout>& diskLayout,
+        std::shared_ptr<SectorInterface> sectors):
+        Filesystem(diskLayout, sectors),
         _config(config)
     {
     }
@@ -91,7 +92,8 @@ public:
         dev.devType = DEVTYPE_FLOPDD;
         dev.cylinders = globalConfig()->layout().tracks();
         dev.heads = globalConfig()->layout().sides();
-        dev.sectors = Layout::getLayoutOfTrack(0, 0)->numSectors;
+        dev.sectors =
+            _diskLayout->layoutByLogicalLocation.at({0, 0})->numSectors;
         adfInitDevice(&dev, nullptr, false);
         int res = adfCreateFlop(&dev, (char*)volumeName.c_str(), 0);
         if (res != RC_OK)
@@ -469,7 +471,10 @@ static BOOL adfIsDevNative(char*)
 }
 
 std::unique_ptr<Filesystem> Filesystem::createAmigaFfsFilesystem(
-    const FilesystemProto& config, std::shared_ptr<SectorInterface> sectors)
+    const FilesystemProto& config,
+    const std::shared_ptr<const DiskLayout>& diskLayout,
+    std::shared_ptr<SectorInterface> sectors)
 {
-    return std::make_unique<AmigaFfsFilesystem>(config.amigaffs(), sectors);
+    return std::make_unique<AmigaFfsFilesystem>(
+        config.amigaffs(), diskLayout, sectors);
 }

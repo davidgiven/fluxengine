@@ -10,6 +10,7 @@
 #include <lexy_ext/report_error.hpp>
 #include "fmt/ranges.h"
 #include <ranges>
+#include <algorithm>
 
 namespace
 {

@@ -1,12 +1,14 @@
 #ifndef SECTORINTERFACE_H
 #define SECTORINTERFACE_H
 
+class Image;
 class ImageReader;
 class ImageWriter;
 class Sector;
 class FluxSource;
-class FluxSink;
+class FluxSinkFactory;
 class Decoder;
+class DiskLayout;
 class Encoder;
 
 class SectorInterface
@@ -35,12 +37,16 @@ public:
     virtual void discardChanges() {}
 
 public:
+    static std::unique_ptr<SectorInterface> createMemorySectorInterface(
+        std::shared_ptr<Image> image);
     static std::unique_ptr<SectorInterface> createImageSectorInterface(
+        const std::shared_ptr<const DiskLayout>& diskLayout,
         std::shared_ptr<ImageReader> reader,
         std::shared_ptr<ImageWriter> writer);
     static std::unique_ptr<SectorInterface> createFluxSectorInterface(
+        const std::shared_ptr<const DiskLayout>& diskLayout,
         std::shared_ptr<FluxSource> fluxSource,
-        std::shared_ptr<FluxSink> fluxSink,
+        std::shared_ptr<FluxSinkFactory> fluxSinkFactory,
         std::shared_ptr<Encoder> encoder,
         std::shared_ptr<Decoder> decoder);
 };

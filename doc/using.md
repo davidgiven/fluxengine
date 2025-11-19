@@ -15,8 +15,11 @@ If possible, try using the GUI, which should provide simplified access for most
 common operations.
 
 <div style="text-align: center">
-<a href="screenshot-details.png"><img src="screenshot-details.png" style="width:60%" alt="screenshot of the GUI in action"></a>
+<a href="screenshot.png"><img src="screenshot.png" style="width:60%" alt="screenshot of the GUI in action"></a>
 </div>
+
+Precompiled binaries for Windows and OSX can be
+found [at the downloads page](https://github.com/davidgiven/fluxengine/releases/tag/dev).
 
 ### Core concepts
 
@@ -385,9 +388,8 @@ disks, and have different magnetic properties. 3.5" drives can usually
 autodetect what kind of medium is inserted into the drive based on the hole in
 the disk casing, but 5.25" drives can't. As a result, you need to explicitly
 tell FluxEngine on the command line whether you're using a high density disk or
-not with the `--drive.high_density` configuration setting.
-**If you don't do this, your disks may not read correctly and will _certainly_
-fail to write correctly.**
+not with the `--hd` configuration setting.  **If you don't do this, your disks
+may not read correctly and will _certainly_ fail to write correctly.**
 
 You can distinguish high density 5.25" floppies from the presence of a
 traction ring around the hole in the middle of the disk; if the ring is not

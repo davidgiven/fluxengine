@@ -6,15 +6,16 @@
 #include "lib/data/fluxmapreader.h"
 #include "lib/decoders/fluxdecoder.h"
 
-class Sector;
-class Fluxmap;
-class FluxMatcher;
-class FluxmapReader;
-class RawBits;
-class DecoderProto;
 class Config;
+class DecoderProto;
+class FluxMatcher;
+class Fluxmap;
+class FluxmapReader;
+class PhysicalTrackLayout;
+class RawBits;
+class Sector;
 
-#include "lib/data/flux.h"
+#include "lib/data/disk.h"
 
 extern void setDecoderManualClockRate(double clockrate_us);
 
@@ -52,9 +53,9 @@ public:
     };
 
 public:
-    std::shared_ptr<TrackDataFlux> decodeToSectors(
+    std::shared_ptr<Track> decodeToSectors(
         std::shared_ptr<const Fluxmap> fluxmap,
-        std::shared_ptr<const TrackInfo>& trackInfo);
+        const std::shared_ptr<const PhysicalTrackLayout>& ptl);
 
     void pushRecord(
         const Fluxmap::Position& start, const Fluxmap::Position& end);
@@ -104,7 +105,8 @@ protected:
     virtual void decodeDataRecord() {};
 
     const DecoderProto& _config;
-    std::shared_ptr<TrackDataFlux> _trackdata;
+    std::shared_ptr<const LogicalTrackLayout> _ltl;
+    std::shared_ptr<Track> _trackdata;
     std::shared_ptr<Sector> _sector;
     std::unique_ptr<FluxDecoder> _decoder;
     std::vector<bool> _recordBits;

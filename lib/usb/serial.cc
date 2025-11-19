@@ -83,7 +83,7 @@ public:
     {
         DWORD wlen;
         /* Windows gets unhappy if we try to transfer too much... */
-        len = std::min(4096U, len);
+        len = std::min((size_t)4096, len);
         bool r = WriteFile(
             /* hFile= */ _handle,
             /* lpBuffer= */ buffer,

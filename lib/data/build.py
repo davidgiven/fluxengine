@@ -3,6 +3,7 @@ from build.c import cxxlibrary
 cxxlibrary(
     name="data",
     srcs=[
+        "./disk.cc",
         "./fluxmap.cc",
         "./fluxmapreader.cc",
         "./fluxpattern.cc",
@@ -12,7 +13,7 @@ cxxlibrary(
         "./sector.cc",
     ],
     hdrs={
-        "lib/data/flux.h": "./flux.h",
+        "lib/data/disk.h": "./disk.h",
         "lib/data/fluxmap.h": "./fluxmap.h",
         "lib/data/sector.h": "./sector.h",
         "lib/data/layout.h": "./layout.h",

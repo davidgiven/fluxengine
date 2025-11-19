@@ -1,6 +1,8 @@
 #include "lib/core/globals.h"
 #include "lib/data/fluxmap.h"
+#include "lib/data/fluxmapreader.h"
 #include "protocol.h"
+#include <mutex>
 
 Fluxmap& Fluxmap::appendBytes(const Bytes& bytes)
 {
@@ -12,6 +14,8 @@ Fluxmap& Fluxmap::appendBytes(const Bytes& bytes)
 
 Fluxmap& Fluxmap::appendBytes(const uint8_t* ptr, size_t len)
 {
+    flushIndexMarks();
+
     ByteWriter bw(_bytes);
     bw.seekToEnd();
 
@@ -52,6 +56,7 @@ Fluxmap& Fluxmap::appendPulse()
 
 Fluxmap& Fluxmap::appendIndex()
 {
+    flushIndexMarks();
     findLastByte() |= 0x40;
     return *this;
 }
@@ -74,4 +79,34 @@ std::vector<std::unique_ptr<const Fluxmap>> Fluxmap::split() const
     }
 
     return maps;
+}
+
+const std::vector<nanoseconds_t>& Fluxmap::getIndexMarks() const
+{
+    std::scoped_lock lock(_mutationMutex);
+    if (!_indexMarks.has_value())
+    {
+        _indexMarks = std::make_optional<std::vector<nanoseconds_t>>();
+        FluxmapReader fmr(*this);
+        nanoseconds_t oldt = -1;
+        for (;;)
+        {
+            unsigned ticks;
+            if (!fmr.findEvent(F_BIT_INDEX, ticks))
+                break;
+
+            /* Debounce. */
+            nanoseconds_t t = fmr.tell().ns();
+            if (t != oldt)
+                _indexMarks->push_back(t);
+            oldt = t;
+        }
+    }
+    return *_indexMarks;
+}
+
+void Fluxmap::flushIndexMarks()
+{
+    std::scoped_lock lock(_mutationMutex);
+    _indexMarks = {};
 }

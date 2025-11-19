@@ -5,6 +5,7 @@
 #include "lib/data/fluxmap.h"
 #include "lib/decoders/decoders.h"
 #include "lib/data/sector.h"
+#include "lib/data/layout.h"
 #include "lib/config/proto.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/fluxsink/fluxsink.h"
@@ -50,11 +51,12 @@ int mainRead(int argc, const char* argv[])
     if (globalConfig()->decoder().copy_flux_to().type() == FLUXTYPE_DRIVE)
         error("you cannot copy flux to a hardware device");
 
+    auto diskLayout = createDiskLayout(globalConfig());
     auto fluxSource = FluxSource::create(globalConfig());
     auto decoder = Arch::createDecoder(globalConfig());
     auto writer = ImageWriter::create(globalConfig());
 
-    readDiskCommand(*fluxSource, *decoder, *writer);
+    readDiskCommand(*diskLayout, *fluxSource, *decoder, *writer);
 
     return 0;
 }

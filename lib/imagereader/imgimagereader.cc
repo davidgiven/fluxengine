@@ -31,28 +31,28 @@ public:
                 "IMG: bad configuration; did you remember to set the "
                 "tracks, sides and trackdata fields in the layout?");
 
+        const auto diskLayout = createDiskLayout();
         bool in_filesystem_order = _config.img().filesystem_sector_order();
         std::unique_ptr<Image> image(new Image);
-        for (const auto& p : Layout::getTrackOrdering(
-                 in_filesystem_order ? layout.filesystem_track_order()
-                                     : layout.image_track_order()))
+
+        for (auto& logicalLocation :
+            in_filesystem_order ? diskLayout->logicalLocationsInFilesystemOrder
+                                : diskLayout->logicalLocations)
         {
-            int track = p.first;
-            int side = p.second;
+            auto& ltl = diskLayout->layoutByLogicalLocation.at(logicalLocation);
 
-            if (inputFile.eof())
-                break;
-
-            auto trackLayout = Layout::getLayoutOfTrack(track, side);
-            for (int sectorId : trackLayout->naturalSectorOrder)
+            for (unsigned sectorId : in_filesystem_order
+                                         ? ltl->filesystemSectorOrder
+                                         : ltl->naturalSectorOrder)
             {
-                Bytes data(trackLayout->sectorSize);
+                if (inputFile.eof())
+                    break;
+
+                Bytes data(ltl->sectorSize);
                 inputFile.read((char*)data.begin(), data.size());
 
-                if (in_filesystem_order)
-                    sectorId =
-                        trackLayout->filesystemToNaturalSectorMap.at(sectorId);
-                const auto& sector = image->put(track, side, sectorId);
+                const auto& sector = image->put(
+                    logicalLocation.cylinder, logicalLocation.head, sectorId);
                 sector->status = Sector::OK;
                 sector->data = data;
             }
@@ -61,8 +61,8 @@ public:
         image->calculateSize();
         const Geometry& geometry = image->getGeometry();
         log("IMG: read {} tracks, {} sides, {} kB total from {}",
-            geometry.numTracks,
-            geometry.numSides,
+            geometry.numCylinders,
+            geometry.numHeads,
             inputFile.tellg() / 1024,
             _config.filename());
         return image;

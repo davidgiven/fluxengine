@@ -55,8 +55,8 @@ public:
 
         log("DC42: writing DiskCopy 4.2 image");
         log("DC42: {} tracks, {} sides, {} sectors, {} bytes per sector; {}",
-            geometry.numTracks,
-            geometry.numSides,
+            geometry.numCylinders,
+            geometry.numHeads,
             geometry.numSectors,
             geometry.sectorSize,
             mfm ? "MFM" : "GCR");
@@ -86,9 +86,9 @@ public:
         uint32_t tagChecksum = 0;
         uint32_t offset = 0x54;
         uint32_t sectorDataStart = offset;
-        for (int track = 0; track < geometry.numTracks; track++)
+        for (int track = 0; track < geometry.numCylinders; track++)
         {
-            for (int side = 0; side < geometry.numSides; side++)
+            for (int side = 0; side < geometry.numHeads; side++)
             {
                 int sectorCount = sectors_per_track(track);
                 for (int sectorId = 0; sectorId < sectorCount; sectorId++)
@@ -107,9 +107,9 @@ public:
         uint32_t sectorDataEnd = offset;
         if (!mfm)
         {
-            for (int track = 0; track < geometry.numTracks; track++)
+            for (int track = 0; track < geometry.numCylinders; track++)
             {
-                for (int side = 0; side < geometry.numSides; side++)
+                for (int side = 0; side < geometry.numHeads; side++)
                 {
                     int sectorCount = sectors_per_track(track);
                     for (int sectorId = 0; sectorId < sectorCount; sectorId++)
@@ -142,7 +142,7 @@ public:
         }
         else
         {
-            if (geometry.numSides == 2)
+            if (geometry.numHeads == 2)
             {
                 encoding = 1;
                 format = 0x22;

@@ -1,21 +1,9 @@
 #include "lib/core/globals.h"
-#include "lib/data/flux.h"
+#include "lib/data/disk.h"
 #include "lib/data/sector.h"
 #include "lib/data/layout.h"
 
-Sector::Sector(const LogicalLocation& location):
-    LogicalLocation(location),
-    physicalTrack(Layout::remapTrackLogicalToPhysical(location.logicalTrack)),
-    physicalSide(Layout::remapSideLogicalToPhysical(location.logicalSide))
-{
-}
-
-Sector::Sector(std::shared_ptr<const TrackInfo>& layout, unsigned sectorId):
-    LogicalLocation({layout->logicalTrack, layout->logicalSide, sectorId}),
-    physicalTrack(layout->physicalTrack),
-    physicalSide(layout->physicalSide)
-{
-}
+Sector::Sector(const LogicalLocation& location): LogicalLocation(location) {}
 
 std::string Sector::statusToString(Status status)
 {
@@ -32,7 +20,7 @@ std::string Sector::statusToString(Status status)
         case Status::CONFLICT:
             return "conflicting data";
         default:
-            return fmt::format("unknown error {}", status);
+            return fmt::format("unknown error {}", (int)status);
     }
 }
 

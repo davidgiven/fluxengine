@@ -133,9 +133,10 @@ class ProdosFilesystem : public Filesystem
     };
 
 public:
-    ProdosFilesystem(
-        const ProdosProto& config, std::shared_ptr<SectorInterface> sectors):
-        Filesystem(sectors),
+    ProdosFilesystem(const ProdosProto& config,
+        const std::shared_ptr<const DiskLayout>& diskLayout,
+        std::shared_ptr<SectorInterface> sectors):
+        Filesystem(diskLayout, sectors),
         _config(config)
     {
     }
@@ -302,7 +303,10 @@ private:
 };
 
 std::unique_ptr<Filesystem> Filesystem::createProdosFilesystem(
-    const FilesystemProto& config, std::shared_ptr<SectorInterface> sectors)
+    const FilesystemProto& config,
+    const std::shared_ptr<const DiskLayout>& diskLayout,
+    std::shared_ptr<SectorInterface> sectors)
 {
-    return std::make_unique<ProdosFilesystem>(config.prodos(), sectors);
+    return std::make_unique<ProdosFilesystem>(
+        config.prodos(), diskLayout, sectors);
 }

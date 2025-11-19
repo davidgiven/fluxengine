@@ -200,7 +200,7 @@ public:
             headerPtr++;
             sectorSize = getSectorSize(header.SectorSize);
 
-            unsigned optionalsector_map[header.numSectors];
+            std::vector<unsigned> optionalsector_map(header.numSectors);
             // The Sector Cylinder Map has one entry for each sector, and
             // contains the logical Cylinder ID for the corresponding sector in
             // the Sector Numbering Map.
@@ -224,7 +224,7 @@ public:
             // The Sector Head Map has one entry for each sector, and contains
             // the logical Head ID for the corresponding sector in the Sector
             // Numbering Map.
-            unsigned optionalhead_map[header.numSectors];
+            std::vector<unsigned> optionalhead_map(header.numSectors);
             if (header.Head & SEC_HEAD_MAP_FLAG)
             {
                 // Read optional sector head map
@@ -408,38 +408,32 @@ public:
                             header.track,
                             s);
                 }
-                if (blnOptionalCylinderMap) // there was een optional cylinder
-                                            // map. write it to the sector
-                // The Sector Cylinder Map has one entry for each sector, and
-                // contains the logical Cylinder ID for the corresponding sector
-                // in the Sector Numbering Map.
+
+                if (blnOptionalCylinderMap)
                 {
-                    sector->physicalTrack =
-                        Layout::remapTrackLogicalToPhysical(header.track);
-                    sector->logicalTrack = optionalsector_map[s];
+                    // there was een optional cylinder
+                    // map. write it to the sector
+                    // The Sector Cylinder Map has one entry for each sector,
+                    // and contains the logical Cylinder ID for the
+                    // corresponding sector in the Sector Numbering Map.
+                    sector->logicalCylinder = optionalsector_map[s];
                     blnOptionalCylinderMap = false;
                 }
                 else
+                    sector->logicalCylinder = header.track;
+
+                if (blnOptionalHeadMap)
                 {
-                    sector->logicalTrack = header.track;
-                    sector->physicalTrack =
-                        Layout::remapTrackLogicalToPhysical(header.track);
-                }
-                if (blnOptionalHeadMap) // there was een optional head map.
-                                        // write it to the sector
-                // The Sector Head Map has one entry for each sector, and
-                // contains the logical Head ID for the corresponding sector in
-                // the Sector Numbering Map.
-                {
-                    sector->physicalSide = header.Head;
-                    sector->logicalSide = optionalhead_map[s];
+                    // there was een optional head map.
+                    // write it to the sector
+                    // The Sector Head Map has one entry for each sector, and
+                    // contains the logical Head ID for the corresponding sector
+                    // in the Sector Numbering Map.
+                    sector->logicalHead = optionalhead_map[s];
                     blnOptionalHeadMap = false;
                 }
                 else
-                {
-                    sector->logicalSide = header.Head;
-                    sector->physicalSide = header.Head;
-                }
+                    sector->logicalHead = header.Head;
             }
         }
 
@@ -462,8 +456,8 @@ public:
             sectorSize,
             (header.track + 1) * trackSize / 1024);
 
-        layout->set_tracks(geometry.numTracks);
-        layout->set_sides(geometry.numSides);
+        layout->set_tracks(geometry.numCylinders);
+        layout->set_sides(geometry.numHeads);
 
         return image;
     }

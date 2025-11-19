@@ -9,7 +9,7 @@
 class ConfigProto;
 class OptionProto;
 class FluxSource;
-class FluxSink;
+class FluxSinkFactory;
 class ImageReader;
 class ImageWriter;
 class Encoder;
@@ -142,6 +142,8 @@ public:
     bool isOptionValid(const OptionProto& option);
     void applyOption(const OptionInfo& optionInfo);
     bool applyOption(const std::string& name, const std::string value = "");
+    void applyOptionsFile(const std::string& data);
+    void applyDefaultOptions();
     void clearOptions();
 
     /* Adjust overall inputs and outputs. */

@@ -39,7 +39,6 @@ image format. FluxEngine will use these parameters.
 ## Options
 
   - Format variants:
-      - `auto`: try to autodetect the format (unreliable)
       - `160`: 160kB 5.25" 40-track 8-sector SSDD
       - `180`: 180kB 5.25" 40-track 9-sector SSDD
       - `320`: 320kB 5.25" 40-track 8-sector DSDD
@@ -55,7 +54,6 @@ image format. FluxEngine will use these parameters.
 
 To read:
 
-  - `fluxengine read -c ibm --auto -s drive:0 -o ibm.img`
   - `fluxengine read -c ibm --160 -s drive:0 -o ibm.img`
   - `fluxengine read -c ibm --180 -s drive:0 -o ibm.img`
   - `fluxengine read -c ibm --320 -s drive:0 -o ibm.img`

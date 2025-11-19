@@ -23,5 +23,6 @@ cxxlibrary(
         "dep/agg",
         "dep/stb",
         "+fmt_lib",
+        "+z_lib",
     ],
 )

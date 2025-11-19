@@ -8,30 +8,52 @@ ifeq ($(BUILDTYPE),)
 endif
 export BUILDTYPE
 
+OPTFLAGS = -g -O3
+
 ifeq ($(BUILDTYPE),windows)
-	MINGW = i686-w64-mingw32-
+	MINGW = x86_64-w64-mingw32-
 	CC = $(MINGW)gcc
-	CXX = $(MINGW)g++ -std=c++20
-	CFLAGS += -g -O3 \
-		-Wno-unknown-warning-option \
+	CXX = $(MINGW)g++
+	CFLAGS += \
+		$(OPTFLAGS) \
 		-ffunction-sections \
-		-fdata-sections
+		-fdata-sections \
+		-Wno-attributes \
+		-Wa,-mbig-obj \
+		-static
 	CXXFLAGS += \
-		-fext-numeric-literals \
+		$(OPTFLAGS) \
+		-std=c++23 \
 		-Wno-deprecated-enum-float-conversion \
-		-Wno-deprecated-enum-enum-conversion
-	LDFLAGS += -static -Wl,--gc-sections
-	AR = $(MINGW)ar
-	PKG_CONFIG = $(MINGW)pkg-config -static
+		-Wno-deprecated-enum-enum-conversion \
+		-Wno-attributes \
+		-Wa,-mbig-obj \
+		-static
+	LDFLAGS += -Wl,--gc-sections -static
+	AR = $(MINGW)gcc-ar
+	PKG_CONFIG = $(MINGW)pkg-config --static
 	WINDRES = $(MINGW)windres
 	WX_CONFIG = /usr/i686-w64-mingw32/sys-root/mingw/bin/wx-config-3.0 --static=yes
+	NINJA = /bin/ninja
+	PROTOC = /mingw64/bin/protoc
+	PROTOC_SEPARATOR = ;
 	EXT = .exe
+
+	AB_SANDBOX = no
 else
-	CC = gcc
-	CXX = g++ -std=c++20
-	CFLAGS = -g -O3 \
+	CC = clang
+	CXX = clang++
+	CFLAGS = \
+		$(OPTFLAGS) \
+		-I/opt/homebrew/include -I/usr/local/include \
 		-Wno-unknown-warning-option
-	CXXFLAGS += \
+	CXXFLAGS = \
+		$(OPTFLAGS) \
+		-std=c++23 \
+		-fexperimental-library \
+		-I/opt/homebrew/include -I/usr/local/include \
+		-Wformat \
+		-Wformat-security \
 		-Wno-deprecated-enum-float-conversion \
 		-Wno-deprecated-enum-enum-conversion
 	LDFLAGS =
@@ -56,31 +78,33 @@ BINDIR ?= $(PREFIX)/bin
 
 # Special Windows settings.
 
-ifeq ($(OS), Windows_NT)
-	EXT ?= .exe
-	MINGWBIN = /mingw32/bin
-	CCPREFIX = $(MINGWBIN)/
-	PKG_CONFIG = $(MINGWBIN)/pkg-config
-	WX_CONFIG = /usr/bin/sh $(MINGWBIN)/wx-config --static=yes
-	PROTOC = $(MINGWBIN)/protoc
-	WINDRES = windres
-	LDFLAGS += \
-		-static
-	CXXFLAGS += \
-		-fext-numeric-literals \
-		-Wno-deprecated-enum-float-conversion \
-		-Wno-deprecated-enum-enum-conversion
-
-	# Required to get the gcc run - time libraries on the path.
-	export PATH := $(PATH):$(MINGWBIN)
-endif
+#ifeq ($(OS), Windows_NT)
+#	EXT ?= .exe
+#	MINGWBIN = /mingw32/bin
+#	CCPREFIX = $(MINGWBIN)/
+#	PKG_CONFIG = $(MINGWBIN)/pkg-config
+#	WX_CONFIG = /usr/bin/sh $(MINGWBIN)/wx-config --static=yes
+#	PROTOC = $(MINGWBIN)/protoc
+#	WINDRES = windres
+#	LDFLAGS += \
+#		-static
+#	CXXFLAGS += \
+#		-fext-numeric-literals \
+#		-Wno-deprecated-enum-float-conversion \
+#		-Wno-deprecated-enum-enum-conversion
+#
+#	# Required to get the gcc run - time libraries on the path.
+#	export PATH := $(PATH):$(MINGWBIN)
+#endif
 
 # Special OSX settings.
 
 ifeq ($(shell uname),Darwin)
 	LDFLAGS += \
 		-framework IOKit \
-		-framework Foundation 
+		-framework AppKit  \
+		-framework UniformTypeIdentifiers \
+		-framework UserNotifications
 endif
 
 .PHONY: all

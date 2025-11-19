@@ -1,7 +1,7 @@
 #pragma once
 
 class FluxSource;
-class FluxSink;
+class FluxSinkFactory;
 class ImageReader;
 class ImageWriter;
 class Encoder;
@@ -15,7 +15,7 @@ public:
 public:
     virtual FluxSource* GetFluxSource() = 0;
     virtual FluxSource* GetVerificationFluxSource() = 0;
-    virtual FluxSink* GetFluxSink() = 0;
+    virtual FluxSinkFactory* GetFluxSink() = 0;
     virtual ImageReader* GetImageReader() = 0;
     virtual ImageWriter* GetImageWriter() = 0;
     virtual Encoder* GetEncoder() = 0;

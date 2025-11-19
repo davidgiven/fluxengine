@@ -6,6 +6,7 @@
 #include "lib/data/fluxmapreader.h"
 #include "lib/data/fluxpattern.h"
 #include "lib/data/sector.h"
+#include "lib/data/layout.h"
 #include <string.h>
 
 const int SECTOR_SIZE = 256;
@@ -64,8 +65,8 @@ public:
             gotChecksum += br.read_be16();
         uint16_t wantChecksum = br.read_be16();
 
-        _sector->logicalTrack = _sector->physicalTrack;
-        _sector->logicalSide = _sector->physicalSide;
+        _sector->logicalCylinder = _ltl->logicalCylinder;
+        _sector->logicalHead = _ltl->logicalHead;
         _sector->logicalSector = _currentSector;
         _sector->data = bytes.slice(0, SECTOR_SIZE).swab();
         _sector->status =

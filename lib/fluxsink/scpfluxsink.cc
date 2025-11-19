@@ -36,41 +36,46 @@ static void appendChecksum(uint32_t& checksum, const Bytes& bytes)
         checksum += br.read_8();
 }
 
-class ScpFluxSink : public FluxSink
+class ScpSink : public FluxSink
 {
 public:
-    ScpFluxSink(const ScpFluxSinkProto& lconfig): _config(lconfig)
+    ScpSink(const std::string& filename, uint8_t typeByte, bool alignWithIndex):
+        _filename(filename),
+        _typeByte(typeByte),
+        _alignWithIndex(alignWithIndex)
     {
-        auto [minTrack, maxTrack, minSide, maxSide] =
-            Layout::getBounds(Layout::computePhysicalLocations());
+        // FIXME: should use a passed-in DiskLayout object.
+        auto diskLayout = createDiskLayout();
+        auto [minCylinder, maxCylinder, minHead, maxHead] =
+            diskLayout->getPhysicalBounds();
 
         _fileheader.file_id[0] = 'S';
         _fileheader.file_id[1] = 'C';
         _fileheader.file_id[2] = 'P';
         _fileheader.version = 0x18; /* Version 1.8 of the spec */
-        _fileheader.type = _config.type_byte();
-        _fileheader.start_track = strackno(minTrack, minSide);
-        _fileheader.end_track = strackno(maxTrack, maxSide);
+        _fileheader.type = _typeByte;
+        _fileheader.start_track = strackno(minCylinder, minHead);
+        _fileheader.end_track = strackno(maxCylinder, maxHead);
         _fileheader.flags = SCP_FLAG_INDEXED;
         if (globalConfig()->drive().drive_type() == DRIVETYPE_APPLE2)
             error("you can't write Apple II flux images to SCP files yet");
         if (globalConfig()->drive().drive_type() != DRIVETYPE_40TRACK)
             _fileheader.flags |= SCP_FLAG_96TPI;
         _fileheader.cell_width = 0;
-        if ((minSide == 0) && (maxSide == 0))
+        if ((minHead == 0) && (maxHead == 0))
             _fileheader.heads = 1;
-        else if ((minSide == 1) && (maxSide == 1))
+        else if ((minHead == 1) && (maxHead == 1))
             _fileheader.heads = 2;
         else
             _fileheader.heads = 0;
 
         log("SCP: writing {} tpi {} file containing {} tracks",
             (_fileheader.flags & SCP_FLAG_96TPI) ? 96 : 48,
-            (minSide == maxSide) ? "single sided" : "double sided",
+            (minHead == maxHead) ? "single sided" : "double sided",
             _fileheader.end_track - _fileheader.start_track + 1);
     }
 
-    ~ScpFluxSink()
+    ~ScpSink()
     {
         uint32_t checksum = 0;
         appendChecksum(checksum,
@@ -80,7 +85,7 @@ public:
         write_le32(_fileheader.checksum, checksum);
 
         log("SCP: writing output file");
-        std::ofstream of(_config.filename(), std::ios::out | std::ios::binary);
+        std::ofstream of(_filename, std::ios::out | std::ios::binary);
         if (!of.is_open())
             error("cannot open output file");
         of.write((const char*)&_fileheader, sizeof(_fileheader));
@@ -88,8 +93,7 @@ public:
         of.close();
     }
 
-public:
-    void writeFlux(int track, int head, const Fluxmap& fluxmap) override
+    void addFlux(int track, int head, const Fluxmap& fluxmap) override
     {
         ByteWriter trackdataWriter(_trackdata);
         trackdataWriter.seekToEnd();
@@ -97,7 +101,8 @@ public:
 
         if (strack >= std::size(_fileheader.track))
         {
-            log("SCP: cannot write track {} head {}, there are not not enough "
+            log("SCP: cannot write track {} head {}, there are not not "
+                "enough "
                 "Track Data Headers.",
                 track,
                 head);
@@ -115,7 +120,7 @@ public:
 
         int revolution =
             -1; // -1 indicates that we are before the first index pulse
-        if (_config.align_with_index())
+        if (_alignWithIndex)
         {
             fmr.skipToEvent(F_BIT_INDEX);
             revolution = 0;
@@ -134,9 +139,9 @@ public:
             totalTicks += ticks;
             revTicks += ticks;
 
-            // if we haven't output any revolutions yet by the end of the track,
-            // assume that the whole track is one rev
-            // also discard any duplicate index pulses
+            // if we haven't output any revolutions yet by the end of the
+            // track, assume that the whole track is one rev also discard
+            // any duplicate index pulses
             if (((fmr.eof() && revolution <= 0) ||
                     ((event & F_BIT_INDEX)) && revTicks > 0))
             {
@@ -179,6 +184,32 @@ public:
         trackdataWriter += fluxdata;
     }
 
+private:
+    std::string _filename;
+    uint8_t _typeByte;
+    bool _alignWithIndex;
+    ScpHeader _fileheader = {0};
+    Bytes _trackdata;
+};
+
+class ScpFluxSinkFactory : public FluxSinkFactory
+{
+public:
+    ScpFluxSinkFactory(const ScpFluxSinkProto& lconfig): _config(lconfig) {}
+
+    std::unique_ptr<FluxSink> create() override
+    {
+        return std::make_unique<ScpSink>(_config.filename(),
+            _config.type_byte(),
+            _config.align_with_index());
+    }
+
+    std::optional<std::filesystem::path> getPath() const override
+    {
+        return std::make_optional(_config.filename());
+    }
+
+public:
     operator std::string() const override
     {
         return fmt::format("scp({})", _config.filename());
@@ -186,12 +217,10 @@ public:
 
 private:
     const ScpFluxSinkProto& _config;
-    ScpHeader _fileheader = {0};
-    Bytes _trackdata;
 };
 
-std::unique_ptr<FluxSink> FluxSink::createScpFluxSink(
+std::unique_ptr<FluxSinkFactory> FluxSinkFactory::createScpFluxSinkFactory(
     const ScpFluxSinkProto& config)
 {
-    return std::unique_ptr<FluxSink>(new ScpFluxSink(config));
+    return std::unique_ptr<FluxSinkFactory>(new ScpFluxSinkFactory(config));
 }

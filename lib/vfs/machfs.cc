@@ -16,9 +16,10 @@ static MacHfsFilesystem* currentMacHfs;
 class MacHfsFilesystem : public Filesystem
 {
 public:
-    MacHfsFilesystem(
-        const MacHfsProto& config, std::shared_ptr<SectorInterface> sectors):
-        Filesystem(sectors),
+    MacHfsFilesystem(const MacHfsProto& config,
+        const std::shared_ptr<const DiskLayout>& diskLayout,
+        std::shared_ptr<SectorInterface> sectors):
+        Filesystem(diskLayout, sectors),
         _config(config)
     {
     }
@@ -459,7 +460,10 @@ unsigned long os_write(void** priv, const void* buffer, unsigned long len)
 }
 
 std::unique_ptr<Filesystem> Filesystem::createMacHfsFilesystem(
-    const FilesystemProto& config, std::shared_ptr<SectorInterface> sectors)
+    const FilesystemProto& config,
+    const std::shared_ptr<const DiskLayout>& diskLayout,
+    std::shared_ptr<SectorInterface> sectors)
 {
-    return std::make_unique<MacHfsFilesystem>(config.machfs(), sectors);
+    return std::make_unique<MacHfsFilesystem>(
+        config.machfs(), diskLayout, sectors);
 }

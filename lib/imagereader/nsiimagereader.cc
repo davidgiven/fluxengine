@@ -30,7 +30,7 @@ public:
 
         log("NSI: Autodetecting geometry based on file size: {}", fsize);
 
-        unsigned numTracks = 35;
+        unsigned numCylinders = 35;
         unsigned numSectors = 10;
         unsigned numHeads = 2;
         unsigned sectorSize = 512;
@@ -60,18 +60,18 @@ public:
 
         log("reading {} tracks, {} heads, {} sectors, {} bytes per sector, {} "
             "kB total",
-            numTracks,
+            numCylinders,
             numHeads,
             numSectors,
             sectorSize,
-            numTracks * numHeads * trackSize / 1024);
+            numCylinders * numHeads * trackSize / 1024);
 
         std::unique_ptr<Image> image(new Image);
         unsigned sectorFileOffset;
 
         for (unsigned head = 0; head < numHeads; head++)
         {
-            for (unsigned track = 0; track < numTracks; track++)
+            for (unsigned track = 0; track < numCylinders; track++)
             {
                 for (unsigned sectorId = 0; sectorId < numSectors; sectorId++)
                 {
@@ -83,8 +83,8 @@ public:
                     else
                     { /* Head 1 is from track 70-35 */
                         sectorFileOffset =
-                            (trackSize * numTracks) + /* Skip over side 0 */
-                            ((numTracks - track - 1) * trackSize) +
+                            (trackSize * numCylinders) + /* Skip over side 0 */
+                            ((numCylinders - track - 1) * trackSize) +
                             (sectorId * sectorSize); /* Sector offset from
                                                         beginning of track. */
                     }
@@ -101,8 +101,8 @@ public:
             }
         }
 
-        image->setGeometry({.numTracks = numTracks,
-            .numSides = numHeads,
+        image->setGeometry({.numCylinders = numCylinders,
+            .numHeads = numHeads,
             .numSectors = numSectors,
             .sectorSize = sectorSize});
         return image;

@@ -35,6 +35,7 @@ cxxlibrary(
         "./imagesectorinterface.cc",
         "./lif.cc",
         "./machfs.cc",
+        "./memorysectorinterface.cc",
         "./microdos.cc",
         "./philefs.cc",
         "./prodos.cc",

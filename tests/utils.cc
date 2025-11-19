@@ -4,6 +4,18 @@
 
 using namespace snowhouse;
 
+template <typename F, typename S>
+struct snowhouse::Stringizer<std::pair<F, S>>
+{
+    static std::string ToString(const std::pair<F, S>& a)
+    {
+        std::stringstream stream;
+        stream << "pair(" << Stringizer<F>::ToString(a.first) << ", "
+               << Stringizer<S>::ToString(a.second) << ')';
+        return stream.str();
+    }
+};
+
 static void testJoin()
 {
     AssertThat(join({}, "/"), Equals(""));
@@ -56,6 +68,26 @@ static void testUnbcd()
     AssertThat(unbcd(0x87654321), Equals(87654321));
 }
 
+static void testMultimapToMap()
+{
+    std::multimap<int, std::string> input = {
+        {0, "zero" },
+        {0, "nil"  },
+        {1, "one"  },
+        {3, "two"  },
+        {3, "drei" },
+        {3, "trois"}
+    };
+    std::map<int, std::vector<std::string>> wanted = {
+        {0, {"zero", "nil"}         },
+        {1, {"one"}                 },
+        {3, {"two", "drei", "trois"}}
+    };
+
+    auto output = multimapToMapOfVectors(input);
+    AssertThat(output, Equals(wanted));
+}
+
 int main(void)
 {
     testJoin();
@@ -65,5 +97,6 @@ int main(void)
     testLeafname();
     testUnhex();
     testUnbcd();
+    testMultimapToMap();
     return 0;
 }

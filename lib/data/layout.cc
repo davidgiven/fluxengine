@@ -4,10 +4,10 @@
 #include "lib/config/proto.h"
 #include "lib/core/logger.h"
 
-static unsigned getTrackStep()
+static unsigned getTrackStep(const ConfigProto& config = globalConfig())
 {
-    auto format_type = globalConfig()->layout().format_type();
-    auto drive_type = globalConfig()->drive().drive_type();
+    auto format_type = config.layout().format_type();
+    auto drive_type = config.drive().drive_type();
 
     switch (format_type)
     {
@@ -22,6 +22,9 @@ static unsigned getTrackStep()
 
                 case DRIVETYPE_APPLE2:
                     return 4;
+
+                default:
+                    break;
             }
 
         case FORMATTYPE_80TRACK:
@@ -30,8 +33,7 @@ static unsigned getTrackStep()
                 case DRIVETYPE_40TRACK:
                     error(
                         "you can't read/write an 80 track image from/to a 40 "
-                        "track "
-                        "drive");
+                        "track drive");
 
                 case DRIVETYPE_80TRACK:
                     return 1;
@@ -39,111 +41,55 @@ static unsigned getTrackStep()
                 case DRIVETYPE_APPLE2:
                     error(
                         "you can't read/write an 80 track image from/to an "
-                        "Apple II "
-                        "drive");
+                        "Apple II drive");
+
+                default:
+                    break;
             }
+
+        default:
+            break;
     }
 
     return 1;
 }
 
-unsigned Layout::remapTrackPhysicalToLogical(unsigned ptrack)
+static std::vector<CylinderHead> getTrackOrdering(
+    LayoutProto::Order ordering, unsigned tracks, unsigned sides)
 {
-    return (ptrack - globalConfig()->drive().head_bias()) / getTrackStep();
-}
-
-unsigned Layout::remapTrackLogicalToPhysical(unsigned ltrack)
-{
-    return globalConfig()->drive().head_bias() + ltrack * getTrackStep();
-}
-
-unsigned Layout::remapSidePhysicalToLogical(unsigned pside)
-{
-    return pside ^ globalConfig()->layout().swap_sides();
-}
-
-unsigned Layout::remapSideLogicalToPhysical(unsigned lside)
-{
-    return lside ^ globalConfig()->layout().swap_sides();
-}
-
-std::vector<CylinderHead> Layout::computePhysicalLocations()
-{
-    if (globalConfig()->has_tracks())
-        return parseCylinderHeadsString(globalConfig()->tracks());
-
-    std::set<unsigned> tracks = iterate(0, globalConfig()->layout().tracks());
-    std::set<unsigned> heads = iterate(0, globalConfig()->layout().sides());
-
-    std::vector<CylinderHead> locations;
-    for (unsigned logicalTrack : tracks)
-        for (unsigned logicalHead : heads)
-            locations.push_back(
-                CylinderHead{remapTrackLogicalToPhysical(logicalTrack),
-                    remapSideLogicalToPhysical(logicalHead)});
-
-    return locations;
-}
-
-Layout::LayoutBounds Layout::getBounds(
-    const std::vector<CylinderHead>& locations)
-{
-    LayoutBounds r{.minTrack = INT_MAX,
-        .maxTrack = INT_MIN,
-        .minSide = INT_MAX,
-        .maxSide = INT_MIN};
-
-    for (const auto& ti : locations)
-    {
-        r.minTrack = std::min<int>(r.minTrack, ti.cylinder);
-        r.maxTrack = std::max<int>(r.maxTrack, ti.cylinder);
-        r.minSide = std::min<int>(r.minSide, ti.head);
-        r.maxSide = std::max<int>(r.maxSide, ti.head);
-    }
-
-    return r;
-}
-
-std::vector<std::pair<int, int>> Layout::getTrackOrdering(
-    LayoutProto::Order ordering, unsigned guessedTracks, unsigned guessedSides)
-{
-    auto layout = globalConfig()->layout();
-    int tracks = layout.has_tracks() ? layout.tracks() : guessedTracks;
-    int sides = layout.has_sides() ? layout.sides() : guessedSides;
-
-    std::vector<std::pair<int, int>> trackList;
+    std::vector<CylinderHead> trackList;
     switch (ordering)
     {
         case LayoutProto::CHS:
         {
-            for (int track = 0; track < tracks; track++)
+            for (unsigned track = 0; track < tracks; track++)
             {
-                for (int side = 0; side < sides; side++)
-                    trackList.push_back(std::make_pair(track, side));
+                for (unsigned side = 0; side < sides; side++)
+                    trackList.push_back({track, side});
             }
             break;
         }
 
         case LayoutProto::HCS:
         {
-            for (int side = 0; side < sides; side++)
+            for (unsigned side = 0; side < sides; side++)
             {
-                for (int track = 0; track < tracks; track++)
-                    trackList.push_back(std::make_pair(track, side));
+                for (unsigned track = 0; track < tracks; track++)
+                    trackList.push_back({track, side});
             }
             break;
         }
 
         case LayoutProto::HCS_RH1:
         {
-            for (int side = 0; side < sides; side++)
+            for (unsigned side = 0; side < sides; side++)
             {
                 if (side == 0)
-                    for (int track = 0; track < tracks; track++)
-                        trackList.push_back(std::make_pair(track, side));
+                    for (unsigned track = 0; track < tracks; track++)
+                        trackList.push_back({track, side});
                 if (side == 1)
-                    for (int track = tracks; track >= 0; track--)
-                        trackList.push_back(std::make_pair(track - 1, side));
+                    for (unsigned track = tracks; track >= 0; track--)
+                        trackList.push_back({track - 1, side});
             }
             break;
         }
@@ -155,7 +101,7 @@ std::vector<std::pair<int, int>> Layout::getTrackOrdering(
     return trackList;
 }
 
-std::vector<unsigned> Layout::expandSectorList(
+static std::vector<unsigned> expandSectorList(
     const SectorListProto& sectorsProto)
 {
     std::vector<unsigned> sectors;
@@ -197,95 +143,182 @@ std::vector<unsigned> Layout::expandSectorList(
     return sectors;
 }
 
-std::shared_ptr<const TrackInfo> Layout::getLayoutOfTrack(
-    unsigned logicalTrack, unsigned logicalSide)
+static const LayoutProto::LayoutdataProto getLayoutData(
+    unsigned logicalCylinder, unsigned logicalHead, const ConfigProto& config)
 {
-    auto trackInfo = std::make_shared<TrackInfo>();
-
-    LayoutProto::LayoutdataProto layoutdata;
-    for (const auto& f : globalConfig()->layout().layoutdata())
+    LayoutProto::LayoutdataProto layoutData;
+    for (const auto& f : config.layout().layoutdata())
     {
         if (f.has_track() && f.has_up_to_track() &&
-            ((logicalTrack < f.track()) || (logicalTrack > f.up_to_track())))
+            ((logicalCylinder < f.track()) ||
+                (logicalCylinder > f.up_to_track())))
             continue;
         if (f.has_track() && !f.has_up_to_track() &&
-            (logicalTrack != f.track()))
+            (logicalCylinder != f.track()))
             continue;
-        if (f.has_side() && (f.side() != logicalSide))
+        if (f.has_side() && (f.side() != logicalHead))
             continue;
 
-        layoutdata.MergeFrom(f);
+        layoutData.MergeFrom(f);
     }
-
-    trackInfo->numTracks = globalConfig()->layout().tracks();
-    trackInfo->numSides = globalConfig()->layout().sides();
-    trackInfo->sectorSize = layoutdata.sector_size();
-    trackInfo->logicalTrack = logicalTrack;
-    trackInfo->logicalSide = logicalSide;
-    trackInfo->physicalTrack = remapTrackLogicalToPhysical(logicalTrack);
-    trackInfo->physicalSide =
-        logicalSide ^ globalConfig()->layout().swap_sides();
-    trackInfo->groupSize = getTrackStep();
-    trackInfo->diskSectorOrder = expandSectorList(layoutdata.physical());
-    trackInfo->naturalSectorOrder = trackInfo->diskSectorOrder;
-    std::sort(trackInfo->naturalSectorOrder.begin(),
-        trackInfo->naturalSectorOrder.end());
-    trackInfo->numSectors = trackInfo->naturalSectorOrder.size();
-
-    if (layoutdata.has_filesystem())
-    {
-        trackInfo->filesystemSectorOrder =
-            expandSectorList(layoutdata.filesystem());
-        if (trackInfo->filesystemSectorOrder.size() != trackInfo->numSectors)
-            error(
-                "filesystem sector order list doesn't contain the right "
-                "number of sectors");
-    }
-    else
-        trackInfo->filesystemSectorOrder = trackInfo->naturalSectorOrder;
-
-    for (int i = 0; i < trackInfo->numSectors; i++)
-    {
-        unsigned fid = trackInfo->naturalSectorOrder[i];
-        unsigned lid = trackInfo->filesystemSectorOrder[i];
-        trackInfo->filesystemToNaturalSectorMap[fid] = lid;
-        trackInfo->naturalToFilesystemSectorMap[lid] = fid;
-    }
-
-    return trackInfo;
+    return layoutData;
 }
 
-std::shared_ptr<const TrackInfo> Layout::getLayoutOfTrackPhysical(
-    unsigned physicalTrack, unsigned physicalSide)
+DiskLayout::DiskLayout(const ConfigProto& config)
 {
-    return getLayoutOfTrack(remapTrackPhysicalToLogical(physicalTrack),
-        remapSidePhysicalToLogical(physicalSide));
-}
+    minPhysicalCylinder = minPhysicalHead = UINT_MAX;
+    maxPhysicalCylinder = maxPhysicalHead = 0;
 
-std::shared_ptr<const TrackInfo> Layout::getLayoutOfTrackPhysical(
-    const CylinderHead& physicalLocation)
-{
-    return getLayoutOfTrackPhysical(
-        physicalLocation.cylinder, physicalLocation.head);
-}
+    numLogicalCylinders = config.layout().tracks();
+    numLogicalHeads = config.layout().sides();
 
-std::vector<std::shared_ptr<const TrackInfo>> Layout::getLayoutOfTracksPhysical(
-    const std::vector<CylinderHead>& physicalLocations)
-{
-    std::vector<std::shared_ptr<const TrackInfo>> results;
-    for (const auto& physicalLocation : physicalLocations)
-        results.push_back(getLayoutOfTrackPhysical(physicalLocation));
-    return results;
-}
+    groupSize = getTrackStep(config);
+    headBias = config.drive().head_bias();
+    swapSides = config.layout().swap_sides();
 
-int Layout::getHeadWidth()
-{
-    switch (globalConfig()->drive().drive_type())
+    switch (config.drive().drive_type())
     {
         case DRIVETYPE_APPLE2:
-            return 4;
+            headWidth = 4;
+            break;
 
         default:
-            return 1;
+            headWidth = 1;
+            break;
     }
+
+    for (unsigned logicalCylinder = 0; logicalCylinder < numLogicalCylinders;
+        logicalCylinder++)
+        for (unsigned logicalHead = 0; logicalHead < numLogicalHeads;
+            logicalHead++)
+        {
+            auto ltl = std::make_shared<LogicalTrackLayout>();
+            CylinderHead ch(logicalCylinder, logicalHead);
+            layoutByLogicalLocation[ch] = ltl;
+            logicalLocations.push_back(ch);
+
+            ltl->logicalCylinder = logicalCylinder;
+            ltl->logicalHead = logicalHead;
+            ltl->groupSize = groupSize;
+            ltl->physicalCylinder =
+                remapCylinderLogicalToPhysical(logicalCylinder);
+            ltl->physicalHead = remapHeadLogicalToPhysical(logicalHead);
+
+            minPhysicalCylinder =
+                std::min(minPhysicalCylinder, ltl->physicalCylinder);
+            maxPhysicalCylinder = std::max(maxPhysicalCylinder,
+                ltl->physicalCylinder + ltl->groupSize - 1);
+            minPhysicalHead = std::min(minPhysicalHead, ltl->physicalHead);
+            maxPhysicalHead = std::max(maxPhysicalHead, ltl->physicalHead);
+
+            auto layoutdata =
+                getLayoutData(logicalCylinder, logicalHead, config);
+            ltl->sectorSize = layoutdata.sector_size();
+            ltl->diskSectorOrder = expandSectorList(layoutdata.physical());
+            ltl->naturalSectorOrder = ltl->diskSectorOrder;
+            std::sort(
+                ltl->naturalSectorOrder.begin(), ltl->naturalSectorOrder.end());
+            ltl->numSectors = ltl->naturalSectorOrder.size();
+
+            if (layoutdata.has_filesystem())
+            {
+                ltl->filesystemSectorOrder =
+                    expandSectorList(layoutdata.filesystem());
+                if (ltl->filesystemSectorOrder.size() != ltl->numSectors)
+                    error(
+                        "filesystem sector order list doesn't contain the "
+                        "right number of sectors");
+            }
+            else
+                ltl->filesystemSectorOrder = ltl->naturalSectorOrder;
+
+            for (int i = 0; i < ltl->numSectors; i++)
+            {
+                unsigned fid = ltl->naturalSectorOrder[i];
+                unsigned lid = ltl->filesystemSectorOrder[i];
+                ltl->sectorIdToNaturalOrdering[i] = fid;
+                ltl->sectorIdToFilesystemOrdering[i] = fid;
+            }
+        };
+
+    for (unsigned physicalCylinder = minPhysicalCylinder;
+        physicalCylinder <= maxPhysicalCylinder;
+        physicalCylinder++)
+        for (unsigned physicalHead = minPhysicalHead;
+            physicalHead <= maxPhysicalHead;
+            physicalHead++)
+        {
+            auto ptl = std::make_shared<PhysicalTrackLayout>();
+            CylinderHead ch(physicalCylinder, physicalHead);
+            layoutByPhysicalLocation[ch] = ptl;
+            physicalLocations.push_back(ch);
+
+            ptl->physicalCylinder = physicalCylinder;
+            ptl->physicalHead = physicalHead;
+            ptl->groupOffset = (physicalCylinder - headBias) % groupSize;
+
+            unsigned logicalCylinder =
+                remapCylinderPhysicalToLogical(physicalCylinder);
+            unsigned logicalHead = remapHeadPhysicalToLogical(physicalHead);
+            ptl->logicalTrackLayout = findOrDefault(
+                layoutByLogicalLocation, {logicalCylinder, logicalHead});
+        }
+
+    unsigned sectorOffset = 0;
+    unsigned blockId = 0;
+    for (auto& ch : getTrackOrdering(config.layout().filesystem_track_order(),
+             numLogicalCylinders,
+             numLogicalHeads))
+    {
+        const auto& ltl = layoutByLogicalLocation[ch];
+        logicalLocationsInFilesystemOrder.push_back(ch);
+
+        for (unsigned lid : ltl->filesystemSectorOrder)
+        {
+            LogicalLocation logicalLocation = {ch.cylinder, ch.head, lid};
+            logicalSectorLocationBySectorOffset[sectorOffset] = logicalLocation;
+            sectorOffsetByLogicalSectorLocation[logicalLocation] = sectorOffset;
+            logicalSectorLocationsInFilesystemOrder.push_back(logicalLocation);
+            sectorOffset += ltl->sectorSize;
+
+            blockIdByLogicalSectorLocation[logicalLocation] = blockId;
+            blockId++;
+        }
+    }
+
+    totalBytes = sectorOffset;
+}
+
+static ConfigProto createTestConfig(unsigned numCylinders,
+    unsigned numHeads,
+    unsigned numSectors,
+    unsigned sectorSize)
+{
+    ConfigProto config;
+    auto* layout = config.mutable_layout();
+    layout->set_tracks(numCylinders);
+    layout->set_sides(numHeads);
+    auto* layoutData = layout->add_layoutdata();
+    layoutData->set_sector_size(sectorSize);
+    layoutData->mutable_physical()->set_count(numSectors);
+
+    return config;
+}
+
+DiskLayout::DiskLayout(unsigned numCylinders,
+    unsigned numHeads,
+    unsigned numSectors,
+    unsigned sectorSize):
+    DiskLayout(createTestConfig(numCylinders, numHeads, numSectors, sectorSize))
+{
+}
+
+DiskLayout::LayoutBounds DiskLayout::getPhysicalBounds() const
+{
+    return getBounds(std::views::keys(layoutByPhysicalLocation));
+}
+
+DiskLayout::LayoutBounds DiskLayout::getLogicalBounds() const
+{
+    return getBounds(std::views::keys(layoutByLogicalLocation));
 }

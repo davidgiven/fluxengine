@@ -44,22 +44,23 @@ int mainConvert(int argc, const char* argv[])
     auto locations = globalConfig()->drive().tracks();
     globalConfig().overrides()->set_tracks(locations);
 
-    auto physicalLocations = Layout::computePhysicalLocations();
+    auto diskLayout = createDiskLayout(globalConfig());
     auto [minCylinder, maxCylinder, minHead, maxHead] =
-        Layout::getBounds(physicalLocations);
+        diskLayout->getPhysicalBounds();
     log("CONVERT: seen cylinders {}..{}, heads {}..{}",
         minCylinder,
         maxCylinder,
         minHead,
         maxHead);
 
-    auto fluxSink = FluxSink::create(globalConfig());
+    auto fluxSinkFactory = FluxSinkFactory::create(globalConfig());
+    auto fluxSink = fluxSinkFactory->create();
 
-    for (const auto& physicalLocation : physicalLocations)
+    for (const auto& physicalLocation : diskLayout->physicalLocations)
     {
         auto fi = fluxSource->readFlux(physicalLocation);
         while (fi->hasNext())
-            fluxSink->writeFlux(physicalLocation, *fi->next());
+            fluxSink->addFlux(physicalLocation, *fi->next());
     }
 
     return 0;

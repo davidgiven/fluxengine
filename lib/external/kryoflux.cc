@@ -28,14 +28,6 @@ std::unique_ptr<Fluxmap> readStream(
 {
     std::string suffix = fmt::format("{:02}.{}.raw", track, side);
 
-    FILE* fp = fopen(dir.c_str(), "r");
-    if (fp)
-    {
-        fclose(fp);
-        int i = dir.find_last_of("/\\");
-        dir = dir.substr(0, i);
-    }
-
     DIR* dirp = opendir(dir.c_str());
     if (!dirp)
         error("cannot access path '{}'", dir);

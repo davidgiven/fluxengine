@@ -1,72 +1,180 @@
 #ifndef LAYOUT_H
 #define LAYOUT_H
 
-#include "lib/data/flux.h"
+#include "lib/data/disk.h"
 #include "lib/config/layout.pb.h"
+#include "lib/config/config.h"
 #include "lib/data/locations.h"
 
-class SectorListProto;
-class TrackInfo;
+class ConfigProto;
 
-class Layout
+struct LogicalTrackLayout
+{
+    /* Physical cylinder of the first element of the group. */
+    unsigned physicalCylinder;
+
+    /* Physical head of the first element of the group. */
+    unsigned physicalHead;
+
+    /* Size of this group. */
+    unsigned groupSize;
+
+    /* Logical cylinder of this track. */
+    unsigned logicalCylinder = 0;
+
+    /* Logical side of this track. */
+    unsigned logicalHead = 0;
+
+    /* The number of sectors in this track. */
+    unsigned numSectors = 0;
+
+    /* Number of bytes in a sector. */
+    unsigned sectorSize = 0;
+
+    /* Sector IDs in sector ID order. This is the order in which the appear in
+     * disk images. */
+    std::vector<unsigned> naturalSectorOrder;
+
+    /* Sector IDs in disk order. This is the order they are written to the disk.
+     */
+    std::vector<unsigned> diskSectorOrder;
+
+    /* Sector IDs in filesystem order. This is the order in which the filesystem
+     * uses them. */
+    std::vector<unsigned> filesystemSectorOrder;
+
+    /* Mapping of sector ID to filesystem ordering. */
+    std::map<unsigned, unsigned> sectorIdToFilesystemOrdering;
+
+    /* Mapping of sector ID to natural ordering. */
+    std::map<unsigned, unsigned> sectorIdToNaturalOrdering;
+};
+
+struct PhysicalTrackLayout
+{
+    /* Physical location of this track. */
+    unsigned physicalCylinder;
+
+    /* Physical side of this track. */
+    unsigned physicalHead;
+
+    /* Which member of the group this is. */
+    unsigned groupOffset;
+
+    /* The logical track that this track is part of. */
+    std::shared_ptr<const LogicalTrackLayout> logicalTrackLayout;
+};
+
+class DiskLayout
 {
 public:
-    /* Translates logical track numbering (the numbers actually written in the
-     * sector headers) to the track numbering on the actual drive, taking into
-     * account tpi settings.
-     */
-    static unsigned remapTrackPhysicalToLogical(unsigned physicalTrack);
-    static unsigned remapTrackLogicalToPhysical(unsigned logicalTrack);
+    DiskLayout(const ConfigProto& config = globalConfig());
 
-    /* Translates logical side numbering (the numbers actually written in the
-     * sector headers) to the sides used on the actual drive.
-     */
-    static unsigned remapSidePhysicalToLogical(unsigned physicalSide);
-    static unsigned remapSideLogicalToPhysical(unsigned logicalSide);
+    /* Makes a simplified layout for testing. */
 
-    /* Uses the layout and current track and heads settings to determine
-     * which physical tracks are going to be read from or written to.
-     */
-    static std::vector<CylinderHead> computePhysicalLocations();
+    DiskLayout(unsigned numCylinders,
+        unsigned numHeads,
+        unsigned numSectors,
+        unsigned sectorSize);
+
+public:
+    /* Logical size. */
+
+    unsigned numLogicalCylinders;
+    unsigned numLogicalHeads;
+
+    /* Physical size and properties. */
+
+    unsigned minPhysicalCylinder, maxPhysicalCylinder;
+    unsigned minPhysicalHead, maxPhysicalHead;
+    unsigned groupSize;  /* Number of physical cylinders per logical cylinder */
+    unsigned headBias;   /* Physical cylinder offset */
+    unsigned headWidth;  /* Width of the physical head */
+    bool swapSides;      /* Whether sides need to be swapped */
+    unsigned totalBytes; /* Total number of bytes on the disk. */
+
+    /* Physical and logical layouts by location. */
+
+    std::map<CylinderHead, std::shared_ptr<const PhysicalTrackLayout>>
+        layoutByPhysicalLocation;
+    std::map<CylinderHead, std::shared_ptr<const LogicalTrackLayout>>
+        layoutByLogicalLocation;
+
+    /* Ordered lists of physical and logical locations. */
+
+    std::vector<CylinderHead> logicalLocations;
+    std::vector<CylinderHead> logicalLocationsInFilesystemOrder;
+    std::vector<CylinderHead> physicalLocations;
+
+    /* Ordered lists of sector locations, plus the reverse mapping. */
+
+    std::vector<LogicalLocation> logicalSectorLocationsInFilesystemOrder;
+    std::map<LogicalLocation, unsigned> blockIdByLogicalSectorLocation;
+    std::vector<CylinderHeadSector> physicalSectorLocationsInFilesystemOrder;
+
+    /* Mapping from logical location to sector offset and back again. */
+
+    std::map<unsigned, LogicalLocation> logicalSectorLocationBySectorOffset;
+    std::map<LogicalLocation, unsigned> sectorOffsetByLogicalSectorLocation;
+
+public:
+    unsigned remapCylinderPhysicalToLogical(unsigned physicalCylinder) const
+    {
+        return (physicalCylinder - headBias) / groupSize;
+    }
+
+    unsigned remapCylinderLogicalToPhysical(unsigned logicalCylinder) const
+    {
+        return headBias + logicalCylinder * groupSize;
+    }
+
+    unsigned remapHeadPhysicalToLogical(unsigned physicalHead) const
+    {
+        return physicalHead ^ swapSides;
+    }
+
+    unsigned remapHeadLogicalToPhysical(unsigned logicalHead) const
+    {
+        return logicalHead ^ swapSides;
+    }
 
     /* Given a list of CylinderHead locations, determines the minimum and
      * maximum track and side settings. */
     struct LayoutBounds
     {
-        int minTrack, maxTrack, minSide, maxSide;
+        std::strong_ordering operator<=>(
+            const LayoutBounds& other) const = default;
+
+        int minCylinder, maxCylinder, minHead, maxHead;
     };
-    static LayoutBounds getBounds(const std::vector<CylinderHead>& locations);
 
-    /* Returns a series of <track, side> pairs representing the filesystem
-     * ordering of the disk, in logical numbers. */
-    static std::vector<std::pair<int, int>> getTrackOrdering(
-        LayoutProto::Order ordering,
-        unsigned guessedTracks = 0,
-        unsigned guessedSides = 0);
+    static LayoutBounds getBounds(std::ranges::view auto keys)
+    {
+        LayoutBounds r{.minCylinder = INT_MAX,
+            .maxCylinder = INT_MIN,
+            .minHead = INT_MAX,
+            .maxHead = INT_MIN};
 
-    /* Returns the layout of a given track. */
-    static std::shared_ptr<const TrackInfo> getLayoutOfTrack(
-        unsigned logicalTrack, unsigned logicalHead);
+        for (const auto& ch : keys)
+        {
+            r.minCylinder = std::min<int>(r.minCylinder, ch.cylinder);
+            r.maxCylinder = std::max<int>(r.maxCylinder, ch.cylinder);
+            r.minHead = std::min<int>(r.minHead, ch.head);
+            r.maxHead = std::max<int>(r.maxHead, ch.head);
+        }
 
-    /* Returns the layout of a given track via physical location. */
-    static std::shared_ptr<const TrackInfo> getLayoutOfTrackPhysical(
-        unsigned physicalTrack, unsigned physicalSide);
+        return r;
+    }
 
-    /* Returns the layout of a given track via physical location. */
-    static std::shared_ptr<const TrackInfo> getLayoutOfTrackPhysical(
-        const CylinderHead& physicalLocation);
-
-    /* Returns the layouts of a multiple tracks via physical location. */
-    static std::vector<std::shared_ptr<const TrackInfo>>
-    getLayoutOfTracksPhysical(const std::vector<CylinderHead>& locations);
-
-    /* Expand a SectorList into the actual sector IDs. */
-    static std::vector<unsigned> expandSectorList(
-        const SectorListProto& sectorsProto);
-
-    /* Return the head width of the current drive. */
-    static int getHeadWidth();
+    LayoutBounds getPhysicalBounds() const;
+    LayoutBounds getLogicalBounds() const;
 };
+
+static std::shared_ptr<DiskLayout> createDiskLayout(
+    const ConfigProto& config = globalConfig())
+{
+    return std::make_shared<DiskLayout>(config);
+}
 
 class TrackInfo
 {
@@ -79,23 +187,23 @@ private:
     TrackInfo& operator=(const TrackInfo&);
 
 public:
-    unsigned numTracks = 0;
-    unsigned numSides = 0;
+    unsigned numCylinders = 0;
+    unsigned numHeads = 0;
 
     /* The number of sectors in this track. */
     unsigned numSectors = 0;
 
     /* Physical location of this track. */
-    unsigned physicalTrack = 0;
+    unsigned physicalCylinder = 0;
 
     /* Physical side of this track. */
-    unsigned physicalSide = 0;
+    unsigned physicalHead = 0;
 
     /* Logical location of this track. */
-    unsigned logicalTrack = 0;
+    unsigned logicalCylinder = 0;
 
     /* Logical side of this track. */
-    unsigned logicalSide = 0;
+    unsigned logicalHead = 0;
 
     /* The number of physical tracks which need to be written for one logical
      * track. */

@@ -104,18 +104,6 @@ option_group {
 	comment: "$formats"
 
 	option {
-		name: "auto"
-		comment: 'try to autodetect the format (unreliable)'
-		set_by_default: true
-
-		config {
-			layout {
-				format_type: FORMATTYPE_80TRACK
-			}
-		}
-	}
-
-	option {
 		name: "160"
 		comment: '160kB 5.25" 40-track 8-sector SSDD'
 
@@ -350,6 +338,7 @@ option_group {
 	option {
 		name: "1440"
 		comment: '1440kB 3.5" 80-track 18-sector DSHD'
+		set_by_default: true
 
 		config {
 			layout {

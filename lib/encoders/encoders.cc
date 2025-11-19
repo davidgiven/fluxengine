@@ -5,6 +5,7 @@
 #include "lib/encoders/encoders.pb.h"
 #include "lib/config/proto.h"
 #include "lib/data/layout.h"
+#include "lib/data/locations.h"
 #include "lib/data/image.h"
 #include "protocol.h"
 
@@ -23,25 +24,24 @@ nanoseconds_t Encoder::calculatePhysicalClockPeriod(
 }
 
 std::shared_ptr<const Sector> Encoder::getSector(
-    std::shared_ptr<const TrackInfo>& trackInfo,
-    const Image& image,
-    unsigned sectorId)
+    const CylinderHead& ch, const Image& image, unsigned sectorId)
 {
-    return image.get(trackInfo->logicalTrack, trackInfo->logicalSide, sectorId);
+    return image.get(ch.cylinder, ch.head, sectorId);
 }
 
 std::vector<std::shared_ptr<const Sector>> Encoder::collectSectors(
-    std::shared_ptr<const TrackInfo>& trackLayout, const Image& image)
+    const LogicalTrackLayout& ltl, const Image& image)
 {
     std::vector<std::shared_ptr<const Sector>> sectors;
 
-    for (unsigned sectorId : trackLayout->diskSectorOrder)
+    for (unsigned sectorId : ltl.diskSectorOrder)
     {
-        const auto& sector = getSector(trackLayout, image, sectorId);
+        const auto& sector =
+            getSector({ltl.logicalCylinder, ltl.logicalHead}, image, sectorId);
         if (!sector)
             error("sector {}.{}.{} is missing from the image",
-                trackLayout->logicalTrack,
-                trackLayout->logicalSide,
+                ltl.logicalCylinder,
+                ltl.logicalHead,
                 sectorId);
         sectors.push_back(sector);
     }

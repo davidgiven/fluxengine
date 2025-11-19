@@ -32,9 +32,6 @@ def protoencode_single(self, name, srcs: Targets, proto, include, symbol):
         outs=[f"={name}.cc"],
         deps=[r],
         commands=[
-            # Materialise symbolic links (for Windows).
-            "cp -L $[ins[0]] $[ins[0]].real",
-            "mv $[ins[0]].real $[ins[0]]",
             "$[deps[0]] $[ins] $[outs] " + symbol
         ],
         label="PROTOENCODE",

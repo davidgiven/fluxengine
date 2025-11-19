@@ -119,8 +119,14 @@ public:
 
                 auto keys = std::views::keys(_v2data);
                 std::vector<CylinderHead> chs{keys.begin(), keys.end()};
-                auto [minCylinder, maxCylinder, minHead, maxHead] =
-                    Layout::getBounds(chs);
+                unsigned minCylinder = std::ranges::min(
+                    chs | std::views::transform(&CylinderHead::cylinder));
+                unsigned maxCylinder = std::ranges::min(
+                    chs | std::views::transform(&CylinderHead::cylinder));
+                unsigned minHead = std::ranges::min(
+                    chs | std::views::transform(&CylinderHead::head));
+                unsigned maxHead = std::ranges::min(
+                    chs | std::views::transform(&CylinderHead::head));
                 log("A2R: reading A2R {} file with {} cylinders and {} head{}",
                     (disktype == 1)   ? "Apple II"
                     : (disktype == 2) ? "normal"

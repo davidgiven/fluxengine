@@ -44,6 +44,13 @@ void FluxmapReader::skipToEvent(int event)
     findEvent(event, ticks);
 }
 
+int FluxmapReader::getCurrentEvent()
+{
+    if (eof())
+        return F_EOF;
+    return _bytes[_pos.bytes] & 0xc0;
+}
+
 bool FluxmapReader::findEvent(int event, unsigned& ticks)
 {
     ticks = 0;

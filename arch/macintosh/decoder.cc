@@ -5,6 +5,7 @@
 #include "protocol.h"
 #include "lib/decoders/decoders.h"
 #include "lib/data/sector.h"
+#include "lib/data/layout.h"
 #include "arch/macintosh/macintosh.h"
 #include "lib/core/bytes.h"
 #include "fmt/format.h"
@@ -146,7 +147,7 @@ public:
         auto header = toBytes(readRawBits(7 * 8)).slice(0, 7);
 
         uint8_t encodedTrack = decode_data_gcr(header[0]);
-        if (encodedTrack != (_sector->physicalTrack & 0x3f))
+        if (encodedTrack != (_ltl->logicalCylinder & 0x3f))
             return;
 
         uint8_t encodedSector = decode_data_gcr(header[1]);
@@ -157,8 +158,8 @@ public:
         if (encodedSector > 11)
             return;
 
-        _sector->logicalTrack = _sector->physicalTrack;
-        _sector->logicalSide = decode_side(encodedSide);
+        _sector->logicalCylinder = _ltl->logicalCylinder;
+        _sector->logicalHead = decode_side(encodedSide);
         _sector->logicalSector = encodedSector;
         uint8_t gotsum =
             (encodedTrack ^ encodedSector ^ encodedSide ^ formatByte) & 0x3f;

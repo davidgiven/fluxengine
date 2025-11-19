@@ -43,8 +43,8 @@ public:
 
         ByteReader br(bytes);
         uint8_t track = br.read_8();
-        _sector->logicalTrack = track >> 1;
-        _sector->logicalSide = track & 1;
+        _sector->logicalCylinder = track >> 1;
+        _sector->logicalHead = track & 1;
         br.skip(1); /* seems always to be 1 */
         _sector->logicalSector = br.read_8();
         uint8_t wantChecksum = br.read_8();

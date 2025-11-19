@@ -6,6 +6,7 @@
 #include "lib/decoders/decoders.h"
 #include "lib/encoders/encoders.h"
 #include "lib/data/sector.h"
+#include "lib/data/layout.h"
 #include "lib/config/proto.h"
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/fluxsource/fluxsource.h"
@@ -53,22 +54,25 @@ int mainWrite(int argc, const char* argv[])
 
     auto reader = ImageReader::create(globalConfig());
     std::shared_ptr<Image> image = reader->readImage();
+    globalConfig().overrides()->MergeFrom(reader->getExtraConfig());
 
+    auto diskLayout = createDiskLayout();
     auto encoder = Arch::createEncoder(globalConfig());
-    auto fluxSink = FluxSink::create(globalConfig());
+    auto fluxSinkFactory = FluxSinkFactory::create(globalConfig());
 
     std::shared_ptr<Decoder> decoder;
     std::shared_ptr<FluxSource> verificationFluxSource;
-    if (globalConfig().hasDecoder() && fluxSink->isHardware() && verify)
+    if (globalConfig().hasDecoder() && fluxSinkFactory->isHardware() && verify)
     {
         decoder = Arch::createDecoder(globalConfig());
         verificationFluxSource =
             FluxSource::create(globalConfig().getVerificationFluxSourceProto());
     }
 
-    writeDiskCommand(*image,
+    writeDiskCommand(*diskLayout,
+        *image,
         *encoder,
-        *fluxSink,
+        *fluxSinkFactory,
         decoder.get(),
         verificationFluxSource.get());
 

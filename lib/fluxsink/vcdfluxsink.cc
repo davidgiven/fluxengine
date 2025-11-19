@@ -11,18 +11,16 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-class VcdFluxSink : public FluxSink
+class VcdSink : public FluxSink
 {
 public:
-    VcdFluxSink(const VcdFluxSinkProto& config): _config(config) {}
+    VcdSink(const std::string& directory): _directory(directory) {}
 
-public:
-    void writeFlux(int track, int head, const Fluxmap& fluxmap) override
+    void addFlux(int track, int head, const Fluxmap& fluxmap) override
     {
-        mkdir(_config.directory().c_str(), 0744);
+        mkdir(_directory.c_str(), 0744);
         std::ofstream of(
-            fmt::format(
-                "{}/c{:02d}.h{:01d}.vcd", _config.directory(), track, head),
+            fmt::format("{}/c{:02d}.h{:01d}.vcd", _directory, track, head),
             std::ios::out | std::ios::binary);
         if (!of.is_open())
             error("cannot open output file");
@@ -64,6 +62,26 @@ public:
         of << "\n";
     }
 
+private:
+    const std::string _directory;
+};
+
+class VcdFluxSinkFactory : public FluxSinkFactory
+{
+public:
+    VcdFluxSinkFactory(const VcdFluxSinkProto& config): _config(config) {}
+
+    std::unique_ptr<FluxSink> create() override
+    {
+        return std::make_unique<VcdSink>(_config.directory());
+    }
+
+    std::optional<std::filesystem::path> getPath() const override
+    {
+        return std::make_optional(_config.directory());
+    }
+
+public:
     operator std::string() const override
     {
         return fmt::format("vcd({})", _config.directory());
@@ -73,8 +91,8 @@ private:
     const VcdFluxSinkProto& _config;
 };
 
-std::unique_ptr<FluxSink> FluxSink::createVcdFluxSink(
+std::unique_ptr<FluxSinkFactory> FluxSinkFactory::createVcdFluxSinkFactory(
     const VcdFluxSinkProto& config)
 {
-    return std::unique_ptr<FluxSink>(new VcdFluxSink(config));
+    return std::unique_ptr<FluxSinkFactory>(new VcdFluxSinkFactory(config));
 }

@@ -5,8 +5,11 @@
 #include "fmt/format.h"
 #include "tests.h"
 #include <sstream>
+#include "snowhouse/snowhouse.h"
 
-static Fluxmap fluxmap(Bytes{F_DESYNC,
+using namespace snowhouse;
+
+static const Fluxmap fluxmap(Bytes{F_DESYNC,
     F_BIT_PULSE | 0x30,
     F_BIT_INDEX | 0x30,
     F_BIT_PULSE | F_BIT_INDEX | 0x30,
@@ -59,7 +62,7 @@ void test_read_pulses()
     ASSERT_READ_SPECIFIC_EVENT(F_BIT_PULSE, 0x60);
     ASSERT_READ_SPECIFIC_EVENT(F_BIT_PULSE, 0x60);
     ASSERT_READ_SPECIFIC_EVENT(F_BIT_PULSE, 0x30);
-    ASSERT_READ_SPECIFIC_EVENT(F_BIT_PULSE, 0x90);
+    ASSERT_READ_SPECIFIC_EVENT(F_BIT_PULSE, 0x90); /* EOF event */
 }
 
 void test_read_indices()
@@ -67,7 +70,7 @@ void test_read_indices()
     FluxmapReader fmr(fluxmap);
     ASSERT_READ_SPECIFIC_EVENT(F_BIT_INDEX, 0x60);
     ASSERT_READ_SPECIFIC_EVENT(F_BIT_INDEX, 0x30);
-    ASSERT_READ_SPECIFIC_EVENT(F_BIT_INDEX, 6 * 0x30);
+    ASSERT_READ_SPECIFIC_EVENT(F_BIT_INDEX, 6 * 0x30); /* EOF event */
 }
 
 void test_read_desyncs()
@@ -76,7 +79,13 @@ void test_read_desyncs()
     ASSERT_READ_SPECIFIC_EVENT(F_DESYNC, 0);
     ASSERT_READ_SPECIFIC_EVENT(F_DESYNC, 0xf0);
     ASSERT_READ_SPECIFIC_EVENT(F_DESYNC, 0x60);
-    ASSERT_READ_SPECIFIC_EVENT(F_DESYNC, 0x60);
+    ASSERT_READ_SPECIFIC_EVENT(F_DESYNC, 0x60); /* EOF event */
+}
+
+void test_index_marks()
+{
+    AssertThat(fluxmap.getIndexMarks(),
+        Equals(std::vector<nanoseconds_t>{8000, 12000}));
 }
 
 int main(int argc, const char* argv[])
@@ -85,5 +94,6 @@ int main(int argc, const char* argv[])
     test_read_pulses();
     test_read_indices();
     test_read_desyncs();
+    test_index_marks();
     return 0;
 }

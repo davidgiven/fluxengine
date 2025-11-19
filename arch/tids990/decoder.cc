@@ -64,8 +64,8 @@ public:
         uint16_t gotChecksum =
             crc16(CCITT_POLY, bytes.slice(1, TIDS990_SECTOR_RECORD_SIZE - 3));
 
-        _sector->logicalSide = br.read_8() >> 3;
-        _sector->logicalTrack = br.read_8();
+        _sector->logicalHead = br.read_8() >> 3;
+        _sector->logicalCylinder = br.read_8();
         br.read_8(); /* number of sectors per track */
         _sector->logicalSector = br.read_8();
         br.read_be16(); /* sector size */

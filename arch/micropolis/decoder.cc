@@ -4,6 +4,7 @@
 #include "lib/data/fluxpattern.h"
 #include "lib/decoders/decoders.h"
 #include "lib/data/sector.h"
+#include "lib/data/layout.h"
 #include "arch/micropolis/micropolis.h"
 #include "lib/core/bytes.h"
 #include "fmt/format.h"
@@ -222,14 +223,14 @@ public:
         if (syncByte != 0xFF)
             return;
 
-        _sector->logicalTrack = br.read_8();
-        _sector->logicalSide = _sector->physicalSide;
+        _sector->logicalCylinder = br.read_8();
+        _sector->logicalHead = _ltl->logicalHead;
         _sector->logicalSector = br.read_8();
         if (_sector->logicalSector > 15)
             return;
-        if (_sector->logicalTrack > 76)
+        if (_sector->logicalCylinder > 76)
             return;
-        if (_sector->logicalTrack != _sector->physicalTrack)
+        if (_sector->logicalCylinder != _ltl->logicalCylinder)
             return;
 
         br.read(10); /* OS data or padding */

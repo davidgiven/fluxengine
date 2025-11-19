@@ -37,6 +37,15 @@ std::map<V, K> reverseMap(const std::map<K, V>& map)
     return reverse;
 }
 
+template <typename K, typename V>
+std::map<K, std::vector<V>> multimapToMapOfVectors(const std::multimap<K, V>& multimap)
+{
+    std::map<K, std::vector<V>> results;
+    for (auto& [k, v] : multimap)
+        results[k].push_back(v);
+    return results;
+}
+
 /* If set, any running job will terminate as soon as possible (with an error).
  */
 

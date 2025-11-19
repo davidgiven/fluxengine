@@ -4,7 +4,7 @@
 #include "lib/config/config.h"
 #include "lib/decoders/decoders.h"
 #include "lib/data/fluxmapreader.h"
-#include "lib/data/flux.h"
+#include "lib/data/disk.h"
 #include "protocol.h"
 #include "lib/decoders/rawbits.h"
 #include "lib/data/sector.h"
@@ -13,20 +13,25 @@
 #include "lib/data/layout.h"
 #include <numeric>
 
-std::shared_ptr<TrackDataFlux> Decoder::decodeToSectors(
+std::shared_ptr<Track> Decoder::decodeToSectors(
     std::shared_ptr<const Fluxmap> fluxmap,
-    std::shared_ptr<const TrackInfo>& trackInfo)
+    const std::shared_ptr<const PhysicalTrackLayout>& ptl)
 {
-    _trackdata = std::make_shared<TrackDataFlux>();
+    _ltl = ptl->logicalTrackLayout;
+
+    _trackdata = std::make_shared<Track>();
     _trackdata->fluxmap = fluxmap;
-    _trackdata->trackInfo = trackInfo;
+    _trackdata->ptl = ptl;
+    _trackdata->ltl = ptl->logicalTrackLayout;
 
     FluxmapReader fmr(*fluxmap);
     _fmr = &fmr;
 
     auto newSector = [&]
     {
-        _sector = std::make_shared<Sector>(trackInfo, 0);
+        _sector = std::make_shared<Sector>(LogicalLocation{0, 0, 0});
+        _sector->physicalLocation = std::make_optional<CylinderHead>(
+            ptl->physicalCylinder, ptl->physicalHead);
         _sector->status = Sector::MISSING;
     };
 
@@ -67,6 +72,7 @@ std::shared_ptr<TrackDataFlux> Decoder::decodeToSectors(
 
             before = fmr.tell();
             decodeDataRecord();
+            _sector->data = _sector->data.slice(0, _ltl->sectorSize);
             after = fmr.tell();
 
             if (_sector->status != Sector::DATA_MISSING)
@@ -84,11 +90,7 @@ std::shared_ptr<TrackDataFlux> Decoder::decodeToSectors(
         }
 
         if (_sector->status != Sector::MISSING)
-        {
-            auto trackLayout = Layout::getLayoutOfTrack(
-                _sector->logicalTrack, _sector->logicalSide);
-            _trackdata->sectors.push_back(_sector);
-        }
+            _trackdata->allSectors.push_back(_sector);
     }
 
     return _trackdata;

@@ -5,7 +5,7 @@
 
 class ConfigProto;
 class ExecEvent;
-class DiskFlux;
+class Disk;
 class TrackFlux;
 class wxSimplebook;
 class Context;
@@ -193,7 +193,7 @@ public:
     virtual void SetVisualiserMode(int head, int track, int mode) = 0;
     virtual void SetVisualiserTrackData(
         std::shared_ptr<const TrackFlux> track) = 0;
-    virtual void SetDisk(std::shared_ptr<const DiskFlux> disk) = 0;
+    virtual void SetDisk(std::shared_ptr<const Disk> disk) = 0;
 };
 
 class BrowserPanel : public PanelComponent

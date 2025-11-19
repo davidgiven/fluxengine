@@ -4,6 +4,7 @@
 #include "lib/algorithms/readerwriter.h"
 #include "lib/data/fluxmap.h"
 #include "lib/data/sector.h"
+#include "lib/data/layout.h"
 #include "lib/config/proto.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/fluxsink/fluxsink.h"
@@ -50,8 +51,9 @@ int mainRawWrite(int argc, const char* argv[])
         error("you can't use rawwrite to read from hardware");
 
     auto fluxSource = FluxSource::create(globalConfig());
-    auto fluxSink = FluxSink::create(globalConfig());
+    auto fluxSinkFactory = FluxSinkFactory::create(globalConfig());
+    auto diskLayout = createDiskLayout(globalConfig());
 
-    writeRawDiskCommand(*fluxSource, *fluxSink);
+    writeRawDiskCommand(*diskLayout, *fluxSource, *fluxSinkFactory);
     return 0;
 }

@@ -29,9 +29,10 @@ static std::string modeToString(BYTE attrib)
 class FatFsFilesystem : public Filesystem
 {
 public:
-    FatFsFilesystem(
-        const FatFsProto& config, std::shared_ptr<SectorInterface> sectors):
-        Filesystem(sectors),
+    FatFsFilesystem(const FatFsProto& config,
+        const std::shared_ptr<const DiskLayout>& diskLayout,
+        std::shared_ptr<SectorInterface> sectors):
+        Filesystem(diskLayout, sectors),
         _config(config)
     {
     }
@@ -336,7 +337,10 @@ DWORD get_fattime(void)
 }
 
 std::unique_ptr<Filesystem> Filesystem::createFatFsFilesystem(
-    const FilesystemProto& config, std::shared_ptr<SectorInterface> sectors)
+    const FilesystemProto& config,
+    const std::shared_ptr<const DiskLayout>& diskLayout,
+    std::shared_ptr<SectorInterface> sectors)
 {
-    return std::make_unique<FatFsFilesystem>(config.fatfs(), sectors);
+    return std::make_unique<FatFsFilesystem>(
+        config.fatfs(), diskLayout, sectors);
 }

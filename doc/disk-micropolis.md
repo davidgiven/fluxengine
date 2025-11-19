@@ -52,7 +52,7 @@ need to apply extra options to change the format if desired.
 
 ## Options
 
-  - :
+  - $format:
       - `143`: 143kB 5.25" SSDD hard-sectored; Micropolis MetaFloppy Mod I
       - `287`: 287kB 5.25" DSDD hard-sectored; Micropolis MetaFloppy Mod I
       - `315`: 315kB 5.25" SSDD hard-sectored; Micropolis MetaFloppy Mod II

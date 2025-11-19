@@ -93,9 +93,10 @@ private:
     };
 
 public:
-    RolandFsFilesystem(
-        const RolandFsProto& config, std::shared_ptr<SectorInterface> sectors):
-        Filesystem(sectors),
+    RolandFsFilesystem(const RolandFsProto& config,
+        const std::shared_ptr<const DiskLayout>& diskLayout,
+        std::shared_ptr<SectorInterface> sectors):
+        Filesystem(diskLayout, sectors),
         _config(config)
     {
     }
@@ -421,7 +422,10 @@ private:
 };
 
 std::unique_ptr<Filesystem> Filesystem::createRolandFsFilesystem(
-    const FilesystemProto& config, std::shared_ptr<SectorInterface> sectors)
+    const FilesystemProto& config,
+    const std::shared_ptr<const DiskLayout>& diskLayout,
+    std::shared_ptr<SectorInterface> sectors)
 {
-    return std::make_unique<RolandFsFilesystem>(config.roland(), sectors);
+    return std::make_unique<RolandFsFilesystem>(
+        config.roland(), diskLayout, sectors);
 }

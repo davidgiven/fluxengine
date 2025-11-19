@@ -1,9 +1,23 @@
 comment: 'Options which can be applied everywhere.'
 is_extension: true
 
+option {
+	comment: "High density"
+	name: "hd"
+	applicability: HARDWARE_SOURCESINK
+	set_by_default: true
+
+	config {
+		drive {
+			high_density: true
+		}
+	}
+}
+	
 option_group {
 	comment: "Drive type"
     name: "drivetype"
+	applicability: ANY_SOURCESINK
 
 	option {
 		name: "80"
@@ -11,6 +25,10 @@ option_group {
         set_by_default: true
 
 		config {
+            drive {
+                tracks: "c0-80h0-1"
+                drive_type: DRIVETYPE_80TRACK
+            }
 		}
 	}
 
@@ -40,8 +58,46 @@ option_group {
 }
 
 option_group {
+	comment: "Drive rotational speed"
+    name: "drivespeed"
+	applicability: ANY_SOURCESINK
+	
+	option {
+		name: "auto"
+		comment: 'Autodetect from hardware'
+		set_by_default: true
+
+		config {
+		}
+	}
+
+	option {
+		name: "300"
+		comment: '300rpm (200ms)'
+
+		config {
+			drive {
+				rotational_period_ms: 200
+			}
+		}
+	}
+
+	option {
+		name: "360"
+		comment: '360rpm (166ms)'
+
+		config {
+			drive {
+				rotational_period_ms: 166
+			}
+		}
+	}
+}
+
+option_group {
     comment: 'Bus interface'
     name: "bus"
+	applicability: HARDWARE_SOURCESINK
 
 	option {
 		name: "pc"

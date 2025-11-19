@@ -36,8 +36,8 @@ public:
             decodeFmMfm(rawbits).slice(0, AESLANIER_RECORD_SIZE);
         const auto& reversed = bytes.reverseBits();
 
-        _sector->logicalTrack = reversed[1];
-        _sector->logicalSide = 0;
+        _sector->logicalCylinder = reversed[1];
+        _sector->logicalHead = 0;
         _sector->logicalSector = reversed[2];
 
         /* Check header 'checksum' (which seems far too simple to mean much). */

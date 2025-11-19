@@ -104,15 +104,15 @@ export(
     name="all",
     items={
         "fluxengine$(EXT)": "src+fluxengine",
-        "fluxengine-gui$(EXT)": "src/gui",
+        "fluxengine-gui$(EXT)": "src/gui2",
         "brother120tool$(EXT)": "tools+brother120tool",
         "brother240tool$(EXT)": "tools+brother240tool",
         "upgrade-flux-file$(EXT)": "tools+upgrade-flux-file",
     }
     | (
         {
-            "FluxEngine.pkg": "src/gui+fluxengine_pkg",
-            "FluxEngine.app.zip": "src/gui+fluxengine_app_zip",
+            "FluxEngine.pkg": "src/gui2+fluxengine_pkg",
+            "FluxEngine.app.zip": "src/gui2+fluxengine_app_zip",
         }
         if config.osx
         else {}

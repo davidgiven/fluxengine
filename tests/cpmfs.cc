@@ -6,6 +6,7 @@
 #include "lib/data/image.h"
 #include "lib/config/proto.h"
 #include "lib/data/sector.h"
+#include "lib/data/layout.h"
 #include "snowhouse/snowhouse.h"
 #include <google/protobuf/text_format.h>
 
@@ -13,11 +14,21 @@ using namespace snowhouse;
 
 static Bytes blank_dirent = Bytes{0xe5} * 32;
 
+/* The layout must use one cylinder per CP/M block (eight sectors). */
+
+static std::shared_ptr<const DiskLayout> diskLayout =
+    std::make_shared<DiskLayout>(10, 1, 8, 256);
+
 namespace
 {
     class TestSectorInterface : public SectorInterface
     {
     public:
+        TestSectorInterface()
+        {
+            _image.addMissingSectors(*diskLayout, true);
+        }
+
         std::shared_ptr<const Sector> get(
             unsigned track, unsigned side, unsigned sectorId) override
         {
@@ -125,7 +136,7 @@ static void testPartialExtent()
 {
     auto sectors = std::make_shared<TestSectorInterface>();
     auto fs = Filesystem::createCpmFsFilesystem(
-        globalConfig()->filesystem(), sectors);
+        globalConfig()->filesystem(), diskLayout, sectors);
 
     setBlock(sectors,
         0,
@@ -145,7 +156,7 @@ static void testLogicalExtents()
 {
     auto sectors = std::make_shared<TestSectorInterface>();
     auto fs = Filesystem::createCpmFsFilesystem(
-        globalConfig()->filesystem(), sectors);
+        globalConfig()->filesystem(), diskLayout, sectors);
 
     setBlock(sectors,
         0,
@@ -169,7 +180,7 @@ static void testBitmap()
 {
     auto sectors = std::make_shared<TestSectorInterface>();
     auto fs = Filesystem::createCpmFsFilesystem(
-        globalConfig()->filesystem(), sectors);
+        globalConfig()->filesystem(), diskLayout, sectors);
 
     setBlock(sectors,
         0,

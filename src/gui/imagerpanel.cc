@@ -96,12 +96,12 @@ public:
                 {
                     auto* fluxSource = GetContext().GetFluxSource();
                     auto* decoder = GetContext().GetDecoder();
-                    auto diskflux = readDiskCommand(*fluxSource, *decoder);
+                    auto disk = readDiskCommand(*fluxSource, *decoder);
 
                     runOnUiThread(
                         [&]()
                         {
-                            visualiser->SetDiskData(diskflux);
+                            visualiser->SetDiskData(disk);
                         });
                 });
         }
@@ -143,11 +143,12 @@ public:
                 {
                     auto image = GetContext().GetImageReader()->readImage();
                     auto* encoder = GetContext().GetEncoder();
-                    auto* fluxSink = GetContext().GetFluxSink();
+                    auto* fluxSinkFactory = GetContext().GetFluxSink();
 
                     Decoder* decoder = nullptr;
                     FluxSource* verificationFluxSource;
-                    if (globalConfig().hasDecoder() && fluxSink->isHardware())
+                    if (globalConfig().hasDecoder() &&
+                        fluxSinkFactory->isHardware())
                     {
                         decoder = GetContext().GetDecoder();
                         verificationFluxSource =
@@ -156,7 +157,7 @@ public:
 
                     writeDiskCommand(*image,
                         *encoder,
-                        *fluxSink,
+                        *fluxSinkFactory,
                         decoder,
                         verificationFluxSource);
                 });
@@ -213,7 +214,7 @@ public:
             histogram->Redraw(*(*trackdata->trackDatas.begin())->fluxmap, 0);
     }
 
-    void SetDisk(std::shared_ptr<const DiskFlux> diskdata) override
+    void SetDisk(std::shared_ptr<const Disk> diskdata) override
     {
         _currentDisk = diskdata;
     }
@@ -289,9 +290,9 @@ public:
                 {
                     auto fluxSource =
                         FluxSource::createMemoryFluxSource(*_currentDisk);
-                    auto fluxSink =
-                        FluxSink::create(globalConfig()->flux_sink());
-                    writeRawDiskCommand(*fluxSource, *fluxSink);
+                    auto fluxSinkFactory =
+                        FluxSinkFactory::create(globalConfig()->flux_sink());
+                    writeRawDiskCommand(*fluxSource, *fluxSinkFactory);
                 });
         }
         catch (const ErrorException& e)
@@ -307,7 +308,7 @@ public:
 
 private:
     int _state = STATE_DEAD;
-    std::shared_ptr<const DiskFlux> _currentDisk;
+    std::shared_ptr<const Disk> _currentDisk;
 };
 
 ImagerPanel* ImagerPanel::Create(MainWindow* mainWindow, wxSimplebook* parent)

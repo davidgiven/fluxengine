@@ -42,6 +42,7 @@ public:
         return (_fluxmap.duration());
     }
 
+    int getCurrentEvent();
     void getNextEvent(int& event, unsigned& ticks);
     void skipToEvent(int event);
     bool findEvent(int event, unsigned& ticks);

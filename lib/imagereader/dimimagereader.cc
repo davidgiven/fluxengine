@@ -141,12 +141,12 @@ public:
         image->calculateSize();
         const Geometry& geometry = image->getGeometry();
         log("DIM: read {} tracks, {} sides, {} kB total",
-            geometry.numTracks,
-            geometry.numSides,
+            geometry.numCylinders,
+            geometry.numHeads,
             ((int)inputFile.tellg() - 256) / 1024);
 
-        layout->set_tracks(geometry.numTracks);
-        layout->set_sides(geometry.numSides);
+        layout->set_tracks(geometry.numCylinders);
+        layout->set_sides(geometry.numHeads);
 
         return image;
     }

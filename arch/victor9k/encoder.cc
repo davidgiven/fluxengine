@@ -112,7 +112,7 @@ static void write_sector(std::vector<bool>& bits,
     write_one_bits(bits, cursor, trackdata.pre_header_sync_bits());
     write_bits(bits, cursor, VICTOR9K_SECTOR_RECORD, 10);
 
-    uint8_t encodedTrack = sector.logicalTrack | (sector.logicalSide << 7);
+    uint8_t encodedTrack = sector.logicalCylinder | (sector.logicalHead << 7);
     uint8_t encodedSector = sector.logicalSector;
     write_bytes(bits,
         cursor,
@@ -164,13 +164,12 @@ private:
     }
 
 public:
-    std::unique_ptr<Fluxmap> encode(std::shared_ptr<const TrackInfo>& trackInfo,
+    std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout& ltl,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
         Victor9kEncoderProto::TrackdataProto trackdata;
-        getTrackFormat(
-            trackdata, trackInfo->logicalTrack, trackInfo->logicalSide);
+        getTrackFormat(trackdata, ltl.logicalCylinder, ltl.logicalHead);
 
         unsigned bitsPerRevolution = (trackdata.rotational_period_ms() * 1e3) /
                                      trackdata.clock_period_us();

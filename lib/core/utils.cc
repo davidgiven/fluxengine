@@ -17,6 +17,11 @@ void ErrorException::print() const
     std::cerr << message << '\n';
 }
 
+const char* ErrorException::what() const throw()
+{
+    return message.c_str();
+}
+
 std::string join(
     const std::vector<std::string>& values, const std::string& separator)
 {

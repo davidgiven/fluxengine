@@ -76,8 +76,8 @@ public:
         const auto& bytes = decode(readRawBits(6 * 10));
 
         _sector->logicalSector = bytes[2];
-        _sector->logicalSide = 0;
-        _sector->logicalTrack = bytes[0];
+        _sector->logicalHead = 0;
+        _sector->logicalCylinder = bytes[0];
 
         uint16_t wantChecksum = bytes.reader().seek(4).read_be16();
         uint16_t gotChecksum = crc16(CCITT_POLY, 0xef21, bytes.slice(0, 4));
