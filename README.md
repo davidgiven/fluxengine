@@ -14,32 +14,37 @@ the excellent [ImHex](https://imhex.werwolv.net/), which is substantially better
 What?
 -----
 
-The FluxEngine is a very cheap USB floppy disk interface capable of reading and
-writing exotic non-PC floppy disk formats. It allows you to use a conventional
-PC drive to accept Amiga disks, CLV Macintosh disks, bizarre 128-sector CP/M
-disks, and other weird and bizarre formats. (Although not all of these are
-supported yet. I could really use samples.)
+FluxEngine is two things:
 
-The hardware consists of a single, commodity part with a floppy drive
-connector soldered onto it. No ordering custom boards, no fiddly surface
-mount assembly, and no fuss: nineteen simpler solder joints and you're done.
-You can make one for $15 (plus shipping).
+- Firstly: the [FluxEngine hardware](doc/building-hardware.md) is a very cheap USB floppy disk interface capable of
+  reading and
+  writing exotic non-PC floppy disk formats. It allows you to use a conventional
+  PC drive to accept Amiga disks, CLV Macintosh disks, bizarre 128-sector CP/M
+  disks, and other weird and bizarre formats. (Although not all of these are
+  supported yet. I could really use samples.)
 
-Don't believe me? Watch the demo reel!
+  The hardware consists of a single, commodity part with a floppy drive
+  connector soldered onto it. No ordering custom boards, no fiddly surface
+  mount assembly, and no fuss: nineteen simpler solder joints and you're done.
+  You can make one for $15 (plus shipping).
 
-<div style="text-align: center">
-<iframe width="373" height="210" src="https://www.youtube.com/embed/m_s1iw8eW7o" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</div>
+  Don't believe me? Watch the demo reel!
 
-**New!** The FluxEngine client software now works with
-[Greaseweazle](https://github.com/keirf/Greaseweazle/wiki) and
-[Applesauce](https://applesaucefdc.com/) hardware. So, if you can't find a PSoC5
-development kit, or don't want to use the Cypress Windows tools for programming
-it, you can use one of these instead. Very nearly all FluxEngine features are
-available with the Greaseweazle and it works out-of-the box; the Applesauce is a
-bit less supported but still works. See the [dedicated Greaseweazle
-documentation page](doc/greaseweazle.md) or the [Applesauce
-page](doc/applesauce.md) for more information.
+  <div style="text-align: center">
+    <iframe width="373" height="210" src="https://www.youtube.com/embed/m_s1iw8eW7o" frameborder="0"
+            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  </div>
+
+- Secondly: the [FluxEngine software](doc/building-client.md) is a cross-platform set of tools for reading, writing and
+  processing floppy disk magnetic flux information.
+  It works on the FluxEngine hardware (described above), the
+  [Greaseweazle](https://github.com/keirf/Greaseweazle/wiki), and to a limited extent the
+  [Applesauce](https://applesaucefdc.com/). You can also use it standalone for working with either flux dumps or simple
+  sector images of disks.
+
+  See the [dedicated Greaseweazle
+  documentation page](doc/greaseweazle.md) or the [Applesauce
+  page](doc/applesauce.md) for more information about using the FluxEngine client with these devices.
 
 Where?
 ------
@@ -52,35 +57,37 @@ How?
 This page was getting kinda unwieldy so I've broken it up. Please consult the
 following friendly articles:
 
-  - [Frequently asked questions](doc/faq.md) ∾ but why...? ∾ does it...? ∾ can it...?
-  
-  - [How the FluxEngine works](doc/technical.md) ∾ nitty gritty of the
-    sampler/sequencer hardware ∾ useful links on floppy drives ∾ why I'm not
-    using an Arduino/STM32/ESP32/Raspberry Pi
+- [Frequently asked questions](doc/faq.md) ∾ but why...? ∾ does it...? ∾ can it...?
 
-  - [Making a FluxEngine](doc/building.md) ∾ what parts you need ∾ building it ∾
-    setting up the toolchain ∾ compiling the firmware ∾ programming the board
+- [How the FluxEngine works](doc/technical.md) ∾ nitty gritty of the
+  sampler/sequencer hardware ∾ useful links on floppy drives ∾ why I'm not
+  using an Arduino/STM32/ESP32/Raspberry Pi
 
-  - [Using a FluxEngine](doc/using.md) ∾ what to do with your new hardware ∾
-    flux files and image files ∾ knowing what you're doing
+- [Building the FluxEngine software](doc/building-client.md) ∾ dependencies ∾ build commands ∾ installation
 
-  - [Using Greaseweazle hardware with the FluxEngine client
-    software](doc/greaseweazle.md) ∾ what works ∾ what doesn't work ∾ where to
-    go for help
+- [Making the FluxEngine hardware](doc/building-hardware.md) ∾ what parts you need ∾ building it ∾
+  setting up the toolchain ∾ compiling the firmware ∾ programming the board
 
-  - [Configuring for your drive](doc/drives.md) ∾ but I don't have a 80 track
-    drive! ∾ reading and writing 40 track disks ∾ Shugart and Apple II
+- [Using a FluxEngine](doc/using.md) ∾ what to do with your new hardware ∾
+  flux files and image files ∾ knowing what you're doing
 
-  - [Direct filesystem access](doc/filesystem.md) ∾ imaging files is a pain
-    ∾ accessing files directly ∾ features and limitation ∾ it works on disk
-    images too, you say?
-    
-  - [Troubleshooting dubious disks](doc/problems.md) ∾ it's not an exact
-    science ∾ the sector map ∾ clock detection and the histogram
+- [Using Greaseweazle hardware with the FluxEngine client
+  software](doc/greaseweazle.md) ∾ what works ∾ what doesn't work ∾ where to
+  go for help
 
-  - [Disk densities](doc/driveresponse.md) ∾ what's the difference between an HD
-    and DD disk? ∾ you can't do that with that ∾ measuring your drive's ability to
-    work with exotic formats ∾ I think my drive is broken
+- [Configuring for your drive](doc/drives.md) ∾ but I don't have a 80 track
+  drive! ∾ reading and writing 40 track disks ∾ Shugart and Apple II
+
+- [Direct filesystem access](doc/filesystem.md) ∾ imaging files is a pain
+  ∾ accessing files directly ∾ features and limitation ∾ it works on disk
+  images too, you say?
+
+- [Troubleshooting dubious disks](doc/problems.md) ∾ it's not an exact
+  science ∾ the sector map ∾ clock detection and the histogram
+
+- [Disk densities](doc/driveresponse.md) ∾ what's the difference between an HD
+  and DD disk? ∾ you can't do that with that ∾ measuring your drive's ability to
+  work with exotic formats ∾ I think my drive is broken
 
 Which?
 ------
@@ -148,22 +155,22 @@ choices because they can store multiple types of file system.
 
 ### Notes
 
-  - IBM PC disks are the lowest-common-denominator standard. A number of other
-    systems use this format in disguise (the Atari ST, late-era Apple
-    machines, Acorn). FluxEngine supports both FM and MFM disks, although you
-    have to tell it which one. If you have an unknown disk, try this; you may
-    get something. Then [tell me about
-    it](https://github.com/davidgiven/fluxengine/issues/new).
+- IBM PC disks are the lowest-common-denominator standard. A number of other
+  systems use this format in disguise (the Atari ST, late-era Apple
+  machines, Acorn). FluxEngine supports both FM and MFM disks, although you
+  have to tell it which one. If you have an unknown disk, try this; you may
+  get something. Then [tell me about
+  it](https://github.com/davidgiven/fluxengine/issues/new).
 
-  - Not many formats support writing yet. That's because I need actual,
-    physical hardware to test with in order to verify it works, and I only
-    have a limited selection. (Plus a lot of the write code needs work.)
-    There hasn't been a lot of demand for this yet; if you have a pressing
-    need to write weird disks, [please
-    ask](https://github.com/davidgiven/fluxengine/issues/new). I haven't
-    implemented write support for PC disks because they're boring and I'm lazy,
-    and also because they vary so much that figuring out how to specify them
-    is hard.
+- Not many formats support writing yet. That's because I need actual,
+  physical hardware to test with in order to verify it works, and I only
+  have a limited selection. (Plus a lot of the write code needs work.)
+  There hasn't been a lot of demand for this yet; if you have a pressing
+  need to write weird disks, [please
+  ask](https://github.com/davidgiven/fluxengine/issues/new). I haven't
+  implemented write support for PC disks because they're boring and I'm lazy,
+  and also because they vary so much that figuring out how to specify them
+  is hard.
 
 If you have samples of weird disks, and want to send them to me --- either
 FluxEngine, Kryoflux or Catweasel dumps, or (even better) actually physically

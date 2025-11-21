@@ -194,50 +194,6 @@ until the light stays solidly on. Now you should be able to acquire
 the port and proceed normally.
 
 
-## Building the client
-
-The client software is where the intelligence, such as it is, is. It's pretty
-generic libusb stuff and should build and run on Windows, Linux and OSX as
-well, although on Windows it'll need MSYS2 and mingw32. You'll need to
-install some support packages.
-
-  - For Linux with Ubuntu/Debian:
-	`libusb-1.0-0-dev`, `libsqlite3-dev`, `zlib1g-dev`,
-	`libudev-dev`, `protobuf-compiler`, `libwxgtk3.0-gtk3-dev`,
-	`libfmt-dev`, `python3`. `ninja-build`
-  - For Linux with Fedora/Red Hat:
-    `git`, `make`, `gcc`, `gcc-c++`, `xxd`, `protobuf-compiler`,
-    `protobuf-devel`, `fmt-devel`, `systemd-devel`, `wxGTK3-devel`,
-    `libsqlite3x-devel`, `ninja-build`
-  - For OSX with Homebrew: `libusb`, `pkg-config`, `sqlite`,
-    `protobuf`, `truncate`, `wxwidgets`, `fmt`. `ninja`
-  - For Windows with WSL: `protobuf-c-compiler` `protobuf-devel` `fmt-devel`
-  `systemd-devel` `sqlite-devel` `wxGTK-devel` `mingw32-gcc` `mingw32-gcc-c++`
-  `mingw32-zlib-static` `mingw32-protobuf-static` `mingw32-sqlite-static`
-  `mingw32-wxWidgets3-static` `mingw32-libpng-static` `mingw32-libjpeg-static`
-  `mingw32-libtiff-static` `mingw32-nsis png2ico` `ninja-build`
-
-These lists are not necessarily exhaustive --- please [get in
-touch](https://github.com/davidgiven/fluxengine/issues/new) if I've missed
-anything.
-
-Windows and Linux (and other Unixes) build by just doing `make`. OSX builds by
-doing `gmake` (we're using a feature which the elderly default make in OSX
-doesn't have). Remember to add an appropriate `-j` option for a parallel build.
-You should end up with some executables in the current directory, one of which
-is called `fluxengine` or `fluxengine.exe` depending on your platform. It has
-minimal dependencies and you should be able to put it anywhere. The other
-binaries may also be of interest.
-
-Potential issues:
-
-  - Complaints about a missing `libudev` on Windows? Make sure you're using the
-  mingw Python rather than the msys Python.
-
-If it doesn't build, please [get in
-touch](https://github.com/davidgiven/fluxengine/issues/new).
-
-
 ## Connecting it up
 
 You should now have a working board, so it's time to test it.
