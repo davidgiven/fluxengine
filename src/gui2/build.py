@@ -1,7 +1,7 @@
 from build.c import cxxprogram, cxxlibrary, simplerule, clibrary
 from build.ab import simplerule
 from build.pkg import package
-from glob import glob
+from build.utils import glob
 from functools import reduce
 import operator
 from os.path import *
@@ -26,17 +26,14 @@ else:
 
 def headers_from(path):
     hdrs = {
-        k: f"{path}/{k}" for k in glob("**/*.h*", root_dir=path, recursive=True)
+        k: f"{path}/{k}" for k in glob(["**/*.h*"], dir=path, relative_to=path)
     }
     assert hdrs, f"path {path} contained no headers"
     return hdrs
 
 
 def sources_from(path, except_for=[]):
-    srcs = [
-        join(path, f) for f in glob("**/*.[ch]*", root_dir=path, recursive=True)
-    ]
-    srcs = [f for f in srcs if f not in except_for]
+    srcs = glob(["**/*.[ch]*"], exclude=except_for, dir=path)
     assert srcs, f"path {path} contained no sources"
     return srcs
 
@@ -352,7 +349,7 @@ def romfs(name, id, dir):
 
     simplerule(
         name=name,
-        ins=[f for f in glob(dir + "/**", recursive=True) if isfile(f)],
+        ins=glob(dir=dir),
         outs=["=romfs.cc"],
         deps=[f".+{id}_mkromfs"],
         commands=[
@@ -429,9 +426,9 @@ plugin(
             "dep/imhex/plugins/builtin/source/content/welcome_screen.cpp",
         ]
         + glob(
-            "dep/imhex/plugins/builtin/source/content/data_processor_nodes/*"
+            dir="dep/imhex/plugins/builtin/source/content/data_processor_nodes"
         )
-        + glob("dep/imhex/plugins/builtin/source/content/tutorials/*"),
+        + glob(dir="dep/imhex/plugins/builtin/source/content/tutorials"),
     )
     + [
         "./imhex_overrides/main_menu_items.cpp",

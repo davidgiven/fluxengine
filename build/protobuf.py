@@ -2,14 +2,12 @@ from build.ab import Rule, Targets, emit, simplerule, filenamesof, G
 from build.utils import filenamesmatchingof, collectattrs
 from os.path import join, abspath, dirname, relpath
 from build.pkg import has_package
-import platform
 
 G.setdefault("PROTOC", "protoc")
 G.setdefault("HOSTPROTOC", "hostprotoc")
 
 assert has_package("protobuf"), "required package 'protobuf' not installed"
 
-PROTO_SEPARATOR = ";" if (platform.system() == "Windows") else ":"
 
 def _getprotodeps(deps):
     r = set()
@@ -21,7 +19,7 @@ def _getprotodeps(deps):
 @Rule
 def proto(self, name, srcs: Targets = [], deps: Targets = []):
     protodeps = _getprotodeps(deps)
-    descriptorlist = PROTO_SEPARATOR.join(
+    descriptorlist = ":".join(
         [
             relpath(f, start=self.dir)
             for f in filenamesmatchingof(protodeps, "*.descriptor")
@@ -48,7 +46,7 @@ def proto(self, name, srcs: Targets = [], deps: Targets = []):
                             f"--descriptor_set_out={self.localname}.descriptor",
                         ]
                         + (
-                            [f"--descriptor_set_in='{descriptorlist}'"]
+                            [f"--descriptor_set_in={descriptorlist}"]
                             if descriptorlist
                             else []
                         )
@@ -91,7 +89,7 @@ def protocc(self, name, srcs: Targets = [], deps: Targets = []):
         outs += ["=" + cc, "=" + h]
 
     protodeps = _getprotodeps(deps + srcs)
-    descriptorlist = PROTO_SEPARATOR.join(
+    descriptorlist = ":".join(
         [
             relpath(f, start=self.dir)
             for f in filenamesmatchingof(protodeps, "*.descriptor")
@@ -112,7 +110,7 @@ def protocc(self, name, srcs: Targets = [], deps: Targets = []):
                         "$(PROTOC)",
                         "--proto_path=.",
                         "--cpp_out=.",
-                        f"--descriptor_set_in='{descriptorlist}'",
+                        f"--descriptor_set_in={descriptorlist}",
                     ]
                     + protos
                 )
@@ -144,7 +142,7 @@ def protojava(self, name, srcs: Targets = [], deps: Targets = []):
         protos += [f]
         srcs += [f]
 
-    descriptorlist = PROTO_SEPARATOR.join(
+    descriptorlist = ":".join(
         [abspath(f) for f in filenamesmatchingof(srcs + deps, "*.descriptor")]
     )
 
@@ -163,7 +161,7 @@ def protojava(self, name, srcs: Targets = [], deps: Targets = []):
                         "$(PROTOC)",
                         "--proto_path=.",
                         "--java_out=.",
-                        f"--descriptor_set_in='{descriptorlist}'",
+                        f"--descriptor_set_in={descriptorlist}",
                     ]
                     + protos
                 )
