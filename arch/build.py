@@ -4,7 +4,7 @@ from os.path import *
 from glob import glob
 import sys
 
-archs = [f for f in glob("*", root_dir="arch") if isfile(f"arch/{f}/{f}.proto")]
+archs = {basename(dirname(f)) for f in glob("arch/*/*.proto")}
 
 ps = []
 pls = []

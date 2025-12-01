@@ -1,8 +1,7 @@
 from build.ab import simplerule, simplerule
-from build.utils import objectify
+from build.utils import objectify, glob
 from build.c import clibrary
 from build.zip import zip
-from glob import glob
 from os.path import *
 import config
 
@@ -31,16 +30,14 @@ if config.osx:
         label="ICONSET",
     )
 
-    template_files = [
-        f
-        for f in glob("**", recursive=True, root_dir="extras/FluxEngine.app.template")
-        if isfile(join("extras/FluxEngine.app.template", f))
-    ]
     zip(
         name="fluxengine_template",
         items={
             join("FluxEngine.app", k): join("extras/FluxEngine.app.template", k)
-            for k in template_files
+            for k in glob(
+                dir="extras/FluxEngine.app.template",
+                relative_to="extras/FluxEngine.app.template",
+            )
         },
     )
 
