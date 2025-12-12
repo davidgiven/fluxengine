@@ -146,7 +146,7 @@ in the bottom left corner. You can see that this is much more pronounced on the
 HD media than it is on the DD media --- the DD media is capable of accurately
 reproducing pulses up to about 12µs, while the HD media only goes up to 7µs.
 
-This demonstrates that some formats, such as the [Apple II](doc/disk-apple2.md)
+This demonstrates that some formats, such as the [Apple II](disk-apple2.md)
 which uses a maximum pulse width of 8µs, cannot be written to HD media at all.
 
 We would also normally see spurious pulses on the left of the graph, indicating
