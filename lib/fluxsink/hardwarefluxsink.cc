@@ -1,60 +1,47 @@
-#include "globals.h"
-#include "flags.h"
-#include "fluxmap.h"
-#include "logger.h"
-#include "proto.h"
-#include "usb/usb.h"
-#include "fluxsink/fluxsink.h"
+#include "lib/core/globals.h"
+#include "lib/config/config.h"
+#include "lib/config/flags.h"
+#include "lib/data/fluxmap.h"
+#include "lib/core/logger.h"
+#include "lib/config/proto.h"
+#include "lib/usb/usb.h"
+#include "lib/fluxsink/fluxsink.h"
 #include "lib/fluxsink/fluxsink.pb.h"
-#include "lib/readerwriter.cc"
-#include "fmt/format.h"
 
-class HardwareFluxSink : public FluxSink
+class HardwareSink : public FluxSink
 {
-public:
-    HardwareFluxSink(const HardwareFluxSinkProto& conf):
-        _config(conf)
+    void addFlux(int track, int side, const Fluxmap& fluxmap) override
     {
-    	nanoseconds_t oneRevolution;
-    	measureDiskRotation(oneRevolution, _hardSectorThreshold);
+        auto& drive = globalConfig()->drive();
+        usbSetDrive(drive.drive(), drive.high_density(), drive.index_mode());
+        usbSeek(track);
+
+        return usbWrite(
+            side, fluxmap.rawBytes(), drive.hard_sector_threshold_ns());
     }
-
-    ~HardwareFluxSink()
-    {
-    }
-
-public:
-    void writeFlux(int track, int side, const Fluxmap& fluxmap) override
-    {
-        usbSetDrive(config.drive().drive(), config.drive().high_density(), config.drive().index_mode());
-		#if 0
-		if (fluxSourceSinkFortyTrack)
-		{
-			if (track & 1)
-				Error() << "cannot write to odd physical tracks in 40-track mode";
-			usbSeek(track / 2);
-		}
-		else
-		#endif
-			usbSeek(track);
-
-        return usbWrite(side, fluxmap.rawBytes(), _hardSectorThreshold);
-    }
-
-	operator std::string () const
-	{
-		return fmt::format("drive {}", config.drive().drive());
-	}
-
-private:
-    const HardwareFluxSinkProto& _config;
-    nanoseconds_t _hardSectorThreshold;
 };
 
-std::unique_ptr<FluxSink> FluxSink::createHardwareFluxSink(const HardwareFluxSinkProto& config)
+class HardwareFluxSinkFactory : public FluxSinkFactory
 {
-    return std::unique_ptr<FluxSink>(new HardwareFluxSink(config));
+public:
+    std::unique_ptr<FluxSink> create() override
+    {
+        return std::make_unique<HardwareSink>();
+    }
+
+    bool isHardware() const override
+    {
+        return true;
+    }
+
+    operator std::string() const override
+    {
+        return "hardware {}";
+    }
+};
+
+std::unique_ptr<FluxSinkFactory> FluxSinkFactory::createHardwareFluxSinkFactory(
+    const HardwareFluxSinkProto& config)
+{
+    return std::make_unique<HardwareFluxSinkFactory>();
 }
-
-
-

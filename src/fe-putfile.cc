@@ -1,14 +1,13 @@
-#include "globals.h"
-#include "flags.h"
-#include "fluxmap.h"
-#include "sector.h"
-#include "proto.h"
-#include "readerwriter.h"
-#include "imagereader/imagereader.h"
-#include "imagewriter/imagewriter.h"
+#include "lib/core/globals.h"
+#include "lib/config/flags.h"
+#include "lib/data/fluxmap.h"
+#include "lib/data/sector.h"
+#include "lib/config/proto.h"
+#include "lib/algorithms/readerwriter.h"
+#include "lib/imagereader/imagereader.h"
+#include "lib/imagewriter/imagewriter.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/decoders/decoders.h"
-#include "fmt/format.h"
 #include "fluxengine.h"
 #include "lib/vfs/sectorinterface.h"
 #include "lib/vfs/vfs.h"
@@ -30,21 +29,21 @@ int mainPutFile(int argc, const char* argv[])
     try
     {
         std::string inputFilename = input;
-		if (inputFilename.empty())
-			Error() << "you must supply a local file to read from";
+        if (inputFilename.empty())
+            error("you must supply a local file to read from");
 
         Path outputFilename(path);
         if (outputFilename.size() == 0)
-            Error() << "you must supply a destination path to write to";
+            error("you must supply a destination path to write to");
 
-		auto data = Bytes::readFromFile(inputFilename);
+        auto data = Bytes::readFromFile(inputFilename);
         auto filesystem = Filesystem::createFilesystemFromConfig();
         filesystem->putFile(outputFilename, data);
-		filesystem->flushChanges();
+        filesystem->flushChanges();
     }
     catch (const FilesystemException& e)
     {
-        Error() << e.message;
+        error("{}", e.message);
     }
 
     return 0;

@@ -2,8 +2,8 @@
 // Anti-Grain Geometry - Version 2.4
 // Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
 //
-// Permission to copy, use, modify, sell and distribute this software 
-// is granted provided this copyright notice appears in all copies. 
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
 // This software is provided "as is" without express or implied
 // warranty, and with no claim as to its suitability for any purpose.
 //
@@ -20,19 +20,20 @@
 
 namespace agg
 {
-    
+
     class bitset_iterator
     {
     public:
-        bitset_iterator(const int8u* bits, unsigned offset = 0) :
+        bitset_iterator(const int8u* bits, unsigned offset = 0):
             m_bits(bits + (offset >> 3)),
             m_mask(0x80 >> (offset & 7))
-        {}
+        {
+        }
 
-        void operator ++ ()
+        void operator++()
         {
             m_mask >>= 1;
-            if(m_mask == 0)
+            if (m_mask == 0)
             {
                 ++m_bits;
                 m_mask = 0x80;
@@ -46,7 +47,7 @@ namespace agg
 
     private:
         const int8u* m_bits;
-        int8u        m_mask;
+        int8u m_mask;
     };
 
 }

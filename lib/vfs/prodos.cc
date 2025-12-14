@@ -1,7 +1,6 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/vfs/vfs.h"
-#include "lib/config.pb.h"
-#include <fmt/format.h>
+#include "lib/config/config.pb.h"
 
 /* This is described here:
  * http://fileformats.archiveteam.org/wiki/ProDOS_file_system
@@ -134,14 +133,15 @@ class ProdosFilesystem : public Filesystem
     };
 
 public:
-    ProdosFilesystem(
-        const ProdosProto& config, std::shared_ptr<SectorInterface> sectors):
-        Filesystem(sectors),
+    ProdosFilesystem(const ProdosProto& config,
+        const std::shared_ptr<const DiskLayout>& diskLayout,
+        std::shared_ptr<SectorInterface> sectors):
+        Filesystem(diskLayout, sectors),
         _config(config)
     {
     }
 
-    uint32_t capabilities() const
+    uint32_t capabilities() const override
     {
         return OP_LIST | OP_GETDIRENT | OP_GETFILE | OP_GETFSDATA;
     }
@@ -303,7 +303,10 @@ private:
 };
 
 std::unique_ptr<Filesystem> Filesystem::createProdosFilesystem(
-    const FilesystemProto& config, std::shared_ptr<SectorInterface> sectors)
+    const FilesystemProto& config,
+    const std::shared_ptr<const DiskLayout>& diskLayout,
+    std::shared_ptr<SectorInterface> sectors)
 {
-    return std::make_unique<ProdosFilesystem>(config.prodos(), sectors);
+    return std::make_unique<ProdosFilesystem>(
+        config.prodos(), diskLayout, sectors);
 }

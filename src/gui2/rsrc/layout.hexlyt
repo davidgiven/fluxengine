@@ -1,0 +1,534 @@
+[Window][ImHexDockSpace]
+Pos=0,33
+Size=2880,1590
+Collapsed=0
+
+[Window][Debug##Default]
+Pos=0,55
+Size=400,400
+Collapsed=0
+
+[Window][###hex.builtin.view.settings.name]
+Pos=915,510
+Size=1050,600
+Collapsed=0
+
+[Window][Question]
+Pos=496,338
+Size=400,105
+Collapsed=0
+
+[Window][Welcome Screen]
+Pos=0,37
+Size=1393,728
+Collapsed=0
+
+[Window][###hex.builtin.view.hex_editor.name]
+Pos=484,66
+Size=907,1018
+Collapsed=0
+DockId=0x00000007,0
+
+[Window][###hex.builtin.view.data_inspector.name]
+Pos=484,66
+Size=2396,982
+Collapsed=0
+DockId=0x00000007,1
+
+[Window][###hex.builtin.view.pattern_data.name]
+Pos=484,1051
+Size=1678,528
+Collapsed=0
+DockId=0x00000006,0
+
+[Window][###hex.builtin.view.pattern_editor.name]
+Pos=2165,66
+Size=715,1513
+Collapsed=0
+DockId=0x00000009,0
+
+[Window][###hex.hashes.view.hashes.name]
+Pos=1697,76
+Size=863,1427
+Collapsed=0
+DockId=0x00000009,4
+
+[Window][###hex.builtin.view.find.name]
+Pos=1697,76
+Size=863,1427
+Collapsed=0
+DockId=0x00000009,3
+
+[Window][###hex.builtin.view.bookmarks.name]
+Pos=1697,76
+Size=863,1427
+Collapsed=0
+DockId=0x00000009,2
+
+[Window][###hex.builtin.view.information.name]
+Pos=-1889,-120
+Size=510,420
+Collapsed=0
+
+[Window][###hex.yara_rules.view.yara.name]
+Pos=720,38
+Size=560,660
+Collapsed=0
+
+[Window][###hex.builtin.view.store.name]
+ViewportPos=564,236
+ViewportId=0xB51F9C4A
+Size=900,700
+Collapsed=0
+
+[Window][###hex.diffing.view.diff.name]
+Pos=1372,38
+Size=1188,1333
+Collapsed=0
+DockId=0x00000009,1
+
+[Window][###hex.builtin.view.provider_settings.load_popup]
+Pos=585,322
+Size=314,208
+Collapsed=0
+
+[Window][###hex.builtin.view.patches.name]
+Pos=-1889,-120
+Size=510,420
+Collapsed=0
+
+[Window][###hex.builtin.view.data_processor.name]
+Pos=2165,66
+Size=715,1513
+Collapsed=0
+DockId=0x00000009,0
+
+[Window][###hex.builtin.view.tools.name]
+Pos=849,268
+Size=431,430
+Collapsed=0
+DockId=0x0000000A,0
+
+[Window][###hex.builtin.view.theme_manager.name]
+Pos=391,302
+Size=469,400
+Collapsed=0
+
+[Window][###hex.builtin.tools.invariant_multiplication]
+Pos=-1826,300
+Size=600,232
+Collapsed=0
+
+[Window][###hex.builtin.tools.regex_replacer]
+Pos=-2091,104
+Size=600,305
+Collapsed=0
+
+[Window][###hex.builtin.tools.calc]
+Pos=-1811,118
+Size=600,402
+Collapsed=0
+
+[Window][###hex.builtin.tools.permissions]
+Pos=423,296
+Size=600,220
+Collapsed=0
+
+[Window][###hex.builtin.view.help.about.name]
+Pos=377,193
+Size=677,400
+Collapsed=0
+
+[Window][###hex.builtin.view.constants.name]
+Pos=419,-124
+Size=652,660
+Collapsed=0
+
+[Window][###hex.disassembler.view.disassembler.name]
+Pos=1004,-204
+Size=1336,1320
+Collapsed=0
+
+[Window][##achievement_unlocked]
+Pos=1093,0
+Size=200,55
+Collapsed=0
+
+[Window][hex.builtin.popup.blocking_task.title]
+Pos=506,305
+Size=20,40
+Collapsed=0
+
+[Window][Waiting for Tasks]
+Pos=60,60
+Size=16,35
+Collapsed=0
+
+[Window][Restore lost data]
+Pos=555,349
+Size=283,84
+Collapsed=0
+
+[Window][Error]
+Pos=440,301
+Size=400,118
+Collapsed=0
+
+[Window][###hex.builtin.view.highlight_rules.name]
+ViewportPos=724,217
+ViewportId=0x31C07F88
+Size=700,400
+Collapsed=0
+
+[Window][SideBarWindow]
+Pos=19,37
+Size=660,1345
+Collapsed=0
+
+[Window][SideBarWindow/##Content_53A061AE]
+IsChild=1
+Size=644,1329
+
+[Window][Choose file]
+Pos=382,131
+Size=516,458
+Collapsed=0
+
+[Window][###hex.builtin.view.logs.name]
+Pos=260,256
+Size=1418,854
+Collapsed=0
+
+[Window][###hex.builtin.view.achievements.name]
+Pos=60,60
+Size=800,600
+Collapsed=0
+
+[Window][hex.builtin.welcome.start.recent.auto_backups]
+Pos=580,365
+Size=233,52
+Collapsed=0
+
+[Window][Auto Backups]
+Pos=580,331
+Size=233,120
+Collapsed=0
+
+[Window][hex.builtin.popup.create_workspace.title]
+Pos=496,325
+Size=400,132
+Collapsed=0
+
+[Window][###fluxengine.view.config.name]
+Pos=0,66
+Size=481,1048
+Collapsed=0
+DockId=0x0000000F,0
+
+[Window][##Toast_0]
+Pos=2340,1497
+Size=525,108
+Collapsed=0
+
+[Window][Please Wait...]
+Pos=60,60
+Size=450,300
+Collapsed=0
+
+[Window][##Banner0x7f67b4008db0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f40f8008db0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fd0fc008db0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fe158008db0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Toast_1]
+Pos=2340,1312
+Size=525,108
+Collapsed=0
+
+[Window][##Banner0x7f46f0008db0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f4524008e10]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fadb0008e10]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f110c008e70]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7feac8008ec0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f940c008ec0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f8064008f10]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fb6e4008f10]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][###fluxengine.view.summary.name]
+Pos=484,1087
+Size=2396,492
+Collapsed=0
+DockId=0x00000006,0
+
+[Window][##Banner0x7f74dc008f40]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f024c008f40]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f46c8008f40]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f5940008f40]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f2378008f40]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f373c008f40]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f4694008f90]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f7600008f90]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fed80008f90]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7fdbe8008f90]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f25e4008ff0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f5580008ff0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7facb0008ff0]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Toast_2]
+Pos=2340,1128
+Size=525,108
+Collapsed=0
+
+[Window][##Toast_3]
+Pos=2340,943
+Size=525,108
+Collapsed=0
+
+[Window][##Banner0x7f6808009070]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7f177c009030]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][##Banner0x7ffa6c009030]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][###fluxengine.view.image.name]
+Pos=1394,66
+Size=736,1018
+Collapsed=0
+DockId=0x0000000D,0
+
+[Window][###fluxengine.view.physical.name]
+Pos=2133,66
+Size=747,1018
+Collapsed=0
+DockId=0x0000000E,0
+
+[Window][##Banner0x7f7960009030]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Window][Save Layout]
+Pos=1140,697
+Size=600,225
+Collapsed=0
+
+[Window][###fluxengine.view.controlpanel.name]
+Pos=0,1117
+Size=481,462
+Collapsed=0
+DockId=0x00000010,0
+
+[Window][##Banner0x7f8010009060]
+Pos=1,99
+Size=2877,48
+Collapsed=0
+
+[Table][0x6A4694E4,3]
+RefScale=13
+Column 0  Sort=0v
+
+[Table][0x7EE28D79,8]
+RefScale=13
+Column 0  Width=13
+Column 1  Weight=1.0000
+Column 2  Weight=1.0000
+Column 3  Weight=1.0000 Sort=0v
+Column 4  Weight=1.0000
+Column 5  Weight=1.0000
+Column 6  Weight=1.0000
+Column 7  Weight=1.0000
+
+[Table][0x6190819E,3]
+Column 0  Weight=1.0000
+Column 1  Weight=1.0000
+Column 2  Weight=1.0000
+
+[Table][0x4A4A8566,9]
+RefScale=24
+Column 0  Width=24
+Column 1  Weight=1.0000
+Column 2  Weight=1.0000
+Column 3  Weight=1.0000 Sort=0v
+Column 4  Weight=1.0000
+Column 5  Weight=1.0000
+Column 6  Weight=1.0000
+Column 7  Weight=1.0000
+Column 8  Weight=-1.0000
+
+[Table][0x1A47DE68,2]
+Column 0  Weight=0.7860
+Column 1  Weight=1.2140
+
+[Table][0xC787C0E5,2]
+Column 0  Weight=1.0000
+Column 1  Weight=1.0000
+
+[Table][0x3F2E8A3C,2]
+Column 0  Weight=0.6791
+Column 1  Weight=1.3209
+
+[Table][0xBA4B7604,2]
+RefScale=24
+Column 0  Width=180
+Column 1  Weight=1.0000
+
+[Docking][Data]
+DockSpace           ID=0x81A8BB71 Window=0xF9B0A590 Pos=0,66 Size=2880,1513 Split=X
+  DockNode          ID=0x0000000B Parent=0x81A8BB71 SizeRef=481,1513 Split=Y Selected=0xFCDCA4E7
+    DockNode        ID=0x0000000F Parent=0x0000000B SizeRef=481,1048 Selected=0xFCDCA4E7
+    DockNode        ID=0x00000010 Parent=0x0000000B SizeRef=481,462 Selected=0x34081179
+  DockNode          ID=0x0000000C Parent=0x81A8BB71 SizeRef=2396,1513 Split=X
+    DockNode        ID=0x00000001 Parent=0x0000000C SizeRef=1678,0 Split=Y
+      DockNode      ID=0x00000005 Parent=0x00000001 SizeRef=0,1018 Split=X Selected=0x6D92B9F4
+        DockNode    ID=0x00000007 Parent=0x00000005 SizeRef=907,982 Selected=0x5708C63F
+        DockNode    ID=0x00000008 Parent=0x00000005 SizeRef=1486,982 Split=X Selected=0xDA2066A8
+          DockNode  ID=0x0000000D Parent=0x00000008 SizeRef=736,982 Selected=0xDA2066A8
+          DockNode  ID=0x0000000E Parent=0x00000008 SizeRef=747,982 Selected=0x6D92B9F4
+      DockNode      ID=0x00000006 Parent=0x00000001 SizeRef=0,492 Selected=0x941F5F91
+    DockNode        ID=0x00000002 Parent=0x0000000C SizeRef=715,0 Split=X
+      DockNode      ID=0x00000003 Parent=0x00000002 SizeRef=12,0
+      DockNode      ID=0x00000004 Parent=0x00000002 SizeRef=52,0 Split=Y Selected=0xCACA884B
+        DockNode    ID=0x00000009 Parent=0x00000004 SizeRef=420,228 Selected=0x7BCB417F
+        DockNode    ID=0x0000000A Parent=0x00000004 SizeRef=420,430 Selected=0x1F041AD3
+
+[ImHex][General]
+hex.builtin.tools.demangler=0
+hex.builtin.tools.ascii_table=0
+hex.builtin.tools.regex_replacer=0
+hex.builtin.tools.color=0
+hex.builtin.tools.calc=0
+hex.builtin.tools.graphing=0
+hex.builtin.tools.base_converter=0
+hex.builtin.tools.byte_swapper=0
+hex.builtin.tools.permissions=0
+hex.builtin.tools.wiki_explain=0
+hex.builtin.tools.file_tools=0
+hex.builtin.tools.ieee754=0
+hex.builtin.tools.invariant_multiplication=0
+hex.builtin.tools.tcp_client_server=0
+hex.builtin.tools.euclidean_algorithm=0
+hex.builtin.tools.http_requests=0
+fluxengine.view.config.name=1
+fluxengine.view.controlpanel.name=1
+fluxengine.view.image.name=1
+fluxengine.view.physical.name=1
+fluxengine.view.summary.name=1
+hex.builtin.view.bookmarks.name=0
+hex.builtin.view.command_palette.name=0
+hex.builtin.view.constants.name=0
+hex.builtin.view.data_inspector.name=0
+hex.builtin.view.data_processor.name=0
+hex.builtin.view.find.name=0
+hex.builtin.view.hex_editor.name=1
+hex.builtin.view.information.name=0
+hex.builtin.view.patches.name=0
+hex.builtin.view.pattern_data.name=0
+hex.builtin.view.pattern_editor.name=0
+hex.builtin.view.tools.name=0
+

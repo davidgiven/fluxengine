@@ -2,8 +2,8 @@
 // Anti-Grain Geometry - Version 2.4
 // Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
 //
-// Permission to copy, use, modify, sell and distribute this software 
-// is granted provided this copyright notice appears in all copies. 
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
 // This software is provided "as is" without express or implied
 // warranty, and with no claim as to its suitability for any purpose.
 //
@@ -31,7 +31,7 @@ namespace agg
     class vcgen_markers_term
     {
     public:
-        vcgen_markers_term() : m_curr_id(0), m_curr_idx(0) {}
+        vcgen_markers_term(): m_curr_id(0), m_curr_idx(0) {}
 
         // Vertex Generator Interface
         void remove_all();
@@ -43,23 +43,22 @@ namespace agg
 
     private:
         vcgen_markers_term(const vcgen_markers_term&);
-        const vcgen_markers_term& operator = (const vcgen_markers_term&);
+        const vcgen_markers_term& operator=(const vcgen_markers_term&);
 
         struct coord_type
         {
             double x, y;
 
             coord_type() {}
-            coord_type(double x_, double y_) : x(x_), y(y_) {}
+            coord_type(double x_, double y_): x(x_), y(y_) {}
         };
 
-        typedef pod_bvector<coord_type, 6> coord_storage; 
+        typedef pod_bvector<coord_type, 6> coord_storage;
 
         coord_storage m_markers;
-        unsigned      m_curr_id;
-        unsigned      m_curr_idx;
+        unsigned m_curr_id;
+        unsigned m_curr_idx;
     };
-
 
 }
 

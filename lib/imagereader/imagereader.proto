@@ -1,8 +1,13 @@
 syntax = "proto2";
 
-import "lib/common.proto";
+import "lib/config/common.proto";
 
-message ImgInputOutputProto {}
+message ImgInputOutputProto {
+    optional bool filesystem_sector_order = 1 [
+        (help) = "read/write sector image in filesystem order",
+        default = false
+    ];
+}
 
 message DiskCopyInputProto {}
 message ImdInputProto {}
@@ -13,29 +18,25 @@ message Td0InputProto {}
 message DimInputProto {}
 message FdiInputProto {}
 message D88InputProto {}
-message NFDInputProto {}
+message NfdInputProto {}
 
 // NEXT_TAG: 14
 message ImageReaderProto
 {
     optional string filename = 1 [ (help) = "filename of input sector image" ];
-    optional bool filesystem_sector_order = 13 [
-        (help) = "read/write sector image in filesystem order",
-        default = false
-    ];
 
-    oneof format
-    {
-        ImgInputOutputProto img = 2;
-        DiskCopyInputProto diskcopy = 3;
-        ImdInputProto imd = 4;
-        Jv3InputProto jv3 = 5;
-        D64InputProto d64 = 6;
-        NsiInputProto nsi = 7;
-        Td0InputProto td0 = 8;
-        DimInputProto dim = 9;
-        FdiInputProto fdi = 10;
-        D88InputProto d88 = 11;
-        NFDInputProto nfd = 12;
-    }
+	optional ImageReaderWriterType type = 13
+		[default = IMAGETYPE_NOT_SET, (help) = "input image type"];
+
+	optional ImgInputOutputProto img = 2;
+	optional DiskCopyInputProto diskcopy = 3;
+	optional ImdInputProto imd = 4;
+	optional Jv3InputProto jv3 = 5;
+	optional D64InputProto d64 = 6;
+	optional NsiInputProto nsi = 7;
+	optional Td0InputProto td0 = 8;
+	optional DimInputProto dim = 9;
+	optional FdiInputProto fdi = 10;
+	optional D88InputProto d88 = 11;
+	optional NfdInputProto nfd = 12;
 }

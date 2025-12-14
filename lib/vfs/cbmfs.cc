@@ -1,9 +1,9 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
+#include "lib/config/config.h"
 #include "lib/vfs/vfs.h"
-#include "lib/config.pb.h"
-#include "lib/proto.h"
-#include "lib/utils.h"
-#include <fmt/format.h>
+#include "lib/config/config.pb.h"
+#include "lib/config/proto.h"
+#include "lib/core/utils.h"
 
 enum
 {
@@ -127,7 +127,8 @@ class CbmfsFilesystem : public Filesystem
             bam.resize(fs->getLogicalSectorCount());
             usedBlocks = 0;
             unsigned block = 0;
-            for (int track = 0; track < config.layout().tracks(); track++)
+            for (int track = 0; track < globalConfig()->layout().tracks();
+                track++)
             {
                 uint8_t blocks = br.read_8();
                 uint32_t bitmap = br.read_le24();
@@ -188,14 +189,15 @@ class CbmfsFilesystem : public Filesystem
     };
 
 public:
-    CbmfsFilesystem(
-        const CbmfsProto& config, std::shared_ptr<SectorInterface> sectors):
-        Filesystem(sectors),
+    CbmfsFilesystem(const CbmfsProto& config,
+        const std::shared_ptr<const DiskLayout>& diskLayout,
+        std::shared_ptr<SectorInterface> sectors):
+        Filesystem(diskLayout, sectors),
         _config(config)
     {
     }
 
-    uint32_t capabilities() const
+    uint32_t capabilities() const override
     {
         return OP_GETFSDATA | OP_LIST | OP_GETFILE | OP_GETDIRENT;
     }
@@ -280,7 +282,10 @@ private:
 };
 
 std::unique_ptr<Filesystem> Filesystem::createCbmfsFilesystem(
-    const FilesystemProto& config, std::shared_ptr<SectorInterface> sectors)
+    const FilesystemProto& config,
+    const std::shared_ptr<const DiskLayout>& diskLayout,
+    std::shared_ptr<SectorInterface> sectors)
 {
-    return std::make_unique<CbmfsFilesystem>(config.cbmfs(), sectors);
+    return std::make_unique<CbmfsFilesystem>(
+        config.cbmfs(), diskLayout, sectors);
 }

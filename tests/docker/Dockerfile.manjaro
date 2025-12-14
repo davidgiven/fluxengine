@@ -1,0 +1,27 @@
+FROM manjarolinux/base:latest
+
+RUN pacman -Sy --noconfirm base-devel protobuf wxwidgets-gtk3
+
+RUN useradd app
+RUN mkdir -p /home/app
+RUN chown app /home/app
+USER app
+WORKDIR /home/app
+
+COPY --chown=app:app arch arch
+COPY --chown=app:app build build
+COPY --chown=app:app dep dep
+COPY --chown=app:app doc doc
+COPY --chown=app:app extras extras
+COPY --chown=app:app lib lib
+COPY --chown=app:app scripts scripts
+COPY --chown=app:app src src
+COPY --chown=app:app tests tests
+COPY --chown=app:app tools tools
+COPY --chown=app:app Makefile .
+COPY --chown=app:app build.py .
+COPY --chown=app:app config.py .
+COPY --chown=app:app protocol.h .
+COPY --chown=app:app README.md .
+
+RUN make

@@ -12,6 +12,7 @@ data = numpy.loadtxt(open("driveresponse.csv", "rb"), delimiter=",", skiprows=1)
 labels = data[:, 0]
 frequencies = data[:, 1:]
 
+
 # Scale the frequencies.
 def scaled(row):
     m = row.mean()
@@ -20,13 +21,21 @@ def scaled(row):
     else:
         return row
 
+
 scaledfreq = numpy.array([scaled(row) for row in frequencies])
 
 # Create new Figure with black background
-fig = plt.figure(figsize=(8, 8), facecolor='#aaa')
+fig = plt.figure(figsize=(8, 8), facecolor="#aaa")
 
-plt.imshow(scaledfreq, extent=[0, 512/TICKS_PER_US, labels[0], labels[-1]], cmap='jet',
-           vmin=0, vmax=1, origin='lower', aspect='auto')
+plt.imshow(
+    scaledfreq,
+    extent=[0, 512 / TICKS_PER_US, labels[0], labels[-1]],
+    cmap="jet",
+    vmin=0,
+    vmax=1,
+    origin="lower",
+    aspect="auto",
+)
 plt.colorbar()
 plt.ylabel("Interval period (us)")
 plt.xlabel("Response (us)")

@@ -1,15 +1,15 @@
 #define _USE_MATH_DEFINES
-#include "globals.h"
-#include "flags.h"
-#include "bitmap.h"
-#include "fluxmap.h"
-#include "sector.h"
-#include "csvreader.h"
-#include "image.h"
-#include "decoders/fluxmapreader.h"
-#include "dep/agg/include/agg2d.h"
-#include "dep/stb/stb_image_write.h"
-#include "fmt/format.h"
+#include "lib/core/globals.h"
+#include "lib/config/config.h"
+#include "lib/config/flags.h"
+#include "lib/core/bitmap.h"
+#include "lib/data/fluxmap.h"
+#include "lib/data/sector.h"
+#include "lib/external/csvreader.h"
+#include "lib/data/image.h"
+#include "lib/data/fluxmapreader.h"
+#include "agg2d.h"
+#include "stb_image_write.h"
 #include <math.h>
 #include <fstream>
 
@@ -42,7 +42,7 @@ void visualiseSectorsToFile(const Image& image, const std::string& filename)
 {
     Bitmap bitmap(writeImg, imgWidth, imgHeight);
     if (bitmap.filename.empty())
-        Error() << "you must specify an image filename to write to";
+        error("you must specify an image filename to write to");
 
     Agg2D& painter = bitmap.painter();
     painter.clearAll(0xff, 0xff, 0xff);
@@ -63,9 +63,11 @@ void visualiseSectorsToFile(const Image& image, const std::string& filename)
             BORDER + ((sideToDraw == -1) ? (panel_centre + side * panel_size)
                                          : panel_centre);
 
-        for (int physicalTrack = 0; physicalTrack < TRACKS; physicalTrack++)
+        for (int physicalCylinder = 0; physicalCylinder < TRACKS;
+            physicalCylinder++)
         {
-            double visibleDistance = (TRACKS * 0.5) + (TRACKS - physicalTrack);
+            double visibleDistance =
+                (TRACKS * 0.5) + (TRACKS - physicalCylinder);
             double radius = (disk_radius * visibleDistance) / (TRACKS * 1.5);
             painter.noFill();
             painter.lineColor(0x88, 0x88, 0x88);
@@ -77,8 +79,9 @@ void visualiseSectorsToFile(const Image& image, const std::string& filename)
             {
                 for (const auto& sector : image)
                 {
-                    if ((sector->physicalSide == side) &&
-                        (sector->physicalTrack == physicalTrack) &&
+                    if ((sector->physicalLocation->head == side) &&
+                        (sector->physicalLocation->cylinder ==
+                            physicalCylinder) &&
                         (sector->logicalSector == alignWithSector))
                     {
                         offset = sector->headerStartTime;
@@ -111,8 +114,8 @@ void visualiseSectorsToFile(const Image& image, const std::string& filename)
             /* Sadly, Images aren't indexable by physical track. */
             for (const auto& sector : image)
             {
-                if ((sector->physicalSide == side) &&
-                    (sector->physicalTrack == physicalTrack))
+                if ((sector->physicalLocation->head == side) &&
+                    (sector->physicalLocation->cylinder == physicalCylinder))
                 {
                     painter.lineColor(0xff, 0x00, 0x00);
                     if (sector->status == Sector::OK)
@@ -154,12 +157,12 @@ void visualiseSectorsToFile(const Image& image, const std::string& filename)
 static void check_for_error()
 {
     if (inputFile.fail())
-        Error() << fmt::format("I/O error: {}", strerror(errno));
+        error("I/O error: {}", strerror(errno));
 }
 
 static void bad_csv()
 {
-    Error() << "bad CSV file format";
+    error("bad CSV file format");
 }
 
 static void readRow(const std::vector<std::string>& row, Image& image)
@@ -175,16 +178,16 @@ static void readRow(const std::vector<std::string>& row, Image& image)
         if (status == Sector::Status::MISSING)
             return;
 
-        int logicalTrack = std::stoi(row[3]);
-        int logicalSide = std::stoi(row[4]);
+        int logicalCylinder = std::stoi(row[3]);
+        int logicalHead = std::stoi(row[4]);
         int logicalSector = std::stoi(row[2]);
 
         const auto& sector =
-            image.put(logicalTrack, logicalSide, logicalSector);
-        sector->physicalTrack = std::stoi(row[0]);
-        sector->physicalSide = std::stoi(row[1]);
-        sector->logicalTrack = logicalTrack;
-        sector->logicalSide = logicalSide;
+            image.put(logicalCylinder, logicalHead, logicalSector);
+        sector->physicalLocation = std::make_optional<CylinderHead>(
+            (unsigned)std::stoi(row[0]), (unsigned)std::stoi(row[1]));
+        sector->logicalCylinder = logicalCylinder;
+        sector->logicalHead = logicalHead;
         sector->logicalSector = logicalSector;
         sector->clock = std::stod(row[5]);
         sector->headerStartTime = std::stod(row[6]);
@@ -202,7 +205,7 @@ static void readRow(const std::vector<std::string>& row, Image& image)
 static Image readCsv(const std::string& filename)
 {
     if (filename == "")
-        Error() << "you must specify an input CSV file";
+        error("you must specify an input CSV file");
 
     inputFile.open(filename);
     check_for_error();

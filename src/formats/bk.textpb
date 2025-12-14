@@ -1,0 +1,60 @@
+shortname: 'BK'
+comment: '800kB 5.25"/3.5" 80-track 10-sector DSDD'
+read_support_status: DINOSAUR
+write_support_status: DINOSAUR
+
+documentation:
+<<<
+The BK (an abbreviation for бытовой компьютер --- 'home computer' in Russian)
+is a Soviet era personal computer from Elektronika based on a PDP-11
+single-chip processor. It was the _only_ official, government approved home
+computer in mass production at the time.
+
+It got a floppy interface in 1989 when the 128kB BK-0011 was released. This
+used a relatively normal double-sided IBM scheme format with 80 sectors and ten
+sectors per track, resulting in 800kB disks. The format is, in fact, identical
+to the Atari ST 800kB format. Either 5.25" or 3.5" drives were used depending
+on what was available at the time, with the same format on both.
+>>>
+
+image_reader {
+	filename: "bk800.img"
+	type: IMAGETYPE_IMG
+}
+
+image_writer {
+	filename: "bk800.img"
+	type: IMAGETYPE_IMG
+}
+
+layout {
+	format_type: FORMATTYPE_80TRACK
+	tracks: 80
+	sides: 2
+	layoutdata {
+		sector_size: 512
+		physical {
+			start_sector: 1
+			count: 10
+		}
+	}
+}
+
+encoder {
+	ibm {
+		trackdata {
+			target_rotational_period_ms: 200
+			target_clock_period_us: 4.0
+			emit_iam: false
+			gap0: 80
+			gap2: 22
+			gap3: 34
+		}
+	}
+}
+
+decoder {
+	ibm {}
+}
+
+

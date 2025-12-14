@@ -1,0 +1,81 @@
+from build.ab import simplerule, export
+from build.c import cxxlibrary
+from scripts.build import protoencode
+
+formats = [
+    "_global_options",
+    "acornadfs",
+    "acorndfs",
+    "aeslanier",
+    "agat",
+    "amiga",
+    "ampro",
+    "apple2",
+    "atarist",
+    "bk",
+    "brother",
+    "commodore",
+    "eco1",
+    "epsonpf10",
+    "f85",
+    "fb100",
+    "hplif",
+    "ibm",
+    "icl30",
+    "juku",
+    "mac",
+    "micropolis",
+    "ms2000",
+    "mx",
+    "n88basic",
+    "northstar",
+    "psos",
+    "rolandd20",
+    "rx50",
+    "smaky6",
+    "tartu",
+    "ti99",
+    "tids990",
+    "tiki",
+    "victor9k",
+    "zilogmcz",
+]
+
+simplerule(
+    name="table_cc",
+    ins=[f"./{name}.textpb" for name in formats],
+    deps=["scripts/mktable.sh"],
+    outs=["=table.cc"],
+    commands=[
+        "sh scripts/mktable.sh formats " + (" ".join(formats)) + " > $[outs]"
+    ],
+    label="MKTABLE",
+)
+
+protoencode(
+    name="formats_cc",
+    srcs={name: f"./{name}.textpb" for name in formats},
+    proto="ConfigProto",
+    include="lib/config/config.pb.h",
+    symbol="formats",
+)
+
+cxxlibrary(
+    name="formats",
+    srcs=[".+formats_cc", ".+table_cc"],
+    deps=["lib/config", "lib/core"],
+)
+
+export(
+    name="docs",
+    items={
+        f"doc/disk-{f}.md": simplerule(
+            name=f"{f}_doc",
+            ins=["scripts+mkdoc"],
+            outs=[f"=disk-{f}.md"],
+            commands=["$[ins[0]] " + f + " | tr -d '\\r' > $[outs[0]]"],
+            label="MKDOC",
+        )
+        for f in formats
+    },
+)

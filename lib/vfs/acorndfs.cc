@@ -1,8 +1,7 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/vfs/vfs.h"
-#include "lib/config.pb.h"
-#include "lib/utils.h"
-#include <fmt/format.h>
+#include "lib/config/config.pb.h"
+#include "lib/core/utils.h"
 
 class AcornDfsFilesystem;
 
@@ -107,19 +106,20 @@ public:
 class AcornDfsFilesystem : public Filesystem
 {
 public:
-    AcornDfsFilesystem(
-        const AcornDfsProto& config, std::shared_ptr<SectorInterface> sectors):
-        Filesystem(sectors),
+    AcornDfsFilesystem(const AcornDfsProto& config,
+        const std::shared_ptr<const DiskLayout>& diskLayout,
+        std::shared_ptr<SectorInterface> sectors):
+        Filesystem(diskLayout, sectors),
         _config(config)
     {
     }
 
-    uint32_t capabilities() const
+    uint32_t capabilities() const override
     {
         return OP_GETFSDATA | OP_LIST | OP_GETFILE | OP_GETDIRENT;
     }
 
-    std::map<std::string, std::string> getMetadata()
+    std::map<std::string, std::string> getMetadata() override
     {
         AcornDfsDirectory dir(this);
 
@@ -131,12 +131,12 @@ public:
         return attributes;
     }
 
-    FilesystemStatus check()
+    FilesystemStatus check() override
     {
         return FS_OK;
     }
 
-    std::vector<std::shared_ptr<Dirent>> list(const Path& path)
+    std::vector<std::shared_ptr<Dirent>> list(const Path& path) override
     {
         if (!path.empty())
             throw FileNotFoundException();
@@ -149,7 +149,7 @@ public:
         return result;
     }
 
-    Bytes getFile(const Path& path)
+    Bytes getFile(const Path& path) override
     {
         AcornDfsDirectory dir(this);
         auto dirent = dir.findFile(path);
@@ -167,7 +167,7 @@ public:
         return data;
     }
 
-    std::shared_ptr<Dirent> getDirent(const Path& path)
+    std::shared_ptr<Dirent> getDirent(const Path& path) override
     {
         AcornDfsDirectory dir(this);
         return dir.findFile(path);
@@ -179,7 +179,10 @@ private:
 };
 
 std::unique_ptr<Filesystem> Filesystem::createAcornDfsFilesystem(
-    const FilesystemProto& config, std::shared_ptr<SectorInterface> sectors)
+    const FilesystemProto& config,
+    const std::shared_ptr<const DiskLayout>& diskLayout,
+    std::shared_ptr<SectorInterface> sectors)
 {
-    return std::make_unique<AcornDfsFilesystem>(config.acorndfs(), sectors);
+    return std::make_unique<AcornDfsFilesystem>(
+        config.acorndfs(), diskLayout, sectors);
 }

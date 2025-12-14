@@ -1,11 +1,10 @@
-#include "globals.h"
-#include "flags.h"
-#include "sector.h"
-#include "imagereader/imagereader.h"
-#include "image.h"
-#include "logger.h"
-#include "fmt/format.h"
-#include "lib/config.pb.h"
+#include "lib/core/globals.h"
+#include "lib/config/flags.h"
+#include "lib/data/sector.h"
+#include "lib/imagereader/imagereader.h"
+#include "lib/data/image.h"
+#include "lib/core/logger.h"
+#include "lib/config/config.pb.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -82,7 +81,7 @@ static unsigned getSectorSize(uint8_t flags)
                 return 512;
         }
     }
-    Error() << "not reachable";
+    error("not reachable");
 }
 
 class Jv3ImageReader : public ImageReader
@@ -90,12 +89,12 @@ class Jv3ImageReader : public ImageReader
 public:
     Jv3ImageReader(const ImageReaderProto& config): ImageReader(config) {}
 
-    std::unique_ptr<Image> readImage()
+    std::unique_ptr<Image> readImage() override
     {
         std::ifstream inputFile(
             _config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
-            Error() << "cannot open input file";
+            error("cannot open input file");
 
         inputFile.seekg(0, std::ios::end);
         unsigned inputFileSize = inputFile.tellg();

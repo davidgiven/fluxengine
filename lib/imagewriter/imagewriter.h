@@ -3,17 +3,17 @@
 
 class ImageWriterProto;
 class Image;
+class Config;
 
 class ImageWriter
 {
 public:
     ImageWriter(const ImageWriterProto& config);
-    virtual ~ImageWriter(){};
+    virtual ~ImageWriter() {};
 
 public:
+    static std::unique_ptr<ImageWriter> create(Config& config);
     static std::unique_ptr<ImageWriter> create(const ImageWriterProto& config);
-    static void updateConfigForFilename(
-        ImageWriterProto* proto, const std::string& filename);
 
     static std::unique_ptr<ImageWriter> createD64ImageWriter(
         const ImageWriterProto& config);
@@ -37,11 +37,8 @@ public:
     void writeCsv(const Image& sectors, const std::string& filename);
 
     /* Writes a raw image. */
-    virtual void writeImage(const Image& sectors) = 0;
 
-    /* Writes an image applying any optional mapping from disk sector numbering
-     * to filesystem sector numbering. */
-    void writeMappedImage(const Image& sectors);
+    virtual void writeImage(const Image& sectors) = 0;
 
 protected:
     const ImageWriterProto& _config;

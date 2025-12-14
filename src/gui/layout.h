@@ -18,30 +18,31 @@
 #include <wx/font.h>
 #include <wx/colour.h>
 #include <wx/settings.h>
-#include <wx/statbmp.h>
-#include <wx/stattext.h>
-#include <wx/radiobut.h>
-#include <wx/combobox.h>
-#include <wx/choice.h>
-#include <wx/checkbox.h>
-#include <wx/sizer.h>
-#include <wx/panel.h>
-#include <wx/filepicker.h>
-#include <wx/button.h>
-#include <wx/scrolwin.h>
-#include <wx/aui/aui.h>
-#include <wx/aui/auibar.h>
-#include "visualisationcontrol.h"
-#include <wx/dataview.h>
-#include <wx/gauge.h>
 #include <wx/simplebook.h>
+#include <wx/sizer.h>
 #include <wx/frame.h>
 #include <wx/textctrl.h>
+#include <wx/button.h>
 #include <wx/dialog.h>
 #include "fluxviewercontrol.h"
 #include <wx/scrolbar.h>
+#include <wx/panel.h>
 #include <wx/notebook.h>
+#include <wx/stattext.h>
+#include <wx/filepicker.h>
 #include <wx/gbsizer.h>
+#include <wx/checkbox.h>
+#include <wx/statbmp.h>
+#include <wx/wrapsizer.h>
+#include <wx/statbox.h>
+#include <wx/choice.h>
+#include <wx/aui/aui.h>
+#include <wx/aui/auibar.h>
+#include "visualisationcontrol.h"
+#include "histogramviewer.h"
+#include <wx/dataview.h>
+#include <wx/gauge.h>
+#include <wx/spinctrl.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -56,59 +57,6 @@ protected:
     wxMenu* m_menu1;
     wxMenu* m_menu2;
     wxSimplebook* dataNotebook;
-    wxScrolledWindow* idlePanel;
-    wxStaticBitmap* applicationBitmap;
-    wxStaticText* m_staticText61;
-    wxRadioButton* realDiskRadioButton;
-    wxPanel* realDiskRadioButtonPanel;
-    wxComboBox* deviceCombo;
-    wxChoice* driveChoice;
-    wxCheckBox* highDensityToggle;
-    wxCheckBox* fortyTrackDriveToggle;
-    wxRadioButton* fluxImageRadioButton;
-    wxPanel* fluxImageRadioButtonPanel;
-    wxFilePickerCtrl* fluxImagePicker;
-    wxRadioButton* diskImageRadioButton;
-    wxPanel* diskImageRadioButtonPanel;
-    wxFilePickerCtrl* diskImagePicker;
-    wxStaticText* m_staticText23;
-    wxPanel* m_panel11;
-    wxChoice* formatChoice;
-    wxButton* customConfigurationButton;
-    wxStaticText* m_staticText19;
-    wxButton* readButton;
-    wxButton* writeButton;
-    wxButton* browseButton;
-    wxButton* formatButton;
-    wxPanel* imagePanel;
-    wxAuiToolBar* imagerToolbar;
-    wxAuiToolBarItem* imagerBackTool;
-    VisualisationControl* visualiser;
-    wxButton* imagerSaveImageButton;
-    wxButton* imagerSaveFluxButton;
-    wxStaticText* m_staticText4;
-    wxButton* imagerGoAgainButton;
-    wxPanel* browsePanel;
-    wxAuiToolBar* browserToolbar;
-    wxAuiToolBarItem* browserBackTool;
-    wxAuiToolBarItem* browserInfoTool;
-    wxAuiToolBarItem* browserViewTool;
-    wxAuiToolBarItem* browserSaveTool;
-    wxAuiToolBarItem* browserMoreMenuButton;
-    wxMenu* browserMoreMenu;
-    wxMenuItem* browserAddMenuItem;
-    wxMenuItem* browserNewDirectoryMenuItem;
-    wxMenuItem* browserRenameMenuItem;
-    wxMenuItem* browserDeleteMenuItem;
-    wxAuiToolBarItem* browserFormatTool;
-    wxDataViewCtrl* browserTree;
-    wxDataViewColumn* m_dataViewColumn1;
-    wxDataViewColumn* m_dataViewColumn2;
-    wxDataViewColumn* m_dataViewColumn3;
-    wxGauge* diskSpaceGauge;
-    wxButton* browserDiscardButton;
-    wxButton* browserCommitButton;
-    wxStaticText* m_staticText12;
 
     // Virtual event handlers, override them in your derived class
     virtual void OnClose(wxCloseEvent& event)
@@ -131,118 +79,6 @@ protected:
     {
         event.Skip();
     }
-    virtual void OnConfigRadioButtonClicked(wxCommandEvent& event)
-    {
-        event.Skip();
-    }
-    virtual void OnControlsChanged(wxCommandEvent& event)
-    {
-        event.Skip();
-    }
-    virtual void OnControlsChanged(wxFileDirPickerEvent& event)
-    {
-        event.Skip();
-    }
-    virtual void OnCustomConfigurationButton(wxCommandEvent& event)
-    {
-        event.Skip();
-    }
-    virtual void OnReadButton(wxCommandEvent& event)
-    {
-        event.Skip();
-    }
-    virtual void OnWriteButton(wxCommandEvent& event)
-    {
-        event.Skip();
-    }
-    virtual void OnBrowseButton(wxCommandEvent& event)
-    {
-        event.Skip();
-    }
-    virtual void OnFormatButton(wxCommandEvent& event)
-    {
-        event.Skip();
-    }
-    virtual void OnBackButton(wxCommandEvent& event)
-    {
-        event.Skip();
-    }
-    virtual void OnSaveImageButton(wxCommandEvent& event)
-    {
-        event.Skip();
-    }
-    virtual void OnSaveFluxButton(wxCommandEvent& event)
-    {
-        event.Skip();
-    }
-    virtual void OnImagerGoAgainButton(wxCommandEvent& event)
-    {
-        event.Skip();
-    }
-    virtual void OnBrowserInfoButton(wxCommandEvent& event)
-    {
-        event.Skip();
-    }
-    virtual void OnBrowserViewButton(wxCommandEvent& event)
-    {
-        event.Skip();
-    }
-    virtual void OnBrowserSaveButton(wxCommandEvent& event)
-    {
-        event.Skip();
-    }
-    virtual void OnBrowserAddMenuItem(wxCommandEvent& event)
-    {
-        event.Skip();
-    }
-    virtual void OnBrowserNewDirectoryMenuItem(wxCommandEvent& event)
-    {
-        event.Skip();
-    }
-    virtual void OnBrowserRenameMenuItem(wxCommandEvent& event)
-    {
-        event.Skip();
-    }
-    virtual void OnBrowserDeleteMenuItem(wxCommandEvent& event)
-    {
-        event.Skip();
-    }
-    virtual void OnBrowserFormatButton(wxCommandEvent& event)
-    {
-        event.Skip();
-    }
-    virtual void OnBrowserBeginDrag(wxDataViewEvent& event)
-    {
-        event.Skip();
-    }
-    virtual void OnBrowserDrop(wxDataViewEvent& event)
-    {
-        event.Skip();
-    }
-    virtual void OnBrowserDropPossible(wxDataViewEvent& event)
-    {
-        event.Skip();
-    }
-    virtual void OnBrowserFilenameChanged(wxDataViewEvent& event)
-    {
-        event.Skip();
-    }
-    virtual void OnBrowserDirectoryExpanding(wxDataViewEvent& event)
-    {
-        event.Skip();
-    }
-    virtual void OnBrowserSelectionChanged(wxDataViewEvent& event)
-    {
-        event.Skip();
-    }
-    virtual void OnBrowserDiscardButton(wxCommandEvent& event)
-    {
-        event.Skip();
-    }
-    virtual void OnBrowserCommitButton(wxCommandEvent& event)
-    {
-        event.Skip();
-    }
 
 public:
     MainWindowGen(wxWindow* parent,
@@ -254,19 +90,6 @@ public:
                      wxFULL_REPAINT_ON_RESIZE | wxTAB_TRAVERSAL);
 
     ~MainWindowGen();
-
-    void browserMoreMenuButtonOnDropDownMenu(wxAuiToolBarEvent& event)
-    {
-        if (event.IsDropDownClicked())
-        {
-            browserToolbar->SetToolSticky(event.GetId(), true);
-            wxRect rect = browserToolbar->GetToolRect(event.GetId());
-            wxPoint pt = browserToolbar->ClientToScreen(rect.GetBottomLeft());
-            pt = ScreenToClient(pt);
-            browserToolbar->PopupMenu(browserMoreMenu, pt);
-            browserToolbar->SetToolSticky(event.GetId(), false);
-        }
-    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -541,4 +364,368 @@ public:
         long style = wxDEFAULT_DIALOG_STYLE);
 
     ~FormatDialog();
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class IdlePanelGen
+///////////////////////////////////////////////////////////////////////////////
+class IdlePanelGen : public wxPanel
+{
+private:
+protected:
+    wxStaticBitmap* applicationBitmap;
+    wxPanel* sourceIconPanel;
+    wxSimplebook* sourceBook;
+    wxChoice* formatChoice;
+    wxButton* customConfigurationButton;
+    wxPanel* formatOptionsContainer;
+    wxButton* readButton;
+    wxButton* writeButton;
+    wxButton* browseButton;
+    wxButton* formatButton;
+    wxButton* exploreButton;
+
+    // Virtual event handlers, override them in your derived class
+    virtual void OnControlsChanged(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnCustomConfigurationButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnReadButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnWriteButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowseButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnFormatButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnExploreButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+
+public:
+    IdlePanelGen(wxWindow* parent,
+        wxWindowID id = wxID_ANY,
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxSize(-1, -1),
+        long style = wxTAB_TRAVERSAL,
+        const wxString& name = wxEmptyString);
+
+    ~IdlePanelGen();
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class ImagerPanelGen
+///////////////////////////////////////////////////////////////////////////////
+class ImagerPanelGen : public wxPanel
+{
+private:
+protected:
+    wxAuiToolBar* imagerToolbar;
+    wxAuiToolBarItem* imagerBackTool;
+    VisualisationControl* visualiser;
+    wxButton* imagerSaveImageButton;
+    wxButton* imagerSaveFluxButton;
+    HistogramViewer* histogram;
+    wxButton* imagerGoAgainButton;
+
+    // Virtual event handlers, override them in your derived class
+    virtual void OnBackButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnSaveImageButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnSaveFluxButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnImagerGoAgainButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+
+public:
+    ImagerPanelGen(wxWindow* parent,
+        wxWindowID id = wxID_ANY,
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxSize(500, 300),
+        long style = wxTAB_TRAVERSAL,
+        const wxString& name = wxEmptyString);
+
+    ~ImagerPanelGen();
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class BrowserPanelGen
+///////////////////////////////////////////////////////////////////////////////
+class BrowserPanelGen : public wxPanel
+{
+private:
+protected:
+    wxAuiToolBar* browserToolbar;
+    wxAuiToolBarItem* browserBackTool;
+    wxAuiToolBarItem* browserInfoTool;
+    wxAuiToolBarItem* browserViewTool;
+    wxAuiToolBarItem* browserSaveTool;
+    wxAuiToolBarItem* browserMoreMenuButton;
+    wxMenu* browserMoreMenu;
+    wxMenuItem* browserAddMenuItem;
+    wxMenuItem* browserNewDirectoryMenuItem;
+    wxMenuItem* browserRenameMenuItem;
+    wxMenuItem* browserDeleteMenuItem;
+    wxAuiToolBarItem* browserFormatTool;
+    wxDataViewCtrl* browserTree;
+    wxDataViewColumn* m_dataViewColumn1;
+    wxDataViewColumn* m_dataViewColumn2;
+    wxDataViewColumn* m_dataViewColumn3;
+    wxGauge* diskSpaceGauge;
+    wxButton* browserDiscardButton;
+    wxButton* browserCommitButton;
+    wxStaticText* m_staticText12;
+
+    // Virtual event handlers, override them in your derived class
+    virtual void OnBackButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserInfoButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserViewButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserSaveButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserAddMenuItem(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserNewDirectoryMenuItem(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserRenameMenuItem(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserDeleteMenuItem(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserFormatButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserBeginDrag(wxDataViewEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserDrop(wxDataViewEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserDropPossible(wxDataViewEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserDirectoryExpanding(wxDataViewEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserFilenameChanged(wxDataViewEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserSelectionChanged(wxDataViewEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserDiscardButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnBrowserCommitButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+
+public:
+    BrowserPanelGen(wxWindow* parent,
+        wxWindowID id = wxID_ANY,
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxSize(500, 300),
+        long style = wxTAB_TRAVERSAL,
+        const wxString& name = wxEmptyString);
+
+    ~BrowserPanelGen();
+
+    void browserMoreMenuButtonOnDropDownMenu(wxAuiToolBarEvent& event)
+    {
+        if (event.IsDropDownClicked())
+        {
+            browserToolbar->SetToolSticky(event.GetId(), true);
+            wxRect rect = browserToolbar->GetToolRect(event.GetId());
+            wxPoint pt = browserToolbar->ClientToScreen(rect.GetBottomLeft());
+            pt = ScreenToClient(pt);
+            browserToolbar->PopupMenu(browserMoreMenu, pt);
+            browserToolbar->SetToolSticky(event.GetId(), false);
+        }
+    }
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class ExplorerPanelGen
+///////////////////////////////////////////////////////////////////////////////
+class ExplorerPanelGen : public wxPanel
+{
+private:
+protected:
+    wxAuiToolBar* explorerToolbar;
+    wxAuiToolBarItem* explorerBackTool;
+    wxAuiToolBarItem* explorerRefreshTool;
+    wxStaticText* m_staticText22;
+    wxSpinCtrl* explorerTrackSpinCtrl;
+    wxStaticText* m_staticText26;
+    wxSpinCtrl* explorerSideSpinCtrl;
+    wxStaticText* m_staticText231;
+    wxSpinCtrlDouble* explorerStartTimeSpinCtrl;
+    wxStaticText* m_staticText24;
+    wxButton* guessButton;
+    wxSpinCtrlDouble* explorerClockSpinCtrl;
+    wxStaticText* m_staticText25;
+    wxSpinCtrl* explorerBitOffsetSpinCtrl;
+    wxStaticText* m_staticText27;
+    wxChoice* explorerDecodeChoice;
+    wxStaticText* m_staticText241;
+    wxCheckBox* explorerReverseCheckBox;
+    HistogramViewer* histogram;
+    wxTextCtrl* explorerText;
+
+    // Virtual event handlers, override them in your derived class
+    virtual void OnBackButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnExplorerRefreshButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnExplorerSettingChange(wxSpinEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnExplorerSettingChange(wxSpinDoubleEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnGuessClockButton(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+    virtual void OnExplorerSettingChange(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+
+public:
+    ExplorerPanelGen(wxWindow* parent,
+        wxWindowID id = wxID_ANY,
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxSize(620, 426),
+        long style = wxTAB_TRAVERSAL,
+        const wxString& name = wxEmptyString);
+
+    ~ExplorerPanelGen();
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class HardwareSourcePanelGen
+///////////////////////////////////////////////////////////////////////////////
+class HardwareSourcePanelGen : public wxPanel
+{
+private:
+protected:
+    wxStaticText* m_staticText30;
+    wxStaticText* m_staticText29;
+
+public:
+    wxStaticText* label;
+    wxCheckBox* highDensityToggle;
+    wxChoice* driveTypeChoice;
+
+    HardwareSourcePanelGen(wxWindow* parent,
+        wxWindowID id = wxID_ANY,
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxSize(-1, -1),
+        long style = wxTAB_TRAVERSAL,
+        const wxString& name = wxEmptyString);
+
+    ~HardwareSourcePanelGen();
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class FluxfileSourcePanelGen
+///////////////////////////////////////////////////////////////////////////////
+class FluxfileSourcePanelGen : public wxPanel
+{
+private:
+protected:
+    wxStaticText* m_staticText28;
+    wxStaticText* m_staticText27;
+    wxStaticText* m_staticText281;
+
+public:
+    wxFilePickerCtrl* fluxImagePicker;
+    wxChoice* fluxImageFormat;
+
+    FluxfileSourcePanelGen(wxWindow* parent,
+        wxWindowID id = wxID_ANY,
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxSize(-1, -1),
+        long style = wxTAB_TRAVERSAL,
+        const wxString& name = wxEmptyString);
+
+    ~FluxfileSourcePanelGen();
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class ImagefileSourcePanelGen
+///////////////////////////////////////////////////////////////////////////////
+class ImagefileSourcePanelGen : public wxPanel
+{
+private:
+protected:
+    wxStaticText* m_staticText29;
+    wxStaticText* m_staticText28;
+
+public:
+    wxFilePickerCtrl* diskImagePicker;
+
+    ImagefileSourcePanelGen(wxWindow* parent,
+        wxWindowID id = wxID_ANY,
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxSize(-1, -1),
+        long style = wxTAB_TRAVERSAL,
+        const wxString& name = wxEmptyString);
+
+    ~ImagefileSourcePanelGen();
 };

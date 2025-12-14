@@ -1,5 +1,9 @@
 name: Autorelease
 
+concurrency:
+  group: environment-release-${{ github.head_ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches:
@@ -11,43 +15,101 @@ jobs:
     defaults:
       run:
         shell: msys2 {0}
+
     steps:
-    - uses: msys2/setup-msys2@v2
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: mingw64
+          update: true
+          install: |
+            python diffutils ninja make zip
+          pacboy: |
+            protobuf:p pkgconf:p curl-winssl:p file:p glfw:p mbedtls:p
+            sqlite:p freetype:p boost:p gcc:p binutils:p nsis:p abseil-cpp:p
+
+      - name: debug
+        run: |
+          pacboy -Q --info protobuf:p
+          cat /mingw64/lib/pkgconfig/protobuf.pc
+          /mingw64/bin/pkg-config.exe protobuf --cflags
+          /mingw64/bin/pkg-config.exe protobuf --cflags --static
+
+      - uses: actions/checkout@v4
+        with:
+          repository: 'davidgiven/fluxengine'
+          path: 'fluxengine'
+          submodules: 'true'
+
+      - name: run
+        run: |
+          make -C fluxengine BUILDTYPE=windows AB_SANDBOX=no
+
+      - name: nsis
+        run: |
+          cd fluxengine
+          strip fluxengine.exe -o fluxengine-stripped.exe
+          strip fluxengine-gui.exe -o fluxengine-gui-stripped.exe
+          makensis -v2 -nocd -dOUTFILE=fluxengine-installer.exe extras/windows-installer.nsi
+
+      - name: zip
+        run: |
+          cd fluxengine && zip -9 fluxengine-windows.zip fluxengine.exe fluxengine-gui.exe upgrade-flux-file.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex fluxengine-installer.exe
+
+      - name: date
+        run: |
+          echo "RELEASE_DATE=$(date --rfc-3339=date)" >> ${GITHUB_ENV}
+
+      - name: tag
+        uses: EndBug/latest-tag@latest
+        with:
+          tag-name: dev
+          force-branch: false
+          git-directory: 'fluxengine'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: delete-old-assets
+        uses: mknejp/delete-release-assets@v1
+        with:
+          token: ${{ github.token }}
+          tag: dev
+          assets: |
+            fluxengine.zip
+            fluxengine-installer.exe
+          fail-if-no-assets: false
+
+      - name: release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Development build ${{ env.RELEASE_DATE }}
+          files: |
+            fluxengine/fluxengine.zip
+            fluxengine/fluxengine-installer.exe
+          tag_name: dev
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-macos:
+    strategy:
+      matrix:
+        runs-on: [ macos-15, macos-15-intel ]
+    runs-on: ${{ matrix.runs-on }}
+    steps:
+    - uses: actions/checkout@v4
       with:
-        update: true
-        msystem: MINGW32
-        install: >-
-          diffutils
-          make
-          mingw-w64-i686-fmt
-          mingw-w64-i686-gcc
-          mingw-w64-i686-libusb
-          mingw-w64-i686-pkg-config
-          mingw-w64-i686-protobuf
-          mingw-w64-i686-sqlite3
-          mingw-w64-i686-wxWidgets
-          mingw-w64-i686-zlib
-          mingw-w64-i686-nsis
-          zip
-    - uses: actions/checkout@v3
+        submodules: 'true'
 
-    - name: build
+    - name: brew
       run: |
-        make
+        brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg libmagic nlohmann-json cli11 boost glfw3 md4c ninja python freetype2 mbedtls@3
+        brew link mbedtls@3
+        brew upgrade
 
-    - name: nsis
+    - name: make
       run: |
-        strip fluxengine.exe -o fluxengine-stripped.exe
-        strip fluxengine-gui.exe -o fluxengine-gui-stripped.exe
-        makensis -v2 -nocd -dOUTFILE=fluxengine-installer.exe extras/windows-installer.nsi
-
-    - name: zip
-      run: |
-        zip -9 fluxengine.zip fluxengine.exe fluxengine-gui.exe upgrade-flux-file.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex
-
-    - name: date
-      run: |
-        echo "RELEASE_DATE=$(date --rfc-3339=date)" >> ${GITHUB_ENV}
+        gmake
+        mv FluxEngine.pkg FluxEngine-${{ runner.arch }}.pkg
+        mv FluxEngine.app.zip FluxEngine-${{ runner.arch }}.app.zip
 
     - name: tag
       uses: EndBug/latest-tag@latest
@@ -62,9 +124,9 @@ jobs:
       with:
         token: ${{ github.token }}
         tag: dev
-        assets: | 
-          fluxengine.zip
-          fluxengine-installer.exe
+        assets: |
+          FluxEngine-${{ runner.arch }}.pkg
+          FluxEngine-${{ runner.arch }}.app.zip
         fail-if-no-assets: false
 
     - name: release
@@ -72,8 +134,11 @@ jobs:
       with:
         name: Development build ${{ env.RELEASE_DATE }}
         files: |
-          fluxengine.zip
-          fluxengine-installer.exe
+          FluxEngine-${{ runner.arch }}.pkg
+          FluxEngine-${{ runner.arch }}.app.zip
         tag_name: dev
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+

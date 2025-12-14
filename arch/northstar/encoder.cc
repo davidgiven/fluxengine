@@ -1,10 +1,10 @@
-#include "globals.h"
-#include "northstar.h"
-#include "sector.h"
-#include "bytes.h"
-#include "decoders/decoders.h"
-#include "encoders/encoders.h"
-#include "image.h"
+#include "lib/core/globals.h"
+#include "arch/northstar/northstar.h"
+#include "lib/data/sector.h"
+#include "lib/core/bytes.h"
+#include "lib/decoders/decoders.h"
+#include "lib/encoders/encoders.h"
+#include "lib/data/image.h"
 #include "lib/encoders/encoders.pb.h"
 
 #define GAP_FILL_SIZE_SD 30
@@ -49,7 +49,7 @@ static void write_sector(std::vector<bool>& bits,
             doubleDensity = true;
             break;
         default:
-            Error() << "unsupported sector size --- you must pick 256 or 512";
+            error("unsupported sector size --- you must pick 256 or 512");
             break;
     }
 
@@ -96,9 +96,10 @@ static void write_sector(std::vector<bool>& bits,
             fullSector->push_back(GAP2_FILL_BYTE);
 
         if (fullSector->size() != fullSectorSize)
-            Error() << "sector mismatched length (" << sector->data.size()
-                    << ") expected: " << fullSector->size() << " got "
-                    << fullSectorSize;
+            error("sector mismatched length ({}); expected {}, got {}",
+                sector->data.size(),
+                fullSector->size(),
+                fullSectorSize);
     }
     else
     {
@@ -128,7 +129,7 @@ public:
     {
     }
 
-    std::unique_ptr<Fluxmap> encode(std::shared_ptr<const TrackInfo>& trackInfo,
+    std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout& ltl,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
@@ -148,7 +149,7 @@ public:
             write_sector(bits, cursor, sectorData);
 
         if (cursor > bits.size())
-            Error() << "track data overrun";
+            error("track data overrun");
 
         std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
         fluxmap->appendBits(bits,
@@ -161,8 +162,7 @@ private:
     const NorthstarEncoderProto& _config;
 };
 
-std::unique_ptr<Encoder> createNorthstarEncoder(
-    const EncoderProto& config)
+std::unique_ptr<Encoder> createNorthstarEncoder(const EncoderProto& config)
 {
     return std::unique_ptr<Encoder>(new NorthstarEncoder(config));
 }

@@ -1,11 +1,10 @@
-#include "globals.h"
+#include "lib/core/globals.h"
 #include "gui.h"
-#include "layout.h"
+#include "lib/data/layout.h"
 #include "fluxviewerwindow.h"
 #include "fluxviewercontrol.h"
-#include "lib/flux.h"
-#include "lib/layout.h"
-#include "fmt/format.h"
+#include "lib/data/disk.h"
+#include "lib/data/layout.h"
 
 FluxViewerWindow::FluxViewerWindow(
     wxWindow* parent, std::shared_ptr<const TrackFlux> flux):
@@ -15,8 +14,8 @@ FluxViewerWindow::FluxViewerWindow(
     fluxviewer->SetScrollbar(scrollbar);
     fluxviewer->SetFlux(flux);
     SetTitle(fmt::format("Flux for c{} h{}",
-        flux->trackInfo->physicalTrack,
-        flux->trackInfo->physicalSide));
+        flux->trackInfo->physicalCylinder,
+        flux->trackInfo->physicalHead));
 }
 
 void FluxViewerWindow::OnExit(wxCommandEvent& event)

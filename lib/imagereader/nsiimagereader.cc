@@ -1,12 +1,11 @@
 /* Image reader for Northstar floppy disk images */
 
-#include "globals.h"
-#include "flags.h"
-#include "sector.h"
-#include "imagereader/imagereader.h"
-#include "image.h"
-#include "fmt/format.h"
-#include "logger.h"
+#include "lib/core/globals.h"
+#include "lib/config/flags.h"
+#include "lib/data/sector.h"
+#include "lib/imagereader/imagereader.h"
+#include "lib/data/image.h"
+#include "lib/core/logger.h"
 #include "lib/imagereader/imagereader.pb.h"
 #include <algorithm>
 #include <iostream>
@@ -17,22 +16,21 @@ class NsiImageReader : public ImageReader
 public:
     NsiImageReader(const ImageReaderProto& config): ImageReader(config) {}
 
-    std::unique_ptr<Image> readImage()
+    std::unique_ptr<Image> readImage() override
     {
         std::ifstream inputFile(
             _config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
-            Error() << "cannot open input file";
+            error("cannot open input file");
 
         const auto begin = inputFile.tellg();
         inputFile.seekg(0, std::ios::end);
         const auto end = inputFile.tellg();
         const auto fsize = (end - begin);
 
-        Logger() << fmt::format(
-            "NSI: Autodetecting geometry based on file size: {}", fsize);
+        log("NSI: Autodetecting geometry based on file size: {}", fsize);
 
-        unsigned numTracks = 35;
+        unsigned numCylinders = 35;
         unsigned numSectors = 10;
         unsigned numHeads = 2;
         unsigned sectorSize = 512;
@@ -55,26 +53,25 @@ public:
                 break;
 
             default:
-                Error() << "NSI: unknown file size";
+                error("NSI: unknown file size");
         }
 
         size_t trackSize = numSectors * sectorSize;
 
-        Logger() << fmt::format(
-            "reading {} tracks, {} heads, {} sectors, {} bytes per sector, {} "
+        log("reading {} tracks, {} heads, {} sectors, {} bytes per sector, {} "
             "kB total",
-            numTracks,
+            numCylinders,
             numHeads,
             numSectors,
             sectorSize,
-            numTracks * numHeads * trackSize / 1024);
+            numCylinders * numHeads * trackSize / 1024);
 
         std::unique_ptr<Image> image(new Image);
         unsigned sectorFileOffset;
 
         for (unsigned head = 0; head < numHeads; head++)
         {
-            for (unsigned track = 0; track < numTracks; track++)
+            for (unsigned track = 0; track < numCylinders; track++)
             {
                 for (unsigned sectorId = 0; sectorId < numSectors; sectorId++)
                 {
@@ -86,8 +83,8 @@ public:
                     else
                     { /* Head 1 is from track 70-35 */
                         sectorFileOffset =
-                            (trackSize * numTracks) + /* Skip over side 0 */
-                            ((numTracks - track - 1) * trackSize) +
+                            (trackSize * numCylinders) + /* Skip over side 0 */
+                            ((numCylinders - track - 1) * trackSize) +
                             (sectorId * sectorSize); /* Sector offset from
                                                         beginning of track. */
                     }
@@ -104,8 +101,8 @@ public:
             }
         }
 
-        image->setGeometry({.numTracks = numTracks,
-            .numSides = numHeads,
+        image->setGeometry({.numCylinders = numCylinders,
+            .numHeads = numHeads,
             .numSectors = numSectors,
             .sectorSize = sectorSize});
         return image;

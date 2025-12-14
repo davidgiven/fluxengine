@@ -107,7 +107,7 @@ namespace libusbp
     {
     public:
         /*! Constructor that takes a pointer. */
-        explicit unique_pointer_wrapper(T * p = nullptr) noexcept
+        explicit unique_pointer_wrapper(T * p = NULL) noexcept
             : pointer(p)
         {
         }
@@ -133,9 +133,9 @@ namespace libusbp
 
         /*! Implicit conversion to bool.  Returns true if the underlying pointer
          *  is not NULL. */
-        explicit operator bool() const noexcept
+        operator bool() const noexcept
         {
-            return pointer != nullptr;
+            return pointer != NULL;
         }
 
         /*! Returns the underlying pointer. */
@@ -146,19 +146,19 @@ namespace libusbp
 
         /*! Sets the underlying pointer to the specified value, freeing the
          * previous pointer and taking ownership of the specified one. */
-        void pointer_reset(T * p = nullptr) noexcept
+        void pointer_reset(T * p = NULL) noexcept
         {
             pointer_free(pointer);
             pointer = p;
         }
 
         /*! Releases the pointer, transferring ownership of it to the caller and
-         * resetting the underlying pointer of this object to nullptr.  The caller
+         * resetting the underlying pointer of this object to NULL.  The caller
          * is responsible for freeing the returned pointer if it is not NULL. */
         T * pointer_release() noexcept
         {
             T * p = pointer;
-            pointer = nullptr;
+            pointer = NULL;
             return p;
         }
 
@@ -193,14 +193,14 @@ namespace libusbp
     {
     public:
         /*! Constructor that takes a pointer. */
-        explicit unique_pointer_wrapper_with_copy(T * p = nullptr) noexcept
+        explicit unique_pointer_wrapper_with_copy(T * p = NULL) noexcept
             : unique_pointer_wrapper<T>(p)
         {
         }
 
         /*! Move constructor. */
         unique_pointer_wrapper_with_copy(
-            unique_pointer_wrapper_with_copy && other) noexcept = default;
+            unique_pointer_wrapper_with_copy && other) = default;
 
         /*! Copy constructor */
         unique_pointer_wrapper_with_copy(
@@ -228,13 +228,14 @@ namespace libusbp
     {
     public:
         /*! Constructor that takes a pointer.  */
-        explicit error(libusbp_error * p = nullptr) noexcept
+        explicit error(libusbp_error * p = NULL) noexcept
             : unique_pointer_wrapper_with_copy(p)
         {
         }
 
         /*! Wrapper for libusbp_error_get_message(). */
-        const char * what() const noexcept override {
+        virtual const char * what() const noexcept override
+        {
             return libusbp_error_get_message(pointer);
         }
 
@@ -255,7 +256,7 @@ namespace libusbp
     /*! \cond */
     inline void throw_if_needed(libusbp_error * err)
     {
-        if (err != nullptr)
+        if (err != NULL)
         {
             throw error(err);
         }
@@ -267,7 +268,7 @@ namespace libusbp
     {
     public:
         /*! Constructor that takes a pointer. */
-        explicit async_in_pipe(libusbp_async_in_pipe * pointer = nullptr)
+        explicit async_in_pipe(libusbp_async_in_pipe * pointer = NULL)
             : unique_pointer_wrapper(pointer)
         {
         }
@@ -303,8 +304,8 @@ namespace libusbp
         bool handle_finished_transfer(void * buffer, size_t * transferred,
             error * transfer_error)
         {
-            libusbp_error ** error_out = nullptr;
-            if (transfer_error != nullptr)
+            libusbp_error ** error_out = NULL;
+            if (transfer_error != NULL)
             {
                 transfer_error->pointer_reset();
                 error_out = transfer_error->pointer_to_pointer_get();
@@ -328,7 +329,7 @@ namespace libusbp
     {
     public:
         /*! Constructor that takes a pointer. */
-        explicit device(libusbp_device * pointer = nullptr) :
+        explicit device(libusbp_device * pointer = NULL) :
             unique_pointer_wrapper_with_copy(pointer)
         {
         }
@@ -387,7 +388,7 @@ namespace libusbp
         std::vector<device> vector;
         for(size_t i = 0; i < size; i++)
         {
-            vector.emplace_back(device_list[i]);
+            vector.push_back(device(device_list[i]));
         }
         libusbp_list_free(device_list);
         return vector;
@@ -408,13 +409,13 @@ namespace libusbp
     public:
         /*! Constructor that takes a pointer.  This object will free the pointer
          *  when it is destroyed. */
-        explicit generic_interface(libusbp_generic_interface * pointer = nullptr)
+        explicit generic_interface(libusbp_generic_interface * pointer = NULL)
             : unique_pointer_wrapper_with_copy(pointer)
         {
         }
 
         /*! Wrapper for libusbp_generic_interface_create. */
-        explicit generic_interface(const device & device,
+        generic_interface(const device & device,
             uint8_t interface_number = 0, bool composite = false)
         {
             throw_if_needed(libusbp_generic_interface_create(
@@ -448,13 +449,13 @@ namespace libusbp
     public:
         /*! Constructor that takes a pointer.  This object will free the pointer
          *  when it is destroyed. */
-        explicit generic_handle(libusbp_generic_handle * pointer = nullptr) noexcept
+        explicit generic_handle(libusbp_generic_handle * pointer = NULL) noexcept
             : unique_pointer_wrapper(pointer)
         {
         }
 
         /*! Wrapper for libusbp_generic_handle_open(). */
-        explicit generic_handle(const generic_interface & gi)
+        generic_handle(const generic_interface & gi)
         {
             throw_if_needed(libusbp_generic_handle_open(gi.pointer_get(), &pointer));
         }
@@ -486,9 +487,9 @@ namespace libusbp
             uint8_t bRequest,
             uint16_t wValue,
             uint16_t wIndex,
-            void * buffer = nullptr,
+            void * buffer = NULL,
             uint16_t wLength = 0,
-            size_t * transferred = nullptr)
+            size_t * transferred = NULL)
         {
             throw_if_needed(libusbp_control_transfer(pointer,
                 bmRequestType, bRequest, wValue, wIndex,
@@ -542,13 +543,13 @@ namespace libusbp
     public:
         /*! Constructor that takes a pointer.  This object will free the pointer
          *  when it is destroyed. */
-        explicit serial_port(libusbp_serial_port * pointer = nullptr)
+        explicit serial_port(libusbp_serial_port * pointer = NULL)
             : unique_pointer_wrapper_with_copy(pointer)
         {
         }
 
         /*! Wrapper for libusbp_serial_port_create(). */
-        explicit serial_port(const device & device,
+        serial_port(const device & device,
             uint8_t interface_number = 0, bool composite = false)
         {
             throw_if_needed(libusbp_serial_port_create(

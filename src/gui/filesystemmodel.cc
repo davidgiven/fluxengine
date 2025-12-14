@@ -1,9 +1,8 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "gui.h"
 #include "filesystemmodel.h"
 #include "lib/vfs/vfs.h"
 #include <wx/artprov.h>
-#include <fmt/format.h>
 
 static uintptr_t nodeCount = 0;
 FilesystemNode::FilesystemNode(std::shared_ptr<Dirent> dirent):

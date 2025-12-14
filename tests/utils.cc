@@ -1,8 +1,20 @@
-#include "globals.h"
-#include "utils.h"
+#include "lib/core/globals.h"
+#include "lib/core/utils.h"
 #include "snowhouse/snowhouse.h"
 
 using namespace snowhouse;
+
+template <typename F, typename S>
+struct snowhouse::Stringizer<std::pair<F, S>>
+{
+    static std::string ToString(const std::pair<F, S>& a)
+    {
+        std::stringstream stream;
+        stream << "pair(" << Stringizer<F>::ToString(a.first) << ", "
+               << Stringizer<S>::ToString(a.second) << ')';
+        return stream.str();
+    }
+};
 
 static void testJoin()
 {
@@ -45,9 +57,35 @@ static void testLeafname()
 
 static void testUnhex()
 {
-	AssertThat(unhex(""), Equals(""));
-	AssertThat(unhex("foo"), Equals("foo"));
-	AssertThat(unhex("f%20o"), Equals("f o"));
+    AssertThat(unhex(""), Equals(""));
+    AssertThat(unhex("foo"), Equals("foo"));
+    AssertThat(unhex("f%20o"), Equals("f o"));
+}
+
+static void testUnbcd()
+{
+    AssertThat(unbcd(0x1234), Equals(1234));
+    AssertThat(unbcd(0x87654321), Equals(87654321));
+}
+
+static void testMultimapToMap()
+{
+    std::multimap<int, std::string> input = {
+        {0, "zero" },
+        {0, "nil"  },
+        {1, "one"  },
+        {3, "two"  },
+        {3, "drei" },
+        {3, "trois"}
+    };
+    std::map<int, std::vector<std::string>> wanted = {
+        {0, {"zero", "nil"}         },
+        {1, {"one"}                 },
+        {3, {"two", "drei", "trois"}}
+    };
+
+    auto output = multimapToMapOfVectors(input);
+    AssertThat(output, Equals(wanted));
 }
 
 int main(void)
@@ -57,6 +95,8 @@ int main(void)
     testRightTrim();
     testTrim();
     testLeafname();
-	testUnhex();
+    testUnhex();
+    testUnbcd();
+    testMultimapToMap();
     return 0;
 }

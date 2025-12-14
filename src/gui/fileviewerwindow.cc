@@ -1,10 +1,9 @@
-#include "lib/globals.h"
-#include "lib/utils.h"
-#include "lib/bytes.h"
+#include "lib/core/globals.h"
+#include "lib/core/utils.h"
+#include "lib/core/bytes.h"
 #include "gui.h"
-#include "layout.h"
+#include "lib/data/layout.h"
 #include "fileviewerwindow.h"
-#include "fmt/format.h"
 
 FileViewerWindow::FileViewerWindow(
     wxWindow* parent, const std::string& title, const Bytes& data):
@@ -31,7 +30,7 @@ FileViewerWindow::FileViewerWindow(
                 continue;
             }
 
-            if ((c == '\n') || ((c >= 32) && (c <= 126)))
+            if ((c == '\n') || (c == '\t') || ((c >= 32) && (c <= 126)))
                 ss << (char)c;
             else if (c == '\r')
                 ss << '\n';

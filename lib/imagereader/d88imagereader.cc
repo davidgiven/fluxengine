@@ -1,12 +1,11 @@
-#include "globals.h"
-#include "flags.h"
-#include "sector.h"
-#include "imagereader/imagereader.h"
-#include "image.h"
-#include "proto.h"
-#include "logger.h"
-#include "lib/config.pb.h"
-#include "fmt/format.h"
+#include "lib/core/globals.h"
+#include "lib/config/flags.h"
+#include "lib/data/sector.h"
+#include "lib/imagereader/imagereader.h"
+#include "lib/data/image.h"
+#include "lib/config/proto.h"
+#include "lib/core/logger.h"
+#include "lib/config/config.pb.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -19,12 +18,12 @@ class D88ImageReader : public ImageReader
 public:
     D88ImageReader(const ImageReaderProto& config): ImageReader(config) {}
 
-    std::unique_ptr<Image> readImage()
+    std::unique_ptr<Image> readImage() override
     {
         std::ifstream inputFile(
             _config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
-            Error() << "cannot open input file";
+            error("cannot open input file");
 
         Bytes header(0x24); // read first entry of track table as well
         inputFile.read((char*)header.begin(), header.size());
@@ -35,7 +34,7 @@ public:
         std::string diskName = header.slice(0, 0x16);
 
         if (diskName[0])
-            Logger() << fmt::format("D88: disk name: {}", diskName);
+            log("D88: disk name: {}", diskName);
 
         ByteReader headerReader(header);
 
@@ -47,7 +46,7 @@ public:
         int diskSize = headerReader.seek(0x1c).read_le32();
 
         if (diskSize > fileSize)
-            Logger() << "D88: found multiple disk images. Only using first";
+            log("D88: found multiple disk images. Only using first");
 
         int trackTableEnd = headerReader.seek(0x20).read_le32();
         int trackTableSize = trackTableEnd - 0x20;
@@ -57,27 +56,21 @@ public:
         inputFile.read((char*)trackTable.begin(), trackTable.size());
         ByteReader trackTableReader(trackTable);
 
-        if (config.encoder().format_case() !=
-            EncoderProto::FormatCase::FORMAT_NOT_SET)
-            Logger() << "D88: overriding configured format";
-
-        auto ibm = config.mutable_encoder()->mutable_ibm();
+        auto ibm = _extraConfig.mutable_encoder()->mutable_ibm();
         int clockRate = 500;
         if (mediaFlag == 0x20)
         {
-            Logger() << "D88: forcing high density mode";
-				config.mutable_drive()->set_high_density(true);
-                config.set_tpi(96);
+            _extraConfig.mutable_drive()->set_high_density(true);
+            _extraConfig.mutable_layout()->set_format_type(FORMATTYPE_80TRACK);
         }
         else
         {
-            Logger() << "D88: forcing single/double density mode";
             clockRate = 300;
-				config.mutable_drive()->set_high_density(false);
-                config.set_tpi(48);
+            _extraConfig.mutable_drive()->set_high_density(false);
+            _extraConfig.mutable_layout()->set_format_type(FORMATTYPE_40TRACK);
         }
 
-		auto layout = config.mutable_layout();
+        auto layout = _extraConfig.mutable_layout();
         std::unique_ptr<Image> image(new Image);
         for (int track = 0; track < trackTableSize / 4; track++)
         {
@@ -96,11 +89,11 @@ public:
             trackdata->set_target_clock_period_us(1e3 / clockRate);
             trackdata->set_target_rotational_period_ms(167);
 
-			auto layoutdata = layout->add_layoutdata();
+            auto layoutdata = layout->add_layoutdata();
             auto physical = layoutdata->mutable_physical();
 
             for (int sectorInTrack = 0; sectorInTrack < currentSectorsInTrack;
-                 sectorInTrack++)
+                sectorInTrack++)
             {
                 Bytes sectorHeader(0x10);
                 inputFile.read(
@@ -116,26 +109,27 @@ public:
                 int fddStatusCode = sectorHeaderReader.seek(8).read_8();
                 int rpm = sectorHeaderReader.seek(13).read_8();
                 int dataLength = sectorHeaderReader.seek(14).read_le16();
-                if (dataLength < sectorSize) {
+                if (dataLength < sectorSize)
+                {
                     dataLength = sectorSize;
                 }
                 // D88 provides much more sector information that is currently
                 // ignored
                 if (ddam != 0)
-                    Error() << "D88: nonzero ddam currently unsupported";
+                    error("D88: nonzero ddam currently unsupported");
                 if (rpm != 0)
-                    Error()
-                        << "D88: 1.44MB 300rpm formats currently unsupported";
+                    error("D88: 1.44MB 300rpm formats currently unsupported");
                 if (fddStatusCode != 0)
-                    Error() << "D88: nonzero fdd status codes are currently "
-                               "unsupported";
+                    error(
+                        "D88: nonzero fdd status codes are currently "
+                        "unsupported");
                 if (currentSectorsInTrack == 0xffff)
                 {
                     currentSectorsInTrack = sectorsInTrack;
                 }
                 else if (currentSectorsInTrack != sectorsInTrack)
                 {
-                    Error() << "D88: mismatched number of sectors in track";
+                    error("D88: mismatched number of sectors in track");
                 }
                 if (currentTrackTrack < 0)
                 {
@@ -143,8 +137,9 @@ public:
                 }
                 else if (currentTrackTrack != track)
                 {
-                    Error() << "D88: all sectors in a track must belong to the "
-                               "same track";
+                    error(
+                        "D88: all sectors in a track must belong to the same "
+                        "track");
                 }
                 if (trackSectorSize < 0)
                 {
@@ -166,14 +161,17 @@ public:
                         trackdata->set_dam_byte(0xf56f);
                     }
                     // create timings to approximately match N88-BASIC
-                    if (clockRate == 300) {
+                    if (clockRate == 300)
+                    {
                         if (sectorSize <= 256)
                         {
                             trackdata->set_gap0(0x1b);
                             trackdata->set_gap2(0x14);
                             trackdata->set_gap3(0x1b);
                         }
-                    } else {
+                    }
+                    else
+                    {
                         if (sectorSize <= 128)
                         {
                             trackdata->set_gap0(0x1b);
@@ -189,12 +187,13 @@ public:
                 }
                 else if (trackSectorSize != sectorSize)
                 {
-                    Error() << "D88: multiple sector sizes per track are "
-                               "currently unsupported";
+                    error(
+                        "D88: multiple sector sizes per track are currently "
+                        "unsupported");
                 }
                 Bytes data(sectorSize);
                 inputFile.read((char*)data.begin(), data.size());
-                inputFile.seekg(dataLength-sectorSize, std::ios_base::cur);
+                inputFile.seekg(dataLength - sectorSize, std::ios_base::cur);
                 physical->add_sector(sectorId);
                 const auto& sector = image->put(track, head, sectorId);
                 sector->status = Sector::OK;
@@ -211,12 +210,12 @@ public:
 
         image->calculateSize();
         const Geometry& geometry = image->getGeometry();
-        Logger() << fmt::format("D88: read {} tracks, {} sides",
-            geometry.numTracks,
-            geometry.numSides);
+        log("D88: read {} tracks, {} sides",
+            geometry.numCylinders,
+            geometry.numHeads);
 
-		layout->set_tracks(geometry.numTracks);
-		layout->set_sides(geometry.numSides);
+        layout->set_tracks(geometry.numCylinders);
+        layout->set_sides(geometry.numHeads);
 
         return image;
     }

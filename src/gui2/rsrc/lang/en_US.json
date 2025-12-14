@@ -1,0 +1,72 @@
+{
+    "fluxengine.provider.disk": "FluxEngine disk access",
+
+    "fluxengine.view.config.name": "FluxEngine configuration",
+    "fluxengine.view.config.deviceConfiguration": "Device setup",
+    "fluxengine.view.config.selectedDevice": "Device",
+    "fluxengine.view.config.formatConfiguration": "Format setup",
+    "fluxengine.view.config.selectedFormat": "Format",
+    "fluxengine.view.config.subformats": "Available subformats",
+    "fluxengine.view.config.other": "Miscellaneous",
+    "fluxengine.view.config.fluxfile": "Flux file",
+    "fluxengine.view.config.manual": "Manual device setup",
+    "fluxengine.view.config.hardwareDevicePath": "Device path",
+    "fluxengine.view.config.highDensity": "High density disk",
+    "fluxengine.view.config.rescan": "Rescan USB",
+    "fluxengine.view.config.setupFluxFile": "Use flux file",
+    "fluxengine.view.config.yes": "yes",
+    "fluxengine.view.config.no": "no",
+    "fluxengine.view.config.format": "Format",
+    "fluxengine.view.config.variations": "Variant",
+    "fluxengine.view.config.manualDevicePath": "Device path",
+    "fluxengine.view.config.fluxFile": "Flux file",
+    "fluxengine.view.config.formatProperties": "Format properties",
+    "fluxengine.view.config.deviceProperties": "Device properties",
+    "fluxengine.view.config.customProperties": "Custom properties",
+
+    "fluxengine.view.summary.name":"FluxEngine status",
+    "fluxengine.view.summary.physical":"Physical view (what your drive sees)",
+    "fluxengine.view.summary.logical":"Logical view (what's on the disk)",
+
+    "fluxengine.view.image.name": "FluxEngine logical sector map",
+
+    "fluxengine.view.physical.name": "FluxEngine physical sector map",
+
+    "fluxengine.view.controlpanel.name": "FluxEngine controls",
+    "fluxengine.view.controlpanel.readDevice": "Read from device",
+    "fluxengine.view.controlpanel.writeDevice": "Write to device",
+    "fluxengine.view.controlpanel.writeFlux": "Write flux file",
+    "fluxengine.view.controlpanel.readImage": "Load disk image",
+    "fluxengine.view.controlpanel.writeImage": "Save disk image",
+    "fluxengine.view.controlpanel.rereadBad": "Re-read bad tracks",
+    "fluxengine.view.controlpanel.createBlank": "Make empty image",
+    "fluxengine.view.controlpanel.stop": "Stop",
+
+    "fluxengine.view.log.name": "FluxEngine log viewer",
+
+    "fluxengine.view.visualiser.name": "FluxEngine disk visualiser",
+    "fluxengine.view.visualiser.missingData": "Partial visualisation",
+
+    "fluxengine.view.exerciser.name": "FluxEngine disk exerciser",
+    "fluxengine.view.exerciser.drive": "Drive",
+    "fluxengine.view.exerciser.cylinder": "Cylinder",
+    "fluxengine.view.exerciser.nudgeDown": "Nudge down",
+    "fluxengine.view.exerciser.reset": "Reset",
+    "fluxengine.view.exerciser.nudgeUp": "Nudge up",
+
+    "fluxengine.view.status.runningSuffix": "...",
+    "fluxengine.view.status.succeededSuffix": "... done",
+    "fluxengine.view.status.failedSuffix": "... failed",
+    "fluxengine.view.status.readDevice": "Reading and decoding",
+    "fluxengine.view.status.writeDevice": "Encoding and writing",
+    "fluxengine.view.status.writeFlux": "Writing flux file to disk",
+    "fluxengine.view.status.readImage": "Reading image file from disk",
+    "fluxengine.view.status.writeImage": "Writing image file to disk",
+    "fluxengine.view.status.blankFilesystem": "Creating blank filesystem",
+
+    "fluxengine.messages.writingFluxToFile": "The current configuration is to write to a flux file rather than to hardware. Is this what you intended?",
+    
+    "fluxengine.menu.name": "Disk",
+    "fluxengine.menu.disk.exerciser": "Disk exerciser",
+    "fluxengine.menu.workspace.reset": "Reset workspace"
+}

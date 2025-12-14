@@ -1,7 +1,7 @@
 #ifndef READIBM_H
 #define READIBM_H
 
-#include "flags.h"
+#include "lib/config/flags.h"
 #include "dataspec.h"
 
 extern IntFlag sectorIdBase;
@@ -11,4 +11,3 @@ extern RangeFlag requiredSectors;
 extern int mainReadIBM(int argc, const char* argv[]);
 
 #endif
-

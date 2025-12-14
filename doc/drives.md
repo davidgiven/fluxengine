@@ -36,34 +36,16 @@ Forty track formats on a forty track drive
 ------------------------------------------
 
 If you actually have a forty track drive, you need to tell FluxEngine. This is
-done by adding the special profile `40track_drive`:
+done by adding `--drivetype=40`:
 
 ```
-fluxengine write ibm360 40track_drive -i image.img -d drive:0
+fluxengine write -c ibm --360 --drivetype=40 -i image.img -d drive:0
 ```
 
-It should then Just Work. This is supported by both FluxEngine and GreaseWeazle
+It should then Just Work. This is supported by both FluxEngine and Greaseweazle
 hardware.
 
 Obviously you can't write an eighty-track format using a forty-track drive!
-
-Apple II drives
----------------
-
-The Apple II had special drives which supported microstepping: when commanded
-to move the head, then instead of moving in single-track steps as is done in
-most other drives, the Apple II drive would move in quarter-track steps. This
-allowed much less precise head alignment, as small errors could be corrected in
-software. (The Brother word processor drives were similar.) The bus interface
-is different from normal PC drives.
-
-The FluxEngine client supports these with the `apple2_drive` profile:
-
-```
-fluxengine write apple2 apple2_drive -i image.img -d drive:0
-```
-
-This is supported only by GreaseWeazle hardware.
 
 Shugart drives
 --------------
@@ -77,14 +59,32 @@ the drives must be jumpered to configure them. This was mostly used by older
 3.5" drives, such as those on the Atari ST. [the How It Works
 page](technical.md) for the pinout.
 
-The FluxEngine client supports these with the `shugart_drive` profile:
+The FluxEngine client supports these with `--bus=shugart`:
 
 ```
-fluxengine write atarist720 shugart_drive -i image.img -d drive:0
+fluxengine write -c atarist720 --bus=shugart -i image.img -d drive:0
 ```
 
-(If you have a 40-track Shugart drive, use _both_ `shugart_drive` and
-`40track_drive`.)
+(If you have a 40-track Shugart drive, use _both_ `--bus=shugart` and
+`--drivetype=40`.)
 
-This is supported only by GreaseWeazle hardware.
+This is supported only by Greaseweazle hardware.
+
+Apple II drives
+---------------
+
+The Apple II had special drives which supported microstepping: when commanded
+to move the head, then instead of moving in single-track steps as is done in
+most other drives, the Apple II drive would move in quarter-track steps. This
+allowed much less precise head alignment, as small errors could be corrected in
+software. (The Brother word processor drives were similar.) The bus interface
+is different from normal PC drives.
+
+The FluxEngine client supports these with `--drivetype=160 --bus=appleii`.
+
+```
+fluxengine write -c apple2 --drivetype=160 --bus=appleii -i image.img -d drive:0
+```
+
+This is supported only by Greaseweazle hardware.
 

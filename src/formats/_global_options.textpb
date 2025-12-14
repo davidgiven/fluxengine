@@ -1,0 +1,133 @@
+comment: 'Options which can be applied everywhere.'
+is_extension: true
+
+option {
+	comment: "High density"
+	name: "hd"
+	applicability: HARDWARE_SOURCESINK
+	set_by_default: true
+
+	config {
+		drive {
+			high_density: true
+		}
+	}
+}
+	
+option_group {
+	comment: "Drive type"
+    name: "drivetype"
+	applicability: ANY_SOURCESINK
+
+	option {
+		name: "80"
+		comment: '80 track drive'
+        set_by_default: true
+
+		config {
+            drive {
+                tracks: "c0-80h0-1"
+                drive_type: DRIVETYPE_80TRACK
+            }
+		}
+	}
+
+	option {
+		name: "40"
+		comment: '40 track drive'
+
+		config {
+            drive {
+                tracks: "c0-40h0-1"
+                drive_type: DRIVETYPE_40TRACK
+            }
+		}
+	}
+
+	option {
+		name: "160"
+		comment: '160 track Apple II drive'
+
+		config {
+            drive {
+                tracks: "c0-159h0"
+                drive_type: DRIVETYPE_APPLE2
+            }
+		}
+	}
+}
+
+option_group {
+	comment: "Drive rotational speed"
+    name: "drivespeed"
+	applicability: ANY_SOURCESINK
+	
+	option {
+		name: "auto"
+		comment: 'Autodetect from hardware'
+		set_by_default: true
+
+		config {
+		}
+	}
+
+	option {
+		name: "300"
+		comment: '300rpm (200ms)'
+
+		config {
+			drive {
+				rotational_period_ms: 200
+			}
+		}
+	}
+
+	option {
+		name: "360"
+		comment: '360rpm (166ms)'
+
+		config {
+			drive {
+				rotational_period_ms: 166
+			}
+		}
+	}
+}
+
+option_group {
+    comment: 'Bus interface'
+    name: "bus"
+	applicability: HARDWARE_SOURCESINK
+
+	option {
+		name: "pc"
+		comment: 'PC drive interface'
+        set_by_default: true
+    }
+
+	option {
+		name: "shugart"
+		comment: 'Shugart bus interface (only on Greaseweazle)'
+
+		config {
+            usb {
+                greaseweazle {
+                    bus_type: SHUGART
+                }
+            }
+        }
+    }
+
+	option {
+		name: "appleii"
+		comment: 'Apple II bus interface (only on Greaseweazle)'
+
+		config {
+            usb {
+                greaseweazle {
+                    bus_type: APPLE2
+                }
+            }
+		}
+	}
+}

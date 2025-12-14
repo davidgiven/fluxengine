@@ -1,8 +1,7 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/vfs/vfs.h"
-#include "lib/config.pb.h"
-#include "lib/utils.h"
-#include <fmt/format.h>
+#include "lib/config/config.pb.h"
+#include "lib/core/utils.h"
 
 extern "C"
 {
@@ -30,14 +29,15 @@ static std::string modeToString(BYTE attrib)
 class FatFsFilesystem : public Filesystem
 {
 public:
-    FatFsFilesystem(
-        const FatFsProto& config, std::shared_ptr<SectorInterface> sectors):
-        Filesystem(sectors),
+    FatFsFilesystem(const FatFsProto& config,
+        const std::shared_ptr<const DiskLayout>& diskLayout,
+        std::shared_ptr<SectorInterface> sectors):
+        Filesystem(diskLayout, sectors),
         _config(config)
     {
     }
 
-    uint32_t capabilities() const
+    uint32_t capabilities() const override
     {
         return OP_GETFSDATA | OP_CREATE | OP_LIST | OP_GETFILE | OP_PUTFILE |
                OP_GETDIRENT | OP_MOVE | OP_CREATEDIR | OP_DELETE;
@@ -80,6 +80,8 @@ public:
         currentFatFs = this;
         MKFS_PARM parm = {
             .fmt = FM_SFD | FM_ANY,
+            .n_root = _config.root_directory_entries(),
+            .au_size = _config.cluster_size(),
         };
         FRESULT res = f_mkfs("", &parm, buffer, sizeof(buffer));
         throwError(res);
@@ -198,7 +200,7 @@ public:
         throwError(res);
     }
 
-    void createDirectory(const Path& path)
+    void createDirectory(const Path& path) override
     {
         mount();
         auto pathStr = path.to_str();
@@ -246,11 +248,11 @@ public:
         switch (cmd)
         {
             case GET_SECTOR_SIZE:
-                *(DWORD*)buffer = getLogicalSectorSize();
+                *(WORD*)buffer = getLogicalSectorSize();
                 break;
 
             case GET_SECTOR_COUNT:
-                *(DWORD*)buffer = getLogicalSectorCount();
+                *(LBA_t*)buffer = getLogicalSectorCount();
                 break;
 
             case CTRL_SYNC:
@@ -295,7 +297,7 @@ private:
 
             default:
                 throw FilesystemException(
-                    fmt::format("unknown fatfs error {}", res));
+                    fmt::format("unknown fatfs error {}", (int)res));
         }
     }
 
@@ -335,7 +337,10 @@ DWORD get_fattime(void)
 }
 
 std::unique_ptr<Filesystem> Filesystem::createFatFsFilesystem(
-    const FilesystemProto& config, std::shared_ptr<SectorInterface> sectors)
+    const FilesystemProto& config,
+    const std::shared_ptr<const DiskLayout>& diskLayout,
+    std::shared_ptr<SectorInterface> sectors)
 {
-    return std::make_unique<FatFsFilesystem>(config.fatfs(), sectors);
+    return std::make_unique<FatFsFilesystem>(
+        config.fatfs(), diskLayout, sectors);
 }

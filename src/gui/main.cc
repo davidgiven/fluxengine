@@ -1,7 +1,7 @@
-#include "lib/globals.h"
-#include "lib/logger.h"
+#include "lib/core/globals.h"
+#include "lib/core/logger.h"
 #include "gui.h"
-#include "utils.h"
+#include "lib/core/utils.h"
 
 class FluxEngineApp;
 class ExecEvent;
@@ -14,8 +14,9 @@ wxDEFINE_EVENT(EXEC_EVENT_TYPE, ExecEvent);
 class ExecEvent : public wxThreadEvent
 {
 public:
-    ExecEvent(wxEventType commandType = EXEC_EVENT_TYPE, int id = 0):
-        wxThreadEvent(commandType, id)
+    ExecEvent(bool synchronous = true):
+        wxThreadEvent(EXEC_EVENT_TYPE, 0),
+        _synchronous(synchronous)
     {
     }
 
@@ -25,7 +26,7 @@ public:
     {
     }
 
-    wxEvent* Clone() const
+    wxEvent* Clone() const override
     {
         return new ExecEvent(*this);
     }
@@ -35,6 +36,11 @@ public:
         _callback = callback;
     }
 
+    bool IsSynchronous() const
+    {
+        return _synchronous;
+    }
+
     void RunCallback() const
     {
         _callback();
@@ -42,15 +48,24 @@ public:
 
 private:
     std::function<void()> _callback;
+    bool _synchronous;
 };
 
 bool FluxEngineApp::OnInit()
 {
-    wxImage::AddHandler(new wxPNGHandler());
-    Bind(EXEC_EVENT_TYPE, &FluxEngineApp::OnExec, this);
-    _mainWindow = CreateMainWindow();
-    _mainWindow->Show(true);
-    return true;
+    try
+    {
+        wxImage::AddHandler(new wxPNGHandler());
+        Bind(EXEC_EVENT_TYPE, &FluxEngineApp::OnExec, this);
+        _mainWindow = CreateMainWindow();
+        _mainWindow->Show(true);
+        return true;
+    }
+    catch (const ErrorException* e)
+    {
+        fmt::print(stderr, "Exception on startup: {}\n", e->message);
+        exit(1);
+    }
 }
 
 wxThread::ExitCode FluxEngineApp::Entry()
@@ -62,16 +77,18 @@ wxThread::ExitCode FluxEngineApp::Entry()
     }
     catch (const ErrorException& e)
     {
-        Logger() << ErrorLogMessage{e.message + '\n'};
+        log(ErrorLogMessage{e.message + '\n'});
     }
     catch (const EmergencyStopException& e)
     {
-        Logger() << EmergencyStopMessage();
+        log(EmergencyStopMessage());
     }
 
-    runOnUiThread(
+    postToUiThread(
         [&]
         {
+            GetThread()->Wait();
+
             _callback = nullptr;
             SendUpdateEvent();
         });
@@ -84,7 +101,7 @@ void FluxEngineApp::RunOnWorkerThread(std::function<void()> callback)
         std::cerr << "Cannot start new worker task as one is already running\n";
     _callback = callback;
 
-    if (GetThread())
+    if (GetThread() && GetThread()->IsRunning())
         GetThread()->Wait();
 
     emergencyStop = false;
@@ -106,15 +123,33 @@ void runOnWorkerThread(std::function<void()> callback)
     wxGetApp().RunOnWorkerThread(callback);
 }
 
-bool FluxEngineApp::IsWorkerThreadRunning() const
+bool isWorkerThread()
+{
+    return wxGetApp().IsWorkerThread();
+}
+
+bool FluxEngineApp::IsWorkerThread()
+{
+    return wxThread::GetCurrentId() != wxThread::GetMainId();
+}
+
+bool FluxEngineApp::IsWorkerThreadRunning()
 {
     return !!_callback;
 }
 
 void FluxEngineApp::OnExec(const ExecEvent& event)
 {
-    event.RunCallback();
-    execSemaphore.Post();
+    try
+    {
+        event.RunCallback();
+        if (event.IsSynchronous())
+            execSemaphore.Post();
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << "Unhandled exception: " << e.what() << "\n";
+    }
 }
 
 void runOnUiThread(std::function<void()> callback)
@@ -123,6 +158,13 @@ void runOnUiThread(std::function<void()> callback)
     event->SetCallback(callback);
     wxGetApp().QueueEvent(event);
     execSemaphore.Wait();
+}
+
+void postToUiThread(std::function<void()> callback)
+{
+    ExecEvent* event = new ExecEvent(false);
+    event->SetCallback(callback);
+    wxGetApp().QueueEvent(event);
 }
 
 wxIMPLEMENT_APP(FluxEngineApp);

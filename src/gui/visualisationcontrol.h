@@ -6,7 +6,7 @@
 #include <wx/control.h>
 
 class Sector;
-class DiskFlux;
+class Disk;
 class TrackFlux;
 
 enum
@@ -24,7 +24,7 @@ public:
     {
     }
 
-    wxEvent* Clone() const
+    wxEvent* Clone() const override
     {
         return new TrackSelectionEvent(*this);
     }
@@ -47,7 +47,7 @@ public:
     void Clear();
     void SetMode(int head, int track, int mode);
     void SetTrackData(std::shared_ptr<const TrackFlux> track);
-    void SetDiskData(std::shared_ptr<const DiskFlux> disk);
+    void SetDiskData(std::shared_ptr<const Disk> disk);
 
 private:
     void OnPaint(wxPaintEvent& evt);

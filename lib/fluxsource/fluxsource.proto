@@ -1,12 +1,12 @@
 syntax = "proto2";
 
-import "lib/common.proto";
+import "lib/config/common.proto";
 
 message HardwareFluxSourceProto {}
 
 message TestPatternFluxSourceProto {
 	optional double interval_us = 1        [default = 4.0, (help) = "interval between pulses"];
-	optional double sequence_length_us = 2 [default = 200.0, (help) = "length of test sequence"];
+	optional double sequence_length_ms = 2 [default = 166.0, (help) = "length of test sequence"];
 }
 
 message EraseFluxSourceProto {}
@@ -20,9 +20,19 @@ message ScpFluxSourceProto {
 		(help) = ".scp file to read flux from"];
 }
 
+message A2rFluxSourceProto {
+	optional string filename = 1 [default = "flux.a2r",
+		(help) = ".a2r file to read flux from"];
+}
+
 message CwfFluxSourceProto {
 	optional string filename = 1 [default = "flux.cwf",
 		(help) = ".cwf file to read flux from"];
+}
+
+message DmkFluxSourceProto {
+	optional string directory = 1 [
+		(help) = "path to DMK directory"];
 }
 
 message Fl2FluxSourceProto {
@@ -30,15 +40,24 @@ message Fl2FluxSourceProto {
 		(help) = ".fl2 file to read flux from"];
 }
 
+message FlxFluxSourceProto {
+	optional string directory = 1 [(help) = "path to FLX stream directory"];
+}
+
+// NEXT: 13
 message FluxSourceProto {
-	oneof source {
-		HardwareFluxSourceProto drive = 2;
-		TestPatternFluxSourceProto test_pattern = 3;
-		EraseFluxSourceProto erase = 4;
-		KryofluxFluxSourceProto kryoflux = 5;
-		ScpFluxSourceProto scp = 6;
-		CwfFluxSourceProto cwf = 7;
-		Fl2FluxSourceProto fl2 = 8;
-	}
+	optional FluxSourceSinkType type = 9
+		[default = FLUXTYPE_NOT_SET, (help) = "flux source type"];
+
+	optional A2rFluxSourceProto a2r = 11;
+	optional CwfFluxSourceProto cwf = 7;
+	optional DmkFluxSourceProto dmk = 12;
+	optional EraseFluxSourceProto erase = 4;
+	optional Fl2FluxSourceProto fl2 = 8;
+	optional FlxFluxSourceProto flx = 10;
+	optional HardwareFluxSourceProto drive = 2;
+	optional KryofluxFluxSourceProto kryoflux = 5;
+	optional ScpFluxSourceProto scp = 6;
+	optional TestPatternFluxSourceProto test_pattern = 3;
 }
 

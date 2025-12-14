@@ -1,10 +1,10 @@
-#include "globals.h"
-#include "decoders/decoders.h"
-#include "encoders/encoders.h"
-#include "amiga.h"
-#include "crc.h"
-#include "readerwriter.h"
-#include "image.h"
+#include "lib/core/globals.h"
+#include "lib/core/utils.h"
+#include "lib/decoders/decoders.h"
+#include "lib/encoders/encoders.h"
+#include "arch/amiga/amiga.h"
+#include "lib/core/crc.h"
+#include "lib/data/image.h"
 #include "arch/amiga/amiga.pb.h"
 #include "lib/encoders/encoders.pb.h"
 
@@ -59,7 +59,7 @@ static void write_sector(std::vector<bool>& bits,
     const std::shared_ptr<const Sector>& sector)
 {
     if ((sector->data.size() != 512) && (sector->data.size() != 528))
-        Error() << "unsupported sector size --- you must pick 512 or 528";
+        error("unsupported sector size --- you must pick 512 or 528");
 
     uint32_t checksum = 0;
 
@@ -84,7 +84,7 @@ static void write_sector(std::vector<bool>& bits,
 
     checksum = 0;
     Bytes header = {0xff, /* Amiga 1.0 format byte */
-        (uint8_t)((sector->logicalTrack << 1) | sector->logicalSide),
+        (uint8_t)((sector->logicalCylinder << 1) | sector->logicalHead),
         (uint8_t)sector->logicalSector,
         (uint8_t)(AMIGA_SECTORS_PER_TRACK - sector->logicalSector)};
     write_interleaved_bytes(header);
@@ -110,11 +110,12 @@ public:
     }
 
 public:
-    std::unique_ptr<Fluxmap> encode(std::shared_ptr<const TrackInfo>& trackInfo,
+    std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout& ltl,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
-        /* Number of bits for one nominal revolution of a real 200ms Amiga disk. */
+        /* Number of bits for one nominal revolution of a real 200ms Amiga disk.
+         */
         int bitsPerRevolution = 200e3 / _config.clock_rate_us();
         std::vector<bool> bits(bitsPerRevolution);
         unsigned cursor = 0;
@@ -129,13 +130,12 @@ public:
             write_sector(bits, cursor, sector);
 
         if (cursor >= bits.size())
-            Error() << "track data overrun";
+            error("track data overrun");
         fillBitmapTo(bits, cursor, bits.size(), {true, false});
 
         auto fluxmap = std::make_unique<Fluxmap>();
         fluxmap->appendBits(bits,
-            calculatePhysicalClockPeriod(
-                _config.clock_rate_us() * 1e3, 200e6));
+            calculatePhysicalClockPeriod(_config.clock_rate_us() * 1e3, 200e6));
         return fluxmap;
     }
 

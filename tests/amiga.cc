@@ -1,6 +1,6 @@
-#include "globals.h"
-#include "bytes.h"
-#include "decoders/decoders.h"
+#include "lib/core/globals.h"
+#include "lib/core/bytes.h"
+#include "lib/decoders/decoders.h"
 #include "arch/amiga/amiga.h"
 #include <assert.h>
 

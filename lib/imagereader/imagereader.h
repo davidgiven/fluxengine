@@ -1,21 +1,23 @@
 #ifndef IMAGEREADER_H
 #define IMAGEREADER_H
 
-#include "image.h"
+#include "lib/data/image.h"
+#include "lib/config/config.pb.h"
 
 class ImageSpec;
 class ImageReaderProto;
+class ConfigProto;
+class Config;
 
 class ImageReader
 {
 public:
     ImageReader(const ImageReaderProto& config);
-    virtual ~ImageReader(){};
+    virtual ~ImageReader() {};
 
 public:
+    static std::unique_ptr<ImageReader> create(Config& config);
     static std::unique_ptr<ImageReader> create(const ImageReaderProto& config);
-    static void updateConfigForFilename(
-        ImageReaderProto* proto, const std::string& filename);
 
 public:
     static std::unique_ptr<ImageReader> createD64ImageReader(
@@ -42,15 +44,21 @@ public:
         const ImageReaderProto& config);
 
 public:
-    /* Directly reads the image. */
-    virtual std::unique_ptr<Image> readImage() = 0;
+    /* Returns any extra config the image might want to contribute. */
 
-    /* Reads the image, and then applies any optional mapping to go from
-     * filesystem ordering to disk ordering. */
-    std::unique_ptr<Image> readMappedImage();
+    const ConfigProto& getExtraConfig() const
+    {
+        return _extraConfig;
+    }
+
+    /* Reads the image. */
+
+    virtual std::unique_ptr<Image> readImage() = 0;
 
 protected:
     const ImageReaderProto& _config;
+    std::shared_ptr<const DiskLayout> _layout;
+    ConfigProto _extraConfig;
 };
 
 #endif

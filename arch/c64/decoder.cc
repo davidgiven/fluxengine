@@ -1,12 +1,13 @@
-#include "globals.h"
-#include "fluxmap.h"
-#include "decoders/fluxmapreader.h"
+#include "lib/core/globals.h"
+#include "lib/data/fluxmap.h"
+#include "lib/data/fluxmapreader.h"
+#include "lib/data/fluxpattern.h"
 #include "protocol.h"
-#include "decoders/decoders.h"
-#include "sector.h"
-#include "c64.h"
-#include "crc.h"
-#include "bytes.h"
+#include "lib/decoders/decoders.h"
+#include "lib/data/sector.h"
+#include "arch/c64/c64.h"
+#include "lib/core/crc.h"
+#include "lib/core/bytes.h"
 #include "fmt/format.h"
 #include <string.h>
 #include <algorithm>
@@ -73,8 +74,8 @@ public:
 
         uint8_t checksum = bytes[0];
         _sector->logicalSector = bytes[1];
-        _sector->logicalSide = 0;
-        _sector->logicalTrack = bytes[2] - 1;
+        _sector->logicalHead = 0;
+        _sector->logicalCylinder = bytes[2] - 1;
         if (checksum == xorBytes(bytes.slice(1, 4)))
             _sector->status =
                 Sector::DATA_MISSING; /* unintuitive but correct */
@@ -96,8 +97,7 @@ public:
     }
 };
 
-std::unique_ptr<Decoder> createCommodore64Decoder(
-    const DecoderProto& config)
+std::unique_ptr<Decoder> createCommodore64Decoder(const DecoderProto& config)
 {
     return std::unique_ptr<Decoder>(new Commodore64Decoder(config));
 }

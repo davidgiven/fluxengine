@@ -1,0 +1,339 @@
+shortname: 'Victor 9000 / Sirius One'
+comment: '1224kB 5.25" DSDD GCR'
+read_support_status: DINOSAUR
+write_support_status: DINOSAUR
+
+documentation:
+<<<
+The Victor 9000 / Sirius One was a rather strange old 8086-based machine
+which used a disk format very reminiscent of the Commodore format; not a
+coincidence, as Chuck Peddle designed them both. They're 80-track, 512-byte
+sector GCR disks, with a variable-speed drive and a varying number of sectors
+per track --- from 19 to 12. Disks can be double-sided, meaning that they can
+store 1224kB per disk, which was almost unheard of back then. Because the way
+that the tracks on head 1 are offset from head 0 (this happens with all disks),
+the speed zone allocation on head 1 differs from head 0...
+
+| Zone | Head 0 tracks | Head 1 tracks | Sectors | Original period (ms) |
+|:----:|:-------------:|:-------------:|:-------:|:--------------------:|
+| 0    | 0-3           |               | 19      | 237.9                |
+| 1    | 4-15          | 0-7           | 18      | 224.5                |
+| 2    | 16-26         | 8-18          | 17      | 212.2                |
+| 3    | 27-37         | 19-29         | 16      | 199.9                |
+| 4    | 38-47\*       | 30-39\*       | 15      | 187.6                |
+| 5    | 48-59         | 40-51         | 14      | 175.3                |
+| 6    | 60-70         | 52-62         | 13      | 163.0                |
+| 7    | 71-79         | 63-74         | 12      | 149.6                |
+| 8    |               | 75-79         | 11      | 144.0                |
+
+(The Original Period column is the original rotation rate. When used in
+FluxEngine, the disk always spins at 360 rpm, which corresponds to a rotational
+period of 166 ms.)
+
+\*The Victor 9000 Hardware Reference Manual has a bug in the documentation 
+and lists Zone 4 as ending with track 48 on head 0 and track 40 on head 1. 
+The above table matches observed data on various disks and the assembly 
+code in the boot loader, which ends Zone 4 with track 47 on head 0 
+and track 39 on Head 1.
+
+FluxEngine can read and write both the single-sided and double-sided variants. 
+>>>
+
+documentation:
+<<<
+## References
+
+  - [The Victor 9000 technical reference manual](http://bitsavers.org/pdf/victor/victor9000/Victor9000TechRef_Jun82.pdf)
+
+  - [DiskFerret's Victor 9000 format guide](https://discferret.com/wiki/Victor_9000_format)
+>>>
+
+image_reader {
+	filename: "victor9k.img"
+	type: IMAGETYPE_IMG
+}
+
+image_writer {
+	filename: "victor9k.img"
+	type: IMAGETYPE_IMG
+}
+
+layout {
+	format_type: FORMATTYPE_80TRACK
+	tracks: 80
+	sides: 2
+	layoutdata {
+		sector_size: 512
+		physical {
+			start_sector: 0
+		}
+	}
+	layoutdata {
+		side: 0
+		track: 0
+		up_to_track: 3
+		physical {
+			count: 19
+		}
+	}
+	layoutdata {
+		side: 0
+		track: 4
+		up_to_track: 15
+		physical {
+			count: 18
+		}
+	}
+	layoutdata {
+		side: 0
+		track: 16
+		up_to_track: 26
+		physical {
+			count: 17
+		}
+	}
+	layoutdata {
+		side: 0
+		track: 27
+		up_to_track: 37
+		physical {
+			count: 16
+		}
+	}
+	layoutdata {
+		side: 0
+		track: 38
+		up_to_track: 47
+		physical {
+			count: 15
+		}
+	}
+	layoutdata {
+		side: 0
+		track: 48
+		up_to_track: 59
+		physical {
+			count: 14
+		}
+	}
+	layoutdata {
+		side: 0
+		track: 60
+		up_to_track: 70
+		physical {
+			count: 13
+		}
+	}
+	layoutdata {
+		side: 0
+		track: 71
+		up_to_track: 79
+		physical {
+			count: 12
+		}
+	}
+	layoutdata {
+		side: 1
+		track: 0
+		up_to_track: 7
+		physical {
+			count: 18
+		}
+	}
+	layoutdata {
+		side: 1
+		track: 8
+		up_to_track: 18
+		physical {
+			count: 17
+		}
+	}
+	layoutdata {
+		side: 1
+		track: 19
+		up_to_track: 29
+		physical {
+			count: 16
+		}
+	}
+	layoutdata {
+		side: 1
+		track: 30
+		up_to_track: 39
+		physical {
+			count: 15
+		}
+	}
+	layoutdata {
+		side: 1
+		track: 40
+		up_to_track: 51
+		physical {
+			count: 14
+		}
+	}
+	layoutdata {
+		side: 1
+		track: 52
+		up_to_track: 62
+		physical {
+			count: 13
+		}
+	}
+	layoutdata {
+		side: 1
+		track: 63
+		up_to_track: 74
+		physical {
+			count: 12
+		}
+	}
+	layoutdata {
+		side: 1
+		track: 75
+		up_to_track: 79
+		physical {
+			count: 11
+		}
+	}
+}
+
+encoder {
+	victor9k {
+		trackdata {
+			clock_period_us: 2.1367 # 468kHz
+			post_index_gap_us: 500.0
+			pre_header_sync_bits: 150
+			post_header_gap_bits: 60
+			pre_data_sync_bits: 40
+			post_data_gap_bits: 300
+		}
+		trackdata {
+			head: 0
+			min_track: 0
+			max_track: 3
+			rotational_period_ms: 237.9
+		}
+		trackdata {
+			head: 0
+			min_track: 4
+			max_track: 15
+			rotational_period_ms: 224.5
+		}
+		trackdata {
+			head: 0
+			min_track: 16
+			max_track: 26
+			rotational_period_ms: 212.2
+		}
+		trackdata {
+			head: 0
+			min_track: 27
+			max_track: 37
+			rotational_period_ms: 199.9
+		}
+		trackdata {
+			head: 0
+			min_track: 38
+			max_track: 47
+			rotational_period_ms: 187.6
+		}
+		trackdata {
+			head: 0
+			min_track: 48
+			max_track: 59
+			rotational_period_ms: 175.3
+		}
+		trackdata {
+			head: 0
+			min_track: 60
+			max_track: 70
+			rotational_period_ms: 163.0
+		}
+		trackdata {
+			head: 0
+			min_track: 71
+			max_track: 79
+			rotational_period_ms: 149.6
+		}
+		trackdata {
+			head: 1
+			min_track: 0
+			max_track: 7
+			rotational_period_ms: 224.5
+		}
+		trackdata {
+			head: 1
+			min_track: 8
+			max_track: 18
+			rotational_period_ms: 212.2
+		}
+		trackdata {
+			head: 1
+			min_track: 19
+			max_track: 29
+			rotational_period_ms: 199.9
+		}
+		trackdata {
+			head: 1
+			min_track: 30
+			max_track: 39
+			rotational_period_ms: 187.6
+		}
+		trackdata {
+			head: 1
+			min_track: 40
+			max_track: 51
+			rotational_period_ms: 175.3
+		}
+		trackdata {
+			head: 1
+			min_track: 52
+			max_track: 62
+			rotational_period_ms: 163.0
+		}
+		trackdata {
+			head: 1
+			min_track: 63
+			max_track: 74
+			rotational_period_ms: 149.6
+		}
+		trackdata {
+			head: 1
+			min_track: 75
+			max_track: 79
+			rotational_period_ms: 144.0
+		}
+	}
+}
+
+decoder {
+	victor9k {}
+}
+
+option_group {
+	comment: "$formats"
+
+	option {
+		name: "612"
+		comment: '612kB 80-track DSHD GCR'
+
+		config {
+			layout {
+				sides: 1
+			}
+		}
+	}
+
+	option {
+		name: "1224"
+		comment: '1224kB 80-track DSHD GCR'
+
+		config {
+			layout {
+				sides: 2
+			}
+		}
+	}
+}
+

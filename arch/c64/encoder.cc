@@ -1,17 +1,17 @@
-#include "globals.h"
-#include "decoders/decoders.h"
-#include "encoders/encoders.h"
-#include "c64.h"
-#include "crc.h"
-#include "sector.h"
-#include "readerwriter.h"
-#include "image.h"
+#include "lib/core/globals.h"
+#include "lib/core/utils.h"
+#include "lib/decoders/decoders.h"
+#include "lib/encoders/encoders.h"
+#include "arch/c64/c64.h"
+#include "lib/core/crc.h"
+#include "lib/data/sector.h"
+#include "lib/data/image.h"
 #include "fmt/format.h"
 #include "arch/c64/c64.pb.h"
 #include "lib/encoders/encoders.pb.h"
-#include "lib/layout.h"
+#include "lib/data/layout.h"
 #include <ctype.h>
-#include "bytes.h"
+#include "lib/core/bytes.h"
 
 static bool lastBit;
 
@@ -51,26 +51,6 @@ static void write_bits(
     }
 }
 
-void bindump(std::ostream& stream, std::vector<bool>& buffer)
-{
-    size_t pos = 0;
-
-    while ((pos < buffer.size()) and (pos < 520))
-    {
-        stream << fmt::format("{:5d} : ", pos);
-        for (int i = 0; i < 40; i++)
-        {
-            if ((pos + i) < buffer.size())
-                stream << fmt::format("{:01b}", (buffer[pos + i]));
-            else
-                stream << "-- ";
-            if ((((pos + i + 1) % 8) == 0) and i != 0)
-                stream << "  ";
-        }
-        stream << std::endl;
-        pos += 40;
-    }
-}
 static std::vector<bool> encode_data(uint8_t input)
 {
     /*
@@ -175,7 +155,7 @@ public:
     }
 
 public:
-    std::unique_ptr<Fluxmap> encode(std::shared_ptr<const TrackInfo>& trackInfo,
+    std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout& ltl,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
@@ -198,7 +178,7 @@ public:
         else
             _formatByte1 = _formatByte2 = 0;
 
-        double clockRateUs = clockPeriodForC64Track(trackInfo->logicalTrack);
+        double clockRateUs = clockPeriodForC64Track(ltl.logicalCylinder);
         int bitsPerRevolution = 200000.0 / clockRateUs;
 
         std::vector<bool> bits(bitsPerRevolution);
@@ -214,8 +194,7 @@ public:
             writeSector(bits, cursor, sector);
 
         if (cursor >= bits.size())
-            Error() << fmt::format(
-                "track data overrun by {} bits", cursor - bits.size());
+            error("track data overrun by {} bits", cursor - bits.size());
         fillBitmapTo(bits, cursor, bits.size(), {true, false});
 
         std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
@@ -243,8 +222,7 @@ private:
         {
             // There is data to encode to disk.
             if ((sector->data.size() != C64_SECTOR_LENGTH))
-                Error() << fmt::format(
-                    "unsupported sector size {} --- you must pick 256",
+                error("unsupported sector size {} --- you must pick 256",
                     sector->data.size());
 
             // 1. Write header Sync (not GCR)
@@ -267,7 +245,7 @@ private:
              *   06-07 - $0F ("off" bytes)
              */
             uint8_t encodedTrack =
-                ((sector->logicalTrack) +
+                ((sector->logicalCylinder) +
                     1); // C64 track numbering starts with 1. Fluxengine with 0.
             uint8_t encodedSector = sector->logicalSector;
             // uint8_t formatByte1 = C64_FORMAT_ID_BYTE1;

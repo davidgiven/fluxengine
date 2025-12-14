@@ -142,11 +142,11 @@ recorded to the disk (repeatedly). The Y axis shows a heatmap of the pulses read
 back again. What we want to see is a solid diagonal line, showing that the
 pulses are being read back accurately. However, once the pulse width gets wide
 enough, spurious pulses appear, which show up on the graph as the rainbow smear
-in the bottom left corner. You can see that this is much more pronounced on the
+in the bottom right corner. You can see that this is much more pronounced on the
 HD media than it is on the DD media --- the DD media is capable of accurately
 reproducing pulses up to about 12µs, while the HD media only goes up to 7µs.
 
-This demonstrates that some formats, such as the [Apple II](doc/disk-apple2.md)
+This demonstrates that some formats, such as the [Apple II](disk-apple2.md)
 which uses a maximum pulse width of 8µs, cannot be written to HD media at all.
 
 We would also normally see spurious pulses on the left of the graph, indicating
@@ -198,7 +198,7 @@ disk to make the drive treat it as a DD disk. Unfortunately, doing it the other
 way around would require drilling a hole in a DD disk, which I'm unwilling to
 do! So there are only three graphs here.
 
-We get the same smear of spurious pulses in the bottom left, but we _also_ get
+We get the same smear of spurious pulses in the bottom right, but we _also_ get
 some incorrect pulses on the left. In addition, the line itself only starts at
 about 2.5µs --- it turns out that this drive simply returns nothing at all for
 pulses shorter than that.

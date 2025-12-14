@@ -1,14 +1,14 @@
-#include "globals.h"
+#include "lib/core/globals.h"
+#include "lib/core/utils.h"
 #include "arch/apple2/apple2.h"
-#include "decoders/decoders.h"
-#include "encoders/encoders.h"
-#include "sector.h"
-#include "readerwriter.h"
-#include "image.h"
+#include "lib/decoders/decoders.h"
+#include "lib/encoders/encoders.h"
+#include "lib/data/sector.h"
+#include "lib/data/image.h"
 #include "fmt/format.h"
 #include "lib/encoders/encoders.pb.h"
 #include <ctype.h>
-#include "bytes.h"
+#include "lib/core/bytes.h"
 
 static int encode_data_gcr(uint8_t data)
 {
@@ -36,7 +36,7 @@ private:
     const Apple2EncoderProto& _config;
 
 public:
-    std::unique_ptr<Fluxmap> encode(std::shared_ptr<const TrackInfo>& trackInfo,
+    std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout& ltl,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
@@ -50,14 +50,12 @@ public:
             writeSector(bits, cursor, *sector);
 
         if (cursor >= bits.size())
-            Error() << fmt::format(
-                "track data overrun by {} bits", cursor - bits.size());
+            error("track data overrun by {} bits", cursor - bits.size());
         fillBitmapTo(bits, cursor, bits.size(), {true, false});
 
         std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
         fluxmap->appendBits(bits,
-            calculatePhysicalClockPeriod(
-                _config.clock_period_us() * 1e3,
+            calculatePhysicalClockPeriod(_config.clock_period_us() * 1e3,
                 _config.rotational_period_ms() * 1e6));
         return fluxmap;
     }
@@ -119,8 +117,7 @@ private:
 
             // There is data to encode to disk.
             if ((sector.data.size() != APPLE2_SECTOR_LENGTH))
-                Error() << fmt::format(
-                    "unsupported sector size {} --- you must pick 256",
+                error("unsupported sector size {} --- you must pick 256",
                     sector.data.size());
 
             // Write address syncing leader : A sequence of "FF40"s; 5 of them
@@ -132,13 +129,17 @@ private:
             // extra padding.
             write_ff40(sector.logicalSector == 0 ? 32 : 8);
 
+            int track = sector.logicalCylinder;
+            if (sector.logicalHead == 1)
+                track += _config.side_one_track_offset();
+
             // Write address field: APPLE2_SECTOR_RECORD + sector identifier +
             // DE AA EB
             write_bits(APPLE2_SECTOR_RECORD, 24);
             write_gcr44(volume_id);
-            write_gcr44(sector.logicalTrack);
+            write_gcr44(track);
             write_gcr44(sector.logicalSector);
-            write_gcr44(volume_id ^ sector.logicalTrack ^ sector.logicalSector);
+            write_gcr44(volume_id ^ track ^ sector.logicalSector);
             write_bits(0xDEAAEB, 24);
 
             // Write data syncing leader: FF40 + APPLE2_DATA_RECORD + sector

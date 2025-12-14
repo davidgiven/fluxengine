@@ -1,0 +1,37 @@
+from build.c import clibrary
+
+clibrary(
+    name="hfsutils",
+    srcs=[
+        "./libhfs/block.c",
+        "./libhfs/block.h",
+        "./libhfs/btree.c",
+        "./libhfs/btree.h",
+        "./libhfs/data.c",
+        "./libhfs/data.h",
+        "./libhfs/file.c",
+        "./libhfs/file.h",
+        "./libhfs/hfs.c",
+        "./libhfs/hfs.h",
+        "./libhfs/low.c",
+        "./libhfs/low.h",
+        "./libhfs/medium.c",
+        "./libhfs/medium.h",
+        "./libhfs/memcmp.c",
+        "./libhfs/node.c",
+        "./libhfs/node.h",
+        "./libhfs/record.c",
+        "./libhfs/record.h",
+        "./libhfs/version.c",
+        "./libhfs/version.h",
+        "./libhfs/volume.c",
+        "./libhfs/volume.h",
+    ],
+    hdrs={
+        "apple.h": "./libhfs/apple.h",
+        "hfs.h": "./libhfs/hfs.h",
+        "libhfs.h": "./libhfs/libhfs.h",
+        "os.h": "./libhfs/os.h",
+    },
+    cflags=["-Wno-pointer-sign"],
+)

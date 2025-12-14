@@ -2,8 +2,8 @@
 // Anti-Grain Geometry - Version 2.4
 // Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
 //
-// Permission to copy, use, modify, sell and distribute this software 
-// is granted provided this copyright notice appears in all copies. 
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
 // This software is provided "as is" without express or implied
 // warranty, and with no claim as to its suitability for any purpose.
 //
@@ -26,7 +26,7 @@
 namespace agg
 {
     //=================================================span_interpolator_trans
-    template<class Transformer, unsigned SubpixelShift = 8> 
+    template <class Transformer, unsigned SubpixelShift = 8>
     class span_interpolator_trans
     {
     public:
@@ -39,17 +39,23 @@ namespace agg
 
         //--------------------------------------------------------------------
         span_interpolator_trans() {}
-        span_interpolator_trans(trans_type& trans) : m_trans(&trans) {}
-        span_interpolator_trans(trans_type& trans,
-                                double x, double y, unsigned) :
+        span_interpolator_trans(trans_type& trans): m_trans(&trans) {}
+        span_interpolator_trans(
+            trans_type& trans, double x, double y, unsigned):
             m_trans(&trans)
         {
             begin(x, y, 0);
         }
 
         //----------------------------------------------------------------
-        const trans_type& transformer() const { return *m_trans; }
-        void transformer(const trans_type& trans) { m_trans = &trans; }
+        const trans_type& transformer() const
+        {
+            return *m_trans;
+        }
+        void transformer(const trans_type& trans)
+        {
+            m_trans = &trans;
+        }
 
         //----------------------------------------------------------------
         void begin(double x, double y, unsigned)
@@ -80,11 +86,11 @@ namespace agg
         }
 
     private:
-        trans_type*       m_trans;
-        double            m_x;
-        double            m_y;
-        int               m_ix;
-        int               m_iy;
+        trans_type* m_trans;
+        double m_x;
+        double m_y;
+        int m_ix;
+        int m_iy;
     };
 
 }

@@ -1,63 +1,43 @@
-#include "globals.h"
-#include "flags.h"
-#include "fluxsink/fluxsink.h"
-#include "lib/config.pb.h"
-#include "proto.h"
-#include "utils.h"
-#include "fmt/format.h"
+#include "lib/core/globals.h"
+#include "lib/config/flags.h"
+#include "lib/config/config.h"
+#include "lib/fluxsink/fluxsink.h"
+#include "lib/config/config.pb.h"
+#include "lib/config/proto.h"
+#include "lib/core/utils.h"
 #include <regex>
 
-std::unique_ptr<FluxSink> FluxSink::create(const FluxSinkProto& config)
+std::unique_ptr<FluxSinkFactory> FluxSinkFactory::create(Config& config)
 {
-	switch (config.dest_case())
-	{
-		case FluxSinkProto::kDrive:
-			return createHardwareFluxSink(config.drive());
-
-		case FluxSinkProto::kA2R:
-			return createA2RFluxSink(config.a2r());
-
-		case FluxSinkProto::kAu:
-			return createAuFluxSink(config.au());
-
-		case FluxSinkProto::kVcd:
-			return createVcdFluxSink(config.vcd());
-
-		case FluxSinkProto::kScp:
-			return createScpFluxSink(config.scp());
-
-		case FluxSinkProto::kFl2:
-			return createFl2FluxSink(config.fl2());
-
-		default:
-			Error() << "bad output disk config";
-			return std::unique_ptr<FluxSink>();
-	}
+    if (!config.hasFluxSink())
+        error("no flux sink configured");
+    return create(config->flux_sink());
 }
 
-void FluxSink::updateConfigForFilename(FluxSinkProto* proto, const std::string& filename)
+std::unique_ptr<FluxSinkFactory> FluxSinkFactory::create(
+    const FluxSinkProto& config)
 {
-	static const std::vector<std::pair<std::regex, std::function<void(const std::string&, FluxSinkProto*)>>> formats =
-	{
-		{ std::regex("^(.*\\.a2r)$"),  [](auto& s, auto* proto) { proto->mutable_a2r()->set_filename(s); }},
-		{ std::regex("^(.*\\.flux)$"), [](auto& s, auto* proto) { proto->mutable_fl2()->set_filename(s); }},
-		{ std::regex("^(.*\\.scp)$"),  [](auto& s, auto* proto) { proto->mutable_scp()->set_filename(s); }},
-		{ std::regex("^vcd:(.*)$"),    [](auto& s, auto* proto) { proto->mutable_vcd()->set_directory(s); }},
-		{ std::regex("^au:(.*)$"),     [](auto& s, auto* proto) { proto->mutable_au()->set_directory(s); }},
-		{ std::regex("^drive:(.*)"),   [](auto& s, auto* proto) { proto->mutable_drive(); config.mutable_drive()->set_drive(std::stoi(s)); }},
-	};
+    switch (config.type())
+    {
+        case FLUXTYPE_DRIVE:
+            return createHardwareFluxSinkFactory(config.drive());
 
-	for (const auto& it : formats)
-	{
-		std::smatch match;
-		if (std::regex_match(filename, match, it.first))
-		{
-			it.second(match[1], proto);
-			return;
-		}
-	}
+        case FLUXTYPE_A2R:
+            return createA2RFluxSinkFactory(config.a2r());
 
-	Error() << fmt::format("unrecognised flux filename '{}'", filename);
+        case FLUXTYPE_AU:
+            return createAuFluxSinkFactory(config.au());
+
+        case FLUXTYPE_VCD:
+            return createVcdFluxSinkFactory(config.vcd());
+
+        case FLUXTYPE_SCP:
+            return createScpFluxSinkFactory(config.scp());
+
+        case FLUXTYPE_FLUX:
+            return createFl2FluxSinkFactory(config.fl2());
+
+        default:
+            return std::unique_ptr<FluxSinkFactory>();
+    }
 }
-
-

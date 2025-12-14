@@ -1,12 +1,12 @@
-#include "globals.h"
-#include "flags.h"
-#include "sector.h"
-#include "imagereader/imagereader.h"
-#include "image.h"
-#include "logger.h"
-#include "proto.h"
-#include "lib/config.pb.h"
-#include "fmt/format.h"
+#include "lib/core/globals.h"
+#include "lib/config/config.h"
+#include "lib/config/flags.h"
+#include "lib/data/sector.h"
+#include "lib/imagereader/imagereader.h"
+#include "lib/data/image.h"
+#include "lib/core/logger.h"
+#include "lib/config/proto.h"
+#include "lib/config/config.pb.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -19,17 +19,17 @@ class DimImageReader : public ImageReader
 public:
     DimImageReader(const ImageReaderProto& config): ImageReader(config) {}
 
-    std::unique_ptr<Image> readImage()
+    std::unique_ptr<Image> readImage() override
     {
         std::ifstream inputFile(
             _config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
-            Error() << "cannot open input file";
+            error("cannot open input file");
 
         Bytes header(256);
         inputFile.read((char*)header.begin(), header.size());
         if (header.slice(0xAB, 13) != Bytes("DIFC HEADER  "))
-            Error() << "DIM: could not find DIM header, is this a DIM file?";
+            error("DIM: could not find DIM header, is this a DIM file?");
 
         // the DIM header technically has a bit field for sectors present,
         // however it is currently ignored by this reader
@@ -61,7 +61,7 @@ public:
                 sectorSize = 512;
                 break;
             default:
-                Error() << "DIM: unsupported media byte";
+                error("DIM: unsupported media byte");
                 break;
         }
 
@@ -92,61 +92,61 @@ public:
             trackCount++;
         }
 
-		auto layout = config.mutable_layout();
-        if (config.encoder().format_case() ==
+        auto layout = _extraConfig.mutable_layout();
+        if (globalConfig()->encoder().format_case() ==
             EncoderProto::FormatCase::FORMAT_NOT_SET)
         {
-            auto ibm = config.mutable_encoder()->mutable_ibm();
+            auto ibm = _extraConfig.mutable_encoder()->mutable_ibm();
             auto trackdata = ibm->add_trackdata();
             trackdata->set_target_clock_period_us(2);
 
-			auto layoutdata = layout->add_layoutdata();
+            auto layoutdata = layout->add_layoutdata();
             auto physical = layoutdata->mutable_physical();
             switch (mediaByte)
             {
                 case 0x00:
-                    Logger() << "DIM: automatically setting format to 1.2MB "
-                                "(1024 byte sectors)";
+                    log("DIM: automatically setting format to 1.2MB "
+                        "(1024 byte sectors)");
                     trackdata->set_target_rotational_period_ms(167);
                     layoutdata->set_sector_size(1024);
                     for (int i = 0; i < 9; i++)
                         physical->add_sector(i);
                     break;
                 case 0x02:
-                    Logger() << "DIM: automatically setting format to 1.2MB "
-                                "(512 byte sectors)";
+                    log("DIM: automatically setting format to 1.2MB "
+                        "(512 byte sectors)");
                     trackdata->set_target_rotational_period_ms(167);
                     layoutdata->set_sector_size(512);
                     for (int i = 0; i < 15; i++)
                         physical->add_sector(i);
                     break;
                 case 0x03:
-                    Logger() << "DIM: automatically setting format to 1.44MB";
+                    log("DIM: automatically setting format to 1.44MB");
                     trackdata->set_target_rotational_period_ms(200);
                     layoutdata->set_sector_size(512);
                     for (int i = 0; i < 18; i++)
                         physical->add_sector(i);
                     break;
                 default:
-                    Error() << fmt::format(
-                        "DIM: unknown media byte 0x%02x, could not determine "
+                    error(
+                        "DIM: unknown media byte 0x{:02x}, could not determine "
                         "write profile automatically",
                         mediaByte);
                     break;
             }
 
-            config.mutable_decoder()->mutable_ibm();
+            _extraConfig.mutable_decoder()->mutable_ibm();
         }
 
         image->calculateSize();
         const Geometry& geometry = image->getGeometry();
-        Logger() << fmt::format("DIM: read {} tracks, {} sides, {} kB total",
-            geometry.numTracks,
-            geometry.numSides,
+        log("DIM: read {} tracks, {} sides, {} kB total",
+            geometry.numCylinders,
+            geometry.numHeads,
             ((int)inputFile.tellg() - 256) / 1024);
 
-		layout->set_tracks(geometry.numTracks);
-		layout->set_sides(geometry.numSides);
+        layout->set_tracks(geometry.numCylinders);
+        layout->set_sides(geometry.numHeads);
 
         return image;
     }

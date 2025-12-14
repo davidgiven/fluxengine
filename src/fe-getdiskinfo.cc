@@ -1,18 +1,16 @@
-#include "globals.h"
-#include "flags.h"
-#include "fluxmap.h"
-#include "sector.h"
-#include "proto.h"
-#include "readerwriter.h"
-#include "imagereader/imagereader.h"
-#include "imagewriter/imagewriter.h"
+#include "lib/core/globals.h"
+#include "lib/config/flags.h"
+#include "lib/data/fluxmap.h"
+#include "lib/data/sector.h"
+#include "lib/config/proto.h"
+#include "lib/imagereader/imagereader.h"
+#include "lib/imagewriter/imagewriter.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/decoders/decoders.h"
-#include "fmt/format.h"
 #include "fluxengine.h"
 #include "lib/vfs/sectorinterface.h"
 #include "lib/vfs/vfs.h"
-#include "lib/utils.h"
+#include "lib/core/utils.h"
 #include "src/fileutils.h"
 #include <google/protobuf/text_format.h>
 #include <fstream>
@@ -35,7 +33,7 @@ int mainGetDiskInfo(int argc, const char* argv[])
     }
     catch (const FilesystemException& e)
     {
-        Error() << e.message;
+        error("{}", e.message);
     }
 
     return 0;

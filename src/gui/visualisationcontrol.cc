@@ -1,12 +1,11 @@
-#include "globals.h"
+#include "lib/core/globals.h"
 #include "gui.h"
 #include "visualisationcontrol.h"
-#include "fluxmap.h"
-#include "flux.h"
-#include "sector.h"
-#include "image.h"
-#include "lib/layout.h"
-#include "fmt/format.h"
+#include "lib/data/fluxmap.h"
+#include "lib/data/disk.h"
+#include "lib/data/sector.h"
+#include "lib/data/image.h"
+#include "lib/data/layout.h"
 
 #define BORDER 20
 #define TICK 3
@@ -107,8 +106,8 @@ void VisualisationControl::OnPaint(wxPaintEvent&)
             key_t key = {track, head};
             std::vector<std::shared_ptr<const Sector>> sectors;
             for (auto it = _sectors.lower_bound(key);
-                 it != _sectors.upper_bound(key);
-                 it++)
+                it != _sectors.upper_bound(key);
+                it++)
                 sectors.push_back(it->second);
             std::sort(
                 sectors.begin(), sectors.end(), sectorPointerSortPredicate);
@@ -152,8 +151,8 @@ void VisualisationControl::OnPaint(wxPaintEvent&)
         key_t key = {_selectedTrack, _selectedHead};
         int sectorCount = 0;
         for (auto it = _sectors.lower_bound(key);
-             it != _sectors.upper_bound(key);
-             it++)
+            it != _sectors.upper_bound(key);
+            it++)
             sectorCount++;
 
         if (sectorCount != 0)
@@ -195,8 +194,8 @@ void VisualisationControl::OnPaint(wxPaintEvent&)
         std::string logicalText = "logical: (none)";
         if (it != _tracks.end())
             logicalText = fmt::format("logical: {}.{}",
-                it->second->trackInfo->logicalTrack,
-                it->second->trackInfo->logicalSide);
+                it->second->trackInfo->logicalCylinder,
+                it->second->trackInfo->logicalHead);
 
         centreText(logicalText, h - 35);
     }
@@ -272,7 +271,8 @@ void VisualisationControl::Clear()
 
 void VisualisationControl::SetTrackData(std::shared_ptr<const TrackFlux> track)
 {
-    key_t key = {track->trackInfo->physicalTrack, track->trackInfo->physicalSide};
+    key_t key = {
+        track->trackInfo->physicalCylinder, track->trackInfo->physicalHead};
     _tracks[key] = track;
     _sectors.erase(key);
     for (auto& sector : track->sectors)
@@ -281,18 +281,19 @@ void VisualisationControl::SetTrackData(std::shared_ptr<const TrackFlux> track)
     Refresh();
 }
 
-void VisualisationControl::SetDiskData(std::shared_ptr<const DiskFlux> disk)
+void VisualisationControl::SetDiskData(std::shared_ptr<const Disk> disk)
 {
     _sectors.clear();
     for (const auto& track : disk->tracks)
     {
-        key_t key = {track->trackInfo->physicalTrack, track->trackInfo->physicalSide};
+        key_t key = {
+            track->trackInfo->physicalCylinder, track->trackInfo->physicalHead};
         _tracks[key] = track;
     }
 
     for (const auto& sector : *(disk->image))
     {
-        key_t key = {sector->physicalTrack, sector->physicalSide};
+        key_t key = {sector->physicalCylinder, sector->physicalHead};
         _sectors.insert({key, sector});
     }
 

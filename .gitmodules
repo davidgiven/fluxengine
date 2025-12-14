@@ -1,0 +1,36 @@
+[submodule "dep/imhex"]
+	path = dep/imhex
+	url = https://github.com/davidgiven/ImHex.git
+[submodule "dep/libwolv"]
+	path = dep/libwolv
+	url = https://github.com/WerWolv/libwolv.git
+[submodule "dep/imgui"]
+	path = dep/imgui
+	url = https://github.com/ocornut/imgui.git
+[submodule "dep/pattern-language"]
+	path = dep/pattern-language
+	url = https://github.com/WerWolv/PatternLanguage.git
+[submodule "dep/native-file-dialog"]
+	path = dep/native-file-dialog
+	url = https://github.com/btzy/nativefiledialog-extended.git
+[submodule "dep/xdgpp"]
+	path = dep/xdgpp
+	url = https://github.com/WerWolv/xdgpp.git
+[submodule "dep/libromfs"]
+	path = dep/libromfs
+	url = https://github.com/WerWolv/libromfs.git
+[submodule "dep/throwing_ptr"]
+	path = dep/throwing_ptr
+	url = https://github.com/rockdreamer/throwing_ptr.git
+[submodule "dep/lunasvg"]
+	path = dep/lunasvg
+	url = https://github.com/sammycage/lunasvg.git
+[submodule "dep/md4c"]
+	path = dep/md4c
+	url = https://github.com/mity/md4c
+[submodule "dep/nlohmann_json"]
+	path = dep/nlohmann_json
+	url = https://github.com/nlohmann/json
+[submodule "dep/cli11"]
+	path = dep/cli11
+	url = https://github.com/CLIUtils/CLI11

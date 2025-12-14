@@ -1,79 +1,37 @@
-#include "globals.h"
-#include "flags.h"
-#include "fluxmap.h"
-#include "decoders/decoders.h"
-#include "encoders/encoders.h"
-#include "arch/agat/agat.h"
-#include "arch/aeslanier/aeslanier.h"
-#include "arch/amiga/amiga.h"
-#include "arch/apple2/apple2.h"
-#include "arch/brother/brother.h"
-#include "arch/c64/c64.h"
-#include "arch/f85/f85.h"
-#include "arch/fb100/fb100.h"
-#include "arch/ibm/ibm.h"
-#include "arch/macintosh/macintosh.h"
-#include "arch/micropolis/micropolis.h"
-#include "arch/mx/mx.h"
-#include "arch/northstar/northstar.h"
-#include "arch/tids990/tids990.h"
-#include "arch/victor9k/victor9k.h"
-#include "arch/zilogmcz/zilogmcz.h"
-#include "decoders/fluxmapreader.h"
-#include "flux.h"
+#include "lib/core/globals.h"
+#include "lib/config/flags.h"
+#include "lib/data/fluxmap.h"
+#include "lib/config/config.h"
+#include "lib/decoders/decoders.h"
+#include "lib/data/fluxmapreader.h"
+#include "lib/data/disk.h"
 #include "protocol.h"
-#include "decoders/rawbits.h"
-#include "sector.h"
-#include "image.h"
+#include "lib/decoders/rawbits.h"
+#include "lib/data/sector.h"
+#include "lib/data/image.h"
 #include "lib/decoders/decoders.pb.h"
-#include "lib/layout.h"
-#include "fmt/format.h"
+#include "lib/data/layout.h"
 #include <numeric>
 
-std::unique_ptr<Decoder> Decoder::create(const DecoderProto& config)
-{
-    static const std::map<int,
-        std::function<std::unique_ptr<Decoder>(const DecoderProto&)>>
-        decoders = {
-            {DecoderProto::kAgat,       createAgatDecoder       },
-            {DecoderProto::kAeslanier,  createAesLanierDecoder  },
-            {DecoderProto::kAmiga,      createAmigaDecoder      },
-            {DecoderProto::kApple2,     createApple2Decoder     },
-            {DecoderProto::kBrother,    createBrotherDecoder    },
-            {DecoderProto::kC64,        createCommodore64Decoder},
-            {DecoderProto::kF85,        createDurangoF85Decoder },
-            {DecoderProto::kFb100,      createFb100Decoder      },
-            {DecoderProto::kIbm,        createIbmDecoder        },
-            {DecoderProto::kMacintosh,  createMacintoshDecoder  },
-            {DecoderProto::kMicropolis, createMicropolisDecoder },
-            {DecoderProto::kMx,         createMxDecoder         },
-            {DecoderProto::kNorthstar,  createNorthstarDecoder  },
-            {DecoderProto::kTids990,    createTids990Decoder    },
-            {DecoderProto::kVictor9K,   createVictor9kDecoder   },
-            {DecoderProto::kZilogmcz,   createZilogMczDecoder   },
-    };
-
-    auto decoder = decoders.find(config.format_case());
-    if (decoder == decoders.end())
-        Error() << "no decoder specified";
-
-    return (decoder->second)(config);
-}
-
-std::shared_ptr<TrackDataFlux> Decoder::decodeToSectors(
+std::shared_ptr<Track> Decoder::decodeToSectors(
     std::shared_ptr<const Fluxmap> fluxmap,
-    std::shared_ptr<const TrackInfo>& trackInfo)
+    const std::shared_ptr<const PhysicalTrackLayout>& ptl)
 {
-    _trackdata = std::make_shared<TrackDataFlux>();
+    _ltl = ptl->logicalTrackLayout;
+
+    _trackdata = std::make_shared<Track>();
     _trackdata->fluxmap = fluxmap;
-    _trackdata->trackInfo = trackInfo;
+    _trackdata->ptl = ptl;
+    _trackdata->ltl = ptl->logicalTrackLayout;
 
     FluxmapReader fmr(*fluxmap);
     _fmr = &fmr;
 
     auto newSector = [&]
     {
-        _sector = std::make_shared<Sector>(trackInfo, 0);
+        _sector = std::make_shared<Sector>(LogicalLocation{0, 0, 0});
+        _sector->physicalLocation = std::make_optional<CylinderHead>(
+            ptl->physicalCylinder, ptl->physicalHead);
         _sector->status = Sector::MISSING;
     };
 
@@ -86,7 +44,7 @@ std::shared_ptr<TrackDataFlux> Decoder::decodeToSectors(
         Fluxmap::Position recordStart = fmr.tell();
         _sector->clock = advanceToNextRecord();
         if (fmr.eof() || !_sector->clock)
-            return _trackdata;
+            break;
 
         /* Read the sector record. */
 
@@ -105,40 +63,37 @@ std::shared_ptr<TrackDataFlux> Decoder::decodeToSectors(
         {
             /* The data is in a separate record. */
 
-            for (;;)
+            _sector->headerStartTime = before.ns();
+            _sector->headerEndTime = after.ns();
+
+            _sector->clock = advanceToNextRecord();
+            if (fmr.eof() || !_sector->clock)
+                break;
+
+            before = fmr.tell();
+            decodeDataRecord();
+            _sector->data = _sector->data.slice(0, _ltl->sectorSize);
+            after = fmr.tell();
+
+            if (_sector->status != Sector::DATA_MISSING)
             {
-                _sector->headerStartTime = before.ns();
-                _sector->headerEndTime = after.ns();
-
-                _sector->clock = advanceToNextRecord();
-                if (fmr.eof() || !_sector->clock)
-                    break;
-
-                before = fmr.tell();
-                decodeDataRecord();
-                after = fmr.tell();
-
-                if (_sector->status != Sector::DATA_MISSING)
-                {
-                    _sector->position = before.bytes;
-                    _sector->dataStartTime = before.ns();
-                    _sector->dataEndTime = after.ns();
-                    pushRecord(before, after);
-                    break;
-                }
-
+                _sector->position = before.bytes;
+                _sector->dataStartTime = before.ns();
+                _sector->dataEndTime = after.ns();
+                pushRecord(before, after);
+            }
+            else
+            {
                 fmr.skipToEvent(F_BIT_PULSE);
                 resetFluxDecoder();
             }
         }
 
         if (_sector->status != Sector::MISSING)
-        {
-            auto trackLayout = Layout::getLayoutOfTrack(
-                _sector->logicalTrack, _sector->logicalSide);
-            _trackdata->sectors.push_back(_sector);
-        }
+            _trackdata->allSectors.push_back(_sector);
     }
+
+    return _trackdata;
 }
 
 void Decoder::pushRecord(
@@ -150,6 +105,7 @@ void Decoder::pushRecord(
     _trackdata->records.push_back(record);
     _sector->records.push_back(record);
 
+    record->position = start.bytes;
     record->startTime = start.ns();
     record->endTime = end.ns();
     record->clock = _sector->clock;

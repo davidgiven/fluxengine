@@ -1,9 +1,8 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/vfs/vfs.h"
-#include "lib/config.pb.h"
+#include "lib/config/config.pb.h"
 #include "lib/vfs/applesingle.h"
-#include "lib/utils.h"
-#include <fmt/format.h>
+#include "lib/core/utils.h"
 
 extern "C"
 {
@@ -17,14 +16,15 @@ static MacHfsFilesystem* currentMacHfs;
 class MacHfsFilesystem : public Filesystem
 {
 public:
-    MacHfsFilesystem(
-        const MacHfsProto& config, std::shared_ptr<SectorInterface> sectors):
-        Filesystem(sectors),
+    MacHfsFilesystem(const MacHfsProto& config,
+        const std::shared_ptr<const DiskLayout>& diskLayout,
+        std::shared_ptr<SectorInterface> sectors):
+        Filesystem(diskLayout, sectors),
         _config(config)
     {
     }
 
-    uint32_t capabilities() const
+    uint32_t capabilities() const override
     {
         return OP_GETFSDATA | OP_CREATE | OP_LIST | OP_GETFILE | OP_PUTFILE |
                OP_GETDIRENT | OP_MOVE | OP_CREATEDIR | OP_DELETE;
@@ -460,7 +460,10 @@ unsigned long os_write(void** priv, const void* buffer, unsigned long len)
 }
 
 std::unique_ptr<Filesystem> Filesystem::createMacHfsFilesystem(
-    const FilesystemProto& config, std::shared_ptr<SectorInterface> sectors)
+    const FilesystemProto& config,
+    const std::shared_ptr<const DiskLayout>& diskLayout,
+    std::shared_ptr<SectorInterface> sectors)
 {
-    return std::make_unique<MacHfsFilesystem>(config.machfs(), sectors);
+    return std::make_unique<MacHfsFilesystem>(
+        config.machfs(), diskLayout, sectors);
 }

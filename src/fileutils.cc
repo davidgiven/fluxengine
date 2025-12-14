@@ -1,19 +1,31 @@
-#include "globals.h"
-#include "flags.h"
-#include "fluxmap.h"
-#include "sector.h"
-#include "proto.h"
-#include "readerwriter.h"
+#include "lib/core/globals.h"
+#include "lib/config/config.h"
+#include "lib/config/flags.h"
+#include "lib/data/fluxmap.h"
+#include "lib/data/sector.h"
+#include "lib/config/proto.h"
+#include "lib/algorithms/readerwriter.h"
 #include "lib/fluxsource/fluxsource.h"
 #include "lib/fluxsink/fluxsink.h"
 #include "lib/imagereader/imagereader.h"
 #include "lib/imagewriter/imagewriter.h"
-#include "fmt/format.h"
 #include "fluxengine.h"
 #include "lib/vfs/sectorinterface.h"
 #include "lib/vfs/vfs.h"
 #include <google/protobuf/text_format.h>
 #include <fstream>
+
+static void ignoreInapplicableValueExceptions(std::function<void(void)> cb)
+{
+    try
+    {
+        cb();
+    }
+    catch (const InapplicableValueException* e)
+    {
+        /* swallow */
+    }
+}
 
 FlagGroup fileFlags;
 
@@ -22,10 +34,16 @@ static StringFlag image({"-i", "--image"},
     "",
     [](const auto& value)
     {
-        ImageReader::updateConfigForFilename(
-            config.mutable_image_reader(), value);
-        ImageWriter::updateConfigForFilename(
-            config.mutable_image_writer(), value);
+        ignoreInapplicableValueExceptions(
+            [&]()
+            {
+                globalConfig().setImageReader(value);
+            });
+        ignoreInapplicableValueExceptions(
+            [&]()
+            {
+                globalConfig().setImageWriter(value);
+            });
     });
 
 static StringFlag flux({"-f", "--flux"},
@@ -33,9 +51,14 @@ static StringFlag flux({"-f", "--flux"},
     "",
     [](const auto& value)
     {
-		FluxSource::updateConfigForFilename(
-            config.mutable_flux_source(), value);
-		FluxSink::updateConfigForFilename(
-            config.mutable_flux_sink(), value);
+        ignoreInapplicableValueExceptions(
+            [&]()
+            {
+                globalConfig().setFluxSink(value);
+            });
+        ignoreInapplicableValueExceptions(
+            [&]()
+            {
+                globalConfig().setFluxSource(value);
+            });
     });
-

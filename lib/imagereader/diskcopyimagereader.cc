@@ -1,11 +1,10 @@
-#include "globals.h"
-#include "flags.h"
-#include "sector.h"
-#include "imagereader/imagereader.h"
-#include "image.h"
-#include "logger.h"
-#include "lib/config.pb.h"
-#include "fmt/format.h"
+#include "lib/core/globals.h"
+#include "lib/config/flags.h"
+#include "lib/data/sector.h"
+#include "lib/imagereader/imagereader.h"
+#include "lib/data/image.h"
+#include "lib/core/logger.h"
+#include "lib/config/config.pb.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -15,12 +14,12 @@ class DiskCopyImageReader : public ImageReader
 public:
     DiskCopyImageReader(const ImageReaderProto& config): ImageReader(config) {}
 
-    std::unique_ptr<Image> readImage()
+    std::unique_ptr<Image> readImage() override
     {
         std::ifstream inputFile(
             _config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
-            Error() << "cannot open input file";
+            error("cannot open input file");
 
         Bytes data;
         data.writer() += inputFile;
@@ -36,7 +35,7 @@ public:
         uint8_t encoding = br.read_8();
         uint8_t formatByte = br.read_8();
 
-        unsigned numTracks = 80;
+        unsigned numCylinders = 80;
         unsigned numHeads = 2;
         unsigned numSectors = 0;
         bool mfm = false;
@@ -61,13 +60,11 @@ public:
                 break;
 
             default:
-                Error() << fmt::format(
-                    "don't understand DiskCopy disks of type {}", encoding);
+                error("don't understand DiskCopy disks of type {}", encoding);
         }
 
-        Logger() << fmt::format(
-            "DC42: reading image with {} tracks, {} heads; {}; {}",
-            numTracks,
+        log("DC42: reading image with {} tracks, {} heads; {}; {}",
+            numCylinders,
             numHeads,
             mfm ? "MFM" : "GCR",
             label);
@@ -92,7 +89,7 @@ public:
         uint32_t tagPtr = dataPtr + dataSize;
 
         std::unique_ptr<Image> image(new Image);
-        for (int track = 0; track < numTracks; track++)
+        for (int track = 0; track < numCylinders; track++)
         {
             int numSectors = sectorsPerTrack(track);
             for (int head = 0; head < numHeads; head++)
@@ -114,8 +111,10 @@ public:
             }
         }
 
-        image->setGeometry({.numTracks = numTracks,
-            .numSides = numHeads,
+        _extraConfig.mutable_layout()->add_layoutdata()->set_sector_size(524);
+
+        image->setGeometry({.numCylinders = numCylinders,
+            .numHeads = numHeads,
             .numSectors = 12,
             .sectorSize = 512 + 12,
             .irregular = true});

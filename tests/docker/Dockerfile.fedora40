@@ -1,0 +1,32 @@
+FROM fedora:40
+
+RUN dnf update -y
+RUN dnf -y install https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-40.noarch.rpm
+RUN dnf -y install https://github.com/rpmsphere/noarch/raw/master/r/rpmsphere-release-40-1.noarch.rpm
+RUN dnf -y install \
+    protobuf-compiler protobuf-devel sqlite-devel libudev-devel \
+    wxGTK-devel gcc gcc-c++ fmt-devel png2ico
+
+RUN useradd app
+RUN mkdir -p /home/app
+RUN chown app /home/app
+USER app
+WORKDIR /home/app
+
+COPY --chown=app:app arch arch
+COPY --chown=app:app build build
+COPY --chown=app:app dep dep
+COPY --chown=app:app doc doc
+COPY --chown=app:app extras extras
+COPY --chown=app:app lib lib
+COPY --chown=app:app scripts scripts
+COPY --chown=app:app src src
+COPY --chown=app:app tests tests
+COPY --chown=app:app tools tools
+COPY --chown=app:app Makefile .
+COPY --chown=app:app build.py .
+COPY --chown=app:app config.py .
+COPY --chown=app:app protocol.h .
+COPY --chown=app:app README.md .
+
+RUN make

@@ -486,6 +486,9 @@ TEST_CASE("async_in_pipe for an interrupt endpoint")
         // ms, a three-packet transfer will quickly receive those two packets
         // and then keep waiting for more.
 
+        // Previous versions of macOS returned one packet instead of two,
+        // but this is no longer true on Darwin Kernel 22.1.0 (Oct 2022).
+
         // Pause the ADC for 100 ms.
         handle.control_transfer(0x40, 0xA0, 100, 0);
 
@@ -508,9 +511,6 @@ TEST_CASE("async_in_pipe for an interrupt endpoint")
 
                 #if defined(VBOX_LINUX_ON_WINDOWS)
                 CHECK(transferred == 0);
-                #elif defined(__APPLE__)
-                CHECK(transferred == transfer_size);
-                CHECK(buffer[4] == 0xAB);
                 #else
                 CHECK(transferred == transfer_size * 2);
                 CHECK(buffer[4] == 0xAB);
@@ -662,9 +662,10 @@ TEST_CASE("async_in_pipe for an interrupt endpoint")
         expected_message = "Asynchronous IN transfer failed.  "
             "Incorrect function.  Windows error code 0x1.";
         #elif defined(__linux__)
-        // This request results in an error in Linux but it is only detected
-        // after some data is transferred.
-        expected_transferred = transfer_size + 1;
+        // This request results in an error in Linux after some data is transferred.
+        // On some older Linux systems, expected_transferred was transfer_size + 1.
+        // With Linux 5.15 on a Raspberry Pi 4, expected_transferred is transfer_size.
+        expected_transferred = transfer_size;
         expected_message = "Asynchronous IN transfer failed.  "
             "The transfer overflowed.  Error code 75.";
         #elif defined(__APPLE__)

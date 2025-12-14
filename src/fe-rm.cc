@@ -1,10 +1,9 @@
-#include "globals.h"
-#include "flags.h"
-#include "proto.h"
-#include "fmt/format.h"
+#include "lib/core/globals.h"
+#include "lib/config/flags.h"
+#include "lib/config/proto.h"
 #include "fluxengine.h"
 #include "lib/vfs/vfs.h"
-#include "lib/utils.h"
+#include "lib/core/utils.h"
 #include "src/fileutils.h"
 #include <google/protobuf/text_format.h>
 #include <fstream>
@@ -25,14 +24,14 @@ int mainRm(int argc, const char* argv[])
 
         Path path(filename);
         if (path.size() == 0)
-            Error() << "filename missing";
+            error("filename missing");
 
         filesystem->deleteFile(path);
         filesystem->flushChanges();
     }
     catch (const FilesystemException& e)
     {
-        Error() << e.message;
+        error("{}", e.message);
     }
 
     return 0;

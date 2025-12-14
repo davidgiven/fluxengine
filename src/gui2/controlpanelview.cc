@@ -1,0 +1,159 @@
+#include <hex/api/content_registry/user_interface.hpp>
+#include <hex/api/theme_manager.hpp>
+#include <hex/helpers/logger.hpp>
+#include <fonts/vscode_icons.hpp>
+#include <fonts/tabler_icons.hpp>
+#include <fmt/format.h>
+#include <imgui_internal.h>
+#include "lib/core/globals.h"
+#include "lib/config/config.h"
+#include "lib/data/disk.h"
+#include "lib/data/sector.h"
+#include "lib/config/proto.h"
+#include "globals.h"
+#include "controlpanelview.h"
+#include "datastore.h"
+#include "utils.h"
+#include <implot.h>
+#include <implot_internal.h>
+
+using namespace hex;
+
+static DynamicSettingFactory settings("fluxengine.settings");
+
+ControlPanelView::ControlPanelView():
+    View::Window("fluxengine.view.controlpanel.name", ICON_VS_COMPASS)
+{
+}
+
+static void saveFluxFile()
+{
+    fs::openFileBrowser(fs::DialogMode::Save, {}, Datastore::writeFluxFile);
+}
+
+static void loadSectorImage()
+{
+    fs::openFileBrowser(fs::DialogMode::Open, {}, Datastore::readImage);
+}
+
+static void saveSectorImage()
+{
+    fs::openFileBrowser(fs::DialogMode::Save, {}, Datastore::writeImage);
+}
+
+void ControlPanelView::drawContent()
+{
+    auto disk = Datastore::getDisk();
+    bool busy = Datastore::isBusy();
+    bool hasImage = disk && disk->image;
+
+    if (ImGui::BeginTable("controlPanelOuter",
+            3,
+            ImGuiTableFlags_NoSavedSettings | ImGuiTableFlags_NoClip))
+    {
+        ON_SCOPE_EXIT
+        {
+            ImGui::EndTable();
+        };
+
+        ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);
+        ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed);
+        ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);
+
+        ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
+        ImGui::TableNextColumn();
+        ImGui::TextAligned(0.5f, -FLT_MIN, "Inputs");
+        ImGui::TableNextColumn();
+        ImGui::TableHeader(ICON_VS_ARROW_RIGHT);
+        ImGui::TableNextColumn();
+        ImGui::TextAligned(0.5f, -FLT_MIN, "Outputs");
+
+        auto button = [&](const std::string& icon,
+                          const std::string& label,
+                          std::function<void()> callback,
+                          bool isDisabled)
+        {
+            ImGui::TableNextColumn();
+            ImGui::BeginDisabled(isDisabled);
+            ON_SCOPE_EXIT
+            {
+                ImGui::EndDisabled();
+            };
+            if (ImGui::Button(fmt::format("{} {}", icon, label).c_str(),
+                    {ImGui::GetContentRegionAvail().x, 0}))
+                callback();
+        };
+
+        ImGui::TableNextRow();
+        button(
+            ICON_TA_DEVICE_FLOPPY,
+            "fluxengine.view.controlpanel.readDevice"_lang,
+            []
+            {
+                Datastore::beginRead(false);
+            },
+            busy);
+        ImGui::TableNextColumn();
+        button(ICON_VS_SAVE_AS,
+            "fluxengine.view.controlpanel.writeDevice"_lang,
+            Datastore::beginWrite,
+            busy || !hasImage);
+
+        ImGui::TableNextRow();
+        button(
+            ICON_TA_REPEAT,
+            "fluxengine.view.controlpanel.rereadBad"_lang,
+            []
+            {
+                Datastore::beginRead(true);
+            },
+            busy || !disk);
+        ImGui::TableNextColumn();
+        button(ICON_TA_DOWNLOAD,
+            "fluxengine.view.controlpanel.writeFlux"_lang,
+            saveFluxFile,
+            busy || !disk);
+
+        ImGui::TableNextRow();
+        button(ICON_VS_FOLDER_OPENED,
+            "fluxengine.view.controlpanel.readImage"_lang,
+            loadSectorImage,
+            busy);
+        ImGui::TableNextColumn();
+        button(ICON_VS_SAVE_ALL,
+            "fluxengine.view.controlpanel.writeImage"_lang,
+            saveSectorImage,
+            busy || !hasImage);
+
+        ImGui::TableNextRow();
+        button(ICON_VS_NEW_FILE,
+            "fluxengine.view.controlpanel.createBlank"_lang,
+            Datastore::createBlankImage,
+            busy || !Datastore::canFormat());
+    }
+
+    ImGui::Dummy({0, ImGui::GetFontSize()});
+
+    {
+        auto red = ImGuiExt::GetCustomColorU32(ImGuiCustomCol_LoggerError);
+        auto text = ImGui::GetColorU32(ImGuiCol_Text);
+        auto redHover = ImMixU32(red, text, 32);
+        auto redPressed = ImMixU32(red, text, 64);
+
+        ImGui::PushStyleColor(ImGuiCol_Button, red);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, redHover);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, redPressed);
+
+        ON_SCOPE_EXIT
+        {
+            ImGui::PopStyleColor(3);
+        };
+
+        if (maybeDisabledButton(fmt::format("{} {}",
+                                    ICON_TA_CANCEL,
+                                    "fluxengine.view.controlpanel.stop"_lang),
+                {ImGui::GetContentRegionAvail().x, 0},
+                !busy))
+            Datastore::stop();
+    }
+}

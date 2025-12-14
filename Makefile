@@ -1,252 +1,140 @@
-# Special Windows settings.
+ifeq ($(BUILDTYPE),)
+    buildtype_Darwin = osx
+    buildtype_Haiku = haiku
+    BUILDTYPE := $(buildtype_$(shell uname -s ))
+        ifeq ($(BUILDTYPE),)
+                BUILDTYPE := unix
+        endif
+endif
+export BUILDTYPE
 
-ifeq ($(OS), Windows_NT)
-	MINGWBIN = /mingw32/bin
-	CCPREFIX = $(MINGWBIN)/
-	LUA = $(MINGWBIN)/lua
-	PKG_CONFIG = $(MINGWBIN)/pkg-config
-	WX_CONFIG = /usr/bin/sh $(MINGWBIN)/wx-config --static=yes
-	PROTOC = $(MINGWBIN)/protoc
-	PLATFORM = WINDOWS
-	LDFLAGS += \
+OPTFLAGS = -g -O3
+
+ifeq ($(BUILDTYPE),windows)
+	MINGW = x86_64-w64-mingw32-
+	CC = $(MINGW)gcc
+	CXX = $(MINGW)g++
+	CFLAGS += \
+		$(OPTFLAGS) \
+		-ffunction-sections \
+		-fdata-sections \
+		-Wno-attributes \
+		-Wa,-mbig-obj \
 		-static
 	CXXFLAGS += \
-		-std=c++17 \
-		-fext-numeric-literals \
+		$(OPTFLAGS) \
+		-std=c++23 \
+		-Wno-deprecated-enum-float-conversion \
+		-Wno-deprecated-enum-enum-conversion \
+		-Wno-attributes \
+		-Wa,-mbig-obj \
+		-static
+	LDFLAGS += -Wl,--gc-sections -static
+	AR = $(MINGW)gcc-ar
+	PKG_CONFIG = $(MINGW)pkg-config --static
+	WINDRES = $(MINGW)windres
+	WX_CONFIG = /usr/i686-w64-mingw32/sys-root/mingw/bin/wx-config-3.0 --static=yes
+	NINJA = /bin/ninja
+	PROTOC = /mingw64/bin/protoc
+	PROTOC_SEPARATOR = ;
+	EXT = .exe
+
+	AB_SANDBOX = no
+else
+	CC = clang
+	CXX = clang++
+	CFLAGS = \
+		$(OPTFLAGS) \
+		-I/opt/homebrew/include -I/usr/local/include \
+		-Wno-unknown-warning-option
+	CXXFLAGS = \
+		$(OPTFLAGS) \
+		-std=c++23 \
+		-fexperimental-library \
+		-I/opt/homebrew/include -I/usr/local/include \
+		-Wformat \
+		-Wformat-security \
 		-Wno-deprecated-enum-float-conversion \
 		-Wno-deprecated-enum-enum-conversion
-
-	# Required to get the gcc run-time libraries on the path.
-	export PATH := $(PATH):$(MINGWBIN)
-	EXT ?= .exe
+	LDFLAGS =
+	AR = ar
+	PKG_CONFIG = pkg-config
+	ifeq ($(BUILDTYPE),osx)
+	else
+		LDFLAGS += -pthread -Wl,--no-as-needed
+	endif
 endif
 
-# Special OSX settings.
+HOSTCC = gcc
+HOSTCXX = g++ -std=c++20
+HOSTCFLAGS = -g -O3
+HOSTLDFLAGS =
 
-ifeq ($(shell uname),Darwin)
-	PLATFORM = OSX
-	LDFLAGS += \
-		-framework IOKit \
-		-framework Foundation
-endif
-
-# Check the Make version.
-
-
-ifeq ($(findstring 4.,$(MAKE_VERSION)),)
-$(error You need GNU Make 4.x for this (if you're on OSX, use gmake).)
-endif
-
-# Normal settings.
-
-OBJDIR ?= .obj
-CCPREFIX ?=
-LUA ?= lua
-CC ?= $(CCPREFIX)gcc
-CXX ?= $(CCPREFIX)g++
-AR ?= $(CCPREFIX)ar
-PKG_CONFIG ?= pkg-config
-WX_CONFIG ?= wx-config
-PROTOC ?= protoc
-CFLAGS ?= -g -O3
-CXXFLAGS += -std=c++17
-LDFLAGS ?=
-PLATFORM ?= UNIX
-TESTS ?= yes
-EXT ?=
+REALOBJ = .obj
+OBJ = $(REALOBJ)/$(BUILDTYPE)
 DESTDIR ?=
 PREFIX ?= /usr/local
 BINDIR ?= $(PREFIX)/bin
 
-CFLAGS += \
-	-Iarch \
-	-Ilib \
-	-I. \
-	-I$(OBJDIR)/arch \
-	-I$(OBJDIR)/lib \
-	-I$(OBJDIR) \
+# Special Windows settings.
 
-LDFLAGS += \
-	-lz \
-	-lfmt
+#ifeq ($(OS), Windows_NT)
+#	EXT ?= .exe
+#	MINGWBIN = /mingw32/bin
+#	CCPREFIX = $(MINGWBIN)/
+#	PKG_CONFIG = $(MINGWBIN)/pkg-config
+#	WX_CONFIG = /usr/bin/sh $(MINGWBIN)/wx-config --static=yes
+#	PROTOC = $(MINGWBIN)/protoc
+#	WINDRES = windres
+#	LDFLAGS += \
+#		-static
+#	CXXFLAGS += \
+#		-fext-numeric-literals \
+#		-Wno-deprecated-enum-float-conversion \
+#		-Wno-deprecated-enum-enum-conversion
+#
+#	# Required to get the gcc run - time libraries on the path.
+#	export PATH := $(PATH):$(MINGWBIN)
+#endif
 
-.SUFFIXES:
-.DELETE_ON_ERROR:
+# Special OSX settings.
 
-define nl
-
-endef
-
-use-library = $(eval $(use-library-impl))
-define use-library-impl
-$1: $(call $3_LIB)
-$1: private LDFLAGS += $(call $3_LDFLAGS)
-$2: private CFLAGS += $(call $3_CFLAGS)
-endef
-
-use-pkgconfig = $(eval $(use-pkgconfig-impl))
-define use-pkgconfig-impl
-ifneq ($(strip $(shell $(PKG_CONFIG) $3; echo $$?)),0)
-$$(error Missing required pkg-config dependency: $3)
+ifeq ($(shell uname),Darwin)
+	LDFLAGS += \
+		-framework IOKit \
+		-framework AppKit  \
+		-framework UniformTypeIdentifiers \
+		-framework UserNotifications
 endif
 
-$(1): private LDFLAGS += $(shell $(PKG_CONFIG) --libs $(3))
-$(2): private CFLAGS += $(shell $(PKG_CONFIG) --cflags $(3))
-endef
+.PHONY: all
+all: +all README.md
 
-.PHONY: all binaries tests clean install install-bin
-all: binaries tests
+.PHONY: binaries tests
+binaries: all
+tests: all
+	
+README.md: $(OBJ)/scripts/+mkdocindex/mkdocindex$(EXT)
+	@echo $(PROGRESSINFO)MKDOC $@
+	@csplit -s -f$(OBJ)/README. README.md '/<!-- FORMATSSTART -->/' '%<!-- FORMATSEND -->%'
+	@(cat $(OBJ)/README.00 && $< && cat $(OBJ)/README.01) > README.md
 
-PROTOS = \
-	arch/aeslanier/aeslanier.proto \
-	arch/agat/agat.proto \
-	arch/amiga/amiga.proto \
-	arch/apple2/apple2.proto \
-	arch/brother/brother.proto \
-	arch/c64/c64.proto \
-	arch/f85/f85.proto \
-	arch/fb100/fb100.proto \
-	arch/ibm/ibm.proto \
-	arch/macintosh/macintosh.proto \
-	arch/micropolis/micropolis.proto \
-	arch/mx/mx.proto \
-	arch/northstar/northstar.proto \
-	arch/tids990/tids990.proto \
-	arch/victor9k/victor9k.proto \
-	arch/zilogmcz/zilogmcz.proto \
-	lib/common.proto \
-	lib/config.proto \
-	lib/decoders/decoders.proto \
-	lib/drive.proto \
-	lib/encoders/encoders.proto \
-	lib/fl2.proto \
-	lib/fluxsink/fluxsink.proto \
-	lib/fluxsource/fluxsource.proto \
-	lib/imagereader/imagereader.proto \
-	lib/imagewriter/imagewriter.proto \
-	lib/layout.proto \
-	lib/usb/usb.proto \
-	lib/vfs/vfs.proto \
-	tests/testproto.proto \
+.PHONY: tests
 
-PROTO_HDRS = $(patsubst %.proto, $(OBJDIR)/%.pb.h, $(PROTOS))
-PROTO_SRCS = $(patsubst %.proto, $(OBJDIR)/%.pb.cc, $(PROTOS))
-PROTO_OBJS = $(patsubst %.cc, %.o, $(PROTO_SRCS))
-PROTO_CFLAGS = $(shell $(PKG_CONFIG) --cflags protobuf)
-$(PROTO_SRCS): | $(PROTO_HDRS)
-$(PROTO_OBJS): CFLAGS += $(PROTO_CFLAGS)
-PROTO_LIB = $(OBJDIR)/libproto.a
-$(PROTO_LIB): $(PROTO_OBJS)
-PROTO_LDFLAGS = $(shell $(PKG_CONFIG) --libs protobuf) -pthread $(PROTO_LIB)
-.PRECIOUS: $(PROTO_HDRS) $(PROTO_SRCS)
+clean::
+	$(hide) rm -rf $(REALOBJ)
 
-include dep/agg/build.mk
-include dep/libusbp/build.mk
-include dep/stb/build.mk
-include dep/emu/build.mk
-include dep/fatfs/build.mk
-include dep/adflib/build.mk
-include dep/hfsutils/build.mk
-include scripts/build.mk
+include build/ab.mk
 
-include lib/build.mk
-include arch/build.mk
-include src/build.mk
-include src/gui/build.mk
-include tools/build.mk
-include tests/build.mk
+DOCKERFILES = \
+	debian11 \
+    debian12 \
+    fedora40 \
+    fedora41 \
+	manjaro
 
-do-encodedecodetest = $(eval $(do-encodedecodetest-impl))
-define do-encodedecodetest-impl
+docker-%: tests/docker/Dockerfile.%
+	docker build -t $* -f $< .
 
-tests: $(OBJDIR)/$1$3.encodedecode
-$(OBJDIR)/$1$3.encodedecode: scripts/encodedecodetest.sh $(FLUXENGINE_BIN) $2
-	@mkdir -p $(dir $$@)
-	@echo ENCODEDECODETEST $1 $3
-	@scripts/encodedecodetest.sh $1 flux $(FLUXENGINE_BIN) $2 $3 > $$@
-
-endef
-
-$(call do-encodedecodetest,amiga)
-$(call do-encodedecodetest,apple2)
-$(call do-encodedecodetest,atarist360)
-$(call do-encodedecodetest,atarist370)
-$(call do-encodedecodetest,atarist400)
-$(call do-encodedecodetest,atarist410)
-$(call do-encodedecodetest,atarist720)
-$(call do-encodedecodetest,atarist740)
-$(call do-encodedecodetest,atarist800)
-$(call do-encodedecodetest,atarist820)
-$(call do-encodedecodetest,bk800)
-$(call do-encodedecodetest,brother120)
-$(call do-encodedecodetest,brother240)
-$(call do-encodedecodetest,commodore1541,scripts/commodore1541_test.textpb,--35)
-$(call do-encodedecodetest,commodore1541,scripts/commodore1541_test.textpb,--40)
-$(call do-encodedecodetest,commodore1581)
-$(call do-encodedecodetest,cmd_fd2000)
-$(call do-encodedecodetest,hp9121)
-$(call do-encodedecodetest,ibm1200)
-$(call do-encodedecodetest,ibm1232)
-$(call do-encodedecodetest,ibm1440)
-$(call do-encodedecodetest,ibm180)
-$(call do-encodedecodetest,ibm360)
-$(call do-encodedecodetest,ibm720)
-$(call do-encodedecodetest,mac400,scripts/mac400_test.textpb)
-$(call do-encodedecodetest,mac800,scripts/mac800_test.textpb)
-$(call do-encodedecodetest,n88basic)
-$(call do-encodedecodetest,rx50)
-$(call do-encodedecodetest,tids990)
-$(call do-encodedecodetest,trs80_88,,--35)
-$(call do-encodedecodetest,trs80_88,,--40)
-$(call do-encodedecodetest,trs80_175,,--35)
-$(call do-encodedecodetest,trs80_175,,--40)
-$(call do-encodedecodetest,victor9k_ss)
-$(call do-encodedecodetest,victor9k_ds)
-
-$(OBJDIR)/%.a:
-	@mkdir -p $(dir $@)
-	@echo AR $@
-	@$(AR) rc $@ $^
-
-%.exe:
-	@mkdir -p $(dir $@)
-	@echo LINK $@
-	@$(CXX) -o $@ $^ $(LDFLAGS) $(LDFLAGS)
-
-$(OBJDIR)/%.o: %.cpp
-	@mkdir -p $(dir $@)
-	@echo CXX $<
-	@$(CXX) $(CFLAGS) $(CXXFLAGS) -MMD -MP -MF $(@:.o=.d) -c -o $@ $<
-
-$(OBJDIR)/%.o: %.cc
-	@mkdir -p $(dir $@)
-	@echo CXX $<
-	@$(CXX) $(CFLAGS) $(CXXFLAGS) -MMD -MP -MF $(@:.o=.d) -c -o $@ $<
-
-$(OBJDIR)/%.o: $(OBJDIR)/%.cc
-	@mkdir -p $(dir $@)
-	@echo CXX $<
-	@$(CXX) $(CFLAGS) $(CXXFLAGS) -MMD -MP -MF $(@:.o=.d) -c -o $@ $<
-
-$(OBJDIR)/%.o: %.c
-	@mkdir -p $(dir $@)
-	@echo CC $<
-	@$(CC) $(CFLAGS) $(CFLAGS) -MMD -MP -MF $(@:.o=.d) -c -o $@ $<
-
-$(OBJDIR)/%.pb.h: %.proto
-	@mkdir -p $(dir $@)
-	@echo PROTOC $@
-	@$(PROTOC) -I. --cpp_out=$(OBJDIR) $<
-
-clean:
-	rm -rf $(OBJDIR)
-
-install: install-bin # install-man install-docs ...
-
-install-bin: fluxengine$(EXT) fluxengine-gui$(EXT) brother120tool$(EXT) brother240tool$(EXT) upgrade-flux-file$(EXT)
-	install -d "$(DESTDIR)$(BINDIR)"
-	for target in $^; do \
-		install $$target "$(DESTDIR)$(BINDIR)/$$target"; \
-	done
-
--include $(OBJS:%.o=%.d)
+.PHONY: dockertests
+dockertests: $(foreach f,$(DOCKERFILES), docker-$(strip $f) .WAIT)

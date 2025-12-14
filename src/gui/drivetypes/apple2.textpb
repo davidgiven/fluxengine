@@ -1,0 +1,13 @@
+comment: '5.25" 40-track Apple II drive (Greaseweazle only)'
+
+usb {
+    greaseweazle {
+        bus_type: APPLE2
+    }
+}
+
+drive {
+    tracks: "c0-159h0"
+    drive_type: DRIVETYPE_APPLE2
+}
+

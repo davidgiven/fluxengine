@@ -2,8 +2,8 @@
 // Anti-Grain Geometry - Version 2.4
 // Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
 //
-// Permission to copy, use, modify, sell and distribute this software 
-// is granted provided this copyright notice appears in all copies. 
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
 // This software is provided "as is" without express or implied
 // warranty, and with no claim as to its suitability for any purpose.
 //
@@ -35,21 +35,24 @@ namespace agg
     };
 
     //--------------------------------------------------------------blender_base
-    template<class ColorT, class Order = void> 
+    template <class ColorT, class Order = void>
     struct blender_base
     {
         typedef ColorT color_type;
         typedef Order order_type;
         typedef typename color_type::value_type value_type;
 
-        static rgba get(value_type r, value_type g, value_type b, value_type a, cover_type cover = cover_full)
+        static rgba get(value_type r,
+            value_type g,
+            value_type b,
+            value_type a,
+            cover_type cover = cover_full)
         {
             if (cover > cover_none)
             {
-                rgba c(
-                    color_type::to_double(r), 
-                    color_type::to_double(g), 
-                    color_type::to_double(b), 
+                rgba c(color_type::to_double(r),
+                    color_type::to_double(g),
+                    color_type::to_double(b),
                     color_type::to_double(a));
 
                 if (cover < cover_full)
@@ -63,20 +66,24 @@ namespace agg
 
                 return c;
             }
-            else return rgba::no_color();
+            else
+                return rgba::no_color();
         }
 
         static rgba get(const value_type* p, cover_type cover = cover_full)
         {
-            return get(
-                p[order_type::R], 
-                p[order_type::G], 
-                p[order_type::B], 
-                p[order_type::A], 
+            return get(p[order_type::R],
+                p[order_type::G],
+                p[order_type::B],
+                p[order_type::A],
                 cover);
         }
 
-        static void set(value_type* p, value_type r, value_type g, value_type b, value_type a)
+        static void set(value_type* p,
+            value_type r,
+            value_type g,
+            value_type b,
+            value_type a)
         {
             p[order_type::R] = r;
             p[order_type::G] = g;

@@ -2,64 +2,135 @@ name: C/C++ CI
 
 on: [push]
 
+concurrency: 
+  group: environment-${{ github.head_ref }}
+  cancel-in-progress: true
+
 jobs:
   build-linux:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
+      with:
+        repository: 'davidgiven/fluxengine'
+        path: 'fluxengine'
+        submodules: 'true'
+    - uses: actions/checkout@v4
+      with:
+        repository: 'davidgiven/fluxengine-testdata'
+        path: 'fluxengine-testdata'
     - name: apt
-      run: sudo apt update && sudo apt install libudev-dev libsqlite3-dev protobuf-compiler libwxgtk3.0-gtk3-dev libfmt-dev
+      run: |
+        sudo apt update
+        sudo apt install libudev-dev libsqlite3-dev protobuf-compiler libwxgtk3.2-dev libfmt-dev libprotobuf-dev libmagic-dev libmbedtls-dev libcurl4-openssl-dev libmagic-dev nlohmann-json3-dev libdbus-1-dev libglfw3-dev libmd4c-dev libfreetype-dev libcli11-dev libboost-regex-dev
     - name: make
-      run: CXXFLAGS="-Wp,-D_GLIBCXX_ASSERTIONS" make
+      run: CXXFLAGS="-Wp,-D_GLIBCXX_ASSERTIONS" make -j`nproc` -C fluxengine
 
-  build-macos:
-    runs-on: macos-latest
+  #build-linux-debian-11:
+  #  runs-on: ubuntu-22.04
+  #  container: debian:11
+  #  steps:
+  #  - uses: actions/checkout@v4
+  #    with:
+  #      repository: 'davidgiven/fluxengine'
+  #      path: 'fluxengine'
+  #  - uses: actions/checkout@v4
+  #    with:
+  #      repository: 'davidgiven/fluxengine-testdata'
+  #      path: 'fluxengine-testdata'
+  #  - name: apt update
+  #    run: apt update
+  #  - name: apt
+  #    run: >
+  #      apt install -y python3 make xz-utils python3 python3-hamcrest
+  #      protobuf-compiler libprotobuf-dev libsqlite3-dev
+  #      libfmt-dev libprotobuf-dev wx-common pkg-config
+  #      libudev-dev g++ libwxgtk3.0-gtk3-dev
+  #  - name: make
+  #    run: make -C fluxengine
+      
+  build-macos-current:
+    strategy:
+      matrix:
+        runs-on: [macos-15, macos-15-intel]
+    runs-on: ${{ matrix.runs-on }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
+      with:
+        repository: 'davidgiven/fluxengine'
+        path: 'fluxengine'
+        submodules: 'true'
+    - uses: actions/checkout@v4
+      with:
+        repository: 'davidgiven/fluxengine-testdata'
+        path: 'fluxengine-testdata'
     - name: brew
-      run: brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils
+      run: |
+        brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg libmagic nlohmann-json cli11 boost glfw3 md4c ninja python freetype2 mbedtls@3
+        brew link mbedtls@3
+        brew upgrade
     - name: make
-      run: gmake
+      run: gmake -C fluxengine
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ github.event.repository.name }}.${{ github.sha }}.fluxengine.${{ runner.arch }}.pkg
+        path: |
+          fluxengine/FluxEngine.pkg
+          fluxengine/FluxEngine.app.zip
 
   build-windows:
     runs-on: windows-latest
     defaults:
       run:
         shell: msys2 {0}
+
     steps:
     - uses: msys2/setup-msys2@v2
       with:
+        msystem: mingw64
         update: true
-        msystem: MINGW32
-        install: >-
-          diffutils
-          make
-          mingw-w64-i686-fmt
-          mingw-w64-i686-gcc
-          mingw-w64-i686-libusb
-          mingw-w64-i686-pkg-config
-          mingw-w64-i686-protobuf
-          mingw-w64-i686-sqlite3
-          mingw-w64-i686-wxWidgets
-          mingw-w64-i686-zlib
-          mingw-w64-i686-nsis
-          zip
-    - uses: actions/checkout@v1
-    - name: build
-      run: make
+        install: |
+          python diffutils ninja make zip
+        pacboy: |
+          protobuf:p pkgconf:p curl-winssl:p file:p glfw:p mbedtls:p
+          sqlite:p freetype:p boost:p gcc:p binutils:p nsis:p abseil-cpp:p
+
+    - name: debug
+      run: |
+        pacboy -Q --info protobuf:p
+        cat /mingw64/lib/pkgconfig/protobuf.pc
+        /mingw64/bin/pkg-config.exe protobuf --cflags
+        /mingw64/bin/pkg-config.exe protobuf --cflags --static
+
+    - uses: actions/checkout@v4
+      with:
+        repository: 'davidgiven/fluxengine'
+        path: 'fluxengine'
+        submodules: 'true'
+
+    - uses: actions/checkout@v4
+      with:
+        repository: 'davidgiven/fluxengine-testdata'
+        path: 'fluxengine-testdata'
+
+    - name: run
+      run: |
+        make -C fluxengine BUILDTYPE=windows AB_SANDBOX=no
 
     - name: nsis
       run: |
+        cd fluxengine
         strip fluxengine.exe -o fluxengine-stripped.exe
         strip fluxengine-gui.exe -o fluxengine-gui-stripped.exe
         makensis -v2 -nocd -dOUTFILE=fluxengine-installer.exe extras/windows-installer.nsi
 
     - name: zip
       run: |
-        zip -9 fluxengine.zip fluxengine.exe fluxengine-gui.exe upgrade-flux-file.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex fluxengine-installer.exe
+        cd fluxengine && zip -9 fluxengine-windows.zip fluxengine.exe fluxengine-gui.exe upgrade-flux-file.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex fluxengine-installer.exe
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
-        name: ${{ github.event.repository.name }}.${{ github.sha }}
-        path: fluxengine.zip
+        name: ${{ github.event.repository.name }}.${{ github.sha }}.windows.zip
+        path: fluxengine/fluxengine-windows.zip

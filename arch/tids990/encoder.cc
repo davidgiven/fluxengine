@@ -1,13 +1,12 @@
-#include "globals.h"
-#include "decoders/decoders.h"
-#include "encoders/encoders.h"
-#include "tids990.h"
-#include "crc.h"
-#include "readerwriter.h"
-#include "image.h"
+#include "lib/core/globals.h"
+#include "lib/decoders/decoders.h"
+#include "lib/encoders/encoders.h"
+#include "arch/tids990/tids990.h"
+#include "lib/core/crc.h"
+#include "lib/data/image.h"
 #include "arch/tids990/tids990.pb.h"
 #include "lib/encoders/encoders.pb.h"
-#include <fmt/format.h>
+#include "fmt/format.h"
 
 static int charToInt(char c)
 {
@@ -60,7 +59,7 @@ private:
     }
 
 public:
-    std::unique_ptr<Fluxmap> encode(std::shared_ptr<const TrackInfo>& trackInfo,
+    std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout& ltl,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
@@ -96,8 +95,8 @@ public:
 
                 writeBytes(12, 0x55);
                 bw.write_8(am1Unencoded);
-                bw.write_8(sectorData->logicalSide << 3);
-                bw.write_8(sectorData->logicalTrack);
+                bw.write_8(sectorData->logicalHead << 3);
+                bw.write_8(sectorData->logicalCylinder);
                 bw.write_8(_config.sector_count());
                 bw.write_8(sectorData->logicalSector);
                 bw.write_be16(sectorData->data.size());
@@ -127,14 +126,14 @@ public:
         }
 
         if (_cursor >= _bits.size())
-            Error() << "track data overrun";
+            error("track data overrun");
         while (_cursor < _bits.size())
             writeBytes(1, 0x55);
 
         auto fluxmap = std::make_unique<Fluxmap>();
         fluxmap->appendBits(_bits,
-            calculatePhysicalClockPeriod(clockRateUs * 1e3,
-                _config.rotational_period_ms() * 1e6));
+            calculatePhysicalClockPeriod(
+                clockRateUs * 1e3, _config.rotational_period_ms() * 1e6));
         return fluxmap;
     }
 
@@ -145,8 +144,7 @@ private:
     bool _lastBit;
 };
 
-std::unique_ptr<Encoder> createTids990Encoder(
-    const EncoderProto& config)
+std::unique_ptr<Encoder> createTids990Encoder(const EncoderProto& config)
 {
     return std::unique_ptr<Encoder>(new Tids990Encoder(config));
 }

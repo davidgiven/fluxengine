@@ -1,14 +1,14 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
+#include "lib/config/config.h"
 #include "lib/vfs/vfs.h"
-#include "lib/config.pb.h"
-#include "lib/proto.h"
-#include "lib/layout.h"
-#include "lib/logger.h"
-#include <fmt/format.h>
+#include "lib/config/config.pb.h"
+#include "lib/config/proto.h"
+#include "lib/data/layout.h"
+#include "lib/core/logger.h"
 
 #include "adflib.h"
 #include "adf_blk.h"
-#include "dep/adflib/adf_nativ.h"
+#include "adf_nativ.h"
 #undef min
 
 #include <ctime>
@@ -50,14 +50,15 @@ static std::string modeToString(long access)
 class AmigaFfsFilesystem : public Filesystem
 {
 public:
-    AmigaFfsFilesystem(
-        const AmigaFfsProto& config, std::shared_ptr<SectorInterface> sectors):
-        Filesystem(sectors),
+    AmigaFfsFilesystem(const AmigaFfsProto& config,
+        const std::shared_ptr<const DiskLayout>& diskLayout,
+        std::shared_ptr<SectorInterface> sectors):
+        Filesystem(diskLayout, sectors),
         _config(config)
     {
     }
 
-    uint32_t capabilities() const
+    uint32_t capabilities() const override
     {
         return OP_GETFSDATA | OP_CREATE | OP_LIST | OP_GETFILE | OP_PUTFILE |
                OP_GETDIRENT | OP_DELETE | OP_MOVE | OP_CREATEDIR;
@@ -89,9 +90,10 @@ public:
         dev.readOnly = false;
         dev.isNativeDev = true;
         dev.devType = DEVTYPE_FLOPDD;
-        dev.cylinders = config.layout().tracks();
-        dev.heads = config.layout().sides();
-        dev.sectors = Layout::getLayoutOfTrack(0, 0)->numSectors;
+        dev.cylinders = globalConfig()->layout().tracks();
+        dev.heads = globalConfig()->layout().sides();
+        dev.sectors =
+            _diskLayout->layoutByLogicalLocation.at({0, 0})->numSectors;
         adfInitDevice(&dev, nullptr, false);
         int res = adfCreateFlop(&dev, (char*)volumeName.c_str(), 0);
         if (res != RC_OK)
@@ -230,7 +232,7 @@ public:
             throw CannotWriteException();
     }
 
-    void createDirectory(const Path& path)
+    void createDirectory(const Path& path) override
     {
         AdfMount m(this);
         if (path.empty())
@@ -420,7 +422,7 @@ private:
 
 static void onAdfWarning(char* message)
 {
-    Logger() << message;
+    log((const char*)message);
 }
 
 static void onAdfError(char* message)
@@ -469,7 +471,10 @@ static BOOL adfIsDevNative(char*)
 }
 
 std::unique_ptr<Filesystem> Filesystem::createAmigaFfsFilesystem(
-    const FilesystemProto& config, std::shared_ptr<SectorInterface> sectors)
+    const FilesystemProto& config,
+    const std::shared_ptr<const DiskLayout>& diskLayout,
+    std::shared_ptr<SectorInterface> sectors)
 {
-    return std::make_unique<AmigaFfsFilesystem>(config.amigaffs(), sectors);
+    return std::make_unique<AmigaFfsFilesystem>(
+        config.amigaffs(), diskLayout, sectors);
 }

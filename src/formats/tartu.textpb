@@ -1,0 +1,105 @@
+shortname: 'Tartu'
+comment: 'The Palivere and variations'
+read_support_status: UNICORN
+write_support_status: DINOSAUR
+
+documentation:
+<<<
+The Tartu Palivere is a 1988 Z80-based computer from Estonia. It is a CP/M
+machine with 64kB of RAM, running off a 2MHz КP580ВМ80А, a Soviet Union 8080
+clone; it operated off punched tape, cassette, external hard drive or floppy, and was notable as being the first ever computer with an Estonian keyboard.
+
+<div style="text-align: center">
+<img src="tartu.jpg" alt="The Tartu computer's developer Leo Humal working with one."/>
+</div>
+
+From a floppy disk perspective, it is interesting because the floppy drive
+interface is almost entirely handled in software --- necessary at the time as
+the usual floppy disk interface chip at the time, the КR1818VG93 (a Soviet clone
+of the WD1793), was hard to find. Instead, the floppy controller board was
+implemented entirely using TTL logic. Despite this, the encoding is fairly high
+density, using MFM and with up to 780kB on a double-sided 80 track disk.
+
+<div style="text-align: center">
+<img src="tartu-fdc.jpg" alt="The Tartu FDC with Soviet TTL logic chips."/>
+</div>
+
+FluxEngine supports reading and writing Tartu disks with CP/M filesystem access.
+>>>
+
+documentation:
+<<<
+## References
+
+  - [The Estonia Museum of Electronics](https://www.elektroonikamuuseum.ee/tartu_arvuti_lugu.html)
+>>>
+
+image_writer {
+	filename: "tartu.img"
+	type: IMAGETYPE_IMG
+}
+
+layout {
+	layoutdata {
+		sector_size: 128
+		physical {
+			start_sector: 1
+			count: 39
+		}
+
+		filesystem {
+			start_sector: 1
+			count: 39
+			skew: 3
+		}
+	}
+}
+
+encoder {
+	tartu {}
+}
+
+decoder {
+	tartu {}
+}
+
+option_group {
+	comment: "$formats"
+
+	option {
+		name: "390"
+		comment: '390kB 5.25" 40-track DSDD'
+
+		config {
+			layout {
+				format_type: FORMATTYPE_40TRACK
+				tracks: 40
+				sides: 2
+			}
+		}
+	}
+
+	option {
+		name: "780"
+		comment: '780kB 5.25" 80-track DSDD'
+
+		config {
+			layout {
+				format_type: FORMATTYPE_80TRACK
+				tracks: 80
+				sides: 2
+			}
+		}
+	}
+}
+
+filesystem {
+	type: CPMFS
+	cpmfs {
+		filesystem_start {
+			track: 1
+		}
+		block_size: 2048
+		dir_entries: 128
+	}
+}

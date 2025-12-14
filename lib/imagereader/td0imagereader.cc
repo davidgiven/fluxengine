@@ -1,13 +1,11 @@
-#include "globals.h"
-#include "flags.h"
-#include "sector.h"
-#include "imagereader/imagereader.h"
-#include "image.h"
-#include "crc.h"
-#include "logger.h"
-#include "fmt/format.h"
-#include "lib/config.pb.h"
-#include "fmt/format.h"
+#include "lib/core/globals.h"
+#include "lib/config/flags.h"
+#include "lib/data/sector.h"
+#include "lib/imagereader/imagereader.h"
+#include "lib/data/image.h"
+#include "lib/core/crc.h"
+#include "lib/core/logger.h"
+#include "lib/config/config.pb.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -49,12 +47,12 @@ class Td0ImageReader : public ImageReader
 public:
     Td0ImageReader(const ImageReaderProto& config): ImageReader(config) {}
 
-    std::unique_ptr<Image> readImage()
+    std::unique_ptr<Image> readImage() override
     {
         std::ifstream inputFile(
             _config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
-            Error() << "cannot open input file";
+            error("cannot open input file");
 
         Bytes input;
         input.writer() += inputFile;
@@ -71,10 +69,11 @@ public:
 
         uint16_t gotCrc = crc16(0xa097, 0, input.slice(0, 10));
         if (gotCrc != headerCrc)
-            Error() << "TD0: header checksum mismatch";
+            error("TD0: header checksum mismatch");
         if (signature != 0x5444)
-            Error() << "TD0: unsupported file type (only uncompressed files "
-                       "are supported for now)";
+            error(
+                "TD0: unsupported file type (only uncompressed files "
+                "are supported for now)");
 
         std::string comment = "(no comment)";
         if (stepping & 0x80)
@@ -98,8 +97,7 @@ public:
             comment.erase(nl.base(), comment.end());
         }
 
-        Logger() << fmt::format(
-            "TD0: TeleDisk {}.{}: {}", version / 10, version % 10, comment);
+        log("TD0: TeleDisk {}.{}: {}", version / 10, version % 10, comment);
 
         unsigned totalSize = 0;
         std::unique_ptr<Image> image(new Image);
@@ -111,16 +109,16 @@ public:
             if (sectorCount == 0xff)
                 break;
 
-            uint8_t physicalTrack = br.read_8();
-            uint8_t physicalSide = br.read_8() & 1;
+            uint8_t physicalCylinder = br.read_8();
+            uint8_t physicalHead = br.read_8() & 1;
             br.skip(1); /* crc */
 
             for (int i = 0; i < sectorCount; i++)
             {
                 /* Read sector */
 
-                uint8_t logicalTrack = br.read_8();
-                uint8_t logicalSide = br.read_8();
+                uint8_t logicalCylinder = br.read_8();
+                uint8_t logicalHead = br.read_8();
                 uint8_t sectorId = br.read_8();
                 uint8_t sectorSizeEncoded = br.read_8();
                 unsigned sectorSize = 128 << sectorSizeEncoded;
@@ -183,10 +181,8 @@ public:
                 }
 
                 const auto& sector =
-                    image->put(logicalTrack, logicalSide, sectorId);
+                    image->put(logicalCylinder, logicalHead, sectorId);
                 sector->status = Sector::OK;
-                sector->physicalTrack = physicalTrack;
-                sector->physicalSide = physicalSide;
                 sector->data = data.slice(0, sectorSize);
                 totalSize += sectorSize;
             }
@@ -194,11 +190,10 @@ public:
 
         image->calculateSize();
         const Geometry& geometry = image->getGeometry();
-        Logger() << fmt::format(
-            "TD0: found {} tracks, {} sides, {} sectors, {} bytes per sector, "
+        log("TD0: found {} tracks, {} sides, {} sectors, {} bytes per sector, "
             "{} kB total",
-            geometry.numTracks,
-            geometry.numSides,
+            geometry.numCylinders,
+            geometry.numHeads,
             geometry.numSectors,
             geometry.sectorSize,
             totalSize / 1024);

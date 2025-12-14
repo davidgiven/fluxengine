@@ -1,15 +1,15 @@
-#include "globals.h"
-#include "decoders/decoders.h"
-#include "encoders/encoders.h"
-#include "ibm.h"
-#include "crc.h"
-#include "readerwriter.h"
-#include "image.h"
+#include "lib/core/globals.h"
+#include "lib/config/config.h"
+#include "lib/decoders/decoders.h"
+#include "lib/encoders/encoders.h"
+#include "arch/ibm/ibm.h"
+#include "lib/core/crc.h"
+#include "lib/data/image.h"
 #include "arch/ibm/ibm.pb.h"
 #include "lib/encoders/encoders.pb.h"
 #include "fmt/format.h"
-#include "lib/proto.h"
-#include "lib/layout.h"
+#include "lib/config/proto.h"
+#include "lib/data/layout.h"
 #include <ctype.h>
 
 /* IAM record separator:
@@ -107,15 +107,12 @@ private:
     }
 
 public:
-    std::unique_ptr<Fluxmap> encode(std::shared_ptr<const TrackInfo>& trackInfo,
+    std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout& ltl,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
         IbmEncoderProto::TrackdataProto trackdata;
-        getEncoderTrackData(trackdata, trackInfo->logicalTrack, trackInfo->logicalSide);
-
-        auto trackLayout =
-            Layout::getLayoutOfTrack(trackInfo->logicalTrack, trackInfo->logicalSide);
+        getEncoderTrackData(trackdata, ltl.logicalCylinder, ltl.logicalHead);
 
         auto writeBytes = [&](const Bytes& bytes)
         {
@@ -151,7 +148,7 @@ public:
 
         uint8_t sectorSize = 0;
         {
-            int s = trackLayout->sectorSize >> 7;
+            int s = ltl.sectorSize >> 7;
             while (s > 1)
             {
                 s >>= 1;
@@ -201,9 +198,9 @@ public:
                         bw.write_8(MFM_RECORD_SEPARATOR_BYTE);
                 }
                 bw.write_8(idamUnencoded);
-                bw.write_8(sectorData->logicalTrack);
+                bw.write_8(sectorData->logicalCylinder);
                 bw.write_8(
-                    sectorData->logicalSide ^ trackdata.invert_side_byte());
+                    sectorData->logicalHead ^ trackdata.invert_side_byte());
                 bw.write_8(sectorData->logicalSector);
                 bw.write_8(sectorSize);
                 uint16_t crc = crc16(CCITT_POLY, header);
@@ -236,8 +233,7 @@ public:
                 }
                 bw.write_8(damUnencoded);
 
-                Bytes truncatedData =
-                    sectorData->data.slice(0, trackLayout->sectorSize);
+                Bytes truncatedData = sectorData->data.slice(0, ltl.sectorSize);
                 bw += truncatedData;
                 uint16_t crc = crc16(CCITT_POLY, data);
                 bw.write_be16(crc);
@@ -257,7 +253,7 @@ public:
         }
 
         if (_cursor >= _bits.size())
-            Error() << "track data overrun";
+            error("track data overrun");
         while (_cursor < _bits.size())
             writeFillerRawBytes(1, gapFill);
 

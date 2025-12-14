@@ -1,8 +1,7 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "gui.h"
 #include "customstatusbar.h"
 #include <wx/artprov.h>
-#include <fmt/format.h>
 
 // clang-format off
 BEGIN_EVENT_TABLE(CustomStatusBar, wxStatusBar)

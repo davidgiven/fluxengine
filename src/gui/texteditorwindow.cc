@@ -1,8 +1,7 @@
-#include "globals.h"
+#include "lib/core/globals.h"
 #include "gui.h"
-#include "layout.h"
+#include "lib/data/layout.h"
 #include "texteditorwindow.h"
-#include "fmt/format.h"
 
 wxDEFINE_EVENT(EDITOR_SAVE_EVENT, EditorSaveEvent);
 

@@ -2,8 +2,8 @@
 // Anti-Grain Geometry - Version 2.4
 // Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
 //
-// Permission to copy, use, modify, sell and distribute this software 
-// is granted provided this copyright notice appears in all copies. 
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
 // This software is provided "as is" without express or implied
 // warranty, and with no claim as to its suitability for any purpose.
 //
@@ -22,7 +22,7 @@ namespace agg
 {
 
     //===============================================span_interpolator_adaptor
-    template<class Interpolator, class Distortion>
+    template <class Interpolator, class Distortion>
     class span_interpolator_adaptor : public Interpolator
     {
     public:
@@ -32,17 +32,18 @@ namespace agg
 
         //--------------------------------------------------------------------
         span_interpolator_adaptor() {}
-        span_interpolator_adaptor(trans_type& trans, 
-                                  distortion_type& dist) :
+        span_interpolator_adaptor(trans_type& trans, distortion_type& dist):
             base_type(trans),
             m_distortion(&dist)
-        {   
+        {
         }
 
         //--------------------------------------------------------------------
         span_interpolator_adaptor(trans_type& trans,
-                                  distortion_type& dist,
-                                  double x, double y, unsigned len) :
+            distortion_type& dist,
+            double x,
+            double y,
+            unsigned len):
             base_type(trans, x, y, len),
             m_distortion(&dist)
         {
@@ -72,6 +73,5 @@ namespace agg
         distortion_type* m_distortion;
     };
 }
-
 
 #endif

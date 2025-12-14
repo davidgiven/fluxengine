@@ -19,15 +19,15 @@
  * $Id: btree.h,v 1.8 1998/11/02 22:08:55 rob Exp $
  */
 
-int bt_getnode(node *, btree *, unsigned long);
-int bt_putnode(node *);
+int bt_getnode(node*, btree*, unsigned long);
+int bt_putnode(node*);
 
-int bt_readhdr(btree *);
-int bt_writehdr(btree *);
+int bt_readhdr(btree*);
+int bt_writehdr(btree*);
 
-int bt_space(btree *, unsigned int);
+int bt_space(btree*, unsigned int);
 
-int bt_insert(btree *, const byte *, unsigned int);
-int bt_delete(btree *, const byte *);
+int bt_insert(btree*, const byte*, unsigned int);
+int bt_delete(btree*, const byte*);
 
-int bt_search(btree *, const byte *, node *);
+int bt_search(btree*, const byte*, node*);

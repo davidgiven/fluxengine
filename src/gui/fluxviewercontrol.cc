@@ -1,12 +1,15 @@
-#include "globals.h"
+#include "lib/core/globals.h"
 #include "gui.h"
 #include "fluxviewercontrol.h"
 #include "textviewerwindow.h"
-#include "lib/flux.h"
-#include "lib/fluxmap.h"
-#include "lib/sector.h"
-#include "lib/layout.h"
-#include "lib/decoders/fluxmapreader.h"
+#include "lib/data/disk.h"
+#include "lib/data/fluxmap.h"
+#include "lib/decoders/decoders.h"
+#include "lib/decoders/decoders.pb.h"
+#include "lib/data/sector.h"
+#include "lib/data/layout.h"
+#include "lib/data/fluxmapreader.h"
+#include "lib/core/crc.h"
 
 DECLARE_COLOUR(BACKGROUND, 192, 192, 192);
 DECLARE_COLOUR(READ_SEPARATOR, 255, 0, 0);
@@ -62,8 +65,17 @@ void FluxViewerControl::SetFlux(std::shared_ptr<const TrackFlux> flux)
 
     _scrollPosition = 0;
     _totalDuration = 0;
+    _events.clear();
     for (const auto& trackdata : _flux->trackDatas)
+    {
+        for (const auto& record : trackdata->records)
+        {
+            _events.insert(_totalDuration + record->startTime);
+            _events.insert(_totalDuration + record->endTime);
+        }
+
         _totalDuration += trackdata->fluxmap->duration();
+    }
 
     auto size = GetSize();
     _nanosecondsPerPixel = (double)_totalDuration / (double)size.GetWidth();
@@ -125,13 +137,16 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
     auto size = GetSize();
     int w = size.GetWidth();
     int h = size.GetHeight();
-    int th = h / 4;
+    constexpr int rows = 5;
+    int th = h / rows;
+    int th2 = th / 2;
     int ch = th * 2 / 3;
     int ch2 = ch / 2;
-    int t1y = th / 2;
-    int t2y = th + th / 2;
-    int t3y = th * 2 + th / 2;
-    int t4y = th * 3 + th / 2;
+    int t1y = th2;
+    int t2y = th + th2;
+    int t3y = th * 2 + th2;
+    int t4y = th * 3 + th2;
+    int t5y = th * 4 + th2;
 
     int x = -_scrollPosition / _nanosecondsPerPixel;
     nanoseconds_t fluxStartTime = 0;
@@ -151,7 +166,7 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
             dc.SetPen(FOREGROUND_PEN);
             dc.DrawLine({x, t1y}, {x + fw, t1y});
             dc.DrawLine({x, t2y}, {x + fw, t2y});
-            dc.DrawLine({x, t3y}, {x + fw, t3y});
+            dc.DrawLine({x, t4y}, {x + fw, t4y});
 
             /* Index lines. */
 
@@ -199,11 +214,11 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
                     ts = ch2 / 2;
                 if ((tick % (100 * tickStep)) == 0)
                     ts = ch2;
-                dc.DrawLine({x + xx, t3y - ts}, {x + xx, t3y + ts});
+                dc.DrawLine({x + xx, t4y - ts}, {x + xx, t4y + ts});
                 if ((tick % (10 * tickStep)) == 0)
                 {
                     dc.DrawText(fmt::format("{:.3f}ms", tick / 1e6),
-                        {x + xx, t3y - ch2});
+                        {x + xx, t4y - ch2});
                 }
 
                 tick += tickStep;
@@ -250,8 +265,8 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
                 wxDCClipper clipper(dc, rect);
 
                 auto text = fmt::format("c{}.h{}.s{} {}",
-                    sector->logicalTrack,
-                    sector->logicalSide,
+                    sector->logicalCylinder,
+                    sector->logicalHead,
                     sector->logicalSector,
                     Sector::statusToString(sector->status));
                 auto size = dc.GetTextExtent(text);
@@ -264,29 +279,125 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
 
             /* Record blocks. */
 
-            dc.SetPen(FOREGROUND_PEN);
-            dc.SetBrush(RECORD_BRUSH);
             for (auto& record : trackdata->records)
             {
                 int rp = record->startTime / _nanosecondsPerPixel;
                 int rw = (record->endTime - record->startTime) /
                          _nanosecondsPerPixel;
+                int rl = x + rp;
+                int rr = rl + rw;
 
-                wxRect rect = {x + rp, t2y - ch2, rw, ch};
-                bool hovered = rect.Contains(_mouseX, _mouseY);
-                wxPen pen(FOREGROUND_COLOUR, hovered ? 2 : 1);
-                dc.SetPen(pen);
+                if ((rr >= 0) && (rl < w))
+                {
+                    wxRect rect = {rl, t2y - ch2, rw, ch};
+                    bool hovered = rect.Contains(_mouseX, _mouseY);
+                    wxPen pen(FOREGROUND_COLOUR, hovered ? 2 : 1);
+                    dc.SetPen(pen);
+                    dc.SetBrush(RECORD_BRUSH);
 
-                dc.DrawRectangle(rect);
-                wxDCClipper clipper(dc, rect);
+                    dc.DrawRectangle(rect);
+                    wxDCClipper clipper(dc, rect);
 
-                auto text = fmt::format("+{:.3f}ms", record->startTime / 1e6);
-                auto size = dc.GetTextExtent(text);
-                dc.DrawText(
-                    text, {x + rp + BORDER, t2y - size.GetHeight() / 2});
+                    if (_nanosecondsPerPixel > (RENDER_LIMIT / 4))
+                    {
+                        auto text =
+                            fmt::format("+{:.3f}ms", record->startTime / 1e6);
+                        auto size = dc.GetTextExtent(text);
+                        dc.DrawText(
+                            text, {rl + BORDER, t2y - size.GetHeight() / 2});
+                    }
+                    else
+                    {
+                        dc.SetPen(FOREGROUND_PEN);
 
-                if (_rightClicked && hovered)
-                    ShowRecordMenu(trackdata->trackInfo, record);
+                        /* This is a bit dubious. We lie to the FluxMapReader
+                         * about the ticks and ns part of the seek position.
+                         * This makes the maths easier later, and also avoids
+                         * having to count all the way through the fluxmap
+                         * to read the start of the record. */
+
+                        FluxmapReader fmr(*trackdata->fluxmap);
+                        fmr.seek({record->position, 0, 0});
+
+                        FluxDecoder fd(&fmr, record->clock, DecoderProto());
+                        while ((int)fmr.tell().ns() <=
+                               (int)(record->endTime - record->startTime))
+                        {
+                            uint8_t b = toBytes(fd.readBits(8)).slice(0, 1)[0];
+
+                            int xx = fmr.tell().ns() / _nanosecondsPerPixel;
+                            if ((rl + xx) > (w + 50))
+                                break;
+                            if (((rl + xx) > 0) && (fmr.tell().ns() != 0))
+                            {
+                                auto text = fmt::format("{:02x}", b);
+                                auto size = dc.GetTextExtent(text);
+                                dc.DrawLine(
+                                    {rl + xx, t2y - ch2}, {rl + xx, t2y + ch2});
+                                dc.DrawText(text,
+                                    {rl + xx - size.GetWidth() - BORDER,
+                                        t2y - size.GetHeight() / 2});
+                            }
+                        }
+                    }
+
+                    if (_rightClicked && hovered)
+                        ShowRecordMenu(trackdata->trackInfo, record);
+                }
+            }
+
+            /* Raw flux bits. */
+
+            if (_nanosecondsPerPixel < (RENDER_LIMIT / 8))
+            {
+                for (auto& record : trackdata->records)
+                {
+                    int rp = record->startTime / _nanosecondsPerPixel;
+                    int rw = (record->endTime - record->startTime) /
+                             _nanosecondsPerPixel;
+                    int rl = x + rp;
+                    int rr = rl + rw;
+
+                    if ((rr >= 0) && (rl < w))
+                    {
+                        dc.SetPen(FOREGROUND_PEN);
+
+                        /* This is a bit dubious. We lie to the FluxMapReader
+                         * about the ticks and ns part of the seek position.
+                         * This makes the maths easier later, and also avoids
+                         * having to count all the way through the fluxmap
+                         * to read the start of the record. */
+
+                        FluxmapReader fmr(*trackdata->fluxmap);
+                        fmr.seek({record->position, 0, 0});
+
+                        FluxDecoder fd(&fmr, record->clock, DecoderProto());
+                        std::string text;
+                        while ((int)fmr.tell().ns() <=
+                               (int)(record->endTime - record->startTime))
+                        {
+                            bool b = fd.readBit();
+                            if (!b)
+                            {
+                                text += "0";
+                                continue;
+                            }
+                            text += "1";
+
+                            int xx = fmr.tell().ns() / _nanosecondsPerPixel;
+                            if ((rl + xx) > (w + 50))
+                                break;
+                            if ((rl + xx) > 0)
+                            {
+                                auto size = dc.GetTextExtent(text);
+                                dc.DrawText(text,
+                                    {rl + xx - size.GetWidth() - BORDER, t4y});
+                            }
+
+                            text = "";
+                        }
+                    }
+                }
             }
 
             /* Flux chart. */
@@ -315,7 +426,7 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
                                 density));
                         wxBrush brush(colour);
                         dc.SetBrush(brush);
-                        dc.DrawRectangle({x + fx, t4y - ch2}, {1, ch});
+                        dc.DrawRectangle({x + fx, t5y - ch2}, {1, ch});
                     }
                 }
             }
@@ -332,18 +443,49 @@ void FluxViewerControl::OnPaint(wxPaintEvent&)
 
                     int fx = fmr.tell().ns() / _nanosecondsPerPixel;
                     if (((x + fx) > 0) && ((x + fx) < w))
-                        dc.DrawLine({x + fx, t4y - ch2}, {x + fx, t4y + ch2});
+                        dc.DrawLine({x + fx, t5y - ch2}, {x + fx, t5y + ch2});
                     if ((x + fx) >= w)
                         break;
                 }
             }
 
             dc.SetPen(FLUX_PEN);
-            dc.DrawLine({x, t4y}, {x + fw, t4y});
+            dc.DrawLine({x, t5y}, {x + fw, t5y});
         }
 
         x += fw;
         fluxStartTime += duration;
+    }
+
+    /* Ruler. */
+
+    {
+        nanoseconds_t cursorTime =
+            (_mouseX * _nanosecondsPerPixel) + _scrollPosition;
+        auto rightEvent = _events.lower_bound(cursorTime);
+        if (rightEvent != _events.end())
+        {
+            auto leftEvent = rightEvent;
+            leftEvent--;
+            if (leftEvent != _events.begin())
+            {
+                int lx = (*leftEvent - _scrollPosition) / _nanosecondsPerPixel;
+                int rx = (*rightEvent - _scrollPosition) / _nanosecondsPerPixel;
+                int dx = rx - lx;
+                int y = t3y - th2;
+
+                dc.SetBackgroundMode(wxTRANSPARENT);
+                dc.SetTextForeground(*wxBLACK);
+                dc.SetPen(FOREGROUND_PEN);
+                dc.DrawLine({lx, y}, {rx, y});
+
+                auto text =
+                    fmt::format("{:.3f}ms", (*rightEvent - *leftEvent) / 1e6);
+                auto size = dc.GetTextExtent(text);
+                int mx = (lx + rx) / 2;
+                dc.DrawText(text, {mx - size.GetWidth() / 2, y});
+            }
+        }
     }
 
     _rightClicked = false;
@@ -418,6 +560,14 @@ void FluxViewerControl::ShowSectorMenu(std::shared_ptr<const Sector> sector)
         wxEVT_MENU,
         [&](wxCommandEvent&)
         {
+            DisplaySectorSummary(sector);
+        },
+        menu.Append(wxID_ANY, "Show sector summary")->GetId());
+
+    menu.Bind(
+        wxEVT_MENU,
+        [&](wxCommandEvent&)
+        {
             DisplayDecodedData(sector);
         },
         menu.Append(wxID_ANY, "Show decoded data")->GetId());
@@ -457,11 +607,26 @@ static void dumpSectorMetadata(
     s << fmt::format(
              "Sector status:     {}\n", Sector::statusToString(sector->status))
       << fmt::format("Physical location: c{}.h{}\n",
-             sector->physicalTrack,
-             sector->physicalSide)
+             sector->physicalCylinder,
+             sector->physicalHead)
       << fmt::format("Clock:             {:.2f}us / {:.0f}kHz\n",
              sector->clock / 1000.0,
-             1000000.0 / sector->clock);
+             1000000.0 / sector->clock)
+      << fmt::format("Bytecode position: {}\n", sector->position)
+      << fmt::format(
+             "Data CRC16:        {:4x}\n", crc16(CCITT_POLY, sector->data));
+}
+
+static void dumpRecordMetadata(
+    std::ostream& s, std::shared_ptr<const Record> record)
+{
+    s << fmt::format("Bytecode position: {}\n", record->position)
+      << fmt::format(
+             "Start:             {:.2f}ms\n", record->startTime / 1000000.0)
+      << fmt::format(
+             "End:               {:.2f}ms\n", record->endTime / 1000000.0)
+      << fmt::format(
+             "Data CRC16:        {:4x}\n", crc16(CCITT_POLY, record->rawData));
 }
 
 void FluxViewerControl::DisplayDecodedData(std::shared_ptr<const Sector> sector)
@@ -469,8 +634,8 @@ void FluxViewerControl::DisplayDecodedData(std::shared_ptr<const Sector> sector)
     std::stringstream s;
 
     auto title = fmt::format("User data for c{}.h{}.s{}",
-        sector->logicalTrack,
-        sector->logicalSide,
+        sector->logicalCylinder,
+        sector->logicalHead,
         sector->logicalSector);
     s << title << '\n';
     dumpSectorMetadata(s, sector);
@@ -481,20 +646,62 @@ void FluxViewerControl::DisplayDecodedData(std::shared_ptr<const Sector> sector)
     TextViewerWindow::Create(this, title, s.str())->Show();
 }
 
+void FluxViewerControl::DisplaySectorSummary(
+    std::shared_ptr<const Sector> sector)
+{
+    std::stringstream s;
+
+    auto title = fmt::format("Sector summary c{}.h{}.s{}",
+        sector->logicalCylinder,
+        sector->logicalHead,
+        sector->logicalSector);
+    s << title << '\n';
+
+    std::vector<std::shared_ptr<const Sector>> sectors;
+    for (auto& trackdata : _flux->trackDatas)
+    {
+        if ((trackdata->trackInfo->logicalCylinder ==
+                sector->logicalCylinder) &&
+            (trackdata->trackInfo->logicalHead == sector->logicalHead))
+        {
+            for (auto& sec : trackdata->sectors)
+            {
+                if (*sec == *sector)
+                    sectors.push_back(sec);
+            }
+        }
+    }
+
+    s << fmt::format("Number of times seen: {}\n", sectors.size());
+
+    for (int i = 0; i < sectors.size(); i++)
+    {
+        auto& sec = sectors[i];
+        s << fmt::format("\nInstance {}:\n\n", i);
+        dumpSectorMetadata(s, sec);
+        s << '\n';
+    }
+
+    TextViewerWindow::Create(this, title, s.str())->Show();
+}
+
 void FluxViewerControl::DisplayRawData(std::shared_ptr<const Sector> sector)
 {
     std::stringstream s;
 
     auto title = fmt::format("Raw data for c{}.h{}.s{}",
-        sector->logicalTrack,
-        sector->logicalSide,
+        sector->logicalCylinder,
+        sector->logicalHead,
         sector->logicalSector);
     s << title << '\n';
     dumpSectorMetadata(s, sector);
     s << fmt::format("Number of records: {}\n", sector->records.size());
 
-    for (auto& record : sector->records)
+    for (int i = 0; i < sector->records.size(); i++)
     {
+        auto& record = sector->records[i];
+        s << fmt::format("\nRecord {}:\n\n", i);
+        dumpRecordMetadata(s, record);
         s << '\n';
         hexdump(s, record->rawData);
     }
@@ -508,10 +715,12 @@ void FluxViewerControl::DisplayRawData(std::shared_ptr<const TrackInfo>& layout,
     std::stringstream s;
 
     auto title = fmt::format("Raw data for record c{}.h{} + {:.3f}ms",
-        layout->physicalTrack,
-        layout->physicalSide,
+        layout->physicalCylinder,
+        layout->physicalHead,
         record->startTime / 1e6);
-    s << title << "\n\n";
+    s << title << "\n";
+    dumpRecordMetadata(s, record);
+    s << '\n';
     hexdump(s, record->rawData);
 
     TextViewerWindow::Create(this, title, s.str())->Show();

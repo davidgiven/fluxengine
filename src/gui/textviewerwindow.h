@@ -3,7 +3,7 @@
 
 #include "layout.h"
 
-class TextViewerWindow : public TextViewerWindowGen
+class TextViewerWindow : public TextViewerWindowGen, public std::streambuf
 {
 public:
     TextViewerWindow(wxWindow* parent,
@@ -19,8 +19,12 @@ public:
 public:
     wxTextCtrl* GetTextControl() const;
 
+public:
+    std::streamsize xsputn(const char* s, std::streamsize n) override;
+    int overflow(int c) override;
+
 private:
-    void OnClose(wxCloseEvent& event);
+    void OnClose(wxCloseEvent& event) override;
 
 private:
     bool _autodestroy;

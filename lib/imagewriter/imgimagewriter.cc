@@ -1,14 +1,14 @@
-#include "globals.h"
-#include "flags.h"
-#include "sector.h"
-#include "imagewriter/imagewriter.h"
-#include "image.h"
-#include "lib/proto.h"
-#include "lib/config.pb.h"
-#include "lib/layout.h"
-#include "lib/layout.pb.h"
-#include "fmt/format.h"
-#include "logger.h"
+#include "lib/core/globals.h"
+#include "lib/config/config.h"
+#include "lib/config/flags.h"
+#include "lib/data/sector.h"
+#include "lib/imagewriter/imagewriter.h"
+#include "lib/data/image.h"
+#include "lib/config/proto.h"
+#include "lib/config/config.pb.h"
+#include "lib/data/layout.h"
+#include "lib/config/layout.pb.h"
+#include "lib/core/logger.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -18,40 +18,47 @@ class ImgImageWriter : public ImageWriter
 public:
     ImgImageWriter(const ImageWriterProto& config): ImageWriter(config) {}
 
-    void writeImage(const Image& image)
+    void writeImage(const Image& image) override
     {
         const Geometry geometry = image.getGeometry();
 
-        auto& layout = config.layout();
-        int tracks = layout.has_tracks() ? layout.tracks() : geometry.numTracks;
-        int sides = layout.has_sides() ? layout.sides() : geometry.numSides;
+        auto& layout = globalConfig()->layout();
+        int tracks =
+            layout.has_tracks() ? layout.tracks() : geometry.numCylinders;
+        int sides = layout.has_sides() ? layout.sides() : geometry.numHeads;
 
         std::ofstream outputFile(
             _config.filename(), std::ios::out | std::ios::binary);
         if (!outputFile.is_open())
-            Error() << "cannot open output file";
+            error("cannot open output file");
 
-        for (const auto& p : Layout::getTrackOrdering(tracks, sides))
+        const auto diskLayout = createDiskLayout();
+        bool in_filesystem_order = _config.img().filesystem_sector_order();
+
+        for (auto& logicalLocation :
+            in_filesystem_order ? diskLayout->logicalLocationsInFilesystemOrder
+                                : diskLayout->logicalLocations)
         {
-            int track = p.first;
-            int side = p.second;
+            auto& ltl = diskLayout->layoutByLogicalLocation.at(logicalLocation);
 
-            auto trackLayout = Layout::getLayoutOfTrack(track, side);
-            for (int sectorId : trackLayout->logicalSectorOrder)
+            for (unsigned sectorId : in_filesystem_order
+                                         ? ltl->filesystemSectorOrder
+                                         : ltl->naturalSectorOrder)
             {
-                const auto& sector = image.get(track, side, sectorId);
+                const auto& sector = image.get(
+                    logicalLocation.cylinder, logicalLocation.head, sectorId);
                 if (sector)
-                    sector->data.slice(0, trackLayout->sectorSize).writeTo(outputFile);
+                    sector->data.slice(0, ltl->sectorSize).writeTo(outputFile);
                 else
-                    outputFile.seekp(trackLayout->sectorSize, std::ios::cur);
+                    outputFile.seekp(ltl->sectorSize, std::ios::cur);
             }
         }
 
-        Logger() << fmt::format("IMG: wrote {} tracks, {} sides, {} kB total to {}",
+        log("IMG: wrote {} tracks, {} sides, {} kB total to {}",
             tracks,
             sides,
             outputFile.tellp() / 1024,
-			_config.filename());
+            _config.filename());
     }
 };
 

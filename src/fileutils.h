@@ -4,4 +4,3 @@
 extern FlagGroup fileFlags;
 
 #endif
-

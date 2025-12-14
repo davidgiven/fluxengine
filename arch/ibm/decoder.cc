@@ -1,13 +1,14 @@
-#include "globals.h"
-#include "decoders/decoders.h"
-#include "ibm.h"
-#include "crc.h"
-#include "fluxmap.h"
-#include "decoders/fluxmapreader.h"
-#include "sector.h"
+#include "lib/core/globals.h"
+#include "lib/decoders/decoders.h"
+#include "arch/ibm/ibm.h"
+#include "lib/core/crc.h"
+#include "lib/data/fluxmap.h"
+#include "lib/data/fluxmapreader.h"
+#include "lib/data/fluxpattern.h"
+#include "lib/data/sector.h"
 #include "arch/ibm/ibm.pb.h"
-#include "proto.h"
-#include "lib/layout.h"
+#include "lib/config/proto.h"
+#include "lib/data/layout.h"
 #include <string.h>
 
 static_assert(std::is_trivially_copyable<IbmIdam>::value,
@@ -140,13 +141,13 @@ public:
         bw += decodeFmMfm(bits).slice(0, IBM_IDAM_LEN);
 
         IbmDecoderProto::TrackdataProto trackdata;
-        getTrackFormat(
-            trackdata, _sector->physicalTrack, _sector->physicalSide);
+        getTrackFormat(trackdata, _ltl->logicalCylinder, _ltl->logicalHead);
 
-        _sector->logicalTrack = br.read_8();
-        _sector->logicalSide = br.read_8();
+        _sector->logicalCylinder = br.read_8();
+        _sector->logicalHead = br.read_8();
         _sector->logicalSector = br.read_8();
         _currentSectorSize = 1 << (br.read_8() + 7);
+
         uint16_t gotCrc = crc16(CCITT_POLY, bytes.slice(0, br.pos));
         uint16_t wantCrc = br.read_be16();
         if (wantCrc == gotCrc)
@@ -154,11 +155,10 @@ public:
                 Sector::DATA_MISSING; /* correct but unintuitive */
 
         if (trackdata.ignore_side_byte())
-            _sector->logicalSide =
-                Layout::remapSidePhysicalToLogical(_sector->physicalSide);
-        _sector->logicalSide ^= trackdata.invert_side_byte();
+            _sector->logicalHead = _ltl->logicalHead;
+        _sector->logicalHead ^= trackdata.invert_side_byte();
         if (trackdata.ignore_track_byte())
-            _sector->logicalTrack = _sector->physicalTrack;
+            _sector->logicalCylinder = _ltl->logicalCylinder;
 
         for (int sector : trackdata.ignore_sector())
             if (_sector->logicalSector == sector)
@@ -206,6 +206,16 @@ public:
         uint16_t wantCrc = br.read_be16();
         _sector->status =
             (wantCrc == gotCrc) ? Sector::OK : Sector::BAD_CHECKSUM;
+
+        if (_currentSectorSize != _ltl->sectorSize)
+            std::cerr << fmt::format(
+                "Warning: configured sector size for t{}.h{}.s{} is {} bytes "
+                "but that seen on disk is {} bytes\n",
+                _sector->logicalCylinder,
+                _sector->logicalHead,
+                _sector->logicalSector,
+                _ltl->sectorSize,
+                _currentSectorSize);
     }
 
 private:

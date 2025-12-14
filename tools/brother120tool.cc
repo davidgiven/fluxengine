@@ -1,7 +1,7 @@
-#include "globals.h"
-#include "bytes.h"
+#include "lib/core/globals.h"
+#include "lib/core/bytes.h"
 #include "fmt/format.h"
-#include "utils.h"
+#include "lib/core/utils.h"
 #include <fstream>
 #include "fnmatch.h"
 
@@ -75,7 +75,7 @@ void writeDirectory()
         const auto& dirent = it.second;
 
         if (count == DIRECTORY_SIZE)
-            Error() << "too many files on disk";
+            error("too many files on disk");
 
         bw.append(dirent->filename);
         for (int i = dirent->filename.size(); i < 8; i++)
@@ -102,15 +102,15 @@ void writeDirectory()
 
 void writeBootSector(const Dirent& dirent, uint16_t checksum)
 {
-	uint8_t sslo = dirent.startSector & 0xff;
-	uint8_t sshi = dirent.startSector >> 8;
-	uint8_t scnt = dirent.sectorCount;
-	uint8_t end = 0x70 + scnt;
-	uint8_t cklo = checksum & 0xff;
-	uint8_t ckhi = checksum >> 8;
+    uint8_t sslo = dirent.startSector & 0xff;
+    uint8_t sshi = dirent.startSector >> 8;
+    uint8_t scnt = dirent.sectorCount;
+    uint8_t end = 0x70 + scnt;
+    uint8_t cklo = checksum & 0xff;
+    uint8_t ckhi = checksum >> 8;
 
-	uint8_t machineCode[] =
-	{
+    uint8_t machineCode[] = {
+        // clang-format off
 		/* 6000 */ 0x55,             /* magic number?         */
 		/* 6001 */ 0xf3,             /* di                    */
 		/* 6002 */ 0x31, 0x00, 0x00, /* ld sp, $0000          */
@@ -233,10 +233,11 @@ void writeBootSector(const Dirent& dirent, uint16_t checksum)
 		/* 60ed */ 0xed, 0x39, 0x0a, /* out0 ($0a),a          */
 		/* 60f0 */ 0xc3, 0x00, 0x00, /* jp $0000              */
 		/* 60f3 */ cklo, ckhi,       /* checksum              */
-	};
+        // clang-format on
+    };
 
     file.seekp(0xc00, std::ifstream::beg);
-	file.write((char*) machineCode, sizeof(machineCode));
+    file.write((char*)machineCode, sizeof(machineCode));
 }
 
 static bool isValidFile(const Dirent& dirent)
@@ -283,7 +284,7 @@ uint16_t allocateSector()
             return sector;
         }
     }
-    Error() << "unable to allocate sector --- disk full";
+    error("unable to allocate sector --- disk full");
     return 0;
 }
 
@@ -345,16 +346,15 @@ void insertFile(const std::string& filename)
 {
     auto leafname = getLeafname(filename);
     if (leafname.size() > 8)
-        Error() << "filename too long";
+        error("filename too long");
     std::cout << fmt::format("Inserting '{}'\n", leafname);
 
     std::ifstream inputFile(filename, std::ios::in | std::ios::binary);
     if (!inputFile)
-        Error() << fmt::format(
-            "unable to open input file: {}", strerror(errno));
+        error("unable to open input file: {}", strerror(errno));
 
     if (directory.find(leafname) != directory.end())
-        Error() << fmt::format("duplicate filename: {}", leafname);
+        error("duplicate filename: {}", leafname);
 
     auto dirent = std::make_unique<Dirent>();
     dirent->filename = leafname;
@@ -363,17 +363,17 @@ void insertFile(const std::string& filename)
     dirent->sectorCount = 0;
 
     uint16_t lastSector = 0xffff;
-	uint16_t checksum = 0;
+    uint16_t checksum = 0;
     while (!inputFile.eof())
     {
         uint8_t buffer[SECTOR_SIZE] = {};
-        inputFile.read((char*) buffer, sizeof(buffer));
-		for (int i=0; i<inputFile.gcount(); i++)
-			checksum += buffer[i];
+        inputFile.read((char*)buffer, sizeof(buffer));
+        for (int i = 0; i < inputFile.gcount(); i++)
+            checksum += buffer[i];
         if (inputFile.gcount() == 0)
             break;
         if (inputFile.bad())
-            Error() << fmt::format("I/O error on read: {}", strerror(errno));
+            error("I/O error on read: {}", strerror(errno));
 
         uint16_t thisSector = allocateSector();
         if (lastSector == 0xffff)
@@ -383,19 +383,19 @@ void insertFile(const std::string& filename)
         dirent->sectorCount++;
 
         file.seekp((thisSector - 1) * 0x100, std::ifstream::beg);
-        file.write((char*) buffer, sizeof(buffer));
+        file.write((char*)buffer, sizeof(buffer));
         if (file.bad())
-            Error() << fmt::format("I/O error on write: {}", strerror(errno));
+            error("I/O error on write: {}", strerror(errno));
 
         lastSector = thisSector;
     }
 
-	if (leafname == "*boot")
-	{
-		std::cout << fmt::format(
-			"Writing boot sector with checksum 0x{:04x}\n", checksum);
-		writeBootSector(*dirent, checksum);
-	}
+    if (leafname == "*boot")
+    {
+        std::cout << fmt::format(
+            "Writing boot sector with checksum 0x{:04x}\n", checksum);
+        writeBootSector(*dirent, checksum);
+    }
 
     directory[leafname] = std::move(dirent);
 }
@@ -416,8 +416,7 @@ void extractFile(const std::string& pattern)
         std::ofstream outputFile(dirent.filename,
             std::ios::out | std::ios::binary | std::ios::trunc);
         if (!outputFile)
-            Error() << fmt::format(
-                "unable to open output file: {}", strerror(errno));
+            error("unable to open output file: {}", strerror(errno));
 
         uint16_t sector = dirent.startSector;
         while ((sector != 0) && (sector != 0xffff))
@@ -425,11 +424,9 @@ void extractFile(const std::string& pattern)
             uint8_t buffer[256];
             file.seekg((sector - 1) * 0x100, std::ifstream::beg);
             if (!file.read((char*)buffer, sizeof(buffer)))
-                Error() << fmt::format(
-                    "I/O error on read: {}", strerror(errno));
+                error("I/O error on read: {}", strerror(errno));
             if (!outputFile.write((const char*)buffer, sizeof(buffer)))
-                Error() << fmt::format(
-                    "I/O error on write: {}", strerror(errno));
+                error("I/O error on write: {}", strerror(errno));
 
             sector = allocationTable[sector];
         }
@@ -443,7 +440,7 @@ static void doCreate(int argc, const char* argv[])
 
     file.open(argv[1], std::ios::out | std::ios::binary | std::ios::trunc);
     if (!file.is_open())
-        Error() << fmt::format("cannot open output file '{}'", argv[1]);
+        error("cannot open output file '{}'", argv[1]);
 
     file.seekp(SECTOR_COUNT * SECTOR_SIZE - 1, std::ifstream::beg);
     file.put(0);
@@ -465,7 +462,7 @@ static void doExtract(int argc, const char* argv[])
 
     file.open(argv[1], std::ios::in | std::ios::binary);
     if (!file.is_open())
-        Error() << fmt::format("cannot open input file '{}'", argv[1]);
+        error("cannot open input file '{}'", argv[1]);
 
     readDirectory();
     readAllocationTable();

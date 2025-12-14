@@ -7,7 +7,7 @@
  *  adf_env.h
  *
  *  $Id$
- *  
+ *
  *  This file is part of ADFLib.
  *
  *  ADFLib is free software; you can redistribute it and/or modify
@@ -26,13 +26,15 @@
  *
  */
 
-#include"prefix.h"
+#include "prefix.h"
 
 PREFIX void adfEnvInitDefault();
-PREFIX void adfSetEnvFct( void(*e)(char*), void(*w)(char*), void(*v)(char*),
-	void(*n)(SECTNUM,int) );
+PREFIX void adfSetEnvFct(void (*e)(char*),
+    void (*w)(char*),
+    void (*v)(char*),
+    void (*n)(SECTNUM, int));
 PREFIX void adfEnvCleanUp();
-PREFIX void adfChgEnvProp(int prop, void *new);
+PREFIX void adfChgEnvProp(int prop, void* new);
 PREFIX char* adfGetVersionNumber();
 PREFIX char* adfGetVersionDate();
 

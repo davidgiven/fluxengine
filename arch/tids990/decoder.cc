@@ -1,13 +1,14 @@
-#include "globals.h"
-#include "decoders/decoders.h"
-#include "encoders/encoders.h"
-#include "tids990/tids990.h"
-#include "crc.h"
-#include "fluxmap.h"
-#include "decoders/fluxmapreader.h"
-#include "sector.h"
+#include "lib/core/globals.h"
+#include "lib/decoders/decoders.h"
+#include "lib/encoders/encoders.h"
+#include "arch/tids990/tids990.h"
+#include "lib/core/crc.h"
+#include "lib/data/fluxmap.h"
+#include "lib/data/fluxmapreader.h"
+#include "lib/data/fluxpattern.h"
+#include "lib/data/sector.h"
 #include <string.h>
-#include <fmt/format.h>
+#include "fmt/format.h"
 
 /* The Texas Instruments DS990 uses MFM with a scheme similar to a simplified
  * version of the IBM record scheme (it's actually easier to parse than IBM).
@@ -38,61 +39,63 @@ const FluxPattern SECTOR_RECORD_PATTERN(32, 0x11112244);
 const uint16_t DATA_ID = 0x550b;
 const FluxPattern DATA_RECORD_PATTERN(32, 0x11112245);
 
-const FluxMatchers ANY_RECORD_PATTERN({ &SECTOR_RECORD_PATTERN, &DATA_RECORD_PATTERN });
+const FluxMatchers ANY_RECORD_PATTERN(
+    {&SECTOR_RECORD_PATTERN, &DATA_RECORD_PATTERN});
 
 class Tids990Decoder : public Decoder
 {
 public:
-	Tids990Decoder(const DecoderProto& config):
-		Decoder(config)
-	{}
+    Tids990Decoder(const DecoderProto& config): Decoder(config) {}
 
     nanoseconds_t advanceToNextRecord() override
-	{
-		return seekToPattern(ANY_RECORD_PATTERN);
-	}
+    {
+        return seekToPattern(ANY_RECORD_PATTERN);
+    }
 
     void decodeSectorRecord() override
-	{
-		auto bits = readRawBits(TIDS990_SECTOR_RECORD_SIZE*16);
-		auto bytes = decodeFmMfm(bits).slice(0, TIDS990_SECTOR_RECORD_SIZE);
+    {
+        auto bits = readRawBits(TIDS990_SECTOR_RECORD_SIZE * 16);
+        auto bytes = decodeFmMfm(bits).slice(0, TIDS990_SECTOR_RECORD_SIZE);
 
-		ByteReader br(bytes);
-		if (br.read_be16() != SECTOR_ID)
-			return;
+        ByteReader br(bytes);
+        if (br.read_be16() != SECTOR_ID)
+            return;
 
-		uint16_t gotChecksum = crc16(CCITT_POLY, bytes.slice(1, TIDS990_SECTOR_RECORD_SIZE-3));
+        uint16_t gotChecksum =
+            crc16(CCITT_POLY, bytes.slice(1, TIDS990_SECTOR_RECORD_SIZE - 3));
 
-		_sector->logicalSide = br.read_8() >> 3;
-		_sector->logicalTrack = br.read_8();
-		br.read_8(); /* number of sectors per track */
-		_sector->logicalSector = br.read_8();
-		br.read_be16(); /* sector size */
-		uint16_t wantChecksum = br.read_be16();
+        _sector->logicalHead = br.read_8() >> 3;
+        _sector->logicalCylinder = br.read_8();
+        br.read_8(); /* number of sectors per track */
+        _sector->logicalSector = br.read_8();
+        br.read_be16(); /* sector size */
+        uint16_t wantChecksum = br.read_be16();
 
-		if (wantChecksum == gotChecksum)
-			_sector->status = Sector::DATA_MISSING; /* correct but unintuitive */
-	}
+        if (wantChecksum == gotChecksum)
+            _sector->status =
+                Sector::DATA_MISSING; /* correct but unintuitive */
+    }
 
-	void decodeDataRecord() override
-	{
-		auto bits = readRawBits(TIDS990_DATA_RECORD_SIZE*16);
-		auto bytes = decodeFmMfm(bits).slice(0, TIDS990_DATA_RECORD_SIZE);
+    void decodeDataRecord() override
+    {
+        auto bits = readRawBits(TIDS990_DATA_RECORD_SIZE * 16);
+        auto bytes = decodeFmMfm(bits).slice(0, TIDS990_DATA_RECORD_SIZE);
 
-		ByteReader br(bytes);
-		if (br.read_be16() != DATA_ID)
-			return;
+        ByteReader br(bytes);
+        if (br.read_be16() != DATA_ID)
+            return;
 
-		uint16_t gotChecksum = crc16(CCITT_POLY, bytes.slice(1, TIDS990_DATA_RECORD_SIZE-3));
+        uint16_t gotChecksum =
+            crc16(CCITT_POLY, bytes.slice(1, TIDS990_DATA_RECORD_SIZE - 3));
 
-		_sector->data = br.read(TIDS990_PAYLOAD_SIZE);
-		uint16_t wantChecksum = br.read_be16();
-		_sector->status = (wantChecksum == gotChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
-	}
+        _sector->data = br.read(TIDS990_PAYLOAD_SIZE);
+        uint16_t wantChecksum = br.read_be16();
+        _sector->status =
+            (wantChecksum == gotChecksum) ? Sector::OK : Sector::BAD_CHECKSUM;
+    }
 };
 
 std::unique_ptr<Decoder> createTids990Decoder(const DecoderProto& config)
 {
-	return std::unique_ptr<Decoder>(new Tids990Decoder(config));
+    return std::unique_ptr<Decoder>(new Tids990Decoder(config));
 }
-

@@ -1,11 +1,10 @@
-#include "globals.h"
-#include "flags.h"
-#include "sector.h"
-#include "imagereader/imagereader.h"
-#include "fmt/format.h"
-#include "image.h"
-#include "logger.h"
-#include "proto.h"
+#include "lib/core/globals.h"
+#include "lib/config/flags.h"
+#include "lib/data/sector.h"
+#include "lib/imagereader/imagereader.h"
+#include "lib/data/image.h"
+#include "lib/core/logger.h"
+#include "lib/config/proto.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -15,12 +14,12 @@ class D64ImageReader : public ImageReader
 public:
     D64ImageReader(const ImageReaderProto& config): ImageReader(config) {}
 
-    std::unique_ptr<Image> readImage()
+    std::unique_ptr<Image> readImage() override
     {
         std::ifstream inputFile(
             _config.filename(), std::ios::in | std::ios::binary);
         if (!inputFile.is_open())
-            Error() << "cannot open input file";
+            error("cannot open input file");
 
         inputFile.seekg(0, inputFile.beg);
         uint32_t begin = inputFile.tellg();
@@ -32,11 +31,13 @@ public:
         data.writer() += inputFile;
         ByteReader br(data);
 
-        unsigned numTracks = 39;
+        unsigned numCylinders = 39;
         unsigned numHeads = 1;
         unsigned numSectors = 0;
 
-        Logger() << fmt::format("D64: reading image with {} tracks, {} heads", numTracks, numHeads);
+        log("D64: reading image with {} tracks, {} heads",
+            numCylinders,
+            numHeads);
 
         uint32_t offset = 0;
 

@@ -1,7 +1,6 @@
-#include "lib/globals.h"
+#include "lib/core/globals.h"
 #include "lib/vfs/vfs.h"
-#include "lib/config.pb.h"
-#include <fmt/format.h>
+#include "lib/config/config.pb.h"
 
 /* Number of sectors on a 120kB disk. */
 static constexpr int SECTOR_COUNT = 468;
@@ -31,7 +30,18 @@ public:
     {
         ByteReader br(bytes);
         filename = br.read(8);
-        filename = filename.substr(0, filename.find(' '));
+
+        for (int i = 0; filename.size(); i++)
+        {
+            if (filename[i] == ' ')
+            {
+                filename = filename.substr(0, i);
+                break;
+            }
+            if ((filename[i] < 32) || (filename[i] > 126))
+                throw BadFilesystemException();
+        }
+
         path = {filename};
 
         brotherType = br.read_8();
@@ -91,7 +101,7 @@ public:
             for (int d = 0; d < SECTOR_SIZE / 16; d++)
             {
                 Bytes buffer = bytes.slice(d * 16, 16);
-                if (buffer[0] == 0xf0)
+                if (buffer[0] & 0x80)
                     continue;
 
                 auto de = std::make_shared<Brother120Dirent>(buffer);
@@ -216,13 +226,14 @@ class Brother120Filesystem : public Filesystem
 {
 public:
     Brother120Filesystem(const Brother120FsProto& config,
+        const std::shared_ptr<const DiskLayout>& diskLayout,
         std::shared_ptr<SectorInterface> sectors):
-        Filesystem(sectors),
+        Filesystem(diskLayout, sectors),
         _config(config)
     {
     }
 
-    uint32_t capabilities() const
+    uint32_t capabilities() const override
     {
         return OP_GETFSDATA | OP_LIST | OP_GETFILE | OP_PUTFILE | OP_GETDIRENT |
                OP_DELETE;
@@ -338,7 +349,10 @@ private:
 };
 
 std::unique_ptr<Filesystem> Filesystem::createBrother120Filesystem(
-    const FilesystemProto& config, std::shared_ptr<SectorInterface> sectors)
+    const FilesystemProto& config,
+    const std::shared_ptr<const DiskLayout>& diskLayout,
+    std::shared_ptr<SectorInterface> sectors)
 {
-    return std::make_unique<Brother120Filesystem>(config.brother120(), sectors);
+    return std::make_unique<Brother120Filesystem>(
+        config.brother120(), diskLayout, sectors);
 }

@@ -1,63 +1,64 @@
-#include "globals.h"
-#include "flags.h"
-#include "fluxmap.h"
-#include "bytes.h"
+#include "lib/core/globals.h"
+#include "lib/config/flags.h"
+#include "lib/config/config.h"
+#include "lib/data/fluxmap.h"
+#include "lib/core/bytes.h"
 #include "protocol.h"
-#include "fluxsink/fluxsink.h"
-#include "decoders/fluxmapreader.h"
+#include "lib/fluxsink/fluxsink.h"
+#include "lib/data/fluxmapreader.h"
 #include "lib/fluxsink/fluxsink.pb.h"
-#include "lib/logger.h"
-#include "proto.h"
-#include "fmt/format.h"
-#include "fmt/chrono.h"
-#include "fluxmap.h"
-#include "a2r.h"
+#include "lib/core/logger.h"
+#include "lib/config/proto.h"
+#include "lib/data/fluxmap.h"
+#include "lib/data/layout.h"
+#include "lib/external/a2r.h"
 #include <fstream>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include "fmt/chrono.h"
 
-namespace
-{
-uint32_t ticks_to_a2r(uint32_t ticks)
+static uint32_t ticks_to_a2r(uint32_t ticks)
 {
     return ticks * NS_PER_TICK / A2R_NS_PER_TICK;
 }
 
-bool singlesided(void)
-{
-    return config.heads().start() == config.heads().end();
-}
-
-class A2RFluxSink : public FluxSink
+class A2RSink : public FluxSink
 {
 public:
-    A2RFluxSink(const A2RFluxSinkProto& lconfig):
-        _config(lconfig),
+    A2RSink(const std::string& filename):
+        _filename(filename),
         _bytes{},
-        _writer{_bytes.writer()}
+        _writer(_bytes.writer())
     {
-
-        Logger() << fmt::format(
-            "A2R: writing A2R {} file containing {} tracks\n",
-            singlesided() ? "single sided" : "double sided",
-            config.tracks().end() - config.tracks().start() + 1);
-
         time_t now{std::time(nullptr)};
         auto t = gmtime(&now);
         _metadata["image_date"] = fmt::format("{:%FT%TZ}", *t);
     }
 
-    ~A2RFluxSink()
+    ~A2RSink()
     {
+        // FIXME: should use a passed-in DiskLayout object.
+        auto diskLayout = createDiskLayout();
+        auto [minCylinder, maxCylinder, minHead, maxHead] =
+            diskLayout->getPhysicalBounds();
+
+        _minCylinder = minCylinder;
+        _maxCylinder = maxCylinder;
+        _minHead = minHead;
+        _maxHead = maxHead;
+
+        log("A2R: writing A2R {} file containing {} tracks...",
+            (_minHead == _maxHead) ? "single sided" : "double sided",
+            _maxCylinder - _minCylinder + 1);
+
         writeHeader();
         writeInfo();
         writeStream();
         writeMeta();
 
-        Logger() << "A2R: writing output file...\n";
-        std::ofstream of(_config.filename(), std::ios::out | std::ios::binary);
+        std::ofstream of(_filename, std::ios::out | std::ios::binary);
         if (!of.is_open())
-            Error() << "cannot open output file";
+            error("cannot open output file");
         _bytes.writeTo(of);
         of.close();
     }
@@ -72,7 +73,8 @@ private:
 
     void writeHeader()
     {
-		static const uint8_t a2r2_fileheader[] = {'A', '2', 'R', '2', 0xff, 0x0a, 0x0d, 0x0a};
+        static const uint8_t a2r2_fileheader[] = {
+            'A', '2', 'R', '2', 0xff, 0x0a, 0x0d, 0x0a};
         _writer += Bytes(a2r2_fileheader, sizeof(a2r2_fileheader));
     }
 
@@ -81,10 +83,15 @@ private:
         Bytes info;
         auto writer = info.writer();
         writer.write_8(A2R_INFO_CHUNK_VERSION);
-        auto version_str_padded = fmt::format("{: <32}", "Fluxengine");
+        auto version_str_padded = fmt::format("{: <32}", "FluxEngine");
         assert(version_str_padded.size() == 32);
         writer.append(version_str_padded);
-        writer.write_8(singlesided() ? A2R_DISK_525 : A2R_DISK_35);
+
+        writer.write_8(
+            (globalConfig()->drive().drive_type() == DRIVETYPE_APPLE2)
+                ? A2R_DISK_525
+                : A2R_DISK_35);
+
         writer.write_8(1); // write protected
         writer.write_8(1); // synchronized
         writeChunkAndData(A2R_CHUNK_INFO, info);
@@ -106,28 +113,29 @@ private:
 
     void writeStream()
     {
-        // A STRM always ends with a 255, even though this could ALSO indicate
-        // the first byte of a multi-byte sequence
+        // A STRM always ends with a 255, even though this could ALSO
+        // indicate the first byte of a multi-byte sequence
         _strmWriter.write_8(255);
 
         writeChunkAndData(A2R_CHUNK_STRM, _strmBytes);
     }
 
-    void writeFlux(int cylinder, int head, const Fluxmap& fluxmap) override
+public:
+    void addFlux(int cylinder, int head, const Fluxmap& fluxmap) override
     {
         if (!fluxmap.bytes())
         {
             return;
         }
 
-        // Writing from an image (as opposed to from a floppy) will contain
-        // exactly one revolution and no index events.
+        // Writing from an image (as opposed to from a floppy) will
+        // contain exactly one revolution and no index events.
         auto is_image = [](auto& fluxmap)
         {
             FluxmapReader fmr(fluxmap);
             fmr.skipToEvent(F_BIT_INDEX);
-            // but maybe there is no index, if we're writing from an image to an
-            // a2r
+            // but maybe there is no index, if we're writing from an
+            // image to an a2r
             return fmr.eof();
         };
 
@@ -181,8 +189,8 @@ private:
         if (is_image(fluxmap))
         {
             // A timing stream with no index represents exactly one
-            // revolution with no index. However, a2r nominally contains 450
-            // degress of rotation, 250ms at 300rpm.
+            // revolution with no index. However, a2r nominally contains
+            // 450 degress of rotation, 250ms at 300rpm.
             write_flux();
             loopPoint = totalTicks;
             fmr.rewind();
@@ -191,19 +199,51 @@ private:
         }
         else
         {
-            // We have an index, so this is real from a floppy and should be
-            // "one revolution plus a bit"
+            // We have an index, so this is a real read from a floppy
+            // and should be "one revolution plus a bit"
             fmr.skipToEvent(F_BIT_INDEX);
             write_flux();
         }
 
         uint32_t chunk_size = 10 + trackBytes.size();
 
-        _strmWriter.write_8(cylinder);
+        if (globalConfig()->drive().drive_type() == DRIVETYPE_APPLE2)
+            _strmWriter.write_8(cylinder);
+        else
+            _strmWriter.write_8((cylinder << 1) | head);
+
         _strmWriter.write_8(A2R_TIMING);
         _strmWriter.write_le32(trackBytes.size());
         _strmWriter.write_le32(ticks_to_a2r(loopPoint));
         _strmWriter += trackBytes;
+    }
+
+private:
+    std::string _filename;
+    Bytes _bytes;
+    ByteWriter _writer;
+    Bytes _strmBytes;
+    ByteWriter _strmWriter{_strmBytes.writer()};
+    std::map<std::string, std::string> _metadata;
+    int _minHead;
+    int _maxHead;
+    int _minCylinder;
+    int _maxCylinder;
+};
+
+class A2RFluxSinkFactory : public FluxSinkFactory
+{
+public:
+    A2RFluxSinkFactory(const A2RFluxSinkProto& lconfig): _config(lconfig) {}
+
+    std::unique_ptr<FluxSink> create() override
+    {
+        return std::make_unique<A2RSink>(_config.filename());
+    }
+
+    std::optional<std::filesystem::path> getPath() const override
+    {
+        return std::make_optional(_config.filename());
     }
 
     operator std::string() const override
@@ -213,17 +253,10 @@ private:
 
 private:
     const A2RFluxSinkProto& _config;
-    Bytes _bytes;
-    ByteWriter _writer;
-    Bytes _strmBytes;
-    ByteWriter _strmWriter{_strmBytes.writer()};
-    std::map<std::string, std::string> _metadata;
 };
-} // namespace
 
-std::unique_ptr<FluxSink> FluxSink::createA2RFluxSink(
+std::unique_ptr<FluxSinkFactory> FluxSinkFactory::createA2RFluxSinkFactory(
     const A2RFluxSinkProto& config)
 {
-    return std::unique_ptr<FluxSink>(new A2RFluxSink(config));
+    return std::unique_ptr<FluxSinkFactory>(new A2RFluxSinkFactory(config));
 }
-

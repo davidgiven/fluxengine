@@ -1,6 +1,6 @@
-#include "globals.h"
-#include "flags.h"
-#include "usb/usb.h"
+#include "lib/core/globals.h"
+#include "lib/config/flags.h"
+#include "lib/usb/usb.h"
 
 static FlagGroup flags;
 

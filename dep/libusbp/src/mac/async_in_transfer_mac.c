@@ -51,11 +51,14 @@ libusbp_error * async_in_transfer_create(
     libusbp_error * error = NULL;
 
     // Allocate memory for the transfer struct.
-    async_in_transfer * new_transfer = calloc(1, sizeof(async_in_transfer));
-
-    if (new_transfer == NULL)
+    async_in_transfer * new_transfer = NULL;
+    if (error == NULL)
     {
-        error = &error_no_memory;
+        new_transfer = calloc(1, sizeof(async_in_transfer));
+        if (new_transfer == NULL)
+        {
+            error = &error_no_memory;
+        }
     }
 
     // Allocate memory for the buffer.

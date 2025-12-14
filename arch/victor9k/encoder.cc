@@ -1,17 +1,17 @@
-#include "globals.h"
-#include "decoders/decoders.h"
-#include "encoders/encoders.h"
-#include "victor9k.h"
-#include "crc.h"
-#include "sector.h"
-#include "readerwriter.h"
-#include "image.h"
+#include "lib/core/globals.h"
+#include "lib/core/utils.h"
+#include "lib/decoders/decoders.h"
+#include "lib/encoders/encoders.h"
+#include "arch/victor9k/victor9k.h"
+#include "lib/core/crc.h"
+#include "lib/data/sector.h"
+#include "lib/data/image.h"
 #include "fmt/format.h"
 #include "arch/victor9k/victor9k.pb.h"
 #include "lib/encoders/encoders.pb.h"
-#include "lib/layout.h"
+#include "lib/data/layout.h"
 #include <ctype.h>
-#include "bytes.h"
+#include "lib/core/bytes.h"
 
 static bool lastBit;
 
@@ -112,7 +112,7 @@ static void write_sector(std::vector<bool>& bits,
     write_one_bits(bits, cursor, trackdata.pre_header_sync_bits());
     write_bits(bits, cursor, VICTOR9K_SECTOR_RECORD, 10);
 
-    uint8_t encodedTrack = sector.logicalTrack | (sector.logicalSide << 7);
+    uint8_t encodedTrack = sector.logicalCylinder | (sector.logicalHead << 7);
     uint8_t encodedSector = sector.logicalSector;
     write_bytes(bits,
         cursor,
@@ -164,19 +164,19 @@ private:
     }
 
 public:
-    std::unique_ptr<Fluxmap> encode(std::shared_ptr<const TrackInfo>& trackInfo,
+    std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout& ltl,
         const std::vector<std::shared_ptr<const Sector>>& sectors,
         const Image& image) override
     {
         Victor9kEncoderProto::TrackdataProto trackdata;
-        getTrackFormat(trackdata, trackInfo->logicalTrack, trackInfo->logicalSide);
+        getTrackFormat(trackdata, ltl.logicalCylinder, ltl.logicalHead);
 
         unsigned bitsPerRevolution = (trackdata.rotational_period_ms() * 1e3) /
                                      trackdata.clock_period_us();
         std::vector<bool> bits(bitsPerRevolution);
-        nanoseconds_t clockPeriod = calculatePhysicalClockPeriod(
-            trackdata.clock_period_us() * 1e3,
-            trackdata.rotational_period_ms() * 1e6);
+        nanoseconds_t clockPeriod =
+            calculatePhysicalClockPeriod(trackdata.clock_period_us() * 1e3,
+                trackdata.rotational_period_ms() * 1e6);
         unsigned cursor = 0;
 
         fillBitmapTo(bits,
@@ -189,8 +189,7 @@ public:
             write_sector(bits, cursor, trackdata, *sector);
 
         if (cursor >= bits.size())
-            Error() << fmt::format(
-                "track data overrun by {} bits", cursor - bits.size());
+            error("track data overrun by {} bits", cursor - bits.size());
         fillBitmapTo(bits, cursor, bits.size(), {true, false});
 
         std::unique_ptr<Fluxmap> fluxmap(new Fluxmap);
@@ -202,8 +201,7 @@ private:
     const Victor9kEncoderProto& _config;
 };
 
-std::unique_ptr<Encoder> createVictor9kEncoder(
-    const EncoderProto& config)
+std::unique_ptr<Encoder> createVictor9kEncoder(const EncoderProto& config)
 {
     return std::unique_ptr<Encoder>(new Victor9kEncoder(config));
 }

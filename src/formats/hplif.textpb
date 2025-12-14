@@ -1,0 +1,213 @@
+shortname: "Hewlett-Packard LIF"
+comment: 'a variety of disk formats used by HP'
+read_support_status: UNICORN
+write_support_status: UNICORN
+
+documentation:
+<<<
+LIF, a.k.a. Logical Interchange Format, is a series of formats used by
+Hewlett-Packard across their entire range of computers, from calculators to
+modern servers. It also defines a simple non-hierarchical filesystem which is
+bizarrely _still_ supported by HP-UX systems.
+
+Floppy-disk wise, they're yet more variations of the standard IBM floppy
+encoding scheme.
+>>>
+
+documentation:
+<<<
+## References
+
+  * [A summary of the Hewlett Packard floppy disk
+    formats](http://www.bitsavers.org/pdf/hp/disc/912x/HP_Flexible_Disk_Formats.pdf)
+>>>
+
+drive {
+	high_density: false
+}
+
+image_reader {
+	filename: "hplif.img"
+	type: IMAGETYPE_IMG
+}
+
+image_writer {
+	filename: "hplif.img"
+	type: IMAGETYPE_IMG
+}
+
+decoder {
+	ibm {
+	}
+}
+
+filesystem {
+	type: LIF
+}
+
+layout {
+	format_type: FORMATTYPE_80TRACK
+}
+
+option_group {
+	comment: "$formats"
+
+	option {
+		name: "264"
+		comment: '264kB 3.5" 66-track SSDD; HP9121 format'
+
+		config {
+			layout {
+				tracks: 66
+				sides: 1
+				layoutdata {
+					sector_size: 256
+					physical {
+						sector: 1
+						sector: 5
+						sector: 9
+						sector: 13
+						sector: 2
+						sector: 6
+						sector: 10
+						sector: 14
+						sector: 3
+						sector: 7
+						sector: 11
+						sector: 15
+						sector: 4
+						sector: 8
+						sector: 12
+						sector: 16
+					}
+				}
+			}
+
+			encoder {
+				ibm {
+					trackdata {
+						emit_iam: false
+						target_rotational_period_ms: 200
+						target_clock_period_us: 4
+						gap0: 80
+						gap2: 22
+						gap3: 44
+					}
+				}
+			}
+		}
+	}
+
+	option {
+		name: "608"
+		comment: '608kB 3.5" 76-track DSDD; HP9122 format'
+
+		config {
+			layout {
+				tracks: 76
+				sides: 2
+				layoutdata {
+					sector_size: 256
+					physical {
+						sector: 1
+						sector: 5
+						sector: 9
+						sector: 13
+						sector: 2
+						sector: 6
+						sector: 10
+						sector: 14
+						sector: 3
+						sector: 7
+						sector: 11
+						sector: 15
+						sector: 4
+						sector: 8
+						sector: 12
+						sector: 16
+					}
+				}
+			}
+
+			encoder {
+				ibm {
+					trackdata {
+						emit_iam: false
+						target_rotational_period_ms: 200
+						target_clock_period_us: 4
+						gap0: 80
+						gap2: 22
+						gap3: 44
+					}
+				}
+			}
+		}
+	}
+
+	option {
+		name: "616"
+		comment: '616kB 3.5" 77-track DSDD'
+
+		config {
+			layout {
+				tracks: 77
+				sides: 2
+				layoutdata {
+					sector_size: 256
+					physical {
+						start_sector: 1
+						count: 16
+					}
+				}
+			}
+
+			encoder {
+				ibm {
+					trackdata {
+						target_rotational_period_ms: 200
+						target_clock_period_us: 4
+						emit_iam: false
+						gap0: 80
+						gap2: 22
+						gap3: 40
+					}
+				}
+			}
+		}
+	}
+
+	option {
+		name: "770"
+		comment: '770kB 3.5" 77-track DSDD'
+
+		config {
+			layout {
+				tracks: 77
+				sides: 2
+				layoutdata {
+					sector_size: 1024
+					physical {
+						sector: 1
+						sector: 2
+						sector: 3
+						sector: 4
+						sector: 5
+					}
+				}
+			}
+
+			encoder {
+				ibm {
+					trackdata {
+						target_rotational_period_ms: 200
+						target_clock_period_us: 4
+						gap0: 80
+						gap2: 22
+						gap3: 80
+					}
+				}
+			}
+		}
+	}
+}
+
