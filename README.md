@@ -224,8 +224,8 @@ License
 
 Everything here _except the contents of the `dep` directory_ is © 2022 The
 FluxEngine Authors (mostly me, David Given; see the VCS history for the other
-people) and is licensed under the GPL 2.0 open source license. Please see
-[COPYING](COPYING.md) for the full text.
+people) and is licensed under the GPL 2.0-only open source license (not any
+later version). Please see [COPYING](COPYING.md) for the full text.
 
 As an exception, `dep/emu` contains parts of the OpenBSD C library
 code, maintained by Todd Miller and William A. Rowe (and probably others). It is licensed

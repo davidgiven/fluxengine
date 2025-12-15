@@ -7,6 +7,7 @@ license of a FluxEngine binary or source package is also GPL 2.0.
 These parts are all in the `dep` directory. See the COPYING files in each
 subdirectory for more details. The [README](README.md) contains a summary.
 
+Note: FluxEngine is GPL 2.0, not GPL 2.0-or-later.
 
 
 
