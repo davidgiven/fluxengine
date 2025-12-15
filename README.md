@@ -224,9 +224,8 @@ License
 
 Everything here _except the contents of the `dep` directory_ is © 2022 The
 FluxEngine Authors (mostly me, David Given; see the VCS history for the other
-people) and is licensed under the MIT open source license. Please see
-[COPYING](COPYING) for the full text. The tl;dr is: you can do what you like
-with it provided you don't claim you wrote it.
+people) and is licensed under the GPL 2.0 open source license. Please see
+[COPYING](COPYING.md) for the full text.
 
 As an exception, `dep/emu` contains parts of the OpenBSD C library
 code, maintained by Todd Miller and William A. Rowe (and probably others). It is licensed
@@ -275,7 +274,5 @@ written by Dave Koelle, taken from
 https://web.archive.org/web/20210207124255/davekoelle.com/alphanum.html. It is
 MIT licensed. Please see the source for the full text.
 
-__Important:__ Because of all these exceptions, if you distribute the
-FluxEngine package as a whole, you must comply with the terms of _all_ of the
-licensing terms. This means that __effectively the FluxEngine package is
-distributable under the terms of the GPL 2.0__.
+__Important:__ The aggregate license for FluxEngine source or binary packages is
+GPL 2.0.
