@@ -40,20 +40,24 @@ def collectattrs(*, targets, name, initial=[]):
 
 @functools.cache
 def _glob_to_re(glob_str):
-    opts = re.compile('([.]|[*][*]/|[*]|[?])|(.)')
-    out = ''
-    for (pattern_match, literal_text) in opts.findall(glob_str):
-        if pattern_match == '.':
-            out += '[.]'
-        elif pattern_match == '**/':
-            out += '(?:.*/)?'
-        elif pattern_match == '*':
-            out += '[^/]*'
-        elif pattern_match == '?':
-            out += '.'
+    if glob_str.startswith("./"):
+        glob_str = normpath(join(getcwd(), glob_str))
+
+    opts = re.compile("([.]|[*][*]/|[*]|[?])|(.)")
+    out = ""
+    for pattern_match, literal_text in opts.findall(glob_str):
+        if pattern_match == ".":
+            out += "[.]"
+        elif pattern_match == "**/":
+            out += "(?:.*/)?"
+        elif pattern_match == "*":
+            out += "[^/]*"
+        elif pattern_match == "?":
+            out += "."
         elif literal_text:
             out += literal_text
     return re.compile(out)
+
 
 def _glob_filter(paths, pattern):
     r = _glob_to_re(pattern)
@@ -61,9 +65,11 @@ def _glob_filter(paths, pattern):
         if r.match(f):
             yield f
 
+
 def _glob_matches(path, pattern):
     r = _glob_to_re(pattern)
     return r.match(path)
+
 
 def glob(include=["*"], exclude=[], dir=None, relative_to="."):
     if not dir:
@@ -77,15 +83,15 @@ def glob(include=["*"], exclude=[], dir=None, relative_to="."):
         for dirpath, dirnames, filenames in walk(
             dir, topdown=True, followlinks=True
         ):
-            dirpath = relpath(dirpath, dir)
+            dirpath = relpath(dirpath, relative_to)
             filenames = [normpath(join(dirpath, f)) for f in filenames]
             matching = set()
             for p in include:
-                matching.update(_glob_filter(filenames, p))
+                matching.update([f for f in _glob_filter(filenames, p)])
             for p in exclude:
-               matching = [n for n in matching if not _glob_matches(n, p)]
+                matching = [n for n in matching if not _glob_matches(n, p)]
             for f in matching:
-                yield normpath(relpath(join(dir, f), relative_to))
+                yield f
 
     return list(iterate())
 
