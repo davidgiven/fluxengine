@@ -11,6 +11,7 @@ assert has_package("protobuf"), "required package 'protobuf' not installed"
 
 PROTO_SEPARATOR = ";" if (platform.system() == "Windows") else ":"
 
+
 def _getprotodeps(deps):
     r = set()
     for d in deps:
