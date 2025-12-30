@@ -37,6 +37,7 @@ HostPkgConfig = _PkgConfig(G.HOST_PKG_CONFIG)
 
 def _package(self, name, package, fallback, pkgconfig):
     if pkgconfig.has_package(package):
+        print(f"package '{package}' found")
         cflags = pkgconfig.get_property(package, "--cflags")
         ldflags = pkgconfig.get_property(package, "--libs")
 
@@ -50,6 +51,7 @@ def _package(self, name, package, fallback, pkgconfig):
         return
 
     assert fallback, f"Required package '{package}' not installed"
+    print(f"package '{package}' not found; using fallback")
 
     if "cheader_deps" in fallback.args:
         self.args["cheader_deps"] = fallback.args["cheader_deps"]
