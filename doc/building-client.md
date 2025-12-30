@@ -21,6 +21,7 @@ install some support packages. **You will need to check out git with submodules 
     `freetype2` `mbedtls` Plus, optionally (if not present, internal versions
     will be used): `nlohmann-json` `cli11` `md4c` `lunasvg`
   - For Windows with MSYS and pacboy:
+    `python` `diffutils` `ninja` `make` `zip` `mingw-w64-cross-clang`
     `protobuf:p` `pkgconf:p` `curl-winssl:p` `file:p` `glfw:p` `mbedtls:p`
     `sqlite:p` `freetype:p` `boost:p` `gcc:p` `binutils:p` `nsis:p`
     `abseil-cpp:p`
