@@ -11,15 +11,17 @@ install some support packages. **You will need to check out git with submodules 
 
   - For Linux with Ubuntu/Debian:
     `libudev-dev` `libsqlite3-dev` `protobuf-compiler` `libfmt-dev`
-    `libprotobuf-dev` `libmagic-dev` `libmbedtls-dev`
-    `libcurl4-openssl-dev` `libmagic-dev` `nlohmann-json3-dev`
-    `libdbus-1-dev` `libglfw3-dev` `libmd4c-dev` `libfreetype-dev`
-    `libcli11-dev` `libboost-regex-dev`
+    `libprotobuf-dev` `libmagic-dev` `libmbedtls-dev` `libcurl4-openssl-dev`
+    `libmagic-dev` `libdbus-1-dev` `libglfw3-dev` `libfreetype-dev`
+    `libboost-regex-dev` Plus, optionally (if not present, internal versions
+    will be used): `nlohmann-json3-dev` `libcli11-dev` `libmd4c-dev`
   - For OSX with Homebrew:
     `sqlite` `pkg-config` `libusb` `protobuf` `fmt` `make` `coreutils`
-    `dylibbundler` `libjpeg` `libmagic` `nlohmann-json` `cli11` `boost`
-    `glfw3` `md4c` `ninja` `python` `freetype2` `mbedtls`
+    `dylibbundler` `libjpeg` `libmagic`  `boost` `glfw3` `ninja` `python`
+    `freetype2` `mbedtls` Plus, optionally (if not present, internal versions
+    will be used): `nlohmann-json` `cli11` `md4c` `lunasvg`
   - For Windows with MSYS and pacboy:
+    `python` `diffutils` `ninja` `make` `zip` `mingw-w64-cross-clang`
     `protobuf:p` `pkgconf:p` `curl-winssl:p` `file:p` `glfw:p` `mbedtls:p`
     `sqlite:p` `freetype:p` `boost:p` `gcc:p` `binutils:p` `nsis:p`
     `abseil-cpp:p`

@@ -44,19 +44,35 @@ package(name="glfw3_lib", package="glfw3")
 package(name="magic_lib", package="libmagic")
 package(name="mbedtls_lib", package="mbedtls")
 
-cxxlibrary(
+package(
     name="nlohmannjson_lib",
-    srcs=[],
-    hdrs=headers_from("dep/nlohmann_json/single_include"),
+    package="nlohmann_json",
+    fallback=cxxlibrary(
+        name="nlohmannjson_fallback_lib",
+        srcs=[],
+        hdrs=headers_from("dep/nlohmann_json/single_include"),
+    ),
 )
 
-clibrary(
+package(
     name="md4c_lib",
-    srcs=sources_from("dep/md4c/src"),
-    hdrs={"md4c.h": "dep/md4c/src/md4c.h"},
+    package="md4c",
+    fallback=clibrary(
+        name="md4c_fallback_lib",
+        srcs=sources_from("dep/md4c/src"),
+        hdrs={"md4c.h": "dep/md4c/src/md4c.h"},
+    ),
 )
 
-cxxlibrary(name="cli11_lib", srcs=[], hdrs=headers_from("dep/cli11/include"))
+package(
+    name="cli11_lib",
+    package="CLI11",
+    fallback=cxxlibrary(
+        name="cli11_fallback_lib",
+        srcs=[],
+        hdrs=headers_from("dep/cli11/include"),
+    ),
+)
 
 if config.osx:
     clibrary(
@@ -95,12 +111,16 @@ clibrary(
     cflags=cflags,
 )
 
-cxxlibrary(
+package(
     name="lunasvg",
-    srcs=sources_from("dep/lunasvg/source"),
-    hdrs=headers_from("dep/lunasvg/include"),
-    deps=[".+plutovg", "+fmt_lib"],
-    cflags=cflags,
+    package="lunasvg",
+    fallback=cxxlibrary(
+        name="lunasvg_fallback_lib",
+        srcs=sources_from("dep/lunasvg/source"),
+        hdrs=headers_from("dep/lunasvg/include"),
+        deps=[".+plutovg", "+fmt_lib"],
+        cflags=cflags,
+    ),
 )
 
 cxxlibrary(
