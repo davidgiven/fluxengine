@@ -43,11 +43,11 @@ ifeq ($(BUILDTYPE),windows)
 else
 	CC = clang
 	CXX = clang++
-	CFLAGS = \
+	CFLAGS += \
 		$(OPTFLAGS) \
 		-I/opt/homebrew/include -I/usr/local/include \
 		-Wno-unknown-warning-option
-	CXXFLAGS = \
+	CXXFLAGS += \
 		$(OPTFLAGS) \
 		-std=c++23 \
 		-fexperimental-library \
@@ -56,7 +56,7 @@ else
 		-Wformat-security \
 		-Wno-deprecated-enum-float-conversion \
 		-Wno-deprecated-enum-enum-conversion
-	LDFLAGS =
+	LDFLAGS +=
 	AR = ar
 	PKG_CONFIG = pkg-config
 	ifeq ($(BUILDTYPE),osx)
@@ -67,7 +67,7 @@ endif
 
 HOSTCC = gcc
 HOSTCXX = g++ -std=c++20
-HOSTCFLAGS = -g -O3
+HOSTCFLAGS += -g -O3
 HOSTLDFLAGS =
 
 REALOBJ = .obj
