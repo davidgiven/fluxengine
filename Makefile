@@ -41,8 +41,6 @@ ifeq ($(BUILDTYPE),windows)
 
 	AB_SANDBOX = no
 else
-	CC = clang
-	CXX = clang++
 	CFLAGS += \
 		$(OPTFLAGS) \
 		-I/opt/homebrew/include -I/usr/local/include \
@@ -50,7 +48,6 @@ else
 	CXXFLAGS += \
 		$(OPTFLAGS) \
 		-std=c++23 \
-		-fexperimental-library \
 		-I/opt/homebrew/include -I/usr/local/include \
 		-Wformat \
 		-Wformat-security \
