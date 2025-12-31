@@ -24,7 +24,9 @@ jobs:
         sudo apt update
         sudo apt install libudev-dev libsqlite3-dev protobuf-compiler libwxgtk3.2-dev libfmt-dev libprotobuf-dev libmagic-dev libmbedtls-dev libcurl4-openssl-dev libmagic-dev nlohmann-json3-dev libdbus-1-dev libglfw3-dev libmd4c-dev libfreetype-dev libcli11-dev libboost-regex-dev
     - name: make
-      run: CXXFLAGS="-Wp,-D_GLIBCXX_ASSERTIONS" make -j`nproc` -C fluxengine
+      run: |
+        g++ -v
+        CXXFLAGS="-Wp,-D_GLIBCXX_ASSERTIONS" make -C fluxengine
 
   #build-linux-debian-11:
   #  runs-on: ubuntu-22.04
@@ -70,7 +72,9 @@ jobs:
         brew link mbedtls@3
         brew upgrade
     - name: make
-      run: gmake -C fluxengine
+      run: |
+        g++ -v
+        gmake -C fluxengine
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -116,6 +120,7 @@ jobs:
 
     - name: run
       run: |
+        g++ -v
         make -C fluxengine BUILDTYPE=windows AB_SANDBOX=no
 
     - name: nsis
