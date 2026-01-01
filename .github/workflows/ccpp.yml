@@ -28,6 +28,34 @@ jobs:
         g++ -v
         CXXFLAGS="-Wp,-D_GLIBCXX_ASSERTIONS" make -C fluxengine
 
+  build-docker:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        variant:
+        - debian12
+        - fedora40
+        - fedora41
+        - fedora42
+        - fedora43
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        repository: 'davidgiven/fluxengine'
+        path: 'fluxengine'
+        submodules: 'true'
+    - uses: actions/checkout@v4
+      with:
+        repository: 'davidgiven/fluxengine-testdata'
+        path: 'fluxengine-testdata'
+    - name: apt
+      run: |
+        sudo apt update
+        sudo apt install docker
+    - name: make
+      run: |
+        make -C docker-${{ matrix.variant }}
+
   #build-linux-debian-11:
   #  runs-on: ubuntu-22.04
   #  container: debian:11
