@@ -5,7 +5,9 @@ RUN dnf -y install https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-rele
 RUN dnf -y install https://github.com/rpmsphere/noarch/raw/master/r/rpmsphere-release-40-1.noarch.rpm
 RUN dnf -y install \
     protobuf-compiler protobuf-devel sqlite-devel libudev-devel \
-    wxGTK-devel gcc gcc-c++ fmt-devel png2ico
+    wxGTK-devel gcc gcc-c++ fmt-devel png2ico ninja-build glfw-devel \
+    libcurl-devel file-devel mbedtls-devel cli11-devel \
+    lunasvg-devel md4c-devel boost-devel
 
 RUN useradd app
 RUN mkdir -p /home/app

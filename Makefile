@@ -41,8 +41,6 @@ ifeq ($(BUILDTYPE),windows)
 
 	AB_SANDBOX = no
 else
-	CC = clang
-	CXX = clang++
 	CFLAGS += \
 		$(OPTFLAGS) \
 		-I/opt/homebrew/include -I/usr/local/include \
@@ -50,7 +48,6 @@ else
 	CXXFLAGS += \
 		$(OPTFLAGS) \
 		-std=c++23 \
-		-fexperimental-library \
 		-I/opt/homebrew/include -I/usr/local/include \
 		-Wformat \
 		-Wformat-security \
@@ -60,8 +57,9 @@ else
 	AR = ar
 	PKG_CONFIG = pkg-config
 	ifeq ($(BUILDTYPE),osx)
+		CXXFLAGS += -fexperimental-library
 	else
-		LDFLAGS += -pthread -Wl,--no-as-needed
+		LDFLAGS += -pthread
 	endif
 endif
 
@@ -127,11 +125,11 @@ clean::
 include build/ab.mk
 
 DOCKERFILES = \
-	debian11 \
     debian12 \
     fedora40 \
     fedora41 \
-	manjaro
+	fedora42 \
+	fedora43
 
 docker-%: tests/docker/Dockerfile.%
 	docker build -t $* -f $< .

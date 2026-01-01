@@ -1,10 +1,12 @@
-FROM debian:11
+FROM fedora:42
 
-RUN apt-get update
-RUN apt install -y python3 make xz-utils python3 python3-hamcrest \
-    protobuf-compiler libprotobuf-dev libsqlite3-dev \
-    libfmt-dev libprotobuf-dev wx-common pkg-config \
-    libudev-dev g++ libwxgtk3.0-gtk3-dev
+RUN dnf update -y
+RUN dnf -y install https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-42.noarch.rpm
+RUN dnf -y install \
+    protobuf-compiler protobuf-devel sqlite-devel libudev-devel \
+    wxGTK-devel gcc gcc-c++ fmt-devel ninja-build glfw-devel \
+    libcurl-devel file-devel mbedtls-devel cli11-devel \
+    lunasvg-devel md4c-devel boost-devel
 
 RUN useradd app
 RUN mkdir -p /home/app

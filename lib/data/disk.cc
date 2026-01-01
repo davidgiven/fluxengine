@@ -19,8 +19,7 @@ namespace
     inline constexpr pair_to_range_t pair_to_range{};
 }
 
-Disk::Disk():
-image(std::make_shared<Image>()){}
+Disk::Disk(): image(std::make_shared<Image>()) {}
 
 Disk::Disk(
     const std::shared_ptr<const Image>& image, const DiskLayout& diskLayout):
@@ -32,8 +31,9 @@ Disk::Disk(
         sectorsGroupedByTrack.insert(
             std::make_pair(sector->physicalLocation.value(), sector));
 
+    const auto sectorLocations = std::views::keys(sectorsGroupedByTrack);
     for (const auto& physicalLocation :
-        std::views::keys(sectorsGroupedByTrack) | std::ranges::to<std::set>())
+        std::set(sectorLocations.begin(), sectorLocations.end()))
     {
         const auto& ptl =
             diskLayout.layoutByPhysicalLocation.at(physicalLocation);

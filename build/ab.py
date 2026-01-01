@@ -29,6 +29,7 @@ materialisingStack = []
 defaultGlobals = {}
 outputTargets = set()
 commandsDb = []
+belatedErrors = []
 
 RE_FORMAT_SPEC = re.compile(
     r"(?:(?P<fill>[\s\S])?(?P<align>[<>=^]))?"
@@ -557,6 +558,11 @@ def add_commanddb_entry(commands, file):
     ]
 
 
+def add_belated_error(msg):
+    global belatedErrors
+    belatedErrors += [msg]
+
+
 def emit_rule(self, ins, outs, cmds=[], label=None):
     name = self.name
     fins = [self.templateexpand(f) for f in set(filenamesof(ins))]
@@ -755,6 +761,12 @@ def main():
     while unmaterialisedTargets:
         t = next(iter(unmaterialisedTargets))
         t.materialise()
+
+    if belatedErrors:
+        print("FAILED:")
+        for s in belatedErrors:
+            print(s)
+        sys.exit(1)
 
     with open(outputdir + "/build.targets", "wt") as fp:
         fp.write("ninja-targets =")

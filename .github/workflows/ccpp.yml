@@ -7,8 +7,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-linux:
+  build-docker:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        variant:
+        - debian12
+        - fedora40
+        - fedora41
+        - fedora42
+        - fedora43
     steps:
     - uses: actions/checkout@v4
       with:
@@ -19,36 +27,10 @@ jobs:
       with:
         repository: 'davidgiven/fluxengine-testdata'
         path: 'fluxengine-testdata'
-    - name: apt
-      run: |
-        sudo apt update
-        sudo apt install libudev-dev libsqlite3-dev protobuf-compiler libwxgtk3.2-dev libfmt-dev libprotobuf-dev libmagic-dev libmbedtls-dev libcurl4-openssl-dev libmagic-dev nlohmann-json3-dev libdbus-1-dev libglfw3-dev libmd4c-dev libfreetype-dev libcli11-dev libboost-regex-dev
     - name: make
-      run: CXXFLAGS="-Wp,-D_GLIBCXX_ASSERTIONS" make -j`nproc` -C fluxengine
+      run: |
+        cd fluxengine && docker build -t ${{ matrix.variant }} -f tests/docker/Dockerfile.${{ matrix.variant }} .
 
-  #build-linux-debian-11:
-  #  runs-on: ubuntu-22.04
-  #  container: debian:11
-  #  steps:
-  #  - uses: actions/checkout@v4
-  #    with:
-  #      repository: 'davidgiven/fluxengine'
-  #      path: 'fluxengine'
-  #  - uses: actions/checkout@v4
-  #    with:
-  #      repository: 'davidgiven/fluxengine-testdata'
-  #      path: 'fluxengine-testdata'
-  #  - name: apt update
-  #    run: apt update
-  #  - name: apt
-  #    run: >
-  #      apt install -y python3 make xz-utils python3 python3-hamcrest
-  #      protobuf-compiler libprotobuf-dev libsqlite3-dev
-  #      libfmt-dev libprotobuf-dev wx-common pkg-config
-  #      libudev-dev g++ libwxgtk3.0-gtk3-dev
-  #  - name: make
-  #    run: make -C fluxengine
-      
   build-macos-current:
     strategy:
       matrix:
@@ -70,7 +52,9 @@ jobs:
         brew link mbedtls@3
         brew upgrade
     - name: make
-      run: gmake -C fluxengine
+      run: |
+        g++ -v
+        gmake -C fluxengine
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -116,6 +100,7 @@ jobs:
 
     - name: run
       run: |
+        g++ -v
         make -C fluxengine BUILDTYPE=windows AB_SANDBOX=no
 
     - name: nsis
