@@ -54,7 +54,7 @@ jobs:
         #sudo apt install docker
     - name: make
       run: |
-        make -C fluxengine docker-${{ matrix.variant }}
+        cd fluxengine && docker build -t ${{ matrix.variant }} -f tests/docker/Dockerfile-${{ matrix.variant }} .
 
   #build-linux-debian-11:
   #  runs-on: ubuntu-22.04
