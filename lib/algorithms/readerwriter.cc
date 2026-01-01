@@ -283,7 +283,8 @@ static std::vector<std::shared_ptr<const Sector>> collectSectors(
         sector_set.insert(new_sector);
         it = ub;
     }
-    return sector_set | std::ranges::to<std::vector>();
+
+    return std::vector(sector_set.begin(), sector_set.end());
 }
 
 struct CombinationResult
@@ -604,8 +605,9 @@ void writeDiskCommand(const DiskLayout& diskLayout,
     FluxSource* fluxSource,
     const std::vector<CylinderHead>& physicalLocations)
 {
-    auto chs = std::ranges::views::keys(diskLayout.layoutByLogicalLocation) |
-               std::ranges::to<std::vector>();
+    auto sectorLocations =
+        std::ranges::views::keys(diskLayout.layoutByLogicalLocation);
+    auto chs = std::vector(sectorLocations.begin(), sectorLocations.end());
     if (fluxSource && decoder)
         writeTracksAndVerify(diskLayout,
             fluxSinkFactory,
@@ -625,14 +627,15 @@ void writeDiskCommand(const DiskLayout& diskLayout,
     Decoder* decoder,
     FluxSource* fluxSource)
 {
+    auto sectorLocations =
+        std::ranges::views::keys(diskLayout.layoutByLogicalLocation);
     writeDiskCommand(diskLayout,
         image,
         encoder,
         fluxSinkFactory,
         decoder,
         fluxSource,
-        std::ranges::views::keys(diskLayout.layoutByLogicalLocation) |
-            std::ranges::to<std::vector>());
+        std::vector(sectorLocations.begin(), sectorLocations.end()));
 }
 
 void writeRawDiskCommand(const DiskLayout& diskLayout,
