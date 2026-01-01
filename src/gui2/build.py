@@ -574,7 +574,8 @@ cxxprogram(
         "./main.cc",
     ],
     cflags=cflags,
-    ldflags=["-lmbedcrypto", "-lboost_regex"]
+    ldflags=["-lmbedcrypto"]
+    + ([] if config.osx else ["-lboost_regex"])
     + (["-ldl"] if config.unix else [])
     + (["-ldwmapi", "-lnetapi32"] if config.windows else []),
     deps=[
