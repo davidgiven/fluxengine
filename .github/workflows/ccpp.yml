@@ -51,7 +51,7 @@ jobs:
     - name: apt
       run: |
         sudo apt update
-        sudo apt install docker
+        #sudo apt install docker
     - name: make
       run: |
         make -C docker-${{ matrix.variant }}
