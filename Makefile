@@ -57,8 +57,9 @@ else
 	AR = ar
 	PKG_CONFIG = pkg-config
 	ifeq ($(BUILDTYPE),osx)
+		CXXFLAGS += -fexperimental-library
 	else
-		LDFLAGS += -pthread -Wl,--no-as-needed
+		LDFLAGS += -pthread
 	endif
 endif
 
