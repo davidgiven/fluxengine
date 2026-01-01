@@ -59,7 +59,7 @@ else
 	ifeq ($(BUILDTYPE),osx)
 		CXXFLAGS += -fexperimental-library
 	else
-		LDFLAGS += -pthrea
+		LDFLAGS += -pthread
 	endif
 endif
 
