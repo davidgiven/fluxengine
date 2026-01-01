@@ -124,11 +124,11 @@ clean::
 include build/ab.mk
 
 DOCKERFILES = \
-	debian11 \
     debian12 \
     fedora40 \
     fedora41 \
-	manjaro
+	fedora42 \
+	fedora43
 
 docker-%: tests/docker/Dockerfile.%
 	docker build -t $* -f $< .

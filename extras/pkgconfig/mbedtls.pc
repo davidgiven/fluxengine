@@ -1,0 +1,7 @@
+
+Name: pkg-config
+Description: Sample package for AB tests
+Version: 1.2.3
+
+Cflags:
+Libs: -lmbedtls
