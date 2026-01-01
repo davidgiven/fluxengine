@@ -48,13 +48,9 @@ jobs:
       with:
         repository: 'davidgiven/fluxengine-testdata'
         path: 'fluxengine-testdata'
-    - name: apt
-      run: |
-        sudo apt update
-        #sudo apt install docker
     - name: make
       run: |
-        cd fluxengine && docker build -t ${{ matrix.variant }} -f tests/docker/Dockerfile-${{ matrix.variant }} .
+        cd fluxengine && docker build -t ${{ matrix.variant }} -f tests/docker/Dockerfile.${{ matrix.variant }} .
 
   #build-linux-debian-11:
   #  runs-on: ubuntu-22.04
