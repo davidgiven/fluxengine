@@ -124,15 +124,5 @@ clean::
 
 include build/ab.mk
 
-DOCKERFILES = \
-    debian12 \
-    fedora40 \
-    fedora41 \
-	fedora42 \
-	fedora43
-
 docker-%: tests/docker/Dockerfile.%
 	docker build -t $* -f $< .
-
-.PHONY: dockertests
-dockertests: $(foreach f,$(DOCKERFILES), docker-$(strip $f) .WAIT)

@@ -13,6 +13,7 @@ jobs:
       matrix:
         variant:
         - debian12
+        - debian13
         - fedora40
         - fedora41
         - fedora42
