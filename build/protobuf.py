@@ -1,13 +1,22 @@
-from build.ab import Rule, Targets, emit, simplerule, filenamesof, G
+from build.ab import (
+    Rule,
+    Targets,
+    emit,
+    simplerule,
+    filenamesof,
+    G,
+    add_belated_error,
+)
 from build.utils import filenamesmatchingof, collectattrs
 from os.path import join, abspath, dirname, relpath
-from build.pkg import has_package
+from build.pkg import has_package, TargetPkgConfig
 import platform
 
 G.setdefault("PROTOC", "protoc")
 G.setdefault("HOSTPROTOC", "hostprotoc")
 
-assert has_package("protobuf"), "required package 'protobuf' not installed"
+if not has_package("protobuf"):
+    add_belated_error("Required package 'protobuf' not installed")
 
 PROTO_SEPARATOR = ";" if (platform.system() == "Windows") else ":"
 

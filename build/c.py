@@ -69,9 +69,13 @@ def _toolchain_find_header_targets(deps, initial=[]):
 Toolchain.find_c_header_targets = _toolchain_find_header_targets
 
 
-HostToolchain.CC = ["$(HOSTCC) -c -o $[outs[0]] $[ins[0]] $(HOSTCFLAGS) $[cflags]"]
+HostToolchain.CC = [
+    "$(HOSTCC) -c -o $[outs[0]] $[ins[0]] $(HOSTCFLAGS) $[cflags]"
+]
 HostToolchain.CPP = ["$(HOSTCC) -E -P -o $[outs] $[cflags] -x c $[ins]"]
-HostToolchain.CXX = ["$(HOSTCXX) -c -o $[outs[0]] $[ins[0]] $(HOSTCFLAGS) $[cflags]"]
+HostToolchain.CXX = [
+    "$(HOSTCXX) -c -o $[outs[0]] $[ins[0]] $(HOSTCFLAGS) $[cflags]"
+]
 HostToolchain.AR = ["$(HOSTAR) cqs $[outs[0]] $[ins]"]
 HostToolchain.ARXX = ["$(HOSTAR) cqs $[outs[0]] $[ins]"]
 HostToolchain.CLINK = [
@@ -97,7 +101,9 @@ def _indirect(deps, name):
     return r
 
 
-def cfileimpl(self, name, srcs, deps, suffix, commands, label, toolchain, cflags):
+def cfileimpl(
+    self, name, srcs, deps, suffix, commands, label, toolchain, cflags
+):
     outleaf = "=" + stripext(basename(filenameof(srcs[0]))) + suffix
 
     hdr_deps = toolchain.find_c_header_targets(deps)
@@ -107,7 +113,9 @@ def cfileimpl(self, name, srcs, deps, suffix, commands, label, toolchain, cflags
         if ("cheader_deps" not in d.args) and ("clibrary_deps" not in d.args)
     ]
     hdr_files = collectattrs(targets=hdr_deps, name="cheader_files")
-    cflags = collectattrs(targets=hdr_deps, name="caller_cflags", initial=cflags)
+    cflags = collectattrs(
+        targets=hdr_deps, name="caller_cflags", initial=cflags
+    )
 
     t = simplerule(
         replaces=self,
@@ -231,7 +239,9 @@ def libraryimpl(
         i = 0
         for dest, src in hdrs.items():
             s = filenamesof([src])
-            assert len(s) == 1, "the target of a header must return exactly one file"
+            assert (
+                len(s) == 1
+            ), "the target of a header must return exactly one file"
 
             cs += [f"$(CP) $[ins[{i}]] $[outs[{i}]]"]
             outs += ["=" + dest]
@@ -421,11 +431,15 @@ def programimpl(
     label,
     filerule,
 ):
-    cfiles = findsources(self, srcs, deps, cflags, filerule, toolchain, self.cwd)
+    cfiles = findsources(
+        self, srcs, deps, cflags, filerule, toolchain, self.cwd
+    )
 
     lib_deps = toolchain.find_c_library_targets(deps)
     libs = collectattrs(targets=lib_deps, name="clibrary_files")
-    ldflags = collectattrs(targets=lib_deps, name="caller_ldflags", initial=ldflags)
+    ldflags = collectattrs(
+        targets=lib_deps, name="caller_ldflags", initial=ldflags
+    )
 
     simplerule(
         replaces=self,
@@ -544,7 +558,9 @@ def hostcxxprogram(
 
 def _cppfileimpl(self, name, srcs, deps, cflags, toolchain):
     hdr_deps = _indirect(deps, "cheader_deps")
-    cflags = collectattrs(targets=hdr_deps, name="caller_cflags", initial=cflags)
+    cflags = collectattrs(
+        targets=hdr_deps, name="caller_cflags", initial=cflags
+    )
 
     simplerule(
         replaces=self,

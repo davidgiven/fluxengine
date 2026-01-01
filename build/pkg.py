@@ -1,5 +1,4 @@
-from build.ab import Rule, Target, G
-import os
+from build.ab import Rule, Target, G, add_belated_error
 import subprocess
 
 
@@ -50,7 +49,10 @@ def _package(self, name, package, fallback, pkgconfig):
         self.traits.update({"clibrary", "cxxlibrary"})
         return
 
-    assert fallback, f"Required package '{package}' not installed"
+    if not fallback:
+        add_belated_error(f"Required package '{package}' not installed")
+        return
+
     print(f"package '{package}' not found; using fallback")
 
     if "cheader_deps" in fallback.args:

@@ -1,6 +1,7 @@
 import platform
 
-_is_windows = (platform.system() == "Windows")
+_is_windows = platform.system() == "Windows"
+
 
 class Toolchain:
     PREFIX = ""
