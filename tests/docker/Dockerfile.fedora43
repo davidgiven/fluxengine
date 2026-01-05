@@ -6,7 +6,7 @@ RUN dnf -y install \
     protobuf-compiler protobuf-devel sqlite-devel libudev-devel \
     wxGTK-devel gcc gcc-c++ fmt-devel ninja-build glfw-devel \
     libcurl-devel file-devel mbedtls-devel cli11-devel \
-    lunasvg-devel md4c-devel boost-devel
+    lunasvg-devel md4c-devel boost-devel git
 
 RUN useradd app
 RUN mkdir -p /home/app
