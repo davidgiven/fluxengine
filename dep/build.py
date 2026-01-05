@@ -1,5 +1,5 @@
 from build.pkg import package
-from build.c import clibrary
+from build.c import clibrary, cxxlibrary
 from build.git import git_repository
 
 package(
@@ -26,7 +26,7 @@ package(
     ),
 )
 
-clibrary(
+cxxlibrary(
     name="lexy_lib",
     hdrs={
         h: f"dep/lexy/include/{h}"
@@ -160,6 +160,65 @@ clibrary(
             url="https://github.com/foonathan/lexy",
             branch="v2025.05.0",
             path="dep/lexy",
+        )
+    ],
+)
+
+cxxlibrary(
+    name="snowhouse_lib",
+    hdrs={
+        h: f"dep/snowhouse/include/{h}"
+        for h in [
+            "snowhouse/snowhouse.h",
+            "snowhouse/assert.h",
+            "snowhouse/fluent/fluent.h",
+            "snowhouse/fluent/constraintadapter.h",
+            "snowhouse/fluent/constraintlist.h",
+            "snowhouse/fluent/operators/andoperator.h",
+            "snowhouse/fluent/operators/invalidexpressionexception.h",
+            "snowhouse/fluent/operators/collections/collectionoperator.h",
+            "snowhouse/fluent/operators/collections/collectionconstraintevaluator.h",
+            "snowhouse/fluent/operators/collections/atleastoperator.h",
+            "snowhouse/fluent/operators/collections/noneoperator.h",
+            "snowhouse/fluent/operators/collections/atmostoperator.h",
+            "snowhouse/fluent/operators/collections/alloperator.h",
+            "snowhouse/fluent/operators/collections/exactlyoperator.h",
+            "snowhouse/fluent/operators/notoperator.h",
+            "snowhouse/fluent/operators/constraintoperator.h",
+            "snowhouse/fluent/operators/oroperator.h",
+            "snowhouse/fluent/expressionbuilder.h",
+            "snowhouse/assertionexception.h",
+            "snowhouse/exceptions.h",
+            "snowhouse/stringizers.h",
+            "snowhouse/macros.h",
+            "snowhouse/constraints/equalscontainerconstraint.h",
+            "snowhouse/constraints/islessthanorequaltoconstraint.h",
+            "snowhouse/constraints/equalsconstraint.h",
+            "snowhouse/constraints/isgreaterthanconstraint.h",
+            "snowhouse/constraints/fulfillsconstraint.h",
+            "snowhouse/constraints/endswithconstraint.h",
+            "snowhouse/constraints/constraints.h",
+            "snowhouse/constraints/haslengthconstraint.h",
+            "snowhouse/constraints/startswithconstraint.h",
+            "snowhouse/constraints/equalswithdeltaconstraint.h",
+            "snowhouse/constraints/isgreaterthanorequaltoconstraint.h",
+            "snowhouse/constraints/containsconstraint.h",
+            "snowhouse/constraints/islessthanconstraint.h",
+            "snowhouse/constraints/isemptyconstraint.h",
+            "snowhouse/constraints/expressions/andexpression.h",
+            "snowhouse/constraints/expressions/orexpression.h",
+            "snowhouse/constraints/expressions/expression_fwd.h",
+            "snowhouse/constraints/expressions/notexpression.h",
+            "snowhouse/constraints/expressions/expression.h",
+            "snowhouse/stringize.h",
+        ]
+    },
+    deps=[
+        git_repository(
+            name="snowhouse_repo",
+            url="https://github.com/banditcpp/snowhouse",
+            branch="v5.0.0",
+            path="dep/snowhouse",
         )
     ],
 )

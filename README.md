@@ -242,12 +242,6 @@ written by Sean T Barett (and others). It is public domain/Unlicense/MIT
 licensed, at your choice. Please see the contents of the directory for the full
 text.
 
-As an exception, `dep/snowhouse` contains the snowhouse assertion library,
-taken from https://github.com/banditcpp/snowhouse. It is Boost Standard License
-1.0 licensed. Please see the contents of the directory for the full text. Note
-that this is only used during the build and no code ends up in the output
-binaries.
-
 As an exception, `dep/libusbp` contains the libusbp library, taken from
 https://github.com/pololu/libusbp. It is MIT licensed. Please see the contents
 of the directory for the full text.
@@ -264,10 +258,6 @@ As an exception, `dep/hfsutils` contains a partial copy of the hfsutils
 package, written by Robert Leslie et al, taken from
 https://www.mars.org/home/rob/proj/hfs. It is GPL 2.0 licensed. Please see the
 contents of the directory for the full text.
-
-As an exception, `dep/lexy` contains a partial copy of the lexy package, written
-by foonathen@github, taken from https://github.com/foonathan/lexy. It is BSL 1.0
-licensed. Please see the contents of the directory for the full text.
 
 As an exception, `dep/alphanum` contains a copy of the alphanum package,
 written by Dave Koelle, taken from
