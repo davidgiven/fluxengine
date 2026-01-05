@@ -55,16 +55,6 @@ package(
 )
 
 package(
-    name="md4c_lib",
-    package="md4c",
-    fallback=clibrary(
-        name="md4c_fallback_lib",
-        srcs=sources_from("dep/md4c/src"),
-        hdrs={"md4c.h": "dep/md4c/src/md4c.h"},
-    ),
-)
-
-package(
     name="cli11_lib",
     package="CLI11",
     fallback=cxxlibrary(
@@ -424,7 +414,7 @@ plugin(
     ),
     hdrs=headers_from("dep/imhex/plugins/ui/include"),
     romfsdir="dep/imhex/plugins/ui/romfs",
-    deps=[".+libimhex", ".+fonts-plugin", ".+md4c_lib"],
+    deps=[".+libimhex", ".+fonts-plugin", "dep+md4c_lib"],
 )
 
 plugin(

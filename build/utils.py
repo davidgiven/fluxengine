@@ -7,6 +7,9 @@ from build.ab import (
     getcwd,
     error,
     simplerule,
+    add_atexit,
+    targets,
+    emit,
     G,
 )
 from os.path import relpath, splitext, join, basename, isfile, normpath
@@ -123,6 +126,18 @@ def does_command_exist(cmd):
 def shell(cmd):
     r = subprocess.check_output([G.SHELL, "-c", cmd])
     return r.decode("utf-8").strip()
+
+
+def add_wildcard_dependency(dep, pattern, exclude="."):
+    def cb():
+        yesre = _glob_to_re(pattern)
+        nore = _glob_to_re(exclude)
+        for t in targets.values():
+            for o in t.outs:
+                if (type(o) == str) and yesre.match(o) and not nore.match(o):
+                    emit("build", o, ":phony", dep.name)
+
+    add_atexit(cb)
 
 
 @Rule
