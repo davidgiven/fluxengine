@@ -13,9 +13,6 @@
 [submodule "dep/native-file-dialog"]
 	path = dep/native-file-dialog
 	url = https://github.com/btzy/nativefiledialog-extended.git
-[submodule "dep/xdgpp"]
-	path = dep/xdgpp
-	url = https://github.com/WerWolv/xdgpp.git
 [submodule "dep/libromfs"]
 	path = dep/libromfs
 	url = https://github.com/WerWolv/libromfs.git

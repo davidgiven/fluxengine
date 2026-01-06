@@ -316,3 +316,17 @@ cxxlibrary(
         )
     ],
 )
+
+cxxlibrary(
+    name="xdgpp_lib",
+    srcs=[],
+    hdrs={"xdg.hpp": "dep/xdgpp/xdg.hpp"},
+    deps=[
+        git_repository(
+            name="xdgpp_repo",
+            url="https://github.com/WerWolv/xdgpp",
+            branch="master",
+            path="dep/xdgpp",
+        )
+    ],
+)

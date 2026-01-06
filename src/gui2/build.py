@@ -121,8 +121,6 @@ cxxlibrary(
     deps=[".+freetype2_lib", ".+lunasvg", ".+glfw3_lib"],
 )
 
-cxxlibrary(name="libxdgpp", srcs=[], hdrs={"xdg.hpp": "dep/xdgpp/xdg.hpp"})
-
 cxxprogram(
     name="mkromfs",
     srcs=["./tools/mkromfs.cc"],
@@ -283,18 +281,18 @@ cxxlibrary(
     hdrs=headers_from("dep/imhex/lib/libimhex/include"),
     cflags=cflags,
     deps=[
-        ".+libwolv",
-        ".+imgui",
-        ".+libpl",
-        ".+libnfd",
-        ".+libxdgpp",
-        ".+libmicrotar",
-        ".+libimhex-utils",
-        ".+libcurl_lib",
         ".+glfw3_lib",
+        ".+hacks",
+        ".+imgui",
+        ".+libcurl_lib",
+        ".+libimhex-utils",
+        ".+libmicrotar",
+        ".+libnfd",
+        ".+libpl",
+        ".+libwolv",
         ".+magic_lib",
         ".+mbedtls_lib",
-        ".+hacks",
+        "dep+xdgpp_lib",
     ],
 )
 
