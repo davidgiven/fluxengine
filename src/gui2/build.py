@@ -74,13 +74,6 @@ else:
         deps=[".+dbus_lib"],
     )
 
-clibrary(
-    name="plutovg",
-    srcs=sources_from("dep/lunasvg/plutovg/source"),
-    hdrs=headers_from("dep/lunasvg/plutovg/include"),
-    cflags=cflags,
-)
-
 package(
     name="lunasvg",
     package="lunasvg",
@@ -88,11 +81,10 @@ package(
         name="lunasvg_fallback_lib",
         srcs=sources_from("dep/lunasvg/source"),
         hdrs=headers_from("dep/lunasvg/include"),
-        deps=[".+plutovg", "+fmt_lib"],
+        deps=["dep+plutovg_lib", "+fmt_lib"],
         cflags=cflags,
     ),
 )
-
 cxxlibrary(
     name="imgui",
     srcs=sources_from("dep/imhex/lib/third_party/imgui/backend/source")

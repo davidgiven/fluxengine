@@ -330,3 +330,42 @@ cxxlibrary(
         )
     ],
 )
+
+package(
+    name="plutovg_lib",
+    package="plutovg",
+    fallback=clibrary(
+        name="plutovg_fallback_lib",
+        srcs=[
+            "dep/plutovg/source/plutovg-canvas.c",
+            "dep/plutovg/source/plutovg-ft-math.c",
+            "dep/plutovg/source/plutovg-surface.c",
+            "dep/plutovg/source/plutovg-font.c",
+            "dep/plutovg/source/plutovg-ft-math.h",
+            "dep/plutovg/source/plutovg-ft-stroker.h",
+            "dep/plutovg/source/plutovg-rasterize.c",
+            "dep/plutovg/source/plutovg-stb-image-write.h",
+            "dep/plutovg/source/plutovg-blend.c",
+            "dep/plutovg/source/plutovg-ft-stroker.c",
+            "dep/plutovg/source/plutovg-private.h",
+            "dep/plutovg/source/plutovg-ft-raster.h",
+            "dep/plutovg/source/plutovg-ft-types.h",
+            "dep/plutovg/source/plutovg-stb-image.h",
+            "dep/plutovg/source/plutovg-stb-truetype.h",
+            "dep/plutovg/source/plutovg-paint.c",
+            "dep/plutovg/source/plutovg-matrix.c",
+            "dep/plutovg/source/plutovg-ft-raster.c",
+            "dep/plutovg/source/plutovg-utils.h",
+            "dep/plutovg/source/plutovg-path.c",
+        ],
+        hdrs={"plutovg.h": "dep/plutovg/include/plutovg.h"},
+        deps=[
+            git_repository(
+                name="plutovg_repo",
+                url="https://github.com/sammycage/plutovg",
+                branch="v1.3.2",
+                path="dep/plutovg",
+            )
+        ],
+    ),
+)
