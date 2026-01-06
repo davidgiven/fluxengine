@@ -76,7 +76,7 @@ jobs:
         msystem: mingw64
         update: true
         install: |
-          python diffutils ninja make zip
+          python diffutils ninja make zip git
         pacboy: |
           protobuf:p pkgconf:p curl-winssl:p file:p glfw:p mbedtls:p
           sqlite:p freetype:p boost:p gcc:p binutils:p nsis:p abseil-cpp:p
