@@ -197,12 +197,6 @@ cxxlibrary(
 )
 
 cxxlibrary(
-    name="libthrowingptr",
-    srcs=[],
-    hdrs=headers_from("dep/throwing_ptr/include"),
-)
-
-cxxlibrary(
     name="libpl",
     srcs=sources_from("dep/pattern-language/lib/source")
     + sources_from("dep/pattern-language/cli/source"),
@@ -212,7 +206,7 @@ cxxlibrary(
         | headers_from("dep/pattern-language/cli/include")
     ),
     deps=[
-        ".+libthrowingptr",
+        "dep+libthrowingptr",
         ".+libwolv",
         "+fmt_lib",
         "dep+cli11_lib",

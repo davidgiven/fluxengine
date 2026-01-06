@@ -19,9 +19,6 @@
 [submodule "dep/libromfs"]
 	path = dep/libromfs
 	url = https://github.com/WerWolv/libromfs.git
-[submodule "dep/throwing_ptr"]
-	path = dep/throwing_ptr
-	url = https://github.com/rockdreamer/throwing_ptr.git
 [submodule "dep/lunasvg"]
 	path = dep/lunasvg
 	url = https://github.com/sammycage/lunasvg.git

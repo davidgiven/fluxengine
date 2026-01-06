@@ -294,3 +294,26 @@ package(
         ],
     ),
 )
+
+cxxlibrary(
+    name="libthrowingptr",
+    srcs=[],
+    hdrs={
+        h: f"dep/throwing_ptr/include/{h}"
+        for h in [
+            "throwing/unique_ptr.hpp",
+            "throwing/private/clear_compiler_checks.hpp",
+            "throwing/private/compiler_checks.hpp",
+            "throwing/shared_ptr.hpp",
+            "throwing/null_ptr_exception.hpp",
+        ]
+    },
+    deps=[
+        git_repository(
+            name="libthrowingptr_repo",
+            url="https://github.com/rockdreamer/throwing_ptr",
+            branch="master",
+            path="dep/throwing_ptr",
+        )
+    ],
+)
