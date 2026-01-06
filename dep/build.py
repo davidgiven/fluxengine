@@ -222,3 +222,54 @@ cxxlibrary(
         )
     ],
 )
+
+package(
+    name="cli11_lib",
+    package="CLI11",
+    fallback=cxxlibrary(
+        name="cli11_fallback_lib",
+        srcs=[],
+        hdrs={
+            h: f"dep/cli11/include/{h}"
+            for h in [
+                "CLI/Error.hpp",
+                "CLI/App.hpp",
+                "CLI/ExtraValidators.hpp",
+                "CLI/ConfigFwd.hpp",
+                "CLI/impl",
+                "CLI/impl/Encoding_inl.hpp",
+                "CLI/impl/Config_inl.hpp",
+                "CLI/impl/Split_inl.hpp",
+                "CLI/impl/Validators_inl.hpp",
+                "CLI/impl/ExtraValidators_inl.hpp",
+                "CLI/impl/App_inl.hpp",
+                "CLI/impl/Option_inl.hpp",
+                "CLI/impl/Formatter_inl.hpp",
+                "CLI/impl/StringTools_inl.hpp",
+                "CLI/impl/Argv_inl.hpp",
+                "CLI/Split.hpp",
+                "CLI/Version.hpp",
+                "CLI/Config.hpp",
+                "CLI/StringTools.hpp",
+                "CLI/TypeTools.hpp",
+                "CLI/FormatterFwd.hpp",
+                "CLI/CLI.hpp",
+                "CLI/Macros.hpp",
+                "CLI/Formatter.hpp",
+                "CLI/Option.hpp",
+                "CLI/Argv.hpp",
+                "CLI/Encoding.hpp",
+                "CLI/Validators.hpp",
+                "CLI/Timer.hpp",
+            ]
+        },
+        deps=[
+            git_repository(
+                name="cli11_repo",
+                url="https://github.com/CLIUtils/CLI11",
+                branch="v2.6.1",
+                path="dep/cli11",
+            )
+        ],
+    ),
+)

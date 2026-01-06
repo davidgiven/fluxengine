@@ -28,6 +28,3 @@
 [submodule "dep/nlohmann_json"]
 	path = dep/nlohmann_json
 	url = https://github.com/nlohmann/json
-[submodule "dep/cli11"]
-	path = dep/cli11
-	url = https://github.com/CLIUtils/CLI11

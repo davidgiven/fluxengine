@@ -54,16 +54,6 @@ package(
     ),
 )
 
-package(
-    name="cli11_lib",
-    package="CLI11",
-    fallback=cxxlibrary(
-        name="cli11_fallback_lib",
-        srcs=[],
-        hdrs=headers_from("dep/cli11/include"),
-    ),
-)
-
 if config.osx:
     clibrary(
         name="libnfd",
@@ -235,7 +225,7 @@ cxxlibrary(
         ".+libthrowingptr",
         ".+libwolv",
         "+fmt_lib",
-        ".+cli11_lib",
+        "dep+cli11_lib",
         ".+nlohmannjson_lib",
     ],
 )
