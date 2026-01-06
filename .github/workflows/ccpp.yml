@@ -18,6 +18,7 @@ jobs:
         - fedora41
         - fedora42
         - fedora43
+        - fedora43.nooptionaldeps
     steps:
     - uses: actions/checkout@v4
       with:
