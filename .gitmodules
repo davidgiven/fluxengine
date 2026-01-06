@@ -16,6 +16,3 @@
 [submodule "dep/libromfs"]
 	path = dep/libromfs
 	url = https://github.com/WerWolv/libromfs.git
-[submodule "dep/lunasvg"]
-	path = dep/lunasvg
-	url = https://github.com/sammycage/lunasvg.git

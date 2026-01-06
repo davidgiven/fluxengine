@@ -11,8 +11,6 @@ cflags = [
     '-DIMHEX_PROJECT_NAME=\\"fluxengine\\"',
     "-DIMHEX_STATIC_LINK_PLUGINS",
     '-DIMHEX_VERSION=\\"0.0.0\\"',
-    "-DLUNASVG_BUILD_STATIC",
-    "-DPLUTOVG_BUILD_STATIC",
     "-DUNICODE",
     # "-DDEBUG",
 ]
@@ -74,17 +72,6 @@ else:
         deps=[".+dbus_lib"],
     )
 
-package(
-    name="lunasvg",
-    package="lunasvg",
-    fallback=cxxlibrary(
-        name="lunasvg_fallback_lib",
-        srcs=sources_from("dep/lunasvg/source"),
-        hdrs=headers_from("dep/lunasvg/include"),
-        deps=["dep+plutovg_lib", "dep+fmt_lib"],
-        cflags=cflags,
-    ),
-)
 cxxlibrary(
     name="imgui",
     srcs=sources_from("dep/imhex/lib/third_party/imgui/backend/source")
@@ -110,7 +97,7 @@ cxxlibrary(
         "imgui_freetype.h": "dep/imhex/lib/third_party/imgui/imgui/include/misc/freetype/imgui_freetype.h",
         "imconfig.h": "./imhex_overrides/imconfig.h",
     },
-    deps=[".+freetype2_lib", ".+lunasvg", ".+glfw3_lib"],
+    deps=[".+freetype2_lib", "dep+lunasvg", ".+glfw3_lib"],
 )
 
 cxxprogram(

@@ -408,3 +408,51 @@ package(
         ],
     ),
 )
+
+package(
+    name="lunasvg",
+    package="lunasvg",
+    fallback=cxxlibrary(
+        name="lunasvg_fallback_lib",
+        srcs=[
+            "dep/lunasvg/source/svgtextelement.cpp",
+            "dep/lunasvg/source/lunasvg.cpp",
+            "dep/lunasvg/source/graphics.h",
+            "dep/lunasvg/source/svggeometryelement.cpp",
+            "dep/lunasvg/source/svgproperty.cpp",
+            "dep/lunasvg/source/graphics.cpp",
+            "dep/lunasvg/source/svgpaintelement.cpp",
+            "dep/lunasvg/source/svgparser.cpp",
+            "dep/lunasvg/source/svgelement.cpp",
+            "dep/lunasvg/source/svgrenderstate.h",
+            "dep/lunasvg/source/svgproperty.h",
+            "dep/lunasvg/source/svgpaintelement.h",
+            "dep/lunasvg/source/svgelement.h",
+            "dep/lunasvg/source/svgtextelement.h",
+            "dep/lunasvg/source/svggeometryelement.h",
+            "dep/lunasvg/source/svgparserutils.h",
+            "dep/lunasvg/source/svglayoutstate.cpp",
+            "dep/lunasvg/source/svglayoutstate.h",
+            "dep/lunasvg/source/svgrenderstate.cpp",
+        ],
+        hdrs={"lunasvg.h": "dep/lunasvg/include/lunasvg.h"},
+        deps=[
+            "dep+plutovg_lib",
+            "dep+fmt_lib",
+            git_repository(
+                name="lunasvg_repo",
+                url="https://github.com/sammycage/lunasvg",
+                branch="v3.5.0",
+                path="dep/lunasvg",
+            ),
+        ],
+        cflags=[
+            "-DLUNASVG_BUILD_STATIC",
+            "-DPLUTOVG_BUILD_STATIC",
+        ],
+        caller_cflags=[
+            "-DLUNASVG_BUILD_STATIC",
+            "-DPLUTOVG_BUILD_STATIC",
+        ],
+    ),
+)
