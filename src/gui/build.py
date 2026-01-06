@@ -50,7 +50,7 @@ cxxprogram(
         "src/formats",
         "src/gui/drivetypes",
         "+z_lib",
-        "+fmt_lib",
+        "dep+fmt_lib",
         "+protobuf_lib",
     ],
 )

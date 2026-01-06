@@ -60,7 +60,7 @@ export(
                     ".+testproto_cc",
                 ],
                 deps=[
-                    "+fmt_lib",
+                    "dep+fmt_lib",
                     "+protobuf_lib",
                     "+protocol",
                     ".+test_proto_lib",
@@ -85,7 +85,7 @@ export(
                 srcs=[f"./{n}.cc", "./tests.h"],
                 deps=[
                     "lib/external+fl2_proto_lib",
-                    "+fmt_lib",
+                    "dep+fmt_lib",
                     "+protobuf_lib",
                     "+protocol",
                     "+z_lib",

@@ -81,7 +81,7 @@ package(
         name="lunasvg_fallback_lib",
         srcs=sources_from("dep/lunasvg/source"),
         hdrs=headers_from("dep/lunasvg/include"),
-        deps=["dep+plutovg_lib", "+fmt_lib"],
+        deps=["dep+plutovg_lib", "dep+fmt_lib"],
         cflags=cflags,
     ),
 )
@@ -120,7 +120,7 @@ cxxprogram(
         '-DLIBROMFS_PROJECT_NAME=\\"fluxengine\\"',
         '-DRESOURCE_LOCATION=\\"rsrc\\"',
     ],
-    deps=["+fmt_lib"],
+    deps=["dep+fmt_lib"],
 )
 
 if config.osx:
@@ -198,7 +198,7 @@ cxxlibrary(
     deps=[
         "dep+libthrowingptr",
         ".+libwolv",
-        "+fmt_lib",
+        "dep+fmt_lib",
         "dep+cli11_lib",
         "dep+nlohmannjson_lib",
     ],
@@ -233,7 +233,7 @@ elif config.unix:
         srcs=["dep/imhex/lib/libimhex/source/helpers/utils_linux.cpp"],
         hdrs=headers_from("dep/imhex/lib/libimhex/include"),
         cflags=cflags,
-        deps=[".+libwolv"],
+        deps=[".+libwolv", "dep+fmt_lib"],
     )
 
 cxxlibrary(
@@ -318,7 +318,7 @@ def romfs(name, id, dir):
             f'-DLIBROMFS_PROJECT_NAME=\\"{id}\\"',
             f'-DRESOURCE_LOCATION=\\"{dir}\\"',
         ],
-        deps=["+fmt_lib"],
+        deps=["dep+fmt_lib"],
     )
 
     simplerule(
@@ -534,7 +534,7 @@ cxxprogram(
     + (["-ldwmapi", "-lnetapi32"] if config.windows else []),
     deps=[
         ".+libpl",
-        "+fmt_lib",
+        "dep+fmt_lib",
         ".+builtin-plugin",
         ".+fonts-plugin",
         ".+ui-plugin",

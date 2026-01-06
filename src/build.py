@@ -36,7 +36,7 @@ cxxprogram(
     ],
     cflags=["-I."],
     deps=[
-        "+fmt_lib",
+        "dep+fmt_lib",
         "+protobuf_lib",
         "+protocol",
         "+z_lib",

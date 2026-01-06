@@ -3,6 +3,45 @@ from build.c import clibrary, cxxlibrary
 from build.git import git_repository
 
 package(
+    name="fmt_lib",
+    package="fmt",
+    fallback=cxxlibrary(
+        name="fmt_fallback_lib",
+        srcs=[
+            "dep/fmt/src/format.cc",
+            "dep/fmt/src/os.cc",
+        ],
+        hdrs={
+            h: f"dep/fmt/include/{h}"
+            for h in [
+                "fmt/args.h",
+                "fmt/base.h",
+                "fmt/chrono.h",
+                "fmt/color.h",
+                "fmt/compile.h",
+                "fmt/core.h",
+                "fmt/format.h",
+                "fmt/format-inl.h",
+                "fmt/os.h",
+                "fmt/ostream.h",
+                "fmt/printf.h",
+                "fmt/ranges.h",
+                "fmt/std.h",
+                "fmt/xchar.h",
+            ]
+        },
+        deps=[
+            git_repository(
+                name="fmt_repo",
+                url="https://github.com/fmtlib/fmt",
+                branch="11.1.4",
+                path="dep/fmt",
+            )
+        ],
+    ),
+)
+
+package(
     name="md4c_lib",
     package="md4c",
     fallback=clibrary(

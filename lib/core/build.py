@@ -22,7 +22,7 @@ cxxlibrary(
     deps=[
         "dep/agg",
         "dep/stb",
-        "+fmt_lib",
+        "dep+fmt_lib",
         "+z_lib",
     ],
 )

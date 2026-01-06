@@ -18,7 +18,7 @@ def protoencode_single(self, name, srcs: Targets, proto, include, symbol):
                 "lib/fluxsink+proto_lib",
                 "tests+test_proto_lib",
                 "+protobuf_lib",
-                "+fmt_lib",
+                "dep+fmt_lib",
             ],
         )
         encoders[proto] = r
@@ -64,7 +64,7 @@ cxxprogram(
     name="mkdoc",
     srcs=["./mkdoc.cc"],
     deps=[
-        "+fmt_lib",
+        "dep+fmt_lib",
         "+protobuf_lib",
         "lib/algorithms",
         "lib/config+proto_lib",
@@ -78,7 +78,7 @@ cxxprogram(
     name="mkdocindex",
     srcs=["./mkdocindex.cc"],
     deps=[
-        "+fmt_lib",
+        "dep+fmt_lib",
         "+protobuf_lib",
         "lib/algorithms",
         "lib/config+proto_lib",
