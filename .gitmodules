@@ -25,6 +25,3 @@
 [submodule "dep/lunasvg"]
 	path = dep/lunasvg
 	url = https://github.com/sammycage/lunasvg.git
-[submodule "dep/nlohmann_json"]
-	path = dep/nlohmann_json
-	url = https://github.com/nlohmann/json

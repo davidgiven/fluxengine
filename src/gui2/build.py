@@ -44,16 +44,6 @@ package(name="glfw3_lib", package="glfw3")
 package(name="magic_lib", package="libmagic")
 package(name="mbedtls_lib", package="mbedtls")
 
-package(
-    name="nlohmannjson_lib",
-    package="nlohmann_json",
-    fallback=cxxlibrary(
-        name="nlohmannjson_fallback_lib",
-        srcs=[],
-        hdrs=headers_from("dep/nlohmann_json/single_include"),
-    ),
-)
-
 if config.osx:
     clibrary(
         name="libnfd",
@@ -226,7 +216,7 @@ cxxlibrary(
         ".+libwolv",
         "+fmt_lib",
         "dep+cli11_lib",
-        ".+nlohmannjson_lib",
+        "dep+nlohmannjson_lib",
     ],
 )
 

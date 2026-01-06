@@ -273,3 +273,24 @@ package(
         ],
     ),
 )
+
+package(
+    name="nlohmannjson_lib",
+    package="nlohmann_json",
+    fallback=cxxlibrary(
+        name="nlohmannjson_fallback_lib",
+        srcs=[],
+        hdrs={
+            h: f"dep/nlohmann_json/single_include/{h}"
+            for h in ["nlohmann/json_fwd.hpp", "nlohmann/json.hpp"]
+        },
+        deps=[
+            git_repository(
+                name="nlohmannjson_repo",
+                url="https://github.com/nlohmann/json",
+                branch="v3.12.0",
+                path="dep/nlohmann_json",
+            )
+        ],
+    ),
+)
