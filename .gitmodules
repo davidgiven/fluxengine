@@ -1,9 +1,6 @@
 [submodule "dep/imhex"]
 	path = dep/imhex
 	url = https://github.com/davidgiven/ImHex.git
-[submodule "dep/libwolv"]
-	path = dep/libwolv
-	url = https://github.com/WerWolv/libwolv.git
 [submodule "dep/imgui"]
 	path = dep/imgui
 	url = https://github.com/ocornut/imgui.git

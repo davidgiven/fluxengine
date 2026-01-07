@@ -80,68 +80,6 @@ cxxprogram(
     deps=["dep+fmt_lib"],
 )
 
-if config.osx:
-    clibrary(
-        name="libwolv-io-fs",
-        srcs=[
-            "dep/libwolv/libs/io/source/io/fs_macos.m",
-        ],
-        cflags=cflags,
-    )
-elif config.windows:
-    cxxlibrary(
-        name="libwolv-io-fs",
-        srcs=["dep/libwolv/libs/io/source/io/file_win.cpp"],
-        hdrs=(
-            headers_from("dep/libwolv/libs/io/include")
-            | headers_from("dep/libwolv/libs/types/include")
-            | headers_from("dep/libwolv/libs/utils/include")
-        ),
-        cflags=cflags,
-    )
-else:
-    cxxlibrary(
-        name="libwolv-io-fs",
-        srcs=[],
-        cflags=cflags,
-    )
-
-wolv_modules = [
-    "types",
-    "io",
-    "utils",
-    "containers",
-    "hash",
-    "math_eval",
-    "net",
-]
-cxxlibrary(
-    name="libwolv",
-    srcs=(
-        [
-            "dep/libwolv/libs/io/source/io/file.cpp",
-            "dep/libwolv/libs/io/source/io/fs.cpp",
-            "dep/libwolv/libs/io/source/io/handle.cpp",
-            "dep/libwolv/libs/math_eval/source/math_eval/math_evaluator.cpp",
-            "dep/libwolv/libs/utils/source/utils/string.cpp",
-        ]
-        + sources_from("dep/libwolv/libs/net/source")
-        + (
-            ["dep/libwolv/libs/io/source/io/file_unix.cpp"]
-            if config.osx or config.unix
-            else []
-        )
-    ),
-    hdrs=reduce(
-        operator.ior,
-        [headers_from(f"dep/libwolv/libs/{d}/include") for d in wolv_modules],
-    )
-    | {
-        "types/uintwide_t.h": "dep/libwolv/libs/types/include/wolv/types/uintwide_t.h"
-    },
-    deps=[".+libwolv-io-fs"],
-    cflags=cflags,
-)
 
 cxxlibrary(
     name="libpl",
@@ -154,15 +92,11 @@ cxxlibrary(
     ),
     deps=[
         "dep+libthrowingptr",
-        ".+libwolv",
+        "dep+libwolv_lib",
         "dep+fmt_lib",
         "dep+cli11_lib",
         "dep+nlohmannjson_lib",
     ],
-)
-
-cxxlibrary(
-    name="hacks", srcs=[], hdrs={"jthread.hpp": "./imhex_overrides/jthread.hpp"}
 )
 
 clibrary(
@@ -190,7 +124,7 @@ elif config.unix:
         srcs=["dep/imhex/lib/libimhex/source/helpers/utils_linux.cpp"],
         hdrs=headers_from("dep/imhex/lib/libimhex/include"),
         cflags=cflags,
-        deps=[".+libwolv", "dep+fmt_lib"],
+        deps=["dep+libwolv_lib", "dep+fmt_lib"],
     )
 
 cxxlibrary(
@@ -231,15 +165,14 @@ cxxlibrary(
     cflags=cflags,
     deps=[
         ".+glfw3_lib",
-        ".+hacks",
         ".+imgui",
         ".+libcurl_lib",
         ".+libimhex-utils",
         ".+libmicrotar",
         ".+libpl",
-        ".+libwolv",
         ".+magic_lib",
         ".+mbedtls_lib",
+        "dep+libwolv_lib",
         "dep+nativefiledialog_lib",
         "dep+xdgpp_lib",
     ],
@@ -372,12 +305,12 @@ plugin(
     hdrs=headers_from("dep/imhex/plugins/builtin/include"),
     romfsdir="dep/imhex/plugins/builtin/romfs",
     deps=[
-        ".+libimhex",
-        ".+libtrace",
-        ".+libpl",
-        ".+libwolv",
-        ".+ui-plugin",
         ".+fonts-plugin",
+        ".+libimhex",
+        ".+libpl",
+        ".+libtrace",
+        ".+ui-plugin",
+        "dep+libwolv_lib",
         "dep/imhex/plugins/builtin/source/content/ui_items.cpp",
     ],
 )

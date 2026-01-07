@@ -595,3 +595,110 @@ clibrary(
         )
     ],
 )
+
+# All this is libwolv.
+
+git_repository(
+    name="libwolv_repo",
+    url="https://github.com/WerWolv/libwolv",
+    branch="master",
+    path="dep/r/libwolv",
+)
+
+cxxlibrary(
+    name="libwolv_core",
+    srcs=[
+        "dep/r/libwolv/libs/io/source/io/file.cpp",
+        "dep/r/libwolv/libs/io/source/io/fs.cpp",
+        "dep/r/libwolv/libs/io/source/io/handle.cpp",
+        "dep/r/libwolv/libs/math_eval/source/math_eval/math_evaluator.cpp",
+        "dep/r/libwolv/libs/net/source/net/common.cpp",
+        "dep/r/libwolv/libs/net/source/net/socket_client.cpp",
+        "dep/r/libwolv/libs/net/source/net/socket_server.cpp",
+        "dep/r/libwolv/libs/utils/source/utils/string.cpp",
+    ],
+    hdrs=(
+        {"jthread.hpp": "./jthread.hpp"}
+        | {
+            f: f"dep/r/libwolv/libs/types/include/{f}"
+            for f in [
+                "wolv/literals.hpp",
+                "wolv/concepts.hpp",
+                "wolv/types.hpp",
+                "wolv/types/uintwide_t.h",
+                "wolv/types/type_name.hpp",
+                "wolv/types/static_string.hpp",
+            ]
+        }
+        | {
+            f: f"dep/r/libwolv/libs/utils/include/{f}"
+            for f in [
+                "wolv/utils/expected.hpp",
+                "wolv/utils/thread_pool.hpp",
+                "wolv/utils/string.hpp",
+                "wolv/utils/preproc.hpp",
+                "wolv/utils/lock.hpp",
+                "wolv/utils/guards.hpp",
+                "wolv/utils/core.hpp",
+            ]
+        }
+        | {
+            f: f"dep/r/libwolv/libs/math_eval/include/{f}"
+            for f in ["wolv/math_eval/math_evaluator.hpp"]
+        }
+        | {
+            f: f"dep/r/libwolv/libs/containers/include/{f}"
+            for f in [
+                "wolv/container/lazy.hpp",
+                "wolv/container/ring_buffer.hpp",
+                "wolv/container/interval_tree.hpp",
+            ]
+        }
+        | {
+            f: f"dep/r/libwolv/libs/io/include/{f}"
+            for f in [
+                "wolv/io/buffered_reader.hpp",
+                "wolv/io/file.hpp",
+                "wolv/io/fs.hpp",
+                "wolv/io/handle.hpp",
+            ]
+        }
+        | {
+            f: f"dep/r/libwolv/libs/hash/include/{f}"
+            for f in [
+                "wolv/hash/crc.hpp",
+                "wolv/hash/uuid.hpp",
+            ]
+        }
+        | {
+            f: f"dep/r/libwolv/libs/net/include/{f}"
+            for f in [
+                "wolv/net/common.hpp",
+                "wolv/net/socket_client.hpp",
+                "wolv/net/socket_server.hpp",
+            ]
+        }
+    ),
+    deps=[".+libwolv_repo"],
+)
+
+if config.osx:
+    clibrary(
+        name="libwolv_lib",
+        srcs=[
+            "dep/r/libwolv/libs/io/source/io/fs_macos.m",
+        ],
+        deps=[".+libwolv_core"],
+    )
+elif config.windows:
+    cxxlibrary(
+        name="libwolv_lib",
+        srcs=["dep/r/libwolv/libs/io/source/io/file_win.cpp"],
+        deps=[".+libwolv_core"],
+    )
+else:
+    cxxlibrary(
+        name="libwolv_lib",
+        srcs=["dep/r/libwolv/libs/io/source/io/file_unix.cpp"],
+        deps=[".+libwolv_core"],
+    )
