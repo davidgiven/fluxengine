@@ -48,7 +48,7 @@ cxxprogram(
         "+protocol",
         "+sqlite3_lib",
         "+z_lib",
-        "dep/libusbp",
+        "dep+libusbp_lib",
         "lib/config+proto_lib",
         "lib/core",
         "lib/data",

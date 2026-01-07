@@ -94,7 +94,7 @@ export(
                     "dep/agg",
                     "dep/fatfs",
                     "dep/hfsutils",
-                    "dep/libusbp",
+                    "dep+libusbp_lib",
                     "dep+snowhouse_lib",
                     "dep/stb",
                     "lib/algorithms",

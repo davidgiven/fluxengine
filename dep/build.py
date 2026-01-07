@@ -500,3 +500,80 @@ else:
         },
         deps=[".+dbus_lib", ".+nativefiledialog_repo"],
     )
+
+clibrary(
+    name="libusbp_lib",
+    srcs=[
+        "dep/libusbp/src/async_in_pipe.c",
+        "dep/libusbp/src/error.c",
+        "dep/libusbp/src/error_hresult.c",
+        "dep/libusbp/src/find_device.c",
+        "dep/libusbp/src/list.c",
+        "dep/libusbp/src/pipe_id.c",
+        "dep/libusbp/src/string.c",
+        "dep/libusbp/src/libusbp_internal.h",
+        "dep/libusbp/include/libusbp_config.h",
+        "dep/libusbp/include/libusbp.h",
+    ]
+    + (
+        [
+            "dep/libusbp/src/windows/async_in_transfer_windows.c",
+            "dep/libusbp/src/windows/device_instance_id_windows.c",
+            "dep/libusbp/src/windows/device_windows.c",
+            "dep/libusbp/src/windows/error_windows.c",
+            "dep/libusbp/src/windows/generic_handle_windows.c",
+            "dep/libusbp/src/windows/generic_interface_windows.c",
+            "dep/libusbp/src/windows/interface_windows.c",
+            "dep/libusbp/src/windows/list_windows.c",
+            "dep/libusbp/src/windows/serial_port_windows.c",
+        ]
+        if config.windows
+        else (
+            [
+                "dep/libusbp/src/mac/async_in_transfer_mac.c",
+                "dep/libusbp/src/mac/device_mac.c",
+                "dep/libusbp/src/mac/error_mac.c",
+                "dep/libusbp/src/mac/generic_handle_mac.c",
+                "dep/libusbp/src/mac/generic_interface_mac.c",
+                "dep/libusbp/src/mac/iokit_mac.c",
+                "dep/libusbp/src/mac/list_mac.c",
+                "dep/libusbp/src/mac/serial_port_mac.c",
+            ]
+            if config.osx
+            else [
+                "dep/libusbp/src/linux/async_in_transfer_linux.c",
+                "dep/libusbp/src/linux/device_linux.c",
+                "dep/libusbp/src/linux/error_linux.c",
+                "dep/libusbp/src/linux/generic_handle_linux.c",
+                "dep/libusbp/src/linux/generic_interface_linux.c",
+                "dep/libusbp/src/linux/list_linux.c",
+                "dep/libusbp/src/linux/serial_port_linux.c",
+                "dep/libusbp/src/linux/udev_linux.c",
+                "dep/libusbp/src/linux/usbfd_linux.c",
+            ]
+        )
+    ),
+    cflags=[
+        "-Wno-deprecated-declarations",
+    ],
+    caller_ldflags=(
+        ["-lsetupapi", "-lwinusb", "-lole32", "-luuid"]
+        if config.windows
+        else []
+    ),
+    deps=([package(name="udev_lib", package="libudev")] if config.unix else [])
+    + [
+        git_repository(
+            name="libusbp_repo",
+            url="https://github.com/pololu/libusbp",
+            branch="master",
+            path="dep/libusbp",
+        )
+    ],
+    hdrs={
+        "libusbp_internal.h": "dep/libusbp/src/libusbp_internal.h",
+        "libusbp_config.h": "dep/libusbp_config.h",
+        "libusbp.hpp": "dep/libusbp/include/libusbp.hpp",
+        "libusbp.h": "dep/libusbp/include/libusbp.h",
+    },
+)

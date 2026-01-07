@@ -40,7 +40,7 @@ cxxprogram(
         "dep/adflib",
         "dep/fatfs",
         "dep/hfsutils",
-        "dep/libusbp",
+        "dep+libusbp_lib",
         "extras+icons",
         "lib/core",
         "lib/data",

@@ -45,7 +45,7 @@ cxxprogram(
         "dep/alphanum",
         "dep/fatfs",
         "dep/hfsutils",
-        "dep/libusbp",
+        "dep+libusbp_lib",
         "dep/stb",
         "lib/config",
         "lib/core",

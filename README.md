@@ -242,10 +242,6 @@ written by Sean T Barett (and others). It is public domain/Unlicense/MIT
 licensed, at your choice. Please see the contents of the directory for the full
 text.
 
-As an exception, `dep/libusbp` contains the libusbp library, taken from
-https://github.com/pololu/libusbp. It is MIT licensed. Please see the contents
-of the directory for the full text.
-
 As an exception, `dep/fatfs` contains the fatfs library, taken from
 http://elm-chan.org/fsw/ff/00index_e.html. It is single-clause BSD licensed.
 Please see the contents of the directory for the full text.

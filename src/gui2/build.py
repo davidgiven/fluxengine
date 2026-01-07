@@ -467,7 +467,7 @@ plugin(
         "dep/adflib",
         "dep/fatfs",
         "dep/hfsutils",
-        "dep/libusbp",
+        "dep+libusbp_lib",
         "lib/core",
         "lib/data",
         "lib/vfs",
