@@ -1,6 +1,7 @@
 from build.pkg import package
 from build.c import clibrary, cxxlibrary
 from build.git import git_repository
+import config
 
 package(
     name="fmt_lib",
@@ -460,3 +461,42 @@ package(
         ],
     ),
 )
+
+git_repository(
+    name="nativefiledialog_repo",
+    url="https://github.com/btzy/nativefiledialog-extended",
+    branch="v1.3.0",
+    path="dep/native-file-dialog",
+)
+
+if config.osx:
+    clibrary(
+        name="nativefiledialog_lib",
+        srcs=["dep/native-file-dialog/src/nfd_cocoa.m"],
+        hdrs={
+            "nfd.hpp": "dep/native-file-dialog/src/include/nfd.hpp",
+            "nfd.h": "dep/native-file-dialog/src/include/nfd.h",
+        },
+        deps=[".+nativefiledialog_repo"],
+    )
+elif config.windows:
+    cxxlibrary(
+        name="nativefiledialog_lib",
+        srcs=(["dep/native-file-dialog/src/nfd_win.cpp"]),
+        hdrs={
+            "nfd.hpp": "dep/native-file-dialog/src/include/nfd.hpp",
+            "nfd.h": "dep/native-file-dialog/src/include/nfd.h",
+        },
+        deps=[".+nativefiledialog_repo"],
+    )
+else:
+    package(name="dbus_lib", package="dbus-1")
+    cxxlibrary(
+        name="nativefiledialog_lib",
+        srcs=(["dep/native-file-dialog/src/nfd_portal.cpp"]),
+        hdrs={
+            "nfd.hpp": "dep/native-file-dialog/src/include/nfd.hpp",
+            "nfd.h": "dep/native-file-dialog/src/include/nfd.h",
+        },
+        deps=[".+dbus_lib", ".+nativefiledialog_repo"],
+    )

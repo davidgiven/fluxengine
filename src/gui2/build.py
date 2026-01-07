@@ -42,36 +42,6 @@ package(name="glfw3_lib", package="glfw3")
 package(name="magic_lib", package="libmagic")
 package(name="mbedtls_lib", package="mbedtls")
 
-if config.osx:
-    clibrary(
-        name="libnfd",
-        srcs=["dep/native-file-dialog/src/nfd_cocoa.m"],
-        hdrs={
-            "nfd.hpp": "dep/native-file-dialog/src/include/nfd.hpp",
-            "nfd.h": "dep/native-file-dialog/src/include/nfd.h",
-        },
-    )
-elif config.windows:
-    cxxlibrary(
-        name="libnfd",
-        srcs=(["dep/native-file-dialog/src/nfd_win.cpp"]),
-        hdrs={
-            "nfd.hpp": "dep/native-file-dialog/src/include/nfd.hpp",
-            "nfd.h": "dep/native-file-dialog/src/include/nfd.h",
-        },
-    )
-else:
-    package(name="dbus_lib", package="dbus-1")
-    cxxlibrary(
-        name="libnfd",
-        srcs=(["dep/native-file-dialog/src/nfd_portal.cpp"]),
-        hdrs={
-            "nfd.hpp": "dep/native-file-dialog/src/include/nfd.hpp",
-            "nfd.h": "dep/native-file-dialog/src/include/nfd.h",
-        },
-        deps=[".+dbus_lib"],
-    )
-
 cxxlibrary(
     name="imgui",
     srcs=sources_from("dep/imhex/lib/third_party/imgui/backend/source")
@@ -266,11 +236,11 @@ cxxlibrary(
         ".+libcurl_lib",
         ".+libimhex-utils",
         ".+libmicrotar",
-        ".+libnfd",
         ".+libpl",
         ".+libwolv",
         ".+magic_lib",
         ".+mbedtls_lib",
+        "dep+nativefiledialog_lib",
         "dep+xdgpp_lib",
     ],
 )
