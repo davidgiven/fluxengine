@@ -9,11 +9,11 @@ package(
     fallback=cxxlibrary(
         name="fmt_fallback_lib",
         srcs=[
-            "dep/fmt/src/format.cc",
-            "dep/fmt/src/os.cc",
+            "dep/r/fmt/src/format.cc",
+            "dep/r/fmt/src/os.cc",
         ],
         hdrs={
-            h: f"dep/fmt/include/{h}"
+            h: f"dep/r/fmt/include/{h}"
             for h in [
                 "fmt/args.h",
                 "fmt/base.h",
@@ -36,7 +36,7 @@ package(
                 name="fmt_repo",
                 url="https://github.com/fmtlib/fmt",
                 branch="11.1.4",
-                path="dep/fmt",
+                path="dep/r/fmt",
             )
         ],
     ),
@@ -48,19 +48,19 @@ package(
     fallback=clibrary(
         name="md4c_fallback_lib",
         srcs=[
-            "dep/md4c/src/entity.c",
-            "dep/md4c/src/entity.h",
-            "dep/md4c/src/md4c-html.h",
-            "dep/md4c/src/md4c.c",
-            "dep/md4c/src/md4c.h",
+            "dep/r/md4c/src/entity.c",
+            "dep/r/md4c/src/entity.h",
+            "dep/r/md4c/src/md4c-html.h",
+            "dep/r/md4c/src/md4c.c",
+            "dep/r/md4c/src/md4c.h",
         ],
-        hdrs={"md4c.h": "dep/md4c/src/md4c.h"},
+        hdrs={"md4c.h": "dep/r/md4c/src/md4c.h"},
         deps=[
             git_repository(
                 name="md4c_repo",
                 url="https://github.com/mity/md4c",
                 branch="master",
-                path="dep/md4c",
+                path="dep/r/md4c",
             )
         ],
     ),
@@ -69,7 +69,7 @@ package(
 cxxlibrary(
     name="lexy_lib",
     hdrs={
-        h: f"dep/lexy/include/{h}"
+        h: f"dep/r/lexy/include/{h}"
         for h in [
             "lexy_ext/parse_tree_algorithm.hpp",
             "lexy_ext/report_error.hpp",
@@ -199,7 +199,7 @@ cxxlibrary(
             name="lexy_repo",
             url="https://github.com/foonathan/lexy",
             branch="v2025.05.0",
-            path="dep/lexy",
+            path="dep/r/lexy",
         )
     ],
 )
@@ -207,7 +207,7 @@ cxxlibrary(
 cxxlibrary(
     name="snowhouse_lib",
     hdrs={
-        h: f"dep/snowhouse/include/{h}"
+        h: f"dep/r/snowhouse/include/{h}"
         for h in [
             "snowhouse/snowhouse.h",
             "snowhouse/assert.h",
@@ -258,7 +258,7 @@ cxxlibrary(
             name="snowhouse_repo",
             url="https://github.com/banditcpp/snowhouse",
             branch="v5.0.0",
-            path="dep/snowhouse",
+            path="dep/r/snowhouse",
         )
     ],
 )
@@ -270,7 +270,7 @@ package(
         name="cli11_fallback_lib",
         srcs=[],
         hdrs={
-            h: f"dep/cli11/include/{h}"
+            h: f"dep/r/cli11/include/{h}"
             for h in [
                 "CLI/Error.hpp",
                 "CLI/App.hpp",
@@ -307,7 +307,7 @@ package(
                 name="cli11_repo",
                 url="https://github.com/CLIUtils/CLI11",
                 branch="v2.6.1",
-                path="dep/cli11",
+                path="dep/r/cli11",
             )
         ],
     ),
@@ -320,7 +320,7 @@ package(
         name="nlohmannjson_fallback_lib",
         srcs=[],
         hdrs={
-            h: f"dep/nlohmann_json/single_include/{h}"
+            h: f"dep/r/nlohmann_json/single_include/{h}"
             for h in ["nlohmann/json_fwd.hpp", "nlohmann/json.hpp"]
         },
         deps=[
@@ -328,7 +328,7 @@ package(
                 name="nlohmannjson_repo",
                 url="https://github.com/nlohmann/json",
                 branch="v3.12.0",
-                path="dep/nlohmann_json",
+                path="dep/r/nlohmann_json",
             )
         ],
     ),
@@ -338,7 +338,7 @@ cxxlibrary(
     name="libthrowingptr",
     srcs=[],
     hdrs={
-        h: f"dep/throwing_ptr/include/{h}"
+        h: f"dep/r/throwing_ptr/include/{h}"
         for h in [
             "throwing/unique_ptr.hpp",
             "throwing/private/clear_compiler_checks.hpp",
@@ -352,7 +352,7 @@ cxxlibrary(
             name="libthrowingptr_repo",
             url="https://github.com/rockdreamer/throwing_ptr",
             branch="master",
-            path="dep/throwing_ptr",
+            path="dep/r/throwing_ptr",
         )
     ],
 )
@@ -360,13 +360,13 @@ cxxlibrary(
 cxxlibrary(
     name="xdgpp_lib",
     srcs=[],
-    hdrs={"xdg.hpp": "dep/xdgpp/xdg.hpp"},
+    hdrs={"xdg.hpp": "dep/r/xdgpp/xdg.hpp"},
     deps=[
         git_repository(
             name="xdgpp_repo",
             url="https://github.com/WerWolv/xdgpp",
             branch="master",
-            path="dep/xdgpp",
+            path="dep/r/xdgpp",
         )
     ],
 )
@@ -377,34 +377,34 @@ package(
     fallback=clibrary(
         name="plutovg_fallback_lib",
         srcs=[
-            "dep/plutovg/source/plutovg-canvas.c",
-            "dep/plutovg/source/plutovg-ft-math.c",
-            "dep/plutovg/source/plutovg-surface.c",
-            "dep/plutovg/source/plutovg-font.c",
-            "dep/plutovg/source/plutovg-ft-math.h",
-            "dep/plutovg/source/plutovg-ft-stroker.h",
-            "dep/plutovg/source/plutovg-rasterize.c",
-            "dep/plutovg/source/plutovg-stb-image-write.h",
-            "dep/plutovg/source/plutovg-blend.c",
-            "dep/plutovg/source/plutovg-ft-stroker.c",
-            "dep/plutovg/source/plutovg-private.h",
-            "dep/plutovg/source/plutovg-ft-raster.h",
-            "dep/plutovg/source/plutovg-ft-types.h",
-            "dep/plutovg/source/plutovg-stb-image.h",
-            "dep/plutovg/source/plutovg-stb-truetype.h",
-            "dep/plutovg/source/plutovg-paint.c",
-            "dep/plutovg/source/plutovg-matrix.c",
-            "dep/plutovg/source/plutovg-ft-raster.c",
-            "dep/plutovg/source/plutovg-utils.h",
-            "dep/plutovg/source/plutovg-path.c",
+            "dep/r/plutovg/source/plutovg-canvas.c",
+            "dep/r/plutovg/source/plutovg-ft-math.c",
+            "dep/r/plutovg/source/plutovg-surface.c",
+            "dep/r/plutovg/source/plutovg-font.c",
+            "dep/r/plutovg/source/plutovg-ft-math.h",
+            "dep/r/plutovg/source/plutovg-ft-stroker.h",
+            "dep/r/plutovg/source/plutovg-rasterize.c",
+            "dep/r/plutovg/source/plutovg-stb-image-write.h",
+            "dep/r/plutovg/source/plutovg-blend.c",
+            "dep/r/plutovg/source/plutovg-ft-stroker.c",
+            "dep/r/plutovg/source/plutovg-private.h",
+            "dep/r/plutovg/source/plutovg-ft-raster.h",
+            "dep/r/plutovg/source/plutovg-ft-types.h",
+            "dep/r/plutovg/source/plutovg-stb-image.h",
+            "dep/r/plutovg/source/plutovg-stb-truetype.h",
+            "dep/r/plutovg/source/plutovg-paint.c",
+            "dep/r/plutovg/source/plutovg-matrix.c",
+            "dep/r/plutovg/source/plutovg-ft-raster.c",
+            "dep/r/plutovg/source/plutovg-utils.h",
+            "dep/r/plutovg/source/plutovg-path.c",
         ],
-        hdrs={"plutovg.h": "dep/plutovg/include/plutovg.h"},
+        hdrs={"plutovg.h": "dep/r/plutovg/include/plutovg.h"},
         deps=[
             git_repository(
                 name="plutovg_repo",
                 url="https://github.com/sammycage/plutovg",
                 branch="v1.3.2",
-                path="dep/plutovg",
+                path="dep/r/plutovg",
             )
         ],
         cflags=[
@@ -422,27 +422,27 @@ package(
     fallback=cxxlibrary(
         name="lunasvg_fallback_lib",
         srcs=[
-            "dep/lunasvg/source/svgtextelement.cpp",
-            "dep/lunasvg/source/lunasvg.cpp",
-            "dep/lunasvg/source/graphics.h",
-            "dep/lunasvg/source/svggeometryelement.cpp",
-            "dep/lunasvg/source/svgproperty.cpp",
-            "dep/lunasvg/source/graphics.cpp",
-            "dep/lunasvg/source/svgpaintelement.cpp",
-            "dep/lunasvg/source/svgparser.cpp",
-            "dep/lunasvg/source/svgelement.cpp",
-            "dep/lunasvg/source/svgrenderstate.h",
-            "dep/lunasvg/source/svgproperty.h",
-            "dep/lunasvg/source/svgpaintelement.h",
-            "dep/lunasvg/source/svgelement.h",
-            "dep/lunasvg/source/svgtextelement.h",
-            "dep/lunasvg/source/svggeometryelement.h",
-            "dep/lunasvg/source/svgparserutils.h",
-            "dep/lunasvg/source/svglayoutstate.cpp",
-            "dep/lunasvg/source/svglayoutstate.h",
-            "dep/lunasvg/source/svgrenderstate.cpp",
+            "dep/r/lunasvg/source/svgtextelement.cpp",
+            "dep/r/lunasvg/source/lunasvg.cpp",
+            "dep/r/lunasvg/source/graphics.h",
+            "dep/r/lunasvg/source/svggeometryelement.cpp",
+            "dep/r/lunasvg/source/svgproperty.cpp",
+            "dep/r/lunasvg/source/graphics.cpp",
+            "dep/r/lunasvg/source/svgpaintelement.cpp",
+            "dep/r/lunasvg/source/svgparser.cpp",
+            "dep/r/lunasvg/source/svgelement.cpp",
+            "dep/r/lunasvg/source/svgrenderstate.h",
+            "dep/r/lunasvg/source/svgproperty.h",
+            "dep/r/lunasvg/source/svgpaintelement.h",
+            "dep/r/lunasvg/source/svgelement.h",
+            "dep/r/lunasvg/source/svgtextelement.h",
+            "dep/r/lunasvg/source/svggeometryelement.h",
+            "dep/r/lunasvg/source/svgparserutils.h",
+            "dep/r/lunasvg/source/svglayoutstate.cpp",
+            "dep/r/lunasvg/source/svglayoutstate.h",
+            "dep/r/lunasvg/source/svgrenderstate.cpp",
         ],
-        hdrs={"lunasvg.h": "dep/lunasvg/include/lunasvg.h"},
+        hdrs={"lunasvg.h": "dep/r/lunasvg/include/lunasvg.h"},
         deps=[
             "dep+plutovg_lib",
             "dep+fmt_lib",
@@ -450,7 +450,7 @@ package(
                 name="lunasvg_repo",
                 url="https://github.com/sammycage/lunasvg",
                 branch="v3.5.0",
-                path="dep/lunasvg",
+                path="dep/r/lunasvg",
             ),
         ],
         cflags=[
@@ -466,26 +466,26 @@ git_repository(
     name="nativefiledialog_repo",
     url="https://github.com/btzy/nativefiledialog-extended",
     branch="v1.3.0",
-    path="dep/native-file-dialog",
+    path="dep/r/native-file-dialog",
 )
 
 if config.osx:
     clibrary(
         name="nativefiledialog_lib",
-        srcs=["dep/native-file-dialog/src/nfd_cocoa.m"],
+        srcs=["dep/r/native-file-dialog/src/nfd_cocoa.m"],
         hdrs={
-            "nfd.hpp": "dep/native-file-dialog/src/include/nfd.hpp",
-            "nfd.h": "dep/native-file-dialog/src/include/nfd.h",
+            "nfd.hpp": "dep/r/native-file-dialog/src/include/nfd.hpp",
+            "nfd.h": "dep/r/native-file-dialog/src/include/nfd.h",
         },
         deps=[".+nativefiledialog_repo"],
     )
 elif config.windows:
     cxxlibrary(
         name="nativefiledialog_lib",
-        srcs=(["dep/native-file-dialog/src/nfd_win.cpp"]),
+        srcs=(["dep/r/native-file-dialog/src/nfd_win.cpp"]),
         hdrs={
-            "nfd.hpp": "dep/native-file-dialog/src/include/nfd.hpp",
-            "nfd.h": "dep/native-file-dialog/src/include/nfd.h",
+            "nfd.hpp": "dep/r/native-file-dialog/src/include/nfd.hpp",
+            "nfd.h": "dep/r/native-file-dialog/src/include/nfd.h",
         },
         deps=[".+nativefiledialog_repo"],
     )
@@ -493,10 +493,10 @@ else:
     package(name="dbus_lib", package="dbus-1")
     cxxlibrary(
         name="nativefiledialog_lib",
-        srcs=(["dep/native-file-dialog/src/nfd_portal.cpp"]),
+        srcs=(["dep/r/native-file-dialog/src/nfd_portal.cpp"]),
         hdrs={
-            "nfd.hpp": "dep/native-file-dialog/src/include/nfd.hpp",
-            "nfd.h": "dep/native-file-dialog/src/include/nfd.h",
+            "nfd.hpp": "dep/r/native-file-dialog/src/include/nfd.hpp",
+            "nfd.h": "dep/r/native-file-dialog/src/include/nfd.h",
         },
         deps=[".+dbus_lib", ".+nativefiledialog_repo"],
     )
@@ -504,52 +504,52 @@ else:
 clibrary(
     name="libusbp_lib",
     srcs=[
-        "dep/libusbp/src/async_in_pipe.c",
-        "dep/libusbp/src/error.c",
-        "dep/libusbp/src/error_hresult.c",
-        "dep/libusbp/src/find_device.c",
-        "dep/libusbp/src/list.c",
-        "dep/libusbp/src/pipe_id.c",
-        "dep/libusbp/src/string.c",
-        "dep/libusbp/src/libusbp_internal.h",
-        "dep/libusbp/include/libusbp_config.h",
-        "dep/libusbp/include/libusbp.h",
+        "dep/r/libusbp/src/async_in_pipe.c",
+        "dep/r/libusbp/src/error.c",
+        "dep/r/libusbp/src/error_hresult.c",
+        "dep/r/libusbp/src/find_device.c",
+        "dep/r/libusbp/src/list.c",
+        "dep/r/libusbp/src/pipe_id.c",
+        "dep/r/libusbp/src/string.c",
+        "dep/r/libusbp/src/libusbp_internal.h",
+        "dep/r/libusbp/include/libusbp_config.h",
+        "dep/r/libusbp/include/libusbp.h",
     ]
     + (
         [
-            "dep/libusbp/src/windows/async_in_transfer_windows.c",
-            "dep/libusbp/src/windows/device_instance_id_windows.c",
-            "dep/libusbp/src/windows/device_windows.c",
-            "dep/libusbp/src/windows/error_windows.c",
-            "dep/libusbp/src/windows/generic_handle_windows.c",
-            "dep/libusbp/src/windows/generic_interface_windows.c",
-            "dep/libusbp/src/windows/interface_windows.c",
-            "dep/libusbp/src/windows/list_windows.c",
-            "dep/libusbp/src/windows/serial_port_windows.c",
+            "dep/r/libusbp/src/windows/async_in_transfer_windows.c",
+            "dep/r/libusbp/src/windows/device_instance_id_windows.c",
+            "dep/r/libusbp/src/windows/device_windows.c",
+            "dep/r/libusbp/src/windows/error_windows.c",
+            "dep/r/libusbp/src/windows/generic_handle_windows.c",
+            "dep/r/libusbp/src/windows/generic_interface_windows.c",
+            "dep/r/libusbp/src/windows/interface_windows.c",
+            "dep/r/libusbp/src/windows/list_windows.c",
+            "dep/r/libusbp/src/windows/serial_port_windows.c",
         ]
         if config.windows
         else (
             [
-                "dep/libusbp/src/mac/async_in_transfer_mac.c",
-                "dep/libusbp/src/mac/device_mac.c",
-                "dep/libusbp/src/mac/error_mac.c",
-                "dep/libusbp/src/mac/generic_handle_mac.c",
-                "dep/libusbp/src/mac/generic_interface_mac.c",
-                "dep/libusbp/src/mac/iokit_mac.c",
-                "dep/libusbp/src/mac/list_mac.c",
-                "dep/libusbp/src/mac/serial_port_mac.c",
+                "dep/r/libusbp/src/mac/async_in_transfer_mac.c",
+                "dep/r/libusbp/src/mac/device_mac.c",
+                "dep/r/libusbp/src/mac/error_mac.c",
+                "dep/r/libusbp/src/mac/generic_handle_mac.c",
+                "dep/r/libusbp/src/mac/generic_interface_mac.c",
+                "dep/r/libusbp/src/mac/iokit_mac.c",
+                "dep/r/libusbp/src/mac/list_mac.c",
+                "dep/r/libusbp/src/mac/serial_port_mac.c",
             ]
             if config.osx
             else [
-                "dep/libusbp/src/linux/async_in_transfer_linux.c",
-                "dep/libusbp/src/linux/device_linux.c",
-                "dep/libusbp/src/linux/error_linux.c",
-                "dep/libusbp/src/linux/generic_handle_linux.c",
-                "dep/libusbp/src/linux/generic_interface_linux.c",
-                "dep/libusbp/src/linux/list_linux.c",
-                "dep/libusbp/src/linux/serial_port_linux.c",
-                "dep/libusbp/src/linux/udev_linux.c",
-                "dep/libusbp/src/linux/usbfd_linux.c",
+                "dep/r/libusbp/src/linux/async_in_transfer_linux.c",
+                "dep/r/libusbp/src/linux/device_linux.c",
+                "dep/r/libusbp/src/linux/error_linux.c",
+                "dep/r/libusbp/src/linux/generic_handle_linux.c",
+                "dep/r/libusbp/src/linux/generic_interface_linux.c",
+                "dep/r/libusbp/src/linux/list_linux.c",
+                "dep/r/libusbp/src/linux/serial_port_linux.c",
+                "dep/r/libusbp/src/linux/udev_linux.c",
+                "dep/r/libusbp/src/linux/usbfd_linux.c",
             ]
         )
     ),
@@ -571,27 +571,27 @@ clibrary(
             name="libusbp_repo",
             url="https://github.com/pololu/libusbp",
             branch="master",
-            path="dep/libusbp",
+            path="dep/r/libusbp",
         )
     ],
     hdrs={
-        "libusbp_internal.h": "dep/libusbp/src/libusbp_internal.h",
+        "libusbp_internal.h": "dep/r/libusbp/src/libusbp_internal.h",
         "libusbp_config.h": "dep/libusbp_config.h",
-        "libusbp.hpp": "dep/libusbp/include/libusbp.hpp",
-        "libusbp.h": "dep/libusbp/include/libusbp.h",
+        "libusbp.hpp": "dep/r/libusbp/include/libusbp.hpp",
+        "libusbp.h": "dep/r/libusbp/include/libusbp.h",
     },
 )
 
 clibrary(
     name="stb_lib",
     srcs=["dep/stb_image_write.c"],
-    hdrs={"stb_image_write.h": "dep/stb/stb_image_write.h"},
+    hdrs={"stb_image_write.h": "dep/r/stb/stb_image_write.h"},
     deps=[
         git_repository(
             name="stb_repo",
             url="https://github.com/nothings/stb",
             branch="master",
-            path="dep/stb",
+            path="dep/r/stb",
         )
     ],
 )
