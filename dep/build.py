@@ -406,6 +406,12 @@ package(
                 path="dep/plutovg",
             )
         ],
+        cflags=[
+            "-DPLUTOVG_BUILD_STATIC",
+        ],
+        caller_cflags=[
+            "-DPLUTOVG_BUILD_STATIC",
+        ],
     ),
 )
 
@@ -448,11 +454,9 @@ package(
         ],
         cflags=[
             "-DLUNASVG_BUILD_STATIC",
-            "-DPLUTOVG_BUILD_STATIC",
         ],
         caller_cflags=[
             "-DLUNASVG_BUILD_STATIC",
-            "-DPLUTOVG_BUILD_STATIC",
         ],
     ),
 )
