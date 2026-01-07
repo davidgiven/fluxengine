@@ -96,7 +96,7 @@ export(
                     "dep/hfsutils",
                     "dep+libusbp_lib",
                     "dep+snowhouse_lib",
-                    "dep/stb",
+                    "dep+stb_lib",
                     "lib/algorithms",
                     "lib/config",
                     "lib/core",

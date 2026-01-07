@@ -577,3 +577,17 @@ clibrary(
         "libusbp.h": "dep/libusbp/include/libusbp.h",
     },
 )
+
+clibrary(
+    name="stb_lib",
+    srcs=["dep/stb_image_write.c"],
+    hdrs={"stb_image_write.h": "dep/stb/stb_image_write.h"},
+    deps=[
+        git_repository(
+            name="stb_repo",
+            url="https://github.com/nothings/stb",
+            branch="master",
+            path="dep/stb",
+        )
+    ],
+)
