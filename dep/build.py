@@ -561,7 +561,11 @@ clibrary(
         if config.windows
         else []
     ),
-    deps=([package(name="udev_lib", package="libudev")] if config.unix else [])
+    deps=(
+        [package(name="udev_lib", package="libudev")]
+        if not config.windows and not config.osx
+        else []
+    )
     + [
         git_repository(
             name="libusbp_repo",
