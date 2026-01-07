@@ -605,6 +605,12 @@ git_repository(
     path="dep/r/libwolv",
 )
 
+libwolv_cflags = (
+    ["-DOS_MACOS"]
+    if config.osx
+    else ["-DOS_WINDOWS"] if config.windows else ["-DOS_LINUX"]
+)
+
 cxxlibrary(
     name="libwolv_core",
     srcs=[
@@ -680,6 +686,8 @@ cxxlibrary(
         }
     ),
     deps=[".+libwolv_repo"],
+    cflags=libwolv_cflags,
+    caller_cflags=libwolv_cflags,
 )
 
 if config.osx:
