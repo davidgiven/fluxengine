@@ -666,6 +666,7 @@ cxxlibrary(
                 "wolv/io/buffered_reader.hpp",
                 "wolv/io/file.hpp",
                 "wolv/io/fs.hpp",
+                "wolv/io/fs_macos.hpp",
                 "wolv/io/handle.hpp",
             ]
         }
