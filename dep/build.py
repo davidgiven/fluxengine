@@ -898,3 +898,17 @@ cxxlibrary(
         ),
     ],
 )
+
+clibrary(
+    name="microtar_lib",
+    srcs=["dep/r/microtar/src/microtar.c"],
+    hdrs={"microtar.h":"dep/r/microtar/src/microtar.h"},
+    deps=[
+        git_repository(
+            name="microtar_repo",
+            url="https://github.com/rxi/microtar",
+            branch="v0.1.0",
+            path="dep/r/microtar",
+        ),
+    ]
+)

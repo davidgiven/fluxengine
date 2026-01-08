@@ -81,12 +81,6 @@ cxxprogram(
 )
 
 
-clibrary(
-    name="libmicrotar",
-    srcs=sources_from("dep/imhex/lib/third_party/microtar/source"),
-    hdrs=headers_from("dep/imhex/lib/third_party/microtar/include"),
-)
-
 if config.osx:
     clibrary(
         name="libimhex-utils",
@@ -150,7 +144,7 @@ cxxlibrary(
         ".+imgui",
         ".+libcurl_lib",
         ".+libimhex-utils",
-        ".+libmicrotar",
+        "dep+microtar_lib",
         ".+magic_lib",
         ".+mbedtls_lib",
         "dep+libwolv_lib",
