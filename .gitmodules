@@ -4,9 +4,6 @@
 [submodule "dep/imgui"]
 	path = dep/imgui
 	url = https://github.com/ocornut/imgui.git
-[submodule "dep/pattern-language"]
-	path = dep/pattern-language
-	url = https://github.com/WerWolv/PatternLanguage.git
 [submodule "dep/libromfs"]
 	path = dep/libromfs
 	url = https://github.com/WerWolv/libromfs.git

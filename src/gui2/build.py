@@ -81,24 +81,6 @@ cxxprogram(
 )
 
 
-cxxlibrary(
-    name="libpl",
-    srcs=sources_from("dep/pattern-language/lib/source")
-    + sources_from("dep/pattern-language/cli/source"),
-    hdrs=(
-        headers_from("dep/pattern-language/lib/include")
-        | headers_from("dep/pattern-language/generators/include")
-        | headers_from("dep/pattern-language/cli/include")
-    ),
-    deps=[
-        "dep+libthrowingptr",
-        "dep+libwolv_lib",
-        "dep+fmt_lib",
-        "dep+cli11_lib",
-        "dep+nlohmannjson_lib",
-    ],
-)
-
 clibrary(
     name="libmicrotar",
     srcs=sources_from("dep/imhex/lib/third_party/microtar/source"),
@@ -169,11 +151,11 @@ cxxlibrary(
         ".+libcurl_lib",
         ".+libimhex-utils",
         ".+libmicrotar",
-        ".+libpl",
         ".+magic_lib",
         ".+mbedtls_lib",
         "dep+libwolv_lib",
         "dep+nativefiledialog_lib",
+        "dep+patternlanguage_lib",
         "dep+xdgpp_lib",
     ],
 )
@@ -307,7 +289,7 @@ plugin(
     deps=[
         ".+fonts-plugin",
         ".+libimhex",
-        ".+libpl",
+        "dep+patternlanguage_lib",
         ".+libtrace",
         ".+ui-plugin",
         "dep+libwolv_lib",
@@ -423,7 +405,7 @@ cxxprogram(
     + (["-ldl"] if config.unix else [])
     + (["-ldwmapi", "-lnetapi32"] if config.windows else []),
     deps=[
-        ".+libpl",
+        "dep+patternlanguage_lib",
         "dep+fmt_lib",
         ".+builtin-plugin",
         ".+fonts-plugin",
