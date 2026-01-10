@@ -92,7 +92,6 @@ export(
                     "arch+proto_lib",
                     "dep/adflib",
                     "dep/agg",
-                    "dep/fatfs",
                     "dep/hfsutils",
                     "dep+libusbp_lib",
                     "dep+snowhouse_lib",

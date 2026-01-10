@@ -920,6 +920,30 @@ clibrary(
     ],
 )
 
+clibrary(
+    name="fatfs_lib",
+    srcs=[
+        "dep/r/fatfs/source/ff.c",
+        "dep/r/fatfs/source/ffsystem.c",
+        "dep/r/fatfs/source/ffunicode.c",
+        "dep/r/fatfs/source/ff.h",
+    ],
+    hdrs={
+        "ff.h": "dep/r/fatfs/source/ff.h",
+        "ffconf.h": "dep/ffconf.h",
+        "diskio.h": "dep/r/fatfs/source/diskio.h",
+    },
+    cflags=["-Wno-pointer-sign"],
+    deps=[
+        git_repository(
+            name="fatfs_repo",
+            url="https://github.com/davidgiven/fatfs",
+            branch="R0.14b-fluxengine",
+            path="dep/r/fatfs",
+        )
+    ],
+)
+
 git_repository(
     name="imhex_repo",
     url="https://github.com/davidgiven/ImHex",

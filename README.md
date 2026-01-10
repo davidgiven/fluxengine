@@ -237,10 +237,6 @@ library, written by Maxim Semanarev (and others). It is licensed under the
 terms of the 3-clause BSD license. Please see the contents of the directory for
 the full text. It's been lightly modified by me.
 
-As an exception, `dep/fatfs` contains the fatfs library, taken from
-http://elm-chan.org/fsw/ff/00index_e.html. It is single-clause BSD licensed.
-Please see the contents of the directory for the full text.
-
 As an exception, `dep/adflib` contains the adflib library, written by Laurent
 Clevy et al, taken from https://github.com/lclevy/ADFlib. It is GPL 2.0
 licensed. Please see the contents of the directory for the full text.
