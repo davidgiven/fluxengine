@@ -613,17 +613,21 @@ libwolv_cflags = (
 
 cxxlibrary(
     name="libwolv_core",
-    srcs=[
-        "dep/r/libwolv/libs/io/source/io/file.cpp",
-        "dep/r/libwolv/libs/io/source/io/file_unix.cpp",
-        "dep/r/libwolv/libs/io/source/io/fs.cpp",
-        "dep/r/libwolv/libs/io/source/io/handle.cpp",
-        "dep/r/libwolv/libs/math_eval/source/math_eval/math_evaluator.cpp",
-        "dep/r/libwolv/libs/net/source/net/common.cpp",
-        "dep/r/libwolv/libs/net/source/net/socket_client.cpp",
-        "dep/r/libwolv/libs/net/source/net/socket_server.cpp",
-        "dep/r/libwolv/libs/utils/source/utils/string.cpp",
-    ],
+    srcs=(
+        [
+            "dep/r/libwolv/libs/io/source/io/file.cpp",
+            "dep/r/libwolv/libs/io/source/io/fs.cpp",
+            "dep/r/libwolv/libs/io/source/io/handle.cpp",
+            "dep/r/libwolv/libs/math_eval/source/math_eval/math_evaluator.cpp",
+            "dep/r/libwolv/libs/net/source/net/common.cpp",
+            "dep/r/libwolv/libs/net/source/net/socket_client.cpp",
+            "dep/r/libwolv/libs/net/source/net/socket_server.cpp",
+            "dep/r/libwolv/libs/utils/source/utils/string.cpp",
+        ]
+        + ["dep/r/libwolv/libs/io/source/io/file_unix.cpp"]
+        if not config.windows
+        else []
+    ),
     hdrs=(
         {"jthread.hpp": "./jthread.hpp"}
         | {
