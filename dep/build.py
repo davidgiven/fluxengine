@@ -624,9 +624,11 @@ cxxlibrary(
             "dep/r/libwolv/libs/net/source/net/socket_server.cpp",
             "dep/r/libwolv/libs/utils/source/utils/string.cpp",
         ]
-        + ["dep/r/libwolv/libs/io/source/io/file_unix.cpp"]
-        if not config.windows
-        else []
+        + (
+            ["dep/r/libwolv/libs/io/source/io/file_unix.cpp"]
+            if not config.windows
+            else []
+        )
     ),
     hdrs=(
         {"jthread.hpp": "./jthread.hpp"}
