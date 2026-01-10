@@ -24,7 +24,6 @@ jobs:
       with:
         repository: 'davidgiven/fluxengine'
         path: 'fluxengine'
-        submodules: 'true'
     - uses: actions/checkout@v4
       with:
         repository: 'davidgiven/fluxengine-testdata'
@@ -43,7 +42,6 @@ jobs:
       with:
         repository: 'davidgiven/fluxengine'
         path: 'fluxengine'
-        submodules: 'true'
     - uses: actions/checkout@v4
       with:
         repository: 'davidgiven/fluxengine-testdata'
@@ -93,7 +91,6 @@ jobs:
       with:
         repository: 'davidgiven/fluxengine'
         path: 'fluxengine'
-        submodules: 'true'
 
     - uses: actions/checkout@v4
       with:
