@@ -10,4 +10,5 @@ remote
 FluxEngine.cydsn/CortexM3
 FluxEngine.cydsn/Generated_Source
 FluxEngine.cydsn/codegentemp
+dep/r
 

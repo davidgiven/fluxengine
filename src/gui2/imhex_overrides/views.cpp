@@ -9,7 +9,6 @@
 #include "content/views/view_patches.hpp"
 #include "content/views/view_command_palette.hpp"
 #include "content/views/view_settings.hpp"
-#include "content/views/view_data_processor.hpp"
 #include "content/views/view_constants.hpp"
 #include "content/views/view_store.hpp"
 #include "content/views/view_provider_settings.hpp"

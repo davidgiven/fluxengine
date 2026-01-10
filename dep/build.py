@@ -912,3 +912,10 @@ clibrary(
         ),
     ]
 )
+
+git_repository(
+            name="imhex_repo",
+            url="https://github.com/davidgiven/ImHex",
+            branch="master",
+            path="dep/r/imhex",
+        ),
