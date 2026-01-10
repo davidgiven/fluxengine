@@ -2,8 +2,6 @@ from build.c import cxxprogram, cxxlibrary, simplerule, clibrary
 from build.ab import simplerule
 from build.pkg import package
 from build.utils import glob
-from functools import reduce
-import operator
 from os.path import *
 import config
 
@@ -384,9 +382,9 @@ def plugin(name, id, srcs, hdrs, romfsdir, deps):
 
     cxxlibrary(
         name=name,
-        srcs=srcs + [f".+{id}_romfs", "dep/libromfs/lib/source/romfs.cpp"],
+        srcs=srcs + [f".+{id}_romfs", "dep/r/libromfs/lib/source/romfs.cpp"],
         hdrs=hdrs
-        | {"romfs/romfs.hpp": "dep/libromfs/lib/include/romfs/romfs.hpp"},
+        | {"romfs/romfs.hpp": "dep/r/libromfs/lib/include/romfs/romfs.hpp"},
         cflags=cflags
         + [
             f"-DIMHEX_PLUGIN_NAME={id}",
@@ -394,7 +392,7 @@ def plugin(name, id, srcs, hdrs, romfsdir, deps):
             f"-DIMHEX_PLUGIN_FEATURES_CONTENT=",
             f"-Dromfs=romfs_{id}",
         ],
-        deps=deps,
+        deps=deps + ["dep+libromfs_repo"],
     )
 
 

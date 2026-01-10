@@ -903,7 +903,7 @@ cxxlibrary(
 clibrary(
     name="microtar_lib",
     srcs=["dep/r/microtar/src/microtar.c"],
-    hdrs={"microtar.h":"dep/r/microtar/src/microtar.h"},
+    hdrs={"microtar.h": "dep/r/microtar/src/microtar.h"},
     deps=[
         git_repository(
             name="microtar_repo",
@@ -911,12 +911,19 @@ clibrary(
             branch="v0.1.0",
             path="dep/r/microtar",
         ),
-    ]
+    ],
 )
 
 git_repository(
-            name="imhex_repo",
-            url="https://github.com/davidgiven/ImHex",
-            branch="master",
-            path="dep/r/imhex",
-        ),
+    name="imhex_repo",
+    url="https://github.com/davidgiven/ImHex",
+    branch="master",
+    path="dep/r/imhex",
+),
+
+git_repository(
+    name="libromfs_repo",
+    url="https://github.com/WerWolv/libromfs",
+    branch="master",
+    path="dep/r/libromfs",
+),
