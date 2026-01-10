@@ -336,7 +336,20 @@ cxxlibrary(
             for f in ["hex/trace/stacktrace.hpp", "hex/trace/exceptions.hpp"]
         }
         | {
-            "ItaniumNodes.def": "dep/r/imhex/lib/third_party/llvm-demangle/include/llvm/Demangle/ItaniumNodes.def"
+            f: f"dep/r/imhex/lib/third_party/llvm-demangle/include/{f}"
+            for f in [
+                "llvm/Demangle/Utility.h",
+                "llvm/Demangle/DemangleConfig.h",
+                "llvm/Demangle/MicrosoftDemangleNodes.h",
+                "llvm/Demangle/MicrosoftDemangle.h",
+                "llvm/Demangle/ItaniumNodes.def",
+                "llvm/Demangle/ItaniumDemangle.h",
+                "llvm/Demangle/Demangle.h",
+                "llvm/Demangle/StringViewExtras.h",
+            ]
+        }
+        | {
+            "ItaniumNodes.def": "dep/r/imhex/lib/third_party/llvm-demangle/include/llvm/Demangle/ItaniumNodes.def",
         }
     ),
     deps=["dep+imhex_repo"],
