@@ -615,6 +615,7 @@ cxxlibrary(
     name="libwolv_core",
     srcs=[
         "dep/r/libwolv/libs/io/source/io/file.cpp",
+        "dep/r/libwolv/libs/io/source/io/file_unix.cpp",
         "dep/r/libwolv/libs/io/source/io/fs.cpp",
         "dep/r/libwolv/libs/io/source/io/handle.cpp",
         "dep/r/libwolv/libs/math_eval/source/math_eval/math_evaluator.cpp",
@@ -709,7 +710,7 @@ elif config.windows:
 else:
     cxxlibrary(
         name="libwolv_lib",
-        srcs=["dep/r/libwolv/libs/io/source/io/file_unix.cpp"],
+        srcs=[],
         deps=[".+libwolv_core"],
     )
 
