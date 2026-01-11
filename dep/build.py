@@ -933,7 +933,13 @@ clibrary(
         "ffconf.h": "dep/ffconf.h",
         "diskio.h": "dep/r/fatfs/source/diskio.h",
     },
-    cflags=["-Wno-pointer-sign"],
+    cflags=[
+        "-Wno-pointer-sign",
+        # Forces our own customised ffconf.h to be read in instead of the one
+        # in the fatfs source code.
+        "-include",
+        ".obj/unix/dep/+fatfs_lib_hdr/ffconf.h",
+    ],
     deps=[
         git_repository(
             name="fatfs_repo",
