@@ -29,14 +29,6 @@ package(name="mbedtls_lib", package="mbedtls")
 cxxlibrary(
     name="imgui",
     srcs=[
-        "dep/r/imhex/lib/third_party/imgui/imgui_test_engine/source/imgui_te_perftool.cpp",
-        "dep/r/imhex/lib/third_party/imgui/imgui_test_engine/source/imgui_te_coroutine.cpp",
-        "dep/r/imhex/lib/third_party/imgui/imgui_test_engine/source/imgui_te_exporters.cpp",
-        "dep/r/imhex/lib/third_party/imgui/imgui_test_engine/source/imgui_te_context.cpp",
-        "dep/r/imhex/lib/third_party/imgui/imgui_test_engine/source/imgui_capture_tool.cpp",
-        "dep/r/imhex/lib/third_party/imgui/imgui_test_engine/source/imgui_te_utils.cpp",
-        "dep/r/imhex/lib/third_party/imgui/imgui_test_engine/source/imgui_te_ui.cpp",
-        "dep/r/imhex/lib/third_party/imgui/imgui_test_engine/source/imgui_te_engine.cpp",
         "dep/r/imhex/lib/third_party/imgui/backend/source/imgui_impl_glfw.cpp",
         "dep/r/imhex/lib/third_party/imgui/backend/source/imgui_impl_opengl3.cpp",
         "dep/r/imhex/lib/third_party/imgui/imgui/source/imgui.cpp",
@@ -64,7 +56,6 @@ cxxlibrary(
         f: f"dep/r/imhex/lib/third_party/imgui/imgui/include/{f}"
         for f in [
             "imstb_truetype.h",
-            "imconfig.h",
             "imgui.h",
             "imstb_rectpack.h",
             "imgui_internal.h",
@@ -101,24 +92,6 @@ cxxlibrary(
         for f in [
             "imnodes.h",
             "imnodes_internal.h",
-        ]
-    }
-    | {
-        f: f"dep/r/imhex/lib/third_party/imgui/imgui_test_engine/include/{f}"
-        for f in [
-            "imgui_capture_tool.h",
-            "imgui_te_context.h",
-            "thirdparty/stb/imstb_image_write.h",
-            "thirdparty/Str/Str.h",
-            "thirdparty/Str/Str.natvis",
-            "imgui_te_utils.h",
-            "imgui_te_engine.h",
-            "imgui_te_internal.h",
-            "imgui_te_ui.h",
-            "imgui_te_exporters.h",
-            "imgui_te_imconfig.h",
-            "imgui_te_perftool.h",
-            "imgui_te_coroutine.h",
         ]
     },
     deps=[".+freetype2_lib", "dep+lunasvg", ".+glfw3_lib", "dep+imhex_repo"],
@@ -284,14 +257,14 @@ cxxlibrary(
         ".+glfw3_lib",
         ".+imgui",
         ".+libcurl_lib",
-        "dep+microtar_lib",
         ".+magic_lib",
         ".+mbedtls_lib",
+        "dep+imhex_repo",
         "dep+libwolv_lib",
+        "dep+microtar_lib",
         "dep+nativefiledialog_lib",
         "dep+patternlanguage_lib",
         "dep+xdgpp_lib",
-        "dep+imhex_repo",
     ],
 )
 
