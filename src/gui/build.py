@@ -40,7 +40,7 @@ cxxprogram(
         "dep/adflib",
         "dep/fatfs",
         "dep/hfsutils",
-        "dep/libusbp",
+        "dep+libusbp_lib",
         "extras+icons",
         "lib/core",
         "lib/data",
@@ -50,7 +50,7 @@ cxxprogram(
         "src/formats",
         "src/gui/drivetypes",
         "+z_lib",
-        "+fmt_lib",
+        "dep+fmt_lib",
         "+protobuf_lib",
     ],
 )

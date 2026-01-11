@@ -86,21 +86,21 @@ Section "FluxEngine (required)"
 	File /oname=fluxengine.exe fluxengine-stripped.exe
 	File /oname=fluxengine-gui.exe fluxengine-gui-stripped.exe
 	File README.md
-	CreateDirectory $INSTDIR\dep
-	CreateDirectory $INSTDIR\dep\adflib
-	File /oname=dep\adflib\COPYING dep\adflib\COPYING
-	CreateDirectory $INSTDIR\dep\hfsutils
-	File /oname=dep\hfsutils\COPYING dep\hfsutils\COPYING
-	CreateDirectory $INSTDIR\dep\stb
-	File /oname=dep\stb\LICENSE dep\stb\LICENSE
-	CreateDirectory $INSTDIR\dep\fatfs
-	File /oname=dep\fatfs\LICENSE.txt dep\fatfs\LICENSE.txt
-	CreateDirectory $INSTDIR\dep\libusbp
-	File /oname=dep\libusbp\LICENSE.txt dep\libusbp\LICENSE.txt
-	CreateDirectory $INSTDIR\dep\snowhouse
-	File /oname=dep\snowhouse\LICENSE_1_0.txt dep\snowhouse\LICENSE_1_0.txt
-	CreateDirectory $INSTDIR\dep\agg
-	File /oname=dep\agg\README dep\agg\README
+	#CreateDirectory $INSTDIR\dep
+	#CreateDirectory $INSTDIR\dep\adflib
+	#File /oname=dep\adflib\COPYING dep\adflib\COPYING
+	#CreateDirectory $INSTDIR\dep\hfsutils
+	#File /oname=dep\hfsutils\COPYING dep\hfsutils\COPYING
+	#CreateDirectory $INSTDIR\dep\stb
+	#File /oname=dep\stb\LICENSE dep\stb\LICENSE
+	#CreateDirectory $INSTDIR\dep\fatfs
+	#File /oname=dep\fatfs\LICENSE.txt dep\fatfs\LICENSE.txt
+	#CreateDirectory $INSTDIR\dep\libusbp
+	#File /oname=dep\libusbp\LICENSE.txt dep\libusbp\LICENSE.txt
+	#CreateDirectory $INSTDIR\dep\snowhouse
+	#File /oname=dep\snowhouse\LICENSE_1_0.txt dep\snowhouse\LICENSE_1_0.txt
+	#CreateDirectory $INSTDIR\dep\agg
+	#File /oname=dep\agg\README dep\agg\README
 
 	; Write the installation path into the registry
 	WriteRegStr HKLM SOFTWARE\NSIS_FluxEngine "Install_Dir" "$INSTDIR"

@@ -22,5 +22,5 @@ cxxlibrary(
         "lib/data/fluxmapreader.h": "./fluxmapreader.h",
         "lib/data/fluxpattern.h": "./fluxpattern.h",
     },
-    deps=["lib/core", "lib/config", "+protocol", "dep/lexy"],
+    deps=["lib/core", "lib/config", "+protocol", "dep+lexy_lib"],
 )

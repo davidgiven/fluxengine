@@ -9,7 +9,7 @@ cxxprogram(
     name="brother120tool",
     srcs=["./brother120tool.cc"],
     deps=[
-        "+fmt_lib",
+        "dep+fmt_lib",
         "+protobuf_lib",
         "+z_lib",
         "lib/config",
@@ -26,7 +26,7 @@ cxxprogram(
     name="brother240tool",
     srcs=["./brother240tool.cc"],
     deps=[
-        "+fmt_lib",
+        "dep+fmt_lib",
         "+protobuf_lib",
         "+z_lib",
         "lib/config",
@@ -43,12 +43,12 @@ cxxprogram(
     name="upgrade-flux-file",
     srcs=["./upgrade-flux-file.cc"],
     deps=[
-        "+fmt_lib",
+        "dep+fmt_lib",
         "+protobuf_lib",
         "+protocol",
         "+sqlite3_lib",
         "+z_lib",
-        "dep/libusbp",
+        "dep+libusbp_lib",
         "lib/config+proto_lib",
         "lib/core",
         "lib/data",

@@ -84,6 +84,6 @@ cxxlibrary(
     deps=[
         "lib/core",
         ".+proto_lib",
-        "+fmt_lib",
+        "dep+fmt_lib",
     ],
 )

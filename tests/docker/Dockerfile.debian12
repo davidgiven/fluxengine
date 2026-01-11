@@ -7,7 +7,8 @@ RUN apt install -y python3 make xz-utils python3 python3-hamcrest \
     libudev-dev g++ libwxgtk3.2-dev ninja-build \
     libfreetype-dev libglfw3-dev libboost-regex-dev \
     nlohmann-json3-dev libmd4c-dev libdbus-1-dev \
-    libcurl4-openssl-dev libmagic-dev libmbedtls-dev
+    libcurl4-openssl-dev libmagic-dev libmbedtls-dev \
+    git
 
 RUN useradd app
 RUN mkdir -p /home/app
