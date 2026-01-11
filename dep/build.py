@@ -931,6 +931,7 @@ clibrary(
     hdrs={
         "ff.h": "dep/r/fatfs/source/ff.h",
         "ffconf.h": "dep/ffconf.h",
+        "ffconf_override.h": "dep/ffconf_override.h",
         "diskio.h": "dep/r/fatfs/source/diskio.h",
     },
     cflags=[
@@ -938,7 +939,7 @@ clibrary(
         # Forces our own customised ffconf.h to be read in instead of the one
         # in the fatfs source code.
         "-include",
-        ".obj/unix/dep/+fatfs_lib_hdr/ffconf.h",
+        "ffconf_override.h"
     ],
     deps=[
         git_repository(
