@@ -15,6 +15,13 @@ install some support packages. **You will need to check out git with submodules 
     `libmagic-dev` `libdbus-1-dev` `libglfw3-dev` `libfreetype-dev`
     `libboost-regex-dev` Plus, optionally (if not present, internal versions
     will be used): `nlohmann-json3-dev` `libcli11-dev` `libmd4c-dev`
+  - For Linux with RHEL+EPEL/Fedora:
+    `@c-development` `git` `ninja-build` `protobuf-compiler`
+    `libudev-devel` `sqlite-devel` `fmt-devel` `protobuf-devel` `file-devel`
+    `mbedtls-devel` `libcurl-devel` `dbus-devel` `glfw-devel` `freetype-devel`
+    `boost-devel` `systemd-devel`
+    Plus, optionally (if not present, internal versions will be used):
+    `cli11-devel` `md4c-devel` `lunasvg-devel`
   - For OSX with Homebrew:
     `sqlite` `pkg-config` `libusb` `protobuf` `fmt` `make` `coreutils`
     `dylibbundler` `libjpeg` `libmagic`  `boost` `glfw3` `ninja` `python`
