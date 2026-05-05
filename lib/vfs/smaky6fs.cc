@@ -5,9 +5,19 @@
 
 /* A directory entry looks like:
  *
- * 00-09: ten byte filename FFFFFFFF.EE
- * 0a-0b: word: start sector
- * 0c-17: unknown
+ * 00-07: name, space-padded ASCII (high bit may be set as attribute flag → mask with 0x7f)
+ * 08-09: 2-char type code (SY, SM, ST, SR, LS, FH, BS, IM, KS …)
+ * 0a-0b: uint16 LE start_sector  – first data sector (0-based absolute)
+ * 0c-0d: uint16 LE end_sector    – first sector after the file (exclusive)
+ * 0e-0f: uint16 LE flags         – purpose unknown
+ * 10-11: uint16 LE last_bytes    – bytes used in last sector;
+ *                                   0 means last sector is completely full
+ *         exact_size = (size_sectors-1)*256 + last_bytes  if last_bytes > 0
+ *                      size_sectors * 256                  if last_bytes == 0
+ * 12-13: load address  – high byte then low byte (reliable for type SM)
+ * 14-15: entry point   – same encoding
+ * 16:    month BCD (0x07 = July);  0x00 or 0xFF = no date
+ * 17:    year  BCD (0x82 = 1982);  0x00 or 0xFF = no date
  */
 
 class Smaky6Filesystem : public Filesystem
@@ -57,37 +67,59 @@ class Smaky6Filesystem : public Filesystem
                 filename = ss.str();
             }
 
-            std::string metadataBytes;
-            {
-                std::stringstream ss;
-
-                for (int i = 10; i < 0x18; i++)
-                    ss << fmt::format("{:02x} ", (uint8_t)dbuf[i]);
-
-                metadataBytes = ss.str();
-            }
-
             ByteReader br(dbuf);
-
-            br.skip(10); /* filename */
+            br.skip(10); /* skip filename/type already parsed above */
             startSector = br.read_le16();
-            endSector = br.read_le16();
-            br.skip(2); /* unknown */
+            endSector   = br.read_le16();
+            uint16_t flags = br.read_le16(); /* purpose unknown */
             lastSectorLength = br.read_le16();
+            uint8_t loadHi  = br.read_8();
+            uint8_t loadLo  = br.read_8();
+            uint8_t entryHi = br.read_8();
+            uint8_t entryLo = br.read_8();
+            uint8_t monthBcd = br.read_8();
+            uint8_t yearBcd  = br.read_8();
+
+            /* Decode BCD date; 0x00 and 0xFF both mean "no date" */
+            auto bcdToInt = [](uint8_t b) -> int {
+                return (b >> 4) * 10 + (b & 0x0f);
+            };
+            int month = (monthBcd && monthBcd != 0xff) ? bcdToInt(monthBcd) : 0;
+            int year  = (yearBcd  && yearBcd  != 0xff) ? bcdToInt(yearBcd)  : 0;
+
+            uint16_t loadAddr  = ((uint16_t)loadHi  << 8) | loadLo;
+            uint16_t entryAddr = ((uint16_t)entryHi << 8) | entryLo;
 
             file_type = TYPE_FILE;
-            length = (endSector - startSector - 1) * 256 + lastSectorLength;
+            /* When lastSectorLength == 0 the last sector is completely full;
+             * FluxEngine's original formula subtracted 256 bytes in that case. */
+            length = lastSectorLength
+                ? (endSector - startSector - 1) * 256 + lastSectorLength
+                : (endSector - startSector) * 256;
 
             path = {filename};
             attributes[Filesystem::FILENAME] = filename;
-            attributes[Filesystem::LENGTH] = std::to_string(length);
+            attributes[Filesystem::LENGTH]    = std::to_string(length);
             attributes[Filesystem::FILE_TYPE] = "file";
-            attributes[Filesystem::MODE] = "";
+            attributes[Filesystem::MODE]      = "";
             attributes["smaky6.start_sector"] = std::to_string(startSector);
-            attributes["smaky6.end_sector"] = std::to_string(endSector);
-            attributes["smaky6.sectors"] =
-                std::to_string(endSector - startSector);
-            attributes["smaky6.metadata_bytes"] = metadataBytes;
+            attributes["smaky6.end_sector"]   = std::to_string(endSector);
+            attributes["smaky6.sectors"]      = std::to_string(endSector - startSector);
+            attributes["smaky6.flags"]        = fmt::format("0x{:04x}", flags);
+            if (loadAddr)
+                attributes["smaky6.load_addr"]  = fmt::format("0x{:04x}", loadAddr);
+            if (entryAddr)
+                attributes["smaky6.entry_addr"] = fmt::format("0x{:04x}", entryAddr);
+            if (month && year)
+            {
+                static const char* months[] = {"","Jan","Feb","Mar","Apr","May","Jun",
+                                                "Jul","Aug","Sep","Oct","Nov","Dec"};
+                int yearFull = (year >= 78) ? 1900 + year : 2000 + year;
+                attributes["smaky6.date"] =
+                    fmt::format("{} {}",
+                        (month >= 1 && month <= 12) ? months[month] : "?",
+                        yearFull);
+            }
         }
 
     public:
@@ -110,7 +142,8 @@ class Smaky6Filesystem : public Filesystem
             for (int i = 0; i < 32; i++)
             {
                 auto dbuf = bytes.slice(i * 0x18, 0x18);
-                if (dbuf[0])
+                /* 0x00 = empty slot; 0xFF = deleted entry (used by system files) */
+                if (dbuf[0] && dbuf[0] != 0xff)
                 {
                     auto de = std::make_shared<SmakyDirent>(dbuf);
                     dirents.push_back(de);
