@@ -90,7 +90,10 @@ class Smaky6Filesystem : public Filesystem
             uint16_t loadAddr  = ((uint16_t)loadHi  << 8) | loadLo;
             uint16_t entryAddr = ((uint16_t)entryHi << 8) | entryLo;
 
-            file_type = TYPE_FILE;
+            /* DR entries are sub-directory containers, not plain files. */
+            file_type = (filename.size() > 3 &&
+                         filename.substr(filename.size() - 3) == ".DR")
+                        ? TYPE_DIRECTORY : TYPE_FILE;
             /* When lastSectorLength == 0 the last sector is completely full;
              * FluxEngine's original formula subtracted 256 bytes in that case. */
             length = lastSectorLength
@@ -132,23 +135,20 @@ class Smaky6Filesystem : public Filesystem
     class Directory
     {
     public:
+        /* Root directory: reads the 3-sector directory area at sector 0. */
         Directory(Smaky6Filesystem* fs)
         {
-            /* Read the directory. */
-
             auto bytes = fs->getLogicalSector(0, 3);
-            ByteReader br(bytes);
+            parseFrom(bytes, 0);
+        }
 
-            for (int i = 0; i < 32; i++)
-            {
-                auto dbuf = bytes.slice(i * 0x18, 0x18);
-                /* 0x00 = empty slot; 0xFF = deleted entry (used by system files) */
-                if (dbuf[0] && dbuf[0] != 0xff)
-                {
-                    auto de = std::make_shared<SmakyDirent>(dbuf);
-                    dirents.push_back(de);
-                }
-            }
+        /* Sub-directory inside a DR container:
+         * The first 3 sectors of the DR entry hold the sub-directory.
+         * Sector numbers stored there are relative to drStartSector. */
+        Directory(Smaky6Filesystem* fs, unsigned drStartSector)
+        {
+            auto bytes = fs->getLogicalSector(drStartSector, 3);
+            parseFrom(bytes, drStartSector);
         }
 
         std::shared_ptr<SmakyDirent> findFile(const std::string& filename)
@@ -158,6 +158,25 @@ class Smaky6Filesystem : public Filesystem
                     return de;
 
             throw FileNotFoundException();
+        }
+
+    private:
+        void parseFrom(const Bytes& bytes, unsigned sectorBase)
+        {
+            for (int i = 0; i < 32; i++)
+            {
+                auto dbuf = bytes.slice(i * 0x18, 0x18);
+                /* 0x00 = empty slot; 0xFF = deleted entry */
+                if (dbuf[0] && dbuf[0] != 0xff)
+                {
+                    auto de = std::make_shared<SmakyDirent>(dbuf);
+                    /* Sub-directory entries use relative sector numbers;
+                     * add the DR container's base sector to get absolute ones. */
+                    de->startSector += sectorBase;
+                    de->endSector   += sectorBase;
+                    dirents.push_back(de);
+                }
+            }
         }
 
     public:
@@ -200,37 +219,85 @@ public:
 
     std::vector<std::shared_ptr<Dirent>> list(const Path& path) override
     {
-        if (!path.empty())
-            throw FileNotFoundException();
-
-        Directory dir(this);
         std::vector<std::shared_ptr<Dirent>> result;
-        for (auto& de : dir.dirents)
-            result.push_back(de);
-        return result;
+
+        if (path.empty())
+        {
+            /* List the root directory. */
+            Directory dir(this);
+            for (auto& de : dir.dirents)
+                result.push_back(de);
+            return result;
+        }
+
+        if (path.size() == 1)
+        {
+            /* Listing a DR sub-directory. */
+            Directory root(this);
+            auto parent = root.findFile(path[0]);
+            if (parent->file_type != TYPE_DIRECTORY)
+                throw BadPathException(path);
+            Directory sub(this, parent->startSector);
+            for (auto& de : sub.dirents)
+                result.push_back(de);
+            return result;
+        }
+
+        throw BadPathException(path);
     }
 
     std::shared_ptr<Dirent> getDirent(const Path& path) override
     {
-        Directory dir(this);
-        if (path.size() != 1)
-            throw BadPathException();
+        if (path.size() == 1)
+        {
+            Directory dir(this);
+            return dir.findFile(path[0]);
+        }
 
-        return dir.findFile(path[0]);
+        if (path.size() == 2)
+        {
+            Directory root(this);
+            auto parent = root.findFile(path[0]);
+            if (parent->file_type != TYPE_DIRECTORY)
+                throw BadPathException(path);
+            Directory sub(this, parent->startSector);
+            return sub.findFile(path[1]);
+        }
+
+        throw BadPathException(path);
     }
 
     Bytes getFile(const Path& path) override
     {
-        if (path.size() != 1)
-            throw BadPathException(path);
+        if (path.size() == 1)
+        {
+            Directory dir(this);
+            auto de = dir.findFile(path[0]);
+            if (de->file_type == TYPE_DIRECTORY)
+                throw BadPathException(path);
+            Bytes data = getLogicalSector(
+                de->startSector, de->endSector - de->startSector);
+            return data.slice(0, de->length);
+        }
 
-        Directory dir(this);
-        auto de = dir.findFile(path[0]);
+        if (path.size() == 2)
+        {
+            Directory root(this);
+            auto parent = root.findFile(path[0]);
+            if (parent->file_type != TYPE_DIRECTORY)
+                throw BadPathException(path);
+            /* Sub-directory occupies the first 3 sectors of the DR entry;
+             * file data starts at sector 3 (relative to parent->startSector),
+             * but startSector in the sub-entry has already been made absolute
+             * by Directory::parseFrom, so we read directly. */
+            Directory sub(this, parent->startSector);
+            auto de = sub.findFile(path[1]);
+            Bytes data = getLogicalSector(
+                de->startSector, de->endSector - de->startSector);
+            return data.slice(0, de->length);
+        }
 
-        Bytes data =
-            getLogicalSector(de->startSector, de->endSector - de->startSector);
-        data = data.slice(0, de->length);
-        return data;
+        throw BadPathException(path);
     }
 
 private:
