@@ -135,17 +135,9 @@ class Smaky6Filesystem : public Filesystem
     class Directory
     {
     public:
-        /* Root directory: reads the 3-sector directory area at sector 0. */
-        Directory(Smaky6Filesystem* fs)
-        {
-            auto bytes = fs->getLogicalSector(0, 3);
-            parseFrom(bytes, 0);
-        }
-
-        /* Sub-directory inside a DR container:
-         * The first 3 sectors of the DR entry hold the sub-directory.
-         * Sector numbers stored there are relative to drStartSector. */
-        Directory(Smaky6Filesystem* fs, unsigned drStartSector)
+        /* drStartSector=0 reads the root directory; any other value reads
+         * the sub-directory stored in the first 3 sectors of a DR entry. */
+        Directory(Smaky6Filesystem* fs, unsigned drStartSector = 0)
         {
             auto bytes = fs->getLogicalSector(drStartSector, 3);
             parseFrom(bytes, drStartSector);
@@ -220,87 +212,54 @@ public:
     std::vector<std::shared_ptr<Dirent>> list(const Path& path) override
     {
         std::vector<std::shared_ptr<Dirent>> result;
-
-        if (path.empty())
-        {
-            /* List the root directory. */
-            Directory dir(this);
-            for (auto& de : dir.dirents)
-                result.push_back(de);
-            return result;
-        }
-
-        if (path.size() == 1)
-        {
-            /* Listing a DR sub-directory. */
-            Directory root(this);
-            auto parent = root.findFile(path[0]);
-            if (parent->file_type != TYPE_DIRECTORY)
-                throw BadPathException(path);
-            Directory sub(this, parent->startSector);
-            for (auto& de : sub.dirents)
-                result.push_back(de);
-            return result;
-        }
-
-        throw BadPathException(path);
+        for (auto& de : directoryAt(path).dirents)
+            result.push_back(de);
+        return result;
     }
 
     std::shared_ptr<Dirent> getDirent(const Path& path) override
     {
-        if (path.size() == 1)
-        {
-            Directory dir(this);
-            return dir.findFile(path[0]);
-        }
-
-        if (path.size() == 2)
-        {
-            Directory root(this);
-            auto parent = root.findFile(path[0]);
-            if (parent->file_type != TYPE_DIRECTORY)
-                throw BadPathException(path);
-            Directory sub(this, parent->startSector);
-            return sub.findFile(path[1]);
-        }
-
-        throw BadPathException(path);
+        return resolveDirent(path);
     }
 
     Bytes getFile(const Path& path) override
     {
-        if (path.size() == 1)
-        {
-            Directory dir(this);
-            auto de = dir.findFile(path[0]);
-            if (de->file_type == TYPE_DIRECTORY)
-                throw BadPathException(path);
-            Bytes data = getLogicalSector(
-                de->startSector, de->endSector - de->startSector);
-            return data.slice(0, de->length);
-        }
-
-        if (path.size() == 2)
-        {
-            Directory root(this);
-            auto parent = root.findFile(path[0]);
-            if (parent->file_type != TYPE_DIRECTORY)
-                throw BadPathException(path);
-            /* Sub-directory occupies the first 3 sectors of the DR entry;
-             * file data starts at sector 3 (relative to parent->startSector),
-             * but startSector in the sub-entry has already been made absolute
-             * by Directory::parseFrom, so we read directly. */
-            Directory sub(this, parent->startSector);
-            auto de = sub.findFile(path[1]);
-            Bytes data = getLogicalSector(
-                de->startSector, de->endSector - de->startSector);
-            return data.slice(0, de->length);
-        }
-
-        throw BadPathException(path);
+        auto de = resolveDirent(path);
+        if (de->file_type == TYPE_DIRECTORY)
+            throw BadPathException(path);
+        Bytes data = getLogicalSector(
+            de->startSector, de->endSector - de->startSector);
+        return data.slice(0, de->length);
     }
 
 private:
+    /* Returns the Directory whose entries are named by path.
+     * path=[] → root; path=["DIR.DR"] → DR sub-directory.
+     * The Smaky 6 FS is at most two levels deep; deeper paths are invalid. */
+    Directory directoryAt(const Path& path)
+    {
+        if (path.empty())
+            return Directory(this);
+        if (path.size() == 1)
+        {
+            auto parent = Directory(this).findFile(path[0]);
+            if (parent->file_type != TYPE_DIRECTORY)
+                throw BadPathException(path);
+            return Directory(this, parent->startSector);
+        }
+        throw BadPathException(path);
+    }
+
+    /* Resolves a full path to its SmakyDirent.
+     * path=["FILE"] → file in root; path=["DIR.DR","FILE"] → file in sub-dir. */
+    std::shared_ptr<SmakyDirent> resolveDirent(const Path& path)
+    {
+        if (path.empty())
+            throw BadPathException(path);
+        Path parentPath(path.begin(), path.end() - 1);
+        return directoryAt(parentPath).findFile(path.back());
+    }
+
     const Smaky6FsProto& _config;
 };
 
