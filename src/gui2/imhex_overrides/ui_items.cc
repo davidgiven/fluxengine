@@ -1,5 +1,5 @@
 #define addTitleBarButtons addTitleBarButtons_disabled
-#include "../../../dep/imhex/plugins/builtin/source/content/ui_items.cpp"
+#include "../../../dep/r/imhex/plugins/builtin/source/content/ui_items.cpp"
 #undef addTitleBarButtons
 
 namespace hex::plugin::builtin

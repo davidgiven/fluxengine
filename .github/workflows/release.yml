@@ -38,7 +38,6 @@ jobs:
         with:
           repository: 'davidgiven/fluxengine'
           path: 'fluxengine'
-          submodules: 'true'
 
       - name: run
         run: |
@@ -96,8 +95,6 @@ jobs:
     runs-on: ${{ matrix.runs-on }}
     steps:
     - uses: actions/checkout@v4
-      with:
-        submodules: 'true'
 
     - name: brew
       run: |

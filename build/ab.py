@@ -30,6 +30,7 @@ defaultGlobals = {}
 outputTargets = set()
 commandsDb = []
 belatedErrors = []
+atexits = []
 
 RE_FORMAT_SPEC = re.compile(
     r"(?:(?P<fill>[\s\S])?(?P<align>[<>=^]))?"
@@ -563,7 +564,14 @@ def add_belated_error(msg):
     belatedErrors += [msg]
 
 
-def emit_rule(self, ins, outs, cmds=[], label=None):
+def add_atexit(cb):
+    global atexits
+    atexits += [cb]
+
+
+def emit_rule(
+    self, ins, outs, cmds=[], label=None, sandbox=True, generator=False
+):
     name = self.name
     fins = [self.templateexpand(f) for f in set(filenamesof(ins))]
     fouts = [self.templateexpand(f) for f in filenamesof(outs)]
@@ -581,7 +589,8 @@ def emit_rule(self, ins, outs, cmds=[], label=None):
         os.makedirs(self.dir, exist_ok=True)
         rule = []
 
-        if G.AB_SANDBOX == "yes":
+        sandbox = sandbox and (G.AB_SANDBOX == "yes")
+        if sandbox:
             sandbox = join(self.dir, "sandbox")
             emit(f"rm -rf {sandbox}", into=rule)
             emit(
@@ -621,6 +630,9 @@ def emit_rule(self, ins, outs, cmds=[], label=None):
             )
         if label:
             emit(" description=", label)
+        if generator:
+            emit(" generator=true")
+
         emit("build", name, ":phony", *fouts)
     else:
         assert len(cmds) == 0, "rules with no outputs cannot have commands"
@@ -638,6 +650,8 @@ def simplerule(
     deps: Targets = [],
     commands=[],
     add_to_commanddb=False,
+    sandbox=True,
+    generator=False,
     label="RULE",
 ):
     self.ins = ins
@@ -676,6 +690,8 @@ def simplerule(
         outs=outs,
         label=self.templateexpand("$[label] $[name]") if label else None,
         cmds=cs,
+        sandbox=sandbox,
+        generator=generator,
     )
 
 
@@ -767,6 +783,9 @@ def main():
         for s in belatedErrors:
             print(s)
         sys.exit(1)
+
+    for cb in atexits:
+        cb()
 
     with open(outputdir + "/build.targets", "wt") as fp:
         fp.write("ninja-targets =")
