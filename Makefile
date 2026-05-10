@@ -1,7 +1,11 @@
 ifeq ($(BUILDTYPE),)
+    # On MSYS2 uname -s produces something like: MINGW64_NT-10.0-19045
+    # Strip the suffix off
+    OS := $(patsubst MINGW%,MINGW,$(shell uname -s))
     buildtype_Darwin = osx
     buildtype_Haiku = haiku
-    BUILDTYPE := $(buildtype_$(shell uname -s ))
+    buildtype_MINGW = windows
+    BUILDTYPE := $(buildtype_$(OS))
         ifeq ($(BUILDTYPE),)
                 BUILDTYPE := unix
         endif
