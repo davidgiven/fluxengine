@@ -157,6 +157,7 @@ static const std::vector<ImageConstructor> imageConstructors = {
     {".nsi",      IMAGETYPE_NSI,      MODE_RW},
     {".st",       IMAGETYPE_IMG,      MODE_RW},
     {".td0",      IMAGETYPE_TD0,      MODE_RO},
+    {".trd",      IMAGETYPE_IMG,      MODE_RW},
     {".vgi",      IMAGETYPE_IMG,      MODE_RW},
     {".xdf",      IMAGETYPE_IMG,      MODE_RW},
 };
