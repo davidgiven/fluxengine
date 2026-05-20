@@ -37,6 +37,7 @@ formats = [
     "ti99",
     "tids990",
     "tiki",
+    "trdos",
     "victor9k",
     "zilogmcz",
 ]
