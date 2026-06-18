@@ -16,6 +16,8 @@ class Path : public std::vector<std::string>
 {
 public:
     Path() {}
+    Path(const std::vector<std::string>::const_iterator& begin,
+        const std::vector<std::string>::const_iterator& end);
     Path(const std::vector<std::string> other);
     Path(const std::string& text);
 

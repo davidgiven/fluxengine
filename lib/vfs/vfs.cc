@@ -23,6 +23,11 @@ Path::Path(const std::vector<std::string> other):
 {
 }
 
+Path::Path(const std::vector<std::string>::const_iterator& begin, const std::vector<std::string>::const_iterator& end):
+    std::vector<std::string>(begin, end)
+{
+}
+
 Path::Path(const std::string& path)
 {
     if (path == "")
