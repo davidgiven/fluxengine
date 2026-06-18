@@ -17,6 +17,7 @@ def protoencode_single(self, name, srcs: Targets, proto, include, symbol):
                 "lib/fluxsource+proto_lib",
                 "lib/fluxsink+proto_lib",
                 "tests+test_proto_lib",
+                "+gc_lib",
                 "+protobuf_lib",
                 "dep+fmt_lib",
             ],
