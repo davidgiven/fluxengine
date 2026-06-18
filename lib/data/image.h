@@ -17,7 +17,7 @@ struct Geometry
     unsigned totalBytes = 0;
 };
 
-class Image
+class Image: public gc
 {
 public:
     Image();

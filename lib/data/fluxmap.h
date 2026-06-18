@@ -8,7 +8,7 @@
 
 class RawBits;
 
-class Fluxmap
+class Fluxmap: public gc
 {
 public:
     struct Position

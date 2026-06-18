@@ -17,6 +17,7 @@
 #include <optional>
 #include <regex>
 #include <ranges>
+#include <gc_cpp.h>
 #include "fmt/format.h"
 
 #if defined(_WIN32) || defined(__WIN32__)

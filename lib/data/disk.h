@@ -11,7 +11,7 @@ class LogicalTrackLayout;
 class PhysicalTrackLayout;
 class Sector;
 
-struct Record
+struct Record: public gc
 {
     nanoseconds_t clock = 0;
     nanoseconds_t startTime = 0;
@@ -20,7 +20,7 @@ struct Record
     Bytes rawData;
 };
 
-struct Track
+struct Track: public gc
 {
     std::shared_ptr<const LogicalTrackLayout> ltl;
     std::shared_ptr<const PhysicalTrackLayout> ptl;
@@ -36,7 +36,7 @@ struct Track
     std::vector<std::shared_ptr<const Sector>> normalisedSectors;
 };
 
-struct Disk
+struct Disk: public gc
 {
     Disk();
 

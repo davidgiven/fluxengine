@@ -10,7 +10,7 @@ def protoencode_single(self, name, srcs: Targets, proto, include, symbol):
         r = cxxprogram(
             name="protoencode_" + proto,
             srcs=["scripts/protoencode.cc"],
-            cflags=["-DPROTO=" + proto, "-DINCLUDE="+include],
+            cflags=["-DPROTO=" + proto, "-DINCLUDE=" + include],
             deps=[
                 "lib/core",
                 "lib/config+proto_lib",
@@ -31,15 +31,13 @@ def protoencode_single(self, name, srcs: Targets, proto, include, symbol):
         ins=srcs,
         outs=[f"={name}.cc"],
         deps=[r],
-        commands=[
-            "$[deps[0]] $[ins] $[outs] " + symbol
-        ],
+        commands=["$[deps[0]] $[ins] $[outs] " + symbol],
         label="PROTOENCODE",
     )
 
 
 @Rule
-def protoencode(self, name, proto, include,srcs: TargetsMap, symbol):
+def protoencode(self, name, proto, include, srcs: TargetsMap, symbol):
     encoded = [
         protoencode_single(
             name=f"{k}_cc",
@@ -65,6 +63,7 @@ cxxprogram(
     srcs=["./mkdoc.cc"],
     deps=[
         "dep+fmt_lib",
+        "+gc_lib",
         "+protobuf_lib",
         "lib/algorithms",
         "lib/config+proto_lib",
@@ -79,6 +78,7 @@ cxxprogram(
     srcs=["./mkdocindex.cc"],
     deps=[
         "dep+fmt_lib",
+        "+gc_lib",
         "+protobuf_lib",
         "lib/algorithms",
         "lib/config+proto_lib",

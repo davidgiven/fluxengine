@@ -8,7 +8,7 @@
 class FluxMatcher;
 class DecoderProto;
 
-struct FluxMatch
+struct FluxMatch: public gc
 {
     const FluxMatcher* matcher;
     unsigned intervals;
@@ -16,7 +16,7 @@ struct FluxMatch
     unsigned zeroes;
 };
 
-class FluxMatcher
+class FluxMatcher: public gc
 {
 public:
     virtual ~FluxMatcher() {}

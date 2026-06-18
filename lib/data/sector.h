@@ -8,7 +8,7 @@
 class Record;
 class LogicalTrackLayout;
 
-struct Sector : public LogicalLocation
+struct Sector : public LogicalLocation, public gc
 {
     enum Status
     {
