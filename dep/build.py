@@ -939,7 +939,7 @@ clibrary(
         # Forces our own customised ffconf.h to be read in instead of the one
         # in the fatfs source code.
         "-include",
-        "ffconf_override.h"
+        "ffconf_override.h",
     ],
     deps=[
         git_repository(
