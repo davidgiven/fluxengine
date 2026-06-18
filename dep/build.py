@@ -956,11 +956,11 @@ git_repository(
     url="https://github.com/davidgiven/ImHex",
     branch="master",
     path="dep/r/imhex",
-),
+)
 
 git_repository(
     name="libromfs_repo",
     url="https://github.com/WerWolv/libromfs",
     branch="master",
     path="dep/r/libromfs",
-),
+)

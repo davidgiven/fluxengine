@@ -7,7 +7,7 @@ either with it, a Greaseweazle, or (to a limited extent) an Applesauce.
 The CLI is pretty generic libusb stuff and should build and run on pretty much anything; the GUI is based on ImHex and
 will work wherever ImHex does. Support platforms for the FluxEngine client include Windows, Linux and OSX as
 well, although on Windows it'll need MSYS2 and mingw32. You'll need to
-install some support packages. **You will need to check out git with submodules enabled.**
+install some support packages.
 
   - For Linux, see the dockerfiles in
     [tests/docker](https://github.com/davidgiven/fluxengine/tree/master/tests/docker).
