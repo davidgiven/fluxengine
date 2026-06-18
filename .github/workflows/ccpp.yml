@@ -16,12 +16,12 @@ jobs:
         - debian13
         - fedora42
         - fedora43
+        - fedora43.nooptionaldeps
     steps:
     - uses: actions/checkout@v4
       with:
         repository: 'davidgiven/fluxengine'
         path: 'fluxengine'
-        submodules: 'true'
     - uses: actions/checkout@v4
       with:
         repository: 'davidgiven/fluxengine-testdata'
@@ -40,7 +40,6 @@ jobs:
       with:
         repository: 'davidgiven/fluxengine'
         path: 'fluxengine'
-        submodules: 'true'
     - uses: actions/checkout@v4
       with:
         repository: 'davidgiven/fluxengine-testdata'
@@ -74,7 +73,7 @@ jobs:
         msystem: mingw64
         update: true
         install: |
-          python diffutils ninja make zip
+          python diffutils ninja make zip git
         pacboy: |
           protobuf:p pkgconf:p curl-winssl:p file:p glfw:p mbedtls:p
           sqlite:p freetype:p boost:p gcc:p binutils:p nsis:p abseil-cpp:p
@@ -90,7 +89,6 @@ jobs:
       with:
         repository: 'davidgiven/fluxengine'
         path: 'fluxengine'
-        submodules: 'true'
 
     - uses: actions/checkout@v4
       with:

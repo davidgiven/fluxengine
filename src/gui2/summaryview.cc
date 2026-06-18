@@ -37,6 +37,7 @@ static std::string getActivityLabel(DiskActivityType type)
         case DiskActivityType::Write:
             return "W";
     }
+	throw std::invalid_argument("bad argument");
 }
 
 SummaryView::SummaryView():

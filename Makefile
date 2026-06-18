@@ -129,4 +129,4 @@ clean::
 include build/ab.mk
 
 docker-%: tests/docker/Dockerfile.%
-	docker build -t $* -f $< .
+	docker build --progress=plain -t $* -f $< .

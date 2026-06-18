@@ -17,5 +17,5 @@ cxxlibrary(
         "./usbfinder.cc",
     ],
     hdrs={"lib/usb/usb.h": "./usb.h", "lib/usb/usbfinder.h": "./usbfinder.h", "lib/usb/serial.h": "./serial.h"},
-    deps=["lib/core", "lib/config", "lib/external", "dep/libusbp", "+protocol"],
+    deps=["lib/core", "lib/config", "lib/external", "dep+libusbp_lib", "+protocol"],
 )
