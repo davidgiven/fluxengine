@@ -148,7 +148,7 @@ private:
     const BrotherEncoderProto& _config;
 };
 
-std::unique_ptr<Encoder> createBrotherEncoder(const EncoderProto& config)
+Encoder* createBrotherEncoder(const EncoderProto& config)
 {
-    return std::unique_ptr<Encoder>(new BrotherEncoder(config));
+    return new BrotherEncoder(config);
 }

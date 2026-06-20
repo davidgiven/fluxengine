@@ -186,7 +186,7 @@ private:
     }
 };
 
-std::unique_ptr<Encoder> createApple2Encoder(const EncoderProto& config)
+Encoder* createApple2Encoder(const EncoderProto& config)
 {
-    return std::unique_ptr<Encoder>(new Apple2Encoder(config));
+    return new Apple2Encoder(config);
 }

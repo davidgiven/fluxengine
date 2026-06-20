@@ -15,7 +15,6 @@
 
 extern std::unique_ptr<Decoder> createBrotherDecoder(
     const DecoderProto& config);
-extern std::unique_ptr<Encoder> createBrotherEncoder(
-    const EncoderProto& config);
+extern Encoder* createBrotherEncoder(const EncoderProto& config);
 
 #endif

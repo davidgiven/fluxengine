@@ -130,7 +130,7 @@ private:
     const MicropolisEncoderProto& _config;
 };
 
-std::unique_ptr<Encoder> createMicropolisEncoder(const EncoderProto& config)
+Encoder* createMicropolisEncoder(const EncoderProto& config)
 {
-    return std::unique_ptr<Encoder>(new MicropolisEncoder(config));
+    return new MicropolisEncoder(config);
 }

@@ -143,7 +143,7 @@ private:
     const AmigaEncoderProto& _config;
 };
 
-std::unique_ptr<Encoder> createAmigaEncoder(const EncoderProto& config)
+Encoder* createAmigaEncoder(const EncoderProto& config)
 {
-    return std::unique_ptr<Encoder>(new AmigaEncoder(config));
+    return new AmigaEncoder(config);
 }

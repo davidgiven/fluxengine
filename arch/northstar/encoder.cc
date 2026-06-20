@@ -162,7 +162,7 @@ private:
     const NorthstarEncoderProto& _config;
 };
 
-std::unique_ptr<Encoder> createNorthstarEncoder(const EncoderProto& config)
+Encoder* createNorthstarEncoder(const EncoderProto& config)
 {
-    return std::unique_ptr<Encoder>(new NorthstarEncoder(config));
+    return new NorthstarEncoder(config);
 }

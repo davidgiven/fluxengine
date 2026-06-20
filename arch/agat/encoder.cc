@@ -109,7 +109,7 @@ private:
     std::vector<bool> _bits;
 };
 
-std::unique_ptr<Encoder> createAgatEncoder(const EncoderProto& config)
+Encoder* createAgatEncoder(const EncoderProto& config)
 {
-    return std::unique_ptr<Encoder>(new AgatEncoder(config));
+    return new AgatEncoder(config);
 }

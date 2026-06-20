@@ -144,7 +144,7 @@ private:
     bool _lastBit;
 };
 
-std::unique_ptr<Encoder> createTids990Encoder(const EncoderProto& config)
+Encoder* createTids990Encoder(const EncoderProto& config)
 {
-    return std::unique_ptr<Encoder>(new Tids990Encoder(config));
+    return new Tids990Encoder(config);
 }

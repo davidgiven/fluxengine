@@ -17,7 +17,6 @@ class EncoderProto;
 
 extern std::unique_ptr<Decoder> createMacintoshDecoder(
     const DecoderProto& config);
-extern std::unique_ptr<Encoder> createMacintoshEncoder(
-    const EncoderProto& config);
+extern Encoder* createMacintoshEncoder(const EncoderProto& config);
 
 #endif

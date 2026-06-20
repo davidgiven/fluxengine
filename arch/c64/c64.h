@@ -29,8 +29,7 @@
 
 extern std::unique_ptr<Decoder> createCommodore64Decoder(
     const DecoderProto& config);
-extern std::unique_ptr<Encoder> createCommodore64Encoder(
-    const EncoderProto& config);
+extern Encoder* createCommodore64Encoder(const EncoderProto& config);
 
 extern nanoseconds_t clockPeriodForC64Track(unsigned track);
 

@@ -1,6 +1,7 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
+#include <gc_cpp.h>
 #include <stddef.h>
 #include <functional>
 #include <numeric>
@@ -17,7 +18,6 @@
 #include <optional>
 #include <regex>
 #include <ranges>
-#include <gc_cpp.h>
 #include "fmt/format.h"
 
 #if defined(_WIN32) || defined(__WIN32__)

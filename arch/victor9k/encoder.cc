@@ -201,9 +201,9 @@ private:
     const Victor9kEncoderProto& _config;
 };
 
-std::unique_ptr<Encoder> createVictor9kEncoder(const EncoderProto& config)
+Encoder* createVictor9kEncoder(const EncoderProto& config)
 {
-    return std::unique_ptr<Encoder>(new Victor9kEncoder(config));
+    return new Victor9kEncoder(config);
 }
 
 // vim: sw=4 ts=4 et

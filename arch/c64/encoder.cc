@@ -310,9 +310,9 @@ private:
     uint8_t _formatByte2;
 };
 
-std::unique_ptr<Encoder> createCommodore64Encoder(const EncoderProto& config)
+Encoder* createCommodore64Encoder(const EncoderProto& config)
 {
-    return std::unique_ptr<Encoder>(new Commodore64Encoder(config));
+    return new Commodore64Encoder(config);
 }
 
 // vim: sw=4 ts=4 et

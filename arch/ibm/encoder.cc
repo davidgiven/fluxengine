@@ -271,7 +271,7 @@ private:
     bool _lastBit;
 };
 
-std::unique_ptr<Encoder> createIbmEncoder(const EncoderProto& config)
+Encoder* createIbmEncoder(const EncoderProto& config)
 {
-    return std::unique_ptr<Encoder>(new IbmEncoder(config));
+    return new IbmEncoder(config);
 }

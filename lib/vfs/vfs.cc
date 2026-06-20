@@ -23,7 +23,8 @@ Path::Path(const std::vector<std::string> other):
 {
 }
 
-Path::Path(const std::vector<std::string>::const_iterator& begin, const std::vector<std::string>::const_iterator& end):
+Path::Path(const std::vector<std::string>::const_iterator& begin,
+    const std::vector<std::string>::const_iterator& end):
     std::vector<std::string>(begin, end)
 {
 }
@@ -240,7 +241,7 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystemFromConfig()
         std::shared_ptr<FluxSource> fluxSource;
         std::shared_ptr<Decoder> decoder;
         std::shared_ptr<FluxSinkFactory> fluxSinkFactory;
-        std::shared_ptr<Encoder> encoder;
+        Encoder* encoder;
         if (globalConfig().hasFluxSource())
         {
             fluxSource = FluxSource::create(globalConfig());

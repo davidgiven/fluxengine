@@ -85,7 +85,7 @@ namespace
         std::unique_ptr<FluxSinkFactory> _fluxSink;
         std::unique_ptr<ImageReader> _imageReader;
         std::unique_ptr<ImageWriter> _imageWriter;
-        std::unique_ptr<Encoder> _encoder;
+        Encoder* _encoder;
         std::unique_ptr<Decoder> _decoder;
     };
 }

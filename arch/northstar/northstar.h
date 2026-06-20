@@ -36,7 +36,6 @@ extern uint8_t northstarChecksum(const Bytes& bytes);
 
 extern std::unique_ptr<Decoder> createNorthstarDecoder(
     const DecoderProto& config);
-extern std::unique_ptr<Encoder> createNorthstarEncoder(
-    const EncoderProto& config);
+extern Encoder* createNorthstarEncoder(const EncoderProto& config);
 
 #endif /* NORTHSTAR */

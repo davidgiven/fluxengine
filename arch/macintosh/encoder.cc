@@ -252,7 +252,7 @@ private:
     const MacintoshEncoderProto& _config;
 };
 
-std::unique_ptr<Encoder> createMacintoshEncoder(const EncoderProto& config)
+Encoder* createMacintoshEncoder(const EncoderProto& config)
 {
-    return std::unique_ptr<Encoder>(new MacintoshEncoder(config));
+    return new MacintoshEncoder(config);
 }

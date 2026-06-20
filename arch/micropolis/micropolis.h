@@ -13,8 +13,7 @@ class DecoderProto;
 
 extern std::unique_ptr<Decoder> createMicropolisDecoder(
     const DecoderProto& config);
-extern std::unique_ptr<Encoder> createMicropolisEncoder(
-    const EncoderProto& config);
+extern Encoder* createMicropolisEncoder(const EncoderProto& config);
 
 extern uint8_t micropolisChecksum(const Bytes& bytes);
 extern uint32_t vectorGraphicEcc(const Bytes& bytes);

@@ -16,7 +16,7 @@ public:
     Encoder(const EncoderProto& config) {}
     virtual ~Encoder() {}
 
-    static std::unique_ptr<Encoder> create(Config& config);
+    static Encoder* create(Config& config);
 
 public:
     virtual std::shared_ptr<const Sector> getSector(

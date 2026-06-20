@@ -23,17 +23,16 @@
 #include "arch/zilogmcz/zilogmcz.h"
 #include "arch/arch.h"
 
-std::unique_ptr<Encoder> Arch::createEncoder(Config& config)
+Encoder* Arch::createEncoder(Config& config)
 {
     if (!config.hasEncoder())
         error("no encoder configured");
     return createEncoder(config->encoder());
 }
 
-std::unique_ptr<Encoder> Arch::createEncoder(const EncoderProto& config)
+Encoder* Arch::createEncoder(const EncoderProto& config)
 {
-    static const std::map<int,
-        std::function<std::unique_ptr<Encoder>(const EncoderProto&)>>
+    static const std::map<int, std::function<Encoder*(const EncoderProto&)>>
         encoders = {
             {EncoderProto::kAgat,       createAgatEncoder       },
             {EncoderProto::kAmiga,      createAmigaEncoder      },

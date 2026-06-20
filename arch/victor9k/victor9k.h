@@ -20,7 +20,6 @@ class DecoderProto;
 
 extern std::unique_ptr<Decoder> createVictor9kDecoder(
     const DecoderProto& config);
-extern std::unique_ptr<Encoder> createVictor9kEncoder(
-    const EncoderProto& config);
+extern Encoder* createVictor9kEncoder(const EncoderProto& config);
 
 #endif

@@ -47,7 +47,7 @@ public:
         const std::shared_ptr<const DiskLayout>& diskLayout,
         std::shared_ptr<FluxSource> fluxSource,
         std::shared_ptr<FluxSinkFactory> fluxSinkFactory,
-        std::shared_ptr<Encoder> encoder,
+        Encoder* encoder,
         std::shared_ptr<Decoder> decoder);
 };
 

@@ -109,7 +109,7 @@ private:
     bool _lastBit;
 };
 
-std::unique_ptr<Encoder> createTartuEncoder(const EncoderProto& config)
+Encoder* createTartuEncoder(const EncoderProto& config)
 {
-    return std::unique_ptr<Encoder>(new TartuEncoder(config));
+    return new TartuEncoder(config);
 }
