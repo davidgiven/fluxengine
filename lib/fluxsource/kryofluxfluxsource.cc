@@ -40,8 +40,8 @@ private:
     const std::string _path;
 };
 
-std::unique_ptr<FluxSource> FluxSource::createKryofluxFluxSource(
+FluxSource* FluxSource::createKryofluxFluxSource(
     const KryofluxFluxSourceProto& config)
 {
-    return std::make_unique<KryofluxFluxSource>(config);
+    return new KryofluxFluxSource(config);
 }

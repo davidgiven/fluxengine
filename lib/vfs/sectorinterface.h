@@ -44,7 +44,7 @@ public:
         std::shared_ptr<ImageWriter> writer);
     static std::unique_ptr<SectorInterface> createFluxSectorInterface(
         const std::shared_ptr<const DiskLayout>& diskLayout,
-        std::shared_ptr<FluxSource> fluxSource,
+        FluxSource* fluxSource,
         FluxSinkFactory* fluxSinkFactory,
         Encoder* encoder,
         Decoder* decoder);

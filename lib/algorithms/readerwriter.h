@@ -85,7 +85,7 @@ extern void writeTracks(const DiskLayout& diskLayout,
 extern void writeTracksAndVerify(const DiskLayout& diskLayout,
     FluxSinkFactory* fluxSinkFactory,
     Encoder* encoder,
-    FluxSource& fluxSource,
+    FluxSource* fluxSource,
     Decoder* decoder,
     const Image& image,
     const std::vector<CylinderHead>& locations);
@@ -106,25 +106,25 @@ extern void writeDiskCommand(const DiskLayout& diskLayout,
     FluxSource* fluxSource = nullptr);
 
 extern void writeRawDiskCommand(const DiskLayout& diskLayout,
-    FluxSource& fluxSource,
+    FluxSource* fluxSource,
     FluxSinkFactory* fluxSinkFactory);
 
 /* Reads a single group of tracks. tracks and combinedSectors are populated.
  * tracks may contain preexisting data which will be taken into account. */
 
 extern void readAndDecodeTrack(const DiskLayout& diskLayout,
-    FluxSource& fluxSource,
+    FluxSource* fluxSource,
     Decoder* decoder,
     const LogicalTrackLayout* ltl,
     std::vector<std::shared_ptr<const Track>>& tracks,
     std::vector<const Sector*>& combinedSectors);
 
 extern void readDiskCommand(const DiskLayout& diskLayout,
-    FluxSource& fluxSource,
+    FluxSource* fluxSource,
     Decoder* decoder,
     Disk& disk);
 extern void readDiskCommand(const DiskLayout& diskLayout,
-    FluxSource& source,
+    FluxSource* source,
     Decoder* decoder,
     ImageWriter& writer);
 

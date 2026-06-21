@@ -12,7 +12,7 @@ class FluxSectorInterface : public SectorInterface
 {
 public:
     FluxSectorInterface(const std::shared_ptr<const DiskLayout>& diskLayout,
-        std::shared_ptr<FluxSource> fluxSource,
+        FluxSource* fluxSource,
         FluxSinkFactory* fluxSinkFactory,
         Encoder* encoder,
         Decoder* decoder):
@@ -98,7 +98,7 @@ public:
             _encoder,
             _fluxSink,
             _decoder,
-            _fluxSource.get(),
+            _fluxSource,
             locations);
 
         discardChanges();
@@ -133,7 +133,7 @@ private:
         std::vector<std::shared_ptr<const Track>> trackFluxes;
         std::vector<const Sector*> trackSectors;
         readAndDecodeTrack(*_diskLayout,
-            *_fluxSource,
+            _fluxSource,
             _decoder,
             ltl,
             trackFluxes,
@@ -146,7 +146,7 @@ private:
     }
 
     std::shared_ptr<const DiskLayout> _diskLayout;
-    std::shared_ptr<FluxSource> _fluxSource;
+    FluxSource* _fluxSource;
     FluxSinkFactory* _fluxSink;
     Encoder* _encoder;
     Decoder* _decoder;
@@ -160,7 +160,7 @@ private:
 
 std::unique_ptr<SectorInterface> SectorInterface::createFluxSectorInterface(
     const std::shared_ptr<const DiskLayout>& diskLayout,
-    std::shared_ptr<FluxSource> fluxSource,
+    FluxSource* fluxSource,
     FluxSinkFactory* fluxSinkFactory,
     Encoder* encoder,
     Decoder* decoder)

@@ -43,8 +43,7 @@ private:
     const std::string _path;
 };
 
-std::unique_ptr<FluxSource> FluxSource::createFlxFluxSource(
-    const FlxFluxSourceProto& config)
+FluxSource* FluxSource::createFlxFluxSource(const FlxFluxSourceProto& config)
 {
-    return std::make_unique<FlxFluxSource>(config);
+    return new FlxFluxSource(config);
 }

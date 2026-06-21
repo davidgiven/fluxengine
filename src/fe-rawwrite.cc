@@ -54,6 +54,6 @@ int mainRawWrite(int argc, const char* argv[])
     auto fluxSinkFactory = FluxSinkFactory::create(globalConfig());
     auto diskLayout = createDiskLayout(globalConfig());
 
-    writeRawDiskCommand(*diskLayout, *fluxSource, fluxSinkFactory);
+    writeRawDiskCommand(*diskLayout, fluxSource, fluxSinkFactory);
     return 0;
 }

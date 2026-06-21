@@ -238,10 +238,10 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystemFromConfig()
     auto diskLayout = createDiskLayout(globalConfig());
     if (globalConfig().hasFluxSource() || globalConfig().hasFluxSink())
     {
-        std::shared_ptr<FluxSource> fluxSource;
-        Decoder* decoder;
-        FluxSinkFactory* fluxSinkFactory;
-        Encoder* encoder;
+        FluxSource* fluxSource = nullptr;
+        Decoder* decoder = nullptr;
+        FluxSinkFactory* fluxSinkFactory = nullptr;
+        Encoder* encoder = nullptr;
         if (globalConfig().hasFluxSource())
         {
             fluxSource = FluxSource::create(globalConfig());

@@ -129,8 +129,7 @@ private:
     std::map<CylinderHead, std::pair<off_t, size_t>> _trackOffsets;
 };
 
-std::unique_ptr<FluxSource> FluxSource::createCwfFluxSource(
-    const CwfFluxSourceProto& config)
+FluxSource* FluxSource::createCwfFluxSource(const CwfFluxSourceProto& config)
 {
-    return std::unique_ptr<FluxSource>(new CwfFluxSource(config));
+    return new CwfFluxSource(config);
 }

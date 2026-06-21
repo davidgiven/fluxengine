@@ -163,18 +163,18 @@ void renderLogMessage(
 class FluxSourceIteratorHolder
 {
 public:
-    FluxSourceIteratorHolder(FluxSource& fluxSource): _fluxSource(fluxSource) {}
+    FluxSourceIteratorHolder(FluxSource* fluxSource): _fluxSource(fluxSource) {}
 
     FluxSourceIterator& getIterator(unsigned physicalCylinder, unsigned head)
     {
         auto& it = _cache[std::make_pair(physicalCylinder, head)];
         if (!it)
-            it = _fluxSource.readFlux(physicalCylinder, head);
+            it = _fluxSource->readFlux(physicalCylinder, head);
         return *it;
     }
 
 private:
-    FluxSource& _fluxSource;
+    FluxSource* _fluxSource;
     std::map<std::pair<unsigned, unsigned>, std::unique_ptr<FluxSourceIterator>>
         _cache;
 };
@@ -330,7 +330,7 @@ static CombinationResult combineRecordAndSectors(
     return cr;
 }
 
-static void adjustTrackOnError(FluxSource& fluxSource, int baseTrack)
+static void adjustTrackOnError(FluxSource* fluxSource, int baseTrack)
 {
     switch (globalConfig()->drive().error_behaviour())
     {
@@ -338,14 +338,14 @@ static void adjustTrackOnError(FluxSource& fluxSource, int baseTrack)
             break;
 
         case DriveProto::RECALIBRATE:
-            fluxSource.recalibrate();
+            fluxSource->recalibrate();
             break;
 
         case DriveProto::JIGGLE:
             if (baseTrack > 0)
-                fluxSource.seek(baseTrack - 1);
+                fluxSource->seek(baseTrack - 1);
             else
-                fluxSource.seek(baseTrack + 1);
+                fluxSource->seek(baseTrack + 1);
             break;
     }
 }
@@ -529,7 +529,7 @@ void writeTracks(const DiskLayout& diskLayout,
 void writeTracksAndVerify(const DiskLayout& diskLayout,
     FluxSinkFactory* fluxSinkFactory,
     Encoder* encoder,
-    FluxSource& fluxSource,
+    FluxSource* fluxSource,
     Decoder* decoder,
     const Image& image,
     const std::vector<CylinderHead>& chs)
@@ -609,7 +609,7 @@ void writeDiskCommand(const DiskLayout& diskLayout,
         writeTracksAndVerify(diskLayout,
             fluxSinkFactory,
             encoder,
-            *fluxSource,
+            fluxSource,
             decoder,
             image,
             chs);
@@ -636,7 +636,7 @@ void writeDiskCommand(const DiskLayout& diskLayout,
 }
 
 void writeRawDiskCommand(const DiskLayout& diskLayout,
-    FluxSource& fluxSource,
+    FluxSource* fluxSource,
     FluxSinkFactory* fluxSinkFactory)
 {
     writeTracks(
@@ -645,7 +645,7 @@ void writeRawDiskCommand(const DiskLayout& diskLayout,
         [&](const LogicalTrackLayout* ltl)
         {
             return fluxSource
-                .readFlux(ltl->physicalCylinder, ltl->physicalHead)
+                ->readFlux(ltl->physicalCylinder, ltl->physicalHead)
                 ->next();
         },
         [](const auto&)
@@ -656,13 +656,13 @@ void writeRawDiskCommand(const DiskLayout& diskLayout,
 }
 
 void readAndDecodeTrack(const DiskLayout& diskLayout,
-    FluxSource& fluxSource,
+    FluxSource* fluxSource,
     Decoder* decoder,
     const LogicalTrackLayout* ltl,
     std::vector<std::shared_ptr<const Track>>& tracks,
     std::vector<const Sector*>& combinedSectors)
 {
-    if (fluxSource.isHardware())
+    if (fluxSource->isHardware())
         measureDiskRotation();
 
     FluxSourceIteratorHolder fluxSourceIteratorHolder(fluxSource);
@@ -686,7 +686,7 @@ void readAndDecodeTrack(const DiskLayout& diskLayout,
             break;
         }
 
-        if (fluxSource.isHardware())
+        if (fluxSource->isHardware())
         {
             adjustTrackOnError(fluxSource, ltl->physicalCylinder);
             log("retrying; {} retries remaining", retriesRemaining);
@@ -696,7 +696,7 @@ void readAndDecodeTrack(const DiskLayout& diskLayout,
 }
 
 void readDiskCommand(const DiskLayout& diskLayout,
-    FluxSource& fluxSource,
+    FluxSource* fluxSource,
     Decoder* decoder,
     Disk& disk)
 {
@@ -714,7 +714,7 @@ void readDiskCommand(const DiskLayout& diskLayout,
 
     log(BeginOperationLogMessage{"Reading and decoding disk"});
 
-    if (fluxSource.isHardware())
+    if (fluxSource->isHardware())
         disk.rotationalPeriod = measureDiskRotation();
     else
         disk.rotationalPeriod = getRotationalPeriodFromConfig();
@@ -845,7 +845,7 @@ void readDiskCommand(const DiskLayout& diskLayout,
 }
 
 void readDiskCommand(const DiskLayout& diskLayout,
-    FluxSource& fluxSource,
+    FluxSource* fluxSource,
     Decoder* decoder,
     ImageWriter& writer)
 {

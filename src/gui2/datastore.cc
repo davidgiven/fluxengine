@@ -544,7 +544,7 @@ void Datastore::beginRead(bool rereadBadSectors)
                 auto fluxSource = FluxSource::create(globalConfig());
                 auto decoder = Arch::createDecoder(globalConfig());
 
-                readDiskCommand(*diskLayout, *fluxSource, decoder, *disk);
+                readDiskCommand(*diskLayout, fluxSource, decoder, *disk);
             }
             catch (...)
             {
@@ -572,7 +572,7 @@ void Datastore::beginWrite()
                 auto fluxSinkFactory = FluxSinkFactory::create(globalConfig());
                 auto encoder = Arch::createEncoder(globalConfig());
                 Decoder* decoder;
-                std::shared_ptr<FluxSource> verificationFluxSource;
+                FluxSource* verificationFluxSource;
                 if (globalConfig().hasDecoder() &&
                     fluxSinkFactory->isHardware())
                 {
@@ -610,7 +610,7 @@ void Datastore::beginWrite()
                     encoder,
                     fluxSinkFactory,
                     decoder,
-                    verificationFluxSource.get());
+                    verificationFluxSource);
             }
             catch (...)
             {
@@ -758,7 +758,7 @@ void Datastore::writeFluxFile(const std::fs::path& path)
                 globalConfig().setFluxSink(path.string());
                 auto fluxSource = FluxSource::createMemoryFluxSource(*disk);
                 auto fluxSinkFactory = FluxSinkFactory::create(globalConfig());
-                writeRawDiskCommand(*diskLayout, *fluxSource, fluxSinkFactory);
+                writeRawDiskCommand(*diskLayout, fluxSource, fluxSinkFactory);
             }
             catch (...)
             {

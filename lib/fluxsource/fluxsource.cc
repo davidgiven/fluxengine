@@ -7,14 +7,14 @@
 #include "lib/config/proto.h"
 #include "lib/core/utils.h"
 
-std::unique_ptr<FluxSource> FluxSource::create(Config& config)
+FluxSource* FluxSource::create(Config& config)
 {
     if (!config.hasFluxSource())
         error("no flux source configured");
     return create(config->flux_source());
 }
 
-std::unique_ptr<FluxSource> FluxSource::create(const FluxSourceProto& config)
+FluxSource* FluxSource::create(const FluxSourceProto& config)
 {
     switch (config.type())
     {
@@ -49,7 +49,7 @@ std::unique_ptr<FluxSource> FluxSource::create(const FluxSourceProto& config)
             return createFlxFluxSource(config.flx());
 
         default:
-            return std::unique_ptr<FluxSource>();
+            return nullptr;
     }
 }
 

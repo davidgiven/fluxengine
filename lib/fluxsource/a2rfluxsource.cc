@@ -196,8 +196,7 @@ private:
     std::map<CylinderHead, std::unique_ptr<A2Rv2Flux>> _v2data;
 };
 
-std::unique_ptr<FluxSource> FluxSource::createA2rFluxSource(
-    const A2rFluxSourceProto& config)
+FluxSource* FluxSource::createA2rFluxSource(const A2rFluxSourceProto& config)
 {
-    return std::unique_ptr<FluxSource>(new A2rFluxSource(config));
+    return new A2rFluxSource(config);
 }

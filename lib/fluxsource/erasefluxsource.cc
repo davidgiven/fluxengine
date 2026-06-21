@@ -22,8 +22,8 @@ public:
     void recalibrate() override {}
 };
 
-std::unique_ptr<FluxSource> FluxSource::createEraseFluxSource(
+FluxSource* FluxSource::createEraseFluxSource(
     const EraseFluxSourceProto& config)
 {
-    return std::make_unique<EraseFluxSource>(config);
+    return new EraseFluxSource(config);
 }

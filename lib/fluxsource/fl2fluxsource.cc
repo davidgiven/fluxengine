@@ -79,8 +79,7 @@ private:
     FluxFileProto _proto;
 };
 
-std::unique_ptr<FluxSource> FluxSource::createFl2FluxSource(
-    const Fl2FluxSourceProto& config)
+FluxSource* FluxSource::createFl2FluxSource(const Fl2FluxSourceProto& config)
 {
-    return std::unique_ptr<FluxSource>(new Fl2FluxSource(config));
+    return new Fl2FluxSource(config);
 }

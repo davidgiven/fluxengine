@@ -155,8 +155,7 @@ private:
     nanoseconds_t _resolution;
 };
 
-std::unique_ptr<FluxSource> FluxSource::createScpFluxSource(
-    const ScpFluxSourceProto& config)
+FluxSource* FluxSource::createScpFluxSource(const ScpFluxSourceProto& config)
 {
-    return std::unique_ptr<FluxSource>(new ScpFluxSource(config));
+    return new ScpFluxSource(config);
 }

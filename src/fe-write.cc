@@ -60,8 +60,8 @@ int mainWrite(int argc, const char* argv[])
     auto encoder = Arch::createEncoder(globalConfig());
     auto fluxSinkFactory = FluxSinkFactory::create(globalConfig());
 
-    Decoder* decoder;
-    std::shared_ptr<FluxSource> verificationFluxSource;
+    Decoder* decoder = nullptr;
+    FluxSource* verificationFluxSource = nullptr;
     if (globalConfig().hasDecoder() && fluxSinkFactory->isHardware() && verify)
     {
         decoder = Arch::createDecoder(globalConfig());
@@ -74,7 +74,7 @@ int mainWrite(int argc, const char* argv[])
         encoder,
         fluxSinkFactory,
         decoder,
-        verificationFluxSource.get());
+        verificationFluxSource);
 
     return 0;
 }
