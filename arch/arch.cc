@@ -55,17 +55,16 @@ Encoder* Arch::createEncoder(const EncoderProto& config)
     return (encoder->second)(config);
 }
 
-std::unique_ptr<Decoder> Arch::createDecoder(Config& config)
+Decoder* Arch::createDecoder(Config& config)
 {
     if (!config.hasDecoder())
         error("no decoder configured");
     return createDecoder(config->decoder());
 }
 
-std::unique_ptr<Decoder> Arch::createDecoder(const DecoderProto& config)
+Decoder* Arch::createDecoder(const DecoderProto& config)
 {
-    static const std::map<int,
-        std::function<std::unique_ptr<Decoder>(const DecoderProto&)>>
+    static const std::map<int, std::function<Decoder*(const DecoderProto&)>>
         decoders = {
             {DecoderProto::kAgat,       createAgatDecoder       },
             {DecoderProto::kAeslanier,  createAesLanierDecoder  },

@@ -241,7 +241,7 @@ private:
     unsigned _currentHeaderLength;
 };
 
-std::unique_ptr<Decoder> createIbmDecoder(const DecoderProto& config)
+Decoder* createIbmDecoder(const DecoderProto& config)
 {
-    return std::unique_ptr<Decoder>(new IbmDecoder(config));
+    return new IbmDecoder(config);
 }

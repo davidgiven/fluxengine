@@ -105,7 +105,7 @@ public:
     }
 };
 
-std::unique_ptr<Decoder> createDurangoF85Decoder(const DecoderProto& config)
+Decoder* createDurangoF85Decoder(const DecoderProto& config)
 {
-    return std::unique_ptr<Decoder>(new DurangoF85Decoder(config));
+    return new DurangoF85Decoder(config);
 }

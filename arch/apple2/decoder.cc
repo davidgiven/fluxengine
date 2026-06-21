@@ -172,7 +172,7 @@ public:
     }
 };
 
-std::unique_ptr<Decoder> createApple2Decoder(const DecoderProto& config)
+Decoder* createApple2Decoder(const DecoderProto& config)
 {
-    return std::unique_ptr<Decoder>(new Apple2Decoder(config));
+    return new Apple2Decoder(config);
 }

@@ -31,7 +31,7 @@ class Decoder;
 class DecoderProto;
 class EncoderProto;
 
-extern std::unique_ptr<Decoder> createIbmDecoder(const DecoderProto& config);
+extern Decoder* createIbmDecoder(const DecoderProto& config);
 extern Encoder* createIbmEncoder(const EncoderProto& config);
 
 #endif

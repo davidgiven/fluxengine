@@ -15,7 +15,7 @@ public:
         std::shared_ptr<FluxSource> fluxSource,
         std::shared_ptr<FluxSinkFactory> fluxSinkFactory,
         Encoder* encoder,
-        std::shared_ptr<Decoder> decoder):
+        Decoder* decoder):
         _diskLayout(diskLayout),
         _fluxSource(fluxSource),
         _fluxSink(fluxSinkFactory),
@@ -99,7 +99,7 @@ public:
             _changedSectors,
             *_encoder,
             *_fluxSink,
-            _decoder.get(),
+            _decoder,
             _fluxSource.get(),
             locations);
 
@@ -151,7 +151,7 @@ private:
     std::shared_ptr<FluxSource> _fluxSource;
     std::shared_ptr<FluxSinkFactory> _fluxSink;
     Encoder* _encoder;
-    std::shared_ptr<Decoder> _decoder;
+    Decoder* _decoder;
 
     Image _loadedSectors;
     Image _changedSectors;
@@ -165,7 +165,7 @@ std::unique_ptr<SectorInterface> SectorInterface::createFluxSectorInterface(
     std::shared_ptr<FluxSource> fluxSource,
     std::shared_ptr<FluxSinkFactory> fluxSinkFactory,
     Encoder* encoder,
-    std::shared_ptr<Decoder> decoder)
+    Decoder* decoder)
 {
     return std::make_unique<FluxSectorInterface>(
         diskLayout, fluxSource, fluxSinkFactory, encoder, decoder);

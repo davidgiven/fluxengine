@@ -113,7 +113,7 @@ public:
     }
 };
 
-std::unique_ptr<Decoder> createVictor9kDecoder(const DecoderProto& config)
+Decoder* createVictor9kDecoder(const DecoderProto& config)
 {
-    return std::unique_ptr<Decoder>(new Victor9kDecoder(config));
+    return new Victor9kDecoder(config);
 }

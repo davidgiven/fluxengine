@@ -116,7 +116,7 @@ public:
     }
 };
 
-std::unique_ptr<Decoder> createBrotherDecoder(const DecoderProto& config)
+Decoder* createBrotherDecoder(const DecoderProto& config)
 {
-    return std::unique_ptr<Decoder>(new BrotherDecoder(config));
+    return new BrotherDecoder(config);
 }

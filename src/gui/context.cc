@@ -86,7 +86,7 @@ namespace
         std::unique_ptr<ImageReader> _imageReader;
         std::unique_ptr<ImageWriter> _imageWriter;
         Encoder* _encoder;
-        std::unique_ptr<Decoder> _decoder;
+        Decoder* _decoder;
     };
 }
 

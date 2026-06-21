@@ -534,12 +534,13 @@ void Datastore::beginRead(bool rereadBadSectors)
                     wtClearDiskData();
 
                 std::shared_ptr<Disk> disk;
-                wtRunSynchronouslyOnUiThread((std::function<void()>)[&] {
-                    if (::disk)
-                        disk = std::make_shared<Disk>(*::disk);
-                    else
-                        disk = std::make_shared<Disk>();
-                });
+                wtRunSynchronouslyOnUiThread((std::function<void()>)[&]
+                    {
+                        if (::disk)
+                            disk = std::make_shared<Disk>(*::disk);
+                        else
+                            disk = std::make_shared<Disk>();
+                    });
                 auto fluxSource = FluxSource::create(globalConfig());
                 auto decoder = Arch::createDecoder(globalConfig());
 
@@ -570,7 +571,7 @@ void Datastore::beginWrite()
 
                 auto fluxSinkFactory = FluxSinkFactory::create(globalConfig());
                 auto encoder = Arch::createEncoder(globalConfig());
-                std::shared_ptr<Decoder> decoder;
+                Decoder* decoder;
                 std::shared_ptr<FluxSource> verificationFluxSource;
                 if (globalConfig().hasDecoder() &&
                     fluxSinkFactory->isHardware())
@@ -585,19 +586,19 @@ void Datastore::beginWrite()
                 {
                     {
                         bool result;
-                        wtRunSynchronouslyOnUiThread((
-                            std::function<void()>)[&] {
-                            hex::ui::PopupQuestion::open(
-                                "fluxengine.messages.writingFluxToFile"_lang,
-                                [&]
-                                {
-                                    result = true;
-                                },
-                                [&]
-                                {
-                                    result = false;
-                                });
-                        });
+                        wtRunSynchronouslyOnUiThread((std::function<void()>)[&]
+                            {
+                                hex::ui::PopupQuestion::open(
+                                    "fluxengine.messages.writingFluxToFile"_lang,
+                                    [&]
+                                    {
+                                        result = true;
+                                    },
+                                    [&]
+                                    {
+                                        result = false;
+                                    });
+                            });
                         if (!result)
                             throw EmergencyStopException();
                     }
@@ -608,7 +609,7 @@ void Datastore::beginWrite()
                     *image,
                     *encoder,
                     *fluxSinkFactory,
-                    decoder.get(),
+                    decoder,
                     verificationFluxSource.get());
             }
             catch (...)
@@ -709,9 +710,10 @@ void Datastore::readImage(const std::fs::path& path)
                 /* Update the setting, and then rebuild the config again as it
                  * will have changed. */
 
-                wtRunSynchronouslyOnUiThread((std::function<void()>)[=] {
-                    Events::SetSystemConfig::post(customConfig);
-                });
+                wtRunSynchronouslyOnUiThread((std::function<void()>)[=]
+                    {
+                        Events::SetSystemConfig::post(customConfig);
+                    });
                 wtRebuildConfiguration(true);
                 wtWaitForUiThreadToCatchUp();
 

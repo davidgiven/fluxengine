@@ -8,8 +8,8 @@ class Config;
 
 namespace Arch
 {
-    std::unique_ptr<Decoder> createDecoder(Config& config);
-    std::unique_ptr<Decoder> createDecoder(const DecoderProto& config);
+    Decoder* createDecoder(Config& config);
+    Decoder* createDecoder(const DecoderProto& config);
 
     Encoder* createEncoder(Config& config);
     Encoder* createEncoder(const EncoderProto& config);

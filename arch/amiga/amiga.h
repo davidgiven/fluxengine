@@ -9,7 +9,7 @@
 #define AMIGA_SECTORS_PER_TRACK 11
 #define AMIGA_RECORD_SIZE 0x21c
 
-extern std::unique_ptr<Decoder> createAmigaDecoder(const DecoderProto& config);
+extern Decoder* createAmigaDecoder(const DecoderProto& config);
 extern Encoder* createAmigaEncoder(const EncoderProto& config);
 
 extern uint32_t amigaChecksum(const Bytes& bytes);

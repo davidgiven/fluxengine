@@ -182,7 +182,7 @@ private:
     uint8_t _hardSectorId;
 };
 
-std::unique_ptr<Decoder> createNorthstarDecoder(const DecoderProto& config)
+Decoder* createNorthstarDecoder(const DecoderProto& config)
 {
-    return std::unique_ptr<Decoder>(new NorthstarDecoder(config));
+    return new NorthstarDecoder(config);
 }

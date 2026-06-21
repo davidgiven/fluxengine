@@ -79,7 +79,7 @@ private:
     int _currentSector;
 };
 
-std::unique_ptr<Decoder> createMxDecoder(const DecoderProto& config)
+Decoder* createMxDecoder(const DecoderProto& config)
 {
-    return std::unique_ptr<Decoder>(new MxDecoder(config));
+    return new MxDecoder(config);
 }

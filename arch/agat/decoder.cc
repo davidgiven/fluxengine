@@ -84,7 +84,7 @@ public:
     }
 };
 
-std::unique_ptr<Decoder> createAgatDecoder(const DecoderProto& config)
+Decoder* createAgatDecoder(const DecoderProto& config)
 {
-    return std::unique_ptr<Decoder>(new AgatDecoder(config));
+    return new AgatDecoder(config);
 }

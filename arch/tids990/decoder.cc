@@ -95,7 +95,7 @@ public:
     }
 };
 
-std::unique_ptr<Decoder> createTids990Decoder(const DecoderProto& config)
+Decoder* createTids990Decoder(const DecoderProto& config)
 {
-    return std::unique_ptr<Decoder>(new Tids990Decoder(config));
+    return new Tids990Decoder(config);
 }

@@ -75,7 +75,7 @@ private:
     const TartuDecoderProto& _config;
 };
 
-std::unique_ptr<Decoder> createTartuDecoder(const DecoderProto& config)
+Decoder* createTartuDecoder(const DecoderProto& config)
 {
-    return std::unique_ptr<Decoder>(new TartuDecoder(config));
+    return new TartuDecoder(config);
 }

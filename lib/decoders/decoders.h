@@ -41,8 +41,8 @@ public:
 
     virtual ~Decoder() {}
 
-    static std::unique_ptr<Decoder> create(Config& config);
-    static std::unique_ptr<Decoder> create(const DecoderProto& config);
+    static Decoder* create(Config& config);
+    static Decoder* create(const DecoderProto& config);
 
 public:
     enum RecordType

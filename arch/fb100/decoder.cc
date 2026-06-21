@@ -137,7 +137,7 @@ public:
     }
 };
 
-std::unique_ptr<Decoder> createFb100Decoder(const DecoderProto& config)
+Decoder* createFb100Decoder(const DecoderProto& config)
 {
-    return std::unique_ptr<Decoder>(new Fb100Decoder(config));
+    return new Fb100Decoder(config);
 }

@@ -191,7 +191,7 @@ public:
     }
 };
 
-std::unique_ptr<Decoder> createMacintoshDecoder(const DecoderProto& config)
+Decoder* createMacintoshDecoder(const DecoderProto& config)
 {
-    return std::unique_ptr<Decoder>(new MacintoshDecoder(config));
+    return new MacintoshDecoder(config);
 }

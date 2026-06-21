@@ -79,7 +79,7 @@ private:
     nanoseconds_t _clock;
 };
 
-std::unique_ptr<Decoder> createAmigaDecoder(const DecoderProto& config)
+Decoder* createAmigaDecoder(const DecoderProto& config)
 {
-    return std::unique_ptr<Decoder>(new AmigaDecoder(config));
+    return new AmigaDecoder(config);
 }

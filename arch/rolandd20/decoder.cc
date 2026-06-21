@@ -46,7 +46,7 @@ public:
     }
 };
 
-std::unique_ptr<Decoder> createRolandD20Decoder(const DecoderProto& config)
+Decoder* createRolandD20Decoder(const DecoderProto& config)
 {
-    return std::unique_ptr<Decoder>(new RolandD20Decoder(config));
+    return new RolandD20Decoder(config);
 }

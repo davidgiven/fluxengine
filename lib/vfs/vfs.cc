@@ -239,7 +239,7 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystemFromConfig()
     if (globalConfig().hasFluxSource() || globalConfig().hasFluxSink())
     {
         std::shared_ptr<FluxSource> fluxSource;
-        std::shared_ptr<Decoder> decoder;
+        Decoder* decoder;
         std::shared_ptr<FluxSinkFactory> fluxSinkFactory;
         Encoder* encoder;
         if (globalConfig().hasFluxSource())

@@ -50,7 +50,7 @@ public:
     }
 };
 
-std::unique_ptr<Decoder> createZilogMczDecoder(const DecoderProto& config)
+Decoder* createZilogMczDecoder(const DecoderProto& config)
 {
-    return std::unique_ptr<Decoder>(new ZilogMczDecoder(config));
+    return new ZilogMczDecoder(config);
 }

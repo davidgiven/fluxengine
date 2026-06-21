@@ -11,8 +11,7 @@ class Encoder;
 class EncoderProto;
 class DecoderProto;
 
-extern std::unique_ptr<Decoder> createMicropolisDecoder(
-    const DecoderProto& config);
+extern Decoder* createMicropolisDecoder(const DecoderProto& config);
 extern Encoder* createMicropolisEncoder(const EncoderProto& config);
 
 extern uint8_t micropolisChecksum(const Bytes& bytes);

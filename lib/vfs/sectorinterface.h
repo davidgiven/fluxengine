@@ -48,7 +48,7 @@ public:
         std::shared_ptr<FluxSource> fluxSource,
         std::shared_ptr<FluxSinkFactory> fluxSinkFactory,
         Encoder* encoder,
-        std::shared_ptr<Decoder> decoder);
+        Decoder* decoder);
 };
 
 #endif
