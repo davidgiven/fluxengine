@@ -61,10 +61,6 @@ struct fmt::formatter<Sector::Status> : formatter<string_view>
     }
 };
 
-extern bool sectorPointerSortPredicate(const std::shared_ptr<const Sector>& lhs,
-    const std::shared_ptr<const Sector>& rhs);
-extern bool sectorPointerEqualsPredicate(
-    const std::shared_ptr<const Sector>& lhs,
-    const std::shared_ptr<const Sector>& rhs);
+extern bool sectorPointerSortPredicate(const Sector* lhs, const Sector* rhs);
 
 #endif

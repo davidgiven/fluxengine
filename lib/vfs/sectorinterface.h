@@ -17,10 +17,9 @@ public:
     virtual ~SectorInterface() {}
 
 public:
-    virtual std::shared_ptr<const Sector> get(
+    virtual const Sector* get(
         unsigned track, unsigned side, unsigned sectorId) = 0;
-    virtual std::shared_ptr<Sector> put(
-        unsigned track, unsigned side, unsigned sectorId) = 0;
+    virtual Sector* put(unsigned track, unsigned side, unsigned sectorId) = 0;
 
     virtual bool isReadOnly()
     {

@@ -54,9 +54,8 @@ static void write_bits(
     }
 }
 
-static void write_sector(std::vector<bool>& bits,
-    unsigned& cursor,
-    const std::shared_ptr<const Sector>& sector)
+static void write_sector(
+    std::vector<bool>& bits, unsigned& cursor, const Sector* sector)
 {
     if ((sector->data.size() != 512) && (sector->data.size() != 528))
         error("unsupported sector size --- you must pick 512 or 528");
@@ -111,7 +110,7 @@ public:
 
 public:
     std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout& ltl,
-        const std::vector<std::shared_ptr<const Sector>>& sectors,
+        const std::vector<const Sector*>& sectors,
         const Image& image) override
     {
         /* Number of bits for one nominal revolution of a real 200ms Amiga disk.

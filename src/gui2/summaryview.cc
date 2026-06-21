@@ -37,7 +37,7 @@ static std::string getActivityLabel(DiskActivityType type)
         case DiskActivityType::Write:
             return "W";
     }
-	throw std::invalid_argument("bad argument");
+    throw std::invalid_argument("bad argument");
 }
 
 SummaryView::SummaryView():
@@ -65,10 +65,10 @@ SummaryView::SummaryView():
         });
 }
 
-static std::set<std::shared_ptr<const Sector>> findSectors(
+static std::set<const Sector*> findSectors(
     const Disk& disk, unsigned physicalCylinder, unsigned physicalHead)
 {
-    std::set<std::shared_ptr<const Sector>> sectors;
+    std::set<const Sector*> sectors;
 
     auto [startIt, endIt] = disk.sectorsByPhysicalLocation.equal_range(
         {physicalCylinder, physicalHead});

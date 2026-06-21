@@ -29,7 +29,7 @@ namespace
             _image.addMissingSectors(*diskLayout, true);
         }
 
-        std::shared_ptr<const Sector> get(
+        const Sector* get(
             unsigned track, unsigned side, unsigned sectorId) override
         {
             auto s = _image.get(track, side, sectorId);
@@ -38,8 +38,7 @@ namespace
             return s;
         }
 
-        std::shared_ptr<Sector> put(
-            unsigned track, unsigned side, unsigned sectorId) override
+        Sector* put(unsigned track, unsigned side, unsigned sectorId) override
         {
             return _image.put(track, side, sectorId);
         }

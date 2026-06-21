@@ -169,9 +169,8 @@ static uint8_t encode_side(uint8_t track, uint8_t side)
     return (side ? 0x20 : 0x00) | ((track > 0x3f) ? 0x01 : 0x00);
 }
 
-static void write_sector(std::vector<bool>& bits,
-    unsigned& cursor,
-    const std::shared_ptr<const Sector>& sector)
+static void write_sector(
+    std::vector<bool>& bits, unsigned& cursor, const Sector* sector)
 {
     if ((sector->data.size() != 512) && (sector->data.size() != 524))
         error("unsupported sector size --- you must pick 512 or 524");
@@ -221,7 +220,7 @@ public:
 
 public:
     std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout& ltl,
-        const std::vector<std::shared_ptr<const Sector>>& sectors,
+        const std::vector<const Sector*>& sectors,
         const Image& image) override
     {
         double clockRateUs = clockRateUsForTrack(ltl.logicalCylinder);

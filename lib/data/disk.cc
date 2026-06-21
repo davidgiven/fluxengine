@@ -25,8 +25,7 @@ Disk::Disk(
     const std::shared_ptr<const Image>& image, const DiskLayout& diskLayout):
     image(image)
 {
-    std::multimap<CylinderHead, std::shared_ptr<const Sector>>
-        sectorsGroupedByTrack;
+    std::multimap<CylinderHead, const Sector*> sectorsGroupedByTrack;
     for (const auto& sector : *image)
         sectorsGroupedByTrack.insert(
             std::make_pair(sector->physicalLocation.value(), sector));

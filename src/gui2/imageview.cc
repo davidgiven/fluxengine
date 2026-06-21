@@ -17,7 +17,7 @@ DiskLayout::LayoutBounds ImageView::getBounds()
     return Datastore::getDiskLayout()->getLogicalBounds();
 }
 
-std::shared_ptr<const Sector> ImageView::getSector(
+const Sector* ImageView::getSector(
     unsigned logicalCylinder, unsigned logicalHead, unsigned sectorId)
 {
     auto disk = Datastore::getDisk();

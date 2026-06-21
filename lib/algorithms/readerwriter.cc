@@ -84,7 +84,7 @@ void renderLogMessage(
 void renderLogMessage(
     LogRenderer& r, std::shared_ptr<const TrackReadLogMessage> m)
 {
-    std::set<std::shared_ptr<const Sector>> rawSectors;
+    std::set<const Sector*> rawSectors;
     std::set<std::shared_ptr<const Record>> rawRecords;
     for (const auto& track : m->tracks)
     {
@@ -109,8 +109,7 @@ void renderLogMessage(
 
     r.newline().add("sectors:");
 
-    std::vector<std::shared_ptr<const Sector>> sectors(
-        m->sectors.begin(), m->sectors.end());
+    std::vector<const Sector*> sectors(m->sectors.begin(), m->sectors.end());
     std::sort(sectors.begin(), sectors.end(), sectorPointerSortPredicate);
 
     for (const auto& sector : rawSectors)
@@ -230,12 +229,11 @@ static nanoseconds_t measureDiskRotation()
 /* Given a set of sectors, deduplicates them sensibly (e.g. if there is a good
  * and bad version of the same sector, the bad version is dropped). */
 
-static std::vector<std::shared_ptr<const Sector>> collectSectors(
-    std::vector<std::shared_ptr<const Sector>>& trackSectors,
-    bool collapse_conflicts = true)
+static std::vector<const Sector*> collectSectors(
+    std::vector<const Sector*>& trackSectors, bool collapse_conflicts = true)
 {
     typedef std::tuple<unsigned, unsigned, unsigned> key_t;
-    std::multimap<key_t, std::shared_ptr<const Sector>> sectors;
+    std::multimap<key_t, const Sector*> sectors;
 
     for (const auto& sector : trackSectors)
     {
@@ -245,7 +243,7 @@ static std::vector<std::shared_ptr<const Sector>> collectSectors(
         sectors.insert({sectorid, sector});
     }
 
-    std::set<std::shared_ptr<const Sector>> sector_set;
+    std::set<const Sector*> sector_set;
     auto it = sectors.begin();
     while (it != sectors.end())
     {
@@ -253,7 +251,7 @@ static std::vector<std::shared_ptr<const Sector>> collectSectors(
         auto new_sector = std::accumulate(it,
             ub,
             it->second,
-            [&](auto left, auto& rightit) -> std::shared_ptr<const Sector>
+            [&](auto left, auto& rightit) -> const Sector*
             {
                 auto& right = rightit.second;
                 if ((left->status == Sector::OK) &&
@@ -262,11 +260,11 @@ static std::vector<std::shared_ptr<const Sector>> collectSectors(
                 {
                     if (!collapse_conflicts)
                     {
-                        auto s = std::make_shared<Sector>(*right);
+                        auto s = new Sector(*right);
                         s->status = Sector::CONFLICT;
                         sector_set.insert(s);
                     }
-                    auto s = std::make_shared<Sector>(*left);
+                    auto s = new Sector(*left);
                     s->status = Sector::CONFLICT;
                     return s;
                 }
@@ -290,7 +288,7 @@ static std::vector<std::shared_ptr<const Sector>> collectSectors(
 struct CombinationResult
 {
     BadSectorsState result;
-    std::vector<std::shared_ptr<const Sector>> sectors;
+    std::vector<const Sector*> sectors;
 };
 
 static CombinationResult combineRecordAndSectors(
@@ -299,7 +297,7 @@ static CombinationResult combineRecordAndSectors(
     const std::shared_ptr<const LogicalTrackLayout>& ltl)
 {
     CombinationResult cr = {HAS_NO_BAD_SECTORS};
-    std::vector<std::shared_ptr<const Sector>> track_sectors;
+    std::vector<const Sector*> track_sectors;
 
     /* Add the sectors which were there. */
 
@@ -311,7 +309,7 @@ static CombinationResult combineRecordAndSectors(
 
     for (unsigned sectorId : ltl->diskSectorOrder)
     {
-        auto sector = std::make_shared<Sector>(
+        auto sector = new Sector(
             LogicalLocation{ltl->logicalCylinder, ltl->logicalHead, sectorId});
 
         sector->status = Sector::MISSING;
@@ -355,7 +353,7 @@ static void adjustTrackOnError(FluxSource& fluxSource, int baseTrack)
 struct ReadGroupResult
 {
     ReadResult result;
-    std::vector<std::shared_ptr<const Sector>> combinedSectors;
+    std::vector<const Sector*> combinedSectors;
 };
 
 static ReadGroupResult readGroup(const DiskLayout& diskLayout,
@@ -663,7 +661,7 @@ void readAndDecodeTrack(const DiskLayout& diskLayout,
     Decoder& decoder,
     const std::shared_ptr<const LogicalTrackLayout>& ltl,
     std::vector<std::shared_ptr<const Track>>& tracks,
-    std::vector<std::shared_ptr<const Sector>>& combinedSectors)
+    std::vector<const Sector*>& combinedSectors)
 {
     if (fluxSource.isHardware())
         measureDiskRotation();
@@ -737,7 +735,7 @@ void readDiskCommand(const DiskLayout& diskLayout,
             testForEmergencyStop();
 
             auto& trackFluxes = tracksByLogicalLocation[logicalLocation];
-            std::vector<std::shared_ptr<const Sector>> trackSectors;
+            std::vector<const Sector*> trackSectors;
             readAndDecodeTrack(diskLayout,
                 fluxSource,
                 decoder,
@@ -829,7 +827,7 @@ void readDiskCommand(const DiskLayout& diskLayout,
             /* track can't be modified below this point. */
             log(TrackReadLogMessage{trackFluxes, trackSectors});
 
-            std::vector<std::shared_ptr<const Sector>> all_sectors;
+            std::vector<const Sector*> all_sectors;
             for (auto& [ch, sector] : disk.sectorsByPhysicalLocation)
                 all_sectors.push_back(sector);
             all_sectors = collectSectors(all_sectors);

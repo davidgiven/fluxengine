@@ -11,7 +11,7 @@ class LogicalTrackLayout;
 class PhysicalTrackLayout;
 class Sector;
 
-struct Record: public gc
+struct Record
 {
     nanoseconds_t clock = 0;
     nanoseconds_t startTime = 0;
@@ -20,23 +20,23 @@ struct Record: public gc
     Bytes rawData;
 };
 
-struct Track: public gc
+struct Track
 {
     std::shared_ptr<const LogicalTrackLayout> ltl;
     std::shared_ptr<const PhysicalTrackLayout> ptl;
     std::shared_ptr<const Fluxmap> fluxmap;
     std::vector<std::shared_ptr<const Record>> records;
-    
+
     /* All sectors, valid or not, including duplicates. */
 
-    std::vector<std::shared_ptr<const Sector>> allSectors;
+    std::vector<const Sector*> allSectors;
 
     /* Zero or one sector for each ID, preferring good ones. */
 
-    std::vector<std::shared_ptr<const Sector>> normalisedSectors;
+    std::vector<const Sector*> normalisedSectors;
 };
 
-struct Disk: public gc
+struct Disk
 {
     Disk();
 
@@ -50,8 +50,7 @@ struct Disk: public gc
 
     std::multimap<CylinderHead, std::shared_ptr<const Track>>
         tracksByPhysicalLocation;
-    std::multimap<CylinderHead, std::shared_ptr<const Sector>>
-        sectorsByPhysicalLocation;
+    std::multimap<CylinderHead, const Sector*> sectorsByPhysicalLocation;
     std::shared_ptr<const Image> image;
 
     /* 0 if the period is unknown (e.g. if this Disk was made from an image). */

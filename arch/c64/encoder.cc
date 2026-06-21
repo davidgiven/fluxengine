@@ -156,7 +156,7 @@ public:
 
 public:
     std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout& ltl,
-        const std::vector<std::shared_ptr<const Sector>>& sectors,
+        const std::vector<const Sector*>& sectors,
         const Image& image) override
     {
         /* The format ID Character # 1 and # 2 are in the .d64 image only
@@ -204,9 +204,8 @@ public:
     }
 
 private:
-    void writeSector(std::vector<bool>& bits,
-        unsigned& cursor,
-        std::shared_ptr<const Sector> sector) const
+    void writeSector(
+        std::vector<bool>& bits, unsigned& cursor, const Sector* sector) const
     {
         /* Source: http://www.unusedino.de/ec64/technical/formats/g64.html
          * 1. Header sync       FF FF FF FF FF (40 'on' bits, not GCR)

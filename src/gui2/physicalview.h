@@ -9,7 +9,7 @@ public:
     PhysicalView();
     ~PhysicalView();
 
-    std::shared_ptr<const Sector> getSector(
+    const Sector* getSector(
         unsigned cylinder, unsigned head, unsigned sectorId) override;
     DiskLayout::LayoutBounds getBounds() override;
 };

@@ -70,7 +70,7 @@ public:
             headerWriter.seek(0x20 + 4 * track);
             headerWriter.write_le32(trackOffset);
             int side = track & 1;
-            std::vector<std::shared_ptr<const Sector>> sectors;
+            std::vector<const Sector*> sectors;
             for (int sectorId = geometry.firstSector;
                 sectorId <= geometry.numSectors;
                 sectorId++)
@@ -83,8 +83,7 @@ public:
             }
             std::sort(begin(sectors),
                 end(sectors),
-                [](std::shared_ptr<const Sector> a,
-                    std::shared_ptr<const Sector> b)
+                [](const Sector* a, const Sector* b)
                 {
                     return a->position < b->position;
                 });

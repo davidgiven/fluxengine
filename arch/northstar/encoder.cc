@@ -17,9 +17,8 @@
 
 #define TOTAL_SECTOR_BYTES ()
 
-static void write_sector(std::vector<bool>& bits,
-    unsigned& cursor,
-    const std::shared_ptr<const Sector>& sector)
+static void write_sector(
+    std::vector<bool>& bits, unsigned& cursor, const Sector* sector)
 {
     int preambleSize = 0;
     int encodedSectorSize = 0;
@@ -130,7 +129,7 @@ public:
     }
 
     std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout& ltl,
-        const std::vector<std::shared_ptr<const Sector>>& sectors,
+        const std::vector<const Sector*>& sectors,
         const Image& image) override
     {
         int bitsPerRevolution = 100000;

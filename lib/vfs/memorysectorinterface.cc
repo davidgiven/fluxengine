@@ -16,14 +16,12 @@ public:
     }
 
 public:
-    std::shared_ptr<const Sector> get(
-        unsigned track, unsigned side, unsigned sectorId) override
+    const Sector* get(unsigned track, unsigned side, unsigned sectorId) override
     {
         return _liveImage->get(track, side, sectorId);
     }
 
-    std::shared_ptr<Sector> put(
-        unsigned track, unsigned side, unsigned sectorId) override
+    Sector* put(unsigned track, unsigned side, unsigned sectorId) override
     {
         _changed = true;
         return _liveImage->put(track, side, sectorId);

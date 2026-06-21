@@ -37,7 +37,7 @@ private:
 
 public:
     std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout& ltl,
-        const std::vector<std::shared_ptr<const Sector>>& sectors,
+        const std::vector<const Sector*>& sectors,
         const Image& image) override
     {
         int bitsPerRevolution =

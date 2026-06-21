@@ -107,7 +107,7 @@ protected:
     const DecoderProto& _config;
     std::shared_ptr<const LogicalTrackLayout> _ltl;
     std::shared_ptr<Track> _trackdata;
-    std::shared_ptr<Sector> _sector;
+    Sector* _sector;
     std::unique_ptr<FluxDecoder> _decoder;
     std::vector<bool> _recordBits;
 

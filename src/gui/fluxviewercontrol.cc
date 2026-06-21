@@ -552,7 +552,7 @@ void FluxViewerControl::OnContextMenu(wxContextMenuEvent& event)
     Refresh();
 }
 
-void FluxViewerControl::ShowSectorMenu(std::shared_ptr<const Sector> sector)
+void FluxViewerControl::ShowSectorMenu(const Sector* sector)
 {
     wxMenu menu;
 
@@ -601,8 +601,7 @@ void FluxViewerControl::ShowRecordMenu(std::shared_ptr<const TrackInfo>& layout,
     PopupMenu(&menu, _mouseX, _mouseY);
 }
 
-static void dumpSectorMetadata(
-    std::ostream& s, std::shared_ptr<const Sector> sector)
+static void dumpSectorMetadata(std::ostream& s, const Sector* sector)
 {
     s << fmt::format(
              "Sector status:     {}\n", Sector::statusToString(sector->status))
@@ -629,7 +628,7 @@ static void dumpRecordMetadata(
              "Data CRC16:        {:4x}\n", crc16(CCITT_POLY, record->rawData));
 }
 
-void FluxViewerControl::DisplayDecodedData(std::shared_ptr<const Sector> sector)
+void FluxViewerControl::DisplayDecodedData(const Sector* sector)
 {
     std::stringstream s;
 
@@ -646,8 +645,7 @@ void FluxViewerControl::DisplayDecodedData(std::shared_ptr<const Sector> sector)
     TextViewerWindow::Create(this, title, s.str())->Show();
 }
 
-void FluxViewerControl::DisplaySectorSummary(
-    std::shared_ptr<const Sector> sector)
+void FluxViewerControl::DisplaySectorSummary(const Sector* sector)
 {
     std::stringstream s;
 
@@ -657,7 +655,7 @@ void FluxViewerControl::DisplaySectorSummary(
         sector->logicalSector);
     s << title << '\n';
 
-    std::vector<std::shared_ptr<const Sector>> sectors;
+    std::vector<const Sector*> sectors;
     for (auto& trackdata : _flux->trackDatas)
     {
         if ((trackdata->trackInfo->logicalCylinder ==
@@ -685,7 +683,7 @@ void FluxViewerControl::DisplaySectorSummary(
     TextViewerWindow::Create(this, title, s.str())->Show();
 }
 
-void FluxViewerControl::DisplayRawData(std::shared_ptr<const Sector> sector)
+void FluxViewerControl::DisplayRawData(const Sector* sector)
 {
     std::stringstream s;
 

@@ -18,7 +18,7 @@ public:
     }
 
     std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout& ltl,
-        const std::vector<std::shared_ptr<const Sector>>& sectors,
+        const std::vector<const Sector*>& sectors,
         const Image& image) override
     {
         _clockRateUs = _config.clock_period_us();
@@ -76,7 +76,7 @@ private:
             writeRawBits(0b10, 2);
     };
 
-    void writeSector(const std::shared_ptr<const Sector>& sectorData)
+    void writeSector(const Sector* sectorData)
     {
         writeRawBits(_config.header_marker(), 64);
         {

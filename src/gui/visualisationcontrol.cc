@@ -104,7 +104,7 @@ void VisualisationControl::OnPaint(wxPaintEvent&)
         auto drawSectors = [&](int head)
         {
             key_t key = {track, head};
-            std::vector<std::shared_ptr<const Sector>> sectors;
+            std::vector<const Sector*> sectors;
             for (auto it = _sectors.lower_bound(key);
                 it != _sectors.upper_bound(key);
                 it++)

@@ -25,8 +25,7 @@ public:
     }
 
 public:
-    std::shared_ptr<const Sector> get(
-        unsigned track, unsigned side, unsigned sectorId) override
+    const Sector* get(unsigned track, unsigned side, unsigned sectorId) override
     {
         auto it = _changedSectors.get(track, side, sectorId);
         if (it)
@@ -39,8 +38,7 @@ public:
         return _loadedSectors.get(track, side, sectorId);
     }
 
-    std::shared_ptr<Sector> put(
-        unsigned track, unsigned side, unsigned sectorId) override
+    Sector* put(unsigned track, unsigned side, unsigned sectorId) override
     {
         CylinderHead trackid(track, side);
         _changedTracks.insert(trackid);
@@ -133,7 +131,7 @@ private:
         CylinderHead logicalLocation = {logicalCylinder, logicalSide};
         auto& ltl = _diskLayout->layoutByLogicalLocation.at(logicalLocation);
         std::vector<std::shared_ptr<const Track>> trackFluxes;
-        std::vector<std::shared_ptr<const Sector>> trackSectors;
+        std::vector<const Sector*> trackSectors;
         readAndDecodeTrack(*_diskLayout,
             *_fluxSource,
             *_decoder,

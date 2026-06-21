@@ -31,7 +31,7 @@ struct EndSpeedOperationLogMessage
 struct TrackReadLogMessage
 {
     std::vector<std::shared_ptr<const Track>> tracks;
-    std::vector<std::shared_ptr<const Sector>> sectors;
+    std::vector<const Sector*> sectors;
 };
 
 struct DiskReadLogMessage
@@ -48,7 +48,7 @@ struct BeginReadOperationLogMessage
 struct EndReadOperationLogMessage
 {
     std::shared_ptr<const Track> trackDataFlux;
-    std::set<std::shared_ptr<const Sector>> sectors;
+    std::set<const Sector*> sectors;
 };
 
 struct BeginWriteOperationLogMessage
@@ -117,7 +117,7 @@ extern void readAndDecodeTrack(const DiskLayout& diskLayout,
     Decoder& decoder,
     const std::shared_ptr<const LogicalTrackLayout>& ltl,
     std::vector<std::shared_ptr<const Track>>& tracks,
-    std::vector<std::shared_ptr<const Sector>>& combinedSectors);
+    std::vector<const Sector*>& combinedSectors);
 
 extern void readDiskCommand(const DiskLayout& diskLayout,
     FluxSource& fluxSource,
