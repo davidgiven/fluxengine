@@ -85,15 +85,14 @@ private:
     const std::string _filename;
 };
 
-std::unique_ptr<FluxSinkFactory> FluxSinkFactory::createFl2FluxSinkFactory(
+FluxSinkFactory* FluxSinkFactory::createFl2FluxSinkFactory(
     const Fl2FluxSinkProto& config)
 {
-    return std::unique_ptr<FluxSinkFactory>(
-        new Fl2FluxSinkFactory(config.filename()));
+    return new Fl2FluxSinkFactory(config.filename());
 }
 
-std::unique_ptr<FluxSinkFactory> FluxSinkFactory::createFl2FluxSinkFactory(
+FluxSinkFactory* FluxSinkFactory::createFl2FluxSinkFactory(
     const std::string& filename)
 {
-    return std::unique_ptr<FluxSinkFactory>(new Fl2FluxSinkFactory(filename));
+    return new Fl2FluxSinkFactory(filename);
 }

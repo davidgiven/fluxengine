@@ -608,7 +608,7 @@ void Datastore::beginWrite()
                 writeDiskCommand(*diskLayout,
                     *image,
                     encoder,
-                    *fluxSinkFactory,
+                    fluxSinkFactory,
                     decoder,
                     verificationFluxSource.get());
             }
@@ -758,7 +758,7 @@ void Datastore::writeFluxFile(const std::fs::path& path)
                 globalConfig().setFluxSink(path.string());
                 auto fluxSource = FluxSource::createMemoryFluxSource(*disk);
                 auto fluxSinkFactory = FluxSinkFactory::create(globalConfig());
-                writeRawDiskCommand(*diskLayout, *fluxSource, *fluxSinkFactory);
+                writeRawDiskCommand(*diskLayout, *fluxSource, fluxSinkFactory);
             }
             catch (...)
             {

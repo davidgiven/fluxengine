@@ -72,7 +72,7 @@ int mainWrite(int argc, const char* argv[])
     writeDiskCommand(*diskLayout,
         *image,
         encoder,
-        *fluxSinkFactory,
+        fluxSinkFactory,
         decoder,
         verificationFluxSource.get());
 

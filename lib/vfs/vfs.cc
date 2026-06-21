@@ -240,7 +240,7 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystemFromConfig()
     {
         std::shared_ptr<FluxSource> fluxSource;
         Decoder* decoder;
-        std::shared_ptr<FluxSinkFactory> fluxSinkFactory;
+        FluxSinkFactory* fluxSinkFactory;
         Encoder* encoder;
         if (globalConfig().hasFluxSource())
         {

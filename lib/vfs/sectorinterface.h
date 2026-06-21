@@ -45,7 +45,7 @@ public:
     static std::unique_ptr<SectorInterface> createFluxSectorInterface(
         const std::shared_ptr<const DiskLayout>& diskLayout,
         std::shared_ptr<FluxSource> fluxSource,
-        std::shared_ptr<FluxSinkFactory> fluxSinkFactory,
+        FluxSinkFactory* fluxSinkFactory,
         Encoder* encoder,
         Decoder* decoder);
 };

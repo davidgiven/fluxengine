@@ -82,7 +82,7 @@ namespace
     private:
         std::unique_ptr<FluxSource> _fluxSource;
         std::unique_ptr<FluxSource> _verificationFluxSource;
-        std::unique_ptr<FluxSinkFactory> _fluxSink;
+        FluxSinkFactory* _fluxSink;
         std::unique_ptr<ImageReader> _imageReader;
         std::unique_ptr<ImageWriter> _imageWriter;
         Encoder* _encoder;

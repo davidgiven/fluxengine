@@ -430,7 +430,7 @@ static ReadGroupResult readGroup(const DiskLayout& diskLayout,
 
 void writeTracks(const DiskLayout& diskLayout,
 
-    FluxSinkFactory& fluxSinkFactory,
+    FluxSinkFactory* fluxSinkFactory,
     std::function<std::unique_ptr<const Fluxmap>(const LogicalTrackLayout*)>
         producer,
     std::function<bool(const LogicalTrackLayout*)> verifier,
@@ -438,10 +438,10 @@ void writeTracks(const DiskLayout& diskLayout,
 {
     log(BeginOperationLogMessage{"Encoding and writing to disk"});
 
-    if (fluxSinkFactory.isHardware())
+    if (fluxSinkFactory->isHardware())
         measureDiskRotation();
     {
-        auto fluxSink = fluxSinkFactory.create();
+        auto fluxSink = fluxSinkFactory->create();
         int index = 0;
         for (auto& ch : logicalLocations)
         {
@@ -506,7 +506,7 @@ void writeTracks(const DiskLayout& diskLayout,
 }
 
 void writeTracks(const DiskLayout& diskLayout,
-    FluxSinkFactory& fluxSinkFactory,
+    FluxSinkFactory* fluxSinkFactory,
     Encoder* encoder,
     const Image& image,
     const std::vector<CylinderHead>& chs)
@@ -527,7 +527,7 @@ void writeTracks(const DiskLayout& diskLayout,
 }
 
 void writeTracksAndVerify(const DiskLayout& diskLayout,
-    FluxSinkFactory& fluxSinkFactory,
+    FluxSinkFactory* fluxSinkFactory,
     Encoder* encoder,
     FluxSource& fluxSource,
     Decoder* decoder,
@@ -597,7 +597,7 @@ void writeTracksAndVerify(const DiskLayout& diskLayout,
 void writeDiskCommand(const DiskLayout& diskLayout,
     const Image& image,
     Encoder* encoder,
-    FluxSinkFactory& fluxSinkFactory,
+    FluxSinkFactory* fluxSinkFactory,
     Decoder* decoder,
     FluxSource* fluxSource,
     const std::vector<CylinderHead>& physicalLocations)
@@ -620,7 +620,7 @@ void writeDiskCommand(const DiskLayout& diskLayout,
 void writeDiskCommand(const DiskLayout& diskLayout,
     const Image& image,
     Encoder* encoder,
-    FluxSinkFactory& fluxSinkFactory,
+    FluxSinkFactory* fluxSinkFactory,
     Decoder* decoder,
     FluxSource* fluxSource)
 {
@@ -637,7 +637,7 @@ void writeDiskCommand(const DiskLayout& diskLayout,
 
 void writeRawDiskCommand(const DiskLayout& diskLayout,
     FluxSource& fluxSource,
-    FluxSinkFactory& fluxSinkFactory)
+    FluxSinkFactory* fluxSinkFactory)
 {
     writeTracks(
         diskLayout,
@@ -700,7 +700,7 @@ void readDiskCommand(const DiskLayout& diskLayout,
     Decoder* decoder,
     Disk& disk)
 {
-    std::unique_ptr<FluxSinkFactory> outputFluxSinkFactory;
+    FluxSinkFactory* outputFluxSinkFactory;
     if (globalConfig()->decoder().has_copy_flux_to())
         outputFluxSinkFactory =
             FluxSinkFactory::create(globalConfig()->decoder().copy_flux_to());

@@ -114,8 +114,8 @@ private:
     const AuFluxSinkProto& _config;
 };
 
-std::unique_ptr<FluxSinkFactory> FluxSinkFactory::createAuFluxSinkFactory(
+FluxSinkFactory* FluxSinkFactory::createAuFluxSinkFactory(
     const AuFluxSinkProto& config)
 {
-    return std::unique_ptr<FluxSinkFactory>(new AuFluxSinkFactory(config));
+    return new AuFluxSinkFactory(config);
 }

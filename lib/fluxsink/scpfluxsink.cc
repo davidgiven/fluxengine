@@ -219,8 +219,8 @@ private:
     const ScpFluxSinkProto& _config;
 };
 
-std::unique_ptr<FluxSinkFactory> FluxSinkFactory::createScpFluxSinkFactory(
+FluxSinkFactory* FluxSinkFactory::createScpFluxSinkFactory(
     const ScpFluxSinkProto& config)
 {
-    return std::unique_ptr<FluxSinkFactory>(new ScpFluxSinkFactory(config));
+    return new ScpFluxSinkFactory(config);
 }

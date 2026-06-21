@@ -33,29 +33,29 @@ public:
     }
 };
 
-class FluxSinkFactory
+class FluxSinkFactory : public gc
 {
 public:
     virtual ~FluxSinkFactory() {}
 
-    static std::unique_ptr<FluxSinkFactory> createHardwareFluxSinkFactory(
+    static FluxSinkFactory* createHardwareFluxSinkFactory(
         const HardwareFluxSinkProto& config);
-    static std::unique_ptr<FluxSinkFactory> createAuFluxSinkFactory(
+    static FluxSinkFactory* createAuFluxSinkFactory(
         const AuFluxSinkProto& config);
-    static std::unique_ptr<FluxSinkFactory> createA2RFluxSinkFactory(
+    static FluxSinkFactory* createA2RFluxSinkFactory(
         const A2RFluxSinkProto& config);
-    static std::unique_ptr<FluxSinkFactory> createVcdFluxSinkFactory(
+    static FluxSinkFactory* createVcdFluxSinkFactory(
         const VcdFluxSinkProto& config);
-    static std::unique_ptr<FluxSinkFactory> createScpFluxSinkFactory(
+    static FluxSinkFactory* createScpFluxSinkFactory(
         const ScpFluxSinkProto& config);
-    static std::unique_ptr<FluxSinkFactory> createFl2FluxSinkFactory(
+    static FluxSinkFactory* createFl2FluxSinkFactory(
         const Fl2FluxSinkProto& config);
 
-    static std::unique_ptr<FluxSinkFactory> createFl2FluxSinkFactory(
+    static FluxSinkFactory* createFl2FluxSinkFactory(
         const std::string& filename);
 
-    static std::unique_ptr<FluxSinkFactory> create(Config& config);
-    static std::unique_ptr<FluxSinkFactory> create(const FluxSinkProto& config);
+    static FluxSinkFactory* create(Config& config);
+    static FluxSinkFactory* create(const FluxSinkProto& config);
 
 public:
     /* Creates a writer object. */
@@ -81,9 +81,9 @@ public:
 };
 
 inline std::ostream& operator<<(
-    std::ostream& stream, FluxSinkFactory& flushSink)
+    std::ostream& stream, FluxSinkFactory* flushSink)
 {
-    stream << (std::string)flushSink;
+    stream << (std::string)*flushSink;
     return stream;
 }
 

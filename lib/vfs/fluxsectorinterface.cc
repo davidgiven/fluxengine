@@ -13,7 +13,7 @@ class FluxSectorInterface : public SectorInterface
 public:
     FluxSectorInterface(const std::shared_ptr<const DiskLayout>& diskLayout,
         std::shared_ptr<FluxSource> fluxSource,
-        std::shared_ptr<FluxSinkFactory> fluxSinkFactory,
+        FluxSinkFactory* fluxSinkFactory,
         Encoder* encoder,
         Decoder* decoder):
         _diskLayout(diskLayout),
@@ -96,7 +96,7 @@ public:
         writeDiskCommand(*_diskLayout,
             _changedSectors,
             _encoder,
-            *_fluxSink,
+            _fluxSink,
             _decoder,
             _fluxSource.get(),
             locations);
@@ -147,7 +147,7 @@ private:
 
     std::shared_ptr<const DiskLayout> _diskLayout;
     std::shared_ptr<FluxSource> _fluxSource;
-    std::shared_ptr<FluxSinkFactory> _fluxSink;
+    FluxSinkFactory* _fluxSink;
     Encoder* _encoder;
     Decoder* _decoder;
 
@@ -161,7 +161,7 @@ private:
 std::unique_ptr<SectorInterface> SectorInterface::createFluxSectorInterface(
     const std::shared_ptr<const DiskLayout>& diskLayout,
     std::shared_ptr<FluxSource> fluxSource,
-    std::shared_ptr<FluxSinkFactory> fluxSinkFactory,
+    FluxSinkFactory* fluxSinkFactory,
     Encoder* encoder,
     Decoder* decoder)
 {
