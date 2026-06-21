@@ -30,7 +30,7 @@ public:
     static const std::map<std::string, Device>& getDevices();
     static const std::map<CylinderHead, std::shared_ptr<const TrackInfo>>&
     getPhysicalCylinderLayouts();
-    static std::shared_ptr<const DiskLayout> getDiskLayout();
+    static const DiskLayout* getDiskLayout();
     static void onLogMessage(const AnyLogMessage& message);
 
     static void reset();

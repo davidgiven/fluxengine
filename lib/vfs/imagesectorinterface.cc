@@ -10,7 +10,7 @@
 class ImageSectorInterface : public SectorInterface
 {
 public:
-    ImageSectorInterface(const std::shared_ptr<const DiskLayout>& diskLayout,
+    ImageSectorInterface(const DiskLayout* diskLayout,
         const std::shared_ptr<ImageReader>& reader,
         const std::shared_ptr<ImageWriter>& writer):
         _diskLayout(diskLayout),
@@ -62,14 +62,14 @@ public:
 
 private:
     std::shared_ptr<Image> _image;
-    std::shared_ptr<const DiskLayout> _diskLayout;
+    const DiskLayout* _diskLayout;
     std::shared_ptr<ImageReader> _reader;
     std::shared_ptr<ImageWriter> _writer;
     bool _changed = false;
 };
 
 std::unique_ptr<SectorInterface> SectorInterface::createImageSectorInterface(
-    const std::shared_ptr<const DiskLayout>& diskLayout,
+    const DiskLayout* diskLayout,
     std::shared_ptr<ImageReader> reader,
     std::shared_ptr<ImageWriter> writer)
 {

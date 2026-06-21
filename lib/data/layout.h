@@ -65,7 +65,7 @@ struct PhysicalTrackLayout
     const LogicalTrackLayout* logicalTrackLayout;
 };
 
-class DiskLayout
+class DiskLayout : public gc
 {
 public:
     DiskLayout(const ConfigProto& config = globalConfig());
@@ -169,10 +169,9 @@ public:
     LayoutBounds getLogicalBounds() const;
 };
 
-static std::shared_ptr<DiskLayout> createDiskLayout(
-    const ConfigProto& config = globalConfig())
+static DiskLayout* createDiskLayout(const ConfigProto& config = globalConfig())
 {
-    return std::make_shared<DiskLayout>(config);
+    return new DiskLayout(config);
 }
 
 class TrackInfo

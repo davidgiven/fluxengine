@@ -11,7 +11,7 @@
 class FluxSectorInterface : public SectorInterface
 {
 public:
-    FluxSectorInterface(const std::shared_ptr<const DiskLayout>& diskLayout,
+    FluxSectorInterface(const DiskLayout* diskLayout,
         FluxSource* fluxSource,
         FluxSinkFactory* fluxSinkFactory,
         Encoder* encoder,
@@ -145,7 +145,7 @@ private:
         _loadedTracks.insert(logicalLocation);
     }
 
-    std::shared_ptr<const DiskLayout> _diskLayout;
+    const DiskLayout* _diskLayout;
     FluxSource* _fluxSource;
     FluxSinkFactory* _fluxSink;
     Encoder* _encoder;
@@ -159,7 +159,7 @@ private:
 };
 
 std::unique_ptr<SectorInterface> SectorInterface::createFluxSectorInterface(
-    const std::shared_ptr<const DiskLayout>& diskLayout,
+    const DiskLayout* diskLayout,
     FluxSource* fluxSource,
     FluxSinkFactory* fluxSinkFactory,
     Encoder* encoder,

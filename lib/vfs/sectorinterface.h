@@ -39,11 +39,11 @@ public:
     static std::unique_ptr<SectorInterface> createMemorySectorInterface(
         std::shared_ptr<Image> image);
     static std::unique_ptr<SectorInterface> createImageSectorInterface(
-        const std::shared_ptr<const DiskLayout>& diskLayout,
+        const DiskLayout* diskLayout,
         std::shared_ptr<ImageReader> reader,
         std::shared_ptr<ImageWriter> writer);
     static std::unique_ptr<SectorInterface> createFluxSectorInterface(
-        const std::shared_ptr<const DiskLayout>& diskLayout,
+        const DiskLayout* diskLayout,
         FluxSource* fluxSource,
         FluxSinkFactory* fluxSinkFactory,
         Encoder* encoder,

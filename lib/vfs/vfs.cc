@@ -157,8 +157,8 @@ void Filesystem::discardChanges()
     _sectors->discardChanges();
 }
 
-Filesystem::Filesystem(const std::shared_ptr<const DiskLayout>& diskLayout,
-    std::shared_ptr<SectorInterface> sectors):
+Filesystem::Filesystem(
+    const DiskLayout* diskLayout, std::shared_ptr<SectorInterface> sectors):
     _diskLayout(diskLayout),
     _blockCount(diskLayout->logicalSectorLocationsInFilesystemOrder.size()),
     _sectors(sectors)
@@ -167,7 +167,7 @@ Filesystem::Filesystem(const std::shared_ptr<const DiskLayout>& diskLayout,
 
 std::unique_ptr<Filesystem> Filesystem::createFilesystem(
     const FilesystemProto& config,
-    const std::shared_ptr<const DiskLayout>& diskLayout,
+    const DiskLayout* diskLayout,
     std::shared_ptr<SectorInterface> image)
 {
     switch (config.type())

@@ -16,8 +16,7 @@ static Bytes blank_dirent = Bytes{0xe5} * 32;
 
 /* The layout must use one cylinder per CP/M block (eight sectors). */
 
-static std::shared_ptr<const DiskLayout> diskLayout =
-    std::make_shared<DiskLayout>(10, 1, 8, 256);
+static const DiskLayout* diskLayout = new DiskLayout(10, 1, 8, 256);
 
 namespace
 {

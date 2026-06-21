@@ -49,7 +49,7 @@ static std::atomic<bool> failed;
 
 static bool formattingSupported;
 static std::map<std::string, Datastore::Device> devices;
-static std::shared_ptr<const DiskLayout> diskLayout;
+static const DiskLayout* diskLayout;
 
 static void wtRebuildConfiguration(bool useCustom);
 
@@ -294,7 +294,7 @@ const std::map<std::string, Datastore::Device>& Datastore::getDevices()
     return devices;
 }
 
-std::shared_ptr<const DiskLayout> Datastore::getDiskLayout()
+const DiskLayout* Datastore::getDiskLayout()
 {
     return diskLayout;
 }
