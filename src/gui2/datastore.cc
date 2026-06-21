@@ -544,7 +544,7 @@ void Datastore::beginRead(bool rereadBadSectors)
                 auto fluxSource = FluxSource::create(globalConfig());
                 auto decoder = Arch::createDecoder(globalConfig());
 
-                readDiskCommand(*diskLayout, *fluxSource, *decoder, *disk);
+                readDiskCommand(*diskLayout, *fluxSource, decoder, *disk);
             }
             catch (...)
             {
@@ -607,7 +607,7 @@ void Datastore::beginWrite()
                 auto image = disk->image;
                 writeDiskCommand(*diskLayout,
                     *image,
-                    *encoder,
+                    encoder,
                     *fluxSinkFactory,
                     decoder,
                     verificationFluxSource.get());

@@ -95,7 +95,7 @@ public:
 
         writeDiskCommand(*_diskLayout,
             _changedSectors,
-            *_encoder,
+            _encoder,
             *_fluxSink,
             _decoder,
             _fluxSource.get(),
@@ -134,7 +134,7 @@ private:
         std::vector<const Sector*> trackSectors;
         readAndDecodeTrack(*_diskLayout,
             *_fluxSource,
-            *_decoder,
+            _decoder,
             ltl,
             trackFluxes,
             trackSectors);

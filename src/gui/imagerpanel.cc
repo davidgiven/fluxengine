@@ -96,7 +96,7 @@ public:
                 {
                     auto* fluxSource = GetContext().GetFluxSource();
                     auto* decoder = GetContext().GetDecoder();
-                    auto disk = readDiskCommand(*fluxSource, *decoder);
+                    auto disk = readDiskCommand(*fluxSource, decoder);
 
                     runOnUiThread(
                         [&]()
@@ -156,7 +156,7 @@ public:
                     }
 
                     writeDiskCommand(*image,
-                        *encoder,
+                        encoder,
                         *fluxSinkFactory,
                         decoder,
                         verificationFluxSource);

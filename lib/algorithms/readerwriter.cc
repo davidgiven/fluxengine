@@ -293,7 +293,7 @@ struct CombinationResult
 
 static CombinationResult combineRecordAndSectors(
     std::vector<std::shared_ptr<const Track>>& tracks,
-    Decoder& decoder,
+    Decoder* decoder,
     const LogicalTrackLayout* ltl)
 {
     CombinationResult cr = {HAS_NO_BAD_SECTORS};
@@ -360,7 +360,7 @@ static ReadGroupResult readGroup(const DiskLayout& diskLayout,
     FluxSourceIteratorHolder& fluxSourceIteratorHolder,
     const LogicalTrackLayout* ltl,
     std::vector<std::shared_ptr<const Track>>& tracks,
-    Decoder& decoder)
+    Decoder* decoder)
 {
     ReadGroupResult rgr = {BAD_AND_CAN_NOT_RETRY};
 
@@ -402,7 +402,7 @@ static ReadGroupResult readGroup(const DiskLayout& diskLayout,
             (int)(fluxmap->duration() / 1e6),
             fluxmap->bytes());
 
-        auto flux = decoder.decodeToSectors(std::move(fluxmap), ptl);
+        auto flux = decoder->decodeToSectors(std::move(fluxmap), ptl);
         flux->normalisedSectors = collectSectors(flux->allSectors);
         tracks.push_back(flux);
 
@@ -507,7 +507,7 @@ void writeTracks(const DiskLayout& diskLayout,
 
 void writeTracks(const DiskLayout& diskLayout,
     FluxSinkFactory& fluxSinkFactory,
-    Encoder& encoder,
+    Encoder* encoder,
     const Image& image,
     const std::vector<CylinderHead>& chs)
 {
@@ -516,8 +516,8 @@ void writeTracks(const DiskLayout& diskLayout,
         fluxSinkFactory,
         [&](const LogicalTrackLayout* ltl)
         {
-            auto sectors = encoder.collectSectors(ltl, image);
-            return encoder.encode(ltl, sectors, image);
+            auto sectors = encoder->collectSectors(ltl, image);
+            return encoder->encode(ltl, sectors, image);
         },
         [](const auto&)
         {
@@ -528,9 +528,9 @@ void writeTracks(const DiskLayout& diskLayout,
 
 void writeTracksAndVerify(const DiskLayout& diskLayout,
     FluxSinkFactory& fluxSinkFactory,
-    Encoder& encoder,
+    Encoder* encoder,
     FluxSource& fluxSource,
-    Decoder& decoder,
+    Decoder* decoder,
     const Image& image,
     const std::vector<CylinderHead>& chs)
 {
@@ -539,8 +539,8 @@ void writeTracksAndVerify(const DiskLayout& diskLayout,
         fluxSinkFactory,
         [&](const LogicalTrackLayout* ltl)
         {
-            auto sectors = encoder.collectSectors(ltl, image);
-            return encoder.encode(ltl, sectors, image);
+            auto sectors = encoder->collectSectors(ltl, image);
+            return encoder->encode(ltl, sectors, image);
         },
         [&](const LogicalTrackLayout* ltl)
         {
@@ -558,7 +558,7 @@ void writeTracksAndVerify(const DiskLayout& diskLayout,
             }
 
             Image wanted;
-            for (const auto& sector : encoder.collectSectors(ltl, image))
+            for (const auto& sector : encoder->collectSectors(ltl, image))
                 wanted
                     .put(sector->logicalCylinder,
                         sector->logicalHead,
@@ -596,7 +596,7 @@ void writeTracksAndVerify(const DiskLayout& diskLayout,
 
 void writeDiskCommand(const DiskLayout& diskLayout,
     const Image& image,
-    Encoder& encoder,
+    Encoder* encoder,
     FluxSinkFactory& fluxSinkFactory,
     Decoder* decoder,
     FluxSource* fluxSource,
@@ -610,7 +610,7 @@ void writeDiskCommand(const DiskLayout& diskLayout,
             fluxSinkFactory,
             encoder,
             *fluxSource,
-            *decoder,
+            decoder,
             image,
             chs);
     else
@@ -619,7 +619,7 @@ void writeDiskCommand(const DiskLayout& diskLayout,
 
 void writeDiskCommand(const DiskLayout& diskLayout,
     const Image& image,
-    Encoder& encoder,
+    Encoder* encoder,
     FluxSinkFactory& fluxSinkFactory,
     Decoder* decoder,
     FluxSource* fluxSource)
@@ -657,7 +657,7 @@ void writeRawDiskCommand(const DiskLayout& diskLayout,
 
 void readAndDecodeTrack(const DiskLayout& diskLayout,
     FluxSource& fluxSource,
-    Decoder& decoder,
+    Decoder* decoder,
     const LogicalTrackLayout* ltl,
     std::vector<std::shared_ptr<const Track>>& tracks,
     std::vector<const Sector*>& combinedSectors)
@@ -697,7 +697,7 @@ void readAndDecodeTrack(const DiskLayout& diskLayout,
 
 void readDiskCommand(const DiskLayout& diskLayout,
     FluxSource& fluxSource,
-    Decoder& decoder,
+    Decoder* decoder,
     Disk& disk)
 {
     std::unique_ptr<FluxSinkFactory> outputFluxSinkFactory;
@@ -846,7 +846,7 @@ void readDiskCommand(const DiskLayout& diskLayout,
 
 void readDiskCommand(const DiskLayout& diskLayout,
     FluxSource& fluxSource,
-    Decoder& decoder,
+    Decoder* decoder,
     ImageWriter& writer)
 {
     Disk disk;

@@ -84,15 +84,15 @@ extern void writeTracks(const DiskLayout& diskLayout,
 
 extern void writeTracksAndVerify(const DiskLayout& diskLayout,
     FluxSinkFactory& fluxSinkFactory,
-    Encoder& encoder,
+    Encoder* encoder,
     FluxSource& fluxSource,
-    Decoder& decoder,
+    Decoder* decoder,
     const Image& image,
     const std::vector<CylinderHead>& locations);
 
 extern void writeDiskCommand(const DiskLayout& diskLayout,
     const Image& image,
-    Encoder& encoder,
+    Encoder* encoder,
     FluxSinkFactory& fluxSinkFactory,
     Decoder* decoder,
     FluxSource* fluxSource,
@@ -100,7 +100,7 @@ extern void writeDiskCommand(const DiskLayout& diskLayout,
 
 extern void writeDiskCommand(const DiskLayout& diskLayout,
     const Image& image,
-    Encoder& encoder,
+    Encoder* encoder,
     FluxSinkFactory& fluxSinkFactory,
     Decoder* decoder = nullptr,
     FluxSource* fluxSource = nullptr);
@@ -114,18 +114,18 @@ extern void writeRawDiskCommand(const DiskLayout& diskLayout,
 
 extern void readAndDecodeTrack(const DiskLayout& diskLayout,
     FluxSource& fluxSource,
-    Decoder& decoder,
+    Decoder* decoder,
     const LogicalTrackLayout* ltl,
     std::vector<std::shared_ptr<const Track>>& tracks,
     std::vector<const Sector*>& combinedSectors);
 
 extern void readDiskCommand(const DiskLayout& diskLayout,
     FluxSource& fluxSource,
-    Decoder& decoder,
+    Decoder* decoder,
     Disk& disk);
 extern void readDiskCommand(const DiskLayout& diskLayout,
     FluxSource& source,
-    Decoder& decoder,
+    Decoder* decoder,
     ImageWriter& writer);
 
 #endif
