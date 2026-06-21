@@ -294,7 +294,7 @@ struct CombinationResult
 static CombinationResult combineRecordAndSectors(
     std::vector<std::shared_ptr<const Track>>& tracks,
     Decoder& decoder,
-    const std::shared_ptr<const LogicalTrackLayout>& ltl)
+    const LogicalTrackLayout* ltl)
 {
     CombinationResult cr = {HAS_NO_BAD_SECTORS};
     std::vector<const Sector*> track_sectors;
@@ -358,7 +358,7 @@ struct ReadGroupResult
 
 static ReadGroupResult readGroup(const DiskLayout& diskLayout,
     FluxSourceIteratorHolder& fluxSourceIteratorHolder,
-    const std::shared_ptr<const LogicalTrackLayout>& ltl,
+    const LogicalTrackLayout* ltl,
     std::vector<std::shared_ptr<const Track>>& tracks,
     Decoder& decoder)
 {
@@ -431,10 +431,9 @@ static ReadGroupResult readGroup(const DiskLayout& diskLayout,
 void writeTracks(const DiskLayout& diskLayout,
 
     FluxSinkFactory& fluxSinkFactory,
-    std::function<std::unique_ptr<const Fluxmap>(
-        const std::shared_ptr<const LogicalTrackLayout>&)> producer,
-    std::function<bool(const std::shared_ptr<const LogicalTrackLayout>&)>
-        verifier,
+    std::function<std::unique_ptr<const Fluxmap>(const LogicalTrackLayout*)>
+        producer,
+    std::function<bool(const LogicalTrackLayout*)> verifier,
     const std::vector<CylinderHead>& logicalLocations)
 {
     log(BeginOperationLogMessage{"Encoding and writing to disk"});
@@ -515,10 +514,10 @@ void writeTracks(const DiskLayout& diskLayout,
     writeTracks(
         diskLayout,
         fluxSinkFactory,
-        [&](const std::shared_ptr<const LogicalTrackLayout>& ltl)
+        [&](const LogicalTrackLayout* ltl)
         {
-            auto sectors = encoder.collectSectors(*ltl, image);
-            return encoder.encode(*ltl, sectors, image);
+            auto sectors = encoder.collectSectors(ltl, image);
+            return encoder.encode(ltl, sectors, image);
         },
         [](const auto&)
         {
@@ -538,12 +537,12 @@ void writeTracksAndVerify(const DiskLayout& diskLayout,
     writeTracks(
         diskLayout,
         fluxSinkFactory,
-        [&](const std::shared_ptr<const LogicalTrackLayout>& ltl)
+        [&](const LogicalTrackLayout* ltl)
         {
-            auto sectors = encoder.collectSectors(*ltl, image);
-            return encoder.encode(*ltl, sectors, image);
+            auto sectors = encoder.collectSectors(ltl, image);
+            return encoder.encode(ltl, sectors, image);
         },
-        [&](const std::shared_ptr<const LogicalTrackLayout>& ltl)
+        [&](const LogicalTrackLayout* ltl)
         {
             FluxSourceIteratorHolder fluxSourceIteratorHolder(fluxSource);
             std::vector<std::shared_ptr<const Track>> tracks;
@@ -559,7 +558,7 @@ void writeTracksAndVerify(const DiskLayout& diskLayout,
             }
 
             Image wanted;
-            for (const auto& sector : encoder.collectSectors(*ltl, image))
+            for (const auto& sector : encoder.collectSectors(ltl, image))
                 wanted
                     .put(sector->logicalCylinder,
                         sector->logicalHead,
@@ -643,7 +642,7 @@ void writeRawDiskCommand(const DiskLayout& diskLayout,
     writeTracks(
         diskLayout,
         fluxSinkFactory,
-        [&](const std::shared_ptr<const LogicalTrackLayout>& ltl)
+        [&](const LogicalTrackLayout* ltl)
         {
             return fluxSource
                 .readFlux(ltl->physicalCylinder, ltl->physicalHead)
@@ -659,7 +658,7 @@ void writeRawDiskCommand(const DiskLayout& diskLayout,
 void readAndDecodeTrack(const DiskLayout& diskLayout,
     FluxSource& fluxSource,
     Decoder& decoder,
-    const std::shared_ptr<const LogicalTrackLayout>& ltl,
+    const LogicalTrackLayout* ltl,
     std::vector<std::shared_ptr<const Track>>& tracks,
     std::vector<const Sector*>& combinedSectors)
 {

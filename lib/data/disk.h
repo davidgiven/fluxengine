@@ -22,7 +22,7 @@ struct Record
 
 struct Track
 {
-    std::shared_ptr<const LogicalTrackLayout> ltl;
+    const LogicalTrackLayout* ltl;
     std::shared_ptr<const PhysicalTrackLayout> ptl;
     std::shared_ptr<const Fluxmap> fluxmap;
     std::vector<std::shared_ptr<const Record>> records;

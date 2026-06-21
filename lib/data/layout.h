@@ -8,7 +8,7 @@
 
 class ConfigProto;
 
-struct LogicalTrackLayout: public gc
+struct LogicalTrackLayout : public gc
 {
     /* Physical cylinder of the first element of the group. */
     unsigned physicalCylinder;
@@ -50,7 +50,7 @@ struct LogicalTrackLayout: public gc
     std::map<unsigned, unsigned> sectorIdToNaturalOrdering;
 };
 
-struct PhysicalTrackLayout: public gc
+struct PhysicalTrackLayout
 {
     /* Physical location of this track. */
     unsigned physicalCylinder;
@@ -62,10 +62,10 @@ struct PhysicalTrackLayout: public gc
     unsigned groupOffset;
 
     /* The logical track that this track is part of. */
-    std::shared_ptr<const LogicalTrackLayout> logicalTrackLayout;
+    const LogicalTrackLayout* logicalTrackLayout;
 };
 
-class DiskLayout: public gc
+class DiskLayout
 {
 public:
     DiskLayout(const ConfigProto& config = globalConfig());
@@ -97,8 +97,7 @@ public:
 
     std::map<CylinderHead, std::shared_ptr<const PhysicalTrackLayout>>
         layoutByPhysicalLocation;
-    std::map<CylinderHead, std::shared_ptr<const LogicalTrackLayout>>
-        layoutByLogicalLocation;
+    std::map<CylinderHead, const LogicalTrackLayout*> layoutByLogicalLocation;
 
     /* Ordered lists of physical and logical locations. */
 
@@ -176,7 +175,7 @@ static std::shared_ptr<DiskLayout> createDiskLayout(
     return std::make_shared<DiskLayout>(config);
 }
 
-class TrackInfo: public gc
+class TrackInfo
 {
 public:
     TrackInfo() {}

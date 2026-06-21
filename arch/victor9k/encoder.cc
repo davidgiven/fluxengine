@@ -164,12 +164,12 @@ private:
     }
 
 public:
-    std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout& ltl,
+    std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout* ltl,
         const std::vector<const Sector*>& sectors,
         const Image& image) override
     {
         Victor9kEncoderProto::TrackdataProto trackdata;
-        getTrackFormat(trackdata, ltl.logicalCylinder, ltl.logicalHead);
+        getTrackFormat(trackdata, ltl->logicalCylinder, ltl->logicalHead);
 
         unsigned bitsPerRevolution = (trackdata.rotational_period_ms() * 1e3) /
                                      trackdata.clock_period_us();

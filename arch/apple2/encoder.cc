@@ -36,7 +36,7 @@ private:
     const Apple2EncoderProto& _config;
 
 public:
-    std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout& ltl,
+    std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout* ltl,
         const std::vector<const Sector*>& sectors,
         const Image& image) override
     {

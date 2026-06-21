@@ -105,7 +105,7 @@ protected:
     virtual void decodeDataRecord() {};
 
     const DecoderProto& _config;
-    std::shared_ptr<const LogicalTrackLayout> _ltl;
+    const LogicalTrackLayout* _ltl;
     std::shared_ptr<Track> _trackdata;
     Sector* _sector;
     std::unique_ptr<FluxDecoder> _decoder;

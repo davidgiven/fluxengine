@@ -23,9 +23,9 @@ public:
         const CylinderHead& ch, const Image& image, unsigned sectorId);
 
     virtual std::vector<const Sector*> collectSectors(
-        const LogicalTrackLayout& ltl, const Image& image);
+        const LogicalTrackLayout* ltl, const Image& image);
 
-    virtual std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout& ltl,
+    virtual std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout* ltl,
         const std::vector<const Sector*>& sectors,
         const Image& image) = 0;
 

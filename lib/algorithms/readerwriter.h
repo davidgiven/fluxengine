@@ -79,7 +79,7 @@ struct OperationProgressLogMessage
 extern void writeTracks(const DiskLayout& diskLayout,
     FluxSinkFactory& fluxSinkFactory,
     const std::function<std::unique_ptr<const Fluxmap>(
-        const LogicalTrackLayout& ltl)> producer,
+        const LogicalTrackLayout* ltl)> producer,
     const std::vector<CylinderHead>& locations);
 
 extern void writeTracksAndVerify(const DiskLayout& diskLayout,
@@ -115,7 +115,7 @@ extern void writeRawDiskCommand(const DiskLayout& diskLayout,
 extern void readAndDecodeTrack(const DiskLayout& diskLayout,
     FluxSource& fluxSource,
     Decoder& decoder,
-    const std::shared_ptr<const LogicalTrackLayout>& ltl,
+    const LogicalTrackLayout* ltl,
     std::vector<std::shared_ptr<const Track>>& tracks,
     std::vector<const Sector*>& combinedSectors);
 
