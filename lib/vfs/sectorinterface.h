@@ -36,13 +36,13 @@ public:
     virtual void discardChanges() {}
 
 public:
-    static std::unique_ptr<SectorInterface> createMemorySectorInterface(
+    static SectorInterface* createMemorySectorInterface(
         std::shared_ptr<Image> image);
-    static std::unique_ptr<SectorInterface> createImageSectorInterface(
+    static SectorInterface* createImageSectorInterface(
         const DiskLayout* diskLayout,
         std::shared_ptr<ImageReader> reader,
         std::shared_ptr<ImageWriter> writer);
-    static std::unique_ptr<SectorInterface> createFluxSectorInterface(
+    static SectorInterface* createFluxSectorInterface(
         const DiskLayout* diskLayout,
         FluxSource* fluxSource,
         FluxSinkFactory* fluxSinkFactory,

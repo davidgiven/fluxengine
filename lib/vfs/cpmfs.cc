@@ -185,7 +185,7 @@ class CpmFsFilesystem : public Filesystem, public HasBitmap, public HasMount
 public:
     CpmFsFilesystem(const CpmFsProto& config,
         const DiskLayout* diskLayout,
-        std::shared_ptr<SectorInterface> sectors):
+        SectorInterface* sectors):
         Filesystem(diskLayout, sectors),
         _config(config)
     {
@@ -663,7 +663,7 @@ private:
 
 Filesystem* Filesystem::createCpmFsFilesystem(const FilesystemProto& config,
     const DiskLayout* diskLayout,
-    std::shared_ptr<SectorInterface> sectors)
+    SectorInterface* sectors)
 {
     return new CpmFsFilesystem(config.cpmfs(), diskLayout, sectors);
 }

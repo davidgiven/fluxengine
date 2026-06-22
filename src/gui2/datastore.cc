@@ -785,7 +785,7 @@ void Datastore::createBlankImage()
                 wtWaitForUiThreadToCatchUp();
 
                 auto image = std::make_shared<Image>();
-                std::shared_ptr<SectorInterface> sectorInterface =
+                SectorInterface* sectorInterface =
                     SectorInterface::createMemorySectorInterface(image);
                 auto filesystem = Filesystem::createFilesystem(
                     globalConfig()->filesystem(), diskLayout, sectorInterface);

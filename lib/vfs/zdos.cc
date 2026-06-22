@@ -184,7 +184,7 @@ class ZDosFilesystem : public Filesystem
 public:
     ZDosFilesystem(const ZDosProto& config,
         const DiskLayout* diskLayout,
-        std::shared_ptr<SectorInterface> sectors):
+        SectorInterface* sectors):
         Filesystem(diskLayout, sectors),
         _config(config)
     {
@@ -322,7 +322,7 @@ private:
 
 Filesystem* Filesystem::createZDosFilesystem(const FilesystemProto& config,
     const DiskLayout* diskLayout,
-    std::shared_ptr<SectorInterface> sectors)
+    SectorInterface* sectors)
 {
     return new ZDosFilesystem(config.zdos(), diskLayout, sectors);
 }

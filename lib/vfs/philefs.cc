@@ -159,7 +159,7 @@ class PhileFilesystem : public Filesystem
 public:
     PhileFilesystem(const PhileProto& config,
         const DiskLayout* diskLayout,
-        std::shared_ptr<SectorInterface> sectors):
+        SectorInterface* sectors):
         Filesystem(diskLayout, sectors),
         _config(config)
     {
@@ -295,7 +295,7 @@ private:
 
 Filesystem* Filesystem::createPhileFilesystem(const FilesystemProto& config,
     const DiskLayout* diskLayout,
-    std::shared_ptr<SectorInterface> sectors)
+    SectorInterface* sectors)
 {
     return new PhileFilesystem(config.phile(), diskLayout, sectors);
 }

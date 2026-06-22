@@ -227,7 +227,7 @@ class Brother120Filesystem : public Filesystem
 public:
     Brother120Filesystem(const Brother120FsProto& config,
         const DiskLayout* diskLayout,
-        std::shared_ptr<SectorInterface> sectors):
+        SectorInterface* sectors):
         Filesystem(diskLayout, sectors),
         _config(config)
     {
@@ -351,7 +351,7 @@ private:
 Filesystem* Filesystem::createBrother120Filesystem(
     const FilesystemProto& config,
     const DiskLayout* diskLayout,
-    std::shared_ptr<SectorInterface> sectors)
+    SectorInterface* sectors)
 {
     return new Brother120Filesystem(config.brother120(), diskLayout, sectors);
 }

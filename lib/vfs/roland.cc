@@ -95,7 +95,7 @@ private:
 public:
     RolandFsFilesystem(const RolandFsProto& config,
         const DiskLayout* diskLayout,
-        std::shared_ptr<SectorInterface> sectors):
+        SectorInterface* sectors):
         Filesystem(diskLayout, sectors),
         _config(config)
     {
@@ -423,7 +423,7 @@ private:
 
 Filesystem* Filesystem::createRolandFsFilesystem(const FilesystemProto& config,
     const DiskLayout* diskLayout,
-    std::shared_ptr<SectorInterface> sectors)
+    SectorInterface* sectors)
 {
     return new RolandFsFilesystem(config.roland(), diskLayout, sectors);
 }

@@ -108,15 +108,13 @@ static Bytes createDirent(const std::string& filename,
     return dirent;
 }
 
-static void setBlock(
-    const std::shared_ptr<SectorInterface>& sectors, int block, Bytes data)
+static void setBlock(SectorInterface* sectors, int block, Bytes data)
 {
     for (int i = 0; i < 8; i++)
         sectors->put(block, 0, i)->data = data.slice(i * 256, 256);
 }
 
-static Bytes getBlock(
-    const std::shared_ptr<SectorInterface>& sectors, int block, int length)
+static Bytes getBlock(SectorInterface* sectors, int block, int length)
 {
     Bytes bytes;
     ByteWriter bw(bytes);
@@ -132,7 +130,7 @@ static Bytes getBlock(
 
 static void testPartialExtent()
 {
-    auto sectors = std::make_shared<TestSectorInterface>();
+    auto sectors = new TestSectorInterface();
     auto fs = Filesystem::createCpmFsFilesystem(
         globalConfig()->filesystem(), diskLayout, sectors);
 
@@ -152,7 +150,7 @@ static void testPartialExtent()
 
 static void testLogicalExtents()
 {
-    auto sectors = std::make_shared<TestSectorInterface>();
+    auto sectors = new TestSectorInterface();
     auto fs = Filesystem::createCpmFsFilesystem(
         globalConfig()->filesystem(), diskLayout, sectors);
 
@@ -176,7 +174,7 @@ static void testLogicalExtents()
 
 static void testBitmap()
 {
-    auto sectors = std::make_shared<TestSectorInterface>();
+    auto sectors = new TestSectorInterface();
     auto fs = Filesystem::createCpmFsFilesystem(
         globalConfig()->filesystem(), diskLayout, sectors);
 

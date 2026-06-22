@@ -18,7 +18,7 @@ class MacHfsFilesystem : public Filesystem
 public:
     MacHfsFilesystem(const MacHfsProto& config,
         const DiskLayout* diskLayout,
-        std::shared_ptr<SectorInterface> sectors):
+        SectorInterface* sectors):
         Filesystem(diskLayout, sectors),
         _config(config)
     {
@@ -461,7 +461,7 @@ unsigned long os_write(void** priv, const void* buffer, unsigned long len)
 
 Filesystem* Filesystem::createMacHfsFilesystem(const FilesystemProto& config,
     const DiskLayout* diskLayout,
-    std::shared_ptr<SectorInterface> sectors)
+    SectorInterface* sectors)
 {
     return new MacHfsFilesystem(config.machfs(), diskLayout, sectors);
 }

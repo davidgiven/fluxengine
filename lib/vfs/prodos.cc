@@ -135,7 +135,7 @@ class ProdosFilesystem : public Filesystem
 public:
     ProdosFilesystem(const ProdosProto& config,
         const DiskLayout* diskLayout,
-        std::shared_ptr<SectorInterface> sectors):
+        SectorInterface* sectors):
         Filesystem(diskLayout, sectors),
         _config(config)
     {
@@ -304,7 +304,7 @@ private:
 
 Filesystem* Filesystem::createProdosFilesystem(const FilesystemProto& config,
     const DiskLayout* diskLayout,
-    std::shared_ptr<SectorInterface> sectors)
+    SectorInterface* sectors)
 {
     return new ProdosFilesystem(config.prodos(), diskLayout, sectors);
 }

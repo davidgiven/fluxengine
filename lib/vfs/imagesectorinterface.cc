@@ -68,10 +68,10 @@ private:
     bool _changed = false;
 };
 
-std::unique_ptr<SectorInterface> SectorInterface::createImageSectorInterface(
+SectorInterface* SectorInterface::createImageSectorInterface(
     const DiskLayout* diskLayout,
     std::shared_ptr<ImageReader> reader,
     std::shared_ptr<ImageWriter> writer)
 {
-    return std::make_unique<ImageSectorInterface>(diskLayout, reader, writer);
+    return new ImageSectorInterface(diskLayout, reader, writer);
 }

@@ -157,8 +157,7 @@ void Filesystem::discardChanges()
     _sectors->discardChanges();
 }
 
-Filesystem::Filesystem(
-    const DiskLayout* diskLayout, std::shared_ptr<SectorInterface> sectors):
+Filesystem::Filesystem(const DiskLayout* diskLayout, SectorInterface* sectors):
     _diskLayout(diskLayout),
     _blockCount(diskLayout->logicalSectorLocationsInFilesystemOrder.size()),
     _sectors(sectors)
@@ -167,7 +166,7 @@ Filesystem::Filesystem(
 
 Filesystem* Filesystem::createFilesystem(const FilesystemProto& config,
     const DiskLayout* diskLayout,
-    std::shared_ptr<SectorInterface> image)
+    SectorInterface* image)
 {
     switch (config.type())
     {
@@ -233,7 +232,7 @@ Filesystem* Filesystem::createFilesystem(const FilesystemProto& config,
 
 Filesystem* Filesystem::createFilesystemFromConfig()
 {
-    std::shared_ptr<SectorInterface> sectorInterface;
+    SectorInterface* sectorInterface;
     auto diskLayout = createDiskLayout(globalConfig());
     if (globalConfig().hasFluxSource() || globalConfig().hasFluxSink())
     {

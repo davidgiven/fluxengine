@@ -52,7 +52,7 @@ class AmigaFfsFilesystem : public Filesystem
 public:
     AmigaFfsFilesystem(const AmigaFfsProto& config,
         const DiskLayout* diskLayout,
-        std::shared_ptr<SectorInterface> sectors):
+        SectorInterface* sectors):
         Filesystem(diskLayout, sectors),
         _config(config)
     {
@@ -472,7 +472,7 @@ static BOOL adfIsDevNative(char*)
 
 Filesystem* Filesystem::createAmigaFfsFilesystem(const FilesystemProto& config,
     const DiskLayout* diskLayout,
-    std::shared_ptr<SectorInterface> sectors)
+    SectorInterface* sectors)
 {
     return new AmigaFfsFilesystem(config.amigaffs(), diskLayout, sectors);
 }

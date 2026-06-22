@@ -68,8 +68,8 @@ private:
     bool _changed = false;
 };
 
-std::unique_ptr<SectorInterface> SectorInterface::createMemorySectorInterface(
+SectorInterface* SectorInterface::createMemorySectorInterface(
     std::shared_ptr<Image> image)
 {
-    return std::make_unique<MemorySectorInterface>(image);
+    return new MemorySectorInterface(image);
 }

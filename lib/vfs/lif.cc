@@ -136,7 +136,7 @@ class LifFilesystem : public Filesystem
 public:
     LifFilesystem(const LifProto& config,
         const DiskLayout* diskLayout,
-        std::shared_ptr<SectorInterface> sectors):
+        SectorInterface* sectors):
         Filesystem(diskLayout, sectors),
         _config(config)
     {
@@ -290,7 +290,7 @@ private:
 
 Filesystem* Filesystem::createLifFilesystem(const FilesystemProto& config,
     const DiskLayout* diskLayout,
-    std::shared_ptr<SectorInterface> sectors)
+    SectorInterface* sectors)
 {
     return new LifFilesystem(config.lif(), diskLayout, sectors);
 }

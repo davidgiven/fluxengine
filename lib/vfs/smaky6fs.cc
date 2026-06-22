@@ -195,7 +195,7 @@ class Smaky6Filesystem : public Filesystem
 public:
     Smaky6Filesystem(const Smaky6FsProto& config,
         const DiskLayout* diskLayout,
-        std::shared_ptr<SectorInterface> sectors):
+        SectorInterface* sectors):
         Filesystem(diskLayout, sectors),
         _config(config)
     {
@@ -283,7 +283,7 @@ private:
 
 Filesystem* Filesystem::createSmaky6Filesystem(const FilesystemProto& config,
     const DiskLayout* diskLayout,
-    std::shared_ptr<SectorInterface> sectors)
+    SectorInterface* sectors)
 {
     return new Smaky6Filesystem(config.smaky6(), diskLayout, sectors);
 }

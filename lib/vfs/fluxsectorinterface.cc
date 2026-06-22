@@ -158,13 +158,13 @@ private:
     std::set<CylinderHead> _changedTracks;
 };
 
-std::unique_ptr<SectorInterface> SectorInterface::createFluxSectorInterface(
+SectorInterface* SectorInterface::createFluxSectorInterface(
     const DiskLayout* diskLayout,
     FluxSource* fluxSource,
     FluxSinkFactory* fluxSinkFactory,
     Encoder* encoder,
     Decoder* decoder)
 {
-    return std::make_unique<FluxSectorInterface>(
+    return new FluxSectorInterface(
         diskLayout, fluxSource, fluxSinkFactory, encoder, decoder);
 }

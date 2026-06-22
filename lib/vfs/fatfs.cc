@@ -31,7 +31,7 @@ class FatFsFilesystem : public Filesystem
 public:
     FatFsFilesystem(const FatFsProto& config,
         const DiskLayout* diskLayout,
-        std::shared_ptr<SectorInterface> sectors):
+        SectorInterface* sectors):
         Filesystem(diskLayout, sectors),
         _config(config)
     {
@@ -338,7 +338,7 @@ DWORD get_fattime(void)
 
 Filesystem* Filesystem::createFatFsFilesystem(const FilesystemProto& config,
     const DiskLayout* diskLayout,
-    std::shared_ptr<SectorInterface> sectors)
+    SectorInterface* sectors)
 {
     return new FatFsFilesystem(config.fatfs(), diskLayout, sectors);
 }

@@ -45,7 +45,7 @@ class AppledosFilesystem : public Filesystem
 public:
     AppledosFilesystem(const AppledosProto& config,
         const DiskLayout* diskLayout,
-        std::shared_ptr<SectorInterface> sectors):
+        SectorInterface* sectors):
         Filesystem(diskLayout, sectors),
         _config(config)
     {
@@ -177,7 +177,7 @@ private:
 
 Filesystem* Filesystem::createAppledosFilesystem(const FilesystemProto& config,
     const DiskLayout* diskLayout,
-    std::shared_ptr<SectorInterface> sectors)
+    SectorInterface* sectors)
 {
     return new AppledosFilesystem(config.appledos(), diskLayout, sectors);
 }

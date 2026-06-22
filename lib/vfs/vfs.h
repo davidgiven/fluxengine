@@ -225,8 +225,7 @@ public:
     void discardChanges();
 
 public:
-    Filesystem(
-        const DiskLayout* diskLayout, std::shared_ptr<SectorInterface> sectors);
+    Filesystem(const DiskLayout* diskLayout, SectorInterface* sectors);
     virtual ~Filesystem() {};
 
     Bytes getSector(unsigned track, unsigned side, unsigned sector);
@@ -245,58 +244,58 @@ protected:
     unsigned _blockCount;
 
 private:
-    std::shared_ptr<SectorInterface> _sectors;
+    SectorInterface* _sectors;
 
 public:
     static Filesystem* createBrother120Filesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
-        std::shared_ptr<SectorInterface> image);
+        SectorInterface* image);
     static Filesystem* createAcornDfsFilesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
-        std::shared_ptr<SectorInterface> image);
+        SectorInterface* image);
     static Filesystem* createFatFsFilesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
-        std::shared_ptr<SectorInterface> image);
+        SectorInterface* image);
     static Filesystem* createCpmFsFilesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
-        std::shared_ptr<SectorInterface> image);
+        SectorInterface* image);
     static Filesystem* createAmigaFfsFilesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
-        std::shared_ptr<SectorInterface> image);
+        SectorInterface* image);
     static Filesystem* createMacHfsFilesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
-        std::shared_ptr<SectorInterface> image);
+        SectorInterface* image);
     static Filesystem* createCbmfsFilesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
-        std::shared_ptr<SectorInterface> image);
+        SectorInterface* image);
     static Filesystem* createProdosFilesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
-        std::shared_ptr<SectorInterface> image);
+        SectorInterface* image);
     static Filesystem* createAppledosFilesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
-        std::shared_ptr<SectorInterface> image);
+        SectorInterface* image);
     static Filesystem* createSmaky6Filesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
-        std::shared_ptr<SectorInterface> image);
+        SectorInterface* image);
     static Filesystem* createPhileFilesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
-        std::shared_ptr<SectorInterface> image);
+        SectorInterface* image);
     static Filesystem* createLifFilesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
-        std::shared_ptr<SectorInterface> image);
+        SectorInterface* image);
     static Filesystem* createMicrodosFilesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
-        std::shared_ptr<SectorInterface> image);
+        SectorInterface* image);
     static Filesystem* createZDosFilesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
-        std::shared_ptr<SectorInterface> image);
+        SectorInterface* image);
     static Filesystem* createRolandFsFilesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
-        std::shared_ptr<SectorInterface> image);
+        SectorInterface* image);
 
     static Filesystem* createFilesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
-        std::shared_ptr<SectorInterface> image);
+        SectorInterface* image);
     static Filesystem* createFilesystemFromConfig();
 };
 

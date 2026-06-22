@@ -96,7 +96,7 @@ class MicrodosFilesystem : public Filesystem
 public:
     MicrodosFilesystem(const MicrodosProto& config,
         const DiskLayout* diskLayout,
-        std::shared_ptr<SectorInterface> sectors):
+        SectorInterface* sectors):
         Filesystem(diskLayout, sectors),
         _config(config)
     {
@@ -219,7 +219,7 @@ private:
 
 Filesystem* Filesystem::createMicrodosFilesystem(const FilesystemProto& config,
     const DiskLayout* diskLayout,
-    std::shared_ptr<SectorInterface> sectors)
+    SectorInterface* sectors)
 {
     return new MicrodosFilesystem(config.microdos(), diskLayout, sectors);
 }
