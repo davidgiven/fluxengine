@@ -336,11 +336,9 @@ DWORD get_fattime(void)
     return 0;
 }
 
-std::unique_ptr<Filesystem> Filesystem::createFatFsFilesystem(
-    const FilesystemProto& config,
+Filesystem* Filesystem::createFatFsFilesystem(const FilesystemProto& config,
     const DiskLayout* diskLayout,
     std::shared_ptr<SectorInterface> sectors)
 {
-    return std::make_unique<FatFsFilesystem>(
-        config.fatfs(), diskLayout, sectors);
+    return new FatFsFilesystem(config.fatfs(), diskLayout, sectors);
 }

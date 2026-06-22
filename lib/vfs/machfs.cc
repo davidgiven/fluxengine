@@ -459,11 +459,9 @@ unsigned long os_write(void** priv, const void* buffer, unsigned long len)
     return self->hfsWrite(buffer, len);
 }
 
-std::unique_ptr<Filesystem> Filesystem::createMacHfsFilesystem(
-    const FilesystemProto& config,
+Filesystem* Filesystem::createMacHfsFilesystem(const FilesystemProto& config,
     const DiskLayout* diskLayout,
     std::shared_ptr<SectorInterface> sectors)
 {
-    return std::make_unique<MacHfsFilesystem>(
-        config.machfs(), diskLayout, sectors);
+    return new MacHfsFilesystem(config.machfs(), diskLayout, sectors);
 }

@@ -302,11 +302,9 @@ private:
     std::vector<bool> _allocationBitmap;
 };
 
-std::unique_ptr<Filesystem> Filesystem::createProdosFilesystem(
-    const FilesystemProto& config,
+Filesystem* Filesystem::createProdosFilesystem(const FilesystemProto& config,
     const DiskLayout* diskLayout,
     std::shared_ptr<SectorInterface> sectors)
 {
-    return std::make_unique<ProdosFilesystem>(
-        config.prodos(), diskLayout, sectors);
+    return new ProdosFilesystem(config.prodos(), diskLayout, sectors);
 }

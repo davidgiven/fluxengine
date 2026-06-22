@@ -281,11 +281,9 @@ private:
     const Smaky6FsProto& _config;
 };
 
-std::unique_ptr<Filesystem> Filesystem::createSmaky6Filesystem(
-    const FilesystemProto& config,
+Filesystem* Filesystem::createSmaky6Filesystem(const FilesystemProto& config,
     const DiskLayout* diskLayout,
     std::shared_ptr<SectorInterface> sectors)
 {
-    return std::make_unique<Smaky6Filesystem>(
-        config.smaky6(), diskLayout, sectors);
+    return new Smaky6Filesystem(config.smaky6(), diskLayout, sectors);
 }

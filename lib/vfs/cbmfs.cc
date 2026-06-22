@@ -281,11 +281,9 @@ private:
     const CbmfsProto& _config;
 };
 
-std::unique_ptr<Filesystem> Filesystem::createCbmfsFilesystem(
-    const FilesystemProto& config,
+Filesystem* Filesystem::createCbmfsFilesystem(const FilesystemProto& config,
     const DiskLayout* diskLayout,
     std::shared_ptr<SectorInterface> sectors)
 {
-    return std::make_unique<CbmfsFilesystem>(
-        config.cbmfs(), diskLayout, sectors);
+    return new CbmfsFilesystem(config.cbmfs(), diskLayout, sectors);
 }

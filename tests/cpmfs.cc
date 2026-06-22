@@ -185,9 +185,9 @@ static void testBitmap()
         createDirent("FILE", 1, 128, {1, 0, 0, 0, 0, 0, 0, 0, 2}) +
             createDirent("FILE", 2, 128, {4}) + (blank_dirent * 62));
 
-    dynamic_cast<HasMount*>(fs.get())->mount();
+    dynamic_cast<HasMount*>(fs)->mount();
     std::vector<bool> bitmap =
-        dynamic_cast<HasBitmap*>(fs.get())->getBitmapForDebugging();
+        dynamic_cast<HasBitmap*>(fs)->getBitmapForDebugging();
     AssertThat(bitmap,
         Equals(std::vector<bool>{
             1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}));

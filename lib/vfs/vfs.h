@@ -248,72 +248,56 @@ private:
     std::shared_ptr<SectorInterface> _sectors;
 
 public:
-    static std::unique_ptr<Filesystem> createBrother120Filesystem(
-        const FilesystemProto& config,
+    static Filesystem* createBrother120Filesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
         std::shared_ptr<SectorInterface> image);
-    static std::unique_ptr<Filesystem> createAcornDfsFilesystem(
-        const FilesystemProto& config,
+    static Filesystem* createAcornDfsFilesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
         std::shared_ptr<SectorInterface> image);
-    static std::unique_ptr<Filesystem> createFatFsFilesystem(
-        const FilesystemProto& config,
+    static Filesystem* createFatFsFilesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
         std::shared_ptr<SectorInterface> image);
-    static std::unique_ptr<Filesystem> createCpmFsFilesystem(
-        const FilesystemProto& config,
+    static Filesystem* createCpmFsFilesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
         std::shared_ptr<SectorInterface> image);
-    static std::unique_ptr<Filesystem> createAmigaFfsFilesystem(
-        const FilesystemProto& config,
+    static Filesystem* createAmigaFfsFilesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
         std::shared_ptr<SectorInterface> image);
-    static std::unique_ptr<Filesystem> createMacHfsFilesystem(
-        const FilesystemProto& config,
+    static Filesystem* createMacHfsFilesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
         std::shared_ptr<SectorInterface> image);
-    static std::unique_ptr<Filesystem> createCbmfsFilesystem(
-        const FilesystemProto& config,
+    static Filesystem* createCbmfsFilesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
         std::shared_ptr<SectorInterface> image);
-    static std::unique_ptr<Filesystem> createProdosFilesystem(
-        const FilesystemProto& config,
+    static Filesystem* createProdosFilesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
         std::shared_ptr<SectorInterface> image);
-    static std::unique_ptr<Filesystem> createAppledosFilesystem(
-        const FilesystemProto& config,
+    static Filesystem* createAppledosFilesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
         std::shared_ptr<SectorInterface> image);
-    static std::unique_ptr<Filesystem> createSmaky6Filesystem(
-        const FilesystemProto& config,
+    static Filesystem* createSmaky6Filesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
         std::shared_ptr<SectorInterface> image);
-    static std::unique_ptr<Filesystem> createPhileFilesystem(
-        const FilesystemProto& config,
+    static Filesystem* createPhileFilesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
         std::shared_ptr<SectorInterface> image);
-    static std::unique_ptr<Filesystem> createLifFilesystem(
-        const FilesystemProto& config,
+    static Filesystem* createLifFilesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
         std::shared_ptr<SectorInterface> image);
-    static std::unique_ptr<Filesystem> createMicrodosFilesystem(
-        const FilesystemProto& config,
+    static Filesystem* createMicrodosFilesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
         std::shared_ptr<SectorInterface> image);
-    static std::unique_ptr<Filesystem> createZDosFilesystem(
-        const FilesystemProto& config,
+    static Filesystem* createZDosFilesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
         std::shared_ptr<SectorInterface> image);
-    static std::unique_ptr<Filesystem> createRolandFsFilesystem(
-        const FilesystemProto& config,
+    static Filesystem* createRolandFsFilesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
         std::shared_ptr<SectorInterface> image);
 
-    static std::unique_ptr<Filesystem> createFilesystem(
-        const FilesystemProto& config,
+    static Filesystem* createFilesystem(const FilesystemProto& config,
         const DiskLayout* diskLayout,
         std::shared_ptr<SectorInterface> image);
-    static std::unique_ptr<Filesystem> createFilesystemFromConfig();
+    static Filesystem* createFilesystemFromConfig();
 };
 
 /* Used for tests only. */

@@ -178,11 +178,9 @@ private:
     const AcornDfsProto& _config;
 };
 
-std::unique_ptr<Filesystem> Filesystem::createAcornDfsFilesystem(
-    const FilesystemProto& config,
+Filesystem* Filesystem::createAcornDfsFilesystem(const FilesystemProto& config,
     const DiskLayout* diskLayout,
     std::shared_ptr<SectorInterface> sectors)
 {
-    return std::make_unique<AcornDfsFilesystem>(
-        config.acorndfs(), diskLayout, sectors);
+    return new AcornDfsFilesystem(config.acorndfs(), diskLayout, sectors);
 }

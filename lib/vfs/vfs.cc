@@ -165,8 +165,7 @@ Filesystem::Filesystem(
 {
 }
 
-std::unique_ptr<Filesystem> Filesystem::createFilesystem(
-    const FilesystemProto& config,
+Filesystem* Filesystem::createFilesystem(const FilesystemProto& config,
     const DiskLayout* diskLayout,
     std::shared_ptr<SectorInterface> image)
 {
@@ -228,11 +227,11 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystem(
 
         default:
             error("no filesystem configured");
-            return std::unique_ptr<Filesystem>();
+            return nullptr;
     }
 }
 
-std::unique_ptr<Filesystem> Filesystem::createFilesystemFromConfig()
+Filesystem* Filesystem::createFilesystemFromConfig()
 {
     std::shared_ptr<SectorInterface> sectorInterface;
     auto diskLayout = createDiskLayout(globalConfig());

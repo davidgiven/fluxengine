@@ -288,10 +288,9 @@ private:
     std::vector<std::shared_ptr<LifDirent>> _dirents;
 };
 
-std::unique_ptr<Filesystem> Filesystem::createLifFilesystem(
-    const FilesystemProto& config,
+Filesystem* Filesystem::createLifFilesystem(const FilesystemProto& config,
     const DiskLayout* diskLayout,
     std::shared_ptr<SectorInterface> sectors)
 {
-    return std::make_unique<LifFilesystem>(config.lif(), diskLayout, sectors);
+    return new LifFilesystem(config.lif(), diskLayout, sectors);
 }

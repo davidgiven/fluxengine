@@ -175,11 +175,9 @@ private:
     std::vector<std::shared_ptr<AppledosDirent>> _dirents;
 };
 
-std::unique_ptr<Filesystem> Filesystem::createAppledosFilesystem(
-    const FilesystemProto& config,
+Filesystem* Filesystem::createAppledosFilesystem(const FilesystemProto& config,
     const DiskLayout* diskLayout,
     std::shared_ptr<SectorInterface> sectors)
 {
-    return std::make_unique<AppledosFilesystem>(
-        config.appledos(), diskLayout, sectors);
+    return new AppledosFilesystem(config.appledos(), diskLayout, sectors);
 }

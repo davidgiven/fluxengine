@@ -470,11 +470,9 @@ static BOOL adfIsDevNative(char*)
     return true;
 }
 
-std::unique_ptr<Filesystem> Filesystem::createAmigaFfsFilesystem(
-    const FilesystemProto& config,
+Filesystem* Filesystem::createAmigaFfsFilesystem(const FilesystemProto& config,
     const DiskLayout* diskLayout,
     std::shared_ptr<SectorInterface> sectors)
 {
-    return std::make_unique<AmigaFfsFilesystem>(
-        config.amigaffs(), diskLayout, sectors);
+    return new AmigaFfsFilesystem(config.amigaffs(), diskLayout, sectors);
 }

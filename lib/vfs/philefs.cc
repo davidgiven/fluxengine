@@ -293,11 +293,9 @@ private:
     std::map<int, std::shared_ptr<PhileDirent>> _dirents;
 };
 
-std::unique_ptr<Filesystem> Filesystem::createPhileFilesystem(
-    const FilesystemProto& config,
+Filesystem* Filesystem::createPhileFilesystem(const FilesystemProto& config,
     const DiskLayout* diskLayout,
     std::shared_ptr<SectorInterface> sectors)
 {
-    return std::make_unique<PhileFilesystem>(
-        config.phile(), diskLayout, sectors);
+    return new PhileFilesystem(config.phile(), diskLayout, sectors);
 }

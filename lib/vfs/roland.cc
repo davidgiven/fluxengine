@@ -421,11 +421,9 @@ private:
     std::vector<bool> _allocationBitmap;
 };
 
-std::unique_ptr<Filesystem> Filesystem::createRolandFsFilesystem(
-    const FilesystemProto& config,
+Filesystem* Filesystem::createRolandFsFilesystem(const FilesystemProto& config,
     const DiskLayout* diskLayout,
     std::shared_ptr<SectorInterface> sectors)
 {
-    return std::make_unique<RolandFsFilesystem>(
-        config.roland(), diskLayout, sectors);
+    return new RolandFsFilesystem(config.roland(), diskLayout, sectors);
 }

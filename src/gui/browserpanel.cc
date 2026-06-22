@@ -679,7 +679,7 @@ private:
 
 private:
     int _state = STATE_DEAD;
-    std::unique_ptr<Filesystem> _filesystem;
+    Filesystem* _filesystem;
     uint32_t _filesystemCapabilities;
     bool _filesystemIsReadOnly;
     bool _filesystemNeedsFlushing;

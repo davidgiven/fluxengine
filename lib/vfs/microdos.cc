@@ -217,11 +217,9 @@ private:
     std::vector<std::shared_ptr<MicrodosDirent>> _dirents;
 };
 
-std::unique_ptr<Filesystem> Filesystem::createMicrodosFilesystem(
-    const FilesystemProto& config,
+Filesystem* Filesystem::createMicrodosFilesystem(const FilesystemProto& config,
     const DiskLayout* diskLayout,
     std::shared_ptr<SectorInterface> sectors)
 {
-    return std::make_unique<MicrodosFilesystem>(
-        config.microdos(), diskLayout, sectors);
+    return new MicrodosFilesystem(config.microdos(), diskLayout, sectors);
 }

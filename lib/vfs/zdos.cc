@@ -320,10 +320,9 @@ private:
     std::vector<std::shared_ptr<ZDosDirent>> _dirents;
 };
 
-std::unique_ptr<Filesystem> Filesystem::createZDosFilesystem(
-    const FilesystemProto& config,
+Filesystem* Filesystem::createZDosFilesystem(const FilesystemProto& config,
     const DiskLayout* diskLayout,
     std::shared_ptr<SectorInterface> sectors)
 {
-    return std::make_unique<ZDosFilesystem>(config.zdos(), diskLayout, sectors);
+    return new ZDosFilesystem(config.zdos(), diskLayout, sectors);
 }
