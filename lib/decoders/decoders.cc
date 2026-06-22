@@ -14,8 +14,7 @@
 #include <numeric>
 
 std::shared_ptr<Track> Decoder::decodeToSectors(
-    std::shared_ptr<const Fluxmap> fluxmap,
-    const std::shared_ptr<const PhysicalTrackLayout>& ptl)
+    std::shared_ptr<const Fluxmap> fluxmap, const PhysicalTrackLayout* ptl)
 {
     _ltl = ptl->logicalTrackLayout;
 

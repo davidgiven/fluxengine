@@ -248,7 +248,7 @@ DiskLayout::DiskLayout(const ConfigProto& config)
             physicalHead <= maxPhysicalHead;
             physicalHead++)
         {
-            auto ptl = std::make_shared<PhysicalTrackLayout>();
+            auto ptl = new PhysicalTrackLayout();
             CylinderHead ch(physicalCylinder, physicalHead);
             layoutByPhysicalLocation[ch] = ptl;
             physicalLocations.push_back(ch);

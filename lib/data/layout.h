@@ -8,7 +8,7 @@
 
 class ConfigProto;
 
-struct LogicalTrackLayout : public gc
+struct LogicalTrackLayout
 {
     /* Physical cylinder of the first element of the group. */
     unsigned physicalCylinder;
@@ -65,7 +65,7 @@ struct PhysicalTrackLayout
     const LogicalTrackLayout* logicalTrackLayout;
 };
 
-class DiskLayout : public gc
+class DiskLayout
 {
 public:
     DiskLayout(const ConfigProto& config = globalConfig());
@@ -95,8 +95,7 @@ public:
 
     /* Physical and logical layouts by location. */
 
-    std::map<CylinderHead, std::shared_ptr<const PhysicalTrackLayout>>
-        layoutByPhysicalLocation;
+    std::map<CylinderHead, const PhysicalTrackLayout*> layoutByPhysicalLocation;
     std::map<CylinderHead, const LogicalTrackLayout*> layoutByLogicalLocation;
 
     /* Ordered lists of physical and logical locations. */

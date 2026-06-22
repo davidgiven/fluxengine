@@ -54,8 +54,7 @@ public:
 
 public:
     std::shared_ptr<Track> decodeToSectors(
-        std::shared_ptr<const Fluxmap> fluxmap,
-        const std::shared_ptr<const PhysicalTrackLayout>& ptl);
+        std::shared_ptr<const Fluxmap> fluxmap, const PhysicalTrackLayout* ptl);
 
     void pushRecord(
         const Fluxmap::Position& start, const Fluxmap::Position& end);
