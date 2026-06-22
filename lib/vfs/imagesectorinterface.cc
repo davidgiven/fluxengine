@@ -54,14 +54,14 @@ public:
             _image = _reader->readImage();
         else
         {
-            _image = std::make_shared<Image>();
+            _image = new Image();
             _image->addMissingSectors(*_diskLayout);
         }
         _changed = false;
     }
 
 private:
-    std::shared_ptr<Image> _image;
+    Image* _image;
     const DiskLayout* _diskLayout;
     std::shared_ptr<ImageReader> _reader;
     std::shared_ptr<ImageWriter> _writer;

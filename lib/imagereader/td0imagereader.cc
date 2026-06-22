@@ -47,7 +47,7 @@ class Td0ImageReader : public ImageReader
 public:
     Td0ImageReader(const ImageReaderProto& config): ImageReader(config) {}
 
-    std::unique_ptr<Image> readImage() override
+    Image* readImage() override
     {
         std::ifstream inputFile(
             _config.filename(), std::ios::in | std::ios::binary);
@@ -100,7 +100,7 @@ public:
         log("TD0: TeleDisk {}.{}: {}", version / 10, version % 10, comment);
 
         unsigned totalSize = 0;
-        std::unique_ptr<Image> image(new Image);
+        Image* image(new Image);
         for (;;)
         {
             /* Read track header */

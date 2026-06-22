@@ -19,11 +19,9 @@ namespace
     inline constexpr pair_to_range_t pair_to_range{};
 }
 
-Disk::Disk(): image(std::make_shared<Image>()) {}
+Disk::Disk(): image(nullptr) {}
 
-Disk::Disk(
-    const std::shared_ptr<const Image>& image, const DiskLayout& diskLayout):
-    image(image)
+Disk::Disk(const Image* image, const DiskLayout& diskLayout): image(image)
 {
     std::multimap<CylinderHead, const Sector*> sectorsGroupedByTrack;
     for (const auto& sector : *image)

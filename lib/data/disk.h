@@ -43,15 +43,14 @@ struct Disk
     /* Creates a Disk from an Image, populating the tracks and sectors maps
      * based on the supplied disk layout. */
 
-    Disk(const std::shared_ptr<const Image>& image,
-        const DiskLayout& diskLayout);
+    Disk(const Image* image, const DiskLayout& diskLayout);
 
     Disk& operator=(const Disk& other) = default;
 
     std::multimap<CylinderHead, std::shared_ptr<const Track>>
         tracksByPhysicalLocation;
     std::multimap<CylinderHead, const Sector*> sectorsByPhysicalLocation;
-    std::shared_ptr<const Image> image;
+    const Image* image;
 
     /* 0 if the period is unknown (e.g. if this Disk was made from an image). */
 

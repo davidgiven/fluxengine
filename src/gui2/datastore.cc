@@ -36,7 +36,7 @@
 using hex::operator""_lang;
 
 static std::shared_ptr<const Disk> disk = std::make_shared<Disk>();
-static std::shared_ptr<Image> wtImage;
+static Image* wtImage;
 
 static std::deque<std::function<void()>> pendingTasks;
 static std::mutex pendingTasksMutex;
@@ -649,8 +649,7 @@ void Datastore::stop()
     emergencyStop = true;
 }
 
-static std::shared_ptr<Disk> wtMakeDiskDataFromImage(
-    std::shared_ptr<Image>& image)
+static std::shared_ptr<Disk> wtMakeDiskDataFromImage(Image* image)
 {
     image->calculateSize();
     image->populateSectorPhysicalLocationsFromLogicalLocations(*diskLayout);
@@ -702,7 +701,7 @@ void Datastore::readImage(const std::fs::path& path)
                 wtWaitForUiThreadToCatchUp();
                 globalConfig().setImageReader(path.string());
                 auto imageReader = ImageReader::create(globalConfig());
-                std::shared_ptr<Image> image = imageReader->readImage();
+                Image* image = imageReader->readImage();
 
                 const auto& extraConfig = imageReader->getExtraConfig();
                 auto customConfig = renderProtoAsConfig(&extraConfig);
@@ -784,7 +783,7 @@ void Datastore::createBlankImage()
                 wtClearDiskData();
                 wtWaitForUiThreadToCatchUp();
 
-                auto image = std::make_shared<Image>();
+                auto image = new Image();
                 SectorInterface* sectorInterface =
                     SectorInterface::createMemorySectorInterface(image);
                 auto filesystem = Filesystem::createFilesystem(

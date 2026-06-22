@@ -830,7 +830,7 @@ void readDiskCommand(const DiskLayout& diskLayout,
             for (auto& [ch, sector] : disk.sectorsByPhysicalLocation)
                 all_sectors.push_back(sector);
             all_sectors = collectSectors(all_sectors);
-            disk.image = std::make_shared<Image>(all_sectors);
+            disk.image = new Image(all_sectors);
 
             /* Log a _copy_ of the disk structure so that the logger
              * doesn't see the disk get mutated in subsequent reads. */
@@ -839,7 +839,7 @@ void readDiskCommand(const DiskLayout& diskLayout,
     }
 
     if (!disk.image)
-        disk.image = std::make_shared<Image>();
+        disk.image = new Image();
 
     log(EndOperationLogMessage{"Read complete"});
 }

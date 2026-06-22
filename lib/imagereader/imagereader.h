@@ -53,7 +53,7 @@ public:
 
     /* Reads the image. */
 
-    virtual std::unique_ptr<Image> readImage() = 0;
+    virtual Image* readImage() = 0;
 
 protected:
     const ImageReaderProto& _config;

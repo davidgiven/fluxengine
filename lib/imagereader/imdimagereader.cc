@@ -137,7 +137,7 @@ public:
      * <End of file>
      */
     // clang-format on
-    std::unique_ptr<Image> readImage() override
+    Image* readImage() override
     {
         // Read File
         std::ifstream inputFile(
@@ -153,7 +153,7 @@ public:
         Bytes data;
         data.writer() += inputFile;
         ByteReader br(data);
-        std::unique_ptr<Image> image(new Image);
+        Image* image(new Image);
         TrackHeader header = {0, 0, 0, 0, 0};
         TrackHeader previousheader = {0, 0, 0, 0, 0};
 

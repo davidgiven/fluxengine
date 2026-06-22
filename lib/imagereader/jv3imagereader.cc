@@ -89,7 +89,7 @@ class Jv3ImageReader : public ImageReader
 public:
     Jv3ImageReader(const ImageReaderProto& config): ImageReader(config) {}
 
-    std::unique_ptr<Image> readImage() override
+    Image* readImage() override
     {
         std::ifstream inputFile(
             _config.filename(), std::ios::in | std::ios::binary);
@@ -99,7 +99,7 @@ public:
         inputFile.seekg(0, std::ios::end);
         unsigned inputFileSize = inputFile.tellg();
         unsigned headerPtr = 0;
-        std::unique_ptr<Image> image(new Image);
+        Image* image(new Image);
         for (;;)
         {
             unsigned dataPtr = headerPtr + 2901 * 3 + 1;

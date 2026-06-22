@@ -18,7 +18,7 @@ class ImgImageReader : public ImageReader
 public:
     ImgImageReader(const ImageReaderProto& config): ImageReader(config) {}
 
-    std::unique_ptr<Image> readImage() override
+    Image* readImage() override
     {
         std::ifstream inputFile(
             _config.filename(), std::ios::in | std::ios::binary);
@@ -33,7 +33,7 @@ public:
 
         const auto diskLayout = createDiskLayout();
         bool in_filesystem_order = _config.img().filesystem_sector_order();
-        std::unique_ptr<Image> image(new Image);
+        Image* image(new Image);
 
         for (auto& logicalLocation :
             in_filesystem_order ? diskLayout->logicalLocationsInFilesystemOrder

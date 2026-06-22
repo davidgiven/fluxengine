@@ -53,7 +53,7 @@ int mainWrite(int argc, const char* argv[])
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
     auto reader = ImageReader::create(globalConfig());
-    std::shared_ptr<Image> image = reader->readImage();
+    Image* image = reader->readImage();
     globalConfig().overrides()->MergeFrom(reader->getExtraConfig());
 
     auto diskLayout = createDiskLayout();

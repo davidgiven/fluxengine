@@ -36,8 +36,7 @@ public:
     virtual void discardChanges() {}
 
 public:
-    static SectorInterface* createMemorySectorInterface(
-        std::shared_ptr<Image> image);
+    static SectorInterface* createMemorySectorInterface(Image* image);
     static SectorInterface* createImageSectorInterface(
         const DiskLayout* diskLayout,
         std::shared_ptr<ImageReader> reader,
