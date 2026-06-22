@@ -1,0 +1,125 @@
+shortname: 'TR-DOS'
+comment: 'TR-DOS for ZX-Spectrum BetaDisc interface'
+read_support_status: UNICORN
+write_support_status: UNICORN
+
+documentation:
+<<<
+BetaDisc interface for the ZX-Spectrum by Technology research came with a simple
+operating system in ROM named TR-DOS. The controller is a standard 1793 chip,
+widespread at the time. 40 or 80 tracks, one or two sides, 16 sectors per track,
+sector size is 256 bytes. Side byte in sector ID record is not used and always
+set to 0.
+
+FluxEngine can read these.
+>>>
+
+image_reader {
+	filename: "trdos.trd"
+	type: IMAGETYPE_IMG
+}
+
+image_writer {
+	filename: "trdos.trd"
+	type: IMAGETYPE_IMG
+}
+
+decoder {
+	ibm {
+		trackdata {
+			ignore_side_byte: true
+		}
+	}
+}
+
+encoder {
+  	ibm {
+    	trackdata {
+      		emit_iam: false
+			gap0: 10
+			gap2: 22
+			gap3: 60
+    	}
+  	}
+}
+
+option_group {
+	comment: "$formats"
+
+	option {
+		name: "640DSDD"
+		comment: '80-track double-sided'
+
+		config {
+			layout {
+				format_type: FORMATTYPE_80TRACK
+				tracks: 80
+				sides: 2
+				layoutdata {
+					sector_size: 256
+					physical {
+						start_sector: 1
+						count: 16
+					}
+				}
+			}
+		}
+	}
+	option {
+		name: "320SSDD"
+		comment: '80-track single-sided'
+
+		config {
+			layout {
+				format_type: FORMATTYPE_80TRACK
+				tracks: 80
+				sides: 1
+				layoutdata {
+					sector_size: 256
+					physical {
+						start_sector: 1
+						count: 16
+					}
+				}
+			}
+		}
+	}
+	option {
+		name: "320DSDD"
+		comment: '40-track double-sided'
+
+		config {
+			layout {
+				format_type: FORMATTYPE_40TRACK
+				tracks: 40
+				sides: 2
+				layoutdata {
+					sector_size: 256
+					physical {
+						start_sector: 1
+						count: 16
+					}
+				}
+			}
+		}
+	}
+	option {
+		name: "160SSDD"
+		comment: '40-track single-sided'
+
+		config {
+			layout {
+				format_type: FORMATTYPE_40TRACK
+				tracks: 40
+				sides: 1
+				layoutdata {
+					sector_size: 256
+					physical {
+						start_sector: 1
+						count: 16
+					}
+				}
+			}
+		}
+	}
+}
