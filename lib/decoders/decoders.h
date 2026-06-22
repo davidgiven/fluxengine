@@ -53,7 +53,7 @@ public:
     };
 
 public:
-    std::shared_ptr<Track> decodeToSectors(
+    Track* decodeToSectors(
         std::shared_ptr<const Fluxmap> fluxmap, const PhysicalTrackLayout* ptl);
 
     void pushRecord(
@@ -105,7 +105,7 @@ protected:
 
     const DecoderProto& _config;
     const LogicalTrackLayout* _ltl;
-    std::shared_ptr<Track> _trackdata;
+    Track* _trackdata;
     Sector* _sector;
     std::unique_ptr<FluxDecoder> _decoder;
     std::vector<bool> _recordBits;

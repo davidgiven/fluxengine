@@ -47,8 +47,7 @@ struct Disk
 
     Disk& operator=(const Disk& other) = default;
 
-    std::multimap<CylinderHead, std::shared_ptr<const Track>>
-        tracksByPhysicalLocation;
+    std::multimap<CylinderHead, const Track*> tracksByPhysicalLocation;
     std::multimap<CylinderHead, const Sector*> sectorsByPhysicalLocation;
     const Image* image;
 

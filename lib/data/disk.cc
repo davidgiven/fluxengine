@@ -36,7 +36,7 @@ Disk::Disk(const Image* image, const DiskLayout& diskLayout): image(image)
             diskLayout.layoutByPhysicalLocation.at(physicalLocation);
         const auto& ltl = ptl->logicalTrackLayout;
 
-        auto decodedTrack = std::make_shared<Track>();
+        auto decodedTrack = new Track();
         decodedTrack->ltl = ltl;
         decodedTrack->ptl = ptl;
         tracksByPhysicalLocation.insert(

@@ -130,7 +130,7 @@ private:
     {
         CylinderHead logicalLocation = {logicalCylinder, logicalSide};
         auto& ltl = _diskLayout->layoutByLogicalLocation.at(logicalLocation);
-        std::vector<std::shared_ptr<const Track>> trackFluxes;
+        std::vector<const Track*> trackFluxes;
         std::vector<const Sector*> trackSectors;
         readAndDecodeTrack(*_diskLayout,
             _fluxSource,

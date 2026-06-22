@@ -8,7 +8,7 @@
 
 class MemoryFluxSourceIterator : public FluxSourceIterator
 {
-    using multimap = std::multimap<CylinderHead, std::shared_ptr<const Track>>;
+    using multimap = std::multimap<CylinderHead, const Track*>;
 
 public:
     MemoryFluxSourceIterator(

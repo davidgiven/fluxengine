@@ -292,7 +292,7 @@ struct CombinationResult
 };
 
 static CombinationResult combineRecordAndSectors(
-    std::vector<std::shared_ptr<const Track>>& tracks,
+    std::vector<const Track*>& tracks,
     Decoder* decoder,
     const LogicalTrackLayout* ltl)
 {
@@ -359,7 +359,7 @@ struct ReadGroupResult
 static ReadGroupResult readGroup(const DiskLayout& diskLayout,
     FluxSourceIteratorHolder& fluxSourceIteratorHolder,
     const LogicalTrackLayout* ltl,
-    std::vector<std::shared_ptr<const Track>>& tracks,
+    std::vector<const Track*>& tracks,
     Decoder* decoder)
 {
     ReadGroupResult rgr = {BAD_AND_CAN_NOT_RETRY};
@@ -545,7 +545,7 @@ void writeTracksAndVerify(const DiskLayout& diskLayout,
         [&](const LogicalTrackLayout* ltl)
         {
             FluxSourceIteratorHolder fluxSourceIteratorHolder(fluxSource);
-            std::vector<std::shared_ptr<const Track>> tracks;
+            std::vector<const Track*> tracks;
             auto [result, sectors] = readGroup(
                 diskLayout, fluxSourceIteratorHolder, ltl, tracks, decoder);
             log(TrackReadLogMessage{tracks, sectors});
@@ -659,7 +659,7 @@ void readAndDecodeTrack(const DiskLayout& diskLayout,
     FluxSource* fluxSource,
     Decoder* decoder,
     const LogicalTrackLayout* ltl,
-    std::vector<std::shared_ptr<const Track>>& tracks,
+    std::vector<const Track*>& tracks,
     std::vector<const Sector*>& combinedSectors)
 {
     if (fluxSource->isHardware())
@@ -705,8 +705,7 @@ void readDiskCommand(const DiskLayout& diskLayout,
         outputFluxSinkFactory =
             FluxSinkFactory::create(globalConfig()->decoder().copy_flux_to());
 
-    std::map<CylinderHead, std::vector<std::shared_ptr<const Track>>>
-        tracksByLogicalLocation;
+    std::map<CylinderHead, std::vector<const Track*>> tracksByLogicalLocation;
     for (auto& [ch, track] : disk.tracksByPhysicalLocation)
         tracksByLogicalLocation[CylinderHead(track->ltl->logicalCylinder,
                                     track->ltl->logicalHead)]
