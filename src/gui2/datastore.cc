@@ -212,7 +212,7 @@ void Datastore::init()
         []
         {
             Logger::setLogger(
-                [](const AnyLogMessage& message)
+                [](const AnyLogMessage* message)
                 {
                     hex::TaskManager::doLater(
                         [=]
@@ -432,7 +432,7 @@ void wtRebuildConfiguration(bool withCustom = false)
         });
 }
 
-void Datastore::onLogMessage(const AnyLogMessage& message)
+void Datastore::onLogMessage(const AnyLogMessage* message)
 {
     LogView::logMessage(message);
     std::visit(
@@ -443,48 +443,48 @@ void Datastore::onLogMessage(const AnyLogMessage& message)
             },
 
             /* We terminated due to the stop button. */
-            [&](std::shared_ptr<const EmergencyStopMessage> m)
+            [&](const EmergencyStopMessage* m)
             {
             },
 
             /* A fatal error. */
-            [&](std::shared_ptr<const ErrorLogMessage> m)
+            [&](const ErrorLogMessage* m)
             {
                 hex::ui::ToastError::open(m->message);
             },
 
             /* Indicates that we're starting a write operation. */
-            [&](std::shared_ptr<const BeginWriteOperationLogMessage> m)
+            [&](const BeginWriteOperationLogMessage* m)
             {
                 Events::DiskActivityNotification::post(
                     DiskActivityType::Write, m->track, m->head);
             },
 
-            [&](std::shared_ptr<const EndWriteOperationLogMessage> m)
+            [&](const EndWriteOperationLogMessage* m)
             {
                 Events::DiskActivityNotification::post(
                     DiskActivityType::None, 0, 0);
             },
 
             /* Indicates that we're starting a read operation. */
-            [&](std::shared_ptr<const BeginReadOperationLogMessage> m)
+            [&](const BeginReadOperationLogMessage* m)
             {
                 Events::DiskActivityNotification::post(
                     DiskActivityType::Read, m->track, m->head);
             },
 
-            [&](std::shared_ptr<const EndReadOperationLogMessage> m)
+            [&](const EndReadOperationLogMessage* m)
             {
                 Events::DiskActivityNotification::post(
                     DiskActivityType::None, 0, 0);
             },
 
-            [&](std::shared_ptr<const TrackReadLogMessage> m)
+            [&](const TrackReadLogMessage* m)
             {
                 // _imagerPanel->SetVisualiserTrackData(m->track);
             },
 
-            [&](std::shared_ptr<const DiskReadLogMessage> m)
+            [&](const DiskReadLogMessage* m)
             {
                 /* This is where data gets from the worker thread to the GUI.
                  * The disk here is a copy of the one being worked on, and
@@ -494,27 +494,27 @@ void Datastore::onLogMessage(const AnyLogMessage& message)
             },
 
             /* Large-scale operation start. */
-            [&](std::shared_ptr<const BeginOperationLogMessage> m)
+            [&](const BeginOperationLogMessage* m)
             {
                 // _statusBar->SetLeftLabel(m->message);
                 // _statusBar->ShowProgressBar();
             },
 
             /* Large-scale operation end. */
-            [&](std::shared_ptr<const EndOperationLogMessage> m)
+            [&](const EndOperationLogMessage* m)
             {
                 // _statusBar->SetLeftLabel(m->message);
                 // _statusBar->HideProgressBar();
             },
 
             /* Large-scale operation progress. */
-            [&](std::shared_ptr<const OperationProgressLogMessage> m)
+            [&](const OperationProgressLogMessage* m)
             {
                 // _statusBar->SetProgress(m->progress);
             },
 
         },
-        message);
+        *message);
 }
 
 void Datastore::beginRead(bool rereadBadSectors)

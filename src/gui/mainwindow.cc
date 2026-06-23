@@ -65,7 +65,7 @@ public:
         _logRenderer(LogRenderer::create(_logStream))
     {
         Logger::setLogger(
-            [&](const AnyLogMessage& message)
+            [&](const AnyLogMessage* message)
             {
                 if (isWorkerThread())
                 {
@@ -233,7 +233,7 @@ public:
         ShowConfig();
     }
 
-    void OnLogMessage(const AnyLogMessage& message)
+    void OnLogMessage(const AnyLogMessage* message)
     {
         _logRenderer->add(message);
         _logStream.flush();
@@ -246,7 +246,7 @@ public:
                 },
 
                 /* We terminated due to the stop button. */
-                [&](std::shared_ptr<const EmergencyStopMessage> m)
+                [&](const EmergencyStopMessage* m)
                 {
                     _statusBar->SetLeftLabel("Emergency stop!");
                     _statusBar->HideProgressBar();
@@ -254,7 +254,7 @@ public:
                 },
 
                 /* A fatal error. */
-                [&](std::shared_ptr<const ErrorLogMessage> m)
+                [&](const ErrorLogMessage* m)
                 {
                     _statusBar->SetLeftLabel(m->message);
                     wxMessageBox(m->message, "Error", wxOK | wxICON_ERROR);
@@ -263,7 +263,7 @@ public:
                 },
 
                 /* Indicates that we're starting a write operation. */
-                [&](std::shared_ptr<const BeginWriteOperationLogMessage> m)
+                [&](const BeginWriteOperationLogMessage* m)
                 {
                     _statusBar->SetRightLabel(
                         fmt::format("W {}.{}", m->track, m->head));
@@ -271,14 +271,14 @@ public:
                         m->track, m->head, VISMODE_WRITING);
                 },
 
-                [&](std::shared_ptr<const EndWriteOperationLogMessage> m)
+                [&](const EndWriteOperationLogMessage* m)
                 {
                     _statusBar->SetRightLabel("");
                     _imagerPanel->SetVisualiserMode(0, 0, VISMODE_NOTHING);
                 },
 
                 /* Indicates that we're starting a read operation. */
-                [&](std::shared_ptr<const BeginReadOperationLogMessage> m)
+                [&](const BeginReadOperationLogMessage* m)
                 {
                     _statusBar->SetRightLabel(
                         fmt::format("R {}.{}", m->track, m->head));
@@ -286,38 +286,38 @@ public:
                         m->track, m->head, VISMODE_READING);
                 },
 
-                [&](std::shared_ptr<const EndReadOperationLogMessage> m)
+                [&](const EndReadOperationLogMessage* m)
                 {
                     _statusBar->SetRightLabel("");
                     _imagerPanel->SetVisualiserMode(0, 0, VISMODE_NOTHING);
                 },
 
-                [&](std::shared_ptr<const TrackReadLogMessage> m)
+                [&](const TrackReadLogMessage* m)
                 {
                     _imagerPanel->SetVisualiserTrackData(m->track);
                 },
 
-                [&](std::shared_ptr<const DiskReadLogMessage> m)
+                [&](const DiskReadLogMessage* m)
                 {
                     _imagerPanel->SetDisk(m->disk);
                 },
 
                 /* Large-scale operation start. */
-                [&](std::shared_ptr<const BeginOperationLogMessage> m)
+                [&](const BeginOperationLogMessage* m)
                 {
                     _statusBar->SetLeftLabel(m->message);
                     _statusBar->ShowProgressBar();
                 },
 
                 /* Large-scale operation end. */
-                [&](std::shared_ptr<const EndOperationLogMessage> m)
+                [&](const EndOperationLogMessage* m)
                 {
                     _statusBar->SetLeftLabel(m->message);
                     _statusBar->HideProgressBar();
                 },
 
                 /* Large-scale operation progress. */
-                [&](std::shared_ptr<const OperationProgressLogMessage> m)
+                [&](const OperationProgressLogMessage* m)
                 {
                     _statusBar->SetProgress(m->progress);
                 },

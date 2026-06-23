@@ -36,15 +36,13 @@ enum BadSectorsState
 /* Log renderers. */
 
 /* Start measuring the rotational speed */
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const BeginSpeedOperationLogMessage> m)
+void renderLogMessage(LogRenderer& r, const BeginSpeedOperationLogMessage* m)
 {
     r.newline().add("Measuring rotational speed...").newline();
 }
 
 /* Finish measuring the rotational speed */
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const EndSpeedOperationLogMessage> m)
+void renderLogMessage(LogRenderer& r, const EndSpeedOperationLogMessage* m)
 {
     r.newline()
         .add(fmt::format("Rotational period is {:.1f}ms ({:.1f}rpm)",
@@ -54,35 +52,26 @@ void renderLogMessage(
 }
 
 /* Indicates that we're starting a write operation. */
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const BeginWriteOperationLogMessage> m)
+void renderLogMessage(LogRenderer& r, const BeginWriteOperationLogMessage* m)
 {
     r.header(fmt::format("W{:2}.{}: ", m->track, m->head));
 }
 
 /* Indicates that we're finishing a write operation. */
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const EndWriteOperationLogMessage> m)
-{
-}
+void renderLogMessage(LogRenderer& r, const EndWriteOperationLogMessage* m) {}
 
 /* Indicates that we're starting a read operation. */
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const BeginReadOperationLogMessage> m)
+void renderLogMessage(LogRenderer& r, const BeginReadOperationLogMessage* m)
 {
     r.header(fmt::format("R{:2}.{}: ", m->track, m->head));
 }
 
 /* Indicates that we're finishing a read operation. */
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const EndReadOperationLogMessage> m)
-{
-}
+void renderLogMessage(LogRenderer& r, const EndReadOperationLogMessage* m) {}
 
 /* We've just read a track (we might reread it if there are errors)
  */
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const TrackReadLogMessage> m)
+void renderLogMessage(LogRenderer& r, const TrackReadLogMessage* m)
 {
     std::set<const Sector*> rawSectors;
     std::set<std::shared_ptr<const Record>> rawRecords;
@@ -133,28 +122,16 @@ void renderLogMessage(
 
 /* We've just read a disk.
  */
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const DiskReadLogMessage> m)
-{
-}
+void renderLogMessage(LogRenderer& r, const DiskReadLogMessage* m) {}
 
 /* Large-scale operation start. */
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const BeginOperationLogMessage> m)
-{
-}
+void renderLogMessage(LogRenderer& r, const BeginOperationLogMessage* m) {}
 
 /* Large-scale operation end. */
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const EndOperationLogMessage> m)
-{
-}
+void renderLogMessage(LogRenderer& r, const EndOperationLogMessage* m) {}
 
 /* Large-scale operation progress. */
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const OperationProgressLogMessage> m)
-{
-}
+void renderLogMessage(LogRenderer& r, const OperationProgressLogMessage* m) {}
 
 /* In order to allow rereads in file-based flux sources, we need to persist the
  * FluxSourceIterator (as that's where the state for which read to return is

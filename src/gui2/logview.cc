@@ -61,7 +61,7 @@ void LogView::drawContent()
     }
 }
 
-void LogView::logMessage(const AnyLogMessage& message)
+void LogView::logMessage(const AnyLogMessage* message)
 {
     logRenderer->add(message);
     scrollToEndOnNextRedraw = true;

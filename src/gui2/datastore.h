@@ -31,7 +31,7 @@ public:
     static const std::map<CylinderHead, std::shared_ptr<const TrackInfo>>&
     getPhysicalCylinderLayouts();
     static const DiskLayout* getDiskLayout();
-    static void onLogMessage(const AnyLogMessage& message);
+    static void onLogMessage(const AnyLogMessage* message);
 
     static void reset();
     static void beginRead(bool rereadBadSectors);

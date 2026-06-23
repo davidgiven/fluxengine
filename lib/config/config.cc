@@ -166,7 +166,7 @@ struct OptionLogMessage
     std::string message;
 };
 
-void renderLogMessage(LogRenderer& r, std::shared_ptr<const OptionLogMessage> m)
+void renderLogMessage(LogRenderer& r, const OptionLogMessage* m)
 {
     r.newline().add("OPTION:").add(m->message).newline();
 }
