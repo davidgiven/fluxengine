@@ -10,20 +10,18 @@
 class MemorySectorInterface : public SectorInterface
 {
 public:
-    MemorySectorInterface(std::shared_ptr<Image> image): _backupImage(image)
+    MemorySectorInterface(Image* image): _backupImage(image)
     {
         discardChanges();
     }
 
 public:
-    std::shared_ptr<const Sector> get(
-        unsigned track, unsigned side, unsigned sectorId) override
+    const Sector* get(unsigned track, unsigned side, unsigned sectorId) override
     {
         return _liveImage->get(track, side, sectorId);
     }
 
-    std::shared_ptr<Sector> put(
-        unsigned track, unsigned side, unsigned sectorId) override
+    Sector* put(unsigned track, unsigned side, unsigned sectorId) override
     {
         _changed = true;
         return _liveImage->put(track, side, sectorId);
@@ -53,7 +51,7 @@ public:
 
     void discardChanges() override
     {
-        _liveImage = std::make_unique<Image>();
+        _liveImage = new Image();
         for (auto sector : *_backupImage)
         {
             auto s = _liveImage->put(sector->logicalCylinder,
@@ -65,13 +63,12 @@ public:
     }
 
 private:
-    std::shared_ptr<Image> _backupImage;
-    std::shared_ptr<Image> _liveImage;
+    Image* _backupImage = nullptr;
+    Image* _liveImage = nullptr;
     bool _changed = false;
 };
 
-std::unique_ptr<SectorInterface> SectorInterface::createMemorySectorInterface(
-    std::shared_ptr<Image> image)
+SectorInterface* SectorInterface::createMemorySectorInterface(Image* image)
 {
-    return std::make_unique<MemorySectorInterface>(image);
+    return new MemorySectorInterface(image);
 }

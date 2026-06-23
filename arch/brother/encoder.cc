@@ -107,8 +107,8 @@ public:
     }
 
 public:
-    std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout& ltl,
-        const std::vector<std::shared_ptr<const Sector>>& sectors,
+    std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout* ltl,
+        const std::vector<const Sector*>& sectors,
         const Image& image) override
     {
         int bitsPerRevolution = 200000.0 / _config.clock_rate_us();
@@ -148,7 +148,7 @@ private:
     const BrotherEncoderProto& _config;
 };
 
-std::unique_ptr<Encoder> createBrotherEncoder(const EncoderProto& config)
+Encoder* createBrotherEncoder(const EncoderProto& config)
 {
-    return std::unique_ptr<Encoder>(new BrotherEncoder(config));
+    return new BrotherEncoder(config);
 }

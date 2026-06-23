@@ -59,7 +59,7 @@ public:
     }
 };
 
-std::unique_ptr<Decoder> createAesLanierDecoder(const DecoderProto& config)
+Decoder* createAesLanierDecoder(const DecoderProto& config)
 {
-    return std::unique_ptr<Decoder>(new AesLanierDecoder(config));
+    return new AesLanierDecoder(config);
 }

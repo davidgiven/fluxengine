@@ -169,9 +169,8 @@ static uint8_t encode_side(uint8_t track, uint8_t side)
     return (side ? 0x20 : 0x00) | ((track > 0x3f) ? 0x01 : 0x00);
 }
 
-static void write_sector(std::vector<bool>& bits,
-    unsigned& cursor,
-    const std::shared_ptr<const Sector>& sector)
+static void write_sector(
+    std::vector<bool>& bits, unsigned& cursor, const Sector* sector)
 {
     if ((sector->data.size() != 512) && (sector->data.size() != 524))
         error("unsupported sector size --- you must pick 512 or 524");
@@ -220,11 +219,11 @@ public:
     }
 
 public:
-    std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout& ltl,
-        const std::vector<std::shared_ptr<const Sector>>& sectors,
+    std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout* ltl,
+        const std::vector<const Sector*>& sectors,
         const Image& image) override
     {
-        double clockRateUs = clockRateUsForTrack(ltl.logicalCylinder);
+        double clockRateUs = clockRateUsForTrack(ltl->logicalCylinder);
         int bitsPerRevolution = 200000.0 / clockRateUs;
         std::vector<bool> bits(bitsPerRevolution);
         unsigned cursor = 0;
@@ -252,7 +251,7 @@ private:
     const MacintoshEncoderProto& _config;
 };
 
-std::unique_ptr<Encoder> createMacintoshEncoder(const EncoderProto& config)
+Encoder* createMacintoshEncoder(const EncoderProto& config)
 {
-    return std::unique_ptr<Encoder>(new MacintoshEncoder(config));
+    return new MacintoshEncoder(config);
 }

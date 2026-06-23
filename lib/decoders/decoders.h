@@ -41,8 +41,8 @@ public:
 
     virtual ~Decoder() {}
 
-    static std::unique_ptr<Decoder> create(Config& config);
-    static std::unique_ptr<Decoder> create(const DecoderProto& config);
+    static Decoder* create(Config& config);
+    static Decoder* create(const DecoderProto& config);
 
 public:
     enum RecordType
@@ -53,9 +53,8 @@ public:
     };
 
 public:
-    std::shared_ptr<Track> decodeToSectors(
-        std::shared_ptr<const Fluxmap> fluxmap,
-        const std::shared_ptr<const PhysicalTrackLayout>& ptl);
+    Track* decodeToSectors(
+        std::shared_ptr<const Fluxmap> fluxmap, const PhysicalTrackLayout* ptl);
 
     void pushRecord(
         const Fluxmap::Position& start, const Fluxmap::Position& end);
@@ -105,9 +104,9 @@ protected:
     virtual void decodeDataRecord() {};
 
     const DecoderProto& _config;
-    std::shared_ptr<const LogicalTrackLayout> _ltl;
-    std::shared_ptr<Track> _trackdata;
-    std::shared_ptr<Sector> _sector;
+    const LogicalTrackLayout* _ltl;
+    Track* _trackdata;
+    Sector* _sector;
     std::unique_ptr<FluxDecoder> _decoder;
     std::vector<bool> _recordBits;
 

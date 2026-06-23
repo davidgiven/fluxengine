@@ -190,8 +190,8 @@ class CbmfsFilesystem : public Filesystem
 
 public:
     CbmfsFilesystem(const CbmfsProto& config,
-        const std::shared_ptr<const DiskLayout>& diskLayout,
-        std::shared_ptr<SectorInterface> sectors):
+        const DiskLayout* diskLayout,
+        SectorInterface* sectors):
         Filesystem(diskLayout, sectors),
         _config(config)
     {
@@ -281,11 +281,9 @@ private:
     const CbmfsProto& _config;
 };
 
-std::unique_ptr<Filesystem> Filesystem::createCbmfsFilesystem(
-    const FilesystemProto& config,
-    const std::shared_ptr<const DiskLayout>& diskLayout,
-    std::shared_ptr<SectorInterface> sectors)
+Filesystem* Filesystem::createCbmfsFilesystem(const FilesystemProto& config,
+    const DiskLayout* diskLayout,
+    SectorInterface* sectors)
 {
-    return std::make_unique<CbmfsFilesystem>(
-        config.cbmfs(), diskLayout, sectors);
+    return new CbmfsFilesystem(config.cbmfs(), diskLayout, sectors);
 }

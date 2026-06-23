@@ -56,7 +56,7 @@ int mainRead(int argc, const char* argv[])
     auto decoder = Arch::createDecoder(globalConfig());
     auto writer = ImageWriter::create(globalConfig());
 
-    readDiskCommand(*diskLayout, *fluxSource, *decoder, *writer);
+    readDiskCommand(*diskLayout, fluxSource, decoder, *writer);
 
     return 0;
 }

@@ -107,8 +107,8 @@ class AcornDfsFilesystem : public Filesystem
 {
 public:
     AcornDfsFilesystem(const AcornDfsProto& config,
-        const std::shared_ptr<const DiskLayout>& diskLayout,
-        std::shared_ptr<SectorInterface> sectors):
+        const DiskLayout* diskLayout,
+        SectorInterface* sectors):
         Filesystem(diskLayout, sectors),
         _config(config)
     {
@@ -178,11 +178,9 @@ private:
     const AcornDfsProto& _config;
 };
 
-std::unique_ptr<Filesystem> Filesystem::createAcornDfsFilesystem(
-    const FilesystemProto& config,
-    const std::shared_ptr<const DiskLayout>& diskLayout,
-    std::shared_ptr<SectorInterface> sectors)
+Filesystem* Filesystem::createAcornDfsFilesystem(const FilesystemProto& config,
+    const DiskLayout* diskLayout,
+    SectorInterface* sectors)
 {
-    return std::make_unique<AcornDfsFilesystem>(
-        config.acorndfs(), diskLayout, sectors);
+    return new AcornDfsFilesystem(config.acorndfs(), diskLayout, sectors);
 }

@@ -13,9 +13,7 @@
 #define BROTHER_TRACKS_PER_120KB_DISK 39
 #define BROTHER_SECTORS_PER_TRACK 12
 
-extern std::unique_ptr<Decoder> createBrotherDecoder(
-    const DecoderProto& config);
-extern std::unique_ptr<Encoder> createBrotherEncoder(
-    const EncoderProto& config);
+extern Decoder* createBrotherDecoder(const DecoderProto& config);
+extern Encoder* createBrotherEncoder(const EncoderProto& config);
 
 #endif

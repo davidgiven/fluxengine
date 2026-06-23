@@ -35,33 +35,26 @@ public:
     virtual ~FluxSource() {}
 
 private:
-    static std::unique_ptr<FluxSource> createA2rFluxSource(
-        const A2rFluxSourceProto& config);
-    static std::unique_ptr<FluxSource> createCwfFluxSource(
-        const CwfFluxSourceProto& config);
-    static std::unique_ptr<FluxSource> createDmkFluxSource(
-        const DmkFluxSourceProto& config);
-    static std::unique_ptr<FluxSource> createEraseFluxSource(
+    static FluxSource* createA2rFluxSource(const A2rFluxSourceProto& config);
+    static FluxSource* createCwfFluxSource(const CwfFluxSourceProto& config);
+    static FluxSource* createDmkFluxSource(const DmkFluxSourceProto& config);
+    static FluxSource* createEraseFluxSource(
         const EraseFluxSourceProto& config);
-    static std::unique_ptr<FluxSource> createFl2FluxSource(
-        const Fl2FluxSourceProto& config);
-    static std::unique_ptr<FluxSource> createFlxFluxSource(
-        const FlxFluxSourceProto& config);
-    static std::unique_ptr<FluxSource> createHardwareFluxSource(
+    static FluxSource* createFl2FluxSource(const Fl2FluxSourceProto& config);
+    static FluxSource* createFlxFluxSource(const FlxFluxSourceProto& config);
+    static FluxSource* createHardwareFluxSource(
         const HardwareFluxSourceProto& config);
-    static std::unique_ptr<FluxSource> createKryofluxFluxSource(
+    static FluxSource* createKryofluxFluxSource(
         const KryofluxFluxSourceProto& config);
-    static std::unique_ptr<FluxSource> createScpFluxSource(
-        const ScpFluxSourceProto& config);
-    static std::unique_ptr<FluxSource> createTestPatternFluxSource(
+    static FluxSource* createScpFluxSource(const ScpFluxSourceProto& config);
+    static FluxSource* createTestPatternFluxSource(
         const TestPatternFluxSourceProto& config);
 
 public:
-    static std::unique_ptr<FluxSource> createMemoryFluxSource(
-        const Disk& flux);
+    static FluxSource* createMemoryFluxSource(const Disk& flux);
 
-    static std::unique_ptr<FluxSource> create(Config& config);
-    static std::unique_ptr<FluxSource> create(const FluxSourceProto& spec);
+    static FluxSource* create(Config& config);
+    static FluxSource* create(const FluxSourceProto& spec);
 
 public:
     /* Returns any configuration this flux source might be carrying (e.g. tpi

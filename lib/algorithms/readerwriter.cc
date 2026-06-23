@@ -36,15 +36,13 @@ enum BadSectorsState
 /* Log renderers. */
 
 /* Start measuring the rotational speed */
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const BeginSpeedOperationLogMessage> m)
+void renderLogMessage(LogRenderer& r, const BeginSpeedOperationLogMessage* m)
 {
     r.newline().add("Measuring rotational speed...").newline();
 }
 
 /* Finish measuring the rotational speed */
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const EndSpeedOperationLogMessage> m)
+void renderLogMessage(LogRenderer& r, const EndSpeedOperationLogMessage* m)
 {
     r.newline()
         .add(fmt::format("Rotational period is {:.1f}ms ({:.1f}rpm)",
@@ -54,37 +52,28 @@ void renderLogMessage(
 }
 
 /* Indicates that we're starting a write operation. */
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const BeginWriteOperationLogMessage> m)
+void renderLogMessage(LogRenderer& r, const BeginWriteOperationLogMessage* m)
 {
     r.header(fmt::format("W{:2}.{}: ", m->track, m->head));
 }
 
 /* Indicates that we're finishing a write operation. */
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const EndWriteOperationLogMessage> m)
-{
-}
+void renderLogMessage(LogRenderer& r, const EndWriteOperationLogMessage* m) {}
 
 /* Indicates that we're starting a read operation. */
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const BeginReadOperationLogMessage> m)
+void renderLogMessage(LogRenderer& r, const BeginReadOperationLogMessage* m)
 {
     r.header(fmt::format("R{:2}.{}: ", m->track, m->head));
 }
 
 /* Indicates that we're finishing a read operation. */
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const EndReadOperationLogMessage> m)
-{
-}
+void renderLogMessage(LogRenderer& r, const EndReadOperationLogMessage* m) {}
 
 /* We've just read a track (we might reread it if there are errors)
  */
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const TrackReadLogMessage> m)
+void renderLogMessage(LogRenderer& r, const TrackReadLogMessage* m)
 {
-    std::set<std::shared_ptr<const Sector>> rawSectors;
+    std::set<const Sector*> rawSectors;
     std::set<std::shared_ptr<const Record>> rawRecords;
     for (const auto& track : m->tracks)
     {
@@ -109,8 +98,7 @@ void renderLogMessage(
 
     r.newline().add("sectors:");
 
-    std::vector<std::shared_ptr<const Sector>> sectors(
-        m->sectors.begin(), m->sectors.end());
+    std::vector<const Sector*> sectors(m->sectors.begin(), m->sectors.end());
     std::sort(sectors.begin(), sectors.end(), sectorPointerSortPredicate);
 
     for (const auto& sector : rawSectors)
@@ -134,28 +122,16 @@ void renderLogMessage(
 
 /* We've just read a disk.
  */
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const DiskReadLogMessage> m)
-{
-}
+void renderLogMessage(LogRenderer& r, const DiskReadLogMessage* m) {}
 
 /* Large-scale operation start. */
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const BeginOperationLogMessage> m)
-{
-}
+void renderLogMessage(LogRenderer& r, const BeginOperationLogMessage* m) {}
 
 /* Large-scale operation end. */
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const EndOperationLogMessage> m)
-{
-}
+void renderLogMessage(LogRenderer& r, const EndOperationLogMessage* m) {}
 
 /* Large-scale operation progress. */
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const OperationProgressLogMessage> m)
-{
-}
+void renderLogMessage(LogRenderer& r, const OperationProgressLogMessage* m) {}
 
 /* In order to allow rereads in file-based flux sources, we need to persist the
  * FluxSourceIterator (as that's where the state for which read to return is
@@ -164,18 +140,18 @@ void renderLogMessage(
 class FluxSourceIteratorHolder
 {
 public:
-    FluxSourceIteratorHolder(FluxSource& fluxSource): _fluxSource(fluxSource) {}
+    FluxSourceIteratorHolder(FluxSource* fluxSource): _fluxSource(fluxSource) {}
 
     FluxSourceIterator& getIterator(unsigned physicalCylinder, unsigned head)
     {
         auto& it = _cache[std::make_pair(physicalCylinder, head)];
         if (!it)
-            it = _fluxSource.readFlux(physicalCylinder, head);
+            it = _fluxSource->readFlux(physicalCylinder, head);
         return *it;
     }
 
 private:
-    FluxSource& _fluxSource;
+    FluxSource* _fluxSource;
     std::map<std::pair<unsigned, unsigned>, std::unique_ptr<FluxSourceIterator>>
         _cache;
 };
@@ -230,12 +206,11 @@ static nanoseconds_t measureDiskRotation()
 /* Given a set of sectors, deduplicates them sensibly (e.g. if there is a good
  * and bad version of the same sector, the bad version is dropped). */
 
-static std::vector<std::shared_ptr<const Sector>> collectSectors(
-    std::vector<std::shared_ptr<const Sector>>& trackSectors,
-    bool collapse_conflicts = true)
+static std::vector<const Sector*> collectSectors(
+    std::vector<const Sector*>& trackSectors, bool collapse_conflicts = true)
 {
     typedef std::tuple<unsigned, unsigned, unsigned> key_t;
-    std::multimap<key_t, std::shared_ptr<const Sector>> sectors;
+    std::multimap<key_t, const Sector*> sectors;
 
     for (const auto& sector : trackSectors)
     {
@@ -245,7 +220,7 @@ static std::vector<std::shared_ptr<const Sector>> collectSectors(
         sectors.insert({sectorid, sector});
     }
 
-    std::set<std::shared_ptr<const Sector>> sector_set;
+    std::set<const Sector*> sector_set;
     auto it = sectors.begin();
     while (it != sectors.end())
     {
@@ -253,7 +228,7 @@ static std::vector<std::shared_ptr<const Sector>> collectSectors(
         auto new_sector = std::accumulate(it,
             ub,
             it->second,
-            [&](auto left, auto& rightit) -> std::shared_ptr<const Sector>
+            [&](auto left, auto& rightit) -> const Sector*
             {
                 auto& right = rightit.second;
                 if ((left->status == Sector::OK) &&
@@ -262,11 +237,11 @@ static std::vector<std::shared_ptr<const Sector>> collectSectors(
                 {
                     if (!collapse_conflicts)
                     {
-                        auto s = std::make_shared<Sector>(*right);
+                        auto s = new Sector(*right);
                         s->status = Sector::CONFLICT;
                         sector_set.insert(s);
                     }
-                    auto s = std::make_shared<Sector>(*left);
+                    auto s = new Sector(*left);
                     s->status = Sector::CONFLICT;
                     return s;
                 }
@@ -290,16 +265,16 @@ static std::vector<std::shared_ptr<const Sector>> collectSectors(
 struct CombinationResult
 {
     BadSectorsState result;
-    std::vector<std::shared_ptr<const Sector>> sectors;
+    std::vector<const Sector*> sectors;
 };
 
 static CombinationResult combineRecordAndSectors(
-    std::vector<std::shared_ptr<const Track>>& tracks,
-    Decoder& decoder,
-    const std::shared_ptr<const LogicalTrackLayout>& ltl)
+    std::vector<const Track*>& tracks,
+    Decoder* decoder,
+    const LogicalTrackLayout* ltl)
 {
     CombinationResult cr = {HAS_NO_BAD_SECTORS};
-    std::vector<std::shared_ptr<const Sector>> track_sectors;
+    std::vector<const Sector*> track_sectors;
 
     /* Add the sectors which were there. */
 
@@ -311,7 +286,7 @@ static CombinationResult combineRecordAndSectors(
 
     for (unsigned sectorId : ltl->diskSectorOrder)
     {
-        auto sector = std::make_shared<Sector>(
+        auto sector = new Sector(
             LogicalLocation{ltl->logicalCylinder, ltl->logicalHead, sectorId});
 
         sector->status = Sector::MISSING;
@@ -332,7 +307,7 @@ static CombinationResult combineRecordAndSectors(
     return cr;
 }
 
-static void adjustTrackOnError(FluxSource& fluxSource, int baseTrack)
+static void adjustTrackOnError(FluxSource* fluxSource, int baseTrack)
 {
     switch (globalConfig()->drive().error_behaviour())
     {
@@ -340,14 +315,14 @@ static void adjustTrackOnError(FluxSource& fluxSource, int baseTrack)
             break;
 
         case DriveProto::RECALIBRATE:
-            fluxSource.recalibrate();
+            fluxSource->recalibrate();
             break;
 
         case DriveProto::JIGGLE:
             if (baseTrack > 0)
-                fluxSource.seek(baseTrack - 1);
+                fluxSource->seek(baseTrack - 1);
             else
-                fluxSource.seek(baseTrack + 1);
+                fluxSource->seek(baseTrack + 1);
             break;
     }
 }
@@ -355,14 +330,14 @@ static void adjustTrackOnError(FluxSource& fluxSource, int baseTrack)
 struct ReadGroupResult
 {
     ReadResult result;
-    std::vector<std::shared_ptr<const Sector>> combinedSectors;
+    std::vector<const Sector*> combinedSectors;
 };
 
 static ReadGroupResult readGroup(const DiskLayout& diskLayout,
     FluxSourceIteratorHolder& fluxSourceIteratorHolder,
-    const std::shared_ptr<const LogicalTrackLayout>& ltl,
-    std::vector<std::shared_ptr<const Track>>& tracks,
-    Decoder& decoder)
+    const LogicalTrackLayout* ltl,
+    std::vector<const Track*>& tracks,
+    Decoder* decoder)
 {
     ReadGroupResult rgr = {BAD_AND_CAN_NOT_RETRY};
 
@@ -404,7 +379,7 @@ static ReadGroupResult readGroup(const DiskLayout& diskLayout,
             (int)(fluxmap->duration() / 1e6),
             fluxmap->bytes());
 
-        auto flux = decoder.decodeToSectors(std::move(fluxmap), ptl);
+        auto flux = decoder->decodeToSectors(std::move(fluxmap), ptl);
         flux->normalisedSectors = collectSectors(flux->allSectors);
         tracks.push_back(flux);
 
@@ -432,19 +407,18 @@ static ReadGroupResult readGroup(const DiskLayout& diskLayout,
 
 void writeTracks(const DiskLayout& diskLayout,
 
-    FluxSinkFactory& fluxSinkFactory,
-    std::function<std::unique_ptr<const Fluxmap>(
-        const std::shared_ptr<const LogicalTrackLayout>&)> producer,
-    std::function<bool(const std::shared_ptr<const LogicalTrackLayout>&)>
-        verifier,
+    FluxSinkFactory* fluxSinkFactory,
+    std::function<std::unique_ptr<const Fluxmap>(const LogicalTrackLayout*)>
+        producer,
+    std::function<bool(const LogicalTrackLayout*)> verifier,
     const std::vector<CylinderHead>& logicalLocations)
 {
     log(BeginOperationLogMessage{"Encoding and writing to disk"});
 
-    if (fluxSinkFactory.isHardware())
+    if (fluxSinkFactory->isHardware())
         measureDiskRotation();
     {
-        auto fluxSink = fluxSinkFactory.create();
+        auto fluxSink = fluxSinkFactory->create();
         int index = 0;
         for (auto& ch : logicalLocations)
         {
@@ -509,18 +483,18 @@ void writeTracks(const DiskLayout& diskLayout,
 }
 
 void writeTracks(const DiskLayout& diskLayout,
-    FluxSinkFactory& fluxSinkFactory,
-    Encoder& encoder,
+    FluxSinkFactory* fluxSinkFactory,
+    Encoder* encoder,
     const Image& image,
     const std::vector<CylinderHead>& chs)
 {
     writeTracks(
         diskLayout,
         fluxSinkFactory,
-        [&](const std::shared_ptr<const LogicalTrackLayout>& ltl)
+        [&](const LogicalTrackLayout* ltl)
         {
-            auto sectors = encoder.collectSectors(*ltl, image);
-            return encoder.encode(*ltl, sectors, image);
+            auto sectors = encoder->collectSectors(ltl, image);
+            return encoder->encode(ltl, sectors, image);
         },
         [](const auto&)
         {
@@ -530,25 +504,25 @@ void writeTracks(const DiskLayout& diskLayout,
 }
 
 void writeTracksAndVerify(const DiskLayout& diskLayout,
-    FluxSinkFactory& fluxSinkFactory,
-    Encoder& encoder,
-    FluxSource& fluxSource,
-    Decoder& decoder,
+    FluxSinkFactory* fluxSinkFactory,
+    Encoder* encoder,
+    FluxSource* fluxSource,
+    Decoder* decoder,
     const Image& image,
     const std::vector<CylinderHead>& chs)
 {
     writeTracks(
         diskLayout,
         fluxSinkFactory,
-        [&](const std::shared_ptr<const LogicalTrackLayout>& ltl)
+        [&](const LogicalTrackLayout* ltl)
         {
-            auto sectors = encoder.collectSectors(*ltl, image);
-            return encoder.encode(*ltl, sectors, image);
+            auto sectors = encoder->collectSectors(ltl, image);
+            return encoder->encode(ltl, sectors, image);
         },
-        [&](const std::shared_ptr<const LogicalTrackLayout>& ltl)
+        [&](const LogicalTrackLayout* ltl)
         {
             FluxSourceIteratorHolder fluxSourceIteratorHolder(fluxSource);
-            std::vector<std::shared_ptr<const Track>> tracks;
+            std::vector<const Track*> tracks;
             auto [result, sectors] = readGroup(
                 diskLayout, fluxSourceIteratorHolder, ltl, tracks, decoder);
             log(TrackReadLogMessage{tracks, sectors});
@@ -561,7 +535,7 @@ void writeTracksAndVerify(const DiskLayout& diskLayout,
             }
 
             Image wanted;
-            for (const auto& sector : encoder.collectSectors(*ltl, image))
+            for (const auto& sector : encoder->collectSectors(ltl, image))
                 wanted
                     .put(sector->logicalCylinder,
                         sector->logicalHead,
@@ -599,8 +573,8 @@ void writeTracksAndVerify(const DiskLayout& diskLayout,
 
 void writeDiskCommand(const DiskLayout& diskLayout,
     const Image& image,
-    Encoder& encoder,
-    FluxSinkFactory& fluxSinkFactory,
+    Encoder* encoder,
+    FluxSinkFactory* fluxSinkFactory,
     Decoder* decoder,
     FluxSource* fluxSource,
     const std::vector<CylinderHead>& physicalLocations)
@@ -612,8 +586,8 @@ void writeDiskCommand(const DiskLayout& diskLayout,
         writeTracksAndVerify(diskLayout,
             fluxSinkFactory,
             encoder,
-            *fluxSource,
-            *decoder,
+            fluxSource,
+            decoder,
             image,
             chs);
     else
@@ -622,8 +596,8 @@ void writeDiskCommand(const DiskLayout& diskLayout,
 
 void writeDiskCommand(const DiskLayout& diskLayout,
     const Image& image,
-    Encoder& encoder,
-    FluxSinkFactory& fluxSinkFactory,
+    Encoder* encoder,
+    FluxSinkFactory* fluxSinkFactory,
     Decoder* decoder,
     FluxSource* fluxSource)
 {
@@ -639,16 +613,16 @@ void writeDiskCommand(const DiskLayout& diskLayout,
 }
 
 void writeRawDiskCommand(const DiskLayout& diskLayout,
-    FluxSource& fluxSource,
-    FluxSinkFactory& fluxSinkFactory)
+    FluxSource* fluxSource,
+    FluxSinkFactory* fluxSinkFactory)
 {
     writeTracks(
         diskLayout,
         fluxSinkFactory,
-        [&](const std::shared_ptr<const LogicalTrackLayout>& ltl)
+        [&](const LogicalTrackLayout* ltl)
         {
             return fluxSource
-                .readFlux(ltl->physicalCylinder, ltl->physicalHead)
+                ->readFlux(ltl->physicalCylinder, ltl->physicalHead)
                 ->next();
         },
         [](const auto&)
@@ -659,13 +633,13 @@ void writeRawDiskCommand(const DiskLayout& diskLayout,
 }
 
 void readAndDecodeTrack(const DiskLayout& diskLayout,
-    FluxSource& fluxSource,
-    Decoder& decoder,
-    const std::shared_ptr<const LogicalTrackLayout>& ltl,
-    std::vector<std::shared_ptr<const Track>>& tracks,
-    std::vector<std::shared_ptr<const Sector>>& combinedSectors)
+    FluxSource* fluxSource,
+    Decoder* decoder,
+    const LogicalTrackLayout* ltl,
+    std::vector<const Track*>& tracks,
+    std::vector<const Sector*>& combinedSectors)
 {
-    if (fluxSource.isHardware())
+    if (fluxSource->isHardware())
         measureDiskRotation();
 
     FluxSourceIteratorHolder fluxSourceIteratorHolder(fluxSource);
@@ -689,7 +663,7 @@ void readAndDecodeTrack(const DiskLayout& diskLayout,
             break;
         }
 
-        if (fluxSource.isHardware())
+        if (fluxSource->isHardware())
         {
             adjustTrackOnError(fluxSource, ltl->physicalCylinder);
             log("retrying; {} retries remaining", retriesRemaining);
@@ -699,17 +673,16 @@ void readAndDecodeTrack(const DiskLayout& diskLayout,
 }
 
 void readDiskCommand(const DiskLayout& diskLayout,
-    FluxSource& fluxSource,
-    Decoder& decoder,
+    FluxSource* fluxSource,
+    Decoder* decoder,
     Disk& disk)
 {
-    std::unique_ptr<FluxSinkFactory> outputFluxSinkFactory;
+    FluxSinkFactory* outputFluxSinkFactory;
     if (globalConfig()->decoder().has_copy_flux_to())
         outputFluxSinkFactory =
             FluxSinkFactory::create(globalConfig()->decoder().copy_flux_to());
 
-    std::map<CylinderHead, std::vector<std::shared_ptr<const Track>>>
-        tracksByLogicalLocation;
+    std::map<CylinderHead, std::vector<const Track*>> tracksByLogicalLocation;
     for (auto& [ch, track] : disk.tracksByPhysicalLocation)
         tracksByLogicalLocation[CylinderHead(track->ltl->logicalCylinder,
                                     track->ltl->logicalHead)]
@@ -717,7 +690,7 @@ void readDiskCommand(const DiskLayout& diskLayout,
 
     log(BeginOperationLogMessage{"Reading and decoding disk"});
 
-    if (fluxSource.isHardware())
+    if (fluxSource->isHardware())
         disk.rotationalPeriod = measureDiskRotation();
     else
         disk.rotationalPeriod = getRotationalPeriodFromConfig();
@@ -737,7 +710,7 @@ void readDiskCommand(const DiskLayout& diskLayout,
             testForEmergencyStop();
 
             auto& trackFluxes = tracksByLogicalLocation[logicalLocation];
-            std::vector<std::shared_ptr<const Sector>> trackSectors;
+            std::vector<const Sector*> trackSectors;
             readAndDecodeTrack(diskLayout,
                 fluxSource,
                 decoder,
@@ -829,11 +802,11 @@ void readDiskCommand(const DiskLayout& diskLayout,
             /* track can't be modified below this point. */
             log(TrackReadLogMessage{trackFluxes, trackSectors});
 
-            std::vector<std::shared_ptr<const Sector>> all_sectors;
+            std::vector<const Sector*> all_sectors;
             for (auto& [ch, sector] : disk.sectorsByPhysicalLocation)
                 all_sectors.push_back(sector);
             all_sectors = collectSectors(all_sectors);
-            disk.image = std::make_shared<Image>(all_sectors);
+            disk.image = new Image(all_sectors);
 
             /* Log a _copy_ of the disk structure so that the logger
              * doesn't see the disk get mutated in subsequent reads. */
@@ -842,14 +815,14 @@ void readDiskCommand(const DiskLayout& diskLayout,
     }
 
     if (!disk.image)
-        disk.image = std::make_shared<Image>();
+        disk.image = new Image();
 
     log(EndOperationLogMessage{"Read complete"});
 }
 
 void readDiskCommand(const DiskLayout& diskLayout,
-    FluxSource& fluxSource,
-    Decoder& decoder,
+    FluxSource* fluxSource,
+    Decoder* decoder,
     ImageWriter& writer)
 {
     Disk disk;

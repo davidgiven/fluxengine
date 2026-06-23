@@ -4,53 +4,51 @@
 
 static bool indented = false;
 
-static std::function<void(const AnyLogMessage&)> loggerImpl =
+static std::function<void(const AnyLogMessage*)> currentLoggerCb =
     [](const auto& message)
 {
     static auto r = LogRenderer::create(std::cout);
     r->add(message);
 };
 
+void logImpl(const AnyLogMessage* message)
+{
+    currentLoggerCb(message);
+}
+
 void log(const char* m)
 {
-    log(std::string(m));
+    currentLoggerCb(new AnyLogMessage(new std::string(m)));
 }
 
-void log(const AnyLogMessage& message)
+void Logger::setLogger(std::function<void(const AnyLogMessage*)> cb)
 {
-    loggerImpl(message);
+    currentLoggerCb = cb;
 }
 
-void Logger::setLogger(std::function<void(const AnyLogMessage&)> cb)
-{
-    loggerImpl = cb;
-}
-
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const ErrorLogMessage> msg)
+void renderLogMessage(LogRenderer& r, const ErrorLogMessage* msg)
 {
     r.newline().add("Error:").add(msg->message).newline();
 }
 
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const EmergencyStopMessage> msg)
+void renderLogMessage(LogRenderer& r, const EmergencyStopMessage* msg)
 {
     r.newline().add("Stop!").newline();
 }
 
-void renderLogMessage(LogRenderer& r, std::shared_ptr<const std::string> msg)
+void renderLogMessage(LogRenderer& r, const std::string* msg)
 {
     r.newline().add(*msg).newline();
 }
 
-LogRenderer& LogRenderer::add(const AnyLogMessage& message)
+LogRenderer& LogRenderer::add(const AnyLogMessage* message)
 {
     std::visit(
-        [&](const auto& arg)
+        [&](const auto* arg)
         {
             renderLogMessage(*this, arg);
         },
-        message);
+        *message);
 
     return *this;
 }

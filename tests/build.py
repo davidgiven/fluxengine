@@ -4,7 +4,6 @@ from build.protobuf import proto, protocc
 from build.utils import test
 from scripts.build import protoencode_single
 
-
 proto(
     name="test_proto",
     srcs=["./testproto.proto"],
@@ -61,6 +60,7 @@ export(
                 ],
                 deps=[
                     "dep+fmt_lib",
+                    "+gc_lib",
                     "+protobuf_lib",
                     "+protocol",
                     ".+test_proto_lib",
@@ -86,6 +86,7 @@ export(
                 deps=[
                     "lib/external+fl2_proto_lib",
                     "dep+fmt_lib",
+                    "+gc_lib",
                     "+protobuf_lib",
                     "+protocol",
                     "+z_lib",

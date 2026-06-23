@@ -11,8 +11,8 @@ class EncoderProto;
 class Decoder;
 class DecoderProto;
 
-extern std::unique_ptr<Decoder> createAgatDecoder(const DecoderProto& config);
-extern std::unique_ptr<Encoder> createAgatEncoder(const EncoderProto& config);
+extern Decoder* createAgatDecoder(const DecoderProto& config);
+extern Encoder* createAgatEncoder(const EncoderProto& config);
 
 extern uint8_t agatChecksum(const Bytes& bytes);
 

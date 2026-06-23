@@ -63,7 +63,7 @@ private:
     int _mode = VISMODE_NOTHING;
     int _selectedHead = -1;
     int _selectedTrack = -1;
-    std::multimap<key_t, std::shared_ptr<const Sector>> _sectors;
+    std::multimap<key_t, const Sector*> _sectors;
     std::map<key_t, std::shared_ptr<const TrackFlux>> _tracks;
     wxDECLARE_EVENT_TABLE();
 };

@@ -16,17 +16,17 @@ public:
     Encoder(const EncoderProto& config) {}
     virtual ~Encoder() {}
 
-    static std::unique_ptr<Encoder> create(Config& config);
+    static Encoder* create(Config& config);
 
 public:
-    virtual std::shared_ptr<const Sector> getSector(
+    virtual const Sector* getSector(
         const CylinderHead& ch, const Image& image, unsigned sectorId);
 
-    virtual std::vector<std::shared_ptr<const Sector>> collectSectors(
-        const LogicalTrackLayout& ltl, const Image& image);
+    virtual std::vector<const Sector*> collectSectors(
+        const LogicalTrackLayout* ltl, const Image& image);
 
-    virtual std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout& ltl,
-        const std::vector<std::shared_ptr<const Sector>>& sectors,
+    virtual std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout* ltl,
+        const std::vector<const Sector*>& sectors,
         const Image& image) = 0;
 
     nanoseconds_t calculatePhysicalClockPeriod(

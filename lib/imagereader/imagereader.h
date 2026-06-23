@@ -53,11 +53,11 @@ public:
 
     /* Reads the image. */
 
-    virtual std::unique_ptr<Image> readImage() = 0;
+    virtual Image* readImage() = 0;
 
 protected:
     const ImageReaderProto& _config;
-    std::shared_ptr<const DiskLayout> _layout;
+    const DiskLayout* _layout;
     ConfigProto _extraConfig;
 };
 

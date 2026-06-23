@@ -8,7 +8,7 @@
 
 class MemoryFluxSourceIterator : public FluxSourceIterator
 {
-    using multimap = std::multimap<CylinderHead, std::shared_ptr<const Track>>;
+    using multimap = std::multimap<CylinderHead, const Track*>;
 
 public:
     MemoryFluxSourceIterator(
@@ -65,7 +65,7 @@ private:
     const Disk& _flux;
 };
 
-std::unique_ptr<FluxSource> FluxSource::createMemoryFluxSource(const Disk& flux)
+FluxSource* FluxSource::createMemoryFluxSource(const Disk& flux)
 {
-    return std::make_unique<MemoryFluxSource>(flux);
+    return new MemoryFluxSource(flux);
 }

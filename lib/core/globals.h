@@ -1,6 +1,7 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
+#include <gc_cpp.h>
 #include <stddef.h>
 #include <functional>
 #include <numeric>

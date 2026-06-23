@@ -97,7 +97,7 @@ public:
     }
 };
 
-std::unique_ptr<Decoder> createCommodore64Decoder(const DecoderProto& config)
+Decoder* createCommodore64Decoder(const DecoderProto& config)
 {
-    return std::unique_ptr<Decoder>(new Commodore64Decoder(config));
+    return new Commodore64Decoder(config);
 }

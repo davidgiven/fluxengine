@@ -34,16 +34,16 @@ TargetPkgConfig = _PkgConfig(G.PKG_CONFIG)
 HostPkgConfig = _PkgConfig(G.HOST_PKG_CONFIG)
 
 
-def _package(self, name, package, fallback, pkgconfig):
+def _package(
+    self, name, package, fallback, extra_ldflags, extra_cflags, pkgconfig
+):
     if pkgconfig.has_package(package):
         print(f"package '{package}' found")
         cflags = pkgconfig.get_property(package, "--cflags")
         ldflags = pkgconfig.get_property(package, "--libs")
 
-        if cflags:
-            self.args["caller_cflags"] = [cflags]
-        if ldflags:
-            self.args["caller_ldflags"] = [ldflags]
+        self.args["caller_cflags"] = extra_cflags + [cflags]
+        self.args["caller_ldflags"] = extra_ldflags + [ldflags]
         self.args["clibrary_deps"] = [self]
         self.args["cheader_deps"] = [self]
         self.traits.update({"clibrary", "cxxlibrary"})
@@ -70,13 +70,17 @@ def _package(self, name, package, fallback, pkgconfig):
 
 
 @Rule
-def package(self, name, package=None, fallback: Target = None):
-    _package(self, name, package, fallback, TargetPkgConfig)
+def package(
+    self, name, package=None, fallback: Target = None, ldflags=[], cflags=[]
+):
+    _package(self, name, package, fallback, ldflags, cflags, TargetPkgConfig)
 
 
 @Rule
-def hostpackage(self, name, package=None, fallback: Target = None):
-    _package(self, name, package, fallback, HostPkgConfig)
+def hostpackage(
+    self, name, package=None, fallback: Target = None, ldflags=[], cflags=[]
+):
+    _package(self, name, package, fallback, ldflags, cflags, HostPkgConfig)
 
 
 def has_package(name):

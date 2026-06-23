@@ -51,8 +51,8 @@ class AmigaFfsFilesystem : public Filesystem
 {
 public:
     AmigaFfsFilesystem(const AmigaFfsProto& config,
-        const std::shared_ptr<const DiskLayout>& diskLayout,
-        std::shared_ptr<SectorInterface> sectors):
+        const DiskLayout* diskLayout,
+        SectorInterface* sectors):
         Filesystem(diskLayout, sectors),
         _config(config)
     {
@@ -289,7 +289,7 @@ private:
                 adfFreeEntry(_entry);
         }
 
-        operator struct Entry *() const
+        operator struct Entry*() const
         {
             return _entry;
         }
@@ -314,7 +314,7 @@ private:
                 adfFreeDirList(_list);
         }
 
-        operator struct List *() const
+        operator struct List*() const
         {
             return _list;
         }
@@ -470,11 +470,9 @@ static BOOL adfIsDevNative(char*)
     return true;
 }
 
-std::unique_ptr<Filesystem> Filesystem::createAmigaFfsFilesystem(
-    const FilesystemProto& config,
-    const std::shared_ptr<const DiskLayout>& diskLayout,
-    std::shared_ptr<SectorInterface> sectors)
+Filesystem* Filesystem::createAmigaFfsFilesystem(const FilesystemProto& config,
+    const DiskLayout* diskLayout,
+    SectorInterface* sectors)
 {
-    return std::make_unique<AmigaFfsFilesystem>(
-        config.amigaffs(), diskLayout, sectors);
+    return new AmigaFfsFilesystem(config.amigaffs(), diskLayout, sectors);
 }

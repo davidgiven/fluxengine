@@ -10,7 +10,7 @@
 class ImageSectorInterface : public SectorInterface
 {
 public:
-    ImageSectorInterface(const std::shared_ptr<const DiskLayout>& diskLayout,
+    ImageSectorInterface(const DiskLayout* diskLayout,
         const std::shared_ptr<ImageReader>& reader,
         const std::shared_ptr<ImageWriter>& writer):
         _diskLayout(diskLayout),
@@ -21,14 +21,12 @@ public:
     }
 
 public:
-    std::shared_ptr<const Sector> get(
-        unsigned track, unsigned side, unsigned sectorId) override
+    const Sector* get(unsigned track, unsigned side, unsigned sectorId) override
     {
         return _image->get(track, side, sectorId);
     }
 
-    std::shared_ptr<Sector> put(
-        unsigned track, unsigned side, unsigned sectorId) override
+    Sector* put(unsigned track, unsigned side, unsigned sectorId) override
     {
         _changed = true;
         return _image->put(track, side, sectorId);
@@ -56,24 +54,24 @@ public:
             _image = _reader->readImage();
         else
         {
-            _image = std::make_shared<Image>();
+            _image = new Image();
             _image->addMissingSectors(*_diskLayout);
         }
         _changed = false;
     }
 
 private:
-    std::shared_ptr<Image> _image;
-    std::shared_ptr<const DiskLayout> _diskLayout;
+    Image* _image;
+    const DiskLayout* _diskLayout;
     std::shared_ptr<ImageReader> _reader;
     std::shared_ptr<ImageWriter> _writer;
     bool _changed = false;
 };
 
-std::unique_ptr<SectorInterface> SectorInterface::createImageSectorInterface(
-    const std::shared_ptr<const DiskLayout>& diskLayout,
+SectorInterface* SectorInterface::createImageSectorInterface(
+    const DiskLayout* diskLayout,
     std::shared_ptr<ImageReader> reader,
     std::shared_ptr<ImageWriter> writer)
 {
-    return std::make_unique<ImageSectorInterface>(diskLayout, reader, writer);
+    return new ImageSectorInterface(diskLayout, reader, writer);
 }

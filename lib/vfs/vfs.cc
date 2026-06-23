@@ -23,7 +23,8 @@ Path::Path(const std::vector<std::string> other):
 {
 }
 
-Path::Path(const std::vector<std::string>::const_iterator& begin, const std::vector<std::string>::const_iterator& end):
+Path::Path(const std::vector<std::string>::const_iterator& begin,
+    const std::vector<std::string>::const_iterator& end):
     std::vector<std::string>(begin, end)
 {
 }
@@ -156,18 +157,16 @@ void Filesystem::discardChanges()
     _sectors->discardChanges();
 }
 
-Filesystem::Filesystem(const std::shared_ptr<const DiskLayout>& diskLayout,
-    std::shared_ptr<SectorInterface> sectors):
+Filesystem::Filesystem(const DiskLayout* diskLayout, SectorInterface* sectors):
     _diskLayout(diskLayout),
     _blockCount(diskLayout->logicalSectorLocationsInFilesystemOrder.size()),
     _sectors(sectors)
 {
 }
 
-std::unique_ptr<Filesystem> Filesystem::createFilesystem(
-    const FilesystemProto& config,
-    const std::shared_ptr<const DiskLayout>& diskLayout,
-    std::shared_ptr<SectorInterface> image)
+Filesystem* Filesystem::createFilesystem(const FilesystemProto& config,
+    const DiskLayout* diskLayout,
+    SectorInterface* image)
 {
     switch (config.type())
     {
@@ -227,20 +226,20 @@ std::unique_ptr<Filesystem> Filesystem::createFilesystem(
 
         default:
             error("no filesystem configured");
-            return std::unique_ptr<Filesystem>();
+            return nullptr;
     }
 }
 
-std::unique_ptr<Filesystem> Filesystem::createFilesystemFromConfig()
+Filesystem* Filesystem::createFilesystemFromConfig()
 {
-    std::shared_ptr<SectorInterface> sectorInterface;
+    SectorInterface* sectorInterface;
     auto diskLayout = createDiskLayout(globalConfig());
     if (globalConfig().hasFluxSource() || globalConfig().hasFluxSink())
     {
-        std::shared_ptr<FluxSource> fluxSource;
-        std::shared_ptr<Decoder> decoder;
-        std::shared_ptr<FluxSinkFactory> fluxSinkFactory;
-        std::shared_ptr<Encoder> encoder;
+        FluxSource* fluxSource = nullptr;
+        Decoder* decoder = nullptr;
+        FluxSinkFactory* fluxSinkFactory = nullptr;
+        Encoder* encoder = nullptr;
         if (globalConfig().hasFluxSource())
         {
             fluxSource = FluxSource::create(globalConfig());

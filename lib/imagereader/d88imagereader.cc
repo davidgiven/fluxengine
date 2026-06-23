@@ -18,7 +18,7 @@ class D88ImageReader : public ImageReader
 public:
     D88ImageReader(const ImageReaderProto& config): ImageReader(config) {}
 
-    std::unique_ptr<Image> readImage() override
+    Image* readImage() override
     {
         std::ifstream inputFile(
             _config.filename(), std::ios::in | std::ios::binary);
@@ -71,7 +71,7 @@ public:
         }
 
         auto layout = _extraConfig.mutable_layout();
-        std::unique_ptr<Image> image(new Image);
+        Image* image(new Image);
         for (int track = 0; track < trackTableSize / 4; track++)
         {
             int trackOffset = trackTableReader.seek(track * 4).read_le32();

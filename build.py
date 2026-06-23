@@ -16,6 +16,7 @@ toolchain.Toolchain.EXE = "$(EXT)"
 package(name="protobuf_lib", package="protobuf")
 package(name="z_lib", package="zlib")
 package(name="sqlite3_lib", package="sqlite3")
+package(name="gc_lib", package="bdw-gc", ldflags=["-lgccpp"])
 
 clibrary(name="protocol", hdrs={"protocol.h": "./protocol.h"})
 

@@ -1,4 +1,3 @@
 #pragma once
 
-extern std::unique_ptr<Decoder> createRolandD20Decoder(
-    const DecoderProto& config);
+extern Decoder* createRolandD20Decoder(const DecoderProto& config);

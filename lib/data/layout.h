@@ -62,7 +62,7 @@ struct PhysicalTrackLayout
     unsigned groupOffset;
 
     /* The logical track that this track is part of. */
-    std::shared_ptr<const LogicalTrackLayout> logicalTrackLayout;
+    const LogicalTrackLayout* logicalTrackLayout;
 };
 
 class DiskLayout
@@ -95,10 +95,8 @@ public:
 
     /* Physical and logical layouts by location. */
 
-    std::map<CylinderHead, std::shared_ptr<const PhysicalTrackLayout>>
-        layoutByPhysicalLocation;
-    std::map<CylinderHead, std::shared_ptr<const LogicalTrackLayout>>
-        layoutByLogicalLocation;
+    std::map<CylinderHead, const PhysicalTrackLayout*> layoutByPhysicalLocation;
+    std::map<CylinderHead, const LogicalTrackLayout*> layoutByLogicalLocation;
 
     /* Ordered lists of physical and logical locations. */
 
@@ -170,10 +168,9 @@ public:
     LayoutBounds getLogicalBounds() const;
 };
 
-static std::shared_ptr<DiskLayout> createDiskLayout(
-    const ConfigProto& config = globalConfig())
+static DiskLayout* createDiskLayout(const ConfigProto& config = globalConfig())
 {
-    return std::make_shared<DiskLayout>(config);
+    return new DiskLayout(config);
 }
 
 class TrackInfo

@@ -18,7 +18,7 @@ class NFDImageReader : public ImageReader
 public:
     NFDImageReader(const ImageReaderProto& config): ImageReader(config) {}
 
-    std::unique_ptr<Image> readImage() override
+    Image* readImage() override
     {
         std::ifstream inputFile(
             _config.filename(), std::ios::in | std::ios::binary);
@@ -60,7 +60,7 @@ public:
         _extraConfig.mutable_drive()->set_high_density(true);
         _extraConfig.mutable_layout()->set_format_type(FORMATTYPE_80TRACK);
 
-        std::unique_ptr<Image> image(new Image);
+        Image* image(new Image);
         for (int track = 0; track < 163; track++)
         {
             auto trackdata = ibm->add_trackdata();

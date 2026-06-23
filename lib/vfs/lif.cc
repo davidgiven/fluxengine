@@ -135,8 +135,8 @@ class LifFilesystem : public Filesystem
 
 public:
     LifFilesystem(const LifProto& config,
-        const std::shared_ptr<const DiskLayout>& diskLayout,
-        std::shared_ptr<SectorInterface> sectors):
+        const DiskLayout* diskLayout,
+        SectorInterface* sectors):
         Filesystem(diskLayout, sectors),
         _config(config)
     {
@@ -288,10 +288,9 @@ private:
     std::vector<std::shared_ptr<LifDirent>> _dirents;
 };
 
-std::unique_ptr<Filesystem> Filesystem::createLifFilesystem(
-    const FilesystemProto& config,
-    const std::shared_ptr<const DiskLayout>& diskLayout,
-    std::shared_ptr<SectorInterface> sectors)
+Filesystem* Filesystem::createLifFilesystem(const FilesystemProto& config,
+    const DiskLayout* diskLayout,
+    SectorInterface* sectors)
 {
-    return std::make_unique<LifFilesystem>(config.lif(), diskLayout, sectors);
+    return new LifFilesystem(config.lif(), diskLayout, sectors);
 }

@@ -17,10 +17,9 @@ public:
     virtual ~SectorInterface() {}
 
 public:
-    virtual std::shared_ptr<const Sector> get(
+    virtual const Sector* get(
         unsigned track, unsigned side, unsigned sectorId) = 0;
-    virtual std::shared_ptr<Sector> put(
-        unsigned track, unsigned side, unsigned sectorId) = 0;
+    virtual Sector* put(unsigned track, unsigned side, unsigned sectorId) = 0;
 
     virtual bool isReadOnly()
     {
@@ -37,18 +36,17 @@ public:
     virtual void discardChanges() {}
 
 public:
-    static std::unique_ptr<SectorInterface> createMemorySectorInterface(
-        std::shared_ptr<Image> image);
-    static std::unique_ptr<SectorInterface> createImageSectorInterface(
-        const std::shared_ptr<const DiskLayout>& diskLayout,
+    static SectorInterface* createMemorySectorInterface(Image* image);
+    static SectorInterface* createImageSectorInterface(
+        const DiskLayout* diskLayout,
         std::shared_ptr<ImageReader> reader,
         std::shared_ptr<ImageWriter> writer);
-    static std::unique_ptr<SectorInterface> createFluxSectorInterface(
-        const std::shared_ptr<const DiskLayout>& diskLayout,
-        std::shared_ptr<FluxSource> fluxSource,
-        std::shared_ptr<FluxSinkFactory> fluxSinkFactory,
-        std::shared_ptr<Encoder> encoder,
-        std::shared_ptr<Decoder> decoder);
+    static SectorInterface* createFluxSectorInterface(
+        const DiskLayout* diskLayout,
+        FluxSource* fluxSource,
+        FluxSinkFactory* fluxSinkFactory,
+        Encoder* encoder,
+        Decoder* decoder);
 };
 
 #endif

@@ -290,7 +290,7 @@ private:
         _checksumType; /* -1 = auto, 1 = Micropolis, 2=MZOS */
 };
 
-std::unique_ptr<Decoder> createMicropolisDecoder(const DecoderProto& config)
+Decoder* createMicropolisDecoder(const DecoderProto& config)
 {
-    return std::unique_ptr<Decoder>(new MicropolisDecoder(config));
+    return new MicropolisDecoder(config);
 }

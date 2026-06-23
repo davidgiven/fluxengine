@@ -14,7 +14,7 @@ class D64ImageReader : public ImageReader
 public:
     D64ImageReader(const ImageReaderProto& config): ImageReader(config) {}
 
-    std::unique_ptr<Image> readImage() override
+    Image* readImage() override
     {
         std::ifstream inputFile(
             _config.filename(), std::ios::in | std::ios::binary);
@@ -52,7 +52,7 @@ public:
             return 17;
         };
 
-        std::unique_ptr<Image> image(new Image);
+        Image* image(new Image);
         for (int track = 0; track < 40; track++)
         {
             int numSectors = sectorsPerTrack(track);

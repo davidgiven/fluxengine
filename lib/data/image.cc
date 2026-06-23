@@ -6,7 +6,7 @@
 
 Image::Image() {}
 
-Image::Image(const std::vector<std::shared_ptr<const Sector>>& sectors)
+Image::Image(const std::vector<const Sector*>& sectors)
 {
     for (auto& sector : sectors)
         _sectors[{sector->logicalCylinder,
@@ -32,7 +32,7 @@ bool Image::contains(const LogicalLocation& location) const
     return _sectors.find(location) != _sectors.end();
 }
 
-std::shared_ptr<const Sector> Image::get(const LogicalLocation& location) const
+const Sector* Image::get(const LogicalLocation& location) const
 {
     auto i = _sectors.find(location);
     if (i == _sectors.end())
@@ -40,9 +40,9 @@ std::shared_ptr<const Sector> Image::get(const LogicalLocation& location) const
     return i->second;
 }
 
-std::shared_ptr<Sector> Image::put(const LogicalLocation& location)
+Sector* Image::put(const LogicalLocation& location)
 {
-    auto sector = std::make_shared<Sector>(location);
+    auto sector = new Sector(location);
     _sectors[location] = sector;
     return sector;
 }
@@ -59,7 +59,7 @@ void Image::addMissingSectors(const DiskLayout& diskLayout, bool populated)
         {
             auto& ltl = diskLayout.layoutByLogicalLocation.at(
                 {location.logicalCylinder, location.logicalHead});
-            auto sector = std::make_shared<Sector>(location);
+            auto sector = new Sector(location);
 
             if (populated)
                 sector->data = Bytes(ltl->sectorSize);

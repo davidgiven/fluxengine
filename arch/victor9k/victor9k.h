@@ -18,9 +18,7 @@ class DecoderProto;
 
 #define VICTOR9K_SECTOR_LENGTH 512
 
-extern std::unique_ptr<Decoder> createVictor9kDecoder(
-    const DecoderProto& config);
-extern std::unique_ptr<Encoder> createVictor9kEncoder(
-    const EncoderProto& config);
+extern Decoder* createVictor9kDecoder(const DecoderProto& config);
+extern Encoder* createVictor9kEncoder(const EncoderProto& config);
 
 #endif

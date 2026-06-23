@@ -35,8 +35,8 @@ private:
     const TestPatternFluxSourceProto& _config;
 };
 
-std::unique_ptr<FluxSource> FluxSource::createTestPatternFluxSource(
+FluxSource* FluxSource::createTestPatternFluxSource(
     const TestPatternFluxSourceProto& config)
 {
-    return std::make_unique<TestPatternFluxSource>(config);
+    return new TestPatternFluxSource(config);
 }

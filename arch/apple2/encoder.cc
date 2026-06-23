@@ -36,8 +36,8 @@ private:
     const Apple2EncoderProto& _config;
 
 public:
-    std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout& ltl,
-        const std::vector<std::shared_ptr<const Sector>>& sectors,
+    std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout* ltl,
+        const std::vector<const Sector*>& sectors,
         const Image& image) override
     {
         int bitsPerRevolution =
@@ -186,7 +186,7 @@ private:
     }
 };
 
-std::unique_ptr<Encoder> createApple2Encoder(const EncoderProto& config)
+Encoder* createApple2Encoder(const EncoderProto& config)
 {
-    return std::unique_ptr<Encoder>(new Apple2Encoder(config));
+    return new Apple2Encoder(config);
 }

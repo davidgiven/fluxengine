@@ -192,7 +192,7 @@ DiskLayout::DiskLayout(const ConfigProto& config)
         for (unsigned logicalHead = 0; logicalHead < numLogicalHeads;
             logicalHead++)
         {
-            auto ltl = std::make_shared<LogicalTrackLayout>();
+            auto ltl = new LogicalTrackLayout();
             CylinderHead ch(logicalCylinder, logicalHead);
             layoutByLogicalLocation[ch] = ltl;
             logicalLocations.push_back(ch);
@@ -248,7 +248,7 @@ DiskLayout::DiskLayout(const ConfigProto& config)
             physicalHead <= maxPhysicalHead;
             physicalHead++)
         {
-            auto ptl = std::make_shared<PhysicalTrackLayout>();
+            auto ptl = new PhysicalTrackLayout();
             CylinderHead ch(physicalCylinder, physicalHead);
             layoutByPhysicalLocation[ch] = ptl;
             physicalLocations.push_back(ch);

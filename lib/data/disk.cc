@@ -19,14 +19,11 @@ namespace
     inline constexpr pair_to_range_t pair_to_range{};
 }
 
-Disk::Disk(): image(std::make_shared<Image>()) {}
+Disk::Disk(): image(nullptr) {}
 
-Disk::Disk(
-    const std::shared_ptr<const Image>& image, const DiskLayout& diskLayout):
-    image(image)
+Disk::Disk(const Image* image, const DiskLayout& diskLayout): image(image)
 {
-    std::multimap<CylinderHead, std::shared_ptr<const Sector>>
-        sectorsGroupedByTrack;
+    std::multimap<CylinderHead, const Sector*> sectorsGroupedByTrack;
     for (const auto& sector : *image)
         sectorsGroupedByTrack.insert(
             std::make_pair(sector->physicalLocation.value(), sector));
@@ -39,7 +36,7 @@ Disk::Disk(
             diskLayout.layoutByPhysicalLocation.at(physicalLocation);
         const auto& ltl = ptl->logicalTrackLayout;
 
-        auto decodedTrack = std::make_shared<Track>();
+        auto decodedTrack = new Track();
         decodedTrack->ltl = ltl;
         decodedTrack->ptl = ptl;
         tracksByPhysicalLocation.insert(

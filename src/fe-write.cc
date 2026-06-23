@@ -53,15 +53,15 @@ int mainWrite(int argc, const char* argv[])
     flags.parseFlagsWithConfigFiles(argc, argv, formats);
 
     auto reader = ImageReader::create(globalConfig());
-    std::shared_ptr<Image> image = reader->readImage();
+    Image* image = reader->readImage();
     globalConfig().overrides()->MergeFrom(reader->getExtraConfig());
 
     auto diskLayout = createDiskLayout();
     auto encoder = Arch::createEncoder(globalConfig());
     auto fluxSinkFactory = FluxSinkFactory::create(globalConfig());
 
-    std::shared_ptr<Decoder> decoder;
-    std::shared_ptr<FluxSource> verificationFluxSource;
+    Decoder* decoder = nullptr;
+    FluxSource* verificationFluxSource = nullptr;
     if (globalConfig().hasDecoder() && fluxSinkFactory->isHardware() && verify)
     {
         decoder = Arch::createDecoder(globalConfig());
@@ -71,10 +71,10 @@ int mainWrite(int argc, const char* argv[])
 
     writeDiskCommand(*diskLayout,
         *image,
-        *encoder,
-        *fluxSinkFactory,
-        decoder.get(),
-        verificationFluxSource.get());
+        encoder,
+        fluxSinkFactory,
+        decoder,
+        verificationFluxSource);
 
     return 0;
 }

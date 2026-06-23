@@ -13,7 +13,7 @@
 
 #define APPLE2_SECTORS 16
 
-extern std::unique_ptr<Decoder> createApple2Decoder(const DecoderProto& config);
-extern std::unique_ptr<Encoder> createApple2Encoder(const EncoderProto& config);
+extern Decoder* createApple2Decoder(const DecoderProto& config);
+extern Encoder* createApple2Encoder(const EncoderProto& config);
 
 #endif

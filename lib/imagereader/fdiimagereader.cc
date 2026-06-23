@@ -19,7 +19,7 @@ class FdiImageReader : public ImageReader
 public:
     FdiImageReader(const ImageReaderProto& config): ImageReader(config) {}
 
-    std::unique_ptr<Image> readImage() override
+    Image* readImage() override
     {
         std::ifstream inputFile(
             _config.filename(), std::ios::in | std::ios::binary);
@@ -44,7 +44,7 @@ public:
 
         inputFile.seekg(headerSize);
 
-        std::unique_ptr<Image> image(new Image);
+        Image* image(new Image);
         int trackCount = 0;
         for (int track = 0; track < tracks; track++)
         {

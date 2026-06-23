@@ -22,7 +22,7 @@ DiskLayout::LayoutBounds PhysicalView::getBounds()
     return Datastore::getDiskLayout()->getPhysicalBounds();
 }
 
-std::shared_ptr<const Sector> PhysicalView::getSector(
+const Sector* PhysicalView::getSector(
     unsigned physicalCylinder, unsigned physicalHead, unsigned sectorId)
 {
     const auto& disk = Datastore::getDisk();

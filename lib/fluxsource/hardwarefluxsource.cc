@@ -78,8 +78,8 @@ private:
     bool _measured;
 };
 
-std::unique_ptr<FluxSource> FluxSource::createHardwareFluxSource(
+FluxSource* FluxSource::createHardwareFluxSource(
     const HardwareFluxSourceProto& config)
 {
-    return std::unique_ptr<FluxSource>(new HardwareFluxSource(config));
+    return new HardwareFluxSource(config);
 }

@@ -21,7 +21,7 @@ namespace
             {
                 _fluxSource = FluxSource::create(globalConfig());
             }
-            return _fluxSource.get();
+            return _fluxSource->get();
         }
 
         FluxSource* GetVerificationFluxSource() override
@@ -31,7 +31,7 @@ namespace
                 _verificationFluxSource = FluxSource::create(
                     globalConfig().getVerificationFluxSourceProto());
             }
-            return _verificationFluxSource.get();
+            return _verificationfluxSource->get();
         }
 
         FluxSinkFactory* GetFluxSink() override
@@ -80,13 +80,13 @@ namespace
         }
 
     private:
-        std::unique_ptr<FluxSource> _fluxSource;
-        std::unique_ptr<FluxSource> _verificationFluxSource;
-        std::unique_ptr<FluxSinkFactory> _fluxSink;
+        FluxSource* _fluxSource;
+        FluxSource* _verificationFluxSource;
+        FluxSinkFactory* _fluxSink;
         std::unique_ptr<ImageReader> _imageReader;
         std::unique_ptr<ImageWriter> _imageWriter;
-        std::unique_ptr<Encoder> _encoder;
-        std::unique_ptr<Decoder> _decoder;
+        Encoder* _encoder;
+        Decoder* _decoder;
     };
 }
 

@@ -26,12 +26,12 @@ public:
 
 private:
     void UpdateScale();
-    void ShowSectorMenu(std::shared_ptr<const Sector> sector);
+    void ShowSectorMenu(const Sector* sector);
     void ShowRecordMenu(std::shared_ptr<const TrackInfo>& layout,
         std::shared_ptr<const Record> record);
-    void DisplayDecodedData(std::shared_ptr<const Sector> sector);
-    void DisplaySectorSummary(std::shared_ptr<const Sector> sector);
-    void DisplayRawData(std::shared_ptr<const Sector> sector);
+    void DisplayDecodedData(const Sector* sector);
+    void DisplaySectorSummary(const Sector* sector);
+    void DisplayRawData(const Sector* sector);
     void DisplayRawData(std::shared_ptr<const TrackInfo>& layout,
         std::shared_ptr<const Record> record);
 

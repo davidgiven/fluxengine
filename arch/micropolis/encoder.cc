@@ -8,7 +8,7 @@
 
 static void write_sector(std::vector<bool>& bits,
     unsigned& cursor,
-    const std::shared_ptr<const Sector>& sector,
+    const Sector* sector,
     MicropolisEncoderProto::EccType eccType)
 {
     if ((sector->data.size() != 256) &&
@@ -87,8 +87,8 @@ public:
     {
     }
 
-    std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout& ltl,
-        const std::vector<std::shared_ptr<const Sector>>& sectors,
+    std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout* ltl,
+        const std::vector<const Sector*>& sectors,
         const Image& image) override
     {
         int bitsPerRevolution =
@@ -130,7 +130,7 @@ private:
     const MicropolisEncoderProto& _config;
 };
 
-std::unique_ptr<Encoder> createMicropolisEncoder(const EncoderProto& config)
+Encoder* createMicropolisEncoder(const EncoderProto& config)
 {
-    return std::unique_ptr<Encoder>(new MicropolisEncoder(config));
+    return new MicropolisEncoder(config);
 }

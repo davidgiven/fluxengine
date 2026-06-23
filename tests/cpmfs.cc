@@ -16,8 +16,7 @@ static Bytes blank_dirent = Bytes{0xe5} * 32;
 
 /* The layout must use one cylinder per CP/M block (eight sectors). */
 
-static std::shared_ptr<const DiskLayout> diskLayout =
-    std::make_shared<DiskLayout>(10, 1, 8, 256);
+static const DiskLayout* diskLayout = new DiskLayout(10, 1, 8, 256);
 
 namespace
 {
@@ -29,7 +28,7 @@ namespace
             _image.addMissingSectors(*diskLayout, true);
         }
 
-        std::shared_ptr<const Sector> get(
+        const Sector* get(
             unsigned track, unsigned side, unsigned sectorId) override
         {
             auto s = _image.get(track, side, sectorId);
@@ -38,8 +37,7 @@ namespace
             return s;
         }
 
-        std::shared_ptr<Sector> put(
-            unsigned track, unsigned side, unsigned sectorId) override
+        Sector* put(unsigned track, unsigned side, unsigned sectorId) override
         {
             return _image.put(track, side, sectorId);
         }
@@ -110,15 +108,13 @@ static Bytes createDirent(const std::string& filename,
     return dirent;
 }
 
-static void setBlock(
-    const std::shared_ptr<SectorInterface>& sectors, int block, Bytes data)
+static void setBlock(SectorInterface* sectors, int block, Bytes data)
 {
     for (int i = 0; i < 8; i++)
         sectors->put(block, 0, i)->data = data.slice(i * 256, 256);
 }
 
-static Bytes getBlock(
-    const std::shared_ptr<SectorInterface>& sectors, int block, int length)
+static Bytes getBlock(SectorInterface* sectors, int block, int length)
 {
     Bytes bytes;
     ByteWriter bw(bytes);
@@ -134,7 +130,7 @@ static Bytes getBlock(
 
 static void testPartialExtent()
 {
-    auto sectors = std::make_shared<TestSectorInterface>();
+    auto sectors = new TestSectorInterface();
     auto fs = Filesystem::createCpmFsFilesystem(
         globalConfig()->filesystem(), diskLayout, sectors);
 
@@ -154,7 +150,7 @@ static void testPartialExtent()
 
 static void testLogicalExtents()
 {
-    auto sectors = std::make_shared<TestSectorInterface>();
+    auto sectors = new TestSectorInterface();
     auto fs = Filesystem::createCpmFsFilesystem(
         globalConfig()->filesystem(), diskLayout, sectors);
 
@@ -178,7 +174,7 @@ static void testLogicalExtents()
 
 static void testBitmap()
 {
-    auto sectors = std::make_shared<TestSectorInterface>();
+    auto sectors = new TestSectorInterface();
     auto fs = Filesystem::createCpmFsFilesystem(
         globalConfig()->filesystem(), diskLayout, sectors);
 
@@ -187,9 +183,9 @@ static void testBitmap()
         createDirent("FILE", 1, 128, {1, 0, 0, 0, 0, 0, 0, 0, 2}) +
             createDirent("FILE", 2, 128, {4}) + (blank_dirent * 62));
 
-    dynamic_cast<HasMount*>(fs.get())->mount();
+    dynamic_cast<HasMount*>(fs)->mount();
     std::vector<bool> bitmap =
-        dynamic_cast<HasBitmap*>(fs.get())->getBitmapForDebugging();
+        dynamic_cast<HasBitmap*>(fs)->getBitmapForDebugging();
     AssertThat(bitmap,
         Equals(std::vector<bool>{
             1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}));

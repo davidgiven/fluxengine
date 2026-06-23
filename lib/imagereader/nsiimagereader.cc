@@ -16,7 +16,7 @@ class NsiImageReader : public ImageReader
 public:
     NsiImageReader(const ImageReaderProto& config): ImageReader(config) {}
 
-    std::unique_ptr<Image> readImage() override
+    Image* readImage() override
     {
         std::ifstream inputFile(
             _config.filename(), std::ios::in | std::ios::binary);
@@ -66,7 +66,7 @@ public:
             sectorSize,
             numCylinders * numHeads * trackSize / 1024);
 
-        std::unique_ptr<Image> image(new Image);
+        Image* image(new Image);
         unsigned sectorFileOffset;
 
         for (unsigned head = 0; head < numHeads; head++)

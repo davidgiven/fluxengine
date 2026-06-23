@@ -10,65 +10,29 @@
 #include <sstream>
 #include <locale>
 
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const BeginSpeedOperationLogMessage> m)
-{
-}
+void renderLogMessage(LogRenderer& r, const BeginSpeedOperationLogMessage* m) {}
 
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const EndSpeedOperationLogMessage> m)
-{
-}
+void renderLogMessage(LogRenderer& r, const EndSpeedOperationLogMessage* m) {}
 
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const BeginWriteOperationLogMessage> m)
-{
-}
+void renderLogMessage(LogRenderer& r, const BeginWriteOperationLogMessage* m) {}
 
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const EndWriteOperationLogMessage> m)
-{
-}
+void renderLogMessage(LogRenderer& r, const EndWriteOperationLogMessage* m) {}
 
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const BeginReadOperationLogMessage> m)
-{
-}
+void renderLogMessage(LogRenderer& r, const BeginReadOperationLogMessage* m) {}
 
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const EndReadOperationLogMessage> m)
-{
-}
+void renderLogMessage(LogRenderer& r, const EndReadOperationLogMessage* m) {}
 
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const TrackReadLogMessage> m)
-{
-}
+void renderLogMessage(LogRenderer& r, const TrackReadLogMessage* m) {}
 
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const DiskReadLogMessage> m)
-{
-}
+void renderLogMessage(LogRenderer& r, const DiskReadLogMessage* m) {}
 
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const BeginOperationLogMessage> m)
-{
-}
+void renderLogMessage(LogRenderer& r, const BeginOperationLogMessage* m) {}
 
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const EndOperationLogMessage> m)
-{
-}
+void renderLogMessage(LogRenderer& r, const EndOperationLogMessage* m) {}
 
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const OperationProgressLogMessage> m)
-{
-}
+void renderLogMessage(LogRenderer& r, const OperationProgressLogMessage* m) {}
 
-void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const OptionLogMessage> m)
-{
-}
+void renderLogMessage(LogRenderer& r, const OptionLogMessage* m) {}
 
 const std::string protoname = STRINGIFY(PROTO);
 

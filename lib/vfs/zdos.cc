@@ -183,8 +183,8 @@ class ZDosFilesystem : public Filesystem
 
 public:
     ZDosFilesystem(const ZDosProto& config,
-        const std::shared_ptr<const DiskLayout>& diskLayout,
-        std::shared_ptr<SectorInterface> sectors):
+        const DiskLayout* diskLayout,
+        SectorInterface* sectors):
         Filesystem(diskLayout, sectors),
         _config(config)
     {
@@ -320,10 +320,9 @@ private:
     std::vector<std::shared_ptr<ZDosDirent>> _dirents;
 };
 
-std::unique_ptr<Filesystem> Filesystem::createZDosFilesystem(
-    const FilesystemProto& config,
-    const std::shared_ptr<const DiskLayout>& diskLayout,
-    std::shared_ptr<SectorInterface> sectors)
+Filesystem* Filesystem::createZDosFilesystem(const FilesystemProto& config,
+    const DiskLayout* diskLayout,
+    SectorInterface* sectors)
 {
-    return std::make_unique<ZDosFilesystem>(config.zdos(), diskLayout, sectors);
+    return new ZDosFilesystem(config.zdos(), diskLayout, sectors);
 }

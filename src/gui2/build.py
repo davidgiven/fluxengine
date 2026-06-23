@@ -687,6 +687,7 @@ plugin(
     hdrs={},
     romfsdir="src/gui2/rsrc",
     deps=[
+        "+gc_lib",
         "+protocol",
         "+z_lib",
         ".+fonts-plugin",
@@ -714,13 +715,13 @@ cxxprogram(
     + (["-ldl"] if config.unix else [])
     + (["-ldwmapi", "-lnetapi32"] if config.windows else []),
     deps=[
-        "dep+patternlanguage_lib",
-        "dep+fmt_lib",
         ".+builtin-plugin",
-        ".+fonts-plugin",
-        ".+ui-plugin",
-        ".+gui-plugin",
         ".+fluxengine-plugin",
+        ".+fonts-plugin",
+        ".+gui-plugin",
+        ".+ui-plugin",
+        "dep+fmt_lib",
+        "dep+patternlanguage_lib",
     ]
     # Windows needs this, for some reason.
     + (config.windows and [package(name="tre_lib", package="tre")] or []),

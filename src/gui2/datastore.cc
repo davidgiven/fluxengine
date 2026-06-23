@@ -36,7 +36,7 @@
 using hex::operator""_lang;
 
 static std::shared_ptr<const Disk> disk = std::make_shared<Disk>();
-static std::shared_ptr<Image> wtImage;
+static Image* wtImage;
 
 static std::deque<std::function<void()>> pendingTasks;
 static std::mutex pendingTasksMutex;
@@ -49,7 +49,7 @@ static std::atomic<bool> failed;
 
 static bool formattingSupported;
 static std::map<std::string, Datastore::Device> devices;
-static std::shared_ptr<const DiskLayout> diskLayout;
+static const DiskLayout* diskLayout;
 
 static void wtRebuildConfiguration(bool useCustom);
 
@@ -212,7 +212,7 @@ void Datastore::init()
         []
         {
             Logger::setLogger(
-                [](const AnyLogMessage& message)
+                [](const AnyLogMessage* message)
                 {
                     hex::TaskManager::doLater(
                         [=]
@@ -294,7 +294,7 @@ const std::map<std::string, Datastore::Device>& Datastore::getDevices()
     return devices;
 }
 
-std::shared_ptr<const DiskLayout> Datastore::getDiskLayout()
+const DiskLayout* Datastore::getDiskLayout()
 {
     return diskLayout;
 }
@@ -432,7 +432,7 @@ void wtRebuildConfiguration(bool withCustom = false)
         });
 }
 
-void Datastore::onLogMessage(const AnyLogMessage& message)
+void Datastore::onLogMessage(const AnyLogMessage* message)
 {
     LogView::logMessage(message);
     std::visit(
@@ -443,48 +443,48 @@ void Datastore::onLogMessage(const AnyLogMessage& message)
             },
 
             /* We terminated due to the stop button. */
-            [&](std::shared_ptr<const EmergencyStopMessage> m)
+            [&](const EmergencyStopMessage* m)
             {
             },
 
             /* A fatal error. */
-            [&](std::shared_ptr<const ErrorLogMessage> m)
+            [&](const ErrorLogMessage* m)
             {
                 hex::ui::ToastError::open(m->message);
             },
 
             /* Indicates that we're starting a write operation. */
-            [&](std::shared_ptr<const BeginWriteOperationLogMessage> m)
+            [&](const BeginWriteOperationLogMessage* m)
             {
                 Events::DiskActivityNotification::post(
                     DiskActivityType::Write, m->track, m->head);
             },
 
-            [&](std::shared_ptr<const EndWriteOperationLogMessage> m)
+            [&](const EndWriteOperationLogMessage* m)
             {
                 Events::DiskActivityNotification::post(
                     DiskActivityType::None, 0, 0);
             },
 
             /* Indicates that we're starting a read operation. */
-            [&](std::shared_ptr<const BeginReadOperationLogMessage> m)
+            [&](const BeginReadOperationLogMessage* m)
             {
                 Events::DiskActivityNotification::post(
                     DiskActivityType::Read, m->track, m->head);
             },
 
-            [&](std::shared_ptr<const EndReadOperationLogMessage> m)
+            [&](const EndReadOperationLogMessage* m)
             {
                 Events::DiskActivityNotification::post(
                     DiskActivityType::None, 0, 0);
             },
 
-            [&](std::shared_ptr<const TrackReadLogMessage> m)
+            [&](const TrackReadLogMessage* m)
             {
                 // _imagerPanel->SetVisualiserTrackData(m->track);
             },
 
-            [&](std::shared_ptr<const DiskReadLogMessage> m)
+            [&](const DiskReadLogMessage* m)
             {
                 /* This is where data gets from the worker thread to the GUI.
                  * The disk here is a copy of the one being worked on, and
@@ -494,27 +494,27 @@ void Datastore::onLogMessage(const AnyLogMessage& message)
             },
 
             /* Large-scale operation start. */
-            [&](std::shared_ptr<const BeginOperationLogMessage> m)
+            [&](const BeginOperationLogMessage* m)
             {
                 // _statusBar->SetLeftLabel(m->message);
                 // _statusBar->ShowProgressBar();
             },
 
             /* Large-scale operation end. */
-            [&](std::shared_ptr<const EndOperationLogMessage> m)
+            [&](const EndOperationLogMessage* m)
             {
                 // _statusBar->SetLeftLabel(m->message);
                 // _statusBar->HideProgressBar();
             },
 
             /* Large-scale operation progress. */
-            [&](std::shared_ptr<const OperationProgressLogMessage> m)
+            [&](const OperationProgressLogMessage* m)
             {
                 // _statusBar->SetProgress(m->progress);
             },
 
         },
-        message);
+        *message);
 }
 
 void Datastore::beginRead(bool rereadBadSectors)
@@ -534,16 +534,17 @@ void Datastore::beginRead(bool rereadBadSectors)
                     wtClearDiskData();
 
                 std::shared_ptr<Disk> disk;
-                wtRunSynchronouslyOnUiThread((std::function<void()>)[&] {
-                    if (::disk)
-                        disk = std::make_shared<Disk>(*::disk);
-                    else
-                        disk = std::make_shared<Disk>();
-                });
+                wtRunSynchronouslyOnUiThread((std::function<void()>)[&]
+                    {
+                        if (::disk)
+                            disk = std::make_shared<Disk>(*::disk);
+                        else
+                            disk = std::make_shared<Disk>();
+                    });
                 auto fluxSource = FluxSource::create(globalConfig());
                 auto decoder = Arch::createDecoder(globalConfig());
 
-                readDiskCommand(*diskLayout, *fluxSource, *decoder, *disk);
+                readDiskCommand(*diskLayout, fluxSource, decoder, *disk);
             }
             catch (...)
             {
@@ -570,8 +571,8 @@ void Datastore::beginWrite()
 
                 auto fluxSinkFactory = FluxSinkFactory::create(globalConfig());
                 auto encoder = Arch::createEncoder(globalConfig());
-                std::shared_ptr<Decoder> decoder;
-                std::shared_ptr<FluxSource> verificationFluxSource;
+                Decoder* decoder;
+                FluxSource* verificationFluxSource;
                 if (globalConfig().hasDecoder() &&
                     fluxSinkFactory->isHardware())
                 {
@@ -585,19 +586,19 @@ void Datastore::beginWrite()
                 {
                     {
                         bool result;
-                        wtRunSynchronouslyOnUiThread((
-                            std::function<void()>)[&] {
-                            hex::ui::PopupQuestion::open(
-                                "fluxengine.messages.writingFluxToFile"_lang,
-                                [&]
-                                {
-                                    result = true;
-                                },
-                                [&]
-                                {
-                                    result = false;
-                                });
-                        });
+                        wtRunSynchronouslyOnUiThread((std::function<void()>)[&]
+                            {
+                                hex::ui::PopupQuestion::open(
+                                    "fluxengine.messages.writingFluxToFile"_lang,
+                                    [&]
+                                    {
+                                        result = true;
+                                    },
+                                    [&]
+                                    {
+                                        result = false;
+                                    });
+                            });
                         if (!result)
                             throw EmergencyStopException();
                     }
@@ -606,10 +607,10 @@ void Datastore::beginWrite()
                 auto image = disk->image;
                 writeDiskCommand(*diskLayout,
                     *image,
-                    *encoder,
-                    *fluxSinkFactory,
-                    decoder.get(),
-                    verificationFluxSource.get());
+                    encoder,
+                    fluxSinkFactory,
+                    decoder,
+                    verificationFluxSource);
             }
             catch (...)
             {
@@ -648,8 +649,7 @@ void Datastore::stop()
     emergencyStop = true;
 }
 
-static std::shared_ptr<Disk> wtMakeDiskDataFromImage(
-    std::shared_ptr<Image>& image)
+static std::shared_ptr<Disk> wtMakeDiskDataFromImage(Image* image)
 {
     image->calculateSize();
     image->populateSectorPhysicalLocationsFromLogicalLocations(*diskLayout);
@@ -701,7 +701,7 @@ void Datastore::readImage(const std::fs::path& path)
                 wtWaitForUiThreadToCatchUp();
                 globalConfig().setImageReader(path.string());
                 auto imageReader = ImageReader::create(globalConfig());
-                std::shared_ptr<Image> image = imageReader->readImage();
+                Image* image = imageReader->readImage();
 
                 const auto& extraConfig = imageReader->getExtraConfig();
                 auto customConfig = renderProtoAsConfig(&extraConfig);
@@ -709,9 +709,10 @@ void Datastore::readImage(const std::fs::path& path)
                 /* Update the setting, and then rebuild the config again as it
                  * will have changed. */
 
-                wtRunSynchronouslyOnUiThread((std::function<void()>)[=] {
-                    Events::SetSystemConfig::post(customConfig);
-                });
+                wtRunSynchronouslyOnUiThread((std::function<void()>)[=]
+                    {
+                        Events::SetSystemConfig::post(customConfig);
+                    });
                 wtRebuildConfiguration(true);
                 wtWaitForUiThreadToCatchUp();
 
@@ -756,7 +757,7 @@ void Datastore::writeFluxFile(const std::fs::path& path)
                 globalConfig().setFluxSink(path.string());
                 auto fluxSource = FluxSource::createMemoryFluxSource(*disk);
                 auto fluxSinkFactory = FluxSinkFactory::create(globalConfig());
-                writeRawDiskCommand(*diskLayout, *fluxSource, *fluxSinkFactory);
+                writeRawDiskCommand(*diskLayout, fluxSource, fluxSinkFactory);
             }
             catch (...)
             {
@@ -782,8 +783,8 @@ void Datastore::createBlankImage()
                 wtClearDiskData();
                 wtWaitForUiThreadToCatchUp();
 
-                auto image = std::make_shared<Image>();
-                std::shared_ptr<SectorInterface> sectorInterface =
+                auto image = new Image();
+                SectorInterface* sectorInterface =
                     SectorInterface::createMemorySectorInterface(image);
                 auto filesystem = Filesystem::createFilesystem(
                     globalConfig()->filesystem(), diskLayout, sectorInterface);

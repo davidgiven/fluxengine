@@ -30,8 +30,8 @@ class FatFsFilesystem : public Filesystem
 {
 public:
     FatFsFilesystem(const FatFsProto& config,
-        const std::shared_ptr<const DiskLayout>& diskLayout,
-        std::shared_ptr<SectorInterface> sectors):
+        const DiskLayout* diskLayout,
+        SectorInterface* sectors):
         Filesystem(diskLayout, sectors),
         _config(config)
     {
@@ -336,11 +336,9 @@ DWORD get_fattime(void)
     return 0;
 }
 
-std::unique_ptr<Filesystem> Filesystem::createFatFsFilesystem(
-    const FilesystemProto& config,
-    const std::shared_ptr<const DiskLayout>& diskLayout,
-    std::shared_ptr<SectorInterface> sectors)
+Filesystem* Filesystem::createFatFsFilesystem(const FilesystemProto& config,
+    const DiskLayout* diskLayout,
+    SectorInterface* sectors)
 {
-    return std::make_unique<FatFsFilesystem>(
-        config.fatfs(), diskLayout, sectors);
+    return new FatFsFilesystem(config.fatfs(), diskLayout, sectors);
 }

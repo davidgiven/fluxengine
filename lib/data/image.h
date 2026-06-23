@@ -17,21 +17,21 @@ struct Geometry
     unsigned totalBytes = 0;
 };
 
-class Image
+class Image : public gc
 {
 public:
     Image();
-    Image(const std::vector<std::shared_ptr<const Sector>>& sectors);
+    Image(const std::vector<const Sector*>& sectors);
 
 public:
     class const_iterator
     {
-        typedef std::map<LogicalLocation,
-            std::shared_ptr<const Sector>>::const_iterator wrapped_iterator_t;
+        typedef std::map<LogicalLocation, const Sector*>::const_iterator
+            wrapped_iterator_t;
 
     public:
         const_iterator(const wrapped_iterator_t& it): _it(it) {}
-        std::shared_ptr<const Sector> operator*()
+        const Sector* operator*()
         {
             return _it->second;
         }
@@ -63,8 +63,8 @@ public:
     bool empty() const;
 
     bool contains(const LogicalLocation& location) const;
-    std::shared_ptr<const Sector> get(const LogicalLocation& location) const;
-    std::shared_ptr<Sector> put(const LogicalLocation& location);
+    const Sector* get(const LogicalLocation& location) const;
+    Sector* put(const LogicalLocation& location);
     void erase(const LogicalLocation& location);
 
     bool contains(const CylinderHead& ch, unsigned sector) const
@@ -77,25 +77,22 @@ public:
         return contains({cylinder, head, sector});
     }
 
-    std::shared_ptr<const Sector> get(
-        const CylinderHead& ch, unsigned sector) const
+    const Sector* get(const CylinderHead& ch, unsigned sector) const
     {
         return get({ch.cylinder, ch.head, sector});
     }
 
-    std::shared_ptr<const Sector> get(
-        unsigned cylinder, unsigned head, unsigned sector) const
+    const Sector* get(unsigned cylinder, unsigned head, unsigned sector) const
     {
         return get({cylinder, head, sector});
     }
 
-    std::shared_ptr<Sector> put(const CylinderHead& ch, unsigned sector)
+    Sector* put(const CylinderHead& ch, unsigned sector)
     {
         return put({ch.cylinder, ch.head, sector});
     }
 
-    std::shared_ptr<Sector> put(
-        unsigned cylinder, unsigned head, unsigned sector)
+    Sector* put(unsigned cylinder, unsigned head, unsigned sector)
     {
         return put({cylinder, head, sector});
     }
@@ -129,7 +126,7 @@ public:
 
 private:
     Geometry _geometry = {0, 0, 0};
-    std::map<LogicalLocation, std::shared_ptr<const Sector>> _sectors;
+    std::map<LogicalLocation, const Sector*> _sectors;
 };
 
 #endif

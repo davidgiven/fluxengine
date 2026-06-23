@@ -10,7 +10,7 @@ public:
     ~LogView() override = default;
 
     void drawContent() override;
-    static void logMessage(const AnyLogMessage& message);
+    static void logMessage(const AnyLogMessage* message);
 
     [[nodiscard]] bool shouldDraw() const override
     {

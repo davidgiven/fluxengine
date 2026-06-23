@@ -150,7 +150,7 @@ private:
     int _sectorIndex;
 };
 
-std::unique_ptr<Decoder> createSmaky6Decoder(const DecoderProto& config)
+Decoder* createSmaky6Decoder(const DecoderProto& config)
 {
-    return std::unique_ptr<Decoder>(new Smaky6Decoder(config));
+    return new Smaky6Decoder(config);
 }

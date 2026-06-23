@@ -91,8 +91,8 @@ private:
     const VcdFluxSinkProto& _config;
 };
 
-std::unique_ptr<FluxSinkFactory> FluxSinkFactory::createVcdFluxSinkFactory(
+FluxSinkFactory* FluxSinkFactory::createVcdFluxSinkFactory(
     const VcdFluxSinkProto& config)
 {
-    return std::unique_ptr<FluxSinkFactory>(new VcdFluxSinkFactory(config));
+    return new VcdFluxSinkFactory(config);
 }

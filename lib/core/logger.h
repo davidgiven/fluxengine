@@ -33,59 +33,52 @@ struct EmergencyStopMessage
 {
 };
 
+extern void renderLogMessage(LogRenderer& r, const ErrorLogMessage* m);
+extern void renderLogMessage(LogRenderer& r, const EmergencyStopMessage* m);
+extern void renderLogMessage(LogRenderer& r, const TrackReadLogMessage* m);
+extern void renderLogMessage(LogRenderer& r, const DiskReadLogMessage* m);
 extern void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const ErrorLogMessage> m);
+    LogRenderer& r, const BeginSpeedOperationLogMessage* m);
 extern void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const EmergencyStopMessage> m);
+    LogRenderer& r, const EndSpeedOperationLogMessage* m);
 extern void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const TrackReadLogMessage> m);
+    LogRenderer& r, const BeginReadOperationLogMessage* m);
 extern void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const DiskReadLogMessage> m);
+    LogRenderer& r, const EndReadOperationLogMessage* m);
 extern void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const BeginSpeedOperationLogMessage> m);
+    LogRenderer& r, const BeginWriteOperationLogMessage* m);
 extern void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const EndSpeedOperationLogMessage> m);
+    LogRenderer& r, const EndWriteOperationLogMessage* m);
+extern void renderLogMessage(LogRenderer& r, const BeginOperationLogMessage* m);
+extern void renderLogMessage(LogRenderer& r, const EndOperationLogMessage* m);
 extern void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const BeginReadOperationLogMessage> m);
-extern void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const EndReadOperationLogMessage> m);
-extern void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const BeginWriteOperationLogMessage> m);
-extern void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const EndWriteOperationLogMessage> m);
-extern void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const BeginOperationLogMessage> m);
-extern void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const EndOperationLogMessage> m);
-extern void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const OperationProgressLogMessage> m);
-extern void renderLogMessage(
-    LogRenderer& r, std::shared_ptr<const OptionLogMessage> m);
+    LogRenderer& r, const OperationProgressLogMessage* m);
+extern void renderLogMessage(LogRenderer& r, const OptionLogMessage* m);
 
-typedef std::variant<std::shared_ptr<const std::string>,
-    std::shared_ptr<const ErrorLogMessage>,
-    std::shared_ptr<const EmergencyStopMessage>,
-    std::shared_ptr<const TrackReadLogMessage>,
-    std::shared_ptr<const DiskReadLogMessage>,
-    std::shared_ptr<const BeginSpeedOperationLogMessage>,
-    std::shared_ptr<const EndSpeedOperationLogMessage>,
-    std::shared_ptr<const BeginReadOperationLogMessage>,
-    std::shared_ptr<const EndReadOperationLogMessage>,
-    std::shared_ptr<const BeginWriteOperationLogMessage>,
-    std::shared_ptr<const EndWriteOperationLogMessage>,
-    std::shared_ptr<const BeginOperationLogMessage>,
-    std::shared_ptr<const EndOperationLogMessage>,
-    std::shared_ptr<const OperationProgressLogMessage>,
-    std::shared_ptr<const OptionLogMessage>>
+typedef std::variant<const std::string*,
+    const ErrorLogMessage*,
+    const EmergencyStopMessage*,
+    const TrackReadLogMessage*,
+    const DiskReadLogMessage*,
+    const BeginSpeedOperationLogMessage*,
+    const EndSpeedOperationLogMessage*,
+    const BeginReadOperationLogMessage*,
+    const EndReadOperationLogMessage*,
+    const BeginWriteOperationLogMessage*,
+    const EndWriteOperationLogMessage*,
+    const BeginOperationLogMessage*,
+    const EndOperationLogMessage*,
+    const OperationProgressLogMessage*,
+    const OptionLogMessage*>
     AnyLogMessage;
 
 extern void log(const char* ptr);
-extern void log(const AnyLogMessage& message);
+extern void logImpl(const AnyLogMessage* message);
 
 template <class T>
 inline void log(const T& message)
 {
-    log(AnyLogMessage(std::make_shared<T>(message)));
+    logImpl(new AnyLogMessage(new T(message)));
 }
 
 template <typename... Args>
@@ -101,7 +94,7 @@ public:
     virtual ~LogRenderer() {}
 
 public:
-    LogRenderer& add(const AnyLogMessage& message);
+    LogRenderer& add(const AnyLogMessage* message);
 
 public:
     virtual LogRenderer& add(const std::string& m) = 0;
@@ -112,7 +105,7 @@ public:
 
 namespace Logger
 {
-    extern void setLogger(std::function<void(const AnyLogMessage&)> cb);
+    extern void setLogger(std::function<void(const AnyLogMessage*)> cb);
 }
 
 #endif

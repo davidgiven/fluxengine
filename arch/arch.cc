@@ -23,17 +23,16 @@
 #include "arch/zilogmcz/zilogmcz.h"
 #include "arch/arch.h"
 
-std::unique_ptr<Encoder> Arch::createEncoder(Config& config)
+Encoder* Arch::createEncoder(Config& config)
 {
     if (!config.hasEncoder())
         error("no encoder configured");
     return createEncoder(config->encoder());
 }
 
-std::unique_ptr<Encoder> Arch::createEncoder(const EncoderProto& config)
+Encoder* Arch::createEncoder(const EncoderProto& config)
 {
-    static const std::map<int,
-        std::function<std::unique_ptr<Encoder>(const EncoderProto&)>>
+    static const std::map<int, std::function<Encoder*(const EncoderProto&)>>
         encoders = {
             {EncoderProto::kAgat,       createAgatEncoder       },
             {EncoderProto::kAmiga,      createAmigaEncoder      },
@@ -56,17 +55,16 @@ std::unique_ptr<Encoder> Arch::createEncoder(const EncoderProto& config)
     return (encoder->second)(config);
 }
 
-std::unique_ptr<Decoder> Arch::createDecoder(Config& config)
+Decoder* Arch::createDecoder(Config& config)
 {
     if (!config.hasDecoder())
         error("no decoder configured");
     return createDecoder(config->decoder());
 }
 
-std::unique_ptr<Decoder> Arch::createDecoder(const DecoderProto& config)
+Decoder* Arch::createDecoder(const DecoderProto& config)
 {
-    static const std::map<int,
-        std::function<std::unique_ptr<Decoder>(const DecoderProto&)>>
+    static const std::map<int, std::function<Decoder*(const DecoderProto&)>>
         decoders = {
             {DecoderProto::kAgat,       createAgatDecoder       },
             {DecoderProto::kAeslanier,  createAesLanierDecoder  },

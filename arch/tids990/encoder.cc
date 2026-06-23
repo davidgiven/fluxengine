@@ -59,8 +59,8 @@ private:
     }
 
 public:
-    std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout& ltl,
-        const std::vector<std::shared_ptr<const Sector>>& sectors,
+    std::unique_ptr<Fluxmap> encode(const LogicalTrackLayout* ltl,
+        const std::vector<const Sector*>& sectors,
         const Image& image) override
     {
         double clockRateUs = _config.clock_period_us() / 2.0;
@@ -144,7 +144,7 @@ private:
     bool _lastBit;
 };
 
-std::unique_ptr<Encoder> createTids990Encoder(const EncoderProto& config)
+Encoder* createTids990Encoder(const EncoderProto& config)
 {
-    return std::unique_ptr<Encoder>(new Tids990Encoder(config));
+    return new Tids990Encoder(config);
 }

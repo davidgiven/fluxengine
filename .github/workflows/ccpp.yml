@@ -46,7 +46,7 @@ jobs:
         path: 'fluxengine-testdata'
     - name: brew
       run: |
-        brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg libmagic nlohmann-json cli11 boost glfw3 md4c ninja python freetype2 mbedtls@3 lunasvg
+        brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg libmagic nlohmann-json cli11 boost glfw3 md4c ninja python freetype2 mbedtls@3 lunasvg libgc
         brew link mbedtls@3
         brew upgrade
     - name: make
@@ -77,6 +77,7 @@ jobs:
         pacboy: |
           protobuf:p pkgconf:p curl-winssl:p file:p glfw:p mbedtls:p
           sqlite:p freetype:p boost:p gcc:p binutils:p nsis:p abseil-cpp:p
+          gc:p
 
     - name: debug
       run: |

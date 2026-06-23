@@ -23,25 +23,25 @@ nanoseconds_t Encoder::calculatePhysicalClockPeriod(
            (currentRotationalPeriod / targetRotationalPeriod);
 }
 
-std::shared_ptr<const Sector> Encoder::getSector(
+const Sector* Encoder::getSector(
     const CylinderHead& ch, const Image& image, unsigned sectorId)
 {
     return image.get(ch.cylinder, ch.head, sectorId);
 }
 
-std::vector<std::shared_ptr<const Sector>> Encoder::collectSectors(
-    const LogicalTrackLayout& ltl, const Image& image)
+std::vector<const Sector*> Encoder::collectSectors(
+    const LogicalTrackLayout* ltl, const Image& image)
 {
-    std::vector<std::shared_ptr<const Sector>> sectors;
+    std::vector<const Sector*> sectors;
 
-    for (unsigned sectorId : ltl.diskSectorOrder)
+    for (unsigned sectorId : ltl->diskSectorOrder)
     {
-        const auto& sector =
-            getSector({ltl.logicalCylinder, ltl.logicalHead}, image, sectorId);
+        const auto& sector = getSector(
+            {ltl->logicalCylinder, ltl->logicalHead}, image, sectorId);
         if (!sector)
             error("sector {}.{}.{} is missing from the image",
-                ltl.logicalCylinder,
-                ltl.logicalHead,
+                ltl->logicalCylinder,
+                ltl->logicalHead,
                 sectorId);
         sectors.push_back(sector);
     }

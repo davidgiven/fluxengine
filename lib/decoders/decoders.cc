@@ -13,13 +13,12 @@
 #include "lib/data/layout.h"
 #include <numeric>
 
-std::shared_ptr<Track> Decoder::decodeToSectors(
-    std::shared_ptr<const Fluxmap> fluxmap,
-    const std::shared_ptr<const PhysicalTrackLayout>& ptl)
+Track* Decoder::decodeToSectors(
+    std::shared_ptr<const Fluxmap> fluxmap, const PhysicalTrackLayout* ptl)
 {
     _ltl = ptl->logicalTrackLayout;
 
-    _trackdata = std::make_shared<Track>();
+    _trackdata = new Track();
     _trackdata->fluxmap = fluxmap;
     _trackdata->ptl = ptl;
     _trackdata->ltl = ptl->logicalTrackLayout;
@@ -29,7 +28,7 @@ std::shared_ptr<Track> Decoder::decodeToSectors(
 
     auto newSector = [&]
     {
-        _sector = std::make_shared<Sector>(LogicalLocation{0, 0, 0});
+        _sector = new Sector(LogicalLocation{0, 0, 0});
         _sector->physicalLocation = std::make_optional<CylinderHead>(
             ptl->physicalCylinder, ptl->physicalHead);
         _sector->status = Sector::MISSING;

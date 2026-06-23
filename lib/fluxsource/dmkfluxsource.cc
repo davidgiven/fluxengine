@@ -85,8 +85,7 @@ private:
     const std::string _path;
 };
 
-std::unique_ptr<FluxSource> FluxSource::createDmkFluxSource(
-    const DmkFluxSourceProto& config)
+FluxSource* FluxSource::createDmkFluxSource(const DmkFluxSourceProto& config)
 {
-    return std::unique_ptr<FluxSource>(new DmkFluxSource(config));
+    return new DmkFluxSource(config);
 }

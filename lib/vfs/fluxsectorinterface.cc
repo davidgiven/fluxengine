@@ -11,11 +11,11 @@
 class FluxSectorInterface : public SectorInterface
 {
 public:
-    FluxSectorInterface(const std::shared_ptr<const DiskLayout>& diskLayout,
-        std::shared_ptr<FluxSource> fluxSource,
-        std::shared_ptr<FluxSinkFactory> fluxSinkFactory,
-        std::shared_ptr<Encoder> encoder,
-        std::shared_ptr<Decoder> decoder):
+    FluxSectorInterface(const DiskLayout* diskLayout,
+        FluxSource* fluxSource,
+        FluxSinkFactory* fluxSinkFactory,
+        Encoder* encoder,
+        Decoder* decoder):
         _diskLayout(diskLayout),
         _fluxSource(fluxSource),
         _fluxSink(fluxSinkFactory),
@@ -25,8 +25,7 @@ public:
     }
 
 public:
-    std::shared_ptr<const Sector> get(
-        unsigned track, unsigned side, unsigned sectorId) override
+    const Sector* get(unsigned track, unsigned side, unsigned sectorId) override
     {
         auto it = _changedSectors.get(track, side, sectorId);
         if (it)
@@ -39,8 +38,7 @@ public:
         return _loadedSectors.get(track, side, sectorId);
     }
 
-    std::shared_ptr<Sector> put(
-        unsigned track, unsigned side, unsigned sectorId) override
+    Sector* put(unsigned track, unsigned side, unsigned sectorId) override
     {
         CylinderHead trackid(track, side);
         _changedTracks.insert(trackid);
@@ -97,10 +95,10 @@ public:
 
         writeDiskCommand(*_diskLayout,
             _changedSectors,
-            *_encoder,
-            *_fluxSink,
-            _decoder.get(),
-            _fluxSource.get(),
+            _encoder,
+            _fluxSink,
+            _decoder,
+            _fluxSource,
             locations);
 
         discardChanges();
@@ -132,11 +130,11 @@ private:
     {
         CylinderHead logicalLocation = {logicalCylinder, logicalSide};
         auto& ltl = _diskLayout->layoutByLogicalLocation.at(logicalLocation);
-        std::vector<std::shared_ptr<const Track>> trackFluxes;
-        std::vector<std::shared_ptr<const Sector>> trackSectors;
+        std::vector<const Track*> trackFluxes;
+        std::vector<const Sector*> trackSectors;
         readAndDecodeTrack(*_diskLayout,
-            *_fluxSource,
-            *_decoder,
+            _fluxSource,
+            _decoder,
             ltl,
             trackFluxes,
             trackSectors);
@@ -147,11 +145,11 @@ private:
         _loadedTracks.insert(logicalLocation);
     }
 
-    std::shared_ptr<const DiskLayout> _diskLayout;
-    std::shared_ptr<FluxSource> _fluxSource;
-    std::shared_ptr<FluxSinkFactory> _fluxSink;
-    std::shared_ptr<Encoder> _encoder;
-    std::shared_ptr<Decoder> _decoder;
+    const DiskLayout* _diskLayout;
+    FluxSource* _fluxSource;
+    FluxSinkFactory* _fluxSink;
+    Encoder* _encoder;
+    Decoder* _decoder;
 
     Image _loadedSectors;
     Image _changedSectors;
@@ -160,13 +158,13 @@ private:
     std::set<CylinderHead> _changedTracks;
 };
 
-std::unique_ptr<SectorInterface> SectorInterface::createFluxSectorInterface(
-    const std::shared_ptr<const DiskLayout>& diskLayout,
-    std::shared_ptr<FluxSource> fluxSource,
-    std::shared_ptr<FluxSinkFactory> fluxSinkFactory,
-    std::shared_ptr<Encoder> encoder,
-    std::shared_ptr<Decoder> decoder)
+SectorInterface* SectorInterface::createFluxSectorInterface(
+    const DiskLayout* diskLayout,
+    FluxSource* fluxSource,
+    FluxSinkFactory* fluxSinkFactory,
+    Encoder* encoder,
+    Decoder* decoder)
 {
-    return std::make_unique<FluxSectorInterface>(
+    return new FluxSectorInterface(
         diskLayout, fluxSource, fluxSinkFactory, encoder, decoder);
 }

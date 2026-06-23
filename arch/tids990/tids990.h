@@ -10,9 +10,7 @@ class Decoder;
 class DecoderProto;
 class EncoderProto;
 
-extern std::unique_ptr<Decoder> createTids990Decoder(
-    const DecoderProto& config);
-extern std::unique_ptr<Encoder> createTids990Encoder(
-    const EncoderProto& config);
+extern Decoder* createTids990Decoder(const DecoderProto& config);
+extern Encoder* createTids990Encoder(const EncoderProto& config);
 
 #endif

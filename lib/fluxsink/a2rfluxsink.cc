@@ -255,8 +255,8 @@ private:
     const A2RFluxSinkProto& _config;
 };
 
-std::unique_ptr<FluxSinkFactory> FluxSinkFactory::createA2RFluxSinkFactory(
+FluxSinkFactory* FluxSinkFactory::createA2RFluxSinkFactory(
     const A2RFluxSinkProto& config)
 {
-    return std::unique_ptr<FluxSinkFactory>(new A2RFluxSinkFactory(config));
+    return new A2RFluxSinkFactory(config);
 }
