@@ -22,97 +22,142 @@
 
 #include <wolv/utils/guards.hpp>
 
-namespace hex::plugin::builtin {
+namespace hex::plugin::builtin
+{
 
-    void registerProviders() {
+    void registerProviders()
+    {
 
         ContentRegistry::Provider::add<FileProvider>(false);
         ContentRegistry::Provider::add<NullProvider>(false);
         ContentRegistry::Provider::add<MemoryFileProvider>(false);
         ContentRegistry::Provider::add<ViewProvider>(false);
 
-        ProjectFile::registerHandler({
-            .basePath = "providers",
+        ProjectFile::registerHandler({.basePath = "providers",
             .required = true,
-            .load = [](const std::fs::path &basePath, const Tar &tar) {
-                auto json = nlohmann::json::parse(tar.readString(basePath / "providers.json"));
+            .load =
+                [](const std::fs::path& basePath, const Tar& tar)
+            {
+                auto json = nlohmann::json::parse(
+                    tar.readString(basePath / "providers.json"));
                 auto providerIds = json.at("providers").get<std::vector<int>>();
 
                 bool success = true;
-                std::map<hex::prv::Provider*, std::string> providerWarnings;
-                for (const auto &id : providerIds) {
-                    auto providerSettings = nlohmann::json::parse(tar.readString(basePath / fmt::format("{}.json", id)));
+                std::map<std::shared_ptr<hex::prv::Provider>, std::string>
+                    providerWarnings;
+                for (const auto& id : providerIds)
+                {
+                    auto providerSettings = nlohmann::json::parse(
+                        tar.readString(basePath / fmt::format("{}.json", id)));
 
-                    auto providerType = providerSettings.at("type").get<std::string>();
-                    auto newProvider = ImHexApi::Provider::createProvider(providerType, true, false);
-                    ON_SCOPE_EXIT {
-                        if (!success) {
-                            for (auto &task : TaskManager::getRunningTasks())
+                    auto providerType =
+                        providerSettings.at("type").get<std::string>();
+                    auto newProvider = ImHexApi::Provider::createProvider(
+                        providerType, true, false);
+                    ON_SCOPE_EXIT
+                    {
+                        if (!success)
+                        {
+                            for (auto& task : TaskManager::getRunningTasks())
                                 task->interrupt();
 
-                            TaskManager::runWhenTasksFinished([]{
-                                for (const auto &provider : ImHexApi::Provider::getProviders())
-                                    ImHexApi::Provider::remove(provider, true);
-                            });
+                            TaskManager::runWhenTasksFinished(
+                                []
+                                {
+                                    for (const auto& provider :
+                                        ImHexApi::Provider::getProviders())
+                                        ImHexApi::Provider::remove(
+                                            provider, true);
+                                });
                         }
                     };
 
-                    if (newProvider == nullptr) {
-                        // If a provider is not created, it will be overwritten when saving the project,
-                        // so we should prevent the project from loading at all
-                        ui::ToastError::open(
-                            fmt::format("hex.builtin.popup.error.project.load"_lang,
-                                fmt::format("hex.builtin.popup.error.project.load.create_provider"_lang, providerType)
-                            )
-                        );
+                    if (newProvider == nullptr)
+                    {
+                        // If a provider is not created, it will be overwritten
+                        // when saving the project, so we should prevent the
+                        // project from loading at all
+                        ui::ToastError::open(fmt::format(
+                            "hex.builtin.popup.error.project.load"_lang,
+                            fmt::format(
+                                "hex.builtin.popup.error.project.load.create_provider"_lang,
+                                providerType)));
                         success = false;
                         break;
                     }
 
                     newProvider->setID(id);
                     bool loaded = false;
-                    try {
-                        newProvider->loadSettings(providerSettings.at("settings"));
+                    try
+                    {
+                        newProvider->loadSettings(
+                            providerSettings.at("settings"));
                         loaded = true;
-                    } catch (const std::exception &e){
-                            providerWarnings[newProvider] = e.what();
                     }
-                    if (loaded) {
-                        if (!newProvider->open() || !newProvider->isAvailable() || !newProvider->isReadable()) {
-                            providerWarnings[newProvider] = newProvider->getErrorMessage();
-                        } else {
-                            EventProviderOpened::post(newProvider);
+                    catch (const std::exception& e)
+                    {
+                        providerWarnings[newProvider] = e.what();
+                    }
+                    if (loaded)
+                    {
+                        auto openResult = newProvider->open();
+                        if (openResult.isFailure() ||
+                            !newProvider->isAvailable() ||
+                            !newProvider->isReadable())
+                        {
+                            providerWarnings[newProvider] =
+                                openResult.getErrorMessage();
+                        }
+                        else
+                        {
+                            EventProviderOpened::post(newProvider.get());
                         }
                     }
                 }
 
                 std::string warningMessage;
-                for (const auto &warning : providerWarnings){
-                    ImHexApi::Provider::remove(warning.first);
-                    warningMessage.append(
-                        fmt::format("\n - {} : {}", warning.first->getName(), warning.second));
+                for (const auto& warning : providerWarnings)
+                {
+                    ImHexApi::Provider::remove(warning.first.get());
+                    warningMessage.append(fmt::format("\n - {} : {}",
+                        warning.first->getName(),
+                        warning.second));
                 }
 
                 // If no providers were opened, display an error with
-                // the warnings that happened when opening them 
-                if (ImHexApi::Provider::getProviders().empty()) {
-                    ui::ToastError::open(fmt::format("{}{}", "hex.builtin.popup.error.project.load"_lang, "hex.builtin.popup.error.project.load.no_providers"_lang, warningMessage));
+                // the warnings that happened when opening them
+                if (ImHexApi::Provider::getProviders().empty())
+                {
+                    ui::ToastError::open(fmt::format("{}{}",
+                        "hex.builtin.popup.error.project.load"_lang,
+                        "hex.builtin.popup.error.project.load.no_providers"_lang,
+                        warningMessage));
 
                     return false;
-                } else {
+                }
+                else
+                {
                     // Else, if there are warnings, still display them
-                    if (warningMessage.empty()) {
+                    if (warningMessage.empty())
+                    {
                         return true;
-                    } else {
-                        ui::ToastWarning::open(fmt::format("hex.builtin.popup.error.project.load.some_providers_failed"_lang, warningMessage));
+                    }
+                    else
+                    {
+                        ui::ToastWarning::open(fmt::format(
+                            "hex.builtin.popup.error.project.load.some_providers_failed"_lang,
+                            warningMessage));
                     }
 
                     return success;
                 }
             },
-            .store = [](const std::fs::path &basePath, const Tar &tar) {
+            .store =
+                [](const std::fs::path& basePath, const Tar& tar)
+            {
                 std::vector<int> providerIds;
-                for (const auto &provider : ImHexApi::Provider::getProviders()) {
+                for (const auto& provider : ImHexApi::Provider::getProviders())
+                {
                     auto id = provider->getID();
                     providerIds.push_back(id);
 
@@ -120,17 +165,18 @@ namespace hex::plugin::builtin {
                     json["type"] = provider->getTypeName();
                     json["settings"] = provider->storeSettings({});
 
-                    tar.writeString(basePath / fmt::format("{}.json", id), json.dump(4));
+                    tar.writeString(
+                        basePath / fmt::format("{}.json", id), json.dump(4));
                 }
 
                 tar.writeString(basePath / "providers.json",
-                    nlohmann::json({ { "providers", providerIds } }).dump(4)
-                );
+                    nlohmann::json({
+                                       {"providers", providerIds}
+                })
+                        .dump(4));
 
                 return true;
-            }
-        });
+            }});
     }
 
 }
-

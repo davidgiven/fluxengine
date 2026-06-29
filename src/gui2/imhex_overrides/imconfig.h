@@ -34,18 +34,17 @@
 // while (0)' block so it can be used as a single statement.
 // #define IM_ASSERT(_EXPR)  MyAssert(_EXPR)
 // #define IM_ASSERT(_EXPR)  ((void)(_EXPR))     // Disable asserts
-namespace hex::log::impl
-{
-    void assertionHandler(const char* expr_str, const char* file, int line);
+namespace hex::dbg {
+    [[noreturn]] void assertionHandler(const char* file, int line, const char *function, const char* exprString);
 }
-#define IM_ASSERT(_EXPR)                                                  \
-    do                                                                    \
-    {                                                                     \
-        if (!(_EXPR)) [[unlikely]]                                        \
-        {                                                                 \
-            hex::log::impl::assertionHandler(#_EXPR, __FILE__, __LINE__); \
-        }                                                                 \
-    } while (0)
+
+#if defined(__PRETTY_FUNCTION__)
+    #define IM_ASSERT(_EXPR) do { if (!(_EXPR)) [[unlikely]] { hex::dbg::assertionHandler(__FILE__, __LINE__, __PRETTY_FUNCTION__, #_EXPR); } } while(0)
+#elif defined(__FUNCSIG__)
+    #define IM_ASSERT(_EXPR) do { if (!(_EXPR)) [[unlikely]] { hex::dbg::assertionHandler(__FILE__, __LINE__, __FUNCSIG__, #_EXPR); } } while(0)
+#else
+    #define IM_ASSERT(_EXPR) do { if (!(_EXPR)) [[unlikely]] { hex::dbg::assertionHandler(__FILE__, __LINE__, __FUNCTION__, #_EXPR); } } while(0)
+#endif
 
 //---- Define attributes of all API symbols declarations, e.g. for DLL under
 // Windows

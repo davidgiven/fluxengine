@@ -395,3 +395,7 @@ void SummaryView::drawContent()
         }
     }
 }
+
+void SummaryView::drawHelpText()
+{
+}

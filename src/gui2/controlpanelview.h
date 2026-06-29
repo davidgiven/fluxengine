@@ -9,6 +9,7 @@ public:
     ~ControlPanelView() override = default;
 
     void drawContent() override;
+    void drawHelpText() override;
 
     [[nodiscard]] bool shouldDraw() const override
     {

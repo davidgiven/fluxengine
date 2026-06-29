@@ -97,6 +97,21 @@ namespace hex::menu {
             ImGui::EndMenu();
         }
 
+        bool beginTaskBarMenu() {
+            #if defined(OS_MACOS)
+                return beginMenu(ContentRegistry::UserInterface::impl::TaskBarMenuValue, true);
+            #else
+                return false;
+            #endif
+        }
+
+        void endTaskBarMenu() {
+            #if defined(OS_MACOS)
+                endMenu();
+            #else
+
+            #endif
+        }
 
         bool menuItem(const char *label, const Shortcut &shortcut, bool selected, bool enabled) {
             #if defined(OS_MACOS)

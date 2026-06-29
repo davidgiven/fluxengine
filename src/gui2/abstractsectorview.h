@@ -12,6 +12,7 @@ public:
     AbstractSectorView(const std::string& name);
 
     void drawContent() override;
+    void drawHelpText() override;
 
     [[nodiscard]] bool shouldDraw() const override
     {

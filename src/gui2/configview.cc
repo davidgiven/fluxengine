@@ -382,3 +382,7 @@ void ConfigView::drawContent()
         }
     }
 }
+
+void ConfigView::drawHelpText() 
+{
+}

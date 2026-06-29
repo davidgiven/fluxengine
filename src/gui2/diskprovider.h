@@ -18,7 +18,7 @@ public:
     [[nodiscard]] bool isResizable() const override;
     [[nodiscard]] bool isSavable() const override;
 
-    [[nodiscard]] bool open() override;
+    [[nodiscard]] OpenResult open() override;
 
     void close() override;
 

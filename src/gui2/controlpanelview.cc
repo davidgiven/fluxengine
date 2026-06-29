@@ -157,3 +157,7 @@ void ControlPanelView::drawContent()
             Datastore::stop();
     }
 }
+
+void ControlPanelView::drawHelpText() 
+{
+}

@@ -198,3 +198,7 @@ void AbstractSectorView::drawContent()
             }
     }
 }
+
+void AbstractSectorView::drawHelpText()
+{
+}

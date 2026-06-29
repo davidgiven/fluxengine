@@ -174,3 +174,7 @@ void VisualiserView::drawContent()
             pos + ImVec2(size.x / 2, size.y - 100),
             size.x * 0.7);
 }
+
+void VisualiserView::drawHelpText()
+{
+}
