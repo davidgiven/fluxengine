@@ -66,3 +66,7 @@ void LogView::logMessage(const AnyLogMessage& message)
     logRenderer->add(message);
     scrollToEndOnNextRedraw = true;
 }
+
+void LogView::drawHelpText() 
+{
+}

@@ -8,4 +8,7 @@ namespace hex
     {
     }
 
+    void AchievementManager::loadProgress() 
+    {
+    }
 }

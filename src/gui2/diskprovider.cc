@@ -51,9 +51,9 @@ DiskProvider::~DiskProvider()
     return false;
 }
 
-[[nodiscard]] bool DiskProvider::open()
+[[nodiscard]] hex::prv::Provider::OpenResult DiskProvider::open()
 {
-    return true;
+    return OpenResult();
 }
 
 void DiskProvider::close() {}

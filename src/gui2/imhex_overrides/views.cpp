@@ -9,7 +9,6 @@
 #include "content/views/view_patches.hpp"
 #include "content/views/view_command_palette.hpp"
 #include "content/views/view_settings.hpp"
-#include "content/views/view_constants.hpp"
 #include "content/views/view_store.hpp"
 #include "content/views/view_provider_settings.hpp"
 #include "content/views/view_find.hpp"
@@ -34,7 +33,6 @@ namespace hex::plugin::builtin {
         ContentRegistry::Views::add<ViewCommandPalette>();
         ContentRegistry::Views::add<ViewAbout>();
         ContentRegistry::Views::add<ViewSettings>();
-        ContentRegistry::Views::add<ViewConstants>();
         ContentRegistry::Views::add<ViewProviderSettings>();
         ContentRegistry::Views::add<ViewFind>();
         ContentRegistry::Views::add<ViewThemeManager>();

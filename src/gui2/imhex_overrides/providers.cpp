@@ -39,7 +39,7 @@ namespace hex::plugin::builtin {
                 auto providerIds = json.at("providers").get<std::vector<int>>();
 
                 bool success = true;
-                std::map<hex::prv::Provider*, std::string> providerWarnings;
+                std::map<std::shared_ptr<hex::prv::Provider>, std::string> providerWarnings;
                 for (const auto &id : providerIds) {
                     auto providerSettings = nlohmann::json::parse(tar.readString(basePath / fmt::format("{}.json", id)));
 
@@ -78,23 +78,24 @@ namespace hex::plugin::builtin {
                             providerWarnings[newProvider] = e.what();
                     }
                     if (loaded) {
-                        if (!newProvider->open() || !newProvider->isAvailable() || !newProvider->isReadable()) {
-                            providerWarnings[newProvider] = newProvider->getErrorMessage();
+                        auto openResult = newProvider->open();
+                        if (openResult.isFailure() || !newProvider->isAvailable() || !newProvider->isReadable()) {
+                            providerWarnings[newProvider] = openResult.getErrorMessage();
                         } else {
-                            EventProviderOpened::post(newProvider);
+                            EventProviderOpened::post(newProvider.get());
                         }
                     }
                 }
 
                 std::string warningMessage;
                 for (const auto &warning : providerWarnings){
-                    ImHexApi::Provider::remove(warning.first);
+                    ImHexApi::Provider::remove(warning.first.get());
                     warningMessage.append(
                         fmt::format("\n - {} : {}", warning.first->getName(), warning.second));
                 }
 
                 // If no providers were opened, display an error with
-                // the warnings that happened when opening them 
+                // the warnings that happened when opening them
                 if (ImHexApi::Provider::getProviders().empty()) {
                     ui::ToastError::open(fmt::format("{}{}", "hex.builtin.popup.error.project.load"_lang, "hex.builtin.popup.error.project.load.no_providers"_lang, warningMessage));
 

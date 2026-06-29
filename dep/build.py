@@ -772,6 +772,7 @@ cxxlibrary(
         "dep/r/pattern-language/lib/source/pl/core/ast/ast_node_struct.cpp",
         "dep/r/pattern-language/lib/source/pl/core/ast/ast_node_ternary_expression.cpp",
         "dep/r/pattern-language/lib/source/pl/core/ast/ast_node_try_catch_statement.cpp",
+        "dep/r/pattern-language/lib/source/pl/core/ast/ast_node_type_application.cpp",
         "dep/r/pattern-language/lib/source/pl/core/ast/ast_node_type_decl.cpp",
         "dep/r/pattern-language/lib/source/pl/core/ast/ast_node_type_operator.cpp",
         "dep/r/pattern-language/lib/source/pl/core/ast/ast_node_union.cpp",
@@ -848,8 +849,10 @@ cxxlibrary(
                 "pl/core/ast/ast_node_rvalue_assignment.hpp",
                 "pl/core/ast/ast_node_scope_resolution.hpp",
                 "pl/core/ast/ast_node_struct.hpp",
+                "pl/core/ast/ast_node_template_parameter.hpp",
                 "pl/core/ast/ast_node_ternary_expression.hpp",
                 "pl/core/ast/ast_node_try_catch_statement.hpp",
+                "pl/core/ast/ast_node_type_appilication.hpp",
                 "pl/core/ast/ast_node_type_decl.hpp",
                 "pl/core/ast/ast_node_type_operator.hpp",
                 "pl/core/ast/ast_node_union.hpp",
@@ -899,8 +902,8 @@ cxxlibrary(
         git_repository(
             name="patternlanguage_repo",
             url="https://github.com/WerWolv/PatternLanguage",
-            branch="ImHex-v1.38.0",
-            commit="f97999d4da8f64df0706227f8b5a6a861e5a95ff",
+            branch="master",
+            commit="2e49805fcc715acdc8706f87467a8d0ed7268855",
             path="dep/r/pattern-language",
         ),
     ],
@@ -953,7 +956,7 @@ clibrary(
 
 git_repository(
     name="imhex_repo",
-    url="https://github.com/davidgiven/ImHex",
+    url="https://github.com/the-claw/ImHex",
     branch="master",
     path="dep/r/imhex",
 )
