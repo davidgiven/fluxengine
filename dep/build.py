@@ -903,6 +903,7 @@ cxxlibrary(
             name="patternlanguage_repo",
             url="https://github.com/WerWolv/PatternLanguage",
             branch="master",
+            commit="2e49805fcc715acdc8706f87467a8d0ed7268855",
             path="dep/r/pattern-language",
         ),
     ],
