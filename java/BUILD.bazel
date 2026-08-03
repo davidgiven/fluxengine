@@ -1,5 +1,16 @@
 package(default_visibility = ["//visibility:public"]) 
 
+# Java annotation processor plugin for Dagger
+# Uses the dagger-compiler artifact provided via rules_jvm_external (maven_install)
+java_plugin(
+    name = "dagger_plugin",
+    # The fully-qualified annotation processor class provided by dagger-compiler
+    processor_class = "dagger.internal.codegen.ComponentProcessor",
+    deps = [
+        "@maven//:com_google_dagger_dagger_compiler",
+    ],
+)
+
 # Java library built from Java sources
 java_library(
     name = "fluxengine",
@@ -9,6 +20,7 @@ java_library(
         # Dagger runtime (provided via rules_jvm_external maven_install):
         "@maven//:com_google_dagger_dagger",
     ],
+    plugins = [":dagger_plugin"],
 )
 
 java_binary(
@@ -39,9 +51,7 @@ java_test(
     deps = [
         ":fluxengine",
         "@maven//:junit_junit",
-        # If tests need dagger code generated at compile-time, include the compiler
-        # on the annotation processing path. With maven_install, dagger-compiler is
-        # available as @maven//:com_google_dagger_dagger_compiler but configuring it
-        # as an annotation processor depends on which java_rules you use.
     ],
+    # If tests require generated dagger code, ensure plugin is available to test compilation too.
+    plugins = [":dagger_plugin"],
 )
