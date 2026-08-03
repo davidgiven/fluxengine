@@ -27,9 +27,7 @@ jobs:
         repository: 'davidgiven/fluxengine-testdata'
         path: 'fluxengine-testdata'
     - name: Setup Bazel
-      uses: bazelbuild/setup-bazel@v4
-      with:
-        install-bazelisk: true
+      uses: bazel-contrib/setup-bazel@v2
     - name: Build with Bazel
       run: |
         cd fluxengine
@@ -56,9 +54,7 @@ jobs:
         repository: 'davidgiven/fluxengine-testdata'
         path: 'fluxengine-testdata'
     - name: Setup Bazel
-      uses: bazelbuild/setup-bazel@v4
-      with:
-        install-bazelisk: true
+      uses: bazel-contrib/setup-bazel@v2
     - name: Build with Bazel
       run: |
         cd fluxengine
@@ -85,9 +81,7 @@ jobs:
         path: 'fluxengine-testdata'
 
     - name: Setup Bazel
-      uses: bazelbuild/setup-bazel@v4
-      with:
-        install-bazelisk: true
+      uses: bazel-contrib/setup-bazel@v2
 
     - name: Build with Bazel
       run: |
