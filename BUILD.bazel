@@ -1,7 +1,12 @@
 package(default_visibility = ["//visibility:public"]) 
 
-# Root BUILD - alias exposing the Java main program at the repository root
+# Root aliases for running/building the application
 alias(
     name = "fluxengine",
     actual = "//java/src/main/java/com/cowlark/fluxengine:fluxengine_main",
+)
+
+alias(
+    name = "fluxengine_native",
+    actual = "//java/src/main/java/com/cowlark/fluxengine:fluxengine_native",
 )
