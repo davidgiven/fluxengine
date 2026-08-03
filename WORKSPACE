@@ -47,9 +47,9 @@ http_archive(
     url = "https://github.com/bazelbuild/rules_kotlin/releases/download/v4.0.0/rules_kotlin-v4.0.0.tar.gz",
 )
 load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kotlin_repositories")
-# Registers Kotlin toolchain. Call this after adjusting workspace to your environment.
-# Uncomment the following line if you want the kotlin toolchain registered immediately:
-# kotlin_repositories()
+# Registers Kotlin toolchain. Call this to register kotlin toolchain and enable KAPT support.
+# Note: rules_kotlin must be fetched successfully by bazel before this call will work.
+kotlin_repositories()
 
 # -----------------------------------------------------------------------------
 # rules_proto (Protobuf support)

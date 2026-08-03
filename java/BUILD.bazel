@@ -29,18 +29,29 @@ java_binary(
     deps = [":fluxengine"],
 )
 
-# Kotlin targets (requires rules_kotlin to be enabled in WORKSPACE)
+# Kotlin targets using rules_kotlin
 load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_jvm_library", "kt_jvm_binary")
+load("@io_bazel_rules_kotlin//kotlin:kapt.bzl", "kt_kapt")
+
+# KAPT target: runs the dagger annotation processor against kotlin sources and emits generated java sources
+kt_kapt(
+    name = "kapt_fluxengine",
+    srcs = glob(["src/main/kotlin/**/*.kt"]),
+    processors = ["dagger.internal.codegen.ComponentProcessor"],
+    processor_deps = ["@maven//:com_google_dagger_dagger_compiler"],
+    deps = [":fluxengine"],
+)
 
 kt_jvm_library(
     name = "kotlin_lib",
     srcs = glob(["src/main/kotlin/**/*.kt"]),
-    deps = [":fluxengine"],
+    # Depend on the kapt target so generated sources are available during compilation.
+    deps = [":fluxengine", ":kapt_fluxengine"],
 )
 
 kt_jvm_binary(
     name = "kotlin_bin",
-    main_class = "org.fluxengine.KotlinExample",
+    main_class = "com.cowlark.fluxengine.Main",
     deps = [":kotlin_lib"],
 )
 
