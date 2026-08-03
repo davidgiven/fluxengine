@@ -69,39 +69,32 @@ load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies")
 
 # -----------------------------------------------------------------------------
 # rules_graalvm (GraalVM native-image integration)
-# Use the official release archive rather than a git_repository so Bazel exposes
-# the @rules_graalvm repository correctly during repository evaluation.
-# See https://github.com/sgammon/rules_graalvm README for details.
+# Use the official release archive and register the SDK via graalvm_repository
+# as requested. Follow the rules_graalvm README for details.
 # -----------------------------------------------------------------------------
 http_archive(
     name = "rules_graalvm",
+    sha256 = "",
+    strip_prefix = "rules_graalvm-0.12.0",
     urls = [
         "https://github.com/sgammon/rules_graalvm/releases/download/v0.12.0/rules_graalvm-0.12.0.zip",
     ],
-    strip_prefix = "rules_graalvm-0.12.0",
-    sha256 = "",  # TODO: add the release sha256 for hermeticity
 )
 
-# Load helper repository functions from rules_graalvm and register the
-# repository-level dependencies. This makes @rules_graalvm visible to the
-# main workspace and avoids the "unknown repo 'rules_graalvm'" error.
-load("@rules_graalvm//graalvm:workspace.bzl", "rules_graalvm_repositories")
+load("@rules_graalvm//graalvm:repositories.bzl", "graalvm_repository")
 
-# Register the rules' own external repositories (examples, toolchain helpers, etc.).
+graalvm_repository(
+    name = "graalvm",
+    distribution = "ce",  # `oracle`, `ce`, or `community`
+    java_version = "23",  # `17`, `20`, `22`, `23`, etc.
+    version = "23.0.0",  # pass graalvm or specific jdk version supported by gvm
+)
+
+load("@rules_graalvm//graalvm:workspace.bzl", "register_graalvm_toolchains", "rules_graalvm_repositories")
+
 rules_graalvm_repositories()
 
-# NOTE: To use GraalVM as an SDK/toolchain you must declare a @graalvm SDK
-# repository and register its toolchains. Example (uncomment and adjust):
-# load("@rules_graalvm//graalvm:repositories.bzl", "graalvm_bindist_repository")
-# graalvm_bindist_repository(
-#     name = "graalvm",
-#     version = "23.0.0",
-#     url_template = "https://github.com/graalvm/graalvm-ce-builds/releases/download/v{version}/graalvm-ce-java17-linux-amd64-{version}.tar.gz",
-#     sha256 = "<sha256-for-the-tarball>",
-# )
-#
-# load("@rules_graalvm//graalvm:workspace.bzl", "register_graalvm_toolchains")
-# register_graalvm_toolchains(name = "@graalvm")
+register_graalvm_toolchains()
 
 # -----------------------------------------------------------------------------
 # Notes
