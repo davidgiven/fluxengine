@@ -1,0 +1,7 @@
+package(default_visibility = ["//visibility:public"]) 
+
+# Root BUILD - alias exposing the Kotlin main program at the repository root
+alias(
+    name = "fluxengine",
+    actual = "//java/src/main/kotlin/com/cowlark/fluxengine:kotlin_bin",
+)

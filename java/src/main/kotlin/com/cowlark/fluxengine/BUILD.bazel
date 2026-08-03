@@ -1,0 +1,31 @@
+package(default_visibility = ["//visibility:public"]) 
+
+# Minimal per-package BUILD for Kotlin sources in com.cowlark.fluxengine
+load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_jvm_library", "kt_jvm_binary")
+load("@io_bazel_rules_kotlin//kotlin:kapt.bzl", "kt_kapt")
+
+# Run Dagger annotation processor for this package
+kt_kapt(
+    name = "kapt_fluxengine",
+    srcs = ["Main.kt"],
+    processors = ["dagger.internal.codegen.ComponentProcessor"],
+    processor_deps = ["@maven//:com_google_dagger_dagger_compiler"],
+    # Provide the Java library on the classpath so generated code can reference runtime types.
+    deps = ["//java/src/main/java/com/cowlark/fluxengine:fluxengine_java_lib"],
+)
+
+kt_jvm_library(
+    name = "fluxengine_kotlin_lib",
+    srcs = ["Main.kt"],
+    deps = [
+        ":kapt_fluxengine",
+        "//java/src/main/java/com/cowlark/fluxengine:fluxengine_java_lib",
+        "@maven//:com_google_dagger_dagger",
+    ],
+)
+
+kt_jvm_binary(
+    name = "kotlin_bin",
+    main_class = "com.cowlark.fluxengine.Main",
+    deps = [":fluxengine_kotlin_lib"],
+)

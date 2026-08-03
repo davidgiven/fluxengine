@@ -1,0 +1,26 @@
+package(default_visibility = ["//visibility:public"]) 
+
+# Per-package BUILD for Java sources in com.cowlark.fluxengine
+# Dagger annotation processor plugin for this Java package
+java_plugin(
+    name = "dagger_plugin",
+    processor_class = "dagger.internal.codegen.ComponentProcessor",
+    deps = [
+        "@maven//:com_google_dagger_dagger_compiler",
+    ],
+)
+
+java_library(
+    name = "fluxengine_java_lib",
+    srcs = glob(["*.java"]),
+    deps = [
+        "@maven//:com_google_dagger_dagger",
+    ],
+    plugins = [":dagger_plugin"],
+)
+
+java_binary(
+    name = "fluxengine_main",
+    main_class = "com.cowlark.fluxengine.Main",
+    deps = [":fluxengine_java_lib"],
+)
