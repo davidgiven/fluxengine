@@ -26,9 +26,20 @@ jobs:
       with:
         repository: 'davidgiven/fluxengine-testdata'
         path: 'fluxengine-testdata'
-    - name: make
+    - name: Setup Bazel
+      uses: bazelbuild/setup-bazel@v4
+      with:
+        install-bazelisk: true
+    - name: Build with Bazel
       run: |
-        cd fluxengine && docker build -t ${{ matrix.variant }} -f tests/docker/Dockerfile.${{ matrix.variant }} .
+        cd fluxengine
+        bazel build //:all
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ github.event.repository.name }}.${{ github.sha }}.bazel.artifacts
+        path: |
+          fluxengine/bazel-bin/**
 
   build-macos-current:
     strategy:
@@ -44,47 +55,25 @@ jobs:
       with:
         repository: 'davidgiven/fluxengine-testdata'
         path: 'fluxengine-testdata'
-    - name: brew
+    - name: Setup Bazel
+      uses: bazelbuild/setup-bazel@v4
+      with:
+        install-bazelisk: true
+    - name: Build with Bazel
       run: |
-        brew install sqlite pkg-config libusb protobuf wxwidgets fmt make coreutils dylibbundler libjpeg libmagic nlohmann-json cli11 boost glfw3 md4c ninja python freetype2 mbedtls@3 lunasvg
-        brew link mbedtls@3
-        brew upgrade
-    - name: make
-      run: |
-        g++ -v
-        gmake -C fluxengine
+        cd fluxengine
+        bazel build //:all
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ github.event.repository.name }}.${{ github.sha }}.fluxengine.${{ runner.arch }}.pkg
+        name: ${{ github.event.repository.name }}.${{ github.sha }}.bazel.artifacts.${{ runner.arch }}
         path: |
-          fluxengine/FluxEngine.pkg
-          fluxengine/FluxEngine.app.zip
+          fluxengine/bazel-bin/**
 
   build-windows:
     runs-on: windows-latest
-    defaults:
-      run:
-        shell: msys2 {0}
 
     steps:
-    - uses: msys2/setup-msys2@v2
-      with:
-        msystem: mingw64
-        update: true
-        install: |
-          python diffutils ninja make zip git
-        pacboy: |
-          protobuf:p pkgconf:p curl-winssl:p file:p glfw:p mbedtls:p
-          sqlite:p freetype:p boost:p gcc:p binutils:p nsis:p abseil-cpp:p
-
-    - name: debug
-      run: |
-        pacboy -Q --info protobuf:p
-        cat /mingw64/lib/pkgconfig/protobuf.pc
-        /mingw64/bin/pkg-config.exe protobuf --cflags
-        /mingw64/bin/pkg-config.exe protobuf --cflags --static
-
     - uses: actions/checkout@v4
       with:
         repository: 'davidgiven/fluxengine'
@@ -95,24 +84,18 @@ jobs:
         repository: 'davidgiven/fluxengine-testdata'
         path: 'fluxengine-testdata'
 
-    - name: run
-      run: |
-        g++ -v
-        make -C fluxengine BUILDTYPE=windows AB_SANDBOX=no
+    - name: Setup Bazel
+      uses: bazelbuild/setup-bazel@v4
+      with:
+        install-bazelisk: true
 
-    - name: nsis
+    - name: Build with Bazel
       run: |
         cd fluxengine
-        strip fluxengine.exe -o fluxengine-stripped.exe
-        strip fluxengine-gui.exe -o fluxengine-gui-stripped.exe
-        makensis -v2 -nocd -dOUTFILE=fluxengine-installer.exe extras/windows-installer.nsi
-
-    - name: zip
-      run: |
-        cd fluxengine && zip -9 fluxengine-windows.zip fluxengine.exe fluxengine-gui.exe upgrade-flux-file.exe brother120tool.exe brother240tool.exe FluxEngine.cydsn/CortexM3/ARM_GCC_541/Release/FluxEngine.hex fluxengine-installer.exe
+        bazel build //:all
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ github.event.repository.name }}.${{ github.sha }}.windows.zip
-        path: fluxengine/fluxengine-windows.zip
+        name: ${{ github.event.repository.name }}.${{ github.sha }}.bazel.artifacts.windows
+        path: fluxengine/bazel-bin/**
