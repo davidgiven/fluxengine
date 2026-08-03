@@ -1,4 +1,4 @@
-package(default_visibility = ["//visibility:public"]) 
+package(default_visibility = ["//visibility:public"])
 
 # Per-package BUILD for Java sources in com.cowlark.fluxengine
 # Dagger annotation processor plugin for this Java package
@@ -24,12 +24,6 @@ java_binary(
     main_class = "com.cowlark.fluxengine.Main",
     deps = [":fluxengine_java_lib"],
 )
-
-# Native image integration (GraalVM rules)
-# The native_image rule is provided by the @rules_graalvm repository. It will
-# attempt to resolve a native-image tool via toolchains; for that to work you
-# must declare a GraalVM SDK repository (commonly @graalvm) and register its
-# toolchains in WORKSPACE (see comments in WORKSPACE).
 
 load("@rules_graalvm//graal:graal.bzl", "native_image")
 

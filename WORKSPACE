@@ -1,6 +1,3 @@
-# Minimal WORKSPACE for Bazel Java/Kotlin/Protobuf builds for incremental migration.
-# This file references specific release tarballs for Bazel rule sets without sha256 checksums.
-# NOTE: Omitting sha256 makes fetches non-hermetic and is NOT recommended for long-term use.
 workspace(name = "fluxengine_java")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
@@ -17,6 +14,7 @@ http_archive(
 )
 
 load("@rules_jvm_external//:defs.bzl", "maven_install")
+
 # Configure Maven dependencies that we'll use during incremental migration.
 maven_install(
     name = "maven",
@@ -46,7 +44,9 @@ http_archive(
     name = "io_bazel_rules_kotlin",
     url = "https://github.com/bazelbuild/rules_kotlin/releases/download/v4.0.0/rules_kotlin-v4.0.0.tar.gz",
 )
+
 load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kotlin_repositories")
+
 # Registers Kotlin toolchain. Call this to register kotlin toolchain and enable KAPT support.
 # Note: rules_kotlin must be fetched successfully by bazel before this call will work.
 kotlin_repositories()
@@ -61,7 +61,9 @@ http_archive(
     name = "rules_proto",
     url = "https://github.com/bazelbuild/rules_proto/releases/download/4.0.0/rules_proto-4.0.0.tar.gz",
 )
+
 load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies")
+
 # Register proto toolchain if desired by uncommenting the following line:
 # rules_proto_dependencies()
 

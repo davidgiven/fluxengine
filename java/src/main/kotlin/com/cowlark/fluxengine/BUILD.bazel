@@ -1,4 +1,4 @@
-package(default_visibility = ["//visibility:public"]) 
+package(default_visibility = ["//visibility:public"])
 
 # Minimal per-package BUILD for Kotlin sources in com.cowlark.fluxengine
 # This package is deprecated: the project has been migrated to Java.

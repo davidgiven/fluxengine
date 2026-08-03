@@ -1,0 +1,24 @@
+package(default_visibility = ["//visibility:public"])
+
+# Placeholder cc_library for future JNI/native code.
+# Do NOT add source files here yet if you don't want a native library built.
+# Populate srcs/hdrs/copts when you add real native sources.
+cc_library(
+    name = "fluxjni",
+    srcs = [],  # e.g. ["fluxjni.cc"]
+    hdrs = [],  # e.g. ["fluxjni.h"]
+    copts = [],  # e.g. ["-I/path/to/jdk/include", "-I/path/to/jdk/include/linux"]
+    linkstatic = False,
+    visibility = ["//visibility:public"],
+)
+
+# Example: to build a shared library suitable for System.loadLibrary(), add a
+# cc_binary target like this (uncomment and adapt when you add sources):
+#
+# cc_binary(
+#     name = "fluxjni_so",
+#     srcs = ["fluxjni.cc"],
+#     copts = ["-fPIC", "-I$JAVA_HOME/include", "-I$JAVA_HOME/include/linux"],
+#     linkshared = 1,
+#     visibility = ["//visibility:public"],
+# )

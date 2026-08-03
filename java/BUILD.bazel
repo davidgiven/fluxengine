@@ -1,4 +1,4 @@
-package(default_visibility = ["//visibility:public"]) 
+package(default_visibility = ["//visibility:public"])
 
 # Top-level package BUILD within java/ kept minimal: per-package BUILD files live under src/.
 # This file intentionally contains no targets that compile sources; see per-package BUILD files.
