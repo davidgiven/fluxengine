@@ -66,10 +66,45 @@ load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies")
 # rules_proto_dependencies()
 
 # -----------------------------------------------------------------------------
+# rules_graalvm (GraalVM native-image integration)
+# We fetch the rules_graalvm repository so we can use the `native_image` rule and
+# toolchain helpers. This is pinned to a specific commit to keep the workspace
+# reproducible; replace the commit with a release tag if you prefer.
+# -----------------------------------------------------------------------------
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+
+git_repository(
+    name = "rules_graalvm",
+    remote = "https://github.com/sgammon/rules_graalvm.git",
+    commit = "35d47821696b4d96aa579b184338fb5e1ea20885",
+)
+
+# NOTE: The rules_graalvm repository provides helper repository rules (graalvm_repository
+# or graal_bindist_repository) to declare an SDK repository (commonly named @graalvm).
+# You must declare a GraalVM SDK repository appropriate for your host platform and pin
+# it to a specific GraalVM CE build in order for `native_image` targets to be fully
+# functional. See the rules_graalvm docs for examples:
+# https://github.com/sgammon/rules_graalvm/blob/main/docs/native-image.md
+
+# Example (commented) — replace URL and sha256 with the GraalVM build you want to pin:
+# load("@rules_graalvm//graalvm:repositories.bzl", "graalvm_bindist_repository")
+# graalvm_bindist_repository(
+#     name = "graalvm",
+#     version = "22.3.0",
+#     url_template = "https://github.com/graalvm/graalvm-ce-builds/releases/download/v{version}/graalvm-ce-java17-linux-amd64-{version}.tar.gz",
+#     sha256 = "<sha256-for-the-tarball>",
+# )
+
+# After declaring a @graalvm SDK repository, register the GraalVM toolchains so
+# the `native_image` rule resolves the native-image tool for the host/exec
+# platform automatically:
+# load("@rules_graalvm//graalvm:toolchain.bzl", "register_graalvm_toolchains")
+# register_graalvm_toolchains(name = "@graalvm")
+
+# -----------------------------------------------------------------------------
 # Notes
-# - Omitting sha256 values reduces hermeticity. Replace these http_archive blocks
-#   with a version that includes sha256 values when you have the hashes.
-# - If you later want to compute checksums locally, see previous commit messages or
-#   run a local script to download and compute the shasums and paste them into WORKSPACE.
-# - After configuring the workspace properly, run `bazel fetch //...` then `bazel build`.
+# - Omitting sha256 values reduces hermeticity. Replace these http_archive/git_repository
+#   blocks with versions that include sha256 values when you have the hashes.
+# - After configuring the workspace properly (including a @graalvm SDK repo), run
+#   `bazel fetch //...` then `bazel build` to populate external dependencies.
 # -----------------------------------------------------------------------------

@@ -24,3 +24,22 @@ java_binary(
     main_class = "com.cowlark.fluxengine.Main",
     deps = [":fluxengine_java_lib"],
 )
+
+# Native image integration (GraalVM rules)
+# The native_image rule is provided by the @rules_graalvm repository. It will
+# attempt to resolve a native-image tool via toolchains; for that to work you
+# must declare a GraalVM SDK repository (commonly @graalvm) and register its
+# toolchains in WORKSPACE (see comments in WORKSPACE).
+
+load("@rules_graalvm//graal:graal.bzl", "native_image")
+
+native_image(
+    name = "fluxengine_native",
+    deps = [":fluxengine_java_lib"],
+    main_class = "com.cowlark.fluxengine.Main",
+    # executable_name defaults to <target>-bin; override if desired.
+    executable_name = "fluxengine",
+    # If you have internal native archives (cc_library with linkstatic = True),
+    # add them here (or use extra_args) so native-image links them into the
+    # produced binary. We do not force --static linking of system libraries.
+)
