@@ -1,0 +1,47 @@
+package(default_visibility = ["//visibility:public"]) 
+
+# Java library built from Java sources
+java_library(
+    name = "fluxengine",
+    srcs = glob(["src/main/java/**/*.java"]),
+    resources = glob(["src/main/resources/**"]),
+    deps = [
+        # Dagger runtime (provided via rules_jvm_external maven_install):
+        "@maven//:com_google_dagger_dagger",
+    ],
+)
+
+java_binary(
+    name = "fluxengine_main",
+    main_class = "org.fluxengine.Main",
+    deps = [":fluxengine"],
+)
+
+# Kotlin targets (requires rules_kotlin to be enabled in WORKSPACE)
+load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_jvm_library", "kt_jvm_binary")
+
+kt_jvm_library(
+    name = "kotlin_lib",
+    srcs = glob(["src/main/kotlin/**/*.kt"]),
+    deps = [":fluxengine"],
+)
+
+kt_jvm_binary(
+    name = "kotlin_bin",
+    main_class = "org.fluxengine.KotlinExample",
+    deps = [":kotlin_lib"],
+)
+
+# Java tests using JUnit4 (requires rules_jvm_external / maven_install configured in WORKSPACE)
+java_test(
+    name = "fluxengine_tests",
+    srcs = glob(["src/test/java/**/*.java"]),
+    deps = [
+        ":fluxengine",
+        "@maven//:junit_junit",
+        # If tests need dagger code generated at compile-time, include the compiler
+        # on the annotation processing path. With maven_install, dagger-compiler is
+        # available as @maven//:com_google_dagger_dagger_compiler but configuring it
+        # as an annotation processor depends on which java_rules you use.
+    ],
+)
