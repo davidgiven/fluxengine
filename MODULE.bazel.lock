@@ -185,7 +185,7 @@
   "moduleExtensions": {
     "//:graalvm_extension.bzl%graalvm_ext": {
       "general": {
-        "bzlTransitiveDigest": "YNdJVd0z2Zz/CwXyMp9xfCg0hQuOo4r6jJkynvrByNk=",
+        "bzlTransitiveDigest": "j3Qz7w1ruIOY8oFfCFAgWWjr/ev5O+1F8Jebvo5QHGo=",
         "usagesDigest": "iUXd/3jCJaegO0Dllj33xgb8pqISEwNiOB/aoc6/sBQ=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
