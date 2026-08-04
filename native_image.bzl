@@ -1,7 +1,12 @@
 def _native_image_impl(ctx):
     is_windows = ctx.configuration.host_path_separator == ";"
+    
+    # 1. Determine output binary file name
     out_name = ctx.label.name + (".exe" if is_windows else "")
     out_binary = ctx.actions.declare_file(out_name)
+
+    # 2. Select the correct tool executable depending on host OS
+    tool_file = ctx.file._native_image_win if is_windows else ctx.file._native_image_unix
 
     jar_file = ctx.file.jar
 
@@ -15,7 +20,7 @@ def _native_image_impl(ctx):
     ctx.actions.run(
         outputs = [out_binary],
         inputs = [jar_file],
-        executable = ctx.executable._native_image_tool,
+        executable = tool_file,
         arguments = [args],
         mnemonic = "GraalVMNativeImage",
         progress_message = "Building GraalVM native image %s" % ctx.label.name,
@@ -33,12 +38,17 @@ native_image = rule(
             allow_single_file = [".jar"],
         ),
         "extra_args": attr.string_list(default = []),
-        "_native_image_tool": attr.label(
+        "_native_image_unix": attr.label(
             default = Label("@graalvm//:bin/native-image"),
+            allow_single_file = True,
+            executable = True,
+            cfg = "exec",
+        ),
+        "_native_image_win": attr.label(
+            default = Label("@graalvm//:bin/native-image.cmd"),
             allow_single_file = True,
             executable = True,
             cfg = "exec",
         ),
     },
 )
-
